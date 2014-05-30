@@ -199,12 +199,71 @@ int isTimeUnits(const char *timeunits)
 }
 
 static
-int splitBasetime(const char *timeunits, taxis_t *taxis)
+void scanTimeString(const char *ptu, int *rdate, int *rtime)
+{
+  int year, month, day;
+  int hour = 0, minute = 0, second = 0;
+  int v1, v2, v3;
+
+  *rdate = 0;
+  *rtime = 0;
+
+  v1 = atoi(ptu);
+  if ( v1 < 0 ) ptu++;
+  while ( isdigit((int) *ptu) ) ptu++;
+  v2 = atoi(++ptu);
+  while ( isdigit((int) *ptu) ) ptu++;
+  v3 = atoi(++ptu);
+  while ( isdigit((int) *ptu) ) ptu++;
+
+  if ( v3 > 999 && v1 < 32 )
+    { year = v3; month = v2; day = v1; }
+  else
+    { year = v1; month = v2; day = v3; }
+
+  while ( isspace((int) *ptu) ) ptu++;
+
+  if ( *ptu )
+    {
+      while ( ! isdigit((int) *ptu) ) ptu++;
+
+      hour = atoi(ptu);
+      while ( isdigit((int) *ptu) ) ptu++;
+      if ( *ptu == ':' )
+        {
+          ptu++;
+          minute = atoi(ptu);
+          while ( isdigit((int) *ptu) ) ptu++;
+          if ( *ptu == ':' )
+            {
+              ptu++;
+              second = atoi(ptu);
+            }
+        }
+    }
+
+  *rdate = cdiEncodeDate(year, month, day);
+  *rtime = cdiEncodeTime(hour, minute, second);
+}
+
+static
+void setForecastTime(const char *timestr, taxis_t *taxis)
+{
+  int len = (int) strlen(timestr);
+  if ( len == 0 ) return;
+
+  int fdate = 0, ftime = 0;
+  scanTimeString(timestr, &fdate, &ftime);
+
+  (*taxis).fdate = fdate;
+  (*taxis).ftime = ftime;
+}
+
+static
+int setBaseTime(const char *timeunits, taxis_t *taxis)
 {
   int len, i;
   char *ptu, *tu;
-  int year, month, day;
-  int hour = 0, minute = 0, second = 0;
   int timetype = TAXIS_ABSOLUTE;
   int rdate = -1, rtime = -1;
   int timeunit;
@@ -253,47 +312,8 @@ int splitBasetime(const char *timeunits, taxis_t *taxis)
             }
           else if ( timetype == TAXIS_RELATIVE )
             {
-              int v1, v2, v3;
-              v1 = atoi(ptu);
-              if ( v1 < 0 ) ptu++;
-              while ( isdigit((int) *ptu) ) ptu++;
-              v2 = atoi(++ptu);
-              while ( isdigit((int) *ptu) ) ptu++;
-              v3 = atoi(++ptu);
-              while ( isdigit((int) *ptu) ) ptu++;
+              scanTimeString(ptu, &rdate, &rtime);
 
-              if ( v3 > 999 && v1 < 32 )
-                { year = v3; month = v2; day = v1; }
-              else
-                { year = v1; month = v2; day = v3; }
-
-              while ( isspace((int) *ptu) ) ptu++;
-
-              if ( *ptu )
-                {
-                  while ( ! isdigit((int) *ptu) ) ptu++;
-
-                  hour = atoi(ptu);
-                  while ( isdigit((int) *ptu) ) ptu++;
-                  if ( *ptu == ':' )
-                    {
-                      ptu++;
-                      minute = atoi(ptu);
-                      while ( isdigit((int) *ptu) ) ptu++;
-                      if ( *ptu == ':' )
-                        {
-                          ptu++;
-                          second = atoi(ptu);
-                          /*
-                          if ( second != 0 )
-                            Message("Seconds not supported in time units!");
-                          */
-                        }
-                    }
-                }
-
-              rdate = cdiEncodeDate(year, month, day);
-              rtime = cdiEncodeTime(hour, minute, second);
               (*taxis).rdate = rdate;
               (*taxis).rtime = rtime;
 
@@ -6871,7 +6891,8 @@ void define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, 
 
 static
 void scan_global_attributes(int fileID, int vlistID, stream_t *streamptr, int ngatts,
-                            int *instID, int *modelID, int *ucla_les, char *uuidOfHGrid, char *gridfile, int *number_of_grid_used)
+                            int *instID, int *modelID, int *ucla_les, char *uuidOfHGrid,
+                            char *gridfile, int *number_of_grid_used, char *fcreftime)
 {
   nc_type xtype;
   size_t attlen;
@@ -6888,6 +6909,8 @@ void scan_global_attributes(int fileID, int vlistID, stream_t *streamptr, int ng
       if ( xtype == NC_CHAR )
 	{
 	  cdfGetAttText(fileID, NC_GLOBAL, attname, attstringlen-1, attstring);
+
+          size_t attstrlen = strlen(attstring);
 
 	  if ( attlen > 0 && attstring[0] != 0 )
 	    {
@@ -6923,11 +6946,15 @@ void scan_global_attributes(int fileID, int vlistID, stream_t *streamptr, int ng
 	      else if ( strcmp(attname, "CDO") == 0 )
 		{
 		}
+	      else if ( strcmp(attname, "forecast_reference_time") == 0 )
+		{
+                  memcpy(fcreftime, attstring, attstrlen+1);
+		}
 	      else if ( strcmp(attname, "grid_file_uri") == 0 )
 		{
-                  memcpy(gridfile, attstring, attlen+1);
+                  memcpy(gridfile, attstring, attstrlen+1);
 		}
-	      else if ( strcmp(attname, "uuidOfHGrid") == 0 && attlen == 36 )
+	      else if ( strcmp(attname, "uuidOfHGrid") == 0 && attstrlen == 36 )
 		{
                   attstring[36] = 0;
                   str2uuid(attstring, uuidOfHGrid);
@@ -6937,10 +6964,10 @@ void scan_global_attributes(int fileID, int vlistID, stream_t *streamptr, int ng
 		{
                   if ( strcmp(attname, "ICON_grid_file_uri") == 0 && gridfile[0] == 0 )
                     {
-                      memcpy(gridfile, attstring, attlen+1);
+                      memcpy(gridfile, attstring, attstrlen+1);
                     }
 
-		  vlistDefAttTxt(vlistID, CDI_GLOBAL, attname, (int)attlen, attstring);
+		  vlistDefAttTxt(vlistID, CDI_GLOBAL, attname, (int)attstrlen, attstring);
 		}
 	    }
 	}
@@ -7113,10 +7140,12 @@ int cdfInqContents(stream_t *streamptr)
   int ucla_les = FALSE;
   char uuidOfHGrid[17];
   char gridfile[8912];
+  char fcreftime[CDI_MAX_NAME];
   int number_of_grid_used = UNDEFID;
 
   uuidOfHGrid[0] = 0;
-  gridfile[0] = 0;
+  gridfile[0]    = 0;
+  fcreftime[0]   = 0;
 
   vlistID = streamptr->vlistID;
   fileID  = streamptr->fileID;
@@ -7186,7 +7215,7 @@ int cdfInqContents(stream_t *streamptr)
     }
 
   /* scan global attributes */
-  scan_global_attributes(fileID, vlistID, streamptr, ngatts, &instID, &modelID, &ucla_les, uuidOfHGrid, gridfile, &number_of_grid_used);
+  scan_global_attributes(fileID, vlistID, streamptr, ngatts, &instID, &modelID, &ucla_les, uuidOfHGrid, gridfile, &number_of_grid_used, fcreftime);
 
   /* find time dim */
   if ( unlimdimid >= 0 )
@@ -7473,8 +7502,15 @@ int cdfInqContents(stream_t *streamptr)
       taxis_t *taxis = &streamptr->tsteps[0].taxis;
 
       cdfGetAttText(fileID, ncvarid, "units", attstringlen-1, attstring);
-      if ( splitBasetime(attstring, taxis) == 1 )
+      if ( setBaseTime(attstring, taxis) == 1 )
 	streamptr->basetime.ncvarid = UNDEFID;
+
+      if ( leadtime_id != UNDEFID && taxis->type == TAXIS_RELATIVE )
+        {
+          streamptr->basetime.leadtimeid = leadtime_id;
+          taxis->type = TAXIS_FORECAST;
+          setForecastTime(fcreftime, taxis);
+        }
     }
 
   if ( time_has_bounds )
