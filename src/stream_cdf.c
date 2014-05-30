@@ -137,7 +137,7 @@ void strtolower(char *str)
 }
 
 static
-int get_timeunit(int len, char *ptu)
+int get_timeunit(int len, const char *ptu)
 {
   int timeunit = -1;
 
@@ -247,9 +247,28 @@ void scanTimeString(const char *ptu, int *rdate, int *rtime)
 }
 
 static
+int scanTimeUnit(const char *unitstr)
+{
+  int timeunit = -1;
+  int len;
+
+  len = (int) strlen(unitstr);
+  timeunit = get_timeunit(len, unitstr);
+  if ( timeunit == -1 )
+    Message("Unsupported TIMEUNIT: %s!", unitstr);
+
+  return (timeunit);
+}
+
+static
 void setForecastTime(const char *timestr, taxis_t *taxis)
 {
-  int len = (int) strlen(timestr);
+  int len;
+
+  (*taxis).fdate = 0;
+  (*taxis).ftime = 0;
+
+  len = (int) strlen(timestr);
   if ( len == 0 ) return;
 
   int fdate = 0, ftime = 0;
@@ -7501,14 +7520,19 @@ int cdfInqContents(stream_t *streamptr)
     {
       taxis_t *taxis = &streamptr->tsteps[0].taxis;
 
-      cdfGetAttText(fileID, ncvarid, "units", attstringlen-1, attstring);
-      if ( setBaseTime(attstring, taxis) == 1 )
+      if ( setBaseTime(ncvars[streamptr->basetime.ncvarid].units, taxis) == 1 )
 	streamptr->basetime.ncvarid = UNDEFID;
 
       if ( leadtime_id != UNDEFID && taxis->type == TAXIS_RELATIVE )
         {
           streamptr->basetime.leadtimeid = leadtime_id;
           taxis->type = TAXIS_FORECAST;
+
+          int timeunit = -1;
+          if ( ncvars[leadtime_id].units[0] != 0 ) timeunit = scanTimeUnit(ncvars[leadtime_id].units);
+          if ( timeunit == -1 ) timeunit = taxis->unit;
+          taxis->fc_unit = timeunit;
+
           setForecastTime(fcreftime, taxis);
         }
     }
@@ -7553,7 +7577,11 @@ int cdfInqContents(stream_t *streamptr)
 	  Warning("calendar >%s< unsupported!", attstring);
       }
 
-  if ( streamptr->tsteps[0].taxis.type == TAXIS_RELATIVE )
+  if ( streamptr->tsteps[0].taxis.type == TAXIS_FORECAST )
+    {
+      taxisID = taxisCreate(TAXIS_FORECAST);
+    }
+  else if ( streamptr->tsteps[0].taxis.type == TAXIS_RELATIVE )
     {
       taxisID = taxisCreate(TAXIS_RELATIVE);
     }
@@ -7606,8 +7634,6 @@ int cdfInqTimestep(stream_t * streamptr, int tsID)
   long nrecs = 0;
 #if  defined  (HAVE_LIBNETCDF)
   double timevalue;
-  int nctimevarid;
-  int nctimeboundsid;
   int fileID;
   size_t index;
   taxis_t *taxis;
@@ -7626,7 +7652,7 @@ int cdfInqTimestep(stream_t * streamptr, int tsID)
 
       timevalue = tsID;
 
-      nctimevarid = streamptr->basetime.ncvarid;
+      int nctimevarid = streamptr->basetime.ncvarid;
       if ( nctimevarid != UNDEFID )
 	{
 	  fileID = streamptr->fileID;
@@ -7658,7 +7684,7 @@ int cdfInqTimestep(stream_t * streamptr, int tsID)
 	      cdiDecodeTimeval(timevalue, taxis, &taxis->vdate, &taxis->vtime);
 	    }
 
-	  nctimeboundsid = streamptr->basetime.ncvarboundsid;
+	  int nctimeboundsid = streamptr->basetime.ncvarboundsid;
 	  if ( nctimeboundsid != UNDEFID )
 	    {
 	      size_t start[2], count[2];
