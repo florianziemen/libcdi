@@ -162,6 +162,20 @@ int get_timeunit(int len, const char *ptu)
 static
 int isTimeUnits(const char *timeunits)
 {
+  int status = 0;
+
+  if ( strncmp(timeunits, "sec",    3) == 0 ||
+       strncmp(timeunits, "minute", 6) == 0 ||
+       strncmp(timeunits, "hour",   4) == 0 ||
+       strncmp(timeunits, "day",    3) == 0 ||
+       strncmp(timeunits, "month",  5) == 0 ) status = 1;
+
+  return (status);
+}
+
+static
+int isTimeAxisUnits(const char *timeunits)
+{
   int len, i;
   char *ptu, *tu;
   int timetype = -1;
@@ -4405,16 +4419,12 @@ int cdfTimeDimID(int fileID, int ndims, int nvars)
               for ( iatt = 0; iatt < nvatts; iatt++ )
                 {
                   cdf_inq_attname(fileID, varid, iatt, attname);
-                  if ( memcmp(attname, "units", 5) == 0 )
+                  if ( strncmp(attname, "units", 5) == 0 )
                     {
                       cdfGetAttText(fileID, varid, "units", sizeof(timeunits), timeunits);
                       strtolower(timeunits);
 
-                      if ( memcmp(timeunits, "sec",    3) == 0 ||
-                           memcmp(timeunits, "minute", 6) == 0 ||
-                           memcmp(timeunits, "hour",   4) == 0 ||
-                           memcmp(timeunits, "day",    3) == 0 ||
-                           memcmp(timeunits, "month",  5) == 0 )
+                      if ( isTimeUnits(timeunits) )
                         {
                           timedimid = dimids[0];
                           break;
@@ -7050,7 +7060,29 @@ void find_time_vars(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimid, 
 {
   int ncvarid;
 
-  if ( timedimid != UNDEFID )
+  if ( timedimid == UNDEFID )
+    {
+      char timeunits[CDI_MAX_NAME];
+
+      for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
+        {
+          if ( ncvars[ncvarid].ndims == 0 && strcmp(ncvars[ncvarid].name, "time") == 0 )
+            {
+              if ( ncvars[ncvarid].units[0] )
+                {
+                  strcpy(timeunits, ncvars[ncvarid].units);
+                  strtolower(timeunits);
+
+                  if ( isTimeUnits(timeunits) )
+                    {
+                      streamptr->basetime.ncvarid = ncvarid;
+                      break;
+                    }
+                }
+            }
+        }
+    }
+  else
     {
       int ltimevar = FALSE;
 
@@ -7065,7 +7097,7 @@ void find_time_vars(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimid, 
              ncvars[ncvarid].ndims == 1 &&
              timedimid == ncvars[ncvarid].dimids[0] &&
              ncvars[ncvarid].xtype != NC_CHAR &&
-             isTimeUnits(ncvars[ncvarid].units) )
+             isTimeAxisUnits(ncvars[ncvarid].units) )
           {
             ncvars[ncvarid].isvar = FALSE;
 
@@ -7104,22 +7136,26 @@ void find_time_vars(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimid, 
         {
           Warning("Time variable >%s< not found!", ncdims[timedimid].name);
         }
-      else if ( streamptr->basetime.lwrf == FALSE )
-        {
-          if ( ncvars[ncvarid].units[0] != 0 ) *time_has_units = TRUE;
+    }
 
-          if ( ncvars[ncvarid].bounds != UNDEFID )
+  /* time varID */
+  ncvarid = streamptr->basetime.ncvarid;
+
+  if ( ncvarid != UNDEFID && streamptr->basetime.lwrf == FALSE )
+    {
+      if ( ncvars[ncvarid].units[0] != 0 ) *time_has_units = TRUE;
+
+      if ( ncvars[ncvarid].bounds != UNDEFID )
+        {
+          int nbdims = ncvars[ncvars[ncvarid].bounds].ndims;
+          if ( nbdims == 2 )
             {
-              int nbdims = ncvars[ncvars[ncvarid].bounds].ndims;
-              if ( nbdims == 2 )
+              int len = (int) ncdims[ncvars[ncvars[ncvarid].bounds].dimids[nbdims-1]].len;
+              if ( len == 2 && timedimid == ncvars[ncvars[ncvarid].bounds].dimids[0] )
                 {
-                  int len = (int) ncdims[ncvars[ncvars[ncvarid].bounds].dimids[nbdims-1]].len;
-                  if ( len == 2 && timedimid == ncvars[ncvars[ncvarid].bounds].dimids[0] )
-                    {
-                      *time_has_bounds = TRUE;
-                      streamptr->basetime.ncvarboundsid = ncvars[ncvarid].bounds;
-                      if ( ncvars[ncvarid].climatology ) *time_climatology = TRUE;
-                    }
+                  *time_has_bounds = TRUE;
+                  streamptr->basetime.ncvarboundsid = ncvars[ncvarid].bounds;
+                  if ( ncvars[ncvarid].climatology ) *time_climatology = TRUE;
                 }
             }
         }
@@ -7505,6 +7541,9 @@ int cdfInqContents(stream_t *streamptr)
       return (CDI_EUFSTRUCT);
     }
 
+  if ( ntsteps == 0 && streamptr->basetime.ncdimid == UNDEFID && streamptr->basetime.ncvarid != UNDEFID )
+    ntsteps = 1;
+
   streamptr->ntsteps = ntsteps;
 
   /* define all data variables */
@@ -7520,8 +7559,11 @@ int cdfInqContents(stream_t *streamptr)
     {
       taxis_t *taxis = &streamptr->tsteps[0].taxis;
 
-      if ( setBaseTime(ncvars[streamptr->basetime.ncvarid].units, taxis) == 1 )
-	streamptr->basetime.ncvarid = UNDEFID;
+      if ( setBaseTime(ncvars[ncvarid].units, taxis) == 1 )
+        {
+          ncvarid = UNDEFID;
+          streamptr->basetime.ncvarid = UNDEFID;
+        }
 
       if ( leadtime_id != UNDEFID && taxis->type == TAXIS_RELATIVE )
         {
@@ -7543,7 +7585,7 @@ int cdfInqContents(stream_t *streamptr)
       if ( time_climatology ) streamptr->tsteps[0].taxis.climatology = TRUE;
     }
 
-  if ( ncvarid != -1 )
+  if ( ncvarid != UNDEFID )
     {
       taxis_t *taxis = &streamptr->tsteps[0].taxis;
 
@@ -7552,7 +7594,7 @@ int cdfInqContents(stream_t *streamptr)
         taxis->longname = strdup(ncvars[ncvarid].longname);
     }
 
-  if ( ncvarid != -1 )
+  if ( ncvarid != UNDEFID )
     if ( ncvars[ncvarid].calendar == TRUE )
       {
 	cdfGetAttText(fileID, ncvarid, "calendar", attstringlen-1, attstring);
