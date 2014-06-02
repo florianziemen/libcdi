@@ -117,16 +117,17 @@ void taxisDefaultValue(taxis_t* taxisptr)
   taxisptr->ftime       = 0;
   taxisptr->calendar    = cdiDefaultCalendar;
   taxisptr->unit        = DefaultTimeUnit;
-  taxisptr->fc_unit     = DefaultTimeUnit;
   taxisptr->numavg      = 0;
+  taxisptr->climatology = FALSE;
   taxisptr->has_bounds  = FALSE;
   taxisptr->vdate_lb    = 0;
   taxisptr->vtime_lb    = 0;
   taxisptr->vdate_ub    = 0;
   taxisptr->vtime_ub    = 0;
+  taxisptr->fc_unit     = DefaultTimeUnit;
+  taxisptr->fc_period   = 0;
   taxisptr->name        = NULL;
   taxisptr->longname    = NULL;
-  taxisptr->climatology = FALSE;
 }
 
 static taxis_t *
@@ -529,6 +530,22 @@ void taxisDefForecastTunit(int taxisID, int unit)
 }
 
 
+void taxisDefForecastPeriod(int taxisID, double fc_period)
+{
+  if ( reshGetStatus ( taxisID, &taxisOps ) == RESH_CLOSED )
+    {
+      Warning("%s", "Operation not executed.");
+      return;
+    }
+
+  taxis_t *taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
+
+  taxis_check_ptr(__func__, taxisptr);
+
+  taxisptr->fc_period = fc_period;
+}
+
+
 void taxisDefNumavg(int taxisID, int numavg)
 {
   if ( reshGetStatus ( taxisID, &taxisOps ) == RESH_CLOSED )
@@ -894,6 +911,16 @@ int taxisInqForecastTunit(int taxisID)
 }
 
 
+double taxisInqForecastPeriod(int taxisID)
+{
+  taxis_t *taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
+
+  taxis_check_ptr(__func__, taxisptr);
+
+  return (taxisptr->fc_period);
+}
+
+
 int taxisInqNumavg(int taxisID)
 {
   taxis_t *taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
@@ -1241,6 +1268,66 @@ void splitTimevalue(double timevalue, int timeunit, int *date, int *time)
 }
 
 
+void cdiSetForecastPeriod(double timevalue, taxis_t *taxis)
+{
+  int year, month, day, hour, minute, second;
+  int vdate, vtime;
+  int timeunit;
+  int calendar;
+  int julday, secofday, days, secs;
+
+  (*taxis).fc_period = timevalue;
+
+  timeunit = (*taxis).fc_unit;
+  calendar = (*taxis).calendar;
+
+  vdate  = (*taxis).vdate;
+  vtime  = (*taxis).vtime;
+
+  if ( vdate == 0 && vtime == 0 && DBL_IS_EQUAL(timevalue, 0.) ) return;
+
+  cdiDecodeDate(vdate, &year, &month, &day);
+  cdiDecodeTime(vtime, &hour, &minute, &second);
+
+  if ( timeunit == TUNIT_MONTH && calendar == CALENDAR_360DAYS )
+    {
+      timeunit = TUNIT_DAY;
+      timevalue *= 30;
+    }
+
+  if ( timeunit == TUNIT_MONTH || timeunit == TUNIT_YEAR )
+    {
+      int nmon, dpm;
+      double fmon;
+
+      if ( timeunit == TUNIT_YEAR ) timevalue *= 12;
+
+      nmon = (int) timevalue;
+      fmon = timevalue - nmon;
+
+      month -= nmon;
+
+      while ( month > 12 ) { month -= 12; year++; }
+      while ( month <  1 ) { month += 12; year--; }
+
+      dpm = days_per_month(calendar, year, month);
+      timeunit = TUNIT_DAY;
+      timevalue = fmon*dpm;
+    }
+
+  encode_caldaysec(calendar, year, month, day, hour, minute, second, &julday, &secofday);
+
+  cdiDecodeTimevalue(timeunit, timevalue, &days, &secs);
+
+  julday_add(-days, -secs, &julday, &secofday);
+
+  decode_caldaysec(calendar, julday, secofday, &year, &month, &day, &hour, &minute, &second);
+
+  (*taxis).fdate = cdiEncodeDate(year, month, day);
+  (*taxis).ftime = cdiEncodeTime(hour, minute, second);
+}
+
+
 void cdiDecodeTimeval(double timevalue, taxis_t *taxis, int *date, int *time)
 {
   if ( taxis->type == TAXIS_ABSOLUTE )
@@ -1310,14 +1397,15 @@ void ptaxisCopy(taxis_t *dest, taxis_t *source)
   dest->ftime       = source->ftime;
   dest->calendar    = source->calendar;
   dest->unit        = source->unit;
-  dest->fc_unit     = source->fc_unit;
   dest->numavg      = source->numavg;
+  dest->climatology = source->climatology;
   dest->has_bounds  = source->has_bounds;
   dest->vdate_lb    = source->vdate_lb;
   dest->vtime_lb    = source->vtime_lb;
   dest->vdate_ub    = source->vdate_ub;
   dest->vtime_ub    = source->vtime_ub;
-  dest->climatology = source->climatology;
+  dest->fc_unit     = source->fc_unit;
+  dest->fc_period   = source->fc_period;
 
   reshUnlock ();
 }
@@ -1348,7 +1436,6 @@ taxisPrintKernel(taxis_t * taxisptr, FILE * fp)
   fprintf ( fp, "ftime       = %d\n", taxisptr->ftime );
   fprintf ( fp, "calendar    = %d\n", taxisptr->calendar );
   fprintf ( fp, "unit        = %d\n", taxisptr->unit );
-  fprintf ( fp, "fc_unit     = %d\n", taxisptr->fc_unit );
   fprintf ( fp, "numavg      = %d\n", taxisptr->numavg );
   fprintf ( fp, "climatology = %d\n", taxisptr->climatology );
   fprintf ( fp, "has_bounds  = %d\n", taxisptr->has_bounds );
@@ -1356,6 +1443,8 @@ taxisPrintKernel(taxis_t * taxisptr, FILE * fp)
   fprintf ( fp, "vtime_lb    = %d\n", vtime_lb );
   fprintf ( fp, "vdate_ub    = %d\n", vdate_ub );
   fprintf ( fp, "vtime_ub    = %d\n", vtime_ub );
+  fprintf ( fp, "fc_unit     = %d\n", taxisptr->fc_unit );
+  fprintf ( fp, "fc_period   = %g\n", taxisptr->fc_period );
   fprintf ( fp, "\n");
 }
 

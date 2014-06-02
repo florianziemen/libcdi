@@ -954,6 +954,9 @@ int     taxisInqTunit(int taxisID);
 void    taxisDefForecastTunit(int taxisID, int tunit);
 int     taxisInqForecastTunit(int taxisID);
 
+void    taxisDefForecastPeriod(int taxisID, double fc_period);
+double  taxisInqForecastPeriod(int taxisID);
+
 void    taxisDefNumavg(int taxisID, int numavg);
 
 int     taxisInqType(int taxisID);

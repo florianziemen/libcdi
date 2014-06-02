@@ -7730,18 +7730,25 @@ int cdfInqTimestep(stream_t * streamptr, int tsID)
 	  if ( nctimeboundsid != UNDEFID )
 	    {
 	      size_t start[2], count[2];
-	      start[0] = tsID; count[0] = 1; start[1] = 0; count[1] = 1;
+	      start[0] = index; count[0] = 1; start[1] = 0; count[1] = 1;
 	      cdf_get_vara_double(fileID, nctimeboundsid, start, count, &timevalue);
               if ( timevalue >= NC_FILL_DOUBLE || timevalue < -NC_FILL_DOUBLE ) timevalue = 0;
 
 	      cdiDecodeTimeval(timevalue, taxis, &taxis->vdate_lb, &taxis->vtime_lb);
 
-	      start[0] = tsID; count[0] = 1; start[1] = 1; count[1] = 1;
+	      start[0] = index; count[0] = 1; start[1] = 1; count[1] = 1;
 	      cdf_get_vara_double(fileID, nctimeboundsid, start, count, &timevalue);
               if ( timevalue >= NC_FILL_DOUBLE || timevalue < -NC_FILL_DOUBLE ) timevalue = 0;
 
 	      cdiDecodeTimeval(timevalue, taxis, &taxis->vdate_ub, &taxis->vtime_ub);
 	    }
+
+          int leadtimeid = streamptr->basetime.leadtimeid;
+          if ( leadtimeid != UNDEFID )
+            {
+	      cdf_get_var1_double(fileID, leadtimeid, &index, &timevalue);
+              cdiSetForecastPeriod(timevalue, taxis);
+            }
 	}
     }
 
