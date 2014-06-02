@@ -625,6 +625,12 @@ void taxisCopyTimestep(int taxisID2, int taxisID1)
       taxisptr2->vtime_ub = taxisptr1->vtime_ub;
     }
 
+  taxisptr2->fdate = taxisptr1->fdate;
+  taxisptr2->ftime = taxisptr1->ftime;
+
+  taxisptr2->fc_unit   = taxisptr1->fc_unit;
+  taxisptr2->fc_period = taxisptr1->fc_period;
+
   reshUnlock ();
 }
 

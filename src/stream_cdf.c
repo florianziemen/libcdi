@@ -854,6 +854,14 @@ void cdfDefTimeValue(stream_t *streamptr, int tsID)
       start[0] = tsID; count[0] = 1; start[1] = 1; count[1] = 1;
       cdf_put_vara_double(fileID, ncvarid, start, count, &timevalue);
     }
+
+  ncvarid = streamptr->basetime.leadtimeid;
+  if ( taxis->type == TAXIS_FORECAST && ncvarid != UNDEFID )
+    {
+      timevalue = taxis->fc_period;
+      cdf_put_var1_double(fileID, ncvarid, &index, &timevalue);
+    }
+
   /*
 printf("fileID = %d %d %d %f\n", fileID, time_varid, index, timevalue);
   */
@@ -934,6 +942,21 @@ void cdfDefTimeUnits(char *unitstr, taxis_t* taxis0, taxis_t* taxis)
       sprintf(unitstr, "%s since %d-%02d-%02d %02d:%02d:%02d",
               tunitNamePtr(timeunit), year, month, day, hour, minute, second);
     }
+}
+
+static
+void cdfDefForecastTimeUnits(char *unitstr, int timeunit)
+{
+  unitstr[0] = 0;
+
+  if ( timeunit == -1 ) timeunit = TUNIT_HOUR;
+
+  if ( timeunit == TUNIT_QUARTER ) timeunit = TUNIT_MINUTE;
+  if ( timeunit == TUNIT_3HOURS  ||
+       timeunit == TUNIT_6HOURS  ||
+       timeunit == TUNIT_12HOURS ) timeunit = TUNIT_HOUR;
+
+  sprintf(unitstr, "%s", tunitNamePtr(timeunit));
 }
 #endif
 
@@ -1022,6 +1045,26 @@ void cdfDefTime(stream_t* streamptr)
 
       if ( taxis->has_bounds )
         cdfDefCalendar(fileID, time_bndsid, taxis->calendar);
+    }
+
+  if ( taxis->type == TAXIS_FORECAST )
+    {
+      int leadtimeid;
+
+      cdf_def_var(fileID, "leadtime", NC_DOUBLE, 1, &time_dimid, &leadtimeid);
+
+      streamptr->basetime.leadtimeid = leadtimeid;
+
+      strcpy(tmpstr, "forecast_period");
+      cdf_put_att_text(fileID, leadtimeid, "standard_name", strlen(tmpstr), tmpstr);
+
+      strcpy(tmpstr, "Time elapsed since the start of the forecast");
+      cdf_put_att_text(fileID, leadtimeid, "long_name", strlen(tmpstr), tmpstr);
+
+      cdfDefForecastTimeUnits(unitstr, taxis->fc_unit);
+
+      len = strlen(unitstr);
+      if ( len ) cdf_put_att_text(fileID, leadtimeid, "units", len, unitstr);
     }
 
   if ( streamptr->ncmode == 2 ) cdf_enddef(fileID);
