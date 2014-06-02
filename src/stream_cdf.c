@@ -5251,7 +5251,7 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
                   if ( status == NC_NOERR )
                     {
                       cdfSetVar(ncvars, dimvarid, FALSE);
-                      if ( cdiIgnoreAttCoordinates == FALSE )
+                      //  if ( cdiIgnoreAttCoordinates == FALSE )
                         {
                           ncvars[ncvarid].auxvarids[i] = dimvarid;
                           ncvars[ncvarid].nauxvars++;
@@ -7379,6 +7379,7 @@ int cdfInqContents(stream_t *streamptr)
   find_time_vars(nvars, ncvars, ncdims, timedimid, streamptr, &time_has_units, &time_has_bounds, &time_climatology);
 
   leadtime_id = find_leadtime(nvars, ncvars);
+  if ( leadtime_id != UNDEFID ) ncvars[leadtime_id].isvar = FALSE;
 
   /* check ncvars */
   for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
@@ -7442,7 +7443,6 @@ int cdfInqContents(stream_t *streamptr)
 	    }
 	}
     }
-
 
   /* verify coordinate vars - first scan (dimname == varname) */
   verify_coordinate_vars_1(ndims, ncdims, ncvars, timedimid);
