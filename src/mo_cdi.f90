@@ -2825,6 +2825,21 @@ module mo_cdi
       end interface
   
       interface
+        subroutine taxisDefForecastPeriod(taxisID,fc_period) bind(c,name='taxisDefForecastPeriod')
+          import :: c_int,c_double
+          integer(c_int), value :: taxisID
+          real(c_double), value :: fc_period
+       end subroutine taxisDefForecastPeriod
+      end interface
+  
+      interface
+        real(c_double) function taxisInqForecastPeriod(taxisID) bind(c,name='taxisInqForecastPeriod')
+          import :: c_int,c_double
+          integer(c_int), value :: taxisID
+       end function taxisInqForecastPeriod
+      end interface
+  
+      interface
         subroutine taxisDefNumavg(taxisID,numavg) bind(c,name='taxisDefNumavg')
           import :: c_int
           integer(c_int), value :: taxisID
@@ -3447,6 +3462,8 @@ module mo_cdi
       public :: taxisInqTunit
       public :: taxisDefForecastTunit
       public :: taxisInqForecastTunit
+      public :: taxisDefForecastPeriod
+      public :: taxisInqForecastPeriod
       public :: taxisDefNumavg
       public :: taxisInqType
       public :: taxisInqNumavg

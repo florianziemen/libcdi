@@ -228,7 +228,7 @@ void cdiInitialize(void)
 	  cdiSkipRecords = cdiSkipRecords > 0 ? cdiSkipRecords : 0;
 	}
 
-      envString = getenv("GRIB_INVENTORY_MODE");
+      envString = getenv("CDI_INVENTORY_MODE");
       if ( envString )
 	{
 	  if ( strncmp(envString, "time", 4) == 0 )
