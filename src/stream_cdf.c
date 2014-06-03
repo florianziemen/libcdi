@@ -7018,10 +7018,12 @@ void scan_global_attributes(int fileID, int vlistID, stream_t *streamptr, int ng
 	      else if ( strcmp(attname, "CDO") == 0 )
 		{
 		}
+              /*
 	      else if ( strcmp(attname, "forecast_reference_time") == 0 )
 		{
                   memcpy(fcreftime, attstring, attstrlen+1);
 		}
+              */
 	      else if ( strcmp(attname, "grid_file_uri") == 0 )
 		{
                   memcpy(gridfile, attstring, attstrlen+1);
