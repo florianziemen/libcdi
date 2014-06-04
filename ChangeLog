@@ -6,7 +6,7 @@
 
 2014-06-04  Uwe Schulzweida
 
-	* netCDF: do not defined attribute calendar and units for time bounds
+	* netCDF: do not defined attribute calendar and units for time bounds [report: Stephanie Legutke]
 
 2014-05-19  Uwe Schulzweida
 
