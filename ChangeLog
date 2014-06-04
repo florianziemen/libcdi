@@ -4,6 +4,10 @@
 	* using EXSE library version 1.3.2
 	* using CGRIBEX library version 1.6.4
 
+2014-06-04  Uwe Schulzweida
+
+	* netCDF: do not defined attribute calendar and units for time bounds
+
 2014-05-19  Uwe Schulzweida
 
 	* netCDF: added support for  opendap files by https

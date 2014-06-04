@@ -1034,9 +1034,10 @@ void cdfDefTime(stream_t* streamptr)
   if ( len )
     {
       cdf_put_att_text(fileID, time_varid, "units", len, unitstr);
-
+      /*
       if ( taxis->has_bounds )
         cdf_put_att_text(fileID, time_bndsid, "units", len, unitstr);
+      */
     }
 
   if ( taxis->calendar != -1 )
