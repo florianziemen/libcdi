@@ -1042,9 +1042,10 @@ void cdfDefTime(stream_t* streamptr)
   if ( taxis->calendar != -1 )
     {
       cdfDefCalendar(fileID, time_varid, taxis->calendar);
-
+      /*
       if ( taxis->has_bounds )
         cdfDefCalendar(fileID, time_bndsid, taxis->calendar);
+      */
     }
 
   if ( taxis->type == TAXIS_FORECAST )
