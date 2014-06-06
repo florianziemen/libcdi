@@ -2502,13 +2502,11 @@ int gridCompare(int gridID, grid_t grid)
               char uuidOfHGrid[17];
               gridInqUUID(gridID, uuidOfHGrid);
 
-              if ( !differ && memcmp(uuidOfHGrid, grid.uuid, 16) != 0 ) differ = 1;
-
+              if ( uuidOfHGrid[0] != 0 && grid.uuid[0] != 0 )
+                if ( !differ && memcmp(uuidOfHGrid, grid.uuid, 16) != 0 ) differ = 1;
               if ( !differ && grid.nvertex != gridInqNvertex(gridID) ) differ = 1;
-
               if ( !differ && grid.number != gridInqNumber(gridID) ) differ = 1;
               if ( !differ && grid.position != gridInqPosition(gridID) ) differ = 1;
-
 	      if ( !differ )
 		differ = compareXYvals2(gridID, grid.size, grid.xvals, grid.yvals);
 	    }

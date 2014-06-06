@@ -1775,6 +1775,7 @@ void cdfDefCurvilinear(stream_t *streamptr, int gridID)
                      IS_EQUAL(gridInqXval(gridID0, xdimlen-1), gridInqXval(gridID, xdimlen-1)) )
                   {
                     xdimID = streamptr->xdimID[index];
+                    ncxvarid = streamptr->ncxvarID[index];
                     break;
                   }
               dimlen0 = gridInqYsize(gridID0);
@@ -1783,6 +1784,7 @@ void cdfDefCurvilinear(stream_t *streamptr, int gridID)
                      IS_EQUAL(gridInqYval(gridID0, xdimlen-1), gridInqYval(gridID, xdimlen-1)) )
                   {
                     ydimID = streamptr->ydimID[index];
+                    ncyvarid = streamptr->ncyvarID[index];
                     break;
                   }
             }
@@ -1825,8 +1827,6 @@ void cdfDefCurvilinear(stream_t *streamptr, int gridID)
           /* attribute for Panoply */
           cdf_put_att_text(fileID, ncxvarid, "_CoordinateAxisType", 3, "Lon");
 
-          streamptr->ncxvarID[gridindex] = ncxvarid;
-
           if ( gridInqXboundsPtr(gridID) && nvdimID != UNDEFID )
             {
               strcat(xaxisname, "_bnds");
@@ -1855,8 +1855,6 @@ void cdfDefCurvilinear(stream_t *streamptr, int gridID)
           /* attribute for Panoply */
           cdf_put_att_text(fileID, ncyvarid, "_CoordinateAxisType", 3, "Lat");
 
-          streamptr->ncyvarID[gridindex] = ncyvarid;
-
           if ( gridInqYboundsPtr(gridID) && nvdimID != UNDEFID )
             {
               strcat(yaxisname, "_bnds");
@@ -1882,8 +1880,6 @@ void cdfDefCurvilinear(stream_t *streamptr, int gridID)
           cdf_put_att_text(fileID, ncavarid, "standard_name", strlen(stdname), stdname);
           cdf_put_att_text(fileID, ncavarid, "long_name", strlen(longname), longname);
           cdf_put_att_text(fileID, ncavarid, "units", strlen(units), units);
-
-          streamptr->ncavarID[gridindex] = ncavarid;
         }
 
       cdf_enddef(fileID);
@@ -1898,6 +1894,9 @@ void cdfDefCurvilinear(stream_t *streamptr, int gridID)
 
   streamptr->xdimID[gridindex] = xdimID;
   streamptr->ydimID[gridindex] = ydimID;
+  streamptr->ncxvarID[gridindex] = ncxvarid;
+  streamptr->ncyvarID[gridindex] = ncyvarid;
+  streamptr->ncavarID[gridindex] = ncavarid;
 }
 #endif
 
@@ -2173,6 +2172,9 @@ void cdfDefUnstructured(stream_t *streamptr, int gridID)
                      IS_EQUAL(gridInqXval(gridID0, dimlen-1), gridInqXval(gridID, dimlen-1)) )
 		  {
 		    dimID = streamptr->xdimID[index];
+                    ncxvarid = streamptr->ncxvarID[index];
+                    ncyvarid = streamptr->ncyvarID[index];
+                    ncavarid = streamptr->ncavarID[index];
 		    break;
 		  }
             }
@@ -2214,8 +2216,6 @@ void cdfDefUnstructured(stream_t *streamptr, int gridID)
           if ( (len = strlen(xunits)) )
             cdf_put_att_text(fileID, ncxvarid, "units", len, xunits);
 
-          streamptr->ncxvarID[gridindex] = ncxvarid;
-
           if ( gridInqXboundsPtr(gridID) && nvdimID != UNDEFID )
             {
               int dimIDs[2];
@@ -2240,8 +2240,6 @@ void cdfDefUnstructured(stream_t *streamptr, int gridID)
             cdf_put_att_text(fileID, ncyvarid, "long_name", len, ylongname);
           if ( (len = strlen(yunits)) )
             cdf_put_att_text(fileID, ncyvarid, "units", len, yunits);
-
-          streamptr->ncyvarID[gridindex] = ncyvarid;
 
           if ( gridInqYboundsPtr(gridID) && nvdimID != UNDEFID )
             {
@@ -2268,8 +2266,6 @@ void cdfDefUnstructured(stream_t *streamptr, int gridID)
           cdf_put_att_text(fileID, ncavarid, "standard_name", strlen(stdname), stdname);
           cdf_put_att_text(fileID, ncavarid, "long_name", strlen(longname), longname);
           cdf_put_att_text(fileID, ncavarid, "units", strlen(units), units);
-
-          streamptr->ncavarID[gridindex] = ncavarid;
         }
 
       cdf_enddef(fileID);
@@ -2283,6 +2279,9 @@ void cdfDefUnstructured(stream_t *streamptr, int gridID)
     }
 
   streamptr->xdimID[gridindex] = dimID;
+  streamptr->ncxvarID[gridindex] = ncxvarid;
+  streamptr->ncyvarID[gridindex] = ncyvarid;
+  streamptr->ncavarID[gridindex] = ncavarid;
 }
 #endif
 
@@ -6351,6 +6350,9 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
                   ncvars[ncvarid].isvar = -1;
                   continue;
                 }
+
+              if ( ncvars[ncvarid].position > 0 ) grid.position = ncvars[ncvarid].position;
+              if ( uuidOfHGrid[0] != 0 ) memcpy(grid.uuid, uuidOfHGrid, 16);
             }
 
 #if defined (PROJECTION_TEST)
@@ -6392,17 +6394,7 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 
           if ( grid.type == GRID_UNSTRUCTURED )
             {
-              if ( CDI_Debug)
-                {
-                  if ( grid.number != UNDEFID ) printf("number : %d\n", grid.number);
-                  if ( ncvars[ncvarid].position > 0 ) printf("position : %d\n", ncvars[ncvarid].position);
-                  if ( gridfile[0] != 0 ) printf("gridfile: %s\n", gridfile);
-                  if ( uuidOfHGrid[0] != 0 ) printf("uuidOfHGrid: defined\n");
-                }
-
-              if ( ncvars[ncvarid].position > 0 ) gridDefPosition(ncvars[ncvarid].gridID, ncvars[ncvarid].position);
               if ( gridfile[0] != 0 ) gridDefReference(ncvars[ncvarid].gridID, gridfile);
-              if ( uuidOfHGrid[0] != 0 ) gridDefUUID(ncvars[ncvarid].gridID, uuidOfHGrid);
             }
 
           if ( ncvars[ncvarid].chunked )

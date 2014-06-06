@@ -4,6 +4,10 @@
 	* using EXSE library version 1.3.2
 	* using CGRIBEX library version 1.6.4
 
+2014-06-06  Uwe Schulzweida
+
+	* Loss of coordinates attribute when merging files [Bug #4880]
+
 2014-06-04  Uwe Schulzweida
 
 	* netCDF: do not defined attribute calendar and units for time bounds [report: Stephanie Legutke]
