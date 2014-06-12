@@ -477,7 +477,6 @@ int vlistInqVarCode(int vlistID, int varID)
   cdiDecodeParam(param, &pnum, &pcat, &pdis);
 
   if ( pdis == 255 ) code = pnum;
-  printf("pdis %d pnum %d code %d\n", pdis, pnum, code);
 
   if ( code < 0 && vlistptr->vars[varID].tableID != -1 && vlistptr->vars[varID].name != NULL )
     {
@@ -941,7 +940,7 @@ void vlistDefVarTable(int vlistID, int varID, int tableID)
     param = vlistptr->vars[varID].param;
 
     cdiDecodeParam(param, &pnum, &pcat, &pdis);
-  
+
     vlistptr->vars[varID].param = cdiEncodeParam(pnum, tablenum, pdis);
   }
 }
