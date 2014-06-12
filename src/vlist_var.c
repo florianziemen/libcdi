@@ -466,7 +466,7 @@ The function @func{vlistInqVarCode} returns the code number of a variable.
 int vlistInqVarCode(int vlistID, int varID)
 {
   vlist_t *vlistptr;
-  int param, code;
+  int param, code = -varID-1;
   int pdis, pcat, pnum;
 
   vlistptr = vlist_to_pointer(vlistID);
@@ -475,7 +475,9 @@ int vlistInqVarCode(int vlistID, int varID)
 
   param = vlistptr->vars[varID].param;
   cdiDecodeParam(param, &pnum, &pcat, &pdis);
-  code = pnum;
+
+  if ( pdis == 255 ) code = pnum;
+  printf("pdis %d pnum %d code %d\n", pdis, pnum, code);
 
   if ( code < 0 && vlistptr->vars[varID].tableID != -1 && vlistptr->vars[varID].name != NULL )
     {
