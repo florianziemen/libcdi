@@ -7810,6 +7810,7 @@ void cdfEndDef(stream_t *streamptr)
 
   cdfDefGlobalAtts(streamptr);
   cdfDefLocalAtts(streamptr);
+
   if ( streamptr->accessmode == 0 )
     {
       nvars =  streamptr->nvars;
@@ -7821,12 +7822,12 @@ void cdfEndDef(stream_t *streamptr)
 
       if ( streamptr->ncmode == 2 )
         {
-          size_t hdr_pad = 0UL;
+          extern size_t CDI_netcdf_hdr_pad;
 
-          if ( hdr_pad == 0UL )
+          if ( CDI_netcdf_hdr_pad == 0UL )
             cdf_enddef(fileID);
           else
-            cdf__enddef(fileID, hdr_pad);
+            cdf__enddef(fileID, CDI_netcdf_hdr_pad);
         }
 
       streamptr->accessmode = 1;
