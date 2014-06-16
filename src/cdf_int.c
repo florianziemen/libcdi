@@ -148,6 +148,20 @@ void cdf_enddef(int ncid)
 }
 
 
+void cdf__enddef(const int ncid, const size_t hdr_pad)
+{
+  int status;
+  const size_t v_align   = 4UL; /* [B] Alignment of beginning of data section for fixed variables */
+  const size_t v_minfree = 0UL; /* [B] Pad at end of data section for fixed size variables */
+  const size_t r_align   = 4UL; /* [B] Alignment of beginning of data section for record variables */
+
+  /* nc_enddef(ncid) is equivalent to nc__enddef(ncid, 0, 4, 0, 4) */
+  status = nc__enddef(ncid, hdr_pad, v_align, v_minfree, r_align);
+
+  if ( status != NC_NOERR ) Error("%s", nc_strerror(status));
+}
+
+
 void cdf_sync(int ncid)
 {
   int status;

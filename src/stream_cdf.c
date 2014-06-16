@@ -7819,7 +7819,15 @@ void cdfEndDef(stream_t *streamptr)
       for ( varID = 0; varID < nvars; varID++ )
 	cdfDefVar(streamptr, varID);
 
-      if ( streamptr->ncmode == 2 ) cdf_enddef(fileID);
+      if ( streamptr->ncmode == 2 )
+        {
+          size_t hdr_pad = 0UL;
+
+          if ( hdr_pad == 0UL )
+            cdf_enddef(fileID);
+          else
+            cdf__enddef(fileID, hdr_pad);
+        }
 
       streamptr->accessmode = 1;
     }
