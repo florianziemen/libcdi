@@ -5616,9 +5616,6 @@ void verify_coordinate_vars_1(int ndims, ncdim_t *ncdims, ncvar_t *ncvars, int t
 	    {
 	      if ( isLonAxis(ncvars[ncvarid].units, ncvars[ncvarid].stdname) )
 		{
-                  printf("ncvars[ncvarid].islon %d %s %s\n", ncvars[ncvarid].islon, ncvars[ncvarid].units, ncvars[ncvarid].stdname);
-                  printf("lon1\n");
-
 		  ncvars[ncvarid].islon = TRUE;
 		  cdfSetVar(ncvars, ncvarid, FALSE);
 		  cdfSetDim(ncvars, ncvarid, 0, X_AXIS);
@@ -5626,8 +5623,6 @@ void verify_coordinate_vars_1(int ndims, ncdim_t *ncdims, ncvar_t *ncvars, int t
 		}
 	      else if ( isLatAxis(ncvars[ncvarid].units, ncvars[ncvarid].stdname) )
 		{
-                  printf("lat1\n");
-
 		  ncvars[ncvarid].islat = TRUE;
 		  cdfSetVar(ncvars, ncvarid, FALSE);
 		  cdfSetDim(ncvars, ncvarid, 0, Y_AXIS);
@@ -5668,8 +5663,6 @@ void verify_coordinate_vars_1(int ndims, ncdim_t *ncdims, ncvar_t *ncvars, int t
 	    {
 	      if ( memcmp(ncvars[ncvarid].longname+1, "ongitude", 8) == 0 )
 		{
-                  printf("lon\n");
-
 		  ncvars[ncvarid].islon = TRUE;
 		  cdfSetVar(ncvars, ncvarid, FALSE);
 		  cdfSetDim(ncvars, ncvarid, 0, X_AXIS);
@@ -5678,8 +5671,6 @@ void verify_coordinate_vars_1(int ndims, ncdim_t *ncdims, ncvar_t *ncvars, int t
 		}
 	      else if ( memcmp(ncvars[ncvarid].longname+1, "atitude", 7) == 0 )
 		{
-                  printf("lat\n");
-
 		  ncvars[ncvarid].islat = TRUE;
 		  cdfSetVar(ncvars, ncvarid, FALSE);
 		  cdfSetDim(ncvars, ncvarid, 0, Y_AXIS);
