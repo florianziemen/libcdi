@@ -4587,7 +4587,7 @@ int isLonAxis(const char *units, const char *stdname)
       if ( degree_units[ioff] == 'e' ) status = TRUE;
     }
 
-  if ( status == TRUE ||
+  if ( status == FALSE &&
        ((memcmp(units, "degree", 6) == 0 ||memcmp(units, "radian", 6) == 0) &&
         (memcmp(stdname, "grid_longitude", 14) == 0 || memcmp(stdname, "longitude", 9) == 0)) )
     {
@@ -4615,7 +4615,7 @@ int isLatAxis(const char *units, const char *stdname)
       if ( degree_units[ioff] == 'n' ) status = TRUE;
     }
 
-  if ( status == TRUE ||
+  if ( status == FALSE &&
        ((memcmp(units, "degree", 6) == 0 || memcmp(units, "radian", 6) == 0) &&
         (memcmp(stdname, "grid_latitude", 13) == 0 || memcmp(stdname, "latitude", 8) == 0)) )
     {
@@ -5612,30 +5612,13 @@ void verify_coordinate_vars_1(int ndims, ncdim_t *ncdims, ncvar_t *ncvars, int t
 	      continue;
 	    }
 
-	  if ( ncvars[ncvarid].longname[0] != 0 && ncvars[ncvarid].longname[1] != 0 )
-	    {
-	      if ( memcmp(ncvars[ncvarid].longname+1, "ongitude", 8) == 0 )
-		{
-		  ncvars[ncvarid].islon = TRUE;
-		  cdfSetVar(ncvars, ncvarid, FALSE);
-		  cdfSetDim(ncvars, ncvarid, 0, X_AXIS);
-		  ncdims[ncdimid].dimtype = X_AXIS;
-		  continue;
-		}
-	      else if ( memcmp(ncvars[ncvarid].longname+1, "atitude", 7) == 0 )
-		{
-		  ncvars[ncvarid].islat = TRUE;
-		  cdfSetVar(ncvars, ncvarid, FALSE);
-		  cdfSetDim(ncvars, ncvarid, 0, Y_AXIS);
-		  ncdims[ncdimid].dimtype = Y_AXIS;
-		  continue;
-		}
-	    }
-
 	  if ( ncvars[ncvarid].units[0] != 0 )
 	    {
 	      if ( isLonAxis(ncvars[ncvarid].units, ncvars[ncvarid].stdname) )
 		{
+                  printf("ncvars[ncvarid].islon %d %s %s\n", ncvars[ncvarid].islon, ncvars[ncvarid].units, ncvars[ncvarid].stdname);
+                  printf("lon1\n");
+
 		  ncvars[ncvarid].islon = TRUE;
 		  cdfSetVar(ncvars, ncvarid, FALSE);
 		  cdfSetDim(ncvars, ncvarid, 0, X_AXIS);
@@ -5643,6 +5626,8 @@ void verify_coordinate_vars_1(int ndims, ncdim_t *ncdims, ncvar_t *ncvars, int t
 		}
 	      else if ( isLatAxis(ncvars[ncvarid].units, ncvars[ncvarid].stdname) )
 		{
+                  printf("lat1\n");
+
 		  ncvars[ncvarid].islat = TRUE;
 		  cdfSetVar(ncvars, ncvarid, FALSE);
 		  cdfSetDim(ncvars, ncvarid, 0, Y_AXIS);
@@ -5678,6 +5663,31 @@ void verify_coordinate_vars_1(int ndims, ncdim_t *ncdims, ncvar_t *ncvars, int t
 		}
 	    }
 
+	  if ( ncvars[ncvarid].islon == FALSE && ncvars[ncvarid].longname[0] != 0 &&
+               ncvars[ncvarid].islat == FALSE && ncvars[ncvarid].longname[1] != 0 )
+	    {
+	      if ( memcmp(ncvars[ncvarid].longname+1, "ongitude", 8) == 0 )
+		{
+                  printf("lon\n");
+
+		  ncvars[ncvarid].islon = TRUE;
+		  cdfSetVar(ncvars, ncvarid, FALSE);
+		  cdfSetDim(ncvars, ncvarid, 0, X_AXIS);
+		  ncdims[ncdimid].dimtype = X_AXIS;
+		  continue;
+		}
+	      else if ( memcmp(ncvars[ncvarid].longname+1, "atitude", 7) == 0 )
+		{
+                  printf("lat\n");
+
+		  ncvars[ncvarid].islat = TRUE;
+		  cdfSetVar(ncvars, ncvarid, FALSE);
+		  cdfSetDim(ncvars, ncvarid, 0, Y_AXIS);
+		  ncdims[ncdimid].dimtype = Y_AXIS;
+		  continue;
+		}
+	    }
+
 	  if ( ncvars[ncvarid].zaxistype != UNDEFID )
 	    {
               ncvars[ncvarid].islev = TRUE;
@@ -5699,21 +5709,6 @@ void verify_coordinate_vars_2(int nvars, ncvar_t *ncvars)
     {
       if ( ncvars[ncvarid].isvar == 0 )
 	{
-	  /* not needed anymore for rotated grids */
-	  if ( ncvars[ncvarid].longname[0] != 0 && ncvars[ncvarid].longname[1] != 0 )
-	    {
-	      if ( memcmp(ncvars[ncvarid].longname+1, "ongitude", 8) == 0 )
-		{
-		  ncvars[ncvarid].islon = TRUE;
-		  continue;
-		}
-	      else if ( memcmp(ncvars[ncvarid].longname+1, "atitude", 7) == 0 )
-		{
-		  ncvars[ncvarid].islat = TRUE;
-		  continue;
-		}
-	    }
-
 	  if ( ncvars[ncvarid].units[0] != 0 )
 	    {
 	      if ( isLonAxis(ncvars[ncvarid].units, ncvars[ncvarid].stdname) )
@@ -5756,6 +5751,22 @@ void verify_coordinate_vars_2(int nvars, ncvar_t *ncvars)
 		    ncvars[ncvarid].zaxistype = ZAXIS_DEPTH_BELOW_SEA;
 		  else if ( isHeightAxis(ncvars[ncvarid].stdname, ncvars[ncvarid].longname) )
 		    ncvars[ncvarid].zaxistype = ZAXIS_HEIGHT;
+		  continue;
+		}
+            }
+
+	  /* not needed anymore for rotated grids */
+	  if ( ncvars[ncvarid].islon == FALSE && ncvars[ncvarid].longname[0] != 0 &&
+               ncvars[ncvarid].islat == FALSE && ncvars[ncvarid].longname[1] != 0 )
+	    {
+	      if ( memcmp(ncvars[ncvarid].longname+1, "ongitude", 8) == 0 )
+		{
+		  ncvars[ncvarid].islon = TRUE;
+		  continue;
+		}
+	      else if ( memcmp(ncvars[ncvarid].longname+1, "atitude", 7) == 0 )
+		{
+		  ncvars[ncvarid].islat = TRUE;
 		  continue;
 		}
 	    }
