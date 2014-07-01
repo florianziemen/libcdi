@@ -1,3 +1,7 @@
+2014-07-01  Uwe Schulzweida
+
+	* netCDF: skip coordinate variables with more than 2 dimension
+
 2014-06-26  Uwe Schulzweida
 
 	* Version 1.6.4 released

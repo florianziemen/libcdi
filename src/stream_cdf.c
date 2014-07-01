@@ -5946,7 +5946,27 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 		    }
 		}
 
-	      if ( xvarid != UNDEFID )
+              if ( xvarid != UNDEFID )
+                {
+                  if ( ncvars[xvarid].ndims > 3 || (ncvars[xvarid].ndims == 3 && ltgrid == FALSE) )
+                    {
+                      Warning("Coordinate variable %s has to many dimensions (%d), skipped!", ncvars[xvarid].name, ncvars[xvarid].ndims);
+                      //ncvars[ncvarid].xvarid = UNDEFID;
+                      xvarid = UNDEFID;
+                    }
+                }
+
+              if ( yvarid != UNDEFID )
+                {
+                  if ( ncvars[yvarid].ndims > 3 || (ncvars[yvarid].ndims == 3 && ltgrid == FALSE) )
+                    {
+                      Warning("Coordinate variable %s has to many dimensions (%d), skipped!", ncvars[yvarid].name, ncvars[yvarid].ndims);
+                      //ncvars[ncvarid].yvarid = UNDEFID;
+                      yvarid = UNDEFID;
+                    }
+                }
+
+              if ( xvarid != UNDEFID )
 		{
                   skipvar = TRUE;
 		  islon = ncvars[xvarid].islon;
@@ -5987,7 +6007,7 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 
                   if ( skipvar )
                     {
-                      Warning("Unsupported array structure, skipped variable %s!", ncvars[ncvarid].name);
+                      Warning("1Unsupported array structure, skipped variable %s!", ncvars[ncvarid].name);
                       ncvars[ncvarid].isvar = -1;
                       continue;
                     }
@@ -6064,7 +6084,7 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 
                   if ( skipvar )
                     {
-                      Warning("Unsupported array structure, skipped variable %s!", ncvars[ncvarid].name);
+                      Warning("2Unsupported array structure, skipped variable %s!", ncvars[ncvarid].name);
                       ncvars[ncvarid].isvar = -1;
                       continue;
                     }
