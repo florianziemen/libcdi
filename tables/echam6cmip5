@@ -32,7 +32,7 @@
 &parameter  code=96         name=sofllac          delete=1 /
 &parameter  code=97         name=friac            delete=1 /
 &parameter  code=102        name=tsi              delete=1 /
-&parameter  code=103        name=tsw              delete=1                 standard_name=surface_temperature_where_open_sea delete=1 /
+&parameter  code=103        name=tsw                              standard_name=surface_temperature_where_open_sea delete=1 /
 &parameter  code=104        name=ustri            delete=1 /
 &parameter  code=105        name=vstri            delete=1 /
 &parameter  code=106        name=ustrw            delete=1 /
@@ -143,7 +143,7 @@
 &parameter  code=214        name=sni               delete=1/
 &parameter  code=215        name=rogl              delete=1/
 &parameter  code=216        name=wimax         out_name=sfcWindmax standard_name=wind_speed  delete=0/         
-&parameter  code=217        name=topmax        out_name=cct        standard_name=maximum_height_of_convective_cloud_tops       delete=1/
+&parameter  code=217        name=topmax        out_name=cct        standard_name=maximum_height_of_convective_cloud_tops       delete=0/
 &parameter  code=218        name=snmel         out_name=snm        standard_name=surface_snow_melt_flux  delete=0/
 &parameter  code=219        name=runtoc           delete=1 /
 &parameter  code=220        name=runlnd            delete=1/

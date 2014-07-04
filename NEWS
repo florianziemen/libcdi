@@ -5,8 +5,12 @@ Version 1.6.4 (26 June 2014):
 
    New features:
      * Added support for SPECS forecast time axis
+     * Added support for GRIB_API key cfName
    Fixed bugs:
      * netCDF4 classic: existing files are converted to netCDF4 - classic flag is lost
+     * netCDF: added support for opendap files by https:
+     * gribapiDefDateTimeRel: set vdate to rdate for time invariant fields [Bug #4641]
+     * Loss of coordinates attribute when merging files [Bug #4880]
 
 Version 1.6.3 (14 February 2014):
 
