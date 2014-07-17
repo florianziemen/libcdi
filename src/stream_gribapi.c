@@ -2362,7 +2362,7 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int ljpeg, i
 
       if ( ljpeg )
         {
-          if ( nmiss > 0 ) ljpeg = 0;
+          //if ( nmiss > 0 ) ljpeg = 0;
 
           if ( ljpeg )
             {
@@ -2536,7 +2536,7 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int ljpeg, i
           }
         else if ( ljpeg )
 	  {
-            if ( nmiss > 0 ) ljpeg = 0;
+            //if ( nmiss > 0 ) ljpeg = 0;
 
             if ( ljpeg )
               {
