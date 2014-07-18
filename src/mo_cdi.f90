@@ -493,6 +493,16 @@ module mo_cdi
       end interface
   
       interface
+        subroutine streamReadVarF(streamID,varID,data_vec,nmiss) bind(c,name='streamReadVarF')
+          import :: c_int,c_float
+          integer(c_int), value :: streamID
+          integer(c_int), value :: varID
+          real(c_float), intent(out),dimension(*) :: data_vec
+          integer(c_int), intent(out) :: nmiss
+       end subroutine streamReadVarF
+      end interface
+  
+      interface
         subroutine streamWriteVarSlice(streamID,varID,levelID,data_vec,nmiss) bind(c,name='streamWriteVarSlice')
           import :: c_int,c_double
           integer(c_int), value :: streamID
@@ -523,6 +533,17 @@ module mo_cdi
           real(c_double), intent(out),dimension(*) :: data_vec
           integer(c_int), intent(out) :: nmiss
        end subroutine streamReadVarSlice
+      end interface
+  
+      interface
+        subroutine streamReadVarSliceF(streamID,varID,levelID,data_vec,nmiss) bind(c,name='streamReadVarSliceF')
+          import :: c_int,c_float
+          integer(c_int), value :: streamID
+          integer(c_int), value :: varID
+          integer(c_int), value :: levelID
+          real(c_float), intent(out),dimension(*) :: data_vec
+          integer(c_int), intent(out) :: nmiss
+       end subroutine streamReadVarSliceF
       end interface
   
       interface
@@ -3178,9 +3199,11 @@ module mo_cdi
       public :: streamWriteVar
       public :: streamWriteVarF
       public :: streamReadVar
+      public :: streamReadVarF
       public :: streamWriteVarSlice
       public :: streamWriteVarSliceF
       public :: streamReadVarSlice
+      public :: streamReadVarSliceF
       public :: streamDefRecord
       public :: streamInqRecord
       public :: streamWriteRecord

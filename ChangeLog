@@ -5,6 +5,7 @@
 
 2014-07-18  Uwe Schulzweida
 
+	* added function streamReadVarF() and streamReadVarSliceF()
 	* streamWriteVarF, streamWriteVarSliceF: added support for GRIB1 (cgribex)
 
 2014-07-17  Uwe Schulzweida

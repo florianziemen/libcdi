@@ -619,7 +619,7 @@ int grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype
 	}
     }
 
-  nbytes = grbEncode(filetype, memtype, varID, levelID, vlistID, gridID, zaxisID, date, time, tsteptype, numavg, 
+  nbytes = grbEncode(filetype, memtype, varID, levelID, vlistID, gridID, zaxisID, date, time, tsteptype, numavg,
 		     datasize, (const double*) data, nmiss, &gribbuffer, ljpeg, gc);
 
   if ( streamptr->comptype == COMPRESS_SZIP )

@@ -326,6 +326,7 @@ void    streamWriteVarF(int streamID, int varID, const float *data_vec, int nmis
 
 /*      streamReadVar: Read a variable */
 void    streamReadVar(int streamID, int varID, double *data_vec, int *nmiss);
+void    streamReadVarF(int streamID, int varID, float *data_vec, int *nmiss);
 
 /*      streamWriteVarSlice: Write a horizontal slice of a variable */
 void    streamWriteVarSlice(int streamID, int varID, int levelID, const double *data_vec, int nmiss);
@@ -333,6 +334,7 @@ void    streamWriteVarSliceF(int streamID, int varID, int levelID, const float *
 
 /*      streamReadVarSlice: Read a horizontal slice of a variable */
 void    streamReadVarSlice(int streamID, int varID, int levelID, double *data_vec, int *nmiss);
+void    streamReadVarSliceF(int streamID, int varID, int levelID, float *data_vec, int *nmiss);
 
 void    streamWriteVarChunk(int streamID, int varID, const int rect[][2],
                             const double *data_vec, int nmiss);

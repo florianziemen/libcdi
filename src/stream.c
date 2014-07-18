@@ -1468,24 +1468,9 @@ int streamInqTimestep(int streamID, int tsID)
   return (nrecs);
 }
 
-/*
-@Function  streamReadVar
-@Title     Read a variable
-
-@Prototype void streamReadVar(int streamID, int varID, double *data, int *nmiss)
-@Parameter
-    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead}.
-    @Item  varID     Variable identifier.
-    @Item  data      Pointer to the location into which the data values are read.
-                     The caller must allocate space for the returned values.
-    @Item  nmiss     Number of missing values.
-
-@Description
-The function streamReadVar reads all the values of one time step of a variable
-from an open dataset.
-@EndFunction
-*/
-void streamReadVar(int streamID, int varID, double *data, int *nmiss)
+/* the single image implementation */
+static
+void cdiStreamReadVar(int streamID, int varID, int memtype, void *data, int *nmiss)
 {
   if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamID, varID);
 
@@ -1506,6 +1491,7 @@ void streamReadVar(int streamID, int varID, double *data, int *nmiss)
     case FILETYPE_GRB:
     case FILETYPE_GRB2:
       {
+        if ( memtype == MEMTYPE_FLOAT ) Error("grbReadVar not implemented for memtype float!");
         grbReadVarDP(streamptr, varID, data, nmiss);
 	break;
       }
@@ -1513,6 +1499,7 @@ void streamReadVar(int streamID, int varID, double *data, int *nmiss)
 #if  defined  (HAVE_LIBSERVICE)
     case FILETYPE_SRV:
       {
+        if ( memtype == MEMTYPE_FLOAT ) Error("srvReadVar not implemented for memtype float!");
         srvReadVarDP(streamptr, varID, data, nmiss);
 	break;
       }
@@ -1520,6 +1507,7 @@ void streamReadVar(int streamID, int varID, double *data, int *nmiss)
 #if  defined  (HAVE_LIBEXTRA)
     case FILETYPE_EXT:
       {
+        if ( memtype == MEMTYPE_FLOAT ) Error("extReadVar not implemented for memtype float!");
         extReadVarDP(streamptr, varID, data, nmiss);
 	break;
       }
@@ -1527,6 +1515,7 @@ void streamReadVar(int streamID, int varID, double *data, int *nmiss)
 #if  defined  (HAVE_LIBIEG)
     case FILETYPE_IEG:
       {
+        if ( memtype == MEMTYPE_FLOAT ) Error("iegReadVar not implemented for memtype float!");
         iegReadVarDP(streamptr, varID, data, nmiss);
 	break;
       }
@@ -1537,6 +1526,7 @@ void streamReadVar(int streamID, int varID, double *data, int *nmiss)
     case FILETYPE_NC4:
     case FILETYPE_NC4C:
       {
+        if ( memtype == MEMTYPE_FLOAT ) Error("cdfReadVar not implemented for memtype float!");
         cdfReadVarDP(streamptr, varID, data, nmiss);
 	break;
       }
@@ -1549,36 +1539,52 @@ void streamReadVar(int streamID, int varID, double *data, int *nmiss)
     }
 }
 
-
 /*
-@Function  streamWriteVar
-@Title     Write a variable
+@Function  streamReadVar
+@Title     Read a variable
 
-@Prototype void streamWriteVar(int streamID, int varID, const double *data, int nmiss)
+@Prototype void streamReadVar(int streamID, int varID, double *data, int *nmiss)
 @Parameter
-    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenWrite}.
+    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead}.
     @Item  varID     Variable identifier.
-    @Item  data      Pointer to a block of double precision floating point data values to be written.
+    @Item  data      Pointer to the location into which the data values are read.
+                     The caller must allocate space for the returned values.
     @Item  nmiss     Number of missing values.
 
 @Description
-The function streamWriteVar writes the values of one time step of a variable to an open dataset.
-The values are converted to the external data type of the variable, if necessary.
+The function streamReadVar reads all the values of one time step of a variable
+from an open dataset.
 @EndFunction
 */
-void streamWriteVar(int streamID, int varID, const double *data, int nmiss)
+void streamReadVar(int streamID, int varID, double *data, int *nmiss)
 {
-  void (*myCdiStreamWriteVar_)(int streamID, int varID, int memtype,
-                               const void *data, int nmiss)
-    = (void (*)(int, int, int, const void *, int))
-    namespaceSwitchGet(NSSWITCH_STREAM_WRITE_VAR_).func;
-  myCdiStreamWriteVar_(streamID, varID, MEMTYPE_DOUBLE, data, nmiss);
+  cdiStreamReadVar(streamID, varID, MEMTYPE_DOUBLE, data, nmiss);
+}
+
+/*
+@Function  streamReadVarF
+@Title     Read a variable
+
+@Prototype void streamReadVar(int streamID, int varID, float *data, int *nmiss)
+@Parameter
+    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead}.
+    @Item  varID     Variable identifier.
+    @Item  data      Pointer to the location into which the data values are read.
+                     The caller must allocate space for the returned values.
+    @Item  nmiss     Number of missing values.
+
+@Description
+The function streamReadVar reads all the values of one time step of a variable
+from an open dataset.
+@EndFunction
+*/
+void streamReadVarF(int streamID, int varID, float *data, int *nmiss)
+{
+  cdiStreamReadVar(streamID, varID, MEMTYPE_FLOAT, data, nmiss);
 }
 
 /* the single image implementation */
-void
-cdiStreamWriteVar_(int streamID, int varID, int memtype, const void *data,
-                   int nmiss)
+void cdiStreamWriteVar_(int streamID, int varID, int memtype, const void *data, int nmiss)
 {
   if ( CDI_Debug ) Message("streamID = %d varID = %d", streamID, varID);
 
@@ -1647,6 +1653,31 @@ cdiStreamWriteVar_(int streamID, int varID, int memtype, const void *data,
 }
 
 /*
+@Function  streamWriteVar
+@Title     Write a variable
+
+@Prototype void streamWriteVar(int streamID, int varID, const double *data, int nmiss)
+@Parameter
+    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenWrite}.
+    @Item  varID     Variable identifier.
+    @Item  data      Pointer to a block of double precision floating point data values to be written.
+    @Item  nmiss     Number of missing values.
+
+@Description
+The function streamWriteVar writes the values of one time step of a variable to an open dataset.
+The values are converted to the external data type of the variable, if necessary.
+@EndFunction
+*/
+void streamWriteVar(int streamID, int varID, const double *data, int nmiss)
+{
+  void (*myCdiStreamWriteVar_)(int streamID, int varID, int memtype,
+                               const void *data, int nmiss)
+    = (void (*)(int, int, int, const void *, int))
+    namespaceSwitchGet(NSSWITCH_STREAM_WRITE_VAR_).func;
+  myCdiStreamWriteVar_(streamID, varID, MEMTYPE_DOUBLE, data, nmiss);
+}
+
+/*
 @Function  streamWriteVarF
 @Title     Write a variable
 
@@ -1672,25 +1703,8 @@ void streamWriteVarF(int streamID, int varID, const float *data, int nmiss)
   myCdiStreamWriteVar_(streamID, varID, MEMTYPE_FLOAT, data, nmiss);
 }
 
-/*
-@Function  streamReadVarSlice
-@Title     Read a horizontal slice of a variable
-
-@Prototype void streamReadVarSlice(int streamID, int varID, int levelID, double *data, int *nmiss)
-@Parameter
-    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead}.
-    @Item  varID     Variable identifier.
-    @Item  levelID   Level identifier.
-    @Item  data      Pointer to the location into which the data values are read.
-                     The caller must allocate space for the returned values.
-    @Item  nmiss     Number of missing values.
-
-@Description
-The function streamReadVar reads all the values of a horizontal slice of a variable
-from an open dataset.
-@EndFunction
-*/
-void streamReadVarSlice(int streamID, int varID, int levelID, double *data, int *nmiss)
+static
+void cdiStreamReadVarSlice(int streamID, int varID, int levelID, int memtype, void *data, int *nmiss)
 {
   if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamID, varID);
 
@@ -1711,6 +1725,7 @@ void streamReadVarSlice(int streamID, int varID, int levelID, double *data, int 
     case FILETYPE_GRB:
     case FILETYPE_GRB2:
       {
+        if ( memtype == MEMTYPE_FLOAT ) Error("grbReadVarSlice not implemented for memtype float!");
         grbReadVarSliceDP(streamptr, varID, levelID, data, nmiss);
 	break;
       }
@@ -1718,6 +1733,7 @@ void streamReadVarSlice(int streamID, int varID, int levelID, double *data, int 
 #if  defined  (HAVE_LIBSERVICE)
     case FILETYPE_SRV:
       {
+        if ( memtype == MEMTYPE_FLOAT ) Error("srvReadVarSlice not implemented for memtype float!");
         srvReadVarSliceDP(streamptr, varID, levelID, data, nmiss);
 	break;
       }
@@ -1725,6 +1741,7 @@ void streamReadVarSlice(int streamID, int varID, int levelID, double *data, int 
 #if  defined  (HAVE_LIBEXTRA)
     case FILETYPE_EXT:
       {
+        if ( memtype == MEMTYPE_FLOAT ) Error("extReadVarSlice not implemented for memtype float!");
         extReadVarSliceDP(streamptr, varID, levelID, data, nmiss);
 	break;
       }
@@ -1732,6 +1749,7 @@ void streamReadVarSlice(int streamID, int varID, int levelID, double *data, int 
 #if  defined  (HAVE_LIBIEG)
     case FILETYPE_IEG:
       {
+        if ( memtype == MEMTYPE_FLOAT ) Error("iegReadVarSlice not implemented for memtype float!");
         iegReadVarSliceDP(streamptr, varID, levelID, data, nmiss);
 	break;
       }
@@ -1742,6 +1760,7 @@ void streamReadVarSlice(int streamID, int varID, int levelID, double *data, int 
     case FILETYPE_NC4:
     case FILETYPE_NC4C:
       {
+        if ( memtype == MEMTYPE_FLOAT ) Error("cdfReadVarSlice not implemented for memtype float!");
         /* FIXME: status value ignored */
         int ierr = cdfReadVarSliceDP(streamptr, varID, levelID, data, nmiss);
 	break;
@@ -1755,8 +1774,54 @@ void streamReadVarSlice(int streamID, int varID, int levelID, double *data, int 
     }
 }
 
+/*
+@Function  streamReadVarSlice
+@Title     Read a horizontal slice of a variable
+
+@Prototype void streamReadVarSlice(int streamID, int varID, int levelID, double *data, int *nmiss)
+@Parameter
+    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead}.
+    @Item  varID     Variable identifier.
+    @Item  levelID   Level identifier.
+    @Item  data      Pointer to the location into which the data values are read.
+                     The caller must allocate space for the returned values.
+    @Item  nmiss     Number of missing values.
+
+@Description
+The function streamReadVarSlice reads all the values of a horizontal slice of a variable
+from an open dataset.
+@EndFunction
+*/
+void streamReadVarSlice(int streamID, int varID, int levelID, double *data, int *nmiss)
+{
+  cdiStreamReadVarSlice(streamID, varID, levelID, MEMTYPE_DOUBLE, data, nmiss);
+}
+
+/*
+@Function  streamReadVarSliceF
+@Title     Read a horizontal slice of a variable
+
+@Prototype void streamReadVarSliceF(int streamID, int varID, int levelID, float *data, int *nmiss)
+@Parameter
+    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead}.
+    @Item  varID     Variable identifier.
+    @Item  levelID   Level identifier.
+    @Item  data      Pointer to the location into which the data values are read.
+                     The caller must allocate space for the returned values.
+    @Item  nmiss     Number of missing values.
+
+@Description
+The function streamReadVarSliceF reads all the values of a horizontal slice of a variable
+from an open dataset.
+@EndFunction
+*/
+void streamReadVarSliceF(int streamID, int varID, int levelID, float *data, int *nmiss)
+{
+  cdiStreamReadVarSlice(streamID, varID,levelID, MEMTYPE_FLOAT, data, nmiss);
+}
+
 static
-void stream_write_var_slice(int streamID, int varID, int levelID, int memtype, const void *data, int nmiss)
+void cdiStreamWriteVarSlice(int streamID, int varID, int levelID, int memtype, const void *data, int nmiss)
 {
   if ( CDI_Debug ) Message("streamID = %d varID = %d", streamID, varID);
 
@@ -1844,7 +1909,7 @@ The values are converted to the external data type of the variable, if necessary
 */
 void streamWriteVarSlice(int streamID, int varID, int levelID, const double *data, int nmiss)
 {
-  stream_write_var_slice(streamID, varID, levelID, MEMTYPE_DOUBLE, data, nmiss);
+  cdiStreamWriteVarSlice(streamID, varID, levelID, MEMTYPE_DOUBLE, data, nmiss);
 }
 
 /*
@@ -1867,7 +1932,7 @@ Only support for netCDF was implemented in this function.
 */
 void streamWriteVarSliceF(int streamID, int varID, int levelID, const float *data, int nmiss)
 {
-  stream_write_var_slice(streamID, varID, levelID, MEMTYPE_FLOAT, data, nmiss);
+  cdiStreamWriteVarSlice(streamID, varID, levelID, MEMTYPE_FLOAT, data, nmiss);
 }
 
 
