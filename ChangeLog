@@ -3,6 +3,10 @@
 	* Version 1.7.0 released
 	* using CGRIBEX library version 1.7.0
 
+2014-07-18  Uwe Schulzweida
+
+	* streamWriteVarF, streamWriteVarSliceF: added support for GRIB1 (cgribex)
+
 2014-07-17  Uwe Schulzweida
 
 	* grib2: activate jpeg support in combination with masks (missing values)

@@ -488,7 +488,7 @@ void grbReadVarSliceDP(stream_t * streamptr, int varID, int levelID, double *dat
 }
 
 static
-size_t grbEncode(int filetype, int varID, int levelID, int vlistID, int gridID, int zaxisID,
+size_t grbEncode(int filetype, int memtype, int varID, int levelID, int vlistID, int gridID, int zaxisID,
 		 int date, int time, int tsteptype, int numavg,
 		 long datasize, const double *data, int nmiss, unsigned char **gribbuffer,
 		 int ljpeg, void *gribContainer)
@@ -502,13 +502,15 @@ size_t grbEncode(int filetype, int varID, int levelID, int vlistID, int gridID, 
       gribbuffersize = datasize*4+3000;
       *gribbuffer = (unsigned char *) malloc(gribbuffersize);
 
-      nbytes = cgribexEncode(varID, levelID, vlistID, gridID, zaxisID,
+      nbytes = cgribexEncode(memtype, varID, levelID, vlistID, gridID, zaxisID,
 			     date, time, tsteptype, numavg,
 			     datasize, data, nmiss, *gribbuffer, gribbuffersize);
     }
   else
 #endif
     {
+      if ( memtype == MEMTYPE_FLOAT ) Error("gribapiEncode() not implemented for memtype float!");
+
       nbytes = gribapiEncode(varID, levelID, vlistID, gridID, zaxisID,
 			     date, time, tsteptype, numavg,
 			     datasize, data, nmiss, gribbuffer, &gribbuffersize,
@@ -567,8 +569,6 @@ int grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype
   int ljpeg_warn = 1;
   void *gc = NULL;
 
-  if ( memtype == MEMTYPE_FLOAT ) Error("grb_write_var_slice not implemented for memtype float!");
-
   filetype  = streamptr->filetype;
   fileID    = streamptr->fileID;
   vlistID   = streamptr->vlistID;
@@ -619,7 +619,7 @@ int grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype
 	}
     }
 
-  nbytes = grbEncode(filetype, varID, levelID, vlistID, gridID, zaxisID, date, time, tsteptype, numavg, 
+  nbytes = grbEncode(filetype, memtype, varID, levelID, vlistID, gridID, zaxisID, date, time, tsteptype, numavg, 
 		     datasize, (const double*) data, nmiss, &gribbuffer, ljpeg, gc);
 
   if ( streamptr->comptype == COMPRESS_SZIP )

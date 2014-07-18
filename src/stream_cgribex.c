@@ -2224,7 +2224,7 @@ void cgribexDefEnsembleVar(int *isec1, int vlistID, int varID)
 #endif
 
 
-size_t cgribexEncode(int varID, int levelID, int vlistID, int gridID, int zaxisID,
+size_t cgribexEncode(int memtype, int varID, int levelID, int vlistID, int gridID, int zaxisID,
 		     int vdate, int vtime, int tsteptype, int numavg,
 		     long datasize, const double *data, int nmiss, unsigned char *gribbuffer, size_t gribbuffersize)
 {
@@ -2233,12 +2233,14 @@ size_t cgribexEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   long gribsize;
   int iret = 0, iword = 0;
   int isec0[2], isec1[4096], isec2[4096], isec3[2], isec4[512];
+  float fsec2f[512], fsec3f[2];
   double fsec2[512], fsec3[2];
   int datatype;
   int param;
 
   memset(isec1, 0, 256*sizeof(int));
   fsec2[0] = 0; fsec2[1] = 0;
+  fsec2f[0] = 0; fsec2f[1] = 0;
 
   gribsize = gribbuffersize / sizeof(int);
   param    = vlistInqVarParam(vlistID, varID);
@@ -2277,8 +2279,18 @@ size_t cgribexEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
     }
   //printf("isec4[16] %d\n", isec4[16]);
 
-  gribExDP(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, (double*) data,
-	   datasize, (int *) gribbuffer, gribsize, &iword, "C", &iret);
+  if ( memtype == MEMTYPE_FLOAT )
+    {
+      for ( int i = 0; i < ISEC2_NumVCP; ++i ) fsec2f[10+i] = fsec2[10+i];
+      fsec3f[ 1] = fsec3[ 1];
+    }
+
+  if ( memtype == MEMTYPE_FLOAT )
+    gribExSP(isec0, isec1, isec2, fsec2f, isec3, fsec3f, isec4, (float*) data,
+             datasize, (int *) gribbuffer, gribsize, &iword, "C", &iret);
+  else
+    gribExDP(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, (double*) data,
+             datasize, (int *) gribbuffer, gribsize, &iword, "C", &iret);
 
   if ( iret ) Error("Problem during GRIB encode (errno = %d)!", iret);
 
