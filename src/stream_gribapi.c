@@ -175,11 +175,10 @@ double timeunit_factor(int tu1, int tu2)
 static
 int gribapiGetTimeUnits(grib_handle *gh)
 {
-  int status;
   int timeunits = -1;
   long unitsOfTime = -1;
 
-  status = grib_get_long(gh, "indicatorOfUnitOfTimeRange", &unitsOfTime);
+  grib_get_long(gh, "indicatorOfUnitOfTimeRange", &unitsOfTime);
 
   GRIB_CHECK(my_grib_set_long(gh, "stepUnits", unitsOfTime), 0);
 
@@ -1989,6 +1988,10 @@ int gribapiDecode(unsigned char *gribbuffer, int gribsize, double *data, int gri
   size_t datasize, dummy, recsize;
   grib_handle *gh = NULL;
 
+  UNUSED(zip);
+  UNUSED(vlistID);
+  UNUSED(varID);
+
   if ( unreduced )
     {
       static int lwarn = 1;
@@ -2169,7 +2172,7 @@ void gribapiDefStepUnits(grib_handle *gh, int timeunit, int gcinit)
 }
 
 static
-int gribapiDefSteptype(int editionNumber, grib_handle *gh, int tsteptype, int gcinit)
+int gribapiDefSteptype(int editionNumber, grib_handle *gh, int typeOfGeneratingProcess, int tsteptype, int gcinit)
 {
   long proDefTempNum = 0;
   size_t len = 64;
@@ -2190,6 +2193,12 @@ int gribapiDefSteptype(int editionNumber, grib_handle *gh, int tsteptype, int gc
     default:             strcpy(stepType, "instant"); proDefTempNum = 0; break;
     }
 
+  if ( typeOfGeneratingProcess == 4 )
+    {
+      if ( proDefTempNum == 8 ) proDefTempNum = 11;
+      else                      proDefTempNum = 1;
+    }
+
   if ( !gcinit )
     {
       if ( editionNumber > 1 ) GRIB_CHECK(my_grib_set_long(gh, "productDefinitionTemplateNumber", proDefTempNum), 0);
@@ -2201,9 +2210,9 @@ int gribapiDefSteptype(int editionNumber, grib_handle *gh, int tsteptype, int gc
 }
 
 static
-void gribapiDefDateTimeAbs(int editionNumber, grib_handle *gh, int date, int time, int tsteptype, int gcinit)
+void gribapiDefDateTimeAbs(int editionNumber, grib_handle *gh, int date, int time, int typeOfGeneratingProcess, int tsteptype, int gcinit)
 {
-  (void ) gribapiDefSteptype(editionNumber, gh, tsteptype, gcinit);
+  (void ) gribapiDefSteptype(editionNumber, gh, typeOfGeneratingProcess, tsteptype, gcinit);
 
   if ( editionNumber > 1 ) GRIB_CHECK(my_grib_set_long(gh, "significanceOfReferenceTime", 0), 0);
   if ( editionNumber > 1 ) GRIB_CHECK(my_grib_set_long(gh, "stepRange", 0), 0);
@@ -2214,7 +2223,7 @@ void gribapiDefDateTimeAbs(int editionNumber, grib_handle *gh, int date, int tim
 
 static
 int gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, int rdate, int rtime, int vdate, int vtime,
-                          int tsteptype, int timeunit, int calendar, int gcinit)
+                          int typeOfGeneratingProcess, int tsteptype, int timeunit, int calendar, int gcinit)
 {
   int status = -1;
   int year, month, day, hour, minute, second;
@@ -2238,7 +2247,7 @@ int gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, int rdate, int rti
 
   if ( !(int) fmod(days*86400.0 + secs, factor) )
     {
-      int proDefTempNum = gribapiDefSteptype(editionNumber, gh, tsteptype, gcinit);
+      int proDefTempNum = gribapiDefSteptype(editionNumber, gh, typeOfGeneratingProcess, tsteptype, gcinit);
 
       gribapiDefStepUnits(gh, timeunit, gcinit);
 
@@ -2268,6 +2277,8 @@ void gribapiDefTime(int editionNumber, int typeOfGeneratingProcess, grib_handle 
 {
   int taxistype = -1;
 
+  UNUSED(numavg);
+
   if ( taxisID != -1 ) taxistype = taxisInqType(taxisID);
 
   if ( typeOfGeneratingProcess == 196 )
@@ -2291,14 +2302,14 @@ void gribapiDefTime(int editionNumber, int typeOfGeneratingProcess, grib_handle 
       int timeunit = taxisInqTunit(taxisID);
 
       status = gribapiDefDateTimeRel(editionNumber, gh, rdate, rtime, vdate, vtime,
-                                     tsteptype, timeunit, calendar, gcinit);
+                                     typeOfGeneratingProcess, tsteptype, timeunit, calendar, gcinit);
 
       if ( status != 0 ) taxistype = TAXIS_ABSOLUTE;
     }
 
   if ( taxistype == TAXIS_ABSOLUTE )
     {
-      gribapiDefDateTimeAbs(editionNumber, gh, vdate, vtime, tsteptype, gcinit);
+      gribapiDefDateTimeAbs(editionNumber, gh, vdate, vtime, typeOfGeneratingProcess, tsteptype, gcinit);
     }
 }
 
@@ -2310,6 +2321,8 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int ljpeg, i
   static short lwarn = TRUE;
   size_t len;
   char *mesg;
+
+  UNUSED(nmiss);
 
   gridtype = gridInqType(gridID);
 
@@ -3080,10 +3093,6 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
       if ( ! gc->init ) GRIB_CHECK(my_grib_set_long(gh, "typeOfGeneratingProcess", typeOfGeneratingProcess), 0);
     }
 
-  if ( ! gc->init ) gribapiDefInstitut(gh, vlistID, varID);
-  if ( ! gc->init ) gribapiDefModel(gh, vlistID, varID);
-
-  if ( ! gc->init ) gribapiDefParam(editionNumber, gh, param, name);
   /*
   if( vlistInqVarEnsemble( vlistID,  varID, &ensID, &ensCount, &forecast_type ) )
     {
@@ -3094,6 +3103,11 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   */
 
   gribapiDefTime(editionNumber, typeOfGeneratingProcess, gh, vdate, vtime, tsteptype, numavg, vlistInqTaxis(vlistID), gc->init);
+
+  if ( ! gc->init ) gribapiDefInstitut(gh, vlistID, varID);
+  if ( ! gc->init ) gribapiDefModel(gh, vlistID, varID);
+
+  if ( ! gc->init ) gribapiDefParam(editionNumber, gh, param, name);
 
   if ( editionNumber == 2 && (datatype == DATATYPE_FLT32 || datatype == DATATYPE_FLT64) ) lieee = TRUE;
 

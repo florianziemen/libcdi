@@ -13,6 +13,9 @@
 #include <math.h>
 #include <sys/types.h>
 
+/* dummy use of unused parameters to silence compiler warnings */
+#define  UNUSED(x) (void)x
+
 #ifndef strdupx
 #ifndef strdup
 char *strdup(const char *s);

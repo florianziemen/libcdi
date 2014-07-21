@@ -5,6 +5,7 @@
 
 2014-07-21  Uwe Schulzweida
 
+	* gribapiDefSteptype: changed proDefTempNum to 1/11 for typeOfGeneratingProcess=4
 	* file write: set default to NONBLOCK if available
 
 2014-07-18  Uwe Schulzweida
