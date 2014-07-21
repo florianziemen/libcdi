@@ -801,6 +801,9 @@ void file_initialize(void)
 	}
     }
 
+#if defined (O_NONBLOCK)
+  FileFlagWrite = O_NONBLOCK;
+#endif
   envString = getenv("FILE_FLAG_WRITE");
   if ( envString )
     {
@@ -1230,8 +1233,10 @@ int fileClose_serial(int fileID)
       if ( fileptr->type == FILE_TYPE_FOPEN )
 	fprintf(stderr, " file pointer     : %p\n",  (void *) fileptr->fp);
       else
-        fprintf(stderr, " file descriptor  : %d\n",  fileptr->fd);
-
+        {
+          fprintf(stderr, " file descriptor  : %d\n",  fileptr->fd);
+          fprintf(stderr, " file flag        : %d\n", FileFlagWrite);
+        }
       fprintf(stderr, " file mode        : %c\n",  fileptr->mode);
 
       if ( sizeof(off_t) > sizeof(long) )
