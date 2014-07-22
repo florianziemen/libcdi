@@ -24,7 +24,7 @@ case "${HOSTNAME}" in
                     --with-szlib=$HOME/local \
 	            CC=icc CFLAGS="-g -D_REENTRANT -Wall -O3 -march=native -Df2cFortran -fp-model source"
 	;;
-    bailung*)
+    bailung*|d133*|d134*)
 	./configure --prefix=$HOME/local \
                     --enable-maintainer-mode \
                     --enable-iso-c-interface \

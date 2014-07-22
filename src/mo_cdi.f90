@@ -1302,6 +1302,25 @@ module mo_cdi
       end interface
   
       interface
+        subroutine vlistDefVarProductDefinitionTemplate(vlistID,varID,productDefinitionTemplate) bind(c,&
+       name='vlistDefVarProductDefinitionTemplate')
+          import :: c_int
+          integer(c_int), value :: vlistID
+          integer(c_int), value :: varID
+          integer(c_int), value :: productDefinitionTemplate
+       end subroutine vlistDefVarProductDefinitionTemplate
+      end interface
+  
+      interface
+        integer(c_int) function vlistInqVarProductDefinitionTemplate(vlistID,varID) bind(c,&
+       name='vlistInqVarProductDefinitionTemplate')
+          import :: c_int
+          integer(c_int), value :: vlistID
+          integer(c_int), value :: varID
+       end function vlistInqVarProductDefinitionTemplate
+      end interface
+  
+      interface
         integer(c_int) function vlistInqVarSize(vlistID,varID) bind(c,name='vlistInqVarSize')
           import :: c_int
           integer(c_int), value :: vlistID
@@ -3295,6 +3314,8 @@ module mo_cdi
       public :: vlistInqVarTimaccu
       public :: vlistDefVarTypeOfGeneratingProcess
       public :: vlistInqVarTypeOfGeneratingProcess
+      public :: vlistDefVarProductDefinitionTemplate
+      public :: vlistInqVarProductDefinitionTemplate
       public :: vlistInqVarSize
       public :: vlistDefIndex
       public :: vlistInqIndex

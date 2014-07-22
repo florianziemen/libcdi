@@ -39,8 +39,8 @@ void vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].tsteptype     = TSTEP_INSTANT;
   vlistptr->vars[varID].timave        = 0;
   vlistptr->vars[varID].timaccu       = 0;
-  vlistptr->vars[varID].typeOfGeneratingProcess = 0;
-  //vlistptr->vars[varID].productDefinitionTemplate = -1;
+  vlistptr->vars[varID].typeOfGeneratingProcess   = 0;
+  vlistptr->vars[varID].productDefinitionTemplate = -1;
   vlistptr->vars[varID].chunktype     = cdiChunkType;
   vlistptr->vars[varID].xyz           = 0;
   vlistptr->vars[varID].gridID        = CDI_UNDEFID;
@@ -1280,7 +1280,7 @@ int vlistInqVarTypeOfGeneratingProcess(int vlistID, int varID)
   return (vlistptr->vars[varID].typeOfGeneratingProcess);
 }
 
-/*
+
 void vlistDefVarProductDefinitionTemplate(int vlistID, int varID, int productDefinitionTemplate)
 {
   RETURN_IF_CLOSED_VLIST(vlistID);
@@ -1297,7 +1297,7 @@ int vlistInqVarProductDefinitionTemplate(int vlistID, int varID)
 
   return (vlistptr->vars[varID].productDefinitionTemplate);
 }
-*/
+
 
 void vlistDestroyVarName(int vlistID, int varID)
 {

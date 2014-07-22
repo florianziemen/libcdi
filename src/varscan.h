@@ -30,6 +30,7 @@ int  varInqTable(int varID);
 void varDefEnsembleInfo(int varID, int ens_idx, int ens_count, int forecast_type);
 
 void varDefTypeOfGeneratingProcess(int varID, int typeOfGeneratingProcess);
+void varDefProductDefinitionTemplate(int varID, int productDefinitionTemplate);
 
 
 void varDefOptGribInt(int varID, long lval, const char *keyword);

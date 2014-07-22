@@ -3,6 +3,10 @@
 	* Version 1.7.0 released
 	* using CGRIBEX library version 1.7.0
 
+2014-07-22  Uwe Schulzweida
+
+	* added vlistDefVarProductDefinitionTemplate() to define GRIB2 Product Definition Template Number
+
 2014-07-21  Uwe Schulzweida
 
 	* gribapiDefSteptype: changed proDefTempNum to 1/11 for typeOfGeneratingProcess=4

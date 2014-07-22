@@ -66,6 +66,7 @@ typedef struct
   char         *units;
   ensinfo_t    *ensdata;
   int           typeOfGeneratingProcess;
+  int           productDefinitionTemplate;
 #if  defined  (HAVE_LIBGRIB_API)
   /* (Optional) list of keyword/double value pairs */
   int           opt_grib_dbl_nentries;
@@ -106,7 +107,8 @@ void paramInitEntry(int varID, int param)
   vartable[varID].instID         = UNDEFID;
   vartable[varID].modelID        = UNDEFID;
   vartable[varID].tableID        = UNDEFID;
-  vartable[varID].typeOfGeneratingProcess  = UNDEFID;
+  vartable[varID].typeOfGeneratingProcess   = UNDEFID;
+  vartable[varID].productDefinitionTemplate = UNDEFID;
   vartable[varID].comptype       = COMPRESS_NONE;
   vartable[varID].complevel      = 1;
   vartable[varID].lmissval       = 0;
@@ -603,6 +605,9 @@ void cdi_generate_vars(stream_t *streamptr)
       if ( vartable[varid].typeOfGeneratingProcess != UNDEFID )
         vlistDefVarTypeOfGeneratingProcess(vlistID, varID, vartable[varid].typeOfGeneratingProcess);
 
+      if ( vartable[varid].productDefinitionTemplate != UNDEFID )
+        vlistDefVarProductDefinitionTemplate(vlistID, varID, vartable[varid].productDefinitionTemplate);
+
       if ( vartable[varid].lmissval ) vlistDefVarMissval(vlistID, varID, vartable[varid].missval);
 
       if ( vartable[varid].name )     vlistDefVarName(vlistID, varID, vartable[varid].name);
@@ -1020,6 +1025,12 @@ void varDefEnsembleInfo(int varID, int ens_idx, int ens_count, int forecast_type
 void varDefTypeOfGeneratingProcess(int varID, int typeOfGeneratingProcess)
 {
   vartable[varID].typeOfGeneratingProcess = typeOfGeneratingProcess;
+}
+
+
+void varDefProductDefinitionTemplate(int varID, int productDefinitionTemplate)
+{
+  vartable[varID].productDefinitionTemplate = productDefinitionTemplate;
 }
 
 

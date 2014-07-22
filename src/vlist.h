@@ -86,6 +86,7 @@ typedef struct
   int         timave;
   int         timaccu;
   int         typeOfGeneratingProcess;
+  int         productDefinitionTemplate;
   int         chunktype;
   int         xyz;
   int         missvalused; /* TRUE if missval is defined */
