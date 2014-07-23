@@ -56,7 +56,7 @@ const resOps taxisOps = {
 };
 
 #define RESH_ISCLOSED_TAXIS(taxisID)    (reshGetStatus(taxisID, &taxisOps) == RESH_CLOSED)
-#define RETURN_IF_CLOSED_TAXIS(taxisID) if ( RESH_ISCLOSED_TAXIS(taxisID) ) {Warning("%s", "Operation not executed."); return;}
+#define RETURN_IFCLOSED_TAXIS(taxisID) if ( RESH_ISCLOSED_TAXIS(taxisID) ) {Warning("%s", "Operation not executed."); return;}
 
 
 static int  TAXIS_Debug = 0;   /* If set to 1, debugging */
@@ -294,7 +294,7 @@ int taxisDuplicate(int taxisID1)
 
 void taxisDefType(int taxisID, int type)
 {
-  RETURN_IF_CLOSED_TAXIS(taxisID);
+  RETURN_IFCLOSED_TAXIS(taxisID);
 
   taxis_t *taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
@@ -365,7 +365,7 @@ The function @func{taxisDefRdate} defines the reference date of a Time axis.
 */
 void taxisDefRdate(int taxisID, int rdate)
 {
-  RETURN_IF_CLOSED_TAXIS(taxisID);
+  RETURN_IFCLOSED_TAXIS(taxisID);
 
   taxis_t *taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
@@ -390,7 +390,7 @@ The function @func{taxisDefRtime} defines the reference time of a Time axis.
 */
 void taxisDefRtime(int taxisID, int rtime)
 {
-  RETURN_IF_CLOSED_TAXIS(taxisID);
+  RETURN_IFCLOSED_TAXIS(taxisID);
 
   taxis_t *taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
@@ -415,7 +415,7 @@ The function @func{taxisDefFdate} defines the forecast reference date of a Time 
 */
 void taxisDefFdate(int taxisID, int fdate)
 {
-  RETURN_IF_CLOSED_TAXIS(taxisID);
+  RETURN_IFCLOSED_TAXIS(taxisID);
 
   taxis_t *taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
@@ -440,7 +440,7 @@ The function @func{taxisDefFtime} defines the forecast reference time of a Time 
 */
 void taxisDefFtime(int taxisID, int ftime)
 {
-  RETURN_IF_CLOSED_TAXIS(taxisID);
+  RETURN_IFCLOSED_TAXIS(taxisID);
 
   taxis_t *taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
@@ -467,7 +467,7 @@ The function @func{taxisDefCalendar} defines the calendar of a Time axis.
 */
 void taxisDefCalendar(int taxisID, int calendar)
 {
-  RETURN_IF_CLOSED_TAXIS(taxisID);
+  RETURN_IFCLOSED_TAXIS(taxisID);
 
   taxis_t *taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
@@ -479,7 +479,7 @@ void taxisDefCalendar(int taxisID, int calendar)
 
 void taxisDefTunit(int taxisID, int unit)
 {
-  RETURN_IF_CLOSED_TAXIS(taxisID);
+  RETURN_IFCLOSED_TAXIS(taxisID);
 
   taxis_t *taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
@@ -491,7 +491,7 @@ void taxisDefTunit(int taxisID, int unit)
 
 void taxisDefForecastTunit(int taxisID, int unit)
 {
-  RETURN_IF_CLOSED_TAXIS(taxisID);
+  RETURN_IFCLOSED_TAXIS(taxisID);
 
   taxis_t *taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
@@ -503,7 +503,7 @@ void taxisDefForecastTunit(int taxisID, int unit)
 
 void taxisDefForecastPeriod(int taxisID, double fc_period)
 {
-  RETURN_IF_CLOSED_TAXIS(taxisID);
+  RETURN_IFCLOSED_TAXIS(taxisID);
 
   taxis_t *taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
@@ -515,7 +515,7 @@ void taxisDefForecastPeriod(int taxisID, double fc_period)
 
 void taxisDefNumavg(int taxisID, int numavg)
 {
-  RETURN_IF_CLOSED_TAXIS(taxisID);
+  RETURN_IFCLOSED_TAXIS(taxisID);
 
   taxis_t *taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
@@ -550,7 +550,7 @@ int taxisHasBounds(int taxisID)
 
 void taxisDeleteBounds(int taxisID)
 {
-  RETURN_IF_CLOSED_TAXIS(taxisID);
+  RETURN_IFCLOSED_TAXIS(taxisID);
 
   taxis_t *taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
@@ -632,7 +632,7 @@ void taxisInqVdateBounds(int taxisID, int *vdate_lb, int *vdate_ub)
 
 void taxisDefVdateBounds(int taxisID, int vdate_lb, int vdate_ub)
 {
-  RETURN_IF_CLOSED_TAXIS(taxisID);
+  RETURN_IFCLOSED_TAXIS(taxisID);
 
   taxis_t *taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
@@ -683,7 +683,7 @@ void taxisInqVtimeBounds(int taxisID, int *vtime_lb, int *vtime_ub)
 
 void taxisDefVtimeBounds(int taxisID, int vtime_lb, int vtime_ub)
 {
-  RETURN_IF_CLOSED_TAXIS(taxisID);
+  RETURN_IFCLOSED_TAXIS(taxisID);
 
   taxis_t *taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 

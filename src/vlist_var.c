@@ -22,8 +22,8 @@ const
 resOps vlist_ops;
 
 #define RESH_ISCLOSED_VLIST(vlistID)    (reshGetStatus(vlistID, &vlist_ops) == RESH_CLOSED)
-#define RETURN_IF_CLOSED_VLIST(vlistID)         if ( RESH_ISCLOSED_VLIST(vlistID) ) {Warning("%s", "Operation not executed."); return;}
-#define RETURN_IF_CLOSED_VLIST2(vlistID, rval)  if ( RESH_ISCLOSED_VLIST(vlistID) ) {Warning("%s", "Operation not executed."); return rval;}
+#define RETURN_IFCLOSED_VLIST(vlistID)         if ( RESH_ISCLOSED_VLIST(vlistID) ) {Warning("%s", "Operation not executed."); return;}
+#define RETURN_IFCLOSED_VLIST2(vlistID, rval)  if ( RESH_ISCLOSED_VLIST(vlistID) ) {Warning("%s", "Operation not executed."); return rval;}
 
 
 static
@@ -206,7 +206,7 @@ int vlistDefVar(int vlistID, int gridID, int zaxisID, int tsteptype)
   int varID;
   int index;
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  RETURN_IF_CLOSED_VLIST2(vlistID, CDI_UNDEFID);
+  RETURN_IFCLOSED_VLIST2(vlistID, CDI_UNDEFID);
 
   if ( CDI_Debug )
     Message("gridID = %d  zaxisID = %d  tsteptype = %d", gridID, zaxisID, tsteptype);
@@ -285,7 +285,7 @@ The function @func{vlistDefVarParam} defines the parameter number of a variable.
 */
 void vlistDefVarParam(int vlistID, int varID, int param)
 {
-  RETURN_IF_CLOSED_VLIST(vlistID);
+  RETURN_IFCLOSED_VLIST(vlistID);
 
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
@@ -311,7 +311,7 @@ The function @func{vlistDefVarCode} defines the code number of a variable.
 */
 void vlistDefVarCode(int vlistID, int varID, int code)
 {
-  RETURN_IF_CLOSED_VLIST(vlistID);
+  RETURN_IFCLOSED_VLIST(vlistID);
 
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
@@ -787,7 +787,7 @@ The function @func{vlistDefVarDatatype} defines the data type of a variable.
 */
 void vlistDefVarDatatype(int vlistID, int varID, int datatype)
 {
-  RETURN_IF_CLOSED_VLIST(vlistID);
+  RETURN_IFCLOSED_VLIST(vlistID);
 
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
@@ -810,7 +810,7 @@ void vlistDefVarDatatype(int vlistID, int varID, int datatype)
 
 void vlistDefVarInstitut(int vlistID, int varID, int instID)
 {
-  RETURN_IF_CLOSED_VLIST(vlistID);
+  RETURN_IFCLOSED_VLIST(vlistID);
 
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
@@ -828,7 +828,7 @@ int vlistInqVarInstitut(int vlistID, int varID)
 
 void vlistDefVarModel(int vlistID, int varID, int modelID)
 {
-  RETURN_IF_CLOSED_VLIST(vlistID);
+  RETURN_IFCLOSED_VLIST(vlistID);
 
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
@@ -846,7 +846,7 @@ int vlistInqVarModel(int vlistID, int varID)
 
 void vlistDefVarTable(int vlistID, int varID, int tableID)
 {
-  RETURN_IF_CLOSED_VLIST(vlistID);
+  RETURN_IFCLOSED_VLIST(vlistID);
 
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
@@ -890,7 +890,7 @@ The function @func{vlistDefVarName} defines the name of a variable.
 */
 void vlistDefVarName(int vlistID, int varID, const char *name)
 {
-  RETURN_IF_CLOSED_VLIST(vlistID);
+  RETURN_IFCLOSED_VLIST(vlistID);
 
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
@@ -925,7 +925,7 @@ The function @func{vlistDefVarLongname} defines the long name of a variable.
 */
 void vlistDefVarLongname(int vlistID, int varID, const char *longname)
 {
-  RETURN_IF_CLOSED_VLIST(vlistID);
+  RETURN_IFCLOSED_VLIST(vlistID);
 
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
@@ -960,7 +960,7 @@ The function @func{vlistDefVarStdname} defines the standard name of a variable.
 */
 void vlistDefVarStdname(int vlistID, int varID, const char *stdname)
 {
-  RETURN_IF_CLOSED_VLIST(vlistID);
+  RETURN_IFCLOSED_VLIST(vlistID);
 
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
@@ -995,7 +995,7 @@ The function @func{vlistDefVarUnits} defines the units of a variable.
 */
 void vlistDefVarUnits(int vlistID, int varID, const char *units)
 {
-  RETURN_IF_CLOSED_VLIST(vlistID);
+  RETURN_IFCLOSED_VLIST(vlistID);
 
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
@@ -1081,7 +1081,7 @@ The function @func{vlistDefVarExtra} defines the extra information of a variable
 */
 void vlistDefVarExtra(int vlistID, int varID, const char *extra)
 {
-  RETURN_IF_CLOSED_VLIST(vlistID);
+  RETURN_IFCLOSED_VLIST(vlistID);
 
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
@@ -1165,7 +1165,7 @@ void vlistDefVarValidrange(int vlistID, int varID, const double *validrange)
 
 double vlistInqVarScalefactor(int vlistID, int varID)
 {
-  RETURN_IF_CLOSED_VLIST2(vlistID, 1.0);
+  RETURN_IFCLOSED_VLIST2(vlistID, 1.0);
 
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
@@ -1187,7 +1187,7 @@ double vlistInqVarAddoffset(int vlistID, int varID)
 
 void vlistDefVarScalefactor(int vlistID, int varID, double scalefactor)
 {
-  RETURN_IF_CLOSED_VLIST(vlistID);
+  RETURN_IFCLOSED_VLIST(vlistID);
 
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
@@ -1199,7 +1199,7 @@ void vlistDefVarScalefactor(int vlistID, int varID, double scalefactor)
 
 void vlistDefVarAddoffset(int vlistID, int varID, double addoffset)
 {
-  RETURN_IF_CLOSED_VLIST(vlistID);
+  RETURN_IFCLOSED_VLIST(vlistID);
 
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
@@ -1211,7 +1211,7 @@ void vlistDefVarAddoffset(int vlistID, int varID, double addoffset)
 
 void vlistDefVarTsteptype(int vlistID, int varID, int tsteptype)
 {
-  RETURN_IF_CLOSED_VLIST(vlistID);
+  RETURN_IFCLOSED_VLIST(vlistID);
 
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
@@ -1229,7 +1229,7 @@ int vlistInqVarTsteptype(int vlistID, int varID)
 
 void vlistDefVarTimave(int vlistID, int varID, int timave)
 {
-  RETURN_IF_CLOSED_VLIST(vlistID);
+  RETURN_IFCLOSED_VLIST(vlistID);
 
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
@@ -1247,7 +1247,7 @@ int vlistInqVarTimave(int vlistID, int varID)
 
 void vlistDefVarTimaccu(int vlistID, int varID, int timaccu)
 {
-  RETURN_IF_CLOSED_VLIST(vlistID);
+  RETURN_IFCLOSED_VLIST(vlistID);
 
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
@@ -1265,7 +1265,7 @@ int vlistInqVarTimaccu(int vlistID, int varID)
 
 void vlistDefVarTypeOfGeneratingProcess(int vlistID, int varID, int typeOfGeneratingProcess)
 {
-  RETURN_IF_CLOSED_VLIST(vlistID);
+  RETURN_IFCLOSED_VLIST(vlistID);
 
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
@@ -1283,7 +1283,7 @@ int vlistInqVarTypeOfGeneratingProcess(int vlistID, int varID)
 
 void vlistDefVarProductDefinitionTemplate(int vlistID, int varID, int productDefinitionTemplate)
 {
-  RETURN_IF_CLOSED_VLIST(vlistID);
+  RETURN_IFCLOSED_VLIST(vlistID);
 
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
@@ -1357,7 +1357,7 @@ int vlistInqVarMissvalUsed(int vlistID, int varID)
 
 void vlistDefFlag(int vlistID, int varID, int levID, int flag)
 {
-  RETURN_IF_CLOSED_VLIST(vlistID);
+  RETURN_IFCLOSED_VLIST(vlistID);
 
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
@@ -1471,7 +1471,7 @@ int vlistMergedLevel(int vlistID, int varID, int levelID)
 
 void vlistDefIndex(int vlistID, int varID, int levelID, int index)
 {
-  RETURN_IF_CLOSED_VLIST(vlistID);
+  RETURN_IFCLOSED_VLIST(vlistID);
 
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
@@ -1502,7 +1502,7 @@ int vlistInqIndex(int vlistID, int varID, int levelID)
 
 void vlistChangeVarZaxis(int vlistID, int varID, int zaxisID)
 {
-  RETURN_IF_CLOSED_VLIST(vlistID);
+  RETURN_IFCLOSED_VLIST(vlistID);
 
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
@@ -1548,7 +1548,7 @@ void vlistChangeVarZaxis(int vlistID, int varID, int zaxisID)
 
 void vlistChangeVarGrid(int vlistID, int varID, int gridID)
 {
-  RETURN_IF_CLOSED_VLIST(vlistID);
+  RETURN_IFCLOSED_VLIST(vlistID);
 
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
@@ -1588,7 +1588,7 @@ void vlistChangeVarGrid(int vlistID, int varID, int gridID)
 
 void vlistDefVarCompType(int vlistID, int varID, int comptype)
 {
-  RETURN_IF_CLOSED_VLIST(vlistID);
+  RETURN_IFCLOSED_VLIST(vlistID);
 
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
@@ -1610,7 +1610,7 @@ int vlistInqVarCompType(int vlistID, int varID)
 
 void vlistDefVarCompLevel(int vlistID, int varID, int complevel)
 {
-  RETURN_IF_CLOSED_VLIST(vlistID);
+  RETURN_IFCLOSED_VLIST(vlistID);
 
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
@@ -1854,7 +1854,7 @@ int vlistInqVarIntKey(int vlistID, int varID, const char* name)
 
 void vlistDefVarIOrank(int vlistID, int varID, int iorank)
 {
-  RETURN_IF_CLOSED_VLIST(vlistID);
+  RETURN_IFCLOSED_VLIST(vlistID);
 
   vlist_t *vlistptr = vlist_to_pointer(vlistID );
 
