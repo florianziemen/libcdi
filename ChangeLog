@@ -3,9 +3,13 @@
 	* Version 1.7.0 released
 	* using CGRIBEX library version 1.7.0
 
+2014-07-24  Uwe Schulzweida
+
+	* gribapiEncode: update additional keys defined with vlistDefVarXXXKey() [Feature #4720]
+
 2014-07-22  Uwe Schulzweida
 
-	* added vlistDefVarProductDefinitionTemplate() to define GRIB2 Product Definition Template Number
+	* added vlistDefVarProductDefinitionTemplate() to define GRIB2 Product Definition Template Number [Feature #4694]
 
 2014-07-21  Uwe Schulzweida
 

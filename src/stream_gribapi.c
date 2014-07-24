@@ -3138,29 +3138,37 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
 
   vlist_t *vlistptr;
   vlistptr = vlist_to_pointer(vlistID);
-  if (!gc->init) {
-    int i;
-    for (i=0; i<vlistptr->vars[varID].opt_grib_dbl_nentries; i++)
+  //if (!gc->init)
+  {
+    for (int i=0; i<vlistptr->vars[varID].opt_grib_dbl_nentries; i++)
       {
-	int ret = my_grib_set_double(gh, vlistptr->vars[varID].opt_grib_dbl_keyword[i],
-                                  vlistptr->vars[varID].opt_grib_dbl_val[i]);
-	if (ret != 0) {
-	    fprintf(stderr, "key \"%s\"  :   value = %g\n",
-                    vlistptr->vars[varID].opt_grib_dbl_keyword[i],
-		    vlistptr->vars[varID].opt_grib_dbl_val[i]);
-	}
-	GRIB_CHECK(ret, 0);
+        if ( vlistptr->vars[varID].opt_grib_dbl_update[i] )
+          {
+            vlistptr->vars[varID].opt_grib_dbl_update[i] = FALSE;
+            int ret = my_grib_set_double(gh, vlistptr->vars[varID].opt_grib_dbl_keyword[i],
+                                         vlistptr->vars[varID].opt_grib_dbl_val[i]);
+            if (ret != 0) {
+              fprintf(stderr, "key \"%s\"  :   value = %g\n",
+                      vlistptr->vars[varID].opt_grib_dbl_keyword[i],
+                      vlistptr->vars[varID].opt_grib_dbl_val[i]);
+            }
+            GRIB_CHECK(ret, 0);
+          }
       }
-    for (i=0; i<vlistptr->vars[varID].opt_grib_int_nentries; i++)
+    for (int i=0; i<vlistptr->vars[varID].opt_grib_int_nentries; i++)
       {
-	int ret = my_grib_set_long(gh, vlistptr->vars[varID].opt_grib_int_keyword[i],
-	                        vlistptr->vars[varID].opt_grib_int_val[i]);
-	if (ret != 0) {
-	    fprintf(stderr, "key \"%s\"  :   value = %d\n",
-		    vlistptr->vars[varID].opt_grib_int_keyword[i],
-		    vlistptr->vars[varID].opt_grib_int_val[i]);
-	}
-	GRIB_CHECK(ret, 0);
+        if ( vlistptr->vars[varID].opt_grib_int_update[i] )
+          {
+            vlistptr->vars[varID].opt_grib_int_update[i] = FALSE;
+            int ret = my_grib_set_long(gh, vlistptr->vars[varID].opt_grib_int_keyword[i],
+                                       vlistptr->vars[varID].opt_grib_int_val[i]);
+            if (ret != 0) {
+              fprintf(stderr, "key \"%s\"  :   value = %d\n",
+                      vlistptr->vars[varID].opt_grib_int_keyword[i],
+                      vlistptr->vars[varID].opt_grib_int_val[i]);
+            }
+            GRIB_CHECK(ret, 0);
+          }
       }
   }
 

@@ -340,6 +340,7 @@ void vlistCopy(int vlistID2, int vlistID1)
 	    if ( vlistptr1->vars[varID].opt_grib_int_keyword[i] ) {
 	      vlistptr2->vars[varID].opt_grib_int_keyword[i] = strdupx(vlistptr1->vars[varID].opt_grib_int_keyword[i]);
 	      vlistptr2->vars[varID].opt_grib_int_val[i]     = vlistptr1->vars[varID].opt_grib_int_val[i];
+	      vlistptr2->vars[varID].opt_grib_int_update[i]  = TRUE;
 	    }
 	  }
 	  vlistptr2->vars[varID].opt_grib_dbl_nentries = vlistptr1->vars[varID].opt_grib_dbl_nentries;
@@ -347,6 +348,7 @@ void vlistCopy(int vlistID2, int vlistID1)
 	    if ( vlistptr1->vars[varID].opt_grib_dbl_keyword[i] ) {
 	      vlistptr2->vars[varID].opt_grib_dbl_keyword[i] = strdupx(vlistptr1->vars[varID].opt_grib_dbl_keyword[i]);
 	      vlistptr2->vars[varID].opt_grib_dbl_val[i]     = vlistptr1->vars[varID].opt_grib_dbl_val[i];
+	      vlistptr2->vars[varID].opt_grib_dbl_update[i]  = TRUE;
 	    }
 	  }
 #endif
@@ -595,6 +597,7 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
 	      if ( vlistptr1->vars[varID].opt_grib_int_keyword[i] ) {
 		vlistptr2->vars[varID2].opt_grib_int_keyword[i] = strdupx(vlistptr1->vars[varID].opt_grib_int_keyword[i]);
 		vlistptr2->vars[varID2].opt_grib_int_val[i]     = vlistptr1->vars[varID].opt_grib_int_val[i];
+                vlistptr2->vars[varID2].opt_grib_int_update[i]  = TRUE;
 	      }
 	    }
 	    vlistptr2->vars[varID2].opt_grib_dbl_nentries = vlistptr1->vars[varID].opt_grib_dbl_nentries;
@@ -602,6 +605,7 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
 	      if ( vlistptr1->vars[varID].opt_grib_dbl_keyword[i] ) {
 		vlistptr2->vars[varID2].opt_grib_dbl_keyword[i] = strdupx(vlistptr1->vars[varID].opt_grib_dbl_keyword[i]);
 		vlistptr2->vars[varID2].opt_grib_dbl_val[i]     = vlistptr1->vars[varID].opt_grib_dbl_val[i];
+                vlistptr2->vars[varID2].opt_grib_dbl_update[i]  = TRUE;
 	      }
 	    }
 #endif
@@ -821,6 +825,7 @@ void vlistCat(int vlistID2, int vlistID1)
 	if ( vlistptr1->vars[varID].opt_grib_int_keyword[i] ) {
 	  vlistptr2->vars[varID2].opt_grib_int_keyword[i] = strdupx(vlistptr1->vars[varID].opt_grib_int_keyword[i]);
 	  vlistptr2->vars[varID2].opt_grib_int_val[i]     = vlistptr1->vars[varID].opt_grib_int_val[i];
+          vlistptr2->vars[varID2].opt_grib_int_update[i]  = TRUE;
 	}
       }
       vlistptr2->vars[varID2].opt_grib_dbl_nentries = vlistptr1->vars[varID].opt_grib_dbl_nentries;
@@ -828,6 +833,7 @@ void vlistCat(int vlistID2, int vlistID1)
 	if ( vlistptr1->vars[varID].opt_grib_dbl_keyword[i] ) {
 	  vlistptr2->vars[varID2].opt_grib_dbl_keyword[i] = strdupx(vlistptr1->vars[varID].opt_grib_dbl_keyword[i]);
 	  vlistptr2->vars[varID2].opt_grib_dbl_val[i]     = vlistptr1->vars[varID].opt_grib_dbl_val[i];
+          vlistptr2->vars[varID2].opt_grib_dbl_update[i]  = TRUE;
 	}
       }
 #endif

@@ -632,6 +632,7 @@ void cdi_generate_vars(stream_t *streamptr)
           int idx = vlistptr->vars[varID].opt_grib_int_nentries;
           vlistptr->vars[varID].opt_grib_int_nentries++;
           if ( idx >= MAX_OPT_GRIB_ENTRIES ) Error("Too many optional keyword/integer value pairs!");
+          vlistptr->vars[varID].opt_grib_int_update[idx] = TRUE;
           vlistptr->vars[varID].opt_grib_int_val[idx] = vartable[varid].opt_grib_int_val[idx];
           vlistptr->vars[varID].opt_grib_int_keyword[idx] = strdupx(vartable[varid].opt_grib_int_keyword[idx]);
         }
@@ -640,6 +641,7 @@ void cdi_generate_vars(stream_t *streamptr)
           int idx = vlistptr->vars[varID].opt_grib_dbl_nentries;
           vlistptr->vars[varID].opt_grib_dbl_nentries++;
           if ( idx >= MAX_OPT_GRIB_ENTRIES ) Error("Too many optional keyword/double value pairs!");
+          vlistptr->vars[varID].opt_grib_dbl_update[idx] = TRUE;
           vlistptr->vars[varID].opt_grib_dbl_val[idx] = vartable[varid].opt_grib_dbl_val[idx];
           vlistptr->vars[varID].opt_grib_dbl_keyword[idx] = strdupx(vartable[varid].opt_grib_dbl_keyword[idx]);
         }

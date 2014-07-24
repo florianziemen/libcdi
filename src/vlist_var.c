@@ -77,8 +77,10 @@ void vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].opt_grib_int_nentries = 0;
   int i;
   for (i=0; i<MAX_OPT_GRIB_ENTRIES; i++) {
-    vlistptr->vars[varID].opt_grib_dbl_val[i] = 0.0;
     vlistptr->vars[varID].opt_grib_int_val[i] =   0;
+    vlistptr->vars[varID].opt_grib_dbl_val[i] = 0.0;
+    vlistptr->vars[varID].opt_grib_int_update[i] = FALSE;
+    vlistptr->vars[varID].opt_grib_dbl_update[i] = FALSE;
     vlistptr->vars[varID].opt_grib_int_keyword[i] = NULL;
     vlistptr->vars[varID].opt_grib_dbl_keyword[i] = NULL;
   } // for
@@ -1739,15 +1741,28 @@ void vlistDefVarIntKey(int vlistID, int varID, const char *name, int value)
 {
 #if  defined  (HAVE_LIBGRIB_API)
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
+  int idx;
 
-  int idx = vlistptr->vars[varID].opt_grib_int_nentries;
-  vlistptr->vars[varID].opt_grib_int_nentries++;
-  if ( idx >= MAX_OPT_GRIB_ENTRIES ) Error("Too many optional keyword/integer value pairs!");
-  vlistptr->vars[varID].opt_grib_int_val[idx] = value;
-  if ( name )
-    vlistptr->vars[varID].opt_grib_int_keyword[idx] = strdupx(name);
+  for ( idx=0; idx<vlistptr->vars[varID].opt_grib_int_nentries; idx++)
+    if ( strcmp(name, vlistptr->vars[varID].opt_grib_int_keyword[idx]) == 0 ) break;
+
+  if ( idx < vlistptr->vars[varID].opt_grib_int_nentries )
+    {
+      vlistptr->vars[varID].opt_grib_int_val[idx] = value;
+      vlistptr->vars[varID].opt_grib_int_update[idx] = TRUE;
+    }
   else
-    Error("Internal error!");
+    {
+      idx = vlistptr->vars[varID].opt_grib_int_nentries;
+      vlistptr->vars[varID].opt_grib_int_nentries++;
+      if ( idx >= MAX_OPT_GRIB_ENTRIES ) Error("Too many optional keyword/integer value pairs!");
+      vlistptr->vars[varID].opt_grib_int_val[idx] = value;
+      vlistptr->vars[varID].opt_grib_int_update[idx] = TRUE;
+      if ( name )
+        vlistptr->vars[varID].opt_grib_int_keyword[idx] = strdupx(name);
+      else
+        Error("Internal error, name undefined!");
+    }
 #endif
 }
 
@@ -1756,15 +1771,28 @@ void vlistDefVarDblKey(int vlistID, int varID, const char *name, double value)
 {
 #if  defined  (HAVE_LIBGRIB_API)
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
+  int idx;
 
-  int idx = vlistptr->vars[varID].opt_grib_dbl_nentries;
-  vlistptr->vars[varID].opt_grib_dbl_nentries++;
-  if ( idx >= MAX_OPT_GRIB_ENTRIES ) Error("Too many optional keyword/double value pairs!");
-  vlistptr->vars[varID].opt_grib_dbl_val[idx] = value;
-  if ( name )
-    vlistptr->vars[varID].opt_grib_dbl_keyword[idx] = strdupx(name);
+  for ( idx=0; idx<vlistptr->vars[varID].opt_grib_dbl_nentries; idx++)
+    if ( strcmp(name, vlistptr->vars[varID].opt_grib_dbl_keyword[idx]) == 0 ) break;
+
+  if ( idx < vlistptr->vars[varID].opt_grib_dbl_nentries )
+    {
+      vlistptr->vars[varID].opt_grib_dbl_val[idx] = value;
+      vlistptr->vars[varID].opt_grib_dbl_update[idx] = TRUE;
+    }
   else
-    Error("Internal error!");
+    {
+      idx = vlistptr->vars[varID].opt_grib_dbl_nentries;
+      vlistptr->vars[varID].opt_grib_dbl_nentries++;
+      if ( idx >= MAX_OPT_GRIB_ENTRIES ) Error("Too many optional keyword/double value pairs!");
+      vlistptr->vars[varID].opt_grib_dbl_val[idx] = value;
+      vlistptr->vars[varID].opt_grib_dbl_update[idx] = TRUE;
+      if ( name )
+        vlistptr->vars[varID].opt_grib_dbl_keyword[idx] = strdupx(name);
+      else
+        Error("Internal error, name undefined!");
+    }
 #endif
 }
 
