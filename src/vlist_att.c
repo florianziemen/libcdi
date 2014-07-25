@@ -213,6 +213,10 @@ int vlistDelAtt(int vlistID, int varID, const char *name)
 {
   int status = CDI_NOERR;
 
+  UNUSED(vlistID);
+  UNUSED(varID);
+  UNUSED(name);
+
   fprintf(stderr, "vlistDelAtt not implemented!\n");
 
   return (status);
@@ -278,11 +282,13 @@ int vlist_inq_att(int indtype, int vlistID, int varID, const char *name, size_t 
       else
 	{
 	  Warning("Attribute %s has wrong data type!", name);
+          status = -2;
 	}
     }
   else
     {
-      Warning("Internal problem, attribute %s not found!", name);
+      //Warning("Internal problem, attribute %s not found!", name);
+      status = -1;
     }
 
   return (status);

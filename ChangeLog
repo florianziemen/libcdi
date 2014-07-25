@@ -6,6 +6,7 @@
 2014-07-25  Uwe Schulzweida
 
 	* vlistInqAtt: return -1 if attnum is out of range
+	* vlistInqAttXXX: return -1 if attname not found
 
 2014-07-24  Uwe Schulzweida
 
