@@ -3,6 +3,10 @@
 	* Version 1.7.0 released
 	* using CGRIBEX library version 1.7.0
 
+2014-07-25  Uwe Schulzweida
+
+	* vlistInqAtt: return -1 if attnum is out of range
+
 2014-07-24  Uwe Schulzweida
 
 	* gribapiEncode: update additional keys defined with vlistDefVarXXXKey() [Feature #4720]

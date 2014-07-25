@@ -121,7 +121,7 @@ int vlistInqNatts(int vlistID, int varID, int *nattsp)
   cdi_atts_t *attsp;
 
   vlistptr = vlist_to_pointer(vlistID);
-  
+
   attsp = get_attsp(vlistptr, varID);
   xassert(attsp != NULL);
 
@@ -139,7 +139,7 @@ int vlistInqNatts(int vlistID, int varID, int *nattsp)
     @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate} or @fref{streamInqVlist}.
     @Item  varID    Variable identifier, or @func{CDI_GLOBAL} for a global attribute.
     @Item  attnum   Attribute number (from 0 to natts-1).
-    @Item  name     Pointer to the location for the returned attribute name. The caller must allocate space for the 
+    @Item  name     Pointer to the location for the returned attribute name. The caller must allocate space for the
                     returned string. The maximum possible length, in characters, of
                     the string is given by the predefined constant @func{CDI_MAX_NAME}.
     @Item  typep    Pointer to location for returned attribute type.
@@ -153,15 +153,13 @@ The function @func{vlistInqAtt} gets information about an attribute.
 int vlistInqAtt(int vlistID, int varID, int attnum, char *name, int *typep, int *lenp)
 {
   int status = CDI_NOERR;
-  vlist_t *vlistptr;
   cdi_att_t *attp = NULL;
-  cdi_atts_t *attsp;
 
   xassert(name != NULL);
 
-  vlistptr = vlist_to_pointer(vlistID);
+  vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
-  attsp = get_attsp(vlistptr, varID);
+  cdi_atts_t *attsp = get_attsp(vlistptr, varID);
   xassert(attsp != NULL);
 
   if ( attnum >= 0 && attnum < (int)attsp->nelems )
@@ -178,6 +176,7 @@ int vlistInqAtt(int vlistID, int varID, int attnum, char *name, int *typep, int 
       name[0] =  0;
       *typep  = -1;
       *lenp   =  0;
+      status  = -1;
     }
 
   return (status);
