@@ -723,7 +723,7 @@ void cdf_put_att_double(int ncid, int varid, const char *name, nc_type xtype,
 }
 
 
-void cdf_get_att_text(int ncid, int varid, char *name, char *tp)
+void cdf_get_att_text(int ncid, int varid, const char *name, char *tp)
 {
   int status;
 
@@ -735,8 +735,22 @@ void cdf_get_att_text(int ncid, int varid, char *name, char *tp)
   if ( status != NC_NOERR ) Error("%s", nc_strerror(status));
 }
 
+void cdf_get_att_string(int ncid, int varid, const char *name, char **tp)
+{
+#if  defined  (HAVE_NETCDF4)
+  int status;
 
-void cdf_get_att_int(int ncid, int varid, char *name, int *ip)
+  status = nc_get_att_string(ncid, varid, name, tp);
+
+  if ( CDF_Debug || status != NC_NOERR )
+    Message("ncid = %d varid = %d name = %s", ncid, varid, name);
+
+  if ( status != NC_NOERR ) Error("%s", nc_strerror(status));
+#endif
+}
+
+
+void cdf_get_att_int(int ncid, int varid, const char *name, int *ip)
 {
   int status;
 
@@ -749,7 +763,7 @@ void cdf_get_att_int(int ncid, int varid, char *name, int *ip)
 }
 
 
-void cdf_get_att_double(int ncid, int varid, char *name, double *dp)
+void cdf_get_att_double(int ncid, int varid, const char *name, double *dp)
 {
   int status;
 

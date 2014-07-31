@@ -3,6 +3,10 @@
 	* Version 1.7.0 released
 	* using CGRIBEX library version 1.7.0
 
+2014-07-31  Uwe Schulzweida
+
+	* netCDF4: added support for xtype NC_STRING
+
 2014-07-25  Uwe Schulzweida
 
 	* vlistInqAtt: return -1 if attnum is out of range
