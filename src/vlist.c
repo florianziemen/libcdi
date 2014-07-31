@@ -437,7 +437,7 @@ int vlist_generate_zaxis(int vlistID, int zaxistype, int nlevels, double *levels
       nzaxis = zaxisSize();
       if ( nzaxis > 0 )
         {
-          int *zaxisIndexList = xmalloc(nzaxis * sizeof (int));
+          int *zaxisIndexList = (int *)xmalloc(nzaxis * sizeof (int));
           reshLock();
           zaxisGetIndexList ( nzaxis, zaxisIndexList );
           for ( int index = 0; index < nzaxis; ++index )
@@ -512,31 +512,30 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
   if ( vlistptr1->vars )
     {
       int nvars = vlistptr1->nvars;
-      int nvars2 = 0, levID2;
-      int nlevs, nlevs2, levID, varID, varID2;
-      int gridID, zaxisID;
+      int nvars2 = 0;
+      int varID2;
       int index;
 
       vlistptr2->ngrids = 0;
       vlistptr2->nzaxis = 0;
 
-      for ( varID = 0; varID < nvars; varID++ )
-        if ( vlistptr1->vars[varID].flag ) nvars2++;
+      for ( int varID = 0; varID < nvars; varID++ )
+        nvars2 += (vlistptr1->vars[varID].flag != 0);
 
       vlistptr2->nvars = nvars2;
       vlistptr2->varsAllocated = nvars2;
       if ( nvars2 > 0 )
-        vlistptr2->vars  = (var_t *) malloc(nvars2*sizeof(var_t));
+        vlistptr2->vars  = (var_t *)xmalloc(nvars2*sizeof(var_t));
       else
         vlistptr2->vars  = NULL;
 
       varID2 = 0;
-      for ( varID = 0; varID < nvars; varID++ )
+      for ( int varID = 0; varID < nvars; varID++ )
 	if ( vlistptr1->vars[varID].flag )
 	  {
 	    vlistptr2->vars[varID2].flag = FALSE;
-	    zaxisID = vlistptr1->vars[varID].zaxisID;
-	    gridID  = vlistptr1->vars[varID].gridID;
+	    int zaxisID = vlistptr1->vars[varID].zaxisID;
+	    int gridID  = vlistptr1->vars[varID].gridID;
 
 	    memcpy(&vlistptr2->vars[varID2], &vlistptr1->vars[varID], sizeof(var_t));
 
@@ -559,7 +558,7 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
 
             if ( vlistptr1->vars[varID].ensdata )
               {
-                vlistptr2->vars[varID2].ensdata = (ensinfo_t *) malloc(sizeof(ensinfo_t));
+                vlistptr2->vars[varID2].ensdata = (ensinfo_t *)xmalloc(sizeof(ensinfo_t));
                 memcpy(vlistptr2->vars[varID2].ensdata,
                        vlistptr1->vars[varID].ensdata, sizeof(ensinfo_t));
               }
@@ -591,38 +590,34 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
 	    vlistptr2->vars[varID2].atts.nelems = 0;
 	    vlistCopyVarAtts(vlistID1, varID, vlistID2, varID2);
 
-	    nlevs  = zaxisInqSize(vlistptr1->vars[varID].zaxisID);
-	    nlevs2 = 0;
+	    int nlevs  = zaxisInqSize(vlistptr1->vars[varID].zaxisID);
+	    int nlevs2 = 0;
             if ( vlistptr1->vars[varID].levinfo )
-              for ( levID = 0; levID < nlevs; levID++ )
-                if ( vlistptr1->vars[varID].levinfo[levID].flag ) nlevs2++;
+              for ( int levID = 0; levID < nlevs; levID++ )
+                nlevs2 += (vlistptr1->vars[varID].levinfo[levID].flag != 0);
 
-	    vlistptr2->vars[varID2].levinfo = (levinfo_t *) malloc(nlevs2*sizeof(levinfo_t));
+	    vlistptr2->vars[varID2].levinfo = (levinfo_t *)xmalloc(nlevs2*sizeof(levinfo_t));
 
 	    if ( nlevs != nlevs2 )
 	      {
-		int zaxisType;
-		int zaxisID2;
 		int nvct = 0;
-		double *levels;
 		double *lbounds = NULL, *ubounds = NULL;
 		const double *vct = NULL;
                 char ctemp[CDI_MAX_NAME];
 
 		zaxisID = vlistptr1->vars[varID].zaxisID;
-		levels = (double *) malloc(nlevs2*sizeof(double));
-		levID2 = 0;
+		double *levels = (double *)xmalloc(nlevs2*sizeof(double));
+                int levID2 = 0;
                 if (!vlistptr1->vars[varID].levinfo)
                   cdiVlistCreateVarLevInfo(vlistptr1, varID);
-		for ( levID = 0; levID < nlevs; ++levID )
-		  if ( vlistptr1->vars[varID].levinfo[levID].flag )
-		    {
-		      vlistptr1->vars[varID].levinfo[levID].flevelID = levID2;
-		      vlistptr1->vars[varID].levinfo[levID].mlevelID = levID2;
-		      levels[levID2++] = zaxisInqLevel(zaxisID, levID);
-		    }
-
-		zaxisType = zaxisInqType(zaxisID);
+                for ( int levID = 0; levID < nlevs; ++levID )
+                  if ( vlistptr1->vars[varID].levinfo[levID].flag )
+                    {
+                      vlistptr1->vars[varID].levinfo[levID].flevelID = levID2;
+                      vlistptr1->vars[varID].levinfo[levID].mlevelID = levID2;
+                      levels[levID2++] = zaxisInqLevel(zaxisID, levID);
+                    }
+		int zaxisType = zaxisInqType(zaxisID);
 
 		if ( zaxisType == ZAXIS_HYBRID )
 		  {
@@ -632,18 +627,17 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
 
                 if ( zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL) )
                   {
-                    double *lbounds1, *ubounds1;
-                    lbounds1 = (double *) malloc(nlevs*sizeof(double));
-                    ubounds1 = (double *) malloc(nlevs*sizeof(double));
+                    lbounds = (double *)xmalloc(2 * nlevs2*sizeof(double));
+                    ubounds = lbounds + nlevs2;
+
+                    double *lbounds1 = (double *)xmalloc(2 * nlevs*sizeof(double)),
+                      *ubounds1 = lbounds1 + nlevs;
 
                     zaxisInqLbounds(zaxisID, lbounds1);
                     zaxisInqUbounds(zaxisID, ubounds1);
 
-                    lbounds = (double *) malloc(nlevs2*sizeof(double));
-                    ubounds = (double *) malloc(nlevs2*sizeof(double));
-
-                    levID2 = 0;
-                    for ( levID = 0; levID < nlevs; ++levID )
+                    int levID2 = 0;
+                    for ( int levID = 0; levID < nlevs; ++levID )
                       if ( vlistptr1->vars[varID].levinfo[levID].flag )
                         {
                           lbounds[levID2] = lbounds1[levID];
@@ -652,13 +646,11 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
                         }
 
                     free(lbounds1);
-                    free(ubounds1);
                   }
 
-		zaxisID2 = vlist_generate_zaxis(vlistID2, zaxisType, nlevs2, levels, lbounds, ubounds, nvct, vct);
+		int zaxisID2 = vlist_generate_zaxis(vlistID2, zaxisType, nlevs2, levels, lbounds, ubounds, nvct, vct);
 		free(levels);
-                if ( lbounds ) free(lbounds);
-                if ( ubounds ) free(ubounds);
+                free(lbounds);
 
                 zaxisInqName(zaxisID, ctemp);
                 zaxisDefName(zaxisID2, ctemp);
@@ -671,14 +663,14 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
 		vlistptr2->vars[varID2].zaxisID = zaxisID2;
 	      }
 
-	    for ( levID = 0; levID < nlevs2; levID++ )
+	    for ( int levID = 0; levID < nlevs2; levID++ )
 	      {
 		vlistptr2->vars[varID2].levinfo[levID].flag  = FALSE;
 		vlistptr2->vars[varID2].levinfo[levID].index = -1;
 	      }
 
-	    levID2 = 0;
-	    for ( levID = 0; levID < nlevs; levID++ )
+	    int levID2 = 0;
+	    for ( int levID = 0; levID < nlevs; levID++ )
 	      if ( vlistptr1->vars[varID].levinfo[levID].flag )
 		{
 		  vlistptr2->vars[varID2].levinfo[levID2].flevelID = levID;
