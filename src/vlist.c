@@ -438,6 +438,7 @@ int vlist_generate_zaxis(int vlistID, int zaxistype, int nlevels, double *levels
       if ( nzaxis > 0 )
         {
           int *zaxisIndexList = xmalloc(nzaxis * sizeof (int));
+          reshLock();
           zaxisGetIndexList ( nzaxis, zaxisIndexList );
           for ( int index = 0; index < nzaxis; ++index )
             {
@@ -448,6 +449,7 @@ int vlist_generate_zaxis(int vlistID, int zaxistype, int nlevels, double *levels
                   break;
                 }
             }
+          reshUnlock();
           free(zaxisIndexList);
         }
     }
