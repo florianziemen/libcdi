@@ -194,15 +194,13 @@ vlistDestroy(vlistID);
 */
 int vlistDefVar(int vlistID, int gridID, int zaxisID, int tsteptype)
 {
-  int varID;
-  int index;
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
   RETURN_IFCLOSED_VLIST2(vlistID, CDI_UNDEFID);
 
   if ( CDI_Debug )
     Message("gridID = %d  zaxisID = %d  tsteptype = %d", gridID, zaxisID, tsteptype);
 
-  varID = vlistvarNewEntry(vlistID);
+  int varID = vlistvarNewEntry(vlistID);
 
   vlistptr->nvars++;
 
@@ -216,6 +214,7 @@ int vlistDefVar(int vlistID, int gridID, int zaxisID, int tsteptype)
       vlistptr->vars[varID].tsteptype = TSTEP_INSTANT;
     }
 
+  int index;
   for ( index = 0; index < vlistptr->ngrids; index++ )
     if ( gridID == vlistptr->gridIDs[index] ) break;
 
@@ -309,12 +308,9 @@ void vlistDefVarCode(int vlistID, int varID, int code)
 
   vlistCheckVarID(__func__, vlistID, varID);
 
-  int param, pnum, pcat, pdis;
-
-  param = vlistptr->vars[varID].param;
-
+  int param = vlistptr->vars[varID].param;
+  int pnum, pcat, pdis;
   cdiDecodeParam(param, &pnum, &pcat, &pdis);
-
   vlistptr->vars[varID].param = cdiEncodeParam(code, pcat, pdis);
 }
 
@@ -429,16 +425,14 @@ The function @func{vlistInqVarCode} returns the code number of a variable.
 */
 int vlistInqVarCode(int vlistID, int varID)
 {
-  int param, code = -varID-1;
-  int pdis, pcat, pnum;
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
   vlistCheckVarID(__func__, vlistID, varID);
 
-  param = vlistptr->vars[varID].param;
+  int param = vlistptr->vars[varID].param;
+  int pdis, pcat, pnum;
   cdiDecodeParam(param, &pnum, &pcat, &pdis);
-
-  if ( pdis == 255 ) code = pnum;
+  int code = pdis == 255 ? pnum : -varID-1;
 
   if ( code < 0 && vlistptr->vars[varID].tableID != -1 && vlistptr->vars[varID].name != NULL )
     {
@@ -496,7 +490,7 @@ const char *vlistInqVarUnitsPtr(int vlistID, int varID)
 @Parameter
     @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate} or @fref{streamInqVlist}.
     @Item  varID    Variable identifier.
-    @Item  name     Returned variable name. The caller must allocate space for the 
+    @Item  name     Returned variable name. The caller must allocate space for the
                     returned string. The maximum possible length, in characters, of
                     the string is given by the predefined constant @func{CDI_MAX_NAME}.
 
@@ -511,21 +505,19 @@ otherwise the result is an empty string.
 */
 void vlistInqVarName(int vlistID, int varID, char *name)
 {
-  int tableID;
-  int param;
-  int pdis, pcat, pnum;
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
   vlistCheckVarID(__func__, vlistID, varID);
 
   if ( vlistptr->vars[varID].name == NULL )
     {
-      param = vlistptr->vars[varID].param;
+      int param = vlistptr->vars[varID].param;
+      int pdis, pcat, pnum;
       cdiDecodeParam(param, &pnum, &pcat, &pdis);
       if ( pdis == 255 )
 	{
 	  int code = pnum;
-	  tableID = vlistptr->vars[varID].tableID;
+	  int tableID = vlistptr->vars[varID].tableID;
 	  if ( tableInqParName(tableID, code, name) != 0 )
 	    sprintf(name, "var%d", code);
 	}
@@ -548,7 +540,7 @@ void vlistInqVarName(int vlistID, int varID, char *name)
 @Parameter
     @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate} or @fref{streamInqVlist}.
     @Item  varID    Variable identifier.
-    @Item  longname Long name of the variable. The caller must allocate space for the 
+    @Item  longname Long name of the variable. The caller must allocate space for the
                     returned string. The maximum possible length, in characters, of
                     the string is given by the predefined constant @func{CDI_MAX_NAME}.
 
@@ -563,9 +555,6 @@ otherwise the result is an empty string.
 */
 void vlistInqVarLongname(int vlistID, int varID, char *longname)
 {
-  int tableID;
-  int param;
-  int pdis, pcat, pnum;
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
   vlistCheckVarID(__func__, vlistID, varID);
@@ -574,12 +563,13 @@ void vlistInqVarLongname(int vlistID, int varID, char *longname)
 
   if ( vlistptr->vars[varID].longname == NULL )
     {
-      param = vlistptr->vars[varID].param;
+      int param = vlistptr->vars[varID].param;
+      int pdis, pcat, pnum;
       cdiDecodeParam(param, &pnum, &pcat, &pdis);
       if ( pdis == 255 )
 	{
 	  int code = pnum;
-	  tableID = vlistptr->vars[varID].tableID;
+          int tableID = vlistptr->vars[varID].tableID;
 	  if ( tableInqParLongname(tableID, code, longname) != 0 )
 	    longname[0] = '\0';
 	}
@@ -598,7 +588,7 @@ void vlistInqVarLongname(int vlistID, int varID, char *longname)
 @Parameter
     @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate} or @fref{streamInqVlist}.
     @Item  varID    Variable identifier.
-    @Item  stdname  Standard name of the variable. The caller must allocate space for the 
+    @Item  stdname  Standard name of the variable. The caller must allocate space for the
                     returned string. The maximum possible length, in characters, of
                     the string is given by the predefined constant @func{CDI_MAX_NAME}.
 
@@ -650,9 +640,6 @@ otherwise the result is an empty string.
 */
 void vlistInqVarUnits(int vlistID, int varID, char *units)
 {
-  int tableID;
-  int param;
-  int pdis, pcat, pnum;
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
   vlistCheckVarID(__func__, vlistID, varID);
@@ -661,12 +648,13 @@ void vlistInqVarUnits(int vlistID, int varID, char *units)
 
   if ( vlistptr->vars[varID].units == NULL )
     {
-      param = vlistptr->vars[varID].param;
+      int param = vlistptr->vars[varID].param;
+      int pdis, pcat, pnum;
       cdiDecodeParam(param, &pnum, &pcat, &pdis);
       if ( pdis == 255 )
 	{
 	  int code = pnum;
-	  tableID = vlistptr->vars[varID].tableID;
+	  int tableID = vlistptr->vars[varID].tableID;
 	  if ( tableInqParUnits(tableID, code, units) != 0 )
 	    units[0] = '\0';
 	}
@@ -680,13 +668,12 @@ void vlistInqVarUnits(int vlistID, int varID, char *units)
 /* used in MPIOM ! */
 int vlistInqVarID(int vlistID, int code)
 {
-  int varID;
-  int param, pdis, pcat, pnum;
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
-  for ( varID = 0; varID < vlistptr->nvars; varID++ )
+  for ( int varID = 0; varID < vlistptr->nvars; varID++ )
     {
-      param = vlistptr->vars[varID].param;
+      int param = vlistptr->vars[varID].param;
+      int pdis, pcat, pnum;
       cdiDecodeParam(param, &pnum, &pcat, &pdis);
       if ( pnum == code ) return (varID);
     }
@@ -697,20 +684,17 @@ int vlistInqVarID(int vlistID, int code)
 
 int vlistInqVarSize(int vlistID, int varID)
 {
-  int size;
-  int zaxisID, gridID;
-  int nlevs, gridsize;
-  int tsteptype;
-
   vlistCheckVarID(__func__, vlistID, varID);
 
+  int zaxisID, gridID;
+  int tsteptype;
   vlistInqVar(vlistID, varID, &gridID, &zaxisID, &tsteptype);
 
-  nlevs = zaxisInqSize(zaxisID);
+  int nlevs = zaxisInqSize(zaxisID);
 
-  gridsize = gridInqSize(gridID);
+  int gridsize = gridInqSize(gridID);
 
-  size = gridsize*nlevs;
+  int size = gridsize*nlevs;
 
   return (size);
 }
@@ -747,11 +731,11 @@ int vlistInqVarDatatype(int vlistID, int varID)
 
 int vlistInqVarNumber(int vlistID, int varID)
 {
-  int number = CDI_REAL;
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
   vlistCheckVarID(__func__, vlistID, varID);
 
+  int number = CDI_REAL;
   if ( vlistptr->vars[varID].datatype == DATATYPE_CPX32 ||
        vlistptr->vars[varID].datatype == DATATYPE_CPX64 )
     number = CDI_COMP;
@@ -845,14 +829,12 @@ void vlistDefVarTable(int vlistID, int varID, int tableID)
   vlistptr->vars[varID].tableID = tableID;
 
   {
-    int param, pnum, pcat, pdis;
-    int tablenum;
-    tablenum = tableInqNum(tableID);
+    int tablenum = tableInqNum(tableID);
 
-    param = vlistptr->vars[varID].param;
+    int param = vlistptr->vars[varID].param;
 
+    int pnum, pcat, pdis;
     cdiDecodeParam(param, &pnum, &pcat, &pdis);
-
     vlistptr->vars[varID].param = cdiEncodeParam(pnum, tablenum, pdis);
   }
 }
@@ -1413,11 +1395,10 @@ int vlistFindVar(int vlistID, int fvarID)
 
 int vlistFindLevel(int vlistID, int fvarID, int flevelID)
 {
-  int varID;
   int levelID = -1;
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
-  varID = vlistFindVar(vlistID, fvarID);
+  int varID = vlistFindVar(vlistID, fvarID);
 
   if ( varID != -1 )
     {
@@ -1442,7 +1423,6 @@ int vlistFindLevel(int vlistID, int fvarID, int flevelID)
 int vlistMergedVar(int vlistID, int varID)
 {
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
-
   return (vlistptr->vars[varID].mvarID);
 }
 
@@ -1500,15 +1480,13 @@ void vlistChangeVarZaxis(int vlistID, int varID, int zaxisID)
 
   vlistCheckVarID(__func__, vlistID, varID);
 
-  int nlevs1, nlevs2;
-  int nvars, index;
-
-  nlevs1 = zaxisInqSize(vlistptr->vars[varID].zaxisID);
-  nlevs2 = zaxisInqSize(zaxisID);
+  int nlevs1 = zaxisInqSize(vlistptr->vars[varID].zaxisID);
+  int nlevs2 = zaxisInqSize(zaxisID);
 
   if ( nlevs1 != nlevs2 ) Error("Number of levels must not change!");
 
-  nvars = vlistptr->nvars;
+  int nvars = vlistptr->nvars;
+  int index;
   for ( index = 0; index < nvars; index++ )
     if ( index != varID )
       if ( vlistptr->vars[index].zaxisID == vlistptr->vars[varID].zaxisID ) break;
@@ -1546,9 +1524,8 @@ void vlistChangeVarGrid(int vlistID, int varID, int gridID)
 
   vlistCheckVarID(__func__, vlistID, varID);
 
-  int nvars, index;
-
-  nvars = vlistptr->nvars;
+  int nvars = vlistptr->nvars;
+  int index;
   for ( index = 0; index < nvars; index++ )
     if ( index != varID )
       if ( vlistptr->vars[index].gridID == vlistptr->vars[varID].gridID ) break;
@@ -1821,16 +1798,15 @@ int vlistHasVarKey(int vlistID, int varID, const char* name)
 {
 #if  defined  (HAVE_LIBGRIB_API)
   /* check if the GRIB key was previously read and is stored */
-  int      i;
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
-  for (i=0; i<vlistptr->vars[varID].opt_grib_dbl_nentries; i++)
+  for (int i=0; i<vlistptr->vars[varID].opt_grib_dbl_nentries; i++)
     {
       if ( strcmp(name, vlistptr->vars[varID].opt_grib_dbl_keyword[i]) == 0 )
 	return 1;
     }
 
-  for (i=0; i<vlistptr->vars[varID].opt_grib_int_nentries; i++)
+  for (int i=0; i<vlistptr->vars[varID].opt_grib_int_nentries; i++)
     {
       if ( strcmp(name, vlistptr->vars[varID].opt_grib_int_keyword[i]) == 0 )
 	return 1;
@@ -2036,7 +2012,6 @@ void vlistVarUnpack(int vlistID, char * buf, int size, int *position,
 {
   double dtempbuf[vlistvar_ndbls];
   int tempbuf[vlistvar_nints];
-  int newvar;
   char *varname = NULL;
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
   serializeUnpack(buf, size, position,
@@ -2044,7 +2019,7 @@ void vlistVarUnpack(int vlistID, char * buf, int size, int *position,
   serializeUnpack(buf, size, position,
                   dtempbuf, vlistvar_ndbls, DATATYPE_FLT64, context);
 
-  newvar = vlistDefVar ( vlistID,
+  int newvar = vlistDefVar ( vlistID,
 			 namespaceAdaptKey ( tempbuf[1], originNamespace ),
 			 namespaceAdaptKey ( tempbuf[2], originNamespace ),
 			 tempbuf[3]);
@@ -2079,7 +2054,7 @@ void vlistVarUnpack(int vlistID, char * buf, int size, int *position,
     varname[tempbuf[7]] = '\0';
     vlistDefVarUnits(vlistID, newvar, varname);
   }
-  if ( varname ) free ( varname );
+  free(varname);
   vlistDefVarDatatype(vlistID, newvar, tempbuf[8]);
   vlistDefVarInstitut ( vlistID, newvar,
 			namespaceAdaptKey ( tempbuf[10], originNamespace ));
