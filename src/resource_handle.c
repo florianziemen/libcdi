@@ -130,7 +130,7 @@ reshListCreate(int namespaceID)
   LIST_LOCK();
   if (resHListSize <= namespaceID)
     {
-      resHList = (struct resHList_t*) xrealloc(resHList, (namespaceID + 1) * sizeof (resHList[0]));
+      resHList = (struct resHList_t *)xrealloc(resHList, (namespaceID + 1) * sizeof (resHList[0]));
       for (int i = resHListSize; i <= namespaceID; ++i)
         reshListClearEntry(i);
       resHListSize = namespaceID + 1;
@@ -209,26 +209,26 @@ void listSizeExtend()
 {
   int nsp = namespaceGetActive ();
   int oldSize = resHList[nsp].size;
-  int newListSize = oldSize + MIN_LIST_SIZE;
+  size_t newListSize = (size_t)oldSize + MIN_LIST_SIZE;
 
   resHList[nsp].resources = (listElem_t*) xrealloc(resHList[nsp].resources,
                                                    newListSize * sizeof(listElem_t));
 
   listElem_t *r = resHList[nsp].resources;
-  for (int i = oldSize; i < newListSize; ++i)
+  for (size_t i = (size_t)oldSize; i < newListSize; ++i)
     {
-      r[i].res.free.next = i + 1;
-      r[i].res.free.prev = i - 1;
+      r[i].res.free.next = (int)i + 1;
+      r[i].res.free.prev = (int)i - 1;
       r[i].status = RESH_UNUSED;
     }
 
   if (resHList[nsp].freeHead != -1)
     r[resHList[nsp].freeHead].res.free.next
-      = newListSize - 1;
+      = (int)newListSize - 1;
   r[newListSize-1].res.free.next = resHList[nsp].freeHead;
   r[oldSize].res.free.prev = -1;
   resHList[nsp].freeHead = oldSize;
-  resHList[nsp].size = newListSize;
+  resHList[nsp].size = (int)newListSize;
 }
 
 /**************************************************************/
@@ -280,12 +280,32 @@ reshRemove_(int nsp, int idx)
   resHList[nsp].freeHead = idx;
 }
 
-void reshRemove ( cdiResH resH, const resOps * ops )
+void reshDestroy(cdiResH resH)
 {
   int nsp;
   namespaceTuple_t nspT;
 
-  LIST_INIT(1);
+  LIST_LOCK();
+
+  nsp = namespaceGetActive ();
+
+  nspT = namespaceResHDecode ( resH );
+
+  xassert ( nspT.nsp == nsp
+            && nspT.idx >= 0
+            && nspT.idx < resHList[nsp].size
+            && resHList[nsp].resources[nspT.idx].res.v.ops);
+
+  if (resHList[nsp].resources[nspT.idx].status & RESH_IN_USE_BIT)
+    reshRemove_(nsp, nspT.idx);
+
+  LIST_UNLOCK();
+}
+
+void reshRemove ( cdiResH resH, const resOps * ops )
+{
+  int nsp;
+  namespaceTuple_t nspT;
 
   LIST_LOCK();
 
@@ -495,7 +515,7 @@ static int getPackBufferSize(void *context)
       {
         if (r[i].status == RESH_DESYNC_DELETED)
           {
-            /* FIXME: pack resource deletion */
+            packBufferSize += 3 * intpacksize;
           }
         else if (r[i].status == RESH_DESYNC_IN_USE)
           {
@@ -533,7 +553,7 @@ void reshPackBufferCreate(char **packBuffer, int *packBufferSize, void *context)
   int nsp = namespaceGetActive ();
 
   int pBSize = *packBufferSize = getPackBufferSize(context);
-  char *pB = *packBuffer = (char*) xcalloc(1, *packBufferSize);
+  char *pB = *packBuffer = (char *)xcalloc(1, (size_t)pBSize);
 
   {
     int header[3] = { start, nsp, sep };
@@ -546,7 +566,10 @@ void reshPackBufferCreate(char **packBuffer, int *packBufferSize, void *context)
       {
         if (r[i].status == RESH_DESYNC_DELETED)
           {
-            /* FIXME: pack resource deletion */
+            enum { del_ints = 3 };
+            int temp[del_ints] = { RESH_DELETE, namespaceIdxEncode2(nsp, i), SEPARATOR };
+            serializePack(temp, del_ints, DATATYPE_INT,
+                          pB, pBSize, &packBufferPos, context);
           }
         else
           {
@@ -554,11 +577,12 @@ void reshPackBufferCreate(char **packBuffer, int *packBufferSize, void *context)
             xassert ( curr->res.v.ops );
             type = curr->res.v.ops->valTxCode ();
             if ( ! type ) continue;
-            serializePack(&type, 1, DATATYPE_INT, * packBuffer,
+            serializePack(&type, 1, DATATYPE_INT, pB,
                           pBSize, &packBufferPos, context);
             curr->res.v.ops->valPack(curr->res.v.val,
                                      pB, pBSize, &packBufferPos, context);
-            serializePack(&sep, 1, DATATYPE_INT, pB, pBSize, &packBufferPos, context);
+            serializePack(&sep, 1, DATATYPE_INT,
+                          pB, pBSize, &packBufferPos, context);
           }
         r[i].status &= ~RESH_SYNC_BIT;
       }
@@ -665,8 +689,8 @@ int reshListCompare ( int nsp0, int nsp1 )
     *resources1 = resHList[nsp1].resources;
   for (i = 0; i < listSizeMin; i++)
     {
-      int occupied0 = resources0[i].status & RESH_IN_USE_BIT != 0,
-        occupied1 = resources1[i].status & RESH_IN_USE_BIT != 0;
+      int occupied0 = (resources0[i].status & RESH_IN_USE_BIT) != 0,
+        occupied1 = (resources1[i].status & RESH_IN_USE_BIT) != 0;
       /* occupation mismatch ? */
       int diff = occupied0 ^ occupied1;
       valCompare |= (diff << cdiResHListOccupationMismatch);

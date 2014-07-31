@@ -160,6 +160,8 @@ int defineVlist ( int gridID, int zaxisID, int taxisID )
   int vlistID2 = vlistCreate();
   vlistDefVar(vlistID2, gridID, zaxisID, TIME_VARIABLE);
   vlistCopy(vlistID2, vlistID);
+  vlistDestroy(vlistID);
+  vlistID = vlistID2;
   return vlistID;
 }
 
@@ -205,13 +207,13 @@ int modelRun(MPI_Comm comm)
   defineStream ( streamID, vlistID );
 
   reshPackBufferCreate ( &sendBuffer, &bufferSize, &comm );
-  recvBuffer = xmalloc(bufferSize);
+  recvBuffer = xmalloc((size_t)bufferSize);
 #ifdef MPI_MARSHALLING
   xmpi(MPI_Sendrecv(sendBuffer, bufferSize, MPI_PACKED, 0, 0,
                     recvBuffer, bufferSize, MPI_PACKED, 0, 0,
                     MPI_COMM_SELF, MPI_STATUS_IGNORE));
 #else
-  memcpy(recvBuffer, sendBuffer, bufferSize);
+  memcpy(recvBuffer, sendBuffer, (size_t)bufferSize);
 #endif
   namespaceSetActive(destNamespace);
   reshUnpackResources(recvBuffer, bufferSize, &comm);

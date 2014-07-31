@@ -54,6 +54,8 @@ void   reshListDestruct(int namespaceID);
 int    reshPut ( void *, const resOps * );
 void reshReplace(cdiResH resH, void *p, const resOps *ops);
 void   reshRemove ( cdiResH, const resOps * );
+/*> doesn't check resource type */
+void reshDestroy(cdiResH);
 
 int    reshCountType ( const resOps * );
 
