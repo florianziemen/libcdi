@@ -1464,16 +1464,19 @@ void vlistChangeVarZaxis(int vlistID, int varID, int zaxisID)
   if ( nlevs1 != nlevs2 ) Error("Number of levels must not change!");
 
   int nvars = vlistptr->nvars;
-  int index;
-  for ( index = 0; index < nvars; index++ )
-    if ( index != varID )
-      if ( vlistptr->vars[index].zaxisID == vlistptr->vars[varID].zaxisID ) break;
+  int found = 0;
+  int oldZaxisID = vlistptr->vars[varID].zaxisID;
+  for ( int i = 0; i < varID; ++i)
+    found |= (vlistptr->vars[i].zaxisID == oldZaxisID);
+  for ( int i = varID + 1; i < nvars; ++i)
+    found |= (vlistptr->vars[i].zaxisID == oldZaxisID);
 
-  if ( index == nvars )
+  if (found)
     {
-      for ( index = 0; index < vlistptr->nzaxis; index++ )
-	if ( vlistptr->zaxisIDs[index] == vlistptr->vars[varID].zaxisID )
-	  vlistptr->zaxisIDs[index] = zaxisID;
+      int nzaxis = vlistptr->nzaxis;
+      for (int i = 0; i < nzaxis; ++i)
+	if (vlistptr->zaxisIDs[i] == oldZaxisID )
+	  vlistptr->zaxisIDs[i] = zaxisID;
     }
   else
     vlistAdd2ZaxisIDs(vlistptr, zaxisID);
