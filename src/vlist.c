@@ -155,9 +155,7 @@ void vlist_initialize(void)
 static
 void vlist_copy(vlist_t *vlistptr2, vlist_t *vlistptr1)
 {
-  int vlistID2;
-
-  vlistID2 = vlistptr2->self;
+  int vlistID2 = vlistptr2->self;
   memcpy(vlistptr2, vlistptr1, sizeof(vlist_t));
   vlistptr2->atts.nelems = 0;
   vlistptr2->self = vlistID2;
@@ -197,18 +195,12 @@ vlistDestroy(vlistID);
 */
 int vlistCreate(void)
 {
-  int vlistID = 0;
-  vlist_t *vlistptr;
-
   cdiInitialize();
 
   VLIST_INIT();
 
-  vlistptr = vlist_new_entry(CDI_UNDEFID);
-
-  vlistID = vlistptr->self;
-
-  return (vlistID);
+  vlist_t *vlistptr = vlist_new_entry(CDI_UNDEFID);
+  return (vlistptr->self);
 }
 
 static void
@@ -233,12 +225,11 @@ vlist_delete(vlist_t *vlistptr)
       if ( vlistptr->vars[varID].ensdata )  free(vlistptr->vars[varID].ensdata);
 
 #if  defined  (HAVE_LIBGRIB_API)
-      int i;
-      for (i=0; i<vlistptr->vars[varID].opt_grib_int_nentries; i++) {
+      for (int i=0; i<vlistptr->vars[varID].opt_grib_int_nentries; i++) {
 	if ( vlistptr->vars[varID].opt_grib_int_keyword[i] )
 	  free(vlistptr->vars[varID].opt_grib_int_keyword[i]);
       }
-      for (i=0; i<vlistptr->vars[varID].opt_grib_dbl_nentries; i++) {
+      for (int i=0; i<vlistptr->vars[varID].opt_grib_dbl_nentries; i++) {
 	if ( vlistptr->vars[varID].opt_grib_dbl_keyword[i] )
 	  free(vlistptr->vars[varID].opt_grib_dbl_keyword[i]);
       }
@@ -265,9 +256,7 @@ vlist_delete(vlist_t *vlistptr)
 */
 void vlistDestroy(int vlistID)
 {
-  vlist_t *vlistptr;
-
-  vlistptr = vlist_to_pointer(vlistID);
+  vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
   vlist_delete(vlistptr);
 }
@@ -303,13 +292,12 @@ void vlistCopy(int vlistID2, int vlistID1)
   if ( vlistptr1->vars )
     {
       int nvars = vlistptr1->nvars;
-      int varID;
 
       //vlistptr2->varsAllocated = nvars;
       vlistptr2->vars = (var_t *) malloc(vlistptr2->varsAllocated*sizeof(var_t));
       memcpy(vlistptr2->vars, vlistptr1->vars, vlistptr2->varsAllocated*sizeof(var_t));
 
-      for ( varID = 0; varID < nvars; varID++ )
+      for ( int varID = 0; varID < nvars; varID++ )
         {
           if ( vlistptr1->vars[varID].name )
             vlistptr2->vars[varID].name = strdupx(vlistptr1->vars[varID].name);
@@ -334,9 +322,8 @@ void vlistCopy(int vlistID2, int vlistID1)
           /* Local change: 2013-01-28, FP (DWD) */
           /* ---------------------------------- */
 
-	  int i;
 	  vlistptr2->vars[varID].opt_grib_int_nentries = vlistptr1->vars[varID].opt_grib_int_nentries;
-	  for (i=0; i<vlistptr1->vars[varID].opt_grib_int_nentries; i++) {
+	  for (int i=0; i<vlistptr1->vars[varID].opt_grib_int_nentries; i++) {
 	    if ( vlistptr1->vars[varID].opt_grib_int_keyword[i] ) {
 	      vlistptr2->vars[varID].opt_grib_int_keyword[i] = strdupx(vlistptr1->vars[varID].opt_grib_int_keyword[i]);
 	      vlistptr2->vars[varID].opt_grib_int_val[i]     = vlistptr1->vars[varID].opt_grib_int_val[i];
@@ -344,7 +331,7 @@ void vlistCopy(int vlistID2, int vlistID1)
 	    }
 	  }
 	  vlistptr2->vars[varID].opt_grib_dbl_nentries = vlistptr1->vars[varID].opt_grib_dbl_nentries;
-	  for (i=0; i<vlistptr1->vars[varID].opt_grib_dbl_nentries; i++) {
+	  for (int i=0; i<vlistptr1->vars[varID].opt_grib_dbl_nentries; i++) {
 	    if ( vlistptr1->vars[varID].opt_grib_dbl_keyword[i] ) {
 	      vlistptr2->vars[varID].opt_grib_dbl_keyword[i] = strdupx(vlistptr1->vars[varID].opt_grib_dbl_keyword[i]);
 	      vlistptr2->vars[varID].opt_grib_dbl_val[i]     = vlistptr1->vars[varID].opt_grib_dbl_val[i];
