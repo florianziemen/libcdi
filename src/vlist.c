@@ -679,16 +679,7 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
 		}
 
             vlistAdd2GridIDs(vlistptr2, gridID);
-
-	    for ( index = 0; index < vlistptr2->nzaxis; index++ )
-	      if ( vlistptr2->zaxisIDs[index] == zaxisID ) break;
-
-	    if ( index == vlistptr2->nzaxis )
-	      {
-		vlistptr2->zaxisIDs[vlistptr2->nzaxis++] = zaxisID;
-		if (vlistptr2->nzaxis >= MAX_ZAXES_PS )
-		  Error("Internal Problem! More than %d zaxis.", MAX_ZAXES_PS);
-	      }
+            vlistAdd2ZaxisIDs(vlistptr2, zaxisID);
 
 	    varID2++;
 	  }
@@ -713,7 +704,6 @@ void vlistCat(int vlistID2, int vlistID1)
 {
   int nvars, nvars1, nvars2;
   int varID, varID2, nlevs;
-  int index, gridID, zaxisID;
   vlist_t *vlistptr1 = vlist_to_pointer(vlistID1),
     *vlistptr2 = vlist_to_pointer(vlistID2);
 
@@ -801,19 +791,8 @@ void vlistCat(int vlistID2, int vlistID1)
       vlistptr2->vars[varID2].atts.nelems = 0;
       vlistCopyVarAtts(vlistID1, varID, vlistID2, varID2);
 
-      gridID = vlistptr1->vars[varID].gridID;
-      vlistAdd2GridIDs(vlistptr2, gridID);
-
-      zaxisID = vlistptr1->vars[varID].zaxisID;
-      for ( index = 0; index < vlistptr2->nzaxis; index++ )
-        if ( zaxisID == vlistptr2->zaxisIDs[index] ) break;
-
-      if ( index == vlistptr2->nzaxis )
-	{
-	  vlistptr2->zaxisIDs[vlistptr2->nzaxis++] = zaxisID;
-	  if ( vlistptr2->nzaxis >= MAX_ZAXES_PS )
-	    Error("Internal Problem! More than %d zaxis.", MAX_ZAXES_PS);
-	}
+      vlistAdd2GridIDs(vlistptr2, vlistptr1->vars[varID].gridID);
+      vlistAdd2ZaxisIDs(vlistptr2, vlistptr1->vars[varID].zaxisID);
     }
 }
 

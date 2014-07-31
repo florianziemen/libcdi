@@ -188,6 +188,22 @@ vlistAdd2GridIDs(vlist_t *vlistptr, int gridID)
     }
 }
 
+static inline void
+vlistAdd2ZaxisIDs(vlist_t *vlistptr, int zaxisID)
+{
+  int index, nzaxis = vlistptr->nzaxis;
+  for ( index = 0; index < nzaxis; index++ )
+    if ( zaxisID == vlistptr->zaxisIDs[index] ) break;
+
+  if ( index == nzaxis )
+    {
+      if ( nzaxis >= MAX_ZAXES_PS )
+	Error("Internal limit exceeded: more than %d zaxis.", MAX_ZAXES_PS);
+      vlistptr->zaxisIDs[nzaxis] = zaxisID;
+      vlistptr->nzaxis++;
+    }
+}
+
 
 #if  defined  (HAVE_LIBGRIB_API)
 extern int   cdiNAdditionalGRIBKeys;

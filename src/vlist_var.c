@@ -215,19 +215,7 @@ int vlistDefVar(int vlistID, int gridID, int zaxisID, int tsteptype)
     }
 
   vlistAdd2GridIDs(vlistptr, gridID);
-
-  int index;
-  for ( index = 0; index < vlistptr->nzaxis; index++ )
-    if ( zaxisID == vlistptr->zaxisIDs[index] ) break;
-
-  if ( index == vlistptr->nzaxis )
-    {
-      if ( vlistptr->nzaxis + 1 >= MAX_ZAXES_PS )
-	Error("Maximum of %d zaxis reached", MAX_ZAXES_PS);
-
-      vlistptr->zaxisIDs[vlistptr->nzaxis] = zaxisID;
-      vlistptr->nzaxis++;
-    }
+  vlistAdd2ZaxisIDs(vlistptr, zaxisID);
 
   vlistptr->vars[varID].param = cdiEncodeParam(-(varID + 1), 255, 255);
 
@@ -1488,19 +1476,7 @@ void vlistChangeVarZaxis(int vlistID, int varID, int zaxisID)
 	  vlistptr->zaxisIDs[index] = zaxisID;
     }
   else
-    {
-      for ( index = 0; index < vlistptr->nzaxis; index++ )
-	if ( vlistptr->zaxisIDs[index] == zaxisID ) break;
-
-      if ( index == vlistptr->nzaxis )
-	{
-	  if ( vlistptr->nzaxis + 1 >= MAX_ZAXES_PS )
-	    Error("Maximum of %d zaxis reached", MAX_ZAXES_PS);
-
-	  vlistptr->zaxisIDs[vlistptr->nzaxis] = zaxisID;
-	  vlistptr->nzaxis++;
-	}
-    }
+    vlistAdd2ZaxisIDs(vlistptr, zaxisID);
 
   vlistptr->vars[varID].zaxisID = zaxisID;
 }
