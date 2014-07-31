@@ -294,13 +294,15 @@ int taxisDuplicate(int taxisID1)
 
 void taxisDefType(int taxisID, int type)
 {
-  RETURN_IFCLOSED_TAXIS(taxisID);
-
   taxis_t *taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
   taxis_check_ptr(__func__, taxisptr);
 
-  taxisptr->type = type;
+  if (taxisptr->type != type)
+    {
+      taxisptr->type = type;
+      reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
+    }
 }
 
 /*
@@ -319,11 +321,15 @@ The function @func{taxisDefVdate} defines the verification date of a Time axis.
 */
 void taxisDefVdate(int taxisID, int vdate)
 {
-  taxis_t *taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
+  taxis_t *taxisptr = (taxis_t *)reshGetVal(taxisID, &taxisOps);
 
   taxis_check_ptr(__func__, taxisptr);
 
-  taxisptr->vdate = vdate;
+  if (taxisptr->vdate != vdate)
+    {
+      taxisptr->vdate = vdate;
+      reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
+    }
 }
 
 /*
@@ -342,11 +348,15 @@ The function @func{taxisDefVtime} defines the verification time of a Time axis.
 */
 void taxisDefVtime(int taxisID, int vtime)
 {
-  taxis_t *taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
+  taxis_t *taxisptr = (taxis_t *)reshGetVal(taxisID, &taxisOps);
 
   taxis_check_ptr(__func__, taxisptr);
 
-  taxisptr->vtime = vtime;
+  if (taxisptr->vtime != vtime)
+    {
+      taxisptr->vtime = vtime;
+      reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
+    }
 }
 
 /*
@@ -365,13 +375,15 @@ The function @func{taxisDefRdate} defines the reference date of a Time axis.
 */
 void taxisDefRdate(int taxisID, int rdate)
 {
-  RETURN_IFCLOSED_TAXIS(taxisID);
-
   taxis_t *taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
   taxis_check_ptr(__func__, taxisptr);
 
-  taxisptr->rdate = rdate;
+  if (taxisptr->rdate != rdate)
+    {
+      taxisptr->rdate = rdate;
+      reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
+    }
 }
 
 /*
@@ -390,13 +402,15 @@ The function @func{taxisDefRtime} defines the reference time of a Time axis.
 */
 void taxisDefRtime(int taxisID, int rtime)
 {
-  RETURN_IFCLOSED_TAXIS(taxisID);
-
   taxis_t *taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
   taxis_check_ptr(__func__, taxisptr);
 
-  taxisptr->rtime = rtime;
+  if (taxisptr->rtime != rtime)
+    {
+      taxisptr->rtime = rtime;
+      reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
+    }
 }
 
 /*
@@ -415,13 +429,15 @@ The function @func{taxisDefFdate} defines the forecast reference date of a Time 
 */
 void taxisDefFdate(int taxisID, int fdate)
 {
-  RETURN_IFCLOSED_TAXIS(taxisID);
-
   taxis_t *taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
   taxis_check_ptr(__func__, taxisptr);
 
-  taxisptr->fdate = fdate;
+  if (taxisptr->fdate != fdate)
+    {
+      taxisptr->fdate = fdate;
+      reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
+    }
 }
 
 /*
@@ -440,13 +456,15 @@ The function @func{taxisDefFtime} defines the forecast reference time of a Time 
 */
 void taxisDefFtime(int taxisID, int ftime)
 {
-  RETURN_IFCLOSED_TAXIS(taxisID);
-
   taxis_t *taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
   taxis_check_ptr(__func__, taxisptr);
 
-  taxisptr->ftime = ftime;
+  if (taxisptr->ftime != ftime)
+    {
+      taxisptr->ftime = ftime;
+      reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
+    }
 }
 
 /*
@@ -467,61 +485,71 @@ The function @func{taxisDefCalendar} defines the calendar of a Time axis.
 */
 void taxisDefCalendar(int taxisID, int calendar)
 {
-  RETURN_IFCLOSED_TAXIS(taxisID);
-
   taxis_t *taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
   taxis_check_ptr(__func__, taxisptr);
 
-  taxisptr->calendar = calendar;
+  if (taxisptr->calendar != calendar)
+    {
+      taxisptr->calendar = calendar;
+      reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
+    }
 }
 
 
 void taxisDefTunit(int taxisID, int unit)
 {
-  RETURN_IFCLOSED_TAXIS(taxisID);
-
   taxis_t *taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
   taxis_check_ptr(__func__, taxisptr);
 
-  taxisptr->unit = unit;
+  if (taxisptr->unit != unit)
+    {
+      taxisptr->unit = unit;
+      reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
+    }
 }
 
 
 void taxisDefForecastTunit(int taxisID, int unit)
 {
-  RETURN_IFCLOSED_TAXIS(taxisID);
-
-  taxis_t *taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
+  taxis_t *taxisptr = (taxis_t *)reshGetVal(taxisID, &taxisOps);
 
   taxis_check_ptr(__func__, taxisptr);
 
-  taxisptr->fc_unit = unit;
+  if (taxisptr->fc_unit != unit)
+    {
+      taxisptr->fc_unit = unit;
+      reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
+    }
 }
 
 
 void taxisDefForecastPeriod(int taxisID, double fc_period)
 {
-  RETURN_IFCLOSED_TAXIS(taxisID);
-
   taxis_t *taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
   taxis_check_ptr(__func__, taxisptr);
 
-  taxisptr->fc_period = fc_period;
+  if (taxisptr->fc_period != fc_period)
+    {
+      taxisptr->fc_period = fc_period;
+      reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
+    }
 }
 
 
 void taxisDefNumavg(int taxisID, int numavg)
 {
-  RETURN_IFCLOSED_TAXIS(taxisID);
-
   taxis_t *taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
   taxis_check_ptr(__func__, taxisptr);
 
-  taxisptr->numavg = numavg;
+  if (taxisptr->numavg != numavg)
+    {
+      taxisptr->numavg = numavg;
+      reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
+    }
 }
 
 /*
@@ -530,7 +558,7 @@ The valid CDI time types are TAXIS_ABSOLUTE and TAXIS_RELATIVE.
 */
 int taxisInqType(int taxisID)
 {
-  taxis_t *taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
+  taxis_t *taxisptr = (taxis_t *)reshGetVal(taxisID, &taxisOps);
 
   taxis_check_ptr(__func__, taxisptr);
 
@@ -540,7 +568,7 @@ int taxisInqType(int taxisID)
 
 int taxisHasBounds(int taxisID)
 {
-  taxis_t *taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
+  taxis_t *taxisptr = (taxis_t *)reshGetVal(taxisID, &taxisOps);
 
   taxis_check_ptr(__func__, taxisptr);
 
@@ -550,25 +578,27 @@ int taxisHasBounds(int taxisID)
 
 void taxisDeleteBounds(int taxisID)
 {
-  RETURN_IFCLOSED_TAXIS(taxisID);
-
   taxis_t *taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
   taxis_check_ptr(__func__, taxisptr);
 
-  taxisptr->has_bounds = FALSE;
+  if (taxisptr->has_bounds != FALSE)
+    {
+      taxisptr->has_bounds = FALSE;
+      reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
+    }
 }
 
 
 void taxisCopyTimestep(int taxisID2, int taxisID1)
 {
-  taxis_t *taxisptr1 = ( taxis_t * ) reshGetVal ( taxisID1, &taxisOps );
-  taxis_t *taxisptr2 = ( taxis_t * ) reshGetVal ( taxisID2, &taxisOps );
+  taxis_t *taxisptr1 = (taxis_t *)reshGetVal(taxisID1, &taxisOps),
+    *taxisptr2 = (taxis_t *)reshGetVal(taxisID2, &taxisOps);
 
   taxis_check_ptr(__func__, taxisptr1);
   taxis_check_ptr(__func__, taxisptr2);
 
-  reshLock ();
+  reshLock();
 
   taxisptr2->rdate = taxisptr1->rdate;
   taxisptr2->rtime = taxisptr1->rtime;
@@ -590,7 +620,8 @@ void taxisCopyTimestep(int taxisID2, int taxisID1)
   taxisptr2->fc_unit   = taxisptr1->fc_unit;
   taxisptr2->fc_period = taxisptr1->fc_period;
 
-  reshUnlock ();
+  reshSetStatus(taxisID2, &taxisOps, RESH_DESYNC_IN_USE);
+  reshUnlock();
 }
 
 /*
@@ -611,7 +642,7 @@ The function @func{taxisInqVdate} returns the verification date of a Time axis.
 */
 int taxisInqVdate(int taxisID)
 {
-  taxis_t *taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
+  taxis_t *taxisptr = (taxis_t *)reshGetVal(taxisID, &taxisOps);
 
   taxis_check_ptr(__func__, taxisptr);
 
@@ -621,7 +652,7 @@ int taxisInqVdate(int taxisID)
 
 void taxisInqVdateBounds(int taxisID, int *vdate_lb, int *vdate_ub)
 {
-  taxis_t *taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
+  taxis_t *taxisptr = (taxis_t *)reshGetVal(taxisID, &taxisOps);
 
   taxis_check_ptr(__func__, taxisptr);
 
@@ -632,16 +663,19 @@ void taxisInqVdateBounds(int taxisID, int *vdate_lb, int *vdate_ub)
 
 void taxisDefVdateBounds(int taxisID, int vdate_lb, int vdate_ub)
 {
-  RETURN_IFCLOSED_TAXIS(taxisID);
-
   taxis_t *taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
   taxis_check_ptr(__func__, taxisptr);
 
-  taxisptr->vdate_lb = vdate_lb;
-  taxisptr->vdate_ub = vdate_ub;
-
-  taxisptr->has_bounds = TRUE;
+  if (taxisptr->vdate_lb != vdate_lb
+      || taxisptr->vdate_ub != vdate_ub
+      || taxisptr->has_bounds != TRUE)
+    {
+      taxisptr->vdate_lb = vdate_lb;
+      taxisptr->vdate_ub = vdate_ub;
+      taxisptr->has_bounds = TRUE;
+      reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
+    }
 }
 
 /*
@@ -662,7 +696,7 @@ The function @func{taxisInqVtime} returns the verification time of a Time axis.
 */
 int taxisInqVtime(int taxisID)
 {
-  taxis_t *taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
+  taxis_t *taxisptr = (taxis_t *)reshGetVal(taxisID, &taxisOps);
 
   taxis_check_ptr(__func__, taxisptr);
 
@@ -672,7 +706,7 @@ int taxisInqVtime(int taxisID)
 
 void taxisInqVtimeBounds(int taxisID, int *vtime_lb, int *vtime_ub)
 {
-  taxis_t *taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
+  taxis_t *taxisptr = (taxis_t *)reshGetVal(taxisID, &taxisOps);
 
   taxis_check_ptr(__func__, taxisptr);
 
@@ -683,16 +717,19 @@ void taxisInqVtimeBounds(int taxisID, int *vtime_lb, int *vtime_ub)
 
 void taxisDefVtimeBounds(int taxisID, int vtime_lb, int vtime_ub)
 {
-  RETURN_IFCLOSED_TAXIS(taxisID);
-
   taxis_t *taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
   taxis_check_ptr(__func__, taxisptr);
 
-  taxisptr->vtime_lb = vtime_lb;
-  taxisptr->vtime_ub = vtime_ub;
-
-  taxisptr->has_bounds = TRUE;
+  if (taxisptr->vtime_lb != vtime_lb
+      || taxisptr->vtime_ub != vtime_ub
+      || taxisptr->has_bounds != TRUE)
+    {
+      taxisptr->vtime_lb = vtime_lb;
+      taxisptr->vtime_ub = vtime_ub;
+      taxisptr->has_bounds = TRUE;
+      reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
+    }
 }
 
 /*
@@ -721,6 +758,7 @@ int taxisInqRdate(int taxisID)
     {
       taxisptr->rdate = taxisptr->vdate;
       taxisptr->rtime = taxisptr->vtime;
+      reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
     }
 
   return (taxisptr->rdate);
@@ -752,6 +790,7 @@ int taxisInqRtime(int taxisID)
     {
       taxisptr->rdate = taxisptr->vdate;
       taxisptr->rtime = taxisptr->vtime;
+      reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
     }
 
   return (taxisptr->rtime);
@@ -890,7 +929,7 @@ int taxisInqNumavg(int taxisID)
 
 taxis_t *taxisPtr(int taxisID)
 {
-  taxis_t *taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
+  taxis_t *taxisptr = (taxis_t *)reshGetVal(taxisID, &taxisOps);
 
   taxis_check_ptr(__func__, taxisptr);
 
@@ -1364,6 +1403,9 @@ void ptaxisCopy(taxis_t *dest, taxis_t *source)
   dest->fc_unit     = source->fc_unit;
   dest->fc_period   = source->fc_period;
 
+  dest->climatology = source->climatology;
+  if (dest->self != CDI_UNDEFID)
+    reshSetStatus(dest->self, &taxisOps, RESH_DESYNC_IN_USE);
   reshUnlock ();
 }
 

@@ -1056,13 +1056,11 @@ void vlistDefNtsteps(int vlistID, int nts)
 
   vlist_check_ptr(__func__, vlistptr);
 
-  if ( reshGetStatus ( vlistID, &vlist_ops ) == RESH_CLOSED )
+  if (vlistptr->ntsteps != nts)
     {
-      Warning("%s", "Operation not executed." );
-      return;
+      vlistptr->ntsteps = nts;
+      reshSetStatus(vlistID, &vlist_ops, RESH_DESYNC_IN_USE);
     }
-
-  vlistptr->ntsteps = nts;
 }
 
 
@@ -1190,13 +1188,11 @@ void vlistDefTaxis(int vlistID, int taxisID)
 
   vlist_check_ptr(__func__, vlistptr);
 
-  if ( reshGetStatus ( vlistID, &vlist_ops ) == RESH_CLOSED )
+  if (vlistptr->taxisID != taxisID)
     {
-      Warning("%s", "Operation not executed." );
-      return;
+      vlistptr->taxisID = taxisID;
+      reshSetStatus(vlistID, &vlist_ops, RESH_DESYNC_IN_USE);
     }
-
-  vlistptr->taxisID = taxisID;
 }
 
 /*
@@ -1225,19 +1221,17 @@ int vlistInqTaxis(int vlistID)
 }
 
 
-void  vlistDefTable(int vlistID, int tableID)
+void vlistDefTable(int vlistID, int tableID)
 {
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
   vlist_check_ptr(__func__, vlistptr);
 
-  if ( reshGetStatus ( vlistID, &vlist_ops ) == RESH_CLOSED )
+  if (vlistptr->tableID != tableID)
     {
-      Warning("%s", "Operation not executed." );
-      return;
+      vlistptr->tableID = tableID;
+      reshSetStatus(vlistID, &vlist_ops, RESH_DESYNC_IN_USE);
     }
-
-  vlistptr->tableID = tableID;
 }
 
 
@@ -1257,13 +1251,11 @@ void vlistDefInstitut(int vlistID, int instID)
 
   vlist_check_ptr(__func__, vlistptr);
 
-  if ( reshGetStatus ( vlistID, &vlist_ops ) == RESH_CLOSED )
+  if (vlistptr->instID != instID)
     {
-      Warning("%s", "Operation not executed." );
-      return;
+      vlistptr->instID = instID;
+      reshSetStatus(vlistID, &vlist_ops, RESH_DESYNC_IN_USE);
     }
-
-  vlistptr->instID = instID;
 }
 
 
@@ -1298,13 +1290,11 @@ void vlistDefModel(int vlistID, int modelID)
 
   vlist_check_ptr(__func__, vlistptr);
 
-  if ( reshGetStatus ( vlistID, &vlist_ops ) == RESH_CLOSED )
+  if (vlistptr->modelID != modelID)
     {
-      Warning("%s", "Operation not executed." );
-      return;
+      vlistptr->modelID = modelID;
+      reshSetStatus(vlistID, &vlist_ops, RESH_DESYNC_IN_USE);
     }
-
-  vlistptr->modelID = modelID;
 }
 
 
@@ -1388,19 +1378,17 @@ void vlistChangeGridIndex(int vlistID, int index, int gridID)
 
   vlist_check_ptr(__func__, vlistptr);
 
-  if ( reshGetStatus ( vlistID, &vlist_ops ) == RESH_CLOSED )
-    {
-      Warning("%s", "Operation not executed." );
-      return;
-    }
-
   int gridIDold = vlistptr->gridIDs[index];
-  vlistptr->gridIDs[index] = gridID;
+  if (gridIDold != gridID)
+    {
+      vlistptr->gridIDs[index] = gridID;
 
-  int nvars = vlistptr->nvars;
-  for ( int varID = 0; varID < nvars; varID++ )
-    if ( vlistptr->vars[varID].gridID == gridIDold )
-      vlistptr->vars[varID].gridID = gridID;
+      int nvars = vlistptr->nvars;
+      for ( int varID = 0; varID < nvars; varID++ )
+        if ( vlistptr->vars[varID].gridID == gridIDold )
+          vlistptr->vars[varID].gridID = gridID;
+      reshSetStatus(vlistID, &vlist_ops, RESH_DESYNC_IN_USE);
+    }
 }
 
 
@@ -1410,26 +1398,23 @@ void vlistChangeGrid(int vlistID, int gridID1, int gridID2)
 
   vlist_check_ptr(__func__, vlistptr);
 
-  if ( reshGetStatus ( vlistID, &vlist_ops ) == RESH_CLOSED )
+  if (gridID1 != gridID2)
     {
-      Warning("%s", "Operation not executed." );
-      return;
-    }
-
-  int ngrids = vlistptr->ngrids;
-  for ( int index = 0; index < ngrids; index++ )
-    {
-      if ( vlistptr->gridIDs[index] == gridID1 )
+      int ngrids = vlistptr->ngrids;
+      for ( int index = 0; index < ngrids; index++ )
         {
-          vlistptr->gridIDs[index] = gridID2;
-          break;
+          if ( vlistptr->gridIDs[index] == gridID1 )
+            {
+              vlistptr->gridIDs[index] = gridID2;
+              break;
+            }
         }
+      int nvars = vlistptr->nvars;
+      for ( int varID = 0; varID < nvars; varID++ )
+        if ( vlistptr->vars[varID].gridID == gridID1 )
+          vlistptr->vars[varID].gridID = gridID2;
+      reshSetStatus(vlistID, &vlist_ops, RESH_DESYNC_IN_USE);
     }
-
-  int nvars = vlistptr->nvars;
-  for ( int varID = 0; varID < nvars; varID++ )
-    if ( vlistptr->vars[varID].gridID == gridID1 )
-      vlistptr->vars[varID].gridID = gridID2;
 }
 
 
@@ -1468,32 +1453,29 @@ void vlistChangeZaxisIndex(int vlistID, int index, int zaxisID)
 
   vlist_check_ptr(__func__, vlistptr);
 
-  if ( reshGetStatus ( vlistID, &vlist_ops ) == RESH_CLOSED )
-    {
-      Warning("%s", "Operation not executed." );
-      return;
-    }
-
   int zaxisIDold = vlistptr->zaxisIDs[index];
-  vlistptr->zaxisIDs[index] = zaxisID;
+  if (zaxisIDold != zaxisID)
+    {
+      vlistptr->zaxisIDs[index] = zaxisID;
 
-  int nvars = vlistptr->nvars;
-  for ( int varID = 0; varID < nvars; varID++ )
-    if ( vlistptr->vars[varID].zaxisID == zaxisIDold )
-      {
-        vlistptr->vars[varID].zaxisID = zaxisID;
-
-        int nlevs = zaxisInqSize(zaxisID);
-        if ( vlistptr->vars[varID].levinfo
-             && nlevs != zaxisInqSize(zaxisIDold) )
+      int nlevs = zaxisInqSize(zaxisID),
+        nlevsOld = zaxisInqSize(zaxisIDold);
+      int nvars = vlistptr->nvars;
+      for ( int varID = 0; varID < nvars; varID++ )
+        if ( vlistptr->vars[varID].zaxisID == zaxisIDold )
           {
-            vlistptr->vars[varID].levinfo = (levinfo_t *) realloc(vlistptr->vars[varID].levinfo,
+            vlistptr->vars[varID].zaxisID = zaxisID;
+            if ( vlistptr->vars[varID].levinfo && nlevs != nlevsOld )
+              {
+                vlistptr->vars[varID].levinfo = (levinfo_t *)xrealloc(vlistptr->vars[varID].levinfo,
                                                                      nlevs*sizeof(levinfo_t));
 
-            for ( int levID = 0; levID < nlevs; levID++ )
-              vlistptr->vars[varID].levinfo[levID] = DEFAULT_LEVINFO(levID);
+                for ( int levID = 0; levID < nlevs; levID++ )
+                  vlistptr->vars[varID].levinfo[levID] = DEFAULT_LEVINFO(levID);
+              }
           }
-      }
+      reshSetStatus(vlistID, &vlist_ops, RESH_DESYNC_IN_USE);
+    }
 }
 
 
@@ -1503,12 +1485,6 @@ void vlistChangeZaxis(int vlistID, int zaxisID1, int zaxisID2)
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
   vlist_check_ptr(__func__, vlistptr);
-
-  if ( reshGetStatus ( vlistID, &vlist_ops ) == RESH_CLOSED )
-    {
-      Warning("%s", "Operation not executed." );
-      return;
-    }
 
   int nzaxis = vlistptr->nzaxis;
   for ( int index = 0; index < nzaxis; index++ )
@@ -1529,13 +1505,14 @@ void vlistChangeZaxis(int vlistID, int zaxisID1, int zaxisID2)
         if ( vlistptr->vars[varID].levinfo && nlevs2 != nlevs1 )
           {
             vlistptr->vars[varID].levinfo
-              = (levinfo_t*) realloc(vlistptr->vars[varID].levinfo,
-                                     nlevs2 * sizeof(levinfo_t));
+              = (levinfo_t *)xrealloc(vlistptr->vars[varID].levinfo,
+                                      (size_t)nlevs2 * sizeof(levinfo_t));
 
             for ( int levID = 0; levID < nlevs2; levID++ )
               vlistptr->vars[varID].levinfo[levID] = DEFAULT_LEVINFO(levID);
           }
       }
+  reshSetStatus(vlistID, &vlist_ops, RESH_DESYNC_IN_USE);
 }
 
 

@@ -443,12 +443,6 @@ void streamDefByteorder(int streamID, int byteorder)
 
   stream_check_ptr(__func__, streamptr);
 
-  if ( reshGetStatus ( streamID, &streamOps ) == RESH_CLOSED )
-    {
-      Warning("%s", "Operation not executed.");
-      return;
-    }
-
   streamptr->byteorder = byteorder;
   filetype = streamptr->filetype;
 
@@ -482,6 +476,7 @@ void streamDefByteorder(int streamID, int byteorder)
       }
 #endif
     }
+  reshSetStatus(streamID, &streamOps, RESH_DESYNC_IN_USE);
 }
 
 /*
@@ -2223,37 +2218,29 @@ int streamInqVlistIDorig(int streamID)
 
 void streamDefCompType(int streamID, int comptype)
 {
-  stream_t *streamptr;
-
-  if ( reshGetStatus ( streamID, &streamOps ) == RESH_CLOSED )
-    {
-      Warning("%s", "Operation not executed.");
-      return;
-    }
-
-  streamptr = stream_to_pointer(streamID);
+  stream_t *streamptr = stream_to_pointer(streamID);
 
   stream_check_ptr(__func__, streamptr);
 
-  streamptr->comptype = comptype;
+  if (streamptr->comptype != comptype)
+    {
+      streamptr->comptype = comptype;
+      reshSetStatus(streamID, &streamOps, RESH_DESYNC_IN_USE);
+    }
 }
 
 
 void streamDefCompLevel(int streamID, int complevel)
 {
-  stream_t *streamptr;
-
-  if ( reshGetStatus ( streamID, &streamOps ) == RESH_CLOSED )
-    {
-      Warning("%s", "Operation not executed.");
-      return;
-    }
-
-  streamptr = stream_to_pointer(streamID);
+  stream_t *streamptr = stream_to_pointer(streamID);
 
   stream_check_ptr(__func__, streamptr);
 
-  streamptr->complevel = complevel;
+  if (streamptr->complevel != complevel)
+    {
+      streamptr->complevel = complevel;
+      reshSetStatus(streamID, &streamOps, RESH_DESYNC_IN_USE);
+    }
 }
 
 

@@ -80,7 +80,7 @@ void instituteDefaultEntries ( void )
   /*     (void) institutDef(  0,   0, "IPSL", "IPSL (Institut Pierre Simon Laplace, Paris, France)"); */
 
   for ( i = 0; i < n ; i++ )
-    reshSetStatus(resH[i], &instituteOps, RESH_PRE_ASSIGNED);
+    reshSetStatus(resH[i], &instituteOps, RESH_IN_USE);
 }
 
 

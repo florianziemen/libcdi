@@ -342,15 +342,7 @@ The function @func{zaxisDefName} defines the name of a Z-axis.
 */
 void zaxisDefName(int zaxisID, const char *name)
 {
-  zaxis_t *zaxisptr;
-
-  if ( reshGetStatus ( zaxisID, &zaxisOps ) == RESH_CLOSED )
-    {
-      Warning("%s", "Operation not executed.");
-      return;
-    }
-
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
+  zaxis_t *zaxisptr = reshGetVal(zaxisID, &zaxisOps);
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
@@ -358,6 +350,7 @@ void zaxisDefName(int zaxisID, const char *name)
     {
       strncpy(zaxisptr->name, name, CDI_MAX_NAME - 1);
       zaxisptr->name[CDI_MAX_NAME - 1] = '\0';
+      reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
     }
 }
 
@@ -377,15 +370,7 @@ The function @func{zaxisDefLongname} defines the longname of a Z-axis.
 */
 void zaxisDefLongname(int zaxisID, const char *longname)
 {
-  zaxis_t *zaxisptr;
-
-  if ( reshGetStatus ( zaxisID, &zaxisOps ) == RESH_CLOSED )
-    {
-      Warning("%s", "Operation not executed.");
-      return;
-    }
-
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
+  zaxis_t *zaxisptr = reshGetVal(zaxisID, &zaxisOps);
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
@@ -393,6 +378,7 @@ void zaxisDefLongname(int zaxisID, const char *longname)
     {
       strncpy(zaxisptr->longname, longname, CDI_MAX_NAME - 1);
       zaxisptr->longname[CDI_MAX_NAME - 1] = '\0';
+      reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
     }
 }
 
@@ -412,15 +398,7 @@ The function @func{zaxisDefUnits} defines the units of a Z-axis.
 */
 void zaxisDefUnits(int zaxisID, const char *units)
 {
-  zaxis_t *zaxisptr;
-
-  if ( reshGetStatus ( zaxisID, &zaxisOps ) == RESH_CLOSED )
-    {
-      Warning("%s", "Operation not executed.");
-      return;
-    }
-
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
+  zaxis_t *zaxisptr = reshGetVal(zaxisID, &zaxisOps);
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
@@ -428,6 +406,7 @@ void zaxisDefUnits(int zaxisID, const char *units)
     {
       strncpy(zaxisptr->units, units, CDI_MAX_NAME - 1);
       zaxisptr->units[CDI_MAX_NAME - 1] = '\0';
+      reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
     }
 }
 
@@ -528,19 +507,15 @@ void zaxisInqStdname(int zaxisID, char *stdname)
 
 void zaxisDefPrec(int zaxisID, int prec)
 {
-  zaxis_t *zaxisptr;
-
-  if ( reshGetStatus ( zaxisID, &zaxisOps ) == RESH_CLOSED )
-    {
-      Warning("%s", "Operation not executed.");
-      return;
-    }
-
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
+  zaxis_t *zaxisptr = reshGetVal(zaxisID, &zaxisOps);
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
-  zaxisptr->prec = prec;
+  if (zaxisptr->prec != prec)
+    {
+      zaxisptr->prec = prec;
+      reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
+    }
 }
 
 
@@ -556,19 +531,15 @@ int zaxisInqPrec(int zaxisID)
 
 void zaxisDefPositive(int zaxisID, int positive)
 {
-  zaxis_t *zaxisptr;
-
-  if ( reshGetStatus ( zaxisID, &zaxisOps ) == RESH_CLOSED )
-    {
-      Warning("%s", "Operation not executed.");
-      return;
-    }
-
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
+  zaxis_t *zaxisptr = reshGetVal(zaxisID, &zaxisOps);
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
-  zaxisptr->positive = positive;
+  if (zaxisptr->positive != positive)
+    {
+      zaxisptr->positive = positive;
+      reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
+    }
 }
 
 
@@ -584,19 +555,15 @@ int zaxisInqPositive(int zaxisID)
 
 void zaxisDefLtype(int zaxisID, int ltype)
 {
-  zaxis_t *zaxisptr;
-
-  if ( reshGetStatus ( zaxisID, &zaxisOps ) == RESH_CLOSED )
-    {
-      Warning("%s", "Operation not executed.");
-      return;
-    }
-
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
+  zaxis_t *zaxisptr = reshGetVal(zaxisID, &zaxisOps);
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
-  zaxisptr->ltype = ltype;
+  if (zaxisptr->ltype != ltype)
+    {
+      zaxisptr->ltype = ltype;
+      reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
+    }
 }
 
 
@@ -625,15 +592,7 @@ The function @func{zaxisDefLevels} defines the levels of a Z-axis.
 */
 void zaxisDefLevels(int zaxisID, const double *levels)
 {
-  zaxis_t *zaxisptr;
-
-  if ( reshGetStatus ( zaxisID, &zaxisOps ) == RESH_CLOSED )
-    {
-      Warning("%s", "Operation not executed.");
-      return;
-    }
-
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
+  zaxis_t *zaxisptr = reshGetVal(zaxisID, &zaxisOps);
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
@@ -643,6 +602,7 @@ void zaxisDefLevels(int zaxisID, const double *levels)
 
   for (int ilev = 0; ilev < size; ilev++ )
     vals[ilev] = levels[ilev];
+  reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
 }
 
 /*
@@ -662,38 +622,27 @@ The function @func{zaxisDefLevel} defines one level of a Z-axis.
 */
 void zaxisDefLevel(int zaxisID, int levelID, double level)
 {
-  zaxis_t *zaxisptr;
-
-  if ( reshGetStatus ( zaxisID, &zaxisOps ) == RESH_CLOSED )
-    {
-      Warning("%s", "Operation not executed.");
-      return;
-    }
-
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
+  zaxis_t *zaxisptr = reshGetVal(zaxisID, &zaxisOps);
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
   if ( levelID >= 0 && levelID < zaxisptr->size )
     zaxisptr->vals[levelID] = level;
+  reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
 }
 
 
 void zaxisDefNlevRef(int zaxisID, const int nhlev)
 {
-  zaxis_t *zaxisptr;
-
-  if ( reshGetStatus ( zaxisID, &zaxisOps ) == RESH_CLOSED )
-    {
-      Warning("%s", "Operation not executed.");
-      return;
-    }
-
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
+  zaxis_t *zaxisptr = reshGetVal(zaxisID, &zaxisOps);
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
-  zaxisptr->nhlev = nhlev;
+  if (zaxisptr->nhlev != nhlev)
+    {
+      zaxisptr->nhlev = nhlev;
+      reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
+    }
 }
 
 
@@ -722,19 +671,15 @@ The function @func{zaxisDefNumber} defines the reference number for a generalize
 */
 void zaxisDefNumber(int zaxisID, const int number)
 {
-  zaxis_t *zaxisptr;
-
-  if ( reshGetStatus ( zaxisID, &zaxisOps ) == RESH_CLOSED )
-    {
-      Warning("%s", "Operation not executed.");
-      return;
-    }
-
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
+  zaxis_t *zaxisptr = reshGetVal(zaxisID, &zaxisOps);
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
-  zaxisptr->number = number;
+  if (zaxisptr->number != number)
+    {
+      zaxisptr->number = number;
+      reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
+    }
 }
 
 /*
@@ -777,21 +722,12 @@ The function @func{zaxisDefUUID} defines the UUID for a generalized  Z-axis.
 */
 void zaxisDefUUID(int zaxisID, const char *uuid)
 {
-  zaxis_t *zaxisptr;
-
-    if ( reshGetStatus ( zaxisID, &zaxisOps ) == RESH_CLOSED )
-    {
-      Warning("%s", "Operation not executed.");
-      return;
-    }
-
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
+  zaxis_t *zaxisptr = reshGetVal(zaxisID, &zaxisOps);
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
   memcpy(zaxisptr->uuid, uuid, 16);
-
-  return;
+  reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
 }
 
 /*
@@ -1095,15 +1031,7 @@ void cdiCheckZaxis(int zaxisID)
 
 void zaxisDefVct(int zaxisID, int size, const double *vct)
 {
-  zaxis_t *zaxisptr;
-
-  if ( reshGetStatus ( zaxisID, &zaxisOps ) == RESH_CLOSED )
-    {
-      Warning("%s", "Operation not executed.");
-      return;
-    }
-
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
+  zaxis_t *zaxisptr = reshGetVal(zaxisID, &zaxisOps);
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
@@ -1112,6 +1040,7 @@ void zaxisDefVct(int zaxisID, int size, const double *vct)
       zaxisptr->vctsize = size;
       zaxisptr->vct = (double *)xmalloc(size*sizeof(double));
       memcpy(zaxisptr->vct, vct, size*sizeof(double));
+      reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
     }
   else
     if ( zaxisptr->vctsize != size )
@@ -1151,15 +1080,7 @@ const double *zaxisInqVctPtr(int zaxisID)
 
 void zaxisDefLbounds(int zaxisID, const double *lbounds)
 {
-  zaxis_t *zaxisptr;
-
-  if ( reshGetStatus ( zaxisID, &zaxisOps ) == RESH_CLOSED )
-    {
-      Warning("%s", "Operation not executed.");
-      return;
-    }
-
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
+  zaxis_t *zaxisptr = reshGetVal(zaxisID, &zaxisOps);
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
@@ -1173,20 +1094,13 @@ void zaxisDefLbounds(int zaxisID, const double *lbounds)
     zaxisptr->lbounds = (double *)xmalloc(size*sizeof(double));
 
   memcpy(zaxisptr->lbounds, lbounds, size*sizeof(double));
+  reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
 }
 
 
 void zaxisDefUbounds(int zaxisID, const double *ubounds)
 {
-  zaxis_t *zaxisptr;
-
-  if ( reshGetStatus ( zaxisID, &zaxisOps ) == RESH_CLOSED )
-    {
-      Warning("%s", "Operation not executed.");
-      return;
-    }
-
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
+  zaxis_t *zaxisptr = reshGetVal(zaxisID, &zaxisOps);
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
@@ -1200,20 +1114,13 @@ void zaxisDefUbounds(int zaxisID, const double *ubounds)
     zaxisptr->ubounds = (double *)xmalloc(size*sizeof(double));
 
   memcpy(zaxisptr->ubounds, ubounds, size*sizeof(double));
+  reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
 }
 
 
 void zaxisDefWeights(int zaxisID, const double *weights)
 {
-  zaxis_t *zaxisptr;
-
-  if ( reshGetStatus ( zaxisID, &zaxisOps ) == RESH_CLOSED )
-    {
-      Warning("%s", "Operation not executed.");
-      return;
-    }
-
-  zaxisptr = ( zaxis_t * ) reshGetVal ( zaxisID, &zaxisOps );
+  zaxis_t *zaxisptr = reshGetVal(zaxisID, &zaxisOps);
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
@@ -1227,6 +1134,7 @@ void zaxisDefWeights(int zaxisID, const double *weights)
     zaxisptr->weights = (double *)xmalloc(size*sizeof(double));
 
   memcpy(zaxisptr->weights, weights, size*sizeof(double));
+  reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
 }
 
 

@@ -113,8 +113,9 @@ void modelDefaultEntries ( void )
   instID  = institutInq(  0,   1, "NCEP", NULL);
   resH[9] = modelDef(instID,  80, "T62L28MRF");
 
+  /* pre-defined models are not synchronized */
   for ( i = 0; i < nDefModels ; i++ )
-    reshSetStatus(resH[i], &modelOps, RESH_PRE_ASSIGNED);
+    reshSetStatus(resH[i], &modelOps, RESH_IN_USE);
 }
 
 static
