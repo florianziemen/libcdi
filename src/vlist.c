@@ -285,6 +285,7 @@ void vlistCopy(int vlistID2, int vlistID1)
   vlist_check_ptr(__func__, vlistptr1);
   vlist_check_ptr(__func__, vlistptr2);
 
+  var_t *vlist2vars = vlistptr2->vars;
   vlist_copy(vlistptr2, vlistptr1);
 
   vlistCopyVarAtts(vlistID1, CDI_GLOBAL, vlistID2, CDI_GLOBAL);
@@ -294,7 +295,7 @@ void vlistCopy(int vlistID2, int vlistID1)
       int nvars = vlistptr1->nvars;
 
       //vlistptr2->varsAllocated = nvars;
-      vlistptr2->vars = (var_t *) malloc(vlistptr2->varsAllocated*sizeof(var_t));
+      vlistptr2->vars = xrealloc(vlist2vars, vlistptr2->varsAllocated*sizeof(var_t));
       memcpy(vlistptr2->vars, vlistptr1->vars, vlistptr2->varsAllocated*sizeof(var_t));
 
       for ( int varID = 0; varID < nvars; varID++ )
