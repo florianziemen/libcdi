@@ -38,10 +38,11 @@
 static void
 cdiPrintDefaults(void)
 {
-  fprintf (stderr, "default instID     :  %d\n", cdiDefaultInstID);
-  fprintf (stderr, "default modelID    :  %d\n", cdiDefaultModelID);
-  fprintf (stderr, "default tableID    :  %d\n", cdiDefaultTableID);
-  fprintf (stderr, "default missval    :  %g\n", cdiDefaultMissval);
+  fprintf(stderr, "default instID     :  %d\n"
+          "default modelID    :  %d\n"
+          "default tableID    :  %d\n"
+          "default missval    :  %g\n", cdiDefaultInstID,
+          cdiDefaultModelID, cdiDefaultTableID, cdiDefaultMissval);
 }
 
 
