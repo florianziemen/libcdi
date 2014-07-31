@@ -374,9 +374,7 @@ The function @func{vlistDuplicate} duplicates the variable list from vlistID1.
 int vlistDuplicate(int vlistID)
 {
   int vlistIDnew;
-  vlist_t *vlistptr;
-
-  vlistptr = vlist_to_pointer(vlistID);
+  vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
   vlist_check_ptr(__func__, vlistptr);
 
@@ -391,9 +389,7 @@ int vlistDuplicate(int vlistID)
 void vlistClearFlag(int vlistID)
 {
   int varID, levID;
-  vlist_t *vlistptr;
-
-  vlistptr = vlist_to_pointer(vlistID);
+  vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
   for ( varID = 0; varID < vlistptr->nvars; varID++ )
     {
@@ -413,24 +409,19 @@ static
 int vlist_generate_zaxis(int vlistID, int zaxistype, int nlevels, double *levels,
                          double *lbounds, double *ubounds, int vctsize, const double *vct)
 {
-  int zaxisdefined;
-  int nzaxis;
   int zaxisID = CDI_UNDEFID;
-  int index;
   int zaxisglobdefined = 0;
   int has_bounds = FALSE;
-  vlist_t *vlistptr;
-
-  vlistptr = vlist_to_pointer(vlistID);
+  vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
   vlist_check_ptr(__func__, vlistptr);
 
-  zaxisdefined = 0;
-  nzaxis = vlistptr->nzaxis;
+  int zaxisdefined = 0;
+  int nzaxis = vlistptr->nzaxis;
 
   if ( lbounds && ubounds ) has_bounds = TRUE;
 
-  for ( index = 0; index < nzaxis; ++index )
+  for ( int index = 0; index < nzaxis; ++index )
     {
       zaxisID = vlistptr->zaxisIDs[index];
 
@@ -446,10 +437,9 @@ int vlist_generate_zaxis(int vlistID, int zaxistype, int nlevels, double *levels
       nzaxis = zaxisSize();
       if ( nzaxis > 0 )
         {
-          int *zaxisIndexList;
-          zaxisIndexList = (int *) malloc ( nzaxis * sizeof ( int ));
+          int *zaxisIndexList = xmalloc(nzaxis * sizeof (int));
           zaxisGetIndexList ( nzaxis, zaxisIndexList );
-          for ( index = 0; index < nzaxis; ++index )
+          for ( int index = 0; index < nzaxis; ++index )
             {
               zaxisID = zaxisIndexList[index];
               if ( zaxisCompare(zaxisID, zaxistype, nlevels, has_bounds, levels, NULL, NULL, 0) == 0 )
@@ -458,7 +448,7 @@ int vlist_generate_zaxis(int vlistID, int zaxistype, int nlevels, double *levels
                   break;
                 }
             }
-          if ( zaxisIndexList ) free ( zaxisIndexList );
+          free(zaxisIndexList);
         }
     }
 
@@ -507,10 +497,8 @@ The function @func{vlistCopyFlag} copies all entries with a flag from vlistID1 t
 */
 void vlistCopyFlag(int vlistID2, int vlistID1)
 {
-  vlist_t *vlistptr1, *vlistptr2;
-
-  vlistptr1 = vlist_to_pointer(vlistID1);
-  vlistptr2 = vlist_to_pointer(vlistID2);
+  vlist_t *vlistptr1 = vlist_to_pointer(vlistID1),
+    *vlistptr2 = vlist_to_pointer(vlistID2);
 
   vlist_check_ptr(__func__, vlistptr1);
   vlist_check_ptr(__func__, vlistptr2);
@@ -740,10 +728,8 @@ void vlistCat(int vlistID2, int vlistID1)
   int nvars, nvars1, nvars2;
   int varID, varID2, nlevs;
   int index, gridID, zaxisID;
-  vlist_t *vlistptr1, *vlistptr2;
-
-  vlistptr1 = vlist_to_pointer(vlistID1);
-  vlistptr2 = vlist_to_pointer(vlistID2);
+  vlist_t *vlistptr1 = vlist_to_pointer(vlistID1),
+    *vlistptr2 = vlist_to_pointer(vlistID2);
 
   vlist_check_ptr(__func__, vlistptr1);
   vlist_check_ptr(__func__, vlistptr2);
