@@ -106,13 +106,7 @@ int vlistvarNewEntry(int vlistID)
       int i;
 
       vlistvarSize = 2;
-      vlistvar = (var_t *) malloc(vlistvarSize*sizeof(var_t));
-      if ( vlistvar == NULL )
-	{
-          Message("vlistvarSize = %d", vlistvarSize);
-	  SysError("Allocation of var_t failed");
-	}
-
+      vlistvar = (var_t *)xmalloc(vlistvarSize*sizeof(var_t));
       for ( i = 0; i < vlistvarSize; i++ )
 	vlistvar[i].isUsed = FALSE;
     }
@@ -129,12 +123,7 @@ int vlistvarNewEntry(int vlistID)
       int i;
 
       vlistvarSize = 2*vlistvarSize;
-      vlistvar = (var_t *) realloc(vlistvar, vlistvarSize*sizeof(var_t));
-      if ( vlistvar == NULL )
-	{
-          Message("vlistvarSize = %d", vlistvarSize);
-	  SysError("Reallocation of var_t failed");
-	}
+      vlistvar = (var_t *)xrealloc(vlistvar, vlistvarSize*sizeof(var_t));
       varID = vlistvarSize/2;
 
       for ( i = varID; i < vlistvarSize; i++ )
@@ -264,7 +253,8 @@ cdiVlistCreateVarLevInfo(vlist_t *vlistptr, int varID)
   int zaxisID = vlistptr->vars[varID].zaxisID;
   int nlevs = zaxisInqSize(zaxisID);
 
-  vlistptr->vars[varID].levinfo = (levinfo_t*) malloc(nlevs * sizeof(levinfo_t));
+  vlistptr->vars[varID].levinfo
+    = (levinfo_t*)xmalloc((size_t)nlevs * sizeof(levinfo_t));
 
   for (int levID = 0; levID < nlevs; levID++ )
       vlistptr->vars[varID].levinfo[levID] = DEFAULT_LEVINFO(levID);
@@ -1705,7 +1695,8 @@ void vlistDefVarEnsemble(int vlistID, int varID, int ensID, int ensCount, int fo
   vlistCheckVarID(__func__, vlistID, varID);
 
   if ( vlistptr->vars[varID].ensdata == NULL )
-    vlistptr->vars[varID].ensdata = (ensinfo_t *) malloc( sizeof( ensinfo_t ) );
+    vlistptr->vars[varID].ensdata
+      = (ensinfo_t *)xmalloc( sizeof( ensinfo_t ) );
 
   vlistptr->vars[varID].ensdata->ens_index          = ensID;
   vlistptr->vars[varID].ensdata->ens_count          = ensCount;
