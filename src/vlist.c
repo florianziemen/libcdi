@@ -1129,46 +1129,39 @@ int vlistNtsteps(int vlistID)
 static void
 vlistPrintKernel(vlist_t *vlistptr, FILE * fp )
 {
-  int nvars, flag, index;
-  int varID, fvarID, mvarID, flevID, mlevID, levID;
-  int param, gridID, zaxisID, tsteptype, nlevs;
-  int dtype;
-
-  int iorank;
-
   char paramstr[32];
-  char *name, *longname, *units;
-  double level;
 
   vlist_check_ptr(__func__, vlistptr);
 
   fprintf ( fp, "#\n# vlistID %d\n#\n", vlistptr->self);
 
-  nvars = vlistptr->nvars;
+  int nvars = vlistptr->nvars;
 
-  fprintf ( fp, "nvars   %d\n", nvars);
-  fprintf ( fp, "ngrids  %d\n", vlistptr->ngrids);
-  fprintf ( fp, "nzaxis  %d\n", vlistptr->nzaxis);
-  fprintf ( fp, "taxisID %d\n", vlistptr->taxisID);
-  fprintf ( fp, "instID  %d\n", vlistptr->instID);
-  fprintf ( fp, "modelID %d\n", vlistptr->modelID);
-  fprintf ( fp, "tableID %d\n", vlistptr->tableID);
+  fprintf(fp, "nvars   %d\n"
+          "ngrids  %d\n"
+          "nzaxis  %d\n"
+          "taxisID %d\n"
+          "instID  %d\n"
+          "modelID %d\n"
+          "tableID %d\n",
+          nvars, vlistptr->ngrids, vlistptr->nzaxis, vlistptr->taxisID,
+          vlistptr->instID, vlistptr->modelID, vlistptr->tableID);
 
   if ( nvars > 0 )
     {
       fprintf(fp, " varID param    gridID zaxisID tsteptype flag "
               " name     longname iorank\n");
-      for ( varID = 0; varID < nvars; varID++ )
+      for ( int varID = 0; varID < nvars; varID++ )
         {
-          param    = vlistptr->vars[varID].param;
-          gridID   = vlistptr->vars[varID].gridID;
-          zaxisID  = vlistptr->vars[varID].zaxisID;
-	  tsteptype= vlistptr->vars[varID].tsteptype;
-          name     = vlistptr->vars[varID].name;
-          longname = vlistptr->vars[varID].longname;
-          units    = vlistptr->vars[varID].units;
-          flag     = vlistptr->vars[varID].flag;
-          iorank   = vlistptr->vars[varID].iorank;
+          int param = vlistptr->vars[varID].param;
+          int gridID = vlistptr->vars[varID].gridID;
+          int zaxisID = vlistptr->vars[varID].zaxisID;
+	  int tsteptype = vlistptr->vars[varID].tsteptype;
+          const char *name = vlistptr->vars[varID].name;
+          const char *longname = vlistptr->vars[varID].longname;
+          const char *units = vlistptr->vars[varID].units;
+          int flag = vlistptr->vars[varID].flag;
+          int iorank = vlistptr->vars[varID].iorank;
 
           cdiParamToString(param, paramstr, sizeof(paramstr));
           fprintf(fp, "%6d %-8s %6d %6d %6d %5d %-8s"
@@ -1177,31 +1170,31 @@ vlistPrintKernel(vlist_t *vlistptr, FILE * fp )
                   name ? name : "", longname ? longname : "",
                   iorank);
 
-          if ( units ) fprintf ( fp, "   [%s]", units);
-          fprintf ( fp, "\n");
+          if ( units ) fprintf(fp, "   [%s]", units);
+          fputs("\n", fp);
         }
 
-      fprintf(fp, "\n");
-      fprintf(fp, " varID  levID fvarID flevID mvarID mlevID  index  dtype  flag  level\n");
-      for ( varID = 0; varID < nvars; varID++ )
+      fputs("\n"
+            " varID  levID fvarID flevID mvarID mlevID  index  dtype  flag  level\n", fp);
+      for ( int varID = 0; varID < nvars; varID++ )
         {
-          zaxisID  = vlistptr->vars[varID].zaxisID;
-          nlevs    = zaxisInqSize(zaxisID);
-          fvarID   = vlistptr->vars[varID].fvarID;
-          mvarID   = vlistptr->vars[varID].mvarID;
-          dtype    = vlistptr->vars[varID].datatype;
-          for ( levID = 0; levID < nlevs; levID++ )
+          int zaxisID = vlistptr->vars[varID].zaxisID;
+          int nlevs = zaxisInqSize(zaxisID);
+          int fvarID = vlistptr->vars[varID].fvarID;
+          int mvarID = vlistptr->vars[varID].mvarID;
+          int dtype    = vlistptr->vars[varID].datatype;
+          for ( int levID = 0; levID < nlevs; levID++ )
             {
               levinfo_t li;
               if (vlistptr->vars[varID].levinfo)
                 li = vlistptr->vars[varID].levinfo[levID];
               else
                 li = DEFAULT_LEVINFO(levID);
-              flevID = li.flevelID;
-              mlevID = li.mlevelID;
-              index  = li.index;
-              flag   = li.flag;
-              level  = zaxisInqLevel(zaxisID, levID);
+              int flevID = li.flevelID;
+              int mlevID = li.mlevelID;
+              int index  = li.index;
+              int flag   = li.flag;
+              double level  = zaxisInqLevel(zaxisID, levID);
 
               fprintf(fp, "%6d %6d %6d %6d %6d %6d %6d %6d %5d  %.9g\n",
                       varID, levID, fvarID, flevID, mvarID, mlevID, index,
@@ -1209,9 +1202,9 @@ vlistPrintKernel(vlist_t *vlistptr, FILE * fp )
             }
         }
 
-      fprintf(fp, "\n");
-      fprintf(fp, " varID  size iorank\n");
-      for ( varID = 0; varID < nvars; varID++ )
+      fputs("\n"
+            " varID  size iorank\n", fp);
+      for ( int varID = 0; varID < nvars; varID++ )
         fprintf(fp, "%3d %8d %6d\n", varID,
                 zaxisInqSize(vlistptr->vars[varID].zaxisID)
                 * gridInqSize(vlistptr->vars[varID].gridID),
