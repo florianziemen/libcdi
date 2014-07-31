@@ -849,22 +849,15 @@ Merge the variable list vlistID1 to the variable list vlistID2.
 */
 void vlistMerge(int vlistID2, int vlistID1)
 {
-  int nvars1, nvars2;
-  int varID = 0, varID2, levID, nlevs, nlevs1, nlevs2;
-  int index, zaxisID;
-  int zaxisID1, zaxisID2;
-  int *lvar;
-  double *levels;
-  vlist_t *vlistptr1, *vlistptr2;
-
-  vlistptr1 = vlist_to_pointer(vlistID1);
-  vlistptr2 = vlist_to_pointer(vlistID2);
+  int varID = 0;
+  vlist_t *vlistptr1 = vlist_to_pointer(vlistID1),
+    *vlistptr2 = vlist_to_pointer(vlistID2);
 
   vlist_check_ptr(__func__, vlistptr1);
   vlist_check_ptr(__func__, vlistptr2);
 
-  nvars1 = vlistptr1->nvars;
-  nvars2 = vlistptr2->nvars;
+  int nvars1 = vlistptr1->nvars;
+  int nvars2 = vlistptr2->nvars;
 
   if ( nvars1 == nvars2 )
     {
@@ -893,10 +886,10 @@ void vlistMerge(int vlistID2, int vlistID1)
           vlistptr1->vars[varID].mvarID = varID;
           vlistptr2->vars[varID].mvarID = varID;
 
-          nlevs1 = zaxisInqSize(vlistptr1->vars[varID].zaxisID);
-          nlevs2 = zaxisInqSize(vlistptr2->vars[varID].zaxisID);
+          int nlevs1 = zaxisInqSize(vlistptr1->vars[varID].zaxisID);
+          int nlevs2 = zaxisInqSize(vlistptr2->vars[varID].zaxisID);
 
-          nlevs = nlevs1 + nlevs2;
+          int nlevs = nlevs1 + nlevs2;
 
           /*
           fprintf(stderr, "var %d %d %d %d %d\n", varID, nlevs1, nlevs2, nlevs, sizeof(levinfo_t));
@@ -911,53 +904,52 @@ void vlistMerge(int vlistID2, int vlistID1)
             }
           else
             cdiVlistCreateVarLevInfo(vlistptr1, varID);
-	  for ( levID = 0; levID < nlevs1; levID++ )
+	  for ( int levID = 0; levID < nlevs1; levID++ )
 	    {
 	      vlistptr1->vars[varID].levinfo[levID].mlevelID = nlevs2 + levID;
 	    }
 	}
 
-      lvar = (int *) malloc(nvars2*sizeof(int));
-      for ( varID = 0; varID < nvars2; varID++ ) lvar[varID] = FALSE;
+      int *lvar = (int *)xcalloc(nvars2, sizeof(int));
 
       for ( varID = 0; varID < nvars2; varID++ )
         {
           if ( lvar[varID] == TRUE ) continue;
 
-          zaxisID1 = vlistptr1->vars[varID].zaxisID;
-          zaxisID2 = vlistptr2->vars[varID].zaxisID;
+          int zaxisID1 = vlistptr1->vars[varID].zaxisID;
+          int zaxisID2 = vlistptr2->vars[varID].zaxisID;
           /*
           nlevs1 = zaxisInqSize(vlistptr1->vars[varID].zaxisID);
           nlevs2 = zaxisInqSize(vlistptr2->vars[varID].zaxisID);
           */
-          nlevs1 = zaxisInqSize(zaxisID1);
-          nlevs2 = zaxisInqSize(zaxisID2);
+          int nlevs1 = zaxisInqSize(zaxisID1);
+          int nlevs2 = zaxisInqSize(zaxisID2);
           /*
           fprintf(stderr, "zaxis %d %d %d %d\n", zaxisID1, zaxisID2, nlevs1, nlevs2);
           */
-          nlevs = nlevs1 + nlevs2;
+          int nlevs = nlevs1 + nlevs2;
 
-          zaxisID = zaxisDuplicate(zaxisID2);
+          int zaxisID = zaxisDuplicate(zaxisID2);
 
           zaxisResize(zaxisID, nlevs);
 
-          levels = (double *) malloc(nlevs1*sizeof(double));
+          double *levels = (double *)xmalloc(nlevs1*sizeof(double));
 
           zaxisInqLevels(zaxisID1, levels);
           /*
           for ( levID = 0; levID < nlevs1; levID++ )
             fprintf(stderr, "%d %d %d %d %d %g\n", varID, levID, nlevs1, nlevs2, vlistptr2->vars[varID].nlevs, levels[levID]);
           */
-          for ( levID = 0; levID < nlevs1; levID++ )
+          for ( int levID = 0; levID < nlevs1; levID++ )
             zaxisDefLevel(zaxisID, nlevs2+levID, levels[levID]);
 
           free(levels);
 
-          for ( index = 0; index < vlistptr2->nzaxis; index++ )
+          for ( int index = 0; index < vlistptr2->nzaxis; index++ )
             if ( vlistptr2->zaxisIDs[index] == zaxisID2 )
               vlistptr2->zaxisIDs[index] = zaxisID;
 
-          for ( varID2 = 0; varID2 < nvars2; varID2++ )
+          for ( int varID2 = 0; varID2 < nvars2; varID2++ )
             if ( lvar[varID2] == FALSE && vlistptr2->vars[varID2].zaxisID == zaxisID2 )
               {
                 vlistptr2->vars[varID2].zaxisID = zaxisID;
