@@ -152,13 +152,12 @@ static
 int getFiletype(const char *filename, int *byteorder)
 {
   int filetype = CDI_EUFTYPE;
-  int fileID;
   int swap = 0;
   int version;
   long recpos;
   char buffer[8];
 
-  fileID = fileOpen(filename, "r");
+  int fileID = fileOpen(filename, "r");
 
   if ( fileID == CDI_UNDEFID )
     {
