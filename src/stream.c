@@ -243,7 +243,7 @@ int getFiletype(const char *filename, int *byteorder)
 }
 
 
-int _readline_(FILE *fp, char *line, int len)
+static int _readline_(FILE *fp, char *line, int len)
 {
   int ichar, ipos = 0;
 
@@ -266,7 +266,7 @@ int _readline_(FILE *fp, char *line, int len)
 
 #define  MAX_LINE  4096
 
-int get_fnames(const char *argument, char *fnames[], int max_fnames)
+static int get_fnames(const char *argument, char *fnames[], int max_fnames)
 {
   int num_fnames = 0;
   int nfiles = 0;
