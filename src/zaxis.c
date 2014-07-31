@@ -1110,7 +1110,7 @@ void zaxisDefVct(int zaxisID, int size, const double *vct)
   if ( zaxisptr->vct == 0 )
     {
       zaxisptr->vctsize = size;
-      zaxisptr->vct = (double *) malloc(size*sizeof(double));
+      zaxisptr->vct = (double *)xmalloc(size*sizeof(double));
       memcpy(zaxisptr->vct, vct, size*sizeof(double));
     }
   else
