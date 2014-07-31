@@ -678,15 +678,7 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
 		  levID2++;
 		}
 
-	    for ( index = 0; index <vlistptr2->ngrids; index++ )
-	      if (vlistptr2->gridIDs[index] == gridID ) break;
-
-	    if ( index == vlistptr2->ngrids )
-	      {
-		vlistptr2->gridIDs[vlistptr2->ngrids++] = gridID;
-		if (vlistptr2->ngrids >= MAX_GRIDS_PS )
-		  Error("Internal Problem! More than %d grids.", MAX_GRIDS_PS);
-	      }
+            vlistAdd2GridIDs(vlistptr2, gridID);
 
 	    for ( index = 0; index < vlistptr2->nzaxis; index++ )
 	      if ( vlistptr2->zaxisIDs[index] == zaxisID ) break;
@@ -810,15 +802,7 @@ void vlistCat(int vlistID2, int vlistID1)
       vlistCopyVarAtts(vlistID1, varID, vlistID2, varID2);
 
       gridID = vlistptr1->vars[varID].gridID;
-      for ( index = 0; index < vlistptr2->ngrids; index++ )
-        if ( gridID == vlistptr2->gridIDs[index] ) break;
-
-      if ( index == vlistptr2->ngrids )
-	{
-	  vlistptr2->gridIDs[vlistptr2->ngrids++] = gridID;
-	  if ( vlistptr2->ngrids >= MAX_GRIDS_PS )
-	    Error("Internal Problem! More than %d grids.", MAX_GRIDS_PS);
-	}
+      vlistAdd2GridIDs(vlistptr2, gridID);
 
       zaxisID = vlistptr1->vars[varID].zaxisID;
       for ( index = 0; index < vlistptr2->nzaxis; index++ )

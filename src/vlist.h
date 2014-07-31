@@ -173,6 +173,22 @@ int     vlistInqVarValidrange(int vlistID, int varID, double *validrange);
 int vlist_att_compare(vlist_t *a, int varIDA, vlist_t *b, int varIDB,
                       int attnum);
 
+static inline void
+vlistAdd2GridIDs(vlist_t *vlistptr, int gridID)
+{
+  int index, ngrids = vlistptr->ngrids;
+  for ( index = 0; index < ngrids; index++ )
+    if (vlistptr->gridIDs[index] == gridID ) break;
+  if ( index == ngrids )
+    {
+      if (ngrids >= MAX_GRIDS_PS)
+        Error("Internal limit exceeded: more than %d grids.", MAX_GRIDS_PS);
+      ++(vlistptr->ngrids);
+      vlistptr->gridIDs[ngrids] = gridID;
+    }
+}
+
+
 #if  defined  (HAVE_LIBGRIB_API)
 extern int   cdiNAdditionalGRIBKeys;
 extern char* cdiAdditionalGRIBKeys[];

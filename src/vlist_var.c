@@ -214,19 +214,9 @@ int vlistDefVar(int vlistID, int gridID, int zaxisID, int tsteptype)
       vlistptr->vars[varID].tsteptype = TSTEP_INSTANT;
     }
 
+  vlistAdd2GridIDs(vlistptr, gridID);
+
   int index;
-  for ( index = 0; index < vlistptr->ngrids; index++ )
-    if ( gridID == vlistptr->gridIDs[index] ) break;
-
-  if ( index == vlistptr->ngrids )
-    {
-      if ( vlistptr->ngrids + 1 >= MAX_GRIDS_PS )
-	Error("Maximum of %d grids reached", MAX_GRIDS_PS);
-
-      vlistptr->gridIDs[vlistptr->ngrids] = gridID;
-      vlistptr->ngrids++;
-    }
-
   for ( index = 0; index < vlistptr->nzaxis; index++ )
     if ( zaxisID == vlistptr->zaxisIDs[index] ) break;
 
@@ -1537,19 +1527,7 @@ void vlistChangeVarGrid(int vlistID, int varID, int gridID)
 	  vlistptr->gridIDs[index] = gridID;
     }
   else
-    {
-      for ( index = 0; index < vlistptr->ngrids; index++ )
-	if ( vlistptr->gridIDs[index] == gridID ) break;
-
-      if ( index == vlistptr->ngrids )
-	{
-	  if ( vlistptr->ngrids + 1 >= MAX_GRIDS_PS )
-	    Error("Maximum of %d grids reached", MAX_GRIDS_PS);
-
-	  vlistptr->gridIDs[vlistptr->ngrids] = gridID;
-	  vlistptr->ngrids++;
-	}
-    }
+    vlistAdd2GridIDs(vlistptr, gridID);
 
   vlistptr->vars[varID].gridID = gridID;
 }
