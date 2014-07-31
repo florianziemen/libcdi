@@ -270,15 +270,14 @@ int _readline_(FILE *fp, char *line, int len)
 int get_fnames(const char *argument, char *fnames[], int max_fnames)
 {
   int num_fnames = 0;
-  int len;
   int nfiles = 0;
   int i, j;
   const char *pch;
   char line[MAX_LINE];
 
-  len = (int) strlen(argument);
-  for ( i = 0; i < len; ++i )
-    if ( argument[i] == ':' ) break;
+  int len = (int) strlen(argument);
+  char *colpos = strchr(argument, ':');
+  i = colpos ? (int)(colpos - argument) : 0;
 
   if ( i < len )
     {
