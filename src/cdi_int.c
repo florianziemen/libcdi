@@ -292,19 +292,6 @@ const char *strfiletype(int filetype)
 }
 
 
-stream_t *stream_to_pointer(int idx)
-{
-  return ( stream_t *) reshGetVal ( idx, &streamOps );
-}
-
-
-void stream_check_ptr(const char *caller, stream_t *streamptr)
-{
-  if ( streamptr == NULL )
-    Errorc("stream undefined!");
-}
-
-
 int streamSize(void)
 {
   return reshCountType ( &streamOps );

@@ -273,9 +273,20 @@ extern int STREAM_Debug;
 
 extern char *cdiPartabPath;
 extern int   cdiPartabIntern;
+extern const resOps streamOps;
 
-stream_t *stream_to_pointer(int idx);
-void stream_check_ptr(const char *caller, stream_t *streamptr);
+static inline stream_t *
+stream_to_pointer(int idx)
+{
+  return reshGetVal(idx, &streamOps);
+}
+
+static inline void
+stream_check_ptr(const char *caller, stream_t *streamptr)
+{
+  if ( streamptr == NULL )
+    Errorc("stream undefined!");
+}
 
 int     streamInqFileID(int streamID);
 
@@ -371,8 +382,6 @@ int cdiStreamDefTimestep_(stream_t *streamptr, int tsID);
 void cdiStreamSync_(stream_t *streamptr);
 
 char *cdiUnitNamePtr(int cdi_unit);
-
-extern const resOps streamOps;
 
 #endif  /* _CDI_INT_H */
 /*
