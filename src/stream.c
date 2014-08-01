@@ -274,13 +274,12 @@ static int get_fnames(const char *argument, char *fnames[], int max_fnames)
 {
   int num_fnames = 0;
   int nfiles = 0;
-  int i, j;
   const char *pch;
   char line[MAX_LINE];
 
-  int len = (int) strlen(argument);
+  size_t len = strlen(argument);
   char *colpos = strchr(argument, ':');
-  i = colpos ? (int)(colpos - argument) : 0;
+  size_t i = colpos ? (size_t)(colpos - argument) : 0;
 
   if ( i < len )
     {
@@ -336,7 +335,7 @@ static int get_fnames(const char *argument, char *fnames[], int max_fnames)
 		}
 
 	      i = 0;
-	      for ( j = 0; j < nfiles; j++ )
+	      for ( int j = 0; j < nfiles; j++ )
 		{
 		  fnames[j] = strdupx(&xline[i]);
 		  i += strlen(&xline[i]) + 1;
