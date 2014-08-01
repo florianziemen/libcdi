@@ -254,7 +254,7 @@ static int _readline_(FILE *fp, char *line, int len)
   while ( (ichar = fgetc(fp)) != EOF )
     {
       if ( ichar == '\n' ) break;
-      line[ipos++] = ichar;
+      line[ipos++] = (char)ichar;
       if ( ipos >= len )
         {
           fprintf(stderr, "readline Warning: end of line not found (maxlen = %d)!\n", len);
@@ -555,12 +555,9 @@ int cdiInqTimeSize(int streamID)
 static
 int cdiInqContents(stream_t * streamptr)
 {
-  int filetype;
-  int vlistID;
-  int taxisID;
   int status = 0;
 
-  filetype = streamptr->filetype;
+  int filetype = streamptr->filetype;
 
   switch (filetype)
     {
@@ -615,9 +612,9 @@ int cdiInqContents(stream_t * streamptr)
 
   if ( status == 0 )
     {
-      vlistID = streamptr->vlistID;
-      taxisID = vlistInqTaxis(vlistID);
-      if ( taxisID != -1 )
+      int vlistID = streamptr->vlistID;
+      int taxisID = vlistInqTaxis(vlistID);
+      if ( taxisID != CDI_UNDEFID )
         {
           taxis_t *taxisptr1 = &streamptr->tsteps[0].taxis;
           taxis_t *taxisptr2 = taxisPtr(taxisID);
