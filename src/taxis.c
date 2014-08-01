@@ -272,10 +272,8 @@ void taxisDestroyP( void * taxisptr )
 
 int taxisDuplicate(int taxisID1)
 {
-  taxis_t *taxisptr1 = ( taxis_t * ) reshGetVal ( taxisID1, &taxisOps );
-
+  taxis_t *taxisptr1 = (taxis_t *)reshGetVal(taxisID1, &taxisOps);
   taxis_t *taxisptr2 = taxisNewEntry(CDI_UNDEFID);
-  if ( ! taxisptr2 ) Error("No memory");
 
   int taxisID2 = taxisptr2->self;
 

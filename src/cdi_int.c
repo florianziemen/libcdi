@@ -444,12 +444,11 @@ static int streamCompareP(void * streamptr1, void * streamptr2)
 
 void streamDestroyP ( void * streamptr )
 {
-  int id;
   stream_t * sp = ( stream_t * ) streamptr;
 
   xassert ( sp );
 
-  id = sp->self;
+  int id = sp->self;
   streamClose ( id );
 }
 

@@ -763,16 +763,14 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
 
       if ( streamptr->filemode == 'r' )
 	{
-	  vlist_t *vlistptr;
-	  int vlistID;
-	  vlistID = vlistCreate();
+	  int vlistID = vlistCreate();
 	  if ( vlistID < 0 ) return(CDI_ELIMIT);
 
 	  streamptr->vlistID = vlistID;
 	  /* cdiReadByteorder(streamID); */
 	  status = cdiInqContents(streamptr);
 	  if ( status < 0 ) return (status);
-	  vlistptr = vlist_to_pointer(streamptr->vlistID);
+	  vlist_t *vlistptr = vlist_to_pointer(streamptr->vlistID);
 	  vlistptr->ntsteps = streamNtsteps(streamID);
 	}
     }
