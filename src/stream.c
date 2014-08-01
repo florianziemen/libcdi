@@ -932,46 +932,21 @@ if ( streamID < 0 ) handle_error(streamID);
 @EndSource
 @EndFunction
 */
-int streamOpenRead(const char *filenames)
+int streamOpenRead(const char *filename)
 {
-  int filetype, byteorder;
-  int streamID;
-  int num_fnames = 0;
-  char *fnames[MAX_FNAMES];
-  const char *filename;
-
   cdiInitialize();
 
-  //num_fnames = get_fnames(filenames, fnames, MAX_FNAMES);
-
-  if ( num_fnames == 0 )
-    filename = filenames;
-  else
-    {
-      int i;
-      for ( i = 0; i < num_fnames; ++i ) printf("fnames: %d %s\n", i, fnames[i]);
-      filename = fnames[0];
-    }
-
-  filetype = getFiletype(filename, &byteorder);
+  int byteorder;
+  int filetype = getFiletype(filename, &byteorder);
 
   if ( filetype < 0 ) return (filetype);
 
-  streamID = streamOpen(filename, "r", filetype);
+  int streamID = streamOpen(filename, "r", filetype);
 
   if ( streamID >= 0 )
     {
       stream_t *streamptr = stream_to_pointer(streamID);
       streamptr->byteorder = byteorder;
-
-      if ( num_fnames > 0 )
-	{
-	  int i;
-	  streamptr->nfiles = num_fnames;
-	  streamptr->fnames = (char **) malloc(num_fnames*sizeof(char *));
-	  for ( i = 0; i < num_fnames; ++i )
-	    streamptr->fnames[i] = fnames[i];
-	}
     }
 
   return (streamID);
@@ -980,10 +955,9 @@ int streamOpenRead(const char *filenames)
 
 int streamOpenAppend(const char *filename)
 {
-  int byteorder;
-
   cdiInitialize();
 
+  int byteorder;
   int filetype = getFiletype(filename, &byteorder);
 
   if ( filetype < 0 ) return (filetype);
