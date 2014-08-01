@@ -514,7 +514,6 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
       int nvars = vlistptr1->nvars;
       int nvars2 = 0;
       int varID2;
-      int index;
 
       vlistptr2->ngrids = 0;
       vlistptr2->nzaxis = 0;
@@ -1597,6 +1596,20 @@ void vlistUnpack(char * buf, int size, int *position, int originNamespace,
     vlistVarUnpack(targetID, buf, size, position, originNamespace, context);
 }
 
+
+void vlist_check_contents(int vlistID)
+{
+  int index, nzaxis, zaxisID;
+
+  nzaxis = vlistNzaxis(vlistID);
+
+  for ( index = 0; index < nzaxis; index++ )
+    {
+      zaxisID = vlistZaxis(vlistID, index);
+      if ( zaxisInqType(zaxisID) == ZAXIS_GENERIC )
+	cdiCheckZaxis(zaxisID);
+    }
+}
 /*
  * Local Variables:
  * c-file-style: "Java"
