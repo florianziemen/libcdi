@@ -449,7 +449,7 @@ int streamInqNvars ( int streamID )
 }
 
 
-int  streamCompareP ( void * streamptr1, void * streamptr2 )
+static int streamCompareP(void * streamptr1, void * streamptr2)
 {
   stream_t * s1 = ( stream_t * ) streamptr1;
   stream_t * s2 = ( stream_t * ) streamptr2;
