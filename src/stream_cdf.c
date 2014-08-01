@@ -3994,7 +3994,7 @@ int set_validrange(long gridsize, double *data, double missval, double validmin,
 }
 
 
-int cdfReadVarSliceDP(stream_t *streamptr, int varID, int levelID, double *data, int *nmiss)
+void cdfReadVarSliceDP(stream_t *streamptr, int varID, int levelID, double *data, int *nmiss)
 {
 #if  defined  (HAVE_LIBNETCDF)
   int fileID;
@@ -4231,7 +4231,6 @@ int cdfReadVarSliceDP(stream_t *streamptr, int varID, int levelID, double *data,
     }
 
 #endif
-  return (0);
 }
 
 

@@ -1739,12 +1739,9 @@ void cdiStreamReadVarSlice(int streamID, int varID, int levelID, int memtype, vo
     case FILETYPE_NC2:
     case FILETYPE_NC4:
     case FILETYPE_NC4C:
-      {
-        if ( memtype == MEMTYPE_FLOAT ) Error("cdfReadVarSlice not implemented for memtype float!");
-        /* FIXME: status value ignored */
-        int ierr = cdfReadVarSliceDP(streamptr, varID, levelID, data, nmiss);
-	break;
-      }
+      if ( memtype == MEMTYPE_FLOAT ) Error("cdfReadVarSlice not implemented for memtype float!");
+      cdfReadVarSliceDP(streamptr, varID, levelID, data, nmiss);
+      break;
 #endif
     default:
       {
