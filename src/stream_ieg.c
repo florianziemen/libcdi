@@ -16,6 +16,7 @@
 #include "varscan.h"
 #include "datetime.h"
 #include "ieg.h"
+#include "stream_ieg.h"
 #include "vlist.h"
 
 
@@ -556,9 +557,8 @@ int iegCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
 }
 
 
-int iegDefRecord(stream_t *streamptr)
+void iegDefRecord(stream_t *streamptr)
 {
-  int status = 0;
   int vlistID;
   int gridID;
   int date, time;
@@ -598,8 +598,6 @@ int iegDefRecord(stream_t *streamptr)
   datatype = streamptr->record->prec;
 
   iegp->dprec = iegDefDatatype(datatype);
-
-  return (status);
 }
 
 

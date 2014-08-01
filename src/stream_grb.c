@@ -182,11 +182,8 @@ int grbInqRecord(stream_t * streamptr, int *varID, int *levelID)
 }
 */
 
-int grbDefRecord(stream_t * streamptr)
+void grbDefRecord(stream_t * streamptr)
 {
-  int status = 0;
-
-  return (status);
 }
 
 static

@@ -197,7 +197,6 @@ void streamInqRecord(int streamID, int *varID, int *levelID)
 
 void streamDefRecord(int streamID, int varID, int levelID)
 {
-  int status = 0;
   int filetype;
   int param, gridID, zaxisID, level;
   int tsID;
@@ -241,52 +240,36 @@ void streamDefRecord(int streamID, int varID, int levelID)
 #if  defined  (HAVE_LIBGRIB)
     case FILETYPE_GRB:
     case FILETYPE_GRB2:
-      {
-        /* FIXME: return value not inspected */
-        status = grbDefRecord(streamptr);
-	break;
-      }
+      grbDefRecord(streamptr);
+      break;
 #endif
 #if  defined  (HAVE_LIBSERVICE)
     case FILETYPE_SRV:
-      {
-        /* FIXME: return value not inspected */
-        status = srvDefRecord(streamptr);
-	break;
-      }
+      srvDefRecord(streamptr);
+      break;
 #endif
 #if  defined  (HAVE_LIBEXTRA)
     case FILETYPE_EXT:
-      {
-        /* FIXME: return value not inspected */
-        status = extDefRecord(streamptr);
-	break;
-      }
+      extDefRecord(streamptr);
+      break;
 #endif
 #if  defined  (HAVE_LIBIEG)
     case FILETYPE_IEG:
-      {
-        /* FIXME: return value not inspected */
-        status = iegDefRecord(streamptr);
-	break;
-      }
+      iegDefRecord(streamptr);
+      break;
 #endif
 #if  defined  (HAVE_LIBNETCDF)
     case FILETYPE_NC:
     case FILETYPE_NC2:
     case FILETYPE_NC4:
     case FILETYPE_NC4C:
-      {
-	if ( streamptr->accessmode == 0 ) cdfEndDef(streamptr);
-	status = cdfDefRecord(streamptr);
-	break;
-      }
+      if ( streamptr->accessmode == 0 ) cdfEndDef(streamptr);
+      cdfDefRecord(streamptr);
+      break;
 #endif
     default:
-      {
-	Error("%s support not compiled in!", strfiletype(filetype));
-	break;
-      }
+      Error("%s support not compiled in!", strfiletype(filetype));
+      break;
     }
 }
 

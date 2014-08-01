@@ -9,7 +9,7 @@ int    srvInqContents(stream_t *streamptr);
 int    srvInqTimestep(stream_t *streamptr, int tsID);
 
 int    srvInqRecord(stream_t *streamptr, int *varID, int *levelID);
-int    srvDefRecord(stream_t *streamptr);
+void   srvDefRecord(stream_t *streamptr);
 int    srvCopyRecord(stream_t *streamptr2, stream_t *streamptr1);
 int    srvReadRecord(stream_t *streamptr, double *data, int *nmiss);
 int    srvWriteRecord(stream_t *streamptr, const double *data);

@@ -669,13 +669,8 @@ int cdfInqRecord(stream_t *streamptr, int *varID, int *levelID)
 */
 
 
-int cdfDefRecord(stream_t *streamptr)
+void cdfDefRecord(stream_t *streamptr)
 {
-  int ierr = 0;
-
-  if ( streamptr->fileID < 0 ) ierr = 1;
-
-  return (ierr);
 }
 
 #if  defined  (HAVE_LIBNETCDF)

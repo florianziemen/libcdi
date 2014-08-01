@@ -10,7 +10,7 @@ int    cdfInqHistorySize(stream_t *streamptr);
 void   cdfInqHistoryString(stream_t *streamptr, char *history);
 
 void   cdfEndDef(stream_t * streamptr);
-int    cdfDefRecord(stream_t * streamptr);
+void   cdfDefRecord(stream_t * streamptr);
 
 int    cdfCopyRecord(stream_t *streamptr2, stream_t *streamptr1);
 

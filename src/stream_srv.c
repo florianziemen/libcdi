@@ -174,11 +174,10 @@ int srvCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
 }
 
 
-int srvDefRecord(stream_t *streamptr)
+void srvDefRecord(stream_t *streamptr)
 {
   int gridID;
   int header[8];
-  int status = 0;
   int xsize, ysize;
   int datatype;
   int pdis, pcat, pnum;
@@ -213,8 +212,6 @@ int srvDefRecord(stream_t *streamptr)
   srvp->dprec = srvDefDatatype(datatype);
 
   srvDefHeader(srvp, header);
-
-  return (status);
 }
 
 

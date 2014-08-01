@@ -196,11 +196,10 @@ int extCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
 }
 
 
-int extDefRecord(stream_t *streamptr)
+void extDefRecord(stream_t *streamptr)
 {
   int gridID;
   int header[4];
-  int status = 0;
   int pdis, pcat, pnum;
   extrec_t *extp = (extrec_t*) streamptr->record->exsep;
 
@@ -215,8 +214,6 @@ int extDefRecord(stream_t *streamptr)
   extDefDatatype(streamptr->record->prec, &extp->prec, &extp->number);
 
   extDefHeader(extp, header);
-
-  return (status);
 }
 
 
