@@ -1852,12 +1852,9 @@ void cdiStreamWriteVarSlice(int streamID, int varID, int levelID, int memtype, c
     case FILETYPE_NC2:
     case FILETYPE_NC4:
     case FILETYPE_NC4C:
-      {
-        int ierr = 0;
-	if ( streamptr->accessmode == 0 ) cdfEndDef(streamptr);
-        ierr = cdf_write_var_slice(streamptr, varID, levelID, memtype, data, nmiss);
-	break;
-      }
+      if ( streamptr->accessmode == 0 ) cdfEndDef(streamptr);
+      cdf_write_var_slice(streamptr, varID, levelID, memtype, data, nmiss);
+      break;
 #endif
     default:
       {
