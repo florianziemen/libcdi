@@ -303,6 +303,10 @@ AC_ARG_VAR([BUILD_LDFLAGS],
   [append to LDFLAGS during build but not in configure phase])dnl
 AC_CONFIG_COMMANDS_PRE([LDFLAGS="$LDFLAGS${BUILD_LDFLAGS+ $BUILD_LDFLAGS}"])dnl
 AM_SUBST_NOTMAKE([BUILD_LDFLAGS])dnl
+AC_ARG_VAR([BUILD_LIBS],
+  [append to LIBS during build but not in configure phase])dnl
+AC_CONFIG_COMMANDS_PRE([LIBS="$LIBS${BUILD_LIBS+ $BUILD_LIBS}"])dnl
+AM_SUBST_NOTMAKE([BUILD_LIBS])dnl
 AC_ARG_VAR([BUILD_CC],
   [replace CC with expansion of $BUILD_CC during build but not in configure phase])dnl
 AC_CONFIG_COMMANDS_PRE([CC="${BUILD_CC-$CC}"])dnl
