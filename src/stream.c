@@ -622,8 +622,6 @@ int cdiInqContents(stream_t * streamptr)
           taxis_t *taxisptr1 = &streamptr->tsteps[0].taxis;
           taxis_t *taxisptr2 = taxisPtr(taxisID);
           ptaxisCopy(taxisptr2, taxisptr1);
-          if ( taxisptr1->name     ) taxisptr2->name = taxisptr1->name;
-          if ( taxisptr1->longname ) taxisptr2->longname = taxisptr1->longname;
         }
     }
 
@@ -1218,6 +1216,7 @@ void streamClose(int streamID)
 	free(streamptr->tsteps[index].records);
       if ( streamptr->tsteps[index].recIDs )
 	free(streamptr->tsteps[index].recIDs);
+      taxisDestroyKernel(&streamptr->tsteps[index].taxis);
     }
 
   if ( streamptr->tsteps ) free(streamptr->tsteps);
@@ -1360,11 +1359,6 @@ int cdiStreamDefTimestep_(stream_t *streamptr, int tsID)
       taxis_t *taxisptr1 = taxisPtr(taxisID);
       taxis_t *taxisptr2 = &streamptr->tsteps[tsID].taxis;
       ptaxisCopy(taxisptr2, taxisptr1);
-      if ( tsID == 0 )
-        {
-          if ( taxisptr1->name     ) taxisptr2->name = taxisptr1->name;
-          if ( taxisptr1->longname ) taxisptr2->longname = taxisptr1->longname;
-        }
     }
 
   streamptr->ntsteps = tsID + 1;

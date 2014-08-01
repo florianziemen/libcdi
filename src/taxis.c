@@ -2,6 +2,7 @@
 #  include "config.h"
 #endif
 
+#include <stddef.h>
 #include <string.h>
 
 #include "dmemory.h"
@@ -55,9 +56,50 @@ const resOps taxisOps = {
   taxisTxCode
 };
 
-#define RESH_ISCLOSED_TAXIS(taxisID)    (reshGetStatus(taxisID, &taxisOps) == RESH_CLOSED)
-#define RETURN_IFCLOSED_TAXIS(taxisID) if ( RESH_ISCLOSED_TAXIS(taxisID) ) {Warning("%s", "Operation not executed."); return;}
+#define container_of(ptr, type, member) \
+  ((type *)((unsigned char *)ptr - offsetof(type,member)))
 
+struct refcount_string
+{
+  int ref_count;
+  char string[];
+};
+
+static char *
+new_refcount_string(size_t len)
+{
+  struct refcount_string *container
+    = xmalloc(sizeof (*container) + len + 1);
+  container->ref_count = 1;
+  return container->string;
+}
+
+static void
+delete_refcount_string(void *p)
+{
+  if (p)
+    {
+      struct refcount_string *container
+        = container_of(p, struct refcount_string, string);
+      if (!--(container->ref_count))
+        free(container);
+    }
+}
+
+static char *
+dup_refcount_string(char *p)
+{
+  if (p)
+    {
+      struct refcount_string *container
+        = container_of(p, struct refcount_string, string);
+      ++(container->ref_count);
+    }
+  return p;
+}
+
+
+#undef container_of
 
 static int  TAXIS_Debug = 0;   /* If set to 1, debugging */
 
@@ -231,16 +273,14 @@ int taxisCreate(int taxistype)
   return (taxisID);
 }
 
-static
-void taxisDestroyKernel( taxis_t * taxisptr )
+void taxisDestroyKernel(taxis_t *taxisptr)
 {
   taxis_check_ptr(__func__, taxisptr);
-
   int id = taxisptr->self;
-
-  free ( taxisptr );
-
-  reshRemove ( id, &taxisOps );
+  delete_refcount_string(taxisptr->name);
+  delete_refcount_string(taxisptr->longname);
+  if (id != CDI_UNDEFID)
+    reshRemove(id, &taxisOps);
 }
 
 /*
@@ -255,18 +295,16 @@ void taxisDestroyKernel( taxis_t * taxisptr )
 */
 void taxisDestroy(int taxisID)
 {
-  taxis_t *taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
-
-  if ( taxisptr->name     ) free(taxisptr->name);
-  if ( taxisptr->longname ) free(taxisptr->longname);
-
-  taxisDestroyKernel ( taxisptr );
+  taxis_t *taxisptr = (taxis_t *)reshGetVal(taxisID, &taxisOps);
+  taxisDestroyKernel(taxisptr);
+  free(taxisptr);
 }
 
 
 void taxisDestroyP( void * taxisptr )
 {
-  taxisDestroyKernel (( taxis_t * ) taxisptr );
+  taxisDestroyKernel((taxis_t *)taxisptr);
+  free(taxisptr);
 }
 
 
@@ -281,11 +319,6 @@ int taxisDuplicate(int taxisID1)
     Message("taxisID2: %d", taxisID2);
 
   ptaxisCopy(taxisptr2, taxisptr1);
-  if ( taxisptr1->name     ) taxisptr2->name = strdup(taxisptr1->name);
-  if ( taxisptr1->longname ) taxisptr2->longname = strdup(taxisptr1->longname);
-
-  // taxisptr2->has_bounds = FALSE;
-
   return (taxisID2);
 }
 
@@ -934,6 +967,31 @@ taxis_t *taxisPtr(int taxisID)
   return (taxisptr);
 }
 
+void
+ptaxisDefName(taxis_t *taxisptr, const char *name)
+{
+  if (name)
+    {
+      taxis_check_ptr(__func__, taxisptr);
+      size_t len = strlen(name);
+      delete_refcount_string(taxisptr->name);
+      char *taxisname = taxisptr->name = new_refcount_string(len);
+      strcpy(taxisname, name);
+    }
+}
+
+void
+ptaxisDefLongname(taxis_t *taxisptr, const char *longname)
+{
+  if (longname)
+    {
+      taxis_check_ptr(__func__, taxisptr);
+      size_t len = strlen(longname);
+      delete_refcount_string(taxisptr->longname);
+      char *taxislongname = taxisptr->longname = new_refcount_string(len);
+      strcpy(taxislongname, longname);
+    }
+}
 
 void cdiDecodeTimevalue(int timeunit, double timevalue, int *days, int *secs)
 {
@@ -1402,6 +1460,10 @@ void ptaxisCopy(taxis_t *dest, taxis_t *source)
   dest->fc_period   = source->fc_period;
 
   dest->climatology = source->climatology;
+  delete_refcount_string(dest->name);
+  delete_refcount_string(dest->longname);
+  dest->name = dup_refcount_string(source->name);
+  dest->longname = dup_refcount_string(source->longname);
   if (dest->self != CDI_UNDEFID)
     reshSetStatus(dest->self, &taxisOps, RESH_DESYNC_IN_USE);
   reshUnlock ();
@@ -1553,7 +1615,7 @@ taxisUnpack(char * unpackBuffer, int unpackBufferSize, int * unpackBufferPos,
   if (intBuffer[idx])
     {
       size_t len = intBuffer[idx];
-      char *name = (char*) xmalloc(len + 1);
+      char *name = new_refcount_string(len);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
                       name, len, DATATYPE_TXT, context);
       name[len] = '\0';
@@ -1563,7 +1625,7 @@ taxisUnpack(char * unpackBuffer, int unpackBufferSize, int * unpackBufferPos,
   if (intBuffer[idx])
     {
       size_t len = intBuffer[idx];
-      char *longname = (char*) xmalloc(len + 1);
+      char *longname = new_refcount_string(len);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
                       longname, len, DATATYPE_TXT, context);
       longname[len] = '\0';

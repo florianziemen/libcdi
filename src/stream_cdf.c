@@ -7694,10 +7694,9 @@ int cdfInqContents(stream_t *streamptr)
   if ( ncvarid != UNDEFID )
     {
       taxis_t *taxis = &streamptr->tsteps[0].taxis;
-
-      taxis->name = strdup(ncvars[ncvarid].name);
+      ptaxisDefName(taxis, ncvars[ncvarid].name);
       if ( ncvars[ncvarid].longname[0] )
-        taxis->longname = strdup(ncvars[ncvarid].longname);
+        ptaxisDefLongname(taxis, ncvars[ncvarid].longname);
     }
 
   if ( ncvarid != UNDEFID )
