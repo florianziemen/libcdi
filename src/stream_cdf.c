@@ -1429,7 +1429,7 @@ int checkGridName(int type, char *axisname, int fileID, int vlistID, int gridID,
   checkname = TRUE;
   iz = 0;
 
-  while ( checkname )
+  do
     {
       strcpy(axisname2, axisname);
       if ( iz ) sprintf(&axisname2[strlen(axisname2)], "_%d", iz+1);
@@ -1467,9 +1467,9 @@ int checkGridName(int type, char *axisname, int fileID, int vlistID, int gridID,
         }
 
       if ( checkname ) iz++;
-
-      if ( iz > 99 ) break;
     }
+  while (checkname && iz <= 99);
+
 
   if ( iz ) sprintf(&axisname[strlen(axisname)], "_%d", iz+1);
 
