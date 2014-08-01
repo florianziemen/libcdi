@@ -40,6 +40,7 @@ extern "C" {
 
 /* File types */
 
+#define  FILETYPE_UNDEF          -1   /* Unknown/not yet defined file type */
 #define  FILETYPE_GRB             1   /* File type GRIB                       */
 #define  FILETYPE_GRB2            2   /* File type GRIB version 2             */
 #define  FILETYPE_NC              3   /* File type netCDF                     */

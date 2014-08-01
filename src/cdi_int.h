@@ -265,13 +265,16 @@ extern int cdiDefaultLeveltype;
 extern int cdiNcChunksizehint;
 extern int cdiChunkType;
 extern int cdiSplitLtype105;
+extern int cdiDataUnreduced;
+extern int cdiSortName;
+extern int cdiHaveMissval;
+extern int STREAM_Debug;
+
 
 extern char *cdiPartabPath;
 extern int   cdiPartabIntern;
 
 stream_t *stream_to_pointer(int idx);
-stream_t *stream_new_entry(void);
-void stream_delete_entry(stream_t *streamptr);
 void stream_check_ptr(const char *caller, stream_t *streamptr);
 
 int     streamInqFileID(int streamID);

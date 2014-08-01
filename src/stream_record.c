@@ -444,7 +444,7 @@ void streamWriteRecordF(int streamID, const float *data, int nmiss)
 void streamCopyRecord(int streamID2, int streamID1)
 {
   int status = 0;
-  int filetype = CDI_UNDEFID, filetype1, filetype2;
+  int filetype = FILETYPE_UNDEF, filetype1, filetype2;
   stream_t *streamptr1;
   stream_t *streamptr2;
 
@@ -480,7 +480,7 @@ void streamCopyRecord(int streamID2, int streamID1)
         }
     }
 
-  if ( filetype == CDI_UNDEFID )
+  if ( filetype == FILETYPE_UNDEF )
     Error("Streams have different file types (%s -> %s)!", strfiletype(filetype1), strfiletype(filetype2));
 
   switch (filetype)

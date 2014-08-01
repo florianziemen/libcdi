@@ -35,6 +35,10 @@
 
 #define  MAX_FNAMES  3
 
+static stream_t *stream_new_entry(void);
+static void stream_delete_entry(stream_t *streamptr);
+
+
 static void
 cdiPrintDefaults(void)
 {
@@ -1043,6 +1047,81 @@ int streamOpenWrite(const char *filename, int filetype)
   return (streamOpen(filename, "w", filetype));
 }
 
+static
+void streamDefaultValue ( stream_t * streamptr )
+{
+  int i;
+
+  streamptr->self              = CDI_UNDEFID;
+  streamptr->accesstype        = CDI_UNDEFID;
+  streamptr->accessmode        = 0;
+  streamptr->filetype          = FILETYPE_UNDEF;
+  streamptr->byteorder         = CDI_UNDEFID;
+  streamptr->fileID            = 0;
+  streamptr->dimgroupID        = CDI_UNDEFID;
+  streamptr->filemode          = 0;
+  streamptr->numvals           = 0;
+  streamptr->filename          = NULL;
+  streamptr->record            = NULL;
+  streamptr->varsAllocated     = 0;
+  streamptr->nrecs             = 0;
+  streamptr->nvars             = 0;
+  streamptr->vars              = NULL;
+  streamptr->varinit           = 0;
+  streamptr->ncmode            = 0;
+  streamptr->curTsID           = CDI_UNDEFID;
+  streamptr->rtsteps           = 0;
+  streamptr->ntsteps           = CDI_UNDEFID;
+  streamptr->numTimestep       = 0;
+  streamptr->tsteps            = NULL;
+  streamptr->tstepsTableSize   = 0;
+  streamptr->tstepsNextID      = 0;
+  streamptr->historyID         = CDI_UNDEFID;
+  streamptr->vlistID           = CDI_UNDEFID;
+  streamptr->globalatts        = 0;
+  streamptr->localatts         = 0;
+  streamptr->vct.ilev          = 0;
+  streamptr->vct.mlev          = 0;
+  streamptr->vct.ilevID        = CDI_UNDEFID;
+  streamptr->vct.mlevID        = CDI_UNDEFID;
+  streamptr->unreduced         = cdiDataUnreduced;
+  streamptr->sortname          = cdiSortName;
+  streamptr->have_missval      = cdiHaveMissval;
+  streamptr->comptype          = COMPRESS_NONE;
+  streamptr->complevel         = 0;
+
+  basetimeInit(&streamptr->basetime);
+
+  for ( i = 0; i < MAX_GRIDS_PS; i++ ) streamptr->xdimID[i]   = CDI_UNDEFID;
+  for ( i = 0; i < MAX_GRIDS_PS; i++ ) streamptr->ydimID[i]   = CDI_UNDEFID;
+  for ( i = 0; i < MAX_ZAXES_PS; i++ ) streamptr->zaxisID[i]  = CDI_UNDEFID;
+  for ( i = 0; i < MAX_GRIDS_PS; i++ ) streamptr->ncxvarID[i] = CDI_UNDEFID;
+  for ( i = 0; i < MAX_GRIDS_PS; i++ ) streamptr->ncyvarID[i] = CDI_UNDEFID;
+  for ( i = 0; i < MAX_GRIDS_PS; i++ ) streamptr->ncavarID[i] = CDI_UNDEFID;
+
+  streamptr->curfile           = 0;
+  streamptr->nfiles            = 0;
+  streamptr->fnames            = NULL;
+
+  streamptr->gribContainers    = NULL;
+  streamptr->vlistIDorig       = CDI_UNDEFID;
+}
+
+
+static stream_t *stream_new_entry(void)
+{
+  stream_t *streamptr;
+
+  cdiInitialize(); /* ***************** make MT version !!! */
+
+  streamptr = (stream_t *) xmalloc(sizeof(stream_t));
+  streamDefaultValue ( streamptr );
+  streamptr->self = reshPut (( void * ) streamptr, &streamOps );
+
+  return streamptr;
+}
+
+
 void
 cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDeleted)
 {
@@ -1192,6 +1271,21 @@ void streamClose(int streamID)
 
   stream_delete_entry(streamptr);
 }
+
+static void stream_delete_entry(stream_t *streamptr)
+{
+  int idx;
+
+  xassert ( streamptr );
+
+  idx = streamptr->self;
+  free ( streamptr );
+  reshRemove ( idx, &streamOps );
+
+  if ( STREAM_Debug )
+    Message("Removed idx %d from stream list", idx);
+}
+
 
 void cdiStreamSync_(stream_t *streamptr)
 {

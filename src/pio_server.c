@@ -532,7 +532,7 @@ buildStreamMap(struct winHeaderEntry *winDict)
 {
   int streamIDOld = CDI_UNDEFID;
   int oldStreamIdx = CDI_UNDEFID;
-  int filetype = CDI_UNDEFID;
+  int filetype = FILETYPE_UNDEF;
   int sizeStreamMap = 16;
   struct streamMapping *streamMap = (struct streamMapping *) xmalloc(sizeStreamMap * sizeof (streamMap[0]));
   int numDataEntries = winDict[0].specific.headerSize.numDataEntries;
