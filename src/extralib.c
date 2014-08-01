@@ -241,9 +241,8 @@ int extDefHeader(void *ext, const int *header)
 }
 
 
-int extInqData(void *ext, int prec, void *data)
+static int extInqData(extrec_t *extp, int prec, void *data)
 {
-  extrec_t *extp = (extrec_t *) ext;
   size_t datasize;
   size_t i;
   int ierr = 0;
