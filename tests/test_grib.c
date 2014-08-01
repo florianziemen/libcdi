@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "cdi.h"
+#include "dmemory.h"
 
 int main(int argc, char *argv[])
 {
@@ -27,7 +28,7 @@ int main(int argc, char *argv[])
 
 
   datasize = nlon * nlat;
-  data = (double *) malloc(datasize*sizeof(double));
+  data = (double *)xmalloc(datasize*sizeof(double));
   memset(data, 0, datasize*sizeof(double));
 
   gridID = gridCreate(GRID_GAUSSIAN, datasize);
@@ -83,7 +84,7 @@ int main(int argc, char *argv[])
       if ( gridsize*nlevel > datasize ) datasize = gridsize*nlevel;
     }
 
-  data = (double *) malloc(datasize*sizeof(double));
+  data = (double *)xrealloc(data, datasize*sizeof(double));
   memset(data, 0, datasize*sizeof(double));
 
   taxisID = vlistInqTaxis(vlistID);
