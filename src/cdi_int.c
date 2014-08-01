@@ -350,44 +350,6 @@ int streamInqFileID(int streamID)
   return (streamptr->fileID);
 }
 
-/* not used anymore */
-/*
-void streamDefineTaxis(int streamID)
-{
-  stream_t *streamptr;
-
-  streamptr = ( stream_t *) reshGetVal ( streamID, &streamOps );
-
-  if ( streamptr->tsteps == NULL )
-    {
-      int varID, nvars;
-      int vlistID;
-
-      vlistID = streamptr->vlistID;
-
-      nvars = vlistNvars(vlistID);
-      for ( varID = 0; varID < nvars; varID++ )
-	if ( vlistInqVarTsteptype(vlistID, varID) == TSTEP_CONSTANT ) break;
-
-      if ( varID == nvars )
-	{
-	  int taxisID;
-
-	  taxisID = vlistInqTaxis(vlistID);
-	  if ( taxisID == CDI_UNDEFID )
-	    {
-	      taxisID = taxisCreate(TAXIS_ABSOLUTE);
-	      vlistDefTaxis(vlistID, taxisID);
-	    }
-
-	  (void) streamDefTimestep(streamID, 0);
-	}
-      else
-	Error("time axis undefined");
-    }
-}
-*/
-
 void streamDefDimgroupID(int streamID, int dimgroupID)
 {
   stream_t *streamptr;
