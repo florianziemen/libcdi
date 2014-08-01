@@ -212,9 +212,8 @@ int grbDecode(int filetype, unsigned char *gribbuffer, int gribsize, double *dat
 }
 
 
-int grbReadRecord(stream_t * streamptr, double *data, int *nmiss)
+void grbReadRecord(stream_t * streamptr, double *data, int *nmiss)
 {
-  int status = 0;
   unsigned char *gribbuffer;
   int fileID;
   int recID, vrecID, tsID, gridID, varID;
@@ -246,15 +245,14 @@ int grbReadRecord(stream_t * streamptr, double *data, int *nmiss)
 
   fileSetPos(fileID, recpos, SEEK_SET);
 
-  fileRead(fileID, gribbuffer, (size_t) recsize);
+  if (fileRead(fileID, gribbuffer, (size_t) recsize) != recsize)
+    Error("Failed to read GRIB record");
 
   missval = vlistInqVarMissval(vlistID, varID);
 
   grbDecode(filetype, gribbuffer, recsize, data, gridsize, streamptr->unreduced, nmiss, &zip, missval, vlistID, varID);
 
   streamptr->tsteps[tsID].records[recID].zip = zip;
-
-  return (status);
 }
 
 static

@@ -829,10 +829,8 @@ void cdf_write_record(stream_t *streamptr, int memtype, const void *data, int nm
 #endif
 }
 
-
-int cdfReadRecord(stream_t *streamptr, double *data, int *nmiss)
+void cdfReadRecord(stream_t *streamptr, double *data, int *nmiss)
 {
-  int ierr = 0;
   int levelID, varID, tsID, recID, vrecID;
 
   if ( CDI_Debug ) Message("streamID = %d", streamptr->self);
@@ -844,8 +842,6 @@ int cdfReadRecord(stream_t *streamptr, double *data, int *nmiss)
   levelID = streamptr->tsteps[tsID].records[recID].levelID;
 
   cdfReadVarSliceDP(streamptr, varID, levelID, data, nmiss);
-
-  return (ierr);
 }
 
 #if  defined  (HAVE_LIBNETCDF)

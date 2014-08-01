@@ -99,7 +99,7 @@ int iegInqRecord(stream_t *streamptr, int *varID, int *levelID)
 }
 */
 
-int iegReadRecord(stream_t *streamptr, double *data, int *nmiss)
+void iegReadRecord(stream_t *streamptr, double *data, int *nmiss)
 {
   int vlistID, fileID;
   int status;
@@ -121,7 +121,8 @@ int iegReadRecord(stream_t *streamptr, double *data, int *nmiss)
   fileSetPos(fileID, recpos, SEEK_SET);
 
   status = iegRead(fileID, iegp);
-  if ( status != 0 ) return (0);
+  if ( status != 0 )
+    Error("Could not read IEG record!");
 
   iegInqDataDP(iegp, data);
 
@@ -138,8 +139,6 @@ int iegReadRecord(stream_t *streamptr, double *data, int *nmiss)
 	data[i] = missval;
 	(*nmiss)++;
       }
-
-  return (1);
 }
 
 static

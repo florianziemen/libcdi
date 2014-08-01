@@ -106,7 +106,7 @@ int extInqRecord(stream_t *streamptr, int *varID, int *levelID)
 }
 */
 
-int extReadRecord(stream_t *streamptr, double *data, int *nmiss)
+void extReadRecord(stream_t *streamptr, double *data, int *nmiss)
 {
   int vlistID, fileID;
   int status;
@@ -129,7 +129,8 @@ int extReadRecord(stream_t *streamptr, double *data, int *nmiss)
   fileSetPos(fileID, recpos, SEEK_SET);
 
   status = extRead(fileID, extp);
-  if ( status != 0 ) return (0);
+  if ( status != 0 )
+    Error("Failed to read EXTRA record");
 
   extInqHeader(extp, header);
   extInqDataDP(extp, data);
@@ -159,8 +160,6 @@ int extReadRecord(stream_t *streamptr, double *data, int *nmiss)
 	    (*nmiss)++;
 	  }
     }
-
-  return (1);
 }
 
 

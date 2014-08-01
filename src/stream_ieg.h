@@ -11,7 +11,7 @@ int    iegInqTimestep(stream_t *streamptr, int tsID);
 int    iegInqRecord(stream_t *streamptr, int *varID, int *levelID);
 void   iegDefRecord(stream_t *streamptr);
 int    iegCopyRecord(stream_t *streamptr2, stream_t *streamptr1);
-int    iegReadRecord(stream_t *streamptr, double *data, int *nmiss);
+void   iegReadRecord(stream_t *streamptr, double *data, int *nmiss);
 int    iegWriteRecord(stream_t *streamptr, const double *data);
 
 void   iegReadVarDP (stream_t *streamptr, int varID,       double *data, int *nmiss);

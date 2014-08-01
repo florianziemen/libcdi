@@ -8,7 +8,7 @@ int   grbInqTimestep(stream_t * streamptr, int tsID);
 
 int   grbInqRecord(stream_t * streamptr, int *varID, int *levelID);
 void  grbDefRecord(stream_t * streamptr);
-int   grbReadRecord(stream_t * streamptr, double *data, int *nmiss);
+void  grbReadRecord(stream_t * streamptr, double *data, int *nmiss);
 int   grb_write_record(stream_t * streamptr, int memtype, const void *data, int nmiss);
 int   grbCopyRecord(stream_t * streamptr2, stream_t * streamptr1);
 

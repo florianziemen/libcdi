@@ -276,7 +276,6 @@ void streamDefRecord(int streamID, int varID, int levelID)
 
 void streamReadRecord(int streamID, double *data, int *nmiss)
 {
-  int status = 0;
   int filetype;
   stream_t *streamptr;
 
@@ -296,46 +295,31 @@ void streamReadRecord(int streamID, double *data, int *nmiss)
 #if  defined  (HAVE_LIBGRIB)
     case FILETYPE_GRB:
     case FILETYPE_GRB2:
-      {
-        /* FIXME: return value not inspected */
-        status = grbReadRecord(streamptr, data, nmiss);
-	break;
-      }
+      grbReadRecord(streamptr, data, nmiss);
+      break;
 #endif
 #if  defined  (HAVE_LIBSERVICE)
     case FILETYPE_SRV:
-      {
-        /* FIXME: return value not inspected */
-        status = srvReadRecord(streamptr, data, nmiss);
-	break;
-      }
+      srvReadRecord(streamptr, data, nmiss);
+      break;
 #endif
 #if  defined  (HAVE_LIBEXTRA)
     case FILETYPE_EXT:
-      {
-        /* FIXME: return value not inspected */
-        status = extReadRecord(streamptr, data, nmiss);
-	break;
-      }
+      extReadRecord(streamptr, data, nmiss);
+      break;
 #endif
 #if  defined  (HAVE_LIBIEG)
     case FILETYPE_IEG:
-      {
-        /* FIXME: return value not inspected */
-        status = iegReadRecord(streamptr, data, nmiss);
-	break;
-      }
+      iegReadRecord(streamptr, data, nmiss);
+      break;
 #endif
 #if  defined  (HAVE_LIBNETCDF)
     case FILETYPE_NC:
     case FILETYPE_NC2:
     case FILETYPE_NC4:
     case FILETYPE_NC4C:
-      {
-        /* FIXME: return value not inspected */
-	status = cdfReadRecord(streamptr, data, nmiss);
-	break;
-      }
+      cdfReadRecord(streamptr, data, nmiss);
+      break;
 #endif
     default:
       {

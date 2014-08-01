@@ -96,7 +96,7 @@ int srvInqRecord(stream_t *streamptr, int *varID, int *levelID)
 }
 */
 
-int srvReadRecord(stream_t *streamptr, double *data, int *nmiss)
+void srvReadRecord(stream_t *streamptr, double *data, int *nmiss)
 {
   int vlistID, fileID;
   int status;
@@ -119,7 +119,8 @@ int srvReadRecord(stream_t *streamptr, double *data, int *nmiss)
   fileSetPos(fileID, recpos, SEEK_SET);
 
   status = srvRead(fileID, srvp);
-  if ( status != 0 ) return (0);
+  if ( status != 0 )
+    Error("Failed to read record from SRV file");
 
   srvInqHeader(srvp, header);
   srvInqDataDP(srvp, data);
@@ -137,8 +138,6 @@ int srvReadRecord(stream_t *streamptr, double *data, int *nmiss)
 	data[i] = missval;
 	(*nmiss)++;
       }
-
-  return (1);
 }
 
 
