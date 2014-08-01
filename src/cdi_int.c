@@ -91,7 +91,7 @@ const resOps streamOps = {
   streamTxCode
 };
 
-long cdiGetenvInt(char *envName)
+static long cdiGetenvInt(char *envName)
 {
   char *envString;
   long envValue = -1;
