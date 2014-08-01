@@ -2467,9 +2467,9 @@ streamPack(void * streamptr, void * packBuffer, int packBufferSize,
   intBuffer[5]  = streamP->byteorder;
   intBuffer[6]  = streamP->comptype;
   intBuffer[7]  = streamP->complevel;
-  intBuffer[8]  = cdiDataUnreduced;
-  intBuffer[9]  = cdiSortName;
-  intBuffer[10] = cdiHaveMissval;
+  intBuffer[8]  = streamP->unreduced;
+  intBuffer[9]  = streamP->sortname;
+  intBuffer[10] = streamP->have_missval;
 
   serializePack(intBuffer, streamNint, DATATYPE_INT, packBuffer, packBufferSize, packBufferPos, context);
   uint32_t d = cdiCheckSum(DATATYPE_INT, streamNint, intBuffer);
@@ -2508,9 +2508,10 @@ streamUnpack(char * unpackBuffer, int unpackBufferSize,
   streamDefByteorder(streamID, intBuffer[5]);
   streamDefCompType(streamID, intBuffer[6]);
   streamDefCompLevel(streamID, intBuffer[7]);
-  cdiDefGlobal("REGULARGRID", intBuffer[8]);
-  cdiDefGlobal("SORTNAME", intBuffer[9]);
-  cdiDefGlobal("HAVE_MISSVAL", intBuffer[10]);
+  stream_t *streamptr = stream_to_pointer(streamID);
+  streamptr->unreduced = intBuffer[8];
+  streamptr->sortname = intBuffer[9];
+  streamptr->have_missval = intBuffer[10];
   struct streamAssoc retval = { streamID, intBuffer[3], intBuffer[4] };
   return retval;
 }
