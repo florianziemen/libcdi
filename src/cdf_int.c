@@ -536,6 +536,19 @@ void  cdf_get_vara_text(int ncid, int varid, const size_t start[],
 }
 
 
+void  cdf_get_vara_uchar(int ncid, int varid, const size_t start[], const size_t count[], unsigned char *tp)
+{
+  int status;
+
+  status = nc_get_vara_uchar(ncid, varid, start, count, tp);
+
+  if ( CDF_Debug || status != NC_NOERR )
+    Message("ncid = %d varid = %d", ncid, varid);
+
+  if ( status != NC_NOERR ) Error("%s", nc_strerror(status));
+}
+
+
 void cdf_put_var_double(int ncid, int varid, const double *dp)
 {
   int status;

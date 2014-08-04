@@ -4249,12 +4249,7 @@ void cdfReadVarSliceDP(stream_t *streamptr, int varID, int levelID, double *data
         data[i] = (double) data_fp[i];
       free(data_fp);
     }
-  else
-    cdf_get_vara_double(fileID, ncvarid, start, count, data);
-
-  if ( swapxy ) transpose2dArrayDP(xsize, ysize, data);
-
-  if ( vlistInqVarDatatype(vlistID, varID) == DATATYPE_UINT8 )
+  else if ( vlistInqVarDatatype(vlistID, varID) == DATATYPE_UINT8 )
     {
       nc_type xtype;
       cdf_inq_vartype(fileID, ncvarid, &xtype);
@@ -4264,6 +4259,12 @@ void cdfReadVarSliceDP(stream_t *streamptr, int varID, int levelID, double *data
             if ( data[i] < 0 ) data[i] += 256;
         }
     }
+  else
+    {
+      cdf_get_vara_double(fileID, ncvarid, start, count, data);
+    }
+
+  if ( swapxy ) transpose2dArrayDP(xsize, ysize, data);
 
   *nmiss = 0;
   double missval = vlistInqVarMissval(vlistID, varID);
