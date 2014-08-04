@@ -3462,6 +3462,45 @@ void cdfGetSlapDescription(stream_t *streamptr, int varID, size_t (*start)[4], s
     for (int idim = 0; idim < ndims; idim++)
       Message("dim = %d  start = %d  count = %d", idim, start[idim], count[idim]);
 }
+
+//Scans the data array for missVals, optionally applying first a scale factor and then an offset.
+//Returns the number of missVals encountered.
+static
+size_t cdfDoInputDataTransformation(size_t valueCount, double *data, bool haveMissVal, double missVal, double scaleFactor, double offset)
+ {
+  const bool haveOffset   = IS_NOT_EQUAL(offset, 0);
+  const bool haveScaleFactor = IS_NOT_EQUAL(scaleFactor, 1);
+
+  size_t missValCount = 0;
+
+  if ( haveScaleFactor || haveOffset )
+    {
+      for ( size_t i = 0; i < valueCount; i++ )
+        {
+          if ( haveMissVal && DBL_IS_EQUAL(data[i], missVal) )
+            {
+              missValCount++;
+            }
+          else
+            {
+              if ( haveScaleFactor ) data[i] *= scaleFactor;
+              if ( haveOffset ) data[i] += offset;
+            }
+        }
+    }
+  else
+    {
+      for ( size_t i = 0; i < valueCount; i++ )
+        {
+          if ( haveMissVal && DBL_IS_EQUAL(data[i], missVal) )
+            {
+              missValCount++;
+            }
+        }
+    }
+
+  return missValCount;
+}
 #endif
 
 void cdfReadVarDP(stream_t *streamptr, int varID, double *data, int *nmiss)
@@ -3471,14 +3510,9 @@ void cdfReadVarDP(stream_t *streamptr, int varID, double *data, int *nmiss)
   int gridID;
   int zaxisID;
   int ncvarid;
-  size_t size;
   size_t start[4];
   size_t count[4];
   int vlistID;
-  int i;
-  double missval;
-  int laddoffset, lscalefactor;
-  double addoffset, scalefactor;
 
   if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamptr->self, varID);
 
@@ -3494,46 +3528,13 @@ void cdfReadVarDP(stream_t *streamptr, int varID, double *data, int *nmiss)
 
   cdf_get_vara_double(fileID, ncvarid, start, count, data);
 
-  *nmiss = 0;
-  if ( vlistInqVarMissvalUsed(vlistID, varID) == TRUE  )
-    {
-      size    = gridInqSize(gridID)*zaxisInqSize(zaxisID);
-      missval = vlistInqVarMissval(vlistID, varID);
+  double addoffset    = vlistInqVarAddoffset(vlistID, varID);
+  double scalefactor  = vlistInqVarScalefactor(vlistID, varID);
+  size_t size = gridInqSize(gridID)*zaxisInqSize(zaxisID);
+  const bool haveMissVal = vlistInqVarMissvalUsed(vlistID, varID);
+  double missval = vlistInqVarMissval(vlistID, varID);
 
-      for ( i = 0; i < (int) size; i++ )
-        if ( DBL_IS_EQUAL(data[i], missval) ) *nmiss += 1;
-    }
-
-  addoffset    = vlistInqVarAddoffset(vlistID, varID);
-  scalefactor  = vlistInqVarScalefactor(vlistID, varID);
-  laddoffset   = IS_NOT_EQUAL(addoffset, 0);
-  lscalefactor = IS_NOT_EQUAL(scalefactor, 1);
-
-  if ( laddoffset || lscalefactor )
-    {
-      size    = gridInqSize(gridID)*zaxisInqSize(zaxisID);
-      missval = vlistInqVarMissval(vlistID, varID);
-
-      if ( *nmiss > 0 )
-        {
-          for ( i = 0; i < (int) size; i++ )
-            {
-              if ( !DBL_IS_EQUAL(data[i], missval) )
-                {
-                  if ( lscalefactor ) data[i] *= scalefactor;
-                  if ( laddoffset )   data[i] += addoffset;
-                }
-            }
-        }
-      else
-        {
-          for ( i = 0; i < (int) size; i++ )
-            {
-              if ( lscalefactor ) data[i] *= scalefactor;
-              if ( laddoffset )   data[i] += addoffset;
-            }
-        }
-    }
+  *nmiss = cdfDoInputDataTransformation(size, data, haveMissVal, missval, scalefactor, addoffset);
 #endif
 }
 
