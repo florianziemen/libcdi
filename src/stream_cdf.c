@@ -4060,6 +4060,36 @@ int set_validrange(long gridsize, double *data, double missval, double validmin,
   return (nmiss);
 }
 
+static
+size_t min_size(size_t a, size_t b)
+{
+  return a < b ? a : b;
+}
+
+static
+void transpose2dArrayDP(size_t inWidth, size_t inHeight, double* data)
+{
+  const size_t cacheBlockSize = 32;    // Purely an optimization parameter. Current value of 32 means we are handling 8kB blocks,
+                                       // which should be a decent compromise on many architectures.
+  double (*temp)[inWidth] = malloc(inHeight*sizeof(*temp));
+  double (*out)[inHeight] = (double (*)[inHeight])data;
+  memcpy(temp, data, inHeight*sizeof(*temp));
+  for ( size_t yBlock = 0; yBlock < inHeight; yBlock++ )
+    {
+      for ( size_t xBlock = 0; xBlock < inWidth; xBlock++ )
+        {
+          for ( size_t y = yBlock, yEnd = min_size(yBlock + cacheBlockSize, inHeight); y < yEnd; y++ )
+            {
+              for ( size_t x = xBlock, xEnd = min_size(xBlock + cacheBlockSize, inWidth); x < xEnd; x++ )
+                {
+                  out[x][y] = temp[y][x];
+                }
+            }
+        }
+    }
+  free(temp);
+}
+
 
 void cdfReadVarSliceDP(stream_t *streamptr, int varID, int levelID, double *data, int *nmiss)
 {
@@ -4081,7 +4111,7 @@ void cdfReadVarSliceDP(stream_t *streamptr, int varID, int levelID, double *data
   int gridindex;
   int zaxisindex;
   int vlistID;
-  int i, j;
+  int i;
   int dimorder[3];
   int ixyz;
   int swapxy = FALSE;
@@ -4222,16 +4252,7 @@ void cdfReadVarSliceDP(stream_t *streamptr, int varID, int levelID, double *data
   else
     cdf_get_vara_double(fileID, ncvarid, start, count, data);
 
-  if ( swapxy )
-    {
-      double *tdata;
-      tdata = (double *) malloc(gridsize*sizeof(double));
-      memcpy(tdata, data, gridsize*sizeof(double));
-      for ( j = 0; j < ysize; ++j )
-        for ( i = 0; i < xsize; ++i )
-          data[j*xsize+i] = tdata[i*ysize+j];
-      free(tdata);
-    }
+  if ( swapxy ) transpose2dArrayDP(xsize, ysize, data);
 
   if ( vlistInqVarDatatype(vlistID, varID) == DATATYPE_UINT8 )
     {
