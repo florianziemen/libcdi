@@ -4189,50 +4189,39 @@ void cdfReadVarSliceDP(stream_t *streamptr, int varID, int levelID, double *data
   printf("dimorder: %d %d %d\n", dimorder[0], dimorder[1], dimorder[2]);
   */
 
-  if ( tsteptype != TSTEP_CONSTANT )
-    {
-      start[ndims] = tsID;
-      count[ndims] = 1;
-      ndims++;
-    }
+#define addDimension(startIndex, extent) do {   \
+      start[ndims] = startIndex; \
+      count[ndims] = extent; \
+      ndims++; \
+  } while(0)
 
-  if ( skipdim == 1 )
-    {
-      start[ndims] = 0;
-      count[ndims] = 1;
-      ndims++;
-    }
+  if ( tsteptype != TSTEP_CONSTANT ) addDimension(tsID, 1);
+  if ( skipdim == 1 ) addDimension(0, 1);
 
   for ( int id = 0; id < 3; ++id )
     {
       if ( dimorder[id] == 3 && zid != UNDEFID )
         {
-          start[ndims] = levelID;
-          count[ndims] = 1;
-          ndims++;
+          addDimension(levelID, 1);
         }
       else if ( dimorder[id] == 2 && yid != UNDEFID )
         {
-          start[ndims] = 0;
           cdf_inq_dimlen(fileID, yid, &size);
-          count[ndims] = size;
-          ndims++;
+          addDimension(0, size);
         }
       else if ( dimorder[id] == 1 && xid != UNDEFID )
         {
-          start[ndims] = 0;
           cdf_inq_dimlen(fileID, xid, &size);
-          count[ndims] = size;
-          ndims++;
+          addDimension(0, size);
         }
     }
 
-  if ( skipdim == 2 )
-    {
-      start[ndims] = 0;
-      count[ndims] = 1;
-      ndims++;
-    }
+  if ( skipdim == 2 ) addDimension(0, 1);
+
+  assert(ndims <= (int)(sizeof(start)/sizeof(*start)));
+  assert(ndims <= (int)(sizeof(count)/sizeof(*count)));
+
+#undef addDimension
 
   if ( CDI_Debug )
     for (idim = 0; idim < ndims; idim++)
