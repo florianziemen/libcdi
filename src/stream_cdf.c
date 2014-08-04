@@ -4085,11 +4085,6 @@ void cdfReadVarSliceDP(stream_t *streamptr, int varID, int levelID, double *data
   int dimorder[3];
   int ixyz;
   int swapxy = FALSE;
-  int lvalidrange;
-  double validrange[2];
-  double missval;
-  int laddoffset, lscalefactor;
-  double addoffset, scalefactor;
 
   if ( CDI_Debug )
     Message("streamID = %d  varID = %d  levelID = %d", streamptr->self, varID, levelID);
@@ -4250,54 +4245,19 @@ void cdfReadVarSliceDP(stream_t *streamptr, int varID, int levelID, double *data
     }
 
   *nmiss = 0;
-  if ( vlistInqVarMissvalUsed(vlistID, varID) == TRUE )
+  double missval = vlistInqVarMissval(vlistID, varID);
+  double validrange[2];
+  bool haveMissval = vlistInqVarMissvalUsed(vlistID, varID);
+  if ( haveMissval && vlistInqVarValidrange(vlistID, varID, validrange) )
     {
-      missval = vlistInqVarMissval(vlistID, varID);
-
-      lvalidrange = vlistInqVarValidrange(vlistID, varID, validrange);
-      // printf("readvarslice: validrange %d %g %g\n", lvalidrange, validrange[0], validrange[1]);
-      if ( lvalidrange )
-        {
-          *nmiss = set_validrange(gridsize, data, missval, validrange[0], validrange[1]);
-        }
-      else
-        {
-          double *data_ptr = data;
-          for ( i = 0; i < gridsize; i++, data_ptr++ )
-            if ( DBL_IS_EQUAL((*data_ptr), missval) ) (*nmiss)++;
-        }
+      *nmiss = set_validrange(gridsize, data, missval, validrange[0], validrange[1]);
     }
-
-  addoffset    = vlistInqVarAddoffset(vlistID, varID);
-  scalefactor  = vlistInqVarScalefactor(vlistID, varID);
-  laddoffset   = IS_NOT_EQUAL(addoffset, 0);
-  lscalefactor = IS_NOT_EQUAL(scalefactor, 1);
-
-  if ( laddoffset || lscalefactor )
+  else
     {
-      missval = vlistInqVarMissval(vlistID, varID);
-
-      if ( *nmiss > 0 )
-        {
-          for ( i = 0; i < gridsize; i++ )
-            {
-              if ( !DBL_IS_EQUAL(data[i], missval) )
-                {
-                  if ( lscalefactor ) data[i] *= scalefactor;
-                  if ( laddoffset )   data[i] += addoffset;
-                }
-            }
-        }
-      else
-        {
-          for ( i = 0; i < gridsize; i++ )
-            {
-              if ( lscalefactor ) data[i] *= scalefactor;
-              if ( laddoffset )   data[i] += addoffset;
-            }
-        }
+      double addoffset = vlistInqVarAddoffset(vlistID, varID);
+      double scalefactor = vlistInqVarScalefactor(vlistID, varID);
+      *nmiss = cdfDoInputDataTransformationDP(gridsize, data, haveMissval, missval, scalefactor, addoffset);
     }
-
 #endif
 }
 
