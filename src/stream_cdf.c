@@ -3505,7 +3505,7 @@ size_t cdfDoInputDataTransformationDP(size_t valueCount, double *data, bool have
 }
 
 static
-size_t cdfDoInputDataTransformationSP(size_t valueCount, double *data, bool haveMissVal, double missVal, double scaleFactor, double offset)
+size_t cdfDoInputDataTransformationSP(size_t valueCount, float *data, bool haveMissVal, double missVal, double scaleFactor, double offset)
  {
   const bool haveOffset   = IS_NOT_EQUAL(offset, 0);
   const bool haveScaleFactor = IS_NOT_EQUAL(scaleFactor, 1);
@@ -3579,6 +3579,43 @@ void cdfReadVarDP(stream_t *streamptr, int varID, double *data, int *nmiss)
   double missval = vlistInqVarMissval(vlistID, varID);
 
   *nmiss = cdfDoInputDataTransformationDP(size, data, haveMissVal, missval, scalefactor, addoffset);
+#endif
+}
+
+
+void cdfReadVarSP(stream_t *streamptr, int varID, float *data, int *nmiss)
+{
+#if  defined  (HAVE_LIBNETCDF)
+  int fileID;
+  int gridID;
+  int zaxisID;
+  int ncvarid;
+  size_t start[4];
+  size_t count[4];
+  int vlistID;
+  double addoffset, scalefactor;
+
+  if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamptr->self, varID);
+
+  vlistID = streamptr->vlistID;
+  fileID  = streamptr->fileID;
+
+  ncvarid = streamptr->vars[varID].ncvarid;
+
+  gridID    = vlistInqVarGrid(vlistID, varID);
+  zaxisID   = vlistInqVarZaxis(vlistID, varID);
+
+  cdfGetSlapDescription(streamptr, varID, &start, &count);
+
+  cdf_get_vara_float(fileID, ncvarid, start, count, data);
+
+  addoffset = vlistInqVarAddoffset(vlistID, varID);
+  scalefactor = vlistInqVarScalefactor(vlistID, varID);
+  size_t size = gridInqSize(gridID)*zaxisInqSize(zaxisID);
+  const bool haveMissVal = vlistInqVarMissvalUsed(vlistID, varID);
+  double missval = vlistInqVarMissval(vlistID, varID);
+
+  *nmiss = cdfDoInputDataTransformationSP(size, data, haveMissVal, missval, scalefactor, addoffset);
 #endif
 }
 
