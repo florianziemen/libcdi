@@ -1506,8 +1506,11 @@ void cdiStreamReadVar(int streamID, int varID, int memtype, void *data, int *nmi
     case FILETYPE_NC4:
     case FILETYPE_NC4C:
       {
-        if ( memtype == MEMTYPE_FLOAT ) Error("cdfReadVar not implemented for memtype float!");
-        cdfReadVarDP(streamptr, varID, data, nmiss);
+        if ( memtype == MEMTYPE_FLOAT )
+          cdfReadVarSP(streamptr, varID, data, nmiss);
+        else
+          cdfReadVarDP(streamptr, varID, data, nmiss);
+
 	break;
       }
 #endif

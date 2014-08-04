@@ -18,6 +18,8 @@ void   cdfReadRecord(stream_t *streamptr, double *data, int *nmiss);
 void   cdf_write_record(stream_t *streamptr, int memtype, const void *data, int nmiss);
 
 void   cdfReadVarDP(stream_t *streamptr, int varID, double *data, int *nmiss);
+void   cdfReadVarSP(stream_t *streamptr, int varID, float *data, int *nmiss);
+
 void   cdf_write_var(stream_t *streamptr, int varID, int memtype, const void *data, int nmiss);
 
 void   cdfReadVarSliceDP(stream_t *streamptr, int varID, int levelID, double *data, int *nmiss);
