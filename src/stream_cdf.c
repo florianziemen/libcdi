@@ -3466,12 +3466,14 @@ void cdfGetSlapDescription(stream_t *streamptr, int varID, size_t (*start)[4], s
 //Scans the data array for missVals, optionally applying first a scale factor and then an offset.
 //Returns the number of missVals encountered.
 static
-size_t cdfDoInputDataTransformation(size_t valueCount, double *data, bool haveMissVal, double missVal, double scaleFactor, double offset)
+size_t cdfDoInputDataTransformationDP(size_t valueCount, double *data, bool haveMissVal, double missVal, double scaleFactor, double offset)
  {
   const bool haveOffset   = IS_NOT_EQUAL(offset, 0);
   const bool haveScaleFactor = IS_NOT_EQUAL(scaleFactor, 1);
-
   size_t missValCount = 0;
+
+  //Quick return if there's nothing to do. Needed because the compiler might not realize that the loop is a noop in this case.
+  if ( !haveMissVal && !haveOffset && !haveScaleFactor ) return missValCount;
 
   if ( haveScaleFactor || haveOffset )
     {
@@ -3485,6 +3487,48 @@ size_t cdfDoInputDataTransformation(size_t valueCount, double *data, bool haveMi
             {
               if ( haveScaleFactor ) data[i] *= scaleFactor;
               if ( haveOffset ) data[i] += offset;
+            }
+        }
+    }
+  else
+    {
+      for ( size_t i = 0; i < valueCount; i++ )
+        {
+          if ( haveMissVal && DBL_IS_EQUAL(data[i], missVal) )
+            {
+              missValCount++;
+            }
+        }
+    }
+
+  return missValCount;
+}
+
+static
+size_t cdfDoInputDataTransformationSP(size_t valueCount, double *data, bool haveMissVal, double missVal, double scaleFactor, double offset)
+ {
+  const bool haveOffset   = IS_NOT_EQUAL(offset, 0);
+  const bool haveScaleFactor = IS_NOT_EQUAL(scaleFactor, 1);
+  size_t missValCount = 0;
+
+  //Quick return if there's nothing to do. Needed because the compiler might not realize that the loop is a noop in this case.
+  if ( !haveMissVal && !haveOffset && !haveScaleFactor ) return missValCount;
+
+  if ( haveScaleFactor || haveOffset )
+    {
+      double curVal;
+      for ( size_t i = 0; i < valueCount; i++ )
+        {
+          if ( haveMissVal && DBL_IS_EQUAL(data[i], missVal) )
+            {
+              missValCount++;
+            }
+          else
+            {
+              curVal = data[i];    //This is to avoid unnecessary precision losses during the transformation.
+              if ( haveScaleFactor ) curVal *= scaleFactor;
+              if ( haveOffset ) curVal += offset;
+              data[i] = curVal;
             }
         }
     }
@@ -3534,7 +3578,7 @@ void cdfReadVarDP(stream_t *streamptr, int varID, double *data, int *nmiss)
   const bool haveMissVal = vlistInqVarMissvalUsed(vlistID, varID);
   double missval = vlistInqVarMissval(vlistID, varID);
 
-  *nmiss = cdfDoInputDataTransformation(size, data, haveMissVal, missval, scalefactor, addoffset);
+  *nmiss = cdfDoInputDataTransformationDP(size, data, haveMissVal, missval, scalefactor, addoffset);
 #endif
 }
 
