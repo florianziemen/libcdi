@@ -21,6 +21,7 @@ module mo_cdi
       integer :: CDI_EUFSTRUCT = -23
       integer :: CDI_EUNC4 = -24
       integer :: CDI_ELIMIT = -99
+      integer :: FILETYPE_UNDEF = -1
       integer :: FILETYPE_GRB = 1
       integer :: FILETYPE_GRB2 = 2
       integer :: FILETYPE_NC = 3
@@ -3562,6 +3563,7 @@ module mo_cdi
       public :: CDI_EUFSTRUCT
       public :: CDI_EUNC4
       public :: CDI_ELIMIT
+      public :: FILETYPE_UNDEF
       public :: FILETYPE_GRB
       public :: FILETYPE_GRB2
       public :: FILETYPE_NC

@@ -3416,22 +3416,64 @@ void scale_add(long size, double *data, double addoffset, double scalefactor)
 }
 #endif
 
+#if defined (HAVE_LIBNETCDF)
+static
+void cdfGetSlapDescription(stream_t *streamptr, int varID, size_t (*start)[4], size_t (*count)[4])
+{
+  int vlistID = streamptr->vlistID;
+  int tsID = streamptr->curTsID;
+  int gridID    = vlistInqVarGrid(vlistID, varID);
+  int zaxisID   = vlistInqVarZaxis(vlistID, varID);
+  int tsteptype = vlistInqVarTsteptype(vlistID, varID);
+  int gridindex = vlistGridIndex(vlistID, gridID);
+
+  if ( CDI_Debug ) Message("tsID = %d", tsID);
+
+  int xid = UNDEFID, yid = UNDEFID;
+  if ( gridInqType(gridID) == GRID_TRAJECTORY )
+    {
+      cdfReadGridTraj(streamptr, gridID);
+    }
+  else
+    {
+      xid = streamptr->xdimID[gridindex];
+      yid = streamptr->ydimID[gridindex];
+    }
+  int zaxisindex = vlistZaxisIndex(vlistID, zaxisID);
+  int zid = streamptr->zaxisID[zaxisindex];
+
+  int ndims = 0;
+#define addDimension(startCoord, length) do \
+    { \
+      (*start)[ndims] = startCoord; \
+      (*count)[ndims] = length; \
+      ndims++; \
+    } while(0)
+  if ( tsteptype != TSTEP_CONSTANT ) addDimension(tsID, 1);
+  if ( zid != UNDEFID ) addDimension(0, zaxisInqSize(zaxisID));
+  if ( yid != UNDEFID ) addDimension(0, gridInqYsize(gridID));
+  if ( xid != UNDEFID ) addDimension(0, gridInqXsize(gridID));
+#undef addDimension
+
+  assert(ndims <= (int)(sizeof(*start)/sizeof(**start)));
+  assert(ndims <= (int)(sizeof(*count)/sizeof(**count)));
+
+  if ( CDI_Debug )
+    for (int idim = 0; idim < ndims; idim++)
+      Message("dim = %d  start = %d  count = %d", idim, start[idim], count[idim]);
+}
+#endif
+
 void cdfReadVarDP(stream_t *streamptr, int varID, double *data, int *nmiss)
 {
 #if  defined  (HAVE_LIBNETCDF)
   int fileID;
   int gridID;
   int zaxisID;
-  int xid = UNDEFID, yid = UNDEFID, zid = UNDEFID;
   int ncvarid;
-  int tsID;
   size_t size;
-  size_t start[5];
-  size_t count[5];
-  int ndims = 0;
-  int idim;
-  int tsteptype;
-  int gridindex, zaxisindex;
+  size_t start[4];
+  size_t count[4];
   int vlistID;
   int i;
   double missval;
@@ -3443,58 +3485,12 @@ void cdfReadVarDP(stream_t *streamptr, int varID, double *data, int *nmiss)
   vlistID = streamptr->vlistID;
   fileID  = streamptr->fileID;
 
-  tsID = streamptr->curTsID;
-
-  if ( CDI_Debug ) Message("tsID = %d", tsID);
-
   ncvarid = streamptr->vars[varID].ncvarid;
 
   gridID    = vlistInqVarGrid(vlistID, varID);
   zaxisID   = vlistInqVarZaxis(vlistID, varID);
-  tsteptype = vlistInqVarTsteptype(vlistID, varID);
 
-  gridindex = vlistGridIndex(vlistID, gridID);
-  if ( gridInqType(gridID) == GRID_TRAJECTORY )
-    {
-      cdfReadGridTraj(streamptr, gridID);
-    }
-  else
-    {
-      xid = streamptr->xdimID[gridindex];
-      yid = streamptr->ydimID[gridindex];
-    }
-
-  zaxisindex = vlistZaxisIndex(vlistID, zaxisID);
-  zid = streamptr->zaxisID[zaxisindex];
-
-  if ( tsteptype != TSTEP_CONSTANT )
-    {
-      start[ndims] = tsID;
-      count[ndims] = 1;
-      ndims++;
-    }
-  if ( zid != UNDEFID )
-    {
-      start[ndims] = 0;
-      count[ndims] = zaxisInqSize(zaxisID);
-      ndims++;
-    }
-  if ( yid != UNDEFID )
-    {
-      start[ndims] = 0;
-      count[ndims] = gridInqYsize(gridID);
-      ndims++;
-    }
-  if ( xid != UNDEFID )
-    {
-      start[ndims] = 0;
-      count[ndims] = gridInqXsize(gridID);
-      ndims++;
-    }
-
-  if ( CDI_Debug )
-    for (idim = 0; idim < ndims; idim++)
-      Message("dim = %d  start = %d  count = %d", idim, start[idim], count[idim]);
+  cdfGetSlapDescription(streamptr, varID, &start, &count);
 
   cdf_get_vara_double(fileID, ncvarid, start, count, data);
 

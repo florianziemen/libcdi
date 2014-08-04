@@ -2,6 +2,8 @@
 #  include "config.h"
 #endif
 
+#include <assert.h>
+
 #include "dmemory.h"
 #include "cdi.h"
 #include "cdi_int.h"
@@ -78,6 +80,8 @@ void instituteDefaultEntries ( void )
   resH[n++]  =           institutDef( 97,   0, "ESA",       "European Space Agency");
   resH[n++]  =           institutDef( 99,   0, "KNMI",      "Royal Netherlands Meteorological Institute");
   /*     (void) institutDef(  0,   0, "IPSL", "IPSL (Institut Pierre Simon Laplace, Paris, France)"); */
+
+  assert(n <= sizeof(resH)/sizeof(*resH));
 
   for ( i = 0; i < n ; i++ )
     reshSetStatus(resH[i], &instituteOps, RESH_IN_USE);
