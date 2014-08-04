@@ -858,7 +858,7 @@ int streamOpenRead(const char *filename)
 {
   cdiInitialize();
 
-  int byteorder;
+  int byteorder = 0;
   int filetype = getFiletype(filename, &byteorder);
 
   if ( filetype < 0 ) return (filetype);
@@ -879,7 +879,7 @@ int streamOpenAppend(const char *filename)
 {
   cdiInitialize();
 
-  int byteorder;
+  int byteorder = 0;
   int filetype = getFiletype(filename, &byteorder);
 
   if ( filetype < 0 ) return (filetype);
@@ -2082,8 +2082,8 @@ int streamNtsteps(int streamID)
   return (streamptr->ntsteps);
 }
 
-
-off_t   streamNvals(int streamID)
+// This function is used in CDO!
+off_t streamNvals(int streamID)
 {
   stream_t *streamptr = stream_to_pointer(streamID);
 

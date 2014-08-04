@@ -4218,10 +4218,11 @@ void cdfReadVarSliceDP(stream_t *streamptr, int varID, int levelID, double *data
 
   if ( vlistInqVarDatatype(vlistID, varID) == DATATYPE_FLT32 )
     {
-      float *data_fp = (float *) data;
+      float *data_fp = malloc(gridsize*sizeof(*data_fp));
       cdf_get_vara_float(fileID, ncvarid, start, count, data_fp);
-      for ( i = gridsize-1; i >=0; i-- )
+      for ( i = 0; i < gridsize; i++ )
         data[i] = (double) data_fp[i];
+      free(data_fp);
     }
   else
     cdf_get_vara_double(fileID, ncvarid, start, count, data);
