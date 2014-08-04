@@ -81,7 +81,6 @@ int getByteorder(int byteswap)
   return (byteorder);
 }
 
-
 static
 int getFiletype(const char *filename, int *byteorder)
 {
@@ -174,28 +173,6 @@ int getFiletype(const char *filename, int *byteorder)
   *byteorder = getByteorder(swap);
 
   return (filetype);
-}
-
-
-static int _readline_(FILE *fp, char *line, int len)
-{
-  int ichar, ipos = 0;
-
-  while ( (ichar = fgetc(fp)) != EOF )
-    {
-      if ( ichar == '\n' ) break;
-      line[ipos++] = (char)ichar;
-      if ( ipos >= len )
-        {
-          fprintf(stderr, "readline Warning: end of line not found (maxlen = %d)!\n", len);
-          break;
-        }
-    }
-  line[ipos] = 0;
-
-  if ( feof(fp) && ipos == 0 ) return (0);
-
-  return (1);
 }
 
 /*
