@@ -660,11 +660,10 @@ void grb_write_var(stream_t *streamptr, int varID, int memtype, const void *data
 }
 
 
-int grbCopyRecord(stream_t * streamptr2, stream_t * streamptr1)
+void grbCopyRecord(stream_t * streamptr2, stream_t * streamptr1)
 {
   int fileID1, fileID2;
   int tsID, recID, vrecID;
-  long recsize;
   size_t gribbuffersize;
   off_t recpos;
   size_t nwrite;
@@ -683,16 +682,17 @@ int grbCopyRecord(stream_t * streamptr2, stream_t * streamptr1)
   vrecID  = streamptr1->tsteps[tsID].curRecID;
   recID   = streamptr1->tsteps[tsID].recIDs[vrecID];
   recpos  = streamptr1->tsteps[tsID].records[recID].position;
-  recsize = streamptr1->tsteps[tsID].records[recID].size;
+  size_t recsize = streamptr1->tsteps[tsID].records[recID].size;
 
   fileSetPos(fileID1, recpos, SEEK_SET);
 
   /* round up recsize to next multiple of 8 */
-  gribbuffersize = (size_t)((recsize + 7) & ~7);
+  gribbuffersize = ((recsize + 7) & ~7);
 
-  gribbuffer = (unsigned char *) malloc(gribbuffersize);
+  gribbuffer = xmalloc(gribbuffersize);
 
-  fileRead(fileID1, gribbuffer, recsize);
+  if (fileRead(fileID1, gribbuffer, recsize) != recsize)
+    Error("Could not read GRIB record for copying!");
 
   nbytes = recsize;
 
@@ -705,11 +705,13 @@ int grbCopyRecord(stream_t * streamptr2, stream_t * streamptr1)
   while ( nbytes & 7 ) gribbuffer[nbytes++] = 0;
 
   nwrite = fileWrite(fileID2, gribbuffer, nbytes);
-  if ( nwrite != nbytes ) perror(__func__);
+  if ( nwrite != nbytes )
+    {
+      perror(__func__);
+      Error("Could not write record for copying!");
+    }
 
   free(gribbuffer);
-
-  return ((int)nwrite);
 }
 
 

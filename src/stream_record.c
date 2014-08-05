@@ -443,11 +443,8 @@ void streamCopyRecord(int streamID2, int streamID1)
 #if  defined  (HAVE_LIBGRIB)
     case FILETYPE_GRB:
     case FILETYPE_GRB2:
-      {
-        /* FIXME: return value not inspected */
-	status = grbCopyRecord(streamptr2, streamptr1);
-	break;
-      }
+      grbCopyRecord(streamptr2, streamptr1);
+      break;
 #endif
 #if  defined  (HAVE_LIBSERVICE)
     case FILETYPE_SRV:
