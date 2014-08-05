@@ -972,7 +972,8 @@ cdiPioStreamCDFOpenWrap(const char *filename, const char *filemode,
     case FILETYPE_NC4:
     case FILETYPE_NC4C:
       {
-        int rank, fileID;
+        /* Only needs initialization to shut up gcc */
+        int rank = -1, fileID;
         int ioMode = commInqIOMode();
         if (ioMode == PIO_NONE
             || commInqRankColl() == (rank = cdiPioNextOpenRank()))
