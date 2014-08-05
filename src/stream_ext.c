@@ -260,8 +260,8 @@ void extAddRecord(stream_t *streamptr, int param, int level, int xysize,
   varAddRecord(recID, param, gridID, leveltype, 0, level, 0, 0, 0,
 	       extInqDatatype(prec, number), &varID, &levelID, UNDEFID, 0, 0, NULL, NULL, NULL, NULL);
 
-  (*record).varID   = varID;
-  (*record).levelID = levelID;
+  (*record).varID   = (short)varID;
+  (*record).levelID = (short)levelID;
 
   streamptr->tsteps[tsID].nallrecs++;
   streamptr->nrecs++;
