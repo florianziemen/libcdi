@@ -687,7 +687,8 @@ int grbCopyRecord(stream_t * streamptr2, stream_t * streamptr1)
 
   fileSetPos(fileID1, recpos, SEEK_SET);
 
-  gribbuffersize = recsize == (recsize>>3)<<3 ? recsize : (1+(recsize>>3))<<3;
+  /* round up recsize to next multiple of 8 */
+  gribbuffersize = (size_t)((recsize + 7) & ~7);
 
   gribbuffer = (unsigned char *) malloc(gribbuffersize);
 
