@@ -2206,7 +2206,6 @@ static int streamCompareP(void * streamptr1, void * streamptr2)
     differ = -1,
     equal  = 0,
   };
-  int len;
 
   xassert ( s1 );
   xassert ( s2 );
@@ -2220,8 +2219,7 @@ static int streamCompareP(void * streamptr1, void * streamptr2)
 
   if ( s1->filename )
     {
-      len = strlen ( s1->filename ) + 1;
-      if ( memcmp ( s1->filename, s2->filename, len ))
+      if (strcmp(s1->filename, s2->filename))
 	return differ;
     }
   else if ( s2->filename )
