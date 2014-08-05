@@ -3,6 +3,7 @@
 #endif
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "dmemory.h"
@@ -142,35 +143,29 @@ void srvReadRecord(stream_t *streamptr, double *data, int *nmiss)
 }
 
 
-int srvCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
+void srvCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
 {
-  int fileID1, fileID2;
-  int tsID, recID, vrecID;
-  long recsize;
-  off_t recpos;
-  int status = 0;
-  char *buffer;
+  int fileID1 = streamptr1->fileID;
+  int fileID2 = streamptr2->fileID;
 
-  fileID1 = streamptr1->fileID;
-  fileID2 = streamptr2->fileID;
+  int tsID    = streamptr1->curTsID;
+  int vrecID  = streamptr1->tsteps[tsID].curRecID;
+  int recID   = streamptr1->tsteps[tsID].recIDs[vrecID];
+  off_t recpos  = streamptr1->tsteps[tsID].records[recID].position;
+  size_t recsize = streamptr1->tsteps[tsID].records[recID].size;
 
-  tsID    = streamptr1->curTsID;
-  vrecID  = streamptr1->tsteps[tsID].curRecID;
-  recID   = streamptr1->tsteps[tsID].recIDs[vrecID];
-  recpos  = streamptr1->tsteps[tsID].records[recID].position;
-  recsize = streamptr1->tsteps[tsID].records[recID].size;
+  if (fileSetPos(fileID1, recpos, SEEK_SET) != 0)
+    Error("Cannot seek input file for SRV record copy!");
 
-  fileSetPos(fileID1, recpos, SEEK_SET);
+  char *buffer = xmalloc(recsize);
 
-  buffer = (char *) malloc(recsize);
+  if (fileRead(fileID1, buffer, recsize) != recsize)
+    Error("Failed to read record from SRV file for copying!");
 
-  fileRead(fileID1, buffer, recsize);
-
-  fileWrite(fileID2, buffer, recsize);
+  if (fileWrite(fileID2, buffer, recsize) != recsize)
+    Error("Failed to write record to SRV file when copying!");
 
   free(buffer);
-
-  return (status);
 }
 
 
