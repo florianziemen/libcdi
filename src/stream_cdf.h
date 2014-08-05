@@ -12,7 +12,7 @@ void   cdfInqHistoryString(stream_t *streamptr, char *history);
 void   cdfEndDef(stream_t * streamptr);
 void   cdfDefRecord(stream_t * streamptr);
 
-int    cdfCopyRecord(stream_t *streamptr2, stream_t *streamptr1);
+void   cdfCopyRecord(stream_t *streamptr2, stream_t *streamptr1);
 
 void   cdfReadRecord(stream_t *streamptr, double *data, int *nmiss);
 void   cdf_write_record(stream_t *streamptr, int memtype, const void *data, int nmiss);

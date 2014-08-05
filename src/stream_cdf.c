@@ -606,39 +606,30 @@ void defineAttributes(int vlistID, int varID, int fileID, int ncvarID)
 }
 #endif
 
-int cdfCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
+void cdfCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
 {
-  double *data;
-  int datasize;
-  int tsID1, recID1;
-  int ivarID, gridID;
-  int nmiss;
-  int ierr = 0;
   int memtype = MEMTYPE_DOUBLE;
-  int vlistID1;
+  int vlistID1 = streamptr1->vlistID;
 
-  vlistID1 = streamptr1->vlistID;
+  int tsID1 = streamptr1->curTsID;
 
-  tsID1 = streamptr1->curTsID;
+  int recID1 = streamptr1->tsteps[tsID1].curRecID;
 
-  recID1 = streamptr1->tsteps[tsID1].curRecID;
+  int ivarID = streamptr1->tsteps[tsID1].records[recID1].varID;
 
-  ivarID = streamptr1->tsteps[tsID1].records[recID1].varID;
+  int gridID = vlistInqVarGrid(vlistID1, ivarID);
 
-  gridID = vlistInqVarGrid(vlistID1, ivarID);
-
-  datasize = gridInqSize(gridID);
+  int datasize = gridInqSize(gridID);
   /* bug fix for constant netCDF fields */
   if ( datasize < 1048576 ) datasize = 1048576;
 
-  data = (double *) malloc(datasize*sizeof(double));
+  double *data = xmalloc(datasize*sizeof(double));
 
+  int nmiss;
   cdfReadRecord(streamptr1, data, &nmiss);
   cdf_write_record(streamptr2, memtype, data, nmiss);
 
   free(data);
-
-  return (ierr);
 }
 
 /* not used

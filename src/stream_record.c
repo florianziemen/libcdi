@@ -398,7 +398,6 @@ void streamWriteRecordF(int streamID, const float *data, int nmiss)
 
 void streamCopyRecord(int streamID2, int streamID1)
 {
-  int status = 0;
   int filetype = FILETYPE_UNDEF, filetype1, filetype2;
   stream_t *streamptr1;
   stream_t *streamptr2;
@@ -466,11 +465,8 @@ void streamCopyRecord(int streamID2, int streamID1)
     case FILETYPE_NC2:
     case FILETYPE_NC4:
     case FILETYPE_NC4C:
-      {
-        /* FIXME: return value not inspected */
-	status = cdfCopyRecord(streamptr2, streamptr1);
-	break;
-      }
+      cdfCopyRecord(streamptr2, streamptr1);
+      break;
 #endif
     default:
       {
