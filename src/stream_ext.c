@@ -223,7 +223,7 @@ void extWriteRecord(stream_t *streamptr, const double *data)
 
 static
 void extAddRecord(stream_t *streamptr, int param, int level, int xysize,
-		  long recsize, off_t position, int prec, int number)
+		  size_t recsize, off_t position, int prec, int number)
 {
   int leveltype;
   int gridID = UNDEFID;
@@ -379,7 +379,7 @@ void extScanTimestep1(stream_t *streamptr)
       if ( CDI_Debug )
 	Message("%4d%8d%4d%8d%8d%6d", nrecs, (int)recpos, rcode, rlevel, vdate, vtime);
 
-      extAddRecord(streamptr, param, rlevel, rxysize, recsize, recpos, extp->prec, extp->number);
+      extAddRecord(streamptr, param, rlevel, rxysize, (size_t)recsize, recpos, extp->prec, extp->number);
     }
 
   streamptr->rtsteps = 1;
