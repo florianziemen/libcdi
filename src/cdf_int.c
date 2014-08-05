@@ -56,7 +56,8 @@ void cdf_create(const char *path, int cmode, int *ncidp)
   chunksizehint = 16777216; /* 16 MB */
 #endif
 
-  if ( cdiNcChunksizehint != CDI_UNDEFID ) chunksizehint = cdiNcChunksizehint;
+  if ( cdiNcChunksizehint != CDI_UNDEFID )
+    chunksizehint = (size_t)cdiNcChunksizehint;
 
   cdi_nc__create_funcp my_nc__create =
     (cdi_nc__create_funcp)namespaceSwitchGet(NSSWITCH_NC__CREATE).func;
