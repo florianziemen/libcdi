@@ -11,6 +11,7 @@
 #include "file.h"
 #include "cdi.h"
 #include "cdi_int.h"
+#include "stream_ext.h"
 #include "varscan.h"
 #include "datetime.h"
 #include "extra.h"
@@ -216,17 +217,13 @@ void extDefRecord(stream_t *streamptr)
 }
 
 
-int extWriteRecord(stream_t *streamptr, const double *data)
+void extWriteRecord(stream_t *streamptr, const double *data)
 {
-  int status = 0;
   int fileID = streamptr->fileID;
   extrec_t *extp = (extrec_t*) streamptr->record->exsep;
 
   extDefDataDP(extp, data);
-
   extWrite(fileID, extp);
-
-  return (status);
 }
 
 static

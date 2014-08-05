@@ -360,11 +360,9 @@ stream_write_record(int streamID, int memtype, const void *data, int nmiss)
 #endif
 #if  defined  (HAVE_LIBEXTRA)
     case FILETYPE_EXT:
-      {
-        if ( memtype == MEMTYPE_FLOAT ) Error("extWriteRecord not implemented for memtype float!");
-        status = extWriteRecord(streamptr, (const double*) data);
-	break;
-      }
+      if ( memtype == MEMTYPE_FLOAT ) Error("extWriteRecord not implemented for memtype float!");
+      extWriteRecord(streamptr, (const double *)data);
+      break;
 #endif
 #if  defined  (HAVE_LIBIEG)
     case FILETYPE_IEG:
