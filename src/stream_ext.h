@@ -10,7 +10,7 @@ int    extInqTimestep(stream_t *streamptr, int tsID);
 
 int    extInqRecord(stream_t *streamptr, int *varID, int *levelID);
 void   extDefRecord(stream_t *streamptr);
-int    extCopyRecord(stream_t *streamptr2, stream_t *streamptr1);
+void   extCopyRecord(stream_t *streamptr2, stream_t *streamptr1);
 void   extReadRecord(stream_t *streamptr, double *data, int *nmiss);
 void   extWriteRecord(stream_t *streamptr, const double *data);
 

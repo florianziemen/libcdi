@@ -453,11 +453,8 @@ void streamCopyRecord(int streamID2, int streamID1)
 #endif
 #if  defined  (HAVE_LIBEXTRA)
     case FILETYPE_EXT:
-      {
-        /* FIXME: return value not inspected */
-	status = extCopyRecord(streamptr2, streamptr1);
-	break;
-      }
+      extCopyRecord(streamptr2, streamptr1);
+      break;
 #endif
 #if  defined  (HAVE_LIBIEG)
     case FILETYPE_IEG:
