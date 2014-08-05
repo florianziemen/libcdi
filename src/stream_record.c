@@ -349,10 +349,8 @@ void stream_write_record(int streamID, int memtype, const void *data, int nmiss)
 #if  defined  (HAVE_LIBGRIB)
     case FILETYPE_GRB:
     case FILETYPE_GRB2:
-      {
-        status = grb_write_record(streamptr, memtype, data, nmiss);
-	break;
-      }
+      grb_write_record(streamptr, memtype, data, nmiss);
+      break;
 #endif
 #if  defined  (HAVE_LIBSERVICE)
     case FILETYPE_SRV:

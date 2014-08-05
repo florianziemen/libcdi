@@ -9,6 +9,7 @@
 #include "cdi.h"
 #include "cdi_int.h"
 #include "stream_cgribex.h"
+#include "stream_grb.h"
 #include "stream_gribapi.h"
 #include "file.h"
 #include "cgribex.h"  /* gribZip gribGetZip gribGinfo */
@@ -545,7 +546,7 @@ size_t grbSzip(int filetype, unsigned char *gribbuffer, size_t gribbuffersize)
 }
 
 
-int grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, const void *data, int nmiss)
+void grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, const void *data, int nmiss)
 {
   size_t nwrite;
   int fileID;
@@ -628,11 +629,13 @@ int grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype
     nwrite = myFileWrite(fileID, gribbuffer, nbytes, tsID);
   }
 
-  if ( nwrite != nbytes ) perror(__func__);
+  if ( nwrite != nbytes )
+    {
+      perror(__func__);
+      Error("Failed to write GRIB slice!");
+    }
 
   if ( gribbuffer ) free(gribbuffer);
-
-  return ((int)nwrite);
 }
 
 
@@ -709,17 +712,14 @@ int grbCopyRecord(stream_t * streamptr2, stream_t * streamptr1)
 }
 
 
-int grb_write_record(stream_t * streamptr, int memtype, const void *data, int nmiss)
+void grb_write_record(stream_t * streamptr, int memtype, const void *data, int nmiss)
 {
-  int status = 0;
   int varID, levelID;
 
   varID   = streamptr->record->varID;
   levelID = streamptr->record->levelID;
 
-  status = grb_write_var_slice(streamptr, varID, levelID, memtype, data, nmiss);
-
-  return (status);
+  grb_write_var_slice(streamptr, varID, levelID, memtype, data, nmiss);
 }
 
 
