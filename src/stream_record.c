@@ -458,11 +458,8 @@ void streamCopyRecord(int streamID2, int streamID1)
 #endif
 #if  defined  (HAVE_LIBIEG)
     case FILETYPE_IEG:
-      {
-        /* FIXME: return value not inspected */
-	status = iegCopyRecord(streamptr2, streamptr1);
-	break;
-      }
+      iegCopyRecord(streamptr2, streamptr1);
+      break;
 #endif
 #if  defined  (HAVE_LIBNETCDF)
     case FILETYPE_NC:
