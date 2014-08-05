@@ -332,17 +332,13 @@ void streamReadRecord(int streamID, double *data, int *nmiss)
 static void
 stream_write_record(int streamID, int memtype, const void *data, int nmiss)
 {
-  int status = 0;
-  int filetype;
-  stream_t *streamptr;
-
   check_parg(data);
 
-  streamptr = stream_to_pointer(streamID);
+  stream_t *streamptr = stream_to_pointer(streamID);
 
   stream_check_ptr(__func__, streamptr);
 
-  filetype = streamptr->filetype;
+  int filetype = streamptr->filetype;
 
   switch (filetype)
     {
@@ -366,11 +362,9 @@ stream_write_record(int streamID, int memtype, const void *data, int nmiss)
 #endif
 #if  defined  (HAVE_LIBIEG)
     case FILETYPE_IEG:
-      {
-        if ( memtype == MEMTYPE_FLOAT ) Error("iegWriteRecord not implemented for memtype float!");
-        status = iegWriteRecord(streamptr, (const double*) data);
-	break;
-      }
+      if ( memtype == MEMTYPE_FLOAT ) Error("iegWriteRecord not implemented for memtype float!");
+      iegWriteRecord(streamptr, (const double *)data);
+      break;
 #endif
 #if  defined  (HAVE_LIBNETCDF)
     case FILETYPE_NC:

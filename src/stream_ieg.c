@@ -600,10 +600,9 @@ void iegDefRecord(stream_t *streamptr)
 }
 
 
-int iegWriteRecord(stream_t *streamptr, const double *data)
+void iegWriteRecord(stream_t *streamptr, const double *data)
 {
   int fileID;
-  int status = 0;
   int i, gridsize, gridID;
   double refval;
   iegrec_t *iegp = (iegrec_t*) streamptr->record->exsep;
@@ -622,8 +621,6 @@ int iegWriteRecord(stream_t *streamptr, const double *data)
   iegDefDataDP(iegp, data);
 
   iegWrite(fileID, iegp);
-
-  return (status);
 }
 
 static
