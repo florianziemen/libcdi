@@ -329,8 +329,8 @@ void streamReadRecord(int streamID, double *data, int *nmiss)
     }
 }
 
-
-void stream_write_record(int streamID, int memtype, const void *data, int nmiss)
+static void
+stream_write_record(int streamID, int memtype, const void *data, int nmiss)
 {
   int status = 0;
   int filetype;
@@ -354,11 +354,9 @@ void stream_write_record(int streamID, int memtype, const void *data, int nmiss)
 #endif
 #if  defined  (HAVE_LIBSERVICE)
     case FILETYPE_SRV:
-      {
-        if ( memtype == MEMTYPE_FLOAT ) Error("srvWriteRecord not implemented for memtype float!");
-        status = srvWriteRecord(streamptr, (const double*) data);
-	break;
-      }
+      if ( memtype == MEMTYPE_FLOAT ) Error("srvWriteRecord not implemented for memtype float!");
+      srvWriteRecord(streamptr, (const double *)data);
+      break;
 #endif
 #if  defined  (HAVE_LIBEXTRA)
     case FILETYPE_EXT:

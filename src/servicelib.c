@@ -522,7 +522,7 @@ int srvRead(int fileID, srvrec_t *srvp)
 }
 
 
-int srvWrite(int fileID, srvrec_t *srvp)
+void srvWrite(int fileID, srvrec_t *srvp)
 {
   size_t datasize;
   size_t blocklen;
@@ -600,8 +600,6 @@ int srvWrite(int fileID, srvrec_t *srvp)
     }
 
   binWriteF77Block(fileID, byteswap, blocklen);
-
-  return (0);
 }
 /*
  * Local Variables:

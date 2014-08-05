@@ -12,7 +12,7 @@ int    srvInqRecord(stream_t *streamptr, int *varID, int *levelID);
 void   srvDefRecord(stream_t *streamptr);
 int    srvCopyRecord(stream_t *streamptr2, stream_t *streamptr1);
 void   srvReadRecord(stream_t *streamptr, double *data, int *nmiss);
-int    srvWriteRecord(stream_t *streamptr, const double *data);
+void   srvWriteRecord(stream_t *streamptr, const double *data);
 
 void   srvReadVarDP (stream_t *streamptr, int varID,       double *data, int *nmiss);
 void   srvWriteVarDP(stream_t *streamptr, int varID, const double *data);

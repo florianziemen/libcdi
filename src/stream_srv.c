@@ -14,6 +14,7 @@
 #include "varscan.h"
 #include "datetime.h"
 #include "service.h"
+#include "stream_srv.h"
 #include "vlist.h"
 
 
@@ -214,7 +215,7 @@ void srvDefRecord(stream_t *streamptr)
 }
 
 
-int srvWriteRecord(stream_t *streamptr, const double *data)
+void srvWriteRecord(stream_t *streamptr, const double *data)
 {
   int status = 0;
   int fileID = streamptr->fileID;
@@ -223,8 +224,6 @@ int srvWriteRecord(stream_t *streamptr, const double *data)
   srvDefDataDP(srvp, data);
 
   srvWrite(fileID, srvp);
-
-  return (status);
 }
 
 static
