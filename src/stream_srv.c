@@ -232,7 +232,7 @@ void srv_add_record(stream_t *streamptr, int param, int level, int xsize, int ys
                     long recsize, off_t position, int prec)
 {
   int leveltype;
-  int gridID = UNDEFID;
+  int gridID = CDI_UNDEFID;
   int levelID = 0;
   int tsID, recID, varID;
   int datatype;
@@ -762,7 +762,7 @@ int srvInqTimestep(stream_t *streamptr, int tsID)
   while ( ( tsID + 1 ) > streamptr->rtsteps && ntsteps == UNDEFID )
     ntsteps = srvScanTimestep(streamptr);
 
-  if ( tsID >= streamptr->ntsteps && streamptr->ntsteps != CDI_UNDEFID )
+  if ( tsID >= streamptr->ntsteps && streamptr->ntsteps != UNDEFID )
     {
       nrecs = 0;
     }
