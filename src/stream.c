@@ -2202,8 +2202,10 @@ static int streamCompareP(void * streamptr1, void * streamptr2)
 {
   stream_t * s1 = ( stream_t * ) streamptr1;
   stream_t * s2 = ( stream_t * ) streamptr2;
-  int differ = -1;
-  int equal  = 0;
+  enum {
+    differ = -1,
+    equal  = 0,
+  };
   int len;
 
   xassert ( s1 );
