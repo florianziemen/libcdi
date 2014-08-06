@@ -119,6 +119,7 @@ c="dmemory.c         \
    stream_history.c  \
    stream_cgribex.c  \
    stream_gribapi.c  \
+   stream_fcommon.c  \
    stream_grb.c      \
    stream_srv.c      \
    stream_ext.c      \
@@ -144,7 +145,7 @@ h="cdi_limits.h resource_handle.h taxis.h dtypes.h file.h service.h extra.h \
    tablepar.h table.h gaussgrid.h grid.h zaxis.h varscan.h binary.h swap.h \
    service.h stream_srv.h stream_ext.h stream_ieg.h cdf_int.h  \
    cdf.h vlist.h vlist_var.h vlist_att.h model.h institution.h \
-   resource_unpack.h serialize.h"
+   resource_unpack.h serialize.h stream_fcommon.h"
 
 #cat $h >> ${PROG}
 #cat $c | grep -v '#include' | grep -v '#  include' >> ${PROG}

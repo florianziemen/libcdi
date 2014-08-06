@@ -17,6 +17,7 @@
 #include "varscan.h"
 #include "datetime.h"
 #include "ieg.h"
+#include "stream_fcommon.h"
 #include "stream_ieg.h"
 #include "vlist.h"
 
@@ -527,27 +528,7 @@ void iegDefLevel(int *pdb, int *gdb, double *vct, int zaxisID, int levelID)
 
 void iegCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
 {
-  int fileID1 = streamptr1->fileID;
-  int fileID2 = streamptr2->fileID;
-
-  int tsID    = streamptr1->curTsID;
-  int vrecID  = streamptr1->tsteps[tsID].curRecID;
-  int recID   = streamptr1->tsteps[tsID].recIDs[vrecID];
-  off_t recpos  = streamptr1->tsteps[tsID].records[recID].position;
-  size_t recsize = streamptr1->tsteps[tsID].records[recID].size;
-
-  if (fileSetPos(fileID1, recpos, SEEK_SET) != 0)
-    Error("Cannot seek input file for IEG record copy!");
-
-  char *buffer = xmalloc(recsize);
-
-  if (fileRead(fileID1, buffer, recsize) != recsize)
-    Error("Failed to read record from IEG file for copying!");
-
-  if (fileWrite(fileID2, buffer, recsize) != recsize)
-    Error("Failed to write record to IEG file when copying!");
-
-  free(buffer);
+  streamFCopyRecord(streamptr2, streamptr1, "IEG");
 }
 
 

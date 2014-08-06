@@ -279,6 +279,8 @@ src/stream_cgribex.c -text
 src/stream_cgribex.h -text
 src/stream_ext.c -text
 src/stream_ext.h -text
+src/stream_fcommon.c -text
+src/stream_fcommon.h -text
 src/stream_grb.c -text
 src/stream_grb.h -text
 src/stream_gribapi.c -text
