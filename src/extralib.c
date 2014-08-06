@@ -147,11 +147,11 @@ void extDelete(void *ext)
 
 int extCheckFiletype(int fileID, int *swap)
 {
-  size_t blocklen = 0;
+  size_t blocklen = 0, fact = 0;
   size_t sblocklen = 0;
   size_t data =  0;
   size_t dimxy = 0;
-  int fact = 0, found = 0;
+  int found = 0;
   unsigned char buffer[40], *pbuf;
 
   if ( fileRead(fileID, buffer, 4) != 4 ) return (found);
