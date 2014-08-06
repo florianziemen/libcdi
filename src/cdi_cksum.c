@@ -1,4 +1,9 @@
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
+
 #include <inttypes.h>
+#include <sys/types.h>
 #include <stdlib.h>
 
 #include "cdi_cksum.h"
