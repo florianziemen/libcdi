@@ -315,8 +315,8 @@ int iegDefData(iegrec_t *iegp, int prec, const void *data)
 
   iegp->dprec = dprec;
 
-  datasize = IEG_G_NumLon(iegp->igdb)*IEG_G_NumLat(iegp->igdb);
-  blocklen = datasize * dprec;
+  datasize = (size_t)IEG_G_NumLon(iegp->igdb) * (size_t)IEG_G_NumLat(iegp->igdb);
+  blocklen = datasize * (size_t)dprec;
 
   iegp->datasize = datasize;
 
@@ -573,8 +573,8 @@ int iegWrite(int fileID, iegrec_t *iegp)
 
   binWriteF77Block(fileID, byteswap, blocklen);
 
-  datasize = iegp->igdb[4]*iegp->igdb[5];
-  blocklen = datasize * dprec;
+  datasize = (size_t)iegp->igdb[4] * (size_t)iegp->igdb[5];
+  blocklen = datasize * (size_t)dprec;
 
   binWriteF77Block(fileID, byteswap, blocklen);
 
