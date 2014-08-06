@@ -150,14 +150,15 @@ module mo_cdi
       integer :: TAXIS_FORECAST = 3
       integer :: TUNIT_SECOND = 1
       integer :: TUNIT_MINUTE = 2
-      integer :: TUNIT_HOUR = 3
-      integer :: TUNIT_DAY = 4
-      integer :: TUNIT_MONTH = 5
-      integer :: TUNIT_YEAR = 6
-      integer :: TUNIT_QUARTER = 7
-      integer :: TUNIT_3HOURS = 8
-      integer :: TUNIT_6HOURS = 9
-      integer :: TUNIT_12HOURS = 10
+      integer :: TUNIT_QUARTER = 3
+      integer :: TUNIT_30MINUTES = 4
+      integer :: TUNIT_HOUR = 5
+      integer :: TUNIT_3HOURS = 6
+      integer :: TUNIT_6HOURS = 7
+      integer :: TUNIT_12HOURS = 8
+      integer :: TUNIT_DAY = 9
+      integer :: TUNIT_MONTH = 10
+      integer :: TUNIT_YEAR = 11
       integer :: CALENDAR_STANDARD = 0
       integer :: CALENDAR_PROLEPTIC = 1
       integer :: CALENDAR_360DAYS = 2
@@ -3692,14 +3693,15 @@ module mo_cdi
       public :: TAXIS_FORECAST
       public :: TUNIT_SECOND
       public :: TUNIT_MINUTE
-      public :: TUNIT_HOUR
-      public :: TUNIT_DAY
-      public :: TUNIT_MONTH
-      public :: TUNIT_YEAR
       public :: TUNIT_QUARTER
+      public :: TUNIT_30MINUTES
+      public :: TUNIT_HOUR
       public :: TUNIT_3HOURS
       public :: TUNIT_6HOURS
       public :: TUNIT_12HOURS
+      public :: TUNIT_DAY
+      public :: TUNIT_MONTH
+      public :: TUNIT_YEAR
       public :: CALENDAR_STANDARD
       public :: CALENDAR_PROLEPTIC
       public :: CALENDAR_360DAYS

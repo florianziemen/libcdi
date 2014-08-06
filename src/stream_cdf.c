@@ -960,7 +960,8 @@ void cdfDefTimeUnits(char *unitstr, taxis_t* taxis0, taxis_t* taxis)
       cdiDecodeDate(rdate, &year, &month, &day);
       cdiDecodeTime(rtime, &hour, &minute, &second);
 
-      if ( timeunit == TUNIT_QUARTER ) timeunit = TUNIT_MINUTE;
+      if ( timeunit == TUNIT_QUARTER   ) timeunit = TUNIT_MINUTE;
+      if ( timeunit == TUNIT_30MINUTES ) timeunit = TUNIT_MINUTE;
       if ( timeunit == TUNIT_3HOURS  ||
 	   timeunit == TUNIT_6HOURS  ||
 	   timeunit == TUNIT_12HOURS ) timeunit = TUNIT_HOUR;
@@ -977,7 +978,8 @@ void cdfDefForecastTimeUnits(char *unitstr, int timeunit)
 
   if ( timeunit == -1 ) timeunit = TUNIT_HOUR;
 
-  if ( timeunit == TUNIT_QUARTER ) timeunit = TUNIT_MINUTE;
+  if ( timeunit == TUNIT_QUARTER   ) timeunit = TUNIT_MINUTE;
+  if ( timeunit == TUNIT_30MINUTES ) timeunit = TUNIT_MINUTE;
   if ( timeunit == TUNIT_3HOURS  ||
        timeunit == TUNIT_6HOURS  ||
        timeunit == TUNIT_12HOURS ) timeunit = TUNIT_HOUR;

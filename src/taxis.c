@@ -28,14 +28,15 @@ char *Timeunits[] = {
   "undefined",
   "seconds",
   "minutes",
-  "hours",
-  "days",
-  "months",
-  "years",
   "quarters",
+  "30minutes",
+  "hours",
   "3hours",
   "6hours",
   "12hours",
+  "days",
+  "months",
+  "years",
 };
 
 
@@ -1053,8 +1054,9 @@ void cdiEncodeTimevalue(int days, int secs, int timeunit, double *timevalue)
     {
       *timevalue = days*86400. + secs;
     }
-  else if ( timeunit == TUNIT_MINUTE ||
-	    timeunit == TUNIT_QUARTER )
+  else if ( timeunit == TUNIT_MINUTE  ||
+	    timeunit == TUNIT_QUARTER ||
+	    timeunit == TUNIT_30MINUTES )
     {
       *timevalue = days*1440. + secs/60.;
     }

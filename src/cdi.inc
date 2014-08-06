@@ -4,7 +4,7 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   July 2014
+! Uwe Schulzweida, MPI-MET, Hamburg,   August 2014
 !
 
       INTEGER    CDI_MAX_NAME          
@@ -336,22 +336,24 @@
       PARAMETER (TUNIT_SECOND           =  1)
       INTEGER    TUNIT_MINUTE          
       PARAMETER (TUNIT_MINUTE           =  2)
-      INTEGER    TUNIT_HOUR            
-      PARAMETER (TUNIT_HOUR             =  3)
-      INTEGER    TUNIT_DAY             
-      PARAMETER (TUNIT_DAY              =  4)
-      INTEGER    TUNIT_MONTH           
-      PARAMETER (TUNIT_MONTH            =  5)
-      INTEGER    TUNIT_YEAR            
-      PARAMETER (TUNIT_YEAR             =  6)
       INTEGER    TUNIT_QUARTER         
-      PARAMETER (TUNIT_QUARTER          =  7)
+      PARAMETER (TUNIT_QUARTER          =  3)
+      INTEGER    TUNIT_30MINUTES       
+      PARAMETER (TUNIT_30MINUTES        =  4)
+      INTEGER    TUNIT_HOUR            
+      PARAMETER (TUNIT_HOUR             =  5)
       INTEGER    TUNIT_3HOURS          
-      PARAMETER (TUNIT_3HOURS           =  8)
+      PARAMETER (TUNIT_3HOURS           =  6)
       INTEGER    TUNIT_6HOURS          
-      PARAMETER (TUNIT_6HOURS           =  9)
+      PARAMETER (TUNIT_6HOURS           =  7)
       INTEGER    TUNIT_12HOURS         
-      PARAMETER (TUNIT_12HOURS          = 10)
+      PARAMETER (TUNIT_12HOURS          =  8)
+      INTEGER    TUNIT_DAY             
+      PARAMETER (TUNIT_DAY              =  9)
+      INTEGER    TUNIT_MONTH           
+      PARAMETER (TUNIT_MONTH            = 10)
+      INTEGER    TUNIT_YEAR            
+      PARAMETER (TUNIT_YEAR             = 11)
 !
 !  CALENDAR types
 !

@@ -198,14 +198,15 @@ extern "C" {
 
 #define  TUNIT_SECOND             1
 #define  TUNIT_MINUTE             2
-#define  TUNIT_HOUR               3
-#define  TUNIT_DAY                4
-#define  TUNIT_MONTH              5
-#define  TUNIT_YEAR               6
-#define  TUNIT_QUARTER            7
-#define  TUNIT_3HOURS             8
-#define  TUNIT_6HOURS             9
-#define  TUNIT_12HOURS           10
+#define  TUNIT_QUARTER            3
+#define  TUNIT_30MINUTES          4
+#define  TUNIT_HOUR               5
+#define  TUNIT_3HOURS             6
+#define  TUNIT_6HOURS             7
+#define  TUNIT_12HOURS            8
+#define  TUNIT_DAY                9
+#define  TUNIT_MONTH             10
+#define  TUNIT_YEAR              11
 
 /* CALENDAR types */
 

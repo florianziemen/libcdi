@@ -272,16 +272,18 @@ void printInfo(int gridtype, int vdate, int vtime, char *varname, double level,
 
 const char * tunit2str(int tunits)
 {
-  if      ( tunits == TUNIT_YEAR )    return ("years");
-  else if ( tunits == TUNIT_MONTH )   return ("months");
-  else if ( tunits == TUNIT_DAY )     return ("days");
-  else if ( tunits == TUNIT_12HOURS ) return ("12hours");
-  else if ( tunits == TUNIT_6HOURS )  return ("6hours");
-  else if ( tunits == TUNIT_3HOURS )  return ("3hours");
-  else if ( tunits == TUNIT_HOUR )    return ("hours");
-  else if ( tunits == TUNIT_MINUTE )  return ("minutes");
-  else if ( tunits == TUNIT_SECOND )  return ("seconds");
-  else                                return ("unknown");
+  if      ( tunits == TUNIT_YEAR )       return ("years");
+  else if ( tunits == TUNIT_MONTH )      return ("months");
+  else if ( tunits == TUNIT_DAY )        return ("days");
+  else if ( tunits == TUNIT_12HOURS )    return ("12hours");
+  else if ( tunits == TUNIT_6HOURS )     return ("6hours");
+  else if ( tunits == TUNIT_3HOURS )     return ("3hours");
+  else if ( tunits == TUNIT_HOUR )       return ("hours");
+  else if ( tunits == TUNIT_30MINUTES )  return ("30minutes");
+  else if ( tunits == TUNIT_QUARTER )    return ("15minutes");
+  else if ( tunits == TUNIT_MINUTE )     return ("minutes");
+  else if ( tunits == TUNIT_SECOND )     return ("seconds");
+  else                                   return ("unknown");
 }
 
 
