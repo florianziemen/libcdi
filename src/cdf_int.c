@@ -102,7 +102,8 @@ int cdf_open(const char *path, int omode, int *ncidp)
       /*
       if ( chunksizehint < ChunkSizeMin ) chunksizehint = ChunkSizeMin;
       */
-      if ( cdiNcChunksizehint != CDI_UNDEFID ) chunksizehint = cdiNcChunksizehint;
+      if ( cdiNcChunksizehint != CDI_UNDEFID )
+        chunksizehint = (size_t)cdiNcChunksizehint;
 
       /* FIXME: parallel part missing */
       status = nc__open(path, omode, &chunksizehint, ncidp);
