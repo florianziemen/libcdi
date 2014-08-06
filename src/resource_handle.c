@@ -223,8 +223,7 @@ void listSizeExtend()
     }
 
   if (resHList[nsp].freeHead != -1)
-    r[resHList[nsp].freeHead].res.free.next
-      = (int)newListSize - 1;
+    r[resHList[nsp].freeHead].res.free.prev = (int)newListSize - 1;
   r[newListSize-1].res.free.next = resHList[nsp].freeHead;
   r[oldSize].res.free.prev = -1;
   resHList[nsp].freeHead = oldSize;
@@ -237,10 +236,14 @@ static void
 reshPut_(int nsp, int entry, void *p, const resOps *ops)
 {
   listElem_t *newListElem = resHList[nsp].resources + entry;
-  int next = newListElem->res.free.next;
+  int next = newListElem->res.free.next,
+    prev = newListElem->res.free.prev;
   if (next != -1)
-    resHList[nsp].resources[next].res.free.prev = -1;
-  resHList[nsp].freeHead = next;
+    resHList[nsp].resources[next].res.free.prev = prev;
+  if (prev != -1)
+    resHList[nsp].resources[prev].res.free.next = next;
+  else
+    resHList[nsp].freeHead = next;
   newListElem->res.v.val = p;
   newListElem->res.v.ops = ops;
   newListElem->status = RESH_DESYNC_IN_USE;
@@ -274,6 +277,7 @@ reshRemove_(int nsp, int idx)
   int curFree = resHList[nsp].freeHead;
   listElem_t *r = resHList[nsp].resources;
   r[idx].res.free.next = curFree;
+  r[idx].res.free.prev = -1;
   if (curFree != -1)
     r[curFree].res.free.prev = idx;
   r[idx].status = RESH_DESYNC_DELETED;
