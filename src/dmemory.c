@@ -561,21 +561,21 @@ size_t memTotal(void)
   struct mallinfo meminfo = mallinfo();
   if ( MEM_Debug )
     {
-      fprintf(stderr, "arena      %8ld (non-mmapped space allocated from system)\n", (unsigned long) meminfo.arena);
-      fprintf(stderr, "ordblks    %8ld (number of free chunks)\n", (unsigned long) meminfo.ordblks);
-      fprintf(stderr, "smblks     %8ld (number of fastbin blocks)\n", (unsigned long) meminfo.smblks);
-      fprintf(stderr, "hblks      %8ld (number of mmapped regions)\n", (unsigned long) meminfo.hblks);
-      fprintf(stderr, "hblkhd     %8ld (space in mmapped regions)\n", (unsigned long) meminfo.hblkhd);
-      fprintf(stderr, "usmblks    %8ld (maximum total allocated space)\n", (unsigned long) meminfo.usmblks);
-      fprintf(stderr, "fsmblks    %8ld (maximum total allocated space)\n", (unsigned long) meminfo.fsmblks);
-      fprintf(stderr, "uordblks   %8ld (total allocated space)\n", (unsigned long) meminfo.uordblks);
-      fprintf(stderr, "fordblks   %8ld (total free space)\n", (unsigned long) meminfo.fordblks);
-      fprintf(stderr, "Memory in use:   %8ld bytes\n", (unsigned long) meminfo.usmblks + meminfo.uordblks);
-      fprintf(stderr, "Total heap size: %8ld bytes\n", (unsigned long) meminfo.arena);
+      fprintf(stderr, "arena      %8zu (non-mmapped space allocated from system)\n", (size_t)meminfo.arena);
+      fprintf(stderr, "ordblks    %8zu (number of free chunks)\n", (size_t)meminfo.ordblks);
+      fprintf(stderr, "smblks     %8zu (number of fastbin blocks)\n", (size_t) meminfo.smblks);
+      fprintf(stderr, "hblks      %8zu (number of mmapped regions)\n", (size_t) meminfo.hblks);
+      fprintf(stderr, "hblkhd     %8zu (space in mmapped regions)\n", (size_t) meminfo.hblkhd);
+      fprintf(stderr, "usmblks    %8zu (maximum total allocated space)\n", (size_t) meminfo.usmblks);
+      fprintf(stderr, "fsmblks    %8zu (maximum total allocated space)\n", (size_t) meminfo.fsmblks);
+      fprintf(stderr, "uordblks   %8zu (total allocated space)\n", (size_t) meminfo.uordblks);
+      fprintf(stderr, "fordblks   %8zu (total free space)\n", (size_t) meminfo.fordblks);
+      fprintf(stderr, "Memory in use:   %8zu bytes\n", (size_t) meminfo.usmblks + (size_t)meminfo.uordblks);
+      fprintf(stderr, "Total heap size: %8zu bytes\n", (size_t) meminfo.arena);
 
       /* malloc_stats(); */
     }
-  memtotal = meminfo.arena;
+  memtotal = (size_t)meminfo.arena;
 #endif
 
   return (memtotal);
