@@ -401,10 +401,10 @@ void extScanTimestep1(stream_t *streamptr)
     {
       streamptr->tsteps[0].recordSize = nrecords;
       streamptr->tsteps[0].records =
-      (record_t *)xrealloc(streamptr->tsteps[0].records, nrecords*sizeof(record_t));
+        (record_t *)xrealloc(streamptr->tsteps[0].records, (size_t)nrecords * sizeof (record_t));
     }
 
-  streamptr->tsteps[0].recIDs = (int *)xmalloc(nrecords*sizeof(int));
+  streamptr->tsteps[0].recIDs = (int *)xmalloc((size_t)nrecords * sizeof (int));
   streamptr->tsteps[0].nrecs = nrecords;
   for ( recID = 0; recID < nrecords; recID++ )
     streamptr->tsteps[0].recIDs[recID] = recID;
@@ -468,7 +468,7 @@ int extScanTimestep2(stream_t *streamptr)
   cdi_create_records(streamptr, tsID);
 
   nrecords = streamptr->tsteps[0].nallrecs;
-  streamptr->tsteps[1].recIDs = (int *) malloc(nrecords*sizeof(int));
+  streamptr->tsteps[1].recIDs = xmalloc((size_t)nrecords * sizeof (int));
   streamptr->tsteps[1].nrecs = 0;
   for ( recID = 0; recID < nrecords; recID++ )
     streamptr->tsteps[1].recIDs[recID] = -1;
