@@ -63,27 +63,26 @@ void instituteDefaultValue ( institute_t * instituteptr )
 
 void instituteDefaultEntries ( void )
 {
-  cdiResH resH[64];
-  int i, n=0;
-
-  resH[n++]  = ECMWF   = institutDef( 98,   0, "ECMWF",     "European Centre for Medium-Range Weather Forecasts");
-  resH[n++]  = MPIMET  = institutDef( 98, 232, "MPIMET",    "Max-Planck-Institute for Meteorology");
-  resH[n++]  =           institutDef( 98, 255, "MPIMET",    "Max-Planck-Institute for Meteorology");
-  resH[n++]  =           institutDef( 98, 232, "MPIMET",    "Max-Planck Institute for Meteorology");
-  resH[n++]  =           institutDef( 78,   0, "DWD",       "Deutscher Wetterdienst");
-  resH[n++]  =           institutDef( 78, 255, "DWD",       "Deutscher Wetterdienst");
-  resH[n++]  = MCH     = institutDef(215, 255, "MCH",       "MeteoSwiss");
-  resH[n++]  =           institutDef(  7,   0, "NCEP",      "National Centers for Environmental Prediction");
-  resH[n++]  =           institutDef(  7,   1, "NCEP",      "National Centers for Environmental Prediction");
-  resH[n++]  =           institutDef( 60,   0, "NCAR",      "National Center for Atmospheric Research");
-  resH[n++]  =           institutDef( 74,   0, "METOFFICE", "U.K. Met Office");
-  resH[n++]  =           institutDef( 97,   0, "ESA",       "European Space Agency");
-  resH[n++]  =           institutDef( 99,   0, "KNMI",      "Royal Netherlands Meteorological Institute");
+  cdiResH resH[]
+    = { ECMWF   = institutDef( 98,   0, "ECMWF",     "European Centre for Medium-Range Weather Forecasts"),
+        MPIMET  = institutDef( 98, 232, "MPIMET",    "Max-Planck-Institute for Meteorology"),
+        institutDef( 98, 255, "MPIMET",    "Max-Planck-Institute for Meteorology"),
+        institutDef( 98, 232, "MPIMET",    "Max-Planck Institute for Meteorology"),
+        institutDef( 78,   0, "DWD",       "Deutscher Wetterdienst"),
+        institutDef( 78, 255, "DWD",       "Deutscher Wetterdienst"),
+        MCH     = institutDef(215, 255, "MCH",       "MeteoSwiss"),
+        institutDef(  7,   0, "NCEP",      "National Centers for Environmental Prediction"),
+        institutDef(  7,   1, "NCEP",      "National Centers for Environmental Prediction"),
+        institutDef( 60,   0, "NCAR",      "National Center for Atmospheric Research"),
+        institutDef( 74,   0, "METOFFICE", "U.K. Met Office"),
+        institutDef( 97,   0, "ESA",       "European Space Agency"),
+        institutDef( 99,   0, "KNMI",      "Royal Netherlands Meteorological Institute"),
+  };
   /*     (void) institutDef(  0,   0, "IPSL", "IPSL (Institut Pierre Simon Laplace, Paris, France)"); */
 
-  assert(n <= sizeof(resH)/sizeof(*resH));
+  size_t n = sizeof(resH)/sizeof(*resH);
 
-  for ( i = 0; i < n ; i++ )
+  for (size_t i = 0; i < n ; i++ )
     reshSetStatus(resH[i], &instituteOps, RESH_IN_USE);
 }
 
