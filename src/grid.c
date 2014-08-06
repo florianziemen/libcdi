@@ -234,21 +234,18 @@ void gridGenXvals(int xsize, double xfirst, double xlast, double xinc, double *x
 static
 void calc_gaussgrid(double *yvals, int ysize, double yfirst, double ylast)
 {
-  long yhsize;
-
-  double *yw = (double *)xmalloc(ysize*sizeof(double));
+  double *yw = (double *)xmalloc((size_t)ysize * sizeof(double));
   gaussaw(yvals, yw, ysize);
   free(yw);
-  for (long i = 0; i < ysize; i++ )
+  for (int i = 0; i < ysize; i++ )
     yvals[i] = asin(yvals[i])/M_PI*180.0;
 
   if ( yfirst < ylast && yfirst > -90.0 && ylast < 90.0 )
     {
-      double ytmp;
-      yhsize = ysize/2;
-      for (long i = 0; i < yhsize; i++ )
+      int yhsize = ysize/2;
+      for (int i = 0; i < yhsize; i++ )
         {
-          ytmp = yvals[i];
+          double ytmp = yvals[i];
           yvals[i] = yvals[ysize-i-1];
           yvals[ysize-i-1] = ytmp;
         }
@@ -258,7 +255,6 @@ void calc_gaussgrid(double *yvals, int ysize, double yfirst, double ylast)
 
 void gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double yinc, double *yvals)
 {
-  long i;
   double deleps = 0.002;
 
   if ( gridtype == GRID_GAUSSIAN || gridtype == GRID_GAUSSIAN_REDUCED )
@@ -280,6 +276,7 @@ void gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double y
 		  {
 		    ytmp = (double *) malloc(ny*sizeof(double));
 		    calc_gaussgrid(ytmp, ny, yfirst, ylast);
+                    int i;
 		    for ( i = 0; i < (ny-ysize); i++ )
 		      if ( fabs(ytmp[i] - yfirst) < deleps ) break;
 
@@ -291,12 +288,12 @@ void gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double y
 
 		if ( lfound )
 		  {
-		    for ( i = 0; i < ysize; i++ ) yvals[i] = ytmp[i+nstart];
+		    for (int i = 0; i < ysize; i++) yvals[i] = ytmp[i+nstart];
 		  }
 		else
 		  {
 		    Warning("Cannot calculate gaussian latitudes for lat1 = %g latn = %g!", yfirst, ylast);
-		    for ( i = 0; i < ysize; i++ ) yvals[i] = 0;
+		    for (int i = 0; i < ysize; i++ ) yvals[i] = 0;
 		    yvals[0] = yfirst;
 		    yvals[ysize-1] = ylast;
 		  }
@@ -338,7 +335,7 @@ void gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double y
 
       if ( yfirst > ylast && yinc > 0 ) yinc = -yinc;
 
-      for ( i = 0; i < ysize; i++ )
+      for (int i = 0; i < ysize; i++ )
         yvals[i] = yfirst + i*yinc;
     }
   /*
