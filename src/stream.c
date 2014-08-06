@@ -331,20 +331,18 @@ char *streamFilename(int streamID)
 }
 
 static
-int cdiInqTimeSize(int streamID)
+long cdiInqTimeSize(int streamID)
 {
-  int ntsteps;
   int tsID = 0, nrecs;
   stream_t *streamptr = stream_to_pointer(streamID);
 
   stream_check_ptr(__func__, streamptr);
 
-  ntsteps = streamptr->ntsteps;
+  long ntsteps = streamptr->ntsteps;
 
-  if ( ntsteps == CDI_UNDEFID )
+  if ( ntsteps == (long)CDI_UNDEFID )
     while ( (nrecs = streamInqTimestep(streamID, tsID++)) )
-
-  ntsteps = streamptr->ntsteps;
+      ntsteps = streamptr->ntsteps;
 
   return (ntsteps);
 }
@@ -607,7 +605,7 @@ static int streamOpenA(const char *filename, const char *filemode, int filetype)
   status = cdiInqContents(streamptr);
   if ( status < 0 ) return (status);
   vlistptr = vlist_to_pointer(streamptr->vlistID);
-  vlistptr->ntsteps = cdiInqTimeSize(streamID);
+  vlistptr->ntsteps = (int)cdiInqTimeSize(streamID);
 
   {
     void (*streamCloseDelegate)(stream_t *streamptr, int recordBufIsToBeDeleted)
@@ -1173,7 +1171,7 @@ int cdiStreamDefTimestep_(stream_t *streamptr, int tsID)
 
   cdi_create_records(streamptr, tsID);
 
-  return (streamptr->ntsteps);
+  return (int)streamptr->ntsteps;
 }
 
 /*
@@ -1947,7 +1945,7 @@ int streamNtsteps(int streamID)
 
   stream_check_ptr(__func__, streamptr);
 
-  return (streamptr->ntsteps);
+  return (int)streamptr->ntsteps;
 }
 
 // This function is used in CDO!
