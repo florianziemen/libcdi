@@ -226,7 +226,7 @@ char   *cdiStringError(int cdiErrno);
 
 void    cdiDebug(int debug);
 
-char   *cdiLibraryVersion(void);
+const char *cdiLibraryVersion(void);
 void    cdiPrintVersion(void);
 
 int     cdiHaveFiletype(int filetype);
