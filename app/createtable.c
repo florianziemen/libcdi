@@ -24,7 +24,7 @@ void usage(void)
 
 int main(int argc, char *argv[])
 {
-  int c, len;
+  int c;
   char  *cstring;
   char *ifile = NULL, *ofile = NULL;
   int debug = 0;
@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
     {
       c = *++argv[0];
       cstring = argv[0];
-      len = strlen(cstring);
+      size_t len = strlen(cstring);
       switch (c)
 	{
         case 'd':
