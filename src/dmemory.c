@@ -49,8 +49,8 @@ typedef struct
 }
 MemTable_t;
 
-static MemTable_t* memTable;
-static int     memTableSize  = 0;
+static MemTable_t *memTable;
+static size_t  memTableSize  = 0;
 static long    memAccess     = 0;
 
 static size_t  MemObjs       = 0;
@@ -130,23 +130,23 @@ void memListPrintEntry(int mtype, int item, size_t size, void *ptr,
 static
 void memListPrintTable(void)
 {
-  int memID, item, item1, item2 = 0;
+  int item, item1, item2 = 0;
 
   if ( MemObjs ) fprintf(stderr, "\nMemory table:\n");
 
   /* find maximum item */
-  for ( memID = 0; memID < memTableSize; memID++ )
+  for (size_t memID = 0; memID < memTableSize; memID++)
     if ( memTable[memID].item != UNDEFID )
       if ( memTable[memID].item > item2 ) item2 = memTable[memID].item;
 
   /* find minimum item */
   item1 = item2;
-  for ( memID = 0; memID < memTableSize; memID++ )
+  for (size_t memID = 0; memID < memTableSize; memID++)
     if ( memTable[memID].item != UNDEFID )
       if ( memTable[memID].item < item1 ) item1 = memTable[memID].item;
 
   for ( item = item1; item <= item2; item++ )
-    for ( memID = 0; memID < memTableSize; memID++ )
+    for (size_t memID = 0; memID < memTableSize; memID++)
       {
 	if ( memTable[memID].item == item )
 	  memListPrintEntry(memTable[memID].mtype, memTable[memID].item,
@@ -158,7 +158,7 @@ void memListPrintTable(void)
   if ( MemObjs )
     {
       fprintf(stderr, "  Memory access             : %6u\n", (unsigned) memAccess);
-      fprintf(stderr, "  Maximum objects           : %6u\n", (unsigned) memTableSize);
+      fprintf(stderr, "  Maximum objects           : %6zu\n", memTableSize);
       fprintf(stderr, "  Objects used              : %6u\n", (unsigned) MaxMemObjs);
       fprintf(stderr, "  Objects in use            : %6u\n", (unsigned) MemObjs);
       fprintf(stderr, "  Memory allocated          : ");
@@ -218,10 +218,10 @@ void memInit(void)
 static
 int memListDeleteEntry(void *ptr, size_t *size)
 {
-  int memID = 0;
   int item = UNDEFID;
+  size_t memID;
 
-  for ( memID = 0; memID < memTableSize; memID++ )
+  for (memID = 0; memID < memTableSize; memID++ )
     {
       if ( memTable[memID].item == UNDEFID ) continue;
       if ( memTable[memID].ptr == ptr ) break;
@@ -240,9 +240,9 @@ int memListDeleteEntry(void *ptr, size_t *size)
 }
 
 static
-void memTableInitEntry(int memID)
+void memTableInitEntry(size_t memID)
 {
-  if ( memID < 0 || memID >= memTableSize )
+  if ( memID >= memTableSize )
     memInternalProblem(__func__, "memID %d undefined!", memID);
 
   memTable[memID].ptr    = NULL;
@@ -259,9 +259,7 @@ int memListNewEntry(int mtype, void *ptr, size_t size, size_t nobj,
 {
   static int item = 0;
   size_t memSize = 0;
-  int memID = 0;
-  size_t len;
-  int i;
+  size_t memID = 0;
 
   /*
     Look for a free slot in memTable.
@@ -270,11 +268,11 @@ int memListNewEntry(int mtype, void *ptr, size_t size, size_t nobj,
   if ( memTableSize == 0 )
     {
       memTableSize = 8;
-      memSize  = memTableSize*sizeof(MemTable_t);
-      memTable = (MemTable_t*) malloc(memSize);
+      memSize  = memTableSize * sizeof(MemTable_t);
+      memTable = (MemTable_t *) malloc(memSize);
       if( memTable == NULL ) memError(__func__, __FILE__, __LINE__, memSize);
 
-      for( i = 0; i < memTableSize; i++ )
+      for(size_t i = 0; i < memTableSize; i++)
 	memTableInitEntry(i);
     }
   else
@@ -295,7 +293,7 @@ int memListNewEntry(int mtype, void *ptr, size_t size, size_t nobj,
       memTable = (MemTable_t*) realloc(memTable, memSize);
       if( memTable == NULL ) memError(__func__, __FILE__, __LINE__, memSize);
 
-      for( i = memID; i < memTableSize; i++ )
+      for (size_t i = memID; i < memTableSize; i++)
 	memTableInitEntry(i);
     }
 
@@ -308,7 +306,7 @@ int memListNewEntry(int mtype, void *ptr, size_t size, size_t nobj,
 
   if ( file )
     {
-      len = strlen(file);
+      size_t len = strlen(file);
       if ( len > MAXNAME-1 ) len = MAXNAME-1;
 
       (void) memcpy(memTable[memID].file, file, len);
@@ -321,7 +319,7 @@ int memListNewEntry(int mtype, void *ptr, size_t size, size_t nobj,
 
   if ( caller )
     {
-      len = strlen(caller);
+      size_t len = strlen(caller);
       if ( len > MAXNAME-1 ) len = MAXNAME-1;
 
       (void) memcpy(memTable[memID].caller, caller, len);
@@ -346,7 +344,6 @@ int memListChangeEntry(void *ptrold, void *ptr, size_t size,
 {
   int item = UNDEFID;
   int memID = 0;
-  size_t len;
   size_t sizeold;
 
   while( memID < memTableSize )
@@ -375,7 +372,7 @@ int memListChangeEntry(void *ptrold, void *ptr, size_t size,
 
       if ( file )
 	{
-	  len = strlen(file);
+	  size_t len = strlen(file);
 	  if ( len > MAXNAME-1 ) len = MAXNAME-1;
 
 	  (void) memcpy(memTable[memID].file, file, len);
@@ -388,7 +385,7 @@ int memListChangeEntry(void *ptrold, void *ptr, size_t size,
 
       if ( caller )
 	{
-	  len = strlen(caller);
+	  size_t len = strlen(caller);
 	  if ( len > MAXNAME-1 ) len = MAXNAME-1;
 
 	  (void) memcpy(memTable[memID].caller, caller, len);
