@@ -37,7 +37,7 @@ void vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].typeOfGeneratingProcess   = 0;
   vlistptr->vars[varID].productDefinitionTemplate = -1;
   vlistptr->vars[varID].chunktype     = cdiChunkType;
-  vlistptr->vars[varID].xyz           = 0;
+  vlistptr->vars[varID].xyz           = 321;
   vlistptr->vars[varID].gridID        = CDI_UNDEFID;
   vlistptr->vars[varID].zaxisID       = CDI_UNDEFID;
   vlistptr->vars[varID].instID        = CDI_UNDEFID;
@@ -1580,6 +1580,21 @@ int vlistInqVarChunkType(int vlistID, int varID)
   return (vlistptr->vars[varID].chunktype);
 }
 
+static
+int vlistEncodeXyz(int (*dimorder)[3])
+{
+  return (*dimorder)[0]*100 + (*dimorder)[1]*10 + (*dimorder)[2];
+}
+
+
+static
+void vlistDecodeXyz(int xyz, int (*outDimorder)[3])
+{
+  (*outDimorder)[0] = xyz/100, xyz -= (*outDimorder)[0]*100;
+  (*outDimorder)[1] = xyz/10, xyz -= (*outDimorder)[1]*10;
+  (*outDimorder)[2] = xyz;
+}
+
 
 void  vlistDefVarXYZ(int vlistID, int varID, int xyz)
 {
@@ -1592,29 +1607,44 @@ void  vlistDefVarXYZ(int vlistID, int varID, int xyz)
   /* check xyz dimension order */
   {
     int dimorder[3];
+    vlistDecodeXyz(xyz, &dimorder);
     int dimx = 0, dimy = 0, dimz = 0;
-    dimorder[0] = xyz/100;
-    dimorder[1] = (xyz-dimorder[0]*100)/10;
-    dimorder[2] = (xyz-dimorder[0]*100-dimorder[1]*10);
     for ( int id = 0; id < 3; ++id )
       {
-        if      ( dimorder[id] == 3 ) { dimz++; }
-        else if ( dimorder[id] == 2 ) { dimy++; }
-        else if ( dimorder[id] == 1 ) { dimx++; }
-      }
+        switch ( dimorder[id] )
+          {
+            case 1: dimx++; break;
+            case 2: dimy++; break;
+            case 3: dimz++; break;
+            default: dimorder[id] = 0; break;    //Ensure that we assign a valid dimension to this position.
+          }
+     }
     if ( dimz > 1 || dimy > 1 || dimx > 1 ) xyz = 321; // ZYX
     else
       {
-        int lchanged = 0;
-        if ( dimz == 0 ) for ( int id = 0; id < 3; ++id ) if ( dimorder[id] == 0 ) {dimorder[id] = 3; lchanged++; break;}
-        if ( dimy == 0 ) for ( int id = 0; id < 3; ++id ) if ( dimorder[id] == 0 ) {dimorder[id] = 2; lchanged++; break;}
-        if ( dimx == 0 ) for ( int id = 0; id < 3; ++id ) if ( dimorder[id] == 0 ) {dimorder[id] = 1; lchanged++; break;}
-        if ( lchanged ) xyz = dimorder[0]*100 + dimorder[1]*10 + dimorder[2];
+        if ( dimz == 0 ) for ( int id = 0; id < 3; ++id ) if ( dimorder[id] == 0 ) {dimorder[id] = 3; break;}
+        if ( dimy == 0 ) for ( int id = 0; id < 3; ++id ) if ( dimorder[id] == 0 ) {dimorder[id] = 2; break;}
+        if ( dimx == 0 ) for ( int id = 0; id < 3; ++id ) if ( dimorder[id] == 0 ) {dimorder[id] = 1; break;}
+        xyz = vlistEncodeXyz(&dimorder);
       }
   }
 
+  assert(xyz == 123 || xyz == 312 || xyz == 231 || xyz == 321 || xyz == 132 || xyz == 213);
+
   vlistptr->vars[varID].xyz = xyz;
   reshSetStatus(vlistID, &vlist_ops, RESH_DESYNC_IN_USE);
+}
+
+
+void vlistInqVarDimorder(int vlistID, int varID, int (*outDimorder)[3])
+{
+  vlist_t *vlistptr;
+
+  vlistptr = vlist_to_pointer(vlistID);
+
+  vlistCheckVarID(__func__, vlistID, varID);
+
+  vlistDecodeXyz(vlistptr->vars[varID].xyz, outDimorder);
 }
 
 

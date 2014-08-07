@@ -32,6 +32,8 @@
 #define UNDEFID  CDI_UNDEFID
 
 
+void    vlistInqVarDimorder(int vlistID, int varID, int (*outDimorder)[3]);
+
 void cdfDefGlobalAtts(stream_t *streamptr);
 void cdfDefLocalAtts(stream_t *streamptr);
 
@@ -2923,7 +2925,6 @@ int cdfDefVar(stream_t *streamptr, int varID)
   int tablenum;
   int vlistID;
   int dimorder[3];
-  int ixyz;
   int iax = 0;
   char axis[5];
   int ensID, ensCount, forecast_type;
@@ -2947,8 +2948,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
 
   chunktype = vlistInqVarChunkType(vlistID, varID);
 
-  ixyz    = vlistInqVarXYZ(vlistID, varID);
-  if ( ixyz == 0 ) ixyz = 321; // ZYX
+  vlistInqVarDimorder(vlistID, varID, &dimorder);
 
   gridsize  = gridInqSize(gridID);
   if ( gridsize > 1 ) lchunk = TRUE;
@@ -2965,14 +2965,11 @@ int cdfDefVar(stream_t *streamptr, int varID)
   zaxisindex = vlistZaxisIndex(vlistID, zaxisID);
   zid = streamptr->zaxisID[zaxisindex];
 
-  dimorder[0] = ixyz/100;
-  dimorder[1] = (ixyz-dimorder[0]*100)/10;
-  dimorder[2] = (ixyz-dimorder[0]*100-dimorder[1]*10);
   if ( dimorder[0] != 3 ) lchunk = FALSE; /* ZYX and ZXY */
 
   if ( ((dimorder[0]>0)+(dimorder[1]>0)+(dimorder[2]>0)) < ((xid!=UNDEFID)+(yid!=UNDEFID)+(zid!=UNDEFID)) )
     {
-      printf("xyz=%d  zid=%d  yid=%d  xid=%d\n", ixyz, zid, yid, xid);
+      printf("zid=%d  yid=%d  xid=%d\n", zid, yid, xid);
       Error("Internal problem, dimension order missing!");
     }
 
@@ -4098,9 +4095,6 @@ void cdfGetSliceSlapDescription(stream_t *streamptr, int varId, int levelId, boo
   int gridId = vlistInqVarGrid(vlistId, varId);
   int zaxisID = vlistInqVarZaxis(vlistId, varId);
   int tsteptype = vlistInqVarTsteptype(vlistId, varId);
-  int ixyz = vlistInqVarXYZ(vlistId, varId);
-  if ( ixyz == 0 ) ixyz = 321; // ZYX
-
   int gridsize = gridInqSize(gridId);
 
   streamptr->numvals += gridsize;
@@ -4146,9 +4140,7 @@ void cdfGetSliceSlapDescription(stream_t *streamptr, int varId, int levelId, boo
   printf("2 %p %d %d %s\n", streamptr, zaxisindex, streamptr->zaxisID[zaxisindex], vlistInqVarNamePtr(vlistId, varId));
   */
   int dimorder[3];
-  dimorder[0] = ixyz/100;
-  dimorder[1] = (ixyz-dimorder[0]*100)/10;
-  dimorder[2] = (ixyz-dimorder[0]*100-dimorder[1]*10);
+  vlistInqVarDimorder(vlistId, varId, &dimorder);
 
   *outSwapXY = (dimorder[2] == 2 || dimorder[0] == 1) && xid != UNDEFID && yid != UNDEFID ;
 
@@ -4281,7 +4273,6 @@ void cdf_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
   int tsteptype;
   int gridindex, zaxisindex;
   int dimorder[3];
-  int ixyz;
   int swapxy = FALSE;
   int dtype;
   int vlistID;
@@ -4302,8 +4293,8 @@ void cdf_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
   gridID    = vlistInqVarGrid(vlistID, varID);
   zaxisID   = vlistInqVarZaxis(vlistID, varID);
   tsteptype = vlistInqVarTsteptype(vlistID, varID);
-  ixyz      = vlistInqVarXYZ(vlistID, varID);
-  if ( ixyz == 0 ) ixyz = 321; // ZYX
+  vlistInqVarDimorder(vlistID, varID, &dimorder);
+
 
   gridindex = vlistGridIndex(vlistID, gridID);
   if ( gridInqType(gridID) == GRID_TRAJECTORY )
@@ -4319,14 +4310,9 @@ void cdf_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
   zaxisindex = vlistZaxisIndex(vlistID, zaxisID);
   zid = streamptr->zaxisID[zaxisindex];
 
-  dimorder[0] = ixyz/100;
-  dimorder[1] = (ixyz-dimorder[0]*100)/10;
-  dimorder[2] = (ixyz-dimorder[0]*100-dimorder[1]*10);
-
   if ( (dimorder[2] == 2 || dimorder[0] == 1) && xid != UNDEFID && yid != UNDEFID ) swapxy = TRUE;
   /*
   printf("swapxy %d\n", swapxy);
-  printf("ixyz %d\n", ixyz);
   printf("dimorder: %d %d %d\n", dimorder[0], dimorder[1], dimorder[2]);
   */
 
