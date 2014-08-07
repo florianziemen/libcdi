@@ -43,7 +43,7 @@ const char *extLibraryVersion(void)
 }
 
 
-int EXT_Debug = 0;    /* If set to 1, debugging */
+static int EXT_Debug = 0;    /* If set to 1, debugging */
 
 
 void extDebug(int debug)
