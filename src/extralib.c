@@ -404,7 +404,6 @@ int extRead(int fileID, void *ext)
   size_t i;
   char tempheader[32];
   void *buffer;
-  int buffersize;
   int byteswap;
   int status;
 
@@ -464,15 +463,15 @@ int extRead(int fileID, void *ext)
       if ( blocklen2 != 0 ) return (-1);
     }
 
-  extp->datasize = extp->header[3];
+  extp->datasize = (size_t)extp->header[3];
 
   if ( EXT_Debug ) Message("datasize = %lu", extp->datasize);
 
   blocklen = binReadF77Block(fileID, byteswap);
 
-  buffersize = extp->buffersize;
+  size_t buffersize = (size_t)extp->buffersize;
 
-  if ( buffersize < (int) blocklen )
+  if ( buffersize < blocklen )
     {
       buffersize = blocklen;
       buffer = extp->buffer;
@@ -534,7 +533,7 @@ int extWrite(int fileID, void *ext)
   header = extp->header;
 
   /* write header record */
-  blocklen = EXT_HEADER_LEN * rprec;
+  blocklen = EXT_HEADER_LEN * (size_t)rprec;
 
   binWriteF77Block(fileID, byteswap, blocklen);
 
@@ -567,9 +566,9 @@ int extWrite(int fileID, void *ext)
 
   binWriteF77Block(fileID, byteswap, blocklen);
 
-  datasize = header[3];
+  datasize = (size_t)header[3];
   if ( number == EXT_COMP ) datasize *= 2;
-  blocklen = datasize * rprec;
+  blocklen = datasize * (size_t)rprec;
 
   binWriteF77Block(fileID, byteswap, blocklen);
 
