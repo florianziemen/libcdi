@@ -1266,9 +1266,9 @@ void gridDefRowlon(int gridID, int nrowlon, const int *rowlon)
 
   grid_check_ptr(gridID, gridptr);
 
-  gridptr->rowlon = (int *)xmalloc(nrowlon * sizeof(int));
+  gridptr->rowlon = (int *)xmalloc((size_t)nrowlon * sizeof(int));
   gridptr->nrowlon = nrowlon;
-  memcpy(gridptr->rowlon, rowlon, nrowlon * sizeof(int));
+  memcpy(gridptr->rowlon, rowlon, (size_t)nrowlon * sizeof(int));
   reshSetStatus(gridID, &gridOps, RESH_DESYNC_IN_USE);
 }
 
@@ -1290,24 +1290,23 @@ void gridInqRowlon(int gridID, int *rowlon)
 
   if ( gridptr->rowlon == 0 )  Error("undefined pointer!");
 
-  memcpy(rowlon, gridptr->rowlon, gridptr->nrowlon*sizeof(int));
+  memcpy(rowlon, gridptr->rowlon, (size_t)gridptr->nrowlon * sizeof(int));
 }
 
 
 int gridInqMask(int gridID, int *mask)
 {
-  long size, i;
   grid_t *gridptr = ( grid_t *) reshGetVal ( gridID, &gridOps );
 
   grid_check_ptr(gridID, gridptr);
 
-  size = gridptr->size;
+  long size = gridptr->size;
 
   if ( CDI_Debug && size == 0 )
     Warning("Size undefined for gridID = %d", gridID);
 
-  if ( mask && gridptr->mask )
-    for ( i = 0; i < size; ++i )
+  if (mask && gridptr->mask)
+    for (long i = 0; i < size; ++i)
       mask[i] = gridptr->mask[i];
 
   if ( gridptr->mask == NULL ) size = 0;
