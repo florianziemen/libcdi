@@ -1262,8 +1262,7 @@ int fileClose_serial(int fileID)
 
       if ( fileptr->time_in_sec > 0 )
         {
-          rout = fileptr->byteTrans;
-          rout /= 1024.*1014.*fileptr->time_in_sec;
+          rout = (double)fileptr->byteTrans / (1024.*1024.*fileptr->time_in_sec);
         }
 
       fprintf(stderr, " wall time [s]    : %.2f\n", fileptr->time_in_sec);
