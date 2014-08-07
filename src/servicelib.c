@@ -17,7 +17,9 @@
 #include "swap.h"
 
 
-#define SRV_HEADER_LEN    8
+enum {
+  SRV_HEADER_LEN = 8,
+};
 
 
 static int initSrvLib      = 0;
