@@ -3,16 +3,17 @@
 #endif
 
 #include <assert.h>
-#include <stdio.h>
-#include <stdarg.h>
-#include <string.h>
-#include <errno.h>
 #include <ctype.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <limits.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <string.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/time.h>  // gettimeofday()
-#include <fcntl.h>
 
 #include "dmemory.h"
 #include "error.h"
@@ -918,7 +919,7 @@ void file_set_buffer(bfile_t *fileptr)
 static
 int file_fill_buffer(bfile_t *fileptr)
 {
-  long nread;
+  ssize_t nread;
   int fd;
   long offset = 0;
   off_t retseek;
@@ -943,7 +944,8 @@ int file_fill_buffer(bfile_t *fileptr)
 	}
       else
 	{
-	  nread = fileptr->bufferSize;
+          xassert(fileptr->bufferSize <= SSIZE_MAX);
+	  nread = (ssize_t)fileptr->bufferSize;
 	  if ( (nread + fileptr->bufferPos) > fileptr->size )
 	    nread = fileptr->size - fileptr->bufferPos;
 
@@ -955,7 +957,7 @@ int file_fill_buffer(bfile_t *fileptr)
 	      fileptr->buffer = NULL;
 	    }
 
-	  fileptr->mappedSize = (size_t) nread;
+	  fileptr->mappedSize = (size_t)nread;
 
 	  fileptr->buffer = (char*) mmap(NULL, (size_t) nread, PROT_READ, MAP_PRIVATE, fd, fileptr->bufferPos);
 
@@ -971,7 +973,7 @@ int file_fill_buffer(bfile_t *fileptr)
       if ( retseek == (off_t)-1 )
 	SysError("lseek error at pos %ld file %s", (long) fileptr->bufferPos, fileptr->name);
 
-      nread = (long) read(fd, fileptr->buffer, fileptr->bufferSize);
+      nread = read(fd, fileptr->buffer, fileptr->bufferSize);
     }
 
   if ( nread <= 0 )
@@ -986,7 +988,7 @@ int file_fill_buffer(bfile_t *fileptr)
     }
 
   fileptr->bufferPtr = fileptr->buffer;
-  fileptr->bufferCnt = nread;
+  fileptr->bufferCnt = (size_t)nread;
 
   fileptr->bufferStart = fileptr->bufferPos;
   fileptr->bufferPos  += nread;
@@ -1009,7 +1011,7 @@ int file_fill_buffer(bfile_t *fileptr)
 	Error("Internal problem with buffer handling. nread = %d offset = %d", nread, offset);
 
       fileptr->bufferPtr += offset;
-      fileptr->bufferCnt -= offset;
+      fileptr->bufferCnt -= (size_t)offset;
     }
 
   fileptr->bufferNumFill++;
