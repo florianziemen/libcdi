@@ -148,10 +148,10 @@ int iegCheckFiletype(int fileID, int *swap)
   size_t sblocklen = 0;
   size_t data = 0;
   size_t dimx = 0, dimy = 0;
-  int fact = 0, found = 0;
+  size_t fact = 0;
   unsigned char buffer[1048], *pbuf;
 
-  if ( fileRead(fileID, buffer, 4) != 4 ) return (found);
+  if ( fileRead(fileID, buffer, 4) != 4 ) return (0);
 
   blocklen  = get_UINT32(buffer);
   sblocklen = get_SUINT32(buffer);
@@ -163,7 +163,7 @@ int iegCheckFiletype(int fileID, int *swap)
     {
      *swap = 0;
       fact = 4;
-      if ( fileRead(fileID, buffer, blocklen+8) != blocklen+8 ) return (found);
+      if ( fileRead(fileID, buffer, blocklen+8) != blocklen+8 ) return (0);
       pbuf = buffer+(37+4)*4;    dimx = (size_t) get_UINT32(pbuf);
       pbuf = buffer+(37+5)*4;    dimy = (size_t) get_UINT32(pbuf);
       pbuf = buffer+blocklen+4;  data = (size_t) get_UINT32(pbuf);
@@ -172,7 +172,7 @@ int iegCheckFiletype(int fileID, int *swap)
     {
      *swap = 0;
       fact = 8;
-      if ( fileRead(fileID, buffer, blocklen+8) != blocklen+8 ) return (found);
+      if ( fileRead(fileID, buffer, blocklen+8) != blocklen+8 ) return (0);
       pbuf = buffer+(37+4)*4;    dimx = (size_t) get_UINT32(pbuf);
       pbuf = buffer+(37+5)*4;    dimy = (size_t) get_UINT32(pbuf);
       pbuf = buffer+blocklen+4;  data = (size_t) get_UINT32(pbuf);
@@ -181,7 +181,7 @@ int iegCheckFiletype(int fileID, int *swap)
     {
      *swap = 1;
       fact = 4;
-      if ( fileRead(fileID, buffer, sblocklen+8) != sblocklen+8 ) return (found);
+      if ( fileRead(fileID, buffer, sblocklen+8) != sblocklen+8 ) return (0);
       pbuf = buffer+(37+4)*4;     dimx = (size_t) get_SUINT32(pbuf);
       pbuf = buffer+(37+5)*4;     dimy = (size_t) get_SUINT32(pbuf);
       pbuf = buffer+sblocklen+4;  data = (size_t) get_SUINT32(pbuf);
@@ -190,7 +190,7 @@ int iegCheckFiletype(int fileID, int *swap)
     {
      *swap = 1;
       fact = 8;
-      if ( fileRead(fileID, buffer, sblocklen+8) != sblocklen+8 ) return (found);
+      if ( fileRead(fileID, buffer, sblocklen+8) != sblocklen+8 ) return (0);
       pbuf = buffer+(37+4)*4;     dimx = (size_t) get_SUINT32(pbuf);
       pbuf = buffer+(37+5)*4;     dimy = (size_t) get_SUINT32(pbuf);
       pbuf = buffer+sblocklen+4;  data = (size_t) get_SUINT32(pbuf);
@@ -198,8 +198,7 @@ int iegCheckFiletype(int fileID, int *swap)
 
   fileRewind(fileID);
 
-  if      ( data && dimx*dimy*fact == data ) found = 1;
-  else if ( data && dimx*dimy*8    == data ) found = 1;
+  int found = data && (dimx*dimy*fact == data || dimx*dimy*8 == data);
 
   if ( IEG_Debug )
     {
