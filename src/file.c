@@ -190,7 +190,7 @@ void file_list_new(void)
 {
   assert(_fileList == NULL);
 
-  _fileList = (filePtrToIdx *) malloc(_file_max*sizeof(filePtrToIdx));
+  _fileList = (filePtrToIdx *)xmalloc((size_t)_file_max * sizeof (filePtrToIdx));
 }
 
 static
