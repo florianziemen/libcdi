@@ -531,7 +531,6 @@ off_t fileGetPos(int fileID)
 int fileSetPos(int fileID, off_t offset, int whence)
 {
   int status = 0;
-  off_t position;
   bfile_t *fileptr;
 
   fileptr = file_to_pointer(fileID);
@@ -549,7 +548,7 @@ int fileSetPos(int fileID, off_t offset, int whence)
     case SEEK_SET:
       if ( fileptr->mode == 'r' && fileptr->type == FILE_TYPE_OPEN )
 	{
-	  position = offset;
+	  off_t position = offset;
 	  fileptr->position = position;
 	  if ( position < fileptr->bufferStart || position > fileptr->bufferEnd )
 	    {
@@ -571,7 +570,7 @@ int fileSetPos(int fileID, off_t offset, int whence)
 
 		  fileptr->bufferPos = fileptr->bufferEnd + 1;
 		}
-	      fileptr->bufferCnt = fileptr->bufferEnd - position + 1;
+	      fileptr->bufferCnt = (size_t)(fileptr->bufferEnd - position) + 1;
 	      fileptr->bufferPtr = fileptr->buffer + position - fileptr->bufferStart;
 	    }
 	}
@@ -584,7 +583,7 @@ int fileSetPos(int fileID, off_t offset, int whence)
       if ( fileptr->mode == 'r' && fileptr->type == FILE_TYPE_OPEN )
 	{
 	  fileptr->position += offset;
-	  position = fileptr->position;
+	  off_t position = fileptr->position;
 	  if ( position < fileptr->bufferStart || position > fileptr->bufferEnd )
 	    {
 	      if ( fileptr->bufferType == FILE_BUFTYPE_STD )
@@ -605,7 +604,7 @@ int fileSetPos(int fileID, off_t offset, int whence)
 
 		  fileptr->bufferPos = fileptr->bufferEnd + 1;
 		}
-	      fileptr->bufferCnt -= offset;
+	      fileptr->bufferCnt -= (size_t)offset;
 	      fileptr->bufferPtr += offset;
 	    }
 	}
@@ -780,7 +779,7 @@ void file_initialize(void)
 	{
 	case FILE_TYPE_OPEN:
 	case FILE_TYPE_FOPEN:
-	  FileTypeRead = value;
+	  FileTypeRead = (int)value;
 	  break;
 	default:
 	  Warning("File type %d not implemented!", value);
@@ -794,7 +793,7 @@ void file_initialize(void)
 	{
 	case FILE_TYPE_OPEN:
 	case FILE_TYPE_FOPEN:
-	  FileTypeWrite = value;
+	  FileTypeWrite = (int)value;
 	  break;
 	default:
 	  Warning("File type %d not implemented!", value);
@@ -826,7 +825,7 @@ void file_initialize(void)
 	{
 	case FILE_BUFTYPE_STD:
 	case FILE_BUFTYPE_MMAP:
-	  FileBufferTypeEnv = value;
+	  FileBufferTypeEnv = (int)value;
 	  break;
 	default:
 	  Warning("File buffer type %d not implemented!", value);
