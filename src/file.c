@@ -1088,11 +1088,9 @@ size_t file_read_from_buffer(bfile_t *fileptr, void *ptr, size_t size)
 
 void fileSetBufferSize(int fileID, long buffersize)
 {
-  bfile_t *fileptr;
-
-  fileptr = file_to_pointer(fileID);
-
-  if ( fileptr ) fileptr->bufferSize = buffersize;
+  bfile_t *fileptr = file_to_pointer(fileID);
+  xassert(buffersize >= 0);
+  if ( fileptr ) fileptr->bufferSize = (size_t)buffersize;
 }
 
 /*
