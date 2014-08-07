@@ -403,7 +403,6 @@ int extRead(int fileID, void *ext)
   size_t blocklen, blocklen2;
   size_t i;
   char tempheader[32];
-  int hprec, dprec;
   void *buffer;
   int buffersize;
   int byteswap;
@@ -426,9 +425,9 @@ int extRead(int fileID, void *ext)
   if ( EXT_Debug )
     Message("blocklen = %lu", blocklen);
 
-  hprec = blocklen / EXT_HEADER_LEN;
+  size_t hprec = blocklen / EXT_HEADER_LEN;
 
-  extp->prec = hprec;
+  extp->prec = (int)hprec;
 
   switch ( hprec )
     {
@@ -484,7 +483,7 @@ int extRead(int fileID, void *ext)
   else
     buffer = extp->buffer;
 
-  dprec = blocklen / extp->datasize;
+  size_t dprec = blocklen / extp->datasize;
 
   if ( dprec == hprec )
     {
