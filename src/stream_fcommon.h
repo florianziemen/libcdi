@@ -3,6 +3,11 @@
 
 #include "cdi_int.h"
 
+enum {
+  SINGLE_PRECISION = 4,
+  DOUBLE_PRECISION = 8,
+};
+
 void streamFCopyRecord(stream_t *streamptr2, stream_t *streamptr1,
                        const char *container_name);
 

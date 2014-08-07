@@ -13,11 +13,9 @@
 #include "error.h"
 #include "file.h"
 #include "binary.h"
+#include "stream_fcommon.h"
 #include "swap.h"
 
-
-#define  SINGLE_PRECISION    4
-#define  DOUBLE_PRECISION    8
 
 enum {
   EXT_HEADER_LEN = 4,
