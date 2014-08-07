@@ -3,6 +3,7 @@
 #endif
 
 #include <assert.h>
+#include <limits.h>
 
 #include "dmemory.h"
 #include "cdi.h"
@@ -307,10 +308,13 @@ enum {
 
 static int instituteGetPackSize(institute_t *ip, void *context)
 {
-  int txsize = serializeGetSize(institute_nints, DATATYPE_INT, context)
-    + serializeGetSize(strlen(ip->name) + 1, DATATYPE_TXT, context)
-    + serializeGetSize(strlen(ip->longname) + 1, DATATYPE_TXT, context);
-  return txsize;
+  size_t namelen = strlen(ip->name), longnamelen = strlen(ip->longname);
+  xassert(namelen < INT_MAX && longnamelen < INT_MAX);
+  size_t txsize = (size_t)serializeGetSize(institute_nints, DATATYPE_INT, context)
+    + (size_t)serializeGetSize((int)namelen + 1, DATATYPE_TXT, context)
+    + (size_t)serializeGetSize((int)longnamelen + 1, DATATYPE_TXT, context);
+  xassert(txsize <= INT_MAX);
+  return (int)txsize;
 }
 
 static void institutePackP(void * instituteptr, void *buf, int size, int *position, void *context)
@@ -334,7 +338,7 @@ int instituteUnpack(void *buf, int size, int *position, int originNamespace,
   int instituteID;
   char *name, *longname;
   serializeUnpack(buf, size, position, tempbuf, institute_nints, DATATYPE_INT, context);
-  name = (char *)xmalloc(tempbuf[3] + tempbuf[4]);
+  name = (char *)xmalloc((size_t)tempbuf[3] + (size_t)tempbuf[4]);
   longname = name + tempbuf[3];
   serializeUnpack(buf, size, position, name, tempbuf[3], DATATYPE_TXT, context);
   serializeUnpack(buf, size, position, longname, tempbuf[4], DATATYPE_TXT, context);
