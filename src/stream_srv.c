@@ -2,6 +2,7 @@
 #  include "config.h"
 #endif
 
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -204,7 +205,7 @@ void srvWriteRecord(stream_t *streamptr, const double *data)
 
 static
 void srv_add_record(stream_t *streamptr, int param, int level, int xsize, int ysize,
-                    long recsize, off_t position, int prec)
+                    size_t recsize, off_t position, int prec)
 {
   int leveltype;
   int gridID = CDI_UNDEFID;
@@ -244,8 +245,9 @@ void srv_add_record(stream_t *streamptr, int param, int level, int xsize, int ys
   varAddRecord(recID, param, gridID, leveltype, 0, level, 0, 0, 0,
 	       datatype, &varID, &levelID, UNDEFID, 0, 0, NULL, NULL, NULL, NULL);
 
-  (*record).varID   = varID;
-  (*record).levelID = levelID;
+  xassert(varID <= SHRT_MAX && levelID <= SHRT_MAX);
+  (*record).varID   = (short)varID;
+  (*record).levelID = (short)levelID;
 
   streamptr->tsteps[tsID].nallrecs++;
   streamptr->nrecs++;
@@ -295,7 +297,6 @@ void srvScanTimestep1(stream_t *streamptr)
   DateTime datetime, datetime0;
   int tsID;
   int varID;
-  long recsize;
   off_t recpos;
   int nrecords, nrecs, recID;
   int taxisID = -1;
@@ -324,7 +325,7 @@ void srvScanTimestep1(stream_t *streamptr)
 	  streamptr->ntsteps = 1;
 	  break;
 	}
-      recsize = fileGetPos(fileID) - recpos;
+      size_t recsize = (size_t)(fileGetPos(fileID) - recpos);
 
       srvInqHeader(srvp, header);
 
@@ -375,8 +376,8 @@ void srvScanTimestep1(stream_t *streamptr)
 
   taxisID = taxisCreate(TAXIS_ABSOLUTE);
   taxis->type  = TAXIS_ABSOLUTE;
-  taxis->vdate = datetime0.date;
-  taxis->vtime = datetime0.time;
+  taxis->vdate = (int)datetime0.date;
+  taxis->vtime = (int)datetime0.time;
 
   vlistID = streamptr->vlistID;
   vlistDefTaxis(vlistID, taxisID);
@@ -388,10 +389,11 @@ void srvScanTimestep1(stream_t *streamptr)
     {
       streamptr->tsteps[0].recordSize = nrecords;
       streamptr->tsteps[0].records =
-	(record_t *) realloc(streamptr->tsteps[0].records, nrecords*sizeof(record_t));
+	(record_t *)xrealloc(streamptr->tsteps[0].records,
+                             (size_t)nrecords * sizeof(record_t));
     }
 
-  streamptr->tsteps[0].recIDs = (int *) malloc(nrecords*sizeof(int));
+  streamptr->tsteps[0].recIDs = (int *)xmalloc((size_t)nrecords * sizeof (int));
   streamptr->tsteps[0].nrecs = nrecords;
   for ( recID = 0; recID < nrecords; recID++ )
     streamptr->tsteps[0].recIDs[recID] = recID;
@@ -429,7 +431,6 @@ int srvScanTimestep2(stream_t *streamptr)
   int rcode = 0, rlevel = 0, vdate = 0, vtime = 0;
   int tsID;
   int varID;
-  long recsize;
   off_t recpos = 0;
   int nrecords, nrecs, recID, rindex;
   int nextstep;
@@ -454,7 +455,7 @@ int srvScanTimestep2(stream_t *streamptr)
   cdi_create_records(streamptr, tsID);
 
   nrecords = streamptr->tsteps[0].nallrecs;
-  streamptr->tsteps[1].recIDs = (int *) malloc(nrecords*sizeof(int));
+  streamptr->tsteps[1].recIDs = (int *)xmalloc((size_t)nrecords * sizeof (int));
   streamptr->tsteps[1].nrecs = 0;
   for ( recID = 0; recID < nrecords; recID++ )
     streamptr->tsteps[1].recIDs[recID] = -1;
@@ -477,7 +478,7 @@ int srvScanTimestep2(stream_t *streamptr)
 	  streamptr->ntsteps = 2;
 	  break;
 	}
-      recsize = fileGetPos(fileID) - recpos;
+      size_t recsize = (size_t)(fileGetPos(fileID) - recpos);
 
       srvInqHeader(srvp, header);
 
@@ -604,7 +605,6 @@ int srvScanTimestep(stream_t *streamptr)
   /* int rxsize = 0, rysize = 0; */
   int param = 0;
   int rcode = 0, rlevel = 0, vdate = 0, vtime = 0;
-  long recsize = 0;
   off_t recpos = 0;
   int recID;
   taxis_t *taxis;
@@ -633,7 +633,8 @@ int srvScanTimestep(stream_t *streamptr)
       nrecs = streamptr->tsteps[1].nrecs;
 
       streamptr->tsteps[tsID].nrecs = nrecs;
-      streamptr->tsteps[tsID].recIDs = (int *) malloc(nrecs*sizeof(int));
+      streamptr->tsteps[tsID].recIDs
+        = (int *)xmalloc((size_t)nrecs * sizeof (int));
       for ( recID = 0; recID < nrecs; recID++ )
 	streamptr->tsteps[tsID].recIDs[recID] = streamptr->tsteps[1].recIDs[recID];
 
@@ -650,7 +651,7 @@ int srvScanTimestep(stream_t *streamptr)
 	      streamptr->ntsteps = streamptr->rtsteps + 1;
 	      break;
 	    }
-	  recsize = fileGetPos(fileID) - recpos;
+	  size_t recsize = (size_t)(fileGetPos(fileID) - recpos);
 
 	  srvInqHeader(srvp, header);
 
