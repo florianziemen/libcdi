@@ -1307,7 +1307,7 @@ int gridInqMask(int gridID, int *mask)
 
   if (mask && gridptr->mask)
     for (long i = 0; i < size; ++i)
-      mask[i] = gridptr->mask[i];
+      mask[i] = (int)gridptr->mask[i];
 
   if ( gridptr->mask == NULL ) size = 0;
 
@@ -1335,31 +1335,30 @@ void gridDefMask(int gridID, const int *mask)
   else
     {
       if ( gridptr->mask == NULL )
-	gridptr->mask = (mask_t *)xmalloc(size*sizeof(mask_t));
+	gridptr->mask = (mask_t *)xmalloc((size_t)size*sizeof(mask_t));
       else if ( CDI_Debug )
 	Warning("grid mask already defined!");
 
       for (long i = 0; i < size; ++i )
-	gridptr->mask[i] = mask[i];
+	gridptr->mask[i] = (mask_t)(mask[i] != 0);
     }
 }
 
 
 int gridInqMaskGME(int gridID, int *mask)
 {
-  long size, i;
   grid_t *gridptr = ( grid_t *) reshGetVal ( gridID, &gridOps );
 
   grid_check_ptr(gridID, gridptr);
 
-  size = gridptr->size;
+  long size = gridptr->size;
 
   if ( CDI_Debug && size == 0 )
     Warning("Size undefined for gridID = %d", gridID);
 
   if ( mask && gridptr->mask_gme )
-    for ( i = 0; i < size; ++i )
-      mask[i] = gridptr->mask_gme[i];
+    for (long i = 0; i < size; ++i)
+      mask[i] = (int)gridptr->mask_gme[i];
 
   if ( gridptr->mask_gme == NULL ) size = 0;
 
@@ -1379,12 +1378,12 @@ void gridDefMaskGME(int gridID, const int *mask)
     Error("Size undefined for gridID = %d", gridID);
 
   if ( gridptr->mask_gme == NULL )
-    gridptr->mask_gme = (mask_t *)xmalloc(size*sizeof(mask_t));
+    gridptr->mask_gme = (mask_t *)xmalloc((size_t)size * sizeof (mask_t));
   else if ( CDI_Debug )
     Warning("mask already defined!");
 
-  for (long i = 0; i < size; ++i )
-    gridptr->mask_gme[i] = mask[i];
+  for (long i = 0; i < size; ++i)
+    gridptr->mask_gme[i] = (mask_t)(mask[i] != 0);
 }
 
 /*
@@ -1409,11 +1408,11 @@ Otherwise, 0 is returned and @func{xvals} is empty.
 */
 int gridInqXvals(int gridID, double *xvals)
 {
-  long size;
   grid_t *gridptr = ( grid_t *) reshGetVal ( gridID, &gridOps );
 
   grid_check_ptr(gridID, gridptr);
 
+  long size;
   if ( gridptr->type == GRID_CURVILINEAR || gridptr->type == GRID_UNSTRUCTURED )
     size = gridptr->size;
   else if ( gridptr->type == GRID_GAUSSIAN_REDUCED )
@@ -1425,7 +1424,7 @@ int gridInqXvals(int gridID, double *xvals)
     Warning("size undefined for gridID = %d", gridID);
 
   if ( size && xvals && gridptr->xvals )
-    memcpy(xvals, gridptr->xvals, size*sizeof(double));
+    memcpy(xvals, gridptr->xvals, (size_t)size * sizeof (double));
 
   if ( gridptr->xvals == NULL ) size = 0;
 
@@ -1469,8 +1468,9 @@ void gridDefXvals(int gridID, const double *xvals)
 
   if (gridptr->xvals && CDI_Debug)
     Warning("values already defined!");
-  gridptr->xvals = (double *)xrealloc(gridptr->xvals, size * sizeof(double));
-  memcpy(gridptr->xvals, xvals, size*sizeof(double));
+  gridptr->xvals = (double *)xrealloc(gridptr->xvals,
+                                      (size_t)size * sizeof(double));
+  memcpy(gridptr->xvals, xvals, (size_t)size * sizeof (double));
   reshSetStatus(gridID, &gridOps, RESH_DESYNC_IN_USE);
 }
 
@@ -4653,7 +4653,7 @@ gridPack(void * voidP, void * packBuffer, int packBufferSize,
 
   if ( gridP->reference )
     {
-      size = strlen ( gridP->reference ) + 1;
+      size = (int)strlen(gridP->reference) + 1;
       serializePack(&size, 1, DATATYPE_INT,
                     packBuffer, packBufferSize, packBufferPos, context);
       serializePack(gridP->reference, size, DATATYPE_TXT,
