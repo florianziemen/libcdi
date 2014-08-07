@@ -19,7 +19,9 @@
 #define  SINGLE_PRECISION    4
 #define  DOUBLE_PRECISION    8
 
-#define  EXT_HEADER_LEN      4
+enum {
+  EXT_HEADER_LEN = 4,
+};
 
 
 static int initExtLib       = 0;
