@@ -232,7 +232,7 @@ int extDefHeader(void *ext, const int *header)
   for ( i = 0; i < EXT_HEADER_LEN; i++ )
     extp->header[i] = header[i];
 
-  extp->datasize = header[3];
+  extp->datasize = (size_t)header[3];
   if ( extp->number == EXT_COMP ) extp->datasize *= 2;
 
   if ( EXT_Debug ) Message("datasize = %lu", extp->datasize);
@@ -333,9 +333,9 @@ int extDefData(void *ext, int prec, const void *data)
 
   header = extp->header;
 
-  datasize = header[3];
+  datasize = (size_t)header[3];
   if ( extp->number == EXT_COMP ) datasize *= 2;
-  blocklen = datasize * rprec;
+  blocklen = datasize * (size_t)rprec;
 
   extp->datasize = datasize;
 
