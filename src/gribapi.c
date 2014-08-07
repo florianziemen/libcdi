@@ -17,19 +17,26 @@
 #define STRING(x)	XSTRING(x)
 
 static char gribapi_libvers[64] = "";
+#if  defined  (HAVE_LIBGRIB_API)
+static int gribapi_libvers_init;
+#endif
 
 const char *gribapiLibraryVersion(void)
 {
 #if  defined  (HAVE_LIBGRIB_API)
-  long version = grib_get_api_version();
-  int major_version, minor_version, revision_version;
+  if (!gribapi_libvers_init)
+    {
+      long version = grib_get_api_version();
+      int major_version, minor_version, revision_version;
 
-  major_version    = version/10000;
-  minor_version    = (version-major_version*10000)/100;
-  revision_version = (version-major_version*10000-minor_version*100);
+      major_version    = (int)(version/10000L);
+      minor_version    = (int)(version-(long)major_version*10000L)/100;
+      revision_version = (int)(version-(long)major_version*10000L - minor_version*100);
 
-  sprintf(gribapi_libvers, "%d.%d.%d",
-	  major_version, minor_version, revision_version);
+      sprintf(gribapi_libvers, "%d.%d.%d",
+              major_version, minor_version, revision_version);
+      gribapi_libvers_init = 1;
+    }
 #endif
 
   return (gribapi_libvers);
@@ -69,8 +76,8 @@ void gribContainersNew(stream_t * streamptr)
 
       streamptr->gribContainers = (void **) gribContainers;
 #else
-      gribContainer_t *gribContainers;
-      gribContainers = (gribContainer_t *) malloc(nvars*sizeof(gribContainer_t));
+      gribContainer_t *gribContainers
+        = (gribContainer_t *)xmalloc((size_t)nvars*sizeof(gribContainer_t));
 
       for ( int varID = 0; varID < nvars; ++varID )
         {
