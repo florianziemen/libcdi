@@ -4001,8 +4001,9 @@ void cdf_write_var_chunk(stream_t *streamptr, int varID, int memtype,
 }
 #endif
 
+#if  defined  (HAVE_LIBNETCDF)
 static
-int set_validrange(long gridsize, double *data, double missval, double validmin, double validmax)
+int set_validrangeDP(long gridsize, double *data, double missval, double validmin, double validmax)
 {
   long i;
   int nmiss = 0;
@@ -4050,6 +4051,56 @@ int set_validrange(long gridsize, double *data, double missval, double validmin,
   return (nmiss);
 }
 
+static
+int set_validrangeSP(long gridsize, float *data, double missval, double validmin, double validmax)
+{
+  long i;
+  int nmiss = 0;
+  /*
+  for ( i = 0; i < gridsize; i++, data++ )
+    {
+      if ( IS_NOT_EQUAL(validmin, VALIDMISS) && (*data) < validmin ) *data = missval;
+      if ( IS_NOT_EQUAL(validmax, VALIDMISS) && (*data) > validmax ) *data = missval;
+      if ( DBL_IS_EQUAL((*data), missval) ) nmiss++;
+    }
+  */
+  // 21/01/2014 Florian Prill: SX-9 vectorization
+
+  if ( IS_NOT_EQUAL(validmin, VALIDMISS) && !IS_NOT_EQUAL(validmax, VALIDMISS) )
+    {
+      for ( i = 0; i < gridsize; i++, data++ )
+        {
+          if ( (*data) < validmin )  { (*data) = missval; nmiss++; }
+          else if ( DBL_IS_EQUAL((*data), missval) )  nmiss++;
+        } // i
+    }
+  else if ( IS_NOT_EQUAL(validmax, VALIDMISS) && !IS_NOT_EQUAL(validmin, VALIDMISS))
+    {
+      for ( i = 0; i < gridsize; i++, data++ )
+        {
+          if ( (*data) > validmax )  { (*data) = missval; nmiss++; }
+          else if ( DBL_IS_EQUAL((*data), missval) )  nmiss++;
+        } // i
+    }
+  else if ( IS_NOT_EQUAL(validmin, VALIDMISS) && IS_NOT_EQUAL(validmax, VALIDMISS))
+    {
+      for ( i = 0; i < gridsize; i++, data++ )
+        {
+          if      ( (*data) < validmin )  { (*data) = missval; nmiss++; }
+          else if ( (*data) > validmax )  { (*data) = missval; nmiss++; }
+          else if ( DBL_IS_EQUAL((*data), missval) )  nmiss++;
+        } // i
+    }
+  else
+    {
+      for ( i = 0; i < gridsize; i++, data++ )
+        if ( DBL_IS_EQUAL((*data), missval) ) nmiss++;
+    }
+
+  return (nmiss);
+}
+#endif
+
 #if  defined  (HAVE_LIBNETCDF)
 static
 size_t min_size(size_t a, size_t b)
@@ -4064,6 +4115,30 @@ void transpose2dArrayDP(size_t inWidth, size_t inHeight, double* data)
                                        // which should be a decent compromise on many architectures.
   double (*temp)[inWidth] = malloc(inHeight*sizeof(*temp));
   double (*out)[inHeight] = (double (*)[inHeight])data;
+  memcpy(temp, data, inHeight*sizeof(*temp));
+  for ( size_t yBlock = 0; yBlock < inHeight; yBlock++ )
+    {
+      for ( size_t xBlock = 0; xBlock < inWidth; xBlock++ )
+        {
+          for ( size_t y = yBlock, yEnd = min_size(yBlock + cacheBlockSize, inHeight); y < yEnd; y++ )
+            {
+              for ( size_t x = xBlock, xEnd = min_size(xBlock + cacheBlockSize, inWidth); x < xEnd; x++ )
+                {
+                  out[x][y] = temp[y][x];
+                }
+            }
+        }
+    }
+  free(temp);
+}
+
+static
+void transpose2dArraySP(size_t inWidth, size_t inHeight, float* data)
+{
+  const size_t cacheBlockSize = 32;    // Purely an optimization parameter. Current value of 32 means we are handling 8kB blocks,
+                                       // which should be a decent compromise on many architectures.
+  float (*temp)[inWidth] = malloc(inHeight*sizeof(*temp));
+  float (*out)[inHeight] = (float (*)[inHeight])data;
   memcpy(temp, data, inHeight*sizeof(*temp));
   for ( size_t yBlock = 0; yBlock < inHeight; yBlock++ )
     {
@@ -4267,13 +4342,78 @@ void cdfReadVarSliceDP(stream_t *streamptr, int varID, int levelID, double *data
   bool haveMissval = vlistInqVarMissvalUsed(vlistID, varID);
   if ( haveMissval && vlistInqVarValidrange(vlistID, varID, validrange) )
     {
-      *nmiss = set_validrange(gridsize, data, missval, validrange[0], validrange[1]);
+      *nmiss = set_validrangeDP(gridsize, data, missval, validrange[0], validrange[1]);
     }
   else
     {
       double addoffset = vlistInqVarAddoffset(vlistID, varID);
       double scalefactor = vlistInqVarScalefactor(vlistID, varID);
       *nmiss = cdfDoInputDataTransformationDP(gridsize, data, haveMissval, missval, scalefactor, addoffset);
+    }
+#endif
+}
+
+
+void cdfReadVarSliceSP(stream_t *streamptr, int varID, int levelID, float *data, int *nmiss)
+{
+#if  defined  (HAVE_LIBNETCDF)
+  size_t start[4];
+  size_t count[4];
+  int i;
+
+  if ( CDI_Debug )
+    Message("streamID = %d  varID = %d  levelID = %d", streamptr->self, varID, levelID);
+
+  int vlistID = streamptr->vlistID;
+  int fileID = streamptr->fileID;
+
+  bool swapxy;
+  cdfGetSliceSlapDescription(streamptr, varID, levelID, &swapxy, &start, &count);
+
+  int ncvarid = streamptr->vars[varID].ncvarid;
+  int gridId = vlistInqVarGrid(vlistID, varID);
+  int gridsize = gridInqSize(gridId);
+  int xsize = gridInqXsize(gridId);
+  int ysize = gridInqYsize(gridId);
+
+  if ( vlistInqVarDatatype(vlistID, varID) == DATATYPE_FLT64 )
+    {
+      double *data_dp = malloc(gridsize*sizeof(*data_dp));
+      cdf_get_vara_double(fileID, ncvarid, start, count, data_dp);
+      for ( i = 0; i < gridsize; i++ )
+        data[i] = (float) data_dp[i];
+      free(data_dp);
+    }
+  else if ( vlistInqVarDatatype(vlistID, varID) == DATATYPE_UINT8 )
+    {
+      nc_type xtype;
+      cdf_inq_vartype(fileID, ncvarid, &xtype);
+      if ( xtype == NC_BYTE )
+        {
+          for ( i = 0; i < gridsize; i++ )
+            if ( data[i] < 0 ) data[i] += 256;
+        }
+    }
+  else
+    {
+      cdf_get_vara_float(fileID, ncvarid, start, count, data);
+    }
+
+  if ( swapxy ) transpose2dArraySP(xsize, ysize, data);
+
+  *nmiss = 0;
+  double missval = vlistInqVarMissval(vlistID, varID);
+  double validrange[2];
+  bool haveMissval = vlistInqVarMissvalUsed(vlistID, varID);
+  if ( haveMissval && vlistInqVarValidrange(vlistID, varID, validrange) )
+    {
+      *nmiss = set_validrangeSP(gridsize, data, missval, validrange[0], validrange[1]);
+    }
+  else
+    {
+      double addoffset = vlistInqVarAddoffset(vlistID, varID);
+      double scalefactor = vlistInqVarScalefactor(vlistID, varID);
+      *nmiss = cdfDoInputDataTransformationSP(gridsize, data, haveMissval, missval, scalefactor, addoffset);
     }
 #endif
 }
