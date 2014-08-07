@@ -1385,8 +1385,8 @@ size_t filePtrRead(void *vfileptr, void *restrict ptr, size_t size)
 	    }
 	}
 
-      fileptr->position  += nread;
-      fileptr->byteTrans += nread;
+      fileptr->position  += (off_t)nread;
+      fileptr->byteTrans += (off_t)nread;
       fileptr->access++;
     }
 
@@ -1425,8 +1425,8 @@ size_t fileRead(int fileID, void *restrict ptr, size_t size)
 
       if ( FileInfo ) fileptr->time_in_sec += file_time() - t_begin;
 
-      fileptr->position  += nread;
-      fileptr->byteTrans += nread;
+      fileptr->position  += (off_t)nread;
+      fileptr->byteTrans += (off_t)nread;
       fileptr->access++;
     }
 
@@ -1454,12 +1454,21 @@ size_t fileWrite(int fileID, const void *restrict ptr, size_t size)
       if ( fileptr->type == FILE_TYPE_FOPEN )
         nwrite = fwrite(ptr, 1, size, fileptr->fp);
       else
-        nwrite =  write(fileptr->fd, ptr, size);
+        {
+          ssize_t temp = write(fileptr->fd, ptr, size);
+          if (temp == -1)
+            {
+              perror("error writing to file");
+              nwrite = 0;
+            }
+          else
+            nwrite = (size_t)temp;
+        }
 
       if ( FileInfo ) fileptr->time_in_sec += file_time() - t_begin;
 
-      fileptr->position  += nwrite;
-      fileptr->byteTrans += nwrite;
+      fileptr->position  += (off_t)nwrite;
+      fileptr->byteTrans += (off_t)nwrite;
       fileptr->access++;
     }
 
