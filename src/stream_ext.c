@@ -206,7 +206,7 @@ void extAddRecord(stream_t *streamptr, int param, int level, int xysize,
 		  size_t recsize, off_t position, int prec, int number)
 {
   int leveltype;
-  int gridID = UNDEFID;
+  int gridID = CDI_UNDEFID;
   int levelID = 0;
   int tsID, recID, varID;
   record_t *record;
@@ -423,7 +423,6 @@ int extScanTimestep2(stream_t *streamptr)
   int rcode = 0, rlevel = 0, vdate = 0, vtime = 0;
   int tsID;
   int varID;
-  long recsize;
   off_t recpos = 0;
   int nrecords, nrecs, recID, rindex;
   int nextstep;
@@ -471,7 +470,7 @@ int extScanTimestep2(stream_t *streamptr)
 	  streamptr->ntsteps = 2;
 	  break;
 	}
-      recsize = fileGetPos(fileID) - recpos;
+      size_t recsize = (size_t)(fileGetPos(fileID) - recpos);
 
       extInqHeader(extp, header);
 
@@ -599,7 +598,6 @@ int extScanTimestep(stream_t *streamptr)
   // int rxysize = 0;
   int param = 0;
   int rcode = 0, rlevel = 0, vdate = 0, vtime = 0;
-  long recsize = 0;
   off_t recpos = 0;
   int recID;
   taxis_t *taxis;
@@ -646,7 +644,7 @@ int extScanTimestep(stream_t *streamptr)
 	      streamptr->ntsteps = streamptr->rtsteps + 1;
 	      break;
 	    }
-	  recsize = fileGetPos(fileID) - recpos;
+	  size_t recsize = (size_t)(fileGetPos(fileID) - recpos);
 
 	  extInqHeader(extp, header);
 
