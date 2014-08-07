@@ -57,7 +57,7 @@ void extDebug(int debug)
 }
 
 
-void extLibInit()
+static void extLibInit()
 {
   char *envString;
   char *envName = "EXT_PRECISION";
