@@ -4110,6 +4110,32 @@ void cdfInqDimIds(stream_t *streamptr, int varId, int (*outDimIds)[3])
 }
 
 static
+int cdfGetSkipDim(int fileId, int ncvarid, int (*dimIds)[3])
+{
+  if((*dimIds)[0] != UNDEFID) return 0;
+  if((*dimIds)[1] != UNDEFID) return 0;
+  int nvdims;
+  cdf_inq_varndims(fileId, ncvarid, &nvdims);
+  if(nvdims != 3) return 0;
+
+  int varDimIds[3];
+  cdf_inq_vardimid(fileId, ncvarid, varDimIds);
+  size_t size = 0;
+  if ( (*dimIds)[2] == varDimIds[2] )
+    {
+      cdf_inq_dimlen(fileId, varDimIds[1], &size);
+      if ( size == 1 ) return 1;
+    }
+  else if ( (*dimIds)[2] == varDimIds[1] )
+    {
+      cdf_inq_dimlen(fileId, varDimIds[2], &size);
+      if ( size == 1 ) return 2;
+    }
+  return 0;
+}
+
+
+static
 void cdfGetSliceSlapDescription(stream_t *streamptr, int varId, int levelId, bool *outSwapXY, size_t (*start)[4], size_t (*count)[4])
 {
   int tsID = streamptr->curTsID;
@@ -4118,8 +4144,6 @@ void cdfGetSliceSlapDescription(stream_t *streamptr, int varId, int levelId, boo
   int fileId = streamptr->fileID;
   int vlistId = streamptr->vlistID;
   int ncvarid = streamptr->vars[varId].ncvarid;
-  int nvdims;
-  cdf_inq_varndims(fileId, ncvarid, &nvdims);
 
   int gridId = vlistInqVarGrid(vlistId, varId);
   int tsteptype = vlistInqVarTsteptype(vlistId, varId);
@@ -4130,24 +4154,7 @@ void cdfGetSliceSlapDescription(stream_t *streamptr, int varId, int levelId, boo
   int dimIds[3];    //this array joins the old variables xid, yid, and zid
   cdfInqDimIds(streamptr, varId, &dimIds);
 
-  int skipdim = 0;
-  if ( dimIds[0] == UNDEFID && dimIds[1] == UNDEFID && nvdims == 3 )
-    {
-      int varDimIds[3];
-      cdf_inq_vardimid(fileId, ncvarid, varDimIds);
-
-      size_t size = 0;
-      if ( dimIds[2] == varDimIds[2] )
-        {
-          cdf_inq_dimlen(fileId, varDimIds[1], &size);
-          if ( size == 1 ) skipdim = 1;
-        }
-      else if ( dimIds[2] == varDimIds[1] )
-        {
-          cdf_inq_dimlen(fileId, varDimIds[2], &size);
-          if ( size == 1 ) skipdim = 2;
-        }
-    }
+  int skipdim = cdfGetSkipDim(fileId, ncvarid, &dimIds);
 
   int dimorder[3];
   vlistInqVarDimorder(vlistId, varId, &dimorder);
@@ -4198,6 +4205,9 @@ void cdfGetSliceSlapDescription(stream_t *streamptr, int varId, int levelId, boo
   if ( CDI_Debug )
     for (int idim = 0; idim < ndims; idim++)
       Message("dim = %d  start = %d  count = %d", idim, start[idim], count[idim]);
+
+  int nvdims;
+  cdf_inq_varndims(fileId, ncvarid, &nvdims);
 
   if ( nvdims != ndims )
     Error("Internal error, variable %s has an unsupported array structure!", vlistInqVarNamePtr(vlistId, varId));
