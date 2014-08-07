@@ -4050,6 +4050,7 @@ int set_validrange(long gridsize, double *data, double missval, double validmin,
   return (nmiss);
 }
 
+#if  defined  (HAVE_LIBNETCDF)
 static
 size_t min_size(size_t a, size_t b)
 {
@@ -4080,7 +4081,35 @@ void transpose2dArrayDP(size_t inWidth, size_t inHeight, double* data)
   free(temp);
 }
 
-#if  defined  (HAVE_LIBNETCDF)
+static
+void cdfInqDimIds(stream_t *streamptr, int varId, int (*outDimIds)[3])
+{
+  int gridId = vlistInqVarGrid(streamptr->vlistID, varId);
+  int gridindex = vlistGridIndex(streamptr->vlistID, gridId);
+
+  (*outDimIds)[0] = (*outDimIds)[1] = (*outDimIds)[2] = UNDEFID;
+  switch ( gridInqType(gridId) )
+    {
+      case GRID_TRAJECTORY:
+        cdfReadGridTraj(streamptr, gridId);
+        break;
+
+      case GRID_UNSTRUCTURED:
+        (*outDimIds)[0] = streamptr->xdimID[gridindex];
+        break;
+
+      default:
+        (*outDimIds)[0] = streamptr->xdimID[gridindex];
+        (*outDimIds)[1] = streamptr->ydimID[gridindex];
+        break;
+    }
+
+  int zaxisID = vlistInqVarZaxis(streamptr->vlistID, varId);
+  int zaxisindex = vlistZaxisIndex(streamptr->vlistID, zaxisID);
+  (*outDimIds)[2] = streamptr->zaxisID[zaxisindex];
+}
+
+static
 void cdfGetSliceSlapDescription(stream_t *streamptr, int varId, int levelId, bool *outSwapXY, size_t (*start)[4], size_t (*count)[4])
 {
   int tsID = streamptr->curTsID;
@@ -4093,56 +4122,37 @@ void cdfGetSliceSlapDescription(stream_t *streamptr, int varId, int levelId, boo
   cdf_inq_varndims(fileId, ncvarid, &nvdims);
 
   int gridId = vlistInqVarGrid(vlistId, varId);
-  int zaxisID = vlistInqVarZaxis(vlistId, varId);
   int tsteptype = vlistInqVarTsteptype(vlistId, varId);
   int gridsize = gridInqSize(gridId);
 
   streamptr->numvals += gridsize;
 
-  int gridindex = vlistGridIndex(vlistId, gridId);
-  int xid = UNDEFID, yid = UNDEFID;
-
-  if ( gridInqType(gridId) == GRID_TRAJECTORY )
-    {
-      cdfReadGridTraj(streamptr, gridId);
-    }
-  else if ( gridInqType(gridId) == GRID_UNSTRUCTURED )
-    {
-      xid = streamptr->xdimID[gridindex];
-    }
-  else
-    {
-      xid = streamptr->xdimID[gridindex];
-      yid = streamptr->ydimID[gridindex];
-    }
-
-  int zaxisindex = vlistZaxisIndex(vlistId, zaxisID);
-  int zid = streamptr->zaxisID[zaxisindex];
+  int dimIds[3];    //this array joins the old variables xid, yid, and zid
+  cdfInqDimIds(streamptr, varId, &dimIds);
 
   int skipdim = 0;
-  if ( xid == UNDEFID && yid == UNDEFID && nvdims == 3 )
+  if ( dimIds[0] == UNDEFID && dimIds[1] == UNDEFID && nvdims == 3 )
     {
-      int dimids[3];
-      cdf_inq_vardimid(fileId, ncvarid, dimids);
+      int varDimIds[3];
+      cdf_inq_vardimid(fileId, ncvarid, varDimIds);
+
       size_t size = 0;
-      if ( zid == dimids[2] )
+      if ( dimIds[2] == varDimIds[2] )
         {
-          cdf_inq_dimlen(fileId, dimids[1], &size);
+          cdf_inq_dimlen(fileId, varDimIds[1], &size);
           if ( size == 1 ) skipdim = 1;
         }
-      else if ( zid == dimids[1] )
+      else if ( dimIds[2] == varDimIds[1] )
         {
-          cdf_inq_dimlen(fileId, dimids[2], &size);
+          cdf_inq_dimlen(fileId, varDimIds[2], &size);
           if ( size == 1 ) skipdim = 2;
         }
     }
-  /*
-  printf("2 %p %d %d %s\n", streamptr, zaxisindex, streamptr->zaxisID[zaxisindex], vlistInqVarNamePtr(vlistId, varId));
-  */
+
   int dimorder[3];
   vlistInqVarDimorder(vlistId, varId, &dimorder);
 
-  *outSwapXY = (dimorder[2] == 2 || dimorder[0] == 1) && xid != UNDEFID && yid != UNDEFID ;
+  *outSwapXY = (dimorder[2] == 2 || dimorder[0] == 1) && dimIds[0] != UNDEFID && dimIds[1] != UNDEFID ;
 
   int ndims = 0;
 
@@ -4158,19 +4168,23 @@ void cdfGetSliceSlapDescription(stream_t *streamptr, int varId, int levelId, boo
   for ( int id = 0; id < 3; ++id )
     {
       size_t size;
-      if ( dimorder[id] == 3 && zid != UNDEFID )
+      int curDimId = dimIds[dimorder[id]-1];
+      if ( curDimId == UNDEFID ) continue;
+      switch ( dimorder[id] )
         {
-          addDimension(levelId, 1);
-        }
-      else if ( dimorder[id] == 2 && yid != UNDEFID )
-        {
-          cdf_inq_dimlen(fileId, yid, &size);
-          addDimension(0, size);
-        }
-      else if ( dimorder[id] == 1 && xid != UNDEFID )
-        {
-          cdf_inq_dimlen(fileId, xid, &size);
-          addDimension(0, size);
+          Error("Internal errror: Malformed dimension order encountered. Please report this bug.\n");
+          case 1:
+          case 2:
+            cdf_inq_dimlen(fileId, curDimId, &size);
+            addDimension(0, size);
+            break;
+
+          case 3:
+            addDimension(levelId, 1);
+            break;
+
+          default:
+            Error("Internal errror: Malformed dimension order encountered. Please report this bug.\n");
         }
     }
 
