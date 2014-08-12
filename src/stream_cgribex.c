@@ -25,6 +25,7 @@ typedef struct {
   int level1;
   int level2;
   int ltype;
+  int tsteptype;
 } compvar_t;
 
 
@@ -385,12 +386,13 @@ void cgribexAddRecord(stream_t * streamptr, int param, int *isec1, int *isec2, d
 
   /* fprintf(stderr, "param %d %d %d %d\n", param, level1, level2, ISEC1_LevelType); */
 
-  (*record).size     = recsize;
-  (*record).position = position;
-  (*record).param    = param;
-  (*record).ilevel   = level1;
-  (*record).ilevel2  = level2;
-  (*record).ltype    = ISEC1_LevelType;
+  (*record).size      = recsize;
+  (*record).position  = position;
+  (*record).param     = param;
+  (*record).ilevel    = level1;
+  (*record).ilevel2   = level2;
+  (*record).ltype     = ISEC1_LevelType;
+  (*record).tsteptype = tsteptype;
 
   cgribexGetGrid(streamptr, isec2, isec4, &grid, iret);
 
@@ -514,14 +516,16 @@ void cgribexDecodeHeader(int *isec0, int *isec1, int *isec2, double *fsec2,
 }
 
 static
-compvar_t cgribexVarSet(int param, int level1, int level2, int leveltype)
+compvar_t cgribexVarSet(int param, int level1, int level2, int leveltype, int trange)
 {
   compvar_t compVar;
+  int tsteptype = cgribexGetTsteptype(trange);
 
-  compVar.param  = param;
-  compVar.level1 = level1;
-  compVar.level2 = level2;
-  compVar.ltype  = leveltype;
+  compVar.param     = param;
+  compVar.level1    = level1;
+  compVar.level2    = level2;
+  compVar.ltype     = leveltype;
+  compVar.tsteptype = tsteptype;
 
   return (compVar);
 }
@@ -536,6 +540,7 @@ int cgribexVarCompare(compvar_t compVar, record_t record)
   compVar0.level1 = record.ilevel;
   compVar0.level2 = record.ilevel2;
   compVar0.ltype  = record.ltype;
+  compVar0.tsteptype = record.tsteptype;
 
   rstatus = memcmp(&compVar0, &compVar, sizeof(compvar_t));
 
@@ -675,7 +680,7 @@ int cgribexScanTimestep1(stream_t * streamptr)
 	  datetime.date  = vdate;
 	  datetime.time  = vtime;
 
-	  compVar = cgribexVarSet(param, level1, level2, ISEC1_LevelType);
+	  compVar = cgribexVarSet(param, level1, level2, ISEC1_LevelType, ISEC1_TimeRange);
 
 	  for ( recID = 0; recID < nrecs; recID++ )
 	    {
@@ -954,7 +959,7 @@ int cgribexScanTimestep2(stream_t * streamptr)
       datetime.date  = vdate;
       datetime.time  = vtime;
 
-      compVar = cgribexVarSet(param, level1, level2, ISEC1_LevelType);
+      compVar = cgribexVarSet(param, level1, level2, ISEC1_LevelType, ISEC1_TimeRange);
 
       for ( recID = 0; recID < nrecords; recID++ )
 	{
@@ -1222,7 +1227,7 @@ int cgribexScanTimestep(stream_t * streamptr)
 	  datetime.date  = vdate;
 	  datetime.time  = vtime;
 
-	  compVar = cgribexVarSet(param, level1, level2, ISEC1_LevelType);
+	  compVar = cgribexVarSet(param, level1, level2, ISEC1_LevelType, ISEC1_TimeRange);
 
 	  for ( vrecID = 0; vrecID < nrecs; vrecID++ )
 	    {

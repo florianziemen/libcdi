@@ -143,6 +143,7 @@ typedef struct
   int       ilevel;
   int       ilevel2;
   int       ltype;
+  int       tsteptype;
   short     used;
   short     varID;
   short     levelID;
