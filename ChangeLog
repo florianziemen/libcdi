@@ -5,6 +5,7 @@
 
 2014-08-12  Daniel Reinert
 
+	* listDestroy(): set resHListSize=0 [Bug #5058]
 	* NetCDF: Reading uuidOfVGrid [Bug #5046]
 
 2014-08-04  Nathanael Huebbe

@@ -172,6 +172,7 @@ static void listDestroy ( void )
   for (int i = resHListSize; i > 0; --i)
     if (resHList[i-1].resources)
       namespaceDelete(i-1);
+  resHListSize = 0;
   free(resHList);
   resHList = NULL;
   cdiReset();
