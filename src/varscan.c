@@ -338,7 +338,7 @@ void varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds,
       vartable[varID].lbounds    = lbounds;
       vartable[varID].level_sf   = level_sf;
       vartable[varID].level_unit = level_unit;
-      if ( tsteptype != UNDEFID ) vartable[varID].tsteptype = tsteptype;
+      vartable[varID].tsteptype  = tsteptype;
       if ( numavg ) vartable[varID].timave = 1;
 
       if ( name )     if ( name[0] )     vartable[varID].name     = strdup(name);
