@@ -28,6 +28,7 @@ typedef struct {
   int level1;
   int level2;
   int ltype;
+  int tsteptype;
   char name[32];
 } compvar2_t;
 
@@ -860,12 +861,13 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
 
   // fprintf(stderr, "param %d %d %d %d\n", param, level1, level2, leveltype);
 
-  (*record).size     = recsize;
-  (*record).position = position;
-  (*record).param    = param;
-  (*record).ilevel   = level1;
-  (*record).ilevel2  = level2;
-  (*record).ltype    = leveltype;
+  (*record).size      = recsize;
+  (*record).position  = position;
+  (*record).param     = param;
+  (*record).ilevel    = level1;
+  (*record).ilevel2   = level2;
+  (*record).ltype     = leveltype;
+  (*record).tsteptype = tsteptype;
   memcpy((*record).varname, varname, len);
 
   gribapiGetGrid(gh, &grid);
@@ -1074,17 +1076,18 @@ int gribapiGetParam(grib_handle *gh)
 }
 
 static
-compvar2_t gribapiVarSet(int param, int level1, int level2, int leveltype, char *name)
+compvar2_t gribapiVarSet(int param, int level1, int level2, int leveltype, int tsteptype, char *name)
 {
   compvar2_t compVar;
   size_t maxlen = sizeof(compVar.name);
   size_t len = strlen(name);
   if ( len > maxlen ) len = maxlen;
 
-  compVar.param  = param;
-  compVar.level1 = level1;
-  compVar.level2 = level2;
-  compVar.ltype  = leveltype;
+  compVar.param     = param;
+  compVar.level1    = level1;
+  compVar.level2    = level2;
+  compVar.ltype     = leveltype;
+  compVar.tsteptype = tsteptype;
   memset(compVar.name, 0, maxlen);
   memcpy(compVar.name, name, len);
 
@@ -1094,17 +1097,17 @@ compvar2_t gribapiVarSet(int param, int level1, int level2, int leveltype, char 
 static
 int gribapiVarCompare(compvar2_t compVar, record_t record)
 {
-  int rstatus;
   compvar2_t compVar0;
   size_t maxlen = sizeof(compVar.name);
 
-  compVar0.param  = record.param;
-  compVar0.level1 = record.ilevel;
-  compVar0.level2 = record.ilevel2;
-  compVar0.ltype  = record.ltype;
+  compVar0.param     = record.param;
+  compVar0.level1    = record.ilevel;
+  compVar0.level2    = record.ilevel2;
+  compVar0.ltype     = record.ltype;
+  compVar0.tsteptype = record.tsteptype;
   memcpy(compVar0.name, record.varname, maxlen);
 
-  rstatus = memcmp(&compVar0, &compVar, sizeof(compvar2_t));
+  int rstatus = memcmp(&compVar0, &compVar, sizeof(compvar2_t));
 
   return (rstatus);
 }
@@ -1152,6 +1155,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
   int lieee = FALSE;
   int lbounds;
   int level_sf, level_unit;
+  int tsteptype;
   char paramstr[32];
   char varname[256];
 
@@ -1247,6 +1251,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
       if ( len > 32 ) len = 32;
       //printf("param = %s  name = %s   l1 = %d  l2 = %d\n", paramstr, varname, level1, level2);
 
+      tsteptype = gribapiGetTsteptype(gh);
       gribapiGetValidityDateTime(gh, &vdate, &vtime);
       /*
       printf("%d %d %d\n", vdate, vtime, leveltype);
@@ -1284,7 +1289,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
 	  datetime.date  = vdate;
 	  datetime.time  = vtime;
 
-	  compVar = gribapiVarSet(param, level1, level2, leveltype, varname);
+	  compVar = gribapiVarSet(param, level1, level2, leveltype, tsteptype, varname);
 
 	  for ( recID = 0; recID < nrecs; recID++ )
             if ( gribapiVarCompare(compVar, streamptr->tsteps[0].records[recID]) == 0 ) break;
@@ -1596,7 +1601,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
       datetime.date  = vdate;
       datetime.time  = vtime;
 
-      compVar = gribapiVarSet(param, level1, level2, leveltype, varname);
+      compVar = gribapiVarSet(param, level1, level2, leveltype, tsteptype, varname);
 
       for ( recID = 0; recID < nrecords; recID++ )
         if ( gribapiVarCompare(compVar, streamptr->tsteps[tsID].records[recID]) == 0 ) break;
@@ -1872,7 +1877,9 @@ int gribapiScanTimestep(stream_t * streamptr)
 	  datetime.date  = vdate;
 	  datetime.time  = vtime;
 
-	  compVar = gribapiVarSet(param, level1, level2, leveltype, varname);
+          int tsteptype = gribapiGetTsteptype(gh);
+
+	  compVar = gribapiVarSet(param, level1, level2, leveltype, tsteptype, varname);
 
 	  for ( vrecID = 0; vrecID < nrecs; vrecID++ )
 	    {
