@@ -1313,8 +1313,12 @@ void splitTimevalue(double timevalue, int timeunit, int *date, int *time)
       vdate = cdiEncodeDate(year, month, day);
       vtime = cdiEncodeTime(hour, minute, second);
 
-      Warning("Reset wrong date/time to %4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d!",
-	      year, month, day, hour, minute, second);
+      if ( lwarn )
+        {
+          lwarn = FALSE;
+          Warning("Reset wrong date/time to %4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d!",
+                  year, month, day, hour, minute, second);
+        }
     }
 
   *date = vdate;
