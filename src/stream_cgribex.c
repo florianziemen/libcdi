@@ -533,16 +533,15 @@ compvar_t cgribexVarSet(int param, int level1, int level2, int leveltype, int tr
 static
 int cgribexVarCompare(compvar_t compVar, record_t record)
 {
-  int rstatus;
   compvar_t compVar0;
 
-  compVar0.param  = record.param;
-  compVar0.level1 = record.ilevel;
-  compVar0.level2 = record.ilevel2;
-  compVar0.ltype  = record.ltype;
+  compVar0.param     = record.param;
+  compVar0.level1    = record.ilevel;
+  compVar0.level2    = record.ilevel2;
+  compVar0.ltype     = record.ltype;
   compVar0.tsteptype = record.tsteptype;
 
-  rstatus = memcmp(&compVar0, &compVar, sizeof(compvar_t));
+  int rstatus = memcmp(&compVar0, &compVar, sizeof(compvar_t));
 
   return (rstatus);
 }

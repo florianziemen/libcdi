@@ -121,7 +121,7 @@ void paramInitEntry(int varID, int param)
 }
 
 static
-int varGetEntry(int param, int zaxistype, int ltype, const char *name)
+int varGetEntry(int param, int zaxistype, int ltype, int tsteptype, const char *name)
 {
   int varID;
 
@@ -129,7 +129,8 @@ int varGetEntry(int param, int zaxistype, int ltype, const char *name)
     {
       if ( vartable[varID].param     == param     &&
 	   vartable[varID].zaxistype == zaxistype &&
-	   vartable[varID].ltype     == ltype )
+	   vartable[varID].ltype     == ltype     &&
+	   vartable[varID].tsteptype == tsteptype )
         {
           if ( name && name[0] && vartable[varID].name && vartable[varID].name[0] )
             {
@@ -325,17 +326,17 @@ void varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds,
   int levelID = -1;
 
   if ( ! (cdiSplitLtype105 == 1 && zaxistype == ZAXIS_HEIGHT) )
-    varID = varGetEntry(param, zaxistype, ltype, name);
+    varID = varGetEntry(param, zaxistype, ltype, tsteptype, name);
 
   if ( varID == UNDEFID )
     {
       nvars++;
       varID = paramNewEntry(param);
-      vartable[varID].gridID    = gridID;
-      vartable[varID].zaxistype = zaxistype;
-      vartable[varID].ltype     = ltype;
-      vartable[varID].lbounds   = lbounds;
-      vartable[varID].level_sf  = level_sf;
+      vartable[varID].gridID     = gridID;
+      vartable[varID].zaxistype  = zaxistype;
+      vartable[varID].ltype      = ltype;
+      vartable[varID].lbounds    = lbounds;
+      vartable[varID].level_sf   = level_sf;
       vartable[varID].level_unit = level_unit;
       if ( tsteptype != UNDEFID ) vartable[varID].tsteptype = tsteptype;
       if ( numavg ) vartable[varID].timave = 1;
@@ -449,23 +450,20 @@ void cdi_generate_vars(stream_t *streamptr)
   double *dlevels = NULL;
   double *dlevels1 = NULL;
   double *dlevels2 = NULL;
-  int vlistID;
-  int *varids, index, varid;
+  int index, varid;
   double level_sf = 1;
+  int vlistID = streamptr->vlistID;
 
-  vlistID =  streamptr->vlistID;
-
-  varids = (int *) malloc(nvars*sizeof(int));
+  int *varids = (int *) malloc(nvars*sizeof(int));
   for ( varID = 0; varID < nvars; varID++ ) varids[varID] = varID;
 
   if ( streamptr->sortname )
     {
-      int index;
       param_t **varInfo;
       varInfo    = (param_t **) malloc(nvars*sizeof(param_t *));
       varInfo[0] = (param_t *)  malloc(nvars*sizeof(param_t));
 
-      for ( index = 1; index < nvars; index++ )
+      for ( int index = 1; index < nvars; index++ )
 	varInfo[index] = varInfo[0] + index;
 
       for ( varid = 0; varid < nvars; varid++ )

@@ -375,6 +375,8 @@ void printShortinfo(int streamID, int vlistID, int vardis)
 	  else if ( tsteptype == TSTEP_MIN      ) fprintf(stdout, "%-8s ", "min");
 	  else if ( tsteptype == TSTEP_MAX      ) fprintf(stdout, "%-8s ", "max");
 	  else if ( tsteptype == TSTEP_ACCUM    ) fprintf(stdout, "%-8s ", "accum");
+	  else if ( tsteptype == TSTEP_RANGE    ) fprintf(stdout, "%-8s ", "range");
+	  else if ( tsteptype == TSTEP_DIFF     ) fprintf(stdout, "%-8s ", "diff");
 	  else                                    fprintf(stdout, "%-8s ", "unknown");
 
 	  /* layer info */

@@ -3,6 +3,10 @@
 	* Version 1.7.0 released
 	* using CGRIBEX library version 1.7.0
 
+2014-08-13  Uwe Schulzweida
+
+	* cgribex: use timerange indication to identify different variables
+
 2014-08-12  Daniel Reinert
 
 	* listDestroy(): set resHListSize=0 [Bug #5058]
