@@ -346,7 +346,7 @@ int tableFromEnv(int modelID, int tablenum)
       strcpy(tablename, modelInqNamePtr(modelID));
       if ( tablenum )
 	{
-	  int len = strlen(tablename);
+	  size_t len = strlen(tablename);
 	  sprintf(tablename+len, "_%03d", tablenum);
 	}
       tablenamefound = 1;
@@ -361,7 +361,7 @@ int tableFromEnv(int modelID, int tablenum)
 	      strcpy(tablename, institutInqNamePtr(instID));
 	      if ( tablenum )
 		{
-		  int len = strlen(tablename);
+		  size_t len = strlen(tablename);
 		  sprintf(tablename+len, "_%03d", tablenum);
 		}
 	      tablenamefound = 1;
@@ -371,7 +371,7 @@ int tableFromEnv(int modelID, int tablenum)
 
   if ( tablenamefound )
     {
-      int lenp = 0, lenf;
+      size_t lenp = 0, lenf;
       char *tablefile = NULL;
       if ( tablePath )
 	lenp = strlen(tablePath);
@@ -406,7 +406,7 @@ int tableFromEnv(int modelID, int tablenum)
 int tableInq(int modelID, int tablenum, const char *tablename)
 {
   int tableID = UNDEFID;
-  int modelID2 = UNDEFID, i, len;
+  int modelID2 = UNDEFID;
   char tablefile[256] = {'\0'};
 
   if ( ! ParTableInit ) parTableInit();
@@ -452,8 +452,8 @@ int tableInq(int modelID, int tablenum, const char *tablename)
 	      if ( modelInqNamePtr(modelID) )
 		{
 		  strcpy(tablefile, modelInqNamePtr(modelID));
-		  len = strlen(tablefile);
-		  for ( i = 0; i < len; i++)
+		  size_t len = strlen(tablefile);
+		  for ( size_t i = 0; i < len; i++)
 		    if ( tablefile[i] == '.' ) tablefile[i] = '\0';
 		  modelID2 = modelInq(-1, 0, tablefile);
 		}
