@@ -574,7 +574,6 @@ void tableWrite(const char *ptfile, int tableID)
   FILE *ptfp;
   int tablenum, modelID, instID = CDI_UNDEFID;
   int center = 0, subcenter = 0;
-  char *name, *longname, *units;
   char *instnameptr = NULL, *modelnameptr = NULL;
 
   if ( CDI_Debug )
@@ -656,9 +655,9 @@ void tableWrite(const char *ptfile, int tableID)
 	  
   for ( item = 0; item < npars; item++)
     {
-      name = parTable[tableID].pars[item].name;
-      longname = parTable[tableID].pars[item].longname;
-      units = parTable[tableID].pars[item].units;
+      const char *name = parTable[tableID].pars[item].name,
+        *longname = parTable[tableID].pars[item].longname,
+        *units = parTable[tableID].pars[item].units;
       if ( name == NULL ) name = " ";
       if ( longname == NULL ) longname = " ";
       if ( units == NULL ) units = " ";
@@ -826,7 +825,7 @@ int tableInqParName(int tableID, int code, char *varname)
 
 const char *tableInqParNamePtr(int tableID, int code)
 {
-  char *name = NULL;
+  const char *name = NULL;
   int item, npars;
 
   if ( tableID != UNDEFID )
@@ -848,7 +847,7 @@ const char *tableInqParNamePtr(int tableID, int code)
 
 const char *tableInqParLongnamePtr(int tableID, int code)
 {
-  char *longname = NULL;
+  const char *longname = NULL;
   int item, npars;
 
   if ( tableID != UNDEFID )
@@ -870,7 +869,7 @@ const char *tableInqParLongnamePtr(int tableID, int code)
 
 const char *tableInqParUnitsPtr(int tableID, int code)
 {
-  char *units = NULL;
+  const char *units = NULL;
   int item, npars;
 
   if ( tableID != UNDEFID )

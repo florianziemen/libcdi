@@ -4,9 +4,9 @@
 typedef struct
 {
   int   id;	     /* Parameter number (GRIB) */
-  char *name;	     /* Parameter name */
-  char *longname;    /* Parameter long name */
-  char *units;	     /* Parameter units */
+  const char *name;	     /* Parameter name */
+  const char *longname;    /* Parameter long name */
+  const char *units;	     /* Parameter units */
 }
 PAR;
 
