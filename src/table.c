@@ -40,8 +40,8 @@ static int  ParTableInit = 0;
 
 static char *tablePath = NULL;
 
-void tableDefModelID(int tableID, int modelID);
-void tableDefNum(int tableID, int tablenum);
+static void tableDefModelID(int tableID, int modelID);
+static void tableDefNum(int tableID, int tablenum);
 
 
 void tableDefEntry(int tableID, int id, const char *name,
@@ -66,7 +66,7 @@ void tableDefEntry(int tableID, int id, const char *name,
       parTable[tableID].pars[item].units    = strdupx(units);
 }
 
-void tableLink(int tableID, const PAR *pars, int npars)
+static void tableLink(int tableID, const PAR *pars, int npars)
 {
   int item;
 
@@ -81,7 +81,7 @@ void tableLink(int tableID, const PAR *pars, int npars)
   parTable[tableID].npars = npars;
 }
 
-void parTableInitEntry(int tableID)
+static void parTableInitEntry(int tableID)
 {
   parTable[tableID].used    = 0;
   parTable[tableID].pars    = NULL;
@@ -91,7 +91,7 @@ void parTableInitEntry(int tableID)
   parTable[tableID].name    = NULL;
 }
 
-void tableGetPath(void)
+static void tableGetPath(void)
 {
   char *path;
 
@@ -103,7 +103,7 @@ void tableGetPath(void)
   */
 }
 
-void parTableInit(void)
+static void parTableInit(void)
 {
   ParTableInit = 1;
 
@@ -113,7 +113,7 @@ void parTableInit(void)
   tableGetPath();
 }
 
-int tableNewEntry()
+static int tableNewEntry()
 {
   int tableID = 0;
   static int init = 0;
@@ -341,7 +341,7 @@ int tableRead(const char *tablefile)
   return (tableID);
 }
 
-int tableFromEnv(int modelID, int tablenum)
+static int tableFromEnv(int modelID, int tablenum)
 {
   int tableID = UNDEFID;
   char tablename[256] = {'\0'};
@@ -512,12 +512,12 @@ int tableDef(int modelID, int tablenum, const char *tablename)
   return (tableID);
 }
 
-void tableDefModelID(int tableID, int modelID)
+static void tableDefModelID(int tableID, int modelID)
 {
   parTable[tableID].modelID = modelID;
 }
 
-void tableDefNum(int tableID, int tablenum)
+static void tableDefNum(int tableID, int tablenum)
 {
   parTable[tableID].number  = tablenum;
 }
@@ -542,7 +542,7 @@ int tableInqModel(int tableID)
   return (modelID);
 }
 
-void partabCheckID(int item)
+static void partabCheckID(int item)
 {
   if ( item < 0 || item >= parTableSize )
     Error("item %d undefined!", item);

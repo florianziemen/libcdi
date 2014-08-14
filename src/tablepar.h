@@ -11,7 +11,7 @@ typedef struct
 PAR;
 
 
-void tableLink(int tableID, const PAR *pars, int npars);
+static void tableLink(int tableID, const PAR *pars, int npars);
 int tableDef(int modelID, int tablegribID, const char *tablename);
 
 #endif
