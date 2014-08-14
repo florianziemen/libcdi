@@ -3,6 +3,7 @@
 #endif
 
 #include <ctype.h>
+#include <stddef.h>
 
 #include "dmemory.h"
 #include "cdi.h"
@@ -140,21 +141,18 @@ int tableNewEntry()
   return (tableID);
 }
 
-int decodeForm1(char *pline, char *name, char *longname, char *units)
+static int
+decodeForm1(char *pline, char *name, char *longname, char *units)
 {
-  /* Format 1 : code name add mult longname [units] */
-  double add, mult;
-  int level;
   char *pstart, *pend;
-  long len;
 
   /* FIXME: parse success isn't verified */
-  level = strtol(pline, &pline, 10);
+  /* long level =  */strtol(pline, &pline, 10);
   while ( isspace((int) *pline) ) pline++;
 
   pstart = pline;
   while ( ! (isspace((int) *pline) || *pline == 0) ) pline++;
-  len = pline - pstart;
+  size_t len = (size_t)(pline - pstart);
   if ( len > 0 )
     {
       memcpy(name, pstart, len);
@@ -166,10 +164,11 @@ int decodeForm1(char *pline, char *name, char *longname, char *units)
   len = strlen(pline);
   if ( len == 0 ) return (0);
 
+  /* Format 1 : code name add mult longname [units] */
   /* FIXME: successful parse isn't verified */
-  add  = strtod(pline, &pline);
+  /* double add  =  */strtod(pline, &pline);
   /* FIXME: successful parse isn't verified */
-  mult = strtod(pline, &pline);
+  /* double mult =  */strtod(pline, &pline);
 
   while ( isspace((int) *pline) ) pline++;
 
@@ -183,7 +182,7 @@ int decodeForm1(char *pline, char *name, char *longname, char *units)
       else
 	pend = pstart + len;
       while ( isspace((int) *pend) ) pend--;
-      len = pend - pstart + 1;
+      len = (size_t)(pend - pstart + 1);
       if ( len > 0 )
 	{
 	  memcpy(longname, pstart, len);
@@ -198,7 +197,7 @@ int decodeForm1(char *pline, char *name, char *longname, char *units)
 	  if ( ! pend ) return (0);
 	  pend--;
 	  while ( isspace((int) *pend) ) pend--;
-	  len = pend - pstart + 1;
+	  len = (size_t)(pend - pstart + 1);
 	  if ( len > 0 )
 	    {
 	      memcpy(units, pstart, len);
@@ -210,11 +209,12 @@ int decodeForm1(char *pline, char *name, char *longname, char *units)
   return (0);
 }
 
-int decodeForm2(char *pline, char *name, char *longname, char *units)
+static int
+decodeForm2(char *pline, char *name, char *longname, char *units)
 {
   /* Format 2 : code | name | longname | units */
   char *pend;
-  long len;
+  size_t len;
 
   pline = strchr(pline, '|');
   pline++;
@@ -225,7 +225,7 @@ int decodeForm2(char *pline, char *name, char *longname, char *units)
     {
       pend = pline;
       while ( ! isspace((int) *pend) ) pend++;
-      len = pend - pline;
+      len = (size_t)(pend - pline);
       if ( len > 0 )
 	{
 	  memcpy(name, pline, len);
@@ -237,7 +237,7 @@ int decodeForm2(char *pline, char *name, char *longname, char *units)
     {
       pend--;
       while ( isspace((int) *pend) ) pend--;
-      len = pend - pline + 1;
+      len = (size_t)(pend - pline + 1);
       if ( len > 0 )
 	{
 	  memcpy(name, pline, len);
@@ -252,7 +252,7 @@ int decodeForm2(char *pline, char *name, char *longname, char *units)
   if ( !pend ) pend = strchr(pline, 0);
   pend--;
   while ( isspace((int) *pend) ) pend--;
-  len = pend - pline + 1;
+  len = (size_t)(pend - pline + 1);
   if ( len > 0 )
     {
       memcpy(longname, pline, len);
@@ -268,9 +268,9 @@ int decodeForm2(char *pline, char *name, char *longname, char *units)
       if ( !pend ) pend = strchr(pline, 0);
       pend--;
       while ( isspace((int) *pend) ) pend--;
-      len = pend - pline + 1;
+      ptrdiff_t len = pend - pline + 1;
       if ( len < 0 ) len = 0;
-      memcpy(units, pline, len);
+      memcpy(units, pline, (size_t)len);
       units[len] = 0;
     }
 
@@ -281,7 +281,6 @@ int tableRead(const char *tablefile)
 {
   char line[1024], *pline;
   int lnr = 0;
-  long len;
   int id;
   char name[256], longname[256], units[256];
   int tableID = UNDEFID;
@@ -300,7 +299,7 @@ int tableRead(const char *tablefile)
 
   while ( fgets(line, 1023, tablefp) )
     {
-      len = strlen(line);
+      size_t len = strlen(line);
       if ( line[len-1] == '\n' ) line[len-1] = '\0';
       lnr++;
       id       = CDI_UNDEFID;
