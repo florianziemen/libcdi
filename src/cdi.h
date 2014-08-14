@@ -1016,9 +1016,9 @@ int     tableInqParName(int tableID, int code, char *name);
 int     tableInqParLongname(int tableID, int code, char *longname);
 int     tableInqParUnits(int tableID, int code, char *units);
 
-char   *tableInqParNamePtr(int tableID, int parID);
-char   *tableInqParLongnamePtr(int tableID, int parID);
-char   *tableInqParUnitsPtr(int tableID, int parID);
+const char *tableInqParNamePtr(int tableID, int parID);
+const char *tableInqParLongnamePtr(int tableID, int parID);
+const char *tableInqParUnitsPtr(int tableID, int parID);
 
 /* History routines */
 

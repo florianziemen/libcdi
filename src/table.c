@@ -824,7 +824,7 @@ int tableInqParName(int tableID, int code, char *varname)
 }
 
 
-char *tableInqParNamePtr(int tableID, int code)
+const char *tableInqParNamePtr(int tableID, int code)
 {
   char *name = NULL;
   int item, npars;
@@ -846,7 +846,7 @@ char *tableInqParNamePtr(int tableID, int code)
 }
 
 
-char *tableInqParLongnamePtr(int tableID, int code)
+const char *tableInqParLongnamePtr(int tableID, int code)
 {
   char *longname = NULL;
   int item, npars;
@@ -868,7 +868,7 @@ char *tableInqParLongnamePtr(int tableID, int code)
 }
 
 
-char *tableInqParUnitsPtr(int tableID, int code)
+const char *tableInqParUnitsPtr(int tableID, int code)
 {
   char *units = NULL;
   int item, npars;
