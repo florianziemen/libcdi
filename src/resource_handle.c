@@ -158,6 +158,7 @@ reshListDestruct(int namespaceID)
             listElem->res.v.ops->valDestroy(listElem->res.v.val);
         }
       free(resHList[namespaceID].resources);
+      resHList[namespaceID].resources = NULL;
       reshListClearEntry(namespaceID);
     }
   if (resHList[callerNamespaceID].resources)
