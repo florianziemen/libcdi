@@ -49,7 +49,7 @@ void tableDefEntry(int tableID, int id, const char *name,
 {
   int item;
 
-  if ( tableID >= 0 && tableID < MAX_TABLE ) { } else
+  if ( tableID >= 0 && tableID < MAX_TABLE && parTable[tableID].used) { } else
     Error("Invalid table ID %d", tableID);
   item = parTable[tableID].npars++;
   parTable[tableID].pars[item].id       = id;
@@ -113,10 +113,31 @@ static void tableGetPath(void)
   */
 }
 
+static void parTableFinalize(void)
+{
+  for (int tableID = 0; tableID < MAX_TABLE; ++tableID)
+    if (parTable[tableID].used)
+      {
+        int npars = parTable[tableID].npars;
+        for (int item = 0; item < npars; ++item)
+          {
+            if (parTable[tableID].pars[item].dupflags & TABLE_DUP_NAME)
+              free((void *)parTable[tableID].pars[item].name);
+            if (parTable[tableID].pars[item].dupflags & TABLE_DUP_LONGNAME)
+              free((void *)parTable[tableID].pars[item].longname);
+            if (parTable[tableID].pars[item].dupflags & TABLE_DUP_UNITS)
+              free((void *)parTable[tableID].pars[item].units);
+          }
+        free(parTable[tableID].pars);
+        free(parTable[tableID].name);
+      }
+}
+
 static void parTableInit(void)
 {
   ParTableInit = 1;
 
+  atexit(parTableFinalize);
   if ( cdiPartabIntern )
     tableDefault();
 
