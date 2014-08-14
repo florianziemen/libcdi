@@ -730,7 +730,8 @@ void tableFWriteC(FILE *ptfp, int tableID)
 	}
     }
 
-  strcpy(tablename, parTable[tableID].name);
+  strncpy(tablename, parTable[tableID].name, sizeof (tablename));
+  tablename[sizeof (tablename) - 1] = '\0';
   {
     size_t len = strlen(tablename);
     for (size_t i = 0; i < len; i++ )
