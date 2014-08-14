@@ -670,13 +670,22 @@ void tableWrite(const char *ptfile, int tableID)
 
 void tableWriteC(const char *filename, int tableID)
 {
+  FILE *ptfp = fopen(filename, "w");
+  if (!ptfp)
+    Error("failed to open file \"%s\"!", filename);
+  if ( CDI_Debug )
+    Message("write parameter table %d to %s", tableID, filename);
+  tableFWriteC(ptfp, tableID);
+  fclose(ptfp);
+}
+
+void tableFWriteC(FILE *ptfp, int tableID)
+{
   char chelp[] = "";
   int item, npars;
   size_t maxname = 0, maxlname = 0, maxunits = 0;
   char tablename[256];
 
-  if ( CDI_Debug )
-    Message("write parameter table %d to %s", tableID, filename);
 
   if ( tableID == UNDEFID )
     {
@@ -685,8 +694,6 @@ void tableWriteC(const char *filename, int tableID)
     }
 
   partabCheckID(tableID);
-
-  FILE *ptfp = fopen(filename, "w");
 
   npars = parTable[tableID].npars;
 
@@ -751,8 +758,6 @@ void tableWriteC(const char *filename, int tableID)
     }
 
   fprintf(ptfp, "};\n\n");
-
-  fclose(ptfp);
 }
 
 

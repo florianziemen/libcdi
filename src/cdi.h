@@ -7,6 +7,7 @@
 #ifndef  CDI_H_
 #define  CDI_H_
 
+#include <stdio.h>
 #include <sys/types.h>
 /*
 #if defined(__cplusplus)
@@ -994,6 +995,7 @@ char   *modelInqNamePtr(int modelID);
 /* Table routines */
 
 void    tableWriteC(const char *filename, int tableID);
+void    tableFWriteC(FILE *ptfp, int tableID);
 void    tableWrite(const char *filename, int tableID);
 int     tableRead(const char *tablefile);
 int     tableDef(int modelID, int tablenum, const char *tablename);
