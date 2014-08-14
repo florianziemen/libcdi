@@ -741,33 +741,22 @@ void tableFWriteC(FILE *ptfp, int tableID)
 
   for ( item = 0; item < npars; item++ )
     {
-      size_t len = strlen(parTable[tableID].pars[item].name);
-      fprintf(ptfp, "  {%4d, 0, \"%s\", %-*s",
+      size_t len = strlen(parTable[tableID].pars[item].name),
+        llen = parTable[tableID].pars[item].longname
+        ? strlen(parTable[tableID].pars[item].longname) : 0,
+        ulen = parTable[tableID].pars[item].units
+        ? strlen(parTable[tableID].pars[item].units) : 0;
+      fprintf(ptfp, "  {%4d, 0, \"%s\", %-*s%c%s%s, %-*s%c%s%s %-*s},\n",
 	      parTable[tableID].pars[item].id,
-	      parTable[tableID].pars[item].name, (int)(maxname-len), chelp);
-
-      if ( parTable[tableID].pars[item].longname )
-	len = strlen(parTable[tableID].pars[item].longname);
-      else
-	len = 0;
-
-      if ( len == 0 )
-	fprintf(ptfp, " NULL, %-*s", (int)(maxlname-3), chelp);
-      else
-	fprintf(ptfp, "\"%s\", %-*s",
-		parTable[tableID].pars[item].longname, (int)(maxlname-len), chelp);
-
-      if ( parTable[tableID].pars[item].units )
-	len = strlen(parTable[tableID].pars[item].units);
-      else
-	len = 0;
-
-      if ( len == 0 )
-	fprintf(ptfp, " NULL %-*s},\n", (int)(maxunits-3), chelp);
-      else
-	fprintf(ptfp, "\"%s\" %-*s},\n",
-		parTable[tableID].pars[item].units,
-		(int)(maxunits-len), chelp);
+	      parTable[tableID].pars[item].name, (int)(maxname-len), chelp,
+              llen?'"':' ',
+              llen?parTable[tableID].pars[item].longname:"NULL",
+              llen?"\"":"",
+              (int)(maxlname-(llen?llen:3)), chelp,
+              ulen?'"':' ',
+              ulen?parTable[tableID].pars[item].units:"NULL",
+              ulen?"\"":"",
+              (int)(maxunits-(ulen?ulen:3)), chelp);
     }
 
   fprintf(ptfp, "};\n\n");
