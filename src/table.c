@@ -66,7 +66,7 @@ void tableDefEntry(int tableID, int id, const char *name,
       parTable[tableID].pars[item].units    = strdupx(units);
 }
 
-void tableLink(int tableID, PAR *pars, int npars)
+void tableLink(int tableID, const PAR *pars, int npars)
 {
   int item;
 
