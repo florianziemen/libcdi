@@ -1,7 +1,7 @@
 #ifndef _TABLE_H
 #define _TABLE_H
 
-static PAR echam4[] = {
+static const PAR echam4[] = {
   {   4, "precip",      "total precipitation",                      "m/s"      },
   {  34, "low_cld",     "low cloud",                                 NULL      },
   {  35, "mid_cld",     "mid cloud",                                 NULL      },
@@ -119,7 +119,7 @@ static PAR echam4[] = {
   { 275, "fresh_water",  NULL,                                       NULL      },
 };
 
-static PAR echam5[] = {
+static const PAR echam5[] = {
   {   4, "precip",     "total precipitation",                       "kg/m^2s" },
   {  79, "swnirac",    "net surface NIR flux acc.",                 "W/m^2"   },
   {  80, "swdifnirac", "fraction of diffuse NIR acc.",              "W/m^2"   },
@@ -281,7 +281,7 @@ static PAR echam5[] = {
   { 272, "mastrfu",    "mass stream function",                      "kg/s"    },
 };
 
-static PAR echam6[] = {
+static const PAR echam6[] = {
   {   4, "precip",         "total precipitation",                       "kg m-2 s-1" },
   {  34, "low_cld",        "low cloud",                                  NULL        },
   {  35, "mid_cld",        "mid cloud",                                  NULL        },
@@ -459,7 +459,7 @@ static PAR echam6[] = {
   { 272, "mastfru",        "mass stream function",                      "kg/s"       },
 };
 
-static PAR mpiom1[] = {
+static const PAR mpiom1[] = {
   {   2, "THO",      "temperature",                     "C"        },
   {   5, "SAO",      "salinity",                        "psu"      },
   {   3, "UKO",      "zon. velocity",                   "m/s"      },
@@ -551,7 +551,7 @@ static PAR mpiom1[] = {
   { 280, "AOFLWSVO", "oasis wind speed",                "m/s"      },
 };
 
-static PAR ecmwf[] = {
+static const PAR ecmwf[] = {
   {   1, "STRF",   "Stream function",                                            "m**2 s**-1"            },
   {   2, "VPOT",   "Velocity potential",                                         "m**2 s**-1"            },
   {   3, "PT",     "Potential temperature",                                      "K"                     },
@@ -725,7 +725,7 @@ static PAR ecmwf[] = {
   { 254, "ATMW",   "Adiabatic tendency of meridional wind",                      "m s**-1"               },
 };
 
-static PAR remo[] = {
+static const PAR remo[] = {
   {  14, "FTKVM",     "turbulent transfer coefficient of momentum in the atmosphere",   NULL           },
   {  15, "FTKVH",     "turbulent transfer coefficient of heat in the atmosphere",       NULL           },
   {  38, "U10ER",     "10m u-velocity",                                                "m/s"           },
@@ -896,7 +896,7 @@ static PAR remo[] = {
   { 260, "PRECIP",    "total precipitation",                                            NULL           },
 };
 
-static PAR cosmo002[] = {
+static const PAR cosmo002[] = {
   {   1, "P",         "pressure",                                          "Pa"         },
   {   2, "PMSL",      "mean sea level pressure",                           "Pa"         },
   {   3, "DPSDT",     "surface pressure change",                           "Pa s-1"     },
@@ -961,7 +961,7 @@ static PAR cosmo002[] = {
   { 137, "SWDIR_COR", "topo correction of direct solar radiarion",         "1"          },
 };
 
-static PAR cosmo201[] = {
+static const PAR cosmo201[] = {
   {   5, "APAB",      "&",                                                         "W m-2"      },
   {  13, "SOHR_RAD",  "&",                                                         "K s-1"      },
   {  14, "THHR_RAD",  "&",                                                         "K s-1"      },
@@ -1045,7 +1045,7 @@ static PAR cosmo201[] = {
   { 243, "QCVG_CON",  "&",                                                         "s-1"        },
 };
 
-static PAR cosmo202[] = {
+static const PAR cosmo202[] = {
   {  46, "SSO_STDH",  "standard deviation of subgrid scale height",                "m"         },
   {  47, "SSO_GAMMA", "anisotropy of topography",                                  "-"         },
   {  48, "SSO_THETA", "angle between principal axis of orography and global east", "-"         },
@@ -1109,7 +1109,7 @@ static PAR cosmo202[] = {
   { 235, "Ru103_WD",  "undefined",                                                 "undefined" },
 };
 
-static PAR cosmo203[] = {
+static const PAR cosmo203[] = {
   { 135, "LCL_ML",   "undefined",                  "undefined" },
   { 136, "LFC_ML",   "undefined",                  "undefined" },
   { 137, "CAPE_3KM", "undefined",                  "undefined" },
@@ -1123,14 +1123,14 @@ static PAR cosmo203[] = {
   { 204, "CLCT_MOD", "modified_total_cloud_cover", "1"         },
 };
 
-static PAR cosmo205[] = {
+static const PAR cosmo205[] = {
   {   1, "SYNME5", "synthetic satellite images Meteosat5", "-" },
   {   2, "SYNME6", "synthetic satellite images Meteosat6", "-" },
   {   3, "SYNME7", "synthetic satellite images Meteosat7", "-" },
   {   4, "SYNMSG", "synthetic satellite images MSG",       "-" },
 };
 
-static PAR cosmo250[] = {
+static const PAR cosmo250[] = {
   {   1, "QNH",       "sea level air pressure",                                         "hPa"                                },
   {  11, "TSOIL",     "2m temperature",                                                 "K"                                  },
   {  12, "TSOIL",     "2m temperature",                                                 "K"                                  },

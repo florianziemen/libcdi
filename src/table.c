@@ -729,7 +729,7 @@ void tableFWriteC(FILE *ptfp, int tableID)
     for (size_t i = 0; i < len; i++ )
       if ( tablename[i] == '.' ) tablename[i] = '_';
   }
-  fprintf(ptfp, "static PAR %s[] = {\n", tablename);
+  fprintf(ptfp, "static const PAR %s[] = {\n", tablename);
 
   for ( item = 0; item < npars; item++ )
     {
