@@ -51,19 +51,26 @@ void tableDefEntry(int tableID, int id, const char *name,
 
   item = parTable[tableID].npars++;
   parTable[tableID].pars[item].id       = id;
+  parTable[tableID].pars[item].dupflags = 0;
   parTable[tableID].pars[item].name     = NULL;
   parTable[tableID].pars[item].longname = NULL;
   parTable[tableID].pars[item].units    = NULL;
 
-  if ( name )
-    if ( strlen(name) > 0 )
+  if ( name && strlen(name) > 0 )
+    {
       parTable[tableID].pars[item].name     = strdupx(name);
-  if ( longname )
-    if ( strlen(longname) > 0 )
+      parTable[tableID].pars[item].dupflags |= TABLE_DUP_NAME;
+    }
+  if ( longname && strlen(longname) > 0 )
+    {
       parTable[tableID].pars[item].longname = strdupx(longname);
-  if ( units )
-    if ( strlen(units) > 0 )
+      parTable[tableID].pars[item].dupflags |= TABLE_DUP_LONGNAME;
+    }
+  if ( units && strlen(units) > 0 )
+    {
       parTable[tableID].pars[item].units    = strdupx(units);
+      parTable[tableID].pars[item].dupflags |= TABLE_DUP_UNITS;
+    }
 }
 
 static void tableLink(int tableID, const PAR *pars, int npars)
@@ -73,6 +80,7 @@ static void tableLink(int tableID, const PAR *pars, int npars)
   for ( item = 0; item < npars; item++ )
     {
       parTable[tableID].pars[item].id       = pars[item].id;
+      parTable[tableID].pars[item].dupflags = 0;
       parTable[tableID].pars[item].name     = pars[item].name;
       parTable[tableID].pars[item].longname = pars[item].longname;
       parTable[tableID].pars[item].units    = pars[item].units;
@@ -503,7 +511,7 @@ int tableDef(int modelID, int tablenum, const char *tablename)
 
       parTable[tableID].modelID = modelID;
       parTable[tableID].number  = tablenum;
-      if ( tablename ) 
+      if ( tablename )
 	parTable[tableID].name = strdupx(tablename);
 
       parTable[tableID].pars = (PAR *) malloc(MAX_PARS * sizeof(PAR));
@@ -685,7 +693,7 @@ void tableWriteC(const char *filename, int tableID)
 
 void tableFWriteC(FILE *ptfp, int tableID)
 {
-  char chelp[] = "";
+  const char chelp[] = "";
   int item, npars;
   size_t maxname = 0, maxlname = 0, maxunits = 0;
   char tablename[256];
@@ -733,7 +741,7 @@ void tableFWriteC(FILE *ptfp, int tableID)
   for ( item = 0; item < npars; item++ )
     {
       size_t len = strlen(parTable[tableID].pars[item].name);
-      fprintf(ptfp, "  {%4d, \"%s\", %-*s",
+      fprintf(ptfp, "  {%4d, 0, \"%s\", %-*s",
 	      parTable[tableID].pars[item].id,
 	      parTable[tableID].pars[item].name, (int)(maxname-len), chelp);
 
