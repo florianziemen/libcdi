@@ -49,6 +49,8 @@ void tableDefEntry(int tableID, int id, const char *name,
 {
   int item;
 
+  if ( tableID >= 0 && tableID < MAX_TABLE ) { } else
+    Error("Invalid table ID %d", tableID);
   item = parTable[tableID].npars++;
   parTable[tableID].pars[item].id       = id;
   parTable[tableID].pars[item].dupflags = 0;
