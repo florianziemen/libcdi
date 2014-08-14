@@ -128,14 +128,9 @@ ncvar_t;
 static
 void strtolower(char *str)
 {
-  int i, len;
-
   if ( str )
-    {
-      len = (int) strlen(str);
-      for ( i = 0; i < len; i++ )
-        str[i] = tolower((int) str[i]);
-    }
+    for (size_t i = 0; str[i]; ++i)
+      str[i] = tolower((int)str[i]);
 }
 
 static
