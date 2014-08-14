@@ -972,23 +972,6 @@ void tableInqPar(int tableID, int code, char *name, char *longname, char *units)
     }
 }
 
-
-int parInqID(int tableID, int code)
-{
-  int item, npars;
-
-  npars = parTable[tableID].npars;
-
-  for ( item = 0; item < npars; item++ )
-    {
-      if ( parTable[tableID].pars[item].id == code ) break;
-    }
-
-  if ( item == npars ) item = -1;
-
-  return (item);
-}
-
 int tableInqNumber(void)
 {
   if ( ! ParTableInit ) parTableInit();
