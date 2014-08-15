@@ -233,8 +233,9 @@ def genInterface(cFuncname, returnType, returnPointer, paramList)
 
   fReturnInfo                    = CFTypeInfo[returnType]
   if not fReturnInfo.nil?
-    fReturnString = "#{fReturnInfo[:ftype]}(#{fReturnInfo[:namedConst]}) function"
-    fEndString    = "end function"
+    fReturnString = "function"
+    fEndString    = "  #{fReturnInfo[:ftype]}(kind=#{fReturnInfo[:namedConst]}) :: #{fFuncname}
+        end function"
     fTypes4Import << fReturnInfo[:namedConst]
   elsif returnType == 'void'
     fReturnString = "subroutine"
@@ -244,7 +245,7 @@ def genInterface(cFuncname, returnType, returnPointer, paramList)
   out << "
       interface
         #{fReturnString} #{fFuncname}(#{fParams4Import.join(',')}) bind(c,name='#{cFuncname}')
-  "       
+  "
   out << "        import :: #{fTypes4Import.uniq.join(',')}
   " unless fTypes4Import.empty?
 
@@ -267,7 +268,7 @@ def genInterface(cFuncname, returnType, returnPointer, paramList)
   }
 
   out << 
-  "     #{fEndString} #{fFuncname}
+  "      #{fEndString} #{fFuncname}
       end interface
   "
   [out, makePublic(fFuncname)]
