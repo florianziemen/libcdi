@@ -45,7 +45,7 @@ done
 #
 cat >> $OFILE <<EOF
 
-void
+static void
 tableDefault(void)
 {
   int tableID, instID, modelID;
