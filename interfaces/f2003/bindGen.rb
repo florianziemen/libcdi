@@ -185,6 +185,9 @@ def setFortranParams(paramswithtypes,fFuncname)
       # but maybe the result is the name of another parameter. -> play it again sam...
       param += FParamExtension while ( originalParameters.include?(param) )
     end
+    if param[0,1] == '_'
+      param = 'p' + param
+    end
 
     [param,paramCType,fType,isPointer,isArray,arraySize,isConstant]
   }
