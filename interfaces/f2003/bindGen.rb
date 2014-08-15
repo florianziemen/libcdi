@@ -98,9 +98,9 @@ end
 
 
 # create fortran module variables
-def genModVars(vars)
+def genModParams(vars)
   vars.collect {|var, value|
-    "      integer :: #{var} = #{value}"
+    "      integer, parameter :: #{var} = #{value}"
   }.join("\n")
 end
 
@@ -382,7 +382,7 @@ end.parse!
   pp cDefines if debug
   unless cDefines.empty?
     makeModVarsPublic = makePublic(*cDefines.transpose[0]) 
-    moduleVariables   = genModVars(cDefines)
+    moduleVariables   = genModParams(cDefines)
   end
 
   interfaces, makepublics, subroutines = '', '', ''
