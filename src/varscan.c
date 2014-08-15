@@ -354,12 +354,12 @@ void varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds,
       if ( vartable[varID].gridID != gridID )
 	{
 	  Message("param = %s gridID = %d", paramstr, gridID);
-	  Error("horizontal grid must not change for same param!");
+	  Error("horizontal grid must not change for same parameter!");
 	}
       if ( vartable[varID].zaxistype != zaxistype )
 	{
 	  Message("param = %s zaxistype = %d", paramstr, zaxistype);
-	  Error("zaxistype must not change for same param!");
+	  Error("zaxistype must not change for same parameter!");
 	}
     }
 

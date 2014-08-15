@@ -2316,12 +2316,21 @@ int gridCompare(int gridID, grid_t grid)
 	    {
               char uuidOfHGrid[17];
               gridInqUUID(gridID, uuidOfHGrid);
-
+              /*
+              printf("compare unstructured grids\n");
+	      printf("gridID        %d\n", gridID);
+	      printf("gridsize      %d\n", grid.size);
+              if ( uuidOfHGrid[0] != 0 && grid.uuid[0] != 0 && memcmp(grid.uuid, uuidOfHGrid, 16) )
+                printf("uuidOfHGrid     differ\n");
+              printf("nvertex      %d  %d\n", grid.nvertex, gridInqNvertex(gridID));
+              printf("number       %d  %d\n", grid.number, gridInqNumber(gridID));
+              printf("position     %d  %d\n", grid.position, gridInqPosition(gridID));
+              */
               if ( uuidOfHGrid[0] != 0 && grid.uuid[0] != 0 )
                 if ( !differ && memcmp(uuidOfHGrid, grid.uuid, 16) != 0 ) differ = 1;
               if ( !differ && grid.nvertex != gridInqNvertex(gridID) ) differ = 1;
               if ( !differ && grid.number != gridInqNumber(gridID) ) differ = 1;
-              if ( !differ && grid.position != gridInqPosition(gridID) ) differ = 1;
+              if ( !differ && grid.number > 0 && grid.position != gridInqPosition(gridID) ) differ = 1;
 	      if ( !differ )
 		differ = compareXYvals2(gridID, grid.size, grid.xvals, grid.yvals);
 	    }
