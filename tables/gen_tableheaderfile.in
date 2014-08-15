@@ -9,8 +9,7 @@ PTFILES=""
 #
 #########################################
 #
-cat $DEFTABLES |&
-exec 3<&p
+exec 3<"$DEFTABLES"
 #
 item=0
 while true ; do
