@@ -5,7 +5,7 @@
 
 #include "cdi.h"
 
-char *Progname;
+static char *Progname;
 
 void version(void)
 {
