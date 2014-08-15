@@ -19,13 +19,11 @@ while read -u3 PTFILE[item] ; do
 if [ -z ${PTFILE[item]} ] ; then break ; fi
 #
 PTFILE[item]="@abs_srcdir@/${PTFILE[item]}"
-PTFILES="${PTFILES} ${PTFILE[item]}"
 #
 let item=item+1
 #
 done
-#
-NTABLES=$item
+unset PTFILE[item]
 #
 #########################################
 #
@@ -37,7 +35,7 @@ cat >> $OFILE <<EOF
 
 EOF
 #
-for TFILE in $PTFILES; do
+for TFILE in "${PTFILE[@]}"; do
     echo "process: $TFILE"
     rm -f ptfile
     ../app/createtable "$TFILE" - >>"$OFILE"
@@ -58,8 +56,7 @@ settabvar() {
 }
 #
 item=0
-while [ $item -lt $NTABLES ] ; do
-TFILE=${PTFILE[item]}
+for TFILE in "${PTFILE[@]}" ; do
 TFBASENAME="${TFILE##*/}"
 echo "process: $TFILE"
 #
@@ -97,8 +94,6 @@ cat >> $OFILE <<EOF
 
   tableLink(tableID, ${TABLENAME}, sizeof(${TABLENAME}) / sizeof(PAR));
 EOF
-#
-let item=item+1
 #
 done
 #
