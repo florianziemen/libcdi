@@ -3,6 +3,7 @@
 # gen_tables create the headerfile table.h
 # with all default tables from default_tables
 #
+set -e
 DEFTABLES=@abs_top_srcdir@/tables/default_tables
 OFILE=@abs_top_srcdir@/src/table.h
 PTFILES=""
