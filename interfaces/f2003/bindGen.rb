@@ -139,8 +139,11 @@ def isBadFunction(returnType, returnPointer, paramList)
   paramList.each {|paramInfo|
     next if paramInfo == ['void']
     ctype, param = paramInfo[-2,2]
+    # TJ: unnamed arguments shouldn't be matched at all but because
+    # pointer * is parsed as part of the name those need to be rejected here
     return true if (
       CFTypeInfo[ctype].nil? or                        # derived data type 
+      param == '*' or                                  # unnamed pointer
       param[0,2] == '**' or                            # pointer2pointer
       (param[0,1] == '*' and /\w\[\d*\]/.match(param)) # array of pointers
     )
