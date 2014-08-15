@@ -48,22 +48,22 @@ int main(int argc, char *argv[])
 	  break;
         case 'h':
 	  if ( !strncmp(cstring, "help", len) )
-	    { 
+	    {
 	      usage( );
-	      return( 0 );
+	      return EXIT_SUCCESS;
             }
 	  break;
         case 'v':
 	  if ( !strncmp(cstring, "version", len) )
 	    {
 	      version();
-	      return (0);
+	      return EXIT_SUCCESS;
             }
 	  break;
         default:
 	  usage();
 	  fprintf(stderr, "illegal option %s\n", cstring);
-	  return (-1);
+	  return EXIT_FAILURE;
 	  break;
         }
     }
@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
     {
       usage();
       fprintf(stderr, "missing filenames\n");
-      return (-1);
+      return EXIT_FAILURE;
     }
 
   if ( debug )
@@ -101,7 +101,7 @@ int main(int argc, char *argv[])
   if ( tableID != CDI_UNDEFID )
     tableWriteC(ofile, tableID);
 
-  return (0);
+  return EXIT_SUCCESS;
 }
 /*
  * Local Variables:
