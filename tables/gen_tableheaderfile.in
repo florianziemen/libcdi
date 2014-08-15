@@ -20,7 +20,7 @@ if [ -z ${PTFILE[item]} ] ; then break ; fi
 PTFILE[item]="@abs_srcdir@/${PTFILE[item]}"
 PTFILES="${PTFILES} ${PTFILE[item]}"
 #
-item=`expr $item + 1`
+let item=item+1
 #
 done
 #
@@ -98,7 +98,7 @@ cat >> $OFILE <<EOF
   tableLink(tableID, ${TABLENAME}, sizeof(${TABLENAME}) / sizeof(PAR));
 EOF
 #
-item=`expr $item + 1`
+let item=item+1
 #
 done
 #
