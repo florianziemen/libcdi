@@ -12,9 +12,9 @@ PTFILES=""
 exec 3<"$DEFTABLES"
 #
 item=0
-while true ; do
+while read -u3 PTFILE[item] ; do
 #
-read -u3 PTFILE[item]
+
 if [ -z ${PTFILE[item]} ] ; then break ; fi
 #
 PTFILE[item]="@abs_srcdir@/${PTFILE[item]}"
