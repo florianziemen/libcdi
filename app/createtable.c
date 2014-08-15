@@ -4,8 +4,10 @@
 #include <string.h>
 
 #include "cdi.h"
+#include "error.h"
 
 static char *Progname;
+extern int CDI_Debug;
 
 void version(void)
 {
@@ -98,8 +100,11 @@ int main(int argc, char *argv[])
   if ( debug ) cdiDebug(debug);
   */
   tableID = tableRead(ifile);
+  if ( CDI_Debug )
+    Message("write parameter table %d to %s", tableID, ofile);
+  FILE *ptfp = (ofile[0] == '-' && ofile[1] == '\0')?stdout:fopen(ofile, "w");
   if ( tableID != CDI_UNDEFID )
-    tableWriteC(ofile, tableID);
+    tableFWriteC(ptfp, tableID);
 
   return EXIT_SUCCESS;
 }

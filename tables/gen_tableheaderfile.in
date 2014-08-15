@@ -40,8 +40,7 @@ EOF
 for TFILE in $PTFILES; do
     echo "process: $TFILE"
     rm -f ptfile
-    ../app/createtable $TFILE ptfile
-    cat ptfile >> $OFILE
+    ../app/createtable "$TFILE" - >>"$OFILE"
 done
 #
 cat >> $OFILE <<EOF
