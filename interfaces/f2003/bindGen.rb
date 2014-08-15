@@ -264,7 +264,7 @@ def genInterface(cFuncname, returnType, returnPointer, paramList)
     end
 
     typeinfo = [value,intent,dimension].select {|s| ! s.nil?}.join(',')
-    out << "        #{ftype}(#{paramType}), #{typeinfo} :: #{param}\n  "
+    out << "        #{ftype}(kind=#{paramType}), #{typeinfo} :: #{param}\n  "
   }
 
   out << 
