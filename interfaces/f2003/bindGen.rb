@@ -58,12 +58,12 @@ def getFuncInfo(filename)
   typelist = %w[char int float double void]
   funclist = IO.popen("cpp #{filename} | cpp -fpreprocessed").readlines.delete_if {|line| not line.index('#').nil?}.collect {|line| line.chomp}
   # delete everything, that do not look like a function prototype
-  typeRegexp = /^.*(#{typelist.join('|')}) \**\w+\(.*\)/
+  typeRegexp = /^.*(#{typelist.join('|')}) \**\w+\s*\(.*\)/
   funclist.delete_if {|line|
     not typeRegexp.match(line.lstrip)
   }
   funclist.collect! {|line|
-    md = /(\w+)+ +(\**)(\w+)\((.*)\)/.match(line)
+    md = /(\w+)+ +(\**)(\w+)\s*\((.*)\)/.match(line)
     returnType, returnPointer, funcName, paramList = md[1,4]
     paramList = paramList.split(',').collect {|p| p.split(' ').each {|_p| _p.strip}}
     [funcName, returnType, returnPointer,  paramList]
