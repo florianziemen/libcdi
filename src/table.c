@@ -917,7 +917,7 @@ int tableInqParLongname(int tableID, int code, char *longname)
 
   npars = parTable[tableID].npars;
 
-  if ( tableID >= 0 && tableID < MAX_TABLE ) { } else
+  if ( (tableID >= 0) & (tableID < MAX_TABLE) | (tableID == UNDEFID) ) { } else
     Error("Invalid table ID %d", tableID);
 
   if ( tableID == UNDEFID )
