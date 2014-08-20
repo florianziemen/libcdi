@@ -504,5 +504,6 @@ FCALLSCFUN2 (STRING, tableInqParUnitsPtr, TABLEINQPARUNITSPTR, tableinqparunitsp
 FCALLSCSUB3 (streamDefHistory, STREAMDEFHISTORY, streamdefhistory, INT, INT, STRING)
 FCALLSCFUN1 (INT, streamInqHistorySize, STREAMINQHISTORYSIZE, streaminqhistorysize, INT)
 FCALLSCSUB2 (streamInqHistoryString, STREAMINQHISTORYSTRING, streaminqhistorystring, INT, PSTRING)
+FCALLSCSUB3 (gribapiLibraryVersion, GRIBAPILIBRARYVERSION, gribapilibraryversion, PINT, PINT, PINT)
 
 #endif

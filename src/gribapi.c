@@ -21,20 +21,31 @@ static char gribapi_libvers[64] = "";
 static int gribapi_libvers_init;
 #endif
 
+
+void gribapiLibraryVersion(int* major_version, int* minor_version, int* revision_version)
+{
+#if  defined  (HAVE_LIBGRIB_API)
+  long version = grib_get_api_version();
+  (*major_version)    = version/10000;
+  (*minor_version)    = (version-(*major_version)*10000)/100;
+  (*revision_version) = (version-(*major_version)*10000-(*minor_version)*100);
+#else
+  (*major_version)    = 0;
+  (*minor_version)    = 0;
+  (*revision_version) = 0;
+#endif
+}
+
 const char *gribapiLibraryVersionString(void)
 {
 #if  defined  (HAVE_LIBGRIB_API)
   if (!gribapi_libvers_init)
     {
-      long version = grib_get_api_version();
       int major_version, minor_version, revision_version;
 
-      major_version    = (int)(version/10000L);
-      minor_version    = (int)(version-(long)major_version*10000L)/100;
-      revision_version = (int)(version-(long)major_version*10000L - minor_version*100);
+      gribapiLibraryVersion(&major_version, &minor_version, &revision_version);
 
-      sprintf(gribapi_libvers, "%d.%d.%d",
-              major_version, minor_version, revision_version);
+      sprintf(gribapi_libvers, "%d.%d.%d", major_version, minor_version, revision_version);
       gribapi_libvers_init = 1;
     }
 #endif

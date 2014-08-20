@@ -1026,6 +1026,9 @@ void    streamDefHistory(int streamID, int size, const char *history);
 int     streamInqHistorySize(int streamID);
 void    streamInqHistoryString(int streamID, char *history);
 
+
+void gribapiLibraryVersion(int *major_version, int *minor_version, int *revision_version);
+
 /*
 #if defined (__cplusplus)
 }

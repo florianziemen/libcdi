@@ -3377,6 +3377,15 @@ module mo_cdi
         end subroutine streamInqHistoryString
       end interface
   
+      interface
+        subroutine gribapiLibraryVersion(major_version,minor_version,revision_version) bind(c,name='gribapiLibraryVersion')
+          import :: c_int
+          integer(kind=c_int), intent(out) :: major_version
+          integer(kind=c_int), intent(out) :: minor_version
+          integer(kind=c_int), intent(out) :: revision_version
+        end subroutine gribapiLibraryVersion
+      end interface
+  
       public :: getchar
       public :: getchar_unlocked
       public :: cdiReset
@@ -3750,6 +3759,7 @@ module mo_cdi
       public :: streamDefHistory
       public :: streamInqHistorySize
       public :: streamInqHistoryString
+      public :: gribapiLibraryVersion
       public :: ctrim
 
       public :: CDI_MAX_NAME

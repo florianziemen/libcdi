@@ -2352,3 +2352,9 @@
 !                                     CHARACTER*(*)   history)
       EXTERNAL        streamInqHistoryString
 
+!                     gribapiLibraryVersion
+!                                    (INTEGER         major_version,
+!                                     INTEGER         minor_version,
+!                                     INTEGER         revision_version)
+      EXTERNAL        gribapiLibraryVersion
+
