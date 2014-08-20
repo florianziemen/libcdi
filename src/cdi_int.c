@@ -128,7 +128,7 @@ void cdiPrintVersion(void)
   fprintf(stderr, " CGRIBEX library version : %s\n", cgribexLibraryVersion());
 #endif
 #if  defined  (HAVE_LIBGRIB_API)
-  fprintf(stderr, "GRIB_API library version : %s\n", gribapiLibraryVersion());
+  fprintf(stderr, "GRIB_API library version : %s\n", gribapiLibraryVersionString());
 #endif
 #if  defined  (HAVE_LIBNETCDF)
   fprintf(stderr, "  netCDF library version : %s\n", cdfLibraryVersion());

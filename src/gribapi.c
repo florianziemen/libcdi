@@ -21,7 +21,7 @@ static char gribapi_libvers[64] = "";
 static int gribapi_libvers_init;
 #endif
 
-const char *gribapiLibraryVersion(void)
+const char *gribapiLibraryVersionString(void)
 {
 #if  defined  (HAVE_LIBGRIB_API)
   if (!gribapi_libvers_init)
