@@ -218,7 +218,7 @@ void grbReadRecord(stream_t * streamptr, double *data, int *nmiss)
   unsigned char *gribbuffer;
   int fileID;
   int recID, vrecID, tsID, gridID, varID;
-  long recsize;
+  size_t recsize;
   off_t recpos;
   int gridsize;
   int vlistID;
@@ -246,7 +246,7 @@ void grbReadRecord(stream_t * streamptr, double *data, int *nmiss)
 
   fileSetPos(fileID, recpos, SEEK_SET);
 
-  if (fileRead(fileID, gribbuffer, (size_t) recsize) != recsize)
+  if (fileRead(fileID, gribbuffer, recsize) != recsize)
     Error("Failed to read GRIB record");
 
   missval = vlistInqVarMissval(vlistID, varID);
