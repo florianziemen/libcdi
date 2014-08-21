@@ -3102,30 +3102,26 @@ void gridDefYbounds(int gridID, const double *ybounds)
 
   grid_check_ptr(gridID, gridptr);
 
-  long size;
-  long nvertex;
-
-  nvertex = gridptr->nvertex;
+  size_t nvertex = (size_t)gridptr->nvertex;
   if ( nvertex == 0 )
     {
       Warning("nvertex undefined for gridID = %d. Cannot define bounds!", gridID);
       return;
     }
 
-  if ( gridptr->type == GRID_CURVILINEAR || gridptr->type == GRID_UNSTRUCTURED )
-    size = nvertex*gridptr->size;
-  else
-    size = nvertex*gridptr->ysize;
+  int irregular = gridptr->type == GRID_CURVILINEAR
+    || gridptr->type == GRID_UNSTRUCTURED;
+  size_t size = nvertex * (size_t)(irregular ? gridptr->size : gridptr->ysize);
 
   if ( size == 0 )
     Error("size undefined for gridID = %d", gridID);
 
   if ( gridptr->ybounds == NULL )
-    gridptr->ybounds = (double *) malloc(size*sizeof(double));
+    gridptr->ybounds = xmalloc(size * sizeof (double));
   else if ( CDI_Debug )
     Warning("values already defined!");
 
-  memcpy(gridptr->ybounds, ybounds, size*sizeof(double));
+  memcpy(gridptr->ybounds, ybounds, size * sizeof (double));
   reshSetStatus(gridID, &gridOps, RESH_DESYNC_IN_USE);
 }
 
