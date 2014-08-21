@@ -2491,8 +2491,7 @@ int gridCompareP ( void * gridptr1, void * gridptr2 )
   if ( g1->reference )
     {
       if ( !g2->reference ) return differ;
-      size = strlen ( g1->reference ) + 1;
-      if ( memcmp ( g1->reference, g2->reference, size ) ) return differ;
+      if ( strcmp(g1->reference, g2->reference) ) return differ;
     }
   else if ( g2->reference )
     return differ;
