@@ -130,11 +130,11 @@ void strtolower(char *str)
 {
   if ( str )
     for (size_t i = 0; str[i]; ++i)
-      str[i] = tolower((int)str[i]);
+      str[i] = (char)tolower((int)str[i]);
 }
 
 static
-int get_timeunit(int len, const char *ptu)
+int get_timeunit(size_t len, const char *ptu)
 {
   int timeunit = -1;
 
@@ -173,18 +173,17 @@ int isTimeUnits(const char *timeunits)
 static
 int isTimeAxisUnits(const char *timeunits)
 {
-  int len, i;
   char *ptu, *tu;
   int timetype = -1;
   int timeunit;
   int status = FALSE;
 
-  len = (int) strlen(timeunits);
-  tu = (char *) malloc((len+1)*sizeof(char));
-  memcpy(tu, timeunits, (len+1)*sizeof(char));
+  size_t len = strlen(timeunits);
+  tu = xmalloc((len+1)*sizeof(char));
+  memcpy(tu, timeunits, (len+1) * sizeof(char));
   ptu = tu;
 
-  for ( i = 0; i < len; i++ ) ptu[i] = tolower((int) ptu[i]);
+  for (size_t i = 0; i < len; i++ ) ptu[i] = (char)tolower((int)ptu[i]);
 
   timeunit = get_timeunit(len, ptu);
   if ( timeunit != -1 )
