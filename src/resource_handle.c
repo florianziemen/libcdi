@@ -9,6 +9,23 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#if defined (HAVE_EXECINFO_H)
+#include <execinfo.h>
+#endif
+
+static
+void show_stackframe()
+{
+#if defined (HAVE_EXECINFO_H)
+  void *trace[16];
+  size_t trace_size = backtrace(trace, 16);
+  char **messages = backtrace_symbols(trace, trace_size);
+
+  fprintf(stderr, "[bt] Execution path:\n");
+  for ( size_t i=0; i<trace_size; ++i ) fprintf(stderr, "[bt] %s\n", messages[i]);
+#endif
+}
+
 #include "dmemory.h"
 #include "resource_handle.h"
 #include "namespace.h"
@@ -379,13 +396,17 @@ reshGetElem(const char *caller, cdiResH resH, const resOps *ops)
   else
     {
       LIST_UNLOCK();
+      show_stackframe();
       xabortC(caller, "Invalid namespace %d or index %d for resource handle %d when using namespace %d of size %d!",
               nspT.nsp, nspT.idx, (int)resH, nsp, resHList[nsp].size);
     }
 
   if ( !(listElem && listElem->res.v.ops == ops) )
-    xabortC(caller, "Invalid resource handle %d, list element not found!",
-            (int)resH);
+    {
+      show_stackframe();
+      xabortC(caller, "Invalid resource handle %d, list element not found!", (int)resH);
+    }
+
   return listElem;
 }
 

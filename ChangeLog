@@ -3,6 +3,10 @@
 	* Version 1.7.0 released
 	* using CGRIBEX library version 1.7.0
 
+2014-08-21  Uwe Schulzweida
+
+	* reshGetElem: call show_stackframe() to print a backtrace 
+
 2014-08-20  Uwe Schulzweida
 
 	* added CDI function gribapiLibraryVersion(major_version, minor_version, revision_version) [Feature #5043]
