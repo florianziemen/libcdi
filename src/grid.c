@@ -4191,8 +4191,9 @@ gridGetPackSize(void * voidP, void *context)
 
   if (gridP->reference)
     {
+      size_t len = strlen(gridP->reference);
       packBuffSize += serializeGetSize(1, DATATYPE_INT, context)
-        + serializeGetSize(strlen(gridP->reference) + 1, DATATYPE_TXT, context)
+        + serializeGetSize((int)len + 1, DATATYPE_TXT, context)
         + serializeGetSize(1, DATATYPE_UINT32, context);
     }
 
