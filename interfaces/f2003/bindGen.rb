@@ -56,7 +56,8 @@ FortranMaxLineLength = 132
 # each function
 def getFuncInfo(filename)
   typelist = %w[char int float double void]
-  funclist = IO.popen("cpp #{filename} | cpp -fpreprocessed").readlines.delete_if {|line| not line.index('#').nil?}.collect {|line| line.chomp}
+  cppflags = ENV['CPPFLAGS'].nil? ? '' : ENV['CPPFLAGS']
+  funclist = IO.popen("cpp #{cppflags} #{filename} | cpp -fpreprocessed").readlines.delete_if {|line| line.include?('#')}.collect {|line| line.chomp}
   # delete everything, that do not look like a function prototype
   typeRegexp = /^.*(#{typelist.join('|')}) \**\w+\s*\(.*\)/
   funclist.delete_if {|line|
