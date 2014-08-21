@@ -4094,7 +4094,7 @@ enum { gridNint    = 27,
 };
 
 
-static int gridGetComponentFlags ( grid_t * gridP )
+static int gridGetComponentFlags(const grid_t * gridP)
 {
   int flags = (gridHasMaskFlag & (int)((unsigned)(gridP->mask == NULL) - 1U))
     | (gridHasGMEMaskFlag & (int)((unsigned)(gridP->mask_gme == NULL) - 1U))
@@ -4313,12 +4313,11 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
     gridP->angle = doubleBuffer[23];
   }
 
+  int irregular = gridP->type == GRID_UNSTRUCTURED
+    || gridP->type == GRID_CURVILINEAR;
   if (memberMask & gridHasXValsFlag)
     {
-      if (gridP->type == GRID_UNSTRUCTURED || gridP->type == GRID_CURVILINEAR)
-	size = gridP->size;
-      else
-	size = gridP->xsize;
+      size = irregular ? gridP->size : gridP->xsize;
 
       gridP->xvals = (double *)xmalloc((size_t)size * sizeof (double));
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
@@ -4330,10 +4329,7 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
 
   if (memberMask & gridHasYValsFlag)
     {
-      if ( gridP->type == GRID_UNSTRUCTURED || gridP->type == GRID_CURVILINEAR )
-	size = gridP->size;
-      else
-	size = gridP->ysize;
+      size = irregular ? gridP->size : gridP->ysize;
 
       gridP->yvals = (double *)xmalloc((size_t)size * sizeof (double));
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
@@ -4345,7 +4341,8 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
 
   if (memberMask & gridHasAreaFlag)
     {
-      xassert((size = gridP->size));
+      size = gridP->size;
+      xassert(size);
       gridP->area = (double *)xmalloc((size_t)size * sizeof (double));
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
                       gridP->area, size, DATATYPE_FLT64, context);
@@ -4356,10 +4353,7 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
 
   if (memberMask & gridHasXBoundsFlag)
     {
-      if (gridP->type == GRID_CURVILINEAR || gridP->type == GRID_UNSTRUCTURED)
-	size = gridP->nvertex * gridP->size;
-      else
-	size = gridP->nvertex * gridP->xsize;
+      size = gridP->nvertex * (irregular ? gridP->size : gridP->xsize);
       xassert(size);
 
       gridP->xbounds = (double *)xmalloc((size_t)size * sizeof (double));
@@ -4372,10 +4366,7 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
 
   if (memberMask & gridHasYBoundsFlag)
     {
-      if (gridP->type == GRID_CURVILINEAR || gridP->type == GRID_UNSTRUCTURED)
-	size = gridP->nvertex * gridP->size;
-      else
-	size = gridP->nvertex * gridP->ysize;
+      size = gridP->nvertex * (irregular ? gridP->size : gridP->ysize);
       xassert(size);
 
       gridP->ybounds = (double *)xmalloc((size_t)size * sizeof (double));
