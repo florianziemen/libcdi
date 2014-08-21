@@ -596,7 +596,7 @@ int srvInqContents(stream_t *streamptr)
 }
 
 static
-int srvScanTimestep(stream_t *streamptr)
+long srvScanTimestep(stream_t *streamptr)
 {
   int header[8];
   int status;
@@ -726,7 +726,8 @@ int srvScanTimestep(stream_t *streamptr)
 
 int srvInqTimestep(stream_t *streamptr, int tsID)
 {
-  int ntsteps, nrecs;
+  long ntsteps;
+  int nrecs;
 
   if ( tsID == 0 && streamptr->rtsteps == 0 )
     Error("Call to cdiInqContents missing!");
