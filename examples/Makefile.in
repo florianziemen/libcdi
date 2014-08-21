@@ -144,7 +144,7 @@ cdi_write_ens_DEPENDENCIES = $(top_builddir)/src/libcdi.la
 am_cdi_write_f2003_OBJECTS = cdi_write_f2003.$(OBJEXT)
 cdi_write_f2003_OBJECTS = $(am_cdi_write_f2003_OBJECTS)
 cdi_write_f2003_DEPENDENCIES = $(top_builddir)/src/libcdi.la \
-	$(top_builddir)/src/mo_cdi.o
+	$(top_builddir)/src/mo_cdi.$(OBJEXT)
 cdi_write_f2003_LINK = $(LIBTOOL) $(AM_V_lt) --tag=FC \
 	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(FCLD) \
 	$(AM_FCFLAGS) $(FCFLAGS) $(cdi_write_f2003_LDFLAGS) $(LDFLAGS) \
@@ -446,7 +446,8 @@ cdi_read_f2003_SOURCES = cdi_read_f2003.f90
 cdi_read_f2003_LDADD = $(top_builddir)/src/libcdi.la $(top_builddir)/src/mo_cdi.o
 #
 cdi_write_f2003_SOURCES = cdi_write_f2003.f90
-cdi_write_f2003_LDADD = $(top_builddir)/src/libcdi.la $(top_builddir)/src/mo_cdi.o
+cdi_write_f2003_LDADD = $(top_builddir)/src/libcdi.la $(top_builddir)/src/mo_cdi.$(OBJEXT)
+
 #
 @ENABLE_ALL_STATIC_TRUE@cdi_write_LDFLAGS = -all-static
 @ENABLE_ALL_STATIC_TRUE@cdi_read_LDFLAGS = -all-static
@@ -776,6 +777,8 @@ uninstall-am:
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
 	tags tags-am uninstall uninstall-am
 
+cdi_read_f2003.$(OBJEXT): $(top_builddir)/src/mo_cdi.$(FCMODEXT)
+cdi_write_f2003.$(OBJEXT): $(top_builddir)/src/mo_cdi.$(FCMODEXT)
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
