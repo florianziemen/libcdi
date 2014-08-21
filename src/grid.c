@@ -276,7 +276,7 @@ gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double yinc, 
 		/* printf("%g %g %g %g %g %d\n", ylast, yfirst, ylast-yfirst,yinc, 180/yinc, ny); */
 		if ( ny > ysize && ny < 4096 )
 		  {
-		    ytmp = (double *) malloc(ny*sizeof(double));
+		    ytmp = (double *)xmalloc((size_t)ny * sizeof (double));
 		    calc_gaussgrid(ytmp, ny, yfirst, ylast);
                     int i;
 		    for ( i = 0; i < (ny-ysize); i++ )
@@ -2120,9 +2120,7 @@ int compareXYvals(int gridID, long xsize, long ysize, double *xvals0, double *yv
 
   if ( !differ && xsize == gridInqXvals(gridID, NULL) )
     {
-      double *xvals;
-
-      xvals = (double *) malloc(xsize*sizeof(double));
+      double *xvals = (double *)xmalloc((size_t)xsize * sizeof (double));
 
       gridInqXvals(gridID, xvals);
 
@@ -2138,9 +2136,7 @@ int compareXYvals(int gridID, long xsize, long ysize, double *xvals0, double *yv
 
   if ( !differ && ysize == gridInqYvals(gridID, NULL) )
     {
-      double *yvals;
-
-      yvals = (double *) malloc(ysize*sizeof(double));
+      double *yvals = (double *)xmalloc((size_t)ysize * sizeof (double));
 
       gridInqYvals(gridID, yvals);
 
@@ -2559,7 +2555,8 @@ int gridGenerate(grid_t grid)
 	  }
 	else if ( grid.xdef == 2 )
 	  {
-	    double *xvals = (double *) malloc(grid.xsize*sizeof(double));
+	    double *xvals
+              = (double *)xmalloc((size_t)grid.xsize * sizeof (double));
 	    gridGenXvals(grid.xsize, grid.xfirst, grid.xlast, grid.xinc, xvals);
 	    gridDefXvals(gridID, xvals);
 	    free(xvals);
@@ -2576,7 +2573,8 @@ int gridGenerate(grid_t grid)
 	  }
 	else if ( grid.ydef == 2 )
 	  {
-	    double *yvals = (double *) malloc(grid.ysize*sizeof(double));
+	    double *yvals
+              = (double *)xmalloc((size_t)grid.ysize * sizeof (double));
 	    gridGenYvals(grid.type, grid.ysize, grid.yfirst, grid.ylast, grid.yinc, yvals);
 	    gridDefYvals(gridID, yvals);
 	    free(yvals);
@@ -2660,7 +2658,8 @@ int gridGenerate(grid_t grid)
 	  }
 	else if ( grid.ydef == 2 )
 	  {
-	    double *yvals = (double *) malloc(grid.ysize*sizeof(double));
+	    double *yvals
+              = (double *)xmalloc((size_t)grid.ysize * sizeof (double));
 	    gridGenYvals(grid.type, grid.ysize, grid.yfirst, grid.ylast, grid.yinc, yvals);
 	    gridDefYvals(gridID, yvals);
 	    free(yvals);
