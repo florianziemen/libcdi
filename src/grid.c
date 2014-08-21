@@ -2771,7 +2771,7 @@ int gridDuplicate(int gridID)
   int irregular = gridtype == GRID_CURVILINEAR || gridtype == GRID_UNSTRUCTURED;
   if ( nrowlon )
     {
-      gridptrnew->rowlon = xmalloc(nrowlon * sizeof (int));
+      gridptrnew->rowlon = (int *)xmalloc(nrowlon * sizeof (int));
       memcpy(gridptrnew->rowlon, gridptr->rowlon, nrowlon * sizeof(int));
     }
 
@@ -2779,7 +2779,7 @@ int gridDuplicate(int gridID)
     {
       size_t size  = (size_t)(irregular ? gridsize : gridptr->xsize);
 
-      gridptrnew->xvals = xmalloc(size * sizeof (double));
+      gridptrnew->xvals = (double *)xmalloc(size * sizeof (double));
       memcpy(gridptrnew->xvals, gridptr->xvals, size * sizeof (double));
     }
 
