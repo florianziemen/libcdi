@@ -212,7 +212,8 @@ int gridSize(void)
 }
 
 
-void gridGenXvals(int xsize, double xfirst, double xlast, double xinc, double *xvals)
+static void
+gridGenXvals(int xsize, double xfirst, double xlast, double xinc, double *xvals)
 {
   if ( (! (fabs(xinc) > 0)) && xsize > 1 )
     {
@@ -253,9 +254,10 @@ void calc_gaussgrid(double *yvals, int ysize, double yfirst, double ylast)
 }
 
 
-void gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double yinc, double *yvals)
+static void
+gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double yinc, double *yvals)
 {
-  double deleps = 0.002;
+  const double deleps = 0.002;
 
   if ( gridtype == GRID_GAUSSIAN || gridtype == GRID_GAUSSIAN_REDUCED )
     {
