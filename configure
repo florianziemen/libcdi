@@ -643,6 +643,7 @@ FCMODCASE
 FCMODEXT
 CDI_F90_INTERFACE_FCFLAGS
 FC_MOD_FLAG
+ENABLE_F2003_ISOC
 CREATE_ISOC_FALSE
 CREATE_ISOC_TRUE
 USE_MPI
@@ -1548,7 +1549,6 @@ Optional Features:
   --enable-iso-c-interface
                           Create Fortran Interface via iso_c_bindings facility
                           of F2003 [default=no].
-
   --enable-swig           use swig to create extra bindings [default=no]
                           (EXPERIMENTAL)
   --enable-ruby           ruby language bindings [default=no] (EXPERIMENTAL)
@@ -27363,6 +27363,79 @@ else
   enable_isoc=no
 fi
 
+if test x"$enable_isoc" = xyes; then :
+  ac_ext=${ac_fc_srcext-f}
+ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
+ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $ac_fcflags_srcext conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_fc_compiler_gnu
+
+   { $as_echo "$as_me:${as_lineno-$LINENO}: checking if Fortran compiler can handle complex CHARACTER interoperability" >&5
+$as_echo_n "checking if Fortran compiler can handle complex CHARACTER interoperability... " >&6; }
+   cat > conftest.$ac_ext <<_ACEOF
+module conftest_mod
+  use iso_c_binding
+  implicit none
+  private
+  public :: errstr
+contains
+  function errstr(errno)
+    integer, intent(in) :: errno
+    interface
+      function strerror(errno) bind(c, name='strerror')
+        import :: c_int, c_ptr
+        integer(c_int), value, intent(in) :: errno
+        type(c_ptr) :: strerror
+      end function strerror
+      function strlen(s) bind(c, name='strlen')
+        import :: c_ptr, c_size_t
+        type(c_ptr), value, intent(in) :: s
+        integer(c_size_t) :: strlen
+      end function strlen
+    end interface
+    type(c_ptr) :: cptr
+    character(len=:, kind=c_char), pointer :: errstr
+
+    cptr = strerror(int(errno, c_int))
+    errstr => c2f_string(cptr, int(strlen(cptr)))
+  end function errstr
+
+  function c2f_string(s, slen)
+    type(c_ptr), intent(in) :: s
+    integer, intent(in) :: slen
+    CHARACTER(len=slen, kind=c_char), POINTER :: c2f_string
+    c2f_string => NULL()
+    call c_f_pointer(s, c2f_string)
+  end function c2f_string
+end module conftest_mod
+
+program conftest
+  use iso_c_binding
+  use conftest_mod, only: errstr
+  implicit none
+  character(kind=c_char, len=:), pointer :: msg
+  msg => errstr(42)
+  write (0, '(a)') msg
+end program conftest
+_ACEOF
+if ac_fn_fc_try_compile "$LINENO"; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+   ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+else
+  enable_isoc=no
+fi
  if test $enable_isoc = 'yes'; then
   CREATE_ISOC_TRUE=
   CREATE_ISOC_FALSE='#'
@@ -27370,6 +27443,9 @@ else
   CREATE_ISOC_TRUE='#'
   CREATE_ISOC_FALSE=
 fi
+
+ENABLE_F2003_ISOC=$enable_isoc
+
 
 # in case the Fortran interface uses the more modern F90-style interface,
 # the FCFLAGS for users of the library have to include a switch to use the
@@ -27829,7 +27905,7 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
 
-ac_config_files="$ac_config_files tests/test_cksum_grib tests/test_cksum_nc tests/test_cksum_nc2 tests/test_cksum_nc4 tests/test_cksum_extra tests/test_cksum_service tests/test_cksum_ieg tests/test_chunk_cksum tests/pio_write_run tests/pio_write_deco2d_run tests/pio_cksum_mpinonb tests/pio_cksum_fpguard tests/pio_cksum_asynch tests/pio_cksum_writer tests/pio_cksum_cdf tests/test_resource_copy_mpi_run tables/gen_tableheaderfile util/serialrun"
+ac_config_files="$ac_config_files tests/test_cksum_grib tests/test_cksum_nc tests/test_cksum_nc2 tests/test_cksum_nc4 tests/test_cksum_extra tests/test_cksum_service tests/test_cksum_ieg tests/test_chunk_cksum tests/test_f2003 tests/pio_write_run tests/pio_write_deco2d_run tests/pio_cksum_mpinonb tests/pio_cksum_fpguard tests/pio_cksum_asynch tests/pio_cksum_writer tests/pio_cksum_cdf tests/test_resource_copy_mpi_run tables/gen_tableheaderfile util/serialrun"
 
 
 ac_config_files="$ac_config_files Makefile src/Makefile interfaces/Makefile app/Makefile tests/Makefile examples/Makefile cdi.settings examples/pio/Makefile src/pkgconfig/cdi.pc src/pkgconfig/cdipio.pc"
@@ -29186,6 +29262,7 @@ do
     "tests/test_cksum_service") CONFIG_FILES="$CONFIG_FILES tests/test_cksum_service" ;;
     "tests/test_cksum_ieg") CONFIG_FILES="$CONFIG_FILES tests/test_cksum_ieg" ;;
     "tests/test_chunk_cksum") CONFIG_FILES="$CONFIG_FILES tests/test_chunk_cksum" ;;
+    "tests/test_f2003") CONFIG_FILES="$CONFIG_FILES tests/test_f2003" ;;
     "tests/pio_write_run") CONFIG_FILES="$CONFIG_FILES tests/pio_write_run" ;;
     "tests/pio_write_deco2d_run") CONFIG_FILES="$CONFIG_FILES tests/pio_write_deco2d_run" ;;
     "tests/pio_cksum_mpinonb") CONFIG_FILES="$CONFIG_FILES tests/pio_cksum_mpinonb" ;;
@@ -31005,6 +31082,7 @@ _LT_EOF
     "tests/test_cksum_service":F) chmod a+x "$ac_file" ;;
     "tests/test_cksum_ieg":F) chmod a+x "$ac_file" ;;
     "tests/test_chunk_cksum":F) chmod a+x "$ac_file" ;;
+    "tests/test_f2003":F) chmod a+x "$ac_file" ;;
     "tests/pio_write_run":F) chmod a+x "$ac_file" ;;
     "tests/pio_write_deco2d_run":F) chmod a+x "$ac_file" ;;
     "tests/pio_cksum_mpinonb":F) chmod a+x "$ac_file" ;;

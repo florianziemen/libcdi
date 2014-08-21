@@ -209,11 +209,15 @@ AM_CONDITIONAL([USE_PPM_CORE],[test $enable_ppm = yes])
 AC_SUBST([USE_MPI])
 #  ----------------------------------------------------------------------
 #  Create the Fortran Interface via iso_c_binding module (Fortran 2003 Standard)
-AC_ARG_ENABLE(iso-c-interface,
-              AS_HELP_STRING([--enable-iso-c-interface],
-                             [Create Fortran Interface via iso_c_bindings facility of F2003 [default=no]]).
-              ,enable_isoc=${enableval},enable_isoc=no)
+AC_ARG_ENABLE([iso-c-interface],
+              [AS_HELP_STRING([--enable-iso-c-interface],
+                 [Create Fortran Interface via iso_c_bindings facility of F2003 [default=no].])],
+              [enable_isoc=${enableval}],[enable_isoc=no])
+AS_IF([test x"$enable_isoc" = xyes],
+  [ACX_FC_CHECK_STRPTR_CONVERT],[enable_isoc=no])
 AM_CONDITIONAL([CREATE_ISOC],[test $enable_isoc = 'yes'])
+AC_SUBST([ENABLE_F2003_ISOC],[$enable_isoc])
+AM_SUBST_NOTMAKE([ENABLE_F2003_ISOC])
 # in case the Fortran interface uses the more modern F90-style interface,
 # the FCFLAGS for users of the library have to include a switch to use the
 # .mod file
@@ -338,6 +342,7 @@ AC_CONFIG_FILES([tests/test_cksum_grib \
                  tests/test_cksum_service \
                  tests/test_cksum_ieg \
                  tests/test_chunk_cksum \
+                 tests/test_f2003 \
                  tests/pio_write_run \
                  tests/pio_write_deco2d_run \
                  tests/pio_cksum_mpinonb \
