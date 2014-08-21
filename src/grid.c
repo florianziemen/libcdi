@@ -3435,7 +3435,7 @@ void gridPrintKernel(grid_t * gridptr, int opt, FILE *fp)
             int *rowlon;
             nbyte0 = fprintf(fp, "rowlon    = ");
             nbyte  = nbyte0;
-            rowlon = (int *) malloc(ysize*sizeof(int));
+            rowlon = (int *)xmalloc((size_t)ysize*sizeof(int));
             gridInqRowlon(gridID, rowlon);
             for ( i = 0; i < ysize; i++ )
               {
