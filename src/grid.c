@@ -2741,21 +2741,15 @@ The function @func{gridDuplicate} duplicates a horizontal Grid.
 */
 int gridDuplicate(int gridID)
 {
-  int gridIDnew;
-  int gridtype, gridsize;
-  int nrowlon;
-  int size;
-  grid_t *gridptr, *gridptrnew;
-
-  gridptr = ( grid_t *) reshGetVal ( gridID, &gridOps );
+  grid_t *gridptr = reshGetVal(gridID, &gridOps);
 
   grid_check_ptr(gridID, gridptr);
 
-  gridtype = gridInqType(gridID);
-  gridsize = gridInqSize(gridID);
+  int gridtype = gridInqType(gridID);
+  int gridsize = gridInqSize(gridID);
 
-  gridIDnew = gridCreate(gridtype, gridsize);
-  gridptrnew = ( grid_t *) reshGetVal ( gridIDnew, &gridOps );
+  int gridIDnew = gridCreate(gridtype, gridsize);
+  grid_t *gridptrnew = reshGetVal(gridIDnew, &gridOps);
 
   grid_copy(gridptrnew, gridptr);
 
@@ -2768,85 +2762,73 @@ int gridDuplicate(int gridID)
   strcpy(gridptrnew->xstdname, gridptr->xstdname);
   strcpy(gridptrnew->ystdname, gridptr->ystdname);
 
-  if ( gridptr->reference )  gridptrnew->reference = strdupx(gridptr->reference);
+  if (gridptr->reference)
+    gridptrnew->reference = strdupx(gridptr->reference);
 
-  nrowlon = gridptr->nrowlon;
+  size_t nrowlon = (size_t)gridptr->nrowlon;
+  int irregular = gridtype == GRID_CURVILINEAR || gridtype == GRID_UNSTRUCTURED;
   if ( nrowlon )
     {
-      gridptrnew->rowlon = (int *) malloc(nrowlon*sizeof(int));
-      memcpy(gridptrnew->rowlon, gridptr->rowlon, nrowlon*sizeof(int));
+      gridptrnew->rowlon = xmalloc(nrowlon * sizeof (int));
+      memcpy(gridptrnew->rowlon, gridptr->rowlon, nrowlon * sizeof(int));
     }
 
   if ( gridptr->xvals != NULL )
     {
-      if ( gridtype == GRID_CURVILINEAR || gridtype == GRID_UNSTRUCTURED )
-	size = gridsize;
-      else
-        size = gridptr->xsize;
+      size_t size  = (size_t)(irregular ? gridsize : gridptr->xsize);
 
-      gridptrnew->xvals = (double *) malloc(size*sizeof(double));
-      memcpy(gridptrnew->xvals, gridptr->xvals, size*sizeof(double));
+      gridptrnew->xvals = xmalloc(size * sizeof (double));
+      memcpy(gridptrnew->xvals, gridptr->xvals, size * sizeof (double));
     }
 
   if ( gridptr->yvals != NULL )
     {
-      if ( gridtype == GRID_CURVILINEAR || gridtype == GRID_UNSTRUCTURED )
-	size = gridsize;
-      else
-        size = gridptr->ysize;
+      size_t size  = (size_t)(irregular ? gridsize : gridptr->ysize);
 
-      gridptrnew->yvals = (double *) malloc(size*sizeof(double));
-      memcpy(gridptrnew->yvals, gridptr->yvals, size*sizeof(double));
+      gridptrnew->yvals = xmalloc(size * sizeof (double));
+      memcpy(gridptrnew->yvals, gridptr->yvals, size * sizeof (double));
     }
 
   if ( gridptr->xbounds != NULL )
     {
-      if ( gridtype == GRID_CURVILINEAR || gridtype == GRID_UNSTRUCTURED )
-	size = gridsize;
-      else
-        size = gridptr->xsize;
+      size_t size  = (size_t)(irregular ? gridsize : gridptr->xsize)
+        * (size_t)gridptr->nvertex;
 
-      size *= gridptr->nvertex;
-
-      gridptrnew->xbounds = (double *) malloc(size*sizeof(double));
-      memcpy(gridptrnew->xbounds, gridptr->xbounds, size*sizeof(double));
+      gridptrnew->xbounds = xmalloc(size * sizeof (double));
+      memcpy(gridptrnew->xbounds, gridptr->xbounds, size * sizeof (double));
     }
 
   if ( gridptr->ybounds != NULL )
     {
-      if ( gridtype == GRID_CURVILINEAR || gridtype == GRID_UNSTRUCTURED )
-	size = gridsize;
-      else
-        size = gridptr->ysize;
+      size_t size = (size_t)(irregular ? gridsize : gridptr->ysize)
+        * (size_t)gridptr->nvertex;
 
-      size *= gridptr->nvertex;
-
-      gridptrnew->ybounds = (double *) malloc(size*sizeof(double));
-      memcpy(gridptrnew->ybounds, gridptr->ybounds, size*sizeof(double));
+      gridptrnew->ybounds = xmalloc(size * sizeof (double));
+      memcpy(gridptrnew->ybounds, gridptr->ybounds, size * sizeof (double));
     }
 
   if ( gridptr->area != NULL )
     {
-      size = gridsize;
+      size_t size = (size_t)gridsize;
 
-      gridptrnew->area = (double *) malloc(size*sizeof(double));
-      memcpy(gridptrnew->area, gridptr->area, size*sizeof(double));
+      gridptrnew->area = xmalloc(size * sizeof (double));
+      memcpy(gridptrnew->area, gridptr->area, size * sizeof (double));
     }
 
   if ( gridptr->mask != NULL )
     {
-      size = gridsize;
+      size_t size = (size_t)gridsize;
 
-      gridptrnew->mask = (mask_t *) malloc(size*sizeof(mask_t));
-      memcpy(gridptrnew->mask, gridptr->mask, size*sizeof(mask_t));
+      gridptrnew->mask = xmalloc(size * sizeof(mask_t));
+      memcpy(gridptrnew->mask, gridptr->mask, size * sizeof (mask_t));
     }
 
   if ( gridptr->mask_gme != NULL )
     {
-      size = gridsize;
+      size_t size = (size_t)gridsize;
 
-      gridptrnew->mask_gme = (mask_t *) malloc(size*sizeof(mask_t));
-      memcpy(gridptrnew->mask_gme, gridptr->mask_gme, size*sizeof(mask_t));
+      gridptrnew->mask_gme = xmalloc(size * sizeof (mask_t));
+      memcpy(gridptrnew->mask_gme, gridptr->mask_gme, size * sizeof(mask_t));
     }
 
   return (gridIDnew);
