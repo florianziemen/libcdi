@@ -403,12 +403,20 @@ top_srcdir = @top_srcdir@
 SWIGCDILIB = cdilib.i
 SWIGCDIOBJ = cdiobj.i
 BINDINGS = $(am__append_1) $(am__append_4) $(am__append_5)
-EXTRA_DIST = $(SWIGCDIOBJ) $(SWIGCDILIB) ruby/cdilib_wrap.c \
-	ruby/cdiobj_wrap.cpp ruby/testLib.rb ruby/testObj.rb \
+EXTRA_DIST = $(SWIGCDIOBJ) $(SWIGCDILIB) \
+	\
+	ruby/cdilib_wrap.c ruby/cdiobj_wrap.cpp ruby/testLib.rb \
+	ruby/testObj.rb \
+	\
 	python/cdilib_wrap.c python/cdiobj_wrap.cpp python/testLib.py \
 	python/testObj.py python/setupObj.py python/setupLib.py \
 	python/setup.py python/table.py python/CdiLib.py \
-	python/CdiObj.py
+	python/CdiObj.py \
+	\
+	CdiInfo.cpp \
+	\
+	f2003/bindGen.rb
+
 noinst_LTLIBRARIES = $(am__append_3)
 #
 locallibs = $(top_builddir)/src/.libs/libcdi.so @LTLIBOBJS@ @NETCDF_LIBS@ @HDF5_LIBS@ @SZLIB_LIBS@ @ZLIB_LIBS@
