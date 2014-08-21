@@ -3147,26 +3147,23 @@ Otherwise, 0 is returned and @func{ybounds} is empty.
 */
 int gridInqYbounds(int gridID, double *ybounds)
 {
-  long size;
-  long nvertex;
   grid_t *gridptr = ( grid_t *) reshGetVal ( gridID, &gridOps );
 
   grid_check_ptr(gridID, gridptr);
 
-  nvertex = gridptr->nvertex;
+  size_t nvertex = (size_t)gridptr->nvertex;
   if ( CDI_Debug && nvertex == 0 )
     Warning("nvertex undefined for gridID = %d", gridID);
 
-  if ( gridptr->type == GRID_CURVILINEAR || gridptr->type == GRID_UNSTRUCTURED )
-    size = nvertex*gridptr->size;
-  else
-    size = nvertex*gridptr->ysize;
+  int irregular = gridptr->type == GRID_CURVILINEAR
+    || gridptr->type == GRID_UNSTRUCTURED;
+  size_t size = nvertex * (size_t)(irregular ? gridptr->size : gridptr->ysize);
 
   if ( CDI_Debug && size == 0 )
     Warning("size undefined for gridID = %d", gridID);
 
   if ( size && ybounds && gridptr->ybounds )
-    memcpy(ybounds, gridptr->ybounds, size*sizeof(double));
+    memcpy(ybounds, gridptr->ybounds, size * sizeof (double));
 
   if ( gridptr->ybounds == NULL ) size = 0;
 
