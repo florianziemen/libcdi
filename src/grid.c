@@ -2928,15 +2928,12 @@ void gridDefArea(int gridID, const double *area)
 
 void gridInqArea(int gridID, double *area)
 {
-  long size;
   grid_t *gridptr = ( grid_t *) reshGetVal ( gridID, &gridOps );
 
   grid_check_ptr(gridID, gridptr);
 
-  size = gridptr->size;
-
-  if ( gridptr->area )
-    memcpy(area, gridptr->area, size*sizeof(double));
+  if (gridptr->area)
+    memcpy(area, gridptr->area, (size_t)gridptr->size * sizeof (double));
 }
 
 
