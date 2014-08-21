@@ -420,8 +420,8 @@ void iegDefLevel(int *pdb, int *gdb, double *vct, int zaxisID, int levelID)
 	else
 	  {
 	    IEG_G_Size(gdb) += (vctsize*4);
-	    memcpy(vct, zaxisInqVctPtr(zaxisID), vctsize/2*sizeof(double));
-	    memcpy(vct+50, zaxisInqVctPtr(zaxisID)+vctsize/2, vctsize/2*sizeof(double));
+	    memcpy(vct, zaxisInqVctPtr(zaxisID), (size_t)vctsize/2*sizeof(double));
+	    memcpy(vct+50, zaxisInqVctPtr(zaxisID)+vctsize/2, (size_t)vctsize/2*sizeof(double));
 	  }
 	break;
       }
