@@ -2156,7 +2156,7 @@ int compareXYvals(int gridID, long xsize, long ysize, double *xvals0, double *yv
 }
 
 static
-int compareXYvals2(int gridID, long gridsize, double *xvals, double *yvals)
+int compareXYvals2(int gridID, int gridsize, double *xvals, double *yvals)
 {
   int differ = 0;
 
