@@ -2911,17 +2911,17 @@ void gridDefArea(int gridID, const double *area)
 
   grid_check_ptr(gridID, gridptr);
 
-  long size = gridptr->size;
+  size_t size = gridptr->size;
 
   if ( size == 0 )
     Error("size undefined for gridID = %d", gridID);
 
   if ( gridptr->area == NULL )
-    gridptr->area = (double *) malloc(size*sizeof(double));
+    gridptr->area = (double *)xmalloc(size*sizeof(double));
   else if ( CDI_Debug )
     Warning("values already defined!");
 
-  memcpy(gridptr->area, area, size*sizeof(double));
+  memcpy(gridptr->area, area, size * sizeof(double));
   reshSetStatus(gridID, &gridOps, RESH_DESYNC_IN_USE);
 }
 
