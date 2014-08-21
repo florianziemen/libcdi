@@ -3049,26 +3049,23 @@ Otherwise, 0 is returned and @func{xbounds} is empty.
 */
 int gridInqXbounds(int gridID, double *xbounds)
 {
-  long size;
-  long nvertex;
   grid_t *gridptr = ( grid_t *) reshGetVal ( gridID, &gridOps );
 
   grid_check_ptr(gridID, gridptr);
 
-  nvertex = gridptr->nvertex;
+  size_t nvertex = (size_t)gridptr->nvertex;
   if ( CDI_Debug && nvertex == 0 )
     Warning("nvertex undefined for gridID = %d", gridID);
 
-  if ( gridptr->type == GRID_CURVILINEAR || gridptr->type == GRID_UNSTRUCTURED )
-    size = nvertex*gridptr->size;
-  else
-    size = nvertex*gridptr->xsize;
+  int irregular = gridptr->type == GRID_CURVILINEAR
+    || gridptr->type == GRID_UNSTRUCTURED;
+  size_t size = nvertex * (size_t)(irregular ? gridptr->size : gridptr->xsize);
 
   if ( CDI_Debug && size == 0 )
     Warning("size undefined for gridID = %d", gridID);
 
   if ( size && xbounds && gridptr->xbounds )
-    memcpy(xbounds, gridptr->xbounds, size*sizeof(double));
+    memcpy(xbounds, gridptr->xbounds, size * sizeof (double));
 
   if ( gridptr->xbounds == NULL ) size = 0;
 
