@@ -1496,21 +1496,20 @@ Otherwise, 0 is returned and @func{yvals} is empty.
 */
 int gridInqYvals(int gridID, double *yvals)
 {
-  long size;
   grid_t *gridptr = ( grid_t *) reshGetVal ( gridID, &gridOps );
 
   grid_check_ptr(gridID, gridptr);
 
-  if ( gridptr->type == GRID_CURVILINEAR || gridptr->type == GRID_UNSTRUCTURED )
-    size = gridptr->size;
-  else
-    size = gridptr->ysize;
+  int gridtype = gridptr->type;
+  long size
+    = (gridtype == GRID_CURVILINEAR || gridtype == GRID_UNSTRUCTURED)
+    ? gridptr->size : gridptr->ysize;
 
   if ( CDI_Debug && size == 0 )
     Warning("size undefined for gridID = %d!", gridID);
 
   if ( size && yvals && gridptr->yvals )
-    memcpy(yvals, gridptr->yvals, size*sizeof(double));
+    memcpy(yvals, gridptr->yvals, (size_t)size * sizeof (double));
 
   if ( gridptr->yvals == NULL ) size = 0;
 
@@ -1533,19 +1532,14 @@ The function @func{gridDefYvals} defines all values of the Y-axis.
 */
 void gridDefYvals(int gridID, const double *yvals)
 {
-  grid_t *gridptr = ( grid_t *) reshGetVal ( gridID, &gridOps );
+  grid_t *gridptr = reshGetVal(gridID, &gridOps);
 
   grid_check_ptr(gridID, gridptr);
 
-  int gridtype;
-  long size;
-
-  gridtype = gridptr->type;
-
-  if ( gridtype == GRID_UNSTRUCTURED || gridtype == GRID_CURVILINEAR )
-    size = gridptr->size;
-  else
-    size = gridptr->ysize;
+  int gridtype = gridptr->type;
+  long size
+    = (gridtype == GRID_CURVILINEAR || gridtype == GRID_UNSTRUCTURED)
+    ? gridptr->size : gridptr->ysize;
 
   if ( size == 0 )
     Error("Size undefined for gridID = %d!", gridID);
@@ -1553,8 +1547,8 @@ void gridDefYvals(int gridID, const double *yvals)
   if (gridptr->yvals && CDI_Debug)
     Warning("Values already defined!");
 
-  gridptr->yvals = (double *)xrealloc(gridptr->yvals, size*sizeof(double));
-  memcpy(gridptr->yvals, yvals, size*sizeof(double));
+  gridptr->yvals = (double *)xrealloc(gridptr->yvals, (size_t)size * sizeof (double));
+  memcpy(gridptr->yvals, yvals, (size_t)size * sizeof (double));
   reshSetStatus(gridID, &gridOps, RESH_DESYNC_IN_USE);
 }
 
@@ -1615,17 +1609,13 @@ double gridInqXinc(int gridID)
 
   if ( (! (fabs(xinc) > 0)) && gridptr->xvals )
     {
-      int xsize;
-      double *xvals;
-
-      xsize = gridptr->xsize;
-      xvals = gridptr->xvals;
-
+      int xsize = gridptr->xsize;
       if ( xsize > 1 )
         {
-          long i;
+          double *xvals = gridptr->xvals;
           xinc = fabs(xvals[xsize-1] - xvals[0])/(xsize-1);
-          for ( i = 2; i < xsize; i++ )
+          int i;
+          for (i = 2; i < xsize; i++ )
             if ( fabs(fabs(xvals[i-1] - xvals[i]) - xinc) > 0.01*xinc ) break;
 
           if ( i < xsize ) xinc = 0;
@@ -1663,8 +1653,8 @@ double gridInqYinc(int gridID)
 
       if ( ysize > 1 )
         {
-          long i;
           yinc = fabs(yvals[1] - yvals[0]);
+          int i;
           for ( i = 2; i < ysize; i++ )
             if ( fabs(fabs(yvals[i] - yvals[i-1]) - yinc) > (yinc/1000) ) break;
 
