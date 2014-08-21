@@ -479,8 +479,7 @@ void streamCopyRecord(int streamID2, int streamID1)
 
 void cdi_create_records(stream_t *streamptr, int tsID)
 {
-  int nrecords, maxrecords;
-  int nvars, varID, recID;
+  unsigned nrecords, maxrecords;
   record_t *records;
   int vlistID;
 
@@ -491,12 +490,12 @@ void cdi_create_records(stream_t *streamptr, int tsID)
   if ( tsID == 0 )
     {
       maxrecords = 0;
-      nvars = streamptr->nvars;
-      for ( varID = 0; varID < nvars; varID++)
-	maxrecords += streamptr->vars[varID].nlevs;
+      int nvars = streamptr->nvars;
+      for ( int varID = 0; varID < nvars; varID++)
+	maxrecords += (unsigned)streamptr->vars[varID].nlevs;
     }
   else
-    maxrecords = streamptr->tsteps[0].recordSize;
+    maxrecords = (unsigned)streamptr->tsteps[0].recordSize;
 
   if ( tsID == 0 )
     {
@@ -505,42 +504,41 @@ void cdi_create_records(stream_t *streamptr, int tsID)
   else if ( tsID == 1 )
     {
       nrecords = 0;
-      maxrecords = streamptr->tsteps[0].recordSize;
-      for ( recID = 0; recID < maxrecords; recID++ )
+      maxrecords = (unsigned)streamptr->tsteps[0].recordSize;
+      for (unsigned recID = 0; recID < maxrecords; recID++ )
 	{
-	  varID = streamptr->tsteps[0].records[recID].varID;
-	  if ( varID != -1 ) /* varID = -1 for write mode !!! */
-	    if ( vlistInqVarTsteptype(vlistID, varID) == TSTEP_CONSTANT )
-	      continue;
-	  nrecords++;
+	  int varID = streamptr->tsteps[0].records[recID].varID;
+	  nrecords +=
+            (varID == -1 /* varID = -1 for write mode !!! */
+             || vlistInqVarTsteptype(vlistID, varID) != TSTEP_CONSTANT);
 	}
     }
   else
-    nrecords = streamptr->tsteps[1].nallrecs;
+    nrecords = (unsigned)streamptr->tsteps[1].nallrecs;
 
   if ( maxrecords > 0 )
-    records = (record_t *) malloc(maxrecords*sizeof(record_t));
+    records = (record_t *) malloc(maxrecords * sizeof(record_t));
   else
     records = NULL;
 
   streamptr->tsteps[tsID].records    = records;
-  streamptr->tsteps[tsID].recordSize = maxrecords;
-  streamptr->tsteps[tsID].nallrecs   = nrecords;
+  streamptr->tsteps[tsID].recordSize = (int)maxrecords;
+  streamptr->tsteps[tsID].nallrecs   = (int)nrecords;
 
   if ( tsID == 0 )
     {
-      for ( recID = 0; recID < maxrecords; recID++ )
+      for ( unsigned recID = 0; recID < maxrecords; recID++ )
 	recordInitEntry(&streamptr->tsteps[tsID].records[recID]);
     }
   else
     {
       memcpy(streamptr->tsteps[tsID].records,
 	     streamptr->tsteps[0].records,
-	     maxrecords*sizeof(record_t));
+	     (size_t)maxrecords * sizeof(record_t));
 
-      for ( recID = 0; recID < maxrecords; recID++ )
+      for ( unsigned recID = 0; recID < maxrecords; recID++ )
 	{
-	  varID = streamptr->tsteps[0].records[recID].varID;
+	  int varID = streamptr->tsteps[0].records[recID].varID;
 	  if ( varID != -1 ) /* varID = -1 for write mode !!! */
 	    if ( vlistInqVarTsteptype(vlistID, varID) != TSTEP_CONSTANT )
 	      {
