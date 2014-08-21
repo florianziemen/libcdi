@@ -35,7 +35,7 @@ static int  MODEL_Debug = 0;   /* If set to 1, debugging */
 static void modelInit(void);
 
 
-static int    modelCompareP ( void * modelptr1, void * modelptr2 );
+static int modelCompareP(void *modelptr1, void *modelptr2);
 static void   modelDestroyP ( void * modelptr );
 static void   modelPrintP   ( void * modelptr, FILE * fp );
 static int    modelGetSizeP ( void * modelptr, void *context);
@@ -250,9 +250,15 @@ char *modelInqNamePtr(int modelID)
 }
 
 
-int  modelCompareP ( void * modelptr1, void * modelptr2 )
+static int
+modelCompareP(void *modelptr1, void *modelptr2)
 {
-  return 0;
+  model_t *model1 = modelptr1, *model2 = modelptr2;
+  int diff = (namespaceResHDecode(model1->instID).idx
+              != namespaceResHDecode(model2->instID).idx)
+    | (model1->modelgribID != model2->modelgribID)
+    | (strcmp(model1->name, model2->name) != 0);
+  return diff;
 }
 
 
