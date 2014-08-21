@@ -713,9 +713,9 @@ void grib1GetLevel(grib_handle *gh, int *leveltype, int *lbounds, int *level1, i
       else
 	{
 	  GRIB_CHECK(grib_get_long(gh, "topLevel", &lpar), 0);
-	  *level1 = lpar;
+	  *level1 = (int)lpar;
 	  GRIB_CHECK(grib_get_long(gh, "bottomLevel", &lpar), 0);
-	  *level2 = lpar;
+	  *level2 = (int)lpar;
 	}
     }
 }
