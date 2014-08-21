@@ -2837,36 +2837,38 @@ int gridDuplicate(int gridID)
 
 void gridCompress(int gridID)
 {
-  int gridtype, gridsize;
   grid_t *gridptr = ( grid_t *) reshGetVal ( gridID, &gridOps );
 
   grid_check_ptr(gridID, gridptr);
 
-  gridtype = gridInqType(gridID);
-  gridsize = gridInqSize(gridID);
-
+  int gridtype = gridInqType(gridID);
   if ( gridtype == GRID_UNSTRUCTURED )
     {
       if ( gridptr->mask_gme != NULL )
 	{
-	  long i, j, iv, nv;
+          size_t gridsize = (size_t)gridInqSize(gridID);
+	  size_t nv = (size_t)gridptr->nvertex;
 
-	  nv = gridptr->nvertex;
-
-	  j = 0;
-	  for ( i = 0; i < gridsize; i++ )
+	  size_t j = 0;
+          double *area = gridptr->area,
+            *xvals = gridptr->xvals,
+            *yvals = gridptr->yvals,
+            *xbounds = gridptr->xbounds,
+            *ybounds = gridptr->ybounds;
+          mask_t *mask_gme = gridptr->mask_gme;
+	  for (size_t i = 0; i < gridsize; i++ )
 	    {
-	      if ( gridptr->mask_gme[i] )
+	      if (mask_gme[i])
 		{
-		  if ( gridptr->xvals != NULL ) gridptr->xvals[j] = gridptr->xvals[i];
-		  if ( gridptr->yvals != NULL ) gridptr->yvals[j] = gridptr->yvals[i];
-		  if ( gridptr->area  != NULL ) gridptr->area[j]  = gridptr->area[i];
-		  if ( gridptr->xbounds != NULL )
-		    for ( iv = 0; iv < nv; iv++ )
-		      gridptr->xbounds[j*nv+iv] = gridptr->xbounds[i*nv+iv];
-		  if ( gridptr->ybounds != NULL )
-		    for ( iv = 0; iv < nv; iv++ )
-		      gridptr->ybounds[j*nv+iv] = gridptr->ybounds[i*nv+iv];
+		  if (xvals) xvals[j] = xvals[i];
+		  if (yvals) yvals[j] = yvals[i];
+		  if (area) area[j]  = area[i];
+		  if (xbounds != NULL)
+		    for (size_t iv = 0; iv < nv; iv++)
+		      xbounds[j * nv + iv] = xbounds[i * nv + iv];
+		  if (ybounds != NULL)
+		    for (size_t iv = 0; iv < nv; iv++)
+		      ybounds[j * nv + iv] = ybounds[i * nv + iv];
 
 		  j++;
 		}
@@ -2874,9 +2876,9 @@ void gridCompress(int gridID)
 
 	  /* fprintf(stderr, "grid compress %d %d %d\n", i, j, gridsize); */
 	  gridsize = j;
-	  gridptr->size  = gridsize;
-	  gridptr->xsize = gridsize;
-	  gridptr->ysize = gridsize;
+	  gridptr->size  = (int)gridsize;
+	  gridptr->xsize = (int)gridsize;
+	  gridptr->ysize = (int)gridsize;
 
 	  if ( gridptr->xvals )
 	    gridptr->xvals = (double *)xrealloc(gridptr->xvals, gridsize*sizeof(double));
