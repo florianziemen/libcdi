@@ -211,9 +211,8 @@ int gridSize(void)
   return reshCountType ( &gridOps );
 }
 
-
-static void
-gridGenXvals(int xsize, double xfirst, double xlast, double xinc, double *xvals)
+// used also in CDO
+void gridGenXvals(int xsize, double xfirst, double xlast, double xinc, double *xvals)
 {
   if ( (! (fabs(xinc) > 0)) && xsize > 1 )
     {
@@ -253,9 +252,8 @@ void calc_gaussgrid(double *yvals, int ysize, double yfirst, double ylast)
     }
 }
 
-
-static void
-gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double yinc, double *yvals)
+// used also in CDO
+void gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double yinc, double *yvals)
 {
   const double deleps = 0.002;
 
