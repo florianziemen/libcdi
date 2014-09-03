@@ -11,5 +11,5 @@ heading_suffix "}}"
 EOF
 makeindex -s ${FILE}.ist ${FILE}.idx
 pdflatex ${FILE}
-thumbpdf ${FILE}
+#thumbpdf ${FILE}
 pdflatex ${FILE}
