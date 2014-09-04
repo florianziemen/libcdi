@@ -18,11 +18,13 @@ void show_stackframe()
 {
 #if defined (HAVE_EXECINFO_H)
   void *trace[16];
+  size_t i;
   size_t trace_size = backtrace(trace, 16);
   char **messages = backtrace_symbols(trace, trace_size);
 
   fprintf(stderr, "[bt] Execution path:\n");
-  for ( size_t i=0; i<trace_size; ++i ) fprintf(stderr, "[bt] %s\n", messages[i]);
+  for ( i = 0; i < trace_size; ++i ) fprintf(stderr, "[bt] %s\n", messages[i]);
+  if ( messages ) free(messages);
 #endif
 }
 
