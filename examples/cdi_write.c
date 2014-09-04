@@ -40,7 +40,7 @@ int main(void)
   varID2 = vlistDefVar(vlistID, gridID, zaxisID2, TSTEP_INSTANT);
 
   // Define the variable names
-  vlistDefVarName(vlistID*8, varID1, "varname1");
+  vlistDefVarName(vlistID, varID1, "varname1");
   vlistDefVarName(vlistID, varID2, "varname2");
 
   // Create a Time axis
