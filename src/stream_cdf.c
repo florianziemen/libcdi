@@ -4993,7 +4993,7 @@ void printNCvars(ncvar_t *ncvars, int nvars, const char *oname)
   char axis[7];
   int ncvarid, i;
   int ndim;
-  int iaxis[] = {'t', 'z', 'y', 'x'};
+  static const char iaxis[] = {'t', 'z', 'y', 'x'};
 
   fprintf(stderr, "%s:\n", oname);
 
