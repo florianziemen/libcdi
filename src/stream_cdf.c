@@ -291,18 +291,17 @@ void setForecastTime(const char *timestr, taxis_t *taxis)
 static
 int setBaseTime(const char *timeunits, taxis_t *taxis)
 {
-  int len, i;
   char *ptu, *tu;
   int timetype = TAXIS_ABSOLUTE;
   int rdate = -1, rtime = -1;
   int timeunit;
 
-  len = (int) strlen(timeunits);
-  tu = (char *) malloc((len+1)*sizeof(char));
-  memcpy(tu, timeunits, (len+1)*sizeof(char));
+  size_t len = strlen(timeunits);
+  tu = xmalloc((len+1) * sizeof (char));
+  memcpy(tu, timeunits, (len+1) * sizeof (char));
   ptu = tu;
 
-  for ( i = 0; i < len; i++ ) ptu[i] = tolower((int) ptu[i]);
+  for ( size_t i = 0; i < len; i++ ) ptu[i] = (char)tolower((int) ptu[i]);
 
   timeunit = get_timeunit(len, ptu);
   if ( timeunit == -1 )
