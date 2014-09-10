@@ -2388,10 +2388,9 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
   int dimID = UNDEFID;
   int dimIDs[2];
   int fileID;
-  int dimlen;
   size_t len;
   int ncvarid = UNDEFID, ncbvarid = UNDEFID;
-  int nvertex = 2, nvdimID = UNDEFID;
+  int nvdimID = UNDEFID;
   int type;
   int nzaxis;
   int ilevel = 0;
@@ -2409,22 +2408,27 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
 
   nzaxis = vlistNzaxis(vlistID);
 
-  dimlen = zaxisInqSize(zaxisID);
+  size_t dimlen = (size_t)zaxisInqSize(zaxisID);
   type   = zaxisInqType(zaxisID);
 
-  if ( dimlen == 1 && type == ZAXIS_SURFACE            ) return;
-  if ( dimlen == 1 && type == ZAXIS_CLOUD_BASE         ) return;
-  if ( dimlen == 1 && type == ZAXIS_CLOUD_TOP          ) return;
-  if ( dimlen == 1 && type == ZAXIS_ISOTHERM_ZERO      ) return;
-  if ( dimlen == 1 && type == ZAXIS_TOA                ) return;
-  if ( dimlen == 1 && type == ZAXIS_SEA_BOTTOM         ) return;
-  if ( dimlen == 1 && type == ZAXIS_ATMOSPHERE         ) return;
-  if ( dimlen == 1 && type == ZAXIS_MEANSEA            ) return;
-  if ( dimlen == 1 && type == ZAXIS_LAKE_BOTTOM        ) return;
-  if ( dimlen == 1 && type == ZAXIS_SEDIMENT_BOTTOM    ) return;
-  if ( dimlen == 1 && type == ZAXIS_SEDIMENT_BOTTOM_TA ) return;
-  if ( dimlen == 1 && type == ZAXIS_SEDIMENT_BOTTOM_TW ) return;
-  if ( dimlen == 1 && type == ZAXIS_MIX_LAYER          ) return;
+  if (dimlen == 1)
+    switch (type)
+      {
+      case ZAXIS_SURFACE:
+      case ZAXIS_CLOUD_BASE:
+      case ZAXIS_CLOUD_TOP:
+      case ZAXIS_ISOTHERM_ZERO:
+      case ZAXIS_TOA:
+      case ZAXIS_SEA_BOTTOM:
+      case ZAXIS_ATMOSPHERE:
+      case ZAXIS_MEANSEA:
+      case ZAXIS_LAKE_BOTTOM:
+      case ZAXIS_SEDIMENT_BOTTOM:
+      case ZAXIS_SEDIMENT_BOTTOM_TA:
+      case ZAXIS_SEDIMENT_BOTTOM_TW:
+      case ZAXIS_MIX_LAYER:
+        return;
+      }
 
   zaxisInqName(zaxisID, axisname);
   /*
@@ -2589,6 +2593,7 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
 
 	  if ( zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL) )
             {
+              size_t nvertex = 2;
 	      if ( nc_inq_dimid(fileID, "nb2", &nvdimID) != NC_NOERR )
 		cdf_def_dim(fileID, "nb2", nvertex, &nvdimID);
 
@@ -2609,7 +2614,6 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
 
           if ( ncbvarid != UNDEFID )
 	    {
-	      int i;
 	      double *zbounds, *lbounds, *ubounds;
 
 	      lbounds = (double *) malloc(dimlen*sizeof(double));
@@ -2619,7 +2623,7 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
 	      zaxisInqLbounds(zaxisID, lbounds);
 	      zaxisInqUbounds(zaxisID, ubounds);
 
-	      for ( i = 0; i < dimlen; ++i )
+	      for (size_t i = 0; i < dimlen; ++i )
 		{
 		  zbounds[2*i  ] = lbounds[i];
 		  zbounds[2*i+1] = ubounds[i];
@@ -2888,7 +2892,6 @@ int cdfDefVar(stream_t *streamptr, int varID)
   size_t chunks[4] = {0,0,0,0};
   int tableID;
   int ndims = 0;
-  int len;
   int tsteptype;
   int xtype, dtype;
   int gridtype, gridsize;
@@ -2896,7 +2899,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
   int tablenum;
   int vlistID;
   int dimorder[3];
-  int iax = 0;
+  size_t iax = 0;
   char axis[5];
   int ensID, ensCount, forecast_type;
   int retval;
@@ -3172,7 +3175,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
 
   if ( gridtype != GRID_GENERIC && gridtype != GRID_LONLAT  && gridtype != GRID_CURVILINEAR )
     {
-      len = strlen(gridNamePtr(gridtype));
+      size_t len = strlen(gridNamePtr(gridtype));
       if ( len > 0 )
         cdf_put_att_text(fileID, ncvarid, "grid_type", len, gridNamePtr(gridtype));
     }
@@ -3357,9 +3360,8 @@ int cdfDefVar(stream_t *streamptr, int varID)
 }
 
 static
-void scale_add(long size, double *data, double addoffset, double scalefactor)
+void scale_add(size_t size, double *data, double addoffset, double scalefactor)
 {
-  long i;
   int laddoffset;
   int lscalefactor;
 
@@ -3368,7 +3370,7 @@ void scale_add(long size, double *data, double addoffset, double scalefactor)
 
   if ( laddoffset || lscalefactor )
     {
-      for ( i = 0; i < size; ++i )
+      for (size_t i = 0; i < size; ++i )
         {
           if ( lscalefactor ) data[i] *= scalefactor;
           if ( laddoffset )   data[i] += addoffset;
@@ -3410,10 +3412,10 @@ void cdfGetSlapDescription(stream_t *streamptr, int varID, size_t (*start)[4], s
       (*count)[ndims] = length; \
       ndims++; \
     } while(0)
-  if ( tsteptype != TSTEP_CONSTANT ) addDimension(tsID, 1);
-  if ( zid != UNDEFID ) addDimension(0, zaxisInqSize(zaxisID));
-  if ( yid != UNDEFID ) addDimension(0, gridInqYsize(gridID));
-  if ( xid != UNDEFID ) addDimension(0, gridInqXsize(gridID));
+  if ( tsteptype != TSTEP_CONSTANT ) addDimension((size_t)tsID, 1);
+  if ( zid != UNDEFID ) addDimension(0, (size_t)zaxisInqSize(zaxisID));
+  if ( yid != UNDEFID ) addDimension(0, (size_t)gridInqYsize(gridID));
+  if ( xid != UNDEFID ) addDimension(0, (size_t)gridInqXsize(gridID));
 #undef addDimension
 
   assert(ndims <= (int)(sizeof(*start)/sizeof(**start)));
@@ -3433,33 +3435,45 @@ size_t cdfDoInputDataTransformationDP(size_t valueCount, double *data, bool have
   const bool haveScaleFactor = IS_NOT_EQUAL(scaleFactor, 1);
   size_t missValCount = 0;
 
-  //Quick return if there's nothing to do. Needed because the compiler might not realize that the loop is a noop in this case.
-  if ( !haveMissVal && !haveOffset && !haveScaleFactor ) return missValCount;
-
-  if ( haveScaleFactor || haveOffset )
+  switch ((int)haveMissVal | ((int)haveScaleFactor << 1) | ((int)haveOffset << 2))
     {
+    case 7: /* haveMissVal & haveScaleFactor & haveOffset */
       for ( size_t i = 0; i < valueCount; i++ )
-        {
-          if ( haveMissVal && DBL_IS_EQUAL(data[i], missVal) )
-            {
-              missValCount++;
-            }
-          else
-            {
-              if ( haveScaleFactor ) data[i] *= scaleFactor;
-              if ( haveOffset ) data[i] += offset;
-            }
-        }
-    }
-  else
-    {
+        if ( DBL_IS_EQUAL(data[i], missVal) )
+          missValCount++;
+        else
+          data[i] = data[i] * scaleFactor + offset;
+      break;
+    case 6: /* haveOffset & haveScaleFactor */
       for ( size_t i = 0; i < valueCount; i++ )
-        {
-          if ( haveMissVal && DBL_IS_EQUAL(data[i], missVal) )
-            {
-              missValCount++;
-            }
-        }
+        data[i] = data[i] * scaleFactor + offset;
+      break;
+    case 5: /* haveMissVal & haveOffset */
+      for ( size_t i = 0; i < valueCount; i++ )
+        if ( DBL_IS_EQUAL(data[i], missVal) )
+          missValCount++;
+        else
+          data[i] += offset;
+      break;
+    case 4: /* haveOffset */
+      for ( size_t i = 0; i < valueCount; i++ )
+        data[i] += offset;
+      break;
+    case 3: /* haveMissVal & haveScaleFactor */
+      for ( size_t i = 0; i < valueCount; i++ )
+        if ( DBL_IS_EQUAL(data[i], missVal) )
+          missValCount++;
+        else
+          data[i] *= scaleFactor;
+      break;
+    case 2: /* haveScaleFactor */
+      for ( size_t i = 0; i < valueCount; i++ )
+        data[i] *= scaleFactor;
+      break;
+    case 1: /* haveMissVal */
+      for ( size_t i = 0; i < valueCount; i++ )
+        missValCount += DBL_IS_EQUAL(data[i], missVal);
+      break;
     }
 
   return missValCount;
@@ -3472,36 +3486,45 @@ size_t cdfDoInputDataTransformationSP(size_t valueCount, float *data, bool haveM
   const bool haveScaleFactor = IS_NOT_EQUAL(scaleFactor, 1);
   size_t missValCount = 0;
 
-  //Quick return if there's nothing to do. Needed because the compiler might not realize that the loop is a noop in this case.
-  if ( !haveMissVal && !haveOffset && !haveScaleFactor ) return missValCount;
-
-  if ( haveScaleFactor || haveOffset )
+  switch ((int)haveMissVal | ((int)haveScaleFactor << 1) | ((int)haveOffset << 2))
     {
-      double curVal;
+    case 7: /* haveMissVal & haveScaleFactor & haveOffset */
       for ( size_t i = 0; i < valueCount; i++ )
-        {
-          if ( haveMissVal && DBL_IS_EQUAL(data[i], missVal) )
-            {
-              missValCount++;
-            }
-          else
-            {
-              curVal = data[i];    //This is to avoid unnecessary precision losses during the transformation.
-              if ( haveScaleFactor ) curVal *= scaleFactor;
-              if ( haveOffset ) curVal += offset;
-              data[i] = curVal;
-            }
-        }
-    }
-  else
-    {
+        if ( DBL_IS_EQUAL(data[i], missVal) )
+          missValCount++;
+        else
+          data[i] = data[i] * scaleFactor + offset;
+      break;
+    case 6: /* haveOffset & haveScaleFactor */
       for ( size_t i = 0; i < valueCount; i++ )
-        {
-          if ( haveMissVal && DBL_IS_EQUAL(data[i], missVal) )
-            {
-              missValCount++;
-            }
-        }
+        data[i] = data[i] * scaleFactor + offset;
+      break;
+    case 5: /* haveMissVal & haveOffset */
+      for ( size_t i = 0; i < valueCount; i++ )
+        if ( DBL_IS_EQUAL(data[i], missVal) )
+          missValCount++;
+        else
+          data[i] += offset;
+      break;
+    case 4: /* haveOffset */
+      for ( size_t i = 0; i < valueCount; i++ )
+        data[i] += offset;
+      break;
+    case 3: /* haveMissVal & haveScaleFactor */
+      for ( size_t i = 0; i < valueCount; i++ )
+        if ( DBL_IS_EQUAL(data[i], missVal) )
+          missValCount++;
+        else
+          data[i] *= scaleFactor;
+      break;
+    case 2: /* haveScaleFactor */
+      for ( size_t i = 0; i < valueCount; i++ )
+        data[i] *= scaleFactor;
+      break;
+    case 1: /* haveMissVal */
+      for ( size_t i = 0; i < valueCount; i++ )
+        missValCount += DBL_IS_EQUAL(data[i], missVal);
+      break;
     }
 
   return missValCount;
@@ -3535,7 +3558,7 @@ void cdfReadVarDP(stream_t *streamptr, int varID, double *data, int *nmiss)
 
   double addoffset    = vlistInqVarAddoffset(vlistID, varID);
   double scalefactor  = vlistInqVarScalefactor(vlistID, varID);
-  size_t size = gridInqSize(gridID)*zaxisInqSize(zaxisID);
+  size_t size = (size_t)gridInqSize(gridID)*zaxisInqSize(zaxisID);
   const bool haveMissVal = vlistInqVarMissvalUsed(vlistID, varID);
   double missval = vlistInqVarMissval(vlistID, varID);
 
