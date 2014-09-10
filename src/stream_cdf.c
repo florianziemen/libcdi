@@ -821,9 +821,7 @@ static
 void cdfDefTimeValue(stream_t *streamptr, int tsID)
 {
   int fileID;
-  double timevalue;
   int ncvarid;
-  size_t index;
   taxis_t *taxis;
 
   fileID = streamptr->fileID;
@@ -839,9 +837,9 @@ void cdfDefTimeValue(stream_t *streamptr, int tsID)
       streamptr->ncmode = 2;
     }
 
-  index = tsID;
+  size_t index = (size_t)tsID;
 
-  timevalue = cdiEncodeTimeval(taxis->vdate, taxis->vtime, &streamptr->tsteps[0].taxis);
+  double timevalue = cdiEncodeTimeval(taxis->vdate, taxis->vtime, &streamptr->tsteps[0].taxis);
   if ( CDI_Debug ) Message("tsID = %d  timevalue = %f", tsID, timevalue);
 
   ncvarid = streamptr->basetime.ncvarid;
@@ -854,11 +852,11 @@ void cdfDefTimeValue(stream_t *streamptr, int tsID)
       ncvarid = streamptr->basetime.ncvarboundsid;
 
       timevalue = cdiEncodeTimeval(taxis->vdate_lb, taxis->vtime_lb, &streamptr->tsteps[0].taxis);
-      start[0] = tsID; count[0] = 1; start[1] = 0; count[1] = 1;
+      start[0] = (size_t)tsID; count[0] = 1; start[1] = 0; count[1] = 1;
       cdf_put_vara_double(fileID, ncvarid, start, count, &timevalue);
 
       timevalue = cdiEncodeTimeval(taxis->vdate_ub, taxis->vtime_ub, &streamptr->tsteps[0].taxis);
-      start[0] = tsID; count[0] = 1; start[1] = 1; count[1] = 1;
+      start[0] = (size_t)tsID; count[0] = 1; start[1] = 1; count[1] = 1;
       cdf_put_vara_double(fileID, ncvarid, start, count, &timevalue);
     }
 
