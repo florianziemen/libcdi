@@ -371,7 +371,7 @@ void cdfGetAttInt(int fileID, int ncvarid, char *attname, int attlen, int *attin
   cdf_inq_attlen(fileID, ncvarid, attname, &nc_attlen);
 
   if ( (int)nc_attlen > attlen )
-    pintatt = (int *) malloc(nc_attlen*sizeof(int));
+    pintatt = (int *) malloc(nc_attlen * sizeof (int));
   else
     pintatt = attint;
 
@@ -379,7 +379,7 @@ void cdfGetAttInt(int fileID, int ncvarid, char *attname, int attlen, int *attin
 
   if ( (int)nc_attlen > attlen )
     {
-      memcpy(attint, pintatt, attlen*sizeof(int));
+      memcpy(attint, pintatt, (size_t)attlen * sizeof (int));
       free(pintatt);
     }
 }
@@ -393,7 +393,7 @@ void cdfGetAttDouble(int fileID, int ncvarid, char *attname, int attlen, double 
   cdf_inq_attlen(fileID, ncvarid, attname, &nc_attlen);
 
   if ( (int)nc_attlen > attlen )
-    pdoubleatt = (double *) malloc(nc_attlen*sizeof(double));
+    pdoubleatt = (double *) malloc(nc_attlen * sizeof (double));
   else
     pdoubleatt = attdouble;
 
@@ -401,7 +401,7 @@ void cdfGetAttDouble(int fileID, int ncvarid, char *attname, int attlen, double 
 
   if ( (int)nc_attlen > attlen )
     {
-      memcpy(attdouble, pdoubleatt, attlen*sizeof(double));
+      memcpy(attdouble, pdoubleatt, (size_t)attlen * sizeof (double));
       free(pdoubleatt);
     }
 }
@@ -424,7 +424,7 @@ void cdfGetAttText(int fileID, int ncvarid, char *attname, int attlen, char *att
 
           attbuf[nc_attlen++] = 0;
 
-          if ( (int) nc_attlen > attlen ) nc_attlen = attlen;
+          if ( (int) nc_attlen > attlen ) nc_attlen = (size_t)attlen;
           memcpy(atttext, attbuf, nc_attlen);
         }
       else
@@ -566,19 +566,17 @@ void defineAttributes(int vlistID, int varID, int fileID, int ncvarID)
 
       if ( atttype == DATATYPE_TXT )
         {
-          char *atttxt;
-          atttxt = (char *) malloc(attlen*sizeof(char));
+          char *atttxt = (char *)xmalloc((size_t)attlen*sizeof(char));
           vlistInqAttTxt(vlistID, varID, attname, attlen, atttxt);
-          len = attlen;
+          len = (size_t)attlen;
           cdf_put_att_text(fileID, ncvarID, attname, len, atttxt);
           free(atttxt);
         }
       else if ( atttype == DATATYPE_INT16 || atttype == DATATYPE_INT32 )
         {
-          int *attint;
-          attint = (int *) malloc(attlen*sizeof(int));
+          int *attint = (int *)xmalloc((size_t)attlen*sizeof(int));
           vlistInqAttInt(vlistID, varID, attname, attlen, &attint[0]);
-          len = attlen;
+          len = (size_t)attlen;
           if ( atttype == DATATYPE_INT16 )
             cdf_put_att_int(fileID, ncvarID, attname, NC_SHORT, len, attint);
           else
@@ -587,10 +585,9 @@ void defineAttributes(int vlistID, int varID, int fileID, int ncvarID)
         }
       else if ( atttype == DATATYPE_FLT32 || atttype == DATATYPE_FLT64 )
         {
-          double *attflt;
-          attflt = (double *) malloc(attlen*sizeof(double));
+          double *attflt = (double *)xmalloc((size_t)attlen*sizeof(double));
           vlistInqAttFlt(vlistID, varID, attname, attlen, attflt);
-          len = attlen;
+          len = (size_t)attlen;
           if ( atttype == DATATYPE_FLT32 )
             cdf_put_att_double(fileID, ncvarID, attname, NC_FLOAT, len, attflt);
           else
