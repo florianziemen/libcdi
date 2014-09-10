@@ -386,7 +386,7 @@ void cgribexAddRecord(stream_t * streamptr, int param, int *isec1, int *isec2, d
 
   /* fprintf(stderr, "param %d %d %d %d\n", param, level1, level2, ISEC1_LevelType); */
 
-  (*record).size      = recsize;
+  (*record).size      = (size_t)recsize;
   (*record).position  = position;
   (*record).param     = param;
   (*record).ilevel    = level1;
@@ -402,7 +402,7 @@ void cgribexAddRecord(stream_t * streamptr, int param, int *isec1, int *isec2, d
 
   if ( zaxistype == ZAXIS_HYBRID || zaxistype == ZAXIS_HYBRID_HALF )
     {
-      int vctsize = ISEC2_NumVCP;
+      size_t vctsize = (size_t)ISEC2_NumVCP;
       double *vctptr = &fsec2[10];
 
       varDefVCT(vctsize, vctptr);
@@ -416,8 +416,8 @@ void cgribexAddRecord(stream_t * streamptr, int param, int *isec1, int *isec2, d
   varAddRecord(recID, param, gridID, zaxistype, lbounds, level1, level2, 0, 0,
 	       datatype, &varID, &levelID, tsteptype, numavg, ISEC1_LevelType, NULL, NULL, NULL, NULL);
 
-  (*record).varID   = varID;
-  (*record).levelID = levelID;
+  (*record).varID   = (short)varID;
+  (*record).levelID = (short)levelID;
 
   varDefCompType(varID, comptype);
 
@@ -558,7 +558,7 @@ int cgribexScanTimestep1(stream_t * streamptr)
   int lmv = 0, iret = 0;
   off_t recpos = 0;
   unsigned char *gribbuffer = NULL;
-  long buffersize = 0;
+  size_t buffersize = 0;
   int rstatus;
   int fileID;
   int param = 0;
@@ -626,11 +626,11 @@ int cgribexScanTimestep1(stream_t * streamptr)
 	}
       if ( recsize > buffersize )
 	{
-	  buffersize = recsize;
+	  buffersize = (size_t)recsize;
 	  gribbuffer = (unsigned char *) realloc(gribbuffer, buffersize);
 	}
 
-      readsize = recsize;
+      readsize = (size_t)recsize;
       rstatus = gribRead(fileID, gribbuffer, &readsize);
       if ( rstatus ) break;
 
@@ -639,16 +639,16 @@ int cgribexScanTimestep1(stream_t * streamptr)
 	{
 	  comptype = COMPRESS_SZIP;
 	  unzipsize += 100; /* need 0 to 1 bytes for rounding of bds */
-	  if ( (long) buffersize < unzipsize )
+	  if ( buffersize < (size_t)unzipsize )
 	    {
-	      buffersize = unzipsize;
+	      buffersize = (size_t)unzipsize;
 	      gribbuffer = (unsigned char *) realloc(gribbuffer, buffersize);
 	    }
 	}
 
       nrecs_scanned++;
       cgribexDecodeHeader(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, fsec4,
-			  (int *) gribbuffer, recsize, &lmv, &iret);
+			  (int *) gribbuffer, (int)recsize, &lmv, &iret);
 
       param = cdiEncodeParam(ISEC1_Parameter, ISEC1_CodeTable, 255);
       cdiParamToString(param, paramstr, sizeof(paramstr));
@@ -751,8 +751,8 @@ int cgribexScanTimestep1(stream_t * streamptr)
       taxis->unit  = tunit;
     }
 
-  taxis->vdate = datetime0.date;
-  taxis->vtime = datetime0.time;
+  taxis->vdate = (int)datetime0.date;
+  taxis->vtime = (int)datetime0.time;
 
   vlistID = streamptr->vlistID;
   vlistDefTaxis(vlistID, taxisID);
@@ -771,7 +771,7 @@ int cgribexScanTimestep1(stream_t * streamptr)
     streamptr->tsteps[0].recIDs[recID] = recID;
 
   streamptr->record->buffer     = gribbuffer;
-  streamptr->record->buffersize = buffersize;
+  streamptr->record->buffersize = (size_t)buffersize;
 
   if ( streamptr->ntsteps == -1 )
     {
@@ -811,7 +811,7 @@ int cgribexScanTimestep2(stream_t * streamptr)
   int lmv = 0, iret = 0;
   off_t recpos = 0;
   unsigned char *gribbuffer = NULL;
-  long buffersize = 0;
+  size_t buffersize = 0;
   int fileID;
   int param = 0;
   int level1 = 0, level2 = 0, vdate = 0, vtime = 0;
@@ -882,28 +882,28 @@ int cgribexScanTimestep2(stream_t * streamptr)
 	  streamptr->ntsteps = 2;
 	  break;
 	}
-      if ( recsize > buffersize )
+      if ( (size_t)recsize > buffersize )
 	{
-	  buffersize = recsize;
-	  gribbuffer = (unsigned char *) realloc(gribbuffer, (size_t)buffersize);
+	  buffersize = (size_t)recsize;
+	  gribbuffer = (unsigned char *) realloc(gribbuffer, buffersize);
 	}
 
-      readsize = recsize;
+      readsize = (size_t)recsize;
       rstatus = gribRead(fileID, gribbuffer, &readsize);
       if ( rstatus ) break;
 
       if ( gribGetZip(recsize, gribbuffer, &unzipsize) > 0 )
 	{
 	  unzipsize += 100; /* need 0 to 1 bytes for rounding of bds */
-	  if ( (long) buffersize < unzipsize )
+	  if ( buffersize < (size_t)unzipsize )
 	    {
-	      buffersize = unzipsize;
+	      buffersize = (size_t)unzipsize;
 	      gribbuffer = (unsigned char *) realloc(gribbuffer, buffersize);
 	    }
 	}
 
       cgribexDecodeHeader(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, fsec4,
-			  (int *) gribbuffer, recsize, &lmv, &iret);
+			  (int *) gribbuffer, (int)recsize, &lmv, &iret);
 
       nrecs_scanned++;
 
@@ -1002,7 +1002,7 @@ int cgribexScanTimestep2(stream_t * streamptr)
       if ( CDI_Debug )
 	Message("Read record %2d (id=%s lev1=%d lev2=%d) %8d %6d", nrecs_scanned, paramstr, level1, level2, vdate, vtime);
 
-      streamptr->tsteps[tsID].records[recID].size = recsize;
+      streamptr->tsteps[tsID].records[recID].size = (size_t)recsize;
 
       if ( cgribexVarCompare(compVar, streamptr->tsteps[tsID].records[recID]) != 0 )
 	{
@@ -1074,7 +1074,7 @@ int cgribexScanTimestep(stream_t * streamptr)
   long recsize = 0;
   off_t recpos = 0;
   unsigned char *gribbuffer;
-  long buffersize = 0;
+  size_t buffersize = 0;
   int fileID;
   int param = 0;
   int level1 = 0, level2 = 0, vdate = 0, vtime = 0;
@@ -1121,7 +1121,8 @@ int cgribexScanTimestep(stream_t * streamptr)
       nrecs = streamptr->tsteps[1].nrecs;
 
       streamptr->tsteps[tsID].nrecs = nrecs;
-      streamptr->tsteps[tsID].recIDs = (int *) malloc(nrecs*sizeof(int));
+      streamptr->tsteps[tsID].recIDs
+        = (int *)xmalloc((size_t)nrecs * sizeof (int));
       for ( recID = 0; recID < nrecs; recID++ )
 	streamptr->tsteps[tsID].recIDs[recID] = streamptr->tsteps[1].recIDs[recID];
 
@@ -1142,15 +1143,15 @@ int cgribexScanTimestep(stream_t * streamptr)
 	      streamptr->ntsteps = streamptr->rtsteps + 1;
 	      break;
 	    }
-	  if ( recsize > buffersize )
+	  if ( recsize > 0 && (size_t)recsize > buffersize )
 	    {
-	      buffersize = recsize;
+	      buffersize = (size_t)recsize;
 	      gribbuffer = (unsigned char *) realloc(gribbuffer, buffersize);
 	    }
 
 	  if ( rindex >= nrecs ) break;
 
-	  readsize = recsize;
+	  readsize = (size_t)recsize;
 	  rstatus = gribRead(fileID, gribbuffer, &readsize);
 	  if ( rstatus )
 	    {
@@ -1162,15 +1163,15 @@ int cgribexScanTimestep(stream_t * streamptr)
 	  if ( gribGetZip(recsize, gribbuffer, &unzipsize) > 0 )
 	    {
 	      unzipsize += 100; /* need 0 to 1 bytes for rounding of bds */
-	      if ( (long) buffersize < unzipsize )
+	      if ( buffersize < (size_t)unzipsize )
 		{
-		  buffersize = unzipsize;
+		  buffersize = (size_t)unzipsize;
 		  gribbuffer = (unsigned char *) realloc(gribbuffer, buffersize);
 		}
 	    }
 
 	  cgribexDecodeHeader(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, fsec4,
-			      (int *) gribbuffer, recsize, &lmv, &iret);
+			      (int *) gribbuffer, (int)recsize, &lmv, &iret);
 
           nrecs_scanned++;
 
@@ -1283,7 +1284,7 @@ int cgribexScanTimestep(stream_t * streamptr)
 	    }
 
 	  streamptr->tsteps[tsID].records[recID].position = recpos;
-	  streamptr->tsteps[tsID].records[recID].size = recsize;
+	  streamptr->tsteps[tsID].records[recID].size = (size_t)recsize;
 
 	  rindex++;
 	}
@@ -1327,7 +1328,7 @@ int cgribexScanTimestep(stream_t * streamptr)
       streamptr->ntsteps = tsID;
     }
 
-  rstatus = streamptr->ntsteps;
+  rstatus = (int)streamptr->ntsteps;
 #endif
 
   return (rstatus);
@@ -1373,7 +1374,7 @@ int cgribexDecode(unsigned char *gribbuffer, int gribsize, double *data, int gri
 
 	  if ( itmpbuffersize < (size_t) gribsize )
 	    {
-	      itmpbuffersize = gribsize;
+	      itmpbuffersize = (size_t)gribsize;
 	      itmpbuffer = (unsigned char *) realloc(itmpbuffer, itmpbuffersize);
 	    }
 
@@ -2236,7 +2237,7 @@ size_t cgribexEncode(int memtype, int varID, int levelID, int vlistID, int gridI
 {
   size_t nbytes = 0;
 #if  defined  (HAVE_LIBCGRIBEX)
-  long gribsize;
+  int gribsize;
   int iret = 0, iword = 0;
   int isec0[2], isec1[4096], isec2[4096], isec3[2], isec4[512];
   float fsec2f[512], fsec3f[2];
@@ -2248,7 +2249,7 @@ size_t cgribexEncode(int memtype, int varID, int levelID, int vlistID, int gridI
   fsec2[0] = 0; fsec2[1] = 0;
   fsec2f[0] = 0; fsec2f[1] = 0;
 
-  gribsize = gribbuffersize / sizeof(int);
+  gribsize = (int)(gribbuffersize / sizeof(int));
   param    = vlistInqVarParam(vlistID, varID);
 
   cgribexDefaultSec0(isec0);
@@ -2293,14 +2294,14 @@ size_t cgribexEncode(int memtype, int varID, int levelID, int vlistID, int gridI
 
   if ( memtype == MEMTYPE_FLOAT )
     gribExSP(isec0, isec1, isec2, fsec2f, isec3, fsec3f, isec4, (float*) data,
-             datasize, (int *) gribbuffer, gribsize, &iword, "C", &iret);
+             (int)datasize, (int *) gribbuffer, gribsize, &iword, "C", &iret);
   else
     gribExDP(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, (double*) data,
-             datasize, (int *) gribbuffer, gribsize, &iword, "C", &iret);
+             (int)datasize, (int *) gribbuffer, gribsize, &iword, "C", &iret);
 
   if ( iret ) Error("Problem during GRIB encode (errno = %d)!", iret);
 
-  nbytes = iword*sizeof(int);
+  nbytes = (size_t)iword * sizeof (int);
 #else
   Error("CGRIBEX support not compiled in!");
 #endif
