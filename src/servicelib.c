@@ -152,7 +152,8 @@ int srvCheckFiletype(int fileID, int *swap)
   size_t sblocklen = 0;
   size_t data = 0;
   size_t dimx = 0, dimy = 0;
-  int fact = 0, found = 0;
+  size_t fact = 0;
+  int found = 0;
   unsigned char buffer[72], *pbuf;
 
   if ( fileRead(fileID, buffer, 4) != 4 ) return (found);
