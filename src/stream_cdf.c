@@ -4917,14 +4917,14 @@ int unitsIsPressure(const char *units)
 }
 
 static
-int isGaussGrid(long ysize, double yinc, double *yvals)
+int isGaussGrid(size_t ysize, double yinc, double *yvals)
 {
   int lgauss = FALSE;
-  long i;
   double *yv, *yw;
 
   if ( IS_EQUAL(yinc, 0) && ysize > 2 ) /* check if gaussian */
     {
+      size_t i;
       yv = (double *) malloc(ysize*sizeof(double));
       yw = (double *) malloc(ysize*sizeof(double));
       gaussaw(yv, yw, ysize);

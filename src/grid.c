@@ -235,7 +235,7 @@ static
 void calc_gaussgrid(double *yvals, int ysize, double yfirst, double ylast)
 {
   double *yw = (double *)xmalloc((size_t)ysize * sizeof(double));
-  gaussaw(yvals, yw, ysize);
+  gaussaw(yvals, yw, (size_t)ysize);
   free(yw);
   for (int i = 0; i < ysize; i++ )
     yvals[i] = asin(yvals[i])/M_PI*180.0;
