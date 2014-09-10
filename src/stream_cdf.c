@@ -6775,7 +6775,7 @@ void define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 	  if ( zdimid != UNDEFID )
 	    {
 	      zvarid = ncdims[zdimid].ncvarid;
-	      zsize  = ncdims[zdimid].len;
+	      zsize  = (int)ncdims[zdimid].len;
 	    }
 
 	  if ( CDI_Debug ) Message("nlevs = %d", zsize);
@@ -6810,15 +6810,15 @@ void define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 		  nbdims = ncvars[ncvars[zvarid].bounds].ndims;
 		  if ( nbdims == 2 )
 		    {
-		      nlevel  = ncdims[ncvars[ncvars[zvarid].bounds].dimids[0]].len;
-		      nvertex = ncdims[ncvars[ncvars[zvarid].bounds].dimids[1]].len;
+		      nlevel  = (int)ncdims[ncvars[ncvars[zvarid].bounds].dimids[0]].len;
+		      nvertex = (int)ncdims[ncvars[ncvars[zvarid].bounds].dimids[1]].len;
 		      if ( nlevel == zsize && nvertex == 2 )
 			{
 			  double *zbounds;
 			  with_bounds = TRUE;
-			  zbounds = (double *) malloc(2*nlevel*sizeof(double));
-			  lbounds = (double *) malloc(nlevel*sizeof(double));
-			  ubounds = (double *) malloc(nlevel*sizeof(double));
+			  zbounds = (double *) malloc(2*(size_t)nlevel*sizeof(double));
+			  lbounds = (double *) malloc((size_t)nlevel*sizeof(double));
+			  ubounds = (double *) malloc((size_t)nlevel*sizeof(double));
 			  cdf_get_var_double(ncvars[zvarid].ncid, ncvars[zvarid].bounds, zbounds);
 			  for ( i = 0; i < nlevel; ++i )
 			    {
@@ -6853,12 +6853,12 @@ void define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 		}
 	      else
 		{
-		  for ( ilev = 0; ilev < (int)zsize; ilev++ ) zvar[ilev] = ilev + 1;
+		  for ( ilev = 0; ilev < zsize; ilev++ ) zvar[ilev] = ilev + 1;
 		}
 	    }
 
       	  ncvars[ncvarid].zaxisID = varDefZaxis(vlistID, zaxisType, (int) zsize, zvar, with_bounds, lbounds, ubounds,
-						vctsize, vct, pname, plongname, punits, zprec, 1, 0);
+						(int)vctsize, vct, pname, plongname, punits, zprec, 1, 0);
 
 	  if ( uuidOfVGrid[0] != 0 )
             {
@@ -6925,7 +6925,7 @@ void define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, 
 	  varInfo[varID]->ncvarid = ncvarid;
 	  strcpy(varInfo[varID]->name, ncvars[ncvarid].name);
 	}
-      qsort(varInfo[0], nvars, sizeof(varinfo_t), cmpvarname);
+      qsort(varInfo[0], (size_t)nvars, sizeof(varinfo_t), cmpvarname);
       for ( varID = 0; varID < nvars; varID++ )
 	{
 	  varids[varID] = varInfo[varID]->ncvarid;
@@ -7085,7 +7085,7 @@ void define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, 
 		{
 		  int *attint;
 		  attint = (int *) malloc(attlen*sizeof(int));
-		  cdfGetAttInt(ncid, ncvarid, attname, attlen, attint);
+		  cdfGetAttInt(ncid, ncvarid, attname, (int)attlen, attint);
 		  if ( attrtype == NC_SHORT )
 		    vlistDefAttInt(vlistID, varID, attname, DATATYPE_INT16, (int)attlen, attint);
 		  else
@@ -7098,7 +7098,7 @@ void define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, 
 		{
 		  double *attflt;
 		  attflt = (double *) malloc(attlen*sizeof(double));
-		  cdfGetAttDouble(ncid, ncvarid, attname, attlen, attflt);
+		  cdfGetAttDouble(ncid, ncvarid, attname, (int)attlen, attflt);
 		  if ( attrtype == NC_FLOAT )
 		    vlistDefAttFlt(vlistID, varID, attname, DATATYPE_FLT32, (int)attlen, attflt);
 		  else
@@ -7304,7 +7304,7 @@ void scan_global_attributes(int fileID, int vlistID, stream_t *streamptr, int ng
             {
               int *attint;
               attint = (int *) malloc(attlen*sizeof(int));
-              cdfGetAttInt(fileID, NC_GLOBAL, attname, attlen, attint);
+              cdfGetAttInt(fileID, NC_GLOBAL, attname, (int)attlen, attint);
               if ( xtype == NC_SHORT )
                 vlistDefAttInt(vlistID, CDI_GLOBAL, attname, DATATYPE_INT16, (int)attlen, attint);
               else
@@ -7316,7 +7316,7 @@ void scan_global_attributes(int fileID, int vlistID, stream_t *streamptr, int ng
 	{
 	  double *attflt;
 	  attflt = (double *) malloc(attlen*sizeof(double));
-	  cdfGetAttDouble(fileID, NC_GLOBAL, attname, attlen, attflt);
+	  cdfGetAttDouble(fileID, NC_GLOBAL, attname, (int)attlen, attflt);
 	  if ( xtype == NC_FLOAT )
 	    vlistDefAttFlt(vlistID, CDI_GLOBAL, attname, DATATYPE_FLT32, (int)attlen, attflt);
 	  else
@@ -7840,7 +7840,7 @@ int cdfInqContents(stream_t *streamptr)
   if ( ntsteps == 0 && streamptr->basetime.ncdimid == UNDEFID && streamptr->basetime.ncvarid != UNDEFID )
     ntsteps = 1;
 
-  streamptr->ntsteps = ntsteps;
+  streamptr->ntsteps = (long)ntsteps;
 
   /* define all data variables */
   define_all_vars(streamptr, vlistID, instID, modelID, varids, nvars_data, nvars, ncvars);
@@ -7993,7 +7993,7 @@ int cdfInqTimestep(stream_t * streamptr, int tsID)
       if ( nctimevarid != UNDEFID )
 	{
 	  fileID = streamptr->fileID;
-	  index  = tsID;
+	  index  = (size_t)tsID;
 
 	  if ( streamptr->basetime.lwrf )
 	    {
@@ -8025,13 +8025,13 @@ int cdfInqTimestep(stream_t * streamptr, int tsID)
 	  if ( nctimeboundsid != UNDEFID )
 	    {
 	      size_t start[2], count[2];
-	      start[0] = index; count[0] = 1; start[1] = 0; count[1] = 1;
+              start[0] = index; count[0] = 1; start[1] = 0; count[1] = 1;
 	      cdf_get_vara_double(fileID, nctimeboundsid, start, count, &timevalue);
               if ( timevalue >= NC_FILL_DOUBLE || timevalue < -NC_FILL_DOUBLE ) timevalue = 0;
 
 	      cdiDecodeTimeval(timevalue, taxis, &taxis->vdate_lb, &taxis->vtime_lb);
 
-	      start[0] = index; count[0] = 1; start[1] = 1; count[1] = 1;
+              start[0] = index; count[0] = 1; start[1] = 1; count[1] = 1;
 	      cdf_get_vara_double(fileID, nctimeboundsid, start, count, &timevalue);
               if ( timevalue >= NC_FILL_DOUBLE || timevalue < -NC_FILL_DOUBLE ) timevalue = 0;
 
