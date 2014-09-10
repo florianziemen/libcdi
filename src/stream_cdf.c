@@ -5102,7 +5102,7 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
               if ( storage_in == NC_CHUNKED )
                 {
                   ncvars[ncvarid].chunked = 1;
-                  for ( int i = 0; i < nvdims; ++i ) ncvars[ncvarid].chunks[i] = chunks[i];
+                  for ( int i = 0; i < nvdims; ++i ) ncvars[ncvarid].chunks[i] = (int)chunks[i];
                   if ( CDI_Debug )
                     {
                       fprintf(stderr, "\nchunking %d %d %d\nchunks ", storage_in, NC_CONTIGUOUS, NC_CHUNKED);
@@ -5645,12 +5645,12 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
 			  if ( (int) attstring[attlen] == 't' )
 			    {
 			      if ( attlen != 0 ) Warning("axis attribute 't' not on first position");
-			      cdfSetDim(ncvars, ncvarid, attlen, T_AXIS);
+			      cdfSetDim(ncvars, ncvarid, (int)attlen, T_AXIS);
 			    }
 			  else if ( (int) attstring[attlen] == 'z' )
 			    {
 			      ncvars[ncvarid].zdim = dimidsp[attlen];
-			      cdfSetDim(ncvars, ncvarid, attlen, Z_AXIS);
+			      cdfSetDim(ncvars, ncvarid, (int)attlen, Z_AXIS);
 
 			      if ( ncvars[ncvarid].ndims == 1 )
 				{
@@ -5661,7 +5661,7 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
 			  else if ( (int) attstring[attlen] == 'y' )
 			    {
 			      ncvars[ncvarid].ydim = dimidsp[attlen];
-			      cdfSetDim(ncvars, ncvarid, attlen, Y_AXIS);
+			      cdfSetDim(ncvars, ncvarid, (int)attlen, Y_AXIS);
 
 			      if ( ncvars[ncvarid].ndims == 1 )
 				{
@@ -5672,7 +5672,7 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
 			  else if ( (int) attstring[attlen] == 'x' )
 			    {
 			      ncvars[ncvarid].xdim = dimidsp[attlen];
-			      cdfSetDim(ncvars, ncvarid, attlen, X_AXIS);
+			      cdfSetDim(ncvars, ncvarid, (int)attlen, X_AXIS);
 
 			      if ( ncvars[ncvarid].ndims == 1 )
 				{
@@ -6383,10 +6383,10 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 	    case GRID_UNSTRUCTURED:
 	    case GRID_CURVILINEAR:
 	      {
-		grid.size  = size;
-		grid.xsize = xsize;
-		grid.ysize = ysize;
-                grid.np    = np;
+		grid.size  = (int)size;
+		grid.xsize = (int)xsize;
+		grid.ysize = (int)ysize;
+                grid.np    = (int)np;
 		if ( xvarid != UNDEFID )
 		  {
 		    grid.xdef  = 1;
@@ -6432,13 +6432,13 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 	      }
 	    case GRID_SPECTRAL:
 	      {
-		grid.size = size;
+		grid.size = (int)size;
 		grid.lcomplex = 1;
 		break;
 	      }
 	    case GRID_FOURIER:
 	      {
-		grid.size = size;
+		grid.size = (int)size;
 		break;
 	      }
 	    case GRID_TRAJECTORY:
