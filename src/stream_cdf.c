@@ -679,22 +679,17 @@ void cdfWriteGridTraj(stream_t *streamptr, int gridID)
 static
 void cdfReadGridTraj(stream_t *streamptr, int gridID)
 {
-  int tsID, fileID;
-  int lonID, latID, gridindex;
-  size_t index;
+  int vlistID = streamptr->vlistID;
+  int fileID  = streamptr->fileID;
+
+  int gridindex = vlistGridIndex(vlistID, gridID);
+  int lonID = streamptr->xdimID[gridindex];
+  int latID = streamptr->ydimID[gridindex];
+
+  int tsID = streamptr->curTsID;
+  size_t index = (size_t)tsID;
+
   double xlon, xlat;
-  int vlistID;
-
-  vlistID = streamptr->vlistID;
-  fileID  = streamptr->fileID;
-
-  gridindex = vlistGridIndex(vlistID, gridID);
-  lonID = streamptr->xdimID[gridindex];
-  latID = streamptr->ydimID[gridindex];
-
-  tsID = streamptr->curTsID;
-  index = tsID;
-
   cdf_get_var1_double(fileID, lonID, &index, &xlon);
   cdf_get_var1_double(fileID, latID, &index, &xlat);
 
