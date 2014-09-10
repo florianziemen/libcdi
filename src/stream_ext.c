@@ -589,7 +589,7 @@ int extInqContents(stream_t *streamptr)
 }
 
 static
-int extScanTimestep(stream_t *streamptr)
+long extScanTimestep(stream_t *streamptr)
 {
   int header[4];
   int status;
@@ -718,7 +718,8 @@ int extScanTimestep(stream_t *streamptr)
 
 int extInqTimestep(stream_t *streamptr, int tsID)
 {
-  int ntsteps, nrecs;
+  int nrecs;
+  long ntsteps;
 
   if ( tsID == 0 && streamptr->rtsteps == 0 )
     Error("Call to cdiInqContents missing!");
