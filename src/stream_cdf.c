@@ -615,7 +615,7 @@ void cdfCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
   /* bug fix for constant netCDF fields */
   if ( datasize < 1048576 ) datasize = 1048576;
 
-  double *data = xmalloc(datasize*sizeof(double));
+  double *data = xmalloc((size_t)datasize * sizeof (double));
 
   int nmiss;
   cdfReadRecord(streamptr1, data, &nmiss);
@@ -660,23 +660,17 @@ void cdfDefRecord(stream_t *streamptr)
 static
 void cdfWriteGridTraj(stream_t *streamptr, int gridID)
 {
-  int tsID, fileID;
-  int lonID, latID, gridindex;
-  size_t index;
-  double xlon, xlat;
-  int vlistID;
+  int vlistID = streamptr->vlistID;
+  int fileID  = streamptr->fileID;
 
-  vlistID = streamptr->vlistID;
-  fileID  = streamptr->fileID;
+  int gridindex = vlistGridIndex(vlistID, gridID);
+  int lonID = streamptr->xdimID[gridindex],
+    latID = streamptr->ydimID[gridindex];
 
-  gridindex = vlistGridIndex(vlistID, gridID);
-  lonID = streamptr->xdimID[gridindex];
-  latID = streamptr->ydimID[gridindex];
-
-  xlon = gridInqXval(gridID, 0);
-  xlat = gridInqYval(gridID, 0);
-  tsID = streamptr->curTsID;
-  index = tsID;
+  double xlon = gridInqXval(gridID, 0),
+    xlat = gridInqYval(gridID, 0);
+  int tsID = streamptr->curTsID;
+  size_t index = (size_t)tsID;
 
   cdf_put_var1_double(fileID, lonID, &index, &xlon);
   cdf_put_var1_double(fileID, latID, &index, &xlat);
