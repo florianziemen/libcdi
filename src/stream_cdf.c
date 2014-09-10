@@ -4490,7 +4490,7 @@ void cdf_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
     {
       if ( dimorder[id] == 3 && zid != UNDEFID )
         {
-          start[ndims] = levelID;
+          start[ndims] = (size_t)levelID;
           count[ndims] = 1;
           ndims++;
         }
@@ -4569,8 +4569,8 @@ void cdfCreateRecords(stream_t *streamptr, int tsID)
           for ( levelID = 0; levelID < nlev; levelID++ )
             {
               recordInitEntry(&records[recID]);
-              records[recID].varID   = varID;
-              records[recID].levelID = levelID;
+              records[recID].varID   = (short)varID;
+              records[recID].levelID = (short)levelID;
               recID++;
             }
         }
@@ -4592,7 +4592,7 @@ void cdfCreateRecords(stream_t *streamptr, int tsID)
 
       streamptr->nrecs += nvrecs;
 
-      records = (record_t *) malloc(nrecs*sizeof(record_t));
+      records = (record_t *) malloc((size_t)nrecs * sizeof (record_t));
       streamptr->tsteps[tsID].records    = records;
       streamptr->tsteps[tsID].nrecs      = nvrecs;
       streamptr->tsteps[tsID].nallrecs   = nrecs;
@@ -4601,11 +4601,11 @@ void cdfCreateRecords(stream_t *streamptr, int tsID)
 
       memcpy(streamptr->tsteps[tsID].records,
              streamptr->tsteps[0].records,
-             nrecs*sizeof(record_t));
+             (size_t)nrecs * sizeof (record_t));
 
       if ( nvrecs )
         {
-          recIDs = (int *) malloc(nvrecs*sizeof(int));
+          recIDs = (int *) malloc((size_t)nvrecs * sizeof (int));
           streamptr->tsteps[tsID].recIDs     = recIDs;
           vrecID = 0;
           for ( recID = 0; recID < nrecs; recID++ )
@@ -4636,14 +4636,14 @@ void cdfCreateRecords(stream_t *streamptr, int tsID)
 
       memcpy(streamptr->tsteps[tsID].records,
              streamptr->tsteps[0].records,
-             nrecs*sizeof(record_t));
+             (size_t)nrecs * sizeof (record_t));
 
-      recIDs = (int *) malloc(nvrecs*sizeof(int));
+      recIDs = (int *) malloc((size_t)nvrecs * sizeof(int));
       streamptr->tsteps[tsID].recIDs     = recIDs;
 
       memcpy(streamptr->tsteps[tsID].recIDs,
              streamptr->tsteps[1].recIDs,
-             nvrecs*sizeof(int));
+             (size_t)nvrecs * sizeof (int));
     }
 }
 #endif
