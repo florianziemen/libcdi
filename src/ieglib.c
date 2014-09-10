@@ -382,7 +382,6 @@ int iegRead(int fileID, iegrec_t *iegp)
   char tmpbuffer[800], *tmpbuf = tmpbuffer;
   int dprec = 0;
   void *buffer;
-  int buffersize;
   int byteswap;
   int status;
 
@@ -474,16 +473,17 @@ int iegRead(int fileID, iegrec_t *iegp)
       return (-1);
     }
 
-  iegp->datasize = IEG_G_NumLon(iegp->igdb)*IEG_G_NumLat(iegp->igdb);
+  iegp->datasize = (size_t)IEG_G_NumLon(iegp->igdb)
+    * (size_t)IEG_G_NumLat(iegp->igdb);
 
   if ( IEG_Debug )
     Message("datasize = %lu", iegp->datasize);
 
   blocklen = binReadF77Block(fileID, byteswap);
 
-  buffersize = iegp->buffersize;
+  size_t buffersize = iegp->buffersize;
 
-  if ( buffersize < (int) blocklen )
+  if ( buffersize < blocklen )
     {
       buffersize = blocklen;
       buffer = iegp->buffer;
