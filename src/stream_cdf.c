@@ -3607,7 +3607,6 @@ void cdfReadVarSP(stream_t *streamptr, int varID, float *data, int *nmiss)
 static void
 cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarid, int dtype, long nvals, size_t xsize, size_t ysize, int swapxy, size_t *start, size_t *count, int memtype, const void *data, int nmiss)
 {
-  long i, j;
   const double *pdata_dp = (const double *) data;
   double *mdata_dp = NULL;
   double *sdata_dp = NULL;
@@ -3618,7 +3617,7 @@ cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarid, int dtype, l
 
   /*  if ( dtype == DATATYPE_INT8 || dtype == DATATYPE_INT16 || dtype == DATATYPE_INT32 ) */
     {
-      int laddoffset, lscalefactor;
+      bool laddoffset, lscalefactor;
       double addoffset, scalefactor;
       double missval;
 
@@ -3633,39 +3632,43 @@ cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarid, int dtype, l
         {
           if ( memtype == MEMTYPE_FLOAT )
             {
-              mdata_sp = (float *) malloc(nvals*sizeof(float));
-              memcpy(mdata_sp, pdata_sp, nvals*sizeof(float));
+              mdata_sp = (float *) malloc((size_t)nvals*sizeof(float));
+              memcpy(mdata_sp, pdata_sp, (size_t)nvals * sizeof (float));
               pdata_sp = mdata_sp;
 
               if ( nmiss > 0 )
                 {
-                  for ( i = 0; i < nvals; i++ )
+                  for (long i = 0; i < nvals; i++ )
                     {
-                      if ( !DBL_IS_EQUAL(mdata_sp[i], missval) )
+                      double temp = mdata_sp[i];
+                      if ( !DBL_IS_EQUAL(temp, missval) )
                         {
-                          if ( laddoffset )   mdata_sp[i] -= addoffset;
-                          if ( lscalefactor ) mdata_sp[i] /= scalefactor;
+                          if ( laddoffset )   temp -= addoffset;
+                          if ( lscalefactor ) temp /= scalefactor;
+                          mdata_sp[i] = temp;
                         }
                     }
                 }
               else
                 {
-                  for ( i = 0; i < nvals; i++ )
+                  for (long i = 0; i < nvals; i++ )
                     {
-                      if ( laddoffset )   mdata_sp[i] -= addoffset;
-                      if ( lscalefactor ) mdata_sp[i] /= scalefactor;
+                      double temp = mdata_sp[i];
+                      if ( laddoffset )   temp -= addoffset;
+                      if ( lscalefactor ) temp /= scalefactor;
+                      mdata_sp[i] = temp;
                     }
                 }
             }
           else
             {
-              mdata_dp = (double *) malloc(nvals*sizeof(double));
-              memcpy(mdata_dp, pdata_dp, nvals*sizeof(double));
+              mdata_dp = (double *) malloc((size_t)nvals * sizeof(double));
+              memcpy(mdata_dp, pdata_dp, (size_t)nvals * sizeof(double));
               pdata_dp = mdata_dp;
 
               if ( nmiss > 0 )
                 {
-                  for ( i = 0; i < nvals; i++ )
+                  for (long i = 0; i < nvals; i++ )
                     {
                       if ( !DBL_IS_EQUAL(mdata_dp[i], missval) )
                         {
@@ -3676,7 +3679,7 @@ cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarid, int dtype, l
                 }
               else
                 {
-                  for ( i = 0; i < nvals; i++ )
+                  for (long i = 0; i < nvals; i++ )
                     {
                       if ( laddoffset )   mdata_dp[i] -= addoffset;
                       if ( lscalefactor ) mdata_dp[i] /= scalefactor;
@@ -3692,12 +3695,12 @@ cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarid, int dtype, l
             {
               if ( mdata_sp == NULL )
                 {
-                  mdata_sp = (float *) malloc(nvals*sizeof(float));
-                  memcpy(mdata_sp, pdata_sp, nvals*sizeof(float));
+                  mdata_sp = (float *) malloc((size_t)nvals * sizeof(float));
+                  memcpy(mdata_sp, pdata_sp, (size_t)nvals * sizeof(float));
                   pdata_sp = mdata_sp;
                 }
 
-              for ( i = 0; i < nvals; i++ ) mdata_sp[i] = roundf(mdata_sp[i]);
+              for (long i = 0; i < nvals; i++ ) mdata_sp[i] = roundf(mdata_sp[i]);
 
               if ( dtype == DATATYPE_UINT8 )
                 {
@@ -3705,7 +3708,7 @@ cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarid, int dtype, l
                   cdf_inq_vartype(fileID, ncvarid, &xtype);
                   if ( xtype == NC_BYTE )
                     {
-                      for ( i = 0; i < nvals; ++i )
+                      for ( long i = 0; i < nvals; ++i )
                         if ( mdata_sp[i] > 127 ) mdata_sp[i] -= 256;
                     }
                 }
@@ -3714,12 +3717,12 @@ cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarid, int dtype, l
             {
               if ( mdata_dp == NULL )
                 {
-                  mdata_dp = (double *) malloc(nvals*sizeof(double));
-                  memcpy(mdata_dp, pdata_dp, nvals*sizeof(double));
+                  mdata_dp = (double *) malloc((size_t)nvals * sizeof (double));
+                  memcpy(mdata_dp, pdata_dp, (size_t)nvals * sizeof (double));
                   pdata_dp = mdata_dp;
                 }
 
-              for ( i = 0; i < nvals; i++ ) mdata_dp[i] = round(mdata_dp[i]);
+              for (long i = 0; i < nvals; i++ ) mdata_dp[i] = round(mdata_dp[i]);
 
               if ( dtype == DATATYPE_UINT8 )
                 {
@@ -3727,7 +3730,7 @@ cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarid, int dtype, l
                   cdf_inq_vartype(fileID, ncvarid, &xtype);
                   if ( xtype == NC_BYTE )
                     {
-                      for ( i = 0; i < nvals; ++i )
+                      for (long i = 0; i < nvals; ++i )
                         if ( mdata_dp[i] > 127 ) mdata_dp[i] -= 256;
                     }
                 }
@@ -3739,7 +3742,7 @@ cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarid, int dtype, l
           double fmin, fmax;
           fmin =  1.0e200;
           fmax = -1.0e200;
-          for ( i = 0; i < nvals; ++i )
+          for ( long i = 0; i < nvals; ++i )
             {
               if ( !DBL_IS_EQUAL(pdata_dp[i], missval) )
                 {
@@ -3756,17 +3759,19 @@ cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarid, int dtype, l
     {
       if ( memtype == MEMTYPE_FLOAT )
         {
-          sdata_sp = (float *) malloc(nvals*sizeof(float));
-          for ( j = 0; j < (long)ysize; ++j )
-            for ( i = 0; i < (long)xsize; ++i )
+          /* malloc and the loop imply nvals >= ysize * xsize,
+           * but that is not checked and the types don't match */
+          sdata_sp = (float *) malloc((size_t)nvals*sizeof(float));
+          for ( size_t j = 0; j < ysize; ++j )
+            for ( size_t i = 0; i < xsize; ++i )
               sdata_sp[i*ysize+j] = pdata_sp[j*xsize+i];
           pdata_sp = sdata_sp;
         }
       else
         {
           sdata_dp = (double *) malloc(nvals*sizeof(double));
-          for ( j = 0; j < (long)ysize; ++j )
-            for ( i = 0; i < (long)xsize; ++i )
+          for ( size_t j = 0; j < ysize; ++j )
+            for ( size_t i = 0; i < xsize; ++i )
               sdata_dp[i*ysize+j] = pdata_dp[j*xsize+i];
           pdata_dp = sdata_dp;
         }
@@ -3792,7 +3797,6 @@ void cdf_write_var(stream_t *streamptr, int varID, int memtype, const void *data
   int zaxisID;
   int xid = UNDEFID, yid = UNDEFID, zid = UNDEFID;
   int ncvarid;
-  int ntsteps;
   size_t xsize = 0, ysize = 0;
   size_t size;
   size_t start[5];
@@ -3811,8 +3815,8 @@ void cdf_write_var(stream_t *streamptr, int varID, int memtype, const void *data
   vlistID = streamptr->vlistID;
   fileID  = streamptr->fileID;
 
-  ntsteps = streamptr->ntsteps;
-  if ( CDI_Debug ) Message("ntsteps = %d", ntsteps);
+  long ntsteps = streamptr->ntsteps;
+  if ( CDI_Debug ) Message("ntsteps = %ld", ntsteps);
 
   if ( vlistHasTime(vlistID) ) cdfDefTime(streamptr);
 
@@ -3838,14 +3842,14 @@ void cdf_write_var(stream_t *streamptr, int varID, int memtype, const void *data
 
   if ( tsteptype != TSTEP_CONSTANT )
     {
-      start[ndims] = ntsteps - 1;
+      start[ndims] = (size_t)ntsteps - 1;
       count[ndims] = 1;
       ndims++;
     }
   if ( zid != UNDEFID )
     {
       start[ndims] = 0;
-      count[ndims] = zaxisInqSize(zaxisID);
+      count[ndims] = (size_t)zaxisInqSize(zaxisID);
       ndims++;
     }
   if ( yid != UNDEFID )
@@ -3895,7 +3899,6 @@ void cdf_write_var_chunk(stream_t *streamptr, int varID, int memtype,
   int zaxisID;
   int xid = UNDEFID, yid = UNDEFID, zid = UNDEFID;
   int ncvarid;
-  int ntsteps;
   size_t xsize = 0, ysize = 0;
   size_t start[5];
   size_t count[5];
@@ -3915,9 +3918,9 @@ void cdf_write_var_chunk(stream_t *streamptr, int varID, int memtype,
   vlistID = streamInqVlist(streamID);
   fileID  = streamInqFileID(streamID);
 
-  ntsteps = streamptr->ntsteps;
+  long ntsteps = streamptr->ntsteps;
   if ( CDI_Debug )
-    Message("ntsteps = %d", ntsteps);
+    Message("ntsteps = %ld", ntsteps);
 
   if ( vlistHasTime(vlistID) ) cdfDefTime(streamptr);
 
@@ -3943,34 +3946,37 @@ void cdf_write_var_chunk(stream_t *streamptr, int varID, int memtype,
 
   if ( tsteptype != TSTEP_CONSTANT )
     {
-      start[ndims] = ntsteps - 1;
+      start[ndims] = (size_t)ntsteps - 1;
       count[ndims] = 1;
       ndims++;
     }
   if ( zid != UNDEFID )
     {
       int size = zaxisInqSize(zaxisID);
-      xassert(rect[2][0] >= 0 && rect[2][0] <= rect[2][1] && rect[2][1] <= size);
-      start[ndims] = rect[2][0];
-      count[ndims] = rect[2][1] - rect[2][0] + 1;
+      xassert(rect[2][0] >= 0 && rect[2][0] <= rect[2][1]
+              && rect[2][1] <= size);
+      start[ndims] = (size_t)rect[2][0];
+      count[ndims] = (size_t)rect[2][1] - (size_t)rect[2][0] + 1;
       ndims++;
     }
   if ( yid != UNDEFID )
     {
       size_t size;
       cdf_inq_dimlen(fileID, yid, &size);
-      xassert(rect[1][0] >= 0 && rect[1][0] <= rect[1][1] && rect[1][1] <= (int)size);
-      start[ndims] = rect[1][0];
-      count[ndims] = rect[1][1] - rect[1][0] + 1;
+      xassert(rect[1][0] >= 0 && rect[1][0] <= rect[1][1]
+              && rect[1][1] <= (int)size);
+      start[ndims] = (size_t)rect[1][0];
+      count[ndims] = (size_t)rect[1][1] - (size_t)rect[1][0] + 1;
       ndims++;
     }
   if ( xid != UNDEFID )
     {
       size_t size;
       cdf_inq_dimlen(fileID, xid, &size);
-      xassert(rect[0][0] >= 0 && rect[0][0] <= rect[0][1] && rect[0][1] <= (int)size);
-      start[ndims] = rect[0][0];
-      count[ndims] = rect[0][1] - rect[0][0] + 1;
+      xassert(rect[0][0] >= 0 && rect[0][0] <= rect[0][1]
+              && rect[0][1] <= (int)size);
+      start[ndims] = (size_t)rect[0][0];
+      count[ndims] = (size_t)rect[0][1] - (size_t)rect[0][0] + 1;
       ndims++;
     }
 
@@ -4238,7 +4244,7 @@ void cdfGetSliceSlapDescription(stream_t *streamptr, int varId, int levelId, boo
       ndims++; \
   } while(0)
 
-  if ( tsteptype != TSTEP_CONSTANT ) addDimension(tsID, 1);
+  if ( tsteptype != TSTEP_CONSTANT ) addDimension((size_t)tsID, 1);
   if ( skipdim == 1 ) addDimension(0, 1);
 
   for ( int id = 0; id < 3; ++id )
@@ -4256,7 +4262,7 @@ void cdfGetSliceSlapDescription(stream_t *streamptr, int varId, int levelId, boo
             break;
 
           case 3:
-            addDimension(levelId, 1);
+            addDimension((size_t)levelId, 1);
             break;
 
           default:
@@ -4421,7 +4427,6 @@ void cdf_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
   int zaxisID;
   int xid = UNDEFID, yid = UNDEFID, zid = UNDEFID;
   int ncvarid;
-  int ntsteps;
   long nvals;
   size_t xsize = 0, ysize = 0;
   size_t start[5];
@@ -4441,8 +4446,8 @@ void cdf_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
   vlistID = streamptr->vlistID;
   fileID  = streamptr->fileID;
 
-  ntsteps = streamptr->ntsteps;
-  if ( CDI_Debug ) Message("ntsteps = %d", ntsteps);
+  long ntsteps = streamptr->ntsteps;
+  if ( CDI_Debug ) Message("ntsteps = %ld", ntsteps);
 
   if ( vlistHasTime(vlistID) ) cdfDefTime(streamptr);
 
@@ -4476,7 +4481,7 @@ void cdf_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
 
   if ( tsteptype != TSTEP_CONSTANT )
     {
-      start[ndims] = ntsteps - 1;
+      start[ndims] = (size_t)ntsteps - 1;
       count[ndims] = 1;
       ndims++;
     }
