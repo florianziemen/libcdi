@@ -24,13 +24,13 @@
 
 typedef struct
 {
-  int    used;  
+  int    used;
   PAR   *pars;
   int    npars;
   int    modelID;
   int    number;
   char  *name;
-} 
+}
 PARTAB;
 
 static PARTAB parTable[MAX_TABLE];
@@ -474,12 +474,12 @@ int tableInq(int modelID, int tablenum, const char *tablename)
       for ( tableID = 0; tableID < MAX_TABLE; tableID++ )
 	{
 	  if ( parTable[tableID].used )
-	    {	  
+	    {
 	      if ( parTable[tableID].modelID == modelID &&
 		   parTable[tableID].number  == tablenum ) break;
 	    }
 	}
-  
+
       if ( tableID == MAX_TABLE ) tableID = UNDEFID;
 
       if ( tableID == UNDEFID )
@@ -917,7 +917,7 @@ int tableInqParLongname(int tableID, int code, char *longname)
 
   npars = parTable[tableID].npars;
 
-  if ( (tableID >= 0) & (tableID < MAX_TABLE) | (tableID == UNDEFID) ) { } else
+  if ( ((tableID >= 0) & (tableID < MAX_TABLE)) | (tableID == UNDEFID) ) { } else
     Error("Invalid table ID %d", tableID);
 
   if ( tableID == UNDEFID )
@@ -949,7 +949,7 @@ int tableInqParUnits(int tableID, int code, char *units)
 
   npars = parTable[tableID].npars;
 
-  if ( (tableID >= 0) & (tableID < MAX_TABLE) | (tableID == UNDEFID) ) { } else
+  if ( ((tableID >= 0) & (tableID < MAX_TABLE)) | (tableID == UNDEFID) ) { } else
     Error("Invalid table ID %d", tableID);
 
   if ( tableID == UNDEFID )
