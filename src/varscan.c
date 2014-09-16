@@ -508,7 +508,7 @@ void cdi_generate_vars(stream_t *streamptr)
       zaxisID = UNDEFID;
 
       if ( ltype == 0 && zaxistype == ZAXIS_GENERIC && nlevels == 1 &&
-	   ! (fabs(vartable[varid].levelTable[0].level1)>0) )
+	   vartable[varid].levelTable[0].level1 == 0 )
 	zaxistype = ZAXIS_SURFACE;
 
       dlevels = (double *) malloc(nlevels*sizeof(double));
