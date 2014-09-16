@@ -194,7 +194,6 @@ void srvDefRecord(stream_t *streamptr)
 
 void srvWriteRecord(stream_t *streamptr, const double *data)
 {
-  int status = 0;
   int fileID = streamptr->fileID;
   srvrec_t *srvp = (srvrec_t*) streamptr->record->exsep;
 
