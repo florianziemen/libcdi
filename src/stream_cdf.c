@@ -7054,7 +7054,7 @@ void define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, 
           ncvars[ncvarid].ensdata = NULL;
         }
 
-      if ( ncvars[ncvarid].extra != NULL && ncvars[ncvarid].extra[0] != 0 )
+      if ( ncvars[ncvarid].extra[0] != 0 )
         {
           vlistDefVarExtra(vlistID, varID, ncvars[ncvarid].extra);
         }
