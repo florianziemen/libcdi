@@ -630,41 +630,31 @@ void grb_write_var(stream_t *streamptr, int varID, int memtype, const void *data
 
 void grbCopyRecord(stream_t * streamptr2, stream_t * streamptr1)
 {
-  int fileID1, fileID2;
-  int tsID, recID, vrecID;
-  size_t gribbuffersize;
-  off_t recpos;
-  size_t nwrite;
-  unsigned char *gribbuffer;
-  int filetype;
-  size_t nbytes;
-  long unzipsize;
-  int izip;
+  int filetype = streamptr1->filetype;
 
-  filetype = streamptr1->filetype;
+  int fileID1 = streamptr1->fileID;
+  int fileID2 = streamptr2->fileID;
 
-  fileID1 = streamptr1->fileID;
-  fileID2 = streamptr2->fileID;
-
-  tsID    = streamptr1->curTsID;
-  vrecID  = streamptr1->tsteps[tsID].curRecID;
-  recID   = streamptr1->tsteps[tsID].recIDs[vrecID];
-  recpos  = streamptr1->tsteps[tsID].records[recID].position;
+  int tsID    = streamptr1->curTsID;
+  int vrecID  = streamptr1->tsteps[tsID].curRecID;
+  int recID   = streamptr1->tsteps[tsID].recIDs[vrecID];
+  off_t recpos  = streamptr1->tsteps[tsID].records[recID].position;
   size_t recsize = streamptr1->tsteps[tsID].records[recID].size;
 
   fileSetPos(fileID1, recpos, SEEK_SET);
 
   /* round up recsize to next multiple of 8 */
-  gribbuffersize = ((recsize + 7) & ~7);
+  size_t gribbuffersize = ((recsize + 7U) & ~7U);
 
-  gribbuffer = xmalloc(gribbuffersize);
+  unsigned char *gribbuffer = xmalloc(gribbuffersize);
 
   if (fileRead(fileID1, gribbuffer, recsize) != recsize)
     Error("Could not read GRIB record for copying!");
 
-  nbytes = recsize;
+  size_t nbytes = recsize;
 
-  izip = gribGetZip(recsize, gribbuffer, &unzipsize);
+  long unzipsize;
+  int izip = gribGetZip((long)recsize, gribbuffer, &unzipsize);
 
   if ( izip == 0 )
     if ( streamptr2->comptype == COMPRESS_SZIP )
@@ -672,7 +662,7 @@ void grbCopyRecord(stream_t * streamptr2, stream_t * streamptr1)
 
   while ( nbytes & 7 ) gribbuffer[nbytes++] = 0;
 
-  nwrite = fileWrite(fileID2, gribbuffer, nbytes);
+    size_t nwrite = fileWrite(fileID2, gribbuffer, nbytes);
   if ( nwrite != nbytes )
     {
       perror(__func__);
