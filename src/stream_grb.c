@@ -686,35 +686,27 @@ void grb_write_record(stream_t * streamptr, int memtype, const void *data, int n
 
 void streamInqGinfo(int streamID, int *intnum, float *fltnum, off_t *bignum)
 {
-  int recID, vrecID, tsID;
-  int filetype;
-  void *gribbuffer;
-  long gribbuffersize;
-  off_t recpos;
-  int zip;
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
+  stream_t *streamptr = stream_to_pointer(streamID);
 
   stream_check_ptr(__func__, streamptr);
 
-  filetype = streamptr->filetype;
+  int filetype = streamptr->filetype;
 
   if ( filetype == FILETYPE_GRB )
     {
-      tsID    = streamptr->curTsID;
-      vrecID  = streamptr->tsteps[tsID].curRecID;
-      recID   = streamptr->tsteps[tsID].recIDs[vrecID];
-      recpos  = streamptr->tsteps[tsID].records[recID].position;
-      zip     = streamptr->tsteps[tsID].records[recID].zip;
+      int tsID     = streamptr->curTsID;
+      int vrecID   = streamptr->tsteps[tsID].curRecID;
+      int recID    = streamptr->tsteps[tsID].recIDs[vrecID];
+      off_t recpos = streamptr->tsteps[tsID].records[recID].position;
+      int zip      = streamptr->tsteps[tsID].records[recID].zip;
 
-      gribbuffer = streamptr->record->buffer;
-      gribbuffersize = streamptr->record->buffersize;
+      void *gribbuffer = streamptr->record->buffer;
+      size_t gribbuffersize = streamptr->record->buffersize;
 
       if ( zip > 0 )
 	Error("Compressed GRIB records unsupported!");
       else
-	gribGinfo(recpos, gribbuffersize, (unsigned char *) gribbuffer, intnum, fltnum, bignum);
+        gribGinfo(recpos, (long)gribbuffersize, (unsigned char *) gribbuffer, intnum, fltnum, bignum);
     }
 }
 /*
