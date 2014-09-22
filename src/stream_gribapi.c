@@ -780,7 +780,8 @@ void grib2GetLevel(grib_handle *gh, int *leveltype, int *lbounds, int *level1, i
       *leveltype = (int) lpar;
 
       status = grib_get_long(gh, "typeOfSecondFixedSurface", &lpar);
-      if ( status == 0 ) leveltype2 = lpar;
+      /* FIXME: assert(lpar >= INT_MIN && lpar <= INT_MAX) */
+      if ( status == 0 ) leveltype2 = (int)lpar;
 
       if ( *leveltype != 255 && leveltype2 != 255 && leveltype2 > 0 ) *lbounds = 1;
       if ( *leveltype == GRIB2_LTYPE_REFERENCE && leveltype2 == 1 ) *lbounds = 0;
@@ -806,12 +807,12 @@ void grib2GetLevel(grib_handle *gh, int *leveltype, int *lbounds, int *level1, i
       if ( llevel != GRIB_MISSING_LONG )
         {
           if ( factor != GRIB_MISSING_LONG )
-            dlevel1 = llevel*grib2ScaleFactor(factor);
+            dlevel1 = (double)llevel * grib2ScaleFactor(factor);
           else
-            dlevel1 = llevel;
+            dlevel1 = (double)llevel;
         }
 
-      if ( *level_sf != 0 ) dlevel1 *= (*level_sf);
+      if ( *level_sf != 0 ) dlevel1 *= (double)(*level_sf);
 
       if ( *lbounds == 1 )
 	{
@@ -820,9 +821,9 @@ void grib2GetLevel(grib_handle *gh, int *leveltype, int *lbounds, int *level1, i
           if ( llevel != GRIB_MISSING_LONG )
             {
               if ( factor != GRIB_MISSING_LONG )
-                dlevel2 = llevel*grib2ScaleFactor(factor);
+                dlevel2 = (double)llevel * grib2ScaleFactor(factor);
               else
-                dlevel2 = llevel;
+                dlevel2 = (double)llevel;
             }
 
           if ( *level_sf != 0 ) dlevel2 *= (*level_sf);
