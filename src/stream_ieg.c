@@ -667,7 +667,7 @@ void iegAddRecord(stream_t *streamptr, int param, int *pdb, int *gdb, double *vc
 	if ( IEG_G_FirstLon(gdb) == 0 && IEG_G_LastLon(gdb) > 354000 )
 	  {
 	    double xinc = 360. / grid.xsize;
-	    
+            /* FIXME: why not use grid.xinc != xinc as condition? */
 	    if ( fabs(grid.xinc-xinc) > 0.0 )
 	      {
 		grid.xinc = xinc;
