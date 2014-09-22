@@ -546,6 +546,7 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
     case GRID_LCC:
       {
 	int nlon, nlat;
+        long lpar;
 
 	GRIB_CHECK(grib_get_long(gh, "Nx", &lpar), 0);
 	nlon = lpar;
@@ -3141,7 +3142,7 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
     }
   */
 
-  gribapiDefTime(editionNumber, productDefinitionTemplate, typeOfGeneratingProcess, gh, vdate, vtime, tsteptype, numavg, vlistInqTaxis(vlistID), gc->init);
+  gribapiDefTime((int)editionNumber, productDefinitionTemplate, typeOfGeneratingProcess, gh, vdate, vtime, tsteptype, numavg, vlistInqTaxis(vlistID), gc->init);
 
   if ( ! gc->init ) gribapiDefInstitut(gh, vlistID, varID);
   if ( ! gc->init ) gribapiDefModel(gh, vlistID, varID);
@@ -3157,9 +3158,9 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
       GRIB_CHECK(my_grib_set_long(gh, "bitsPerValue", bitsPerValue), 0);
     }
 
-  gribapiDefGrid(editionNumber, gh, gridID, ljpeg, lieee, datatype, nmiss, gc->init);
+  gribapiDefGrid((int)editionNumber, gh, gridID, ljpeg, lieee, datatype, nmiss, gc->init);
 
-  gribapiDefLevel(editionNumber, gh, param, zaxisID, levelID, gc->init);
+  gribapiDefLevel((int)editionNumber, gh, param, zaxisID, levelID, gc->init);
 
   /* ---------------------------------- */
   /* Local change: 2013-01-28, FP (DWD) */
@@ -3208,7 +3209,7 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
       GRIB_CHECK(my_grib_set_double(gh, "missingValue", vlistInqVarMissval(vlistID, varID)), 0);
     }
 
-  GRIB_CHECK(grib_set_double_array(gh, "values", data, datasize), 0);
+  GRIB_CHECK(grib_set_double_array(gh, "values", data, (size_t)datasize), 0);
 
   /* get the size of coded message  */
   GRIB_CHECK(grib_get_message(gh, (const void **)&dummy, &recsize), 0);
