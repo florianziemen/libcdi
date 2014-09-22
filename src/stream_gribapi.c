@@ -193,18 +193,17 @@ int gribapiGetEndStep(grib_handle *gh, int startStep, int timeunits)
 {
   int endStep = startStep;
   int timeunits2 = timeunits;
-  int status;
-  long unitsOfTime;
-  long lpar;
 
-  status = grib_get_long(gh, "stepUnits", &unitsOfTime);
+  long unitsOfTime;
+  int status = grib_get_long(gh, "stepUnits", &unitsOfTime);
   if ( status == 0 ) timeunits2 = getTimeunits(unitsOfTime);
   //timeunits2 = gribapiGetTimeUnits(gh);
 
+  long lpar;
   status = grib_get_long(gh, "endStep", &lpar);
 
   if ( status == 0 )
-    endStep = (int) ((lpar * timeunit_factor(timeunits, timeunits2)) + 0.5);
+    endStep = (int) (((double)lpar * timeunit_factor(timeunits, timeunits2)) + 0.5);
   // printf("%d %d %d %d %d %g\n", startStep, endStep, lpar, timeunits, timeunits2, timeunit_factor(timeunits, timeunits2));
 
   return (endStep);
