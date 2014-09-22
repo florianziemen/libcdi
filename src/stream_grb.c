@@ -455,30 +455,30 @@ void grbReadVarSliceDP(stream_t * streamptr, int varID, int levelID, double *dat
 static
 size_t grbEncode(int filetype, int memtype, int varID, int levelID, int vlistID, int gridID, int zaxisID,
 		 int date, int time, int tsteptype, int numavg,
-		 long datasize, const double *data, int nmiss, unsigned char **gribbuffer,
+		 size_t datasize, const double *data, int nmiss, unsigned char **gribbuffer,
 		 int ljpeg, void *gribContainer)
 {
   size_t nbytes;
-  size_t gribbuffersize;
 
 #if  defined  (HAVE_LIBCGRIBEX)
   if ( filetype == FILETYPE_GRB )
     {
-      gribbuffersize = datasize*4+3000;
+      size_t gribbuffersize = datasize*4+3000;
       *gribbuffer = (unsigned char *) malloc(gribbuffersize);
 
       nbytes = cgribexEncode(memtype, varID, levelID, vlistID, gridID, zaxisID,
 			     date, time, tsteptype, numavg,
-			     datasize, data, nmiss, *gribbuffer, gribbuffersize);
+			     (long)datasize, data, nmiss, *gribbuffer, gribbuffersize);
     }
   else
 #endif
     {
       if ( memtype == MEMTYPE_FLOAT ) Error("gribapiEncode() not implemented for memtype float!");
 
+      size_t gribbuffersize;
       nbytes = gribapiEncode(varID, levelID, vlistID, gridID, zaxisID,
 			     date, time, tsteptype, numavg,
-			     datasize, data, nmiss, gribbuffer, &gribbuffersize,
+			     (long)datasize, data, nmiss, gribbuffer, &gribbuffersize,
 			     ljpeg, gribContainer);
     }
 
@@ -500,7 +500,7 @@ size_t grbSzip(int filetype, unsigned char *gribbuffer, size_t gribbuffersize)
 
   if ( filetype == FILETYPE_GRB )
     {
-      nbytes = gribZip(gribbuffer, (long) gribbuffersize, buffer, (long) buffersize);
+      nbytes = (size_t)gribZip(gribbuffer, (long) gribbuffersize, buffer, (long) buffersize);
     }
   else
     {
@@ -522,7 +522,6 @@ void grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
   int gridID;
   int zaxisID;
   unsigned char *gribbuffer = NULL;
-  long datasize;
   int tsID;
   int vlistID;
   int date, time;
@@ -550,7 +549,7 @@ void grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
   if ( CDI_Debug )
     Message("gridID = %d zaxisID = %d", gridID, zaxisID);
 
-  datasize = gridInqSize(gridID);
+  size_t datasize = (size_t)gridInqSize(gridID);
   /*
   gribbuffersize = datasize*4+3000;
   gribbuffer = (unsigned char *) malloc(gribbuffersize);
