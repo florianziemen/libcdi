@@ -721,12 +721,11 @@ void iegAddRecord(stream_t *streamptr, int param, int *pdb, int *gdb, double *vc
 
   if ( leveltype == ZAXIS_HYBRID )
     {
-      int i;
       double tmpvct[100];
-      int vctsize = IEG_G_NumVCP(gdb);
+      size_t vctsize = (size_t)IEG_G_NumVCP(gdb);
 
-      for ( i = 0; i < vctsize/2; i++ ) tmpvct[i] = vct[i];
-      for ( i = 0; i < vctsize/2; i++ ) tmpvct[i+vctsize/2] = vct[i+50];
+      for (size_t i = 0; i < vctsize/2; i++ ) tmpvct[i] = vct[i];
+      for (size_t i = 0; i < vctsize/2; i++ ) tmpvct[i+vctsize/2] = vct[i+50];
 
       varDefVCT(vctsize, tmpvct);
     }
