@@ -601,7 +601,7 @@ void iegWriteRecord(stream_t *streamptr, const double *data)
 
 static
 void iegAddRecord(stream_t *streamptr, int param, int *pdb, int *gdb, double *vct,
-		  long recsize, off_t position, int prec)
+		  size_t recsize, off_t position, int prec)
 {
   int leveltype;
   int gridID = UNDEFID;
@@ -808,7 +808,7 @@ void iegScanTimestep1(stream_t *streamptr)
   DateTime datetime, datetime0;
   int tsID;
   int varID;
-  long recsize;
+  size_t recsize;
   off_t recpos;
   int nrecords, nrecs, recID;
   int taxisID = -1;
@@ -837,7 +837,7 @@ void iegScanTimestep1(stream_t *streamptr)
 	  streamptr->ntsteps = 1;
 	  break;
 	}
-      recsize = fileGetPos(fileID) - recpos;
+      recsize = (size_t)(fileGetPos(fileID) - recpos);
 
       prec   = iegp->dprec;
       rcode  = IEG_P_Parameter(iegp->ipdb);
@@ -944,7 +944,7 @@ int iegScanTimestep2(stream_t *streamptr)
   int rcode = 0, rlevel = 0, vdate = 0, vtime = 0;
   int tsID;
   int varID;
-  long recsize;
+  size_t recsize;
   off_t recpos = 0;
   int nrecords, nrecs, recID, rindex;
   int nextstep;
@@ -992,7 +992,7 @@ int iegScanTimestep2(stream_t *streamptr)
 	  streamptr->ntsteps = 2;
 	  break;
 	}
-      recsize = fileGetPos(fileID) - recpos;
+      recsize = (size_t)(fileGetPos(fileID) - recpos);
 
       rcode  = IEG_P_Parameter(iegp->ipdb);
       tabnum = IEG_P_CodeTable(iegp->ipdb);
@@ -1124,7 +1124,7 @@ int iegScanTimestep(stream_t *streamptr)
   int tabnum;
   int param = 0;
   int rcode = 0, rlevel = 0, vdate = 0, vtime = 0;
-  long recsize = 0;
+  size_t recsize = 0;
   off_t recpos = 0;
   int recID;
   taxis_t *taxis;
@@ -1170,7 +1170,7 @@ int iegScanTimestep(stream_t *streamptr)
 	      streamptr->ntsteps = streamptr->rtsteps + 1;
 	      break;
 	    }
-	  recsize = fileGetPos(fileID) - recpos;
+	  recsize = (size_t)(fileGetPos(fileID) - recpos);
 
 	  rcode  = IEG_P_Parameter(iegp->ipdb);
 	  tabnum = IEG_P_CodeTable(iegp->ipdb);
