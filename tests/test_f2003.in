@@ -29,6 +29,7 @@ if [ @ENABLE_NETCDF@ = yes -a @ENABLE_F2003_ISOC@ = yes ]; then
   [ "$pattern" = '#END PATTERNS' ]
   exec 5<&- 6<&-
   \rm cdi_read_f2003.$$.stdout cdi_read_f2003.$$.stderr
+  \rm test_f2003_$format.log
 else
   # skip tests for unsupported formats
   exit 77
