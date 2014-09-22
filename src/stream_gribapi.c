@@ -2736,6 +2736,7 @@ static
 void getLevelFactor(double level, long *factor, long *out_scaled_value)
 {
   double scaled_value  = level;
+  /* FIXME: lround might be better here */
   long   iscaled_value = (long) round(scaled_value);
   long   i;
 
@@ -2743,7 +2744,8 @@ void getLevelFactor(double level, long *factor, long *out_scaled_value)
   for ( i=0; (fabs(scaled_value - (double) iscaled_value) >= eps) && i < 7; i++ )
     {
       scaled_value *= 10.;
-      iscaled_value = round(scaled_value);
+      /* FIXME: lround might be better here */
+      iscaled_value = (long)round(scaled_value);
     }
 
   (*factor)           = i;
