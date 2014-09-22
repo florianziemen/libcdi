@@ -1569,9 +1569,9 @@ taxisGetPackSize(void *p, void *context)
     = serializeGetSize(taxisNint, DATATYPE_INT, context)
     + serializeGetSize(1, DATATYPE_UINT32, context)
     + (taxisptr->name ?
-       serializeGetSize(strlen(taxisptr->name), DATATYPE_TXT, context) : 0)
+       serializeGetSize((int)strlen(taxisptr->name), DATATYPE_TXT, context) : 0)
     + (taxisptr->longname ?
-       serializeGetSize(strlen(taxisptr->longname), DATATYPE_TXT,
+       serializeGetSize((int)strlen(taxisptr->longname), DATATYPE_TXT,
                         context) : 0);
   return packBufferSize;
 }
@@ -1620,8 +1620,8 @@ taxisUnpack(char * unpackBuffer, int unpackBufferSize, int * unpackBufferPos,
 
   if (intBuffer[idx])
     {
-      size_t len = intBuffer[idx];
-      char *name = new_refcount_string(len);
+      int len = intBuffer[idx];
+      char *name = new_refcount_string((size_t)len);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
                       name, len, DATATYPE_TXT, context);
       name[len] = '\0';
@@ -1630,8 +1630,8 @@ taxisUnpack(char * unpackBuffer, int unpackBufferSize, int * unpackBufferPos,
   idx++;
   if (intBuffer[idx])
     {
-      size_t len = intBuffer[idx];
-      char *longname = new_refcount_string(len);
+      int len = intBuffer[idx];
+      char *longname = new_refcount_string((size_t)len);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
                       longname, len, DATATYPE_TXT, context);
       longname[len] = '\0';
