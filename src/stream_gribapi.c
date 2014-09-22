@@ -847,7 +847,7 @@ void gribapiGetString(grib_handle *gh, const char *key, char *string, size_t len
 #if  defined  (HAVE_LIBGRIB_API)
 static
 void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
-		      long recsize, off_t position, int datatype, int comptype, size_t len, const char *varname,
+		      size_t recsize, off_t position, int datatype, int comptype, size_t len, const char *varname,
                       int leveltype, int lbounds, int level1, int level2, int level_sf, int level_unit)
 {
   long editionNumber;
@@ -904,13 +904,14 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
         double *vctptr;
 
         GRIB_CHECK(grib_get_long(gh, "NV", &lpar), 0);
-        vctsize = lpar;
+        /* FIXME: assert(lpar >= INT_MIN && lpar <= INT_MAX) */
+        vctsize = (int)lpar;
         if ( vctsize > 0 )
           {
             vctptr = (double *) malloc(vctsize*sizeof(double));
-            dummy = vctsize;
+            dummy = (size_t)vctsize;
             GRIB_CHECK(grib_get_double_array(gh, "pv", vctptr, &dummy), 0);
-            varDefVCT(vctsize, vctptr);
+            varDefVCT((size_t)vctsize, vctptr);
             free(vctptr);
           }
         break;
@@ -966,8 +967,8 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
 	       datatype, &varID, &levelID, tsteptype, numavg, leveltype,
 	       varname, stdname, longname, units);
 
-  (*record).varID   = varID;
-  (*record).levelID = levelID;
+  (*record).varID   = (short)varID;
+  (*record).levelID = (short)levelID;
 
   varDefCompType(varID, comptype);
 
@@ -1036,9 +1037,10 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
       status = grib_get_long(gh, "generatingProcessIdentifier", &processID);
       if ( status == 0 )
 	{
-	  modelID = modelInq(varInqInst(varID), processID, NULL);
+          /* FIXME: assert(processID >= INT_MIN && processID <= INT_MAX) */
+	  modelID = modelInq(varInqInst(varID), (int)processID, NULL);
 	  if ( modelID == CDI_UNDEFID )
-	    modelID = modelDef(varInqInst(varID), processID, NULL);
+	    modelID = modelDef(varInqInst(varID), (int)processID, NULL);
 	  varDefModel(varID, modelID);
 	}
     }
@@ -1139,7 +1141,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
 #if  defined  (HAVE_LIBGRIB_API)
   off_t recpos = 0;
   unsigned char *gribbuffer = NULL;
-  long buffersize = 0;
+  size_t buffersize = 0;
   int rstatus;
   int status;
   int fileID;
@@ -1154,7 +1156,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
   int nrecords, nrecs, recID;
   int nrecs_scanned = 0;
   int datatype;
-  long recsize = 0;
+  size_t recsize = 0;
   int warn_time = TRUE;
   // int warn_numavg = TRUE;
   int taxisID = -1;
@@ -1192,7 +1194,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
     {
       level1 = 0;
       level2 = 0;
-      recsize = gribGetSize(fileID);
+      recsize = (size_t)gribGetSize(fileID);
       recpos  = fileGetPos(fileID);
 
       if ( recsize == 0 )
@@ -1213,13 +1215,13 @@ int gribapiScanTimestep1(stream_t * streamptr)
       lieee = FALSE;
 
       comptype = COMPRESS_NONE;
-      if ( gribGetZip(recsize, gribbuffer, &unzipsize) > 0 )
+      if ( gribGetZip((long)recsize, gribbuffer, &unzipsize) > 0 )
 	{
 	  comptype = COMPRESS_SZIP;
 	  unzipsize += 100;
-	  if ( (long) buffersize < unzipsize )
+	  if ( buffersize < (size_t)unzipsize )
 	    {
-	      buffersize = unzipsize;
+	      buffersize = (size_t)unzipsize;
 	      gribbuffer = (unsigned char *) realloc(gribbuffer, buffersize);
 	    }
 	}
@@ -1396,8 +1398,8 @@ int gribapiScanTimestep1(stream_t * streamptr)
       taxis->type  = TAXIS_ABSOLUTE;
     }
 
-  taxis->vdate = datetime0.date;
-  taxis->vtime = datetime0.time;
+  taxis->vdate = (int)datetime0.date;
+  taxis->vtime = (int)datetime0.time;
 
   vlistID = streamptr->vlistID;
   vlistDefTaxis(vlistID, taxisID);
@@ -1453,7 +1455,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
 #if  defined  (HAVE_LIBGRIB_API)
   off_t recpos = 0;
   unsigned char *gribbuffer = NULL;
-  long buffersize = 0;
+  size_t buffersize = 0;
   int fileID;
   int rtabnum = 0;
   int rcode = 0, level1 = 0, level2 = 0, vdate = 0, vtime = 0;
@@ -1464,7 +1466,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
   size_t readsize;
   int nrecords, nrecs, recID, rindex;
   int nrecs_scanned = 0;
-  long recsize = 0;
+  size_t recsize = 0;
   //  int warn_numavg = TRUE;
   int tsteptype;
   int taxisID = -1;
@@ -1520,7 +1522,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
     {
       if ( rindex > nrecords ) break;
 
-      recsize = gribGetSize(fileID);
+      recsize = (size_t)gribGetSize(fileID);
       recpos  = fileGetPos(fileID);
       if ( recsize == 0 )
 	{
@@ -1530,19 +1532,19 @@ int gribapiScanTimestep2(stream_t * streamptr)
       if ( recsize > buffersize )
 	{
 	  buffersize = recsize;
-	  gribbuffer = (unsigned char *) realloc(gribbuffer, (size_t)buffersize);
+	  gribbuffer = (unsigned char *) realloc(gribbuffer, buffersize);
 	}
 
       readsize = recsize;
       rstatus = gribRead(fileID, gribbuffer, &readsize);
       if ( rstatus ) break;
 
-      if ( gribGetZip(recsize, gribbuffer, &unzipsize) > 0 )
+      if ( gribGetZip((long)recsize, gribbuffer, &unzipsize) > 0 )
 	{
 	  unzipsize += 100; /* need 0 to 1 bytes for rounding of bds */
-	  if ( (long) buffersize < unzipsize )
+	  if ( buffersize < (size_t)unzipsize )
 	    {
-	      buffersize = unzipsize;
+	      buffersize = (size_t)unzipsize;
 	      gribbuffer = (unsigned char *) realloc(gribbuffer, buffersize);
 	    }
 	}
@@ -1721,10 +1723,10 @@ int gribapiScanTimestep(stream_t * streamptr)
 {
   int rstatus = 0;
 #if  defined  (HAVE_LIBGRIB_API)
-  long recsize = 0;
+  size_t recsize = 0;
   off_t recpos = 0;
   unsigned char *gribbuffer;
-  long buffersize = 0;
+  size_t buffersize = 0;
   int fileID;
   int rtabnum = 0;
   int rcode = 0, level1 = 0, level2 = 0, vdate = 0, vtime = 0;
@@ -1787,7 +1789,7 @@ int gribapiScanTimestep(stream_t * streamptr)
 	{
 	  if ( rindex > nrecs ) break;
 
-	  recsize = gribGetSize(fileID);
+	  recsize = (size_t)gribGetSize(fileID);
 	  recpos  = fileGetPos(fileID);
 	  if ( recsize == 0 )
 	    {
@@ -1812,12 +1814,12 @@ int gribapiScanTimestep(stream_t * streamptr)
 	      break;
 	    }
 
-	  if ( gribGetZip(recsize, gribbuffer, &unzipsize) > 0 )
+	  if ( gribGetZip((long)recsize, gribbuffer, &unzipsize) > 0 )
 	    {
 	      unzipsize += 100; /* need 0 to 1 bytes for rounding of bds */
-	      if ( (long) buffersize < unzipsize )
+	      if ( buffersize < (size_t)unzipsize )
 		{
-		  buffersize = unzipsize;
+		  buffersize = (size_t)unzipsize;
 		  gribbuffer = (unsigned char *) realloc(gribbuffer, buffersize);
 		}
 	    }
@@ -1996,7 +1998,7 @@ int gribapiScanTimestep(stream_t * streamptr)
       streamptr->ntsteps = tsID;
     }
 
-  rstatus = streamptr->ntsteps;
+  rstatus = (int)streamptr->ntsteps;
 #else
   Error("GRIB_API support not compiled in!");
 #endif
@@ -2033,7 +2035,7 @@ int gribapiDecode(unsigned char *gribbuffer, int gribsize, double *data, int gri
 	}
     }
 
-  recsize = gribsize;
+  recsize = (size_t)gribsize;
   gh = grib_handle_new_from_message(NULL, (void *) gribbuffer, recsize);
   GRIB_CHECK(my_grib_set_double(gh, "missingValue", missval), 0);
 
