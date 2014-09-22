@@ -414,36 +414,25 @@ void grbReadVarDP(stream_t * streamptr, int varID, double *data, int *nmiss)
 
 void grbReadVarSliceDP(stream_t * streamptr, int varID, int levelID, double *data, int *nmiss)
 {
-  int fileID;
-  int gridID, gridsize;
-  unsigned char *gribbuffer;
-  long recsize;
-  off_t recpos, currentfilepos;
-  int tsID, recID;
-  int vlistID;
-  int zip;
-  int filetype;
-  double missval;
+  int filetype = streamptr->filetype;
 
-  filetype = streamptr->filetype;
+  unsigned char *gribbuffer = (unsigned char *) streamptr->record->buffer;
 
-  gribbuffer = (unsigned char *) streamptr->record->buffer;
-
-  vlistID  = streamptr->vlistID;
-  gridID   = vlistInqVarGrid(vlistID, varID);
-  gridsize = gridInqSize(gridID);
-  tsID     = streamptr->curTsID;
+  int vlistID = streamptr->vlistID;
+  int gridID   = vlistInqVarGrid(vlistID, varID);
+  int gridsize = gridInqSize(gridID);
+  int tsID = streamptr->curTsID;
 
   if ( CDI_Debug )
     Message("gridID = %d gridsize = %d", gridID, gridsize);
 
-  fileID = streamptr->fileID;
+  int fileID = streamptr->fileID;
 
-  currentfilepos = fileGetPos(fileID);
+  off_t currentfilepos = fileGetPos(fileID);
 
-  recID   = streamptr->vars[varID].level[levelID];
-  recpos  = streamptr->tsteps[tsID].records[recID].position;
-  recsize = streamptr->tsteps[tsID].records[recID].size;
+  int recID   = streamptr->vars[varID].level[levelID];
+  off_t recpos  = streamptr->tsteps[tsID].records[recID].position;
+  size_t recsize = streamptr->tsteps[tsID].records[recID].size;
 
   if ( recsize == 0 )
     Error("Internal problem! Recordsize is zero for record %d at timestep %d",
@@ -453,9 +442,10 @@ void grbReadVarSliceDP(stream_t * streamptr, int varID, int levelID, double *dat
 
   fileRead(fileID, gribbuffer, recsize);
 
-  missval = vlistInqVarMissval(vlistID, varID);
+  double missval = vlistInqVarMissval(vlistID, varID);
 
-  grbDecode(filetype, gribbuffer, recsize, data, gridsize, streamptr->unreduced, nmiss, &zip, missval, vlistID, varID);
+  int zip;
+  grbDecode(filetype, gribbuffer, (int)recsize, data, gridsize, streamptr->unreduced, nmiss, &zip, missval, vlistID, varID);
 
   fileSetPos(fileID, currentfilepos, SEEK_SET);
 
