@@ -377,14 +377,9 @@ static
 void gribapiGetGrid(grib_handle *gh, grid_t *grid)
 {
   long editionNumber;
-  int gridtype;
-  size_t datasize;
-  long numberOfPoints;
-  long lpar;
-
   GRIB_CHECK(grib_get_long(gh, "editionNumber", &editionNumber), 0);
 
-  gridtype = gribapiGetGridType(gh);
+  int gridtype = gribapiGetGridType(gh);
   /*
   if ( streamptr->unreduced && gridtype == GRID_GAUSSIAN_REDUCED )
     {
@@ -395,7 +390,9 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
   */
   memset(grid, 0, sizeof(grid_t));
 
+  size_t datasize;
   GRIB_CHECK(grib_get_size(gh, "values", &datasize), 0);
+  long numberOfPoints;
   GRIB_CHECK(grib_get_long(gh, "numberOfPoints", &numberOfPoints), 0);
 
   switch (gridtype)
@@ -403,23 +400,25 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
     case GRID_LONLAT:
     case GRID_GAUSSIAN:
       {
-	int nlon, nlat;
-
+        long lpar;
 	GRIB_CHECK(grib_get_long(gh, "Ni", &lpar), 0);
-	nlon = lpar;
+        /* FIXME: assert(lpar <= INT_MAX && lpar >= INT_MIN) */
+	int nlon = (int)lpar;
 	GRIB_CHECK(grib_get_long(gh, "Nj", &lpar), 0);
-	nlat = lpar;
+        /* FIXME: assert(lpar <= INT_MAX && lpar >= INT_MIN) */
+	int nlat = (int)lpar;
 
 	if ( gridtype == GRID_GAUSSIAN )
           {
             GRIB_CHECK(grib_get_long(gh, "numberOfParallelsBetweenAPoleAndTheEquator", &lpar), 0);
-            grid->np = lpar;
+            grid->np = (int)lpar;
           }
 
 	if ( numberOfPoints != nlon*nlat )
-	  Error("numberOfPoints (%d) and gridSize (%d) differ!", (int)numberOfPoints, nlon*nlat);
+	  Error("numberOfPoints (%ld) and gridSize (%d) differ!", numberOfPoints, nlon*nlat);
 
-	grid->size  = numberOfPoints;
+        /* FIXME: assert(numberOfPoints <= INT_MAX && numberOfPoints >= INT_MIN) */
+	grid->size  = (int)numberOfPoints;
 	grid->xsize = nlon;
 	grid->ysize = nlat;
 	grid->xinc  = 0;
@@ -473,23 +472,27 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
       }
     case GRID_GAUSSIAN_REDUCED:
       {
-	int nlat, i;
 	size_t dummy;
 	long *pl;
 
+        long lpar;
         GRIB_CHECK(grib_get_long(gh, "numberOfParallelsBetweenAPoleAndTheEquator", &lpar), 0);
-        grid->np = lpar;
+        /* FIXME: assert(lpar <= INT_MAX && lpar >= INT_MIN) */
+        grid->np = (int)lpar;
 
 	GRIB_CHECK(grib_get_long(gh, "Nj", &lpar), 0);
-	nlat = lpar;
+        /* FIXME: assert(lpar <= INT_MAX && lpar >= INT_MIN) */
+	int nlat = (int)lpar;
 
-	grid->size   = numberOfPoints;
+        /* FIXME: assert(numberOfPoints <= INT_MAX && numberOfPoints >= INT_MIN) */
+	grid->size   = (int)numberOfPoints;
 
-        grid->rowlon = (int *) malloc(nlat*sizeof(int));
-        pl          = (long *) malloc(nlat*sizeof(long));
-	dummy       = nlat;
+        grid->rowlon = (int *) malloc((size_t)nlat * sizeof (int));
+        pl          = (long *) malloc((size_t)nlat * sizeof (long));
+	dummy       = (size_t)nlat;
 	GRIB_CHECK(grib_get_long_array(gh, "pl", pl, &dummy), 0);
-	for ( i = 0; i < nlat; ++i ) grid->rowlon[i] = pl[i];
+        /* FIXME: assert(pl[i] >= INT_MIN && pl[i] <= INT_MIN) */
+	for (int i = 0; i < nlat; ++i ) grid->rowlon[i] = (int)pl[i];
 	free(pl);
 
 	grid->ysize  = nlat;
@@ -585,19 +588,28 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
 	grid->lcomplex = 0;
 	if ( strncmp(typeOfPacking, "spectral_complex", len) == 0 ) grid->lcomplex = 1;
 
-	grid->size  = datasize;
+        /* FIXME: assert(datasize >= INT_MIN && datasize <= INT_MAX) */
+	grid->size  = (int)datasize;
+        long lpar;
 	GRIB_CHECK(grib_get_long(gh, "J", &lpar), 0);
-	grid->trunc = lpar;
+        /* FIXME: assert(lpar >= INT_MIN && lpar <= INT_MAX) */
+	grid->trunc = (int)lpar;
 
 	break;
       }
     case GRID_GME:
       {
-	grid->size  = numberOfPoints;
-	if ( grib_get_long(gh, "nd", &lpar) == 0 ) grid->nd  = lpar;
-	if ( grib_get_long(gh, "Ni", &lpar) == 0 ) grid->ni  = lpar;
-	if ( grib_get_long(gh, "n2", &lpar) == 0 ) grid->ni2 = lpar;
-	if ( grib_get_long(gh, "n3", &lpar) == 0 ) grid->ni3 = lpar;
+        /* FIXME: assert(numberOfPoints <= INT_MAX && numberOfPoints >= INT_MIN) */
+	grid->size  = (int)numberOfPoints;
+        long lpar;
+        /* FIXME: assert(lpar >= INT_MIN && lpar <= INT_MAX) */
+	if ( grib_get_long(gh, "nd", &lpar) == 0 ) grid->nd  = (int)lpar;
+        /* FIXME: assert(lpar >= INT_MIN && lpar <= INT_MAX) */
+	if ( grib_get_long(gh, "Ni", &lpar) == 0 ) grid->ni  = (int)lpar;
+        /* FIXME: assert(lpar >= INT_MIN && lpar <= INT_MAX) */
+	if ( grib_get_long(gh, "n2", &lpar) == 0 ) grid->ni2 = (int)lpar;
+        /* FIXME: assert(lpar >= INT_MIN && lpar <= INT_MAX) */
+	if ( grib_get_long(gh, "n3", &lpar) == 0 ) grid->ni3 = (int)lpar;
 
 	break;
       }
@@ -608,11 +620,16 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
         size_t len = sizeof(reference_link);
         reference_link[0] = 0;
 
-    	grid->size  = numberOfPoints;
+        /* FIXME: assert(numberOfPoints <= INT_MAX && numberOfPoints >= INT_MIN) */
+    	grid->size  = (int)numberOfPoints;
+        long lpar;
         if ( grib_get_long(gh, "numberOfGridUsed", &lpar) == 0 )
           {
-            grid->number   = lpar;
-            if ( grib_get_long(gh, "numberOfGridInReference", &lpar) == 0 ) grid->position = lpar;
+            /* FIXME: assert(lpar <= INT_MAX && lpar >= INT_MIN) */
+            grid->number   = (int)lpar;
+            /* FIXME: assert(lpar <= INT_MAX && lpar >= INT_MIN) */
+            if ( grib_get_long(gh, "numberOfGridInReference", &lpar) == 0 )
+              grid->position = (int)lpar;
             /*
             if ( grib_get_string(gh, "gridDescriptionFile", reference_link, &len) == 0 )
               {
@@ -631,11 +648,14 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
     case GRID_GENERIC:
       {
 	int nlon = 0, nlat = 0;
+        long lpar;
+        /* FIXME: assert(lpar <= INT_MAX && lpar >= INT_MIN) */
+	if ( grib_get_long(gh, "Ni", &lpar) == 0 ) nlon = (int)lpar;
+        /* FIXME: assert(lpar <= INT_MAX && lpar >= INT_MIN) */
+	if ( grib_get_long(gh, "Nj", &lpar) == 0 ) nlat = (int)lpar;
 
-	if ( grib_get_long(gh, "Ni", &lpar) == 0 ) nlon = lpar;
-	if ( grib_get_long(gh, "Nj", &lpar) == 0 ) nlat = lpar;
-
-	grid->size  = numberOfPoints;
+        /* FIXME: assert(numberOfPoints <= INT_MAX && numberOfPoints >= INT_MIN) */
+	grid->size  = (int)numberOfPoints;
 
 	if ( nlon > 0 && nlat > 0 && nlon*nlat == grid->size )
 	  {
@@ -677,16 +697,13 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
 static
 void grib1GetLevel(grib_handle *gh, int *leveltype, int *lbounds, int *level1, int *level2)
 {
-  int status;
-  long lpar;
-  double dlevel;
-
   *leveltype = 0;
   *lbounds = 0;
   *level1  = 0;
   *level2  = 0;
 
-  status = grib_get_long(gh, "indicatorOfTypeOfLevel", &lpar);
+  long lpar;
+  int status = grib_get_long(gh, "indicatorOfTypeOfLevel", &lpar);
   if ( status == 0 )
     {
       *leveltype = (int) lpar;
@@ -701,6 +718,7 @@ void grib1GetLevel(grib_handle *gh, int *leveltype, int *lbounds, int *level1, i
 
       if ( *lbounds == 0 )
 	{
+          double dlevel;
 	  GRIB_CHECK(grib_get_double(gh, "level", &dlevel), 0);
 	  if ( *leveltype == 100 ) dlevel *= 100;
 	  if ( dlevel < -2.e9 || dlevel > 2.e9 ) dlevel = 0;
