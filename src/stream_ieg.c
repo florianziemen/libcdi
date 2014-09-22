@@ -632,12 +632,12 @@ void iegAddRecord(stream_t *streamptr, int param, int *pdb, int *gdb, double *vc
       if ( IEG_P_LevelType(pdb) == 100 ) level1 *= 100;
     }
 
-  (*record).size     = recsize;
-  (*record).position = position;
-  (*record).param    = param;
-  (*record).ilevel   = level1;
-  (*record).ilevel2  = level2;
-  (*record).ltype    = IEG_P_LevelType(pdb);
+  record->size     = recsize;
+  record->position = position;
+  record->param    = param;
+  record->ilevel   = level1;
+  record->ilevel2  = level2;
+  record->ltype    = IEG_P_LevelType(pdb);
 
   if ( IEG_G_GridType(gdb) == 0 || IEG_G_GridType(gdb) == 10 )
     gridtype = GRID_LONLAT;
@@ -737,8 +737,8 @@ void iegAddRecord(stream_t *streamptr, int param, int *pdb, int *gdb, double *vc
   varAddRecord(recID, param, gridID, leveltype, lbounds, level1, level2, 0, 0,
 	       datatype, &varID, &levelID, TSTEP_INSTANT, 0, 0, NULL, NULL, NULL, NULL);
 
-  (*record).varID   = varID;
-  (*record).levelID = levelID;
+  record->varID   = (short)varID;
+  record->levelID = (short)levelID;
 
   streamptr->tsteps[tsID].nallrecs++;
   streamptr->nrecs++;
@@ -889,8 +889,8 @@ void iegScanTimestep1(stream_t *streamptr)
 
   taxisID = taxisCreate(TAXIS_ABSOLUTE);
   taxis->type  = TAXIS_ABSOLUTE;
-  taxis->vdate = datetime0.date;
-  taxis->vtime = datetime0.time;
+  taxis->vdate = (int)datetime0.date;
+  taxis->vtime = (int)datetime0.time;
 
   vlistID = streamptr->vlistID;
   vlistDefTaxis(vlistID, taxisID);
@@ -1115,7 +1115,7 @@ int iegInqContents(stream_t *streamptr)
 }
 
 static
-int iegScanTimestep(stream_t *streamptr)
+long iegScanTimestep(stream_t *streamptr)
 {
   int status;
   int fileID;
@@ -1244,7 +1244,7 @@ int iegScanTimestep(stream_t *streamptr)
 
 int iegInqTimestep(stream_t *streamptr, int tsID)
 {
-  int ntsteps, nrecs;
+  int nrecs;
 
   if ( tsID == 0 && streamptr->rtsteps == 0 )
     Error("Call to cdiInqContents missing!");
@@ -1252,7 +1252,7 @@ int iegInqTimestep(stream_t *streamptr, int tsID)
   if ( CDI_Debug )
     Message("tsID = %d rtsteps = %d", tsID, streamptr->rtsteps);
 
-  ntsteps = UNDEFID;
+  long ntsteps = UNDEFID;
   while ( ( tsID + 1 ) > streamptr->rtsteps && ntsteps == UNDEFID )
     ntsteps = iegScanTimestep(streamptr);
 
