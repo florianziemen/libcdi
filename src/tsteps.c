@@ -41,7 +41,8 @@ int tstepsNewEntry(stream_t *streamptr)
     {
       if ( tstepsTableSize == 0 ) tstepsTableSize = 1;
       tstepsTableSize = 2*tstepsTableSize;
-      tstepsTable = (tsteps_t *) realloc(tstepsTable, tstepsTableSize*sizeof(tsteps_t));
+      tstepsTable = (tsteps_t *)xrealloc(tstepsTable,
+                                         (size_t)tstepsTableSize * sizeof (tsteps_t));
       if ( tstepsTable == NULL )
 	{
           Message("tstepsTableSize = %d", tstepsTableSize);
