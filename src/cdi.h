@@ -352,7 +352,7 @@ void    streamWriteRecordF(int streamID, const float *data_vec, int nmiss);
 void    streamReadRecord(int streamID, double *data_vec, int *nmiss);
 void    streamCopyRecord(int streamIDdest, int streamIDsrc);
 
-void    streamInqGinfo(int streamID, int *intnum, float *fltnum, off_t *bignum);
+void    streamInqGRIBinfo(int streamID, int *intnum, float *fltnum, off_t *bignum);
 
 /* VLIST routines */
 

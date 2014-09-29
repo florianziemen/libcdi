@@ -684,7 +684,7 @@ void grb_write_record(stream_t * streamptr, int memtype, const void *data, int n
 }
 
 
-void streamInqGinfo(int streamID, int *intnum, float *fltnum, off_t *bignum)
+void streamInqGRIBinfo(int streamID, int *intnum, float *fltnum, off_t *bignum)
 {
   stream_t *streamptr = stream_to_pointer(streamID);
 
@@ -706,7 +706,7 @@ void streamInqGinfo(int streamID, int *intnum, float *fltnum, off_t *bignum)
       if ( zip > 0 )
 	Error("Compressed GRIB records unsupported!");
       else
-        gribGinfo(recpos, (long)gribbuffersize, (unsigned char *) gribbuffer, intnum, fltnum, bignum);
+        grib_info_for_grads(recpos, (long)gribbuffersize, (unsigned char *) gribbuffer, intnum, fltnum, bignum);
     }
 }
 /*

@@ -185,47 +185,6 @@ module mo_cdi
         end function getchar_unlocked
       end interface
       interface
-        function putchar(p__c) bind(c,name='putchar')
-          import :: c_int
-          integer(kind=c_int), value :: p__c
-          integer(kind=c_int) :: putchar
-        end function putchar
-      end interface
-      interface
-        function putchar_unlocked(p__c) bind(c,name='putchar_unlocked')
-          import :: c_int
-          integer(kind=c_int), value :: p__c
-          integer(kind=c_int) :: putchar_unlocked
-        end function putchar_unlocked
-      end interface
-      interface
-        function puts(p__s) bind(c,name='puts')
-          import :: c_char,c_int
-          character(kind=c_char), dimension(*) :: p__s
-          integer(kind=c_int) :: puts
-        end function puts
-      end interface
-      interface
-        subroutine perror(p__s) bind(c,name='perror')
-          import :: c_char
-          character(kind=c_char), dimension(*) :: p__s
-        end subroutine perror
-      end interface
-      interface
-        function gnu_dev_major(p__dev) bind(c,name='gnu_dev_major')
-          import :: c_int
-          integer(kind=c_int), value :: p__dev
-          integer(kind=c_int) :: gnu_dev_major
-        end function gnu_dev_major
-      end interface
-      interface
-        function gnu_dev_minor(p__dev) bind(c,name='gnu_dev_minor')
-          import :: c_int
-          integer(kind=c_int), value :: p__dev
-          integer(kind=c_int) :: gnu_dev_minor
-        end function gnu_dev_minor
-      end interface
-      interface
         subroutine cdiReset() bind(c,name='cdiReset')
         end subroutine cdiReset
       end interface
@@ -2968,16 +2927,8 @@ module mo_cdi
       end interface
 
       public :: strlen
-      public :: tempnam
       public :: getchar
       public :: getchar_unlocked
-      public :: putchar
-      public :: putchar_unlocked
-      public :: gets
-      public :: puts
-      public :: perror
-      public :: gnu_dev_major
-      public :: gnu_dev_minor
       public :: cdiReset
       public :: cdiStringError
       public :: cdiDebug
@@ -3514,45 +3465,6 @@ module mo_cdi
       public :: CALENDAR_NONE
 
 contains
-      function tempnam(p__dir,p__pfx)
-        character(kind=c_char), dimension(*) :: p__dir
-        character(kind=c_char), dimension(*) :: p__pfx
-        interface
-          function tempnam_c(p__dir,p__pfx) bind(c,name='tempnam')
-            import :: c_ptr,c_char
-            character(kind=c_char), dimension(*) :: p__dir
-            character(kind=c_char), dimension(*) :: p__pfx
-            type(c_ptr) :: tempnam_c
-          end function tempnam_c
-        end interface
-        character(len=1, kind=c_char), pointer :: tempnam(:)
-        type(c_ptr) :: cptr
-        integer :: slen(1)
-
-        cptr = tempnam_c(p__dir,&
-          p__pfx)
-        tempnam => null()
-        slen(1) = int(strlen(cptr))
-        call c_f_pointer(cptr, tempnam, slen)
-      end function tempnam
-      function gets(p__s)
-        character(kind=c_char), dimension(*) :: p__s
-        interface
-          function gets_c(p__s) bind(c,name='gets')
-            import :: c_ptr,c_char
-            character(kind=c_char), dimension(*) :: p__s
-            type(c_ptr) :: gets_c
-          end function gets_c
-        end interface
-        character(len=1, kind=c_char), pointer :: gets(:)
-        type(c_ptr) :: cptr
-        integer :: slen(1)
-
-        cptr = gets_c(p__s)
-        gets => null()
-        slen(1) = int(strlen(cptr))
-        call c_f_pointer(cptr, gets, slen)
-      end function gets
       function cdiStringError(cdiErrno)
         integer(kind=c_int), value :: cdiErrno
         interface
