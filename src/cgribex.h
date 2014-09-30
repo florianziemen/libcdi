@@ -223,12 +223,6 @@ void  gribPrintBDS(int nrec, long recpos, long recsize, unsigned char *gribbuffe
 void  gribCheck1(int nrec, long recpos, long recsize, unsigned char *gribbuffer);
 void  gribRepair1(int nrec, long recsize, unsigned char *gribbuffer);
 
-int grib1Sections(unsigned char *gribbuffer, long recsize, unsigned char **pdsp,
-		  unsigned char **gdsp, unsigned char **bmsp, unsigned char **bdsp);
-int grib2Sections(unsigned char *gribbuffer, long recsize, unsigned char **idsp,
-		  unsigned char **lusp, unsigned char **gdsp, unsigned char **pdsp,
-		  unsigned char **drsp, unsigned char **bmsp, unsigned char **bdsp);
-
 int   gribGetZip(long recsize, unsigned char *gribbuffer, long *urecsize);
 
 int   gribBzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbufsize);
