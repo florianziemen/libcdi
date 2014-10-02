@@ -4,8 +4,10 @@
 
 #include <inttypes.h>
 #include <stdlib.h>
-#include <limits.h>
 #include <sys/types.h>
+#ifdef WORDS_BIGENDIAN
+#include <limits.h>
+#endif
 
 #include "cksum.h"
 
