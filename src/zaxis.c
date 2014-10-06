@@ -189,6 +189,7 @@ zaxisCreate_(int zaxistype, int size, int id)
 {
   zaxis_t *zaxisptr = zaxisNewEntry(id);
 
+  xassert(size >= 0);
   zaxisptr->type = zaxistype;
   zaxisptr->size = size;
 
@@ -205,7 +206,8 @@ zaxisCreate_(int zaxistype, int size, int id)
 
   zaxisptr->positive = ZaxistypeEntry[zaxistype].positive;
 
-  double *vals = zaxisptr->vals = (double *)xmalloc(size*sizeof(double));
+  double *vals = zaxisptr->vals
+    = (double *)xmalloc((size_t)size * sizeof(double));
 
   for ( int ilev = 0; ilev < size; ilev++ )
     vals[ilev] = 0.0;
@@ -537,7 +539,7 @@ void zaxisDefPositive(int zaxisID, int positive)
 
   if (zaxisptr->positive != positive)
     {
-      zaxisptr->positive = positive;
+      zaxisptr->positive = (unsigned char)positive;
       reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
     }
 }
@@ -1038,8 +1040,8 @@ void zaxisDefVct(int zaxisID, int size, const double *vct)
   if ( zaxisptr->vct == 0 )
     {
       zaxisptr->vctsize = size;
-      zaxisptr->vct = (double *)xmalloc(size*sizeof(double));
-      memcpy(zaxisptr->vct, vct, size*sizeof(double));
+      zaxisptr->vct = (double *)xmalloc((size_t)size * sizeof (double));
+      memcpy(zaxisptr->vct, vct, (size_t)size * sizeof (double));
       reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
     }
   else
@@ -1054,7 +1056,7 @@ void zaxisInqVct(int zaxisID, double *vct)
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
-  memcpy(vct, zaxisptr->vct, zaxisptr->vctsize*sizeof(double));
+  memcpy(vct, zaxisptr->vct, (size_t)zaxisptr->vctsize * sizeof (double));
 }
 
 
@@ -1084,7 +1086,7 @@ void zaxisDefLbounds(int zaxisID, const double *lbounds)
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
-  size_t size = zaxisptr->size;
+  size_t size = (size_t)zaxisptr->size;
 
   if ( CDI_Debug )
     if ( zaxisptr->lbounds != NULL )
@@ -1104,7 +1106,7 @@ void zaxisDefUbounds(int zaxisID, const double *ubounds)
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
-  size_t size = zaxisptr->size;
+  size_t size = (size_t)zaxisptr->size;
 
   if ( CDI_Debug )
     if ( zaxisptr->ubounds != NULL )
@@ -1124,7 +1126,7 @@ void zaxisDefWeights(int zaxisID, const double *weights)
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
-  size_t size = zaxisptr->size;
+  size_t size = (size_t)zaxisptr->size;
 
   if ( CDI_Debug )
     if ( zaxisptr->weights != NULL )
@@ -1152,26 +1154,25 @@ void zaxisResize(int zaxisID, int size)
 {
   zaxis_t *zaxisptr = reshGetVal(zaxisID, &zaxisOps);
 
+  xassert(size >= 0);
   zaxis_check_ptr(zaxisID, zaxisptr);
 
   zaxisptr->size = size;
 
   if ( zaxisptr->vals )
-    zaxisptr->vals = (double *)xrealloc(zaxisptr->vals, size*sizeof(double));
+    zaxisptr->vals = (double *)xrealloc(zaxisptr->vals, (size_t)size * sizeof(double));
 }
 
 
 int zaxisDuplicate(int zaxisID)
 {
   int zaxisIDnew;
-  int zaxistype, zaxissize;
-  int size;
   zaxis_t *zaxisptr = reshGetVal(zaxisID, &zaxisOps);
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
-  zaxistype = zaxisInqType(zaxisID);
-  zaxissize = zaxisInqSize(zaxisID);
+  int zaxistype = zaxisInqType(zaxisID);
+  int zaxissize = zaxisInqSize(zaxisID);
 
   zaxisIDnew = zaxisCreate(zaxistype, zaxissize);
   zaxis_t *zaxisptrnew = reshGetVal(zaxisIDnew, &zaxisOps);
@@ -1184,37 +1185,37 @@ int zaxisDuplicate(int zaxisID)
 
   if ( zaxisptr->vals != NULL )
     {
-      size = zaxissize;
+      size_t size = (size_t)zaxissize;
 
-      zaxisptrnew->vals = (double *)xmalloc(size*sizeof(double));
-      memcpy(zaxisptrnew->vals, zaxisptr->vals, size*sizeof(double));
+      zaxisptrnew->vals = (double *)xmalloc(size * sizeof (double));
+      memcpy(zaxisptrnew->vals, zaxisptr->vals, size * sizeof (double));
     }
 
   if ( zaxisptr->lbounds )
     {
-      size = zaxissize;
+      size_t size = (size_t)zaxissize;
 
-      zaxisptrnew->lbounds = (double *)xmalloc(size*sizeof(double));
-      memcpy(zaxisptrnew->lbounds, zaxisptr->lbounds, size*sizeof(double));
+      zaxisptrnew->lbounds = (double *)xmalloc(size * sizeof (double));
+      memcpy(zaxisptrnew->lbounds, zaxisptr->lbounds, size * sizeof(double));
     }
 
   if ( zaxisptr->ubounds )
     {
-      size = zaxissize;
+      size_t size = (size_t)zaxissize;
 
-      zaxisptrnew->ubounds = (double *)xmalloc(size*sizeof(double));
-      memcpy(zaxisptrnew->ubounds, zaxisptr->ubounds, size*sizeof(double));
+      zaxisptrnew->ubounds = (double *)xmalloc(size * sizeof (double));
+      memcpy(zaxisptrnew->ubounds, zaxisptr->ubounds, size * sizeof (double));
     }
 
   if ( zaxisptr->vct != NULL )
     {
-      size = zaxisptr->vctsize;
+      size_t size = (size_t)zaxisptr->vctsize;
 
       if ( size )
         {
-          zaxisptrnew->vctsize = size;
-          zaxisptrnew->vct = (double *)xmalloc(size*sizeof(double));
-          memcpy(zaxisptrnew->vct, zaxisptr->vct, size*sizeof(double));
+          zaxisptrnew->vctsize = (int)size;
+          zaxisptrnew->vct = (double *)xmalloc(size * sizeof (double));
+          memcpy(zaxisptrnew->vct, zaxisptr->vct, size * sizeof (double));
         }
     }
 
@@ -1539,10 +1540,10 @@ zaxisUnpack(char * unpackBuffer, int unpackBufferSize,
 
   if (memberMask & vals)
     {
-      int size;
-      xassert((size = zaxisP->size));
+      int size = zaxisP->size;
+      xassert(size >= 0);
 
-      zaxisP->vals = (double*) xmalloc(size * sizeof ( double ));
+      zaxisP->vals = (double *)xmalloc((size_t)size * sizeof (double));
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
                       zaxisP->vals, size, DATATYPE_FLT64, context);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
@@ -1552,10 +1553,10 @@ zaxisUnpack(char * unpackBuffer, int unpackBufferSize,
 
   if (memberMask & lbounds)
     {
-      int size;
-      xassert((size = zaxisP->size));
+      int size = zaxisP->size;
+      xassert(size >= 0);
 
-      zaxisP->lbounds = (double*) xmalloc(size * sizeof (double));
+      zaxisP->lbounds = (double *)xmalloc((size_t)size * sizeof (double));
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
                       zaxisP->lbounds, size, DATATYPE_FLT64, context);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
@@ -1565,10 +1566,10 @@ zaxisUnpack(char * unpackBuffer, int unpackBufferSize,
 
   if (memberMask & ubounds)
     {
-      int size;
-      xassert((size = zaxisP->size));
+      int size = zaxisP->size;
+      xassert(size >= 0);
 
-      zaxisP->ubounds = (double*) xmalloc(size * sizeof (double));
+      zaxisP->ubounds = (double *)xmalloc((size_t)size * sizeof (double));
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
                       zaxisP->ubounds, size, DATATYPE_FLT64, context);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
@@ -1578,10 +1579,10 @@ zaxisUnpack(char * unpackBuffer, int unpackBufferSize,
 
   if (memberMask & weights)
     {
-      int size;
-      xassert((size = zaxisP->size));
+      int size = zaxisP->size;
+      xassert(size >= 0);
 
-      zaxisP->weights = (double*) xmalloc(size * sizeof (double));
+      zaxisP->weights = (double *)xmalloc((size_t)size * sizeof (double));
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
                       zaxisP->weights, size, DATATYPE_FLT64, context);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
@@ -1591,10 +1592,10 @@ zaxisUnpack(char * unpackBuffer, int unpackBufferSize,
 
   if ( memberMask & vct )
     {
-      int size;
-      xassert((size = zaxisP->vctsize));
+      int size = zaxisP->vctsize;
+      xassert(size >= 0);
 
-      zaxisP->vct = (double*) xmalloc(size * sizeof (double));
+      zaxisP->vct = (double *)xmalloc((size_t)size * sizeof (double));
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
                       zaxisP->vct, size, DATATYPE_FLT64, context);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
