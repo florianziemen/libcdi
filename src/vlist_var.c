@@ -98,11 +98,9 @@ int vlistvarNewEntry(int vlistID)
   */
   if ( ! vlistvarSize )
     {
-      int i;
-
       vlistvarSize = 2;
-      vlistvar = (var_t *)xmalloc(vlistvarSize*sizeof(var_t));
-      for ( i = 0; i < vlistvarSize; i++ )
+      vlistvar = (var_t *)xmalloc((size_t)vlistvarSize * sizeof (var_t));
+      for (int i = 0; i < vlistvarSize; i++ )
 	vlistvar[i].isUsed = FALSE;
     }
   else
@@ -118,7 +116,8 @@ int vlistvarNewEntry(int vlistID)
       int i;
 
       vlistvarSize = 2*vlistvarSize;
-      vlistvar = (var_t *)xrealloc(vlistvar, vlistvarSize*sizeof(var_t));
+      vlistvar = (var_t *)xrealloc(vlistvar,
+                                   (size_t)vlistvarSize * sizeof(var_t));
       varID = vlistvarSize/2;
 
       for ( i = varID; i < vlistvarSize; i++ )
@@ -221,13 +220,13 @@ cdiVlistCreateVarLevInfo(vlist_t *vlistptr, int varID)
   xassert(varID >= 0 && varID < vlistptr->nvars
           && vlistptr->vars[varID].levinfo == NULL);
   int zaxisID = vlistptr->vars[varID].zaxisID;
-  int nlevs = zaxisInqSize(zaxisID);
+  size_t nlevs = (size_t)zaxisInqSize(zaxisID);
 
   vlistptr->vars[varID].levinfo
     = (levinfo_t*)xmalloc((size_t)nlevs * sizeof(levinfo_t));
 
-  for (int levID = 0; levID < nlevs; levID++ )
-      vlistptr->vars[varID].levinfo[levID] = DEFAULT_LEVINFO(levID);
+  for (size_t levID = 0; levID < nlevs; levID++ )
+    vlistptr->vars[varID].levinfo[levID] = DEFAULT_LEVINFO((int)levID);
 }
 
 /*
@@ -1892,17 +1891,17 @@ int vlistVarCompare(vlist_t *a, int varIDA, vlist_t *b, int varIDB)
   if (pva->levinfo)
     {
       int zaxisID = pva->zaxisID;
-      int nlevs = zaxisInqSize(zaxisID);
+      size_t nlevs = (size_t)zaxisInqSize(zaxisID);
       diff |= (memcmp(pva->levinfo, pvb->levinfo, sizeof (levinfo_t) * nlevs)
                != 0);
       if (diff)
         return 1;
     }
-  int natts = a->vars[varIDA].atts.nelems;
+  size_t natts = a->vars[varIDA].atts.nelems;
   if (natts != b->vars[varIDB].atts.nelems)
     return 1;
-  for (int attID = 0; attID < natts; ++attID)
-    diff |= vlist_att_compare(a, varIDA, b, varIDB, attID);
+  for (size_t attID = 0; attID < natts; ++attID)
+    diff |= vlist_att_compare(a, varIDA, b, varIDB, (int)attID);
   if ((diff |= ((pva->ensdata == NULL) ^ (pvb->ensdata == NULL))))
     return 1;
   if (pva->ensdata)
@@ -1923,13 +1922,13 @@ int vlistVarGetPackSize(vlist_t *p, int varID, void *context)
   int varsize = serializeGetSize(vlistvar_nints, DATATYPE_INT, context)
     + serializeGetSize(vlistvar_ndbls, DATATYPE_FLT64, context);
   if (var->name)
-    varsize += serializeGetSize(strlen(var->name), DATATYPE_TXT, context);
+    varsize += serializeGetSize((int)strlen(var->name), DATATYPE_TXT, context);
   if (var->longname)
-    varsize += serializeGetSize(strlen(var->longname), DATATYPE_TXT, context);
+    varsize += serializeGetSize((int)strlen(var->longname), DATATYPE_TXT, context);
   if (var->stdname)
-    varsize += serializeGetSize(strlen(var->stdname), DATATYPE_TXT, context);
+    varsize += serializeGetSize((int)strlen(var->stdname), DATATYPE_TXT, context);
   if (var->units)
-    varsize += serializeGetSize(strlen(var->units), DATATYPE_TXT, context);
+    varsize += serializeGetSize((int)strlen(var->units), DATATYPE_TXT, context);
   varsize += serializeGetSize(4 * zaxisInqSize(var->zaxisID),
                               DATATYPE_INT, context);
   varsize += vlistAttsGetSize(p, varID, context);
@@ -1947,10 +1946,10 @@ void vlistVarPack(vlist_t *p, int varID, char * buf, int size, int *position,
   tempbuf[1] = var->gridID;
   tempbuf[2] = var->zaxisID;
   tempbuf[3] = var->tsteptype;
-  tempbuf[4] = namesz = var->name?strlen(var->name):0;
-  tempbuf[5] = longnamesz = var->longname?strlen(var->longname):0;
-  tempbuf[6] = stdnamesz = var->stdname?strlen(var->stdname):0;
-  tempbuf[7] = unitssz = var->units?strlen(var->units):0;
+  tempbuf[4] = namesz = var->name?(int)strlen(var->name):0;
+  tempbuf[5] = longnamesz = var->longname?(int)strlen(var->longname):0;
+  tempbuf[6] = stdnamesz = var->stdname?(int)strlen(var->stdname):0;
+  tempbuf[7] = unitssz = var->units?(int)strlen(var->units):0;
   tempbuf[8] = var->datatype;
   tempbuf[9] = var->param;
   tempbuf[10] = var->instID;
@@ -2022,8 +2021,9 @@ void vlistVarUnpack(int vlistID, char * buf, int size, int *position,
 			 namespaceAdaptKey ( tempbuf[2], originNamespace ),
 			 tempbuf[3]);
   if (tempbuf[4] || tempbuf[5] || tempbuf[6] || tempbuf[7])
-    varname = (char*) xmalloc(imax(imax(imax(tempbuf[4],tempbuf[5]),tempbuf[6]),
-                           tempbuf[7])+ 1);
+    varname = (char *)xmalloc((size_t)imax(imax(imax(tempbuf[4],tempbuf[5]),
+                                                tempbuf[6]),
+                                           tempbuf[7]) + 1);
   if (tempbuf[4])
   {
     serializeUnpack(buf, size, position,
