@@ -3708,9 +3708,9 @@ contains
       end function tableInqParUnitsPtr
 
     subroutine ctrim(str)
-    character(kind=c_char) :: str(:)
+    character(kind=c_char), intent(inout) :: str(:)
     character(kind=c_char) :: c
-    integer                        :: i
+    integer :: i
 
     do i=1,size(str)
       c = str(i)
