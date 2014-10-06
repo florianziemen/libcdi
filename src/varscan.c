@@ -81,10 +81,9 @@ typedef struct
 vartable_t;
 
 
-int vartableInit = 0;
-vartable_t *vartable;
+static vartable_t *vartable;
 static int varTablesize = 0;
-int nvars = 0;
+static int nvars = 0;
 
 
 static
