@@ -195,7 +195,8 @@ int levelNewEntry(int varID, int level1, int level2)
       int i;
 
       levelTableSize = 2;
-      levelTable = (leveltable_t *) malloc(levelTableSize*sizeof(leveltable_t));
+      levelTable = (leveltable_t *)xmalloc((size_t)levelTableSize
+                                           * sizeof (leveltable_t));
       if( levelTable == NULL )
 	{
           Message("levelTableSize = %d", levelTableSize);
@@ -221,7 +222,8 @@ int levelNewEntry(int varID, int level1, int level2)
       int i;
 
       levelTableSize = 2*levelTableSize;
-      levelTable = (leveltable_t *) realloc(levelTable, levelTableSize*sizeof(leveltable_t));
+      levelTable = (leveltable_t *)xrealloc(levelTable, (size_t)levelTableSize
+                                            * sizeof (leveltable_t));
       if( levelTable == NULL )
 	{
           Message("levelTableSize = %d", levelTableSize);
@@ -260,7 +262,8 @@ int paramNewEntry(int param)
       int i;
 
       varTablesize = 2;
-      vartable = (vartable_t *) malloc(varTablesize*sizeof(vartable_t));
+      vartable = (vartable_t *)xmalloc((size_t)varTablesize
+                                       * sizeof (vartable_t));
       if( vartable == NULL )
 	{
           Message("varTablesize = %d", varTablesize);
@@ -291,8 +294,9 @@ int paramNewEntry(int param)
     {
       int i;
 
-      varTablesize = 2*varTablesize;
-      vartable = (vartable_t *) realloc(vartable, varTablesize*sizeof(vartable_t));
+      varTablesize = 2 * varTablesize;
+      vartable = (vartable_t *)xrealloc(vartable, (size_t)varTablesize
+                                        * sizeof (vartable_t));
       if( vartable == NULL )
 	{
           Message("varTablesize = %d", varTablesize);
@@ -453,14 +457,14 @@ void cdi_generate_vars(stream_t *streamptr)
   double level_sf = 1;
   int vlistID = streamptr->vlistID;
 
-  int *varids = (int *) malloc(nvars*sizeof(int));
+  int *varids = (int *)xmalloc((size_t)nvars*sizeof(int));
   for ( varID = 0; varID < nvars; varID++ ) varids[varID] = varID;
 
   if ( streamptr->sortname )
     {
       param_t **varInfo;
-      varInfo    = (param_t **) malloc(nvars*sizeof(param_t *));
-      varInfo[0] = (param_t *)  malloc(nvars*sizeof(param_t));
+      varInfo    = (param_t **)xmalloc((size_t)nvars * sizeof (param_t *));
+      varInfo[0] = (param_t *)xmalloc((size_t)nvars * sizeof (param_t));
 
       for ( int index = 1; index < nvars; index++ )
 	varInfo[index] = varInfo[0] + index;
@@ -471,7 +475,7 @@ void cdi_generate_vars(stream_t *streamptr)
 	  varInfo[varid]->param = vartable[varid].param;
 	  varInfo[varid]->ltype = vartable[varid].ltype;
 	}
-      qsort(varInfo[0], nvars, sizeof(param_t), cmpparam);
+      qsort(varInfo[0], (size_t)nvars, sizeof(param_t), cmpparam);
       for ( varid = 0; varid < nvars; varid++ )
 	{
 	  varids[varid] = varInfo[varid]->varid;
@@ -577,7 +581,7 @@ void cdi_generate_vars(stream_t *streamptr)
 
       char *unitptr = cdiUnitNamePtr(vartable[varid].level_unit);
       zaxisID = varDefZaxis(vlistID, zaxistype, nlevels, dlevels, lbounds, dlevels1, dlevels2,
-                            Vctsize, Vct, NULL, NULL, unitptr, 0, 0, ltype);
+                            (int)Vctsize, Vct, NULL, NULL, unitptr, 0, 0, ltype);
 
       if ( zaxisInqType(zaxisID) == ZAXIS_REFERENCE )
         {
