@@ -2790,7 +2790,7 @@ void gribPrintSec1(int *isec0, int *isec1)
 
   */
 
-  int iprev, icurr, icount, ioffset;
+  int iprev, icurr, ioffset;
   int ibit, ierr, iout, iyear;
   int jloop, jiloop;
   float value;
@@ -3342,7 +3342,7 @@ void gribPrintSec1(int *isec0, int *isec1)
           fprintf(grprsm, " List of different time intervals used:\n");
           iprev  = isec1[49];
           icurr  = 0;
-          icount = 0;
+          unsigned icount = 0;
           for (jloop = 1; jloop <= isec1[48]; jloop++)
 	    {
 	      icurr = isec1[48+jloop];
@@ -3353,7 +3353,7 @@ void gribPrintSec1(int *isec0, int *isec1)
 		  if ( icount == 2 )
 		    fprintf(grprsm, "  - interval %5.4d used       twice\n", iprev);
 		  if ( icount > 2 )
-		    fprintf(grprsm, "  - interval %5.4d used %5d times\n",  iprev, icount);
+		    fprintf(grprsm, "  - interval %5.4d used %5u times\n",  iprev, icount);
 		  iprev  = icurr;
 		  icount = 1;
 		}
@@ -3365,7 +3365,7 @@ void gribPrintSec1(int *isec0, int *isec1)
 	  if ( icount == 2 )
 	    fprintf(grprsm, "  - interval %5.4d used       twice\n", iprev);
 	  if ( icount > 2 )
-	    fprintf(grprsm, "  - interval %5.4d used %5d times\n",  iprev, icount);
+	    fprintf(grprsm, "  - interval %5.4d used %5u times\n",  iprev, icount);
 	}
       /*
 	ECMWF Local definition 13.
@@ -3538,7 +3538,7 @@ void printQuasi(int *isec2)
   */
 
   char yout[64];
-  int nextlat, nrepeat, latcnt;
+  int nextlat, latcnt;
   int j;
   int ntos;
 
@@ -3579,7 +3579,7 @@ void printQuasi(int *isec2)
       /*
 	Look for neighbouring latitudes with same number of points
       */
-      nrepeat = 0;
+      unsigned nrepeat = 0;
 
     LABEL110:
       /*
