@@ -9,7 +9,7 @@ int nts  =  3; // Number of time steps
 int main(void)
 {
   int taxisID, vlistID1, vlistID2, varID1, varID2, streamID1, streamID2, tsID;
-  int nmiss, vdate, vtime;
+  int nmiss;
   double var1[nlon*nlat];
   double var2[nlon*nlat*nlev];
 
@@ -51,8 +51,8 @@ int main(void)
       streamInqTimestep(streamID1, tsID);
 
       // Get the verification date and time
-      vdate = taxisInqVdate(taxisID);
-      vtime = taxisInqVtime(taxisID);
+      /* int vdate = */taxisInqVdate(taxisID);
+      /* int vtime = */taxisInqVtime(taxisID);
 
       // Define the output time step
       streamDefTimestep(streamID2, tsID);
