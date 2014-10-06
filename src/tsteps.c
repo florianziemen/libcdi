@@ -72,9 +72,7 @@ void cdiCreateTimesteps(stream_t *streamptr)
   if ( streamptr->ntsteps == 0 ) ntsteps = 1;    /* <<<<<-------- */
   else ntsteps = streamptr->ntsteps;
 
-  streamptr->tsteps = (tsteps_t *) malloc((size_t)ntsteps*sizeof(tsteps_t));
-  if ( streamptr->tsteps == NULL )
-    SysError("Allocation of tsteps_t failed");
+  streamptr->tsteps = (tsteps_t *)xmalloc((size_t)ntsteps*sizeof(tsteps_t));
 
   streamptr->tstepsTableSize = (int)ntsteps;
   streamptr->tstepsNextID    = (int)ntsteps;
