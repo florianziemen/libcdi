@@ -10,6 +10,7 @@
 #pragma GCC diagnostic ignored "-Wconversion"
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 #pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+#pragma GCC diagnostic warning "-Wstrict-overflow"
 #endif
 
 #ifdef _ARCH_PWR6
