@@ -899,7 +899,7 @@ int main(int argc, char *argv[])
 	}
 
       if ( vlistNumber(vlistID1) != CDI_REAL ) datasize *= 2;
-      data = (double *) malloc(datasize*sizeof(double));
+      data = (double *) malloc((size_t)datasize * sizeof (double));
 
       /*
 	nts = cdiInqTimeSize(streamID1);
