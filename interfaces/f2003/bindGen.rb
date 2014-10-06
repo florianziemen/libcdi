@@ -67,7 +67,7 @@ def getFuncInfo(filename)
     md = /(\w+)+ +(\**)(\w+)\s*\((.*)\)/.match(line)
     returnType, returnPointer, funcName, paramList = md[1,4]
     paramList = paramList.split(',').collect {|p| p.split(' ').each {|_p| _p.strip}}
-    [funcName, returnType, returnPointer,  paramList]
+    [funcName, returnType, returnPointer, paramList]
   }
   funclist
 end
@@ -226,7 +226,7 @@ def genInterface(cFuncname, returnType, returnPointer, paramList)
     warn "parameterlist of '#{cFuncname}' is not supported -> function ignored."
     return ['','']
   end
-  return ['', ''] if (cFuncname[0] == '_')
+  return ['', ''] if (cFuncname[0,1] == '_')
   # the void argument type can be left out: if 'void' occures in the
   # parameterlist (which is only the case, if it is the only parameter
   # information), it is simply removed and a empty paramter list is left.
