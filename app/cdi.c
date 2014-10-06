@@ -714,7 +714,7 @@ int main(int argc, char *argv[])
   int Move = 0;
   int Record = 0;
   int Debug = 0;
-  int Quiet  = 0;
+  /* int Quiet  = 0; */
   int Vardis = 0;
   int Version = 0;
   int Longinfo = 0;
@@ -755,7 +755,7 @@ int main(int argc, char *argv[])
 	  Move = 1;
 	  break;
 	case 'q':
-	  Quiet = 1;
+	  /* Quiet = 1; */
 	  break;
 	case 'R':
 	  cdiDefGlobal("REGULARGRID", 1);
