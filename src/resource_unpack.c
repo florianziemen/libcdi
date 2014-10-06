@@ -25,7 +25,8 @@ void reshUnpackResources(char * unpackBuffer, int unpackBufferSize,
   int unpackBufferPos = 0;
   int numAssociations = 0, sizeAssociations = 16;
   struct streamAssoc *associations
-    = xmalloc(sizeof (associations[0]) * sizeAssociations);
+    = (struct streamAssoc *)xmalloc(sizeof (associations[0])
+                                    * (size_t)sizeAssociations);
 
   while ( unpackBufferPos < unpackBufferSize )
     {
@@ -64,7 +65,7 @@ void reshUnpackResources(char * unpackBuffer, int unpackBufferSize,
           if (sizeAssociations == numAssociations)
             associations
               = xrealloc(associations,
-                         sizeof (associations[0]) * (sizeAssociations *= 2));
+                         sizeof (associations[0]) * (size_t)(sizeAssociations *= 2));
 	  associations[numAssociations]
             = streamUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos,
                            originNamespace, context);
