@@ -52,7 +52,7 @@ int main(void)
 
       // Get the verification date and time
       vdate = taxisInqVdate(taxisID);
-      vtime = ttaxisInqVtime(taxisID);
+      vtime = taxisInqVtime(taxisID);
 
       // Define the output time step
       streamDefTimestep(streamID2, tsID);
