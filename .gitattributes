@@ -104,6 +104,7 @@ doc/tex/vlist.tex -text
 doc/tex/zaxis.tex -text
 examples/Makefile.am -text
 examples/Makefile.in -text
+examples/README -text
 examples/cdi_copy.c -text
 examples/cdi_copy_f.f -text
 examples/cdi_copy_file.c -text
