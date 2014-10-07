@@ -1013,6 +1013,8 @@ void streamClose(int streamID)
 
   if ( streamptr->tsteps ) free(streamptr->tsteps);
 
+  if ( streamptr->basetime.timevar_cache ) free(streamptr->basetime.timevar_cache);
+
   if ( streamptr->nfiles > 0 )
     {
       for ( index = 0; index < streamptr->nfiles; ++index )

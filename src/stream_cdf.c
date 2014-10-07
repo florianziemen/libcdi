@@ -7967,6 +7967,62 @@ int cdfInqContents(stream_t *streamptr)
   return (0);
 }
 
+static
+void wrf_read_timestep(int fileID, int nctimevarid, int tsID, taxis_t *taxis)
+{
+  size_t start[2], count[2];
+  char stvalue[32];
+  start[0] = (size_t) tsID; start[1] = 0;
+  count[0] = 1; count[1] = 19;
+  stvalue[0] = 0;
+  cdf_get_vara_text(fileID, nctimevarid, start, count, stvalue);
+  stvalue[19] = 0;
+  {
+    int year = 1, month = 1, day = 1 , hour = 0, minute = 0, second = 0;
+    if ( strlen(stvalue) == 19 )
+      sscanf(stvalue, "%d-%d-%d_%d:%d:%d", &year, &month, &day, &hour, &minute, &second);
+    taxis->vdate = cdiEncodeDate(year, month, day);
+    taxis->vtime = cdiEncodeTime(hour, minute, second);
+    taxis->type = TAXIS_ABSOLUTE;
+  }
+}
+
+static
+double get_timevalue(int fileID, int nctimevarid, int tsID, timecache_t *tcache)
+{
+  double timevalue = 0;
+  size_t index = (size_t) tsID;
+
+  if ( tcache )
+    {
+      if ( tcache->size == 0 || (tsID < tcache->startid || tsID > (tcache->startid+tcache->size-1)) )
+        {
+          int maxvals = MAX_TIMECACHE_SIZE;
+          tcache->startid = (tsID/MAX_TIMECACHE_SIZE)*MAX_TIMECACHE_SIZE;
+          if ( (tcache->startid + maxvals) > tcache->maxvals ) maxvals = (tcache->maxvals)%MAX_TIMECACHE_SIZE;
+          tcache->size = maxvals;
+          index = (size_t) tcache->startid;
+          // fprintf(stderr, "fill time cache: %d %d %d %d %d\n", tcache->maxvals, tsID, tcache->startid, tcache->startid+maxvals-1, maxvals);
+          for ( int ival = 0; ival < maxvals; ++ival )
+            {
+              cdf_get_var1_double(fileID, nctimevarid, &index, &timevalue);
+              if ( timevalue >= NC_FILL_DOUBLE || timevalue < -NC_FILL_DOUBLE ) timevalue = 0;
+              tcache->cache[ival] = timevalue;
+              index++;
+            }
+        }
+
+      timevalue = tcache->cache[tsID%MAX_TIMECACHE_SIZE];
+    }
+  else
+    {
+      cdf_get_var1_double(fileID, nctimevarid, &index, &timevalue);
+      if ( timevalue >= NC_FILL_DOUBLE || timevalue < -NC_FILL_DOUBLE ) timevalue = 0;
+    }
+
+  return timevalue;
+}
+
 
 int cdfInqTimestep(stream_t * streamptr, int tsID)
 {
@@ -7974,7 +8030,6 @@ int cdfInqTimestep(stream_t * streamptr, int tsID)
 #if  defined  (HAVE_LIBNETCDF)
   double timevalue;
   int fileID;
-  size_t index;
   taxis_t *taxis;
 
   if ( CDI_Debug ) Message("streamID = %d  tsID = %d", streamptr->self, tsID);
@@ -7995,31 +8050,21 @@ int cdfInqTimestep(stream_t * streamptr, int tsID)
       if ( nctimevarid != UNDEFID )
 	{
 	  fileID = streamptr->fileID;
-	  index  = (size_t)tsID;
+	  size_t index  = (size_t)tsID;
 
 	  if ( streamptr->basetime.lwrf )
 	    {
-	      size_t start[2], count[2];
-	      char stvalue[32];
-	      start[0] = index; start[1] = 0;
-	      count[0] = 1; count[1] = 19;
-	      stvalue[0] = 0;
-	      cdf_get_vara_text(fileID, nctimevarid, start, count, stvalue);
-	      stvalue[19] = 0;
-	      {
-		int year = 1, month = 1, day = 1 , hour = 0, minute = 0, second = 0;
-		if ( strlen(stvalue) == 19 )
-		  sscanf(stvalue, "%d-%d-%d_%d:%d:%d", &year, &month, &day, &hour, &minute, &second);
-		taxis->vdate = cdiEncodeDate(year, month, day);
-		taxis->vtime = cdiEncodeTime(hour, minute, second);
-		taxis->type = TAXIS_ABSOLUTE;
-	      }
+              wrf_read_timestep(fileID, nctimevarid, tsID, taxis);
 	    }
 	  else
 	    {
-	      cdf_get_var1_double(fileID, nctimevarid, &index, &timevalue);
-              if ( timevalue >= NC_FILL_DOUBLE || timevalue < -NC_FILL_DOUBLE ) timevalue = 0;
-
+              if ( streamptr->basetime.timevar_cache == NULL )
+                {
+                  streamptr->basetime.timevar_cache = (timecache_t *) malloc(MAX_TIMECACHE_SIZE*sizeof(timecache_t));
+                  streamptr->basetime.timevar_cache->size = 0;
+                  streamptr->basetime.timevar_cache->maxvals = streamptr->ntsteps;
+                }
+              timevalue = get_timevalue(fileID, nctimevarid, tsID, streamptr->basetime.timevar_cache);
 	      cdiDecodeTimeval(timevalue, taxis, &taxis->vdate, &taxis->vtime);
 	    }
 
@@ -8043,7 +8088,7 @@ int cdfInqTimestep(stream_t * streamptr, int tsID)
           int leadtimeid = streamptr->basetime.leadtimeid;
           if ( leadtimeid != UNDEFID )
             {
-	      cdf_get_var1_double(fileID, leadtimeid, &index, &timevalue);
+              timevalue = get_timevalue(fileID, leadtimeid, tsID, NULL);
               cdiSetForecastPeriod(timevalue, taxis);
             }
 	}

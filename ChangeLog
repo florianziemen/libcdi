@@ -1,7 +1,11 @@
-2014-10-01  Uwe Schulzweida
+2014-10-23  Uwe Schulzweida
 
-	* Version 1.7.0 released
-	* using CGRIBEX library version 1.7.0
+	* Version 1.6.5 released
+	* using CGRIBEX library version 1.6.5
+
+2014-10-07  Uwe Schulzweida
+
+	* read netCDF: cache time variable
 
 2014-08-21  Uwe Schulzweida
 
