@@ -7967,6 +7967,7 @@ int cdfInqContents(stream_t *streamptr)
   return (0);
 }
 
+#if  defined  (HAVE_LIBNETCDF)
 static
 void wrf_read_timestep(int fileID, int nctimevarid, int tsID, taxis_t *taxis)
 {
@@ -8022,7 +8023,7 @@ double get_timevalue(int fileID, int nctimevarid, int tsID, timecache_t *tcache)
 
   return timevalue;
 }
-
+#endif
 
 int cdfInqTimestep(stream_t * streamptr, int tsID)
 {
