@@ -2012,7 +2012,7 @@ int gribapiScanTimestep(stream_t * streamptr)
 #endif
 
 int gribapiDecode(unsigned char *gribbuffer, int gribsize, double *data, int gridsize,
-		  int unreduced, int *nmiss, int *zip, double missval, int vlistID, int varID)
+		  int unreduced, int *nmiss, double missval, int vlistID, int varID)
 {
   int status = 0;
 #if  defined  (HAVE_LIBGRIB_API)
@@ -2021,7 +2021,6 @@ int gribapiDecode(unsigned char *gribbuffer, int gribsize, double *data, int gri
   size_t datasize, dummy, recsize;
   grib_handle *gh = NULL;
 
-  UNUSED(zip);
   UNUSED(vlistID);
   UNUSED(varID);
 

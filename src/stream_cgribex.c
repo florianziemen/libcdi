@@ -624,7 +624,7 @@ int cgribexScanTimestep1(stream_t * streamptr)
 	  streamptr->ntsteps = 1;
 	  break;
 	}
-      if ( recsize > buffersize )
+      if ( (size_t)recsize > buffersize )
 	{
 	  buffersize = (size_t)recsize;
 	  gribbuffer = (unsigned char *) realloc(gribbuffer, buffersize);
@@ -1339,61 +1339,19 @@ int cgribexScanTimestep(stream_t * streamptr)
 #endif
 
 int cgribexDecode(unsigned char *gribbuffer, int gribsize, double *data, int gridsize,
-		  int unreduced, int *nmiss, int *zip, double missval)
+		  int unreduced, int *nmiss, double missval)
 {
   int status = 0;
 #if  defined  (HAVE_LIBCGRIBEX)
   int iret = 0, iword = 0;
   int isec0[2], isec1[4096], isec2[4096], isec3[2], isec4[512];
-  int izip;
-  long unzipsize;
   double fsec2[512], fsec3[2];
   char hoper[2];
-
-  *zip = 0;
 
   if ( unreduced ) strcpy(hoper, "R");
   else             strcpy(hoper, "D");
 
   FSEC3_MissVal = missval;
-
-  if ( (izip = gribGetZip(gribsize, gribbuffer, &unzipsize)) > 0 )
-    {
-      *zip = izip;
-      if ( izip == 128 ) /* szip */
-	{
-	  unsigned char *itmpbuffer = NULL;
-	  size_t itmpbuffersize = 0;
-
-	  if ( unzipsize < (long) gribsize )
-	    {
-	      fprintf(stderr, "Decompressed size smaller than compressed size (in %d; out %ld)!\n",
-		      gribsize, unzipsize);
-	      return (status);
-	    }
-
-	  if ( itmpbuffersize < (size_t) gribsize )
-	    {
-	      itmpbuffersize = (size_t)gribsize;
-	      itmpbuffer = (unsigned char *) realloc(itmpbuffer, itmpbuffersize);
-	    }
-
-	  memcpy(itmpbuffer, gribbuffer, itmpbuffersize);
-
-	  unzipsize += 100; /* need 0 to 1 bytes for rounding of bds */
-
-	  gribsize = gribUnzip(gribbuffer, unzipsize, itmpbuffer, gribsize);
-
-	  if ( gribsize <= 0 )
-	    Error("Decompression problem!");
-
-	  free(itmpbuffer);
-	}
-      else
-	{
-	  Error("Decompression for %d not implemented!", izip);
-	}
-    }
 
   gribExDP(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, data,
 	   gridsize, (int *) gribbuffer, gribsize, &iword, hoper, &iret);
@@ -2177,6 +2135,7 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
 static
 void cgribexDefMask(int *isec3)
 {
+  UNUSED(isec3);
 }
 
 static

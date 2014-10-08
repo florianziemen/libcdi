@@ -185,11 +185,12 @@ int grbInqRecord(stream_t * streamptr, int *varID, int *levelID)
 
 void grbDefRecord(stream_t * streamptr)
 {
+  UNUSED(streamptr);
 }
 
 static
 int grbDecode(int filetype, unsigned char *gribbuffer, int gribsize, double *data, int gridsize,
-	      int unreduced, int *nmiss, int *zip, double missval, int vlistID, int varID)
+	      int unreduced, int *nmiss, double missval, int vlistID, int varID)
 {
   int status = 0;
 
@@ -201,15 +202,68 @@ int grbDecode(int filetype, unsigned char *gribbuffer, int gribsize, double *dat
       if ( cdiNAdditionalGRIBKeys > 0 )
 	Error("CGRIBEX decode does not support reading of additional GRIB keys!");
 #endif
-      status = cgribexDecode(gribbuffer, gribsize, data, gridsize, unreduced, nmiss, zip, missval);
+      status = cgribexDecode(gribbuffer, gribsize, data, gridsize, unreduced, nmiss, missval);
     }
   else
 #endif
     {
-      status = gribapiDecode(gribbuffer, gribsize, data, gridsize, unreduced, nmiss, zip, missval, vlistID, varID);
+      status = gribapiDecode(gribbuffer, gribsize, data, gridsize, unreduced, nmiss, missval, vlistID, varID);
     }
 
   return (status);
+}
+
+
+int grbUnzipRecord(unsigned char *gribbuffer, size_t *gribsize)
+{
+  int zip = 0;
+  int izip;
+  size_t igribsize;
+  size_t ogribsize;
+  long unzipsize;
+
+  igribsize = *gribsize;
+  ogribsize = *gribsize;
+
+  if ( (izip = gribGetZip(igribsize, gribbuffer, &unzipsize)) > 0 )
+    {
+      zip = izip;
+      if ( izip == 128 ) /* szip */
+	{
+	  unsigned char *itmpbuffer = NULL;
+	  size_t itmpbuffersize = 0;
+
+	  if ( unzipsize < (long) igribsize )
+	    {
+	      fprintf(stderr, "Decompressed size smaller than compressed size (in %ld; out %ld)!\n", (long)igribsize, unzipsize);
+	      return (0);
+	    }
+
+	  if ( itmpbuffersize < igribsize )
+	    {
+	      itmpbuffersize = igribsize;
+	      itmpbuffer = (unsigned char *) realloc(itmpbuffer, itmpbuffersize);
+	    }
+
+	  memcpy(itmpbuffer, gribbuffer, itmpbuffersize);
+
+	  unzipsize += 100; /* need 0 to 1 bytes for rounding of bds */
+
+	  ogribsize = gribUnzip(gribbuffer, unzipsize, itmpbuffer, igribsize);
+
+	  free(itmpbuffer);
+
+	  if ( ogribsize <= 0 ) Error("Decompression problem!");
+	}
+      else
+	{
+	  Error("Decompression for %d not implemented!", izip);
+	}
+    }
+
+  *gribsize = ogribsize;
+
+  return zip;
 }
 
 
@@ -240,10 +294,9 @@ void grbReadRecord(stream_t * streamptr, double *data, int *nmiss)
 
   double missval = vlistInqVarMissval(vlistID, varID);
 
-  int zip;
-  grbDecode(filetype, gribbuffer, (int)recsize, data, gridsize, streamptr->unreduced, nmiss, &zip, missval, vlistID, varID);
+  streamptr->tsteps[tsID].records[recID].zip = grbUnzipRecord(gribbuffer, &recsize);
 
-  streamptr->tsteps[tsID].records[recID].zip = zip;
+  grbDecode(filetype, gribbuffer, (int)recsize, data, gridsize, streamptr->unreduced, nmiss, missval, vlistID, varID);
 }
 
 static
@@ -399,13 +452,14 @@ void grbReadVarDP(stream_t * streamptr, int varID, double *data, int *nmiss)
 
       double missval = vlistInqVarMissval(vlistID, varID);
 
-      int imiss, zip;
+      int imiss;
+
+      streamptr->tsteps[tsID].records[recID].zip = grbUnzipRecord(gribbuffer, &recsize);
+
       grbDecode(filetype, gribbuffer, (int)recsize, &data[levelID*gridsize], gridsize,
-		streamptr->unreduced, &imiss, &zip, missval, vlistID, varID);
+		streamptr->unreduced, &imiss, missval, vlistID, varID);
 
       *nmiss += imiss;
-
-      streamptr->tsteps[tsID].records[recID].zip = zip;
     }
 
   fileSetPos(fileID, currentfilepos, SEEK_SET);
@@ -444,12 +498,11 @@ void grbReadVarSliceDP(stream_t * streamptr, int varID, int levelID, double *dat
 
   double missval = vlistInqVarMissval(vlistID, varID);
 
-  int zip;
-  grbDecode(filetype, gribbuffer, (int)recsize, data, gridsize, streamptr->unreduced, nmiss, &zip, missval, vlistID, varID);
+  streamptr->tsteps[tsID].records[recID].zip = grbUnzipRecord(gribbuffer, &recsize);
+
+  grbDecode(filetype, gribbuffer, (int)recsize, data, gridsize, streamptr->unreduced, nmiss, missval, vlistID, varID);
 
   fileSetPos(fileID, currentfilepos, SEEK_SET);
-
-  streamptr->tsteps[tsID].records[recID].zip = zip;
 }
 
 static
