@@ -8059,12 +8059,14 @@ int cdfInqTimestep(stream_t * streamptr, int tsID)
 	    }
 	  else
 	    {
+#if defined (USE_TIMECACHE)
               if ( streamptr->basetime.timevar_cache == NULL )
                 {
                   streamptr->basetime.timevar_cache = (timecache_t *) malloc(MAX_TIMECACHE_SIZE*sizeof(timecache_t));
                   streamptr->basetime.timevar_cache->size = 0;
                   streamptr->basetime.timevar_cache->maxvals = streamptr->ntsteps;
                 }
+#endif
               timevalue = get_timevalue(fileID, nctimevarid, tsID, streamptr->basetime.timevar_cache);
 	      cdiDecodeTimeval(timevalue, taxis, &taxis->vdate, &taxis->vtime);
 	    }
