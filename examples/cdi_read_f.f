@@ -40,6 +40,8 @@
 !        Get the verification date and time
          vdate = taxisInqVdate(taxisID)
          vtime = taxisInqVtime(taxisID)
+         WRITE(0, *)"read timestep ",tsID+1,"date=",vdate,"time=",vtime
+
 
 !        Read var1 and var2
          CALL streamReadVar(streamID, varID1, var1, nmiss)
