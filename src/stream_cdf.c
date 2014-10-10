@@ -6229,7 +6229,7 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 
                   if ( skipvar )
                     {
-                      Warning("1Unsupported array structure, skipped variable %s!", ncvars[ncvarid].name);
+                      Warning("Unsupported array structure, skipped variable %s!", ncvars[ncvarid].name);
                       ncvars[ncvarid].isvar = -1;
                       continue;
                     }
@@ -6306,7 +6306,7 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 
                   if ( skipvar )
                     {
-                      Warning("2Unsupported array structure, skipped variable %s!", ncvars[ncvarid].name);
+                      Warning("Unsupported array structure, skipped variable %s!", ncvars[ncvarid].name);
                       ncvars[ncvarid].isvar = -1;
                       continue;
                     }
@@ -6455,8 +6455,8 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 	  if ( grid.size == 0 )
 	    {
 	      if ( (ncvars[ncvarid].ndims == 1 && ncvars[ncvarid].dimtype[0] == T_AXIS) ||
-		   (ncvars[ncvarid].ndims == 2 && ncvars[ncvarid].dimtype[0] == T_AXIS &&
-		    ncvars[ncvarid].dimtype[1] == Z_AXIS) )
+		   (ncvars[ncvarid].ndims == 1 && ncvars[ncvarid].dimtype[0] == Z_AXIS) ||
+		   (ncvars[ncvarid].ndims == 2 && ncvars[ncvarid].dimtype[0] == T_AXIS && ncvars[ncvarid].dimtype[1] == Z_AXIS) )
 		{
 		  grid.type  = GRID_GENERIC;
 		  grid.size  = 1;

@@ -3,6 +3,10 @@
 	* Version 1.6.5 released
 	* using CGRIBEX library version 1.6.5
 
+2014-10-10  Uwe Schulzweida
+
+	* netCDF: added support 1D level variables
+
 2014-10-07  Uwe Schulzweida
 
 	* read netCDF: cache time variable
