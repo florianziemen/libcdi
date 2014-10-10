@@ -12,7 +12,7 @@
 
       INTEGER gridID, zaxisID1, zaxisID2, taxisID, tsID
       INTEGER vlistID1, vlistID2, varID1, varID2, streamID1, streamID2
-      INTEGER i, nmiss, status, vdate, vtime
+      INTEGER i, nmiss, status
       REAL*8 var1(nlon*nlat), var2(nlon*nlat*nlev)
 
 !     Open the input dataset
@@ -47,10 +47,6 @@
       DO tsID = 0, nts-1
 !        Inquire the input time step */
          status = streamInqTimestep(streamID1, tsID)
-
-!        Get the verification date and time
-         vdate = taxisInqVdate(taxisID)
-         vtime = taxisInqVtime(taxisID)
 
 !        Define the output time step
          status = streamDefTimestep(streamID2, tsID)
