@@ -699,9 +699,9 @@ static
 void grib1GetLevel(grib_handle *gh, int *leveltype, int *lbounds, int *level1, int *level2)
 {
   *leveltype = 0;
-  *lbounds = 0;
-  *level1  = 0;
-  *level2  = 0;
+  *lbounds   = 0;
+  *level1    = 0;
+  *level2    = 0;
 
   long lpar;
   int status = grib_get_long(gh, "indicatorOfTypeOfLevel", &lpar);
@@ -758,14 +758,15 @@ double grib2ScaleFactor(long factor)
 }
 
 static
-void grib2GetLevel(grib_handle *gh, int *leveltype, int *lbounds, int *level1, int *level2, int *level_sf, int *level_unit)
+void grib2GetLevel(grib_handle *gh, int *leveltype1, int *leveltype2, int *lbounds, int *level1, 
+                   int *level2, int *level_sf, int *level_unit)
 {
   int status;
-  int leveltype2 = -1;
   long lpar;
   long factor;
 
-  *leveltype  = 0;
+  *leveltype1 = 0;
+  *leveltype2 = -1;
   *lbounds    = 0;
   *level1     = 0;
   *level2     = 0;
@@ -778,26 +779,26 @@ void grib2GetLevel(grib_handle *gh, int *leveltype, int *lbounds, int *level1, i
       long llevel;
       double dlevel1 = 0, dlevel2 = 0;
 
-      *leveltype = (int) lpar;
+      *leveltype1 = (int) lpar;
 
       status = grib_get_long(gh, "typeOfSecondFixedSurface", &lpar);
       /* FIXME: assert(lpar >= INT_MIN && lpar <= INT_MAX) */
-      if ( status == 0 ) leveltype2 = (int)lpar;
+      if ( status == 0 ) *leveltype2 = (int)lpar;
 
-      if ( *leveltype != 255 && leveltype2 != 255 && leveltype2 > 0 ) *lbounds = 1;
-      if ( *leveltype == GRIB2_LTYPE_REFERENCE && leveltype2 == 1 ) *lbounds = 0;
+      if ( *leveltype1 != 255 && *leveltype2 != 255 && *leveltype2 > 0 ) *lbounds = 1;
+      if ( *leveltype1 == GRIB2_LTYPE_REFERENCE && *leveltype2 == 1 ) *lbounds = 0;
 
-      if ( *leveltype == GRIB2_LTYPE_LANDDEPTH )
+      if ( *leveltype1 == GRIB2_LTYPE_LANDDEPTH )
         {
           *level_sf = 1000;
           *level_unit = CDI_UNIT_M;
         }
-      else if ( *leveltype == GRIB2_LTYPE_ISOBARIC )
+      else if ( *leveltype1 == GRIB2_LTYPE_ISOBARIC )
         {
           *level_sf = 1000;
           *level_unit = CDI_UNIT_PA;
         }
-      else if ( *leveltype == GRIB2_LTYPE_SIGMA )
+      else if ( *leveltype1 == GRIB2_LTYPE_SIGMA )
         {
           *level_sf = 1000;
           *level_unit = 0;
@@ -849,7 +850,7 @@ void gribapiGetString(grib_handle *gh, const char *key, char *string, size_t len
 static
 void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
 		      size_t recsize, off_t position, int datatype, int comptype, size_t len, const char *varname,
-                      int leveltype, int lbounds, int level1, int level2, int level_sf, int level_unit)
+                      int leveltype1, int leveltype2, int lbounds, int level1, int level2, int level_sf, int level_unit)
 {
   long editionNumber;
   int zaxistype;
@@ -878,14 +879,14 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
 
   GRIB_CHECK(grib_get_long(gh, "editionNumber", &editionNumber), 0);
 
-  // fprintf(stderr, "param %d %d %d %d\n", param, level1, level2, leveltype);
+  // fprintf(stderr, "param %d %d %d %d\n", param, level1, level2, leveltype1);
 
   (*record).size      = recsize;
   (*record).position  = position;
   (*record).param     = param;
   (*record).ilevel    = level1;
   (*record).ilevel2   = level2;
-  (*record).ltype     = leveltype;
+  (*record).ltype     = leveltype1;
   (*record).tsteptype = tsteptype;
   memcpy((*record).varname, varname, len);
 
@@ -893,7 +894,7 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
 
   gridID = varDefGrid(vlistID, grid, 0);
 
-  zaxistype = gribapiGetZaxisType(editionNumber, leveltype);
+  zaxistype = gribapiGetZaxisType(editionNumber, leveltype1);
 
   switch (zaxistype)
     {
@@ -965,7 +966,7 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
   // fprintf(stderr, "param %d name %s %s %s\n", param, name, longname, units);
 
   varAddRecord(recID, param, gridID, zaxistype, lbounds, level1, level2, level_sf, level_unit,
-	       datatype, &varID, &levelID, tsteptype, numavg, leveltype,
+	       datatype, &varID, &levelID, tsteptype, numavg, leveltype1, leveltype2,
 	       varname, stdname, longname, units);
 
   (*record).varID   = (short)varID;
@@ -1168,7 +1169,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
   long unzipsize;
   compvar2_t compVar;
   grib_handle *gh = NULL;
-  int leveltype;
+  int leveltype1, leveltype2 = -1;
   long editionNumber;
   long lpar;
   size_t len;
@@ -1242,7 +1243,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
 
 	  param = cdiEncodeParam(rcode, rtabnum, 255);
 
-	  grib1GetLevel(gh, &leveltype, &lbounds, &level1, &level2);
+	  grib1GetLevel(gh, &leveltype1, &lbounds, &level1, &level2);
           level_sf = 0;
           level_unit = 0;
 	}
@@ -1261,7 +1262,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
 
 	  param = gribapiGetParam(gh);
 
-	  grib2GetLevel(gh, &leveltype, &lbounds, &level1, &level2, &level_sf, &level_unit);
+	  grib2GetLevel(gh, &leveltype1, &leveltype2, &lbounds, &level1, &level2, &level_sf, &level_unit);
 	}
 
       cdiParamToString(param, paramstr, sizeof(paramstr));
@@ -1275,7 +1276,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
       tsteptype = gribapiGetTsteptype(gh);
       gribapiGetValidityDateTime(gh, &vdate, &vtime);
       /*
-      printf("%d %d %d\n", vdate, vtime, leveltype);
+      printf("%d %d %d\n", vdate, vtime, leveltype1);
       */
       if ( lieee )
         {
@@ -1310,7 +1311,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
 	  datetime.date  = vdate;
 	  datetime.time  = vtime;
 
-	  compVar = gribapiVarSet(param, level1, level2, leveltype, tsteptype, varname);
+	  compVar = gribapiVarSet(param, level1, level2, leveltype1, tsteptype, varname);
 
 	  for ( recID = 0; recID < nrecs; recID++ )
             if ( gribapiVarCompare(compVar, streamptr->tsteps[0].records[recID]) == 0 ) break;
@@ -1368,10 +1369,10 @@ int gribapiScanTimestep1(stream_t * streamptr)
 
       if ( CDI_Debug )
 	Message("%4d %8d name=%s id=%s ltype=%d lev1=%d lev2=%d vdate=%d vtime=%d",
-                nrecs, (int)recpos, varname, paramstr, leveltype, level1, level2, vdate, vtime);
+                nrecs, (int)recpos, varname, paramstr, leveltype1, level1, level2, vdate, vtime);
 
       gribapiAddRecord(streamptr, param, gh, recsize, recpos, datatype, comptype, len, varname,
-                       leveltype, lbounds, level1, level2, level_sf, level_unit);
+                       leveltype1, leveltype2, lbounds, level1, level2, level_sf, level_unit);
 
       grib_handle_delete(gh);
       gh = NULL;
@@ -1476,7 +1477,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
   long unzipsize;
   compvar2_t compVar;
   grib_handle *gh = NULL;
-  int leveltype;
+  int leveltype1, leveltype2 = -1;
   int param = 0;
   long editionNumber;
   long lpar;
@@ -1565,7 +1566,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
 
 	  param = cdiEncodeParam(rcode, rtabnum, 255);
 
-	  grib1GetLevel(gh, &leveltype, &lbounds, &level1, &level2);
+	  grib1GetLevel(gh, &leveltype1, &lbounds, &level1, &level2);
           level_sf = 0;
           level_unit = 0;
 	}
@@ -1573,7 +1574,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
 	{
 	  param = gribapiGetParam(gh);
 
-	  grib2GetLevel(gh, &leveltype, &lbounds, &level1, &level2, &level_sf, &level_unit);
+	  grib2GetLevel(gh, &leveltype1, &leveltype2, &lbounds, &level1, &level2, &level_sf, &level_unit);
 	}
 
       cdiParamToString(param, paramstr, sizeof(paramstr));
@@ -1622,7 +1623,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
       datetime.date  = vdate;
       datetime.time  = vtime;
 
-      compVar = gribapiVarSet(param, level1, level2, leveltype, tsteptype, varname);
+      compVar = gribapiVarSet(param, level1, level2, leveltype1, tsteptype, varname);
 
       for ( recID = 0; recID < nrecords; recID++ )
         if ( gribapiVarCompare(compVar, streamptr->tsteps[tsID].records[recID]) == 0 ) break;
@@ -1650,7 +1651,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
 
       if ( CDI_Debug )
 	Message("%4d %8d name=%s id=%s ltype=%d lev1=%d lev2=%d vdate=%d vtime=%d",
-                nrecs_scanned, (int)recpos, varname, paramstr, leveltype, level1, level2, vdate, vtime);
+                nrecs_scanned, (int)recpos, varname, paramstr, leveltype1, level1, level2, vdate, vtime);
 
       streamptr->tsteps[tsID].records[recID].size = recsize;
 
@@ -1744,7 +1745,7 @@ int gribapiScanTimestep(stream_t * streamptr)
   long unzipsize;
   compvar2_t compVar;
   grib_handle *gh = NULL;
-  int leveltype;
+  int leveltype1, leveltype2 = -1;
   int param = 0;
   long editionNumber;
   long lpar;
@@ -1840,7 +1841,7 @@ int gribapiScanTimestep(stream_t * streamptr)
 
 	      param = cdiEncodeParam(rcode, rtabnum, 255);
 
-	      grib1GetLevel(gh, &leveltype, &lbounds, &level1, &level2);
+	      grib1GetLevel(gh, &leveltype1, &lbounds, &level1, &level2);
               level_sf = 0;
               level_unit = 0;
 	    }
@@ -1848,7 +1849,7 @@ int gribapiScanTimestep(stream_t * streamptr)
 	    {
 	      param = gribapiGetParam(gh);
 
-	      grib2GetLevel(gh, &leveltype, &lbounds, &level1, &level2, &level_sf, &level_unit);
+	      grib2GetLevel(gh, &leveltype1, &leveltype2, &lbounds, &level1, &level2, &level_sf, &level_unit);
 	    }
 
           cdiParamToString(param, paramstr, sizeof(paramstr));
@@ -1900,7 +1901,7 @@ int gribapiScanTimestep(stream_t * streamptr)
 
           int tsteptype = gribapiGetTsteptype(gh);
 
-	  compVar = gribapiVarSet(param, level1, level2, leveltype, tsteptype, varname);
+	  compVar = gribapiVarSet(param, level1, level2, leveltype1, tsteptype, varname);
 
 	  for ( vrecID = 0; vrecID < nrecs; vrecID++ )
 	    {
@@ -2759,13 +2760,13 @@ void gribapiDefLevelType(grib_handle *gh, int gcinit, const char *keyname, long 
 }
 
 static
-void grib2DefLevel(grib_handle *gh, int gcinit, long leveltype, int lbounds, double level, double dlevel1, double dlevel2)
+void grib2DefLevel(grib_handle *gh, int gcinit, long leveltype1, long leveltype2, int lbounds, double level, double dlevel1, double dlevel2)
 {
   long scaled_level;
   long factor;
 
-  gribapiDefLevelType(gh, gcinit, "typeOfFirstFixedSurface", leveltype);
-  if ( lbounds ) gribapiDefLevelType(gh, gcinit, "typeOfSecondFixedSurface", leveltype);
+  gribapiDefLevelType(gh, gcinit, "typeOfFirstFixedSurface", leveltype1);
+  if ( lbounds ) gribapiDefLevelType(gh, gcinit, "typeOfSecondFixedSurface", leveltype2);
 
   if ( !lbounds ) dlevel1 = level;
 
@@ -2789,9 +2790,9 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
   double dlevel1 = 0, dlevel2 = 0;
   unsigned char uuid[16];
 
-
   int zaxistype = zaxisInqType(zaxisID);
   int ltype = zaxisInqLtype(zaxisID);
+  int ltype2 = zaxisInqLtype2(zaxisID);
   double level = zaxisInqLevel(zaxisID, levelID);
 
   if ( zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL) )
@@ -2941,7 +2942,8 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
 	  }
 	else
 	  {
-            grib2DefLevel(gh, gcinit, GRIB2_LTYPE_ISOBARIC, lbounds, level, dlevel1, dlevel2);
+            if ( ltype2 == -1 ) ltype2 = GRIB2_LTYPE_ISOBARIC;
+            grib2DefLevel(gh, gcinit, GRIB2_LTYPE_ISOBARIC, ltype2, lbounds, level, dlevel1, dlevel2);
 	  }
 
 	break;
@@ -2952,7 +2954,7 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
           ; // not available
 	else
           {
-            grib2DefLevel(gh, gcinit, GRIB2_LTYPE_SNOW, lbounds, level, dlevel1, dlevel2);
+            grib2DefLevel(gh, gcinit, GRIB2_LTYPE_SNOW, GRIB2_LTYPE_SNOW, lbounds, level, dlevel1, dlevel2);
           }
 
 	break;
@@ -2986,7 +2988,7 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
             dlevel1 *= scalefactor;
             dlevel2 *= scalefactor;
 
-            grib2DefLevel(gh, gcinit, GRIB2_LTYPE_LANDDEPTH, lbounds, level, dlevel1, dlevel2);
+            grib2DefLevel(gh, gcinit, GRIB2_LTYPE_LANDDEPTH, GRIB2_LTYPE_LANDDEPTH, lbounds, level, dlevel1, dlevel2);
 	  }
 
 	break;

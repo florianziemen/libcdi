@@ -8,7 +8,7 @@
 
 void varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds,
 		  int level1, int level2, int level_sf, int level_unit, int prec,
-		  int *pvarID, int *plevelID, int tsteptype, int numavg, int ltype,
+		  int *pvarID, int *plevelID, int tsteptype, int numavg, int ltype1, int ltype2,
 		  const char *name, const char *stdname, const char *longname, const char *units);
 
 void varDefVCT(size_t vctsize, double *vctptr);

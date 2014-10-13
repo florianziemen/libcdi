@@ -76,6 +76,7 @@ typedef struct {
   int      prec;
   int      type;
   int      ltype;    /* GRIB level type */
+  int      ltype2;
   int      size;
   int      direction;
   int      vctsize;
@@ -105,7 +106,7 @@ static const resOps zaxisOps = {
 static int  ZAXIS_Debug = 0;   /* If set to 1, debugging */
 
 static
-void zaxisDefaultValue ( zaxis_t *zaxisptr )
+void zaxisDefaultValue(zaxis_t *zaxisptr)
 {
   zaxisptr->self        = CDI_UNDEFID;
   zaxisptr->name[0]     = 0;
@@ -118,6 +119,7 @@ void zaxisDefaultValue ( zaxis_t *zaxisptr )
   zaxisptr->weights     = NULL;
   zaxisptr->type        = CDI_UNDEFID;
   zaxisptr->ltype       = 0;
+  zaxisptr->ltype2      = -1;
   zaxisptr->positive    = 0;
   zaxisptr->direction   = 0;
   zaxisptr->prec        = 0;
@@ -576,6 +578,30 @@ int zaxisInqLtype(int zaxisID)
   zaxis_check_ptr(zaxisID, zaxisptr);
 
   return (zaxisptr->ltype);
+}
+
+
+void zaxisDefLtype2(int zaxisID, int ltype2)
+{
+  zaxis_t *zaxisptr = reshGetVal(zaxisID, &zaxisOps);
+
+  zaxis_check_ptr(zaxisID, zaxisptr);
+
+  if (zaxisptr->ltype2 != ltype2)
+    {
+      zaxisptr->ltype2 = ltype2;
+      reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
+    }
+}
+
+
+int zaxisInqLtype2(int zaxisID)
+{
+  zaxis_t *zaxisptr = reshGetVal(zaxisID, &zaxisOps);
+
+  zaxis_check_ptr(zaxisID, zaxisptr);
+
+  return (zaxisptr->ltype2);
 }
 
 /*
