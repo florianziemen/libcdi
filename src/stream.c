@@ -1555,8 +1555,12 @@ void streamWriteVarF(int streamID, int varID, const float *data, int nmiss)
 }
 
 static
-void cdiStreamReadVarSlice(int streamID, int varID, int levelID, int memtype, void *data, int *nmiss)
+int cdiStreamReadVarSlice(int streamID, int varID, int levelID, int memtype, void *data, int *nmiss)
 {
+  // May fail if memtype == MEMTYPE_FLOAT and the file format does not support single precision reading.
+  // A value > 0 is returned in this case, otherwise it returns zero.
+  int status = 0;
+
   if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamID, varID);
 
   check_parg(data);
@@ -1576,7 +1580,7 @@ void cdiStreamReadVarSlice(int streamID, int varID, int levelID, int memtype, vo
     case FILETYPE_GRB:
     case FILETYPE_GRB2:
       {
-        if ( memtype == MEMTYPE_FLOAT ) Error("grbReadVarSlice not implemented for memtype float!");
+        if ( memtype == MEMTYPE_FLOAT ) return 1;
         grbReadVarSliceDP(streamptr, varID, levelID, data, nmiss);
 	break;
       }
@@ -1584,7 +1588,7 @@ void cdiStreamReadVarSlice(int streamID, int varID, int levelID, int memtype, vo
 #if  defined  (HAVE_LIBSERVICE)
     case FILETYPE_SRV:
       {
-        if ( memtype == MEMTYPE_FLOAT ) Error("srvReadVarSlice not implemented for memtype float!");
+        if ( memtype == MEMTYPE_FLOAT ) return 1;
         srvReadVarSliceDP(streamptr, varID, levelID, data, nmiss);
 	break;
       }
@@ -1592,7 +1596,7 @@ void cdiStreamReadVarSlice(int streamID, int varID, int levelID, int memtype, vo
 #if  defined  (HAVE_LIBEXTRA)
     case FILETYPE_EXT:
       {
-        if ( memtype == MEMTYPE_FLOAT ) Error("extReadVarSlice not implemented for memtype float!");
+        if ( memtype == MEMTYPE_FLOAT ) return 1;
         extReadVarSliceDP(streamptr, varID, levelID, data, nmiss);
 	break;
       }
@@ -1600,7 +1604,7 @@ void cdiStreamReadVarSlice(int streamID, int varID, int levelID, int memtype, vo
 #if  defined  (HAVE_LIBIEG)
     case FILETYPE_IEG:
       {
-        if ( memtype == MEMTYPE_FLOAT ) Error("iegReadVarSlice not implemented for memtype float!");
+        if ( memtype == MEMTYPE_FLOAT ) return 1;
         iegReadVarSliceDP(streamptr, varID, levelID, data, nmiss);
 	break;
       }
@@ -1621,9 +1625,12 @@ void cdiStreamReadVarSlice(int streamID, int varID, int levelID, int memtype, vo
     default:
       {
 	Error("%s support not compiled in!", strfiletype(filetype));
+        status = 2;
 	break;
       }
     }
+
+  return status;
 }
 
 /*
@@ -1646,7 +1653,12 @@ from an open dataset.
 */
 void streamReadVarSlice(int streamID, int varID, int levelID, double *data, int *nmiss)
 {
-  cdiStreamReadVarSlice(streamID, varID, levelID, MEMTYPE_DOUBLE, data, nmiss);
+  if ( cdiStreamReadVarSlice(streamID, varID, levelID, MEMTYPE_DOUBLE, data, nmiss) )
+    {
+      Warning("Unexpected error returned from cdiStreamReadVarSlice()!");
+      size_t elementCount = gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
+      memset(data, 0, elementCount * sizeof(*data));
+    }
 }
 
 /*
@@ -1669,7 +1681,16 @@ from an open dataset.
 */
 void streamReadVarSliceF(int streamID, int varID, int levelID, float *data, int *nmiss)
 {
-  cdiStreamReadVarSlice(streamID, varID,levelID, MEMTYPE_FLOAT, data, nmiss);
+  if ( cdiStreamReadVarSlice(streamID, varID,levelID, MEMTYPE_FLOAT, data, nmiss) )
+    {
+      // In case the file format does not support single precision reading,
+      // we fall back to double precision reading, converting the data on the fly.
+      size_t elementCount = gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
+      double* conversionBuffer = malloc(elementCount * sizeof(*conversionBuffer));
+      streamReadVarSlice(streamID, varID, levelID, conversionBuffer, nmiss);
+      for (size_t i = elementCount; i--; ) data[i] = conversionBuffer[i];
+      free(conversionBuffer);
+    }
 }
 
 static
