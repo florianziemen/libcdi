@@ -509,7 +509,7 @@ static
 size_t grbEncode(int filetype, int memtype, int varID, int levelID, int vlistID, int gridID, int zaxisID,
 		 int date, int time, int tsteptype, int numavg,
 		 size_t datasize, const double *data, int nmiss, unsigned char **gribbuffer,
-		 int ljpeg, void *gribContainer)
+		 int comptype, void *gribContainer)
 {
   size_t nbytes;
 
@@ -532,7 +532,7 @@ size_t grbEncode(int filetype, int memtype, int varID, int levelID, int vlistID,
       nbytes = gribapiEncode(varID, levelID, vlistID, gridID, zaxisID,
 			     date, time, tsteptype, numavg,
 			     (long)datasize, data, nmiss, gribbuffer, &gribbuffersize,
-			     ljpeg, gribContainer);
+			     comptype, gribContainer);
     }
 
   return (nbytes);
@@ -582,8 +582,6 @@ void grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
   int numavg = 0;
   size_t nbytes;
   int filetype;
-  int ljpeg = 0;
-  int ljpeg_warn = 1;
   void *gc = NULL;
 
   filetype  = streamptr->filetype;
@@ -592,6 +590,8 @@ void grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
   gridID    = vlistInqVarGrid(vlistID, varID);
   zaxisID   = vlistInqVarZaxis(vlistID, varID);
   tsteptype = vlistInqVarTsteptype(vlistID, varID);
+
+  int comptype  = streamptr->comptype;
 
   tsID      = streamptr->curTsID;
   date      = streamptr->tsteps[tsID].taxis.vdate;
@@ -623,23 +623,19 @@ void grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
 #endif
     }
 
-  if ( streamptr->comptype == COMPRESS_JPEG )
+  if ( comptype != COMPRESS_JPEG && comptype != COMPRESS_SZIP ) comptype = COMPRESS_NONE;
+
+  if ( filetype == FILETYPE_GRB && comptype == COMPRESS_JPEG )
     {
-      if ( filetype == FILETYPE_GRB2 )
-	{
-	  ljpeg = 1;
-	}
-      else
-	{
-	  if ( ljpeg_warn ) Warning("JPEG compression of GRIB1 records not available!");
-	  ljpeg_warn = 0;
-	}
+      static int ljpeg_warn = 1;
+      if ( ljpeg_warn ) Warning("JPEG compression of GRIB1 records not available!");
+      ljpeg_warn = 0;
     }
 
   nbytes = grbEncode(filetype, memtype, varID, levelID, vlistID, gridID, zaxisID, date, time, tsteptype, numavg,
-		     datasize, (const double*) data, nmiss, &gribbuffer, ljpeg, gc);
+		     datasize, (const double*) data, nmiss, &gribbuffer, comptype, gc);
 
-  if ( streamptr->comptype == COMPRESS_SZIP )
+  if ( filetype == FILETYPE_GRB && streamptr->comptype == COMPRESS_SZIP )
     nbytes = grbSzip(filetype, gribbuffer, nbytes);
 
   {
@@ -706,16 +702,19 @@ void grbCopyRecord(stream_t * streamptr2, stream_t * streamptr1)
 
   size_t nbytes = recsize;
 
-  long unzipsize;
-  int izip = gribGetZip((long)recsize, gribbuffer, &unzipsize);
+  if ( filetype == FILETYPE_GRB )
+    {
+      long unzipsize;
+      int izip = gribGetZip((long)recsize, gribbuffer, &unzipsize);
 
-  if ( izip == 0 )
-    if ( streamptr2->comptype == COMPRESS_SZIP )
-      nbytes = grbSzip(filetype, gribbuffer, nbytes);
+      if ( izip == 0 )
+        if ( streamptr2->comptype == COMPRESS_SZIP )
+          nbytes = grbSzip(filetype, gribbuffer, nbytes);
+    }
 
   while ( nbytes & 7 ) gribbuffer[nbytes++] = 0;
 
-    size_t nwrite = fileWrite(fileID2, gribbuffer, nbytes);
+  size_t nwrite = fileWrite(fileID2, gribbuffer, nbytes);
   if ( nwrite != nbytes )
     {
       perror(__func__);

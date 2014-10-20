@@ -2352,7 +2352,7 @@ void gribapiDefTime(int editionNumber, int productDefinitionTemplate, int typeOf
 }
 
 static
-void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int ljpeg, int lieee, int datatype, int nmiss, int gcinit)
+void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype, int lieee, int datatype, int nmiss, int gcinit)
 {
   int gridtype;
   int status;
@@ -2409,15 +2409,20 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int ljpeg, i
 
   if ( gridtype == GRID_LONLAT || gridtype == GRID_GAUSSIAN )
     {
-      if ( editionNumber != 2 || lieee ) { ljpeg = 0; }
+      if ( editionNumber != 2 || lieee ) { comptype = 0; }
 
-      if ( ljpeg )
+      if ( comptype )
         {
-          //if ( nmiss > 0 ) ljpeg = 0;
+          //if ( nmiss > 0 ) comptype = 0;
 
-          if ( ljpeg )
+          if ( comptype == COMPRESS_JPEG )
             {
               mesg = "grid_jpeg"; len = strlen(mesg);
+              GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
+            }
+          else if ( comptype == COMPRESS_SZIP )
+            {
+              mesg = "grid_szip"; len = strlen(mesg);
               GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
             }
           else
@@ -2573,7 +2578,7 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int ljpeg, i
 	/* South -> North */
 	//if ( ISEC2_LastLat > ISEC2_FirstLat ) ISEC2_ScanFlag += 64;
 
-        if ( editionNumber != 2 ) { lieee = 0; ljpeg = 0; }
+        if ( editionNumber != 2 ) { lieee = 0; comptype = 0; }
 
         if ( lieee )
           {
@@ -2585,13 +2590,18 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int ljpeg, i
 	    else
 	      GRIB_CHECK(my_grib_set_long(gh, "precision", 1), 0);
           }
-        else if ( ljpeg )
+        else if ( comptype )
 	  {
-            //if ( nmiss > 0 ) ljpeg = 0;
+            //if ( nmiss > 0 ) comptype = 0;
 
-            if ( ljpeg )
+            if ( comptype == COMPRESS_JPEG )
               {
                 mesg = "grid_jpeg"; len = strlen(mesg);
+                GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
+              }
+            else if ( comptype == COMPRESS_SZIP )
+              {
+                mesg = "grid_szip"; len = strlen(mesg);
                 GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
               }
             else
@@ -3096,7 +3106,7 @@ void gribHandleDelete(void *gh)
 size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisID,
 		     int vdate, int vtime, int tsteptype, int numavg, 
 		     long datasize, const double *data, int nmiss, unsigned char **gribbuffer, size_t *gribbuffersize,
-		     int ljpeg, void *gribContainer)
+		     int comptype, void *gribContainer)
 {
   size_t nbytes = 0;
 #if  defined  (HAVE_LIBGRIB_API)
@@ -3161,7 +3171,7 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
       GRIB_CHECK(my_grib_set_long(gh, "bitsPerValue", bitsPerValue), 0);
     }
 
-  gribapiDefGrid((int)editionNumber, gh, gridID, ljpeg, lieee, datatype, nmiss, gc->init);
+  gribapiDefGrid((int)editionNumber, gh, gridID, comptype, lieee, datatype, nmiss, gc->init);
 
   gribapiDefLevel((int)editionNumber, gh, param, zaxisID, levelID, gc->init);
 
