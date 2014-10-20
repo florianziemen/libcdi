@@ -2784,13 +2784,14 @@ void grib2DefLevel(grib_handle *gh, int gcinit, long leveltype1, long leveltype2
     }
 }
 
+int zaxisInqLtype2(int zaxisID);
+
 static
 void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID, int levelID, int gcinit)
 {
   int lbounds = 0;
   static int warning = 1;
   double dlevel1 = 0, dlevel2 = 0;
-  unsigned char uuid[16];
 
   int zaxistype = zaxisInqType(zaxisID);
   int ltype = zaxisInqLtype(zaxisID);
@@ -2997,6 +2998,7 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
       }
     case ZAXIS_REFERENCE:
       {
+        char uuid[16];
         int number;
 
         if ( !gcinit )
