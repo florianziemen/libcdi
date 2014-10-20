@@ -2181,7 +2181,7 @@ int getTimeunitFactor(int timeunit)
 }
 
 static
-void gribapiDefStepUnits(grib_handle *gh, int timeunit, int gcinit)
+void gribapiDefStepUnits(grib_handle *gh, int timeunit, int proDefTempNum, int gcinit)
 {
   long unitsOfTime;
 
@@ -2200,6 +2200,8 @@ void gribapiDefStepUnits(grib_handle *gh, int timeunit, int gcinit)
   if ( !gcinit )
     {
       GRIB_CHECK(my_grib_set_long(gh, "stepUnits", unitsOfTime), 0);
+      if ( proDefTempNum == 8 || proDefTempNum == 11 )
+        GRIB_CHECK(my_grib_set_long(gh, "indicatorOfUnitForTimeRange", unitsOfTime), 0);
       GRIB_CHECK(my_grib_set_long(gh, "indicatorOfUnitOfTimeRange", unitsOfTime), 0);
     }
 }
@@ -2284,7 +2286,7 @@ int gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, int rdate, int rti
     {
       int proDefTempNum = gribapiDefSteptype(editionNumber, gh, productDefinitionTemplate, typeOfGeneratingProcess, tsteptype, gcinit);
 
-      gribapiDefStepUnits(gh, timeunit, gcinit);
+      gribapiDefStepUnits(gh, timeunit, proDefTempNum, gcinit);
 
       endStep = (int) ((days*86400.0 + secs)/factor);
 
