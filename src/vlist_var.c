@@ -1704,6 +1704,10 @@ void vlistDefVarIntKey(int vlistID, int varID, const char *name, int value)
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
   int idx;
 
+  if ( !vlistptr->locked )
+    Error("User defined vlist object (vlistID=%d) isn't allowed!\n"
+          "Need a CDI internal vlist object from streamInqVlist(streamID).", vlistID);
+
   for ( idx=0; idx<vlistptr->vars[varID].opt_grib_int_nentries; idx++)
     if ( strcmp(name, vlistptr->vars[varID].opt_grib_int_keyword[idx]) == 0 ) break;
 
@@ -1724,6 +1728,7 @@ void vlistDefVarIntKey(int vlistID, int varID, const char *name, int value)
       else
         Error("Internal error, name undefined!");
     }
+
   reshSetStatus(vlistID, &vlist_ops, RESH_DESYNC_IN_USE);
 #endif
 }
@@ -1734,6 +1739,10 @@ void vlistDefVarDblKey(int vlistID, int varID, const char *name, double value)
 #if  defined  (HAVE_LIBGRIB_API)
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
   int idx;
+
+  if ( !vlistptr->locked )
+    Error("User defined vlist object (vlistID=%d) isn't allowed!\n"
+          "Need a CDI internal vlist object from streamInqVlist(streamID).", vlistID);
 
   for ( idx=0; idx<vlistptr->vars[varID].opt_grib_dbl_nentries; idx++)
     if ( strcmp(name, vlistptr->vars[varID].opt_grib_dbl_keyword[idx]) == 0 ) break;
@@ -1755,6 +1764,7 @@ void vlistDefVarDblKey(int vlistID, int varID, const char *name, double value)
       else
         Error("Internal error, name undefined!");
     }
+
   reshSetStatus(vlistID, &vlist_ops, RESH_DESYNC_IN_USE);
 #endif
 }

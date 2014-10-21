@@ -5,6 +5,7 @@
 
 2014-10-21  Uwe Schulzweida
 
+	* vlistDefVarXXXKey: check validity of vlist object [Feature #4720]
 	*  lock CDI internal vlist objects
 
 2014-10-13  Uwe Schulzweida
