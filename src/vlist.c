@@ -95,6 +95,7 @@ vlist_t *vlist_to_pointer(int code)
 static
 void vlist_init_entry(vlist_t *vlistptr)
 {
+  vlistptr->locked         = 0;
   vlistptr->self           = CDI_UNDEFID;
   vlistptr->nvars          = 0;
   vlistptr->vars           = NULL;
@@ -166,6 +167,34 @@ void vlist_check_ptr(const char *caller, vlist_t *vlistptr)
 {
   if ( vlistptr == NULL )
     Errorc("vlist undefined!");
+}
+
+
+void vlist_lock(int vlistID)
+{
+  vlist_t *vlistptr = vlist_to_pointer(vlistID);
+
+  vlist_check_ptr(__func__, vlistptr);
+
+  if ( !vlistptr->locked )
+    {
+      vlistptr->locked = 1;
+      reshSetStatus(vlistID, &vlist_ops, RESH_DESYNC_IN_USE);
+    }
+}
+
+
+void vlist_unlock(int vlistID)
+{
+  vlist_t *vlistptr = vlist_to_pointer(vlistID);
+
+  vlist_check_ptr(__func__, vlistptr);
+
+  if ( vlistptr->locked )
+    {
+      vlistptr->locked = 0;
+      reshSetStatus(vlistID, &vlist_ops, RESH_DESYNC_IN_USE);
+    }
 }
 
 /*
@@ -258,7 +287,10 @@ void vlistDestroy(int vlistID)
 {
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
-  vlist_delete(vlistptr);
+  if ( vlistptr->locked )
+    Warning("Destroying of a locked object (vlistID=%d) failed!", vlistID);
+  else
+    vlist_delete(vlistptr);
 }
 
 /*

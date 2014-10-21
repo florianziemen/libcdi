@@ -128,6 +128,7 @@ var_t;
 
 typedef struct
 {
+  int         locked;
   int         self;
   int         nvars;        /* number of variables                */
   int         ngrids;
@@ -170,8 +171,10 @@ void    vlistDefVarValidrange(int vlistID, int varID, const double *validrange);
 /*      vlistInqVarValidrange: Get the valid range of a Variable */
 int     vlistInqVarValidrange(int vlistID, int varID, double *validrange);
 
-int vlist_att_compare(vlist_t *a, int varIDA, vlist_t *b, int varIDB,
-                      int attnum);
+int vlist_att_compare(vlist_t *a, int varIDA, vlist_t *b, int varIDB, int attnum);
+
+void vlist_lock(int vlistID);
+void vlist_unlock(int vlistID);
 
 static inline void
 vlistAdd2GridIDs(vlist_t *vlistptr, int gridID)

@@ -3,6 +3,10 @@
 	* Version 1.6.5 released
 	* using CGRIBEX library version 1.6.5
 
+2014-10-21  Uwe Schulzweida
+
+	*  lock CDI internal vlist objects
+
 2014-10-13  Uwe Schulzweida
 
 	* added support for grib_api key typeOfSecondFixedSurface

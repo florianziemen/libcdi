@@ -1031,6 +1031,7 @@ void streamClose(int streamID)
 	    taxisDestroy(vlistInqTaxis(vlistID));
 	  }
 
+      vlist_unlock(vlistID);
       vlistDestroy(vlistID);
     }
 
@@ -2164,16 +2165,16 @@ int cdiInqAccesstype(int streamID)
   return (streamptr->accesstype);
 }
 
-static int
-streamTxCode(void)
+static
+int streamTxCode(void)
 {
   return STREAM;
 }
 
 
-void
-cdiStreamSetupVlist(stream_t *streamptr, int vlistID, int vlistIDorig)
+void cdiStreamSetupVlist(stream_t *streamptr, int vlistID, int vlistIDorig)
 {
+  vlist_lock(vlistID);
   int nvars = vlistNvars(vlistID);
   streamptr->vlistID = vlistID;
   streamptr->vlistIDorig = vlistIDorig;
