@@ -1134,7 +1134,7 @@ void vlistDefVarScalefactor(int vlistID, int varID, double scalefactor)
 
   vlistCheckVarID(__func__, vlistID, varID);
 
-  if (vlistptr->vars[varID].scalefactor != scalefactor)
+  if ( IS_NOT_EQUAL(vlistptr->vars[varID].scalefactor, scalefactor) )
     {
       vlistptr->vars[varID].scalefactor = scalefactor;
       reshSetStatus(vlistID, &vlist_ops, RESH_DESYNC_IN_USE);
@@ -1148,7 +1148,7 @@ void vlistDefVarAddoffset(int vlistID, int varID, double addoffset)
 
   vlistCheckVarID(__func__, vlistID, varID);
 
-  if (vlistptr->vars[varID].addoffset != addoffset)
+  if ( IS_NOT_EQUAL(vlistptr->vars[varID].addoffset, addoffset))
     {
       vlistptr->vars[varID].addoffset = addoffset;
       reshSetStatus(vlistID, &vlist_ops, RESH_DESYNC_IN_USE);
@@ -1883,6 +1883,7 @@ int vlistVarCompare(vlist_t *a, int varIDA, vlist_t *b, int varIDB)
           && varIDB >= 0 && varIDB < b->nvars);
   var_t *pva = a->vars + varIDA, *pvb = b->vars + varIDB;
 #define FCMP(f) ((pva->f) != (pvb->f))
+#define FCMPFLT(f) (IS_NOT_EQUAL((pva->f), (pvb->f)))
 #define FCMPSTR(fs) ((pva->fs) != (pvb->fs) && strcmp((pva->fs), (pvb->fs)))
 #define FCMP2(f) (namespaceResHDecode(pva->f).idx       \
                   != namespaceResHDecode(pvb->f).idx)
@@ -1890,11 +1891,12 @@ int vlistVarCompare(vlist_t *a, int varIDA, vlist_t *b, int varIDB)
     | FCMP(datatype) | FCMP(tsteptype) | FCMP(timave) | FCMP(timaccu)
     | FCMP(chunktype) | FCMP(xyz) | FCMP2(gridID) | FCMP2(zaxisID)
     | FCMP2(instID) | FCMP2(modelID) | FCMP2(tableID) | FCMP(missvalused)
-    | FCMP(missval) | FCMP(addoffset) | FCMP(scalefactor) | FCMPSTR(name)
+    | FCMPFLT(missval) | FCMPFLT(addoffset) | FCMPFLT(scalefactor) | FCMPSTR(name)
     | FCMPSTR(longname) | FCMPSTR(stdname) | FCMPSTR(units) | FCMPSTR(extra)
     | FCMP(comptype) | FCMP(complevel) | FCMP(lvalidrange)
-    | FCMP(validrange[0]) | FCMP(validrange[1]);
+    | FCMPFLT(validrange[0]) | FCMPFLT(validrange[1]);
 #undef FCMP
+#undef FCMPFLT
 #undef FCMP2
   if ((diff |= ((pva->levinfo == NULL) ^ (pvb->levinfo == NULL))))
     return 1;
