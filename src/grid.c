@@ -1704,7 +1704,7 @@ void gridDefXpole(int gridID, double xpole)
   if ( memcmp(gridptr->xstdname, "grid", 4) != 0 )
     strcpy(gridptr->xstdname, "grid_longitude");
 
-  if (gridptr->isRotated != TRUE || gridptr->xpole != xpole)
+  if ( gridptr->isRotated != TRUE || IS_NOT_EQUAL(gridptr->xpole, xpole) )
     {
       gridptr->isRotated = TRUE;
       gridptr->xpole = xpole;
@@ -1750,7 +1750,7 @@ void gridDefYpole(int gridID, double ypole)
   if ( memcmp(gridptr->ystdname, "grid", 4) != 0 )
     strcpy(gridptr->ystdname, "grid_latitude");
 
-  if (gridptr->isRotated != TRUE || gridptr->ypole != ypole)
+  if ( gridptr->isRotated != TRUE || IS_NOT_EQUAL(gridptr->ypole, ypole) )
     {
       gridptr->isRotated = TRUE;
       gridptr->ypole = ypole;
@@ -1793,7 +1793,7 @@ void gridDefAngle(int gridID, double angle)
 
   grid_check_ptr(gridID, gridptr);
 
-  if (gridptr->isRotated != TRUE || gridptr->angle != angle)
+  if ( gridptr->isRotated != TRUE || IS_NOT_EQUAL(gridptr->angle, angle) )
     {
       gridptr->isRotated = TRUE;
       gridptr->angle = angle;
