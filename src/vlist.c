@@ -86,10 +86,10 @@ resOps vlist_ops = {
 };
 
 
-vlist_t *vlist_to_pointer(int code)
+vlist_t *vlist_to_pointer(int vlistID)
 {
   VLIST_INIT();
-  return (vlist_t*) reshGetVal(code, &vlist_ops );
+  return (vlist_t*) reshGetVal(vlistID, &vlist_ops );
 }
 
 static
