@@ -1117,7 +1117,7 @@ compvar2_t gribapiVarSet(int param, int level1, int level2, int leveltype, int t
 }
 
 static
-int gribapiVarCompare(compvar2_t compVar, record_t record)
+int gribapiVarCompare(compvar2_t compVar, record_t record, int flag)
 {
   compvar2_t compVar0;
   size_t maxlen = sizeof(compVar.name);
@@ -1128,6 +1128,12 @@ int gribapiVarCompare(compvar2_t compVar, record_t record)
   compVar0.ltype     = record.ltype;
   compVar0.tsteptype = record.tsteptype;
   memcpy(compVar0.name, record.varname, maxlen);
+
+  if ( flag == 0 )
+    {
+      if ( compVar0.tsteptype == TSTEP_INSTANT  && compVar.tsteptype == TSTEP_INSTANT3 ) compVar0.tsteptype = TSTEP_INSTANT3;
+      if ( compVar0.tsteptype == TSTEP_INSTANT3 && compVar.tsteptype == TSTEP_INSTANT  ) compVar0.tsteptype = TSTEP_INSTANT;
+    }
 
   int rstatus = memcmp(&compVar0, &compVar, sizeof(compvar2_t));
 
@@ -1314,7 +1320,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
 	  compVar = gribapiVarSet(param, level1, level2, leveltype1, tsteptype, varname);
 
 	  for ( recID = 0; recID < nrecs; recID++ )
-            if ( gribapiVarCompare(compVar, streamptr->tsteps[0].records[recID]) == 0 ) break;
+            if ( gribapiVarCompare(compVar, streamptr->tsteps[0].records[recID], 1) == 0 ) break;
 
 	  if ( cdiInventoryMode == 1 )
 	    {
@@ -1626,7 +1632,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
       compVar = gribapiVarSet(param, level1, level2, leveltype1, tsteptype, varname);
 
       for ( recID = 0; recID < nrecords; recID++ )
-        if ( gribapiVarCompare(compVar, streamptr->tsteps[tsID].records[recID]) == 0 ) break;
+        if ( gribapiVarCompare(compVar, streamptr->tsteps[tsID].records[recID], 0) == 0 ) break;
 
       if ( recID == nrecords )
 	{
@@ -1655,7 +1661,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
 
       streamptr->tsteps[tsID].records[recID].size = recsize;
 
-      if ( gribapiVarCompare(compVar, streamptr->tsteps[tsID].records[recID]) != 0 )
+      if ( gribapiVarCompare(compVar, streamptr->tsteps[tsID].records[recID], 0) != 0 )
 	{
 	  Message("tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d",
 		  tsID, recID,
@@ -1906,7 +1912,7 @@ int gribapiScanTimestep(stream_t * streamptr)
 	  for ( vrecID = 0; vrecID < nrecs; vrecID++ )
 	    {
 	      recID   = streamptr->tsteps[1].recIDs[vrecID];
-	      if ( gribapiVarCompare(compVar, streamptr->tsteps[tsID].records[recID]) == 0 ) break;
+	      if ( gribapiVarCompare(compVar, streamptr->tsteps[tsID].records[recID], 0) == 0 ) break;
 	    }
 
 	  if ( vrecID == nrecs )
@@ -1938,7 +1944,7 @@ int gribapiScanTimestep(stream_t * streamptr)
 	  if ( CDI_Debug )
 	    Message("%4d %8d %4d %8d %8d %6d", rindex+1, (int)recpos, param, level1, vdate, vtime);
 
-	  if ( gribapiVarCompare(compVar, streamptr->tsteps[tsID].records[recID]) != 0 )
+	  if ( gribapiVarCompare(compVar, streamptr->tsteps[tsID].records[recID], 0) != 0 )
 	    {
 	      Message("tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d",
 		      tsID, recID,

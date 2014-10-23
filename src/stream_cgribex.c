@@ -531,7 +531,7 @@ compvar_t cgribexVarSet(int param, int level1, int level2, int leveltype, int tr
 }
 
 static
-int cgribexVarCompare(compvar_t compVar, record_t record)
+int cgribexVarCompare(compvar_t compVar, record_t record, int flag)
 {
   compvar_t compVar0;
 
@@ -540,6 +540,12 @@ int cgribexVarCompare(compvar_t compVar, record_t record)
   compVar0.level2    = record.ilevel2;
   compVar0.ltype     = record.ltype;
   compVar0.tsteptype = record.tsteptype;
+
+  if ( flag == 0 )
+    {
+      if ( compVar0.tsteptype == TSTEP_INSTANT  && compVar.tsteptype == TSTEP_INSTANT3 ) compVar0.tsteptype = TSTEP_INSTANT3;
+      if ( compVar0.tsteptype == TSTEP_INSTANT3 && compVar.tsteptype == TSTEP_INSTANT  ) compVar0.tsteptype = TSTEP_INSTANT;
+    }
 
   int rstatus = memcmp(&compVar0, &compVar, sizeof(compvar_t));
 
@@ -683,7 +689,7 @@ int cgribexScanTimestep1(stream_t * streamptr)
 
 	  for ( recID = 0; recID < nrecs; recID++ )
 	    {
-	      if ( cgribexVarCompare(compVar, streamptr->tsteps[0].records[recID]) == 0 ) break;
+	      if ( cgribexVarCompare(compVar, streamptr->tsteps[0].records[recID], 1) == 0 ) break;
 	    }
 
 	  if ( cdiInventoryMode == 1 )
@@ -962,7 +968,7 @@ int cgribexScanTimestep2(stream_t * streamptr)
 
       for ( recID = 0; recID < nrecords; recID++ )
 	{
-	  if ( cgribexVarCompare(compVar, streamptr->tsteps[tsID].records[recID]) == 0 ) break;
+	  if ( cgribexVarCompare(compVar, streamptr->tsteps[tsID].records[recID], 0) == 0 ) break;
 	}
 
       if ( recID == nrecords )
@@ -1004,7 +1010,7 @@ int cgribexScanTimestep2(stream_t * streamptr)
 
       streamptr->tsteps[tsID].records[recID].size = (size_t)recsize;
 
-      if ( cgribexVarCompare(compVar, streamptr->tsteps[tsID].records[recID]) != 0 )
+      if ( cgribexVarCompare(compVar, streamptr->tsteps[tsID].records[recID], 0) != 0 )
 	{
 	  Message("tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d",
 		  tsID, recID,
@@ -1232,7 +1238,7 @@ int cgribexScanTimestep(stream_t * streamptr)
 	  for ( vrecID = 0; vrecID < nrecs; vrecID++ )
 	    {
 	      recID   = streamptr->tsteps[1].recIDs[vrecID];
-	      if ( cgribexVarCompare(compVar, streamptr->tsteps[tsID].records[recID]) == 0 ) break;
+	      if ( cgribexVarCompare(compVar, streamptr->tsteps[tsID].records[recID], 0) == 0 ) break;
 	    }
 
 	  if ( vrecID == nrecs )
@@ -1274,7 +1280,7 @@ int cgribexScanTimestep(stream_t * streamptr)
 	  if ( CDI_Debug )
             Message("Read record %2d (id=%s lev1=%d lev2=%d) %8d %6d", nrecs_scanned, paramstr, level1, level2, vdate, vtime);
 
-	  if ( cgribexVarCompare(compVar, streamptr->tsteps[tsID].records[recID]) != 0 )
+	  if ( cgribexVarCompare(compVar, streamptr->tsteps[tsID].records[recID], 0) != 0 )
 	    {
 	      Message("tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d",
 		      tsID, recID,
