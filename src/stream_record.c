@@ -230,8 +230,6 @@ void streamReadRecord(int streamID, double *data, int *nmiss)
   stream_t *streamptr = stream_to_pointer(streamID);
   stream_check_ptr(__func__, streamptr);
 
-  filetype = streamptr->filetype;
-
   *nmiss = 0;
 
   switch (streamptr->filetype)
