@@ -121,15 +121,10 @@ void cdiInitRecord(stream_t *streamptr)
 
 void streamInqRecord(int streamID, int *varID, int *levelID)
 {
-  /* int rec = 0; */
-  int recID, tsID, rindex;
-  int lindex;
-  stream_t *streamptr;
-
   check_parg(varID);
   check_parg(levelID);
 
-  streamptr = stream_to_pointer(streamID);
+  stream_t *streamptr = stream_to_pointer(streamID);
 
   stream_check_ptr(__func__, streamptr);
 
@@ -137,19 +132,19 @@ void streamInqRecord(int streamID, int *varID, int *levelID)
 
   if ( ! streamptr->record ) cdiInitRecord(streamptr);
 
-  tsID   = streamptr->curTsID;
-  rindex = streamptr->tsteps[tsID].curRecID + 1;
+  int tsID   = streamptr->curTsID;
+  int rindex = streamptr->tsteps[tsID].curRecID + 1;
 
   if ( rindex >= streamptr->tsteps[tsID].nrecs )
     Error("record %d not available at timestep %d", rindex+1, tsID+1);
 
-  recID  = streamptr->tsteps[tsID].recIDs[rindex];
+  int recID  = streamptr->tsteps[tsID].recIDs[rindex];
 
   if ( recID == -1 || recID >= streamptr->tsteps[tsID].nallrecs )
     Error("Internal problem! tsID = %d recID = %d", tsID, recID);
 
   *varID   = streamptr->tsteps[tsID].records[recID].varID;
-  lindex   = streamptr->tsteps[tsID].records[recID].levelID;
+  int lindex   = streamptr->tsteps[tsID].records[recID].levelID;
 
   *levelID = streamptr->vars[*varID].lindex[lindex];
 
@@ -159,40 +154,6 @@ void streamInqRecord(int streamID, int *varID, int *levelID)
 
   streamptr->curTsID = tsID;
   streamptr->tsteps[tsID].curRecID = rindex;
-
-  /*
-  rec = recID + 1;
-  filetype = streamptr->filetype;
-
-  switch ( filetype )
-    {
-    case FILETYPE_GRB:
-      {
-        rec = grbInqRecord(streamID, varID, levelID);
-	break;
-      }
-    case FILETYPE_SRV:
-      {
-        rec = srvInqRecord(streamptr, varID, levelID);
-	break;
-      }
-#if  defined  (HAVE_LIBNETCDF)
-    case FILETYPE_NC:
-    case FILETYPE_NC2:
-    case FILETYPE_NC4:
-    case FILETYPE_NC4C:
-      {
-	rec = cdfInqRecord(streamID, varID, levelID);
-	break;
-      }
-#endif
-    default:
-      {
-	Error("%s support not compiled in!", strfiletype(filetype));
-	break;
-      }
-    }
-  */
 }
 
 
