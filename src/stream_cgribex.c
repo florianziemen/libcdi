@@ -1074,7 +1074,6 @@ int cgribexScanTimestep(stream_t * streamptr)
 {
   int rstatus = 0;
 #if  defined  (HAVE_LIBCGRIBEX)
-  int *isec0, *isec1, *isec2, *isec3, *isec4;
   double fsec2[512], fsec3[2], *fsec4 = NULL;
   int lmv = 0, iret = 0;
   long recsize = 0;
@@ -1085,20 +1084,16 @@ int cgribexScanTimestep(stream_t * streamptr)
   int param = 0;
   int level1 = 0, level2 = 0, vdate = 0, vtime = 0;
   DateTime datetime, datetime0;
-  int tsID;
   int vrecID, recID;
   int warn_numavg = TRUE;
   size_t readsize;
   int taxisID = -1;
-  taxis_t *taxis;
-  int vlistID;
   int rindex, nrecs = 0;
   int nrecs_scanned;
   long unzipsize;
   compvar_t compVar;
   char paramstr[32];
 
-  vlistID = streamptr->vlistID;
   /*
   if ( CDI_Debug )
     {
@@ -1108,14 +1103,14 @@ int cgribexScanTimestep(stream_t * streamptr)
       Message("nts = %d", streamptr->ntsteps);
     }
   */
-  isec0 = streamptr->record->sec0;
-  isec1 = streamptr->record->sec1;
-  isec2 = streamptr->record->sec2;
-  isec3 = streamptr->record->sec3;
-  isec4 = streamptr->record->sec4;
+  int *isec0 = streamptr->record->sec0;
+  int *isec1 = streamptr->record->sec1;
+  int *isec2 = streamptr->record->sec2;
+  int *isec3 = streamptr->record->sec3;
+  int *isec4 = streamptr->record->sec4;
 
-  tsID  = streamptr->rtsteps;
-  taxis = &streamptr->tsteps[tsID].taxis;
+  int tsID  = streamptr->rtsteps;
+  taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
 
   if ( streamptr->tsteps[tsID].recordSize == 0 )
     {
@@ -1127,8 +1122,7 @@ int cgribexScanTimestep(stream_t * streamptr)
       nrecs = streamptr->tsteps[1].nrecs;
 
       streamptr->tsteps[tsID].nrecs = nrecs;
-      streamptr->tsteps[tsID].recIDs
-        = (int *)xmalloc((size_t)nrecs * sizeof (int));
+      streamptr->tsteps[tsID].recIDs = (int *)xmalloc((size_t)nrecs * sizeof (int));
       for ( recID = 0; recID < nrecs; recID++ )
 	streamptr->tsteps[tsID].recIDs[recID] = streamptr->tsteps[1].recIDs[recID];
 
@@ -1195,6 +1189,7 @@ int cgribexScanTimestep(stream_t * streamptr)
 
 	  if ( rindex == 0 )
 	    {
+              int vlistID = streamptr->vlistID;
 	      taxisID = vlistInqTaxis(vlistID);
 	      if ( taxisInqType(taxisID) == TAXIS_RELATIVE )
 		{
