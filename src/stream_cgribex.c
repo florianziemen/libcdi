@@ -62,7 +62,7 @@ int cgribexGetIsRotated(int *isec2)
     {
       isRotated = 1;
     }
- 
+
   return (isRotated);
 }
 
@@ -154,9 +154,8 @@ int cgribexGetTsteptype(int timerange)
 static
 void cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid, int iret)
 {
-  int gridtype;
-
-  gridtype = cgribexGetGridType(isec2);
+  int compyinc = TRUE;
+  int gridtype = cgribexGetGridType(isec2);
 
   if ( streamptr->unreduced && gridtype == GRID_GAUSSIAN_REDUCED && iret != -801 )
     {
@@ -166,6 +165,7 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid, i
       gridtype = GRID_GAUSSIAN;
       ISEC2_NumLon = nlon;
       ISEC4_NumValues = nlon*ISEC2_NumLat;
+      compyinc = FALSE;
     }
 
   memset(grid, 0, sizeof(grid_t));
@@ -222,10 +222,9 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid, i
 	grid->ydef  = 0;
 	/* if ( ISEC2_FirstLat != 0 || ISEC2_LastLat != 0 ) */
 	  {
-	    if ( grid->ysize > 1 )
+	    if ( grid->ysize > 1 && compyinc )
 	      {
                 int recompinc = TRUE;
-
 		if ( ISEC2_ResFlag && ISEC2_LatIncr > 0 )
                   {
                     if ( abs(ISEC2_LastLat - (ISEC2_FirstLat+ISEC2_LatIncr*(grid->ysize-1))) <= 2 )
@@ -361,44 +360,36 @@ static
 void cgribexAddRecord(stream_t * streamptr, int param, int *isec1, int *isec2, double *fsec2, double *fsec3,
 		      int *isec4, long recsize, off_t position, int datatype, int comptype, int lmv, int iret)
 {
-  int zaxistype;
-  int gridID = CDI_UNDEFID, varID;
+  int varID;
   int levelID = 0;
-  int tsID, recID;
-  int level1, level2;
-  int numavg;
-  int tsteptype;
-  int lbounds = 0;
-  record_t *record;
   grid_t grid;
-  int vlistID;
 
-  vlistID = streamptr->vlistID;
-  tsID    = streamptr->curTsID;
-  recID   = recordNewEntry(streamptr, tsID);
-  record  = &streamptr->tsteps[tsID].records[recID];
+  int vlistID = streamptr->vlistID;
+  int tsID    = streamptr->curTsID;
+  int recID   = recordNewEntry(streamptr, tsID);
+  record_t *record  = &streamptr->tsteps[tsID].records[recID];
 
-  tsteptype = cgribexGetTsteptype(ISEC1_TimeRange);
-  numavg    = ISEC1_AvgNum;
+  int tsteptype = cgribexGetTsteptype(ISEC1_TimeRange);
+  int numavg    = ISEC1_AvgNum;
 
-  level1  = ISEC1_Level1;
-  level2  = ISEC1_Level2;
+  int level1  = ISEC1_Level1;
+  int level2  = ISEC1_Level2;
 
   /* fprintf(stderr, "param %d %d %d %d\n", param, level1, level2, ISEC1_LevelType); */
 
-  (*record).size      = (size_t)recsize;
-  (*record).position  = position;
-  (*record).param     = param;
-  (*record).ilevel    = level1;
-  (*record).ilevel2   = level2;
-  (*record).ltype     = ISEC1_LevelType;
-  (*record).tsteptype = tsteptype;
+  record->size      = (size_t)recsize;
+  record->position  = position;
+  record->param     = param;
+  record->ilevel    = level1;
+  record->ilevel2   = level2;
+  record->ltype     = ISEC1_LevelType;
+  record->tsteptype = tsteptype;
 
   cgribexGetGrid(streamptr, isec2, isec4, &grid, iret);
 
-  gridID = varDefGrid(vlistID, grid, 0);
+  int gridID = varDefGrid(vlistID, grid, 0);
 
-  zaxistype = grib1ltypeToZaxisType(ISEC1_LevelType);
+  int zaxistype = grib1ltypeToZaxisType(ISEC1_LevelType);
 
   if ( zaxistype == ZAXIS_HYBRID || zaxistype == ZAXIS_HYBRID_HALF )
     {
@@ -408,7 +399,7 @@ void cgribexAddRecord(stream_t * streamptr, int param, int *isec1, int *isec2, d
       varDefVCT(vctsize, vctptr);
     }
 
-  lbounds = cgribexGetZaxisHasBounds(ISEC1_LevelType);
+  int lbounds = cgribexGetZaxisHasBounds(ISEC1_LevelType);
 
   if ( datatype > 32 ) datatype = DATATYPE_PACK32;
   if ( datatype <  0 ) datatype = DATATYPE_PACK;

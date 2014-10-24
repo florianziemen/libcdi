@@ -2262,8 +2262,8 @@ int gridCompare(int gridID, grid_t grid)
 		    {
 		      if ( ! (IS_EQUAL(grid.xfirst, 0) && IS_EQUAL(grid.xlast, 0) && IS_EQUAL(grid.xinc, 0)) &&
 			   ! (IS_EQUAL(grid.yfirst, 0) && IS_EQUAL(grid.ylast, 0)) )
-			if ( fabs(grid.xfirst - gridInqXval(gridID, 0)) > 0.001 ||
-			     fabs(grid.yfirst - gridInqYval(gridID, 0)) > 0.001 ||
+			if ( fabs(grid.xfirst - gridInqXval(gridID, 0)) > 0.0015 ||
+			     fabs(grid.yfirst - gridInqYval(gridID, 0)) > 0.0015 ||
 			     (fabs(grid.xinc)>0 && fabs(fabs(grid.xinc) - fabs(gridInqXinc(gridID))) > fabs(grid.xinc/1000)) )
 			  {
 			    differ = 1;
