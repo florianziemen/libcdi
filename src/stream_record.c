@@ -159,17 +159,10 @@ void streamInqRecord(int streamID, int *varID, int *levelID)
 
 void streamDefRecord(int streamID, int varID, int levelID)
 {
-  int filetype;
-  int param, gridID, zaxisID, level;
-  int tsID;
-  int vlistID;
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
-
+  stream_t *streamptr = stream_to_pointer(streamID);
   stream_check_ptr(__func__, streamptr);
 
-  tsID = streamptr->curTsID;
+  int tsID = streamptr->curTsID;
 
   if ( tsID == CDI_UNDEFID )
     {
@@ -179,11 +172,11 @@ void streamDefRecord(int streamID, int varID, int levelID)
 
   if ( ! streamptr->record ) cdiInitRecord(streamptr);
 
-  vlistID = streamptr->vlistID;
-  gridID  = vlistInqVarGrid(vlistID, varID);
-  zaxisID = vlistInqVarZaxis(vlistID, varID);
-  param   = vlistInqVarParam(vlistID, varID);
-  level   = (int) zaxisInqLevel(zaxisID, levelID);
+  int vlistID = streamptr->vlistID;
+  int gridID  = vlistInqVarGrid(vlistID, varID);
+  int zaxisID = vlistInqVarZaxis(vlistID, varID);
+  int param   = vlistInqVarParam(vlistID, varID);
+  int level   = (int) zaxisInqLevel(zaxisID, levelID);
 
   streamptr->record->varID    = varID;
   streamptr->record->levelID  = levelID;
@@ -195,9 +188,7 @@ void streamDefRecord(int streamID, int varID, int levelID)
   streamptr->record->zaxisID  = zaxisID;
   streamptr->record->prec     = vlistInqVarDatatype(vlistID, varID);
 
-  filetype = streamptr->filetype;
-
-  switch (filetype)
+  switch (streamptr->filetype)
     {
 #if  defined  (HAVE_LIBGRIB)
     case FILETYPE_GRB:
@@ -230,7 +221,7 @@ void streamDefRecord(int streamID, int varID, int levelID)
       break;
 #endif
     default:
-      Error("%s support not compiled in!", strfiletype(filetype));
+      Error("%s support not compiled in!", strfiletype(streamptr->filetype));
       break;
     }
 }
