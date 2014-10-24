@@ -19,25 +19,22 @@
 
 void recordInitEntry(record_t *record)
 {
-  (*record).position = CDI_UNDEFID;
-  (*record).size     = 0;
-  (*record).param    = 0;
-  (*record).ilevel   = CDI_UNDEFID;
-  (*record).used     = FALSE;
-  (*record).varID    = CDI_UNDEFID;
-  (*record).levelID  = CDI_UNDEFID;
-  memset((*record).varname, 0, sizeof((*record).varname));
+  record->position = CDI_UNDEFID;
+  record->size     = 0;
+  record->param    = 0;
+  record->ilevel   = CDI_UNDEFID;
+  record->used     = FALSE;
+  record->varID    = CDI_UNDEFID;
+  record->levelID  = CDI_UNDEFID;
+  memset(record->varname, 0, sizeof(record->varname));
 }
 
 
 int recordNewEntry(stream_t *streamptr, int tsID)
 {
   int recordID = 0;
-  int recordSize;
-  record_t *records;
-
-  recordSize = streamptr->tsteps[tsID].recordSize;
-  records    = streamptr->tsteps[tsID].records;
+  int recordSize = streamptr->tsteps[tsID].recordSize;
+  record_t *records = streamptr->tsteps[tsID].records;
   /*
     Look for a free slot in record.
     (Create the table the first time through).
@@ -125,7 +122,6 @@ void streamInqRecord(int streamID, int *varID, int *levelID)
   check_parg(levelID);
 
   stream_t *streamptr = stream_to_pointer(streamID);
-
   stream_check_ptr(__func__, streamptr);
 
   cdiDefAccesstype(streamID, TYPE_REC);
@@ -144,13 +140,12 @@ void streamInqRecord(int streamID, int *varID, int *levelID)
     Error("Internal problem! tsID = %d recID = %d", tsID, recID);
 
   *varID   = streamptr->tsteps[tsID].records[recID].varID;
-  int lindex   = streamptr->tsteps[tsID].records[recID].levelID;
+  int lindex = streamptr->tsteps[tsID].records[recID].levelID;
 
   *levelID = streamptr->vars[*varID].lindex[lindex];
 
   if ( CDI_Debug )
-    Message("tsID = %d, recID = %d, varID = %d, levelID = %d\n",
-	    tsID, recID, *varID, *levelID);
+    Message("tsID = %d, recID = %d, varID = %d, levelID = %d\n", tsID, recID, *varID, *levelID);
 
   streamptr->curTsID = tsID;
   streamptr->tsteps[tsID].curRecID = rindex;
@@ -229,21 +224,17 @@ void streamDefRecord(int streamID, int varID, int levelID)
 
 void streamReadRecord(int streamID, double *data, int *nmiss)
 {
-  int filetype;
-  stream_t *streamptr;
-
   check_parg(data);
   check_parg(nmiss);
 
-  streamptr = stream_to_pointer(streamID);
-
+  stream_t *streamptr = stream_to_pointer(streamID);
   stream_check_ptr(__func__, streamptr);
 
   filetype = streamptr->filetype;
 
   *nmiss = 0;
 
-  switch (filetype)
+  switch (streamptr->filetype)
     {
 #if  defined  (HAVE_LIBGRIB)
     case FILETYPE_GRB:
@@ -276,7 +267,7 @@ void streamReadRecord(int streamID, double *data, int *nmiss)
 #endif
     default:
       {
-	Error("%s support not compiled in!", strfiletype(filetype));
+	Error("%s support not compiled in!", strfiletype(streamptr->filetype));
 	break;
       }
     }
@@ -288,12 +279,9 @@ stream_write_record(int streamID, int memtype, const void *data, int nmiss)
   check_parg(data);
 
   stream_t *streamptr = stream_to_pointer(streamID);
-
   stream_check_ptr(__func__, streamptr);
 
-  int filetype = streamptr->filetype;
-
-  switch (filetype)
+  switch (streamptr->filetype)
     {
 #if  defined  (HAVE_LIBGRIB)
     case FILETYPE_GRB:
@@ -331,7 +319,7 @@ stream_write_record(int streamID, int memtype, const void *data, int nmiss)
 #endif
     default:
       {
-	Error("%s support not compiled in!", strfiletype(filetype));
+	Error("%s support not compiled in!", strfiletype(streamptr->filetype));
 	break;
       }
     }
@@ -351,18 +339,15 @@ void streamWriteRecordF(int streamID, const float *data, int nmiss)
 
 void streamCopyRecord(int streamID2, int streamID1)
 {
-  int filetype = FILETYPE_UNDEF, filetype1, filetype2;
-  stream_t *streamptr1;
-  stream_t *streamptr2;
-
-  streamptr1 = stream_to_pointer(streamID1);
-  streamptr2 = stream_to_pointer(streamID2);
+  stream_t *streamptr1 = stream_to_pointer(streamID1);
+  stream_t *streamptr2 = stream_to_pointer(streamID2);
 
   stream_check_ptr(__func__, streamptr1);
   stream_check_ptr(__func__, streamptr2);
 
-  filetype1 = streamptr1->filetype;
-  filetype2 = streamptr2->filetype;
+  int filetype1 = streamptr1->filetype;
+  int filetype2 = streamptr2->filetype;
+  int filetype  = FILETYPE_UNDEF;
 
   if ( filetype1 == filetype2 ) filetype = filetype2;
   else
@@ -434,11 +419,10 @@ void cdi_create_records(stream_t *streamptr, int tsID)
 {
   unsigned nrecords, maxrecords;
   record_t *records;
-  int vlistID;
 
   if ( streamptr->tsteps[tsID].records ) return;
 
-  vlistID  = streamptr->vlistID;
+  int vlistID  = streamptr->vlistID;
 
   if ( tsID == 0 )
     {

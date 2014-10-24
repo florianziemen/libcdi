@@ -204,7 +204,7 @@ typedef struct {
   off_t       numvals;
   char       *filename;
   Record     *record;
-  int        nrecs;        /* number of records                  */
+  int         nrecs;        /* number of records                  */
   int         nvars;        /* number of variables                */
   int         varlocked;    /* variables locked                   */
   svarinfo_t *vars;
