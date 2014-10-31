@@ -142,7 +142,7 @@ int cgribexGetTsteptype(int timerange)
     default:
       if ( lprint )
 	{
-	  Message("GRIB time range %d unsupported!", timerange);
+	  Message("Time range indicator %d unsupported, set to 0!", timerange);
 	  lprint = FALSE;
 	}
       break;

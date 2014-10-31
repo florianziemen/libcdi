@@ -256,7 +256,7 @@ int gribapiGetTsteptype(grib_handle *gh)
 	  else if ( strncmp("ratio",   stepType, len) == 0 ) tsteptype = TSTEP_RATIO;
 	  else if ( lprint )
 	    {
-	      Message("stepType %s unsupported, set to instant!", stepType);
+	      Message("Time stepType %s unsupported, set to instant!", stepType);
 	      lprint = FALSE;
 	    }
 
@@ -340,30 +340,33 @@ int gribapiGetValidityDateTime(grib_handle *gh, int *vdate, int *vtime)
 	cdiDecodeDate(rdate, &ryear, &rmonth, &rday);
 	cdiDecodeTime(rtime, &rhour, &rminute, &rsecond);
 
-	encode_caldaysec(grib_calendar, ryear, rmonth, rday, rhour, rminute, rsecond, &julday, &secofday);
+        if ( rday > 0 )
+          {
+            encode_caldaysec(grib_calendar, ryear, rmonth, rday, rhour, rminute, rsecond, &julday, &secofday);
 
-	addsec = 0;
-	switch ( timeUnits )
-	  {
-	  case TUNIT_SECOND:  addsec =         time_period; break;
-	  case TUNIT_MINUTE:  addsec =    60 * time_period; break;
-	  case TUNIT_HOUR:    addsec =  3600 * time_period; break;
-	  case TUNIT_3HOURS:  addsec = 10800 * time_period; break;
-	  case TUNIT_6HOURS:  addsec = 21600 * time_period; break;
-	  case TUNIT_12HOURS: addsec = 43200 * time_period; break;
-	  case TUNIT_DAY:     addsec = 86400 * time_period; break;
-	  default:
-	    if ( lprint )
-	      {
-	        Warning("Time unit %d unsupported", timeUnits);
-		lprint = FALSE;
-	      }
-	    break;
-	  }
+            addsec = 0;
+            switch ( timeUnits )
+              {
+              case TUNIT_SECOND:  addsec =         time_period; break;
+              case TUNIT_MINUTE:  addsec =    60 * time_period; break;
+              case TUNIT_HOUR:    addsec =  3600 * time_period; break;
+              case TUNIT_3HOURS:  addsec = 10800 * time_period; break;
+              case TUNIT_6HOURS:  addsec = 21600 * time_period; break;
+              case TUNIT_12HOURS: addsec = 43200 * time_period; break;
+              case TUNIT_DAY:     addsec = 86400 * time_period; break;
+              default:
+                if ( lprint )
+                  {
+                    Warning("Time unit %d unsupported", timeUnits);
+                    lprint = FALSE;
+                  }
+                break;
+              }
 
-	julday_add_seconds(addsec, &julday, &secofday);
+            julday_add_seconds(addsec, &julday, &secofday);
 
-	decode_caldaysec(grib_calendar, julday, secofday, &ryear, &rmonth, &rday, &rhour, &rminute, &rsecond);
+            decode_caldaysec(grib_calendar, julday, secofday, &ryear, &rmonth, &rday, &rhour, &rminute, &rsecond);
+          }
 
 	*vdate = cdiEncodeDate(ryear, rmonth, rday);
 	*vtime = cdiEncodeTime(rhour, rminute, rsecond);
