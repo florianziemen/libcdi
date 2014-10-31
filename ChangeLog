@@ -4,6 +4,7 @@
 
 2014-10-31  Uwe Schulzweida
 
+	* netCDF: call set_validrangeDP() in cdfReadVar() (bug fix)
 	* netCDF: call cdfDoInputDataTransformation() if have missvals (bug fix)
 
 2014-10-24  Uwe Schulzweida
