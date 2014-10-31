@@ -3429,15 +3429,15 @@ void cdfGetSlapDescription(stream_t *streamptr, int varID, size_t (*start)[4], s
 //Scans the data array for missVals, optionally applying first a scale factor and then an offset.
 //Returns the number of missVals encountered.
 static
-size_t cdfDoInputDataTransformationDP(size_t valueCount, double *data, bool haveMissVal, double missVal, double scaleFactor, double offset)
+size_t cdfDoInputDataTransformationDP(size_t valueCount, double *data, bool haveMissval, double missVal, double scaleFactor, double offset)
  {
   const bool haveOffset   = IS_NOT_EQUAL(offset, 0);
   const bool haveScaleFactor = IS_NOT_EQUAL(scaleFactor, 1);
   size_t missValCount = 0;
 
-  switch ((int)haveMissVal | ((int)haveScaleFactor << 1) | ((int)haveOffset << 2))
+  switch ((int)haveMissval | ((int)haveScaleFactor << 1) | ((int)haveOffset << 2))
     {
-    case 7: /* haveMissVal & haveScaleFactor & haveOffset */
+    case 7: /* haveMissval & haveScaleFactor & haveOffset */
       for ( size_t i = 0; i < valueCount; i++ )
         if ( DBL_IS_EQUAL(data[i], missVal) )
           missValCount++;
@@ -3448,7 +3448,7 @@ size_t cdfDoInputDataTransformationDP(size_t valueCount, double *data, bool have
       for ( size_t i = 0; i < valueCount; i++ )
         data[i] = data[i] * scaleFactor + offset;
       break;
-    case 5: /* haveMissVal & haveOffset */
+    case 5: /* haveMissval & haveOffset */
       for ( size_t i = 0; i < valueCount; i++ )
         if ( DBL_IS_EQUAL(data[i], missVal) )
           missValCount++;
@@ -3459,7 +3459,7 @@ size_t cdfDoInputDataTransformationDP(size_t valueCount, double *data, bool have
       for ( size_t i = 0; i < valueCount; i++ )
         data[i] += offset;
       break;
-    case 3: /* haveMissVal & haveScaleFactor */
+    case 3: /* haveMissval & haveScaleFactor */
       for ( size_t i = 0; i < valueCount; i++ )
         if ( DBL_IS_EQUAL(data[i], missVal) )
           missValCount++;
@@ -3470,7 +3470,7 @@ size_t cdfDoInputDataTransformationDP(size_t valueCount, double *data, bool have
       for ( size_t i = 0; i < valueCount; i++ )
         data[i] *= scaleFactor;
       break;
-    case 1: /* haveMissVal */
+    case 1: /* haveMissval */
       for ( size_t i = 0; i < valueCount; i++ )
         missValCount += DBL_IS_EQUAL(data[i], missVal);
       break;
@@ -3480,15 +3480,15 @@ size_t cdfDoInputDataTransformationDP(size_t valueCount, double *data, bool have
 }
 
 static
-size_t cdfDoInputDataTransformationSP(size_t valueCount, float *data, bool haveMissVal, double missVal, double scaleFactor, double offset)
+size_t cdfDoInputDataTransformationSP(size_t valueCount, float *data, bool haveMissval, double missVal, double scaleFactor, double offset)
  {
   const bool haveOffset   = IS_NOT_EQUAL(offset, 0);
   const bool haveScaleFactor = IS_NOT_EQUAL(scaleFactor, 1);
   size_t missValCount = 0;
 
-  switch ((int)haveMissVal | ((int)haveScaleFactor << 1) | ((int)haveOffset << 2))
+  switch ((int)haveMissval | ((int)haveScaleFactor << 1) | ((int)haveOffset << 2))
     {
-    case 7: /* haveMissVal & haveScaleFactor & haveOffset */
+    case 7: /* haveMissval & haveScaleFactor & haveOffset */
       for ( size_t i = 0; i < valueCount; i++ )
         if ( DBL_IS_EQUAL(data[i], missVal) )
           missValCount++;
@@ -3499,7 +3499,7 @@ size_t cdfDoInputDataTransformationSP(size_t valueCount, float *data, bool haveM
       for ( size_t i = 0; i < valueCount; i++ )
         data[i] = data[i] * scaleFactor + offset;
       break;
-    case 5: /* haveMissVal & haveOffset */
+    case 5: /* haveMissval & haveOffset */
       for ( size_t i = 0; i < valueCount; i++ )
         if ( DBL_IS_EQUAL(data[i], missVal) )
           missValCount++;
@@ -3510,7 +3510,7 @@ size_t cdfDoInputDataTransformationSP(size_t valueCount, float *data, bool haveM
       for ( size_t i = 0; i < valueCount; i++ )
         data[i] += offset;
       break;
-    case 3: /* haveMissVal & haveScaleFactor */
+    case 3: /* haveMissval & haveScaleFactor */
       for ( size_t i = 0; i < valueCount; i++ )
         if ( DBL_IS_EQUAL(data[i], missVal) )
           missValCount++;
@@ -3521,7 +3521,7 @@ size_t cdfDoInputDataTransformationSP(size_t valueCount, float *data, bool haveM
       for ( size_t i = 0; i < valueCount; i++ )
         data[i] *= scaleFactor;
       break;
-    case 1: /* haveMissVal */
+    case 1: /* haveMissval */
       for ( size_t i = 0; i < valueCount; i++ )
         missValCount += DBL_IS_EQUAL(data[i], missVal);
       break;
@@ -3530,78 +3530,6 @@ size_t cdfDoInputDataTransformationSP(size_t valueCount, float *data, bool haveM
   return missValCount;
 }
 #endif
-
-void cdfReadVarDP(stream_t *streamptr, int varID, double *data, int *nmiss)
-{
-#if  defined  (HAVE_LIBNETCDF)
-  int fileID;
-  int gridID;
-  int zaxisID;
-  int ncvarid;
-  size_t start[4];
-  size_t count[4];
-  int vlistID;
-
-  if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamptr->self, varID);
-
-  vlistID = streamptr->vlistID;
-  fileID  = streamptr->fileID;
-
-  ncvarid = streamptr->vars[varID].ncvarid;
-
-  gridID    = vlistInqVarGrid(vlistID, varID);
-  zaxisID   = vlistInqVarZaxis(vlistID, varID);
-
-  cdfGetSlapDescription(streamptr, varID, &start, &count);
-
-  cdf_get_vara_double(fileID, ncvarid, start, count, data);
-
-  double addoffset    = vlistInqVarAddoffset(vlistID, varID);
-  double scalefactor  = vlistInqVarScalefactor(vlistID, varID);
-  size_t size = (size_t)gridInqSize(gridID)*zaxisInqSize(zaxisID);
-  const bool haveMissVal = vlistInqVarMissvalUsed(vlistID, varID);
-  double missval = vlistInqVarMissval(vlistID, varID);
-
-  *nmiss = cdfDoInputDataTransformationDP(size, data, haveMissVal, missval, scalefactor, addoffset);
-#endif
-}
-
-
-void cdfReadVarSP(stream_t *streamptr, int varID, float *data, int *nmiss)
-{
-#if  defined  (HAVE_LIBNETCDF)
-  int fileID;
-  int gridID;
-  int zaxisID;
-  int ncvarid;
-  size_t start[4];
-  size_t count[4];
-  int vlistID;
-  double addoffset, scalefactor;
-
-  if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamptr->self, varID);
-
-  vlistID = streamptr->vlistID;
-  fileID  = streamptr->fileID;
-
-  ncvarid = streamptr->vars[varID].ncvarid;
-
-  gridID    = vlistInqVarGrid(vlistID, varID);
-  zaxisID   = vlistInqVarZaxis(vlistID, varID);
-
-  cdfGetSlapDescription(streamptr, varID, &start, &count);
-
-  cdf_get_vara_float(fileID, ncvarid, start, count, data);
-
-  addoffset = vlistInqVarAddoffset(vlistID, varID);
-  scalefactor = vlistInqVarScalefactor(vlistID, varID);
-  size_t size = gridInqSize(gridID)*zaxisInqSize(zaxisID);
-  const bool haveMissVal = vlistInqVarMissvalUsed(vlistID, varID);
-  double missval = vlistInqVarMissval(vlistID, varID);
-
-  *nmiss = cdfDoInputDataTransformationSP(size, data, haveMissVal, missval, scalefactor, addoffset);
-#endif
-}
 
 #if defined(HAVE_LIBNETCDF)
 static void
@@ -4289,12 +4217,87 @@ void cdfGetSliceSlapDescription(stream_t *streamptr, int varId, int levelId, boo
 }
 #endif
 
+void cdfReadVarDP(stream_t *streamptr, int varID, double *data, int *nmiss)
+{
+#if  defined  (HAVE_LIBNETCDF)
+  if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamptr->self, varID);
+
+  int vlistID = streamptr->vlistID;
+  int fileID  = streamptr->fileID;
+
+  int ncvarid = streamptr->vars[varID].ncvarid;
+
+  int gridID  = vlistInqVarGrid(vlistID, varID);
+  int zaxisID = vlistInqVarZaxis(vlistID, varID);
+
+  size_t start[4];
+  size_t count[4];
+  cdfGetSlapDescription(streamptr, varID, &start, &count);
+
+  cdf_get_vara_double(fileID, ncvarid, start, count, data);
+
+  size_t size = (size_t)gridInqSize(gridID)*zaxisInqSize(zaxisID);
+  double missval = vlistInqVarMissval(vlistID, varID);
+  const bool haveMissval = vlistInqVarMissvalUsed(vlistID, varID);
+  if ( haveMissval )
+    {
+      double validrange[2];
+      if ( vlistInqVarValidrange(vlistID, varID, validrange) )
+        *nmiss = set_validrangeDP(size, data, missval, validrange[0], validrange[1]);
+      else
+        *nmiss = cdfDoInputDataTransformationDP(size, data, haveMissval, missval, 1, 0);
+    }
+
+  double addoffset   = vlistInqVarAddoffset(vlistID, varID);
+  double scalefactor = vlistInqVarScalefactor(vlistID, varID);
+  (void) cdfDoInputDataTransformationDP(size, data, haveMissval, missval, scalefactor, addoffset);
+#endif
+}
+
+
+void cdfReadVarSP(stream_t *streamptr, int varID, float *data, int *nmiss)
+{
+#if  defined  (HAVE_LIBNETCDF)
+  if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamptr->self, varID);
+
+  int vlistID = streamptr->vlistID;
+  int fileID  = streamptr->fileID;
+
+  int ncvarid = streamptr->vars[varID].ncvarid;
+
+  int gridID  = vlistInqVarGrid(vlistID, varID);
+  int zaxisID = vlistInqVarZaxis(vlistID, varID);
+
+  size_t start[4];
+  size_t count[4];
+  cdfGetSlapDescription(streamptr, varID, &start, &count);
+
+  cdf_get_vara_float(fileID, ncvarid, start, count, data);
+
+  size_t size = (size_t)gridInqSize(gridID)*zaxisInqSize(zaxisID);
+  double missval = vlistInqVarMissval(vlistID, varID);
+  const bool haveMissval = vlistInqVarMissvalUsed(vlistID, varID);
+  if ( haveMissval )
+    {
+      double validrange[2];
+      if ( vlistInqVarValidrange(vlistID, varID, validrange) )
+        *nmiss = set_validrangeSP(size, data, missval, validrange[0], validrange[1]);
+      else
+        *nmiss = cdfDoInputDataTransformationSP(size, data, haveMissval, missval, 1, 0);
+    }
+
+  double addoffset    = vlistInqVarAddoffset(vlistID, varID);
+  double scalefactor  = vlistInqVarScalefactor(vlistID, varID);
+  (void) cdfDoInputDataTransformationSP(size, data, haveMissval, missval, scalefactor, addoffset);
+#endif
+}
+
 void cdfReadVarSliceDP(stream_t *streamptr, int varID, int levelID, double *data, int *nmiss)
 {
 #if  defined  (HAVE_LIBNETCDF)
+  int i;
   size_t start[4];
   size_t count[4];
-  int i;
 
   if ( CDI_Debug )
     Message("streamID = %d  varID = %d  levelID = %d", streamptr->self, varID, levelID);
@@ -4338,10 +4341,10 @@ void cdfReadVarSliceDP(stream_t *streamptr, int varID, int levelID, double *data
 
   *nmiss = 0;
   double missval = vlistInqVarMissval(vlistID, varID);
-  double validrange[2];
-  bool haveMissval = vlistInqVarMissvalUsed(vlistID, varID);
+  const bool haveMissval = vlistInqVarMissvalUsed(vlistID, varID);
   if ( haveMissval )
     {
+      double validrange[2];
       if ( vlistInqVarValidrange(vlistID, varID, validrange) )
         *nmiss = set_validrangeDP(gridsize, data, missval, validrange[0], validrange[1]);
       else
@@ -4358,9 +4361,9 @@ void cdfReadVarSliceDP(stream_t *streamptr, int varID, int levelID, double *data
 void cdfReadVarSliceSP(stream_t *streamptr, int varID, int levelID, float *data, int *nmiss)
 {
 #if  defined  (HAVE_LIBNETCDF)
+  int i;
   size_t start[4];
   size_t count[4];
-  int i;
 
   if ( CDI_Debug )
     Message("streamID = %d  varID = %d  levelID = %d", streamptr->self, varID, levelID);
@@ -4404,10 +4407,10 @@ void cdfReadVarSliceSP(stream_t *streamptr, int varID, int levelID, float *data,
 
   *nmiss = 0;
   double missval = vlistInqVarMissval(vlistID, varID);
-  double validrange[2];
   bool haveMissval = vlistInqVarMissvalUsed(vlistID, varID);
   if ( haveMissval )
     {
+      double validrange[2];
       if ( vlistInqVarValidrange(vlistID, varID, validrange) )
         *nmiss = set_validrangeSP(gridsize, data, missval, validrange[0], validrange[1]);
       else
