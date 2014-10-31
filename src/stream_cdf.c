@@ -4340,16 +4340,17 @@ void cdfReadVarSliceDP(stream_t *streamptr, int varID, int levelID, double *data
   double missval = vlistInqVarMissval(vlistID, varID);
   double validrange[2];
   bool haveMissval = vlistInqVarMissvalUsed(vlistID, varID);
-  if ( haveMissval && vlistInqVarValidrange(vlistID, varID, validrange) )
+  if ( haveMissval )
     {
-      *nmiss = set_validrangeDP(gridsize, data, missval, validrange[0], validrange[1]);
+      if ( vlistInqVarValidrange(vlistID, varID, validrange) )
+        *nmiss = set_validrangeDP(gridsize, data, missval, validrange[0], validrange[1]);
+      else
+        *nmiss = cdfDoInputDataTransformationDP(gridsize, data, haveMissval, missval, 1, 0);
     }
-  else
-    {
-      double addoffset = vlistInqVarAddoffset(vlistID, varID);
-      double scalefactor = vlistInqVarScalefactor(vlistID, varID);
-      *nmiss = cdfDoInputDataTransformationDP(gridsize, data, haveMissval, missval, scalefactor, addoffset);
-    }
+
+  double addoffset = vlistInqVarAddoffset(vlistID, varID);
+  double scalefactor = vlistInqVarScalefactor(vlistID, varID);
+  (void) cdfDoInputDataTransformationDP(gridsize, data, haveMissval, missval, scalefactor, addoffset);
 #endif
 }
 
@@ -4405,16 +4406,17 @@ void cdfReadVarSliceSP(stream_t *streamptr, int varID, int levelID, float *data,
   double missval = vlistInqVarMissval(vlistID, varID);
   double validrange[2];
   bool haveMissval = vlistInqVarMissvalUsed(vlistID, varID);
-  if ( haveMissval && vlistInqVarValidrange(vlistID, varID, validrange) )
+  if ( haveMissval )
     {
-      *nmiss = set_validrangeSP(gridsize, data, missval, validrange[0], validrange[1]);
+      if ( vlistInqVarValidrange(vlistID, varID, validrange) )
+        *nmiss = set_validrangeSP(gridsize, data, missval, validrange[0], validrange[1]);
+      else
+        *nmiss = cdfDoInputDataTransformationSP(gridsize, data, haveMissval, missval, 1, 0);
     }
-  else
-    {
-      double addoffset = vlistInqVarAddoffset(vlistID, varID);
-      double scalefactor = vlistInqVarScalefactor(vlistID, varID);
-      *nmiss = cdfDoInputDataTransformationSP(gridsize, data, haveMissval, missval, scalefactor, addoffset);
-    }
+
+  double addoffset = vlistInqVarAddoffset(vlistID, varID);
+  double scalefactor = vlistInqVarScalefactor(vlistID, varID);
+  (void ) cdfDoInputDataTransformationSP(gridsize, data, haveMissval, missval, scalefactor, addoffset);
 #endif
 }
 
