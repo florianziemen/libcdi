@@ -756,7 +756,7 @@ int varDefGrid(int vlistID, grid_t grid, int mode)
   int gridglobdefined = FALSE;
   int griddefined;
   int ngrids;
-  int gridID = UNDEFID;
+  int gridID = CDI_UNDEFID;
   int index;
   vlist_t *vlistptr;
   int * gridIndexList, i;
