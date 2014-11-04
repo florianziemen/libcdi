@@ -2422,15 +2422,12 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
       gridtype = GRID_LONLAT;
     }
 
-
   if ( gridtype == GRID_LONLAT || gridtype == GRID_GAUSSIAN )
     {
       if ( editionNumber != 2 || lieee ) { comptype = 0; }
 
       if ( comptype )
         {
-          //if ( nmiss > 0 ) comptype = 0;
-
           if ( comptype == COMPRESS_JPEG )
             {
               mesg = "grid_jpeg"; len = strlen(mesg);
@@ -2606,10 +2603,8 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 	    else
 	      GRIB_CHECK(my_grib_set_long(gh, "precision", 1), 0);
           }
-        else if ( comptype )
+        else
 	  {
-            //if ( nmiss > 0 ) comptype = 0;
-
             if ( comptype == COMPRESS_JPEG )
               {
                 mesg = "grid_jpeg"; len = strlen(mesg);
@@ -2625,11 +2620,6 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
                 mesg = "grid_simple"; len = strlen(mesg);
                 GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
               }
-	  }
-	else
-	  {
-	    mesg = "grid_simple"; len = strlen(mesg);
-	    GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
 	  }
 
 	break;
@@ -2723,11 +2713,18 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 	GRIB_CHECK(my_grib_set_long(gh, "numberOfDataPoints", gridInqSize(gridID)), 0);
 	GRIB_CHECK(my_grib_set_long(gh, "totalNumberOfGridPoints", gridInqSize(gridID)), 0);
 
+        if ( comptype == COMPRESS_SZIP )
+          {
+            mesg = "grid_ccsds"; len = strlen(mesg);
+            GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
+          }
+
 	break;
       }
     case GRID_UNSTRUCTURED:
       {
 	static int warning = 1;
+
 	status = my_grib_set_long(gh, "gridDefinitionTemplateNumber", GRIB2_GTYPE_UNSTRUCTURED);
 	if ( status != 0 && warning )
 	  {
@@ -2750,6 +2747,12 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 	    if (grib_set_bytes(gh, "uuidOfHGrid", uuid, &len) != 0)
 	      Warning("Can't write UUID!");
 	  }
+
+        if ( comptype == COMPRESS_SZIP )
+          {
+            mesg = "grid_ccsds"; len = strlen(mesg);
+            GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
+          }
 
 	break;
       }
