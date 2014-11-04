@@ -165,6 +165,7 @@ module mo_cdi
       integer, parameter :: CALENDAR_365DAYS = 3
       integer, parameter :: CALENDAR_366DAYS = 4
       integer, parameter :: CALENDAR_NONE = 5
+      integer, parameter :: CDI_UUID_SIZE = 16
       interface
         function strlen(s) bind(c,name='strlen')
           import :: c_ptr,c_size_t
@@ -1962,17 +1963,17 @@ module mo_cdi
         end function gridInqReference
       end interface
       interface
-        subroutine gridDefUUID(gridID,uuid_cbuf) bind(c,name='gridDefUUID')
+        subroutine gridDefUUID(gridID,uuid) bind(c,name='gridDefUUID')
           import :: c_int,c_char
           integer(kind=c_int), value :: gridID
-          character(kind=c_char), dimension(*) :: uuid_cbuf
+          character(kind=c_char), dimension(16) :: uuid
         end subroutine gridDefUUID
       end interface
       interface
-        subroutine gridInqUUID(gridID,uuid_cbuf) bind(c,name='gridInqUUID')
+        subroutine gridInqUUID(gridID,uuid) bind(c,name='gridInqUUID')
           import :: c_int,c_char
           integer(kind=c_int), value :: gridID
-          character(kind=c_char), dimension(*) :: uuid_cbuf
+          character(kind=c_char), dimension(16) :: uuid
         end subroutine gridInqUUID
       end interface
       interface
@@ -2260,17 +2261,17 @@ module mo_cdi
         end function zaxisInqNumber
       end interface
       interface
-        subroutine zaxisDefUUID(zaxisID,uuid_cbuf) bind(c,name='zaxisDefUUID')
+        subroutine zaxisDefUUID(zaxisID,uuid) bind(c,name='zaxisDefUUID')
           import :: c_int,c_char
           integer(kind=c_int), value :: zaxisID
-          character(kind=c_char), dimension(*) :: uuid_cbuf
+          character(kind=c_char), dimension(16) :: uuid
         end subroutine zaxisDefUUID
       end interface
       interface
-        subroutine zaxisInqUUID(zaxisID,uuid_cbuf) bind(c,name='zaxisInqUUID')
+        subroutine zaxisInqUUID(zaxisID,uuid) bind(c,name='zaxisInqUUID')
           import :: c_int,c_char
           integer(kind=c_int), value :: zaxisID
-          character(kind=c_char), dimension(*) :: uuid_cbuf
+          character(kind=c_char), dimension(16) :: uuid
         end subroutine zaxisInqUUID
       end interface
       interface
@@ -3463,6 +3464,7 @@ module mo_cdi
       public :: CALENDAR_365DAYS
       public :: CALENDAR_366DAYS
       public :: CALENDAR_NONE
+      public :: CDI_UUID_SIZE
 
 contains
       function cdiStringError(cdiErrno)
