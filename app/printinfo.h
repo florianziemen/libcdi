@@ -229,8 +229,7 @@ void printGridInfo(int vlistID)
 	  if ( gridInqXbounds(gridID, NULL) || gridInqYbounds(gridID, NULL) )
 	    {
 	      fprintf(stdout, "%33s :", "available");
-	      if ( gridInqXbounds(gridID, NULL) ) fprintf(stdout, " xbounds");
-	      if ( gridInqYbounds(gridID, NULL) ) fprintf(stdout, " ybounds");
+	      if ( gridInqXbounds(gridID, NULL) && gridInqYbounds(gridID, NULL) ) fprintf(stdout, " cellbounds");
 	      if ( gridHasArea(gridID) )          fprintf(stdout, " area");
 	      if ( gridInqMask(gridID, NULL) )    fprintf(stdout, " mask");
 	      fprintf(stdout, "\n");
@@ -303,8 +302,8 @@ void printGridInfo(int vlistID)
 	      int i;
 	      double *xvals, *yvals;
 	      double xfirst, xlast, yfirst, ylast;
-	      xvals = (double *)malloc((size_t)gridsize * sizeof (double));
-	      yvals = (double *)malloc((size_t)gridsize * sizeof (double));
+	      xvals = (double*) malloc((size_t)gridsize*sizeof(double));
+	      yvals = (double*) malloc((size_t)gridsize*sizeof(double));
 
 	      gridInqXvals(gridID, xvals);
 	      gridInqYvals(gridID, yvals);
@@ -357,14 +356,11 @@ void printGridInfo(int vlistID)
 
       if ( gridtype == GRID_CURVILINEAR || gridtype == GRID_UNSTRUCTURED || gridtype == GRID_LCC )
 	{
-	  if ( gridInqXvals(gridID, NULL) || gridInqYvals(gridID, NULL) || gridHasArea(gridID) ||
+	  if ( gridHasArea(gridID) ||
 	       gridInqXbounds(gridID, NULL) || gridInqYbounds(gridID, NULL) )
 	    {
 	      fprintf(stdout, "%33s :", "available");
-	      if ( gridInqXvals(gridID, NULL) )   fprintf(stdout, " xvals");
-	      if ( gridInqYvals(gridID, NULL) )   fprintf(stdout, " yvals");
-	      if ( gridInqXbounds(gridID, NULL) ) fprintf(stdout, " xbounds");
-	      if ( gridInqYbounds(gridID, NULL) ) fprintf(stdout, " ybounds");
+	      if ( gridInqXbounds(gridID, NULL) && gridInqYbounds(gridID, NULL) ) fprintf(stdout, " cellbounds");
 	      if ( gridHasArea(gridID) )          fprintf(stdout, " area");
 	      if ( gridInqMask(gridID, NULL) )    fprintf(stdout, " mask");
 	      fprintf(stdout, "\n");
@@ -414,7 +410,7 @@ void printZaxisInfo(int vlistID)
       fprintf(stdout, " levels=%d", levelsize);
       fprintf(stdout, "\n");
 
-      levels = (double*) malloc(levelsize*sizeof(double));
+      levels = (double*) malloc((size_t)levelsize*sizeof(double));
       zaxisInqLevels(zaxisID, levels);
 
       if ( !(zaxistype == ZAXIS_SURFACE && levelsize == 1 && !(fabs(levels[0]) > 0)) )
