@@ -2431,7 +2431,7 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
             }
           else if ( comptype == COMPRESS_SZIP )
             {
-              mesg = "grid_szip"; len = strlen(mesg);
+              mesg = "grid_ccsds"; len = strlen(mesg);
               GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
             }
           else
@@ -2610,7 +2610,7 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
               }
             else if ( comptype == COMPRESS_SZIP )
               {
-                mesg = "grid_szip"; len = strlen(mesg);
+                mesg = "grid_ccsds"; len = strlen(mesg);
                 GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
               }
             else
