@@ -1455,6 +1455,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
 	}
     }
 #else
+  (void)streamptr;
   Error("GRIB_API support not compiled in!");
 #endif
 
@@ -1726,6 +1727,8 @@ int gribapiScanTimestep2(stream_t * streamptr)
 
   streamptr->record->buffer     = gribbuffer;
   streamptr->record->buffersize = buffersize;
+#else
+  (void)streamptr;
 #endif
 
   return (rstatus);

@@ -64,6 +64,7 @@ void memcpyPackFunc(void *dataDesc, void *buf, int size, int *pos,
                     void *context)
 {
   struct memCpyDataDesc *p = dataDesc;
+  (void)context;
   xassert(size >= *pos && (size_t)(size - *pos) >= p->obj_size);
   memcpy((unsigned char *)buf + *pos, p->obj, p->obj_size);
   *pos += (int)p->obj_size;
