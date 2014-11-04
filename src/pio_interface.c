@@ -343,7 +343,7 @@ static void
 modelWinDefBufferSizes(void)
 {
   int collID, nstreams, * streamIndexList, streamNo, nvars, varID;
-  int sumWinBufferSize = 0;
+  size_t sumWinBufferSize = 0;
   int nProcsColl  = commInqNProcsColl ();
   int rankGlob    = commInqRankGlob ();
   int root = commInqRootGlob ();
@@ -365,12 +365,13 @@ modelWinDefBufferSizes(void)
       for ( varID = 0; varID < nvars; varID++ )
         {
           int collID = commRankGlob2CollID(vlistInqVarIOrank(vlistID, varID));
-          int collIDchunk;
+          size_t collIDchunk;
           {
             int varSize = vlistInqVarSize(vlistID, varID);
             int nProcsModel = commInqNProcsModel();
-            collIDchunk = (int)ceilf(cdiPIOpartInflate_
-                                     * (varSize + nProcsModel - 1)/nProcsModel);
+            collIDchunk = (size_t)ceilf(cdiPIOpartInflate_
+                                        * (float)(varSize + nProcsModel - 1)
+                                        / (float)nProcsModel);
           }
           xassert ( collID != CDI_UNDEFID && collIDchunk > 0 );
           collIndex[collID].numDataRecords += 2;
@@ -409,14 +410,14 @@ modelWinDefBufferSizes(void)
       txWin[collID].size += sizeof (struct winHeaderEntry);
       txWin[collID].size = roundUpToMultiple(txWin[collID].size,
                                              PIO_WIN_ALIGN);
-      sumWinBufferSize += txWin[collID].size;
+      sumWinBufferSize += (size_t)txWin[collID].size;
     }
   free(collIndex);
   free ( streamIndexList );
 
-  xdebug("sumWinBufferSize=%zu, MAXWINBUFFERSIZE=%zu", (size_t)sumWinBufferSize,
+  xdebug("sumWinBufferSize=%zu, MAXWINBUFFERSIZE=%zu", sumWinBufferSize,
          (size_t)MAXWINBUFFERSIZE);
-  xassert ( sumWinBufferSize <= MAXWINBUFFERSIZE );
+  xassert ( sumWinBufferSize <= (size_t)MAXWINBUFFERSIZE );
   xdebug("%s", "RETURN");
 }
 
