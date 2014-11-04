@@ -1228,16 +1228,6 @@ int gribapiScanTimestep1(stream_t * streamptr)
       lieee = FALSE;
 
       comptype = COMPRESS_NONE;
-      if ( gribGetZip((long)recsize, gribbuffer, &unzipsize) > 0 )
-	{
-	  comptype = COMPRESS_SZIP;
-	  unzipsize += 100;
-	  if ( buffersize < (size_t)unzipsize )
-	    {
-	      buffersize = (size_t)unzipsize;
-	      gribbuffer = (unsigned char *) realloc(gribbuffer, buffersize);
-	    }
-	}
 
       nrecs_scanned++;
       gh = grib_handle_new_from_message(NULL, (void *) gribbuffer, recsize);
@@ -1247,6 +1237,17 @@ int gribapiScanTimestep1(stream_t * streamptr)
 
       if ( editionNumber <= 1 )
 	{
+          if ( gribGetZip((long)recsize, gribbuffer, &unzipsize) > 0 )
+            {
+              comptype = COMPRESS_SZIP;
+              unzipsize += 100;
+              if ( buffersize < (size_t)unzipsize )
+                {
+                  buffersize = (size_t)unzipsize;
+                  gribbuffer = (unsigned char *) realloc(gribbuffer, buffersize);
+                }
+            }
+
 	  GRIB_CHECK(grib_get_long(gh, "table2Version", &lpar), 0);
 	  rtabnum = (int) lpar;
 	  GRIB_CHECK(grib_get_long(gh, "indicatorOfParameter", &lpar), 0);
@@ -1267,8 +1268,9 @@ int gribapiScanTimestep1(stream_t * streamptr)
 	  if ( status == 0 )
 	    {
 	      // fprintf(stderr, "packingType %d %s\n", len, typeOfPacking);
-	      if      ( strncmp(typeOfPacking, "grid_jpeg", len) == 0 ) comptype = COMPRESS_JPEG;
-	      else if ( strncmp(typeOfPacking, "grid_ieee", len) == 0 ) lieee = TRUE;
+	      if      ( strncmp(typeOfPacking, "grid_jpeg", len)  == 0 ) comptype = COMPRESS_JPEG;
+	      else if ( strncmp(typeOfPacking, "grid_ccsds", len) == 0 ) comptype = COMPRESS_SZIP;
+	      else if ( strncmp(typeOfPacking, "grid_ieee", len)  == 0 ) lieee = TRUE;
 	    }
 
 	  param = gribapiGetParam(gh);
