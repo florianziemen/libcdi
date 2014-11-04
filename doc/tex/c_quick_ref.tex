@@ -88,7 +88,7 @@ Define the reference URI for an unstructured grid.
 \section*{\tt \htmlref{gridDefUUID}{gridDefUUID}}
 
 \begin{verbatim}
-    void gridDefUUID (int gridID, const char *uuid_cbuf);
+    void gridDefUUID (int gridID, const unsigned char uuid[CDI_UUID_SIZE]);
 \end{verbatim}
 
 Define the UUID of an unstructured grid.
@@ -295,7 +295,7 @@ Get the type of a Grid.
 \section*{\tt \htmlref{gridInqUUID}{gridInqUUID}}
 
 \begin{verbatim}
-    void gridInqUUID (int gridID, char *uuid_cbuf);
+    void gridInqUUID (int gridID, unsigned char uuid[CDI_UUID_SIZE]);
 \end{verbatim}
 
 Get the UUID of an unstructured grid.
@@ -1240,7 +1240,7 @@ Define the reference number for a generalized Z-axis.
 \section*{\tt \htmlref{zaxisDefUUID}{zaxisDefUUID}}
 
 \begin{verbatim}
-    void zaxisDefUUID (int zaxisID, const char *uuid_cbuf);
+    void zaxisDefUUID (int zaxisID, const unsigned char uuid[CDI_UUID_SIZE]);
 \end{verbatim}
 
 Define the UUID of a generalized Z-axis.
@@ -1357,7 +1357,7 @@ Get the type of a Z-axis.
 \section*{\tt \htmlref{zaxisInqUUID}{zaxisInqUUID}}
 
 \begin{verbatim}
-    void zaxisInqUUID (int zaxisID, char *uuid_cbuf);
+    void zaxisInqUUID (int zaxisID, unsigned char uuid[CDI_UUID_SIZE]);
 \end{verbatim}
 
 Get the UUID of a generalized Z-axis.

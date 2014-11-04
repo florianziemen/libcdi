@@ -340,8 +340,8 @@ void    streamGetIndexList ( int, int * );
 
 void  cdiInitialize(void);
 
-void uuid2str(const char *uuid, char *uuidstr);
-void str2uuid(const char *uuidstr, char *uuid);
+void uuid2str(const unsigned char *uuid, char *uuidstr);
+int str2uuid(const char *uuidstr, unsigned char *uuid);
 
 #define CDI_UNIT_PA   1
 #define CDI_UNIT_HPA  2

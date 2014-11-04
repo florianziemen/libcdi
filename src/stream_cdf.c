@@ -2079,7 +2079,7 @@ void cdfDefGridReference(stream_t *streamptr, int gridID)
 static
 void cdfDefGridUUID(stream_t *streamptr, int gridID)
 {
-  char uuidOfHGrid[17];
+  unsigned char uuidOfHGrid[CDI_UUID_SIZE];
 
   gridInqUUID(gridID, uuidOfHGrid);
   if ( uuidOfHGrid[0] != 0 )
@@ -2099,7 +2099,7 @@ void cdfDefGridUUID(stream_t *streamptr, int gridID)
 static
 void cdfDefZaxisUUID(stream_t *streamptr, int zaxisID)
 {
-  char uuidOfVGrid[17];
+  unsigned char uuidOfVGrid[CDI_UUID_SIZE];
   zaxisInqUUID(zaxisID, uuidOfVGrid);
 
   if ( uuidOfVGrid[0] != 0 )
@@ -6017,7 +6017,7 @@ void copy_numeric_projatts(int gridID, int ncvarID, int ncfileID)
 
 /* define all input grids */
 static
-void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars, int timedimid, char *uuidOfHGrid, char *gridfile, int number_of_grid_used)
+void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars, int timedimid, unsigned char *uuidOfHGrid, char *gridfile, int number_of_grid_used)
 {
   int ncvarid, ncvarid2;
   int ndims;
@@ -6747,7 +6747,7 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 /* define all input zaxes */
 static
 void define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars,
-		      size_t vctsize, double *vct, char *uuidOfVGrid)
+		      size_t vctsize, double *vct, unsigned char *uuidOfVGrid)
 {
   int ncvarid, ncvarid2;
   int i, ilev, ndims;
@@ -7212,9 +7212,7 @@ void define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, 
 }
 
 static
-void scan_global_attributes(int fileID, int vlistID, stream_t *streamptr, int ngatts,
-                            int *instID, int *modelID, int *ucla_les, char *uuidOfHGrid, char *uuidOfVGrid,
-                            char *gridfile, int *number_of_grid_used, char *fcreftime)
+void scan_global_attributes(int fileID, int vlistID, stream_t *streamptr, int ngatts, int *instID, int *modelID, int *ucla_les, unsigned char *uuidOfHGrid, unsigned char *uuidOfVGrid, char *gridfile, int *number_of_grid_used, char *fcreftime)
 {
   nc_type xtype;
   size_t attlen;
@@ -7493,8 +7491,8 @@ int cdfInqContents(stream_t *streamptr)
   int vlistID;
   int format = 0;
   int ucla_les = FALSE;
-  char uuidOfHGrid[17];
-  char uuidOfVGrid[17];
+  unsigned char uuidOfHGrid[CDI_UUID_SIZE];
+  unsigned char uuidOfVGrid[CDI_UUID_SIZE];
   char gridfile[8912];
   char fcreftime[CDI_MAX_NAME];
   int number_of_grid_used = UNDEFID;

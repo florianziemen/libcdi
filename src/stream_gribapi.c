@@ -926,7 +926,7 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
     case ZAXIS_REFERENCE:
       {
         size_t len;
-        char uuid[CDI_UUID_SIZE];
+        unsigned char uuid[CDI_UUID_SIZE];
         long ltmp;
         long nhlev, nvgrid;
 
@@ -3020,7 +3020,6 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
     case ZAXIS_REFERENCE:
       {
         unsigned char uuid[CDI_UUID_SIZE];
-        int number;
 
         if ( !gcinit )
           {
@@ -3033,7 +3032,7 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
               ; // not available
             else
               {
-                number = zaxisInqNumber(zaxisID);
+                int number = zaxisInqNumber(zaxisID);
                 gribapiDefLevelType(gh, gcinit, "typeOfFirstFixedSurface", GRIB2_LTYPE_REFERENCE);
                 gribapiDefLevelType(gh, gcinit, "typeOfSecondFixedSurface", GRIB2_LTYPE_REFERENCE);
                 GRIB_CHECK(my_grib_set_long(gh, "NV", 6), 0);
@@ -3053,7 +3052,7 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
               ; // not available
             else
               {
-                number = zaxisInqNumber(zaxisID);
+                int number = zaxisInqNumber(zaxisID);
                 gribapiDefLevelType(gh, gcinit, "typeOfFirstFixedSurface", GRIB2_LTYPE_REFERENCE);
                 GRIB_CHECK(my_grib_set_long(gh, "NV", 6), 0);
                 GRIB_CHECK(my_grib_set_long(gh, "nlev", zaxisInqNlevRef(zaxisID)), 0);

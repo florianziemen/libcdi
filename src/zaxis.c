@@ -83,7 +83,7 @@ typedef struct {
   double  *vct;
   int      number;   /* Reference number to a generalized Z-axis */
   int      nhlev;
-  char     uuid[17];
+  unsigned char uuid[CDI_UUID_SIZE];
 }
 zaxis_t;
 
@@ -748,13 +748,13 @@ The function @func{zaxisDefUUID} defines the UUID for a generalized  Z-axis.
 
 @EndFunction
 */
-void zaxisDefUUID(int zaxisID, const char *uuid)
+void zaxisDefUUID(int zaxisID, const unsigned char uuid[CDI_UUID_SIZE])
 {
   zaxis_t *zaxisptr = reshGetVal(zaxisID, &zaxisOps);
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
-  memcpy(zaxisptr->uuid, uuid, 16);
+  memcpy(zaxisptr->uuid, uuid, CDI_UUID_SIZE);
   reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
 }
 
@@ -773,13 +773,13 @@ The function @func{zaxisInqUUID} returns the UUID to a generalized Z-axis.
 @func{zaxisInqUUID} returns the UUID to a generalized Z-axis to the parameter uuid.
 @EndFunction
 */
-void zaxisInqUUID(int zaxisID, char *uuid)
+void zaxisInqUUID(int zaxisID, unsigned char uuid[CDI_UUID_SIZE])
 {
   zaxis_t *zaxisptr = reshGetVal(zaxisID, &zaxisOps);
 
   zaxis_check_ptr(zaxisID, zaxisptr);
 
-  memcpy(uuid, zaxisptr->uuid, 16);
+  memcpy(uuid, zaxisptr->uuid, CDI_UUID_SIZE);
 }
 
 /*
@@ -1253,7 +1253,7 @@ void zaxisPrintKernel ( zaxis_t * zaxisptr, FILE * fp )
 {
   int zaxisID;
   int type;
-  char uuid[17];
+  unsigned char uuid[CDI_UUID_SIZE];
   int nlevels, levelID;
   int nbyte0, nbyte;
   double level;
@@ -1354,7 +1354,7 @@ void zaxisPrintKernel ( zaxis_t * zaxisptr, FILE * fp )
     {
       const unsigned char *d;
       zaxisInqUUID(zaxisID, uuid);
-      d = (unsigned char *) &uuid;
+      d = uuid;
       fprintf(fp, "uuid      = %02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x\n",
               d[0], d[1], d[2], d[3], d[4], d[5], d[6], d[7],
               d[8], d[9], d[10], d[11], d[12], d[13], d[14], d[15]);

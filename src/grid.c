@@ -2300,20 +2300,11 @@ int gridCompare(int gridID, grid_t grid)
 	    }
 	  else if ( grid.type == GRID_UNSTRUCTURED )
 	    {
-              char uuidOfHGrid[17];
+              unsigned char uuidOfHGrid[CDI_UUID_SIZE];
               gridInqUUID(gridID, uuidOfHGrid);
-              /*
-              printf("compare unstructured grids\n");
-	      printf("gridID        %d\n", gridID);
-	      printf("gridsize      %d\n", grid.size);
-              if ( uuidOfHGrid[0] != 0 && grid.uuid[0] != 0 && memcmp(grid.uuid, uuidOfHGrid, 16) )
-                printf("uuidOfHGrid     differ\n");
-              printf("nvertex      %d  %d\n", grid.nvertex, gridInqNvertex(gridID));
-              printf("number       %d  %d\n", grid.number, gridInqNumber(gridID));
-              printf("position     %d  %d\n", grid.position, gridInqPosition(gridID));
-              */
-              if ( uuidOfHGrid[0] != 0 && grid.uuid[0] != 0 )
-                if ( !differ && memcmp(uuidOfHGrid, grid.uuid, 16) != 0 ) differ = 1;
+
+              if ( !differ && memcmp(uuidOfHGrid, grid.uuid, CDI_UUID_SIZE) != 0 ) differ = 1;
+
               if ( !differ && grid.nvertex != gridInqNvertex(gridID) ) differ = 1;
               if ( !differ && grid.number != gridInqNumber(gridID) ) differ = 1;
               if ( !differ && grid.number > 0 && grid.position != gridInqPosition(gridID) ) differ = 1;
@@ -3186,7 +3177,7 @@ void gridPrintKernel(grid_t * gridptr, int opt, FILE *fp)
   int nbyte0, nbyte;
   int i;
   int nvertex, iv;
-  char uuidOfHGrid[17];
+  unsigned char uuidOfHGrid[CDI_UUID_SIZE];
   int gridID = gridptr->self;
   const double *area    = gridInqAreaPtr(gridID);
   const double *xvals   = gridInqXvalsPtr(gridID);
@@ -4030,13 +4021,13 @@ The function @func{gridDefUUID} defines the UUID for an unstructured grid.
 
 @EndFunction
 */
-void gridDefUUID(int gridID, const char *uuid)
+void gridDefUUID(int gridID, const unsigned char uuid[CDI_UUID_SIZE])
 {
   grid_t* gridptr = ( grid_t *) reshGetVal ( gridID, &gridOps );
 
   grid_check_ptr(gridID, gridptr);
 
-  memcpy(gridptr->uuid, uuid, 16);
+  memcpy(gridptr->uuid, uuid, CDI_UUID_SIZE);
   reshSetStatus(gridID, &gridOps, RESH_DESYNC_IN_USE);
 }
 
@@ -4055,13 +4046,13 @@ The function @func{gridInqUUID} returns the UUID to an unstructured grid.
 @func{gridInqUUID} returns the UUID to an unstructured grid to the parameter uuid.
 @EndFunction
 */
-void gridInqUUID(int gridID, char *uuid)
+void gridInqUUID(int gridID, unsigned char uuid[CDI_UUID_SIZE])
 {
   grid_t *gridptr = (grid_t *)reshGetVal(gridID, &gridOps);
 
   grid_check_ptr(gridID, gridptr);
 
-  memcpy(uuid, gridptr->uuid, 16);
+  memcpy(uuid, gridptr->uuid, CDI_UUID_SIZE);
 }
 
 

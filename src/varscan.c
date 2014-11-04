@@ -26,7 +26,7 @@ static double *Vct = NULL;
 
 static int numberOfVerticalLevels = 0;
 static int numberOfVerticalGrid = 0;
-static char uuidVGrid[17];
+static unsigned char uuidVGrid[CDI_UUID_SIZE];
 
 typedef struct
 {
@@ -738,11 +738,11 @@ void varDefVCT(size_t vctsize, double *vctptr)
 }
 
 
-void varDefZAxisReference(int nhlev, int nvgrid, char *uuid)
+void varDefZAxisReference(int nhlev, int nvgrid, unsigned char uuid[CDI_UUID_SIZE])
 {
   numberOfVerticalLevels = nhlev;
   numberOfVerticalGrid = nvgrid;
-  memcpy(uuidVGrid, uuid, 16);
+  memcpy(uuidVGrid, uuid, CDI_UUID_SIZE);
 }
 
 

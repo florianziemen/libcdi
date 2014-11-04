@@ -1661,12 +1661,12 @@
 
 !                     gridDefUUID
 !                                    (INTEGER         gridID,
-!                                     CHARACTER*(*)   uuid_cbuf)
+!                                     INTEGER*1(16)   uuid)
       EXTERNAL        gridDefUUID
 
 !                     gridInqUUID
 !                                    (INTEGER         gridID,
-!                                     CHARACTER*(*)   uuid_cbuf)
+!                                     INTEGER*1(16)   uuid)
       EXTERNAL        gridInqUUID
 
 !
@@ -1883,12 +1883,12 @@
 
 !                     zaxisDefUUID
 !                                    (INTEGER         zaxisID,
-!                                     CHARACTER*(*)   uuid_cbuf)
+!                                     INTEGER*1(16)   uuid)
       EXTERNAL        zaxisDefUUID
 
 !                     zaxisInqUUID
 !                                    (INTEGER         zaxisID,
-!                                     CHARACTER*(*)   uuid_cbuf)
+!                                     INTEGER*1(16)   uuid)
       EXTERNAL        zaxisInqUUID
 
 !                     zaxisDefName

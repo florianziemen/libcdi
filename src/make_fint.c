@@ -88,7 +88,8 @@ static void doctotxt(FILE *fp, Docu *doc, size_t ndoc)
 
 enum cftype {ISVOID, ISCONSTSTRING, ISINT, ISREAL, ISDOUBLE, ISMPI_COMM,
              ISXT_IDXLIST, ISCHOICE, ISINTP, ISINTV, ISINTVV, ISREALP,
-             ISDOUBLEP, ISCBUF, ISSTRING, ISSTRINGP, VOIDFUNCVOID,
+             ISDOUBLEP, ISCBUF, ISUUID, ISUCHAR, ISSTRING, ISSTRINGP,
+             VOIDFUNCVOID,
              NUM_KNOWN_ARG_TYPES};
 
 enum conversionType { CONV_ARG, CONV_RET };
@@ -157,6 +158,10 @@ static struct symbol funArgSym[]
       { "CHARACTER*(*)",   "PPSTRING",    "char *%.*s",
         "^"WS"*(const"WS"+)?char"WS"+\\*""([A-Za-z_][A-Za-z_0-9]*_cbuf)"
         WS"*[,\\)]", 2, 0, 0 },
+      { "INTEGER*1(16)",   "PVOID",    "unsigned char %.*s[16]",
+        "^"WS"*(const"WS"+)?unsigned"WS"+char"WS"+"SYMRE"?\\[(16|CDI_UUID_SIZE)\\]"WS"*[,\\)]", 2, 0, 0 },
+      { "INTEGER*1(*)",   "PVOID",    "unsigned char *%.*s",
+        "^"WS"*(const"WS"+)?unsigned"WS"+char"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2, 0, 0 },
       { "CHARACTER*(*)",   "STRING",  "char *%.*s",
         "^"WS"*const"WS"+char"WS"+\\*"WS"*"SYMRE"?"WS"*[,\\)]", 1, 0, 0 },
       { "CHARACTER*(*)",   "PSTRING", "char *%.*s",
@@ -164,7 +169,7 @@ static struct symbol funArgSym[]
       { "PROCEDURE", "ROUTINE", "void (*%.*s)(void)",
         "^"WS"*void"WS"*\\("WS"*\\*"WS"*"SYMRE"?"WS"*\\)"
         WS"*\\("WS"*void"WS"*\\)"WS"*[,\\)]", 1, 0, 1,
-        NULL, NULL, cfVoidFuncPrologue }
+        NULL, NULL, cfVoidFuncPrologue },
 };
 
 static struct symbol funRet[] = {
