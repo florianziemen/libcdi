@@ -564,7 +564,7 @@ int cgribexScanTimestep1(stream_t * streamptr)
   int tsID;
   int varID;
   size_t readsize;
-  int nrecords, nrecs, recID;
+  unsigned nrecords, recID;
   int nrecs_scanned = 0;
   int datatype;
   long recsize = 0;
@@ -604,10 +604,10 @@ int cgribexScanTimestep1(stream_t * streamptr)
 	Error("Skipping of %d records failed!", cdiSkipRecords);
 
       recpos  = fileGetPos(fileID);
-      fileSetPos(fileID, recsize, SEEK_CUR);
+      fileSetPos(fileID, (off_t)recsize, SEEK_CUR);
     }
 
-  nrecs = 0;
+  unsigned nrecs = 0;
   while ( TRUE )
     {
       recsize = gribGetSize(fileID);
@@ -754,18 +754,18 @@ int cgribexScanTimestep1(stream_t * streamptr)
   vlistID = streamptr->vlistID;
   vlistDefTaxis(vlistID, taxisID);
 
-  nrecords = streamptr->tsteps[0].nallrecs;
-  if ( nrecords < streamptr->tsteps[0].recordSize )
+  nrecords = (unsigned)streamptr->tsteps[0].nallrecs;
+  if ( nrecords < (unsigned)streamptr->tsteps[0].recordSize )
     {
-      streamptr->tsteps[0].recordSize = nrecords;
+      streamptr->tsteps[0].recordSize = (int)nrecords;
       streamptr->tsteps[0].records =
       (record_t *) realloc(streamptr->tsteps[0].records, nrecords*sizeof(record_t));
     }
 
   streamptr->tsteps[0].recIDs = (int *) malloc(nrecords*sizeof(int));
-  streamptr->tsteps[0].nrecs = nrecords;
+  streamptr->tsteps[0].nrecs = (int)nrecords;
   for ( recID = 0; recID < nrecords; recID++ )
-    streamptr->tsteps[0].recIDs[recID] = recID;
+    streamptr->tsteps[0].recIDs[recID] = (int)recID;
 
   streamptr->record->buffer     = gribbuffer;
   streamptr->record->buffersize = (size_t)buffersize;
