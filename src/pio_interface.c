@@ -664,14 +664,14 @@ scatterGatherPackFunc(void *dataDesc, void *buf, int size, int *pos,
   for (unsigned j = 0; j < numBlocks && copyCount < numElems; ++j)
     {
       int bl = bls[j];
-      if (bl + copyCount > numElems)
-        {
-          bl = numElems - copyCount;
-          Warning("%s: %s", "streamWriteScatteredVarPart",
-                  "blocks longer than number of elements in index list!");
-        }
       if (bl > 0)
         {
+          if ((unsigned)bl + copyCount > numElems)
+            {
+              bl = (int)(numElems - copyCount);
+              Warning("%s: %s", "streamWriteScatteredVarPart",
+                      "blocks longer than number of elements in index list!");
+            }
           size_t bsize = (size_t)bl * elemSize;
           xassert(dstBuf + bsize <= bufEnd);
           memcpy(dstBuf, data + elemSize * disps[j], bsize);
