@@ -2125,12 +2125,6 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
 }
 
 static
-void cgribexDefMask(int *isec3)
-{
-  UNUSED(isec3);
-}
-
-static
 void cgribexDefaultSec0(int *isec0)
 {
   ISEC0_GRIB_Len     = 0;
@@ -2216,7 +2210,6 @@ size_t cgribexEncode(int memtype, int varID, int levelID, int vlistID, int gridI
   cgribexDefTime(isec1, vdate, vtime, tsteptype, numavg, vlistInqTaxis(vlistID));
   cgribexDefGrid(isec1, isec2, isec4, gridID);
   cgribexDefLevel(isec1, isec2, fsec2, zaxisID, levelID);
-  cgribexDefMask(isec3);
 
   cgribexDefEnsembleVar(isec1, vlistID, varID);
 
