@@ -57,6 +57,9 @@
 /*  CALENDAR types  */
 
 
+/*  number of unsigned char needed to store UUID  */
+
+
 /*  CDI control routines  */
 
 FCALLSCSUB0 (cdiReset, CDIRESET, cdireset)

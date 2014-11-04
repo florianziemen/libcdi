@@ -218,6 +218,8 @@ extern "C" {
 #define  CALENDAR_366DAYS         4
 #define  CALENDAR_NONE            5
 
+/* number of unsigned char needed to store UUID */
+#define  CDI_UUID_SIZE           16
 
 /* CDI control routines */
 

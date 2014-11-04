@@ -370,6 +370,11 @@
       INTEGER    CALENDAR_NONE         
       PARAMETER (CALENDAR_NONE          =  5)
 !
+!  number of unsigned char needed to store UUID
+!
+      INTEGER    CDI_UUID_SIZE         
+      PARAMETER (CDI_UUID_SIZE          = 16)
+!
 !  CDI control routines
 !
 !                     cdiReset
