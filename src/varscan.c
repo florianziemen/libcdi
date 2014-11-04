@@ -1048,38 +1048,38 @@ void varDefProductDefinitionTemplate(int varID, int productDefinitionTemplate)
 }
 
 
+#if  defined  (HAVE_LIBGRIB_API)
 void varDefOptGribInt(int varID, long lval, const char *keyword)
 {
-#if  defined  (HAVE_LIBGRIB_API)
   int idx = vartable[varID].opt_grib_int_nentries;
   vartable[varID].opt_grib_int_nentries++;
   if ( idx >= MAX_OPT_GRIB_ENTRIES ) Error("Too many optional keyword/integer value pairs!");
   vartable[varID].opt_grib_int_val[idx] = (int) lval;
   vartable[varID].opt_grib_int_keyword[idx] = strdupx(keyword);
-#endif
 }
+#endif
 
 
+#if  defined  (HAVE_LIBGRIB_API)
 void varDefOptGribDbl(int varID, double dval, const char *keyword)
 {
-#if  defined  (HAVE_LIBGRIB_API)
   int idx = vartable[varID].opt_grib_dbl_nentries;
   vartable[varID].opt_grib_dbl_nentries++;
   if ( idx >= MAX_OPT_GRIB_ENTRIES ) Error("Too many optional keyword/double value pairs!");
   vartable[varID].opt_grib_dbl_val[idx] = dval;
   vartable[varID].opt_grib_dbl_keyword[idx] = strdupx(keyword);
-#endif
 }
+#endif
 
 
+#if  defined  (HAVE_LIBGRIB_API)
 int varOptGribNentries(int varID)
 {
   int nentries = 0;
-#if  defined  (HAVE_LIBGRIB_API)
   nentries = vartable[varID].opt_grib_int_nentries + vartable[varID].opt_grib_dbl_nentries;
-#endif
   return (nentries);
 }
+#endif
 
 /*
  * Local Variables:
