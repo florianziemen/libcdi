@@ -3088,30 +3088,6 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
 }
 #endif
 
-void *gribHandleNew(int editionNumber)
-{
-  void *gh = NULL;
-
-#if  defined  (HAVE_LIBGRIB_API)
-  if ( editionNumber == 1 )
-    gh = (void *) grib_handle_new_from_samples(NULL, "GRIB1");
-  else
-    gh = (void *) grib_handle_new_from_samples(NULL, "GRIB2");
-
-  if ( gh == NULL ) Error("grib_handle_new_from_samples failed!");
-#endif
-
-  return (gh);
-}
-
-
-void gribHandleDelete(void *gh)
-{
-#if  defined  (HAVE_LIBGRIB_API)
-  grib_handle_delete(gh);
-#endif
-}
-
 /* #define GRIBAPIENCODETEST 1 */
 
 #ifdef HAVE_LIBGRIB_API
