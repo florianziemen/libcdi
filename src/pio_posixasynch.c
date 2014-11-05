@@ -54,7 +54,7 @@ fileIDTest(void *a, void *fileID)
   return ((bFiledataPA *)a)->fileID == (int)(intptr_t)fileID;
 }
 
-int nPrefStreams = 4;
+static int nPrefStreams = 4;
 
 /***************************************************************/
 
@@ -62,7 +62,6 @@ static bFiledataPA *
 initBFiledataPA(char *filename, size_t bs, int nc)
 {
   bFiledataPA *bfd;
-  int i;
 
   xdebug ( "filename=%s, buffersize=%zu, ncollectors=%d, nPrefetchStreams=%d",
            filename, bs, nc, nPrefStreams );
@@ -77,7 +76,7 @@ initBFiledataPA(char *filename, size_t bs, int nc)
 
   bfd->ctrlBlks = xcalloc((size_t)nPrefStreams, sizeof (bfd->ctrlBlks[0]));
 
-  for ( i = 0; i < nPrefStreams; i++ )
+  for (int i = 0; i < nPrefStreams; i++ )
     {
       bfd->ctrlBlks[i].aio_fildes     = bfd->handle;
       bfd->ctrlBlks[i].aio_buf = bfd->fb->buffer + (size_t)i * bs;
@@ -246,11 +245,6 @@ void pioWriterAIO(void)
 {
   bFiledataPA *bfd; 
   listSet * bibBFiledataPA;
-  long amount, buffersize;
-  char *messageBuffer, *pMB, *filename, *temp;
-  int messagesize, source, tag, id;
-  struct fileOpTag rtag;
-  MPI_Status status;
   MPI_Comm commNode = commInqCommNode ();
   int nProcsCollNode = commInqSizeNode () - commInqSizeColl ();
   bool * sentFinalize, doFinalize;
@@ -262,15 +256,17 @@ void pioWriterAIO(void)
   sentFinalize = xmalloc((size_t)nProcsCollNode * sizeof (sentFinalize[0]));
   
   for ( ;; )
-    {   
-      xmpiStat ( MPI_Probe ( MPI_ANY_SOURCE, MPI_ANY_TAG, commNode, 
-                             &status ), &status );
+    {
+      MPI_Status status;
+      xmpiStat(MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, commNode,
+                         &status ), &status);
 
-      source = status.MPI_SOURCE;
-      tag    = status.MPI_TAG;
-      rtag = decodeFileOpTag(tag);
+      int source = status.MPI_SOURCE;
+      int tag = status.MPI_TAG;
+      struct fileOpTag rtag = decodeFileOpTag(tag);
 
-      xmpi ( MPI_Get_count ( &status, MPI_CHAR, &messagesize ));
+      int messagesize;
+      xmpi (MPI_Get_count(&status, MPI_CHAR, &messagesize));
 
       xdebug ( "receive message from source=%d, id=%d, command=%d ( %s ), "
                "messagesize=%d", source, rtag.id, rtag.command,
@@ -279,48 +275,48 @@ void pioWriterAIO(void)
       switch (rtag.command)
 	{
       	case IO_Open_file:
+          {
+            char *messageBuffer = xmalloc((size_t)messagesize
+                                          * sizeof (messageBuffer[0]));
+            char *pMB = messageBuffer;
 
-	  messageBuffer = ( char *) xmalloc ( messagesize * 
-                                              sizeof ( messageBuffer[0] ));
-	  pMB = messageBuffer;
+            xmpi(MPI_Recv(messageBuffer, messagesize, MPI_CHAR, source,
+                          tag, commNode, &status ));
 
-	  xmpi ( MPI_Recv ( messageBuffer, messagesize, MPI_CHAR, source, 
-                            tag, commNode, &status ));
+            char *filename = strtok(pMB, token);
+            pMB += (strlen(filename) + 1);
+            char *temp = strtok(pMB, token);
+            long buffersize =  strtol(temp, NULL, 16);
+            pMB += (strlen(temp) + 1);
+            size_t amount = (size_t)(messageBuffer + messagesize - pMB);
 
-	  filename = strtok ( pMB, token );
-	  pMB += ( strlen ( filename ) + 1 );
-	  temp =  strtok ( pMB, token );
-	  buffersize =  strtol ( temp, NULL, 16 );
-	  pMB += ( strlen ( temp ) + 1 );
-	  amount = ( long ) ( messageBuffer + messagesize - pMB );
+            xdebug("command  %s, filename=%s, buffersize=%ld, amount=%zd",
+                   command2charP[rtag.command], filename, buffersize, amount);
 
-	  xdebug("command  %s, filename=%s, buffersize=%ld, amount=%ld",
-                 command2charP[rtag.command], filename, buffersize, amount);
+            if (!(bfd = listSetGet(bibBFiledataPA, fileIDTest,
+                                   (void *)(intptr_t)rtag.id)))
+              {
+                listSetForeach(bibBFiledataPA, elemCheck, filename);
+                bfd = initBFiledataPA(filename, (size_t)buffersize, nProcsCollNode);
+                int id;
+                if ((id = listSetAdd(bibBFiledataPA, bfd)) < 0)
+                  xabort("fileID=%d not unique", rtag.id);
+                bfd->fileID = id;
+              }
+            else
+              if (strcmp(filename, bfd->name) != 0)
+                xabort("filename is not consistent, fileID=%d", rtag.id);
 
-          if (!(bfd = listSetGet(bibBFiledataPA, fileIDTest,
-                               (void *)(intptr_t)rtag.id)))
-	    {
-              listSetForeach(bibBFiledataPA, elemCheck, filename);
-	      bfd = initBFiledataPA(filename, buffersize, nProcsCollNode);
-              if ((id = listSetAdd(bibBFiledataPA, bfd)) < 0)
-                xabort("fileID=%d not unique", rtag.id);
-              bfd->fileID = id;
-	    }
-	  else
-	    if (strcmp(filename, bfd->name) != 0)
-              xabort("filename is not consistent, fileID=%d", rtag.id);
+            bfd->currOpIndex = bfd->nextOpIndex;
+            bfd->nextOpIndex = ( bfd->nextOpIndex + 1 ) % nPrefStreams;
 
-	  bfd->currOpIndex = bfd->nextOpIndex;
-	  bfd->nextOpIndex = ( bfd->nextOpIndex + 1 ) % nPrefStreams;
+            memcpy((void *)bfd->ctrlBlks[bfd->currOpIndex].aio_buf,
+                   pMB, (size_t)amount);
 
-          xassert(amount >= 0);
-	  memcpy((void *)bfd->ctrlBlks[bfd->currOpIndex].aio_buf,
-                 pMB, (size_t)amount);
+            writePA(bfd, amount);
 
-	  writePA ( bfd, amount );
-
-	  free ( messageBuffer );
-
+            free(messageBuffer);
+          }
 	  break;
 
 	case IO_Send_buffer:
@@ -373,11 +369,7 @@ void pioWriterAIO(void)
             sentFinalize[source] = true;
             doFinalize = true;
             for ( collID = 0; collID < nProcsCollNode; collID++ )
-              if ( !sentFinalize[collID] ) 
-                {
-                  doFinalize = false;
-                  break;
-                }
+              doFinalize &= sentFinalize[collID];
             if ( doFinalize )
               {
                 if (!listSetIsEmpty(bibBFiledataPA))

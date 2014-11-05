@@ -245,7 +245,10 @@ pioSendOpen(const char *filename)
 {
   remoteFileBuf *afd;
   static long buffersize = 0;
-  int root = 0, id, iret, messageLength = 32;
+  int root = 0, id, iret;
+  enum {
+    messageLength = 32,
+  };
   char message[messageLength];
   MPI_Comm commCollectors = commInqCommColl();
 
