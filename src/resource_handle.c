@@ -24,8 +24,11 @@ void show_stackframe()
   char **messages = backtrace_symbols(trace, trace_size);
 
   fprintf(stderr, "[bt] Execution path:\n");
-  for ( i = 0; i < trace_size; ++i ) fprintf(stderr, "[bt] %s\n", messages[i]);
-  if ( messages ) free(messages);
+  if ( messages ) {
+    for ( i = 0; i < trace_size; ++i )
+      fprintf(stderr, "[bt] %s\n", messages[i]);
+    free(messages);
+  }
 #endif
 }
 
