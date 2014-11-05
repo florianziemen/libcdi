@@ -235,6 +235,7 @@ int main (int argc, char *argv[])
   MPI_Init(&argc, &argv);
   commModel = MPI_COMM_WORLD;
 #else
+  (void)argc; (void)argv;
   commModel = 0;
 #endif
   destNamespace = namespaceNew();

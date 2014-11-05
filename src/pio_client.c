@@ -100,6 +100,7 @@ static void
 cdiPioClientStreamWriteVar_(int streamID, int varID, int memtype,
                             const void *data, int nmiss)
 {
+  (void)streamID; (void)varID; (void)memtype; (void)data; (void)nmiss;
   xabort("parallel writing requires explicit partition information,"
          " use streamWriteVarPart!");
 }
@@ -183,6 +184,7 @@ cdiPioCdfDefTimestepNOP(stream_t *streamptr, int tsID)
 static void
 cdiPioClientStreamNOP(stream_t *streamptr)
 {
+  (void)streamptr;
 }
 
 
@@ -191,6 +193,7 @@ cdiPioClientStreamClose(stream_t *streamptr, int recordBufIsToBeDeleted)
 {
   struct winHeaderEntry header;
   statusCode nspStatus = namespaceInqResStatus ();
+  (void)recordBufIsToBeDeleted;
   switch ( nspStatus )
     {
     case STAGE_DEFINITION:
