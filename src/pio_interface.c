@@ -653,12 +653,14 @@ static void
 scatterGatherPackFunc(void *dataDesc, void *buf, int size, int *pos,
                       void *context)
 {
+  (void)context;
   const struct scatterGatherDesc *p = dataDesc;
   unsigned numBlocks = p->numBlocks;
   const int *bls = p->blocklengths, *disps = p->displacements;
   int pos_ = *pos;
   unsigned char *dstBuf = buf + pos_, *bufEnd = (unsigned char *)buf + size;
   size_t elemSize = p->elemSize;
+  xassert(elemSize <= SSIZE_MAX);
   const unsigned char *data = p->data;
   unsigned copyCount = 0, numElems = p->numElems;
   for (unsigned j = 0; j < numBlocks && copyCount < numElems; ++j)
@@ -674,7 +676,7 @@ scatterGatherPackFunc(void *dataDesc, void *buf, int size, int *pos,
             }
           size_t bsize = (size_t)bl * elemSize;
           xassert(dstBuf + bsize <= bufEnd);
-          memcpy(dstBuf, data + elemSize * disps[j], bsize);
+          memcpy(dstBuf, data + (ssize_t)elemSize * (ssize_t)disps[j], bsize);
           dstBuf += bsize;
         }
     }
@@ -693,7 +695,8 @@ cdiPioBufferPartDataGather(int streamID, int varID, const double *data,
                      &(struct scatterGatherDesc)
                      { .data = (void *)data, .blocklengths = blocklengths,
                        .displacements = displacements,
-                       .elemSize = sizeof (data[0]), .numBlocks = numBlocks,
+                       .elemSize = sizeof (data[0]),
+                       .numBlocks = (unsigned)numBlocks,
                        .numElems
                          = (unsigned)xt_idxlist_get_num_indices(partDesc) },
                      scatterGatherPackFunc,
