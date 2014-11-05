@@ -908,11 +908,10 @@ void clearModelWinBuffer(int modelID)
 {
   int nProcsModel = commInqNProcsModel ();
 
-  xassert ( modelID                >= 0           &&
-            modelID                 < nProcsModel &&
-            rxWin != NULL && rxWin[modelID].buffer != NULL &&
-            rxWin[modelID].size > 0 &&
-            rxWin[modelID].size <= MAXWINBUFFERSIZE );
+  xassert((unsigned)modelID < (unsigned)nProcsModel &&
+          rxWin != NULL && rxWin[modelID].buffer != NULL &&
+          rxWin[modelID].size > 0 &&
+          rxWin[modelID].size <= MAXWINBUFFERSIZE );
   memset(rxWin[modelID].buffer, 0, rxWin[modelID].size);
 }
 
@@ -1047,9 +1046,8 @@ cdiPioCdfDefTimestep(stream_t *streamptr, int tsID)
 
 void cdiPioServer(void (*postCommSetupActions)(void))
 {
-  int source, tag, size, nProcsModel=commInqNProcsModel();
+  int nProcsModel=commInqNProcsModel();
   static int nfinished = 0;
-  char * buffer;
   MPI_Comm commCalc;
   MPI_Status status;
 
@@ -1082,8 +1080,8 @@ void cdiPioServer(void (*postCommSetupActions)(void))
     {
       xmpi ( MPI_Probe ( MPI_ANY_SOURCE, MPI_ANY_TAG, commCalc, &status ));
       
-      source = status.MPI_SOURCE;
-      tag    = status.MPI_TAG;
+      int source = status.MPI_SOURCE;
+      int tag = status.MPI_TAG;
       
       switch ( tag )
         {
@@ -1104,12 +1102,11 @@ void cdiPioServer(void (*postCommSetupActions)(void))
 
                 if ( nStreams > 0 )
                   {
-                    int streamNo;
                     int * resHs = xmalloc((size_t)nStreams * sizeof (resHs[0]));
                     streamGetIndexList ( nStreams, resHs );
-                    for ( streamNo = 0; streamNo < nStreams; streamNo++ )
-                      streamClose ( resHs[streamNo] );
-                    free ( resHs );
+                    for (int streamNo = 0; streamNo < nStreams; ++streamNo)
+                      streamClose(resHs[streamNo]);
+                    free(resHs);
                   }
               }
               cdiPioFileWritingFinalize();
@@ -1125,16 +1122,17 @@ void cdiPioServer(void (*postCommSetupActions)(void))
           break;
           
 	case RESOURCES:
-	  xdebugMsg (  tag, source, nfinished );
-	  xmpi ( MPI_Get_count ( &status, MPI_CHAR, &size ));
-	  buffer = (char*) xmalloc(size);
-	  xmpi ( MPI_Recv ( buffer, size, MPI_PACKED, source,
-                            tag, commCalc, &status ));
-          xdebug("%s", "RECEIVED MESSAGE WITH TAG \"RESOURCES\"");
-	  reshUnpackResources(buffer, size, &commCalc);
-          xdebug("%s", "");
-	  free ( buffer );
           {
+            int size;
+            xdebugMsg(tag, source, nfinished);
+            xmpi(MPI_Get_count(&status, MPI_CHAR, &size));
+            char *buffer = xmalloc((size_t)size);
+            xmpi(MPI_Recv(buffer, size, MPI_PACKED, source,
+                          tag, commCalc, &status));
+            xdebug("%s", "RECEIVED MESSAGE WITH TAG \"RESOURCES\"");
+            reshUnpackResources(buffer, size, &commCalc);
+            xdebug("%s", "");
+            free(buffer);
             int rankGlob = commInqRankGlob();
             if ( ddebug > 0 && rankGlob == nProcsModel)
               {
@@ -1152,7 +1150,6 @@ void cdiPioServer(void (*postCommSetupActions)(void))
           }
           serverWinCreate ();
 	  break;
-
 	case WRITETS:
           {
             xdebugMsg(tag, source, nfinished);
