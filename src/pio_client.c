@@ -21,6 +21,7 @@
 static void
 nullPackFunc(void *obj, void *buf, int size, int *pos, void *context)
 {
+  (void)obj; (void)buf; (void)size; (void)pos; (void)context;
 }
 
 
@@ -174,6 +175,7 @@ cdiPioClientStreamWriteScatteredVarPart(int streamID, int varID,
 static void
 cdiPioCdfDefTimestepNOP(stream_t *streamptr, int tsID)
 {
+  (void)streamptr; (void)tsID;
 }
 #endif
 
