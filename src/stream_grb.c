@@ -324,7 +324,7 @@ int grbScanTimestep1(stream_t * streamptr)
 static
 int grbScanTimestep2(stream_t * streamptr)
 {
-  int status;
+  int status = 0;
   int filetype;
 
   filetype  = streamptr->filetype;
@@ -334,11 +334,13 @@ int grbScanTimestep2(stream_t * streamptr)
     {
       status = cgribexScanTimestep2(streamptr);
     }
+#endif
+#if defined(HAVE_LIBCGRIBEX) && defined (HAVE_LIBGRIB_API)
   else
 #endif
-    {
-      status = gribapiScanTimestep2(streamptr);
-    }
+#ifdef HAVE_LIBGRIB_API
+    status = gribapiScanTimestep2(streamptr);
+#endif
 
   return (status);
 }

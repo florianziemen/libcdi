@@ -1465,10 +1465,10 @@ int gribapiScanTimestep1(stream_t * streamptr)
 }
 
 
+#ifdef HAVE_LIBGRIB_API
 int gribapiScanTimestep2(stream_t * streamptr)
 {
   int rstatus = 0;
-#if  defined  (HAVE_LIBGRIB_API)
   off_t recpos = 0;
   unsigned char *gribbuffer = NULL;
   size_t buffersize = 0;
@@ -1729,12 +1729,10 @@ int gribapiScanTimestep2(stream_t * streamptr)
 
   streamptr->record->buffer     = gribbuffer;
   streamptr->record->buffersize = buffersize;
-#else
-  (void)streamptr;
-#endif
 
   return (rstatus);
 }
+#endif
 
 
 #if  defined  (HAVE_LIBGRIB_API)
