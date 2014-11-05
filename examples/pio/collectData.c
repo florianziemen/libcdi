@@ -172,6 +172,21 @@ static struct {
   { "PIO_WRITER", PIO_WRITER },
   { "PIO_FPGUARD", PIO_FPGUARD},
 };
+
+static inline int
+search_iomode_str(const char *modestr)
+{
+  int retval = -1;
+  for (size_t i = 0;
+       i < sizeof (mode_map) / sizeof (mode_map[0]);
+       ++i)
+    if (!strcmp(modestr, mode_map[i].text))
+      {
+        retval = (int)i;
+        break;
+      }
+  return retval;
+}
 #endif
 
 
@@ -197,21 +212,13 @@ int main (int argc, char *argv[])
       switch (opt) {
       case 'p':
         {
-          int found=0;
-          for (size_t i = 0;
-               i < sizeof (mode_map) / sizeof (mode_map[0]);
-               ++i)
-            if (!strcmp(optarg, mode_map[i].text))
-              {
-                found = 1;
-                IOMode = mode_map[i].mode;
-                break;
-              }
-          if (!found)
+          int entry = search_iomode_str(optarg);
+          if (entry < 0)
             {
               fprintf(stderr, "Unsupported PIO mode requested: %s\n", optarg);
               exit(EXIT_FAILURE);
             }
+          IOMode = mode_map[entry].mode;
         }
         break;
       case 'w':
