@@ -2023,11 +2023,11 @@ int gribapiScanTimestep(stream_t * streamptr)
 #undef gribWarning
 #endif
 
+#ifdef HAVE_LIBGRIB_API
 int gribapiDecode(unsigned char *gribbuffer, int gribsize, double *data, int gridsize,
 		  int unreduced, int *nmiss, double missval, int vlistID, int varID)
 {
   int status = 0;
-#if  defined  (HAVE_LIBGRIB_API)
   long lpar;
   long editionNumber, numberOfPoints;
   size_t datasize, dummy, recsize;
@@ -2078,12 +2078,10 @@ int gribapiDecode(unsigned char *gribbuffer, int gribsize, double *data, int gri
 
   grib_handle_delete(gh);
 
-#else
-  Error("GRIB_API support not compiled in!");
-#endif
-
   return (status);
 }
+#endif
+
 
 #if  defined  (HAVE_LIBGRIB_API)
 static

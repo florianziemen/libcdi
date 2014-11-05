@@ -32,6 +32,7 @@ cdiPioClientStreamOpen(const char *filename, const char *filemode,
 {
   struct winHeaderEntry header;
   size_t filename_len;
+  (void)streamptr; (void)recordBufIsToBeCreated;
   if ( tolower ( * filemode ) == 'w' )
     {
       statusCode nspStatus = namespaceInqResStatus ();

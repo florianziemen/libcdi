@@ -206,9 +206,14 @@ int grbDecode(int filetype, unsigned char *gribbuffer, int gribsize, double *dat
     }
   else
 #endif
+#ifdef HAVE_LIBGRIB_API
+    status = gribapiDecode(gribbuffer, gribsize, data, gridsize, unreduced, nmiss, missval, vlistID, varID);
+#else
     {
-      status = gribapiDecode(gribbuffer, gribsize, data, gridsize, unreduced, nmiss, missval, vlistID, varID);
+      (void)vlistID; (void)varID;
+      Error("GRIB_API support not compiled in!");
     }
+#endif
 
   return (status);
 }
