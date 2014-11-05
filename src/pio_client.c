@@ -121,7 +121,7 @@ cdiPioClientStreamWriteVarChunk_(int streamID, int varID, int memtype,
   int varSize = varShape[0] * varShape[1] * varShape[2];
   xassert(varSize == size);
   Xt_idxlist chunkDesc
-    = xt_idxsection_new(0, ndims, varShapeXt, chunkShape, origin);
+    = xt_idxsection_new(0, (int)ndims, varShapeXt, chunkShape, origin);
   pioBufferPartData(streamID, varID, data, nmiss, chunkDesc);
   xt_idxlist_delete(chunkDesc);
 }
