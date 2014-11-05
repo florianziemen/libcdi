@@ -14,7 +14,7 @@
 #include "cdi.h"
 
 #include "cksum.h"
-
+#include "simple_model_helper.h"
 
 static int
 parse_intarg(const char msg[])
@@ -34,14 +34,6 @@ parse_intarg(const char msg[])
   return (int)temp;
 }
 
-static inline double
-sign_flat(double v)
-{
-  if (v == 0.0)
-    return 0.0;
-  return v;
-}
-
 static void
 allocError(const char *msg)
 {
@@ -54,8 +46,8 @@ fname_create(const char *prefix, const char *suffix)
 {
   size_t prefix_len, suffix_len;
   char *fname;
-  if (!(fname =malloc((prefix_len = strlen(prefix)) + 1
-                      + (suffix_len = strlen(suffix)) + 1)))
+  if (!(fname = malloc((prefix_len = strlen(prefix)) + 1
+                       + (suffix_len = strlen(suffix)) + 1)))
     allocError("cannot create string");
   strcpy(fname, prefix);
   fname[prefix_len] = '.';
@@ -244,36 +236,7 @@ main(int argc, char *argv[])
       var[i] = malloc(varSize[i] * sizeof (var[i][0]));
     }
 
-  {
-    int mant_bits;
-    switch (datatype)
-      {
-      case DATATYPE_PACK8:
-        mant_bits = 7;
-        break;
-      case DATATYPE_PACK16:
-        mant_bits = 15;
-        break;
-      case DATATYPE_PACK24:
-        mant_bits = 23;
-        break;
-      case DATATYPE_FLT32:
-        mant_bits = 24;
-        break;
-      case DATATYPE_FLT64:
-        mant_bits = 53;
-        break;
-      case DATATYPE_INT8:
-      case DATATYPE_INT16:
-      case DATATYPE_INT32:
-      default:
-        fprintf(stderr, "Unexpected or unusable content format: %d\n",
-                datatype);
-        exit(EXIT_FAILURE);
-      }
-    mscale = (double)(INT64_C(1) << mant_bits);
-    mrscale = 1.0/mscale;
-  }
+  var_scale(datatype, &mscale, &mrscale);
 
   // Assign the Time axis to the variable list
   vlistDefTaxis(vlistID, taxisID);

@@ -15,8 +15,8 @@ check_PROGRAMS = cksum_verify test_grib cksum_write cksum_read pio_write \
 #
 test_grib_SOURCES = test_grib.c
 cksum_verify_SOURCES = cksum_verify.c
-cksum_write_SOURCES = cksum_write.c
-cksum_write_chunk_SOURCES = cksum_write_chunk.c
+cksum_write_SOURCES = cksum_write.c simple_model_helper.h simple_model_helper.c
+cksum_write_chunk_SOURCES = cksum_write_chunk.c simple_model_helper.h simple_model_helper.c
 cksum_read_SOURCES = cksum_read.c \
 	var_cksum.c var_cksum.h \
 	stream_cksum.c stream_cksum.h \

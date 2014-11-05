@@ -142,11 +142,13 @@ am_cksum_verify_OBJECTS = cksum_verify.$(OBJEXT)
 cksum_verify_OBJECTS = $(am_cksum_verify_OBJECTS)
 cksum_verify_LDADD = $(LDADD)
 cksum_verify_DEPENDENCIES = ../src/libcdi.la
-am_cksum_write_OBJECTS = cksum_write.$(OBJEXT)
+am_cksum_write_OBJECTS = cksum_write.$(OBJEXT) \
+	simple_model_helper.$(OBJEXT)
 cksum_write_OBJECTS = $(am_cksum_write_OBJECTS)
 cksum_write_LDADD = $(LDADD)
 cksum_write_DEPENDENCIES = ../src/libcdi.la
-am_cksum_write_chunk_OBJECTS = cksum_write_chunk.$(OBJEXT)
+am_cksum_write_chunk_OBJECTS = cksum_write_chunk.$(OBJEXT) \
+	simple_model_helper.$(OBJEXT)
 cksum_write_chunk_OBJECTS = $(am_cksum_write_chunk_OBJECTS)
 cksum_write_chunk_LDADD = $(LDADD)
 cksum_write_chunk_DEPENDENCIES = ../src/libcdi.la
@@ -460,8 +462,8 @@ top_srcdir = @top_srcdir@
 #
 test_grib_SOURCES = test_grib.c
 cksum_verify_SOURCES = cksum_verify.c
-cksum_write_SOURCES = cksum_write.c
-cksum_write_chunk_SOURCES = cksum_write_chunk.c
+cksum_write_SOURCES = cksum_write.c simple_model_helper.h simple_model_helper.c
+cksum_write_chunk_SOURCES = cksum_write_chunk.c simple_model_helper.h simple_model_helper.c
 cksum_read_SOURCES = cksum_read.c \
 	var_cksum.c var_cksum.h \
 	stream_cksum.c stream_cksum.h \
