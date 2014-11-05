@@ -1474,6 +1474,7 @@ void iegWriteVarSliceDP(stream_t *streamptr, int varID, int levID, const double 
   /* tsID     = streamptr->curTsID; */
   gridID   = vlistInqVarGrid(vlistID, varID);
   zaxisID  = vlistInqVarZaxis(vlistID, varID);
+  (void)levID;
   /* level    = zaxisInqLevel(zaxisID, levID); */
 
   if ( CDI_Debug )
