@@ -3114,13 +3114,13 @@ void gribHandleDelete(void *gh)
 
 /* #define GRIBAPIENCODETEST 1 */
 
+#ifdef HAVE_LIBGRIB_API
 size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisID,
 		     int vdate, int vtime, int tsteptype, int numavg, 
 		     long datasize, const double *data, int nmiss, unsigned char **gribbuffer, size_t *gribbuffersize,
 		     int comptype, void *gribContainer)
 {
   size_t nbytes = 0;
-#if  defined  (HAVE_LIBGRIB_API)
   size_t recsize = 0;
   void *dummy = NULL;
   int datatype;
@@ -3251,12 +3251,10 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   gc->init = TRUE;
 
   nbytes = recsize;
-#else
-  Error("GRIB_API support not compiled in!");
-#endif
 
   return (nbytes);
 }
+#endif
 
 /*
  * Local Variables:

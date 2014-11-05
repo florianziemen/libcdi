@@ -520,7 +520,7 @@ size_t grbEncode(int filetype, int memtype, int varID, int levelID, int vlistID,
 		 size_t datasize, const double *data, int nmiss, unsigned char **gribbuffer,
 		 int comptype, void *gribContainer)
 {
-  size_t nbytes;
+  size_t nbytes = 0;
 
 #if  defined  (HAVE_LIBCGRIBEX)
   if ( filetype == FILETYPE_GRB )
@@ -534,6 +534,7 @@ size_t grbEncode(int filetype, int memtype, int varID, int levelID, int vlistID,
     }
   else
 #endif
+#ifdef HAVE_LIBGRIB_API
     {
       if ( memtype == MEMTYPE_FLOAT ) Error("gribapiEncode() not implemented for memtype float!");
 
@@ -543,6 +544,11 @@ size_t grbEncode(int filetype, int memtype, int varID, int levelID, int vlistID,
 			     (long)datasize, data, nmiss, gribbuffer, &gribbuffersize,
 			     comptype, gribContainer);
     }
+#else
+    Error("GRIB_API support not compiled in!");
+    (void)gribContainer;
+#endif
+
 
   return (nbytes);
 }
