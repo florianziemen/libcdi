@@ -261,10 +261,11 @@ main(int argc, char *argv[])
     // Loop over the number of time steps
     for ( tsID = 0; tsID < nts; tsID++ )
       {
+        int vdatetime[2] = { 120000, 19850101+tsID };
         // Set the verification date to 1985-01-01 + tsID
-        taxisDefVdate(taxisID, 19850101+tsID);
+        taxisDefVdate(taxisID, vdatetime[1]);
         // Set the verification time to 12:00:00
-        taxisDefVtime(taxisID, 120000);
+        taxisDefVtime(taxisID, vdatetime[0]);
         // Define the time step
         streamDefTimestep(streamID, tsID);
 
@@ -289,7 +290,17 @@ main(int argc, char *argv[])
                             / (lons[nlat-1] - lats[0]))
                       ) * mscale)) * mrscale;
 
+        if (filetype == FILETYPE_EXT)
+          {
+            /* EXTRA doesn't store time, only date
+             * set the value to 0 before checksumming, because a
+             * time field of 0 is what reading an EXTRA file will
+             * return */
+            vdatetime[0] = 0;
+          }
+        memcrc_r(&checksum_state[0], (const unsigned char *)vdatetime, sizeof (vdatetime));
         memcrc_r(&checksum_state[0], (const unsigned char *)var[0], varSize[0] * sizeof (var[0][0]));
+        memcrc_r(&checksum_state[1], (const unsigned char *)vdatetime, sizeof (vdatetime));
         memcrc_r(&checksum_state[1], (const unsigned char *)var[1], varSize[1] * sizeof (var[1][0]));
 
         // Write var1 and var2
@@ -343,9 +354,10 @@ main(int argc, char *argv[])
         {
           uint32_t cksum;
           int code;
-          cksum = memcrc_finish(&checksum_state[i],
-                                (off_t)(varSize[i] * sizeof (var[i][0])
-                                        * (size_t)nts));
+          cksum
+            = memcrc_finish(&checksum_state[i],
+                            (off_t)((varSize[i] * sizeof (var[i][0])
+                                     + sizeof (int) * 2) * (size_t)nts));
           code = vlistInqVarCode(vlistID, varID[i]);
           if (fprintf(tablefp, "%08lx %d\n", (unsigned long)cksum, code) < 0)
             {
