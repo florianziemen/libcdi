@@ -73,14 +73,14 @@ initBFiledataPA(char *filename, size_t bs, int nc)
   if (( bfd->handle = open ( bfd->name, O_CREAT | O_WRONLY, 0666 )) == -1 )
     xabort("Failed to open %s", bfd->name);
 
-  dbuffer_init(&(bfd->fb), (size_t)(nPrefStreams * bs));
+  dbuffer_init(&(bfd->fb), (size_t)nPrefStreams * bs);
 
-  bfd->ctrlBlks = (struct aiocb *) xcalloc(nPrefStreams, sizeof (bfd->ctrlBlks[0]));
+  bfd->ctrlBlks = xcalloc((size_t)nPrefStreams, sizeof (bfd->ctrlBlks[0]));
 
   for ( i = 0; i < nPrefStreams; i++ )
     {
       bfd->ctrlBlks[i].aio_fildes     = bfd->handle;
-      bfd->ctrlBlks[i].aio_buf = bfd->fb->buffer + i * bs;
+      bfd->ctrlBlks[i].aio_buf = bfd->fb->buffer + (size_t)i * bs;
       bfd->ctrlBlks[i].aio_reqprio    = 0;
       bfd->ctrlBlks[i].aio_sigevent.sigev_notify = SIGEV_NONE;   
     }
@@ -167,10 +167,10 @@ compareNamesBPA(void *v1, void *v2)
 /***************************************************************/
 
 static void
-writePA(bFiledataPA *bfd, long amount)
+writePA(bFiledataPA *bfd, size_t amount)
 {
   const struct aiocb *ccBP[1];
-  int iret;
+  ssize_t iret;
   double startTime;
 
   xdebug ( "file %s, in", bfd->name );
@@ -191,7 +191,7 @@ writePA(bFiledataPA *bfd, long amount)
   xdebug ( "after aio_write(), file %s, aio_nbytes=%zu, aio_offset=%zu,"
            "iret=aio_write()=%d",
            bfd->name, bfd->ctrlBlks[bfd->currOpIndex].aio_nbytes,
-           bfd->ctrlBlks[bfd->currOpIndex].aio_offset, iret );
+           bfd->ctrlBlks[bfd->currOpIndex].aio_offset, (int)iret );
    
   if ( iret == -1 ) 
     {
@@ -200,7 +200,7 @@ writePA(bFiledataPA *bfd, long amount)
   else
     xdebug ( "buffer written to %s",  bfd->name );
      
-  bfd->offset += ( off_t ) amount;
+  bfd->offset += (off_t)amount;
   bfd->prefIndex ++;
 
   if ( bfd->prefIndex >= nPrefStreams ) 
@@ -259,7 +259,7 @@ void pioWriterAIO(void)
   xdebug ( "nProcsCollNode=%d on this node", nProcsCollNode );
  
   bibBFiledataPA = listSetNew(destroyBFiledataPA, compareNamesBPA);
-  sentFinalize = (bool*) xmalloc ( nProcsCollNode * sizeof ( sentFinalize ));
+  sentFinalize = xmalloc((size_t)nProcsCollNode * sizeof (sentFinalize[0]));
   
   for ( ;; )
     {   
@@ -329,19 +329,15 @@ void pioWriterAIO(void)
                                (void *)(intptr_t)rtag.id)))
             xabort("fileID=%d is not in set", rtag.id);
 
-	  amount = messagesize;
-
 	  xdebug("command: %s, id=%d, name=%s",
                  command2charP[rtag.command], rtag.id, bfd->name );
 
 	  bfd->currOpIndex = bfd->nextOpIndex;
 	  bfd->nextOpIndex = ( bfd->nextOpIndex + 1 ) % nPrefStreams;
-	  
-	  xmpi(MPI_Recv((void *)bfd->ctrlBlks[bfd->currOpIndex].aio_buf,
-                        amount, MPI_CHAR, source, tag, commNode, &status ));
 
-	  writePA ( bfd, amount );
-	  
+	  xmpi(MPI_Recv((void *)bfd->ctrlBlks[bfd->currOpIndex].aio_buf,
+                        messagesize, MPI_CHAR, source, tag, commNode, &status ));
+	  writePA(bfd, (size_t)messagesize);
 	  break;
 
 	case IO_Close_file:
@@ -349,8 +345,6 @@ void pioWriterAIO(void)
           if (!(bfd = listSetGet(bibBFiledataPA, fileIDTest,
                                (void *)(intptr_t)rtag.id)))
             xabort("fileID=%d is not in set", rtag.id);
-
-	  amount = messagesize;
 
 	  xdebug(" command %s, id=%d, name=%s",
                  command2charP[rtag.command], rtag.id, bfd->name);
@@ -360,9 +354,9 @@ void pioWriterAIO(void)
 	  bfd->nextOpIndex = ( bfd->nextOpIndex + 1 ) % nPrefStreams;
 
 	  MPI_Recv((void *)bfd->ctrlBlks[bfd->currOpIndex].aio_buf,
-                   amount, MPI_CHAR, source, tag, commNode, &status);
+                   messagesize, MPI_CHAR, source, tag, commNode, &status);
 
-	  writePA ( bfd, amount );
+	  writePA(bfd, (size_t)messagesize);
 
 	  if ( ! --(bfd->activeCollectors))
 	    {
@@ -373,7 +367,7 @@ void pioWriterAIO(void)
           break;
         case IO_Finalize:
           {
-            int buffer = CDI_UNDEFID, collID;
+            int buffer, collID;
 
             xmpi ( MPI_Recv ( &buffer, 1, MPI_INT, source, tag, commNode, &status ));
             sentFinalize[source] = true;
