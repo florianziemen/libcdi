@@ -346,7 +346,7 @@ int grbScanTimestep2(stream_t * streamptr)
 static
 int grbScanTimestep(stream_t * streamptr)
 {
-  int status;
+  int status = CDI_EUFTYPE;
   int filetype;
 
   filetype  = streamptr->filetype;
@@ -358,9 +358,11 @@ int grbScanTimestep(stream_t * streamptr)
     }
   else
 #endif
-    {
-      status = gribapiScanTimestep(streamptr);
-    }
+#ifdef HAVE_LIBGRIB_API
+    status = gribapiScanTimestep(streamptr);
+#else
+    Error("Sufficient GRIB support unavailable!");
+#endif
 
   return (status);
 }

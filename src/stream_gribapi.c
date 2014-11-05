@@ -1737,10 +1737,10 @@ int gribapiScanTimestep2(stream_t * streamptr)
 }
 
 
+#if  defined  (HAVE_LIBGRIB_API)
 int gribapiScanTimestep(stream_t * streamptr)
 {
   int rstatus = 0;
-#if  defined  (HAVE_LIBGRIB_API)
   size_t recsize = 0;
   off_t recpos = 0;
   unsigned char *gribbuffer;
@@ -2017,12 +2017,9 @@ int gribapiScanTimestep(stream_t * streamptr)
     }
 
   rstatus = (int)streamptr->ntsteps;
-#else
-  Error("GRIB_API support not compiled in!");
-#endif
-
   return (rstatus);
 }
+#endif
 
 #ifdef gribWarning
 #undef gribWarning
