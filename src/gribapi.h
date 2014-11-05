@@ -53,9 +53,8 @@ void gribContainersDelete(stream_t * streamptr);
 #ifdef HAVE_LIBGRIBAPI
 static inline void *gribHandleNew(int editionNumber)
 {
-  void *gh = (editionNumber == 1) ?
-    (void *) grib_handle_new_from_samples(NULL, "GRIB1") :
-    (void *) grib_handle_new_from_samples(NULL, "GRIB2");
+  void *gh =
+    (void *)grib_handle_new_from_samples(NULL, (editionNumber == 1) ? "GRIB1" : "GRIB2");
 
   if ( gh == NULL ) Error("grib_handle_new_from_samples failed!");
   return gh;
