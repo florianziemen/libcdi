@@ -148,7 +148,7 @@ main(int argc, char *argv[])
       case 'f':
         {
           int found = 0;
-          for (i = 0;
+          for (size_t i = 0;
                i < sizeof (suffix2type) / sizeof (suffix2type[0]);
                ++i)
             if (!strcmp(optarg, suffix2type[i].suffix))
