@@ -680,7 +680,7 @@ int cgribexScanTimestep1(stream_t * streamptr)
 
 	  for ( recID = 0; recID < nrecs; recID++ )
 	    {
-	      if ( cgribexVarCompare(compVar, streamptr->tsteps[0].records[recID], 1) == 0 ) break;
+	      if ( cgribexVarCompare(compVar, streamptr->tsteps[0].records[recID], 0) == 0 ) break;
 	    }
 
 	  if ( cdiInventoryMode == 1 )
