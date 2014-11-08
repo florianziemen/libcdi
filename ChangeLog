@@ -1,3 +1,7 @@
+2014-11-08  Uwe Schulzweida
+
+	* cgribexScanTimestep1: set flag to 0 in call to cgribexVarCompare() (bug fix)
+
 2014-11-05  Uwe Schulzweida
 
 	* IEG: added support for coordinate scale factor [patch from Kevin Sieck]
