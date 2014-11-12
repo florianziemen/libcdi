@@ -1,7 +1,8 @@
 PROGRAM collectdata2003
 #ifdef USE_MPI
   USE yaxt, ONLY: xt_initialize, xt_finalize, xt_idxlist, xt_idxstripes_new, &
-       xt_idxlist_delete, xt_int_kind, xt_stripe
+       xt_idxlist_delete, xi => xt_int_kind, xt_stripe
+  USE iso_c_binding, ONLY: c_int
 #endif
 
   IMPLICIT NONE
@@ -122,12 +123,14 @@ CONTAINS
     chunk = uniform_partition_start((/ 1, SIZE(var1) /), comm_size, rank + 2) &
          - start
     vardeco1 = var1ddeco(start, chunk, &
-         xt_idxstripes_new(xt_stripe(start - 1, chunk, 1)))
+         xt_idxstripes_new(xt_stripe(INT(start, xi) - 1_xi, 1_xi, &
+         INT(chunk, c_int))))
     start = uniform_partition_start((/ 1, SIZE(var2) /), comm_size, rank + 1)
     chunk = uniform_partition_start((/ 1, SIZE(var2) /), comm_size, rank + 2) &
          - start
     vardeco2 = var1ddeco(start, chunk, &
-         xt_idxstripes_new(xt_stripe(start - 1, chunk, 1)))
+         xt_idxstripes_new(xt_stripe(INT(start, xi) - 1_xi, 1_xi, &
+         INT(chunk, c_int))))
 #endif
     !     Define the variable names
     varname = 'varname1'
