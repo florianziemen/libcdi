@@ -26,16 +26,17 @@ PROGRAM collectdata2003
   ! INTEGER, PARAMETER :: IOMode       = PIO_ASYNCH
   INTEGER, PARAMETER :: IOMode       = PIO_FPGUARD
 
-  INTEGER ::commGlob, commModel, error, pio_namespace
+  INTEGER :: commModel
 #ifdef USE_MPI
   LOGICAL :: run_model
+  INTEGER :: commGlob, ierror, pio_namespace
 #else
   LOGICAL, PARAMETER :: run_model = .TRUE.
 #endif
 
   ! Start parallel environment
 #ifdef USE_MPI
-  CALL MPI_INIT ( error )
+  CALL MPI_INIT ( ierror )
   commGlob = MPI_COMM_WORLD
   CALL xt_initialize(commGlob)
 
@@ -45,6 +46,8 @@ PROGRAM collectdata2003
        cdiPioNoPostCommSetup)
   run_model = commModel /= MPI_COMM_NULL
   IF (run_model) CALL namespaceSetActive(pio_namespace)
+#else
+  commModel = 0
 #endif
 
   IF (run_model) CALL modelrun ( commModel )
@@ -54,7 +57,7 @@ PROGRAM collectdata2003
   ! Cleanup environment.
   IF (run_model) CALL pioFinalize ()
   CALL xt_finalize
-  CALL MPI_FINALIZE ( error )
+  CALL MPI_FINALIZE ( ierror )
 #endif
 
 CONTAINS
@@ -77,9 +80,9 @@ CONTAINS
     DOUBLE PRECISION :: lons ( nlon ), lats ( nlat ), levs ( nlev )
     DOUBLE PRECISION :: var1 ( nlon * nlat ), var2 ( nlon * nlat * nlev )
     CHARACTER(len=256) :: varname
-    INTEGER :: last, start, chunk
+    INTEGER :: last, start
 #ifdef USE_MPI
-    INTEGER :: rank, comm_size, ierror
+    INTEGER :: rank, comm_size, ierror, chunk
     TYPE var1ddeco
       INTEGER :: start, chunksize
       TYPE(xt_idxlist) :: partdesc
