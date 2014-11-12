@@ -8176,21 +8176,16 @@ static void cdfDefInstitut(stream_t *streamptr)
 #if  defined  (HAVE_LIBNETCDF)
 static void cdfDefSource(stream_t *streamptr)
 {
-  int fileID, modelID;
-  char *longname;
-  size_t len;
-  int vlistID;
-
-  vlistID = streamptr->vlistID;
-  fileID  = streamptr->fileID;
-  modelID = vlistInqModel(vlistID);
+  int vlistID = streamptr->vlistID;
+  int fileID  = streamptr->fileID;
+  int modelID = vlistInqModel(vlistID);
 
   if ( modelID != UNDEFID )
     {
-      longname = modelInqNamePtr(modelID);
+      char *longname = modelInqNamePtr(modelID);
       if ( longname )
 	{
-	  len = strlen(longname);
+          size_t len = strlen(longname);
 	  if ( len > 0 )
 	    {
 	      if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
