@@ -139,7 +139,11 @@ void defineStream ( int streamID, int vlistID )
   streamDefVlist(streamID, vlistID);
 }
 
-int defineVlist ( int gridID, int zaxisID, int taxisID )
+struct idPair {
+  int id1, id2;
+};
+
+struct idPair defineVlist ( int gridID, int zaxisID, int taxisID )
 {
   int vlistID = CDI_UNDEFID;
   int zaxisID2 = zaxisCreate(ZAXIS_SURFACE, 1);
@@ -160,9 +164,7 @@ int defineVlist ( int gridID, int zaxisID, int taxisID )
   int vlistID2 = vlistCreate();
   vlistDefVar(vlistID2, gridID, zaxisID, TIME_VARIABLE);
   vlistCopy(vlistID2, vlistID);
-  vlistDestroy(vlistID);
-  vlistID = vlistID2;
-  return vlistID;
+  return (struct idPair){ vlistID, vlistID2 };
 }
 
 int defineInstitute ()
@@ -201,10 +203,14 @@ int modelRun(MPI_Comm comm)
   taxisID = defineTaxis     ();
   instID  = defineInstitute ();
   defineModel(instID);
-  vlistID = defineVlist     ( gridID, zaxisID, taxisID);
-  streamID = streamOpenWrite("example.grb", FILETYPE_GRB);
-  if ( streamID < 0 ) xabort ( "Could not open file" );
-  defineStream ( streamID, vlistID );
+  {
+    struct idPair temp = defineVlist(gridID, zaxisID, taxisID);
+    vlistID = temp.id1;
+    streamID = streamOpenWrite("example.grb", FILETYPE_GRB);
+    if ( streamID < 0 ) xabort ( "Could not open file" );
+    defineStream ( streamID, vlistID );
+    vlistDestroy(temp.id2);
+  }
 
   reshPackBufferCreate ( &sendBuffer, &bufferSize, &comm );
   recvBuffer = xmalloc((size_t)bufferSize);

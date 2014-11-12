@@ -36,7 +36,7 @@
 #include "namespace.h"
 
 
-static stream_t *stream_new_entry(void);
+static stream_t *stream_new_entry(int resH);
 static void stream_delete_entry(stream_t *streamptr);
 static int streamCompareP(void * streamptr1, void * streamptr2);
 static void streamDestroyP(void * streamptr);
@@ -514,10 +514,11 @@ int cdiStreamOpenDefaultDelegate(const char *filename, const char *filemode,
 }
 
 
-int streamOpen(const char *filename, const char *filemode, int filetype)
+static int
+streamOpenID(const char *filename, const char *filemode, int filetype,
+             int resH)
 {
   int fileID = CDI_UNDEFID;
-  int streamID = CDI_ESYSTEM;
   int status;
 
   if ( CDI_Debug )
@@ -526,7 +527,8 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
 
   if ( ! filename || ! filemode || filetype < 0 ) return (CDI_EINVAL);
 
-  stream_t *streamptr = stream_new_entry();
+  stream_t *streamptr = stream_new_entry(resH);
+  int streamID = CDI_ESYSTEM;
 
   {
     int (*streamOpenDelegate)(const char *filename, const char *filemode,
@@ -570,13 +572,17 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
   return (streamID);
 }
 
+int streamOpen(const char *filename, const char *filemode, int filetype)
+{
+  return streamOpenID(filename, filemode, filetype, CDI_UNDEFID);
+}
 
 static int streamOpenA(const char *filename, const char *filemode, int filetype)
 {
   int fileID = CDI_UNDEFID;
   int streamID = CDI_ESYSTEM;
   int status;
-  stream_t *streamptr = stream_new_entry();
+  stream_t *streamptr = stream_new_entry(CDI_UNDEFID);
   vlist_t *vlistptr;
 
   if ( CDI_Debug )
@@ -872,7 +878,7 @@ void streamDefaultValue ( stream_t * streamptr )
 }
 
 
-static stream_t *stream_new_entry(void)
+static stream_t *stream_new_entry(int resH)
 {
   stream_t *streamptr;
 
@@ -880,7 +886,13 @@ static stream_t *stream_new_entry(void)
 
   streamptr = (stream_t *) xmalloc(sizeof(stream_t));
   streamDefaultValue ( streamptr );
-  streamptr->self = reshPut (( void * ) streamptr, &streamOps );
+  if (resH == CDI_UNDEFID)
+    streamptr->self = reshPut(streamptr, &streamOps);
+  else
+    {
+      streamptr->self = resH;
+      reshReplace(resH, streamptr, &streamOps);
+    }
 
   return streamptr;
 }
@@ -2395,9 +2407,9 @@ streamUnpack(char * unpackBuffer, int unpackBufferSize,
   serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
                   &d, 1, DATATYPE_UINT32, context);
   xassert(d == cdiCheckSum(DATATYPE_TXT, intBuffer[2], filename));
-  streamID = streamOpenWrite ( filename, intBuffer[1] );
-  xassert ( streamID >= 0 &&
-            namespaceAdaptKey ( intBuffer[0], originNamespace ) == streamID );
+  int targetStreamID = namespaceAdaptKey(intBuffer[0], originNamespace);
+  streamID = streamOpenID(filename, "w", intBuffer[1], targetStreamID);
+  xassert(streamID >= 0 && targetStreamID == streamID);
   streamDefByteorder(streamID, intBuffer[5]);
   streamDefCompType(streamID, intBuffer[6]);
   streamDefCompLevel(streamID, intBuffer[7]);
