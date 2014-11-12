@@ -8182,7 +8182,7 @@ static void cdfDefSource(stream_t *streamptr)
 
   if ( modelID != UNDEFID )
     {
-      char *longname = modelInqNamePtr(modelID);
+      const char *longname = modelInqNamePtr(modelID);
       if ( longname )
 	{
           size_t len = strlen(longname);

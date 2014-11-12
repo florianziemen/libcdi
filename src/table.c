@@ -378,9 +378,10 @@ static int tableFromEnv(int modelID, int tablenum)
   char tablename[256] = {'\0'};
   int tablenamefound = 0;
 
-  if ( modelInqNamePtr(modelID) )
+  const char *modelName;
+  if ( (modelName = modelInqNamePtr(modelID)) )
     {
-      strcpy(tablename, modelInqNamePtr(modelID));
+      strcpy(tablename, modelName);
       if ( tablenum )
 	{
 	  size_t len = strlen(tablename);
@@ -486,9 +487,10 @@ int tableInq(int modelID, int tablenum, const char *tablename)
 	{
 	  if ( modelID != UNDEFID )
 	    {
-	      if ( modelInqNamePtr(modelID) )
+              const char *modelName;
+	      if ( (modelName = modelInqNamePtr(modelID)) )
 		{
-		  strcpy(tablefile, modelInqNamePtr(modelID));
+		  strcpy(tablefile, modelName);
 		  size_t len = strlen(tablefile);
 		  for ( size_t i = 0; i < len; i++)
 		    if ( tablefile[i] == '.' ) tablefile[i] = '\0';
@@ -605,7 +607,8 @@ void tableWrite(const char *ptfile, int tableID)
   FILE *ptfp;
   int tablenum, modelID, instID = CDI_UNDEFID;
   int center = 0, subcenter = 0;
-  char *instnameptr = NULL, *modelnameptr = NULL;
+  char *instnameptr = NULL;
+  const char *modelnameptr = NULL;
 
   if ( CDI_Debug )
     Message("write parameter table %d to %s", tableID, ptfile);

@@ -992,7 +992,7 @@ int     modelDef(int instID, int modelgribID, const char *name);
 int     modelInq(int instID, int modelgribID, char *name);
 int     modelInqInstitut(int modelID);
 int     modelInqGribID(int modelID);
-char   *modelInqNamePtr(int modelID);
+const char *modelInqNamePtr(int modelID);
 
 /* Table routines */
 
