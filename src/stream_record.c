@@ -151,7 +151,20 @@ void streamInqRecord(int streamID, int *varID, int *levelID)
   streamptr->tsteps[tsID].curRecID = rindex;
 }
 
+/*
+@Function  streamDefRecord
+@Title     Define the next record
 
+@Prototype void streamDefRecord(int streamID, int varID, int levelID)
+@Parameter
+    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenWrite}.
+    @Item  varID     Variable identifier.
+    @Item  levelID   Level identifier.
+
+@Description
+The function streamDefRecord defines the meta-data of the next record.
+@EndFunction
+*/
 void streamDefRecord(int streamID, int varID, int levelID)
 {
   stream_t *streamptr = stream_to_pointer(streamID);
@@ -323,7 +336,21 @@ stream_write_record(int streamID, int memtype, const void *data, int nmiss)
     }
 }
 
+/*
+@Function  streamWriteRecord
+@Title     Write a horizontal slice of a variable
 
+@Prototype void streamWriteRecord(int streamID, const double *data, int nmiss)
+@Parameter
+    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenWrite}.
+    @Item  data      Pointer to a block of double precision floating point data values to be written.
+    @Item  nmiss     Number of missing values.
+
+@Description
+The function streamWriteRecord writes the values of a horizontal slice (record) of a variable to an open dataset.
+The values are converted to the external data type of the variable, if necessary.
+@EndFunction
+*/
 void streamWriteRecord(int streamID, const double *data, int nmiss)
 {
   stream_write_record(streamID, MEMTYPE_DOUBLE, (const void *) data, nmiss);
