@@ -32,11 +32,10 @@
 #define UNDEFID  CDI_UNDEFID
 
 
-void    vlistInqVarDimorder(int vlistID, int varID, int (*outDimorder)[3]);
-
-void cdfDefGlobalAtts(stream_t *streamptr);
-void cdfDefLocalAtts(stream_t *streamptr);
-
+#if defined HAVE_LIBNETCDF
+static void cdfDefGlobalAtts(stream_t *streamptr);
+static void cdfDefLocalAtts(stream_t *streamptr);
+#endif
 
 #define  X_AXIS  1
 #define  Y_AXIS  2
@@ -8144,9 +8143,9 @@ void cdfEndDef(stream_t *streamptr)
 #endif
 
 
-void cdfDefInstitut(stream_t *streamptr)
-{
 #if  defined  (HAVE_LIBNETCDF)
+static void cdfDefInstitut(stream_t *streamptr)
+{
   int fileID, instID;
   char *longname;
   size_t len;
@@ -8170,13 +8169,13 @@ void cdfDefInstitut(stream_t *streamptr)
 	    }
 	}
     }
-#endif
 }
+#endif
 
 
-void cdfDefSource(stream_t *streamptr)
-{
 #if  defined  (HAVE_LIBNETCDF)
+static void cdfDefSource(stream_t *streamptr)
+{
   int fileID, modelID;
   char *longname;
   size_t len;
@@ -8200,13 +8199,11 @@ void cdfDefSource(stream_t *streamptr)
 	    }
 	}
     }
-#endif
 }
 
 
-void cdfDefGlobalAtts(stream_t *streamptr)
+static void cdfDefGlobalAtts(stream_t *streamptr)
 {
-#if  defined  (HAVE_LIBNETCDF)
   int fileID, vlistID;
   int natts;
 
@@ -8227,13 +8224,11 @@ void cdfDefGlobalAtts(stream_t *streamptr)
   if ( natts > 0 && streamptr->ncmode == 2 ) cdf_enddef(fileID);
 
   streamptr->globalatts = 1;
-#endif
 }
 
 
-void cdfDefLocalAtts(stream_t *streamptr)
+static void cdfDefLocalAtts(stream_t *streamptr)
 {
-#if  defined  (HAVE_LIBNETCDF)
   int varID, instID, fileID;
   char *name;
   size_t len;
@@ -8266,8 +8261,8 @@ void cdfDefLocalAtts(stream_t *streamptr)
       }
 
   if ( streamptr->ncmode == 2 ) cdf_enddef(fileID);
-#endif
 }
+#endif
 
 
 void cdfDefHistory(stream_t *streamptr, int size, char *history)
