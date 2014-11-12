@@ -519,12 +519,14 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
   int fileID = CDI_UNDEFID;
   int streamID = CDI_ESYSTEM;
   int status;
-  stream_t *streamptr = stream_new_entry();
 
   if ( CDI_Debug )
-    Message("Open %s mode %c file %s", strfiletype(filetype), (int) *filemode, filename);
+    Message("Open %s mode %c file %s", strfiletype(filetype), (int) *filemode,
+            filename?filename:"(NUL)");
 
   if ( ! filename || ! filemode || filetype < 0 ) return (CDI_EINVAL);
+
+  stream_t *streamptr = stream_new_entry();
 
   {
     int (*streamOpenDelegate)(const char *filename, const char *filemode,
