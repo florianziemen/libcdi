@@ -1082,6 +1082,7 @@ void cdfDefTime(stream_t* streamptr)
 }
 
 
+#if  defined  (HAVE_LIBNETCDF)
 void cdfDefTimestep(stream_t *streamptr, int tsID)
 {
 #if  defined  (HAVE_LIBNETCDF)
@@ -1095,7 +1096,6 @@ void cdfDefTimestep(stream_t *streamptr, int tsID)
 #endif
 }
 
-#if  defined  (HAVE_LIBNETCDF)
 static
 void cdfDefComplex(stream_t *streamptr, int gridID)
 {
