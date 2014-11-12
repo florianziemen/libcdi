@@ -4218,9 +4218,9 @@ void cdfGetSliceSlapDescription(stream_t *streamptr, int varId, int levelId, boo
 }
 #endif
 
+#if  defined  (HAVE_LIBNETCDF)
 void cdfReadVarDP(stream_t *streamptr, int varID, double *data, int *nmiss)
 {
-#if  defined  (HAVE_LIBNETCDF)
   if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamptr->self, varID);
 
   int vlistID = streamptr->vlistID;
@@ -4252,13 +4252,13 @@ void cdfReadVarDP(stream_t *streamptr, int varID, double *data, int *nmiss)
   double addoffset   = vlistInqVarAddoffset(vlistID, varID);
   double scalefactor = vlistInqVarScalefactor(vlistID, varID);
   (void) cdfDoInputDataTransformationDP(size, data, haveMissval, missval, scalefactor, addoffset);
-#endif
 }
+#endif
 
 
+#if  defined  (HAVE_LIBNETCDF)
 void cdfReadVarSP(stream_t *streamptr, int varID, float *data, int *nmiss)
 {
-#if  defined  (HAVE_LIBNETCDF)
   if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamptr->self, varID);
 
   int vlistID = streamptr->vlistID;
@@ -4290,8 +4290,8 @@ void cdfReadVarSP(stream_t *streamptr, int varID, float *data, int *nmiss)
   double addoffset    = vlistInqVarAddoffset(vlistID, varID);
   double scalefactor  = vlistInqVarScalefactor(vlistID, varID);
   (void) cdfDoInputDataTransformationSP(size, data, haveMissval, missval, scalefactor, addoffset);
-#endif
 }
+#endif
 
 void cdfReadVarSliceDP(stream_t *streamptr, int varID, int levelID, double *data, int *nmiss)
 {
