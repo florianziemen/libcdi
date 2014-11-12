@@ -787,9 +787,9 @@ void cdfDefVarMissval(stream_t *streamptr, int varID, int dtype, int lcheck)
 }
 #endif
 
+#if  defined  (HAVE_LIBNETCDF)
 void cdf_write_record(stream_t *streamptr, int memtype, const void *data, int nmiss)
 {
-#if  defined  (HAVE_LIBNETCDF)
   int varID;
   int levelID;
 
@@ -799,8 +799,8 @@ void cdf_write_record(stream_t *streamptr, int memtype, const void *data, int nm
   if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamptr->self, varID);
 
   cdf_write_var_slice(streamptr, varID, levelID, memtype, data, nmiss);
-#endif
 }
+#endif
 
 void cdfReadRecord(stream_t *streamptr, double *data, int *nmiss)
 {
