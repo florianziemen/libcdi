@@ -227,7 +227,7 @@ int institutInqSubcenter(int instID)
 }
 
 
-char *institutInqNamePtr(int instID)
+const char *institutInqNamePtr(int instID)
 {
   institute_t * instituteptr = NULL;
 

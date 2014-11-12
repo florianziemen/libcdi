@@ -983,7 +983,7 @@ int     institutInq(int center, int subcenter, const char *name, const char *lon
 int     institutInqNumber(void);
 int     institutInqCenter(int instID);
 int     institutInqSubcenter(int instID);
-char   *institutInqNamePtr(int instID);
+const char *institutInqNamePtr(int instID);
 char   *institutInqLongnamePtr(int instID);
 
 /* Model routines */

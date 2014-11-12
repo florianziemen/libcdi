@@ -8225,7 +8225,6 @@ static void cdfDefGlobalAtts(stream_t *streamptr)
 static void cdfDefLocalAtts(stream_t *streamptr)
 {
   int varID, instID, fileID;
-  char *name;
   size_t len;
   int ncvarid;
   int vlistID;
@@ -8246,7 +8245,7 @@ static void cdfDefLocalAtts(stream_t *streamptr)
       if ( instID != UNDEFID )
 	{
           ncvarid = streamptr->vars[varID].ncvarid;
-  	  name = institutInqNamePtr(instID);
+  	  const char *name = institutInqNamePtr(instID);
 	  if ( name )
 	    {
 	      len = strlen(name);
