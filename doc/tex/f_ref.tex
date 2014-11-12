@@ -617,6 +617,21 @@ Define the byte order
 
 \section*{\tt 
 \ifpdf
+\hyperref[streamDefRecord]{streamDefRecord}
+\else
+streamDefRecord
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE streamDefRecord(INTEGER streamID, INTEGER varID, INTEGER levelID)
+\end{verbatim}
+
+Define the next record
+\ifpdfoutput{}{(\ref{streamDefRecord})}
+
+
+\section*{\tt 
+\ifpdf
 \hyperref[streamDefTimestep]{streamDefTimestep}
 \else
 streamDefTimestep
@@ -765,6 +780,21 @@ streamReadVarSlice
 
 Read a horizontal slice of a variable
 \ifpdfoutput{}{(\ref{streamReadVarSlice})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[streamWriteRecord]{streamWriteRecord}
+\else
+streamWriteRecord
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE streamWriteRecord(INTEGER streamID, REAL*8 data, INTEGER nmiss)
+\end{verbatim}
+
+Write a horizontal slice of a variable
+\ifpdfoutput{}{(\ref{streamWriteRecord})}
 
 
 \section*{\tt 
