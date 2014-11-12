@@ -4293,9 +4293,9 @@ void cdfReadVarSP(stream_t *streamptr, int varID, float *data, int *nmiss)
 }
 #endif
 
+#if  defined  (HAVE_LIBNETCDF)
 void cdfReadVarSliceDP(stream_t *streamptr, int varID, int levelID, double *data, int *nmiss)
 {
-#if  defined  (HAVE_LIBNETCDF)
   int i;
   size_t start[4];
   size_t count[4];
@@ -4355,14 +4355,13 @@ void cdfReadVarSliceDP(stream_t *streamptr, int varID, int levelID, double *data
   double addoffset = vlistInqVarAddoffset(vlistID, varID);
   double scalefactor = vlistInqVarScalefactor(vlistID, varID);
   (void) cdfDoInputDataTransformationDP(gridsize, data, haveMissval, missval, scalefactor, addoffset);
-#endif
 }
+#endif
 
 
+#if  defined  (HAVE_LIBNETCDF)
 void cdfReadVarSliceSP(stream_t *streamptr, int varID, int levelID, float *data, int *nmiss)
 {
-#if  defined  (HAVE_LIBNETCDF)
-  int i;
   size_t start[4];
   size_t count[4];
 
@@ -4385,7 +4384,7 @@ void cdfReadVarSliceSP(stream_t *streamptr, int varID, int levelID, float *data,
     {
       double *data_dp = malloc(gridsize*sizeof(*data_dp));
       cdf_get_vara_double(fileID, ncvarid, start, count, data_dp);
-      for ( i = 0; i < gridsize; i++ )
+      for (int i = 0; i < gridsize; i++ )
         data[i] = (float) data_dp[i];
       free(data_dp);
     }
@@ -4395,7 +4394,7 @@ void cdfReadVarSliceSP(stream_t *streamptr, int varID, int levelID, float *data,
       cdf_inq_vartype(fileID, ncvarid, &xtype);
       if ( xtype == NC_BYTE )
         {
-          for ( i = 0; i < gridsize; i++ )
+          for (int i = 0; i < gridsize; i++ )
             if ( data[i] < 0 ) data[i] += 256;
         }
     }
@@ -4421,13 +4420,13 @@ void cdfReadVarSliceSP(stream_t *streamptr, int varID, int levelID, float *data,
   double addoffset = vlistInqVarAddoffset(vlistID, varID);
   double scalefactor = vlistInqVarScalefactor(vlistID, varID);
   (void ) cdfDoInputDataTransformationSP(gridsize, data, haveMissval, missval, scalefactor, addoffset);
-#endif
 }
+#endif
 
 
+#if  defined  (HAVE_LIBNETCDF)
 void cdf_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, const void *data, int nmiss)
 {
-#if  defined  (HAVE_LIBNETCDF)
   int fileID;
   int gridID;
   int zaxisID;
@@ -4528,8 +4527,8 @@ void cdf_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
 
   cdf_write_var_data(fileID, vlistID, varID, ncvarid, dtype, nvals, xsize, ysize, swapxy, start, count, memtype, data, nmiss);
 
-#endif
 }
+#endif
 
 #if  defined  (HAVE_LIBNETCDF)
 static
