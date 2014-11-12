@@ -7462,9 +7462,9 @@ void find_time_vars(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimid, 
 }
 #endif
 
+#if  defined  (HAVE_LIBNETCDF)
 int cdfInqContents(stream_t *streamptr)
 {
-#if  defined  (HAVE_LIBNETCDF)
   int ndims, nvars, ngatts, unlimdimid;
   int ncvarid;
   int ncdimid;
@@ -7966,10 +7966,9 @@ int cdfInqContents(stream_t *streamptr)
   /* free ncvars */
   free(ncvars);
 
-#endif
-
   return (0);
 }
+#endif
 
 #if  defined  (HAVE_LIBNETCDF)
 static
