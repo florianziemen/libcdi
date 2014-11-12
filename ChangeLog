@@ -1,3 +1,11 @@
+2014-11-12  Uwe Schulzweida
+
+	* Version 1.6.5.2 released
+
+2014-11-12  Uwe Schulzweida
+
+	* transpose2dArrayXX: wrong result (bug fix)
+
 2014-11-08  Uwe Schulzweida
 
 	* cgribexScanTimestep1: set flag to 0 in call to cgribexVarCompare() (bug fix)
@@ -47,7 +55,7 @@
 
 2014-08-21  Uwe Schulzweida
 
-	* reshGetElem: call show_stackframe() to print a backtrace 
+	* reshGetElem: call show_stackframe() to print a backtrace
 
 2014-08-20  Uwe Schulzweida
 
