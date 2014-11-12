@@ -8027,10 +8027,10 @@ double get_timevalue(int fileID, int nctimevarid, int tsID, timecache_t *tcache)
 }
 #endif
 
+#if  defined  (HAVE_LIBNETCDF)
 int cdfInqTimestep(stream_t * streamptr, int tsID)
 {
   long nrecs = 0;
-#if  defined  (HAVE_LIBNETCDF)
   double timevalue;
   int fileID;
   taxis_t *taxis;
@@ -8102,9 +8102,9 @@ int cdfInqTimestep(stream_t * streamptr, int tsID)
   streamptr->curTsID = tsID;
   nrecs = streamptr->tsteps[tsID].nrecs;
 
-#endif
   return ((int) nrecs);
 }
+#endif
 
 
 void cdfEndDef(stream_t *streamptr)
