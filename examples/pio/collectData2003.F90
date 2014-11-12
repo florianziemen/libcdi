@@ -231,6 +231,8 @@ CONTAINS
     CALL zaxisDestroy(zaxisID2)
     CALL gridDestroy(gridID)
 #ifdef USE_MPI
+    CALL xt_idxlist_delete(vardeco1%partdesc)
+    CALL xt_idxlist_delete(vardeco2%partdesc)
     CALL mpi_barrier(commModel, ierror)
     IF (ierror /= mpi_success) STOP 1
 #endif
