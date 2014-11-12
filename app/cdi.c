@@ -318,7 +318,7 @@ void printShortinfo(int streamID, int vlistID, int vardis)
   int tsteptype, taxisID;
   char tmpname[CDI_MAX_NAME];
   char varname[CDI_MAX_NAME];
-  char *modelptr, *instptr;
+  const char *modelptr, *instptr;
   int datatype;
   int year, month, day, hour, minute, second;
   char pstr[4];
