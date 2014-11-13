@@ -538,10 +538,7 @@ const char *gridNamePtr(int gridtype)
   const char *name;
   int size = (int) (sizeof(Grids)/sizeof(char *));
 
-  if ( gridtype >= 0 && gridtype < size )
-    name = Grids[gridtype];
-  else
-    name = Grids[GRID_GENERIC];
+  name = gridtype >= 0 && gridtype < size ? Grids[gridtype] : Grids[GRID_GENERIC];
 
   return (name);
 }
