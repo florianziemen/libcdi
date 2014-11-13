@@ -8280,19 +8280,17 @@ void cdfDefHistory(stream_t *streamptr, int size, const char *history)
 #endif
 
 
+#if  defined  (HAVE_LIBNETCDF)
 int cdfInqHistorySize(stream_t *streamptr)
 {
   size_t size = 0;
-#if  defined  (HAVE_LIBNETCDF)
-  int ncid;
-
-  ncid = streamptr->fileID;
+  int ncid = streamptr->fileID;
   if ( streamptr->historyID != UNDEFID )
     cdf_inq_attlen(ncid, NC_GLOBAL, "history", &size);
 
-#endif
   return ((int) size);
 }
+#endif
 
 
 void cdfInqHistoryString(stream_t *streamptr, char *history)
