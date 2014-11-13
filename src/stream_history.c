@@ -10,9 +10,8 @@
 
 void streamDefHistory(int streamID, int length, const char *history)
 {
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
+#ifdef HAVE_LIBNETCDF
+  stream_t *streamptr = stream_to_pointer(streamID);
 
   if ( streamptr->filetype == FILETYPE_NC  ||
        streamptr->filetype == FILETYPE_NC2 ||
@@ -26,12 +25,17 @@ void streamDefHistory(int streamID, int length, const char *history)
 	  len = strlen(history);
 	  if ( len )
 	    {
+              /* FIXME: what's the point of strdupx? Why not use
+               * history argument directly? */
 	      histstring = strdupx(history);
 	      cdfDefHistory(streamptr, length, histstring);
 	      free(histstring);
 	    }
 	}
     }
+#else
+  (void)streamID; (void)length; (void)history;
+#endif
 }
 
 

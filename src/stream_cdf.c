@@ -8271,15 +8271,13 @@ static void cdfDefLocalAtts(stream_t *streamptr)
 #endif
 
 
-void cdfDefHistory(stream_t *streamptr, int size, char *history)
-{
 #if  defined  (HAVE_LIBNETCDF)
-  int ncid;
-
-  ncid = streamptr->fileID;
+void cdfDefHistory(stream_t *streamptr, int size, const char *history)
+{
+  int ncid = streamptr->fileID;
   cdf_put_att_text(ncid, NC_GLOBAL, "history", (size_t) size, history);
-#endif
 }
+#endif
 
 
 int cdfInqHistorySize(stream_t *streamptr)
