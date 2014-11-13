@@ -785,7 +785,7 @@ void    gridDefYbounds(int gridID, const double *ybounds_vec);
 /*      gridInqYbounds: Get the bounds of a Y-axis */
 int     gridInqYbounds(int gridID, double *ybounds_vec);
 
-void    gridDefRowlon(int gridID, int nrowlon, const int rowlon_vec[nrowlon]);
+void    gridDefRowlon(int gridID, int nrowlon, const int rowlon_vec[]);
 void    gridInqRowlon(int gridID, int *rowlon_vec);
 void    gridChangeType(int gridID, int gridtype);
 
