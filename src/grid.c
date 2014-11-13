@@ -574,7 +574,8 @@ void gridDefXname(int gridID, const char *xname)
 
   if ( xname )
     {
-      strcpy(gridptr->xname, xname);
+      strncpy(gridptr->xname, xname, CDI_MAX_NAME);
+      gridptr->xname[CDI_MAX_NAME - 1] = 0;
       reshSetStatus(gridID, &gridOps, RESH_DESYNC_IN_USE);
     }
 }
@@ -600,7 +601,8 @@ void gridDefXlongname(int gridID, const char *xlongname)
 
   if ( xlongname )
     {
-      strcpy(gridptr->xlongname, xlongname);
+      strncpy(gridptr->xlongname, xlongname, CDI_MAX_NAME);
+      gridptr->xlongname[CDI_MAX_NAME - 1] = 0;
       reshSetStatus(gridID, &gridOps, RESH_DESYNC_IN_USE);
     }
 }
@@ -627,7 +629,8 @@ void gridDefXunits(int gridID, const char *xunits)
 
   if ( xunits )
     {
-      strcpy(gridptr->xunits, xunits);
+      strncpy(gridptr->xunits, xunits, CDI_MAX_NAME);
+      gridptr->xunits[CDI_MAX_NAME - 1] = 0;
       reshSetStatus(gridID, &gridOps, RESH_DESYNC_IN_USE);
     }
 }
@@ -654,7 +657,8 @@ void gridDefYname(int gridID, const char *yname)
 
   if ( yname )
     {
-      strcpy(gridptr->yname, yname);
+      strncpy(gridptr->yname, yname, CDI_MAX_NAME);
+      gridptr->yname[CDI_MAX_NAME - 1] = 0;
       reshSetStatus(gridID, &gridOps, RESH_DESYNC_IN_USE);
     }
 }
@@ -681,7 +685,8 @@ void gridDefYlongname(int gridID, const char *ylongname)
 
   if ( ylongname )
     {
-      strcpy(gridptr->ylongname, ylongname);
+      strncpy(gridptr->ylongname, ylongname, CDI_MAX_NAME);
+      gridptr->ylongname[CDI_MAX_NAME - 1] = 0;
       reshSetStatus(gridID, &gridOps, RESH_DESYNC_IN_USE);
     }
 }
@@ -708,7 +713,8 @@ void gridDefYunits(int gridID, const char *yunits)
 
   if ( yunits )
     {
-      strcpy(gridptr->yunits, yunits);
+      strncpy(gridptr->yunits, yunits, CDI_MAX_NAME);
+      gridptr->yunits[CDI_MAX_NAME - 1] = 0;
       reshSetStatus(gridID, &gridOps, RESH_DESYNC_IN_USE);
     }
 }
@@ -3996,12 +4002,9 @@ int gridInqReference(int gridID, char *reference)
 
   grid_check_ptr(gridID, gridptr);
 
-  if ( gridptr->reference )
+  if ( gridptr->reference && reference )
     {
-      len = (int) strlen(gridptr->reference);
-
-      if ( reference )
-        strcpy(reference, gridptr->reference);
+      strcpy(reference, gridptr->reference);
     }
 
   return (len);
