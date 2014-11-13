@@ -61,9 +61,8 @@ int streamInqHistorySize(int streamID)
 
 void streamInqHistoryString(int streamID, char *history)
 {
-  stream_t *streamptr;
-
-  streamptr = stream_to_pointer(streamID);
+#ifdef HAVE_LIBNETCDF
+  stream_t *streamptr = stream_to_pointer(streamID);
 
   if ( streamptr->filetype == FILETYPE_NC  ||
        streamptr->filetype == FILETYPE_NC2 ||
@@ -72,6 +71,9 @@ void streamInqHistoryString(int streamID, char *history)
     {
       cdfInqHistoryString(streamptr, history);
     }
+#else
+  (void)streamID; (void)history;
+#endif
 }
 /*
  * Local Variables:
