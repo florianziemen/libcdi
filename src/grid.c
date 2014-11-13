@@ -984,10 +984,7 @@ int nsp2trunc(int nsp)
   /*  with:  y^2 + p*y + q = 0               */
   /*         y = -p/2 +- sqrt((p/2)^2 - q)   */
   /*         p = 3 and q = - (x-2)           */
-  int trunc;
-
-  trunc = (int) (sqrt(nsp*4 + 1.) - 3) / 2;
-
+  int trunc = (int) (sqrt(nsp*4 + 1.) - 3) / 2;
   return (trunc);
 }
 
