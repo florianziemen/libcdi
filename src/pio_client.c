@@ -110,6 +110,9 @@ cdiPioClientStreamWriteVarChunk_(int streamID, int varID, int memtype,
                                  const int rect[][2],
                                  const void *data, int nmiss)
 {
+  /* todo: handle transmission of float data */
+  if (memtype != MEMTYPE_DOUBLE)
+    Error("Writing of non-double type data not implemented!");
   int vlistID = streamInqVlist(streamID);
   int size = vlistInqVarSize(vlistID, varID),
     varShape[3];
