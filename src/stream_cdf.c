@@ -799,7 +799,6 @@ void cdf_write_record(stream_t *streamptr, int memtype, const void *data, int nm
 
   cdf_write_var_slice(streamptr, varID, levelID, memtype, data, nmiss);
 }
-#endif
 
 void cdfReadRecord(stream_t *streamptr, double *data, int *nmiss)
 {
