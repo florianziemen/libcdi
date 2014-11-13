@@ -2,6 +2,8 @@
 #  include "config.h"
 #endif
 
+#ifdef HAVE_LIBNETCDF
+
 //#define TEST_GROUPS 1
 
 #include <stdio.h>
@@ -10,13 +12,9 @@
 #include <math.h>
 #include <float.h>
 
-#if  defined  (HAVE_LIBNETCDF)
-#  include <netcdf.h>
-#endif
-
+#include <netcdf.h>
 
 #include "dmemory.h"
-
 #include "cdi.h"
 #include "basetime.h"
 #include "gaussgrid.h"
@@ -123,7 +121,6 @@ typedef struct {
 }
 ncvar_t;
 
-#ifdef HAVE_LIBNETCDF
 static
 void strtolower(char *str)
 {
@@ -654,9 +651,8 @@ void cdfDefRecord(stream_t *streamptr)
 {
   (void)streamptr;
 }
-#endif
 
-#if  defined  (HAVE_LIBNETCDF)
+
 static
 void cdfWriteGridTraj(stream_t *streamptr, int gridID)
 {
@@ -696,9 +692,8 @@ void cdfReadGridTraj(stream_t *streamptr, int gridID)
   gridDefXvals(gridID, &xlon);
   gridDefYvals(gridID, &xlat);
 }
-#endif
 
-#if  defined  (HAVE_LIBNETCDF)
+
 static
 void cdfDefVarDeflate(int ncid, int ncvarid, int deflate_level)
 {
@@ -724,9 +719,9 @@ void cdfDefVarDeflate(int ncid, int ncvarid, int deflate_level)
     }
 #endif
 }
-#endif
 
-#if  defined(HAVE_LIBNETCDF) && defined(NC_SZIP_NN_OPTION_MASK)
+
+#if defined(NC_SZIP_NN_OPTION_MASK)
 static
 void cdfDefVarSzip(int ncid, int ncvarid)
 {
@@ -753,7 +748,6 @@ void cdfDefVarSzip(int ncid, int ncvarid)
 }
 #endif
 
-#if  defined  (HAVE_LIBNETCDF)
 static
 void cdfDefVarMissval(stream_t *streamptr, int varID, int dtype, int lcheck)
 {
@@ -784,9 +778,8 @@ void cdfDefVarMissval(stream_t *streamptr, int varID, int dtype, int lcheck)
       streamptr->vars[varID].defmiss = TRUE;
     }
 }
-#endif
 
-#if  defined  (HAVE_LIBNETCDF)
+
 void cdf_write_record(stream_t *streamptr, int memtype, const void *data, int nmiss)
 {
   int varID;
@@ -814,9 +807,7 @@ void cdfReadRecord(stream_t *streamptr, double *data, int *nmiss)
 
   cdfReadVarSliceDP(streamptr, varID, levelID, data, nmiss);
 }
-#endif
 
-#if  defined  (HAVE_LIBNETCDF)
 static
 void cdfDefTimeValue(stream_t *streamptr, int tsID)
 {
@@ -965,7 +956,6 @@ void cdfDefForecastTimeUnits(char *unitstr, int timeunit)
 
   sprintf(unitstr, "%s", tunitNamePtr(timeunit));
 }
-#endif
 
 static
 void cdfDefCalendar(int fileID, int ncvarid, int calendar)
@@ -984,15 +974,12 @@ void cdfDefCalendar(int fileID, int ncvarid, int calendar)
 
   len = strlen(calstr);
 
-#if  defined  (HAVE_LIBNETCDF)
   if ( len ) cdf_put_att_text(fileID, ncvarid, "calendar", len, calstr);
-#endif
 }
 
 static
 void cdfDefTime(stream_t* streamptr)
 {
-#if  defined  (HAVE_LIBNETCDF)
   int fileID;
   int time_varid;
   int time_dimid;
@@ -1077,14 +1064,11 @@ void cdfDefTime(stream_t* streamptr)
     }
 
   if ( streamptr->ncmode == 2 ) cdf_enddef(fileID);
-#endif
 }
 
 
-#if  defined  (HAVE_LIBNETCDF)
 void cdfDefTimestep(stream_t *streamptr, int tsID)
 {
-#if  defined  (HAVE_LIBNETCDF)
   int vlistID;
 
   vlistID = streamptr->vlistID;
@@ -1092,7 +1076,6 @@ void cdfDefTimestep(stream_t *streamptr, int tsID)
   if ( vlistHasTime(vlistID) ) cdfDefTime(streamptr);
 
   cdfDefTimeValue(streamptr, tsID);
-#endif
 }
 
 static
@@ -1140,9 +1123,8 @@ void cdfDefComplex(stream_t *streamptr, int gridID)
   gridindex = vlistGridIndex(vlistID, gridID);
   streamptr->xdimID[gridindex] = dimID;
 }
-#endif
 
-#if  defined  (HAVE_LIBNETCDF)
+
 static
 void cdfDefSP(stream_t *streamptr, int gridID)
 {
@@ -1200,9 +1182,8 @@ void cdfDefSP(stream_t *streamptr, int gridID)
   gridindex = vlistGridIndex(vlistID, gridID);
   streamptr->ydimID[gridindex] = dimID;
 }
-#endif
 
-#if  defined  (HAVE_LIBNETCDF)
+
 static
 void cdfDefFC(stream_t *streamptr, int gridID)
 {
@@ -1257,9 +1238,8 @@ void cdfDefFC(stream_t *streamptr, int gridID)
   gridindex = vlistGridIndex(vlistID, gridID);
   streamptr->ydimID[gridindex] = dimID;
 }
-#endif
 
-#if  defined  (HAVE_LIBNETCDF)
+
 static
 void cdfDefTrajLon(stream_t *streamptr, int gridID)
 {
@@ -1314,9 +1294,8 @@ void cdfDefTrajLon(stream_t *streamptr, int gridID)
 
   streamptr->xdimID[gridindex] = ncvarid; /* var ID for trajectory !!! */
 }
-#endif
 
-#if  defined  (HAVE_LIBNETCDF)
+
 static
 void cdfDefTrajLat(stream_t *streamptr, int gridID)
 {
@@ -1371,9 +1350,8 @@ void cdfDefTrajLat(stream_t *streamptr, int gridID)
 
   streamptr->ydimID[gridindex] = ncvarid; /* var ID for trajectory !!! */
 }
-#endif
 
-#if  defined  (HAVE_LIBNETCDF)
+
 static
 int checkGridName(int type, char *axisname, int fileID, int vlistID, int gridID, int ngrids, int mode)
 {
@@ -1435,9 +1413,8 @@ int checkGridName(int type, char *axisname, int fileID, int vlistID, int gridID,
 
   return (iz);
 }
-#endif
 
-#if  defined  (HAVE_LIBNETCDF)
+
 static
 void cdfDefXaxis(stream_t *streamptr, int gridID, int ndims)
 {
@@ -1566,9 +1543,8 @@ void cdfDefXaxis(stream_t *streamptr, int gridID, int ndims)
 
   streamptr->xdimID[gridindex] = dimID;
 }
-#endif
 
-#if  defined  (HAVE_LIBNETCDF)
+
 static
 void cdfDefYaxis(stream_t *streamptr, int gridID, int ndims)
 {
@@ -1697,9 +1673,8 @@ void cdfDefYaxis(stream_t *streamptr, int gridID, int ndims)
 
   streamptr->ydimID[gridindex] = dimID;
 }
-#endif
 
-#if  defined  (HAVE_LIBNETCDF)
+
 static
 void cdfGridCompress(int fileID, int ncvarid, int gridsize, int filetype, int comptype)
 {
@@ -1711,9 +1686,8 @@ void cdfGridCompress(int fileID, int ncvarid, int gridsize, int filetype, int co
     }
 #endif
 }
-#endif
 
-#if  defined  (HAVE_LIBNETCDF)
+
 static
 void cdfDefCurvilinear(stream_t *streamptr, int gridID)
 {
@@ -1902,9 +1876,8 @@ void cdfDefCurvilinear(stream_t *streamptr, int gridID)
   streamptr->ncyvarID[gridindex] = ncyvarid;
   streamptr->ncavarID[gridindex] = ncavarid;
 }
-#endif
 
-#if  defined  (HAVE_LIBNETCDF)
+
 static
 void cdfDefRgrid(stream_t *streamptr, int gridID)
 {
@@ -1968,9 +1941,8 @@ void cdfDefRgrid(stream_t *streamptr, int gridID)
   gridindex = vlistGridIndex(vlistID, gridID);
   streamptr->xdimID[gridindex] = dimID;
 }
-#endif
 
-#if  defined  (HAVE_LIBNETCDF)
+
 static
 void cdfDefGdim(stream_t *streamptr, int gridID)
 {
@@ -2052,9 +2024,8 @@ void cdfDefGdim(stream_t *streamptr, int gridID)
   gridindex = vlistGridIndex(vlistID, gridID);
   streamptr->xdimID[gridindex] = dimID;
 }
-#endif
 
-#if  defined  (HAVE_LIBNETCDF)
+
 static
 void cdfDefGridReference(stream_t *streamptr, int gridID)
 {
@@ -2284,9 +2255,8 @@ void cdfDefUnstructured(stream_t *streamptr, int gridID)
   streamptr->ncyvarID[gridindex] = ncyvarid;
   streamptr->ncavarID[gridindex] = ncavarid;
 }
-#endif
 
-#if  defined  (HAVE_LIBNETCDF)
+
 static
 void cdfDefVCT(stream_t *streamptr, int zaxisID)
 {
@@ -2371,9 +2341,8 @@ void cdfDefVCT(stream_t *streamptr, int zaxisID)
         }
     }
 }
-#endif
 
-#if  defined  (HAVE_LIBNETCDF)
+
 static
 void cdfDefZaxis(stream_t *streamptr, int zaxisID)
 {
@@ -2641,9 +2610,8 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
   if ( dimID != UNDEFID )
     streamptr->zaxisID[zaxisindex] = dimID;
 }
-#endif
 
-#if  defined  (HAVE_LIBNETCDF)
+
 static
 void cdfDefPole(stream_t *streamptr, int gridID)
 {
@@ -2674,9 +2642,8 @@ void cdfDefPole(stream_t *streamptr, int gridID)
 
   cdf_enddef(fileID);
 }
-#endif
 
-#if  defined  (HAVE_LIBNETCDF)
+
 static
 void cdfDefMapping(stream_t *streamptr, int gridID)
 {
@@ -2764,9 +2731,8 @@ void cdfDefMapping(stream_t *streamptr, int gridID)
       cdf_enddef(fileID);
     }
 }
-#endif
 
-#if  defined  (HAVE_LIBNETCDF)
+
 static
 void cdfDefGrid(stream_t *streamptr, int gridID)
 {
@@ -2869,9 +2835,8 @@ void cdfDefGrid(stream_t *streamptr, int gridID)
       Error("Unsupported grid type: %s", gridNamePtr(gridtype));
     }
 }
-#endif
 
-#if  defined  (HAVE_LIBNETCDF)
+
 static
 int cdfDefVar(stream_t *streamptr, int varID)
 {
@@ -3377,9 +3342,7 @@ void scale_add(size_t size, double *data, double addoffset, double scalefactor)
         }
     }
 }
-#endif
 
-#if defined (HAVE_LIBNETCDF)
 static
 void cdfGetSlapDescription(stream_t *streamptr, int varID, size_t (*start)[4], size_t (*count)[4])
 {
@@ -3529,9 +3492,7 @@ size_t cdfDoInputDataTransformationSP(size_t valueCount, float *data, bool haveM
 
   return missValCount;
 }
-#endif
 
-#if defined(HAVE_LIBNETCDF)
 static void
 cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarid, int dtype, long nvals, size_t xsize, size_t ysize, int swapxy, size_t *start, size_t *count, int memtype, const void *data, int nmiss)
 {
@@ -3715,9 +3676,8 @@ cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarid, int dtype, l
   if ( mdata_sp ) free(mdata_sp);
   if ( sdata_sp ) free(sdata_sp);
 }
-#endif
 
-#if  defined  (HAVE_LIBNETCDF)
+
 void cdf_write_var(stream_t *streamptr, int varID, int memtype, const void *data, int nmiss)
 {
   int fileID;
@@ -3816,9 +3776,8 @@ void cdf_write_var(stream_t *streamptr, int varID, int memtype, const void *data
   cdf_write_var_data(fileID, vlistID, varID, ncvarid, dtype, nvals, xsize, ysize, swapxy, start, count, memtype, data, nmiss);
 
 }
-#endif
 
-#if  defined  (HAVE_LIBNETCDF)
+
 void cdf_write_var_chunk(stream_t *streamptr, int varID, int memtype,
                          const int rect[][2], const void *data, int nmiss)
 {
@@ -3927,9 +3886,7 @@ void cdf_write_var_chunk(stream_t *streamptr, int varID, int memtype,
   cdf_write_var_data(fileID, vlistID, varID, ncvarid, dtype, nvals,
                      xsize, ysize, swapxy, start, count, memtype, data, nmiss);
 }
-#endif
 
-#if  defined  (HAVE_LIBNETCDF)
 static
 int set_validrangeDP(long gridsize, double *data, double missval, double validmin, double validmax)
 {
@@ -4027,9 +3984,7 @@ int set_validrangeSP(long gridsize, float *data, double missval, double validmin
 
   return (nmiss);
 }
-#endif
 
-#if  defined  (HAVE_LIBNETCDF)
 /*
 static
 size_t min_size(size_t a, size_t b)
@@ -4232,9 +4187,7 @@ void cdfGetSliceSlapDescription(stream_t *streamptr, int varId, int levelId, boo
   if ( nvdims != ndims )
     Error("Internal error, variable %s has an unsupported array structure!", vlistInqVarNamePtr(vlistId, varId));
 }
-#endif
 
-#if  defined  (HAVE_LIBNETCDF)
 void cdfReadVarDP(stream_t *streamptr, int varID, double *data, int *nmiss)
 {
   if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamptr->self, varID);
@@ -4269,10 +4222,7 @@ void cdfReadVarDP(stream_t *streamptr, int varID, double *data, int *nmiss)
   double scalefactor = vlistInqVarScalefactor(vlistID, varID);
   (void) cdfDoInputDataTransformationDP(size, data, haveMissval, missval, scalefactor, addoffset);
 }
-#endif
 
-
-#if  defined  (HAVE_LIBNETCDF)
 void cdfReadVarSP(stream_t *streamptr, int varID, float *data, int *nmiss)
 {
   if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamptr->self, varID);
@@ -4307,9 +4257,7 @@ void cdfReadVarSP(stream_t *streamptr, int varID, float *data, int *nmiss)
   double scalefactor  = vlistInqVarScalefactor(vlistID, varID);
   (void) cdfDoInputDataTransformationSP(size, data, haveMissval, missval, scalefactor, addoffset);
 }
-#endif
 
-#if  defined  (HAVE_LIBNETCDF)
 void cdfReadVarSliceDP(stream_t *streamptr, int varID, int levelID, double *data, int *nmiss)
 {
   int i;
@@ -4372,10 +4320,8 @@ void cdfReadVarSliceDP(stream_t *streamptr, int varID, int levelID, double *data
   double scalefactor = vlistInqVarScalefactor(vlistID, varID);
   (void) cdfDoInputDataTransformationDP(gridsize, data, haveMissval, missval, scalefactor, addoffset);
 }
-#endif
 
 
-#if  defined  (HAVE_LIBNETCDF)
 void cdfReadVarSliceSP(stream_t *streamptr, int varID, int levelID, float *data, int *nmiss)
 {
   size_t start[4];
@@ -4437,10 +4383,8 @@ void cdfReadVarSliceSP(stream_t *streamptr, int varID, int levelID, float *data,
   double scalefactor = vlistInqVarScalefactor(vlistID, varID);
   (void ) cdfDoInputDataTransformationSP(gridsize, data, haveMissval, missval, scalefactor, addoffset);
 }
-#endif
 
 
-#if  defined  (HAVE_LIBNETCDF)
 void cdf_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, const void *data, int nmiss)
 {
   int fileID;
@@ -4544,9 +4488,8 @@ void cdf_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
   cdf_write_var_data(fileID, vlistID, varID, ncvarid, dtype, nvals, xsize, ysize, swapxy, start, count, memtype, data, nmiss);
 
 }
-#endif
 
-#if  defined  (HAVE_LIBNETCDF)
+
 static
 void cdfCreateRecords(stream_t *streamptr, int tsID)
 {
@@ -4668,9 +4611,8 @@ void cdfCreateRecords(stream_t *streamptr, int tsID)
              (size_t)nvrecs * sizeof (int));
     }
 }
-#endif
 
-#if  defined  (HAVE_LIBNETCDF)
+
 static
 int cdfTimeDimID(int fileID, int ndims, int nvars)
 {
@@ -5057,7 +4999,6 @@ void printNCvars(ncvar_t *ncvars, int nvars, const char *oname)
       fprintf(stderr, "%3d %3d  %-6s %s\n", ncvarid, ndim-3, axis, ncvars[ncvarid].name);
     }
 }
-#endif
 
 typedef struct
 {
@@ -5067,7 +5008,6 @@ typedef struct
 varinfo_t;
 
 
-#ifdef HAVE_LIBNETCDF
 static
 int cmpvarname(const void *s1, const void *s2)
 {
@@ -7475,9 +7415,7 @@ void find_time_vars(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimid, 
         }
     }
 }
-#endif
 
-#if  defined  (HAVE_LIBNETCDF)
 int cdfInqContents(stream_t *streamptr)
 {
   int ndims, nvars, ngatts, unlimdimid;
@@ -7983,9 +7921,7 @@ int cdfInqContents(stream_t *streamptr)
 
   return (0);
 }
-#endif
 
-#if  defined  (HAVE_LIBNETCDF)
 static
 void wrf_read_timestep(int fileID, int nctimevarid, int tsID, taxis_t *taxis)
 {
@@ -8041,9 +7977,7 @@ double get_timevalue(int fileID, int nctimevarid, int tsID, timecache_t *tcache)
 
   return timevalue;
 }
-#endif
 
-#if  defined  (HAVE_LIBNETCDF)
 int cdfInqTimestep(stream_t * streamptr, int tsID)
 {
   long nrecs = 0;
@@ -8120,10 +8054,8 @@ int cdfInqTimestep(stream_t * streamptr, int tsID)
 
   return ((int) nrecs);
 }
-#endif
 
 
-#if  defined  (HAVE_LIBNETCDF)
 void cdfEndDef(stream_t *streamptr)
 {
   int varID;
@@ -8157,10 +8089,8 @@ void cdfEndDef(stream_t *streamptr)
       streamptr->accessmode = 1;
     }
 }
-#endif
 
 
-#if  defined  (HAVE_LIBNETCDF)
 static void cdfDefInstitut(stream_t *streamptr)
 {
   int fileID, instID;
@@ -8187,10 +8117,8 @@ static void cdfDefInstitut(stream_t *streamptr)
 	}
     }
 }
-#endif
 
 
-#if  defined  (HAVE_LIBNETCDF)
 static void cdfDefSource(stream_t *streamptr)
 {
   int vlistID = streamptr->vlistID;
@@ -8268,19 +8196,15 @@ static void cdfDefLocalAtts(stream_t *streamptr)
 
   if ( streamptr->ncmode == 2 ) cdf_enddef(fileID);
 }
-#endif
 
 
-#if  defined  (HAVE_LIBNETCDF)
 void cdfDefHistory(stream_t *streamptr, int size, const char *history)
 {
   int ncid = streamptr->fileID;
   cdf_put_att_text(ncid, NC_GLOBAL, "history", (size_t) size, history);
 }
-#endif
 
 
-#if  defined  (HAVE_LIBNETCDF)
 int cdfInqHistorySize(stream_t *streamptr)
 {
   size_t size = 0;
@@ -8290,20 +8214,16 @@ int cdfInqHistorySize(stream_t *streamptr)
 
   return ((int) size);
 }
-#endif
 
 
-#if  defined  (HAVE_LIBNETCDF)
 void cdfInqHistoryString(stream_t *streamptr, char *history)
 {
   int ncid = streamptr->fileID;
   if ( streamptr->historyID != UNDEFID )
     cdf_get_att_text(ncid, NC_GLOBAL, "history", history);
 }
-#endif
 
 
-#if  defined  (HAVE_LIBNETCDF)
 void cdfDefVars(stream_t *streamptr)
 {
   int index, gridID, zaxisID, vlistID;
