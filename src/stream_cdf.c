@@ -8241,13 +8241,8 @@ static void cdfDefGlobalAtts(stream_t *streamptr)
 
 static void cdfDefLocalAtts(stream_t *streamptr)
 {
-  int varID, instID, fileID;
-  size_t len;
-  int ncvarid;
-  int vlistID;
-
-  vlistID = streamptr->vlistID;
-  fileID  = streamptr->fileID;
+  int vlistID = streamptr->vlistID;
+  int fileID  = streamptr->fileID;
 
   if ( streamptr->localatts ) return;
   if ( vlistInqInstitut(vlistID) != UNDEFID ) return;
@@ -8256,16 +8251,16 @@ static void cdfDefLocalAtts(stream_t *streamptr)
 
   if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
-  for ( varID = 0; varID < streamptr->nvars; varID++ )
+  for ( int varID = 0; varID < streamptr->nvars; varID++ )
     {
-      instID = vlistInqVarInstitut(vlistID, varID);
+      int instID = vlistInqVarInstitut(vlistID, varID);
       if ( instID != UNDEFID )
 	{
-          ncvarid = streamptr->vars[varID].ncvarid;
+          int ncvarid = streamptr->vars[varID].ncvarid;
   	  const char *name = institutInqNamePtr(instID);
 	  if ( name )
 	    {
-	      len = strlen(name);
+              size_t len = strlen(name);
 	      cdf_put_att_text(fileID, ncvarid, "institution", len, name);
 	    }
 	}
