@@ -621,6 +621,7 @@ void cdfCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
 
   free(data);
 }
+#endif
 
 /* not used
 int cdfInqRecord(stream_t *streamptr, int *varID, int *levelID)
