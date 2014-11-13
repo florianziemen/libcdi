@@ -2116,7 +2116,7 @@ module mo_cdi
           import :: c_int
           integer(kind=c_int), value :: gridID
           integer(kind=c_int), value :: nrowlon
-          integer(kind=c_int), intent(in),dimension(*) :: rowlon_vec
+          integer(kind=c_int), intent(in),dimension(nrowlon) :: rowlon_vec
         end subroutine gridDefRowlon
       end interface
       interface

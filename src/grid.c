@@ -1266,7 +1266,7 @@ int gridInqNP(int gridID)
 
 @EndFunction
 */
-void gridDefRowlon(int gridID, int nrowlon, const int *rowlon)
+void gridDefRowlon(int gridID, int nrowlon, const int rowlon[nrowlon])
 {
   grid_t *gridptr = ( grid_t *) reshGetVal ( gridID, &gridOps );
 
