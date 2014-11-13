@@ -8303,9 +8303,9 @@ void cdfInqHistoryString(stream_t *streamptr, char *history)
 #endif
 
 
+#if  defined  (HAVE_LIBNETCDF)
 void cdfDefVars(stream_t *streamptr)
 {
-#if  defined  (HAVE_LIBNETCDF)
   int index, gridID, zaxisID, vlistID;
   int ngrids, nzaxis;
   /* int  nvars, ncvarid; */
@@ -8338,8 +8338,8 @@ void cdfDefVars(stream_t *streamptr)
       ncvarid = cdfDefVar(streamptr, varID);
     }
   */
-#endif
 }
+#endif
 /*
  * Local Variables:
  * c-file-style: "Java"
