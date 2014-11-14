@@ -595,20 +595,13 @@ void defineAttributes(int vlistID, int varID, int fileID, int ncvarID)
 
 void cdfCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
 {
-  int memtype = MEMTYPE_DOUBLE;
+  int memtype  = MEMTYPE_DOUBLE;
   int vlistID1 = streamptr1->vlistID;
-
-  int tsID1 = streamptr1->curTsID;
-
-  int recID1 = streamptr1->tsteps[tsID1].curRecID;
-
-  int ivarID = streamptr1->tsteps[tsID1].records[recID1].varID;
-
-  int gridID = vlistInqVarGrid(vlistID1, ivarID);
-
+  int tsID1    = streamptr1->curTsID;
+  int recID1   = streamptr1->tsteps[tsID1].curRecID;
+  int ivarID   = streamptr1->tsteps[tsID1].records[recID1].varID;
+  int gridID   = vlistInqVarGrid(vlistID1, ivarID);
   int datasize = gridInqSize(gridID);
-  /* bug fix for constant netCDF fields */
-  if ( datasize < 1048576 ) datasize = 1048576;
 
   double *data = xmalloc((size_t)datasize * sizeof (double));
 
