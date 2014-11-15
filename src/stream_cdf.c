@@ -6623,34 +6623,7 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
               if ( gridfile[0] != 0 ) gridDefReference(ncvars[ncvarid].gridID, gridfile);
             }
 
-          printf("chunktype = %d %d %d %d\n", ncvars[ncvarid].chunktype, CHUNK_GRID, CHUNK_LINES, CHUNK_AUTO);
           if ( ncvars[ncvarid].chunked ) grid_set_chunktype(&grid, &ncvars[ncvarid]);
-          /*
-          if ( ncvars[ncvarid].chunked ) 
-            {
-              ndims = ncvars[ncvarid].ndims;
-
-              if ( grid.type == GRID_UNSTRUCTURED )
-                {
-                  if ( ncvars[ncvarid].chunks[ndims-1] == grid.size )
-                    ncvars[ncvarid].chunktype = CHUNK_GRID;
-                  else
-                    ncvars[ncvarid].chunktype = CHUNK_AUTO;
-                }
-              else
-                {
-                  if ( grid.xsize > 1 && grid.ysize > 1 && ndims > 1 &&
-                       grid.xsize == ncvars[ncvarid].chunks[ndims-1] &&
-                       grid.ysize == ncvars[ncvarid].chunks[ndims-2] )
-                    ncvars[ncvarid].chunktype = CHUNK_GRID;
-                  else if ( grid.xsize > 1 && grid.xsize == ncvars[ncvarid].chunks[ndims-1] )
-                    ncvars[ncvarid].chunktype = CHUNK_LINES;
-                  else
-                    ncvars[ncvarid].chunktype = CHUNK_AUTO;
-                }
-            }
-          */
-          printf("chunktype = %d %d %d %d\n", ncvars[ncvarid].chunktype, CHUNK_GRID, CHUNK_LINES, CHUNK_AUTO);
 
 	  gridindex = vlistGridIndex(vlistID, ncvars[ncvarid].gridID);
 	  streamptr->xdimID[gridindex] = xdimid;
