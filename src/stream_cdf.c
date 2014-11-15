@@ -5964,6 +5964,34 @@ void copy_numeric_projatts(int gridID, int ncvarID, int ncfileID)
 }
 #endif
 
+static
+void grid_set_chunktype(grid_t *grid, ncvar_t *ncvar)
+{
+  if ( ncvar->chunked )
+    {
+      int ndims = ncvar->ndims;
+
+      if ( grid->type == GRID_UNSTRUCTURED )
+        {
+          if ( ncvar->chunks[ndims-1] == grid->size )
+            ncvar->chunktype = CHUNK_GRID;
+          else
+            ncvar->chunktype = CHUNK_AUTO;
+        }
+      else
+        {
+          if ( grid->xsize > 1 && grid->ysize > 1 && ndims > 1 &&
+               grid->xsize == ncvar->chunks[ndims-1] &&
+               grid->ysize == ncvar->chunks[ndims-2] )
+            ncvar->chunktype = CHUNK_GRID;
+          else if ( grid->xsize > 1 && grid->xsize == ncvar->chunks[ndims-1] )
+            ncvar->chunktype = CHUNK_LINES;
+          else
+            ncvar->chunktype = CHUNK_AUTO;
+        }
+    }
+}
+
 /* define all input grids */
 static
 void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars, int timedimid, unsigned char *uuidOfHGrid, char *gridfile, int number_of_grid_used)
@@ -6595,7 +6623,10 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
               if ( gridfile[0] != 0 ) gridDefReference(ncvars[ncvarid].gridID, gridfile);
             }
 
-          if ( ncvars[ncvarid].chunked )
+          printf("chunktype = %d %d %d %d\n", ncvars[ncvarid].chunktype, CHUNK_GRID, CHUNK_LINES, CHUNK_AUTO);
+          if ( ncvars[ncvarid].chunked ) grid_set_chunktype(&grid, &ncvars[ncvarid]);
+          /*
+          if ( ncvars[ncvarid].chunked ) 
             {
               ndims = ncvars[ncvarid].ndims;
 
@@ -6618,6 +6649,8 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
                     ncvars[ncvarid].chunktype = CHUNK_AUTO;
                 }
             }
+          */
+          printf("chunktype = %d %d %d %d\n", ncvars[ncvarid].chunktype, CHUNK_GRID, CHUNK_LINES, CHUNK_AUTO);
 
 	  gridindex = vlistGridIndex(vlistID, ncvars[ncvarid].gridID);
 	  streamptr->xdimID[gridindex] = xdimid;
