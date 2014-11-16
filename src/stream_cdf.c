@@ -4750,25 +4750,26 @@ static
 int isLonAxis(const char *units, const char *stdname)
 {
   int status = FALSE;
-  char degree_units[16];
+  char lc_units[16];
 
-  memcpy(degree_units, units, 16);
-  degree_units[15] = 0;
-  strtolower(degree_units);
+  memcpy(lc_units, units, 15);
+  lc_units[15] = 0;
+  strtolower(lc_units);
 
-  if ( memcmp(degree_units, "degree", 6) == 0 )
-    {
-      int ioff = 6;
-      if ( degree_units[ioff] == 's' ) ioff++;
-      if ( degree_units[ioff] == '_' ) ioff++;
-      if ( degree_units[ioff] == 'e' ) status = TRUE;
-    }
-
-  if ( status == FALSE &&
-       ((memcmp(units, "degree", 6) == 0 ||memcmp(units, "radian", 6) == 0) &&
+  if ( ((memcmp(lc_units, "degree", 6) == 0 || memcmp(lc_units, "radian", 6) == 0) &&
         (memcmp(stdname, "grid_longitude", 14) == 0 || memcmp(stdname, "longitude", 9) == 0)) )
     {
       status = TRUE;
+    }
+
+  if ( status == FALSE &&
+       memcmp(stdname, "grid_latitude", 13) && memcmp(stdname, "latitude", 8) &&
+       memcmp(lc_units, "degree", 6) == 0 )
+    {
+      int ioff = 6;
+      if ( lc_units[ioff] == 's' ) ioff++;
+      if ( lc_units[ioff] == '_' ) ioff++;
+      if ( lc_units[ioff] == 'e' ) status = TRUE;
     }
 
   return (status);
@@ -4778,25 +4779,26 @@ static
 int isLatAxis(const char *units, const char *stdname)
 {
   int status = FALSE;
-  char degree_units[16];
+  char lc_units[16];
 
-  memcpy(degree_units, units, 16);
-  degree_units[15] = 0;
-  strtolower(degree_units);
+  memcpy(lc_units, units, 15);
+  lc_units[15] = 0;
+  strtolower(lc_units);
 
-  if ( memcmp(degree_units, "degree", 6) == 0 )
-    {
-      int ioff = 6;
-      if ( degree_units[ioff] == 's' ) ioff++;
-      if ( degree_units[ioff] == '_' ) ioff++;
-      if ( degree_units[ioff] == 'n' ) status = TRUE;
-    }
-
-  if ( status == FALSE &&
-       ((memcmp(units, "degree", 6) == 0 || memcmp(units, "radian", 6) == 0) &&
+  if ( ((memcmp(lc_units, "degree", 6) == 0 || memcmp(lc_units, "radian", 6) == 0) &&
         (memcmp(stdname, "grid_latitude", 13) == 0 || memcmp(stdname, "latitude", 8) == 0)) )
     {
       status = TRUE;
+    }
+
+  if ( status == FALSE &&
+       memcmp(stdname, "grid_longitude", 14) && memcmp(stdname, "longitude", 9) &&
+       memcmp(lc_units, "degree", 6) == 0 )
+    {
+      int ioff = 6;
+      if ( lc_units[ioff] == 's' ) ioff++;
+      if ( lc_units[ioff] == '_' ) ioff++;
+      if ( lc_units[ioff] == 'n' ) status = TRUE;
     }
 
   return (status);
@@ -7027,15 +7029,14 @@ void define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, 
 
       if ( ncvars[ncvarid].natts )
 	{
-	  int nvatts;
 	  int attnum;
 	  int iatt;
 	  nc_type attrtype;
 	  size_t attlen;
 	  char attname[CDI_MAX_NAME];
 	  const int attstringlen = 8192; char attstring[8192];
+	  int nvatts = ncvars[ncvarid].natts;
 
-	  nvatts = ncvars[ncvarid].natts;
 	  for ( iatt = 0; iatt < nvatts; iatt++ )
 	    {
 	      attnum = ncvars[ncvarid].atts[iatt];
@@ -7045,41 +7046,32 @@ void define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, 
 
 	      if ( attrtype == NC_SHORT || attrtype == NC_INT )
 		{
-		  int *attint;
-		  attint = (int *) malloc(attlen*sizeof(int));
+		  int *attint = (int *) malloc(attlen*sizeof(int));
 		  cdfGetAttInt(ncid, ncvarid, attname, (int)attlen, attint);
 		  if ( attrtype == NC_SHORT )
 		    vlistDefAttInt(vlistID, varID, attname, DATATYPE_INT16, (int)attlen, attint);
 		  else
 		    vlistDefAttInt(vlistID, varID, attname, DATATYPE_INT32, (int)attlen, attint);
-		  if ( CDI_Debug )
-		    printf("int: %s.%s = %d\n", ncvars[ncvarid].name, attname, attint[0]);
 		  free(attint);
 		}
 	      else if ( attrtype == NC_FLOAT || attrtype == NC_DOUBLE )
 		{
-		  double *attflt;
-		  attflt = (double *) malloc(attlen*sizeof(double));
+		  double *attflt = (double *) malloc(attlen*sizeof(double));
 		  cdfGetAttDouble(ncid, ncvarid, attname, (int)attlen, attflt);
 		  if ( attrtype == NC_FLOAT )
 		    vlistDefAttFlt(vlistID, varID, attname, DATATYPE_FLT32, (int)attlen, attflt);
 		  else
 		    vlistDefAttFlt(vlistID, varID, attname, DATATYPE_FLT64, (int)attlen, attflt);
-		  if ( CDI_Debug )
-		    printf("flt: %s.%s = %g\n", ncvars[ncvarid].name, attname, attflt[0]);
 		  free(attflt);
 		}
 	      else if ( xtypeIsText(attrtype) )
 		{
 		  cdfGetAttText(ncid, ncvarid, attname, attstringlen-1, attstring);
 		  vlistDefAttTxt(vlistID, varID, attname, (int)attlen, attstring);
-		  if ( CDI_Debug )
-		    printf("txt: %s.%s = %s\n", ncvars[ncvarid].name, attname, attstring);
 		}
 	      else
 		{
-		  if ( CDI_Debug )
-		    printf("att: %s.%s = unknown\n", ncvars[ncvarid].name, attname);
+		  if ( CDI_Debug ) printf("att: %s.%s = unknown\n", ncvars[ncvarid].name, attname);
 		}
 	    }
 
