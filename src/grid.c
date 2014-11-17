@@ -3995,6 +3995,10 @@ gridGetPackSize(void * voidP, void *context)
   return packBuffSize;
 }
 
+#define GRID_STR_SERIALIZE { gridP->xname, gridP->yname, \
+    gridP->xlongname, gridP->ylongname, \
+    gridP->xstdname, gridP->ystdname, \
+    gridP->xunits, gridP->yunits }
 
 void
 gridUnpack(char * unpackBuffer, int unpackBufferSize,
@@ -4164,15 +4168,12 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
                   &d, 1, DATATYPE_UINT32, context);
 
   xassert(d == cdiCheckSum(DATATYPE_TXT, gridNstrings * CDI_MAX_NAME, charBuffer));
-
-  memcpy ( gridP->xname    , &charBuffer[CDI_MAX_NAME * 0], CDI_MAX_NAME );
-  memcpy ( gridP->yname    , &charBuffer[CDI_MAX_NAME * 1], CDI_MAX_NAME );
-  memcpy ( gridP->xlongname, &charBuffer[CDI_MAX_NAME * 2], CDI_MAX_NAME );
-  memcpy ( gridP->ylongname, &charBuffer[CDI_MAX_NAME * 3], CDI_MAX_NAME );
-  memcpy ( gridP->xstdname , &charBuffer[CDI_MAX_NAME * 4], CDI_MAX_NAME );
-  memcpy ( gridP->ystdname , &charBuffer[CDI_MAX_NAME * 5], CDI_MAX_NAME );
-  memcpy ( gridP->xunits   , &charBuffer[CDI_MAX_NAME * 6], CDI_MAX_NAME );
-  memcpy ( gridP->yunits   , &charBuffer[CDI_MAX_NAME * 7], CDI_MAX_NAME );
+  {
+    char *strTab[] = GRID_STR_SERIALIZE;
+    size_t numStr = sizeof (strTab) / sizeof (strTab[0]);
+    for (size_t i = 0; i < numStr; ++i)
+      memcpy(strTab[i], charBuffer + CDI_MAX_NAME * i, CDI_MAX_NAME);
+  }
 
   if (memberMask & gridHasReferenceFlag)
     {
@@ -4375,14 +4376,12 @@ gridPack(void * voidP, void * packBuffer, int packBufferSize,
                     packBuffer, packBufferSize, packBufferPos, context);
     }
 
-  memcpy ( &charBuffer[CDI_MAX_NAME * 0], gridP->xname,     CDI_MAX_NAME );
-  memcpy ( &charBuffer[CDI_MAX_NAME * 1], gridP->yname,     CDI_MAX_NAME );
-  memcpy ( &charBuffer[CDI_MAX_NAME * 2], gridP->xlongname, CDI_MAX_NAME );
-  memcpy ( &charBuffer[CDI_MAX_NAME * 3], gridP->ylongname, CDI_MAX_NAME );
-  memcpy ( &charBuffer[CDI_MAX_NAME * 4], gridP->xstdname,  CDI_MAX_NAME );
-  memcpy ( &charBuffer[CDI_MAX_NAME * 5], gridP->ystdname,  CDI_MAX_NAME );
-  memcpy ( &charBuffer[CDI_MAX_NAME * 6], gridP->xunits,    CDI_MAX_NAME );
-  memcpy ( &charBuffer[CDI_MAX_NAME * 7], gridP->yunits,    CDI_MAX_NAME );
+  {
+    char *strTab[] = GRID_STR_SERIALIZE;
+    size_t numStr = sizeof (strTab) / sizeof (strTab[0]);
+    for (size_t i = 0; i < numStr; ++i)
+      memcpy(charBuffer + CDI_MAX_NAME * i, strTab[i], CDI_MAX_NAME);
+  }
 
   serializePack( charBuffer, gridNstrings * CDI_MAX_NAME, DATATYPE_TXT,
 		    packBuffer, packBufferSize, packBufferPos, context);
