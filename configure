@@ -699,6 +699,7 @@ ax_pthread_config
 SYSTEM_TYPE
 HOST_NAME
 USER_NAME
+UUID_C_LIB
 AS
 CXXCPP
 am__fastdepCXX_FALSE
@@ -24323,24 +24324,13 @@ fi
 
 #  ----------------------------------------------------------------------
 # Checks for header files
-for ac_header in malloc.h
+for ac_header in malloc.h execinfo.h uuid.h uuid/uuid.h
 do :
-  ac_fn_c_check_header_mongrel "$LINENO" "malloc.h" "ac_cv_header_malloc_h" "$ac_includes_default"
-if test "x$ac_cv_header_malloc_h" = xyes; then :
+  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
+ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
+if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
   cat >>confdefs.h <<_ACEOF
-#define HAVE_MALLOC_H 1
-_ACEOF
-
-fi
-
-done
-
-for ac_header in execinfo.h
-do :
-  ac_fn_c_check_header_mongrel "$LINENO" "execinfo.h" "ac_cv_header_execinfo_h" "$ac_includes_default"
-if test "x$ac_cv_header_execinfo_h" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_EXECINFO_H 1
+#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
 _ACEOF
 
 fi
@@ -24370,6 +24360,89 @@ _ACEOF
 
 fi
 done
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for uuid_generate in -luuid" >&5
+$as_echo_n "checking for uuid_generate in -luuid... " >&6; }
+if ${ac_cv_lib_uuid_uuid_generate+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-luuid  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char uuid_generate ();
+int
+main ()
+{
+return uuid_generate ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_uuid_uuid_generate=yes
+else
+  ac_cv_lib_uuid_uuid_generate=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_uuid_uuid_generate" >&5
+$as_echo "$ac_cv_lib_uuid_uuid_generate" >&6; }
+if test "x$ac_cv_lib_uuid_uuid_generate" = xyes; then :
+  ac_fn_c_check_decl "$LINENO" "uuid_generate" "ac_cv_have_decl_uuid_generate" "$ac_includes_default
+#include <uuid/uuid.h>
+"
+if test "x$ac_cv_have_decl_uuid_generate" = xyes; then :
+  ac_have_decl=1
+else
+  ac_have_decl=0
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_UUID_GENERATE $ac_have_decl
+_ACEOF
+if test $ac_have_decl = 1; then :
+  UUID_C_LIB=-luuid
+fi
+
+else
+  for ac_func in uuid_create
+do :
+  ac_fn_c_check_func "$LINENO" "uuid_create" "ac_cv_func_uuid_create"
+if test "x$ac_cv_func_uuid_create" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_UUID_CREATE 1
+_ACEOF
+ ac_fn_c_check_decl "$LINENO" "uuid_create" "ac_cv_have_decl_uuid_create" "$ac_includes_default
+#include <uuid.h>
+"
+if test "x$ac_cv_have_decl_uuid_create" = xyes; then :
+  ac_have_decl=1
+else
+  ac_have_decl=0
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_UUID_CREATE $ac_have_decl
+_ACEOF
+if test $ac_have_decl = 1; then :
+  UUID_C_LIB=""
+fi
+
+fi
+done
+
+fi
+
 
 #  ----------------------------------------------------------------------
 # Checks for the availability of ANSI-C99 functions

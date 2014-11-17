@@ -22,24 +22,26 @@ cksum_read_SOURCES = cksum_read.c \
 	stream_cksum.c stream_cksum.h \
 	ensure_array_size.h ensure_array_size.c
 pio_write_SOURCES = pio_write.c pio_write.h simple_model.c \
-	simple_model_helper.h simple_model_helper.c
+	simple_model_helper.h simple_model_helper.c \
+	create_uuid.h create_uuid.c
 pio_write_deco2d_SOURCES = pio_write.c pio_write.h deco2d_model.c \
-	simple_model_helper.h simple_model_helper.c
+	simple_model_helper.h simple_model_helper.c \
+	create_uuid.h create_uuid.c
 test_resource_copy_SOURCES = test_resource_copy.c \
 	$(top_srcdir)/src/resource_unpack.c
 test_resource_copy_mpi_SOURCES = test_resource_copy.c
 #
 AM_CFLAGS = $(PPM_CORE_CFLAGS) $(YAXT_CFLAGS)
 if USE_MPI
-pio_write_LDADD = ../src/libcdipio.la
-pio_write_deco2d_LDADD = ../src/libcdipio.la
+pio_write_LDADD = ../src/libcdipio.la $(UUID_C_LIB)
+pio_write_deco2d_LDADD = ../src/libcdipio.la $(UUID_C_LIB)
 TESTS +=  test_resource_copy_mpi_run
 check_PROGRAMS += test_resource_copy_mpi
 test_resource_copy_mpi_LDADD = ../src/libcdipio.la
 test_resource_copy_mpi_CFLAGS = $(AM_CFLAGS) $(CFLAGS) -DMPI_MARSHALLING
 else
-pio_write_LDADD = $(LDADD)
-pio_write_deco2d_LDADD = $(LDADD)
+pio_write_LDADD = $(LDADD) $(UUID_C_LIB)
+pio_write_deco2d_LDADD = $(LDADD) $(UUID_C_LIB)
 endif
 
 LDADD = ../src/libcdi.la -lm

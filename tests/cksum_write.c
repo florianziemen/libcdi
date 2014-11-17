@@ -216,6 +216,28 @@ main(int argc, char *argv[])
   zaxisID[1] = zaxisCreate(ZAXIS_PRESSURE, nlev);
   zaxisDefLevels(zaxisID[1], levs);
 
+  /* add uuids to zaxis and grid */
+  {
+    unsigned char uuid[16];
+    int str2uuid(const char *uuidstr, unsigned char *uuid);
+
+    static char gridUUIDTxt[] = "107d7a5b-348c-4d1a-90a9-d745914f2fb6";
+
+    str2uuid(gridUUIDTxt, uuid);
+    gridDefUUID(gridID, uuid);
+
+    static char zaxisUUIDTxt[2][37] = {
+      { "d157f399-5496-4097-a3d8-437a6dda6311" },
+      { "6f784a65-bce8-48c9-afa4-4c40130709c7" }
+    };
+
+    for (int i = 0; i < 2; ++i)
+      {
+        str2uuid(zaxisUUIDTxt[i], uuid);
+        zaxisDefUUID(zaxisID[i], uuid);
+      }
+  }
+
   // Create a Time axis
   taxisID = taxisCreate(TAXIS_ABSOLUTE);
 
@@ -241,7 +263,7 @@ main(int argc, char *argv[])
   // Assign the Time axis to the variable list
   vlistDefTaxis(vlistID, taxisID);
 
-  // Create a dataset in netCDF fromat
+  // Create a dataset
   {
     char *fname = fname_create(prefix, suffix);
     if ((streamID = streamOpenWrite(fname, filetype)) < 0)

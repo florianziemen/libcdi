@@ -153,16 +153,22 @@ cksum_write_chunk_OBJECTS = $(am_cksum_write_chunk_OBJECTS)
 cksum_write_chunk_LDADD = $(LDADD)
 cksum_write_chunk_DEPENDENCIES = ../src/libcdi.la
 am_pio_write_OBJECTS = pio_write.$(OBJEXT) simple_model.$(OBJEXT) \
-	simple_model_helper.$(OBJEXT)
+	simple_model_helper.$(OBJEXT) create_uuid.$(OBJEXT)
 pio_write_OBJECTS = $(am_pio_write_OBJECTS)
 am__DEPENDENCIES_1 = ../src/libcdi.la
-@USE_MPI_FALSE@pio_write_DEPENDENCIES = $(am__DEPENDENCIES_1)
-@USE_MPI_TRUE@pio_write_DEPENDENCIES = ../src/libcdipio.la
+am__DEPENDENCIES_2 =
+@USE_MPI_FALSE@pio_write_DEPENDENCIES = $(am__DEPENDENCIES_1) \
+@USE_MPI_FALSE@	$(am__DEPENDENCIES_2)
+@USE_MPI_TRUE@pio_write_DEPENDENCIES = ../src/libcdipio.la \
+@USE_MPI_TRUE@	$(am__DEPENDENCIES_2)
 am_pio_write_deco2d_OBJECTS = pio_write.$(OBJEXT) \
-	deco2d_model.$(OBJEXT) simple_model_helper.$(OBJEXT)
+	deco2d_model.$(OBJEXT) simple_model_helper.$(OBJEXT) \
+	create_uuid.$(OBJEXT)
 pio_write_deco2d_OBJECTS = $(am_pio_write_deco2d_OBJECTS)
-@USE_MPI_FALSE@pio_write_deco2d_DEPENDENCIES = $(am__DEPENDENCIES_1)
-@USE_MPI_TRUE@pio_write_deco2d_DEPENDENCIES = ../src/libcdipio.la
+@USE_MPI_FALSE@pio_write_deco2d_DEPENDENCIES = $(am__DEPENDENCIES_1) \
+@USE_MPI_FALSE@	$(am__DEPENDENCIES_2)
+@USE_MPI_TRUE@pio_write_deco2d_DEPENDENCIES = ../src/libcdipio.la \
+@USE_MPI_TRUE@	$(am__DEPENDENCIES_2)
 am_test_grib_OBJECTS = test_grib.$(OBJEXT)
 test_grib_OBJECTS = $(am_test_grib_OBJECTS)
 test_grib_LDADD = $(LDADD)
@@ -396,6 +402,7 @@ THREADS_INCLUDE = @THREADS_INCLUDE@
 THREADS_LIBS = @THREADS_LIBS@
 USER_NAME = @USER_NAME@
 USE_MPI = @USE_MPI@
+UUID_C_LIB = @UUID_C_LIB@
 VERSION = @VERSION@
 YAXT_CFLAGS = @YAXT_CFLAGS@
 YAXT_LIBS = @YAXT_LIBS@
@@ -470,10 +477,12 @@ cksum_read_SOURCES = cksum_read.c \
 	ensure_array_size.h ensure_array_size.c
 
 pio_write_SOURCES = pio_write.c pio_write.h simple_model.c \
-	simple_model_helper.h simple_model_helper.c
+	simple_model_helper.h simple_model_helper.c \
+	create_uuid.h create_uuid.c
 
 pio_write_deco2d_SOURCES = pio_write.c pio_write.h deco2d_model.c \
-	simple_model_helper.h simple_model_helper.c
+	simple_model_helper.h simple_model_helper.c \
+	create_uuid.h create_uuid.c
 
 test_resource_copy_SOURCES = test_resource_copy.c \
 	$(top_srcdir)/src/resource_unpack.c
@@ -481,10 +490,10 @@ test_resource_copy_SOURCES = test_resource_copy.c \
 test_resource_copy_mpi_SOURCES = test_resource_copy.c
 #
 AM_CFLAGS = $(PPM_CORE_CFLAGS) $(YAXT_CFLAGS)
-@USE_MPI_FALSE@pio_write_LDADD = $(LDADD)
-@USE_MPI_TRUE@pio_write_LDADD = ../src/libcdipio.la
-@USE_MPI_FALSE@pio_write_deco2d_LDADD = $(LDADD)
-@USE_MPI_TRUE@pio_write_deco2d_LDADD = ../src/libcdipio.la
+@USE_MPI_FALSE@pio_write_LDADD = $(LDADD) $(UUID_C_LIB)
+@USE_MPI_TRUE@pio_write_LDADD = ../src/libcdipio.la $(UUID_C_LIB)
+@USE_MPI_FALSE@pio_write_deco2d_LDADD = $(LDADD) $(UUID_C_LIB)
+@USE_MPI_TRUE@pio_write_deco2d_LDADD = ../src/libcdipio.la $(UUID_C_LIB)
 @USE_MPI_TRUE@test_resource_copy_mpi_LDADD = ../src/libcdipio.la
 @USE_MPI_TRUE@test_resource_copy_mpi_CFLAGS = $(AM_CFLAGS) $(CFLAGS) -DMPI_MARSHALLING
 LDADD = ../src/libcdi.la -lm
@@ -619,6 +628,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cksum_verify.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cksum_write.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cksum_write_chunk.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/create_uuid.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/deco2d_model.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ensure_array_size.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_write.Po@am__quote@
