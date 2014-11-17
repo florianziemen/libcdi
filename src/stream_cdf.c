@@ -3426,7 +3426,7 @@ size_t cdfDoInputDataTransformationDP(size_t valueCount, double *data, bool have
       break;
     case 1: /* haveMissval */
       for ( size_t i = 0; i < valueCount; i++ )
-        missValCount += DBL_IS_EQUAL(data[i], missVal);
+        missValCount += (unsigned)DBL_IS_EQUAL(data[i], missVal);
       break;
     }
 
@@ -3447,37 +3447,37 @@ size_t cdfDoInputDataTransformationSP(size_t valueCount, float *data, bool haveM
         if ( DBL_IS_EQUAL(data[i], missVal) )
           missValCount++;
         else
-          data[i] = data[i] * scaleFactor + offset;
+          data[i] = (float)(data[i] * scaleFactor + offset);
       break;
     case 6: /* haveOffset & haveScaleFactor */
       for ( size_t i = 0; i < valueCount; i++ )
-        data[i] = data[i] * scaleFactor + offset;
+        data[i] = (float)(data[i] * scaleFactor + offset);
       break;
     case 5: /* haveMissval & haveOffset */
       for ( size_t i = 0; i < valueCount; i++ )
         if ( DBL_IS_EQUAL(data[i], missVal) )
           missValCount++;
         else
-          data[i] += offset;
+          data[i] = (float)(data[i] + offset);
       break;
     case 4: /* haveOffset */
       for ( size_t i = 0; i < valueCount; i++ )
-        data[i] += offset;
+        data[i] = (float)(data[i] + offset);
       break;
     case 3: /* haveMissval & haveScaleFactor */
       for ( size_t i = 0; i < valueCount; i++ )
         if ( DBL_IS_EQUAL(data[i], missVal) )
           missValCount++;
         else
-          data[i] *= scaleFactor;
+          data[i] = (float)(data[i] * scaleFactor);
       break;
     case 2: /* haveScaleFactor */
       for ( size_t i = 0; i < valueCount; i++ )
-        data[i] *= scaleFactor;
+        data[i] = (float)(data[i] * scaleFactor);
       break;
     case 1: /* haveMissval */
       for ( size_t i = 0; i < valueCount; i++ )
-        missValCount += DBL_IS_EQUAL(data[i], missVal);
+        missValCount += (unsigned)DBL_IS_EQUAL(data[i], missVal);
       break;
     }
 
