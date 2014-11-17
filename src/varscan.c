@@ -785,7 +785,7 @@ int varDefGrid(int vlistID, grid_t grid, int mode)
       ngrids = gridSize();
       if ( ngrids > 0 )
         {
-          gridIndexList = (int*) malloc(ngrids*sizeof(int));
+          gridIndexList = (int*)xmalloc((size_t)ngrids * sizeof(int));
           gridGetIndexList ( ngrids, gridIndexList );
           for ( i = 0; i < ngrids; i++ )
             {
@@ -907,7 +907,7 @@ int varDefZaxis(int vlistID, int zaxistype, int nlevels, double *levels, int lbo
       if ( nzaxis > 0 )
         {
           int *zaxisIndexList;
-          zaxisIndexList = (int *) malloc ( nzaxis * sizeof ( int ));
+          zaxisIndexList = (int *)xmalloc((size_t)nzaxis * sizeof (int));
           zaxisGetIndexList ( nzaxis, zaxisIndexList );
           for ( i = 0; i < nzaxis; i++ )
             {

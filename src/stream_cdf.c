@@ -256,9 +256,7 @@ static
 int scanTimeUnit(const char *unitstr)
 {
   int timeunit = -1;
-  int len;
-
-  len = (int) strlen(unitstr);
+  size_t len = strlen(unitstr);
   timeunit = get_timeunit(len, unitstr);
   if ( timeunit == -1 )
     Message("Unsupported TIMEUNIT: %s!", unitstr);

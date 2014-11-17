@@ -153,7 +153,7 @@ reshListCreate(int namespaceID)
   LIST_LOCK();
   if (resHListSize <= namespaceID)
     {
-      resHList = (struct resHList_t *)xrealloc(resHList, (namespaceID + 1) * sizeof (resHList[0]));
+      resHList = (struct resHList_t *)xrealloc(resHList, (size_t)(namespaceID + 1) * sizeof (resHList[0]));
       for (int i = resHListSize; i <= namespaceID; ++i)
         reshListClearEntry(i);
       resHListSize = namespaceID + 1;
