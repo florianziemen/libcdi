@@ -3620,7 +3620,7 @@ cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarid, int dtype, l
                         {
                           if ( laddoffset )   temp -= addoffset;
                           if ( lscalefactor ) temp /= scalefactor;
-                          mdata_sp[i] = temp;
+                          mdata_sp[i] = (float)temp;
                         }
                     }
                 }
@@ -3631,7 +3631,7 @@ cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarid, int dtype, l
                       double temp = mdata_sp[i];
                       if ( laddoffset )   temp -= addoffset;
                       if ( lscalefactor ) temp /= scalefactor;
-                      mdata_sp[i] = temp;
+                      mdata_sp[i] = (float)temp;
                     }
                 }
             }
