@@ -3978,31 +3978,28 @@ int set_validrangeSP(long gridsize, float *data, double missval, double validmin
   return (nmiss);
 }
 
-/*
 static
 size_t min_size(size_t a, size_t b)
 {
   return a < b ? a : b;
 }
-*/
+
 static
 void transpose2dArrayDP(size_t inWidth, size_t inHeight, double* data)
 {
-  double *temp = (double *) malloc(inWidth*inHeight*sizeof(double));
-  memcpy(temp, data, inWidth*inHeight*sizeof(double));
-  for ( size_t j = 0; j < inHeight; ++j )
-    for ( size_t i = 0; i < inWidth; ++i )
-      data[j*inWidth+i] = temp[i*inHeight+j];
-  free(temp);
-  /*
   const size_t cacheBlockSize = 32;    // Purely an optimization parameter. Current value of 32 means we are handling 8kB blocks,
                                        // which should be a decent compromise on many architectures.
   double (*temp)[inWidth] = malloc(inHeight*sizeof(*temp));
   double (*out)[inHeight] = (double (*)[inHeight])data;
   memcpy(temp, data, inHeight*sizeof(*temp));
-  for ( size_t yBlock = 0; yBlock < inHeight; yBlock++ )
+  /*
+  for ( size_t y = 0; y < inHeight; ++y )
+    for ( size_t x = 0; x < inWidth; ++x )
+      out[x][y] = temp[y][x];
+  */
+  for ( size_t yBlock = 0; yBlock < inHeight; yBlock += cacheBlockSize )
     {
-      for ( size_t xBlock = 0; xBlock < inWidth; xBlock++ )
+      for ( size_t xBlock = 0; xBlock < inWidth; xBlock += cacheBlockSize )
         {
           for ( size_t y = yBlock, yEnd = min_size(yBlock + cacheBlockSize, inHeight); y < yEnd; y++ )
             {
@@ -4013,28 +4010,26 @@ void transpose2dArrayDP(size_t inWidth, size_t inHeight, double* data)
             }
         }
     }
+
   free(temp);
-  */
 }
 
 static
 void transpose2dArraySP(size_t inWidth, size_t inHeight, float* data)
 {
-  float *temp = (float *) malloc(inWidth*inHeight*sizeof(float));
-  memcpy(temp, data, inWidth*inHeight*sizeof(float));
-  for ( size_t j = 0; j < inHeight; ++j )
-    for ( size_t i = 0; i < inWidth; ++i )
-      data[j*inWidth+i] = temp[i*inHeight+j];
-  free(temp);
-  /*
   const size_t cacheBlockSize = 32;    // Purely an optimization parameter. Current value of 32 means we are handling 8kB blocks,
                                        // which should be a decent compromise on many architectures.
   float (*temp)[inWidth] = malloc(inHeight*sizeof(*temp));
   float (*out)[inHeight] = (float (*)[inHeight])data;
   memcpy(temp, data, inHeight*sizeof(*temp));
-  for ( size_t yBlock = 0; yBlock < inHeight; yBlock++ )
+  /*
+  for ( size_t y = 0; y < inHeight; ++y )
+    for ( size_t x = 0; x < inWidth; ++x )
+      out[x][y] = temp[y][x];
+  */
+  for ( size_t yBlock = 0; yBlock < inHeight; yBlock += cacheBlockSize )
     {
-      for ( size_t xBlock = 0; xBlock < inWidth; xBlock++ )
+      for ( size_t xBlock = 0; xBlock < inWidth; xBlock += cacheBlockSize )
         {
           for ( size_t y = yBlock, yEnd = min_size(yBlock + cacheBlockSize, inHeight); y < yEnd; y++ )
             {
@@ -4045,8 +4040,8 @@ void transpose2dArraySP(size_t inWidth, size_t inHeight, float* data)
             }
         }
     }
+
   free(temp);
-  */
 }
 
 static
@@ -4295,7 +4290,7 @@ void cdfReadVarSliceDP(stream_t *streamptr, int varID, int levelID, double *data
       cdf_get_vara_double(fileID, ncvarid, start, count, data);
     }
 
-  if ( swapxy ) transpose2dArrayDP(xsize, ysize, data);
+  if ( swapxy ) transpose2dArrayDP(ysize, xsize, data);
 
   *nmiss = 0;
   double missval = vlistInqVarMissval(vlistID, varID);
@@ -4358,7 +4353,7 @@ void cdfReadVarSliceSP(stream_t *streamptr, int varID, int levelID, float *data,
       cdf_get_vara_float(fileID, ncvarid, start, count, data);
     }
 
-  if ( swapxy ) transpose2dArraySP(xsize, ysize, data);
+  if ( swapxy ) transpose2dArraySP(ysize, xsize, data);
 
   *nmiss = 0;
   double missval = vlistInqVarMissval(vlistID, varID);

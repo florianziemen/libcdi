@@ -1106,7 +1106,7 @@ void vlistDefNtsteps(int vlistID, int nts)
     }
 }
 
-
+// This function is used in CDO!
 int vlistNtsteps(int vlistID)
 {
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
