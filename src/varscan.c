@@ -821,7 +821,7 @@ int varDefGrid(int vlistID, grid_t grid, int mode)
 }
 
 
-int zaxisCompare(int zaxisID, int zaxistype, int nlevels, int lbounds, double *levels, char *longname, char *units, int ltype1)
+int zaxisCompare(int zaxisID, int zaxistype, int nlevels, int lbounds, const double *levels, char *longname, char *units, int ltype1)
 {
   int differ = 1;
   int levelID;

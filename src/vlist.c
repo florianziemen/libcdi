@@ -444,8 +444,8 @@ void vlistClearFlag(int vlistID)
 }
 
 static
-int vlist_generate_zaxis(int vlistID, int zaxistype, int nlevels, double *levels,
-                         double *lbounds, double *ubounds, int vctsize, const double *vct)
+int vlist_generate_zaxis(int vlistID, int zaxistype, int nlevels, const double *levels,
+                         const double *lbounds, const double *ubounds, int vctsize, const double *vct)
 {
   int zaxisID = CDI_UNDEFID;
   int zaxisglobdefined = 0;

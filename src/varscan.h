@@ -38,7 +38,7 @@ void varDefOptGribInt(int varID, long lval, const char *keyword);
 void varDefOptGribDbl(int varID, double dval, const char *keyword);
 int varOptGribNentries(int varID);
 
-int  zaxisCompare(int zaxisID, int zaxistype, int nlevels, int lbounds, double *levels, char *longname, char *units, int ltype);
+int  zaxisCompare(int zaxisID, int zaxistype, int nlevels, int lbounds, const double *levels, char *longname, char *units, int ltype);
 
 #endif
 /*
