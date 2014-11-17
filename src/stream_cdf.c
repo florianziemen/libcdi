@@ -434,12 +434,11 @@ void cdfGetAttText(int fileID, int ncvarid, char *attname, int attlen, char *att
           char *attbuf = NULL;
           cdf_get_att_string(fileID, ncvarid, attname, &attbuf);
 
-          int slen = (int) strlen(attbuf);
-          slen++;
+          size_t ssize = strlen(attbuf) + 1;
 
-          if ( slen > attlen ) slen = attlen;
-          memcpy(atttext, attbuf, slen);
-
+          if ( ssize > (size_t)attlen ) ssize = (size_t)attlen;
+          memcpy(atttext, attbuf, ssize);
+          atttext[ssize - 1] = 0;
           free(attbuf);
         }
       else
