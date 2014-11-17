@@ -3987,7 +3987,7 @@ size_t min_size(size_t a, size_t b)
 static
 void transpose2dArrayDP(size_t inWidth, size_t inHeight, double* data)
 {
-  const size_t cacheBlockSize = 32;    // Purely an optimization parameter. Current value of 32 means we are handling 8kB blocks,
+  const size_t cacheBlockSize = 256;    // Purely an optimization parameter. Current value of 32 means we are handling 8kB blocks,
                                        // which should be a decent compromise on many architectures.
   double (*temp)[inWidth] = malloc(inHeight*sizeof(*temp));
   double (*out)[inHeight] = (double (*)[inHeight])data;
@@ -4017,7 +4017,7 @@ void transpose2dArrayDP(size_t inWidth, size_t inHeight, double* data)
 static
 void transpose2dArraySP(size_t inWidth, size_t inHeight, float* data)
 {
-  const size_t cacheBlockSize = 32;    // Purely an optimization parameter. Current value of 32 means we are handling 8kB blocks,
+  const size_t cacheBlockSize = 256;    // Purely an optimization parameter. Current value of 32 means we are handling 8kB blocks,
                                        // which should be a decent compromise on many architectures.
   float (*temp)[inWidth] = malloc(inHeight*sizeof(*temp));
   float (*out)[inHeight] = (float (*)[inHeight])data;
