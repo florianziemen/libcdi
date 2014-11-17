@@ -35,7 +35,7 @@ static struct rdmaWin
   MPI_Win win;
   int postSet, refuseFuncCall;
   MPI_Group ioGroup;
-  int dictSize, dictDataUsed, dictRPCUsed, dict;
+  int dictSize, dictDataUsed, dictRPCUsed;
 } *txWin = NULL;
 
 
