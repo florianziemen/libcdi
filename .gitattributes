@@ -373,6 +373,7 @@ tests/test_resource_copy.c -text
 tests/test_resource_copy_mpi_run.in -text
 tests/var_cksum.c -text
 tests/var_cksum.h -text
+util/crayftnpreproc-wrapper -text
 util/mpi_launch_poe -text
 util/serialrun.in -text
 util/sunf95preproc-wrapper -text
