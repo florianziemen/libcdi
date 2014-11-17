@@ -1244,7 +1244,7 @@ int gridInqMask(int gridID, int *mask)
 
   if ( gridptr->mask == NULL ) size = 0;
 
-  return (size);
+  return (int)size;
 }
 
 
@@ -1293,7 +1293,7 @@ int gridInqMaskGME(int gridID, int *mask)
 
   if ( gridptr->mask_gme == NULL ) size = 0;
 
-  return (size);
+  return (int)size;
 }
 
 
@@ -1355,7 +1355,7 @@ int gridInqXvals(int gridID, double *xvals)
 
   if ( gridptr->xvals == NULL ) size = 0;
 
-  return (size);
+  return (int)size;
 }
 
 /*
@@ -1436,7 +1436,7 @@ int gridInqYvals(int gridID, double *yvals)
 
   if ( gridptr->yvals == NULL ) size = 0;
 
-  return (size);
+  return (int)size;
 }
 
 /*
