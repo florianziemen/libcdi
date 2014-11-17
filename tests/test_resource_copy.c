@@ -6,6 +6,7 @@
 #include <string.h>
 
 #include "cdi.h"
+#include "create_uuid.h"
 #include "dmemory.h"
 #include "error.h"
 #include "resource_handle.h"
@@ -86,6 +87,11 @@ int defineGrid ()
     mask_vec[i] = i;
   gridDefRowlon ( gridID, nlon*nlat, mp );
   gridDefComplexPacking ( gridID, 1 );
+  {
+    unsigned char uuid[CDI_UUID_SIZE];
+    create_uuid(uuid);
+    gridDefUUID(gridID, uuid);
+  }
 
   return gridID;
 }

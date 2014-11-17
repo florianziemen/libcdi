@@ -174,15 +174,18 @@ test_grib_OBJECTS = $(am_test_grib_OBJECTS)
 test_grib_LDADD = $(LDADD)
 test_grib_DEPENDENCIES = ../src/libcdi.la
 am_test_resource_copy_OBJECTS = test_resource_copy.$(OBJEXT) \
-	resource_unpack.$(OBJEXT)
+	resource_unpack.$(OBJEXT) create_uuid.$(OBJEXT)
 test_resource_copy_OBJECTS = $(am_test_resource_copy_OBJECTS)
-test_resource_copy_LDADD = $(LDADD)
-test_resource_copy_DEPENDENCIES = ../src/libcdi.la
+test_resource_copy_DEPENDENCIES = $(am__DEPENDENCIES_2) \
+	$(am__DEPENDENCIES_1)
 am_test_resource_copy_mpi_OBJECTS =  \
-	test_resource_copy_mpi-test_resource_copy.$(OBJEXT)
+	test_resource_copy_mpi-test_resource_copy.$(OBJEXT) \
+	test_resource_copy_mpi-create_uuid.$(OBJEXT)
 test_resource_copy_mpi_OBJECTS = $(am_test_resource_copy_mpi_OBJECTS)
+@USE_MPI_FALSE@test_resource_copy_mpi_DEPENDENCIES =  \
+@USE_MPI_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
 @USE_MPI_TRUE@test_resource_copy_mpi_DEPENDENCIES =  \
-@USE_MPI_TRUE@	../src/libcdipio.la
+@USE_MPI_TRUE@	../src/libcdipio.la $(am__DEPENDENCIES_2)
 test_resource_copy_mpi_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
 	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
 	$(test_resource_copy_mpi_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
@@ -485,16 +488,20 @@ pio_write_deco2d_SOURCES = pio_write.c pio_write.h deco2d_model.c \
 	create_uuid.h create_uuid.c
 
 test_resource_copy_SOURCES = test_resource_copy.c \
-	$(top_srcdir)/src/resource_unpack.c
+	$(top_srcdir)/src/resource_unpack.c \
+	create_uuid.h create_uuid.c
 
-test_resource_copy_mpi_SOURCES = test_resource_copy.c
-#
+test_resource_copy_LDADD = $(UUID_C_LIB) $(LDADD)
+test_resource_copy_mpi_SOURCES = test_resource_copy.c \
+	create_uuid.h create_uuid.c
+
 AM_CFLAGS = $(PPM_CORE_CFLAGS) $(YAXT_CFLAGS)
 @USE_MPI_FALSE@pio_write_LDADD = $(LDADD) $(UUID_C_LIB)
 @USE_MPI_TRUE@pio_write_LDADD = ../src/libcdipio.la $(UUID_C_LIB)
 @USE_MPI_FALSE@pio_write_deco2d_LDADD = $(LDADD) $(UUID_C_LIB)
 @USE_MPI_TRUE@pio_write_deco2d_LDADD = ../src/libcdipio.la $(UUID_C_LIB)
-@USE_MPI_TRUE@test_resource_copy_mpi_LDADD = ../src/libcdipio.la
+@USE_MPI_FALSE@test_resource_copy_mpi_LDADD = $(LDADD) $(UUID_C_LIB)
+@USE_MPI_TRUE@test_resource_copy_mpi_LDADD = ../src/libcdipio.la $(UUID_C_LIB)
 @USE_MPI_TRUE@test_resource_copy_mpi_CFLAGS = $(AM_CFLAGS) $(CFLAGS) -DMPI_MARSHALLING
 LDADD = ../src/libcdi.la -lm
 AM_CPPFLAGS = -I$(top_srcdir)/src
@@ -638,6 +645,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_cksum.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_grib.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_resource_copy.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_resource_copy_mpi-create_uuid.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_resource_copy_mpi-test_resource_copy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/var_cksum.Po@am__quote@
 
@@ -689,6 +697,20 @@ test_resource_copy_mpi-test_resource_copy.obj: test_resource_copy.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='test_resource_copy.c' object='test_resource_copy_mpi-test_resource_copy.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_resource_copy_mpi_CFLAGS) $(CFLAGS) -c -o test_resource_copy_mpi-test_resource_copy.obj `if test -f 'test_resource_copy.c'; then $(CYGPATH_W) 'test_resource_copy.c'; else $(CYGPATH_W) '$(srcdir)/test_resource_copy.c'; fi`
+
+test_resource_copy_mpi-create_uuid.o: create_uuid.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_resource_copy_mpi_CFLAGS) $(CFLAGS) -MT test_resource_copy_mpi-create_uuid.o -MD -MP -MF $(DEPDIR)/test_resource_copy_mpi-create_uuid.Tpo -c -o test_resource_copy_mpi-create_uuid.o `test -f 'create_uuid.c' || echo '$(srcdir)/'`create_uuid.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_resource_copy_mpi-create_uuid.Tpo $(DEPDIR)/test_resource_copy_mpi-create_uuid.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='create_uuid.c' object='test_resource_copy_mpi-create_uuid.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_resource_copy_mpi_CFLAGS) $(CFLAGS) -c -o test_resource_copy_mpi-create_uuid.o `test -f 'create_uuid.c' || echo '$(srcdir)/'`create_uuid.c
+
+test_resource_copy_mpi-create_uuid.obj: create_uuid.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_resource_copy_mpi_CFLAGS) $(CFLAGS) -MT test_resource_copy_mpi-create_uuid.obj -MD -MP -MF $(DEPDIR)/test_resource_copy_mpi-create_uuid.Tpo -c -o test_resource_copy_mpi-create_uuid.obj `if test -f 'create_uuid.c'; then $(CYGPATH_W) 'create_uuid.c'; else $(CYGPATH_W) '$(srcdir)/create_uuid.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_resource_copy_mpi-create_uuid.Tpo $(DEPDIR)/test_resource_copy_mpi-create_uuid.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='create_uuid.c' object='test_resource_copy_mpi-create_uuid.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_resource_copy_mpi_CFLAGS) $(CFLAGS) -c -o test_resource_copy_mpi-create_uuid.obj `if test -f 'create_uuid.c'; then $(CYGPATH_W) 'create_uuid.c'; else $(CYGPATH_W) '$(srcdir)/create_uuid.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo
