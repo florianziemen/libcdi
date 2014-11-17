@@ -368,7 +368,7 @@ void printGridInfo(int vlistID)
 	}
 
       gridInqUUID(gridID, uuidOfHGrid);
-      if ( uuidOfHGrid[0] != 0 )
+      if ( !cdiUUIDIsNull(uuidOfHGrid) )
         {
           char uuidOfHGridStr[37];
           uuid2str(uuidOfHGrid, uuidOfHGridStr);
@@ -471,7 +471,7 @@ void printZaxisInfo(int vlistID)
 
           unsigned char uuidOfVGrid[CDI_UUID_SIZE];
           zaxisInqUUID(zaxisID, uuidOfVGrid);
-          if ( uuidOfVGrid[0] != 0 )
+          if ( !cdiUUIDIsNull(uuidOfVGrid) )
             {
               char uuidOfVGridStr[37];
               uuid2str(uuidOfVGrid, uuidOfVGridStr);

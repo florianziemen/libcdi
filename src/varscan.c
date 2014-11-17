@@ -597,7 +597,7 @@ void cdi_generate_vars(stream_t *streamptr)
         {
           if ( numberOfVerticalLevels > 0 ) zaxisDefNlevRef(zaxisID, numberOfVerticalLevels);
           if ( numberOfVerticalGrid > 0 ) zaxisDefNumber(zaxisID, numberOfVerticalGrid);
-          if ( uuidVGrid[0] != 0 ) zaxisDefUUID(zaxisID, uuidVGrid);
+          if ( !cdiUUIDIsNull(uuidVGrid) ) zaxisDefUUID(zaxisID, uuidVGrid);
         }
 
       if ( lbounds ) free(dlevels1);

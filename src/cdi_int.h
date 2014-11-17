@@ -65,6 +65,8 @@ char *strdup(const char *s);
 #  include "resource_handle.h"
 #endif
 
+#include "cdi.h"
+
 
 #define check_parg(arg)  if ( arg == 0 ) Warning("Argument '" #arg "' not allocated!")
 
@@ -342,6 +344,13 @@ void  cdiInitialize(void);
 
 void uuid2str(const unsigned char *uuid, char *uuidstr);
 int str2uuid(const char *uuidstr, unsigned char *uuid);
+static inline int
+cdiUUIDIsNull(const unsigned char uuid[CDI_UUID_SIZE])
+{
+  static unsigned char uuid_nil[CDI_UUID_SIZE];
+  return !memcmp(uuid, uuid_nil, CDI_UUID_SIZE);
+}
+
 
 #define CDI_UNIT_PA   1
 #define CDI_UNIT_HPA  2

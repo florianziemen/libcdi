@@ -137,7 +137,7 @@ void grid_init(grid_t *gridptr)
   gridptr->yunits[0]    = 0;
   gridptr->xstdname[0]  = 0;
   gridptr->ystdname[0]  = 0;
-  memset(gridptr->uuid, 0, 16);
+  memset(gridptr->uuid, 0, CDI_UUID_SIZE);
   gridptr->name         = NULL;
 }
 
@@ -2491,7 +2491,7 @@ int gridGenerate(grid_t grid)
                 gridDefNumber(gridID, number);
                 gridDefPosition(gridID, position);
               }
-            if ( grid.uuid[0] != 0 ) gridDefUUID(gridID, grid.uuid);
+            gridDefUUID(gridID, grid.uuid);
             if ( grid.reference ) gridDefReference(gridID, grid.reference);
           }
 
@@ -3326,7 +3326,7 @@ void gridPrintKernel(grid_t * gridptr, int opt, FILE *fp)
     }
 
   gridInqUUID(gridID, uuidOfHGrid);
-  if ( uuidOfHGrid[0] != 0 )
+  if ( !cdiUUIDIsNull(uuidOfHGrid) )
     {
       char uuidOfHGridStr[37];
       uuid2str(uuidOfHGrid, uuidOfHGridStr);

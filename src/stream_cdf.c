@@ -2046,7 +2046,7 @@ void cdfDefGridUUID(stream_t *streamptr, int gridID)
   unsigned char uuidOfHGrid[CDI_UUID_SIZE];
 
   gridInqUUID(gridID, uuidOfHGrid);
-  if ( uuidOfHGrid[0] != 0 )
+  if ( !cdiUUIDIsNull(uuidOfHGrid) )
     {
       char uuidOfHGridStr[37];
       uuid2str(uuidOfHGrid, uuidOfHGridStr);
@@ -7437,10 +7437,10 @@ int cdfInqContents(stream_t *streamptr)
   char fcreftime[CDI_MAX_NAME];
   int number_of_grid_used = UNDEFID;
 
-  uuidOfHGrid[0] = 0;
-  uuidOfVGrid[0] = 0;
-  gridfile[0]    = 0;
-  fcreftime[0]   = 0;
+  memset(uuidOfHGrid, 0, CDI_UUID_SIZE);
+  memset(uuidOfVGrid, 0, CDI_UUID_SIZE);
+  gridfile[0] = 0;
+  fcreftime[0] = 0;
 
   vlistID = streamptr->vlistID;
   fileID  = streamptr->fileID;

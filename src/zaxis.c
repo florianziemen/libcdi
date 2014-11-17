@@ -128,7 +128,7 @@ void zaxisDefaultValue(zaxis_t *zaxisptr)
   zaxisptr->vct         = NULL;
   zaxisptr->number      = 0;
   zaxisptr->nhlev       = 0;
-  zaxisptr->uuid[0]     = 0;
+  memset(zaxisptr->uuid, 0, CDI_UUID_SIZE);
 }
 
 
