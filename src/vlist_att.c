@@ -42,9 +42,10 @@ cdi_att_t *find_att(cdi_atts_t *attsp, const char *name)
 
   size_t slen = strlen(name);
 
+  cdi_att_t *atts = attsp->value;
   for (size_t attid = 0; attid < attsp->nelems; attid++)
     {
-      cdi_att_t *attp = &(attsp->value[attid]);
+      cdi_att_t *attp = atts + attid;
       if (attp->namesz == slen
           && memcmp(attp->name, name, slen) == 0)
         return (attp); /* Normal return */
