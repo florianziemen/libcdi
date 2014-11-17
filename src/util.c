@@ -54,7 +54,13 @@ void cdiPrintDatatypes(void)
     fprintf (stderr, "\n  byte ordering is LITTLEENDIAN\n\n");
 }
 
-static char uuidFmt[] = "%02hhx%02hhx%02hhx%02hhx-%02hhx%02hhx-%02hhx%02hhx-%02hhx%02hhx-%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx";
+static char uuidFmt[] = "%02hhx%02hhx%02hhx%02hhx-"
+  "%02hhx%02hhx-%02hhx%02hhx-%02hhx%02hhx-"
+  "%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx";
+
+enum {
+  uuidNumHexChars = 36,
+};
 
 void uuid2str(const unsigned char *uuid, char *uuidstr)
 {
@@ -67,13 +73,14 @@ void uuid2str(const unsigned char *uuid, char *uuidstr)
                      uuid[8], uuid[9], uuid[10], uuid[11],
                      uuid[12], uuid[13], uuid[14], uuid[15]);
 
-  if ( iret != 36 ) uuidstr[0] = 0;
+  if ( iret != uuidNumHexChars ) uuidstr[0] = 0;
 }
 
 
 int str2uuid(const char *uuidstr, unsigned char *uuid)
 {
-  if ( uuid == NULL || uuidstr == NULL || strlen(uuidstr) != 36) return -1;
+  if ( uuid == NULL || uuidstr == NULL || strlen(uuidstr) != uuidNumHexChars)
+    return -1;
 
   int iret = sscanf(uuidstr, uuidFmt,
                     &uuid[0], &uuid[1], &uuid[2], &uuid[3],
