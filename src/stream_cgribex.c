@@ -387,7 +387,7 @@ void cgribexAddRecord(stream_t * streamptr, int param, int *isec1, int *isec2, d
 
   cgribexGetGrid(streamptr, isec2, isec4, &grid, iret);
 
-  int gridID = varDefGrid(vlistID, grid, 0);
+  int gridID = varDefGrid(vlistID, &grid, 0);
 
   int zaxistype = grib1ltypeToZaxisType(ISEC1_LevelType);
 

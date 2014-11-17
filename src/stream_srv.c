@@ -232,7 +232,7 @@ void srv_add_record(stream_t *streamptr, int param, int level, int xsize, int ys
   grid.ysize = ysize;
   grid.xvals = NULL;
   grid.yvals = NULL;
-  gridID = varDefGrid(vlistID, grid, 0);
+  gridID = varDefGrid(vlistID, &grid, 0);
   /*
   if ( level == 0 ) leveltype = ZAXIS_SURFACE;
   else              leveltype = ZAXIS_GENERIC;

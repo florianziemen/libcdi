@@ -2056,52 +2056,52 @@ int compareXYvals2(int gridID, int gridsize, double *xvals, double *yvals)
 }
 
 
-int gridCompare(int gridID, grid_t grid)
+int gridCompare(int gridID, const grid_t *grid)
 {
   int differ = 1;
 
-  if ( grid.type == gridInqType(gridID) || grid.type == GRID_GENERIC )
+  if ( grid->type == gridInqType(gridID) || grid->type == GRID_GENERIC )
     {
-      if ( grid.size == gridInqSize(gridID) )
+      if ( grid->size == gridInqSize(gridID) )
 	{
 	  differ = 0;
-	  if ( grid.type == GRID_LONLAT )
+	  if ( grid->type == GRID_LONLAT )
 	    {
 	      /*
 	      printf("gridID      %d\n", gridID);
-	      printf("grid.xdef   %d\n", grid.xdef);
-	      printf("grid.ydef   %d\n", grid.ydef);
-	      printf("grid.xsize  %d\n", grid.xsize);
-	      printf("grid.ysize  %d\n", grid.ysize);
-	      printf("grid.xfirst %f\n", grid.xfirst);
-	      printf("grid.yfirst %f\n", grid.yfirst);
+	      printf("grid.xdef   %d\n", grid->xdef);
+	      printf("grid.ydef   %d\n", grid->ydef);
+	      printf("grid.xsize  %d\n", grid->xsize);
+	      printf("grid.ysize  %d\n", grid->ysize);
+	      printf("grid.xfirst %f\n", grid->xfirst);
+	      printf("grid.yfirst %f\n", grid->yfirst);
 	      printf("grid.xfirst %f\n", gridInqXval(gridID, 0));
 	      printf("grid.yfirst %f\n", gridInqYval(gridID, 0));
-	      printf("grid.xinc   %f\n", grid.xinc);
-	      printf("grid.yinc   %f\n", grid.yinc);
+	      printf("grid.xinc   %f\n", grid->xinc);
+	      printf("grid.yinc   %f\n", grid->yinc);
 	      printf("grid.xinc   %f\n", gridInqXinc(gridID));
 	      printf("grid.yinc   %f\n", gridInqYinc(gridID));
 	      */
-	      if ( grid.xsize == gridInqXsize(gridID) && grid.ysize == gridInqYsize(gridID) )
+	      if ( grid->xsize == gridInqXsize(gridID) && grid->ysize == gridInqYsize(gridID) )
 		{
-		  if ( grid.xdef == 2 && grid.ydef == 2 )
+		  if ( grid->xdef == 2 && grid->ydef == 2 )
 		    {
-		      if ( ! (IS_EQUAL(grid.xfirst, 0) && IS_EQUAL(grid.xlast, 0) && IS_EQUAL(grid.xinc, 0)) &&
-			   ! (IS_EQUAL(grid.yfirst, 0) && IS_EQUAL(grid.ylast, 0) && IS_EQUAL(grid.yinc, 0)) &&
-			   IS_NOT_EQUAL(grid.xfirst, grid.xlast) && IS_NOT_EQUAL(grid.yfirst, grid.ylast) )
+		      if ( ! (IS_EQUAL(grid->xfirst, 0) && IS_EQUAL(grid->xlast, 0) && IS_EQUAL(grid->xinc, 0)) &&
+			   ! (IS_EQUAL(grid->yfirst, 0) && IS_EQUAL(grid->ylast, 0) && IS_EQUAL(grid->yinc, 0)) &&
+			   IS_NOT_EQUAL(grid->xfirst, grid->xlast) && IS_NOT_EQUAL(grid->yfirst, grid->ylast) )
 			{
-			  if ( IS_NOT_EQUAL(grid.xfirst, gridInqXval(gridID, 0)) ||
-			       IS_NOT_EQUAL(grid.yfirst, gridInqYval(gridID, 0)))
+			  if ( IS_NOT_EQUAL(grid->xfirst, gridInqXval(gridID, 0)) ||
+			       IS_NOT_EQUAL(grid->yfirst, gridInqYval(gridID, 0)))
 			    {
 			      differ = 1;
 			    }
-			  if ( !differ && fabs(grid.xinc) > 0 &&
-			       fabs(fabs(grid.xinc) - fabs(gridInqXinc(gridID))) > fabs(grid.xinc/1000))
+			  if ( !differ && fabs(grid->xinc) > 0 &&
+			       fabs(fabs(grid->xinc) - fabs(gridInqXinc(gridID))) > fabs(grid->xinc/1000))
 			    {
 			      differ = 1;
 			    }
-			  if ( !differ && fabs(grid.yinc) > 0 &&
-			       fabs(fabs(grid.yinc) - fabs(gridInqYinc(gridID))) > fabs(grid.yinc/1000))
+			  if ( !differ && fabs(grid->yinc) > 0 &&
+			       fabs(fabs(grid->yinc) - fabs(gridInqYinc(gridID))) > fabs(grid->yinc/1000))
 			    {
 			      differ = 1;
 			    }
@@ -2109,86 +2109,91 @@ int gridCompare(int gridID, grid_t grid)
 		    }
 		  else
 		    {
-		      if ( grid.xvals && grid.yvals )
-			differ = compareXYvals(gridID, grid.xsize, grid.ysize, grid.xvals, grid.yvals);
+		      if ( grid->xvals && grid->yvals )
+			differ = compareXYvals(gridID, grid->xsize, grid->ysize, grid->xvals, grid->yvals);
 		    }
 		}
 	      else
 		differ = 1;
 	    }
-	  else if ( grid.type == GRID_GENERIC )
+	  else if ( grid->type == GRID_GENERIC )
 	    {
-	      if ( grid.xsize == gridInqXsize(gridID) && grid.ysize == gridInqYsize(gridID) )
+	      if ( grid->xsize == gridInqXsize(gridID) && grid->ysize == gridInqYsize(gridID) )
 		{
-		  if ( grid.xdef == 1 && grid.ydef == 1 )
+		  if ( grid->xdef == 1 && grid->ydef == 1 )
 		    {
-		      if ( grid.xvals && grid.yvals )
-			differ = compareXYvals(gridID, grid.xsize, grid.ysize, grid.xvals, grid.yvals);
+		      if ( grid->xvals && grid->yvals )
+			differ = compareXYvals(gridID, grid->xsize, grid->ysize, grid->xvals, grid->yvals);
 		    }
 		}
-	      else if ( (grid.ysize == 0 || grid.ysize == 1) &&
-			grid.xsize == gridInqXsize(gridID)*gridInqYsize(gridID) )
+	      else if ( (grid->ysize == 0 || grid->ysize == 1) &&
+			grid->xsize == gridInqXsize(gridID)*gridInqYsize(gridID) )
 		{
 		}
 	      else
 		differ = 1;
 	    }
-	  else if ( grid.type == GRID_GAUSSIAN )
+	  else if ( grid->type == GRID_GAUSSIAN )
 	    {
-	      if ( grid.xsize == gridInqXsize(gridID) && grid.ysize == gridInqYsize(gridID) )
+	      if ( grid->xsize == gridInqXsize(gridID) && grid->ysize == gridInqYsize(gridID) )
 		{
-		  if ( grid.xdef == 2 && grid.ydef == 2 )
+		  if ( grid->xdef == 2 && grid->ydef == 2 )
 		    {
-		      if ( ! (IS_EQUAL(grid.xfirst, 0) && IS_EQUAL(grid.xlast, 0) && IS_EQUAL(grid.xinc, 0)) &&
-			   ! (IS_EQUAL(grid.yfirst, 0) && IS_EQUAL(grid.ylast, 0)) )
-			if ( fabs(grid.xfirst - gridInqXval(gridID, 0)) > 0.0015 ||
-			     fabs(grid.yfirst - gridInqYval(gridID, 0)) > 0.0015 ||
-			     (fabs(grid.xinc)>0 && fabs(fabs(grid.xinc) - fabs(gridInqXinc(gridID))) > fabs(grid.xinc/1000)) )
+		      if ( ! (IS_EQUAL(grid->xfirst, 0) && IS_EQUAL(grid->xlast, 0) && IS_EQUAL(grid->xinc, 0)) &&
+			   ! (IS_EQUAL(grid->yfirst, 0) && IS_EQUAL(grid->ylast, 0)) )
+			if ( fabs(grid->xfirst - gridInqXval(gridID, 0)) > 0.0015 ||
+			     fabs(grid->yfirst - gridInqYval(gridID, 0)) > 0.0015 ||
+			     (fabs(grid->xinc)>0 && fabs(fabs(grid->xinc) - fabs(gridInqXinc(gridID))) > fabs(grid->xinc/1000)) )
 			  {
 			    differ = 1;
 			  }
 		    }
 		  else
 		    {
-		      if ( grid.xvals && grid.yvals )
-			differ = compareXYvals(gridID, grid.xsize, grid.ysize, grid.xvals, grid.yvals);
+		      if ( grid->xvals && grid->yvals )
+			differ = compareXYvals(gridID, grid->xsize, grid->ysize, grid->xvals, grid->yvals);
 		    }
 		}
 	      else
 		differ = 1;
 	    }
-	  else if ( grid.type == GRID_CURVILINEAR )
+	  else if ( grid->type == GRID_CURVILINEAR )
 	    {
 	      /*
 	      printf("gridID      %d\n", gridID);
-	      printf("grid.xsize  %d\n", grid.xsize);
-	      printf("grid.ysize  %d\n", grid.ysize);
-	      printf("grid.xfirst %f\n", grid.xvals[0]);
-	      printf("grid.yfirst %f\n", grid.yvals[0]);
+	      printf("grid.xsize  %d\n", grid->xsize);
+	      printf("grid.ysize  %d\n", grid->ysize);
+	      printf("grid.xfirst %f\n", grid->xvals[0]);
+	      printf("grid.yfirst %f\n", grid->yvals[0]);
 	      printf("grid xfirst %f\n", gridInqXval(gridID, 0));
 	      printf("grid yfirst %f\n", gridInqYval(gridID, 0));
-	      printf("grid.xlast  %f\n", grid.xvals[grid.size-1]);
-	      printf("grid.ylast  %f\n", grid.yvals[grid.size-1]);
-	      printf("grid xlast  %f\n", gridInqXval(gridID, grid.size-1));
-	      printf("grid ylast  %f\n", gridInqYval(gridID, grid.size-1));
-	      printf("grid.nv     %d\n", grid.nvertex);
+	      printf("grid.xlast  %f\n", grid->xvals[grid->size-1]);
+	      printf("grid.ylast  %f\n", grid->yvals[grid->size-1]);
+	      printf("grid xlast  %f\n", gridInqXval(gridID, grid->size-1));
+	      printf("grid ylast  %f\n", gridInqYval(gridID, grid->size-1));
+	      printf("grid.nv     %d\n", grid->nvertex);
 	      printf("grid nv     %d\n", gridInqNvertex(gridID));
 	      */
-	      if ( grid.xsize == gridInqXsize(gridID) && grid.ysize == gridInqYsize(gridID) )
-		differ = compareXYvals2(gridID, grid.size, grid.xvals, grid.yvals);
+	      if ( grid->xsize == gridInqXsize(gridID) && grid->ysize == gridInqYsize(gridID) )
+		differ = compareXYvals2(gridID, grid->size, grid->xvals, grid->yvals);
 	    }
-	  else if ( grid.type == GRID_UNSTRUCTURED )
+	  else if ( grid->type == GRID_UNSTRUCTURED )
 	    {
               unsigned char uuidOfHGrid[CDI_UUID_SIZE];
               gridInqUUID(gridID, uuidOfHGrid);
 
-              if ( !differ && memcmp(uuidOfHGrid, grid.uuid, CDI_UUID_SIZE) != 0 ) differ = 1;
+              if ( !differ && memcmp(uuidOfHGrid, grid->uuid, CDI_UUID_SIZE) != 0 ) differ = 1;
 
-              if ( !differ && grid.nvertex != gridInqNvertex(gridID) ) differ = 1;
-              if ( !differ && grid.number != gridInqNumber(gridID) ) differ = 1;
-              if ( !differ && grid.number > 0 && grid.position != gridInqPosition(gridID) ) differ = 1;
+              if ( !differ && grid->nvertex != gridInqNvertex(gridID) ) differ = 1;
+
+              if ( !differ && grid->number != gridInqNumber(gridID) ) differ = 1;
+              if ( !differ && grid->position != gridInqPosition(gridID) ) differ = 1;
+
+              if ( !differ && grid->nvertex != gridInqNvertex(gridID) ) differ = 1;
+              if ( !differ && grid->number != gridInqNumber(gridID) ) differ = 1;
+              if ( !differ && grid->number > 0 && grid->position != gridInqPosition(gridID) ) differ = 1;
 	      if ( !differ )
-		differ = compareXYvals2(gridID, grid.size, grid.xvals, grid.yvals);
+		differ = compareXYvals2(gridID, grid->size, grid->xvals, grid->yvals);
 	    }
 	}
     }
@@ -2387,15 +2392,15 @@ int gridCompareP ( void * gridptr1, void * gridptr2 )
 }
 
 
-int gridGenerate(grid_t grid)
+int gridGenerate(const grid_t *grid)
 {
-  int gridID = gridCreate(grid.type, grid.size);
+  int gridID = gridCreate(grid->type, grid->size);
 
   grid_t *gridptr = gridID2Ptr(gridID);
 
-  gridDefPrec(gridID, grid.prec);
+  gridDefPrec(gridID, grid->prec);
 
-  switch (grid.type)
+  switch (grid->type)
     {
     case GRID_LONLAT:
     case GRID_GAUSSIAN:
@@ -2408,51 +2413,51 @@ int gridGenerate(grid_t grid)
     case GRID_LAEA:
     case GRID_PROJECTION:
       {
-	if ( grid.xsize > 0 ) gridDefXsize(gridID, grid.xsize);
-	if ( grid.ysize > 0 ) gridDefYsize(gridID, grid.ysize);
+	if ( grid->xsize > 0 ) gridDefXsize(gridID, grid->xsize);
+	if ( grid->ysize > 0 ) gridDefYsize(gridID, grid->ysize);
 
-        if ( grid.type == GRID_GAUSSIAN ) gridDefNP(gridID, grid.np);
+        if ( grid->type == GRID_GAUSSIAN ) gridDefNP(gridID, grid->np);
 
-	if ( grid.nvertex > 0 )
-	  gridDefNvertex(gridID, grid.nvertex);
+	if ( grid->nvertex > 0 )
+	  gridDefNvertex(gridID, grid->nvertex);
 
-	if ( grid.xdef == 1 )
+	if ( grid->xdef == 1 )
 	  {
-	    gridDefXvals(gridID, grid.xvals);
-	    if ( grid.xbounds )
-	      gridDefXbounds(gridID, grid.xbounds);
+	    gridDefXvals(gridID, grid->xvals);
+	    if ( grid->xbounds )
+	      gridDefXbounds(gridID, grid->xbounds);
 	  }
-	else if ( grid.xdef == 2 )
+	else if ( grid->xdef == 2 )
 	  {
 	    double *xvals
-              = (double *)xmalloc((size_t)grid.xsize * sizeof (double));
-	    gridGenXvals(grid.xsize, grid.xfirst, grid.xlast, grid.xinc, xvals);
+              = (double *)xmalloc((size_t)grid->xsize * sizeof (double));
+	    gridGenXvals(grid->xsize, grid->xfirst, grid->xlast, grid->xinc, xvals);
 	    gridDefXvals(gridID, xvals);
 	    free(xvals);
 	    /*
-	    gridDefXinc(gridID, grid.xinc);
+	    gridDefXinc(gridID, grid->xinc);
 	    */
 	  }
 
-	if ( grid.ydef == 1 )
+	if ( grid->ydef == 1 )
 	  {
-	    gridDefYvals(gridID, grid.yvals);
-	    if ( grid.ybounds && grid.nvertex )
-	      gridDefYbounds(gridID, grid.ybounds);
+	    gridDefYvals(gridID, grid->yvals);
+	    if ( grid->ybounds && grid->nvertex )
+	      gridDefYbounds(gridID, grid->ybounds);
 	  }
-	else if ( grid.ydef == 2 )
+	else if ( grid->ydef == 2 )
 	  {
 	    double *yvals
-              = (double *)xmalloc((size_t)grid.ysize * sizeof (double));
-	    gridGenYvals(grid.type, grid.ysize, grid.yfirst, grid.ylast, grid.yinc, yvals);
+              = (double *)xmalloc((size_t)grid->ysize * sizeof (double));
+	    gridGenYvals(grid->type, grid->ysize, grid->yfirst, grid->ylast, grid->yinc, yvals);
 	    gridDefYvals(gridID, yvals);
 	    free(yvals);
 	    /*
-	    gridDefYinc(gridID, grid.yinc);
+	    gridDefYinc(gridID, grid->yinc);
 	    */
 	  }
 
-	if ( grid.isRotated )
+	if ( grid->isRotated )
 	  {
 	    gridDefXname(gridID, "rlon");
 	    gridDefYname(gridID, "rlat");
@@ -2463,109 +2468,109 @@ int gridGenerate(grid_t grid)
 	    gridDefXunits(gridID, "degrees");
 	    gridDefYunits(gridID, "degrees");
 
-	    gridDefXpole(gridID, grid.xpole);
-	    gridDefYpole(gridID, grid.ypole);
-	    gridDefAngle(gridID, grid.angle);
+	    gridDefXpole(gridID, grid->xpole);
+	    gridDefYpole(gridID, grid->ypole);
+	    gridDefAngle(gridID, grid->angle);
 	  }
 
-	if ( grid.area )
+	if ( grid->area )
 	  {
-	    gridDefArea(gridID, grid.area);
+	    gridDefArea(gridID, grid->area);
 	  }
 
-	if ( grid.type == GRID_LAEA )
-	  gridDefLaea(gridID, grid.laea_a, grid.laea_lon_0, grid.laea_lat_0);
+	if ( grid->type == GRID_LAEA )
+	  gridDefLaea(gridID, grid->laea_a, grid->laea_lon_0, grid->laea_lat_0);
 
-	if ( grid.type == GRID_LCC2 )
-	  gridDefLcc2(gridID, grid.lcc2_a, grid.lcc2_lon_0, grid.lcc2_lat_0, grid.lcc2_lat_1, grid.lcc2_lat_2);
+	if ( grid->type == GRID_LCC2 )
+	  gridDefLcc2(gridID, grid->lcc2_a, grid->lcc2_lon_0, grid->lcc2_lat_0, grid->lcc2_lat_1, grid->lcc2_lat_2);
 
-	if ( grid.type == GRID_LCC )
-	  gridDefLCC(gridID, grid.lcc_originLon, grid.lcc_originLat, grid.lcc_lonParY,
-		     grid.lcc_lat1, grid.lcc_lat2, grid.lcc_xinc, grid.lcc_yinc,
-		     grid.lcc_projflag, grid.lcc_scanflag);
+	if ( grid->type == GRID_LCC )
+	  gridDefLCC(gridID, grid->lcc_originLon, grid->lcc_originLat, grid->lcc_lonParY,
+		     grid->lcc_lat1, grid->lcc_lat2, grid->lcc_xinc, grid->lcc_yinc,
+		     grid->lcc_projflag, grid->lcc_scanflag);
 
-	if ( grid.type == GRID_UNSTRUCTURED )
+	if ( grid->type == GRID_UNSTRUCTURED )
           {
-            int number = grid.number;
-            int position = grid.position;
+            int number = grid->number;
+            int position = grid->position;
             if ( position < 0 ) position = 0;
             if ( number > 0 )
               {
                 gridDefNumber(gridID, number);
                 gridDefPosition(gridID, position);
               }
-            gridDefUUID(gridID, grid.uuid);
-            if ( grid.reference ) gridDefReference(gridID, grid.reference);
+            gridDefUUID(gridID, grid->uuid);
+            if ( grid->reference ) gridDefReference(gridID, grid->reference);
           }
 
-	if ( grid.type == GRID_PROJECTION )
+	if ( grid->type == GRID_PROJECTION )
 	  {
-	    gridptr->name = strdup(grid.name);
+	    gridptr->name = strdup(grid->name);
 	  }
 
 	break;
       }
     case GRID_GAUSSIAN_REDUCED:
       {
-	gridDefNP(gridID, grid.np);
-	gridDefYsize(gridID, grid.ysize);
-	gridDefRowlon(gridID, grid.ysize, grid.rowlon);
+	gridDefNP(gridID, grid->np);
+	gridDefYsize(gridID, grid->ysize);
+	gridDefRowlon(gridID, grid->ysize, grid->rowlon);
 
-        if ( grid.xdef == 2 )
+        if ( grid->xdef == 2 )
           {
             double xvals[2];
-            xvals[0] = grid.xfirst;
-            xvals[1] = grid.xlast;
+            xvals[0] = grid->xfirst;
+            xvals[1] = grid->xlast;
             gridDefXvals(gridID, xvals);
           }
 
-	if ( grid.ydef == 1 )
+	if ( grid->ydef == 1 )
 	  {
-	    gridDefYvals(gridID, grid.yvals);
-	    if ( grid.ybounds && grid.nvertex )
-	      gridDefYbounds(gridID, grid.ybounds);
+	    gridDefYvals(gridID, grid->yvals);
+	    if ( grid->ybounds && grid->nvertex )
+	      gridDefYbounds(gridID, grid->ybounds);
 	  }
-	else if ( grid.ydef == 2 )
+	else if ( grid->ydef == 2 )
 	  {
 	    double *yvals
-              = (double *)xmalloc((size_t)grid.ysize * sizeof (double));
-	    gridGenYvals(grid.type, grid.ysize, grid.yfirst, grid.ylast, grid.yinc, yvals);
+              = (double *)xmalloc((size_t)grid->ysize * sizeof (double));
+	    gridGenYvals(grid->type, grid->ysize, grid->yfirst, grid->ylast, grid->yinc, yvals);
 	    gridDefYvals(gridID, yvals);
 	    free(yvals);
 	    /*
-	    gridDefYinc(gridID, grid.yinc);
+	    gridDefYinc(gridID, grid->yinc);
 	    */
 	  }
 	break;
       }
     case GRID_SPECTRAL:
       {
-        gridDefTrunc(gridID, grid.trunc);
-        if ( grid.lcomplex ) gridDefComplexPacking(gridID, 1);
+        gridDefTrunc(gridID, grid->trunc);
+        if ( grid->lcomplex ) gridDefComplexPacking(gridID, 1);
         break;
       }
     case GRID_FOURIER:
       {
-	gridDefTrunc(gridID, grid.trunc);
+	gridDefTrunc(gridID, grid->trunc);
 	break;
       }
     case GRID_GME:
       {
-        gridDefGMEnd(gridID, grid.nd);
-        gridDefGMEni(gridID, grid.ni);
-        gridDefGMEni2(gridID, grid.ni2);
-        gridDefGMEni3(gridID, grid.ni3);
+        gridDefGMEnd(gridID, grid->nd);
+        gridDefGMEni(gridID, grid->ni);
+        gridDefGMEni2(gridID, grid->ni2);
+        gridDefGMEni3(gridID, grid->ni3);
         break;
       }
       /*
     case GRID_GENERIC:
       {
-        if ( grid.xsize > 0 && grid.ysize > 0 )
+        if ( grid->xsize > 0 && grid->ysize > 0 )
           {
-            gridDefXsize(gridID, grid.xsize);
-            gridDefYsize(gridID, grid.ysize);
-            if ( grid.xvals ) gridDefXvals(gridID, grid.xvals);
-            if ( grid.yvals ) gridDefYvals(gridID, grid.yvals);
+            gridDefXsize(gridID, grid->xsize);
+            gridDefYsize(gridID, grid->ysize);
+            if ( grid->xvals ) gridDefXvals(gridID, grid->xvals);
+            if ( grid->yvals ) gridDefYvals(gridID, grid->yvals);
           }
         break;
       }
@@ -2578,17 +2583,17 @@ int gridGenerate(grid_t grid)
       }
     default:
       {
-	Error("Gridtype %s unsupported!", gridNamePtr(grid.type));
+	Error("Gridtype %s unsupported!", gridNamePtr(grid->type));
 	break;
       }
     }
 
-  if ( grid.xname[0]     ) gridDefXname(gridID, grid.xname);
-  if ( grid.xlongname[0] ) gridDefXlongname(gridID, grid.xlongname);
-  if ( grid.xunits[0]    ) gridDefXunits(gridID, grid.xunits);
-  if ( grid.yname[0]     ) gridDefYname(gridID, grid.yname);
-  if ( grid.ylongname[0] ) gridDefYlongname(gridID, grid.ylongname);
-  if ( grid.yunits[0]    ) gridDefYunits(gridID, grid.yunits);
+  if ( grid->xname[0]     ) gridDefXname(gridID, grid->xname);
+  if ( grid->xlongname[0] ) gridDefXlongname(gridID, grid->xlongname);
+  if ( grid->xunits[0]    ) gridDefXunits(gridID, grid->xunits);
+  if ( grid->yname[0]     ) gridDefYname(gridID, grid->yname);
+  if ( grid->ylongname[0] ) gridDefYlongname(gridID, grid->ylongname);
+  if ( grid->yunits[0]    ) gridDefYunits(gridID, grid->yunits);
 
   return (gridID);
 }

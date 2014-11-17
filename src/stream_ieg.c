@@ -752,7 +752,7 @@ void iegAddRecord(stream_t *streamptr, int param, int *pdb, int *gdb, double *vc
       grid.angle     = 0;
     }
 
-  gridID = varDefGrid(vlistID, grid, 0);
+  gridID = varDefGrid(vlistID, &grid, 0);
 
   leveltype = iegGetZaxisType(IEG_P_LevelType(pdb));
 

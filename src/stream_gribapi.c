@@ -897,7 +897,7 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
 
   gribapiGetGrid(gh, &grid);
 
-  gridID = varDefGrid(vlistID, grid, 0);
+  gridID = varDefGrid(vlistID, &grid, 0);
 
   zaxistype = gribapiGetZaxisType(editionNumber, leveltype1);
 

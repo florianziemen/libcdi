@@ -6584,12 +6584,12 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 #if defined (PROJECTION_TEST)
 	  if ( proj.type == GRID_PROJECTION )
 	    {
-	      ncvars[ncvarid].gridID = varDefGrid(vlistID, proj, 1);
+	      ncvars[ncvarid].gridID = varDefGrid(vlistID, &proj, 1);
 	      copy_numeric_projatts(ncvars[ncvarid].gridID, ncvars[ncvarid].gmapid, ncvars[ncvarid].ncid);
 	    }
 	  else
 #endif
-	    ncvars[ncvarid].gridID = varDefGrid(vlistID, grid, 1);
+	    ncvars[ncvarid].gridID = varDefGrid(vlistID, &grid, 1);
 
           if ( grid.type == GRID_UNSTRUCTURED )
             {

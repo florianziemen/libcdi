@@ -747,7 +747,7 @@ void varDefZAxisReference(int nhlev, int nvgrid, unsigned char uuid[CDI_UUID_SIZ
 }
 
 
-int varDefGrid(int vlistID, grid_t grid, int mode)
+int varDefGrid(int vlistID, const grid_t *grid, int mode)
 {
   /*
     mode: 0 search in vlist and grid table
