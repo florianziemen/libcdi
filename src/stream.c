@@ -565,7 +565,7 @@ streamOpenID(const char *filename, const char *filemode, int filetype,
 	  status = cdiInqContents(streamptr);
 	  if ( status < 0 ) return (status);
 	  vlist_t *vlistptr = vlist_to_pointer(streamptr->vlistID);
-	  vlistptr->ntsteps = streamNtsteps(streamID);
+	  vlistptr->ntsteps = streamptr->ntsteps;
 	}
     }
 
@@ -1978,16 +1978,6 @@ void streamWriteContents(int streamID, char *cname)
     }
 
   fclose(cnp);
-}
-
-
-int streamNtsteps(int streamID)
-{
-  stream_t *streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
-
-  return (int)streamptr->ntsteps;
 }
 
 // This function is used in CDO!

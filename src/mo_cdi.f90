@@ -433,13 +433,6 @@ module mo_cdi
         end function streamInqCurTimestepID
       end interface
       interface
-        function streamNtsteps(streamID) bind(c,name='streamNtsteps')
-          import :: c_int
-          integer(kind=c_int), value :: streamID
-          integer(kind=c_int) :: streamNtsteps
-        end function streamNtsteps
-      end interface
-      interface
         function streamInqNvars(streamID) bind(c,name='streamInqNvars')
           import :: c_int
           integer(kind=c_int), value :: streamID
@@ -2969,7 +2962,6 @@ module mo_cdi
       public :: streamInqCurTimestepID
       public :: streamFilename
       public :: streamFilesuffix
-      public :: streamNtsteps
       public :: streamInqNvars
       public :: streamWriteVar
       public :: streamWriteVarF

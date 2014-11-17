@@ -119,7 +119,6 @@ FCALLSCFUN2 (INT, streamInqTimestep, STREAMINQTIMESTEP, streaminqtimestep, INT, 
 FCALLSCFUN1 (INT, streamInqCurTimestepID, STREAMINQCURTIMESTEPID, streaminqcurtimestepid, INT)
 FCALLSCFUN1 (STRING, streamFilename, STREAMFILENAME, streamfilename, INT)
 FCALLSCFUN1 (STRING, streamFilesuffix, STREAMFILESUFFIX, streamfilesuffix, INT)
-FCALLSCFUN1 (INT, streamNtsteps, STREAMNTSTEPS, streamntsteps, INT)
 FCALLSCFUN1 (INT, streamInqNvars, STREAMINQNVARS, streaminqnvars, INT)
 
 /*  STREAM var I/O routines  */

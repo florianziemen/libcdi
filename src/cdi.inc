@@ -571,10 +571,6 @@
 !                                    (INTEGER         filetype)
       EXTERNAL        streamFilesuffix
 
-      INTEGER         streamNtsteps
-!                                    (INTEGER         streamID)
-      EXTERNAL        streamNtsteps
-
       INTEGER         streamInqNvars
 !                                    (INTEGER         streamID)
       EXTERNAL        streamInqNvars

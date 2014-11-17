@@ -318,7 +318,6 @@ int     streamInqCurTimestepID(int streamID);
 
 char   *streamFilename(int streamID);
 char   *streamFilesuffix(int filetype);
-int     streamNtsteps(int streamID);
 off_t   streamNvals(int streamID);
 
 int     streamInqNvars ( int streamID );
