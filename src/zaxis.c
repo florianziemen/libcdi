@@ -1385,7 +1385,7 @@ static int
 zaxisCompareP(zaxis_t *z1, zaxis_t *z2)
 {
   enum {
-    differ = -1,
+    differ = 1,
   };
   int diff = 0;
   xassert(z1 && z2);
@@ -1459,8 +1459,9 @@ zaxisCompareP(zaxis_t *z1, zaxis_t *z2)
   diff |= strcmp(z1->name, z2->name)
     | strcmp(z1->longname, z2->longname)
     | strcmp(z1->stdname, z2->stdname)
-    | strcmp(z1->units, z2->units);
-  return diff;
+    | strcmp(z1->units, z2->units)
+    | memcmp(z1->uuid, z2->uuid, CDI_UUID_SIZE);
+  return diff != 0;
 }
 
 
@@ -1476,7 +1477,8 @@ enum { zaxisNint     = 8,
        lbounds  = 1 << 1,
        ubounds  = 1 << 2,
        weights  = 1 << 3,
-       vct      = 1 << 4
+       vct      = 1 << 4,
+       zaxisHasUUIDFlag = 1 << 5,
 };
 
 
@@ -1490,7 +1492,7 @@ int zaxisGetMemberMask ( zaxis_t * zaxisP )
   if ( zaxisP->ubounds )   memberMask |= ubounds;
   if ( zaxisP->weights )   memberMask |= weights;
   if ( zaxisP->vct )       memberMask |= vct;
-
+  if (!cdiUUIDIsNull(zaxisP->uuid)) memberMask |= zaxisHasUUIDFlag;
   return memberMask;
 }
 
@@ -1530,6 +1532,10 @@ zaxisGetPackSize(void * voidP, void *context)
   packBufferSize += serializeGetSize(zaxisNstrings * CDI_MAX_NAME, DATATYPE_TXT, context)
     + serializeGetSize(1, DATATYPE_UINT32, context)
     + serializeGetSize(1, DATATYPE_UCHAR, context);
+
+  if (!cdiUUIDIsNull(zaxisP->uuid))
+    packBufferSize += serializeGetSize(CDI_UUID_SIZE, DATATYPE_UCHAR, context);
+
   return packBufferSize;
 }
 
@@ -1643,6 +1649,11 @@ zaxisUnpack(char * unpackBuffer, int unpackBufferSize,
 
   serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
                   &zaxisP->positive, 1, DATATYPE_UCHAR, context);
+
+  if (memberMask & zaxisHasUUIDFlag)
+    serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
+                    zaxisP->uuid, CDI_UUID_SIZE, DATATYPE_UCHAR, context);
+
 }
 
 static void
@@ -1651,6 +1662,7 @@ zaxisPack(void * voidP, void * packBuffer, int packBufferSize,
 {
   zaxis_t   * zaxisP = ( zaxis_t * ) voidP;
   int intBuffer[zaxisNint];
+  int memberMask;
   uint32_t d;
   char charBuffer[zaxisNstrings * CDI_MAX_NAME];
 
@@ -1661,7 +1673,7 @@ zaxisPack(void * voidP, void * packBuffer, int packBufferSize,
   intBuffer[4]  = zaxisP->size;
   intBuffer[5]  = zaxisP->direction;
   intBuffer[6]  = zaxisP->vctsize;
-  intBuffer[7]  = zaxisGetMemberMask ( zaxisP );
+  intBuffer[7]  = memberMask = zaxisGetMemberMask ( zaxisP );
 
   serializePack(intBuffer, zaxisNint, DATATYPE_INT,
                 packBuffer, packBufferSize, packBufferPos, context);
@@ -1670,7 +1682,7 @@ zaxisPack(void * voidP, void * packBuffer, int packBufferSize,
                 packBuffer, packBufferSize, packBufferPos, context);
 
 
-  if ( zaxisP->vals )
+  if ( memberMask & vals )
     {
       xassert(zaxisP->size);
       serializePack(zaxisP->vals, zaxisP->size, DATATYPE_FLT64,
@@ -1680,7 +1692,7 @@ zaxisPack(void * voidP, void * packBuffer, int packBufferSize,
                     packBuffer, packBufferSize, packBufferPos, context);
     }
 
-  if (zaxisP->lbounds)
+  if (memberMask & lbounds)
     {
       xassert(zaxisP->size);
       serializePack(zaxisP->lbounds, zaxisP->size, DATATYPE_FLT64,
@@ -1690,7 +1702,7 @@ zaxisPack(void * voidP, void * packBuffer, int packBufferSize,
                     packBuffer, packBufferSize, packBufferPos, context);
     }
 
-  if (zaxisP->ubounds)
+  if (memberMask & ubounds)
     {
       xassert(zaxisP->size);
 
@@ -1701,7 +1713,7 @@ zaxisPack(void * voidP, void * packBuffer, int packBufferSize,
                     packBuffer, packBufferSize, packBufferPos, context);
     }
 
-  if (zaxisP->weights)
+  if (memberMask & weights)
     {
       xassert(zaxisP->size);
 
@@ -1712,7 +1724,7 @@ zaxisPack(void * voidP, void * packBuffer, int packBufferSize,
                     packBuffer, packBufferSize, packBufferPos, context);
     }
 
-  if (zaxisP->vct)
+  if (memberMask & vct)
     {
       xassert(zaxisP->vctsize);
 
@@ -1736,6 +1748,11 @@ zaxisPack(void * voidP, void * packBuffer, int packBufferSize,
 
   serializePack(&zaxisP->positive, 1, DATATYPE_UCHAR,
                 packBuffer, packBufferSize, packBufferPos, context);
+
+  if (memberMask & zaxisHasUUIDFlag)
+    serializePack(zaxisP->uuid, CDI_UUID_SIZE, DATATYPE_UCHAR,
+                  packBuffer, packBufferSize, packBufferPos, context);
+
 }
 
 

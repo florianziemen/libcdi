@@ -113,6 +113,11 @@ int defineZaxis ()
   zaxisDefLbounds ( zaxisID, &levs[0] );
   zaxisDefUbounds ( zaxisID, &levs[0] );
   zaxisDefWeights ( zaxisID, &levs[0] );
+  {
+    unsigned char uuid[CDI_UUID_SIZE];
+    create_uuid(uuid);
+    zaxisDefUUID(zaxisID, uuid);
+  }
 
   return zaxisID;
 }
