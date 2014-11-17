@@ -36,24 +36,18 @@ cdi_atts_t *get_attsp(vlist_t *vlistptr, int varID)
 static
 cdi_att_t *find_att(cdi_atts_t *attsp, const char *name)
 {
-  cdi_att_t *attp;
-  size_t attid;
-  size_t slen;
-
   xassert(attsp != NULL);
 
   if ( attsp->nelems == 0 ) return NULL;
 
-  slen = strlen(name);
+  size_t slen = strlen(name);
 
-  for ( attid = 0; attid < attsp->nelems; attid++ )
+  for (size_t attid = 0; attid < attsp->nelems; attid++)
     {
-      attp = &(attsp->value[attid]);
-      if ( attp->namesz == slen )
-	if ( memcmp(attp->name, name, slen) == 0)
-	  {
-	    return (attp); /* Normal return */
-	  }
+      cdi_att_t *attp = &(attsp->value[attid]);
+      if (attp->namesz == slen
+          && memcmp(attp->name, name, slen) == 0)
+        return (attp); /* Normal return */
     }
 
   return (NULL);
