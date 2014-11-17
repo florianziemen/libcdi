@@ -381,7 +381,7 @@ The function @func{vlistDefAttTxt} defines a text attribute.
 */
 int vlistDefAttTxt(int vlistID, int varID, const char *name, int len, const char *tp)
 {
-  return vlist_def_att(DATATYPE_TXT, DATATYPE_TXT, vlistID, varID, name, (size_t)len, (size_t)len * sizeof (char), tp);
+  return vlist_def_att(DATATYPE_TXT, DATATYPE_TXT, vlistID, varID, name, (size_t)len, (size_t)len, tp);
 }
 
 /*
