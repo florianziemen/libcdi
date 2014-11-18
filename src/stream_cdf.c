@@ -3394,7 +3394,7 @@ size_t cdfDoInputDataTransformationDP(size_t valueCount, double *data, bool have
     validMax = DBL_MAX;
 
   bool haveRangeCheck = (validMax != DBL_MAX) | (validMin != DBL_MIN);
-  assert(!(haveMissVal ^ haveRangeCheck));
+  assert(!haveRangeCheck || haveMissVal);
 
   switch ((int)haveMissVal | ((int)haveScaleFactor << 1)
           | ((int)haveOffset << 2) | ((int)haveRangeCheck << 3))
@@ -3493,7 +3493,7 @@ size_t cdfDoInputDataTransformationSP(size_t valueCount, float *data, bool haveM
     validMax = DBL_MAX;
 
   bool haveRangeCheck = (validMax != DBL_MAX) | (validMin != DBL_MIN);
-  assert(!(haveMissVal ^ haveRangeCheck));
+  assert(!haveRangeCheck || haveMissVal);
 
   switch ((int)haveMissVal | ((int)haveScaleFactor << 1)
           | ((int)haveOffset << 2) | ((int)haveRangeCheck << 3))
