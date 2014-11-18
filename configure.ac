@@ -124,6 +124,7 @@ AC_CHECK_LIB(m, floor)
 #  ----------------------------------------------------------------------
 # Add basic configure options
 ACX_OPTIONS
+AM_CONDITIONAL([ENABLE_NETCDF],[test x$ENABLE_NETCDF = xyes])
 #  ----------------------------------------------------------------------
 # Compile with MPI support
 AC_ARG_ENABLE(mpi,AS_HELP_STRING([--enable-mpi],[Compile with MPI compiler [default=no]]),enable_mpi=yes,enable_mpi=no)
@@ -359,6 +360,7 @@ AC_CONFIG_FILES([tests/test_cksum_grib \
                  tests/pio_cksum_writer \
                  tests/pio_cksum_cdf \
                  tests/test_resource_copy_mpi_run \
+                 tests/test_cdf_transformation \
                  tables/gen_tableheaderfile \
                  util/serialrun],[chmod a+x "$ac_file"])
 
