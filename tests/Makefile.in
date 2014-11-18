@@ -187,10 +187,10 @@ test_grib_OBJECTS = $(am_test_grib_OBJECTS)
 test_grib_LDADD = $(LDADD)
 test_grib_DEPENDENCIES = ../src/libcdi.la
 am_test_resource_copy_OBJECTS = test_resource_copy.$(OBJEXT) \
-	resource_unpack.$(OBJEXT) create_uuid.$(OBJEXT)
+	create_uuid.$(OBJEXT)
 test_resource_copy_OBJECTS = $(am_test_resource_copy_OBJECTS)
 test_resource_copy_DEPENDENCIES = $(am__DEPENDENCIES_2) \
-	$(am__DEPENDENCIES_1)
+	../src/libcdiresunpack.la $(am__DEPENDENCIES_1)
 am_test_resource_copy_mpi_OBJECTS =  \
 	test_resource_copy_mpi-test_resource_copy.$(OBJEXT) \
 	test_resource_copy_mpi-create_uuid.$(OBJEXT)
@@ -503,10 +503,9 @@ pio_write_deco2d_SOURCES = pio_write.c pio_write.h deco2d_model.c \
 	create_uuid.h create_uuid.c
 
 test_resource_copy_SOURCES = test_resource_copy.c \
-	$(top_srcdir)/src/resource_unpack.c \
 	create_uuid.h create_uuid.c
 
-test_resource_copy_LDADD = $(UUID_C_LIB) $(LDADD)
+test_resource_copy_LDADD = $(UUID_C_LIB) ../src/libcdiresunpack.la $(LDADD)
 test_resource_copy_mpi_SOURCES = test_resource_copy.c \
 	create_uuid.h create_uuid.c
 
@@ -666,7 +665,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/deco2d_model.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ensure_array_size.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_write.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/resource_unpack.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/simple_model.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/simple_model_helper.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_cksum.Po@am__quote@
@@ -698,20 +696,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE) -c -o $@ $<
-
-resource_unpack.o: $(top_srcdir)/src/resource_unpack.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT resource_unpack.o -MD -MP -MF $(DEPDIR)/resource_unpack.Tpo -c -o resource_unpack.o `test -f '$(top_srcdir)/src/resource_unpack.c' || echo '$(srcdir)/'`$(top_srcdir)/src/resource_unpack.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/resource_unpack.Tpo $(DEPDIR)/resource_unpack.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$(top_srcdir)/src/resource_unpack.c' object='resource_unpack.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o resource_unpack.o `test -f '$(top_srcdir)/src/resource_unpack.c' || echo '$(srcdir)/'`$(top_srcdir)/src/resource_unpack.c
-
-resource_unpack.obj: $(top_srcdir)/src/resource_unpack.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT resource_unpack.obj -MD -MP -MF $(DEPDIR)/resource_unpack.Tpo -c -o resource_unpack.obj `if test -f '$(top_srcdir)/src/resource_unpack.c'; then $(CYGPATH_W) '$(top_srcdir)/src/resource_unpack.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/resource_unpack.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/resource_unpack.Tpo $(DEPDIR)/resource_unpack.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$(top_srcdir)/src/resource_unpack.c' object='resource_unpack.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o resource_unpack.obj `if test -f '$(top_srcdir)/src/resource_unpack.c'; then $(CYGPATH_W) '$(top_srcdir)/src/resource_unpack.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/resource_unpack.c'; fi`
 
 test_resource_copy_mpi-test_resource_copy.o: test_resource_copy.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_resource_copy_mpi_CFLAGS) $(CFLAGS) -MT test_resource_copy_mpi-test_resource_copy.o -MD -MP -MF $(DEPDIR)/test_resource_copy_mpi-test_resource_copy.Tpo -c -o test_resource_copy_mpi-test_resource_copy.o `test -f 'test_resource_copy.c' || echo '$(srcdir)/'`test_resource_copy.c
