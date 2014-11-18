@@ -17,3 +17,8 @@ else
   # skip tests for unsupported formats
   exit 77
 fi
+#
+# Local Variables:
+# mode: sh
+# End:
+#
