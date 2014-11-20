@@ -205,16 +205,21 @@ decodeForm1(char *pline, char *name, char *longname, char *units)
   while ( isspace((int) *pline) ) pline++;
 
   len = strlen(pline);
-  if ( len > 0)
+  if ( len > 0 )
     {
       pstart = pline;
       pend = strrchr(pline, '[');
-      if ( pend )
-	pend--;
+      if ( pend == pstart )
+        len = 0;
       else
-	pend = pstart + len;
-      while ( isspace((int) *pend) ) pend--;
-      len = (size_t)(pend - pstart + 1);
+        {
+          if ( pend )
+            pend--;
+          else
+            pend = pstart + len;
+          while ( isspace((int) *pend) ) pend--;
+          len = (size_t)(pend - pstart + 1);
+        }
       if ( len > 0 )
 	{
 	  memcpy(longname, pstart, len);
@@ -234,10 +239,10 @@ decodeForm1(char *pline, char *name, char *longname, char *units)
 	    {
 	      memcpy(units, pstart, len);
 	      units[len] = 0;
-	    }	  
+	    }
 	}
     }
- 
+
   return (0);
 }
 
