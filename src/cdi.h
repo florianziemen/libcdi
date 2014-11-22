@@ -264,6 +264,8 @@ int     cdiEncodeTime(int hour, int minute, int second);
 
 /* STREAM control routines */
 
+int     cdiGetFiletype(const char *path, int *byteorder);
+
 /*      streamOpenRead: Open a dataset for reading */
 int     streamOpenRead(const char *path);
 

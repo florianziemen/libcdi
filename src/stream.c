@@ -81,8 +81,8 @@ int getByteorder(int byteswap)
   return (byteorder);
 }
 
-static
-int getFiletype(const char *filename, int *byteorder)
+// used also in CDO
+int cdiGetFiletype(const char *filename, int *byteorder)
 {
   int filetype = CDI_EUFTYPE;
   int swap = 0;
@@ -733,7 +733,7 @@ int streamOpenRead(const char *filename)
   cdiInitialize();
 
   int byteorder = 0;
-  int filetype = getFiletype(filename, &byteorder);
+  int filetype = cdiGetFiletype(filename, &byteorder);
 
   if ( filetype < 0 ) return (filetype);
 
@@ -754,7 +754,7 @@ int streamOpenAppend(const char *filename)
   cdiInitialize();
 
   int byteorder = 0;
-  int filetype = getFiletype(filename, &byteorder);
+  int filetype = cdiGetFiletype(filename, &byteorder);
 
   if ( filetype < 0 ) return (filetype);
 
