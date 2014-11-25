@@ -481,6 +481,11 @@
 !
 !  STREAM control routines
 !
+      INTEGER         cdiGetFiletype
+!                                    (CHARACTER*(*)   path,
+!                                     INTEGER         byteorder)
+      EXTERNAL        cdiGetFiletype
+
       INTEGER         streamOpenRead
 !                                    (CHARACTER*(*)   path)
       EXTERNAL        streamOpenRead

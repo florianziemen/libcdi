@@ -96,6 +96,7 @@ FCALLSCFUN3 (INT, cdiEncodeTime, CDIENCODETIME, cdiencodetime, INT, INT, INT)
 
 /*  STREAM control routines  */
 
+FCALLSCFUN2 (INT, cdiGetFiletype, CDIGETFILETYPE, cdigetfiletype, STRING, PINT)
 FCALLSCFUN1 (INT, streamOpenRead, STREAMOPENREAD, streamopenread, STRING)
 FCALLSCFUN2 (INT, streamOpenWrite, STREAMOPENWRITE, streamopenwrite, STRING, INT)
 FCALLSCFUN1 (INT, streamOpenAppend, STREAMOPENAPPEND, streamopenappend, STRING)

@@ -306,6 +306,14 @@ module mo_cdi
         end function cdiEncodeTime
       end interface
       interface
+        function cdiGetFiletype(path,byteorder) bind(c,name='cdiGetFiletype')
+          import :: c_char,c_int
+          character(kind=c_char), dimension(*) :: path
+          integer(kind=c_int), intent(out) :: byteorder
+          integer(kind=c_int) :: cdiGetFiletype
+        end function cdiGetFiletype
+      end interface
+      interface
         function streamOpenRead(path) bind(c,name='streamOpenRead')
           import :: c_char,c_int
           character(kind=c_char), dimension(*) :: path
@@ -2942,6 +2950,7 @@ module mo_cdi
       public :: cdiEncodeDate
       public :: cdiDecodeTime
       public :: cdiEncodeTime
+      public :: cdiGetFiletype
       public :: streamOpenRead
       public :: streamOpenWrite
       public :: streamOpenAppend
