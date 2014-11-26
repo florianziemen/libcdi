@@ -542,6 +542,17 @@ int cdfDefDatatype(int datatype, int filetype)
   return (xtype);
 }
 
+static inline void *
+resizeBuf(void **buf, size_t *bufSize, size_t reqSize)
+{
+  if (reqSize > *bufSize)
+    {
+      buf = xrealloc(buf, reqSize);
+      *bufSize = reqSize;
+    }
+  return buf;
+}
+
 static
 void defineAttributes(int vlistID, int varID, int fileID, int ncvarID)
 {
@@ -549,6 +560,8 @@ void defineAttributes(int vlistID, int varID, int fileID, int ncvarID)
   int atttype, attlen;
   size_t len;
   char attname[1024];
+  void *attBuf = NULL;
+  size_t attBufSize = 0;
 
   vlistInqNatts(vlistID, varID, &natts);
 
@@ -560,35 +573,30 @@ void defineAttributes(int vlistID, int varID, int fileID, int ncvarID)
 
       if ( atttype == DATATYPE_TXT )
         {
-          char *atttxt = (char *)xmalloc((size_t)attlen*sizeof(char));
+          size_t attSize = (size_t)attlen*sizeof(char);
+          char *atttxt = (char *)resizeBuf(&attBuf, &attBufSize, attSize);
           vlistInqAttTxt(vlistID, varID, attname, attlen, atttxt);
           len = (size_t)attlen;
           cdf_put_att_text(fileID, ncvarID, attname, len, atttxt);
-          free(atttxt);
         }
       else if ( atttype == DATATYPE_INT16 || atttype == DATATYPE_INT32 )
         {
-          int *attint = (int *)xmalloc((size_t)attlen*sizeof(int));
+          size_t attSize = (size_t)attlen*sizeof(int);
+          int *attint = (int *)resizeBuf(&attBuf, &attBufSize, attSize);
           vlistInqAttInt(vlistID, varID, attname, attlen, &attint[0]);
           len = (size_t)attlen;
-          if ( atttype == DATATYPE_INT16 )
-            cdf_put_att_int(fileID, ncvarID, attname, NC_SHORT, len, attint);
-          else
-            cdf_put_att_int(fileID, ncvarID, attname, NC_INT, len, attint);
-          free(attint);
+          cdf_put_att_int(fileID, ncvarID, attname, atttype == DATATYPE_INT16 ? NC_SHORT : NC_INT, len, attint);
         }
       else if ( atttype == DATATYPE_FLT32 || atttype == DATATYPE_FLT64 )
         {
-          double *attflt = (double *)xmalloc((size_t)attlen*sizeof(double));
+          size_t attSize = (size_t)attlen * sizeof(double);
+          double *attflt = (double *)resizeBuf(&attBuf, &attBufSize, attSize);
           vlistInqAttFlt(vlistID, varID, attname, attlen, attflt);
           len = (size_t)attlen;
-          if ( atttype == DATATYPE_FLT32 )
-            cdf_put_att_double(fileID, ncvarID, attname, NC_FLOAT, len, attflt);
-          else
-            cdf_put_att_double(fileID, ncvarID, attname, NC_DOUBLE, len, attflt);
-          free(attflt);
+          cdf_put_att_double(fileID, ncvarID, attname, atttype == DATATYPE_FLT32 ? NC_FLOAT : NC_DOUBLE, len, attflt);
         }
     }
+  free(attBuf);
 }
 
 void cdfCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
