@@ -1511,7 +1511,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
 
   tsID = streamptr->rtsteps;
   if ( tsID != 1 )
-    Error("Internal problem! unexpeceted timestep %d", tsID+1);
+    Error("Internal problem! unexpected timestep %d", tsID+1);
 
   taxis = &streamptr->tsteps[tsID].taxis;
 
