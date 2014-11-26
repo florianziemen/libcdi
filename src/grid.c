@@ -83,7 +83,11 @@ void grid_init(grid_t *gridptr)
   gridptr->ybounds      = NULL;
   gridptr->rowlon       = NULL;
   gridptr->nrowlon      = 0;
+  gridptr->xfirst       = 0.0;
+  gridptr->xlast        = 0.0;
   gridptr->xinc         = 0.0;
+  gridptr->yfirst       = 0.0;
+  gridptr->ylast        = 0.0;
   gridptr->yinc         = 0.0;
   gridptr->lcc_originLon = 0.0;
   gridptr->lcc_originLat = 0.0;

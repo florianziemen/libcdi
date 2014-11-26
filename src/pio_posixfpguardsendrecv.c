@@ -176,7 +176,7 @@ void fpgPOSIXFPGUARDSENDRECV ( void )
   xdebug ( "ncollectors=%d on this node", nProcsCollNode );
   
   bibBFiledataPF = listSetNew( destroyBFiledataPF, fileIDCmpB);
-  sentFinalize = xmalloc((size_t)nProcsCollNode * sizeof (sentFinalize[0]));
+  sentFinalize = xcalloc((size_t)nProcsCollNode, sizeof (sentFinalize[0]));
 
   for ( ;; )
     {
