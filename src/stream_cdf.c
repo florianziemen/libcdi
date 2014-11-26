@@ -6664,7 +6664,6 @@ void define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 	  int zdimid = UNDEFID;
 	  int zvarid = UNDEFID;
 	  int zsize = 1;
-	  double *zvar = NULL;
 	  double *lbounds = NULL;
 	  double *ubounds = NULL;
 	  int zaxisType;
@@ -6686,7 +6685,7 @@ void define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 
 	  if ( CDI_Debug ) Message("nlevs = %d", zsize);
 
-	  zvar = (double *)xmalloc((size_t)zsize * sizeof (double));
+	  double *zvar = (double *)xmalloc((size_t)zsize * sizeof (double));
 
 	  zaxisType = UNDEFID;
 
