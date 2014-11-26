@@ -108,30 +108,23 @@ char *strdup(const char *s);
 
 typedef struct
 {
-  void     *buffer;
-  size_t    buffersize;
-  off_t     position;
-  int       recsize;
-  int       size;
-  int       dataread;
-  int       param;
-  int       level;
-  int       date;
-  int       time;
-  int       gridID;
-  int       zaxisID;
-  int       used;
-  int       nrec;
-  int       varID;
-  int       levelID;
-  int       recid;
-  int       prec;
-  int       sec0[2];
-  int       sec1[1024];
-  int       sec2[4096];
-  int       sec3[2];
-  int       sec4[512];
-  void     *exsep;
+  void     *buffer;             /* gribapi, cgribex */
+  size_t    buffersize;         /* gribapi, cgribex */
+  off_t     position;           /* ieg */
+  int       param;              /* srv */
+  int       level;              /* ext, srv */
+  int       date;               /* ext, srv */
+  int       time;               /* srv */
+  int       gridID;             /* ieg, ext */
+  int       varID;              /* ieg */
+  int       levelID;            /* ieg  */
+  int       prec;               /* ext, srv */
+  int       sec0[2];            /* cgribex */
+  int       sec1[1024];         /* cgribex */
+  int       sec2[4096];         /* cgribex */
+  int       sec3[2];            /* cgribex */
+  int       sec4[512];          /* cgribex */
+  void     *exsep;              /* ieg, ext, srv */
 }
 Record;
 
