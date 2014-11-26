@@ -608,7 +608,6 @@ int cgribexScanTimestep1(stream_t * streamptr)
   int vlistID;
   int comptype;
   long unzipsize;
-  compvar_t compVar;
   char paramstr[32];
   extern int cdiSkipRecords;
   int nskip = cdiSkipRecords;
@@ -708,7 +707,7 @@ int cgribexScanTimestep1(stream_t * streamptr)
 	  datetime.date  = vdate;
 	  datetime.time  = vtime;
 
-	  compVar = cgribexVarSet(param, level1, level2, ISEC1_LevelType, ISEC1_TimeRange);
+	  compvar_t compVar = cgribexVarSet(param, level1, level2, ISEC1_LevelType, ISEC1_TimeRange);
 
 	  for ( recID = 0; recID < nrecs; recID++ )
 	    {
@@ -834,7 +833,6 @@ int cgribexScanTimestep2(stream_t * streamptr)
   taxis_t *taxis;
   int vlistID;
   long unzipsize;
-  compvar_t compVar;
   char paramstr[32];
 
   streamptr->curTsID = 1;
@@ -964,7 +962,7 @@ int cgribexScanTimestep2(stream_t * streamptr)
       datetime.date  = vdate;
       datetime.time  = vtime;
 
-      compVar = cgribexVarSet(param, level1, level2, ISEC1_LevelType, ISEC1_TimeRange);
+      compvar_t compVar = cgribexVarSet(param, level1, level2, ISEC1_LevelType, ISEC1_TimeRange);
 
       for ( recID = 0; recID < nrecords; recID++ )
 	{
@@ -1083,7 +1081,6 @@ int cgribexScanTimestep(stream_t * streamptr)
   int rindex, nrecs = 0;
   int nrecs_scanned;
   long unzipsize;
-  compvar_t compVar;
   char paramstr[32];
 
   /*
@@ -1220,7 +1217,7 @@ int cgribexScanTimestep(stream_t * streamptr)
 	  datetime.date  = vdate;
 	  datetime.time  = vtime;
 
-	  compVar = cgribexVarSet(param, level1, level2, ISEC1_LevelType, ISEC1_TimeRange);
+	  compvar_t compVar = cgribexVarSet(param, level1, level2, ISEC1_LevelType, ISEC1_TimeRange);
 
 	  for ( vrecID = 0; vrecID < nrecs; vrecID++ )
 	    {
