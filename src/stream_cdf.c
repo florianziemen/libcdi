@@ -7344,12 +7344,10 @@ int cdfInqContents(stream_t *streamptr)
   int ndims, nvars, ngatts, unlimdimid;
   int ncvarid;
   int ncdimid;
-  int fileID;
   size_t ntsteps;
   int timedimid = -1;
   int *varids;
   int nvarids;
-  const int attstringlen = 8192; char attstring[8192];
   int time_has_units = FALSE;
   int time_has_bounds = FALSE;
   int time_climatology = FALSE;
@@ -7365,7 +7363,6 @@ int cdfInqContents(stream_t *streamptr)
   int calendar = UNDEFID;
   ncdim_t *ncdims;
   ncvar_t *ncvars = NULL;
-  int vlistID;
   int format = 0;
   int ucla_les = FALSE;
   unsigned char uuidOfHGrid[CDI_UUID_SIZE];
@@ -7379,8 +7376,8 @@ int cdfInqContents(stream_t *streamptr)
   gridfile[0] = 0;
   fcreftime[0] = 0;
 
-  vlistID = streamptr->vlistID;
-  fileID  = streamptr->fileID;
+  int vlistID = streamptr->vlistID;
+  int fileID  = streamptr->fileID;
 
   if ( CDI_Debug ) Message("streamID = %d, fileID = %d", streamptr->self, fileID);
 
@@ -7774,6 +7771,11 @@ int cdfInqContents(stream_t *streamptr)
   if ( ncvarid != UNDEFID )
     if ( ncvars[ncvarid].calendar == TRUE )
       {
+        enum {
+          attstringlen = 8192,
+        };
+        char attstring[attstringlen];
+
 	cdfGetAttText(fileID, ncvarid, "calendar", attstringlen-1, attstring);
 	strtolower(attstring);
 
