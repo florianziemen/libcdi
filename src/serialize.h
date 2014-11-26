@@ -9,9 +9,9 @@
  * Generic interfaces for (de-)marshalling
  */
 int serializeGetSize(int count, int datatype, void *context);
-void serializePack(void *data, int count, int datatype,
+void serializePack(const void *data, int count, int datatype,
                    void *buf, int buf_size, int *position, void *context);
-void serializeUnpack(void *buf, int buf_size, int *position,
+void serializeUnpack(const void *buf, int buf_size, int *position,
                      void *data, int count, int datatype, void *context);
 
 /*
@@ -22,9 +22,18 @@ void serializeUnpack(void *buf, int buf_size, int *position,
  * Interfaces for marshalling within a single memory domain
  */
 int serializeGetSizeInCore(int count, int datatype, void *context);
-void serializePackInCore(void *data, int count, int datatype,
+void serializePackInCore(const void *data, int count, int datatype,
                           void *buf, int buf_size, int *position, void *context);
-void serializeUnpackInCore(void *buf, int buf_size, int *position,
-                            void *data, int count, int datatype, void *context);
+void serializeUnpackInCore(const void *buf, int buf_size, int *position,
+                           void *data, int count, int datatype, void *context);
 
 #endif
+/*
+ * Local Variables:
+ * c-file-style: "Java"
+ * c-basic-offset: 2
+ * indent-tabs-mode: nil
+ * show-trailing-whitespace: t
+ * require-trailing-newline: t
+ * End:
+ */
