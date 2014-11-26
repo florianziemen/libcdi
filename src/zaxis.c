@@ -1359,7 +1359,6 @@ zaxisTxCode ( void )
 }
 
 enum { zaxisNint     = 8,
-       zaxisNstrings = 4,
        vals     = 1 << 0,
        lbounds  = 1 << 1,
        ubounds  = 1 << 2,
@@ -1368,6 +1367,8 @@ enum { zaxisNint     = 8,
        zaxisHasUUIDFlag = 1 << 5,
 };
 
+#define ZAXIS_STR_SERIALIZE { zaxisP->name, zaxisP->longname, \
+      zaxisP->stdname, zaxisP->units }
 
 static
 int zaxisGetMemberMask ( zaxis_t * zaxisP )
@@ -1416,9 +1417,14 @@ zaxisGetPackSize(void * voidP, void *context)
         + serializeGetSize(1, DATATYPE_UINT32, context);
     }
 
-  packBufferSize += serializeGetSize(zaxisNstrings * CDI_MAX_NAME, DATATYPE_TXT, context)
-    + serializeGetSize(1, DATATYPE_UINT32, context)
-    + serializeGetSize(1, DATATYPE_UCHAR, context);
+  {
+    const char *strTab[] = ZAXIS_STR_SERIALIZE;
+    size_t numStr = sizeof (strTab) / sizeof (strTab[0]);
+    packBufferSize
+      += serializeStrTabGetPackSize(strTab, (int)numStr, context);
+  }
+
+  packBufferSize += serializeGetSize(1, DATATYPE_UCHAR, context);
 
   if (!cdiUUIDIsNull(zaxisP->uuid))
     packBufferSize += serializeGetSize(CDI_UUID_SIZE, DATATYPE_UCHAR, context);
@@ -1434,7 +1440,6 @@ zaxisUnpack(char * unpackBuffer, int unpackBufferSize,
 {
   int intBuffer[zaxisNint], memberMask;
   uint32_t d;
-  char charBuffer[zaxisNstrings * CDI_MAX_NAME];
 
   serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
                   intBuffer, zaxisNint, DATATYPE_INT, context);
@@ -1522,17 +1527,12 @@ zaxisUnpack(char * unpackBuffer, int unpackBufferSize,
       xassert(cdiCheckSum(DATATYPE_FLT64, size, zaxisP->vct) == d);
     }
 
-  serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                  charBuffer, zaxisNstrings * CDI_MAX_NAME, DATATYPE_TXT, context);
-  serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                  &d, 1, DATATYPE_UINT32, context);
-
-  xassert(d == cdiCheckSum(DATATYPE_TXT, zaxisNstrings * CDI_MAX_NAME, charBuffer));
-
-  memcpy ( zaxisP->name,     &charBuffer[CDI_MAX_NAME * 0], CDI_MAX_NAME );
-  memcpy ( zaxisP->longname, &charBuffer[CDI_MAX_NAME * 1], CDI_MAX_NAME );
-  memcpy ( zaxisP->stdname,  &charBuffer[CDI_MAX_NAME * 2], CDI_MAX_NAME );
-  memcpy ( zaxisP->units,    &charBuffer[CDI_MAX_NAME * 3], CDI_MAX_NAME );
+  {
+    char *strTab[] = ZAXIS_STR_SERIALIZE;
+    int numStr = sizeof (strTab) / sizeof (strTab[0]);
+    serializeStrTabUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
+                          strTab, numStr, context);
+  }
 
   serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
                   &zaxisP->positive, 1, DATATYPE_UCHAR, context);
@@ -1551,7 +1551,6 @@ zaxisPack(void * voidP, void * packBuffer, int packBufferSize,
   int intBuffer[zaxisNint];
   int memberMask;
   uint32_t d;
-  char charBuffer[zaxisNstrings * CDI_MAX_NAME];
 
   intBuffer[0]  = zaxisP->self;
   intBuffer[1]  = zaxisP->prec;
@@ -1622,16 +1621,12 @@ zaxisPack(void * voidP, void * packBuffer, int packBufferSize,
                     packBuffer, packBufferSize, packBufferPos, context);
     }
 
-  memcpy ( &charBuffer[CDI_MAX_NAME * 0], zaxisP->name,     CDI_MAX_NAME );
-  memcpy ( &charBuffer[CDI_MAX_NAME * 1], zaxisP->longname, CDI_MAX_NAME );
-  memcpy ( &charBuffer[CDI_MAX_NAME * 2], zaxisP->stdname,  CDI_MAX_NAME );
-  memcpy ( &charBuffer[CDI_MAX_NAME * 3], zaxisP->units,    CDI_MAX_NAME );
-
-  serializePack(charBuffer, zaxisNstrings * CDI_MAX_NAME, DATATYPE_TXT,
-                packBuffer, packBufferSize, packBufferPos, context);
-  d = cdiCheckSum(DATATYPE_TXT, zaxisNstrings * CDI_MAX_NAME, charBuffer);
-  serializePack(&d, 1, DATATYPE_UINT32,
-                packBuffer, packBufferSize, packBufferPos, context);
+  {
+    const char *strTab[] = ZAXIS_STR_SERIALIZE;
+    int numStr = sizeof (strTab) / sizeof (strTab[0]);
+    serializeStrTabPack(strTab, numStr,
+                        packBuffer, packBufferSize, packBufferPos, context);
+  }
 
   serializePack(&zaxisP->positive, 1, DATATYPE_UCHAR,
                 packBuffer, packBufferSize, packBufferPos, context);
@@ -1647,6 +1642,9 @@ void zaxisGetIndexList ( int nzaxis, int * zaxisResHs )
 {
   reshGetResHListOfType ( nzaxis, zaxisResHs, &zaxisOps );
 }
+
+#undef ZAXIS_STR_SERIALIZE
+
 /*
  * Local Variables:
  * c-file-style: "Java"

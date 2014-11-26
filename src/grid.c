@@ -3870,7 +3870,6 @@ gridTxCode ()
 
 enum { gridNint    = 27,
        gridNdouble = 24,
-       gridNstrings= 8,
        gridHasMaskFlag = 1 << 0,
        gridHasGMEMaskFlag = 1 << 1,
        gridHasXValsFlag = 1 << 2,
@@ -3899,6 +3898,11 @@ static int gridGetComponentFlags(const grid_t * gridP)
   return flags;
 }
 
+
+#define GRID_STR_SERIALIZE { gridP->xname, gridP->yname, \
+    gridP->xlongname, gridP->ylongname, \
+    gridP->xstdname, gridP->ystdname, \
+    gridP->xunits, gridP->yunits }
 
 static int
 gridGetPackSize(void * voidP, void *context)
@@ -3974,9 +3978,12 @@ gridGetPackSize(void * voidP, void *context)
             + serializeGetSize(1, DATATYPE_UINT32, context));
     }
 
-  packBuffSize +=
-    serializeGetSize(gridNstrings * CDI_MAX_NAME , DATATYPE_TXT, context)
-    + serializeGetSize(1, DATATYPE_UINT32, context);
+  {
+    const char *strTab[] = GRID_STR_SERIALIZE;
+    int numStr = (int)(sizeof (strTab) / sizeof (strTab[0]));
+    packBuffSize
+      += serializeStrTabGetPackSize(strTab, numStr, context);
+  }
 
   if (gridP->reference)
     {
@@ -4007,11 +4014,6 @@ gridGetPackSize(void * voidP, void *context)
   return packBuffSize;
 }
 
-#define GRID_STR_SERIALIZE { gridP->xname, gridP->yname, \
-    gridP->xlongname, gridP->ylongname, \
-    gridP->xstdname, gridP->ystdname, \
-    gridP->xunits, gridP->yunits }
-
 void
 gridUnpack(char * unpackBuffer, int unpackBufferSize,
            int * unpackBufferPos, int originNamespace, void *context,
@@ -4020,7 +4022,6 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
   grid_t * gridP;
   uint32_t d;
   int memberMask, size;
-  char charBuffer[gridNstrings * CDI_MAX_NAME];
 
   gridInit();
 
@@ -4174,17 +4175,11 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
       xassert(cdiCheckSum(DATATYPE_FLT, size, gridP->ybounds) == d);
     }
 
-  serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                  charBuffer, gridNstrings * CDI_MAX_NAME, DATATYPE_TXT, context);
-  serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                  &d, 1, DATATYPE_UINT32, context);
-
-  xassert(d == cdiCheckSum(DATATYPE_TXT, gridNstrings * CDI_MAX_NAME, charBuffer));
   {
     char *strTab[] = GRID_STR_SERIALIZE;
-    size_t numStr = sizeof (strTab) / sizeof (strTab[0]);
-    for (size_t i = 0; i < numStr; ++i)
-      memcpy(strTab[i], charBuffer + CDI_MAX_NAME * i, CDI_MAX_NAME);
+    int numStr = sizeof (strTab) / sizeof (strTab[0]);
+    serializeStrTabUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
+                          strTab, numStr, context);
   }
 
   if (memberMask & gridHasReferenceFlag)
@@ -4237,7 +4232,6 @@ gridPack(void * voidP, void * packBuffer, int packBufferSize,
   int size;
   uint32_t d;
   int memberMask;
-  char charBuffer[gridNstrings * CDI_MAX_NAME];
 
   {
     int intBuffer[gridNint];
@@ -4279,7 +4273,8 @@ gridPack(void * voidP, void * packBuffer, int packBufferSize,
 
   if (memberMask & gridHasRowLonFlag)
     {
-      xassert((size = gridP->nrowlon));
+      size = gridP->nrowlon;
+      xassert(size > 0);
       serializePack(gridP->rowlon, size, DATATYPE_INT,
                     packBuffer, packBufferSize, packBufferPos, context);
       d = cdiCheckSum(DATATYPE_INT , size, gridP->rowlon);
@@ -4395,17 +4390,11 @@ gridPack(void * voidP, void * packBuffer, int packBufferSize,
     }
 
   {
-    char *strTab[] = GRID_STR_SERIALIZE;
-    size_t numStr = sizeof (strTab) / sizeof (strTab[0]);
-    for (size_t i = 0; i < numStr; ++i)
-      memcpy(charBuffer + CDI_MAX_NAME * i, strTab[i], CDI_MAX_NAME);
+    const char *strTab[] = GRID_STR_SERIALIZE;
+    int numStr = sizeof (strTab) / sizeof (strTab[0]);
+    serializeStrTabPack(strTab, numStr,
+                        packBuffer, packBufferSize, packBufferPos, context);
   }
-
-  serializePack( charBuffer, gridNstrings * CDI_MAX_NAME, DATATYPE_TXT,
-		    packBuffer, packBufferSize, packBufferPos, context);
-  d = cdiCheckSum(DATATYPE_TXT, gridNstrings * CDI_MAX_NAME, charBuffer);
-  serializePack(&d, 1, DATATYPE_UINT32,
-                packBuffer, packBufferSize, packBufferPos, context);
 
   if (memberMask & gridHasReferenceFlag)
     {
@@ -4444,6 +4433,8 @@ gridPack(void * voidP, void * packBuffer, int packBufferSize,
     serializePack(gridP->uuid, CDI_UUID_SIZE, DATATYPE_UCHAR,
                   packBuffer, packBufferSize, packBufferPos, context);
 }
+
+#undef GRID_STR_SERIALIZE
 
 /*
  * Local Variables:
