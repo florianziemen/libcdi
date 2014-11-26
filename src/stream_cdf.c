@@ -4953,23 +4953,6 @@ void printNCvars(ncvar_t *ncvars, int nvars, const char *oname)
     }
 }
 
-typedef struct
-{
-  int      ncvarid;
-  char     name[CDI_MAX_NAME];
-}
-varinfo_t;
-
-
-static
-int cmpvarname(const void *s1, const void *s2)
-{
-  varinfo_t *x = (varinfo_t *) s1;
-  varinfo_t *y = (varinfo_t *) s2;
-
-  return (strcmp(x->name, y->name));
-}
-
 static
 void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
                           int timedimid, int modelID, int format)
@@ -6822,6 +6805,20 @@ void define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
     }
 }
 
+struct varinfo
+{
+  int      ncvarid;
+  const char *name;
+};
+
+static
+int cmpvarname(const void *s1, const void *s2)
+{
+  const struct varinfo *x = (const struct varinfo *)s1,
+    *y = (const struct varinfo *)s2;
+  return (strcmp(x->name, y->name));
+}
+
 /* define all input data variables */
 static
 void define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, int *varids, int nvars, int num_ncvars, ncvar_t *ncvars)
@@ -6833,26 +6830,20 @@ void define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, 
 
   if ( streamptr->sortname )
     {
-      int index;
-      varinfo_t **varInfo;
-      varInfo    = (varinfo_t **)xmalloc((size_t)nvars * sizeof (varinfo_t *));
-      varInfo[0] = (varinfo_t *)xmalloc((size_t)nvars * sizeof (varinfo_t));
+      struct varinfo *varInfo
+        = (struct varinfo *)xmalloc((size_t)nvars * sizeof (struct varinfo));
 
-      for ( index = 1; index < nvars; index++ )
-	varInfo[index] = varInfo[0] + index;
-
+      for ( int varID = 0; varID < nvars; varID++ )
+	{
+	  int ncvarid = varids[varID];
+	  varInfo[varID].ncvarid = ncvarid;
+	  varInfo[varID].name = ncvars[ncvarid].name;
+	}
+      qsort(varInfo, (size_t)nvars, sizeof(varInfo[0]), cmpvarname);
       for ( varID = 0; varID < nvars; varID++ )
 	{
-	  ncvarid = varids[varID];
-	  varInfo[varID]->ncvarid = ncvarid;
-	  strcpy(varInfo[varID]->name, ncvars[ncvarid].name);
+	  varids[varID] = varInfo[varID].ncvarid;
 	}
-      qsort(varInfo[0], (size_t)nvars, sizeof(varinfo_t), cmpvarname);
-      for ( varID = 0; varID < nvars; varID++ )
-	{
-	  varids[varID] = varInfo[varID]->ncvarid;
-	}
-      free(varInfo[0]);
       free(varInfo);
     }
 
