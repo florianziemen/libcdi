@@ -6812,11 +6812,6 @@ int cmpvarname(const void *s1, const void *s2)
 static
 void define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, int *varids, int nvars, int num_ncvars, ncvar_t *ncvars)
 {
-  int ncid;
-  int varID1, varID, ncvarid;
-  int code;
-  int tableID;
-
   if ( streamptr->sortname )
     {
       struct varinfo *varInfo
@@ -6829,23 +6824,23 @@ void define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, 
 	  varInfo[varID].name = ncvars[ncvarid].name;
 	}
       qsort(varInfo, (size_t)nvars, sizeof(varInfo[0]), cmpvarname);
-      for ( varID = 0; varID < nvars; varID++ )
+      for ( int varID = 0; varID < nvars; varID++ )
 	{
 	  varids[varID] = varInfo[varID].ncvarid;
 	}
       free(varInfo);
     }
 
-  for ( varID1 = 0; varID1 < nvars; varID1++ )
+  for ( int varID1 = 0; varID1 < nvars; varID1++ )
     {
       int gridID, zaxisID;
 
-      ncvarid = varids[varID1];
+      int ncvarid = varids[varID1];
       gridID  = ncvars[ncvarid].gridID;
       zaxisID = ncvars[ncvarid].zaxisID;
 
-      varID = stream_new_var(streamptr, gridID, zaxisID);
-      varID = vlistDefVar(vlistID, gridID, zaxisID, ncvars[ncvarid].tsteptype);
+      stream_new_var(streamptr, gridID, zaxisID);
+      int varID = vlistDefVar(vlistID, gridID, zaxisID, ncvars[ncvarid].tsteptype);
 
 #if  defined  (HAVE_NETCDF4)
       if ( ncvars[ncvarid].deflate )
@@ -6960,10 +6955,10 @@ void define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, 
         }
     }
 
-  for ( varID = 0; varID < nvars; varID++ )
+  for ( int varID = 0; varID < nvars; varID++ )
     {
-      ncvarid = varids[varID];
-      ncid = ncvars[ncvarid].ncid;
+      int ncvarid = varids[varID];
+      int ncid = ncvars[ncvarid].ncid;
 
       if ( ncvars[ncvarid].natts )
 	{
@@ -7019,12 +7014,12 @@ void define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, 
     }
 
   /* release mem of not freed attributes */
-  for ( ncvarid = 0; ncvarid < num_ncvars; ncvarid++ )
+  for ( int ncvarid = 0; ncvarid < num_ncvars; ncvarid++ )
     if ( ncvars[ncvarid].atts ) free(ncvars[ncvarid].atts);
 
   if ( varids ) free(varids);
 
-  for ( varID = 0; varID < nvars; varID++ )
+  for ( int varID = 0; varID < nvars; varID++ )
     {
       if ( vlistInqVarCode(vlistID, varID) == -varID-1 )
 	{
@@ -7059,12 +7054,12 @@ void define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, 
 	}
     }
 
-  for ( varID = 0; varID < nvars; varID++ )
+  for ( int varID = 0; varID < nvars; varID++ )
     {
-      instID  = vlistInqVarInstitut(vlistID, varID);
-      modelID = vlistInqVarModel(vlistID, varID);
-      tableID = vlistInqVarTable(vlistID, varID);
-      code    = vlistInqVarCode(vlistID, varID);
+      int instID  = vlistInqVarInstitut(vlistID, varID);
+      int modelID = vlistInqVarModel(vlistID, varID);
+      int tableID = vlistInqVarTable(vlistID, varID);
+      int code = vlistInqVarCode(vlistID, varID);
       if ( cdiDefaultTableID != UNDEFID )
 	{
 	  if ( tableInqParNamePtr(cdiDefaultTableID, code) )
