@@ -548,6 +548,39 @@ int cgribexVarCompare(compvar_t compVar, record_t record, int flag)
             Warning("Record %2d (id=%s lev1=%d lev2=%d) timestep %d: %s", nrecs, paramstr, level1, level2, timestep, text)
 
 #if  defined  (HAVE_LIBCGRIBEX)
+
+static inline void
+cgribexScanTsFixNtsteps(stream_t *streamptr, off_t recpos)
+{
+  if ( streamptr->ntsteps == -1 )
+    {
+      int tsID = tstepsNewEntry(streamptr);
+      if ( tsID != streamptr->rtsteps )
+	Error("Internal error. tsID = %d", tsID);
+
+      streamptr->tsteps[tsID-1].next   = TRUE;
+      streamptr->tsteps[tsID].position = recpos;
+    }
+}
+
+static inline void
+cgribexScanTsConstAdjust(stream_t *streamptr, taxis_t *taxis)
+{
+  int vlistID = streamptr->vlistID;
+  if ( streamptr->ntsteps == 1 )
+    {
+      if ( taxis->vdate == 0 && taxis->vtime == 0 )
+	{
+	  streamptr->ntsteps = 0;
+	  for (int varID = 0; varID < streamptr->nvars; varID++ )
+	    {
+	      vlistDefVarTsteptype(vlistID, varID, TSTEP_CONSTANT);
+	    }
+	}
+    }
+}
+
+
 int cgribexScanTimestep1(stream_t * streamptr)
 {
   int *isec0, *isec1, *isec2, *isec3, *isec4;
@@ -562,7 +595,6 @@ int cgribexScanTimestep1(stream_t * streamptr)
   int level1 = 0, level2 = 0, vdate = 0, vtime = 0;
   DateTime datetime, datetime0;
   int tsID;
-  int varID;
   size_t readsize;
   unsigned nrecords, recID;
   int nrecs_scanned = 0;
@@ -770,34 +802,13 @@ int cgribexScanTimestep1(stream_t * streamptr)
   streamptr->record->buffer     = gribbuffer;
   streamptr->record->buffersize = (size_t)buffersize;
 
-  if ( streamptr->ntsteps == -1 )
-    {
-      tsID = tstepsNewEntry(streamptr);
-      if ( tsID != streamptr->rtsteps )
-	Error("Internal error. tsID = %d", tsID);
-
-      streamptr->tsteps[tsID-1].next   = TRUE;
-      streamptr->tsteps[tsID].position = recpos;
-    }
-
-  if ( streamptr->ntsteps == 1 )
-    {
-      if ( taxis->vdate == 0 && taxis->vtime == 0 )
-	{
-	  streamptr->ntsteps = 0;
-	  for ( varID = 0; varID < streamptr->nvars; varID++ )
-	    {
-	      vlistDefVarTsteptype(vlistID, varID, TSTEP_CONSTANT);
-	    }
-	}
-    }
+  cgribexScanTsFixNtsteps(streamptr, recpos);
+  cgribexScanTsConstAdjust(streamptr, taxis);
 
   return (0);
 }
-#endif
 
 
-#if  defined  (HAVE_LIBCGRIBEX)
 int cgribexScanTimestep2(stream_t * streamptr)
 {
   int rstatus = 0;
@@ -1041,15 +1052,7 @@ int cgribexScanTimestep2(stream_t * streamptr)
 
   streamptr->rtsteps = 2;
 
-  if ( streamptr->ntsteps == -1 )
-    {
-      tsID = tstepsNewEntry(streamptr);
-      if ( tsID != streamptr->rtsteps )
-	Error("Internal error. tsID = %d", tsID);
-
-      streamptr->tsteps[tsID-1].next   = TRUE;
-      streamptr->tsteps[tsID].position = recpos;
-    }
+  cgribexScanTsFixNtsteps(streamptr, recpos);
 
   streamptr->record->buffer     = gribbuffer;
   streamptr->record->buffersize = buffersize;
