@@ -290,6 +290,7 @@ void fpgPOSIXFPGUARDSENDRECV ( void )
                     xdebug("%s", "destroy set");
                     listSetDelete(bibBFiledataPF);
                   }
+                free(sentFinalize);
                 return;
               }
           }

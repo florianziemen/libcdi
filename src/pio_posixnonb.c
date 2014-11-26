@@ -277,6 +277,7 @@ pioWriterStdIO(void)
                            " return");
                     listSetDelete(bibBFiledataP);
                   }
+                free(sentFinalize);
                 return;
               }
           }

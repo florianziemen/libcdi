@@ -380,6 +380,7 @@ void pioWriterAIO(void)
                            " return");
                     listSetDelete(bibBFiledataPA);
                   }
+                free(sentFinalize);
                 return;
               }
           }
