@@ -57,15 +57,11 @@ modelRegionCompute(double region[], int nlev, int nlat, int nlon,
     for (unsigned j = 0; j < n; ++j)
       for (unsigned i = 0; i < m; ++i)
         region[k * kstride + j * jstride + i]
-          = sign_flat(round((cos(2.0 * M_PI
-                                 * (lons[(i + is + (unsigned)tsID)
-                                         %(unsigned)nlon] - lons[0])
-                                 / (lons[nlon-1] - lons[0]))
-                             * sin(2.0 * M_PI
-                                   * (lats[(j + js + k + ks)%(unsigned)nlat]
-                                      - lats[0])
-                                   / (lats[nlat-1] - lats[0]))
-                             ) * mscale)) * mrscale;
+          = dg_wobble((lons[(i + is + (unsigned)tsID)%(unsigned)nlon] - lons[0])
+                      / (lons[nlon-1] - lons[0]),
+                      (lats[(j + js + k + ks)%(unsigned)nlat] - lats[0])
+                      / (lats[nlat-1] - lats[0]),
+                      mscale, mrscale);
 }
 
 #ifdef USE_MPI
