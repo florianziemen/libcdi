@@ -786,15 +786,13 @@ void cdf_write_record(stream_t *streamptr, int memtype, const void *data, int nm
 
 void cdfReadRecord(stream_t *streamptr, double *data, int *nmiss)
 {
-  int levelID, varID, tsID, recID, vrecID;
-
   if ( CDI_Debug ) Message("streamID = %d", streamptr->self);
 
-  tsID    = streamptr->curTsID;
-  vrecID  = streamptr->tsteps[tsID].curRecID;
-  recID   = streamptr->tsteps[tsID].recIDs[vrecID];
-  varID   = streamptr->tsteps[tsID].records[recID].varID;
-  levelID = streamptr->tsteps[tsID].records[recID].levelID;
+  int tsID    = streamptr->curTsID;
+  int vrecID  = streamptr->tsteps[tsID].curRecID;
+  int recID   = streamptr->tsteps[tsID].recIDs[vrecID];
+  int varID   = streamptr->tsteps[tsID].records[recID].varID;
+  int levelID = streamptr->tsteps[tsID].records[recID].levelID;
 
   cdfReadVarSliceDP(streamptr, varID, levelID, data, nmiss);
 }
@@ -802,16 +800,12 @@ void cdfReadRecord(stream_t *streamptr, double *data, int *nmiss)
 static
 void cdfDefTimeValue(stream_t *streamptr, int tsID)
 {
-  int fileID;
-  int ncvarid;
-  taxis_t *taxis;
-
-  fileID = streamptr->fileID;
+  int fileID = streamptr->fileID;
 
   if ( CDI_Debug )
     Message("streamID = %d, fileID = %d", streamptr->self, fileID);
 
-  taxis = &streamptr->tsteps[tsID].taxis;
+  taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
 
   if ( streamptr->ncmode == 1 )
     {
@@ -824,7 +818,7 @@ void cdfDefTimeValue(stream_t *streamptr, int tsID)
   double timevalue = cdiEncodeTimeval(taxis->vdate, taxis->vtime, &streamptr->tsteps[0].taxis);
   if ( CDI_Debug ) Message("tsID = %d  timevalue = %f", tsID, timevalue);
 
-  ncvarid = streamptr->basetime.ncvarid;
+  int ncvarid = streamptr->basetime.ncvarid;
   cdf_put_var1_double(fileID, ncvarid, &index, &timevalue);
 
   if ( taxis->has_bounds )
