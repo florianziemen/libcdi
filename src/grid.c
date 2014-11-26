@@ -2206,8 +2206,8 @@ int gridCompareP ( void * gridptr1, void * gridptr2 )
 {
   grid_t * g1 = ( grid_t * ) gridptr1;
   grid_t * g2 = ( grid_t * ) gridptr2;
-  int differ = -1;
-  int equal  = 0;
+  enum { equal = 0,
+         differ = -1 };
   int i, size;
 
   xassert ( g1 );
@@ -2350,14 +2350,14 @@ int gridCompareP ( void * gridptr1, void * gridptr2 )
   else if ( g2->ybounds )
     return differ;
 
-  if ( memcmp ( &g1->xname    ,&g2->xname    ,CDI_MAX_NAME ) ) return differ;
-  if ( memcmp ( &g1->yname    ,&g2->yname    ,CDI_MAX_NAME ) ) return differ;
-  if ( memcmp ( &g1->xlongname,&g2->xlongname,CDI_MAX_NAME ) ) return differ;
-  if ( memcmp ( &g1->ylongname,&g2->ylongname,CDI_MAX_NAME ) ) return differ;
-  if ( memcmp ( &g1->xstdname ,&g2->xstdname ,CDI_MAX_NAME ) ) return differ;
-  if ( memcmp ( &g1->ystdname ,&g2->ystdname ,CDI_MAX_NAME ) ) return differ;
-  if ( memcmp ( &g1->xunits   ,&g2->xunits   ,CDI_MAX_NAME ) ) return differ;
-  if ( memcmp ( &g1->yunits   ,&g2->yunits   ,CDI_MAX_NAME ) ) return differ;
+  if (strcmp(g1->xname, g2->xname)) return differ;
+  if (strcmp(g1->yname, g2->yname)) return differ;
+  if (strcmp(g1->xlongname, g2->xlongname)) return differ;
+  if (strcmp(g1->ylongname, g2->ylongname)) return differ;
+  if (strcmp(g1->xstdname, g2->xstdname)) return differ;
+  if (strcmp(g1->ystdname, g2->ystdname)) return differ;
+  if (strcmp(g1->xunits, g2->xunits)) return differ;
+  if (strcmp(g1->yunits, g2->yunits)) return differ;
 
   if ( g1->reference )
     {
