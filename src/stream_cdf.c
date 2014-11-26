@@ -8175,31 +8175,31 @@ void cdfInqHistoryString(stream_t *streamptr, char *history)
 
 void cdfDefVars(stream_t *streamptr)
 {
-  int index, gridID, zaxisID, vlistID;
-  int ngrids, nzaxis;
   /* int  nvars, ncvarid; */
 
-  vlistID = streamptr->vlistID;
+  int vlistID = streamptr->vlistID;
   if ( vlistID == UNDEFID )
     Error("Internal problem! vlist undefined for streamptr %p", streamptr);
 
   /* nvars  = vlistNvars(vlistID); */
-  ngrids = vlistNgrids(vlistID);
-  nzaxis = vlistNzaxis(vlistID);
+  int ngrids = vlistNgrids(vlistID);
+  int nzaxis = vlistNzaxis(vlistID);
   /*
   if ( vlistHasTime(vlistID) ) cdfDefTime(streamptr);
   */
-  for ( index = 0; index < ngrids; index++ )
-    {
-      gridID = vlistGrid(vlistID, index);
-      cdfDefGrid(streamptr, gridID);
-    }
+  if (ngrids > 0)
+    for (size_t index = 0; index < (size_t)ngrids; index++ )
+      {
+        int gridID = vlistGrid(vlistID, index);
+        cdfDefGrid(streamptr, gridID);
+      }
 
-  for ( index = 0; index < nzaxis; index++ )
-    {
-      zaxisID = vlistZaxis(vlistID, index);
-      if ( streamptr->zaxisID[index] == UNDEFID ) cdfDefZaxis(streamptr, zaxisID);
-    }
+  if (nzaxis > 0)
+    for (size_t index = 0; index < (size_t)nzaxis; index++ )
+      {
+        int zaxisID = vlistZaxis(vlistID, index);
+        if ( streamptr->zaxisID[index] == UNDEFID ) cdfDefZaxis(streamptr, zaxisID);
+      }
   /*
     define time first!!!
   for (varID = 0; varID < nvars; varID++ )
