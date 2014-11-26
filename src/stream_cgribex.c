@@ -547,9 +547,9 @@ int cgribexVarCompare(compvar_t compVar, record_t record, int flag)
 #define gribWarning(text, nrecs, timestep, paramstr, level1, level2) \
             Warning("Record %2d (id=%s lev1=%d lev2=%d) timestep %d: %s", nrecs, paramstr, level1, level2, timestep, text)
 
+#if  defined  (HAVE_LIBCGRIBEX)
 int cgribexScanTimestep1(stream_t * streamptr)
 {
-#if  defined  (HAVE_LIBCGRIBEX)
   int *isec0, *isec1, *isec2, *isec3, *isec4;
   double fsec2[512], fsec3[2], *fsec4 = NULL;
   int lmv = 0, iret = 0;
@@ -791,18 +791,16 @@ int cgribexScanTimestep1(stream_t * streamptr)
 	    }
 	}
     }
-#else
-  Error("CGRIBEX support not compiled in!");
-#endif
 
   return (0);
 }
+#endif
 
 
+#if  defined  (HAVE_LIBCGRIBEX)
 int cgribexScanTimestep2(stream_t * streamptr)
 {
   int rstatus = 0;
-#if  defined  (HAVE_LIBCGRIBEX)
   int *isec0, *isec1, *isec2, *isec3, *isec4;
   double fsec2[512], fsec3[2], *fsec4 = NULL;
   int lmv = 0, iret = 0;
@@ -1055,16 +1053,16 @@ int cgribexScanTimestep2(stream_t * streamptr)
 
   streamptr->record->buffer     = gribbuffer;
   streamptr->record->buffersize = buffersize;
-#endif
 
   return (rstatus);
 }
+#endif
 
 
+#if  defined  (HAVE_LIBCGRIBEX)
 int cgribexScanTimestep(stream_t * streamptr)
 {
   int rstatus = 0;
-#if  defined  (HAVE_LIBCGRIBEX)
   double fsec2[512], fsec3[2], *fsec4 = NULL;
   int lmv = 0, iret = 0;
   long recsize = 0;
@@ -1321,20 +1319,20 @@ int cgribexScanTimestep(stream_t * streamptr)
     }
 
   rstatus = (int)streamptr->ntsteps;
-#endif
 
   return (rstatus);
 }
+#endif
 
 #ifdef gribWarning
 #undef gribWarning
 #endif
 
+#if  defined  (HAVE_LIBCGRIBEX)
 int cgribexDecode(unsigned char *gribbuffer, int gribsize, double *data, int gridsize,
 		  int unreduced, int *nmiss, double missval)
 {
   int status = 0;
-#if  defined  (HAVE_LIBCGRIBEX)
   int iret = 0, iword = 0;
   int isec0[2], isec1[4096], isec2[4096], isec3[2], isec4[512];
   double fsec2[512], fsec3[2];
@@ -1367,12 +1365,11 @@ int cgribexDecode(unsigned char *gribbuffer, int gribsize, double *data, int gri
           (*nmiss)++;
         }
     }
-#else
-  Error("CGRIBEX support not compiled in!");
-#endif
 
   return (status);
 }
+#endif
+
 
 #if  defined  (HAVE_LIBCGRIBEX)
 static
