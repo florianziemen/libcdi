@@ -39,8 +39,6 @@
 #include "vlist_var.h"
 
 
-extern void arrayDestroy ( void );
-
 static struct
 {
   size_t size;
