@@ -1054,9 +1054,7 @@ void cdfDefTime(stream_t* streamptr)
 
 void cdfDefTimestep(stream_t *streamptr, int tsID)
 {
-  int vlistID;
-
-  vlistID = streamptr->vlistID;
+  int vlistID = streamptr->vlistID;
 
   if ( vlistHasTime(vlistID) ) cdfDefTime(streamptr);
 
@@ -1067,19 +1065,14 @@ static
 void cdfDefComplex(stream_t *streamptr, int gridID)
 {
   char axisname[] = "nc2";
-  int index;
   int dimID = UNDEFID;
-  int gridID0, gridtype0, gridindex;
-  int ngrids;
-  int fileID;
-  int vlistID;
+  int gridID0, gridtype0;
+  int vlistID = streamptr->vlistID;
+  int fileID  = streamptr->fileID;
 
-  vlistID = streamptr->vlistID;
-  fileID  = streamptr->fileID;
+  int ngrids = vlistNgrids(vlistID);
 
-  ngrids = vlistNgrids(vlistID);
-
-  for ( index = 0; index < ngrids; index++ )
+  for ( int index = 0; index < ngrids; index++ )
     {
       if ( streamptr->xdimID[index] != UNDEFID )
         {
@@ -1105,7 +1098,7 @@ void cdfDefComplex(stream_t *streamptr, int gridID)
       streamptr->ncmode = 2;
     }
 
-  gridindex = vlistGridIndex(vlistID, gridID);
+  int gridindex = vlistGridIndex(vlistID, gridID);
   streamptr->xdimID[gridindex] = dimID;
 }
 
