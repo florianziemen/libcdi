@@ -7215,9 +7215,8 @@ static
 int find_leadtime(int nvars, ncvar_t *ncvars)
 {
   int leadtime_id = UNDEFID;
-  int ncvarid;
 
-  for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
+  for ( int ncvarid = 0; ncvarid < nvars; ncvarid++ )
     {
       if ( ncvars[ncvarid].stdname[0] )
         {
