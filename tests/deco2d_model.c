@@ -31,6 +31,7 @@ typedef int MPI_Comm;
 #include "pio_write.h"
 
 #include "simple_model_helper.h"
+#include "create_uuid.h"
 
 enum {
   ntfiles     = 2,
@@ -145,7 +146,15 @@ modelRun(struct model_config setup, MPI_Comm comm)
     lats[i] = ((double)(i * 180))/nlat - 90.0;
   gridDefXvals ( gridID, lons );
   gridDefYvals ( gridID, lats );
-
+  {
+    unsigned char uuid[CDI_UUID_SIZE];
+    if (rank == 0)
+      create_uuid(uuid);
+#if USE_MPI
+    MPI_Bcast(uuid, CDI_UUID_SIZE, MPI_UNSIGNED_CHAR, 0, comm);
+#endif
+    gridDefUUID(gridID, uuid);
+  }
   levs = xmalloc((size_t)setup.max_nlev * sizeof (levs[0]));
   for (i = 0; i < setup.max_nlev; ++i)
     levs[i] = 101300.0
@@ -177,9 +186,23 @@ modelRun(struct model_config setup, MPI_Comm comm)
             varDesc[varIdx].zaxisID = varDesc[i].zaxisID;
             goto zaxisIDset;
           }
-      varDesc[varIdx].zaxisID
-        = zaxisCreate(ZAXIS_PRESSURE, varDesc[varIdx].nlev);
-      zaxisDefLevels(varDesc[varIdx].zaxisID, levs);
+      if (varLevs == 1)
+        varDesc[varIdx].zaxisID = zaxisCreate(ZAXIS_SURFACE, 1);
+      else
+        {
+          varDesc[varIdx].zaxisID
+            = zaxisCreate(ZAXIS_PRESSURE, varDesc[varIdx].nlev);
+          zaxisDefLevels(varDesc[varIdx].zaxisID, levs);
+        }
+      {
+        unsigned char uuid[16];
+        if (rank == 0)
+          create_uuid(uuid);
+#if USE_MPI
+        MPI_Bcast(uuid, CDI_UUID_SIZE, MPI_UNSIGNED_CHAR, 0, comm);
+#endif
+        zaxisDefUUID(varDesc[varIdx].zaxisID, uuid);
+      }
       zaxisIDset:
       varDesc[varIdx].id
         = vlistDefVar(vlistID, gridID, varDesc[varIdx].zaxisID, TIME_VARIABLE);
