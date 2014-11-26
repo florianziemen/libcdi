@@ -547,10 +547,10 @@ resizeBuf(void **buf, size_t *bufSize, size_t reqSize)
 {
   if (reqSize > *bufSize)
     {
-      buf = xrealloc(buf, reqSize);
+      *buf = xrealloc(*buf, reqSize);
       *bufSize = reqSize;
     }
-  return buf;
+  return *buf;
 }
 
 static
