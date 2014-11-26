@@ -8093,13 +8093,12 @@ static void cdfDefSource(stream_t *streamptr)
 
 static void cdfDefGlobalAtts(stream_t *streamptr)
 {
-  int fileID, vlistID;
   int natts;
 
   if ( streamptr->globalatts ) return;
 
-  vlistID = streamptr->vlistID;
-  fileID  = streamptr->fileID;
+  int vlistID = streamptr->vlistID;
+  int fileID  = streamptr->fileID;
 
   cdfDefSource(streamptr);
   cdfDefInstitut(streamptr);
