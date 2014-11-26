@@ -5952,7 +5952,6 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
   int ltwarn = TRUE;
   size_t attlen;
   char attname[CDI_MAX_NAME];
-  const int attstringlen = 8192; char attstring[8192];
   double datt;
 
   for ( ncvarid = 0; ncvarid < nvars; ++ncvarid )
@@ -6410,6 +6409,11 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 
 		  if ( strcmp(attname, "grid_mapping_name") == 0 )
 		    {
+                      enum {
+                        attstringlen = 8192,
+                      };
+                      char attstring[attstringlen];
+
 		      cdfGetAttText(ncvars[ncvarid].ncid, ncvars[ncvarid].gmapid, attname, attstringlen-1, attstring);
 		      strtolower(attstring);
 
@@ -7105,7 +7109,10 @@ void scan_global_attributes(int fileID, int vlistID, stream_t *streamptr, int ng
   nc_type xtype;
   size_t attlen;
   char attname[CDI_MAX_NAME];
-  const int attstringlen = 8192; char attstring[8192];
+  enum {
+    attstringlen = 8192,
+  };
+  char attstring[attstringlen];
   int iatt;
 
   for ( iatt = 0; iatt < ngatts; iatt++ )
