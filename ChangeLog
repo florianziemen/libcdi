@@ -1,3 +1,11 @@
+2014-12-04  Uwe Schulzweida
+
+	* Version 1.6.6.1 released
+
+2014-12-01  Uwe Schulzweida
+
+	* GRIB_API output does not work (bug fix)
+
 2014-11-27  Uwe Schulzweida
 
 	* Version 1.6.6 released

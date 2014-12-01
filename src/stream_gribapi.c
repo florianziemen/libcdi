@@ -3092,7 +3092,7 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
 
 #ifdef HAVE_LIBGRIB_API
 size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisID,
-		     int vdate, int vtime, int tsteptype, int numavg, 
+		     int vdate, int vtime, int tsteptype, int numavg,
 		     long datasize, const double *data, int nmiss, unsigned char **gribbuffer, size_t *gribbuffersize,
 		     int comptype, void *gribContainer)
 {
@@ -3124,7 +3124,6 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
 #else
   gh = gc->gribHandle;
 #endif
-
   GRIB_CHECK(grib_get_long(gh, "editionNumber", &editionNumber), 0);
 
   if ( editionNumber == 2 )
