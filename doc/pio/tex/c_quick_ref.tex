@@ -4,6 +4,16 @@
 This appendix provide a brief listing of the C language bindings of the
 CDI library routines:
 
+\section*{\tt \htmlref{cdiPioNoPostCommSetup}{cdiPioNoPostCommSetup}}
+
+\begin{verbatim}
+    void cdiPioNoPostCommSetup ();
+\end{verbatim}
+
+Dummy function to use as argument to pioInit
+if no actions are necessary after I/O servers initialize communication.
+
+
 \section*{\tt \htmlref{pioInit}{pioInit}}
 
 \begin{verbatim}
