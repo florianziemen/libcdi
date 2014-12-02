@@ -15,8 +15,6 @@
 #include "pio_impl.h"
 #include "pio_util.h"
 
-extern long initial_buffersize;
-
 typedef struct
 {
   size_t size;
@@ -217,8 +215,6 @@ size_t fwMPINONB ( int fileID, int tsID, const void *buffer, size_t len )
 int fcMPINONB ( int fileID )
 {
   aFiledataM *of;
-  int iret;
-  MPI_Comm commNode = commInqCommNode ();
   int rankNode = commInqRankNode ();
 
   xdebug("IOPE%d: write buffer, close file and cleanup, in %d",
@@ -249,27 +245,21 @@ elemCheck(void *q, void *nm)
 int fowMPINONB ( const char *filename )
 {
   static aFiledataM *of;
-  static long buffersize = 0;
-  int id, bcastRank = 0;
+  static unsigned long buffersize = 0;
+  int id;
+  enum {
+    bcastRoot = 0
+  };
   MPI_Comm commNode = commInqCommNode ();
   int rankNode = commInqRankNode ();
 
   /* broadcast buffersize to collectors ( just once, for all files )*/
 
-  if ( ! buffersize )
+  if (!buffersize)
     {
-        xdebug ( "IOPE%d: Broadcast buffersize to collectors ...",
-                  rankNode );
-
-      if  ( rankNode == bcastRank )
-        {
-          if ( getenv( "BUFSIZE" ) != NULL )
-            buffersize = atol ( getenv ( "BUFSIZE" ));
-          if ( buffersize < initial_buffersize )
-            buffersize = initial_buffersize;
-        }
-
-      xmpi ( MPI_Bcast ( &buffersize, 1, MPI_LONG, bcastRank, commNode ));
+      if (rankNode == bcastRoot)
+        buffersize = findWriteAccumBufsize();
+      xmpi(MPI_Bcast(&buffersize, 1, MPI_UNSIGNED_LONG, bcastRoot, commNode));
     }
 
   xdebug("buffersize=%ld", buffersize);

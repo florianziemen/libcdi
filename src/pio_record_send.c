@@ -12,7 +12,6 @@
 #include "dmemory.h"
 
 extern char *token;
-extern long initial_buffersize;
 
 typedef struct
 {
@@ -221,9 +220,10 @@ int
 pioSendOpen(const char *filename)
 {
   remoteFileBuf *afd;
-  static long buffersize = 0;
-  int root = 0, id, iret;
+  static unsigned long buffersize = 0;
+  int id, iret;
   enum {
+    bcastRoot = 0,
     messageLength = 32,
   };
   char message[messageLength];
@@ -232,16 +232,10 @@ pioSendOpen(const char *filename)
   /* broadcast buffersize to collectors */
   if (!buffersize)
     {
-      if  (commInqRankColl() == root)
-	{
-	  if (getenv("BUFSIZE") != NULL)
-	    buffersize = atol(getenv("BUFSIZE"));
-	  if (buffersize < initial_buffersize)
-	    buffersize = initial_buffersize;
-          xdebug("filename=%s, broadcast buffersize=%ld to collectors ...",
-                 filename, buffersize);
-	}
-      xmpi(MPI_Bcast(&buffersize, 1, MPI_LONG, root, commCollectors));
+      if (commInqRankColl() == bcastRoot)
+        buffersize = findWriteAccumBufsize();
+      xmpi(MPI_Bcast(&buffersize, 1, MPI_UNSIGNED_LONG, bcastRoot,
+                     commCollectors));
     }
 
   /* init and add remoteFileBuf */

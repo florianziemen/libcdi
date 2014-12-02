@@ -28,12 +28,6 @@ const char *const cdiPioCmdStrTab[] = {
   "IO_Finalize"
 };
 
-long initial_buffersize = 16 * 1024 * 1024;
-/*  4 KB <= x < 256 MB */
-/* 16 * 1024 * 1024; */
-/* 16 * 1024; */
-/* 4 * 1024; */
-
 char *token = "%";
 
 /***************************************************************/

@@ -21,8 +21,6 @@
 #include "pio_util.h"
 #include "dmemory.h"
 
-extern long initial_buffersize;
-
 typedef struct
 {
   struct dBuffer *db1;
@@ -454,23 +452,20 @@ elemCheck(void *q, void *nm)
 
 int fowPOSIXFPGUARDSENDRECV ( const char *filename )
 {
-  int root = 0, id;
+  int id;
+  enum {
+    bcastRoot = 0
+  };
   aFiledataPF *afd;
-  static long buffersize = 0;
+  static unsigned long buffersize = 0;
 
   /* broadcast buffersize to collectors */
   if (!buffersize)
     {
-      if (commInqRankColl() == root)
-	{
-          xdebug("name=%s, broadcast buffersize to collectors ...",
-                 filename);
-	  if ( getenv( "BUFSIZE" ) != NULL )
-	    buffersize = atol ( getenv ( "BUFSIZE" ));
-	  if ( buffersize < initial_buffersize )
-	    buffersize = initial_buffersize;
-	}
-      xmpi(MPI_Bcast(&buffersize, 1, MPI_LONG, root, commInqCommColl()));
+      if (commInqRankColl() == bcastRoot)
+        buffersize = findWriteAccumBufsize();
+      xmpi(MPI_Bcast(&buffersize, 1, MPI_UNSIGNED_LONG, bcastRoot,
+                     commInqCommColl()));
     }
 
   /* init and add file element */
