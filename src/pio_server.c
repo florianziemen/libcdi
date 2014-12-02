@@ -438,15 +438,16 @@ int cdiPioNextOpenRank()
   return minRank;
 }
 
-void cdiPioOpenFileOnRank(int rank)
+static void
+cdiPioOpenFileOnRank(int rank)
 {
   xassert(cdiSerialOpenFileCount != NULL
-          && rank >= 0 && rank < commInqSizeColl());
+          && (unsigned)rank < (unsigned)commInqSizeColl());
   ++(cdiSerialOpenFileCount[rank]);
 }
 
-
-void cdiPioCloseFileOnRank(int rank)
+static void
+cdiPioCloseFileOnRank(int rank)
 {
   xassert(cdiSerialOpenFileCount != NULL
           && rank >= 0 && rank < commInqSizeColl());
@@ -987,6 +988,7 @@ cdiPioStreamCDFOpenWrap(const char *filename, const char *filemode,
         if (ioMode != PIO_NONE)
           xmpi(MPI_Bcast(&fileID, 1, MPI_INT, rank, commInqCommColl()));
         streamptr->ownerRank = rank;
+        cdiPioOpenFileOnRank(rank);
         return fileID;
       }
     default:
@@ -1010,11 +1012,11 @@ cdiPioStreamCDFCloseWrap(stream_t *streamptr, int recordBufIsToBeDeleted)
       case FILETYPE_NC4:
       case FILETYPE_NC4C:
         {
-          int rank, rankOpen;
+          int rank, rankOpen = cdiPioSerialOpenFileMap(streamptr->self);
           if (commInqIOMode() == PIO_NONE
-              || ((rank = commInqRankColl())
-                  == (rankOpen = cdiPioSerialOpenFileMap(streamptr->self))))
+              || ((rank = commInqRankColl()) == rankOpen))
             cdiStreamCloseDefaultDelegate(streamptr, recordBufIsToBeDeleted);
+          cdiPioCloseFileOnRank(rankOpen);
           break;
         }
       default:
