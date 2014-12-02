@@ -332,7 +332,8 @@ void pioWriterAIO(void)
 	  bfd->nextOpIndex = ( bfd->nextOpIndex + 1 ) % nPrefStreams;
 
 	  xmpi(MPI_Recv((void *)bfd->ctrlBlks[bfd->currOpIndex].aio_buf,
-                        messagesize, MPI_CHAR, source, tag, commNode, &status ));
+                        messagesize, MPI_UNSIGNED_CHAR, source, tag, commNode,
+                        &status));
 	  writePA(bfd, (size_t)messagesize);
 	  break;
 

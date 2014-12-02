@@ -239,8 +239,8 @@ pioWriterStdIO(void)
 	  xdebug("COMMAND %s, ID=%d, NAME=%s, AMOUNT=%zu",
                  command2charP[rtag.command], rtag.id, bfd->name, amount);
 
-	  xmpi(MPI_Recv(bfd->fb->buffer, messagesize, MPI_CHAR, source, tag,
-                        commNode, &status));
+	  xmpi(MPI_Recv(bfd->fb->buffer, messagesize, MPI_UNSIGNED_CHAR,
+                        source, tag, commNode, &status));
 
 	  writeP ( bfd, amount );
 

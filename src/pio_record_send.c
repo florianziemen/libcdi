@@ -119,8 +119,9 @@ sendP(remoteFileBuf *afd, int id)
   if ( ddebug ) accumWait +=  ( MPI_Wtime () - startTime );
 
   /* FIXME: amount > INT_MAX unhandled */
-  xmpi(MPI_Issend(afd->db->buffer, (int)amount, MPI_CHAR, commInqSpecialRankNode(),
-                  tag, commInqCommNode(), &( afd->request )));
+  xmpi(MPI_Issend(afd->db->buffer, (int)amount, MPI_UNSIGNED_CHAR,
+                  commInqSpecialRankNode(), tag, commInqCommNode(),
+                  &afd->request));
 
   /* change outputBuffer */
   dbuffer_reset ( afd->db );
