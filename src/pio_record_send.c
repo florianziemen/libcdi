@@ -11,7 +11,6 @@
 #include "pio_util.h"
 #include "dmemory.h"
 
-extern char *command2charP[];
 extern char *token;
 extern long initial_buffersize;
 
@@ -108,7 +107,7 @@ sendP(remoteFileBuf *afd, int id)
   tag = encodeFileOpTag(id, afd->command);
 
   xdebug("send buffer for %s, size: %zu bytes, command=%s, in",
-         afd->name, amount, command2charP[afd->command]);
+         afd->name, amount, cdiPioCmdStrTab[afd->command]);
 
   xmpiStat(MPI_Wait(&(afd->request), &status), &status);
 

@@ -21,8 +21,6 @@
 #include "pio_util.h"
 #include "dmemory.h"
 
-extern char * command2charP[6];
-
 extern long initial_buffersize;
 
 typedef struct
@@ -186,8 +184,8 @@ fpgPOSIXFPGUARDSENDRECV(void)
       rtag = decodeFileOpTag(status.MPI_TAG);
       
       xdebug("receive message from source=%d, id=%d, command=%d ( %s )",
-             source, rtag.id, rtag.command, command2charP[rtag.command]);
-      
+             source, rtag.id, rtag.command, cdiPioCmdStrTab[rtag.command]);
+
       switch (rtag.command)
       	{
       	case IO_Open_file:
@@ -203,8 +201,8 @@ fpgPOSIXFPGUARDSENDRECV(void)
 	    }
 
           xdebug("id=%d, command=%d ( %s ), send offset=%ld", rtag.id,
-                 rtag.command, command2charP[rtag.command], bfd->offset);
-	  
+                 rtag.command, cdiPioCmdStrTab[rtag.command], bfd->offset);
+
 	  xmpi ( MPI_Sendrecv ( &( bfd->offset ), 1, MPI_LONG, source,  status.MPI_TAG,
                                 &amount, 1, MPI_LONG, source,  status.MPI_TAG,
                                 commNode, &status ));
@@ -212,7 +210,7 @@ fpgPOSIXFPGUARDSENDRECV(void)
 	  bfd->offset += amount; 
  
           xdebug("id=%d, command=%d ( %s ), recv amount=%ld, set offset=%ld",
-                 rtag.id, rtag.command, command2charP[rtag.command], amount,
+                 rtag.id, rtag.command, cdiPioCmdStrTab[rtag.command], amount,
                  bfd->offset);
 
 	  break;
@@ -224,7 +222,7 @@ fpgPOSIXFPGUARDSENDRECV(void)
             xabort("fileId=%d not in set", rtag.id);
 
           xdebug("id=%d, command=%d ( %s ), send offset=%ld", rtag.id,
-                 rtag.command, command2charP[rtag.command], bfd->offset);
+                 rtag.command, cdiPioCmdStrTab[rtag.command], bfd->offset);
 
 	  xmpi ( MPI_Sendrecv ( &( bfd->offset ), 1, MPI_LONG, source,  status.MPI_TAG,
                                 &amount, 1, MPI_LONG, source,  status.MPI_TAG,
@@ -233,7 +231,7 @@ fpgPOSIXFPGUARDSENDRECV(void)
 	  bfd->offset += amount;
 
           xdebug("id=%d, command=%d ( %s ), recv amount=%ld, set offset=%ld",
-                 rtag.id, rtag.command, command2charP[rtag.command], amount,
+                 rtag.id, rtag.command, cdiPioCmdStrTab[rtag.command], amount,
                  bfd->offset);
 
 	  break;
@@ -245,7 +243,7 @@ fpgPOSIXFPGUARDSENDRECV(void)
             xabort("fileId=%d not in set", rtag.id);
 
           xdebug("id=%d, command=%d ( %s )), send offset=%ld", rtag.id,
-                 rtag.command, command2charP[rtag.command], bfd->offset);
+                 rtag.command, cdiPioCmdStrTab[rtag.command], bfd->offset);
 
 	  xmpi ( MPI_Sendrecv ( &( bfd->offset ), 1, MPI_LONG, source,  status.MPI_TAG,
                                 &amount, 1, MPI_LONG, source,  status.MPI_TAG,
@@ -254,7 +252,7 @@ fpgPOSIXFPGUARDSENDRECV(void)
 	  bfd->offset += amount;
 
           xdebug("id=%d, command=%d ( %s ), recv amount=%ld, set offset=%ld",
-                 rtag.id, rtag.command, command2charP[rtag.command], amount,
+                 rtag.id, rtag.command, cdiPioCmdStrTab[rtag.command], amount,
                  bfd->offset);
 
 

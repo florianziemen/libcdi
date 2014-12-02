@@ -27,10 +27,7 @@
 #include "pio_util.h"
 #include "dmemory.h"
 
-extern char * command2charP[6];
-
 extern char *token;
-
 
 typedef struct
 {
@@ -247,7 +244,7 @@ void pioWriterAIO(void)
 
       xdebug ( "receive message from source=%d, id=%d, command=%d ( %s ), "
                "messagesize=%d", source, rtag.id, rtag.command,
-               command2charP[rtag.command], messagesize);
+               cdiPioCmdStrTab[rtag.command], messagesize);
 
       switch (rtag.command)
 	{
@@ -268,7 +265,7 @@ void pioWriterAIO(void)
             size_t amount = (size_t)(messageBuffer + messagesize - pMB);
 
             xdebug("command  %s, filename=%s, buffersize=%ld, amount=%zd",
-                   command2charP[rtag.command], filename, buffersize, amount);
+                   cdiPioCmdStrTab[rtag.command], filename, buffersize, amount);
 
             if (!(bfd = listSetGet(bibBFiledataPA, fileIDTest,
                                    (void *)(intptr_t)rtag.id)))
@@ -303,7 +300,7 @@ void pioWriterAIO(void)
             xabort("fileID=%d is not in set", rtag.id);
 
 	  xdebug("command: %s, id=%d, name=%s",
-                 command2charP[rtag.command], rtag.id, bfd->name );
+                 cdiPioCmdStrTab[rtag.command], rtag.id, bfd->name );
 
 	  bfd->currOpIndex = bfd->nextOpIndex;
 	  bfd->nextOpIndex = ( bfd->nextOpIndex + 1 ) % nPrefStreams;
@@ -321,7 +318,7 @@ void pioWriterAIO(void)
             xabort("fileID=%d is not in set", rtag.id);
 
 	  xdebug(" command %s, id=%d, name=%s",
-                 command2charP[rtag.command], rtag.id, bfd->name);
+                 cdiPioCmdStrTab[rtag.command], rtag.id, bfd->name);
 
 	  bfd->currOpIndex = bfd->nextOpIndex;
 

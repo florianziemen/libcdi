@@ -21,6 +21,8 @@ enum IO_Server_command
                                  * larger than IO_Finalize */
 };
 
+extern const char *const cdiPioCmdStrTab[];
+
 struct dBuffer
 {
   size_t wr_pointer;

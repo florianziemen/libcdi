@@ -19,9 +19,14 @@
 #include "pio_rpc.h"
 #include "pio_util.h"
 
-char * command2charP[6] = {"IO_Open_file", "IO_Close_file",
-                           "IO_Get_fp","IO_Set_fp",
-                           "IO_Send_buffer", "IO_Finalize"};
+const char *const cdiPioCmdStrTab[] = {
+  "IO_Open_file",
+  "IO_Close_file",
+  "IO_Get_fp",
+  "IO_Set_fp",
+  "IO_Send_buffer",
+  "IO_Finalize"
+};
 
 long initial_buffersize = 16 * 1024 * 1024;
 /*  4 KB <= x < 256 MB */
