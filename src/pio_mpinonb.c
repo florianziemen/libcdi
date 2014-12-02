@@ -146,9 +146,9 @@ writeMPINONB(aFiledataM *of)
            rankNode, amount );
 
   xmpi ( MPI_Wait ( & ( of->request ), &status ));
-  xmpi ( MPI_File_iwrite_shared ( of->fh, of->db->buffer, amount, MPI_CHAR,
-                                  & ( of->request )));
-  xdebug ( "%d bytes written for fileID=%d", amount, fileID );
+  xmpi(MPI_File_iwrite_shared(of->fh, of->db->buffer, amount, MPI_UNSIGNED_CHAR,
+                              &of->request));
+  xdebug("%d bytes written for fileID=%d", amount, fileID);
 
   /* change outputBuffer */
 

@@ -266,7 +266,7 @@ void pioWriterAIO(void)
       struct fileOpTag rtag = decodeFileOpTag(tag);
 
       int messagesize;
-      xmpi (MPI_Get_count(&status, MPI_CHAR, &messagesize));
+      xmpi(MPI_Get_count(&status, MPI_UNSIGNED_CHAR, &messagesize));
 
       xdebug ( "receive message from source=%d, id=%d, command=%d ( %s ), "
                "messagesize=%d", source, rtag.id, rtag.command,
@@ -280,7 +280,7 @@ void pioWriterAIO(void)
                                           * sizeof (messageBuffer[0]));
             char *pMB = messageBuffer;
 
-            xmpi(MPI_Recv(messageBuffer, messagesize, MPI_CHAR, source,
+            xmpi(MPI_Recv(messageBuffer, messagesize, MPI_UNSIGNED_CHAR, source,
                           tag, commNode, &status ));
 
             char *filename = strtok(pMB, token);
@@ -350,8 +350,9 @@ void pioWriterAIO(void)
 
 	  bfd->nextOpIndex = ( bfd->nextOpIndex + 1 ) % nPrefStreams;
 
-	  MPI_Recv((void *)bfd->ctrlBlks[bfd->currOpIndex].aio_buf,
-                   messagesize, MPI_CHAR, source, tag, commNode, &status);
+	  xmpi(MPI_Recv((void *)bfd->ctrlBlks[bfd->currOpIndex].aio_buf,
+                        messagesize, MPI_UNSIGNED_CHAR,
+                        source, tag, commNode, &status));
 
 	  writePA(bfd, (size_t)messagesize);
 

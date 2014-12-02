@@ -154,8 +154,8 @@ pioWriterStdIO(void)
       tag    = status.MPI_TAG;
       
       rtag = decodeFileOpTag(tag);
-      
-      xmpi ( MPI_Get_count ( &status, MPI_CHAR, &messagesize ));
+
+      xmpi(MPI_Get_count(&status, MPI_UNSIGNED_CHAR, &messagesize));
 
       xdebug ( "RECEIVE MESSAGE FROM SOURCE=%d, ID=%d, COMMAND=%d ( %s ),"
                "MESSAGESIZE=%d", source, rtag.id, rtag.command,
@@ -169,8 +169,8 @@ pioWriterStdIO(void)
             = xmalloc((size_t)messagesize * sizeof (messageBuffer[0]));
     	  pMB = messageBuffer;
 
-	  xmpi ( MPI_Recv ( messageBuffer, messagesize, MPI_CHAR, source, 
-                            tag, commNode, &status ));
+	  xmpi(MPI_Recv(messageBuffer, messagesize, MPI_UNSIGNED_CHAR,
+                        source, tag, commNode, &status));
 
 	  xdebug("%s", "after recv, in loop");
 	  
@@ -219,8 +219,8 @@ pioWriterStdIO(void)
 	  xdebug("COMMAND %s, ID=%d, NAME=%s", command2charP[rtag.command],
                  rtag.id, bfd->name);
 
-	  xmpi(MPI_Recv(bfd->fb->buffer, messagesize, MPI_CHAR, source, tag,
-                        commNode, &status));
+	  xmpi(MPI_Recv(bfd->fb->buffer, messagesize, MPI_UNSIGNED_CHAR,
+                        source, tag, commNode, &status));
 
 	  writeP(bfd, amount);
 	  break;
