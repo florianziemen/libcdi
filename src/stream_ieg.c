@@ -292,12 +292,11 @@ void iegDefGrid(int *gdb, int gridID)
 
   if ( gridtype == GRID_LONLAT || gridtype == GRID_GAUSSIAN )
     {
-      int nlon, nlat;
       double xfirst = 0, xlast = 0, xinc = 0;
       double yfirst = 0, ylast = 0, yinc = 0;
 
-      nlon = (int) gridInqXsize(gridID);
-      nlat = (int) gridInqYsize(gridID);
+      int nlon = gridInqXsize(gridID),
+        nlat = gridInqYsize(gridID);
 
       if ( nlon == 0 )
 	{
