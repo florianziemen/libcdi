@@ -12,7 +12,6 @@
 #include "dmemory.h"
 
 extern char *command2charP[];
-extern double accumWait;
 extern char *token;
 extern long initial_buffersize;
 
@@ -104,7 +103,6 @@ sendP(remoteFileBuf *afd, int id)
   int tag;
   size_t amount;
   MPI_Status status;
-  double startTime;
 
   amount = dbuffer_data_size ( afd->db );
   tag = encodeFileOpTag(id, afd->command);
@@ -112,11 +110,7 @@ sendP(remoteFileBuf *afd, int id)
   xdebug("send buffer for %s, size: %zu bytes, command=%s, in",
          afd->name, amount, command2charP[afd->command]);
 
-  if ( ddebug ) startTime = MPI_Wtime ();
-
   xmpiStat(MPI_Wait(&(afd->request), &status), &status);
-
-  if ( ddebug ) accumWait +=  ( MPI_Wtime () - startTime );
 
   /* FIXME: amount > INT_MAX unhandled */
   xmpi(MPI_Issend(afd->db->buffer, (int)amount, MPI_UNSIGNED_CHAR,
@@ -174,11 +168,8 @@ pioSendWrite(int id, int tsID, const void *buffer, size_t len)
 
       flushOp(afd, tsID);
       {
-        double startTime;
         MPI_Status status;
-        if (ddebug) startTime = MPI_Wtime();
         xmpiStat(MPI_Wait(&(afd->request), &status), &status);
-        if (ddebug) accumWait +=  MPI_Wtime() - startTime;
       }
       xmpi(MPI_Barrier(commInqCommColl()));
     }
@@ -209,10 +200,7 @@ pioSendWrite(int id, int tsID, const void *buffer, size_t len)
 int
 pioSendClose(int id)
 {
-  double accumWaitMax;
   remoteFileBuf *afd;
-  int iret;
-
   xdebug ( "fileID %d: send buffer, close file and cleanup",id );
 
   afd = listSetGet(bibRemoteFileBuf, fileIDTest, (void *)(intptr_t)id);
@@ -226,18 +214,7 @@ pioSendClose(int id)
   xmpi(MPI_Barrier(commInqCommColl()));
 
   /* remove file element */
-  iret = listSetRemove(bibRemoteFileBuf, fileIDTest, (void *)(intptr_t)id);
-
-  /* timer output */
-  if ( ddebug )
-    {
-      enum { root = 0 };
-      xmpi(MPI_Reduce(&accumWait, &accumWaitMax,
-                      1, MPI_DOUBLE, MPI_MAX, root, commInqCommColl()));
-      xdebug ( "Wait time %15.10lf s", accumWait );
-      if ( commInqRankColl () == root )
-	xdebug ( "Max wait time %15.10lf s", accumWaitMax );
-    }
+  int iret = listSetRemove(bibRemoteFileBuf, fileIDTest, (void *)(intptr_t)id);
   return iret;
 }
 

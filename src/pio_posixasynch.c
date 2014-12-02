@@ -31,9 +31,6 @@ extern char * command2charP[6];
 
 extern char *token;
 
-extern double accumSuspend;
-extern double accumWrite;
-
 
 typedef struct
 {
@@ -105,7 +102,6 @@ destroyBFiledataPA ( void *v )
   ssize_t ssiret;
   int nextFinishOp = (bfd->nextOpIndex - bfd->prefIndex + nPrefStreams)
     % nPrefStreams;
-  double startTime;
 
   xdebug ( "filename=%s, cleanup and close file", bfd->name );
 
@@ -115,19 +111,12 @@ destroyBFiledataPA ( void *v )
     {
       xdebug("file: %s, prefIndex=%d", bfd->name, (int)bfd->prefIndex);
       ccBP[0] = ( bfd->ctrlBlks + nextFinishOp );
-
-      if ( ddebug )
-	startTime = MPI_Wtime ();
-
       do
 	{
 	  iret = aio_suspend ( ccBP, 1, NULL );
 	  if ( iret < 0 && errno != EINTR ) xabort ( "aio_suspend () failed" );
 	}
       while ( iret != 0 );
-
-      if ( ddebug )
-	accumSuspend += ( MPI_Wtime () - startTime);
 
       iret = aio_error(bfd->ctrlBlks + nextFinishOp);
       if (( ssiret = aio_return ( bfd->ctrlBlks + nextFinishOp )) == -1 )
@@ -170,7 +159,6 @@ writePA(bFiledataPA *bfd, size_t amount)
 {
   const struct aiocb *ccBP[1];
   ssize_t iret;
-  double startTime;
 
   xdebug ( "file %s, in", bfd->name );
   
@@ -181,11 +169,7 @@ writePA(bFiledataPA *bfd, size_t amount)
            bfd->name, bfd->ctrlBlks[bfd->currOpIndex].aio_nbytes,
            bfd->ctrlBlks[bfd->currOpIndex].aio_offset );
 
-  if ( ddebug ) startTime = MPI_Wtime ();
-
   iret = aio_write ( bfd->ctrlBlks + bfd->currOpIndex );
-
-  if ( ddebug ) accumWrite += ( MPI_Wtime () - startTime);
 
   xdebug ( "after aio_write(), file %s, aio_nbytes=%zu, aio_offset=%zu,"
            "iret=aio_write()=%d",
@@ -205,10 +189,6 @@ writePA(bFiledataPA *bfd, size_t amount)
   if ( bfd->prefIndex >= nPrefStreams ) 
     {
       ccBP[0] = ( bfd->ctrlBlks + bfd->nextOpIndex );
-
-      if ( ddebug )
-	startTime = MPI_Wtime ();
-
       do
 	{
 	  iret = aio_suspend ( ccBP, 1, NULL );
@@ -216,10 +196,7 @@ writePA(bFiledataPA *bfd, size_t amount)
 	    xabort ( "aio_suspend () failed" );
 	} while ( iret != 0 );
 
-      if ( ddebug )
-	accumSuspend += ( MPI_Wtime () - startTime);
-	      
-      if (( iret = aio_return ( bfd->ctrlBlks + bfd->nextOpIndex )) == -1 ) 
+      if (( iret = aio_return ( bfd->ctrlBlks + bfd->nextOpIndex )) == -1 )
 	xabort ( "aio_return () failed" );
 
       bfd->prefIndex --;

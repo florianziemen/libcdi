@@ -17,8 +17,6 @@
 
 extern long initial_buffersize;
 
-extern double accumWait;
-
 typedef struct
 {
   size_t size;
@@ -86,7 +84,6 @@ destroyAFiledataMPINONB(void *v)
   aFiledataM *of;
   MPI_Status status;
   int rankNode = commInqRankNode ();
-  double startTime;
   MPI_Offset endpos;
 
   of = (aFiledataM * ) v;
@@ -95,11 +92,8 @@ destroyAFiledataMPINONB(void *v)
            rankNode, of->fileID, of->name );
 
   /* close file */
-
-  startTime = MPI_Wtime ();
-  xmpi ( MPI_Wait ( & ( of->request ), &status ));
+  xmpi(MPI_Wait(&of->request, &status));
   xmpi(MPI_Barrier(commInqCommNode()));
-  accumWait += ( MPI_Wtime () - startTime );
   xmpi(MPI_File_get_position_shared(of->fh, &endpos));
   xmpi(MPI_File_set_size(of->fh, endpos));
   iret = MPI_File_close ( & ( of->fh ));
@@ -224,7 +218,6 @@ int fcMPINONB ( int fileID )
 {
   aFiledataM *of;
   int iret;
-  double accumWaitMax;
   MPI_Comm commNode = commInqCommNode ();
   int rankNode = commInqRankNode ();
 
@@ -237,21 +230,7 @@ int fcMPINONB ( int fileID )
   writeMPINONB(of);
 
   /* remove file element */
-  iret = listSetRemove(bibAFiledataM, fileIDTest, (void *)(intptr_t)fileID);
-
-  /* timer output */
-
-  if ( ddebug == MAXDEBUG )
-    {
-      xmpi ( MPI_Reduce ( &accumWait, &accumWaitMax,
-                          1, MPI_DOUBLE, MPI_MAX, 0, commNode  ));
-      xdebug ( "IOPE%d: Wait time %15.10lf s",
-               rankNode, accumWait );
-      if ( rankNode == 0 )
-          xdebug ( "IOPE%d: Max wait time %15.10lf s",
-                   rankNode, accumWaitMax );
-    }
-
+  int iret = listSetRemove(bibAFiledataM, fileIDTest, (void *)(intptr_t)fileID);
   return iret;
 }
 

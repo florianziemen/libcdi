@@ -29,13 +29,6 @@ long initial_buffersize = 16 * 1024 * 1024;
 /* 16 * 1024; */
 /* 4 * 1024; */
 
-double accumProbe   = 0.0;
-double accumRecv    = 0.0;
-double accumSend    = 0.0;
-double accumSuspend = 0.0;
-double accumWait    = 0.0;
-double accumWrite   = 0.0;
-
 char *token = "%";
 
 /***************************************************************/
