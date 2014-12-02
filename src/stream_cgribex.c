@@ -521,25 +521,19 @@ compvar_t cgribexVarSet(int param, int level1, int level2, int leveltype, int tr
   return (compVar);
 }
 
-static
-int cgribexVarCompare(compvar_t compVar, record_t record, int flag)
+static inline int
+cgribexVarCompare(compvar_t compVar, record_t record, int flag)
 {
-  compvar_t compVar0;
-
-  compVar0.param     = record.param;
-  compVar0.level1    = record.ilevel;
-  compVar0.level2    = record.ilevel2;
-  compVar0.ltype     = record.ltype;
-  compVar0.tsteptype = record.tsteptype;
-
-  if ( flag == 0 )
-    {
-      if ( compVar0.tsteptype == TSTEP_INSTANT  && compVar.tsteptype == TSTEP_INSTANT3 ) compVar0.tsteptype = TSTEP_INSTANT3;
-      if ( compVar0.tsteptype == TSTEP_INSTANT3 && compVar.tsteptype == TSTEP_INSTANT  ) compVar0.tsteptype = TSTEP_INSTANT;
-    }
-
-  int rstatus = memcmp(&compVar0, &compVar, sizeof(compvar_t));
-
+  int tstepDiff = !(flag == 0 & (((compVar.tsteptype == TSTEP_INSTANT)
+                                  & (record.tsteptype == TSTEP_INSTANT3))
+                                 |((compVar.tsteptype == TSTEP_INSTANT3)
+                                   & (record.tsteptype == TSTEP_INSTANT))))
+    & (compVar.tsteptype != record.tsteptype);
+  int rstatus = (compVar.param != record.param)
+    |           (compVar.level1 != record.ilevel)
+    |           (compVar.level2 != record.ilevel2)
+    |           (compVar.ltype != record.ltype)
+    |           tstepDiff;
   return (rstatus);
 }
 #endif
