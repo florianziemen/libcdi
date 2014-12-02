@@ -183,14 +183,12 @@ modelRun(struct model_config setup, MPI_Comm comm)
                 (int32_t)varDesc[varIdx].size }, comm_size, rank);
         int start = range.first;
         int chunkSize = range.size;
-         fprintf(stderr, "%d: start=%d, chunkSize = %d\n", rank,
-                 start, chunkSize);
-         Xt_idxlist idxlist
-           = xt_idxstripes_new(&(struct Xt_stripe){ .start = start,
-                 .nstrides = chunkSize, .stride = 1 }, 1);
-         varDesc[varIdx].start = start;
-         varDesc[varIdx].chunkSize = chunkSize;
-         varDesc[varIdx].partDesc = idxlist;
+        Xt_idxlist idxlist
+          = xt_idxstripes_new(&(struct Xt_stripe){ .start = start,
+                .nstrides = chunkSize, .stride = 1 }, 1);
+        varDesc[varIdx].start = start;
+        varDesc[varIdx].chunkSize = chunkSize;
+        varDesc[varIdx].partDesc = idxlist;
       }
 #endif
       varDesc[varIdx].code = 129 + varIdx;
