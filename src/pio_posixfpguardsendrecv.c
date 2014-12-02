@@ -161,7 +161,8 @@ compareNamesAPF(void *v1, void *v2)
 
 /***************************************************************/
 
-void fpgPOSIXFPGUARDSENDRECV ( void )
+static void
+fpgPOSIXFPGUARDSENDRECV(void)
 {
   int i, source, iret;
   struct fileOpTag rtag;
