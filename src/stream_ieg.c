@@ -241,7 +241,7 @@ int calc_resfac(double xfirst, double xlast, double xinc, double yfirst, double 
       ifact = ifacarr[j];
       for ( i = 0; i < 6; ++i )
         {
-          if ( fabs(vals[i]*ifact-(lround(vals[i]*ifact))) > FLT_EPSILON ) break;
+          if ( fabs(vals[i]*ifact - round(vals[i]*ifact)) > FLT_EPSILON ) break;
         }
       if ( i == 6 )
         {
