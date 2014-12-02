@@ -424,7 +424,9 @@ int cdiPioSerialOpenFileMap(int streamID)
 /* for load-balancing purposes, count number of files per process */
 /* cdiOpenFileCounts[rank] gives number of open files rank has to himself */
 static int *cdiSerialOpenFileCount = NULL;
-int cdiPioNextOpenRank()
+
+static int
+cdiPioNextOpenRank()
 {
   xassert(cdiSerialOpenFileCount != NULL);
   int commCollSize = commInqSizeColl();
