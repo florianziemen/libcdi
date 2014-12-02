@@ -229,7 +229,7 @@ void gridGenXvals(int xsize, double xfirst, double xlast, double xinc, double *x
 static
 void calc_gaussgrid(double *yvals, int ysize, double yfirst, double ylast)
 {
-  double *yw = (double *)xmalloc((size_t)ysize * sizeof(double));
+  double *restrict yw = (double *)xmalloc((size_t)ysize * sizeof(double));
   gaussaw(yvals, yw, (size_t)ysize);
   free(yw);
   for (int i = 0; i < ysize; i++ )
@@ -262,7 +262,7 @@ void gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double y
 	    if ( fabs(yvals[0] - yfirst) > deleps || fabs(yvals[ysize-1] - ylast) > deleps )
 	      {
 		double yinc = fabs(ylast-yfirst)/(ysize-1);
-		double *ytmp = NULL;
+		double *restrict ytmp = NULL;
 		int nstart, lfound = 0;
 		int ny = (int) (180./yinc + 0.5);
 		ny -= ny%2;
@@ -277,8 +277,8 @@ void gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double y
 
 		    nstart = i;
 
-		    if ( (nstart+ysize-1) < ny )
-		      if ( fabs(ytmp[nstart+ysize-1] - ylast) < deleps ) lfound = 1;
+		    lfound = (nstart+ysize-1) < ny
+                      && fabs(ytmp[nstart+ysize-1] - ylast) < deleps;
 		  }
 
 		if ( lfound )
