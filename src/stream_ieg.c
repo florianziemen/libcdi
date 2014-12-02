@@ -336,11 +336,11 @@ void iegDefGrid(int *gdb, int gridID)
 
       IEG_G_NumLon(gdb)   = nlon;
       IEG_G_NumLat(gdb)   = nlat;
-      IEG_G_FirstLat(gdb) = lround(yfirst*resfac);
-      IEG_G_LastLat(gdb)  = lround(ylast*resfac);
-      IEG_G_FirstLon(gdb) = lround(xfirst*resfac);
-      IEG_G_LastLon(gdb)  = lround(xlast*resfac);
-      IEG_G_LonIncr(gdb)  = lround(xinc*resfac);
+      IEG_G_FirstLat(gdb) = (int)lround(yfirst*resfac);
+      IEG_G_LastLat(gdb)  = (int)lround(ylast*resfac);
+      IEG_G_FirstLon(gdb) = (int)lround(xfirst*resfac);
+      IEG_G_LastLon(gdb)  = (int)lround(xlast*resfac);
+      IEG_G_LonIncr(gdb)  = (int)lround(xinc*resfac);
       if ( fabs(xinc*resfac - IEG_G_LonIncr(gdb)) > FLT_EPSILON )
 	IEG_G_LonIncr(gdb) = 0;
 
@@ -348,7 +348,7 @@ void iegDefGrid(int *gdb, int gridID)
 	IEG_G_LatIncr(gdb) = nlat/2;
       else
 	{
-	  IEG_G_LatIncr(gdb) = lround(yinc*resfac);
+	  IEG_G_LatIncr(gdb) = (int)lround(yinc*resfac);
 	  if ( fabs(yinc*resfac - IEG_G_LatIncr(gdb)) > FLT_EPSILON )
 	    IEG_G_LatIncr(gdb) = 0;
 
@@ -368,8 +368,8 @@ void iegDefGrid(int *gdb, int gridID)
 
       if ( gridIsRotated(gridID) )
 	{
-	  IEG_G_LatSP(gdb) = - lround(gridInqYpole(gridID) * resfac);
-	  IEG_G_LonSP(gdb) =   lround((gridInqXpole(gridID) + 180) * resfac);
+	  IEG_G_LatSP(gdb) = - (int)lround(gridInqYpole(gridID) * resfac);
+	  IEG_G_LonSP(gdb) =   (int)lround((gridInqXpole(gridID) + 180) * resfac);
 	  IEG_G_Size(gdb)  = 42;
 	}
       else
