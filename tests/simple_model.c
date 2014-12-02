@@ -124,10 +124,11 @@ modelRun(struct model_config setup, MPI_Comm comm)
     gridDefUUID(gridID, uuid);
   }
   levs = xmalloc((size_t)setup.max_nlev * sizeof (levs[0]));
-  for (i = 0; i < setup.max_nlev; ++i)
-    levs[i] = 101300.0
-      - 3940.3 * (exp(1.3579 * (double)(i)/(setup.max_nlev - 1)) - 1.0);
-
+  {
+    double lscale = 1.0/(double)(setup.max_nlev - 1);
+    for (i = 0; i < setup.max_nlev; ++i)
+      levs[i] = 101300.0 - 13000.0 * expm1(2.173 * (double)i * lscale);
+  }
   vlistID = vlistCreate ();
 
   varDesc = xmalloc((size_t)nVars * sizeof (varDesc[0]));
