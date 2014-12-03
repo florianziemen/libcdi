@@ -1,6 +1,10 @@
-2014-12-04  Uwe Schulzweida
+2014-12-14  Uwe Schulzweida
 
-	* Version 1.6.6.1 released
+	* Version 1.6.7 released
+
+2014-12-03  Uwe Schulzweida
+
+	* gribapi: time dependet metadata [Feature #4720]
 
 2014-12-01  Uwe Schulzweida
 
