@@ -1719,19 +1719,19 @@ void cgribexDefGrid(int *isec1, int *isec2, int *isec4, int gridID)
 
 	ISEC2_NumLon   = nlon;
 	ISEC2_NumLat   = nlat;
-	ISEC2_FirstLat = lround(yfirst*1000);
-	ISEC2_LastLat  = lround(ylast*1000);
+	ISEC2_FirstLat = (int)lround(yfirst*1000);
+	ISEC2_LastLat  = (int)lround(ylast*1000);
 	if ( gridtype == GRID_GAUSSIAN_REDUCED )
 	  {
 	    ISEC2_FirstLon = 0;
-	    ISEC2_LastLon  = lround(1000*(360.-360./(nlat*2)));
-	    ISEC2_LonIncr  = lround(1000*360./(nlat*2));
+	    ISEC2_LastLon  = (int)lround(1000*(360.-360./(nlat*2)));
+	    ISEC2_LonIncr  = (int)lround(1000*360./(nlat*2));
 	  }
 	else
 	  {
-	    ISEC2_FirstLon = lround(xfirst*1000);
-	    ISEC2_LastLon  = lround(xlast*1000);
-	    ISEC2_LonIncr  = lround(xinc*1000);
+	    ISEC2_FirstLon = (int)lround(xfirst*1000);
+	    ISEC2_LastLon  = (int)lround(xlast*1000);
+	    ISEC2_LonIncr  = (int)lround(xinc*1000);
 	  }
 
 	// if ( fabs(xinc*1000 - ISEC2_LonIncr) > FLT_EPSILON ) ISEC2_LonIncr = 0;
@@ -1744,7 +1744,7 @@ void cgribexDefGrid(int *isec1, int *isec2, int *isec4, int gridID)
           }
 	else
 	  {
-	    ISEC2_LatIncr = lround(yinc*1000);
+	    ISEC2_LatIncr = (int)lround(yinc*1000);
 	    // if ( fabs(yinc*1000 - ISEC2_LatIncr) > FLT_EPSILON ) ISEC2_LatIncr = 0;
 
 	    if ( ISEC2_LatIncr < 0 ) ISEC2_LatIncr = -ISEC2_LatIncr;
@@ -1763,8 +1763,8 @@ void cgribexDefGrid(int *isec1, int *isec2, int *isec4, int gridID)
 
 	if ( gridIsRotated(gridID) )
 	  {
-	    ISEC2_LatSP = - lround(gridInqYpole(gridID) * 1000);
-	    ISEC2_LonSP =   lround((gridInqXpole(gridID) + 180) * 1000);
+	    ISEC2_LatSP = - (int)lround(gridInqYpole(gridID) * 1000);
+	    ISEC2_LonSP =   (int)lround((gridInqXpole(gridID) + 180) * 1000);
 	  }
 
 	/* East -> West */
@@ -1790,13 +1790,13 @@ void cgribexDefGrid(int *isec1, int *isec2, int *isec4, int gridID)
 	ISEC2_GridType = GRIB1_GTYPE_LCC;
 	ISEC2_NumLon   = xsize;
 	ISEC2_NumLat   = ysize;
-	ISEC2_FirstLon = lround(originLon * 1000);
-	ISEC2_FirstLat = lround(originLat * 1000);
-	ISEC2_Lambert_Lov    = lround(lonParY * 1000);
-	ISEC2_Lambert_LatS1  = lround(lat1 * 1000);
-	ISEC2_Lambert_LatS2  = lround(lat2 * 1000);
-	ISEC2_Lambert_dx     = lround(xincm);
-	ISEC2_Lambert_dy     = lround(yincm);
+	ISEC2_FirstLon = (int)lround(originLon * 1000);
+	ISEC2_FirstLat = (int)lround(originLat * 1000);
+	ISEC2_Lambert_Lov    = (int)lround(lonParY * 1000);
+	ISEC2_Lambert_LatS1  = (int)lround(lat1 * 1000);
+	ISEC2_Lambert_LatS2  = (int)lround(lat2 * 1000);
+	ISEC2_Lambert_dx     = (int)lround(xincm);
+	ISEC2_Lambert_dy     = (int)lround(yincm);
 	ISEC2_Lambert_LatSP  = 0;
 	ISEC2_Lambert_LatSP  = 0;
 	ISEC2_Lambert_ProjFlag = projflag;
