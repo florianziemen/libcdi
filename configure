@@ -25992,9 +25992,9 @@ $as_echo_n "checking netcdf's nc2 support... " >&6; }
 
 $as_echo "#define HAVE_NETCDF2 1" >>confdefs.h
 
+                                          ENABLE_NC2=yes
                                           { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
-                                          ENABLE_NC2=yes
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
@@ -26005,8 +26005,8 @@ $as_echo_n "checking netcdf's nc4 support... " >&6; }
 
 $as_echo "#define HAVE_NETCDF4 1" >>confdefs.h
 
-                                    ENABLE_NC4=yes
-                                    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+                                          ENABLE_NC4=yes
+                                          { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
