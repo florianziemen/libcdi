@@ -3399,7 +3399,7 @@ size_t cdfDoInputDataTransformationDP(size_t valueCount, double *data, bool have
         {
           int outOfRange = data[i] < validMin || data[i] > validMax;
           int isMissVal = DBL_IS_EQUAL(data[i], missVal);
-          missValCount += (outOfRange | isMissVal);
+          missValCount += (size_t)(outOfRange | isMissVal);
           data[i] = outOfRange ? missVal
             : isMissVal ? data[i] : data[i] * scaleFactor + offset;
         }
@@ -3409,7 +3409,7 @@ size_t cdfDoInputDataTransformationDP(size_t valueCount, double *data, bool have
         {
           int outOfRange = data[i] < validMin || data[i] > validMax;
           int isMissVal = DBL_IS_EQUAL(data[i], missVal);
-          missValCount += (outOfRange | isMissVal);
+          missValCount += (size_t)(outOfRange | isMissVal);
           data[i] = outOfRange ? missVal
             : isMissVal ? data[i] : data[i] + offset;
         }
@@ -3419,7 +3419,7 @@ size_t cdfDoInputDataTransformationDP(size_t valueCount, double *data, bool have
         {
           int outOfRange = data[i] < validMin || data[i] > validMax;
           int isMissVal = DBL_IS_EQUAL(data[i], missVal);
-          missValCount += (outOfRange | isMissVal);
+          missValCount += (size_t)(outOfRange | isMissVal);
           data[i] = outOfRange ? missVal
             : isMissVal ? data[i] : data[i] * scaleFactor;
         }
@@ -3429,7 +3429,7 @@ size_t cdfDoInputDataTransformationDP(size_t valueCount, double *data, bool have
         {
           int outOfRange = data[i] < validMin || data[i] > validMax;
           int isMissVal = DBL_IS_EQUAL(data[i], missVal);
-          missValCount += (outOfRange | isMissVal);
+          missValCount += (size_t)(outOfRange | isMissVal);
           data[i] = outOfRange ? missVal : data[i];
         }
       break;
@@ -3498,7 +3498,7 @@ size_t cdfDoInputDataTransformationSP(size_t valueCount, float *data, bool haveM
         {
           int outOfRange = data[i] < validMin || data[i] > validMax;
           int isMissVal = DBL_IS_EQUAL(data[i], missVal);
-          missValCount += (outOfRange | isMissVal);
+          missValCount += (size_t)(outOfRange | isMissVal);
           data[i] = outOfRange ? (float)missVal
             : isMissVal ? data[i] : (float)(data[i] * scaleFactor + offset);
         }
@@ -3508,7 +3508,7 @@ size_t cdfDoInputDataTransformationSP(size_t valueCount, float *data, bool haveM
         {
           int outOfRange = data[i] < validMin || data[i] > validMax;
           int isMissVal = DBL_IS_EQUAL(data[i], missVal);
-          missValCount += (outOfRange | isMissVal);
+          missValCount += (size_t)(outOfRange | isMissVal);
           data[i] = outOfRange ? (float)missVal
             : isMissVal ? data[i] : (float)(data[i] + offset);
         }
@@ -3518,7 +3518,7 @@ size_t cdfDoInputDataTransformationSP(size_t valueCount, float *data, bool haveM
         {
           int outOfRange = data[i] < validMin || data[i] > validMax;
           int isMissVal = DBL_IS_EQUAL(data[i], missVal);
-          missValCount += (outOfRange | isMissVal);
+          missValCount += (size_t)(outOfRange | isMissVal);
           data[i] = outOfRange ? (float)missVal
             : isMissVal ? data[i] : (float)(data[i] * scaleFactor);
         }
@@ -3528,7 +3528,7 @@ size_t cdfDoInputDataTransformationSP(size_t valueCount, float *data, bool haveM
         {
           int outOfRange = data[i] < validMin || data[i] > validMax;
           int isMissVal = DBL_IS_EQUAL(data[i], missVal);
-          missValCount += (outOfRange | isMissVal);
+          missValCount += (size_t)(outOfRange | isMissVal);
           data[i] = outOfRange ? (float)missVal : data[i];
         }
       break;
@@ -4215,7 +4215,7 @@ void cdfReadVarSP(stream_t *streamptr, int varID, float *data, int *nmiss)
 
   cdf_get_vara_float(fileID, ncvarid, start, count, data);
 
-  size_t size = (size_t)gridInqSize(gridID)*zaxisInqSize(zaxisID);
+  size_t size = (size_t)gridInqSize(gridID) * (size_t)zaxisInqSize(zaxisID);
   double missval = vlistInqVarMissval(vlistID, varID);
   const bool haveMissVal = vlistInqVarMissvalUsed(vlistID, varID);
   double validRange[2];
@@ -8179,14 +8179,14 @@ void cdfDefVars(stream_t *streamptr)
   if (ngrids > 0)
     for (size_t index = 0; index < (size_t)ngrids; index++ )
       {
-        int gridID = vlistGrid(vlistID, index);
+        int gridID = vlistGrid(vlistID, (int)index);
         cdfDefGrid(streamptr, gridID);
       }
 
   if (nzaxis > 0)
     for (size_t index = 0; index < (size_t)nzaxis; index++ )
       {
-        int zaxisID = vlistZaxis(vlistID, index);
+        int zaxisID = vlistZaxis(vlistID, (int)index);
         if ( streamptr->zaxisID[index] == UNDEFID ) cdfDefZaxis(streamptr, zaxisID);
       }
   /*
