@@ -2223,8 +2223,9 @@ size_t cgribexEncode(int memtype, int varID, int levelID, int vlistID, int gridI
 
   if ( memtype == MEMTYPE_FLOAT )
     {
-      for ( int i = 0; i < ISEC2_NumVCP; ++i ) fsec2f[10+i] = fsec2[10+i];
-      fsec3f[ 1] = fsec3[ 1];
+      size_t numVCP = ISEC2_NumVCP > 0 ? (size_t)ISEC2_NumVCP : (size_t)0;
+      for ( size_t i = 0; i < numVCP; ++i ) fsec2f[10+i] = (float)fsec2[10+i];
+      fsec3f[ 1] = (float)fsec3[ 1];
     }
 
   if ( memtype == MEMTYPE_FLOAT )
