@@ -1061,7 +1061,7 @@ int vlistNtsteps(int vlistID)
 {
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
-  return (vlistptr->ntsteps);
+  return (int)vlistptr->ntsteps;
 }
 
 static void
@@ -1485,7 +1485,7 @@ int vlistHasTime(int vlistID)
 }
 
 enum {
-  vlist_nints=7,
+  vlist_nints=6,
 };
 
 static int
@@ -1501,6 +1501,7 @@ int  vlistGetSizeP ( void * vlistptr, void *context)
   int txsize, varID;
   vlist_t *p = (vlist_t*) vlistptr;
   txsize = serializeGetSize(vlist_nints, DATATYPE_INT, context);
+  txsize += serializeGetSize(1, DATATYPE_LONG, context);
   txsize += vlistAttsGetSize(p, CDI_GLOBAL, context);
   for ( varID = 0; varID <  p->nvars; varID++ )
     txsize += vlistVarGetPackSize(p, varID, context);
@@ -1516,12 +1517,13 @@ void vlistPackP ( void * vlistptr, void * buf, int size, int *position,
   vlist_t *p = (vlist_t*) vlistptr;
   tempbuf[0] = p->self;
   tempbuf[1] = p->nvars;
-  tempbuf[2] = p->ntsteps;
-  tempbuf[3] = p->taxisID;
-  tempbuf[4] = p->tableID;
-  tempbuf[5] = p->instID;
-  tempbuf[6] = p->modelID;
+  tempbuf[2] = p->taxisID;
+  tempbuf[3] = p->tableID;
+  tempbuf[4] = p->instID;
+  tempbuf[5] = p->modelID;
   serializePack(tempbuf, vlist_nints, DATATYPE_INT, buf, size, position, context);
+  serializePack(&p->ntsteps, 1, DATATYPE_LONG, buf, size, position, context);
+
   vlistAttsPack(p, CDI_GLOBAL, buf, size, position, context);
   for ( varID = 0; varID < p->nvars; varID++ )
     {
@@ -1534,17 +1536,19 @@ void vlistUnpack(char * buf, int size, int *position, int originNamespace,
 {
   int tempbuf[vlist_nints];
   serializeUnpack(buf, size, position, tempbuf, vlist_nints, DATATYPE_INT, context);
+  int nvars = tempbuf[1];
   int targetID = namespaceAdaptKey(tempbuf[0], originNamespace);
   vlist_t *p = vlist_new_entry(force_id?targetID:CDI_UNDEFID);
   xassert(!force_id || p->self == targetID);
   if (!force_id)
     targetID = p->self;
-  p->taxisID = namespaceAdaptKey(tempbuf[3], originNamespace);
-  p->tableID = tempbuf[4];
-  p->instID = namespaceAdaptKey(tempbuf[5], originNamespace);
-  p->modelID = namespaceAdaptKey(tempbuf[6], originNamespace);
+  p->taxisID = namespaceAdaptKey(tempbuf[2], originNamespace);
+  p->tableID = tempbuf[3];
+  p->instID = namespaceAdaptKey(tempbuf[4], originNamespace);
+  p->modelID = namespaceAdaptKey(tempbuf[5], originNamespace);
+  serializeUnpack(buf, size, position, &p->ntsteps, 1, DATATYPE_LONG, context);
   vlistAttsUnpack(targetID, CDI_GLOBAL, buf, size, position, context);
-  for (int varID = 0; varID < tempbuf[1]; varID++ )
+  for (int varID = 0; varID < nvars; varID++ )
     vlistVarUnpack(targetID, buf, size, position, originNamespace, context);
 }
 

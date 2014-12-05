@@ -65,6 +65,9 @@ serializeGetSizeInCore(int count, int datatype, void *context)
   case DATATYPE_UCHAR:
     elemSize = 1;
     break;
+  case DATATYPE_LONG:
+    elemSize = sizeof (long);
+    break;
   default:
     xabort("Unexpected datatype");
   }

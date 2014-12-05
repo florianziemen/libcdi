@@ -113,6 +113,7 @@ extern "C" {
 #define  DATATYPE_TXT           253
 #define  DATATYPE_CPX           254
 #define  DATATYPE_UCHAR         255
+#define  DATATYPE_LONG          256
 
 /* Chunks */
 

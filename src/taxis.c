@@ -1594,8 +1594,8 @@ taxisPack(void * voidP, void * packBuffer, int packBufferSize, int * packBufferP
   intBuffer[idx++] = taxisP->vtime_lb;
   intBuffer[idx++] = taxisP->vdate_ub;
   intBuffer[idx++] = taxisP->vtime_ub;
-  intBuffer[idx++] = taxisP->name ? strlen(taxisP->name) : 0;
-  intBuffer[idx++] = taxisP->longname ? strlen(taxisP->longname) : 0;
+  intBuffer[idx++] = taxisP->name ? (int)strlen(taxisP->name) : 0;
+  intBuffer[idx++] = taxisP->longname ? (int)strlen(taxisP->longname) : 0;
 
   serializePack(intBuffer, taxisNint, DATATYPE_INT,
                 packBuffer, packBufferSize, packBufferPos, context);

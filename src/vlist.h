@@ -133,7 +133,7 @@ typedef struct
   int         nvars;        /* number of variables                */
   int         ngrids;
   int         nzaxis;
-  int         ntsteps;
+  long        ntsteps;
   int         taxisID;
   int         tableID;
   int         instID;
