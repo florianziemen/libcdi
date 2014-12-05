@@ -17,15 +17,14 @@
 static
 void show_stackframe()
 {
-#if defined (HAVE_EXECINFO_H)
+#if defined HAVE_EXECINFO_H && defined backtrace_size_t && defined HAVE_BACKTRACE
   void *trace[16];
-  size_t i;
-  size_t trace_size = backtrace(trace, 16);
+  backtrace_size_t trace_size = backtrace(trace, 16);
   char **messages = backtrace_symbols(trace, trace_size);
 
   fprintf(stderr, "[bt] Execution path:\n");
   if ( messages ) {
-    for ( i = 0; i < trace_size; ++i )
+    for ( backtrace_size_t i = 0; i < trace_size; ++i )
       fprintf(stderr, "[bt] %s\n", messages[i]);
     free(messages);
   }

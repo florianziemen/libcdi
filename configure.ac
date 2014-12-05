@@ -64,7 +64,8 @@ AC_CHECK_LIB(malloc, malloc)
 AC_CHECK_MEMBERS([struct stat.st_blksize])
 #  ----------------------------------------------------------------------
 # Checks for header files
-AC_CHECK_HEADERS([malloc.h execinfo.h uuid.h uuid/uuid.h])
+AC_CHECK_HEADERS([malloc.h uuid.h uuid/uuid.h])
+AX_EXECINFO
 #  ----------------------------------------------------------------------
 # Checks for the availability of functions
 AC_CHECK_FUNCS([mallinfo])
