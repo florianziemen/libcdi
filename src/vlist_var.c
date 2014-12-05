@@ -1724,6 +1724,11 @@ void vlistDefVarIntKey(int vlistID, int varID, const char *name, int value)
     }
 
   reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
+#else
+  (void)vlistID;
+  (void)varID;
+  (void)name;
+  (void)value;
 #endif
 }
 
@@ -1760,6 +1765,11 @@ void vlistDefVarDblKey(int vlistID, int varID, const char *name, double value)
     }
 
   reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
+#else
+  (void)vlistID;
+  (void)varID;
+  (void)name;
+  (void)value;
 #endif
 }
 
@@ -1789,6 +1799,8 @@ void cdiDefAdditionalKey(const char *name)
     cdiAdditionalGRIBKeys[idx] = strdupx(name);
   else
     Error("Internal error!");
+#else
+  (void)name;
 #endif
 }
 
@@ -1810,6 +1822,10 @@ int vlistHasVarKey(int vlistID, int varID, const char* name)
       if ( strcmp(name, vlistptr->vars[varID].opt_grib_int_keyword[i]) == 0 )
 	return 1;
     }
+#else
+  (void)vlistID;
+  (void)varID;
+  (void)name;
 #endif
   return 0;
 }
@@ -1825,6 +1841,10 @@ double vlistInqVarDblKey(int vlistID, int varID, const char* name)
   for (int i=0; i<vlistptr->vars[varID].opt_grib_dbl_nentries; i++)
     if ( strcmp(name, vlistptr->vars[varID].opt_grib_dbl_keyword[i]) == 0 )
       return vlistptr->vars[varID].opt_grib_dbl_val[i];
+#else
+  (void)vlistID;
+  (void)varID;
+  (void)name;
 #endif
   return value;
 }
@@ -1841,6 +1861,10 @@ int vlistInqVarIntKey(int vlistID, int varID, const char* name)
   for (int i=0; i<vlistptr->vars[varID].opt_grib_int_nentries; i++)
     if ( strcmp(name, vlistptr->vars[varID].opt_grib_int_keyword[i]) == 0 )
       return vlistptr->vars[varID].opt_grib_int_val[i];
+#else
+  (void)vlistID;
+  (void)varID;
+  (void)name;
 #endif
   return (int) value;
 }
