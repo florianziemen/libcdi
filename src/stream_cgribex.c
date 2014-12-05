@@ -649,7 +649,7 @@ int cgribexScanTimestep1(stream_t * streamptr)
       if ( (size_t)recsize > buffersize )
 	{
 	  buffersize = (size_t)recsize;
-	  gribbuffer = (unsigned char *) realloc(gribbuffer, buffersize);
+	  gribbuffer = (unsigned char *)xrealloc(gribbuffer, buffersize);
 	}
 
       readsize = (size_t)recsize;
