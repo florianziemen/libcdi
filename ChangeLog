@@ -2,6 +2,10 @@
 
 	* Version 1.6.7 released
 
+2014-12-05  Uwe Schulzweida
+
+	* netCDF absolute time axis with units month: change day from 0 to 1
+
 2014-12-03  Uwe Schulzweida
 
 	* gribapi: time dependent metadata [Feature #4720]

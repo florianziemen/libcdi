@@ -1194,6 +1194,7 @@ void splitTimevalue(double timevalue, int timeunit, int *date, int *time)
   else if ( timeunit == TUNIT_MONTH )
     {
       vdate = (int) timevalue*100;
+      vdate += 1;
       vtime = 0;
     }
   else if ( timeunit == TUNIT_YEAR )
