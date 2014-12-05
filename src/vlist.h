@@ -215,6 +215,12 @@ extern int   cdiNAdditionalGRIBKeys;
 extern char* cdiAdditionalGRIBKeys[];
 #endif
 
+extern
+#ifndef __cplusplus
+const
+#endif
+resOps vlistOps;
+
 #endif  /* _VLIST_H */
 /*
  * Local Variables:

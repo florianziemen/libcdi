@@ -76,7 +76,7 @@ static int  vlistTxCode   ( void );
 #if !defined(__cplusplus)
 const
 #endif
-resOps vlist_ops = {
+resOps vlistOps = {
   (valCompareFunc)vlist_compare,
   (valDestroyFunc)vlist_delete,
   (valPrintFunc)vlistPrintKernel
@@ -89,7 +89,7 @@ resOps vlist_ops = {
 vlist_t *vlist_to_pointer(int vlistID)
 {
   VLIST_INIT();
-  return (vlist_t*) reshGetVal(vlistID, &vlist_ops );
+  return (vlist_t*) reshGetVal(vlistID, &vlistOps );
 }
 
 static
@@ -117,11 +117,11 @@ vlist_t *vlist_new_entry(cdiResH resH)
   vlist_t *vlistptr = (vlist_t*) xmalloc(sizeof(vlist_t));
   vlist_init_entry(vlistptr);
   if (resH == CDI_UNDEFID)
-    vlistptr->self = reshPut(vlistptr, &vlist_ops);
+    vlistptr->self = reshPut(vlistptr, &vlistOps);
   else
     {
       vlistptr->self = resH;
-      reshReplace(resH, vlistptr, &vlist_ops);
+      reshReplace(resH, vlistptr, &vlistOps);
     }
   return (vlistptr);
 }
@@ -133,7 +133,7 @@ void vlist_delete_entry(vlist_t *vlistptr)
 
   idx = vlistptr->self;
 
-  reshRemove(idx, &vlist_ops );
+  reshRemove(idx, &vlistOps );
 
   free(vlistptr);
 
@@ -169,7 +169,7 @@ void vlist_lock(int vlistID)
   if ( !vlistptr->locked )
     {
       vlistptr->locked = 1;
-      reshSetStatus(vlistID, &vlist_ops, RESH_DESYNC_IN_USE);
+      reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
     }
 }
 
@@ -181,7 +181,7 @@ void vlist_unlock(int vlistID)
   if ( vlistptr->locked )
     {
       vlistptr->locked = 0;
-      reshSetStatus(vlistID, &vlist_ops, RESH_DESYNC_IN_USE);
+      reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
     }
 }
 
@@ -1052,7 +1052,7 @@ void vlistDefNtsteps(int vlistID, int nts)
   if (vlistptr->ntsteps != nts)
     {
       vlistptr->ntsteps = nts;
-      reshSetStatus(vlistID, &vlist_ops, RESH_DESYNC_IN_USE);
+      reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
     }
 }
 
@@ -1177,7 +1177,7 @@ void vlistDefTaxis(int vlistID, int taxisID)
   if (vlistptr->taxisID != taxisID)
     {
       vlistptr->taxisID = taxisID;
-      reshSetStatus(vlistID, &vlist_ops, RESH_DESYNC_IN_USE);
+      reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
     }
 }
 
@@ -1212,7 +1212,7 @@ void vlistDefTable(int vlistID, int tableID)
   if (vlistptr->tableID != tableID)
     {
       vlistptr->tableID = tableID;
-      reshSetStatus(vlistID, &vlist_ops, RESH_DESYNC_IN_USE);
+      reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
     }
 }
 
@@ -1232,7 +1232,7 @@ void vlistDefInstitut(int vlistID, int instID)
   if (vlistptr->instID != instID)
     {
       vlistptr->instID = instID;
-      reshSetStatus(vlistID, &vlist_ops, RESH_DESYNC_IN_USE);
+      reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
     }
 }
 
@@ -1267,7 +1267,7 @@ void vlistDefModel(int vlistID, int modelID)
   if (vlistptr->modelID != modelID)
     {
       vlistptr->modelID = modelID;
-      reshSetStatus(vlistID, &vlist_ops, RESH_DESYNC_IN_USE);
+      reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
     }
 }
 
@@ -1351,7 +1351,7 @@ void vlistChangeGridIndex(int vlistID, int index, int gridID)
       for ( int varID = 0; varID < nvars; varID++ )
         if ( vlistptr->vars[varID].gridID == gridIDold )
           vlistptr->vars[varID].gridID = gridID;
-      reshSetStatus(vlistID, &vlist_ops, RESH_DESYNC_IN_USE);
+      reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
     }
 }
 
@@ -1375,7 +1375,7 @@ void vlistChangeGrid(int vlistID, int gridID1, int gridID2)
       for ( int varID = 0; varID < nvars; varID++ )
         if ( vlistptr->vars[varID].gridID == gridID1 )
           vlistptr->vars[varID].gridID = gridID2;
-      reshSetStatus(vlistID, &vlist_ops, RESH_DESYNC_IN_USE);
+      reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
     }
 }
 
@@ -1429,7 +1429,7 @@ void vlistChangeZaxisIndex(int vlistID, int index, int zaxisID)
                   vlistptr->vars[varID].levinfo[levID] = DEFAULT_LEVINFO(levID);
               }
           }
-      reshSetStatus(vlistID, &vlist_ops, RESH_DESYNC_IN_USE);
+      reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
     }
 }
 
@@ -1465,7 +1465,7 @@ void vlistChangeZaxis(int vlistID, int zaxisID1, int zaxisID2)
               vlistptr->vars[varID].levinfo[levID] = DEFAULT_LEVINFO(levID);
           }
       }
-  reshSetStatus(vlistID, &vlist_ops, RESH_DESYNC_IN_USE);
+  reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
 }
 
 
