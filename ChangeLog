@@ -4,7 +4,8 @@
 
 2014-12-05  Uwe Schulzweida
 
-	* netCDF absolute time axis with units month: change day from 0 to 1
+	* netCDF absolute time axis with units month: change day from 00 to 01
+	* netCDF absolute time axis with units year: change month/day from 0000 to 0101
 
 2014-12-03  Uwe Schulzweida
 

@@ -85,6 +85,7 @@ module mo_cdi
       integer, parameter :: DATATYPE_TXT = 253
       integer, parameter :: DATATYPE_CPX = 254
       integer, parameter :: DATATYPE_UCHAR = 255
+      integer, parameter :: DATATYPE_LONG = 256
       integer, parameter :: CHUNK_AUTO = 1
       integer, parameter :: CHUNK_GRID = 2
       integer, parameter :: CHUNK_LINES = 3
@@ -3385,6 +3386,7 @@ module mo_cdi
       public :: DATATYPE_TXT
       public :: DATATYPE_CPX
       public :: DATATYPE_UCHAR
+      public :: DATATYPE_LONG
       public :: CHUNK_AUTO
       public :: CHUNK_GRID
       public :: CHUNK_LINES

@@ -1211,6 +1211,7 @@ void splitTimevalue(double timevalue, int timeunit, int *date, int *time)
 	}
 
       vdate = (int) timevalue*10000;
+      vdate += 101;
       vtime = 0;
     }
   else
