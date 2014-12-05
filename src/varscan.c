@@ -447,7 +447,7 @@ void cdi_generate_vars(stream_t *streamptr)
 {
   int varID, gridID, zaxisID;
   int instID, modelID, tableID;
-  int param, zaxistype, ltype1, ltype2, lindex;
+  int param, zaxistype, ltype1, ltype2;
   int prec;
   int tsteptype;
   int timave, timaccu;
@@ -701,7 +701,6 @@ void cdi_generate_vars(stream_t *streamptr)
       /*
       for ( levelID = 0; levelID < nlevels; levelID++ )
 	{
-	  lindex = vartable[varid].levelTable[levelID].lindex;
 	  printf("%d %d %d %d %d\n", varID, levelID,
 		 vartable[varid].levelTable[levelID].lindex,
 		 vartable[varid].levelTable[levelID].recID,
