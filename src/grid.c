@@ -2784,7 +2784,7 @@ void gridDefArea(int gridID, const double *area)
 {
   grid_t *gridptr = gridID2Ptr(gridID);
 
-  size_t size = gridptr->size;
+  size_t size = (size_t)gridptr->size;
 
   if ( size == 0 )
     Error("size undefined for gridID = %d", gridID);
