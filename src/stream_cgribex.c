@@ -2167,12 +2167,12 @@ void cgribexDefEnsembleVar(int *isec1, int vlistID, int varID)
 #endif
 
 
+#if  defined  (HAVE_LIBCGRIBEX)
 size_t cgribexEncode(int memtype, int varID, int levelID, int vlistID, int gridID, int zaxisID,
 		     int vdate, int vtime, int tsteptype, int numavg,
 		     long datasize, const double *data, int nmiss, unsigned char *gribbuffer, size_t gribbuffersize)
 {
   size_t nbytes = 0;
-#if  defined  (HAVE_LIBCGRIBEX)
   int gribsize;
   int iret = 0, iword = 0;
   int isec0[2], isec1[4096], isec2[4096], isec3[2], isec4[512];
@@ -2238,12 +2238,9 @@ size_t cgribexEncode(int memtype, int varID, int levelID, int vlistID, int gridI
   if ( iret ) Error("Problem during GRIB encode (errno = %d)!", iret);
 
   nbytes = (size_t)iword * sizeof (int);
-#else
-  Error("CGRIBEX support not compiled in!");
-#endif
-
   return (nbytes);
 }
+#endif
 /*
  * Local Variables:
  * c-file-style: "Java"
