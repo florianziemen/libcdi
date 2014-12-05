@@ -524,10 +524,10 @@ compvar_t cgribexVarSet(int param, int level1, int level2, int leveltype, int tr
 static inline int
 cgribexVarCompare(compvar_t compVar, record_t record, int flag)
 {
-  int tstepDiff = !(flag == 0 & (((compVar.tsteptype == TSTEP_INSTANT)
-                                  & (record.tsteptype == TSTEP_INSTANT3))
-                                 |((compVar.tsteptype == TSTEP_INSTANT3)
-                                   & (record.tsteptype == TSTEP_INSTANT))))
+  int tstepDiff = (!((flag == 0) & (((compVar.tsteptype == TSTEP_INSTANT)
+                                     & (record.tsteptype == TSTEP_INSTANT3))
+                                    |((compVar.tsteptype == TSTEP_INSTANT3)
+                                      & (record.tsteptype == TSTEP_INSTANT)))))
     & (compVar.tsteptype != record.tsteptype);
   int rstatus = (compVar.param != record.param)
     |           (compVar.level1 != record.ilevel)
