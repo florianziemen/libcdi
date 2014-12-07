@@ -8,7 +8,7 @@ int nts  =  3; // Number of time steps
 
 int main(void)
 {
-  int taxisID, vlistID1, vlistID2, varID1, varID2, streamID1, streamID2, tsID;
+  int vlistID1, vlistID2, varID1, varID2, streamID1, streamID2, tsID;
   int nmiss;
   double var1[nlon*nlat];
   double var2[nlon*nlat*nlev];
@@ -28,9 +28,6 @@ int main(void)
   // Set the variable IDs
   varID1 = 0;
   varID2 = 1;
-
-  // Get the Time axis from the variable list
-  taxisID = vlistInqTaxis(vlistID1);
 
   // Open the output dataset (GRIB format)
   streamID2  = streamOpenWrite("example.grb", FILETYPE_GRB);

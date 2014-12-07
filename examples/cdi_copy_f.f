@@ -10,7 +10,7 @@
       PARAMETER (nlev =  5)   ! Number of levels
       PARAMETER (nts  =  3)   ! Number of time steps
 
-      INTEGER gridID, zaxisID1, zaxisID2, taxisID, tsID
+      INTEGER gridID, zaxisID1, zaxisID2, tsID
       INTEGER vlistID1, vlistID2, varID1, varID2, streamID1, streamID2
       INTEGER i, nmiss, status
       REAL*8 var1(nlon*nlat), var2(nlon*nlat*nlev)
@@ -28,9 +28,6 @@
 !     Set the variable IDs
       varID1 = 0
       varID2 = 1
-
-!     Get the Time axis from the variable list
-      taxisID = vlistInqTaxis(vlistID1)
 
 !     Open the output dataset (GRIB format)
       streamID2 = streamOpenWrite("example.grb", FILETYPE_GRB)
