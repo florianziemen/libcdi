@@ -796,8 +796,7 @@ open stream. Otherwise, a negative number with the error status is returned.
 @EndList
 
 @Example
-Here is an example using @func{streamOpenWrite} to create a new netCDF file
-named @func{foo.nc} for writing:
+Here is an example using @func{streamOpenWrite} to create a new netCDF file named @func{foo.nc} for writing:
 
 @Source
 #include "cdi.h"
