@@ -2186,9 +2186,8 @@ void streamGetIndexList ( int nstreams, int * streamIndexList )
 
 int streamInqNvars ( int streamID )
 {
-  stream_t * streamptr;
-  streamptr = ( stream_t * ) reshGetVal ( streamID, &streamOps );
-  return ( streamptr->nvars );
+  stream_t *streamptr = reshGetVal(streamID, &streamOps);
+  return streamptr->nvars;
 }
 
 
