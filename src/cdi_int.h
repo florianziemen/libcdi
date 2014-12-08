@@ -227,9 +227,6 @@ typedef struct {
   int         have_missval;
   int         comptype;      // compression type
   int         complevel;     // compression level
-  int         curfile;
-  int         nfiles;
-  char      **fnames;
 #if defined (GRIBCONTAINER2D)
   void      **gribContainers;
 #else

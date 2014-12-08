@@ -866,10 +866,6 @@ void streamDefaultValue ( stream_t * streamptr )
   for ( i = 0; i < MAX_GRIDS_PS; i++ ) streamptr->ncyvarID[i] = CDI_UNDEFID;
   for ( i = 0; i < MAX_GRIDS_PS; i++ ) streamptr->ncavarID[i] = CDI_UNDEFID;
 
-  streamptr->curfile           = 0;
-  streamptr->nfiles            = 0;
-  streamptr->fnames            = NULL;
-
   streamptr->gribContainers    = NULL;
   streamptr->vlistIDorig       = CDI_UNDEFID;
 }
@@ -1025,14 +1021,6 @@ void streamClose(int streamID)
   if ( streamptr->tsteps ) free(streamptr->tsteps);
 
   if ( streamptr->basetime.timevar_cache ) free(streamptr->basetime.timevar_cache);
-
-  if ( streamptr->nfiles > 0 )
-    {
-      for ( index = 0; index < streamptr->nfiles; ++index )
-	free(streamptr->fnames[index]);
-
-      free(streamptr->fnames);
-    }
 
   if ( vlistID != -1 )
     {
@@ -2295,9 +2283,6 @@ void streamPrintP   ( void * streamptr, FILE * fp )
   fprintf ( fp, "have_missval  = %d\n", sp->have_missval );
   fprintf ( fp, "ztype         = %d\n", sp->comptype );
   fprintf ( fp, "zlevel        = %d\n", sp->complevel );
-  fprintf ( fp, "curfile       = %d\n", sp->curfile );
-  fprintf ( fp, "nfiles        = %d\n", sp->nfiles );
-  fprintf ( fp, "//  char    **fnames;\n" );
   fprintf ( fp, "//  void    **gribContainers;\n" );
   fprintf ( fp, "vlistIDorig   = %d\n", sp->vlistIDorig );
 }
