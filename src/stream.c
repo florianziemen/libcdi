@@ -2103,24 +2103,15 @@ int streamInqFileID(int streamID)
 
 void cdiDefAccesstype(int streamID, int type)
 {
-  stream_t *streamptr;
-
-  streamptr = ( stream_t *) reshGetVal ( streamID, &streamOps );
+  stream_t *streamptr = reshGetVal(streamID, &streamOps);
 
   if ( streamptr->accesstype == CDI_UNDEFID )
     {
       streamptr->accesstype = type;
     }
-  else
-    {
-      if ( streamptr->accesstype != type )
-	{
-	  if ( streamptr->accesstype == TYPE_REC )
-	    Error("Changing access type from REC to VAR not allowed!");
-	  else
-	    Error("Changing access type from VAR to REC not allowed!");
-	}
-    }
+  else if ( streamptr->accesstype != type )
+    Error("Changing access type from %s not allowed!",
+          streamptr->accesstype == TYPE_REC ? "REC to VAR" : "VAR to REC");
 }
 
 
