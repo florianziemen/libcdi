@@ -2157,25 +2157,26 @@ void cdiStreamSetupVlist(stream_t *streamptr, int vlistID, int vlistIDorig)
     }
 
   if (streamptr->filemode == 'w' )
-    {
-      if ( streamptr->filetype == FILETYPE_NC  ||
-           streamptr->filetype == FILETYPE_NC2 ||
-           streamptr->filetype == FILETYPE_NC4 ||
-           streamptr->filetype == FILETYPE_NC4C )
-        {
+    switch (streamptr->filetype)
+      {
 #ifdef HAVE_LIBNETCDF
+      case FILETYPE_NC:
+      case FILETYPE_NC2:
+      case FILETYPE_NC4:
+      case FILETYPE_NC4C:
+        {
           void (*myCdfDefVars)(stream_t *streamptr)
             = (void (*)(stream_t *))
             namespaceSwitchGet(NSSWITCH_CDF_STREAM_SETUP).func;
           myCdfDefVars(streamptr);
+        }
+        break;
 #endif
-        }
-      else if ( streamptr->filetype == FILETYPE_GRB  ||
-                streamptr->filetype == FILETYPE_GRB2 )
-        {
-          gribContainersNew(streamptr);
-        }
-    }
+      case FILETYPE_GRB:
+      case FILETYPE_GRB2:
+        gribContainersNew(streamptr);
+        break;
+      }
 }
 
 
