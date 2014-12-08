@@ -21,7 +21,7 @@
 void reshUnpackResources(char * unpackBuffer, int unpackBufferSize,
                          void *context)
 {
-  int token1, token2, originNamespace;
+  int updateType, resH, originNamespace;
   int unpackBufferPos = 0;
   int numAssociations = 0, sizeAssociations = 16;
   struct streamAssoc *associations
@@ -39,10 +39,10 @@ void reshUnpackResources(char * unpackBuffer, int unpackBufferSize,
   while ( unpackBufferPos < unpackBufferSize )
     {
       serializeUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos,
-                      &token1, 1, DATATYPE_INT, context);
-      if (token1 == END)
+                      &updateType, 1, DATATYPE_INT, context);
+      if (updateType == END)
         break;
-      switch (token1)
+      switch (updateType)
 	{
 	case GRID:
 	  gridUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos,
@@ -80,8 +80,8 @@ void reshUnpackResources(char * unpackBuffer, int unpackBufferSize,
 	  break;
         case RESH_DELETE:
           serializeUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos,
-                          &token2, 1, DATATYPE_INT, context);
-          reshDestroy(namespaceAdaptKey(token2, originNamespace));
+                          &resH, 1, DATATYPE_INT, context);
+          reshDestroy(namespaceAdaptKey(resH, originNamespace));
           break;
 	default:
 	  xabort ( "TOKEN MAPS NO VALID DATATYPE" );
