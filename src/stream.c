@@ -839,7 +839,6 @@ void streamDefaultValue ( stream_t * streamptr )
   streamptr->curTsID           = CDI_UNDEFID;
   streamptr->rtsteps           = 0;
   streamptr->ntsteps           = CDI_UNDEFID;
-  streamptr->numTimestep       = 0;
   streamptr->tsteps            = NULL;
   streamptr->tstepsTableSize   = 0;
   streamptr->tstepsNextID      = 0;
@@ -2261,7 +2260,6 @@ void streamPrintP   ( void * streamptr, FILE * fp )
   fprintf ( fp, "curTsID       = %d\n", sp->curTsID );
   fprintf ( fp, "rtsteps       = %d\n", sp->rtsteps );
   fprintf ( fp, "//long ntsteps;\n" );
-  fprintf ( fp, "numTimestep   = %d\n", sp->numTimestep );
   fprintf ( fp, "//  tsteps_t   *tsteps;\n" );
   fprintf ( fp, "tstepsTableSize= %d\n", sp->tstepsTableSize );
   fprintf ( fp, "tstepsNextID  = %d\n", sp->tstepsNextID );

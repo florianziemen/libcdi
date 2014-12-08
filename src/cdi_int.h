@@ -205,7 +205,6 @@ typedef struct {
   int         curTsID;      /* current timestep ID */
   int         rtsteps;      /* number of tsteps accessed       */
   long        ntsteps;      /* number of tsteps : only set if all records accessed */
-  int         numTimestep;  /* number of tsteps : only set if all records accessed */
   tsteps_t   *tsteps;
   int         tstepsTableSize;
   int         tstepsNextID;
