@@ -201,7 +201,6 @@ typedef struct {
   Record     *record;
   int         nrecs;        /* number of records                  */
   int         nvars;        /* number of variables                */
-  int         varlocked;    /* variables locked                   */
   svarinfo_t *vars;
   int         varsAllocated;
   int         curTsID;      /* current timestep ID */
