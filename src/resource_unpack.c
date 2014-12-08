@@ -28,19 +28,22 @@ void reshUnpackResources(char * unpackBuffer, int unpackBufferSize,
     = (struct streamAssoc *)xmalloc(sizeof (associations[0])
                                     * (size_t)sizeAssociations);
 
+  {
+    int msgHdr[2];
+    serializeUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos,
+                    &msgHdr, 2, DATATYPE_INT, context);
+    if (msgHdr[0] != START)
+      xabort("error parsing resource serialization buffer");
+    originNamespace = msgHdr[1];
+  }
   while ( unpackBufferPos < unpackBufferSize )
     {
       serializeUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos,
                       &token1, 1, DATATYPE_INT, context);
-
       if (token1 == END)
         break;
       switch (token1)
 	{
-	case START:
-	  serializeUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos,
-                          &originNamespace, 1, DATATYPE_INT, context);
-	  break;
 	case GRID:
 	  gridUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos,
                      originNamespace, context, 1);
