@@ -84,7 +84,8 @@ void reshUnpackResources(char * unpackBuffer, int unpackBufferSize,
           reshDestroy(namespaceAdaptKey(resH, originNamespace));
           break;
 	default:
-	  xabort ( "TOKEN MAPS NO VALID DATATYPE" );
+	  xabort("Invalid/unexpected serialization type %d or transfer error!",
+                 updateType);
 	}
     }
   for (int i = 0; i < numAssociations; ++i)
