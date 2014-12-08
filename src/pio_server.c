@@ -1088,12 +1088,8 @@ void cdiPioServer(void (*postCommSetupActions)(void))
       switch ( tag )
         {
         case FINALIZE:
-          {
-            int i;
-            xdebugMsg(tag, source, nfinished);
-            xmpi(MPI_Recv(&i, 1, MPI_INTEGER, source,
-                          tag, commCalc, &status));
-          }
+          xdebugMsg(tag, source, nfinished);
+          xmpi(MPI_Recv(NULL, 0, MPI_INT, source, tag, commCalc, &status));
           xdebug("%s", "RECEIVED MESSAGE WITH TAG \"FINALIZE\"");
           nfinished++;
           xdebug("nfinished=%d, nProcsModel=%d", nfinished, nProcsModel);
