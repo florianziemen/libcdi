@@ -827,7 +827,6 @@ void streamDefaultValue ( stream_t * streamptr )
   streamptr->filetype          = FILETYPE_UNDEF;
   streamptr->byteorder         = CDI_UNDEFID;
   streamptr->fileID            = 0;
-  streamptr->dimgroupID        = CDI_UNDEFID;
   streamptr->filemode          = 0;
   streamptr->numvals           = 0;
   streamptr->filename          = NULL;
@@ -2115,26 +2114,6 @@ int streamInqFileID(int streamID)
   return (streamptr->fileID);
 }
 
-void streamDefDimgroupID(int streamID, int dimgroupID)
-{
-  stream_t *streamptr;
-
-  streamptr = ( stream_t *) reshGetVal ( streamID, &streamOps );
-
-  streamptr->dimgroupID = dimgroupID;
-}
-
-
-int streamInqDimgroupID(int streamID)
-{
-  stream_t *streamptr;
-
-  streamptr = ( stream_t *) reshGetVal ( streamID, &streamOps );
-
-  return (streamptr->dimgroupID);
-}
-
-
 void cdiDefAccesstype(int streamID, int type)
 {
   stream_t *streamptr;
@@ -2283,7 +2262,6 @@ void streamPrintP   ( void * streamptr, FILE * fp )
   fprintf ( fp, "filetype      = %d\n", sp->filetype );
   fprintf ( fp, "byteorder     = %d\n", sp->byteorder );
   fprintf ( fp, "fileID        = %d\n", sp->fileID );
-  fprintf ( fp, "dimgroupID    = %d\n", sp->dimgroupID );
   fprintf ( fp, "filemode      = %d\n", sp->filemode );
   fprintf ( fp, "//off_t numvals;\n" );
   fprintf ( fp, "filename      = %s\n", sp->filename );

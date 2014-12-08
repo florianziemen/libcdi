@@ -194,7 +194,6 @@ typedef struct {
   int         filetype;
   int         byteorder;
   int         fileID;
-  int         dimgroupID;
   int         filemode;
   off_t       numvals;
   char       *filename;
@@ -321,9 +320,6 @@ void    cdiPrintDatatypes(void);
 
 void    cdiDefAccesstype(int streamID, int type);
 int     cdiInqAccesstype(int streamID);
-
-void    streamDefDimgroupID(int streamID, int dimgroupID);
-int     streamInqDimgroupID(int streamID);
 
 int     getByteswap(int byteorder);
 
