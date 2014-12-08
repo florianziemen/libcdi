@@ -330,7 +330,7 @@ int str2uuid(const char *uuidstr, unsigned char *uuid);
 static inline int
 cdiUUIDIsNull(const unsigned char uuid[CDI_UUID_SIZE])
 {
-  static unsigned char uuid_nil[CDI_UUID_SIZE];
+  static const unsigned char uuid_nil[CDI_UUID_SIZE];
   return !memcmp(uuid, uuid_nil, CDI_UUID_SIZE);
 }
 
