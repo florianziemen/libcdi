@@ -836,7 +836,6 @@ void streamDefaultValue ( stream_t * streamptr )
   streamptr->nrecs             = 0;
   streamptr->nvars             = 0;
   streamptr->vars              = NULL;
-  streamptr->varinit           = 0;
   streamptr->ncmode            = 0;
   streamptr->curTsID           = CDI_UNDEFID;
   streamptr->rtsteps           = 0;
@@ -2294,7 +2293,6 @@ void streamPrintP   ( void * streamptr, FILE * fp )
   fprintf ( fp, "varlocked     = %d\n", sp->varlocked );
   fprintf ( fp, "//svarinfo_t *vars;\n" );
   fprintf ( fp, "varsAllocated = %d\n", sp->varsAllocated );
-  fprintf ( fp, "varinit       = %d\n", sp->varinit );
   fprintf ( fp, "curTsID       = %d\n", sp->curTsID );
   fprintf ( fp, "rtsteps       = %d\n", sp->rtsteps );
   fprintf ( fp, "//long ntsteps;\n" );

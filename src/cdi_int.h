@@ -204,7 +204,6 @@ typedef struct {
   int         varlocked;    /* variables locked                   */
   svarinfo_t *vars;
   int         varsAllocated;
-  int         varinit;
   int         curTsID;      /* current timestep ID */
   int         rtsteps;      /* number of tsteps accessed       */
   long        ntsteps;      /* number of tsteps : only set if all records accessed */
