@@ -83,10 +83,6 @@ void reshUnpackResources(char * unpackBuffer, int unpackBufferSize,
 	default:
 	  xabort ( "TOKEN MAPS NO VALID DATATYPE" );
 	}
-
-      serializeUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos,
-                       &token2, 1, DATATYPE_INT, context);
-      xassert ( token2 == SEPARATOR );
     }
   for (int i = 0; i < numAssociations; ++i)
     {
