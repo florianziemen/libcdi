@@ -559,7 +559,7 @@ void defineAttributes(int vlistID, int varID, int fileID, int ncvarID)
   int natts, iatt;
   int atttype, attlen;
   size_t len;
-  char attname[1024];
+  char attname[CDI_MAX_NAME+1];
   void *attBuf = NULL;
   size_t attBufSize = 0;
 
