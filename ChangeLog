@@ -1,6 +1,10 @@
-2014-12-14  Uwe Schulzweida
+2014-12-11  Uwe Schulzweida
 
 	* Version 1.6.7 released
+
+2014-12-10  Uwe Schulzweida
+
+	* vlistDefAttXXX: limit length of attribute name to CDI_MAX_NAME
 
 2014-12-05  Uwe Schulzweida
 

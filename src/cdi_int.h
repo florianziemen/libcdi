@@ -67,7 +67,6 @@ char *strdup(const char *s);
 
 #include "cdi.h"
 
-
 #define check_parg(arg)  if ( arg == 0 ) Warning("Argument '" #arg "' not allocated!")
 
 #if defined (__xlC__) /* performance problems on IBM */
