@@ -1483,8 +1483,8 @@ void cdfDefXaxis(stream_t *streamptr, int gridID, int ndims)
           if ( gridInqXboundsPtr(gridID) || gridInqYboundsPtr(gridID) )
             {
               size_t nvertex = 2;
-              if ( nc_inq_dimid(fileID, "nb2", &nvdimID) != NC_NOERR )
-                cdf_def_dim(fileID, "nb2", nvertex, &nvdimID);
+              if ( nc_inq_dimid(fileID, "bnds", &nvdimID) != NC_NOERR )
+                cdf_def_dim(fileID, "bnds", nvertex, &nvdimID);
             }
         }
 
@@ -1613,8 +1613,8 @@ void cdfDefYaxis(stream_t *streamptr, int gridID, int ndims)
           if ( gridInqXboundsPtr(gridID) || gridInqYboundsPtr(gridID) )
             {
               size_t nvertex = 2;
-              if ( nc_inq_dimid(fileID, "nb2", &nvdimID) != NC_NOERR )
-                cdf_def_dim(fileID, "nb2", nvertex, &nvdimID);
+              if ( nc_inq_dimid(fileID, "bnds", &nvdimID) != NC_NOERR )
+                cdf_def_dim(fileID, "bnds", nvertex, &nvdimID);
             }
         }
 
@@ -1769,8 +1769,8 @@ void cdfDefCurvilinear(stream_t *streamptr, int gridID)
       if ( gridInqXboundsPtr(gridID) || gridInqYboundsPtr(gridID) )
         {
           size_t nvertex = 4;
-          if ( nc_inq_dimid(fileID, "nv4", &nvdimID) != NC_NOERR )
-            cdf_def_dim(fileID, "nv4", nvertex, &nvdimID);
+          if ( nc_inq_dimid(fileID, "vertices", &nvdimID) != NC_NOERR )
+            cdf_def_dim(fileID, "vertices", nvertex, &nvdimID);
         }
 
       dimIDs[0] = ydimID;
@@ -1793,7 +1793,7 @@ void cdfDefCurvilinear(stream_t *streamptr, int gridID)
 
           if ( gridInqXboundsPtr(gridID) && nvdimID != UNDEFID )
             {
-              strcat(xaxisname, "_bnds");
+              strcat(xaxisname, "_vertices");
               dimIDs[0] = ydimID;
               dimIDs[1] = xdimID;
               dimIDs[2] = nvdimID;
@@ -1821,7 +1821,7 @@ void cdfDefCurvilinear(stream_t *streamptr, int gridID)
 
           if ( gridInqYboundsPtr(gridID) && nvdimID != UNDEFID )
             {
-              strcat(yaxisname, "_bnds");
+              strcat(yaxisname, "_vertices");
               dimIDs[0] = ydimID;
               dimIDs[1] = xdimID;
               dimIDs[2] = nvdimID;
@@ -2144,7 +2144,7 @@ void cdfDefUnstructured(stream_t *streamptr, int gridID)
       char axisname[CDI_MAX_NAME];
       char vertname[CDI_MAX_NAME];
       strcpy(axisname, "ncells");
-      strcpy(vertname, "nv");
+      strcpy(vertname, "vertices");
 
       checkGridName('V', xaxisname, fileID, vlistID, gridID, ngrids, 'X');
       checkGridName('V', yaxisname, fileID, vlistID, gridID, ngrids, 'Y');
@@ -2549,8 +2549,8 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
 	  if ( zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL) )
             {
               size_t nvertex = 2;
-	      if ( nc_inq_dimid(fileID, "nb2", &nvdimID) != NC_NOERR )
-		cdf_def_dim(fileID, "nb2", nvertex, &nvdimID);
+	      if ( nc_inq_dimid(fileID, "bnds", &nvdimID) != NC_NOERR )
+		cdf_def_dim(fileID, "bnds", nvertex, &nvdimID);
 
 	      if ( nvdimID != UNDEFID )
 		{

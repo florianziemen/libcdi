@@ -1,3 +1,7 @@
+2014-12-19  Uwe Schulzweida
+
+	* netCDF: renamed bounds dimension from nv2 to bnds
+
 2014-12-11  Uwe Schulzweida
 
 	* Version 1.6.7 released
