@@ -1,6 +1,6 @@
 ! This file was automatically generated, don't edit!
 !
-! Fortran interface for CDI library version 1.6.7
+! Fortran interface for CDI library version 1.6.8
 !
 ! Author:
 ! -------
@@ -185,6 +185,8 @@
       PARAMETER (DATATYPE_CPX           = 254)
       INTEGER    DATATYPE_UCHAR        
       PARAMETER (DATATYPE_UCHAR         = 255)
+      INTEGER    DATATYPE_LONG         
+      PARAMETER (DATATYPE_LONG          = 256)
 !
 !  Chunks
 !
