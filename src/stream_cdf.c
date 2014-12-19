@@ -867,8 +867,8 @@ int cdfDefTimeBounds(int fileID, int nctimevarid, int nctimedimid, char* taxis_n
 
   /* fprintf(stderr, "time has bounds\n"); */
 
-  if ( nc_inq_dimid(fileID, "nb2", &dims[1]) != NC_NOERR )
-    cdf_def_dim(fileID, "nb2", 2, &dims[1]);
+  if ( nc_inq_dimid(fileID, "bnds", &dims[1]) != NC_NOERR )
+    cdf_def_dim(fileID, "bnds", 2, &dims[1]);
 
   if ( taxis->climatology )
     {

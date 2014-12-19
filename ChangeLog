@@ -4,7 +4,8 @@
 
 2014-12-19  Uwe Schulzweida
 
-	* netCDF: renamed bounds dimension from nv2 to bnds
+	* netCDF: renamed coordinate bounds dimension from nv2 to bnds
+	* netCDF: renamed time bounds dimension from nb2 to bnds
 
 2014-12-11  Uwe Schulzweida
 
