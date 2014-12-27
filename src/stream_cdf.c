@@ -417,9 +417,9 @@ void cdfGetAttText(int fileID, int ncvarid, char *attname, int attlen, char *att
         {
           cdf_get_att_text(fileID, ncvarid, attname, attbuf);
 
-          attbuf[nc_attlen++] = 0;
+          if ( (int) nc_attlen > (attlen-1) ) nc_attlen = (size_t)(attlen-1);
 
-          if ( (int) nc_attlen > attlen ) nc_attlen = (size_t)attlen;
+          attbuf[nc_attlen++] = 0;
           memcpy(atttext, attbuf, nc_attlen);
         }
       else
@@ -5087,13 +5087,13 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
             }
           else if ( strcmp(attname, "trunc_type") == 0 && xtypeIsText(atttype) )
             {
-              cdfGetAttText(ncid, ncvarid, attname, attstringlen-1, attstring);
+              cdfGetAttText(ncid, ncvarid, attname, attstringlen, attstring);
               if ( memcmp(attstring, "Triangular", attlen) == 0 )
                 ncvars[ncvarid].gridtype = GRID_SPECTRAL;
             }
           else if ( strcmp(attname, "grid_type") == 0 && xtypeIsText(atttype) )
             {
-              cdfGetAttText(ncid, ncvarid, attname, attstringlen-1, attstring);
+              cdfGetAttText(ncid, ncvarid, attname, attstringlen, attstring);
               strtolower(attstring);
 
               if      ( strcmp(attstring, "gaussian reduced") == 0 )
@@ -5136,7 +5136,7 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
             }
           else if ( strcmp(attname, "level_type") == 0 && xtypeIsText(atttype) )
             {
-              cdfGetAttText(ncid, ncvarid, attname, attstringlen-1, attstring);
+              cdfGetAttText(ncid, ncvarid, attname, attstringlen, attstring);
               strtolower(attstring);
 
               if      ( strcmp(attstring, "toa") == 0 )
@@ -5209,7 +5209,7 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
             {
               int status, ncboundsid;
 
-              cdfGetAttText(ncid, ncvarid, attname, attstringlen-1, attstring);
+              cdfGetAttText(ncid, ncvarid, attname, attstringlen, attstring);
 
               status = nc_inq_varid(ncid, attstring, &ncboundsid);
 
@@ -5227,7 +5227,7 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
             {
               int status, ncboundsid;
 
-              cdfGetAttText(ncid, ncvarid, attname, attstringlen-1, attstring);
+              cdfGetAttText(ncid, ncvarid, attname, attstringlen, attstring);
 
               status = nc_inq_varid(ncid, attstring, &ncboundsid);
 
@@ -5244,7 +5244,7 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
             {
               char *pstring, *cell_measures = NULL, *cell_var = NULL;
 
-              cdfGetAttText(ncid, ncvarid, attname, attstringlen-1, attstring);
+              cdfGetAttText(ncid, ncvarid, attname, attstringlen, attstring);
               pstring = attstring;
 
               while ( isspace((int) *pstring) ) pstring++;
@@ -5285,7 +5285,7 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
             {
               char *pstring, *xvarname = NULL, *yvarname = NULL;
 
-              cdfGetAttText(ncid, ncvarid, attname, attstringlen-1, attstring);
+              cdfGetAttText(ncid, ncvarid, attname, attstringlen, attstring);
               pstring = attstring;
 
               while ( isspace((int) *pstring) ) pstring++;
@@ -5313,7 +5313,7 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
               int dimvarid;
               extern int cdiIgnoreAttCoordinates;
 
-              cdfGetAttText(ncid, ncvarid, attname, attstringlen-1, attstring);
+              cdfGetAttText(ncid, ncvarid, attname, attstringlen, attstring);
               pstring = attstring;
 
               for ( i = 0; i < MAX_COORDVARS; i++ )
@@ -5351,7 +5351,7 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
               int dimvarid;
               extern int cdiIgnoreAttCoordinates;
 
-              cdfGetAttText(ncid, ncvarid, attname, attstringlen-1, attstring);
+              cdfGetAttText(ncid, ncvarid, attname, attstringlen, attstring);
               pstring = attstring;
 
               for ( i = 0; i < MAX_AUXVARS; i++ )
@@ -5386,7 +5386,7 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
               int status;
               int nc_gmap_id;
 
-              cdfGetAttText(ncid, ncvarid, attname, attstringlen-1, attstring);
+              cdfGetAttText(ncid, ncvarid, attname, attstringlen, attstring);
 
               status = nc_inq_varid(ncid, attstring, &nc_gmap_id);
               if ( status == NC_NOERR )
@@ -5401,7 +5401,7 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
             }
           else if ( strcmp(attname, "positive") == 0 && xtypeIsText(atttype) )
             {
-              cdfGetAttText(ncid, ncvarid, attname, attstringlen-1, attstring);
+              cdfGetAttText(ncid, ncvarid, attname, attstringlen, attstring);
               strtolower(attstring);
 
               if    ( memcmp(attstring, "down", 4) == 0 ) ncvars[ncvarid].positive = POSITIVE_DOWN;
@@ -5485,7 +5485,7 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
             }
           else if ( strcmp(attname, "_Unsigned") == 0 && xtypeIsText(atttype) )
             {
-              cdfGetAttText(ncid, ncvarid, attname, attstringlen-1, attstring);
+              cdfGetAttText(ncid, ncvarid, attname, attstringlen, attstring);
               strtolower(attstring);
 
               if ( memcmp(attstring, "true", 4) == 0 )
@@ -5501,7 +5501,7 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
             }
           else if ( strcmp(attname, "cdi") == 0 && xtypeIsText(atttype) )
             {
-	      cdfGetAttText(ncid, ncvarid, attname, attstringlen-1, attstring);
+	      cdfGetAttText(ncid, ncvarid, attname, attstringlen, attstring);
 	      strtolower(attstring);
 
 	      if ( memcmp(attstring, "ignore", 6) == 0 )
@@ -5512,7 +5512,7 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
             }
           else if ( strcmp(attname, "axis") == 0 && xtypeIsText(atttype) )
             {
-              cdfGetAttText(ncid, ncvarid, attname, attstringlen-1, attstring);
+              cdfGetAttText(ncid, ncvarid, attname, attstringlen, attstring);
 	      attlen = strlen(attstring);
 
 	      if ( (int) attlen > nvdims )
@@ -5624,7 +5624,7 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
 		}
 	      else if ( attrtype == NC_CHAR )
 		{
-		  cdfGetAttText(ncid, ncvarid, attname, attstringlen-1, attstring);
+		  cdfGetAttText(ncid, ncvarid, attname, attstringlen, attstring);
 		  attstring[attlen] = 0;
 		  printf("txt: %s.%s = %s\n", ncvars[ncvarid].name, attname, attstring);
 		}
@@ -6414,7 +6414,7 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
                       };
                       char attstring[attstringlen];
 
-		      cdfGetAttText(ncvars[ncvarid].ncid, ncvars[ncvarid].gmapid, attname, attstringlen-1, attstring);
+		      cdfGetAttText(ncvars[ncvarid].ncid, ncvars[ncvarid].gmapid, attname, attstringlen, attstring);
 		      strtolower(attstring);
 
 		      if ( strcmp(attstring, "rotated_latitude_longitude") == 0 )
@@ -7010,7 +7010,7 @@ void define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, 
 		}
 	      else if ( xtypeIsText(attrtype) )
 		{
-		  cdfGetAttText(ncid, ncvarid, attname, attstringlen-1, attstring);
+		  cdfGetAttText(ncid, ncvarid, attname, attstringlen, attstring);
 		  vlistDefAttTxt(vlistID, varID, attname, (int)attlen, attstring);
 		}
 	      else
@@ -7108,9 +7108,7 @@ void scan_global_attributes(int fileID, int vlistID, stream_t *streamptr, int ng
   nc_type xtype;
   size_t attlen;
   char attname[CDI_MAX_NAME];
-  enum {
-    attstringlen = 8192,
-  };
+  enum { attstringlen = 65636 };
   char attstring[attstringlen];
   int iatt;
 
@@ -7122,7 +7120,7 @@ void scan_global_attributes(int fileID, int vlistID, stream_t *streamptr, int ng
 
       if ( xtypeIsText(xtype) )
 	{
-	  cdfGetAttText(fileID, NC_GLOBAL, attname, attstringlen-1, attstring);
+	  cdfGetAttText(fileID, NC_GLOBAL, attname, attstringlen, attstring);
 
           size_t attstrlen = strlen(attstring);
 
@@ -7790,7 +7788,7 @@ int cdfInqContents(stream_t *streamptr)
         };
         char attstring[attstringlen];
 
-	cdfGetAttText(fileID, ncvarid, "calendar", attstringlen-1, attstring);
+	cdfGetAttText(fileID, ncvarid, "calendar", attstringlen, attstring);
 	strtolower(attstring);
 
 	if ( memcmp(attstring, "standard", 8)  == 0 ||
