@@ -27,6 +27,7 @@ LT_INIT([pic-only])
 AC_CHECK_TOOL([CC],[gcc],[:])
 AC_PROG_CC_C99
 AM_PROG_CC_C_O
+AC_C_RESTRICT
 AC_PROG_FC
 AS_IF([test -n "$FC" && test "X$FC" != "Xno"],
   [AC_FC_SRCEXT([f90])
