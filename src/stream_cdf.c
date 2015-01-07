@@ -360,22 +360,30 @@ int setBaseTime(const char *timeunits, taxis_t *taxis)
 static
 void cdfGetAttInt(int fileID, int ncvarid, char *attname, int attlen, int *attint)
 {
+  nc_type atttype;
   size_t nc_attlen;
-  int *pintatt;
 
+  *attint = 0;
+
+  cdf_inq_atttype(fileID, ncvarid, attname, &atttype);
   cdf_inq_attlen(fileID, ncvarid, attname, &nc_attlen);
 
-  if ( (int)nc_attlen > attlen )
-    pintatt = (int *) malloc(nc_attlen * sizeof (int));
-  else
-    pintatt = attint;
-
-  cdf_get_att_int(fileID, ncvarid, attname, pintatt);
-
-  if ( (int)nc_attlen > attlen )
+  if ( atttype != NC_CHAR )
     {
-      memcpy(attint, pintatt, (size_t)attlen * sizeof (int));
-      free(pintatt);
+      int *pintatt = NULL;
+
+      if ( (int)nc_attlen > attlen )
+        pintatt = (int *) malloc(nc_attlen * sizeof (int));
+      else
+        pintatt = attint;
+
+      cdf_get_att_int(fileID, ncvarid, attname, pintatt);
+
+      if ( (int)nc_attlen > attlen )
+        {
+          memcpy(attint, pintatt, (size_t)attlen * sizeof (int));
+          free(pintatt);
+        }
     }
 }
 
@@ -383,7 +391,7 @@ static
 void cdfGetAttDouble(int fileID, int ncvarid, char *attname, int attlen, double *attdouble)
 {
   nc_type atttype;
-  size_t nc_attlen = 0;
+  size_t nc_attlen;
 
   *attdouble = 0;
 
