@@ -382,22 +382,30 @@ void cdfGetAttInt(int fileID, int ncvarid, char *attname, int attlen, int *attin
 static
 void cdfGetAttDouble(int fileID, int ncvarid, char *attname, int attlen, double *attdouble)
 {
-  size_t nc_attlen;
-  double *pdoubleatt;
+  nc_type atttype;
+  size_t nc_attlen = 0;
 
+  *attdouble = 0;
+
+  cdf_inq_atttype(fileID, ncvarid, attname, &atttype);
   cdf_inq_attlen(fileID, ncvarid, attname, &nc_attlen);
 
-  if ( (int)nc_attlen > attlen )
-    pdoubleatt = (double *) malloc(nc_attlen * sizeof (double));
-  else
-    pdoubleatt = attdouble;
-
-  cdf_get_att_double(fileID, ncvarid, attname, pdoubleatt);
-
-  if ( (int)nc_attlen > attlen )
+  if ( atttype != NC_CHAR )
     {
-      memcpy(attdouble, pdoubleatt, (size_t)attlen * sizeof (double));
-      free(pdoubleatt);
+      double *pdoubleatt = NULL;
+
+      if ( (int)nc_attlen > attlen )
+        pdoubleatt = (double *) malloc(nc_attlen * sizeof (double));
+      else
+        pdoubleatt = attdouble;
+
+      cdf_get_att_double(fileID, ncvarid, attname, pdoubleatt);
+
+      if ( (int)nc_attlen > attlen )
+        {
+          memcpy(attdouble, pdoubleatt, (size_t)attlen * sizeof (double));
+          free(pdoubleatt);
+        }
     }
 }
 
