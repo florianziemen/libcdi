@@ -1,6 +1,10 @@
-2015-01-08  Uwe Schulzweida
+2015-01-22  Uwe Schulzweida
 
 	* Version 1.6.8 released
+
+2015-01-09  Uwe Schulzweida
+
+	* cdi_create_records: the contents of unused records must not be interpreted (bug fix) [patch from Nathanael Huebbe]
 
 2014-12-19  Uwe Schulzweida
 
