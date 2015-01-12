@@ -4542,10 +4542,8 @@ void cdfCreateRecords(stream_t *streamptr, int tsID)
     }
   else
     {
-      printf("nallocrecs1 %d\n", streamptr->tsteps[1].nallrecs);
-      printf("records %p\n", streamptr->tsteps[1].records);
-
       if ( streamptr->tsteps[1].records == 0 ) cdfCreateRecords(streamptr, 1);
+
       nvrecs = streamptr->tsteps[1].nrecs;
 
       streamptr->nrecs += nvrecs;
