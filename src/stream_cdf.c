@@ -4458,37 +4458,37 @@ static
 void cdfCreateRecords(stream_t *streamptr, int tsID)
 {
   int varID, levelID, recID, vrecID, zaxisID;
-  int nvars, nlev, nrecs, nvrecs;
-  record_t *records = NULL;
-  int *recIDs = NULL;
-  int vlistID;
+  int nlev, nvrecs;
 
-  vlistID  = streamptr->vlistID;
+  int vlistID  = streamptr->vlistID;
 
   if ( tsID < 0 || (tsID >= streamptr->ntsteps && tsID > 0) ) return;
 
   if ( streamptr->tsteps[tsID].nallrecs > 0 ) return;
 
+  tsteps_t* sourceTstep = streamptr->tsteps;
+  tsteps_t* destTstep = sourceTstep + tsID;
+
+  int nvars = vlistNvars(vlistID);
+  int nrecs = vlistNrecs(vlistID);
+
+  if ( nrecs <= 0 ) return;
+
   if ( tsID == 0 )
     {
-      nvars = vlistNvars(vlistID);
-      nrecs = vlistNrecs(vlistID);
+      nvrecs = nrecs; /* use all records at first timestep */
 
       streamptr->nrecs += nrecs;
 
-      if ( nrecs > 0 )
-        records = (record_t *)xmalloc((size_t)nrecs * sizeof (record_t));
-      streamptr->tsteps[tsID].records    = records;
-      streamptr->tsteps[tsID].nrecs      = nrecs;
-      streamptr->tsteps[tsID].nallrecs   = nrecs;
-      streamptr->tsteps[tsID].recordSize = nrecs;
-      streamptr->tsteps[tsID].curRecID   = UNDEFID;
+      destTstep->records    = (record_t *)xmalloc((size_t)nrecs*sizeof(record_t));
+      destTstep->nrecs      = nrecs;
+      destTstep->nallrecs   = nrecs;
+      destTstep->recordSize = nrecs;
+      destTstep->curRecID   = UNDEFID;
+      destTstep->recIDs     = (int *)xmalloc((size_t)nvrecs*sizeof (int));;
+      for ( recID = 0; recID < nvrecs; recID++ ) destTstep->recIDs[recID] = recID;
 
-      nvrecs = nrecs; /* use all records at first timestep */
-      if ( nvrecs > 0 ) recIDs = (int *)xmalloc((size_t)nvrecs * sizeof (int));
-      streamptr->tsteps[tsID].recIDs     = recIDs;
-      for ( recID = 0; recID < nvrecs; recID++ )
-        recIDs[recID] = recID;
+      record_t *records = destTstep->records;
 
       recID = 0;
       for ( varID = 0; varID < nvars; varID++ )
@@ -4506,9 +4506,6 @@ void cdfCreateRecords(stream_t *streamptr, int tsID)
     }
   else if ( tsID == 1 )
     {
-      nvars = vlistNvars(vlistID);
-      nrecs = vlistNrecs(vlistID);
-
       nvrecs = 0;
       for ( varID = 0; varID < nvars; varID++ )
         {
@@ -4521,58 +4518,49 @@ void cdfCreateRecords(stream_t *streamptr, int tsID)
 
       streamptr->nrecs += nvrecs;
 
-      records = (record_t *) malloc((size_t)nrecs * sizeof (record_t));
-      streamptr->tsteps[tsID].records    = records;
-      streamptr->tsteps[tsID].nrecs      = nvrecs;
-      streamptr->tsteps[tsID].nallrecs   = nrecs;
-      streamptr->tsteps[tsID].recordSize = nrecs;
-      streamptr->tsteps[tsID].curRecID   = UNDEFID;
+      destTstep->records    = (record_t *) xmalloc((size_t)nrecs*sizeof(record_t));
+      destTstep->nrecs      = nvrecs;
+      destTstep->nallrecs   = nrecs;
+      destTstep->recordSize = nrecs;
+      destTstep->curRecID   = UNDEFID;
 
-      memcpy(streamptr->tsteps[tsID].records,
-             streamptr->tsteps[0].records,
-             (size_t)nrecs * sizeof (record_t));
+      memcpy(destTstep->records, sourceTstep->records, (size_t)nrecs*sizeof(record_t));
 
       if ( nvrecs )
         {
-          recIDs = (int *) malloc((size_t)nvrecs * sizeof (int));
-          streamptr->tsteps[tsID].recIDs     = recIDs;
+          destTstep->recIDs = (int *) xmalloc((size_t)nvrecs * sizeof (int));
           vrecID = 0;
           for ( recID = 0; recID < nrecs; recID++ )
             {
-              varID = records[recID].varID;
+              varID = destTstep->records[recID].varID;
               if ( vlistInqVarTsteptype(vlistID, varID) != TSTEP_CONSTANT )
                 {
-                  recIDs[vrecID++] = recID;
+                  destTstep->recIDs[vrecID++] = recID;
                 }
             }
         }
     }
   else
     {
-      nvars = vlistNvars(vlistID);
-      nrecs = vlistNrecs(vlistID);
+      printf("nallocrecs1 %d\n", streamptr->tsteps[1].nallrecs);
+      printf("records %p\n", streamptr->tsteps[1].records);
 
+      if ( streamptr->tsteps[1].records == 0 ) cdfCreateRecords(streamptr, 1);
       nvrecs = streamptr->tsteps[1].nrecs;
 
       streamptr->nrecs += nvrecs;
 
-      records = (record_t *)xmalloc((size_t)nrecs * sizeof (record_t));
-      streamptr->tsteps[tsID].records    = records;
-      streamptr->tsteps[tsID].nrecs      = nvrecs;
-      streamptr->tsteps[tsID].nallrecs   = nrecs;
-      streamptr->tsteps[tsID].recordSize = nrecs;
-      streamptr->tsteps[tsID].curRecID   = UNDEFID;
+      destTstep->records    = (record_t *) xmalloc((size_t)nrecs*sizeof(record_t));
+      destTstep->nrecs      = nvrecs;
+      destTstep->nallrecs   = nrecs;
+      destTstep->recordSize = nrecs;
+      destTstep->curRecID   = UNDEFID;
 
-      memcpy(streamptr->tsteps[tsID].records,
-             streamptr->tsteps[0].records,
-             (size_t)nrecs * sizeof (record_t));
+      memcpy(destTstep->records, sourceTstep->records, (size_t)nrecs*sizeof(record_t));
 
-      recIDs = (int *) malloc((size_t)nvrecs * sizeof(int));
-      streamptr->tsteps[tsID].recIDs     = recIDs;
+      destTstep->recIDs     = (int *) malloc((size_t)nvrecs * sizeof(int));
 
-      memcpy(streamptr->tsteps[tsID].recIDs,
-             streamptr->tsteps[1].recIDs,
-             (size_t)nvrecs * sizeof (int));
+      memcpy(destTstep->recIDs, streamptr->tsteps[1].recIDs, (size_t)nvrecs*sizeof(int));
     }
 }
 
