@@ -3399,12 +3399,11 @@ size_t cdfDoInputDataTransformationDP(size_t valueCount, double *data, bool have
   const bool haveOffset   = IS_NOT_EQUAL(offset, 0);
   const bool haveScaleFactor = IS_NOT_EQUAL(scaleFactor, 1);
   size_t missValCount = 0;
-  if (validMin == VALIDMISS)
-    validMin = DBL_MIN;
-  if (validMax == VALIDMISS)
-    validMax = DBL_MAX;
 
-  bool haveRangeCheck = (validMax != DBL_MAX) | (validMin != DBL_MIN);
+  if ( IS_EQUAL(validMin, VALIDMISS) ) validMin = DBL_MIN;
+  if ( IS_EQUAL(validMax, VALIDMISS) ) validMax = DBL_MAX;
+
+  bool haveRangeCheck = (IS_NOT_EQUAL(validMax, DBL_MAX)) | (IS_NOT_EQUAL(validMin,DBL_MIN));
   assert(!haveRangeCheck || haveMissVal);
 
   switch ((int)haveMissVal | ((int)haveScaleFactor << 1)
@@ -3498,12 +3497,10 @@ size_t cdfDoInputDataTransformationSP(size_t valueCount, float *data, bool haveM
   const bool haveScaleFactor = IS_NOT_EQUAL(scaleFactor, 1);
   size_t missValCount = 0;
 
-  if (validMin == VALIDMISS)
-    validMin = DBL_MIN;
-  if (validMax == VALIDMISS)
-    validMax = DBL_MAX;
+  if ( IS_EQUAL(validMin, VALIDMISS) ) validMin = DBL_MIN;
+  if ( IS_EQUAL(validMax, VALIDMISS) ) validMax = DBL_MAX;
 
-  bool haveRangeCheck = (validMax != DBL_MAX) | (validMin != DBL_MIN);
+  bool haveRangeCheck = (IS_NOT_EQUAL(validMax, DBL_MAX)) | (IS_NOT_EQUAL(validMin,DBL_MIN));
   assert(!haveRangeCheck || haveMissVal);
 
   switch ((int)haveMissVal | ((int)haveScaleFactor << 1)
@@ -4556,7 +4553,7 @@ void cdfCreateRecords(stream_t *streamptr, int tsID)
 
       memcpy(destTstep->records, sourceTstep->records, (size_t)nrecs*sizeof(record_t));
 
-      destTstep->recIDs     = (int *) malloc((size_t)nvrecs * sizeof(int));
+      destTstep->recIDs     = (int *) xmalloc((size_t)nvrecs * sizeof(int));
 
       memcpy(destTstep->recIDs, streamptr->tsteps[1].recIDs, (size_t)nvrecs*sizeof(int));
     }
