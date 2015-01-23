@@ -4,7 +4,7 @@
 #  autoconf 2.68
 #  libtool  2.4.2
 
-AC_INIT([cdi], [1.6.8], [https://code.zmaw.de/projects/cdi])
+AC_INIT([cdi], [1.6.8], [http://mpimet.mpg.de/cdi])
 
 echo "configuring ${PACKAGE_NAME} ${PACKAGE_VERSION}"
 
