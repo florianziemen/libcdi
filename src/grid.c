@@ -3020,14 +3020,11 @@ const double *gridInqYboundsPtr(int gridID)
 }
 
 
-void gridPrintKernel(grid_t * gridptr, int opt, FILE *fp)
+void gridPrintKernel(grid_t * gridptr, int index, int opt, FILE *fp)
 {
-  int type;
-  int gridsize, xsize, ysize, xdim, ydim;
-  int trunc;
-  int nbyte0, nbyte;
-  int i;
-  int nvertex, iv;
+  int xdim, ydim;
+  int nbyte;
+  int i, iv;
   unsigned char uuidOfHGrid[CDI_UUID_SIZE];
   int gridID = gridptr->self;
   const double *area    = gridInqAreaPtr(gridID);
@@ -3036,16 +3033,16 @@ void gridPrintKernel(grid_t * gridptr, int opt, FILE *fp)
   const double *xbounds = gridInqXboundsPtr(gridID);
   const double *ybounds = gridInqYboundsPtr(gridID);
 
-  type     = gridInqType(gridID);
-  trunc    = gridInqTrunc(gridID);
-  gridsize = gridInqSize(gridID);
-  xsize    = gridInqXsize(gridID);
-  ysize    = gridInqYsize(gridID);
-  nvertex  = gridInqNvertex(gridID);
+  int type     = gridInqType(gridID);
+  int trunc    = gridInqTrunc(gridID);
+  int gridsize = gridInqSize(gridID);
+  int xsize    = gridInqXsize(gridID);
+  int ysize    = gridInqYsize(gridID);
+  int nvertex  = gridInqNvertex(gridID);
 
-  nbyte0 = 0;
+  int nbyte0 = 0;
   fprintf(fp, "#\n");
-  fprintf(fp, "# gridID %d\n", gridID);
+  fprintf(fp, "# gridID %d\n", index);
   fprintf(fp, "#\n");
   fprintf(fp, "gridtype  = %s\n", gridNamePtr(type));
   fprintf(fp, "gridsize  = %d\n", gridsize);
@@ -3364,11 +3361,11 @@ void gridPrintKernel(grid_t * gridptr, int opt, FILE *fp)
     }
 }
 
-void gridPrint ( int gridID, int opt )
+void gridPrint ( int gridID, int index, int opt )
 {
   grid_t *gridptr = gridID2Ptr(gridID);
 
-  gridPrintKernel ( gridptr, opt, stdout );
+  gridPrintKernel ( gridptr, index, opt, stdout );
 }
 
 
@@ -3380,7 +3377,7 @@ void gridPrintP ( void * voidptr, FILE * fp )
 
   xassert ( gridptr );
 
-  gridPrintKernel ( gridptr , 0, fp );
+  gridPrintKernel ( gridptr , gridptr->self, 0, fp );
 
   fprintf ( fp, "precision = %d\n", gridptr->prec);
   fprintf ( fp, "nd        = %d\n", gridptr->nd );

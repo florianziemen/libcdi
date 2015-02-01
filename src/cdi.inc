@@ -4,7 +4,7 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   December 2014
+! Uwe Schulzweida, MPI-MET, Hamburg,   February 2015
 !
 
       INTEGER    CDI_MAX_NAME          
@@ -1380,6 +1380,7 @@
 
 !                     gridPrint
 !                                    (INTEGER         gridID,
+!                                     INTEGER         index,
 !                                     INTEGER         opt)
       EXTERNAL        gridPrint
 
