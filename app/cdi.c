@@ -845,7 +845,7 @@ int main(int argc, char *argv[])
 	  ngrids = vlistNgrids(vlistID1);
 	  nzaxis = vlistNzaxis(vlistID1);
 	  for ( gridID = 0; gridID < ngrids; gridID++ ) gridPrint(gridID, gridID, 1);
-	  for ( zaxisID = 0; zaxisID < nzaxis; zaxisID++ ) zaxisPrint(zaxisID);
+	  for ( zaxisID = 0; zaxisID < nzaxis; zaxisID++ ) zaxisPrint(zaxisID, zaxisID);
 	}
 
       nvars   = vlistNvars(vlistID1);

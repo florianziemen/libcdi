@@ -1843,7 +1843,8 @@
       EXTERNAL        zaxisResize
 
 !                     zaxisPrint
-!                                    (INTEGER         zaxisID)
+!                                    (INTEGER         zaxisID,
+!                                     INTEGER         index)
       EXTERNAL        zaxisPrint
 
 !                     zaxisDefLevels
