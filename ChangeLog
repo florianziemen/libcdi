@@ -1,6 +1,10 @@
-2015-01-22  Uwe Schulzweida
+2015-02-12  Uwe Schulzweida
 
 	* Version 1.6.8 released
+
+2015-02-02  Uwe Schulzweida
+
+	* cdfCopyRecord: incorrect checksum for freed object [Bug #5461]
 
 2015-01-16  Uwe Schulzweida
 

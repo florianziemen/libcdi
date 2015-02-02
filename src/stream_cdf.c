@@ -620,7 +620,8 @@ void cdfCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
   int memtype  = MEMTYPE_DOUBLE;
   int vlistID1 = streamptr1->vlistID;
   int tsID1    = streamptr1->curTsID;
-  int recID1   = streamptr1->tsteps[tsID1].curRecID;
+  int vrecID   = streamptr1->tsteps[tsID1].curRecID;
+  int recID1   = streamptr1->tsteps[tsID1].recIDs[vrecID];
   int ivarID   = streamptr1->tsteps[tsID1].records[recID1].varID;
   int gridID   = vlistInqVarGrid(vlistID1, ivarID);
   int datasize = gridInqSize(gridID);
@@ -4999,7 +5000,7 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
                   for ( int i = 0; i < nvdims; ++i ) ncvars[ncvarid].chunks[i] = (int)chunks[i];
                   if ( CDI_Debug )
                     {
-                      fprintf(stderr, "\nchunking %d %d %d\nchunks ", storage_in, NC_CONTIGUOUS, NC_CHUNKED);
+                      fprintf(stderr, "%s: chunking %d %d %d  chunks ", name, storage_in, NC_CONTIGUOUS, NC_CHUNKED);
                       for ( int i = 0; i < nvdims; ++i ) fprintf(stderr, "%ld ", chunks[i]);
                       fprintf(stderr, "\n");
                     }
