@@ -4,6 +4,7 @@
 
 2015-02-02  Uwe Schulzweida
 
+	* gribapiDefDateTimeRel: forecastTime [Bug #5435]
 	* cdfCopyRecord: incorrect checksum for freed object [Bug #5461]
 
 2015-01-16  Uwe Schulzweida
