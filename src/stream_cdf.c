@@ -615,6 +615,7 @@ void defineAttributes(int vlistID, int varID, int fileID, int ncvarID)
   free(attBuf);
 }
 
+
 void cdfCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
 {
   int memtype  = MEMTYPE_DOUBLE;
