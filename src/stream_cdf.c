@@ -620,10 +620,10 @@ void cdfCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
 {
   int memtype  = MEMTYPE_DOUBLE;
   int vlistID1 = streamptr1->vlistID;
-  int tsID1    = streamptr1->curTsID;
-  int vrecID   = streamptr1->tsteps[tsID1].curRecID;
-  int recID1   = streamptr1->tsteps[tsID1].recIDs[vrecID];
-  int ivarID   = streamptr1->tsteps[tsID1].records[recID1].varID;
+  int tsID     = streamptr1->curTsID;
+  int vrecID   = streamptr1->tsteps[tsID].curRecID;
+  int recID    = streamptr1->tsteps[tsID].recIDs[vrecID];
+  int ivarID   = streamptr1->tsteps[tsID].records[recID].varID;
   int gridID   = vlistInqVarGrid(vlistID1, ivarID);
   int datasize = gridInqSize(gridID);
 
