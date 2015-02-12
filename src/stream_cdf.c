@@ -208,20 +208,29 @@ int isTimeAxisUnits(const char *timeunits)
 static
 void scanTimeString(const char *ptu, int *rdate, int *rtime)
 {
-  int year, month, day;
+  int year = 1, month = 1, day = 1;
   int hour = 0, minute = 0, second = 0;
-  int v1, v2, v3;
+  int v1 = 1, v2 = 1, v3 = 1;
 
   *rdate = 0;
   *rtime = 0;
 
-  v1 = atoi(ptu);
-  if ( v1 < 0 ) ptu++;
-  while ( isdigit((int) *ptu) ) ptu++;
-  v2 = atoi(++ptu);
-  while ( isdigit((int) *ptu) ) ptu++;
-  v3 = atoi(++ptu);
-  while ( isdigit((int) *ptu) ) ptu++;
+  if ( *ptu )
+    {
+      v1 = atoi(ptu);
+      if ( v1 < 0 ) ptu++;
+      while ( isdigit((int) *ptu) ) ptu++;
+      if ( *ptu )
+        {
+          v2 = atoi(++ptu);
+          while ( isdigit((int) *ptu) ) ptu++;
+          if ( *ptu )
+            {
+              v3 = atoi(++ptu);
+              while ( isdigit((int) *ptu) ) ptu++;
+            }
+        }
+    }
 
   if ( v3 > 999 && v1 < 32 )
     { year = v3; month = v2; day = v1; }
