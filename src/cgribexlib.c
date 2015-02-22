@@ -12173,8 +12173,8 @@ void TEMPLATE(encode_array,T)(int numBits, size_t packStart, size_t datasize,
 #endif
 
       if ( sizeof(T) == sizeof(double) )
-      	{ 
-          grib_encode_array_2byte_double(datasize, lGrib, data, zref, factor, &z);
+      	{
+          grib_encode_array_2byte_double(datasize, lGrib, (const double * restrict) data, zref, factor, &z);
         }
       else
         {
@@ -12644,8 +12644,8 @@ void TEMPLATE(encode_array,T)(int numBits, size_t packStart, size_t datasize,
 #endif
 
       if ( sizeof(T) == sizeof(double) )
-      	{ 
-          grib_encode_array_2byte_double(datasize, lGrib, data, zref, factor, &z);
+      	{
+          grib_encode_array_2byte_double(datasize, lGrib, (const double * restrict) data, zref, factor, &z);
         }
       else
         {
@@ -14220,7 +14220,7 @@ void encode_dummy(void)
   (void) encode_array_unrolled_double(0, 0, 0, NULL, NULL, 0, 0, NULL);
   (void) encode_array_unrolled_float(0, 0, 0, NULL, NULL, 0, 0, NULL);
 }
-static const char grb_libvers[] = "1.7.1" " of ""Feb 22 2015"" ""10:52:27";
+static const char grb_libvers[] = "1.7.1" " of ""Feb 22 2015"" ""11:10:55";
 const char *
 cgribexLibraryVersion(void)
 {
