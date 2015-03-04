@@ -658,10 +658,10 @@ void reshSetStatus ( cdiResH resH, const resOps * ops, int status )
             nspT.idx >= 0 &&
             nspT.idx < resHList[nsp].size );
 
+  xassert ( resHList[nsp].resources );
   listElem = resHList[nsp].resources + nspT.idx;
 
-  xassert ( listElem &&
-            listElem->res.v.ops == ops );
+  xassert ( listElem->res.v.ops == ops );
 
   listElem->status = status;
 
