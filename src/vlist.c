@@ -1176,6 +1176,7 @@ void vlistDefTaxis(int vlistID, int taxisID)
 
   if (vlistptr->taxisID != taxisID)
     {
+      //FIXME: This code seems to leak a taxis_t object if `vlistptr->taxisID` was valid before the call to vlistDefTaxis.
       vlistptr->taxisID = taxisID;
       reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
     }

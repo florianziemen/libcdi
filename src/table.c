@@ -841,7 +841,7 @@ int tableInqParName(int tableID, int code, char *varname)
 	  if ( parTable[tableID].pars[item].id == code )
 	    {
 	      if ( parTable[tableID].pars[item].name )
-		strcpy(varname, parTable[tableID].pars[item].name);
+		strcpy(varname, parTable[tableID].pars[item].name);     //FIXME: This may overrun the supplied buffer!
 	      break;
 	    }
 	}
