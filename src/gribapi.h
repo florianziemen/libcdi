@@ -50,13 +50,14 @@
 const char *gribapiLibraryVersionString(void);
 void gribContainersNew(stream_t * streamptr);
 void gribContainersDelete(stream_t * streamptr);
+
 #ifdef HAVE_LIBGRIB_API
 static inline void *gribHandleNew(int editionNumber)
 {
-  void *gh =
-    (void *)grib_handle_new_from_samples(NULL, (editionNumber == 1) ? "GRIB1" : "GRIB2");
+  void *gh = (void *)grib_handle_new_from_samples(NULL, (editionNumber == 1) ? "GRIB1" : "GRIB2");
 
   if ( gh == NULL ) Error("grib_handle_new_from_samples failed!");
+
   return gh;
 }
 

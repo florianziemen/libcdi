@@ -14,10 +14,6 @@
 #include "zaxis.h"
 
 
-extern void zaxisGetIndexList(int, int *);
-extern void zaxisDefLtype2(int zaxisID, int ltype2);
-
-
 #undef  UNDEFID
 #define UNDEFID -1
 
@@ -907,7 +903,7 @@ int varDefZaxis(int vlistID, int zaxistype, int nlevels, double *levels, int lbo
         {
           int *zaxisIndexList;
           zaxisIndexList = (int *)xmalloc((size_t)nzaxis * sizeof (int));
-          zaxisGetIndexList ( nzaxis, zaxisIndexList );
+          zaxisGetIndexList(nzaxis, zaxisIndexList);
           for ( i = 0; i < nzaxis; i++ )
             {
               zaxisID = zaxisIndexList[i];

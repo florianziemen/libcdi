@@ -2810,8 +2810,6 @@ void grib2DefLevel(grib_handle *gh, int gcinit, long leveltype1, long leveltype2
     }
 }
 
-int zaxisInqLtype2(int zaxisID);
-
 static
 void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID, int levelID, int gcinit)
 {

@@ -373,6 +373,11 @@ void cdiStreamSync_(stream_t *streamptr);
 
 char *cdiUnitNamePtr(int cdi_unit);
 
+void zaxisGetIndexList(int nzaxis, int *zaxisIndexList);
+
+void zaxisDefLtype2(int zaxisID, int ltype2);
+int  zaxisInqLtype2(int zaxisID);
+
 #endif  /* _CDI_INT_H */
 /*
  * Local Variables:
