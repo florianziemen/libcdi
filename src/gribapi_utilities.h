@@ -1,6 +1,8 @@
 #ifndef INCLUDE_GUARD_CDI_GRIBAPI_UTILITIES_H
 #define INCLUDE_GUARD_CDI_GRIBAPI_UTILITIES_H
 
+#ifdef HAVE_LIBGRIB_API
+
 #include "grid.h"
 
 #include <grib_api.h>
@@ -29,5 +31,7 @@ int gribGetDatatype(grib_handle* gribHandle);
 int gribapiGetParam(grib_handle *gh);
 int gribapiGetGridType(grib_handle *gh);
 void gribapiGetGrid(grib_handle *gh, grid_t *grid);
+
+#endif
 
 #endif

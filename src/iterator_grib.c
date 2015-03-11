@@ -1,3 +1,5 @@
+#ifdef HAVE_LIBGRIB_API
+
 #include "iterator_grib.h"
 
 #include "cdi_int.h"
@@ -806,3 +808,5 @@ double cdiGribIterator_inqDoubleDefaultValue(CdiGribIterator* me, const char* ke
 {
   return gribGetDoubleDefault(me->gribHandle, key, defaultValue);
 }
+
+#endif

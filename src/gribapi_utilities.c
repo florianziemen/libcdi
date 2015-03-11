@@ -1,3 +1,5 @@
+#ifdef HAVE_LIBGRIB_API
+
 #include "gribapi_utilities.h"
 
 #include "cdi.h"
@@ -699,3 +701,4 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
   grid->yvals = NULL;
   grid->type  = gridtype;
 }
+#endif

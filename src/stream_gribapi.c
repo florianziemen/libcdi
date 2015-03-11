@@ -714,6 +714,8 @@ static void ensureBufferSize(size_t requiredSize, size_t* curSize, unsigned char
     }
 }
 
+#if  defined  (HAVE_LIBGRIB_API)
+static
 grib_handle* gribapiGetDiskRepresentation(long recsize, size_t* buffersize, unsigned char** gribbuffer, int* outDatatype, int* outCompressionType, long* outUnzipsize)
 {
   int lieee = FALSE;
@@ -763,6 +765,7 @@ grib_handle* gribapiGetDiskRepresentation(long recsize, size_t* buffersize, unsi
     }
   return gh;
 }
+#endif
 
 typedef enum { CHECKTIME_OK, CHECKTIME_SKIP, CHECKTIME_STOP, CHECKTIME_INCONSISTENT } checkTimeResult;
 static checkTimeResult checkTime(stream_t* streamptr, compvar2_t compVar, const DateTime* verificationTime, const DateTime* expectedVTime) {

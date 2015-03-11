@@ -10,7 +10,9 @@
 #include "iterator.h"
 #include "input_file.h"
 
+#ifdef HAVE_LIBGRIB_API
 #include <grib_api.h>
+#endif
 
 typedef struct recordList recordList;
 typedef struct CdiGribIterator {
@@ -20,7 +22,9 @@ typedef struct CdiGribIterator {
   off_t fileOffset;
   unsigned char* gribBuffer;
   size_t bufferSize, curRecordSize;
+#ifdef HAVE_LIBGRIB_API
   grib_handle* gribHandle;
+#endif
 } CdiGribIterator;
 
 CdiIterator* cdiGribIterator_new(const char* path, int filetype);
