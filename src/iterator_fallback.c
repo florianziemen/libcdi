@@ -10,7 +10,7 @@
 #include <stdlib.h>
 
 //For more information on the condestruct() pattern, see comment in src/iterator_grib.c
-static CdiFallbackIterator* condestruct(CdiFallbackIterator* me, const char* path, int filetype)
+static CdiFallbackIterator* cdiFallbackIterator_condestruct(CdiFallbackIterator* me, const char* path, int filetype)
 {
   if(me) goto destruct;
 
@@ -51,7 +51,7 @@ destructSuper:
 
 CdiIterator* cdiFallbackIterator_new(const char* path, int filetype)
 {
-  return &condestruct(NULL, path, filetype)->super;
+  return &cdiFallbackIterator_condestruct(NULL, path, filetype)->super;
 }
 
 //Fetches the info that is published by the variables in the base class from the current field.
@@ -69,7 +69,7 @@ CdiFallbackIterator* cdiFallbackIterator_clone(CdiIterator* super)
   CdiFallbackIterator* me = (CdiFallbackIterator*)super;
 
   //Make another stream for this file. This yields an unadvanced iterator.
-  CdiFallbackIterator* clone = condestruct(NULL, me->path, me->super.filetype);
+  CdiFallbackIterator* clone = cdiFallbackIterator_condestruct(NULL, me->path, me->super.filetype);
   if(!clone) return NULL;
 
   //Point the clone to the same position in the file.
@@ -281,5 +281,5 @@ void cdiFallbackIterator_readFieldF(CdiIterator* super, float* buffer, size_t* n
 void cdiFallbackIterator_delete(CdiIterator* super)
 {
   CdiFallbackIterator* me = (CdiFallbackIterator*)super;
-  condestruct(me, NULL, 0);
+  cdiFallbackIterator_condestruct(me, NULL, 0);
 }

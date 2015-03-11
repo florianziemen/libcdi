@@ -20,7 +20,7 @@
 //The mode of operation depends on whether me is a NULL pointer on entry:
 //If it is NULL, a new object is allocated and constructed, which is returned if construction is successful.
 //If a non-NULL pointer is passed in, the object is destructed and NULL is returned. In this case, the other arguments are ignored.
-static CdiGribIterator* condestruct(CdiGribIterator* me, const char* path, int filetype)
+static CdiGribIterator* cdiGribIterator_condestruct(CdiGribIterator* me, const char* path, int filetype)
 {
   #define super() (&me->super)
   if(me) goto destruct;
@@ -58,7 +58,7 @@ success:
 
 CdiIterator* cdiGribIterator_new(const char* path, int filetype)
 {
-  return &condestruct(NULL, path, filetype)->super;
+  return &cdiGribIterator_condestruct(NULL, path, filetype)->super;
 }
 
 CdiGribIterator* cdiGribIterator_makeClone(CdiIterator* super)
@@ -545,7 +545,7 @@ void cdiGribIterator_readFieldF(CdiIterator* super, float* buffer, size_t* nmiss
 */
 void cdiGribIterator_delete(CdiGribIterator* me)
 {
-  if(me) condestruct(me, NULL, 0);
+  if(me) cdiGribIterator_condestruct(me, NULL, 0);
 }
 
 

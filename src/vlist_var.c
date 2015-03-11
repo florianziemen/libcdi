@@ -16,6 +16,13 @@
 #include "error.h"
 #include "proprietarySystemWorkarounds.h"
 
+#if  defined  (HAVE_LIBGRIB_API)
+#  include "file.h"
+
+#  include <grib_api.h>
+#endif
+
+
 static
 void vlistvarInitEntry(int vlistID, int varID)
 {
@@ -1815,11 +1822,6 @@ void vlistDefVarDblKey(int vlistID, int varID, const char *name, double value)
   (void)value;
 #endif
 }
-
-#if  defined  (HAVE_LIBGRIB_API)
-#  include "file.h"
-#  include "grib_api.h"
-#endif
 
 
 /* cdiClearAdditionalKeys: Clears the list of additional GRIB keys. */

@@ -1,8 +1,9 @@
 #ifndef INCLUDE_GUARD_CDI_GRIBAPI_UTILITIES_H
 #define INCLUDE_GUARD_CDI_GRIBAPI_UTILITIES_H
 
-#include "grib_api.h"
 #include "grid.h"
+
+#include <grib_api.h>
 
 #include <stdbool.h>
 

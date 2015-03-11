@@ -15,7 +15,7 @@ static void cdiInputFile_destruct(CdiInputFile* me);
 //For an explanation of the condestruct() pattern, see the comment in iterator_grib.c
 //path != NULL -> construction
 //path = NULL -> destruction
-static CdiInputFile* condestruct(CdiInputFile* me, const char* path)
+static CdiInputFile* cdiInputFile_condestruct(CdiInputFile* me, const char* path)
 {
   #define super() (&me->super)
   if(!path) goto destruct;
@@ -74,7 +74,7 @@ CdiInputFile* cdiInputFile_make(const char* path)
       else
         {
           result = xmalloc(sizeof(*result));
-          if(!condestruct(result, path))
+          if(!cdiInputFile_condestruct(result, path))
             {
               //An error occured during construction, avoid a memory leak.
               free(result);
@@ -137,5 +137,5 @@ void cdiInputFile_destruct(CdiInputFile* me)
     }
   error = pthread_mutex_unlock(&openFileListLock);
   xassert(!error);
-  condestruct(me, NULL);
+  cdiInputFile_condestruct(me, NULL);
 }

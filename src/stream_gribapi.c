@@ -20,7 +20,8 @@
 #if  defined  (HAVE_LIBGRIB_API)
 #  include "cgribex.h"      /* gribGetSize, gribRead, gribGetZip, GRIB1_LTYPE_99 */
 #  include "gribapi.h"
-#  include "grib_api.h"
+
+#  include <grib_api.h>
 #endif
 
 extern int cdiInventoryMode;
