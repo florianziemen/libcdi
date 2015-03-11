@@ -56,8 +56,16 @@ libcdi_la_SOURCES = 	 \
 	grid.h	 	 \
 	ieg.h	 	 \
 	ieglib.c         \
+	input_file.c	\
+	input_file.h	\
 	institution.c  	 \
 	institution.h  	 \
+	iterator.c       \
+	iterator.h       \
+	iterator_fallback.c \
+	iterator_fallback.h \
+	iterator_grib.c \
+	iterator_grib.h  \
 	model.c        	 \
 	model.h        	 \
 	namespace.c      \
@@ -66,6 +74,8 @@ libcdi_la_SOURCES = 	 \
 	serialize.c	\
 	proprietarySystemWorkarounds.c \
 	proprietarySystemWorkarounds.h \
+	referenceCounting.c \
+	referenceCounting.h \
 	resource_handle.c\
 	resource_handle.h\
 	service.h	 \

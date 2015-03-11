@@ -14,6 +14,7 @@ module mo_cdi
       integer, parameter :: CDI_REAL = 1
       integer, parameter :: CDI_COMP = 2
       integer, parameter :: CDI_BOTH = 3
+      integer, parameter :: CDI_EEOF = -1
       integer, parameter :: CDI_ESYSTEM = -10
       integer, parameter :: CDI_EINVAL = -20
       integer, parameter :: CDI_EUFTYPE = -21
@@ -3317,6 +3318,7 @@ module mo_cdi
       public :: CDI_REAL
       public :: CDI_COMP
       public :: CDI_BOTH
+      public :: CDI_EEOF
       public :: CDI_ESYSTEM
       public :: CDI_EINVAL
       public :: CDI_EUFTYPE

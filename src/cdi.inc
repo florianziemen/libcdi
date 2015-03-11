@@ -31,6 +31,8 @@
 !
       INTEGER    CDI_NOERR             
       PARAMETER (CDI_NOERR              =  0)
+      INTEGER    CDI_EEOF              
+      PARAMETER (CDI_EEOF               = -1)
       INTEGER    CDI_ESYSTEM           
       PARAMETER (CDI_ESYSTEM            = -10)
       INTEGER    CDI_EINVAL            
@@ -377,6 +379,12 @@
       INTEGER    CDI_UUID_SIZE         
       PARAMETER (CDI_UUID_SIZE          = 16)
 !
+!  Structs that are used to return data to the user
+!
+!
+!  Opaque types
+!
+!
 !  CDI control routines
 !
 !                     cdiReset
@@ -691,6 +699,9 @@
 !                                     INTEGER         streamIDsrc)
       EXTERNAL        streamCopyRecord
 
+!
+!  File driven I/O (may yield better performance than using the streamXXX functions)
+!
 !
 !  VLIST routines
 !
@@ -1957,6 +1968,15 @@
       INTEGER         zaxisInqLtype
 !                                    (INTEGER         zaxisID)
       EXTERNAL        zaxisInqLtype
+
+!                     zaxisDefLtype2
+!                                    (INTEGER         zaxisID,
+!                                     INTEGER         ltype)
+      EXTERNAL        zaxisDefLtype2
+
+      INTEGER         zaxisInqLtype2
+!                                    (INTEGER         zaxisID)
+      EXTERNAL        zaxisInqLtype2
 
 !                     zaxisDefVct
 !                                    (INTEGER         zaxisID,

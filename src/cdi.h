@@ -31,6 +31,7 @@ extern "C" {
 /* Error identifier */
 
 #define	 CDI_NOERR        	  0   /* No Error                             */
+#define  CDI_EEOF                -1   /* The end of file was encountered      */
 #define  CDI_ESYSTEM            -10   /* Operating system error               */
 #define  CDI_EINVAL             -20   /* Invalid argument                     */
 #define  CDI_EUFTYPE            -21   /* Unsupported file type                */
@@ -222,6 +223,17 @@ extern "C" {
 /* number of unsigned char needed to store UUID */
 #define  CDI_UUID_SIZE           16
 
+/* Structs that are used to return data to the user */
+
+typedef struct CdiParam { int discipline, category, number; } CdiParam;
+
+
+/* Opaque types */
+
+typedef struct CdiIterator CdiIterator;
+typedef struct CdiGribIterator CdiGribIterator;
+
+
 /* CDI control routines */
 
 void    cdiReset(void);
@@ -357,6 +369,62 @@ void    streamReadRecord(int streamID, double *data_vec, int *nmiss);
 void    streamCopyRecord(int streamIDdest, int streamIDsrc);
 
 void    streamInqGRIBinfo(int streamID, int *intnum, float *fltnum, off_t *bignum);
+
+
+/* File driven I/O (may yield better performance than using the streamXXX functions) */
+
+//Creation & Destruction
+CdiIterator* cdiIterator_new(const char* path);  //Requires a subsequent call to cdiIteratorNextField() to point the iterator at the first field.
+CdiIterator* cdiIterator_clone(CdiIterator* me);
+char* cdiIterator_serialize(CdiIterator* me);  //Returns a malloc'ed string.
+CdiIterator* cdiIterator_deserialize(const char* description);  //description is a string that was returned by cdiIteratorSerialize(). Returns a copy of the original iterator.
+void cdiIterator_print(CdiIterator* me, FILE* stream);
+void cdiIterator_delete(CdiIterator* me);
+
+//Advancing an iterator
+int cdiIterator_nextField(CdiIterator* me);      //Points the iterator at the next field, returns CDI_EEOF if there are no more fields in the file.
+
+//Introspecting metadata
+//All outXXX arguments to these functions may be NULL.
+char* cdiIterator_inqStartTime(CdiIterator* me);      //Returns the (start) time as an ISO-8601 coded string. The caller is responsible to free() the returned string.
+char* cdiIterator_inqEndTime(CdiIterator* me);      //Returns the end time of an integration period as an ISO-8601 coded string, or NULL if there is no end time. The caller is responsible to free() the returned string.
+char* cdiIterator_inqVTime(CdiIterator* me);      //Returns the validity date as an ISO-8601 coded string. The caller is responsible to free() the returned string.
+int cdiIterator_inqLevelType(CdiIterator* me, int levelSelector, char** outName, char** outLongName, char** outStdName, char** outUnit);      //callers are responsible to free() strings that they request
+int cdiIterator_inqLevel(CdiIterator* me, int levelSelector, double* outValue1, double* outValue2);       //outValue2 is only written to if the level is a hybrid level
+int cdiIterator_inqLevelUuid(CdiIterator* me, int* outVgridNumber, int* outLevelCount, unsigned char (*outUuid)[CDI_UUID_SIZE]);   //outUuid must point to a buffer of 16 bytes, returns an error code if no generalized zaxis is used.
+CdiParam cdiIterator_inqParam(CdiIterator* me);
+int cdiIterator_inqDatatype(CdiIterator* me);
+int cdiIterator_inqTsteptype(CdiIterator* me);
+char* cdiIterator_inqVariableName(CdiIterator* me);        //The caller is responsible to free() the returned buffer.
+int cdiIterator_inqGridId(CdiIterator* me);         //The returned id is only valid until the next call to cdiIteratorNextField().
+
+//Reading data
+void cdiIterator_readField(CdiIterator* me, double* data_vec, size_t* nmiss);
+void cdiIterator_readFieldF(CdiIterator* me, float* data_vec, size_t* nmiss);
+//TODO[NH]: Add functions to read partial fields.
+
+
+//Direct access to grib fields
+CdiGribIterator* cdiGribIterator_clone(CdiIterator* me);  //Returns NULL if the associated file is not a GRIB file.
+void cdiGribIterator_delete(CdiGribIterator* me);
+
+//Callthroughs to GRIB-API
+int cdiGribIterator_getLong(CdiGribIterator* me, const char* key, long* value); //Same semantics as grib_get_long().
+int cdiGribIterator_getDouble(CdiGribIterator* me, const char* key, double* value); //Same semantics as grib_get_double().
+int cdiGribIterator_getLength(CdiGribIterator* me, const char* key, size_t* value);     //Same semantics as grib_get_length().
+int cdiGribIterator_getString(CdiGribIterator* me, const char* key, char* value, size_t* length);       //Same semantics as grib_get_string().
+int cdiGribIterator_getSize(CdiGribIterator* me, const char* key, size_t* value);     //Same semantics as grib_get_size().
+int cdiGribIterator_getLongArray(CdiGribIterator* me, const char* key, long* value, size_t* array_size);       //Same semantics as grib_get_long_array().
+int cdiGribIterator_getDoubleArray(CdiGribIterator* me, const char* key, double* value, size_t* array_size);       //Same semantics as grib_get_double_array().
+
+//Convenience functions for accessing GRIB-API keys
+int cdiGribIterator_inqEdition(CdiGribIterator* me);
+long cdiGribIterator_inqLongValue(CdiGribIterator* me, const char* key);   //Aborts on failure to fetch the given key.
+long cdiGribIterator_inqLongDefaultValue(CdiGribIterator* me, const char* key, long defaultValue); //Returns the default value if the given key is not present.
+double cdiGribIterator_inqDoubleValue(CdiGribIterator* me, const char* key);   //Aborts on failure to fetch the given key.
+double cdiGribIterator_inqDoubleDefaultValue(CdiGribIterator* me, const char* key, double defaultValue); //Returns the default value if the given key is not present.
+char* cdiGribIterator_inqStringValue(CdiGribIterator* me, const char* key);        //Returns a malloc'ed string.
+
 
 /* VLIST routines */
 

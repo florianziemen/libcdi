@@ -60,6 +60,12 @@
 /*  number of unsigned char needed to store UUID  */
 
 
+/*  Structs that are used to return data to the user  */
+
+
+/*  Opaque types  */
+
+
 /*  CDI control routines  */
 
 FCALLSCSUB0 (cdiReset, CDIRESET, cdireset)
@@ -142,6 +148,9 @@ FCALLSCSUB3 (streamWriteRecord, STREAMWRITERECORD, streamwriterecord, INT, PDOUB
 FCALLSCSUB3 (streamWriteRecordF, STREAMWRITERECORDF, streamwriterecordf, INT, PFLOAT, INT)
 FCALLSCSUB3 (streamReadRecord, STREAMREADRECORD, streamreadrecord, INT, PDOUBLE, PINT)
 FCALLSCSUB2 (streamCopyRecord, STREAMCOPYRECORD, streamcopyrecord, INT, INT)
+
+/*  File driven I/O (may yield better performance than using the streamXXX functions)  */
+
 
 /*  VLIST routines  */
 
@@ -412,6 +421,8 @@ FCALLSCSUB2 (zaxisDefPositive, ZAXISDEFPOSITIVE, zaxisdefpositive, INT, INT)
 FCALLSCFUN1 (INT, zaxisInqPositive, ZAXISINQPOSITIVE, zaxisinqpositive, INT)
 FCALLSCSUB2 (zaxisDefLtype, ZAXISDEFLTYPE, zaxisdefltype, INT, INT)
 FCALLSCFUN1 (INT, zaxisInqLtype, ZAXISINQLTYPE, zaxisinqltype, INT)
+FCALLSCSUB2 (zaxisDefLtype2, ZAXISDEFLTYPE2, zaxisdefltype2, INT, INT)
+FCALLSCFUN1 (INT, zaxisInqLtype2, ZAXISINQLTYPE2, zaxisinqltype2, INT)
 FCALLSCSUB3 (zaxisDefVct, ZAXISDEFVCT, zaxisdefvct, INT, INT, PDOUBLE)
 FCALLSCSUB2 (zaxisInqVct, ZAXISINQVCT, zaxisinqvct, INT, PDOUBLE)
 FCALLSCFUN1 (INT, zaxisInqVctSize, ZAXISINQVCTSIZE, zaxisinqvctsize, INT)

@@ -233,8 +233,16 @@ src/grid.c -text
 src/grid.h -text
 src/ieg.h -text
 src/ieglib.c -text
+src/input_file.c -text
+src/input_file.h -text
 src/institution.c -text
 src/institution.h -text
+src/iterator.c -text
+src/iterator.h -text
+src/iterator_fallback.c -text
+src/iterator_fallback.h -text
+src/iterator_grib.c -text
+src/iterator_grib.h -text
 src/make_cdilib -text
 src/make_fint.c -text
 src/mo_cdi.f90 -text
@@ -271,6 +279,8 @@ src/pkgconfig/cdi.pc.in -text
 src/pkgconfig/cdipio.pc.in -text
 src/proprietarySystemWorkarounds.c -text
 src/proprietarySystemWorkarounds.h -text
+src/referenceCounting.c -text
+src/referenceCounting.h -text
 src/resource_handle.c -text
 src/resource_handle.h -text
 src/resource_unpack.c -text
