@@ -50,6 +50,8 @@ libcdi_la_SOURCES = 	 \
 	gaussgrid.h	 \
 	gribapi.c  	 \
 	gribapi.h	 \
+	gribapi_utilities.c \
+	gribapi_utilities.h \
 	grid.c           \
 	grid.h	 	 \
 	ieg.h	 	 \
@@ -62,6 +64,8 @@ libcdi_la_SOURCES = 	 \
 	namespace.h      \
 	serialize.h	\
 	serialize.c	\
+	proprietarySystemWorkarounds.c \
+	proprietarySystemWorkarounds.h \
 	resource_handle.c\
 	resource_handle.h\
 	service.h	 \

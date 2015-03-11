@@ -8,6 +8,8 @@
 #include "cdi.h"
 #include "cdi_int.h"
 #include "file.h"
+#include "gribapi_utilities.h"
+#include "stream_grb.h"
 #include "varscan.h"
 #include "datetime.h"
 #include "vlist.h"
@@ -59,42 +61,6 @@ int my_grib_set_string(grib_handle* h, const char* key, const char* val, size_t*
     fprintf(stderr, "grib_set_string(\tgrib_handle* h, \"%s\", \"%s\")\n", key, val);
 
   return grib_set_string(h, key, val, length);
-}
-
-static
-int gribapiGetGridType(grib_handle *gh)
-{
-  int gridtype = GRID_GENERIC;
-  int gribgridtype = -1;
-  long lpar;
-
-    {
-      int status;
-      status = grib_get_long(gh, "gridDefinitionTemplateNumber", &lpar);
-
-      if ( status ==  0 ) gribgridtype = (int) lpar;
-
-      switch (gribgridtype)
-	{
-	case  GRIB2_GTYPE_LATLON:        { GRIB_CHECK(grib_get_long(gh, "Ni", &lpar), 0);
-	                                   if ( lpar == (long) GRIB_MISSING_LONG ) break;
-                                         }
-	case  GRIB2_GTYPE_LATLON_ROT:    { gridtype = GRID_LONLAT;    break; }
-	case  GRIB2_GTYPE_LCC:           { gridtype = GRID_LCC;       break; }
-	case  GRIB2_GTYPE_GAUSSIAN:      { GRIB_CHECK(grib_get_long(gh, "Ni", &lpar), 0);
-	                                   if ( lpar == (long) GRIB_MISSING_LONG )
-					     gridtype = GRID_GAUSSIAN_REDUCED;
-					   else
-					     gridtype = GRID_GAUSSIAN;
-				  	   break;
-                                         }
-	case  GRIB2_GTYPE_SPECTRAL:      { gridtype = GRID_SPECTRAL;  break; }
-	case  GRIB2_GTYPE_GME:           { gridtype = GRID_GME;       break; }
-	case  GRIB2_GTYPE_UNSTRUCTURED:  { gridtype = GRID_UNSTRUCTURED; break; }
-	}
-    }
-
-  return (gridtype);
 }
 
 static
@@ -210,71 +176,13 @@ int gribapiGetEndStep(grib_handle *gh, int startStep, int timeunits)
 }
 
 static
-int gribapiTimeIsFC(grib_handle *gh)
-{
-  long editionNumber;
-  int isFC = TRUE;
-
-  GRIB_CHECK(grib_get_long(gh, "editionNumber", &editionNumber), 0);
-
-  if ( editionNumber > 1 )
-    {
-      long sigofrtime;
-
-      GRIB_CHECK(grib_get_long(gh, "significanceOfReferenceTime", &sigofrtime), 0);
-
-      if ( sigofrtime == 3 ) isFC = FALSE;
-    }
-
-  return (isFC);
-}
-
-static
-int gribapiGetTsteptype(grib_handle *gh)
-{
-  int tsteptype = TSTEP_INSTANT;
-  static int lprint = TRUE;
-
-  if ( gribapiTimeIsFC(gh) )
-    {
-      int status;
-      size_t len = 256;
-      char stepType[256];
-
-      status = grib_get_string(gh, "stepType", stepType, &len);
-      if ( status == 0 && len > 1 && len < 256 )
-	{
-	  if      ( strncmp("instant", stepType, len) == 0 ) tsteptype = TSTEP_INSTANT;
-	  else if ( strncmp("avg",     stepType, len) == 0 ) tsteptype = TSTEP_AVG;
-	  else if ( strncmp("accum",   stepType, len) == 0 ) tsteptype = TSTEP_ACCUM;
-	  else if ( strncmp("max",     stepType, len) == 0 ) tsteptype = TSTEP_MAX;
-	  else if ( strncmp("min",     stepType, len) == 0 ) tsteptype = TSTEP_MIN;
-	  else if ( strncmp("diff",    stepType, len) == 0 ) tsteptype = TSTEP_DIFF;
-	  else if ( strncmp("rms",     stepType, len) == 0 ) tsteptype = TSTEP_RMS;
-	  else if ( strncmp("sd",      stepType, len) == 0 ) tsteptype = TSTEP_SD;
-	  else if ( strncmp("cov",     stepType, len) == 0 ) tsteptype = TSTEP_COV;
-	  else if ( strncmp("ratio",   stepType, len) == 0 ) tsteptype = TSTEP_RATIO;
-	  else if ( lprint )
-	    {
-	      Message("Time stepType %s unsupported, set to instant!", stepType);
-	      lprint = FALSE;
-	    }
-
-	  // printf("stepType: %s %ld %d\n", stepType, len, tsteptype);
-	}
-    }
-
-  return (tsteptype);
-}
-
-static
 void gribapiGetDataDateTime(grib_handle *gh, int *datadate, int *datatime)
 {
   long lpar;
 
   GRIB_CHECK(grib_get_long(gh, "dataDate", &lpar), 0);
   *datadate = (int) lpar;
-  GRIB_CHECK(grib_get_long(gh, "dataTime", &lpar), 0);
+  GRIB_CHECK(grib_get_long(gh, "dataTime", &lpar), 0);  //FIXME: This looses the seconds in GRIB2 files.
   *datatime = (int) lpar*100;
 }
 
@@ -374,330 +282,6 @@ int gribapiGetValidityDateTime(grib_handle *gh, int *vdate, int *vtime)
     }
 
   return (tstepRange);
-}
-
-static
-void gribapiGetGrid(grib_handle *gh, grid_t *grid)
-{
-  long editionNumber;
-  GRIB_CHECK(grib_get_long(gh, "editionNumber", &editionNumber), 0);
-
-  int gridtype = gribapiGetGridType(gh);
-  /*
-  if ( streamptr->unreduced && gridtype == GRID_GAUSSIAN_REDUCED )
-    {
-      gridtype = GRID_GAUSSIAN;
-      ISEC2_NumLon = 2*ISEC2_NumLat;
-      ISEC4_NumValues = ISEC2_NumLon*ISEC2_NumLat;
-    }
-  */
-  memset(grid, 0, sizeof(grid_t));
-
-  size_t datasize;
-  GRIB_CHECK(grib_get_size(gh, "values", &datasize), 0);
-  long numberOfPoints;
-  GRIB_CHECK(grib_get_long(gh, "numberOfPoints", &numberOfPoints), 0);
-
-  switch (gridtype)
-    {
-    case GRID_LONLAT:
-    case GRID_GAUSSIAN:
-      {
-        long lpar;
-	GRIB_CHECK(grib_get_long(gh, "Ni", &lpar), 0);
-        /* FIXME: assert(lpar <= INT_MAX && lpar >= INT_MIN) */
-	int nlon = (int)lpar;
-	GRIB_CHECK(grib_get_long(gh, "Nj", &lpar), 0);
-        /* FIXME: assert(lpar <= INT_MAX && lpar >= INT_MIN) */
-	int nlat = (int)lpar;
-
-	if ( gridtype == GRID_GAUSSIAN )
-          {
-            GRIB_CHECK(grib_get_long(gh, "numberOfParallelsBetweenAPoleAndTheEquator", &lpar), 0);
-            grid->np = (int)lpar;
-          }
-
-	if ( numberOfPoints != nlon*nlat )
-	  Error("numberOfPoints (%ld) and gridSize (%d) differ!", numberOfPoints, nlon*nlat);
-
-        /* FIXME: assert(numberOfPoints <= INT_MAX && numberOfPoints >= INT_MIN) */
-	grid->size  = (int)numberOfPoints;
-	grid->xsize = nlon;
-	grid->ysize = nlat;
-	grid->xinc  = 0;
-	grid->yinc  = 0;
-	grid->xdef  = 0;
-	GRIB_CHECK(grib_get_double(gh, "longitudeOfFirstGridPointInDegrees", &grid->xfirst), 0);
-	GRIB_CHECK(grib_get_double(gh, "longitudeOfLastGridPointInDegrees",  &grid->xlast), 0);
-	GRIB_CHECK(grib_get_double(gh, "latitudeOfFirstGridPointInDegrees",  &grid->yfirst), 0);
-	GRIB_CHECK(grib_get_double(gh, "latitudeOfLastGridPointInDegrees",   &grid->ylast), 0);
-	GRIB_CHECK(grib_get_double(gh, "iDirectionIncrementInDegrees", &grid->xinc), 0);
-	if ( gridtype == GRID_LONLAT )
-	  GRIB_CHECK(grib_get_double(gh, "jDirectionIncrementInDegrees", &grid->yinc), 0);
-
-	if ( IS_EQUAL(grid->xinc, GRIB_MISSING_DOUBLE) ) grid->xinc = 0;
-
-	/* if ( IS_NOT_EQUAL(grid->xfirst, 0) || IS_NOT_EQUAL(grid->xlast, 0) ) */
-	  {
-	    if ( grid->xsize > 1 )
-	      {
-		if ( (grid->xfirst >= grid->xlast) && (grid->xfirst >= 180) ) grid->xfirst -= 360;
-
-		if ( editionNumber <= 1 )
-		  {
-		    /* correct xinc if necessary */
-		    if ( IS_EQUAL(grid->xfirst, 0) && grid->xlast > 354 )
-		      {
-			double xinc = 360. / grid->xsize;
-
-			if ( fabs(grid->xinc-xinc) > 0.0 )
-			  {
-			    grid->xinc = xinc;
-			    if ( CDI_Debug ) Message("set xinc to %g", grid->xinc);
-			  }
-		      }
-		  }
-	      }
-	    grid->xdef = 2;
-	  }
-	grid->ydef = 0;
-        /* if ( IS_NOT_EQUAL(grid->yfirst, 0) || IS_NOT_EQUAL(grid->ylast, 0) ) */
-	  {
-	    if ( grid->ysize > 1 )
-	      {
-		if ( editionNumber <= 1 )
-		  {
-		  }
-	      }
-	    grid->ydef = 2;
-	  }
-	break;
-      }
-    case GRID_GAUSSIAN_REDUCED:
-      {
-	size_t dummy;
-	long *pl;
-
-        long lpar;
-        GRIB_CHECK(grib_get_long(gh, "numberOfParallelsBetweenAPoleAndTheEquator", &lpar), 0);
-        /* FIXME: assert(lpar <= INT_MAX && lpar >= INT_MIN) */
-        grid->np = (int)lpar;
-
-	GRIB_CHECK(grib_get_long(gh, "Nj", &lpar), 0);
-        /* FIXME: assert(lpar <= INT_MAX && lpar >= INT_MIN) */
-	int nlat = (int)lpar;
-
-        /* FIXME: assert(numberOfPoints <= INT_MAX && numberOfPoints >= INT_MIN) */
-	grid->size   = (int)numberOfPoints;
-
-        grid->rowlon = (int *) malloc((size_t)nlat * sizeof (int));
-        pl          = (long *) malloc((size_t)nlat * sizeof (long));
-	dummy       = (size_t)nlat;
-	GRIB_CHECK(grib_get_long_array(gh, "pl", pl, &dummy), 0);
-        /* FIXME: assert(pl[i] >= INT_MIN && pl[i] <= INT_MIN) */
-	for (int i = 0; i < nlat; ++i ) grid->rowlon[i] = (int)pl[i];
-	free(pl);
-
-	grid->ysize  = nlat;
-	grid->xinc   = 0;
-	grid->yinc   = 0;
-	grid->xdef   = 0;
-	GRIB_CHECK(grib_get_double(gh, "longitudeOfFirstGridPointInDegrees", &grid->xfirst), 0);
-	GRIB_CHECK(grib_get_double(gh, "longitudeOfLastGridPointInDegrees",  &grid->xlast), 0);
-	GRIB_CHECK(grib_get_double(gh, "latitudeOfFirstGridPointInDegrees",  &grid->yfirst), 0);
-	GRIB_CHECK(grib_get_double(gh, "latitudeOfLastGridPointInDegrees",   &grid->ylast), 0);
-	GRIB_CHECK(grib_get_double(gh, "iDirectionIncrementInDegrees", &grid->xinc), 0);
-
-	if ( IS_EQUAL(grid->xinc, GRIB_MISSING_DOUBLE) ) grid->xinc = 0;
-
-	/* if ( IS_NOT_EQUAL(grid->xfirst, 0) || IS_NOT_EQUAL(grid->xlast, 0) ) */
-	  {
-	    if ( grid->xsize > 1 )
-	      {
-		if ( (grid->xfirst > grid->xlast) && (grid->xfirst >= 180) ) grid->xfirst -= 360;
-
-		if ( editionNumber <= 1 )
-		  {
-		    /* correct xinc if necessary */
-		    if ( IS_EQUAL(grid->xfirst, 0) && grid->xlast > 354 )
-		      {
-			double xinc = 360. / grid->xsize;
-
-			if ( fabs(grid->xinc-xinc) > 0.0 )
-			  {
-			    grid->xinc = xinc;
-			    if ( CDI_Debug ) Message("set xinc to %g", grid->xinc);
-			  }
-		      }
-		  }
-	      }
-	    grid->xdef = 2;
-	  }
-	grid->ydef  = 0;
-        /* if ( IS_NOT_EQUAL(grid->yfirst, 0) || IS_NOT_EQUAL(grid->ylast, 0) ) */
-	  {
-	    if ( grid->ysize > 1 )
-	      {
-		if ( editionNumber <= 1 )
-		  {
-		  }
-	      }
-	    grid->ydef = 2;
-	  }
-	break;
-      }
-    case GRID_LCC:
-      {
-	int nlon, nlat;
-        long lpar;
-
-	GRIB_CHECK(grib_get_long(gh, "Nx", &lpar), 0);
-	nlon = lpar;
-	GRIB_CHECK(grib_get_long(gh, "Ny", &lpar), 0);
-	nlat = lpar;
-
-	if ( numberOfPoints != nlon*nlat )
-	  Error("numberOfPoints (%d) and gridSize (%d) differ!", (int)numberOfPoints, nlon*nlat);
-
-	grid->size  = numberOfPoints;
-	grid->xsize = nlon;
-	grid->ysize = nlat;
-
-	GRIB_CHECK(grib_get_double(gh, "DxInMetres", &grid->lcc_xinc), 0);
-	GRIB_CHECK(grib_get_double(gh, "DyInMetres", &grid->lcc_yinc), 0);
-	GRIB_CHECK(grib_get_double(gh, "longitudeOfFirstGridPointInDegrees", &grid->lcc_originLon), 0);
-	GRIB_CHECK(grib_get_double(gh, "latitudeOfFirstGridPointInDegrees", &grid->lcc_originLat), 0);
-	GRIB_CHECK(grib_get_double(gh, "LoVInDegrees", &grid->lcc_lonParY), 0);
-	GRIB_CHECK(grib_get_double(gh, "Latin1InDegrees", &grid->lcc_lat1), 0);
-	GRIB_CHECK(grib_get_double(gh, "Latin2InDegrees", &grid->lcc_lat2), 0);
-
-        if ( editionNumber <= 1 )
-          {
-            GRIB_CHECK(grib_get_long(gh, "projectionCenterFlag", &lpar), 0);
-            grid->lcc_projflag  = (int) lpar;
-            GRIB_CHECK(grib_get_long(gh, "scanningMode", &lpar), 0);
-            grid->lcc_scanflag  = (int) lpar;
-          }
-
-	grid->xdef   = 0;
-	grid->ydef   = 0;
-
-	break;
-      }
-    case GRID_SPECTRAL:
-      {
-	size_t len = 256;
-	char typeOfPacking[256];
-	GRIB_CHECK(grib_get_string(gh, "packingType", typeOfPacking, &len), 0);
-	grid->lcomplex = 0;
-	if ( strncmp(typeOfPacking, "spectral_complex", len) == 0 ) grid->lcomplex = 1;
-
-        /* FIXME: assert(datasize >= INT_MIN && datasize <= INT_MAX) */
-	grid->size  = (int)datasize;
-        long lpar;
-	GRIB_CHECK(grib_get_long(gh, "J", &lpar), 0);
-        /* FIXME: assert(lpar >= INT_MIN && lpar <= INT_MAX) */
-	grid->trunc = (int)lpar;
-
-	break;
-      }
-    case GRID_GME:
-      {
-        /* FIXME: assert(numberOfPoints <= INT_MAX && numberOfPoints >= INT_MIN) */
-	grid->size  = (int)numberOfPoints;
-        long lpar;
-        /* FIXME: assert(lpar >= INT_MIN && lpar <= INT_MAX) */
-	if ( grib_get_long(gh, "nd", &lpar) == 0 ) grid->nd  = (int)lpar;
-        /* FIXME: assert(lpar >= INT_MIN && lpar <= INT_MAX) */
-	if ( grib_get_long(gh, "Ni", &lpar) == 0 ) grid->ni  = (int)lpar;
-        /* FIXME: assert(lpar >= INT_MIN && lpar <= INT_MAX) */
-	if ( grib_get_long(gh, "n2", &lpar) == 0 ) grid->ni2 = (int)lpar;
-        /* FIXME: assert(lpar >= INT_MIN && lpar <= INT_MAX) */
-	if ( grib_get_long(gh, "n3", &lpar) == 0 ) grid->ni3 = (int)lpar;
-
-	break;
-      }
-    case GRID_UNSTRUCTURED:
-      {
-        unsigned char uuid[CDI_UUID_SIZE];
-    	/*
-        char reference_link[8192];
-        size_t len = sizeof(reference_link);
-        reference_link[0] = 0;
-         */
-
-        /* FIXME: assert(numberOfPoints <= INT_MAX && numberOfPoints >= INT_MIN) */
-    	grid->size  = (int)numberOfPoints;
-        long lpar;
-        if ( grib_get_long(gh, "numberOfGridUsed", &lpar) == 0 )
-          {
-            /* FIXME: assert(lpar <= INT_MAX && lpar >= INT_MIN) */
-            grid->number   = (int)lpar;
-            /* FIXME: assert(lpar <= INT_MAX && lpar >= INT_MIN) */
-            if ( grib_get_long(gh, "numberOfGridInReference", &lpar) == 0 )
-              grid->position = (int)lpar;
-            /*
-            if ( grib_get_string(gh, "gridDescriptionFile", reference_link, &len) == 0 )
-              {
-                if ( strncmp(reference_link, "file://", 7) == 0 )
-                  grid->reference = strdupx(reference_link);
-              }
-            */
-            size_t len = (size_t)CDI_UUID_SIZE;
-            if ( grib_get_bytes(gh, "uuidOfHGrid", uuid, &len) == 0)
-              {
-                memcpy(grid->uuid, uuid, CDI_UUID_SIZE);
-              }
-          }
-	break;
-      }
-    case GRID_GENERIC:
-      {
-	int nlon = 0, nlat = 0;
-        long lpar;
-        /* FIXME: assert(lpar <= INT_MAX && lpar >= INT_MIN) */
-	if ( grib_get_long(gh, "Ni", &lpar) == 0 ) nlon = (int)lpar;
-        /* FIXME: assert(lpar <= INT_MAX && lpar >= INT_MIN) */
-	if ( grib_get_long(gh, "Nj", &lpar) == 0 ) nlat = (int)lpar;
-
-        /* FIXME: assert(numberOfPoints <= INT_MAX && numberOfPoints >= INT_MIN) */
-	grid->size  = (int)numberOfPoints;
-
-	if ( nlon > 0 && nlat > 0 && nlon*nlat == grid->size )
-	  {
-	    grid->xsize = nlon;
-	    grid->ysize = nlat;
-	  }
-	else
-	  {
-	    grid->xsize = 0;
-	    grid->ysize = 0;
-	  }
-
-	break;
-      }
-    default:
-      {
-	Error("Unsupported grid type: %s", gridNamePtr(gridtype));
-	break;
-      }
-    }
-
-  grid->isRotated = FALSE;
-  if ( gribapiGetIsRotated(gh) )
-    {
-      grid->isRotated = TRUE;
-      GRIB_CHECK(grib_get_double(gh, "latitudeOfSouthernPoleInDegrees",  &grid->ypole), 0);
-      GRIB_CHECK(grib_get_double(gh, "longitudeOfSouthernPoleInDegrees", &grid->xpole), 0);
-      GRIB_CHECK(grib_get_double(gh, "angleOfRotation", &grid->angle), 0);
-      /* change from south to north pole */
-      grid->ypole = -grid->ypole;
-      grid->xpole =  grid->xpole - 180;
-    }
-
-  grid->xvals = NULL;
-  grid->yvals = NULL;
-  grid->type  = gridtype;
 }
 
 static
@@ -893,13 +477,25 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
   (*record).ilevel2   = level2;
   (*record).ltype     = leveltype1;
   (*record).tsteptype = tsteptype;
-  memcpy((*record).varname, varname, len);
+
+  //FIXME: This may leave the variable name unterminated (which is the behavior that I found in the code).
+  //       I don't know precisely how this field is used, so I did not change this behavior to avoid regressions,
+  //       but I think that it would be better to at least add a line
+  //
+  //           record->varname[sizeof(record->varname) - 1] = 0;`
+  //
+  //       after the `strncpy()` call.
+  //
+  //       I would consider using strdup() (that requires POSIX-2008 compliance, though), or a similar homebrew approach.
+  //       I. e. kick the fixed size array and allocate enough space, whatever that may be.
+  strncpy(record->varname, varname, sizeof(record->varname));
+  record->varname[sizeof(record->varname) - 1] = 0;
 
   gribapiGetGrid(gh, &grid);
 
   gridID = varDefGrid(vlistID, &grid, 0);
 
-  zaxistype = gribapiGetZaxisType(editionNumber, leveltype1);
+  zaxistype = gribapiGetZaxisType(gribEditionNumber(gh), leveltype1);
 
   switch (zaxistype)
     {
@@ -1079,28 +675,6 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
 	    varID, param, zaxistype, gridID, levelID);
 }
 #endif
-
-static
-int gribapiGetParam(grib_handle *gh)
-{
-  int pdis = 0, pcat = 0, pnum = 0;
-  int param = 0;
-  int status;
-  long lpar;
-
-  GRIB_CHECK(grib_get_long(gh, "discipline", &lpar), 0);
-  pdis = (int) lpar;
-
-  status = grib_get_long(gh, "parameterCategory", &lpar);
-  if ( status == 0 ) pcat = (int) lpar;
-
-  status = grib_get_long(gh, "parameterNumber", &lpar);
-  if ( status == 0 ) pnum = (int) lpar;
-
-  param = cdiEncodeParam(pnum, pcat, pdis);
-
-  return (param);
-}
 
 static
 compvar2_t gribapiVarSet(int param, int level1, int level2, int leveltype, int tsteptype, char *name)
