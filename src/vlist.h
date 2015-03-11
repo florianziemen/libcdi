@@ -5,6 +5,8 @@
 #include "config.h"
 #endif
 
+#include "error.h"
+
 #include <stddef.h>  /* size_t */
 
 #ifndef _CDI_LIMITS_H

@@ -1,6 +1,9 @@
 #ifndef _STREAM_GRIBAPI_H
 #define _STREAM_GRIBAPI_H
 
+#include "cdi_int.h"
+#include "grib_api.h"
+
 int gribapiScanTimestep1(stream_t * streamptr);
 int gribapiScanTimestep2(stream_t * streamptr);
 int gribapiScanTimestep(stream_t * streamptr);
