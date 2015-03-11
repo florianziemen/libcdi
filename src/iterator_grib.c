@@ -1,5 +1,3 @@
-#ifdef HAVE_LIBGRIB_API
-
 #include "iterator_grib.h"
 
 #include "cdi_int.h"
@@ -16,6 +14,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+
+#ifdef HAVE_LIBGRIB_API
 
 //Since the error handling in constructors is usually very closely related to the workings of a destructor,
 //this function combines both functions in one, using a centralized exit.
@@ -127,6 +127,7 @@ char* cdiGribIterator_serialize(CdiIterator* super)
   free(escapedPath);
   return result;
 }
+#endif
 
 CdiGribIterator* cdiGribIterator_deserialize(const char* description)
 {
@@ -170,6 +171,7 @@ fail:
   return NULL;
 }
 
+#ifdef HAVE_LIBGRIB_API
 static void cdiGribIterator_ensureBuffer(CdiGribIterator* me, size_t requiredSize)
 {
   if(me->bufferSize < requiredSize)
