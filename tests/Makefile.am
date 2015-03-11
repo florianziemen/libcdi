@@ -8,9 +8,9 @@ TESTS = cksum_verify \
 	pio_write_run pio_cksum_mpinonb pio_cksum_fpguard \
 	pio_cksum_asynch pio_cksum_writer pio_cksum_cdf \
 	test_resource_copy pio_write_deco2d_run \
-	test_f2003 test_cdf_transformation
+	test_f2003 test_cdf_transformation test_input_file
 check_PROGRAMS = cksum_verify test_grib cksum_write cksum_read pio_write \
-	test_resource_copy cksum_write_chunk pio_write_deco2d
+	test_resource_copy cksum_write_chunk pio_write_deco2d testprog_input_file
 
 if ENABLE_NETCDF
 check_PROGRAMS += test_cdf_write test_cdf_read
@@ -38,7 +38,8 @@ test_resource_copy_mpi_SOURCES = test_resource_copy.c \
 	create_uuid.h create_uuid.c
 test_cdf_write_SOURCES = test_cdf_write.c
 test_cdf_read_SOURCES = test_cdf_read.c
-
+testprog_input_file_SOURCES = testprog_input_file.c
+#
 AM_CFLAGS = $(PPM_CORE_CFLAGS) $(YAXT_CFLAGS)
 if USE_MPI
 pio_write_LDADD = ../src/libcdipio.la $(UUID_C_LIB)

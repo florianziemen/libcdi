@@ -488,8 +488,8 @@ libcdi_la_SOURCES = \
 	grid.h	 	 \
 	ieg.h	 	 \
 	ieglib.c         \
-	input_file.c	 \
-	input_file.h	 \
+	input_file.c	\
+	input_file.h	\
 	institution.c  	 \
 	institution.h  	 \
 	iterator.c       \
@@ -506,8 +506,8 @@ libcdi_la_SOURCES = \
 	serialize.c	\
 	proprietarySystemWorkarounds.c \
 	proprietarySystemWorkarounds.h \
-	referenceCounting.c\
-	referenceCounting.h\
+	referenceCounting.c \
+	referenceCounting.h \
 	resource_handle.c\
 	resource_handle.h\
 	service.h	 \
