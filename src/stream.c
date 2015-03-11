@@ -308,10 +308,10 @@ int streamInqByteorder(int streamID)
 }
 
 
-char *streamFilesuffix(int filetype)
+const char *streamFilesuffix(int filetype)
 {
   // static char *fileSuffix[] = {"", ".grb", ".g2", ".nc", ".nc", ".nc4", ".nc4", ".srv", ".ext", ".ieg"};
-  static char *fileSuffix[] = {"", ".grb", ".grb", ".nc", ".nc", ".nc", ".nc", ".srv", ".ext", ".ieg"};
+  static const char *fileSuffix[] = {"", ".grb", ".grb", ".nc", ".nc", ".nc", ".nc", ".srv", ".ext", ".ieg"};
   int size = (int) (sizeof(fileSuffix)/sizeof(char *));
 
   if ( filetype > 0 && filetype < size )
@@ -321,7 +321,7 @@ char *streamFilesuffix(int filetype)
 }
 
 
-char *streamFilename(int streamID)
+const char *streamFilename(int streamID)
 {
   stream_t *streamptr = stream_to_pointer(streamID);
 

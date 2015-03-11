@@ -225,7 +225,7 @@ extern "C" {
 
 /* Structs that are used to return data to the user */
 
-typedef struct CdiParam { int discipline, category, number; } CdiParam;
+typedef struct CdiParam { int discipline; int category; int number; } CdiParam;
 
 
 /* Opaque types */
@@ -331,8 +331,8 @@ int     streamInqTimestep(int streamID, int tsID);
 /*      PIO: query currently set timestep id  */
 int     streamInqCurTimestepID(int streamID);
 
-char   *streamFilename(int streamID);
-char   *streamFilesuffix(int filetype);
+const char* streamFilename(int streamID);
+const char* streamFilesuffix(int filetype);
 off_t   streamNvals(int streamID);
 
 int     streamInqNvars ( int streamID );
@@ -355,8 +355,7 @@ void    streamWriteVarSliceF(int streamID, int varID, int levelID, const float *
 void    streamReadVarSlice(int streamID, int varID, int levelID, double *data_vec, int *nmiss);
 void    streamReadVarSliceF(int streamID, int varID, int levelID, float *data_vec, int *nmiss);
 
-void    streamWriteVarChunk(int streamID, int varID, const int rect[][2],
-                            const double *data_vec, int nmiss);
+void    streamWriteVarChunk(int streamID, int varID, const int rect[3][2], const double *data_vec, int nmiss);
 
 
 /* STREAM record I/O routines */
@@ -555,7 +554,7 @@ void    vlistDefVarName(int vlistID, int varID, const char *name);
 void    vlistInqVarName(int vlistID, int varID, char *name);
 
 /*      vlistCopyVarName: Safe and convenient version of vlistInqVarName */
-char*   vlistCopyVarName(int vlistId, int varId);
+char* vlistCopyVarName(int vlistId, int varId);
 
 /*      vlistDefVarStdname: Define the standard name of a Variable */
 void    vlistDefVarStdname(int vlistID, int varID, const char *stdname);
@@ -858,7 +857,7 @@ void    gridDefYbounds(int gridID, const double *ybounds_vec);
 /*      gridInqYbounds: Get the bounds of a Y-axis */
 int     gridInqYbounds(int gridID, double *ybounds_vec);
 
-void    gridDefRowlon(int gridID, int nrowlon, const int rowlon_vec[]);
+void    gridDefRowlon(int gridID, int nrowlon, const int* rowlon_vec);
 void    gridInqRowlon(int gridID, int *rowlon_vec);
 void    gridChangeType(int gridID, int gridtype);
 
@@ -1046,7 +1045,7 @@ int     taxisInqType(int taxisID);
 
 int     taxisInqNumavg(int taxisID);
 
-char   *tunitNamePtr(int tunitID);
+const char* tunitNamePtr(int tunitID);
 
 
 /* Institut routines */
@@ -1057,7 +1056,7 @@ int     institutInqNumber(void);
 int     institutInqCenter(int instID);
 int     institutInqSubcenter(int instID);
 const char *institutInqNamePtr(int instID);
-char   *institutInqLongnamePtr(int instID);
+const char* institutInqLongnamePtr(int instID);
 
 /* Model routines */
 
@@ -1075,7 +1074,7 @@ void    tableWrite(const char *filename, int tableID);
 int     tableRead(const char *tablefile);
 int     tableDef(int modelID, int tablenum, const char *tablename);
 
-char   *tableInqNamePtr(int tableID);
+const char* tableInqNamePtr(int tableID);
 void    tableDefEntry(int tableID, int code, const char *name, const char *longname, const char *units);
 
 int     tableInq(int modelID, int tablenum, const char *tablename);
