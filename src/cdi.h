@@ -486,6 +486,9 @@ void    vlistDefVarName(int vlistID, int varID, const char *name);
 /*      vlistInqVarName: Get the name of a Variable */
 void    vlistInqVarName(int vlistID, int varID, char *name);
 
+/*      vlistCopyVarName: Safe and convenient version of vlistInqVarName */
+char*   vlistCopyVarName(int vlistId, int varId);
+
 /*      vlistDefVarStdname: Define the standard name of a Variable */
 void    vlistDefVarStdname(int vlistID, int varID, const char *stdname);
 
