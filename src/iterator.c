@@ -834,7 +834,8 @@ void cdiIterator_readField(CdiIterator* me, double* buffer, size_t* nmiss)
       #ifdef HAVE_LIBGRIB
         case FILETYPE_GRB:
         case FILETYPE_GRB2:
-          return cdiGribIterator_readField(me, buffer, nmiss);
+          cdiGribIterator_readField(me, buffer, nmiss);
+	  return;
       #endif
 
       #ifdef HAVE_LIBNETCDF
@@ -852,8 +853,8 @@ void cdiIterator_readField(CdiIterator* me, double* buffer, size_t* nmiss)
       #ifdef HAVE_LIBIEG
         case FILETYPE_IEG:
       #endif
-          return cdiFallbackIterator_readField(me, buffer, nmiss);
-
+          cdiFallbackIterator_readField(me, buffer, nmiss);
+          return;
       default:
         Error(kUnexpectedFileTypeMessage);
     }
@@ -882,7 +883,8 @@ void cdiIterator_readFieldF(CdiIterator* me, float* buffer, size_t* nmiss)
       #ifdef HAVE_LIBGRIB
         case FILETYPE_GRB:
         case FILETYPE_GRB2:
-          return cdiGribIterator_readFieldF(me, buffer, nmiss);
+          cdiGribIterator_readFieldF(me, buffer, nmiss);
+	  return;
       #endif
 
       #ifdef HAVE_LIBNETCDF
@@ -900,8 +902,8 @@ void cdiIterator_readFieldF(CdiIterator* me, float* buffer, size_t* nmiss)
       #ifdef HAVE_LIBIEG
         case FILETYPE_IEG:
       #endif
-          return cdiFallbackIterator_readFieldF(me, buffer, nmiss);
-
+          cdiFallbackIterator_readFieldF(me, buffer, nmiss);
+          return; 
       default:
         Error(kUnexpectedFileTypeMessage);
     }

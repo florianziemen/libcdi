@@ -843,7 +843,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
       int rstatus = gribRead(fileID, gribbuffer, &readsize);        //Search for next 'GRIB', read the following record, and position file offset after it.
       if ( rstatus ) break;
 
-      int datatype, comptype;
+      int datatype, comptype = 0;
       long unzipsize;
       gh = gribapiGetDiskRepresentation(recsize, &buffersize, &gribbuffer, &datatype, &comptype, &unzipsize);
 
