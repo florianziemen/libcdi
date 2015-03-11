@@ -4,7 +4,7 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   February 2015
+! Uwe Schulzweida, MPI-MET, Hamburg,   March 2015
 !
 
       INTEGER    CDI_MAX_NAME          
@@ -577,14 +577,6 @@
       INTEGER         streamInqCurTimestepID
 !                                    (INTEGER         streamID)
       EXTERNAL        streamInqCurTimestepID
-
-      CHARACTER(80)   streamFilename
-!                                    (INTEGER         streamID)
-      EXTERNAL        streamFilename
-
-      CHARACTER(80)   streamFilesuffix
-!                                    (INTEGER         filetype)
-      EXTERNAL        streamFilesuffix
 
       INTEGER         streamInqNvars
 !                                    (INTEGER         streamID)
@@ -1794,12 +1786,6 @@
 !                                     DOUBLEPRECISION ybounds_vec)
       EXTERNAL        gridInqYbounds
 
-!                     gridDefRowlon
-!                                    (INTEGER         gridID,
-!                                     INTEGER         nrowlon,
-!                                     INTEGER         rowlon_vec)
-      EXTERNAL        gridDefRowlon
-
 !                     gridInqRowlon
 !                                    (INTEGER         gridID,
 !                                     INTEGER         rowlon_vec)
@@ -1968,15 +1954,6 @@
       INTEGER         zaxisInqLtype
 !                                    (INTEGER         zaxisID)
       EXTERNAL        zaxisInqLtype
-
-!                     zaxisDefLtype2
-!                                    (INTEGER         zaxisID,
-!                                     INTEGER         ltype)
-      EXTERNAL        zaxisDefLtype2
-
-      INTEGER         zaxisInqLtype2
-!                                    (INTEGER         zaxisID)
-      EXTERNAL        zaxisInqLtype2
 
 !                     zaxisDefVct
 !                                    (INTEGER         zaxisID,
@@ -2198,10 +2175,6 @@
 !                                    (INTEGER         taxisID)
       EXTERNAL        taxisInqNumavg
 
-      CHARACTER(80)   tunitNamePtr
-!                                    (INTEGER         tunitID)
-      EXTERNAL        tunitNamePtr
-
 !
 !  Institut routines
 !
@@ -2233,10 +2206,6 @@
       CHARACTER(80)   institutInqNamePtr
 !                                    (INTEGER         instID)
       EXTERNAL        institutInqNamePtr
-
-      CHARACTER(80)   institutInqLongnamePtr
-!                                    (INTEGER         instID)
-      EXTERNAL        institutInqLongnamePtr
 
 !
 !  Model routines
@@ -2287,10 +2256,6 @@
 !                                     INTEGER         tablenum,
 !                                     CHARACTER*(*)   tablename)
       EXTERNAL        tableDef
-
-      CHARACTER(80)   tableInqNamePtr
-!                                    (INTEGER         tableID)
-      EXTERNAL        tableInqNamePtr
 
 !                     tableDefEntry
 !                                    (INTEGER         tableID,
