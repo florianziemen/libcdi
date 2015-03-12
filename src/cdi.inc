@@ -296,9 +296,6 @@
 !  Currently, only multiple pairs combined by AND are supported.
 !
 !
-!  subtype attributes wrt. TILES
-!
-!
 !  TIME types
 !
       INTEGER    TIME_CONSTANT         
@@ -2439,7 +2436,7 @@
 !
       INTEGER         subtypeInqTile
 !                                    (INTEGER         subtypeID,
-!                                     INTEGER         identificationNumberOfTile,
+!                                     INTEGER         tileindex,
 !                                     INTEGER         attribute)
       EXTERNAL        subtypeInqTile
 

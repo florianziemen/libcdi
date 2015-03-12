@@ -51,9 +51,6 @@
    Currently, only multiple pairs combined by AND are supported.  */
 
 
-/*  subtype attributes wrt. TILES  */
-
-
 /*  TIME types  */
 
 
