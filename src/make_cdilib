@@ -136,7 +136,8 @@ c="dmemory.c         \
    cdf.c             \
    namespace.c       \
    serialize.c       \
-   resource_handle.c"
+   resource_handle.c \
+   subtype.c"
 
 h="cdi_limits.h resource_handle.h taxis.h dtypes.h file.h service.h extra.h \
    ieg.h cdi.h timebase.h calendar.h basetime.h datetime.h namespace.h \
@@ -145,7 +146,7 @@ h="cdi_limits.h resource_handle.h taxis.h dtypes.h file.h service.h extra.h \
    tablepar.h table.h gaussgrid.h grid.h zaxis.h varscan.h binary.h swap.h \
    service.h stream_srv.h stream_ext.h stream_ieg.h cdf_int.h  \
    cdf.h vlist.h vlist_var.h vlist_att.h model.h institution.h \
-   resource_unpack.h serialize.h stream_fcommon.h"
+   resource_unpack.h serialize.h stream_fcommon.h subtype.h"
 
 #cat $h >> ${PROG}
 #cat $c | grep -v '#include' | grep -v '#  include' >> ${PROG}

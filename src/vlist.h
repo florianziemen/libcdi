@@ -63,12 +63,6 @@ typedef struct
 }
 ensinfo_t;
 
-/* ---------------------------------- */
-/* Local change: 2013-01-28, FP (DWD) */
-/* ---------------------------------- */
-
-/* Length of optional keyword/value pair list */
-#define MAX_OPT_GRIB_ENTRIES 50
 
 
 typedef struct
@@ -108,21 +102,13 @@ typedef struct
   ensinfo_t  *ensdata;      /* Ensemble information */
   cdi_atts_t  atts;
   int         iorank;
-#if  defined  (HAVE_LIBGRIB_API)
-  /* ---------------------------------- */
-  /* Local change: 2013-01-28, FP (DWD) */
-  /* ---------------------------------- */
 
-  /* (Optional) list of keyword/double value pairs */
-  int    opt_grib_dbl_nentries;
-  char*  opt_grib_dbl_keyword[MAX_OPT_GRIB_ENTRIES];
-  int    opt_grib_dbl_update[MAX_OPT_GRIB_ENTRIES];
-  double opt_grib_dbl_val[MAX_OPT_GRIB_ENTRIES];
-  /* (Optional) list of keyword/integer value pairs */
-  int    opt_grib_int_nentries;
-  char*  opt_grib_int_keyword[MAX_OPT_GRIB_ENTRIES];
-  int    opt_grib_int_update[MAX_OPT_GRIB_ENTRIES];
-  int    opt_grib_int_val[MAX_OPT_GRIB_ENTRIES];
+  int         subtypeID;   /* subtype ID for tile-related meta-data, currently for GRIB-API only. */
+
+#if  defined  (HAVE_LIBGRIB_API)
+  /* (Optional) list of keyword/value pairs */
+  int                opt_grib_nentries;
+  opt_key_val_pair_t opt_grib_kvpair[MAX_OPT_GRIB_ENTRIES];
 #endif
 }
 var_t;
@@ -135,6 +121,7 @@ typedef struct
   int         nvars;        /* number of variables                */
   int         ngrids;
   int         nzaxis;
+  int         nsubtypes;    /* no. of variable subtypes (e.g. sets of tiles) */
   long        ntsteps;
   int         taxisID;
   int         tableID;
@@ -143,6 +130,7 @@ typedef struct
   int         varsAllocated;
   int         gridIDs[MAX_GRIDS_PS];
   int         zaxisIDs[MAX_ZAXES_PS];
+  int         subtypeIDs[MAX_SUBTYPES_PS];
   var_t      *vars;
   cdi_atts_t  atts;
 }
@@ -208,6 +196,21 @@ vlistAdd2ZaxisIDs(vlist_t *vlistptr, int zaxisID)
 	Error("Internal limit exceeded: more than %d zaxis.", MAX_ZAXES_PS);
       vlistptr->zaxisIDs[nzaxis] = zaxisID;
       vlistptr->nzaxis++;
+    }
+}
+
+static inline void
+vlistAdd2SubtypeIDs(vlist_t *vlistptr, int subtypeID)
+{
+  int index, nsubs = vlistptr->nsubtypes;
+  for ( index = 0; index < nsubs; index++ )
+    if (vlistptr->subtypeIDs[index] == subtypeID ) break;
+  if ( index == nsubs )
+    {
+      if (nsubs >= MAX_SUBTYPES_PS)
+        Error("Internal limit exceeded: more than %d subs.", MAX_SUBTYPES_PS);
+      ++(vlistptr->nsubtypes);
+      vlistptr->subtypeIDs[nsubs] = subtypeID;
     }
 }
 

@@ -58,20 +58,13 @@ void vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].iorank        = CDI_UNDEFID;
 
 #if  defined  (HAVE_LIBGRIB_API)
-  /* ---------------------------------- */
-  /* Local change: 2013-01-28, FP (DWD) */
-  /* ---------------------------------- */
-
-  vlistptr->vars[varID].opt_grib_dbl_nentries = 0;
-  vlistptr->vars[varID].opt_grib_int_nentries = 0;
+  vlistptr->vars[varID].opt_grib_nentries = 0;
   int i;
   for (i=0; i<MAX_OPT_GRIB_ENTRIES; i++) {
-    vlistptr->vars[varID].opt_grib_int_val[i] =   0;
-    vlistptr->vars[varID].opt_grib_dbl_val[i] = 0.0;
-    vlistptr->vars[varID].opt_grib_int_update[i] = FALSE;
-    vlistptr->vars[varID].opt_grib_dbl_update[i] = FALSE;
-    vlistptr->vars[varID].opt_grib_int_keyword[i] = NULL;
-    vlistptr->vars[varID].opt_grib_dbl_keyword[i] = NULL;
+    vlistptr->vars[varID].opt_grib_kvpair[i].int_val =   0;
+    vlistptr->vars[varID].opt_grib_kvpair[i].dbl_val =   0;
+    vlistptr->vars[varID].opt_grib_kvpair[i].update  = FALSE;
+    vlistptr->vars[varID].opt_grib_kvpair[i].keyword = NULL;
   } // for
 #endif
 }
@@ -143,6 +136,35 @@ void vlistCheckVarID(const char *caller, int vlistID, int varID)
     Errorc("varID %d undefined!", varID);
 }
 
+int vlistDefVarTiles(int vlistID, int gridID, int zaxisID, int tsteptype, int tilesetID)
+{
+  vlist_t *vlistptr = vlist_to_pointer(vlistID);
+  if ( CDI_Debug )
+    Message("gridID = %d  zaxisID = %d  tsteptype = %d", gridID, zaxisID, tsteptype);
+
+  int varID = vlistvarNewEntry(vlistID);
+
+  vlistptr->nvars++;
+  vlistptr->vars[varID].gridID  = gridID;
+  vlistptr->vars[varID].zaxisID = zaxisID;
+  vlistptr->vars[varID].tsteptype = tsteptype;
+  vlistptr->vars[varID].subtypeID = tilesetID;
+
+  if ( tsteptype < 0 )
+    {
+      Message("Unexpected tstep type %d, set to TSTEP_INSTANT!", tsteptype);
+      vlistptr->vars[varID].tsteptype = TSTEP_INSTANT;
+    }
+
+  vlistAdd2GridIDs(vlistptr, gridID);
+  vlistAdd2ZaxisIDs(vlistptr, zaxisID);
+  vlistAdd2SubtypeIDs(vlistptr, tilesetID);
+
+  vlistptr->vars[varID].param = cdiEncodeParam(-(varID + 1), 255, 255);
+  reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
+  return (varID);
+}
+
 /*
 @Function  vlistDefVar
 @Title     Define a Variable
@@ -182,30 +204,8 @@ vlistDestroy(vlistID);
 */
 int vlistDefVar(int vlistID, int gridID, int zaxisID, int tsteptype)
 {
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  if ( CDI_Debug )
-    Message("gridID = %d  zaxisID = %d  tsteptype = %d", gridID, zaxisID, tsteptype);
-
-  int varID = vlistvarNewEntry(vlistID);
-
-  vlistptr->nvars++;
-
-  vlistptr->vars[varID].gridID  = gridID;
-  vlistptr->vars[varID].zaxisID = zaxisID;
-  vlistptr->vars[varID].tsteptype = tsteptype;
-
-  if ( tsteptype < 0 )
-    {
-      Message("Unexpected tstep type %d, set to TSTEP_INSTANT!", tsteptype);
-      vlistptr->vars[varID].tsteptype = TSTEP_INSTANT;
-    }
-
-  vlistAdd2GridIDs(vlistptr, gridID);
-  vlistAdd2ZaxisIDs(vlistptr, zaxisID);
-
-  vlistptr->vars[varID].param = cdiEncodeParam(-(varID + 1), 255, 255);
-  reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
-  return (varID);
+  /* call "vlistDefVarTiles" with a trivial tile index: */
+  return vlistDefVarTiles(vlistID, gridID, zaxisID, tsteptype, CDI_UNDEFID);
 }
 
 void
@@ -348,6 +348,28 @@ int vlistInqVarZaxis(int vlistID, int varID)
 
   return (vlistptr->vars[varID].zaxisID);
 }
+
+
+/*
+@Function  vlistInqVarSubtype
+@Title     Get the Subtype ID of a Variable
+
+@Description
+The function @func{vlistInqVarSubtype} returns the subtype ID of a variable.
+
+@Result
+@func{vlistInqVarSubtype} returns the subtype ID of the variable.
+
+@EndFunction
+*/
+int vlistInqVarSubtype(int vlistID, int varID)
+{
+  vlist_t *vlistptr = vlist_to_pointer(vlistID);
+
+  vlistCheckVarID(__func__, vlistID, varID);
+  return (vlistptr->vars[varID].subtypeID);
+}
+
 
 /*
 @Function  vlistInqVarParam
@@ -1687,9 +1709,7 @@ int vlistInqVarEnsemble( int vlistID, int varID, int *ensID, int *ensCount, int 
   return (status);
 }
 
-/* ---------------------------------- */
-/* Local change: 2013-01-28, FP (DWD) */
-/* ---------------------------------- */
+
 
 /* vlistDefVarIntKey: Set an arbitrary keyword/integer value pair for GRIB API */
 void vlistDefVarIntKey(int vlistID, int varID, const char *name, int value)
@@ -1698,27 +1718,29 @@ void vlistDefVarIntKey(int vlistID, int varID, const char *name, int value)
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
   int idx;
 
-  if ( !vlistptr->locked )
+  if ( vlistptr->locked )
     Error("User defined vlist object (vlistID=%d) isn't allowed!\n"
           "Need a CDI internal vlist object from streamInqVlist(streamID).", vlistID);
 
-  for ( idx=0; idx<vlistptr->vars[varID].opt_grib_int_nentries; idx++)
-    if ( strcmp(name, vlistptr->vars[varID].opt_grib_int_keyword[idx]) == 0 ) break;
+  for ( idx=0; idx<vlistptr->vars[varID].opt_grib_nentries; idx++)
+    if ( (strcmp(name, vlistptr->vars[varID].opt_grib_kvpair[idx].keyword) == 0 ) &&
+         (vlistptr->vars[varID].opt_grib_kvpair[idx].data_type == t_int) )  break;
 
-  if ( idx < vlistptr->vars[varID].opt_grib_int_nentries )
+  if ( idx < vlistptr->vars[varID].opt_grib_nentries )
     {
-      vlistptr->vars[varID].opt_grib_int_val[idx] = value;
-      vlistptr->vars[varID].opt_grib_int_update[idx] = TRUE;
+      vlistptr->vars[varID].opt_grib_kvpair[idx].int_val = value;
+      vlistptr->vars[varID].opt_grib_kvpair[idx].update  = TRUE;
     }
   else
     {
-      idx = vlistptr->vars[varID].opt_grib_int_nentries;
-      vlistptr->vars[varID].opt_grib_int_nentries++;
+      idx = vlistptr->vars[varID].opt_grib_nentries;
+      vlistptr->vars[varID].opt_grib_nentries++;
       if ( idx >= MAX_OPT_GRIB_ENTRIES ) Error("Too many optional keyword/integer value pairs!");
-      vlistptr->vars[varID].opt_grib_int_val[idx] = value;
-      vlistptr->vars[varID].opt_grib_int_update[idx] = TRUE;
+      vlistptr->vars[varID].opt_grib_kvpair[idx].data_type   = t_int;
+      vlistptr->vars[varID].opt_grib_kvpair[idx].int_val     = value;
+      vlistptr->vars[varID].opt_grib_kvpair[idx].update      = TRUE;
       if ( name )
-        vlistptr->vars[varID].opt_grib_int_keyword[idx] = strdupx(name);
+        vlistptr->vars[varID].opt_grib_kvpair[idx].keyword = strdupx(name);
       else
         Error("Internal error, name undefined!");
     }
@@ -1739,27 +1761,29 @@ void vlistDefVarDblKey(int vlistID, int varID, const char *name, double value)
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
   int idx;
 
-  if ( !vlistptr->locked )
+  if ( vlistptr->locked )
     Error("User defined vlist object (vlistID=%d) isn't allowed!\n"
           "Need a CDI internal vlist object from streamInqVlist(streamID).", vlistID);
 
-  for ( idx=0; idx<vlistptr->vars[varID].opt_grib_dbl_nentries; idx++)
-    if ( strcmp(name, vlistptr->vars[varID].opt_grib_dbl_keyword[idx]) == 0 ) break;
+  for ( idx=0; idx<vlistptr->vars[varID].opt_grib_nentries; idx++)
+    if ( (strcmp(name, vlistptr->vars[varID].opt_grib_kvpair[idx].keyword) == 0 ) &&
+         (vlistptr->vars[varID].opt_grib_kvpair[idx].data_type == t_double) )  break;
 
-  if ( idx < vlistptr->vars[varID].opt_grib_dbl_nentries )
+  if ( idx < vlistptr->vars[varID].opt_grib_nentries )
     {
-      vlistptr->vars[varID].opt_grib_dbl_val[idx] = value;
-      vlistptr->vars[varID].opt_grib_dbl_update[idx] = TRUE;
+      vlistptr->vars[varID].opt_grib_kvpair[idx].dbl_val = value;
+      vlistptr->vars[varID].opt_grib_kvpair[idx].update  = TRUE;
     }
   else
     {
-      idx = vlistptr->vars[varID].opt_grib_dbl_nentries;
-      vlistptr->vars[varID].opt_grib_dbl_nentries++;
+      idx = vlistptr->vars[varID].opt_grib_nentries;
+      vlistptr->vars[varID].opt_grib_nentries++;
       if ( idx >= MAX_OPT_GRIB_ENTRIES ) Error("Too many optional keyword/double value pairs!");
-      vlistptr->vars[varID].opt_grib_dbl_val[idx] = value;
-      vlistptr->vars[varID].opt_grib_dbl_update[idx] = TRUE;
+      vlistptr->vars[varID].opt_grib_kvpair[idx].data_type = t_double;
+      vlistptr->vars[varID].opt_grib_kvpair[idx].dbl_val   = value;
+      vlistptr->vars[varID].opt_grib_kvpair[idx].update    = TRUE;
       if ( name )
-        vlistptr->vars[varID].opt_grib_dbl_keyword[idx] = strdupx(name);
+        vlistptr->vars[varID].opt_grib_kvpair[idx].keyword = strdupx(name);
       else
         Error("Internal error, name undefined!");
     }
@@ -1811,15 +1835,9 @@ int vlistHasVarKey(int vlistID, int varID, const char* name)
   /* check if the GRIB key was previously read and is stored */
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
-  for (int i=0; i<vlistptr->vars[varID].opt_grib_dbl_nentries; i++)
+  for (int i=0; i<vlistptr->vars[varID].opt_grib_nentries; i++)
     {
-      if ( strcmp(name, vlistptr->vars[varID].opt_grib_dbl_keyword[i]) == 0 )
-	return 1;
-    }
-
-  for (int i=0; i<vlistptr->vars[varID].opt_grib_int_nentries; i++)
-    {
-      if ( strcmp(name, vlistptr->vars[varID].opt_grib_int_keyword[i]) == 0 )
+      if ( strcmp(name, vlistptr->vars[varID].opt_grib_kvpair[i].keyword) == 0 )
 	return 1;
     }
 #else
@@ -1838,9 +1856,14 @@ double vlistInqVarDblKey(int vlistID, int varID, const char* name)
   /* check if the GRIB key was previously read and is stored in "opt_grib_dbl_val" */
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
-  for (int i=0; i<vlistptr->vars[varID].opt_grib_dbl_nentries; i++)
-    if ( strcmp(name, vlistptr->vars[varID].opt_grib_dbl_keyword[i]) == 0 )
-      return vlistptr->vars[varID].opt_grib_dbl_val[i];
+  for (int i=0; i<vlistptr->vars[varID].opt_grib_nentries; i++)
+    {
+      int isub = subtypeInqActiveIndex(vlistptr->vars[varID].subtypeID);
+      if ( (strcmp(name, vlistptr->vars[varID].opt_grib_kvpair[i].keyword) == 0 ) &&
+           (vlistptr->vars[varID].opt_grib_kvpair[i].data_type == t_double)       &&
+           (vlistptr->vars[varID].opt_grib_kvpair[i].subtype_index == isub) )
+        return vlistptr->vars[varID].opt_grib_kvpair[i].dbl_val;
+    }
 #else
   (void)vlistID;
   (void)varID;
@@ -1858,9 +1881,15 @@ int vlistInqVarIntKey(int vlistID, int varID, const char* name)
   /* check if the GRIB key was previously read and is stored in "opt_grib_int_val" */
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
-  for (int i=0; i<vlistptr->vars[varID].opt_grib_int_nentries; i++)
-    if ( strcmp(name, vlistptr->vars[varID].opt_grib_int_keyword[i]) == 0 )
-      return vlistptr->vars[varID].opt_grib_int_val[i];
+  for (int i=0; i<vlistptr->vars[varID].opt_grib_nentries; i++)
+    {
+      int isub = subtypeInqActiveIndex(vlistptr->vars[varID].subtypeID);
+      if ( (strcmp(name, vlistptr->vars[varID].opt_grib_kvpair[i].keyword) == 0 ) &&
+           (vlistptr->vars[varID].opt_grib_kvpair[i].data_type == t_int)          &&
+           (vlistptr->vars[varID].opt_grib_kvpair[i].subtype_index == isub) )
+        return vlistptr->vars[varID].opt_grib_kvpair[i].int_val;
+    }
+
 #else
   (void)vlistID;
   (void)varID;
@@ -2046,10 +2075,14 @@ void vlistVarUnpack(int vlistID, char * buf, int size, int *position,
   serializeUnpack(buf, size, position,
                   dtempbuf, vlistvar_ndbls, DATATYPE_FLT64, context);
 
+  /* ------------------------------------------- */
+  /* NOTE: Tile sets  currently not supported!!! */
+  /* ------------------------------------------- */
+
   int newvar = vlistDefVar ( vlistID,
 			 namespaceAdaptKey ( tempbuf[1], originNamespace ),
 			 namespaceAdaptKey ( tempbuf[2], originNamespace ),
-			 tempbuf[3]);
+                             tempbuf[3]);
   if (tempbuf[4] || tempbuf[5] || tempbuf[6] || tempbuf[7])
     varname = (char *)xmalloc((size_t)imax(imax(imax(tempbuf[4],tempbuf[5]),
                                                 tempbuf[6]),

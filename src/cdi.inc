@@ -4,7 +4,7 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   February 2015
+! Uwe Schulzweida, MPI-MET, Hamburg,   March 2015
 !
 
       INTEGER    CDI_MAX_NAME          
@@ -285,6 +285,20 @@
       INTEGER    ZAXIS_REFERENCE       
       PARAMETER (ZAXIS_REFERENCE        = 25)
 !
+!  SUBTYPE types
+!
+      INTEGER    MAX_KV_PAIRS_MATCH    
+      PARAMETER (MAX_KV_PAIRS_MATCH     = 10)
+!
+!  Data structure defining a key-value search, possibly with multiple
+!  key-value pairs in combination. 
+!  
+!  Currently, only multiple pairs combined by AND are supported.
+!
+!
+!  subtype attributes wrt. TILES
+!
+!
 !  TIME types
 !
       INTEGER    TIME_CONSTANT         
@@ -385,6 +399,17 @@
       CHARACTER(80)   cdiStringError
 !                                    (INTEGER         cdiErrno)
       EXTERNAL        cdiStringError
+
+!
+!  Wrapper for cdiStringError, since direct use of
+!
+!
+!  cdiStringError results in SEGFAULT with Cray compiler
+!
+!                     cdiGetStringError
+!                                    (INTEGER         vlistID,
+!                                     CHARACTER*(*)   name)
+      EXTERNAL        cdiGetStringError
 
 !                     cdiDebug
 !                                    (INTEGER         debug)
@@ -849,6 +874,14 @@
 !
 !  VLIST VAR routines
 !
+      INTEGER         vlistDefVarTiles
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         gridID,
+!                                     INTEGER         zaxisID,
+!                                     INTEGER         tsteptype,
+!                                     INTEGER         tilesetID)
+      EXTERNAL        vlistDefVarTiles
+
       INTEGER         vlistDefVar
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         gridID,
@@ -2361,6 +2394,59 @@
 !                                    (INTEGER         streamID,
 !                                     CHARACTER*(*)   history)
       EXTERNAL        streamInqHistoryString
+
+!
+!  Subtype routines
+!
+      INTEGER         subtypeCreate
+!                                    (INTEGER         subtype)
+      EXTERNAL        subtypeCreate
+
+!
+!  Gives a textual summary of the variable subtype
+!
+!                     subtypePrint
+!                                    (INTEGER         subtypeID)
+      EXTERNAL        subtypePrint
+
+!
+!  Compares two subtype data structures.
+!
+      INTEGER         subtypeCompare
+!                                    (INTEGER         subtypeID1,
+!                                     INTEGER         subtypeID2)
+      EXTERNAL        subtypeCompare
+
+      INTEGER         subtypeInqSize
+!                                    (INTEGER         subtypeID)
+      EXTERNAL        subtypeInqSize
+
+      INTEGER         subtypeInqActiveIndex
+!                                    (INTEGER         subtypeID)
+      EXTERNAL        subtypeInqActiveIndex
+
+!                     subtypeDefActiveIndex
+!                                    (INTEGER         subtypeID,
+!                                     INTEGER         index)
+      EXTERNAL        subtypeDefActiveIndex
+
+!
+!  Generate a "query object" out of a key-value pair.
+!
+!
+!  Generate an AND-combined "query object" out of two previous
+!  query objects.
+!
+      INTEGER         subtypeInqTile
+!                                    (INTEGER         subtypeID,
+!                                     INTEGER         identificationNumberOfTile,
+!                                     INTEGER         attribute)
+      EXTERNAL        subtypeInqTile
+
+      INTEGER         vlistInqVarSubtype
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID)
+      EXTERNAL        vlistInqVarSubtype
 
 !                     gribapiLibraryVersion
 !                                    (INTEGER         major_version,

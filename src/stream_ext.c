@@ -237,8 +237,11 @@ void extAddRecord(stream_t *streamptr, int param, int level, int xysize,
   */
   leveltype = ZAXIS_GENERIC;
 
+  /* set dummy tiles attributes (so far, only used for GRIB2) */
+  int tile_index;
   varAddRecord(recID, param, gridID, leveltype, 0, level, 0, 0, 0,
-	       extInqDatatype(prec, number), &varID, &levelID, TSTEP_INSTANT, 0, 0, -1, NULL, NULL, NULL, NULL);
+	       extInqDatatype(prec, number), &varID, &levelID, TSTEP_INSTANT, 0, 0, -1, 
+               NULL, NULL, NULL, NULL, dummy_tiles, &tile_index);
 
   (*record).varID   = (short)varID;
   (*record).levelID = (short)levelID;
@@ -725,7 +728,8 @@ void extReadVarDP(stream_t *streamptr, int varID, double *data, int *nmiss)
 
   vlistID  = streamptr->vlistID;
   fileID   = streamptr->fileID;
-  nlevs    = streamptr->vars[varID].nlevs;
+  /* NOTE: tiles are not supported here! */
+  nlevs    = streamptr->vars[varID].recordTable[0].nlevs;
   missval  = vlistInqVarMissval(vlistID, varID);
   gridID   = vlistInqVarGrid(vlistID, varID);
   gridsize = gridInqSize(gridID);
@@ -738,7 +742,8 @@ void extReadVarDP(stream_t *streamptr, int varID, double *data, int *nmiss)
 
   for (levID = 0; levID < nlevs; levID++)
     {
-      recID = streamptr->vars[varID].level[levID];
+      /* NOTE: tiles are not supported here! */
+      recID = streamptr->vars[varID].recordTable[0].recordID[levID];
       recpos = streamptr->tsteps[tsid].records[recID].position;
       fileSetPos(fileID, recpos, SEEK_SET);
       extRead(fileID, extp);
@@ -783,7 +788,8 @@ void extReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, 
 
   vlistID  = streamptr->vlistID;
   fileID   = streamptr->fileID;
-  nlevs    = streamptr->vars[varID].nlevs;
+  /* NOTE: tiles are not supported here! */
+  nlevs    = streamptr->vars[varID].recordTable[0].nlevs;
   missval  = vlistInqVarMissval(vlistID, varID);
   gridID   = vlistInqVarGrid(vlistID, varID);
   gridsize = gridInqSize(gridID);
@@ -795,7 +801,8 @@ void extReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, 
 
   currentfilepos = fileGetPos(fileID);
 
-  recID = streamptr->vars[varID].level[levID];
+  /* NOTE: tiles are not supported here! */
+  recID = streamptr->vars[varID].recordTable[0].recordID[levID];
   recpos = streamptr->tsteps[tsid].records[recID].position;
   fileSetPos(fileID, recpos, SEEK_SET);
   extRead(fileID, extp);

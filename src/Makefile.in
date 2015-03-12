@@ -157,7 +157,7 @@ am_libcdi_la_OBJECTS = basetime.lo binary.lo calendar.lo cdf.lo \
 	stream_fcommon.lo cdi_int.lo stream_record.lo stream_srv.lo \
 	stream_var.lo table.lo taxis.lo timebase.lo tsteps.lo util.lo \
 	varscan.lo version.lo vlist.lo vlist_att.lo vlist_var.lo \
-	zaxis.lo stream.lo swap.lo
+	zaxis.lo stream.lo swap.lo subtype.lo
 libcdi_la_OBJECTS = $(am_libcdi_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -538,7 +538,9 @@ libcdi_la_SOURCES = \
 	zaxis.c		 \
 	zaxis.h		 \
         stream.c         \
-        swap.c
+        swap.c           \
+	subtype.c		 \
+	subtype.h
 
 libcdiresunpack_la_SOURCES = \
 	resource_unpack.c
@@ -769,6 +771,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vlist_att.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vlist_var.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/zaxis.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/subtype.Plo@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

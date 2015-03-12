@@ -12,6 +12,7 @@
 #include "vlist.h"
 #include "grid.h"
 #include "zaxis.h"
+#include "subtype.h"
 
 
 #undef  UNDEFID
@@ -24,6 +25,11 @@ static int numberOfVerticalLevels = 0;
 static int numberOfVerticalGrid = 0;
 static unsigned char uuidVGrid[CDI_UUID_SIZE];
 
+/* data structure specifying tile-related meta-data for the current
+ * record. */
+static var_tile_t tiles;
+
+
 typedef struct
 {
   int      level1;
@@ -33,47 +39,59 @@ typedef struct
 }
 leveltable_t;
 
+
 typedef struct
 {
-  int           param;
-  int           prec;
-  int           tsteptype;
-  int           timave;
-  int           timaccu;
-  int           gridID;
-  int           zaxistype;
-  int           ltype1;     /* GRIB first level type */
-  int           ltype2;     /* GRIB second level type */
-  int           lbounds;
-  int           level_sf;
-  int           level_unit;
-  int           zaxisID;
+  int           subtypeIndex; /* corresponding tile in subtype_t structure (subtype->self) */
+
   unsigned      nlevels;
   int           levelTableSize;
-  leveltable_t *levelTable;
-  int           instID;
-  int           modelID;
-  int           tableID;
-  int           comptype;       // compression type
-  int           complevel;      // compression level
-  int           lmissval;
-  double        missval;
-  char         *name;
-  char         *stdname;
-  char         *longname;
-  char         *units;
-  ensinfo_t    *ensdata;
-  int           typeOfGeneratingProcess;
-  int           productDefinitionTemplate;
+  leveltable_t* levelTable;
+} subtypetable_t;
+
+
+typedef struct
+{
+  int            param;
+  int            prec;
+  int            tsteptype;
+  int            timave;
+  int            timaccu;
+  int            gridID;
+  int            zaxistype;
+  int            ltype1;     /* GRIB first level type */
+  int            ltype2;     /* GRIB second level type */
+  int            lbounds;
+  int            level_sf;
+  int            level_unit;
+  int            zaxisID;
+
+  int            nsubtypes_alloc;
+  int            nsubtypes;
+  subtypetable_t *recordTable;    /* ~ two-dimensional record list [nsubtypes_alloc][levelTableSize] */
+
+  int            instID;
+  int            modelID;
+  int            tableID;
+  int            comptype;       // compression type
+  int            complevel;      // compression level
+  int            lmissval;
+  double         missval;
+  char          *name;
+  char          *stdname;
+  char          *longname;
+  char          *units;
+  ensinfo_t     *ensdata;
+  int            typeOfGeneratingProcess;
+  int            productDefinitionTemplate;
+
+  /* meta-data for specification of tiles (currently only GRIB-API: */
+  subtype_t    *tiles;
+
 #if  defined  (HAVE_LIBGRIB_API)
-  /* (Optional) list of keyword/double value pairs */
-  int           opt_grib_dbl_nentries;
-  char         *opt_grib_dbl_keyword[MAX_OPT_GRIB_ENTRIES];
-  double        opt_grib_dbl_val[MAX_OPT_GRIB_ENTRIES];
-  /* (Optional) list of keyword/integer value pairs */
-  int           opt_grib_int_nentries;
-  char         *opt_grib_int_keyword[MAX_OPT_GRIB_ENTRIES];
-  int           opt_grib_int_val[MAX_OPT_GRIB_ENTRIES];
+  /* (Optional) list of keyword/value pairs */
+  int                opt_grib_nentries;
+  opt_key_val_pair_t opt_grib_kvpair[MAX_OPT_GRIB_ENTRIES];
 #endif
 }
 vartable_t;
@@ -99,9 +117,9 @@ void paramInitEntry(int varID, int param)
   vartable[varID].lbounds        = 0;
   vartable[varID].level_sf       = 0;
   vartable[varID].level_unit     = 0;
-  vartable[varID].levelTable     = NULL;
-  vartable[varID].levelTableSize = 0;
-  vartable[varID].nlevels        = 0;
+  vartable[varID].recordTable    = NULL;
+  vartable[varID].nsubtypes_alloc= 0;
+  vartable[varID].nsubtypes      = 0;
   vartable[varID].instID         = UNDEFID;
   vartable[varID].modelID        = UNDEFID;
   vartable[varID].tableID        = UNDEFID;
@@ -116,27 +134,40 @@ void paramInitEntry(int varID, int param)
   vartable[varID].longname       = NULL;
   vartable[varID].units          = NULL;
   vartable[varID].ensdata        = NULL;
+  vartable[varID].tiles          = NULL;
 }
 
+/* Test if a variable specified by the given meta-data has already
+ * been registered in "vartable". */
 static
-int varGetEntry(int param, int zaxistype, int ltype1, int tsteptype, const char *name)
+  int varGetEntry(int param, int zaxistype, int ltype1, 
+                  int tsteptype, const char *name, var_tile_t tiles)
 {
   int varID;
 
   for ( varID = 0; varID < varTablesize; varID++ )
     {
-      if ( vartable[varID].param      == param       &&
-	   vartable[varID].zaxistype  == zaxistype   &&
-	   vartable[varID].ltype1     == ltype1      &&
-	   vartable[varID].tsteptype  == tsteptype )
+      /* testing for "param" implicitly checks if we are beyond the
+       * current vartable size: */
+      if (vartable[varID].param == param)
         {
-          if ( name && name[0] && vartable[varID].name && vartable[varID].name[0] )
+          int no_of_tiles = tiles.numberOfTiles;
+          if (vartable[varID].tiles != NULL)
+            no_of_tiles = subtypeGetGlobalDataP(vartable[varID].tiles,
+                                                SUBTYPE_ATT_NUMBER_OF_TILES);
+          if ( (vartable[varID].zaxistype  == zaxistype)               &&
+               (vartable[varID].ltype1     == ltype1   )               &&
+               (vartable[varID].tsteptype  == tsteptype)               &&
+               (no_of_tiles == tiles.numberOfTiles) )
             {
-              if ( strcmp(name, vartable[varID].name) == 0 ) return (varID);
-            }
-          else
-            {
-              return (varID);
+              if ( name && name[0] && vartable[varID].name && vartable[varID].name[0] )
+                {
+                  if ( strcmp(name, vartable[varID].name) == 0 ) return (varID);
+                }
+              else
+                {
+                  return (varID);
+                }
             }
         }
     }
@@ -151,14 +182,19 @@ void varFree(void)
 
   for ( varID = 0; varID < nvars; varID++ )
     {
-      if ( vartable[varID].levelTable )
-	free(vartable[varID].levelTable);
+      if ( vartable[varID].recordTable )
+        {
+          for (int isub=0; isub<vartable[varID].nsubtypes_alloc; isub++)
+            free(vartable[varID].recordTable[isub].levelTable);
+          free(vartable[varID].recordTable);
+        }
 
       if ( vartable[varID].name )     free(vartable[varID].name);
       if ( vartable[varID].stdname )  free(vartable[varID].stdname);
       if ( vartable[varID].longname ) free(vartable[varID].longname);
       if ( vartable[varID].units )    free(vartable[varID].units);
       if ( vartable[varID].ensdata )  free(vartable[varID].ensdata);
+      if ( vartable[varID].tiles )    subtypeDestroyPtr(vartable[varID].tiles);
     }
 
   if ( vartable )
@@ -175,15 +211,79 @@ void varFree(void)
   Vctsize = 0;
 }
 
-static
-int levelNewEntry(int varID, int level1, int level2)
+
+/* Search for a tile subtype with subtypeIndex == tile_index. */
+static int tileGetEntry(int varID, int tile_index)
+{
+  int tileID = CDI_UNDEFID;
+  for (int isub=0; isub<vartable[varID].nsubtypes; isub++)
+    if (vartable[varID].recordTable[isub].subtypeIndex == tile_index)
+      return isub;
+  return CDI_UNDEFID;
+}
+
+
+/* Resizes vartable:recordTable data structure, if necessary. */
+static int tileNewEntry(int varID, int tile_index)
+{
+  int tileID = 0;
+  if (vartable[varID].nsubtypes_alloc == 0)
+    {
+      /* create table for the first time. */
+      vartable[varID].nsubtypes_alloc     = 2;
+      vartable[varID].nsubtypes       = 0;
+      vartable[varID].recordTable     =
+        (subtypetable_t *)xmalloc((size_t)vartable[varID].nsubtypes_alloc * sizeof (subtypetable_t));
+      if( vartable[varID].recordTable == NULL )
+        SysError("Allocation of leveltable failed!");
+
+      for (int isub = 0; isub<vartable[varID].nsubtypes_alloc; isub++) {
+	vartable[varID].recordTable[isub].levelTable     = NULL;
+        vartable[varID].recordTable[isub].levelTableSize = 0;
+        vartable[varID].recordTable[isub].nlevels        = 0;
+        vartable[varID].recordTable[isub].subtypeIndex   = CDI_UNDEFID;
+      }
+    }
+  else
+    {
+      /* data structure large enough; find a free entry. */
+      while(tileID <  vartable[varID].nsubtypes_alloc)
+	{
+	  if (vartable[varID].recordTable[tileID].levelTable == NULL) break;
+	  tileID++;
+	}
+    }
+
+  /* If the table overflows, double its size. */
+  if (tileID == vartable[varID].nsubtypes_alloc)
+    {
+      tileID = vartable[varID].nsubtypes_alloc;
+      vartable[varID].nsubtypes_alloc *= 2;
+      vartable[varID].recordTable   =
+        (subtypetable_t *)xrealloc(vartable[varID].recordTable,
+                                   (size_t)vartable[varID].nsubtypes_alloc * sizeof (subtypetable_t));
+      if (vartable[varID].recordTable == NULL)
+        SysError("Reallocation of leveltable failed");
+      for(int isub=tileID; isub<vartable[varID].nsubtypes_alloc; isub++) {
+	vartable[varID].recordTable[isub].levelTable     = NULL;
+        vartable[varID].recordTable[isub].levelTableSize = 0;
+        vartable[varID].recordTable[isub].nlevels        = 0;
+        vartable[varID].recordTable[isub].subtypeIndex   = CDI_UNDEFID;
+      }
+    }
+
+  return tileID;
+}
+
+
+static int levelNewEntry(int varID, int level1, int level2, int tileID)
 {
   int levelID = 0;
   int levelTableSize;
   leveltable_t *levelTable;
 
-  levelTableSize = vartable[varID].levelTableSize;
-  levelTable     = vartable[varID].levelTable;
+  levelTableSize = vartable[varID].recordTable[tileID].levelTableSize;
+  levelTable     = vartable[varID].recordTable[tileID].levelTable;
 
   /*
     Look for a free slot in levelTable.
@@ -203,7 +303,7 @@ int levelNewEntry(int varID, int level1, int level2)
 	}
 
       for( i = 0; i < levelTableSize; i++ )
-	levelTable[i].recID = UNDEFID;
+        levelTable[i].recID = UNDEFID;
     }
   else
     {
@@ -231,16 +331,16 @@ int levelNewEntry(int varID, int level1, int level2)
       levelID = levelTableSize/2;
 
       for( i = levelID; i < levelTableSize; i++ )
-	levelTable[i].recID = UNDEFID;
+        levelTable[i].recID = UNDEFID;
     }
 
   levelTable[levelID].level1   = level1;
   levelTable[levelID].level2   = level2;
   levelTable[levelID].lindex   = levelID;
 
-  vartable[varID].nlevels = (unsigned)levelID+1;
-  vartable[varID].levelTableSize = levelTableSize;
-  vartable[varID].levelTable = levelTable;
+  vartable[varID].recordTable[tileID].nlevels        = (unsigned)levelID+1;
+  vartable[varID].recordTable[tileID].levelTableSize = levelTableSize;
+  vartable[varID].recordTable[tileID].levelTable     = levelTable;
 
   return (levelID);
 }
@@ -270,13 +370,12 @@ int paramNewEntry(int param)
 	}
 
       for( i = 0; i < varTablesize; i++ )
-	{
-	  vartable[i].param = UNDEF_PARAM;
+        {
+          vartable[i].param = UNDEF_PARAM;
 #if  defined  (HAVE_LIBGRIB_API)
-	  vartable[i].opt_grib_int_nentries = 0;
-	  vartable[i].opt_grib_dbl_nentries = 0;
+          vartable[i].opt_grib_nentries = 0;
 #endif
-	}
+        }
     }
   else
     {
@@ -304,13 +403,12 @@ int paramNewEntry(int param)
       varID = varTablesize/2;
 
       for( i = varID; i < varTablesize; i++ )
-	{
-	  vartable[i].param = UNDEF_PARAM;
+        {
+          vartable[i].param = UNDEF_PARAM;
 #if  defined  (HAVE_LIBGRIB_API)
-	  vartable[i].opt_grib_int_nentries = 0;
-	  vartable[i].opt_grib_dbl_nentries = 0;
+          vartable[i].opt_grib_nentries = 0;
 #endif
-	}
+        }
     }
 
   paramInitEntry(varID, param);
@@ -319,16 +417,51 @@ int paramNewEntry(int param)
 }
 
 
+/* Append tile set to a subtype. Return index of the new tile (i.e.
+ * the "entry->self" value). */
+int varInsertTileSubtype(vartable_t *vptr, var_tile_t tiles)
+{
+  /* first, generate a subtype based on the info in "tiles". */
+
+  subtype_t *subtype_ptr;
+  subtypeAllocate(&subtype_ptr, SUBTYPE_TILES);
+  subtypeDefGlobalDataP(subtype_ptr, SUBTYPE_ATT_IDENTIFICATION_NO_OF_ATTR, tiles.identificationNumberOfAttribute);
+  subtypeDefGlobalDataP(subtype_ptr, SUBTYPE_ATT_TILE_CLASSIFICATION      , tiles.tileClassification);
+  subtypeDefGlobalDataP(subtype_ptr, SUBTYPE_ATT_NUMBER_OF_TILES          , tiles.numberOfTiles);
+
+  /* 
+   * Here, we create a tile set for comparison that contains only one
+   * tile/attribute pair (based on "tiles"). 
+   */
+  struct subtype_entry_t *entry = subtypeEntryInsert(subtype_ptr);
+  subtypeDefEntryDataP(entry, SUBTYPE_ATT_NUMBER_OF_ATTR           , tiles.numberOfAttributes);
+  subtypeDefEntryDataP(entry, SUBTYPE_ATT_IDENTIFICATION_NO_OF_TILE, tiles.identificationNumberOfTile);
+  subtypeDefEntryDataP(entry, SUBTYPE_ATT_ATTRIBUTE,                 tiles.attribute);
+
+  if (vptr->tiles == NULL) {
+    vptr->tiles = subtype_ptr;
+    return 0;
+  }
+  else {
+    tilesetInsertP(vptr->tiles, subtype_ptr);
+    subtypeDestroyPtr(subtype_ptr);
+    return vptr->tiles->nentries - 1;
+  }
+  return CDI_UNDEFID;
+}
+
+
 void varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds,
 		  int level1, int level2, int level_sf, int level_unit, int prec,
 		  int *pvarID, int *plevelID, int tsteptype, int numavg, int ltype1, int ltype2,
-		  const char *name, const char *stdname, const char *longname, const char *units)
+		  const char *name, const char *stdname, const char *longname, const char *units,
+                  var_tile_t tiles, int *tile_index)
 {
   int varID = UNDEFID;
   int levelID = -1;
 
   if ( ! (cdiSplitLtype105 == 1 && zaxistype == ZAXIS_HEIGHT) )
-    varID = varGetEntry(param, zaxistype, ltype1, tsteptype, name);
+    varID = varGetEntry(param, zaxistype, ltype1, tsteptype, name, tiles);
 
   if ( varID == UNDEFID )
     {
@@ -342,6 +475,7 @@ void varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds,
       vartable[varID].level_sf   = level_sf;
       vartable[varID].level_unit = level_unit;
       vartable[varID].tsteptype  = tsteptype;
+
       if ( numavg ) vartable[varID].timave = 1;
 
       if ( name )     if ( name[0] )     vartable[varID].name     = strdup(name);
@@ -368,8 +502,22 @@ void varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds,
 
   if ( prec > vartable[varID].prec ) vartable[varID].prec = prec;
 
-  levelID = levelNewEntry(varID, level1, level2);
-  vartable[varID].levelTable[levelID].recID = recID;
+  /* append current tile to tile subtype info. */
+  int this_tile = varInsertTileSubtype(&vartable[varID], tiles);
+  int tileID  = tileGetEntry(varID, this_tile);
+  (*tile_index) = this_tile;
+  if (tileID == CDI_UNDEFID) {
+    tileID = tileNewEntry(varID, this_tile);
+    vartable[varID].recordTable[tileID].subtypeIndex = this_tile;
+    vartable[varID].nsubtypes++;
+  }
+
+  /* append current level to level table info */
+  levelID = levelNewEntry(varID, level1, level2, tileID);
+  if (CDI_Debug)
+    Message("vartable[%d].recordTable[%d].levelTable[%d].recID = %d; level1,2=%d,%d\n",
+            varID, tileID, levelID, recID,level1,level2);
+  vartable[varID].recordTable[tileID].levelTable[levelID].recID = recID;
 
   *pvarID   = varID;
   *plevelID = levelID;
@@ -441,7 +589,7 @@ int cmpparam(const void* s1, const void* s2)
 
 void cdi_generate_vars(stream_t *streamptr)
 {
-  int varID, gridID, zaxisID;
+  int varID, gridID, zaxisID, tilesetID;
   int instID, modelID, tableID;
   int param, zaxistype, ltype1, ltype2;
   int prec;
@@ -490,7 +638,6 @@ void cdi_generate_vars(stream_t *streamptr)
 
       gridID     = vartable[varid].gridID;
       param      = vartable[varid].param;
-      unsigned nlevels = vartable[varid].nlevels;
       ltype1     = vartable[varid].ltype1;
       ltype2     = vartable[varid].ltype2;
       zaxistype = vartable[varid].zaxistype;
@@ -511,19 +658,50 @@ void cdi_generate_vars(stream_t *streamptr)
 
       zaxisID = UNDEFID;
 
+      /* consistency check: test if all subtypes have the same levels: */
+      unsigned nlevels = vartable[varid].recordTable[0].nlevels;
+      for (int isub=1; isub<vartable[varid].nsubtypes; isub++) {
+        if (vartable[varid].recordTable[isub].nlevels != nlevels)
+          {
+            fprintf(stderr, "isub = %d / %d :: "
+                    "nlevels = %d, vartable[varid].recordTable[isub].nlevels = %d\n",
+                    isub, vartable[varid].nsubtypes,
+                    nlevels, vartable[varid].recordTable[isub].nlevels);
+            Error("zaxis size must not change for same parameter!");
+          }
+
+        leveltable_t *t1 = vartable[varid].recordTable[isub-1].levelTable;
+        leveltable_t *t2 = vartable[varid].recordTable[isub  ].levelTable;
+        for (int ilev=0; ilev<nlevels; ilev++)
+          if ((t1[ilev].level1 != t2[ilev].level1)  ||
+              (t1[ilev].level2 != t2[ilev].level2)  ||
+              (t1[ilev].lindex != t2[ilev].lindex))
+            {
+              fprintf(stderr, "isub = %d / %d :: "
+                      "nlevels = %d, vartable[varid].recordTable[isub].nlevels = %d\n",
+                      isub, vartable[varid].nsubtypes,
+                      nlevels, vartable[varid].recordTable[isub].nlevels);
+              Message("t1[ilev].level1=%d / t2[ilev].level1=%d\n",t1[ilev].level1, t2[ilev].level1);
+              Message("t1[ilev].level2=%d / t2[ilev].level2=%d\n",t1[ilev].level2, t2[ilev].level2);
+              Message("t1[ilev].lindex=%d / t2[ilev].lindex=%d\n",t1[ilev].lindex, t2[ilev].lindex);
+              Error("zaxis type must not change for same parameter!");
+            }
+      }
+      leveltable_t *levelTable = vartable[varid].recordTable[0].levelTable;
+
       if ( ltype1 == 0 && zaxistype == ZAXIS_GENERIC && nlevels == 1 &&
-	   vartable[varid].levelTable[0].level1 == 0 )
+	   levelTable[0].level1 == 0 )
 	zaxistype = ZAXIS_SURFACE;
 
       dlevels = (double *) malloc(nlevels*sizeof(double));
 
       if ( lbounds && zaxistype != ZAXIS_HYBRID && zaxistype != ZAXIS_HYBRID_HALF )
 	for (unsigned levelID = 0; levelID < nlevels; levelID++ )
-	  dlevels[levelID] = (level_sf*vartable[varid].levelTable[levelID].level1 +
-	                      level_sf*vartable[varid].levelTable[levelID].level2)/2;
+	  dlevels[levelID] = (level_sf*levelTable[levelID].level1 +
+	                      level_sf*levelTable[levelID].level2)/2;
       else
 	for (unsigned levelID = 0; levelID < nlevels; levelID++ )
-	  dlevels[levelID] = level_sf*vartable[varid].levelTable[levelID].level1;
+	  dlevels[levelID] = level_sf*levelTable[levelID].level1;
 
       if ( nlevels > 1 )
 	{
@@ -537,24 +715,24 @@ void cdi_generate_vars(stream_t *streamptr)
             }
           /*
            * always sort pressure z-axis to ensure
-           * vartable[varid].levelTable[levelID1].level1 < vartable[varid].levelTable[levelID2].level1 <=> levelID1 > levelID2
+           * levelTable[levelID1].level1 < levelTable[levelID2].level1 <=> levelID1 > levelID2
            * unless already sorted in decreasing order
            */
           if ( !ldec && zaxistype == ZAXIS_PRESSURE )
             {
-              qsort(vartable[varid].levelTable, nlevels, sizeof(leveltable_t), cmpLevelTableInv);
+              qsort(levelTable, nlevels, sizeof(leveltable_t), cmpLevelTableInv);
               lsort = true;
             }
           /*
            * always sort hybrid and depth-below-land z-axis to ensure
-           * vartable[varid].levelTable[levelID1].level1 < vartable[varid].levelTable[levelID2].level1 <=> levelID1 < levelID2
+           * levelTable[levelID1].level1 < levelTable[levelID2].level1 <=> levelID1 < levelID2
            * unless already sorted in increasing order
            */
           else if ( (!linc && !ldec) ||
                     zaxistype == ZAXIS_HYBRID ||
                     zaxistype == ZAXIS_DEPTH_BELOW_LAND )
             {
-              qsort(vartable[varid].levelTable, nlevels, sizeof(leveltable_t), cmpLevelTable);
+              qsort(levelTable, nlevels, sizeof(leveltable_t), cmpLevelTable);
               lsort = true;
             }
 
@@ -562,11 +740,11 @@ void cdi_generate_vars(stream_t *streamptr)
             {
               if ( lbounds && zaxistype != ZAXIS_HYBRID && zaxistype != ZAXIS_HYBRID_HALF )
                 for (unsigned levelID = 0; levelID < nlevels; levelID++ )
-                  dlevels[levelID] = (level_sf*vartable[varid].levelTable[levelID].level1 +
-                                      level_sf*vartable[varid].levelTable[levelID].level2)/2.;
+                  dlevels[levelID] = (level_sf*levelTable[levelID].level1 +
+                                      level_sf*levelTable[levelID].level2)/2.;
               else
                 for (unsigned levelID = 0; levelID < nlevels; levelID++ )
-                  dlevels[levelID] = level_sf*vartable[varid].levelTable[levelID].level1;
+                  dlevels[levelID] = level_sf*levelTable[levelID].level1;
             }
 	}
 
@@ -574,10 +752,10 @@ void cdi_generate_vars(stream_t *streamptr)
 	{
 	  dlevels1 = (double *) malloc(nlevels*sizeof(double));
 	  for (unsigned levelID = 0; levelID < nlevels; levelID++)
-	    dlevels1[levelID] = level_sf*vartable[varid].levelTable[levelID].level1;
+	    dlevels1[levelID] = level_sf*levelTable[levelID].level1;
 	  dlevels2 = (double *) malloc(nlevels*sizeof(double));
 	  for (unsigned levelID = 0; levelID < nlevels; levelID++)
-	    dlevels2[levelID] = level_sf*vartable[varid].levelTable[levelID].level2;
+	    dlevels2[levelID] = level_sf*levelTable[levelID].level2;
         }
 
       char *unitptr = cdiUnitNamePtr(vartable[varid].level_unit);
@@ -600,8 +778,12 @@ void cdi_generate_vars(stream_t *streamptr)
       if ( lbounds ) free(dlevels2);
       free(dlevels);
 
-      varID = stream_new_var(streamptr, gridID, zaxisID);
-      varID = vlistDefVar(vlistID, gridID, zaxisID, tsteptype);
+      /* define new subtype for tile set */
+      tilesetID = vlistDefTileSubtype(vlistID, vartable[varid].tiles);
+
+      /* generate new variable */
+      varID = stream_new_var(streamptr, gridID, zaxisID, tilesetID);
+      varID = vlistDefVarTiles(vlistID, gridID, zaxisID, tsteptype, tilesetID);
 
       vlistDefVarParam(vlistID, varID, param);
       vlistDefVarDatatype(vlistID, varID, prec);
@@ -616,7 +798,6 @@ void cdi_generate_vars(stream_t *streamptr)
         vlistDefVarProductDefinitionTemplate(vlistID, varID, vartable[varid].productDefinitionTemplate);
 
       if ( vartable[varid].lmissval ) vlistDefVarMissval(vlistID, varID, vartable[varid].missval);
-
       if ( vartable[varid].name )     vlistDefVarName(vlistID, varID, vartable[varid].name);
       if ( vartable[varid].stdname )  vlistDefVarStdname(vlistID, varID, vartable[varid].stdname);
       if ( vartable[varid].longname ) vlistDefVarLongname(vlistID, varID, vartable[varid].longname);
@@ -627,30 +808,17 @@ void cdi_generate_vars(stream_t *streamptr)
 							  vartable[varid].ensdata->forecast_init_type);
 
 #if  defined  (HAVE_LIBGRIB_API)
-      /* ---------------------------------- */
-      /* Local change: 2013-04-23, FP (DWD) */
-      /* ---------------------------------- */
-
       int    i;
       vlist_t *vlistptr;
       vlistptr = vlist_to_pointer(vlistID);
-      for (i=0; i<vartable[varid].opt_grib_int_nentries; i++)
+      for (i=0; i<vartable[varid].opt_grib_nentries; i++)
         {
-          int idx = vlistptr->vars[varID].opt_grib_int_nentries;
-          vlistptr->vars[varID].opt_grib_int_nentries++;
+          int idx = vlistptr->vars[varID].opt_grib_nentries;
+          vlistptr->vars[varID].opt_grib_nentries++;
           if ( idx >= MAX_OPT_GRIB_ENTRIES ) Error("Too many optional keyword/integer value pairs!");
-          vlistptr->vars[varID].opt_grib_int_update[idx] = TRUE;
-          vlistptr->vars[varID].opt_grib_int_val[idx] = vartable[varid].opt_grib_int_val[idx];
-          vlistptr->vars[varID].opt_grib_int_keyword[idx] = strdupx(vartable[varid].opt_grib_int_keyword[idx]);
-        }
-      for (i=0; i<vartable[varid].opt_grib_dbl_nentries; i++)
-        {
-          int idx = vlistptr->vars[varID].opt_grib_dbl_nentries;
-          vlistptr->vars[varID].opt_grib_dbl_nentries++;
-          if ( idx >= MAX_OPT_GRIB_ENTRIES ) Error("Too many optional keyword/double value pairs!");
-          vlistptr->vars[varID].opt_grib_dbl_update[idx] = TRUE;
-          vlistptr->vars[varID].opt_grib_dbl_val[idx] = vartable[varid].opt_grib_dbl_val[idx];
-          vlistptr->vars[varID].opt_grib_dbl_keyword[idx] = strdupx(vartable[varid].opt_grib_dbl_keyword[idx]);
+
+          vlistptr->vars[varID].opt_grib_kvpair[idx] = vartable[varid].opt_grib_kvpair[idx];
+          vlistptr->vars[varID].opt_grib_kvpair[idx].update = TRUE;
         }
       /* note: if the key is not defined, we do not throw an error! */
 #endif
@@ -692,8 +860,8 @@ void cdi_generate_vars(stream_t *streamptr)
     {
       varID     = index;
       varid     = varids[index];
+      unsigned nlevels = vartable[varid].recordTable[0].nlevels;
 
-      unsigned nlevels = vartable[varid].nlevels;
       /*
       for ( levelID = 0; levelID < nlevels; levelID++ )
 	{
@@ -703,18 +871,23 @@ void cdi_generate_vars(stream_t *streamptr)
 		 vartable[varid].levelTable[levelID].level1);
 	}
       */
-      for (unsigned levelID = 0; levelID < nlevels; levelID++)
-	{
-	  streamptr->vars[varID].level[levelID] = vartable[varid].levelTable[levelID].recID;
-          unsigned lindex;
-	  for (lindex = 0; lindex < nlevels; lindex++ )
-	    if ( levelID == (unsigned)vartable[varid].levelTable[lindex].lindex ) break;
-
-	  if ( lindex == nlevels )
-	    Error("Internal problem! lindex not found.");
-
-	  streamptr->vars[varID].lindex[levelID] = (int)lindex;
-	}
+      for (unsigned isub=0; isub<vartable[varid].nsubtypes; isub++)
+        {
+          for (unsigned levelID = 0; levelID < nlevels; levelID++)
+            {
+              if ( CDI_Debug )
+                Message("streamptr->vars[%d].recordTable[%d].recordID[%d]=%d\n",
+                        varID,isub,levelID);
+              streamptr->vars[varID].recordTable[isub].recordID[levelID] =
+                vartable[varid].recordTable[isub].levelTable[levelID].recID;
+              unsigned lindex;
+              for (lindex = 0; lindex < nlevels; lindex++ )
+                if ( levelID == (unsigned)vartable[varid].recordTable[isub].levelTable[lindex].lindex ) break;
+              if ( lindex == nlevels )
+                Error("Internal problem! lindex not found.");
+              streamptr->vars[varID].recordTable[isub].lindex[levelID] = (int)lindex;
+            }
+        }
     }
 
   free(varids);
@@ -740,6 +913,7 @@ void varDefZAxisReference(int nhlev, int nvgrid, unsigned char uuid[CDI_UUID_SIZ
   numberOfVerticalGrid = nvgrid;
   memcpy(uuidVGrid, uuid, CDI_UUID_SIZE);
 }
+
 
 
 int varDefGrid(int vlistID, const grid_t *grid, int mode)
@@ -1044,25 +1218,63 @@ void varDefProductDefinitionTemplate(int varID, int productDefinitionTemplate)
 
 
 #if  defined  (HAVE_LIBGRIB_API)
-void varDefOptGribInt(int varID, long lval, const char *keyword)
+void varDefOptGribInt(int varID, int tile_index, long lval, const char *keyword)
 {
-  int idx = vartable[varID].opt_grib_int_nentries;
-  vartable[varID].opt_grib_int_nentries++;
-  if ( idx >= MAX_OPT_GRIB_ENTRIES ) Error("Too many optional keyword/integer value pairs!");
-  vartable[varID].opt_grib_int_val[idx] = (int) lval;
-  vartable[varID].opt_grib_int_keyword[idx] = strdupx(keyword);
+  int idx = -1;
+  for (int i=0; i<vartable[varID].opt_grib_nentries; i++)
+    {
+      if ( (strcmp(keyword, vartable[varID].opt_grib_kvpair[i].keyword) == 0 ) &&
+           (vartable[varID].opt_grib_kvpair[i].data_type == t_int)             &&
+           (vartable[varID].opt_grib_kvpair[i].subtype_index == tile_index) )
+        idx = i;
+    }
+
+  if (idx == -1) 
+    {
+      idx = vartable[varID].opt_grib_nentries;
+      vartable[varID].opt_grib_nentries++;
+      if ( idx >= MAX_OPT_GRIB_ENTRIES ) Error("Too many optional keyword/value pairs!");
+    }
+  else
+    {
+      if (vartable[varID].opt_grib_kvpair[idx].keyword)
+        free (vartable[varID].opt_grib_kvpair[idx].keyword);
+    }
+  vartable[varID].opt_grib_kvpair[idx].data_type     = t_int;
+  vartable[varID].opt_grib_kvpair[idx].int_val       = (int) lval;
+  vartable[varID].opt_grib_kvpair[idx].keyword       = strdupx(keyword);
+  vartable[varID].opt_grib_kvpair[idx].subtype_index = tile_index;
 }
 #endif
 
 
 #if  defined  (HAVE_LIBGRIB_API)
-void varDefOptGribDbl(int varID, double dval, const char *keyword)
+void varDefOptGribDbl(int varID, int tile_index, double dval, const char *keyword)
 {
-  int idx = vartable[varID].opt_grib_dbl_nentries;
-  vartable[varID].opt_grib_dbl_nentries++;
-  if ( idx >= MAX_OPT_GRIB_ENTRIES ) Error("Too many optional keyword/double value pairs!");
-  vartable[varID].opt_grib_dbl_val[idx] = dval;
-  vartable[varID].opt_grib_dbl_keyword[idx] = strdupx(keyword);
+  int idx = -1;
+  for (int i=0; i<vartable[varID].opt_grib_nentries; i++)
+    {
+      if ( (strcmp(keyword, vartable[varID].opt_grib_kvpair[i].keyword) == 0 ) &&
+           (vartable[varID].opt_grib_kvpair[i].data_type == t_double)          &&
+           (vartable[varID].opt_grib_kvpair[i].subtype_index == tile_index) )
+        idx = i;
+    }
+
+  if (idx == -1) 
+    {
+      idx = vartable[varID].opt_grib_nentries;
+      vartable[varID].opt_grib_nentries++;
+      if ( idx >= MAX_OPT_GRIB_ENTRIES ) Error("Too many optional keyword/value pairs!");
+    }
+  else
+    {
+      if (vartable[varID].opt_grib_kvpair[idx].keyword)
+        free (vartable[varID].opt_grib_kvpair[idx].keyword);
+    }
+  vartable[varID].opt_grib_kvpair[idx].data_type     = t_double;
+  vartable[varID].opt_grib_kvpair[idx].dbl_val       = (int) dval;
+  vartable[varID].opt_grib_kvpair[idx].keyword       = strdupx(keyword);
+  vartable[varID].opt_grib_kvpair[idx].subtype_index = tile_index;
 }
 #endif
 
@@ -1071,7 +1283,7 @@ void varDefOptGribDbl(int varID, double dval, const char *keyword)
 int varOptGribNentries(int varID)
 {
   int nentries = 0;
-  nentries = vartable[varID].opt_grib_int_nentries + vartable[varID].opt_grib_dbl_nentries;
+  nentries = vartable[varID].opt_grib_nentries;
   return (nentries);
 }
 #endif

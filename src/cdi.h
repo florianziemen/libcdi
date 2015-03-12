@@ -168,6 +168,37 @@ extern "C" {
 #define  ZAXIS_MIX_LAYER           24  /* Mixing Layer                                          */
 #define  ZAXIS_REFERENCE           25  /* zaxis reference number                                */
 
+/* SUBTYPE types */
+
+enum {
+  SUBTYPE_TILES                         = 0  /* Tiles variable                                  */
+} subtype_kind;
+
+#define MAX_KV_PAIRS_MATCH 10
+
+/* Data structure defining a key-value search, possibly with multiple
+   key-value pairs in combination. 
+
+   Currently, only multiple pairs combined by AND are supported.
+*/
+typedef struct  {
+  int nAND;                                   /* no. of key-value pairs that have to match */
+  int key_value_pairs[2][MAX_KV_PAIRS_MATCH]; /* key-value pairs */
+} subtype_query_t;
+
+
+
+enum {
+  /* subtype attributes wrt. TILES */
+  SUBTYPE_ATT_IDENTIFICATION_NO_OF_TILE = 0,
+  SUBTYPE_ATT_IDENTIFICATION_NO_OF_ATTR = 1,
+  SUBTYPE_ATT_TILE_CLASSIFICATION       = 2,
+  SUBTYPE_ATT_NUMBER_OF_TILES           = 3,
+  SUBTYPE_ATT_NUMBER_OF_ATTR            = 4,
+  SUBTYPE_ATT_ATTRIBUTE                 = 5
+} subtype_attributes;
+
+
 /* TIME types */
 
 #define  TIME_CONSTANT              0  /* obsolate, use TSTEP_CONSTANT                          */
@@ -227,6 +258,11 @@ extern "C" {
 void    cdiReset(void);
 
 const char *cdiStringError(int cdiErrno);
+
+/*      cdiGetStringError: Get CDI error String */
+/* Wrapper for cdiStringError, since direct use of */
+/* cdiStringError results in SEGFAULT with Cray compiler */
+void    cdiGetStringError(int vlistID, char *name);
 
 void    cdiDebug(int debug);
 
@@ -426,7 +462,10 @@ int     vlistInqModel(int vlistID);
 
 /* VLIST VAR routines */
 
-/*      vlistDefVar: Create a new Variable */
+/*      vlistDefVar: Create a new tile-based variable */
+int     vlistDefVarTiles(int vlistID, int gridID, int zaxisID, int tsteptype, int tilesetID);
+
+/*      vlistDefVar: Create a new variable */
 int     vlistDefVar(int vlistID, int gridID, int zaxisID, int tsteptype);
 
 void    vlistChangeVarGrid(int vlistID, int varID, int gridID);
@@ -1030,8 +1069,46 @@ void    streamDefHistory(int streamID, int size, const char *history);
 int     streamInqHistorySize(int streamID);
 void    streamInqHistoryString(int streamID, char *history);
 
+/* Subtype routines */
+
+/*      subtypeCreate: Create a variable subtype */
+int     subtypeCreate(int subtype);
+
+/*      Gives a textual summary of the variable subtype */
+void    subtypePrint(int subtypeID);
+
+/* Compares two subtype data structures. */
+int     subtypeCompare(int subtypeID1, int subtypeID2);
+
+/*      subtypeInqSize: Get the size of a subtype (e.g. no. of tiles). */
+int     subtypeInqSize(int subtypeID);
+
+/*      subtypeInqActiveIndex: Get the currently active index of a subtype (e.g. current tile index). */
+int     subtypeInqActiveIndex(int subtypeID);
+
+/*      subtypeDefActiveIndex: Set the currently active index of a subtype (e.g. current tile index). */
+void    subtypeDefActiveIndex(int subtypeID, int index);
+
+/*      Generate a "query object" out of a key-value pair. */
+subtype_query_t keyValuePair(const char* key, int value);
+
+/*       Generate an AND-combined "query object" out of two previous
+         query objects. */
+subtype_query_t matchAND(subtype_query_t q1, subtype_query_t q2);
+
+/*      subtypeInqSubEntry: Returns subtype entry ID for a given criterion. */
+int     subtypeInqSubEntry(int subtypeID, subtype_query_t criterion);
+
+/*      subtypeInqTile: Specialized version of subtypeInqSubEntry looking for tile/attribute pair. */
+int     subtypeInqTile(int subtypeID, int identificationNumberOfTile, int attribute);
+
+/*      vlistInqVarSubtype: Return subtype ID for a given variable. */
+int     vlistInqVarSubtype(int vlistID, int varID);
+
 
 void gribapiLibraryVersion(int *major_version, int *minor_version, int *revision_version);
+
+
 
 /*
 #if defined (__cplusplus)

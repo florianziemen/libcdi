@@ -109,6 +109,9 @@ void vlist_init_entry(vlist_t *vlistptr)
   vlistptr->ntsteps        = CDI_UNDEFID;
   vlistptr->atts.nalloc    = MAX_ATTRIBUTES;
   vlistptr->atts.nelems    = 0;
+  vlistptr->nsubtypes      = 0;
+  for (int i=0; i<MAX_SUBTYPES_PS; i++)
+    vlistptr->subtypeIDs[i] = CDI_UNDEFID;
 }
 
 static
@@ -240,13 +243,9 @@ vlist_delete(vlist_t *vlistptr)
       if ( vlistptr->vars[varID].ensdata )  free(vlistptr->vars[varID].ensdata);
 
 #if  defined  (HAVE_LIBGRIB_API)
-      for (int i=0; i<vlistptr->vars[varID].opt_grib_int_nentries; i++) {
-	if ( vlistptr->vars[varID].opt_grib_int_keyword[i] )
-	  free(vlistptr->vars[varID].opt_grib_int_keyword[i]);
-      }
-      for (int i=0; i<vlistptr->vars[varID].opt_grib_dbl_nentries; i++) {
-	if ( vlistptr->vars[varID].opt_grib_dbl_keyword[i] )
-	  free(vlistptr->vars[varID].opt_grib_dbl_keyword[i]);
+      for (int i=0; i<vlistptr->vars[varID].opt_grib_nentries; i++) {
+	if ( vlistptr->vars[varID].opt_grib_kvpair[i].keyword )
+	  free(vlistptr->vars[varID].opt_grib_kvpair[i].keyword);
       }
 #endif
 
@@ -337,24 +336,14 @@ void vlistCopy(int vlistID2, int vlistID1)
                      vlistptr1->vars[varID].ensdata, sizeof(ensinfo_t));
             }
 #if  defined  (HAVE_LIBGRIB_API)
-          /* ---------------------------------- */
-          /* Local change: 2013-01-28, FP (DWD) */
-          /* ---------------------------------- */
-
-	  vlistptr2->vars[varID].opt_grib_int_nentries = vlistptr1->vars[varID].opt_grib_int_nentries;
-	  for (int i=0; i<vlistptr1->vars[varID].opt_grib_int_nentries; i++) {
-	    if ( vlistptr1->vars[varID].opt_grib_int_keyword[i] ) {
-	      vlistptr2->vars[varID].opt_grib_int_keyword[i] = strdupx(vlistptr1->vars[varID].opt_grib_int_keyword[i]);
-	      vlistptr2->vars[varID].opt_grib_int_val[i]     = vlistptr1->vars[varID].opt_grib_int_val[i];
-	      vlistptr2->vars[varID].opt_grib_int_update[i]  = TRUE;
-	    }
-	  }
-	  vlistptr2->vars[varID].opt_grib_dbl_nentries = vlistptr1->vars[varID].opt_grib_dbl_nentries;
-	  for (int i=0; i<vlistptr1->vars[varID].opt_grib_dbl_nentries; i++) {
-	    if ( vlistptr1->vars[varID].opt_grib_dbl_keyword[i] ) {
-	      vlistptr2->vars[varID].opt_grib_dbl_keyword[i] = strdupx(vlistptr1->vars[varID].opt_grib_dbl_keyword[i]);
-	      vlistptr2->vars[varID].opt_grib_dbl_val[i]     = vlistptr1->vars[varID].opt_grib_dbl_val[i];
-	      vlistptr2->vars[varID].opt_grib_dbl_update[i]  = TRUE;
+	  vlistptr2->vars[varID].opt_grib_nentries = vlistptr1->vars[varID].opt_grib_nentries;
+	  for (int i=0; i<vlistptr1->vars[varID].opt_grib_nentries; i++) {
+	    if ( vlistptr1->vars[varID].opt_grib_kvpair[i].keyword ) {
+	      vlistptr2->vars[varID].opt_grib_kvpair[i] =
+                vlistptr1->vars[varID].opt_grib_kvpair[i];
+	      vlistptr2->vars[varID].opt_grib_kvpair[i].keyword = 
+                strdupx(vlistptr1->vars[varID].opt_grib_kvpair[i].keyword);
+	      vlistptr2->vars[varID].opt_grib_kvpair[i].update = TRUE;
 	    }
 	  }
 #endif
@@ -396,6 +385,9 @@ int vlistDuplicate(int vlistID)
 {
   int vlistIDnew = vlistCreate();
   vlistCopy(vlistIDnew, vlistID);
+  /* lock the old vlist */
+  vlist_lock(vlistID);
+  vlist_unlock(vlistIDnew);
   return (vlistIDnew);
 }
 
@@ -540,8 +532,9 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
 	if ( vlistptr1->vars[varID].flag )
 	  {
 	    vlistptr2->vars[varID2].flag = FALSE;
-	    int zaxisID = vlistptr1->vars[varID].zaxisID;
-	    int gridID  = vlistptr1->vars[varID].gridID;
+	    int zaxisID   = vlistptr1->vars[varID].zaxisID;
+	    int gridID    = vlistptr1->vars[varID].gridID;
+	    int subtypeID = vlistptr1->vars[varID].subtypeID;
 
 	    memcpy(&vlistptr2->vars[varID2], &vlistptr1->vars[varID], sizeof(var_t));
 
@@ -570,25 +563,14 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
               }
 
 #if  defined  (HAVE_LIBGRIB_API)
-	    /* ---------------------------------- */
-	    /* Local change: 2013-01-28, FP (DWD) */
-	    /* ---------------------------------- */
-
 	    int i;
-	    vlistptr2->vars[varID2].opt_grib_int_nentries = vlistptr1->vars[varID].opt_grib_int_nentries;
-	    for (i=0; i<vlistptr1->vars[varID].opt_grib_int_nentries; i++) {
-	      if ( vlistptr1->vars[varID].opt_grib_int_keyword[i] ) {
-		vlistptr2->vars[varID2].opt_grib_int_keyword[i] = strdupx(vlistptr1->vars[varID].opt_grib_int_keyword[i]);
-		vlistptr2->vars[varID2].opt_grib_int_val[i]     = vlistptr1->vars[varID].opt_grib_int_val[i];
-                vlistptr2->vars[varID2].opt_grib_int_update[i]  = TRUE;
-	      }
-	    }
-	    vlistptr2->vars[varID2].opt_grib_dbl_nentries = vlistptr1->vars[varID].opt_grib_dbl_nentries;
-	    for (i=0; i<vlistptr1->vars[varID].opt_grib_dbl_nentries; i++) {
-	      if ( vlistptr1->vars[varID].opt_grib_dbl_keyword[i] ) {
-		vlistptr2->vars[varID2].opt_grib_dbl_keyword[i] = strdupx(vlistptr1->vars[varID].opt_grib_dbl_keyword[i]);
-		vlistptr2->vars[varID2].opt_grib_dbl_val[i]     = vlistptr1->vars[varID].opt_grib_dbl_val[i];
-                vlistptr2->vars[varID2].opt_grib_dbl_update[i]  = TRUE;
+	    vlistptr2->vars[varID2].opt_grib_nentries = vlistptr1->vars[varID].opt_grib_nentries;
+	    for (i=0; i<vlistptr1->vars[varID].opt_grib_nentries; i++) {
+	      if ( vlistptr1->vars[varID].opt_grib_kvpair[i].keyword ) {
+		vlistptr2->vars[varID2].opt_grib_kvpair[i] = vlistptr1->vars[varID].opt_grib_kvpair[i];
+		vlistptr2->vars[varID2].opt_grib_kvpair[i].keyword = 
+                  strdupx(vlistptr1->vars[varID].opt_grib_kvpair[i].keyword);
+                vlistptr2->vars[varID2].opt_grib_kvpair[i].update  = TRUE;
 	      }
 	    }
 #endif
@@ -686,6 +668,7 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
 
             vlistAdd2GridIDs(vlistptr2, gridID);
             vlistAdd2ZaxisIDs(vlistptr2, zaxisID);
+            vlistAdd2SubtypeIDs(vlistptr2, subtypeID);
 
 	    varID2++;
 	  }
@@ -771,26 +754,14 @@ void vlistCat(int vlistID2, int vlistID1)
         }
 
 #if  defined  (HAVE_LIBGRIB_API)
-      /* ---------------------------------- */
-      /* Local change: 2013-01-28, FP (DWD) */
-      /* ---------------------------------- */
-
-      vlistptr2->vars[varID2].opt_grib_int_nentries = vlistptr1->vars[varID].opt_grib_int_nentries;
-      int n = vlistptr1->vars[varID].opt_grib_int_nentries;
+      vlistptr2->vars[varID2].opt_grib_nentries = vlistptr1->vars[varID].opt_grib_nentries;
+      int n = vlistptr1->vars[varID].opt_grib_nentries;
       for (int i = 0; i < n; ++i) {
-	if ( vlistptr1->vars[varID].opt_grib_int_keyword[i] ) {
-	  vlistptr2->vars[varID2].opt_grib_int_keyword[i] = strdupx(vlistptr1->vars[varID].opt_grib_int_keyword[i]);
-	  vlistptr2->vars[varID2].opt_grib_int_val[i]     = vlistptr1->vars[varID].opt_grib_int_val[i];
-          vlistptr2->vars[varID2].opt_grib_int_update[i]  = TRUE;
-	}
-      }
-      vlistptr2->vars[varID2].opt_grib_dbl_nentries = vlistptr1->vars[varID].opt_grib_dbl_nentries;
-      n = vlistptr1->vars[varID].opt_grib_dbl_nentries;
-      for (int i = 0; i < n; i++) {
-	if ( vlistptr1->vars[varID].opt_grib_dbl_keyword[i] ) {
-	  vlistptr2->vars[varID2].opt_grib_dbl_keyword[i] = strdupx(vlistptr1->vars[varID].opt_grib_dbl_keyword[i]);
-	  vlistptr2->vars[varID2].opt_grib_dbl_val[i]     = vlistptr1->vars[varID].opt_grib_dbl_val[i];
-          vlistptr2->vars[varID2].opt_grib_dbl_update[i]  = TRUE;
+	if ( vlistptr1->vars[varID].opt_grib_kvpair[i].keyword ) {
+          vlistptr2->vars[varID2].opt_grib_kvpair[i] = vlistptr1->vars[varID].opt_grib_kvpair[i];
+	  vlistptr2->vars[varID2].opt_grib_kvpair[i].keyword = 
+            strdupx(vlistptr1->vars[varID].opt_grib_kvpair[i].keyword);
+          vlistptr2->vars[varID2].opt_grib_kvpair[i].update  = TRUE;
 	}
       }
 #endif
@@ -800,6 +771,7 @@ void vlistCat(int vlistID2, int vlistID1)
 
       vlistAdd2GridIDs(vlistptr2, vlistptr1->vars[varID].gridID);
       vlistAdd2ZaxisIDs(vlistptr2, vlistptr1->vars[varID].zaxisID);
+      vlistAdd2SubtypeIDs(vlistptr2, vlistptr1->vars[varID].subtypeID);
     }
 }
 

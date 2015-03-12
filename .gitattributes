@@ -14,6 +14,9 @@ app/Makefile.in -text
 app/cdi.c -text
 app/createtable.c -text
 app/printinfo.h -text
+basic_test/Makefile -text
+basic_test/example.f90 -text
+basic_test/main.c -text
 /cdi.settings.in -text
 config/compile -text
 config/config.guess -text
@@ -28,6 +31,7 @@ config/missing -text
 config/mkinstalldirs -text
 /configure -text
 /configure.ac -text
+/do_configure.sh -text
 doc/Doxyfile -text
 doc/cdi_cman.pdf -text
 doc/cdi_fman.pdf -text
@@ -295,6 +299,8 @@ src/stream_record.c -text
 src/stream_srv.c -text
 src/stream_srv.h -text
 src/stream_var.c -text
+src/subtype.c -text
+src/subtype.h -text
 src/swap.c -text
 src/swap.h -text
 src/table.c -text
