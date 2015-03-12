@@ -51,12 +51,12 @@ const int nSubtypeAttributes = 6;
 /* Literal constants corresponding to the different constants of the
    enumeration "subtype_attributes". */
 const char* subtypeAttributeName[] = {
-  "identificationNumberOfTile",
-  "identificationNumberOfAttribute",
+  "tileIndex",
+  "totalNumberOfTileAttributePairs",
   "tileClassification",
   "numberOfTiles",
-  "numberOfAttributes",
-  "attribute"
+  "numberOfTileAttributes",
+  "tileAttribute"
 };
 
 
@@ -754,11 +754,11 @@ int subtypeInqSubEntry(int subtypeID, subtype_query_t criterion)
 }
 
 
-int subtypeInqTile(int subtypeID, int identificationNumberOfTile, int attribute)
+int subtypeInqTile(int subtypeID, int tileindex, int attribute)
 {
   return subtypeInqSubEntry(subtypeID, 
-			    matchAND(keyValuePair("identificationNumberOfTile", identificationNumberOfTile),
-				     keyValuePair("attribute",                  attribute)));
+			    matchAND(keyValuePair("tileIndex",     tileindex),
+				     keyValuePair("tileAttribute", attribute)));
 }
 
 

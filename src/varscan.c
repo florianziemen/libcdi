@@ -425,7 +425,7 @@ int varInsertTileSubtype(vartable_t *vptr, var_tile_t tiles)
 
   subtype_t *subtype_ptr;
   subtypeAllocate(&subtype_ptr, SUBTYPE_TILES);
-  subtypeDefGlobalDataP(subtype_ptr, SUBTYPE_ATT_IDENTIFICATION_NO_OF_ATTR, tiles.identificationNumberOfAttribute);
+  subtypeDefGlobalDataP(subtype_ptr, SUBTYPE_ATT_TOTALNO_OF_TILEATTR_PAIRS, tiles.totalno_of_tileattr_pairs);
   subtypeDefGlobalDataP(subtype_ptr, SUBTYPE_ATT_TILE_CLASSIFICATION      , tiles.tileClassification);
   subtypeDefGlobalDataP(subtype_ptr, SUBTYPE_ATT_NUMBER_OF_TILES          , tiles.numberOfTiles);
 
@@ -434,9 +434,9 @@ int varInsertTileSubtype(vartable_t *vptr, var_tile_t tiles)
    * tile/attribute pair (based on "tiles"). 
    */
   struct subtype_entry_t *entry = subtypeEntryInsert(subtype_ptr);
-  subtypeDefEntryDataP(entry, SUBTYPE_ATT_NUMBER_OF_ATTR           , tiles.numberOfAttributes);
-  subtypeDefEntryDataP(entry, SUBTYPE_ATT_IDENTIFICATION_NO_OF_TILE, tiles.identificationNumberOfTile);
-  subtypeDefEntryDataP(entry, SUBTYPE_ATT_ATTRIBUTE,                 tiles.attribute);
+  subtypeDefEntryDataP(entry, SUBTYPE_ATT_NUMBER_OF_ATTR,            tiles.numberOfAttributes);
+  subtypeDefEntryDataP(entry, SUBTYPE_ATT_TILEINDEX,                 tiles.tileindex);
+  subtypeDefEntryDataP(entry, SUBTYPE_ATT_TILEATTRIBUTE,             tiles.attribute);
 
   if (vptr->tiles == NULL) {
     vptr->tiles = subtype_ptr;
@@ -663,9 +663,9 @@ void cdi_generate_vars(stream_t *streamptr)
       for (int isub=1; isub<vartable[varid].nsubtypes; isub++) {
         if (vartable[varid].recordTable[isub].nlevels != nlevels)
           {
-            fprintf(stderr, "isub = %d / %d :: "
+            fprintf(stderr, "var \"%s\": isub = %d / %d :: "
                     "nlevels = %d, vartable[varid].recordTable[isub].nlevels = %d\n",
-                    isub, vartable[varid].nsubtypes,
+                    vartable[varID].name, isub, vartable[varid].nsubtypes,
                     nlevels, vartable[varid].recordTable[isub].nlevels);
             Error("zaxis size must not change for same parameter!");
           }

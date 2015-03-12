@@ -32,6 +32,7 @@ config/mkinstalldirs -text
 /configure -text
 /configure.ac -text
 /do_configure.sh -text
+/do_configure.xce.sh -text
 doc/Doxyfile -text
 doc/cdi_cman.pdf -text
 doc/cdi_fman.pdf -text

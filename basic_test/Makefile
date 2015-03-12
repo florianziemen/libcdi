@@ -10,5 +10,8 @@ run:
 	LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../build/lib64  ./main
 runfortran:
 	LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../build/lib64:/opt/grib_api/lib64  ./example
+xce:
+	cc -DHAVE_CF_INTERFACE -DHAVE_LIBNETCDF -DHAVE_LIBGRIB -DHAVE_LIBGRIB_API ${GRIB_API_INCLUDE} -I${NETCDF_DIR}/include -c ../src/cdilib.c -o cdilib.o
+	ftn -I../build/include cdilib.o example.f90 -L${NETCDF_DIR}/lib ${GRIB_API_LIB} -lgrib_api -lnetcdff -lnetcdf -o example 
 clean:
 	rm -f main main.o example cdilib.o

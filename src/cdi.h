@@ -190,12 +190,12 @@ typedef struct  {
 
 enum {
   /* subtype attributes wrt. TILES */
-  SUBTYPE_ATT_IDENTIFICATION_NO_OF_TILE = 0,
-  SUBTYPE_ATT_IDENTIFICATION_NO_OF_ATTR = 1,
+  SUBTYPE_ATT_TILEINDEX                 = 0,
+  SUBTYPE_ATT_TOTALNO_OF_TILEATTR_PAIRS = 1,
   SUBTYPE_ATT_TILE_CLASSIFICATION       = 2,
   SUBTYPE_ATT_NUMBER_OF_TILES           = 3,
   SUBTYPE_ATT_NUMBER_OF_ATTR            = 4,
-  SUBTYPE_ATT_ATTRIBUTE                 = 5
+  SUBTYPE_ATT_TILEATTRIBUTE             = 5
 } subtype_attributes;
 
 
@@ -1100,7 +1100,7 @@ subtype_query_t matchAND(subtype_query_t q1, subtype_query_t q2);
 int     subtypeInqSubEntry(int subtypeID, subtype_query_t criterion);
 
 /*      subtypeInqTile: Specialized version of subtypeInqSubEntry looking for tile/attribute pair. */
-int     subtypeInqTile(int subtypeID, int identificationNumberOfTile, int attribute);
+int     subtypeInqTile(int subtypeID, int tileindex, int attribute);
 
 /*      vlistInqVarSubtype: Return subtype ID for a given variable. */
 int     vlistInqVarSubtype(int vlistID, int varID);

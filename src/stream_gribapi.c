@@ -1286,17 +1286,15 @@ int gribapiScanTimestep1(stream_t * streamptr)
 	  grib2GetLevel(gh, &leveltype1, &leveltype2, &lbounds, &level1, &level2, &level_sf, &level_unit);
 
           /* read in tiles attributes (if there are any) */
-          /* NOTE THAT "identificationNumberOfAttribute" HOLDS THE
-           * TOTAL NO. OF TILE/ATTRIBUTE PAIRS!!! */
 
-          if (grib_get_long(gh, "identificationNumberOfTile",       &lpar) != 0)
-            tiles.identificationNumberOfTile        = -1;
+          if (grib_get_long(gh, "tileIndex",                        &lpar) != 0)
+            tiles.tileindex                         = -1;
           else
-            tiles.identificationNumberOfTile        = (int) lpar;
-          if (grib_get_long(gh, "identificationNumberOfAttribute",  &lpar) != 0)
-            tiles.identificationNumberOfAttribute   = -1;
+            tiles.tileindex                         = (int) lpar;
+          if (grib_get_long(gh, "totalNumberOfTileAttributePairs",  &lpar) != 0)
+            tiles.totalno_of_tileattr_pairs         = -1;
           else
-            tiles.identificationNumberOfAttribute   = (int) lpar;
+            tiles.totalno_of_tileattr_pairs         = (int) lpar;
           if (grib_get_long(gh, "tileClassification",               &lpar) != 0)
             tiles.tileClassification                = -1;
           else
@@ -1309,19 +1307,11 @@ int gribapiScanTimestep1(stream_t * streamptr)
             tiles.numberOfAttributes                = -1;
           else
             tiles.numberOfAttributes                = (int) lpar;
-          if (grib_get_long(gh, "attribute",                        &lpar) != 0)
+          if (grib_get_long(gh, "tileAttribute",                    &lpar) != 0)
             tiles.attribute                         = -1;
           else
             tiles.attribute                         = (int) lpar;
 
-          /*
-          printf("tiles: identificationNumberOfTile=%d, identificationNumberOfAttribute=%d\n",
-                 tiles.identificationNumberOfTile, tiles.identificationNumberOfAttribute);
-          printf("       tileClassification=%d, numberOfTiles=%d\n",
-                 tiles.tileClassification, tiles.numberOfTiles);
-          printf("       numberOfAttributes=%d, attribute=%d\n",
-                 tiles.numberOfAttributes, tiles.attribute);
-          */
 	}
 
       cdiParamToString(param, paramstr, sizeof(paramstr));
@@ -1641,17 +1631,15 @@ int gribapiScanTimestep2(stream_t * streamptr)
 	  grib2GetLevel(gh, &leveltype1, &leveltype2, &lbounds, &level1, &level2, &level_sf, &level_unit);
 
           /* read in tiles attributes (if there are any) */
-          /* NOTE THAT "identificationNumberOfAttribute" HOLDS THE
-           * TOTAL NO. OF TILE/ATTRIBUTE PAIRS!!! */
 
-          if (grib_get_long(gh, "identificationNumberOfTile",       &lpar) != 0)
-            tiles.identificationNumberOfTile        = -1;
+          if (grib_get_long(gh, "tileIndex",                        &lpar) != 0)
+            tiles.tileindex                         = -1;
           else
-            tiles.identificationNumberOfTile        = (int) lpar;
-          if (grib_get_long(gh, "identificationNumberOfAttribute",  &lpar) != 0)
-            tiles.identificationNumberOfAttribute   = -1;
+            tiles.tileindex                         = (int) lpar;
+          if (grib_get_long(gh, "totalNumberOfTileAttributePairs",  &lpar) != 0)
+            tiles.totalno_of_tileattr_pairs         = -1;
           else
-            tiles.identificationNumberOfAttribute   = (int) lpar;
+            tiles.totalno_of_tileattr_pairs         = (int) lpar;
           if (grib_get_long(gh, "tileClassification",               &lpar) != 0)
             tiles.tileClassification                = -1;
           else
@@ -1664,6 +1652,10 @@ int gribapiScanTimestep2(stream_t * streamptr)
             tiles.numberOfAttributes                = -1;
           else
             tiles.numberOfAttributes                = (int) lpar;
+          if (grib_get_long(gh, "tileAttribute",                    &lpar) != 0)
+            tiles.attribute                         = -1;
+          else
+            tiles.attribute                         = (int) lpar;
 	}
 
       cdiParamToString(param, paramstr, sizeof(paramstr));
@@ -1945,17 +1937,15 @@ int gribapiScanTimestep(stream_t * streamptr)
 	      grib2GetLevel(gh, &leveltype1, &leveltype2, &lbounds, &level1, &level2, &level_sf, &level_unit);
 
               /* read in tiles attributes (if there are any) */
-              /* NOTE THAT "identificationNumberOfAttribute" HOLDS THE
-               * TOTAL NO. OF TILE/ATTRIBUTE PAIRS!!! */
 
-              if (grib_get_long(gh, "identificationNumberOfTile",       &lpar) != 0)
-                tiles.identificationNumberOfTile        = -1;
+              if (grib_get_long(gh, "tileIndex",                        &lpar) != 0)
+                tiles.tileindex                         = -1;
               else
-                tiles.identificationNumberOfTile        = (int) lpar;
-              if (grib_get_long(gh, "identificationNumberOfAttribute",  &lpar) != 0)
-                tiles.identificationNumberOfAttribute   = -1;
+                tiles.tileindex                         = (int) lpar;
+              if (grib_get_long(gh, "totalNumberOfTileAttributePairs",  &lpar) != 0)
+                tiles.totalno_of_tileattr_pairs         = -1;
               else
-                tiles.identificationNumberOfAttribute   = (int) lpar;
+                tiles.totalno_of_tileattr_pairs         = (int) lpar;
               if (grib_get_long(gh, "tileClassification",               &lpar) != 0)
                 tiles.tileClassification                = -1;
               else
@@ -1968,6 +1958,10 @@ int gribapiScanTimestep(stream_t * streamptr)
                 tiles.numberOfAttributes                = -1;
               else
                 tiles.numberOfAttributes                = (int) lpar;
+              if (grib_get_long(gh, "tileAttribute",                    &lpar) != 0)
+                tiles.attribute                         = -1;
+              else
+                tiles.attribute                         = (int) lpar;
 	    }
 
           cdiParamToString(param, paramstr, sizeof(paramstr));

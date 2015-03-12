@@ -130,8 +130,8 @@ Record;
  * contains "-1" if this is no tile-variable. */
 typedef struct {
   int
-    identificationNumberOfTile,
-    identificationNumberOfAttribute,
+    tileindex,
+    totalno_of_tileattr_pairs,
     tileClassification,
     numberOfTiles,
     numberOfAttributes,

@@ -13,8 +13,8 @@ PROGRAM example
 
   WRITE (0,*) "cdi-tiles example"
   ! Register additional GRIB keys which are read when file is opened.
-  CALL cdiDefAdditionalKey("identificationNumberOfTile")
-  CALL cdiDefAdditionalKey("attribute")
+  CALL cdiDefAdditionalKey("tileIndex")
+  CALL cdiDefAdditionalKey("tileAttribute")
 
   streamID = streamOpenRead("NWP_tiles_test.grb")
 !  streamID = streamOpenRead("NWP_tiles_test.nc")
@@ -30,10 +30,10 @@ PROGRAM example
     IF (tile_index /= CDI_UNDEFID) THEN
       CALL subtypeDefActiveIndex(subtypeID, tile_index)
       WRITE (0,*) "VAR ", TRIM(name)
-      WRITE (0,*) "   identificationNumberOfTile = ", &
-        &         vlistInqVarIntKey(vlistID, varID, "identificationNumberOfTile")
-      WRITE (0,*) "   attribute                  = ", &
-        &         vlistInqVarIntKey(vlistID, varID, "attribute")
+      WRITE (0,*) "   tileIndex         = ", &
+        &         vlistInqVarIntKey(vlistID, varID, "tileIndex")
+      WRITE (0,*) "   tileAttribute     = ", &
+        &         vlistInqVarIntKey(vlistID, varID, "tileAttribute")
 
       ! query grid size, allocate buffer
       gridID = vlistInqVarGrid(vlistID, varID)
