@@ -44,21 +44,6 @@ const char* subtypeName[] = {
   "tileset"
 };
 
-/* No. of different constants in the enumeration
-   "subtype_attributes" */
-const int nSubtypeAttributes = 6;
-
-/* Literal constants corresponding to the different constants of the
-   enumeration "subtype_attributes". */
-const char* subtypeAttributeName[] = {
-  "tileIndex",
-  "totalNumberOfTileAttributePairs",
-  "tileClassification",
-  "numberOfTiles",
-  "numberOfTileAttributes",
-  "tileAttribute"
-};
-
 
 /* prototypes: */
 static int    subtypeCompareP    (subtype_t *z1, subtype_t *z2);
@@ -757,8 +742,8 @@ int subtypeInqSubEntry(int subtypeID, subtype_query_t criterion)
 int subtypeInqTile(int subtypeID, int tileindex, int attribute)
 {
   return subtypeInqSubEntry(subtypeID, 
-			    matchAND(keyValuePair("tileIndex",     tileindex),
-				     keyValuePair("tileAttribute", attribute)));
+			    matchAND(keyValuePair(subtypeAttributeName[SUBTYPE_ATT_TILEINDEX], tileindex),
+				     keyValuePair(subtypeAttributeName[SUBTYPE_ATT_TILEATTRIBUTE], attribute)));
 }
 
 

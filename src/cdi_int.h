@@ -140,6 +140,33 @@ typedef struct {
 
 static var_tile_t dummy_tiles = { -1, -1, -1, -1, -1 };
 
+/* No. of different constants in the enumeration
+   "subtype_attributes" */
+static const int nSubtypeAttributes = 6;
+
+enum {
+  /* subtype attributes wrt. TILES */
+  SUBTYPE_ATT_TILEINDEX                 = 0,
+  SUBTYPE_ATT_TOTALNO_OF_TILEATTR_PAIRS = 1,
+  SUBTYPE_ATT_TILE_CLASSIFICATION       = 2,
+  SUBTYPE_ATT_NUMBER_OF_TILES           = 3,
+  SUBTYPE_ATT_NUMBER_OF_ATTR            = 4,
+  SUBTYPE_ATT_TILEATTRIBUTE             = 5
+} subtype_attributes;
+
+
+/* Literal constants corresponding to the different constants of the
+   enumeration "subtype_attributes". */
+static const char* subtypeAttributeName[] = {
+  "tileIndex",
+  "totalNumberOfTileAttributePairs",
+  "tileClassification",
+  "numberOfTiles",
+  "numberOfTileAttributes",
+  "tileAttribute"
+};
+
+
 
 typedef struct
 {

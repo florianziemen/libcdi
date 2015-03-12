@@ -188,17 +188,6 @@ typedef struct  {
 
 
 
-enum {
-  /* subtype attributes wrt. TILES */
-  SUBTYPE_ATT_TILEINDEX                 = 0,
-  SUBTYPE_ATT_TOTALNO_OF_TILEATTR_PAIRS = 1,
-  SUBTYPE_ATT_TILE_CLASSIFICATION       = 2,
-  SUBTYPE_ATT_NUMBER_OF_TILES           = 3,
-  SUBTYPE_ATT_NUMBER_OF_ATTR            = 4,
-  SUBTYPE_ATT_TILEATTRIBUTE             = 5
-} subtype_attributes;
-
-
 /* TIME types */
 
 #define  TIME_CONSTANT              0  /* obsolate, use TSTEP_CONSTANT                          */

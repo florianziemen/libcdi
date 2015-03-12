@@ -1287,27 +1287,27 @@ int gribapiScanTimestep1(stream_t * streamptr)
 
           /* read in tiles attributes (if there are any) */
 
-          if (grib_get_long(gh, "tileIndex",                        &lpar) != 0)
+          if (grib_get_long(gh, subtypeAttributeName[SUBTYPE_ATT_TILEINDEX], &lpar) != 0)
             tiles.tileindex                         = -1;
           else
             tiles.tileindex                         = (int) lpar;
-          if (grib_get_long(gh, "totalNumberOfTileAttributePairs",  &lpar) != 0)
+          if (grib_get_long(gh, subtypeAttributeName[SUBTYPE_ATT_TOTALNO_OF_TILEATTR_PAIRS],  &lpar) != 0)
             tiles.totalno_of_tileattr_pairs         = -1;
           else
             tiles.totalno_of_tileattr_pairs         = (int) lpar;
-          if (grib_get_long(gh, "tileClassification",               &lpar) != 0)
+          if (grib_get_long(gh, subtypeAttributeName[SUBTYPE_ATT_TILE_CLASSIFICATION], &lpar) != 0)
             tiles.tileClassification                = -1;
           else
             tiles.tileClassification                = (int) lpar;
-          if (grib_get_long(gh, "numberOfTiles",                    &lpar) != 0)
+          if (grib_get_long(gh, subtypeAttributeName[SUBTYPE_ATT_NUMBER_OF_TILES], &lpar) != 0)
             tiles.numberOfTiles                     = -1;
           else
             tiles.numberOfTiles                     = (int) lpar;
-          if (grib_get_long(gh, "numberOfAttributes",               &lpar) != 0)
+          if (grib_get_long(gh, subtypeAttributeName[SUBTYPE_ATT_NUMBER_OF_ATTR], &lpar) != 0)
             tiles.numberOfAttributes                = -1;
           else
             tiles.numberOfAttributes                = (int) lpar;
-          if (grib_get_long(gh, "tileAttribute",                    &lpar) != 0)
+          if (grib_get_long(gh, subtypeAttributeName[SUBTYPE_ATT_TILEATTRIBUTE], &lpar) != 0)
             tiles.attribute                         = -1;
           else
             tiles.attribute                         = (int) lpar;
@@ -1632,27 +1632,27 @@ int gribapiScanTimestep2(stream_t * streamptr)
 
           /* read in tiles attributes (if there are any) */
 
-          if (grib_get_long(gh, "tileIndex",                        &lpar) != 0)
+          if (grib_get_long(gh, subtypeAttributeName[SUBTYPE_ATT_TILEINDEX], &lpar) != 0)
             tiles.tileindex                         = -1;
           else
             tiles.tileindex                         = (int) lpar;
-          if (grib_get_long(gh, "totalNumberOfTileAttributePairs",  &lpar) != 0)
+          if (grib_get_long(gh, subtypeAttributeName[SUBTYPE_ATT_TOTALNO_OF_TILEATTR_PAIRS],  &lpar) != 0)
             tiles.totalno_of_tileattr_pairs         = -1;
           else
             tiles.totalno_of_tileattr_pairs         = (int) lpar;
-          if (grib_get_long(gh, "tileClassification",               &lpar) != 0)
+          if (grib_get_long(gh, subtypeAttributeName[SUBTYPE_ATT_TILE_CLASSIFICATION], &lpar) != 0)
             tiles.tileClassification                = -1;
           else
             tiles.tileClassification                = (int) lpar;
-          if (grib_get_long(gh, "numberOfTiles",                    &lpar) != 0)
+          if (grib_get_long(gh, subtypeAttributeName[SUBTYPE_ATT_NUMBER_OF_TILES], &lpar) != 0)
             tiles.numberOfTiles                     = -1;
           else
             tiles.numberOfTiles                     = (int) lpar;
-          if (grib_get_long(gh, "numberOfAttributes",               &lpar) != 0)
+          if (grib_get_long(gh, subtypeAttributeName[SUBTYPE_ATT_NUMBER_OF_ATTR], &lpar) != 0)
             tiles.numberOfAttributes                = -1;
           else
             tiles.numberOfAttributes                = (int) lpar;
-          if (grib_get_long(gh, "tileAttribute",                    &lpar) != 0)
+          if (grib_get_long(gh, subtypeAttributeName[SUBTYPE_ATT_TILEATTRIBUTE], &lpar) != 0)
             tiles.attribute                         = -1;
           else
             tiles.attribute                         = (int) lpar;
@@ -1938,27 +1938,27 @@ int gribapiScanTimestep(stream_t * streamptr)
 
               /* read in tiles attributes (if there are any) */
 
-              if (grib_get_long(gh, "tileIndex",                        &lpar) != 0)
+              if (grib_get_long(gh, subtypeAttributeName[SUBTYPE_ATT_TILEINDEX], &lpar) != 0)
                 tiles.tileindex                         = -1;
               else
                 tiles.tileindex                         = (int) lpar;
-              if (grib_get_long(gh, "totalNumberOfTileAttributePairs",  &lpar) != 0)
+              if (grib_get_long(gh, subtypeAttributeName[SUBTYPE_ATT_TOTALNO_OF_TILEATTR_PAIRS],  &lpar) != 0)
                 tiles.totalno_of_tileattr_pairs         = -1;
               else
                 tiles.totalno_of_tileattr_pairs         = (int) lpar;
-              if (grib_get_long(gh, "tileClassification",               &lpar) != 0)
+              if (grib_get_long(gh, subtypeAttributeName[SUBTYPE_ATT_TILE_CLASSIFICATION], &lpar) != 0)
                 tiles.tileClassification                = -1;
               else
                 tiles.tileClassification                = (int) lpar;
-              if (grib_get_long(gh, "numberOfTiles",                    &lpar) != 0)
+              if (grib_get_long(gh, subtypeAttributeName[SUBTYPE_ATT_NUMBER_OF_TILES], &lpar) != 0)
                 tiles.numberOfTiles                     = -1;
               else
                 tiles.numberOfTiles                     = (int) lpar;
-              if (grib_get_long(gh, "numberOfAttributes",               &lpar) != 0)
+              if (grib_get_long(gh, subtypeAttributeName[SUBTYPE_ATT_NUMBER_OF_ATTR], &lpar) != 0)
                 tiles.numberOfAttributes                = -1;
               else
                 tiles.numberOfAttributes                = (int) lpar;
-              if (grib_get_long(gh, "tileAttribute",                    &lpar) != 0)
+              if (grib_get_long(gh, subtypeAttributeName[SUBTYPE_ATT_TILEATTRIBUTE], &lpar) != 0)
                 tiles.attribute                         = -1;
               else
                 tiles.attribute                         = (int) lpar;
