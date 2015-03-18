@@ -1,7 +1,11 @@
-2015-03-12  Uwe Schulzweida
+2015-03-26  Uwe Schulzweida
 
 	* Version 1.6.8 released
         * using CGRIBEX library version 1.7.1
+
+2015-02-18  Uwe Schulzweida
+
+	* cdiDecodeTimevalue: fix rounding error for negativ timevalue
 
 2015-02-12  Uwe Schulzweida
 
