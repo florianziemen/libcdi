@@ -941,7 +941,8 @@ void cdiDecodeTimevalue(int timeunit, double timevalue, int *days, int *secs)
   if ( timeunit == TUNIT_SECOND )
     {
       *days = (int) (timevalue/86400);
-      *secs = (int) (timevalue - *days*86400. + 0.5);
+      double seconds = timevalue - *days*86400.;
+      *secs = lround(seconds);
       if ( *secs < 0 ) { *days -= 1; *secs += 86400; };
       /*
       {
@@ -954,7 +955,8 @@ void cdiDecodeTimevalue(int timeunit, double timevalue, int *days, int *secs)
   else if ( timeunit == TUNIT_DAY )
     {
       *days = (int) timevalue;
-      *secs = (int) ((timevalue - *days)*86400 + 0.5);
+      double seconds = (timevalue - *days)*86400;
+      *secs = lround(seconds);
       if ( *secs < 0 ) { *days -= 1; *secs += 86400; };
       /*
       {
