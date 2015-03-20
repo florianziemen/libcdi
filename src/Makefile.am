@@ -39,6 +39,7 @@ libcdi_la_SOURCES = 	 \
 	cksum.h		\
 	cdi_cksum.c	\
 	cdi_cksum.h	\
+	create_uuid.h	 \
 	dtypes.h	 \
 	error.c        	 \
 	error.h	 	 \
