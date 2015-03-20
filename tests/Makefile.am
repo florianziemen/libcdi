@@ -26,16 +26,12 @@ cksum_read_SOURCES = cksum_read.c \
 	stream_cksum.c stream_cksum.h \
 	ensure_array_size.h ensure_array_size.c
 pio_write_SOURCES = pio_write.c pio_write.h simple_model.c \
-	simple_model_helper.h simple_model_helper.c \
-	create_uuid.h create_uuid.c
+	simple_model_helper.h simple_model_helper.c
 pio_write_deco2d_SOURCES = pio_write.c pio_write.h deco2d_model.c \
-	simple_model_helper.h simple_model_helper.c \
-	create_uuid.h create_uuid.c
-test_resource_copy_SOURCES = test_resource_copy.c \
-	create_uuid.h create_uuid.c
+	simple_model_helper.h simple_model_helper.c
+test_resource_copy_SOURCES = test_resource_copy.c
 test_resource_copy_LDADD = $(UUID_C_LIB) ../src/libcdiresunpack.la $(LDADD)
-test_resource_copy_mpi_SOURCES = test_resource_copy.c \
-	create_uuid.h create_uuid.c
+test_resource_copy_mpi_SOURCES = test_resource_copy.c
 test_cdf_write_SOURCES = test_cdf_write.c
 test_cdf_read_SOURCES = test_cdf_read.c
 
