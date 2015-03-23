@@ -6,8 +6,6 @@
 #  include <grib_api.h>
 #endif
 
-#include "cdi_int.h"
-
 #define  GRIBAPI_MISSVAL  -9.E33
 
 /* GRIB2 Level Types */
