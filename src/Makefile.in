@@ -145,7 +145,8 @@ am__uninstall_files_from_dir = { \
   }
 am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(includedir)"
 LTLIBRARIES = $(lib_LTLIBRARIES) $(noinst_LTLIBRARIES)
-libcdi_la_DEPENDENCIES =
+am__DEPENDENCIES_1 =
+libcdi_la_DEPENDENCIES = $(am__DEPENDENCIES_1)
 am_libcdi_la_OBJECTS = basetime.lo binary.lo calendar.lo cdf.lo \
 	cdf_int.lo cdi_error.lo cdi_util.lo cdiFortran.lo \
 	cgribexlib.lo dmemory.lo cksum.lo cdi_cksum.lo error.lo \
@@ -165,7 +166,6 @@ am__v_lt_0 = --silent
 am__v_lt_1 = 
 @ENABLE_CDI_LIB_FALSE@am_libcdi_la_rpath =
 @ENABLE_CDI_LIB_TRUE@am_libcdi_la_rpath = -rpath $(libdir)
-am__DEPENDENCIES_1 =
 libcdipio_la_DEPENDENCIES = libcdi.la $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1)
 am_libcdipio_la_OBJECTS = cdipioFortran.lo pio.lo pio_comm.lo \
@@ -579,7 +579,7 @@ libcdipio_la_SOURCES = \
 libcdipio_la_LIBADD = libcdi.la $(PPM_CORE_LIBS) $(YAXT_LIBS)
 
 #libcdi_la_CPPFLAGS  = @CPPFLAGS@
-libcdi_la_LIBADD = 
+libcdi_la_LIBADD = $(UUID_C_LIB)
 #
 #cdilib.c:
 #	$(top_srcdir)/src/make_cdilib $(top_srcdir)/src

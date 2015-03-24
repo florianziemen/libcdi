@@ -160,7 +160,7 @@ libcdipio_la_LIBADD    = libcdi.la $(PPM_CORE_LIBS) $(YAXT_LIBS)
 
 
 #libcdi_la_CPPFLAGS  = @CPPFLAGS@
-libcdi_la_LIBADD    =
+libcdi_la_LIBADD    = $(UUID_C_LIB)
 #
 #cdilib.c:
 #	$(top_srcdir)/src/make_cdilib $(top_srcdir)/src
