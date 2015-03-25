@@ -333,6 +333,7 @@ int     streamInqCurTimestepID(int streamID);
 
 const char* streamFilename(int streamID);
 const char* streamFilesuffix(int filetype);
+
 off_t   streamNvals(int streamID);
 
 int     streamInqNvars ( int streamID );

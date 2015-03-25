@@ -83,11 +83,12 @@ TESTS = cksum_verify$(EXEEXT) test_cksum_grib test_cksum_nc \
 	pio_cksum_mpinonb pio_cksum_fpguard pio_cksum_asynch \
 	pio_cksum_writer pio_cksum_cdf test_resource_copy$(EXEEXT) \
 	pio_write_deco2d_run test_f2003 test_cdf_transformation \
-	$(am__append_2)
+	test_input_file $(am__append_2)
 check_PROGRAMS = cksum_verify$(EXEEXT) test_grib$(EXEEXT) \
 	cksum_write$(EXEEXT) cksum_read$(EXEEXT) pio_write$(EXEEXT) \
 	test_resource_copy$(EXEEXT) cksum_write_chunk$(EXEEXT) \
-	pio_write_deco2d$(EXEEXT) $(am__EXEEXT_1) $(am__EXEEXT_2)
+	pio_write_deco2d$(EXEEXT) testprog_input_file$(EXEEXT) \
+	$(am__EXEEXT_1) $(am__EXEEXT_2)
 @ENABLE_NETCDF_TRUE@am__append_1 = test_cdf_write test_cdf_read
 @USE_MPI_TRUE@am__append_2 = test_resource_copy_mpi_run
 @USE_MPI_TRUE@am__append_3 = test_resource_copy_mpi
@@ -109,17 +110,26 @@ DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps =  \
 	$(top_srcdir)/m4/acx_assert_lang_is_fortran_variant.m4 \
+	$(top_srcdir)/m4/acx_c_package.m4 \
 	$(top_srcdir)/m4/acx_check_strptr_convert.m4 \
 	$(top_srcdir)/m4/acx_execinfo.m4 \
+	$(top_srcdir)/m4/acx_fortran_package.m4 \
+	$(top_srcdir)/m4/acx_lang_check_include.m4 \
 	$(top_srcdir)/m4/acx_lang_other_suffix_conftest.m4 \
+	$(top_srcdir)/m4/acx_lang_package.m4 \
+	$(top_srcdir)/m4/acx_option_search_libs.m4 \
 	$(top_srcdir)/m4/acx_options.m4 \
 	$(top_srcdir)/m4/acx_sl_fc_mod_path_flag.m4 \
 	$(top_srcdir)/m4/acx_sl_mod_suffix.m4 \
-	$(top_srcdir)/m4/asx_unset.m4 $(top_srcdir)/m4/ax_pthread.m4 \
-	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltoptions.m4 \
-	$(top_srcdir)/m4/ltsugar.m4 $(top_srcdir)/m4/ltversion.m4 \
-	$(top_srcdir)/m4/lt~obsolete.m4 $(top_srcdir)/m4/pkg.m4 \
-	$(top_srcdir)/m4/starlink_fpp.m4 $(top_srcdir)/acinclude.m4 \
+	$(top_srcdir)/m4/asx_tr_arg.m4 $(top_srcdir)/m4/asx_unset.m4 \
+	$(top_srcdir)/m4/ax_pthread.m4 $(top_srcdir)/m4/libtool.m4 \
+	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
+	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
+	$(top_srcdir)/m4/pkg.m4 $(top_srcdir)/m4/starlink_fpp.m4 \
+	$(top_srcdir)/acinclude.m4 \
+	$(top_srcdir)/m4/ac_lang_program_fortran.m4 \
+	$(top_srcdir)/m4/acx_lang_fortran_check_include.m4 \
+	$(top_srcdir)/m4/acx_lang_c_check_include.m4 \
 	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
@@ -159,22 +169,21 @@ cksum_write_chunk_OBJECTS = $(am_cksum_write_chunk_OBJECTS)
 cksum_write_chunk_LDADD = $(LDADD)
 cksum_write_chunk_DEPENDENCIES = ../src/libcdi.la
 am_pio_write_OBJECTS = pio_write.$(OBJEXT) simple_model.$(OBJEXT) \
-	simple_model_helper.$(OBJEXT) create_uuid.$(OBJEXT)
+	simple_model_helper.$(OBJEXT)
 pio_write_OBJECTS = $(am_pio_write_OBJECTS)
 am__DEPENDENCIES_1 = ../src/libcdi.la
 am__DEPENDENCIES_2 =
 @USE_MPI_FALSE@pio_write_DEPENDENCIES = $(am__DEPENDENCIES_1) \
 @USE_MPI_FALSE@	$(am__DEPENDENCIES_2)
 @USE_MPI_TRUE@pio_write_DEPENDENCIES = ../src/libcdipio.la \
-@USE_MPI_TRUE@	$(am__DEPENDENCIES_2)
+@USE_MPI_TRUE@	$(am__DEPENDENCIES_2) $(am__DEPENDENCIES_2)
 am_pio_write_deco2d_OBJECTS = pio_write.$(OBJEXT) \
-	deco2d_model.$(OBJEXT) simple_model_helper.$(OBJEXT) \
-	create_uuid.$(OBJEXT)
+	deco2d_model.$(OBJEXT) simple_model_helper.$(OBJEXT)
 pio_write_deco2d_OBJECTS = $(am_pio_write_deco2d_OBJECTS)
 @USE_MPI_FALSE@pio_write_deco2d_DEPENDENCIES = $(am__DEPENDENCIES_1) \
 @USE_MPI_FALSE@	$(am__DEPENDENCIES_2)
 @USE_MPI_TRUE@pio_write_deco2d_DEPENDENCIES = ../src/libcdipio.la \
-@USE_MPI_TRUE@	$(am__DEPENDENCIES_2)
+@USE_MPI_TRUE@	$(am__DEPENDENCIES_2) $(am__DEPENDENCIES_2)
 am_test_cdf_read_OBJECTS = test_cdf_read.$(OBJEXT)
 test_cdf_read_OBJECTS = $(am_test_cdf_read_OBJECTS)
 test_cdf_read_LDADD = $(LDADD)
@@ -187,14 +196,12 @@ am_test_grib_OBJECTS = test_grib.$(OBJEXT)
 test_grib_OBJECTS = $(am_test_grib_OBJECTS)
 test_grib_LDADD = $(LDADD)
 test_grib_DEPENDENCIES = ../src/libcdi.la
-am_test_resource_copy_OBJECTS = test_resource_copy.$(OBJEXT) \
-	create_uuid.$(OBJEXT)
+am_test_resource_copy_OBJECTS = test_resource_copy.$(OBJEXT)
 test_resource_copy_OBJECTS = $(am_test_resource_copy_OBJECTS)
 test_resource_copy_DEPENDENCIES = $(am__DEPENDENCIES_2) \
 	../src/libcdiresunpack.la $(am__DEPENDENCIES_1)
 am_test_resource_copy_mpi_OBJECTS =  \
-	test_resource_copy_mpi-test_resource_copy.$(OBJEXT) \
-	test_resource_copy_mpi-create_uuid.$(OBJEXT)
+	test_resource_copy_mpi-test_resource_copy.$(OBJEXT)
 test_resource_copy_mpi_OBJECTS = $(am_test_resource_copy_mpi_OBJECTS)
 @USE_MPI_FALSE@test_resource_copy_mpi_DEPENDENCIES =  \
 @USE_MPI_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
@@ -204,6 +211,10 @@ test_resource_copy_mpi_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
 	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
 	$(test_resource_copy_mpi_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
+am_testprog_input_file_OBJECTS = testprog_input_file.$(OBJEXT)
+testprog_input_file_OBJECTS = $(am_testprog_input_file_OBJECTS)
+testprog_input_file_LDADD = $(LDADD)
+testprog_input_file_DEPENDENCIES = ../src/libcdi.la
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -243,13 +254,15 @@ SOURCES = $(cksum_read_SOURCES) $(cksum_verify_SOURCES) \
 	$(pio_write_SOURCES) $(pio_write_deco2d_SOURCES) \
 	$(test_cdf_read_SOURCES) $(test_cdf_write_SOURCES) \
 	$(test_grib_SOURCES) $(test_resource_copy_SOURCES) \
-	$(test_resource_copy_mpi_SOURCES)
+	$(test_resource_copy_mpi_SOURCES) \
+	$(testprog_input_file_SOURCES)
 DIST_SOURCES = $(cksum_read_SOURCES) $(cksum_verify_SOURCES) \
 	$(cksum_write_SOURCES) $(cksum_write_chunk_SOURCES) \
 	$(pio_write_SOURCES) $(pio_write_deco2d_SOURCES) \
 	$(test_cdf_read_SOURCES) $(test_cdf_write_SOURCES) \
 	$(test_grib_SOURCES) $(test_resource_copy_SOURCES) \
-	$(test_resource_copy_mpi_SOURCES)
+	$(test_resource_copy_mpi_SOURCES) \
+	$(testprog_input_file_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -331,6 +344,7 @@ ENABLE_CGRIBEX = @ENABLE_CGRIBEX@
 ENABLE_EXTRA = @ENABLE_EXTRA@
 ENABLE_GRIB = @ENABLE_GRIB@
 ENABLE_IEG = @ENABLE_IEG@
+ENABLE_MPI = @ENABLE_MPI@
 ENABLE_NC2 = @ENABLE_NC2@
 ENABLE_NC4 = @ENABLE_NC4@
 ENABLE_NETCDF = @ENABLE_NETCDF@
@@ -378,6 +392,11 @@ MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 MANIFEST_TOOL = @MANIFEST_TOOL@
 MKDIR_P = @MKDIR_P@
+MPIROOT = @MPIROOT@
+MPI_C_INCLUDE = @MPI_C_INCLUDE@
+MPI_C_LIB = @MPI_C_LIB@
+MPI_FC_INCLUDE = @MPI_FC_INCLUDE@
+MPI_FC_LIB = @MPI_FC_LIB@
 MPI_LAUNCH = @MPI_LAUNCH@
 NC_CONFIG = @NC_CONFIG@
 NETCDF_INCLUDE = @NETCDF_INCLUDE@
@@ -496,30 +515,28 @@ cksum_read_SOURCES = cksum_read.c \
 	ensure_array_size.h ensure_array_size.c
 
 pio_write_SOURCES = pio_write.c pio_write.h simple_model.c \
-	simple_model_helper.h simple_model_helper.c \
-	create_uuid.h create_uuid.c
+	simple_model_helper.h simple_model_helper.c
 
 pio_write_deco2d_SOURCES = pio_write.c pio_write.h deco2d_model.c \
-	simple_model_helper.h simple_model_helper.c \
-	create_uuid.h create_uuid.c
+	simple_model_helper.h simple_model_helper.c
 
-test_resource_copy_SOURCES = test_resource_copy.c \
-	create_uuid.h create_uuid.c
-
+test_resource_copy_SOURCES = test_resource_copy.c
 test_resource_copy_LDADD = $(UUID_C_LIB) ../src/libcdiresunpack.la $(LDADD)
-test_resource_copy_mpi_SOURCES = test_resource_copy.c \
-	create_uuid.h create_uuid.c
-
+test_resource_copy_mpi_SOURCES = test_resource_copy.c
 test_cdf_write_SOURCES = test_cdf_write.c
 test_cdf_read_SOURCES = test_cdf_read.c
-AM_CFLAGS = $(PPM_CORE_CFLAGS) $(YAXT_CFLAGS)
+testprog_input_file_SOURCES = testprog_input_file.c
+#
+AM_CFLAGS = $(PPM_CORE_CFLAGS) $(YAXT_CFLAGS) $(MPI_C_INCLUDE)
 @USE_MPI_FALSE@pio_write_LDADD = $(LDADD) $(UUID_C_LIB)
-@USE_MPI_TRUE@pio_write_LDADD = ../src/libcdipio.la $(UUID_C_LIB)
+@USE_MPI_TRUE@pio_write_LDADD = ../src/libcdipio.la $(UUID_C_LIB) $(MPI_C_LIB)
 @USE_MPI_FALSE@pio_write_deco2d_LDADD = $(LDADD) $(UUID_C_LIB)
-@USE_MPI_TRUE@pio_write_deco2d_LDADD = ../src/libcdipio.la $(UUID_C_LIB)
+@USE_MPI_TRUE@pio_write_deco2d_LDADD = ../src/libcdipio.la $(UUID_C_LIB) $(MPI_C_LIB)
 @USE_MPI_FALSE@test_resource_copy_mpi_LDADD = $(LDADD) $(UUID_C_LIB)
 @USE_MPI_TRUE@test_resource_copy_mpi_LDADD = ../src/libcdipio.la $(UUID_C_LIB)
-@USE_MPI_TRUE@test_resource_copy_mpi_CFLAGS = $(AM_CFLAGS) $(CFLAGS) -DMPI_MARSHALLING
+@USE_MPI_TRUE@test_resource_copy_mpi_CFLAGS = $(AM_CFLAGS) $(CFLAGS) \
+@USE_MPI_TRUE@	-DMPI_MARSHALLING
+
 LDADD = ../src/libcdi.la -lm
 AM_CPPFLAGS = -I$(top_srcdir)/src
 #
@@ -652,6 +669,10 @@ test_resource_copy_mpi$(EXEEXT): $(test_resource_copy_mpi_OBJECTS) $(test_resour
 	@rm -f test_resource_copy_mpi$(EXEEXT)
 	$(AM_V_CCLD)$(test_resource_copy_mpi_LINK) $(test_resource_copy_mpi_OBJECTS) $(test_resource_copy_mpi_LDADD) $(LIBS)
 
+testprog_input_file$(EXEEXT): $(testprog_input_file_OBJECTS) $(testprog_input_file_DEPENDENCIES) $(EXTRA_testprog_input_file_DEPENDENCIES) 
+	@rm -f testprog_input_file$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(testprog_input_file_OBJECTS) $(testprog_input_file_LDADD) $(LIBS)
+
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
 
@@ -662,7 +683,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cksum_verify.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cksum_write.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cksum_write_chunk.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/create_uuid.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/deco2d_model.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ensure_array_size.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_write.Po@am__quote@
@@ -673,8 +693,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_cdf_write.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_grib.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_resource_copy.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_resource_copy_mpi-create_uuid.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_resource_copy_mpi-test_resource_copy.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testprog_input_file.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/var_cksum.Po@am__quote@
 
 .c.o:
@@ -711,20 +731,6 @@ test_resource_copy_mpi-test_resource_copy.obj: test_resource_copy.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='test_resource_copy.c' object='test_resource_copy_mpi-test_resource_copy.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_resource_copy_mpi_CFLAGS) $(CFLAGS) -c -o test_resource_copy_mpi-test_resource_copy.obj `if test -f 'test_resource_copy.c'; then $(CYGPATH_W) 'test_resource_copy.c'; else $(CYGPATH_W) '$(srcdir)/test_resource_copy.c'; fi`
-
-test_resource_copy_mpi-create_uuid.o: create_uuid.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_resource_copy_mpi_CFLAGS) $(CFLAGS) -MT test_resource_copy_mpi-create_uuid.o -MD -MP -MF $(DEPDIR)/test_resource_copy_mpi-create_uuid.Tpo -c -o test_resource_copy_mpi-create_uuid.o `test -f 'create_uuid.c' || echo '$(srcdir)/'`create_uuid.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_resource_copy_mpi-create_uuid.Tpo $(DEPDIR)/test_resource_copy_mpi-create_uuid.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='create_uuid.c' object='test_resource_copy_mpi-create_uuid.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_resource_copy_mpi_CFLAGS) $(CFLAGS) -c -o test_resource_copy_mpi-create_uuid.o `test -f 'create_uuid.c' || echo '$(srcdir)/'`create_uuid.c
-
-test_resource_copy_mpi-create_uuid.obj: create_uuid.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_resource_copy_mpi_CFLAGS) $(CFLAGS) -MT test_resource_copy_mpi-create_uuid.obj -MD -MP -MF $(DEPDIR)/test_resource_copy_mpi-create_uuid.Tpo -c -o test_resource_copy_mpi-create_uuid.obj `if test -f 'create_uuid.c'; then $(CYGPATH_W) 'create_uuid.c'; else $(CYGPATH_W) '$(srcdir)/create_uuid.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_resource_copy_mpi-create_uuid.Tpo $(DEPDIR)/test_resource_copy_mpi-create_uuid.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='create_uuid.c' object='test_resource_copy_mpi-create_uuid.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_resource_copy_mpi_CFLAGS) $(CFLAGS) -c -o test_resource_copy_mpi-create_uuid.obj `if test -f 'create_uuid.c'; then $(CYGPATH_W) 'create_uuid.c'; else $(CYGPATH_W) '$(srcdir)/create_uuid.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo

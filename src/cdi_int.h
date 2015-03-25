@@ -318,8 +318,7 @@ int     cdiInqAccesstype(int streamID);
 
 int     getByteswap(int byteorder);
 
-int     streamSize ();
-void    streamGetIndexList ( int, int * );
+void cdiStreamGetIndexList(unsigned numIDs, int IDs[numIDs]);
 
 
 void  cdiInitialize(void);
