@@ -9410,6 +9410,8 @@ _LT_EOF
 	lf95*)				# Lahey Fortran 8.1
 	  whole_archive_flag_spec=
 	  tmp_sharedflag='--shared' ;;
+        nagfor*)                        # NAGFOR 5.3
+          tmp_sharedflag='-Wl,-shared' ;;
 	xl[cC]* | bgxl[cC]* | mpixl[cC]*) # IBM XL C 8.0 on PPC (deal with xlf below)
 	  tmp_sharedflag='-qmkshrobj'
 	  tmp_addflag= ;;
@@ -13720,6 +13722,8 @@ _LT_EOF
 	lf95*)				# Lahey Fortran 8.1
 	  whole_archive_flag_spec_FC=
 	  tmp_sharedflag='--shared' ;;
+        nagfor*)                        # NAGFOR 5.3
+          tmp_sharedflag='-Wl,-shared' ;;
 	xl[cC]* | bgxl[cC]* | mpixl[cC]*) # IBM XL C 8.0 on PPC (deal with xlf below)
 	  tmp_sharedflag='-qmkshrobj'
 	  tmp_addflag= ;;
@@ -15569,8 +15573,8 @@ fi
 
 
 
-     acx_sl_fpp_srcext=${ac_fc_srcext-F}
-   as_acx_sl_prog_fpp=`$as_echo "     acx_sl_cv_prog_fpp_fc_${ac_fc_srcext-f}" | $as_tr_sh`
+   acx_sl_fpp_srcext=${ac_fc_srcext-F}
+   as_acx_sl_prog_fpp=`$as_echo "acx_sl_cv_prog_fpp_fc_${ac_fc_srcext-f}" | $as_tr_sh`
 
    { $as_echo "$as_me:${as_lineno-$LINENO}: checking how to preprocess Fortran files with suffix $acx_sl_fpp_srcext" >&5
 $as_echo_n "checking how to preprocess Fortran files with suffix $acx_sl_fpp_srcext... " >&6; }
@@ -15590,7 +15594,6 @@ else
 #else
       syntax error
 #endif
-
       end
 _ACEOF
    ac_tmp=conftest.fppout
@@ -15615,9 +15618,9 @@ $as_echo "$ac_try_echo"; } >&5
   $as_echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
-                       eval "$as_acx_sl_prog_fpp=\"\$FPP\""
+            eval "$as_acx_sl_prog_fpp=\"\$FPP\""
 else
-             $as_echo "$as_me: failed program was:" >&5
+  $as_echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
             { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: user-specified \$FPP ($FPP) does not work" >&5
@@ -15626,7 +15629,7 @@ $as_echo "$as_me: WARNING: user-specified \$FPP ($FPP) does not work" >&2;}
 fi
 rm -f core conftest.err conftest.$ac_objext
 else
-          mv $ac_tmp conftest.$ac_ext
+  mv $ac_tmp conftest.$ac_ext
          $as_echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
@@ -15643,9 +15646,12 @@ fi
            `cd $srcdir ; pwd`/util/xlfpreproc-wrapper \
            `cd $srcdir ; pwd`/util/sunf95preproc-wrapper \
            `cd $srcdir ; pwd`/util/crayftnpreproc-wrapper \
-           "$FC -F" "$FC -F -fpp" "$FC -E" "$FC -E -cpp" \
+           "$FC -F" "$FC -F -fpp" "$FC -E" "$FC -E" "$FC -E -cpp" \
            "$FC $FCFLAGS -F" "$FC $FCFLAGS -E" "$FC $FCFLAGS -E" \
-           "$FC $FCFLAGS -E -cpp" "$FC $FCFLAGS -x f95-cpp-input -E -P"
+           "$FC $FCFLAGS -E -cpp" "$FC $FCFLAGS -x f95-cpp-input -E -P" \
+           "${F77-f77} -F" "${F77-f77} -E" 'fpp' \
+           "$CPP" "$CPP -x c" 'cpp' '/lib/cpp' \
+           '/usr/ccs/lib/cpp' 'g77 -E' '${CC-cc} -E'
          do
            rm -f conftest*
 
@@ -15657,7 +15663,6 @@ fi
 #else
       syntax error
 #endif
-
       end
 _ACEOF
    ac_tmp=conftest.fppout
@@ -15685,14 +15690,14 @@ sed 's/^/| /' conftest.$ac_ext >&5
             FPP="$ac_fpp"
               break
 else
-             $as_echo "$as_me: failed program was:" >&5
+  $as_echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
 
 fi
 rm -f core conftest.err conftest.$ac_objext
 else
-          mv $ac_tmp conftest.$ac_ext
+  mv $ac_tmp conftest.$ac_ext
          $as_echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
@@ -15711,7 +15716,6 @@ fi
 #else
       syntax error
 #endif
-
       end
 _ACEOF
    ac_tmp=conftest.fppout
@@ -15739,14 +15743,14 @@ sed 's/^/| /' conftest.$ac_ext >&5
             FPP="$ac_fpp -P"
               break
 else
-             $as_echo "$as_me: failed program was:" >&5
+  $as_echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
 
 fi
 rm -f core conftest.err conftest.$ac_objext
 else
-          mv $ac_tmp conftest.$ac_ext
+  mv $ac_tmp conftest.$ac_ext
          $as_echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
@@ -15782,7 +15786,7 @@ $as_echo_n "checking if preprocessing with $FPP of Fortran source supports requi
 if ${acx_sl_cv_fc_indirect_ok+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-       acx_sl_cv_fc_indirect_ok=yes
+  acx_sl_cv_fc_indirect_ok=yes
       # Set up ac_fpp_need_* flags based on features in
       acx_sl_fpp_srcext=${ac_fc_srcext-F}
       # defaults for needed features
@@ -15865,12 +15869,10 @@ ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 
    ac_ext="$acx_sl_fpp_srcext"
    cat > conftest.$ac_ext <<_ACEOF
-                 program main
-
+      program main
 #ifndef OK
       syntax error
 #endif
-
       end
 _ACEOF
    ac_ext=${ac_fc_srcext-f}
@@ -15888,7 +15890,7 @@ ac_compiler_gnu=$ac_cv_fc_compiler_gnu
          do
            if test x"$FPP_DEFOPT" != x ; then :
   cp conftest.${acx_sl_fpp_srcext}.bak conftest.$acx_sl_fpp_srcext
-                     { { echo Running preprocessor $FPP $FPPFLAGS ${FPP_DEFOPT}OK conftest.$acx_sl_fpp_srcext; } >&5
+              { { echo Running preprocessor $FPP $FPPFLAGS ${FPP_DEFOPT}OK conftest.$acx_sl_fpp_srcext; } >&5
   ($FPP $FPPFLAGS ${FPP_DEFOPT}OK conftest.$acx_sl_fpp_srcext \
         >conftest.${ac_ext}.tmp) 2>&5
   ac_status=$?
@@ -15897,7 +15899,7 @@ ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 
    mv conftest.${ac_ext}.tmp conftest.${ac_ext}
    if ac_fn_fc_try_compile "$LINENO"; then :
-                  acx_sl_prog_fc_cpp_d=yes; break
+  acx_sl_prog_fc_cpp_d=yes; break
 fi
 rm -f core conftest.err conftest.$ac_objext
 fi
@@ -15927,9 +15929,8 @@ ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 
    ac_ext="inc"
    cat > conftest.$ac_ext <<_ACEOF
-           !     This statement overrides the IMPLICIT statement in the program
-         REAL cc
-
+       !     This statement overrides the IMPLICIT statement in the program
+      REAL cc
 _ACEOF
    ac_ext=${ac_fc_srcext-f}
 ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
@@ -15948,13 +15949,11 @@ ac_compiler_gnu=$ac_cv_fc_compiler_gnu
    ac_ext="$acx_sl_fpp_srcext"
    cat > conftest.$ac_ext <<_ACEOF
       program main
-
       IMPLICIT CHARACTER (c)
-!     Comments in test programs should be freeform compliant just in case.
-!     conftest.inc contains the Fortran statement "REAL cc"
+       !     Comments in test programs should be freeform compliant just in case.
+       !     conftest.inc contains the Fortran statement "REAL cc"
 #include "conftest.inc"
       cc=1.
-
       end
 _ACEOF
    ac_ext=${ac_fc_srcext-f}
@@ -15969,7 +15968,7 @@ ac_compiler_gnu=$ac_cv_fc_compiler_gnu
          do
            if test x"$FPP_INCOPT" != x ; then :
   cp conftest.${acx_sl_fpp_srcext}.bak conftest.$acx_sl_fpp_srcext
-                     { { echo Running preprocessor $FPP $FPPFLAGS ${FPP_INCOPT}conftst conftest.$acx_sl_fpp_srcext; } >&5
+              { { echo Running preprocessor $FPP $FPPFLAGS ${FPP_INCOPT}conftst conftest.$acx_sl_fpp_srcext; } >&5
   ($FPP $FPPFLAGS ${FPP_INCOPT}conftst conftest.$acx_sl_fpp_srcext \
         >conftest.${ac_ext}.tmp) 2>&5
   ac_status=$?
@@ -15978,7 +15977,7 @@ ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 
    mv conftest.${ac_ext}.tmp conftest.${ac_ext}
    if ac_fn_fc_try_compile "$LINENO"; then :
-                  acx_sl_prog_fc_cpp_i=yes
+  acx_sl_prog_fc_cpp_i=yes
                  break
 fi
 rm -f core conftest.err conftest.$ac_objext
@@ -16007,12 +16006,10 @@ ac_compiler_gnu=$ac_cv_fc_compiler_gnu
    ac_ext="$acx_sl_fpp_srcext"
    cat > conftest.$ac_ext <<_ACEOF
       program main
-
 #define NM xxxx
       IMPLICIT CHARACTER (n)
       REAL xxxx
       NM=1.
-
       end
 _ACEOF
    ac_ext=${ac_fc_srcext-f}
@@ -16022,7 +16019,7 @@ ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 
 
 
-                { { echo Running preprocessor $FPP $FPPFLAGS conftest.$acx_sl_fpp_srcext; } >&5
+         { { echo Running preprocessor $FPP $FPPFLAGS conftest.$acx_sl_fpp_srcext; } >&5
   ($FPP $FPPFLAGS conftest.$acx_sl_fpp_srcext \
         >conftest.${ac_ext}.tmp) 2>&5
   ac_status=$?
@@ -16031,7 +16028,7 @@ ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 
    mv conftest.${ac_ext}.tmp conftest.${ac_ext}
    if ac_fn_fc_try_compile "$LINENO"; then :
-             acx_sl_prog_fc_cpp_subs=yes
+  acx_sl_prog_fc_cpp_subs=yes
 else
   acx_sl_cv_fc_indirect_ok=no
 fi
@@ -16054,11 +16051,10 @@ ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 
    ac_ext="$acx_sl_fpp_srcext"
    cat > conftest.$ac_ext <<_ACEOF
-                 program main
+      program main
 #define LONG '901234567890123456789012345678901234567890123456789012345678901234567890'
       CHARACTER(LEN=80) :: A
       A=LONG
-
       end
 _ACEOF
    ac_ext=${ac_fc_srcext-f}
@@ -16068,7 +16064,7 @@ ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 
 
 
-                { { echo Running preprocessor $FPP $FPPFLAGS conftest.$acx_sl_fpp_srcext; } >&5
+         { { echo Running preprocessor $FPP $FPPFLAGS conftest.$acx_sl_fpp_srcext; } >&5
   ($FPP $FPPFLAGS conftest.$acx_sl_fpp_srcext \
         >conftest.${ac_ext}.tmp) 2>&5
   ac_status=$?
@@ -16077,7 +16073,7 @@ ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 
    mv conftest.${ac_ext}.tmp conftest.${ac_ext}
    if ac_fn_fc_try_compile "$LINENO"; then :
-             acx_sl_prog_fc_cpp_wrap=yes
+  acx_sl_prog_fc_cpp_wrap=yes
 else
   acx_sl_cv_fc_indirect_ok=no
 fi
@@ -16099,10 +16095,8 @@ ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 
    ac_ext="$acx_sl_fpp_srcext"
    cat > conftest.$ac_ext <<_ACEOF
-                 program main
-
+      program main
       A=1. /* C-style comment */
-
       end
 _ACEOF
    ac_ext=${ac_fc_srcext-f}
@@ -16112,7 +16106,7 @@ ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 
 
 
-                { { echo Running preprocessor $FPP $FPPFLAGS conftest.$acx_sl_fpp_srcext; } >&5
+         { { echo Running preprocessor $FPP $FPPFLAGS conftest.$acx_sl_fpp_srcext; } >&5
   ($FPP $FPPFLAGS conftest.$acx_sl_fpp_srcext \
         >conftest.${ac_ext}.tmp) 2>&5
   ac_status=$?
@@ -16121,7 +16115,7 @@ ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 
    mv conftest.${ac_ext}.tmp conftest.${ac_ext}
    if ac_fn_fc_try_compile "$LINENO"; then :
-             acx_sl_prog_fc_cpp_CSTYLE=yes
+  acx_sl_prog_fc_cpp_CSTYLE=yes
 else
   acx_sl_cv_fc_indirect_ok=no
 fi
@@ -16143,10 +16137,8 @@ ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 
    ac_ext="$acx_sl_fpp_srcext"
    cat > conftest.$ac_ext <<_ACEOF
-                 program main
-
+      program main
       A=1. /* C-style comment */
-
       end
 _ACEOF
    ac_ext=${ac_fc_srcext-f}
@@ -16156,7 +16148,7 @@ ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 
 
 
-                { { echo Running preprocessor $FPP $FPPFLAGS conftest.$acx_sl_fpp_srcext; } >&5
+         { { echo Running preprocessor $FPP $FPPFLAGS conftest.$acx_sl_fpp_srcext; } >&5
   ($FPP $FPPFLAGS conftest.$acx_sl_fpp_srcext \
         >conftest.${ac_ext}.tmp) 2>&5
   ac_status=$?
@@ -16165,7 +16157,7 @@ ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 
    mv conftest.${ac_ext}.tmp conftest.${ac_ext}
    if ac_fn_fc_try_compile "$LINENO"; then :
-             acx_sl_prog_fc_cpp_CSTYLE=yes
+  acx_sl_prog_fc_cpp_CSTYLE=yes
 else
   acx_sl_cv_fc_indirect_ok=no
 fi
@@ -16187,11 +16179,9 @@ ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 
    ac_ext="$acx_sl_fpp_srcext"
    cat > conftest.$ac_ext <<_ACEOF
-                 PROGRAM MAIN
+      PROGRAM MAIN
       CHARACTER(LEN=10) :: C
       C = "abcde" // "fghij"; END PROGRAM
-
-
 _ACEOF
    ac_ext=${ac_fc_srcext-f}
 ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
@@ -16200,7 +16190,7 @@ ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 
 
 
-                { { echo Running preprocessor $FPP $FPPFLAGS conftest.$acx_sl_fpp_srcext; } >&5
+         { { echo Running preprocessor $FPP $FPPFLAGS conftest.$acx_sl_fpp_srcext; } >&5
   ($FPP $FPPFLAGS conftest.$acx_sl_fpp_srcext \
         >conftest.${ac_ext}.tmp) 2>&5
   ac_status=$?
@@ -16209,7 +16199,7 @@ ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 
    mv conftest.${ac_ext}.tmp conftest.${ac_ext}
    if ac_fn_fc_try_compile "$LINENO"; then :
-             acx_sl_prog_fc_cpp_cxxstyle=yes
+  acx_sl_prog_fc_cpp_cxxstyle=yes
 else
   acx_sl_cv_fc_indirect_ok=no
 fi
@@ -16231,11 +16221,9 @@ ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 
    ac_ext="$acx_sl_fpp_srcext"
    cat > conftest.$ac_ext <<_ACEOF
-                 PROGRAM MAIN
+      PROGRAM MAIN
       CHARACTER(LEN=10) :: C
       C = "abcde" // "fghij"; END PROGRAM
-
-
 _ACEOF
    ac_ext=${ac_fc_srcext-f}
 ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
@@ -16244,7 +16232,7 @@ ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 
 
 
-                { { echo Running preprocessor $FPP $FPPFLAGS conftest.$acx_sl_fpp_srcext; } >&5
+         { { echo Running preprocessor $FPP $FPPFLAGS conftest.$acx_sl_fpp_srcext; } >&5
   ($FPP $FPPFLAGS conftest.$acx_sl_fpp_srcext \
         >conftest.${ac_ext}.tmp) 2>&5
   ac_status=$?
@@ -16253,9 +16241,9 @@ ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 
    mv conftest.${ac_ext}.tmp conftest.${ac_ext}
    if ac_fn_fc_try_compile "$LINENO"; then :
-             acx_sl_prog_fc_cpp_cxxstyle=yes
+  acx_sl_prog_fc_cpp_cxxstyle=yes
 else
-             acx_sl_cv_fc_indirect_ok=no
+  acx_sl_cv_fc_indirect_ok=no
 fi
 rm -f core conftest.err conftest.$ac_objext
          if test x$acx_sl_cv_fc_indirect_ok = xyes; then :
@@ -16270,7 +16258,7 @@ fi
       if test x$acx_sl_cv_fc_indirect_ok = xyes; then :
 
 else
-        { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
 $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
 as_fn_error $? "required Fortran preprocessor not available
 See \`config.log' for more details" "$LINENO" 5; }
@@ -17441,6 +17429,8 @@ _LT_EOF
 	lf95*)				# Lahey Fortran 8.1
 	  whole_archive_flag_spec_F77=
 	  tmp_sharedflag='--shared' ;;
+        nagfor*)                        # NAGFOR 5.3
+          tmp_sharedflag='-Wl,-shared' ;;
 	xl[cC]* | bgxl[cC]* | mpixl[cC]*) # IBM XL C 8.0 on PPC (deal with xlf below)
 	  tmp_sharedflag='-qmkshrobj'
 	  tmp_addflag= ;;
@@ -27811,8 +27801,8 @@ else
       cd conftestdir
       cat > conftest.$ac_ext <<_ACEOF
       module cnftst
-       implicit none
-       integer :: i
+      implicit none
+      integer :: i
       end module cnftst
 _ACEOF
 if ac_fn_fc_try_compile "$LINENO"; then :
@@ -27827,12 +27817,10 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
         FCFLAGS="$FCFLAGS ${i}conftestdir"
         cat > conftest.$ac_ext <<_ACEOF
       program main
-       use cnftst
-       implicit none
-       i = 0
-
+      use cnftst
+      implicit none
+      i = 0
       end
-
 _ACEOF
 if ac_fn_fc_try_compile "$LINENO"; then :
   acx_sl_cv_fc_mod_path_flag_fc=$i ; FCFLAGS=$FCFLAGS_save ; break
@@ -27876,12 +27864,10 @@ ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $ac_fcflags_srcext conftest
 ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 
    cat > conftest.$ac_ext <<_ACEOF
-
       module conftest
-       implicit none
-       integer :: i
+      implicit none
+      integer :: i
       end module conftest
-
 _ACEOF
 if ac_fn_fc_try_compile "$LINENO"; then :
 
