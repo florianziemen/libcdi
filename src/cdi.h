@@ -320,7 +320,7 @@ int     streamInqTimestep(int streamID, int tsID);
 int     streamInqCurTimestepID(int streamID);
 
 char   *streamFilename(int streamID);
-char   *streamFilesuffix(int filetype);
+const char *streamFilesuffix(int filetype);
 off_t   streamNvals(int streamID);
 
 int     streamInqNvars ( int streamID );

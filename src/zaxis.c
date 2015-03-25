@@ -94,7 +94,7 @@ static int    zaxisGetPackSize ( void * zaxisptr, void *context);
 static void   zaxisPack        ( void * zaxisptr, void * buffer, int size, int *pos, void *context);
 static int    zaxisTxCode      ( void );
 
-static const resOps zaxisOps = {
+const resOps zaxisOps = {
   (int (*)(void *, void *))zaxisCompareP,
   zaxisDestroyP,
   zaxisPrintP,
@@ -172,9 +172,9 @@ void zaxis_copy(zaxis_t *zaxisptr2, zaxis_t *zaxisptr1)
   zaxisptr2->self = zaxisID2;
 }
 
-int zaxisSize(void)
+unsigned cdiZaxisCount(void)
 {
-  return reshCountType ( &zaxisOps );
+  return reshCountType(&zaxisOps);
 }
 
 static int
@@ -1636,9 +1636,9 @@ zaxisPack(void * voidP, void * packBuffer, int packBufferSize,
 }
 
 
-void zaxisGetIndexList ( int nzaxis, int * zaxisResHs )
+void cdiZaxisGetIndexList(unsigned nzaxis, int zaxisResHs[nzaxis])
 {
-  reshGetResHListOfType ( nzaxis, zaxisResHs, &zaxisOps );
+  reshGetResHListOfType(nzaxis, zaxisResHs, &zaxisOps);
 }
 
 #undef ZAXIS_STR_SERIALIZE
