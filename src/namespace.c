@@ -61,7 +61,7 @@ static const union namespaceSwitchValue
   defaultSwitches_[NUM_NAMESPACE_SWITCH] = defaultSwitches;
 #endif
 
-struct Namespace
+static struct Namespace
 {
   statusCode resStage;
   union namespaceSwitchValue switches[NUM_NAMESPACE_SWITCH];
@@ -70,7 +70,7 @@ struct Namespace
   .switches = defaultSwitches
 };
 
-struct Namespace *namespaces = &initialNamespace;
+static struct Namespace *namespaces = &initialNamespace;
 
 static int namespacesSize = 1;
 
