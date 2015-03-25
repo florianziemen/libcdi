@@ -2174,9 +2174,9 @@ void cdiStreamSetupVlist(stream_t *streamptr, int vlistID, int vlistIDorig)
 }
 
 
-void streamGetIndexList ( int nstreams, int * streamIndexList )
+void cdiStreamGetIndexList(unsigned numIDs, int IDs[numIDs])
 {
-  reshGetResHListOfType ( nstreams, streamIndexList, &streamOps );
+  reshGetResHListOfType(numIDs, IDs, &streamOps);
 }
 
 int streamInqNvars ( int streamID )
@@ -2278,7 +2278,6 @@ void streamPrintP   ( void * streamptr, FILE * fp )
   fprintf ( fp, "//  void    **gribContainers;\n" );
   fprintf ( fp, "vlistIDorig   = %d\n", sp->vlistIDorig );
 }
-
 
 enum {
   streamNint = 11,

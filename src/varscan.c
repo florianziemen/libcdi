@@ -750,19 +750,17 @@ int varDefGrid(int vlistID, const grid_t *grid, int mode)
    */
   int gridglobdefined = FALSE;
   int griddefined;
-  int ngrids;
   int gridID = CDI_UNDEFID;
-  int index;
   vlist_t *vlistptr;
-  int * gridIndexList, i;
+  int * gridIndexList;
 
   vlistptr = vlist_to_pointer(vlistID);
 
   griddefined = FALSE;
-  ngrids = vlistptr->ngrids;
+  unsigned ngrids = (unsigned)vlistptr->ngrids;
 
   if ( mode == 0 )
-    for ( index = 0; index < ngrids; index++ )
+    for (unsigned index = 0; index < ngrids; index++ )
       {
 	gridID = vlistptr->gridIDs[index];
 	if ( gridID == UNDEFID )
@@ -777,12 +775,12 @@ int varDefGrid(int vlistID, const grid_t *grid, int mode)
 
   if ( ! griddefined )
     {
-      ngrids = gridSize();
+      ngrids = cdiGridCount();
       if ( ngrids > 0 )
         {
           gridIndexList = (int*)xmalloc((size_t)ngrids * sizeof(int));
-          gridGetIndexList ( ngrids, gridIndexList );
-          for ( i = 0; i < ngrids; i++ )
+          cdiGridGetIndexList ( ngrids, gridIndexList );
+          for (unsigned i = 0; i < ngrids; i++ )
             {
               gridID = gridIndexList[i];
               if ( gridCompare(gridID, grid) == 0 )
@@ -791,12 +789,12 @@ int varDefGrid(int vlistID, const grid_t *grid, int mode)
                   break;
                 }
             }
-          if ( gridIndexList ) free ( gridIndexList );
+          free(gridIndexList);
         }
 
-      ngrids = vlistptr->ngrids;
+      ngrids = (unsigned)vlistptr->ngrids;
       if ( mode == 1 )
-	for ( index = 0; index < ngrids; index++ )
+	for (unsigned index = 0; index < ngrids; index++ )
 	  if ( vlistptr->gridIDs[index] == gridID )
 	    {
 	      gridglobdefined = FALSE;
@@ -807,7 +805,7 @@ int varDefGrid(int vlistID, const grid_t *grid, int mode)
   if ( ! griddefined )
     {
       if ( ! gridglobdefined ) gridID = gridGenerate(grid);
-      ngrids = vlistptr->ngrids;
+      ngrids = (unsigned)vlistptr->ngrids;
       vlistptr->gridIDs[ngrids] = gridID;
       vlistptr->ngrids++;
     }
@@ -871,17 +869,15 @@ int varDefZaxis(int vlistID, int zaxistype, int nlevels, double *levels, int lbo
     mode: 0 search in vlist and zaxis table
           1 search in zaxis table
    */
-  int zaxisdefined;
+  int zaxisdefined = 0;
   int nzaxis;
   int zaxisID = UNDEFID;
   int index;
   int zaxisglobdefined = 0;
   vlist_t *vlistptr;
-  int i;
 
   vlistptr = vlist_to_pointer(vlistID);
 
-  zaxisdefined = 0;
   nzaxis = vlistptr->nzaxis;
 
   if ( mode == 0 )
@@ -898,13 +894,14 @@ int varDefZaxis(int vlistID, int zaxistype, int nlevels, double *levels, int lbo
 
   if ( ! zaxisdefined )
     {
-      nzaxis = zaxisSize();
+      reshLock();
+      unsigned nzaxis = cdiZaxisCount();
       if ( nzaxis > 0 )
         {
           int *zaxisIndexList;
           zaxisIndexList = (int *)xmalloc((size_t)nzaxis * sizeof (int));
-          zaxisGetIndexList(nzaxis, zaxisIndexList);
-          for ( i = 0; i < nzaxis; i++ )
+          cdiZaxisGetIndexList ( nzaxis, zaxisIndexList );
+          for (unsigned i = 0; i < nzaxis; i++ )
             {
               zaxisID = zaxisIndexList[i];
               if ( zaxisCompare(zaxisID, zaxistype, nlevels, lbounds, levels, longname, units, ltype1) == 0 )
@@ -913,12 +910,13 @@ int varDefZaxis(int vlistID, int zaxistype, int nlevels, double *levels, int lbo
                   break;
                 }
             }
-          if ( zaxisIndexList ) free ( zaxisIndexList );
+          free(zaxisIndexList);
         }
+      reshUnlock();
 
-      nzaxis = vlistptr->nzaxis;
+      nzaxis = (unsigned)vlistptr->nzaxis;
       if ( mode == 1 )
-	for ( index = 0; index < nzaxis; index++ )
+	for (unsigned index = 0; index < nzaxis; index++ )
 	  if ( vlistptr->zaxisIDs[index] == zaxisID )
 	    {
 	      zaxisglobdefined = FALSE;

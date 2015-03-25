@@ -201,9 +201,9 @@ void grid_copy(grid_t *gridptr2, grid_t *gridptr1)
   gridptr2->self = gridID2;
 }
 
-int gridSize(void)
+unsigned cdiGridCount(void)
 {
-  return reshCountType ( &gridOps );
+  return reshCountType(&gridOps);
 }
 
 // used also in CDO
@@ -3860,9 +3860,9 @@ void gridInqUUID(int gridID, unsigned char uuid[CDI_UUID_SIZE])
 }
 
 
-void gridGetIndexList ( int ngrids, int * gridIndexList )
+void cdiGridGetIndexList(unsigned ngrids, int * gridIndexList)
 {
-  reshGetResHListOfType ( ngrids, gridIndexList, &gridOps );
+  reshGetResHListOfType(ngrids, gridIndexList, &gridOps);
 }
 
 
