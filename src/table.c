@@ -958,11 +958,13 @@ int tableInqParUnits(int tableID, int code, char *units)
 
 void tableInqPar(int tableID, int code, char *name, char *longname, char *units)
 {
-  int item, npars;
 
-  npars = parTable[tableID].npars;
+  if ( ((tableID >= 0) & (tableID < MAX_TABLE)) | (tableID == UNDEFID) ) { } else
+    Error("Invalid table ID %d", tableID);
 
-  for ( item = 0; item < npars; item++ )
+  int npars = parTable[tableID].npars;
+
+  for ( int item = 0; item < npars; item++ )
     {
       if ( parTable[tableID].pars[item].id == code )
 	{
