@@ -796,27 +796,21 @@ void tableFWriteC(FILE *ptfp, int tableID)
 
 int tableInqParCode(int tableID, char *varname, int *code)
 {
-  int item, npars;
-  int err = 0;
+  int err = 1;
 
-  npars = parTable[tableID].npars;
-
-  if ( tableID == UNDEFID || varname == NULL )
+  if ( tableID != UNDEFID && varname != NULL )
     {
-      err = 1;
-    }
-  else
-    {
-      for ( item = 0; item < npars; item++ )
+      int npars = parTable[tableID].npars;
+      for ( int item = 0; item < npars; item++ )
 	{
-	  if ( parTable[tableID].pars[item].name )
-	    if ( strcmp(parTable[tableID].pars[item].name, varname) == 0 )
-	      {
-		*code = parTable[tableID].pars[item].id;
-		break;
-	      }
+	  if ( parTable[tableID].pars[item].name
+               && strcmp(parTable[tableID].pars[item].name, varname) == 0 )
+            {
+              *code = parTable[tableID].pars[item].id;
+              err = 0;
+              break;
+            }
 	}
-      if ( item == npars ) err = 1;
     }
 
   return (err);
