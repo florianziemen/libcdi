@@ -82,12 +82,12 @@ vartable_t;
 
 
 static vartable_t *vartable;
-static int varTablesize = 0;
-static int nvars = 0;
+static unsigned varTablesize = 0;
+static unsigned nvars = 0;
 
 
-static
-void paramInitEntry(int varID, int param)
+static void
+paramInitEntry(unsigned varID, int param)
 {
   vartable[varID].param          = param;
   vartable[varID].prec           = 0;
@@ -120,12 +120,10 @@ void paramInitEntry(int varID, int param)
   vartable[varID].ensdata        = NULL;
 }
 
-static
-int varGetEntry(int param, int zaxistype, int ltype1, int tsteptype, const char *name)
+static unsigned
+varGetEntry(int param, int zaxistype, int ltype1, int tsteptype, const char *name)
 {
-  int varID;
-
-  for ( varID = 0; varID < varTablesize; varID++ )
+  for ( unsigned varID = 0; varID < varTablesize; varID++ )
     {
       if ( vartable[varID].param      == param       &&
 	   vartable[varID].zaxistype  == zaxistype   &&
@@ -143,15 +141,13 @@ int varGetEntry(int param, int zaxistype, int ltype1, int tsteptype, const char 
         }
     }
 
-  return (UNDEFID);
+  return (unsigned)-1;
 }
 
 static
 void varFree(void)
 {
-  int varID;
-
-  for ( varID = 0; varID < nvars; varID++ )
+  for ( unsigned varID = 0; varID < nvars; varID++ )
     {
       if ( vartable[varID].levelTable )
 	free(vartable[varID].levelTable);
@@ -177,8 +173,8 @@ void varFree(void)
   Vctsize = 0;
 }
 
-static
-int levelNewEntry(int varID, int level1, int level2)
+static int
+levelNewEntry(unsigned varID, int level1, int level2)
 {
   int levelID = 0;
   int levelTableSize;
@@ -249,10 +245,10 @@ int levelNewEntry(int varID, int level1, int level2)
 
 #define  UNDEF_PARAM  -4711
 
-static
-int paramNewEntry(int param)
+static unsigned
+paramNewEntry(int param)
 {
-  int varID = 0;
+  unsigned varID = 0;
 
   /*
     Look for a free slot in vartable.
@@ -260,8 +256,6 @@ int paramNewEntry(int param)
   */
   if ( ! varTablesize )
     {
-      int i;
-
       varTablesize = 2;
       vartable = (vartable_t *)xmalloc((size_t)varTablesize
                                        * sizeof (vartable_t));
@@ -271,7 +265,7 @@ int paramNewEntry(int param)
 	  SysError("Allocation of vartable failed");
 	}
 
-      for( i = 0; i < varTablesize; i++ )
+      for( unsigned i = 0; i < varTablesize; i++ )
 	{
 	  vartable[i].param = UNDEF_PARAM;
 #if  defined  (HAVE_LIBGRIB_API)
@@ -293,7 +287,6 @@ int paramNewEntry(int param)
   */
   if ( varID == varTablesize )
     {
-      int i;
 
       varTablesize = 2 * varTablesize;
       vartable = (vartable_t *)xrealloc(vartable, (size_t)varTablesize
@@ -305,7 +298,7 @@ int paramNewEntry(int param)
 	}
       varID = varTablesize/2;
 
-      for( i = varID; i < varTablesize; i++ )
+      for( unsigned i = varID; i < varTablesize; i++ )
 	{
 	  vartable[i].param = UNDEF_PARAM;
 #if  defined  (HAVE_LIBGRIB_API)
@@ -326,13 +319,10 @@ void varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds,
 		  int *pvarID, int *plevelID, int tsteptype, int numavg, int ltype1, int ltype2,
 		  const char *name, const char *stdname, const char *longname, const char *units)
 {
-  int varID = UNDEFID;
-  int levelID = -1;
+  unsigned varID = (cdiSplitLtype105 != 1 || zaxistype != ZAXIS_HEIGHT) ?
+    varGetEntry(param, zaxistype, ltype1, tsteptype, name) : (unsigned)UNDEFID;
 
-  if ( ! (cdiSplitLtype105 == 1 && zaxistype == ZAXIS_HEIGHT) )
-    varID = varGetEntry(param, zaxistype, ltype1, tsteptype, name);
-
-  if ( varID == UNDEFID )
+  if ( varID == (unsigned)UNDEFID )
     {
       nvars++;
       varID = paramNewEntry(param);
@@ -370,10 +360,10 @@ void varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds,
 
   if ( prec > vartable[varID].prec ) vartable[varID].prec = prec;
 
-  levelID = levelNewEntry(varID, level1, level2);
+  int levelID = levelNewEntry(varID, level1, level2);
   vartable[varID].levelTable[levelID].recID = recID;
 
-  *pvarID   = varID;
+  *pvarID   = (int)varID;
   *plevelID = levelID;
 }
 /*
@@ -443,7 +433,7 @@ int cmpparam(const void* s1, const void* s2)
 
 void cdi_generate_vars(stream_t *streamptr)
 {
-  int varID, gridID, zaxisID;
+  int gridID, zaxisID;
   int instID, modelID, tableID;
   int param, zaxistype, ltype1, ltype2;
   int prec;
@@ -455,34 +445,33 @@ void cdi_generate_vars(stream_t *streamptr)
   double *dlevels = NULL;
   double *dlevels1 = NULL;
   double *dlevels2 = NULL;
-  int index, varid;
   double level_sf = 1;
   int vlistID = streamptr->vlistID;
 
-  int *varids = (int *)xmalloc((size_t)nvars*sizeof(int));
-  for ( varID = 0; varID < nvars; varID++ ) varids[varID] = varID;
+  int *varids = (int *)xmalloc(nvars*sizeof(int));
+  for ( unsigned varID = 0; varID < nvars; varID++ ) varids[varID] = (int)varID;
 
   if ( streamptr->sortname )
     {
       param_t *varInfo = (param_t *)xmalloc((size_t)nvars * sizeof (param_t));
 
-      for ( varid = 0; varid < nvars; varid++ )
+      for ( unsigned varID = 0; varID < nvars; varID++ )
 	{
-	  varInfo[varid].varid = varids[varid];
-	  varInfo[varid].param = vartable[varid].param;
-	  varInfo[varid].ltype = vartable[varid].ltype1;
+	  varInfo[varID].varid = varids[varID];
+	  varInfo[varID].param = vartable[varID].param;
+	  varInfo[varID].ltype = vartable[varID].ltype1;
 	}
       qsort(varInfo, (size_t)nvars, sizeof(param_t), cmpparam);
-      for ( varid = 0; varid < nvars; varid++ )
+      for ( unsigned varID = 0; varID < nvars; varID++ )
 	{
-	  varids[varid] = varInfo[varid].varid;
+	  varids[varID] = varInfo[varID].varid;
 	}
       free(varInfo);
     }
 
-  for ( index = 0; index < nvars; index++ )
+  for ( unsigned index = 0; index < nvars; index++ )
     {
-      varid      = varids[index];
+      int varid      = varids[index];
 
       gridID     = vartable[varid].gridID;
       param      = vartable[varid].param;
@@ -596,7 +585,7 @@ void cdi_generate_vars(stream_t *streamptr)
       if ( lbounds ) free(dlevels2);
       free(dlevels);
 
-      varID = stream_new_var(streamptr, gridID, zaxisID);
+      int varID = stream_new_var(streamptr, gridID, zaxisID);
       varID = vlistDefVar(vlistID, gridID, zaxisID, tsteptype);
 
       vlistDefVarParam(vlistID, varID, param);
@@ -684,10 +673,10 @@ void cdi_generate_vars(stream_t *streamptr)
       if ( tableID != UNDEFID ) vlistDefVarTable(vlistID, varID, tableID);
     }
 
-  for ( index = 0; index < nvars; index++ )
+  for ( unsigned index = 0; index < nvars; index++ )
     {
-      varID     = index;
-      varid     = varids[index];
+      int varID = (int)index;
+      int varid = varids[index];
 
       unsigned nlevels = vartable[varid].nlevels;
       /*
