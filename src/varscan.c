@@ -866,6 +866,33 @@ int zaxisCompare(int zaxisID, int zaxistype, int nlevels, int lbounds, const dou
   return (differ);
 }
 
+struct varDefZAxisSearchState
+{
+  int resIDValue;
+  int zaxistype;
+  int nlevels;
+  double *levels;
+  int lbounds;
+  char *longname, *units;
+  int ltype;
+};
+
+static enum cdiApplyRet
+varDefZAxisSearch(int id, void *res, void *data)
+{
+  struct varDefZAxisSearchState *state = data;
+  (void)res;
+  if (zaxisCompare(id, state->zaxistype, state->nlevels, state->lbounds,
+                   state->levels, state->longname, state->units, state->ltype)
+      == 0)
+    {
+      state->resIDValue = id;
+      return CDI_APPLY_STOP;
+    }
+  else
+    return CDI_APPLY_GO_ON;
+}
+
 
 int varDefZaxis(int vlistID, int zaxistype, int nlevels, double *levels, int lbounds,
 		double *levels1, double *levels2, int vctsize, double *vct, char *name,
@@ -900,29 +927,22 @@ int varDefZaxis(int vlistID, int zaxistype, int nlevels, double *levels, int lbo
 
   if ( ! zaxisdefined )
     {
-      reshLock();
-      unsigned nzaxis = cdiZaxisCount();
-      if ( nzaxis > 0 )
-        {
-          int *zaxisIndexList;
-          zaxisIndexList = (int *)xmalloc((size_t)nzaxis * sizeof (int));
-          cdiZaxisGetIndexList ( nzaxis, zaxisIndexList );
-          for (unsigned i = 0; i < nzaxis; i++ )
-            {
-              zaxisID = zaxisIndexList[i];
-              if ( zaxisCompare(zaxisID, zaxistype, nlevels, lbounds, levels, longname, units, ltype1) == 0 )
-                {
-                  zaxisglobdefined = 1;
-                  break;
-                }
-            }
-          free(zaxisIndexList);
-        }
-      reshUnlock();
+      struct varDefZAxisSearchState query = {
+        .zaxistype = zaxistype,
+        .nlevels = nlevels,
+        .levels = levels,
+        .lbounds = lbounds,
+        .longname = longname,
+        .units = units,
+        .ltype = ltype1,
+      };
+      if ((zaxisglobdefined
+           = (cdiResHFilterApply(&zaxisOps, varDefZAxisSearch, &query)
+              == CDI_APPLY_STOP)))
+        zaxisID = query.resIDValue;
 
-      nzaxis = (unsigned)vlistptr->nzaxis;
-      if ( mode == 1 )
-	for (unsigned index = 0; index < nzaxis; index++ )
+      if ( mode == 1 && zaxisglobdefined)
+	for (int index = 0; index < nzaxis; index++ )
 	  if ( vlistptr->zaxisIDs[index] == zaxisID )
 	    {
 	      zaxisglobdefined = FALSE;

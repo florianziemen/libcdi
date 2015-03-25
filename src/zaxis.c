@@ -94,7 +94,7 @@ static int    zaxisGetPackSize ( void * zaxisptr, void *context);
 static void   zaxisPack        ( void * zaxisptr, void * buffer, int size, int *pos, void *context);
 static int    zaxisTxCode      ( void );
 
-static const resOps zaxisOps = {
+const resOps zaxisOps = {
   (int (*)(void *, void *))zaxisCompareP,
   zaxisDestroyP,
   zaxisPrintP,
