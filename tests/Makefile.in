@@ -83,7 +83,7 @@ TESTS = cksum_verify$(EXEEXT) test_cksum_grib test_cksum_nc \
 	pio_cksum_mpinonb pio_cksum_fpguard pio_cksum_asynch \
 	pio_cksum_writer pio_cksum_cdf test_resource_copy$(EXEEXT) \
 	pio_write_deco2d_run test_f2003 test_cdf_transformation \
-	test_input_file $(am__append_2)
+	$(am__append_2)
 check_PROGRAMS = cksum_verify$(EXEEXT) test_grib$(EXEEXT) \
 	cksum_write$(EXEEXT) cksum_read$(EXEEXT) pio_write$(EXEEXT) \
 	test_resource_copy$(EXEEXT) cksum_write_chunk$(EXEEXT) \
