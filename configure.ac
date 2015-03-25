@@ -325,40 +325,20 @@ AM_CONDITIONAL([USE_FC],[test -n "$FC" && test "X$FC" != "Xno" && test x$acx_cv_
 dnl
 AC_SUBST([CPPFLAGS])dnl
 dnl
-AC_ARG_VAR([BUILD_CFLAGS],
-  [append to CFLAGS during build but not in configure phase])dnl
-AC_CONFIG_COMMANDS_PRE([CFLAGS="$CFLAGS${BUILD_CFLAGS+ $BUILD_CFLAGS}"])dnl
-AM_SUBST_NOTMAKE([BUILD_CFLAGS])dnl
-AC_ARG_VAR([BUILD_FCFLAGS],
-  [append to FCFLAGS during build but not in configure phase])dnl
-AC_CONFIG_COMMANDS_PRE([FCFLAGS="$FCFLAGS${BUILD_FCFLAGS+ $BUILD_FCFLAGS}"])dnl
-AM_SUBST_NOTMAKE([BUILD_FCFLAGS])dnl
-AC_ARG_VAR([BUILD_LDFLAGS],
-  [append to LDFLAGS during build but not in configure phase])dnl
-AC_CONFIG_COMMANDS_PRE([LDFLAGS="$LDFLAGS${BUILD_LDFLAGS+ $BUILD_LDFLAGS}"])dnl
-AM_SUBST_NOTMAKE([BUILD_LDFLAGS])dnl
-AC_ARG_VAR([BUILD_LIBS],
-  [append to LIBS during build but not in configure phase])dnl
-AC_CONFIG_COMMANDS_PRE([LIBS="$LIBS${BUILD_LIBS+ $BUILD_LIBS}"])dnl
-AM_SUBST_NOTMAKE([BUILD_LIBS])dnl
-AC_ARG_VAR([BUILD_CC],
-  [replace CC with expansion of $BUILD_CC during build but not in configure phase])dnl
-AC_CONFIG_COMMANDS_PRE([CC="${BUILD_CC-$CC}"])dnl
-AM_SUBST_NOTMAKE([BUILD_CC])dnl
-AC_ARG_VAR([BUILD_CXX],
-  [replace CXX with expansion of $BUILD_CXX during build but not in configure phase])dnl
-AC_CONFIG_COMMANDS_PRE([CXX="${BUILD_CXX-$CXX}"])dnl
-AM_SUBST_NOTMAKE([BUILD_CXX])dnl
-AC_ARG_VAR([BUILD_FC],
-  [replace FC with expansion of $BUILD_FC during build but not in configure phase])dnl
-AC_CONFIG_COMMANDS_PRE([FC="${BUILD_FC-$FC}"])dnl
-AM_SUBST_NOTMAKE([BUILD_FC])dnl
-AC_ARG_VAR([BUILD_F77],
-  [replace F77 with expansion of $BUILD_F77 during build but not in configure phase])dnl
-AC_CONFIG_COMMANDS_PRE([F77="${BUILD_F77-$F77}"])dnl
-AM_SUBST_NOTMAKE([BUILD_F77])dnl
+m4_foreach([build_flag_var],[[BUILD_CFLAGS],[BUILD_FCFLAGS],[BUILD_LDFLAGS],[BUILD_LIBS],[BUILD_MPI_C_LIB],[BUILD_MPI_FC_LIB],[BUILD_C_INCLUDE],[BUILD_FC_INCLUDE]],
+  [AC_ARG_VAR(build_flag_var,
+     [append to ]m4_bpatsubst(build_flag_var, [BUILD_], [])[ during build but not in configure phase])dnl
+AC_CONFIG_COMMANDS_PRE(m4_bpatsubst(build_flag_var, [BUILD_], [])[="$]m4_bpatsubst(build_flag_var, [BUILD_], [])[$]{build_flag_var+ $build_flag_var[}"])dnl
+AM_SUBST_NOTMAKE(build_flag_var)])dnl
 
-
+m4_foreach([build_tool_var],[[BUILD_CC],[BUILD_CXX],[BUILD_FC],[BUILD_F77]],
+  [AC_ARG_VAR(build_tool_var,
+     [replace ]m4_bpatsubst(build_tool_var, [BUILD_], [])[ with expansion of $]build_tool_var[ during build but not in configure phase])dnl
+AC_CONFIG_COMMANDS_PRE(m4_bpatsubst(build_tool_var, [BUILD_], [])[="$]{build_tool_var-$[]m4_bpatsubst(build_tool_var, [BUILD_], [])}["])dnl
+AM_SUBST_NOTMAKE(build_tool_var)])dnl
+dnl
+dnl
+dnl
 # Checks for compiler
 COMPILER="$CC $CFLAGS"
 AC_DEFINE_UNQUOTED(COMPILER, ["$COMPILER"], [Compiler])

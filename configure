@@ -620,6 +620,10 @@ BUILD_F77
 BUILD_FC
 BUILD_CXX
 BUILD_CC
+BUILD_FC_INCLUDE
+BUILD_C_INCLUDE
+BUILD_MPI_FC_LIB
+BUILD_MPI_C_LIB
 BUILD_LIBS
 BUILD_LDFLAGS
 BUILD_FCFLAGS
@@ -914,6 +918,10 @@ BUILD_CFLAGS
 BUILD_FCFLAGS
 BUILD_LDFLAGS
 BUILD_LIBS
+BUILD_MPI_C_LIB
+BUILD_MPI_FC_LIB
+BUILD_C_INCLUDE
+BUILD_FC_INCLUDE
 BUILD_CC
 BUILD_CXX
 BUILD_FC
@@ -1655,6 +1663,14 @@ Some influential environment variables:
   BUILD_LDFLAGS
               append to LDFLAGS during build but not in configure phase
   BUILD_LIBS  append to LIBS during build but not in configure phase
+  BUILD_MPI_C_LIB
+              append to MPI_C_LIB during build but not in configure phase
+  BUILD_MPI_FC_LIB
+              append to MPI_FC_LIB during build but not in configure phase
+  BUILD_C_INCLUDE
+              append to C_INCLUDE during build but not in configure phase
+  BUILD_FC_INCLUDE
+              append to FC_INCLUDE during build but not in configure phase
   BUILD_CC    replace CC with expansion of $BUILD_CC during build but not in
               configure phase
   BUILD_CXX   replace CXX with expansion of $BUILD_CXX during build but not in
@@ -28740,7 +28756,6 @@ else
   USE_FC_FALSE=
 fi
 
-
 # Checks for compiler
 COMPILER="$CC $CFLAGS"
 
@@ -28944,6 +28959,10 @@ CFLAGS="$CFLAGS${BUILD_CFLAGS+ $BUILD_CFLAGS}"
 FCFLAGS="$FCFLAGS${BUILD_FCFLAGS+ $BUILD_FCFLAGS}"
 LDFLAGS="$LDFLAGS${BUILD_LDFLAGS+ $BUILD_LDFLAGS}"
 LIBS="$LIBS${BUILD_LIBS+ $BUILD_LIBS}"
+MPI_C_LIB="$MPI_C_LIB${BUILD_MPI_C_LIB+ $BUILD_MPI_C_LIB}"
+MPI_FC_LIB="$MPI_FC_LIB${BUILD_MPI_FC_LIB+ $BUILD_MPI_FC_LIB}"
+C_INCLUDE="$C_INCLUDE${BUILD_C_INCLUDE+ $BUILD_C_INCLUDE}"
+FC_INCLUDE="$FC_INCLUDE${BUILD_FC_INCLUDE+ $BUILD_FC_INCLUDE}"
 CC="${BUILD_CC-$CC}"
 CXX="${BUILD_CXX-$CXX}"
 FC="${BUILD_FC-$FC}"
