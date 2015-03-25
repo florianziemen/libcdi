@@ -650,6 +650,7 @@ FC_MOD_FLAG
 ENABLE_F2003_ISOC
 CREATE_ISOC_FALSE
 CREATE_ISOC_TRUE
+ENABLE_MPI
 USE_MPI
 USE_PPM_CORE_FALSE
 USE_PPM_CORE_TRUE
@@ -28217,6 +28218,8 @@ else
   USE_PPM_CORE_FALSE=
 fi
 
+
+ENABLE_MPI=`test x"$enable_mpi" = xyes && echo true || echo false`
 
 #  ----------------------------------------------------------------------
 #  Create the Fortran Interface via iso_c_binding module (Fortran 2003 Standard)

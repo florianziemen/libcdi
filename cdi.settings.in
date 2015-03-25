@@ -30,6 +30,12 @@
         "lib"      : "@THREADS_LIBS@",
         "include"  : "@THREADS_INCLUDE@"
       },
+      "mpi"        : {
+        "libs"     : "@MPI_C_LIB@",
+        "cflags"   : "@MPI_C_INCLUDE@",
+        "fclibs"   : "@MPI_FC_LIB@",
+        "fcflags"  : "@MPI_FC_INCLUDE@"
+      },
       "zlib"     : {
         "lib"      : "@ZLIB_LIBS@",
         "include"  : "@ZLIB_INCLUDE@"
@@ -62,6 +68,8 @@
     "service"        : "@ENABLE_SERVICE@",
     "extra"          : "@ENABLE_EXTRA@",
     "ieg"            : "@ENABLE_IEG@",
+    "enable_mpi"    : @ENABLE_MPI@,
+    "parallel_nc4"  : @HAVE_PARALLEL_NC4@,
     "enable_python" : @ENABLE_PYTHON@,
     "enable_ruby"   : @ENABLE_RUBY@
   }

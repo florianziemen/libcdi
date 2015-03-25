@@ -236,6 +236,7 @@ AC_SUBST([HAVE_PARALLEL_NC4])
 AM_CONDITIONAL([USE_MPI],[test x"$USE_MPI" = xyes])
 AM_CONDITIONAL([USE_PPM_CORE],[test $enable_ppm = yes])
 AC_SUBST([USE_MPI])
+AC_SUBST([ENABLE_MPI],[`test x"$enable_mpi" = xyes && echo true || echo false`])
 #  ----------------------------------------------------------------------
 #  Create the Fortran Interface via iso_c_binding module (Fortran 2003 Standard)
 AC_ARG_ENABLE([iso-c-interface],
