@@ -660,6 +660,11 @@ PKG_CONFIG_LIBDIR
 PKG_CONFIG_PATH
 PKG_CONFIG
 MPI_LAUNCH
+MPI_FC_LIB
+MPI_FC_INCLUDE
+MPI_C_LIB
+MPI_C_INCLUDE
+MPIROOT
 ENABLE_NETCDF_FALSE
 ENABLE_NETCDF_TRUE
 ENABLE_ALL_STATIC_FALSE
@@ -866,6 +871,9 @@ enable_extra
 enable_ieg
 enable_all_static
 enable_mpi
+with_mpi_root
+with_mpi_include
+with_mpi_lib
 enable_iso_c_interface
 enable_swig
 enable_ruby
@@ -890,6 +898,10 @@ CXX
 CXXFLAGS
 CCC
 CXXCPP
+MPI_C_INCLUDE
+MPI_C_LIB
+MPI_FC_INCLUDE
+MPI_FC_LIB
 PKG_CONFIG
 PKG_CONFIG_PATH
 PKG_CONFIG_LIBDIR
@@ -1592,6 +1604,11 @@ Optional Packages:
                           library for grib2 compression; if a directory is
                           given, it will be used as a value for
                           --with-jasper-root
+  --with-mpi-root         set directory to search for MPI headers and library
+  --with-mpi-include      specifically set directory to search for MPI
+                          headers, [default=$with_mpi_root/include]
+  --with-mpi-lib          specifically set directory to search for MPI
+                          library, [default=$with_mpi_root/lib]
 
 Some influential environment variables:
   CC          C compiler command
@@ -1611,6 +1628,14 @@ Some influential environment variables:
   CXX         C++ compiler command
   CXXFLAGS    C++ compiler flags
   CXXCPP      C++ preprocessor
+  MPI_C_INCLUDE
+              specifically set flags to use when compiling sources using MPI
+              includes.
+  MPI_C_LIB   specifically set flags to use when linking MPI.
+  MPI_FC_INCLUDE
+              specifically set flags to use when compiling sources using MPI
+              includes.
+  MPI_FC_LIB  specifically set flags to use when linking MPI.
   PKG_CONFIG  path to pkg-config utility
   PKG_CONFIG_PATH
               directories to add to pkg-config's search path
@@ -2848,6 +2873,7 @@ fi
 ac_config_guess="$SHELL $ac_aux_dir/config.guess"  # Please don't use this var.
 ac_config_sub="$SHELL $ac_aux_dir/config.sub"  # Please don't use this var.
 ac_configure="$SHELL $ac_aux_dir/configure"  # Please don't use this var.
+
 
 
 
@@ -12543,7 +12569,7 @@ if ${ac_cv_fc_compiler_gnu+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   cat > conftest.$ac_ext <<_ACEOF
-      program main
+      program conftest
 #ifndef __GNUC__
        choke me
 #endif
@@ -12572,7 +12598,7 @@ if ${ac_cv_prog_fc_g+:} false; then :
 else
   FCFLAGS=-g
 cat > conftest.$ac_ext <<_ACEOF
-      program main
+      program conftest
 
       end
 _ACEOF
@@ -13977,7 +14003,7 @@ else
   $as_echo_n "(cached) " >&6
 else
   cat > conftest.$ac_ext <<_ACEOF
-      program main
+      program conftest
 
       end
 _ACEOF
@@ -14024,7 +14050,7 @@ else
   $as_echo_n "(cached) " >&6
 else
   cat > conftest.$ac_ext <<_ACEOF
-      program main
+      program conftest
 
       end
 _ACEOF
@@ -15167,7 +15193,7 @@ else
     eval "libdir=/foo; wl=\"$lt_prog_compiler_wl_FC\"; \
 	 LDFLAGS=\"\$LDFLAGS $hardcode_libdir_flag_spec_FC\""
     cat > conftest.$ac_ext <<_ACEOF
-      program main
+      program conftest
 
       end
 _ACEOF
@@ -15521,7 +15547,7 @@ ac_cv_fc_srcext_f90=unknown
 for ac_flag in none -qsuffix=f=f90 -Tf; do
   test "x$ac_flag" != xnone && ac_fcflags_srcext="$ac_flag"
   cat > conftest.$ac_ext <<_ACEOF
-      program main
+      program conftest
 
       end
 _ACEOF
@@ -15587,7 +15613,7 @@ else
   rm -f conftest*
 
    cat > conftest.$ac_ext <<_ACEOF
-      program main
+      program conftest
 #define OK
 #ifdef OK
       REAL A
@@ -15656,7 +15682,7 @@ fi
            rm -f conftest*
 
    cat > conftest.$ac_ext <<_ACEOF
-      program main
+      program conftest
 #define OK
 #ifdef OK
       REAL A
@@ -15709,7 +15735,7 @@ fi
            rm -f conftest*
 
    cat > conftest.$ac_ext <<_ACEOF
-      program main
+      program conftest
 #define OK
 #ifdef OK
       REAL A
@@ -15869,7 +15895,7 @@ ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 
    ac_ext="$acx_sl_fpp_srcext"
    cat > conftest.$ac_ext <<_ACEOF
-      program main
+      program conftest
 #ifndef OK
       syntax error
 #endif
@@ -15948,7 +15974,7 @@ ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 
    ac_ext="$acx_sl_fpp_srcext"
    cat > conftest.$ac_ext <<_ACEOF
-      program main
+      program conftest
       IMPLICIT CHARACTER (c)
        !     Comments in test programs should be freeform compliant just in case.
        !     conftest.inc contains the Fortran statement "REAL cc"
@@ -16005,7 +16031,7 @@ ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 
    ac_ext="$acx_sl_fpp_srcext"
    cat > conftest.$ac_ext <<_ACEOF
-      program main
+      program conftest
 #define NM xxxx
       IMPLICIT CHARACTER (n)
       REAL xxxx
@@ -16051,7 +16077,7 @@ ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 
    ac_ext="$acx_sl_fpp_srcext"
    cat > conftest.$ac_ext <<_ACEOF
-      program main
+      program conftest
 #define LONG '901234567890123456789012345678901234567890123456789012345678901234567890'
       CHARACTER(LEN=80) :: A
       A=LONG
@@ -16095,7 +16121,7 @@ ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 
    ac_ext="$acx_sl_fpp_srcext"
    cat > conftest.$ac_ext <<_ACEOF
-      program main
+      program conftest
       A=1. /* C-style comment */
       end
 _ACEOF
@@ -16137,7 +16163,7 @@ ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 
    ac_ext="$acx_sl_fpp_srcext"
    cat > conftest.$ac_ext <<_ACEOF
-      program main
+      program conftest
       A=1. /* C-style comment */
       end
 _ACEOF
@@ -27219,9 +27245,499 @@ fi
 
 #  ----------------------------------------------------------------------
 # Compile with MPI support
+# Sed expression to map a string onto a valid argument string part.
+asx_tr_arg="eval sed 'y%*+%pp%;s%[^-$as_cr_alnum]%-%g'"
+
 # Check whether --enable-mpi was given.
 if test "${enable_mpi+set}" = set; then :
   enableval=$enable_mpi; enable_mpi=yes
+     ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+
+
+
+
+
+
+   have_MPI_c_bindings=yes
+
+
+# Check whether --with-mpi-root was given.
+if test "${with_mpi_root+set}" = set; then :
+  withval=$with_mpi_root; MPIROOT="$with_mpi_root"
+fi
+
+   if ${MPIROOT+:} false; then :
+  if ${MPI_C_LIB+:} false; then :
+
+else
+  acx_temp=$MPIROOT
+         MPI_C_LIB="-L$acx_temp/lib"
+fi
+      if ${MPI_C_INCLUDE+:} false; then :
+
+else
+  acx_temp=$MPIROOT
+         MPI_C_INCLUDE="-I$acx_temp/include"
+fi
+fi
+
+# Check whether --with-mpi-include was given.
+if test "${with_mpi_include+set}" = set; then :
+  withval=$with_mpi_include; MPI_C_INCLUDE="-I$with_mpi_include"
+fi
+
+
+
+   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for mpi.h extra include path" >&5
+$as_echo_n "checking for mpi.h extra include path... " >&6; }
+   if ${acx_cv_c_include_mpi_h+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+       ac_include_search_mpi_h_SAVE="$CPPFLAGS"
+      while :; do
+        for ac_incdir in ''; do
+             if test -z "$ac_incdir"; then :
+  ac_res="none required"
+                CPPFLAGS="$MPI_C_INCLUDE $ac_include_search_mpi_h_SAVE"
+else
+  ac_res="-I$ac_incdir"
+                CPPFLAGS="$MPI_C_INCLUDE $ac_res $ac_include_search_mpi_h_SAVE"
+fi
+             cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+$ac_includes_default
+#include <mpi.h>
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  acx_cv_c_include_mpi_h=yes
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+   if ${acx_cv_c_include_mpi_h+:} false; then :
+                 if test -z "$ac_incdir"; then :
+                    acx_cv_c_include_mpi_h="$MPI_C_INCLUDE"
+else
+                    acx_cv_c_include_mpi_h="$MPI_C_INCLUDE -I$ac_incdir"
+fi
+fi
+             if ${acx_cv_c_include_mpi_h+:} false; then :
+  break
+fi
+           done
+           if ${acx_cv_c_include_mpi_h+:} false; then :
+  break
+fi
+
+        break
+      done
+      CPPFLAGS=$ac_include_search_mpi_h_SAVE
+fi
+
+   if ${acx_cv_c_include_mpi_h+:} false; then :
+  acx_temp=$acx_cv_c_include_mpi_h
+      if test x"$acx_temp" = x; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: (none required)" >&5
+$as_echo "(none required)" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $acx_temp" >&5
+$as_echo "$acx_temp" >&6; }
+fi
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: not found" >&5
+$as_echo "not found" >&6; }
+fi
+   if ${acx_cv_c_include_mpi_h+:} false; then :
+  acx_temp=$acx_cv_c_include_mpi_h
+         acx_temp=`echo "$acx_temp" | sed -e 's/^ *//;s/ *$//'`
+         MPI_C_INCLUDE=$acx_temp
+else
+  have_MPI_c_bindings=no
+         { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "Required header mpi.h not found or not compilable.
+See \`config.log' for more details" "$LINENO" 5; }
+        enable_MPI=no
+fi
+
+
+# Check whether --with-mpi-lib was given.
+if test "${with_mpi_lib+set}" = set; then :
+  withval=$with_mpi_lib; MPI_C_LIB="-L$with_mpi_lib"
+fi
+
+
+
+      if test "x$have_MPI_c_bindings" = xyes; then :
+              { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing MPI_Waitall" >&5
+$as_echo_n "checking for library containing MPI_Waitall... " >&6; }
+   if ${acx_cv_option_search_MPI_Waitall_c+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+       while :; do
+        acx_option_func_search_save_LIBS="$LIBS"
+   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char MPI_Waitall ();
+int
+main ()
+{
+return MPI_Waitall ();
+  ;
+  return 0;
+}
+_ACEOF
+   for ac_lib in '' mpi mpich; do
+     if test -z "$ac_lib"; then :
+  ac_res="none required"
+        LIBS="$MPI_C_LIB $acx_option_func_search_save_LIBS"
+else
+  ac_res="-l$ac_lib"
+        LIBS="$MPI_C_LIB $ac_res $acx_option_func_search_save_LIBS"
+fi
+     if ac_fn_c_try_link "$LINENO"; then :
+  if test x"$ac_res" = x"none required"; then :
+          acx_cv_option_search_MPI_Waitall_c="$MPI_C_LIB "
+else
+          acx_cv_option_search_MPI_Waitall_c="$MPI_C_LIB -l$ac_lib "
+fi
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext
+     if ${acx_cv_option_search_MPI_Waitall_c+:} false; then :
+  break
+fi
+   done
+   rm conftest.$ac_ext
+   LIBS="$acx_option_func_search_save_LIBS"
+        if ${acx_cv_option_search_MPI_Waitall_c+:} false; then :
+  break
+fi
+
+        break
+      done
+fi
+
+   if ${acx_cv_option_search_MPI_Waitall_c+:} false; then :
+       if test x"$acx_cv_option_search_MPI_Waitall_c" = x; then :
+          { $as_echo "$as_me:${as_lineno-$LINENO}: result: (none required)" >&5
+$as_echo "(none required)" >&6; }
+else
+          { $as_echo "$as_me:${as_lineno-$LINENO}: result: $acx_cv_option_search_MPI_Waitall_c" >&5
+$as_echo "$acx_cv_option_search_MPI_Waitall_c" >&6; }
+fi
+else
+       { $as_echo "$as_me:${as_lineno-$LINENO}: result: not found" >&5
+$as_echo "not found" >&6; }
+fi
+   if ${acx_cv_option_search_MPI_Waitall_c+:} false; then :
+
+else
+             have_MPI_c_bindings=no
+            { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "Cannot link C MPI programs.
+See \`config.log' for more details" "$LINENO" 5; }
+        enable_MPI=no
+fi
+
+         acx_temp=$acx_cv_option_search_MPI_Waitall_c
+         acx_temp=`echo "$acx_temp" | sed -e 's/^ *//;s/ *$//'`
+         MPI_C_LIB=$acx_temp
+
+fi
+
+
+
+
+
+
+   ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+     if test -n "$FC" && test "X$FC" != "Xno"; then :
+  ac_ext=${ac_fc_srcext-f}
+ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
+ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $ac_fcflags_srcext conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_fc_compiler_gnu
+
+
+
+
+
+
+
+
+   have_MPI_fc_bindings=yes
+
+
+# Check whether --with-mpi-root was given.
+if test "${with_mpi_root+set}" = set; then :
+  withval=$with_mpi_root; MPIROOT="$with_mpi_root"
+fi
+
+   if ${MPIROOT+:} false; then :
+  if ${MPI_FC_LIB+:} false; then :
+
+else
+  acx_temp=$MPIROOT
+         MPI_FC_LIB="-L$acx_temp/lib"
+fi
+      if ${MPI_FC_INCLUDE+:} false; then :
+
+else
+  acx_temp=$MPIROOT
+         MPI_FC_INCLUDE="$FPP_INCOPT$acx_temp/include"
+fi
+fi
+
+# Check whether --with-mpi-include was given.
+if test "${with_mpi_include+set}" = set; then :
+  withval=$with_mpi_include; MPI_FC_INCLUDE="$FPP_INCOPT$with_mpi_include"
+fi
+
+
+
+   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for mpif.h extra include path" >&5
+$as_echo_n "checking for mpif.h extra include path... " >&6; }
+   if ${acx_cv_fc_include_mpif_h+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+       ac_include_search_mpif_h_SAVE="$FCFLAGS"
+      while :; do
+        for ac_incdir in ''; do
+             if test -z "$ac_incdir"; then :
+  ac_res="none required"
+                FCFLAGS="$MPI_FC_INCLUDE $ac_include_search_mpif_h_SAVE"
+else
+  ac_res="$FPP_INCOPT$ac_incdir"
+                FCFLAGS="$MPI_FC_INCLUDE $ac_res $ac_include_search_mpif_h_SAVE"
+fi
+             cat > conftest.$ac_ext <<_ACEOF
+      program conftest
+      include 'mpif.h'
+      end
+_ACEOF
+if ac_fn_fc_try_compile "$LINENO"; then :
+  acx_cv_fc_include_mpif_h=yes
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+   if ${acx_cv_fc_include_mpif_h+:} false; then :
+                 if test -z "$ac_incdir"; then :
+                    acx_cv_fc_include_mpif_h="$MPI_FC_INCLUDE"
+else
+                    acx_cv_fc_include_mpif_h="$MPI_FC_INCLUDE $FPP_INCOPT$ac_incdir"
+fi
+fi
+             if ${acx_cv_fc_include_mpif_h+:} false; then :
+  break
+fi
+           done
+           if ${acx_cv_fc_include_mpif_h+:} false; then :
+  break
+fi
+
+        break
+      done
+      FCFLAGS=$ac_include_search_mpif_h_SAVE
+fi
+
+   if ${acx_cv_fc_include_mpif_h+:} false; then :
+  acx_temp=$acx_cv_fc_include_mpif_h
+      if test x"$acx_temp" = x; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: (none required)" >&5
+$as_echo "(none required)" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $acx_temp" >&5
+$as_echo "$acx_temp" >&6; }
+fi
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: not found" >&5
+$as_echo "not found" >&6; }
+fi
+   if ${acx_cv_fc_include_mpif_h+:} false; then :
+  acx_temp=$acx_cv_fc_include_mpif_h
+         acx_temp=`echo "$acx_temp" | sed -e 's/^ *//;s/ *$//'`
+         MPI_FC_INCLUDE=$acx_temp
+else
+  have_MPI_fc_bindings=no
+         { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "Required include mpif.h not found or not compilable.
+See \`config.log' for more details" "$LINENO" 5; }
+           enable_MPI=no
+fi
+
+
+# Check whether --with-mpi-lib was given.
+if test "${with_mpi_lib+set}" = set; then :
+  withval=$with_mpi_lib; MPI_FC_LIB="-L$with_mpi_lib"
+fi
+
+
+
+      if test "x$have_MPI_fc_bindings" = xyes; then :
+              { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing mpi_waitall" >&5
+$as_echo_n "checking for library containing mpi_waitall... " >&6; }
+   if ${acx_cv_option_search_mpi_waitall_fc+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+       while :; do
+        acx_option_func_search_save_LIBS="$LIBS"
+   cat > conftest.$ac_ext <<_ACEOF
+      program conftest
+      call mpi_waitall
+      end
+_ACEOF
+   for ac_lib in '' mpi mpi_f90 mpi_f77 mpich; do
+     if test -z "$ac_lib"; then :
+  ac_res="none required"
+        LIBS="$MPI_FC_LIB $acx_option_func_search_save_LIBS"
+else
+  ac_res="-l$ac_lib"
+        LIBS="$MPI_FC_LIB $ac_res $acx_option_func_search_save_LIBS"
+fi
+     if ac_fn_fc_try_link "$LINENO"; then :
+  if test x"$ac_res" = x"none required"; then :
+          acx_cv_option_search_mpi_waitall_fc="$MPI_FC_LIB "
+else
+          acx_cv_option_search_mpi_waitall_fc="$MPI_FC_LIB -l$ac_lib "
+fi
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext
+     if ${acx_cv_option_search_mpi_waitall_fc+:} false; then :
+  break
+fi
+   done
+   rm conftest.$ac_ext
+   LIBS="$acx_option_func_search_save_LIBS"
+        if ${acx_cv_option_search_mpi_waitall_fc+:} false; then :
+  break
+fi
+                  acx_option_func_search_save_LIBS="$LIBS"
+   cat > conftest.$ac_ext <<_ACEOF
+      program conftest
+      call mpi_waitall
+      end
+_ACEOF
+   for ac_lib in '' mpi mpi_f90 mpi_f77 mpich; do
+     if test -z "$ac_lib"; then :
+  ac_res="none required"
+        LIBS="$MPI_FC_LIB -lmpi_f77 -lmpi $acx_option_func_search_save_LIBS"
+else
+  ac_res="-l$ac_lib"
+        LIBS="$MPI_FC_LIB $ac_res -lmpi_f77 -lmpi $acx_option_func_search_save_LIBS"
+fi
+     if ac_fn_fc_try_link "$LINENO"; then :
+  if test x"$ac_res" = x"none required"; then :
+          acx_cv_option_search_mpi_waitall_fc="$MPI_FC_LIB -lmpi_f77 -lmpi"
+else
+          acx_cv_option_search_mpi_waitall_fc="$MPI_FC_LIB -l$ac_lib -lmpi_f77 -lmpi"
+fi
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext
+     if ${acx_cv_option_search_mpi_waitall_fc+:} false; then :
+  break
+fi
+   done
+   rm conftest.$ac_ext
+   LIBS="$acx_option_func_search_save_LIBS"
+           if ${acx_cv_option_search_mpi_waitall_fc+:} false; then :
+  break
+fi
+                    acx_option_func_search_save_LIBS="$LIBS"
+   cat > conftest.$ac_ext <<_ACEOF
+      program conftest
+      call mpi_waitall
+      end
+_ACEOF
+   for ac_lib in '' mpi mpi_f90 mpi_f77 mpich; do
+     if test -z "$ac_lib"; then :
+  ac_res="none required"
+        LIBS="$MPI_FC_LIB -lmpi $acx_option_func_search_save_LIBS"
+else
+  ac_res="-l$ac_lib"
+        LIBS="$MPI_FC_LIB $ac_res -lmpi $acx_option_func_search_save_LIBS"
+fi
+     if ac_fn_fc_try_link "$LINENO"; then :
+  if test x"$ac_res" = x"none required"; then :
+          acx_cv_option_search_mpi_waitall_fc="$MPI_FC_LIB -lmpi"
+else
+          acx_cv_option_search_mpi_waitall_fc="$MPI_FC_LIB -l$ac_lib -lmpi"
+fi
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext
+     if ${acx_cv_option_search_mpi_waitall_fc+:} false; then :
+  break
+fi
+   done
+   rm conftest.$ac_ext
+   LIBS="$acx_option_func_search_save_LIBS"
+           if ${acx_cv_option_search_mpi_waitall_fc+:} false; then :
+  break
+fi
+
+        break
+      done
+fi
+
+   if ${acx_cv_option_search_mpi_waitall_fc+:} false; then :
+       if test x"$acx_cv_option_search_mpi_waitall_fc" = x; then :
+          { $as_echo "$as_me:${as_lineno-$LINENO}: result: (none required)" >&5
+$as_echo "(none required)" >&6; }
+else
+          { $as_echo "$as_me:${as_lineno-$LINENO}: result: $acx_cv_option_search_mpi_waitall_fc" >&5
+$as_echo "$acx_cv_option_search_mpi_waitall_fc" >&6; }
+fi
+else
+       { $as_echo "$as_me:${as_lineno-$LINENO}: result: not found" >&5
+$as_echo "not found" >&6; }
+fi
+   if ${acx_cv_option_search_mpi_waitall_fc+:} false; then :
+
+else
+             have_MPI_fc_bindings=no
+            { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "Cannot link Fortran MPI programs.
+See \`config.log' for more details" "$LINENO" 5; }
+           enable_MPI=no
+fi
+
+         acx_temp=$acx_cv_option_search_mpi_waitall_fc
+         acx_temp=`echo "$acx_temp" | sed -e 's/^ *//;s/ *$//'`
+         MPI_FC_LIB=$acx_temp
+
+fi
+
+
+
+
+
+
+   ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+fi
 else
   enable_mpi=no
 fi
@@ -27816,7 +28332,7 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
         FCFLAGS_save=$FCFLAGS
         FCFLAGS="$FCFLAGS ${i}conftestdir"
         cat > conftest.$ac_ext <<_ACEOF
-      program main
+      program conftest
       use cnftst
       implicit none
       i = 0

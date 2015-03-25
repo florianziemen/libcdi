@@ -11,6 +11,8 @@ echo "configuring ${PACKAGE_NAME} ${PACKAGE_VERSION}"
 CONFIG_ABORT=yes
 AC_CONFIG_AUX_DIR([config])
 AC_CONFIG_MACRO_DIR([m4])
+dnl forbid acx macro names from remaining unexpanded
+m4_pattern_forbid([^ACX_])
 AC_CANONICAL_HOST
 AC_CANONICAL_BUILD
 
@@ -129,7 +131,23 @@ ACX_OPTIONS
 AM_CONDITIONAL([ENABLE_NETCDF],[test x$ENABLE_NETCDF = xyes])
 #  ----------------------------------------------------------------------
 # Compile with MPI support
-AC_ARG_ENABLE(mpi,AS_HELP_STRING([--enable-mpi],[Compile with MPI compiler [default=no]]),enable_mpi=yes,enable_mpi=no)
+AC_ARG_ENABLE([mpi],
+  AS_HELP_STRING([--enable-mpi],
+    [Compile with MPI compiler @<:@default=no@:>@]),
+    [enable_mpi=yes
+     ACX_C_PACKAGE([MPI],[mpi.h],,,
+       [AC_MSG_FAILURE([Required header mpi.h not found or not compilable.])
+        enable_MPI=no],[MPI_Waitall],[mpi mpich],,,
+       [AC_MSG_FAILURE([Cannot link C MPI programs.])
+        enable_MPI=no])
+     AS_IF([test -n "$FC" && test "X$FC" != "Xno"],
+       [ACX_FORTRAN_PACKAGE([MPI], [mpif.h],,,
+          [AC_MSG_FAILURE([Required include mpif.h not found or not compilable.])
+           enable_MPI=no],[mpi_waitall],
+          [mpi mpi_f90 mpi_f77 mpich],[[-lmpi_f77 -lmpi],[-lmpi]],,
+          [AC_MSG_FAILURE([Cannot link Fortran MPI programs.])
+           enable_MPI=no],[])])],
+    [enable_mpi=no])
 AS_IF([test x"${enable_mpi}" = x"yes"],
       [USE_MPI=yes])
 HAVE_PARALLEL_NC4=0
