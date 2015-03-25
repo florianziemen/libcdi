@@ -905,30 +905,24 @@ const char *tableInqParUnitsPtr(int tableID, int code)
 
 int tableInqParLongname(int tableID, int code, char *longname)
 {
-  int item, npars;
-  int err = 0;
-
-  npars = parTable[tableID].npars;
-
   if ( ((tableID >= 0) & (tableID < MAX_TABLE)) | (tableID == UNDEFID) ) { } else
     Error("Invalid table ID %d", tableID);
 
-  if ( tableID == UNDEFID )
+  int err = 1;
+
+  if ( tableID != UNDEFID )
     {
-      err = 1;
-    }
-  else
-    {
-      for ( item = 0; item < npars; item++ )
+      int npars = parTable[tableID].npars;
+      for ( int item = 0; item < npars; item++ )
 	{
 	  if ( parTable[tableID].pars[item].id == code )
 	    {
 	      if ( parTable[tableID].pars[item].longname )
 		strcpy(longname, parTable[tableID].pars[item].longname);
+              err = 0;
 	      break;
 	    }
 	}
-      if ( item == npars ) err = 1;
     }
 
   return (err);
