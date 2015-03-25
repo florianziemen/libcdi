@@ -843,12 +843,11 @@ int tableInqParName(int tableID, int code, char *varname)
 const char *tableInqParNamePtr(int tableID, int code)
 {
   const char *name = NULL;
-  int item, npars;
 
   if ( tableID != UNDEFID )
     {
-      npars = parTable[tableID].npars;
-      for ( item = 0; item < npars; item++ )
+      int npars = parTable[tableID].npars;
+      for ( int item = 0; item < npars; item++ )
 	{
 	  if ( parTable[tableID].pars[item].id == code )
 	    {
@@ -865,12 +864,11 @@ const char *tableInqParNamePtr(int tableID, int code)
 const char *tableInqParLongnamePtr(int tableID, int code)
 {
   const char *longname = NULL;
-  int item, npars;
 
   if ( tableID != UNDEFID )
     {
-      npars = parTable[tableID].npars;
-      for ( item = 0; item < npars; item++ )
+      int npars = parTable[tableID].npars;
+      for ( int item = 0; item < npars; item++ )
 	{
 	  if ( parTable[tableID].pars[item].id == code )
 	    {
@@ -887,12 +885,11 @@ const char *tableInqParLongnamePtr(int tableID, int code)
 const char *tableInqParUnitsPtr(int tableID, int code)
 {
   const char *units = NULL;
-  int item, npars;
 
   if ( tableID != UNDEFID )
     {
-      npars = parTable[tableID].npars;
-      for ( item = 0; item < npars; item++ )
+      int npars = parTable[tableID].npars;
+      for ( int item = 0; item < npars; item++ )
 	{
 	  if ( parTable[tableID].pars[item].id == code )
 	    {
