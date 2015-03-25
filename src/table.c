@@ -825,27 +825,21 @@ int tableInqParCode(int tableID, char *varname, int *code)
 
 int tableInqParName(int tableID, int code, char *varname)
 {
-  int item, npars;
-  int err = 0;
+  int err = 1;
 
-  npars = parTable[tableID].npars;
-
-  if ( tableID == UNDEFID )
+  if ( tableID != UNDEFID )
     {
-      err = 1;
-    }
-  else
-    {
-      for ( item = 0; item < npars; item++ )
+      int npars = parTable[tableID].npars;
+      for ( int item = 0; item < npars; item++ )
 	{
 	  if ( parTable[tableID].pars[item].id == code )
 	    {
 	      if ( parTable[tableID].pars[item].name )
 		strcpy(varname, parTable[tableID].pars[item].name);     //FIXME: This may overrun the supplied buffer!
+              err = 0;
 	      break;
 	    }
 	}
-      if ( item == npars ) err = 1;
     }
 
   return (err);
