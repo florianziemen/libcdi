@@ -464,25 +464,19 @@ void cdi_generate_vars(stream_t *streamptr)
 
   if ( streamptr->sortname )
     {
-      param_t **varInfo;
-      varInfo    = (param_t **)xmalloc((size_t)nvars * sizeof (param_t *));
-      varInfo[0] = (param_t *)xmalloc((size_t)nvars * sizeof (param_t));
-
-      for ( int index = 1; index < nvars; index++ )
-	varInfo[index] = varInfo[0] + index;
+      param_t *varInfo = (param_t *)xmalloc((size_t)nvars * sizeof (param_t));
 
       for ( varid = 0; varid < nvars; varid++ )
 	{
-	  varInfo[varid]->varid = varids[varid];
-	  varInfo[varid]->param = vartable[varid].param;
-	  varInfo[varid]->ltype = vartable[varid].ltype1;
+	  varInfo[varid].varid = varids[varid];
+	  varInfo[varid].param = vartable[varid].param;
+	  varInfo[varid].ltype = vartable[varid].ltype1;
 	}
-      qsort(varInfo[0], (size_t)nvars, sizeof(param_t), cmpparam);
+      qsort(varInfo, (size_t)nvars, sizeof(param_t), cmpparam);
       for ( varid = 0; varid < nvars; varid++ )
 	{
-	  varids[varid] = varInfo[varid]->varid;
+	  varids[varid] = varInfo[varid].varid;
 	}
-      free(varInfo[0]);
       free(varInfo);
     }
 
