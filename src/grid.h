@@ -2,6 +2,7 @@
 #define _GRID_H
 
 #include "cdi.h"
+#include "resource_handle.h"
 
 typedef unsigned char mask_t;
 
@@ -94,6 +95,8 @@ void
 gridUnpack(char * unpackBuffer, int unpackBufferSize,
            int * unpackBufferPos, int originNamespace, void *context,
            int force_id);
+
+extern const resOps gridOps;
 
 #endif
 /*

@@ -2,12 +2,14 @@
 #  include "config.h"
 #endif
 
+#include <stdbool.h>
 #include <string.h>
 #include <math.h>
 
 #include "cdi.h"
 #include "cdi_int.h"
 #include "dmemory.h"
+#include "resource_handle.h"
 #include "varscan.h"
 #include "vlist.h"
 #include "grid.h"
@@ -741,6 +743,25 @@ void varDefZAxisReference(int nhlev, int nvgrid, unsigned char uuid[CDI_UUID_SIZ
   memcpy(uuidVGrid, uuid, CDI_UUID_SIZE);
 }
 
+struct varDefGridSearchState
+{
+  int resIDValue;
+  const grid_t *queryKey;
+};
+
+static enum cdiApplyRet
+varDefGridSearch(int id, void *res, void *data)
+{
+  struct varDefGridSearchState *state = data;
+  (void)res;
+  if (gridCompare(id, state->queryKey) == 0)
+    {
+      state->resIDValue = id;
+      return CDI_APPLY_STOP;
+    }
+  else
+    return CDI_APPLY_GO_ON;
+}
 
 int varDefGrid(int vlistID, const grid_t *grid, int mode)
 {
@@ -751,10 +772,7 @@ int varDefGrid(int vlistID, const grid_t *grid, int mode)
   int gridglobdefined = FALSE;
   int griddefined;
   int gridID = CDI_UNDEFID;
-  vlist_t *vlistptr;
-  int * gridIndexList;
-
-  vlistptr = vlist_to_pointer(vlistID);
+  vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
   griddefined = FALSE;
   unsigned ngrids = (unsigned)vlistptr->ngrids;
@@ -775,25 +793,13 @@ int varDefGrid(int vlistID, const grid_t *grid, int mode)
 
   if ( ! griddefined )
     {
-      ngrids = cdiGridCount();
-      if ( ngrids > 0 )
-        {
-          gridIndexList = (int*)xmalloc((size_t)ngrids * sizeof(int));
-          cdiGridGetIndexList ( ngrids, gridIndexList );
-          for (unsigned i = 0; i < ngrids; i++ )
-            {
-              gridID = gridIndexList[i];
-              if ( gridCompare(gridID, grid) == 0 )
-                {
-                  gridglobdefined = TRUE;
-                  break;
-                }
-            }
-          free(gridIndexList);
-        }
+      struct varDefGridSearchState query = { .queryKey = grid };
+      if ((gridglobdefined
+           = (cdiResHFilterApply(&gridOps, varDefGridSearch, &query)
+              == CDI_APPLY_STOP)))
+        gridID = query.resIDValue;
 
-      ngrids = (unsigned)vlistptr->ngrids;
-      if ( mode == 1 )
+      if ( mode == 1 && gridglobdefined)
 	for (unsigned index = 0; index < ngrids; index++ )
 	  if ( vlistptr->gridIDs[index] == gridID )
 	    {
@@ -953,7 +959,6 @@ int varDefZaxis(int vlistID, int zaxistype, int nlevels, double *levels, int lbo
 	  zaxisDefLtype(zaxisID, ltype1);
 	}
 
-      nzaxis = vlistptr->nzaxis;
       vlistptr->zaxisIDs[nzaxis] = zaxisID;
       vlistptr->nzaxis++;
     }
