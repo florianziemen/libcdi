@@ -34,7 +34,7 @@ test_resource_copy_LDADD = $(UUID_C_LIB) ../src/libcdiresunpack.la $(LDADD)
 test_resource_copy_mpi_SOURCES = test_resource_copy.c
 test_cdf_write_SOURCES = test_cdf_write.c
 test_cdf_read_SOURCES = test_cdf_read.c
-
+#
 AM_CFLAGS = $(PPM_CORE_CFLAGS) $(YAXT_CFLAGS) $(MPI_C_INCLUDE)
 if USE_MPI
 pio_write_LDADD = ../src/libcdipio.la $(UUID_C_LIB) $(MPI_C_LIB)

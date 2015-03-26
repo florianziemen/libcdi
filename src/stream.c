@@ -324,7 +324,7 @@ const char *streamFilesuffix(int filetype)
 }
 
 
-char *streamFilename(int streamID)
+const char *streamFilename(int streamID)
 {
   stream_t *streamptr = stream_to_pointer(streamID);
 
