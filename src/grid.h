@@ -2,7 +2,9 @@
 #define _GRID_H
 
 #include "cdi.h"
+#ifndef RESOURCE_HANDLE_H
 #include "resource_handle.h"
+#endif
 
 typedef unsigned char mask_t;
 

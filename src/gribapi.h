@@ -2,11 +2,15 @@
 #define _GRIBAPI_H
 
 #ifdef HAVE_LIBGRIB_API
-#  include "error.h"
-#  include <grib_api.h>
+#include <grib_api.h>
+#ifndef  _ERROR_H
+#include "error.h"
+#endif
 #endif
 
+#ifndef  _CDI_INT_H
 #include "cdi_int.h"
+#endif
 
 #define  GRIBAPI_MISSVAL  -9.E33
 

@@ -147,7 +147,7 @@
  191 | sclf0       | SW top cloud forcing (178-187)           | W m-2 
  192 | tclf0       | LW top cloud forcing (179-188)           | W m-2 
  193 | wl          | skin reservoir content                   | m     
- 194 | slf         | sea land fraction                        
+ 194 | slf         | sea land fraction                        |
  195 | ustrgw      | u-gravity wave stress                    | Pa    
  196 | vstrgw      | v-gravity wave stress                    | Pa    
  197 | vdisgw      | gravity wave dissipation                 | W m-2 
