@@ -1,3 +1,7 @@
+#if defined (HAVE_CONFIG_H)
+#  include "config.h"
+#endif
+
 static int dummy;
 
 #ifdef HAVE_LIBGRIB_API
