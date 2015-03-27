@@ -325,13 +325,15 @@ void  cdiInitialize(void);
 
 void uuid2str(const unsigned char *uuid, char *uuidstr);
 int str2uuid(const char *uuidstr, unsigned char *uuid);
-static inline int
-cdiUUIDIsNull(const unsigned char uuid[CDI_UUID_SIZE])
+
+static inline int cdiUUIDIsNull(const unsigned char uuid[CDI_UUID_SIZE])
 {
   static const unsigned char uuid_nil[CDI_UUID_SIZE];
   return !memcmp(uuid, uuid_nil, CDI_UUID_SIZE);
 }
 
+char* cdiEscapeSpaces(const char* string);
+char* cdiUnescapeSpaces(const char* string, const char** outStringEnd);
 
 #define CDI_UNIT_PA   1
 #define CDI_UNIT_HPA  2

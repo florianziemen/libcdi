@@ -8041,7 +8041,6 @@ void cdfEndDef(stream_t *streamptr)
 static void cdfDefInstitut(stream_t *streamptr)
 {
   int fileID, instID;
-  char *longname;
   size_t len;
   int vlistID;
 
@@ -8051,7 +8050,7 @@ static void cdfDefInstitut(stream_t *streamptr)
 
   if ( instID != UNDEFID )
     {
-      longname = institutInqLongnamePtr(instID);
+      const char *longname = institutInqLongnamePtr(instID);
       if ( longname )
 	{
 	  len = strlen(longname);

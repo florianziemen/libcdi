@@ -590,9 +590,9 @@ static void partabCheckID(int item)
     Error("item %d name undefined!", item);
 }
 
-char *tableInqNamePtr(int tableID)
+const char *tableInqNamePtr(int tableID)
 {
-  char *tablename = NULL;
+  const char *tablename = NULL;
 
   if ( CDI_Debug )
     Message("tableID = %d", tableID);

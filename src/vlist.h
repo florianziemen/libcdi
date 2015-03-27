@@ -5,12 +5,14 @@
 #include "config.h"
 #endif
 
+#ifndef  _ERROR_H
 #include "error.h"
+#endif
 
 #include <stddef.h>  /* size_t */
 
 #ifndef _CDI_LIMITS_H
-#  include "cdi_limits.h"
+#include "cdi_limits.h"
 #endif
 
 #define VALIDMISS 1.e+303
@@ -150,6 +152,7 @@ vlist_t;
 
 
 vlist_t *vlist_to_pointer(int vlistID);
+void vlistCheckVarID(const char *caller, int vlistID, int varID);
 const char *vlistInqVarNamePtr(int vlistID, int varID);
 const char *vlistInqVarLongnamePtr(int vlistID, int varID);
 const char *vlistInqVarStdnamePtr(int vlistID, int varID);
