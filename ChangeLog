@@ -1,3 +1,7 @@
+2015-03-27  Uwe Schulzweida
+
+	* gribapiScanTimestep1: fixed bug from previous merge of branches/cdi_fileDrivenInput (GRIB2 read failed)
+
 2015-03-26  Uwe Schulzweida
 
         * merged changes from branches/cdi_fileDrivenInput

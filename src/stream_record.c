@@ -47,7 +47,7 @@ int recordNewEntry(stream_t *streamptr, int tsID)
       if ( records == NULL )
 	{
           Message("recordSize = %d", recordSize);
-	  SysError("Allocation of record_tTABLE failed");
+	  SysError("Allocation of records failed");
 	}
 
       for ( i = 0; i < recordSize; i++ )
@@ -74,7 +74,7 @@ int recordNewEntry(stream_t *streamptr, int tsID)
       if ( records == NULL )
 	{
           Message("recordSize = %d", recordSize);
-	  SysError("Reallocation of record_tTABLE failed");
+	  SysError("Reallocation of records failed");
 	}
       recordID = recordSize/2;
 
@@ -443,7 +443,7 @@ void cdi_create_records(stream_t *streamptr, int tsID)
 
   if ( destTstep->records ) return;
 
-  int vlistID  = streamptr->vlistID;
+  int vlistID = streamptr->vlistID;
 
   if ( tsID == 0 )
     {
