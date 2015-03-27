@@ -1,11 +1,7 @@
 #ifndef _DMEMORY_H
 #define _DMEMORY_H
 
-//Ensure that all standard headers that may declare malloc() and friends are already included so that our macros won't clobber their definitions.
 #include <stdlib.h>
-#ifdef HAVE_MALLOC_H
-    #include <malloc.h>
-#endif
 
 /*
  * if DEBUG_MEMORY is defined setenv MEMORY_DEBUG to debug memory

@@ -40,8 +40,7 @@ class CdiTaxis {
     int ntsteps, unit;
     int rdate, rtime, vdate, vtime;
     int type, calendar, hasBounds;
-    char name[CHARSIZE];
-    const char *unitname;
+    char name[CHARSIZE], *unitname;
 };
 
 class CdiZaxis {

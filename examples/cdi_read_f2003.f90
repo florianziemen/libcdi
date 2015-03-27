@@ -11,7 +11,7 @@ PROGRAM CDIREADF2003
   DOUBLE PRECISION, ALLOCATABLE :: field(:,:)
   CHARACTER(kind=c_char), POINTER, DIMENSION(:) :: &
        msg, cdi_version
-  CHARACTER(kind=c_char, LEN = cdi_max_name + 1) :: &
+  CHARACTER(kind=c_char), DIMENSION(cdi_max_name + 1) :: &
        name, longname, units
   INTEGER :: name_c_len, longname_c_len, units_c_len
 

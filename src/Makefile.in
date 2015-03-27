@@ -159,11 +159,8 @@ libcdi_la_DEPENDENCIES = $(am__DEPENDENCIES_1)
 am_libcdi_la_OBJECTS = basetime.lo binary.lo calendar.lo cdf.lo \
 	cdf_int.lo cdi_error.lo cdi_util.lo cdiFortran.lo \
 	cgribexlib.lo dmemory.lo cksum.lo cdi_cksum.lo error.lo \
-	extralib.lo file.lo gaussgrid.lo gribapi.lo \
-	gribapi_utilities.lo grid.lo ieglib.lo input_file.lo \
-	institution.lo iterator.lo iterator_fallback.lo \
-	iterator_grib.lo model.lo namespace.lo serialize.lo \
-	proprietarySystemWorkarounds.lo referenceCounting.lo \
+	extralib.lo file.lo gaussgrid.lo gribapi.lo grid.lo ieglib.lo \
+	institution.lo model.lo namespace.lo serialize.lo \
 	resource_handle.lo servicelib.lo stream_cdf.lo \
 	stream_cgribex.lo stream_ext.lo stream_grb.lo \
 	stream_gribapi.lo stream_history.lo stream_ieg.lo \
@@ -293,7 +290,6 @@ ENABLE_CGRIBEX = @ENABLE_CGRIBEX@
 ENABLE_EXTRA = @ENABLE_EXTRA@
 ENABLE_GRIB = @ENABLE_GRIB@
 ENABLE_IEG = @ENABLE_IEG@
-ENABLE_MPI = @ENABLE_MPI@
 ENABLE_NC2 = @ENABLE_NC2@
 ENABLE_NC4 = @ENABLE_NC4@
 ENABLE_NETCDF = @ENABLE_NETCDF@
@@ -498,32 +494,18 @@ libcdi_la_SOURCES = \
 	gaussgrid.h	 \
 	gribapi.c  	 \
 	gribapi.h	 \
-	gribapi_utilities.c \
-	gribapi_utilities.h \
 	grid.c           \
 	grid.h	 	 \
 	ieg.h	 	 \
 	ieglib.c         \
-	input_file.c	\
-	input_file.h	\
 	institution.c  	 \
 	institution.h  	 \
-	iterator.c       \
-	iterator.h       \
-	iterator_fallback.c \
-	iterator_fallback.h \
-	iterator_grib.c \
-	iterator_grib.h  \
 	model.c        	 \
 	model.h        	 \
 	namespace.c      \
 	namespace.h      \
 	serialize.h	\
 	serialize.c	\
-	proprietarySystemWorkarounds.c \
-	proprietarySystemWorkarounds.h \
-	referenceCounting.c \
-	referenceCounting.h \
 	resource_handle.c\
 	resource_handle.h\
 	service.h	 \
@@ -752,14 +734,9 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/file.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gaussgrid.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gribapi.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gribapi_utilities.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/grid.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ieglib.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/input_file.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/institution.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/iterator.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/iterator_fallback.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/iterator_grib.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/model.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/namespace.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio.Plo@am__quote@
@@ -777,8 +754,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_serialize.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_server.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_util.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/proprietarySystemWorkarounds.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/referenceCounting.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/resource_handle.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/resource_unpack.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/serialize.Plo@am__quote@

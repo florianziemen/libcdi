@@ -14,14 +14,6 @@
 #include "namespace.h"
 #include "serialize.h"
 #include "error.h"
-#include "proprietarySystemWorkarounds.h"
-
-#if  defined  (HAVE_LIBGRIB_API)
-#  include "file.h"
-
-#  include <grib_api.h>
-#endif
-
 
 static
 void vlistvarInitEntry(int vlistID, int varID)
@@ -136,6 +128,7 @@ int vlistvarNewEntry(int vlistID)
   return (varID);
 }
 
+static
 void vlistCheckVarID(const char *caller, int vlistID, int varID)
 {
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
@@ -506,49 +499,6 @@ void vlistInqVarName(int vlistID, int varID, char *name)
     strcpy(name, vlistptr->vars[varID].name);   //FIXME: This may overrun the provided buffer.
 
   return;
-}
-
-/*
-@Function vlistCopyVarName
-@Tatle    Get the name of a Variable in a safe way
-
-@Prototype char* vlistCopyVarName(int vlistId, int varId)
-@Parameter
-    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate} or @fref{streamInqVlist}.
-    @Item  varID    Variable identifier.
-
-@Return A pointer to a malloc'ed string. Must be cleaned up with free().
-
-@Description
-This is the buffer overflow immune version of vlistInqVarName().
-The memory for the returned string is allocated to fit the string via malloc().
-
-@EndFunction
-*/
-char* vlistCopyVarName(int vlistId, int varId)
-{
-  vlist_t* vlistptr = vlist_to_pointer(vlistId);
-  vlistCheckVarID(__func__, vlistId, varId);
-
-  //If a name is set in the variable description, use that.
-  const char* name = vlistptr->vars[varId].name;
-  if(name) return myStrDup(name);
-
-  //Otherwise we check if we should use the table of parameter descriptions.
-  int param = vlistptr->vars[varId].param;
-  int discipline, category, number;
-  cdiDecodeParam(param, &number, &category, &discipline);
-  if(discipline == 255)
-    {
-      int tableId = vlistptr->vars[varId].tableID;
-      if(( name = tableInqParNamePtr(tableId, number) )) return myStrDup(name);
-
-      //No luck, fall back to outputting a name of the format "var<num>".
-      return myAsprintf("var%d", number);
-    }
-
-  //Finally, we fall back to outputting a name of the format "param<num>.<cat>.<dis>".
-  return myAsprintf("param%d.%d.%d", number, category, discipline);
 }
 
 /*
@@ -1822,6 +1772,11 @@ void vlistDefVarDblKey(int vlistID, int varID, const char *name, double value)
   (void)value;
 #endif
 }
+
+#if  defined  (HAVE_LIBGRIB_API)
+#  include "file.h"
+#  include "grib_api.h"
+#endif
 
 
 /* cdiClearAdditionalKeys: Clears the list of additional GRIB keys. */

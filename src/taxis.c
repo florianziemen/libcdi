@@ -24,7 +24,7 @@ static int DefaultTimeType = TAXIS_ABSOLUTE;
 static int DefaultTimeUnit = TUNIT_HOUR;
 
 
-const char *Timeunits[] = {
+char *Timeunits[] = {
   "undefined",
   "seconds",
   "minutes",
@@ -105,10 +105,10 @@ dup_refcount_string(char *p)
 static int  TAXIS_Debug = 0;   /* If set to 1, debugging */
 
 
-const char *tunitNamePtr(int unitID)
+char *tunitNamePtr(int unitID)
 {
-  const char *name;
-  int size = sizeof(Timeunits)/sizeof(*Timeunits);
+  char *name;
+  int size = sizeof(Timeunits)/sizeof(char *);
 
   if ( unitID > 0 && unitID < size )
     name = Timeunits[unitID];

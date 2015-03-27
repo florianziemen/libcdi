@@ -152,7 +152,6 @@ vlist_t;
 
 
 vlist_t *vlist_to_pointer(int vlistID);
-void vlistCheckVarID(const char *caller, int vlistID, int varID);
 const char *vlistInqVarNamePtr(int vlistID, int varID);
 const char *vlistInqVarLongnamePtr(int vlistID, int varID);
 const char *vlistInqVarStdnamePtr(int vlistID, int varID);

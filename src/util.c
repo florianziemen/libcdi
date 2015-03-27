@@ -94,61 +94,6 @@ int str2uuid(const char *uuidstr, unsigned char *uuid)
   return iret;
 }
 
-//Returns a malloc'ed string that escapes all spaces and backslashes with backslashes.
-char* cdiEscapeSpaces(const char* string)
-{
-  //How much memory do we need?
-  size_t escapeCount = 0, length = 0;
-  for(const char* current = string; *current; current++)
-    {
-      if(strchr(" \\", *current)) escapeCount++;
-      length++;
-    }
-
-  char* result = malloc(length + escapeCount + 1);
-  if(!result) return NULL;
-
-  //Do the escaping.
-  for(size_t in = 0, out = 0; in < length;)
-    {
-      if(strchr(" \\", string[in])) result[out++] = '\\';
-      result[out++] = string[in++];
-    }
-  result[length + escapeCount] = 0;     //termination!
-  return result;
-}
-
-//input: a space terminated string that may contain escaped characters
-//output: a new zero terminated string with the escape characters removed
-//*outStringEnd points to the terminating character upon return.
-char* cdiUnescapeSpaces(const char* string, const char** outStringEnd)
-{
-  //How much memory do we need?
-  size_t escapeCount = 0, length = 0;
-  for(const char* current = string; *current && *current != ' '; current++)
-    {
-      if(*current == '\\')
-        {
-          current++, escapeCount++;
-          if(!current) return NULL;
-        }
-      length++;
-    }
-
-  char* result = malloc(length + 1);
-  if(!result) return NULL;
-
-  //Do the unescaping.
-  for(size_t in = 0, out = 0; out < length;)
-    {
-      if(string[in] == '\\') in++;
-      result[out++] = string[in++];
-    }
-  result[length] = 0;   //termination!
-  if(outStringEnd) *outStringEnd = &string[length + escapeCount];
-  return result;
-}
-
 #ifdef HAVE_DECL_UUID_GENERATE
 #include <sys/time.h>
 #include <uuid/uuid.h>

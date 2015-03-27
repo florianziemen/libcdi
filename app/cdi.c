@@ -141,7 +141,7 @@ void version(void)
 static
 void usage(void)
 {
-  const char *name;
+  char *name;
   int id;
 
   fprintf(stderr, "usage : %s  [Option]  [ifile]  [ofile]\n", Progname);

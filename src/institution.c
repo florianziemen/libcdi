@@ -232,7 +232,7 @@ const char *institutInqNamePtr(int instID)
 }
 
 
-const char *institutInqLongnamePtr(int instID)
+char *institutInqLongnamePtr(int instID)
 {
   institute_t * instituteptr = NULL;
 
