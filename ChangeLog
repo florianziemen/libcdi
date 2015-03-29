@@ -1,3 +1,7 @@
+2015-03-29  Uwe Schulzweida
+
+	* vlistMerge: compare size of grids (bug fix)
+
 2015-03-27  Uwe Schulzweida
 
 	* gribapiScanTimestep1: fixed bug from previous merge of branches/cdi_fileDrivenInput (GRIB2 read failed)
