@@ -1,28 +1,29 @@
-#if  defined  (HAVE_CONFIG_H)
-#  include "config.h"
-#endif
-
 #include <stdio.h>
 #include <string.h>
-#include <stdlib.h>
 #include <ctype.h>
 #include <stdarg.h>
 #include <errno.h>
 
 #include "error.h"
 
-#if ! defined (HAVE_CONFIG_H)
-#if ! defined (HAVE_MALLOC_H)
-#  if defined (SX)
-#    define  HAVE_MALLOC_H
-#  endif
+#if  defined  (HAVE_CONFIG_H)
+  #include "config.h"
+#else
+  #if ! defined (HAVE_MALLOC_H)
+    #if defined (SX)
+      #define  HAVE_MALLOC_H
+    #endif
+  #endif
 #endif
-#endif
+//There is no point in avoiding to include our own header, it is likely to be included before this file in the backed cdilib.c.
+//As such, we may as well always include it and let the compiler check our function signatures.
+#include "dmemory.h"
 
-#if  defined  (HAVE_MALLOC_H)
-#    include <malloc.h>
-#endif
-
+//However, we need to avoid clobbering our own `malloc()` calls, so we ensure that our own malloc calls cannot be interpreted as macro calls.
+#define protected_realloc (realloc)
+#define protected_calloc (calloc)
+#define protected_malloc (malloc)
+#define protected_free (free)
 
 #define  MALLOC_FUNC   0
 #define  CALLOC_FUNC   1
@@ -269,7 +270,7 @@ int memListNewEntry(int mtype, void *ptr, size_t size, size_t nobj,
     {
       memTableSize = 8;
       memSize  = memTableSize * sizeof(MemTable_t);
-      memTable = (MemTable_t *) malloc(memSize);
+      memTable = (MemTable_t *) protected_malloc(memSize);
       if( memTable == NULL ) memError(__func__, __FILE__, __LINE__, memSize);
 
       for(size_t i = 0; i < memTableSize; i++)
@@ -290,7 +291,7 @@ int memListNewEntry(int mtype, void *ptr, size_t size, size_t nobj,
     {
       memTableSize = 2*memTableSize;
       memSize  = memTableSize*sizeof(MemTable_t);
-      memTable = (MemTable_t*) realloc(memTable, memSize);
+      memTable = (MemTable_t*) protected_realloc(memTable, memSize);
       if( memTable == NULL ) memError(__func__, __FILE__, __LINE__, memSize);
 
       for (size_t i = memID; i < memTableSize; i++)
@@ -414,7 +415,7 @@ void *Calloc(const char *caller, const char *file, int line, size_t nobjs, size_
 
   if ( nobjs*size > 0 )
     {
-      ptr = calloc(nobjs, size);
+      ptr = protected_calloc(nobjs, size);
 
       if ( MEM_Debug )
 	{
@@ -444,7 +445,7 @@ void *Malloc(const char *caller, const char *file, int line, size_t size)
 
   if ( size > 0 )
     {
-      ptr = malloc(size);
+      ptr = protected_malloc(size);
 
       if ( MEM_Debug )
 	{
@@ -474,7 +475,7 @@ void *Realloc(const char *caller, const char *file, int line, void *ptrold, size
 
   if ( size > 0 )
     {
-      ptr = realloc(ptrold, size);
+      ptr = protected_realloc(ptrold, size);
 
       if ( MEM_Debug )
 	{
@@ -521,13 +522,13 @@ void Free(const char *caller, const char *file, int line, void *ptr)
 	}
     }
 
-  free(ptr);
+  protected_free(ptr);
 }
 
 void *cdiXmalloc(size_t size, const char *filename, const char *functionname,
                  int line)
 {
-  void *value = malloc(size);
+  void *value = protected_malloc(size);
   if (size == 0 || value != NULL) ; else
     cdiAbort(filename, functionname, line, "malloc failed: %s",
              strerror(errno));
@@ -537,7 +538,7 @@ void *cdiXmalloc(size_t size, const char *filename, const char *functionname,
 void *cdiXcalloc(size_t nmemb, size_t size, const char *filename,
                  const char *functionname, int line)
 {
-  void *value = calloc(nmemb, size);
+  void *value = protected_calloc(nmemb, size);
   if (size == 0 || value != NULL) ; else
     cdiAbort(filename, functionname, line, "calloc failed: %s",
              strerror(errno) );
@@ -547,7 +548,7 @@ void *cdiXcalloc(size_t nmemb, size_t size, const char *filename,
 void *cdiXrealloc(void *p, size_t size, const char *functionname,
                   const char *filename, int line)
 {
-  void *value = realloc(p, size);
+  void *value = protected_realloc(p, size);
   if (size == 0 || value != NULL) ; else
     cdiAbort(filename, functionname, line, "realloc failed: %s",
              strerror(errno));
@@ -586,12 +587,3 @@ void memExitOnError(void)
 {
   dmemory_ExitOnError = 1;
 }
-/*
- * Local Variables:
- * c-file-style: "Java"
- * c-basic-offset: 2
- * indent-tabs-mode: nil
- * show-trailing-whitespace: t
- * require-trailing-newline: t
- * End:
- */
