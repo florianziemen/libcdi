@@ -2281,6 +2281,8 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
       zaxisDefUnits(zaxisID, "Pa");
     }
 
+  int grib2ltype = zaxisTypeToGrib2ltype(zaxistype);
+
   switch (zaxistype)
     {
     case ZAXIS_SURFACE:
@@ -2292,11 +2294,14 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
     case ZAXIS_ISENTROPIC:
       {
 	if ( editionNumber <= 1 )
-          gribapiDefLevelType(gh, gcinit, "indicatorOfTypeOfLevel", zaxisTypeToGrib1ltype(zaxistype));
+          {
+            gribapiDefLevelType(gh, gcinit, "indicatorOfTypeOfLevel", zaxisTypeToGrib1ltype(zaxistype));
+            GRIB_CHECK(my_grib_set_long(gh, "level", (long)level), 0);
+          }
         else
-          gribapiDefLevelType(gh, gcinit, "typeOfFirstFixedSurface", zaxisTypeToGrib2ltype(zaxistype));
-
-        GRIB_CHECK(my_grib_set_long(gh, "level", (long)level), 0);
+          {
+            grib2DefLevel(gh, gcinit, grib2ltype, grib2ltype, lbounds, level, dlevel1, dlevel2);
+          }
 
 	break;
       }
@@ -2312,27 +2317,22 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
     case ZAXIS_MIX_LAYER:
     case ZAXIS_ATMOSPHERE:
       {
-        if ( lbounds )
+        if ( editionNumber <= 1 )
           {
-            if ( editionNumber <= 1 )
-              gribapiDefLevelType(gh, gcinit, "indicatorOfTypeOfLevel", zaxisTypeToGrib1ltype(zaxistype));
+            gribapiDefLevelType(gh, gcinit, "indicatorOfTypeOfLevel", zaxisTypeToGrib1ltype(zaxistype));
+            if ( lbounds )
+              {
+                GRIB_CHECK(my_grib_set_long(gh, "topLevel", (long) dlevel1), 0);
+                GRIB_CHECK(my_grib_set_long(gh, "bottomLevel", (long) dlevel2), 0);
+              }
             else
               {
-                gribapiDefLevelType(gh, gcinit, "typeOfFirstFixedSurface", zaxisTypeToGrib2ltype(zaxistype));
-                gribapiDefLevelType(gh, gcinit, "typeOfSecondFixedSurface", zaxisTypeToGrib2ltype(zaxistype));
+                GRIB_CHECK(my_grib_set_long(gh, "level", (long) level), 0);
               }
-
-            GRIB_CHECK(my_grib_set_long(gh, "topLevel", (long) dlevel1), 0);
-            GRIB_CHECK(my_grib_set_long(gh, "bottomLevel", (long) dlevel2), 0);
           }
         else
           {
-            if ( editionNumber <= 1 )
-              gribapiDefLevelType(gh, gcinit, "indicatorOfTypeOfLevel", zaxisTypeToGrib1ltype(zaxistype));
-            else
-              gribapiDefLevelType(gh, gcinit, "typeOfFirstFixedSurface", zaxisTypeToGrib2ltype(zaxistype));
-
-            GRIB_CHECK(my_grib_set_long(gh, "level", (long) level), 0);
+            grib2DefLevel(gh, gcinit, grib2ltype, grib2ltype, lbounds, level, dlevel1, dlevel2);
           }
 
         break;
@@ -2340,28 +2340,24 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
     case ZAXIS_HYBRID:
     case ZAXIS_HYBRID_HALF:
       {
-	if ( lbounds )
-	  {
-	    if ( editionNumber <= 1 )
-	      gribapiDefLevelType(gh, gcinit, "indicatorOfTypeOfLevel", GRIB1_LTYPE_HYBRID_LAYER);
+        if ( editionNumber <= 1 )
+          {
+            if ( lbounds )
+              {
+                gribapiDefLevelType(gh, gcinit, "indicatorOfTypeOfLevel", GRIB1_LTYPE_HYBRID_LAYER);
+                GRIB_CHECK(my_grib_set_long(gh, "topLevel", (long) dlevel1), 0);
+                GRIB_CHECK(my_grib_set_long(gh, "bottomLevel", (long) dlevel2), 0);
+              }
             else
-	      {
-		gribapiDefLevelType(gh, gcinit, "typeOfFirstFixedSurface", GRIB2_LTYPE_HYBRID);
-		gribapiDefLevelType(gh, gcinit, "typeOfSecondFixedSurface", GRIB2_LTYPE_HYBRID);
-	      }
-
-	    GRIB_CHECK(my_grib_set_long(gh, "topLevel", (long) dlevel1), 0);
-	    GRIB_CHECK(my_grib_set_long(gh, "bottomLevel", (long) dlevel2), 0);
-	  }
-	else
-	  {
-	    if ( editionNumber <= 1 )
-              gribapiDefLevelType(gh, gcinit, "indicatorOfTypeOfLevel", GRIB1_LTYPE_HYBRID);
-            else
-              gribapiDefLevelType(gh, gcinit, "typeOfFirstFixedSurface", GRIB2_LTYPE_HYBRID);
-
-	    GRIB_CHECK(my_grib_set_long(gh, "level", (long) level), 0);
-	  }
+              {
+                gribapiDefLevelType(gh, gcinit, "indicatorOfTypeOfLevel", GRIB1_LTYPE_HYBRID);
+                GRIB_CHECK(my_grib_set_long(gh, "level", (long) level), 0);
+              }
+          }
+        else
+          {
+            grib2DefLevel(gh, gcinit, GRIB2_LTYPE_HYBRID, GRIB2_LTYPE_HYBRID, lbounds, level, dlevel1, dlevel2);
+          }
 
         if ( !gcinit )
           {
