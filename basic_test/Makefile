@@ -15,3 +15,8 @@ xce:
 	ftn -I../build/include cdilib.o example.f90 -L${NETCDF_DIR}/lib ${GRIB_API_LIB} -lgrib_api -lnetcdff -lnetcdf -o example 
 clean:
 	rm -f main main.o example cdilib.o
+
+plain:
+	gcc ${CFLAGS} -I../build/include -c main_plain.c -o main_plain.o
+	gcc -L../build/lib64  main_plain.o -lcdi -o main_plain
+	LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../build/lib64  ./main_plain
