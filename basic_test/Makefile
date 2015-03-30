@@ -14,9 +14,17 @@ xce:
 	cc -DHAVE_CF_INTERFACE -DHAVE_LIBNETCDF -DHAVE_LIBGRIB -DHAVE_LIBGRIB_API ${GRIB_API_INCLUDE} -I${NETCDF_DIR}/include -c ../src/cdilib.c -o cdilib.o
 	ftn -I../build/include cdilib.o example.f90 -L${NETCDF_DIR}/lib ${GRIB_API_LIB} -lgrib_api -lnetcdff -lnetcdf -o example 
 clean:
-	rm -f main main.o example cdilib.o
+	rm -f main main.o example cdilib.o main_plain.o main_plain example_plain
 
 plain:
 	gcc ${CFLAGS} -I../build/include -c main_plain.c -o main_plain.o
 	gcc -L../build/lib64  main_plain.o -lcdi -o main_plain
 	LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../build/lib64  ./main_plain
+xceplain:
+	cc -I../build/include -c main_plain.c -o main_plain.o
+	cc -L../build/lib -L${NETCDF_DIR}/lib ${GRIB_API_LIB} main_plain.o -lcdi -lgrib_api -lnetcdff -lnetcdf -o main_plain
+	LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../build/lib64  ./main_plain
+xceplainfortran:
+	cc -DHAVE_CF_INTERFACE -DHAVE_LIBNETCDF -DHAVE_LIBGRIB -DHAVE_LIBGRIB_API ${GRIB_API_INCLUDE} -I${NETCDF_DIR}/include -c ../src/cdilib.c -o cdilib.o
+	ftn -I../build/include cdilib.o example_plain.f90 -L${NETCDF_DIR}/lib ${GRIB_API_LIB} -lgrib_api -lnetcdff -lnetcdf -o example_plain
+	LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../build/lib64:/opt/grib_api/lib64  ./example_plain

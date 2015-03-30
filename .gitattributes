@@ -16,6 +16,7 @@ app/createtable.c -text
 app/printinfo.h -text
 basic_test/Makefile -text
 basic_test/example.f90 -text
+basic_test/example_plain.f90 -text
 basic_test/main.c -text
 basic_test/main_plain.c -text
 /cdi.settings.in -text
