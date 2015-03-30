@@ -308,11 +308,14 @@ int streamInqByteorder(int streamID)
 }
 
 
-char *streamFilesuffix(int filetype)
+const char *streamFilesuffix(int filetype)
 {
   // static char *fileSuffix[] = {"", ".grb", ".g2", ".nc", ".nc", ".nc4", ".nc4", ".srv", ".ext", ".ieg"};
-  static char *fileSuffix[] = {"", ".grb", ".grb", ".nc", ".nc", ".nc", ".nc", ".srv", ".ext", ".ieg"};
-  int size = (int) (sizeof(fileSuffix)/sizeof(char *));
+  /* note: the 2nd dimenstion of the fileSuffix array must be equal to or
+   * larger than the length of the longest suffix (dot and \0 terminator
+   * included) */
+  static const char fileSuffix[][5] = {"", ".grb", ".grb", ".nc", ".nc", ".nc", ".nc", ".srv", ".ext", ".ieg"};
+  int size = (int)(sizeof(fileSuffix)/sizeof(fileSuffix[0]));
 
   if ( filetype > 0 && filetype < size )
     return (fileSuffix[filetype]);
@@ -321,7 +324,7 @@ char *streamFilesuffix(int filetype)
 }
 
 
-char *streamFilename(int streamID)
+const char *streamFilename(int streamID)
 {
   stream_t *streamptr = stream_to_pointer(streamID);
 
@@ -2186,9 +2189,9 @@ void cdiStreamSetupVlist(stream_t *streamptr, int vlistID, int vlistIDorig)
 }
 
 
-void streamGetIndexList ( int nstreams, int * streamIndexList )
+void cdiStreamGetIndexList(unsigned numIDs, int IDs[numIDs])
 {
-  reshGetResHListOfType ( nstreams, streamIndexList, &streamOps );
+  reshGetResHListOfType(numIDs, IDs, &streamOps);
 }
 
 int streamInqNvars ( int streamID )
@@ -2290,7 +2293,6 @@ void streamPrintP   ( void * streamptr, FILE * fp )
   fprintf ( fp, "//  void    **gribContainers;\n" );
   fprintf ( fp, "vlistIDorig   = %d\n", sp->vlistIDorig );
 }
-
 
 enum {
   streamNint = 11,

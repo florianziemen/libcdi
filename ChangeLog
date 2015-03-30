@@ -1,7 +1,23 @@
-2015-03-12  Uwe Schulzweida
+2015-03-29  Uwe Schulzweida
+
+	* vlistMerge: compare size of grids (bug fix)
+
+2015-03-27  Uwe Schulzweida
+
+	* gribapiScanTimestep1: fixed bug from previous merge of branches/cdi_fileDrivenInput (GRIB2 read failed)
+
+2015-03-26  Uwe Schulzweida
+
+        * merged changes from branches/cdi_fileDrivenInput
+
+2015-03-26  Uwe Schulzweida
 
 	* Version 1.6.8 released
         * using CGRIBEX library version 1.7.1
+
+2015-02-18  Uwe Schulzweida
+
+	* cdiDecodeTimevalue: fix rounding error for negativ timevalue
 
 2015-02-12  Uwe Schulzweida
 

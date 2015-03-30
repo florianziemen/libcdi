@@ -69,6 +69,12 @@
 /*  number of unsigned char needed to store UUID  */
 
 
+/*  Structs that are used to return data to the user  */
+
+
+/*  Opaque types  */
+
+
 /*  CDI control routines  */
 
 FCALLSCSUB0 (cdiReset, CDIRESET, cdireset)
@@ -134,8 +140,6 @@ FCALLSCFUN1 (INT, streamInqCompLevel, STREAMINQCOMPLEVEL, streaminqcomplevel, IN
 FCALLSCFUN2 (INT, streamDefTimestep, STREAMDEFTIMESTEP, streamdeftimestep, INT, INT)
 FCALLSCFUN2 (INT, streamInqTimestep, STREAMINQTIMESTEP, streaminqtimestep, INT, INT)
 FCALLSCFUN1 (INT, streamInqCurTimestepID, STREAMINQCURTIMESTEPID, streaminqcurtimestepid, INT)
-FCALLSCFUN1 (STRING, streamFilename, STREAMFILENAME, streamfilename, INT)
-FCALLSCFUN1 (STRING, streamFilesuffix, STREAMFILESUFFIX, streamfilesuffix, INT)
 FCALLSCFUN1 (INT, streamInqNvars, STREAMINQNVARS, streaminqnvars, INT)
 
 /*  STREAM var I/O routines  */
@@ -158,6 +162,9 @@ FCALLSCSUB3 (streamWriteRecord, STREAMWRITERECORD, streamwriterecord, INT, PDOUB
 FCALLSCSUB3 (streamWriteRecordF, STREAMWRITERECORDF, streamwriterecordf, INT, PFLOAT, INT)
 FCALLSCSUB3 (streamReadRecord, STREAMREADRECORD, streamreadrecord, INT, PDOUBLE, PINT)
 FCALLSCSUB2 (streamCopyRecord, STREAMCOPYRECORD, streamcopyrecord, INT, INT)
+
+/*  File driven I/O (may yield better performance than using the streamXXX functions)  */
+
 
 /*  VLIST routines  */
 
@@ -390,7 +397,6 @@ FCALLSCSUB2 (gridDefXbounds, GRIDDEFXBOUNDS, griddefxbounds, INT, PDOUBLE)
 FCALLSCFUN2 (INT, gridInqXbounds, GRIDINQXBOUNDS, gridinqxbounds, INT, PDOUBLE)
 FCALLSCSUB2 (gridDefYbounds, GRIDDEFYBOUNDS, griddefybounds, INT, PDOUBLE)
 FCALLSCFUN2 (INT, gridInqYbounds, GRIDINQYBOUNDS, gridinqybounds, INT, PDOUBLE)
-FCALLSCSUB3 (gridDefRowlon, GRIDDEFROWLON, griddefrowlon, INT, INT, INTV)
 FCALLSCSUB2 (gridInqRowlon, GRIDINQROWLON, gridinqrowlon, INT, PINT)
 FCALLSCSUB2 (gridChangeType, GRIDCHANGETYPE, gridchangetype, INT, INT)
 FCALLSCSUB2 (gridDefComplexPacking, GRIDDEFCOMPLEXPACKING, griddefcomplexpacking, INT, INT)
@@ -478,7 +484,6 @@ FCALLSCFUN1 (DOUBLE, taxisInqForecastPeriod, TAXISINQFORECASTPERIOD, taxisinqfor
 FCALLSCSUB2 (taxisDefNumavg, TAXISDEFNUMAVG, taxisdefnumavg, INT, INT)
 FCALLSCFUN1 (INT, taxisInqType, TAXISINQTYPE, taxisinqtype, INT)
 FCALLSCFUN1 (INT, taxisInqNumavg, TAXISINQNUMAVG, taxisinqnumavg, INT)
-FCALLSCFUN1 (STRING, tunitNamePtr, TUNITNAMEPTR, tunitnameptr, INT)
 
 /*  Institut routines  */
 
@@ -488,7 +493,6 @@ FCALLSCFUN0 (INT, institutInqNumber, INSTITUTINQNUMBER, institutinqnumber)
 FCALLSCFUN1 (INT, institutInqCenter, INSTITUTINQCENTER, institutinqcenter, INT)
 FCALLSCFUN1 (INT, institutInqSubcenter, INSTITUTINQSUBCENTER, institutinqsubcenter, INT)
 FCALLSCFUN1 (STRING, institutInqNamePtr, INSTITUTINQNAMEPTR, institutinqnameptr, INT)
-FCALLSCFUN1 (STRING, institutInqLongnamePtr, INSTITUTINQLONGNAMEPTR, institutinqlongnameptr, INT)
 
 /*  Model routines  */
 
@@ -504,7 +508,6 @@ FCALLSCSUB2 (tableWriteC, TABLEWRITEC, tablewritec, STRING, INT)
 FCALLSCSUB2 (tableWrite, TABLEWRITE, tablewrite, STRING, INT)
 FCALLSCFUN1 (INT, tableRead, TABLEREAD, tableread, STRING)
 FCALLSCFUN3 (INT, tableDef, TABLEDEF, tabledef, INT, INT, STRING)
-FCALLSCFUN1 (STRING, tableInqNamePtr, TABLEINQNAMEPTR, tableinqnameptr, INT)
 FCALLSCSUB5 (tableDefEntry, TABLEDEFENTRY, tabledefentry, INT, INT, STRING, STRING, STRING)
 FCALLSCFUN3 (INT, tableInq, TABLEINQ, tableinq, INT, INT, STRING)
 FCALLSCFUN0 (INT, tableInqNumber, TABLEINQNUMBER, tableinqnumber)

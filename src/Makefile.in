@@ -98,17 +98,26 @@ DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps =  \
 	$(top_srcdir)/m4/acx_assert_lang_is_fortran_variant.m4 \
+	$(top_srcdir)/m4/acx_c_package.m4 \
 	$(top_srcdir)/m4/acx_check_strptr_convert.m4 \
 	$(top_srcdir)/m4/acx_execinfo.m4 \
+	$(top_srcdir)/m4/acx_fortran_package.m4 \
+	$(top_srcdir)/m4/acx_lang_check_include.m4 \
 	$(top_srcdir)/m4/acx_lang_other_suffix_conftest.m4 \
+	$(top_srcdir)/m4/acx_lang_package.m4 \
+	$(top_srcdir)/m4/acx_option_search_libs.m4 \
 	$(top_srcdir)/m4/acx_options.m4 \
 	$(top_srcdir)/m4/acx_sl_fc_mod_path_flag.m4 \
 	$(top_srcdir)/m4/acx_sl_mod_suffix.m4 \
-	$(top_srcdir)/m4/asx_unset.m4 $(top_srcdir)/m4/ax_pthread.m4 \
-	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltoptions.m4 \
-	$(top_srcdir)/m4/ltsugar.m4 $(top_srcdir)/m4/ltversion.m4 \
-	$(top_srcdir)/m4/lt~obsolete.m4 $(top_srcdir)/m4/pkg.m4 \
-	$(top_srcdir)/m4/starlink_fpp.m4 $(top_srcdir)/acinclude.m4 \
+	$(top_srcdir)/m4/asx_tr_arg.m4 $(top_srcdir)/m4/asx_unset.m4 \
+	$(top_srcdir)/m4/ax_pthread.m4 $(top_srcdir)/m4/libtool.m4 \
+	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
+	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
+	$(top_srcdir)/m4/pkg.m4 $(top_srcdir)/m4/starlink_fpp.m4 \
+	$(top_srcdir)/acinclude.m4 \
+	$(top_srcdir)/m4/ac_lang_program_fortran.m4 \
+	$(top_srcdir)/m4/acx_lang_fortran_check_include.m4 \
+	$(top_srcdir)/m4/acx_lang_c_check_include.m4 \
 	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
@@ -145,12 +154,16 @@ am__uninstall_files_from_dir = { \
   }
 am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(includedir)"
 LTLIBRARIES = $(lib_LTLIBRARIES) $(noinst_LTLIBRARIES)
-libcdi_la_DEPENDENCIES =
+am__DEPENDENCIES_1 =
+libcdi_la_DEPENDENCIES = $(am__DEPENDENCIES_1)
 am_libcdi_la_OBJECTS = basetime.lo binary.lo calendar.lo cdf.lo \
 	cdf_int.lo cdi_error.lo cdi_util.lo cdiFortran.lo \
 	cgribexlib.lo dmemory.lo cksum.lo cdi_cksum.lo error.lo \
-	extralib.lo file.lo gaussgrid.lo gribapi.lo grid.lo ieglib.lo \
-	institution.lo model.lo namespace.lo serialize.lo \
+	extralib.lo file.lo gaussgrid.lo gribapi.lo \
+	gribapi_utilities.lo grid.lo ieglib.lo input_file.lo \
+	institution.lo iterator.lo iterator_fallback.lo \
+	iterator_grib.lo model.lo namespace.lo serialize.lo \
+	proprietarySystemWorkarounds.lo referenceCounting.lo \
 	resource_handle.lo servicelib.lo stream_cdf.lo \
 	stream_cgribex.lo stream_ext.lo stream_grb.lo \
 	stream_gribapi.lo stream_history.lo stream_ieg.lo \
@@ -165,9 +178,8 @@ am__v_lt_0 = --silent
 am__v_lt_1 = 
 @ENABLE_CDI_LIB_FALSE@am_libcdi_la_rpath =
 @ENABLE_CDI_LIB_TRUE@am_libcdi_la_rpath = -rpath $(libdir)
-am__DEPENDENCIES_1 =
 libcdipio_la_DEPENDENCIES = libcdi.la $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_libcdipio_la_OBJECTS = cdipioFortran.lo pio.lo pio_comm.lo \
 	pio_dbuffer.lo pio_interface.lo pio_mpinonb.lo \
 	pio_record_send.lo pio_posixasynch.lo \
@@ -281,6 +293,7 @@ ENABLE_CGRIBEX = @ENABLE_CGRIBEX@
 ENABLE_EXTRA = @ENABLE_EXTRA@
 ENABLE_GRIB = @ENABLE_GRIB@
 ENABLE_IEG = @ENABLE_IEG@
+ENABLE_MPI = @ENABLE_MPI@
 ENABLE_NC2 = @ENABLE_NC2@
 ENABLE_NC4 = @ENABLE_NC4@
 ENABLE_NETCDF = @ENABLE_NETCDF@
@@ -328,6 +341,11 @@ MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 MANIFEST_TOOL = @MANIFEST_TOOL@
 MKDIR_P = @MKDIR_P@
+MPIROOT = @MPIROOT@
+MPI_C_INCLUDE = @MPI_C_INCLUDE@
+MPI_C_LIB = @MPI_C_LIB@
+MPI_FC_INCLUDE = @MPI_FC_INCLUDE@
+MPI_FC_LIB = @MPI_FC_LIB@
 MPI_LAUNCH = @MPI_LAUNCH@
 NC_CONFIG = @NC_CONFIG@
 NETCDF_INCLUDE = @NETCDF_INCLUDE@
@@ -441,7 +459,7 @@ noinst_LTLIBRARIES = libcdiresunpack.la $(am__append_1) \
 	$(am__append_4)
 @ENABLE_CDI_LIB_TRUE@lib_LTLIBRARIES = libcdi.la $(am__append_2)
 @ENABLE_CDI_LIB_TRUE@include_HEADERS = cdi.h cdi.inc $(am__append_3)
-AM_CFLAGS = $(PPM_CORE_CFLAGS) $(YAXT_CFLAGS)
+AM_CFLAGS = $(PPM_CORE_CFLAGS) $(YAXT_CFLAGS) $(MPI_C_INCLUDE)
 libcdi_la_SOURCES = \
 	basetime.c     	 \
 	basetime.h	 \
@@ -468,6 +486,7 @@ libcdi_la_SOURCES = \
 	cksum.h		\
 	cdi_cksum.c	\
 	cdi_cksum.h	\
+	create_uuid.h	 \
 	dtypes.h	 \
 	error.c        	 \
 	error.h	 	 \
@@ -479,18 +498,32 @@ libcdi_la_SOURCES = \
 	gaussgrid.h	 \
 	gribapi.c  	 \
 	gribapi.h	 \
+	gribapi_utilities.c \
+	gribapi_utilities.h \
 	grid.c           \
 	grid.h	 	 \
 	ieg.h	 	 \
 	ieglib.c         \
+	input_file.c	\
+	input_file.h	\
 	institution.c  	 \
 	institution.h  	 \
+	iterator.c       \
+	iterator.h       \
+	iterator_fallback.c \
+	iterator_fallback.h \
+	iterator_grib.c \
+	iterator_grib.h  \
 	model.c        	 \
 	model.h        	 \
 	namespace.c      \
 	namespace.h      \
 	serialize.h	\
 	serialize.c	\
+	proprietarySystemWorkarounds.c \
+	proprietarySystemWorkarounds.h \
+	referenceCounting.c \
+	referenceCounting.h \
 	resource_handle.c\
 	resource_handle.h\
 	service.h	 \
@@ -577,10 +610,8 @@ libcdipio_la_SOURCES = \
 	pio_cdf_int.c							\
 	pio_cdf_int.h
 
-libcdipio_la_LIBADD = libcdi.la $(PPM_CORE_LIBS) $(YAXT_LIBS)
-
-#libcdi_la_CPPFLAGS  = @CPPFLAGS@
-libcdi_la_LIBADD = 
+libcdipio_la_LIBADD = libcdi.la $(PPM_CORE_LIBS) $(YAXT_LIBS) $(MPI_C_LIB)
+libcdi_la_LIBADD = $(UUID_C_LIB)
 #
 #cdilib.c:
 #	$(top_srcdir)/src/make_cdilib $(top_srcdir)/src
@@ -723,9 +754,14 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/file.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gaussgrid.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gribapi.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gribapi_utilities.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/grid.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ieglib.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/input_file.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/institution.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/iterator.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/iterator_fallback.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/iterator_grib.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/model.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/namespace.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio.Plo@am__quote@
@@ -743,6 +779,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_serialize.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_server.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_util.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/proprietarySystemWorkarounds.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/referenceCounting.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/resource_handle.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/resource_unpack.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/serialize.Plo@am__quote@

@@ -7,6 +7,14 @@
 
 #include <string.h>
 
+#include "cdi.h"
+#ifndef  CDI_CKSUM_H_
+#include "cdi_cksum.h"
+#endif
+#ifndef  _ERROR_H
+#include "error.h"
+#endif
+
 /*
  * Generic interfaces for (de-)marshalling
  */

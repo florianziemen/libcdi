@@ -1,6 +1,8 @@
 #ifndef _GRID_H
 #define _GRID_H
 
+#include "cdi.h"
+
 typedef unsigned char mask_t;
 
 typedef struct {

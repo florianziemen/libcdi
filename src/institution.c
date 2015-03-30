@@ -88,12 +88,6 @@ void instituteDefaultEntries ( void )
 }
 
 
-int instituteCount ( void )
-{
-  return reshCountType ( &instituteOps );
-}
-
-
 static int
 instituteCompareKernel(institute_t *  ip1, institute_t * ip2)
 {
@@ -238,7 +232,7 @@ const char *institutInqNamePtr(int instID)
 }
 
 
-char *institutInqLongnamePtr(int instID)
+const char *institutInqLongnamePtr(int instID)
 {
   institute_t * instituteptr = NULL;
 

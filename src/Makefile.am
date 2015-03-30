@@ -11,7 +11,7 @@ else
   noinst_LTLIBRARIES += libcdi.la
 endif
 
-AM_CFLAGS = $(PPM_CORE_CFLAGS) $(YAXT_CFLAGS)
+AM_CFLAGS = $(PPM_CORE_CFLAGS) $(YAXT_CFLAGS) $(MPI_C_INCLUDE)
 
 libcdi_la_SOURCES = 	 \
 	basetime.c     	 \
@@ -39,6 +39,7 @@ libcdi_la_SOURCES = 	 \
 	cksum.h		\
 	cdi_cksum.c	\
 	cdi_cksum.h	\
+	create_uuid.h	 \
 	dtypes.h	 \
 	error.c        	 \
 	error.h	 	 \
@@ -50,18 +51,32 @@ libcdi_la_SOURCES = 	 \
 	gaussgrid.h	 \
 	gribapi.c  	 \
 	gribapi.h	 \
+	gribapi_utilities.c \
+	gribapi_utilities.h \
 	grid.c           \
 	grid.h	 	 \
 	ieg.h	 	 \
 	ieglib.c         \
+	input_file.c	\
+	input_file.h	\
 	institution.c  	 \
 	institution.h  	 \
+	iterator.c       \
+	iterator.h       \
+	iterator_fallback.c \
+	iterator_fallback.h \
+	iterator_grib.c \
+	iterator_grib.h  \
 	model.c        	 \
 	model.h        	 \
 	namespace.c      \
 	namespace.h      \
 	serialize.h	\
 	serialize.c	\
+	proprietarySystemWorkarounds.c \
+	proprietarySystemWorkarounds.h \
+	referenceCounting.c \
+	referenceCounting.h \
 	resource_handle.c\
 	resource_handle.h\
 	service.h	 \
@@ -155,11 +170,9 @@ libcdipio_la_SOURCES =							\
 	pio_cdf_int.c							\
 	pio_cdf_int.h
 
-libcdipio_la_LIBADD    = libcdi.la $(PPM_CORE_LIBS) $(YAXT_LIBS)
+libcdipio_la_LIBADD    = libcdi.la $(PPM_CORE_LIBS) $(YAXT_LIBS) $(MPI_C_LIB)
 
-
-#libcdi_la_CPPFLAGS  = @CPPFLAGS@
-libcdi_la_LIBADD    =
+libcdi_la_LIBADD    = $(UUID_C_LIB)
 #
 #cdilib.c:
 #	$(top_srcdir)/src/make_cdilib $(top_srcdir)/src

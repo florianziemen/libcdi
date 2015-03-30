@@ -24,7 +24,7 @@ static int DefaultTimeType = TAXIS_ABSOLUTE;
 static int DefaultTimeUnit = TUNIT_HOUR;
 
 
-char *Timeunits[] = {
+const char *Timeunits[] = {
   "undefined",
   "seconds",
   "minutes",
@@ -105,10 +105,10 @@ dup_refcount_string(char *p)
 static int  TAXIS_Debug = 0;   /* If set to 1, debugging */
 
 
-char *tunitNamePtr(int unitID)
+const char *tunitNamePtr(int unitID)
 {
-  char *name;
-  int size = sizeof(Timeunits)/sizeof(char *);
+  const char *name;
+  int size = sizeof(Timeunits)/sizeof(*Timeunits);
 
   if ( unitID > 0 && unitID < size )
     name = Timeunits[unitID];
@@ -941,7 +941,8 @@ void cdiDecodeTimevalue(int timeunit, double timevalue, int *days, int *secs)
   if ( timeunit == TUNIT_SECOND )
     {
       *days = (int) (timevalue/86400);
-      *secs = (int) (timevalue - *days*86400. + 0.5);
+      double seconds = timevalue - *days*86400.;
+      *secs = lround(seconds);
       if ( *secs < 0 ) { *days -= 1; *secs += 86400; };
       /*
       {
@@ -954,7 +955,8 @@ void cdiDecodeTimevalue(int timeunit, double timevalue, int *days, int *secs)
   else if ( timeunit == TUNIT_DAY )
     {
       *days = (int) timevalue;
-      *secs = (int) ((timevalue - *days)*86400 + 0.5);
+      double seconds = (timevalue - *days)*86400;
+      *secs = lround(seconds);
       if ( *secs < 0 ) { *days -= 1; *secs += 86400; };
       /*
       {
