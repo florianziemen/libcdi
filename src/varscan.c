@@ -377,6 +377,7 @@ paramNewEntry(int param)
           vartable[i].param = UNDEF_PARAM;
 #if  defined  (HAVE_LIBGRIB_API)
           vartable[i].opt_grib_kvpair_size = 0;
+          vartable[i].opt_grib_nentries    = 0;
 #endif
         }
     }
@@ -409,6 +410,7 @@ paramNewEntry(int param)
           vartable[i].param = UNDEF_PARAM;
 #if  defined  (HAVE_LIBGRIB_API)
           vartable[i].opt_grib_kvpair_size = 0;
+          vartable[i].opt_grib_nentries    = 0;
 #endif
         }
     }
@@ -521,6 +523,8 @@ void varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds,
   *pvarID   = (int) varID;
   *plevelID = levelID;
 }
+
+
 /*
 static
 int dblcmp(const void *s1, const void *s2)
@@ -670,9 +674,9 @@ void cdi_generate_vars(stream_t *streamptr)
               (t1[ilev].level2 != t2[ilev].level2)  ||
               (t1[ilev].lindex != t2[ilev].lindex))
             {
-              fprintf(stderr, "isub = %d / %d :: "
+              fprintf(stderr, "var \"%s\", varID=%d: isub = %d / %d :: "
                       "nlevels = %d, vartable[varid].recordTable[isub].nlevels = %d\n",
-                      isub, vartable[varid].nsubtypes,
+                      vartable[varid].name, varid, isub, vartable[varid].nsubtypes,
                       nlevels, vartable[varid].recordTable[isub].nlevels);
               Message("t1[ilev].level1=%d / t2[ilev].level1=%d\n",t1[ilev].level1, t2[ilev].level1);
               Message("t1[ilev].level2=%d / t2[ilev].level2=%d\n",t1[ilev].level2, t2[ilev].level2);
@@ -1164,9 +1168,7 @@ void resize_vartable_opt_grib_entries(vartable_t *var, int nentries)
   else
     {
       int i, new_size;
-      fprintf(stderr, "malloc to size %d\n", new_size);
       new_size = (2*var->opt_grib_kvpair_size) > nentries ? (2*var->opt_grib_kvpair_size) : nentries;
-      fprintf(stderr, "malloc to size %d done.\n", new_size);
       opt_key_val_pair_t *tmp = (opt_key_val_pair_t *)xmalloc((size_t)new_size * sizeof (opt_key_val_pair_t));
       for (i=0; i<var->opt_grib_kvpair_size; i++) {
         tmp[i] = var->opt_grib_kvpair[i];
@@ -1199,6 +1201,7 @@ void varDefOptGribInt(int varID, int tile_index, long lval, const char *keyword)
   if (idx == -1)
     {
       resize_vartable_opt_grib_entries(&vartable[varID], vartable[varID].opt_grib_nentries+1);
+      vartable[varID].opt_grib_nentries += 1;
       idx = vartable[varID].opt_grib_nentries -1;
     }
   else
@@ -1229,6 +1232,7 @@ void varDefOptGribDbl(int varID, int tile_index, double dval, const char *keywor
   if (idx == -1) 
     {
       resize_vartable_opt_grib_entries(&vartable[varID], vartable[varID].opt_grib_nentries+1);
+      vartable[varID].opt_grib_nentries += 1;
       idx = vartable[varID].opt_grib_nentries -1;
     }
   else

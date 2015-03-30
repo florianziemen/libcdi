@@ -1565,9 +1565,7 @@ void resize_opt_grib_entries(var_t *var, int nentries)
     {
       int i, new_size;
       new_size = (2*var->opt_grib_kvpair_size) > nentries ? (2*var->opt_grib_kvpair_size) : nentries;
-      fprintf(stderr, "malloc to size %d\n", new_size);
       opt_key_val_pair_t *tmp = (opt_key_val_pair_t *)xmalloc((size_t)new_size * sizeof (opt_key_val_pair_t));
-      fprintf(stderr, "malloc to size %d done.\n", new_size);
       for (i=0; i<var->opt_grib_kvpair_size; i++) {
         tmp[i] = var->opt_grib_kvpair[i];
       }
