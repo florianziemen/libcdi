@@ -433,7 +433,12 @@ void gribapiGetString(grib_handle *gh, const char *key, char *string, size_t len
 {
   string[0] = 0;
 
-  GRIB_CHECK(grib_get_string(gh, key, string, &length), 0);
+  int ret = grib_get_string(gh, key, string, &length);
+  if (ret != 0)
+    {
+      fprintf(stderr, "grib_get_string(gh, \"%s\", ...) failed!\n", key);
+      GRIB_CHECK(ret, 0);
+    }
   if      ( length == 8 && memcmp(string, "unknown", length) == 0 ) string[0] = 0;
   else if ( length == 2 && memcmp(string, "~", length)       == 0 ) string[0] = 0;
 }
