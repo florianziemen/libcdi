@@ -4791,6 +4791,12 @@ int isDBLAxis(/*const char *units,*/ const char *longname)
 }
 
 static
+int unitsIsMeter(const char *units)
+{
+  return (*units == 'm' && (strcmp(units, "m") == 0 || strncmp(units, "meter", 5) == 0));
+}
+
+static
 int isDepthAxis(const char *stdname, const char *longname)
 {
   int status = FALSE;
@@ -5776,7 +5782,7 @@ void verify_coordinate_vars_1(int ndims, ncdim_t *ncdims, ncvar_t *ncvars, int t
                 {
                   ncvars[ncvarid].zaxistype = ZAXIS_DEPTH_BELOW_LAND;
 		}
-	      else if ( strcmp(ncvars[ncvarid].units, "m")   == 0 )
+	      else if ( unitsIsMeter(ncvars[ncvarid].units) )
 		{
 		  if ( isDepthAxis(ncvars[ncvarid].stdname, ncvars[ncvarid].longname) )
 		    ncvars[ncvarid].zaxistype = ZAXIS_DEPTH_BELOW_SEA;
@@ -5863,7 +5869,7 @@ void verify_coordinate_vars_2(int nvars, ncvar_t *ncvars)
                   ncvars[ncvarid].zaxistype = ZAXIS_DEPTH_BELOW_LAND;
 		  continue;
 		}
-	      else if ( strcmp(ncvars[ncvarid].units, "m")   == 0 )
+	      else if ( unitsIsMeter(ncvars[ncvarid].units) )
 		{
 		  if ( isDepthAxis(ncvars[ncvarid].stdname, ncvars[ncvarid].longname) )
 		    ncvars[ncvarid].zaxistype = ZAXIS_DEPTH_BELOW_SEA;
