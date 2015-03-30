@@ -64,18 +64,10 @@ void vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].validrange[1] = VALIDMISS;
   vlistptr->vars[varID].ensdata       = NULL;
   vlistptr->vars[varID].iorank        = CDI_UNDEFID;
-
-#if  defined  (HAVE_LIBGRIB_API)
-  vlistptr->vars[varID].opt_grib_nentries = 0;
-  int i;
-  for (i=0; i<MAX_OPT_GRIB_ENTRIES; i++) {
-    vlistptr->vars[varID].opt_grib_kvpair[i].int_val =   0;
-    vlistptr->vars[varID].opt_grib_kvpair[i].dbl_val =   0;
-    vlistptr->vars[varID].opt_grib_kvpair[i].update  = FALSE;
-    vlistptr->vars[varID].opt_grib_kvpair[i].keyword = NULL;
-  } // for
-#endif
+  vlistptr->vars[varID].opt_grib_kvpair_size = 0;
 }
+
+
 
 static
 int vlistvarNewEntry(int vlistID)
@@ -1783,9 +1775,8 @@ void vlistDefVarIntKey(int vlistID, int varID, const char *name, int value)
     }
   else
     {
-      idx = vlistptr->vars[varID].opt_grib_nentries;
-      vlistptr->vars[varID].opt_grib_nentries++;
-      if ( idx >= MAX_OPT_GRIB_ENTRIES ) Error("Too many optional keyword/integer value pairs!");
+      resize_opt_grib_entries(&vlistptr->vars[varID], vlistptr->vars[varID].opt_grib_nentries+1);
+      idx = vlistptr->vars[varID].opt_grib_nentries -1;
       vlistptr->vars[varID].opt_grib_kvpair[idx].data_type   = t_int;
       vlistptr->vars[varID].opt_grib_kvpair[idx].int_val     = value;
       vlistptr->vars[varID].opt_grib_kvpair[idx].update      = TRUE;
@@ -1826,9 +1817,8 @@ void vlistDefVarDblKey(int vlistID, int varID, const char *name, double value)
     }
   else
     {
-      idx = vlistptr->vars[varID].opt_grib_nentries;
-      vlistptr->vars[varID].opt_grib_nentries++;
-      if ( idx >= MAX_OPT_GRIB_ENTRIES ) Error("Too many optional keyword/double value pairs!");
+      resize_opt_grib_entries(&vlistptr->vars[varID], vlistptr->vars[varID].opt_grib_nentries+1);
+      idx = vlistptr->vars[varID].opt_grib_nentries -1;
       vlistptr->vars[varID].opt_grib_kvpair[idx].data_type = t_double;
       vlistptr->vars[varID].opt_grib_kvpair[idx].dbl_val   = value;
       vlistptr->vars[varID].opt_grib_kvpair[idx].update    = TRUE;

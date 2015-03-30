@@ -108,9 +108,9 @@ typedef struct
   int         subtypeID;   /* subtype ID for tile-related meta-data, currently for GRIB-API only. */
 
 #if  defined  (HAVE_LIBGRIB_API)
-  /* (Optional) list of keyword/value pairs */
-  int                opt_grib_nentries;
-  opt_key_val_pair_t opt_grib_kvpair[MAX_OPT_GRIB_ENTRIES];
+  int                 opt_grib_nentries;       /* current no. key-value pairs            */
+  int                 opt_grib_kvpair_size;    /* current allocated size                 */
+  opt_key_val_pair_t *opt_grib_kvpair;         /* (optional) list of keyword/value pairs */
 #endif
 }
 var_t;
@@ -171,6 +171,10 @@ int vlist_att_compare(vlist_t *a, int varIDA, vlist_t *b, int varIDB, int attnum
 void vlist_lock(int vlistID);
 void vlist_unlock(int vlistID);
 
+void resize_opt_grib_entries(var_t *var, int nentries);
+
+
+
 static inline void
 vlistAdd2GridIDs(vlist_t *vlistptr, int gridID)
 {
@@ -216,6 +220,7 @@ vlistAdd2SubtypeIDs(vlist_t *vlistptr, int subtypeID)
       vlistptr->subtypeIDs[nsubs] = subtypeID;
     }
 }
+
 
 
 #if  defined  (HAVE_LIBGRIB_API)

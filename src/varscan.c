@@ -91,9 +91,9 @@ typedef struct
   subtype_t    *tiles;
 
 #if  defined  (HAVE_LIBGRIB_API)
-  /* (Optional) list of keyword/value pairs */
-  int                opt_grib_nentries;
-  opt_key_val_pair_t opt_grib_kvpair[MAX_OPT_GRIB_ENTRIES];
+  int                 opt_grib_nentries;                       /* current no. key-value pairs            */
+  int                 opt_grib_kvpair_size;                    /* current allocated size                 */
+  opt_key_val_pair_t *opt_grib_kvpair;                         /* (optional) list of keyword/value pairs */
 #endif
 }
 vartable_t;
@@ -192,6 +192,15 @@ void varFree(void)
       if ( vartable[varID].units )    free(vartable[varID].units);
       if ( vartable[varID].ensdata )  free(vartable[varID].ensdata);
       if ( vartable[varID].tiles )    subtypeDestroyPtr(vartable[varID].tiles);
+
+#if  defined  (HAVE_LIBGRIB_API)
+      for (int i=0; i<vartable[varID].opt_grib_nentries; i++) {
+	if ( vartable[varID].opt_grib_kvpair[i].keyword )
+	  free(vartable[varID].opt_grib_kvpair[i].keyword);
+      }
+      if ( vartable[varID].opt_grib_kvpair )
+        free(vartable[varID].opt_grib_kvpair);
+#endif
     }
 
   if ( vartable )
@@ -367,7 +376,7 @@ paramNewEntry(int param)
         {
           vartable[i].param = UNDEF_PARAM;
 #if  defined  (HAVE_LIBGRIB_API)
-          vartable[i].opt_grib_nentries = 0;
+          vartable[i].opt_grib_kvpair_size = 0;
 #endif
         }
     }
@@ -399,7 +408,7 @@ paramNewEntry(int param)
         {
           vartable[i].param = UNDEF_PARAM;
 #if  defined  (HAVE_LIBGRIB_API)
-          vartable[i].opt_grib_nentries = 0;
+          vartable[i].opt_grib_kvpair_size = 0;
 #endif
         }
     }
@@ -797,9 +806,8 @@ void cdi_generate_vars(stream_t *streamptr)
       vlistptr = vlist_to_pointer(vlistID);
       for (i=0; i<vartable[varid].opt_grib_nentries; i++)
         {
-          int idx = vlistptr->vars[varID].opt_grib_nentries;
-          vlistptr->vars[varID].opt_grib_nentries++;
-          if ( idx >= MAX_OPT_GRIB_ENTRIES ) Error("Too many optional keyword/integer value pairs!");
+          resize_opt_grib_entries(&vlistptr->vars[varID], vlistptr->vars[varID].opt_grib_nentries+1);
+          int idx = vlistptr->vars[varID].opt_grib_nentries-1;
 
           vlistptr->vars[varID].opt_grib_kvpair[idx] = vartable[varid].opt_grib_kvpair[idx];
           vlistptr->vars[varID].opt_grib_kvpair[idx].update = TRUE;
@@ -1144,6 +1152,37 @@ void varDefProductDefinitionTemplate(int varID, int productDefinitionTemplate)
   vartable[varID].productDefinitionTemplate = productDefinitionTemplate;
 }
 
+/* Resizes and initializes opt_grib_kvpair data structure. */
+static 
+void resize_vartable_opt_grib_entries(vartable_t *var, int nentries)
+{
+#if  defined  (HAVE_LIBGRIB_API)
+  if (var->opt_grib_kvpair_size >= nentries) 
+    {
+      return;   /* nothing to do; array is still large enough */
+    }
+  else
+    {
+      int i, new_size;
+      fprintf(stderr, "malloc to size %d\n", new_size);
+      new_size = (2*var->opt_grib_kvpair_size) > nentries ? (2*var->opt_grib_kvpair_size) : nentries;
+      fprintf(stderr, "malloc to size %d done.\n", new_size);
+      opt_key_val_pair_t *tmp = (opt_key_val_pair_t *)xmalloc((size_t)new_size * sizeof (opt_key_val_pair_t));
+      for (i=0; i<var->opt_grib_kvpair_size; i++) {
+        tmp[i] = var->opt_grib_kvpair[i];
+      }
+      var->opt_grib_kvpair_size = new_size;
+      for (i=var->opt_grib_kvpair_size; i<nentries; i++) {
+        tmp[i].int_val =     0;
+        tmp[i].dbl_val =     0;
+        tmp[i].update  = FALSE;
+        tmp[i].keyword =  NULL;
+      } // for
+      free(var->opt_grib_kvpair);
+      var->opt_grib_kvpair = tmp;
+    }
+#endif
+}
 
 #if  defined  (HAVE_LIBGRIB_API)
 void varDefOptGribInt(int varID, int tile_index, long lval, const char *keyword)
@@ -1157,11 +1196,10 @@ void varDefOptGribInt(int varID, int tile_index, long lval, const char *keyword)
         idx = i;
     }
 
-  if (idx == -1) 
+  if (idx == -1)
     {
-      idx = vartable[varID].opt_grib_nentries;
-      vartable[varID].opt_grib_nentries++;
-      if ( idx >= MAX_OPT_GRIB_ENTRIES ) Error("Too many optional keyword/value pairs!");
+      resize_vartable_opt_grib_entries(&vartable[varID], vartable[varID].opt_grib_nentries+1);
+      idx = vartable[varID].opt_grib_nentries -1;
     }
   else
     {
@@ -1190,9 +1228,8 @@ void varDefOptGribDbl(int varID, int tile_index, double dval, const char *keywor
 
   if (idx == -1) 
     {
-      idx = vartable[varID].opt_grib_nentries;
-      vartable[varID].opt_grib_nentries++;
-      if ( idx >= MAX_OPT_GRIB_ENTRIES ) Error("Too many optional keyword/value pairs!");
+      resize_vartable_opt_grib_entries(&vartable[varID], vartable[varID].opt_grib_nentries+1);
+      idx = vartable[varID].opt_grib_nentries -1;
     }
   else
     {
