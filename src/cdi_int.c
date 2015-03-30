@@ -422,6 +422,7 @@ int cdiUUIDIsNull(const unsigned char* uuid)
   return !memcmp(uuid, uuid_nil, CDI_UUID_SIZE);
 }
 
+
 /*
  * Local Variables:
  * c-file-style: "Java"
@@ -431,3 +432,4 @@ int cdiUUIDIsNull(const unsigned char* uuid)
  * require-trailing-newline: t
  * End:
  */
+

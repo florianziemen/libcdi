@@ -16,6 +16,10 @@
 #include "resource_unpack.h"
 #include "namespace.h"
 #include "serialize.h"
+#include "vlist.h"
+
+#undef  UNDEFID
+#define UNDEFID -1
 
 #ifndef  RAD2DEG
 #define  RAD2DEG  (180./M_PI)   /* conversion for rad to deg */
@@ -4439,6 +4443,83 @@ gridPack(void * voidP, void * packBuffer, int packBufferSize,
 }
 
 #undef GRID_STR_SERIALIZE
+
+
+struct varDefGridSearchState
+{
+  int resIDValue;
+  const grid_t *queryKey;
+};
+
+static enum cdiApplyRet
+varDefGridSearch(int id, void *res, void *data)
+{
+  struct varDefGridSearchState *state = data;
+  (void)res;
+  if (gridCompare(id, state->queryKey) == 0)
+    {
+      state->resIDValue = id;
+      return CDI_APPLY_STOP;
+    }
+  else
+    return CDI_APPLY_GO_ON;
+}
+
+int varDefGrid(int vlistID, const grid_t *grid, int mode)
+{
+  /*
+    mode: 0 search in vlist and grid table
+          1 search in grid table
+   */
+  int gridglobdefined = FALSE;
+  int griddefined;
+  int gridID = CDI_UNDEFID;
+  vlist_t *vlistptr = vlist_to_pointer(vlistID);
+
+  griddefined = FALSE;
+  unsigned ngrids = (unsigned)vlistptr->ngrids;
+
+  if ( mode == 0 )
+    for (unsigned index = 0; index < ngrids; index++ )
+      {
+	gridID = vlistptr->gridIDs[index];
+	if ( gridID == UNDEFID )
+	  Error("Internal problem: undefined gridID %d!", gridID);
+
+	if ( gridCompare(gridID, grid) == 0 )
+	  {
+	    griddefined = TRUE;
+	    break;
+	  }
+      }
+
+  if ( ! griddefined )
+    {
+      struct varDefGridSearchState query = { .queryKey = grid };
+      if ((gridglobdefined
+           = (cdiResHFilterApply(&gridOps, varDefGridSearch, &query)
+              == CDI_APPLY_STOP)))
+        gridID = query.resIDValue;
+
+      if ( mode == 1 && gridglobdefined)
+	for (unsigned index = 0; index < ngrids; index++ )
+	  if ( vlistptr->gridIDs[index] == gridID )
+	    {
+	      gridglobdefined = FALSE;
+	      break;
+	    }
+    }
+
+  if ( ! griddefined )
+    {
+      if ( ! gridglobdefined ) gridID = gridGenerate(grid);
+      ngrids = (unsigned)vlistptr->ngrids;
+      vlistptr->gridIDs[ngrids] = gridID;
+      vlistptr->ngrids++;
+    }
+
+  return (gridID);
+}
 
 /*
  * Local Variables:

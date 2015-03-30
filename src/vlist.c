@@ -289,29 +289,16 @@ void var_copy_entries(var_t *var2, var_t *var1)
       memcpy(var2->ensdata, var1->ensdata, sizeof(ensinfo_t));
     }
 #if  defined  (HAVE_LIBGRIB_API)
-  /* ---------------------------------- */
-  /* Local change: 2013-01-28, FP (DWD) */
-  /* ---------------------------------- */
-  var2->opt_grib_int_nentries = var1->opt_grib_int_nentries;
-  for ( int i = 0; i < var1->opt_grib_int_nentries; i++ )
-    {
-      if ( var1->opt_grib_int_keyword[i] )
-        {
-          var2->opt_grib_int_keyword[i] = strdupx(var1->opt_grib_int_keyword[i]);
-          var2->opt_grib_int_val[i]     = var1->opt_grib_int_val[i];
-          var2->opt_grib_int_update[i]  = TRUE;
-        }
+  var2->opt_grib_nentries = var1->opt_grib_nentries;
+  for (int i=0; i<var1->opt_grib_nentries; i++) {
+    if ( var1->opt_grib_kvpair[i].keyword ) {
+      var2->opt_grib_kvpair[i] =
+        var1->opt_grib_kvpair[i];
+      var2->opt_grib_kvpair[i].keyword = 
+        strdupx(var1->opt_grib_kvpair[i].keyword);
+      var2->opt_grib_kvpair[i].update = TRUE;
     }
-  var2->opt_grib_dbl_nentries = var1->opt_grib_dbl_nentries;
-  for ( int i = 0; i < var1->opt_grib_dbl_nentries; i++ )
-    {
-      if ( var1->opt_grib_dbl_keyword[i] )
-        {
-          var2->opt_grib_dbl_keyword[i] = strdupx(var1->opt_grib_dbl_keyword[i]);
-          var2->opt_grib_dbl_val[i]     = var1->opt_grib_dbl_val[i];
-          var2->opt_grib_dbl_update[i]  = TRUE;
-        }
-    }
+  }
 #endif
 }
 

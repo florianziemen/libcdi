@@ -95,6 +95,8 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
            int * unpackBufferPos, int originNamespace, void *context,
            int force_id);
 
+int  varDefGrid(int vlistID, const grid_t *grid, int mode);
+
 #endif
 /*
  * Local Variables:

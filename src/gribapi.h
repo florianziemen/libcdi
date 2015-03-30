@@ -8,6 +8,10 @@
 #endif
 #endif
 
+#ifndef  _CDI_INT_H
+#include "cdi_int.h"
+#endif
+
 #define  GRIBAPI_MISSVAL  -9.E33
 
 /* GRIB2 Level Types */
