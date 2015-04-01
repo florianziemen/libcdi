@@ -6,7 +6,7 @@
 # pretty generic script -- just echos, cats and greps.
 #
 #
-srcdir=./
+srcdir=.
 if [ ! -z $1 ] ; then
 srcdir=$1
 fi
@@ -89,73 +89,98 @@ cat > ${PROG} << EOR
 
 EOR
 
-c="dmemory.c         \
-   dmemory.h         \
-   cksum.c           \
-   cdi_cksum.c       \
-   taxis.c           \
-   timebase.c        \
-   calendar.c        \
-   model.c           \
-   institution.c     \
-   table.c           \
-   util.c            \
-   gaussgrid.c       \
-   varscan.c         \
-   vlist.c           \
-   vlist_att.c       \
-   vlist_var.c       \
-   basetime.c        \
-   servicelib.c      \
-   extralib.c        \
-   ieglib.c          \
-   grid.c            \
-   zaxis.c           \
-   cdf_int.c         \
-   cdi_error.c       \
-   cdi_util.c        \
-   cdi_int.c         \
-   stream.c          \
-   stream_history.c  \
-   stream_cgribex.c  \
-   stream_gribapi.c  \
-   stream_fcommon.c  \
-   stream_grb.c      \
-   stream_srv.c      \
-   stream_ext.c      \
-   stream_ieg.c      \
-   stream_cdf.c      \
-   stream_var.c      \
-   stream_record.c   \
-   tsteps.c          \
-   file.c            \
-   cgribexlib.c      \
-   gribapi.c         \
-   swap.c            \
-   binary.c          \
-   cdf.c             \
-   namespace.c       \
-   serialize.c       \
-   resource_handle.c"
+files="basetime.c \
+   binary.c \
+   calendar.c \
+   cdf.c \
+   cdf_int.c \
+   cdi_cksum.c \
+   cdi_error.c \
+   cdi_int.c \
+   cdi_util.c \
+   cgribexlib.c \
+   cksum.c \
+   dmemory.c \
+   error.c \
+   extralib.c \
+   file.c \
+   gaussgrid.c \
+   gribapi.c \
+   gribapi_utilities.c \
+   grid.c \
+   ieglib.c \
+   input_file.c \
+   institution.c \
+   iterator.c \
+   iterator_fallback.c \
+   iterator_grib.c \
+   model.c \
+   namespace.c \
+   proprietarySystemWorkarounds.c \
+   referenceCounting.c \
+   resource_handle.c \
+   serialize.c \
+   servicelib.c \
+   stream.c \
+   stream_cdf.c \
+   stream_cgribex.c \
+   stream_ext.c \
+   stream_fcommon.c \
+   stream_grb.c \
+   stream_gribapi.c \
+   stream_history.c \
+   stream_ieg.c \
+   stream_record.c \
+   stream_srv.c \
+   stream_var.c \
+   swap.c \
+   table.c \
+   taxis.c \
+   timebase.c \
+   tsteps.c \
+   util.c \
+   varscan.c \
+   vlist.c \
+   vlist_att.c \
+   vlist_var.c \
+   zaxis.c"
 
-h="cdi_limits.h resource_handle.h taxis.h dtypes.h file.h service.h extra.h \
-   ieg.h cdi.h timebase.h calendar.h basetime.h datetime.h namespace.h \
-   cksum.h cdi_cksum.h error.c error.h cdi_int.h cgribex.h gribapi.h \
-   stream_cgribex.h stream_gribapi.h  stream_grb.h  stream_cdf.h \
-   tablepar.h table.h gaussgrid.h grid.h zaxis.h varscan.h binary.h swap.h \
-   service.h stream_srv.h stream_ext.h stream_ieg.h cdf_int.h  \
-   cdf.h vlist.h vlist_var.h vlist_att.h model.h institution.h \
-   resource_unpack.h serialize.h stream_fcommon.h"
+car () {
+    echo "$1"
+}
+cdr () {
+    shift
+    echo "$@"
+}
+listIncludes () {
+    grep '^ *# *include  *"' "$1" | sed 's/^ *# *include  *"\(.*\)".*$/\1/'
+}
 
-#cat $h >> ${PROG}
-#cat $c | grep -v '#include' | grep -v '#  include' >> ${PROG}
-
-for hfile in $h ; do
-  cat $srcdir/$hfile  >> ${PROG}
+scanlist="$files"
+fileList=
+until test "foo$scanlist" = "foo" ; do
+    curFile="$(car $scanlist)"
+    scanlist="$(cdr $scanlist)"
+    case $curFile in
+        (\<*\>)
+            fileList="$fileList $(echo "$curFile" | sed 's/<\(.*\)>/\1/')"
+            ;;
+        (*)
+            if echo "$fileList" | grep -q '\<'"$curFile"'\>' ; then
+                true    #Nothing to do, we have already scanned this header.
+            else
+                #Prepend the includes of the current header to the scanlist so that we will scan them in the order that the preprocessor would.
+                scanlist="$(listIncludes "$curFile") <$curFile> $scanlist"
+            fi
+            ;;
+    esac
 done
 
-for cfile in $c ; do
-  cat $srcdir/$cfile | grep -v '#include "' | grep -v '#  include "' >> ${PROG}
+echo file list:
+echo $fileList
+
+for file in $fileList ; do
+  cat $srcdir/$file | grep -v '^ *# *include  *"'  >> ${PROG}
 done
 
 

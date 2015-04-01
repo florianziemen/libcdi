@@ -4,7 +4,7 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   February 2015
+! Uwe Schulzweida, MPI-MET, Hamburg,   March 2015
 !
 
       INTEGER    CDI_MAX_NAME          
@@ -31,6 +31,8 @@
 !
       INTEGER    CDI_NOERR             
       PARAMETER (CDI_NOERR              =  0)
+      INTEGER    CDI_EEOF              
+      PARAMETER (CDI_EEOF               = -1)
       INTEGER    CDI_ESYSTEM           
       PARAMETER (CDI_ESYSTEM            = -10)
       INTEGER    CDI_EINVAL            
@@ -377,6 +379,12 @@
       INTEGER    CDI_UUID_SIZE         
       PARAMETER (CDI_UUID_SIZE          = 16)
 !
+!  Structs that are used to return data to the user
+!
+!
+!  Opaque types
+!
+!
 !  CDI control routines
 !
 !                     cdiReset
@@ -570,14 +578,6 @@
 !                                    (INTEGER         streamID)
       EXTERNAL        streamInqCurTimestepID
 
-      CHARACTER(80)   streamFilename
-!                                    (INTEGER         streamID)
-      EXTERNAL        streamFilename
-
-      CHARACTER(80)   streamFilesuffix
-!                                    (INTEGER         filetype)
-      EXTERNAL        streamFilesuffix
-
       INTEGER         streamInqNvars
 !                                    (INTEGER         streamID)
       EXTERNAL        streamInqNvars
@@ -691,6 +691,9 @@
 !                                     INTEGER         streamIDsrc)
       EXTERNAL        streamCopyRecord
 
+!
+!  File driven I/O (may yield better performance than using the streamXXX functions)
+!
 !
 !  VLIST routines
 !
@@ -1783,12 +1786,6 @@
 !                                     DOUBLEPRECISION ybounds_vec)
       EXTERNAL        gridInqYbounds
 
-!                     gridDefRowlon
-!                                    (INTEGER         gridID,
-!                                     INTEGER         nrowlon,
-!                                     INTEGER         rowlon_vec)
-      EXTERNAL        gridDefRowlon
-
 !                     gridInqRowlon
 !                                    (INTEGER         gridID,
 !                                     INTEGER         rowlon_vec)
@@ -2178,10 +2175,6 @@
 !                                    (INTEGER         taxisID)
       EXTERNAL        taxisInqNumavg
 
-      CHARACTER(80)   tunitNamePtr
-!                                    (INTEGER         tunitID)
-      EXTERNAL        tunitNamePtr
-
 !
 !  Institut routines
 !
@@ -2213,10 +2206,6 @@
       CHARACTER(80)   institutInqNamePtr
 !                                    (INTEGER         instID)
       EXTERNAL        institutInqNamePtr
-
-      CHARACTER(80)   institutInqLongnamePtr
-!                                    (INTEGER         instID)
-      EXTERNAL        institutInqLongnamePtr
 
 !
 !  Model routines
@@ -2267,10 +2256,6 @@
 !                                     INTEGER         tablenum,
 !                                     CHARACTER*(*)   tablename)
       EXTERNAL        tableDef
-
-      CHARACTER(80)   tableInqNamePtr
-!                                    (INTEGER         tableID)
-      EXTERNAL        tableInqNamePtr
 
 !                     tableDefEntry
 !                                    (INTEGER         tableID,
