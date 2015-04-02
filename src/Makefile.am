@@ -61,12 +61,6 @@ libcdi_la_SOURCES = 	 \
 	input_file.h	\
 	institution.c  	 \
 	institution.h  	 \
-	iterator.c       \
-	iterator.h       \
-	iterator_fallback.c \
-	iterator_fallback.h \
-	iterator_grib.c \
-	iterator_grib.h  \
 	model.c        	 \
 	model.h        	 \
 	namespace.c      \
@@ -126,6 +120,16 @@ libcdi_la_SOURCES = 	 \
         stream.c         \
         swap.c
 
+if HAVE_LIBGRIB_API
+libcdi_la_SOURCES +=        \
+	iterator.c          \
+	iterator.h          \
+	iterator_fallback.c \
+	iterator_fallback.h \
+	iterator_grib.c     \
+	iterator_grib.h
+endif
+
 libcdiresunpack_la_SOURCES = \
 	resource_unpack.c
 
@@ -173,6 +177,7 @@ libcdipio_la_SOURCES =							\
 libcdipio_la_LIBADD    = libcdi.la $(PPM_CORE_LIBS) $(YAXT_LIBS) $(MPI_C_LIB)
 
 libcdi_la_LIBADD    = $(UUID_C_LIB)
+libcdi_la_CFLAGS    = -DpgiFortran
 #
 #cdilib.c:
 #	$(top_srcdir)/src/make_cdilib $(top_srcdir)/src
