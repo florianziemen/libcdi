@@ -314,6 +314,7 @@ AC_ARG_WITH([grib_api],
              AC_MSG_RESULT([suppressed])])
 AC_SUBST([GRIB_API_INCLUDE])
 AC_SUBST([GRIB_API_LIBS])
+AM_CONDITIONAL([HAVE_LIBGRIB_API],[test "x$with_grib_api" != 'x' -a "x$with_grib_api" != 'xno' ])
 #  ----------------------------------------------------------------------
 #  Enable GRIB support
 AC_MSG_CHECKING([for GRIB support])
