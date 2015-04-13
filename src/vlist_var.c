@@ -64,7 +64,9 @@ void vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].validrange[1] = VALIDMISS;
   vlistptr->vars[varID].ensdata       = NULL;
   vlistptr->vars[varID].iorank        = CDI_UNDEFID;
+#if  defined  (HAVE_LIBGRIB_API)
   vlistptr->vars[varID].opt_grib_kvpair_size = 0;
+#endif
 }
 
 
