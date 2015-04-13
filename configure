@@ -682,6 +682,8 @@ ENABLE_EXTRA
 ENABLE_SERVICE
 ENABLE_CGRIBEX
 ENABLE_GRIB
+HAVE_LIBGRIB_API_FALSE
+HAVE_LIBGRIB_API_TRUE
 GRIB_API_LIBS
 GRIB_API_INCLUDE
 LIBPNG_LIBS
@@ -27085,6 +27087,14 @@ fi
 
 
 
+ if test "x$with_grib_api" != 'x' -a "x$with_grib_api" != 'xno' ; then
+  HAVE_LIBGRIB_API_TRUE=
+  HAVE_LIBGRIB_API_FALSE='#'
+else
+  HAVE_LIBGRIB_API_TRUE='#'
+  HAVE_LIBGRIB_API_FALSE=
+fi
+
 #  ----------------------------------------------------------------------
 #  Enable GRIB support
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for GRIB support" >&5
@@ -28914,6 +28924,10 @@ if test -z "${am__fastdepCXX_TRUE}" && test -z "${am__fastdepCXX_FALSE}"; then
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 
+if test -z "${HAVE_LIBGRIB_API_TRUE}" && test -z "${HAVE_LIBGRIB_API_FALSE}"; then
+  as_fn_error $? "conditional \"HAVE_LIBGRIB_API\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
 if test -z "${ENABLE_CDI_LIB_TRUE}" && test -z "${ENABLE_CDI_LIB_FALSE}"; then
   as_fn_error $? "conditional \"ENABLE_CDI_LIB\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5

@@ -1,3 +1,7 @@
+2015-03-30  Uwe Schulzweida
+
+	* gribapiDefLevel: use function grib2DefLevel() to write grib2 levels
+
 2015-03-29  Uwe Schulzweida
 
 	* vlistMerge: compare size of grids (bug fix)

@@ -86,7 +86,9 @@ static int string2FileType(const char* fileType, const char** outRestString)
 
     The returned iterator does not point to the first field yet,
     it must first be advanced once before the first field can be introspected.
-    This design decision has two benefits: 1. Empty files require no special cases, 2. Users can start a while(!cdiIterator_nextField(iterator)) loop right after the call to cdiIterator_new().
+    This design decision has two benefits: 1. Empty files require no special
+    cases, 2. Users can start a while(!cdiIterator_nextField(iterator)) loop
+    right after the call to cdiIterator_new().
 */
 CdiIterator* cdiIterator_new(const char* path)
 {
@@ -173,9 +175,14 @@ const char* baseIter_constructFromString(CdiIterator* me, const char* descriptio
 @Result The clone.
 
 @Description
-    Clones the given iterator. Make sure to call cdiIterator_delete() on both the copy and the original.
+    Clones the given iterator. Make sure to call cdiIterator_delete() on both
+    the copy and the original.
 
-    This is not a cheap operation: Depending on the type of the file, it will either make a copy of the current field in memory (GRIB files), or reopen the file (all other file types). Use it sparingly. And if you do, try to avoid keeping too many clones around: their memory footprint is significant.
+    This is not a cheap operation: Depending on the type of the file, it will
+    either make a copy of the current field in memory (GRIB files), or reopen
+    the file (all other file types). Use it sparingly. And if you do, try to
+    avoid keeping too many clones around: their memory footprint is
+    significant.
 */
 CdiIterator* cdiIterator_clone(CdiIterator* me)
 {
