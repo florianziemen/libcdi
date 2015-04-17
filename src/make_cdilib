@@ -180,7 +180,11 @@ echo file list:
 echo $fileList
 
 for file in $fileList ; do
-  cat $srcdir/$file | grep -v '^ *# *include  *"'  >> ${PROG}
+  if [ "$file" = "config.h" ] ; then
+    echo "skipped file: $file"
+  else
+    cat $srcdir/$file | grep -v '^ *# *include  *"'  >> ${PROG}
+  fi
 done
 
 
