@@ -15,7 +15,7 @@
 #endif
 
 typedef struct recordList recordList;
-typedef struct CdiGribIterator {
+struct CdiGribIterator {
   CdiIterator super;
 
   CdiInputFile* file;
@@ -27,7 +27,7 @@ typedef struct CdiGribIterator {
 #else
   void* gribHandle;
 #endif
-} CdiGribIterator;
+};
 
 CdiIterator* cdiGribIterator_new(const char* path, int filetype);
 CdiGribIterator* cdiGribIterator_makeClone(CdiIterator* me);
