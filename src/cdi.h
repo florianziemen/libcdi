@@ -7,10 +7,6 @@
 #ifndef  CDI_H_
 #define  CDI_H_
 
-#if defined (HAVE_CONFIG_H)
-#  include "config.h"
-#endif
-
 #include <stdio.h>
 #include <sys/types.h>
 /*
@@ -233,10 +229,8 @@ typedef struct CdiParam { int discipline; int category; int number; } CdiParam;
 
 
 /* Opaque types */
-#ifdef HAVE_LIBGRIB_API
 typedef struct CdiIterator CdiIterator;
 typedef struct CdiGribIterator CdiGribIterator;
-#endif
 
 /* CDI control routines */
 
@@ -378,7 +372,6 @@ void    streamInqGRIBinfo(int streamID, int *intnum, float *fltnum, off_t *bignu
 /* File driven I/O (may yield better performance than using the streamXXX functions) */
 
 //Creation & Destruction
-#ifdef HAVE_LIBGRIB_API
 CdiIterator* cdiIterator_new(const char* path);  //Requires a subsequent call to cdiIteratorNextField() to point the iterator at the first field.
 CdiIterator* cdiIterator_clone(CdiIterator* me);
 char* cdiIterator_serialize(CdiIterator* me);  //Returns a malloc'ed string.
@@ -429,7 +422,6 @@ long cdiGribIterator_inqLongDefaultValue(CdiGribIterator* me, const char* key, l
 double cdiGribIterator_inqDoubleValue(CdiGribIterator* me, const char* key);   //Aborts on failure to fetch the given key.
 double cdiGribIterator_inqDoubleDefaultValue(CdiGribIterator* me, const char* key, double defaultValue); //Returns the default value if the given key is not present.
 char* cdiGribIterator_inqStringValue(CdiGribIterator* me, const char* key);        //Returns a malloc'ed string.
-#endif
 
 /* VLIST routines */
 
