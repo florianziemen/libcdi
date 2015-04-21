@@ -2,6 +2,10 @@
 
 	* Version 1.6.9 released
 
+2015-04-21  Uwe Schulzweida
+
+	* dmemory.c: merge changes from branches/cdi-tilesAndFileDrivenInput
+
 2015-03-30  Uwe Schulzweida
 
 	* gribapiDefLevel: use function grib2DefLevel() to write grib2 levels
