@@ -2,6 +2,11 @@
 
 	* Version 1.6.9 released
 
+2015-04-22  Uwe Schulzweida
+
+	* cgribex rotated grids: added support for parameter >angle< (bug fix)
+	* netcdf rotated grids: bug fix for negative angles
+
 2015-04-21  Uwe Schulzweida
 
 	* dmemory.c: merge changes from branches/cdi-tilesAndFileDrivenInput
