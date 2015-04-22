@@ -2649,7 +2649,7 @@ void cdfDefPole(stream_t *streamptr, int gridID)
       cdf_put_att_text(fileID, ncvarid, "grid_mapping_name", strlen(mapname), mapname);
       cdf_put_att_double(fileID, ncvarid, "grid_north_pole_latitude", NC_DOUBLE, 1, &ypole);
       cdf_put_att_double(fileID, ncvarid, "grid_north_pole_longitude", NC_DOUBLE, 1, &xpole);
-      if ( angle > 0 )
+      if ( IS_NOT_EQUAL(angle, 0) )
         cdf_put_att_double(fileID, ncvarid, "north_pole_grid_longitude", NC_DOUBLE, 1, &angle);
     }
 
