@@ -3152,7 +3152,7 @@ void gridPrintKernel(grid_t * gridptr, int index, int opt, FILE *fp)
 	  {
 	    if ( xsize > 0 ) fprintf(fp, "xnpole    = %g\n", gridptr->xpole);
 	    if ( ysize > 0 ) fprintf(fp, "ynpole    = %g\n", gridptr->ypole);
-	    if ( gridptr->angle > 0 ) fprintf(fp, "angle     = %g\n", gridptr->angle);
+	    if ( IS_NOT_EQUAL(gridptr->angle, 0) ) fprintf(fp, "angle     = %g\n", gridptr->angle);
  	  }
 
 	if ( xvals )
