@@ -89,7 +89,7 @@ double gribGetDoubleDefault(grib_handle* gribHandle, const char* key, double def
 {
   double result;
   if(grib_get_double(gribHandle, key, &result)) return defaultValue;
-  if(result == GRIB_MISSING_DOUBLE) return defaultValue;
+  if(IS_EQUAL(result, GRIB_MISSING_DOUBLE)) return defaultValue;
   return result;
 }
 
@@ -443,7 +443,8 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
         if ( gridtype == GRID_LONLAT )
           FAIL_ON_GRIB_ERROR(grib_get_double, gh, "jDirectionIncrementInDegrees", &grid->yinc);
 
-        if ( IS_EQUAL(grid->xinc, GRIB_MISSING_DOUBLE) ) grid->xinc = 0;
+        if ( grid->xinc < -999 || grid->xinc > 999 ) grid->xinc = 0;
+        if ( grid->yinc < -999 || grid->yinc > 999 ) grid->yinc = 0;
 
         /* if ( IS_NOT_EQUAL(grid->xfirst, 0) || IS_NOT_EQUAL(grid->xlast, 0) ) */
           {
