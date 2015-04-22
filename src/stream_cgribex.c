@@ -1404,31 +1404,26 @@ static
 void cgribexDefParam(int *isec1, int param)
 {
   int pdis, pcat, pnum;
-  static bool lwarn_pdis = true, lwarn_pnum = true;
 
   cdiDecodeParam(param, &pnum, &pcat, &pdis);
 
   if ( pnum < 0 ) pnum = -pnum;
 
-  if ( pdis != 255 )
+  static bool lwarn_pdis = true;
+  if ( pdis != 255 && lwarn_pdis )
     {
       char paramstr[32];
       cdiParamToString(param, paramstr, sizeof(paramstr));
-      if ( lwarn_pdis )
-        {
-          Warning("Can't convert GRIB2 parameter ID (%s) to GRIB1, set to %d.%d!", paramstr, pnum, pcat);
-          lwarn_pdis = false;
-        }
+      Warning("Can't convert GRIB2 parameter ID (%s) to GRIB1, set to %d.%d!", paramstr, pnum, pcat);
+      lwarn_pdis = false;
     }
 
-  if ( pnum > 255 )
+  static bool lwarn_pnum = true;
+  if ( pnum > 255 && lwarn_pnum )
     {
-      if ( lwarn_pnum )
-        {
-          Warning("Parameter number %d out of bounds (1-255), set to %d!", pnum, pnum%256);
-          lwarn_pnum = false;
-          pnum = pnum%256;
-        }
+      Warning("Parameter number %d out of bounds (1-255), set to %d!", pnum, pnum%256);
+      lwarn_pnum = false;
+      pnum = pnum%256;
     }
 
   ISEC1_CodeTable = pcat;
