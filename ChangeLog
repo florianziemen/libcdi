@@ -5,6 +5,7 @@
 
 2015-04-22  Uwe Schulzweida
 
+	* gribapiDefParam: use cfName to find parameter ids
 	* cgribex rotated grids: added support for parameter >angle< (bug fix)
 	* netcdf rotated grids: bug fix for negative angles
 
