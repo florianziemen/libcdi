@@ -8,7 +8,7 @@
 struct subtype_attr_t {
   int   key, val;                                /* key/value pair */
   struct subtype_attr_t* next;                   /* next element in linked list */
-} subtype_attr_t;
+};
 
 
 /* Data type specifying a single entry of a subtype, for example a

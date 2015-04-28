@@ -152,7 +152,7 @@ enum {
   SUBTYPE_ATT_NUMBER_OF_TILES           = 3,
   SUBTYPE_ATT_NUMBER_OF_ATTR            = 4,
   SUBTYPE_ATT_TILEATTRIBUTE             = 5
-} subtype_attributes;
+};
 
 
 /* Literal constants corresponding to the different constants of the

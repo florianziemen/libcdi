@@ -173,7 +173,7 @@ extern "C" {
 
 enum {
   SUBTYPE_TILES                         = 0  /* Tiles variable                                  */
-} subtype_kind;
+};
 
 #define MAX_KV_PAIRS_MATCH 10
 
