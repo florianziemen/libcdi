@@ -3,6 +3,30 @@
 
 void uuid2str(const unsigned char uuid[CDI_UUID_SIZE], char *uuidstr);
 
+static inline
+int cdiUUIDIsNull(const unsigned char uuid[CDI_UUID_SIZE])
+{
+  static unsigned char uuid_nil[CDI_UUID_SIZE];
+  return !memcmp(uuid, uuid_nil, CDI_UUID_SIZE);
+}
+
+
+void datetime2str(int date, int time, char *datetimestr, int maxlen)
+{
+  int year, month, day;
+  int hour, minute, second;
+  int len;
+
+  cdiDecodeDate(date, &year, &month, &day);
+  cdiDecodeTime(time, &hour, &minute, &second);
+
+  len = sprintf(datetimestr, DATE_FORMAT "T" TIME_FORMAT, year, month, day, hour, minute, second);
+
+  if ( len > ( maxlen-1) )
+    fprintf(stderr, "Internal problem (%s): sizeof input string is too small!\n", __func__);
+}
+
+
 void date2str(int date, char *datestr, int maxlen)
 {
   int year, month, day;
@@ -222,7 +246,7 @@ void printGridInfo(int vlistID)
 	      latpole = gridInqYpole(gridID);
 	      angle   = gridInqAngle(gridID);
 	      fprintf(stdout, "%33s : lon=%g  lat=%g", "northpole", lonpole, latpole);
-	      if ( angle > 0 ) fprintf(stdout, "  angle=%g", angle);
+	      if ( IS_NOT_EQUAL(angle, 0) ) fprintf(stdout, "  angle=%g", angle);
 	      fprintf(stdout, "\n");
 	    }
 

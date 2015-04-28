@@ -1,20 +1,24 @@
+#if  defined(HAVE_CONFIG_H)
+#  include "config.h"
+#endif
+
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include <ctype.h>
 #include <stdarg.h>
 #include <errno.h>
 
 #include "error.h"
 
-#if  defined  (HAVE_CONFIG_H)
-  #include "config.h"
-#else
-  #if ! defined (HAVE_MALLOC_H)
-    #if defined (SX)
-      #define  HAVE_MALLOC_H
-    #endif
-  #endif
+#if !defined(HAVE_CONFIG_H) && !defined(HAVE_MALLOC_H) && defined(SX)
+#  define  HAVE_MALLOC_H
 #endif
+
+#if  defined(HAVE_MALLOC_H)
+#  include <malloc.h>
+#endif
+
 //There is no point in avoiding to include our own header, it is likely to be included before this file in the backed cdilib.c.
 //As such, we may as well always include it and let the compiler check our function signatures.
 #include "dmemory.h"
@@ -24,6 +28,7 @@
 #define protected_calloc (calloc)
 #define protected_malloc (malloc)
 #define protected_free (free)
+
 
 #define  MALLOC_FUNC   0
 #define  CALLOC_FUNC   1
@@ -530,8 +535,7 @@ void *cdiXmalloc(size_t size, const char *filename, const char *functionname,
 {
   void *value = protected_malloc(size);
   if (size == 0 || value != NULL) ; else
-    cdiAbort(filename, functionname, line, "malloc failed: %s",
-             strerror(errno));
+    cdiAbort(filename, functionname, line, "malloc failed: %s", strerror(errno));
   return value;
 }
 
@@ -540,8 +544,7 @@ void *cdiXcalloc(size_t nmemb, size_t size, const char *filename,
 {
   void *value = protected_calloc(nmemb, size);
   if (size == 0 || value != NULL) ; else
-    cdiAbort(filename, functionname, line, "calloc failed: %s",
-             strerror(errno) );
+    cdiAbort(filename, functionname, line, "calloc failed: %s", strerror(errno) );
   return value;
 }
 
@@ -550,8 +553,7 @@ void *cdiXrealloc(void *p, size_t size, const char *functionname,
 {
   void *value = protected_realloc(p, size);
   if (size == 0 || value != NULL) ; else
-    cdiAbort(filename, functionname, line, "realloc failed: %s",
-             strerror(errno));
+    cdiAbort(filename, functionname, line, "realloc failed: %s", strerror(errno));
   return value;
 }
 
@@ -587,3 +589,12 @@ void memExitOnError(void)
 {
   dmemory_ExitOnError = 1;
 }
+/*
+ * Local Variables:
+ * c-file-style: "Java"
+ * c-basic-offset: 2
+ * indent-tabs-mode: nil
+ * show-trailing-whitespace: t
+ * require-trailing-newline: t
+ * End:
+ */

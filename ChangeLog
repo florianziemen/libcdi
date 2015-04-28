@@ -1,3 +1,18 @@
+2015-04-28  Uwe Schulzweida
+
+	* Version 1.6.9 released
+        * using CGRIBEX library version 1.7.2
+
+2015-04-22  Uwe Schulzweida
+
+	* gribapiDefParam: use cfName to find parameter ids
+	* cgribex rotated grids: added support for parameter >angle< (bug fix)
+	* netcdf rotated grids: bug fix for negative angles
+
+2015-04-21  Uwe Schulzweida
+
+	* dmemory.c: merge changes from branches/cdi-tilesAndFileDrivenInput
+
 2015-03-30  Uwe Schulzweida
 
 	* gribapiDefLevel: use function grib2DefLevel() to write grib2 levels

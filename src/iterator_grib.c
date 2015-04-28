@@ -127,7 +127,7 @@ char* cdiGribIterator_serialize(CdiIterator* super)
   free(escapedPath);
   return result;
 }
-#endif
+
 
 CdiGribIterator* cdiGribIterator_deserialize(const char* description)
 {
@@ -170,6 +170,7 @@ destructSuper:
 fail:
   return NULL;
 }
+#endif
 
 #ifdef HAVE_LIBGRIB_API
 static void cdiGribIterator_ensureBuffer(CdiGribIterator* me, size_t requiredSize)

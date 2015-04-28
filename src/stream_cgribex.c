@@ -152,7 +152,7 @@ int cgribexGetTsteptype(int timerange)
 }
 
 static
-void cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid, int iret)
+void cgribexGetGrid(stream_t *streamptr, int *isec2, double *fsec2, int *isec4, grid_t *grid, int iret)
 {
   int compyinc = TRUE;
   int gridtype = cgribexGetGridType(isec2);
@@ -348,7 +348,7 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid, i
       grid->isRotated = TRUE;
       grid->ypole     = - ISEC2_LatSP*0.001;
       grid->xpole     =   ISEC2_LonSP*0.001 - 180;
-      grid->angle     = 0;
+      grid->angle     = FSEC2_RotAngle;
     }
 
   grid->xvals = NULL;
@@ -385,7 +385,7 @@ void cgribexAddRecord(stream_t * streamptr, int param, int *isec1, int *isec2, d
   record->ltype     = ISEC1_LevelType;
   record->tsteptype = tsteptype;
 
-  cgribexGetGrid(streamptr, isec2, isec4, &grid, iret);
+  cgribexGetGrid(streamptr, isec2, fsec2, isec4, &grid, iret);
 
   int gridID = varDefGrid(vlistID, &grid, 0);
 
@@ -1407,31 +1407,26 @@ static
 void cgribexDefParam(int *isec1, int param)
 {
   int pdis, pcat, pnum;
-  static bool lwarn_pdis = true, lwarn_pnum = true;
 
   cdiDecodeParam(param, &pnum, &pcat, &pdis);
 
   if ( pnum < 0 ) pnum = -pnum;
 
-  if ( pdis != 255 )
+  static bool lwarn_pdis = true;
+  if ( pdis != 255 && lwarn_pdis )
     {
       char paramstr[32];
       cdiParamToString(param, paramstr, sizeof(paramstr));
-      if ( lwarn_pdis )
-        {
-          Warning("Can't convert GRIB2 parameter ID (%s) to GRIB1, set to %d.%d!", paramstr, pnum, pcat);
-          lwarn_pdis = false;
-        }
+      Warning("Can't convert GRIB2 parameter ID (%s) to GRIB1, set to %d.%d!", paramstr, pnum, pcat);
+      lwarn_pdis = false;
     }
 
-  if ( pnum > 255 )
+  static bool lwarn_pnum = true;
+  if ( pnum > 255 && lwarn_pnum )
     {
-      if ( lwarn_pnum )
-        {
-          Warning("Parameter number %d out of bounds (1-255), set to %d!", pnum, pnum%256);
-          lwarn_pnum = false;
-          pnum = pnum%256;
-        }
+      Warning("Parameter number %d out of bounds (1-255), set to %d!", pnum, pnum%256);
+      lwarn_pnum = false;
+      pnum = pnum%256;
     }
 
   ISEC1_CodeTable = pcat;
@@ -1605,7 +1600,7 @@ void cgribexDefTime(int *isec1, int vdate, int vtime, int tsteptype, int numavg,
 }
 
 static
-void cgribexDefGrid(int *isec1, int *isec2, int *isec4, int gridID)
+void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridID)
 {
   int gridtype;
   bool lcurvi = false;
@@ -1768,6 +1763,7 @@ void cgribexDefGrid(int *isec1, int *isec2, int *isec4, int gridID)
 	  {
 	    ISEC2_LatSP = - (int)lround(gridInqYpole(gridID) * 1000);
 	    ISEC2_LonSP =   (int)lround((gridInqXpole(gridID) + 180) * 1000);
+            FSEC2_RotAngle = gridInqAngle(gridID);
 	  }
 
 	/* East -> West */
@@ -2202,7 +2198,7 @@ size_t cgribexEncode(int memtype, int varID, int levelID, int vlistID, int gridI
 
   cgribexDefParam(isec1, param);
   cgribexDefTime(isec1, vdate, vtime, tsteptype, numavg, vlistInqTaxis(vlistID));
-  cgribexDefGrid(isec1, isec2, isec4, gridID);
+  cgribexDefGrid(isec1, isec2, fsec2, isec4, gridID);
   cgribexDefLevel(isec1, isec2, fsec2, zaxisID, levelID);
 
   cgribexDefEnsembleVar(isec1, vlistID, varID);

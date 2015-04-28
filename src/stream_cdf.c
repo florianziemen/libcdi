@@ -2650,7 +2650,7 @@ void cdfDefPole(stream_t *streamptr, int gridID)
       cdf_put_att_text(fileID, ncvarid, "grid_mapping_name", strlen(mapname), mapname);
       cdf_put_att_double(fileID, ncvarid, "grid_north_pole_latitude", NC_DOUBLE, 1, &ypole);
       cdf_put_att_double(fileID, ncvarid, "grid_north_pole_longitude", NC_DOUBLE, 1, &xpole);
-      if ( angle > 0 )
+      if ( IS_NOT_EQUAL(angle, 0) )
         cdf_put_att_double(fileID, ncvarid, "north_pole_grid_longitude", NC_DOUBLE, 1, &angle);
     }
 
@@ -4972,20 +4972,23 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
                           int timedimid, int modelID, int format)
 {
   int ncid;
-  int ncvarid;
   int ncdimid;
   int nvdims, nvatts;
   int *dimidsp;
+  int iatt;
+  int i;
+  int tablenum;
   nc_type xtype, atttype;
   size_t attlen;
   char name[CDI_MAX_NAME];
   char attname[CDI_MAX_NAME];
   const int attstringlen = 8192; char attstring[8192];
-  int iatt;
-  int i;
-  int tablenum;
 
-  for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
+  int nchecked_vars = 0;
+  char *checked_vars[9];
+  for ( i = 0; i < 9; ++i ) checked_vars[i] = NULL;
+
+  for ( int ncvarid = 0; ncvarid < nvars; ncvarid++ )
     {
       ncid    = ncvars[ncvarid].ncid;
       dimidsp = ncvars[ncvarid].dimids;
@@ -5353,7 +5356,17 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
                         }
                     }
                   else
-                    Warning("%s - %s", nc_strerror(status), varname);
+                    {
+                      int k;
+                      for ( k = 0; k < nchecked_vars; ++k )
+                        if ( strcmp(checked_vars[k], varname) == 0 ) break;
+
+                      if ( k == nchecked_vars )
+                        {
+                          if ( nchecked_vars < 9 ) checked_vars[nchecked_vars++] = strdup(varname);
+                          Warning("%s - %s", nc_strerror(status), varname);
+                        }
+                    }
 
                   if ( lstop ) break;
                 }
@@ -5651,6 +5664,8 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
 	    }
 	}
     }
+
+  for ( i = 0; i < 9; ++i ) if ( checked_vars[i] ) free(checked_vars[i]);
 }
 
 static

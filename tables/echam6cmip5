@@ -55,7 +55,7 @@
 &parameter  code=127        name=alake            delete=1 /
 &parameter  code=128        name=rintop           delete=1 /
 &parameter  code=129        name=geosp           out_name=z        standard_name=surface_geopotential factor=1./9.80665 delete=1  /
-&parameter  code=130        name=stp             out_name=ta       standard_name=air_temperature  delete=0 /
+&parameter  code=130        name=t               out_name=ta       standard_name=air_temperature  delete=0 /
 &parameter  code=131        name=u               out_name=ua       standard_name=eastward_wind  delete=0/
 &parameter  code=132        name=v               out_name=va       standard_name=northward_wind delete=0 /
 &parameter  code=133        name=q               out_name=hus      standard_name=specific_humidity  delete=0/
@@ -160,5 +160,5 @@
 &parameter  code=235        name=abso4                             standard_name=antropogenic_sulfur_burden  delete=1/
 &parameter  code=236        name=ao3             out_name=tro3     standard_name=mole_fraction_of_ozone_in_air  factor=1.e+9 delete=0/
 &parameter  code=237        name=tropo                             standard_name=WMO_defined_tropopause_height  delete=1 /
-&parameter  code=259        name=windspeed       out_name=sfcWind  standard_name=wind_speed  delete=0/
-&parameter  code=260        name=precip          out_name=pr       standard_name=precipitation_flux  delete=0/
+&parameter  code=3          name=windspeed       out_name=sfcWind  standard_name=wind_speed  delete=0/
+&parameter  code=4          name=precip          out_name=pr       standard_name=precipitation_flux  delete=0/

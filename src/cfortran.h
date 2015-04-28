@@ -80,7 +80,7 @@ only C calling FORTRAN subroutines will work using K&R style.*/
 
 /* Remainder of cfortran.h depends on the Fortran compiler. */
 
-#if defined(CLIPPERFortran) || defined(pgiFortran)
+#if (defined(CLIPPERFortran) || defined(pgiFortran)) && !defined(f2cFortran)
 #define f2cFortran
 #endif
 

@@ -694,6 +694,7 @@ static compvar2_t gribapiVarSet(int param, int level1, int level2, int leveltype
   compVar.tiles = tiles_data;
   return (compVar);
 }
+#endif
 
 static
 int gribapiVarCompare(compvar2_t compVar, record_t record, int flag)
@@ -720,7 +721,6 @@ int gribapiVarCompare(compvar2_t compVar, record_t record, int flag)
 
   return (rstatus);
 }
-#endif
 
 static void ensureBufferSize(size_t requiredSize, size_t* curSize, unsigned char** buffer) {
   if ( *curSize < requiredSize )
@@ -1585,33 +1585,55 @@ void gribapiDefModel(grib_handle *gh, int vlistID, int varID)
 }
 
 static
-void gribapiDefParam(int editionNumber, grib_handle *gh, int param, const char *name)
+void gribapiDefParam(int editionNumber, grib_handle *gh, int param, const char *name, const char *stdname)
 {
-  int pdis, pcat, pnum;
+  bool ldefined = false;
 
+  int pdis, pcat, pnum;
   cdiDecodeParam(param, &pnum, &pcat, &pdis);
 
   if ( pnum < 0 )
     {
       size_t len;
-      int status;
-      len = strlen(name);
-      status = my_grib_set_string(gh, "shortName", name, &len);
-      if ( status != 0 )
-	Warning("grib_api: No match for shortName=%s", name);
+      len = strlen(stdname);
+      if ( len )
+        {
+          int status = my_grib_set_string(gh, "cfName", stdname, &len);
+          if ( status == 0 ) ldefined = true;
+          else Warning("grib_api: No match for cfName=%s", stdname);
+        }
+
+      if ( ldefined == false )
+        {
+          len = strlen(name);
+          int status = my_grib_set_string(gh, "shortName", name, &len);
+          if ( status == 0 ) ldefined = true;
+          else Warning("grib_api: No match for shortName=%s", name);
+        }
     }
-  else
+
+  if ( ldefined == false )
     {
       if ( pnum < 0 ) pnum = -pnum;
 
       if ( editionNumber <= 1 )
 	{
-	  if ( pdis != 255 )
+          static bool lwarn_pdis = true;
+	  if ( pdis != 255 && lwarn_pdis )
 	    {
 	      char paramstr[32];
 	      cdiParamToString(param, paramstr, sizeof(paramstr));
 	      Warning("Can't convert GRIB2 parameter ID (%s) to GRIB1, set to %d.%d!", paramstr, pnum, pcat);
+              lwarn_pdis = false;
 	    }
+
+          static bool lwarn_pnum = true;
+          if ( pnum > 255 && lwarn_pnum )
+            {
+              Warning("Parameter number %d out of bounds (1-255), set to %d!", pnum, pnum%256);
+              lwarn_pnum = false;
+              pnum = pnum%256;
+            }
 
 	  GRIB_CHECK(my_grib_set_long(gh, "table2Version",        pcat), 0);
 	  GRIB_CHECK(my_grib_set_long(gh, "indicatorOfParameter", pnum), 0);
@@ -2558,8 +2580,6 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
 {
   size_t recsize = 0;
   void *dummy = NULL;
-  int datatype;
-  int param;
   int lieee = FALSE;
   /*  int ensID, ensCount, forecast_type; *//* Ensemble Data */
   int typeOfGeneratingProcess;
@@ -2567,15 +2587,17 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   long bitsPerValue;
   long editionNumber = 2;
   char name[256];
+  char stdname[256];
   gribContainer_t *gc = (gribContainer_t *) gribContainer;
   // extern unsigned char _grib_template_GRIB2[];
 
-  param    = vlistInqVarParam(vlistID, varID);
-  datatype = vlistInqVarDatatype(vlistID, varID);
+  int param    = vlistInqVarParam(vlistID, varID);
+  int datatype = vlistInqVarDatatype(vlistID, varID);
   typeOfGeneratingProcess = vlistInqVarTypeOfGeneratingProcess(vlistID, varID);
   productDefinitionTemplate = vlistInqVarProductDefinitionTemplate(vlistID, varID);
 
   vlistInqVarName(vlistID, varID, name);
+  vlistInqVarStdname(vlistID, varID, stdname);
 
 #if defined(GRIBAPIENCODETEST)
   grib_handle *gh = (grib_handle *) gribHandleNew(editionNumber);
@@ -2604,7 +2626,7 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   if ( ! gc->init ) gribapiDefInstitut(gh, vlistID, varID);
   if ( ! gc->init ) gribapiDefModel(gh, vlistID, varID);
 
-  if ( ! gc->init ) gribapiDefParam(editionNumber, gh, param, name);
+  if ( ! gc->init ) gribapiDefParam(editionNumber, gh, param, name, stdname);
 
   if ( editionNumber == 2 && (datatype == DATATYPE_FLT32 || datatype == DATATYPE_FLT64) ) lieee = TRUE;
 

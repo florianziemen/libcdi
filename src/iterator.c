@@ -17,7 +17,7 @@ static const char* fileType2String(int fileType)
 {
   switch(fileType)
     {
-      #ifdef HAVE_LIBGRIB
+      #ifdef HAVE_LIBGRIB_API
         case FILETYPE_GRB: return "CDI::Iterator::GRIB1";
         case FILETYPE_GRB2: return "CDI::Iterator::GRIB2";
       #endif
@@ -100,7 +100,7 @@ CdiIterator* cdiIterator_new(const char* path)
         Warning("Can't open file \"%s\": unknown format\n", path);
         return NULL;
 
-      #ifdef HAVE_LIBGRIB
+      #ifdef HAVE_LIBGRIB_API
         case FILETYPE_GRB:
         case FILETYPE_GRB2:
           return cdiGribIterator_new(path, filetype);
@@ -189,7 +189,7 @@ CdiIterator* cdiIterator_clone(CdiIterator* me)
   sanityCheck(me);
   switch(me->filetype)
     {
-      #ifdef HAVE_LIBGRIB
+      #ifdef HAVE_LIBGRIB_API
         case FILETYPE_GRB:
         case FILETYPE_GRB2:
           return &cdiGribIterator_clone(me)->super;
@@ -239,7 +239,7 @@ CdiGribIterator* cdiGribIterator_clone(CdiIterator* me)
   sanityCheck(me);
   switch(me->filetype)
     {
-      #ifdef HAVE_LIBGRIB
+      #ifdef HAVE_LIBGRIB_API
         case FILETYPE_GRB:
         case FILETYPE_GRB2:
           return cdiGribIterator_makeClone(me);
@@ -269,7 +269,7 @@ char* cdiIterator_serialize(CdiIterator* me)
   char* subclassDescription = NULL;
   switch(me->filetype)
     {
-      #ifdef HAVE_LIBGRIB
+      #ifdef HAVE_LIBGRIB_API
         case FILETYPE_GRB:
         case FILETYPE_GRB2:
           subclassDescription = cdiGribIterator_serialize(me);
@@ -325,7 +325,7 @@ CdiIterator* cdiIterator_deserialize(const char* description)
 {
   switch(string2FileType(description, NULL))
     {
-      #ifdef HAVE_LIBGRIB
+      #ifdef HAVE_LIBGRIB_API
         case FILETYPE_GRB:
         case FILETYPE_GRB2:
           return &cdiGribIterator_deserialize(description)->super;
@@ -397,7 +397,7 @@ int cdiIterator_nextField(CdiIterator* me)
   me->isAdvanced = true;
   switch(me->filetype)
     {
-      #ifdef HAVE_LIBGRIB
+      #ifdef HAVE_LIBGRIB_API
         case FILETYPE_GRB:
         case FILETYPE_GRB2:
           return cdiGribIterator_nextField(me);
@@ -431,7 +431,7 @@ static char* cdiIterator_inqTime(CdiIterator* me, bool getEndTime)
   sanityCheck(me);
   switch(me->filetype)
     {
-      #ifdef HAVE_LIBGRIB
+      #ifdef HAVE_LIBGRIB_API
         case FILETYPE_GRB:
         case FILETYPE_GRB2:
           return cdiGribIterator_inqTime(me, getEndTime);
@@ -564,7 +564,7 @@ int cdiIterator_inqLevelType(CdiIterator* me, int levelSelector, char** outName,
   sanityCheck(me);
   switch(me->filetype)
     {
-      #ifdef HAVE_LIBGRIB
+      #ifdef HAVE_LIBGRIB_API
         case FILETYPE_GRB:
         case FILETYPE_GRB2:
           return cdiGribIterator_levelType(me, levelSelector, outName, outLongName, outStdName, outUnit);
@@ -614,7 +614,7 @@ int cdiIterator_inqLevel(CdiIterator* me, int levelSelector, double* outValue1, 
   sanityCheck(me);
   switch(me->filetype)
     {
-      #ifdef HAVE_LIBGRIB
+      #ifdef HAVE_LIBGRIB_API
         case FILETYPE_GRB:
         case FILETYPE_GRB2:
           return cdiGribIterator_level(me, levelSelector, outValue1, outValue2);
@@ -664,7 +664,7 @@ int cdiIterator_inqLevelUuid(CdiIterator* me, int* outVgridNumber, int* outLevel
   sanityCheck(me);
   switch(me->filetype)
     {
-      #ifdef HAVE_LIBGRIB
+      #ifdef HAVE_LIBGRIB_API
         case FILETYPE_GRB:
         case FILETYPE_GRB2:
           return cdiGribIterator_zaxisUuid(me, outVgridNumber, outLevelCount, outUuid);
@@ -769,7 +769,7 @@ char* cdiIterator_inqVariableName(CdiIterator* me)
   sanityCheck(me);
   switch(me->filetype)
     {
-      #ifdef HAVE_LIBGRIB
+      #ifdef HAVE_LIBGRIB_API
         case FILETYPE_GRB:
         case FILETYPE_GRB2:
           return cdiGribIterator_copyVariableName(me);
@@ -838,7 +838,7 @@ void cdiIterator_readField(CdiIterator* me, double* buffer, size_t* nmiss)
   if(!buffer) xabort("NULL was passed in a buffer. Please provide a suitable buffer.");
   switch(me->filetype)
     {
-      #ifdef HAVE_LIBGRIB
+      #ifdef HAVE_LIBGRIB_API
         case FILETYPE_GRB:
         case FILETYPE_GRB2:
           cdiGribIterator_readField(me, buffer, nmiss);
@@ -887,7 +887,7 @@ void cdiIterator_readFieldF(CdiIterator* me, float* buffer, size_t* nmiss)
   if(!buffer) xabort("NULL was passed in a buffer. Please provide a suitable buffer.");
   switch(me->filetype)
     {
-      #ifdef HAVE_LIBGRIB
+      #ifdef HAVE_LIBGRIB_API
         case FILETYPE_GRB:
         case FILETYPE_GRB2:
           cdiGribIterator_readFieldF(me, buffer, nmiss);
@@ -932,7 +932,7 @@ void cdiIterator_delete(CdiIterator* me)
   if(!me) xabort("NULL was passed in as an iterator. Please check the return value of cdiIterator_new().");
   switch(me->filetype)
     {
-      #ifdef HAVE_LIBGRIB
+      #ifdef HAVE_LIBGRIB_API
         case FILETYPE_GRB:
         case FILETYPE_GRB2:
           cdiGribIterator_delete((CdiGribIterator*)me);
