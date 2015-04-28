@@ -247,6 +247,9 @@ vlist_delete(vlist_t *vlistptr)
       }
       if ( vlistptr->vars[varID].opt_grib_kvpair )
         free(vlistptr->vars[varID].opt_grib_kvpair);
+      vlistptr->vars[varID].opt_grib_nentries    = 0;
+      vlistptr->vars[varID].opt_grib_kvpair_size = 0;
+      vlistptr->vars[varID].opt_grib_kvpair      = NULL;
 #endif
 
       vlistDelAtts(vlistID, varID);
@@ -290,8 +293,9 @@ void var_copy_entries(var_t *var2, var_t *var1)
       var2->ensdata = (ensinfo_t *)xmalloc(sizeof(ensinfo_t));
       memcpy(var2->ensdata, var1->ensdata, sizeof(ensinfo_t));
     }
-#if  defined  (HAVE_LIBGRIB_API)
+  resize_opt_grib_entries(var2, var1->opt_grib_nentries);
   var2->opt_grib_nentries = var1->opt_grib_nentries;
+#if  defined  (HAVE_LIBGRIB_API)
   for (int i=0; i<var1->opt_grib_nentries; i++) {
     if ( var1->opt_grib_kvpair[i].keyword ) {
       var2->opt_grib_kvpair[i] =
@@ -358,9 +362,10 @@ void vlistCopy(int vlistID2, int vlistID1)
               memcpy(vlistptr2->vars[varID].ensdata,
                      vlistptr1->vars[varID].ensdata, sizeof(ensinfo_t));
             }
-#if  defined  (HAVE_LIBGRIB_API)
+
           resize_opt_grib_entries(&vlistptr2->vars[varID], vlistptr1->vars[varID].opt_grib_nentries);
           vlistptr2->vars[varID].opt_grib_nentries = vlistptr1->vars[varID].opt_grib_nentries;
+#if  defined  (HAVE_LIBGRIB_API)
 	  for (int i=0; i<vlistptr1->vars[varID].opt_grib_nentries; i++) {
 	    if ( vlistptr1->vars[varID].opt_grib_kvpair[i].keyword ) {
 	      vlistptr2->vars[varID].opt_grib_kvpair[i] =
@@ -584,10 +589,10 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
                        vlistptr1->vars[varID].ensdata, sizeof(ensinfo_t));
               }
 
-#if  defined  (HAVE_LIBGRIB_API)
 	    int i;
             resize_opt_grib_entries(&vlistptr2->vars[varID], vlistptr1->vars[varID].opt_grib_nentries);
             vlistptr2->vars[varID].opt_grib_nentries = vlistptr1->vars[varID].opt_grib_nentries;
+#if  defined  (HAVE_LIBGRIB_API)
 	    for (i=0; i<vlistptr1->vars[varID].opt_grib_nentries; i++) {
 	      if ( vlistptr1->vars[varID].opt_grib_kvpair[i].keyword ) {
 		vlistptr2->vars[varID2].opt_grib_kvpair[i] = vlistptr1->vars[varID].opt_grib_kvpair[i];
@@ -764,9 +769,9 @@ void vlistCat(int vlistID2, int vlistID1)
           memcpy(vlistptr2->vars[varID2].ensdata, vlistptr1->vars[varID].ensdata, sizeof(ensinfo_t));
         }
 
-#if  defined  (HAVE_LIBGRIB_API)
       resize_opt_grib_entries(&vlistptr2->vars[varID], vlistptr1->vars[varID].opt_grib_nentries);
       vlistptr2->vars[varID].opt_grib_nentries = vlistptr1->vars[varID].opt_grib_nentries;
+#if  defined  (HAVE_LIBGRIB_API)
       int n = vlistptr1->vars[varID].opt_grib_nentries;
       for (int i = 0; i < n; ++i) {
 	if ( vlistptr1->vars[varID].opt_grib_kvpair[i].keyword ) {

@@ -200,6 +200,9 @@ void varFree(void)
       }
       if ( vartable[varID].opt_grib_kvpair )
         free(vartable[varID].opt_grib_kvpair);
+      vartable[varID].opt_grib_nentries    = 0;
+      vartable[varID].opt_grib_kvpair_size = 0;
+      vartable[varID].opt_grib_kvpair      = NULL;
 #endif
     }
 
@@ -375,10 +378,9 @@ paramNewEntry(int param)
       for( unsigned i = 0; i < varTablesize; i++ )
         {
           vartable[i].param = UNDEF_PARAM;
-#if  defined  (HAVE_LIBGRIB_API)
+          vartable[i].opt_grib_kvpair      = NULL;
           vartable[i].opt_grib_kvpair_size = 0;
           vartable[i].opt_grib_nentries    = 0;
-#endif
         }
     }
   else
@@ -408,10 +410,9 @@ paramNewEntry(int param)
       for( unsigned i = varID; i < varTablesize; i++ )
         {
           vartable[i].param = UNDEF_PARAM;
-#if  defined  (HAVE_LIBGRIB_API)
+          vartable[i].opt_grib_kvpair      = NULL;
           vartable[i].opt_grib_kvpair_size = 0;
           vartable[i].opt_grib_nentries    = 0;
-#endif
         }
     }
 

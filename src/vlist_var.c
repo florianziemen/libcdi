@@ -64,9 +64,8 @@ void vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].validrange[1] = VALIDMISS;
   vlistptr->vars[varID].ensdata       = NULL;
   vlistptr->vars[varID].iorank        = CDI_UNDEFID;
-#if  defined  (HAVE_LIBGRIB_API)
   vlistptr->vars[varID].opt_grib_kvpair_size = 0;
-#endif
+  vlistptr->vars[varID].opt_grib_kvpair      = NULL;
 }
 
 
@@ -150,6 +149,9 @@ int vlistDefVarTiles(int vlistID, int gridID, int zaxisID, int tsteptype, int ti
   vlistptr->vars[varID].zaxisID = zaxisID;
   vlistptr->vars[varID].tsteptype = tsteptype;
   vlistptr->vars[varID].subtypeID = tilesetID;
+
+  vlistptr->vars[varID].opt_grib_nentries    = 0;
+  vlistptr->vars[varID].opt_grib_kvpair_size = 0;
 
   if ( tsteptype < 0 )
     {
