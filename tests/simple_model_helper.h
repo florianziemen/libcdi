@@ -15,8 +15,8 @@ var_scale(int datatype, double *mscale, double *mrscale);
 static inline double
 sign_flat(double v)
 {
-  if (v == 0.0)
-    return 0.0;
+  if (!(v < 0.0 || v > 0.0)) return 0.0;
+  //    if (v == 0.0) return 0.0;
   return v;
 }
 
