@@ -1762,6 +1762,7 @@ void vlistDefVarIntKey(int vlistID, int varID, const char *name, int value)
 {
 #if  defined  (HAVE_LIBGRIB_API)
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
+  if (vlistptr == NULL)  Error("Internal error!");
   int idx;
 
   if ( vlistptr->locked )
@@ -1780,6 +1781,7 @@ void vlistDefVarIntKey(int vlistID, int varID, const char *name, int value)
   else
     {
       resize_opt_grib_entries(&vlistptr->vars[varID], vlistptr->vars[varID].opt_grib_nentries+1);
+      vlistptr->vars[varID].opt_grib_nentries += 1;
       idx = vlistptr->vars[varID].opt_grib_nentries -1;
       vlistptr->vars[varID].opt_grib_kvpair[idx].data_type   = t_int;
       vlistptr->vars[varID].opt_grib_kvpair[idx].int_val     = value;
@@ -1804,6 +1806,7 @@ void vlistDefVarDblKey(int vlistID, int varID, const char *name, double value)
 {
 #if  defined  (HAVE_LIBGRIB_API)
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
+  if (vlistptr == NULL)  Error("Internal error!");
   int idx;
 
   if ( vlistptr->locked )
@@ -1822,7 +1825,8 @@ void vlistDefVarDblKey(int vlistID, int varID, const char *name, double value)
   else
     {
       resize_opt_grib_entries(&vlistptr->vars[varID], vlistptr->vars[varID].opt_grib_nentries+1);
-      idx = vlistptr->vars[varID].opt_grib_nentries -1;
+      vlistptr->vars[varID].opt_grib_nentries += 1;
+      idx = vlistptr->vars[varID].opt_grib_nentries - 1;
       vlistptr->vars[varID].opt_grib_kvpair[idx].data_type = t_double;
       vlistptr->vars[varID].opt_grib_kvpair[idx].dbl_val   = value;
       vlistptr->vars[varID].opt_grib_kvpair[idx].update    = TRUE;

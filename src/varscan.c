@@ -191,7 +191,6 @@ void varFree(void)
       if ( vartable[varID].ensdata )  free(vartable[varID].ensdata);
       if ( vartable[varID].tiles )    subtypeDestroyPtr(vartable[varID].tiles);
 
-#if  defined  (HAVE_LIBGRIB_API)
       for (int i=0; i<vartable[varID].opt_grib_nentries; i++) {
 	if ( vartable[varID].opt_grib_kvpair[i].keyword )
 	  free(vartable[varID].opt_grib_kvpair[i].keyword);
@@ -201,7 +200,6 @@ void varFree(void)
       vartable[varID].opt_grib_nentries    = 0;
       vartable[varID].opt_grib_kvpair_size = 0;
       vartable[varID].opt_grib_kvpair      = NULL;
-#endif
     }
 
   if ( vartable )
@@ -803,7 +801,6 @@ void cdi_generate_vars(stream_t *streamptr)
 	                                                  vartable[varid].ensdata->ens_count,
 							  vartable[varid].ensdata->forecast_init_type);
 
-#if  defined  (HAVE_LIBGRIB_API)
       int    i;
       vlist_t *vlistptr;
       vlistptr = vlist_to_pointer(vlistID);
@@ -816,7 +813,6 @@ void cdi_generate_vars(stream_t *streamptr)
           vlistptr->vars[varID].opt_grib_kvpair[idx].update = TRUE;
         }
       /* note: if the key is not defined, we do not throw an error! */
-#endif
 
       if ( cdiDefaultTableID != UNDEFID )
 	{
@@ -1159,7 +1155,6 @@ void varDefProductDefinitionTemplate(int varID, int productDefinitionTemplate)
 static 
 void resize_vartable_opt_grib_entries(vartable_t *var, int nentries)
 {
-#if  defined  (HAVE_LIBGRIB_API)
   if (var->opt_grib_kvpair_size >= nentries) 
     {
       return;   /* nothing to do; array is still large enough */
@@ -1182,7 +1177,6 @@ void resize_vartable_opt_grib_entries(vartable_t *var, int nentries)
       free(var->opt_grib_kvpair);
       var->opt_grib_kvpair = tmp;
     }
-#endif
 }
 
 #if  defined  (HAVE_LIBGRIB_API)
