@@ -964,6 +964,8 @@ void deallocate_sleveltable_t(sleveltable_t *entry)
   if (entry == NULL) return;
   if (entry->recordID) free(entry->recordID);
   if (entry->lindex)   free(entry->lindex);
+  entry->recordID = NULL;
+  entry->lindex   = NULL;
 }
 
 
@@ -1019,8 +1021,10 @@ void streamClose(int streamID)
           deallocate_sleveltable_t(&streamptr->vars[index].recordTable[isub]);
         }
       if (streamptr->vars[index].recordTable)  free(streamptr->vars[index].recordTable);
+      streamptr->vars[index].recordTable = NULL;
     }
   free(streamptr->vars);
+  streamptr->vars = NULL;
 
   for ( index = 0; index < streamptr->ntsteps; ++index )
     {

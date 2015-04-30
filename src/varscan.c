@@ -90,11 +90,9 @@ typedef struct
   /* meta-data for specification of tiles (currently only GRIB-API: */
   subtype_t    *tiles;
 
-#if  defined  (HAVE_LIBGRIB_API)
   int                 opt_grib_nentries;                       /* current no. key-value pairs            */
   int                 opt_grib_kvpair_size;                    /* current allocated size                 */
   opt_key_val_pair_t *opt_grib_kvpair;                         /* (optional) list of keyword/value pairs */
-#endif
 }
 vartable_t;
 

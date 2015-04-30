@@ -292,8 +292,6 @@ stream_t;
 #define MAX_OPT_GRIB_ENTRIES 500
 
 
-#if  defined  (HAVE_LIBGRIB_API)
-
 /* Data type specification for optional key/value pairs (GRIB) */
 typedef enum {
   t_double = 0,
@@ -310,8 +308,6 @@ typedef struct
   int                    int_val;        /* integer value (data_type == t_int) */
   int                    subtype_index;  /* tile index for this key-value pair */
 } opt_key_val_pair_t;
-
-#endif
 
 
 

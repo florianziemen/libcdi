@@ -75,6 +75,7 @@ enum {
 
 int attribute_to_index(const char *key)
 {
+  if (key == NULL)  Error("Internal error!");
   for (int i=0; i<nSubtypeAttributes; i++)
     if ( strcmp(key, subtypeAttributeName[i]) == 0 ) return i;
   return -1;
@@ -89,6 +90,7 @@ int attribute_to_index(const char *key)
 */
 struct subtype_attr_t* subtypeAttrNewList(struct subtype_entry_t* head, int key, int val)
 {
+  if (head == NULL)  Error("Internal error!");
   struct subtype_attr_t *ptr = (struct subtype_attr_t*) malloc(sizeof(struct subtype_attr_t));
   if(NULL == ptr)  Error("Node creation failed");
   ptr->key   = key;
@@ -109,6 +111,7 @@ struct subtype_attr_t* subtypeAttrNewList(struct subtype_entry_t* head, int key,
 */
 struct subtype_attr_t* subtypeAttrInsert(struct subtype_entry_t* head, int key, int val)
 {
+  if (head == NULL)  Error("Internal error!");
   if (head->atts == NULL)  return (subtypeAttrNewList(head, key, val));
 
   /* create new attribute */
@@ -142,6 +145,7 @@ void subtypeAttrDestroy(struct subtype_attr_t* head)
   if (head == NULL) return;
   subtypeAttrDestroy(head->next);
   free(head);
+  head = NULL; 
 }
 
 
@@ -227,6 +231,7 @@ struct subtype_entry_t* subtypeEntryNewList(subtype_t* head)
 */
 struct subtype_entry_t* subtypeEntryInsert(subtype_t* head)
 {
+  if (head == NULL)  Error("Internal error!");
   if (head->entries == NULL)  return (subtypeEntryNewList(head));
 
   /* create new entry */
@@ -261,6 +266,7 @@ struct subtype_entry_t* subtypeEntryInsert(subtype_t* head)
 */
 struct subtype_entry_t* subtypeEntryAppend(subtype_t* head)
 {
+  if (head == NULL)  Error("Internal error!");
   if (head->entries == NULL)  return (subtypeEntryNewList(head));
 
   /* create new entry */
@@ -288,12 +294,15 @@ void subtypeEntryDestroy(struct subtype_entry_t *entry)
   subtypeEntryDestroy(entry->next);
   subtypeAttrDestroy(entry->atts);
   free(entry);
+  entry = NULL;
 }
 
 
 /* Compares two subtype entries. */
 static int subtypeEntryCompare(struct subtype_entry_t *e1, struct subtype_entry_t *e2)
 {
+  if (e1 == NULL)  Error("Internal error!");
+  if (e2 == NULL)  Error("Internal error!");
   return 
     (e1->self == e2->self) && 
     subtypeAttsCompare(e1->atts, e2->atts);
@@ -322,6 +331,7 @@ void subtypeEntryDuplicate(struct subtype_entry_t *a1, subtype_t* dst)
 /* Print-out subtype data structure together with its attributes. */
 void subtypePrintKernel(subtype_t *subtype_ptr, FILE *fp)
 {
+  if (subtype_ptr == NULL)  Error("Internal error!");
   fprintf(fp, "# %s (subtype ID %d)\n", subtypeName[subtype_ptr->subtype], subtype_ptr->self);
   /* print global attributes of this subtype */
   struct subtype_attr_t* ptr = subtype_ptr->globals.atts;
@@ -378,6 +388,7 @@ static void subtypeDestroyP(void *ptr)
   subtypeEntryDestroy(subtype_ptr->entries);
   subtype_ptr->entries = NULL;
   free(subtype_ptr);
+  subtype_ptr = NULL;
 }
 
 
@@ -414,6 +425,7 @@ void subtypePrintPtr(subtype_t* subtype_ptr)
 /* Fill subtype data structure with default values. */
 static void subtypeDefaultValue(subtype_t *subtype_ptr)
 {
+  if (subtype_ptr == NULL)  Error("Internal error!");
   subtype_ptr->self                 = CDI_UNDEFID;
   subtype_ptr->nentries             = 0;
   subtype_ptr->entries              = NULL;
@@ -438,6 +450,7 @@ void subtypeAllocate(subtype_t **subtype_ptr2, int subtype)
 /* Create a copy of an existing subtype data structure. */
 void subtypeDuplicate(subtype_t *subtype_ptr, subtype_t **dst_ptr)
 {
+  if (subtype_ptr == NULL)  Error("Internal error!");
   subtypeAllocate(dst_ptr, subtype_ptr->subtype);
   subtype_t *dst = (*dst_ptr);
   /* create duplicate of subtype globals */
@@ -451,6 +464,7 @@ void subtypeDuplicate(subtype_t *subtype_ptr, subtype_t **dst_ptr)
 /* Register subtype object at resource handler. */
 int subtypePush(subtype_t *subtype_ptr)
 {
+  if (subtype_ptr == NULL)  Error("Internal error!");
   subtype_ptr->self = reshPut(subtype_ptr, &subtypeOps);
   return subtype_ptr->self; /* subtypeID */
 }
@@ -462,6 +476,7 @@ int subtypePush(subtype_t *subtype_ptr)
    overwritten. */
 void subtypeDefGlobalDataP(subtype_t *subtype_ptr, int key, int val)
 {
+  if (subtype_ptr == NULL)  Error("Internal error!");
   /* find entry in linked list or append otherwise */
   struct subtype_attr_t* att_ptr = subtypeAttrFind(subtype_ptr->globals.atts, key);
   if (att_ptr == NULL) 
@@ -485,6 +500,7 @@ void subtypeDefGlobalData(int subtypeID, int key, int val)
    If the attribute has not been defined, then return -1. */
 int subtypeGetGlobalDataP(subtype_t *subtype_ptr, int key)
 {
+  if (subtype_ptr == NULL)  Error("Internal error!");
   /* find entry in linked list */
   struct subtype_attr_t* att_ptr = subtypeAttrFind(subtype_ptr->globals.atts, key);
   if (att_ptr == NULL) 
@@ -508,6 +524,7 @@ int subtypeGetGlobalData(int subtypeID, int key)
    overwritten. */
 void subtypeDefEntryDataP(struct subtype_entry_t *subtype_entry_ptr, int key, int val)
 {
+  if (subtype_entry_ptr == NULL)  Error("Internal error!");
   /* find entry in linked list or append otherwise */
   struct subtype_attr_t* att_ptr = subtypeAttrFind(subtype_entry_ptr->atts, key);
   if (att_ptr == NULL) 
@@ -578,6 +595,8 @@ subtype_query_t matchAND(subtype_query_t q1, subtype_query_t q2)
 */
 void tilesetInsertP(subtype_t *s1, subtype_t *s2)
 {
+  if (s1 == NULL)  Error("Internal error!");
+  if (s2 == NULL)  Error("Internal error!");
   struct subtype_entry_t 
     *entry1 = s1->entries,
     *entry2 = s2->entries;

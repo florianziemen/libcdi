@@ -107,11 +107,9 @@ typedef struct
 
   int         subtypeID;   /* subtype ID for tile-related meta-data, currently for GRIB-API only. */
 
-#if  defined  (HAVE_LIBGRIB_API)
   int                 opt_grib_nentries;       /* current no. key-value pairs            */
   int                 opt_grib_kvpair_size;    /* current allocated size                 */
   opt_key_val_pair_t *opt_grib_kvpair;         /* (optional) list of keyword/value pairs */
-#endif
 }
 var_t;
 
