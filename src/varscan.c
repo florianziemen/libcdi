@@ -807,10 +807,14 @@ void cdi_generate_vars(stream_t *streamptr)
       for (i=0; i<vartable[varid].opt_grib_nentries; i++)
         {
           resize_opt_grib_entries(&vlistptr->vars[varID], vlistptr->vars[varID].opt_grib_nentries+1);
+          vlistptr->vars[varID].opt_grib_nentries += 1;
           int idx = vlistptr->vars[varID].opt_grib_nentries-1;
 
-          vlistptr->vars[varID].opt_grib_kvpair[idx] = vartable[varid].opt_grib_kvpair[idx];
-          vlistptr->vars[varID].opt_grib_kvpair[idx].update = TRUE;
+          vlistptr->vars[varID].opt_grib_kvpair[idx] = vartable[varid].opt_grib_kvpair[i];
+	  if (vartable[varid].opt_grib_kvpair[i].keyword) 
+	    vlistptr->vars[varID].opt_grib_kvpair[idx].keyword = 
+	      strdupx(vartable[varid].opt_grib_kvpair[i].keyword);
+          vlistptr->vars[varID].opt_grib_kvpair[i].update = TRUE;
         }
       /* note: if the key is not defined, we do not throw an error! */
 
@@ -1168,7 +1172,7 @@ void resize_vartable_opt_grib_entries(vartable_t *var, int nentries)
         tmp[i] = var->opt_grib_kvpair[i];
       }
       var->opt_grib_kvpair_size = new_size;
-      for (i=var->opt_grib_kvpair_size; i<nentries; i++) {
+      for (i=(nentries-1); i<var->opt_grib_kvpair_size; i++) {
         tmp[i].int_val =     0;
         tmp[i].dbl_val =     0;
         tmp[i].update  = FALSE;

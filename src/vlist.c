@@ -1567,7 +1567,7 @@ void resize_opt_grib_entries(var_t *var, int nentries)
         tmp[i] = var->opt_grib_kvpair[i];
       }
       var->opt_grib_kvpair_size = new_size;
-      for (i=var->opt_grib_kvpair_size; i<nentries; i++) {
+      for (i=(nentries-1); i<var->opt_grib_kvpair_size; i++) {
         tmp[i].int_val =     0;
         tmp[i].dbl_val =     0;
         tmp[i].update  = FALSE;
