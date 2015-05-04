@@ -175,6 +175,8 @@ varGetEntry(int param, int zaxistype, int ltype1, int tsteptype, const char *nam
 static
 void varFree(void)
 {
+  if ( CDI_Debug ) Message("call to varFree");
+
   for ( unsigned varID = 0; varID < nvars; varID++ )
     {
       if ( vartable[varID].recordTable )
@@ -813,6 +815,7 @@ void cdi_generate_vars(stream_t *streamptr)
           int idx = vlistptr->vars[varID].opt_grib_nentries-1;
 
           vlistptr->vars[varID].opt_grib_kvpair[idx] = vartable[varid].opt_grib_kvpair[i];
+          vlistptr->vars[varID].opt_grib_kvpair[idx].keyword = NULL;
 	  if (vartable[varid].opt_grib_kvpair[i].keyword) 
 	    vlistptr->vars[varID].opt_grib_kvpair[idx].keyword = 
 	      strdupx(vartable[varid].opt_grib_kvpair[i].keyword);
@@ -1167,6 +1170,9 @@ void resize_vartable_opt_grib_entries(vartable_t *var, int nentries)
     }
   else
     {
+      if ( CDI_Debug )
+        Message("resize data structure, %d -> %d", var->opt_grib_kvpair_size, nentries);
+
       int i, new_size;
       new_size = (2*var->opt_grib_kvpair_size) > nentries ? (2*var->opt_grib_kvpair_size) : nentries;
       if (CDI_Debug)

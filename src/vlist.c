@@ -224,6 +224,8 @@ int vlistCreate(void)
 static void
 vlist_delete(vlist_t *vlistptr)
 {
+  if ( CDI_Debug ) Message("call to vlist_delete");
+
   int vlistID = vlistptr->self;
 
   vlistDelAtts(vlistID, CDI_GLOBAL);
@@ -293,15 +295,27 @@ void var_copy_entries(var_t *var2, var_t *var1)
       var2->ensdata = (ensinfo_t *)xmalloc(sizeof(ensinfo_t));
       memcpy(var2->ensdata, var1->ensdata, sizeof(ensinfo_t));
     }
+
+  var2->opt_grib_kvpair_size = 0;
+  var2->opt_grib_kvpair      = NULL;
+  var2->opt_grib_nentries    = 0;
+
   resize_opt_grib_entries(var2, var1->opt_grib_nentries);
   var2->opt_grib_nentries = var1->opt_grib_nentries;
+  if ((var2->opt_grib_nentries > 0) && CDI_Debug )
+    Message("copy %d optional GRIB keywords", var2->opt_grib_nentries);
+
   for (int i=0; i<var1->opt_grib_nentries; i++) {
-    if ( var1->opt_grib_kvpair[i].keyword ) {
-      var2->opt_grib_kvpair[i] =
-        var1->opt_grib_kvpair[i];
-      var2->opt_grib_kvpair[i].keyword = 
-        strdupx(var1->opt_grib_kvpair[i].keyword);
-      var2->opt_grib_kvpair[i].update = TRUE;
+    if ( CDI_Debug )  Message("copy entry \"%s\" ...", var1->opt_grib_kvpair[i].keyword);
+    var2->opt_grib_kvpair[i].keyword = NULL;
+    if ( var1->opt_grib_kvpair[i].keyword != NULL ) {
+      var2->opt_grib_kvpair[i]         = var1->opt_grib_kvpair[i];
+      var2->opt_grib_kvpair[i].keyword = strdupx(var1->opt_grib_kvpair[i].keyword);
+      var2->opt_grib_kvpair[i].update  = TRUE;
+      if ( CDI_Debug )  Message("done.");
+    }
+    else {
+      if ( CDI_Debug )  Message("not done.");
     }
   }
 }
@@ -360,18 +374,6 @@ void vlistCopy(int vlistID2, int vlistID1)
               memcpy(vlistptr2->vars[varID].ensdata,
                      vlistptr1->vars[varID].ensdata, sizeof(ensinfo_t));
             }
-
-          resize_opt_grib_entries(&vlistptr2->vars[varID], vlistptr1->vars[varID].opt_grib_nentries);
-          vlistptr2->vars[varID].opt_grib_nentries = vlistptr1->vars[varID].opt_grib_nentries;
-	  for (int i=0; i<vlistptr1->vars[varID].opt_grib_nentries; i++) {
-	    if ( vlistptr1->vars[varID].opt_grib_kvpair[i].keyword ) {
-	      vlistptr2->vars[varID].opt_grib_kvpair[i] =
-                vlistptr1->vars[varID].opt_grib_kvpair[i];
-	      vlistptr2->vars[varID].opt_grib_kvpair[i].keyword = 
-                strdupx(vlistptr1->vars[varID].opt_grib_kvpair[i].keyword);
-	      vlistptr2->vars[varID].opt_grib_kvpair[i].update = TRUE;
-	    }
-	  }
 
 	  vlistptr2->vars[varID].atts.nelems = 0;
 	  vlistCopyVarAtts(vlistID1, varID, vlistID2, varID);
@@ -585,18 +587,6 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
                        vlistptr1->vars[varID].ensdata, sizeof(ensinfo_t));
               }
 
-	    int i;
-            resize_opt_grib_entries(&vlistptr2->vars[varID], vlistptr1->vars[varID].opt_grib_nentries);
-            vlistptr2->vars[varID].opt_grib_nentries = vlistptr1->vars[varID].opt_grib_nentries;
-	    for (i=0; i<vlistptr1->vars[varID].opt_grib_nentries; i++) {
-	      if ( vlistptr1->vars[varID].opt_grib_kvpair[i].keyword ) {
-		vlistptr2->vars[varID2].opt_grib_kvpair[i] = vlistptr1->vars[varID].opt_grib_kvpair[i];
-		vlistptr2->vars[varID2].opt_grib_kvpair[i].keyword = 
-                  strdupx(vlistptr1->vars[varID].opt_grib_kvpair[i].keyword);
-                vlistptr2->vars[varID2].opt_grib_kvpair[i].update  = TRUE;
-	      }
-	    }
-
 	    vlistptr2->vars[varID2].atts.nelems = 0;
 	    vlistCopyVarAtts(vlistID1, varID, vlistID2, varID2);
 
@@ -762,18 +752,6 @@ void vlistCat(int vlistID2, int vlistID1)
           vlistptr2->vars[varID2].ensdata = (ensinfo_t *) malloc(sizeof(ensinfo_t));
           memcpy(vlistptr2->vars[varID2].ensdata, vlistptr1->vars[varID].ensdata, sizeof(ensinfo_t));
         }
-
-      resize_opt_grib_entries(&vlistptr2->vars[varID], vlistptr1->vars[varID].opt_grib_nentries);
-      vlistptr2->vars[varID].opt_grib_nentries = vlistptr1->vars[varID].opt_grib_nentries;
-      int n = vlistptr1->vars[varID].opt_grib_nentries;
-      for (int i = 0; i < n; ++i) {
-	if ( vlistptr1->vars[varID].opt_grib_kvpair[i].keyword ) {
-          vlistptr2->vars[varID2].opt_grib_kvpair[i] = vlistptr1->vars[varID].opt_grib_kvpair[i];
-	  vlistptr2->vars[varID2].opt_grib_kvpair[i].keyword = 
-            strdupx(vlistptr1->vars[varID].opt_grib_kvpair[i].keyword);
-          vlistptr2->vars[varID2].opt_grib_kvpair[i].update  = TRUE;
-	}
-      }
 
       vlistptr2->vars[varID2].atts.nelems = 0;
       vlistCopyVarAtts(vlistID1, varID, vlistID2, varID2);
@@ -1553,13 +1531,17 @@ void vlist_check_contents(int vlistID)
 /* Resizes and initializes opt_grib_kvpair data structure. */
 void resize_opt_grib_entries(var_t *var, int nentries)
 {
-#if  defined  (HAVE_LIBGRIB_API)
   if (var->opt_grib_kvpair_size >= nentries) 
     {
+      if ( CDI_Debug )
+        Message("data structure has size %d, no resize to %d needed.", var->opt_grib_kvpair_size, nentries);
       return;   /* nothing to do; array is still large enough */
     }
   else
     {
+      if ( CDI_Debug )
+        Message("resize data structure, %d -> %d", var->opt_grib_kvpair_size, nentries);
+
       int i, new_size;
       new_size = (2*var->opt_grib_kvpair_size) > nentries ? (2*var->opt_grib_kvpair_size) : nentries;
       opt_key_val_pair_t *tmp = (opt_key_val_pair_t *)xmalloc((size_t)new_size * sizeof (opt_key_val_pair_t));
@@ -1576,7 +1558,6 @@ void resize_opt_grib_entries(var_t *var, int nentries)
       free(var->opt_grib_kvpair);
       var->opt_grib_kvpair = tmp;
     }
-#endif
 }
 
 /*
