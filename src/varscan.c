@@ -191,12 +191,14 @@ void varFree(void)
       if ( vartable[varID].ensdata )  free(vartable[varID].ensdata);
       if ( vartable[varID].tiles )    subtypeDestroyPtr(vartable[varID].tiles);
 
-      for (int i=0; i<vartable[varID].opt_grib_nentries; i++) {
-	if ( vartable[varID].opt_grib_kvpair[i].keyword )
-	  free(vartable[varID].opt_grib_kvpair[i].keyword);
-      }
-      if ( vartable[varID].opt_grib_kvpair )
-        free(vartable[varID].opt_grib_kvpair);
+      if ( vartable[varID].opt_grib_kvpair ) 
+        {
+          for (int i=0; i<vartable[varID].opt_grib_nentries; i++) {
+            if ( vartable[varID].opt_grib_kvpair[i].keyword )
+              free(vartable[varID].opt_grib_kvpair[i].keyword);
+          }
+          free(vartable[varID].opt_grib_kvpair);
+        }
       vartable[varID].opt_grib_nentries    = 0;
       vartable[varID].opt_grib_kvpair_size = 0;
       vartable[varID].opt_grib_kvpair      = NULL;
@@ -1167,17 +1169,19 @@ void resize_vartable_opt_grib_entries(vartable_t *var, int nentries)
     {
       int i, new_size;
       new_size = (2*var->opt_grib_kvpair_size) > nentries ? (2*var->opt_grib_kvpair_size) : nentries;
+      if (CDI_Debug)
+        Message("resize vartable opt_grib_entries array to size %d\n", new_size);
       opt_key_val_pair_t *tmp = (opt_key_val_pair_t *)xmalloc((size_t)new_size * sizeof (opt_key_val_pair_t));
       for (i=0; i<var->opt_grib_kvpair_size; i++) {
         tmp[i] = var->opt_grib_kvpair[i];
       }
-      var->opt_grib_kvpair_size = new_size;
-      for (i=(nentries-1); i<var->opt_grib_kvpair_size; i++) {
+      for (i=var->opt_grib_kvpair_size; i<new_size; i++) {
         tmp[i].int_val =     0;
         tmp[i].dbl_val =     0;
         tmp[i].update  = FALSE;
         tmp[i].keyword =  NULL;
       } // for
+      var->opt_grib_kvpair_size = new_size;
       free(var->opt_grib_kvpair);
       var->opt_grib_kvpair = tmp;
     }

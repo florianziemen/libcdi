@@ -66,6 +66,7 @@ void vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].iorank        = CDI_UNDEFID;
   vlistptr->vars[varID].opt_grib_kvpair_size = 0;
   vlistptr->vars[varID].opt_grib_kvpair      = NULL;
+  vlistptr->vars[varID].opt_grib_nentries    = 0;
 }
 
 
@@ -145,13 +146,10 @@ int vlistDefVarTiles(int vlistID, int gridID, int zaxisID, int tsteptype, int ti
   int varID = vlistvarNewEntry(vlistID);
 
   vlistptr->nvars++;
-  vlistptr->vars[varID].gridID  = gridID;
-  vlistptr->vars[varID].zaxisID = zaxisID;
+  vlistptr->vars[varID].gridID    = gridID;
+  vlistptr->vars[varID].zaxisID   = zaxisID;
   vlistptr->vars[varID].tsteptype = tsteptype;
   vlistptr->vars[varID].subtypeID = tilesetID;
-
-  vlistptr->vars[varID].opt_grib_nentries    = 0;
-  vlistptr->vars[varID].opt_grib_kvpair_size = 0;
 
   if ( tsteptype < 0 )
     {
@@ -1792,6 +1790,24 @@ void vlistDefVarIntKey(int vlistID, int varID, const char *name, int value)
         Error("Internal error, name undefined!");
     }
 
+  if ( CDI_Debug )
+    {
+      Message("define additional GRIB2 key \"%s\" (integer): %d", name, value);
+      Message("total list of registered, additional GRIB2 keys (total: %d):",
+              vlistptr->vars[varID].opt_grib_nentries);
+      for ( idx=0; idx<vlistptr->vars[varID].opt_grib_nentries; idx++)
+        if (vlistptr->vars[varID].opt_grib_kvpair[idx].data_type == t_int)
+          Message("%s -> integer %d",
+                  vlistptr->vars[varID].opt_grib_kvpair[idx].keyword,
+                  vlistptr->vars[varID].opt_grib_kvpair[idx].int_val);
+        else if (vlistptr->vars[varID].opt_grib_kvpair[idx].data_type == t_double)
+          Message("%s -> double %d",
+                  vlistptr->vars[varID].opt_grib_kvpair[idx].keyword,
+                  vlistptr->vars[varID].opt_grib_kvpair[idx].dbl_val);
+        else
+          Message("%s -> unknown", vlistptr->vars[varID].opt_grib_kvpair[idx].keyword);
+    }
+
   reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
 #else
   (void)vlistID;
@@ -1834,6 +1850,24 @@ void vlistDefVarDblKey(int vlistID, int varID, const char *name, double value)
         vlistptr->vars[varID].opt_grib_kvpair[idx].keyword = strdupx(name);
       else
         Error("Internal error, name undefined!");
+    }
+
+  if ( CDI_Debug )
+    {
+      Message("define additional GRIB2 key \"%s\" (double): %d", name, value);
+      Message("total list of registered, additional GRIB2 keys (total: %d):",
+              vlistptr->vars[varID].opt_grib_nentries);
+      for ( idx=0; idx<vlistptr->vars[varID].opt_grib_nentries; idx++)
+        if (vlistptr->vars[varID].opt_grib_kvpair[idx].data_type == t_int)
+          Message("%s -> integer %d",
+                  vlistptr->vars[varID].opt_grib_kvpair[idx].keyword,
+                  vlistptr->vars[varID].opt_grib_kvpair[idx].int_val);
+        else if (vlistptr->vars[varID].opt_grib_kvpair[idx].data_type == t_double)
+          Message("%s -> double %d",
+                  vlistptr->vars[varID].opt_grib_kvpair[idx].keyword,
+                  vlistptr->vars[varID].opt_grib_kvpair[idx].dbl_val);
+        else
+          Message("%s -> unknown", vlistptr->vars[varID].opt_grib_kvpair[idx].keyword);
     }
 
   reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);

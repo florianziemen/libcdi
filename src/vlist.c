@@ -240,17 +240,17 @@ vlist_delete(vlist_t *vlistptr)
       if ( vars[varID].units )    free(vars[varID].units);
       if ( vars[varID].ensdata )  free(vars[varID].ensdata);
 
-#if  defined  (HAVE_LIBGRIB_API)
-      for (int i=0; i<vlistptr->vars[varID].opt_grib_nentries; i++) {
-	if ( vlistptr->vars[varID].opt_grib_kvpair[i].keyword )
-	  free(vlistptr->vars[varID].opt_grib_kvpair[i].keyword);
-      }
       if ( vlistptr->vars[varID].opt_grib_kvpair )
-        free(vlistptr->vars[varID].opt_grib_kvpair);
+        {
+          for (int i=0; i<vlistptr->vars[varID].opt_grib_nentries; i++) {
+            if ( vlistptr->vars[varID].opt_grib_kvpair[i].keyword )
+              free(vlistptr->vars[varID].opt_grib_kvpair[i].keyword);
+          }
+          free(vlistptr->vars[varID].opt_grib_kvpair);
+        }
       vlistptr->vars[varID].opt_grib_nentries    = 0;
       vlistptr->vars[varID].opt_grib_kvpair_size = 0;
       vlistptr->vars[varID].opt_grib_kvpair      = NULL;
-#endif
 
       vlistDelAtts(vlistID, varID);
     }
@@ -1566,13 +1566,13 @@ void resize_opt_grib_entries(var_t *var, int nentries)
       for (i=0; i<var->opt_grib_kvpair_size; i++) {
         tmp[i] = var->opt_grib_kvpair[i];
       }
-      var->opt_grib_kvpair_size = new_size;
-      for (i=(nentries-1); i<var->opt_grib_kvpair_size; i++) {
+      for (i=var->opt_grib_kvpair_size; i<new_size; i++) {
         tmp[i].int_val =     0;
         tmp[i].dbl_val =     0;
         tmp[i].update  = FALSE;
         tmp[i].keyword =  NULL;
       } // for
+      var->opt_grib_kvpair_size = new_size;
       free(var->opt_grib_kvpair);
       var->opt_grib_kvpair = tmp;
     }
