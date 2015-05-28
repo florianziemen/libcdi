@@ -1,3 +1,7 @@
+2015-05-28  Uwe Schulzweida
+
+	* dmemory: added env. MEMORY_INFO
+
 2015-04-28  Uwe Schulzweida
 
 	* Version 1.6.9 released
