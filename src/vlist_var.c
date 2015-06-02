@@ -14,7 +14,6 @@
 #include "namespace.h"
 #include "serialize.h"
 #include "error.h"
-#include "proprietarySystemWorkarounds.h"
 
 #if  defined  (HAVE_LIBGRIB_API)
 #  include "file.h"
@@ -532,23 +531,31 @@ char* vlistCopyVarName(int vlistId, int varId)
 
   //If a name is set in the variable description, use that.
   const char* name = vlistptr->vars[varId].name;
-  if(name) return myStrDup(name);
+  if(name) return strdup(name);
 
   //Otherwise we check if we should use the table of parameter descriptions.
   int param = vlistptr->vars[varId].param;
   int discipline, category, number;
   cdiDecodeParam(param, &number, &category, &discipline);
+  char *result = NULL;
   if(discipline == 255)
     {
       int tableId = vlistptr->vars[varId].tableID;
-      if(( name = tableInqParNamePtr(tableId, number) )) return myStrDup(name);
-
-      //No luck, fall back to outputting a name of the format "var<num>".
-      return myAsprintf("var%d", number);
+      if(( name = tableInqParNamePtr(tableId, number) ))
+        result = strdup(name);
+      {
+        //No luck, fall back to outputting a name of the format "var<num>".
+        result = xmalloc(3 + 3 * sizeof (int) * CHAR_BIT / 8 + 2);
+        sprintf(result, "var%d", number);
+      }
     }
-
+  else
+    {
+      result = xmalloc(5 + 2 + 3 * (3 * sizeof (int) * CHAR_BIT + 1) + 1);
+      sprintf(result, "param%d.%d.%d", number, category, discipline);
+    }
   //Finally, we fall back to outputting a name of the format "param<num>.<cat>.<dis>".
-  return myAsprintf("param%d.%d.%d", number, category, discipline);
+  return result;
 }
 
 /*
