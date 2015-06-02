@@ -120,9 +120,8 @@ char* cdiGribIterator_serialize(CdiIterator* super)
 {
   CdiGribIterator* me = (CdiGribIterator*)super;
 
-  char* path = cdiInputFile_copyPath(me->file);
+  const char* path = cdiInputFile_getPath(me->file);
   char* escapedPath = cdiEscapeSpaces(path);
-  free(path);
   char* result = myAsprintf("%s %zu", escapedPath, me->fileOffset);
   free(escapedPath);
   return result;

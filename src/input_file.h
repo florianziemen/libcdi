@@ -21,7 +21,9 @@ typedef struct CdiInputFile {
 //Final class, the constructor is private and not defined here.
 CdiInputFile* cdiInputFile_make(const char* path);   //The caller is responsible to call cdiRefObject_release() on the returned object.
 int cdiInputFile_read(const CdiInputFile* me, off_t readPosition, size_t readSize, size_t* outActualReadSize, void* buffer);       //Returns one of CDI_EINVAL, CDI_ESYSTEM, CDI_EEOF, OR CDI_NOERR.
-char* cdiInputFile_copyPath(const CdiInputFile* me);    //Returns a malloc'ed string, don't forget to free() it.
+/* Returns path string, don't use after destruction of CdiInputFile
+ * object */
+const char* cdiInputFile_getPath(const CdiInputFile* me);
 //Destructor is private as well.
 
 #endif

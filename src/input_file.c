@@ -119,9 +119,9 @@ int cdiInputFile_read(const CdiInputFile* me, off_t readPosition, size_t readSiz
   return CDI_NOERR;
 }
 
-char* cdiInputFile_copyPath(const CdiInputFile* me)
+const char* cdiInputFile_getPath(const CdiInputFile* me)
 {
-  return myStrDup(me->path);
+  return me->path;
 }
 
 void cdiInputFile_destruct(CdiInputFile* me)
