@@ -328,7 +328,17 @@ ACX_XLF_QEXTNAME_ADD_APPENDUS
 AS_IF([test -n "$FC" -a X"$FC" != Xno -o -n "$F77" -a X"$F77" != Xno],
   [ACX_CHECK_CFORTRAN([$srcdir/src],
     [AC_DEFINE([HAVE_CF_INTERFACE],[1],
-       [Defined to 1 if C / Fortran interface cfortran.h works])])])
+       [Defined to 1 if C / Fortran interface cfortran.h works])],
+    [AS_CASE([x"$acx_cv_cfortran_works"],
+       [x"error"],
+       [AC_MSG_NOTICE([Linking/Running with C EXTERNAL built with cfortran.h does not work!])],
+       [x"compiling with cfortran.h failed"],
+       [AC_MSG_NOTICE([Compilation with cfortran.h is not working!])],
+       [x"error compiling Fortran subroutine"],
+       [AC_MSG_NOTICE([compilation of simple Fortran source failed!])],
+       [AC_MSG_NOTICE([Unexpected error when linking C and Fortran via cfortran.h!])])
+     AC_MSG_NOTICE([Disabling cfortran.h bindings generation])
+     acx_cv_cfortran_works=no])])
 AM_CONDITIONAL([USE_FC],[test -n "$FC" -a X"$FC" != Xno -a x"$acx_cv_cfortran_works" = xyes])dnl
 dnl
 AC_SUBST([CPPFLAGS])dnl

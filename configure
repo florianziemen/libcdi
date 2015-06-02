@@ -29158,32 +29158,29 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $acx_cv_cfortran_works" >&5
 $as_echo "$acx_cv_cfortran_works" >&6; }
-   case x"$acx_cv_cfortran_works" in #(
-  x"error") :
-    { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "Linking/Running with C EXTERNAL built with cfortran.h does not work!
-See \`config.log' for more details" "$LINENO" 5; } ;; #(
-  x"compiling with cfortran.h failed") :
-    { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "Compilation with cfortran.h is not working!
-See \`config.log' for more details" "$LINENO" 5; } ;; #(
-  x"error compiling Fortran subroutine") :
-    { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "compilation of simple Fortran source failed!
-See \`config.log' for more details" "$LINENO" 5; } ;; #(
-  xyes) :
+   if test x"$acx_cv_cfortran_works" = xyes; then :
 
 $as_echo "#define HAVE_CF_INTERFACE 1" >>confdefs.h
- ;; #(
+
+else
+  case x"$acx_cv_cfortran_works" in #(
+  x"error") :
+    { $as_echo "$as_me:${as_lineno-$LINENO}: Linking/Running with C EXTERNAL built with cfortran.h does not work!" >&5
+$as_echo "$as_me: Linking/Running with C EXTERNAL built with cfortran.h does not work!" >&6;} ;; #(
+  x"compiling with cfortran.h failed") :
+    { $as_echo "$as_me:${as_lineno-$LINENO}: Compilation with cfortran.h is not working!" >&5
+$as_echo "$as_me: Compilation with cfortran.h is not working!" >&6;} ;; #(
+  x"error compiling Fortran subroutine") :
+    { $as_echo "$as_me:${as_lineno-$LINENO}: compilation of simple Fortran source failed!" >&5
+$as_echo "$as_me: compilation of simple Fortran source failed!" >&6;} ;; #(
   *) :
-    { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "Unexpected error when linking C and Fortran via cfortran.h!
-See \`config.log' for more details" "$LINENO" 5; } ;;
+    { $as_echo "$as_me:${as_lineno-$LINENO}: Unexpected error when linking C and Fortran via cfortran.h!" >&5
+$as_echo "$as_me: Unexpected error when linking C and Fortran via cfortran.h!" >&6;} ;;
 esac
+     { $as_echo "$as_me:${as_lineno-$LINENO}: Disabling cfortran.h bindings generation" >&5
+$as_echo "$as_me: Disabling cfortran.h bindings generation" >&6;}
+     acx_cv_cfortran_works=no
+fi
 
 fi
  if test -n "$FC" -a X"$FC" != Xno -a x"$acx_cv_cfortran_works" = xyes; then
