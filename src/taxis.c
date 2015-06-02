@@ -920,7 +920,8 @@ ptaxisDefLongname(taxis_t *taxisptr, const char *longname)
 }
 
 
-void cdiDecodeTimevalue(int timeunit, double timevalue, int *days, int *secs)
+static void
+cdiDecodeTimevalue(int timeunit, double timevalue, int *days, int *secs)
 {
   static int lwarn = TRUE;
 
@@ -942,7 +943,7 @@ void cdiDecodeTimevalue(int timeunit, double timevalue, int *days, int *secs)
     {
       *days = (int) (timevalue/86400);
       double seconds = timevalue - *days*86400.;
-      *secs = lround(seconds);
+      *secs = (int)lround(seconds);
       if ( *secs < 0 ) { *days -= 1; *secs += 86400; };
       /*
       {
@@ -956,7 +957,7 @@ void cdiDecodeTimevalue(int timeunit, double timevalue, int *days, int *secs)
     {
       *days = (int) timevalue;
       double seconds = (timevalue - *days)*86400;
-      *secs = lround(seconds);
+      *secs = (int)lround(seconds);
       if ( *secs < 0 ) { *days -= 1; *secs += 86400; };
       /*
       {

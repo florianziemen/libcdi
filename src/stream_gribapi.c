@@ -331,7 +331,7 @@ static
 int calcLevel(int level_sf, long factor, long level)
 {
   double result = 0;
-  if(level != GRIB_MISSING_LONG) result = level*grib2ScaleFactor(factor);
+  if(level != GRIB_MISSING_LONG) result = (double)level*grib2ScaleFactor(factor);
   if(level_sf) result *= level_sf;
   return (int)result;
 }
@@ -488,19 +488,19 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
     case ZAXIS_HYBRID:
     case ZAXIS_HYBRID_HALF:
       {
-        int vctsize;
+        size_t vctsize;
         size_t dummy;
         double *vctptr;
 
         GRIB_CHECK(grib_get_long(gh, "NV", &lpar), 0);
-        /* FIXME: assert(lpar >= INT_MIN && lpar <= INT_MAX) */
-        vctsize = (int)lpar;
+        /* FIXME: assert(lpar >= 0) */
+        vctsize = (size_t)lpar;
         if ( vctsize > 0 )
           {
             vctptr = (double *) malloc(vctsize*sizeof(double));
-            dummy = (size_t)vctsize;
+            dummy = vctsize;
             GRIB_CHECK(grib_get_double_array(gh, "pv", vctptr, &dummy), 0);
-            varDefVCT((size_t)vctsize, vctptr);
+            varDefVCT(vctsize, vctptr);
             free(vctptr);
           }
         break;
@@ -716,7 +716,7 @@ static void ensureBufferSize(size_t requiredSize, size_t* curSize, unsigned char
 }
 
 static
-grib_handle* gribapiGetDiskRepresentation(long recsize, size_t* buffersize, unsigned char** gribbuffer, int* outDatatype, int* outCompressionType, long* outUnzipsize)
+grib_handle* gribapiGetDiskRepresentation(size_t recsize, size_t* buffersize, unsigned char** gribbuffer, int* outDatatype, int* outCompressionType, long* outUnzipsize)
 {
   int lieee = FALSE;
 
@@ -736,10 +736,10 @@ grib_handle* gribapiGetDiskRepresentation(long recsize, size_t* buffersize, unsi
     }
   else
     {
-      if( gribGetZip(recsize, *gribbuffer, outUnzipsize) > 0 )
+      if( gribGetZip((long)recsize, *gribbuffer, outUnzipsize) > 0 )
         {
           *outCompressionType = COMPRESS_SZIP;
-          ensureBufferSize(*outUnzipsize + 100, buffersize, gribbuffer);
+          ensureBufferSize((size_t)*outUnzipsize + 100, buffersize, gribbuffer);
         }
       else
         {
@@ -964,10 +964,10 @@ int gribapiScanTimestep1(stream_t * streamptr)
     {
       streamptr->tsteps[0].recordSize = nrecords;
       streamptr->tsteps[0].records =
-      (record_t *) realloc(streamptr->tsteps[0].records, nrecords*sizeof(record_t));
+        (record_t *)xrealloc(streamptr->tsteps[0].records, (size_t)nrecords*sizeof(record_t));
     }
 
-  streamptr->tsteps[0].recIDs = (int *) malloc(nrecords*sizeof(int));
+  streamptr->tsteps[0].recIDs = (int *)xmalloc((size_t)nrecords*sizeof(int));
   streamptr->tsteps[0].nrecs = nrecords;
   for ( int recID = 0; recID < nrecords; recID++ )
     streamptr->tsteps[0].recIDs[recID] = recID;
@@ -1039,7 +1039,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
   cdi_create_records(streamptr, tsID);
 
   int nrecords = streamptr->tsteps[tsID].nallrecs;
-  streamptr->tsteps[1].recIDs = (int *) malloc(nrecords*sizeof(int));
+  streamptr->tsteps[1].recIDs = (int *) malloc((size_t)nrecords*sizeof(int));
   streamptr->tsteps[1].nrecs = 0;
   for ( recID = 0; recID < nrecords; recID++ )
     streamptr->tsteps[1].recIDs[recID] = -1;
@@ -1070,7 +1070,8 @@ int gribapiScanTimestep2(stream_t * streamptr)
       if ( rstatus ) break;
 
       long unzipsize;
-      if ( gribGetZip((long)recsize, gribbuffer, &unzipsize) > 0 ) ensureBufferSize(unzipsize + 100, &buffersize, &gribbuffer);
+      if ( gribGetZip((long)recsize, gribbuffer, &unzipsize) > 0 )
+        ensureBufferSize((size_t)unzipsize + 100, &buffersize, &gribbuffer);
 
       nrecs_scanned++;
       gh = grib_handle_new_from_message(NULL, (void *) gribbuffer, recsize);
@@ -1259,7 +1260,7 @@ int gribapiScanTimestep(stream_t * streamptr)
       nrecs = streamptr->tsteps[1].nrecs;
 
       streamptr->tsteps[tsID].nrecs = nrecs;
-      streamptr->tsteps[tsID].recIDs = (int *) malloc(nrecs*sizeof(int));
+      streamptr->tsteps[tsID].recIDs = (int *) malloc((size_t)nrecs*sizeof(int));
       for ( recID = 0; recID < nrecs; recID++ )
 	streamptr->tsteps[tsID].recIDs[recID] = streamptr->tsteps[1].recIDs[recID];
 
@@ -1298,7 +1299,8 @@ int gribapiScanTimestep(stream_t * streamptr)
 	    }
 
           long unzipsize;
-	  if ( gribGetZip((long)recsize, gribbuffer, &unzipsize) > 0 ) ensureBufferSize(unzipsize + 100, &buffersize, &gribbuffer);
+	  if ( gribGetZip((long)recsize, gribbuffer, &unzipsize) > 0 )
+            ensureBufferSize((size_t)unzipsize + 100, &buffersize, &gribbuffer);
 
           nrecs_scanned++;
 	  gh = grib_handle_new_from_message(NULL, (void *) gribbuffer, recsize);
@@ -1949,8 +1951,8 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 
 	    nlon = 0;
 
-	    rowlon = (int *) malloc(nlat*sizeof(int));
-	    pl     = (long *) malloc(nlat*sizeof(long));
+	    rowlon = (int *)xmalloc((size_t)nlat*sizeof(int));
+	    pl     = (long *)xmalloc((size_t)nlat*sizeof(long));
 	    gridInqRowlon(gridID, rowlon);
 	    for ( i = 0; i < nlat; ++i ) pl[i] = rowlon[i];
 
@@ -2100,8 +2102,10 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 	GRIB_CHECK(my_grib_set_long(gh, "Nx", xsize), 0);
 	GRIB_CHECK(my_grib_set_long(gh, "Ny", ysize), 0);
 
-	GRIB_CHECK(my_grib_set_double(gh, "DxInMetres", lround(xincm)), 0);
-	GRIB_CHECK(my_grib_set_double(gh, "DyInMetres", lround(yincm)), 0);
+        /* FIXME: lround should probably be round here */
+	GRIB_CHECK(my_grib_set_double(gh, "DxInMetres", (double)lround(xincm)), 0);
+        /* FIXME: lround should probably be round here */
+	GRIB_CHECK(my_grib_set_double(gh, "DyInMetres", (double)lround(yincm)), 0);
 	GRIB_CHECK(my_grib_set_double(gh, "longitudeOfFirstGridPointInDegrees", originLon), 0);
 	GRIB_CHECK(my_grib_set_double(gh, "latitudeOfFirstGridPointInDegrees", originLat), 0);
 	GRIB_CHECK(my_grib_set_double(gh, "LoVInDegrees", lonParY), 0);
@@ -2607,7 +2611,7 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   if ( ! gc->init ) gribapiDefInstitut(gh, vlistID, varID);
   if ( ! gc->init ) gribapiDefModel(gh, vlistID, varID);
 
-  if ( ! gc->init ) gribapiDefParam(editionNumber, gh, param, name, stdname);
+  if ( ! gc->init ) gribapiDefParam((int)editionNumber, gh, param, name, stdname);
 
   if ( editionNumber == 2 && (datatype == DATATYPE_FLT32 || datatype == DATATYPE_FLT64) ) lieee = TRUE;
 
