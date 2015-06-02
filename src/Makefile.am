@@ -177,7 +177,6 @@ libcdipio_la_SOURCES =							\
 libcdipio_la_LIBADD    = libcdi.la $(PPM_CORE_LIBS) $(YAXT_LIBS) $(MPI_C_LIB)
 
 libcdi_la_LIBADD    = $(UUID_C_LIB)
-libcdi_la_CFLAGS    = -DpgiFortran
 #
 #cdilib.c:
 #	$(top_srcdir)/src/make_cdilib $(top_srcdir)/src
