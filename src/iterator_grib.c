@@ -11,6 +11,7 @@
 #include "zaxis.h"
 
 #include <assert.h>
+#include <limits.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -122,7 +123,8 @@ char* cdiGribIterator_serialize(CdiIterator* super)
 
   const char* path = cdiInputFile_getPath(me->file);
   char* escapedPath = cdiEscapeSpaces(path);
-  char* result = myAsprintf("%s %zu", escapedPath, me->fileOffset);
+  char* result = xmalloc(strlen(escapedPath) + 3 * sizeof(int) * CHAR_BIT/8);
+  sprintf(result, "%s %zu", escapedPath, me->fileOffset);
   free(escapedPath);
   return result;
 }
