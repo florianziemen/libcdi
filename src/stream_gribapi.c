@@ -706,6 +706,7 @@ int gribapiVarCompare(compvar2_t compVar, record_t record, int flag)
   return (rstatus);
 }
 
+#if  defined  (HAVE_LIBGRIB_API)
 static void ensureBufferSize(size_t requiredSize, size_t* curSize, unsigned char** buffer) {
   if ( *curSize < requiredSize )
     {
@@ -714,7 +715,6 @@ static void ensureBufferSize(size_t requiredSize, size_t* curSize, unsigned char
     }
 }
 
-#if  defined  (HAVE_LIBGRIB_API)
 static
 grib_handle* gribapiGetDiskRepresentation(long recsize, size_t* buffersize, unsigned char** gribbuffer, int* outDatatype, int* outCompressionType, long* outUnzipsize)
 {
