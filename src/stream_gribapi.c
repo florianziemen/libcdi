@@ -804,9 +804,9 @@ static checkTimeResult checkTime(stream_t* streamptr, compvar2_t compVar, const 
   } \
 while(0)
 
+#if  defined  (HAVE_LIBGRIB_API)
 int gribapiScanTimestep1(stream_t * streamptr)
 {
-#if  defined  (HAVE_LIBGRIB_API)
   off_t recpos = 0;
   unsigned char *gribbuffer = NULL;
   size_t buffersize = 0;
@@ -998,13 +998,10 @@ int gribapiScanTimestep1(stream_t * streamptr)
             }
         }
     }
-#else
-  (void)streamptr;
-  Error("GRIB_API support not compiled in!");
-#endif
 
   return (0);
 }
+#endif
 
 
 #ifdef HAVE_LIBGRIB_API
