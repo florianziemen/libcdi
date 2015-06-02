@@ -1185,6 +1185,8 @@ AC_SUBST([am__untar])
 
 m4_include([m4/acx_assert_lang_is_fortran_variant.m4])
 m4_include([m4/acx_c_package.m4])
+m4_include([m4/acx_cfortran_flags.m4])
+m4_include([m4/acx_check_cfortran.m4])
 m4_include([m4/acx_check_strptr_convert.m4])
 m4_include([m4/acx_execinfo.m4])
 m4_include([m4/acx_fortran_package.m4])

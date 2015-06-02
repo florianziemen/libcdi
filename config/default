@@ -22,7 +22,7 @@ case "${HOSTNAME}" in
                     --with-grib_api=$HOME/local/gribapi-1.12.3 \
                     --with-netcdf=$HOME/local \
                     --with-szlib=$HOME/local \
-	            CC=icc CFLAGS="-g -D_REENTRANT -Wall -O3 -march=native -Df2cFortran -fp-model source"
+	            CC=icc CFLAGS="-g -D_REENTRANT -Wall -O3 -march=native -fp-model source"
 	;;
     bailung*|d133*|d134*)
 	./configure --prefix=$HOME/local \
@@ -34,7 +34,7 @@ case "${HOSTNAME}" in
                     --with-grib_api=$HOME/local/gribapi-1.12.3 \
                     --with-netcdf=$HOME/local \
                     --with-szlib=$HOME/local \
-	            CC=gcc CFLAGS="-g -pipe -D_REENTRANT -Wall -W -Wfloat-equal -pedantic -O3 -march=native -Df2cFortran"
+	            CC=gcc CFLAGS="-g -pipe -D_REENTRANT -Wall -W -Wfloat-equal -pedantic -O3 -march=native"
 	;;
     cinglung*|feilung*|wanglung*)
 	./configure --prefix=$HOME/local \
@@ -49,7 +49,7 @@ case "${HOSTNAME}" in
                     --with-netcdf=/opt/local \
                     --with-hdf5=/opt/local \
                     --with-szlib=/opt/local \
-	            CC=gcc CFLAGS="-g -pipe -D_REENTRANT -Wall -W -Wfloat-equal -pedantic -O2 -DpgiFortran"
+	            CC=gcc CFLAGS="-g -pipe -D_REENTRANT -Wall -W -Wfloat-equal -pedantic -O2"
 	;;
     hama*)
 	./configure --prefix=$HOME/local \
@@ -59,14 +59,14 @@ case "${HOSTNAME}" in
                     --enable-python \
                     --with-grib_api=$HOME/local/gribapi-1.13.0 \
                     --with-netcdf=$HOME/local \
-	            CC=gcc CFLAGS="-g -pipe -D_REENTRANT -Wall -W -Wfloat-equal -pedantic -O3 -Df2cFortran"
+	            CC=gcc CFLAGS="-g -pipe -D_REENTRANT -Wall -W -Wfloat-equal -pedantic -O3"
 	;;
 # ia64-nec-linux
     ds*)
 	./configure --prefix=$HOME/local \
                     --with-netcdf=/pool/ia64/netcdf/netcdf-3.6.0-p1 \
                     --with-szlib=$HOME/local \
-                    CC=icc CFLAGS="-g -O2 -Wall -fno-alias -DMIN_BUF_SIZE=4194304 -Df2cFortran"
+                    CC=icc CFLAGS="-g -O2 -Wall -fno-alias -DMIN_BUF_SIZE=4194304"
 	;;
 # i686-linux
     etch-ia32 | gata)
@@ -141,7 +141,7 @@ case "${HOSTNAME}" in
                     --with-zlib=/sw/aix61/zlib-1.2.6 \
                     --with-szlib=/sw/aix61/szip-2.1-threadsafe \
                     AR="ar -X 64" LDFLAGS="-brtl" FC=xlf2003_r CC=xlc_r \
-                    CFLAGS="-g -O3 -qhot -q64 -qarch=auto -qtune=auto -qlistfmt=html=transforms -DHAVE_MMAP -Dextname" \
+                    CFLAGS="-g -O3 -qhot -q64 -qarch=auto -qtune=auto -qlistfmt=html=transforms -DHAVE_MMAP" \
                     FCFLAGS="-qsuffix=cpp=f90 -qextname" \
                     SHELL=/bin/bash
         ;;

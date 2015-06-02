@@ -319,10 +319,16 @@ AM_CONDITIONAL(ENABLE_PYTHON, [test "x$enable_python" != "xno"])
 AS_IF([test "x$enable_python" != "xno"],[AC_SUBST([ENABLE_PYTHON],[true])],[AC_SUBST([ENABLE_PYTHON],[false])])
 #  ----------------------------------------------------------------------
 AM_CONDITIONAL(CREATE_INTERFACES, [test  "x$enable_ruby" = "xyes" -o "x$enable_python" = "xyes"])
-#  ----------------------------------------------------------------------
-#  Check C / Fortran interface
-ACX_CHECK_CFINT([$srcdir/src/cfortran.h])
-AM_CONDITIONAL([USE_FC],[test -n "$FC" && test "X$FC" != "Xno" && test x$acx_cv_check_cfint = "xyes"])dnl
+dnl ######################################################################
+dnl Test whether cfortran.h works correctly
+dnl ######################################################################
+ACX_FIND_CFORTRAN_DEF
+ACX_XLF_QEXTNAME_ADD_APPENDUS
+AS_IF([test -n "$FC" -a X"$FC" != Xno -o -n "$F77" -a X"$F77" != Xno],
+  [ACX_CHECK_CFORTRAN([$srcdir/src],
+    [AC_DEFINE([HAVE_CF_INTERFACE],[1],
+       [Defined to 1 if C / Fortran interface cfortran.h works])])])
+AM_CONDITIONAL([USE_FC],[test -n "$FC" -a X"$FC" != Xno -a x"$acx_cv_cfortran_works" = xyes])dnl
 dnl
 AC_SUBST([CPPFLAGS])dnl
 dnl
