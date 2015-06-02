@@ -3,10 +3,10 @@
 #include "cdi.h"
 #include "cdi_int.h"
 #include "dmemory.h"
-#include "proprietarySystemWorkarounds.h"
 #include "vlist.h"      //Required for vlist_t, which we require because there is no safe function available to access a variable name.
 
 #include <assert.h>
+#include <limits.h>
 #include <stdlib.h>
 
 //For more information on the condestruct() pattern, see comment in src/iterator_grib.c
@@ -30,7 +30,7 @@ static CdiFallbackIterator* cdiFallbackIterator_condestruct(CdiFallbackIterator*
   if(streamInqTimestep(me->streamId, me->curTimestep) <= 0) goto closeStream;
   me->curVariable = 0;
   me->curLevel = -1;
-  me->path = myStrDup(path);
+  me->path = strdup(path);
   if(!me->path) goto closeStream;
 
   return me;
@@ -90,7 +90,9 @@ char* cdiFallbackIterator_serialize(CdiIterator* super)
   CdiFallbackIterator* me = (CdiFallbackIterator*)super;
 
   char* escapedPath = cdiEscapeSpaces(me->path);
-  char* result = myAsprintf("%s %d %d %d %d %d", escapedPath, me->variableCount, me->curVariable, me->curLevelCount, me->curLevel, me->curTimestep);
+  char* result = xmalloc(strlen(escapedPath)
+                         + 5 * (3 * sizeof (int) * CHAR_BIT / 8 + 1) + 1);
+  sprintf(result, "%s %d %d %d %d %d", escapedPath, me->variableCount, me->curVariable, me->curLevelCount, me->curLevel, me->curTimestep);
   free(escapedPath);
   return result;
 }
@@ -184,7 +186,9 @@ char* cdiFallbackIterator_inqTime(CdiIterator* super, bool getEndTime)
   int year, month, day, hour, minute, second;
   cdiDecodeDate(date, &year, &month, &day);
   cdiDecodeTime(time, &hour, &minute, &second);
-  return myAsprintf("%04d-%02d-%02dT%02d:%02d:%02d.000", year, month, day, hour, minute, second);
+  char *result = xmalloc(   4+1 +2+1 +2+1 +2+1 +2+1 +2+4+1);
+  sprintf(result, "%04d-%02d-%02dT%02d:%02d:%02d.000", year, month, day, hour, minute, second);
+  return result;
 }
 
 int cdiFallbackIterator_levelType(CdiIterator* super, int levelSelector, char** outName, char** outLongName, char** outStdName, char** outUnit)
@@ -197,7 +201,7 @@ int cdiFallbackIterator_levelType(CdiIterator* super, int levelSelector, char** 
         { \
           char tempBuffer[CDI_MAX_NAME]; \
           function(zaxisId, tempBuffer); \
-          *outPointer = myStrDup(tempBuffer); \
+          *outPointer = strdup(tempBuffer); \
         } \
     } \
   while(0)

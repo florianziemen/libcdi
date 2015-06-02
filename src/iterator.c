@@ -1,4 +1,5 @@
 #include "cdi.h"
+#include "dmemory.h"
 #include "iterator.h"
 #include "iterator_fallback.h"
 #include "iterator_grib.h"
