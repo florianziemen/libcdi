@@ -49,7 +49,7 @@ case "${HOSTNAME}" in
       CFLAGS="$OPTFLAGS -q64" \
       CPPFLAGS='-Dextname' \
       F77=smartmpxlf \
-      F77FLAGS="$OPTFLAGS -q64 -qsuffix=cpp=f90 -qextname" \
+      FFLAGS="$OPTFLAGS -q64 -qsuffix=cpp=f90 -qextname" \
       FC=smartmpxlf \
       FCFLAGS="$OPTFLAGS -q64 -qsuffix=cpp=f90 -qextname" \
       CXX=smartmpCC_r \
