@@ -682,6 +682,7 @@ compvar2_t gribapiVarSet(int param, int level1, int level2, int leveltype, int t
 }
 #endif
 
+#ifdef HAVE_LIBGRIB_API
 static
 int gribapiVarCompare(compvar2_t compVar, record_t record, int flag)
 {
@@ -706,7 +707,6 @@ int gribapiVarCompare(compvar2_t compVar, record_t record, int flag)
   return (rstatus);
 }
 
-#if  defined  (HAVE_LIBGRIB_API)
 static void ensureBufferSize(size_t requiredSize, size_t* curSize, unsigned char** buffer) {
   if ( *curSize < requiredSize )
     {
