@@ -271,7 +271,7 @@ void cdiFallbackIterator_readField(CdiIterator* super, double* buffer, size_t* n
   CdiFallbackIterator* me = (CdiFallbackIterator*)super;
   int missingValues = 0;
   streamReadVarSlice(me->streamId, me->curVariable, me->curLevel, buffer, &missingValues);
-  if(nmiss) *nmiss = missingValues;
+  if(nmiss) *nmiss = (size_t)missingValues;
 }
 
 void cdiFallbackIterator_readFieldF(CdiIterator* super, float* buffer, size_t* nmiss)
@@ -279,7 +279,7 @@ void cdiFallbackIterator_readFieldF(CdiIterator* super, float* buffer, size_t* n
   CdiFallbackIterator* me = (CdiFallbackIterator*)super;
   int missingValues = 0;
   streamReadVarSliceF(me->streamId, me->curVariable, me->curLevel, buffer, &missingValues);
-  if(nmiss) *nmiss = missingValues;
+  if(nmiss) *nmiss = (size_t)missingValues;
 }
 
 void cdiFallbackIterator_delete(CdiIterator* super)
