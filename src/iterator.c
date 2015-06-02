@@ -3,7 +3,6 @@
 #include "iterator_fallback.h"
 #include "iterator_grib.h"
 #include "cdi_int.h"
-#include "proprietarySystemWorkarounds.h"
 
 #include <assert.h>
 #include <ctype.h>
@@ -299,7 +298,11 @@ char* cdiIterator_serialize(CdiIterator* me)
         return NULL;
     }
 
-  char* result = myAsprintf("%s %s %s", fileType2String(me->filetype), (me->isAdvanced ? kAdvancedString : kUnadvancedString), subclassDescription);
+  const char *ftypeStr = fileType2String(me->filetype),
+    *advStr = me->isAdvanced ? kAdvancedString : kUnadvancedString;
+  char* result = xmalloc(strlen(ftypeStr) + 1 + strlen(advStr) + 1
+                         + strlen(subclassDescription) + 1);
+  sprintf(result, "%s %s %s", ftypeStr, advStr, subclassDescription);
   free(subclassDescription);
   return result;
 }
