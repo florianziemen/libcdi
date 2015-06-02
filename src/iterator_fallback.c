@@ -195,6 +195,7 @@ int cdiFallbackIterator_levelType(CdiIterator* super, int levelSelector, char** 
 {
   CdiFallbackIterator* me = (CdiFallbackIterator*)super;
   int zaxisId = vlistInqVarZaxis(me->vlistId, me->curVariable);
+  (void)levelSelector;
   #define copyString(outPointer, function) do \
     { \
       if(outPointer) \

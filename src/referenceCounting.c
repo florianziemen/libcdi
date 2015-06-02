@@ -25,4 +25,8 @@ void cdiRefObject_release(CdiReferencedObject* me)
     }
 }
 
-void cdiRefObject_destruct(CdiReferencedObject* me) { /* Empty for now, but that's no reason not to call it! */ }
+void cdiRefObject_destruct(CdiReferencedObject* me)
+{
+  (void)me;
+  /* Empty for now, but that's no reason not to call it! */
+}

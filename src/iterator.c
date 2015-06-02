@@ -966,4 +966,8 @@ void cdiIterator_delete(CdiIterator* me)
     }
 }
 
-void baseIterDestruct(CdiIterator* me) { /*currently empty, but that's no reason not to call it*/ }
+void baseIterDestruct(CdiIterator* me)
+{
+  /*currently empty, but that's no reason not to call it*/
+  (void)me;
+}
