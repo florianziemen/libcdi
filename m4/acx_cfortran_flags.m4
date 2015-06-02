@@ -129,14 +129,14 @@ p'`
 dnl find automatically from machine/compiler
       AS_IF([test x"$acx_cv_cf_flag" = x],
         [AC_PROVIDE_IFELSE([AC_PROG_FC],
-           [AS_IF([test -n "$F77" -a X"$F77" != Xno],
+           [AS_IF([test -n "$FC" -a X"$FC" != Xno],
               [AC_LANG_PUSH([Fortran])
                AS_VAR_PUSHDEF([acx_cf_flag],[acx_cv_]_AC_LANG_ABBREV[_cf_flag])
                _ACX_FIND_CFORTRAN_DEF
                AS_VAR_POPDEF([acx_cf_flag])
                AC_LANG_POP([Fortran])])])
          AC_PROVIDE_IFELSE([AC_PROG_F77],
-           [AS_IF([test -n "$FC" -a X"$FC" != Xno],
+           [AS_IF([test -n "$F77" -a X"$F77" != Xno],
               [AC_LANG_PUSH([Fortran 77])
                AS_VAR_PUSHDEF([acx_cf_flag],[acx_cv_]_AC_LANG_ABBREV[_cf_flag])
                _ACX_FIND_CFORTRAN_DEF
