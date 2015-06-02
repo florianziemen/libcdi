@@ -3,7 +3,6 @@
 
 #include "cdi.h"
 #include "dmemory.h"
-#include "proprietarySystemWorkarounds.h"
 
 #include <errno.h>
 #include <fcntl.h>
@@ -21,7 +20,7 @@ static CdiInputFile* cdiInputFile_condestruct(CdiInputFile* me, const char* path
   #define super() (&me->super)
   if(!path) goto destruct;
   cdiRefObject_construct(super());
-  me->path = myStrDup(path);
+  me->path = strdup(path);
   if(!me->path) goto destructSuper;
   do
     {
