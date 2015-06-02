@@ -290,8 +290,6 @@ src/pio_util.c -text
 src/pio_util.h -text
 src/pkgconfig/cdi.pc.in -text
 src/pkgconfig/cdipio.pc.in -text
-src/proprietarySystemWorkarounds.c -text
-src/proprietarySystemWorkarounds.h -text
 src/referenceCounting.c -text
 src/referenceCounting.h -text
 src/resource_handle.c -text

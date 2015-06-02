@@ -116,7 +116,6 @@ files="basetime.c \
    iterator_grib.c \
    model.c \
    namespace.c \
-   proprietarySystemWorkarounds.c \
    referenceCounting.c \
    resource_handle.c \
    serialize.c \

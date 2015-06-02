@@ -67,8 +67,6 @@ libcdi_la_SOURCES = 	 \
 	namespace.h      \
 	serialize.h	\
 	serialize.c	\
-	proprietarySystemWorkarounds.c \
-	proprietarySystemWorkarounds.h \
 	referenceCounting.c \
 	referenceCounting.h \
 	resource_handle.c\
