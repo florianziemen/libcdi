@@ -2,8 +2,6 @@
 #  include "config.h"
 #endif
 
-static int dummy;
-
 #ifdef HAVE_LIBGRIB_API
 
 #include "gribapi_utilities.h"
@@ -12,14 +10,13 @@ static int dummy;
 #include "dmemory.h"
 #include "error.h"
 #include "gribapi.h"
-#include "proprietarySystemWorkarounds.h"
 
 #include <assert.h>
 #include <time.h>
 
 #define FAIL_ON_GRIB_ERROR(function, gribHandle, key, ...) do\
 {\
-  int errorCode = function(gribHandle, key, __VA_ARGS__);\
+  int errorCode = (int)function(gribHandle, key, __VA_ARGS__);  \
   if(errorCode)\
     {\
       fprintf(stderr, "%s:%d: Error in function `%s`: `%s` returned error code %d for key \"%s\"", __FILE__, __LINE__, __func__, #function, errorCode, key);\
@@ -30,11 +27,45 @@ static int dummy;
 //A simple wrapper for grib_get_string() that returns a newly allocated string.
 char* gribCopyString(grib_handle* gribHandle, const char* key)
 {
+  char* result = NULL;
   size_t length;
-  if(grib_get_length(gribHandle, key, &length)) return NULL;
-  char* result = xmalloc(length);
-  if(!grib_get_string(gribHandle, key, result, &length)) return result;
+#ifdef HAVE_GRIB_GET_LENGTH
+  if(!grib_get_length(gribHandle, key, &length))
+  {
+    char* result = xmalloc(length);
+    if(!grib_get_string(gribHandle, key, result, &length))
+      result = xrealloc(result, length);
+    else
+    {
+      free(result);
+      result = NULL;
+    }
+  }
+#else
+  length = 1024;         /* there's an implementation limit
+                          * that makes strings longer than
+                          * this unlikely in grib_api versions
+                          * not providing grib_get_length */
+  int rc;
+  result = xmalloc(length);
+  while ((rc = grib_get_string(gribHandle, key, result, &length))
+         == GRIB_BUFFER_TOO_SMALL || rc == GRIB_ARRAY_TOO_SMALL)
+  {
+    if (length <= 1024UL * 1024UL)
+    {
+      length *= 2;
+      result = xrealloc(result, length);
+    }
+    else
+      break;
+  }
+  if (!rc)
+  {
+    result = xrealloc(result, length);
+    return result;
+  }
   free(result);
+#endif
   return NULL;
 }
 
@@ -42,12 +73,29 @@ char* gribCopyString(grib_handle* gribHandle, const char* key)
 //Returns true if the key exists and the value is equal to the given string.
 bool gribCheckString(grib_handle* gribHandle, const char* key, const char* expectedValue)
 {
-  size_t expectedLength = strlen(expectedValue) + 1, length;
+  size_t expectedLength = strlen(expectedValue) + 1;
+#ifdef HAVE_GRIB_GET_LENGTH
+  size_t length;
   if(grib_get_length(gribHandle, key, &length)) return false;
   if(length != expectedLength) return false;
-  char value[length];
+  char *value = xmalloc(length);
   if(grib_get_string(gribHandle, key, value, &length)) return false;
-  return !strcmp(value, expectedValue);
+  int rc = !strcmp(value, expectedValue);
+  free(value);
+#else
+  char *value = gribCopyString(gribHandle, key);
+  int rc;
+  if (value)
+  {
+    rc = strlen(value) + 1 == expectedLength ?
+      !strcmp(value, expectedValue)
+      : false;
+  }
+  else
+    rc = false;
+  free(value);
+#endif
+  return rc;
 }
 
 //A simple wrapper for grib_get_long() for the usecase that the result is only compared to a given constant value.
@@ -126,7 +174,7 @@ long gribEditionNumber(grib_handle* gh)
 static char* setUtc()
 {
   char* temp = getenv("TZ"), *result = NULL;
-  if(temp) result = myStrDup(temp);
+  if(temp) result = strdup(temp);
   setenv("TZ", "UTC", 1);
   return result;
 }
@@ -163,13 +211,13 @@ static int addSecondsToDate(struct tm* me, long long amount)
   //It is irrelevant here whether days are zero or one based, the correction would have be undone again so that it is effectless.
   long long seconds = ((me->tm_mday*24ll + me->tm_hour)*60 + me->tm_min)*60 + me->tm_sec;    //The portion of the date that uses fixed increments.
   seconds += amount;
-  me->tm_mday = seconds/24/60/60;
-  seconds -= me->tm_mday*24*60*60;
-  me->tm_hour = seconds/60/60;
-  seconds -= me->tm_hour*60*60;
-  me->tm_min = seconds/60;
-  seconds -= me->tm_min*60;
-  me->tm_sec = seconds;
+  me->tm_mday = (int)(seconds / 24 / 60 / 60);
+  seconds -= (long long)me->tm_mday * 24 * 60 * 60;
+  me->tm_hour = (int)(seconds / 60 / 60);
+  seconds -= (long long)me->tm_hour * 60 * 60;
+  me->tm_min = (int)(seconds / 60);
+  seconds -= (long long)(me->tm_min * 60);
+  me->tm_sec = (int)seconds;
   return normalizeDays(me);
 }
 
@@ -177,9 +225,9 @@ static void addMonthsToDate(struct tm* me, long long amount)
 {
   long long months = me->tm_year*12ll + me->tm_mon;
   months += amount;
-  me->tm_year = months/12;
-  months -= me->tm_year*12;
-  me->tm_mon = months;
+  me->tm_year = (int)(months/12);
+  months -= (long long)me->tm_year*12;
+  me->tm_mon = (int)months;
 }
 
 //unit is a value according to code table 4.4 of the GRIB2 specification, returns non-zero on error
@@ -208,7 +256,10 @@ static int addToDate(struct tm* me, long long amount, long unit)
 
 static char* makeDateString(struct tm* me)
 {
-  return myAsprintf("%04d-%02d-%02dT%02d:%02d:%02d.000", me->tm_year + 1900, me->tm_mon + 1, me->tm_mday, me->tm_hour, me->tm_min, me->tm_sec);
+  char *result
+    = xmalloc(       4+1+ 2+1+ 2+1+ 2+1+ 2+1+ 2+ 4+ 1);
+  sprintf(result, "%04d-%02d-%02dT%02d:%02d:%02d.000", me->tm_year + 1900, me->tm_mon + 1, me->tm_mday, me->tm_hour, me->tm_min, me->tm_sec);
+  return result;
 }
 
 //FIXME: This ignores any calendar definition that might be present.
@@ -238,19 +289,19 @@ char* gribMakeTimeString(grib_handle* gh, bool getEndTime)
 {
   //Get the parts of the reference date.
   struct tm date = {
-      .tm_mon = gribGetLong(gh, "month") - 1,   //months are zero based in struct tm and one based in GRIB
-      .tm_mday = gribGetLong(gh, "day"),
-      .tm_hour = gribGetLong(gh, "hour"),
-      .tm_min = gribGetLong(gh, "minute")
+    .tm_mon = (int)gribGetLong(gh, "month") - 1,   //months are zero based in struct tm and one based in GRIB
+    .tm_mday = (int)gribGetLong(gh, "day"),
+    .tm_hour = (int)gribGetLong(gh, "hour"),
+    .tm_min = (int)gribGetLong(gh, "minute")
   };
   if(gribEditionNumber(gh) == 1)
     {
-      date.tm_year = gribGetLong(gh, "yearOfCentury");  //years are -1900 based both in struct tm and GRIB1
+      date.tm_year = (int)gribGetLong(gh, "yearOfCentury");  //years are -1900 based both in struct tm and GRIB1
     }
   else
     {
-      date.tm_year = gribGetLong(gh, "year") - 1900;   //years are -1900 based in struct tm and zero based in GRIB2
-      date.tm_sec = gribGetLong(gh, "second");
+      date.tm_year = (int)gribGetLong(gh, "year") - 1900;   //years are -1900 based in struct tm and zero based in GRIB2
+      date.tm_sec = (int)gribGetLong(gh, "second");
 
       //Determine whether we have a forecast time and a time range.
       bool haveForecastTime, haveTimeRange;
@@ -561,14 +612,14 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
         long lpar;
 
         FAIL_ON_GRIB_ERROR(grib_get_long, gh, "Nx", &lpar);
-        nlon = lpar;
+        nlon = (int)lpar;
         FAIL_ON_GRIB_ERROR(grib_get_long, gh, "Ny", &lpar);
-        nlat = lpar;
+        nlat = (int)lpar;
 
         if ( numberOfPoints != nlon*nlat )
           Error("numberOfPoints (%d) and gridSize (%d) differ!", (int)numberOfPoints, nlon*nlat);
 
-        grid->size  = numberOfPoints;
+        grid->size  = (int)numberOfPoints;
         grid->xsize = nlon;
         grid->ysize = nlat;
 

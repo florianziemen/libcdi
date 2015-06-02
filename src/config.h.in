@@ -12,7 +12,7 @@
 /* Defined if backtrace() could be fully identified. */
 #undef HAVE_BACKTRACE
 
-/* Define if C / Fortran interface cfortran.h works */
+/* Defined to 1 if C / Fortran interface cfortran.h works */
 #undef HAVE_CF_INTERFACE
 
 /* Define to 1 if you have the declaration of `isnan', and to 0 if you don't.
@@ -45,6 +45,9 @@
 
 /* Define to 1 if you have the <grib_api.h> header file. */
 #undef HAVE_GRIB_API_H
+
+/* Define to 1 if you have the `grib_get_length' function. */
+#undef HAVE_GRIB_GET_LENGTH
 
 /* Define to 1 if you have the <hdf5.h> header file. */
 #undef HAVE_HDF5_H

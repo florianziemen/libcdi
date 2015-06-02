@@ -26,9 +26,9 @@ void gribapiLibraryVersion(int* major_version, int* minor_version, int* revision
 {
 #if  defined  (HAVE_LIBGRIB_API)
   long version = grib_get_api_version();
-  (*major_version)    = version/10000;
-  (*minor_version)    = (version-(*major_version)*10000)/100;
-  (*revision_version) = (version-(*major_version)*10000-(*minor_version)*100);
+  (*major_version)    = (int)(version/10000);
+  (*minor_version)    = (int)((version-(*major_version)*10000)/100);
+  (*revision_version) = (int)(version-(*major_version)*10000-(*minor_version)*100);
 #else
   (*major_version)    = 0;
   (*minor_version)    = 0;

@@ -1,8 +1,8 @@
+#define _XOPEN_SOURCE 600
 #include "input_file.h"
 
 #include "cdi.h"
 #include "dmemory.h"
-#include "proprietarySystemWorkarounds.h"
 
 #include <errno.h>
 #include <fcntl.h>
@@ -20,7 +20,7 @@ static CdiInputFile* cdiInputFile_condestruct(CdiInputFile* me, const char* path
   #define super() (&me->super)
   if(!path) goto destruct;
   cdiRefObject_construct(super());
-  me->path = myStrDup(path);
+  me->path = strdup(path);
   if(!me->path) goto destructSuper;
   do
     {
@@ -112,15 +112,15 @@ int cdiInputFile_read(const CdiInputFile* me, off_t readPosition, size_t readSiz
       if(bytesRead == 0) return CDI_EEOF;
       byteBuffer += bytesRead;
       readPosition += bytesRead;
-      readSize -= bytesRead;
-      *outActualReadSize += bytesRead;
+      readSize -= (size_t)bytesRead;
+      *outActualReadSize += (size_t)bytesRead;
     }
   return CDI_NOERR;
 }
 
-char* cdiInputFile_copyPath(const CdiInputFile* me)
+const char* cdiInputFile_getPath(const CdiInputFile* me)
 {
-  return myStrDup(me->path);
+  return me->path;
 }
 
 void cdiInputFile_destruct(CdiInputFile* me)
@@ -129,9 +129,8 @@ void cdiInputFile_destruct(CdiInputFile* me)
   xassert(!error);
     {
       //Find the position of me in the list of open files.
-      ssize_t position;
-      for(position = openFileCount; position--; ) if(openFileList[position] == me) break;
-      xassert(position != -1);
+      ssize_t position = (ssize_t)openFileCount;
+      while (position > 0 && openFileList[--position] != me);
       //Remove me from the list
       openFileList[position] = openFileList[--openFileCount];
     }

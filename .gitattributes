@@ -172,6 +172,8 @@ interfaces/testdata/mulval.nc -text
 m4/ac_lang_program_fortran.m4 -text
 m4/acx_assert_lang_is_fortran_variant.m4 -text
 m4/acx_c_package.m4 -text
+m4/acx_cfortran_flags.m4 -text
+m4/acx_check_cfortran.m4 -text
 m4/acx_check_strptr_convert.m4 -text
 m4/acx_execinfo.m4 -text
 m4/acx_fortran_check_include.m4 -text
@@ -295,8 +297,6 @@ src/pio_util.c -text
 src/pio_util.h -text
 src/pkgconfig/cdi.pc.in -text
 src/pkgconfig/cdipio.pc.in -text
-src/proprietarySystemWorkarounds.c -text
-src/proprietarySystemWorkarounds.h -text
 src/referenceCounting.c -text
 src/referenceCounting.h -text
 src/resource_handle.c -text

@@ -308,21 +308,20 @@ void grbReadRecord(stream_t * streamptr, double *data, int *nmiss)
 static
 int grbScanTimestep1(stream_t * streamptr)
 {
-  int status;
-  int filetype;
-
-  filetype  = streamptr->filetype;
+  int status = CDI_EUFTYPE;
 
 #if  defined  (HAVE_LIBCGRIBEX)
+  int filetype  = streamptr->filetype;
+
   if ( filetype == FILETYPE_GRB )
-    {
-      status = cgribexScanTimestep1(streamptr);
-    }
+    status = cgribexScanTimestep1(streamptr);
+#endif
+#if defined(HAVE_LIBCGRIBEX) && defined (HAVE_LIBGRIB_API)
   else
 #endif
-    {
-      status = gribapiScanTimestep1(streamptr);
-    }
+#ifdef HAVE_LIBGRIB_API
+    status = gribapiScanTimestep1(streamptr);
+#endif
 
   return (status);
 }
@@ -330,12 +329,11 @@ int grbScanTimestep1(stream_t * streamptr)
 static
 int grbScanTimestep2(stream_t * streamptr)
 {
-  int status = 0;
-  int filetype;
-
-  filetype  = streamptr->filetype;
+  int status = CDI_EUFTYPE;
 
 #if  defined  (HAVE_LIBCGRIBEX)
+  int filetype = streamptr->filetype;
+
   if ( filetype == FILETYPE_GRB )
     {
       status = cgribexScanTimestep2(streamptr);
@@ -376,6 +374,7 @@ int grbScanTimestep(stream_t * streamptr)
 }
 
 
+#if  defined  (HAVE_LIBGRIB)
 int grbInqContents(stream_t * streamptr)
 {
   int fileID;
@@ -393,7 +392,7 @@ int grbInqContents(stream_t * streamptr)
 
   return (status);
 }
-
+#endif
 
 int grbInqTimestep(stream_t * streamptr, int tsID)
 {

@@ -28,8 +28,6 @@ libcdi_la_SOURCES = 	 \
 	cdi_error.c      \
 	cdi_limits.h	 \
 	cdi_util.c       \
-	cdiFortran.c     \
-	cfortran.h       \
 	cgribex.h	 \
 	cgribexlib.c  	 \
 	datetime.h	 \
@@ -67,8 +65,6 @@ libcdi_la_SOURCES = 	 \
 	namespace.h      \
 	serialize.h	\
 	serialize.c	\
-	proprietarySystemWorkarounds.c \
-	proprietarySystemWorkarounds.h \
 	referenceCounting.c \
 	referenceCounting.h \
 	resource_handle.c\
@@ -119,6 +115,19 @@ libcdi_la_SOURCES = 	 \
 	zaxis.h		 \
         stream.c         \
         swap.c
+
+# cfortran.h is an optional part of libcdi
+libcdi_la_USE_FC_extra_sources = \
+	cfortran.h       \
+	cdiFortran.c
+
+if USE_FC
+libcdi_la_SOURCES += 	 \
+	$(libcdi_la_USE_FC_extra_sources)
+endif
+EXTRA_DIST += \
+	$(libcdi_la_USE_FC_extra_sources)
+
 
 if HAVE_LIBGRIB_API
 libcdi_la_SOURCES +=        \
@@ -177,7 +186,6 @@ libcdipio_la_SOURCES =							\
 libcdipio_la_LIBADD    = libcdi.la $(PPM_CORE_LIBS) $(YAXT_LIBS) $(MPI_C_LIB)
 
 libcdi_la_LIBADD    = $(UUID_C_LIB)
-libcdi_la_CFLAGS    = -DpgiFortran
 #
 #cdilib.c:
 #	$(top_srcdir)/src/make_cdilib $(top_srcdir)/src

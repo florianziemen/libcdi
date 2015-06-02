@@ -129,6 +129,7 @@ AC_CHECK_LIB(m, floor)
 # Add basic configure options
 ACX_OPTIONS
 AM_CONDITIONAL([ENABLE_NETCDF],[test x$ENABLE_NETCDF = xyes])
+AC_CHECK_FUNCS([grib_get_length])
 #  ----------------------------------------------------------------------
 # Compile with MPI support
 AC_ARG_ENABLE([mpi],
@@ -319,10 +320,26 @@ AM_CONDITIONAL(ENABLE_PYTHON, [test "x$enable_python" != "xno"])
 AS_IF([test "x$enable_python" != "xno"],[AC_SUBST([ENABLE_PYTHON],[true])],[AC_SUBST([ENABLE_PYTHON],[false])])
 #  ----------------------------------------------------------------------
 AM_CONDITIONAL(CREATE_INTERFACES, [test  "x$enable_ruby" = "xyes" -o "x$enable_python" = "xyes"])
-#  ----------------------------------------------------------------------
-#  Check C / Fortran interface
-ACX_CHECK_CFINT([$srcdir/src/cfortran.h])
-AM_CONDITIONAL([USE_FC],[test -n "$FC" && test "X$FC" != "Xno" && test x$acx_cv_check_cfint = "xyes"])dnl
+dnl ######################################################################
+dnl Test whether cfortran.h works correctly
+dnl ######################################################################
+ACX_FIND_CFORTRAN_DEF
+ACX_XLF_QEXTNAME_ADD_APPENDUS
+AS_IF([test -n "$FC" -a X"$FC" != Xno -o -n "$F77" -a X"$F77" != Xno],
+  [ACX_CHECK_CFORTRAN([$srcdir/src],
+    [AC_DEFINE([HAVE_CF_INTERFACE],[1],
+       [Defined to 1 if C / Fortran interface cfortran.h works])],
+    [AS_CASE([x"$acx_cv_cfortran_works"],
+       [x"error"],
+       [AC_MSG_NOTICE([Linking/Running with C EXTERNAL built with cfortran.h does not work!])],
+       [x"compiling with cfortran.h failed"],
+       [AC_MSG_NOTICE([Compilation with cfortran.h is not working!])],
+       [x"error compiling Fortran subroutine"],
+       [AC_MSG_NOTICE([compilation of simple Fortran source failed!])],
+       [AC_MSG_NOTICE([Unexpected error when linking C and Fortran via cfortran.h!])])
+     AC_MSG_NOTICE([Disabling cfortran.h bindings generation])
+     acx_cv_cfortran_works=no])])
+AM_CONDITIONAL([USE_FC],[test -n "$FC" -a X"$FC" != Xno -a x"$acx_cv_cfortran_works" = xyes])dnl
 dnl
 AC_SUBST([CPPFLAGS])dnl
 dnl
