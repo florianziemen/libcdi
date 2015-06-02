@@ -359,23 +359,7 @@ void vlistCopy(int vlistID2, int vlistID1)
         {
           var_copy_entries(&vars2[varID], &vars1[varID]);
 
-          if ( vlistptr1->vars[varID].longname )
-            vlistptr2->vars[varID].longname = strdupx(vlistptr1->vars[varID].longname);
-
-          if ( vlistptr1->vars[varID].stdname )
-            vlistptr2->vars[varID].stdname = strdupx(vlistptr1->vars[varID].stdname);
-
-          if ( vlistptr1->vars[varID].units )
-            vlistptr2->vars[varID].units = strdupx(vlistptr1->vars[varID].units);
-
-          if ( vlistptr1->vars[varID].ensdata )
-            {
-              vlistptr2->vars[varID].ensdata = (ensinfo_t *) malloc(sizeof(ensinfo_t));
-              memcpy(vlistptr2->vars[varID].ensdata,
-                     vlistptr1->vars[varID].ensdata, sizeof(ensinfo_t));
-            }
-
-	  vlistptr2->vars[varID].atts.nelems = 0;
+          vlistptr2->vars[varID].atts.nelems = 0;
 	  vlistCopyVarAtts(vlistID1, varID, vlistID2, varID);
 
           if ( vars1[varID].levinfo )
@@ -571,22 +555,6 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
 
             var_copy_entries(&vars2[varID2], &vars1[varID]);
 
-	    if ( vlistptr1->vars[varID].longname )
-	      vlistptr2->vars[varID2].longname = strdupx(vlistptr1->vars[varID].longname);
-
-	    if ( vlistptr1->vars[varID].stdname )
-	      vlistptr2->vars[varID2].stdname = strdupx(vlistptr1->vars[varID].stdname);
-
-	    if ( vlistptr1->vars[varID].units )
-	      vlistptr2->vars[varID2].units = strdupx(vlistptr1->vars[varID].units);
-
-            if ( vlistptr1->vars[varID].ensdata )
-              {
-                vlistptr2->vars[varID2].ensdata = (ensinfo_t *)xmalloc(sizeof(ensinfo_t));
-                memcpy(vlistptr2->vars[varID2].ensdata,
-                       vlistptr1->vars[varID].ensdata, sizeof(ensinfo_t));
-              }
-
 	    vlistptr2->vars[varID2].atts.nelems = 0;
 	    vlistCopyVarAtts(vlistID1, varID, vlistID2, varID2);
 
@@ -747,13 +715,7 @@ void vlistCat(int vlistID2, int vlistID1)
                  (size_t)nlevs * sizeof(levinfo_t));
         }
 
-      if ( vlistptr1->vars[varID].ensdata )
-        {
-          vlistptr2->vars[varID2].ensdata = (ensinfo_t *) malloc(sizeof(ensinfo_t));
-          memcpy(vlistptr2->vars[varID2].ensdata, vlistptr1->vars[varID].ensdata, sizeof(ensinfo_t));
-        }
-
-      vlistptr2->vars[varID2].atts.nelems = 0;
+      vars2[varID2].atts.nelems = 0;
       vlistCopyVarAtts(vlistID1, varID, vlistID2, varID2);
 
       vlistAdd2GridIDs(vlistptr2, vars1[varID].gridID);
