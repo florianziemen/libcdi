@@ -1,3 +1,4 @@
+#define _XOPEN_SOURCE 600
 #include "input_file.h"
 
 #include "cdi.h"
@@ -112,8 +113,8 @@ int cdiInputFile_read(const CdiInputFile* me, off_t readPosition, size_t readSiz
       if(bytesRead == 0) return CDI_EEOF;
       byteBuffer += bytesRead;
       readPosition += bytesRead;
-      readSize -= bytesRead;
-      *outActualReadSize += bytesRead;
+      readSize -= (size_t)bytesRead;
+      *outActualReadSize += (size_t)bytesRead;
     }
   return CDI_NOERR;
 }
@@ -129,9 +130,8 @@ void cdiInputFile_destruct(CdiInputFile* me)
   xassert(!error);
     {
       //Find the position of me in the list of open files.
-      ssize_t position;
-      for(position = openFileCount; position--; ) if(openFileList[position] == me) break;
-      xassert(position != -1);
+      ssize_t position = (ssize_t)openFileCount;
+      while (position > 0 && openFileList[--position] != me);
       //Remove me from the list
       openFileList[position] = openFileList[--openFileCount];
     }
