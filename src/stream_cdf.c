@@ -7865,12 +7865,21 @@ int cdfInqContents(stream_t *streamptr)
       calendar = CALENDAR_STANDARD;
     }
 
+#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 5)
+#pragma GCC diagnostic push
+#endif
+#ifdef __GNUC__
+#pragma GCC diagnostic warning "-Wstrict-overflow"
+#endif
   if ( calendar != UNDEFID )
     {
       taxis_t *taxis = &streamptr->tsteps[0].taxis;
       taxis->calendar = calendar;
       taxisDefCalendar(taxisID, calendar);
     }
+#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 5)
+#pragma GCC diagnostic pop
+#endif
 
   vlistDefTaxis(vlistID, taxisID);
 

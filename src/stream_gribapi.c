@@ -827,7 +827,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
 
   int fileID = streamptr->fileID;
 
-  int nrecs = 0;
+  unsigned nrecs = 0;
   while ( TRUE )
     {
       int level1 = 0, level2 = 0;
@@ -921,7 +921,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
         {
           char paramstr[32];
           cdiParamToString(param, paramstr, sizeof(paramstr));
-          Message("%4d %8d name=%s id=%s ltype=%d lev1=%d lev2=%d vdate=%d vtime=%d",
+          Message("%4u %8d name=%s id=%s ltype=%d lev1=%d lev2=%d vdate=%d vtime=%d",
                 nrecs, (int)recpos, varname, paramstr, leveltype1, level1, level2, vdate, vtime);
         }
 
