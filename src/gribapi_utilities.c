@@ -10,7 +10,6 @@
 #include "dmemory.h"
 #include "error.h"
 #include "gribapi.h"
-#include "proprietarySystemWorkarounds.h"
 
 #include <assert.h>
 #include <time.h>
@@ -175,7 +174,7 @@ long gribEditionNumber(grib_handle* gh)
 static char* setUtc()
 {
   char* temp = getenv("TZ"), *result = NULL;
-  if(temp) result = myStrDup(temp);
+  if(temp) result = strdup(temp);
   setenv("TZ", "UTC", 1);
   return result;
 }
@@ -257,7 +256,10 @@ static int addToDate(struct tm* me, long long amount, long unit)
 
 static char* makeDateString(struct tm* me)
 {
-  return myAsprintf("%04d-%02d-%02dT%02d:%02d:%02d.000", me->tm_year + 1900, me->tm_mon + 1, me->tm_mday, me->tm_hour, me->tm_min, me->tm_sec);
+  char *result
+    = xmalloc(       4+1+ 2+1+ 2+1+ 2+1+ 2+1+ 2+ 4+ 1);
+  sprintf(result, "%04d-%02d-%02dT%02d:%02d:%02d.000", me->tm_year + 1900, me->tm_mon + 1, me->tm_mday, me->tm_hour, me->tm_min, me->tm_sec);
+  return result;
 }
 
 //FIXME: This ignores any calendar definition that might be present.
