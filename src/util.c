@@ -99,20 +99,17 @@ char* cdiEscapeSpaces(const char* string)
 {
   //How much memory do we need?
   size_t escapeCount = 0, length = 0;
-  for(const char* current = string; *current; current++)
-    {
-      if(strchr(" \\", *current)) escapeCount++;
-      length++;
-    }
+  for(; string[length]; ++length)
+    escapeCount += string[length] == ' ' || string[length] == '\\';
 
   char* result = malloc(length + escapeCount + 1);
   if(!result) return NULL;
 
   //Do the escaping.
-  for(size_t in = 0, out = 0; in < length;)
+  for(size_t in = 0, out = 0; in < length; ++out, ++in)
     {
-      if(strchr(" \\", string[in])) result[out++] = '\\';
-      result[out++] = string[in++];
+      if(string[in] == ' ' || string[in] == '\\') result[out++] = '\\';
+      result[out] = string[in];
     }
   result[length + escapeCount] = 0;     //termination!
   return result;
