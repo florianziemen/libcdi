@@ -2,8 +2,6 @@
 #  include "config.h"
 #endif
 
-static int dummy;
-
 #ifdef HAVE_LIBGRIB_API
 
 #include "gribapi_utilities.h"
