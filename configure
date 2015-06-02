@@ -29061,9 +29061,9 @@ if ac_fn_fc_try_compile "$LINENO"; then :
             if test "$cross_compiling" = yes; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: Skipping run test for cfortran.h in cross-compilation mode," >&5
 $as_echo "$as_me: Skipping run test for cfortran.h in cross-compilation mode," >&6;}
-            { $as_echo "$as_me:${as_lineno-$LINENO}: link test succeeded." >&5
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: link test succeeded." >&5
 $as_echo "$as_me: link test succeeded." >&6;}
-            acx_cv_cfortran_works=yes
+               acx_cv_cfortran_works=yes
 else
   cat > conftest.$ac_ext <<_ACEOF
       program conftest
@@ -29132,6 +29132,7 @@ rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
   conftest.$ac_objext conftest.beam conftest.$ac_ext
 fi
 
+	    LIBS=$save_LIBS
 else
   acx_cv_cfortran_works="error compiling Fortran subroutine"
 fi
@@ -29142,7 +29143,6 @@ ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
-         LIBS=$save_LIBS
 else
   acx_cv_cfortran_works="compiling with cfortran.h failed"
 fi

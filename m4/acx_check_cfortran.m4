@@ -170,14 +170,14 @@ FCALLSCSUB0(errExit,ERR_EXIT,err_exit)
           CALL err_exit
         END IF
       END DO])],
-           [acx_cv_cfortran_works=yes],
-           [acx_cv_cfortran_works="error"],
-           [AC_MSG_NOTICE([Skipping run test for cfortran.h in cross-compilation mode,])
-            AC_MSG_NOTICE([link test succeeded.])
-            acx_cv_cfortran_works=yes])],
+              [acx_cv_cfortran_works=yes],
+              [acx_cv_cfortran_works="error"],
+              [AC_MSG_NOTICE([Skipping run test for cfortran.h in cross-compilation mode,])
+	       AC_MSG_NOTICE([link test succeeded.])
+               acx_cv_cfortran_works=yes])
+	    LIBS=$save_LIBS],
            [acx_cv_cfortran_works="error compiling Fortran subroutine"])
-         AC_LANG_POP([Fortran])
-         LIBS=$save_LIBS],
+         AC_LANG_POP([Fortran])],
         [acx_cv_cfortran_works="compiling with cfortran.h failed"])
       AC_LANG_POP([C])
       CPPFLAGS=$save_CPPFLAGS
