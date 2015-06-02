@@ -28,8 +28,6 @@ libcdi_la_SOURCES = 	 \
 	cdi_error.c      \
 	cdi_limits.h	 \
 	cdi_util.c       \
-	cdiFortran.c     \
-	cfortran.h       \
 	cgribex.h	 \
 	cgribexlib.c  	 \
 	datetime.h	 \
@@ -117,6 +115,19 @@ libcdi_la_SOURCES = 	 \
 	zaxis.h		 \
         stream.c         \
         swap.c
+
+# cfortran.h is an optional part of libcdi
+libcdi_la_USE_FC_extra_sources = \
+	cfortran.h       \
+	cdiFortran.c
+
+if USE_FC
+libcdi_la_SOURCES+ = 	 \
+	$(libcdi_la_USE_FC_extra_sources)
+endif
+EXTRA_DIST += \
+	$(libcdi_la_USE_FC_extra_sources)
+
 
 if HAVE_LIBGRIB_API
 libcdi_la_SOURCES +=        \
