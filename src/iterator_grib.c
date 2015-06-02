@@ -6,7 +6,6 @@
 #include "error.h"
 #include "gribapi.h"
 #include "gribapi_utilities.h"
-#include "proprietarySystemWorkarounds.h"
 #include "stream_grb.h"
 #include "zaxis.h"
 
@@ -378,10 +377,10 @@ int cdiGribIterator_levelType(CdiIterator* super, int levelSelector, char** outN
   //Then lookup the requested names.
   const char* name, *longName, *stdName, *unit;
   zaxisGetTypeDescription(zaxisType, NULL, &name, &longName, &stdName, &unit);
-  if(outName) *outName = myStrDup(name);
-  if(outLongName) *outLongName = myStrDup(longName);
-  if(outStdName) *outStdName = myStrDup(stdName);
-  if(outUnit) *outUnit = myStrDup(unit);
+  if(outName) *outName = strdup(name);
+  if(outLongName) *outLongName = strdup(longName);
+  if(outStdName) *outStdName = strdup(stdName);
+  if(outUnit) *outUnit = strdup(unit);
 
   return zaxisType;
 }
