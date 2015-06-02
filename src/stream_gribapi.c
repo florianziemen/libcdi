@@ -1598,6 +1598,14 @@ void gribapiDefParam(int editionNumber, grib_handle *gh, int param, const char *
     {
       if ( pnum < 0 ) pnum = -pnum;
 
+      static bool lwarn_pnum = true;
+      if ( pnum > 255 && lwarn_pnum )
+        {
+          Warning("Parameter number %d out of range (1-255), set to %d!", pnum, pnum%256);
+          lwarn_pnum = false;
+          pnum = pnum%256;
+        }
+
       if ( editionNumber <= 1 )
 	{
           static bool lwarn_pdis = true;
@@ -1608,14 +1616,6 @@ void gribapiDefParam(int editionNumber, grib_handle *gh, int param, const char *
 	      Warning("Can't convert GRIB2 parameter ID (%s) to GRIB1, set to %d.%d!", paramstr, pnum, pcat);
               lwarn_pdis = false;
 	    }
-
-          static bool lwarn_pnum = true;
-          if ( pnum > 255 && lwarn_pnum )
-            {
-              Warning("Parameter number %d out of bounds (1-255), set to %d!", pnum, pnum%256);
-              lwarn_pnum = false;
-              pnum = pnum%256;
-            }
 
 	  GRIB_CHECK(my_grib_set_long(gh, "table2Version",        pcat), 0);
 	  GRIB_CHECK(my_grib_set_long(gh, "indicatorOfParameter", pnum), 0);

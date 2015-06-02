@@ -1421,7 +1421,7 @@ void cgribexDefParam(int *isec1, int param)
   static bool lwarn_pnum = true;
   if ( pnum > 255 && lwarn_pnum )
     {
-      Warning("Parameter number %d out of bounds (1-255), set to %d!", pnum, pnum%256);
+      Warning("Parameter number %d out of range (1-255), set to %d!", pnum, pnum%256);
       lwarn_pnum = false;
       pnum = pnum%256;
     }
