@@ -16,7 +16,7 @@
 
 #define FAIL_ON_GRIB_ERROR(function, gribHandle, key, ...) do\
 {\
-  int errorCode = function(gribHandle, key, __VA_ARGS__);\
+  int errorCode = (int)function(gribHandle, key, __VA_ARGS__);  \
   if(errorCode)\
     {\
       fprintf(stderr, "%s:%d: Error in function `%s`: `%s` returned error code %d for key \"%s\"", __FILE__, __LINE__, __func__, #function, errorCode, key);\
@@ -211,13 +211,13 @@ static int addSecondsToDate(struct tm* me, long long amount)
   //It is irrelevant here whether days are zero or one based, the correction would have be undone again so that it is effectless.
   long long seconds = ((me->tm_mday*24ll + me->tm_hour)*60 + me->tm_min)*60 + me->tm_sec;    //The portion of the date that uses fixed increments.
   seconds += amount;
-  me->tm_mday = seconds/24/60/60;
-  seconds -= me->tm_mday*24*60*60;
-  me->tm_hour = seconds/60/60;
-  seconds -= me->tm_hour*60*60;
-  me->tm_min = seconds/60;
-  seconds -= me->tm_min*60;
-  me->tm_sec = seconds;
+  me->tm_mday = (int)(seconds / 24 / 60 / 60);
+  seconds -= (long long)me->tm_mday * 24 * 60 * 60;
+  me->tm_hour = (int)(seconds / 60 / 60);
+  seconds -= (long long)me->tm_hour * 60 * 60;
+  me->tm_min = (int)(seconds / 60);
+  seconds -= (long long)(me->tm_min * 60);
+  me->tm_sec = (int)seconds;
   return normalizeDays(me);
 }
 
@@ -225,9 +225,9 @@ static void addMonthsToDate(struct tm* me, long long amount)
 {
   long long months = me->tm_year*12ll + me->tm_mon;
   months += amount;
-  me->tm_year = months/12;
-  months -= me->tm_year*12;
-  me->tm_mon = months;
+  me->tm_year = (int)(months/12);
+  months -= (long long)me->tm_year*12;
+  me->tm_mon = (int)months;
 }
 
 //unit is a value according to code table 4.4 of the GRIB2 specification, returns non-zero on error
@@ -289,19 +289,19 @@ char* gribMakeTimeString(grib_handle* gh, bool getEndTime)
 {
   //Get the parts of the reference date.
   struct tm date = {
-      .tm_mon = gribGetLong(gh, "month") - 1,   //months are zero based in struct tm and one based in GRIB
-      .tm_mday = gribGetLong(gh, "day"),
-      .tm_hour = gribGetLong(gh, "hour"),
-      .tm_min = gribGetLong(gh, "minute")
+    .tm_mon = (int)gribGetLong(gh, "month") - 1,   //months are zero based in struct tm and one based in GRIB
+    .tm_mday = (int)gribGetLong(gh, "day"),
+    .tm_hour = (int)gribGetLong(gh, "hour"),
+    .tm_min = (int)gribGetLong(gh, "minute")
   };
   if(gribEditionNumber(gh) == 1)
     {
-      date.tm_year = gribGetLong(gh, "yearOfCentury");  //years are -1900 based both in struct tm and GRIB1
+      date.tm_year = (int)gribGetLong(gh, "yearOfCentury");  //years are -1900 based both in struct tm and GRIB1
     }
   else
     {
-      date.tm_year = gribGetLong(gh, "year") - 1900;   //years are -1900 based in struct tm and zero based in GRIB2
-      date.tm_sec = gribGetLong(gh, "second");
+      date.tm_year = (int)gribGetLong(gh, "year") - 1900;   //years are -1900 based in struct tm and zero based in GRIB2
+      date.tm_sec = (int)gribGetLong(gh, "second");
 
       //Determine whether we have a forecast time and a time range.
       bool haveForecastTime, haveTimeRange;
@@ -612,14 +612,14 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
         long lpar;
 
         FAIL_ON_GRIB_ERROR(grib_get_long, gh, "Nx", &lpar);
-        nlon = lpar;
+        nlon = (int)lpar;
         FAIL_ON_GRIB_ERROR(grib_get_long, gh, "Ny", &lpar);
-        nlat = lpar;
+        nlat = (int)lpar;
 
         if ( numberOfPoints != nlon*nlat )
           Error("numberOfPoints (%d) and gridSize (%d) differ!", (int)numberOfPoints, nlon*nlat);
 
-        grid->size  = numberOfPoints;
+        grid->size  = (int)numberOfPoints;
         grid->xsize = nlon;
         grid->ysize = nlat;
 
