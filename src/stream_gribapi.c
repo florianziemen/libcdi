@@ -767,6 +767,7 @@ grib_handle* gribapiGetDiskRepresentation(size_t recsize, size_t* buffersize, un
 }
 #endif
 
+#if  defined  (HAVE_LIBGRIB_API)
 typedef enum { CHECKTIME_OK, CHECKTIME_SKIP, CHECKTIME_STOP, CHECKTIME_INCONSISTENT } checkTimeResult;
 static checkTimeResult checkTime(stream_t* streamptr, compvar2_t compVar, const DateTime* verificationTime, const DateTime* expectedVTime) {
   //First determine whether the current record exists already.
@@ -793,6 +794,7 @@ static checkTimeResult checkTime(stream_t* streamptr, compvar2_t compVar, const 
     }
   return CHECKTIME_OK;
 }
+#endif
 
 #define gribWarning(text, nrecs, timestep, varname, param, level1, level2) do \
   { \
