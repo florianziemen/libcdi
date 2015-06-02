@@ -129,6 +129,7 @@ AC_CHECK_LIB(m, floor)
 # Add basic configure options
 ACX_OPTIONS
 AM_CONDITIONAL([ENABLE_NETCDF],[test x$ENABLE_NETCDF = xyes])
+AC_CHECK_FUNCS([grib_get_length])
 #  ----------------------------------------------------------------------
 # Compile with MPI support
 AC_ARG_ENABLE([mpi],

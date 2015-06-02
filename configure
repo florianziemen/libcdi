@@ -27312,6 +27312,17 @@ else
   ENABLE_NETCDF_FALSE=
 fi
 
+for ac_func in grib_get_length
+do :
+  ac_fn_c_check_func "$LINENO" "grib_get_length" "ac_cv_func_grib_get_length"
+if test "x$ac_cv_func_grib_get_length" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_GRIB_GET_LENGTH 1
+_ACEOF
+
+fi
+done
+
 #  ----------------------------------------------------------------------
 # Compile with MPI support
 # Sed expression to map a string onto a valid argument string part.

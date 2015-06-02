@@ -46,6 +46,9 @@
 /* Define to 1 if you have the <grib_api.h> header file. */
 #undef HAVE_GRIB_API_H
 
+/* Define to 1 if you have the `grib_get_length' function. */
+#undef HAVE_GRIB_GET_LENGTH
+
 /* Define to 1 if you have the <hdf5.h> header file. */
 #undef HAVE_HDF5_H
 

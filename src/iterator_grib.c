@@ -611,7 +611,12 @@ int cdiGribIterator_getLong(CdiGribIterator* me, const char* key, long* result)
 */
 int cdiGribIterator_getLength(CdiGribIterator* me, const char* key, size_t* result)
 {
+#ifdef HAVE_GRIB_GET_LENGTH
   return grib_get_length(me->gribHandle, key, result);
+#else
+  Error("unimplemented");
+  return -1;
+#endif
 }
 
 /**

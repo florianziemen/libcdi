@@ -28,11 +28,45 @@
 //A simple wrapper for grib_get_string() that returns a newly allocated string.
 char* gribCopyString(grib_handle* gribHandle, const char* key)
 {
+  char* result = NULL;
   size_t length;
-  if(grib_get_length(gribHandle, key, &length)) return NULL;
-  char* result = xmalloc(length);
-  if(!grib_get_string(gribHandle, key, result, &length)) return result;
+#ifdef HAVE_GRIB_GET_LENGTH
+  if(!grib_get_length(gribHandle, key, &length))
+  {
+    char* result = xmalloc(length);
+    if(!grib_get_string(gribHandle, key, result, &length))
+      result = xrealloc(result, length);
+    else
+    {
+      free(result);
+      result = NULL;
+    }
+  }
+#else
+  length = 1024;         /* there's an implementation limit
+                          * that makes strings longer than
+                          * this unlikely in grib_api versions
+                          * not providing grib_get_length */
+  int rc;
+  result = xmalloc(length);
+  while ((rc = grib_get_string(gribHandle, key, result, &length))
+         == GRIB_BUFFER_TOO_SMALL || rc == GRIB_ARRAY_TOO_SMALL)
+  {
+    if (length <= 1024UL * 1024UL)
+    {
+      length *= 2;
+      result = xrealloc(result, length);
+    }
+    else
+      break;
+  }
+  if (!rc)
+  {
+    result = xrealloc(result, length);
+    return result;
+  }
   free(result);
+#endif
   return NULL;
 }
 
@@ -40,12 +74,29 @@ char* gribCopyString(grib_handle* gribHandle, const char* key)
 //Returns true if the key exists and the value is equal to the given string.
 bool gribCheckString(grib_handle* gribHandle, const char* key, const char* expectedValue)
 {
-  size_t expectedLength = strlen(expectedValue) + 1, length;
+  size_t expectedLength = strlen(expectedValue) + 1;
+#ifdef HAVE_GRIB_GET_LENGTH
+  size_t length;
   if(grib_get_length(gribHandle, key, &length)) return false;
   if(length != expectedLength) return false;
-  char value[length];
+  char *value = xmalloc(length);
   if(grib_get_string(gribHandle, key, value, &length)) return false;
-  return !strcmp(value, expectedValue);
+  int rc = !strcmp(value, expectedValue);
+  free(value);
+#else
+  char *value = gribCopyString(gribHandle, key);
+  int rc;
+  if (value)
+  {
+    rc = strlen(value) + 1 == expectedLength ?
+      !strcmp(value, expectedValue)
+      : false;
+  }
+  else
+    rc = false;
+  free(value);
+#endif
+  return rc;
 }
 
 //A simple wrapper for grib_get_long() for the usecase that the result is only compared to a given constant value.
