@@ -122,7 +122,7 @@ libcdi_la_USE_FC_extra_sources = \
 	cdiFortran.c
 
 if USE_FC
-libcdi_la_SOURCES+ = 	 \
+libcdi_la_SOURCES += 	 \
 	$(libcdi_la_USE_FC_extra_sources)
 endif
 EXTRA_DIST += \

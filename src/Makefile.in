@@ -80,7 +80,10 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 @ENABLE_CDI_LIB_FALSE@am__append_1 = libcdi.la
-@HAVE_LIBGRIB_API_TRUE@am__append_2 = \
+@USE_FC_TRUE@am__append_2 = \
+@USE_FC_TRUE@	$(libcdi_la_USE_FC_extra_sources)
+
+@HAVE_LIBGRIB_API_TRUE@am__append_3 = \
 @HAVE_LIBGRIB_API_TRUE@	iterator.c          \
 @HAVE_LIBGRIB_API_TRUE@	iterator.h          \
 @HAVE_LIBGRIB_API_TRUE@	iterator_fallback.c \
@@ -88,17 +91,17 @@ host_triplet = @host@
 @HAVE_LIBGRIB_API_TRUE@	iterator_grib.c     \
 @HAVE_LIBGRIB_API_TRUE@	iterator_grib.h
 
-@ENABLE_CDI_LIB_TRUE@@USE_MPI_TRUE@am__append_3 = libcdipio.la
-@ENABLE_CDI_LIB_TRUE@@USE_MPI_TRUE@am__append_4 = cdipio.h cdipio.inc
-@ENABLE_CDI_LIB_FALSE@@USE_MPI_TRUE@am__append_5 = libcdipio.la
-@ENABLE_CDI_LIB_TRUE@am__append_6 = pkgconfig/cdi.pc
-@ENABLE_CDI_LIB_TRUE@@USE_MPI_TRUE@am__append_7 = pkgconfig/cdipio.pc
-@CREATE_ISOC_TRUE@am__append_8 = mo_cdi.$(OBJEXT)
+@ENABLE_CDI_LIB_TRUE@@USE_MPI_TRUE@am__append_4 = libcdipio.la
+@ENABLE_CDI_LIB_TRUE@@USE_MPI_TRUE@am__append_5 = cdipio.h cdipio.inc
+@ENABLE_CDI_LIB_FALSE@@USE_MPI_TRUE@am__append_6 = libcdipio.la
+@ENABLE_CDI_LIB_TRUE@am__append_7 = pkgconfig/cdi.pc
+@ENABLE_CDI_LIB_TRUE@@USE_MPI_TRUE@am__append_8 = pkgconfig/cdipio.pc
+@CREATE_ISOC_TRUE@am__append_9 = mo_cdi.$(OBJEXT)
 #CLEANFILES += cdilib.c
-@CREATE_ISOC_TRUE@am__append_9 = mo_cdi.$(FCMODEXT) mo_cdi.$(OBJEXT) mo_cdi.f90
-@ENABLE_CDI_LIB_TRUE@am__append_10 = pkgconfig/cdi.pc
-@ENABLE_CDI_LIB_TRUE@@USE_MPI_TRUE@am__append_11 = pkgconfig/cdipio.pc
+@CREATE_ISOC_TRUE@am__append_10 = mo_cdi.$(FCMODEXT) mo_cdi.$(OBJEXT) mo_cdi.f90
+@ENABLE_CDI_LIB_TRUE@am__append_11 = pkgconfig/cdi.pc
 @ENABLE_CDI_LIB_TRUE@@USE_MPI_TRUE@am__append_12 = pkgconfig/cdipio.pc
+@ENABLE_CDI_LIB_TRUE@@USE_MPI_TRUE@am__append_13 = pkgconfig/cdipio.pc
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(srcdir)/config.h.in $(top_srcdir)/config/mkinstalldirs \
@@ -186,10 +189,12 @@ am__libcdi_la_SOURCES_DIST = basetime.c basetime.h binary.c binary.h \
 	tablepar.h taxis.c taxis.h timebase.c timebase.h tsteps.c \
 	util.c varscan.c varscan.h version.c vlist.c vlist.h \
 	vlist_att.c vlist_att.h vlist_var.c vlist_var.h zaxis.c \
-	zaxis.h stream.c swap.c iterator.c iterator.h \
-	iterator_fallback.c iterator_fallback.h iterator_grib.c \
-	iterator_grib.h
-@HAVE_LIBGRIB_API_TRUE@am__objects_1 = iterator.lo \
+	zaxis.h stream.c swap.c cfortran.h cdiFortran.c iterator.c \
+	iterator.h iterator_fallback.c iterator_fallback.h \
+	iterator_grib.c iterator_grib.h
+am__objects_1 = cdiFortran.lo
+@USE_FC_TRUE@am__objects_2 = $(am__objects_1)
+@HAVE_LIBGRIB_API_TRUE@am__objects_3 = iterator.lo \
 @HAVE_LIBGRIB_API_TRUE@	iterator_fallback.lo iterator_grib.lo
 am_libcdi_la_OBJECTS = basetime.lo binary.lo calendar.lo cdf.lo \
 	cdf_int.lo cdi_error.lo cdi_util.lo cgribexlib.lo dmemory.lo \
@@ -202,7 +207,8 @@ am_libcdi_la_OBJECTS = basetime.lo binary.lo calendar.lo cdf.lo \
 	stream_ieg.lo stream_fcommon.lo cdi_int.lo stream_record.lo \
 	stream_srv.lo stream_var.lo table.lo taxis.lo timebase.lo \
 	tsteps.lo util.lo varscan.lo version.lo vlist.lo vlist_att.lo \
-	vlist_var.lo zaxis.lo stream.lo swap.lo $(am__objects_1)
+	vlist_var.lo zaxis.lo stream.lo swap.lo $(am__objects_2) \
+	$(am__objects_3)
 libcdi_la_OBJECTS = $(am_libcdi_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -488,9 +494,9 @@ top_srcdir = @top_srcdir@
 #
 EXTRA_DIST = cdilib.c mo_cdi.f90 $(libcdi_la_USE_FC_extra_sources)
 noinst_LTLIBRARIES = libcdiresunpack.la $(am__append_1) \
-	$(am__append_5)
-@ENABLE_CDI_LIB_TRUE@lib_LTLIBRARIES = libcdi.la $(am__append_3)
-@ENABLE_CDI_LIB_TRUE@include_HEADERS = cdi.h cdi.inc $(am__append_4)
+	$(am__append_6)
+@ENABLE_CDI_LIB_TRUE@lib_LTLIBRARIES = libcdi.la $(am__append_4)
+@ENABLE_CDI_LIB_TRUE@include_HEADERS = cdi.h cdi.inc $(am__append_5)
 AM_CFLAGS = $(PPM_CORE_CFLAGS) $(YAXT_CFLAGS) $(MPI_C_INCLUDE)
 libcdi_la_SOURCES = basetime.c basetime.h binary.c binary.h calendar.c \
 	calendar.h cdf.c cdf.h cdf_int.c cdf_int.h cdi.h cdi_error.c \
@@ -511,7 +517,8 @@ libcdi_la_SOURCES = basetime.c basetime.h binary.c binary.h calendar.c \
 	stream_var.c swap.h table.c table.h tablepar.h taxis.c taxis.h \
 	timebase.c timebase.h tsteps.c util.c varscan.c varscan.h \
 	version.c vlist.c vlist.h vlist_att.c vlist_att.h vlist_var.c \
-	vlist_var.h zaxis.c zaxis.h stream.c swap.c $(am__append_2)
+	vlist_var.h zaxis.c zaxis.h stream.c swap.c $(am__append_2) \
+	$(am__append_3)
 
 # cfortran.h is an optional part of libcdi
 libcdi_la_USE_FC_extra_sources = \
@@ -561,11 +568,12 @@ libcdi_la_LIBADD = $(UUID_C_LIB)
 #
 #cdilib.o: cdilib.c
 #	$(COMPILE) -c $<
-LOCALTARGETS = $(am__append_6) $(am__append_7) $(am__append_8)
+LOCALTARGETS = $(am__append_7) $(am__append_8) $(am__append_9)
 #
-CLEANFILES = `ls *~` $(am__append_9) $(am__append_10) $(am__append_11)
+CLEANFILES = `ls *~` $(am__append_10) $(am__append_11) \
+	$(am__append_12)
 @ENABLE_CDI_LIB_TRUE@PKGCONFIG_FILES = pkgconfig/cdi.pc \
-@ENABLE_CDI_LIB_TRUE@	$(am__append_12)
+@ENABLE_CDI_LIB_TRUE@	$(am__append_13)
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -683,6 +691,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/calendar.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cdf.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cdf_int.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cdiFortran.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cdi_cksum.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cdi_error.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cdi_int.Plo@am__quote@
@@ -1015,9 +1024,6 @@ uninstall-am: uninstall-includeHEADERS uninstall-libLTLIBRARIES \
 	tags tags-am uninstall uninstall-am uninstall-includeHEADERS \
 	uninstall-libLTLIBRARIES uninstall-local
 
-
-@USE_FC_TRUE@libcdi_la_SOURCES+ = 	 \
-@USE_FC_TRUE@	$(libcdi_la_USE_FC_extra_sources)
 #
 mo_cdi.f90: $(top_srcdir)/src/cdi.h $(top_srcdir)/interfaces/f2003/bindGen.rb
 	ruby $(top_srcdir)/interfaces/f2003/bindGen.rb $(top_srcdir)/src/cdi.h $@
