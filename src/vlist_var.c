@@ -407,7 +407,8 @@ int vlistInqVarCode(int vlistID, int varID)
   int param = vlistptr->vars[varID].param;
   int pdis, pcat, pnum;
   cdiDecodeParam(param, &pnum, &pcat, &pdis);
-  int code = pdis == 255 ? pnum : -varID-1;
+  int code = pnum;
+  if ( pdis != 255 ) code = -varID-1; // GRIB2 Parameter
 
   if ( code < 0 && vlistptr->vars[varID].tableID != -1 && vlistptr->vars[varID].name != NULL )
     {
