@@ -2,7 +2,7 @@
 #include "config.h"
 #endif
 
-#ifndef __STDC_FORMAT_MACROS
+#if defined __cplusplus && !defined __STDC_FORMAT_MACROS
 #define __STDC_FORMAT_MACROS
 #endif
 

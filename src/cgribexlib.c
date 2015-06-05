@@ -1782,7 +1782,9 @@ int main(void)
 #include <mach/mach_time.h>
 #endif
 
+#ifdef __cplusplus
 #define __STDC_FORMAT_MACROS
+#endif
 #include <inttypes.h>
 
 #if   defined(__GNUC__) && (__GNUC__ >= 4)
