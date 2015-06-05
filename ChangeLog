@@ -1,3 +1,7 @@
+2015-06-02  Uwe Schulzweida
+
+	* gribapiDefParam: check range of parameter number
+
 2015-05-28  Uwe Schulzweida
 
 	* dmemory: added env. MEMORY_INFO

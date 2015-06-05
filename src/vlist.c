@@ -985,8 +985,8 @@ int vlistNtsteps(int vlistID)
   return (int)vlistptr->ntsteps;
 }
 
-static void
-vlistPrintKernel(vlist_t *vlistptr, FILE * fp )
+static
+void vlistPrintKernel(vlist_t *vlistptr, FILE *fp)
 {
   char paramstr[32];
 
@@ -1006,8 +1006,8 @@ vlistPrintKernel(vlist_t *vlistptr, FILE * fp )
 
   if ( nvars > 0 )
     {
-      fprintf(fp, " varID param    gridID zaxisID tsteptype flag "
-              " name     longname iorank\n");
+      fprintf(fp, " varID param    gridID zaxisID tsteptype flag iorank"
+              " name     longname         units\n");
       for ( int varID = 0; varID < nvars; varID++ )
         {
           int param = vlistptr->vars[varID].param;
@@ -1021,14 +1021,9 @@ vlistPrintKernel(vlist_t *vlistptr, FILE * fp )
           int iorank = vlistptr->vars[varID].iorank;
 
           cdiParamToString(param, paramstr, sizeof(paramstr));
-          fprintf(fp, "%6d %-8s %6d %6d %6d %5d %-8s"
-                  " %s %6d",
-                  varID, paramstr, gridID, zaxisID, tsteptype, flag,
-                  name ? name : "", longname ? longname : "",
-                  iorank);
-
-          if ( units ) fprintf(fp, "   [%s]", units);
-          fputs("\n", fp);
+          fprintf(fp, "%6d %-8s %6d  %6d  %6d  %5d %6d %-8s %s [%s]\n",
+                  varID, paramstr, gridID, zaxisID, tsteptype, flag, iorank,
+                  name?name:"", longname?longname:"", units?units:"");
         }
 
       fputs("\n"
