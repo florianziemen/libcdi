@@ -1047,8 +1047,17 @@ void streamClose(int streamID)
 	    taxisDestroy(vlistInqTaxis(vlistID));
 	  }
 
-      vlist_unlock(vlistID);
       vlistDestroy(vlistID);
+      /* decrease lock counter of the original vlist by 1 */
+      if ( streamptr->vlistIDorig != CDI_UNDEFID ) {
+        /* Note: Here we have to check if the original vlist still
+         * exists. If, for example, the garbage collection routine
+         * reshListDestruct takes care of the destruction of objects,
+         * then the original vlist might have been destroyed
+         * beforehand. */
+        if (reshExists(streamptr->vlistIDorig, &vlistOps) != 0)
+          vlist_unlock(streamptr->vlistIDorig);
+      }
     }
 
   stream_delete_entry(streamptr);
@@ -2158,6 +2167,11 @@ void cdiStreamSetupVlist(stream_t *streamptr, int vlistID, int vlistIDorig)
   int nvars = vlistNvars(vlistID);
   streamptr->vlistID = vlistID;
   streamptr->vlistIDorig = vlistIDorig;
+
+  /* increase lock counter of the original vlist by 1 */
+  if ( CDI_Debug ) Message("attach vlist=%d to stream, stream vlist=%d", vlistIDorig, vlistID);
+  vlist_lock(vlistIDorig);
+
   for (int varID = 0; varID < nvars; varID++ )
     {
       int gridID    = vlistInqVarGrid(vlistID, varID);

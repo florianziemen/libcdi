@@ -1770,7 +1770,7 @@ void vlistDefVarIntKey(int vlistID, int varID, const char *name, int value)
   if (vlistptr == NULL)  Error("Internal error!");
   int idx;
 
-  if ( vlistptr->locked )
+  if ( vlistptr->locked != 0 )
     Error("User defined vlist object (vlistID=%d) isn't allowed!\n"
           "Need a CDI internal vlist object from streamInqVlist(streamID).", vlistID);
 
@@ -1832,7 +1832,7 @@ void vlistDefVarDblKey(int vlistID, int varID, const char *name, double value)
   if (vlistptr == NULL)  Error("Internal error!");
   int idx;
 
-  if ( vlistptr->locked )
+  if ( vlistptr->locked != 0 )
     Error("User defined vlist object (vlistID=%d) isn't allowed!\n"
           "Need a CDI internal vlist object from streamInqVlist(streamID).", vlistID);
 

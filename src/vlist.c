@@ -169,7 +169,7 @@ void vlist_lock(int vlistID)
 
   if ( !vlistptr->locked )
     {
-      vlistptr->locked = 1;
+      vlistptr->locked += 1;
       reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
     }
 }
@@ -181,7 +181,7 @@ void vlist_unlock(int vlistID)
 
   if ( vlistptr->locked )
     {
-      vlistptr->locked = 0;
+      vlistptr->locked -= 1;
       reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
     }
 }
@@ -194,7 +194,7 @@ void vlist_unlock(int vlistID)
 
 @Example
 Here is an example using @func{vlistCreate} to create a variable list
-and add a variable with @func{vlistDefVar}.
+and add a variable with @func{vlistDefVar.
 
 @Source
 #include "cdi.h"
@@ -218,15 +218,15 @@ int vlistCreate(void)
   VLIST_INIT();
 
   vlist_t *vlistptr = vlist_new_entry(CDI_UNDEFID);
+  if ( CDI_Debug ) Message("create vlistID = %d", vlistptr->self);
   return (vlistptr->self);
 }
 
 static void
 vlist_delete(vlist_t *vlistptr)
 {
-  if ( CDI_Debug ) Message("call to vlist_delete");
-
   int vlistID = vlistptr->self;
+  if ( CDI_Debug ) Message("call to vlist_delete, vlistID = %d", vlistID);
 
   vlistDelAtts(vlistID, CDI_GLOBAL);
 
@@ -277,7 +277,7 @@ void vlistDestroy(int vlistID)
 {
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
-  if ( vlistptr->locked )
+  if ( vlistptr->locked != 0 )
     Warning("Destroying of a locked object (vlistID=%d) failed!", vlistID);
   else
     vlist_delete(vlistptr);
@@ -338,6 +338,7 @@ void vlistCopy(int vlistID2, int vlistID1)
 {
   vlist_t *vlistptr1 = vlist_to_pointer(vlistID1);
   vlist_t *vlistptr2 = vlist_to_pointer(vlistID2);
+  if ( CDI_Debug ) Message("call to vlistCopy, vlistIDs %d -> %d", vlistID1, vlistID2);
 
   var_t *vars1 = vlistptr1->vars;
   var_t *vars2 = vlistptr2->vars;
@@ -390,11 +391,10 @@ The function @func{vlistDuplicate} duplicates the variable list from vlistID1.
 */
 int vlistDuplicate(int vlistID)
 {
+  if ( CDI_Debug ) Message("call to vlistDuplicate");
+
   int vlistIDnew = vlistCreate();
   vlistCopy(vlistIDnew, vlistID);
-  /* lock the old vlist */
-  vlist_lock(vlistID);
-  vlist_unlock(vlistIDnew);
   return (vlistIDnew);
 }
 
