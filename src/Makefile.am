@@ -113,8 +113,14 @@ libcdi_la_SOURCES = 	 \
 	vlist_var.h	 \
 	zaxis.c		 \
 	zaxis.h		 \
-        stream.c         \
-        swap.c
+	stream.c         \
+	swap.c          \
+	iterator.c          \
+	iterator.h          \
+	iterator_fallback.c \
+	iterator_fallback.h \
+	iterator_grib.c     \
+	iterator_grib.h
 
 # cfortran.h is an optional part of libcdi
 libcdi_la_USE_FC_extra_sources = \
@@ -129,15 +135,6 @@ EXTRA_DIST += \
 	$(libcdi_la_USE_FC_extra_sources)
 
 
-if HAVE_LIBGRIB_API
-libcdi_la_SOURCES +=        \
-	iterator.c          \
-	iterator.h          \
-	iterator_fallback.c \
-	iterator_fallback.h \
-	iterator_grib.c     \
-	iterator_grib.h
-endif
 
 libcdiresunpack_la_SOURCES = \
 	resource_unpack.c

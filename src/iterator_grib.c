@@ -170,9 +170,7 @@ destructSuper:
 fail:
   return NULL;
 }
-#endif
 
-#ifdef HAVE_LIBGRIB_API
 static void cdiGribIterator_ensureBuffer(CdiGribIterator* me, size_t requiredSize)
 {
   if(me->bufferSize < requiredSize)
@@ -536,6 +534,7 @@ void cdiGribIterator_readFieldF(CdiIterator* super, float* buffer, size_t* nmiss
   for(size_t i = valueCount; i--; ) buffer[i] = (float)temp[i];
   free(temp);
 }
+#endif
 
 /**
 @Function cdiGribIterator_delete
@@ -550,7 +549,12 @@ void cdiGribIterator_readFieldF(CdiIterator* super, float* buffer, size_t* nmiss
 */
 void cdiGribIterator_delete(CdiGribIterator* me)
 {
+#ifdef HAVE_LIBGRIB_API
   if(me) cdiGribIterator_condestruct(me, NULL, 0);
+#else
+  (void)me;
+  xabort("CDI was compiled without GribAPI support, so you can't possibly have a valid CdiGribIterator* to call this function with");
+#endif
 }
 
 
@@ -573,7 +577,12 @@ void cdiGribIterator_delete(CdiGribIterator* me)
 */
 int cdiGribIterator_inqEdition(CdiGribIterator* me)
 {
+#ifdef HAVE_LIBGRIB_API
   return (int)gribEditionNumber(me->gribHandle);
+#else
+  (void)me;
+  xabort("CDI was compiled without GribAPI support, so you can't possibly have a valid CdiGribIterator* to call this function with");
+#endif
 }
 
 /**
@@ -592,7 +601,14 @@ int cdiGribIterator_inqEdition(CdiGribIterator* me)
 */
 int cdiGribIterator_getLong(CdiGribIterator* me, const char* key, long* result)
 {
+#ifdef HAVE_LIBGRIB_API
   return grib_get_long(me->gribHandle, key, result);
+#else
+  (void)me;
+  (void)key;
+  (void)result;
+  xabort("CDI was compiled without GribAPI support, so you can't possibly have a valid CdiGribIterator* to call this function with");
+#endif
 }
 
 /**
@@ -613,9 +629,17 @@ int cdiGribIterator_getLength(CdiGribIterator* me, const char* key, size_t* resu
 {
 #ifdef HAVE_GRIB_GET_LENGTH
   return grib_get_length(me->gribHandle, key, result);
-#else
-  Error("unimplemented");
+#elif defined(HAVE_LIBGRIB_API)
+  (void)me;
+  (void)key;
+  (void)result;
+  Error("grib_get_length() is not available, so cdiGribIterator_getLength() can't be used");
   return -1;
+#else
+  (void)me;
+  (void)key;
+  (void)result;
+  xabort("CDI was compiled without GribAPI support, so you can't possibly have a valid CdiGribIterator* to call this function with");
 #endif
 }
 
@@ -635,7 +659,15 @@ int cdiGribIterator_getLength(CdiGribIterator* me, const char* key, size_t* resu
 */
 int cdiGribIterator_getString(CdiGribIterator* me, const char* key, char* result, size_t* length)
 {
+#ifdef HAVE_LIBGRIB_API
   return grib_get_string(me->gribHandle, key, result, length);
+#else
+  (void)me;
+  (void)key;
+  (void)result;
+  (void)length;
+  xabort("CDI was compiled without GribAPI support, so you can't possibly have a valid CdiGribIterator* to call this function with");
+#endif
 }
 
 /**
@@ -655,7 +687,13 @@ int cdiGribIterator_getString(CdiGribIterator* me, const char* key, char* result
 */
 long cdiGribIterator_inqLongValue(CdiGribIterator* me, const char* key)
 {
+#ifdef HAVE_LIBGRIB_API
   return gribGetLong(me->gribHandle, key);
+#else
+  (void)me;
+  (void)key;
+  xabort("CDI was compiled without GribAPI support, so you can't possibly have a valid CdiGribIterator* to call this function with");
+#endif
 }
 
 /**
@@ -676,7 +714,14 @@ long cdiGribIterator_inqLongValue(CdiGribIterator* me, const char* key)
 */
 long cdiGribIterator_inqLongDefaultValue(CdiGribIterator* me, const char* key, long defaultValue)
 {
+#ifdef HAVE_LIBGRIB_API
   return gribGetLongDefault(me->gribHandle, key, defaultValue);
+#else
+  (void)me;
+  (void)key;
+  (void)defaultValue;
+  xabort("CDI was compiled without GribAPI support, so you can't possibly have a valid CdiGribIterator* to call this function with");
+#endif
 }
 
 /**
@@ -697,7 +742,13 @@ long cdiGribIterator_inqLongDefaultValue(CdiGribIterator* me, const char* key, l
 */
 char* cdiGribIterator_inqStringValue(CdiGribIterator* me, const char* key)
 {
+#ifdef HAVE_LIBGRIB_API
   return gribCopyString(me->gribHandle, key);
+#else
+  (void)me;
+  (void)key;
+  xabort("CDI was compiled without GribAPI support, so you can't possibly have a valid CdiGribIterator* to call this function with");
+#endif
 }
 
 /**
@@ -716,7 +767,14 @@ char* cdiGribIterator_inqStringValue(CdiGribIterator* me, const char* key)
 */
 int cdiGribIterator_getDouble(CdiGribIterator* me, const char* key, double* result)
 {
+#ifdef HAVE_LIBGRIB_API
   return grib_get_double(me->gribHandle, key, result);
+#else
+  (void)me;
+  (void)key;
+  (void)result;
+  xabort("CDI was compiled without GribAPI support, so you can't possibly have a valid CdiGribIterator* to call this function with");
+#endif
 }
 
 /**
@@ -735,7 +793,14 @@ int cdiGribIterator_getDouble(CdiGribIterator* me, const char* key, double* resu
 */
 int cdiGribIterator_getSize(CdiGribIterator* me, const char* key, size_t* result)
 {
+#ifdef HAVE_LIBGRIB_API
   return grib_get_size(me->gribHandle, key, result);
+#else
+  (void)me;
+  (void)key;
+  (void)result;
+  xabort("CDI was compiled without GribAPI support, so you can't possibly have a valid CdiGribIterator* to call this function with");
+#endif
 }
 
 /**
@@ -754,7 +819,15 @@ int cdiGribIterator_getSize(CdiGribIterator* me, const char* key, size_t* result
 */
 int cdiGribIterator_getLongArray(CdiGribIterator* me, const char* key, long* result, size_t* size)
 {
+#ifdef HAVE_LIBGRIB_API
   return grib_get_long_array(me->gribHandle, key, result, size);
+#else
+  (void)me;
+  (void)key;
+  (void)result;
+  (void)size;
+  xabort("CDI was compiled without GribAPI support, so you can't possibly have a valid CdiGribIterator* to call this function with");
+#endif
 }
 
 /**
@@ -773,7 +846,15 @@ int cdiGribIterator_getLongArray(CdiGribIterator* me, const char* key, long* res
 */
 int cdiGribIterator_getDoubleArray(CdiGribIterator* me, const char* key, double* result, size_t* size)
 {
+#ifdef HAVE_LIBGRIB_API
   return grib_get_double_array(me->gribHandle, key, result, size);
+#else
+  (void)me;
+  (void)key;
+  (void)result;
+  (void)size;
+  xabort("CDI was compiled without GribAPI support, so you can't possibly have a valid CdiGribIterator* to call this function with");
+#endif
 }
 
 /**
@@ -793,7 +874,13 @@ int cdiGribIterator_getDoubleArray(CdiGribIterator* me, const char* key, double*
 */
 double cdiGribIterator_inqDoubleValue(CdiGribIterator* me, const char* key)
 {
+#ifdef HAVE_LIBGRIB_API
   return gribGetDouble(me->gribHandle, key);
+#else
+  (void)me;
+  (void)key;
+  xabort("CDI was compiled without GribAPI support, so you can't possibly have a valid CdiGribIterator* to call this function with");
+#endif
 }
 
 /**
@@ -814,7 +901,12 @@ double cdiGribIterator_inqDoubleValue(CdiGribIterator* me, const char* key)
 */
 double cdiGribIterator_inqDoubleDefaultValue(CdiGribIterator* me, const char* key, double defaultValue)
 {
+#ifdef HAVE_LIBGRIB_API
   return gribGetDoubleDefault(me->gribHandle, key, defaultValue);
-}
-
+#else
+  (void)me;
+  (void)key;
+  (void)defaultValue;
+  xabort("CDI was compiled without GribAPI support, so you can't possibly have a valid CdiGribIterator* to call this function with");
 #endif
+}
