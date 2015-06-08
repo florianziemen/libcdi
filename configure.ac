@@ -4,7 +4,7 @@
 #  autoconf 2.68
 #  libtool  2.4.2
 
-AC_INIT([cdi], [1.6.9], [http://mpimet.mpg.de/cdi])
+AC_INIT([cdi], [1.7.0rc1], [http://mpimet.mpg.de/cdi])
 
 echo "configuring ${PACKAGE_NAME} ${PACKAGE_VERSION}"
 
@@ -21,35 +21,31 @@ AM_INIT_AUTOMAKE([foreign serial-tests])
 AC_CONFIG_HEADERS([src/config.h])
 AM_MAINTAINER_MODE([disable])
 
-# Set up libtool.
-AC_MSG_NOTICE([setting up libtool])
-LT_INIT([pic-only])
-
 # Check building environment
 AC_CHECK_TOOL([CC],[gcc],[:])
 AC_PROG_CC_C99
 AM_PROG_CC_C_O
 AC_C_RESTRICT
 AC_PROG_FC
-AS_IF([test -n "$FC" && test "X$FC" != "Xno"],
+AS_IF([test -n "$FC" && test "X$FC" != Xno],
   [AC_FC_SRCEXT([f90])
    AC_LANG_PUSH([Fortran])
    AC_PROG_FPP
    AC_LANG_POP([Fortran])])
 AC_PROG_F77
 AC_PROG_CXX
-AC_CHECK_PROG(SED,sed,sed,false)
-AC_CHECK_PROG(GREP,grep,grep,false)
 AC_PROG_INSTALL
-AC_CHECK_TOOL([AR],[ar],[:])
-AC_CHECK_TOOL([CPP],[cpp],[:])
-AC_CHECK_TOOL([LD],[ld],[:])
-AC_CHECK_TOOL([NM],[nm],[:])
-AC_CHECK_TOOL([AS],[as],[:])
-AC_CHECK_TOOL([DLLTOOL],[dlltool],[:])
-AC_CHECK_TOOL([OBJDUMP],[objdump],[:])
-AC_CHECK_TOOL([STRIP],[strip],[:])
-AC_CHECK_TOOL([RANLIB],[ranlib],[:])
+
+# Set up libtool.
+AC_MSG_NOTICE([setting up libtool])
+dnl before switching on libtool, identify compilers that prevent us from
+dnl certain build configurations
+ACX_LT_PROBLEMS
+LT_INIT([pic-only])
+dnl _KPSE_USE_LIBTOOL ensures libtool is also used for configure-time tests,
+dnl which deduces dependent libraries automatically
+_KPSE_USE_LIBTOOL
+
 # -----------------------------------------------------------------------
 # Check endianess of system
 AC_C_BIGENDIAN
