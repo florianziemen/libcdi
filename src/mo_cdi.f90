@@ -148,6 +148,7 @@ module mo_cdi
 	integer(c_int), public, parameter :: ZAXIS_SEDIMENT_BOTTOM_TW = 23
 	integer(c_int), public, parameter :: ZAXIS_MIX_LAYER = 24
 	integer(c_int), public, parameter :: ZAXIS_REFERENCE = 25
+	integer(c_int), public, parameter :: MAX_KV_PAIRS_MATCH = 10
 	integer(c_int), public, parameter :: TIME_CONSTANT = 0
 	integer(c_int), public, parameter :: TIME_VARIABLE = 1
 	integer(c_int), public, parameter :: TSTEP_CONSTANT = 0
@@ -204,6 +205,7 @@ module mo_cdi
 	end type t_CdiGribIterator
 	public cdiReset
 	public cdiStringError
+	public cdiGetStringError
 	public cdiDebug
 	public cdiLibraryVersion
 	public cdiPrintVersion
@@ -325,6 +327,7 @@ module mo_cdi
 	public vlistInqInstitut
 	public vlistDefModel
 	public vlistInqModel
+	public vlistDefVarTiles
 	public vlistDefVar
 	public vlistChangeVarGrid
 	public vlistChangeVarZaxis
@@ -609,6 +612,14 @@ module mo_cdi
 	public streamDefHistory
 	public streamInqHistorySize
 	public streamInqHistoryString
+	public subtypeCreate
+	public subtypePrint
+	public subtypeCompare
+	public subtypeInqSize
+	public subtypeInqActiveIndex
+	public subtypeDefActiveIndex
+	public subtypeInqTile
+	public vlistInqVarSubtype
 	public gribapiLibraryVersion
 
 contains
@@ -661,6 +672,39 @@ contains
 			call c_f_pointer(ptr, result, shape)
 		end if
 	end function cdiStringError
+
+	subroutine cdiGetStringError(vlistID_dummy, name_dummy)
+		integer(c_int), value :: vlistID_dummy
+		character(kind = c_char, len = *), intent(inout) :: name_dummy
+		character(kind = c_char) :: name_temp(len(name_dummy))
+		integer :: name_i
+		logical :: name_padding = .true.
+		interface
+			subroutine lib_cdiGetStringError(vlistID_dummy, name_dummy) bind(c, name = 'cdiGetStringError')
+				import c_char, c_int
+				integer(c_int), value :: vlistID_dummy
+				character(kind = c_char) :: name_dummy(*)
+			end subroutine lib_cdiGetStringError
+		end interface
+		do name_i = len(name_dummy), 1, -1
+			if(name_dummy(name_i:name_i) /= ' ') name_padding = .false.
+			if(name_padding) then
+				name_temp(name_i) = c_null_char
+			else
+				name_temp(name_i) = name_dummy(name_i:name_i)
+			end if
+		end do
+		call lib_cdiGetStringError(vlistID_dummy, name_temp)
+		name_padding = .false.
+		do name_i = 1, len(name_dummy)
+			if(name_temp(name_i) == c_null_char) name_padding = .true.
+			if(name_padding) then
+				name_dummy(name_i:name_i) = ' '
+			else
+				name_dummy(name_i:name_i) = name_temp(name_i)
+			end if
+		end do
+	end subroutine cdiGetStringError
 
 	subroutine cdiDebug(debug_dummy)
 		integer(c_int), value :: debug_dummy
@@ -2803,6 +2847,27 @@ contains
 		end interface
 		result = lib_vlistInqModel(vlistID_dummy)
 	end function vlistInqModel
+
+	function vlistDefVarTiles(vlistID_dummy, gridID_dummy, zaxisID_dummy, tsteptype_dummy, tilesetID_dummy) result(result)
+		integer(c_int) :: result
+		integer(c_int), value :: vlistID_dummy
+		integer(c_int), value :: gridID_dummy
+		integer(c_int), value :: zaxisID_dummy
+		integer(c_int), value :: tsteptype_dummy
+		integer(c_int), value :: tilesetID_dummy
+		interface
+			integer(c_int) function lib_vlistDefVarTiles(vlistID_dummy, gridID_dummy, zaxisID_dummy, tsteptype_dummy, tilesetID_dummy) bind(&
+			&c, name = 'vlistDefVarTiles')
+				import c_int
+				integer(c_int), value :: vlistID_dummy
+				integer(c_int), value :: gridID_dummy
+				integer(c_int), value :: zaxisID_dummy
+				integer(c_int), value :: tsteptype_dummy
+				integer(c_int), value :: tilesetID_dummy
+			end function lib_vlistDefVarTiles
+		end interface
+		result = lib_vlistDefVarTiles(vlistID_dummy, gridID_dummy, zaxisID_dummy, tsteptype_dummy, tilesetID_dummy)
+	end function vlistDefVarTiles
 
 	function vlistDefVar(vlistID_dummy, gridID_dummy, zaxisID_dummy, tsteptype_dummy) result(result)
 		integer(c_int) :: result
@@ -7884,6 +7949,110 @@ contains
 			end if
 		end do
 	end subroutine streamInqHistoryString
+
+	function subtypeCreate(subtype_dummy) result(result)
+		integer(c_int) :: result
+		integer(c_int), value :: subtype_dummy
+		interface
+			integer(c_int) function lib_subtypeCreate(subtype_dummy) bind(c, name = 'subtypeCreate')
+				import c_int
+				integer(c_int), value :: subtype_dummy
+			end function lib_subtypeCreate
+		end interface
+		result = lib_subtypeCreate(subtype_dummy)
+	end function subtypeCreate
+
+	subroutine subtypePrint(subtypeID_dummy)
+		integer(c_int), value :: subtypeID_dummy
+		interface
+			subroutine lib_subtypePrint(subtypeID_dummy) bind(c, name = 'subtypePrint')
+				import c_int
+				integer(c_int), value :: subtypeID_dummy
+			end subroutine lib_subtypePrint
+		end interface
+		call lib_subtypePrint(subtypeID_dummy)
+	end subroutine subtypePrint
+
+	function subtypeCompare(subtypeID1_dummy, subtypeID2_dummy) result(result)
+		integer(c_int) :: result
+		integer(c_int), value :: subtypeID1_dummy
+		integer(c_int), value :: subtypeID2_dummy
+		interface
+			integer(c_int) function lib_subtypeCompare(subtypeID1_dummy, subtypeID2_dummy) bind(c, name = 'subtypeCompare')
+				import c_int
+				integer(c_int), value :: subtypeID1_dummy
+				integer(c_int), value :: subtypeID2_dummy
+			end function lib_subtypeCompare
+		end interface
+		result = lib_subtypeCompare(subtypeID1_dummy, subtypeID2_dummy)
+	end function subtypeCompare
+
+	function subtypeInqSize(subtypeID_dummy) result(result)
+		integer(c_int) :: result
+		integer(c_int), value :: subtypeID_dummy
+		interface
+			integer(c_int) function lib_subtypeInqSize(subtypeID_dummy) bind(c, name = 'subtypeInqSize')
+				import c_int
+				integer(c_int), value :: subtypeID_dummy
+			end function lib_subtypeInqSize
+		end interface
+		result = lib_subtypeInqSize(subtypeID_dummy)
+	end function subtypeInqSize
+
+	function subtypeInqActiveIndex(subtypeID_dummy) result(result)
+		integer(c_int) :: result
+		integer(c_int), value :: subtypeID_dummy
+		interface
+			integer(c_int) function lib_subtypeInqActiveIndex(subtypeID_dummy) bind(c, name = 'subtypeInqActiveIndex')
+				import c_int
+				integer(c_int), value :: subtypeID_dummy
+			end function lib_subtypeInqActiveIndex
+		end interface
+		result = lib_subtypeInqActiveIndex(subtypeID_dummy)
+	end function subtypeInqActiveIndex
+
+	subroutine subtypeDefActiveIndex(subtypeID_dummy, index_dummy)
+		integer(c_int), value :: subtypeID_dummy
+		integer(c_int), value :: index_dummy
+		interface
+			subroutine lib_subtypeDefActiveIndex(subtypeID_dummy, index_dummy) bind(c, name = 'subtypeDefActiveIndex')
+				import c_int
+				integer(c_int), value :: subtypeID_dummy
+				integer(c_int), value :: index_dummy
+			end subroutine lib_subtypeDefActiveIndex
+		end interface
+		call lib_subtypeDefActiveIndex(subtypeID_dummy, index_dummy)
+	end subroutine subtypeDefActiveIndex
+
+	function subtypeInqTile(subtypeID_dummy, tileindex_dummy, attribute_dummy) result(result)
+		integer(c_int) :: result
+		integer(c_int), value :: subtypeID_dummy
+		integer(c_int), value :: tileindex_dummy
+		integer(c_int), value :: attribute_dummy
+		interface
+			integer(c_int) function lib_subtypeInqTile(subtypeID_dummy, tileindex_dummy, attribute_dummy) bind(c, name = 'subtypeInqTile')
+				import c_int
+				integer(c_int), value :: subtypeID_dummy
+				integer(c_int), value :: tileindex_dummy
+				integer(c_int), value :: attribute_dummy
+			end function lib_subtypeInqTile
+		end interface
+		result = lib_subtypeInqTile(subtypeID_dummy, tileindex_dummy, attribute_dummy)
+	end function subtypeInqTile
+
+	function vlistInqVarSubtype(vlistID_dummy, varID_dummy) result(result)
+		integer(c_int) :: result
+		integer(c_int), value :: vlistID_dummy
+		integer(c_int), value :: varID_dummy
+		interface
+			integer(c_int) function lib_vlistInqVarSubtype(vlistID_dummy, varID_dummy) bind(c, name = 'vlistInqVarSubtype')
+				import c_int
+				integer(c_int), value :: vlistID_dummy
+				integer(c_int), value :: varID_dummy
+			end function lib_vlistInqVarSubtype
+		end interface
+		result = lib_vlistInqVarSubtype(vlistID_dummy, varID_dummy)
+	end function vlistInqVarSubtype
 
 	subroutine gribapiLibraryVersion(major_version, minor_version, revision_version)
 		integer(c_int), optional, intent(inout) :: major_version

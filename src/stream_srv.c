@@ -241,11 +241,9 @@ void srv_add_record(stream_t *streamptr, int param, int level, int xsize, int ys
 
   datatype = srvInqDatatype(prec);
 
-  /* set dummy tiles attributes (so far, only used for GRIB2) */
-  int tile_index = 0;
   varAddRecord(recID, param, gridID, leveltype, 0, level, 0, 0, 0,
-	       datatype, &varID, &levelID, TSTEP_INSTANT, 0, 0, -1, 
-               NULL, NULL, NULL, NULL, dummy_tiles, &tile_index);
+	       datatype, &varID, &levelID, TSTEP_INSTANT, 0, 0, -1,
+               NULL, NULL, NULL, NULL, NULL, NULL);
 
   xassert(varID <= SHRT_MAX && levelID <= SHRT_MAX);
   (*record).varID   = (short)varID;

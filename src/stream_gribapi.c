@@ -26,7 +26,7 @@
 
 extern int cdiInventoryMode;
 
-
+static var_tile_t dummy_tiles = { -1, -1, -1, -1, -1, -1 };
 
 typedef struct {
   int param;
@@ -448,7 +448,7 @@ static
 void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
                       size_t recsize, off_t position, int datatype, int comptype, const char *varname,
                       int leveltype1, int leveltype2, int lbounds, int level1, int level2, int level_sf, int level_unit,
-                      var_tile_t tiles, int lread_additional_keys)
+                      const var_tile_t *tiles, int lread_additional_keys)
 {
   int zaxistype;
   int gridID = CDI_UNDEFID, varID;
@@ -943,7 +943,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
         }
 
       gribapiAddRecord(streamptr, param, gh, recsize, recpos, datatype, comptype, varname,
-                       leveltype1, leveltype2, lbounds, level1, level2, level_sf, level_unit, tiles, 1);
+                       leveltype1, leveltype2, lbounds, level1, level2, level_sf, level_unit, &tiles, 1);
 
       grib_handle_delete(gh);
       gh = NULL;

@@ -138,8 +138,6 @@ typedef struct {
     attribute;
 } var_tile_t;
 
-static var_tile_t dummy_tiles = { -1, -1, -1, -1, -1 };
-
 /* No. of different constants in the enumeration
    "subtype_attributes" */
 static const int nSubtypeAttributes = 6;

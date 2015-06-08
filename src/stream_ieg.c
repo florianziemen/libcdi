@@ -770,11 +770,9 @@ void iegAddRecord(stream_t *streamptr, int param, int *pdb, int *gdb, double *vc
 
   datatype = iegInqDatatype(prec);
 
-  /* set dummy tiles attributes (so far, only used for GRIB2) */
-  int tile_index = 0;
   varAddRecord(recID, param, gridID, leveltype, lbounds, level1, level2, 0, 0,
-	       datatype, &varID, &levelID, TSTEP_INSTANT, 0, 0, -1, 
-               NULL, NULL, NULL, NULL, dummy_tiles, &tile_index);
+	       datatype, &varID, &levelID, TSTEP_INSTANT, 0, 0, -1,
+               NULL, NULL, NULL, NULL, NULL, NULL);
 
   record->varID   = (short)varID;
   record->levelID = (short)levelID;

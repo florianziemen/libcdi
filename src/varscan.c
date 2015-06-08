@@ -27,10 +27,6 @@ static int numberOfVerticalLevels = 0;
 static int numberOfVerticalGrid = 0;
 static unsigned char uuidVGrid[CDI_UUID_SIZE];
 
-/* data structure specifying tile-related meta-data for the current
- * record. */
-static var_tile_t tiles;
-
 
 typedef struct
 {
@@ -140,7 +136,7 @@ paramInitEntry(unsigned varID, int param)
 /* Test if a variable specified by the given meta-data has already
  * been registered in "vartable". */
 static unsigned
-varGetEntry(int param, int zaxistype, int ltype1, int tsteptype, const char *name, var_tile_t tiles)
+varGetEntry(int param, int zaxistype, int ltype1, int tsteptype, const char *name, const var_tile_t *tiles)
 {
   for ( unsigned varID = 0; varID < varTablesize; varID++ )
     {
@@ -148,14 +144,16 @@ varGetEntry(int param, int zaxistype, int ltype1, int tsteptype, const char *nam
        * current vartable size: */
       if (vartable[varID].param == param)
         {
-          int no_of_tiles = tiles.numberOfTiles;
-          if (vartable[varID].tiles != NULL)
-            no_of_tiles = subtypeGetGlobalDataP(vartable[varID].tiles,
-                                                SUBTYPE_ATT_NUMBER_OF_TILES);
+          int no_of_tiles = -1;
+          if ( tiles ) no_of_tiles = tiles->numberOfTiles;
+          int vt_no_of_tiles = -1;
+          if ( vartable[varID].tiles )
+            vt_no_of_tiles = subtypeGetGlobalDataP(vartable[varID].tiles,
+                                                   SUBTYPE_ATT_NUMBER_OF_TILES);
           if ( (vartable[varID].zaxistype  == zaxistype)               &&
                (vartable[varID].ltype1     == ltype1   )               &&
                (vartable[varID].tsteptype  == tsteptype)               &&
-               (no_of_tiles == tiles.numberOfTiles) )
+               (vt_no_of_tiles == no_of_tiles) )
             {
               if ( name && name[0] && vartable[varID].name && vartable[varID].name[0] )
                 {
@@ -193,7 +191,7 @@ void varFree(void)
       if ( vartable[varID].ensdata )  free(vartable[varID].ensdata);
       if ( vartable[varID].tiles )    subtypeDestroyPtr(vartable[varID].tiles);
 
-      if ( vartable[varID].opt_grib_kvpair ) 
+      if ( vartable[varID].opt_grib_kvpair )
         {
           for (int i=0; i<vartable[varID].opt_grib_nentries; i++) {
             if ( vartable[varID].opt_grib_kvpair[i].keyword )
@@ -223,7 +221,6 @@ void varFree(void)
 /* Search for a tile subtype with subtypeIndex == tile_index. */
 static int tileGetEntry(unsigned varID, int tile_index)
 {
-  int tileID = CDI_UNDEFID;
   for (int isub=0; isub<vartable[varID].nsubtypes; isub++)
     if (vartable[varID].recordTable[isub].subtypeIndex == tile_index)
       return isub;
@@ -232,7 +229,7 @@ static int tileGetEntry(unsigned varID, int tile_index)
 
 
 /* Resizes vartable:recordTable data structure, if necessary. */
-static int tileNewEntry(int varID, int tile_index)
+static int tileNewEntry(int varID)
 {
   int tileID = 0;
   if (vartable[varID].nsubtypes_alloc == 0)
@@ -424,24 +421,42 @@ paramNewEntry(int param)
 
 /* Append tile set to a subtype. Return index of the new tile (i.e.
  * the "entry->self" value). */
-int varInsertTileSubtype(vartable_t *vptr, var_tile_t tiles)
+static
+int varInsertTileSubtype(vartable_t *vptr, const var_tile_t *tiles)
 {
+  int totalno_of_tileattr_pairs = -1;
+  int tileClassification = -1;
+  int numberOfTiles = -1;
+  int numberOfAttributes = -1;
+  int tileindex = -1;
+  int attribute = -1;
+
+  if ( tiles )
+    {
+      totalno_of_tileattr_pairs = tiles->totalno_of_tileattr_pairs;
+      tileClassification =  tiles->tileClassification;
+      numberOfTiles = tiles->numberOfTiles;
+      numberOfAttributes = tiles->numberOfAttributes;
+      tileindex = tiles->tileindex;
+      attribute = tiles->attribute;
+    }
+
   /* first, generate a subtype based on the info in "tiles". */
 
   subtype_t *subtype_ptr;
   subtypeAllocate(&subtype_ptr, SUBTYPE_TILES);
-  subtypeDefGlobalDataP(subtype_ptr, SUBTYPE_ATT_TOTALNO_OF_TILEATTR_PAIRS, tiles.totalno_of_tileattr_pairs);
-  subtypeDefGlobalDataP(subtype_ptr, SUBTYPE_ATT_TILE_CLASSIFICATION      , tiles.tileClassification);
-  subtypeDefGlobalDataP(subtype_ptr, SUBTYPE_ATT_NUMBER_OF_TILES          , tiles.numberOfTiles);
+  subtypeDefGlobalDataP(subtype_ptr, SUBTYPE_ATT_TOTALNO_OF_TILEATTR_PAIRS, totalno_of_tileattr_pairs);
+  subtypeDefGlobalDataP(subtype_ptr, SUBTYPE_ATT_TILE_CLASSIFICATION      , tileClassification);
+  subtypeDefGlobalDataP(subtype_ptr, SUBTYPE_ATT_NUMBER_OF_TILES          , numberOfTiles);
 
-  /* 
+  /*
    * Here, we create a tile set for comparison that contains only one
-   * tile/attribute pair (based on "tiles"). 
+   * tile/attribute pair (based on "tiles").
    */
   struct subtype_entry_t *entry = subtypeEntryInsert(subtype_ptr);
-  subtypeDefEntryDataP(entry, SUBTYPE_ATT_NUMBER_OF_ATTR,            tiles.numberOfAttributes);
-  subtypeDefEntryDataP(entry, SUBTYPE_ATT_TILEINDEX,                 tiles.tileindex);
-  subtypeDefEntryDataP(entry, SUBTYPE_ATT_TILEATTRIBUTE,             tiles.attribute);
+  subtypeDefEntryDataP(entry, SUBTYPE_ATT_NUMBER_OF_ATTR,            numberOfAttributes);
+  subtypeDefEntryDataP(entry, SUBTYPE_ATT_TILEINDEX,                 tileindex);
+  subtypeDefEntryDataP(entry, SUBTYPE_ATT_TILEATTRIBUTE,             attribute);
 
   if (vptr->tiles == NULL) {
     vptr->tiles = subtype_ptr;
@@ -460,7 +475,7 @@ void varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds,
 		  int level1, int level2, int level_sf, int level_unit, int prec,
 		  int *pvarID, int *plevelID, int tsteptype, int numavg, int ltype1, int ltype2,
 		  const char *name, const char *stdname, const char *longname, const char *units,
-                  var_tile_t tiles, int *tile_index)
+                  const var_tile_t *tiles, int *tile_index)
 {
   unsigned varID = (cdiSplitLtype105 != 1 || zaxistype != ZAXIS_HEIGHT) ?
     varGetEntry(param, zaxistype, ltype1, tsteptype, name, tiles) : (unsigned)UNDEFID;
@@ -506,10 +521,10 @@ void varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds,
 
   /* append current tile to tile subtype info. */
   int this_tile = varInsertTileSubtype(&vartable[varID], tiles);
-  int tileID  = tileGetEntry(varID, this_tile);
-  (*tile_index) = this_tile;
+  int tileID = tileGetEntry(varID, this_tile);
+  if ( tile_index ) (*tile_index) = this_tile;
   if (tileID == CDI_UNDEFID) {
-    tileID = tileNewEntry(varID, this_tile);
+    tileID = tileNewEntry(varID);
     vartable[varID].recordTable[tileID].subtypeIndex = this_tile;
     vartable[varID].nsubtypes++;
   }
@@ -518,7 +533,7 @@ void varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds,
   int levelID = levelNewEntry(varID, level1, level2, tileID);
   if (CDI_Debug)
     Message("vartable[%d].recordTable[%d].levelTable[%d].recID = %d; level1,2=%d,%d\n",
-            varID, tileID, levelID, recID,level1,level2);
+            varID, tileID, levelID, recID, level1, level2);
   vartable[varID].recordTable[tileID].levelTable[levelID].recID = recID;
 
   *pvarID   = (int) varID;
@@ -670,7 +685,7 @@ void cdi_generate_vars(stream_t *streamptr)
 
         leveltable_t *t1 = vartable[varid].recordTable[isub-1].levelTable;
         leveltable_t *t2 = vartable[varid].recordTable[isub  ].levelTable;
-        for (int ilev=0; ilev<nlevels; ilev++)
+        for (unsigned ilev=0; ilev<nlevels; ilev++)
           if ((t1[ilev].level1 != t2[ilev].level1)  ||
               (t1[ilev].level2 != t2[ilev].level2)  ||
               (t1[ilev].lindex != t2[ilev].lindex))
@@ -871,7 +886,7 @@ void cdi_generate_vars(stream_t *streamptr)
 		 vartable[varid].levelTable[levelID].level1);
 	}
       */
-      for (unsigned isub=0; isub<vartable[varid].nsubtypes; isub++)
+      for (int isub=0; isub<vartable[varid].nsubtypes; isub++)
         {
           for (unsigned levelID = 0; levelID < nlevels; levelID++)
             {

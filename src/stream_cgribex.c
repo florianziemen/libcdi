@@ -404,11 +404,9 @@ void cgribexAddRecord(stream_t * streamptr, int param, int *isec1, int *isec2, d
   if ( datatype > 32 ) datatype = DATATYPE_PACK32;
   if ( datatype <  0 ) datatype = DATATYPE_PACK;
 
-  /* set dummy tiles attributes (so far, only used for GRIB-API and GRIB2) */
-  int tile_index;
   varAddRecord(recID, param, gridID, zaxistype, lbounds, level1, level2, 0, 0,
-	       datatype, &varID, &levelID, tsteptype, numavg, ISEC1_LevelType, -1, 
-               NULL, NULL, NULL, NULL, dummy_tiles, &tile_index);
+	       datatype, &varID, &levelID, tsteptype, numavg, ISEC1_LevelType, -1,
+               NULL, NULL, NULL, NULL, NULL, NULL);
 
   (*record).varID   = (short)varID;
   (*record).levelID = (short)levelID;
