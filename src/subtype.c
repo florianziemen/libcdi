@@ -195,7 +195,7 @@ void subtypeAttsDuplicate(struct subtype_attr_t *a1, struct subtype_entry_t* dst
   if (a1 == NULL)  return;
   /* duplicate "a1->key", "a1->val" */
   subtypeAttsDuplicate(a1->next, dst);
-  struct subtype_attr_t *ptr = subtypeAttrInsert(dst, a1->key, a1->val);
+  (void) subtypeAttrInsert(dst, a1->key, a1->val);
 }
 
 
@@ -600,8 +600,7 @@ void tilesetInsertP(subtype_t *s1, subtype_t *s2)
   struct subtype_entry_t 
     *entry1 = s1->entries,
     *entry2 = s2->entries;
-  struct subtype_attr_t
-    *att_ptr1, *att_ptr2;
+  struct subtype_attr_t *att_ptr2;
 
   /* test all entries of set 2 against set 1, to check if entry
      already exists: */
@@ -627,7 +626,7 @@ void tilesetInsertP(subtype_t *s1, subtype_t *s2)
 	
 	att_ptr2 = entry2->atts;
 	while (att_ptr2 != NULL) {
-	  att_ptr1 = subtypeAttrInsert(entry1, att_ptr2->key, att_ptr2->val);
+	  (void) subtypeAttrInsert(entry1, att_ptr2->key, att_ptr2->val);
 	  att_ptr2 = att_ptr2->next;
 	}
 	entry2 = entry2->next;
@@ -809,7 +808,7 @@ int vlistInsertTrivialTileSubtype(int vlistID)
   subtypeAllocate(&subtype_ptr, SUBTYPE_TILES);
 
   /* create a tile set that contains only one tile/attribute pair. */
-  struct subtype_entry_t *entry = subtypeEntryInsert(subtype_ptr);
+  (void) subtypeEntryInsert(subtype_ptr);
 
   /* register tile */
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
