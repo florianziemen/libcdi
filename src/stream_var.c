@@ -137,7 +137,7 @@ int stream_new_var(stream_t *streamptr, int gridID, int zaxisID, int tilesetID)
   if (tilesetID != CDI_UNDEFID)
     nsub = subtypeInqSize(tilesetID); /* e.g. no of tiles */
   if ( CDI_Debug )
-    Message("varID %d: create %d tiles with %d level(s), zaxisID=%d\n", varID, nsub, nlevs,zaxisID);
+    Message("varID %d: create %d tiles with %d level(s), zaxisID=%d", varID, nsub, nlevs,zaxisID);
   streamptr->vars[varID].recordTable = (sleveltable_t *)xmalloc((size_t)nsub * sizeof (sleveltable_t));
   if( streamptr->vars[varID].recordTable == NULL )
     SysError("Allocation of leveltable failed!");
@@ -147,7 +147,7 @@ int stream_new_var(stream_t *streamptr, int gridID, int zaxisID, int tilesetID)
     streamvar_init_recordtable(streamptr, varID, isub);
     allocate_record_table_entry(streamptr, varID, isub, nlevs);
     if ( CDI_Debug )
-      Message("streamptr->vars[varID].recordTable[isub].recordID[0]=%d\n", 
+      Message("streamptr->vars[varID].recordTable[isub].recordID[0]=%d", 
               streamptr->vars[varID].recordTable[isub].recordID[0]);
   }
 

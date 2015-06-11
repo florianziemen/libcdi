@@ -548,8 +548,8 @@ subtype_query_t keyValuePair(const char* key, int value)
   result.key_value_pairs[0][0] = attribute_to_index(key);
   result.key_value_pairs[1][0] = value;
   if (CDI_Debug) {
-    Message("key  %s matches %d\n", key, result.key_value_pairs[0][0]);
-    Message("%d --?-- %d\n", result.key_value_pairs[0][0], result.key_value_pairs[1][0]);
+    Message("key  %s matches %d", key, result.key_value_pairs[0][0]);
+    Message("%d --?-- %d", result.key_value_pairs[0][0], result.key_value_pairs[1][0]);
   }
   return result;
 }
@@ -575,9 +575,9 @@ subtype_query_t matchAND(subtype_query_t q1, subtype_query_t q2)
     }
 
   if (CDI_Debug) {
-    Message("combined criterion:\n");
+    Message("combined criterion:");
     for (int i=0; i<result.nAND; i++)
-      Message("%d --?-- %d\n", result.key_value_pairs[0][i], result.key_value_pairs[1][i]);
+      Message("%d --?-- %d", result.key_value_pairs[0][i], result.key_value_pairs[1][i]);
   }
   return result;
 }
@@ -735,18 +735,18 @@ int subtypeInqSubEntry(int subtypeID, subtype_query_t criterion)
       /* test if this entry matches ALL criteria. */
       for (int j=0; (j<criterion.nAND) && (match); j++)
 	{
-	  if (CDI_Debug)  Message("check criterion %d :  %d --?-- %d\n", j,
+	  if (CDI_Debug)  Message("check criterion %d :  %d --?-- %d", j,
 				  criterion.key_value_pairs[0][j], criterion.key_value_pairs[1][j]);
 	  struct subtype_attr_t* att_ptr = 
 	    subtypeAttrFind(entry->atts, criterion.key_value_pairs[0][j]);
 	  if (att_ptr == NULL)
 	    {
 	      match = 0;
-	      if (CDI_Debug)  Message("did not find %d\n", criterion.key_value_pairs[0][j]);
+	      if (CDI_Debug)  Message("did not find %d", criterion.key_value_pairs[0][j]);
 	    }
 	  else
 	    {
-	      if (CDI_Debug)  Message("found %d\n", criterion.key_value_pairs[0][j]);
+	      if (CDI_Debug)  Message("found %d", criterion.key_value_pairs[0][j]);
 	      match &= (att_ptr->val == criterion.key_value_pairs[1][j]);
 	    }
 	}
