@@ -980,7 +980,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
   vlistDefTaxis(vlistID, taxisID);
 
   int nrecords = streamptr->tsteps[0].nallrecs;
-  if ( nrecords > streamptr->tsteps[0].recordSize )
+  if ( nrecords < streamptr->tsteps[0].recordSize )
     {
       streamptr->tsteps[0].recordSize = nrecords;
       streamptr->tsteps[0].records =
