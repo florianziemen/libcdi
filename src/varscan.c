@@ -532,7 +532,7 @@ void varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds,
   /* append current level to level table info */
   int levelID = levelNewEntry(varID, level1, level2, tileID);
   if (CDI_Debug)
-    Message("vartable[%d].recordTable[%d].levelTable[%d].recID = %d; level1,2=%d,%d\n",
+    Message("vartable[%d].recordTable[%d].levelTable[%d].recID = %d; level1,2=%d,%d",
             varID, tileID, levelID, recID, level1, level2);
   vartable[varID].recordTable[tileID].levelTable[levelID].recID = recID;
 
@@ -694,9 +694,9 @@ void cdi_generate_vars(stream_t *streamptr)
                       "nlevels = %d, vartable[varid].recordTable[isub].nlevels = %d\n",
                       vartable[varid].name, varid, isub, vartable[varid].nsubtypes,
                       nlevels, vartable[varid].recordTable[isub].nlevels);
-              Message("t1[ilev].level1=%d / t2[ilev].level1=%d\n",t1[ilev].level1, t2[ilev].level1);
-              Message("t1[ilev].level2=%d / t2[ilev].level2=%d\n",t1[ilev].level2, t2[ilev].level2);
-              Message("t1[ilev].lindex=%d / t2[ilev].lindex=%d\n",t1[ilev].lindex, t2[ilev].lindex);
+              Message("t1[ilev].level1=%d / t2[ilev].level1=%d",t1[ilev].level1, t2[ilev].level1);
+              Message("t1[ilev].level2=%d / t2[ilev].level2=%d",t1[ilev].level2, t2[ilev].level2);
+              Message("t1[ilev].lindex=%d / t2[ilev].lindex=%d",t1[ilev].lindex, t2[ilev].lindex);
               Error("zaxis type must not change for same parameter!");
             }
       }
@@ -891,7 +891,7 @@ void cdi_generate_vars(stream_t *streamptr)
           for (unsigned levelID = 0; levelID < nlevels; levelID++)
             {
               if ( CDI_Debug )
-                Message("streamptr->vars[%d].recordTable[%d].recordID[%d]=%d\n",
+                Message("streamptr->vars[%d].recordTable[%d].recordID[%d]=%d",
                         varID,isub,levelID);
               streamptr->vars[varID].recordTable[isub].recordID[levelID] =
                 vartable[varid].recordTable[isub].levelTable[levelID].recID;
@@ -1191,7 +1191,7 @@ void resize_vartable_opt_grib_entries(vartable_t *var, int nentries)
       int i, new_size;
       new_size = (2*var->opt_grib_kvpair_size) > nentries ? (2*var->opt_grib_kvpair_size) : nentries;
       if (CDI_Debug)
-        Message("resize vartable opt_grib_entries array to size %d\n", new_size);
+        Message("resize vartable opt_grib_entries array to size %d", new_size);
       opt_key_val_pair_t *tmp = (opt_key_val_pair_t *)xmalloc((size_t)new_size * sizeof (opt_key_val_pair_t));
       for (i=0; i<var->opt_grib_kvpair_size; i++) {
         tmp[i] = var->opt_grib_kvpair[i];
