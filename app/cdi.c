@@ -314,7 +314,7 @@ void printShortinfo(int streamID, int vlistID, int vardis)
   int gridsize = 0;
   int gridID, zaxisID, param;
   int vdate, vtime;
-  int nvars, ntsteps;
+  int ntsteps;
   int levelsize;
   int tsteptype, taxisID;
   char tmpname[CDI_MAX_NAME];
@@ -329,14 +329,19 @@ void printShortinfo(int streamID, int vlistID, int vardis)
       fprintf(stdout, " : ");
       printFiletype(streamID, vlistID);
 
-      if ( vardis )
-	fprintf(stdout,
-		"   Var : Institut Source   Ttype    Levels Num  Gridsize Num Dtype : Parameter name\n");
-      else
-	fprintf(stdout,
-		"   Var : Institut Source   Ttype    Levels Num  Gridsize Num Dtype : Parameter ID\n");
+      //vlistPrint(vlistID);
+      int nvars = vlistNvars(vlistID);
+      int nsubtypes = vlistNsubtypes(vlistID);
 
-      nvars = vlistNvars(vlistID);
+      if ( nsubtypes > 0 )
+        fprintf(stdout, "   Var : Institut Source   Ttype    Subtypes Num  Levels Num  Gridsize Num Dtype : ");
+      else
+        fprintf(stdout, "   Var : Institut Source   Ttype    Levels Num  Gridsize Num Dtype : ");
+
+      if ( vardis )
+	fprintf(stdout, "Parameter name\n");
+      else
+	fprintf(stdout, "Parameter ID\n");
 
       for ( varID = 0; varID < nvars; varID++ )
 	{
@@ -373,6 +378,14 @@ void printShortinfo(int streamID, int vlistID, int vardis)
 	  else if ( tsteptype == TSTEP_RANGE    ) fprintf(stdout, "%-8s ", "range");
 	  else if ( tsteptype == TSTEP_DIFF     ) fprintf(stdout, "%-8s ", "diff");
 	  else                                    fprintf(stdout, "%-8s ", "unknown");
+
+          if ( nsubtypes > 0 )
+            {
+              int subtypeID = vlistInqVarSubtype(vlistID, varID);
+              int subtypesize = subtypeInqSize(subtypeID);
+              fprintf(stdout, " %6d  ", subtypesize);
+              fprintf(stdout, "%3d ", vlistSubtypeIndex(vlistID, subtypeID) + 1);
+            }
 
 	  /* layer info */
 	  levelsize = zaxisInqSize(zaxisID);
@@ -432,6 +445,14 @@ void printShortinfo(int streamID, int vlistID, int vardis)
       fprintf(stdout, " :\n");
 
       printZaxisInfo(vlistID);
+
+      if ( nsubtypes > 0 )
+        {
+          fprintf(stdout, "   Subtypes");
+          fprintf(stdout, " :\n");
+
+          printSubtypeInfo(vlistID);
+        }
 
       taxisID = vlistInqTaxis(vlistID);
       ntsteps = vlistNtsteps(vlistID);

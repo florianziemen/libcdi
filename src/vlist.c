@@ -1318,6 +1318,7 @@ int vlistZaxis(int vlistID, int index)
   return (zaxisID);
 }
 
+
 int vlistZaxisIndex(int vlistID, int zaxisID)
 {
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
@@ -1393,6 +1394,32 @@ void vlistChangeZaxis(int vlistID, int zaxisID1, int zaxisID2)
           }
       }
   reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
+}
+
+
+int vlistSubtype(int vlistID, int index)
+{
+  int subtypeID = CDI_UNDEFID;
+  vlist_t *vlistptr = vlist_to_pointer(vlistID);
+
+  if ( index < vlistptr->nsubtypes && index >= 0 )
+    subtypeID = vlistptr->subtypeIDs[index];
+
+  return subtypeID;
+}
+
+
+int vlistSubtypeIndex(int vlistID, int subtypeID)
+{
+  vlist_t *vlistptr = vlist_to_pointer(vlistID);
+
+  int index;
+  for ( index = 0 ; index < vlistptr->nsubtypes ; index++ )
+    if ( subtypeID == vlistptr->subtypeIDs[index] ) break;
+
+  if ( index == vlistptr->nsubtypes ) index = -1;
+
+  return (index);
 }
 
 

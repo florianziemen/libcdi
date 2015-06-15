@@ -487,6 +487,9 @@ int     vlistNgrids(int vlistID);
 /*      vlistNzaxis: Number of zaxis in a variable list */
 int     vlistNzaxis(int vlistID);
 
+/*      vlistNsubtypes: Number of subtypes in a variable list */
+int     vlistNsubtypes(int vlistID);
+
 void    vlistDefNtsteps(int vlistID, int nts);
 int     vlistNtsteps(int vlistID);
 int     vlistGridsizeMax(int vlistID);
@@ -499,6 +502,8 @@ int     vlistZaxisIndex(int vlistID, int zaxisID);
 void    vlistChangeZaxisIndex(int vlistID, int index, int zaxisID);
 void    vlistChangeZaxis(int vlistID, int zaxisID1, int zaxisID2);
 int     vlistNrecs(int vlistID);
+int     vlistSubtype(int vlistID, int index);
+int     vlistSubtypeIndex(int vlistID, int subtypeID);
 
 /*      vlistDefTaxis: Define the time axis of a variable list */
 void    vlistDefTaxis(int vlistID, int taxisID);

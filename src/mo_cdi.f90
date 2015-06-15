@@ -307,6 +307,7 @@ module mo_cdi
 	public vlistNvars
 	public vlistNgrids
 	public vlistNzaxis
+	public vlistNsubtypes
 	public vlistDefNtsteps
 	public vlistNtsteps
 	public vlistGridsizeMax
@@ -319,6 +320,8 @@ module mo_cdi
 	public vlistChangeZaxisIndex
 	public vlistChangeZaxis
 	public vlistNrecs
+	public vlistSubtype
+	public vlistSubtypeIndex
 	public vlistDefTaxis
 	public vlistInqTaxis
 	public vlistDefTable
@@ -2583,6 +2586,18 @@ contains
 		result = lib_vlistNzaxis(vlistID_dummy)
 	end function vlistNzaxis
 
+	function vlistNsubtypes(vlistID_dummy) result(result)
+		integer(c_int) :: result
+		integer(c_int), value :: vlistID_dummy
+		interface
+			integer(c_int) function lib_vlistNsubtypes(vlistID_dummy) bind(c, name = 'vlistNsubtypes')
+				import c_int
+				integer(c_int), value :: vlistID_dummy
+			end function lib_vlistNsubtypes
+		end interface
+		result = lib_vlistNsubtypes(vlistID_dummy)
+	end function vlistNsubtypes
+
 	subroutine vlistDefNtsteps(vlistID_dummy, nts_dummy)
 		integer(c_int), value :: vlistID_dummy
 		integer(c_int), value :: nts_dummy
@@ -2747,6 +2762,34 @@ contains
 		end interface
 		result = lib_vlistNrecs(vlistID_dummy)
 	end function vlistNrecs
+
+	function vlistSubtype(vlistID_dummy, index_dummy) result(result)
+		integer(c_int) :: result
+		integer(c_int), value :: vlistID_dummy
+		integer(c_int), value :: index_dummy
+		interface
+			integer(c_int) function lib_vlistSubtype(vlistID_dummy, index_dummy) bind(c, name = 'vlistSubtype')
+				import c_int
+				integer(c_int), value :: vlistID_dummy
+				integer(c_int), value :: index_dummy
+			end function lib_vlistSubtype
+		end interface
+		result = lib_vlistSubtype(vlistID_dummy, index_dummy)
+	end function vlistSubtype
+
+	function vlistSubtypeIndex(vlistID_dummy, subtypeID_dummy) result(result)
+		integer(c_int) :: result
+		integer(c_int), value :: vlistID_dummy
+		integer(c_int), value :: subtypeID_dummy
+		interface
+			integer(c_int) function lib_vlistSubtypeIndex(vlistID_dummy, subtypeID_dummy) bind(c, name = 'vlistSubtypeIndex')
+				import c_int
+				integer(c_int), value :: vlistID_dummy
+				integer(c_int), value :: subtypeID_dummy
+			end function lib_vlistSubtypeIndex
+		end interface
+		result = lib_vlistSubtypeIndex(vlistID_dummy, subtypeID_dummy)
+	end function vlistSubtypeIndex
 
 	subroutine vlistDefTaxis(vlistID_dummy, taxisID_dummy)
 		integer(c_int), value :: vlistID_dummy
