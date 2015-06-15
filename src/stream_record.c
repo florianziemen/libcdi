@@ -27,6 +27,7 @@ void recordInitEntry(record_t *record)
   record->varID    = CDI_UNDEFID;
   record->levelID  = CDI_UNDEFID;
   memset(record->varname, 0, sizeof(record->varname));
+  memset(&record->tiles, 0, sizeof(record->tiles));
 }
 
 

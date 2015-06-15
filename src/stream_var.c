@@ -103,7 +103,7 @@ int streamvar_new_entry(stream_t *streamptr)
 }
 
 
-void allocate_record_table_entry(stream_t *streamptr, int varID, int subID, int nlevs) 
+void allocate_record_table_entry(stream_t *streamptr, int varID, int subID, int nlevs)
 {
   int *level    = (int *)xmalloc((size_t)nlevs * sizeof (int));
   int *lindex   = (int *)xmalloc((size_t)nlevs * sizeof (int));
@@ -147,7 +147,7 @@ int stream_new_var(stream_t *streamptr, int gridID, int zaxisID, int tilesetID)
     streamvar_init_recordtable(streamptr, varID, isub);
     allocate_record_table_entry(streamptr, varID, isub, nlevs);
     if ( CDI_Debug )
-      Message("streamptr->vars[varID].recordTable[isub].recordID[0]=%d", 
+      Message("streamptr->vars[varID].recordTable[isub].recordID[0]=%d",
               streamptr->vars[varID].recordTable[isub].recordID[0]);
   }
 

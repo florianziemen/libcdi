@@ -424,6 +424,8 @@ paramNewEntry(int param)
 static
 int varInsertTileSubtype(vartable_t *vptr, const var_tile_t *tiles)
 {
+  if ( tiles == NULL ) return -1;
+
   int totalno_of_tileattr_pairs = -1;
   int tileClassification = -1;
   int numberOfTiles = -1;
@@ -792,7 +794,8 @@ void cdi_generate_vars(stream_t *streamptr)
       free(dlevels);
 
       /* define new subtype for tile set */
-      int tilesetID = vlistDefTileSubtype(vlistID, vartable[varid].tiles);
+      int tilesetID = CDI_UNDEFID;
+      if ( vartable[varid].tiles ) tilesetID = vlistDefTileSubtype(vlistID, vartable[varid].tiles);
 
       /* generate new variable */
       int varID = stream_new_var(streamptr, gridID, zaxisID, tilesetID);

@@ -207,6 +207,8 @@ vlistAdd2ZaxisIDs(vlist_t *vlistptr, int zaxisID)
 static inline void
 vlistAdd2SubtypeIDs(vlist_t *vlistptr, int subtypeID)
 {
+  if ( subtypeID == CDI_UNDEFID ) return;
+
   int index, nsubs = vlistptr->nsubtypes;
   for ( index = 0; index < nsubs; index++ )
     if (vlistptr->subtypeIDs[index] == subtypeID ) break;

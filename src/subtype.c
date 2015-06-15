@@ -699,8 +699,15 @@ int subtypeCompare(int subtypeID1, int subtypeID2)
 /*  Get the size of a subtype (e.g. no. of tiles). */
 int subtypeInqSize(int subtypeID)
 {
-  subtype_t *subtype_ptr = reshGetVal(subtypeID, &subtypeOps);
-  return subtype_ptr->nentries;
+  if ( subtypeID == CDI_UNDEFID )
+    {
+      return 0;
+    }
+  else
+    {
+      subtype_t *subtype_ptr = reshGetVal(subtypeID, &subtypeOps);
+      return subtype_ptr->nentries;
+    }
 }
 
 

@@ -24,7 +24,6 @@
 #include "cdf_int.h"
 #include "varscan.h"
 #include "vlist.h"
-#include "subtype.h"
 
 //#define PROJECTION_TEST
 
@@ -6874,8 +6873,6 @@ void define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, 
       free(varInfo);
     }
 
-  int trivial_tileID = vlistInsertTrivialTileSubtype(vlistID);
-
   for ( int varID1 = 0; varID1 < nvars; varID1++ )
     {
       int gridID, zaxisID;
@@ -6885,7 +6882,7 @@ void define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, 
       zaxisID = ncvars[ncvarid].zaxisID;
 
       stream_new_var(streamptr, gridID, zaxisID, CDI_UNDEFID);
-      int varID = vlistDefVarTiles(vlistID, gridID, zaxisID, ncvars[ncvarid].tsteptype, trivial_tileID);
+      int varID = vlistDefVar(vlistID, gridID, zaxisID, ncvars[ncvarid].tsteptype);
 
 #if  defined  (HAVE_NETCDF4)
       if ( ncvars[ncvarid].deflate )

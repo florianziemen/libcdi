@@ -41,6 +41,7 @@ void vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].xyz           = 321;
   vlistptr->vars[varID].gridID        = CDI_UNDEFID;
   vlistptr->vars[varID].zaxisID       = CDI_UNDEFID;
+  vlistptr->vars[varID].subtypeID     = CDI_UNDEFID;
   vlistptr->vars[varID].instID        = CDI_UNDEFID;
   vlistptr->vars[varID].modelID       = CDI_UNDEFID;
   vlistptr->vars[varID].tableID       = CDI_UNDEFID;
@@ -135,6 +136,7 @@ void vlistCheckVarID(const char *caller, int vlistID, int varID)
   if ( ! vlistptr->vars[varID].isUsed )
     Errorc("varID %d undefined!", varID);
 }
+
 
 int vlistDefVarTiles(int vlistID, int gridID, int zaxisID, int tsteptype, int tilesetID)
 {

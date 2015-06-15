@@ -720,7 +720,7 @@ void vlistCat(int vlistID2, int vlistID1)
 
       vlistAdd2GridIDs(vlistptr2, vars1[varID].gridID);
       vlistAdd2ZaxisIDs(vlistptr2, vars1[varID].zaxisID);
-      vlistAdd2SubtypeIDs(vlistptr2, vlistptr1->vars[varID].subtypeID);
+      vlistAdd2SubtypeIDs(vlistptr2, vars1[varID].subtypeID);
     }
 }
 

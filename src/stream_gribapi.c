@@ -15,6 +15,7 @@
 #include "vlist.h"
 #include "stream_grb.h"
 #include "calendar.h"
+#include "subtype.h"
 
 
 #if  defined  (HAVE_LIBGRIB_API)
@@ -483,7 +484,8 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
   (*record).ilevel2   = level2;
   (*record).ltype     = leveltype1;
   (*record).tsteptype = tsteptype;
-  if ( tiles ) (*record).tiles     = *tiles;
+  if ( tiles ) (*record).tiles = *tiles;
+  else         (*record).tiles = dummy_tiles;
 
   //FIXME: This may leave the variable name unterminated (which is the behavior that I found in the code).
   //       I don't know precisely how this field is used, so I did not change this behavior to avoid regressions,
@@ -943,8 +945,10 @@ int gribapiScanTimestep1(stream_t * streamptr)
                 nrecs, (int)recpos, varname, paramstr, leveltype1, level1, level2, vdate, vtime);
         }
 
+      var_tile_t *ptiles = NULL;
+      if ( memcmp(&tiles, &dummy_tiles, sizeof(var_tile_t)) != 0 ) ptiles = &tiles;
       gribapiAddRecord(streamptr, param, gh, recsize, recpos, datatype, comptype, varname,
-                       leveltype1, leveltype2, lbounds, level1, level2, level_sf, level_unit, &tiles, 1);
+                       leveltype1, leveltype2, lbounds, level1, level2, level_sf, level_unit, ptiles, 1);
 
       grib_handle_delete(gh);
       gh = NULL;
