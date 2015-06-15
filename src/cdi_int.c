@@ -63,6 +63,7 @@ const char Filetypes[][9] = {
 
 
 int CDI_Debug   = 0;    /* If set to 1, debugging           */
+int CDI_Recopt = 0;
 
 int cdiGribApiDebug     = 0;
 int cdiDefaultLeveltype = -1;
@@ -288,6 +289,9 @@ void cdiInitialize(void)
 
       value = cdiGetenvInt("CDI_GRIBAPI_DEBUG");
       if ( value >= 0 ) cdiGribApiDebug = (int) value;
+
+      value = cdiGetenvInt("CDI_RECOPT");
+      if ( value >= 0 ) CDI_Recopt = (int) value;
 
       value = cdiGetenvInt("CDI_REGULARGRID");
       if ( value >= 0 ) cdiDataUnreduced = (int) value;

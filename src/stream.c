@@ -2132,6 +2132,7 @@ int streamInqFileID(int streamID)
   return (streamptr->fileID);
 }
 
+
 void cdiDefAccesstype(int streamID, int type)
 {
   stream_t *streamptr = reshGetVal(streamID, &streamOps);
@@ -2148,9 +2149,7 @@ void cdiDefAccesstype(int streamID, int type)
 
 int cdiInqAccesstype(int streamID)
 {
-  stream_t *streamptr;
-
-  streamptr = ( stream_t *) reshGetVal ( streamID, &streamOps );
+  stream_t *streamptr = (stream_t *) reshGetVal ( streamID, &streamOps );
 
   return (streamptr->accesstype);
 }
