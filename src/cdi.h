@@ -178,7 +178,7 @@ enum {
 #define MAX_KV_PAIRS_MATCH 10
 
 /* Data structure defining a key-value search, possibly with multiple
-   key-value pairs in combination. 
+   key-value pairs in combination.
 
    Currently, only multiple pairs combined by AND are supported.
 */

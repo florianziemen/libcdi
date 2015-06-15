@@ -84,7 +84,7 @@ typedef struct
   int            productDefinitionTemplate;
 
   /* meta-data for specification of tiles (currently only GRIB-API: */
-  subtype_t    *tiles;
+  subtype_t     *tiles;
 
   int                 opt_grib_nentries;                       /* current no. key-value pairs            */
   int                 opt_grib_kvpair_size;                    /* current allocated size                 */
@@ -235,7 +235,7 @@ static int tileNewEntry(int varID)
   if (vartable[varID].nsubtypes_alloc == 0)
     {
       /* create table for the first time. */
-      vartable[varID].nsubtypes_alloc     = 2;
+      vartable[varID].nsubtypes_alloc = 2;
       vartable[varID].nsubtypes       = 0;
       vartable[varID].recordTable     =
         (subtypetable_t *)xmalloc((size_t)vartable[varID].nsubtypes_alloc * sizeof (subtypetable_t));
@@ -608,7 +608,7 @@ int cmpparam(const void* s1, const void* s2)
 
 void cdi_generate_vars(stream_t *streamptr)
 {
-  int gridID, zaxisID, tilesetID;
+  int gridID, zaxisID;
 
   int instID, modelID, tableID;
   int param, zaxistype, ltype1, ltype2;
@@ -792,7 +792,7 @@ void cdi_generate_vars(stream_t *streamptr)
       free(dlevels);
 
       /* define new subtype for tile set */
-      tilesetID = vlistDefTileSubtype(vlistID, vartable[varid].tiles);
+      int tilesetID = vlistDefTileSubtype(vlistID, vartable[varid].tiles);
 
       /* generate new variable */
       int varID = stream_new_var(streamptr, gridID, zaxisID, tilesetID);

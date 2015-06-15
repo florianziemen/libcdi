@@ -966,6 +966,14 @@ int vlistNzaxis(int vlistID)
 }
 
 
+int vlistNsubtypes(int vlistID)
+{
+  vlist_t *vlistptr = vlist_to_pointer(vlistID);
+
+  return (vlistptr->nsubtypes);
+}
+
+
 void vlistDefNtsteps(int vlistID, int nts)
 {
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
@@ -994,25 +1002,27 @@ void vlistPrintKernel(vlist_t *vlistptr, FILE *fp)
 
   int nvars = vlistptr->nvars;
 
-  fprintf(fp, "nvars   %d\n"
-          "ngrids  %d\n"
-          "nzaxis  %d\n"
-          "taxisID %d\n"
-          "instID  %d\n"
-          "modelID %d\n"
-          "tableID %d\n",
-          nvars, vlistptr->ngrids, vlistptr->nzaxis, vlistptr->taxisID,
+  fprintf(fp, "nvars    : %d\n"
+          "ngrids   : %d\n"
+          "nzaxis   : %d\n"
+          "nsubtypes: %d\n"
+          "taxisID  : %d\n"
+          "instID   : %d\n"
+          "modelID  : %d\n"
+          "tableID  : %d\n",
+          nvars, vlistptr->ngrids, vlistptr->nzaxis, vlistptr->nsubtypes, vlistptr->taxisID,
           vlistptr->instID, vlistptr->modelID, vlistptr->tableID);
 
   if ( nvars > 0 )
     {
-      fprintf(fp, " varID param    gridID zaxisID tsteptype flag iorank"
+      fprintf(fp, " varID param    gridID zaxisID stypeID tsteptype flag iorank"
               " name     longname         units\n");
       for ( int varID = 0; varID < nvars; varID++ )
         {
           int param = vlistptr->vars[varID].param;
           int gridID = vlistptr->vars[varID].gridID;
           int zaxisID = vlistptr->vars[varID].zaxisID;
+          int subtypeID = vlistptr->vars[varID].subtypeID;
 	  int tsteptype = vlistptr->vars[varID].tsteptype;
           const char *name = vlistptr->vars[varID].name;
           const char *longname = vlistptr->vars[varID].longname;
@@ -1021,8 +1031,8 @@ void vlistPrintKernel(vlist_t *vlistptr, FILE *fp)
           int iorank = vlistptr->vars[varID].iorank;
 
           cdiParamToString(param, paramstr, sizeof(paramstr));
-          fprintf(fp, "%6d %-8s %6d  %6d  %6d  %5d %6d %-8s %s [%s]\n",
-                  varID, paramstr, gridID, zaxisID, tsteptype, flag, iorank,
+          fprintf(fp, "%6d %-8s %6d  %6d  %6d  %6d  %5d %6d %-8s %s [%s]\n",
+                  varID, paramstr, gridID, zaxisID, subtypeID, tsteptype, flag, iorank,
                   name?name:"", longname?longname:"", units?units:"");
         }
 
