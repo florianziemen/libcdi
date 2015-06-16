@@ -5,17 +5,16 @@
 #  include "grid.h"
 #endif
 
-#include "cdi.h"
 
 void varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds,
 		  int level1, int level2, int level_sf, int level_unit, int prec,
 		  int *pvarID, int *plevelID, int tsteptype, int numavg, int ltype1, int ltype2,
-		  const char *name, const char *stdname, const char *longname, const char *units);
+		  const char *name, const char *stdname, const char *longname, const char *units,
+                  const var_tile_t *tiles, int *tile_index);
 
 void varDefVCT(size_t vctsize, double *vctptr);
 void varDefZAxisReference(int nlev, int nvgrid, unsigned char uuid[CDI_UUID_SIZE]);
 
-int  varDefGrid(int vlistID, const grid_t *grid, int mode);
 int  varDefZaxis(int vlistID, int zaxistype, int nlevels, double *levels, int lbounds,
 		 double *levels1, double *levels2, int vctsize, double *vct, char *name,
 		 char *longname, char *units, int prec, int mode, int ltype);
@@ -34,8 +33,8 @@ void varDefTypeOfGeneratingProcess(int varID, int typeOfGeneratingProcess);
 void varDefProductDefinitionTemplate(int varID, int productDefinitionTemplate);
 
 
-void varDefOptGribInt(int varID, long lval, const char *keyword);
-void varDefOptGribDbl(int varID, double dval, const char *keyword);
+void varDefOptGribInt(int varID, int tile_index, long lval, const char *keyword);
+void varDefOptGribDbl(int varID, int tile_index, double dval, const char *keyword);
 int varOptGribNentries(int varID);
 
 int  zaxisCompare(int zaxisID, int zaxistype, int nlevels, int lbounds, const double *levels, char *longname, char *units, int ltype);

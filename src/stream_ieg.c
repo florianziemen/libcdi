@@ -771,7 +771,8 @@ void iegAddRecord(stream_t *streamptr, int param, int *pdb, int *gdb, double *vc
   datatype = iegInqDatatype(prec);
 
   varAddRecord(recID, param, gridID, leveltype, lbounds, level1, level2, 0, 0,
-	       datatype, &varID, &levelID, TSTEP_INSTANT, 0, 0, -1, NULL, NULL, NULL, NULL);
+	       datatype, &varID, &levelID, TSTEP_INSTANT, 0, 0, -1,
+               NULL, NULL, NULL, NULL, NULL, NULL);
 
   record->varID   = (short)varID;
   record->levelID = (short)levelID;
@@ -1321,7 +1322,8 @@ void iegReadVarDP(stream_t *streamptr, int varID, double *data, int *nmiss)
 
   vlistID  = streamptr->vlistID;
   fileID   = streamptr->fileID;
-  nlevs    = streamptr->vars[varID].nlevs;
+  /* NOTE: tiles are not supported here! */
+  nlevs    = streamptr->vars[varID].recordTable[0].nlevs;
   missval  = vlistInqVarMissval(vlistID, varID);
   gridID   = vlistInqVarGrid(vlistID, varID);
   gridsize = gridInqSize(gridID);
@@ -1334,7 +1336,8 @@ void iegReadVarDP(stream_t *streamptr, int varID, double *data, int *nmiss)
 
   for (levID = 0; levID < nlevs; levID++)
     {
-      recID = streamptr->vars[varID].level[levID];
+      /* NOTE: tiles are not supported here! */
+      recID = streamptr->vars[varID].recordTable[0].recordID[levID];
       recpos = streamptr->tsteps[tsid].records[recID].position;
       fileSetPos(fileID, recpos, SEEK_SET);
       iegRead(fileID, iegp);
@@ -1365,7 +1368,8 @@ void iegReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, 
 
   vlistID  = streamptr->vlistID;
   fileID   = streamptr->fileID;
-  nlevs    = streamptr->vars[varID].nlevs;
+  /* NOTE: tiles are not supported here! */
+  nlevs    = streamptr->vars[varID].recordTable[0].nlevs;
   missval  = vlistInqVarMissval(vlistID, varID);
   gridID   = vlistInqVarGrid(vlistID, varID);
   gridsize = gridInqSize(gridID);
@@ -1377,7 +1381,8 @@ void iegReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, 
 
   currentfilepos = fileGetPos(fileID);
 
-  recID = streamptr->vars[varID].level[levID];
+  /* NOTE: tiles are not supported here! */
+  recID = streamptr->vars[varID].recordTable[0].recordID[levID];
   recpos = streamptr->tsteps[tsid].records[recID].position;
   fileSetPos(fileID, recpos, SEEK_SET);
   iegRead(fileID, iegp);

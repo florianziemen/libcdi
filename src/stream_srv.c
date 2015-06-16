@@ -206,17 +206,25 @@ static
 void srv_add_record(stream_t *streamptr, int param, int level, int xsize, int ysize,
                     size_t recsize, off_t position, int prec)
 {
-  int vlistID = streamptr->vlistID;
-  int tsID    = streamptr->curTsID;
-  int recID   = recordNewEntry(streamptr, tsID);
-  record_t *record = &streamptr->tsteps[tsID].records[recID];
-
-  record->size     = recsize;
-  record->position = position;
-  record->param    = param;
-  record->ilevel   = level;
-
+  int leveltype;
+  int gridID = CDI_UNDEFID;
+  int levelID = 0;
+  int tsID, recID, varID;
+  int datatype;
+  record_t *record;
   grid_t grid;
+  int vlistID;
+
+  vlistID = streamptr->vlistID;
+  tsID    = streamptr->curTsID;
+  recID   = recordNewEntry(streamptr, tsID);
+  record  = &streamptr->tsteps[tsID].records[recID];
+
+  (*record).size     = recsize;
+  (*record).position = position;
+  (*record).param    = param;
+  (*record).ilevel   = level;
+
   memset(&grid, 0, sizeof(grid_t));
   grid.type  = GRID_GENERIC;
   grid.size  = xsize*ysize;
@@ -224,24 +232,22 @@ void srv_add_record(stream_t *streamptr, int param, int level, int xsize, int ys
   grid.ysize = ysize;
   grid.xvals = NULL;
   grid.yvals = NULL;
-  int gridID = varDefGrid(vlistID, &grid, 0);
+  gridID = varDefGrid(vlistID, &grid, 0);
   /*
   if ( level == 0 ) leveltype = ZAXIS_SURFACE;
   else              leveltype = ZAXIS_GENERIC;
   */
-  int leveltype = ZAXIS_GENERIC;
+  leveltype = ZAXIS_GENERIC;
 
-  int datatype = srvInqDatatype(prec);
-
-  int levelID = 0;
-  int varID;
+  datatype = srvInqDatatype(prec);
 
   varAddRecord(recID, param, gridID, leveltype, 0, level, 0, 0, 0,
-	       datatype, &varID, &levelID, TSTEP_INSTANT, 0, 0, -1, NULL, NULL, NULL, NULL);
+	       datatype, &varID, &levelID, TSTEP_INSTANT, 0, 0, -1,
+               NULL, NULL, NULL, NULL, NULL, NULL);
 
   xassert(varID <= SHRT_MAX && levelID <= SHRT_MAX);
-  record->varID   = (short)varID;
-  record->levelID = (short)levelID;
+  (*record).varID   = (short)varID;
+  (*record).levelID = (short)levelID;
 
   streamptr->tsteps[tsID].nallrecs++;
   streamptr->nrecs++;
@@ -727,7 +733,8 @@ void srvReadVarDP(stream_t *streamptr, int varID, double *data, int *nmiss)
 
   vlistID  = streamptr->vlistID;
   fileID   = streamptr->fileID;
-  nlevs    = streamptr->vars[varID].nlevs;
+  /* NOTE: tiles are not supported here! */
+  nlevs    = streamptr->vars[varID].recordTable[0].nlevs;
   missval  = vlistInqVarMissval(vlistID, varID);
   gridID   = vlistInqVarGrid(vlistID, varID);
   gridsize = gridInqSize(gridID);
@@ -740,7 +747,8 @@ void srvReadVarDP(stream_t *streamptr, int varID, double *data, int *nmiss)
 
   for (levID = 0; levID < nlevs; levID++)
     {
-      recID = streamptr->vars[varID].level[levID];
+      /* NOTE: tiles are not supported here! */
+      recID = streamptr->vars[varID].recordTable[0].recordID[levID];
       recpos = streamptr->tsteps[tsid].records[recID].position;
       fileSetPos(fileID, recpos, SEEK_SET);
       if (srvRead(fileID, srvp) < 0)
@@ -774,7 +782,8 @@ void srvReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, 
 
   vlistID  = streamptr->vlistID;
   fileID   = streamptr->fileID;
-  nlevs    = streamptr->vars[varID].nlevs;
+  /* NOTE: tiles are not supported here! */
+  nlevs    = streamptr->vars[varID].recordTable[0].nlevs;
   missval  = vlistInqVarMissval(vlistID, varID);
   gridID   = vlistInqVarGrid(vlistID, varID);
   gridsize = gridInqSize(gridID);
@@ -786,7 +795,8 @@ void srvReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, 
 
   currentfilepos = fileGetPos(fileID);
 
-  recID = streamptr->vars[varID].level[levID];
+  /* NOTE: tiles are not supported here! */
+  recID = streamptr->vars[varID].recordTable[0].recordID[levID];
   recpos = streamptr->tsteps[tsid].records[recID].position;
   fileSetPos(fileID, recpos, SEEK_SET);
   if (srvRead(fileID, srvp) < 0)

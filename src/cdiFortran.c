@@ -42,6 +42,15 @@
 /*  ZAXIS types  */
 
 
+/*  SUBTYPE types  */
+
+
+/*  Data structure defining a key-value search, possibly with multiple
+   key-value pairs in combination. 
+
+   Currently, only multiple pairs combined by AND are supported.  */
+
+
 /*  TIME types  */
 
 
@@ -70,6 +79,13 @@
 
 FCALLSCSUB0 (cdiReset, CDIRESET, cdireset)
 FCALLSCFUN1 (STRING, cdiStringError, CDISTRINGERROR, cdistringerror, INT)
+
+/*  Wrapper for cdiStringError, since direct use of  */
+
+
+/*  cdiStringError results in SEGFAULT with Cray compiler  */
+
+FCALLSCSUB2 (cdiGetStringError, CDIGETSTRINGERROR, cdigetstringerror, INT, PSTRING)
 FCALLSCSUB1 (cdiDebug, CDIDEBUG, cdidebug, INT)
 FCALLSCFUN0 (STRING, cdiLibraryVersion, CDILIBRARYVERSION, cdilibraryversion)
 FCALLSCSUB0 (cdiPrintVersion, CDIPRINTVERSION, cdiprintversion)
@@ -188,6 +204,7 @@ FCALLSCFUN1 (INT, vlistInqModel, VLISTINQMODEL, vlistinqmodel, INT)
 
 /*  VLIST VAR routines  */
 
+FCALLSCFUN5 (INT, vlistDefVarTiles, VLISTDEFVARTILES, vlistdefvartiles, INT, INT, INT, INT, INT)
 FCALLSCFUN4 (INT, vlistDefVar, VLISTDEFVAR, vlistdefvar, INT, INT, INT, INT)
 FCALLSCSUB3 (vlistChangeVarGrid, VLISTCHANGEVARGRID, vlistchangevargrid, INT, INT, INT)
 FCALLSCSUB3 (vlistChangeVarZaxis, VLISTCHANGEVARZAXIS, vlistchangevarzaxis, INT, INT, INT)
@@ -510,6 +527,30 @@ FCALLSCFUN2 (STRING, tableInqParUnitsPtr, TABLEINQPARUNITSPTR, tableinqparunitsp
 FCALLSCSUB3 (streamDefHistory, STREAMDEFHISTORY, streamdefhistory, INT, INT, STRING)
 FCALLSCFUN1 (INT, streamInqHistorySize, STREAMINQHISTORYSIZE, streaminqhistorysize, INT)
 FCALLSCSUB2 (streamInqHistoryString, STREAMINQHISTORYSTRING, streaminqhistorystring, INT, PSTRING)
+
+/*  Subtype routines  */
+
+FCALLSCFUN1 (INT, subtypeCreate, SUBTYPECREATE, subtypecreate, INT)
+
+/*  Gives a textual summary of the variable subtype  */
+
+FCALLSCSUB1 (subtypePrint, SUBTYPEPRINT, subtypeprint, INT)
+
+/*  Compares two subtype data structures.  */
+
+FCALLSCFUN2 (INT, subtypeCompare, SUBTYPECOMPARE, subtypecompare, INT, INT)
+FCALLSCFUN1 (INT, subtypeInqSize, SUBTYPEINQSIZE, subtypeinqsize, INT)
+FCALLSCFUN1 (INT, subtypeInqActiveIndex, SUBTYPEINQACTIVEINDEX, subtypeinqactiveindex, INT)
+FCALLSCSUB2 (subtypeDefActiveIndex, SUBTYPEDEFACTIVEINDEX, subtypedefactiveindex, INT, INT)
+
+/*  Generate a "query object" out of a key-value pair.  */
+
+
+/*  Generate an AND-combined "query object" out of two previous
+         query objects.  */
+
+FCALLSCFUN3 (INT, subtypeInqTile, SUBTYPEINQTILE, subtypeinqtile, INT, INT, INT)
+FCALLSCFUN2 (INT, vlistInqVarSubtype, VLISTINQVARSUBTYPE, vlistinqvarsubtype, INT, INT)
 FCALLSCSUB3 (gribapiLibraryVersion, GRIBAPILIBRARYVERSION, gribapilibraryversion, PINT, PINT, PINT)
 
 #endif

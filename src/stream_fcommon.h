@@ -1,17 +1,11 @@
 #ifndef STREAM_FCOMMON_H
 #define STREAM_FCOMMON_H
 
-#ifndef  _CDI_INT_H
-#include "cdi_int.h"
-#endif
-
 enum {
   SINGLE_PRECISION = 4,
   DOUBLE_PRECISION = 8,
 };
 
-void streamFCopyRecord(stream_t *streamptr2, stream_t *streamptr1,
-                       const char *container_name);
 
 #endif
 /*

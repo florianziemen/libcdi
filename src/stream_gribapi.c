@@ -15,6 +15,7 @@
 #include "vlist.h"
 #include "stream_grb.h"
 #include "calendar.h"
+#include "subtype.h"
 
 
 #if  defined  (HAVE_LIBGRIB_API)
@@ -26,6 +27,8 @@
 
 extern int cdiInventoryMode;
 
+static var_tile_t dummy_tiles = { -1, -1, -1, -1, -1, -1 };
+
 typedef struct {
   int param;
   int level1;
@@ -33,6 +36,9 @@ typedef struct {
   int ltype;
   int tsteptype;
   char name[32];
+
+  var_tile_t tiles;
+
 } compvar2_t;
 
 
@@ -400,7 +406,7 @@ void grib2GetLevel(grib_handle *gh, int *leveltype1, int *leveltype2, int *lboun
 }
 
 static
-void gribGetLevel(grib_handle *gh, int* leveltype1, int* leveltype2, int* lbounds, int* level1, int* level2, int* level_sf, int* level_unit)
+void gribGetLevel(grib_handle *gh, int* leveltype1, int* leveltype2, int* lbounds, int* level1, int* level2, int* level_sf, int* level_unit, var_tile_t* tiles)
 {
   if ( gribEditionNumber(gh) <= 1 )
     {
@@ -412,6 +418,14 @@ void gribGetLevel(grib_handle *gh, int* leveltype1, int* leveltype2, int* lbound
   else
     {
       grib2GetLevel(gh, leveltype1, leveltype2, lbounds, level1, level2, level_sf, level_unit);
+
+      /* read in tiles attributes (if there are any) */
+      tiles->tileindex = gribGetLongDefault(gh, subtypeAttributeName[SUBTYPE_ATT_TILEINDEX], -1);
+      tiles->totalno_of_tileattr_pairs = gribGetLongDefault(gh, subtypeAttributeName[SUBTYPE_ATT_TOTALNO_OF_TILEATTR_PAIRS], -1);
+      tiles->tileClassification = gribGetLongDefault(gh, subtypeAttributeName[SUBTYPE_ATT_TILE_CLASSIFICATION], -1);
+      tiles->numberOfTiles = gribGetLongDefault(gh, subtypeAttributeName[SUBTYPE_ATT_NUMBER_OF_TILES], -1);
+      tiles->numberOfAttributes = gribGetLongDefault(gh, subtypeAttributeName[SUBTYPE_ATT_NUMBER_OF_ATTR], -1);
+      tiles->attribute = gribGetLongDefault(gh, subtypeAttributeName[SUBTYPE_ATT_TILEATTRIBUTE], -1);
     }
 }
 
@@ -420,7 +434,12 @@ void gribapiGetString(grib_handle *gh, const char *key, char *string, size_t len
 {
   string[0] = 0;
 
-  GRIB_CHECK(grib_get_string(gh, key, string, &length), 0);
+  int ret = grib_get_string(gh, key, string, &length);
+  if (ret != 0)
+    {
+      fprintf(stderr, "grib_get_string(gh, \"%s\", ...) failed!\n", key);
+      GRIB_CHECK(ret, 0);
+    }
   if      ( length == 8 && memcmp(string, "unknown", length) == 0 ) string[0] = 0;
   else if ( length == 2 && memcmp(string, "~", length)       == 0 ) string[0] = 0;
 }
@@ -429,7 +448,8 @@ void gribapiGetString(grib_handle *gh, const char *key, char *string, size_t len
 static
 void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
                       size_t recsize, off_t position, int datatype, int comptype, const char *varname,
-                      int leveltype1, int leveltype2, int lbounds, int level1, int level2, int level_sf, int level_unit)
+                      int leveltype1, int leveltype2, int lbounds, int level1, int level2, int level_sf, int level_unit,
+                      const var_tile_t *tiles, int lread_additional_keys)
 {
   int zaxistype;
   int gridID = CDI_UNDEFID, varID;
@@ -464,6 +484,8 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
   (*record).ilevel2   = level2;
   (*record).ltype     = leveltype1;
   (*record).tsteptype = tsteptype;
+  if ( tiles ) (*record).tiles = *tiles;
+  else         (*record).tiles = dummy_tiles;
 
   //FIXME: This may leave the variable name unterminated (which is the behavior that I found in the code).
   //       I don't know precisely how this field is used, so I did not change this behavior to avoid regressions,
@@ -552,9 +574,11 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
     }
   // fprintf(stderr, "param %d name %s %s %s\n", param, name, longname, units);
 
+  /* add the previously read record data to the (intermediate) list of records */
+  int tile_index = -1;
   varAddRecord(recID, param, gridID, zaxistype, lbounds, level1, level2, level_sf, level_unit,
 	       datatype, &varID, &levelID, tsteptype, numavg, leveltype1, leveltype2,
-	       varname, stdname, longname, units);
+	       varname, stdname, longname, units, tiles, &tile_index);
 
   (*record).varID   = (short)varID;
   (*record).levelID = (short)levelID;
@@ -589,23 +613,15 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
   long   lval;
   double dval;
 
-  /* we read the additional keys for the first variable record only. */
-  int linitial_field = (varOptGribNentries(varID) == 0);
-
-  for ( i = 0; i < cdiNAdditionalGRIBKeys; i++ )
-    {
-      if ( linitial_field )
-	{
-	  if ( grib_get_long(gh, cdiAdditionalGRIBKeys[i], &lval) == 0 )
-            varDefOptGribInt(varID, lval, cdiAdditionalGRIBKeys[i]);
-	}
-      if ( linitial_field )
-	{
-	  if ( grib_get_double(gh, cdiAdditionalGRIBKeys[i], &dval) == 0 )
-            varDefOptGribDbl(varID, dval, cdiAdditionalGRIBKeys[i]);
-	}
-      /* note: if the key is not defined, we do not throw an error! */
-    }
+  if (lread_additional_keys)
+    for ( i = 0; i < cdiNAdditionalGRIBKeys; i++ )
+      {
+        /* note: if the key is not defined, we do not throw an error! */
+        if ( grib_get_long(gh, cdiAdditionalGRIBKeys[i], &lval) == 0 )
+          varDefOptGribInt(varID, tile_index, lval, cdiAdditionalGRIBKeys[i]);
+        if ( grib_get_double(gh, cdiAdditionalGRIBKeys[i], &dval) == 0 )
+          varDefOptGribDbl(varID, tile_index, dval, cdiAdditionalGRIBKeys[i]);
+      }
 
   if ( varInqInst(varID) == CDI_UNDEFID )
     {
@@ -662,8 +678,8 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
 }
 #endif
 
-static
-compvar2_t gribapiVarSet(int param, int level1, int level2, int leveltype, int tsteptype, char *name)
+static compvar2_t gribapiVarSet(int param, int level1, int level2, int leveltype, 
+                                int tsteptype, char *name, var_tile_t tiles_data)
 {
   compvar2_t compVar;
   size_t maxlen = sizeof(compVar.name);
@@ -678,6 +694,7 @@ compvar2_t gribapiVarSet(int param, int level1, int level2, int leveltype, int t
   memset(compVar.name, 0, maxlen);
   memcpy(compVar.name, name, len);
 
+  compVar.tiles = tiles_data;
   return (compVar);
 }
 #endif
@@ -701,6 +718,8 @@ int gribapiVarCompare(compvar2_t compVar, record_t record, int flag)
       if ( compVar0.tsteptype == TSTEP_INSTANT  && compVar.tsteptype == TSTEP_INSTANT3 ) compVar0.tsteptype = TSTEP_INSTANT3;
       if ( compVar0.tsteptype == TSTEP_INSTANT3 && compVar.tsteptype == TSTEP_INSTANT  ) compVar0.tsteptype = TSTEP_INSTANT;
     }
+
+  compVar0.tiles = record.tiles;
 
   int rstatus = memcmp(&compVar0, &compVar, sizeof(compvar2_t));
 
@@ -854,7 +873,8 @@ int gribapiScanTimestep1(stream_t * streamptr)
 
       int param = gribapiGetParam(gh);
       int leveltype1 = -1, leveltype2 = -1, lbounds, level_sf, level_unit;
-      gribGetLevel(gh, &leveltype1, &leveltype2, &lbounds, &level1, &level2, &level_sf, &level_unit);
+      var_tile_t tiles = dummy_tiles;
+      gribGetLevel(gh, &leveltype1, &leveltype2, &lbounds, &level1, &level2, &level_sf, &level_unit, &tiles);
 
       char varname[256];
       varname[0] = 0;
@@ -883,7 +903,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
 
       if(nrecs)
         {
-          checkTimeResult result = checkTime(streamptr, gribapiVarSet(param, level1, level2, leveltype1, tsteptype, varname), &datetime, &datetime0);
+          checkTimeResult result = checkTime(streamptr, gribapiVarSet(param, level1, level2, leveltype1, tsteptype, varname, tiles), &datetime, &datetime0);
           if(result == CHECKTIME_STOP)
             {
               break;
@@ -925,8 +945,10 @@ int gribapiScanTimestep1(stream_t * streamptr)
                 nrecs, (int)recpos, varname, paramstr, leveltype1, level1, level2, vdate, vtime);
         }
 
+      var_tile_t *ptiles = NULL;
+      if ( memcmp(&tiles, &dummy_tiles, sizeof(var_tile_t)) != 0 ) ptiles = &tiles;
       gribapiAddRecord(streamptr, param, gh, recsize, recpos, datatype, comptype, varname,
-                       leveltype1, leveltype2, lbounds, level1, level2, level_sf, level_unit);
+                       leveltype1, leveltype2, lbounds, level1, level2, level_sf, level_unit, ptiles, 1);
 
       grib_handle_delete(gh);
       gh = NULL;
@@ -1078,7 +1100,8 @@ int gribapiScanTimestep2(stream_t * streamptr)
 
       int param = gribapiGetParam(gh);
       int level1 = 0, level2 = 0, leveltype1, leveltype2, lbounds, level_sf, level_unit;
-      gribGetLevel(gh, &leveltype1, &leveltype2, &lbounds, &level1, &level2, &level_sf, &level_unit);
+      var_tile_t tiles = dummy_tiles;
+      gribGetLevel(gh, &leveltype1, &leveltype2, &lbounds, &level1, &level2, &level_sf, &level_unit, &tiles);
 
       char varname[256];
       varname[0] = 0;
@@ -1128,7 +1151,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
         .time = vtime
       };
 
-      compvar2_t compVar = gribapiVarSet(param, level1, level2, leveltype1, tsteptype, varname);
+      compvar2_t compVar = gribapiVarSet(param, level1, level2, leveltype1, tsteptype, varname, tiles);
 
       for ( recID = 0; recID < nrecords; recID++ )
         if ( gribapiVarCompare(compVar, streamptr->tsteps[tsID].records[recID], 0) == 0 ) break;
@@ -1307,7 +1330,8 @@ int gribapiScanTimestep(stream_t * streamptr)
 
           int param = gribapiGetParam(gh);
           int level1 = 0, level2 = 0, leveltype1, leveltype2 = -1, lbounds, level_sf, level_unit;
-          gribGetLevel(gh, &leveltype1, &leveltype2, &lbounds, &level1, &level2, &level_sf, &level_unit);
+          var_tile_t tiles = dummy_tiles;
+          gribGetLevel(gh, &leveltype1, &leveltype2, &lbounds, &level1, &level2, &level_sf, &level_unit, &tiles);
 
           varname[0] = 0;
 	  gribapiGetString(gh, "shortName", varname, sizeof(varname));
@@ -1359,7 +1383,7 @@ int gribapiScanTimestep(stream_t * streamptr)
 
           int tsteptype = gribapiGetTsteptype(gh);
 
-          compvar2_t compVar = gribapiVarSet(param, level1, level2, leveltype1, tsteptype, varname);
+          compvar2_t compVar = gribapiVarSet(param, level1, level2, leveltype1, tsteptype, varname, tiles);
 
 	  for ( vrecID = 0; vrecID < nrecs; vrecID++ )
 	    {
@@ -2625,47 +2649,45 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
 
   gribapiDefLevel((int)editionNumber, gh, param, zaxisID, levelID, gc->init);
 
-  /* ---------------------------------- */
-  /* Local change: 2013-01-28, FP (DWD) */
-  /* ---------------------------------- */
-
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
   //if (!gc->init)
   {
-    for ( int i=0; i<vlistptr->vars[varID].opt_grib_dbl_nentries; i++ )
+    int ret = 0;
+
+    /* NOTE: Optional key/value pairs: Note that we do not distinguish
+     *       between tiles here! */
+
+    for ( int i=0; i<vlistptr->vars[varID].opt_grib_nentries; i++ )
       {
-        if ( vlistptr->vars[varID].opt_grib_dbl_update[i] )
+        if ( vlistptr->vars[varID].opt_grib_kvpair[i].update )
           {
             //DR: Fix for multi-level fields (otherwise only the 1st level is correct)
-            if ( zaxisInqSize(zaxisID)==(levelID+1) ) vlistptr->vars[varID].opt_grib_dbl_update[i] = FALSE;
-            int ret = my_grib_set_double(gh, vlistptr->vars[varID].opt_grib_dbl_keyword[i],
-                                         vlistptr->vars[varID].opt_grib_dbl_val[i]);
-            if (ret != 0) {
-              fprintf(stderr, "key \"%s\"  :   value = %g\n",
-                      vlistptr->vars[varID].opt_grib_dbl_keyword[i],
-                      vlistptr->vars[varID].opt_grib_dbl_val[i]);
-            }
-            GRIB_CHECK(ret, 0);
-          }
-      }
-    for ( int i=0; i<vlistptr->vars[varID].opt_grib_int_nentries; i++ )
-      {
-        if ( vlistptr->vars[varID].opt_grib_int_update[i] )
-          {
-            //DR: Fix for multi-level fields (otherwise only the 1st level is correct)
-            if ( zaxisInqSize(zaxisID)==(levelID+1) ) vlistptr->vars[varID].opt_grib_int_update[i] = FALSE;
-            int ret = my_grib_set_long(gh, vlistptr->vars[varID].opt_grib_int_keyword[i],
-                                       vlistptr->vars[varID].opt_grib_int_val[i]);
-            if (ret != 0) {
-              fprintf(stderr, "key \"%s\"  :   value = %d\n",
-                      vlistptr->vars[varID].opt_grib_int_keyword[i],
-                      vlistptr->vars[varID].opt_grib_int_val[i]);
-            }
-            GRIB_CHECK(ret, 0);
+            if ( zaxisInqSize(zaxisID)==(levelID+1) )
+              vlistptr->vars[varID].opt_grib_kvpair[i].update = FALSE;
+
+            if (vlistptr->vars[varID].opt_grib_kvpair[i].data_type == t_double)
+              {
+                if ( CDI_Debug )
+                  Message("key \"%s\"  :   double value = %g\n",
+                          vlistptr->vars[varID].opt_grib_kvpair[i].keyword,
+                          vlistptr->vars[varID].opt_grib_kvpair[i].dbl_val);
+                my_grib_set_double(gh, vlistptr->vars[varID].opt_grib_kvpair[i].keyword,
+                                   vlistptr->vars[varID].opt_grib_kvpair[i].dbl_val);
+                GRIB_CHECK(ret, 0);
+                }
+            if (vlistptr->vars[varID].opt_grib_kvpair[i].data_type == t_int)
+              {
+                if ( CDI_Debug )
+                  Message("key \"%s\"  :   integer value = %d\n",
+                          vlistptr->vars[varID].opt_grib_kvpair[i].keyword,
+                          vlistptr->vars[varID].opt_grib_kvpair[i].int_val);
+                my_grib_set_long(gh, vlistptr->vars[varID].opt_grib_kvpair[i].keyword,
+                                 (long) vlistptr->vars[varID].opt_grib_kvpair[i].int_val);
+                GRIB_CHECK(ret, 0);
+              }
           }
       }
   }
-
 
   if ( nmiss > 0 )
     {

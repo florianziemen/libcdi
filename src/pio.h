@@ -8,7 +8,6 @@
 #include <stdlib.h>
 #include <mpi.h>
 
-#include "cdi_int.h"
 
 void cdiPioFileWritingInit(void (*postCommSetupActions)(void));
 void cdiPioFileWritingFinalize(void);

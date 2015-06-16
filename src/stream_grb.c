@@ -17,6 +17,7 @@
 #include "namespace.h"
 
 
+
 int grib1ltypeToZaxisType(int grib_ltype)
 {
   int zaxistype = ZAXIS_GENERIC;
@@ -438,20 +439,21 @@ void grbReadVarDP(stream_t * streamptr, int varID, double *data, int *nmiss)
   int fileID  = streamptr->fileID;
   int tsID    = streamptr->curTsID;
 
-  int nlevs    = streamptr->vars[varID].nlevs;
   int gridID   = vlistInqVarGrid(vlistID, varID);
   int gridsize = gridInqSize(gridID);
 
-  if ( CDI_Debug )
-    Message("nlevs = %d gridID = %d gridsize = %d", nlevs, gridID, gridsize);
-
   off_t currentfilepos = fileGetPos(fileID);
 
+
+  int isub     = subtypeInqActiveIndex(streamptr->vars[varID].subtypeID);
+  int nlevs    = streamptr->vars[varID].recordTable[0].nlevs;
+  if ( CDI_Debug )
+    Message("nlevs = %d gridID = %d gridsize = %d", nlevs, gridID, gridsize);
   *nmiss = 0;
   for (int levelID = 0; levelID < nlevs; levelID++ )
     {
-      int recID   = streamptr->vars[varID].level[levelID];
-      off_t recpos  = streamptr->tsteps[tsID].records[recID].position;
+      int    recID   = streamptr->vars[varID].recordTable[isub].recordID[levelID];
+      off_t  recpos  = streamptr->tsteps[tsID].records[recID].position;
       size_t recsize = streamptr->tsteps[tsID].records[recID].size;
 
       fileSetPos(fileID, recpos, SEEK_SET);
@@ -465,7 +467,7 @@ void grbReadVarDP(stream_t * streamptr, int varID, double *data, int *nmiss)
       streamptr->tsteps[tsID].records[recID].zip = grbUnzipRecord(gribbuffer, &recsize);
 
       grbDecode(filetype, gribbuffer, (int)recsize, &data[levelID*gridsize], gridsize,
-		streamptr->unreduced, &imiss, missval, vlistID, varID);
+                streamptr->unreduced, &imiss, missval, vlistID, varID);
 
       *nmiss += imiss;
     }
@@ -492,8 +494,15 @@ void grbReadVarSliceDP(stream_t * streamptr, int varID, int levelID, double *dat
 
   off_t currentfilepos = fileGetPos(fileID);
 
-  int recID   = streamptr->vars[varID].level[levelID];
-  off_t recpos  = streamptr->tsteps[tsID].records[recID].position;
+  int    isub    = subtypeInqActiveIndex(streamptr->vars[varID].subtypeID);
+  int    nlevs   = streamptr->vars[varID].recordTable[isub].nlevs;
+
+
+  int zaxisID =  vlistInqVarZaxis(vlistID, varID);
+  int nlevs2 = zaxisInqSize(zaxisID);
+
+  int    recID   = streamptr->vars[varID].recordTable[isub].recordID[levelID];
+  off_t  recpos  = streamptr->tsteps[tsID].records[recID].position;
   size_t recsize = streamptr->tsteps[tsID].records[recID].size;
 
   if ( recsize == 0 )

@@ -32,6 +32,33 @@ const char *cdiStringError(int cdiErrno)
 
   return UnknownError;
 }
+
+/*
+@Function  cdiGetStringError
+@Title     Get CDI Error message from cdiStringError
+
+@Prototype void cdiGetStringError(int cdiErrno, char *name)
+@Parameter
+    @Item  cdiErrno  CDI error code.
+    @Item  name      Corresponding error string
+
+@Description
+The function @func{cdiGetStringError} returns a CDI error string.
+
+@Result
+@func{cdiGetStringError} a CDI error string.
+
+@EndFunction
+*/
+void cdiGetStringError(int cdiErrno, char *name)
+{
+
+  strcpy(name, cdiStringError(cdiErrno));
+
+  return;
+}
+
+
 /*
  * Local Variables:
  * c-file-style: "Java"

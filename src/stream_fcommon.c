@@ -1,5 +1,6 @@
 #include <stdlib.h>
 
+#include "cdi_int.h"
 #include "dmemory.h"
 #include "file.h"
 #include "stream_fcommon.h"

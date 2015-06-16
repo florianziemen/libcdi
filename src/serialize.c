@@ -95,3 +95,64 @@ void serializeUnpackInCore(const void *buf, int buf_size, int *position,
   pos += size;
   *position = pos;
 }
+
+/*
+ * (de-)marshalling function for common data structures
+ */
+inline int
+serializeStrTabGetPackSize(const char **strTab, int numStr,
+                           void *context)
+{
+  xassert(numStr >= 0);
+  int packBuffSize = 0;
+  for (size_t i = 0; i < (size_t)numStr; ++i)
+  {
+    size_t len = strlen(strTab[i]);
+    packBuffSize +=
+      serializeGetSize(1, DATATYPE_INT, context)
+      + serializeGetSize((int)len, DATATYPE_TXT, context);
+  }
+  packBuffSize +=
+    serializeGetSize(1, DATATYPE_UINT32, context);
+  return packBuffSize;
+}
+
+inline void
+serializeStrTabPack(const char **strTab, int numStr,
+                    void *buf, int buf_size, int *position, void *context)
+{
+  uint32_t d = 0;
+  xassert(numStr >= 0);
+  for (size_t i = 0; i < (size_t)numStr; ++i)
+  {
+    size_t len = strlen(strTab[i]);
+    serializePack(&(int){(int)len}, 1, DATATYPE_INT,
+                  buf, buf_size, position, context);
+    serializePack(strTab[i], (int)len, DATATYPE_TXT,
+                  buf, buf_size, position, context);
+    d ^= cdiCheckSum(DATATYPE_TXT, (int)len, strTab[i]);
+  }
+  serializePack(&d, 1, DATATYPE_UINT32,
+                buf, buf_size, position, context);
+}
+
+inline void
+serializeStrTabUnpack(const void *buf, int buf_size, int *position,
+                      char **strTab, int numStr, void *context)
+{
+  uint32_t d, d2 = 0;
+  xassert(numStr >= 0);
+  for (size_t i = 0; i < (size_t)numStr; ++i)
+    {
+      int len;
+      serializeUnpack(buf, buf_size, position,
+                      &len, 1, DATATYPE_INT, context);
+      serializeUnpack(buf, buf_size, position,
+                      strTab[i], len, DATATYPE_TXT, context);
+      strTab[i][len] = '\0';
+      d2 ^= cdiCheckSum(DATATYPE_TXT, (size_t)len, strTab[i]);
+    }
+  serializeUnpack(buf, buf_size, position,
+                  &d, 1, DATATYPE_UINT32, context);
+  xassert(d == d2);
+}
