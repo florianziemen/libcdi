@@ -221,7 +221,7 @@ all-local: $(LOCALTARGETS)
 CLEANFILES  = `ls *~`
 #CLEANFILES += cdilib.c
 if CREATE_ISOC
-CLEANFILES += mo_cdi.$(FCMODEXT) mo_cdi.$(OBJEXT) mo_cdi.f90
+CLEANFILES += mo_cdi.$(FCMODEXT) mo_cdi.$(OBJEXT)
 endif
 
 if ENABLE_CDI_LIB

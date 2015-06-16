@@ -495,6 +495,17 @@ $definitionLines = []
 $opaqueTypes = []
 $publicTypes = []
 
+def rubyVersionOk()
+       version = RUBY_VERSION.split(".")
+       if version[0].to_i > 1
+               return true
+       elsif version[0].to_i == 1
+               return version[1].to_i >= 9
+       else
+               return false
+       end
+end
+
 #This substitutes the placeholders <opaqueTypes> and <publicTypes> in the regexString prior to constructing a Regexp out of it.
 def matchTemplate(regexString, matchString)
 	opaqueTypesString = "(#{ $opaqueTypes.collect{ |type| type }.join('|') })"
@@ -777,4 +788,8 @@ def main
 	end
 end
 
-main()
+if rubyVersionOk()
+       main()
+else
+       puts("Error: Ruby version #{RUBY_VERSION} is too old (version 1.9 is required). Skipping fortran interface generation.")
+end
