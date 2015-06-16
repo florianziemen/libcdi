@@ -46,7 +46,7 @@
 
 
 /*  Data structure defining a key-value search, possibly with multiple
-   key-value pairs in combination. 
+   key-value pairs in combination.
 
    Currently, only multiple pairs combined by AND are supported.  */
 
@@ -181,6 +181,7 @@ FCALLSCFUN1 (INT, vlistNumber, VLISTNUMBER, vlistnumber, INT)
 FCALLSCFUN1 (INT, vlistNvars, VLISTNVARS, vlistnvars, INT)
 FCALLSCFUN1 (INT, vlistNgrids, VLISTNGRIDS, vlistngrids, INT)
 FCALLSCFUN1 (INT, vlistNzaxis, VLISTNZAXIS, vlistnzaxis, INT)
+FCALLSCFUN1 (INT, vlistNsubtypes, VLISTNSUBTYPES, vlistnsubtypes, INT)
 FCALLSCSUB2 (vlistDefNtsteps, VLISTDEFNTSTEPS, vlistdefntsteps, INT, INT)
 FCALLSCFUN1 (INT, vlistNtsteps, VLISTNTSTEPS, vlistntsteps, INT)
 FCALLSCFUN1 (INT, vlistGridsizeMax, VLISTGRIDSIZEMAX, vlistgridsizemax, INT)
@@ -193,6 +194,8 @@ FCALLSCFUN2 (INT, vlistZaxisIndex, VLISTZAXISINDEX, vlistzaxisindex, INT, INT)
 FCALLSCSUB3 (vlistChangeZaxisIndex, VLISTCHANGEZAXISINDEX, vlistchangezaxisindex, INT, INT, INT)
 FCALLSCSUB3 (vlistChangeZaxis, VLISTCHANGEZAXIS, vlistchangezaxis, INT, INT, INT)
 FCALLSCFUN1 (INT, vlistNrecs, VLISTNRECS, vlistnrecs, INT)
+FCALLSCFUN2 (INT, vlistSubtype, VLISTSUBTYPE, vlistsubtype, INT, INT)
+FCALLSCFUN2 (INT, vlistSubtypeIndex, VLISTSUBTYPEINDEX, vlistsubtypeindex, INT, INT)
 FCALLSCSUB2 (vlistDefTaxis, VLISTDEFTAXIS, vlistdeftaxis, INT, INT)
 FCALLSCFUN1 (INT, vlistInqTaxis, VLISTINQTAXIS, vlistinqtaxis, INT)
 FCALLSCSUB2 (vlistDefTable, VLISTDEFTABLE, vlistdeftable, INT, INT)

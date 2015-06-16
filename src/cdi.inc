@@ -1,10 +1,10 @@
 ! This file was automatically generated, don't edit!
 !
-! Fortran interface for CDI library version 1.6.9
+! Fortran interface for CDI library version 1.7.0
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   April 2015
+! Uwe Schulzweida, MPI-MET, Hamburg,   June 2015
 !
 
       INTEGER    CDI_MAX_NAME          
@@ -293,7 +293,7 @@
       PARAMETER (MAX_KV_PAIRS_MATCH     = 10)
 !
 !  Data structure defining a key-value search, possibly with multiple
-!  key-value pairs in combination. 
+!  key-value pairs in combination.
 !  
 !  Currently, only multiple pairs combined by AND are supported.
 !
@@ -774,6 +774,10 @@
 !                                    (INTEGER         vlistID)
       EXTERNAL        vlistNzaxis
 
+      INTEGER         vlistNsubtypes
+!                                    (INTEGER         vlistID)
+      EXTERNAL        vlistNsubtypes
+
 !                     vlistDefNtsteps
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         nts)
@@ -834,6 +838,16 @@
       INTEGER         vlistNrecs
 !                                    (INTEGER         vlistID)
       EXTERNAL        vlistNrecs
+
+      INTEGER         vlistSubtype
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         index)
+      EXTERNAL        vlistSubtype
+
+      INTEGER         vlistSubtypeIndex
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         subtypeID)
+      EXTERNAL        vlistSubtypeIndex
 
 !                     vlistDefTaxis
 !                                    (INTEGER         vlistID,
