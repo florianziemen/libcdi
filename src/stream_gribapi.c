@@ -422,12 +422,12 @@ void gribGetLevel(grib_handle *gh, int* leveltype1, int* leveltype2, int* lbound
       grib2GetLevel(gh, leveltype1, leveltype2, lbounds, level1, level2, level_sf, level_unit);
 
       /* read in tiles attributes (if there are any) */
-      tiles->tileindex = gribGetLongDefault(gh, cdiSubtypeAttributeName[SUBTYPE_ATT_TILEINDEX], -1);
-      tiles->totalno_of_tileattr_pairs = gribGetLongDefault(gh, cdiSubtypeAttributeName[SUBTYPE_ATT_TOTALNO_OF_TILEATTR_PAIRS], -1);
-      tiles->tileClassification = gribGetLongDefault(gh, cdiSubtypeAttributeName[SUBTYPE_ATT_TILE_CLASSIFICATION], -1);
-      tiles->numberOfTiles = gribGetLongDefault(gh, cdiSubtypeAttributeName[SUBTYPE_ATT_NUMBER_OF_TILES], -1);
-      tiles->numberOfAttributes = gribGetLongDefault(gh, cdiSubtypeAttributeName[SUBTYPE_ATT_NUMBER_OF_ATTR], -1);
-      tiles->attribute = gribGetLongDefault(gh, cdiSubtypeAttributeName[SUBTYPE_ATT_TILEATTRIBUTE], -1);
+      tiles->tileindex = (int)gribGetLongDefault(gh, cdiSubtypeAttributeName[SUBTYPE_ATT_TILEINDEX], -1);
+      tiles->totalno_of_tileattr_pairs = (int)gribGetLongDefault(gh, cdiSubtypeAttributeName[SUBTYPE_ATT_TOTALNO_OF_TILEATTR_PAIRS], -1);
+      tiles->tileClassification = (int)gribGetLongDefault(gh, cdiSubtypeAttributeName[SUBTYPE_ATT_TILE_CLASSIFICATION], -1);
+      tiles->numberOfTiles = (int)gribGetLongDefault(gh, cdiSubtypeAttributeName[SUBTYPE_ATT_NUMBER_OF_TILES], -1);
+      tiles->numberOfAttributes = (int)gribGetLongDefault(gh, cdiSubtypeAttributeName[SUBTYPE_ATT_NUMBER_OF_ATTR], -1);
+      tiles->attribute = (int)gribGetLongDefault(gh, cdiSubtypeAttributeName[SUBTYPE_ATT_TILEATTRIBUTE], -1);
     }
 }
 
