@@ -184,6 +184,7 @@ m4/acx_sl_mod_suffix.m4 -text
 m4/asx_tr_arg.m4 -text
 m4/asx_unset.m4 -text
 m4/ax_pthread.m4 -text
+m4/kpse_libtool.m4 -text
 m4/libtool.m4 -text
 m4/ltoptions.m4 -text
 m4/ltsugar.m4 -text
