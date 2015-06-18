@@ -4792,7 +4792,7 @@ int isDBLAxis(/*const char *units,*/ const char *longname)
 static
 int unitsIsMeter(const char *units)
 {
-  return (*units == 'm' && (strcmp(units, "m") == 0 || strncmp(units, "meter", 5) == 0));
+  return (units[0] == 'm' && (!units[1] || strncmp(units, "meter", 5) == 0));
 }
 
 static
