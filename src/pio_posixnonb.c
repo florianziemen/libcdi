@@ -8,12 +8,13 @@
 #include <unistd.h>
 #include <mpi.h>
 
+#include "cdi.h"
+#include "dmemory.h"
+
 #include "pio.h"
 #include "pio_comm.h"
 #include "pio_impl.h"
 #include "pio_util.h"
-
-#include "dmemory.h"
 
 extern char *token;
 

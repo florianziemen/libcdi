@@ -6,6 +6,8 @@
 
 #include <yaxt.h>
 
+#include "cdi.h"
+#include "cdi_int.h"
 #include "namespace.h"
 #include "taxis.h"
 
