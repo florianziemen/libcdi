@@ -258,11 +258,6 @@ void    cdiReset(void);
 
 const char *cdiStringError(int cdiErrno);
 
-/*      cdiGetStringError: Get CDI error String */
-/* Wrapper for cdiStringError, since direct use of */
-/* cdiStringError results in SEGFAULT with Cray compiler */
-void    cdiGetStringError(int vlistID, char *name);
-
 void    cdiDebug(int debug);
 
 const char *cdiLibraryVersion(void);

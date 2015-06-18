@@ -405,17 +405,6 @@
 !                                    (INTEGER         cdiErrno)
       EXTERNAL        cdiStringError
 
-!
-!  Wrapper for cdiStringError, since direct use of
-!
-!
-!  cdiStringError results in SEGFAULT with Cray compiler
-!
-!                     cdiGetStringError
-!                                    (INTEGER         vlistID,
-!                                     CHARACTER*(*)   name)
-      EXTERNAL        cdiGetStringError
-
 !                     cdiDebug
 !                                    (INTEGER         debug)
       EXTERNAL        cdiDebug

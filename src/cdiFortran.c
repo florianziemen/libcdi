@@ -79,13 +79,6 @@
 
 FCALLSCSUB0 (cdiReset, CDIRESET, cdireset)
 FCALLSCFUN1 (STRING, cdiStringError, CDISTRINGERROR, cdistringerror, INT)
-
-/*  Wrapper for cdiStringError, since direct use of  */
-
-
-/*  cdiStringError results in SEGFAULT with Cray compiler  */
-
-FCALLSCSUB2 (cdiGetStringError, CDIGETSTRINGERROR, cdigetstringerror, INT, PSTRING)
 FCALLSCSUB1 (cdiDebug, CDIDEBUG, cdidebug, INT)
 FCALLSCFUN0 (STRING, cdiLibraryVersion, CDILIBRARYVERSION, cdilibraryversion)
 FCALLSCSUB0 (cdiPrintVersion, CDIPRINTVERSION, cdiprintversion)
