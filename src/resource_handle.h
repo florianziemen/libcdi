@@ -62,8 +62,8 @@ unsigned reshCountType(const resOps *resTypeOps);
 void * reshGetValue(const char* caller, const char* expressionString, cdiResH id, const resOps* ops);
 #define reshGetVal(resH, ops)  reshGetValue(__func__, #resH, resH, ops)
 
-int reshEntryExists(const char* caller, const char* expressionString, cdiResH id, const resOps* ops);
-#define reshExists(resH, ops)  reshEntryExists(__func__, #resH, resH, ops)
+int reshEntryExists(cdiResH id, const resOps* ops);
+#define reshExists(resH, ops)  reshEntryExists(resH, ops)
 
 
 void reshGetResHListOfType(unsigned numIDs, int IDs[numIDs], const resOps *ops);

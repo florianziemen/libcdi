@@ -429,11 +429,11 @@ void *reshGetValue(const char * caller, const char* expressionString, cdiResH re
 }
 
 int
-reshEntryExists(const char * caller, const char* expressionString, cdiResH resH, const resOps * ops)
+reshEntryExists(cdiResH resH, const resOps * ops)
 {
   int nsp;
   namespaceTuple_t nspT;
-  listElem_t *listElem;
+  listElem_t *listElem = NULL;
   xassert ( ops );
   LIST_INIT(1);
   LIST_LOCK();
