@@ -420,13 +420,6 @@ double cdiInqMissval(void)
   return (cdiDefaultMissval);
 }
 
-int cdiUUIDIsNull(const unsigned char* uuid)
-{
-  static const unsigned char uuid_nil[CDI_UUID_SIZE];
-  return !memcmp(uuid, uuid_nil, CDI_UUID_SIZE);
-}
-
-
 /*
  * Local Variables:
  * c-file-style: "Java"
