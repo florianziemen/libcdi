@@ -526,7 +526,7 @@ void varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds,
   int tileID = tileGetEntry(varID, this_tile);
   if ( tile_index ) (*tile_index) = this_tile;
   if (tileID == CDI_UNDEFID) {
-    tileID = tileNewEntry(varID);
+    tileID = tileNewEntry((int)varID);
     vartable[varID].recordTable[tileID].subtypeIndex = this_tile;
     vartable[varID].nsubtypes++;
   }
@@ -1178,6 +1178,7 @@ void varDefProductDefinitionTemplate(int varID, int productDefinitionTemplate)
   vartable[varID].productDefinitionTemplate = productDefinitionTemplate;
 }
 
+#if  defined  (HAVE_LIBGRIB_API)
 /* Resizes and initializes opt_grib_kvpair data structure. */
 static 
 void resize_vartable_opt_grib_entries(vartable_t *var, int nentries)
@@ -1210,6 +1211,7 @@ void resize_vartable_opt_grib_entries(vartable_t *var, int nentries)
       var->opt_grib_kvpair = tmp;
     }
 }
+#endif
 
 #if  defined  (HAVE_LIBGRIB_API)
 void varDefOptGribInt(int varID, int tile_index, long lval, const char *keyword)

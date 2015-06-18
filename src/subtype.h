@@ -1,9 +1,6 @@
 #ifndef _SUBTYPE_H
 #define _SUBTYPE_H
 
-/* No. of different constants in the enumeration
-   "subtype_attributes" */
-static const int nSubtypeAttributes = 6;
 
 enum {
   /* subtype attributes wrt. TILES */
@@ -12,20 +9,16 @@ enum {
   SUBTYPE_ATT_TILE_CLASSIFICATION       = 2,
   SUBTYPE_ATT_NUMBER_OF_TILES           = 3,
   SUBTYPE_ATT_NUMBER_OF_ATTR            = 4,
-  SUBTYPE_ATT_TILEATTRIBUTE             = 5
+  SUBTYPE_ATT_TILEATTRIBUTE             = 5,
+/* No. of different constants in the enumeration
+   "subtype_attributes" */
+  nSubtypeAttributes
 };
 
 
 /* Literal constants corresponding to the different constants of the
    enumeration "subtype_attributes". */
-static const char* subtypeAttributeName[] = {
-  "tileIndex",
-  "totalNumberOfTileAttributePairs",
-  "tileClassification",
-  "numberOfTiles",
-  "numberOfTileAttributes",
-  "tileAttribute"
-};
+extern const char * const cdiSubtypeAttributeName[];
 
 /* Data type specifying an attribute of a subtype (for example an
    attribute of a set of TILES) or an attribute of a subtype entry
@@ -44,7 +37,7 @@ struct subtype_entry_t {
   struct subtype_entry_t *next;                  /* next node in linked list */
 
   /* linked list with attributes for this subtype entry, ordered by its key values*/
-  struct subtype_attr_t  *atts;                  
+  struct subtype_attr_t  *atts;
 };
 
 

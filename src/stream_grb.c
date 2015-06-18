@@ -495,11 +495,7 @@ void grbReadVarSliceDP(stream_t * streamptr, int varID, int levelID, double *dat
   off_t currentfilepos = fileGetPos(fileID);
 
   int    isub    = subtypeInqActiveIndex(streamptr->vars[varID].subtypeID);
-  int    nlevs   = streamptr->vars[varID].recordTable[isub].nlevs;
 
-
-  int zaxisID =  vlistInqVarZaxis(vlistID, varID);
-  int nlevs2 = zaxisInqSize(zaxisID);
 
   int    recID   = streamptr->vars[varID].recordTable[isub].recordID[levelID];
   off_t  recpos  = streamptr->tsteps[tsID].records[recID].position;

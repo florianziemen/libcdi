@@ -44,6 +44,15 @@ const char* subtypeName[] = {
   "tileset"
 };
 
+const char * const cdiSubtypeAttributeName[] = {
+  "tileIndex",
+  "totalNumberOfTileAttributePairs",
+  "tileClassification",
+  "numberOfTiles",
+  "numberOfTileAttributes",
+  "tileAttribute"
+};
+
 
 /* prototypes: */
 static int    subtypeCompareP    (subtype_t *z1, subtype_t *z2);
@@ -77,7 +86,7 @@ int attribute_to_index(const char *key)
 {
   if (key == NULL)  Error("Internal error!");
   for (int i=0; i<nSubtypeAttributes; i++)
-    if ( strcmp(key, subtypeAttributeName[i]) == 0 ) return i;
+    if ( strcmp(key, cdiSubtypeAttributeName[i]) == 0 ) return i;
   return -1;
 }
 
@@ -337,7 +346,7 @@ void subtypePrintKernel(subtype_t *subtype_ptr, FILE *fp)
   struct subtype_attr_t* ptr = subtype_ptr->globals.atts;
   if (ptr != NULL)  fprintf(fp, "#\n# global attributes:\n");
   while (ptr != NULL) {
-    fprintf(fp, "#   %-40s   (%2d) : %d\n", subtypeAttributeName[ptr->key], ptr->key, ptr->val);    
+    fprintf(fp, "#   %-40s   (%2d) : %d\n", cdiSubtypeAttributeName[ptr->key], ptr->key, ptr->val);    
     ptr = ptr->next;
   } 
   /* print attributes for each subtype */
@@ -348,7 +357,7 @@ void subtypePrintKernel(subtype_t *subtype_ptr, FILE *fp)
     ptr = entry->atts;
     if (ptr != NULL)  fprintf(fp, "#   attributes:\n");
     while (ptr != NULL) {
-      fprintf(fp, "#     %-40s (%2d) : %d\n", subtypeAttributeName[ptr->key], ptr->key, ptr->val);    
+      fprintf(fp, "#     %-40s (%2d) : %d\n", cdiSubtypeAttributeName[ptr->key], ptr->key, ptr->val);    
       ptr = ptr->next;
     } 
     entry = entry->next;
@@ -767,8 +776,8 @@ int subtypeInqSubEntry(int subtypeID, subtype_query_t criterion)
 int subtypeInqTile(int subtypeID, int tileindex, int attribute)
 {
   return subtypeInqSubEntry(subtypeID, 
-			    matchAND(keyValuePair(subtypeAttributeName[SUBTYPE_ATT_TILEINDEX], tileindex),
-				     keyValuePair(subtypeAttributeName[SUBTYPE_ATT_TILEATTRIBUTE], attribute)));
+			    matchAND(keyValuePair(cdiSubtypeAttributeName[SUBTYPE_ATT_TILEINDEX], tileindex),
+				     keyValuePair(cdiSubtypeAttributeName[SUBTYPE_ATT_TILEATTRIBUTE], attribute)));
 }
 
 
