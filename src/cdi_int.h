@@ -267,7 +267,7 @@ extern const resOps streamOps;
 static inline stream_t *
 stream_to_pointer(int idx)
 {
-  return reshGetVal(idx, &streamOps);
+  return (stream_t *)reshGetVal(idx, &streamOps);
 }
 
 static inline void
@@ -327,7 +327,7 @@ void  cdiInitialize(void);
 void uuid2str(const unsigned char *uuid, char *uuidstr);
 int str2uuid(const char *uuidstr, unsigned char *uuid);
 
-static inline int cdiUUIDIsNull(const unsigned char uuid[CDI_UUID_SIZE])
+static inline int cdiUUIDIsNull(const unsigned char *uuid)
 {
   static const unsigned char uuid_nil[CDI_UUID_SIZE];
   return !memcmp(uuid, uuid_nil, CDI_UUID_SIZE);
