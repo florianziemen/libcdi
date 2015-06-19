@@ -194,7 +194,7 @@ void vlist_unlock(int vlistID)
 
 @Example
 Here is an example using @func{vlistCreate} to create a variable list
-and add a variable with @func{vlistDefVar.
+and add a variable with @func{vlistDefVar}.
 
 @Source
 #include "cdi.h"
