@@ -431,7 +431,7 @@ void *reshGetValue(const char * caller, const char* expressionString, cdiResH re
 
 /**************************************************************/
 
-void reshGetResHListOfType(unsigned numIDs, int resHs[numIDs], const resOps *ops)
+void reshGetResHListOfType(unsigned numIDs, int resHs[], const resOps *ops)
 {
   xassert ( resHs && ops );
 

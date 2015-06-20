@@ -319,7 +319,7 @@ int     cdiInqAccesstype(int streamID);
 
 int     getByteswap(int byteorder);
 
-void cdiStreamGetIndexList(unsigned numIDs, int IDs[numIDs]);
+void cdiStreamGetIndexList(unsigned numIDs, int IDs[]);
 
 
 void  cdiInitialize(void);
@@ -329,7 +329,7 @@ int str2uuid(const char *uuidstr, unsigned char *uuid);
 
 static inline int cdiUUIDIsNull(const unsigned char *uuid)
 {
-  static const unsigned char uuid_nil[CDI_UUID_SIZE];
+  static unsigned char uuid_nil[CDI_UUID_SIZE];
   return !memcmp(uuid, uuid_nil, CDI_UUID_SIZE);
 }
 

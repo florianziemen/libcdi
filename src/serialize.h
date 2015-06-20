@@ -53,8 +53,8 @@ serializeStrTabPack(const char **strTab, int numStr,
   xassert(numStr >= 0);
   for (size_t i = 0; i < (size_t)numStr; ++i)
   {
-    size_t len = strlen(strTab[i]);
-    serializePack(&(int){(int)len}, 1, DATATYPE_INT,
+    int len = (int)strlen(strTab[i]);
+    serializePack(&len, 1, DATATYPE_INT,
                   buf, buf_size, position, context);
     serializePack(strTab[i], (int)len, DATATYPE_TXT,
                   buf, buf_size, position, context);

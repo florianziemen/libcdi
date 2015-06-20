@@ -63,7 +63,7 @@ void * reshGetValue(const char* caller, const char* expressionString, cdiResH id
 #define reshGetVal(resH, ops)  reshGetValue(__func__, #resH, resH, ops)
 
 
-void reshGetResHListOfType(unsigned numIDs, int IDs[numIDs], const resOps *ops);
+void reshGetResHListOfType(unsigned numIDs, int IDs[], const resOps *ops);
 
 enum cdiApplyRet {
   CDI_APPLY_ERROR = -1,
