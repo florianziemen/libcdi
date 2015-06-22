@@ -79,7 +79,7 @@ static void modelRun(MPI_Comm commModel)
 #endif
   for ( i = 0; i < nVars; i++ )
     {
-      varID[i] = vlistDefVar ( vlistID, gridID, zaxisID[i], TIME_VARIABLE );
+      varID[i] = vlistDefVar ( vlistID, gridID, zaxisID[i], TIME_VARIABLE);
 #ifdef USE_MPI
       {
         int start = uniform_partition_start((int [2]){ 0, (int)varSize[i] - 1 },

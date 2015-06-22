@@ -104,7 +104,7 @@ static void modelRun(MPI_Comm commModel)
       for ( j = 0; j < nVars; j++ )
       {
         varID[i][j] = vlistDefVar(vlistID[i], gridID, zaxisID[i][j],
-                                  TIME_VARIABLE );
+                                  TIME_VARIABLE);
         varSize[i][j] = nlon * nlat * (size_t)nlev[i][j];
 #ifdef USE_MPI
         {

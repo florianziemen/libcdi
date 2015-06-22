@@ -32,6 +32,7 @@ const char *cdiStringError(int cdiErrno)
 
   return UnknownError;
 }
+
 /*
  * Local Variables:
  * c-file-style: "Java"

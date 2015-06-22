@@ -959,6 +959,16 @@ cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDeleted)
 }
 
 
+void deallocate_sleveltable_t(sleveltable_t *entry)
+{
+  if (entry == NULL) return;
+  if (entry->recordID) free(entry->recordID);
+  if (entry->lindex)   free(entry->lindex);
+  entry->recordID = NULL;
+  entry->lindex   = NULL;
+}
+
+
 /*
 @Function  streamClose
 @Title     Close an open dataset
@@ -1004,12 +1014,17 @@ void streamClose(int streamID)
 
   for ( index = 0; index < streamptr->nvars; index++ )
     {
-      if ( streamptr->vars[index].level )
-	free(streamptr->vars[index].level);
-      if ( streamptr->vars[index].lindex )
-	free(streamptr->vars[index].lindex);
+      for (int isub=0; isub<streamptr->vars[index].subtypeSize; isub++)
+        {
+          /* fprintf(stderr, "deallocate subtype %d / %d\n",      */
+          /*         isub+1, streamptr->vars[index].subtypeSize); */
+          deallocate_sleveltable_t(&streamptr->vars[index].recordTable[isub]);
+        }
+      if (streamptr->vars[index].recordTable)  free(streamptr->vars[index].recordTable);
+      streamptr->vars[index].recordTable = NULL;
     }
   free(streamptr->vars);
+  streamptr->vars = NULL;
 
   for ( index = 0; index < streamptr->ntsteps; ++index )
     {
@@ -1032,8 +1047,17 @@ void streamClose(int streamID)
 	    taxisDestroy(vlistInqTaxis(vlistID));
 	  }
 
-      vlist_unlock(vlistID);
       vlistDestroy(vlistID);
+      /* decrease lock counter of the original vlist by 1 */
+      if ( streamptr->vlistIDorig != CDI_UNDEFID ) {
+        /* Note: Here we have to check if the original vlist still
+         * exists. If, for example, the garbage collection routine
+         * reshListDestruct takes care of the destruction of objects,
+         * then the original vlist might have been destroyed
+         * beforehand. */
+        if (reshExists(streamptr->vlistIDorig, &vlistOps) != 0)
+          vlist_unlock(streamptr->vlistIDorig);
+      }
     }
 
   stream_delete_entry(streamptr);
@@ -1444,6 +1468,8 @@ void cdiStreamWriteVar_(int streamID, int varID, int memtype, const void *data, 
   check_parg(data);
 
   stream_t *streamptr = stream_to_pointer(streamID);
+  if (subtypeInqActiveIndex(streamptr->vars[varID].subtypeID) != 0)
+    Error("Writing of non-trivial subtypes not yet implemented!");
 
   stream_check_ptr(__func__, streamptr);
 
@@ -1703,6 +1729,8 @@ void cdiStreamWriteVarSlice(int streamID, int varID, int levelID, int memtype, c
   check_parg(data);
 
   stream_t *streamptr = stream_to_pointer(streamID);
+  if (subtypeInqActiveIndex(streamptr->vars[varID].subtypeID) != 0)
+    Error("Writing of non-trivial subtypes not yet implemented!");
 
   stream_check_ptr(__func__, streamptr);
 
@@ -2135,15 +2163,20 @@ int streamTxCode(void)
 
 void cdiStreamSetupVlist(stream_t *streamptr, int vlistID, int vlistIDorig)
 {
-  vlist_lock(vlistID);
   int nvars = vlistNvars(vlistID);
   streamptr->vlistID = vlistID;
   streamptr->vlistIDorig = vlistIDorig;
+
+  /* increase lock counter of the original vlist by 1 */
+  if ( CDI_Debug ) Message("attach vlist=%d to stream, stream vlist=%d", vlistIDorig, vlistID);
+  vlist_lock(vlistIDorig);
+
   for (int varID = 0; varID < nvars; varID++ )
     {
-      int gridID  = vlistInqVarGrid(vlistID, varID);
-      int zaxisID = vlistInqVarZaxis(vlistID, varID);
-      stream_new_var(streamptr, gridID, zaxisID);
+      int gridID    = vlistInqVarGrid(vlistID, varID);
+      int zaxisID   = vlistInqVarZaxis(vlistID, varID);
+      int tilesetID = vlistInqVarSubtype(vlistID, varID);
+      stream_new_var(streamptr, gridID, zaxisID, tilesetID);
       if ( streamptr->have_missval )
         vlistDefVarMissval(vlistID, varID,
                            vlistInqVarMissval(vlistID, varID));
@@ -2359,6 +2392,9 @@ streamUnpack(char * unpackBuffer, int unpackBufferSize,
   struct streamAssoc retval = { streamID, intBuffer[3], intBuffer[4] };
   return retval;
 }
+
+
+
 /*
  * Local Variables:
  * c-file-style: "Java"

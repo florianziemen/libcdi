@@ -1,10 +1,10 @@
 ! This file was automatically generated, don't edit!
 !
-! Fortran interface for CDI library version 1.6.9
+! Fortran interface for CDI library version 1.7.0
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   April 2015
+! Uwe Schulzweida, MPI-MET, Hamburg,   June 2015
 !
 
       INTEGER    CDI_MAX_NAME          
@@ -286,6 +286,17 @@
       PARAMETER (ZAXIS_MIX_LAYER        = 24)
       INTEGER    ZAXIS_REFERENCE       
       PARAMETER (ZAXIS_REFERENCE        = 25)
+!
+!  SUBTYPE types
+!
+      INTEGER    MAX_KV_PAIRS_MATCH    
+      PARAMETER (MAX_KV_PAIRS_MATCH     = 10)
+!
+!  Data structure defining a key-value search, possibly with multiple
+!  key-value pairs in combination.
+!  
+!  Currently, only multiple pairs combined by AND are supported.
+!
 !
 !  TIME types
 !
@@ -752,6 +763,10 @@
 !                                    (INTEGER         vlistID)
       EXTERNAL        vlistNzaxis
 
+      INTEGER         vlistNsubtypes
+!                                    (INTEGER         vlistID)
+      EXTERNAL        vlistNsubtypes
+
 !                     vlistDefNtsteps
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         nts)
@@ -813,6 +828,16 @@
 !                                    (INTEGER         vlistID)
       EXTERNAL        vlistNrecs
 
+      INTEGER         vlistSubtype
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         index)
+      EXTERNAL        vlistSubtype
+
+      INTEGER         vlistSubtypeIndex
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         subtypeID)
+      EXTERNAL        vlistSubtypeIndex
+
 !                     vlistDefTaxis
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         taxisID)
@@ -852,6 +877,14 @@
 !
 !  VLIST VAR routines
 !
+      INTEGER         vlistDefVarTiles
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         gridID,
+!                                     INTEGER         zaxisID,
+!                                     INTEGER         tsteptype,
+!                                     INTEGER         tilesetID)
+      EXTERNAL        vlistDefVarTiles
+
       INTEGER         vlistDefVar
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         gridID,
@@ -2346,6 +2379,59 @@
 !                                    (INTEGER         streamID,
 !                                     CHARACTER*(*)   history)
       EXTERNAL        streamInqHistoryString
+
+!
+!  Subtype routines
+!
+      INTEGER         subtypeCreate
+!                                    (INTEGER         subtype)
+      EXTERNAL        subtypeCreate
+
+!
+!  Gives a textual summary of the variable subtype
+!
+!                     subtypePrint
+!                                    (INTEGER         subtypeID)
+      EXTERNAL        subtypePrint
+
+!
+!  Compares two subtype data structures.
+!
+      INTEGER         subtypeCompare
+!                                    (INTEGER         subtypeID1,
+!                                     INTEGER         subtypeID2)
+      EXTERNAL        subtypeCompare
+
+      INTEGER         subtypeInqSize
+!                                    (INTEGER         subtypeID)
+      EXTERNAL        subtypeInqSize
+
+      INTEGER         subtypeInqActiveIndex
+!                                    (INTEGER         subtypeID)
+      EXTERNAL        subtypeInqActiveIndex
+
+!                     subtypeDefActiveIndex
+!                                    (INTEGER         subtypeID,
+!                                     INTEGER         index)
+      EXTERNAL        subtypeDefActiveIndex
+
+!
+!  Generate a "query object" out of a key-value pair.
+!
+!
+!  Generate an AND-combined "query object" out of two previous
+!  query objects.
+!
+      INTEGER         subtypeInqTile
+!                                    (INTEGER         subtypeID,
+!                                     INTEGER         tileindex,
+!                                     INTEGER         attribute)
+      EXTERNAL        subtypeInqTile
+
+      INTEGER         vlistInqVarSubtype
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID)
+      EXTERNAL        vlistInqVarSubtype
 
 !                     gribapiLibraryVersion
 !                                    (INTEGER         major_version,

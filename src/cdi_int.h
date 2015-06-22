@@ -13,6 +13,8 @@
 #include <math.h>
 #include <sys/types.h>
 
+#include "cdi.h"
+
 /* dummy use of unused parameters to silence compiler warnings */
 #define  UNUSED(x) (void)x
 
@@ -65,7 +67,6 @@ char *strdup(const char *s);
 #  include "resource_handle.h"
 #endif
 
-#include "cdi.h"
 
 #define check_parg(arg)  if ( arg == 0 ) Warning("Argument '" #arg "' not allocated!")
 
@@ -127,6 +128,18 @@ typedef struct
 }
 Record;
 
+/* data structure specifying tile-related meta-data. structure
+ * contains "-1" if this is no tile-variable. */
+typedef struct {
+  int
+    tileindex,
+    totalno_of_tileattr_pairs,
+    tileClassification,
+    numberOfTiles,
+    numberOfAttributes,
+    attribute;
+} var_tile_t;
+
 
 typedef struct
 {
@@ -142,6 +155,7 @@ typedef struct
   short     varID;
   short     levelID;
   char      varname[32]; /* needed for grib decoding with GRIB_API */
+  var_tile_t tiles;      /* tile-related meta-data, currently for GRIB-API only. */
 }
 record_t;
 
@@ -163,16 +177,24 @@ tsteps_t;
 
 
 typedef struct {
-  int       ncvarid;
   int       nlevs;
-  int      *level;       /* record IDs */
-  int      *lindex;      /* level index */
-  int       defmiss;     /* TRUE if missval is defined in file */
+  int      *recordID;     /* record IDs: [nlevs] */
+  int      *lindex;       /* level index */
+  int       subtypeIndex; /* corresponding tile in subtype_t structure (subtype->self) */
+} sleveltable_t;
 
-  int       isUsed;
-  int       gridID;
-  int       zaxisID;
-  int       tsteptype;   /* TSTEP_* */
+
+typedef struct {
+  int            ncvarid;
+  int            subtypeSize;
+  sleveltable_t *recordTable; /* record IDs for each subtype */
+  int            defmiss;     /* TRUE if missval is defined in file */
+
+  int            isUsed;
+  int            gridID;
+  int            zaxisID;
+  int            tsteptype;   /* TSTEP_* */
+  int            subtypeID;   /* subtype ID, e.g. for tile-related meta-data (currently for GRIB-API only). */
 }
 svarinfo_t;
 
@@ -233,13 +255,34 @@ typedef struct {
   int         vlistIDorig;
   /* only used by MPI-parallelized version of library */
   int       ownerRank;    // MPI rank of owner process
-  /* ---------------------------------- */
-  /* Local change: 2013-02-18, FP (DWD) */
-  /* ---------------------------------- */
 
   void *gh; // grib handle
 }
 stream_t;
+
+
+/* Length of optional keyword/value pair list */
+#define MAX_OPT_GRIB_ENTRIES 500
+
+
+/* Data type specification for optional key/value pairs (GRIB) */
+typedef enum {
+  t_double = 0,
+  t_int    = 1
+} key_val_pair_datatype;
+
+/* Data structure holding optional key/value pairs for GRIB */
+typedef struct
+{
+  char*                  keyword;        /* keyword string */
+  int                    update;
+  key_val_pair_datatype  data_type;      /* data type of this key/value pair */
+  double                 dbl_val;        /* double value (data_type == t_double) */
+  int                    int_val;        /* integer value (data_type == t_int) */
+  int                    subtype_index;  /* tile index for this key-value pair */
+} opt_key_val_pair_t;
+
+
 
 
 extern int CDI_Debug;      /* If set to 1, debuggig (default 0)            */
@@ -292,7 +335,7 @@ void    streamDefineTaxis(int streamID);
 int     streamsNewEntry(int filetype);
 void    streamsInitEntry(int streamID);
 void    cdiStreamSetupVlist(stream_t *streamptr, int vlistID, int vlistIDorig);
-int     stream_new_var(stream_t *streamptr, int gridID, int zaxisID);
+int     stream_new_var(stream_t *streamptr, int gridID, int zaxisID, int tilesetID);
 
 int     tstepsNewEntry(stream_t *streamptr);
 
@@ -329,9 +372,12 @@ int str2uuid(const char *uuidstr, unsigned char *uuid);
 
 static inline int cdiUUIDIsNull(const unsigned char *uuid)
 {
-  static unsigned char uuid_nil[CDI_UUID_SIZE];
-  return !memcmp(uuid, uuid_nil, CDI_UUID_SIZE);
+  int isNull = 1;
+  for (size_t i = 0; i < CDI_UUID_SIZE; ++i)
+    isNull &= (uuid[i] == 0);
+  return isNull;
 }
+
 
 char* cdiEscapeSpaces(const char* string);
 char* cdiUnescapeSpaces(const char* string, const char** outStringEnd);
@@ -379,6 +425,9 @@ void zaxisGetIndexList(int nzaxis, int *zaxisIndexList);
 
 void zaxisDefLtype2(int zaxisID, int ltype2);
 int  zaxisInqLtype2(int zaxisID);
+
+void streamFCopyRecord(stream_t *streamptr2, stream_t *streamptr1,
+                       const char *container_name);
 
 #endif  /* _CDI_INT_H */
 /*

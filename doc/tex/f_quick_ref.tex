@@ -620,6 +620,52 @@ Write a variable.
 Write a horizontal slice of a variable.
 
 
+\section*{\tt \htmlref{subtypeCreate}{subtypeCreate}}
+
+\begin{verbatim}
+    INTEGER FUNCTION subtypeCreate (INTEGER subtype)
+\end{verbatim}
+
+Create a variable subtype.
+
+
+\section*{\tt \htmlref{subtypeDefActiveIndex}{subtypeDefActiveIndex}}
+
+\begin{verbatim}
+    SUBROUTINE subtypeDefActiveIndex (INTEGER subtypeID, INTEGER index)
+\end{verbatim}
+
+Set the currently active index of a subtype (e.g. current tile index)..
+
+
+\section*{\tt \htmlref{subtypeInqActiveIndex}{subtypeInqActiveIndex}}
+
+\begin{verbatim}
+    INTEGER FUNCTION subtypeInqActiveIndex (INTEGER subtypeID)
+\end{verbatim}
+
+Get the currently active index of a subtype (e.g. current tile index)..
+
+
+\section*{\tt \htmlref{subtypeInqSize}{subtypeInqSize}}
+
+\begin{verbatim}
+    INTEGER FUNCTION subtypeInqSize (INTEGER subtypeID)
+\end{verbatim}
+
+Get the size of a subtype (e.g. no. of tiles)..
+
+
+\section*{\tt \htmlref{subtypeInqTile}{subtypeInqTile}}
+
+\begin{verbatim}
+    INTEGER FUNCTION subtypeInqTile (INTEGER subtypeID, INTEGER tileindex,
+                                     INTEGER attribute)
+\end{verbatim}
+
+Specialized version of subtypeInqSubEntry looking for tile/attribute pair..
+
+
 \section*{\tt \htmlref{taxisCreate}{taxisCreate}}
 
 \begin{verbatim}
@@ -849,7 +895,7 @@ Define the time axis of a variable list.
                                   INTEGER tsteptype)
 \end{verbatim}
 
-Create a new Variable.
+Create a new variable.
 
 
 \section*{\tt \htmlref{vlistDefVarCode}{vlistDefVarCode}}
@@ -1139,6 +1185,15 @@ Get the parameter number of a Variable.
 Get the standard name of a Variable.
 
 
+\section*{\tt \htmlref{vlistInqVarSubtype}{vlistInqVarSubtype}}
+
+\begin{verbatim}
+    INTEGER FUNCTION vlistInqVarSubtype (INTEGER vlistID, INTEGER varID)
+\end{verbatim}
+
+Return subtype ID for a given variable..
+
+
 \section*{\tt \htmlref{vlistInqVarUnits}{vlistInqVarUnits}}
 
 \begin{verbatim}
@@ -1164,6 +1219,15 @@ Merge two variable lists.
 \end{verbatim}
 
 Number of grids in a variable list.
+
+
+\section*{\tt \htmlref{vlistNsubtypes}{vlistNsubtypes}}
+
+\begin{verbatim}
+    INTEGER FUNCTION vlistNsubtypes (INTEGER vlistID)
+\end{verbatim}
+
+Number of subtypes in a variable list.
 
 
 \section*{\tt \htmlref{vlistNumber}{vlistNumber}}

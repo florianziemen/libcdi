@@ -27,6 +27,7 @@ void recordInitEntry(record_t *record)
   record->varID    = CDI_UNDEFID;
   record->levelID  = CDI_UNDEFID;
   memset(record->varname, 0, sizeof(record->varname));
+  memset(&record->tiles, 0, sizeof(record->tiles));
 }
 
 
@@ -136,7 +137,8 @@ void streamInqRecord(int streamID, int *varID, int *levelID)
   *varID   = streamptr->tsteps[tsID].records[recID].varID;
   int lindex = streamptr->tsteps[tsID].records[recID].levelID;
 
-  *levelID = streamptr->vars[*varID].lindex[lindex];
+  int isub = subtypeInqActiveIndex(streamptr->vars[*varID].subtypeID);
+  *levelID = streamptr->vars[*varID].recordTable[isub].lindex[lindex];
 
   if ( CDI_Debug )
     Message("tsID = %d, recID = %d, varID = %d, levelID = %d\n", tsID, recID, *varID, *levelID);
@@ -450,7 +452,8 @@ void cdi_create_records(stream_t *streamptr, int tsID)
       maxrecords = 0;
       int nvars = streamptr->nvars;
       for ( int varID = 0; varID < nvars; varID++)
-	maxrecords += (unsigned)streamptr->vars[varID].nlevs;
+        for (int isub=0; isub<streamptr->vars[varID].subtypeSize; isub++)
+          maxrecords += (unsigned)streamptr->vars[varID].recordTable[isub].nlevs;
     }
   else
     {

@@ -4792,7 +4792,7 @@ int isDBLAxis(/*const char *units,*/ const char *longname)
 static
 int unitsIsMeter(const char *units)
 {
-  return (*units == 'm' && (strcmp(units, "m") == 0 || strncmp(units, "meter", 5) == 0));
+  return (units[0] == 'm' && (!units[1] || strncmp(units, "meter", 5) == 0));
 }
 
 static
@@ -6881,7 +6881,7 @@ void define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, 
       gridID  = ncvars[ncvarid].gridID;
       zaxisID = ncvars[ncvarid].zaxisID;
 
-      stream_new_var(streamptr, gridID, zaxisID);
+      stream_new_var(streamptr, gridID, zaxisID, CDI_UNDEFID);
       int varID = vlistDefVar(vlistID, gridID, zaxisID, ncvars[ncvarid].tsteptype);
 
 #if  defined  (HAVE_NETCDF4)

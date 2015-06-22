@@ -423,11 +423,35 @@ reshGetElem(const char *caller, const char* expressionString, cdiResH resH, cons
   return listElem;
 }
 
-
 void *reshGetValue(const char * caller, const char* expressionString, cdiResH resH, const resOps * ops)
 {
   return reshGetElem(caller, expressionString, resH, ops)->res.v.val;
 }
+
+int
+reshEntryExists(cdiResH resH, const resOps * ops)
+{
+  int nsp;
+  namespaceTuple_t nspT;
+  listElem_t *listElem = NULL;
+  xassert ( ops );
+  LIST_INIT(1);
+  LIST_LOCK();
+  nsp = namespaceGetActive ();
+  nspT = namespaceResHDecode ( resH );
+  LIST_UNLOCK();
+
+  int found = 0;
+  if (nspT.nsp == nsp &&
+      nspT.idx < resHList[nsp].size)
+      listElem = resHList[nsp].resources + nspT.idx;
+
+  LIST_UNLOCK();
+  if ( listElem && (listElem->res.v.ops == ops) )  found = 1;
+
+  return found;
+}
+
 
 /**************************************************************/
 

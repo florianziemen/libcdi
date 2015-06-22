@@ -7,7 +7,7 @@
 
 #include <mpi.h>
 #include <stdio.h>
-#include "cdi.h"
+
 
 typedef struct {
   int hostID;
