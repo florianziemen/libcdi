@@ -589,6 +589,14 @@
 !                                    (INTEGER         streamID)
       EXTERNAL        streamInqCurTimestepID
 
+      CHARACTER(80)   streamFilename
+!                                    (INTEGER         streamID)
+      EXTERNAL        streamFilename
+
+      CHARACTER(80)   streamFilesuffix
+!                                    (INTEGER         filetype)
+      EXTERNAL        streamFilesuffix
+
       INTEGER         streamInqNvars
 !                                    (INTEGER         streamID)
       EXTERNAL        streamInqNvars
@@ -1067,6 +1075,11 @@
 !                                     INTEGER         varID,
 !                                     CHARACTER*(*)   name)
       EXTERNAL        vlistInqVarName
+
+      CHARACTER(80)   vlistCopyVarName
+!                                    (INTEGER         vlistId,
+!                                     INTEGER         varId)
+      EXTERNAL        vlistCopyVarName
 
 !                     vlistDefVarStdname
 !                                    (INTEGER         vlistID,
@@ -1819,6 +1832,12 @@
 !                                     DOUBLEPRECISION ybounds_vec)
       EXTERNAL        gridInqYbounds
 
+!                     gridDefRowlon
+!                                    (INTEGER         gridID,
+!                                     INTEGER         nrowlon,
+!                                     INTEGER         rowlon_vec)
+      EXTERNAL        gridDefRowlon
+
 !                     gridInqRowlon
 !                                    (INTEGER         gridID,
 !                                     INTEGER         rowlon_vec)
@@ -2208,6 +2227,10 @@
 !                                    (INTEGER         taxisID)
       EXTERNAL        taxisInqNumavg
 
+      CHARACTER(80)   tunitNamePtr
+!                                    (INTEGER         tunitID)
+      EXTERNAL        tunitNamePtr
+
 !
 !  Institut routines
 !
@@ -2239,6 +2262,10 @@
       CHARACTER(80)   institutInqNamePtr
 !                                    (INTEGER         instID)
       EXTERNAL        institutInqNamePtr
+
+      CHARACTER(80)   institutInqLongnamePtr
+!                                    (INTEGER         instID)
+      EXTERNAL        institutInqLongnamePtr
 
 !
 !  Model routines
@@ -2289,6 +2316,10 @@
 !                                     INTEGER         tablenum,
 !                                     CHARACTER*(*)   tablename)
       EXTERNAL        tableDef
+
+      CHARACTER(80)   tableInqNamePtr
+!                                    (INTEGER         tableID)
+      EXTERNAL        tableInqNamePtr
 
 !                     tableDefEntry
 !                                    (INTEGER         tableID,
