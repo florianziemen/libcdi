@@ -7867,8 +7867,6 @@ int cdfInqContents(stream_t *streamptr)
 
 #if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 5)
 #pragma GCC diagnostic push
-#endif
-#ifdef __GNUC__
 #pragma GCC diagnostic warning "-Wstrict-overflow"
 #endif
   if ( calendar != UNDEFID )
