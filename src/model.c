@@ -248,7 +248,7 @@ const char *modelInqNamePtr(int modelID)
 static int
 modelCompareP(void *modelptr1, void *modelptr2)
 {
-  model_t *model1 = modelptr1, *model2 = modelptr2;
+  model_t *model1 = (model_t *)modelptr1, *model2 = (model_t *)modelptr2;
   int diff = (namespaceResHDecode(model1->instID).idx
               != namespaceResHDecode(model2->instID).idx)
     | (model1->modelgribID != model2->modelgribID)

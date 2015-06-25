@@ -2627,13 +2627,13 @@ The function @func{gridDuplicate} duplicates a horizontal Grid.
 */
 int gridDuplicate(int gridID)
 {
-  grid_t *gridptr = reshGetVal(gridID, &gridOps);
+  grid_t *gridptr = (grid_t *)reshGetVal(gridID, &gridOps);
 
   int gridtype = gridInqType(gridID);
   int gridsize = gridInqSize(gridID);
 
   int gridIDnew = gridCreate(gridtype, gridsize);
-  grid_t *gridptrnew = reshGetVal(gridIDnew, &gridOps);
+  grid_t *gridptrnew = (grid_t *)reshGetVal(gridIDnew, &gridOps);
 
   grid_copy(gridptrnew, gridptr);
 
@@ -2669,7 +2669,7 @@ int gridDuplicate(int gridID)
     {
       size_t size  = (size_t)(irregular ? gridsize : gridptr->ysize);
 
-      gridptrnew->yvals = xmalloc(size * sizeof (double));
+      gridptrnew->yvals = (double *)xmalloc(size * sizeof (double));
       memcpy(gridptrnew->yvals, gridptr->yvals, size * sizeof (double));
     }
 
@@ -2678,7 +2678,7 @@ int gridDuplicate(int gridID)
       size_t size  = (size_t)(irregular ? gridsize : gridptr->xsize)
         * (size_t)gridptr->nvertex;
 
-      gridptrnew->xbounds = xmalloc(size * sizeof (double));
+      gridptrnew->xbounds = (double *)xmalloc(size * sizeof (double));
       memcpy(gridptrnew->xbounds, gridptr->xbounds, size * sizeof (double));
     }
 
@@ -2687,7 +2687,7 @@ int gridDuplicate(int gridID)
       size_t size = (size_t)(irregular ? gridsize : gridptr->ysize)
         * (size_t)gridptr->nvertex;
 
-      gridptrnew->ybounds = xmalloc(size * sizeof (double));
+      gridptrnew->ybounds = (double *)xmalloc(size * sizeof (double));
       memcpy(gridptrnew->ybounds, gridptr->ybounds, size * sizeof (double));
     }
 
@@ -2695,7 +2695,7 @@ int gridDuplicate(int gridID)
     {
       size_t size = (size_t)gridsize;
 
-      gridptrnew->area = xmalloc(size * sizeof (double));
+      gridptrnew->area = (double *)xmalloc(size * sizeof (double));
       memcpy(gridptrnew->area, gridptr->area, size * sizeof (double));
     }
 
@@ -2703,7 +2703,7 @@ int gridDuplicate(int gridID)
     {
       size_t size = (size_t)gridsize;
 
-      gridptrnew->mask = xmalloc(size * sizeof(mask_t));
+      gridptrnew->mask = (mask_t *)xmalloc(size * sizeof(mask_t));
       memcpy(gridptrnew->mask, gridptr->mask, size * sizeof (mask_t));
     }
 
@@ -2711,7 +2711,7 @@ int gridDuplicate(int gridID)
     {
       size_t size = (size_t)gridsize;
 
-      gridptrnew->mask_gme = xmalloc(size * sizeof (mask_t));
+      gridptrnew->mask_gme = (mask_t *)xmalloc(size * sizeof (mask_t));
       memcpy(gridptrnew->mask_gme, gridptr->mask_gme, size * sizeof(mask_t));
     }
 
@@ -2885,7 +2885,7 @@ void gridDefXbounds(int gridID, const double *xbounds)
     Error("size undefined for gridID = %d", gridID);
 
   if (gridptr->xbounds == NULL)
-    gridptr->xbounds = xmalloc(size * sizeof (double));
+    gridptr->xbounds = (double *)xmalloc(size * sizeof (double));
   else if ( CDI_Debug )
     Warning("values already defined!");
 
@@ -2972,7 +2972,7 @@ void gridDefYbounds(int gridID, const double *ybounds)
     Error("size undefined for gridID = %d", gridID);
 
   if ( gridptr->ybounds == NULL )
-    gridptr->ybounds = xmalloc(size * sizeof (double));
+    gridptr->ybounds = (double *)xmalloc(size * sizeof (double));
   else if ( CDI_Debug )
     Warning("values already defined!");
 
@@ -4454,7 +4454,7 @@ struct varDefGridSearchState
 static enum cdiApplyRet
 varDefGridSearch(int id, void *res, void *data)
 {
-  struct varDefGridSearchState *state = data;
+  struct varDefGridSearchState *state = (struct varDefGridSearchState*)data;
   (void)res;
   if (gridCompare(id, state->queryKey) == 0)
     {
@@ -4495,7 +4495,8 @@ int varDefGrid(int vlistID, const grid_t *grid, int mode)
 
   if ( ! griddefined )
     {
-      struct varDefGridSearchState query = { .queryKey = grid };
+      struct varDefGridSearchState query;
+      query.queryKey = grid;// = { .queryKey = grid };
       if ((gridglobdefined
            = (cdiResHFilterApply(&gridOps, varDefGridSearch, &query)
               == CDI_APPLY_STOP)))
