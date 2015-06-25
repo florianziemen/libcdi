@@ -455,7 +455,7 @@ reshEntryExists(cdiResH resH, const resOps * ops)
 
 /**************************************************************/
 
-void reshGetResHListOfType(unsigned numIDs, int resHs[numIDs], const resOps *ops)
+void reshGetResHListOfType(unsigned numIDs, int resHs[], const resOps *ops)
 {
   xassert ( resHs && ops );
 

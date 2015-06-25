@@ -30,6 +30,7 @@ void serializeUnpack(const void *buf, int buf_size, int *position,
 int serializeStrTabGetPackSize(const char **strTab, int numStr, void *context);
 
 
+
 void serializeStrTabPack(const char **strTab, int numStr, 
                          void *buf, int buf_size, int *position, void *context);
 

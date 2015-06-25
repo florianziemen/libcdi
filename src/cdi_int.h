@@ -310,7 +310,7 @@ extern const resOps streamOps;
 static inline stream_t *
 stream_to_pointer(int idx)
 {
-  return reshGetVal(idx, &streamOps);
+  return (stream_t *)reshGetVal(idx, &streamOps);
 }
 
 static inline void
@@ -362,7 +362,7 @@ int     cdiInqAccesstype(int streamID);
 
 int     getByteswap(int byteorder);
 
-void cdiStreamGetIndexList(unsigned numIDs, int IDs[numIDs]);
+void cdiStreamGetIndexList(unsigned numIDs, int IDs[]);
 
 
 void  cdiInitialize(void);
