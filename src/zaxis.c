@@ -1657,7 +1657,7 @@ zaxisPack(void * voidP, void * packBuffer, int packBufferSize,
 }
 
 
-void cdiZaxisGetIndexList(unsigned nzaxis, int zaxisResHs[nzaxis])
+void cdiZaxisGetIndexList(unsigned nzaxis, int *zaxisResHs)
 {
   reshGetResHListOfType(nzaxis, zaxisResHs, &zaxisOps);
 }
