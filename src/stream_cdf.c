@@ -176,7 +176,7 @@ int isTimeAxisUnits(const char *timeunits)
   int status = FALSE;
 
   size_t len = strlen(timeunits);
-  tu = xmalloc((len+1)*sizeof(char));
+  tu = (char *)xmalloc((len+1)*sizeof(char));
   memcpy(tu, timeunits, (len+1) * sizeof(char));
   ptu = tu;
 
@@ -301,7 +301,7 @@ int setBaseTime(const char *timeunits, taxis_t *taxis)
   int timeunit;
 
   size_t len = strlen(timeunits);
-  tu = xmalloc((len+1) * sizeof (char));
+  tu = (char *)xmalloc((len+1) * sizeof (char));
   memcpy(tu, timeunits, (len+1) * sizeof (char));
   ptu = tu;
 
@@ -636,7 +636,7 @@ void cdfCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
   int gridID   = vlistInqVarGrid(vlistID1, ivarID);
   int datasize = gridInqSize(gridID);
 
-  double *data = xmalloc((size_t)datasize * sizeof (double));
+  double *data = (double *)xmalloc((size_t)datasize * sizeof (double));
 
   int nmiss;
   cdfReadRecord(streamptr1, data, &nmiss);
@@ -4003,7 +4003,7 @@ void transpose2dArrayDP(size_t inWidth, size_t inHeight, double* data)
 {
   const size_t cacheBlockSize = 256;    // Purely an optimization parameter. Current value of 32 means we are handling 8kB blocks,
                                        // which should be a decent compromise on many architectures.
-  double (*temp)[inWidth] = malloc(inHeight*sizeof(*temp));
+  double (*temp)[inWidth] = (double (*)[inWidth])malloc(inHeight*sizeof(*temp));
   double (*out)[inHeight] = (double (*)[inHeight])data;
   memcpy(temp, data, inHeight*sizeof(*temp));
   /*
@@ -4033,7 +4033,7 @@ void transpose2dArraySP(size_t inWidth, size_t inHeight, float* data)
 {
   const size_t cacheBlockSize = 256;    // Purely an optimization parameter. Current value of 32 means we are handling 8kB blocks,
                                        // which should be a decent compromise on many architectures.
-  float (*temp)[inWidth] = malloc(inHeight*sizeof(*temp));
+  float (*temp)[inWidth] = (float (*)[inWidth])malloc(inHeight*sizeof(*temp));
   float (*out)[inHeight] = (float (*)[inHeight])data;
   memcpy(temp, data, inHeight*sizeof(*temp));
   /*
