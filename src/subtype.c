@@ -411,7 +411,7 @@ void subtypeDestroyPtr(void *ptr)
 /* Non-static wrapper function for "subtypeCompareP". */
 int subtypeComparePtr(int s1_ID, subtype_t *s2)
 {
-  subtype_t *subtype_ptr = reshGetVal(s1_ID, &subtypeOps);
+  subtype_t *subtype_ptr = (subtype_t *)reshGetVal(s1_ID, &subtypeOps);
   if (subtype_ptr == NULL)  Error("Internal error");
   return subtypeCompareP(subtype_ptr,s2);
 }
@@ -420,7 +420,7 @@ int subtypeComparePtr(int s1_ID, subtype_t *s2)
 /* Print-out subtype data structure together with its attributes.
    Pointer version of this method. */
 static void subtypePrintP(void * subtype_ptr, FILE * fp)
-{  subtypePrintKernel(subtype_ptr, fp); }
+{  subtypePrintKernel((subtype_t *)subtype_ptr, fp); }
 
 
 
@@ -500,7 +500,7 @@ void subtypeDefGlobalDataP(subtype_t *subtype_ptr, int key, int val)
    overwritten. */
 void subtypeDefGlobalData(int subtypeID, int key, int val)
 {
-  subtype_t *subtype_ptr = reshGetVal(subtypeID, &subtypeOps);
+  subtype_t *subtype_ptr = (subtype_t *)reshGetVal(subtypeID, &subtypeOps);
   subtypeDefGlobalDataP(subtype_ptr, key, val);
 }
 
@@ -523,7 +523,7 @@ int subtypeGetGlobalDataP(subtype_t *subtype_ptr, int key)
    If the attribute has not been defined, then return -1. */
 int subtypeGetGlobalData(int subtypeID, int key)
 {
-  subtype_t *subtype_ptr = reshGetVal(subtypeID, &subtypeOps);
+  subtype_t *subtype_ptr = (subtype_t *)reshGetVal(subtypeID, &subtypeOps);
   return subtypeGetGlobalDataP(subtype_ptr, key);
 }
 
@@ -691,7 +691,7 @@ int subtypeCreate(int subtype)
 /* Print-out subtype data structure together with its attributes. */
 void subtypePrint(int subtypeID)
 {
-  subtype_t *subtype_ptr = reshGetVal(subtypeID, &subtypeOps);
+  subtype_t *subtype_ptr = (subtype_t *)reshGetVal(subtypeID, &subtypeOps);
   subtypePrintKernel(subtype_ptr, stdout);
 }
 
@@ -699,8 +699,8 @@ void subtypePrint(int subtypeID)
 /* Compares two subtype data structures. */
 int subtypeCompare(int subtypeID1, int subtypeID2)
 {
-  subtype_t *subtype_ptr1 = reshGetVal(subtypeID1, &subtypeOps);
-  subtype_t *subtype_ptr2 = reshGetVal(subtypeID2, &subtypeOps);
+  subtype_t *subtype_ptr1 = (subtype_t *)reshGetVal(subtypeID1, &subtypeOps);
+  subtype_t *subtype_ptr2 = (subtype_t *)reshGetVal(subtypeID2, &subtypeOps);
   return subtypeCompareP(subtype_ptr1,subtype_ptr2);
 }
 
@@ -714,7 +714,7 @@ int subtypeInqSize(int subtypeID)
     }
   else
     {
-      subtype_t *subtype_ptr = reshGetVal(subtypeID, &subtypeOps);
+      subtype_t *subtype_ptr = (subtype_t *)reshGetVal(subtypeID, &subtypeOps);
       return subtype_ptr->nentries;
     }
 }
@@ -724,7 +724,7 @@ int subtypeInqSize(int subtypeID)
 int subtypeInqActiveIndex(int subtypeID)
 {
   if (subtypeID == CDI_UNDEFID)  return 0;
-  subtype_t *subtype_ptr = reshGetVal(subtypeID, &subtypeOps);
+  subtype_t *subtype_ptr = (subtype_t *)reshGetVal(subtypeID, &subtypeOps);
   return subtype_ptr->active_subtype_index;
 }
 
@@ -732,7 +732,7 @@ int subtypeInqActiveIndex(int subtypeID)
 /* Set the currently active index of a subtype (e.g. current tile index). */
 void subtypeDefActiveIndex(int subtypeID, int index)
 {
-  subtype_t *subtype_ptr = reshGetVal(subtypeID, &subtypeOps);
+  subtype_t *subtype_ptr = (subtype_t *)reshGetVal(subtypeID, &subtypeOps);
   subtype_ptr->active_subtype_index = index;
 }
 
@@ -741,7 +741,7 @@ void subtypeDefActiveIndex(int subtypeID, int index)
    criterion. */
 int subtypeInqSubEntry(int subtypeID, subtype_query_t criterion)
 {
-  subtype_t *subtype_ptr = reshGetVal(subtypeID, &subtypeOps);
+  subtype_t *subtype_ptr = (subtype_t *)reshGetVal(subtypeID, &subtypeOps);
   struct subtype_entry_t *entry = subtype_ptr->entries;
   /* loop over all entries of this subtype */
   while (entry != NULL) {

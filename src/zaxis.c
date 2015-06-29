@@ -310,7 +310,7 @@ static void zaxisDestroyKernel( zaxis_t * zaxisptr )
 */
 void zaxisDestroy(int zaxisID)
 {
-  zaxis_t *zaxisptr = reshGetVal(zaxisID, &zaxisOps);
+  zaxis_t *zaxisptr = (zaxis_t *)reshGetVal(zaxisID, &zaxisOps);
 
   zaxisDestroyKernel ( zaxisptr );
 }

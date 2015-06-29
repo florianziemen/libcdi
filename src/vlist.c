@@ -352,7 +352,7 @@ void vlistCopy(int vlistID2, int vlistID1)
       //vlistptr2->varsAllocated = nvars;
 
       size_t n = (size_t)vlistptr2->varsAllocated;
-      vars2 = xrealloc(vars2, n*sizeof(var_t));
+      vars2 = (var_t *)xrealloc(vars2, n*sizeof(var_t));
       memcpy(vars2, vars1, n*sizeof(var_t));
       vlistptr2->vars = vars2;
 
@@ -366,7 +366,7 @@ void vlistCopy(int vlistID2, int vlistID1)
           if ( vars1[varID].levinfo )
             {
               n = (size_t)zaxisInqSize(vars1[varID].zaxisID);
-              vars2[varID].levinfo = xmalloc(n*sizeof(levinfo_t));
+              vars2[varID].levinfo = (levinfo_t *)xmalloc(n*sizeof(levinfo_t));
               memcpy(vars2[varID].levinfo, vars1[varID].levinfo, n*sizeof(levinfo_t));
             }
 	}
@@ -683,7 +683,7 @@ void vlistCat(int vlistID2, int vlistID1)
   if ( nvars > vlistptr2->varsAllocated )
     {
       vlistptr2->varsAllocated = nvars;
-      vars2 = xrealloc(vars2, (size_t)nvars*sizeof(var_t));
+      vars2 = (var_t *)xrealloc(vars2, (size_t)nvars*sizeof(var_t));
       vlistptr2->vars = vars2;
     }
   memcpy(vars2+nvars2, vars1, (size_t)nvars1 * sizeof(var_t));
@@ -1481,7 +1481,7 @@ void vlistPackP ( void * vlistptr, void * buf, int size, int *position,
   vlistAttsPack(p, CDI_GLOBAL, buf, size, position, context);
   for ( varID = 0; varID < p->nvars; varID++ )
     {
-      vlistVarPack(p, varID, buf, size, position, context);
+      vlistVarPack(p, varID, (char *)buf, size, position, context);
     }
 }
 

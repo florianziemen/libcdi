@@ -319,7 +319,7 @@ decodeForm2(char *pline, char *name, char *longname, char *units)
   return (0);
 }
 
-int tableRead(const char *tablefile)
+int tableRead(char *tablefile)
 {
   char line[1024], *pline;
   int lnr = 0;

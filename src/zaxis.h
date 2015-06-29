@@ -7,7 +7,7 @@ int zaxisSize(void);
 
 unsigned cdiZaxisCount(void);
 
-void cdiZaxisGetIndexList(unsigned numIDs, int IDs[numIDs]);
+void cdiZaxisGetIndexList(unsigned numIDs, int *IDs);
 
 void
 zaxisUnpack(char * unpackBuffer, int unpackBufferSize,

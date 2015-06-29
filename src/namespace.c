@@ -56,7 +56,7 @@ static int activeNamespace = 0;
     CDI_NETCDF_SWITCHES                        \
     }
 
-#if defined (SX)
+#if defined (SX) || defined (__cplusplus)
 static const union namespaceSwitchValue
   defaultSwitches_[NUM_NAMESPACE_SWITCH] = defaultSwitches;
 #endif
@@ -184,15 +184,15 @@ namespaceNew()
   xassert(newNamespaceID >= 0 && newNamespaceID < NUM_NAMESPACES);
   ++nNamespaces;
   namespaces[newNamespaceID].resStage = STAGE_DEFINITION;
-#if defined (SX)
+  #if defined (SX) || defined (__cplusplus)
   memcpy(namespaces[newNamespaceID].switches,
          defaultSwitches_,
          sizeof (namespaces[newNamespaceID].switches));
-#else
-  memcpy(namespaces[newNamespaceID].switches,
-         (union namespaceSwitchValue[NUM_NAMESPACE_SWITCH])defaultSwitches,
-         sizeof (namespaces[newNamespaceID].switches));
-#endif
+  #else
+    memcpy(namespaces[newNamespaceID].switches,
+           (union namespaceSwitchValue[NUM_NAMESPACE_SWITCH])defaultSwitches,
+           sizeof (namespaces[newNamespaceID].switches));
+  #endif
   reshListCreate(newNamespaceID);
   NAMESPACE_UNLOCK();
   return newNamespaceID;

@@ -1097,7 +1097,7 @@ const char *modelInqNamePtr(int modelID);
 void    tableWriteC(const char *filename, int tableID);
 void    tableFWriteC(FILE *ptfp, int tableID);
 void    tableWrite(const char *filename, int tableID);
-int     tableRead(const char *tablefile);
+int     tableRead(char *tablefile);
 int     tableDef(int modelID, int tablenum, const char *tablename);
 
 const char *tableInqNamePtr(int tableID);

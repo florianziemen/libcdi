@@ -421,7 +421,7 @@ int extScanTimestep2(stream_t *streamptr)
   cdi_create_records(streamptr, tsID);
 
   nrecords = streamptr->tsteps[0].nallrecs;
-  streamptr->tsteps[1].recIDs = xmalloc((size_t)nrecords * sizeof (int));
+  streamptr->tsteps[1].recIDs = (int *)xmalloc((size_t)nrecords * sizeof (int));
   streamptr->tsteps[1].nrecs = 0;
   for ( recID = 0; recID < nrecords; recID++ )
     streamptr->tsteps[1].recIDs[recID] = -1;
