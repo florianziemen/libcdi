@@ -316,6 +316,13 @@ AM_CONDITIONAL(ENABLE_PYTHON, [test "x$enable_python" != "xno"])
 AS_IF([test "x$enable_python" != "xno"],[AC_SUBST([ENABLE_PYTHON],[true])],[AC_SUBST([ENABLE_PYTHON],[false])])
 #  ----------------------------------------------------------------------
 AM_CONDITIONAL(CREATE_INTERFACES, [test  "x$enable_ruby" = "xyes" -o "x$enable_python" = "xyes"])
+#  ----------------------------------------------------------------------
+#  Create the CDI Fortran77 Interface via cfortran.h
+AC_ARG_ENABLE([cf-interface],
+              [AS_HELP_STRING([--disable-cf-interface],
+                              [Omit building of cfortran Interface])],
+              [enable_cfinterface=${enableval}],[enable_cfinterface=yes])
+AS_IF([test "x${enable_cfinterface}" = "xyes"], [
 dnl ######################################################################
 dnl Test whether cfortran.h works correctly
 dnl ######################################################################
@@ -335,6 +342,7 @@ AS_IF([test -n "$FC" -a X"$FC" != Xno -o -n "$F77" -a X"$F77" != Xno],
        [AC_MSG_NOTICE([Unexpected error when linking C and Fortran via cfortran.h!])])
      AC_MSG_NOTICE([Disabling cfortran.h bindings generation])
      acx_cv_cfortran_works=no])])
+])
 AM_CONDITIONAL([USE_FC],[test -n "$FC" -a X"$FC" != Xno -a x"$acx_cv_cfortran_works" = xyes])dnl
 dnl
 AC_SUBST([CPPFLAGS])dnl

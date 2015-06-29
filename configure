@@ -884,6 +884,7 @@ enable_iso_c_interface
 enable_swig
 enable_ruby
 enable_python
+enable_cf_interface
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1578,6 +1579,7 @@ Optional Features:
                           (EXPERIMENTAL)
   --enable-ruby           ruby language bindings [default=no] (EXPERIMENTAL)
   --enable-python         python language bindings [default=no] (EXPERIMENTAL)
+  --disable-cf-interface  Omit building of cfortran Interface
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -30103,6 +30105,17 @@ else
   CREATE_INTERFACES_FALSE=
 fi
 
+#  ----------------------------------------------------------------------
+#  Create the CDI Fortran77 Interface via cfortran.h
+# Check whether --enable-cf-interface was given.
+if test "${enable_cf_interface+set}" = set; then :
+  enableval=$enable_cf_interface; enable_cfinterface=${enableval}
+else
+  enable_cfinterface=yes
+fi
+
+if test "x${enable_cfinterface}" = "xyes"; then :
+
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking C preprocessor flags for Fortran calling convention cfortran.h" >&5
 $as_echo_n "checking C preprocessor flags for Fortran calling convention cfortran.h... " >&6; }
 if ${acx_cv_cf_flag+:} false; then :
@@ -30522,6 +30535,8 @@ esac
      { $as_echo "$as_me:${as_lineno-$LINENO}: Disabling cfortran.h bindings generation" >&5
 $as_echo "$as_me: Disabling cfortran.h bindings generation" >&6;}
      acx_cv_cfortran_works=no
+fi
+
 fi
 
 fi
