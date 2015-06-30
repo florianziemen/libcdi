@@ -876,34 +876,37 @@ void cdi_generate_vars(stream_t *streamptr)
 
   for ( unsigned index = 0; index < nvars; index++ )
     {
-      int varID = (int)index;
       int varid = varids[index];
       unsigned nlevels = vartable[varid].recordTable[0].nlevels;
 
       /*
       for ( levelID = 0; levelID < nlevels; levelID++ )
 	{
-	  printf("%d %d %d %d %d\n", varID, levelID,
+	  printf("%d %d %d %d %d\n", varid, levelID,
 		 vartable[varid].levelTable[levelID].lindex,
 		 vartable[varid].levelTable[levelID].recID,
 		 vartable[varid].levelTable[levelID].level1);
 	}
       */
-      for (int isub=0; isub<vartable[varid].nsubtypes; isub++)
+      unsigned nsub = vartable[varid].nsubtypes >= 0
+        ? (unsigned)vartable[varid].nsubtypes : 0U;
+      for (size_t isub=0; isub < nsub; isub++)
         {
+          sleveltable_t *restrict streamRecordTable
+            = streamptr->vars[index].recordTable + isub;
+          leveltable_t *restrict vartableLevelTable
+            = vartable[varid].recordTable[isub].levelTable;
           for (unsigned levelID = 0; levelID < nlevels; levelID++)
             {
-              if ( CDI_Debug )
-                Message("streamptr->vars[%d].recordTable[%d].recordID[%d]=%d",
-                        varID,isub,levelID);
-              streamptr->vars[varID].recordTable[isub].recordID[levelID] =
-                vartable[varid].recordTable[isub].levelTable[levelID].recID;
+              streamRecordTable->recordID[levelID]
+                = vartableLevelTable[levelID].recID;
               unsigned lindex;
               for (lindex = 0; lindex < nlevels; lindex++ )
-                if ( levelID == (unsigned)vartable[varid].recordTable[isub].levelTable[lindex].lindex ) break;
+                if ( levelID == (unsigned)vartableLevelTable[lindex].lindex )
+                  break;
               if ( lindex == nlevels )
                 Error("Internal problem! lindex not found.");
-              streamptr->vars[varID].recordTable[isub].lindex[levelID] = (int)lindex;
+              streamRecordTable->lindex[levelID] = (int)lindex;
             }
         }
     }
