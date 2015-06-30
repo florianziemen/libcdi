@@ -12157,7 +12157,7 @@ void TEMPLATE(encode_array,T)(int numBits, size_t packStart, size_t datasize,
 
       if ( sizeof(T) == sizeof(double) )
       	{
-          grib_encode_array_2byte_double(datasize, lGrib, (const double * restrict) data, zref, factor, &z);
+          grib_encode_array_2byte_double(datasize, lGrib, (const double *) data, zref, factor, &z);
         }
       else
         {
@@ -12628,7 +12628,7 @@ void TEMPLATE(encode_array,T)(int numBits, size_t packStart, size_t datasize,
 
       if ( sizeof(T) == sizeof(double) )
       	{
-          grib_encode_array_2byte_double(datasize, lGrib, (const double * restrict) data, zref, factor, &z);
+          grib_encode_array_2byte_double(datasize, lGrib, (const double *) data, zref, factor, &z);
         }
       else
         {
