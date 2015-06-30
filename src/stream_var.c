@@ -103,7 +103,8 @@ int streamvar_new_entry(stream_t *streamptr)
 }
 
 
-void allocate_record_table_entry(stream_t *streamptr, int varID, int subID, int nlevs)
+static void
+allocate_record_table_entry(stream_t *streamptr, int varID, int subID, int nlevs)
 {
   int *level    = (int *)xmalloc((size_t)nlevs * sizeof (int));
   int *lindex   = (int *)xmalloc((size_t)nlevs * sizeof (int));
