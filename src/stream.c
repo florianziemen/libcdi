@@ -959,9 +959,8 @@ cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDeleted)
 }
 
 
-void deallocate_sleveltable_t(sleveltable_t *entry)
+static void deallocate_sleveltable_t(sleveltable_t *entry)
 {
-  if (entry == NULL) return;
   if (entry->recordID) free(entry->recordID);
   if (entry->lindex)   free(entry->lindex);
   entry->recordID = NULL;
@@ -1014,14 +1013,14 @@ void streamClose(int streamID)
 
   for ( index = 0; index < streamptr->nvars; index++ )
     {
-      for (int isub=0; isub<streamptr->vars[index].subtypeSize; isub++)
+      sleveltable_t *pslev = streamptr->vars[index].recordTable;
+      unsigned nsub = streamptr->vars[index].subtypeSize >= 0
+        ? (unsigned)streamptr->vars[index].subtypeSize : 0U;
+      for (size_t isub=0; isub < nsub; isub++)
         {
-          /* fprintf(stderr, "deallocate subtype %d / %d\n",      */
-          /*         isub+1, streamptr->vars[index].subtypeSize); */
-          deallocate_sleveltable_t(&streamptr->vars[index].recordTable[isub]);
+          deallocate_sleveltable_t(pslev + isub);
         }
-      if (streamptr->vars[index].recordTable)  free(streamptr->vars[index].recordTable);
-      streamptr->vars[index].recordTable = NULL;
+      if (pslev) free(pslev);
     }
   free(streamptr->vars);
   streamptr->vars = NULL;
