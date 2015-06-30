@@ -19,7 +19,7 @@ const char *cdiStringError(int cdiErrno)
   switch (cdiErrno) {
   case CDI_ESYSTEM:
     {
-      char *cp = (char *) strerror(errno);
+      const char *cp = strerror(errno);
       if ( cp == NULL ) break;
       return cp;
     }
