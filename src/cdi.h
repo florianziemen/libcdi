@@ -842,10 +842,10 @@ void    gridDefReference(int gridID, const char *reference);
 int     gridInqReference(int gridID, char *reference);
 
 /*      gridDefUUID: Define the UUID of an unstructured grid */
-void    gridDefUUID(int gridID, const unsigned char uuid[CDI_UUID_SIZE]);
+void    gridDefUUID(int gridID, const unsigned char *uuid);
 
 /*      gridInqUUID: Get the UUID of an unstructured grid */
-void    gridInqUUID(int gridID, unsigned char uuid[CDI_UUID_SIZE]);
+void    gridInqUUID(int gridID, unsigned char *uuid);
 
 
 /* Lambert Conformal Conic grid (GRIB version) */
@@ -1097,7 +1097,7 @@ const char *modelInqNamePtr(int modelID);
 void    tableWriteC(const char *filename, int tableID);
 void    tableFWriteC(FILE *ptfp, int tableID);
 void    tableWrite(const char *filename, int tableID);
-int     tableRead(char *tablefile);
+int     tableRead(const char *tablefile);
 int     tableDef(int modelID, int tablenum, const char *tablename);
 
 const char *tableInqNamePtr(int tableID);

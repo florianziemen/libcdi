@@ -288,7 +288,7 @@ void gauaw_old(double *pa, double *pw, int nlat)
 }
 #endif
 
-void gaussaw(double *__restrict__ pa, double *__restrict__ pw, size_t nlat)
+void gaussaw(double *restrict pa, double *restrict pw, size_t nlat)
 {
   //gauaw_old(pa, pw, nlat);
   gauaw(nlat, pa, pw);
