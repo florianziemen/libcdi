@@ -516,7 +516,7 @@ int     vlistInqModel(int vlistID);
 
 /* VLIST VAR routines */
 
-/*      vlistDefVar: Create a new tile-based variable */
+/*      vlistDefVarTiles: Create a new tile-based variable */
 int     vlistDefVarTiles(int vlistID, int gridID, int zaxisID, int tsteptype, int tilesetID);
 
 /*      vlistDefVar: Create a new variable */

@@ -28,7 +28,7 @@
 extern int cdiInventoryMode;
 
 #if  defined  (HAVE_LIBGRIB_API)
-static var_tile_t dummy_tiles = { -1, -1, -1, -1, -1, -1 };
+static const var_tile_t dummy_tiles = { -1, -1, -1, -1, -1, -1 };
 #endif
 
 typedef struct {

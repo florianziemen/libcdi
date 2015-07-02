@@ -5,8 +5,6 @@
 
 #if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 5)
 #pragma GCC diagnostic push
-#endif
-#ifdef __GNUC__
 #pragma GCC diagnostic ignored "-Wconversion"
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 #pragma GCC diagnostic warning "-Wstrict-overflow"
@@ -12159,7 +12157,7 @@ void TEMPLATE(encode_array,T)(int numBits, size_t packStart, size_t datasize,
 
       if ( sizeof(T) == sizeof(double) )
       	{
-          grib_encode_array_2byte_double(datasize, lGrib, (const double * restrict) data, zref, factor, &z);
+          grib_encode_array_2byte_double(datasize, lGrib, (const double *) data, zref, factor, &z);
         }
       else
         {
@@ -12630,7 +12628,7 @@ void TEMPLATE(encode_array,T)(int numBits, size_t packStart, size_t datasize,
 
       if ( sizeof(T) == sizeof(double) )
       	{
-          grib_encode_array_2byte_double(datasize, lGrib, (const double * restrict) data, zref, factor, &z);
+          grib_encode_array_2byte_double(datasize, lGrib, (const double *) data, zref, factor, &z);
         }
       else
         {

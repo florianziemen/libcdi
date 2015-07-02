@@ -426,9 +426,6 @@ void zaxisGetIndexList(int nzaxis, int *zaxisIndexList);
 void zaxisDefLtype2(int zaxisID, int ltype2);
 int  zaxisInqLtype2(int zaxisID);
 
-void streamFCopyRecord(stream_t *streamptr2, stream_t *streamptr1,
-                       const char *container_name);
-
 #endif  /* _CDI_INT_H */
 /*
  * Local Variables:
