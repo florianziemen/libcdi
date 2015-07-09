@@ -30,12 +30,16 @@ void
 modelRun(struct model_config setup, MPI_Comm comm);
 
 static const struct model_config default_setup
+#ifdef __cplusplus
+= { 12, 6, 3, 5, 5, FILETYPE_GRB, DATATYPE_PACK24,1,"grb"};
+#else
   = { .nlon = 12, .nts = 3, .nlat = 6, .nvars = 5,
       .filetype = FILETYPE_GRB, .datatype = DATATYPE_PACK24,
       .compute_checksum = 1,
       .suffix = "grb",
       .max_nlev = 5,
 };
+#endif
 
 #ifdef USE_MPI
 static const struct {

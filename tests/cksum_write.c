@@ -46,7 +46,7 @@ fname_create(const char *prefix, const char *suffix)
 {
   size_t prefix_len, suffix_len;
   char *fname;
-  if (!(fname = malloc((prefix_len = strlen(prefix)) + 1
+  if (!(fname = (char *)malloc((prefix_len = strlen(prefix)) + 1
                        + (suffix_len = strlen(suffix)) + 1)))
     allocError("cannot create string");
   strcpy(fname, prefix);
@@ -189,13 +189,13 @@ main(int argc, char *argv[])
       }
   }
 
-  lons = malloc((size_t)nlon * sizeof (lons[0]));
+  lons = (double *)malloc((size_t)nlon * sizeof (lons[0]));
   for (i = 0; i < nlon; ++i)
     lons[i] = ((double)(i * 360))/nlon;
-  lats = malloc((size_t)nlat * sizeof (lats[0]));
+  lats = (double *)malloc((size_t)nlat * sizeof (lats[0]));
   for (i = 0; i < nlat; ++i)
     lats[i] = ((double)(i * 180))/nlat - 90.0;
-  levs = malloc((size_t)nlev * sizeof (levs[0]));
+  levs = (double *)malloc((size_t)nlev * sizeof (levs[0]));
   for (i = 0; i < nlev; ++i)
     levs[i] = 101300 - floor(3940.3 * (exp(2.3579 * (double)(i)/(nlev - 1)) - 1.0));
 
@@ -255,7 +255,7 @@ main(int argc, char *argv[])
       // and set the data type
       vlistDefVarDatatype(vlistID, varID[i], datatype);
       // create memory for variables
-      var[i] = malloc(varSize[i] * sizeof (var[i][0]));
+      var[i] = (double *)malloc(varSize[i] * sizeof (var[i][0]));
     }
 
   var_scale(datatype, &mscale, &mrscale);
@@ -330,7 +330,7 @@ main(int argc, char *argv[])
         {
           size_t maxChunkSize
             = ((size_t)nlon + 1)/2 * (size_t)nlat * (size_t)nlev;
-          double *chunkBuf = malloc(maxChunkSize * sizeof (double));
+          double *chunkBuf = (double *)malloc(maxChunkSize * sizeof (double));
           int varShape[2][3] = { { nlon, nlat, 1 }, { nlon, nlat, nlev } },
             chunk[3][2] = { { 0, nlon/2 - 1 }, { 0, nlat - 1 }, { 0, 0 } };
           if (!chunkBuf)

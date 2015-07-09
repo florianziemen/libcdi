@@ -319,7 +319,7 @@ decodeForm2(char *pline, char *name, char *longname, char *units)
   return (0);
 }
 
-int tableRead(char *tablefile)
+int tableRead(const char *tablefile)
 {
   char line[1024], *pline;
   int lnr = 0;
@@ -333,7 +333,7 @@ int tableRead(char *tablefile)
   tablefp = fopen(tablefile, "r");
   if ( tablefp == NULL ) return (tableID);
 
-  tablename = strrchr(tablefile, '/');
+  tablename = (char* )strrchr(tablefile, '/');
   if ( tablename == 0 ) tablename = (char *) tablefile;
   else                  tablename++;
 

@@ -103,6 +103,11 @@ const resOps zaxisOps = {
   zaxisTxCode
 };
 
+const resOps *getZaxisOps()
+{
+  return &zaxisOps;
+}
+
 static int  ZAXIS_Debug = 0;   /* If set to 1, debugging */
 
 void zaxisGetTypeDescription(int zaxisType, int* outPositive, const char** outName, const char** outLongName, const char** outStdName, const char** outUnit)

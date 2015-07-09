@@ -44,7 +44,7 @@ int main(int argc, const char **argv)
           int nmiss;
           if (memSize > bufSize)
             {
-              double *temp = realloc(buf, memSize);
+              double *temp = (double *)realloc(buf, memSize);
               if (!temp)
                 {
                   perror("read buffer reallocation failed");
@@ -89,14 +89,18 @@ printAtts(int vlistID)
                                attName, &attType, &attLen);
           {
             const char *varDesc = varIdx > 0
-              ? (sprintf(buf, "%s%d", varDescPrefix,
-                         vlistInqVarCode(vlistID, varID)), buf)
+              ? (sprintf((char *)buf, "%s%d", varDescPrefix,
+                         vlistInqVarCode(vlistID, varID)), (char *)buf)
               : globDesc;
             printf("%s attribute \"%s\", value: ",
                    varDesc, attName);
           }
           if (attLen < 0)
-            goto attGetFail;
+            {
+            //goto attGetFail;
+            puts("error retrieving value");
+            continue;
+            }
           size_t elemSize = 0;
           switch (attType)
             {
@@ -125,16 +129,16 @@ printAtts(int vlistID)
             {
             case DATATYPE_TXT:
               rc = vlistInqAttTxt(vlistID, (int)varID, attName,
-                                  attLen, buf);
+                                  attLen, (char *)buf);
               if (rc == CDI_NOERR)
                 printf("\"%.*s\"", attLen, (char *)buf);
               break;
             case DATATYPE_FLT:
               rc = vlistInqAttFlt(vlistID, (int)varID, attName,
-                                  attLen + 1, buf);
+                                  attLen + 1, (double *)buf);
               if (rc == CDI_NOERR && attLen)
                 {
-                  const double *restrict dp = buf;
+                  const double *restrict dp = (const double*)buf;
                   printf("%10g", dp[0]);
                   for (size_t i = 1; i < (size_t)attLen; ++i)
                     printf(", %10g", dp[i]);
@@ -142,10 +146,10 @@ printAtts(int vlistID)
               break;
             case DATATYPE_INT:
               rc = vlistInqAttInt(vlistID, (int)varID, attName,
-                                  attLen + 1, buf);
+                                  attLen + 1, (int *)buf);
               if (rc == CDI_NOERR && attLen)
                 {
-                  const int *restrict ip = buf;
+                  const int *restrict ip = (const int *)buf;
                   printf("%d", ip[0]);
                   for (size_t i = 1; i < (size_t)attLen; ++i)
                     printf(", %d", ip[i]);
@@ -159,7 +163,7 @@ printAtts(int vlistID)
             }
           else
             {
-              attGetFail:
+              //attGetFail:
               puts("error retrieving value");
             }
         }

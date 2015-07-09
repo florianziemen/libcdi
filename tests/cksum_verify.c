@@ -22,8 +22,8 @@ main()
 {
   unsigned char *test_data, *init_block;
   size_t num_blocks = 1000;
-  if (!(init_block = calloc(block_size * block_size, 1U))
-      || !(test_data = calloc((size_t)block_size * num_blocks, 1U)))
+  if (!(init_block = (unsigned char *)calloc(block_size * block_size, 1U))
+      || !(test_data = (unsigned char *)calloc((size_t)block_size * num_blocks, 1U)))
     return EXIT_FAILURE;
   /* this is supposed to be non-random */
   srand48(5L);

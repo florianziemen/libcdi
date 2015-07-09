@@ -1063,7 +1063,7 @@ int varDefZaxis(int vlistID, int zaxistype, int nlevels, double *levels, int lbo
       // };
 
       if ((zaxisglobdefined
-           = (cdiResHFilterApply(&zaxisOps, varDefZAxisSearch, &query)
+           = (cdiResHFilterApply(getZaxisOps(), varDefZAxisSearch, &query)
               == CDI_APPLY_STOP)))
         zaxisID = query.resIDValue;
 

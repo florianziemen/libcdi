@@ -14,6 +14,8 @@ zaxisUnpack(char * unpackBuffer, int unpackBufferSize,
 
 void zaxisDefLtype2(int zaxisID, int ltype2);
 
-extern const resOps zaxisOps;
+const resOps *getZaxisOps();
+
+//extern const resOps zaxisOps;
 
 #endif

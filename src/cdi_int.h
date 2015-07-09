@@ -367,10 +367,10 @@ void cdiStreamGetIndexList(unsigned numIDs, int IDs[]);
 
 void  cdiInitialize(void);
 
-void uuid2str(const unsigned char *uuid, char *uuidstr);
-int str2uuid(const char *uuidstr, unsigned char *uuid);
+void uuid2str(const unsigned char uuid[], char uuidstr[]);
+int str2uuid(const char *uuidstr, unsigned char uuid[]);
 
-static inline int cdiUUIDIsNull(const unsigned char *uuid)
+static inline int cdiUUIDIsNull(const unsigned char uuid[])
 {
   int isNull = 1;
   for (size_t i = 0; i < CDI_UUID_SIZE; ++i)
