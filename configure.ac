@@ -4,7 +4,7 @@
 #  autoconf 2.68
 #  libtool  2.4.2
 
-AC_INIT([cdi], [1.7.0rc3], [http://mpimet.mpg.de/cdi])
+AC_INIT([cdi], [1.7.0rc4], [http://mpimet.mpg.de/cdi])
 
 echo "configuring ${PACKAGE_NAME} ${PACKAGE_VERSION}"
 
