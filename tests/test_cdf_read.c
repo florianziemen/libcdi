@@ -97,7 +97,6 @@ printAtts(int vlistID)
           }
           if (attLen < 0)
             {
-            //goto attGetFail;
             puts("error retrieving value");
             continue;
             }
@@ -163,7 +162,6 @@ printAtts(int vlistID)
             }
           else
             {
-              //attGetFail:
               puts("error retrieving value");
             }
         }

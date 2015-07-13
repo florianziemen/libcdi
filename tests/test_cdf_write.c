@@ -94,7 +94,7 @@ int main(int argc, const char **argv)
   (void)streamDefTimestep(streamID, 0);
 
   {
-    double (*data)[sizex] = (double(*)[80])malloc(sizeof (**data) * sizex * sizey);
+    double (*data)[sizex] = (double(*)[sizex])malloc(sizeof (**data) * sizex * sizey);
     if (!data)
       {
         perror("data values memory allocation failed");
