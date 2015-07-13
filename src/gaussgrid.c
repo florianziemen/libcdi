@@ -108,7 +108,7 @@ void gawl(double *pfn, double *pl, double *pw, size_t kn)
 }
 
 static
-void gauaw(size_t kn, double *restrict pl, double *restrict pw)
+void gauaw(size_t kn, double *__restrict__ pl, double *__restrict__ pw)
 {
   /*
    * 1.0 Initialize Fourier coefficients for ordinary Legendre polynomials

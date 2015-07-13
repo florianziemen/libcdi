@@ -16,7 +16,7 @@ cksum_stream(const char *fname, size_t *table_len)
   int nvars, ngrids, nzaxis;
   int i;
   uint32_t *checksum_state = NULL;
-  struct
+  struct var_size_t
   {
     int x, y, z;
     size_t chars;
@@ -49,8 +49,8 @@ cksum_stream(const char *fname, size_t *table_len)
         nvars = -1;
         break;
       }
-    checksum_state = xcalloc((size_t)nvars, sizeof (checksum_state[0]));
-    varSize = xmalloc((size_t)nvars * sizeof (varSize[0]));
+    checksum_state = (uint32_t *)xcalloc((size_t)nvars, sizeof (checksum_state[0]));
+    varSize = (struct var_size_t *)xmalloc((size_t)nvars * sizeof (varSize[0]));
 
     for (i = 0; i < nvars; ++i)
       {
@@ -95,7 +95,7 @@ cksum_stream(const char *fname, size_t *table_len)
       if (var_size_max_chars < varSize[i].chars)
         var_size_max_chars = varSize[i].chars;
     }
-    buf = xmalloc(var_size_max_chars);
+    buf = (double*)malloc(var_size_max_chars);
 
     if (nvars == -1)
       break;
@@ -121,7 +121,7 @@ cksum_stream(const char *fname, size_t *table_len)
         ++tsID;
       }
 
-    file_vars = xmalloc((size_t)nvars * sizeof (file_vars[0]));
+    file_vars = (struct cksum_table *)xmalloc((size_t)nvars * sizeof (file_vars[0]));
     for (i = 0; i < nvars; ++i)
       {
         file_vars[i].code = vlistInqVarCode(vlistID, i);

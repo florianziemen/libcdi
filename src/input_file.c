@@ -73,7 +73,7 @@ CdiInputFile* cdiInputFile_make(const char* path)
         }
       else
         {
-          result = xmalloc(sizeof(*result));
+          result = (CdiInputFile *)xmalloc(sizeof(*result));
           if(!cdiInputFile_condestruct(result, path))
             {
               //An error occured during construction, avoid a memory leak.
@@ -87,7 +87,7 @@ CdiInputFile* cdiInputFile_make(const char* path)
                 {
                   openFileListSize *= 2;
                   if(openFileListSize < 16) openFileListSize = 16;
-                  openFileList = xrealloc(openFileList, openFileListSize);
+                  openFileList = (CdiInputFile **)xrealloc(openFileList, openFileListSize);
                 }
               xassert(openFileCount < openFileListSize);
               openFileList[openFileCount++] = result;
@@ -101,7 +101,7 @@ CdiInputFile* cdiInputFile_make(const char* path)
 
 int cdiInputFile_read(const CdiInputFile* me, off_t readPosition, size_t readSize, size_t* outActualReadSize, void* buffer)
 {
-  char* byteBuffer = buffer;
+  char* byteBuffer = (char *)buffer;
   size_t trash;
   if(!outActualReadSize) outActualReadSize = &trash;
   *outActualReadSize = 0;

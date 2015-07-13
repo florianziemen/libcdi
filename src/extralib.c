@@ -303,13 +303,13 @@ static int extInqData(extrec_t *extp, int prec, void *data)
 
 int extInqDataSP(void *ext, float *data)
 {
-  return (extInqData(ext, SINGLE_PRECISION, (void *) data));
+  return (extInqData((extrec_t *)ext, SINGLE_PRECISION, (void *) data));
 }
 
 
 int extInqDataDP(void *ext, double *data)
 {
-  return (extInqData(ext, DOUBLE_PRECISION, (void *) data));
+  return (extInqData((extrec_t *)ext, DOUBLE_PRECISION, (void *) data));
 }
 
 

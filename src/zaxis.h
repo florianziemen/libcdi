@@ -5,7 +5,7 @@ void zaxisGetTypeDescription(int zaxisType, int* outPositive, const char** outNa
 
 unsigned cdiZaxisCount(void);
 
-void cdiZaxisGetIndexList(unsigned numIDs, int IDs[numIDs]);
+void cdiZaxisGetIndexList(unsigned numIDs, int *IDs);
 
 void
 zaxisUnpack(char * unpackBuffer, int unpackBufferSize,
@@ -14,6 +14,8 @@ zaxisUnpack(char * unpackBuffer, int unpackBufferSize,
 
 void zaxisDefLtype2(int zaxisID, int ltype2);
 
-extern const resOps zaxisOps;
+const resOps *getZaxisOps();
+
+//extern const resOps zaxisOps;
 
 #endif

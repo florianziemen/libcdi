@@ -996,7 +996,7 @@ struct varDefZAxisSearchState
 static enum cdiApplyRet
 varDefZAxisSearch(int id, void *res, void *data)
 {
-  struct varDefZAxisSearchState *state = data;
+  struct varDefZAxisSearchState *state = (struct varDefZAxisSearchState *)data;
   (void)res;
   if (zaxisCompare(id, state->zaxistype, state->nlevels, state->lbounds,
                    state->levels, state->longname, state->units, state->ltype)
@@ -1043,17 +1043,27 @@ int varDefZaxis(int vlistID, int zaxistype, int nlevels, double *levels, int lbo
 
   if ( ! zaxisdefined )
     {
-      struct varDefZAxisSearchState query = {
-        .zaxistype = zaxistype,
-        .nlevels = nlevels,
-        .levels = levels,
-        .lbounds = lbounds,
-        .longname = longname,
-        .units = units,
-        .ltype = ltype1,
-      };
+      struct varDefZAxisSearchState query;
+      query.zaxistype = zaxistype;
+      query.nlevels = nlevels;
+      query.levels = levels;
+      query.lbounds = lbounds;
+      query.longname = longname;
+      query.units = units;
+      query.ltype = ltype1;
+
+      //  = {
+      //   .zaxistype = zaxistype,
+      //   .nlevels = nlevels,
+      //   .levels = levels,
+      //   .lbounds = lbounds,
+      //   .longname = longname,
+      //   .units = units,
+      //   .ltype = ltype1,
+      // };
+
       if ((zaxisglobdefined
-           = (cdiResHFilterApply(&zaxisOps, varDefZAxisSearch, &query)
+           = (cdiResHFilterApply(getZaxisOps(), varDefZAxisSearch, &query)
               == CDI_APPLY_STOP)))
         zaxisID = query.resIDValue;
 

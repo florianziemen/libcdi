@@ -842,10 +842,10 @@ void    gridDefReference(int gridID, const char *reference);
 int     gridInqReference(int gridID, char *reference);
 
 /*      gridDefUUID: Define the UUID of an unstructured grid */
-void    gridDefUUID(int gridID, const unsigned char uuid[CDI_UUID_SIZE]);
+void    gridDefUUID(int gridID, const unsigned char *uuid);
 
 /*      gridInqUUID: Get the UUID of an unstructured grid */
-void    gridInqUUID(int gridID, unsigned char uuid[CDI_UUID_SIZE]);
+void    gridInqUUID(int gridID, unsigned char *uuid);
 
 
 /* Lambert Conformal Conic grid (GRIB version) */

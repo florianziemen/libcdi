@@ -70,7 +70,7 @@ static char *
 new_refcount_string(size_t len)
 {
   struct refcount_string *container
-    = xmalloc(sizeof (*container) + len + 1);
+    = (struct refcount_string *)xmalloc(sizeof (*container) + len + 1);
   container->ref_count = 1;
   return container->string;
 }

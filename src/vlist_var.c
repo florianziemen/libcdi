@@ -564,13 +564,13 @@ char* vlistCopyVarName(int vlistId, int varId)
         result = strdup(name);
       {
         //No luck, fall back to outputting a name of the format "var<num>".
-        result = xmalloc(3 + 3 * sizeof (int) * CHAR_BIT / 8 + 2);
+        result = (char *)xmalloc(3 + 3 * sizeof (int) * CHAR_BIT / 8 + 2);
         sprintf(result, "var%d", number);
       }
     }
   else
     {
-      result = xmalloc(5 + 2 + 3 * (3 * sizeof (int) * CHAR_BIT + 1) + 1);
+      result = (char *)xmalloc(5 + 2 + 3 * (3 * sizeof (int) * CHAR_BIT + 1) + 1);
       sprintf(result, "param%d.%d.%d", number, category, discipline);
     }
   //Finally, we fall back to outputting a name of the format "param<num>.<cat>.<dis>".

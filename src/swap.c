@@ -10,7 +10,7 @@
 
 void swap4byte(void *ptr, size_t size)
 {
-  int32_t *ptrtmp = ptr;
+  int32_t *ptrtmp = (int32_t *)ptr;
 
   if (sizeof (int32_t) == 4)
     for (size_t i = 0; i < size; ++i)
@@ -22,7 +22,7 @@ void swap4byte(void *ptr, size_t size)
 
 void swap8byte(void *ptr, size_t size)
 {
-  int64_t *ptrtmp = ptr;
+  int64_t *ptrtmp = (int64_t *)ptr;
 
   if (sizeof (int64_t) == 8)
     for (size_t i = 0; i < size; ++i)

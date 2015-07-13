@@ -50,10 +50,17 @@ int main(int argc, const char **argv)
   {
     /* anti-clockwise coordinates around Amazonia */
     static struct cart_coord region[4]
-      = { { .lon = DEG2RAD(-85.0), .lat = DEG2RAD(-25.0) },
+    #ifdef __cplusplus
+      = { { DEG2RAD(-25.0), DEG2RAD(-85.0) },
+          { DEG2RAD(-18.0), DEG2RAD(-44.0) },
+          { DEG2RAD(-7.0),  DEG2RAD(-50.0) },
+          { DEG2RAD(10.0),  DEG2RAD(-80.0) } };
+    #else  
+    = { { .lon = DEG2RAD(-85.0), .lat = DEG2RAD(-25.0) },
           { .lon = DEG2RAD(-44.0), .lat = DEG2RAD(-18.0) },
           { .lon = DEG2RAD(-50.0), .lat = DEG2RAD(7.0) },
           { .lon = DEG2RAD(-80.0), .lat = DEG2RAD(10.0) } };
+    #endif
     double (*gridCoords)[sizey][sizex]
       = (double (*)[sizey][sizex])
       malloc(sizeof (*gridCoords) * sizey * sizex * 2);
@@ -87,7 +94,7 @@ int main(int argc, const char **argv)
   (void)streamDefTimestep(streamID, 0);
 
   {
-    double (*data)[sizex] = malloc(sizeof (**data) * sizex * sizey);
+    double (*data)[sizex] = (double(*)[sizex])malloc(sizeof (**data) * sizex * sizey);
     if (!data)
       {
         perror("data values memory allocation failed");

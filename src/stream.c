@@ -918,7 +918,7 @@ cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDeleted)
         {
           fileClose(fileID);
           if (recordBufIsToBeDeleted)
-            srvDelete(streamptr->record->exsep);
+            srvDelete((srvrec_t *)streamptr->record->exsep);
           break;
         }
 #endif
@@ -936,7 +936,7 @@ cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDeleted)
         {
           fileClose(fileID);
           if (recordBufIsToBeDeleted)
-            iegDelete(streamptr->record->exsep);
+            iegDelete((iegrec_t *)streamptr->record->exsep);
           break;
         }
 #endif
@@ -1365,7 +1365,7 @@ void cdiStreamReadVar(int streamID, int varID, int memtype, void *data, int *nmi
     case FILETYPE_GRB2:
       {
         if ( memtype == MEMTYPE_FLOAT ) Error("grbReadVar not implemented for memtype float!");
-        grbReadVarDP(streamptr, varID, data, nmiss);
+        grbReadVarDP(streamptr, varID, (double *)data, nmiss);
 	break;
       }
 #endif
@@ -1373,7 +1373,7 @@ void cdiStreamReadVar(int streamID, int varID, int memtype, void *data, int *nmi
     case FILETYPE_SRV:
       {
         if ( memtype == MEMTYPE_FLOAT ) Error("srvReadVar not implemented for memtype float!");
-        srvReadVarDP(streamptr, varID, data, nmiss);
+        srvReadVarDP(streamptr, varID, (double *)data, nmiss);
 	break;
       }
 #endif
@@ -1381,7 +1381,7 @@ void cdiStreamReadVar(int streamID, int varID, int memtype, void *data, int *nmi
     case FILETYPE_EXT:
       {
         if ( memtype == MEMTYPE_FLOAT ) Error("extReadVar not implemented for memtype float!");
-        extReadVarDP(streamptr, varID, data, nmiss);
+        extReadVarDP(streamptr, varID, (double *)data, nmiss);
 	break;
       }
 #endif
@@ -1389,7 +1389,7 @@ void cdiStreamReadVar(int streamID, int varID, int memtype, void *data, int *nmi
     case FILETYPE_IEG:
       {
         if ( memtype == MEMTYPE_FLOAT ) Error("iegReadVar not implemented for memtype float!");
-        iegReadVarDP(streamptr, varID, data, nmiss);
+        iegReadVarDP(streamptr, varID, (double *)data, nmiss);
 	break;
       }
 #endif
@@ -1400,9 +1400,9 @@ void cdiStreamReadVar(int streamID, int varID, int memtype, void *data, int *nmi
     case FILETYPE_NC4C:
       {
         if ( memtype == MEMTYPE_FLOAT )
-          cdfReadVarSP(streamptr, varID, data, nmiss);
+          cdfReadVarSP(streamptr, varID, (float *)data, nmiss);
         else
-          cdfReadVarDP(streamptr, varID, data, nmiss);
+          cdfReadVarDP(streamptr, varID, (double *)data, nmiss);
 
 	break;
       }
@@ -1491,7 +1491,7 @@ void cdiStreamWriteVar_(int streamID, int varID, int memtype, const void *data, 
     case FILETYPE_SRV:
       {
         if ( memtype == MEMTYPE_FLOAT ) Error("srvWriteVar not implemented for memtype float!");
-        srvWriteVarDP(streamptr, varID, data);
+        srvWriteVarDP(streamptr, varID, (double *)data);
 	break;
       }
 #endif
@@ -1499,7 +1499,7 @@ void cdiStreamWriteVar_(int streamID, int varID, int memtype, const void *data, 
     case FILETYPE_EXT:
       {
         if ( memtype == MEMTYPE_FLOAT ) Error("extWriteVar not implemented for memtype float!");
-        extWriteVarDP(streamptr, varID, data);
+        extWriteVarDP(streamptr, varID, (double *)data);
 	break;
       }
 #endif
@@ -1507,7 +1507,7 @@ void cdiStreamWriteVar_(int streamID, int varID, int memtype, const void *data, 
     case FILETYPE_IEG:
       {
         if ( memtype == MEMTYPE_FLOAT ) Error("iegWriteVar not implemented for memtype float!");
-        iegWriteVarDP(streamptr, varID, data);
+        iegWriteVarDP(streamptr, varID, (double *)data);
 	break;
       }
 #endif
@@ -1518,7 +1518,7 @@ void cdiStreamWriteVar_(int streamID, int varID, int memtype, const void *data, 
     case FILETYPE_NC4C:
       {
 	if ( streamptr->accessmode == 0 ) cdfEndDef(streamptr);
-        cdf_write_var(streamptr, varID, memtype, data, nmiss);
+        cdf_write_var(streamptr, varID, memtype, (double *)data, nmiss);
 	break;
       }
 #endif
@@ -1608,7 +1608,7 @@ int cdiStreamReadVarSlice(int streamID, int varID, int levelID, int memtype, voi
     case FILETYPE_GRB2:
       {
         if ( memtype == MEMTYPE_FLOAT ) return 1;
-        grbReadVarSliceDP(streamptr, varID, levelID, data, nmiss);
+        grbReadVarSliceDP(streamptr, varID, levelID, (double *)data, nmiss);
 	break;
       }
 #endif
@@ -1616,7 +1616,7 @@ int cdiStreamReadVarSlice(int streamID, int varID, int levelID, int memtype, voi
     case FILETYPE_SRV:
       {
         if ( memtype == MEMTYPE_FLOAT ) return 1;
-        srvReadVarSliceDP(streamptr, varID, levelID, data, nmiss);
+        srvReadVarSliceDP(streamptr, varID, levelID, (double *)data, nmiss);
 	break;
       }
 #endif
@@ -1624,7 +1624,7 @@ int cdiStreamReadVarSlice(int streamID, int varID, int levelID, int memtype, voi
     case FILETYPE_EXT:
       {
         if ( memtype == MEMTYPE_FLOAT ) return 1;
-        extReadVarSliceDP(streamptr, varID, levelID, data, nmiss);
+        extReadVarSliceDP(streamptr, varID, levelID, (double *)data, nmiss);
 	break;
       }
 #endif
@@ -1632,7 +1632,7 @@ int cdiStreamReadVarSlice(int streamID, int varID, int levelID, int memtype, voi
     case FILETYPE_IEG:
       {
         if ( memtype == MEMTYPE_FLOAT ) return 1;
-        iegReadVarSliceDP(streamptr, varID, levelID, data, nmiss);
+        iegReadVarSliceDP(streamptr, varID, levelID, (double *)data, nmiss);
 	break;
       }
 #endif
@@ -1643,9 +1643,9 @@ int cdiStreamReadVarSlice(int streamID, int varID, int levelID, int memtype, voi
     case FILETYPE_NC4C:
       {
         if ( memtype == MEMTYPE_FLOAT )
-          cdfReadVarSliceSP(streamptr, varID, levelID, data, nmiss);
+          cdfReadVarSliceSP(streamptr, varID, levelID, (float *)data, nmiss);
         else
-          cdfReadVarSliceDP(streamptr, varID, levelID, data, nmiss);
+          cdfReadVarSliceDP(streamptr, varID, levelID, (double *)data, nmiss);
         break;
       }
 #endif
@@ -1713,7 +1713,7 @@ void streamReadVarSliceF(int streamID, int varID, int levelID, float *data, int 
       // In case the file format does not support single precision reading,
       // we fall back to double precision reading, converting the data on the fly.
       size_t elementCount = (size_t)gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
-      double* conversionBuffer = malloc(elementCount * sizeof(*conversionBuffer));
+      double* conversionBuffer = (double *)malloc(elementCount * sizeof(*conversionBuffer));
       streamReadVarSlice(streamID, varID, levelID, conversionBuffer, nmiss);
       for (size_t i = elementCount; i--; ) data[i] = (float)conversionBuffer[i];
       free(conversionBuffer);
@@ -1752,7 +1752,7 @@ void cdiStreamWriteVarSlice(int streamID, int varID, int levelID, int memtype, c
     case FILETYPE_SRV:
       {
         if ( memtype == MEMTYPE_FLOAT ) Error("srvWriteVarSlice not implemented for memtype float!");
-        srvWriteVarSliceDP(streamptr, varID, levelID, data);
+        srvWriteVarSliceDP(streamptr, varID, levelID, (double *)data);
 	break;
       }
 #endif
@@ -1760,7 +1760,7 @@ void cdiStreamWriteVarSlice(int streamID, int varID, int levelID, int memtype, c
     case FILETYPE_EXT:
       {
         if ( memtype == MEMTYPE_FLOAT ) Error("extWriteVarSlice not implemented for memtype float!");
-        extWriteVarSliceDP(streamptr, varID, levelID, data);
+        extWriteVarSliceDP(streamptr, varID, levelID, (double *)data);
 	break;
       }
 #endif
@@ -1768,7 +1768,7 @@ void cdiStreamWriteVarSlice(int streamID, int varID, int levelID, int memtype, c
     case FILETYPE_IEG:
       {
         if ( memtype == MEMTYPE_FLOAT ) Error("iegWriteVarSlice not implemented for memtype float!");
-        iegWriteVarSliceDP(streamptr, varID, levelID, data);
+        iegWriteVarSliceDP(streamptr, varID, levelID, (double *)data);
 	break;
       }
 #endif
@@ -2134,7 +2134,7 @@ int streamInqFileID(int streamID)
 
 void cdiDefAccesstype(int streamID, int type)
 {
-  stream_t *streamptr = reshGetVal(streamID, &streamOps);
+  stream_t *streamptr = (stream_t *)reshGetVal(streamID, &streamOps);
 
   if ( streamptr->accesstype == CDI_UNDEFID )
     {
@@ -2205,14 +2205,14 @@ void cdiStreamSetupVlist(stream_t *streamptr, int vlistID, int vlistIDorig)
 }
 
 
-void cdiStreamGetIndexList(unsigned numIDs, int IDs[numIDs])
+void cdiStreamGetIndexList(unsigned numIDs, int *IDs)
 {
   reshGetResHListOfType(numIDs, IDs, &streamOps);
 }
 
 int streamInqNvars ( int streamID )
 {
-  stream_t *streamptr = reshGetVal(streamID, &streamOps);
+  stream_t *streamptr = (stream_t *)reshGetVal(streamID, &streamOps);
   return streamptr->nvars;
 }
 
