@@ -36,6 +36,8 @@ static void cdfDefGlobalAtts(stream_t *streamptr);
 static void cdfDefLocalAtts(stream_t *streamptr);
 #endif
 
+#define  BNDS_SUFFIX  "_bnds"
+
 #define  X_AXIS  1
 #define  Y_AXIS  2
 #define  Z_AXIS  3
@@ -1082,6 +1084,8 @@ void cdfDefTime(stream_t* streamptr)
       len = strlen(unitstr);
       if ( len ) cdf_put_att_text(fileID, leadtimeid, "units", len, unitstr);
     }
+
+  cdf_put_att_text(fileID, time_varid, "axis", 1, "T");
 
   if ( streamptr->ncmode == 2 ) cdf_enddef(fileID);
 }
