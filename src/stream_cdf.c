@@ -6912,8 +6912,7 @@ void define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, 
       if ( ncvars[ncvarid].code != UNDEFID )  vlistDefVarCode(vlistID, varID, ncvars[ncvarid].code);
       if ( ncvars[ncvarid].code != UNDEFID )
 	{
-	  int param;
-	  param = cdiEncodeParam(ncvars[ncvarid].code, ncvars[ncvarid].tabnum, 255);
+	  int param = cdiEncodeParam(ncvars[ncvarid].code, ncvars[ncvarid].tabnum, 255);
 	  vlistDefVarParam(vlistID, varID, param);
 	}
       if ( ncvars[ncvarid].longname[0] )  vlistDefVarLongname(vlistID, varID, ncvars[ncvarid].longname);
@@ -7084,7 +7083,7 @@ void define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, 
 	      if ( memcmp("var", pname, 3) == 0 )
 		{
 		  vlistDefVarCode(vlistID, varID, atoi(pname+3));
-		  vlistDestroyVarName(vlistID, varID);
+                  // vlistDestroyVarName(vlistID, varID);
 		}
 	    }
 	  else if ( len > 4 && isdigit((int) pname[4]) )
@@ -7092,7 +7091,7 @@ void define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, 
 	      if ( memcmp("code", pname, 4) == 0 )
 		{
 		  vlistDefVarCode(vlistID, varID, atoi(pname+4));
-		  vlistDestroyVarName(vlistID, varID);
+		  // vlistDestroyVarName(vlistID, varID);
 		}
 	    }
 	  else if ( len > 5 && isdigit((int) pname[5]) )
@@ -7102,7 +7101,7 @@ void define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, 
 		  int pnum = -1, pcat = 255, pdis = 255;
 		  sscanf(pname+5, "%d.%d.%d", &pnum, &pcat, &pdis);
 		  vlistDefVarParam(vlistID, varID, cdiEncodeParam(pnum, pcat, pdis));
-		  vlistDestroyVarName(vlistID, varID);
+                  // vlistDestroyVarName(vlistID, varID);
 		}
 	    }
 	}
