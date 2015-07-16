@@ -1803,8 +1803,8 @@ void cdfDefCurvilinear(stream_t *streamptr, int gridID)
       if ( gridInqXboundsPtr(gridID) || gridInqYboundsPtr(gridID) )
         {
           size_t nvertex = 4;
-          if ( nc_inq_dimid(fileID, "vertices", &nvdimID) != NC_NOERR )
-            cdf_def_dim(fileID, "vertices", nvertex, &nvdimID);
+          if ( nc_inq_dimid(fileID, "nv4", &nvdimID) != NC_NOERR )
+            cdf_def_dim(fileID, "nv4", nvertex, &nvdimID);
         }
 
       dimIDs[0] = ydimID;
@@ -1827,7 +1827,8 @@ void cdfDefCurvilinear(stream_t *streamptr, int gridID)
 
           if ( gridInqXboundsPtr(gridID) && nvdimID != UNDEFID )
             {
-              strcat(xaxisname, "_vertices");
+              strcat(xaxisname, "_");
+              strcat(xaxisname, BNDS_NAME);
               dimIDs[0] = ydimID;
               dimIDs[1] = xdimID;
               dimIDs[2] = nvdimID;
@@ -1855,7 +1856,8 @@ void cdfDefCurvilinear(stream_t *streamptr, int gridID)
 
           if ( gridInqYboundsPtr(gridID) && nvdimID != UNDEFID )
             {
-              strcat(yaxisname, "_vertices");
+              strcat(yaxisname, "_");
+              strcat(yaxisname, BNDS_NAME);
               dimIDs[0] = ydimID;
               dimIDs[1] = xdimID;
               dimIDs[2] = nvdimID;
@@ -2213,7 +2215,8 @@ void cdfDefUnstructured(stream_t *streamptr, int gridID)
               int dimIDs[2];
               dimIDs[0] = dimID;
               dimIDs[1] = nvdimID;
-              strcat(xaxisname, "_vertices");
+              strcat(xaxisname, "_");
+              strcat(xaxisname, BNDS_NAME);
               cdf_def_var(fileID, xaxisname, (nc_type) xtype, 2, dimIDs, &ncbxvarid);
               cdfGridCompress(fileID, ncbxvarid, (int)dimlen, streamptr->filetype, streamptr->comptype);
 
@@ -2238,7 +2241,8 @@ void cdfDefUnstructured(stream_t *streamptr, int gridID)
               int dimIDs[2];
               dimIDs[0] = dimID;
               dimIDs[1] = nvdimID;
-              strcat(yaxisname, "_vertices");
+              strcat(yaxisname, "_");
+              strcat(yaxisname, BNDS_NAME);
               cdf_def_var(fileID, yaxisname, (nc_type) xtype, 2, dimIDs, &ncbyvarid);
               cdfGridCompress(fileID, ncbyvarid, (int)dimlen, streamptr->filetype, streamptr->comptype);
 
