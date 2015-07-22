@@ -31,16 +31,16 @@ char* gribCopyString(grib_handle* gribHandle, const char* key)
   size_t length;
 #ifdef HAVE_GRIB_GET_LENGTH
   if(!grib_get_length(gribHandle, key, &length))
-  {
-    char* result = xmalloc(length);
-    if(!grib_get_string(gribHandle, key, result, &length))
-      result = xrealloc(result, length);
-    else
     {
-      free(result);
-      result = NULL;
+      char* result = xmalloc(length);
+      if(!grib_get_string(gribHandle, key, result, &length))
+        result = xrealloc(result, length);
+      else
+        {
+          free(result);
+          result = NULL;
+        }
     }
-  }
 #else
   length = 1024;         /* there's an implementation limit
                           * that makes strings longer than
@@ -50,23 +50,24 @@ char* gribCopyString(grib_handle* gribHandle, const char* key)
   result = xmalloc(length);
   while ((rc = grib_get_string(gribHandle, key, result, &length))
          == GRIB_BUFFER_TOO_SMALL || rc == GRIB_ARRAY_TOO_SMALL)
-  {
-    if (length <= 1024UL * 1024UL)
     {
-      length *= 2;
-      result = xrealloc(result, length);
+      if (length <= 1024UL * 1024UL)
+        {
+          length *= 2;
+          result = xrealloc(result, length);
+        }
+      else
+        break;
     }
-    else
-      break;
-  }
   if (!rc)
-  {
     result = xrealloc(result, length);
-    return result;
-  }
-  free(result);
+  else
+    {
+      free(result);
+      result = NULL;
+    }
 #endif
-  return NULL;
+  return result;
 }
 
 //A simple wrapper for grib_get_string() for the usecase that the result is only compared to a given constant string.
