@@ -4,7 +4,7 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   June 2015
+! Uwe Schulzweida, MPI-MET, Hamburg,   July 2015
 !
 
 !

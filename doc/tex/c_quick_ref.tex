@@ -88,7 +88,7 @@ Define the reference URI for an unstructured grid.
 \section*{\tt \htmlref{gridDefUUID}{gridDefUUID}}
 
 \begin{verbatim}
-    void gridDefUUID (int gridID, const unsigned char uuid[CDI_UUID_SIZE]);
+    void gridDefUUID (int gridID, const unsigned char *uuid);
 \end{verbatim}
 
 Define the UUID of an unstructured grid.
@@ -295,7 +295,7 @@ Get the type of a Grid.
 \section*{\tt \htmlref{gridInqUUID}{gridInqUUID}}
 
 \begin{verbatim}
-    void gridInqUUID (int gridID, unsigned char uuid[CDI_UUID_SIZE]);
+    void gridInqUUID (int gridID, unsigned char *uuid);
 \end{verbatim}
 
 Get the UUID of an unstructured grid.
