@@ -910,3 +910,13 @@ double cdiGribIterator_inqDoubleDefaultValue(CdiGribIterator* me, const char* ke
   xabort("CDI was compiled without GribAPI support, so you can't possibly have a valid CdiGribIterator* to call this function with");
 #endif
 }
+
+/*
+ * Local Variables:
+ * c-file-style: "Java"
+ * c-basic-offset: 2
+ * indent-tabs-mode: nil
+ * show-trailing-whitespace: t
+ * require-trailing-newline: t
+ * End:
+ */

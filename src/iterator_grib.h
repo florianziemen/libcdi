@@ -46,3 +46,13 @@ void cdiGribIterator_readField(CdiIterator* me, double* buffer, size_t* nmiss);
 void cdiGribIterator_readFieldF(CdiIterator* me, float* buffer, size_t* nmiss);
 
 #endif
+
+/*
+ * Local Variables:
+ * c-file-style: "Java"
+ * c-basic-offset: 2
+ * indent-tabs-mode: nil
+ * show-trailing-whitespace: t
+ * require-trailing-newline: t
+ * End:
+ */

@@ -30,3 +30,13 @@ void cdiRefObject_destruct(CdiReferencedObject* me)
   (void)me;
   /* Empty for now, but that's no reason not to call it! */
 }
+
+/*
+ * Local Variables:
+ * c-file-style: "Java"
+ * c-basic-offset: 2
+ * indent-tabs-mode: nil
+ * show-trailing-whitespace: t
+ * require-trailing-newline: t
+ * End:
+ */

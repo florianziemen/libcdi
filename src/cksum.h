@@ -18,3 +18,12 @@ memcrc_finish(uint32_t *state, off_t total_size);
 uint32_t
 memcrc(const unsigned char *b, size_t n);
 
+/*
+ * Local Variables:
+ * c-file-style: "Java"
+ * c-basic-offset: 2
+ * indent-tabs-mode: nil
+ * show-trailing-whitespace: t
+ * require-trailing-newline: t
+ * End:
+ */
