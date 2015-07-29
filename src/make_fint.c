@@ -296,14 +296,18 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
     if (reCompile(&docCommentRE, docCommentREString, &line, &lineBufSize))
       exit(EXIT_FAILURE);
   }
-  /* compile keep-conditional regular expression */
-  /* if(n)def and endif preprocessor conditionals followed by
-     make_fint keep are copied to the Fortran interface file */
   regex_t cppCondRE;
   {
     static const char cppCondREString[]
-      = "^"WS"*#"WS"*(ifn?def"WS"+"SYMRE"|endif)"WS"+/\\*"WS"*make_fint keep"WS"*\\*/";
+      = "^"WS"*#"WS"*((ifn?def)"WS"+"SYMRE"|endif)"WS"*(/\\*[^*]*\\*/|//.*)?";
     if (reCompile(&cppCondRE, cppCondREString, &line, &lineBufSize))
+      exit(EXIT_FAILURE);
+  }
+  regex_t cppElseRE;
+  {
+    static const char cppElseREString[]
+      = "^"WS"*#"WS"*else"WS"*(/\\*[^*]*\\*/|//.*)?";
+    if (reCompile(&cppElseRE, cppElseREString, &line, &lineBufSize))
       exit(EXIT_FAILURE);
   }
   regex_t emptyStringRE;
@@ -349,6 +353,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
   ssize_t lineLen;
   while ((lineLen = getline(&line, &lineBufSize, fpin)) >= 0)
     {
+      static const char cplusplus_macro[] = "__cplusplus";
       lineno++;
       functype = ISVOID;
       size_t funcargc = 0;
@@ -385,6 +390,8 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
         funcname[funcnameLen] = 0;
         pline += reMatch[0].rm_eo;
       } while (0);
+      int cppSwitchLen, cppSymLen;
+
       if (declType == FUNC_DECL)
         {
 	  funcargname[funcargc].rm_so = (regoff_t)(pline - line);
@@ -744,11 +751,18 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
                   "      PARAMETER (%-22s = %2d)\n", parname, parname,
                   parvalue);
 	}
-      else if (!regexec(&cppCondRE, line, maxMatch, reMatch, 0))
+      else if (!regexec(&cppCondRE, line, maxMatch, reMatch, 0)
+               && ((cppSwitchLen = reMatch[2].rm_eo - reMatch[2].rm_so) == 5)
+               && ((size_t)(cppSymLen = reMatch[3].rm_eo - reMatch[3].rm_so)
+                   == sizeof (cplusplus_macro) - 1)
+               && !memcmp(line + reMatch[3].rm_so, cplusplus_macro,
+                          sizeof (cplusplus_macro) - 1))
 	{
-          /* fortran include */
-	  fputs(line, fpint);
-	}
+          fprintf(stderr, "Found conditional C++ block, skipping to #else\n");
+          while ((lineLen = getline(&line, &lineBufSize, fpin)) >= 0)
+            if (!regexec(&cppElseRE, line, maxMatch, reMatch, 0))
+              break;
+        }
       else if (detectComment(&line, &lineLen, &lineBufSize,
                              maxMatch, reMatch,
                              xname, &xnameLen, xdes,
@@ -762,8 +776,8 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
 	}
     }
 
-  fprintf(fpint, "\n");
-  fprintf(fpint, "#endif\n");
+  fputs("\n"
+        "#endif\n", fpint);
 
   fclose(fpin);
   fclose(fpinc);

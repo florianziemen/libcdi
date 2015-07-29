@@ -479,6 +479,7 @@ module mo_cdi
 	public gridInqPosition
 	public gridDefReference
 	public gridInqReference
+	public gridDefUUID
 	public gridDefLCC
 	public gridInqLCC
 	public gridDefLcc2
@@ -5571,6 +5572,19 @@ contains
 			end if
 		end do
 	end function gridInqReference
+
+	subroutine gridDefUUID(gridID_dummy, uuid_dummy)
+		integer(c_int), value :: gridID_dummy
+		character(kind = c_char), intent(in) :: uuid_dummy(CDI_UUID_SIZE)
+		interface
+			subroutine lib_gridDefUUID(gridID_dummy, uuid_dummy) bind(c, name = 'gridDefUUID')
+				import c_char, c_int
+				integer(c_int), value :: gridID_dummy
+				character(kind = c_char), intent(in) :: uuid_dummy(*)
+			end subroutine lib_gridDefUUID
+		end interface
+		call lib_gridDefUUID(gridID_dummy, uuid_dummy)
+	end subroutine gridDefUUID
 
 	subroutine gridDefLCC(gridID_dummy, originLon_dummy, originLat_dummy, lonParY_dummy, lat1_dummy, lat2_dummy, xinc_dummy, yinc_dumm&
 	&y, projflag_dummy, scanflag_dummy)

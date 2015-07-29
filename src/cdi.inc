@@ -1714,7 +1714,7 @@
 
 !                     gridDefUUID
 !                                    (INTEGER         gridID,
-!                                     INTEGER*1(*)    uuid)
+!                                     INTEGER*1(16)   uuid)
       EXTERNAL        gridDefUUID
 
 !                     gridInqUUID

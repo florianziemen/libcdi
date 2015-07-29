@@ -842,7 +842,11 @@ void    gridDefReference(int gridID, const char *reference);
 int     gridInqReference(int gridID, char *reference);
 
 /*      gridDefUUID: Define the UUID of an unstructured grid */
+#ifdef __cplusplus
 void    gridDefUUID(int gridID, const unsigned char *uuid);
+#else
+void    gridDefUUID(int gridID, const unsigned char uuid[CDI_UUID_SIZE]);
+#endif
 
 /*      gridInqUUID: Get the UUID of an unstructured grid */
 void    gridInqUUID(int gridID, unsigned char *uuid);
