@@ -849,8 +849,11 @@ void    gridDefUUID(int gridID, const unsigned char uuid[CDI_UUID_SIZE]);
 #endif
 
 /*      gridInqUUID: Get the UUID of an unstructured grid */
+#ifdef __cplusplus
 void    gridInqUUID(int gridID, unsigned char *uuid);
-
+#else
+void    gridInqUUID(int gridID, unsigned char uuid[CDI_UUID_SIZE]);
+#endif
 
 /* Lambert Conformal Conic grid (GRIB version) */
 void gridDefLCC(int gridID, double originLon, double originLat, double lonParY, double lat1, double lat2, double xinc, double yinc, int projflag, int scanflag);

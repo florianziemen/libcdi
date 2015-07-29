@@ -480,6 +480,7 @@ module mo_cdi
 	public gridDefReference
 	public gridInqReference
 	public gridDefUUID
+	public gridInqUUID
 	public gridDefLCC
 	public gridInqLCC
 	public gridDefLcc2
@@ -5585,6 +5586,19 @@ contains
 		end interface
 		call lib_gridDefUUID(gridID_dummy, uuid_dummy)
 	end subroutine gridDefUUID
+
+	subroutine gridInqUUID(gridID_dummy, uuid_dummy)
+		integer(c_int), value :: gridID_dummy
+		character(kind = c_char), intent(inout) :: uuid_dummy(CDI_UUID_SIZE)
+		interface
+			subroutine lib_gridInqUUID(gridID_dummy, uuid_dummy) bind(c, name = 'gridInqUUID')
+				import c_char, c_int
+				integer(c_int), value :: gridID_dummy
+				character(kind = c_char), intent(inout) :: uuid_dummy(*)
+			end subroutine lib_gridInqUUID
+		end interface
+		call lib_gridInqUUID(gridID_dummy, uuid_dummy)
+	end subroutine gridInqUUID
 
 	subroutine gridDefLCC(gridID_dummy, originLon_dummy, originLat_dummy, lonParY_dummy, lat1_dummy, lat2_dummy, xinc_dummy, yinc_dumm&
 	&y, projflag_dummy, scanflag_dummy)
