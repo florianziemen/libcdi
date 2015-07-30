@@ -269,7 +269,6 @@ void srvScanTimestep1(stream_t *streamptr)
   int taxisID = -1;
   taxis_t *taxis;
   int vlistID;
-  SRVCOMPVAR compVar, compVar0;
   srvrec_t *srvp = (srvrec_t*) streamptr->record->exsep;
 
   streamptr->curTsID = 0;
@@ -313,15 +312,10 @@ void srvScanTimestep1(stream_t *streamptr)
 	}
       else
 	{
-	  compVar.param = param;
-          compVar.level = rlevel;
 	  for ( recID = 0; recID < nrecs; recID++ )
-	    {
-	      compVar0.param = streamptr->tsteps[0].records[recID].param;
-	      compVar0.level = streamptr->tsteps[0].records[recID].ilevel;
-
-	      if ( memcmp(&compVar0, &compVar, sizeof(SRVCOMPVAR)) == 0 ) break;
-	    }
+            if (    streamptr->tsteps[0].records[recID].param  == param
+                 && streamptr->tsteps[0].records[recID].ilevel == rlevel )
+              break;
 	  if ( recID < nrecs ) break;
 	  DateTime datetime = { .date = vdate, .time = vtime };
 	  if ( datetimeCmp(datetime, datetime0) )
@@ -573,7 +567,6 @@ long srvScanTimestep(stream_t *streamptr)
   off_t recpos = 0;
   int recID;
   int rindex, nrecs = 0;
-  SRVCOMPVAR compVar, compVar0;
   srvrec_t *srvp = (srvrec_t*) streamptr->record->exsep;
   /*
   if ( CDI_Debug )
@@ -636,12 +629,8 @@ long srvScanTimestep(stream_t *streamptr)
 	      taxis->vtime = vtime;
 	    }
 
-	  compVar.param  = param;
-          compVar.level  = rlevel;
-	  compVar0.param = streamptr->tsteps[tsID].records[recID].param;
-	  compVar0.level = streamptr->tsteps[tsID].records[recID].ilevel;
-
-	  if ( memcmp(&compVar0, &compVar, sizeof(SRVCOMPVAR)) != 0 )
+          if (    param  != streamptr->tsteps[tsID].records[recID].param
+               || rlevel != streamptr->tsteps[tsID].records[recID].ilevel )
 	    {
 	      Message("tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d",
 		      tsID, recID,
