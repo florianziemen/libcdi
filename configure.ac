@@ -236,6 +236,10 @@ AC_SUBST([USE_MPI])
 AC_SUBST([ENABLE_MPI],[`test x"$enable_mpi" = xyes && echo true || echo false`])
 #  ----------------------------------------------------------------------
 #  Create the Fortran Interface via iso_c_binding module (Fortran 2003 Standard)
+#
+# the test for ruby itself is unconditional because ruby is also used in
+# the Fortran 2003 ISO C generator
+AC_CHECK_PROG([RUBY],[ruby],[ruby])
 AC_ARG_ENABLE([iso-c-interface],
               [AS_HELP_STRING([--enable-iso-c-interface],
                  [Create Fortran Interface via iso_c_bindings facility of F2003 [default=no].])],
@@ -267,10 +271,10 @@ AC_ARG_ENABLE(swig,
 AM_CONDITIONAL(ENABLE_SWIG,[test "x$SWIG" != "x"])
 #  ----------------------------------------------------------------------
 #  Create the Ruby Interface via swig
-AC_ARG_ENABLE(ruby,
+#
+AC_ARG_ENABLE([ruby],
   [AS_HELP_STRING([--enable-ruby],[ruby language bindings [default=no] (EXPERIMENTAL)])],
-  [AC_CHECK_PROG(RUBY,ruby,ruby)
-   RUBY_INCLUDES="$($RUBY $srcdir/config/interface.rb)"
+  [RUBY_INCLUDES="$($RUBY $srcdir/config/interface.rb)"
    save_CPPFLAGS=$CPPFLAGS
    CPPFLAGS="$CPPFLAGS $RUBY_INCLUDES"
    AC_CHECK_HEADER([ruby.h],,[enable_ruby=no
