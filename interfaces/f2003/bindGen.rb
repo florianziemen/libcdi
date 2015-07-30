@@ -645,41 +645,40 @@ def defineFunction(name, arguments, returnType)
 	if !returnTemplate[:isVoid]
 		formatLines($definitionLines, 2, returnData.expandTemplate(:helperVars))
 	end
-	formatLines($definitionLines, 2, "interface")
-	if returnTemplate[:isVoid]
-		formatLines($definitionLines, 3, "subroutine lib_#{name}(#{dummyArguments}) bind(c, name = '#{name}')")
-		formatLines($definitionLines, 4, importStatement("", argArray))
-	else
-		formatLines($definitionLines, 3,
-								"function lib_#{name}(#{dummyArguments}) bind(c, name = '#{name}')" +
-								' result(c_result)')
-		formatLines($definitionLines, 4,
-								importStatement(returnData.expandTemplate(:receiveAs), argArray))
+	formatLines($definitionLines, 2, 'interface')
+	line=subprogramtype + ' lib_' + name + '(' + dummyArguments + ') ' +
+		'bind(c, name = \'' + name + '\')' +
+		(returnTemplate[:isVoid] ? '' : ' result(c_result)')
+	formatLines($definitionLines, 3, line)
+	formatLines($definitionLines, 4,
+							importStatement(returnTemplate[:isVoid] ? '' :
+															returnData.expandTemplate(:receiveAs), argArray))
+	if !returnTemplate[:isVoid]
 		formatLines($definitionLines, 4,
 								returnData.expandTemplate(:receiveAs) + ' :: c_result')
 	end
 	dumpStatements(               4, argArray, :passAs)
-	formatLines($definitionLines, 3, "end #{subprogramtype} lib_#{name}")
-	formatLines($definitionLines, 2, "end interface")
+	formatLines($definitionLines, 3, 'end ' + subprogramtype + ' lib_' + name)
+	formatLines($definitionLines, 2, 'end interface')
 	dumpStatements(               2, argArray, :precallStatements)
-	if returnTemplate[:isVoid]
-		formatLines($definitionLines, 2, "call lib_#{name}(#{argArray.collect{ |arg|
-			arg.expandTemplate(:callExpression)
-		}.join(", ")})")
-	else
-		formatLines($definitionLines, 2, returnData.expandTemplate(:precallStatements))
-		formatLines($definitionLines, 2, "#{returnData.expandTemplate(:assignVariable)} = lib_#{name}(#{argArray.collect{ |arg|
-			arg.expandTemplate(:callExpression)
-		}.join(", ")})")
+	if !returnTemplate[:isVoid]
+		formatLines($definitionLines, 2,
+								returnData.expandTemplate(:precallStatements))
 	end
+	formatLines($definitionLines, 2,
+							(returnTemplate[:isVoid] ? 'call' :
+							 (returnData.expandTemplate(:assignVariable) + ' =')) +
+							' lib_' + name + '(' + argArray.collect{ |arg|
+								arg.expandTemplate(:callExpression)
+							}.join(', ') + ')')
 	dumpStatements(               2, argArray, :postcallStatements)
 	if !returnTemplate[:isVoid]
 		formatLines($definitionLines, 2,
 								returnData.expandTemplate(:postcallStatements))
 	end
-	formatLines($definitionLines, 1, "end #{subprogramtype} #{name}")
-	formatLines($definitionLines, 0, "")
-	formatLines($declarationLines, 1, "public #{name}")
+	formatLines($definitionLines, 1, 'end ' + subprogramtype + ' ' + name)
+	formatLines($definitionLines, 0, '')
+	formatLines($declarationLines, 1, 'public ' + name)
 
 end
 
