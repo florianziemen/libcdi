@@ -662,9 +662,10 @@ contains
     type(c_ptr) :: ptr
     integer :: shape(1)
     interface
-      type(c_ptr) function lib_cdiStringError(cdiErrno_dummy) bind(c, name =&
-      & 'cdiStringError')
+      function lib_cdiStringError(cdiErrno_dummy) bind(c, name =&
+      & 'cdiStringError') result(c_result)
         import c_int, c_ptr
+        type(c_ptr) :: c_result
         integer(c_int), value :: cdiErrno_dummy
       end function lib_cdiStringError
     end interface
@@ -692,9 +693,10 @@ contains
     type(c_ptr) :: ptr
     integer :: shape(1)
     interface
-      type(c_ptr) function lib_cdiLibraryVersion() bind(c, name =&
-      & 'cdiLibraryVersion')
+      function lib_cdiLibraryVersion() bind(c, name = 'cdiLibraryVersion')&
+      & result(c_result)
         import c_ptr
+        type(c_ptr) :: c_result
       end function lib_cdiLibraryVersion
     end interface
     result => null()
@@ -717,9 +719,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: filetype_dummy
     interface
-      integer(c_int) function lib_cdiHaveFiletype(filetype_dummy) bind(c, name&
-      & = 'cdiHaveFiletype')
+      function lib_cdiHaveFiletype(filetype_dummy) bind(c, name =&
+      & 'cdiHaveFiletype') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: filetype_dummy
       end function lib_cdiHaveFiletype
     end interface
@@ -741,9 +744,10 @@ contains
   function cdiInqMissval() result(result)
     real(c_double) :: result
     interface
-      real(c_double) function lib_cdiInqMissval() bind(c, name =&
-      & 'cdiInqMissval')
+      function lib_cdiInqMissval() bind(c, name = 'cdiInqMissval')&
+      & result(c_result)
         import c_double
+        real(c_double) :: c_result
       end function lib_cdiInqMissval
     end interface
     result = lib_cdiInqMissval()
@@ -772,8 +776,10 @@ contains
   function namespaceNew() result(result)
     integer(c_int) :: result
     interface
-      integer(c_int) function lib_namespaceNew() bind(c, name = 'namespaceNew')
+      function lib_namespaceNew() bind(c, name = 'namespaceNew')&
+      & result(c_result)
         import c_int
+        integer(c_int) :: c_result
       end function lib_namespaceNew
     end interface
     result = lib_namespaceNew()
@@ -879,9 +885,10 @@ contains
     integer(c_int), value :: pcat_dummy
     integer(c_int), value :: pdis_dummy
     interface
-      integer(c_int) function lib_cdiEncodeParam(pnum_dummy, pcat_dummy,&
-      & pdis_dummy) bind(c, name = 'cdiEncodeParam')
+      function lib_cdiEncodeParam(pnum_dummy, pcat_dummy, pdis_dummy) bind(c,&
+      & name = 'cdiEncodeParam') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: pnum_dummy
         integer(c_int), value :: pcat_dummy
         integer(c_int), value :: pdis_dummy
@@ -929,9 +936,10 @@ contains
     integer(c_int), value :: month_dummy
     integer(c_int), value :: day_dummy
     interface
-      integer(c_int) function lib_cdiEncodeDate(year_dummy, month_dummy,&
-      & day_dummy) bind(c, name = 'cdiEncodeDate')
+      function lib_cdiEncodeDate(year_dummy, month_dummy, day_dummy) bind(c,&
+      & name = 'cdiEncodeDate') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: year_dummy
         integer(c_int), value :: month_dummy
         integer(c_int), value :: day_dummy
@@ -979,9 +987,10 @@ contains
     integer(c_int), value :: minute_dummy
     integer(c_int), value :: second_dummy
     interface
-      integer(c_int) function lib_cdiEncodeTime(hour_dummy, minute_dummy,&
-      & second_dummy) bind(c, name = 'cdiEncodeTime')
+      function lib_cdiEncodeTime(hour_dummy, minute_dummy, second_dummy)&
+      & bind(c, name = 'cdiEncodeTime') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: hour_dummy
         integer(c_int), value :: minute_dummy
         integer(c_int), value :: second_dummy
@@ -999,9 +1008,10 @@ contains
     integer(c_int), target :: byteorder_temp
     type(c_ptr) :: byteorder_ptr
     interface
-      integer(c_int) function lib_cdiGetFiletype(path_dummy, byteorder) bind(c,&
-      & name = 'cdiGetFiletype')
+      function lib_cdiGetFiletype(path_dummy, byteorder) bind(c, name =&
+      & 'cdiGetFiletype') result(c_result)
         import c_char, c_int, c_ptr
+        integer(c_int) :: c_result
         character(kind = c_char) :: path_dummy(*)
         type(c_ptr), value :: byteorder
       end function lib_cdiGetFiletype
@@ -1022,9 +1032,10 @@ contains
     character(kind = c_char) :: path_temp(len(path_dummy) + 1)
     integer :: path_i
     interface
-      integer(c_int) function lib_streamOpenRead(path_dummy) bind(c, name =&
-      & 'streamOpenRead')
+      function lib_streamOpenRead(path_dummy) bind(c, name = 'streamOpenRead')&
+      & result(c_result)
         import c_char, c_int
+        integer(c_int) :: c_result
         character(kind = c_char) :: path_dummy(*)
       end function lib_streamOpenRead
     end interface
@@ -1042,9 +1053,10 @@ contains
     character(kind = c_char) :: path_temp(len(path_dummy) + 1)
     integer :: path_i
     interface
-      integer(c_int) function lib_streamOpenWrite(path_dummy, filetype_dummy)&
-      & bind(c, name = 'streamOpenWrite')
+      function lib_streamOpenWrite(path_dummy, filetype_dummy) bind(c, name =&
+      & 'streamOpenWrite') result(c_result)
         import c_char, c_int
+        integer(c_int) :: c_result
         character(kind = c_char) :: path_dummy(*)
         integer(c_int), value :: filetype_dummy
       end function lib_streamOpenWrite
@@ -1062,9 +1074,10 @@ contains
     character(kind = c_char) :: path_temp(len(path_dummy) + 1)
     integer :: path_i
     interface
-      integer(c_int) function lib_streamOpenAppend(path_dummy) bind(c, name =&
-      & 'streamOpenAppend')
+      function lib_streamOpenAppend(path_dummy) bind(c, name =&
+      & 'streamOpenAppend') result(c_result)
         import c_char, c_int
+        integer(c_int) :: c_result
         character(kind = c_char) :: path_dummy(*)
       end function lib_streamOpenAppend
     end interface
@@ -1115,9 +1128,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: streamID_dummy
     interface
-      integer(c_int) function lib_streamInqVlist(streamID_dummy) bind(c, name =&
-      & 'streamInqVlist')
+      function lib_streamInqVlist(streamID_dummy) bind(c, name =&
+      & 'streamInqVlist') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: streamID_dummy
       end function lib_streamInqVlist
     end interface
@@ -1128,9 +1142,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: streamID_dummy
     interface
-      integer(c_int) function lib_streamInqVlistIDorig(streamID_dummy) bind(c,&
-      & name = 'streamInqVlistIDorig')
+      function lib_streamInqVlistIDorig(streamID_dummy) bind(c, name =&
+      & 'streamInqVlistIDorig') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: streamID_dummy
       end function lib_streamInqVlistIDorig
     end interface
@@ -1141,9 +1156,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: streamID_dummy
     interface
-      integer(c_int) function lib_streamInqFiletype(streamID_dummy) bind(c,&
-      & name = 'streamInqFiletype')
+      function lib_streamInqFiletype(streamID_dummy) bind(c, name =&
+      & 'streamInqFiletype') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: streamID_dummy
       end function lib_streamInqFiletype
     end interface
@@ -1168,9 +1184,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: streamID_dummy
     interface
-      integer(c_int) function lib_streamInqByteorder(streamID_dummy) bind(c,&
-      & name = 'streamInqByteorder')
+      function lib_streamInqByteorder(streamID_dummy) bind(c, name =&
+      & 'streamInqByteorder') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: streamID_dummy
       end function lib_streamInqByteorder
     end interface
@@ -1195,9 +1212,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: streamID_dummy
     interface
-      integer(c_int) function lib_streamInqCompType(streamID_dummy) bind(c,&
-      & name = 'streamInqCompType')
+      function lib_streamInqCompType(streamID_dummy) bind(c, name =&
+      & 'streamInqCompType') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: streamID_dummy
       end function lib_streamInqCompType
     end interface
@@ -1222,9 +1240,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: streamID_dummy
     interface
-      integer(c_int) function lib_streamInqCompLevel(streamID_dummy) bind(c,&
-      & name = 'streamInqCompLevel')
+      function lib_streamInqCompLevel(streamID_dummy) bind(c, name =&
+      & 'streamInqCompLevel') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: streamID_dummy
       end function lib_streamInqCompLevel
     end interface
@@ -1236,9 +1255,10 @@ contains
     integer(c_int), value :: streamID_dummy
     integer(c_int), value :: tsID_dummy
     interface
-      integer(c_int) function lib_streamDefTimestep(streamID_dummy, tsID_dummy)&
-      & bind(c, name = 'streamDefTimestep')
+      function lib_streamDefTimestep(streamID_dummy, tsID_dummy) bind(c, name =&
+      & 'streamDefTimestep') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: streamID_dummy
         integer(c_int), value :: tsID_dummy
       end function lib_streamDefTimestep
@@ -1251,9 +1271,10 @@ contains
     integer(c_int), value :: streamID_dummy
     integer(c_int), value :: tsID_dummy
     interface
-      integer(c_int) function lib_streamInqTimestep(streamID_dummy, tsID_dummy)&
-      & bind(c, name = 'streamInqTimestep')
+      function lib_streamInqTimestep(streamID_dummy, tsID_dummy) bind(c, name =&
+      & 'streamInqTimestep') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: streamID_dummy
         integer(c_int), value :: tsID_dummy
       end function lib_streamInqTimestep
@@ -1265,9 +1286,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: streamID_dummy
     interface
-      integer(c_int) function lib_streamInqCurTimestepID(streamID_dummy)&
-      & bind(c, name = 'streamInqCurTimestepID')
+      function lib_streamInqCurTimestepID(streamID_dummy) bind(c, name =&
+      & 'streamInqCurTimestepID') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: streamID_dummy
       end function lib_streamInqCurTimestepID
     end interface
@@ -1280,9 +1302,10 @@ contains
     type(c_ptr) :: ptr
     integer :: shape(1)
     interface
-      type(c_ptr) function lib_streamFilename(streamID_dummy) bind(c, name =&
-      & 'streamFilename')
+      function lib_streamFilename(streamID_dummy) bind(c, name =&
+      & 'streamFilename') result(c_result)
         import c_int, c_ptr
+        type(c_ptr) :: c_result
         integer(c_int), value :: streamID_dummy
       end function lib_streamFilename
     end interface
@@ -1300,9 +1323,10 @@ contains
     type(c_ptr) :: ptr
     integer :: shape(1)
     interface
-      type(c_ptr) function lib_streamFilesuffix(filetype_dummy) bind(c, name =&
-      & 'streamFilesuffix')
+      function lib_streamFilesuffix(filetype_dummy) bind(c, name =&
+      & 'streamFilesuffix') result(c_result)
         import c_int, c_ptr
+        type(c_ptr) :: c_result
         integer(c_int), value :: filetype_dummy
       end function lib_streamFilesuffix
     end interface
@@ -1318,9 +1342,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: streamID_dummy
     interface
-      integer(c_int) function lib_streamInqNvars(streamID_dummy) bind(c, name =&
-      & 'streamInqNvars')
+      function lib_streamInqNvars(streamID_dummy) bind(c, name =&
+      & 'streamInqNvars') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: streamID_dummy
       end function lib_streamInqNvars
     end interface
@@ -1655,9 +1680,10 @@ contains
     character(kind = c_char) :: path_temp(len(path_dummy) + 1)
     integer :: path_i
     interface
-      type(c_ptr) function lib_cdiIterator_new(path_dummy) bind(c, name =&
-      & 'cdiIterator_new')
+      function lib_cdiIterator_new(path_dummy) bind(c, name =&
+      & 'cdiIterator_new') result(c_result)
         import c_char, c_ptr
+        type(c_ptr) :: c_result
         character(kind = c_char) :: path_dummy(*)
       end function lib_cdiIterator_new
     end interface
@@ -1672,9 +1698,10 @@ contains
     type(t_CdiIterator) :: result
     type(t_CdiIterator), intent(in) :: me_dummy
     interface
-      type(c_ptr) function lib_cdiIterator_clone(me_dummy) bind(c, name =&
-      & 'cdiIterator_clone')
+      function lib_cdiIterator_clone(me_dummy) bind(c, name =&
+      & 'cdiIterator_clone') result(c_result)
         import c_ptr
+        type(c_ptr) :: c_result
         type(c_ptr), value :: me_dummy
       end function lib_cdiIterator_clone
     end interface
@@ -1688,9 +1715,10 @@ contains
     integer :: shape(1)
     character(kind = c_char), dimension(:), pointer :: temp
     interface
-      type(c_ptr) function lib_cdiIterator_serialize(me_dummy) bind(c, name =&
-      & 'cdiIterator_serialize')
+      function lib_cdiIterator_serialize(me_dummy) bind(c, name =&
+      & 'cdiIterator_serialize') result(c_result)
         import c_ptr
+        type(c_ptr) :: c_result
         type(c_ptr), value :: me_dummy
       end function lib_cdiIterator_serialize
     end interface
@@ -1712,9 +1740,10 @@ contains
     character(kind = c_char) :: description_temp(len(description_dummy) + 1)
     integer :: description_i
     interface
-      type(c_ptr) function lib_cdiIterator_deserialize(description_dummy)&
-      & bind(c, name = 'cdiIterator_deserialize')
+      function lib_cdiIterator_deserialize(description_dummy) bind(c, name =&
+      & 'cdiIterator_deserialize') result(c_result)
         import c_char, c_ptr
+        type(c_ptr) :: c_result
         character(kind = c_char) :: description_dummy(*)
       end function lib_cdiIterator_deserialize
     end interface
@@ -1742,9 +1771,10 @@ contains
     integer(c_int) :: result
     type(t_CdiIterator), intent(in) :: me_dummy
     interface
-      integer(c_int) function lib_cdiIterator_nextField(me_dummy) bind(c, name&
-      & = 'cdiIterator_nextField')
+      function lib_cdiIterator_nextField(me_dummy) bind(c, name =&
+      & 'cdiIterator_nextField') result(c_result)
         import c_int, c_ptr
+        integer(c_int) :: c_result
         type(c_ptr), value :: me_dummy
       end function lib_cdiIterator_nextField
     end interface
@@ -1758,9 +1788,10 @@ contains
     integer :: shape(1)
     character(kind = c_char), dimension(:), pointer :: temp
     interface
-      type(c_ptr) function lib_cdiIterator_inqStartTime(me_dummy) bind(c, name&
-      & = 'cdiIterator_inqStartTime')
+      function lib_cdiIterator_inqStartTime(me_dummy) bind(c, name =&
+      & 'cdiIterator_inqStartTime') result(c_result)
         import c_ptr
+        type(c_ptr) :: c_result
         type(c_ptr), value :: me_dummy
       end function lib_cdiIterator_inqStartTime
     end interface
@@ -1783,9 +1814,10 @@ contains
     integer :: shape(1)
     character(kind = c_char), dimension(:), pointer :: temp
     interface
-      type(c_ptr) function lib_cdiIterator_inqEndTime(me_dummy) bind(c, name =&
-      & 'cdiIterator_inqEndTime')
+      function lib_cdiIterator_inqEndTime(me_dummy) bind(c, name =&
+      & 'cdiIterator_inqEndTime') result(c_result)
         import c_ptr
+        type(c_ptr) :: c_result
         type(c_ptr), value :: me_dummy
       end function lib_cdiIterator_inqEndTime
     end interface
@@ -1808,9 +1840,10 @@ contains
     integer :: shape(1)
     character(kind = c_char), dimension(:), pointer :: temp
     interface
-      type(c_ptr) function lib_cdiIterator_inqVTime(me_dummy) bind(c, name =&
-      & 'cdiIterator_inqVTime')
+      function lib_cdiIterator_inqVTime(me_dummy) bind(c, name =&
+      & 'cdiIterator_inqVTime') result(c_result)
         import c_ptr
+        type(c_ptr) :: c_result
         type(c_ptr), value :: me_dummy
       end function lib_cdiIterator_inqVTime
     end interface
@@ -1853,10 +1886,11 @@ contains
     integer :: outUnit_shape(1)
     character(kind = c_char), pointer :: outUnit_fptr(:)
     interface
-      integer(c_int) function lib_cdiIterator_inqLevelType(me_dummy,&
-      & levelSelector_dummy, outName, outLongName, outStdName, outUnit) bind(c,&
-      & name = 'cdiIterator_inqLevelType')
+      function lib_cdiIterator_inqLevelType(me_dummy, levelSelector_dummy,&
+      & outName, outLongName, outStdName, outUnit) bind(c, name =&
+      & 'cdiIterator_inqLevelType') result(c_result)
         import c_int, c_ptr
+        integer(c_int) :: c_result
         type(c_ptr), value :: me_dummy
         integer(c_int), value :: levelSelector_dummy
         type(c_ptr), value :: outName
@@ -1933,10 +1967,11 @@ contains
     real(c_double), target :: outValue2_temp
     type(c_ptr) :: outValue2_ptr
     interface
-      integer(c_int) function lib_cdiIterator_inqLevel(me_dummy,&
-      & levelSelector_dummy, outValue1, outValue2) bind(c, name =&
-      & 'cdiIterator_inqLevel')
+      function lib_cdiIterator_inqLevel(me_dummy, levelSelector_dummy,&
+      & outValue1, outValue2) bind(c, name = 'cdiIterator_inqLevel')&
+      & result(c_result)
         import c_int, c_ptr
+        integer(c_int) :: c_result
         type(c_ptr), value :: me_dummy
         integer(c_int), value :: levelSelector_dummy
         type(c_ptr), value :: outValue1
@@ -1967,10 +2002,11 @@ contains
     character(kind = c_char), target :: outUuid_temp(CDI_UUID_SIZE)
     type(c_ptr) :: outUuid_ptr
     interface
-      integer(c_int) function lib_cdiIterator_inqLevelUuid(me_dummy,&
-      & outVgridNumber, outLevelCount, outUuid) bind(c, name =&
-      & 'cdiIterator_inqLevelUuid')
+      function lib_cdiIterator_inqLevelUuid(me_dummy, outVgridNumber,&
+      & outLevelCount, outUuid) bind(c, name = 'cdiIterator_inqLevelUuid')&
+      & result(c_result)
         import c_int, c_ptr
+        integer(c_int) :: c_result
         type(c_ptr), value :: me_dummy
         type(c_ptr), value :: outVgridNumber
         type(c_ptr), value :: outLevelCount
@@ -1994,9 +2030,10 @@ contains
     type(t_CdiParam) :: result
     type(t_CdiIterator), intent(in) :: me_dummy
     interface
-      type(t_CdiParam) function lib_cdiIterator_inqParam(me_dummy) bind(c, name&
-      & = 'cdiIterator_inqParam')
+      function lib_cdiIterator_inqParam(me_dummy) bind(c, name =&
+      & 'cdiIterator_inqParam') result(c_result)
         import c_ptr, t_CdiParam
+        type(t_CdiParam) :: c_result
         type(c_ptr), value :: me_dummy
       end function lib_cdiIterator_inqParam
     end interface
@@ -2007,9 +2044,10 @@ contains
     integer(c_int) :: result
     type(t_CdiIterator), intent(in) :: me_dummy
     interface
-      integer(c_int) function lib_cdiIterator_inqDatatype(me_dummy) bind(c,&
-      & name = 'cdiIterator_inqDatatype')
+      function lib_cdiIterator_inqDatatype(me_dummy) bind(c, name =&
+      & 'cdiIterator_inqDatatype') result(c_result)
         import c_int, c_ptr
+        integer(c_int) :: c_result
         type(c_ptr), value :: me_dummy
       end function lib_cdiIterator_inqDatatype
     end interface
@@ -2020,9 +2058,10 @@ contains
     integer(c_int) :: result
     type(t_CdiIterator), intent(in) :: me_dummy
     interface
-      integer(c_int) function lib_cdiIterator_inqTsteptype(me_dummy) bind(c,&
-      & name = 'cdiIterator_inqTsteptype')
+      function lib_cdiIterator_inqTsteptype(me_dummy) bind(c, name =&
+      & 'cdiIterator_inqTsteptype') result(c_result)
         import c_int, c_ptr
+        integer(c_int) :: c_result
         type(c_ptr), value :: me_dummy
       end function lib_cdiIterator_inqTsteptype
     end interface
@@ -2036,9 +2075,10 @@ contains
     integer :: shape(1)
     character(kind = c_char), dimension(:), pointer :: temp
     interface
-      type(c_ptr) function lib_cdiIterator_inqVariableName(me_dummy) bind(c,&
-      & name = 'cdiIterator_inqVariableName')
+      function lib_cdiIterator_inqVariableName(me_dummy) bind(c, name =&
+      & 'cdiIterator_inqVariableName') result(c_result)
         import c_ptr
+        type(c_ptr) :: c_result
         type(c_ptr), value :: me_dummy
       end function lib_cdiIterator_inqVariableName
     end interface
@@ -2058,9 +2098,10 @@ contains
     integer(c_int) :: result
     type(t_CdiIterator), intent(in) :: me_dummy
     interface
-      integer(c_int) function lib_cdiIterator_inqGridId(me_dummy) bind(c, name&
-      & = 'cdiIterator_inqGridId')
+      function lib_cdiIterator_inqGridId(me_dummy) bind(c, name =&
+      & 'cdiIterator_inqGridId') result(c_result)
         import c_int, c_ptr
+        integer(c_int) :: c_result
         type(c_ptr), value :: me_dummy
       end function lib_cdiIterator_inqGridId
     end interface
@@ -2113,9 +2154,10 @@ contains
     type(t_CdiGribIterator) :: result
     type(t_CdiIterator), intent(in) :: me_dummy
     interface
-      type(c_ptr) function lib_cdiGribIterator_clone(me_dummy) bind(c, name =&
-      & 'cdiGribIterator_clone')
+      function lib_cdiGribIterator_clone(me_dummy) bind(c, name =&
+      & 'cdiGribIterator_clone') result(c_result)
         import c_ptr
+        type(c_ptr) :: c_result
         type(c_ptr), value :: me_dummy
       end function lib_cdiGribIterator_clone
     end interface
@@ -2144,9 +2186,10 @@ contains
     integer(c_long), target :: value_temp
     type(c_ptr) :: value_ptr
     interface
-      integer(c_int) function lib_cdiGribIterator_getLong(me_dummy, key_dummy,&
-      & value) bind(c, name = 'cdiGribIterator_getLong')
+      function lib_cdiGribIterator_getLong(me_dummy, key_dummy, value) bind(c,&
+      & name = 'cdiGribIterator_getLong') result(c_result)
         import c_char, c_int, c_ptr
+        integer(c_int) :: c_result
         type(c_ptr), value :: me_dummy
         character(kind = c_char) :: key_dummy(*)
         type(c_ptr), value :: value
@@ -2172,9 +2215,10 @@ contains
     real(c_double), target :: value_temp
     type(c_ptr) :: value_ptr
     interface
-      integer(c_int) function lib_cdiGribIterator_getDouble(me_dummy,&
-      & key_dummy, value) bind(c, name = 'cdiGribIterator_getDouble')
+      function lib_cdiGribIterator_getDouble(me_dummy, key_dummy, value)&
+      & bind(c, name = 'cdiGribIterator_getDouble') result(c_result)
         import c_char, c_int, c_ptr
+        integer(c_int) :: c_result
         type(c_ptr), value :: me_dummy
         character(kind = c_char) :: key_dummy(*)
         type(c_ptr), value :: value
@@ -2200,9 +2244,10 @@ contains
     integer(c_size_t), target :: value_temp
     type(c_ptr) :: value_ptr
     interface
-      integer(c_int) function lib_cdiGribIterator_getLength(me_dummy,&
-      & key_dummy, value) bind(c, name = 'cdiGribIterator_getLength')
+      function lib_cdiGribIterator_getLength(me_dummy, key_dummy, value)&
+      & bind(c, name = 'cdiGribIterator_getLength') result(c_result)
         import c_char, c_int, c_ptr
+        integer(c_int) :: c_result
         type(c_ptr), value :: me_dummy
         character(kind = c_char) :: key_dummy(*)
         type(c_ptr), value :: value
@@ -2233,10 +2278,10 @@ contains
     integer(c_size_t), target :: length_temp
     type(c_ptr) :: length_ptr
     interface
-      integer(c_int) function lib_cdiGribIterator_getString(me_dummy,&
-      & key_dummy, value_dummy, length) bind(c, name =&
-      & 'cdiGribIterator_getString')
+      function lib_cdiGribIterator_getString(me_dummy, key_dummy, value_dummy,&
+      & length) bind(c, name = 'cdiGribIterator_getString') result(c_result)
         import c_char, c_int, c_ptr
+        integer(c_int) :: c_result
         type(c_ptr), value :: me_dummy
         character(kind = c_char) :: key_dummy(*)
         character(kind = c_char) :: value_dummy(*)
@@ -2281,9 +2326,10 @@ contains
     integer(c_size_t), target :: value_temp
     type(c_ptr) :: value_ptr
     interface
-      integer(c_int) function lib_cdiGribIterator_getSize(me_dummy, key_dummy,&
-      & value) bind(c, name = 'cdiGribIterator_getSize')
+      function lib_cdiGribIterator_getSize(me_dummy, key_dummy, value) bind(c,&
+      & name = 'cdiGribIterator_getSize') result(c_result)
         import c_char, c_int, c_ptr
+        integer(c_int) :: c_result
         type(c_ptr), value :: me_dummy
         character(kind = c_char) :: key_dummy(*)
         type(c_ptr), value :: value
@@ -2313,10 +2359,11 @@ contains
     integer(c_size_t), target :: array_size_temp
     type(c_ptr) :: array_size_ptr
     interface
-      integer(c_int) function lib_cdiGribIterator_getLongArray(me_dummy,&
-      & key_dummy, value, array_size) bind(c, name =&
-      & 'cdiGribIterator_getLongArray')
+      function lib_cdiGribIterator_getLongArray(me_dummy, key_dummy, value,&
+      & array_size) bind(c, name = 'cdiGribIterator_getLongArray')&
+      & result(c_result)
         import c_char, c_int, c_ptr
+        integer(c_int) :: c_result
         type(c_ptr), value :: me_dummy
         character(kind = c_char) :: key_dummy(*)
         type(c_ptr), value :: value
@@ -2351,10 +2398,11 @@ contains
     integer(c_size_t), target :: array_size_temp
     type(c_ptr) :: array_size_ptr
     interface
-      integer(c_int) function lib_cdiGribIterator_getDoubleArray(me_dummy,&
-      & key_dummy, value, array_size) bind(c, name =&
-      & 'cdiGribIterator_getDoubleArray')
+      function lib_cdiGribIterator_getDoubleArray(me_dummy, key_dummy, value,&
+      & array_size) bind(c, name = 'cdiGribIterator_getDoubleArray')&
+      & result(c_result)
         import c_char, c_int, c_ptr
+        integer(c_int) :: c_result
         type(c_ptr), value :: me_dummy
         character(kind = c_char) :: key_dummy(*)
         type(c_ptr), value :: value
@@ -2379,9 +2427,10 @@ contains
     integer(c_int) :: result
     type(t_CdiGribIterator), intent(in) :: me_dummy
     interface
-      integer(c_int) function lib_cdiGribIterator_inqEdition(me_dummy) bind(c,&
-      & name = 'cdiGribIterator_inqEdition')
+      function lib_cdiGribIterator_inqEdition(me_dummy) bind(c, name =&
+      & 'cdiGribIterator_inqEdition') result(c_result)
         import c_int, c_ptr
+        integer(c_int) :: c_result
         type(c_ptr), value :: me_dummy
       end function lib_cdiGribIterator_inqEdition
     end interface
@@ -2395,9 +2444,10 @@ contains
     character(kind = c_char) :: key_temp(len(key_dummy) + 1)
     integer :: key_i
     interface
-      integer(c_long) function lib_cdiGribIterator_inqLongValue(me_dummy,&
-      & key_dummy) bind(c, name = 'cdiGribIterator_inqLongValue')
+      function lib_cdiGribIterator_inqLongValue(me_dummy, key_dummy) bind(c,&
+      & name = 'cdiGribIterator_inqLongValue') result(c_result)
         import c_char, c_long, c_ptr
+        integer(c_long) :: c_result
         type(c_ptr), value :: me_dummy
         character(kind = c_char) :: key_dummy(*)
       end function lib_cdiGribIterator_inqLongValue
@@ -2418,11 +2468,11 @@ contains
     character(kind = c_char) :: key_temp(len(key_dummy) + 1)
     integer :: key_i
     interface
-      integer(c_long) function&
-      & lib_cdiGribIterator_inqLongDefaultValue(me_dummy, key_dummy,&
+      function lib_cdiGribIterator_inqLongDefaultValue(me_dummy, key_dummy,&
       & defaultValue_dummy) bind(c, name =&
-      & 'cdiGribIterator_inqLongDefaultValue')
+      & 'cdiGribIterator_inqLongDefaultValue') result(c_result)
         import c_char, c_long, c_ptr
+        integer(c_long) :: c_result
         type(c_ptr), value :: me_dummy
         character(kind = c_char) :: key_dummy(*)
         integer(c_long), value :: defaultValue_dummy
@@ -2443,9 +2493,10 @@ contains
     character(kind = c_char) :: key_temp(len(key_dummy) + 1)
     integer :: key_i
     interface
-      real(c_double) function lib_cdiGribIterator_inqDoubleValue(me_dummy,&
-      & key_dummy) bind(c, name = 'cdiGribIterator_inqDoubleValue')
+      function lib_cdiGribIterator_inqDoubleValue(me_dummy, key_dummy) bind(c,&
+      & name = 'cdiGribIterator_inqDoubleValue') result(c_result)
         import c_char, c_double, c_ptr
+        real(c_double) :: c_result
         type(c_ptr), value :: me_dummy
         character(kind = c_char) :: key_dummy(*)
       end function lib_cdiGribIterator_inqDoubleValue
@@ -2466,11 +2517,11 @@ contains
     character(kind = c_char) :: key_temp(len(key_dummy) + 1)
     integer :: key_i
     interface
-      real(c_double) function&
-      & lib_cdiGribIterator_inqDoubleDefaultValue(me_dummy, key_dummy,&
+      function lib_cdiGribIterator_inqDoubleDefaultValue(me_dummy, key_dummy,&
       & defaultValue_dummy) bind(c, name =&
-      & 'cdiGribIterator_inqDoubleDefaultValue')
+      & 'cdiGribIterator_inqDoubleDefaultValue') result(c_result)
         import c_char, c_double, c_ptr
+        real(c_double) :: c_result
         type(c_ptr), value :: me_dummy
         character(kind = c_char) :: key_dummy(*)
         real(c_double), value :: defaultValue_dummy
@@ -2494,9 +2545,10 @@ contains
     integer :: shape(1)
     character(kind = c_char), dimension(:), pointer :: temp
     interface
-      type(c_ptr) function lib_cdiGribIterator_inqStringValue(me_dummy,&
-      & key_dummy) bind(c, name = 'cdiGribIterator_inqStringValue')
+      function lib_cdiGribIterator_inqStringValue(me_dummy, key_dummy) bind(c,&
+      & name = 'cdiGribIterator_inqStringValue') result(c_result)
         import c_char, c_ptr
+        type(c_ptr) :: c_result
         type(c_ptr), value :: me_dummy
         character(kind = c_char) :: key_dummy(*)
       end function lib_cdiGribIterator_inqStringValue
@@ -2520,8 +2572,9 @@ contains
   function vlistCreate() result(result)
     integer(c_int) :: result
     interface
-      integer(c_int) function lib_vlistCreate() bind(c, name = 'vlistCreate')
+      function lib_vlistCreate() bind(c, name = 'vlistCreate') result(c_result)
         import c_int
+        integer(c_int) :: c_result
       end function lib_vlistCreate
     end interface
     result = lib_vlistCreate()
@@ -2542,9 +2595,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: vlistID_dummy
     interface
-      integer(c_int) function lib_vlistDuplicate(vlistID_dummy) bind(c, name =&
-      & 'vlistDuplicate')
+      function lib_vlistDuplicate(vlistID_dummy) bind(c, name =&
+      & 'vlistDuplicate') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: vlistID_dummy
       end function lib_vlistDuplicate
     end interface
@@ -2634,9 +2688,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: vlistID_dummy
     interface
-      integer(c_int) function lib_vlistNumber(vlistID_dummy) bind(c, name =&
-      & 'vlistNumber')
+      function lib_vlistNumber(vlistID_dummy) bind(c, name = 'vlistNumber')&
+      & result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: vlistID_dummy
       end function lib_vlistNumber
     end interface
@@ -2647,9 +2702,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: vlistID_dummy
     interface
-      integer(c_int) function lib_vlistNvars(vlistID_dummy) bind(c, name =&
-      & 'vlistNvars')
+      function lib_vlistNvars(vlistID_dummy) bind(c, name = 'vlistNvars')&
+      & result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: vlistID_dummy
       end function lib_vlistNvars
     end interface
@@ -2660,9 +2716,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: vlistID_dummy
     interface
-      integer(c_int) function lib_vlistNgrids(vlistID_dummy) bind(c, name =&
-      & 'vlistNgrids')
+      function lib_vlistNgrids(vlistID_dummy) bind(c, name = 'vlistNgrids')&
+      & result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: vlistID_dummy
       end function lib_vlistNgrids
     end interface
@@ -2673,9 +2730,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: vlistID_dummy
     interface
-      integer(c_int) function lib_vlistNzaxis(vlistID_dummy) bind(c, name =&
-      & 'vlistNzaxis')
+      function lib_vlistNzaxis(vlistID_dummy) bind(c, name = 'vlistNzaxis')&
+      & result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: vlistID_dummy
       end function lib_vlistNzaxis
     end interface
@@ -2686,9 +2744,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: vlistID_dummy
     interface
-      integer(c_int) function lib_vlistNsubtypes(vlistID_dummy) bind(c, name =&
-      & 'vlistNsubtypes')
+      function lib_vlistNsubtypes(vlistID_dummy) bind(c, name =&
+      & 'vlistNsubtypes') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: vlistID_dummy
       end function lib_vlistNsubtypes
     end interface
@@ -2713,9 +2772,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: vlistID_dummy
     interface
-      integer(c_int) function lib_vlistNtsteps(vlistID_dummy) bind(c, name =&
-      & 'vlistNtsteps')
+      function lib_vlistNtsteps(vlistID_dummy) bind(c, name = 'vlistNtsteps')&
+      & result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: vlistID_dummy
       end function lib_vlistNtsteps
     end interface
@@ -2726,9 +2786,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: vlistID_dummy
     interface
-      integer(c_int) function lib_vlistGridsizeMax(vlistID_dummy) bind(c, name&
-      & = 'vlistGridsizeMax')
+      function lib_vlistGridsizeMax(vlistID_dummy) bind(c, name =&
+      & 'vlistGridsizeMax') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: vlistID_dummy
       end function lib_vlistGridsizeMax
     end interface
@@ -2740,9 +2801,10 @@ contains
     integer(c_int), value :: vlistID_dummy
     integer(c_int), value :: index_dummy
     interface
-      integer(c_int) function lib_vlistGrid(vlistID_dummy, index_dummy) bind(c,&
-      & name = 'vlistGrid')
+      function lib_vlistGrid(vlistID_dummy, index_dummy) bind(c, name =&
+      & 'vlistGrid') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: vlistID_dummy
         integer(c_int), value :: index_dummy
       end function lib_vlistGrid
@@ -2755,9 +2817,10 @@ contains
     integer(c_int), value :: vlistID_dummy
     integer(c_int), value :: gridID_dummy
     interface
-      integer(c_int) function lib_vlistGridIndex(vlistID_dummy, gridID_dummy)&
-      & bind(c, name = 'vlistGridIndex')
+      function lib_vlistGridIndex(vlistID_dummy, gridID_dummy) bind(c, name =&
+      & 'vlistGridIndex') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: vlistID_dummy
         integer(c_int), value :: gridID_dummy
       end function lib_vlistGridIndex
@@ -2802,9 +2865,10 @@ contains
     integer(c_int), value :: vlistID_dummy
     integer(c_int), value :: index_dummy
     interface
-      integer(c_int) function lib_vlistZaxis(vlistID_dummy, index_dummy)&
-      & bind(c, name = 'vlistZaxis')
+      function lib_vlistZaxis(vlistID_dummy, index_dummy) bind(c, name =&
+      & 'vlistZaxis') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: vlistID_dummy
         integer(c_int), value :: index_dummy
       end function lib_vlistZaxis
@@ -2817,9 +2881,10 @@ contains
     integer(c_int), value :: vlistID_dummy
     integer(c_int), value :: zaxisID_dummy
     interface
-      integer(c_int) function lib_vlistZaxisIndex(vlistID_dummy, zaxisID_dummy)&
-      & bind(c, name = 'vlistZaxisIndex')
+      function lib_vlistZaxisIndex(vlistID_dummy, zaxisID_dummy) bind(c, name =&
+      & 'vlistZaxisIndex') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: vlistID_dummy
         integer(c_int), value :: zaxisID_dummy
       end function lib_vlistZaxisIndex
@@ -2863,9 +2928,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: vlistID_dummy
     interface
-      integer(c_int) function lib_vlistNrecs(vlistID_dummy) bind(c, name =&
-      & 'vlistNrecs')
+      function lib_vlistNrecs(vlistID_dummy) bind(c, name = 'vlistNrecs')&
+      & result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: vlistID_dummy
       end function lib_vlistNrecs
     end interface
@@ -2877,9 +2943,10 @@ contains
     integer(c_int), value :: vlistID_dummy
     integer(c_int), value :: index_dummy
     interface
-      integer(c_int) function lib_vlistSubtype(vlistID_dummy, index_dummy)&
-      & bind(c, name = 'vlistSubtype')
+      function lib_vlistSubtype(vlistID_dummy, index_dummy) bind(c, name =&
+      & 'vlistSubtype') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: vlistID_dummy
         integer(c_int), value :: index_dummy
       end function lib_vlistSubtype
@@ -2892,9 +2959,10 @@ contains
     integer(c_int), value :: vlistID_dummy
     integer(c_int), value :: subtypeID_dummy
     interface
-      integer(c_int) function lib_vlistSubtypeIndex(vlistID_dummy,&
-      & subtypeID_dummy) bind(c, name = 'vlistSubtypeIndex')
+      function lib_vlistSubtypeIndex(vlistID_dummy, subtypeID_dummy) bind(c,&
+      & name = 'vlistSubtypeIndex') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: vlistID_dummy
         integer(c_int), value :: subtypeID_dummy
       end function lib_vlistSubtypeIndex
@@ -2920,9 +2988,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: vlistID_dummy
     interface
-      integer(c_int) function lib_vlistInqTaxis(vlistID_dummy) bind(c, name =&
-      & 'vlistInqTaxis')
+      function lib_vlistInqTaxis(vlistID_dummy) bind(c, name = 'vlistInqTaxis')&
+      & result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: vlistID_dummy
       end function lib_vlistInqTaxis
     end interface
@@ -2947,9 +3016,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: vlistID_dummy
     interface
-      integer(c_int) function lib_vlistInqTable(vlistID_dummy) bind(c, name =&
-      & 'vlistInqTable')
+      function lib_vlistInqTable(vlistID_dummy) bind(c, name = 'vlistInqTable')&
+      & result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: vlistID_dummy
       end function lib_vlistInqTable
     end interface
@@ -2974,9 +3044,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: vlistID_dummy
     interface
-      integer(c_int) function lib_vlistInqInstitut(vlistID_dummy) bind(c, name&
-      & = 'vlistInqInstitut')
+      function lib_vlistInqInstitut(vlistID_dummy) bind(c, name =&
+      & 'vlistInqInstitut') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: vlistID_dummy
       end function lib_vlistInqInstitut
     end interface
@@ -3001,9 +3072,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: vlistID_dummy
     interface
-      integer(c_int) function lib_vlistInqModel(vlistID_dummy) bind(c, name =&
-      & 'vlistInqModel')
+      function lib_vlistInqModel(vlistID_dummy) bind(c, name = 'vlistInqModel')&
+      & result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: vlistID_dummy
       end function lib_vlistInqModel
     end interface
@@ -3019,10 +3091,11 @@ contains
     integer(c_int), value :: tsteptype_dummy
     integer(c_int), value :: tilesetID_dummy
     interface
-      integer(c_int) function lib_vlistDefVarTiles(vlistID_dummy, gridID_dummy,&
-      & zaxisID_dummy, tsteptype_dummy, tilesetID_dummy) bind(c, name =&
-      & 'vlistDefVarTiles')
+      function lib_vlistDefVarTiles(vlistID_dummy, gridID_dummy, zaxisID_dummy,&
+      & tsteptype_dummy, tilesetID_dummy) bind(c, name = 'vlistDefVarTiles')&
+      & result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: vlistID_dummy
         integer(c_int), value :: gridID_dummy
         integer(c_int), value :: zaxisID_dummy
@@ -3042,9 +3115,10 @@ contains
     integer(c_int), value :: zaxisID_dummy
     integer(c_int), value :: tsteptype_dummy
     interface
-      integer(c_int) function lib_vlistDefVar(vlistID_dummy, gridID_dummy,&
-      & zaxisID_dummy, tsteptype_dummy) bind(c, name = 'vlistDefVar')
+      function lib_vlistDefVar(vlistID_dummy, gridID_dummy, zaxisID_dummy,&
+      & tsteptype_dummy) bind(c, name = 'vlistDefVar') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: vlistID_dummy
         integer(c_int), value :: gridID_dummy
         integer(c_int), value :: zaxisID_dummy
@@ -3129,9 +3203,10 @@ contains
     integer(c_int), value :: vlistID_dummy
     integer(c_int), value :: varID_dummy
     interface
-      integer(c_int) function lib_vlistInqVarGrid(vlistID_dummy, varID_dummy)&
-      & bind(c, name = 'vlistInqVarGrid')
+      function lib_vlistInqVarGrid(vlistID_dummy, varID_dummy) bind(c, name =&
+      & 'vlistInqVarGrid') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: vlistID_dummy
         integer(c_int), value :: varID_dummy
       end function lib_vlistInqVarGrid
@@ -3144,9 +3219,10 @@ contains
     integer(c_int), value :: vlistID_dummy
     integer(c_int), value :: varID_dummy
     interface
-      integer(c_int) function lib_vlistInqVarZaxis(vlistID_dummy, varID_dummy)&
-      & bind(c, name = 'vlistInqVarZaxis')
+      function lib_vlistInqVarZaxis(vlistID_dummy, varID_dummy) bind(c, name =&
+      & 'vlistInqVarZaxis') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: vlistID_dummy
         integer(c_int), value :: varID_dummy
       end function lib_vlistInqVarZaxis
@@ -3159,9 +3235,10 @@ contains
     integer(c_int), value :: vlistID_dummy
     integer(c_int), value :: code_dummy
     interface
-      integer(c_int) function lib_vlistInqVarID(vlistID_dummy, code_dummy)&
-      & bind(c, name = 'vlistInqVarID')
+      function lib_vlistInqVarID(vlistID_dummy, code_dummy) bind(c, name =&
+      & 'vlistInqVarID') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: vlistID_dummy
         integer(c_int), value :: code_dummy
       end function lib_vlistInqVarID
@@ -3190,9 +3267,10 @@ contains
     integer(c_int), value :: vlistID_dummy
     integer(c_int), value :: varID_dummy
     interface
-      integer(c_int) function lib_vlistInqVarTsteptype(vlistID_dummy,&
-      & varID_dummy) bind(c, name = 'vlistInqVarTsteptype')
+      function lib_vlistInqVarTsteptype(vlistID_dummy, varID_dummy) bind(c,&
+      & name = 'vlistInqVarTsteptype') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: vlistID_dummy
         integer(c_int), value :: varID_dummy
       end function lib_vlistInqVarTsteptype
@@ -3221,9 +3299,10 @@ contains
     integer(c_int), value :: vlistID_dummy
     integer(c_int), value :: varID_dummy
     interface
-      integer(c_int) function lib_vlistInqVarCompType(vlistID_dummy,&
-      & varID_dummy) bind(c, name = 'vlistInqVarCompType')
+      function lib_vlistInqVarCompType(vlistID_dummy, varID_dummy) bind(c, name&
+      & = 'vlistInqVarCompType') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: vlistID_dummy
         integer(c_int), value :: varID_dummy
       end function lib_vlistInqVarCompType
@@ -3252,9 +3331,10 @@ contains
     integer(c_int), value :: vlistID_dummy
     integer(c_int), value :: varID_dummy
     interface
-      integer(c_int) function lib_vlistInqVarCompLevel(vlistID_dummy,&
-      & varID_dummy) bind(c, name = 'vlistInqVarCompLevel')
+      function lib_vlistInqVarCompLevel(vlistID_dummy, varID_dummy) bind(c,&
+      & name = 'vlistInqVarCompLevel') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: vlistID_dummy
         integer(c_int), value :: varID_dummy
       end function lib_vlistInqVarCompLevel
@@ -3283,9 +3363,10 @@ contains
     integer(c_int), value :: vlistID_dummy
     integer(c_int), value :: varID_dummy
     interface
-      integer(c_int) function lib_vlistInqVarParam(vlistID_dummy, varID_dummy)&
-      & bind(c, name = 'vlistInqVarParam')
+      function lib_vlistInqVarParam(vlistID_dummy, varID_dummy) bind(c, name =&
+      & 'vlistInqVarParam') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: vlistID_dummy
         integer(c_int), value :: varID_dummy
       end function lib_vlistInqVarParam
@@ -3314,9 +3395,10 @@ contains
     integer(c_int), value :: vlistID_dummy
     integer(c_int), value :: varID_dummy
     interface
-      integer(c_int) function lib_vlistInqVarCode(vlistID_dummy, varID_dummy)&
-      & bind(c, name = 'vlistInqVarCode')
+      function lib_vlistInqVarCode(vlistID_dummy, varID_dummy) bind(c, name =&
+      & 'vlistInqVarCode') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: vlistID_dummy
         integer(c_int), value :: varID_dummy
       end function lib_vlistInqVarCode
@@ -3345,9 +3427,10 @@ contains
     integer(c_int), value :: vlistID_dummy
     integer(c_int), value :: varID_dummy
     interface
-      integer(c_int) function lib_vlistInqVarDatatype(vlistID_dummy,&
-      & varID_dummy) bind(c, name = 'vlistInqVarDatatype')
+      function lib_vlistInqVarDatatype(vlistID_dummy, varID_dummy) bind(c, name&
+      & = 'vlistInqVarDatatype') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: vlistID_dummy
         integer(c_int), value :: varID_dummy
       end function lib_vlistInqVarDatatype
@@ -3376,9 +3459,10 @@ contains
     integer(c_int), value :: vlistID_dummy
     integer(c_int), value :: varID_dummy
     interface
-      integer(c_int) function lib_vlistInqVarChunkType(vlistID_dummy,&
-      & varID_dummy) bind(c, name = 'vlistInqVarChunkType')
+      function lib_vlistInqVarChunkType(vlistID_dummy, varID_dummy) bind(c,&
+      & name = 'vlistInqVarChunkType') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: vlistID_dummy
         integer(c_int), value :: varID_dummy
       end function lib_vlistInqVarChunkType
@@ -3407,9 +3491,10 @@ contains
     integer(c_int), value :: vlistID_dummy
     integer(c_int), value :: varID_dummy
     interface
-      integer(c_int) function lib_vlistInqVarXYZ(vlistID_dummy, varID_dummy)&
-      & bind(c, name = 'vlistInqVarXYZ')
+      function lib_vlistInqVarXYZ(vlistID_dummy, varID_dummy) bind(c, name =&
+      & 'vlistInqVarXYZ') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: vlistID_dummy
         integer(c_int), value :: varID_dummy
       end function lib_vlistInqVarXYZ
@@ -3422,9 +3507,10 @@ contains
     integer(c_int), value :: vlistID_dummy
     integer(c_int), value :: varID_dummy
     interface
-      integer(c_int) function lib_vlistInqVarNumber(vlistID_dummy, varID_dummy)&
-      & bind(c, name = 'vlistInqVarNumber')
+      function lib_vlistInqVarNumber(vlistID_dummy, varID_dummy) bind(c, name =&
+      & 'vlistInqVarNumber') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: vlistID_dummy
         integer(c_int), value :: varID_dummy
       end function lib_vlistInqVarNumber
@@ -3453,9 +3539,10 @@ contains
     integer(c_int), value :: vlistID_dummy
     integer(c_int), value :: varID_dummy
     interface
-      integer(c_int) function lib_vlistInqVarInstitut(vlistID_dummy,&
-      & varID_dummy) bind(c, name = 'vlistInqVarInstitut')
+      function lib_vlistInqVarInstitut(vlistID_dummy, varID_dummy) bind(c, name&
+      & = 'vlistInqVarInstitut') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: vlistID_dummy
         integer(c_int), value :: varID_dummy
       end function lib_vlistInqVarInstitut
@@ -3484,9 +3571,10 @@ contains
     integer(c_int), value :: vlistID_dummy
     integer(c_int), value :: varID_dummy
     interface
-      integer(c_int) function lib_vlistInqVarModel(vlistID_dummy, varID_dummy)&
-      & bind(c, name = 'vlistInqVarModel')
+      function lib_vlistInqVarModel(vlistID_dummy, varID_dummy) bind(c, name =&
+      & 'vlistInqVarModel') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: vlistID_dummy
         integer(c_int), value :: varID_dummy
       end function lib_vlistInqVarModel
@@ -3515,9 +3603,10 @@ contains
     integer(c_int), value :: vlistID_dummy
     integer(c_int), value :: varID_dummy
     interface
-      integer(c_int) function lib_vlistInqVarTable(vlistID_dummy, varID_dummy)&
-      & bind(c, name = 'vlistInqVarTable')
+      function lib_vlistInqVarTable(vlistID_dummy, varID_dummy) bind(c, name =&
+      & 'vlistInqVarTable') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: vlistID_dummy
         integer(c_int), value :: varID_dummy
       end function lib_vlistInqVarTable
@@ -3591,9 +3680,10 @@ contains
     integer :: shape(1)
     character(kind = c_char), dimension(:), pointer :: temp
     interface
-      type(c_ptr) function lib_vlistCopyVarName(vlistId_dummy, varId_dummy)&
-      & bind(c, name = 'vlistCopyVarName')
+      function lib_vlistCopyVarName(vlistId_dummy, varId_dummy) bind(c, name =&
+      & 'vlistCopyVarName') result(c_result)
         import c_int, c_ptr
+        type(c_ptr) :: c_result
         integer(c_int), value :: vlistId_dummy
         integer(c_int), value :: varId_dummy
       end function lib_vlistCopyVarName
@@ -3806,9 +3896,10 @@ contains
     integer(c_int), value :: vlistID_dummy
     integer(c_int), value :: varID_dummy
     interface
-      real(c_double) function lib_vlistInqVarMissval(vlistID_dummy,&
-      & varID_dummy) bind(c, name = 'vlistInqVarMissval')
+      function lib_vlistInqVarMissval(vlistID_dummy, varID_dummy) bind(c, name&
+      & = 'vlistInqVarMissval') result(c_result)
         import c_double, c_int
+        real(c_double) :: c_result
         integer(c_int), value :: vlistID_dummy
         integer(c_int), value :: varID_dummy
       end function lib_vlistInqVarMissval
@@ -3897,9 +3988,10 @@ contains
     integer(c_int), value :: vlistID_dummy
     integer(c_int), value :: varID_dummy
     interface
-      real(c_double) function lib_vlistInqVarScalefactor(vlistID_dummy,&
-      & varID_dummy) bind(c, name = 'vlistInqVarScalefactor')
+      function lib_vlistInqVarScalefactor(vlistID_dummy, varID_dummy) bind(c,&
+      & name = 'vlistInqVarScalefactor') result(c_result)
         import c_double, c_int
+        real(c_double) :: c_result
         integer(c_int), value :: vlistID_dummy
         integer(c_int), value :: varID_dummy
       end function lib_vlistInqVarScalefactor
@@ -3928,9 +4020,10 @@ contains
     integer(c_int), value :: vlistID_dummy
     integer(c_int), value :: varID_dummy
     interface
-      real(c_double) function lib_vlistInqVarAddoffset(vlistID_dummy,&
-      & varID_dummy) bind(c, name = 'vlistInqVarAddoffset')
+      function lib_vlistInqVarAddoffset(vlistID_dummy, varID_dummy) bind(c,&
+      & name = 'vlistInqVarAddoffset') result(c_result)
         import c_double, c_int
+        real(c_double) :: c_result
         integer(c_int), value :: vlistID_dummy
         integer(c_int), value :: varID_dummy
       end function lib_vlistInqVarAddoffset
@@ -3959,9 +4052,10 @@ contains
     integer(c_int), value :: vlistID_dummy
     integer(c_int), value :: varID_dummy
     interface
-      integer(c_int) function lib_vlistInqVarTimave(vlistID_dummy, varID_dummy)&
-      & bind(c, name = 'vlistInqVarTimave')
+      function lib_vlistInqVarTimave(vlistID_dummy, varID_dummy) bind(c, name =&
+      & 'vlistInqVarTimave') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: vlistID_dummy
         integer(c_int), value :: varID_dummy
       end function lib_vlistInqVarTimave
@@ -3990,9 +4084,10 @@ contains
     integer(c_int), value :: vlistID_dummy
     integer(c_int), value :: varID_dummy
     interface
-      integer(c_int) function lib_vlistInqVarTimaccu(vlistID_dummy,&
-      & varID_dummy) bind(c, name = 'vlistInqVarTimaccu')
+      function lib_vlistInqVarTimaccu(vlistID_dummy, varID_dummy) bind(c, name&
+      & = 'vlistInqVarTimaccu') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: vlistID_dummy
         integer(c_int), value :: varID_dummy
       end function lib_vlistInqVarTimaccu
@@ -4025,10 +4120,11 @@ contains
     integer(c_int), value :: vlistID_dummy
     integer(c_int), value :: varID_dummy
     interface
-      integer(c_int) function&
-      & lib_vlistInqVarTypeOfGeneratingProcess(vlistID_dummy, varID_dummy)&
-      & bind(c, name = 'vlistInqVarTypeOfGeneratingProcess')
+      function lib_vlistInqVarTypeOfGeneratingProcess(vlistID_dummy,&
+      & varID_dummy) bind(c, name = 'vlistInqVarTypeOfGeneratingProcess')&
+      & result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: vlistID_dummy
         integer(c_int), value :: varID_dummy
       end function lib_vlistInqVarTypeOfGeneratingProcess
@@ -4061,10 +4157,11 @@ contains
     integer(c_int), value :: vlistID_dummy
     integer(c_int), value :: varID_dummy
     interface
-      integer(c_int) function&
-      & lib_vlistInqVarProductDefinitionTemplate(vlistID_dummy, varID_dummy)&
-      & bind(c, name = 'vlistInqVarProductDefinitionTemplate')
+      function lib_vlistInqVarProductDefinitionTemplate(vlistID_dummy,&
+      & varID_dummy) bind(c, name = 'vlistInqVarProductDefinitionTemplate')&
+      & result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: vlistID_dummy
         integer(c_int), value :: varID_dummy
       end function lib_vlistInqVarProductDefinitionTemplate
@@ -4078,9 +4175,10 @@ contains
     integer(c_int), value :: vlistID_dummy
     integer(c_int), value :: varID_dummy
     interface
-      integer(c_int) function lib_vlistInqVarSize(vlistID_dummy, varID_dummy)&
-      & bind(c, name = 'vlistInqVarSize')
+      function lib_vlistInqVarSize(vlistID_dummy, varID_dummy) bind(c, name =&
+      & 'vlistInqVarSize') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: vlistID_dummy
         integer(c_int), value :: varID_dummy
       end function lib_vlistInqVarSize
@@ -4115,9 +4213,10 @@ contains
     integer(c_int), value :: varID_dummy
     integer(c_int), value :: levID_dummy
     interface
-      integer(c_int) function lib_vlistInqIndex(vlistID_dummy, varID_dummy,&
-      & levID_dummy) bind(c, name = 'vlistInqIndex')
+      function lib_vlistInqIndex(vlistID_dummy, varID_dummy, levID_dummy)&
+      & bind(c, name = 'vlistInqIndex') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: vlistID_dummy
         integer(c_int), value :: varID_dummy
         integer(c_int), value :: levID_dummy
@@ -4150,9 +4249,10 @@ contains
     integer(c_int), value :: varID_dummy
     integer(c_int), value :: levID_dummy
     interface
-      integer(c_int) function lib_vlistInqFlag(vlistID_dummy, varID_dummy,&
-      & levID_dummy) bind(c, name = 'vlistInqFlag')
+      function lib_vlistInqFlag(vlistID_dummy, varID_dummy, levID_dummy)&
+      & bind(c, name = 'vlistInqFlag') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: vlistID_dummy
         integer(c_int), value :: varID_dummy
         integer(c_int), value :: levID_dummy
@@ -4166,9 +4266,10 @@ contains
     integer(c_int), value :: vlistID_dummy
     integer(c_int), value :: fvarID_dummy
     interface
-      integer(c_int) function lib_vlistFindVar(vlistID_dummy, fvarID_dummy)&
-      & bind(c, name = 'vlistFindVar')
+      function lib_vlistFindVar(vlistID_dummy, fvarID_dummy) bind(c, name =&
+      & 'vlistFindVar') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: vlistID_dummy
         integer(c_int), value :: fvarID_dummy
       end function lib_vlistFindVar
@@ -4183,9 +4284,10 @@ contains
     integer(c_int), value :: fvarID_dummy
     integer(c_int), value :: flevelID_dummy
     interface
-      integer(c_int) function lib_vlistFindLevel(vlistID_dummy, fvarID_dummy,&
-      & flevelID_dummy) bind(c, name = 'vlistFindLevel')
+      function lib_vlistFindLevel(vlistID_dummy, fvarID_dummy, flevelID_dummy)&
+      & bind(c, name = 'vlistFindLevel') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: vlistID_dummy
         integer(c_int), value :: fvarID_dummy
         integer(c_int), value :: flevelID_dummy
@@ -4199,9 +4301,10 @@ contains
     integer(c_int), value :: vlistID_dummy
     integer(c_int), value :: varID_dummy
     interface
-      integer(c_int) function lib_vlistMergedVar(vlistID_dummy, varID_dummy)&
-      & bind(c, name = 'vlistMergedVar')
+      function lib_vlistMergedVar(vlistID_dummy, varID_dummy) bind(c, name =&
+      & 'vlistMergedVar') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: vlistID_dummy
         integer(c_int), value :: varID_dummy
       end function lib_vlistMergedVar
@@ -4216,9 +4319,10 @@ contains
     integer(c_int), value :: varID_dummy
     integer(c_int), value :: levelID_dummy
     interface
-      integer(c_int) function lib_vlistMergedLevel(vlistID_dummy, varID_dummy,&
-      & levelID_dummy) bind(c, name = 'vlistMergedLevel')
+      function lib_vlistMergedLevel(vlistID_dummy, varID_dummy, levelID_dummy)&
+      & bind(c, name = 'vlistMergedLevel') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: vlistID_dummy
         integer(c_int), value :: varID_dummy
         integer(c_int), value :: levelID_dummy
@@ -4265,10 +4369,11 @@ contains
     integer(c_int), target :: forecast_type_temp
     type(c_ptr) :: forecast_type_ptr
     interface
-      integer(c_int) function lib_vlistInqVarEnsemble(vlistID_dummy,&
-      & varID_dummy, ensID, ensCount, forecast_type) bind(c, name =&
-      & 'vlistInqVarEnsemble')
+      function lib_vlistInqVarEnsemble(vlistID_dummy, varID_dummy, ensID,&
+      & ensCount, forecast_type) bind(c, name = 'vlistInqVarEnsemble')&
+      & result(c_result)
         import c_int, c_ptr
+        integer(c_int) :: c_result
         integer(c_int), value :: vlistID_dummy
         integer(c_int), value :: varID_dummy
         type(c_ptr), value :: ensID
@@ -4377,9 +4482,10 @@ contains
     character(kind = c_char) :: name_temp(len(name_dummy) + 1)
     integer :: name_i
     interface
-      integer(c_int) function lib_vlistHasVarKey(vlistID_dummy, varID_dummy,&
-      & name_dummy) bind(c, name = 'vlistHasVarKey')
+      function lib_vlistHasVarKey(vlistID_dummy, varID_dummy, name_dummy)&
+      & bind(c, name = 'vlistHasVarKey') result(c_result)
         import c_char, c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: vlistID_dummy
         integer(c_int), value :: varID_dummy
         character(kind = c_char) :: name_dummy(*)
@@ -4401,9 +4507,10 @@ contains
     character(kind = c_char) :: name_temp(len(name_dummy) + 1)
     integer :: name_i
     interface
-      real(c_double) function lib_vlistInqVarDblKey(vlistID_dummy, varID_dummy,&
-      & name_dummy) bind(c, name = 'vlistInqVarDblKey')
+      function lib_vlistInqVarDblKey(vlistID_dummy, varID_dummy, name_dummy)&
+      & bind(c, name = 'vlistInqVarDblKey') result(c_result)
         import c_char, c_double, c_int
+        real(c_double) :: c_result
         integer(c_int), value :: vlistID_dummy
         integer(c_int), value :: varID_dummy
         character(kind = c_char) :: name_dummy(*)
@@ -4425,9 +4532,10 @@ contains
     character(kind = c_char) :: name_temp(len(name_dummy) + 1)
     integer :: name_i
     interface
-      integer(c_int) function lib_vlistInqVarIntKey(vlistID_dummy, varID_dummy,&
-      & name_dummy) bind(c, name = 'vlistInqVarIntKey')
+      function lib_vlistInqVarIntKey(vlistID_dummy, varID_dummy, name_dummy)&
+      & bind(c, name = 'vlistInqVarIntKey') result(c_result)
         import c_char, c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: vlistID_dummy
         integer(c_int), value :: varID_dummy
         character(kind = c_char) :: name_dummy(*)
@@ -4448,9 +4556,10 @@ contains
     integer(c_int), target :: nattsp_temp
     type(c_ptr) :: nattsp_ptr
     interface
-      integer(c_int) function lib_vlistInqNatts(vlistID_dummy, varID_dummy,&
-      & nattsp) bind(c, name = 'vlistInqNatts')
+      function lib_vlistInqNatts(vlistID_dummy, varID_dummy, nattsp) bind(c,&
+      & name = 'vlistInqNatts') result(c_result)
         import c_int, c_ptr
+        integer(c_int) :: c_result
         integer(c_int), value :: vlistID_dummy
         integer(c_int), value :: varID_dummy
         type(c_ptr), value :: nattsp
@@ -4479,9 +4588,10 @@ contains
     integer(c_int), target :: lenp_temp
     type(c_ptr) :: lenp_ptr
     interface
-      integer(c_int) function lib_vlistInqAtt(vlistID_dummy, varID_dummy,&
-      & attrnum_dummy, name_dummy, typep, lenp) bind(c, name = 'vlistInqAtt')
+      function lib_vlistInqAtt(vlistID_dummy, varID_dummy, attrnum_dummy,&
+      & name_dummy, typep, lenp) bind(c, name = 'vlistInqAtt') result(c_result)
         import c_char, c_int, c_ptr
+        integer(c_int) :: c_result
         integer(c_int), value :: vlistID_dummy
         integer(c_int), value :: varID_dummy
         integer(c_int), value :: attrnum_dummy
@@ -4525,9 +4635,10 @@ contains
     character(kind = c_char) :: name_temp(len(name_dummy) + 1)
     integer :: name_i
     interface
-      integer(c_int) function lib_vlistDelAtt(vlistID_dummy, varID_dummy,&
-      & name_dummy) bind(c, name = 'vlistDelAtt')
+      function lib_vlistDelAtt(vlistID_dummy, varID_dummy, name_dummy) bind(c,&
+      & name = 'vlistDelAtt') result(c_result)
         import c_char, c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: vlistID_dummy
         integer(c_int), value :: varID_dummy
         character(kind = c_char) :: name_dummy(*)
@@ -4552,10 +4663,11 @@ contains
     character(kind = c_char) :: name_temp(len(name_dummy) + 1)
     integer :: name_i
     interface
-      integer(c_int) function lib_vlistDefAttInt(vlistID_dummy, varID_dummy,&
-      & name_dummy, type_dummy, len_dummy, ip_vec_dummy) bind(c, name =&
-      & 'vlistDefAttInt')
+      function lib_vlistDefAttInt(vlistID_dummy, varID_dummy, name_dummy,&
+      & type_dummy, len_dummy, ip_vec_dummy) bind(c, name = 'vlistDefAttInt')&
+      & result(c_result)
         import c_char, c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: vlistID_dummy
         integer(c_int), value :: varID_dummy
         character(kind = c_char) :: name_dummy(*)
@@ -4584,10 +4696,11 @@ contains
     character(kind = c_char) :: name_temp(len(name_dummy) + 1)
     integer :: name_i
     interface
-      integer(c_int) function lib_vlistDefAttFlt(vlistID_dummy, varID_dummy,&
-      & name_dummy, type_dummy, len_dummy, dp_vec_dummy) bind(c, name =&
-      & 'vlistDefAttFlt')
+      function lib_vlistDefAttFlt(vlistID_dummy, varID_dummy, name_dummy,&
+      & type_dummy, len_dummy, dp_vec_dummy) bind(c, name = 'vlistDefAttFlt')&
+      & result(c_result)
         import c_char, c_double, c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: vlistID_dummy
         integer(c_int), value :: varID_dummy
         character(kind = c_char) :: name_dummy(*)
@@ -4617,9 +4730,11 @@ contains
     character(kind = c_char) :: tp_cbuf_temp(len(tp_cbuf_dummy) + 1)
     integer :: tp_cbuf_i
     interface
-      integer(c_int) function lib_vlistDefAttTxt(vlistID_dummy, varID_dummy,&
-      & name_dummy, len_dummy, tp_cbuf_dummy) bind(c, name = 'vlistDefAttTxt')
+      function lib_vlistDefAttTxt(vlistID_dummy, varID_dummy, name_dummy,&
+      & len_dummy, tp_cbuf_dummy) bind(c, name = 'vlistDefAttTxt')&
+      & result(c_result)
         import c_char, c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: vlistID_dummy
         integer(c_int), value :: varID_dummy
         character(kind = c_char) :: name_dummy(*)
@@ -4650,9 +4765,11 @@ contains
     character(kind = c_char) :: name_temp(len(name_dummy) + 1)
     integer :: name_i
     interface
-      integer(c_int) function lib_vlistInqAttInt(vlistID_dummy, varID_dummy,&
-      & name_dummy, mlen_dummy, ip_vec_dummy) bind(c, name = 'vlistInqAttInt')
+      function lib_vlistInqAttInt(vlistID_dummy, varID_dummy, name_dummy,&
+      & mlen_dummy, ip_vec_dummy) bind(c, name = 'vlistInqAttInt')&
+      & result(c_result)
         import c_char, c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: vlistID_dummy
         integer(c_int), value :: varID_dummy
         character(kind = c_char) :: name_dummy(*)
@@ -4679,9 +4796,11 @@ contains
     character(kind = c_char) :: name_temp(len(name_dummy) + 1)
     integer :: name_i
     interface
-      integer(c_int) function lib_vlistInqAttFlt(vlistID_dummy, varID_dummy,&
-      & name_dummy, mlen_dummy, dp_vec_dummy) bind(c, name = 'vlistInqAttFlt')
+      function lib_vlistInqAttFlt(vlistID_dummy, varID_dummy, name_dummy,&
+      & mlen_dummy, dp_vec_dummy) bind(c, name = 'vlistInqAttFlt')&
+      & result(c_result)
         import c_char, c_double, c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: vlistID_dummy
         integer(c_int), value :: varID_dummy
         character(kind = c_char) :: name_dummy(*)
@@ -4711,9 +4830,11 @@ contains
     integer :: tp_cbuf_i
     logical :: tp_cbuf_padding = .true.
     interface
-      integer(c_int) function lib_vlistInqAttTxt(vlistID_dummy, varID_dummy,&
-      & name_dummy, mlen_dummy, tp_cbuf_dummy) bind(c, name = 'vlistInqAttTxt')
+      function lib_vlistInqAttTxt(vlistID_dummy, varID_dummy, name_dummy,&
+      & mlen_dummy, tp_cbuf_dummy) bind(c, name = 'vlistInqAttTxt')&
+      & result(c_result)
         import c_char, c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: vlistID_dummy
         integer(c_int), value :: varID_dummy
         character(kind = c_char) :: name_dummy(*)
@@ -4787,9 +4908,10 @@ contains
     type(c_ptr) :: ptr
     integer :: shape(1)
     interface
-      type(c_ptr) function lib_gridNamePtr(gridtype_dummy) bind(c, name =&
-      & 'gridNamePtr')
+      function lib_gridNamePtr(gridtype_dummy) bind(c, name = 'gridNamePtr')&
+      & result(c_result)
         import c_int, c_ptr
+        type(c_ptr) :: c_result
         integer(c_int), value :: gridtype_dummy
       end function lib_gridNamePtr
     end interface
@@ -4831,9 +4953,10 @@ contains
     integer(c_int), value :: gridID_dummy
     integer(c_int), intent(inout) :: mask_vec_dummy(*)
     interface
-      integer(c_int) function lib_gridInqMaskGME(gridID_dummy, mask_vec_dummy)&
-      & bind(c, name = 'gridInqMaskGME')
+      function lib_gridInqMaskGME(gridID_dummy, mask_vec_dummy) bind(c, name =&
+      & 'gridInqMaskGME') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: gridID_dummy
         integer(c_int), intent(inout) :: mask_vec_dummy(*)
       end function lib_gridInqMaskGME
@@ -4860,9 +4983,10 @@ contains
     integer(c_int), value :: gridID_dummy
     integer(c_int), intent(inout) :: mask_vec_dummy(*)
     interface
-      integer(c_int) function lib_gridInqMask(gridID_dummy, mask_vec_dummy)&
-      & bind(c, name = 'gridInqMask')
+      function lib_gridInqMask(gridID_dummy, mask_vec_dummy) bind(c, name =&
+      & 'gridInqMask') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: gridID_dummy
         integer(c_int), intent(inout) :: mask_vec_dummy(*)
       end function lib_gridInqMask
@@ -4891,9 +5015,10 @@ contains
     integer(c_int), value :: gridtype_dummy
     integer(c_int), value :: size_dummy
     interface
-      integer(c_int) function lib_gridCreate(gridtype_dummy, size_dummy)&
-      & bind(c, name = 'gridCreate')
+      function lib_gridCreate(gridtype_dummy, size_dummy) bind(c, name =&
+      & 'gridCreate') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: gridtype_dummy
         integer(c_int), value :: size_dummy
       end function lib_gridCreate
@@ -4916,9 +5041,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: gridID_dummy
     interface
-      integer(c_int) function lib_gridDuplicate(gridID_dummy) bind(c, name =&
-      & 'gridDuplicate')
+      function lib_gridDuplicate(gridID_dummy) bind(c, name = 'gridDuplicate')&
+      & result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: gridID_dummy
       end function lib_gridDuplicate
     end interface
@@ -4929,9 +5055,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: gridID_dummy
     interface
-      integer(c_int) function lib_gridInqType(gridID_dummy) bind(c, name =&
-      & 'gridInqType')
+      function lib_gridInqType(gridID_dummy) bind(c, name = 'gridInqType')&
+      & result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: gridID_dummy
       end function lib_gridInqType
     end interface
@@ -4942,9 +5069,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: gridID_dummy
     interface
-      integer(c_int) function lib_gridInqSize(gridID_dummy) bind(c, name =&
-      & 'gridInqSize')
+      function lib_gridInqSize(gridID_dummy) bind(c, name = 'gridInqSize')&
+      & result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: gridID_dummy
       end function lib_gridInqSize
     end interface
@@ -4969,9 +5097,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: gridID_dummy
     interface
-      integer(c_int) function lib_gridInqXsize(gridID_dummy) bind(c, name =&
-      & 'gridInqXsize')
+      function lib_gridInqXsize(gridID_dummy) bind(c, name = 'gridInqXsize')&
+      & result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: gridID_dummy
       end function lib_gridInqXsize
     end interface
@@ -4996,9 +5125,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: gridID_dummy
     interface
-      integer(c_int) function lib_gridInqYsize(gridID_dummy) bind(c, name =&
-      & 'gridInqYsize')
+      function lib_gridInqYsize(gridID_dummy) bind(c, name = 'gridInqYsize')&
+      & result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: gridID_dummy
       end function lib_gridInqYsize
     end interface
@@ -5023,9 +5153,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: gridID_dummy
     interface
-      integer(c_int) function lib_gridInqNP(gridID_dummy) bind(c, name =&
-      & 'gridInqNP')
+      function lib_gridInqNP(gridID_dummy) bind(c, name = 'gridInqNP')&
+      & result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: gridID_dummy
       end function lib_gridInqNP
     end interface
@@ -5051,9 +5182,10 @@ contains
     integer(c_int), value :: gridID_dummy
     real(c_double), intent(inout) :: xvals_vec_dummy(*)
     interface
-      integer(c_int) function lib_gridInqXvals(gridID_dummy, xvals_vec_dummy)&
-      & bind(c, name = 'gridInqXvals')
+      function lib_gridInqXvals(gridID_dummy, xvals_vec_dummy) bind(c, name =&
+      & 'gridInqXvals') result(c_result)
         import c_double, c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: gridID_dummy
         real(c_double), intent(inout) :: xvals_vec_dummy(*)
       end function lib_gridInqXvals
@@ -5080,9 +5212,10 @@ contains
     integer(c_int), value :: gridID_dummy
     real(c_double), intent(inout) :: yvals_vec_dummy(*)
     interface
-      integer(c_int) function lib_gridInqYvals(gridID_dummy, yvals_vec_dummy)&
-      & bind(c, name = 'gridInqYvals')
+      function lib_gridInqYvals(gridID_dummy, yvals_vec_dummy) bind(c, name =&
+      & 'gridInqYvals') result(c_result)
         import c_double, c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: gridID_dummy
         real(c_double), intent(inout) :: yvals_vec_dummy(*)
       end function lib_gridInqYvals
@@ -5504,9 +5637,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: gridID_dummy
     interface
-      integer(c_int) function lib_gridInqPrec(gridID_dummy) bind(c, name =&
-      & 'gridInqPrec')
+      function lib_gridInqPrec(gridID_dummy) bind(c, name = 'gridInqPrec')&
+      & result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: gridID_dummy
       end function lib_gridInqPrec
     end interface
@@ -5518,9 +5652,10 @@ contains
     integer(c_int), value :: gridID_dummy
     integer(c_int), value :: index_dummy
     interface
-      real(c_double) function lib_gridInqXval(gridID_dummy, index_dummy)&
-      & bind(c, name = 'gridInqXval')
+      function lib_gridInqXval(gridID_dummy, index_dummy) bind(c, name =&
+      & 'gridInqXval') result(c_result)
         import c_double, c_int
+        real(c_double) :: c_result
         integer(c_int), value :: gridID_dummy
         integer(c_int), value :: index_dummy
       end function lib_gridInqXval
@@ -5533,9 +5668,10 @@ contains
     integer(c_int), value :: gridID_dummy
     integer(c_int), value :: index_dummy
     interface
-      real(c_double) function lib_gridInqYval(gridID_dummy, index_dummy)&
-      & bind(c, name = 'gridInqYval')
+      function lib_gridInqYval(gridID_dummy, index_dummy) bind(c, name =&
+      & 'gridInqYval') result(c_result)
         import c_double, c_int
+        real(c_double) :: c_result
         integer(c_int), value :: gridID_dummy
         integer(c_int), value :: index_dummy
       end function lib_gridInqYval
@@ -5547,9 +5683,10 @@ contains
     real(c_double) :: result
     integer(c_int), value :: gridID_dummy
     interface
-      real(c_double) function lib_gridInqXinc(gridID_dummy) bind(c, name =&
-      & 'gridInqXinc')
+      function lib_gridInqXinc(gridID_dummy) bind(c, name = 'gridInqXinc')&
+      & result(c_result)
         import c_double, c_int
+        real(c_double) :: c_result
         integer(c_int), value :: gridID_dummy
       end function lib_gridInqXinc
     end interface
@@ -5560,9 +5697,10 @@ contains
     real(c_double) :: result
     integer(c_int), value :: gridID_dummy
     interface
-      real(c_double) function lib_gridInqYinc(gridID_dummy) bind(c, name =&
-      & 'gridInqYinc')
+      function lib_gridInqYinc(gridID_dummy) bind(c, name = 'gridInqYinc')&
+      & result(c_result)
         import c_double, c_int
+        real(c_double) :: c_result
         integer(c_int), value :: gridID_dummy
       end function lib_gridInqYinc
     end interface
@@ -5573,9 +5711,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: gridID_dummy
     interface
-      integer(c_int) function lib_gridIsCircular(gridID_dummy) bind(c, name =&
-      & 'gridIsCircular')
+      function lib_gridIsCircular(gridID_dummy) bind(c, name =&
+      & 'gridIsCircular') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: gridID_dummy
       end function lib_gridIsCircular
     end interface
@@ -5586,9 +5725,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: gridID_dummy
     interface
-      integer(c_int) function lib_gridIsRotated(gridID_dummy) bind(c, name =&
-      & 'gridIsRotated')
+      function lib_gridIsRotated(gridID_dummy) bind(c, name = 'gridIsRotated')&
+      & result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: gridID_dummy
       end function lib_gridIsRotated
     end interface
@@ -5613,9 +5753,10 @@ contains
     real(c_double) :: result
     integer(c_int), value :: gridID_dummy
     interface
-      real(c_double) function lib_gridInqXpole(gridID_dummy) bind(c, name =&
-      & 'gridInqXpole')
+      function lib_gridInqXpole(gridID_dummy) bind(c, name = 'gridInqXpole')&
+      & result(c_result)
         import c_double, c_int
+        real(c_double) :: c_result
         integer(c_int), value :: gridID_dummy
       end function lib_gridInqXpole
     end interface
@@ -5640,9 +5781,10 @@ contains
     real(c_double) :: result
     integer(c_int), value :: gridID_dummy
     interface
-      real(c_double) function lib_gridInqYpole(gridID_dummy) bind(c, name =&
-      & 'gridInqYpole')
+      function lib_gridInqYpole(gridID_dummy) bind(c, name = 'gridInqYpole')&
+      & result(c_result)
         import c_double, c_int
+        real(c_double) :: c_result
         integer(c_int), value :: gridID_dummy
       end function lib_gridInqYpole
     end interface
@@ -5667,9 +5809,10 @@ contains
     real(c_double) :: result
     integer(c_int), value :: gridID_dummy
     interface
-      real(c_double) function lib_gridInqAngle(gridID_dummy) bind(c, name =&
-      & 'gridInqAngle')
+      function lib_gridInqAngle(gridID_dummy) bind(c, name = 'gridInqAngle')&
+      & result(c_result)
         import c_double, c_int
+        real(c_double) :: c_result
         integer(c_int), value :: gridID_dummy
       end function lib_gridInqAngle
     end interface
@@ -5680,9 +5823,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: gridID_dummy
     interface
-      integer(c_int) function lib_gridInqTrunc(gridID_dummy) bind(c, name =&
-      & 'gridInqTrunc')
+      function lib_gridInqTrunc(gridID_dummy) bind(c, name = 'gridInqTrunc')&
+      & result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: gridID_dummy
       end function lib_gridInqTrunc
     end interface
@@ -5721,9 +5865,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: gridID_dummy
     interface
-      integer(c_int) function lib_gridInqGMEnd(gridID_dummy) bind(c, name =&
-      & 'gridInqGMEnd')
+      function lib_gridInqGMEnd(gridID_dummy) bind(c, name = 'gridInqGMEnd')&
+      & result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: gridID_dummy
       end function lib_gridInqGMEnd
     end interface
@@ -5748,9 +5893,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: gridID_dummy
     interface
-      integer(c_int) function lib_gridInqGMEni(gridID_dummy) bind(c, name =&
-      & 'gridInqGMEni')
+      function lib_gridInqGMEni(gridID_dummy) bind(c, name = 'gridInqGMEni')&
+      & result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: gridID_dummy
       end function lib_gridInqGMEni
     end interface
@@ -5775,9 +5921,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: gridID_dummy
     interface
-      integer(c_int) function lib_gridInqGMEni2(gridID_dummy) bind(c, name =&
-      & 'gridInqGMEni2')
+      function lib_gridInqGMEni2(gridID_dummy) bind(c, name = 'gridInqGMEni2')&
+      & result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: gridID_dummy
       end function lib_gridInqGMEni2
     end interface
@@ -5802,9 +5949,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: gridID_dummy
     interface
-      integer(c_int) function lib_gridInqGMEni3(gridID_dummy) bind(c, name =&
-      & 'gridInqGMEni3')
+      function lib_gridInqGMEni3(gridID_dummy) bind(c, name = 'gridInqGMEni3')&
+      & result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: gridID_dummy
       end function lib_gridInqGMEni3
     end interface
@@ -5829,9 +5977,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: gridID_dummy
     interface
-      integer(c_int) function lib_gridInqNumber(gridID_dummy) bind(c, name =&
-      & 'gridInqNumber')
+      function lib_gridInqNumber(gridID_dummy) bind(c, name = 'gridInqNumber')&
+      & result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: gridID_dummy
       end function lib_gridInqNumber
     end interface
@@ -5856,9 +6005,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: gridID_dummy
     interface
-      integer(c_int) function lib_gridInqPosition(gridID_dummy) bind(c, name =&
-      & 'gridInqPosition')
+      function lib_gridInqPosition(gridID_dummy) bind(c, name =&
+      & 'gridInqPosition') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: gridID_dummy
       end function lib_gridInqPosition
     end interface
@@ -5893,9 +6043,10 @@ contains
     integer :: reference_i
     logical :: reference_padding = .true.
     interface
-      integer(c_int) function lib_gridInqReference(gridID_dummy,&
-      & reference_dummy) bind(c, name = 'gridInqReference')
+      function lib_gridInqReference(gridID_dummy, reference_dummy) bind(c, name&
+      & = 'gridInqReference') result(c_result)
         import c_char, c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: gridID_dummy
         character(kind = c_char) :: reference_dummy(*)
       end function lib_gridInqReference
@@ -6221,9 +6372,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: gridID_dummy
     interface
-      integer(c_int) function lib_gridHasArea(gridID_dummy) bind(c, name =&
-      & 'gridHasArea')
+      function lib_gridHasArea(gridID_dummy) bind(c, name = 'gridHasArea')&
+      & result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: gridID_dummy
       end function lib_gridHasArea
     end interface
@@ -6248,9 +6400,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: gridID_dummy
     interface
-      integer(c_int) function lib_gridInqNvertex(gridID_dummy) bind(c, name =&
-      & 'gridInqNvertex')
+      function lib_gridInqNvertex(gridID_dummy) bind(c, name =&
+      & 'gridInqNvertex') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: gridID_dummy
       end function lib_gridInqNvertex
     end interface
@@ -6276,9 +6429,10 @@ contains
     integer(c_int), value :: gridID_dummy
     real(c_double), intent(inout) :: xbounds_vec_dummy(*)
     interface
-      integer(c_int) function lib_gridInqXbounds(gridID_dummy,&
-      & xbounds_vec_dummy) bind(c, name = 'gridInqXbounds')
+      function lib_gridInqXbounds(gridID_dummy, xbounds_vec_dummy) bind(c, name&
+      & = 'gridInqXbounds') result(c_result)
         import c_double, c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: gridID_dummy
         real(c_double), intent(inout) :: xbounds_vec_dummy(*)
       end function lib_gridInqXbounds
@@ -6305,9 +6459,10 @@ contains
     integer(c_int), value :: gridID_dummy
     real(c_double), intent(inout) :: ybounds_vec_dummy(*)
     interface
-      integer(c_int) function lib_gridInqYbounds(gridID_dummy,&
-      & ybounds_vec_dummy) bind(c, name = 'gridInqYbounds')
+      function lib_gridInqYbounds(gridID_dummy, ybounds_vec_dummy) bind(c, name&
+      & = 'gridInqYbounds') result(c_result)
         import c_double, c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: gridID_dummy
         real(c_double), intent(inout) :: ybounds_vec_dummy(*)
       end function lib_gridInqYbounds
@@ -6377,9 +6532,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: gridID_dummy
     interface
-      integer(c_int) function lib_gridInqComplexPacking(gridID_dummy) bind(c,&
-      & name = 'gridInqComplexPacking')
+      function lib_gridInqComplexPacking(gridID_dummy) bind(c, name =&
+      & 'gridInqComplexPacking') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: gridID_dummy
       end function lib_gridInqComplexPacking
     end interface
@@ -6426,9 +6582,10 @@ contains
     integer(c_int), value :: zaxistype_dummy
     integer(c_int), value :: size_dummy
     interface
-      integer(c_int) function lib_zaxisCreate(zaxistype_dummy, size_dummy)&
-      & bind(c, name = 'zaxisCreate')
+      function lib_zaxisCreate(zaxistype_dummy, size_dummy) bind(c, name =&
+      & 'zaxisCreate') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: zaxistype_dummy
         integer(c_int), value :: size_dummy
       end function lib_zaxisCreate
@@ -6451,9 +6608,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: zaxisID_dummy
     interface
-      integer(c_int) function lib_zaxisInqType(zaxisID_dummy) bind(c, name =&
-      & 'zaxisInqType')
+      function lib_zaxisInqType(zaxisID_dummy) bind(c, name = 'zaxisInqType')&
+      & result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: zaxisID_dummy
       end function lib_zaxisInqType
     end interface
@@ -6464,9 +6622,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: zaxisID_dummy
     interface
-      integer(c_int) function lib_zaxisInqSize(zaxisID_dummy) bind(c, name =&
-      & 'zaxisInqSize')
+      function lib_zaxisInqSize(zaxisID_dummy) bind(c, name = 'zaxisInqSize')&
+      & result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: zaxisID_dummy
       end function lib_zaxisInqSize
     end interface
@@ -6477,9 +6636,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: zaxisID_dummy
     interface
-      integer(c_int) function lib_zaxisDuplicate(zaxisID_dummy) bind(c, name =&
-      & 'zaxisDuplicate')
+      function lib_zaxisDuplicate(zaxisID_dummy) bind(c, name =&
+      & 'zaxisDuplicate') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: zaxisID_dummy
       end function lib_zaxisDuplicate
     end interface
@@ -6563,9 +6723,10 @@ contains
     integer(c_int), value :: zaxisID_dummy
     integer(c_int), value :: levelID_dummy
     interface
-      real(c_double) function lib_zaxisInqLevel(zaxisID_dummy, levelID_dummy)&
-      & bind(c, name = 'zaxisInqLevel')
+      function lib_zaxisInqLevel(zaxisID_dummy, levelID_dummy) bind(c, name =&
+      & 'zaxisInqLevel') result(c_result)
         import c_double, c_int
+        real(c_double) :: c_result
         integer(c_int), value :: zaxisID_dummy
         integer(c_int), value :: levelID_dummy
       end function lib_zaxisInqLevel
@@ -6591,9 +6752,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: gridID_dummy
     interface
-      integer(c_int) function lib_zaxisInqNlevRef(gridID_dummy) bind(c, name =&
-      & 'zaxisInqNlevRef')
+      function lib_zaxisInqNlevRef(gridID_dummy) bind(c, name =&
+      & 'zaxisInqNlevRef') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: gridID_dummy
       end function lib_zaxisInqNlevRef
     end interface
@@ -6618,9 +6780,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: gridID_dummy
     interface
-      integer(c_int) function lib_zaxisInqNumber(gridID_dummy) bind(c, name =&
-      & 'zaxisInqNumber')
+      function lib_zaxisInqNumber(gridID_dummy) bind(c, name =&
+      & 'zaxisInqNumber') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: gridID_dummy
       end function lib_zaxisInqNumber
     end interface
@@ -6870,9 +7033,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: zaxisID_dummy
     interface
-      integer(c_int) function lib_zaxisInqPrec(zaxisID_dummy) bind(c, name =&
-      & 'zaxisInqPrec')
+      function lib_zaxisInqPrec(zaxisID_dummy) bind(c, name = 'zaxisInqPrec')&
+      & result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: zaxisID_dummy
       end function lib_zaxisInqPrec
     end interface
@@ -6897,9 +7061,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: zaxisID_dummy
     interface
-      integer(c_int) function lib_zaxisInqPositive(zaxisID_dummy) bind(c, name&
-      & = 'zaxisInqPositive')
+      function lib_zaxisInqPositive(zaxisID_dummy) bind(c, name =&
+      & 'zaxisInqPositive') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: zaxisID_dummy
       end function lib_zaxisInqPositive
     end interface
@@ -6924,9 +7089,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: zaxisID_dummy
     interface
-      integer(c_int) function lib_zaxisInqLtype(zaxisID_dummy) bind(c, name =&
-      & 'zaxisInqLtype')
+      function lib_zaxisInqLtype(zaxisID_dummy) bind(c, name = 'zaxisInqLtype')&
+      & result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: zaxisID_dummy
       end function lib_zaxisInqLtype
     end interface
@@ -6937,9 +7103,10 @@ contains
     type(c_ptr) :: result
     integer(c_int), value :: zaxisID_dummy
     interface
-      type(c_ptr) function lib_zaxisInqLevelsPtr(zaxisID_dummy) bind(c, name =&
-      & 'zaxisInqLevelsPtr')
+      function lib_zaxisInqLevelsPtr(zaxisID_dummy) bind(c, name =&
+      & 'zaxisInqLevelsPtr') result(c_result)
         import c_int, c_ptr
+        type(c_ptr) :: c_result
         integer(c_int), value :: zaxisID_dummy
       end function lib_zaxisInqLevelsPtr
     end interface
@@ -6980,9 +7147,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: zaxisID_dummy
     interface
-      integer(c_int) function lib_zaxisInqVctSize(zaxisID_dummy) bind(c, name =&
-      & 'zaxisInqVctSize')
+      function lib_zaxisInqVctSize(zaxisID_dummy) bind(c, name =&
+      & 'zaxisInqVctSize') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: zaxisID_dummy
       end function lib_zaxisInqVctSize
     end interface
@@ -6993,9 +7161,10 @@ contains
     type(c_ptr) :: result
     integer(c_int), value :: zaxisID_dummy
     interface
-      type(c_ptr) function lib_zaxisInqVctPtr(zaxisID_dummy) bind(c, name =&
-      & 'zaxisInqVctPtr')
+      function lib_zaxisInqVctPtr(zaxisID_dummy) bind(c, name =&
+      & 'zaxisInqVctPtr') result(c_result)
         import c_int, c_ptr
+        type(c_ptr) :: c_result
         integer(c_int), value :: zaxisID_dummy
       end function lib_zaxisInqVctPtr
     end interface
@@ -7021,9 +7190,10 @@ contains
     integer(c_int), value :: zaxisID_dummy
     real(c_double), intent(inout) :: lbounds_vec_dummy(*)
     interface
-      integer(c_int) function lib_zaxisInqLbounds(zaxisID_dummy,&
-      & lbounds_vec_dummy) bind(c, name = 'zaxisInqLbounds')
+      function lib_zaxisInqLbounds(zaxisID_dummy, lbounds_vec_dummy) bind(c,&
+      & name = 'zaxisInqLbounds') result(c_result)
         import c_double, c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: zaxisID_dummy
         real(c_double), intent(inout) :: lbounds_vec_dummy(*)
       end function lib_zaxisInqLbounds
@@ -7036,9 +7206,10 @@ contains
     integer(c_int), value :: zaxisID_dummy
     integer(c_int), value :: index_dummy
     interface
-      real(c_double) function lib_zaxisInqLbound(zaxisID_dummy, index_dummy)&
-      & bind(c, name = 'zaxisInqLbound')
+      function lib_zaxisInqLbound(zaxisID_dummy, index_dummy) bind(c, name =&
+      & 'zaxisInqLbound') result(c_result)
         import c_double, c_int
+        real(c_double) :: c_result
         integer(c_int), value :: zaxisID_dummy
         integer(c_int), value :: index_dummy
       end function lib_zaxisInqLbound
@@ -7065,9 +7236,10 @@ contains
     integer(c_int), value :: zaxisID_dummy
     real(c_double), intent(inout) :: ubounds_vec_dummy(*)
     interface
-      integer(c_int) function lib_zaxisInqUbounds(zaxisID_dummy,&
-      & ubounds_vec_dummy) bind(c, name = 'zaxisInqUbounds')
+      function lib_zaxisInqUbounds(zaxisID_dummy, ubounds_vec_dummy) bind(c,&
+      & name = 'zaxisInqUbounds') result(c_result)
         import c_double, c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: zaxisID_dummy
         real(c_double), intent(inout) :: ubounds_vec_dummy(*)
       end function lib_zaxisInqUbounds
@@ -7080,9 +7252,10 @@ contains
     integer(c_int), value :: zaxisID_dummy
     integer(c_int), value :: index_dummy
     interface
-      real(c_double) function lib_zaxisInqUbound(zaxisID_dummy, index_dummy)&
-      & bind(c, name = 'zaxisInqUbound')
+      function lib_zaxisInqUbound(zaxisID_dummy, index_dummy) bind(c, name =&
+      & 'zaxisInqUbound') result(c_result)
         import c_double, c_int
+        real(c_double) :: c_result
         integer(c_int), value :: zaxisID_dummy
         integer(c_int), value :: index_dummy
       end function lib_zaxisInqUbound
@@ -7109,9 +7282,10 @@ contains
     integer(c_int), value :: zaxisID_dummy
     real(c_double), intent(inout) :: weights_vec_dummy(*)
     interface
-      integer(c_int) function lib_zaxisInqWeights(zaxisID_dummy,&
-      & weights_vec_dummy) bind(c, name = 'zaxisInqWeights')
+      function lib_zaxisInqWeights(zaxisID_dummy, weights_vec_dummy) bind(c,&
+      & name = 'zaxisInqWeights') result(c_result)
         import c_double, c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: zaxisID_dummy
         real(c_double), intent(inout) :: weights_vec_dummy(*)
       end function lib_zaxisInqWeights
@@ -7137,9 +7311,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: timetype_dummy
     interface
-      integer(c_int) function lib_taxisCreate(timetype_dummy) bind(c, name =&
-      & 'taxisCreate')
+      function lib_taxisCreate(timetype_dummy) bind(c, name = 'taxisCreate')&
+      & result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: timetype_dummy
       end function lib_taxisCreate
     end interface
@@ -7161,9 +7336,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: taxisID_dummy
     interface
-      integer(c_int) function lib_taxisDuplicate(taxisID_dummy) bind(c, name =&
-      & 'taxisDuplicate')
+      function lib_taxisDuplicate(taxisID_dummy) bind(c, name =&
+      & 'taxisDuplicate') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: taxisID_dummy
       end function lib_taxisDuplicate
     end interface
@@ -7230,9 +7406,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: taxisID_dummy
     interface
-      integer(c_int) function lib_taxisInqVdate(taxisID_dummy) bind(c, name =&
-      & 'taxisInqVdate')
+      function lib_taxisInqVdate(taxisID_dummy) bind(c, name = 'taxisInqVdate')&
+      & result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: taxisID_dummy
       end function lib_taxisInqVdate
     end interface
@@ -7243,9 +7420,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: taxisID_dummy
     interface
-      integer(c_int) function lib_taxisInqVtime(taxisID_dummy) bind(c, name =&
-      & 'taxisInqVtime')
+      function lib_taxisInqVtime(taxisID_dummy) bind(c, name = 'taxisInqVtime')&
+      & result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: taxisID_dummy
       end function lib_taxisInqVtime
     end interface
@@ -7284,9 +7462,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: taxisID_dummy
     interface
-      integer(c_int) function lib_taxisInqRdate(taxisID_dummy) bind(c, name =&
-      & 'taxisInqRdate')
+      function lib_taxisInqRdate(taxisID_dummy) bind(c, name = 'taxisInqRdate')&
+      & result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: taxisID_dummy
       end function lib_taxisInqRdate
     end interface
@@ -7297,9 +7476,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: taxisID_dummy
     interface
-      integer(c_int) function lib_taxisInqRtime(taxisID_dummy) bind(c, name =&
-      & 'taxisInqRtime')
+      function lib_taxisInqRtime(taxisID_dummy) bind(c, name = 'taxisInqRtime')&
+      & result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: taxisID_dummy
       end function lib_taxisInqRtime
     end interface
@@ -7338,9 +7518,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: taxisID_dummy
     interface
-      integer(c_int) function lib_taxisInqFdate(taxisID_dummy) bind(c, name =&
-      & 'taxisInqFdate')
+      function lib_taxisInqFdate(taxisID_dummy) bind(c, name = 'taxisInqFdate')&
+      & result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: taxisID_dummy
       end function lib_taxisInqFdate
     end interface
@@ -7351,9 +7532,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: taxisID_dummy
     interface
-      integer(c_int) function lib_taxisInqFtime(taxisID_dummy) bind(c, name =&
-      & 'taxisInqFtime')
+      function lib_taxisInqFtime(taxisID_dummy) bind(c, name = 'taxisInqFtime')&
+      & result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: taxisID_dummy
       end function lib_taxisInqFtime
     end interface
@@ -7364,9 +7546,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: taxisID_dummy
     interface
-      integer(c_int) function lib_taxisHasBounds(taxisID_dummy) bind(c, name =&
-      & 'taxisHasBounds')
+      function lib_taxisHasBounds(taxisID_dummy) bind(c, name =&
+      & 'taxisHasBounds') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: taxisID_dummy
       end function lib_taxisHasBounds
     end interface
@@ -7487,9 +7670,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: taxisID_dummy
     interface
-      integer(c_int) function lib_taxisInqCalendar(taxisID_dummy) bind(c, name&
-      & = 'taxisInqCalendar')
+      function lib_taxisInqCalendar(taxisID_dummy) bind(c, name =&
+      & 'taxisInqCalendar') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: taxisID_dummy
       end function lib_taxisInqCalendar
     end interface
@@ -7514,9 +7698,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: taxisID_dummy
     interface
-      integer(c_int) function lib_taxisInqTunit(taxisID_dummy) bind(c, name =&
-      & 'taxisInqTunit')
+      function lib_taxisInqTunit(taxisID_dummy) bind(c, name = 'taxisInqTunit')&
+      & result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: taxisID_dummy
       end function lib_taxisInqTunit
     end interface
@@ -7541,9 +7726,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: taxisID_dummy
     interface
-      integer(c_int) function lib_taxisInqForecastTunit(taxisID_dummy) bind(c,&
-      & name = 'taxisInqForecastTunit')
+      function lib_taxisInqForecastTunit(taxisID_dummy) bind(c, name =&
+      & 'taxisInqForecastTunit') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: taxisID_dummy
       end function lib_taxisInqForecastTunit
     end interface
@@ -7568,9 +7754,10 @@ contains
     real(c_double) :: result
     integer(c_int), value :: taxisID_dummy
     interface
-      real(c_double) function lib_taxisInqForecastPeriod(taxisID_dummy) bind(c,&
-      & name = 'taxisInqForecastPeriod')
+      function lib_taxisInqForecastPeriod(taxisID_dummy) bind(c, name =&
+      & 'taxisInqForecastPeriod') result(c_result)
         import c_double, c_int
+        real(c_double) :: c_result
         integer(c_int), value :: taxisID_dummy
       end function lib_taxisInqForecastPeriod
     end interface
@@ -7595,9 +7782,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: taxisID_dummy
     interface
-      integer(c_int) function lib_taxisInqType(taxisID_dummy) bind(c, name =&
-      & 'taxisInqType')
+      function lib_taxisInqType(taxisID_dummy) bind(c, name = 'taxisInqType')&
+      & result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: taxisID_dummy
       end function lib_taxisInqType
     end interface
@@ -7608,9 +7796,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: taxisID_dummy
     interface
-      integer(c_int) function lib_taxisInqNumavg(taxisID_dummy) bind(c, name =&
-      & 'taxisInqNumavg')
+      function lib_taxisInqNumavg(taxisID_dummy) bind(c, name =&
+      & 'taxisInqNumavg') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: taxisID_dummy
       end function lib_taxisInqNumavg
     end interface
@@ -7623,9 +7812,10 @@ contains
     type(c_ptr) :: ptr
     integer :: shape(1)
     interface
-      type(c_ptr) function lib_tunitNamePtr(tunitID_dummy) bind(c, name =&
-      & 'tunitNamePtr')
+      function lib_tunitNamePtr(tunitID_dummy) bind(c, name = 'tunitNamePtr')&
+      & result(c_result)
         import c_int, c_ptr
+        type(c_ptr) :: c_result
         integer(c_int), value :: tunitID_dummy
       end function lib_tunitNamePtr
     end interface
@@ -7649,9 +7839,10 @@ contains
     character(kind = c_char) :: longname_temp(len(longname_dummy) + 1)
     integer :: longname_i
     interface
-      integer(c_int) function lib_institutDef(center_dummy, subcenter_dummy,&
-      & name_dummy, longname_dummy) bind(c, name = 'institutDef')
+      function lib_institutDef(center_dummy, subcenter_dummy, name_dummy,&
+      & longname_dummy) bind(c, name = 'institutDef') result(c_result)
         import c_char, c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: center_dummy
         integer(c_int), value :: subcenter_dummy
         character(kind = c_char) :: name_dummy(*)
@@ -7682,9 +7873,10 @@ contains
     character(kind = c_char) :: longname_temp(len(longname_dummy) + 1)
     integer :: longname_i
     interface
-      integer(c_int) function lib_institutInq(center_dummy, subcenter_dummy,&
-      & name_dummy, longname_dummy) bind(c, name = 'institutInq')
+      function lib_institutInq(center_dummy, subcenter_dummy, name_dummy,&
+      & longname_dummy) bind(c, name = 'institutInq') result(c_result)
         import c_char, c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: center_dummy
         integer(c_int), value :: subcenter_dummy
         character(kind = c_char) :: name_dummy(*)
@@ -7706,9 +7898,10 @@ contains
   function institutInqNumber() result(result)
     integer(c_int) :: result
     interface
-      integer(c_int) function lib_institutInqNumber() bind(c, name =&
-      & 'institutInqNumber')
+      function lib_institutInqNumber() bind(c, name = 'institutInqNumber')&
+      & result(c_result)
         import c_int
+        integer(c_int) :: c_result
       end function lib_institutInqNumber
     end interface
     result = lib_institutInqNumber()
@@ -7718,9 +7911,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: instID_dummy
     interface
-      integer(c_int) function lib_institutInqCenter(instID_dummy) bind(c, name&
-      & = 'institutInqCenter')
+      function lib_institutInqCenter(instID_dummy) bind(c, name =&
+      & 'institutInqCenter') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: instID_dummy
       end function lib_institutInqCenter
     end interface
@@ -7731,9 +7925,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: instID_dummy
     interface
-      integer(c_int) function lib_institutInqSubcenter(instID_dummy) bind(c,&
-      & name = 'institutInqSubcenter')
+      function lib_institutInqSubcenter(instID_dummy) bind(c, name =&
+      & 'institutInqSubcenter') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: instID_dummy
       end function lib_institutInqSubcenter
     end interface
@@ -7746,9 +7941,10 @@ contains
     type(c_ptr) :: ptr
     integer :: shape(1)
     interface
-      type(c_ptr) function lib_institutInqNamePtr(instID_dummy) bind(c, name =&
-      & 'institutInqNamePtr')
+      function lib_institutInqNamePtr(instID_dummy) bind(c, name =&
+      & 'institutInqNamePtr') result(c_result)
         import c_int, c_ptr
+        type(c_ptr) :: c_result
         integer(c_int), value :: instID_dummy
       end function lib_institutInqNamePtr
     end interface
@@ -7766,9 +7962,10 @@ contains
     type(c_ptr) :: ptr
     integer :: shape(1)
     interface
-      type(c_ptr) function lib_institutInqLongnamePtr(instID_dummy) bind(c,&
-      & name = 'institutInqLongnamePtr')
+      function lib_institutInqLongnamePtr(instID_dummy) bind(c, name =&
+      & 'institutInqLongnamePtr') result(c_result)
         import c_int, c_ptr
+        type(c_ptr) :: c_result
         integer(c_int), value :: instID_dummy
       end function lib_institutInqLongnamePtr
     end interface
@@ -7788,9 +7985,10 @@ contains
     character(kind = c_char) :: name_temp(len(name_dummy) + 1)
     integer :: name_i
     interface
-      integer(c_int) function lib_modelDef(instID_dummy, modelgribID_dummy,&
-      & name_dummy) bind(c, name = 'modelDef')
+      function lib_modelDef(instID_dummy, modelgribID_dummy, name_dummy)&
+      & bind(c, name = 'modelDef') result(c_result)
         import c_char, c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: instID_dummy
         integer(c_int), value :: modelgribID_dummy
         character(kind = c_char) :: name_dummy(*)
@@ -7812,9 +8010,10 @@ contains
     integer :: name_i
     logical :: name_padding = .true.
     interface
-      integer(c_int) function lib_modelInq(instID_dummy, modelgribID_dummy,&
-      & name_dummy) bind(c, name = 'modelInq')
+      function lib_modelInq(instID_dummy, modelgribID_dummy, name_dummy)&
+      & bind(c, name = 'modelInq') result(c_result)
         import c_char, c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: instID_dummy
         integer(c_int), value :: modelgribID_dummy
         character(kind = c_char) :: name_dummy(*)
@@ -7844,9 +8043,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: modelID_dummy
     interface
-      integer(c_int) function lib_modelInqInstitut(modelID_dummy) bind(c, name&
-      & = 'modelInqInstitut')
+      function lib_modelInqInstitut(modelID_dummy) bind(c, name =&
+      & 'modelInqInstitut') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: modelID_dummy
       end function lib_modelInqInstitut
     end interface
@@ -7857,9 +8057,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: modelID_dummy
     interface
-      integer(c_int) function lib_modelInqGribID(modelID_dummy) bind(c, name =&
-      & 'modelInqGribID')
+      function lib_modelInqGribID(modelID_dummy) bind(c, name =&
+      & 'modelInqGribID') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: modelID_dummy
       end function lib_modelInqGribID
     end interface
@@ -7872,9 +8073,10 @@ contains
     type(c_ptr) :: ptr
     integer :: shape(1)
     interface
-      type(c_ptr) function lib_modelInqNamePtr(modelID_dummy) bind(c, name =&
-      & 'modelInqNamePtr')
+      function lib_modelInqNamePtr(modelID_dummy) bind(c, name =&
+      & 'modelInqNamePtr') result(c_result)
         import c_int, c_ptr
+        type(c_ptr) :: c_result
         integer(c_int), value :: modelID_dummy
       end function lib_modelInqNamePtr
     end interface
@@ -7932,9 +8134,10 @@ contains
     character(kind = c_char) :: tablefile_temp(len(tablefile_dummy) + 1)
     integer :: tablefile_i
     interface
-      integer(c_int) function lib_tableRead(tablefile_dummy) bind(c, name =&
-      & 'tableRead')
+      function lib_tableRead(tablefile_dummy) bind(c, name = 'tableRead')&
+      & result(c_result)
         import c_char, c_int
+        integer(c_int) :: c_result
         character(kind = c_char) :: tablefile_dummy(*)
       end function lib_tableRead
     end interface
@@ -7954,9 +8157,10 @@ contains
     character(kind = c_char) :: tablename_temp(len(tablename_dummy) + 1)
     integer :: tablename_i
     interface
-      integer(c_int) function lib_tableDef(modelID_dummy, tablenum_dummy,&
-      & tablename_dummy) bind(c, name = 'tableDef')
+      function lib_tableDef(modelID_dummy, tablenum_dummy, tablename_dummy)&
+      & bind(c, name = 'tableDef') result(c_result)
         import c_char, c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: modelID_dummy
         integer(c_int), value :: tablenum_dummy
         character(kind = c_char) :: tablename_dummy(*)
@@ -7975,9 +8179,10 @@ contains
     type(c_ptr) :: ptr
     integer :: shape(1)
     interface
-      type(c_ptr) function lib_tableInqNamePtr(tableID_dummy) bind(c, name =&
-      & 'tableInqNamePtr')
+      function lib_tableInqNamePtr(tableID_dummy) bind(c, name =&
+      & 'tableInqNamePtr') result(c_result)
         import c_int, c_ptr
+        type(c_ptr) :: c_result
         integer(c_int), value :: tableID_dummy
       end function lib_tableInqNamePtr
     end interface
@@ -8038,9 +8243,10 @@ contains
     character(kind = c_char) :: tablename_temp(len(tablename_dummy) + 1)
     integer :: tablename_i
     interface
-      integer(c_int) function lib_tableInq(modelID_dummy, tablenum_dummy,&
-      & tablename_dummy) bind(c, name = 'tableInq')
+      function lib_tableInq(modelID_dummy, tablenum_dummy, tablename_dummy)&
+      & bind(c, name = 'tableInq') result(c_result)
         import c_char, c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: modelID_dummy
         integer(c_int), value :: tablenum_dummy
         character(kind = c_char) :: tablename_dummy(*)
@@ -8056,9 +8262,10 @@ contains
   function tableInqNumber() result(result)
     integer(c_int) :: result
     interface
-      integer(c_int) function lib_tableInqNumber() bind(c, name =&
-      & 'tableInqNumber')
+      function lib_tableInqNumber() bind(c, name = 'tableInqNumber')&
+      & result(c_result)
         import c_int
+        integer(c_int) :: c_result
       end function lib_tableInqNumber
     end interface
     result = lib_tableInqNumber()
@@ -8068,9 +8275,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: tableID_dummy
     interface
-      integer(c_int) function lib_tableInqNum(tableID_dummy) bind(c, name =&
-      & 'tableInqNum')
+      function lib_tableInqNum(tableID_dummy) bind(c, name = 'tableInqNum')&
+      & result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: tableID_dummy
       end function lib_tableInqNum
     end interface
@@ -8081,9 +8289,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: tableID_dummy
     interface
-      integer(c_int) function lib_tableInqModel(tableID_dummy) bind(c, name =&
-      & 'tableInqModel')
+      function lib_tableInqModel(tableID_dummy) bind(c, name = 'tableInqModel')&
+      & result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: tableID_dummy
       end function lib_tableInqModel
     end interface
@@ -8184,9 +8393,10 @@ contains
     integer(c_int), target :: code_temp
     type(c_ptr) :: code_ptr
     interface
-      integer(c_int) function lib_tableInqParCode(tableID_dummy, name_dummy,&
-      & code) bind(c, name = 'tableInqParCode')
+      function lib_tableInqParCode(tableID_dummy, name_dummy, code) bind(c,&
+      & name = 'tableInqParCode') result(c_result)
         import c_char, c_int, c_ptr
+        integer(c_int) :: c_result
         integer(c_int), value :: tableID_dummy
         character(kind = c_char) :: name_dummy(*)
         type(c_ptr), value :: code
@@ -8225,9 +8435,10 @@ contains
     integer :: name_i
     logical :: name_padding = .true.
     interface
-      integer(c_int) function lib_tableInqParName(tableID_dummy, code_dummy,&
-      & name_dummy) bind(c, name = 'tableInqParName')
+      function lib_tableInqParName(tableID_dummy, code_dummy, name_dummy)&
+      & bind(c, name = 'tableInqParName') result(c_result)
         import c_char, c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: tableID_dummy
         integer(c_int), value :: code_dummy
         character(kind = c_char) :: name_dummy(*)
@@ -8263,9 +8474,10 @@ contains
     integer :: longname_i
     logical :: longname_padding = .true.
     interface
-      integer(c_int) function lib_tableInqParLongname(tableID_dummy,&
-      & code_dummy, longname_dummy) bind(c, name = 'tableInqParLongname')
+      function lib_tableInqParLongname(tableID_dummy, code_dummy,&
+      & longname_dummy) bind(c, name = 'tableInqParLongname') result(c_result)
         import c_char, c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: tableID_dummy
         integer(c_int), value :: code_dummy
         character(kind = c_char) :: longname_dummy(*)
@@ -8302,9 +8514,10 @@ contains
     integer :: units_i
     logical :: units_padding = .true.
     interface
-      integer(c_int) function lib_tableInqParUnits(tableID_dummy, code_dummy,&
-      & units_dummy) bind(c, name = 'tableInqParUnits')
+      function lib_tableInqParUnits(tableID_dummy, code_dummy, units_dummy)&
+      & bind(c, name = 'tableInqParUnits') result(c_result)
         import c_char, c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: tableID_dummy
         integer(c_int), value :: code_dummy
         character(kind = c_char) :: units_dummy(*)
@@ -8337,9 +8550,10 @@ contains
     type(c_ptr) :: ptr
     integer :: shape(1)
     interface
-      type(c_ptr) function lib_tableInqParNamePtr(tableID_dummy, parID_dummy)&
-      & bind(c, name = 'tableInqParNamePtr')
+      function lib_tableInqParNamePtr(tableID_dummy, parID_dummy) bind(c, name&
+      & = 'tableInqParNamePtr') result(c_result)
         import c_int, c_ptr
+        type(c_ptr) :: c_result
         integer(c_int), value :: tableID_dummy
         integer(c_int), value :: parID_dummy
       end function lib_tableInqParNamePtr
@@ -8359,9 +8573,10 @@ contains
     type(c_ptr) :: ptr
     integer :: shape(1)
     interface
-      type(c_ptr) function lib_tableInqParLongnamePtr(tableID_dummy,&
-      & parID_dummy) bind(c, name = 'tableInqParLongnamePtr')
+      function lib_tableInqParLongnamePtr(tableID_dummy, parID_dummy) bind(c,&
+      & name = 'tableInqParLongnamePtr') result(c_result)
         import c_int, c_ptr
+        type(c_ptr) :: c_result
         integer(c_int), value :: tableID_dummy
         integer(c_int), value :: parID_dummy
       end function lib_tableInqParLongnamePtr
@@ -8381,9 +8596,10 @@ contains
     type(c_ptr) :: ptr
     integer :: shape(1)
     interface
-      type(c_ptr) function lib_tableInqParUnitsPtr(tableID_dummy, parID_dummy)&
-      & bind(c, name = 'tableInqParUnitsPtr')
+      function lib_tableInqParUnitsPtr(tableID_dummy, parID_dummy) bind(c, name&
+      & = 'tableInqParUnitsPtr') result(c_result)
         import c_int, c_ptr
+        type(c_ptr) :: c_result
         integer(c_int), value :: tableID_dummy
         integer(c_int), value :: parID_dummy
       end function lib_tableInqParUnitsPtr
@@ -8422,9 +8638,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: streamID_dummy
     interface
-      integer(c_int) function lib_streamInqHistorySize(streamID_dummy) bind(c,&
-      & name = 'streamInqHistorySize')
+      function lib_streamInqHistorySize(streamID_dummy) bind(c, name =&
+      & 'streamInqHistorySize') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: streamID_dummy
       end function lib_streamInqHistorySize
     end interface
@@ -8469,9 +8686,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: subtype_dummy
     interface
-      integer(c_int) function lib_subtypeCreate(subtype_dummy) bind(c, name =&
-      & 'subtypeCreate')
+      function lib_subtypeCreate(subtype_dummy) bind(c, name = 'subtypeCreate')&
+      & result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: subtype_dummy
       end function lib_subtypeCreate
     end interface
@@ -8495,9 +8713,10 @@ contains
     integer(c_int), value :: subtypeID1_dummy
     integer(c_int), value :: subtypeID2_dummy
     interface
-      integer(c_int) function lib_subtypeCompare(subtypeID1_dummy,&
-      & subtypeID2_dummy) bind(c, name = 'subtypeCompare')
+      function lib_subtypeCompare(subtypeID1_dummy, subtypeID2_dummy) bind(c,&
+      & name = 'subtypeCompare') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: subtypeID1_dummy
         integer(c_int), value :: subtypeID2_dummy
       end function lib_subtypeCompare
@@ -8509,9 +8728,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: subtypeID_dummy
     interface
-      integer(c_int) function lib_subtypeInqSize(subtypeID_dummy) bind(c, name&
-      & = 'subtypeInqSize')
+      function lib_subtypeInqSize(subtypeID_dummy) bind(c, name =&
+      & 'subtypeInqSize') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: subtypeID_dummy
       end function lib_subtypeInqSize
     end interface
@@ -8522,9 +8742,10 @@ contains
     integer(c_int) :: result
     integer(c_int), value :: subtypeID_dummy
     interface
-      integer(c_int) function lib_subtypeInqActiveIndex(subtypeID_dummy)&
-      & bind(c, name = 'subtypeInqActiveIndex')
+      function lib_subtypeInqActiveIndex(subtypeID_dummy) bind(c, name =&
+      & 'subtypeInqActiveIndex') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: subtypeID_dummy
       end function lib_subtypeInqActiveIndex
     end interface
@@ -8552,9 +8773,10 @@ contains
     integer(c_int), value :: tileindex_dummy
     integer(c_int), value :: attribute_dummy
     interface
-      integer(c_int) function lib_subtypeInqTile(subtypeID_dummy,&
-      & tileindex_dummy, attribute_dummy) bind(c, name = 'subtypeInqTile')
+      function lib_subtypeInqTile(subtypeID_dummy, tileindex_dummy,&
+      & attribute_dummy) bind(c, name = 'subtypeInqTile') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: subtypeID_dummy
         integer(c_int), value :: tileindex_dummy
         integer(c_int), value :: attribute_dummy
@@ -8569,9 +8791,10 @@ contains
     integer(c_int), value :: vlistID_dummy
     integer(c_int), value :: varID_dummy
     interface
-      integer(c_int) function lib_vlistInqVarSubtype(vlistID_dummy,&
-      & varID_dummy) bind(c, name = 'vlistInqVarSubtype')
+      function lib_vlistInqVarSubtype(vlistID_dummy, varID_dummy) bind(c, name&
+      & = 'vlistInqVarSubtype') result(c_result)
         import c_int
+        integer(c_int) :: c_result
         integer(c_int), value :: vlistID_dummy
         integer(c_int), value :: varID_dummy
       end function lib_vlistInqVarSubtype

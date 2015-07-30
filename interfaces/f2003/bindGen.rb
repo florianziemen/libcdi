@@ -648,10 +648,15 @@ def defineFunction(name, arguments, returnType)
 	formatLines($definitionLines, 2, "interface")
 	if returnTemplate[:isVoid]
 		formatLines($definitionLines, 3, "subroutine lib_#{name}(#{dummyArguments}) bind(c, name = '#{name}')")
-		formatLines($definitionLines, 4, "#{importStatement("", argArray)}")
+		formatLines($definitionLines, 4, importStatement("", argArray))
 	else
-		formatLines($definitionLines, 3, "#{returnData.expandTemplate(:receiveAs)} function lib_#{name}(#{dummyArguments}) bind(c, name = '#{name}')")
-		formatLines($definitionLines, 4, "#{importStatement(returnData.expandTemplate(:receiveAs), argArray)}")
+		formatLines($definitionLines, 3,
+								"function lib_#{name}(#{dummyArguments}) bind(c, name = '#{name}')" +
+								' result(c_result)')
+		formatLines($definitionLines, 4,
+								importStatement(returnData.expandTemplate(:receiveAs), argArray))
+		formatLines($definitionLines, 4,
+								returnData.expandTemplate(:receiveAs) + ' :: c_result')
 	end
 	dumpStatements(               4, argArray, :passAs)
 	formatLines($definitionLines, 3, "end #{subprogramtype} lib_#{name}")
