@@ -556,7 +556,7 @@ def defineConstant(name, value)
 	if /^(\+|-|)\d+$/.match(value)
 		formatLines($declarationLines, 1, "integer(c_int), public, parameter :: #{name} = #{value}")
 	else
-		puts("Error: value '#{value}' of constant '#{name}' is not an integer literal")
+		$stderr.puts("Error: value '#{value}' of constant '#{name}' is not an integer literal")
 	end
 end
 
@@ -587,7 +587,7 @@ def definePublicType(name, body)
 			variable = TemplateInstanciation.new(variableDeclaration, template)
 			formatLines($declarationLines, 2, "#{variable.expandTemplate(:declareAs)}")
 		else
-			puts("Error: Can't translate the declaration '#{variableDeclaration}'")
+			$stderr.puts("Error: Can't translate the declaration '#{variableDeclaration}'")
 		end
 	end
 	formatLines($declarationLines, 1, "end type t_#{name}")
@@ -619,12 +619,12 @@ def defineFunction(name, arguments, returnType)
 			if template = findTemplate(argument, $argumentTemplates)
 				argArray.push(TemplateInstanciation.new(argument, template))
 			else
-				puts("Error: type of argument '#{argument}' to function #{name}() is not supported")
+				$stderr.puts("Error: type of argument '#{argument}' to function #{name}() is not supported")
 				return
 			end
 		end
 	else
-		puts("Error: Can't translate return type '#{returnType}' of function #{name}()")
+		$stderr.puts("Error: Can't translate return type '#{returnType}' of function #{name}()")
 		return
 	end
 
@@ -765,17 +765,17 @@ def main
 	unless printUsage
 		case ARGV.length
 			when 0
-				puts("Error: no input file given")
+				$stderr.puts("Error: no input file given")
 				printUsage = true
 			when 1
-				puts("Error: no output file given")
+				$stderr.puts("Error: no output file given")
 				printUsage = true
 			when 2
 				moduleName = /(?<basename>[^.\/]+)\.[^\/]+/.match(ARGV[1])['basename']
 			when 3
 				moduleName = ARGV[2]
 			else
-				puts("Error: too many arguments")
+				$stderr.puts("Error: too many arguments")
 				printUsage = true
 		end
 	end
@@ -798,7 +798,7 @@ end
 if rubyVersionOk()
 	main()
 else
-	puts("Error: Ruby version #{RUBY_VERSION} is too old (version 1.9 is required). Skipping fortran interface generation.")
+	$stderr.puts("Error: Ruby version #{RUBY_VERSION} is too old (version 1.9 is required). Skipping fortran interface generation.")
 end
 #
 # Local Variables:
