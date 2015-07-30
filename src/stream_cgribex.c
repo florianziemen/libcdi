@@ -2,6 +2,7 @@
 #  include "config.h"
 #endif
 
+#include <limits.h>
 #include <stdio.h>
 // #include <float.h>  /* FLT_EPSILON */
 
@@ -588,7 +589,7 @@ int cgribexScanTimestep1(stream_t * streamptr)
   int fileID;
   int param = 0;
   int level1 = 0, level2 = 0, vdate = 0, vtime = 0;
-  DateTime datetime, datetime0;
+  DateTime datetime, datetime0 = { LONG_MIN, LONG_MIN };
   int tsID;
   size_t readsize;
   unsigned nrecords, recID;
@@ -713,7 +714,7 @@ int cgribexScanTimestep1(stream_t * streamptr)
 	    {
 	      if ( recID < nrecs ) break;
 	      if ( warn_time )
-		if ( memcmp(&datetime, &datetime0, sizeof(DateTime)) != 0 )
+		if ( datetimeCmp(datetime, datetime0) != 0 )
 		  {
                     gribWarning("Inconsistent verification time!", nrecs_scanned, tsID+1, paramstr, level1, level2);
 		    warn_time = FALSE;
@@ -721,7 +722,7 @@ int cgribexScanTimestep1(stream_t * streamptr)
 	    }
 	  else
 	    {
-	      if ( memcmp(&datetime, &datetime0, sizeof(DateTime)) != 0 ) break;
+	      if ( datetimeCmp(datetime, datetime0) != 0 ) break;
 
 	      if ( recID < nrecs )
 		{
@@ -815,7 +816,7 @@ int cgribexScanTimestep2(stream_t * streamptr)
   int fileID;
   int param = 0;
   int level1 = 0, level2 = 0, vdate = 0, vtime = 0;
-  DateTime datetime, datetime0;
+  DateTime datetime, datetime0 = { LONG_MIN, LONG_MIN };
   int tsID;
   int varID, gridID;
   size_t readsize;
@@ -986,7 +987,7 @@ int cgribexScanTimestep2(stream_t * streamptr)
 	{
 	  if ( streamptr->tsteps[tsID].records[recID].used )
 	    {
-	      if ( memcmp(&datetime, &datetime0, sizeof(DateTime)) != 0 ) break;
+	      if ( datetimeCmp(datetime, datetime0) != 0 ) break;
 
               gribWarning("Parameter already exist, skipped!", nrecs_scanned, tsID+1, paramstr, level1, level2);
 	      continue;
@@ -1068,7 +1069,7 @@ int cgribexScanTimestep(stream_t * streamptr)
   int fileID;
   int param = 0;
   int level1 = 0, level2 = 0, vdate = 0, vtime = 0;
-  DateTime datetime, datetime0;
+  DateTime datetime, datetime0 = { LONG_MIN, LONG_MIN };
   int vrecID, recID;
   int warn_numavg = TRUE;
   size_t readsize;
@@ -1242,7 +1243,7 @@ int cgribexScanTimestep(stream_t * streamptr)
 		  char paramstr[32];
 		  cdiParamToString(param, paramstr, sizeof(paramstr));
 
-		  if ( memcmp(&datetime, &datetime0, sizeof(DateTime)) != 0 ) break;
+		  if ( datetimeCmp(datetime, datetime0) != 0 ) break;
 
 		  if ( CDI_Debug )
                     gribWarning("Parameter already exist, skipped!", nrecs_scanned, tsID+1, paramstr, level1, level2);

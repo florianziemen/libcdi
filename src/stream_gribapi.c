@@ -892,7 +892,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
 
       if( datetime0.date == 10101 && datetime0.time == 0 )
         {
-          if( memcmp(&datetime, &datetime0, sizeof(datetime)) || !nrecs )       //Do we really need this condition? I have included it in order not to change the number of times gribapiGetDataDateTime() etc. get called. But if those are sideeffect-free, this condition should be removed.
+          if( datetimeCmp(datetime, datetime0) || !nrecs )       //Do we really need this condition? I have included it in order not to change the number of times gribapiGetDataDateTime() etc. get called. But if those are sideeffect-free, this condition should be removed.
             {
               datetime0 = datetime;
 
@@ -1169,7 +1169,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
           if ( cdiInventoryMode == 1 ) break;
           else
 	    {
-	      if ( memcmp(&datetime, &datetime0, sizeof(DateTime)) != 0 ) break;
+	      if ( datetimeCmp(datetime, datetime0) != 0 ) break;
 
               gribWarning("Parameter already exist, skipped!", nrecs_scanned, tsID+1, varname, param, level1, level2);
 	      continue;
@@ -1407,7 +1407,7 @@ int gribapiScanTimestep(stream_t * streamptr)
 	    {
 	      if ( streamptr->tsteps[tsID].records[recID].used )
 		{
-		  if ( memcmp(&datetime, &datetime0, sizeof(DateTime)) != 0 ) break;
+		  if ( datetimeCmp(datetime, datetime0) != 0 ) break;
 
 		  if ( CDI_Debug )
                     gribWarning("Parameter already exist, skipped!", nrecs_scanned, tsID+1, varname, param, level1, level2);

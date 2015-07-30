@@ -2,6 +2,7 @@
 #  include "config.h"
 #endif
 
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -841,7 +842,7 @@ void iegScanTimestep1(stream_t *streamptr)
   int tabnum;
   int param = 0;
   int rcode = 0, rlevel = 0, vdate = 0, vtime = 0;
-  DateTime datetime, datetime0;
+  DateTime datetime0 = { LONG_MIN, LONG_MIN };
   int tsID;
   int varID;
   size_t recsize;
@@ -896,8 +897,6 @@ void iegScanTimestep1(stream_t *streamptr)
 	}
       else
 	{
-	  datetime.date = vdate;
-	  datetime.time = vtime;
 	  compVar.param = param;
           compVar.level = rlevel;
 	  for ( recID = 0; recID < nrecs; recID++ )
@@ -908,7 +907,8 @@ void iegScanTimestep1(stream_t *streamptr)
 	      if ( memcmp(&compVar0, &compVar, sizeof(IEGCOMPVAR)) == 0 ) break;
 	    }
 	  if ( recID < nrecs ) break;
-	  if ( memcmp(&datetime, &datetime0, sizeof(DateTime)) )
+	  DateTime datetime = { .date = vdate, .time = vtime};
+	  if ( datetimeCmp(datetime, datetime0) )
 	    Warning("Inconsistent verification time for param %d level %d", param, rlevel);
 	}
 

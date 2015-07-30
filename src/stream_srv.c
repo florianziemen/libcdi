@@ -261,7 +261,7 @@ void srvScanTimestep1(stream_t *streamptr)
   int rxsize = 0, rysize = 0;
   int param = 0;
   int rcode = 0, rlevel = 0, vdate = 0, vtime = 0;
-  DateTime datetime, datetime0;
+  DateTime datetime0 = { LONG_MIN, LONG_MIN };
   int tsID;
   int varID;
   off_t recpos;
@@ -313,8 +313,6 @@ void srvScanTimestep1(stream_t *streamptr)
 	}
       else
 	{
-	  datetime.date = vdate;
-	  datetime.time = vtime;
 	  compVar.param = param;
           compVar.level = rlevel;
 	  for ( recID = 0; recID < nrecs; recID++ )
@@ -325,7 +323,8 @@ void srvScanTimestep1(stream_t *streamptr)
 	      if ( memcmp(&compVar0, &compVar, sizeof(SRVCOMPVAR)) == 0 ) break;
 	    }
 	  if ( recID < nrecs ) break;
-	  if ( memcmp(&datetime, &datetime0, sizeof(DateTime)) )
+	  DateTime datetime = { .date = vdate, .time = vtime };
+	  if ( datetimeCmp(datetime, datetime0) )
 	    Warning("Inconsistent verification time for code %d level %d", rcode, rlevel);
 	}
 
