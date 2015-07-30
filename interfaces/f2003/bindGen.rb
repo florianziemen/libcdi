@@ -712,10 +712,15 @@ def fortranLine(file, line)
 		# replace tabs with spaces first
 		spacesPerTab = 2
 		mline = line.gsub("\t", ' '*spacesPerTab)
+		charsPerLine=79
 		indentation = /^ */.match(mline)[0]
-		while mline.length > 131
-			file.puts(mline[0...131] + "&")
-			mline = indentation + "&" + mline[131...mline.length]
+		if not /^ *!/.match(mline)
+			while mline.length > charsPerLine
+				# last position of space preceding line break
+				tspos = mline[0..charsPerLine].rindex(' ') or charsPerLine
+				file.puts(mline[0...tspos] + "&")
+				mline = indentation + "&" + mline[tspos...mline.length]
+			end
 		end
 		file.puts(mline)
 	end
