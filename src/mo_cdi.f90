@@ -1938,6 +1938,20 @@ module mo_cdi
       integer(c_int) :: result
     end function gridInqPosition
 
+    subroutine gridDefUUID(gridID_dummy, uuid_dummy) bind(c, name =&
+    & 'gridDefUUID')
+      import CDI_UUID_SIZE, c_int, c_signed_char
+      integer(c_int), value :: gridID_dummy
+      integer(kind = c_signed_char), intent(in) :: uuid_dummy(CDI_UUID_SIZE)
+    end subroutine gridDefUUID
+
+    subroutine gridInqUUID(gridID_dummy, uuid_dummy) bind(c, name =&
+    & 'gridInqUUID')
+      import CDI_UUID_SIZE, c_int, c_signed_char
+      integer(c_int), value :: gridID_dummy
+      integer(kind = c_signed_char), intent(inout) :: uuid_dummy(CDI_UUID_SIZE)
+    end subroutine gridInqUUID
+
     subroutine gridDefLCC(gridID_dummy, originLon_dummy, originLat_dummy,&
     & lonParY_dummy, lat1_dummy, lat2_dummy, xinc_dummy, yinc_dummy,&
     & projflag_dummy, scanflag_dummy) bind(c, name = 'gridDefLCC')
@@ -2180,6 +2194,20 @@ module mo_cdi
       integer(c_int), value :: gridID_dummy
       integer(c_int) :: result
     end function zaxisInqNumber
+
+    subroutine zaxisDefUUID(zaxisID_dummy, uuid_dummy) bind(c, name =&
+    & 'zaxisDefUUID')
+      import CDI_UUID_SIZE, c_int, c_signed_char
+      integer(c_int), value :: zaxisID_dummy
+      integer(kind = c_signed_char), intent(in) :: uuid_dummy(CDI_UUID_SIZE)
+    end subroutine zaxisDefUUID
+
+    subroutine zaxisInqUUID(zaxisID_dummy, uuid_dummy) bind(c, name =&
+    & 'zaxisInqUUID')
+      import CDI_UUID_SIZE, c_int, c_signed_char
+      integer(c_int), value :: zaxisID_dummy
+      integer(kind = c_signed_char), intent(inout) :: uuid_dummy(CDI_UUID_SIZE)
+    end subroutine zaxisInqUUID
 
     subroutine zaxisDefPrec(zaxisID_dummy, prec_dummy) bind(c, name =&
     & 'zaxisDefPrec')
@@ -5436,34 +5464,6 @@ contains
     end do
   end function gridInqReference
 
-  subroutine gridDefUUID(gridID_dummy, uuid_dummy)
-    integer(c_int), value :: gridID_dummy
-    character(kind = c_char), intent(in) :: uuid_dummy(CDI_UUID_SIZE)
-    interface
-      subroutine lib_gridDefUUID(gridID_dummy, uuid_dummy) bind(c, name =&
-      & 'gridDefUUID')
-        import c_char, c_int
-        integer(c_int), value :: gridID_dummy
-        character(kind = c_char), intent(in) :: uuid_dummy(*)
-      end subroutine lib_gridDefUUID
-    end interface
-    call lib_gridDefUUID(gridID_dummy, uuid_dummy)
-  end subroutine gridDefUUID
-
-  subroutine gridInqUUID(gridID_dummy, uuid_dummy)
-    integer(c_int), value :: gridID_dummy
-    character(kind = c_char), intent(inout) :: uuid_dummy(CDI_UUID_SIZE)
-    interface
-      subroutine lib_gridInqUUID(gridID_dummy, uuid_dummy) bind(c, name =&
-      & 'gridInqUUID')
-        import c_char, c_int
-        integer(c_int), value :: gridID_dummy
-        character(kind = c_char), intent(inout) :: uuid_dummy(*)
-      end subroutine lib_gridInqUUID
-    end interface
-    call lib_gridInqUUID(gridID_dummy, uuid_dummy)
-  end subroutine gridInqUUID
-
   subroutine gridInqLCC(gridID_dummy, originLon, originLat, lonParY, lat1,&
   & lat2, xinc, yinc, projflag, scanflag)
     integer(c_int), value :: gridID_dummy
@@ -5659,34 +5659,6 @@ contains
       end if
     end do
   end subroutine zaxisName
-
-  subroutine zaxisDefUUID(zaxisID_dummy, uuid_dummy)
-    integer(c_int), value :: zaxisID_dummy
-    character(kind = c_char), intent(in) :: uuid_dummy(CDI_UUID_SIZE)
-    interface
-      subroutine lib_zaxisDefUUID(zaxisID_dummy, uuid_dummy) bind(c, name =&
-      & 'zaxisDefUUID')
-        import c_char, c_int
-        integer(c_int), value :: zaxisID_dummy
-        character(kind = c_char), intent(in) :: uuid_dummy(*)
-      end subroutine lib_zaxisDefUUID
-    end interface
-    call lib_zaxisDefUUID(zaxisID_dummy, uuid_dummy)
-  end subroutine zaxisDefUUID
-
-  subroutine zaxisInqUUID(zaxisID_dummy, uuid_dummy)
-    integer(c_int), value :: zaxisID_dummy
-    character(kind = c_char), intent(inout) :: uuid_dummy(CDI_UUID_SIZE)
-    interface
-      subroutine lib_zaxisInqUUID(zaxisID_dummy, uuid_dummy) bind(c, name =&
-      & 'zaxisInqUUID')
-        import c_char, c_int
-        integer(c_int), value :: zaxisID_dummy
-        character(kind = c_char), intent(inout) :: uuid_dummy(*)
-      end subroutine lib_zaxisInqUUID
-    end interface
-    call lib_zaxisInqUUID(zaxisID_dummy, uuid_dummy)
-  end subroutine zaxisInqUUID
 
   subroutine zaxisDefName(zaxisID_dummy, name_dummy)
     integer(c_int), value :: zaxisID_dummy

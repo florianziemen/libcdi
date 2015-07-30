@@ -171,11 +171,11 @@ $argumentTemplates = [
 		:regex => '^\s*unsigned\s+char\s+(?<name>\w+)\s*\[\s*(?<size>[^\]]+)\s*\]\s*$',
 		:placeholders => %w[name size],
 		:dummyName => '<name>_dummy',
-		:acceptAs => 'character(kind = c_char), intent(inout) :: <name>_dummy(<size>)',
+		:acceptAs => 'integer(kind = c_signed_char), intent(inout) :: <name>_dummy(<size>)',
 		:helperVars => "",
 		:precallStatements => "",
 		:callExpression => '<name>_dummy',
-		:passAs => 'character(kind = c_char), intent(inout) :: <name>_dummy(*)',
+		:passAs => 'integer(kind = c_signed_char), intent(inout) :: <name>_dummy(<size>)',
 		:postcallStatements => ""
 	}, {	#const <integerTypes>* <name>_vec
 		:regex => '^\s*const\s+(?<type><integerTypes>)\s*\*\s*(?<name>\w+_vec)\s*$',
@@ -201,11 +201,11 @@ $argumentTemplates = [
 		:regex => '^\s*(const\s+unsigned\s+char|unsigned\s+char\s+const)\s+(?<name>\w+)\s*\[\s*(?<size>[^\]]+)\s*\]\s*$',
 		:placeholders => %w[name size],
 		:dummyName => '<name>_dummy',
-		:acceptAs => 'character(kind = c_char), intent(in) :: <name>_dummy(<size>)',
+		:acceptAs => 'integer(kind = c_signed_char), intent(in) :: <name>_dummy(<size>)',
 		:helperVars => "",
 		:precallStatements => "",
 		:callExpression => '<name>_dummy',
-		:passAs => 'character(kind = c_char), intent(in) :: <name>_dummy(*)',
+		:passAs => 'integer(kind = c_signed_char), intent(in) :: <name>_dummy(<size>)',
 		:postcallStatements => ""
 	}, {	#const <integerTypes> <name>[<lineCount>][<lineSize>]
 		:regex => '^\s*const\s+(?<type><integerTypes>)\s+(?<name>\w+)\s*\[\s*(?<lineCount>[^\]]+)\s*\]\s*\[\s*(?<lineSize>[^\]]+)\s*\]\s*$',
@@ -627,12 +627,32 @@ def collectImportConstants(importConstantsArray, typeString)
 	end
 end
 
+def collectArrayBoundImports(importConstantsArray, argPassString)
+	if array_bounds_match =
+			/(?<=\()\s*(?:[a-zA-Z_]\w*|:|\d+)\s*(?:,\s*(?:[a-zA-Z_]\w*|:|\d+)\s*?)*(?=\s*\)$)/.match(argPassString)
+		$stderr.puts('Found array bounds: \'' +
+								 array_bounds_match.to_a.join('\', \'') + "'",
+								 'for \'' + argPassString + "'") if $debug > 3
+		array_bounds_match = array_bounds_match[0]
+		array_bounds_match.lstrip!
+		array_bounds_match = array_bounds_match.split(/\s*,\s*/)
+		array_bounds_match.select! do |bound|
+			bound != ':' && bound !~ /^\d+$/
+		end
+		$stderr.puts('Possible import symbols in array bounds: \'' +
+								 array_bounds_match.join('\', \'') + "'") if $debug > 3
+		importConstantsArray.push(*array_bounds_match)
+	end
+end
+
 #Collect the c_* and t_* constants/types from the arguments and the return type and build the corresponding `import` statement from them.
 def importStatement(returnType, argumentArray)
 	importConstants = []
 	collectImportConstants(importConstants, returnType)
 	argumentArray.each { |arg|
-		collectImportConstants(importConstants, arg.expandTemplate(:passAs))
+		argStr = arg.expandTemplate(:passAs)
+		collectArrayBoundImports(importConstants, argStr)
+		collectImportConstants(importConstants, argStr)
 	}
 	$stderr.puts('Returning \'' + importConstants.sort.uniq.join(', ') +
 							 "' for import\n") if $debug > 2
