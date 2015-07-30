@@ -245,7 +245,7 @@ AC_ARG_ENABLE([iso-c-interface],
                  [Create Fortran Interface via iso_c_bindings facility of F2003 [default=no].])],
               [enable_isoc=${enableval}],[enable_isoc=no])
 AS_IF([test x"$enable_isoc" = xyes],
-  [ACX_FC_CHECK_STRPTR_CONVERT],[enable_isoc=no])
+  [ACX_FC_CHECK_STRPTR_CONVERT(,[enable_isoc=no])],[enable_isoc=no])
 AM_CONDITIONAL([CREATE_ISOC],[test $enable_isoc = 'yes'])
 AC_SUBST([ENABLE_F2003_ISOC],[$enable_isoc])
 AM_SUBST_NOTMAKE([ENABLE_F2003_ISOC])

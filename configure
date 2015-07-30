@@ -29725,7 +29725,7 @@ $as_echo "yes" >&6; }
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
-
+enable_isoc=no
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
    ac_ext=c
