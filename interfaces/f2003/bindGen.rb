@@ -105,6 +105,8 @@
 #		:postcallStatements
 #	end subroutine fname
 
+$debug = 0
+
 ####################################################################################################
 # Template definitions #############################################################################
 ####################################################################################################
@@ -213,7 +215,7 @@ $argumentTemplates = [
 		:helperVars => "",
 		:precallStatements => "",
 		:callExpression => '<name>_dummy',
-		:passAs => 'integer(c_<type>), intent(in) :: <name>_dummy(*)',
+		:passAs => 'integer(c_<type>), intent(in) :: <name>_dummy(<lineSize>, <lineCount>)',
 		:postcallStatements => ""
 	},
 	#Pointer arguments. These match both pointers and arrays, so they must appear after the more special array templates.
@@ -492,6 +494,7 @@ $verbatimDefinitions = "
 
 $declarationLines = []
 $definitionLines = []
+$interfaceLines = []
 $opaqueTypes = []
 $publicTypes = []
 
@@ -508,12 +511,12 @@ end
 
 #This substitutes the placeholders <opaqueTypes> and <publicTypes> in the regexString prior to constructing a Regexp out of it.
 def matchTemplate(regexString, matchString)
-	opaqueTypesString = "(#{ $opaqueTypes.collect{ |type| type }.join('|') })"
+	opaqueTypesString = '(' + $opaqueTypes.collect{ |type| type	}.join('|') + ')'
 	regexString = regexString.gsub("<opaqueTypes>", opaqueTypesString)
-	publicTypesString = "(#{ $publicTypes.collect{ |type| type }.join('|') })"
-	regexString = regexString.gsub("<publicTypes>", publicTypesString)
-	regexString = regexString.gsub("<integerTypes>", '(short|int|long|size_t|intmax_t|int_(least|fast)(8|16|32|64)_t)')
-	regexString = regexString.gsub("<floatTypes>",  '(float|double)')
+	publicTypesString = '(' + $publicTypes.collect{ |type| type }.join('|') + ')'
+	regexString = regexString.gsub('<publicTypes>', publicTypesString)
+	regexString = regexString.gsub('<integerTypes>', '(short|int|long|size_t|intmax_t|int_(least|fast)(8|16|32|64)_t)')
+	regexString = regexString.gsub('<floatTypes>',  '(float|double)')
 	return Regexp.new(regexString).match(matchString)
 end
 
@@ -535,20 +538,43 @@ class TemplateInstanciation
 		}
 		return result
 	end
+	def nonEmptyKey?(templateKey)
+		result = @template[templateKey] != ''
+		return result
+	end
+	attr_reader :template
 end
 
 def formatLines(lineArray, indentation, string)
+	$stderr.puts("Formatting '" + string + "'") if $debug > 3
 	if string == "" && indentation == 0
 		lineArray.push("")	#split() does not return anything if the string is empty, killing our empty lines
 	end
 	string.split("\n").each { |line|
 		lineArray.push("\t"*indentation + line)
 	}
+	tail = ''
+	if lineArray.length > 1
+		tail = lineArray[-2..-1].join("\n")
+	else
+		tail = lineArray[-1]
+	end
+	$stderr.puts("Tail '" + tail + "'") if $debug > 3
 end
 
-def dumpStatements(indentation, argumentArray, templateKey)
+def haveTemplateKey(templates, templateKey)
+	result = false
+	templates.count{ |template|
+		result ||= template.nonEmptyKey?(templateKey)
+		break if result
+	}
+	return result
+end
+
+
+def dumpStatements(indentation, argumentArray, templateKey, outputArray)
 	argumentArray.each{ |argument|
-		formatLines($definitionLines, indentation, argument.expandTemplate(templateKey))
+		formatLines(outputArray, indentation, argument.expandTemplate(templateKey))
 	}
 end
 
@@ -595,6 +621,7 @@ def definePublicType(name, body)
 end
 
 def collectImportConstants(importConstantsArray, typeString)
+	$stderr.puts('Considering \'' + typeString + "' for import\n") if $debug > 2
 	if importConstant = typeString[/\b[ct]_\w+\b/]
 		importConstantsArray.push(importConstant)
 	end
@@ -607,7 +634,9 @@ def importStatement(returnType, argumentArray)
 	argumentArray.each { |arg|
 		collectImportConstants(importConstants, arg.expandTemplate(:passAs))
 	}
-	return (importConstants.length != 0) ? "import #{importConstants.sort.uniq.join(", ")}" : ""
+	$stderr.puts('Returning \'' + importConstants.sort.uniq.join(', ') +
+							 "' for import\n") if $debug > 2
+	return (importConstants.length != 0) ? ('import ' + importConstants.sort.uniq.join(', ')) : ''
 end
 
 def defineFunction(name, arguments, returnType)
@@ -628,58 +657,110 @@ def defineFunction(name, arguments, returnType)
 		return
 	end
 
-	#Generate the wrapper function.
+	needArgPrologue = haveTemplateKey(argArray, :precallStatements)
+	needRetValPrologue = !returnTemplate[:isVoid] &&
+		returnData.nonEmptyKey?(:precallStatements)
+	needArgEpilogue = haveTemplateKey(argArray, :postcallStatements)
+	needRetValEpilogue = !returnTemplate[:isVoid] &&
+		returnData.nonEmptyKey?(:postcallStatements)
+	needRetValConversion = !returnTemplate[:isVoid] &&
+		returnTemplate[:returnAs] != returnTemplate[:receiveAs]
+	needArgConversion = false
+	argArray.each do |arg|
+		needArgConversion = (arg.template[:passAs] != arg.template[:acceptAs])
+		break if needArgConversion
+	end
+
+	needWrapper = needArgPrologue || needRetValPrologue ||
+		needArgEpilogue || needRetValEpilogue ||
+		needRetValConversion || needArgConversion
+	baseIndent = 0
+	formatLines($declarationLines, 1, 'public :: ' + name)
+	$stderr.puts(name + "\n" +
+							 [ "\t"+'needArgPrologue => ' + needArgPrologue.to_s,
+								 "\t"+'needRetValPrologue => ' + needRetValPrologue.to_s,
+								 "\t"+'needArgEpilogue => ' + needArgEpilogue.to_s,
+								 "\t"+'needRetValEpilogue => ' + needRetValEpilogue.to_s,
+								 "\t"+'needRetValConversion => ' + needRetValConversion.to_s,
+								 "\t"+'needArgConversion => ' + needArgConversion.to_s,
+								 "\t"+'needWrapper => ' +
+		needWrapper.to_s].join("\n")) if $debug > 1
+	subprogramtype = returnTemplate[:isVoid] ? 'subroutine' : 'function'
 	dummyArguments = argArray.collect{ |arg|
 		arg.expandTemplate(:dummyName)
 	}.join(", ")
-	subprogramtype = returnTemplate[:isVoid] ? 'subroutine' : 'function'
-	line = "#{subprogramtype} #{name}(#{dummyArguments})" +
-		(returnTemplate[:isVoid] ? '' : ' result(result)')
-	formatLines($definitionLines, 1, line)
-	if !returnTemplate[:isVoid]
-		formatLines($definitionLines, 2,
-								returnData.expandTemplate(:returnAs) + ' :: result')
-	end
-	dumpStatements(               2, argArray, :acceptAs)
-	dumpStatements(               2, argArray, :helperVars)
-	if !returnTemplate[:isVoid]
-		formatLines($definitionLines, 2, returnData.expandTemplate(:helperVars))
-	end
-	formatLines($definitionLines, 2, 'interface')
-	line=subprogramtype + ' lib_' + name + '(' + dummyArguments + ') ' +
-		'bind(c, name = \'' + name + '\')' +
-		(returnTemplate[:isVoid] ? '' : ' result(c_result)')
-	formatLines($definitionLines, 3, line)
-	formatLines($definitionLines, 4,
-							importStatement(returnTemplate[:isVoid] ? '' :
-															returnData.expandTemplate(:receiveAs), argArray))
-	if !returnTemplate[:isVoid]
+	if needWrapper
+		#Generate the wrapper function.
+		line = subprogramtype + ' ' + name + '(' + dummyArguments + ')' +
+			(returnTemplate[:isVoid] ? '' : ' result(result)')
+		formatLines($definitionLines, 1, line)
+		if !returnTemplate[:isVoid]
+			formatLines($definitionLines, 2,
+									returnData.expandTemplate(:returnAs) + ' :: result')
+		end
+		dumpStatements(               2, argArray, :acceptAs, $definitionLines)
+		dumpStatements(               2, argArray, :helperVars, $definitionLines)
+		if !returnTemplate[:isVoid]
+			formatLines($definitionLines, 2, returnData.expandTemplate(:helperVars))
+		end
+		formatLines($definitionLines, 2, 'interface')
+		line=subprogramtype + ' lib_' + name + '(' + dummyArguments + ') ' +
+			'bind(c, name = \'' + name + '\')' +
+			(returnTemplate[:isVoid] ? '' : ' result(c_result)')
+		formatLines($definitionLines, 3, line)
 		formatLines($definitionLines, 4,
-								returnData.expandTemplate(:receiveAs) + ' :: c_result')
-	end
-	dumpStatements(               4, argArray, :passAs)
-	formatLines($definitionLines, 3, 'end ' + subprogramtype + ' lib_' + name)
-	formatLines($definitionLines, 2, 'end interface')
-	dumpStatements(               2, argArray, :precallStatements)
-	if !returnTemplate[:isVoid]
+								importStatement(returnTemplate[:isVoid] ? '' :
+																returnData.expandTemplate(:receiveAs), argArray))
+		if !returnTemplate[:isVoid]
+			formatLines($definitionLines, 4,
+									returnData.expandTemplate(:receiveAs) + ' :: c_result')
+		end
+		dumpStatements(               4, argArray, :passAs, $definitionLines)
+		formatLines($definitionLines, 3, 'end ' + subprogramtype + ' lib_' + name)
+		formatLines($definitionLines, 2, 'end interface')
+		if needArgPrologue
+			dumpStatements(               2, argArray, :precallStatements, $definitionLines)
+		end
+		if !returnTemplate[:isVoid]
+			formatLines($definitionLines, 2,
+									returnData.expandTemplate(:precallStatements))
+		end
 		formatLines($definitionLines, 2,
-								returnData.expandTemplate(:precallStatements))
-	end
-	formatLines($definitionLines, 2,
-							(returnTemplate[:isVoid] ? 'call' :
-							 (returnData.expandTemplate(:assignVariable) + ' =')) +
-							' lib_' + name + '(' + argArray.collect{ |arg|
-								arg.expandTemplate(:callExpression)
-							}.join(', ') + ')')
-	dumpStatements(               2, argArray, :postcallStatements)
-	if !returnTemplate[:isVoid]
-		formatLines($definitionLines, 2,
-								returnData.expandTemplate(:postcallStatements))
-	end
-	formatLines($definitionLines, 1, 'end ' + subprogramtype + ' ' + name)
-	formatLines($definitionLines, 0, '')
-	formatLines($declarationLines, 1, 'public :: ' + name)
+								(returnTemplate[:isVoid] ? 'call' :
+								 (returnData.expandTemplate(:assignVariable) + ' =')) +
+								' lib_' + name + '(' + argArray.collect{ |arg|
+									arg.expandTemplate(:callExpression)
+								}.join(', ') + ')')
+		if (needArgEpilogue)
+			dumpStatements(               2, argArray, :postcallStatements, $definitionLines)
+		end
+		if needRetValEpilogue
+			formatLines($definitionLines, 2,
+									returnData.expandTemplate(:postcallStatements))
+		end
+		formatLines($definitionLines, 1, 'end ' + subprogramtype + ' ' + name)
+		formatLines($definitionLines, 0, '')
+	else
+		#Generate interface block only
+		baseIndent = 1
+		line = subprogramtype + ' ' + name + '(' + dummyArguments +
+			') bind(c, name = \'' + name + '\')' +
+			(returnTemplate[:isVoid] ? '' : ' result(result)')
+		formatLines($interfaceLines, baseIndent + 1, line)
+		line = importStatement(returnTemplate[:isVoid] ? '' :
+													 returnData.expandTemplate(:returnAs),
+													 argArray)
+		$stderr.puts('Emitting \'' + line + "'") if $debug > 2
+		formatLines($interfaceLines, baseIndent + 2, line)
 
+		dumpStatements(baseIndent + 2, argArray, :passAs, $interfaceLines)
+		if !returnTemplate[:isVoid]
+			formatLines($interfaceLines, baseIndent + 2,
+									returnData.expandTemplate(:returnAs) + ' :: result')
+		end
+		formatLines($interfaceLines, baseIndent + 1, 'end ' + subprogramtype + ' ' + name)
+		formatLines($interfaceLines, 0, '')
+	end
 end
 
 #Scan the given header and collect the interface information in the global variables.
@@ -725,7 +806,7 @@ def fortranLine(file, line)
 		if not /^ *!/.match(mline)
 			while mline.length > charsPerLine
 				# last position of space preceding line break
-				tspos = mline[0..charsPerLine].rindex(' ') or charsPerLine
+				tspos = mline[0..charsPerLine].rindex(' ') || charsPerLine
 				file.puts(mline[0...tspos] + "&")
 				mline = indentation + "&" + mline[tspos...mline.length]
 			end
@@ -750,17 +831,24 @@ def writeFortranModule(scriptPath, headerPath, modulePath, moduleName)
 	$verbatimDeclarations.each_line do |line|
 		fortranLine(file, line)
 	end
-	fortranLine(file, "")
+	fortranLine(file, '')
 	$declarationLines.each do |line|
 		fortranLine(file, line)
 	end
-	fortranLine(file, "")
-
+	fortranLine(file, '')
+	unless $interfaceLines.empty?
+		fortranLine(file, "\tinterface")
+		$interfaceLines.each do |line|
+			fortranLine(file, line)
+		end
+		fortranLine(file, "\tend interface")
+		fortranLine(file, '')
+	end
 	fortranLine(file, "contains")
 	$verbatimDefinitions.each_line do |line|
 		fortranLine(file, line)
 	end
-	fortranLine(file, "")
+	fortranLine(file, '')
 	$definitionLines.each do |line|
 		fortranLine(file, line)
 	end
