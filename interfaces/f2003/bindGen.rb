@@ -55,7 +55,7 @@
 #	:returnAs	The type of the fortran wrapper function.
 #	:helperVars	Declarations of additional variables needed to provide the desired functionality in the wrapper function.
 #	:precallStatements	Code that needs to be executed before the C function is called.
-#	:recieveAs	The type of the `bind(c)` interface function.
+#	:receiveAs	The type of the `bind(c)` interface function.
 #	:assignVariable	The expression that the result of the C function is assigned to.
 #	:postcallStatements	Code that needs to be executed after the C function returns.
 #
@@ -77,7 +77,7 @@
 #		:acceptAs...
 #		:helperVars...
 #		interface
-#			:recieveAs function lib_fname(:dummyName...) bind(c, name = 'fname')
+#			:receiveAs function lib_fname(:dummyName...) bind(c, name = 'fname')
 #				import <importConstants>
 #				:passAs...
 #			end function lib_fname
@@ -338,7 +338,7 @@ $returnTypeTemplates = [
 		:returnAs => 'integer(c_<type>)',
 		:helperVars => '',
 		:precallStatements => '',
-		:recieveAs => 'integer(c_<type>)',
+		:receiveAs => 'integer(c_<type>)',
 		:assignVariable => 'result',
 		:postcallStatements => ''
 	}, {	#<floatTypes>
@@ -348,7 +348,7 @@ $returnTypeTemplates = [
 		:returnAs => 'real(c_<type>)',
 		:helperVars => '',
 		:precallStatements => '',
-		:recieveAs => 'real(c_<type>)',
+		:receiveAs => 'real(c_<type>)',
 		:assignVariable => 'result',
 		:postcallStatements => ''
 	}, {	#char*
@@ -360,7 +360,7 @@ $returnTypeTemplates = [
 		               "integer :: shape(1)\n" +
 		               "character(kind = c_char), dimension(:), pointer :: temp",
 		:precallStatements => '',
-		:recieveAs => 'type(c_ptr)',
+		:receiveAs => 'type(c_ptr)',
 		:assignVariable => 'cString',
 		:postcallStatements => "if(c_associated(cString)) then\n" +
 		                       "\tshape(1) = int(lib_strlen(cString))\n" +
@@ -378,7 +378,7 @@ $returnTypeTemplates = [
 		:returnAs => 'character(kind = c_char), dimension(:), pointer',
 		:helperVars => "type(c_ptr) :: ptr\ninteger :: shape(1)",
 		:precallStatements => 'result => null()',
-		:recieveAs => 'type(c_ptr)',
+		:receiveAs => 'type(c_ptr)',
 		:assignVariable => 'ptr',
 		:postcallStatements => "if(c_associated(ptr)) then\n" +
 		                       "\tshape(1) = int(lib_strlen(ptr))\n" +
@@ -391,7 +391,7 @@ $returnTypeTemplates = [
 		:returnAs => 'type(c_ptr)',
 		:helperVars => '',
 		:precallStatements => '',
-		:recieveAs => 'type(c_ptr)',
+		:receiveAs => 'type(c_ptr)',
 		:assignVariable => 'result',
 		:postcallStatements => ''
 	}, {	#const double*	This returns the naked pointer because we can't know the length of the returned array within the wrapper. The user has to call c_f_pointer() himself.
@@ -401,7 +401,7 @@ $returnTypeTemplates = [
 		:returnAs => 'type(c_ptr)',
 		:helperVars => '',
 		:precallStatements => '',
-		:recieveAs => 'type(c_ptr)',
+		:receiveAs => 'type(c_ptr)',
 		:assignVariable => 'result',
 		:postcallStatements => ''
 	},
@@ -413,7 +413,7 @@ $returnTypeTemplates = [
 		:returnAs => 'type(t_<type>)',
 		:helperVars => '',
 		:precallStatements => '',
-		:recieveAs => 'type(t_<type>)',
+		:receiveAs => 'type(t_<type>)',
 		:assignVariable => 'result',
 		:postcallStatements => ''
 	}, {	#<opaqueTypes>*
@@ -423,7 +423,7 @@ $returnTypeTemplates = [
 		:returnAs => 'type(t_<type>)',
 		:helperVars => '',
 		:precallStatements => '',
-		:recieveAs => 'type(c_ptr)',
+		:receiveAs => 'type(c_ptr)',
 		:assignVariable => 'result%ptr',
 		:postcallStatements => ''
 	}
@@ -632,43 +632,47 @@ def defineFunction(name, arguments, returnType)
 	dummyArguments = argArray.collect{ |arg|
 		arg.expandTemplate(:dummyName)
 	}.join(", ")
+	subprogramtype = returnTemplate[:isVoid] ? 'subroutine' : 'function'
+	line = "#{subprogramtype} #{name}(#{dummyArguments})" +
+		(returnTemplate[:isVoid] ? '' : ' result(result)')
+	formatLines($definitionLines, 1, line)
+	if !returnTemplate[:isVoid]
+		formatLines($definitionLines, 2,
+								returnData.expandTemplate(:returnAs) + ' :: result')
+	end
+	dumpStatements(               2, argArray, :acceptAs)
+	dumpStatements(               2, argArray, :helperVars)
+	if !returnTemplate[:isVoid]
+		formatLines($definitionLines, 2, returnData.expandTemplate(:helperVars))
+	end
+	formatLines($definitionLines, 2, "interface")
 	if returnTemplate[:isVoid]
-		formatLines($definitionLines, 1, "subroutine #{name}(#{dummyArguments})")
-		dumpStatements(               2, argArray, :acceptAs)
-		dumpStatements(               2, argArray, :helperVars)
-		formatLines($definitionLines, 2, "interface")
 		formatLines($definitionLines, 3, "subroutine lib_#{name}(#{dummyArguments}) bind(c, name = '#{name}')")
 		formatLines($definitionLines, 4, "#{importStatement("", argArray)}")
-		dumpStatements(               4, argArray, :passAs)
-		formatLines($definitionLines, 3, "end subroutine lib_#{name}")
-		formatLines($definitionLines, 2, "end interface")
-		dumpStatements(               2, argArray, :precallStatements)
+	else
+		formatLines($definitionLines, 3, "#{returnData.expandTemplate(:receiveAs)} function lib_#{name}(#{dummyArguments}) bind(c, name = '#{name}')")
+		formatLines($definitionLines, 4, "#{importStatement(returnData.expandTemplate(:receiveAs), argArray)}")
+	end
+	dumpStatements(               4, argArray, :passAs)
+	formatLines($definitionLines, 3, "end #{subprogramtype} lib_#{name}")
+	formatLines($definitionLines, 2, "end interface")
+	dumpStatements(               2, argArray, :precallStatements)
+	if returnTemplate[:isVoid]
 		formatLines($definitionLines, 2, "call lib_#{name}(#{argArray.collect{ |arg|
 			arg.expandTemplate(:callExpression)
 		}.join(", ")})")
-		dumpStatements(               2, argArray, :postcallStatements)
-		formatLines($definitionLines, 1, "end subroutine #{name}")
 	else
-		formatLines($definitionLines, 1, "function #{name}(#{dummyArguments}) result(result)")
-		formatLines($definitionLines, 2, "#{returnData.expandTemplate(:returnAs)} :: result")
-		dumpStatements(               2, argArray, :acceptAs)
-		dumpStatements(               2, argArray, :helperVars)
-		formatLines($definitionLines, 2, "#{returnData.expandTemplate(:helperVars)}")
-		formatLines($definitionLines, 2, "interface")
-		formatLines($definitionLines, 3, "#{returnData.expandTemplate(:recieveAs)} function lib_#{name}(#{dummyArguments}) bind(c, name = '#{name}')")
-		formatLines($definitionLines, 4, "#{importStatement(returnData.expandTemplate(:recieveAs), argArray)}")
-		dumpStatements(               4, argArray, :passAs)
-		formatLines($definitionLines, 3, "end function lib_#{name}")
-		formatLines($definitionLines, 2, "end interface")
-		dumpStatements(               2, argArray, :precallStatements)
-		formatLines($definitionLines, 2, "#{returnData.expandTemplate(:precallStatements)}")
+		formatLines($definitionLines, 2, returnData.expandTemplate(:precallStatements))
 		formatLines($definitionLines, 2, "#{returnData.expandTemplate(:assignVariable)} = lib_#{name}(#{argArray.collect{ |arg|
 			arg.expandTemplate(:callExpression)
 		}.join(", ")})")
-		dumpStatements(               2, argArray, :postcallStatements)
-		formatLines($definitionLines, 2, "#{returnData.expandTemplate(:postcallStatements)}")
-		formatLines($definitionLines, 1, "end function #{name}")
 	end
+	dumpStatements(               2, argArray, :postcallStatements)
+	if !returnTemplate[:isVoid]
+		formatLines($definitionLines, 2,
+								returnData.expandTemplate(:postcallStatements))
+	end
+	formatLines($definitionLines, 1, "end #{subprogramtype} #{name}")
 	formatLines($definitionLines, 0, "")
 	formatLines($declarationLines, 1, "public #{name}")
 
