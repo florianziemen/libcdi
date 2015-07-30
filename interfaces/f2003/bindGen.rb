@@ -709,12 +709,15 @@ end
 #Prints the line if it does not consist only of indentation, adding continuation lines as necessary.
 def fortranLine(file, line)
 	unless /^\t+$/.match(line)	#Intentionally empty lines don't contain indentation, so we preserve totally empty lines while throwing away the ones with leading tabs.
-		indentation = /^\t*/.match(line)[0]
-		while line.length > 131
-			file.puts(line[0...131] + "&")
-			line = indentation + "&" + line[131...line.length]
+		# replace tabs with spaces first
+		spacesPerTab = 2
+		mline = line.gsub("\t", ' '*spacesPerTab)
+		indentation = /^ */.match(mline)[0]
+		while mline.length > 131
+			file.puts(mline[0...131] + "&")
+			mline = indentation + "&" + mline[131...mline.length]
 		end
-		file.puts(line)
+		file.puts(mline)
 	end
 end
 
@@ -731,7 +734,9 @@ def writeFortranModule(scriptPath, headerPath, modulePath, moduleName)
 	fortranLine(file, "\timplicit none")
 	fortranLine(file, "\tprivate")
 
-	file.puts($verbatimDeclarations)
+	$verbatimDeclarations.each_line do |line|
+		fortranLine(file, line)
+	end
 	fortranLine(file, "")
 	$declarationLines.each do |line|
 		fortranLine(file, line)
@@ -739,7 +744,9 @@ def writeFortranModule(scriptPath, headerPath, modulePath, moduleName)
 	fortranLine(file, "")
 
 	fortranLine(file, "contains")
-	file.puts($verbatimDefinitions)
+	$verbatimDefinitions.each_line do |line|
+		fortranLine(file, line)
+	end
 	fortranLine(file, "")
 	$definitionLines.each do |line|
 		fortranLine(file, line)
@@ -789,7 +796,16 @@ def main
 end
 
 if rubyVersionOk()
-       main()
+	main()
 else
-       puts("Error: Ruby version #{RUBY_VERSION} is too old (version 1.9 is required). Skipping fortran interface generation.")
+	puts("Error: Ruby version #{RUBY_VERSION} is too old (version 1.9 is required). Skipping fortran interface generation.")
 end
+#
+# Local Variables:
+# mode: ruby
+# tab-always-indent: nil
+# tab-width: 2
+# ruby-indent-tabs-mode: t
+# indent-tabs-mode: t
+# End:
+#
