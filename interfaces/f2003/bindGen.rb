@@ -283,7 +283,7 @@ $argumentTemplates = [
 		:dummyName => '<name>_dummy',
 		:acceptAs => 'character(kind = c_char, len = *), intent(in) :: <name>_dummy',
 		:helperVars => "character(kind = c_char) :: <name>_temp(len(<name>_dummy) + 1)\ninteger :: <name>_i",
-		:precallStatements => "do <name>_i = 1, len(<name>_dummy)\n<name>_temp(<name>_i) = <name>_dummy(<name>_i:<name>_i)\nend do\n<name>_temp(len(<name>_dummy) + 1) = c_null_char",
+		:precallStatements => "do <name>_i = 1, len(<name>_dummy)\n\t<name>_temp(<name>_i) = <name>_dummy(<name>_i:<name>_i)\nend do\n<name>_temp(len(<name>_dummy) + 1) = c_null_char",
 		:callExpression => '<name>_temp',
 		:passAs => 'character(kind = c_char) :: <name>_dummy(*)',
 		:postcallStatements => ''

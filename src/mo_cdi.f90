@@ -763,7 +763,7 @@ contains
       end subroutine lib_cdiDefGlobal
     end interface
     do string_i = 1, len(string_dummy)
-    string_temp(string_i) = string_dummy(string_i:string_i)
+      string_temp(string_i) = string_dummy(string_i:string_i)
     end do
     string_temp(len(string_dummy) + 1) = c_null_char
     call lib_cdiDefGlobal(string_temp, val_dummy)
@@ -1007,7 +1007,7 @@ contains
       end function lib_cdiGetFiletype
     end interface
     do path_i = 1, len(path_dummy)
-    path_temp(path_i) = path_dummy(path_i:path_i)
+      path_temp(path_i) = path_dummy(path_i:path_i)
     end do
     path_temp(len(path_dummy) + 1) = c_null_char
     byteorder_ptr = c_null_ptr
@@ -1029,7 +1029,7 @@ contains
       end function lib_streamOpenRead
     end interface
     do path_i = 1, len(path_dummy)
-    path_temp(path_i) = path_dummy(path_i:path_i)
+      path_temp(path_i) = path_dummy(path_i:path_i)
     end do
     path_temp(len(path_dummy) + 1) = c_null_char
     result = lib_streamOpenRead(path_temp)
@@ -1050,7 +1050,7 @@ contains
       end function lib_streamOpenWrite
     end interface
     do path_i = 1, len(path_dummy)
-    path_temp(path_i) = path_dummy(path_i:path_i)
+      path_temp(path_i) = path_dummy(path_i:path_i)
     end do
     path_temp(len(path_dummy) + 1) = c_null_char
     result = lib_streamOpenWrite(path_temp, filetype_dummy)
@@ -1069,7 +1069,7 @@ contains
       end function lib_streamOpenAppend
     end interface
     do path_i = 1, len(path_dummy)
-    path_temp(path_i) = path_dummy(path_i:path_i)
+      path_temp(path_i) = path_dummy(path_i:path_i)
     end do
     path_temp(len(path_dummy) + 1) = c_null_char
     result = lib_streamOpenAppend(path_temp)
@@ -1662,7 +1662,7 @@ contains
       end function lib_cdiIterator_new
     end interface
     do path_i = 1, len(path_dummy)
-    path_temp(path_i) = path_dummy(path_i:path_i)
+      path_temp(path_i) = path_dummy(path_i:path_i)
     end do
     path_temp(len(path_dummy) + 1) = c_null_char
     result%ptr = lib_cdiIterator_new(path_temp)
@@ -1719,8 +1719,8 @@ contains
       end function lib_cdiIterator_deserialize
     end interface
     do description_i = 1, len(description_dummy)
-    description_temp(description_i) =&
-    & description_dummy(description_i:description_i)
+      description_temp(description_i) =&
+      & description_dummy(description_i:description_i)
     end do
     description_temp(len(description_dummy) + 1) = c_null_char
     result%ptr = lib_cdiIterator_deserialize(description_temp)
@@ -2153,7 +2153,7 @@ contains
       end function lib_cdiGribIterator_getLong
     end interface
     do key_i = 1, len(key_dummy)
-    key_temp(key_i) = key_dummy(key_i:key_i)
+      key_temp(key_i) = key_dummy(key_i:key_i)
     end do
     key_temp(len(key_dummy) + 1) = c_null_char
     value_ptr = c_null_ptr
@@ -2181,7 +2181,7 @@ contains
       end function lib_cdiGribIterator_getDouble
     end interface
     do key_i = 1, len(key_dummy)
-    key_temp(key_i) = key_dummy(key_i:key_i)
+      key_temp(key_i) = key_dummy(key_i:key_i)
     end do
     key_temp(len(key_dummy) + 1) = c_null_char
     value_ptr = c_null_ptr
@@ -2209,7 +2209,7 @@ contains
       end function lib_cdiGribIterator_getLength
     end interface
     do key_i = 1, len(key_dummy)
-    key_temp(key_i) = key_dummy(key_i:key_i)
+      key_temp(key_i) = key_dummy(key_i:key_i)
     end do
     key_temp(len(key_dummy) + 1) = c_null_char
     value_ptr = c_null_ptr
@@ -2244,7 +2244,7 @@ contains
       end function lib_cdiGribIterator_getString
     end interface
     do key_i = 1, len(key_dummy)
-    key_temp(key_i) = key_dummy(key_i:key_i)
+      key_temp(key_i) = key_dummy(key_i:key_i)
     end do
     key_temp(len(key_dummy) + 1) = c_null_char
     do value_i = len(value_dummy), 1, -1
@@ -2290,7 +2290,7 @@ contains
       end function lib_cdiGribIterator_getSize
     end interface
     do key_i = 1, len(key_dummy)
-    key_temp(key_i) = key_dummy(key_i:key_i)
+      key_temp(key_i) = key_dummy(key_i:key_i)
     end do
     key_temp(len(key_dummy) + 1) = c_null_char
     value_ptr = c_null_ptr
@@ -2324,7 +2324,7 @@ contains
       end function lib_cdiGribIterator_getLongArray
     end interface
     do key_i = 1, len(key_dummy)
-    key_temp(key_i) = key_dummy(key_i:key_i)
+      key_temp(key_i) = key_dummy(key_i:key_i)
     end do
     key_temp(len(key_dummy) + 1) = c_null_char
     value_ptr = c_null_ptr
@@ -2362,7 +2362,7 @@ contains
       end function lib_cdiGribIterator_getDoubleArray
     end interface
     do key_i = 1, len(key_dummy)
-    key_temp(key_i) = key_dummy(key_i:key_i)
+      key_temp(key_i) = key_dummy(key_i:key_i)
     end do
     key_temp(len(key_dummy) + 1) = c_null_char
     value_ptr = c_null_ptr
@@ -2403,7 +2403,7 @@ contains
       end function lib_cdiGribIterator_inqLongValue
     end interface
     do key_i = 1, len(key_dummy)
-    key_temp(key_i) = key_dummy(key_i:key_i)
+      key_temp(key_i) = key_dummy(key_i:key_i)
     end do
     key_temp(len(key_dummy) + 1) = c_null_char
     result = lib_cdiGribIterator_inqLongValue(me_dummy%ptr, key_temp)
@@ -2429,7 +2429,7 @@ contains
       end function lib_cdiGribIterator_inqLongDefaultValue
     end interface
     do key_i = 1, len(key_dummy)
-    key_temp(key_i) = key_dummy(key_i:key_i)
+      key_temp(key_i) = key_dummy(key_i:key_i)
     end do
     key_temp(len(key_dummy) + 1) = c_null_char
     result = lib_cdiGribIterator_inqLongDefaultValue(me_dummy%ptr, key_temp,&
@@ -2451,7 +2451,7 @@ contains
       end function lib_cdiGribIterator_inqDoubleValue
     end interface
     do key_i = 1, len(key_dummy)
-    key_temp(key_i) = key_dummy(key_i:key_i)
+      key_temp(key_i) = key_dummy(key_i:key_i)
     end do
     key_temp(len(key_dummy) + 1) = c_null_char
     result = lib_cdiGribIterator_inqDoubleValue(me_dummy%ptr, key_temp)
@@ -2477,7 +2477,7 @@ contains
       end function lib_cdiGribIterator_inqDoubleDefaultValue
     end interface
     do key_i = 1, len(key_dummy)
-    key_temp(key_i) = key_dummy(key_i:key_i)
+      key_temp(key_i) = key_dummy(key_i:key_i)
     end do
     key_temp(len(key_dummy) + 1) = c_null_char
     result = lib_cdiGribIterator_inqDoubleDefaultValue(me_dummy%ptr, key_temp,&
@@ -2502,7 +2502,7 @@ contains
       end function lib_cdiGribIterator_inqStringValue
     end interface
     do key_i = 1, len(key_dummy)
-    key_temp(key_i) = key_dummy(key_i:key_i)
+      key_temp(key_i) = key_dummy(key_i:key_i)
     end do
     key_temp(len(key_dummy) + 1) = c_null_char
     cString = lib_cdiGribIterator_inqStringValue(me_dummy%ptr, key_temp)
@@ -3541,7 +3541,7 @@ contains
       end subroutine lib_vlistDefVarName
     end interface
     do name_i = 1, len(name_dummy)
-    name_temp(name_i) = name_dummy(name_i:name_i)
+      name_temp(name_i) = name_dummy(name_i:name_i)
     end do
     name_temp(len(name_dummy) + 1) = c_null_char
     call lib_vlistDefVarName(vlistID_dummy, varID_dummy, name_temp)
@@ -3626,7 +3626,7 @@ contains
       end subroutine lib_vlistDefVarStdname
     end interface
     do stdname_i = 1, len(stdname_dummy)
-    stdname_temp(stdname_i) = stdname_dummy(stdname_i:stdname_i)
+      stdname_temp(stdname_i) = stdname_dummy(stdname_i:stdname_i)
     end do
     stdname_temp(len(stdname_dummy) + 1) = c_null_char
     call lib_vlistDefVarStdname(vlistID_dummy, varID_dummy, stdname_temp)
@@ -3684,7 +3684,7 @@ contains
       end subroutine lib_vlistDefVarLongname
     end interface
     do longname_i = 1, len(longname_dummy)
-    longname_temp(longname_i) = longname_dummy(longname_i:longname_i)
+      longname_temp(longname_i) = longname_dummy(longname_i:longname_i)
     end do
     longname_temp(len(longname_dummy) + 1) = c_null_char
     call lib_vlistDefVarLongname(vlistID_dummy, varID_dummy, longname_temp)
@@ -3743,7 +3743,7 @@ contains
       end subroutine lib_vlistDefVarUnits
     end interface
     do units_i = 1, len(units_dummy)
-    units_temp(units_i) = units_dummy(units_i:units_i)
+      units_temp(units_i) = units_dummy(units_i:units_i)
     end do
     units_temp(len(units_dummy) + 1) = c_null_char
     call lib_vlistDefVarUnits(vlistID_dummy, varID_dummy, units_temp)
@@ -3832,7 +3832,7 @@ contains
       end subroutine lib_vlistDefVarExtra
     end interface
     do extra_i = 1, len(extra_dummy)
-    extra_temp(extra_i) = extra_dummy(extra_i:extra_i)
+      extra_temp(extra_i) = extra_dummy(extra_i:extra_i)
     end do
     extra_temp(len(extra_dummy) + 1) = c_null_char
     call lib_vlistDefVarExtra(vlistID_dummy, varID_dummy, extra_temp)
@@ -4310,7 +4310,7 @@ contains
       end subroutine lib_cdiDefAdditionalKey
     end interface
     do string_i = 1, len(string_dummy)
-    string_temp(string_i) = string_dummy(string_i:string_i)
+      string_temp(string_i) = string_dummy(string_i:string_i)
     end do
     string_temp(len(string_dummy) + 1) = c_null_char
     call lib_cdiDefAdditionalKey(string_temp)
@@ -4335,7 +4335,7 @@ contains
       end subroutine lib_vlistDefVarIntKey
     end interface
     do name_i = 1, len(name_dummy)
-    name_temp(name_i) = name_dummy(name_i:name_i)
+      name_temp(name_i) = name_dummy(name_i:name_i)
     end do
     name_temp(len(name_dummy) + 1) = c_null_char
     call lib_vlistDefVarIntKey(vlistID_dummy, varID_dummy, name_temp,&
@@ -4361,7 +4361,7 @@ contains
       end subroutine lib_vlistDefVarDblKey
     end interface
     do name_i = 1, len(name_dummy)
-    name_temp(name_i) = name_dummy(name_i:name_i)
+      name_temp(name_i) = name_dummy(name_i:name_i)
     end do
     name_temp(len(name_dummy) + 1) = c_null_char
     call lib_vlistDefVarDblKey(vlistID_dummy, varID_dummy, name_temp,&
@@ -4386,7 +4386,7 @@ contains
       end function lib_vlistHasVarKey
     end interface
     do name_i = 1, len(name_dummy)
-    name_temp(name_i) = name_dummy(name_i:name_i)
+      name_temp(name_i) = name_dummy(name_i:name_i)
     end do
     name_temp(len(name_dummy) + 1) = c_null_char
     result = lib_vlistHasVarKey(vlistID_dummy, varID_dummy, name_temp)
@@ -4410,7 +4410,7 @@ contains
       end function lib_vlistInqVarDblKey
     end interface
     do name_i = 1, len(name_dummy)
-    name_temp(name_i) = name_dummy(name_i:name_i)
+      name_temp(name_i) = name_dummy(name_i:name_i)
     end do
     name_temp(len(name_dummy) + 1) = c_null_char
     result = lib_vlistInqVarDblKey(vlistID_dummy, varID_dummy, name_temp)
@@ -4434,7 +4434,7 @@ contains
       end function lib_vlistInqVarIntKey
     end interface
     do name_i = 1, len(name_dummy)
-    name_temp(name_i) = name_dummy(name_i:name_i)
+      name_temp(name_i) = name_dummy(name_i:name_i)
     end do
     name_temp(len(name_dummy) + 1) = c_null_char
     result = lib_vlistInqVarIntKey(vlistID_dummy, varID_dummy, name_temp)
@@ -4534,7 +4534,7 @@ contains
       end function lib_vlistDelAtt
     end interface
     do name_i = 1, len(name_dummy)
-    name_temp(name_i) = name_dummy(name_i:name_i)
+      name_temp(name_i) = name_dummy(name_i:name_i)
     end do
     name_temp(len(name_dummy) + 1) = c_null_char
     result = lib_vlistDelAtt(vlistID_dummy, varID_dummy, name_temp)
@@ -4565,7 +4565,7 @@ contains
       end function lib_vlistDefAttInt
     end interface
     do name_i = 1, len(name_dummy)
-    name_temp(name_i) = name_dummy(name_i:name_i)
+      name_temp(name_i) = name_dummy(name_i:name_i)
     end do
     name_temp(len(name_dummy) + 1) = c_null_char
     result = lib_vlistDefAttInt(vlistID_dummy, varID_dummy, name_temp,&
@@ -4597,7 +4597,7 @@ contains
       end function lib_vlistDefAttFlt
     end interface
     do name_i = 1, len(name_dummy)
-    name_temp(name_i) = name_dummy(name_i:name_i)
+      name_temp(name_i) = name_dummy(name_i:name_i)
     end do
     name_temp(len(name_dummy) + 1) = c_null_char
     result = lib_vlistDefAttFlt(vlistID_dummy, varID_dummy, name_temp,&
@@ -4628,11 +4628,11 @@ contains
       end function lib_vlistDefAttTxt
     end interface
     do name_i = 1, len(name_dummy)
-    name_temp(name_i) = name_dummy(name_i:name_i)
+      name_temp(name_i) = name_dummy(name_i:name_i)
     end do
     name_temp(len(name_dummy) + 1) = c_null_char
     do tp_cbuf_i = 1, len(tp_cbuf_dummy)
-    tp_cbuf_temp(tp_cbuf_i) = tp_cbuf_dummy(tp_cbuf_i:tp_cbuf_i)
+      tp_cbuf_temp(tp_cbuf_i) = tp_cbuf_dummy(tp_cbuf_i:tp_cbuf_i)
     end do
     tp_cbuf_temp(len(tp_cbuf_dummy) + 1) = c_null_char
     result = lib_vlistDefAttTxt(vlistID_dummy, varID_dummy, name_temp,&
@@ -4661,7 +4661,7 @@ contains
       end function lib_vlistInqAttInt
     end interface
     do name_i = 1, len(name_dummy)
-    name_temp(name_i) = name_dummy(name_i:name_i)
+      name_temp(name_i) = name_dummy(name_i:name_i)
     end do
     name_temp(len(name_dummy) + 1) = c_null_char
     result = lib_vlistInqAttInt(vlistID_dummy, varID_dummy, name_temp,&
@@ -4690,7 +4690,7 @@ contains
       end function lib_vlistInqAttFlt
     end interface
     do name_i = 1, len(name_dummy)
-    name_temp(name_i) = name_dummy(name_i:name_i)
+      name_temp(name_i) = name_dummy(name_i:name_i)
     end do
     name_temp(len(name_dummy) + 1) = c_null_char
     result = lib_vlistInqAttFlt(vlistID_dummy, varID_dummy, name_temp,&
@@ -4722,7 +4722,7 @@ contains
       end function lib_vlistInqAttTxt
     end interface
     do name_i = 1, len(name_dummy)
-    name_temp(name_i) = name_dummy(name_i:name_i)
+      name_temp(name_i) = name_dummy(name_i:name_i)
     end do
     name_temp(len(name_dummy) + 1) = c_null_char
     do tp_cbuf_i = len(tp_cbuf_dummy), 1, -1
@@ -5104,7 +5104,7 @@ contains
       end subroutine lib_gridDefXname
     end interface
     do xname_i = 1, len(xname_dummy)
-    xname_temp(xname_i) = xname_dummy(xname_i:xname_i)
+      xname_temp(xname_i) = xname_dummy(xname_i:xname_i)
     end do
     xname_temp(len(xname_dummy) + 1) = c_null_char
     call lib_gridDefXname(gridID_dummy, xname_temp)
@@ -5158,7 +5158,7 @@ contains
       end subroutine lib_gridDefXlongname
     end interface
     do xlongname_i = 1, len(xlongname_dummy)
-    xlongname_temp(xlongname_i) = xlongname_dummy(xlongname_i:xlongname_i)
+      xlongname_temp(xlongname_i) = xlongname_dummy(xlongname_i:xlongname_i)
     end do
     xlongname_temp(len(xlongname_dummy) + 1) = c_null_char
     call lib_gridDefXlongname(gridID_dummy, xlongname_temp)
@@ -5213,7 +5213,7 @@ contains
       end subroutine lib_gridDefXunits
     end interface
     do xunits_i = 1, len(xunits_dummy)
-    xunits_temp(xunits_i) = xunits_dummy(xunits_i:xunits_i)
+      xunits_temp(xunits_i) = xunits_dummy(xunits_i:xunits_i)
     end do
     xunits_temp(len(xunits_dummy) + 1) = c_null_char
     call lib_gridDefXunits(gridID_dummy, xunits_temp)
@@ -5267,7 +5267,7 @@ contains
       end subroutine lib_gridDefYname
     end interface
     do yname_i = 1, len(yname_dummy)
-    yname_temp(yname_i) = yname_dummy(yname_i:yname_i)
+      yname_temp(yname_i) = yname_dummy(yname_i:yname_i)
     end do
     yname_temp(len(yname_dummy) + 1) = c_null_char
     call lib_gridDefYname(gridID_dummy, yname_temp)
@@ -5321,7 +5321,7 @@ contains
       end subroutine lib_gridDefYlongname
     end interface
     do ylongname_i = 1, len(ylongname_dummy)
-    ylongname_temp(ylongname_i) = ylongname_dummy(ylongname_i:ylongname_i)
+      ylongname_temp(ylongname_i) = ylongname_dummy(ylongname_i:ylongname_i)
     end do
     ylongname_temp(len(ylongname_dummy) + 1) = c_null_char
     call lib_gridDefYlongname(gridID_dummy, ylongname_temp)
@@ -5376,7 +5376,7 @@ contains
       end subroutine lib_gridDefYunits
     end interface
     do yunits_i = 1, len(yunits_dummy)
-    yunits_temp(yunits_i) = yunits_dummy(yunits_i:yunits_i)
+      yunits_temp(yunits_i) = yunits_dummy(yunits_i:yunits_i)
     end do
     yunits_temp(len(yunits_dummy) + 1) = c_null_char
     call lib_gridDefYunits(gridID_dummy, yunits_temp)
@@ -5879,7 +5879,7 @@ contains
       end subroutine lib_gridDefReference
     end interface
     do reference_i = 1, len(reference_dummy)
-    reference_temp(reference_i) = reference_dummy(reference_i:reference_i)
+      reference_temp(reference_i) = reference_dummy(reference_i:reference_i)
     end do
     reference_temp(len(reference_dummy) + 1) = c_null_char
     call lib_gridDefReference(gridID_dummy, reference_temp)
@@ -6669,7 +6669,7 @@ contains
       end subroutine lib_zaxisDefName
     end interface
     do name_i = 1, len(name_dummy)
-    name_temp(name_i) = name_dummy(name_i:name_i)
+      name_temp(name_i) = name_dummy(name_i:name_i)
     end do
     name_temp(len(name_dummy) + 1) = c_null_char
     call lib_zaxisDefName(zaxisID_dummy, name_temp)
@@ -6723,7 +6723,7 @@ contains
       end subroutine lib_zaxisDefLongname
     end interface
     do longname_i = 1, len(longname_dummy)
-    longname_temp(longname_i) = longname_dummy(longname_i:longname_i)
+      longname_temp(longname_i) = longname_dummy(longname_i:longname_i)
     end do
     longname_temp(len(longname_dummy) + 1) = c_null_char
     call lib_zaxisDefLongname(zaxisID_dummy, longname_temp)
@@ -6778,7 +6778,7 @@ contains
       end subroutine lib_zaxisDefUnits
     end interface
     do units_i = 1, len(units_dummy)
-    units_temp(units_i) = units_dummy(units_i:units_i)
+      units_temp(units_i) = units_dummy(units_i:units_i)
     end do
     units_temp(len(units_dummy) + 1) = c_null_char
     call lib_zaxisDefUnits(zaxisID_dummy, units_temp)
@@ -7659,11 +7659,11 @@ contains
       end function lib_institutDef
     end interface
     do name_i = 1, len(name_dummy)
-    name_temp(name_i) = name_dummy(name_i:name_i)
+      name_temp(name_i) = name_dummy(name_i:name_i)
     end do
     name_temp(len(name_dummy) + 1) = c_null_char
     do longname_i = 1, len(longname_dummy)
-    longname_temp(longname_i) = longname_dummy(longname_i:longname_i)
+      longname_temp(longname_i) = longname_dummy(longname_i:longname_i)
     end do
     longname_temp(len(longname_dummy) + 1) = c_null_char
     result = lib_institutDef(center_dummy, subcenter_dummy, name_temp,&
@@ -7692,11 +7692,11 @@ contains
       end function lib_institutInq
     end interface
     do name_i = 1, len(name_dummy)
-    name_temp(name_i) = name_dummy(name_i:name_i)
+      name_temp(name_i) = name_dummy(name_i:name_i)
     end do
     name_temp(len(name_dummy) + 1) = c_null_char
     do longname_i = 1, len(longname_dummy)
-    longname_temp(longname_i) = longname_dummy(longname_i:longname_i)
+      longname_temp(longname_i) = longname_dummy(longname_i:longname_i)
     end do
     longname_temp(len(longname_dummy) + 1) = c_null_char
     result = lib_institutInq(center_dummy, subcenter_dummy, name_temp,&
@@ -7797,7 +7797,7 @@ contains
       end function lib_modelDef
     end interface
     do name_i = 1, len(name_dummy)
-    name_temp(name_i) = name_dummy(name_i:name_i)
+      name_temp(name_i) = name_dummy(name_i:name_i)
     end do
     name_temp(len(name_dummy) + 1) = c_null_char
     result = lib_modelDef(instID_dummy, modelgribID_dummy, name_temp)
@@ -7900,7 +7900,7 @@ contains
       end subroutine lib_tableWriteC
     end interface
     do filename_i = 1, len(filename_dummy)
-    filename_temp(filename_i) = filename_dummy(filename_i:filename_i)
+      filename_temp(filename_i) = filename_dummy(filename_i:filename_i)
     end do
     filename_temp(len(filename_dummy) + 1) = c_null_char
     call lib_tableWriteC(filename_temp, tableID_dummy)
@@ -7920,7 +7920,7 @@ contains
       end subroutine lib_tableWrite
     end interface
     do filename_i = 1, len(filename_dummy)
-    filename_temp(filename_i) = filename_dummy(filename_i:filename_i)
+      filename_temp(filename_i) = filename_dummy(filename_i:filename_i)
     end do
     filename_temp(len(filename_dummy) + 1) = c_null_char
     call lib_tableWrite(filename_temp, tableID_dummy)
@@ -7939,7 +7939,7 @@ contains
       end function lib_tableRead
     end interface
     do tablefile_i = 1, len(tablefile_dummy)
-    tablefile_temp(tablefile_i) = tablefile_dummy(tablefile_i:tablefile_i)
+      tablefile_temp(tablefile_i) = tablefile_dummy(tablefile_i:tablefile_i)
     end do
     tablefile_temp(len(tablefile_dummy) + 1) = c_null_char
     result = lib_tableRead(tablefile_temp)
@@ -7963,7 +7963,7 @@ contains
       end function lib_tableDef
     end interface
     do tablename_i = 1, len(tablename_dummy)
-    tablename_temp(tablename_i) = tablename_dummy(tablename_i:tablename_i)
+      tablename_temp(tablename_i) = tablename_dummy(tablename_i:tablename_i)
     end do
     tablename_temp(len(tablename_dummy) + 1) = c_null_char
     result = lib_tableDef(modelID_dummy, tablenum_dummy, tablename_temp)
@@ -8014,15 +8014,15 @@ contains
       end subroutine lib_tableDefEntry
     end interface
     do name_i = 1, len(name_dummy)
-    name_temp(name_i) = name_dummy(name_i:name_i)
+      name_temp(name_i) = name_dummy(name_i:name_i)
     end do
     name_temp(len(name_dummy) + 1) = c_null_char
     do longname_i = 1, len(longname_dummy)
-    longname_temp(longname_i) = longname_dummy(longname_i:longname_i)
+      longname_temp(longname_i) = longname_dummy(longname_i:longname_i)
     end do
     longname_temp(len(longname_dummy) + 1) = c_null_char
     do units_i = 1, len(units_dummy)
-    units_temp(units_i) = units_dummy(units_i:units_i)
+      units_temp(units_i) = units_dummy(units_i:units_i)
     end do
     units_temp(len(units_dummy) + 1) = c_null_char
     call lib_tableDefEntry(tableID_dummy, code_dummy, name_temp, longname_temp,&
@@ -8047,7 +8047,7 @@ contains
       end function lib_tableInq
     end interface
     do tablename_i = 1, len(tablename_dummy)
-    tablename_temp(tablename_i) = tablename_dummy(tablename_i:tablename_i)
+      tablename_temp(tablename_i) = tablename_dummy(tablename_i:tablename_i)
     end do
     tablename_temp(len(tablename_dummy) + 1) = c_null_char
     result = lib_tableInq(modelID_dummy, tablenum_dummy, tablename_temp)
@@ -8412,7 +8412,7 @@ contains
       end subroutine lib_streamDefHistory
     end interface
     do history_i = 1, len(history_dummy)
-    history_temp(history_i) = history_dummy(history_i:history_i)
+      history_temp(history_i) = history_dummy(history_i:history_i)
     end do
     history_temp(len(history_dummy) + 1) = c_null_char
     call lib_streamDefHistory(streamID_dummy, size_dummy, history_temp)
