@@ -588,8 +588,8 @@ end
 
 def defineOpaqueType(name)
 	formatLines($declarationLines, 0, "")
-	formatLines($declarationLines, 1, "public t_#{name}")
-	formatLines($declarationLines, 1, "type t_#{name}")
+	formatLines($declarationLines, 1, "public :: t_#{name}")
+	formatLines($declarationLines, 1, "type :: t_#{name}")
 	formatLines($declarationLines, 2, "type(c_ptr) :: ptr")
 	formatLines($declarationLines, 1, "end type t_#{name}")
 	$opaqueTypes.push(name)

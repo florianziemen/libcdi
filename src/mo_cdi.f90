@@ -194,13 +194,13 @@ module mo_cdi
     integer(c_int) :: number
   end type t_CdiParam
 
-  public t_CdiIterator
-  type t_CdiIterator
+  public :: t_CdiIterator
+  type :: t_CdiIterator
     type(c_ptr) :: ptr
   end type t_CdiIterator
 
-  public t_CdiGribIterator
-  type t_CdiGribIterator
+  public :: t_CdiGribIterator
+  type :: t_CdiGribIterator
     type(c_ptr) :: ptr
   end type t_CdiGribIterator
   public :: cdiReset
