@@ -203,426 +203,426 @@ module mo_cdi
   type t_CdiGribIterator
     type(c_ptr) :: ptr
   end type t_CdiGribIterator
-  public cdiReset
-  public cdiStringError
-  public cdiDebug
-  public cdiLibraryVersion
-  public cdiPrintVersion
-  public cdiHaveFiletype
-  public cdiDefMissval
-  public cdiInqMissval
-  public cdiDefGlobal
-  public namespaceNew
-  public namespaceSetActive
-  public namespaceDelete
-  public cdiParamToString
-  public cdiDecodeParam
-  public cdiEncodeParam
-  public cdiDecodeDate
-  public cdiEncodeDate
-  public cdiDecodeTime
-  public cdiEncodeTime
-  public cdiGetFiletype
-  public streamOpenRead
-  public streamOpenWrite
-  public streamOpenAppend
-  public streamClose
-  public streamSync
-  public streamDefVlist
-  public streamInqVlist
-  public streamInqVlistIDorig
-  public streamInqFiletype
-  public streamDefByteorder
-  public streamInqByteorder
-  public streamDefCompType
-  public streamInqCompType
-  public streamDefCompLevel
-  public streamInqCompLevel
-  public streamDefTimestep
-  public streamInqTimestep
-  public streamInqCurTimestepID
-  public streamFilename
-  public streamFilesuffix
-  public streamInqNvars
-  public streamWriteVar
-  public streamWriteVarF
-  public streamReadVar
-  public streamReadVarF
-  public streamWriteVarSlice
-  public streamWriteVarSliceF
-  public streamReadVarSlice
-  public streamReadVarSliceF
-  public streamWriteVarChunk
-  public streamDefRecord
-  public streamInqRecord
-  public streamWriteRecord
-  public streamWriteRecordF
-  public streamReadRecord
-  public streamCopyRecord
-  public cdiIterator_new
-  public cdiIterator_clone
-  public cdiIterator_serialize
-  public cdiIterator_deserialize
-  public cdiIterator_delete
-  public cdiIterator_nextField
-  public cdiIterator_inqStartTime
-  public cdiIterator_inqEndTime
-  public cdiIterator_inqVTime
-  public cdiIterator_inqLevelType
-  public cdiIterator_inqLevel
-  public cdiIterator_inqLevelUuid
-  public cdiIterator_inqParam
-  public cdiIterator_inqDatatype
-  public cdiIterator_inqTsteptype
-  public cdiIterator_inqVariableName
-  public cdiIterator_inqGridId
-  public cdiIterator_readField
-  public cdiIterator_readFieldF
-  public cdiGribIterator_clone
-  public cdiGribIterator_delete
-  public cdiGribIterator_getLong
-  public cdiGribIterator_getDouble
-  public cdiGribIterator_getLength
-  public cdiGribIterator_getString
-  public cdiGribIterator_getSize
-  public cdiGribIterator_getLongArray
-  public cdiGribIterator_getDoubleArray
-  public cdiGribIterator_inqEdition
-  public cdiGribIterator_inqLongValue
-  public cdiGribIterator_inqLongDefaultValue
-  public cdiGribIterator_inqDoubleValue
-  public cdiGribIterator_inqDoubleDefaultValue
-  public cdiGribIterator_inqStringValue
-  public vlistCreate
-  public vlistDestroy
-  public vlistDuplicate
-  public vlistCopy
-  public vlistCopyFlag
-  public vlistClearFlag
-  public vlistCat
-  public vlistMerge
-  public vlistPrint
-  public vlistNumber
-  public vlistNvars
-  public vlistNgrids
-  public vlistNzaxis
-  public vlistNsubtypes
-  public vlistDefNtsteps
-  public vlistNtsteps
-  public vlistGridsizeMax
-  public vlistGrid
-  public vlistGridIndex
-  public vlistChangeGridIndex
-  public vlistChangeGrid
-  public vlistZaxis
-  public vlistZaxisIndex
-  public vlistChangeZaxisIndex
-  public vlistChangeZaxis
-  public vlistNrecs
-  public vlistSubtype
-  public vlistSubtypeIndex
-  public vlistDefTaxis
-  public vlistInqTaxis
-  public vlistDefTable
-  public vlistInqTable
-  public vlistDefInstitut
-  public vlistInqInstitut
-  public vlistDefModel
-  public vlistInqModel
-  public vlistDefVarTiles
-  public vlistDefVar
-  public vlistChangeVarGrid
-  public vlistChangeVarZaxis
-  public vlistInqVar
-  public vlistInqVarGrid
-  public vlistInqVarZaxis
-  public vlistInqVarID
-  public vlistDefVarTsteptype
-  public vlistInqVarTsteptype
-  public vlistDefVarCompType
-  public vlistInqVarCompType
-  public vlistDefVarCompLevel
-  public vlistInqVarCompLevel
-  public vlistDefVarParam
-  public vlistInqVarParam
-  public vlistDefVarCode
-  public vlistInqVarCode
-  public vlistDefVarDatatype
-  public vlistInqVarDatatype
-  public vlistDefVarChunkType
-  public vlistInqVarChunkType
-  public vlistDefVarXYZ
-  public vlistInqVarXYZ
-  public vlistInqVarNumber
-  public vlistDefVarInstitut
-  public vlistInqVarInstitut
-  public vlistDefVarModel
-  public vlistInqVarModel
-  public vlistDefVarTable
-  public vlistInqVarTable
-  public vlistDefVarName
-  public vlistInqVarName
-  public vlistCopyVarName
-  public vlistDefVarStdname
-  public vlistInqVarStdname
-  public vlistDefVarLongname
-  public vlistInqVarLongname
-  public vlistDefVarUnits
-  public vlistInqVarUnits
-  public vlistDefVarMissval
-  public vlistInqVarMissval
-  public vlistDefVarExtra
-  public vlistInqVarExtra
-  public vlistDefVarScalefactor
-  public vlistInqVarScalefactor
-  public vlistDefVarAddoffset
-  public vlistInqVarAddoffset
-  public vlistDefVarTimave
-  public vlistInqVarTimave
-  public vlistDefVarTimaccu
-  public vlistInqVarTimaccu
-  public vlistDefVarTypeOfGeneratingProcess
-  public vlistInqVarTypeOfGeneratingProcess
-  public vlistDefVarProductDefinitionTemplate
-  public vlistInqVarProductDefinitionTemplate
-  public vlistInqVarSize
-  public vlistDefIndex
-  public vlistInqIndex
-  public vlistDefFlag
-  public vlistInqFlag
-  public vlistFindVar
-  public vlistFindLevel
-  public vlistMergedVar
-  public vlistMergedLevel
-  public vlistDefVarEnsemble
-  public vlistInqVarEnsemble
-  public cdiClearAdditionalKeys
-  public cdiDefAdditionalKey
-  public vlistDefVarIntKey
-  public vlistDefVarDblKey
-  public vlistHasVarKey
-  public vlistInqVarDblKey
-  public vlistInqVarIntKey
-  public vlistInqNatts
-  public vlistInqAtt
-  public vlistDelAtt
-  public vlistDefAttInt
-  public vlistDefAttFlt
-  public vlistDefAttTxt
-  public vlistInqAttInt
-  public vlistInqAttFlt
-  public vlistInqAttTxt
-  public gridName
-  public gridNamePtr
-  public gridCompress
-  public gridDefMaskGME
-  public gridInqMaskGME
-  public gridDefMask
-  public gridInqMask
-  public gridPrint
-  public gridCreate
-  public gridDestroy
-  public gridDuplicate
-  public gridInqType
-  public gridInqSize
-  public gridDefXsize
-  public gridInqXsize
-  public gridDefYsize
-  public gridInqYsize
-  public gridDefNP
-  public gridInqNP
-  public gridDefXvals
-  public gridInqXvals
-  public gridDefYvals
-  public gridInqYvals
-  public gridDefXname
-  public gridInqXname
-  public gridDefXlongname
-  public gridInqXlongname
-  public gridDefXunits
-  public gridInqXunits
-  public gridDefYname
-  public gridInqYname
-  public gridDefYlongname
-  public gridInqYlongname
-  public gridDefYunits
-  public gridInqYunits
-  public gridInqXstdname
-  public gridInqYstdname
-  public gridDefPrec
-  public gridInqPrec
-  public gridInqXval
-  public gridInqYval
-  public gridInqXinc
-  public gridInqYinc
-  public gridIsCircular
-  public gridIsRotated
-  public gridDefXpole
-  public gridInqXpole
-  public gridDefYpole
-  public gridInqYpole
-  public gridDefAngle
-  public gridInqAngle
-  public gridInqTrunc
-  public gridDefTrunc
-  public gridDefGMEnd
-  public gridInqGMEnd
-  public gridDefGMEni
-  public gridInqGMEni
-  public gridDefGMEni2
-  public gridInqGMEni2
-  public gridDefGMEni3
-  public gridInqGMEni3
-  public gridDefNumber
-  public gridInqNumber
-  public gridDefPosition
-  public gridInqPosition
-  public gridDefReference
-  public gridInqReference
-  public gridDefUUID
-  public gridInqUUID
-  public gridDefLCC
-  public gridInqLCC
-  public gridDefLcc2
-  public gridInqLcc2
-  public gridDefLaea
-  public gridInqLaea
-  public gridDefArea
-  public gridInqArea
-  public gridHasArea
-  public gridDefNvertex
-  public gridInqNvertex
-  public gridDefXbounds
-  public gridInqXbounds
-  public gridDefYbounds
-  public gridInqYbounds
-  public gridDefRowlon
-  public gridInqRowlon
-  public gridChangeType
-  public gridDefComplexPacking
-  public gridInqComplexPacking
-  public zaxisName
-  public zaxisCreate
-  public zaxisDestroy
-  public zaxisInqType
-  public zaxisInqSize
-  public zaxisDuplicate
-  public zaxisResize
-  public zaxisPrint
-  public zaxisDefLevels
-  public zaxisInqLevels
-  public zaxisDefLevel
-  public zaxisInqLevel
-  public zaxisDefNlevRef
-  public zaxisInqNlevRef
-  public zaxisDefNumber
-  public zaxisInqNumber
-  public zaxisDefUUID
-  public zaxisInqUUID
-  public zaxisDefName
-  public zaxisInqName
-  public zaxisDefLongname
-  public zaxisInqLongname
-  public zaxisDefUnits
-  public zaxisInqUnits
-  public zaxisInqStdname
-  public zaxisDefPrec
-  public zaxisInqPrec
-  public zaxisDefPositive
-  public zaxisInqPositive
-  public zaxisDefLtype
-  public zaxisInqLtype
-  public zaxisInqLevelsPtr
-  public zaxisDefVct
-  public zaxisInqVct
-  public zaxisInqVctSize
-  public zaxisInqVctPtr
-  public zaxisDefLbounds
-  public zaxisInqLbounds
-  public zaxisInqLbound
-  public zaxisDefUbounds
-  public zaxisInqUbounds
-  public zaxisInqUbound
-  public zaxisDefWeights
-  public zaxisInqWeights
-  public zaxisChangeType
-  public taxisCreate
-  public taxisDestroy
-  public taxisDuplicate
-  public taxisCopyTimestep
-  public taxisDefType
-  public taxisDefVdate
-  public taxisDefVtime
-  public taxisInqVdate
-  public taxisInqVtime
-  public taxisDefRdate
-  public taxisDefRtime
-  public taxisInqRdate
-  public taxisInqRtime
-  public taxisDefFdate
-  public taxisDefFtime
-  public taxisInqFdate
-  public taxisInqFtime
-  public taxisHasBounds
-  public taxisDeleteBounds
-  public taxisDefVdateBounds
-  public taxisDefVtimeBounds
-  public taxisInqVdateBounds
-  public taxisInqVtimeBounds
-  public taxisDefCalendar
-  public taxisInqCalendar
-  public taxisDefTunit
-  public taxisInqTunit
-  public taxisDefForecastTunit
-  public taxisInqForecastTunit
-  public taxisDefForecastPeriod
-  public taxisInqForecastPeriod
-  public taxisDefNumavg
-  public taxisInqType
-  public taxisInqNumavg
-  public tunitNamePtr
-  public institutDef
-  public institutInq
-  public institutInqNumber
-  public institutInqCenter
-  public institutInqSubcenter
-  public institutInqNamePtr
-  public institutInqLongnamePtr
-  public modelDef
-  public modelInq
-  public modelInqInstitut
-  public modelInqGribID
-  public modelInqNamePtr
-  public tableWriteC
-  public tableWrite
-  public tableRead
-  public tableDef
-  public tableInqNamePtr
-  public tableDefEntry
-  public tableInq
-  public tableInqNumber
-  public tableInqNum
-  public tableInqModel
-  public tableInqPar
-  public tableInqParCode
-  public tableInqParName
-  public tableInqParLongname
-  public tableInqParUnits
-  public tableInqParNamePtr
-  public tableInqParLongnamePtr
-  public tableInqParUnitsPtr
-  public streamDefHistory
-  public streamInqHistorySize
-  public streamInqHistoryString
-  public subtypeCreate
-  public subtypePrint
-  public subtypeCompare
-  public subtypeInqSize
-  public subtypeInqActiveIndex
-  public subtypeDefActiveIndex
-  public subtypeInqTile
-  public vlistInqVarSubtype
-  public gribapiLibraryVersion
+  public :: cdiReset
+  public :: cdiStringError
+  public :: cdiDebug
+  public :: cdiLibraryVersion
+  public :: cdiPrintVersion
+  public :: cdiHaveFiletype
+  public :: cdiDefMissval
+  public :: cdiInqMissval
+  public :: cdiDefGlobal
+  public :: namespaceNew
+  public :: namespaceSetActive
+  public :: namespaceDelete
+  public :: cdiParamToString
+  public :: cdiDecodeParam
+  public :: cdiEncodeParam
+  public :: cdiDecodeDate
+  public :: cdiEncodeDate
+  public :: cdiDecodeTime
+  public :: cdiEncodeTime
+  public :: cdiGetFiletype
+  public :: streamOpenRead
+  public :: streamOpenWrite
+  public :: streamOpenAppend
+  public :: streamClose
+  public :: streamSync
+  public :: streamDefVlist
+  public :: streamInqVlist
+  public :: streamInqVlistIDorig
+  public :: streamInqFiletype
+  public :: streamDefByteorder
+  public :: streamInqByteorder
+  public :: streamDefCompType
+  public :: streamInqCompType
+  public :: streamDefCompLevel
+  public :: streamInqCompLevel
+  public :: streamDefTimestep
+  public :: streamInqTimestep
+  public :: streamInqCurTimestepID
+  public :: streamFilename
+  public :: streamFilesuffix
+  public :: streamInqNvars
+  public :: streamWriteVar
+  public :: streamWriteVarF
+  public :: streamReadVar
+  public :: streamReadVarF
+  public :: streamWriteVarSlice
+  public :: streamWriteVarSliceF
+  public :: streamReadVarSlice
+  public :: streamReadVarSliceF
+  public :: streamWriteVarChunk
+  public :: streamDefRecord
+  public :: streamInqRecord
+  public :: streamWriteRecord
+  public :: streamWriteRecordF
+  public :: streamReadRecord
+  public :: streamCopyRecord
+  public :: cdiIterator_new
+  public :: cdiIterator_clone
+  public :: cdiIterator_serialize
+  public :: cdiIterator_deserialize
+  public :: cdiIterator_delete
+  public :: cdiIterator_nextField
+  public :: cdiIterator_inqStartTime
+  public :: cdiIterator_inqEndTime
+  public :: cdiIterator_inqVTime
+  public :: cdiIterator_inqLevelType
+  public :: cdiIterator_inqLevel
+  public :: cdiIterator_inqLevelUuid
+  public :: cdiIterator_inqParam
+  public :: cdiIterator_inqDatatype
+  public :: cdiIterator_inqTsteptype
+  public :: cdiIterator_inqVariableName
+  public :: cdiIterator_inqGridId
+  public :: cdiIterator_readField
+  public :: cdiIterator_readFieldF
+  public :: cdiGribIterator_clone
+  public :: cdiGribIterator_delete
+  public :: cdiGribIterator_getLong
+  public :: cdiGribIterator_getDouble
+  public :: cdiGribIterator_getLength
+  public :: cdiGribIterator_getString
+  public :: cdiGribIterator_getSize
+  public :: cdiGribIterator_getLongArray
+  public :: cdiGribIterator_getDoubleArray
+  public :: cdiGribIterator_inqEdition
+  public :: cdiGribIterator_inqLongValue
+  public :: cdiGribIterator_inqLongDefaultValue
+  public :: cdiGribIterator_inqDoubleValue
+  public :: cdiGribIterator_inqDoubleDefaultValue
+  public :: cdiGribIterator_inqStringValue
+  public :: vlistCreate
+  public :: vlistDestroy
+  public :: vlistDuplicate
+  public :: vlistCopy
+  public :: vlistCopyFlag
+  public :: vlistClearFlag
+  public :: vlistCat
+  public :: vlistMerge
+  public :: vlistPrint
+  public :: vlistNumber
+  public :: vlistNvars
+  public :: vlistNgrids
+  public :: vlistNzaxis
+  public :: vlistNsubtypes
+  public :: vlistDefNtsteps
+  public :: vlistNtsteps
+  public :: vlistGridsizeMax
+  public :: vlistGrid
+  public :: vlistGridIndex
+  public :: vlistChangeGridIndex
+  public :: vlistChangeGrid
+  public :: vlistZaxis
+  public :: vlistZaxisIndex
+  public :: vlistChangeZaxisIndex
+  public :: vlistChangeZaxis
+  public :: vlistNrecs
+  public :: vlistSubtype
+  public :: vlistSubtypeIndex
+  public :: vlistDefTaxis
+  public :: vlistInqTaxis
+  public :: vlistDefTable
+  public :: vlistInqTable
+  public :: vlistDefInstitut
+  public :: vlistInqInstitut
+  public :: vlistDefModel
+  public :: vlistInqModel
+  public :: vlistDefVarTiles
+  public :: vlistDefVar
+  public :: vlistChangeVarGrid
+  public :: vlistChangeVarZaxis
+  public :: vlistInqVar
+  public :: vlistInqVarGrid
+  public :: vlistInqVarZaxis
+  public :: vlistInqVarID
+  public :: vlistDefVarTsteptype
+  public :: vlistInqVarTsteptype
+  public :: vlistDefVarCompType
+  public :: vlistInqVarCompType
+  public :: vlistDefVarCompLevel
+  public :: vlistInqVarCompLevel
+  public :: vlistDefVarParam
+  public :: vlistInqVarParam
+  public :: vlistDefVarCode
+  public :: vlistInqVarCode
+  public :: vlistDefVarDatatype
+  public :: vlistInqVarDatatype
+  public :: vlistDefVarChunkType
+  public :: vlistInqVarChunkType
+  public :: vlistDefVarXYZ
+  public :: vlistInqVarXYZ
+  public :: vlistInqVarNumber
+  public :: vlistDefVarInstitut
+  public :: vlistInqVarInstitut
+  public :: vlistDefVarModel
+  public :: vlistInqVarModel
+  public :: vlistDefVarTable
+  public :: vlistInqVarTable
+  public :: vlistDefVarName
+  public :: vlistInqVarName
+  public :: vlistCopyVarName
+  public :: vlistDefVarStdname
+  public :: vlistInqVarStdname
+  public :: vlistDefVarLongname
+  public :: vlistInqVarLongname
+  public :: vlistDefVarUnits
+  public :: vlistInqVarUnits
+  public :: vlistDefVarMissval
+  public :: vlistInqVarMissval
+  public :: vlistDefVarExtra
+  public :: vlistInqVarExtra
+  public :: vlistDefVarScalefactor
+  public :: vlistInqVarScalefactor
+  public :: vlistDefVarAddoffset
+  public :: vlistInqVarAddoffset
+  public :: vlistDefVarTimave
+  public :: vlistInqVarTimave
+  public :: vlistDefVarTimaccu
+  public :: vlistInqVarTimaccu
+  public :: vlistDefVarTypeOfGeneratingProcess
+  public :: vlistInqVarTypeOfGeneratingProcess
+  public :: vlistDefVarProductDefinitionTemplate
+  public :: vlistInqVarProductDefinitionTemplate
+  public :: vlistInqVarSize
+  public :: vlistDefIndex
+  public :: vlistInqIndex
+  public :: vlistDefFlag
+  public :: vlistInqFlag
+  public :: vlistFindVar
+  public :: vlistFindLevel
+  public :: vlistMergedVar
+  public :: vlistMergedLevel
+  public :: vlistDefVarEnsemble
+  public :: vlistInqVarEnsemble
+  public :: cdiClearAdditionalKeys
+  public :: cdiDefAdditionalKey
+  public :: vlistDefVarIntKey
+  public :: vlistDefVarDblKey
+  public :: vlistHasVarKey
+  public :: vlistInqVarDblKey
+  public :: vlistInqVarIntKey
+  public :: vlistInqNatts
+  public :: vlistInqAtt
+  public :: vlistDelAtt
+  public :: vlistDefAttInt
+  public :: vlistDefAttFlt
+  public :: vlistDefAttTxt
+  public :: vlistInqAttInt
+  public :: vlistInqAttFlt
+  public :: vlistInqAttTxt
+  public :: gridName
+  public :: gridNamePtr
+  public :: gridCompress
+  public :: gridDefMaskGME
+  public :: gridInqMaskGME
+  public :: gridDefMask
+  public :: gridInqMask
+  public :: gridPrint
+  public :: gridCreate
+  public :: gridDestroy
+  public :: gridDuplicate
+  public :: gridInqType
+  public :: gridInqSize
+  public :: gridDefXsize
+  public :: gridInqXsize
+  public :: gridDefYsize
+  public :: gridInqYsize
+  public :: gridDefNP
+  public :: gridInqNP
+  public :: gridDefXvals
+  public :: gridInqXvals
+  public :: gridDefYvals
+  public :: gridInqYvals
+  public :: gridDefXname
+  public :: gridInqXname
+  public :: gridDefXlongname
+  public :: gridInqXlongname
+  public :: gridDefXunits
+  public :: gridInqXunits
+  public :: gridDefYname
+  public :: gridInqYname
+  public :: gridDefYlongname
+  public :: gridInqYlongname
+  public :: gridDefYunits
+  public :: gridInqYunits
+  public :: gridInqXstdname
+  public :: gridInqYstdname
+  public :: gridDefPrec
+  public :: gridInqPrec
+  public :: gridInqXval
+  public :: gridInqYval
+  public :: gridInqXinc
+  public :: gridInqYinc
+  public :: gridIsCircular
+  public :: gridIsRotated
+  public :: gridDefXpole
+  public :: gridInqXpole
+  public :: gridDefYpole
+  public :: gridInqYpole
+  public :: gridDefAngle
+  public :: gridInqAngle
+  public :: gridInqTrunc
+  public :: gridDefTrunc
+  public :: gridDefGMEnd
+  public :: gridInqGMEnd
+  public :: gridDefGMEni
+  public :: gridInqGMEni
+  public :: gridDefGMEni2
+  public :: gridInqGMEni2
+  public :: gridDefGMEni3
+  public :: gridInqGMEni3
+  public :: gridDefNumber
+  public :: gridInqNumber
+  public :: gridDefPosition
+  public :: gridInqPosition
+  public :: gridDefReference
+  public :: gridInqReference
+  public :: gridDefUUID
+  public :: gridInqUUID
+  public :: gridDefLCC
+  public :: gridInqLCC
+  public :: gridDefLcc2
+  public :: gridInqLcc2
+  public :: gridDefLaea
+  public :: gridInqLaea
+  public :: gridDefArea
+  public :: gridInqArea
+  public :: gridHasArea
+  public :: gridDefNvertex
+  public :: gridInqNvertex
+  public :: gridDefXbounds
+  public :: gridInqXbounds
+  public :: gridDefYbounds
+  public :: gridInqYbounds
+  public :: gridDefRowlon
+  public :: gridInqRowlon
+  public :: gridChangeType
+  public :: gridDefComplexPacking
+  public :: gridInqComplexPacking
+  public :: zaxisName
+  public :: zaxisCreate
+  public :: zaxisDestroy
+  public :: zaxisInqType
+  public :: zaxisInqSize
+  public :: zaxisDuplicate
+  public :: zaxisResize
+  public :: zaxisPrint
+  public :: zaxisDefLevels
+  public :: zaxisInqLevels
+  public :: zaxisDefLevel
+  public :: zaxisInqLevel
+  public :: zaxisDefNlevRef
+  public :: zaxisInqNlevRef
+  public :: zaxisDefNumber
+  public :: zaxisInqNumber
+  public :: zaxisDefUUID
+  public :: zaxisInqUUID
+  public :: zaxisDefName
+  public :: zaxisInqName
+  public :: zaxisDefLongname
+  public :: zaxisInqLongname
+  public :: zaxisDefUnits
+  public :: zaxisInqUnits
+  public :: zaxisInqStdname
+  public :: zaxisDefPrec
+  public :: zaxisInqPrec
+  public :: zaxisDefPositive
+  public :: zaxisInqPositive
+  public :: zaxisDefLtype
+  public :: zaxisInqLtype
+  public :: zaxisInqLevelsPtr
+  public :: zaxisDefVct
+  public :: zaxisInqVct
+  public :: zaxisInqVctSize
+  public :: zaxisInqVctPtr
+  public :: zaxisDefLbounds
+  public :: zaxisInqLbounds
+  public :: zaxisInqLbound
+  public :: zaxisDefUbounds
+  public :: zaxisInqUbounds
+  public :: zaxisInqUbound
+  public :: zaxisDefWeights
+  public :: zaxisInqWeights
+  public :: zaxisChangeType
+  public :: taxisCreate
+  public :: taxisDestroy
+  public :: taxisDuplicate
+  public :: taxisCopyTimestep
+  public :: taxisDefType
+  public :: taxisDefVdate
+  public :: taxisDefVtime
+  public :: taxisInqVdate
+  public :: taxisInqVtime
+  public :: taxisDefRdate
+  public :: taxisDefRtime
+  public :: taxisInqRdate
+  public :: taxisInqRtime
+  public :: taxisDefFdate
+  public :: taxisDefFtime
+  public :: taxisInqFdate
+  public :: taxisInqFtime
+  public :: taxisHasBounds
+  public :: taxisDeleteBounds
+  public :: taxisDefVdateBounds
+  public :: taxisDefVtimeBounds
+  public :: taxisInqVdateBounds
+  public :: taxisInqVtimeBounds
+  public :: taxisDefCalendar
+  public :: taxisInqCalendar
+  public :: taxisDefTunit
+  public :: taxisInqTunit
+  public :: taxisDefForecastTunit
+  public :: taxisInqForecastTunit
+  public :: taxisDefForecastPeriod
+  public :: taxisInqForecastPeriod
+  public :: taxisDefNumavg
+  public :: taxisInqType
+  public :: taxisInqNumavg
+  public :: tunitNamePtr
+  public :: institutDef
+  public :: institutInq
+  public :: institutInqNumber
+  public :: institutInqCenter
+  public :: institutInqSubcenter
+  public :: institutInqNamePtr
+  public :: institutInqLongnamePtr
+  public :: modelDef
+  public :: modelInq
+  public :: modelInqInstitut
+  public :: modelInqGribID
+  public :: modelInqNamePtr
+  public :: tableWriteC
+  public :: tableWrite
+  public :: tableRead
+  public :: tableDef
+  public :: tableInqNamePtr
+  public :: tableDefEntry
+  public :: tableInq
+  public :: tableInqNumber
+  public :: tableInqNum
+  public :: tableInqModel
+  public :: tableInqPar
+  public :: tableInqParCode
+  public :: tableInqParName
+  public :: tableInqParLongname
+  public :: tableInqParUnits
+  public :: tableInqParNamePtr
+  public :: tableInqParLongnamePtr
+  public :: tableInqParUnitsPtr
+  public :: streamDefHistory
+  public :: streamInqHistorySize
+  public :: streamInqHistoryString
+  public :: subtypeCreate
+  public :: subtypePrint
+  public :: subtypeCompare
+  public :: subtypeInqSize
+  public :: subtypeInqActiveIndex
+  public :: subtypeDefActiveIndex
+  public :: subtypeInqTile
+  public :: vlistInqVarSubtype
+  public :: gribapiLibraryVersion
 
 contains
 

@@ -678,7 +678,7 @@ def defineFunction(name, arguments, returnType)
 	end
 	formatLines($definitionLines, 1, 'end ' + subprogramtype + ' ' + name)
 	formatLines($definitionLines, 0, '')
-	formatLines($declarationLines, 1, 'public ' + name)
+	formatLines($declarationLines, 1, 'public :: ' + name)
 
 end
 
