@@ -145,6 +145,133 @@ $argumentTemplates =
 		 :passAs => 'real(c_<type>), value :: <name>_dummy',
 		 :postcallStatements => ''
 	 },
+	 #Optional pointer arguments. These are wrapped by optional
+	 #arguments which have to be named in calling code, which is why we
+	 #don't use the _dummy suffix for them.
+	 {	#<integerTypes>*
+		 :regex => '^\s*(?<type><integerTypes>)\s*\*\s*(?<name>\w+)_optional\s*$',
+		 :placeholders => %w[name type],
+		 :dummyName => '<name>',
+		 :acceptAs => 'integer(c_<type>), optional, target, intent(inout) :: <name>',
+		 :helperVars => "type(c_ptr) :: <name>_cptr",
+		 :precallStatements => "<name>_cptr = c_null_ptr\nif(present(<name>)) <name>_cptr = c_loc(<name>)",
+		 :callExpression => '<name>_cptr',
+		 :passAs => 'type(c_ptr), value :: <name>',
+		 :postcallStatements => ""
+	 },
+	 {	#<floatTypes>*
+		 :regex => '^\s*(?<type><floatTypes>)\s*\*\s*(?<name>\w+)_optional\s*$',
+		 :placeholders => %w[name type],
+		 :dummyName => '<name>',
+		 :acceptAs => 'real(c_<type>), target, optional, intent(inout) :: <name>',
+		 :helperVars => "type(c_ptr) :: <name>_cptr",
+		 :precallStatements => "<name>_cptr = c_null_ptr\nif(present(<name>)) <name>_cptr = c_loc(<name>)",
+		 :callExpression => '<name>_cptr',
+		 :passAs => 'type(c_ptr), value :: <name>',
+		 :postcallStatements => ""
+	 },
+	 {	#unsigned char (*<name>)[<size>]
+		 :regex => '^\s*unsigned\s+char\s*\(\s*\*\s*(?<name>\w+)_optional\s*\)\s*\[\s*(?<size>[^\]]+)\s*\]\s*$',
+		 :placeholders => %w[name size],
+		 :dummyName => '<name>',
+		 :acceptAs => 'integer(kind = c_signed_char), target, optional, intent(inout) :: <name>(<size>)',
+		 :helperVars => "type(c_ptr) :: <name>_cptr",
+		 :precallStatements => "<name>_cptr = c_null_ptr\nif(present(<name>)) <name>_cptr = c_loc(<name>)",
+		 :callExpression => '<name>_cptr',
+		 :passAs => 'type(c_ptr), value :: <name>',
+		 :postcallStatements => ""
+	 },
+	 {	#<integerTypes> []
+		 :regex => '^\s*(?<type><integerTypes>)\s*(?<name>\w+)_optional\[\]\s*$',
+		 :placeholders => %w[name type],
+		 :dummyName => '<name>',
+		 :acceptAs => 'integer(c_<type>), target, optional, intent(inout) :: <name>(*)',
+		 :helperVars => "type(c_ptr) :: <name>_cptr",
+		 :precallStatements => "<name>_cptr = c_null_ptr\nif(present(<name>)) <name>_cptr = c_loc(<name>)",
+		 :callExpression => '<name>_cptr',
+		 :passAs => 'type(c_ptr), value :: <name>',
+		 :postcallStatements => ""
+	 }, {	#<floatTypes> []
+		 :regex => '^\s*(?<type><floatTypes>)\s*(?<name>\w+)_optional\[\]\s*$',
+		 :placeholders => %w[name type],
+		 :dummyName => '<name>',
+		 :acceptAs => 'real(c_<type>), target, optional, intent(inout) :: <name>(*)',
+		 :helperVars => "type(c_ptr) :: <name>_cptr",
+		 :precallStatements => "<name>_cptr = c_null_ptr\nif(present(<name>)) <name>_cptr = c_loc(<name>)",
+		 :callExpression => '<name>_cptr',
+		 :passAs => 'type(c_ptr), value :: <name>',
+		 :postcallStatements => ""
+	 }, {	#unsigned char <name>[<size>]
+		 :regex => '^\s*unsigned\s+char\s*(?<name>\w+)_optional\s*\[\s*(?<size>[^\]]+)\s*\]\s*$',
+		 :placeholders => %w[name size],
+		 :dummyName => '<name>',
+		 :acceptAs => 'integer(kind = c_signed_char), target, optional, intent(inout) :: <name>(<size>)',
+		 :helperVars => "type(c_ptr) :: <name>_cptr",
+		 :precallStatements => "<name>_cptr = c_null_ptr\nif(present(<name>)) <name>_cptr = c_loc(<name>)",
+		 :callExpression => '<name>_cptr',
+		 :passAs => 'type(c_ptr), value :: <name>',
+		 :postcallStatements => ""
+	 },
+	 {	#optional char *
+		 :regex => '^\s*char\s*(?:\*\s*(?<name>\w+)_optional|(?<name>\w+)_optional\[\])\s*$',
+		 :placeholders => %w[name],
+		 :dummyName => '<name>',
+		 :acceptAs => 'character(kind = c_char, len = *), optional, intent(inout) :: <name>',
+		 :helperVars => "character(kind = c_char), allocatable, target :: <name>_temp(:)\n" +
+		 "integer :: <name>_i\n" +
+		 "type(c_ptr) :: <name>_cptr",
+		 :precallStatements => "if (present(<name>)) then\n" +
+		 "\tallocate(<name>_temp(len(<name>) + 1))\n" +
+		 "\t<name>_temp(len(<name>) + 1) = c_null_char\n" +
+		 "\tdo <name>_i = len(<name>), 1, -1\n" +
+		 "\t\tif(<name>(<name>_i:<name>_i) /= ' ') exit\n" +
+		 "\t\t<name>_temp(<name>_i) = c_null_char\n" +
+		 "\tend do\n" +
+		 "\tdo <name>_i = <name>_i, 1, -1\n" +
+		 "\t\t\t<name>_temp(<name>_i) = <name>(<name>_i:<name>_i)\n" +
+		 "\tend do\n" +
+		 "\t<name>_cptr = c_loc(<name>_temp)\n" +
+		 "else\n" +
+		 "\t<name>_cptr = c_null_ptr\n" +
+		 "end if",
+		 :callExpression => '<name>_cptr',
+		 :passAs => 'type(c_ptr), value :: <name>',
+		 :postcallStatements => "if (present(<name>)) then\n" +
+		 "\tdo <name>_i = 1, len(<name>)\n" +
+		 "\t\tif(<name>_temp(<name>_i) == c_null_char) exit\n" +
+		 "\t\t<name>(<name>_i:<name>_i) = <name>_temp(<name>_i)\n" +
+		 "\tend do\n" +
+		 "\tdo <name>_i = <name>_i, len(<name>)\n" +
+		 "\t\t<name>(<name>_i:<name>_i) = ' '\n" +
+		 "\tend do\n" +
+		 "end if"
+	 },
+	 {	#optional const char *
+		 :regex => '^\s*const\s+char\s*(?:\*\s*(?<name>\w+)_optional|(?<name>\w+)_optional\[\])\s*$',
+		 :placeholders => %w[name],
+		 :dummyName => '<name>',
+		 :acceptAs => 'character(kind = c_char, len = *), optional, intent(in) :: <name>',
+		 :helperVars => "character(kind = c_char), allocatable, target :: <name>_temp(:)\n" +
+		 "integer :: <name>_i\n" +
+		 "type(c_ptr) :: <name>_cptr",
+		 :precallStatements => "if (present(<name>)) then\n" +
+		 "\tallocate(<name>_temp(len(<name>) + 1))\n" +
+		 "\t<name>_temp(len(<name>) + 1) = c_null_char\n" +
+		 "\tdo <name>_i = len(<name>), 1, -1\n" +
+		 "\t\tif(<name>(<name>_i:<name>_i) /= ' ') exit\n" +
+		 "\t\t<name>_temp(<name>_i) = c_null_char\n" +
+		 "\tend do\n" +
+		 "\tdo <name>_i = <name>_i, 1, -1\n" +
+		 "\t\t\t<name>_temp(<name>_i) = <name>(<name>_i:<name>_i)\n" +
+		 "\tend do\n" +
+		 "\t<name>_cptr = c_loc(<name>_temp)\n" +
+		 "else\n" +
+		 "\t<name>_cptr = c_null_ptr\n" +
+		 "end if",
+		 :callExpression => '<name>_cptr',
+		 :passAs => 'type(c_ptr), value :: <name>',
+		 :postcallStatements => ""
+	 },
 	 #Array arguments. These are marked by a `_vec` suffix by convention.
 	 #Since it's near impossible to write regexs that only match names that do *not* end in a given suffix,
 	 #these templates must precede the more general templates for pointer arguments.
@@ -220,42 +347,6 @@ $argumentTemplates =
 		 :passAs => 'integer(c_<type>), intent(in) :: <name>_dummy(<lineSize>, <lineCount>)',
 		 :postcallStatements => ""
 	 },
-	 #Optional pointer arguments. These match both pointers and arrays,
-	 #so they must appear after the more special array templates.  Most
-	 #of these are wrapped by optional arguments which have to be named
-	 #in calling code, which is why we don't use the _dummy suffix for
-	 #them.
-	 {	#<integerTypes>*
-		 :regex => '^\s*(?<type><integerTypes>)\s*\*\s*(?<name>\w+_optional)\s*$',
-		 :placeholders => %w[name type],
-		 :dummyName => '<name>',
-		 :acceptAs => 'integer(c_<type>), optional, intent(inout) :: <name>',
-		 :helperVars => "integer(c_<type>), target :: <name>_temp\ntype(c_ptr) :: <name>_ptr",
-		 :precallStatements => "<name>_ptr = c_null_ptr\nif(present(<name>)) <name>_ptr = c_loc(<name>_temp)",
-		 :callExpression => '<name>_ptr',
-		 :passAs => 'type(c_ptr), value :: <name>',
-		 :postcallStatements => "if(present(<name>)) <name> = <name>_temp"
-	 }, {	#<floatTypes>*
-		 :regex => '^\s*(?<type><floatTypes>)\s*\*\s*(?<name>\w+_optional)\s*$',
-		 :placeholders => %w[name type],
-		 :dummyName => '<name>',
-		 :acceptAs => 'real(c_<type>), optional, intent(inout) :: <name>',
-		 :helperVars => "real(c_<type>), target :: <name>_temp\ntype(c_ptr) :: <name>_ptr",
-		 :precallStatements => "<name>_ptr = c_null_ptr\nif(present(<name>)) <name>_ptr = c_loc(<name>_temp)",
-		 :callExpression => '<name>_ptr',
-		 :passAs => 'type(c_ptr), value :: <name>',
-		 :postcallStatements => "if(present(<name>)) <name> = <name>_temp"
-	 }, {	#unsigned char (*<name>)[<size>]
-		 :regex => '^\s*unsigned\s+char\s*\(\s*\*\s*(?<name>\w+_optional)\s*\)\s*\[\s*(?<size>[^\]]+)\s*\]\s*$',
-		 :placeholders => %w[name size],
-		 :dummyName => '<name>',
-		 :acceptAs => 'integer(kind = c_signed_char), optional, intent(inout) :: <name>(<size>)',
-		 :helperVars => "integer(kind = c_signed_char), target :: <name>_temp(<size>)\ntype(c_ptr) :: <name>_ptr",
-		 :precallStatements => "<name>_ptr = c_null_ptr\nif(present(<name>)) <name>_ptr = c_loc(<name>_temp)",
-		 :callExpression => '<name>_ptr',
-		 :passAs => 'type(c_ptr), value :: <name>',
-		 :postcallStatements => "if(present(<name>)) <name> = <name>_temp"
-	 },
 	 #Non-optional pointer arguments. These match both pointers and
 	 #arrays, so they must appear after the more special array templates.
 	 {	#<integerTypes>*
@@ -315,7 +406,7 @@ $argumentTemplates =
 		 "\t<name>_dummy(<name>_i:<name>_i) = ' '\n" +
 		 "end do"
 	 }, {	#const char*	Safe passing of an input string.
-		 :regex => '^\s*(const\s+char|char\sconst)\s*\*\s*(?<name>\w+)\s*$',
+		 :regex => '^\s*(const\s+char|char\s+const)\s*\*\s*(?<name>\w+)\s*$',
 		 :placeholders => %w[name],
 		 :dummyName => '<name>_dummy',
 		 :acceptAs => 'character(kind = c_char, len = *), intent(in) :: <name>_dummy',
@@ -325,25 +416,25 @@ $argumentTemplates =
 		 :passAs => 'character(kind = c_char) :: <name>_dummy(*)',
 		 :postcallStatements => ''
 	 }, {	#char**	Safe returning of an output string.
-		 :regex => '^\s*char\s*\*\s*\*\s*(?<name>\w+)\s*$',
+		 :regex => '^\s*char\s*\*\s*\*\s*(?<name>\w+)_optional\s*$',
 		 :placeholders => %w[name],
 		 :dummyName => '<name>',
 		 :acceptAs => 'character(kind = c_char), pointer, optional, intent(inout) :: <name>(:)',
-		 :helperVars => "type(c_ptr), target :: <name>_ptr\n" +
+		 :helperVars => "type(c_ptr), target :: <name>_cptr\n" +
 		 "type(c_ptr) :: <name>_handle\n" +
 		 "integer :: <name>_shape(1)\n" +
 		 "character(kind = c_char), pointer :: <name>_fptr(:)",
 		 :precallStatements => "<name>_handle = c_null_ptr\n" +
-		 "if(present(<name>)) <name>_handle = c_loc(<name>_ptr)",
+		 "if(present(<name>)) <name>_handle = c_loc(<name>_cptr)",
 		 :callExpression => '<name>_handle',
 		 :passAs => 'type(c_ptr), value :: <name>',
 		 :postcallStatements => "if(present(<name>)) then\n" +
-		 "\tif(c_associated(<name>_ptr)) then\n" +
-		 "\t\t<name>_shape(1) = int(lib_strlen(<name>_ptr))\n" +
-		 "\t\tcall c_f_pointer(<name>_ptr, <name>_fptr, <name>_shape)\n" +
+		 "\tif(c_associated(<name>_cptr)) then\n" +
+		 "\t\t<name>_shape(1) = int(lib_strlen(<name>_cptr))\n" +
+		 "\t\tcall c_f_pointer(<name>_cptr, <name>_fptr, <name>_shape)\n" +
 		 "\t\tallocate(<name>(<name>_shape(1)))\n" +
 		 "\t\t<name> = <name>_fptr\n" +
-		 "\t\tcall lib_free(<name>_ptr)\n" +
+		 "\t\tcall lib_free(<name>_cptr)\n" +
 		 "\telse\n" +
 		 "\t\t<name> => null()\n" +
 		 "\tend if\n" +

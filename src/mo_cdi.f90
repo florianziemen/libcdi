@@ -3299,188 +3299,162 @@ contains
     end if
   end function cdiIterator_inqVTime
 
-  function cdiIterator_inqLevelType(me_dummy, levelSelector_dummy,&
-  & outName_optional, outLongName_optional, outStdName_optional, outUnit)&
-  & result(f_result)
+  function cdiIterator_inqLevelType(me_dummy, levelSelector_dummy, outName,&
+  & outLongName, outStdName, outUnit) result(f_result)
     integer(c_int) :: f_result
     type(t_CdiIterator), intent(in) :: me_dummy
     integer(c_int), value :: levelSelector_dummy
+    character(kind = c_char), pointer, optional, intent(inout) :: outName(:)
     character(kind = c_char), pointer, optional, intent(inout) ::&
-    & outName_optional(:)
-    character(kind = c_char), pointer, optional, intent(inout) ::&
-    & outLongName_optional(:)
-    character(kind = c_char), pointer, optional, intent(inout) ::&
-    & outStdName_optional(:)
+    & outLongName(:)
+    character(kind = c_char), pointer, optional, intent(inout) :: outStdName(:)
     character(kind = c_char), pointer, optional, intent(inout) :: outUnit(:)
-    type(c_ptr), target :: outName_optional_ptr
-    type(c_ptr) :: outName_optional_handle
-    integer :: outName_optional_shape(1)
-    character(kind = c_char), pointer :: outName_optional_fptr(:)
-    type(c_ptr), target :: outLongName_optional_ptr
-    type(c_ptr) :: outLongName_optional_handle
-    integer :: outLongName_optional_shape(1)
-    character(kind = c_char), pointer :: outLongName_optional_fptr(:)
-    type(c_ptr), target :: outStdName_optional_ptr
-    type(c_ptr) :: outStdName_optional_handle
-    integer :: outStdName_optional_shape(1)
-    character(kind = c_char), pointer :: outStdName_optional_fptr(:)
-    type(c_ptr), target :: outUnit_ptr
+    type(c_ptr), target :: outName_cptr
+    type(c_ptr) :: outName_handle
+    integer :: outName_shape(1)
+    character(kind = c_char), pointer :: outName_fptr(:)
+    type(c_ptr), target :: outLongName_cptr
+    type(c_ptr) :: outLongName_handle
+    integer :: outLongName_shape(1)
+    character(kind = c_char), pointer :: outLongName_fptr(:)
+    type(c_ptr), target :: outStdName_cptr
+    type(c_ptr) :: outStdName_handle
+    integer :: outStdName_shape(1)
+    character(kind = c_char), pointer :: outStdName_fptr(:)
+    type(c_ptr), target :: outUnit_cptr
     type(c_ptr) :: outUnit_handle
     integer :: outUnit_shape(1)
     character(kind = c_char), pointer :: outUnit_fptr(:)
     interface
       function lib_cdiIterator_inqLevelType(me_dummy, levelSelector_dummy,&
-      & outName_optional, outLongName_optional, outStdName_optional, outUnit)&
-      & bind(c, name = 'cdiIterator_inqLevelType') result(c_result)
+      & outName, outLongName, outStdName, outUnit) bind(c, name =&
+      & 'cdiIterator_inqLevelType') result(c_result)
         import c_int, c_ptr
         integer(c_int) :: c_result
         type(c_ptr), value :: me_dummy
         integer(c_int), value :: levelSelector_dummy
-        type(c_ptr), value :: outName_optional
-        type(c_ptr), value :: outLongName_optional
-        type(c_ptr), value :: outStdName_optional
+        type(c_ptr), value :: outName
+        type(c_ptr), value :: outLongName
+        type(c_ptr), value :: outStdName
         type(c_ptr), value :: outUnit
       end function lib_cdiIterator_inqLevelType
     end interface
-    outName_optional_handle = c_null_ptr
-    if(present(outName_optional)) outName_optional_handle =&
-    & c_loc(outName_optional_ptr)
-    outLongName_optional_handle = c_null_ptr
-    if(present(outLongName_optional)) outLongName_optional_handle =&
-    & c_loc(outLongName_optional_ptr)
-    outStdName_optional_handle = c_null_ptr
-    if(present(outStdName_optional)) outStdName_optional_handle =&
-    & c_loc(outStdName_optional_ptr)
+    outName_handle = c_null_ptr
+    if(present(outName)) outName_handle = c_loc(outName_cptr)
+    outLongName_handle = c_null_ptr
+    if(present(outLongName)) outLongName_handle = c_loc(outLongName_cptr)
+    outStdName_handle = c_null_ptr
+    if(present(outStdName)) outStdName_handle = c_loc(outStdName_cptr)
     outUnit_handle = c_null_ptr
-    if(present(outUnit)) outUnit_handle = c_loc(outUnit_ptr)
+    if(present(outUnit)) outUnit_handle = c_loc(outUnit_cptr)
     f_result = lib_cdiIterator_inqLevelType(me_dummy%ptr, levelSelector_dummy,&
-    & outName_optional_handle, outLongName_optional_handle,&
-    & outStdName_optional_handle, outUnit_handle)
-    if(present(outName_optional)) then
-      if(c_associated(outName_optional_ptr)) then
-        outName_optional_shape(1) = int(lib_strlen(outName_optional_ptr))
-        call c_f_pointer(outName_optional_ptr, outName_optional_fptr,&
-        & outName_optional_shape)
-        allocate(outName_optional(outName_optional_shape(1)))
-        outName_optional = outName_optional_fptr
-        call lib_free(outName_optional_ptr)
+    & outName_handle, outLongName_handle, outStdName_handle, outUnit_handle)
+    if(present(outName)) then
+      if(c_associated(outName_cptr)) then
+        outName_shape(1) = int(lib_strlen(outName_cptr))
+        call c_f_pointer(outName_cptr, outName_fptr, outName_shape)
+        allocate(outName(outName_shape(1)))
+        outName = outName_fptr
+        call lib_free(outName_cptr)
       else
-        outName_optional => null()
+        outName => null()
       end if
     end if
-    if(present(outLongName_optional)) then
-      if(c_associated(outLongName_optional_ptr)) then
-        outLongName_optional_shape(1) =&
-        & int(lib_strlen(outLongName_optional_ptr))
-        call c_f_pointer(outLongName_optional_ptr, outLongName_optional_fptr,&
-        & outLongName_optional_shape)
-        allocate(outLongName_optional(outLongName_optional_shape(1)))
-        outLongName_optional = outLongName_optional_fptr
-        call lib_free(outLongName_optional_ptr)
+    if(present(outLongName)) then
+      if(c_associated(outLongName_cptr)) then
+        outLongName_shape(1) = int(lib_strlen(outLongName_cptr))
+        call c_f_pointer(outLongName_cptr, outLongName_fptr, outLongName_shape)
+        allocate(outLongName(outLongName_shape(1)))
+        outLongName = outLongName_fptr
+        call lib_free(outLongName_cptr)
       else
-        outLongName_optional => null()
+        outLongName => null()
       end if
     end if
-    if(present(outStdName_optional)) then
-      if(c_associated(outStdName_optional_ptr)) then
-        outStdName_optional_shape(1) = int(lib_strlen(outStdName_optional_ptr))
-        call c_f_pointer(outStdName_optional_ptr, outStdName_optional_fptr,&
-        & outStdName_optional_shape)
-        allocate(outStdName_optional(outStdName_optional_shape(1)))
-        outStdName_optional = outStdName_optional_fptr
-        call lib_free(outStdName_optional_ptr)
+    if(present(outStdName)) then
+      if(c_associated(outStdName_cptr)) then
+        outStdName_shape(1) = int(lib_strlen(outStdName_cptr))
+        call c_f_pointer(outStdName_cptr, outStdName_fptr, outStdName_shape)
+        allocate(outStdName(outStdName_shape(1)))
+        outStdName = outStdName_fptr
+        call lib_free(outStdName_cptr)
       else
-        outStdName_optional => null()
+        outStdName => null()
       end if
     end if
     if(present(outUnit)) then
-      if(c_associated(outUnit_ptr)) then
-        outUnit_shape(1) = int(lib_strlen(outUnit_ptr))
-        call c_f_pointer(outUnit_ptr, outUnit_fptr, outUnit_shape)
+      if(c_associated(outUnit_cptr)) then
+        outUnit_shape(1) = int(lib_strlen(outUnit_cptr))
+        call c_f_pointer(outUnit_cptr, outUnit_fptr, outUnit_shape)
         allocate(outUnit(outUnit_shape(1)))
         outUnit = outUnit_fptr
-        call lib_free(outUnit_ptr)
+        call lib_free(outUnit_cptr)
       else
         outUnit => null()
       end if
     end if
   end function cdiIterator_inqLevelType
 
-  function cdiIterator_inqLevel(me_dummy, levelSelector_dummy,&
-  & outValue1_optional, outValue2_optional) result(f_result)
+  function cdiIterator_inqLevel(me_dummy, levelSelector_dummy, outValue1,&
+  & outValue2) result(f_result)
     integer(c_int) :: f_result
     type(t_CdiIterator), intent(in) :: me_dummy
     integer(c_int), value :: levelSelector_dummy
-    real(c_double), optional, intent(inout) :: outValue1_optional
-    real(c_double), optional, intent(inout) :: outValue2_optional
-    real(c_double), target :: outValue1_optional_temp
-    type(c_ptr) :: outValue1_optional_ptr
-    real(c_double), target :: outValue2_optional_temp
-    type(c_ptr) :: outValue2_optional_ptr
+    real(c_double), target, optional, intent(inout) :: outValue1
+    real(c_double), target, optional, intent(inout) :: outValue2
+    type(c_ptr) :: outValue1_cptr
+    type(c_ptr) :: outValue2_cptr
     interface
       function lib_cdiIterator_inqLevel(me_dummy, levelSelector_dummy,&
-      & outValue1_optional, outValue2_optional) bind(c, name =&
-      & 'cdiIterator_inqLevel') result(c_result)
+      & outValue1, outValue2) bind(c, name = 'cdiIterator_inqLevel')&
+      & result(c_result)
         import c_int, c_ptr
         integer(c_int) :: c_result
         type(c_ptr), value :: me_dummy
         integer(c_int), value :: levelSelector_dummy
-        type(c_ptr), value :: outValue1_optional
-        type(c_ptr), value :: outValue2_optional
+        type(c_ptr), value :: outValue1
+        type(c_ptr), value :: outValue2
       end function lib_cdiIterator_inqLevel
     end interface
-    outValue1_optional_ptr = c_null_ptr
-    if(present(outValue1_optional)) outValue1_optional_ptr =&
-    & c_loc(outValue1_optional_temp)
-    outValue2_optional_ptr = c_null_ptr
-    if(present(outValue2_optional)) outValue2_optional_ptr =&
-    & c_loc(outValue2_optional_temp)
+    outValue1_cptr = c_null_ptr
+    if(present(outValue1)) outValue1_cptr = c_loc(outValue1)
+    outValue2_cptr = c_null_ptr
+    if(present(outValue2)) outValue2_cptr = c_loc(outValue2)
     f_result = lib_cdiIterator_inqLevel(me_dummy%ptr, levelSelector_dummy,&
-    & outValue1_optional_ptr, outValue2_optional_ptr)
-    if(present(outValue1_optional)) outValue1_optional =&
-    & outValue1_optional_temp
-    if(present(outValue2_optional)) outValue2_optional =&
-    & outValue2_optional_temp
+    & outValue1_cptr, outValue2_cptr)
   end function cdiIterator_inqLevel
 
-  function cdiIterator_inqLevelUuid(me_dummy, outVgridNumber_optional,&
-  & outLevelCount_optional, outUuid_optional_dummy) result(f_result)
+  function cdiIterator_inqLevelUuid(me_dummy, outVgridNumber, outLevelCount,&
+  & outUuid) result(f_result)
     integer(c_int) :: f_result
     type(t_CdiIterator), intent(in) :: me_dummy
-    integer(c_int), optional, intent(inout) :: outVgridNumber_optional
-    integer(c_int), optional, intent(inout) :: outLevelCount_optional
-    integer(kind = c_signed_char), intent(inout) ::&
-    & outUuid_optional_dummy(CDI_UUID_SIZE)
-    integer(c_int), target :: outVgridNumber_optional_temp
-    type(c_ptr) :: outVgridNumber_optional_ptr
-    integer(c_int), target :: outLevelCount_optional_temp
-    type(c_ptr) :: outLevelCount_optional_ptr
+    integer(c_int), optional, target, intent(inout) :: outVgridNumber
+    integer(c_int), optional, target, intent(inout) :: outLevelCount
+    integer(kind = c_signed_char), target, optional, intent(inout) ::&
+    & outUuid(CDI_UUID_SIZE)
+    type(c_ptr) :: outVgridNumber_cptr
+    type(c_ptr) :: outLevelCount_cptr
+    type(c_ptr) :: outUuid_cptr
     interface
-      function lib_cdiIterator_inqLevelUuid(me_dummy, outVgridNumber_optional,&
-      & outLevelCount_optional, outUuid_optional_dummy) bind(c, name =&
-      & 'cdiIterator_inqLevelUuid') result(c_result)
-        import CDI_UUID_SIZE, c_int, c_ptr, c_signed_char
+      function lib_cdiIterator_inqLevelUuid(me_dummy, outVgridNumber,&
+      & outLevelCount, outUuid) bind(c, name = 'cdiIterator_inqLevelUuid')&
+      & result(c_result)
+        import c_int, c_ptr
         integer(c_int) :: c_result
         type(c_ptr), value :: me_dummy
-        type(c_ptr), value :: outVgridNumber_optional
-        type(c_ptr), value :: outLevelCount_optional
-        integer(kind = c_signed_char), intent(inout) ::&
-        & outUuid_optional_dummy(CDI_UUID_SIZE)
+        type(c_ptr), value :: outVgridNumber
+        type(c_ptr), value :: outLevelCount
+        type(c_ptr), value :: outUuid
       end function lib_cdiIterator_inqLevelUuid
     end interface
-    outVgridNumber_optional_ptr = c_null_ptr
-    if(present(outVgridNumber_optional)) outVgridNumber_optional_ptr =&
-    & c_loc(outVgridNumber_optional_temp)
-    outLevelCount_optional_ptr = c_null_ptr
-    if(present(outLevelCount_optional)) outLevelCount_optional_ptr =&
-    & c_loc(outLevelCount_optional_temp)
-    f_result = lib_cdiIterator_inqLevelUuid(me_dummy%ptr,&
-    & outVgridNumber_optional_ptr, outLevelCount_optional_ptr,&
-    & outUuid_optional_dummy)
-    if(present(outVgridNumber_optional)) outVgridNumber_optional =&
-    & outVgridNumber_optional_temp
-    if(present(outLevelCount_optional)) outLevelCount_optional =&
-    & outLevelCount_optional_temp
+    outVgridNumber_cptr = c_null_ptr
+    if(present(outVgridNumber)) outVgridNumber_cptr = c_loc(outVgridNumber)
+    outLevelCount_cptr = c_null_ptr
+    if(present(outLevelCount)) outLevelCount_cptr = c_loc(outLevelCount)
+    outUuid_cptr = c_null_ptr
+    if(present(outUuid)) outUuid_cptr = c_loc(outUuid)
+    f_result = lib_cdiIterator_inqLevelUuid(me_dummy%ptr, outVgridNumber_cptr,&
+    & outLevelCount_cptr, outUuid_cptr)
   end function cdiIterator_inqLevelUuid
 
   function cdiIterator_inqParam(me_dummy) result(f_result)
@@ -3565,48 +3539,42 @@ contains
     f_result = lib_cdiIterator_inqGridId(me_dummy%ptr)
   end function cdiIterator_inqGridId
 
-  subroutine cdiIterator_readField(me_dummy, data_dummy, nmiss_optional)
+  subroutine cdiIterator_readField(me_dummy, data_dummy, nmiss)
     type(t_CdiIterator), intent(in) :: me_dummy
     real(c_double), intent(inout) :: data_dummy(*)
-    integer(c_size_t), optional, intent(inout) :: nmiss_optional
-    integer(c_size_t), target :: nmiss_optional_temp
-    type(c_ptr) :: nmiss_optional_ptr
+    integer(c_size_t), optional, target, intent(inout) :: nmiss
+    type(c_ptr) :: nmiss_cptr
     interface
-      subroutine lib_cdiIterator_readField(me_dummy, data_dummy,&
-      & nmiss_optional) bind(c, name = 'cdiIterator_readField')
+      subroutine lib_cdiIterator_readField(me_dummy, data_dummy, nmiss) bind(c,&
+      & name = 'cdiIterator_readField')
         import c_double, c_ptr
         type(c_ptr), value :: me_dummy
         real(c_double), intent(inout) :: data_dummy(*)
-        type(c_ptr), value :: nmiss_optional
+        type(c_ptr), value :: nmiss
       end subroutine lib_cdiIterator_readField
     end interface
-    nmiss_optional_ptr = c_null_ptr
-    if(present(nmiss_optional)) nmiss_optional_ptr = c_loc(nmiss_optional_temp)
-    call lib_cdiIterator_readField(me_dummy%ptr, data_dummy,&
-    & nmiss_optional_ptr)
-    if(present(nmiss_optional)) nmiss_optional = nmiss_optional_temp
+    nmiss_cptr = c_null_ptr
+    if(present(nmiss)) nmiss_cptr = c_loc(nmiss)
+    call lib_cdiIterator_readField(me_dummy%ptr, data_dummy, nmiss_cptr)
   end subroutine cdiIterator_readField
 
-  subroutine cdiIterator_readFieldF(me_dummy, data_dummy, nmiss_optional)
+  subroutine cdiIterator_readFieldF(me_dummy, data_dummy, nmiss)
     type(t_CdiIterator), intent(in) :: me_dummy
     real(c_float), intent(inout) :: data_dummy(*)
-    integer(c_size_t), optional, intent(inout) :: nmiss_optional
-    integer(c_size_t), target :: nmiss_optional_temp
-    type(c_ptr) :: nmiss_optional_ptr
+    integer(c_size_t), optional, target, intent(inout) :: nmiss
+    type(c_ptr) :: nmiss_cptr
     interface
-      subroutine lib_cdiIterator_readFieldF(me_dummy, data_dummy,&
-      & nmiss_optional) bind(c, name = 'cdiIterator_readFieldF')
+      subroutine lib_cdiIterator_readFieldF(me_dummy, data_dummy, nmiss)&
+      & bind(c, name = 'cdiIterator_readFieldF')
         import c_float, c_ptr
         type(c_ptr), value :: me_dummy
         real(c_float), intent(inout) :: data_dummy(*)
-        type(c_ptr), value :: nmiss_optional
+        type(c_ptr), value :: nmiss
       end subroutine lib_cdiIterator_readFieldF
     end interface
-    nmiss_optional_ptr = c_null_ptr
-    if(present(nmiss_optional)) nmiss_optional_ptr = c_loc(nmiss_optional_temp)
-    call lib_cdiIterator_readFieldF(me_dummy%ptr, data_dummy,&
-    & nmiss_optional_ptr)
-    if(present(nmiss_optional)) nmiss_optional = nmiss_optional_temp
+    nmiss_cptr = c_null_ptr
+    if(present(nmiss)) nmiss_cptr = c_loc(nmiss)
+    call lib_cdiIterator_readFieldF(me_dummy%ptr, data_dummy, nmiss_cptr)
   end subroutine cdiIterator_readFieldF
 
   function cdiGribIterator_clone(me_dummy) result(f_result)
