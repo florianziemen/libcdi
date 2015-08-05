@@ -32,7 +32,7 @@ char* gribCopyString(grib_handle* gribHandle, const char* key)
 #ifdef HAVE_GRIB_GET_LENGTH
   if(!grib_get_length(gribHandle, key, &length))
     {
-      char* result = xmalloc(length);
+      result = xmalloc(length);
       if(!grib_get_string(gribHandle, key, result, &length))
         result = xrealloc(result, length);
       else
