@@ -525,9 +525,17 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
 		fprintf(fpinc, "!%36s(", "");
 	      else
 		fprintf(fpinc, ",\n!%36s ", "");
-	      fprintf(fpinc, "%-16s%.*s", funArgSym[funcargtype[i]].f77name,
+              int argType = funcargtype[i];
+              int isArray = argType == ISFLOATV
+                || argType == ISFLOATVV
+                || argType == ISDOUBLEV
+                || argType == ISDOUBLEVV
+                || argType == ISINTV
+                || argType == ISINTVV;
+	      fprintf(fpinc, "%-16s%.*s%s", funArgSym[argType].f77name,
                       (int)(funcargname[i].rm_eo - funcargname[i].rm_so),
-                      line + funcargname[i].rm_so);
+                      line + funcargname[i].rm_so,
+                      isArray ? "(*)" : "");
 	    }
 	  if ( funcargc )
 	    fprintf(fpinc, ")\n");

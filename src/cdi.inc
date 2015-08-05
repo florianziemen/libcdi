@@ -607,28 +607,28 @@
 !                     streamWriteVar
 !                                    (INTEGER         streamID,
 !                                     INTEGER         varID,
-!                                     DOUBLEPRECISION data,
+!                                     DOUBLEPRECISION data(*),
 !                                     INTEGER         nmiss)
       EXTERNAL        streamWriteVar
 
 !                     streamWriteVarF
 !                                    (INTEGER         streamID,
 !                                     INTEGER         varID,
-!                                     REAL            data,
+!                                     REAL            data(*),
 !                                     INTEGER         nmiss)
       EXTERNAL        streamWriteVarF
 
 !                     streamReadVar
 !                                    (INTEGER         streamID,
 !                                     INTEGER         varID,
-!                                     DOUBLEPRECISION data,
+!                                     DOUBLEPRECISION data(*),
 !                                     INTEGER         nmiss)
       EXTERNAL        streamReadVar
 
 !                     streamReadVarF
 !                                    (INTEGER         streamID,
 !                                     INTEGER         varID,
-!                                     REAL            data,
+!                                     REAL            data(*),
 !                                     INTEGER         nmiss)
       EXTERNAL        streamReadVarF
 
@@ -636,7 +636,7 @@
 !                                    (INTEGER         streamID,
 !                                     INTEGER         varID,
 !                                     INTEGER         levelID,
-!                                     DOUBLEPRECISION data,
+!                                     DOUBLEPRECISION data(*),
 !                                     INTEGER         nmiss)
       EXTERNAL        streamWriteVarSlice
 
@@ -644,7 +644,7 @@
 !                                    (INTEGER         streamID,
 !                                     INTEGER         varID,
 !                                     INTEGER         levelID,
-!                                     REAL            data,
+!                                     REAL            data(*),
 !                                     INTEGER         nmiss)
       EXTERNAL        streamWriteVarSliceF
 
@@ -652,7 +652,7 @@
 !                                    (INTEGER         streamID,
 !                                     INTEGER         varID,
 !                                     INTEGER         levelID,
-!                                     DOUBLEPRECISION data,
+!                                     DOUBLEPRECISION data(*),
 !                                     INTEGER         nmiss)
       EXTERNAL        streamReadVarSlice
 
@@ -660,15 +660,15 @@
 !                                    (INTEGER         streamID,
 !                                     INTEGER         varID,
 !                                     INTEGER         levelID,
-!                                     REAL            data,
+!                                     REAL            data(*),
 !                                     INTEGER         nmiss)
       EXTERNAL        streamReadVarSliceF
 
 !                     streamWriteVarChunk
 !                                    (INTEGER         streamID,
 !                                     INTEGER         varID,
-!                                     INTEGER         rect,
-!                                     DOUBLEPRECISION data,
+!                                     INTEGER         rect(*),
+!                                     DOUBLEPRECISION data(*),
 !                                     INTEGER         nmiss)
       EXTERNAL        streamWriteVarChunk
 
@@ -689,19 +689,19 @@
 
 !                     streamWriteRecord
 !                                    (INTEGER         streamID,
-!                                     DOUBLEPRECISION data,
+!                                     DOUBLEPRECISION data(*),
 !                                     INTEGER         nmiss)
       EXTERNAL        streamWriteRecord
 
 !                     streamWriteRecordF
 !                                    (INTEGER         streamID,
-!                                     REAL            data,
+!                                     REAL            data(*),
 !                                     INTEGER         nmiss)
       EXTERNAL        streamWriteRecordF
 
 !                     streamReadRecord
 !                                    (INTEGER         streamID,
-!                                     DOUBLEPRECISION data,
+!                                     DOUBLEPRECISION data(*),
 !                                     INTEGER         nmiss)
       EXTERNAL        streamReadRecord
 
@@ -1347,7 +1347,7 @@
 !                                     CHARACTER*(*)   name,
 !                                     INTEGER         type,
 !                                     INTEGER         len,
-!                                     INTEGER         ip)
+!                                     INTEGER         ip(*))
       EXTERNAL        vlistDefAttInt
 
       INTEGER         vlistDefAttFlt
@@ -1356,7 +1356,7 @@
 !                                     CHARACTER*(*)   name,
 !                                     INTEGER         type,
 !                                     INTEGER         len,
-!                                     DOUBLEPRECISION dp)
+!                                     DOUBLEPRECISION dp(*))
       EXTERNAL        vlistDefAttFlt
 
       INTEGER         vlistDefAttTxt
@@ -1372,7 +1372,7 @@
 !                                     INTEGER         varID,
 !                                     CHARACTER*(*)   name,
 !                                     INTEGER         mlen,
-!                                     INTEGER         ip)
+!                                     INTEGER         ip(*))
       EXTERNAL        vlistInqAttInt
 
       INTEGER         vlistInqAttFlt
@@ -1380,7 +1380,7 @@
 !                                     INTEGER         varID,
 !                                     CHARACTER*(*)   name,
 !                                     INTEGER         mlen,
-!                                     DOUBLEPRECISION dp)
+!                                     DOUBLEPRECISION dp(*))
       EXTERNAL        vlistInqAttFlt
 
       INTEGER         vlistInqAttTxt
@@ -1409,22 +1409,22 @@
 
 !                     gridDefMaskGME
 !                                    (INTEGER         gridID,
-!                                     INTEGER         mask)
+!                                     INTEGER         mask(*))
       EXTERNAL        gridDefMaskGME
 
       INTEGER         gridInqMaskGME
 !                                    (INTEGER         gridID,
-!                                     INTEGER         mask)
+!                                     INTEGER         mask(*))
       EXTERNAL        gridInqMaskGME
 
 !                     gridDefMask
 !                                    (INTEGER         gridID,
-!                                     INTEGER         mask)
+!                                     INTEGER         mask(*))
       EXTERNAL        gridDefMask
 
       INTEGER         gridInqMask
 !                                    (INTEGER         gridID,
-!                                     INTEGER         mask)
+!                                     INTEGER         mask(*))
       EXTERNAL        gridInqMask
 
 !                     gridPrint
@@ -1483,22 +1483,22 @@
 
 !                     gridDefXvals
 !                                    (INTEGER         gridID,
-!                                     DOUBLEPRECISION xvals)
+!                                     DOUBLEPRECISION xvals(*))
       EXTERNAL        gridDefXvals
 
       INTEGER         gridInqXvals
 !                                    (INTEGER         gridID,
-!                                     DOUBLEPRECISION xvals)
+!                                     DOUBLEPRECISION xvals(*))
       EXTERNAL        gridInqXvals
 
 !                     gridDefYvals
 !                                    (INTEGER         gridID,
-!                                     DOUBLEPRECISION yvals)
+!                                     DOUBLEPRECISION yvals(*))
       EXTERNAL        gridDefYvals
 
       INTEGER         gridInqYvals
 !                                    (INTEGER         gridID,
-!                                     DOUBLEPRECISION yvals)
+!                                     DOUBLEPRECISION yvals(*))
       EXTERNAL        gridInqYvals
 
 !                     gridDefXname
@@ -1791,12 +1791,12 @@
 
 !                     gridDefArea
 !                                    (INTEGER         gridID,
-!                                     DOUBLEPRECISION area)
+!                                     DOUBLEPRECISION area(*))
       EXTERNAL        gridDefArea
 
 !                     gridInqArea
 !                                    (INTEGER         gridID,
-!                                     DOUBLEPRECISION area)
+!                                     DOUBLEPRECISION area(*))
       EXTERNAL        gridInqArea
 
       INTEGER         gridHasArea
@@ -1814,33 +1814,33 @@
 
 !                     gridDefXbounds
 !                                    (INTEGER         gridID,
-!                                     DOUBLEPRECISION xbounds)
+!                                     DOUBLEPRECISION xbounds(*))
       EXTERNAL        gridDefXbounds
 
       INTEGER         gridInqXbounds
 !                                    (INTEGER         gridID,
-!                                     DOUBLEPRECISION xbounds)
+!                                     DOUBLEPRECISION xbounds(*))
       EXTERNAL        gridInqXbounds
 
 !                     gridDefYbounds
 !                                    (INTEGER         gridID,
-!                                     DOUBLEPRECISION ybounds)
+!                                     DOUBLEPRECISION ybounds(*))
       EXTERNAL        gridDefYbounds
 
       INTEGER         gridInqYbounds
 !                                    (INTEGER         gridID,
-!                                     DOUBLEPRECISION ybounds)
+!                                     DOUBLEPRECISION ybounds(*))
       EXTERNAL        gridInqYbounds
 
 !                     gridDefRowlon
 !                                    (INTEGER         gridID,
 !                                     INTEGER         nrowlon,
-!                                     INTEGER         rowlon)
+!                                     INTEGER         rowlon(*))
       EXTERNAL        gridDefRowlon
 
 !                     gridInqRowlon
 !                                    (INTEGER         gridID,
-!                                     INTEGER         rowlon)
+!                                     INTEGER         rowlon(*))
       EXTERNAL        gridInqRowlon
 
 !                     gridChangeType
@@ -1898,12 +1898,12 @@
 
 !                     zaxisDefLevels
 !                                    (INTEGER         zaxisID,
-!                                     DOUBLEPRECISION levels)
+!                                     DOUBLEPRECISION levels(*))
       EXTERNAL        zaxisDefLevels
 
 !                     zaxisInqLevels
 !                                    (INTEGER         zaxisID,
-!                                     DOUBLEPRECISION levels)
+!                                     DOUBLEPRECISION levels(*))
       EXTERNAL        zaxisInqLevels
 
 !                     zaxisDefLevel
@@ -2010,12 +2010,12 @@
 !                     zaxisDefVct
 !                                    (INTEGER         zaxisID,
 !                                     INTEGER         size,
-!                                     DOUBLEPRECISION vct)
+!                                     DOUBLEPRECISION vct(*))
       EXTERNAL        zaxisDefVct
 
 !                     zaxisInqVct
 !                                    (INTEGER         zaxisID,
-!                                     DOUBLEPRECISION vct)
+!                                     DOUBLEPRECISION vct(*))
       EXTERNAL        zaxisInqVct
 
       INTEGER         zaxisInqVctSize
@@ -2024,12 +2024,12 @@
 
 !                     zaxisDefLbounds
 !                                    (INTEGER         zaxisID,
-!                                     DOUBLEPRECISION lbounds)
+!                                     DOUBLEPRECISION lbounds(*))
       EXTERNAL        zaxisDefLbounds
 
       INTEGER         zaxisInqLbounds
 !                                    (INTEGER         zaxisID,
-!                                     DOUBLEPRECISION lbounds)
+!                                     DOUBLEPRECISION lbounds(*))
       EXTERNAL        zaxisInqLbounds
 
       DOUBLEPRECISION zaxisInqLbound
@@ -2039,12 +2039,12 @@
 
 !                     zaxisDefUbounds
 !                                    (INTEGER         zaxisID,
-!                                     DOUBLEPRECISION ubounds)
+!                                     DOUBLEPRECISION ubounds(*))
       EXTERNAL        zaxisDefUbounds
 
       INTEGER         zaxisInqUbounds
 !                                    (INTEGER         zaxisID,
-!                                     DOUBLEPRECISION ubounds)
+!                                     DOUBLEPRECISION ubounds(*))
       EXTERNAL        zaxisInqUbounds
 
       DOUBLEPRECISION zaxisInqUbound
@@ -2054,12 +2054,12 @@
 
 !                     zaxisDefWeights
 !                                    (INTEGER         zaxisID,
-!                                     DOUBLEPRECISION weights)
+!                                     DOUBLEPRECISION weights(*))
       EXTERNAL        zaxisDefWeights
 
       INTEGER         zaxisInqWeights
 !                                    (INTEGER         zaxisID,
-!                                     DOUBLEPRECISION weights)
+!                                     DOUBLEPRECISION weights(*))
       EXTERNAL        zaxisInqWeights
 
 !                     zaxisChangeType
