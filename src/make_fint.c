@@ -87,7 +87,8 @@ static void doctotxt(FILE *fp, Docu *doc, size_t ndoc)
 }
 
 enum cftype {ISVOID, ISCONSTSTRING, ISINT, ISREAL, ISDOUBLE, ISMPI_COMM,
-             ISXT_IDXLIST, ISCHOICE, ISINTP, ISINTV, ISINTVV, ISREALP,
+             ISXT_IDXLIST, ISCHOICE, ISINTP, ISFLOATV, ISFLOATVV,
+             ISDOUBLEV, ISDOUBLEVV, ISINTV, ISINTVV, ISREALP,
              ISDOUBLEP, ISCBUF, ISUUID, ISUCHAR, ISSTRING, ISSTRINGP,
              VOIDFUNCVOID,
              NUM_KNOWN_ARG_TYPES};
@@ -124,6 +125,7 @@ struct symbol {
 /* white-space */
 #define WS "[[:blank:]\n]"
 #define NWS "[^[:blank:]\n]"
+/* Note: size of this table must match the cftype enum */
 static struct symbol funArgSym[]
   = { { "",                "",        "void",
         "^"WS"*void"WS"*)", 0, 0, 0 },
@@ -145,6 +147,18 @@ static struct symbol funArgSym[]
         "^"WS"*const"WS"+void"WS"*\\*"WS"*"SYMRE"?"WS"*[,\\)]", 1, 0, 0 },
       { "INTEGER",         "PINT",    "int *%.*s",
         "^"WS"*(const"WS"+)?int"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2, 0, 0 },
+      { "REAL",            "FLOATV",  "float %.*s[]",
+        "^"WS"*(const"WS"+)?float("WS"+"SYMRE")?"WS"*\\[[^]]*\\]"
+        WS"*[,\\)]", 3, 0, 0 },
+      { "REAL",            "FLOATVV", "float %.*s[][]",
+        "^"WS"*(const"WS"+)?float("WS"+"SYMRE")?"WS"*\\[[^]]*\\]"
+        WS"*\\[[^]]*\\]"WS"*[,\\)]", 3, 0, 0 },
+      { "DOUBLEPRECISION", "DOUBLEV",  "double %.*s[]",
+        "^"WS"*(const"WS"+)?double("WS"+"SYMRE")?"WS"*\\[[^]]*\\]"
+        WS"*[,\\)]", 3, 0, 0 },
+      { "DOUBLEPRECISION", "DOUBLEVV", "double %.*s[][]",
+        "^"WS"*(const"WS"+)?double("WS"+"SYMRE")?"WS"*\\[[^]]*\\]"
+        WS"*\\[[^]]*\\]"WS"*[,\\)]", 3, 0, 0 },
       { "INTEGER",         "INTV",    "int  %.*s[]",
         "^"WS"*(const"WS"+)?int("WS"+"SYMRE")?"WS"*\\[[^]]*\\]"
         WS"*[,\\)]", 3, 0, 0 },

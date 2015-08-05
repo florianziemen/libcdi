@@ -150,7 +150,7 @@ $argumentTemplates =
 	 #these templates must precede the more general templates for pointer arguments.
 	 #That way, we can override the more general template with the more special one if both match.
 	 {	#<integerTypes>* <name>_vec
-		 :regex => '^\s*(?<type><integerTypes>)\s*\*\s*(?<name>\w+_vec)\s*$',
+		 :regex => '^\s*(?<type><integerTypes>)\s*(?:\*\s*(?<name>\w+_vec)|(?<name>\w+)\[\])\s*$',
 		 :placeholders => %w[name type],
 		 :dummyName => '<name>_dummy',
 		 :acceptAs => 'integer(c_<type>), intent(inout) :: <name>_dummy(*)',
@@ -160,7 +160,7 @@ $argumentTemplates =
 		 :passAs => 'integer(c_<type>), intent(inout) :: <name>_dummy(*)',
 		 :postcallStatements => ""
 	 }, {	#<floatTypes>* <name>_vec
-		 :regex => '^\s*(?<type><floatTypes>)\s*\*\s*(?<name>\w+_vec)\s*$',
+		 :regex => '^\s*(?<type><floatTypes>)\s*(?:\*\s*(?<name>\w+_vec)|(?<name>\w+)\[\])\s*$',
 		 :placeholders => %w[name type],
 		 :dummyName => '<name>_dummy',
 		 :acceptAs => 'real(c_<type>), intent(inout) :: <name>_dummy(*)',
@@ -180,7 +180,7 @@ $argumentTemplates =
 		 :passAs => 'integer(kind = c_signed_char), intent(inout) :: <name>_dummy(<size>)',
 		 :postcallStatements => ""
 	 }, {	#const <integerTypes>* <name>_vec
-		 :regex => '^\s*const\s+(?<type><integerTypes>)\s*\*\s*(?<name>\w+_vec)\s*$',
+		 :regex => '^\s*const\s+(?<type><integerTypes>)\s*(?:\*\s*(?<name>\w+_vec)|(?<name>\w+)\[\])\s*$',
 		 :placeholders => %w[name type],
 		 :dummyName => '<name>_dummy',
 		 :acceptAs => 'integer(c_<type>), intent(in) :: <name>_dummy(*)',
@@ -190,7 +190,7 @@ $argumentTemplates =
 		 :passAs => 'integer(c_<type>), intent(in) :: <name>_dummy(*)',
 		 :postcallStatements => ""
 	 }, {	#const <floatTypes>* <name>_vec
-		 :regex => '^\s*const\s+(?<type><floatTypes>)\s*\*\s*(?<name>\w+_vec)\s*$',
+		 :regex => '^\s*const\s+(?<type><floatTypes>)\s*(?:\*\s*(?<name>\w+_vec)|(?<name>\w+)\[\])\s*$',
 		 :placeholders => %w[name type],
 		 :dummyName => '<name>_dummy',
 		 :acceptAs => 'real(c_<type>), intent(in) :: <name>_dummy(*)',

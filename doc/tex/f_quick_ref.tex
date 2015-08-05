@@ -97,7 +97,7 @@ Define the UUID of an unstructured grid.
 \section*{\tt \htmlref{gridDefXbounds}{gridDefXbounds}}
 
 \begin{verbatim}
-    SUBROUTINE gridDefXbounds (INTEGER gridID, DOUBLEPRECISION xbounds_vec)
+    SUBROUTINE gridDefXbounds (INTEGER gridID, DOUBLEPRECISION xbounds)
 \end{verbatim}
 
 Define the bounds of a X-axis.
@@ -142,7 +142,7 @@ Define the units of a X-axis.
 \section*{\tt \htmlref{gridDefXvals}{gridDefXvals}}
 
 \begin{verbatim}
-    SUBROUTINE gridDefXvals (INTEGER gridID, DOUBLEPRECISION xvals_vec)
+    SUBROUTINE gridDefXvals (INTEGER gridID, DOUBLEPRECISION xvals)
 \end{verbatim}
 
 Define the values of a X-axis.
@@ -151,7 +151,7 @@ Define the values of a X-axis.
 \section*{\tt \htmlref{gridDefYbounds}{gridDefYbounds}}
 
 \begin{verbatim}
-    SUBROUTINE gridDefYbounds (INTEGER gridID, DOUBLEPRECISION ybounds_vec)
+    SUBROUTINE gridDefYbounds (INTEGER gridID, DOUBLEPRECISION ybounds)
 \end{verbatim}
 
 Define the bounds of a Y-axis.
@@ -196,7 +196,7 @@ Define the units of a Y-axis.
 \section*{\tt \htmlref{gridDefYvals}{gridDefYvals}}
 
 \begin{verbatim}
-    SUBROUTINE gridDefYvals (INTEGER gridID, DOUBLEPRECISION yvals_vec)
+    SUBROUTINE gridDefYvals (INTEGER gridID, DOUBLEPRECISION yvals)
 \end{verbatim}
 
 Define the values of a Y-axis.
@@ -304,7 +304,7 @@ Get the UUID of an unstructured grid.
 \section*{\tt \htmlref{gridInqXbounds}{gridInqXbounds}}
 
 \begin{verbatim}
-    INTEGER FUNCTION gridInqXbounds (INTEGER gridID, DOUBLEPRECISION xbounds_vec)
+    INTEGER FUNCTION gridInqXbounds (INTEGER gridID, DOUBLEPRECISION xbounds)
 \end{verbatim}
 
 Get the bounds of a X-axis.
@@ -367,7 +367,7 @@ Get one value of a X-axis.
 \section*{\tt \htmlref{gridInqXvals}{gridInqXvals}}
 
 \begin{verbatim}
-    INTEGER FUNCTION gridInqXvals (INTEGER gridID, DOUBLEPRECISION xvals_vec)
+    INTEGER FUNCTION gridInqXvals (INTEGER gridID, DOUBLEPRECISION xvals)
 \end{verbatim}
 
 Get all values of a X-axis.
@@ -376,7 +376,7 @@ Get all values of a X-axis.
 \section*{\tt \htmlref{gridInqYbounds}{gridInqYbounds}}
 
 \begin{verbatim}
-    INTEGER FUNCTION gridInqYbounds (INTEGER gridID, DOUBLEPRECISION ybounds_vec)
+    INTEGER FUNCTION gridInqYbounds (INTEGER gridID, DOUBLEPRECISION ybounds)
 \end{verbatim}
 
 Get the bounds of a Y-axis.
@@ -439,7 +439,7 @@ Get one value of a Y-axis.
 \section*{\tt \htmlref{gridInqYvals}{gridInqYvals}}
 
 \begin{verbatim}
-    INTEGER FUNCTION gridInqYvals (INTEGER gridID, DOUBLEPRECISION yvals_vec)
+    INTEGER FUNCTION gridInqYvals (INTEGER gridID, DOUBLEPRECISION yvals)
 \end{verbatim}
 
 Get all values of a Y-axis.
@@ -574,8 +574,8 @@ Create a new dataset.
 \section*{\tt \htmlref{streamReadVar}{streamReadVar}}
 
 \begin{verbatim}
-    SUBROUTINE streamReadVar (INTEGER streamID, INTEGER varID,
-                              DOUBLEPRECISION data_vec, INTEGER nmiss)
+    SUBROUTINE streamReadVar (INTEGER streamID, INTEGER varID, DOUBLEPRECISION data,
+                              INTEGER nmiss)
 \end{verbatim}
 
 Read a variable.
@@ -585,7 +585,7 @@ Read a variable.
 
 \begin{verbatim}
     SUBROUTINE streamReadVarSlice (INTEGER streamID, INTEGER varID, INTEGER levelID,
-                                   DOUBLEPRECISION data_vec, INTEGER nmiss)
+                                   DOUBLEPRECISION data, INTEGER nmiss)
 \end{verbatim}
 
 Read a horizontal slice of a variable.
@@ -603,8 +603,8 @@ Synchronize an Open Dataset to Disk.
 \section*{\tt \htmlref{streamWriteVar}{streamWriteVar}}
 
 \begin{verbatim}
-    SUBROUTINE streamWriteVar (INTEGER streamID, INTEGER varID,
-                               DOUBLEPRECISION data_vec, INTEGER nmiss)
+    SUBROUTINE streamWriteVar (INTEGER streamID, INTEGER varID, DOUBLEPRECISION data,
+                               INTEGER nmiss)
 \end{verbatim}
 
 Write a variable.
@@ -614,7 +614,7 @@ Write a variable.
 
 \begin{verbatim}
     SUBROUTINE streamWriteVarSlice (INTEGER streamID, INTEGER varID, INTEGER levelID,
-                                    DOUBLEPRECISION data_vec, INTEGER nmiss)
+                                    DOUBLEPRECISION data, INTEGER nmiss)
 \end{verbatim}
 
 Write a horizontal slice of a variable.
@@ -860,7 +860,7 @@ Create a variable list.
 \begin{verbatim}
     INTEGER FUNCTION vlistDefAttFlt (INTEGER vlistID, INTEGER varID,
                                      CHARACTER*(*) name, INTEGER type, INTEGER len,
-                                     DOUBLEPRECISION dp_vec)
+                                     DOUBLEPRECISION dp)
 \end{verbatim}
 
 Define a floating point attribute.
@@ -871,7 +871,7 @@ Define a floating point attribute.
 \begin{verbatim}
     INTEGER FUNCTION vlistDefAttInt (INTEGER vlistID, INTEGER varID,
                                      CHARACTER*(*) name, INTEGER type, INTEGER len,
-                                     INTEGER ip_vec)
+                                     INTEGER ip)
 \end{verbatim}
 
 Define an integer attribute.
@@ -1065,7 +1065,7 @@ Get information about an attribute.
 \begin{verbatim}
     INTEGER FUNCTION vlistInqAttFlt (INTEGER vlistID, INTEGER varID,
                                      CHARACTER*(*) name, INTEGER mlen,
-                                     DOUBLEPRECISION dp_vec)
+                                     DOUBLEPRECISION dp)
 \end{verbatim}
 
 Get the value(s) of a floating point attribute.
@@ -1075,8 +1075,7 @@ Get the value(s) of a floating point attribute.
 
 \begin{verbatim}
     INTEGER FUNCTION vlistInqAttInt (INTEGER vlistID, INTEGER varID,
-                                     CHARACTER*(*) name, INTEGER mlen,
-                                     INTEGER ip_vec)
+                                     CHARACTER*(*) name, INTEGER mlen, INTEGER ip)
 \end{verbatim}
 
 Get the value(s) of an integer attribute.
@@ -1299,7 +1298,7 @@ Define one level of a Z-axis.
 \section*{\tt \htmlref{zaxisDefLevels}{zaxisDefLevels}}
 
 \begin{verbatim}
-    SUBROUTINE zaxisDefLevels (INTEGER zaxisID, DOUBLEPRECISION levels_vec)
+    SUBROUTINE zaxisDefLevels (INTEGER zaxisID, DOUBLEPRECISION levels)
 \end{verbatim}
 
 Define the levels of a Z-axis.
@@ -1389,7 +1388,7 @@ Get one level of a Z-axis.
 \section*{\tt \htmlref{zaxisInqLevels}{zaxisInqLevels}}
 
 \begin{verbatim}
-    SUBROUTINE zaxisInqLevels (INTEGER zaxisID, DOUBLEPRECISION levels_vec)
+    SUBROUTINE zaxisInqLevels (INTEGER zaxisID, DOUBLEPRECISION levels)
 \end{verbatim}
 
 Get all levels of a Z-axis.

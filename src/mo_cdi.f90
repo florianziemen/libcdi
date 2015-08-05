@@ -834,89 +834,89 @@ module mo_cdi
       integer(c_int) :: f_result
     end function streamInqNvars
 
-    subroutine streamWriteVar(streamID_dummy, varID_dummy, data_vec_dummy,&
+    subroutine streamWriteVar(streamID_dummy, varID_dummy, data_dummy,&
     & nmiss_dummy) bind(c, name = 'streamWriteVar')
       import c_double, c_int
       integer(c_int), value :: streamID_dummy
       integer(c_int), value :: varID_dummy
-      real(c_double), intent(in) :: data_vec_dummy(*)
+      real(c_double), intent(in) :: data_dummy(*)
       integer(c_int), value :: nmiss_dummy
     end subroutine streamWriteVar
 
-    subroutine streamWriteVarF(streamID_dummy, varID_dummy, data_vec_dummy,&
+    subroutine streamWriteVarF(streamID_dummy, varID_dummy, data_dummy,&
     & nmiss_dummy) bind(c, name = 'streamWriteVarF')
       import c_float, c_int
       integer(c_int), value :: streamID_dummy
       integer(c_int), value :: varID_dummy
-      real(c_float), intent(in) :: data_vec_dummy(*)
+      real(c_float), intent(in) :: data_dummy(*)
       integer(c_int), value :: nmiss_dummy
     end subroutine streamWriteVarF
 
-    subroutine streamReadVar(streamID_dummy, varID_dummy, data_vec_dummy,&
+    subroutine streamReadVar(streamID_dummy, varID_dummy, data_dummy,&
     & nmiss_dummy) bind(c, name = 'streamReadVar')
       import c_double, c_int
       integer(c_int), value :: streamID_dummy
       integer(c_int), value :: varID_dummy
-      real(c_double), intent(inout) :: data_vec_dummy(*)
+      real(c_double), intent(inout) :: data_dummy(*)
       integer(c_int), intent(inout) :: nmiss_dummy
     end subroutine streamReadVar
 
-    subroutine streamReadVarF(streamID_dummy, varID_dummy, data_vec_dummy,&
+    subroutine streamReadVarF(streamID_dummy, varID_dummy, data_dummy,&
     & nmiss_dummy) bind(c, name = 'streamReadVarF')
       import c_float, c_int
       integer(c_int), value :: streamID_dummy
       integer(c_int), value :: varID_dummy
-      real(c_float), intent(inout) :: data_vec_dummy(*)
+      real(c_float), intent(inout) :: data_dummy(*)
       integer(c_int), intent(inout) :: nmiss_dummy
     end subroutine streamReadVarF
 
     subroutine streamWriteVarSlice(streamID_dummy, varID_dummy, levelID_dummy,&
-    & data_vec_dummy, nmiss_dummy) bind(c, name = 'streamWriteVarSlice')
+    & data_dummy, nmiss_dummy) bind(c, name = 'streamWriteVarSlice')
       import c_double, c_int
       integer(c_int), value :: streamID_dummy
       integer(c_int), value :: varID_dummy
       integer(c_int), value :: levelID_dummy
-      real(c_double), intent(in) :: data_vec_dummy(*)
+      real(c_double), intent(in) :: data_dummy(*)
       integer(c_int), value :: nmiss_dummy
     end subroutine streamWriteVarSlice
 
     subroutine streamWriteVarSliceF(streamID_dummy, varID_dummy, levelID_dummy,&
-    & data_vec_dummy, nmiss_dummy) bind(c, name = 'streamWriteVarSliceF')
+    & data_dummy, nmiss_dummy) bind(c, name = 'streamWriteVarSliceF')
       import c_float, c_int
       integer(c_int), value :: streamID_dummy
       integer(c_int), value :: varID_dummy
       integer(c_int), value :: levelID_dummy
-      real(c_float), intent(in) :: data_vec_dummy(*)
+      real(c_float), intent(in) :: data_dummy(*)
       integer(c_int), value :: nmiss_dummy
     end subroutine streamWriteVarSliceF
 
     subroutine streamReadVarSlice(streamID_dummy, varID_dummy, levelID_dummy,&
-    & data_vec_dummy, nmiss_dummy) bind(c, name = 'streamReadVarSlice')
+    & data_dummy, nmiss_dummy) bind(c, name = 'streamReadVarSlice')
       import c_double, c_int
       integer(c_int), value :: streamID_dummy
       integer(c_int), value :: varID_dummy
       integer(c_int), value :: levelID_dummy
-      real(c_double), intent(inout) :: data_vec_dummy(*)
+      real(c_double), intent(inout) :: data_dummy(*)
       integer(c_int), intent(inout) :: nmiss_dummy
     end subroutine streamReadVarSlice
 
     subroutine streamReadVarSliceF(streamID_dummy, varID_dummy, levelID_dummy,&
-    & data_vec_dummy, nmiss_dummy) bind(c, name = 'streamReadVarSliceF')
+    & data_dummy, nmiss_dummy) bind(c, name = 'streamReadVarSliceF')
       import c_float, c_int
       integer(c_int), value :: streamID_dummy
       integer(c_int), value :: varID_dummy
       integer(c_int), value :: levelID_dummy
-      real(c_float), intent(inout) :: data_vec_dummy(*)
+      real(c_float), intent(inout) :: data_dummy(*)
       integer(c_int), intent(inout) :: nmiss_dummy
     end subroutine streamReadVarSliceF
 
     subroutine streamWriteVarChunk(streamID_dummy, varID_dummy, rect_dummy,&
-    & data_vec_dummy, nmiss_dummy) bind(c, name = 'streamWriteVarChunk')
+    & data_dummy, nmiss_dummy) bind(c, name = 'streamWriteVarChunk')
       import c_double, c_int
       integer(c_int), value :: streamID_dummy
       integer(c_int), value :: varID_dummy
       integer(c_int), intent(in) :: rect_dummy(2, 3)
-      real(c_double), intent(in) :: data_vec_dummy(*)
+      real(c_double), intent(in) :: data_dummy(*)
       integer(c_int), value :: nmiss_dummy
     end subroutine streamWriteVarChunk
 
@@ -936,27 +936,27 @@ module mo_cdi
       integer(c_int), intent(inout) :: levelID_dummy
     end subroutine streamInqRecord
 
-    subroutine streamWriteRecord(streamID_dummy, data_vec_dummy, nmiss_dummy)&
+    subroutine streamWriteRecord(streamID_dummy, data_dummy, nmiss_dummy)&
     & bind(c, name = 'streamWriteRecord')
       import c_double, c_int
       integer(c_int), value :: streamID_dummy
-      real(c_double), intent(in) :: data_vec_dummy(*)
+      real(c_double), intent(in) :: data_dummy(*)
       integer(c_int), value :: nmiss_dummy
     end subroutine streamWriteRecord
 
-    subroutine streamWriteRecordF(streamID_dummy, data_vec_dummy, nmiss_dummy)&
+    subroutine streamWriteRecordF(streamID_dummy, data_dummy, nmiss_dummy)&
     & bind(c, name = 'streamWriteRecordF')
       import c_float, c_int
       integer(c_int), value :: streamID_dummy
-      real(c_float), intent(in) :: data_vec_dummy(*)
+      real(c_float), intent(in) :: data_dummy(*)
       integer(c_int), value :: nmiss_dummy
     end subroutine streamWriteRecordF
 
-    subroutine streamReadRecord(streamID_dummy, data_vec_dummy, nmiss_dummy)&
+    subroutine streamReadRecord(streamID_dummy, data_dummy, nmiss_dummy)&
     & bind(c, name = 'streamReadRecord')
       import c_double, c_int
       integer(c_int), value :: streamID_dummy
-      real(c_double), intent(inout) :: data_vec_dummy(*)
+      real(c_double), intent(inout) :: data_dummy(*)
       integer(c_int), intent(inout) :: nmiss_dummy
     end subroutine streamReadRecord
 
@@ -1710,33 +1710,33 @@ module mo_cdi
       integer(c_int), value :: gridID_dummy
     end subroutine gridCompress
 
-    subroutine gridDefMaskGME(gridID_dummy, mask_vec_dummy) bind(c, name =&
+    subroutine gridDefMaskGME(gridID_dummy, mask_dummy) bind(c, name =&
     & 'gridDefMaskGME')
       import c_int
       integer(c_int), value :: gridID_dummy
-      integer(c_int), intent(in) :: mask_vec_dummy(*)
+      integer(c_int), intent(in) :: mask_dummy(*)
     end subroutine gridDefMaskGME
 
-    function gridInqMaskGME(gridID_dummy, mask_vec_dummy) bind(c, name =&
+    function gridInqMaskGME(gridID_dummy, mask_dummy) bind(c, name =&
     & 'gridInqMaskGME') result(f_result)
       import c_int
       integer(c_int), value :: gridID_dummy
-      integer(c_int), intent(inout) :: mask_vec_dummy(*)
+      integer(c_int), intent(inout) :: mask_dummy(*)
       integer(c_int) :: f_result
     end function gridInqMaskGME
 
-    subroutine gridDefMask(gridID_dummy, mask_vec_dummy) bind(c, name =&
+    subroutine gridDefMask(gridID_dummy, mask_dummy) bind(c, name =&
     & 'gridDefMask')
       import c_int
       integer(c_int), value :: gridID_dummy
-      integer(c_int), intent(in) :: mask_vec_dummy(*)
+      integer(c_int), intent(in) :: mask_dummy(*)
     end subroutine gridDefMask
 
-    function gridInqMask(gridID_dummy, mask_vec_dummy) bind(c, name =&
+    function gridInqMask(gridID_dummy, mask_dummy) bind(c, name =&
     & 'gridInqMask') result(f_result)
       import c_int
       integer(c_int), value :: gridID_dummy
-      integer(c_int), intent(inout) :: mask_vec_dummy(*)
+      integer(c_int), intent(inout) :: mask_dummy(*)
       integer(c_int) :: f_result
     end function gridInqMask
 
@@ -1823,33 +1823,33 @@ module mo_cdi
       integer(c_int) :: f_result
     end function gridInqNP
 
-    subroutine gridDefXvals(gridID_dummy, xvals_vec_dummy) bind(c, name =&
+    subroutine gridDefXvals(gridID_dummy, xvals_dummy) bind(c, name =&
     & 'gridDefXvals')
       import c_double, c_int
       integer(c_int), value :: gridID_dummy
-      real(c_double), intent(in) :: xvals_vec_dummy(*)
+      real(c_double), intent(in) :: xvals_dummy(*)
     end subroutine gridDefXvals
 
-    function gridInqXvals(gridID_dummy, xvals_vec_dummy) bind(c, name =&
+    function gridInqXvals(gridID_dummy, xvals_dummy) bind(c, name =&
     & 'gridInqXvals') result(f_result)
       import c_double, c_int
       integer(c_int), value :: gridID_dummy
-      real(c_double), intent(inout) :: xvals_vec_dummy(*)
+      real(c_double), intent(inout) :: xvals_dummy(*)
       integer(c_int) :: f_result
     end function gridInqXvals
 
-    subroutine gridDefYvals(gridID_dummy, yvals_vec_dummy) bind(c, name =&
+    subroutine gridDefYvals(gridID_dummy, yvals_dummy) bind(c, name =&
     & 'gridDefYvals')
       import c_double, c_int
       integer(c_int), value :: gridID_dummy
-      real(c_double), intent(in) :: yvals_vec_dummy(*)
+      real(c_double), intent(in) :: yvals_dummy(*)
     end subroutine gridDefYvals
 
-    function gridInqYvals(gridID_dummy, yvals_vec_dummy) bind(c, name =&
+    function gridInqYvals(gridID_dummy, yvals_dummy) bind(c, name =&
     & 'gridInqYvals') result(f_result)
       import c_double, c_int
       integer(c_int), value :: gridID_dummy
-      real(c_double), intent(inout) :: yvals_vec_dummy(*)
+      real(c_double), intent(inout) :: yvals_dummy(*)
       integer(c_int) :: f_result
     end function gridInqYvals
 
@@ -2137,18 +2137,18 @@ module mo_cdi
       real(c_double), intent(inout) :: lat_0_dummy
     end subroutine gridInqLaea
 
-    subroutine gridDefArea(gridID_dummy, area_vec_dummy) bind(c, name =&
+    subroutine gridDefArea(gridID_dummy, area_dummy) bind(c, name =&
     & 'gridDefArea')
       import c_double, c_int
       integer(c_int), value :: gridID_dummy
-      real(c_double), intent(in) :: area_vec_dummy(*)
+      real(c_double), intent(in) :: area_dummy(*)
     end subroutine gridDefArea
 
-    subroutine gridInqArea(gridID_dummy, area_vec_dummy) bind(c, name =&
+    subroutine gridInqArea(gridID_dummy, area_dummy) bind(c, name =&
     & 'gridInqArea')
       import c_double, c_int
       integer(c_int), value :: gridID_dummy
-      real(c_double), intent(inout) :: area_vec_dummy(*)
+      real(c_double), intent(inout) :: area_dummy(*)
     end subroutine gridInqArea
 
     function gridHasArea(gridID_dummy) bind(c, name = 'gridHasArea')&
@@ -2172,49 +2172,49 @@ module mo_cdi
       integer(c_int) :: f_result
     end function gridInqNvertex
 
-    subroutine gridDefXbounds(gridID_dummy, xbounds_vec_dummy) bind(c, name =&
+    subroutine gridDefXbounds(gridID_dummy, xbounds_dummy) bind(c, name =&
     & 'gridDefXbounds')
       import c_double, c_int
       integer(c_int), value :: gridID_dummy
-      real(c_double), intent(in) :: xbounds_vec_dummy(*)
+      real(c_double), intent(in) :: xbounds_dummy(*)
     end subroutine gridDefXbounds
 
-    function gridInqXbounds(gridID_dummy, xbounds_vec_dummy) bind(c, name =&
+    function gridInqXbounds(gridID_dummy, xbounds_dummy) bind(c, name =&
     & 'gridInqXbounds') result(f_result)
       import c_double, c_int
       integer(c_int), value :: gridID_dummy
-      real(c_double), intent(inout) :: xbounds_vec_dummy(*)
+      real(c_double), intent(inout) :: xbounds_dummy(*)
       integer(c_int) :: f_result
     end function gridInqXbounds
 
-    subroutine gridDefYbounds(gridID_dummy, ybounds_vec_dummy) bind(c, name =&
+    subroutine gridDefYbounds(gridID_dummy, ybounds_dummy) bind(c, name =&
     & 'gridDefYbounds')
       import c_double, c_int
       integer(c_int), value :: gridID_dummy
-      real(c_double), intent(in) :: ybounds_vec_dummy(*)
+      real(c_double), intent(in) :: ybounds_dummy(*)
     end subroutine gridDefYbounds
 
-    function gridInqYbounds(gridID_dummy, ybounds_vec_dummy) bind(c, name =&
+    function gridInqYbounds(gridID_dummy, ybounds_dummy) bind(c, name =&
     & 'gridInqYbounds') result(f_result)
       import c_double, c_int
       integer(c_int), value :: gridID_dummy
-      real(c_double), intent(inout) :: ybounds_vec_dummy(*)
+      real(c_double), intent(inout) :: ybounds_dummy(*)
       integer(c_int) :: f_result
     end function gridInqYbounds
 
-    subroutine gridDefRowlon(gridID_dummy, nrowlon_dummy, rowlon_vec_dummy)&
-    & bind(c, name = 'gridDefRowlon')
+    subroutine gridDefRowlon(gridID_dummy, nrowlon_dummy, rowlon_dummy) bind(c,&
+    & name = 'gridDefRowlon')
       import c_int
       integer(c_int), value :: gridID_dummy
       integer(c_int), value :: nrowlon_dummy
-      integer(c_int), intent(in) :: rowlon_vec_dummy(*)
+      integer(c_int), intent(in) :: rowlon_dummy(*)
     end subroutine gridDefRowlon
 
-    subroutine gridInqRowlon(gridID_dummy, rowlon_vec_dummy) bind(c, name =&
+    subroutine gridInqRowlon(gridID_dummy, rowlon_dummy) bind(c, name =&
     & 'gridInqRowlon')
       import c_int
       integer(c_int), value :: gridID_dummy
-      integer(c_int), intent(inout) :: rowlon_vec_dummy(*)
+      integer(c_int), intent(inout) :: rowlon_dummy(*)
     end subroutine gridInqRowlon
 
     subroutine gridChangeType(gridID_dummy, gridtype_dummy) bind(c, name =&
@@ -2286,18 +2286,18 @@ module mo_cdi
       integer(c_int), value :: index_dummy
     end subroutine zaxisPrint
 
-    subroutine zaxisDefLevels(zaxisID_dummy, levels_vec_dummy) bind(c, name =&
+    subroutine zaxisDefLevels(zaxisID_dummy, levels_dummy) bind(c, name =&
     & 'zaxisDefLevels')
       import c_double, c_int
       integer(c_int), value :: zaxisID_dummy
-      real(c_double), intent(in) :: levels_vec_dummy(*)
+      real(c_double), intent(in) :: levels_dummy(*)
     end subroutine zaxisDefLevels
 
-    subroutine zaxisInqLevels(zaxisID_dummy, levels_vec_dummy) bind(c, name =&
+    subroutine zaxisInqLevels(zaxisID_dummy, levels_dummy) bind(c, name =&
     & 'zaxisInqLevels')
       import c_double, c_int
       integer(c_int), value :: zaxisID_dummy
-      real(c_double), intent(inout) :: levels_vec_dummy(*)
+      real(c_double), intent(inout) :: levels_dummy(*)
     end subroutine zaxisInqLevels
 
     subroutine zaxisDefLevel(zaxisID_dummy, levelID_dummy, levels_dummy)&
@@ -2407,19 +2407,19 @@ module mo_cdi
       type(c_ptr) :: f_result
     end function zaxisInqLevelsPtr
 
-    subroutine zaxisDefVct(zaxisID_dummy, size_dummy, vct_vec_dummy) bind(c,&
-    & name = 'zaxisDefVct')
+    subroutine zaxisDefVct(zaxisID_dummy, size_dummy, vct_dummy) bind(c, name =&
+    & 'zaxisDefVct')
       import c_double, c_int
       integer(c_int), value :: zaxisID_dummy
       integer(c_int), value :: size_dummy
-      real(c_double), intent(in) :: vct_vec_dummy(*)
+      real(c_double), intent(in) :: vct_dummy(*)
     end subroutine zaxisDefVct
 
-    subroutine zaxisInqVct(zaxisID_dummy, vct_vec_dummy) bind(c, name =&
+    subroutine zaxisInqVct(zaxisID_dummy, vct_dummy) bind(c, name =&
     & 'zaxisInqVct')
       import c_double, c_int
       integer(c_int), value :: zaxisID_dummy
-      real(c_double), intent(inout) :: vct_vec_dummy(*)
+      real(c_double), intent(inout) :: vct_dummy(*)
     end subroutine zaxisInqVct
 
     function zaxisInqVctSize(zaxisID_dummy) bind(c, name = 'zaxisInqVctSize')&
@@ -2436,18 +2436,18 @@ module mo_cdi
       type(c_ptr) :: f_result
     end function zaxisInqVctPtr
 
-    subroutine zaxisDefLbounds(zaxisID_dummy, lbounds_vec_dummy) bind(c, name =&
+    subroutine zaxisDefLbounds(zaxisID_dummy, lbounds_dummy) bind(c, name =&
     & 'zaxisDefLbounds')
       import c_double, c_int
       integer(c_int), value :: zaxisID_dummy
-      real(c_double), intent(in) :: lbounds_vec_dummy(*)
+      real(c_double), intent(in) :: lbounds_dummy(*)
     end subroutine zaxisDefLbounds
 
-    function zaxisInqLbounds(zaxisID_dummy, lbounds_vec_dummy) bind(c, name =&
+    function zaxisInqLbounds(zaxisID_dummy, lbounds_dummy) bind(c, name =&
     & 'zaxisInqLbounds') result(f_result)
       import c_double, c_int
       integer(c_int), value :: zaxisID_dummy
-      real(c_double), intent(inout) :: lbounds_vec_dummy(*)
+      real(c_double), intent(inout) :: lbounds_dummy(*)
       integer(c_int) :: f_result
     end function zaxisInqLbounds
 
@@ -2459,18 +2459,18 @@ module mo_cdi
       real(c_double) :: f_result
     end function zaxisInqLbound
 
-    subroutine zaxisDefUbounds(zaxisID_dummy, ubounds_vec_dummy) bind(c, name =&
+    subroutine zaxisDefUbounds(zaxisID_dummy, ubounds_dummy) bind(c, name =&
     & 'zaxisDefUbounds')
       import c_double, c_int
       integer(c_int), value :: zaxisID_dummy
-      real(c_double), intent(in) :: ubounds_vec_dummy(*)
+      real(c_double), intent(in) :: ubounds_dummy(*)
     end subroutine zaxisDefUbounds
 
-    function zaxisInqUbounds(zaxisID_dummy, ubounds_vec_dummy) bind(c, name =&
+    function zaxisInqUbounds(zaxisID_dummy, ubounds_dummy) bind(c, name =&
     & 'zaxisInqUbounds') result(f_result)
       import c_double, c_int
       integer(c_int), value :: zaxisID_dummy
-      real(c_double), intent(inout) :: ubounds_vec_dummy(*)
+      real(c_double), intent(inout) :: ubounds_dummy(*)
       integer(c_int) :: f_result
     end function zaxisInqUbounds
 
@@ -2482,18 +2482,18 @@ module mo_cdi
       real(c_double) :: f_result
     end function zaxisInqUbound
 
-    subroutine zaxisDefWeights(zaxisID_dummy, weights_vec_dummy) bind(c, name =&
+    subroutine zaxisDefWeights(zaxisID_dummy, weights_dummy) bind(c, name =&
     & 'zaxisDefWeights')
       import c_double, c_int
       integer(c_int), value :: zaxisID_dummy
-      real(c_double), intent(in) :: weights_vec_dummy(*)
+      real(c_double), intent(in) :: weights_dummy(*)
     end subroutine zaxisDefWeights
 
-    function zaxisInqWeights(zaxisID_dummy, weights_vec_dummy) bind(c, name =&
+    function zaxisInqWeights(zaxisID_dummy, weights_dummy) bind(c, name =&
     & 'zaxisInqWeights') result(f_result)
       import c_double, c_int
       integer(c_int), value :: zaxisID_dummy
-      real(c_double), intent(inout) :: weights_vec_dummy(*)
+      real(c_double), intent(inout) :: weights_dummy(*)
       integer(c_int) :: f_result
     end function zaxisInqWeights
 
@@ -3565,46 +3565,46 @@ contains
     f_result = lib_cdiIterator_inqGridId(me_dummy%ptr)
   end function cdiIterator_inqGridId
 
-  subroutine cdiIterator_readField(me_dummy, data_vec_dummy, nmiss_optional)
+  subroutine cdiIterator_readField(me_dummy, data_dummy, nmiss_optional)
     type(t_CdiIterator), intent(in) :: me_dummy
-    real(c_double), intent(inout) :: data_vec_dummy(*)
+    real(c_double), intent(inout) :: data_dummy(*)
     integer(c_size_t), optional, intent(inout) :: nmiss_optional
     integer(c_size_t), target :: nmiss_optional_temp
     type(c_ptr) :: nmiss_optional_ptr
     interface
-      subroutine lib_cdiIterator_readField(me_dummy, data_vec_dummy,&
+      subroutine lib_cdiIterator_readField(me_dummy, data_dummy,&
       & nmiss_optional) bind(c, name = 'cdiIterator_readField')
         import c_double, c_ptr
         type(c_ptr), value :: me_dummy
-        real(c_double), intent(inout) :: data_vec_dummy(*)
+        real(c_double), intent(inout) :: data_dummy(*)
         type(c_ptr), value :: nmiss_optional
       end subroutine lib_cdiIterator_readField
     end interface
     nmiss_optional_ptr = c_null_ptr
     if(present(nmiss_optional)) nmiss_optional_ptr = c_loc(nmiss_optional_temp)
-    call lib_cdiIterator_readField(me_dummy%ptr, data_vec_dummy,&
+    call lib_cdiIterator_readField(me_dummy%ptr, data_dummy,&
     & nmiss_optional_ptr)
     if(present(nmiss_optional)) nmiss_optional = nmiss_optional_temp
   end subroutine cdiIterator_readField
 
-  subroutine cdiIterator_readFieldF(me_dummy, data_vec_dummy, nmiss_optional)
+  subroutine cdiIterator_readFieldF(me_dummy, data_dummy, nmiss_optional)
     type(t_CdiIterator), intent(in) :: me_dummy
-    real(c_float), intent(inout) :: data_vec_dummy(*)
+    real(c_float), intent(inout) :: data_dummy(*)
     integer(c_size_t), optional, intent(inout) :: nmiss_optional
     integer(c_size_t), target :: nmiss_optional_temp
     type(c_ptr) :: nmiss_optional_ptr
     interface
-      subroutine lib_cdiIterator_readFieldF(me_dummy, data_vec_dummy,&
+      subroutine lib_cdiIterator_readFieldF(me_dummy, data_dummy,&
       & nmiss_optional) bind(c, name = 'cdiIterator_readFieldF')
         import c_float, c_ptr
         type(c_ptr), value :: me_dummy
-        real(c_float), intent(inout) :: data_vec_dummy(*)
+        real(c_float), intent(inout) :: data_dummy(*)
         type(c_ptr), value :: nmiss_optional
       end subroutine lib_cdiIterator_readFieldF
     end interface
     nmiss_optional_ptr = c_null_ptr
     if(present(nmiss_optional)) nmiss_optional_ptr = c_loc(nmiss_optional_temp)
-    call lib_cdiIterator_readFieldF(me_dummy%ptr, data_vec_dummy,&
+    call lib_cdiIterator_readFieldF(me_dummy%ptr, data_dummy,&
     & nmiss_optional_ptr)
     if(present(nmiss_optional)) nmiss_optional = nmiss_optional_temp
   end subroutine cdiIterator_readFieldF
@@ -4504,19 +4504,19 @@ contains
   end function vlistDelAtt
 
   function vlistDefAttInt(vlistID_dummy, varID_dummy, name_dummy, type_dummy,&
-  & len_dummy, ip_vec_dummy) result(f_result)
+  & len_dummy, ip_dummy) result(f_result)
     integer(c_int) :: f_result
     integer(c_int), value :: vlistID_dummy
     integer(c_int), value :: varID_dummy
     character(kind = c_char, len = *), intent(in) :: name_dummy
     integer(c_int), value :: type_dummy
     integer(c_int), value :: len_dummy
-    integer(c_int), intent(in) :: ip_vec_dummy(*)
+    integer(c_int), intent(in) :: ip_dummy(*)
     character(kind = c_char) :: name_temp(len(name_dummy) + 1)
     integer :: name_i
     interface
       function lib_vlistDefAttInt(vlistID_dummy, varID_dummy, name_dummy,&
-      & type_dummy, len_dummy, ip_vec_dummy) bind(c, name = 'vlistDefAttInt')&
+      & type_dummy, len_dummy, ip_dummy) bind(c, name = 'vlistDefAttInt')&
       & result(c_result)
         import c_char, c_int
         integer(c_int) :: c_result
@@ -4525,7 +4525,7 @@ contains
         character(kind = c_char) :: name_dummy(*)
         integer(c_int), value :: type_dummy
         integer(c_int), value :: len_dummy
-        integer(c_int), intent(in) :: ip_vec_dummy(*)
+        integer(c_int), intent(in) :: ip_dummy(*)
       end function lib_vlistDefAttInt
     end interface
     do name_i = 1, len(name_dummy)
@@ -4533,23 +4533,23 @@ contains
     end do
     name_temp(len(name_dummy) + 1) = c_null_char
     f_result = lib_vlistDefAttInt(vlistID_dummy, varID_dummy, name_temp,&
-    & type_dummy, len_dummy, ip_vec_dummy)
+    & type_dummy, len_dummy, ip_dummy)
   end function vlistDefAttInt
 
   function vlistDefAttFlt(vlistID_dummy, varID_dummy, name_dummy, type_dummy,&
-  & len_dummy, dp_vec_dummy) result(f_result)
+  & len_dummy, dp_dummy) result(f_result)
     integer(c_int) :: f_result
     integer(c_int), value :: vlistID_dummy
     integer(c_int), value :: varID_dummy
     character(kind = c_char, len = *), intent(in) :: name_dummy
     integer(c_int), value :: type_dummy
     integer(c_int), value :: len_dummy
-    real(c_double), intent(in) :: dp_vec_dummy(*)
+    real(c_double), intent(in) :: dp_dummy(*)
     character(kind = c_char) :: name_temp(len(name_dummy) + 1)
     integer :: name_i
     interface
       function lib_vlistDefAttFlt(vlistID_dummy, varID_dummy, name_dummy,&
-      & type_dummy, len_dummy, dp_vec_dummy) bind(c, name = 'vlistDefAttFlt')&
+      & type_dummy, len_dummy, dp_dummy) bind(c, name = 'vlistDefAttFlt')&
       & result(c_result)
         import c_char, c_double, c_int
         integer(c_int) :: c_result
@@ -4558,7 +4558,7 @@ contains
         character(kind = c_char) :: name_dummy(*)
         integer(c_int), value :: type_dummy
         integer(c_int), value :: len_dummy
-        real(c_double), intent(in) :: dp_vec_dummy(*)
+        real(c_double), intent(in) :: dp_dummy(*)
       end function lib_vlistDefAttFlt
     end interface
     do name_i = 1, len(name_dummy)
@@ -4566,7 +4566,7 @@ contains
     end do
     name_temp(len(name_dummy) + 1) = c_null_char
     f_result = lib_vlistDefAttFlt(vlistID_dummy, varID_dummy, name_temp,&
-    & type_dummy, len_dummy, dp_vec_dummy)
+    & type_dummy, len_dummy, dp_dummy)
   end function vlistDefAttFlt
 
   function vlistDefAttTxt(vlistID_dummy, varID_dummy, name_dummy, len_dummy,&
@@ -4607,26 +4607,25 @@ contains
   end function vlistDefAttTxt
 
   function vlistInqAttInt(vlistID_dummy, varID_dummy, name_dummy, mlen_dummy,&
-  & ip_vec_dummy) result(f_result)
+  & ip_dummy) result(f_result)
     integer(c_int) :: f_result
     integer(c_int), value :: vlistID_dummy
     integer(c_int), value :: varID_dummy
     character(kind = c_char, len = *), intent(in) :: name_dummy
     integer(c_int), value :: mlen_dummy
-    integer(c_int), intent(inout) :: ip_vec_dummy(*)
+    integer(c_int), intent(inout) :: ip_dummy(*)
     character(kind = c_char) :: name_temp(len(name_dummy) + 1)
     integer :: name_i
     interface
       function lib_vlistInqAttInt(vlistID_dummy, varID_dummy, name_dummy,&
-      & mlen_dummy, ip_vec_dummy) bind(c, name = 'vlistInqAttInt')&
-      & result(c_result)
+      & mlen_dummy, ip_dummy) bind(c, name = 'vlistInqAttInt') result(c_result)
         import c_char, c_int
         integer(c_int) :: c_result
         integer(c_int), value :: vlistID_dummy
         integer(c_int), value :: varID_dummy
         character(kind = c_char) :: name_dummy(*)
         integer(c_int), value :: mlen_dummy
-        integer(c_int), intent(inout) :: ip_vec_dummy(*)
+        integer(c_int), intent(inout) :: ip_dummy(*)
       end function lib_vlistInqAttInt
     end interface
     do name_i = 1, len(name_dummy)
@@ -4634,30 +4633,29 @@ contains
     end do
     name_temp(len(name_dummy) + 1) = c_null_char
     f_result = lib_vlistInqAttInt(vlistID_dummy, varID_dummy, name_temp,&
-    & mlen_dummy, ip_vec_dummy)
+    & mlen_dummy, ip_dummy)
   end function vlistInqAttInt
 
   function vlistInqAttFlt(vlistID_dummy, varID_dummy, name_dummy, mlen_dummy,&
-  & dp_vec_dummy) result(f_result)
+  & dp_dummy) result(f_result)
     integer(c_int) :: f_result
     integer(c_int), value :: vlistID_dummy
     integer(c_int), value :: varID_dummy
     character(kind = c_char, len = *), intent(in) :: name_dummy
     integer(c_int), value :: mlen_dummy
-    real(c_double), intent(inout) :: dp_vec_dummy(*)
+    real(c_double), intent(inout) :: dp_dummy(*)
     character(kind = c_char) :: name_temp(len(name_dummy) + 1)
     integer :: name_i
     interface
       function lib_vlistInqAttFlt(vlistID_dummy, varID_dummy, name_dummy,&
-      & mlen_dummy, dp_vec_dummy) bind(c, name = 'vlistInqAttFlt')&
-      & result(c_result)
+      & mlen_dummy, dp_dummy) bind(c, name = 'vlistInqAttFlt') result(c_result)
         import c_char, c_double, c_int
         integer(c_int) :: c_result
         integer(c_int), value :: vlistID_dummy
         integer(c_int), value :: varID_dummy
         character(kind = c_char) :: name_dummy(*)
         integer(c_int), value :: mlen_dummy
-        real(c_double), intent(inout) :: dp_vec_dummy(*)
+        real(c_double), intent(inout) :: dp_dummy(*)
       end function lib_vlistInqAttFlt
     end interface
     do name_i = 1, len(name_dummy)
@@ -4665,7 +4663,7 @@ contains
     end do
     name_temp(len(name_dummy) + 1) = c_null_char
     f_result = lib_vlistInqAttFlt(vlistID_dummy, varID_dummy, name_temp,&
-    & mlen_dummy, dp_vec_dummy)
+    & mlen_dummy, dp_dummy)
   end function vlistInqAttFlt
 
   function vlistInqAttTxt(vlistID_dummy, varID_dummy, name_dummy, mlen_dummy,&
