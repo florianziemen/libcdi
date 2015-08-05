@@ -1,4 +1,4 @@
-dnl acx_fc_check_strprt_convert.m4 --- unset a shell variable
+dnl acx_fc_check_strprt_convert.m4 --- check F2003 string pointer conversion
 dnl
 dnl Copyright  (C)  2010  Thomas Jahns <jahns@dkrz.de>
 dnl
@@ -37,8 +37,7 @@ dnl SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 dnl
 dnl Commentary:
 dnl
-dnl FIXME: this is currently only a placeholder that expects unset to
-dnl be present although it's not universally available
+dnl Check if FC can handle complex string pointer conversions.
 dnl
 dnl
 dnl Code:

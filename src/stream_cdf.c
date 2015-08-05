@@ -36,6 +36,8 @@ static void cdfDefGlobalAtts(stream_t *streamptr);
 static void cdfDefLocalAtts(stream_t *streamptr);
 #endif
 
+#define  BNDS_NAME  "bnds"
+
 #define  X_AXIS  1
 #define  Y_AXIS  2
 #define  Z_AXIS  3
@@ -894,13 +896,13 @@ int cdfDefTimeBounds(int fileID, int nctimevarid, int nctimedimid, char* taxis_n
 
   /* fprintf(stderr, "time has bounds\n"); */
 
-  if ( nc_inq_dimid(fileID, "bnds", &dims[1]) != NC_NOERR )
-    cdf_def_dim(fileID, "bnds", 2, &dims[1]);
+  if ( nc_inq_dimid(fileID, BNDS_NAME, &dims[1]) != NC_NOERR )
+    cdf_def_dim(fileID, BNDS_NAME, 2, &dims[1]);
 
   if ( taxis->climatology )
     {
-      strcpy(tmpstr, "climatology");
-      strcat(tmpstr, "_bnds");
+      strcpy(tmpstr, "climatology_");
+      strcat(tmpstr, BNDS_NAME);
       cdf_def_var(fileID, tmpstr, NC_DOUBLE, 2, dims, &time_bndsid);
 
       cdf_put_att_text(fileID, nctimevarid, "climatology", strlen(tmpstr), tmpstr);
@@ -908,7 +910,8 @@ int cdfDefTimeBounds(int fileID, int nctimevarid, int nctimedimid, char* taxis_n
   else
     {
       strcpy(tmpstr, taxis_name);
-      strcat(tmpstr, "_bnds");
+      strcat(tmpstr, "_");
+      strcat(tmpstr, BNDS_NAME);
       cdf_def_var(fileID, tmpstr, NC_DOUBLE, 2, dims, &time_bndsid);
 
       cdf_put_att_text(fileID, nctimevarid, "bounds", strlen(tmpstr), tmpstr);
@@ -1082,6 +1085,8 @@ void cdfDefTime(stream_t* streamptr)
       len = strlen(unitstr);
       if ( len ) cdf_put_att_text(fileID, leadtimeid, "units", len, unitstr);
     }
+
+  cdf_put_att_text(fileID, time_varid, "axis", 1, "T");
 
   if ( streamptr->ncmode == 2 ) cdf_enddef(fileID);
 }
@@ -1510,8 +1515,8 @@ void cdfDefXaxis(stream_t *streamptr, int gridID, int ndims)
           if ( gridInqXboundsPtr(gridID) || gridInqYboundsPtr(gridID) )
             {
               size_t nvertex = 2;
-              if ( nc_inq_dimid(fileID, "bnds", &nvdimID) != NC_NOERR )
-                cdf_def_dim(fileID, "bnds", nvertex, &nvdimID);
+              if ( nc_inq_dimid(fileID, BNDS_NAME, &nvdimID) != NC_NOERR )
+                cdf_def_dim(fileID, BNDS_NAME, nvertex, &nvdimID);
             }
         }
 
@@ -1530,7 +1535,8 @@ void cdfDefXaxis(stream_t *streamptr, int gridID, int ndims)
 
           if ( gridInqXboundsPtr(gridID) && nvdimID != UNDEFID )
             {
-              strcat(axisname, "_bnds");
+              strcat(axisname, "_");
+              strcat(axisname, BNDS_NAME);
               dimIDs[0] = dimID;
               dimIDs[1] = nvdimID;
               cdf_def_var(fileID, axisname, (nc_type) xtype, 2, dimIDs, &ncbvarid);
@@ -1640,8 +1646,8 @@ void cdfDefYaxis(stream_t *streamptr, int gridID, int ndims)
           if ( gridInqXboundsPtr(gridID) || gridInqYboundsPtr(gridID) )
             {
               size_t nvertex = 2;
-              if ( nc_inq_dimid(fileID, "bnds", &nvdimID) != NC_NOERR )
-                cdf_def_dim(fileID, "bnds", nvertex, &nvdimID);
+              if ( nc_inq_dimid(fileID, BNDS_NAME, &nvdimID) != NC_NOERR )
+                cdf_def_dim(fileID, BNDS_NAME, nvertex, &nvdimID);
             }
         }
 
@@ -1660,7 +1666,8 @@ void cdfDefYaxis(stream_t *streamptr, int gridID, int ndims)
 
           if ( gridInqYboundsPtr(gridID) && nvdimID != UNDEFID )
             {
-              strcat(axisname, "_bnds");
+              strcat(axisname, "_");
+              strcat(axisname, BNDS_NAME);
               dimIDs[0] = dimID;
               dimIDs[1] = nvdimID;
               cdf_def_var(fileID, axisname, (nc_type) xtype, 2, dimIDs, &ncbvarid);
@@ -1796,8 +1803,8 @@ void cdfDefCurvilinear(stream_t *streamptr, int gridID)
       if ( gridInqXboundsPtr(gridID) || gridInqYboundsPtr(gridID) )
         {
           size_t nvertex = 4;
-          if ( nc_inq_dimid(fileID, "vertices", &nvdimID) != NC_NOERR )
-            cdf_def_dim(fileID, "vertices", nvertex, &nvdimID);
+          if ( nc_inq_dimid(fileID, "nv4", &nvdimID) != NC_NOERR )
+            cdf_def_dim(fileID, "nv4", nvertex, &nvdimID);
         }
 
       dimIDs[0] = ydimID;
@@ -1820,7 +1827,8 @@ void cdfDefCurvilinear(stream_t *streamptr, int gridID)
 
           if ( gridInqXboundsPtr(gridID) && nvdimID != UNDEFID )
             {
-              strcat(xaxisname, "_vertices");
+              strcat(xaxisname, "_");
+              strcat(xaxisname, BNDS_NAME);
               dimIDs[0] = ydimID;
               dimIDs[1] = xdimID;
               dimIDs[2] = nvdimID;
@@ -1848,7 +1856,8 @@ void cdfDefCurvilinear(stream_t *streamptr, int gridID)
 
           if ( gridInqYboundsPtr(gridID) && nvdimID != UNDEFID )
             {
-              strcat(yaxisname, "_vertices");
+              strcat(yaxisname, "_");
+              strcat(yaxisname, BNDS_NAME);
               dimIDs[0] = ydimID;
               dimIDs[1] = xdimID;
               dimIDs[2] = nvdimID;
@@ -2206,7 +2215,8 @@ void cdfDefUnstructured(stream_t *streamptr, int gridID)
               int dimIDs[2];
               dimIDs[0] = dimID;
               dimIDs[1] = nvdimID;
-              strcat(xaxisname, "_vertices");
+              strcat(xaxisname, "_");
+              strcat(xaxisname, BNDS_NAME);
               cdf_def_var(fileID, xaxisname, (nc_type) xtype, 2, dimIDs, &ncbxvarid);
               cdfGridCompress(fileID, ncbxvarid, (int)dimlen, streamptr->filetype, streamptr->comptype);
 
@@ -2231,7 +2241,8 @@ void cdfDefUnstructured(stream_t *streamptr, int gridID)
               int dimIDs[2];
               dimIDs[0] = dimID;
               dimIDs[1] = nvdimID;
-              strcat(yaxisname, "_vertices");
+              strcat(yaxisname, "_");
+              strcat(yaxisname, BNDS_NAME);
               cdf_def_var(fileID, yaxisname, (nc_type) xtype, 2, dimIDs, &ncbyvarid);
               cdfGridCompress(fileID, ncbyvarid, (int)dimlen, streamptr->filetype, streamptr->comptype);
 
@@ -2576,12 +2587,13 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
 	  if ( zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL) )
             {
               size_t nvertex = 2;
-	      if ( nc_inq_dimid(fileID, "bnds", &nvdimID) != NC_NOERR )
-		cdf_def_dim(fileID, "bnds", nvertex, &nvdimID);
+	      if ( nc_inq_dimid(fileID, BNDS_NAME, &nvdimID) != NC_NOERR )
+		cdf_def_dim(fileID, BNDS_NAME, nvertex, &nvdimID);
 
 	      if ( nvdimID != UNDEFID )
 		{
-		  strcat(axisname, "_bnds");
+		  strcat(axisname, "_");
+		  strcat(axisname, BNDS_NAME);
 		  dimIDs[0] = dimID;
 		  dimIDs[1] = nvdimID;
 		  cdf_def_var(fileID, axisname, (nc_type) xtype, 2, dimIDs, &ncbvarid);
@@ -6900,8 +6912,7 @@ void define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, 
       if ( ncvars[ncvarid].code != UNDEFID )  vlistDefVarCode(vlistID, varID, ncvars[ncvarid].code);
       if ( ncvars[ncvarid].code != UNDEFID )
 	{
-	  int param;
-	  param = cdiEncodeParam(ncvars[ncvarid].code, ncvars[ncvarid].tabnum, 255);
+	  int param = cdiEncodeParam(ncvars[ncvarid].code, ncvars[ncvarid].tabnum, 255);
 	  vlistDefVarParam(vlistID, varID, param);
 	}
       if ( ncvars[ncvarid].longname[0] )  vlistDefVarLongname(vlistID, varID, ncvars[ncvarid].longname);
@@ -7072,7 +7083,7 @@ void define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, 
 	      if ( memcmp("var", pname, 3) == 0 )
 		{
 		  vlistDefVarCode(vlistID, varID, atoi(pname+3));
-		  vlistDestroyVarName(vlistID, varID);
+                  // vlistDestroyVarName(vlistID, varID);
 		}
 	    }
 	  else if ( len > 4 && isdigit((int) pname[4]) )
@@ -7080,7 +7091,7 @@ void define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, 
 	      if ( memcmp("code", pname, 4) == 0 )
 		{
 		  vlistDefVarCode(vlistID, varID, atoi(pname+4));
-		  vlistDestroyVarName(vlistID, varID);
+		  // vlistDestroyVarName(vlistID, varID);
 		}
 	    }
 	  else if ( len > 5 && isdigit((int) pname[5]) )
@@ -7090,7 +7101,7 @@ void define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, 
 		  int pnum = -1, pcat = 255, pdis = 255;
 		  sscanf(pname+5, "%d.%d.%d", &pnum, &pcat, &pdis);
 		  vlistDefVarParam(vlistID, varID, cdiEncodeParam(pnum, pcat, pdis));
-		  vlistDestroyVarName(vlistID, varID);
+                  // vlistDestroyVarName(vlistID, varID);
 		}
 	    }
 	}

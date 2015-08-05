@@ -359,31 +359,31 @@ int     streamInqNvars ( int streamID );
 /* STREAM var I/O routines */
 
 /*      streamWriteVar: Write a variable */
-void    streamWriteVar(int streamID, int varID, const double *data_vec, int nmiss);
-void    streamWriteVarF(int streamID, int varID, const float *data_vec, int nmiss);
+void    streamWriteVar(int streamID, int varID, const double data[], int nmiss);
+void    streamWriteVarF(int streamID, int varID, const float data[], int nmiss);
 
 /*      streamReadVar: Read a variable */
-void    streamReadVar(int streamID, int varID, double *data_vec, int *nmiss);
-void    streamReadVarF(int streamID, int varID, float *data_vec, int *nmiss);
+void    streamReadVar(int streamID, int varID, double data[], int *nmiss);
+void    streamReadVarF(int streamID, int varID, float data[], int *nmiss);
 
 /*      streamWriteVarSlice: Write a horizontal slice of a variable */
-void    streamWriteVarSlice(int streamID, int varID, int levelID, const double *data_vec, int nmiss);
-void    streamWriteVarSliceF(int streamID, int varID, int levelID, const float *data_vec, int nmiss);
+void    streamWriteVarSlice(int streamID, int varID, int levelID, const double data[], int nmiss);
+void    streamWriteVarSliceF(int streamID, int varID, int levelID, const float data[], int nmiss);
 
 /*      streamReadVarSlice: Read a horizontal slice of a variable */
-void    streamReadVarSlice(int streamID, int varID, int levelID, double *data_vec, int *nmiss);
-void    streamReadVarSliceF(int streamID, int varID, int levelID, float *data_vec, int *nmiss);
+void    streamReadVarSlice(int streamID, int varID, int levelID, double data[], int *nmiss);
+void    streamReadVarSliceF(int streamID, int varID, int levelID, float data[], int *nmiss);
 
-void    streamWriteVarChunk(int streamID, int varID, const int rect[3][2], const double *data_vec, int nmiss);
+void    streamWriteVarChunk(int streamID, int varID, const int rect[3][2], const double data[], int nmiss);
 
 
 /* STREAM record I/O routines */
 
 void    streamDefRecord(int streamID, int  varID, int  levelID);
 void    streamInqRecord(int streamID, int *varID, int *levelID);
-void    streamWriteRecord(int streamID, const double *data_vec, int nmiss);
-void    streamWriteRecordF(int streamID, const float *data_vec, int nmiss);
-void    streamReadRecord(int streamID, double *data_vec, int *nmiss);
+void    streamWriteRecord(int streamID, const double data[], int nmiss);
+void    streamWriteRecordF(int streamID, const float data[], int nmiss);
+void    streamReadRecord(int streamID, double data[], int *nmiss);
 void    streamCopyRecord(int streamIDdest, int streamIDsrc);
 
 void    streamInqGRIBinfo(int streamID, int *intnum, float *fltnum, off_t *bignum);
@@ -407,9 +407,9 @@ int cdiIterator_nextField(CdiIterator *me);      //Points the iterator at the ne
 char *cdiIterator_inqStartTime(CdiIterator *me);      //Returns the (start) time as an ISO-8601 coded string. The caller is responsible to free() the returned string.
 char *cdiIterator_inqEndTime(CdiIterator *me);      //Returns the end time of an integration period as an ISO-8601 coded string, or NULL if there is no end time. The caller is responsible to free() the returned string.
 char *cdiIterator_inqVTime(CdiIterator *me);      //Returns the validity date as an ISO-8601 coded string. The caller is responsible to free() the returned string.
-int cdiIterator_inqLevelType(CdiIterator *me, int levelSelector, char **outName, char **outLongName, char **outStdName, char **outUnit);      //callers are responsible to free() strings that they request
-int cdiIterator_inqLevel(CdiIterator *me, int levelSelector, double *outValue1, double *outValue2);       //outValue2 is only written to if the level is a hybrid level
-int cdiIterator_inqLevelUuid(CdiIterator *me, int *outVgridNumber, int *outLevelCount, unsigned char (*outUuid)[CDI_UUID_SIZE]);   //outUuid must point to a buffer of 16 bytes, returns an error code if no generalized zaxis is used.
+int cdiIterator_inqLevelType(CdiIterator *me, int levelSelector, char **outName_optional, char **outLongName_optional, char **outStdName_optional, char **outUnit_optional);      //callers are responsible to free() strings that they request
+int cdiIterator_inqLevel(CdiIterator *me, int levelSelector, double *outValue1_optional, double *outValue2_optional);       //outValue2 is only written to if the level is a hybrid level
+int cdiIterator_inqLevelUuid(CdiIterator *me, int *outVgridNumber_optional, int *outLevelCount_optional, unsigned char outUuid_optional[CDI_UUID_SIZE]);   //outUuid must point to a buffer of 16 bytes, returns an error code if no generalized zaxis is used.
 CdiParam cdiIterator_inqParam(CdiIterator *me);
 int cdiIterator_inqDatatype(CdiIterator *me);
 int cdiIterator_inqTsteptype(CdiIterator *me);
@@ -417,8 +417,8 @@ char *cdiIterator_inqVariableName(CdiIterator *me);        //The caller is respo
 int cdiIterator_inqGridId(CdiIterator *me);         //The returned id is only valid until the next call to cdiIteratorNextField().
 
 //Reading data
-void cdiIterator_readField(CdiIterator *me, double *data_vec, size_t *nmiss);
-void cdiIterator_readFieldF(CdiIterator *me, float* data_vec, size_t *nmiss);
+void cdiIterator_readField(CdiIterator *me, double data[], size_t *nmiss_optional);
+void cdiIterator_readFieldF(CdiIterator *me, float data[], size_t *nmiss_optional);
 //TODO[NH]: Add functions to read partial fields.
 
 
@@ -432,7 +432,7 @@ int cdiGribIterator_getDouble(CdiGribIterator *me, const char *key, double *valu
 int cdiGribIterator_getLength(CdiGribIterator *me, const char *key, size_t *value);     //Same semantics as grib_get_length().
 int cdiGribIterator_getString(CdiGribIterator *me, const char *key, char *value, size_t *length);       //Same semantics as grib_get_string().
 int cdiGribIterator_getSize(CdiGribIterator *me, const char *key, size_t *value);     //Same semantics as grib_get_size().
-int cdiGribIterator_getLongArray(CdiGribIterator *me, const char *key, long* value, size_t *array_size);       //Same semantics as grib_get_long_array().
+int cdiGribIterator_getLongArray(CdiGribIterator *me, const char *key, long *value, size_t *array_size);       //Same semantics as grib_get_long_array().
 int cdiGribIterator_getDoubleArray(CdiGribIterator *me, const char *key, double *value, size_t *array_size);       //Same semantics as grib_get_double_array().
 
 //Convenience functions for accessing GRIB-API keys
@@ -670,16 +670,16 @@ int     vlistInqAtt(int vlistID, int varID, int attrnum, char *name, int *typep,
 int     vlistDelAtt(int vlistID, int varID, const char *name);
 
 /*      vlistDefAttInt: Define an integer attribute */
-int     vlistDefAttInt(int vlistID, int varID, const char *name, int type, int len, const int *ip_vec);
+int     vlistDefAttInt(int vlistID, int varID, const char *name, int type, int len, const int ip[]);
 /*      vlistDefAttFlt: Define a floating point attribute */
-int     vlistDefAttFlt(int vlistID, int varID, const char *name, int type, int len, const double *dp_vec);
+int     vlistDefAttFlt(int vlistID, int varID, const char *name, int type, int len, const double dp[]);
 /*      vlistDefAttTxt: Define a text attribute */
 int     vlistDefAttTxt(int vlistID, int varID, const char *name, int len, const char *tp_cbuf);
 
 /*      vlistInqAttInt: Get the value(s) of an integer attribute */
-int     vlistInqAttInt(int vlistID, int varID, const char *name, int mlen, int *ip_vec);
+int     vlistInqAttInt(int vlistID, int varID, const char *name, int mlen, int ip[]);
 /*      vlistInqAttFlt: Get the value(s) of a floating point attribute */
-int     vlistInqAttFlt(int vlistID, int varID, const char *name, int mlen, double *dp_vec);
+int     vlistInqAttFlt(int vlistID, int varID, const char *name, int mlen, double dp[]);
 /*      vlistInqAttTxt: Get the value(s) of a text attribute */
 int     vlistInqAttTxt(int vlistID, int varID, const char *name, int mlen, char *tp_cbuf);
 
@@ -691,11 +691,11 @@ const char *gridNamePtr(int gridtype);
 
 void    gridCompress(int gridID);
 
-void    gridDefMaskGME(int gridID, const int *mask_vec);
-int     gridInqMaskGME(int gridID, int *mask_vec);
+void    gridDefMaskGME(int gridID, const int mask[]);
+int     gridInqMaskGME(int gridID, int mask[]);
 
-void    gridDefMask(int gridID, const int *mask_vec);
-int     gridInqMask(int gridID, int *mask_vec);
+void    gridDefMask(int gridID, const int mask[]);
+int     gridInqMask(int gridID, int mask[]);
 
 void    gridPrint(int gridID, int index, int opt);
 
@@ -733,16 +733,16 @@ void    gridDefNP(int gridID, int np);
 int     gridInqNP(int gridID);
 
 /*      gridDefXvals: Define the values of a X-axis */
-void    gridDefXvals(int gridID, const double *xvals_vec);
+void    gridDefXvals(int gridID, const double xvals[]);
 
 /*      gridInqXvals: Get all values of a X-axis */
-int     gridInqXvals(int gridID, double *xvals_vec);
+int     gridInqXvals(int gridID, double xvals[]);
 
 /*      gridDefYvals: Define the values of a Y-axis */
-void    gridDefYvals(int gridID, const double *yvals_vec);
+void    gridDefYvals(int gridID, const double yvals[]);
 
 /*      gridInqYvals: Get all values of a Y-axis */
-int     gridInqYvals(int gridID, double *yvals_vec);
+int     gridInqYvals(int gridID, double yvals[]);
 
 /*      gridDefXname: Define the name of a X-axis */
 void    gridDefXname(int gridID, const char *xname);
@@ -842,11 +842,18 @@ void    gridDefReference(int gridID, const char *reference);
 int     gridInqReference(int gridID, char *reference);
 
 /*      gridDefUUID: Define the UUID of an unstructured grid */
+#ifdef __cplusplus
 void    gridDefUUID(int gridID, const unsigned char *uuid);
+#else
+void    gridDefUUID(int gridID, const unsigned char uuid[CDI_UUID_SIZE]);
+#endif
 
 /*      gridInqUUID: Get the UUID of an unstructured grid */
+#ifdef __cplusplus
 void    gridInqUUID(int gridID, unsigned char *uuid);
-
+#else
+void    gridInqUUID(int gridID, unsigned char uuid[CDI_UUID_SIZE]);
+#endif
 
 /* Lambert Conformal Conic grid (GRIB version) */
 void gridDefLCC(int gridID, double originLon, double originLat, double lonParY, double lat1, double lat2, double xinc, double yinc, int projflag, int scanflag);
@@ -861,8 +868,8 @@ void gridDefLaea(int gridID, double earth_radius, double lon_0, double lat_0);
 void gridInqLaea(int gridID, double *earth_radius, double *lon_0, double *lat_0);
 
 
-void    gridDefArea(int gridID, const double *area_vec);
-void    gridInqArea(int gridID, double *area_vec);
+void    gridDefArea(int gridID, const double area[]);
+void    gridInqArea(int gridID, double area[]);
 int     gridHasArea(int gridID);
 
 /*      gridDefNvertex: Define the number of vertex of a Gridbox */
@@ -872,19 +879,19 @@ void    gridDefNvertex(int gridID, int nvertex);
 int     gridInqNvertex(int gridID);
 
 /*      gridDefXbounds: Define the bounds of a X-axis */
-void    gridDefXbounds(int gridID, const double *xbounds_vec);
+void    gridDefXbounds(int gridID, const double xbounds[]);
 
 /*      gridInqXbounds: Get the bounds of a X-axis */
-int     gridInqXbounds(int gridID, double *xbounds_vec);
+int     gridInqXbounds(int gridID, double xbounds[]);
 
 /*      gridDefYbounds: Define the bounds of a Y-axis */
-void    gridDefYbounds(int gridID, const double *ybounds_vec);
+void    gridDefYbounds(int gridID, const double ybounds[]);
 
 /*      gridInqYbounds: Get the bounds of a Y-axis */
-int     gridInqYbounds(int gridID, double *ybounds_vec);
+int     gridInqYbounds(int gridID, double ybounds[]);
 
-void    gridDefRowlon(int gridID, int nrowlon, const int *rowlon_vec);
-void    gridInqRowlon(int gridID, int *rowlon_vec);
+void    gridDefRowlon(int gridID, int nrowlon, const int rowlon[]);
+void    gridInqRowlon(int gridID, int rowlon[]);
 void    gridChangeType(int gridID, int gridtype);
 
 void    gridDefComplexPacking(int gridID, int lpack);
@@ -914,10 +921,10 @@ void    zaxisResize(int zaxisID, int size);
 void    zaxisPrint(int zaxisID, int index);
 
 /*      zaxisDefLevels: Define the levels of a Z-axis */
-void    zaxisDefLevels(int zaxisID, const double *levels_vec);
+void    zaxisDefLevels(int zaxisID, const double levels[]);
 
 /*      zaxisInqLevels: Get all levels of a Z-axis */
-void    zaxisInqLevels(int zaxisID, double *levels_vec);
+void    zaxisInqLevels(int zaxisID, double levels[]);
 
 /*      zaxisDefLevel: Define one level of a Z-axis */
 void    zaxisDefLevel(int zaxisID, int levelID, double levels);
@@ -944,19 +951,19 @@ void    zaxisDefUUID(int zaxisID, const unsigned char uuid[CDI_UUID_SIZE]);
 void    zaxisInqUUID(int zaxisID, unsigned char uuid[CDI_UUID_SIZE]);
 
 /*      zaxisDefName: Define the name of a Z-axis */
-void    zaxisDefName(int zaxisID, const char *name);
+void    zaxisDefName(int zaxisID, const char *name_optional);
 
 /*      zaxisInqName: Get the name of a Z-axis */
 void    zaxisInqName(int zaxisID, char *name);
 
 /*      zaxisDefLongname: Define the longname of a Z-axis */
-void    zaxisDefLongname(int zaxisID, const char *longname);
+void    zaxisDefLongname(int zaxisID, const char *longname_optional);
 
 /*      zaxisInqLongname: Get the longname of a Z-axis */
 void    zaxisInqLongname(int zaxisID, char *longname);
 
 /*      zaxisDefUnits: Define the units of a Z-axis */
-void    zaxisDefUnits(int zaxisID, const char *units);
+void    zaxisDefUnits(int zaxisID, const char *units_optional);
 
 /*      zaxisInqUnits: Get the units of a Z-axis */
 void    zaxisInqUnits(int zaxisID, char *units);
@@ -974,18 +981,18 @@ void    zaxisDefLtype(int zaxisID, int ltype);
 int     zaxisInqLtype(int zaxisID);
 
 const double *zaxisInqLevelsPtr(int zaxisID);
-void    zaxisDefVct(int zaxisID, int size, const double *vct_vec);
-void    zaxisInqVct(int zaxisID, double *vct_vec);
+void    zaxisDefVct(int zaxisID, int size, const double vct[]);
+void    zaxisInqVct(int zaxisID, double vct[]);
 int     zaxisInqVctSize(int zaxisID);
 const double *zaxisInqVctPtr(int zaxisID);
-void    zaxisDefLbounds(int zaxisID, const double *lbounds_vec);
-int     zaxisInqLbounds(int zaxisID, double *lbounds_vec);
+void    zaxisDefLbounds(int zaxisID, const double lbounds[]);
+int     zaxisInqLbounds(int zaxisID, double lbounds_optional[]);
 double  zaxisInqLbound(int zaxisID, int index);
-void    zaxisDefUbounds(int zaxisID, const double *ubounds_vec);
-int     zaxisInqUbounds(int zaxisID, double *ubounds_vec);
+void    zaxisDefUbounds(int zaxisID, const double ubounds[]);
+int     zaxisInqUbounds(int zaxisID, double ubounds_optional[]);
 double  zaxisInqUbound(int zaxisID, int index);
-void    zaxisDefWeights(int zaxisID, const double *weights_vec);
-int     zaxisInqWeights(int zaxisID, double *weights_vec);
+void    zaxisDefWeights(int zaxisID, const double weights[]);
+int     zaxisInqWeights(int zaxisID, double weights_optional[]);
 void    zaxisChangeType(int zaxisID, int zaxistype);
 
 /* TAXIS routines */
@@ -1094,9 +1101,13 @@ const char *modelInqNamePtr(int modelID);
 
 /* Table routines */
 
+/*      tableWriteC: write table of parameters to file in C language format */
 void    tableWriteC(const char *filename, int tableID);
+/*      tableFWriteC: write table of parameters to FILE* in C language format */
 void    tableFWriteC(FILE *ptfp, int tableID);
+/*      tableWrite: write table of parameters to file in tabular format */
 void    tableWrite(const char *filename, int tableID);
+/*      tableRead: read table of parameters from file in tabular format */
 int     tableRead(const char *tablefile);
 int     tableDef(int modelID, int tablenum, const char *tablename);
 

@@ -55,7 +55,7 @@
 #	:returnAs	The type of the fortran wrapper function.
 #	:helperVars	Declarations of additional variables needed to provide the desired functionality in the wrapper function.
 #	:precallStatements	Code that needs to be executed before the C function is called.
-#	:recieveAs	The type of the `bind(c)` interface function.
+#	:receiveAs	The type of the `bind(c)` interface function.
 #	:assignVariable	The expression that the result of the C function is assigned to.
 #	:postcallStatements	Code that needs to be executed after the C function returns.
 #
@@ -77,7 +77,7 @@
 #		:acceptAs...
 #		:helperVars...
 #		interface
-#			:recieveAs function lib_fname(:dummyName...) bind(c, name = 'fname')
+#			:receiveAs function lib_fname(:dummyName...) bind(c, name = 'fname')
 #				import <importConstants>
 #				:passAs...
 #			end function lib_fname
@@ -105,226 +105,354 @@
 #		:postcallStatements
 #	end subroutine fname
 
+$debug = 0
+$wrapperResultVarName = 'f_result'
+
 ####################################################################################################
 # Template definitions #############################################################################
 ####################################################################################################
 
-$argumentTemplates = [
-	{	#Dummy for declarations using foo(void).
-		:regex => '^\s*void\s*$',
-		:placeholders => %w[],
-		:dummyName => '',
-		:acceptAs => '',
-		:helperVars => '',
-		:precallStatements => '',
-		:callExpression => '',
-		:passAs => '',
-		:postcallStatements => ''
-	}, {	#<integerTypes>
-		:regex => '^\s*(?<type><integerTypes>)\s+(?<name>\w+)\s*$',
-		:placeholders => %w[name type],
-		:dummyName => '<name>_dummy',
-		:acceptAs => 'integer(c_<type>), value :: <name>_dummy',
-		:helperVars => '',
-		:precallStatements => '',
-		:callExpression => '<name>_dummy',
-		:passAs => 'integer(c_<type>), value :: <name>_dummy',
-		:postcallStatements => ''
-	}, {	#<floatTypes>
-		:regex => '^\s*(?<type><floatTypes>)\s+(?<name>\w+)\s*$',
-		:placeholders => %w[name type],
-		:dummyName => '<name>_dummy',
-		:acceptAs => 'real(c_<type>), value :: <name>_dummy',
-		:helperVars => '',
-		:precallStatements => '',
-		:callExpression => '<name>_dummy',
-		:passAs => 'real(c_<type>), value :: <name>_dummy',
-		:postcallStatements => ''
-	},
-	#Array arguments. These are marked by a `_vec` suffix by convention.
-	#Since it's near impossible to write regexs that only match names that do *not* end in a given suffix,
-	#these templates must precede the more general templates for pointer arguments.
-	#That way, we can override the more general template with the more special one if both match.
-	{	#<integerTypes>* <name>_vec
-		:regex => '^\s*(?<type><integerTypes>)\s*\*\s*(?<name>\w+_vec)\s*$',
-		:placeholders => %w[name type],
-		:dummyName => '<name>_dummy',
-		:acceptAs => 'integer(c_<type>), intent(inout) :: <name>_dummy(*)',
-		:helperVars => "",
-		:precallStatements => "",
-		:callExpression => '<name>_dummy',
-		:passAs => 'integer(c_<type>), intent(inout) :: <name>_dummy(*)',
-		:postcallStatements => ""
-	}, {	#<floatTypes>* <name>_vec
-		:regex => '^\s*(?<type><floatTypes>)\s*\*\s*(?<name>\w+_vec)\s*$',
-		:placeholders => %w[name type],
-		:dummyName => '<name>_dummy',
-		:acceptAs => 'real(c_<type>), intent(inout) :: <name>_dummy(*)',
-		:helperVars => "",
-		:precallStatements => "",
-		:callExpression => '<name>_dummy',
-		:passAs => 'real(c_<type>), intent(inout) :: <name>_dummy(*)',
-		:postcallStatements => ""
-	}, {	#unsigned char <name>[<size>]
-		:regex => '^\s*unsigned\s+char\s+(?<name>\w+)\s*\[\s*(?<size>[^\]]+)\s*\]\s*$',
-		:placeholders => %w[name size],
-		:dummyName => '<name>_dummy',
-		:acceptAs => 'character(kind = c_char), intent(inout) :: <name>_dummy(<size>)',
-		:helperVars => "",
-		:precallStatements => "",
-		:callExpression => '<name>_dummy',
-		:passAs => 'character(kind = c_char), intent(inout) :: <name>_dummy(*)',
-		:postcallStatements => ""
-	}, {	#const <integerTypes>* <name>_vec
-		:regex => '^\s*const\s+(?<type><integerTypes>)\s*\*\s*(?<name>\w+_vec)\s*$',
-		:placeholders => %w[name type],
-		:dummyName => '<name>_dummy',
-		:acceptAs => 'integer(c_<type>), intent(in) :: <name>_dummy(*)',
-		:helperVars => "",
-		:precallStatements => "",
-		:callExpression => '<name>_dummy',
-		:passAs => 'integer(c_<type>), intent(in) :: <name>_dummy(*)',
-		:postcallStatements => ""
-	}, {	#const <floatTypes>* <name>_vec
-		:regex => '^\s*const\s+(?<type><floatTypes>)\s*\*\s*(?<name>\w+_vec)\s*$',
-		:placeholders => %w[name type],
-		:dummyName => '<name>_dummy',
-		:acceptAs => 'real(c_<type>), intent(in) :: <name>_dummy(*)',
-		:helperVars => "",
-		:precallStatements => "",
-		:callExpression => '<name>_dummy',
-		:passAs => 'real(c_<type>), intent(in) :: <name>_dummy(*)',
-		:postcallStatements => ""
-	}, {	#const unsigned char <name>[<size>]
-		:regex => '^\s*(const\s+unsigned\s+char|unsigned\s+char\s+const)\s+(?<name>\w+)\s*\[\s*(?<size>[^\]]+)\s*\]\s*$',
-		:placeholders => %w[name size],
-		:dummyName => '<name>_dummy',
-		:acceptAs => 'character(kind = c_char), intent(in) :: <name>_dummy(<size>)',
-		:helperVars => "",
-		:precallStatements => "",
-		:callExpression => '<name>_dummy',
-		:passAs => 'character(kind = c_char), intent(in) :: <name>_dummy(*)',
-		:postcallStatements => ""
-	}, {	#const <integerTypes> <name>[<lineCount>][<lineSize>]
-		:regex => '^\s*const\s+(?<type><integerTypes>)\s+(?<name>\w+)\s*\[\s*(?<lineCount>[^\]]+)\s*\]\s*\[\s*(?<lineSize>[^\]]+)\s*\]\s*$',
-		:placeholders => %w[name type lineCount lineSize],
-		:dummyName => '<name>_dummy',
-		:acceptAs => 'integer(c_<type>), intent(in) :: <name>_dummy(<lineSize>, <lineCount>)',
-		:helperVars => "",
-		:precallStatements => "",
-		:callExpression => '<name>_dummy',
-		:passAs => 'integer(c_<type>), intent(in) :: <name>_dummy(*)',
-		:postcallStatements => ""
-	},
-	#Pointer arguments. These match both pointers and arrays, so they must appear after the more special array templates.
-	#Most of these are wrapped by optional arguments which have to be named in calling code, which is why we don't use the _dummy suffix for them.
-	{	#<integerTypes>*
-		:regex => '^\s*(?<type><integerTypes>)\s*\*\s*(?<name>\w+)\s*$',
-		:placeholders => %w[name type],
-		:dummyName => '<name>',
-		:acceptAs => 'integer(c_<type>), optional, intent(inout) :: <name>',
-		:helperVars => "integer(c_<type>), target :: <name>_temp\ntype(c_ptr) :: <name>_ptr",
-		:precallStatements => "<name>_ptr = c_null_ptr\nif(present(<name>)) <name>_ptr = c_loc(<name>_temp)",
-		:callExpression => '<name>_ptr',
-		:passAs => 'type(c_ptr), value :: <name>',
-		:postcallStatements => "if(present(<name>)) <name> = <name>_temp"
-	}, {	#<floatTypes>*
-		:regex => '^\s*(?<type><floatTypes>)\s*\*\s*(?<name>\w+)\s*$',
-		:placeholders => %w[name type],
-		:dummyName => '<name>',
-		:acceptAs => 'real(c_<type>), optional, intent(inout) :: <name>',
-		:helperVars => "real(c_<type>), target :: <name>_temp\ntype(c_ptr) :: <name>_ptr",
-		:precallStatements => "<name>_ptr = c_null_ptr\nif(present(<name>)) <name>_ptr = c_loc(<name>_temp)",
-		:callExpression => '<name>_ptr',
-		:passAs => 'type(c_ptr), value :: <name>',
-		:postcallStatements => "if(present(<name>)) <name> = <name>_temp"
-	}, {	#unsigned char (*<name>)[<size>]
-		:regex => '^\s*unsigned\s+char\s*\(\s*\*\s*(?<name>\w+)\s*\)\s*\[\s*(?<size>[^\]]+)\s*\]\s*$',
-		:placeholders => %w[name size],
-		:dummyName => '<name>',
-		:acceptAs => 'character(kind = c_char), optional, intent(inout) :: <name>(<size>)',
-		:helperVars => "character(kind = c_char), target :: <name>_temp(<size>)\ntype(c_ptr) :: <name>_ptr",
-		:precallStatements => "<name>_ptr = c_null_ptr\nif(present(<name>)) <name>_ptr = c_loc(<name>_temp)",
-		:callExpression => '<name>_ptr',
-		:passAs => 'type(c_ptr), value :: <name>',
-		:postcallStatements => "if(present(<name>)) <name> = <name>_temp"
-	},
-	#String arguments.
-	{	#char*	Unsafe buffer passing
-		:regex => '^\s*char\s*\*\s*(?<name>\w+)\s*$',
-		:placeholders => %w[name],
-		:dummyName => '<name>_dummy',
-		:acceptAs => 'character(kind = c_char, len = *), intent(inout) :: <name>_dummy',
-		:helperVars => "character(kind = c_char) :: <name>_temp(len(<name>_dummy))\n" +
-		               "integer :: <name>_i\n" +
-		               "logical :: <name>_padding = .true.",
-		:precallStatements => "do <name>_i = len(<name>_dummy), 1, -1\n" +
-		                      "\tif(<name>_dummy(<name>_i:<name>_i) /= ' ') <name>_padding = .false.\n" +
-		                      "\tif(<name>_padding) then\n" +
-		                      "\t\t<name>_temp(<name>_i) = c_null_char\n" +
-		                      "\telse\n" +
-		                      "\t\t<name>_temp(<name>_i) = <name>_dummy(<name>_i:<name>_i)\n" +
-		                      "\tend if\n" +
-		                      "end do",
-		:callExpression => '<name>_temp',
-		:passAs => 'character(kind = c_char) :: <name>_dummy(*)',
-		:postcallStatements => "<name>_padding = .false.\n" +
-		                       "do <name>_i = 1, len(<name>_dummy)\n" +
-		                       "\tif(<name>_temp(<name>_i) == c_null_char) <name>_padding = .true.\n" +
-		                       "\tif(<name>_padding) then\n" +
-		                       "\t\t<name>_dummy(<name>_i:<name>_i) = ' '\n" +
-		                       "\telse\n" +
-		                       "\t\t<name>_dummy(<name>_i:<name>_i) = <name>_temp(<name>_i)\n" +
-		                       "\tend if\n" +
-		                       "end do"
-	}, {	#const char*	Safe passing of an input string.
-		:regex => '^\s*(const\s+char|char\sconst)\s*\*\s*(?<name>\w+)\s*$',
-		:placeholders => %w[name],
-		:dummyName => '<name>_dummy',
-		:acceptAs => 'character(kind = c_char, len = *), intent(in) :: <name>_dummy',
-		:helperVars => "character(kind = c_char) :: <name>_temp(len(<name>_dummy) + 1)\ninteger :: <name>_i",
-		:precallStatements => "do <name>_i = 1, len(<name>_dummy)\n<name>_temp(<name>_i) = <name>_dummy(<name>_i:<name>_i)\nend do\n<name>_temp(len(<name>_dummy) + 1) = c_null_char",
-		:callExpression => '<name>_temp',
-		:passAs => 'character(kind = c_char) :: <name>_dummy(*)',
-		:postcallStatements => ''
-	}, {	#char**	Safe returning of an output string.
-		:regex => '^\s*char\s*\*\s*\*\s*(?<name>\w+)\s*$',
-		:placeholders => %w[name],
-		:dummyName => '<name>',
-		:acceptAs => 'character(kind = c_char), pointer, optional, intent(inout) :: <name>(:)',
-		:helperVars => "type(c_ptr), target :: <name>_ptr\n" +
-		               "type(c_ptr) :: <name>_handle\n" +
-		               "integer :: <name>_shape(1)\n" +
-		               "character(kind = c_char), pointer :: <name>_fptr(:)",
-		:precallStatements => "<name>_handle = c_null_ptr\n" +
-		                      "if(present(<name>)) <name>_handle = c_loc(<name>_ptr)",
-		:callExpression => '<name>_handle',
-		:passAs => 'type(c_ptr), value :: <name>',
-		:postcallStatements => "if(present(<name>)) then\n" +
-		                       "\tif(c_associated(<name>_ptr)) then\n" +
-		                       "\t\t<name>_shape(1) = int(lib_strlen(<name>_ptr))\n" +
-		                       "\t\tcall c_f_pointer(<name>_ptr, <name>_fptr, <name>_shape)\n" +
-		                       "\t\tallocate(<name>(<name>_shape(1)))\n" +
-		                       "\t\t<name> = <name>_fptr\n" +
-		                       "\t\tcall lib_free(<name>_ptr)\n" +
-		                       "\telse\n" +
-		                       "\t\t<name> => null()\n" +
-		                       "\tend if\n" +
-		                       "end if"
-	},
-	#Public and opaque types
-	{	#[const] <opaqueTypes>*
-		:regex => '^\s*(const\s+|)(?<type><opaqueTypes>)(\s+const|)\s*\*\s*(?<name>\w+)\s*$',
-		:placeholders => %w[name type],
-		:dummyName => '<name>_dummy',
-		:acceptAs => 'type(t_<type>), intent(in) :: <name>_dummy',
-		:helperVars => '',
-		:precallStatements => '',
-		:callExpression => '<name>_dummy%ptr',
-		:passAs => 'type(c_ptr), value :: <name>_dummy',
-		:postcallStatements => ''
-	}
-]
+$argumentTemplates =
+	[
+	 {	#Dummy for declarations using foo(void).
+		 :regex => '^\s*void\s*$',
+		 :placeholders => %w[],
+		 :dummyName => '',
+		 :acceptAs => '',
+		 :helperVars => '',
+		 :precallStatements => '',
+		 :callExpression => '',
+		 :passAs => '',
+		 :postcallStatements => ''
+	 }, {	#<integerTypes>
+		 :regex => '^\s*(?<type><integerTypes>)\s+(?<name>\w+)\s*$',
+		 :placeholders => %w[name type],
+		 :dummyName => '<name>_dummy',
+		 :acceptAs => 'integer(c_<type>), value :: <name>_dummy',
+		 :helperVars => '',
+		 :precallStatements => '',
+		 :callExpression => '<name>_dummy',
+		 :passAs => 'integer(c_<type>), value :: <name>_dummy',
+		 :postcallStatements => ''
+	 }, {	#<floatTypes>
+		 :regex => '^\s*(?<type><floatTypes>)\s+(?<name>\w+)\s*$',
+		 :placeholders => %w[name type],
+		 :dummyName => '<name>_dummy',
+		 :acceptAs => 'real(c_<type>), value :: <name>_dummy',
+		 :helperVars => '',
+		 :precallStatements => '',
+		 :callExpression => '<name>_dummy',
+		 :passAs => 'real(c_<type>), value :: <name>_dummy',
+		 :postcallStatements => ''
+	 },
+	 #Optional pointer arguments. These are wrapped by optional
+	 #arguments which have to be named in calling code, which is why we
+	 #don't use the _dummy suffix for them.
+	 {	#<integerTypes>*
+		 :regex => '^\s*(?<type><integerTypes>)\s*\*\s*(?<name>\w+)_optional\s*$',
+		 :placeholders => %w[name type],
+		 :dummyName => '<name>',
+		 :acceptAs => 'integer(c_<type>), optional, target, intent(inout) :: <name>',
+		 :helperVars => "type(c_ptr) :: <name>_cptr",
+		 :precallStatements => "<name>_cptr = c_null_ptr\nif(present(<name>)) <name>_cptr = c_loc(<name>)",
+		 :callExpression => '<name>_cptr',
+		 :passAs => 'type(c_ptr), value :: <name>',
+		 :postcallStatements => ""
+	 },
+	 {	#<floatTypes>*
+		 :regex => '^\s*(?<type><floatTypes>)\s*\*\s*(?<name>\w+)_optional\s*$',
+		 :placeholders => %w[name type],
+		 :dummyName => '<name>',
+		 :acceptAs => 'real(c_<type>), target, optional, intent(inout) :: <name>',
+		 :helperVars => "type(c_ptr) :: <name>_cptr",
+		 :precallStatements => "<name>_cptr = c_null_ptr\nif(present(<name>)) <name>_cptr = c_loc(<name>)",
+		 :callExpression => '<name>_cptr',
+		 :passAs => 'type(c_ptr), value :: <name>',
+		 :postcallStatements => ""
+	 },
+	 {	#unsigned char (*<name>)[<size>]
+		 :regex => '^\s*unsigned\s+char\s*\(\s*\*\s*(?<name>\w+)_optional\s*\)\s*\[\s*(?<size>[^\]]+)\s*\]\s*$',
+		 :placeholders => %w[name size],
+		 :dummyName => '<name>',
+		 :acceptAs => 'integer(kind = c_signed_char), target, optional, intent(inout) :: <name>(<size>)',
+		 :helperVars => "type(c_ptr) :: <name>_cptr",
+		 :precallStatements => "<name>_cptr = c_null_ptr\nif(present(<name>)) <name>_cptr = c_loc(<name>)",
+		 :callExpression => '<name>_cptr',
+		 :passAs => 'type(c_ptr), value :: <name>',
+		 :postcallStatements => ""
+	 },
+	 {	#<integerTypes> []
+		 :regex => '^\s*(?<type><integerTypes>)\s*(?<name>\w+)_optional\[\]\s*$',
+		 :placeholders => %w[name type],
+		 :dummyName => '<name>',
+		 :acceptAs => 'integer(c_<type>), target, optional, intent(inout) :: <name>(*)',
+		 :helperVars => "type(c_ptr) :: <name>_cptr",
+		 :precallStatements => "<name>_cptr = c_null_ptr\nif(present(<name>)) <name>_cptr = c_loc(<name>)",
+		 :callExpression => '<name>_cptr',
+		 :passAs => 'type(c_ptr), value :: <name>',
+		 :postcallStatements => ""
+	 }, {	#<floatTypes> []
+		 :regex => '^\s*(?<type><floatTypes>)\s*(?<name>\w+)_optional\[\]\s*$',
+		 :placeholders => %w[name type],
+		 :dummyName => '<name>',
+		 :acceptAs => 'real(c_<type>), target, optional, intent(inout) :: <name>(*)',
+		 :helperVars => "type(c_ptr) :: <name>_cptr",
+		 :precallStatements => "<name>_cptr = c_null_ptr\nif(present(<name>)) <name>_cptr = c_loc(<name>)",
+		 :callExpression => '<name>_cptr',
+		 :passAs => 'type(c_ptr), value :: <name>',
+		 :postcallStatements => ""
+	 }, {	#unsigned char <name>[<size>]
+		 :regex => '^\s*unsigned\s+char\s*(?<name>\w+)_optional\s*\[\s*(?<size>[^\]]+)\s*\]\s*$',
+		 :placeholders => %w[name size],
+		 :dummyName => '<name>',
+		 :acceptAs => 'integer(kind = c_signed_char), target, optional, intent(inout) :: <name>(<size>)',
+		 :helperVars => "type(c_ptr) :: <name>_cptr",
+		 :precallStatements => "<name>_cptr = c_null_ptr\nif(present(<name>)) <name>_cptr = c_loc(<name>)",
+		 :callExpression => '<name>_cptr',
+		 :passAs => 'type(c_ptr), value :: <name>',
+		 :postcallStatements => ""
+	 },
+	 {	#optional char *
+		 :regex => '^\s*char\s*(?:\*\s*(?<name>\w+)_optional|(?<name>\w+)_optional\[\])\s*$',
+		 :placeholders => %w[name],
+		 :dummyName => '<name>',
+		 :acceptAs => 'character(kind = c_char, len = *), optional, intent(inout) :: <name>',
+		 :helperVars => "character(kind = c_char), allocatable, target :: <name>_temp(:)\n" +
+		 "integer :: <name>_i\n" +
+		 "type(c_ptr) :: <name>_cptr",
+		 :precallStatements => "if (present(<name>)) then\n" +
+		 "\tallocate(<name>_temp(len(<name>) + 1))\n" +
+		 "\t<name>_temp(len(<name>) + 1) = c_null_char\n" +
+		 "\tdo <name>_i = len(<name>), 1, -1\n" +
+		 "\t\tif(<name>(<name>_i:<name>_i) /= ' ') exit\n" +
+		 "\t\t<name>_temp(<name>_i) = c_null_char\n" +
+		 "\tend do\n" +
+		 "\tdo <name>_i = <name>_i, 1, -1\n" +
+		 "\t\t\t<name>_temp(<name>_i) = <name>(<name>_i:<name>_i)\n" +
+		 "\tend do\n" +
+		 "\t<name>_cptr = c_loc(<name>_temp)\n" +
+		 "else\n" +
+		 "\t<name>_cptr = c_null_ptr\n" +
+		 "end if",
+		 :callExpression => '<name>_cptr',
+		 :passAs => 'type(c_ptr), value :: <name>',
+		 :postcallStatements => "if (present(<name>)) then\n" +
+		 "\tdo <name>_i = 1, len(<name>)\n" +
+		 "\t\tif(<name>_temp(<name>_i) == c_null_char) exit\n" +
+		 "\t\t<name>(<name>_i:<name>_i) = <name>_temp(<name>_i)\n" +
+		 "\tend do\n" +
+		 "\tdo <name>_i = <name>_i, len(<name>)\n" +
+		 "\t\t<name>(<name>_i:<name>_i) = ' '\n" +
+		 "\tend do\n" +
+		 "end if"
+	 },
+	 {	#optional const char *
+		 :regex => '^\s*const\s+char\s*(?:\*\s*(?<name>\w+)_optional|(?<name>\w+)_optional\[\])\s*$',
+		 :placeholders => %w[name],
+		 :dummyName => '<name>',
+		 :acceptAs => 'character(kind = c_char, len = *), optional, intent(in) :: <name>',
+		 :helperVars => "character(kind = c_char), allocatable, target :: <name>_temp(:)\n" +
+		 "integer :: <name>_i\n" +
+		 "type(c_ptr) :: <name>_cptr",
+		 :precallStatements => "if (present(<name>)) then\n" +
+		 "\tallocate(<name>_temp(len(<name>) + 1))\n" +
+		 "\t<name>_temp(len(<name>) + 1) = c_null_char\n" +
+		 "\tdo <name>_i = len(<name>), 1, -1\n" +
+		 "\t\tif(<name>(<name>_i:<name>_i) /= ' ') exit\n" +
+		 "\t\t<name>_temp(<name>_i) = c_null_char\n" +
+		 "\tend do\n" +
+		 "\tdo <name>_i = <name>_i, 1, -1\n" +
+		 "\t\t\t<name>_temp(<name>_i) = <name>(<name>_i:<name>_i)\n" +
+		 "\tend do\n" +
+		 "\t<name>_cptr = c_loc(<name>_temp)\n" +
+		 "else\n" +
+		 "\t<name>_cptr = c_null_ptr\n" +
+		 "end if",
+		 :callExpression => '<name>_cptr',
+		 :passAs => 'type(c_ptr), value :: <name>',
+		 :postcallStatements => ""
+	 },
+	 #Array arguments. These are marked by a `_vec` suffix by convention.
+	 #Since it's near impossible to write regexs that only match names that do *not* end in a given suffix,
+	 #these templates must precede the more general templates for pointer arguments.
+	 #That way, we can override the more general template with the more special one if both match.
+	 {	#<integerTypes>* <name>_vec
+		 :regex => '^\s*(?<type><integerTypes>)\s*(?:\*\s*(?<name>\w+_vec)|(?<name>\w+)\[\])\s*$',
+		 :placeholders => %w[name type],
+		 :dummyName => '<name>_dummy',
+		 :acceptAs => 'integer(c_<type>), intent(inout) :: <name>_dummy(*)',
+		 :helperVars => "",
+		 :precallStatements => "",
+		 :callExpression => '<name>_dummy',
+		 :passAs => 'integer(c_<type>), intent(inout) :: <name>_dummy(*)',
+		 :postcallStatements => ""
+	 }, {	#<floatTypes>* <name>_vec
+		 :regex => '^\s*(?<type><floatTypes>)\s*(?:\*\s*(?<name>\w+_vec)|(?<name>\w+)\[\])\s*$',
+		 :placeholders => %w[name type],
+		 :dummyName => '<name>_dummy',
+		 :acceptAs => 'real(c_<type>), intent(inout) :: <name>_dummy(*)',
+		 :helperVars => "",
+		 :precallStatements => "",
+		 :callExpression => '<name>_dummy',
+		 :passAs => 'real(c_<type>), intent(inout) :: <name>_dummy(*)',
+		 :postcallStatements => ""
+	 }, {	#unsigned char <name>[<size>]
+		 :regex => '^\s*unsigned\s+char\s+(?<name>\w+)\s*\[\s*(?<size>[^\]]+)\s*\]\s*$',
+		 :placeholders => %w[name size],
+		 :dummyName => '<name>_dummy',
+		 :acceptAs => 'integer(kind = c_signed_char), intent(inout) :: <name>_dummy(<size>)',
+		 :helperVars => "",
+		 :precallStatements => "",
+		 :callExpression => '<name>_dummy',
+		 :passAs => 'integer(kind = c_signed_char), intent(inout) :: <name>_dummy(<size>)',
+		 :postcallStatements => ""
+	 }, {	#const <integerTypes>* <name>_vec
+		 :regex => '^\s*const\s+(?<type><integerTypes>)\s*(?:\*\s*(?<name>\w+_vec)|(?<name>\w+)\[\])\s*$',
+		 :placeholders => %w[name type],
+		 :dummyName => '<name>_dummy',
+		 :acceptAs => 'integer(c_<type>), intent(in) :: <name>_dummy(*)',
+		 :helperVars => "",
+		 :precallStatements => "",
+		 :callExpression => '<name>_dummy',
+		 :passAs => 'integer(c_<type>), intent(in) :: <name>_dummy(*)',
+		 :postcallStatements => ""
+	 }, {	#const <floatTypes>* <name>_vec
+		 :regex => '^\s*const\s+(?<type><floatTypes>)\s*(?:\*\s*(?<name>\w+_vec)|(?<name>\w+)\[\])\s*$',
+		 :placeholders => %w[name type],
+		 :dummyName => '<name>_dummy',
+		 :acceptAs => 'real(c_<type>), intent(in) :: <name>_dummy(*)',
+		 :helperVars => "",
+		 :precallStatements => "",
+		 :callExpression => '<name>_dummy',
+		 :passAs => 'real(c_<type>), intent(in) :: <name>_dummy(*)',
+		 :postcallStatements => ""
+	 }, {	#const unsigned char <name>[<size>]
+		 :regex => '^\s*(const\s+unsigned\s+char|unsigned\s+char\s+const)\s+(?<name>\w+)\s*\[\s*(?<size>[^\]]+)\s*\]\s*$',
+		 :placeholders => %w[name size],
+		 :dummyName => '<name>_dummy',
+		 :acceptAs => 'integer(kind = c_signed_char), intent(in) :: <name>_dummy(<size>)',
+		 :helperVars => "",
+		 :precallStatements => "",
+		 :callExpression => '<name>_dummy',
+		 :passAs => 'integer(kind = c_signed_char), intent(in) :: <name>_dummy(<size>)',
+		 :postcallStatements => ""
+	 }, {	#const <integerTypes> <name>[<lineCount>][<lineSize>]
+		 :regex => '^\s*const\s+(?<type><integerTypes>)\s+(?<name>\w+)\s*\[\s*(?<lineCount>[^\]]+)\s*\]\s*\[\s*(?<lineSize>[^\]]+)\s*\]\s*$',
+		 :placeholders => %w[name type lineCount lineSize],
+		 :dummyName => '<name>_dummy',
+		 :acceptAs => 'integer(c_<type>), intent(in) :: <name>_dummy(<lineSize>, <lineCount>)',
+		 :helperVars => "",
+		 :precallStatements => "",
+		 :callExpression => '<name>_dummy',
+		 :passAs => 'integer(c_<type>), intent(in) :: <name>_dummy(<lineSize>, <lineCount>)',
+		 :postcallStatements => ""
+	 },
+	 #Non-optional pointer arguments. These match both pointers and
+	 #arrays, so they must appear after the more special array templates.
+	 {	#<integerTypes>*
+		 :regex => '^\s*(?<type><integerTypes>)\s*\*\s*(?<name>\w+)\s*$',
+		 :placeholders => %w[name type],
+		 :dummyName => '<name>_dummy',
+		 :acceptAs => 'integer(c_<type>), intent(inout) :: <name>_dummy',
+		 :helperVars => "",
+		 :precallStatements => "",
+		 :callExpression => '<name>_dummy',
+		 :passAs => 'integer(c_<type>), intent(inout) :: <name>_dummy',
+		 :postcallStatements => ""
+	 }, {	#<floatTypes>*
+		 :regex => '^\s*(?<type><floatTypes>)\s*\*\s*(?<name>\w+)\s*$',
+		 :placeholders => %w[name type],
+		 :dummyName => '<name>_dummy',
+		 :acceptAs => 'real(c_<type>), intent(inout) :: <name>_dummy',
+		 :helperVars => "",
+		 :precallStatements => "",
+		 :callExpression => '<name>_dummy',
+		 :passAs => 'real(c_<type>), intent(inout) :: <name>_dummy',
+		 :postcallStatements => ""
+	 }, {	#unsigned char (*<name>)[<size>]
+		 :regex => '^\s*unsigned\s+char\s*\(\s*\*\s*(?<name>\w+)\s*\)\s*\[\s*(?<size>[^\]]+)\s*\]\s*$',
+		 :placeholders => %w[name size],
+		 :dummyName => '<name>_dummy',
+		 :acceptAs => 'integer(kind = c_signed_char), intent(inout) :: <name>(<size>)',
+		 :helperVars => "",
+		 :precallStatements => "",
+		 :callExpression => '<name>_dummy',
+		 :passAs => 'integer(kind = c_signed_char), intent(inout) :: <name>(<size>)',
+		 :postcallStatements => ""
+	 },
+	 #String arguments.
+	 {	#char*	Unsafe buffer passing
+		 :regex => '^\s*char\s*\*\s*(?<name>\w+)\s*$',
+		 :placeholders => %w[name],
+		 :dummyName => '<name>_dummy',
+		 :acceptAs => 'character(kind = c_char, len = *), intent(inout) :: <name>_dummy',
+		 :helperVars => "character(kind = c_char) :: <name>_temp(len(<name>_dummy) + 1)\n" +
+		 "integer :: <name>_i",
+		 :precallStatements => "<name>_temp(len(<name>_dummy) + 1) = c_null_char\n" +
+		 "do <name>_i = len(<name>_dummy), 1, -1\n" +
+		 "\tif(<name>_dummy(<name>_i:<name>_i) /= ' ') exit\n" +
+		 "\t<name>_temp(<name>_i) = c_null_char\n" +
+		 "end do\n" +
+		 "do <name>_i = <name>_i, 1, -1\n" +
+		 "\t\t<name>_temp(<name>_i) = <name>_dummy(<name>_i:<name>_i)\n" +
+		 "end do",
+		 :callExpression => '<name>_temp',
+		 :passAs => 'character(kind = c_char) :: <name>_dummy(*)',
+		 :postcallStatements => "do <name>_i = 1, len(<name>_dummy)\n" +
+		 "\tif(<name>_temp(<name>_i) == c_null_char) exit\n" +
+		 "\t<name>_dummy(<name>_i:<name>_i) = <name>_temp(<name>_i)\n" +
+		 "end do\n" +
+		 "do <name>_i = <name>_i, len(<name>_dummy)\n" +
+		 "\t<name>_dummy(<name>_i:<name>_i) = ' '\n" +
+		 "end do"
+	 }, {	#const char*	Safe passing of an input string.
+		 :regex => '^\s*(const\s+char|char\s+const)\s*\*\s*(?<name>\w+)\s*$',
+		 :placeholders => %w[name],
+		 :dummyName => '<name>_dummy',
+		 :acceptAs => 'character(kind = c_char, len = *), intent(in) :: <name>_dummy',
+		 :helperVars => "character(kind = c_char) :: <name>_temp(len(<name>_dummy) + 1)\ninteger :: <name>_i",
+		 :precallStatements => "do <name>_i = 1, len(<name>_dummy)\n\t<name>_temp(<name>_i) = <name>_dummy(<name>_i:<name>_i)\nend do\n<name>_temp(len(<name>_dummy) + 1) = c_null_char",
+		 :callExpression => '<name>_temp',
+		 :passAs => 'character(kind = c_char) :: <name>_dummy(*)',
+		 :postcallStatements => ''
+	 }, {	#char**	Safe returning of an output string.
+		 :regex => '^\s*char\s*\*\s*\*\s*(?<name>\w+)_optional\s*$',
+		 :placeholders => %w[name],
+		 :dummyName => '<name>',
+		 :acceptAs => 'character(kind = c_char), pointer, optional, intent(inout) :: <name>(:)',
+		 :helperVars => "type(c_ptr), target :: <name>_cptr\n" +
+		 "type(c_ptr) :: <name>_handle\n" +
+		 "integer :: <name>_shape(1)\n" +
+		 "character(kind = c_char), pointer :: <name>_fptr(:)",
+		 :precallStatements => "<name>_handle = c_null_ptr\n" +
+		 "if(present(<name>)) <name>_handle = c_loc(<name>_cptr)",
+		 :callExpression => '<name>_handle',
+		 :passAs => 'type(c_ptr), value :: <name>',
+		 :postcallStatements => "if(present(<name>)) then\n" +
+		 "\tif(c_associated(<name>_cptr)) then\n" +
+		 "\t\t<name>_shape(1) = int(lib_strlen(<name>_cptr))\n" +
+		 "\t\tcall c_f_pointer(<name>_cptr, <name>_fptr, <name>_shape)\n" +
+		 "\t\tallocate(<name>(<name>_shape(1)))\n" +
+		 "\t\t<name> = <name>_fptr\n" +
+		 "\t\tcall lib_free(<name>_cptr)\n" +
+		 "\telse\n" +
+		 "\t\t<name> => null()\n" +
+		 "\tend if\n" +
+		 "end if"
+	 },
+	 #Public and opaque types
+	 {	#[const] <opaqueTypes>*
+		 :regex => '^\s*(const\s+|)(?<type><opaqueTypes>)(\s+const|)\s*\*\s*(?<name>\w+)\s*$',
+		 :placeholders => %w[name type],
+		 :dummyName => '<name>_dummy',
+		 :acceptAs => 'type(t_<type>), intent(in) :: <name>_dummy',
+		 :helperVars => '',
+		 :precallStatements => '',
+		 :callExpression => '<name>_dummy%ptr',
+		 :passAs => 'type(c_ptr), value :: <name>_dummy',
+		 :postcallStatements => ''
+	 }
+	]
 
 $returnTypeTemplates = [
 	{	#void
@@ -338,8 +466,8 @@ $returnTypeTemplates = [
 		:returnAs => 'integer(c_<type>)',
 		:helperVars => '',
 		:precallStatements => '',
-		:recieveAs => 'integer(c_<type>)',
-		:assignVariable => 'result',
+		:receiveAs => 'integer(c_<type>)',
+		:assignVariable => $wrapperResultVarName,
 		:postcallStatements => ''
 	}, {	#<floatTypes>
 		:regex => '^\s*(?<type><floatTypes>)\s*$',
@@ -348,8 +476,8 @@ $returnTypeTemplates = [
 		:returnAs => 'real(c_<type>)',
 		:helperVars => '',
 		:precallStatements => '',
-		:recieveAs => 'real(c_<type>)',
-		:assignVariable => 'result',
+		:receiveAs => 'real(c_<type>)',
+		:assignVariable => $wrapperResultVarName,
 		:postcallStatements => ''
 	}, {	#char*
 		:regex => '^\s*char\s*\*\s*$',
@@ -357,32 +485,32 @@ $returnTypeTemplates = [
 		:isVoid => false,
 		:returnAs => 'character(kind = c_char), dimension(:), pointer',
 		:helperVars => "type(c_ptr) :: cString\n" +
-		               "integer :: shape(1)\n" +
+		               "integer :: rv_shape(1)\n" +
 		               "character(kind = c_char), dimension(:), pointer :: temp",
 		:precallStatements => '',
-		:recieveAs => 'type(c_ptr)',
+		:receiveAs => 'type(c_ptr)',
 		:assignVariable => 'cString',
 		:postcallStatements => "if(c_associated(cString)) then\n" +
-		                       "\tshape(1) = int(lib_strlen(cString))\n" +
-		                       "\tcall c_f_pointer(cString, temp, shape)\n" +
-		                       "\tallocate(result(shape(1)))\n" +
-		                       "\tresult = temp\n" +
+		                       "\trv_shape(1) = int(lib_strlen(cString))\n" +
+		                       "\tcall c_f_pointer(cString, temp, rv_shape)\n" +
+		                       "\tallocate(#{$wrapperResultVarName}(rv_shape(1)))\n" +
+		                       "\t#{$wrapperResultVarName} = temp\n" +
 		                       "\tcall lib_free(cString)\n" +
 		                       "else\n" +
-		                       "\tresult => null()\n" +
+		                       "\t#{$wrapperResultVarName} => null()\n" +
 		                       "end if"
 	}, {	#const char*
 		:regex => '^\s*const\s+char\s*\*\s*$',
 		:placeholders => %w[],
 		:isVoid => false,
 		:returnAs => 'character(kind = c_char), dimension(:), pointer',
-		:helperVars => "type(c_ptr) :: ptr\ninteger :: shape(1)",
-		:precallStatements => 'result => null()',
-		:recieveAs => 'type(c_ptr)',
+		:helperVars => "type(c_ptr) :: ptr\ninteger :: rv_shape(1)",
+		:precallStatements => $wrapperResultVarName + ' => null()',
+		:receiveAs => 'type(c_ptr)',
 		:assignVariable => 'ptr',
 		:postcallStatements => "if(c_associated(ptr)) then\n" +
-		                       "\tshape(1) = int(lib_strlen(ptr))\n" +
-		                       "\tcall c_f_pointer(ptr, result, shape)\n" +
+		                       "\trv_shape(1) = int(lib_strlen(ptr))\n" +
+		                       "\tcall c_f_pointer(ptr, #{$wrapperResultVarName}, rv_shape)\n" +
 		                       "end if"
 	}, {	#const int*	This returns the naked pointer because we can't know the length of the returned array within the wrapper. The user has to call c_f_pointer() himself.
 		:regex => '^\s*const\s+(?<type><integerTypes>)\s*\*\s*$',
@@ -391,8 +519,8 @@ $returnTypeTemplates = [
 		:returnAs => 'type(c_ptr)',
 		:helperVars => '',
 		:precallStatements => '',
-		:recieveAs => 'type(c_ptr)',
-		:assignVariable => 'result',
+		:receiveAs => 'type(c_ptr)',
+		:assignVariable => $wrapperResultVarName,
 		:postcallStatements => ''
 	}, {	#const double*	This returns the naked pointer because we can't know the length of the returned array within the wrapper. The user has to call c_f_pointer() himself.
 		:regex => '^\s*const\s+(?<type><floatTypes>)\s*\*\s*$',
@@ -401,8 +529,8 @@ $returnTypeTemplates = [
 		:returnAs => 'type(c_ptr)',
 		:helperVars => '',
 		:precallStatements => '',
-		:recieveAs => 'type(c_ptr)',
-		:assignVariable => 'result',
+		:receiveAs => 'type(c_ptr)',
+		:assignVariable => $wrapperResultVarName,
 		:postcallStatements => ''
 	},
 	#Public and opaque types.
@@ -413,8 +541,8 @@ $returnTypeTemplates = [
 		:returnAs => 'type(t_<type>)',
 		:helperVars => '',
 		:precallStatements => '',
-		:recieveAs => 'type(t_<type>)',
-		:assignVariable => 'result',
+		:receiveAs => 'type(t_<type>)',
+		:assignVariable => $wrapperResultVarName,
 		:postcallStatements => ''
 	}, {	#<opaqueTypes>*
 		:regex => '^\s*(?<type><opaqueTypes>)\s*\*\s*$',
@@ -423,8 +551,8 @@ $returnTypeTemplates = [
 		:returnAs => 'type(t_<type>)',
 		:helperVars => '',
 		:precallStatements => '',
-		:recieveAs => 'type(c_ptr)',
-		:assignVariable => 'result%ptr',
+		:receiveAs => 'type(c_ptr)',
+		:assignVariable => $wrapperResultVarName + '%ptr',
 		:postcallStatements => ''
 	}
 ]
@@ -492,6 +620,7 @@ $verbatimDefinitions = "
 
 $declarationLines = []
 $definitionLines = []
+$interfaceLines = []
 $opaqueTypes = []
 $publicTypes = []
 
@@ -508,12 +637,12 @@ end
 
 #This substitutes the placeholders <opaqueTypes> and <publicTypes> in the regexString prior to constructing a Regexp out of it.
 def matchTemplate(regexString, matchString)
-	opaqueTypesString = "(#{ $opaqueTypes.collect{ |type| type }.join('|') })"
+	opaqueTypesString = '(' + $opaqueTypes.collect{ |type| type	}.join('|') + ')'
 	regexString = regexString.gsub("<opaqueTypes>", opaqueTypesString)
-	publicTypesString = "(#{ $publicTypes.collect{ |type| type }.join('|') })"
-	regexString = regexString.gsub("<publicTypes>", publicTypesString)
-	regexString = regexString.gsub("<integerTypes>", '(short|int|long|size_t|intmax_t|int_(least|fast)(8|16|32|64)_t)')
-	regexString = regexString.gsub("<floatTypes>",  '(float|double)')
+	publicTypesString = '(' + $publicTypes.collect{ |type| type }.join('|') + ')'
+	regexString = regexString.gsub('<publicTypes>', publicTypesString)
+	regexString = regexString.gsub('<integerTypes>', '(short|int|long|size_t|intmax_t|int_(least|fast)(8|16|32|64)_t)')
+	regexString = regexString.gsub('<floatTypes>',  '(float|double)')
 	return Regexp.new(regexString).match(matchString)
 end
 
@@ -535,35 +664,58 @@ class TemplateInstanciation
 		}
 		return result
 	end
+	def nonEmptyKey?(templateKey)
+		result = @template[templateKey] != ''
+		return result
+	end
+	attr_reader :template
 end
 
 def formatLines(lineArray, indentation, string)
+	$stderr.puts("Formatting '" + string + "'") if $debug > 3
 	if string == "" && indentation == 0
 		lineArray.push("")	#split() does not return anything if the string is empty, killing our empty lines
 	end
 	string.split("\n").each { |line|
 		lineArray.push("\t"*indentation + line)
 	}
+	tail = ''
+	if lineArray.length > 1
+		tail = lineArray[-2..-1].join("\n")
+	else
+		tail = lineArray[-1]
+	end
+	$stderr.puts("Tail '" + tail + "'") if $debug > 3
 end
 
-def dumpStatements(indentation, argumentArray, templateKey)
+def haveTemplateKey(templates, templateKey)
+	result = false
+	templates.count{ |template|
+		result ||= template.nonEmptyKey?(templateKey)
+		break if result
+	}
+	return result
+end
+
+
+def dumpStatements(indentation, argumentArray, templateKey, outputArray)
 	argumentArray.each{ |argument|
-		formatLines($definitionLines, indentation, argument.expandTemplate(templateKey))
+		formatLines(outputArray, indentation, argument.expandTemplate(templateKey))
 	}
 end
 
 def defineConstant(name, value)
 	if /^(\+|-|)\d+$/.match(value)
-		formatLines($declarationLines, 1, "integer(c_int), public, parameter :: #{name} = #{value}")
+		formatLines($declarationLines, 1, "integer(c_int), public, parameter :: #{name} = " + value)
 	else
-		puts("Error: value '#{value}' of constant '#{name}' is not an integer literal")
+		$stderr.puts("Error: value '#{value}' of constant '#{name}' is not an integer literal")
 	end
 end
 
 def defineOpaqueType(name)
 	formatLines($declarationLines, 0, "")
-	formatLines($declarationLines, 1, "public t_#{name}")
-	formatLines($declarationLines, 1, "type t_#{name}")
+	formatLines($declarationLines, 1, "public :: t_#{name}")
+	formatLines($declarationLines, 1, "type :: t_#{name}")
 	formatLines($declarationLines, 2, "type(c_ptr) :: ptr")
 	formatLines($declarationLines, 1, "end type t_#{name}")
 	$opaqueTypes.push(name)
@@ -585,18 +737,37 @@ def definePublicType(name, body)
 	body.gsub(/[^;]+;/) do |variableDeclaration|
 		if template = findTemplate(variableDeclaration, $typeTemplates)
 			variable = TemplateInstanciation.new(variableDeclaration, template)
-			formatLines($declarationLines, 2, "#{variable.expandTemplate(:declareAs)}")
+			formatLines($declarationLines, 2, variable.expandTemplate(:declareAs))
 		else
-			puts("Error: Can't translate the declaration '#{variableDeclaration}'")
+			$stderr.puts("Error: Can't translate the declaration '" + variableDeclaration + "'")
 		end
 	end
-	formatLines($declarationLines, 1, "end type t_#{name}")
+	formatLines($declarationLines, 1, 'end type t_' + name)
 	$publicTypes.push(name)
 end
 
 def collectImportConstants(importConstantsArray, typeString)
+	$stderr.puts('Considering \'' + typeString + "' for import\n") if $debug > 2
 	if importConstant = typeString[/\b[ct]_\w+\b/]
 		importConstantsArray.push(importConstant)
+	end
+end
+
+def collectArrayBoundImports(importConstantsArray, argPassString)
+	if array_bounds_match =
+			/(?<=\()\s*(?:[a-zA-Z_]\w*|:|\d+)\s*(?:,\s*(?:[a-zA-Z_]\w*|:|\d+)\s*?)*(?=\s*\)$)/.match(argPassString)
+		$stderr.puts('Found array bounds: \'' +
+								 array_bounds_match.to_a.join('\', \'') + "'",
+								 'for \'' + argPassString + "'") if $debug > 3
+		array_bounds_match = array_bounds_match[0]
+		array_bounds_match.lstrip!
+		array_bounds_match = array_bounds_match.split(/\s*,\s*/)
+		array_bounds_match.select! do |bound|
+			bound != ':' && bound !~ /^\d+$/
+		end
+		$stderr.puts('Possible import symbols in array bounds: \'' +
+								 array_bounds_match.join('\', \'') + "'") if $debug > 3
+		importConstantsArray.push(*array_bounds_match)
 	end
 end
 
@@ -605,9 +776,13 @@ def importStatement(returnType, argumentArray)
 	importConstants = []
 	collectImportConstants(importConstants, returnType)
 	argumentArray.each { |arg|
-		collectImportConstants(importConstants, arg.expandTemplate(:passAs))
+		argStr = arg.expandTemplate(:passAs)
+		collectArrayBoundImports(importConstants, argStr)
+		collectImportConstants(importConstants, argStr)
 	}
-	return (importConstants.length != 0) ? "import #{importConstants.sort.uniq.join(", ")}" : ""
+	$stderr.puts('Returning \'' + importConstants.sort.uniq.join(', ') +
+							 "' for import\n") if $debug > 2
+	return (importConstants.length != 0) ? ('import ' + importConstants.sort.uniq.join(', ')) : ''
 end
 
 def defineFunction(name, arguments, returnType)
@@ -619,65 +794,127 @@ def defineFunction(name, arguments, returnType)
 			if template = findTemplate(argument, $argumentTemplates)
 				argArray.push(TemplateInstanciation.new(argument, template))
 			else
-				puts("Error: type of argument '#{argument}' to function #{name}() is not supported")
+				$stderr.puts("Error: type of argument '#{argument}' to function #{name}() is not supported")
 				return
 			end
 		end
 	else
-		puts("Error: Can't translate return type '#{returnType}' of function #{name}()")
+		$stderr.puts("Error: Can't translate return type '#{returnType}' of function #{name}()")
 		return
 	end
 
-	#Generate the wrapper function.
+	needArgPrologue = haveTemplateKey(argArray, :precallStatements)
+	needRetValPrologue = !returnTemplate[:isVoid] &&
+		returnData.nonEmptyKey?(:precallStatements)
+	needArgEpilogue = haveTemplateKey(argArray, :postcallStatements)
+	needRetValEpilogue = !returnTemplate[:isVoid] &&
+		returnData.nonEmptyKey?(:postcallStatements)
+	needRetValConversion = !returnTemplate[:isVoid] &&
+		returnTemplate[:returnAs] != returnTemplate[:receiveAs]
+	needArgConversion = false
+	argArray.each do |arg|
+		needArgConversion = (arg.template[:passAs] != arg.template[:acceptAs])
+		break if needArgConversion
+	end
+
+	needWrapper = needArgPrologue || needRetValPrologue ||
+		needArgEpilogue || needRetValEpilogue ||
+		needRetValConversion || needArgConversion
+	baseIndent = 0
+	formatLines($declarationLines, 1, 'public :: ' + name)
+	$stderr.puts(name + "\n" +
+							 [ "\t"+'needArgPrologue => ' + needArgPrologue.to_s,
+								 "\t"+'needRetValPrologue => ' + needRetValPrologue.to_s,
+								 "\t"+'needArgEpilogue => ' + needArgEpilogue.to_s,
+								 "\t"+'needRetValEpilogue => ' + needRetValEpilogue.to_s,
+								 "\t"+'needRetValConversion => ' + needRetValConversion.to_s,
+								 "\t"+'needArgConversion => ' + needArgConversion.to_s,
+								 "\t"+'needWrapper => ' +
+		needWrapper.to_s].join("\n")) if $debug > 1
+	subprogramtype = returnTemplate[:isVoid] ? 'subroutine' : 'function'
 	dummyArguments = argArray.collect{ |arg|
 		arg.expandTemplate(:dummyName)
 	}.join(", ")
-	if returnTemplate[:isVoid]
-		formatLines($definitionLines, 1, "subroutine #{name}(#{dummyArguments})")
-		dumpStatements(               2, argArray, :acceptAs)
-		dumpStatements(               2, argArray, :helperVars)
-		formatLines($definitionLines, 2, "interface")
-		formatLines($definitionLines, 3, "subroutine lib_#{name}(#{dummyArguments}) bind(c, name = '#{name}')")
-		formatLines($definitionLines, 4, "#{importStatement("", argArray)}")
-		dumpStatements(               4, argArray, :passAs)
-		formatLines($definitionLines, 3, "end subroutine lib_#{name}")
-		formatLines($definitionLines, 2, "end interface")
-		dumpStatements(               2, argArray, :precallStatements)
-		formatLines($definitionLines, 2, "call lib_#{name}(#{argArray.collect{ |arg|
-			arg.expandTemplate(:callExpression)
-		}.join(", ")})")
-		dumpStatements(               2, argArray, :postcallStatements)
-		formatLines($definitionLines, 1, "end subroutine #{name}")
+	if needWrapper
+		#Generate the wrapper function.
+		line = subprogramtype + ' ' + name + '(' + dummyArguments + ')' +
+			(returnTemplate[:isVoid] ? '' : " result(#{$wrapperResultVarName})")
+		formatLines($definitionLines, 1, line)
+		if !returnTemplate[:isVoid]
+			formatLines($definitionLines, 2,
+									returnData.expandTemplate(:returnAs) + ' :: ' +
+									$wrapperResultVarName)
+		end
+		dumpStatements(               2, argArray, :acceptAs, $definitionLines)
+		dumpStatements(               2, argArray, :helperVars, $definitionLines)
+		if !returnTemplate[:isVoid]
+			formatLines($definitionLines, 2, returnData.expandTemplate(:helperVars))
+		end
+		formatLines($definitionLines, 2, 'interface')
+		line=subprogramtype + ' lib_' + name + '(' + dummyArguments + ') ' +
+			'bind(c, name = \'' + name + '\')' +
+			(returnTemplate[:isVoid] ? '' : ' result(c_result)')
+		formatLines($definitionLines, 3, line)
+		formatLines($definitionLines, 4,
+								importStatement(returnTemplate[:isVoid] ? '' :
+																returnData.expandTemplate(:receiveAs), argArray))
+		if !returnTemplate[:isVoid]
+			formatLines($definitionLines, 4,
+									returnData.expandTemplate(:receiveAs) + ' :: c_result')
+		end
+		dumpStatements(               4, argArray, :passAs, $definitionLines)
+		formatLines($definitionLines, 3, 'end ' + subprogramtype + ' lib_' + name)
+		formatLines($definitionLines, 2, 'end interface')
+		if needArgPrologue
+			dumpStatements(               2, argArray, :precallStatements, $definitionLines)
+		end
+		if !returnTemplate[:isVoid]
+			formatLines($definitionLines, 2,
+									returnData.expandTemplate(:precallStatements))
+		end
+		formatLines($definitionLines, 2,
+								(returnTemplate[:isVoid] ? 'call' :
+								 (returnData.expandTemplate(:assignVariable) + ' =')) +
+								' lib_' + name + '(' + argArray.collect{ |arg|
+									arg.expandTemplate(:callExpression)
+								}.join(', ') + ')')
+		if (needArgEpilogue)
+			dumpStatements(               2, argArray, :postcallStatements, $definitionLines)
+		end
+		if needRetValEpilogue
+			formatLines($definitionLines, 2,
+									returnData.expandTemplate(:postcallStatements))
+		end
+		formatLines($definitionLines, 1, 'end ' + subprogramtype + ' ' + name)
+		formatLines($definitionLines, 0, '')
 	else
-		formatLines($definitionLines, 1, "function #{name}(#{dummyArguments}) result(result)")
-		formatLines($definitionLines, 2, "#{returnData.expandTemplate(:returnAs)} :: result")
-		dumpStatements(               2, argArray, :acceptAs)
-		dumpStatements(               2, argArray, :helperVars)
-		formatLines($definitionLines, 2, "#{returnData.expandTemplate(:helperVars)}")
-		formatLines($definitionLines, 2, "interface")
-		formatLines($definitionLines, 3, "#{returnData.expandTemplate(:recieveAs)} function lib_#{name}(#{dummyArguments}) bind(c, name = '#{name}')")
-		formatLines($definitionLines, 4, "#{importStatement(returnData.expandTemplate(:recieveAs), argArray)}")
-		dumpStatements(               4, argArray, :passAs)
-		formatLines($definitionLines, 3, "end function lib_#{name}")
-		formatLines($definitionLines, 2, "end interface")
-		dumpStatements(               2, argArray, :precallStatements)
-		formatLines($definitionLines, 2, "#{returnData.expandTemplate(:precallStatements)}")
-		formatLines($definitionLines, 2, "#{returnData.expandTemplate(:assignVariable)} = lib_#{name}(#{argArray.collect{ |arg|
-			arg.expandTemplate(:callExpression)
-		}.join(", ")})")
-		dumpStatements(               2, argArray, :postcallStatements)
-		formatLines($definitionLines, 2, "#{returnData.expandTemplate(:postcallStatements)}")
-		formatLines($definitionLines, 1, "end function #{name}")
-	end
-	formatLines($definitionLines, 0, "")
-	formatLines($declarationLines, 1, "public #{name}")
+		#Generate interface block only
+		baseIndent = 1
+		line = subprogramtype + ' ' + name + '(' + dummyArguments +
+			') bind(c, name = \'' + name + '\')' +
+			(returnTemplate[:isVoid] ? '' : " result(#{$wrapperResultVarName})")
+		formatLines($interfaceLines, baseIndent + 1, line)
+		line = importStatement(returnTemplate[:isVoid] ? '' :
+													 returnData.expandTemplate(:returnAs),
+													 argArray)
+		$stderr.puts('Emitting \'' + line + "'") if $debug > 2
+		formatLines($interfaceLines, baseIndent + 2, line)
 
+		dumpStatements(baseIndent + 2, argArray, :passAs, $interfaceLines)
+		if !returnTemplate[:isVoid]
+			formatLines($interfaceLines, baseIndent + 2,
+									returnData.expandTemplate(:returnAs) + ' :: ' +
+									$wrapperResultVarName)
+		end
+		formatLines($interfaceLines, baseIndent + 1, 'end ' + subprogramtype + ' ' + name)
+		formatLines($interfaceLines, 0, '')
+	end
 end
 
 #Scan the given header and collect the interface information in the global variables.
 def scanHeader(headerPath)
 	#Scan the given header.
-	headerLines = IO.popen("cpp -fpreprocessed -dD #{headerPath}").readlines	#The options cause the preprocessor to strip all comments, but retain all #defines, and ignore #includes.
+	headerLines = IO.popen('cpp -fpreprocessed -dD ' + headerPath).readlines	#The options cause the preprocessor to strip all comments, but retain all #defines, and ignore #includes.
 	headerLines.each do |line|
 		line.chomp!
 
@@ -709,12 +946,20 @@ end
 #Prints the line if it does not consist only of indentation, adding continuation lines as necessary.
 def fortranLine(file, line)
 	unless /^\t+$/.match(line)	#Intentionally empty lines don't contain indentation, so we preserve totally empty lines while throwing away the ones with leading tabs.
-		indentation = /^\t*/.match(line)[0]
-		while line.length > 131
-			file.puts(line[0...131] + "&")
-			line = indentation + "&" + line[131...line.length]
+		# replace tabs with spaces first
+		spacesPerTab = 2
+		mline = line.gsub("\t", ' '*spacesPerTab)
+		charsPerLine=79
+		indentation = /^ */.match(mline)[0]
+		if not /^ *!/.match(mline)
+			while mline.length > charsPerLine
+				# last position of space preceding line break
+				tspos = mline[0..charsPerLine].rindex(' ') || charsPerLine
+				file.puts(mline[0...tspos] + "&")
+				mline = indentation + "&" + mline[tspos...mline.length]
+			end
 		end
-		file.puts(line)
+		file.puts(mline)
 	end
 end
 
@@ -726,26 +971,37 @@ def writeFortranModule(scriptPath, headerPath, modulePath, moduleName)
 	fortranLine(file, "! Generated by \"#{scriptPath}\" from input file \"#{headerPath}\".")
 	fortranLine(file, "");
 
-	fortranLine(file, "module #{moduleName}")
+	fortranLine(file, 'module ' + moduleName)
 	fortranLine(file, "\tuse iso_c_binding")
 	fortranLine(file, "\timplicit none")
 	fortranLine(file, "\tprivate")
 
-	file.puts($verbatimDeclarations)
-	fortranLine(file, "")
+	$verbatimDeclarations.each_line do |line|
+		fortranLine(file, line)
+	end
+	fortranLine(file, '')
 	$declarationLines.each do |line|
 		fortranLine(file, line)
 	end
-	fortranLine(file, "")
-
+	fortranLine(file, '')
+	unless $interfaceLines.empty?
+		fortranLine(file, "\tinterface")
+		$interfaceLines.each do |line|
+			fortranLine(file, line)
+		end
+		fortranLine(file, "\tend interface")
+		fortranLine(file, '')
+	end
 	fortranLine(file, "contains")
-	file.puts($verbatimDefinitions)
-	fortranLine(file, "")
+	$verbatimDefinitions.each_line do |line|
+		fortranLine(file, line)
+	end
+	fortranLine(file, '')
 	$definitionLines.each do |line|
 		fortranLine(file, line)
 	end
 
-	fortranLine(file, "end module #{moduleName}")
+	fortranLine(file, 'end module ' + moduleName)
 end
 
 def main
@@ -758,17 +1014,17 @@ def main
 	unless printUsage
 		case ARGV.length
 			when 0
-				puts("Error: no input file given")
+				$stderr.puts("Error: no input file given")
 				printUsage = true
 			when 1
-				puts("Error: no output file given")
+				$stderr.puts("Error: no output file given")
 				printUsage = true
 			when 2
 				moduleName = /(?<basename>[^.\/]+)\.[^\/]+/.match(ARGV[1])['basename']
 			when 3
 				moduleName = ARGV[2]
 			else
-				puts("Error: too many arguments")
+				$stderr.puts("Error: too many arguments")
 				printUsage = true
 		end
 	end
@@ -779,8 +1035,8 @@ def main
 		writeFortranModule($0, headerPath, outputPath, moduleName)
 	else
 		puts("Usage:")
-		puts("#{$0} cHeader outputPath [ moduleName ]")
-		puts("#{$0} ( -h | --help )")
+		puts($0 + ' cHeader outputPath [ moduleName ]')
+		puts($0 + ' ( -h | --help )')
 		puts("")
 		puts("\tcHeader:    input C header file")
 		puts("\toutputPath: output fortran file name")
@@ -789,7 +1045,16 @@ def main
 end
 
 if rubyVersionOk()
-       main()
+	main()
 else
-       puts("Error: Ruby version #{RUBY_VERSION} is too old (version 1.9 is required). Skipping fortran interface generation.")
+	$stderr.puts("Error: Ruby version #{RUBY_VERSION} is too old (version 1.9 is required). Skipping fortran interface generation.")
 end
+#
+# Local Variables:
+# mode: ruby
+# tab-always-indent: nil
+# tab-width: 2
+# ruby-indent-tabs-mode: t
+# indent-tabs-mode: t
+# End:
+#

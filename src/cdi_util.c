@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 void cdiDecodeParam(int param, int *pnum, int *pcat, int *pdis)
 {
@@ -31,48 +32,41 @@ int cdiEncodeParam(int pnum, int pcat, int pdis)
 
 void cdiDecodeDate(int date, int *year, int *month, int *day)
 {
-  int idate;
 
-  *year  =  date / 10000;
-  idate  = date - *year*10000;
-  if ( idate < 0 ) idate = -idate;
-  *month = idate / 100;
-  *day   = idate - *month*100;
+  int iyear = date / 10000;
+  *year = iyear;
+  int idate = abs(date - iyear * 10000),
+    imonth = idate / 100;
+  *month = imonth;
+  *day   = idate - imonth * 100;
 }
 
 
 int cdiEncodeDate(int year, int month, int day)
 {
-  int date;
-  int iyear;
-
-  iyear = year;
-  if ( iyear < 0 ) iyear = -iyear;
-  date = iyear*10000 + month*100 + day;
+  int iyear = abs(year),
+    date = iyear * 10000 + month * 100 + day;
   if ( year < 0 ) date = -date;
-
   return (date);
 }
 
 
 void cdiDecodeTime(int time, int *hour, int *minute, int *second)
 {
-  int itime;
-
-  *hour   = time / 10000;
-  itime   = time - *hour*10000;
-  *minute = itime / 100;
-  *second = itime - *minute*100;
+  int ihour = time / 10000,
+    itime = time - ihour * 10000,
+    iminute = itime / 100;
+  *hour   = ihour;
+  *minute = iminute;
+  *second = itime - iminute * 100;
 }
 
 
 int cdiEncodeTime(int hour, int minute, int second)
 {
-  int time;
+  int time = hour*10000 + minute*100 + second;
 
-  time = hour*10000 + minute*100 + second;
-
-  return (time);
+  return time;
 }
 
 
@@ -83,14 +77,15 @@ void cdiParamToString(int param, char *paramstr, int maxlen)
 
   cdiDecodeParam(param, &num, &cat, &dis);
 
+  size_t umaxlen = maxlen >= 0 ? (unsigned)maxlen : 0U;
   if ( dis == 255 && (cat == 255 || cat == 0 ) )
-    len = sprintf(paramstr, "%d", num);
+    len = snprintf(paramstr, umaxlen, "%d", num);
   else  if ( dis == 255 )
-    len = sprintf(paramstr, "%d.%d", num, cat);
+    len = snprintf(paramstr, umaxlen, "%d.%d", num, cat);
   else
-    len = sprintf(paramstr, "%d.%d.%d", num, cat, dis);
+    len = snprintf(paramstr, umaxlen, "%d.%d.%d", num, cat, dis);
 
-  if ( len > ( maxlen-1) )
+  if ( len >= maxlen || len < 0)
     fprintf(stderr, "Internal problem (%s): size of input string is too small!\n", __func__);
 }
 
@@ -106,15 +101,10 @@ char *cdiUnitNamePtr(int cdi_unit)
     /*  5 */  "dm",
     /*  6 */  "m",
   };
-  char *name;
-  int size = (int) (sizeof(cdiUnits)/sizeof(char *));
-
-  if ( cdi_unit > 0 && cdi_unit < size )
-    name = cdiUnits[cdi_unit];
-  else
-    name = NULL;
-
-  return (name);
+  enum { numUnits = (int) (sizeof(cdiUnits)/sizeof(char *)) };
+  char *name = ( cdi_unit > 0 && cdi_unit < numUnits ) ?
+    cdiUnits[cdi_unit] : NULL;
+  return name;
 }
 
 /*

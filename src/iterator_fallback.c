@@ -9,8 +9,24 @@
 #include <limits.h>
 #include <stdlib.h>
 
+struct CdiFallbackIterator {
+  CdiIterator super;
+  int streamId, vlistId;
+  char *path;   //needed for clone() & serialize()
+
+  int variableCount, curVariable;
+  int curLevelCount, curLevel;
+  int curTimestep;
+};
+
+CdiIterator *cdiFallbackIterator_getSuper(CdiFallbackIterator *me)
+{
+  return &me->super;
+}
+
+
 //For more information on the condestruct() pattern, see comment in src/iterator_grib.c
-static CdiFallbackIterator* cdiFallbackIterator_condestruct(CdiFallbackIterator* me, const char* path, int filetype)
+static CdiFallbackIterator *cdiFallbackIterator_condestruct(CdiFallbackIterator *me, const char *path, int filetype)
 {
   if(me) goto destruct;
 
@@ -49,13 +65,13 @@ destructSuper:
   return NULL;
 }
 
-CdiIterator* cdiFallbackIterator_new(const char* path, int filetype)
+CdiIterator *cdiFallbackIterator_new(const char *path, int filetype)
 {
   return &cdiFallbackIterator_condestruct(NULL, path, filetype)->super;
 }
 
 //Fetches the info that is published by the variables in the base class from the current field.
-static void fetchSuperInfo(CdiFallbackIterator* me)
+static void fetchSuperInfo(CdiFallbackIterator *me)
 {
   me->super.datatype = vlistInqVarDatatype(me->vlistId, me->curVariable);
   me->super.timesteptype = vlistInqVarTsteptype(me->vlistId, me->curVariable);
@@ -64,12 +80,12 @@ static void fetchSuperInfo(CdiFallbackIterator* me)
   cdiDecodeParam(param, &me->super.param.number, &me->super.param.category, &me->super.param.discipline);
 }
 
-CdiFallbackIterator* cdiFallbackIterator_clone(CdiIterator* super)
+CdiFallbackIterator *cdiFallbackIterator_clone(CdiIterator *super)
 {
-  CdiFallbackIterator* me = (CdiFallbackIterator*)super;
+  CdiFallbackIterator *me = (CdiFallbackIterator*)super;
 
   //Make another stream for this file. This yields an unadvanced iterator.
-  CdiFallbackIterator* clone = cdiFallbackIterator_condestruct(NULL, me->path, me->super.filetype);
+  CdiFallbackIterator *clone = cdiFallbackIterator_condestruct(NULL, me->path, me->super.filetype);
   if(!clone) return NULL;
 
   //Point the clone to the same position in the file.
@@ -85,21 +101,21 @@ CdiFallbackIterator* cdiFallbackIterator_clone(CdiIterator* super)
   return clone;
 }
 
-char* cdiFallbackIterator_serialize(CdiIterator* super)
+char *cdiFallbackIterator_serialize(CdiIterator *super)
 {
-  CdiFallbackIterator* me = (CdiFallbackIterator*)super;
+  CdiFallbackIterator *me = (CdiFallbackIterator*)super;
 
-  char* escapedPath = cdiEscapeSpaces(me->path);
-  char* result = (char *)xmalloc(strlen(escapedPath)
+  char *escapedPath = cdiEscapeSpaces(me->path);
+  char *result = (char *)xmalloc(strlen(escapedPath)
                          + 5 * (3 * sizeof (int) * CHAR_BIT / 8 + 1) + 1);
   sprintf(result, "%s %d %d %d %d %d", escapedPath, me->variableCount, me->curVariable, me->curLevelCount, me->curLevel, me->curTimestep);
   free(escapedPath);
   return result;
 }
 
-CdiFallbackIterator* cdiFallbackIterator_deserialize(const char* description)
+CdiFallbackIterator *cdiFallbackIterator_deserialize(const char *description)
 {
-  CdiFallbackIterator* me = (CdiFallbackIterator *)xmalloc(sizeof(*me));
+  CdiFallbackIterator *me = (CdiFallbackIterator *)xmalloc(sizeof(*me));
   if(!me) goto fail;
 
   description = baseIter_constructFromString(&me->super, description);
@@ -114,9 +130,9 @@ CdiFallbackIterator* cdiFallbackIterator_deserialize(const char* description)
   if(me->vlistId == CDI_UNDEFID) goto closeStream;
 
   //This reads one variable from the description string, does error checking, and advances the given string pointer.
-  #define decodeValue(variable, description) do \
+#define decodeValue(variable, description) do \
     { \
-      const char* savedStart = description; \
+      const char *savedStart = description; \
       long long decodedValue = strtoll(description, (char**)&description, 0);   /*The cast is a workaround for the wrong signature of strtoll().*/ \
       variable = (int)decodedValue; \
       if(savedStart == description) goto closeStream; \
@@ -127,7 +143,7 @@ CdiFallbackIterator* cdiFallbackIterator_deserialize(const char* description)
   decodeValue(me->curLevelCount, description);
   decodeValue(me->curLevel, description);
   decodeValue(me->curTimestep, description);
-  #undef decodeValue
+#undef decodeValue
 
   if(streamInqTimestep(me->streamId, me->curTimestep) <= 0) goto closeStream;
   if(me->super.isAdvanced) fetchSuperInfo(me);
@@ -145,7 +161,7 @@ fail:
   return NULL;
 }
 
-static int advance(CdiFallbackIterator* me)
+static int advance(CdiFallbackIterator *me)
 {
   me->curLevel++;
   if(me->curLevel == me->curLevelCount)
@@ -162,9 +178,9 @@ static int advance(CdiFallbackIterator* me)
   return CDI_NOERR;
 }
 
-int cdiFallbackIterator_nextField(CdiIterator* super)
+int cdiFallbackIterator_nextField(CdiIterator *super)
 {
-  CdiFallbackIterator* me = (CdiFallbackIterator*)super;
+  CdiFallbackIterator *me = (CdiFallbackIterator*)super;
   int result = advance(me);
   if(result) return result;
 
@@ -176,9 +192,9 @@ int cdiFallbackIterator_nextField(CdiIterator* super)
   return CDI_NOERR;
 }
 
-char* cdiFallbackIterator_inqTime(CdiIterator* super, bool getEndTime)
+char *cdiFallbackIterator_inqTime(CdiIterator *super, bool getEndTime)
 {
-  CdiFallbackIterator* me = (CdiFallbackIterator*)super;
+  CdiFallbackIterator *me = (CdiFallbackIterator *)super;
   if(getEndTime) return NULL;   //The stream interface does not export the start/end times of statistical fields, so we treat all data as point of time data, returning the validity time as the start time.
   int taxisId = vlistInqTaxis(me->vlistId);
   int date = taxisInqVdate(taxisId);
@@ -186,17 +202,18 @@ char* cdiFallbackIterator_inqTime(CdiIterator* super, bool getEndTime)
   int year, month, day, hour, minute, second;
   cdiDecodeDate(date, &year, &month, &day);
   cdiDecodeTime(time, &hour, &minute, &second);
-  char *result = (char *)xmalloc(   4+1 +2+1 +2+1 +2+1 +2+1 +2+4+1);
-  sprintf(result, "%04d-%02d-%02dT%02d:%02d:%02d.000", year, month, day, hour, minute, second);
+  char *result
+    = (char *)xmalloc(   4+1 +2+1 +2+1 +2+1 +2+1 +2+4+1);
+  sprintf(result,     "%04d-%02d-%02dT%02d:%02d:%02d.000", year, month, day, hour, minute, second);
   return result;
 }
 
-int cdiFallbackIterator_levelType(CdiIterator* super, int levelSelector, char** outName, char** outLongName, char** outStdName, char** outUnit)
+int cdiFallbackIterator_levelType(CdiIterator *super, int levelSelector, char **outName, char **outLongName, char **outStdName, char **outUnit)
 {
-  CdiFallbackIterator* me = (CdiFallbackIterator*)super;
+  CdiFallbackIterator *me = (CdiFallbackIterator*)super;
   int zaxisId = vlistInqVarZaxis(me->vlistId, me->curVariable);
   (void)levelSelector;
-  #define copyString(outPointer, function) do \
+#define copyString(outPointer, function) do \
     { \
       if(outPointer) \
         { \
@@ -210,13 +227,13 @@ int cdiFallbackIterator_levelType(CdiIterator* super, int levelSelector, char** 
   copyString(outLongName, zaxisInqLongname);    //FIXME: zaxisInqLongname is unsafe.
   copyString(outStdName, zaxisInqStdname);    //FIXME: zaxisInqStdname is unsafe.
   copyString(outUnit, zaxisInqUnits);    //FIXME: zaxisInqUnits is unsafe.
-  #undef copyString
+#undef copyString
   return zaxisInqLtype(zaxisId);
 }
 
-int cdiFallbackIterator_level(CdiIterator* super, int levelSelector, double* outValue1, double* outValue2)
+int cdiFallbackIterator_level(CdiIterator *super, int levelSelector, double *outValue1, double *outValue2)
 {
-  CdiFallbackIterator* me = (CdiFallbackIterator*)super;
+  CdiFallbackIterator *me = (CdiFallbackIterator*)super;
   int zaxisId = vlistInqVarZaxis(me->vlistId, me->curVariable);
 
   //handle NULL pointers once and for all
@@ -243,48 +260,58 @@ int cdiFallbackIterator_level(CdiIterator* super, int levelSelector, double* out
   ssize_t intLevel = (ssize_t)(2**outValue1);
   if(0 <= intLevel && intLevel < zaxisInqVctSize(zaxisId) - 1)
     {
-      const double* coordinateTable = zaxisInqVctPtr(zaxisId);
+      const double *coordinateTable = zaxisInqVctPtr(zaxisId);
       *outValue1 = coordinateTable[intLevel];
       *outValue2 = coordinateTable[intLevel + 1];
     }
   return CDI_NOERR;
 }
 
-int cdiFallbackIterator_zaxisUuid(CdiIterator* super, int* outVgridNumber, int* outLevelCount, unsigned char (*outUuid)[16])
+int cdiFallbackIterator_zaxisUuid(CdiIterator *super, int *outVgridNumber, int *outLevelCount, unsigned char outUuid[CDI_UUID_SIZE])
 {
-  CdiFallbackIterator* me = (CdiFallbackIterator*)super;
+  CdiFallbackIterator *me = (CdiFallbackIterator*)super;
   int zaxisId = vlistInqVarZaxis(me->vlistId, me->curVariable);
   if(zaxisInqLtype(zaxisId) != ZAXIS_HYBRID) return CDI_EINVAL;
   if(outVgridNumber) *outVgridNumber = zaxisInqNumber(zaxisId);
   if(outLevelCount) *outLevelCount = zaxisInqNlevRef(zaxisId);
-  if(outUuid) zaxisInqUUID(zaxisId, *outUuid);
+  if(outUuid) zaxisInqUUID(zaxisId, outUuid);
   return CDI_NOERR;
 }
 
-char* cdiFallbackIterator_copyVariableName(CdiIterator* super)
+char *cdiFallbackIterator_copyVariableName(CdiIterator *super)
 {
-  CdiFallbackIterator* me = (CdiFallbackIterator*)super;
+  CdiFallbackIterator *me = (CdiFallbackIterator*)super;
   return vlistCopyVarName(me->vlistId, me->curVariable);
 }
 
-void cdiFallbackIterator_readField(CdiIterator* super, double* buffer, size_t* nmiss)
+void cdiFallbackIterator_readField(CdiIterator *super, double *buffer, size_t *nmiss)
 {
-  CdiFallbackIterator* me = (CdiFallbackIterator*)super;
+  CdiFallbackIterator *me = (CdiFallbackIterator*)super;
   int missingValues = 0;
   streamReadVarSlice(me->streamId, me->curVariable, me->curLevel, buffer, &missingValues);
   if(nmiss) *nmiss = (size_t)missingValues;
 }
 
-void cdiFallbackIterator_readFieldF(CdiIterator* super, float* buffer, size_t* nmiss)
+void cdiFallbackIterator_readFieldF(CdiIterator *super, float *buffer, size_t *nmiss)
 {
-  CdiFallbackIterator* me = (CdiFallbackIterator*)super;
+  CdiFallbackIterator *me = (CdiFallbackIterator*)super;
   int missingValues = 0;
   streamReadVarSliceF(me->streamId, me->curVariable, me->curLevel, buffer, &missingValues);
   if(nmiss) *nmiss = (size_t)missingValues;
 }
 
-void cdiFallbackIterator_delete(CdiIterator* super)
+void cdiFallbackIterator_delete(CdiIterator *super)
 {
-  CdiFallbackIterator* me = (CdiFallbackIterator*)super;
+  CdiFallbackIterator *me = (CdiFallbackIterator*)super;
   cdiFallbackIterator_condestruct(me, NULL, 0);
 }
+
+/*
+ * Local Variables:
+ * c-file-style: "Java"
+ * c-basic-offset: 2
+ * indent-tabs-mode: nil
+ * show-trailing-whitespace: t
+ * require-trailing-newline: t
+ * End:
+ */

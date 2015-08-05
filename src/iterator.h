@@ -41,8 +41,18 @@ struct CdiIterator {
   //The status information for reading/advancing is added in the subclasses.
 };
 
-void baseIterConstruct(CdiIterator* me, int filetype);
-const char* baseIter_constructFromString(CdiIterator* me, const char* description);     //Returns a pointer past the end of the parsed portion of the description string.
-void baseIterDestruct(CdiIterator* me);
+void baseIterConstruct(CdiIterator *me, int filetype);
+const char* baseIter_constructFromString(CdiIterator *me, const char *description);     //Returns a pointer past the end of the parsed portion of the description string.
+void baseIterDestruct(CdiIterator *me);
 
 #endif
+
+/*
+ * Local Variables:
+ * c-file-style: "Java"
+ * c-basic-offset: 2
+ * indent-tabs-mode: nil
+ * show-trailing-whitespace: t
+ * require-trailing-newline: t
+ * End:
+ */

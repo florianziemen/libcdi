@@ -49,7 +49,7 @@ success:
   #undef super
 }
 
-static CdiInputFile** openFileList = NULL;
+static CdiInputFile **openFileList = NULL;
 static size_t openFileCount = 0, openFileListSize = 0;
 static pthread_mutex_t openFileListLock = PTHREAD_MUTEX_INITIALIZER;
 
@@ -138,3 +138,13 @@ void cdiInputFile_destruct(CdiInputFile* me)
   xassert(!error);
   cdiInputFile_condestruct(me, NULL);
 }
+
+/*
+ * Local Variables:
+ * c-file-style: "Java"
+ * c-basic-offset: 2
+ * indent-tabs-mode: nil
+ * show-trailing-whitespace: t
+ * require-trailing-newline: t
+ * End:
+ */

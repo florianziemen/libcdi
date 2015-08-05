@@ -4,7 +4,7 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   June 2015
+! Uwe Schulzweida, MPI-MET, Hamburg,   August 2015
 !
 
 !
@@ -63,8 +63,8 @@
 !                                     INTEGER         varID,
 !                                     CHOICE          data,
 !                                     INTEGER         numBlocks,
-!                                     INTEGER         blocklengths,
-!                                     INTEGER         displacements,
+!                                     INTEGER         blocklengths(*),
+!                                     INTEGER         displacements(*),
 !                                     INTEGER         nmiss,
 !                                     TYPE(XT_IDXLIST)partDesc)
       EXTERNAL        streamWriteScatteredVarPart

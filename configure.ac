@@ -4,7 +4,7 @@
 #  autoconf 2.68
 #  libtool  2.4.2
 
-AC_INIT([cdi], [1.7.0rc3], [http://mpimet.mpg.de/cdi])
+AC_INIT([cdi], [1.7.0rc4], [http://mpimet.mpg.de/cdi])
 
 echo "configuring ${PACKAGE_NAME} ${PACKAGE_VERSION}"
 
@@ -236,12 +236,16 @@ AC_SUBST([USE_MPI])
 AC_SUBST([ENABLE_MPI],[`test x"$enable_mpi" = xyes && echo true || echo false`])
 #  ----------------------------------------------------------------------
 #  Create the Fortran Interface via iso_c_binding module (Fortran 2003 Standard)
+#
+# the test for ruby itself is unconditional because ruby is also used in
+# the Fortran 2003 ISO C generator
+AC_CHECK_PROG([RUBY],[ruby],[ruby])
 AC_ARG_ENABLE([iso-c-interface],
               [AS_HELP_STRING([--enable-iso-c-interface],
                  [Create Fortran Interface via iso_c_bindings facility of F2003 [default=no].])],
               [enable_isoc=${enableval}],[enable_isoc=no])
 AS_IF([test x"$enable_isoc" = xyes],
-  [ACX_FC_CHECK_STRPTR_CONVERT],[enable_isoc=no])
+  [ACX_FC_CHECK_STRPTR_CONVERT(,[enable_isoc=no])],[enable_isoc=no])
 AM_CONDITIONAL([CREATE_ISOC],[test $enable_isoc = 'yes'])
 AC_SUBST([ENABLE_F2003_ISOC],[$enable_isoc])
 AM_SUBST_NOTMAKE([ENABLE_F2003_ISOC])
@@ -267,10 +271,10 @@ AC_ARG_ENABLE(swig,
 AM_CONDITIONAL(ENABLE_SWIG,[test "x$SWIG" != "x"])
 #  ----------------------------------------------------------------------
 #  Create the Ruby Interface via swig
-AC_ARG_ENABLE(ruby,
+#
+AC_ARG_ENABLE([ruby],
   [AS_HELP_STRING([--enable-ruby],[ruby language bindings [default=no] (EXPERIMENTAL)])],
-  [AC_CHECK_PROG(RUBY,ruby,ruby)
-   RUBY_INCLUDES="$($RUBY $srcdir/config/interface.rb)"
+  [RUBY_INCLUDES="$($RUBY $srcdir/config/interface.rb)"
    save_CPPFLAGS=$CPPFLAGS
    CPPFLAGS="$CPPFLAGS $RUBY_INCLUDES"
    AC_CHECK_HEADER([ruby.h],,[enable_ruby=no

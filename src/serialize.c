@@ -95,3 +95,13 @@ void serializeUnpackInCore(const void *buf, int buf_size, int *position,
   pos += size;
   *position = pos;
 }
+
+/*
+ * Local Variables:
+ * c-file-style: "Java"
+ * c-basic-offset: 2
+ * indent-tabs-mode: nil
+ * show-trailing-whitespace: t
+ * require-trailing-newline: t
+ * End:
+ */

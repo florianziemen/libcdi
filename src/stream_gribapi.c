@@ -2,6 +2,7 @@
 #  include "config.h"
 #endif
 
+#include <limits.h>
 #include <stdio.h>
 
 #include "dmemory.h"
@@ -728,7 +729,7 @@ int gribapiVarCompare(compvar2_t compVar, record_t record, int flag)
   return (rstatus);
 }
 
-static void ensureBufferSize(size_t requiredSize, size_t* curSize, unsigned char** buffer) {
+static void ensureBufferSize(size_t requiredSize, size_t* curSize, unsigned char **buffer) {
   if ( *curSize < requiredSize )
     {
       *curSize = requiredSize;
@@ -892,7 +893,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
 
       if( datetime0.date == 10101 && datetime0.time == 0 )
         {
-          if( memcmp(&datetime, &datetime0, sizeof(datetime)) || !nrecs )       //Do we really need this condition? I have included it in order not to change the number of times gribapiGetDataDateTime() etc. get called. But if those are sideeffect-free, this condition should be removed.
+          if( datetimeCmp(datetime, datetime0) || !nrecs )       //Do we really need this condition? I have included it in order not to change the number of times gribapiGetDataDateTime() etc. get called. But if those are sideeffect-free, this condition should be removed.
             {
               datetime0 = datetime;
 
@@ -1036,7 +1037,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
   unsigned char *gribbuffer = NULL;
   size_t buffersize = 0;
   int fileID;
-  DateTime datetime0;
+  DateTime datetime0 = { LONG_MIN, LONG_MIN };
   // int gridID;
   int recID;
   //  int warn_numavg = TRUE;
@@ -1169,7 +1170,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
           if ( cdiInventoryMode == 1 ) break;
           else
 	    {
-	      if ( memcmp(&datetime, &datetime0, sizeof(DateTime)) != 0 ) break;
+	      if ( datetimeCmp(datetime, datetime0) != 0 ) break;
 
               gribWarning("Parameter already exist, skipped!", nrecs_scanned, tsID+1, varname, param, level1, level2);
 	      continue;
@@ -1295,7 +1296,7 @@ int gribapiScanTimestep(stream_t * streamptr)
       int nrecs_scanned = streamptr->tsteps[0].nallrecs + streamptr->tsteps[1].nrecs*(tsID-1);    //Only used for debug output.
       int rindex = 0;
       off_t recpos = 0;
-      DateTime datetime0;
+      DateTime datetime0 = { LONG_MIN, LONG_MIN };
       grib_handle *gh = NULL;
       char varname[256];
       while ( TRUE )
@@ -1407,7 +1408,7 @@ int gribapiScanTimestep(stream_t * streamptr)
 	    {
 	      if ( streamptr->tsteps[tsID].records[recID].used )
 		{
-		  if ( memcmp(&datetime, &datetime0, sizeof(DateTime)) != 0 ) break;
+		  if ( datetimeCmp(datetime, datetime0) != 0 ) break;
 
 		  if ( CDI_Debug )
                     gribWarning("Parameter already exist, skipped!", nrecs_scanned, tsID+1, varname, param, level1, level2);

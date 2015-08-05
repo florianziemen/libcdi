@@ -87,10 +87,14 @@ static void doctotxt(FILE *fp, Docu *doc, size_t ndoc)
 }
 
 enum cftype {ISVOID, ISCONSTSTRING, ISINT, ISREAL, ISDOUBLE, ISMPI_COMM,
-             ISXT_IDXLIST, ISCHOICE, ISINTP, ISINTV, ISINTVV, ISREALP,
+             ISXT_IDXLIST, ISCHOICE, ISINTP, ISFLOATV, ISFLOATVV,
+             ISDOUBLEV, ISDOUBLEVV, ISINTV, ISINTVV, ISREALP,
              ISDOUBLEP, ISCBUF, ISUUID, ISUCHAR, ISSTRING, ISSTRINGP,
              VOIDFUNCVOID,
              NUM_KNOWN_ARG_TYPES};
+
+static inline int
+isArrayArgType(int argType);
 
 enum conversionType { CONV_ARG, CONV_RET };
 
@@ -124,6 +128,7 @@ struct symbol {
 /* white-space */
 #define WS "[[:blank:]\n]"
 #define NWS "[^[:blank:]\n]"
+/* Note: size of this table must match the cftype enum */
 static struct symbol funArgSym[]
   = { { "",                "",        "void",
         "^"WS"*void"WS"*)", 0, 0, 0 },
@@ -145,6 +150,18 @@ static struct symbol funArgSym[]
         "^"WS"*const"WS"+void"WS"*\\*"WS"*"SYMRE"?"WS"*[,\\)]", 1, 0, 0 },
       { "INTEGER",         "PINT",    "int *%.*s",
         "^"WS"*(const"WS"+)?int"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2, 0, 0 },
+      { "REAL",            "FLOATV",  "float %.*s[]",
+        "^"WS"*(const"WS"+)?float("WS"+"SYMRE")?"WS"*\\[[^]]*\\]"
+        WS"*[,\\)]", 3, 0, 0 },
+      { "REAL",            "FLOATVV", "float %.*s[][]",
+        "^"WS"*(const"WS"+)?float("WS"+"SYMRE")?"WS"*\\[[^]]*\\]"
+        WS"*\\[[^]]*\\]"WS"*[,\\)]", 3, 0, 0 },
+      { "DOUBLEPRECISION", "DOUBLEV",  "double %.*s[]",
+        "^"WS"*(const"WS"+)?double("WS"+"SYMRE")?"WS"*\\[[^]]*\\]"
+        WS"*[,\\)]", 3, 0, 0 },
+      { "DOUBLEPRECISION", "DOUBLEVV", "double %.*s[][]",
+        "^"WS"*(const"WS"+)?double("WS"+"SYMRE")?"WS"*\\[[^]]*\\]"
+        WS"*\\[[^]]*\\]"WS"*[,\\)]", 3, 0, 0 },
       { "INTEGER",         "INTV",    "int  %.*s[]",
         "^"WS"*(const"WS"+)?int("WS"+"SYMRE")?"WS"*\\[[^]]*\\]"
         WS"*[,\\)]", 3, 0, 0 },
@@ -296,14 +313,18 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
     if (reCompile(&docCommentRE, docCommentREString, &line, &lineBufSize))
       exit(EXIT_FAILURE);
   }
-  /* compile keep-conditional regular expression */
-  /* if(n)def and endif preprocessor conditionals followed by
-     make_fint keep are copied to the Fortran interface file */
   regex_t cppCondRE;
   {
     static const char cppCondREString[]
-      = "^"WS"*#"WS"*(ifn?def"WS"+"SYMRE"|endif)"WS"+/\\*"WS"*make_fint keep"WS"*\\*/";
+      = "^"WS"*#"WS"*((ifn?def)"WS"+"SYMRE"|endif)"WS"*(/\\*[^*]*\\*/|//.*)?";
     if (reCompile(&cppCondRE, cppCondREString, &line, &lineBufSize))
+      exit(EXIT_FAILURE);
+  }
+  regex_t cppElseRE;
+  {
+    static const char cppElseREString[]
+      = "^"WS"*#"WS"*else"WS"*(/\\*[^*]*\\*/|//.*)?";
+    if (reCompile(&cppElseRE, cppElseREString, &line, &lineBufSize))
       exit(EXIT_FAILURE);
   }
   regex_t emptyStringRE;
@@ -349,6 +370,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
   ssize_t lineLen;
   while ((lineLen = getline(&line, &lineBufSize, fpin)) >= 0)
     {
+      static const char cplusplus_macro[] = "__cplusplus";
       lineno++;
       functype = ISVOID;
       size_t funcargc = 0;
@@ -385,6 +407,8 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
         funcname[funcnameLen] = 0;
         pline += reMatch[0].rm_eo;
       } while (0);
+      int cppSwitchLen, cppSymLen;
+
       if (declType == FUNC_DECL)
         {
 	  funcargname[funcargc].rm_so = (regoff_t)(pline - line);
@@ -504,9 +528,12 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
 		fprintf(fpinc, "!%36s(", "");
 	      else
 		fprintf(fpinc, ",\n!%36s ", "");
-	      fprintf(fpinc, "%-16s%.*s", funArgSym[funcargtype[i]].f77name,
+              int argType = funcargtype[i];
+              int isArray = isArrayArgType(argType);
+	      fprintf(fpinc, "%-16s%.*s%s", funArgSym[argType].f77name,
                       (int)(funcargname[i].rm_eo - funcargname[i].rm_so),
-                      line + funcargname[i].rm_so);
+                      line + funcargname[i].rm_so,
+                      isArray ? "(*)" : "");
 	    }
 	  if ( funcargc )
 	    fprintf(fpinc, ")\n");
@@ -695,12 +722,15 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
 
                   char farg[128];
                   /* FIXME: optional empty argument name unhandled */
+                  int argType = funcargtype[i];
+                  int isArray = isArrayArgType(argType);
 		  int nchn
-                    = snprintf(farg, sizeof (farg), "%s %.*s",
-                               funArgSym[funcargtype[i]].f77name,
+                    = snprintf(farg, sizeof (farg), "%s %.*s%s",
+                               funArgSym[argType].f77name,
                                (int)(funcargname[i].rm_eo
                                      - funcargname[i].rm_so),
-                               line + funcargname[i].rm_so);
+                               line + funcargname[i].rm_so,
+                               isArray ? "(*)" : "");
                   if (nchn < 0)
                     abort();
 		  if ( (xlineLen + (size_t)nchn) > 80 )
@@ -744,11 +774,18 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
                   "      PARAMETER (%-22s = %2d)\n", parname, parname,
                   parvalue);
 	}
-      else if (!regexec(&cppCondRE, line, maxMatch, reMatch, 0))
+      else if (!regexec(&cppCondRE, line, maxMatch, reMatch, 0)
+               && ((cppSwitchLen = reMatch[2].rm_eo - reMatch[2].rm_so) == 5)
+               && ((size_t)(cppSymLen = reMatch[3].rm_eo - reMatch[3].rm_so)
+                   == sizeof (cplusplus_macro) - 1)
+               && !memcmp(line + reMatch[3].rm_so, cplusplus_macro,
+                          sizeof (cplusplus_macro) - 1))
 	{
-          /* fortran include */
-	  fputs(line, fpint);
-	}
+          fprintf(stderr, "Found conditional C++ block, skipping to #else\n");
+          while ((lineLen = getline(&line, &lineBufSize, fpin)) >= 0)
+            if (!regexec(&cppElseRE, line, maxMatch, reMatch, 0))
+              break;
+        }
       else if (detectComment(&line, &lineLen, &lineBufSize,
                              maxMatch, reMatch,
                              xname, &xnameLen, xdes,
@@ -762,8 +799,8 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
 	}
     }
 
-  fprintf(fpint, "\n");
-  fprintf(fpint, "#endif\n");
+  fputs("\n"
+        "#endif\n", fpint);
 
   fclose(fpin);
   fclose(fpinc);
@@ -797,8 +834,8 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
   fp = fopen(filename, "w");
   if ( fp )
     {
-      fprintf(fp, "C Quick Reference\n");
-      fprintf(fp, "-----------------\n\n");
+      fputs("C Quick Reference\n"
+            "-----------------\n\n", fp);
 
       doctotxt(fp, cdoc, ncdoc);
       fclose(fp);
@@ -815,8 +852,8 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
   fp = fopen(filename, "w");
   if ( fp )
     {
-      fprintf(fp, "Fortran Quick Reference\n");
-      fprintf(fp, "-----------------------\n\n");
+      fputs("Fortran Quick Reference\n"
+            "-----------------------\n\n", fp);
 
       doctotxt(fp, fdoc, nfdoc);
       fclose(fp);
@@ -833,12 +870,12 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
   fp = fopen(filename, "w");
   if ( fp )
     {
-      fprintf(fp, "\\chapter*{Quick Reference}\n");
-      fprintf(fp, "\\addcontentsline{toc}{chapter}{Quick Reference}\n");
-      fprintf(fp, "\n");
-      fprintf(fp, "This appendix provide a brief listing of the C language bindings of the\n");
-      fprintf(fp, "CDI library routines:\n");
-      fprintf(fp, "\n");
+      fputs("\\chapter*{Quick Reference}\n"
+            "\\addcontentsline{toc}{chapter}{Quick Reference}\n"
+            "\n"
+            "This appendix provide a brief listing of the C language bindings of the\n"
+            "CDI library routines:\n"
+            "\n", fp);
 
       doctotex(fp, cdoc, ncdoc);
       fclose(fp);
@@ -855,12 +892,12 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
   fp = fopen(filename, "w");
   if ( fp )
     {
-      fprintf(fp, "\\chapter*{Quick Reference}\n");
-      fprintf(fp, "\\addcontentsline{toc}{chapter}{Quick Reference}\n");
-      fprintf(fp, "\n");
-      fprintf(fp, "This appendix provide a brief listing of the Fortran language bindings of the\n");
-      fprintf(fp, "CDI library routines:\n");
-      fprintf(fp, "\n");
+      fputs("\\chapter*{Quick Reference}\n"
+            "\\addcontentsline{toc}{chapter}{Quick Reference}\n"
+            "\n"
+            "This appendix provide a brief listing of the Fortran language bindings of the\n"
+            "CDI library routines:\n"
+            "\n", fp);
 
       doctotex(fp, fdoc, nfdoc);
       fclose(fp);
@@ -1148,6 +1185,16 @@ static int detectComment(char **line_, ssize_t *lineLen, size_t *lineBufSize,
   return matchType;
 }
 
+static inline int
+isArrayArgType(int argType)
+{
+  return argType == ISFLOATV
+    || argType == ISFLOATVV
+    || argType == ISDOUBLEV
+    || argType == ISDOUBLEVV
+    || argType == ISINTV
+    || argType == ISINTVV;
+}
 
 
 /*

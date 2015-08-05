@@ -97,7 +97,7 @@ Define the UUID of an unstructured grid.
 \section*{\tt \htmlref{gridDefXbounds}{gridDefXbounds}}
 
 \begin{verbatim}
-    void gridDefXbounds (int gridID, const double *xbounds_vec);
+    void gridDefXbounds (int gridID, const double xbounds[]);
 \end{verbatim}
 
 Define the bounds of a X-axis.
@@ -142,7 +142,7 @@ Define the units of a X-axis.
 \section*{\tt \htmlref{gridDefXvals}{gridDefXvals}}
 
 \begin{verbatim}
-    void gridDefXvals (int gridID, const double *xvals_vec);
+    void gridDefXvals (int gridID, const double xvals[]);
 \end{verbatim}
 
 Define the values of a X-axis.
@@ -151,7 +151,7 @@ Define the values of a X-axis.
 \section*{\tt \htmlref{gridDefYbounds}{gridDefYbounds}}
 
 \begin{verbatim}
-    void gridDefYbounds (int gridID, const double *ybounds_vec);
+    void gridDefYbounds (int gridID, const double ybounds[]);
 \end{verbatim}
 
 Define the bounds of a Y-axis.
@@ -196,7 +196,7 @@ Define the units of a Y-axis.
 \section*{\tt \htmlref{gridDefYvals}{gridDefYvals}}
 
 \begin{verbatim}
-    void gridDefYvals (int gridID, const double *yvals_vec);
+    void gridDefYvals (int gridID, const double yvals[]);
 \end{verbatim}
 
 Define the values of a Y-axis.
@@ -304,7 +304,7 @@ Get the UUID of an unstructured grid.
 \section*{\tt \htmlref{gridInqXbounds}{gridInqXbounds}}
 
 \begin{verbatim}
-    int gridInqXbounds (int gridID, double *xbounds_vec);
+    int gridInqXbounds (int gridID, double xbounds[]);
 \end{verbatim}
 
 Get the bounds of a X-axis.
@@ -367,7 +367,7 @@ Get one value of a X-axis.
 \section*{\tt \htmlref{gridInqXvals}{gridInqXvals}}
 
 \begin{verbatim}
-    int gridInqXvals (int gridID, double *xvals_vec);
+    int gridInqXvals (int gridID, double xvals[]);
 \end{verbatim}
 
 Get all values of a X-axis.
@@ -376,7 +376,7 @@ Get all values of a X-axis.
 \section*{\tt \htmlref{gridInqYbounds}{gridInqYbounds}}
 
 \begin{verbatim}
-    int gridInqYbounds (int gridID, double *ybounds_vec);
+    int gridInqYbounds (int gridID, double ybounds[]);
 \end{verbatim}
 
 Get the bounds of a Y-axis.
@@ -439,7 +439,7 @@ Get one value of a Y-axis.
 \section*{\tt \htmlref{gridInqYvals}{gridInqYvals}}
 
 \begin{verbatim}
-    int gridInqYvals (int gridID, double *yvals_vec);
+    int gridInqYvals (int gridID, double yvals[]);
 \end{verbatim}
 
 Get all values of a Y-axis.
@@ -574,7 +574,7 @@ Create a new dataset.
 \section*{\tt \htmlref{streamReadVar}{streamReadVar}}
 
 \begin{verbatim}
-    void streamReadVar (int streamID, int varID, double *data_vec, int *nmiss);
+    void streamReadVar (int streamID, int varID, double data[], int *nmiss);
 \end{verbatim}
 
 Read a variable.
@@ -583,7 +583,7 @@ Read a variable.
 \section*{\tt \htmlref{streamReadVarSlice}{streamReadVarSlice}}
 
 \begin{verbatim}
-    void streamReadVarSlice (int streamID, int varID, int levelID, double *data_vec,
+    void streamReadVarSlice (int streamID, int varID, int levelID, double data[],
                              int *nmiss);
 \end{verbatim}
 
@@ -602,7 +602,7 @@ Synchronize an Open Dataset to Disk.
 \section*{\tt \htmlref{streamWriteVar}{streamWriteVar}}
 
 \begin{verbatim}
-    void streamWriteVar (int streamID, int varID, const double *data_vec, int nmiss);
+    void streamWriteVar (int streamID, int varID, const double data[], int nmiss);
 \end{verbatim}
 
 Write a variable.
@@ -612,7 +612,7 @@ Write a variable.
 
 \begin{verbatim}
     void streamWriteVarSlice (int streamID, int varID, int levelID,
-                              const double *data_vec, int nmiss);
+                              const double data[], int nmiss);
 \end{verbatim}
 
 Write a horizontal slice of a variable.
@@ -661,6 +661,33 @@ Get the size of a subtype (e.g. no. of tiles)..
 \end{verbatim}
 
 Specialized version of subtypeInqSubEntry looking for tile/attribute pair..
+
+
+\section*{\tt \htmlref{tableRead}{tableRead}}
+
+\begin{verbatim}
+    int tableRead (const char *tablefile);
+\end{verbatim}
+
+read table of parameters from file in tabular format.
+
+
+\section*{\tt \htmlref{tableWrite}{tableWrite}}
+
+\begin{verbatim}
+    void tableWrite (const char *filename, int tableID);
+\end{verbatim}
+
+write table of parameters to file in tabular format.
+
+
+\section*{\tt \htmlref{tableWriteC}{tableWriteC}}
+
+\begin{verbatim}
+    void tableWriteC (const char *filename, int tableID);
+\end{verbatim}
+
+write table of parameters to file in C language format.
 
 
 \section*{\tt \htmlref{taxisCreate}{taxisCreate}}
@@ -856,7 +883,7 @@ Create a variable list.
 
 \begin{verbatim}
     int vlistDefAttFlt (int vlistID, int varID, const char *name, int type, int len,
-                        const double *dp_vec);
+                        const double dp[]);
 \end{verbatim}
 
 Define a floating point attribute.
@@ -866,7 +893,7 @@ Define a floating point attribute.
 
 \begin{verbatim}
     int vlistDefAttInt (int vlistID, int varID, const char *name, int type, int len,
-                        const int *ip_vec);
+                        const int ip[]);
 \end{verbatim}
 
 Define an integer attribute.
@@ -1050,7 +1077,7 @@ Get information about an attribute.
 
 \begin{verbatim}
     int vlistInqAttFlt (int vlistID, int varID, const char *name, int mlen,
-                        double *dp_vec);
+                        double dp[]);
 \end{verbatim}
 
 Get the value(s) of a floating point attribute.
@@ -1059,8 +1086,7 @@ Get the value(s) of a floating point attribute.
 \section*{\tt \htmlref{vlistInqAttInt}{vlistInqAttInt}}
 
 \begin{verbatim}
-    int vlistInqAttInt (int vlistID, int varID, const char *name, int mlen,
-                        int *ip_vec);
+    int vlistInqAttInt (int vlistID, int varID, const char *name, int mlen, int ip[]);
 \end{verbatim}
 
 Get the value(s) of an integer attribute.
@@ -1277,7 +1303,7 @@ Define one level of a Z-axis.
 \section*{\tt \htmlref{zaxisDefLevels}{zaxisDefLevels}}
 
 \begin{verbatim}
-    void zaxisDefLevels (int zaxisID, const double *levels_vec);
+    void zaxisDefLevels (int zaxisID, const double levels[]);
 \end{verbatim}
 
 Define the levels of a Z-axis.
@@ -1286,7 +1312,7 @@ Define the levels of a Z-axis.
 \section*{\tt \htmlref{zaxisDefLongname}{zaxisDefLongname}}
 
 \begin{verbatim}
-    void zaxisDefLongname (int zaxisID, const char *longname);
+    void zaxisDefLongname (int zaxisID, const char *longname_optional);
 \end{verbatim}
 
 Define the longname of a Z-axis.
@@ -1295,7 +1321,7 @@ Define the longname of a Z-axis.
 \section*{\tt \htmlref{zaxisDefName}{zaxisDefName}}
 
 \begin{verbatim}
-    void zaxisDefName (int zaxisID, const char *name);
+    void zaxisDefName (int zaxisID, const char *name_optional);
 \end{verbatim}
 
 Define the name of a Z-axis.
@@ -1331,7 +1357,7 @@ Define the UUID of a generalized Z-axis.
 \section*{\tt \htmlref{zaxisDefUnits}{zaxisDefUnits}}
 
 \begin{verbatim}
-    void zaxisDefUnits (int zaxisID, const char *units);
+    void zaxisDefUnits (int zaxisID, const char *units_optional);
 \end{verbatim}
 
 Define the units of a Z-axis.
@@ -1367,7 +1393,7 @@ Get one level of a Z-axis.
 \section*{\tt \htmlref{zaxisInqLevels}{zaxisInqLevels}}
 
 \begin{verbatim}
-    void zaxisInqLevels (int zaxisID, double *levels_vec);
+    void zaxisInqLevels (int zaxisID, double levels[]);
 \end{verbatim}
 
 Get all levels of a Z-axis.
