@@ -732,7 +732,7 @@ static void ensureBufferSize(size_t requiredSize, size_t* curSize, unsigned char
   if ( *curSize < requiredSize )
     {
       *curSize = requiredSize;
-      *buffer = realloc(*buffer, *curSize);
+      *buffer = (unsigned char *)realloc(*buffer, *curSize);
     }
 }
 
@@ -2612,7 +2612,7 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
 #if defined(GRIBAPIENCODETEST)
   grib_handle *gh = (grib_handle *) gribHandleNew(editionNumber);
 #else
-  grib_handle *gh = gc->gribHandle;
+  grib_handle *gh = (struct grib_handle *)gc->gribHandle;
 #endif
   GRIB_CHECK(grib_get_long(gh, "editionNumber", &editionNumber), 0);
 
