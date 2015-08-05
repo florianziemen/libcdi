@@ -1947,7 +1947,7 @@
 
 !                     zaxisDefName
 !                                    (INTEGER         zaxisID,
-!                                     CHARACTER*(*)   name)
+!                                     CHARACTER*(*)   name_optional)
       EXTERNAL        zaxisDefName
 
 !                     zaxisInqName
@@ -1957,7 +1957,7 @@
 
 !                     zaxisDefLongname
 !                                    (INTEGER         zaxisID,
-!                                     CHARACTER*(*)   longname)
+!                                     CHARACTER*(*)   longname_optional)
       EXTERNAL        zaxisDefLongname
 
 !                     zaxisInqLongname
@@ -1967,7 +1967,7 @@
 
 !                     zaxisDefUnits
 !                                    (INTEGER         zaxisID,
-!                                     CHARACTER*(*)   units)
+!                                     CHARACTER*(*)   units_optional)
       EXTERNAL        zaxisDefUnits
 
 !                     zaxisInqUnits
@@ -2029,7 +2029,7 @@
 
       INTEGER         zaxisInqLbounds
 !                                    (INTEGER         zaxisID,
-!                                     DOUBLEPRECISION lbounds(*))
+!                                     DOUBLEPRECISION lbounds_optional(*))
       EXTERNAL        zaxisInqLbounds
 
       DOUBLEPRECISION zaxisInqLbound
@@ -2044,7 +2044,7 @@
 
       INTEGER         zaxisInqUbounds
 !                                    (INTEGER         zaxisID,
-!                                     DOUBLEPRECISION ubounds(*))
+!                                     DOUBLEPRECISION ubounds_optional(*))
       EXTERNAL        zaxisInqUbounds
 
       DOUBLEPRECISION zaxisInqUbound
@@ -2059,7 +2059,7 @@
 
       INTEGER         zaxisInqWeights
 !                                    (INTEGER         zaxisID,
-!                                     DOUBLEPRECISION weights(*))
+!                                     DOUBLEPRECISION weights_optional(*))
       EXTERNAL        zaxisInqWeights
 
 !                     zaxisChangeType

@@ -526,7 +526,6 @@ void zaxisDefPrec(int zaxisID, int prec)
 int zaxisInqPrec(int zaxisID)
 {
   zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
-
   return (zaxisptr->prec);
 }
 
@@ -546,8 +545,7 @@ void zaxisDefPositive(int zaxisID, int positive)
 int zaxisInqPositive(int zaxisID)
 {
   zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
-
-  return (zaxisptr->positive);
+  return zaxisptr->positive;
 }
 
 
@@ -566,8 +564,7 @@ void zaxisDefLtype(int zaxisID, int ltype)
 int zaxisInqLtype(int zaxisID)
 {
   zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
-
-  return (zaxisptr->ltype);
+  return zaxisptr->ltype;
 }
 
 
@@ -586,8 +583,7 @@ void zaxisDefLtype2(int zaxisID, int ltype2)
 int zaxisInqLtype2(int zaxisID)
 {
   zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
-
-  return (zaxisptr->ltype2);
+  return zaxisptr->ltype2;
 }
 
 /*
@@ -635,7 +631,6 @@ The function @func{zaxisDefLevel} defines one level of a Z-axis.
 void zaxisDefLevel(int zaxisID, int levelID, double level)
 {
   zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
-
   if ( levelID >= 0 && levelID < zaxisptr->size )
     zaxisptr->vals[levelID] = level;
   reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
@@ -645,7 +640,6 @@ void zaxisDefLevel(int zaxisID, int levelID, double level)
 void zaxisDefNlevRef(int zaxisID, const int nhlev)
 {
   zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
-
   if (zaxisptr->nhlev != nhlev)
     {
       zaxisptr->nhlev = nhlev;
@@ -657,8 +651,7 @@ void zaxisDefNlevRef(int zaxisID, const int nhlev)
 int zaxisInqNlevRef(int zaxisID)
 {
   zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
-
-  return (zaxisptr->nhlev);
+  return zaxisptr->nhlev;
 }
 
 /*
@@ -678,7 +671,6 @@ The function @func{zaxisDefNumber} defines the reference number for a generalize
 void zaxisDefNumber(int zaxisID, const int number)
 {
   zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
-
   if (zaxisptr->number != number)
     {
       zaxisptr->number = number;
@@ -704,8 +696,7 @@ The function @func{zaxisInqNumber} returns the reference number to a generalized
 int zaxisInqNumber(int zaxisID)
 {
   zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
-
-  return (zaxisptr->number);
+  return zaxisptr->number;
 }
 
 /*
@@ -725,7 +716,6 @@ The function @func{zaxisDefUUID} defines the UUID for a generalized  Z-axis.
 void zaxisDefUUID(int zaxisID, const unsigned char uuid[CDI_UUID_SIZE])
 {
   zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
-
   memcpy(zaxisptr->uuid, uuid, CDI_UUID_SIZE);
   reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
 }
@@ -776,7 +766,7 @@ double zaxisInqLevel(int zaxisID, int levelID)
   if ( levelID >= 0 && levelID < zaxisptr->size )
     level = zaxisptr->vals[levelID];
 
-  return (level);
+  return level;
 }
 
 double zaxisInqLbound(int zaxisID, int index)
@@ -784,11 +774,10 @@ double zaxisInqLbound(int zaxisID, int index)
   double level = 0;
   zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
 
-  if ( zaxisptr->lbounds )
-    if ( index >= 0 && index < zaxisptr->size )
+  if ( zaxisptr->lbounds && ( index >= 0 && index < zaxisptr->size ) )
       level = zaxisptr->lbounds[index];
 
-  return (level);
+  return level;
 }
 
 
@@ -797,18 +786,16 @@ double zaxisInqUbound(int zaxisID, int index)
   double level = 0;
   zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
 
-  if ( zaxisptr->ubounds )
-    if ( index >= 0 && index < zaxisptr->size )
-      level = zaxisptr->ubounds[index];
-
-  return (level);
+  if ( zaxisptr->ubounds && ( index >= 0 && index < zaxisptr->size ) )
+    level = zaxisptr->ubounds[index];
+  return level;
 }
 
 
 const double *zaxisInqLevelsPtr(int zaxisID)
 {
   zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
-  return ( zaxisptr->vals );
+  return zaxisptr->vals;
 }
 
 /*
@@ -904,7 +891,7 @@ int zaxisInqLevelID(int zaxisID, double level)
         break;
       }
 
-  return (levelID);
+  return levelID;
 }
 
 /*

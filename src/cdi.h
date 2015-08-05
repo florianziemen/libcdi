@@ -951,19 +951,19 @@ void    zaxisDefUUID(int zaxisID, const unsigned char uuid[CDI_UUID_SIZE]);
 void    zaxisInqUUID(int zaxisID, unsigned char uuid[CDI_UUID_SIZE]);
 
 /*      zaxisDefName: Define the name of a Z-axis */
-void    zaxisDefName(int zaxisID, const char *name);
+void    zaxisDefName(int zaxisID, const char *name_optional);
 
 /*      zaxisInqName: Get the name of a Z-axis */
 void    zaxisInqName(int zaxisID, char *name);
 
 /*      zaxisDefLongname: Define the longname of a Z-axis */
-void    zaxisDefLongname(int zaxisID, const char *longname);
+void    zaxisDefLongname(int zaxisID, const char *longname_optional);
 
 /*      zaxisInqLongname: Get the longname of a Z-axis */
 void    zaxisInqLongname(int zaxisID, char *longname);
 
 /*      zaxisDefUnits: Define the units of a Z-axis */
-void    zaxisDefUnits(int zaxisID, const char *units);
+void    zaxisDefUnits(int zaxisID, const char *units_optional);
 
 /*      zaxisInqUnits: Get the units of a Z-axis */
 void    zaxisInqUnits(int zaxisID, char *units);
@@ -986,13 +986,13 @@ void    zaxisInqVct(int zaxisID, double vct[]);
 int     zaxisInqVctSize(int zaxisID);
 const double *zaxisInqVctPtr(int zaxisID);
 void    zaxisDefLbounds(int zaxisID, const double lbounds[]);
-int     zaxisInqLbounds(int zaxisID, double lbounds[]);
+int     zaxisInqLbounds(int zaxisID, double lbounds_optional[]);
 double  zaxisInqLbound(int zaxisID, int index);
 void    zaxisDefUbounds(int zaxisID, const double ubounds[]);
-int     zaxisInqUbounds(int zaxisID, double ubounds[]);
+int     zaxisInqUbounds(int zaxisID, double ubounds_optional[]);
 double  zaxisInqUbound(int zaxisID, int index);
 void    zaxisDefWeights(int zaxisID, const double weights[]);
-int     zaxisInqWeights(int zaxisID, double weights[]);
+int     zaxisInqWeights(int zaxisID, double weights_optional[]);
 void    zaxisChangeType(int zaxisID, int zaxistype);
 
 /* TAXIS routines */

@@ -2443,14 +2443,6 @@ module mo_cdi
       real(c_double), intent(in) :: lbounds_dummy(*)
     end subroutine zaxisDefLbounds
 
-    function zaxisInqLbounds(zaxisID_dummy, lbounds_dummy) bind(c, name =&
-    & 'zaxisInqLbounds') result(f_result)
-      import c_double, c_int
-      integer(c_int), value :: zaxisID_dummy
-      real(c_double), intent(inout) :: lbounds_dummy(*)
-      integer(c_int) :: f_result
-    end function zaxisInqLbounds
-
     function zaxisInqLbound(zaxisID_dummy, index_dummy) bind(c, name =&
     & 'zaxisInqLbound') result(f_result)
       import c_double, c_int
@@ -2466,14 +2458,6 @@ module mo_cdi
       real(c_double), intent(in) :: ubounds_dummy(*)
     end subroutine zaxisDefUbounds
 
-    function zaxisInqUbounds(zaxisID_dummy, ubounds_dummy) bind(c, name =&
-    & 'zaxisInqUbounds') result(f_result)
-      import c_double, c_int
-      integer(c_int), value :: zaxisID_dummy
-      real(c_double), intent(inout) :: ubounds_dummy(*)
-      integer(c_int) :: f_result
-    end function zaxisInqUbounds
-
     function zaxisInqUbound(zaxisID_dummy, index_dummy) bind(c, name =&
     & 'zaxisInqUbound') result(f_result)
       import c_double, c_int
@@ -2488,14 +2472,6 @@ module mo_cdi
       integer(c_int), value :: zaxisID_dummy
       real(c_double), intent(in) :: weights_dummy(*)
     end subroutine zaxisDefWeights
-
-    function zaxisInqWeights(zaxisID_dummy, weights_dummy) bind(c, name =&
-    & 'zaxisInqWeights') result(f_result)
-      import c_double, c_int
-      integer(c_int), value :: zaxisID_dummy
-      real(c_double), intent(inout) :: weights_dummy(*)
-      integer(c_int) :: f_result
-    end function zaxisInqWeights
 
     subroutine zaxisChangeType(zaxisID_dummy, zaxistype_dummy) bind(c, name =&
     & 'zaxisChangeType')
@@ -5186,24 +5162,35 @@ contains
     end do
   end subroutine zaxisName
 
-  subroutine zaxisDefName(zaxisID_dummy, name_dummy)
+  subroutine zaxisDefName(zaxisID_dummy, name)
     integer(c_int), value :: zaxisID_dummy
-    character(kind = c_char, len = *), intent(in) :: name_dummy
-    character(kind = c_char) :: name_temp(len(name_dummy) + 1)
+    character(kind = c_char, len = *), optional, intent(in) :: name
+    character(kind = c_char), allocatable, target :: name_temp(:)
     integer :: name_i
+    type(c_ptr) :: name_cptr
     interface
-      subroutine lib_zaxisDefName(zaxisID_dummy, name_dummy) bind(c, name =&
+      subroutine lib_zaxisDefName(zaxisID_dummy, name) bind(c, name =&
       & 'zaxisDefName')
-        import c_char, c_int
+        import c_int, c_ptr
         integer(c_int), value :: zaxisID_dummy
-        character(kind = c_char) :: name_dummy(*)
+        type(c_ptr), value :: name
       end subroutine lib_zaxisDefName
     end interface
-    do name_i = 1, len(name_dummy)
-      name_temp(name_i) = name_dummy(name_i:name_i)
-    end do
-    name_temp(len(name_dummy) + 1) = c_null_char
-    call lib_zaxisDefName(zaxisID_dummy, name_temp)
+    if (present(name)) then
+      allocate(name_temp(len(name) + 1))
+      name_temp(len(name) + 1) = c_null_char
+      do name_i = len(name), 1, -1
+        if(name(name_i:name_i) /= ' ') exit
+        name_temp(name_i) = c_null_char
+      end do
+      do name_i = name_i, 1, -1
+          name_temp(name_i) = name(name_i:name_i)
+      end do
+      name_cptr = c_loc(name_temp)
+    else
+      name_cptr = c_null_ptr
+    end if
+    call lib_zaxisDefName(zaxisID_dummy, name_cptr)
   end subroutine zaxisDefName
 
   subroutine zaxisInqName(zaxisID_dummy, name_dummy)
@@ -5237,24 +5224,35 @@ contains
     end do
   end subroutine zaxisInqName
 
-  subroutine zaxisDefLongname(zaxisID_dummy, longname_dummy)
+  subroutine zaxisDefLongname(zaxisID_dummy, longname)
     integer(c_int), value :: zaxisID_dummy
-    character(kind = c_char, len = *), intent(in) :: longname_dummy
-    character(kind = c_char) :: longname_temp(len(longname_dummy) + 1)
+    character(kind = c_char, len = *), optional, intent(in) :: longname
+    character(kind = c_char), allocatable, target :: longname_temp(:)
     integer :: longname_i
+    type(c_ptr) :: longname_cptr
     interface
-      subroutine lib_zaxisDefLongname(zaxisID_dummy, longname_dummy) bind(c,&
-      & name = 'zaxisDefLongname')
-        import c_char, c_int
+      subroutine lib_zaxisDefLongname(zaxisID_dummy, longname) bind(c, name =&
+      & 'zaxisDefLongname')
+        import c_int, c_ptr
         integer(c_int), value :: zaxisID_dummy
-        character(kind = c_char) :: longname_dummy(*)
+        type(c_ptr), value :: longname
       end subroutine lib_zaxisDefLongname
     end interface
-    do longname_i = 1, len(longname_dummy)
-      longname_temp(longname_i) = longname_dummy(longname_i:longname_i)
-    end do
-    longname_temp(len(longname_dummy) + 1) = c_null_char
-    call lib_zaxisDefLongname(zaxisID_dummy, longname_temp)
+    if (present(longname)) then
+      allocate(longname_temp(len(longname) + 1))
+      longname_temp(len(longname) + 1) = c_null_char
+      do longname_i = len(longname), 1, -1
+        if(longname(longname_i:longname_i) /= ' ') exit
+        longname_temp(longname_i) = c_null_char
+      end do
+      do longname_i = longname_i, 1, -1
+          longname_temp(longname_i) = longname(longname_i:longname_i)
+      end do
+      longname_cptr = c_loc(longname_temp)
+    else
+      longname_cptr = c_null_ptr
+    end if
+    call lib_zaxisDefLongname(zaxisID_dummy, longname_cptr)
   end subroutine zaxisDefLongname
 
   subroutine zaxisInqLongname(zaxisID_dummy, longname_dummy)
@@ -5288,24 +5286,35 @@ contains
     end do
   end subroutine zaxisInqLongname
 
-  subroutine zaxisDefUnits(zaxisID_dummy, units_dummy)
+  subroutine zaxisDefUnits(zaxisID_dummy, units)
     integer(c_int), value :: zaxisID_dummy
-    character(kind = c_char, len = *), intent(in) :: units_dummy
-    character(kind = c_char) :: units_temp(len(units_dummy) + 1)
+    character(kind = c_char, len = *), optional, intent(in) :: units
+    character(kind = c_char), allocatable, target :: units_temp(:)
     integer :: units_i
+    type(c_ptr) :: units_cptr
     interface
-      subroutine lib_zaxisDefUnits(zaxisID_dummy, units_dummy) bind(c, name =&
+      subroutine lib_zaxisDefUnits(zaxisID_dummy, units) bind(c, name =&
       & 'zaxisDefUnits')
-        import c_char, c_int
+        import c_int, c_ptr
         integer(c_int), value :: zaxisID_dummy
-        character(kind = c_char) :: units_dummy(*)
+        type(c_ptr), value :: units
       end subroutine lib_zaxisDefUnits
     end interface
-    do units_i = 1, len(units_dummy)
-      units_temp(units_i) = units_dummy(units_i:units_i)
-    end do
-    units_temp(len(units_dummy) + 1) = c_null_char
-    call lib_zaxisDefUnits(zaxisID_dummy, units_temp)
+    if (present(units)) then
+      allocate(units_temp(len(units) + 1))
+      units_temp(len(units) + 1) = c_null_char
+      do units_i = len(units), 1, -1
+        if(units(units_i:units_i) /= ' ') exit
+        units_temp(units_i) = c_null_char
+      end do
+      do units_i = units_i, 1, -1
+          units_temp(units_i) = units(units_i:units_i)
+      end do
+      units_cptr = c_loc(units_temp)
+    else
+      units_cptr = c_null_ptr
+    end if
+    call lib_zaxisDefUnits(zaxisID_dummy, units_cptr)
   end subroutine zaxisDefUnits
 
   subroutine zaxisInqUnits(zaxisID_dummy, units_dummy)
@@ -5369,6 +5378,63 @@ contains
       stdname_dummy(stdname_i:stdname_i) = ' '
     end do
   end subroutine zaxisInqStdname
+
+  function zaxisInqLbounds(zaxisID_dummy, lbounds) result(f_result)
+    integer(c_int) :: f_result
+    integer(c_int), value :: zaxisID_dummy
+    real(c_double), target, optional, intent(inout) :: lbounds(*)
+    type(c_ptr) :: lbounds_cptr
+    interface
+      function lib_zaxisInqLbounds(zaxisID_dummy, lbounds) bind(c, name =&
+      & 'zaxisInqLbounds') result(c_result)
+        import c_int, c_ptr
+        integer(c_int) :: c_result
+        integer(c_int), value :: zaxisID_dummy
+        type(c_ptr), value :: lbounds
+      end function lib_zaxisInqLbounds
+    end interface
+    lbounds_cptr = c_null_ptr
+    if(present(lbounds)) lbounds_cptr = c_loc(lbounds)
+    f_result = lib_zaxisInqLbounds(zaxisID_dummy, lbounds_cptr)
+  end function zaxisInqLbounds
+
+  function zaxisInqUbounds(zaxisID_dummy, ubounds) result(f_result)
+    integer(c_int) :: f_result
+    integer(c_int), value :: zaxisID_dummy
+    real(c_double), target, optional, intent(inout) :: ubounds(*)
+    type(c_ptr) :: ubounds_cptr
+    interface
+      function lib_zaxisInqUbounds(zaxisID_dummy, ubounds) bind(c, name =&
+      & 'zaxisInqUbounds') result(c_result)
+        import c_int, c_ptr
+        integer(c_int) :: c_result
+        integer(c_int), value :: zaxisID_dummy
+        type(c_ptr), value :: ubounds
+      end function lib_zaxisInqUbounds
+    end interface
+    ubounds_cptr = c_null_ptr
+    if(present(ubounds)) ubounds_cptr = c_loc(ubounds)
+    f_result = lib_zaxisInqUbounds(zaxisID_dummy, ubounds_cptr)
+  end function zaxisInqUbounds
+
+  function zaxisInqWeights(zaxisID_dummy, weights) result(f_result)
+    integer(c_int) :: f_result
+    integer(c_int), value :: zaxisID_dummy
+    real(c_double), target, optional, intent(inout) :: weights(*)
+    type(c_ptr) :: weights_cptr
+    interface
+      function lib_zaxisInqWeights(zaxisID_dummy, weights) bind(c, name =&
+      & 'zaxisInqWeights') result(c_result)
+        import c_int, c_ptr
+        integer(c_int) :: c_result
+        integer(c_int), value :: zaxisID_dummy
+        type(c_ptr), value :: weights
+      end function lib_zaxisInqWeights
+    end interface
+    weights_cptr = c_null_ptr
+    if(present(weights)) weights_cptr = c_loc(weights)
+    f_result = lib_zaxisInqWeights(zaxisID_dummy, weights_cptr)
+  end function zaxisInqWeights
 
   function tunitNamePtr(tunitID_dummy) result(f_result)
     character(kind = c_char), dimension(:), pointer :: f_result
