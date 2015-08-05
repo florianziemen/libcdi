@@ -729,7 +729,7 @@ int gribapiVarCompare(compvar2_t compVar, record_t record, int flag)
   return (rstatus);
 }
 
-static void ensureBufferSize(size_t requiredSize, size_t* curSize, unsigned char** buffer) {
+static void ensureBufferSize(size_t requiredSize, size_t* curSize, unsigned char **buffer) {
   if ( *curSize < requiredSize )
     {
       *curSize = requiredSize;

@@ -49,7 +49,7 @@ success:
   #undef super
 }
 
-static CdiInputFile** openFileList = NULL;
+static CdiInputFile **openFileList = NULL;
 static size_t openFileCount = 0, openFileListSize = 0;
 static pthread_mutex_t openFileListLock = PTHREAD_MUTEX_INITIALIZER;
 

@@ -17,34 +17,34 @@ static const char* fileType2String(int fileType)
 {
   switch(fileType)
     {
-      #ifdef HAVE_LIBGRIB_API
+#ifdef HAVE_LIBGRIB_API
         case FILETYPE_GRB: return "CDI::Iterator::GRIB1";
         case FILETYPE_GRB2: return "CDI::Iterator::GRIB2";
-      #endif
-      #ifdef HAVE_LIBNETCDF
+#endif
+#ifdef HAVE_LIBNETCDF
         case FILETYPE_NC: return "CDI::Iterator::NetCDF";
         case FILETYPE_NC2: return "CDI::Iterator::NetCDF2";
         case FILETYPE_NC4: return "CDI::Iterator::NetCDF4";
         case FILETYPE_NC4C: return "CDI::Iterator::NetCDF4C";
-      #endif
-      #ifdef HAVE_LIBSERVICE
+#endif
+#ifdef HAVE_LIBSERVICE
         case FILETYPE_SRV: return "CDI::Iterator::SRV";
-      #endif
-      #ifdef HAVE_LIBEXTRA
+#endif
+#ifdef HAVE_LIBEXTRA
         case FILETYPE_EXT: return "CDI::Iterator::EXT";
-      #endif
-      #ifdef HAVE_LIBIEG
+#endif
+#ifdef HAVE_LIBIEG
         case FILETYPE_IEG: return "CDI::Iterator::IEG";
-      #endif
+#endif
 
       default: return NULL;
     }
 }
 
-static int string2FileType(const char* fileType, const char** outRestString)
+static int string2FileType(const char* fileType, const char **outRestString)
 {
   //This first part unconditionally checks all known type strings, and only if the given string matches one of these strings, we use fileType2string() to check whether support for this type has been compiled in. This is to avoid throwing "invalid type string" errors when we just have a library version mismatch.
-  #define check(givenString, typeString, typeConstant) do \
+#define check(givenString, typeString, typeConstant) do \
     { \
       if(givenString == strstr(givenString, typeString)) \
         { \
@@ -63,7 +63,7 @@ static int string2FileType(const char* fileType, const char** outRestString)
   check(fileType, "CDI::Iterator::SRV", FILETYPE_SRV);
   check(fileType, "CDI::Iterator::EXT", FILETYPE_EXT);
   check(fileType, "CDI::Iterator::IEG", FILETYPE_IEG);
-  #undef check
+#undef check
 
   //If this point is reached, the given string does not seem to be produced by a cdiIterator_serialize() call.
   Error("The string \"%s\" does not start with a valid iterator type. Please check the source of this string.", fileType);
@@ -100,27 +100,27 @@ CdiIterator* cdiIterator_new(const char* path)
         Warning("Can't open file \"%s\": unknown format\n", path);
         return NULL;
 
-      #ifdef HAVE_LIBGRIB_API
+#ifdef HAVE_LIBGRIB_API
         case FILETYPE_GRB:
         case FILETYPE_GRB2:
           return cdiGribIterator_new(path, filetype);
-      #endif
+#endif
 
-      #ifdef HAVE_LIBNETCDF
+#ifdef HAVE_LIBNETCDF
         case FILETYPE_NC:
         case FILETYPE_NC2:
         case FILETYPE_NC4:
         case FILETYPE_NC4C:
-      #endif
-      #ifdef HAVE_LIBSERVICE
+#endif
+#ifdef HAVE_LIBSERVICE
         case FILETYPE_SRV:
-      #endif
-      #ifdef HAVE_LIBEXTRA
+#endif
+#ifdef HAVE_LIBEXTRA
         case FILETYPE_EXT:
-      #endif
-      #ifdef HAVE_LIBIEG
+#endif
+#ifdef HAVE_LIBIEG
         case FILETYPE_IEG:
-      #endif
+#endif
           return cdiFallbackIterator_new(path, filetype);
 
       default:
@@ -189,28 +189,28 @@ CdiIterator* cdiIterator_clone(CdiIterator* me)
   sanityCheck(me);
   switch(me->filetype)
     {
-      #ifdef HAVE_LIBGRIB_API
+#ifdef HAVE_LIBGRIB_API
         case FILETYPE_GRB:
         case FILETYPE_GRB2:
-          return &cdiGribIterator_clone(me)->super;
-      #endif
+          return cdiGribIterator_getSuper(cdiGribIterator_clone(me));
+#endif
 
-      #ifdef HAVE_LIBNETCDF
+#ifdef HAVE_LIBNETCDF
         case FILETYPE_NC:
         case FILETYPE_NC2:
         case FILETYPE_NC4:
         case FILETYPE_NC4C:
-      #endif
-      #ifdef HAVE_LIBSERVICE
+#endif
+#ifdef HAVE_LIBSERVICE
         case FILETYPE_SRV:
-      #endif
-      #ifdef HAVE_LIBEXTRA
+#endif
+#ifdef HAVE_LIBEXTRA
         case FILETYPE_EXT:
-      #endif
-      #ifdef HAVE_LIBIEG
+#endif
+#ifdef HAVE_LIBIEG
         case FILETYPE_IEG:
-      #endif
-          return &cdiFallbackIterator_clone(me)->super;
+#endif
+          return cdiFallbackIterator_getSuper(cdiFallbackIterator_clone(me));
 
       default:
         Error(kUnexpectedFileTypeMessage);
@@ -239,11 +239,11 @@ CdiGribIterator* cdiGribIterator_clone(CdiIterator* me)
   sanityCheck(me);
   switch(me->filetype)
     {
-      #ifdef HAVE_LIBGRIB_API
+#ifdef HAVE_LIBGRIB_API
         case FILETYPE_GRB:
         case FILETYPE_GRB2:
           return cdiGribIterator_makeClone(me);
-      #endif
+#endif
 
       default:
         return NULL;
@@ -269,28 +269,28 @@ char* cdiIterator_serialize(CdiIterator* me)
   char* subclassDescription = NULL;
   switch(me->filetype)
     {
-      #ifdef HAVE_LIBGRIB_API
+#ifdef HAVE_LIBGRIB_API
         case FILETYPE_GRB:
         case FILETYPE_GRB2:
           subclassDescription = cdiGribIterator_serialize(me);
           break;
-      #endif
+#endif
 
-      #ifdef HAVE_LIBNETCDF
+#ifdef HAVE_LIBNETCDF
         case FILETYPE_NC:
         case FILETYPE_NC2:
         case FILETYPE_NC4:
         case FILETYPE_NC4C:
-      #endif
-      #ifdef HAVE_LIBSERVICE
+#endif
+#ifdef HAVE_LIBSERVICE
         case FILETYPE_SRV:
-      #endif
-      #ifdef HAVE_LIBEXTRA
+#endif
+#ifdef HAVE_LIBEXTRA
         case FILETYPE_EXT:
-      #endif
-      #ifdef HAVE_LIBIEG
+#endif
+#ifdef HAVE_LIBIEG
         case FILETYPE_IEG:
-      #endif
+#endif
           subclassDescription = cdiFallbackIterator_serialize(me);
           break;
 
@@ -329,28 +329,28 @@ CdiIterator* cdiIterator_deserialize(const char* description)
 {
   switch(string2FileType(description, NULL))
     {
-      #ifdef HAVE_LIBGRIB_API
+#ifdef HAVE_LIBGRIB_API
         case FILETYPE_GRB:
         case FILETYPE_GRB2:
-          return &cdiGribIterator_deserialize(description)->super;
-      #endif
+          return cdiGribIterator_getSuper(cdiGribIterator_deserialize(description));
+#endif
 
-      #ifdef HAVE_LIBNETCDF
+#ifdef HAVE_LIBNETCDF
         case FILETYPE_NC:
         case FILETYPE_NC2:
         case FILETYPE_NC4:
         case FILETYPE_NC4C:
-      #endif
-      #ifdef HAVE_LIBSERVICE
+#endif
+#ifdef HAVE_LIBSERVICE
         case FILETYPE_SRV:
-      #endif
-      #ifdef HAVE_LIBEXTRA
+#endif
+#ifdef HAVE_LIBEXTRA
         case FILETYPE_EXT:
-      #endif
-      #ifdef HAVE_LIBIEG
+#endif
+#ifdef HAVE_LIBIEG
         case FILETYPE_IEG:
-      #endif
-          return &cdiFallbackIterator_deserialize(description)->super;
+#endif
+          return cdiFallbackIterator_getSuper(cdiFallbackIterator_deserialize(description));
 
       default:
         Error(kUnexpectedFileTypeMessage);
@@ -401,27 +401,27 @@ int cdiIterator_nextField(CdiIterator* me)
   me->isAdvanced = true;
   switch(me->filetype)
     {
-      #ifdef HAVE_LIBGRIB_API
+#ifdef HAVE_LIBGRIB_API
         case FILETYPE_GRB:
         case FILETYPE_GRB2:
           return cdiGribIterator_nextField(me);
-      #endif
+#endif
 
-      #ifdef HAVE_LIBNETCDF
+#ifdef HAVE_LIBNETCDF
         case FILETYPE_NC:
         case FILETYPE_NC2:
         case FILETYPE_NC4:
         case FILETYPE_NC4C:
-      #endif
-      #ifdef HAVE_LIBSERVICE
+#endif
+#ifdef HAVE_LIBSERVICE
         case FILETYPE_SRV:
-      #endif
-      #ifdef HAVE_LIBEXTRA
+#endif
+#ifdef HAVE_LIBEXTRA
         case FILETYPE_EXT:
-      #endif
-      #ifdef HAVE_LIBIEG
+#endif
+#ifdef HAVE_LIBIEG
         case FILETYPE_IEG:
-      #endif
+#endif
           return cdiFallbackIterator_nextField(me);
 
       default:
@@ -435,27 +435,27 @@ static char* cdiIterator_inqTime(CdiIterator* me, bool getEndTime)
   sanityCheck(me);
   switch(me->filetype)
     {
-      #ifdef HAVE_LIBGRIB_API
+#ifdef HAVE_LIBGRIB_API
         case FILETYPE_GRB:
         case FILETYPE_GRB2:
           return cdiGribIterator_inqTime(me, getEndTime);
-      #endif
+#endif
 
-      #ifdef HAVE_LIBNETCDF
+#ifdef HAVE_LIBNETCDF
         case FILETYPE_NC:
         case FILETYPE_NC2:
         case FILETYPE_NC4:
         case FILETYPE_NC4C:
-      #endif
-      #ifdef HAVE_LIBSERVICE
+#endif
+#ifdef HAVE_LIBSERVICE
         case FILETYPE_SRV:
-      #endif
-      #ifdef HAVE_LIBEXTRA
+#endif
+#ifdef HAVE_LIBEXTRA
         case FILETYPE_EXT:
-      #endif
-      #ifdef HAVE_LIBIEG
+#endif
+#ifdef HAVE_LIBIEG
         case FILETYPE_IEG:
-      #endif
+#endif
           return cdiFallbackIterator_inqTime(me, getEndTime);
 
       default:
@@ -548,7 +548,7 @@ char* cdiIterator_inqVTime(CdiIterator* me)
 @Function cdiIterator_inqLevelType
 @Title Get the type of a level
 
-@Prototype int cdiIterator_inqLevelType(CdiIterator* me, int levelSelector, char** outName = NULL, char** outLongName = NULL, char** outStdName = NULL, char** outUnit = NULL)
+@Prototype int cdiIterator_inqLevelType(CdiIterator* me, int levelSelector, char **outName = NULL, char **outLongName = NULL, char **outStdName = NULL, char **outUnit = NULL)
 @Parameter
     @item iterator The iterator to operate on.
     @item levelSelector Zero for the top level, one for the bottom level
@@ -563,32 +563,32 @@ char* cdiIterator_inqVTime(CdiIterator* me)
 Find out some basic information about the given level, the levelSelector selects the function of the requested level.
 If the requested level does not exist, this returns CDI_UNDEFID.
 */
-int cdiIterator_inqLevelType(CdiIterator* me, int levelSelector, char** outName, char** outLongName, char** outStdName, char** outUnit)
+int cdiIterator_inqLevelType(CdiIterator* me, int levelSelector, char **outName, char **outLongName, char **outStdName, char **outUnit)
 {
   sanityCheck(me);
   switch(me->filetype)
     {
-      #ifdef HAVE_LIBGRIB_API
+#ifdef HAVE_LIBGRIB_API
         case FILETYPE_GRB:
         case FILETYPE_GRB2:
           return cdiGribIterator_levelType(me, levelSelector, outName, outLongName, outStdName, outUnit);
-      #endif
+#endif
 
-      #ifdef HAVE_LIBNETCDF
+#ifdef HAVE_LIBNETCDF
         case FILETYPE_NC:
         case FILETYPE_NC2:
         case FILETYPE_NC4:
         case FILETYPE_NC4C:
-      #endif
-      #ifdef HAVE_LIBSERVICE
+#endif
+#ifdef HAVE_LIBSERVICE
         case FILETYPE_SRV:
-      #endif
-      #ifdef HAVE_LIBEXTRA
+#endif
+#ifdef HAVE_LIBEXTRA
         case FILETYPE_EXT:
-      #endif
-      #ifdef HAVE_LIBIEG
+#endif
+#ifdef HAVE_LIBIEG
         case FILETYPE_IEG:
-      #endif
+#endif
           return cdiFallbackIterator_levelType(me, levelSelector, outName, outLongName, outStdName, outUnit);
 
       default:
@@ -618,27 +618,27 @@ int cdiIterator_inqLevel(CdiIterator* me, int levelSelector, double* outValue1, 
   sanityCheck(me);
   switch(me->filetype)
     {
-      #ifdef HAVE_LIBGRIB_API
+#ifdef HAVE_LIBGRIB_API
         case FILETYPE_GRB:
         case FILETYPE_GRB2:
           return cdiGribIterator_level(me, levelSelector, outValue1, outValue2);
-      #endif
+#endif
 
-      #ifdef HAVE_LIBNETCDF
+#ifdef HAVE_LIBNETCDF
         case FILETYPE_NC:
         case FILETYPE_NC2:
         case FILETYPE_NC4:
         case FILETYPE_NC4C:
-      #endif
-      #ifdef HAVE_LIBSERVICE
+#endif
+#ifdef HAVE_LIBSERVICE
         case FILETYPE_SRV:
-      #endif
-      #ifdef HAVE_LIBEXTRA
+#endif
+#ifdef HAVE_LIBEXTRA
         case FILETYPE_EXT:
-      #endif
-      #ifdef HAVE_LIBIEG
+#endif
+#ifdef HAVE_LIBIEG
         case FILETYPE_IEG:
-      #endif
+#endif
           return cdiFallbackIterator_level(me, levelSelector, outValue1, outValue2);
 
       default:
@@ -663,32 +663,32 @@ int cdiIterator_inqLevel(CdiIterator* me, int levelSelector, double* outValue1, 
 @Description
 Returns identifying information for the external z-axis description. May only be called for generalized levels.
 */
-int cdiIterator_inqLevelUuid(CdiIterator* me, int* outVgridNumber, int* outLevelCount, unsigned char (*outUuid)[16])
+int cdiIterator_inqLevelUuid(CdiIterator* me, int* outVgridNumber, int* outLevelCount, unsigned char outUuid[CDI_UUID_SIZE])
 {
   sanityCheck(me);
   switch(me->filetype)
     {
-      #ifdef HAVE_LIBGRIB_API
+#ifdef HAVE_LIBGRIB_API
         case FILETYPE_GRB:
         case FILETYPE_GRB2:
           return cdiGribIterator_zaxisUuid(me, outVgridNumber, outLevelCount, outUuid);
-      #endif
+#endif
 
-      #ifdef HAVE_LIBNETCDF
+#ifdef HAVE_LIBNETCDF
         case FILETYPE_NC:
         case FILETYPE_NC2:
         case FILETYPE_NC4:
         case FILETYPE_NC4C:
-      #endif
-      #ifdef HAVE_LIBSERVICE
+#endif
+#ifdef HAVE_LIBSERVICE
         case FILETYPE_SRV:
-      #endif
-      #ifdef HAVE_LIBEXTRA
+#endif
+#ifdef HAVE_LIBEXTRA
         case FILETYPE_EXT:
-      #endif
-      #ifdef HAVE_LIBIEG
+#endif
+#ifdef HAVE_LIBIEG
         case FILETYPE_IEG:
-      #endif
+#endif
           return cdiFallbackIterator_zaxisUuid(me, outVgridNumber, outLevelCount, outUuid);
 
       default:
@@ -773,27 +773,27 @@ char* cdiIterator_inqVariableName(CdiIterator* me)
   sanityCheck(me);
   switch(me->filetype)
     {
-      #ifdef HAVE_LIBGRIB_API
+#ifdef HAVE_LIBGRIB_API
         case FILETYPE_GRB:
         case FILETYPE_GRB2:
           return cdiGribIterator_copyVariableName(me);
-      #endif
+#endif
 
-      #ifdef HAVE_LIBNETCDF
+#ifdef HAVE_LIBNETCDF
         case FILETYPE_NC:
         case FILETYPE_NC2:
         case FILETYPE_NC4:
         case FILETYPE_NC4C:
-      #endif
-      #ifdef HAVE_LIBSERVICE
+#endif
+#ifdef HAVE_LIBSERVICE
         case FILETYPE_SRV:
-      #endif
-      #ifdef HAVE_LIBEXTRA
+#endif
+#ifdef HAVE_LIBEXTRA
         case FILETYPE_EXT:
-      #endif
-      #ifdef HAVE_LIBIEG
+#endif
+#ifdef HAVE_LIBIEG
         case FILETYPE_IEG:
-      #endif
+#endif
           return cdiFallbackIterator_copyVariableName(me);
 
       default:
@@ -842,28 +842,28 @@ void cdiIterator_readField(CdiIterator* me, double* buffer, size_t* nmiss)
   if(!buffer) xabort("NULL was passed in a buffer. Please provide a suitable buffer.");
   switch(me->filetype)
     {
-      #ifdef HAVE_LIBGRIB_API
+#ifdef HAVE_LIBGRIB_API
         case FILETYPE_GRB:
         case FILETYPE_GRB2:
           cdiGribIterator_readField(me, buffer, nmiss);
 	  return;
-      #endif
+#endif
 
-      #ifdef HAVE_LIBNETCDF
+#ifdef HAVE_LIBNETCDF
         case FILETYPE_NC:
         case FILETYPE_NC2:
         case FILETYPE_NC4:
         case FILETYPE_NC4C:
-      #endif
-      #ifdef HAVE_LIBSERVICE
+#endif
+#ifdef HAVE_LIBSERVICE
         case FILETYPE_SRV:
-      #endif
-      #ifdef HAVE_LIBEXTRA
+#endif
+#ifdef HAVE_LIBEXTRA
         case FILETYPE_EXT:
-      #endif
-      #ifdef HAVE_LIBIEG
+#endif
+#ifdef HAVE_LIBIEG
         case FILETYPE_IEG:
-      #endif
+#endif
           cdiFallbackIterator_readField(me, buffer, nmiss);
           return;
       default:
@@ -891,28 +891,28 @@ void cdiIterator_readFieldF(CdiIterator* me, float* buffer, size_t* nmiss)
   if(!buffer) xabort("NULL was passed in a buffer. Please provide a suitable buffer.");
   switch(me->filetype)
     {
-      #ifdef HAVE_LIBGRIB_API
+#ifdef HAVE_LIBGRIB_API
         case FILETYPE_GRB:
         case FILETYPE_GRB2:
           cdiGribIterator_readFieldF(me, buffer, nmiss);
 	  return;
-      #endif
+#endif
 
-      #ifdef HAVE_LIBNETCDF
+#ifdef HAVE_LIBNETCDF
         case FILETYPE_NC:
         case FILETYPE_NC2:
         case FILETYPE_NC4:
         case FILETYPE_NC4C:
-      #endif
-      #ifdef HAVE_LIBSERVICE
+#endif
+#ifdef HAVE_LIBSERVICE
         case FILETYPE_SRV:
-      #endif
-      #ifdef HAVE_LIBEXTRA
+#endif
+#ifdef HAVE_LIBEXTRA
         case FILETYPE_EXT:
-      #endif
-      #ifdef HAVE_LIBIEG
+#endif
+#ifdef HAVE_LIBIEG
         case FILETYPE_IEG:
-      #endif
+#endif
           cdiFallbackIterator_readFieldF(me, buffer, nmiss);
           return; 
       default:
@@ -936,28 +936,28 @@ void cdiIterator_delete(CdiIterator* me)
   if(!me) xabort("NULL was passed in as an iterator. Please check the return value of cdiIterator_new().");
   switch(me->filetype)
     {
-      #ifdef HAVE_LIBGRIB_API
+#ifdef HAVE_LIBGRIB_API
         case FILETYPE_GRB:
         case FILETYPE_GRB2:
           cdiGribIterator_delete((CdiGribIterator*)me);
           break;
-      #endif
+#endif
 
-      #ifdef HAVE_LIBNETCDF
+#ifdef HAVE_LIBNETCDF
         case FILETYPE_NC:
         case FILETYPE_NC2:
         case FILETYPE_NC4:
         case FILETYPE_NC4C:
-      #endif
-      #ifdef HAVE_LIBSERVICE
+#endif
+#ifdef HAVE_LIBSERVICE
         case FILETYPE_SRV:
-      #endif
-      #ifdef HAVE_LIBEXTRA
+#endif
+#ifdef HAVE_LIBEXTRA
         case FILETYPE_EXT:
-      #endif
-      #ifdef HAVE_LIBIEG
+#endif
+#ifdef HAVE_LIBIEG
         case FILETYPE_IEG:
-      #endif
+#endif
           cdiFallbackIterator_delete(me);
           break;
 

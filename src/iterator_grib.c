@@ -1,5 +1,6 @@
 #include "iterator_grib.h"
 
+#include "cdi.h"
 #include "cdi_int.h"
 #include "cgribex.h"
 #include "dmemory.h"
@@ -17,6 +18,25 @@
 
 #ifdef HAVE_LIBGRIB_API
 
+struct CdiGribIterator {
+  CdiIterator super;
+
+  CdiInputFile* file;
+  off_t fileOffset;
+  unsigned char* gribBuffer;
+  size_t bufferSize, curRecordSize;
+#ifdef HAVE_LIBGRIB_API
+  grib_handle* gribHandle;
+#else
+  void* gribHandle;
+#endif
+};
+
+CdiIterator *cdiGribIterator_getSuper(CdiGribIterator *me)
+{
+  return &me->super;
+}
+
 //Since the error handling in constructors is usually very closely related to the workings of a destructor,
 //this function combines both functions in one, using a centralized exit.
 //The mode of operation depends on whether me is a NULL pointer on entry:
@@ -24,7 +44,7 @@
 //If a non-NULL pointer is passed in, the object is destructed and NULL is returned. In this case, the other arguments are ignored.
 static CdiGribIterator *cdiGribIterator_condestruct(CdiGribIterator *me, const char *path, int filetype)
 {
-  #define super() (&me->super)
+#define super() (&me->super)
   if(me) goto destruct;
   me = xmalloc(sizeof(*me));
   baseIterConstruct(super(), filetype);
@@ -55,7 +75,7 @@ destructSuper:
 
 success:
   return me;
-  #undef super
+#undef super
 }
 
 CdiIterator *cdiGribIterator_new(const char *path, int filetype)
@@ -131,14 +151,13 @@ char *cdiGribIterator_serialize(CdiIterator *super)
 
 CdiGribIterator *cdiGribIterator_deserialize(const char *description)
 {
-  char *path;
   CdiGribIterator *me = xmalloc(sizeof(*me));
   if(!me) goto fail;
 
   description = baseIter_constructFromString(&me->super, description);
 
   while(*description == ' ') description++;
-  path = cdiUnescapeSpaces(description, &description);
+  char *path = cdiUnescapeSpaces(description, &description);
   if(!path) goto destructSuper;
 
   me->file = cdiInputFile_make(path);
@@ -480,7 +499,7 @@ int cdiGribIterator_level(CdiIterator *super, int levelSelector, double *outValu
   return CDI_NOERR;
 }
 
-int cdiGribIterator_zaxisUuid(CdiIterator *super, int *outVgridNumber, int *outLevelCount, unsigned char (*outUuid)[16])
+int cdiGribIterator_zaxisUuid(CdiIterator *super, int *outVgridNumber, int *outLevelCount, unsigned char outUuid[CDI_UUID_SIZE])
 {
   CdiGribIterator *me = (CdiGribIterator*)super;
 
@@ -498,9 +517,9 @@ int cdiGribIterator_zaxisUuid(CdiIterator *super, int *outVgridNumber, int *outL
     }
   if(outUuid)
     {
-      size_t size = sizeof(*outUuid);
-      if(grib_get_bytes(me->gribHandle, "uuidOfVGrid", *outUuid, &size)) return CDI_EINVAL;
-      if(size != sizeof(*outUuid)) return CDI_EUFSTRUCT;
+      size_t size = CDI_UUID_SIZE;
+      if(grib_get_bytes(me->gribHandle, "uuidOfVGrid", outUuid, &size)) return CDI_EINVAL;
+      if(size != CDI_UUID_SIZE) return CDI_EUFSTRUCT;
     }
 
   return CDI_NOERR;

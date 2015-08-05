@@ -407,9 +407,9 @@ int cdiIterator_nextField(CdiIterator *me);      //Points the iterator at the ne
 char *cdiIterator_inqStartTime(CdiIterator *me);      //Returns the (start) time as an ISO-8601 coded string. The caller is responsible to free() the returned string.
 char *cdiIterator_inqEndTime(CdiIterator *me);      //Returns the end time of an integration period as an ISO-8601 coded string, or NULL if there is no end time. The caller is responsible to free() the returned string.
 char *cdiIterator_inqVTime(CdiIterator *me);      //Returns the validity date as an ISO-8601 coded string. The caller is responsible to free() the returned string.
-int cdiIterator_inqLevelType(CdiIterator *me, int levelSelector, char **outName, char **outLongName, char **outStdName, char **outUnit);      //callers are responsible to free() strings that they request
-int cdiIterator_inqLevel(CdiIterator *me, int levelSelector, double *outValue1, double *outValue2);       //outValue2 is only written to if the level is a hybrid level
-int cdiIterator_inqLevelUuid(CdiIterator *me, int *outVgridNumber, int *outLevelCount, unsigned char (*outUuid)[CDI_UUID_SIZE]);   //outUuid must point to a buffer of 16 bytes, returns an error code if no generalized zaxis is used.
+int cdiIterator_inqLevelType(CdiIterator *me, int levelSelector, char **outName_optional, char **outLongName_optional, char **outStdName_optional, char **outUnit);      //callers are responsible to free() strings that they request
+int cdiIterator_inqLevel(CdiIterator *me, int levelSelector, double *outValue1_optional, double *outValue2_optional);       //outValue2 is only written to if the level is a hybrid level
+int cdiIterator_inqLevelUuid(CdiIterator *me, int *outVgridNumber_optional, int *outLevelCount_optional, unsigned char outUuid_optional[CDI_UUID_SIZE]);   //outUuid must point to a buffer of 16 bytes, returns an error code if no generalized zaxis is used.
 CdiParam cdiIterator_inqParam(CdiIterator *me);
 int cdiIterator_inqDatatype(CdiIterator *me);
 int cdiIterator_inqTsteptype(CdiIterator *me);
@@ -417,8 +417,8 @@ char *cdiIterator_inqVariableName(CdiIterator *me);        //The caller is respo
 int cdiIterator_inqGridId(CdiIterator *me);         //The returned id is only valid until the next call to cdiIteratorNextField().
 
 //Reading data
-void cdiIterator_readField(CdiIterator *me, double *data_vec, size_t *nmiss);
-void cdiIterator_readFieldF(CdiIterator *me, float* data_vec, size_t *nmiss);
+void cdiIterator_readField(CdiIterator *me, double *data_vec, size_t *nmiss_optional);
+void cdiIterator_readFieldF(CdiIterator *me, float *data_vec, size_t *nmiss_optional);
 //TODO[NH]: Add functions to read partial fields.
 
 
@@ -432,7 +432,7 @@ int cdiGribIterator_getDouble(CdiGribIterator *me, const char *key, double *valu
 int cdiGribIterator_getLength(CdiGribIterator *me, const char *key, size_t *value);     //Same semantics as grib_get_length().
 int cdiGribIterator_getString(CdiGribIterator *me, const char *key, char *value, size_t *length);       //Same semantics as grib_get_string().
 int cdiGribIterator_getSize(CdiGribIterator *me, const char *key, size_t *value);     //Same semantics as grib_get_size().
-int cdiGribIterator_getLongArray(CdiGribIterator *me, const char *key, long* value, size_t *array_size);       //Same semantics as grib_get_long_array().
+int cdiGribIterator_getLongArray(CdiGribIterator *me, const char *key, long *value, size_t *array_size);       //Same semantics as grib_get_long_array().
 int cdiGribIterator_getDoubleArray(CdiGribIterator *me, const char *key, double *value, size_t *array_size);       //Same semantics as grib_get_double_array().
 
 //Convenience functions for accessing GRIB-API keys

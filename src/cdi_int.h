@@ -379,8 +379,8 @@ static inline int cdiUUIDIsNull(const unsigned char uuid[])
 }
 
 
-char* cdiEscapeSpaces(const char* string);
-char* cdiUnescapeSpaces(const char* string, const char** outStringEnd);
+char *cdiEscapeSpaces(const char *string);
+char *cdiUnescapeSpaces(const char *string, const char **outStringEnd);
 
 #define CDI_UNIT_PA   1
 #define CDI_UNIT_HPA  2
@@ -395,8 +395,8 @@ struct streamAssoc
 };
 
 struct streamAssoc
-streamUnpack(char * unpackBuffer, int unpackBufferSize,
-             int * unpackBufferPos, int originNamespace, void *context);
+streamUnpack(char *unpackBuffer, int unpackBufferSize,
+             int *unpackBufferPos, int originNamespace, void *context);
 
 int
 cdiStreamOpenDefaultDelegate(const char *filename, const char *filemode,
