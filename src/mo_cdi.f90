@@ -2959,9 +2959,8 @@ contains
     integer(c_int), value :: param_dummy
     character(kind = c_char, len = *), intent(inout) :: paramstr_dummy
     integer(c_int), value :: maxlen_dummy
-    character(kind = c_char) :: paramstr_temp(len(paramstr_dummy))
+    character(kind = c_char) :: paramstr_temp(len(paramstr_dummy) + 1)
     integer :: paramstr_i
-    logical :: paramstr_padding = .true.
     interface
       subroutine lib_cdiParamToString(param_dummy, paramstr_dummy,&
       & maxlen_dummy) bind(c, name = 'cdiParamToString')
@@ -2971,24 +2970,21 @@ contains
         integer(c_int), value :: maxlen_dummy
       end subroutine lib_cdiParamToString
     end interface
+    paramstr_temp(len(paramstr_dummy) + 1) = c_null_char
     do paramstr_i = len(paramstr_dummy), 1, -1
-      if(paramstr_dummy(paramstr_i:paramstr_i) /= ' ') paramstr_padding =&
-      & .false.
-      if(paramstr_padding) then
-        paramstr_temp(paramstr_i) = c_null_char
-      else
+      if(paramstr_dummy(paramstr_i:paramstr_i) /= ' ') exit
+      paramstr_temp(paramstr_i) = c_null_char
+    end do
+    do paramstr_i = paramstr_i, 1, -1
         paramstr_temp(paramstr_i) = paramstr_dummy(paramstr_i:paramstr_i)
-      end if
     end do
     call lib_cdiParamToString(param_dummy, paramstr_temp, maxlen_dummy)
-    paramstr_padding = .false.
     do paramstr_i = 1, len(paramstr_dummy)
-      if(paramstr_temp(paramstr_i) == c_null_char) paramstr_padding = .true.
-      if(paramstr_padding) then
-        paramstr_dummy(paramstr_i:paramstr_i) = ' '
-      else
-        paramstr_dummy(paramstr_i:paramstr_i) = paramstr_temp(paramstr_i)
-      end if
+      if(paramstr_temp(paramstr_i) == c_null_char) exit
+      paramstr_dummy(paramstr_i:paramstr_i) = paramstr_temp(paramstr_i)
+    end do
+    do paramstr_i = paramstr_i, len(paramstr_dummy)
+      paramstr_dummy(paramstr_i:paramstr_i) = ' '
     end do
   end subroutine cdiParamToString
 
@@ -3725,9 +3721,8 @@ contains
     integer(c_size_t), intent(inout) :: length_dummy
     character(kind = c_char) :: key_temp(len(key_dummy) + 1)
     integer :: key_i
-    character(kind = c_char) :: value_temp(len(value_dummy))
+    character(kind = c_char) :: value_temp(len(value_dummy) + 1)
     integer :: value_i
-    logical :: value_padding = .true.
     interface
       function lib_cdiGribIterator_getString(me_dummy, key_dummy, value_dummy,&
       & length_dummy) bind(c, name = 'cdiGribIterator_getString')&
@@ -3744,24 +3739,22 @@ contains
       key_temp(key_i) = key_dummy(key_i:key_i)
     end do
     key_temp(len(key_dummy) + 1) = c_null_char
+    value_temp(len(value_dummy) + 1) = c_null_char
     do value_i = len(value_dummy), 1, -1
-      if(value_dummy(value_i:value_i) /= ' ') value_padding = .false.
-      if(value_padding) then
-        value_temp(value_i) = c_null_char
-      else
+      if(value_dummy(value_i:value_i) /= ' ') exit
+      value_temp(value_i) = c_null_char
+    end do
+    do value_i = value_i, 1, -1
         value_temp(value_i) = value_dummy(value_i:value_i)
-      end if
     end do
     f_result = lib_cdiGribIterator_getString(me_dummy%ptr, key_temp,&
     & value_temp, length_dummy)
-    value_padding = .false.
     do value_i = 1, len(value_dummy)
-      if(value_temp(value_i) == c_null_char) value_padding = .true.
-      if(value_padding) then
-        value_dummy(value_i:value_i) = ' '
-      else
-        value_dummy(value_i:value_i) = value_temp(value_i)
-      end if
+      if(value_temp(value_i) == c_null_char) exit
+      value_dummy(value_i:value_i) = value_temp(value_i)
+    end do
+    do value_i = value_i, len(value_dummy)
+      value_dummy(value_i:value_i) = ' '
     end do
   end function cdiGribIterator_getString
 
@@ -4020,9 +4013,8 @@ contains
     integer(c_int), value :: vlistID_dummy
     integer(c_int), value :: varID_dummy
     character(kind = c_char, len = *), intent(inout) :: name_dummy
-    character(kind = c_char) :: name_temp(len(name_dummy))
+    character(kind = c_char) :: name_temp(len(name_dummy) + 1)
     integer :: name_i
-    logical :: name_padding = .true.
     interface
       subroutine lib_vlistInqVarName(vlistID_dummy, varID_dummy, name_dummy)&
       & bind(c, name = 'vlistInqVarName')
@@ -4032,23 +4024,21 @@ contains
         character(kind = c_char) :: name_dummy(*)
       end subroutine lib_vlistInqVarName
     end interface
+    name_temp(len(name_dummy) + 1) = c_null_char
     do name_i = len(name_dummy), 1, -1
-      if(name_dummy(name_i:name_i) /= ' ') name_padding = .false.
-      if(name_padding) then
-        name_temp(name_i) = c_null_char
-      else
+      if(name_dummy(name_i:name_i) /= ' ') exit
+      name_temp(name_i) = c_null_char
+    end do
+    do name_i = name_i, 1, -1
         name_temp(name_i) = name_dummy(name_i:name_i)
-      end if
     end do
     call lib_vlistInqVarName(vlistID_dummy, varID_dummy, name_temp)
-    name_padding = .false.
     do name_i = 1, len(name_dummy)
-      if(name_temp(name_i) == c_null_char) name_padding = .true.
-      if(name_padding) then
-        name_dummy(name_i:name_i) = ' '
-      else
-        name_dummy(name_i:name_i) = name_temp(name_i)
-      end if
+      if(name_temp(name_i) == c_null_char) exit
+      name_dummy(name_i:name_i) = name_temp(name_i)
+    end do
+    do name_i = name_i, len(name_dummy)
+      name_dummy(name_i:name_i) = ' '
     end do
   end subroutine vlistInqVarName
 
@@ -4106,9 +4096,8 @@ contains
     integer(c_int), value :: vlistID_dummy
     integer(c_int), value :: varID_dummy
     character(kind = c_char, len = *), intent(inout) :: stdname_dummy
-    character(kind = c_char) :: stdname_temp(len(stdname_dummy))
+    character(kind = c_char) :: stdname_temp(len(stdname_dummy) + 1)
     integer :: stdname_i
-    logical :: stdname_padding = .true.
     interface
       subroutine lib_vlistInqVarStdname(vlistID_dummy, varID_dummy,&
       & stdname_dummy) bind(c, name = 'vlistInqVarStdname')
@@ -4118,23 +4107,21 @@ contains
         character(kind = c_char) :: stdname_dummy(*)
       end subroutine lib_vlistInqVarStdname
     end interface
+    stdname_temp(len(stdname_dummy) + 1) = c_null_char
     do stdname_i = len(stdname_dummy), 1, -1
-      if(stdname_dummy(stdname_i:stdname_i) /= ' ') stdname_padding = .false.
-      if(stdname_padding) then
-        stdname_temp(stdname_i) = c_null_char
-      else
+      if(stdname_dummy(stdname_i:stdname_i) /= ' ') exit
+      stdname_temp(stdname_i) = c_null_char
+    end do
+    do stdname_i = stdname_i, 1, -1
         stdname_temp(stdname_i) = stdname_dummy(stdname_i:stdname_i)
-      end if
     end do
     call lib_vlistInqVarStdname(vlistID_dummy, varID_dummy, stdname_temp)
-    stdname_padding = .false.
     do stdname_i = 1, len(stdname_dummy)
-      if(stdname_temp(stdname_i) == c_null_char) stdname_padding = .true.
-      if(stdname_padding) then
-        stdname_dummy(stdname_i:stdname_i) = ' '
-      else
-        stdname_dummy(stdname_i:stdname_i) = stdname_temp(stdname_i)
-      end if
+      if(stdname_temp(stdname_i) == c_null_char) exit
+      stdname_dummy(stdname_i:stdname_i) = stdname_temp(stdname_i)
+    end do
+    do stdname_i = stdname_i, len(stdname_dummy)
+      stdname_dummy(stdname_i:stdname_i) = ' '
     end do
   end subroutine vlistInqVarStdname
 
@@ -4164,9 +4151,8 @@ contains
     integer(c_int), value :: vlistID_dummy
     integer(c_int), value :: varID_dummy
     character(kind = c_char, len = *), intent(inout) :: longname_dummy
-    character(kind = c_char) :: longname_temp(len(longname_dummy))
+    character(kind = c_char) :: longname_temp(len(longname_dummy) + 1)
     integer :: longname_i
-    logical :: longname_padding = .true.
     interface
       subroutine lib_vlistInqVarLongname(vlistID_dummy, varID_dummy,&
       & longname_dummy) bind(c, name = 'vlistInqVarLongname')
@@ -4176,24 +4162,21 @@ contains
         character(kind = c_char) :: longname_dummy(*)
       end subroutine lib_vlistInqVarLongname
     end interface
+    longname_temp(len(longname_dummy) + 1) = c_null_char
     do longname_i = len(longname_dummy), 1, -1
-      if(longname_dummy(longname_i:longname_i) /= ' ') longname_padding =&
-      & .false.
-      if(longname_padding) then
-        longname_temp(longname_i) = c_null_char
-      else
+      if(longname_dummy(longname_i:longname_i) /= ' ') exit
+      longname_temp(longname_i) = c_null_char
+    end do
+    do longname_i = longname_i, 1, -1
         longname_temp(longname_i) = longname_dummy(longname_i:longname_i)
-      end if
     end do
     call lib_vlistInqVarLongname(vlistID_dummy, varID_dummy, longname_temp)
-    longname_padding = .false.
     do longname_i = 1, len(longname_dummy)
-      if(longname_temp(longname_i) == c_null_char) longname_padding = .true.
-      if(longname_padding) then
-        longname_dummy(longname_i:longname_i) = ' '
-      else
-        longname_dummy(longname_i:longname_i) = longname_temp(longname_i)
-      end if
+      if(longname_temp(longname_i) == c_null_char) exit
+      longname_dummy(longname_i:longname_i) = longname_temp(longname_i)
+    end do
+    do longname_i = longname_i, len(longname_dummy)
+      longname_dummy(longname_i:longname_i) = ' '
     end do
   end subroutine vlistInqVarLongname
 
@@ -4223,9 +4206,8 @@ contains
     integer(c_int), value :: vlistID_dummy
     integer(c_int), value :: varID_dummy
     character(kind = c_char, len = *), intent(inout) :: units_dummy
-    character(kind = c_char) :: units_temp(len(units_dummy))
+    character(kind = c_char) :: units_temp(len(units_dummy) + 1)
     integer :: units_i
-    logical :: units_padding = .true.
     interface
       subroutine lib_vlistInqVarUnits(vlistID_dummy, varID_dummy, units_dummy)&
       & bind(c, name = 'vlistInqVarUnits')
@@ -4235,23 +4217,21 @@ contains
         character(kind = c_char) :: units_dummy(*)
       end subroutine lib_vlistInqVarUnits
     end interface
+    units_temp(len(units_dummy) + 1) = c_null_char
     do units_i = len(units_dummy), 1, -1
-      if(units_dummy(units_i:units_i) /= ' ') units_padding = .false.
-      if(units_padding) then
-        units_temp(units_i) = c_null_char
-      else
+      if(units_dummy(units_i:units_i) /= ' ') exit
+      units_temp(units_i) = c_null_char
+    end do
+    do units_i = units_i, 1, -1
         units_temp(units_i) = units_dummy(units_i:units_i)
-      end if
     end do
     call lib_vlistInqVarUnits(vlistID_dummy, varID_dummy, units_temp)
-    units_padding = .false.
     do units_i = 1, len(units_dummy)
-      if(units_temp(units_i) == c_null_char) units_padding = .true.
-      if(units_padding) then
-        units_dummy(units_i:units_i) = ' '
-      else
-        units_dummy(units_i:units_i) = units_temp(units_i)
-      end if
+      if(units_temp(units_i) == c_null_char) exit
+      units_dummy(units_i:units_i) = units_temp(units_i)
+    end do
+    do units_i = units_i, len(units_dummy)
+      units_dummy(units_i:units_i) = ' '
     end do
   end subroutine vlistInqVarUnits
 
@@ -4281,9 +4261,8 @@ contains
     integer(c_int), value :: vlistID_dummy
     integer(c_int), value :: varID_dummy
     character(kind = c_char, len = *), intent(inout) :: extra_dummy
-    character(kind = c_char) :: extra_temp(len(extra_dummy))
+    character(kind = c_char) :: extra_temp(len(extra_dummy) + 1)
     integer :: extra_i
-    logical :: extra_padding = .true.
     interface
       subroutine lib_vlistInqVarExtra(vlistID_dummy, varID_dummy, extra_dummy)&
       & bind(c, name = 'vlistInqVarExtra')
@@ -4293,23 +4272,21 @@ contains
         character(kind = c_char) :: extra_dummy(*)
       end subroutine lib_vlistInqVarExtra
     end interface
+    extra_temp(len(extra_dummy) + 1) = c_null_char
     do extra_i = len(extra_dummy), 1, -1
-      if(extra_dummy(extra_i:extra_i) /= ' ') extra_padding = .false.
-      if(extra_padding) then
-        extra_temp(extra_i) = c_null_char
-      else
+      if(extra_dummy(extra_i:extra_i) /= ' ') exit
+      extra_temp(extra_i) = c_null_char
+    end do
+    do extra_i = extra_i, 1, -1
         extra_temp(extra_i) = extra_dummy(extra_i:extra_i)
-      end if
     end do
     call lib_vlistInqVarExtra(vlistID_dummy, varID_dummy, extra_temp)
-    extra_padding = .false.
     do extra_i = 1, len(extra_dummy)
-      if(extra_temp(extra_i) == c_null_char) extra_padding = .true.
-      if(extra_padding) then
-        extra_dummy(extra_i:extra_i) = ' '
-      else
-        extra_dummy(extra_i:extra_i) = extra_temp(extra_i)
-      end if
+      if(extra_temp(extra_i) == c_null_char) exit
+      extra_dummy(extra_i:extra_i) = extra_temp(extra_i)
+    end do
+    do extra_i = extra_i, len(extra_dummy)
+      extra_dummy(extra_i:extra_i) = ' '
     end do
   end subroutine vlistInqVarExtra
 
@@ -4467,9 +4444,8 @@ contains
     character(kind = c_char, len = *), intent(inout) :: name_dummy
     integer(c_int), intent(inout) :: typep_dummy
     integer(c_int), intent(inout) :: lenp_dummy
-    character(kind = c_char) :: name_temp(len(name_dummy))
+    character(kind = c_char) :: name_temp(len(name_dummy) + 1)
     integer :: name_i
-    logical :: name_padding = .true.
     interface
       function lib_vlistInqAtt(vlistID_dummy, varID_dummy, attrnum_dummy,&
       & name_dummy, typep_dummy, lenp_dummy) bind(c, name = 'vlistInqAtt')&
@@ -4484,24 +4460,22 @@ contains
         integer(c_int), intent(inout) :: lenp_dummy
       end function lib_vlistInqAtt
     end interface
+    name_temp(len(name_dummy) + 1) = c_null_char
     do name_i = len(name_dummy), 1, -1
-      if(name_dummy(name_i:name_i) /= ' ') name_padding = .false.
-      if(name_padding) then
-        name_temp(name_i) = c_null_char
-      else
+      if(name_dummy(name_i:name_i) /= ' ') exit
+      name_temp(name_i) = c_null_char
+    end do
+    do name_i = name_i, 1, -1
         name_temp(name_i) = name_dummy(name_i:name_i)
-      end if
     end do
     f_result = lib_vlistInqAtt(vlistID_dummy, varID_dummy, attrnum_dummy,&
     & name_temp, typep_dummy, lenp_dummy)
-    name_padding = .false.
     do name_i = 1, len(name_dummy)
-      if(name_temp(name_i) == c_null_char) name_padding = .true.
-      if(name_padding) then
-        name_dummy(name_i:name_i) = ' '
-      else
-        name_dummy(name_i:name_i) = name_temp(name_i)
-      end if
+      if(name_temp(name_i) == c_null_char) exit
+      name_dummy(name_i:name_i) = name_temp(name_i)
+    end do
+    do name_i = name_i, len(name_dummy)
+      name_dummy(name_i:name_i) = ' '
     end do
   end function vlistInqAtt
 
@@ -4704,9 +4678,8 @@ contains
     character(kind = c_char, len = *), intent(inout) :: tp_cbuf_dummy
     character(kind = c_char) :: name_temp(len(name_dummy) + 1)
     integer :: name_i
-    character(kind = c_char) :: tp_cbuf_temp(len(tp_cbuf_dummy))
+    character(kind = c_char) :: tp_cbuf_temp(len(tp_cbuf_dummy) + 1)
     integer :: tp_cbuf_i
-    logical :: tp_cbuf_padding = .true.
     interface
       function lib_vlistInqAttTxt(vlistID_dummy, varID_dummy, name_dummy,&
       & mlen_dummy, tp_cbuf_dummy) bind(c, name = 'vlistInqAttTxt')&
@@ -4724,33 +4697,30 @@ contains
       name_temp(name_i) = name_dummy(name_i:name_i)
     end do
     name_temp(len(name_dummy) + 1) = c_null_char
+    tp_cbuf_temp(len(tp_cbuf_dummy) + 1) = c_null_char
     do tp_cbuf_i = len(tp_cbuf_dummy), 1, -1
-      if(tp_cbuf_dummy(tp_cbuf_i:tp_cbuf_i) /= ' ') tp_cbuf_padding = .false.
-      if(tp_cbuf_padding) then
-        tp_cbuf_temp(tp_cbuf_i) = c_null_char
-      else
+      if(tp_cbuf_dummy(tp_cbuf_i:tp_cbuf_i) /= ' ') exit
+      tp_cbuf_temp(tp_cbuf_i) = c_null_char
+    end do
+    do tp_cbuf_i = tp_cbuf_i, 1, -1
         tp_cbuf_temp(tp_cbuf_i) = tp_cbuf_dummy(tp_cbuf_i:tp_cbuf_i)
-      end if
     end do
     f_result = lib_vlistInqAttTxt(vlistID_dummy, varID_dummy, name_temp,&
     & mlen_dummy, tp_cbuf_temp)
-    tp_cbuf_padding = .false.
     do tp_cbuf_i = 1, len(tp_cbuf_dummy)
-      if(tp_cbuf_temp(tp_cbuf_i) == c_null_char) tp_cbuf_padding = .true.
-      if(tp_cbuf_padding) then
-        tp_cbuf_dummy(tp_cbuf_i:tp_cbuf_i) = ' '
-      else
-        tp_cbuf_dummy(tp_cbuf_i:tp_cbuf_i) = tp_cbuf_temp(tp_cbuf_i)
-      end if
+      if(tp_cbuf_temp(tp_cbuf_i) == c_null_char) exit
+      tp_cbuf_dummy(tp_cbuf_i:tp_cbuf_i) = tp_cbuf_temp(tp_cbuf_i)
+    end do
+    do tp_cbuf_i = tp_cbuf_i, len(tp_cbuf_dummy)
+      tp_cbuf_dummy(tp_cbuf_i:tp_cbuf_i) = ' '
     end do
   end function vlistInqAttTxt
 
   subroutine gridName(gridtype_dummy, gridname_dummy)
     integer(c_int), value :: gridtype_dummy
     character(kind = c_char, len = *), intent(inout) :: gridname_dummy
-    character(kind = c_char) :: gridname_temp(len(gridname_dummy))
+    character(kind = c_char) :: gridname_temp(len(gridname_dummy) + 1)
     integer :: gridname_i
-    logical :: gridname_padding = .true.
     interface
       subroutine lib_gridName(gridtype_dummy, gridname_dummy) bind(c, name =&
       & 'gridName')
@@ -4759,24 +4729,21 @@ contains
         character(kind = c_char) :: gridname_dummy(*)
       end subroutine lib_gridName
     end interface
+    gridname_temp(len(gridname_dummy) + 1) = c_null_char
     do gridname_i = len(gridname_dummy), 1, -1
-      if(gridname_dummy(gridname_i:gridname_i) /= ' ') gridname_padding =&
-      & .false.
-      if(gridname_padding) then
-        gridname_temp(gridname_i) = c_null_char
-      else
+      if(gridname_dummy(gridname_i:gridname_i) /= ' ') exit
+      gridname_temp(gridname_i) = c_null_char
+    end do
+    do gridname_i = gridname_i, 1, -1
         gridname_temp(gridname_i) = gridname_dummy(gridname_i:gridname_i)
-      end if
     end do
     call lib_gridName(gridtype_dummy, gridname_temp)
-    gridname_padding = .false.
     do gridname_i = 1, len(gridname_dummy)
-      if(gridname_temp(gridname_i) == c_null_char) gridname_padding = .true.
-      if(gridname_padding) then
-        gridname_dummy(gridname_i:gridname_i) = ' '
-      else
-        gridname_dummy(gridname_i:gridname_i) = gridname_temp(gridname_i)
-      end if
+      if(gridname_temp(gridname_i) == c_null_char) exit
+      gridname_dummy(gridname_i:gridname_i) = gridname_temp(gridname_i)
+    end do
+    do gridname_i = gridname_i, len(gridname_dummy)
+      gridname_dummy(gridname_i:gridname_i) = ' '
     end do
   end subroutine gridName
 
@@ -4824,9 +4791,8 @@ contains
   subroutine gridInqXname(gridID_dummy, xname_dummy)
     integer(c_int), value :: gridID_dummy
     character(kind = c_char, len = *), intent(inout) :: xname_dummy
-    character(kind = c_char) :: xname_temp(len(xname_dummy))
+    character(kind = c_char) :: xname_temp(len(xname_dummy) + 1)
     integer :: xname_i
-    logical :: xname_padding = .true.
     interface
       subroutine lib_gridInqXname(gridID_dummy, xname_dummy) bind(c, name =&
       & 'gridInqXname')
@@ -4835,23 +4801,21 @@ contains
         character(kind = c_char) :: xname_dummy(*)
       end subroutine lib_gridInqXname
     end interface
+    xname_temp(len(xname_dummy) + 1) = c_null_char
     do xname_i = len(xname_dummy), 1, -1
-      if(xname_dummy(xname_i:xname_i) /= ' ') xname_padding = .false.
-      if(xname_padding) then
-        xname_temp(xname_i) = c_null_char
-      else
+      if(xname_dummy(xname_i:xname_i) /= ' ') exit
+      xname_temp(xname_i) = c_null_char
+    end do
+    do xname_i = xname_i, 1, -1
         xname_temp(xname_i) = xname_dummy(xname_i:xname_i)
-      end if
     end do
     call lib_gridInqXname(gridID_dummy, xname_temp)
-    xname_padding = .false.
     do xname_i = 1, len(xname_dummy)
-      if(xname_temp(xname_i) == c_null_char) xname_padding = .true.
-      if(xname_padding) then
-        xname_dummy(xname_i:xname_i) = ' '
-      else
-        xname_dummy(xname_i:xname_i) = xname_temp(xname_i)
-      end if
+      if(xname_temp(xname_i) == c_null_char) exit
+      xname_dummy(xname_i:xname_i) = xname_temp(xname_i)
+    end do
+    do xname_i = xname_i, len(xname_dummy)
+      xname_dummy(xname_i:xname_i) = ' '
     end do
   end subroutine gridInqXname
 
@@ -4878,9 +4842,8 @@ contains
   subroutine gridInqXlongname(gridID_dummy, xlongname_dummy)
     integer(c_int), value :: gridID_dummy
     character(kind = c_char, len = *), intent(inout) :: xlongname_dummy
-    character(kind = c_char) :: xlongname_temp(len(xlongname_dummy))
+    character(kind = c_char) :: xlongname_temp(len(xlongname_dummy) + 1)
     integer :: xlongname_i
-    logical :: xlongname_padding = .true.
     interface
       subroutine lib_gridInqXlongname(gridID_dummy, xlongname_dummy) bind(c,&
       & name = 'gridInqXlongname')
@@ -4889,24 +4852,21 @@ contains
         character(kind = c_char) :: xlongname_dummy(*)
       end subroutine lib_gridInqXlongname
     end interface
+    xlongname_temp(len(xlongname_dummy) + 1) = c_null_char
     do xlongname_i = len(xlongname_dummy), 1, -1
-      if(xlongname_dummy(xlongname_i:xlongname_i) /= ' ') xlongname_padding =&
-      & .false.
-      if(xlongname_padding) then
-        xlongname_temp(xlongname_i) = c_null_char
-      else
+      if(xlongname_dummy(xlongname_i:xlongname_i) /= ' ') exit
+      xlongname_temp(xlongname_i) = c_null_char
+    end do
+    do xlongname_i = xlongname_i, 1, -1
         xlongname_temp(xlongname_i) = xlongname_dummy(xlongname_i:xlongname_i)
-      end if
     end do
     call lib_gridInqXlongname(gridID_dummy, xlongname_temp)
-    xlongname_padding = .false.
     do xlongname_i = 1, len(xlongname_dummy)
-      if(xlongname_temp(xlongname_i) == c_null_char) xlongname_padding = .true.
-      if(xlongname_padding) then
-        xlongname_dummy(xlongname_i:xlongname_i) = ' '
-      else
-        xlongname_dummy(xlongname_i:xlongname_i) = xlongname_temp(xlongname_i)
-      end if
+      if(xlongname_temp(xlongname_i) == c_null_char) exit
+      xlongname_dummy(xlongname_i:xlongname_i) = xlongname_temp(xlongname_i)
+    end do
+    do xlongname_i = xlongname_i, len(xlongname_dummy)
+      xlongname_dummy(xlongname_i:xlongname_i) = ' '
     end do
   end subroutine gridInqXlongname
 
@@ -4933,9 +4893,8 @@ contains
   subroutine gridInqXunits(gridID_dummy, xunits_dummy)
     integer(c_int), value :: gridID_dummy
     character(kind = c_char, len = *), intent(inout) :: xunits_dummy
-    character(kind = c_char) :: xunits_temp(len(xunits_dummy))
+    character(kind = c_char) :: xunits_temp(len(xunits_dummy) + 1)
     integer :: xunits_i
-    logical :: xunits_padding = .true.
     interface
       subroutine lib_gridInqXunits(gridID_dummy, xunits_dummy) bind(c, name =&
       & 'gridInqXunits')
@@ -4944,23 +4903,21 @@ contains
         character(kind = c_char) :: xunits_dummy(*)
       end subroutine lib_gridInqXunits
     end interface
+    xunits_temp(len(xunits_dummy) + 1) = c_null_char
     do xunits_i = len(xunits_dummy), 1, -1
-      if(xunits_dummy(xunits_i:xunits_i) /= ' ') xunits_padding = .false.
-      if(xunits_padding) then
-        xunits_temp(xunits_i) = c_null_char
-      else
+      if(xunits_dummy(xunits_i:xunits_i) /= ' ') exit
+      xunits_temp(xunits_i) = c_null_char
+    end do
+    do xunits_i = xunits_i, 1, -1
         xunits_temp(xunits_i) = xunits_dummy(xunits_i:xunits_i)
-      end if
     end do
     call lib_gridInqXunits(gridID_dummy, xunits_temp)
-    xunits_padding = .false.
     do xunits_i = 1, len(xunits_dummy)
-      if(xunits_temp(xunits_i) == c_null_char) xunits_padding = .true.
-      if(xunits_padding) then
-        xunits_dummy(xunits_i:xunits_i) = ' '
-      else
-        xunits_dummy(xunits_i:xunits_i) = xunits_temp(xunits_i)
-      end if
+      if(xunits_temp(xunits_i) == c_null_char) exit
+      xunits_dummy(xunits_i:xunits_i) = xunits_temp(xunits_i)
+    end do
+    do xunits_i = xunits_i, len(xunits_dummy)
+      xunits_dummy(xunits_i:xunits_i) = ' '
     end do
   end subroutine gridInqXunits
 
@@ -4987,9 +4944,8 @@ contains
   subroutine gridInqYname(gridID_dummy, yname_dummy)
     integer(c_int), value :: gridID_dummy
     character(kind = c_char, len = *), intent(inout) :: yname_dummy
-    character(kind = c_char) :: yname_temp(len(yname_dummy))
+    character(kind = c_char) :: yname_temp(len(yname_dummy) + 1)
     integer :: yname_i
-    logical :: yname_padding = .true.
     interface
       subroutine lib_gridInqYname(gridID_dummy, yname_dummy) bind(c, name =&
       & 'gridInqYname')
@@ -4998,23 +4954,21 @@ contains
         character(kind = c_char) :: yname_dummy(*)
       end subroutine lib_gridInqYname
     end interface
+    yname_temp(len(yname_dummy) + 1) = c_null_char
     do yname_i = len(yname_dummy), 1, -1
-      if(yname_dummy(yname_i:yname_i) /= ' ') yname_padding = .false.
-      if(yname_padding) then
-        yname_temp(yname_i) = c_null_char
-      else
+      if(yname_dummy(yname_i:yname_i) /= ' ') exit
+      yname_temp(yname_i) = c_null_char
+    end do
+    do yname_i = yname_i, 1, -1
         yname_temp(yname_i) = yname_dummy(yname_i:yname_i)
-      end if
     end do
     call lib_gridInqYname(gridID_dummy, yname_temp)
-    yname_padding = .false.
     do yname_i = 1, len(yname_dummy)
-      if(yname_temp(yname_i) == c_null_char) yname_padding = .true.
-      if(yname_padding) then
-        yname_dummy(yname_i:yname_i) = ' '
-      else
-        yname_dummy(yname_i:yname_i) = yname_temp(yname_i)
-      end if
+      if(yname_temp(yname_i) == c_null_char) exit
+      yname_dummy(yname_i:yname_i) = yname_temp(yname_i)
+    end do
+    do yname_i = yname_i, len(yname_dummy)
+      yname_dummy(yname_i:yname_i) = ' '
     end do
   end subroutine gridInqYname
 
@@ -5041,9 +4995,8 @@ contains
   subroutine gridInqYlongname(gridID_dummy, ylongname_dummy)
     integer(c_int), value :: gridID_dummy
     character(kind = c_char, len = *), intent(inout) :: ylongname_dummy
-    character(kind = c_char) :: ylongname_temp(len(ylongname_dummy))
+    character(kind = c_char) :: ylongname_temp(len(ylongname_dummy) + 1)
     integer :: ylongname_i
-    logical :: ylongname_padding = .true.
     interface
       subroutine lib_gridInqYlongname(gridID_dummy, ylongname_dummy) bind(c,&
       & name = 'gridInqYlongname')
@@ -5052,24 +5005,21 @@ contains
         character(kind = c_char) :: ylongname_dummy(*)
       end subroutine lib_gridInqYlongname
     end interface
+    ylongname_temp(len(ylongname_dummy) + 1) = c_null_char
     do ylongname_i = len(ylongname_dummy), 1, -1
-      if(ylongname_dummy(ylongname_i:ylongname_i) /= ' ') ylongname_padding =&
-      & .false.
-      if(ylongname_padding) then
-        ylongname_temp(ylongname_i) = c_null_char
-      else
+      if(ylongname_dummy(ylongname_i:ylongname_i) /= ' ') exit
+      ylongname_temp(ylongname_i) = c_null_char
+    end do
+    do ylongname_i = ylongname_i, 1, -1
         ylongname_temp(ylongname_i) = ylongname_dummy(ylongname_i:ylongname_i)
-      end if
     end do
     call lib_gridInqYlongname(gridID_dummy, ylongname_temp)
-    ylongname_padding = .false.
     do ylongname_i = 1, len(ylongname_dummy)
-      if(ylongname_temp(ylongname_i) == c_null_char) ylongname_padding = .true.
-      if(ylongname_padding) then
-        ylongname_dummy(ylongname_i:ylongname_i) = ' '
-      else
-        ylongname_dummy(ylongname_i:ylongname_i) = ylongname_temp(ylongname_i)
-      end if
+      if(ylongname_temp(ylongname_i) == c_null_char) exit
+      ylongname_dummy(ylongname_i:ylongname_i) = ylongname_temp(ylongname_i)
+    end do
+    do ylongname_i = ylongname_i, len(ylongname_dummy)
+      ylongname_dummy(ylongname_i:ylongname_i) = ' '
     end do
   end subroutine gridInqYlongname
 
@@ -5096,9 +5046,8 @@ contains
   subroutine gridInqYunits(gridID_dummy, yunits_dummy)
     integer(c_int), value :: gridID_dummy
     character(kind = c_char, len = *), intent(inout) :: yunits_dummy
-    character(kind = c_char) :: yunits_temp(len(yunits_dummy))
+    character(kind = c_char) :: yunits_temp(len(yunits_dummy) + 1)
     integer :: yunits_i
-    logical :: yunits_padding = .true.
     interface
       subroutine lib_gridInqYunits(gridID_dummy, yunits_dummy) bind(c, name =&
       & 'gridInqYunits')
@@ -5107,32 +5056,29 @@ contains
         character(kind = c_char) :: yunits_dummy(*)
       end subroutine lib_gridInqYunits
     end interface
+    yunits_temp(len(yunits_dummy) + 1) = c_null_char
     do yunits_i = len(yunits_dummy), 1, -1
-      if(yunits_dummy(yunits_i:yunits_i) /= ' ') yunits_padding = .false.
-      if(yunits_padding) then
-        yunits_temp(yunits_i) = c_null_char
-      else
+      if(yunits_dummy(yunits_i:yunits_i) /= ' ') exit
+      yunits_temp(yunits_i) = c_null_char
+    end do
+    do yunits_i = yunits_i, 1, -1
         yunits_temp(yunits_i) = yunits_dummy(yunits_i:yunits_i)
-      end if
     end do
     call lib_gridInqYunits(gridID_dummy, yunits_temp)
-    yunits_padding = .false.
     do yunits_i = 1, len(yunits_dummy)
-      if(yunits_temp(yunits_i) == c_null_char) yunits_padding = .true.
-      if(yunits_padding) then
-        yunits_dummy(yunits_i:yunits_i) = ' '
-      else
-        yunits_dummy(yunits_i:yunits_i) = yunits_temp(yunits_i)
-      end if
+      if(yunits_temp(yunits_i) == c_null_char) exit
+      yunits_dummy(yunits_i:yunits_i) = yunits_temp(yunits_i)
+    end do
+    do yunits_i = yunits_i, len(yunits_dummy)
+      yunits_dummy(yunits_i:yunits_i) = ' '
     end do
   end subroutine gridInqYunits
 
   subroutine gridInqXstdname(gridID_dummy, xstdname_dummy)
     integer(c_int), value :: gridID_dummy
     character(kind = c_char, len = *), intent(inout) :: xstdname_dummy
-    character(kind = c_char) :: xstdname_temp(len(xstdname_dummy))
+    character(kind = c_char) :: xstdname_temp(len(xstdname_dummy) + 1)
     integer :: xstdname_i
-    logical :: xstdname_padding = .true.
     interface
       subroutine lib_gridInqXstdname(gridID_dummy, xstdname_dummy) bind(c, name&
       & = 'gridInqXstdname')
@@ -5141,33 +5087,29 @@ contains
         character(kind = c_char) :: xstdname_dummy(*)
       end subroutine lib_gridInqXstdname
     end interface
+    xstdname_temp(len(xstdname_dummy) + 1) = c_null_char
     do xstdname_i = len(xstdname_dummy), 1, -1
-      if(xstdname_dummy(xstdname_i:xstdname_i) /= ' ') xstdname_padding =&
-      & .false.
-      if(xstdname_padding) then
-        xstdname_temp(xstdname_i) = c_null_char
-      else
+      if(xstdname_dummy(xstdname_i:xstdname_i) /= ' ') exit
+      xstdname_temp(xstdname_i) = c_null_char
+    end do
+    do xstdname_i = xstdname_i, 1, -1
         xstdname_temp(xstdname_i) = xstdname_dummy(xstdname_i:xstdname_i)
-      end if
     end do
     call lib_gridInqXstdname(gridID_dummy, xstdname_temp)
-    xstdname_padding = .false.
     do xstdname_i = 1, len(xstdname_dummy)
-      if(xstdname_temp(xstdname_i) == c_null_char) xstdname_padding = .true.
-      if(xstdname_padding) then
-        xstdname_dummy(xstdname_i:xstdname_i) = ' '
-      else
-        xstdname_dummy(xstdname_i:xstdname_i) = xstdname_temp(xstdname_i)
-      end if
+      if(xstdname_temp(xstdname_i) == c_null_char) exit
+      xstdname_dummy(xstdname_i:xstdname_i) = xstdname_temp(xstdname_i)
+    end do
+    do xstdname_i = xstdname_i, len(xstdname_dummy)
+      xstdname_dummy(xstdname_i:xstdname_i) = ' '
     end do
   end subroutine gridInqXstdname
 
   subroutine gridInqYstdname(gridID_dummy, ystdname_dummy)
     integer(c_int), value :: gridID_dummy
     character(kind = c_char, len = *), intent(inout) :: ystdname_dummy
-    character(kind = c_char) :: ystdname_temp(len(ystdname_dummy))
+    character(kind = c_char) :: ystdname_temp(len(ystdname_dummy) + 1)
     integer :: ystdname_i
-    logical :: ystdname_padding = .true.
     interface
       subroutine lib_gridInqYstdname(gridID_dummy, ystdname_dummy) bind(c, name&
       & = 'gridInqYstdname')
@@ -5176,24 +5118,21 @@ contains
         character(kind = c_char) :: ystdname_dummy(*)
       end subroutine lib_gridInqYstdname
     end interface
+    ystdname_temp(len(ystdname_dummy) + 1) = c_null_char
     do ystdname_i = len(ystdname_dummy), 1, -1
-      if(ystdname_dummy(ystdname_i:ystdname_i) /= ' ') ystdname_padding =&
-      & .false.
-      if(ystdname_padding) then
-        ystdname_temp(ystdname_i) = c_null_char
-      else
+      if(ystdname_dummy(ystdname_i:ystdname_i) /= ' ') exit
+      ystdname_temp(ystdname_i) = c_null_char
+    end do
+    do ystdname_i = ystdname_i, 1, -1
         ystdname_temp(ystdname_i) = ystdname_dummy(ystdname_i:ystdname_i)
-      end if
     end do
     call lib_gridInqYstdname(gridID_dummy, ystdname_temp)
-    ystdname_padding = .false.
     do ystdname_i = 1, len(ystdname_dummy)
-      if(ystdname_temp(ystdname_i) == c_null_char) ystdname_padding = .true.
-      if(ystdname_padding) then
-        ystdname_dummy(ystdname_i:ystdname_i) = ' '
-      else
-        ystdname_dummy(ystdname_i:ystdname_i) = ystdname_temp(ystdname_i)
-      end if
+      if(ystdname_temp(ystdname_i) == c_null_char) exit
+      ystdname_dummy(ystdname_i:ystdname_i) = ystdname_temp(ystdname_i)
+    end do
+    do ystdname_i = ystdname_i, len(ystdname_dummy)
+      ystdname_dummy(ystdname_i:ystdname_i) = ' '
     end do
   end subroutine gridInqYstdname
 
@@ -5221,9 +5160,8 @@ contains
     integer(c_int) :: f_result
     integer(c_int), value :: gridID_dummy
     character(kind = c_char, len = *), intent(inout) :: reference_dummy
-    character(kind = c_char) :: reference_temp(len(reference_dummy))
+    character(kind = c_char) :: reference_temp(len(reference_dummy) + 1)
     integer :: reference_i
-    logical :: reference_padding = .true.
     interface
       function lib_gridInqReference(gridID_dummy, reference_dummy) bind(c, name&
       & = 'gridInqReference') result(c_result)
@@ -5233,33 +5171,29 @@ contains
         character(kind = c_char) :: reference_dummy(*)
       end function lib_gridInqReference
     end interface
+    reference_temp(len(reference_dummy) + 1) = c_null_char
     do reference_i = len(reference_dummy), 1, -1
-      if(reference_dummy(reference_i:reference_i) /= ' ') reference_padding =&
-      & .false.
-      if(reference_padding) then
-        reference_temp(reference_i) = c_null_char
-      else
+      if(reference_dummy(reference_i:reference_i) /= ' ') exit
+      reference_temp(reference_i) = c_null_char
+    end do
+    do reference_i = reference_i, 1, -1
         reference_temp(reference_i) = reference_dummy(reference_i:reference_i)
-      end if
     end do
     f_result = lib_gridInqReference(gridID_dummy, reference_temp)
-    reference_padding = .false.
     do reference_i = 1, len(reference_dummy)
-      if(reference_temp(reference_i) == c_null_char) reference_padding = .true.
-      if(reference_padding) then
-        reference_dummy(reference_i:reference_i) = ' '
-      else
-        reference_dummy(reference_i:reference_i) = reference_temp(reference_i)
-      end if
+      if(reference_temp(reference_i) == c_null_char) exit
+      reference_dummy(reference_i:reference_i) = reference_temp(reference_i)
+    end do
+    do reference_i = reference_i, len(reference_dummy)
+      reference_dummy(reference_i:reference_i) = ' '
     end do
   end function gridInqReference
 
   subroutine zaxisName(zaxistype_dummy, zaxisname_dummy)
     integer(c_int), value :: zaxistype_dummy
     character(kind = c_char, len = *), intent(inout) :: zaxisname_dummy
-    character(kind = c_char) :: zaxisname_temp(len(zaxisname_dummy))
+    character(kind = c_char) :: zaxisname_temp(len(zaxisname_dummy) + 1)
     integer :: zaxisname_i
-    logical :: zaxisname_padding = .true.
     interface
       subroutine lib_zaxisName(zaxistype_dummy, zaxisname_dummy) bind(c, name =&
       & 'zaxisName')
@@ -5268,24 +5202,21 @@ contains
         character(kind = c_char) :: zaxisname_dummy(*)
       end subroutine lib_zaxisName
     end interface
+    zaxisname_temp(len(zaxisname_dummy) + 1) = c_null_char
     do zaxisname_i = len(zaxisname_dummy), 1, -1
-      if(zaxisname_dummy(zaxisname_i:zaxisname_i) /= ' ') zaxisname_padding =&
-      & .false.
-      if(zaxisname_padding) then
-        zaxisname_temp(zaxisname_i) = c_null_char
-      else
+      if(zaxisname_dummy(zaxisname_i:zaxisname_i) /= ' ') exit
+      zaxisname_temp(zaxisname_i) = c_null_char
+    end do
+    do zaxisname_i = zaxisname_i, 1, -1
         zaxisname_temp(zaxisname_i) = zaxisname_dummy(zaxisname_i:zaxisname_i)
-      end if
     end do
     call lib_zaxisName(zaxistype_dummy, zaxisname_temp)
-    zaxisname_padding = .false.
     do zaxisname_i = 1, len(zaxisname_dummy)
-      if(zaxisname_temp(zaxisname_i) == c_null_char) zaxisname_padding = .true.
-      if(zaxisname_padding) then
-        zaxisname_dummy(zaxisname_i:zaxisname_i) = ' '
-      else
-        zaxisname_dummy(zaxisname_i:zaxisname_i) = zaxisname_temp(zaxisname_i)
-      end if
+      if(zaxisname_temp(zaxisname_i) == c_null_char) exit
+      zaxisname_dummy(zaxisname_i:zaxisname_i) = zaxisname_temp(zaxisname_i)
+    end do
+    do zaxisname_i = zaxisname_i, len(zaxisname_dummy)
+      zaxisname_dummy(zaxisname_i:zaxisname_i) = ' '
     end do
   end subroutine zaxisName
 
@@ -5312,9 +5243,8 @@ contains
   subroutine zaxisInqName(zaxisID_dummy, name_dummy)
     integer(c_int), value :: zaxisID_dummy
     character(kind = c_char, len = *), intent(inout) :: name_dummy
-    character(kind = c_char) :: name_temp(len(name_dummy))
+    character(kind = c_char) :: name_temp(len(name_dummy) + 1)
     integer :: name_i
-    logical :: name_padding = .true.
     interface
       subroutine lib_zaxisInqName(zaxisID_dummy, name_dummy) bind(c, name =&
       & 'zaxisInqName')
@@ -5323,23 +5253,21 @@ contains
         character(kind = c_char) :: name_dummy(*)
       end subroutine lib_zaxisInqName
     end interface
+    name_temp(len(name_dummy) + 1) = c_null_char
     do name_i = len(name_dummy), 1, -1
-      if(name_dummy(name_i:name_i) /= ' ') name_padding = .false.
-      if(name_padding) then
-        name_temp(name_i) = c_null_char
-      else
+      if(name_dummy(name_i:name_i) /= ' ') exit
+      name_temp(name_i) = c_null_char
+    end do
+    do name_i = name_i, 1, -1
         name_temp(name_i) = name_dummy(name_i:name_i)
-      end if
     end do
     call lib_zaxisInqName(zaxisID_dummy, name_temp)
-    name_padding = .false.
     do name_i = 1, len(name_dummy)
-      if(name_temp(name_i) == c_null_char) name_padding = .true.
-      if(name_padding) then
-        name_dummy(name_i:name_i) = ' '
-      else
-        name_dummy(name_i:name_i) = name_temp(name_i)
-      end if
+      if(name_temp(name_i) == c_null_char) exit
+      name_dummy(name_i:name_i) = name_temp(name_i)
+    end do
+    do name_i = name_i, len(name_dummy)
+      name_dummy(name_i:name_i) = ' '
     end do
   end subroutine zaxisInqName
 
@@ -5366,9 +5294,8 @@ contains
   subroutine zaxisInqLongname(zaxisID_dummy, longname_dummy)
     integer(c_int), value :: zaxisID_dummy
     character(kind = c_char, len = *), intent(inout) :: longname_dummy
-    character(kind = c_char) :: longname_temp(len(longname_dummy))
+    character(kind = c_char) :: longname_temp(len(longname_dummy) + 1)
     integer :: longname_i
-    logical :: longname_padding = .true.
     interface
       subroutine lib_zaxisInqLongname(zaxisID_dummy, longname_dummy) bind(c,&
       & name = 'zaxisInqLongname')
@@ -5377,24 +5304,21 @@ contains
         character(kind = c_char) :: longname_dummy(*)
       end subroutine lib_zaxisInqLongname
     end interface
+    longname_temp(len(longname_dummy) + 1) = c_null_char
     do longname_i = len(longname_dummy), 1, -1
-      if(longname_dummy(longname_i:longname_i) /= ' ') longname_padding =&
-      & .false.
-      if(longname_padding) then
-        longname_temp(longname_i) = c_null_char
-      else
+      if(longname_dummy(longname_i:longname_i) /= ' ') exit
+      longname_temp(longname_i) = c_null_char
+    end do
+    do longname_i = longname_i, 1, -1
         longname_temp(longname_i) = longname_dummy(longname_i:longname_i)
-      end if
     end do
     call lib_zaxisInqLongname(zaxisID_dummy, longname_temp)
-    longname_padding = .false.
     do longname_i = 1, len(longname_dummy)
-      if(longname_temp(longname_i) == c_null_char) longname_padding = .true.
-      if(longname_padding) then
-        longname_dummy(longname_i:longname_i) = ' '
-      else
-        longname_dummy(longname_i:longname_i) = longname_temp(longname_i)
-      end if
+      if(longname_temp(longname_i) == c_null_char) exit
+      longname_dummy(longname_i:longname_i) = longname_temp(longname_i)
+    end do
+    do longname_i = longname_i, len(longname_dummy)
+      longname_dummy(longname_i:longname_i) = ' '
     end do
   end subroutine zaxisInqLongname
 
@@ -5421,9 +5345,8 @@ contains
   subroutine zaxisInqUnits(zaxisID_dummy, units_dummy)
     integer(c_int), value :: zaxisID_dummy
     character(kind = c_char, len = *), intent(inout) :: units_dummy
-    character(kind = c_char) :: units_temp(len(units_dummy))
+    character(kind = c_char) :: units_temp(len(units_dummy) + 1)
     integer :: units_i
-    logical :: units_padding = .true.
     interface
       subroutine lib_zaxisInqUnits(zaxisID_dummy, units_dummy) bind(c, name =&
       & 'zaxisInqUnits')
@@ -5432,32 +5355,29 @@ contains
         character(kind = c_char) :: units_dummy(*)
       end subroutine lib_zaxisInqUnits
     end interface
+    units_temp(len(units_dummy) + 1) = c_null_char
     do units_i = len(units_dummy), 1, -1
-      if(units_dummy(units_i:units_i) /= ' ') units_padding = .false.
-      if(units_padding) then
-        units_temp(units_i) = c_null_char
-      else
+      if(units_dummy(units_i:units_i) /= ' ') exit
+      units_temp(units_i) = c_null_char
+    end do
+    do units_i = units_i, 1, -1
         units_temp(units_i) = units_dummy(units_i:units_i)
-      end if
     end do
     call lib_zaxisInqUnits(zaxisID_dummy, units_temp)
-    units_padding = .false.
     do units_i = 1, len(units_dummy)
-      if(units_temp(units_i) == c_null_char) units_padding = .true.
-      if(units_padding) then
-        units_dummy(units_i:units_i) = ' '
-      else
-        units_dummy(units_i:units_i) = units_temp(units_i)
-      end if
+      if(units_temp(units_i) == c_null_char) exit
+      units_dummy(units_i:units_i) = units_temp(units_i)
+    end do
+    do units_i = units_i, len(units_dummy)
+      units_dummy(units_i:units_i) = ' '
     end do
   end subroutine zaxisInqUnits
 
   subroutine zaxisInqStdname(zaxisID_dummy, stdname_dummy)
     integer(c_int), value :: zaxisID_dummy
     character(kind = c_char, len = *), intent(inout) :: stdname_dummy
-    character(kind = c_char) :: stdname_temp(len(stdname_dummy))
+    character(kind = c_char) :: stdname_temp(len(stdname_dummy) + 1)
     integer :: stdname_i
-    logical :: stdname_padding = .true.
     interface
       subroutine lib_zaxisInqStdname(zaxisID_dummy, stdname_dummy) bind(c, name&
       & = 'zaxisInqStdname')
@@ -5466,23 +5386,21 @@ contains
         character(kind = c_char) :: stdname_dummy(*)
       end subroutine lib_zaxisInqStdname
     end interface
+    stdname_temp(len(stdname_dummy) + 1) = c_null_char
     do stdname_i = len(stdname_dummy), 1, -1
-      if(stdname_dummy(stdname_i:stdname_i) /= ' ') stdname_padding = .false.
-      if(stdname_padding) then
-        stdname_temp(stdname_i) = c_null_char
-      else
+      if(stdname_dummy(stdname_i:stdname_i) /= ' ') exit
+      stdname_temp(stdname_i) = c_null_char
+    end do
+    do stdname_i = stdname_i, 1, -1
         stdname_temp(stdname_i) = stdname_dummy(stdname_i:stdname_i)
-      end if
     end do
     call lib_zaxisInqStdname(zaxisID_dummy, stdname_temp)
-    stdname_padding = .false.
     do stdname_i = 1, len(stdname_dummy)
-      if(stdname_temp(stdname_i) == c_null_char) stdname_padding = .true.
-      if(stdname_padding) then
-        stdname_dummy(stdname_i:stdname_i) = ' '
-      else
-        stdname_dummy(stdname_i:stdname_i) = stdname_temp(stdname_i)
-      end if
+      if(stdname_temp(stdname_i) == c_null_char) exit
+      stdname_dummy(stdname_i:stdname_i) = stdname_temp(stdname_i)
+    end do
+    do stdname_i = stdname_i, len(stdname_dummy)
+      stdname_dummy(stdname_i:stdname_i) = ' '
     end do
   end subroutine zaxisInqStdname
 
@@ -5648,9 +5566,8 @@ contains
     integer(c_int), value :: instID_dummy
     integer(c_int), value :: modelgribID_dummy
     character(kind = c_char, len = *), intent(inout) :: name_dummy
-    character(kind = c_char) :: name_temp(len(name_dummy))
+    character(kind = c_char) :: name_temp(len(name_dummy) + 1)
     integer :: name_i
-    logical :: name_padding = .true.
     interface
       function lib_modelInq(instID_dummy, modelgribID_dummy, name_dummy)&
       & bind(c, name = 'modelInq') result(c_result)
@@ -5661,23 +5578,21 @@ contains
         character(kind = c_char) :: name_dummy(*)
       end function lib_modelInq
     end interface
+    name_temp(len(name_dummy) + 1) = c_null_char
     do name_i = len(name_dummy), 1, -1
-      if(name_dummy(name_i:name_i) /= ' ') name_padding = .false.
-      if(name_padding) then
-        name_temp(name_i) = c_null_char
-      else
+      if(name_dummy(name_i:name_i) /= ' ') exit
+      name_temp(name_i) = c_null_char
+    end do
+    do name_i = name_i, 1, -1
         name_temp(name_i) = name_dummy(name_i:name_i)
-      end if
     end do
     f_result = lib_modelInq(instID_dummy, modelgribID_dummy, name_temp)
-    name_padding = .false.
     do name_i = 1, len(name_dummy)
-      if(name_temp(name_i) == c_null_char) name_padding = .true.
-      if(name_padding) then
-        name_dummy(name_i:name_i) = ' '
-      else
-        name_dummy(name_i:name_i) = name_temp(name_i)
-      end if
+      if(name_temp(name_i) == c_null_char) exit
+      name_dummy(name_i:name_i) = name_temp(name_i)
+    end do
+    do name_i = name_i, len(name_dummy)
+      name_dummy(name_i:name_i) = ' '
     end do
   end function modelInq
 
@@ -5880,15 +5795,12 @@ contains
     character(kind = c_char, len = *), intent(inout) :: name_dummy
     character(kind = c_char, len = *), intent(inout) :: longname_dummy
     character(kind = c_char, len = *), intent(inout) :: units_dummy
-    character(kind = c_char) :: name_temp(len(name_dummy))
+    character(kind = c_char) :: name_temp(len(name_dummy) + 1)
     integer :: name_i
-    logical :: name_padding = .true.
-    character(kind = c_char) :: longname_temp(len(longname_dummy))
+    character(kind = c_char) :: longname_temp(len(longname_dummy) + 1)
     integer :: longname_i
-    logical :: longname_padding = .true.
-    character(kind = c_char) :: units_temp(len(units_dummy))
+    character(kind = c_char) :: units_temp(len(units_dummy) + 1)
     integer :: units_i
-    logical :: units_padding = .true.
     interface
       subroutine lib_tableInqPar(tableID_dummy, code_dummy, name_dummy,&
       & longname_dummy, units_dummy) bind(c, name = 'tableInqPar')
@@ -5900,59 +5812,52 @@ contains
         character(kind = c_char) :: units_dummy(*)
       end subroutine lib_tableInqPar
     end interface
+    name_temp(len(name_dummy) + 1) = c_null_char
     do name_i = len(name_dummy), 1, -1
-      if(name_dummy(name_i:name_i) /= ' ') name_padding = .false.
-      if(name_padding) then
-        name_temp(name_i) = c_null_char
-      else
+      if(name_dummy(name_i:name_i) /= ' ') exit
+      name_temp(name_i) = c_null_char
+    end do
+    do name_i = name_i, 1, -1
         name_temp(name_i) = name_dummy(name_i:name_i)
-      end if
     end do
+    longname_temp(len(longname_dummy) + 1) = c_null_char
     do longname_i = len(longname_dummy), 1, -1
-      if(longname_dummy(longname_i:longname_i) /= ' ') longname_padding =&
-      & .false.
-      if(longname_padding) then
-        longname_temp(longname_i) = c_null_char
-      else
-        longname_temp(longname_i) = longname_dummy(longname_i:longname_i)
-      end if
+      if(longname_dummy(longname_i:longname_i) /= ' ') exit
+      longname_temp(longname_i) = c_null_char
     end do
+    do longname_i = longname_i, 1, -1
+        longname_temp(longname_i) = longname_dummy(longname_i:longname_i)
+    end do
+    units_temp(len(units_dummy) + 1) = c_null_char
     do units_i = len(units_dummy), 1, -1
-      if(units_dummy(units_i:units_i) /= ' ') units_padding = .false.
-      if(units_padding) then
-        units_temp(units_i) = c_null_char
-      else
+      if(units_dummy(units_i:units_i) /= ' ') exit
+      units_temp(units_i) = c_null_char
+    end do
+    do units_i = units_i, 1, -1
         units_temp(units_i) = units_dummy(units_i:units_i)
-      end if
     end do
     call lib_tableInqPar(tableID_dummy, code_dummy, name_temp, longname_temp,&
     & units_temp)
-    name_padding = .false.
     do name_i = 1, len(name_dummy)
-      if(name_temp(name_i) == c_null_char) name_padding = .true.
-      if(name_padding) then
-        name_dummy(name_i:name_i) = ' '
-      else
-        name_dummy(name_i:name_i) = name_temp(name_i)
-      end if
+      if(name_temp(name_i) == c_null_char) exit
+      name_dummy(name_i:name_i) = name_temp(name_i)
     end do
-    longname_padding = .false.
+    do name_i = name_i, len(name_dummy)
+      name_dummy(name_i:name_i) = ' '
+    end do
     do longname_i = 1, len(longname_dummy)
-      if(longname_temp(longname_i) == c_null_char) longname_padding = .true.
-      if(longname_padding) then
-        longname_dummy(longname_i:longname_i) = ' '
-      else
-        longname_dummy(longname_i:longname_i) = longname_temp(longname_i)
-      end if
+      if(longname_temp(longname_i) == c_null_char) exit
+      longname_dummy(longname_i:longname_i) = longname_temp(longname_i)
     end do
-    units_padding = .false.
+    do longname_i = longname_i, len(longname_dummy)
+      longname_dummy(longname_i:longname_i) = ' '
+    end do
     do units_i = 1, len(units_dummy)
-      if(units_temp(units_i) == c_null_char) units_padding = .true.
-      if(units_padding) then
-        units_dummy(units_i:units_i) = ' '
-      else
-        units_dummy(units_i:units_i) = units_temp(units_i)
-      end if
+      if(units_temp(units_i) == c_null_char) exit
+      units_dummy(units_i:units_i) = units_temp(units_i)
+    end do
+    do units_i = units_i, len(units_dummy)
+      units_dummy(units_i:units_i) = ' '
     end do
   end subroutine tableInqPar
 
@@ -5962,9 +5867,8 @@ contains
     integer(c_int), value :: tableID_dummy
     character(kind = c_char, len = *), intent(inout) :: name_dummy
     integer(c_int), intent(inout) :: code_dummy
-    character(kind = c_char) :: name_temp(len(name_dummy))
+    character(kind = c_char) :: name_temp(len(name_dummy) + 1)
     integer :: name_i
-    logical :: name_padding = .true.
     interface
       function lib_tableInqParCode(tableID_dummy, name_dummy, code_dummy)&
       & bind(c, name = 'tableInqParCode') result(c_result)
@@ -5975,23 +5879,21 @@ contains
         integer(c_int), intent(inout) :: code_dummy
       end function lib_tableInqParCode
     end interface
+    name_temp(len(name_dummy) + 1) = c_null_char
     do name_i = len(name_dummy), 1, -1
-      if(name_dummy(name_i:name_i) /= ' ') name_padding = .false.
-      if(name_padding) then
-        name_temp(name_i) = c_null_char
-      else
+      if(name_dummy(name_i:name_i) /= ' ') exit
+      name_temp(name_i) = c_null_char
+    end do
+    do name_i = name_i, 1, -1
         name_temp(name_i) = name_dummy(name_i:name_i)
-      end if
     end do
     f_result = lib_tableInqParCode(tableID_dummy, name_temp, code_dummy)
-    name_padding = .false.
     do name_i = 1, len(name_dummy)
-      if(name_temp(name_i) == c_null_char) name_padding = .true.
-      if(name_padding) then
-        name_dummy(name_i:name_i) = ' '
-      else
-        name_dummy(name_i:name_i) = name_temp(name_i)
-      end if
+      if(name_temp(name_i) == c_null_char) exit
+      name_dummy(name_i:name_i) = name_temp(name_i)
+    end do
+    do name_i = name_i, len(name_dummy)
+      name_dummy(name_i:name_i) = ' '
     end do
   end function tableInqParCode
 
@@ -6001,9 +5903,8 @@ contains
     integer(c_int), value :: tableID_dummy
     integer(c_int), value :: code_dummy
     character(kind = c_char, len = *), intent(inout) :: name_dummy
-    character(kind = c_char) :: name_temp(len(name_dummy))
+    character(kind = c_char) :: name_temp(len(name_dummy) + 1)
     integer :: name_i
-    logical :: name_padding = .true.
     interface
       function lib_tableInqParName(tableID_dummy, code_dummy, name_dummy)&
       & bind(c, name = 'tableInqParName') result(c_result)
@@ -6014,23 +5915,21 @@ contains
         character(kind = c_char) :: name_dummy(*)
       end function lib_tableInqParName
     end interface
+    name_temp(len(name_dummy) + 1) = c_null_char
     do name_i = len(name_dummy), 1, -1
-      if(name_dummy(name_i:name_i) /= ' ') name_padding = .false.
-      if(name_padding) then
-        name_temp(name_i) = c_null_char
-      else
+      if(name_dummy(name_i:name_i) /= ' ') exit
+      name_temp(name_i) = c_null_char
+    end do
+    do name_i = name_i, 1, -1
         name_temp(name_i) = name_dummy(name_i:name_i)
-      end if
     end do
     f_result = lib_tableInqParName(tableID_dummy, code_dummy, name_temp)
-    name_padding = .false.
     do name_i = 1, len(name_dummy)
-      if(name_temp(name_i) == c_null_char) name_padding = .true.
-      if(name_padding) then
-        name_dummy(name_i:name_i) = ' '
-      else
-        name_dummy(name_i:name_i) = name_temp(name_i)
-      end if
+      if(name_temp(name_i) == c_null_char) exit
+      name_dummy(name_i:name_i) = name_temp(name_i)
+    end do
+    do name_i = name_i, len(name_dummy)
+      name_dummy(name_i:name_i) = ' '
     end do
   end function tableInqParName
 
@@ -6040,9 +5939,8 @@ contains
     integer(c_int), value :: tableID_dummy
     integer(c_int), value :: code_dummy
     character(kind = c_char, len = *), intent(inout) :: longname_dummy
-    character(kind = c_char) :: longname_temp(len(longname_dummy))
+    character(kind = c_char) :: longname_temp(len(longname_dummy) + 1)
     integer :: longname_i
-    logical :: longname_padding = .true.
     interface
       function lib_tableInqParLongname(tableID_dummy, code_dummy,&
       & longname_dummy) bind(c, name = 'tableInqParLongname') result(c_result)
@@ -6053,25 +5951,22 @@ contains
         character(kind = c_char) :: longname_dummy(*)
       end function lib_tableInqParLongname
     end interface
+    longname_temp(len(longname_dummy) + 1) = c_null_char
     do longname_i = len(longname_dummy), 1, -1
-      if(longname_dummy(longname_i:longname_i) /= ' ') longname_padding =&
-      & .false.
-      if(longname_padding) then
-        longname_temp(longname_i) = c_null_char
-      else
+      if(longname_dummy(longname_i:longname_i) /= ' ') exit
+      longname_temp(longname_i) = c_null_char
+    end do
+    do longname_i = longname_i, 1, -1
         longname_temp(longname_i) = longname_dummy(longname_i:longname_i)
-      end if
     end do
     f_result = lib_tableInqParLongname(tableID_dummy, code_dummy,&
     & longname_temp)
-    longname_padding = .false.
     do longname_i = 1, len(longname_dummy)
-      if(longname_temp(longname_i) == c_null_char) longname_padding = .true.
-      if(longname_padding) then
-        longname_dummy(longname_i:longname_i) = ' '
-      else
-        longname_dummy(longname_i:longname_i) = longname_temp(longname_i)
-      end if
+      if(longname_temp(longname_i) == c_null_char) exit
+      longname_dummy(longname_i:longname_i) = longname_temp(longname_i)
+    end do
+    do longname_i = longname_i, len(longname_dummy)
+      longname_dummy(longname_i:longname_i) = ' '
     end do
   end function tableInqParLongname
 
@@ -6081,9 +5976,8 @@ contains
     integer(c_int), value :: tableID_dummy
     integer(c_int), value :: code_dummy
     character(kind = c_char, len = *), intent(inout) :: units_dummy
-    character(kind = c_char) :: units_temp(len(units_dummy))
+    character(kind = c_char) :: units_temp(len(units_dummy) + 1)
     integer :: units_i
-    logical :: units_padding = .true.
     interface
       function lib_tableInqParUnits(tableID_dummy, code_dummy, units_dummy)&
       & bind(c, name = 'tableInqParUnits') result(c_result)
@@ -6094,23 +5988,21 @@ contains
         character(kind = c_char) :: units_dummy(*)
       end function lib_tableInqParUnits
     end interface
+    units_temp(len(units_dummy) + 1) = c_null_char
     do units_i = len(units_dummy), 1, -1
-      if(units_dummy(units_i:units_i) /= ' ') units_padding = .false.
-      if(units_padding) then
-        units_temp(units_i) = c_null_char
-      else
+      if(units_dummy(units_i:units_i) /= ' ') exit
+      units_temp(units_i) = c_null_char
+    end do
+    do units_i = units_i, 1, -1
         units_temp(units_i) = units_dummy(units_i:units_i)
-      end if
     end do
     f_result = lib_tableInqParUnits(tableID_dummy, code_dummy, units_temp)
-    units_padding = .false.
     do units_i = 1, len(units_dummy)
-      if(units_temp(units_i) == c_null_char) units_padding = .true.
-      if(units_padding) then
-        units_dummy(units_i:units_i) = ' '
-      else
-        units_dummy(units_i:units_i) = units_temp(units_i)
-      end if
+      if(units_temp(units_i) == c_null_char) exit
+      units_dummy(units_i:units_i) = units_temp(units_i)
+    end do
+    do units_i = units_i, len(units_dummy)
+      units_dummy(units_i:units_i) = ' '
     end do
   end function tableInqParUnits
 
@@ -6208,9 +6100,8 @@ contains
   subroutine streamInqHistoryString(streamID_dummy, history_dummy)
     integer(c_int), value :: streamID_dummy
     character(kind = c_char, len = *), intent(inout) :: history_dummy
-    character(kind = c_char) :: history_temp(len(history_dummy))
+    character(kind = c_char) :: history_temp(len(history_dummy) + 1)
     integer :: history_i
-    logical :: history_padding = .true.
     interface
       subroutine lib_streamInqHistoryString(streamID_dummy, history_dummy)&
       & bind(c, name = 'streamInqHistoryString')
@@ -6219,23 +6110,21 @@ contains
         character(kind = c_char) :: history_dummy(*)
       end subroutine lib_streamInqHistoryString
     end interface
+    history_temp(len(history_dummy) + 1) = c_null_char
     do history_i = len(history_dummy), 1, -1
-      if(history_dummy(history_i:history_i) /= ' ') history_padding = .false.
-      if(history_padding) then
-        history_temp(history_i) = c_null_char
-      else
+      if(history_dummy(history_i:history_i) /= ' ') exit
+      history_temp(history_i) = c_null_char
+    end do
+    do history_i = history_i, 1, -1
         history_temp(history_i) = history_dummy(history_i:history_i)
-      end if
     end do
     call lib_streamInqHistoryString(streamID_dummy, history_temp)
-    history_padding = .false.
     do history_i = 1, len(history_dummy)
-      if(history_temp(history_i) == c_null_char) history_padding = .true.
-      if(history_padding) then
-        history_dummy(history_i:history_i) = ' '
-      else
-        history_dummy(history_i:history_i) = history_temp(history_i)
-      end if
+      if(history_temp(history_i) == c_null_char) exit
+      history_dummy(history_i:history_i) = history_temp(history_i)
+    end do
+    do history_i = history_i, len(history_dummy)
+      history_dummy(history_i:history_i) = ' '
     end do
   end subroutine streamInqHistoryString
 
