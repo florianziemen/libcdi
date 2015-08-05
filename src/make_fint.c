@@ -93,6 +93,9 @@ enum cftype {ISVOID, ISCONSTSTRING, ISINT, ISREAL, ISDOUBLE, ISMPI_COMM,
              VOIDFUNCVOID,
              NUM_KNOWN_ARG_TYPES};
 
+static inline int
+isArrayArgType(int argType);
+
 enum conversionType { CONV_ARG, CONV_RET };
 
 
@@ -526,12 +529,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
 	      else
 		fprintf(fpinc, ",\n!%36s ", "");
               int argType = funcargtype[i];
-              int isArray = argType == ISFLOATV
-                || argType == ISFLOATVV
-                || argType == ISDOUBLEV
-                || argType == ISDOUBLEVV
-                || argType == ISINTV
-                || argType == ISINTVV;
+              int isArray = isArrayArgType(argType);
 	      fprintf(fpinc, "%-16s%.*s%s", funArgSym[argType].f77name,
                       (int)(funcargname[i].rm_eo - funcargname[i].rm_so),
                       line + funcargname[i].rm_so,
@@ -724,12 +722,15 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
 
                   char farg[128];
                   /* FIXME: optional empty argument name unhandled */
+                  int argType = funcargtype[i];
+                  int isArray = isArrayArgType(argType);
 		  int nchn
-                    = snprintf(farg, sizeof (farg), "%s %.*s",
-                               funArgSym[funcargtype[i]].f77name,
+                    = snprintf(farg, sizeof (farg), "%s %.*s%s",
+                               funArgSym[argType].f77name,
                                (int)(funcargname[i].rm_eo
                                      - funcargname[i].rm_so),
-                               line + funcargname[i].rm_so);
+                               line + funcargname[i].rm_so,
+                               isArray ? "(*)" : "");
                   if (nchn < 0)
                     abort();
 		  if ( (xlineLen + (size_t)nchn) > 80 )
@@ -1184,6 +1185,16 @@ static int detectComment(char **line_, ssize_t *lineLen, size_t *lineBufSize,
   return matchType;
 }
 
+static inline int
+isArrayArgType(int argType)
+{
+  return argType == ISFLOATV
+    || argType == ISFLOATVV
+    || argType == ISDOUBLEV
+    || argType == ISDOUBLEVV
+    || argType == ISINTV
+    || argType == ISINTVV;
+}
 
 
 /*
