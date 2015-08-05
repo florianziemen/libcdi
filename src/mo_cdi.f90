@@ -2899,7 +2899,7 @@ contains
     character(kind = c_char), dimension(:), pointer :: f_result
     integer(c_int), value :: cdiErrno_dummy
     type(c_ptr) :: ptr
-    integer :: shape(1)
+    integer :: rv_shape(1)
     interface
       function lib_cdiStringError(cdiErrno_dummy) bind(c, name =&
       & 'cdiStringError') result(c_result)
@@ -2911,15 +2911,15 @@ contains
     f_result => null()
     ptr = lib_cdiStringError(cdiErrno_dummy)
     if(c_associated(ptr)) then
-      shape(1) = int(lib_strlen(ptr))
-      call c_f_pointer(ptr, f_result, shape)
+      rv_shape(1) = int(lib_strlen(ptr))
+      call c_f_pointer(ptr, f_result, rv_shape)
     end if
   end function cdiStringError
 
   function cdiLibraryVersion() result(f_result)
     character(kind = c_char), dimension(:), pointer :: f_result
     type(c_ptr) :: ptr
-    integer :: shape(1)
+    integer :: rv_shape(1)
     interface
       function lib_cdiLibraryVersion() bind(c, name = 'cdiLibraryVersion')&
       & result(c_result)
@@ -2930,8 +2930,8 @@ contains
     f_result => null()
     ptr = lib_cdiLibraryVersion()
     if(c_associated(ptr)) then
-      shape(1) = int(lib_strlen(ptr))
-      call c_f_pointer(ptr, f_result, shape)
+      rv_shape(1) = int(lib_strlen(ptr))
+      call c_f_pointer(ptr, f_result, rv_shape)
     end if
   end function cdiLibraryVersion
 
@@ -3076,7 +3076,7 @@ contains
     character(kind = c_char), dimension(:), pointer :: f_result
     integer(c_int), value :: streamID_dummy
     type(c_ptr) :: ptr
-    integer :: shape(1)
+    integer :: rv_shape(1)
     interface
       function lib_streamFilename(streamID_dummy) bind(c, name =&
       & 'streamFilename') result(c_result)
@@ -3088,8 +3088,8 @@ contains
     f_result => null()
     ptr = lib_streamFilename(streamID_dummy)
     if(c_associated(ptr)) then
-      shape(1) = int(lib_strlen(ptr))
-      call c_f_pointer(ptr, f_result, shape)
+      rv_shape(1) = int(lib_strlen(ptr))
+      call c_f_pointer(ptr, f_result, rv_shape)
     end if
   end function streamFilename
 
@@ -3097,7 +3097,7 @@ contains
     character(kind = c_char), dimension(:), pointer :: f_result
     integer(c_int), value :: filetype_dummy
     type(c_ptr) :: ptr
-    integer :: shape(1)
+    integer :: rv_shape(1)
     interface
       function lib_streamFilesuffix(filetype_dummy) bind(c, name =&
       & 'streamFilesuffix') result(c_result)
@@ -3109,8 +3109,8 @@ contains
     f_result => null()
     ptr = lib_streamFilesuffix(filetype_dummy)
     if(c_associated(ptr)) then
-      shape(1) = int(lib_strlen(ptr))
-      call c_f_pointer(ptr, f_result, shape)
+      rv_shape(1) = int(lib_strlen(ptr))
+      call c_f_pointer(ptr, f_result, rv_shape)
     end if
   end function streamFilesuffix
 
@@ -3152,7 +3152,7 @@ contains
     character(kind = c_char), dimension(:), pointer :: f_result
     type(t_CdiIterator), intent(in) :: me_dummy
     type(c_ptr) :: cString
-    integer :: shape(1)
+    integer :: rv_shape(1)
     character(kind = c_char), dimension(:), pointer :: temp
     interface
       function lib_cdiIterator_serialize(me_dummy) bind(c, name =&
@@ -3164,9 +3164,9 @@ contains
     end interface
     cString = lib_cdiIterator_serialize(me_dummy%ptr)
     if(c_associated(cString)) then
-      shape(1) = int(lib_strlen(cString))
-      call c_f_pointer(cString, temp, shape)
-      allocate(f_result(shape(1)))
+      rv_shape(1) = int(lib_strlen(cString))
+      call c_f_pointer(cString, temp, rv_shape)
+      allocate(f_result(rv_shape(1)))
       f_result = temp
       call lib_free(cString)
     else
@@ -3225,7 +3225,7 @@ contains
     character(kind = c_char), dimension(:), pointer :: f_result
     type(t_CdiIterator), intent(in) :: me_dummy
     type(c_ptr) :: cString
-    integer :: shape(1)
+    integer :: rv_shape(1)
     character(kind = c_char), dimension(:), pointer :: temp
     interface
       function lib_cdiIterator_inqStartTime(me_dummy) bind(c, name =&
@@ -3237,9 +3237,9 @@ contains
     end interface
     cString = lib_cdiIterator_inqStartTime(me_dummy%ptr)
     if(c_associated(cString)) then
-      shape(1) = int(lib_strlen(cString))
-      call c_f_pointer(cString, temp, shape)
-      allocate(f_result(shape(1)))
+      rv_shape(1) = int(lib_strlen(cString))
+      call c_f_pointer(cString, temp, rv_shape)
+      allocate(f_result(rv_shape(1)))
       f_result = temp
       call lib_free(cString)
     else
@@ -3251,7 +3251,7 @@ contains
     character(kind = c_char), dimension(:), pointer :: f_result
     type(t_CdiIterator), intent(in) :: me_dummy
     type(c_ptr) :: cString
-    integer :: shape(1)
+    integer :: rv_shape(1)
     character(kind = c_char), dimension(:), pointer :: temp
     interface
       function lib_cdiIterator_inqEndTime(me_dummy) bind(c, name =&
@@ -3263,9 +3263,9 @@ contains
     end interface
     cString = lib_cdiIterator_inqEndTime(me_dummy%ptr)
     if(c_associated(cString)) then
-      shape(1) = int(lib_strlen(cString))
-      call c_f_pointer(cString, temp, shape)
-      allocate(f_result(shape(1)))
+      rv_shape(1) = int(lib_strlen(cString))
+      call c_f_pointer(cString, temp, rv_shape)
+      allocate(f_result(rv_shape(1)))
       f_result = temp
       call lib_free(cString)
     else
@@ -3277,7 +3277,7 @@ contains
     character(kind = c_char), dimension(:), pointer :: f_result
     type(t_CdiIterator), intent(in) :: me_dummy
     type(c_ptr) :: cString
-    integer :: shape(1)
+    integer :: rv_shape(1)
     character(kind = c_char), dimension(:), pointer :: temp
     interface
       function lib_cdiIterator_inqVTime(me_dummy) bind(c, name =&
@@ -3289,9 +3289,9 @@ contains
     end interface
     cString = lib_cdiIterator_inqVTime(me_dummy%ptr)
     if(c_associated(cString)) then
-      shape(1) = int(lib_strlen(cString))
-      call c_f_pointer(cString, temp, shape)
-      allocate(f_result(shape(1)))
+      rv_shape(1) = int(lib_strlen(cString))
+      call c_f_pointer(cString, temp, rv_shape)
+      allocate(f_result(rv_shape(1)))
       f_result = temp
       call lib_free(cString)
     else
@@ -3503,7 +3503,7 @@ contains
     character(kind = c_char), dimension(:), pointer :: f_result
     type(t_CdiIterator), intent(in) :: me_dummy
     type(c_ptr) :: cString
-    integer :: shape(1)
+    integer :: rv_shape(1)
     character(kind = c_char), dimension(:), pointer :: temp
     interface
       function lib_cdiIterator_inqVariableName(me_dummy) bind(c, name =&
@@ -3515,9 +3515,9 @@ contains
     end interface
     cString = lib_cdiIterator_inqVariableName(me_dummy%ptr)
     if(c_associated(cString)) then
-      shape(1) = int(lib_strlen(cString))
-      call c_f_pointer(cString, temp, shape)
-      allocate(f_result(shape(1)))
+      rv_shape(1) = int(lib_strlen(cString))
+      call c_f_pointer(cString, temp, rv_shape)
+      allocate(f_result(rv_shape(1)))
       f_result = temp
       call lib_free(cString)
     else
@@ -3928,7 +3928,7 @@ contains
     character(kind = c_char) :: key_temp(len(key_dummy) + 1)
     integer :: key_i
     type(c_ptr) :: cString
-    integer :: shape(1)
+    integer :: rv_shape(1)
     character(kind = c_char), dimension(:), pointer :: temp
     interface
       function lib_cdiGribIterator_inqStringValue(me_dummy, key_dummy) bind(c,&
@@ -3945,9 +3945,9 @@ contains
     key_temp(len(key_dummy) + 1) = c_null_char
     cString = lib_cdiGribIterator_inqStringValue(me_dummy%ptr, key_temp)
     if(c_associated(cString)) then
-      shape(1) = int(lib_strlen(cString))
-      call c_f_pointer(cString, temp, shape)
-      allocate(f_result(shape(1)))
+      rv_shape(1) = int(lib_strlen(cString))
+      call c_f_pointer(cString, temp, rv_shape)
+      allocate(f_result(rv_shape(1)))
       f_result = temp
       call lib_free(cString)
     else
@@ -4015,7 +4015,7 @@ contains
     integer(c_int), value :: vlistId_dummy
     integer(c_int), value :: varId_dummy
     type(c_ptr) :: cString
-    integer :: shape(1)
+    integer :: rv_shape(1)
     character(kind = c_char), dimension(:), pointer :: temp
     interface
       function lib_vlistCopyVarName(vlistId_dummy, varId_dummy) bind(c, name =&
@@ -4028,9 +4028,9 @@ contains
     end interface
     cString = lib_vlistCopyVarName(vlistId_dummy, varId_dummy)
     if(c_associated(cString)) then
-      shape(1) = int(lib_strlen(cString))
-      call c_f_pointer(cString, temp, shape)
-      allocate(f_result(shape(1)))
+      rv_shape(1) = int(lib_strlen(cString))
+      call c_f_pointer(cString, temp, rv_shape)
+      allocate(f_result(rv_shape(1)))
       f_result = temp
       call lib_free(cString)
     else
@@ -4717,7 +4717,7 @@ contains
     character(kind = c_char), dimension(:), pointer :: f_result
     integer(c_int), value :: gridtype_dummy
     type(c_ptr) :: ptr
-    integer :: shape(1)
+    integer :: rv_shape(1)
     interface
       function lib_gridNamePtr(gridtype_dummy) bind(c, name = 'gridNamePtr')&
       & result(c_result)
@@ -4729,8 +4729,8 @@ contains
     f_result => null()
     ptr = lib_gridNamePtr(gridtype_dummy)
     if(c_associated(ptr)) then
-      shape(1) = int(lib_strlen(ptr))
-      call c_f_pointer(ptr, f_result, shape)
+      rv_shape(1) = int(lib_strlen(ptr))
+      call c_f_pointer(ptr, f_result, rv_shape)
     end if
   end function gridNamePtr
 
@@ -5374,7 +5374,7 @@ contains
     character(kind = c_char), dimension(:), pointer :: f_result
     integer(c_int), value :: tunitID_dummy
     type(c_ptr) :: ptr
-    integer :: shape(1)
+    integer :: rv_shape(1)
     interface
       function lib_tunitNamePtr(tunitID_dummy) bind(c, name = 'tunitNamePtr')&
       & result(c_result)
@@ -5386,8 +5386,8 @@ contains
     f_result => null()
     ptr = lib_tunitNamePtr(tunitID_dummy)
     if(c_associated(ptr)) then
-      shape(1) = int(lib_strlen(ptr))
-      call c_f_pointer(ptr, f_result, shape)
+      rv_shape(1) = int(lib_strlen(ptr))
+      call c_f_pointer(ptr, f_result, rv_shape)
     end if
   end function tunitNamePtr
 
@@ -5463,7 +5463,7 @@ contains
     character(kind = c_char), dimension(:), pointer :: f_result
     integer(c_int), value :: instID_dummy
     type(c_ptr) :: ptr
-    integer :: shape(1)
+    integer :: rv_shape(1)
     interface
       function lib_institutInqNamePtr(instID_dummy) bind(c, name =&
       & 'institutInqNamePtr') result(c_result)
@@ -5475,8 +5475,8 @@ contains
     f_result => null()
     ptr = lib_institutInqNamePtr(instID_dummy)
     if(c_associated(ptr)) then
-      shape(1) = int(lib_strlen(ptr))
-      call c_f_pointer(ptr, f_result, shape)
+      rv_shape(1) = int(lib_strlen(ptr))
+      call c_f_pointer(ptr, f_result, rv_shape)
     end if
   end function institutInqNamePtr
 
@@ -5484,7 +5484,7 @@ contains
     character(kind = c_char), dimension(:), pointer :: f_result
     integer(c_int), value :: instID_dummy
     type(c_ptr) :: ptr
-    integer :: shape(1)
+    integer :: rv_shape(1)
     interface
       function lib_institutInqLongnamePtr(instID_dummy) bind(c, name =&
       & 'institutInqLongnamePtr') result(c_result)
@@ -5496,8 +5496,8 @@ contains
     f_result => null()
     ptr = lib_institutInqLongnamePtr(instID_dummy)
     if(c_associated(ptr)) then
-      shape(1) = int(lib_strlen(ptr))
-      call c_f_pointer(ptr, f_result, shape)
+      rv_shape(1) = int(lib_strlen(ptr))
+      call c_f_pointer(ptr, f_result, rv_shape)
     end if
   end function institutInqLongnamePtr
 
@@ -5566,7 +5566,7 @@ contains
     character(kind = c_char), dimension(:), pointer :: f_result
     integer(c_int), value :: modelID_dummy
     type(c_ptr) :: ptr
-    integer :: shape(1)
+    integer :: rv_shape(1)
     interface
       function lib_modelInqNamePtr(modelID_dummy) bind(c, name =&
       & 'modelInqNamePtr') result(c_result)
@@ -5578,8 +5578,8 @@ contains
     f_result => null()
     ptr = lib_modelInqNamePtr(modelID_dummy)
     if(c_associated(ptr)) then
-      shape(1) = int(lib_strlen(ptr))
-      call c_f_pointer(ptr, f_result, shape)
+      rv_shape(1) = int(lib_strlen(ptr))
+      call c_f_pointer(ptr, f_result, rv_shape)
     end if
   end function modelInqNamePtr
 
@@ -5672,7 +5672,7 @@ contains
     character(kind = c_char), dimension(:), pointer :: f_result
     integer(c_int), value :: tableID_dummy
     type(c_ptr) :: ptr
-    integer :: shape(1)
+    integer :: rv_shape(1)
     interface
       function lib_tableInqNamePtr(tableID_dummy) bind(c, name =&
       & 'tableInqNamePtr') result(c_result)
@@ -5684,8 +5684,8 @@ contains
     f_result => null()
     ptr = lib_tableInqNamePtr(tableID_dummy)
     if(c_associated(ptr)) then
-      shape(1) = int(lib_strlen(ptr))
-      call c_f_pointer(ptr, f_result, shape)
+      rv_shape(1) = int(lib_strlen(ptr))
+      call c_f_pointer(ptr, f_result, rv_shape)
     end if
   end function tableInqNamePtr
 
@@ -5977,7 +5977,7 @@ contains
     integer(c_int), value :: tableID_dummy
     integer(c_int), value :: parID_dummy
     type(c_ptr) :: ptr
-    integer :: shape(1)
+    integer :: rv_shape(1)
     interface
       function lib_tableInqParNamePtr(tableID_dummy, parID_dummy) bind(c, name&
       & = 'tableInqParNamePtr') result(c_result)
@@ -5990,8 +5990,8 @@ contains
     f_result => null()
     ptr = lib_tableInqParNamePtr(tableID_dummy, parID_dummy)
     if(c_associated(ptr)) then
-      shape(1) = int(lib_strlen(ptr))
-      call c_f_pointer(ptr, f_result, shape)
+      rv_shape(1) = int(lib_strlen(ptr))
+      call c_f_pointer(ptr, f_result, rv_shape)
     end if
   end function tableInqParNamePtr
 
@@ -6000,7 +6000,7 @@ contains
     integer(c_int), value :: tableID_dummy
     integer(c_int), value :: parID_dummy
     type(c_ptr) :: ptr
-    integer :: shape(1)
+    integer :: rv_shape(1)
     interface
       function lib_tableInqParLongnamePtr(tableID_dummy, parID_dummy) bind(c,&
       & name = 'tableInqParLongnamePtr') result(c_result)
@@ -6013,8 +6013,8 @@ contains
     f_result => null()
     ptr = lib_tableInqParLongnamePtr(tableID_dummy, parID_dummy)
     if(c_associated(ptr)) then
-      shape(1) = int(lib_strlen(ptr))
-      call c_f_pointer(ptr, f_result, shape)
+      rv_shape(1) = int(lib_strlen(ptr))
+      call c_f_pointer(ptr, f_result, rv_shape)
     end if
   end function tableInqParLongnamePtr
 
@@ -6023,7 +6023,7 @@ contains
     integer(c_int), value :: tableID_dummy
     integer(c_int), value :: parID_dummy
     type(c_ptr) :: ptr
-    integer :: shape(1)
+    integer :: rv_shape(1)
     interface
       function lib_tableInqParUnitsPtr(tableID_dummy, parID_dummy) bind(c, name&
       & = 'tableInqParUnitsPtr') result(c_result)
@@ -6036,8 +6036,8 @@ contains
     f_result => null()
     ptr = lib_tableInqParUnitsPtr(tableID_dummy, parID_dummy)
     if(c_associated(ptr)) then
-      shape(1) = int(lib_strlen(ptr))
-      call c_f_pointer(ptr, f_result, shape)
+      rv_shape(1) = int(lib_strlen(ptr))
+      call c_f_pointer(ptr, f_result, rv_shape)
     end if
   end function tableInqParUnitsPtr
 

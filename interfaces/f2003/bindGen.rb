@@ -485,15 +485,15 @@ $returnTypeTemplates = [
 		:isVoid => false,
 		:returnAs => 'character(kind = c_char), dimension(:), pointer',
 		:helperVars => "type(c_ptr) :: cString\n" +
-		               "integer :: shape(1)\n" +
+		               "integer :: rv_shape(1)\n" +
 		               "character(kind = c_char), dimension(:), pointer :: temp",
 		:precallStatements => '',
 		:receiveAs => 'type(c_ptr)',
 		:assignVariable => 'cString',
 		:postcallStatements => "if(c_associated(cString)) then\n" +
-		                       "\tshape(1) = int(lib_strlen(cString))\n" +
-		                       "\tcall c_f_pointer(cString, temp, shape)\n" +
-		                       "\tallocate(#{$wrapperResultVarName}(shape(1)))\n" +
+		                       "\trv_shape(1) = int(lib_strlen(cString))\n" +
+		                       "\tcall c_f_pointer(cString, temp, rv_shape)\n" +
+		                       "\tallocate(#{$wrapperResultVarName}(rv_shape(1)))\n" +
 		                       "\t#{$wrapperResultVarName} = temp\n" +
 		                       "\tcall lib_free(cString)\n" +
 		                       "else\n" +
@@ -504,13 +504,13 @@ $returnTypeTemplates = [
 		:placeholders => %w[],
 		:isVoid => false,
 		:returnAs => 'character(kind = c_char), dimension(:), pointer',
-		:helperVars => "type(c_ptr) :: ptr\ninteger :: shape(1)",
+		:helperVars => "type(c_ptr) :: ptr\ninteger :: rv_shape(1)",
 		:precallStatements => $wrapperResultVarName + ' => null()',
 		:receiveAs => 'type(c_ptr)',
 		:assignVariable => 'ptr',
 		:postcallStatements => "if(c_associated(ptr)) then\n" +
-		                       "\tshape(1) = int(lib_strlen(ptr))\n" +
-		                       "\tcall c_f_pointer(ptr, #{$wrapperResultVarName}, shape)\n" +
+		                       "\trv_shape(1) = int(lib_strlen(ptr))\n" +
+		                       "\tcall c_f_pointer(ptr, #{$wrapperResultVarName}, rv_shape)\n" +
 		                       "end if"
 	}, {	#const int*	This returns the naked pointer because we can't know the length of the returned array within the wrapper. The user has to call c_f_pointer() himself.
 		:regex => '^\s*const\s+(?<type><integerTypes>)\s*\*\s*$',
