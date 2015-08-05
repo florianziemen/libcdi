@@ -834,8 +834,8 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
   fp = fopen(filename, "w");
   if ( fp )
     {
-      fprintf(fp, "C Quick Reference\n");
-      fprintf(fp, "-----------------\n\n");
+      fputs("C Quick Reference\n"
+            "-----------------\n\n", fp);
 
       doctotxt(fp, cdoc, ncdoc);
       fclose(fp);
@@ -852,8 +852,8 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
   fp = fopen(filename, "w");
   if ( fp )
     {
-      fprintf(fp, "Fortran Quick Reference\n");
-      fprintf(fp, "-----------------------\n\n");
+      fputs("Fortran Quick Reference\n"
+            "-----------------------\n\n", fp);
 
       doctotxt(fp, fdoc, nfdoc);
       fclose(fp);
@@ -870,12 +870,12 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
   fp = fopen(filename, "w");
   if ( fp )
     {
-      fprintf(fp, "\\chapter*{Quick Reference}\n");
-      fprintf(fp, "\\addcontentsline{toc}{chapter}{Quick Reference}\n");
-      fprintf(fp, "\n");
-      fprintf(fp, "This appendix provide a brief listing of the C language bindings of the\n");
-      fprintf(fp, "CDI library routines:\n");
-      fprintf(fp, "\n");
+      fputs("\\chapter*{Quick Reference}\n"
+            "\\addcontentsline{toc}{chapter}{Quick Reference}\n"
+            "\n"
+            "This appendix provide a brief listing of the C language bindings of the\n"
+            "CDI library routines:\n"
+            "\n", fp);
 
       doctotex(fp, cdoc, ncdoc);
       fclose(fp);
@@ -892,12 +892,12 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
   fp = fopen(filename, "w");
   if ( fp )
     {
-      fprintf(fp, "\\chapter*{Quick Reference}\n");
-      fprintf(fp, "\\addcontentsline{toc}{chapter}{Quick Reference}\n");
-      fprintf(fp, "\n");
-      fprintf(fp, "This appendix provide a brief listing of the Fortran language bindings of the\n");
-      fprintf(fp, "CDI library routines:\n");
-      fprintf(fp, "\n");
+      fputs("\\chapter*{Quick Reference}\n"
+            "\\addcontentsline{toc}{chapter}{Quick Reference}\n"
+            "\n"
+            "This appendix provide a brief listing of the Fortran language bindings of the\n"
+            "CDI library routines:\n"
+            "\n", fp);
 
       doctotex(fp, fdoc, nfdoc);
       fclose(fp);
