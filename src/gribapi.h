@@ -69,7 +69,7 @@ static inline void *gribHandleNew(int editionNumber)
 
 static inline void gribHandleDelete(void *gh)
 {
-  grib_handle_delete(gh);
+  grib_handle_delete((struct grib_handle *)gh);
 }
 #else
 #define gribHandleNew(editionNumber) (NULL)

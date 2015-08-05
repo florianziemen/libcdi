@@ -46,7 +46,7 @@ static CdiGribIterator *cdiGribIterator_condestruct(CdiGribIterator *me, const c
 {
 #define super() (&me->super)
   if(me) goto destruct;
-  me = xmalloc(sizeof(*me));
+  me = (CdiGribIterator *)xmalloc(sizeof(*me));
   baseIterConstruct(super(), filetype);
 
   me->file = cdiInputFile_make(path);
@@ -65,7 +65,7 @@ static CdiGribIterator *cdiGribIterator_condestruct(CdiGribIterator *me, const c
 
 destruct:
   if(me->super.gridId != CDI_UNDEFID) gridDestroy(me->super.gridId);
-  if(me->gribHandle) grib_handle_delete(me->gribHandle);
+  if(me->gribHandle) grib_handle_delete((struct grib_handle *)me->gribHandle);
   free(me->gribBuffer);
   cdiRefObject_release(&me->file->super);
 destructSuper:
@@ -88,20 +88,19 @@ CdiGribIterator *cdiGribIterator_makeClone(CdiIterator *super)
   CdiGribIterator *me = (CdiGribIterator*)super;
 
   //Allocate memory and copy data. (operations that may fail)
-  CdiGribIterator *result = xmalloc(sizeof(*result));
+  CdiGribIterator* result = (struct CdiGribIterator *)xmalloc(sizeof(*result));
   if(!result) goto fail;
-  *result = (CdiGribIterator)
-    {
-      .file = me->file,
-      .fileOffset = me->fileOffset,
-      .gribBuffer = NULL,
-      .bufferSize = me->bufferSize,
-      .curRecordSize = me->curRecordSize,
-      .gribHandle = NULL
-    };
+
+  result->file = me->file;
+  result->fileOffset = me->fileOffset;
+  result->gribBuffer = NULL;
+  result->bufferSize = me->bufferSize;
+  result->curRecordSize = me->curRecordSize;
+  result->gribHandle = NULL;
+
   if(me->gribBuffer)
     {
-      result->gribBuffer = xmalloc(me->bufferSize);
+      result->gribBuffer = (unsigned char *)xmalloc(me->bufferSize);
       if(!result->gribBuffer) goto freeResult;
       memcpy(result->gribBuffer, me->gribBuffer, me->curRecordSize);
     }
@@ -127,7 +126,7 @@ CdiGribIterator *cdiGribIterator_makeClone(CdiIterator *super)
 
   //Error handling.
 deleteGribHandle:
-  if(result->gribHandle) grib_handle_delete(result->gribHandle);
+  if(result->gribHandle) grib_handle_delete((grib_handle *)result->gribHandle);
 freeBuffer:
   free(result->gribBuffer);
 freeResult:
@@ -140,9 +139,9 @@ char *cdiGribIterator_serialize(CdiIterator *super)
 {
   CdiGribIterator *me = (CdiGribIterator*)super;
 
-  const char *path = cdiInputFile_getPath(me->file);
-  char *escapedPath = cdiEscapeSpaces(path);
-  char *result = xmalloc(strlen(escapedPath) + 3 * sizeof(int) * CHAR_BIT/8);
+  const char* path = (char *)cdiInputFile_getPath(me->file);
+  char* escapedPath = (char *)cdiEscapeSpaces(path);
+  char* result = (char *)xmalloc(strlen(escapedPath) + 3 * sizeof(int) * CHAR_BIT/8);
   sprintf(result, "%s %zu", escapedPath, me->fileOffset);
   free(escapedPath);
   return result;
@@ -151,13 +150,14 @@ char *cdiGribIterator_serialize(CdiIterator *super)
 
 CdiGribIterator *cdiGribIterator_deserialize(const char *description)
 {
-  CdiGribIterator *me = xmalloc(sizeof(*me));
+  char* path;
+  CdiGribIterator* me = (CdiGribIterator *)xmalloc(sizeof(*me));
   if(!me) goto fail;
 
   description = baseIter_constructFromString(&me->super, description);
 
   while(*description == ' ') description++;
-  char *path = cdiUnescapeSpaces(description, &description);
+  path = cdiUnescapeSpaces(description, &description);
   if(!path) goto destructSuper;
 
   me->file = cdiInputFile_make(path);
@@ -196,7 +196,7 @@ static void cdiGribIterator_ensureBuffer(CdiGribIterator *me, size_t requiredSiz
     {
       me->bufferSize *= 2;
       if(me->bufferSize < requiredSize) me->bufferSize = requiredSize;
-      me->gribBuffer = xrealloc(me->gribBuffer, me->bufferSize);
+      me->gribBuffer = (unsigned char *)xrealloc(me->gribBuffer, me->bufferSize);
     }
 }
 
@@ -216,7 +216,7 @@ static const unsigned char *positionOfGribMarker(const unsigned char *data, size
 {
   for(const unsigned char *currentPosition = data, *end = data + size; currentPosition < end; currentPosition++)
     {
-      currentPosition = memchr(currentPosition, 'G', size - (size_t)(currentPosition - data) - 3);      //-3 to ensure that we don't overrun the buffer during the strncmp() call.
+      currentPosition = (unsigned char *)memchr(currentPosition, 'G', size - (size_t)(currentPosition - data) - 3);      //-3 to ensure that we don't overrun the buffer during the strncmp() call.
       if(!currentPosition) return NULL;
       if(!strncmp((const char*)currentPosition, "GRIB", 4)) return currentPosition;
     }
@@ -254,13 +254,13 @@ static ssize_t scanToGribMarker(CdiGribIterator *me)
 
 static unsigned decode24(void *beData)
 {
-  unsigned char *bytes = beData;
+  unsigned char* bytes = (unsigned char *)beData;
   return ((unsigned)bytes[0] << 16) + ((unsigned)bytes[1] << 8) + (unsigned)bytes[2];
 }
 
 static uint64_t decode64(void *beData)
 {
-  unsigned char *bytes = beData;
+  unsigned char* bytes = (unsigned char *)beData;
   uint64_t result = 0;
   for(size_t i = 0; i < 8; i++) result = (result << 8) + bytes[i];
   return result;
@@ -321,7 +321,7 @@ static void hexdump(void *data, size_t size)
 static int readMessage(CdiGribIterator *me)
 {
   //Destroy the old grib_handle.
-  if(me->gribHandle) grib_handle_delete(me->gribHandle), me->gribHandle = NULL;
+  if(me->gribHandle) grib_handle_delete((grib_handle *)me->gribHandle), me->gribHandle = NULL;
   me->fileOffset += (off_t)me->curRecordSize;
 
   //Find the next record and determine its size.
@@ -357,11 +357,11 @@ int cdiGribIterator_nextField(CdiIterator *super)
   if(result) return result;
 
   //Get the metadata that's published as variables in the base class.
-  super->datatype = gribGetDatatype(me->gribHandle);
-  super->timesteptype = gribapiGetTsteptype(me->gribHandle);
-  cdiDecodeParam(gribapiGetParam(me->gribHandle), &super->param.number, &super->param.category, &super->param.discipline);
+  super->datatype = gribGetDatatype((grib_handle *)me->gribHandle);
+  super->timesteptype = gribapiGetTsteptype((grib_handle *)me->gribHandle);
+  cdiDecodeParam(gribapiGetParam((grib_handle *)me->gribHandle), &super->param.number, &super->param.category, &super->param.discipline);
   grid_t grid;
-  gribapiGetGrid(me->gribHandle, &grid);
+  gribapiGetGrid((grib_handle *)me->gribHandle, &grid);
   super->gridId = gridGenerate(&grid);
 
   return CDI_NOERR;
@@ -370,7 +370,7 @@ int cdiGribIterator_nextField(CdiIterator *super)
 char *cdiGribIterator_inqTime(CdiIterator *super, bool getEndTime)
 {
   CdiGribIterator *me = (CdiGribIterator*)super;
-  return gribMakeTimeString(me->gribHandle, getEndTime);
+  return gribMakeTimeString((grib_handle *)me->gribHandle, getEndTime);
 }
 
 int cdiGribIterator_levelType(CdiIterator *super, int levelSelector, char **outName, char **outLongName, char **outStdName, char **outUnit)
@@ -379,15 +379,15 @@ int cdiGribIterator_levelType(CdiIterator *super, int levelSelector, char **outN
 
   //First determine the zaxis type corresponding to the given level.
   int zaxisType = ZAXIS_GENERIC;
-  if(gribEditionNumber(me->gribHandle) <= 1)
+  if(gribEditionNumber((grib_handle *)me->gribHandle) <= 1)
     {
-      int levelType = (int)gribGetLongDefault(me->gribHandle, "indicatorOfTypeOfLevel", 255);
+      int levelType = (int)gribGetLongDefault((grib_handle *)me->gribHandle, "indicatorOfTypeOfLevel", 255);
       if(levelSelector && !isGrib1DualLevel(levelType)) levelType = 255;
       zaxisType = grib1ltypeToZaxisType(levelType);
     }
   else
     {
-      int levelType = (int)gribGetLongDefault(me->gribHandle, levelSelector ? "typeOfSecondFixedSurface" : "typeOfFirstFixedSurface", 255);
+      int levelType = (int)gribGetLongDefault((grib_handle *)me->gribHandle, levelSelector ? "typeOfSecondFixedSurface" : "typeOfFirstFixedSurface", 255);
       zaxisType = grib2ltypeToZaxisType(levelType);
     }
 
@@ -467,33 +467,33 @@ int cdiGribIterator_level(CdiIterator *super, int levelSelector, double *outValu
   if(!outValue2) outValue2 = &trash;
   *outValue1 = *outValue2 = 0;
 
-  if(gribEditionNumber(me->gribHandle) > 1)
+  if(gribEditionNumber((grib_handle *)me->gribHandle) > 1)
     {
       if(levelSelector)
         {
-          return readLevel2(me->gribHandle, "typeOfFirstFixedSurface", "scaleFactorOfFirstFixedSurface", "scaledValueOfFirstFixedSurface", outValue1, outValue2);
+          return readLevel2((grib_handle *)me->gribHandle, "typeOfFirstFixedSurface", "scaleFactorOfFirstFixedSurface", "scaledValueOfFirstFixedSurface", outValue1, outValue2);
         }
       else
         {
-          return readLevel2(me->gribHandle, "typeOfSecondFixedSurface", "scaleFactorOfSecondFixedSurface", "scaledValueOfSecondFixedSurface", outValue1, outValue2);
+          return readLevel2((grib_handle *)me->gribHandle, "typeOfSecondFixedSurface", "scaleFactorOfSecondFixedSurface", "scaledValueOfSecondFixedSurface", outValue1, outValue2);
         }
     }
   else
     {
-      long levelType = (uint8_t)gribGetLongDefault(me->gribHandle, "indicatorOfTypeOfLevel", -1);    //1 byte
+      long levelType = (uint8_t)gribGetLongDefault((grib_handle *)me->gribHandle, "indicatorOfTypeOfLevel", -1);    //1 byte
       if(levelType == 255)
         {}
       else if(isGrib1DualLevel((int)levelType))
         {
-          *outValue1 = (double)gribGetLongDefault(me->gribHandle, (levelSelector ? "bottomLevel" : "topLevel"), 0);
+          *outValue1 = (double)gribGetLongDefault((grib_handle *)me->gribHandle, (levelSelector ? "bottomLevel" : "topLevel"), 0);
         }
       else if(levelType == 100)
         {
-          *outValue1 = 100 * (double)gribGetLongDefault(me->gribHandle, "level", 0);        //2 bytes
+          *outValue1 = 100 * (double)gribGetLongDefault((grib_handle *)me->gribHandle, "level", 0);        //2 bytes
         }
       else
         {
-          *outValue1 = (double)gribGetLongDefault(me->gribHandle, "level", 0);        //2 bytes
+          *outValue1 = (double)gribGetLongDefault((grib_handle *)me->gribHandle, "level", 0);        //2 bytes
         }
     }
   return CDI_NOERR;
@@ -506,19 +506,19 @@ int cdiGribIterator_zaxisUuid(CdiIterator *super, int *outVgridNumber, int *outL
   if(outVgridNumber)
     {
       long temp;
-      if(grib_get_long(me->gribHandle, "numberOfVGridUsed", &temp)) return CDI_EINVAL;
+      if(grib_get_long((grib_handle *)me->gribHandle, "numberOfVGridUsed", &temp)) return CDI_EINVAL;
       *outVgridNumber = (int)temp;
     }
   if(outLevelCount)
     {
       long temp;
-      if(grib_get_long(me->gribHandle, "nlev", &temp)) return CDI_EINVAL;
+      if(grib_get_long((grib_handle *)me->gribHandle, "nlev", &temp)) return CDI_EINVAL;
       *outLevelCount = (int)temp;
     }
   if(outUuid)
     {
       size_t size = CDI_UUID_SIZE;
-      if(grib_get_bytes(me->gribHandle, "uuidOfVGrid", outUuid, &size)) return CDI_EINVAL;
+      if(grib_get_bytes((grib_handle *)me->gribHandle, "uuidOfVGrid", outUuid, &size)) return CDI_EINVAL;
       if(size != CDI_UUID_SIZE) return CDI_EUFSTRUCT;
     }
 
@@ -528,18 +528,18 @@ int cdiGribIterator_zaxisUuid(CdiIterator *super, int *outVgridNumber, int *outL
 char *cdiGribIterator_copyVariableName(CdiIterator *super)
 {
   CdiGribIterator *me = (CdiGribIterator*)super;
-  return gribCopyString(me->gribHandle, "shortName");
+  return gribCopyString((grib_handle *)me->gribHandle, "shortName");
 }
 
 void cdiGribIterator_readField(CdiIterator *super, double *buffer, size_t *nmiss)
 {
   CdiGribIterator *me = (CdiGribIterator*)super;
 
-  gribGetDoubleArray(me->gribHandle, "values", buffer);
-  long gridType = gribGetLong(me->gribHandle, "gridDefinitionTemplateNumber");
+  gribGetDoubleArray((grib_handle *)me->gribHandle, "values", buffer);
+  long gridType = gribGetLong((grib_handle *)me->gribHandle, "gridDefinitionTemplateNumber");
   if(nmiss)
     {
-      *nmiss = (gridType >= 50 && gridType <= 53) ? (size_t)0 : (size_t)gribGetLong(me->gribHandle, "numberOfMissing");        //The condition excludes harmonic data.
+      *nmiss = (gridType >= 50 && gridType <= 53) ? (size_t)0 : (size_t)gribGetLong((grib_handle *)me->gribHandle, "numberOfMissing");        //The condition excludes harmonic data.
     }
 }
 
@@ -547,8 +547,8 @@ void cdiGribIterator_readFieldF(CdiIterator *super, float *buffer, size_t *nmiss
 {
   CdiGribIterator *me = (CdiGribIterator*)super;
 
-  size_t valueCount = gribGetArraySize(me->gribHandle, "values");
-  double *temp = malloc(valueCount*sizeof(*temp));
+  size_t valueCount = gribGetArraySize((grib_handle *)me->gribHandle, "values");
+  double* temp = (double *)malloc(valueCount*sizeof(*temp));
   cdiGribIterator_readField(super, temp, nmiss);
   for(size_t i = valueCount; i--; ) buffer[i] = (float)temp[i];
   free(temp);
@@ -597,7 +597,7 @@ void cdiGribIterator_delete(CdiGribIterator *me)
 int cdiGribIterator_inqEdition(CdiGribIterator *me)
 {
 #ifdef HAVE_LIBGRIB_API
-  return (int)gribEditionNumber(me->gribHandle);
+  return (int)gribEditionNumber((grib_handle *)me->gribHandle);
 #else
   (void)me;
   xabort("CDI was compiled without GribAPI support, so you can't possibly have a valid CdiGribIterator* to call this function with");
@@ -621,7 +621,7 @@ int cdiGribIterator_inqEdition(CdiGribIterator *me)
 int cdiGribIterator_getLong(CdiGribIterator *me, const char *key, long *result)
 {
 #ifdef HAVE_LIBGRIB_API
-  return grib_get_long(me->gribHandle, key, result);
+  return grib_get_long((grib_handle *)me->gribHandle, key, result);
 #else
   (void)me;
   (void)key;
@@ -647,7 +647,7 @@ int cdiGribIterator_getLong(CdiGribIterator *me, const char *key, long *result)
 int cdiGribIterator_getLength(CdiGribIterator *me, const char *key, size_t *result)
 {
 #ifdef HAVE_GRIB_GET_LENGTH
-  return grib_get_length(me->gribHandle, key, result);
+  return grib_get_length((grib_handle *)me->gribHandle, key, result);
 #elif defined(HAVE_LIBGRIB_API)
   (void)me;
   (void)key;
@@ -679,7 +679,7 @@ int cdiGribIterator_getLength(CdiGribIterator *me, const char *key, size_t *resu
 int cdiGribIterator_getString(CdiGribIterator *me, const char *key, char *result, size_t *length)
 {
 #ifdef HAVE_LIBGRIB_API
-  return grib_get_string(me->gribHandle, key, result, length);
+  return grib_get_string((grib_handle *)me->gribHandle, key, result, length);
 #else
   (void)me;
   (void)key;
@@ -707,7 +707,7 @@ int cdiGribIterator_getString(CdiGribIterator *me, const char *key, char *result
 long cdiGribIterator_inqLongValue(CdiGribIterator *me, const char *key)
 {
 #ifdef HAVE_LIBGRIB_API
-  return gribGetLong(me->gribHandle, key);
+  return gribGetLong((grib_handle *)me->gribHandle, key);
 #else
   (void)me;
   (void)key;
@@ -734,7 +734,7 @@ long cdiGribIterator_inqLongValue(CdiGribIterator *me, const char *key)
 long cdiGribIterator_inqLongDefaultValue(CdiGribIterator *me, const char *key, long defaultValue)
 {
 #ifdef HAVE_LIBGRIB_API
-  return gribGetLongDefault(me->gribHandle, key, defaultValue);
+  return gribGetLongDefault((grib_handle *)me->gribHandle, key, defaultValue);
 #else
   (void)me;
   (void)key;
@@ -762,7 +762,7 @@ long cdiGribIterator_inqLongDefaultValue(CdiGribIterator *me, const char *key, l
 char *cdiGribIterator_inqStringValue(CdiGribIterator *me, const char *key)
 {
 #ifdef HAVE_LIBGRIB_API
-  return gribCopyString(me->gribHandle, key);
+  return gribCopyString((grib_handle *)me->gribHandle, key);
 #else
   (void)me;
   (void)key;
@@ -787,7 +787,7 @@ char *cdiGribIterator_inqStringValue(CdiGribIterator *me, const char *key)
 int cdiGribIterator_getDouble(CdiGribIterator *me, const char *key, double *result)
 {
 #ifdef HAVE_LIBGRIB_API
-  return grib_get_double(me->gribHandle, key, result);
+  return grib_get_double((grib_handle *)me->gribHandle, key, result);
 #else
   (void)me;
   (void)key;
@@ -813,7 +813,7 @@ int cdiGribIterator_getDouble(CdiGribIterator *me, const char *key, double *resu
 int cdiGribIterator_getSize(CdiGribIterator *me, const char *key, size_t *result)
 {
 #ifdef HAVE_LIBGRIB_API
-  return grib_get_size(me->gribHandle, key, result);
+  return grib_get_size((grib_handle *)me->gribHandle, key, result);
 #else
   (void)me;
   (void)key;
@@ -839,7 +839,7 @@ int cdiGribIterator_getSize(CdiGribIterator *me, const char *key, size_t *result
 int cdiGribIterator_getLongArray(CdiGribIterator *me, const char *key, long *result, size_t *size)
 {
 #ifdef HAVE_LIBGRIB_API
-  return grib_get_long_array(me->gribHandle, key, result, size);
+  return grib_get_long_array((grib_handle *)me->gribHandle, key, result, size);
 #else
   (void)me;
   (void)key;
@@ -866,7 +866,7 @@ int cdiGribIterator_getLongArray(CdiGribIterator *me, const char *key, long *res
 int cdiGribIterator_getDoubleArray(CdiGribIterator *me, const char *key, double *result, size_t *size)
 {
 #ifdef HAVE_LIBGRIB_API
-  return grib_get_double_array(me->gribHandle, key, result, size);
+  return grib_get_double_array((grib_handle *)me->gribHandle, key, result, size);
 #else
   (void)me;
   (void)key;
@@ -894,7 +894,7 @@ int cdiGribIterator_getDoubleArray(CdiGribIterator *me, const char *key, double 
 double cdiGribIterator_inqDoubleValue(CdiGribIterator *me, const char *key)
 {
 #ifdef HAVE_LIBGRIB_API
-  return gribGetDouble(me->gribHandle, key);
+  return gribGetDouble((grib_handle *)me->gribHandle, key);
 #else
   (void)me;
   (void)key;
@@ -921,7 +921,7 @@ double cdiGribIterator_inqDoubleValue(CdiGribIterator *me, const char *key)
 double cdiGribIterator_inqDoubleDefaultValue(CdiGribIterator *me, const char *key, double defaultValue)
 {
 #ifdef HAVE_LIBGRIB_API
-  return gribGetDoubleDefault(me->gribHandle, key, defaultValue);
+  return gribGetDoubleDefault((grib_handle *)me->gribHandle, key, defaultValue);
 #else
   (void)me;
   (void)key;
