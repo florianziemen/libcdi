@@ -666,6 +666,33 @@ Get the size of a subtype (e.g. no. of tiles)..
 Specialized version of subtypeInqSubEntry looking for tile/attribute pair..
 
 
+\section*{\tt \htmlref{tableRead}{tableRead}}
+
+\begin{verbatim}
+    INTEGER FUNCTION tableRead (CHARACTER*(*) tablefile)
+\end{verbatim}
+
+read table of parameters from file in tabular format.
+
+
+\section*{\tt \htmlref{tableWrite}{tableWrite}}
+
+\begin{verbatim}
+    SUBROUTINE tableWrite (CHARACTER*(*) filename, INTEGER tableID)
+\end{verbatim}
+
+write table of parameters to file in tabular format.
+
+
+\section*{\tt \htmlref{tableWriteC}{tableWriteC}}
+
+\begin{verbatim}
+    SUBROUTINE tableWriteC (CHARACTER*(*) filename, INTEGER tableID)
+\end{verbatim}
+
+write table of parameters to file in C language format.
+
+
 \section*{\tt \htmlref{taxisCreate}{taxisCreate}}
 
 \begin{verbatim}
