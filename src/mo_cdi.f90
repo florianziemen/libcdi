@@ -670,6 +670,15 @@ module mo_cdi
       integer(c_int), value :: namespaceID_dummy
     end subroutine namespaceDelete
 
+    subroutine cdiDecodeParam(param_dummy, pnum_dummy, pcat_dummy, pdis_dummy)&
+    & bind(c, name = 'cdiDecodeParam')
+      import c_int
+      integer(c_int), value :: param_dummy
+      integer(c_int), intent(inout) :: pnum_dummy
+      integer(c_int), intent(inout) :: pcat_dummy
+      integer(c_int), intent(inout) :: pdis_dummy
+    end subroutine cdiDecodeParam
+
     function cdiEncodeParam(pnum_dummy, pcat_dummy, pdis_dummy) bind(c, name =&
     & 'cdiEncodeParam') result(result)
       import c_int
@@ -679,6 +688,15 @@ module mo_cdi
       integer(c_int) :: result
     end function cdiEncodeParam
 
+    subroutine cdiDecodeDate(date_dummy, year_dummy, month_dummy, day_dummy)&
+    & bind(c, name = 'cdiDecodeDate')
+      import c_int
+      integer(c_int), value :: date_dummy
+      integer(c_int), intent(inout) :: year_dummy
+      integer(c_int), intent(inout) :: month_dummy
+      integer(c_int), intent(inout) :: day_dummy
+    end subroutine cdiDecodeDate
+
     function cdiEncodeDate(year_dummy, month_dummy, day_dummy) bind(c, name =&
     & 'cdiEncodeDate') result(result)
       import c_int
@@ -687,6 +705,15 @@ module mo_cdi
       integer(c_int), value :: day_dummy
       integer(c_int) :: result
     end function cdiEncodeDate
+
+    subroutine cdiDecodeTime(time_dummy, hour_dummy, minute_dummy,&
+    & second_dummy) bind(c, name = 'cdiDecodeTime')
+      import c_int
+      integer(c_int), value :: time_dummy
+      integer(c_int), intent(inout) :: hour_dummy
+      integer(c_int), intent(inout) :: minute_dummy
+      integer(c_int), intent(inout) :: second_dummy
+    end subroutine cdiDecodeTime
 
     function cdiEncodeTime(hour_dummy, minute_dummy, second_dummy) bind(c, name&
     & = 'cdiEncodeTime') result(result)
@@ -825,6 +852,24 @@ module mo_cdi
       integer(c_int), value :: nmiss_dummy
     end subroutine streamWriteVarF
 
+    subroutine streamReadVar(streamID_dummy, varID_dummy, data_vec_dummy,&
+    & nmiss_dummy) bind(c, name = 'streamReadVar')
+      import c_double, c_int
+      integer(c_int), value :: streamID_dummy
+      integer(c_int), value :: varID_dummy
+      real(c_double), intent(inout) :: data_vec_dummy(*)
+      integer(c_int), intent(inout) :: nmiss_dummy
+    end subroutine streamReadVar
+
+    subroutine streamReadVarF(streamID_dummy, varID_dummy, data_vec_dummy,&
+    & nmiss_dummy) bind(c, name = 'streamReadVarF')
+      import c_float, c_int
+      integer(c_int), value :: streamID_dummy
+      integer(c_int), value :: varID_dummy
+      real(c_float), intent(inout) :: data_vec_dummy(*)
+      integer(c_int), intent(inout) :: nmiss_dummy
+    end subroutine streamReadVarF
+
     subroutine streamWriteVarSlice(streamID_dummy, varID_dummy, levelID_dummy,&
     & data_vec_dummy, nmiss_dummy) bind(c, name = 'streamWriteVarSlice')
       import c_double, c_int
@@ -845,6 +890,26 @@ module mo_cdi
       integer(c_int), value :: nmiss_dummy
     end subroutine streamWriteVarSliceF
 
+    subroutine streamReadVarSlice(streamID_dummy, varID_dummy, levelID_dummy,&
+    & data_vec_dummy, nmiss_dummy) bind(c, name = 'streamReadVarSlice')
+      import c_double, c_int
+      integer(c_int), value :: streamID_dummy
+      integer(c_int), value :: varID_dummy
+      integer(c_int), value :: levelID_dummy
+      real(c_double), intent(inout) :: data_vec_dummy(*)
+      integer(c_int), intent(inout) :: nmiss_dummy
+    end subroutine streamReadVarSlice
+
+    subroutine streamReadVarSliceF(streamID_dummy, varID_dummy, levelID_dummy,&
+    & data_vec_dummy, nmiss_dummy) bind(c, name = 'streamReadVarSliceF')
+      import c_float, c_int
+      integer(c_int), value :: streamID_dummy
+      integer(c_int), value :: varID_dummy
+      integer(c_int), value :: levelID_dummy
+      real(c_float), intent(inout) :: data_vec_dummy(*)
+      integer(c_int), intent(inout) :: nmiss_dummy
+    end subroutine streamReadVarSliceF
+
     subroutine streamWriteVarChunk(streamID_dummy, varID_dummy, rect_dummy,&
     & data_vec_dummy, nmiss_dummy) bind(c, name = 'streamWriteVarChunk')
       import c_double, c_int
@@ -863,6 +928,14 @@ module mo_cdi
       integer(c_int), value :: levelID_dummy
     end subroutine streamDefRecord
 
+    subroutine streamInqRecord(streamID_dummy, varID_dummy, levelID_dummy)&
+    & bind(c, name = 'streamInqRecord')
+      import c_int
+      integer(c_int), value :: streamID_dummy
+      integer(c_int), intent(inout) :: varID_dummy
+      integer(c_int), intent(inout) :: levelID_dummy
+    end subroutine streamInqRecord
+
     subroutine streamWriteRecord(streamID_dummy, data_vec_dummy, nmiss_dummy)&
     & bind(c, name = 'streamWriteRecord')
       import c_double, c_int
@@ -878,6 +951,14 @@ module mo_cdi
       real(c_float), intent(in) :: data_vec_dummy(*)
       integer(c_int), value :: nmiss_dummy
     end subroutine streamWriteRecordF
+
+    subroutine streamReadRecord(streamID_dummy, data_vec_dummy, nmiss_dummy)&
+    & bind(c, name = 'streamReadRecord')
+      import c_double, c_int
+      integer(c_int), value :: streamID_dummy
+      real(c_double), intent(inout) :: data_vec_dummy(*)
+      integer(c_int), intent(inout) :: nmiss_dummy
+    end subroutine streamReadRecord
 
     subroutine streamCopyRecord(streamIDdest_dummy, streamIDsrc_dummy) bind(c,&
     & name = 'streamCopyRecord')
@@ -1177,6 +1258,16 @@ module mo_cdi
       integer(c_int), value :: varID_dummy
       integer(c_int), value :: zaxisID_dummy
     end subroutine vlistChangeVarZaxis
+
+    subroutine vlistInqVar(vlistID_dummy, varID_dummy, gridID_dummy,&
+    & zaxisID_dummy, tsteptype_dummy) bind(c, name = 'vlistInqVar')
+      import c_int
+      integer(c_int), value :: vlistID_dummy
+      integer(c_int), value :: varID_dummy
+      integer(c_int), intent(inout) :: gridID_dummy
+      integer(c_int), intent(inout) :: zaxisID_dummy
+      integer(c_int), intent(inout) :: tsteptype_dummy
+    end subroutine vlistInqVar
 
     function vlistInqVarGrid(vlistID_dummy, varID_dummy) bind(c, name =&
     & 'vlistInqVarGrid') result(result)
@@ -1589,9 +1680,30 @@ module mo_cdi
       integer(c_int), value :: forecast_type_dummy
     end subroutine vlistDefVarEnsemble
 
+    function vlistInqVarEnsemble(vlistID_dummy, varID_dummy, ensID_dummy,&
+    & ensCount_dummy, forecast_type_dummy) bind(c, name =&
+    & 'vlistInqVarEnsemble') result(result)
+      import c_int
+      integer(c_int), value :: vlistID_dummy
+      integer(c_int), value :: varID_dummy
+      integer(c_int), intent(inout) :: ensID_dummy
+      integer(c_int), intent(inout) :: ensCount_dummy
+      integer(c_int), intent(inout) :: forecast_type_dummy
+      integer(c_int) :: result
+    end function vlistInqVarEnsemble
+
     subroutine cdiClearAdditionalKeys() bind(c, name =&
     & 'cdiClearAdditionalKeys')
     end subroutine cdiClearAdditionalKeys
+
+    function vlistInqNatts(vlistID_dummy, varID_dummy, nattsp_dummy) bind(c,&
+    & name = 'vlistInqNatts') result(result)
+      import c_int
+      integer(c_int), value :: vlistID_dummy
+      integer(c_int), value :: varID_dummy
+      integer(c_int), intent(inout) :: nattsp_dummy
+      integer(c_int) :: result
+    end function vlistInqNatts
 
     subroutine gridCompress(gridID_dummy) bind(c, name = 'gridCompress')
       import c_int
@@ -1968,6 +2080,22 @@ module mo_cdi
       integer(c_int), value :: scanflag_dummy
     end subroutine gridDefLCC
 
+    subroutine gridInqLCC(gridID_dummy, originLon_dummy, originLat_dummy,&
+    & lonParY_dummy, lat1_dummy, lat2_dummy, xinc_dummy, yinc_dummy,&
+    & projflag_dummy, scanflag_dummy) bind(c, name = 'gridInqLCC')
+      import c_double, c_int
+      integer(c_int), value :: gridID_dummy
+      real(c_double), intent(inout) :: originLon_dummy
+      real(c_double), intent(inout) :: originLat_dummy
+      real(c_double), intent(inout) :: lonParY_dummy
+      real(c_double), intent(inout) :: lat1_dummy
+      real(c_double), intent(inout) :: lat2_dummy
+      real(c_double), intent(inout) :: xinc_dummy
+      real(c_double), intent(inout) :: yinc_dummy
+      integer(c_int), intent(inout) :: projflag_dummy
+      integer(c_int), intent(inout) :: scanflag_dummy
+    end subroutine gridInqLCC
+
     subroutine gridDefLcc2(gridID_dummy, earth_radius_dummy, lon_0_dummy,&
     & lat_0_dummy, lat_1_dummy, lat_2_dummy) bind(c, name = 'gridDefLcc2')
       import c_double, c_int
@@ -1979,6 +2107,17 @@ module mo_cdi
       real(c_double), value :: lat_2_dummy
     end subroutine gridDefLcc2
 
+    subroutine gridInqLcc2(gridID_dummy, earth_radius_dummy, lon_0_dummy,&
+    & lat_0_dummy, lat_1_dummy, lat_2_dummy) bind(c, name = 'gridInqLcc2')
+      import c_double, c_int
+      integer(c_int), value :: gridID_dummy
+      real(c_double), intent(inout) :: earth_radius_dummy
+      real(c_double), intent(inout) :: lon_0_dummy
+      real(c_double), intent(inout) :: lat_0_dummy
+      real(c_double), intent(inout) :: lat_1_dummy
+      real(c_double), intent(inout) :: lat_2_dummy
+    end subroutine gridInqLcc2
+
     subroutine gridDefLaea(gridID_dummy, earth_radius_dummy, lon_0_dummy,&
     & lat_0_dummy) bind(c, name = 'gridDefLaea')
       import c_double, c_int
@@ -1987,6 +2126,15 @@ module mo_cdi
       real(c_double), value :: lon_0_dummy
       real(c_double), value :: lat_0_dummy
     end subroutine gridDefLaea
+
+    subroutine gridInqLaea(gridID_dummy, earth_radius_dummy, lon_0_dummy,&
+    & lat_0_dummy) bind(c, name = 'gridInqLaea')
+      import c_double, c_int
+      integer(c_int), value :: gridID_dummy
+      real(c_double), intent(inout) :: earth_radius_dummy
+      real(c_double), intent(inout) :: lon_0_dummy
+      real(c_double), intent(inout) :: lat_0_dummy
+    end subroutine gridInqLaea
 
     subroutine gridDefArea(gridID_dummy, area_vec_dummy) bind(c, name =&
     & 'gridDefArea')
@@ -2501,6 +2649,22 @@ module mo_cdi
       integer(c_int), value :: vtime_ub_dummy
     end subroutine taxisDefVtimeBounds
 
+    subroutine taxisInqVdateBounds(taxisID_dummy, vdate_lb_dummy,&
+    & vdate_ub_dummy) bind(c, name = 'taxisInqVdateBounds')
+      import c_int
+      integer(c_int), value :: taxisID_dummy
+      integer(c_int), intent(inout) :: vdate_lb_dummy
+      integer(c_int), intent(inout) :: vdate_ub_dummy
+    end subroutine taxisInqVdateBounds
+
+    subroutine taxisInqVtimeBounds(taxisID_dummy, vtime_lb_dummy,&
+    & vtime_ub_dummy) bind(c, name = 'taxisInqVtimeBounds')
+      import c_int
+      integer(c_int), value :: taxisID_dummy
+      integer(c_int), intent(inout) :: vtime_lb_dummy
+      integer(c_int), intent(inout) :: vtime_ub_dummy
+    end subroutine taxisInqVtimeBounds
+
     subroutine taxisDefCalendar(taxisID_dummy, calendar_dummy) bind(c, name =&
     & 'taxisDefCalendar')
       import c_int
@@ -2696,6 +2860,14 @@ module mo_cdi
       integer(c_int) :: result
     end function vlistInqVarSubtype
 
+    subroutine gribapiLibraryVersion(major_version_dummy, minor_version_dummy,&
+    & revision_version_dummy) bind(c, name = 'gribapiLibraryVersion')
+      import c_int
+      integer(c_int), intent(inout) :: major_version_dummy
+      integer(c_int), intent(inout) :: minor_version_dummy
+      integer(c_int), intent(inout) :: revision_version_dummy
+    end subroutine gribapiLibraryVersion
+
   end interface
 
 contains
@@ -2819,130 +2991,26 @@ contains
     end do
   end subroutine cdiParamToString
 
-  subroutine cdiDecodeParam(param_dummy, pnum, pcat, pdis)
-    integer(c_int), value :: param_dummy
-    integer(c_int), optional, intent(inout) :: pnum
-    integer(c_int), optional, intent(inout) :: pcat
-    integer(c_int), optional, intent(inout) :: pdis
-    integer(c_int), target :: pnum_temp
-    type(c_ptr) :: pnum_ptr
-    integer(c_int), target :: pcat_temp
-    type(c_ptr) :: pcat_ptr
-    integer(c_int), target :: pdis_temp
-    type(c_ptr) :: pdis_ptr
-    interface
-      subroutine lib_cdiDecodeParam(param_dummy, pnum, pcat, pdis) bind(c, name&
-      & = 'cdiDecodeParam')
-        import c_int, c_ptr
-        integer(c_int), value :: param_dummy
-        type(c_ptr), value :: pnum
-        type(c_ptr), value :: pcat
-        type(c_ptr), value :: pdis
-      end subroutine lib_cdiDecodeParam
-    end interface
-    pnum_ptr = c_null_ptr
-    if(present(pnum)) pnum_ptr = c_loc(pnum_temp)
-    pcat_ptr = c_null_ptr
-    if(present(pcat)) pcat_ptr = c_loc(pcat_temp)
-    pdis_ptr = c_null_ptr
-    if(present(pdis)) pdis_ptr = c_loc(pdis_temp)
-    call lib_cdiDecodeParam(param_dummy, pnum_ptr, pcat_ptr, pdis_ptr)
-    if(present(pnum)) pnum = pnum_temp
-    if(present(pcat)) pcat = pcat_temp
-    if(present(pdis)) pdis = pdis_temp
-  end subroutine cdiDecodeParam
-
-  subroutine cdiDecodeDate(date_dummy, year, month, day)
-    integer(c_int), value :: date_dummy
-    integer(c_int), optional, intent(inout) :: year
-    integer(c_int), optional, intent(inout) :: month
-    integer(c_int), optional, intent(inout) :: day
-    integer(c_int), target :: year_temp
-    type(c_ptr) :: year_ptr
-    integer(c_int), target :: month_temp
-    type(c_ptr) :: month_ptr
-    integer(c_int), target :: day_temp
-    type(c_ptr) :: day_ptr
-    interface
-      subroutine lib_cdiDecodeDate(date_dummy, year, month, day) bind(c, name =&
-      & 'cdiDecodeDate')
-        import c_int, c_ptr
-        integer(c_int), value :: date_dummy
-        type(c_ptr), value :: year
-        type(c_ptr), value :: month
-        type(c_ptr), value :: day
-      end subroutine lib_cdiDecodeDate
-    end interface
-    year_ptr = c_null_ptr
-    if(present(year)) year_ptr = c_loc(year_temp)
-    month_ptr = c_null_ptr
-    if(present(month)) month_ptr = c_loc(month_temp)
-    day_ptr = c_null_ptr
-    if(present(day)) day_ptr = c_loc(day_temp)
-    call lib_cdiDecodeDate(date_dummy, year_ptr, month_ptr, day_ptr)
-    if(present(year)) year = year_temp
-    if(present(month)) month = month_temp
-    if(present(day)) day = day_temp
-  end subroutine cdiDecodeDate
-
-  subroutine cdiDecodeTime(time_dummy, hour, minute, second)
-    integer(c_int), value :: time_dummy
-    integer(c_int), optional, intent(inout) :: hour
-    integer(c_int), optional, intent(inout) :: minute
-    integer(c_int), optional, intent(inout) :: second
-    integer(c_int), target :: hour_temp
-    type(c_ptr) :: hour_ptr
-    integer(c_int), target :: minute_temp
-    type(c_ptr) :: minute_ptr
-    integer(c_int), target :: second_temp
-    type(c_ptr) :: second_ptr
-    interface
-      subroutine lib_cdiDecodeTime(time_dummy, hour, minute, second) bind(c,&
-      & name = 'cdiDecodeTime')
-        import c_int, c_ptr
-        integer(c_int), value :: time_dummy
-        type(c_ptr), value :: hour
-        type(c_ptr), value :: minute
-        type(c_ptr), value :: second
-      end subroutine lib_cdiDecodeTime
-    end interface
-    hour_ptr = c_null_ptr
-    if(present(hour)) hour_ptr = c_loc(hour_temp)
-    minute_ptr = c_null_ptr
-    if(present(minute)) minute_ptr = c_loc(minute_temp)
-    second_ptr = c_null_ptr
-    if(present(second)) second_ptr = c_loc(second_temp)
-    call lib_cdiDecodeTime(time_dummy, hour_ptr, minute_ptr, second_ptr)
-    if(present(hour)) hour = hour_temp
-    if(present(minute)) minute = minute_temp
-    if(present(second)) second = second_temp
-  end subroutine cdiDecodeTime
-
-  function cdiGetFiletype(path_dummy, byteorder) result(result)
+  function cdiGetFiletype(path_dummy, byteorder_dummy) result(result)
     integer(c_int) :: result
     character(kind = c_char, len = *), intent(in) :: path_dummy
-    integer(c_int), optional, intent(inout) :: byteorder
+    integer(c_int), intent(inout) :: byteorder_dummy
     character(kind = c_char) :: path_temp(len(path_dummy) + 1)
     integer :: path_i
-    integer(c_int), target :: byteorder_temp
-    type(c_ptr) :: byteorder_ptr
     interface
-      function lib_cdiGetFiletype(path_dummy, byteorder) bind(c, name =&
+      function lib_cdiGetFiletype(path_dummy, byteorder_dummy) bind(c, name =&
       & 'cdiGetFiletype') result(c_result)
-        import c_char, c_int, c_ptr
+        import c_char, c_int
         integer(c_int) :: c_result
         character(kind = c_char) :: path_dummy(*)
-        type(c_ptr), value :: byteorder
+        integer(c_int), intent(inout) :: byteorder_dummy
       end function lib_cdiGetFiletype
     end interface
     do path_i = 1, len(path_dummy)
       path_temp(path_i) = path_dummy(path_i:path_i)
     end do
     path_temp(len(path_dummy) + 1) = c_null_char
-    byteorder_ptr = c_null_ptr
-    if(present(byteorder)) byteorder_ptr = c_loc(byteorder_temp)
-    result = lib_cdiGetFiletype(path_temp, byteorder_ptr)
-    if(present(byteorder)) byteorder = byteorder_temp
+    result = lib_cdiGetFiletype(path_temp, byteorder_dummy)
   end function cdiGetFiletype
 
   function streamOpenRead(path_dummy) result(result)
@@ -3048,157 +3116,6 @@ contains
       call c_f_pointer(ptr, result, shape)
     end if
   end function streamFilesuffix
-
-  subroutine streamReadVar(streamID_dummy, varID_dummy, data_vec_dummy, nmiss)
-    integer(c_int), value :: streamID_dummy
-    integer(c_int), value :: varID_dummy
-    real(c_double), intent(inout) :: data_vec_dummy(*)
-    integer(c_int), optional, intent(inout) :: nmiss
-    integer(c_int), target :: nmiss_temp
-    type(c_ptr) :: nmiss_ptr
-    interface
-      subroutine lib_streamReadVar(streamID_dummy, varID_dummy, data_vec_dummy,&
-      & nmiss) bind(c, name = 'streamReadVar')
-        import c_double, c_int, c_ptr
-        integer(c_int), value :: streamID_dummy
-        integer(c_int), value :: varID_dummy
-        real(c_double), intent(inout) :: data_vec_dummy(*)
-        type(c_ptr), value :: nmiss
-      end subroutine lib_streamReadVar
-    end interface
-    nmiss_ptr = c_null_ptr
-    if(present(nmiss)) nmiss_ptr = c_loc(nmiss_temp)
-    call lib_streamReadVar(streamID_dummy, varID_dummy, data_vec_dummy,&
-    & nmiss_ptr)
-    if(present(nmiss)) nmiss = nmiss_temp
-  end subroutine streamReadVar
-
-  subroutine streamReadVarF(streamID_dummy, varID_dummy, data_vec_dummy, nmiss)
-    integer(c_int), value :: streamID_dummy
-    integer(c_int), value :: varID_dummy
-    real(c_float), intent(inout) :: data_vec_dummy(*)
-    integer(c_int), optional, intent(inout) :: nmiss
-    integer(c_int), target :: nmiss_temp
-    type(c_ptr) :: nmiss_ptr
-    interface
-      subroutine lib_streamReadVarF(streamID_dummy, varID_dummy,&
-      & data_vec_dummy, nmiss) bind(c, name = 'streamReadVarF')
-        import c_float, c_int, c_ptr
-        integer(c_int), value :: streamID_dummy
-        integer(c_int), value :: varID_dummy
-        real(c_float), intent(inout) :: data_vec_dummy(*)
-        type(c_ptr), value :: nmiss
-      end subroutine lib_streamReadVarF
-    end interface
-    nmiss_ptr = c_null_ptr
-    if(present(nmiss)) nmiss_ptr = c_loc(nmiss_temp)
-    call lib_streamReadVarF(streamID_dummy, varID_dummy, data_vec_dummy,&
-    & nmiss_ptr)
-    if(present(nmiss)) nmiss = nmiss_temp
-  end subroutine streamReadVarF
-
-  subroutine streamReadVarSlice(streamID_dummy, varID_dummy, levelID_dummy,&
-  & data_vec_dummy, nmiss)
-    integer(c_int), value :: streamID_dummy
-    integer(c_int), value :: varID_dummy
-    integer(c_int), value :: levelID_dummy
-    real(c_double), intent(inout) :: data_vec_dummy(*)
-    integer(c_int), optional, intent(inout) :: nmiss
-    integer(c_int), target :: nmiss_temp
-    type(c_ptr) :: nmiss_ptr
-    interface
-      subroutine lib_streamReadVarSlice(streamID_dummy, varID_dummy,&
-      & levelID_dummy, data_vec_dummy, nmiss) bind(c, name =&
-      & 'streamReadVarSlice')
-        import c_double, c_int, c_ptr
-        integer(c_int), value :: streamID_dummy
-        integer(c_int), value :: varID_dummy
-        integer(c_int), value :: levelID_dummy
-        real(c_double), intent(inout) :: data_vec_dummy(*)
-        type(c_ptr), value :: nmiss
-      end subroutine lib_streamReadVarSlice
-    end interface
-    nmiss_ptr = c_null_ptr
-    if(present(nmiss)) nmiss_ptr = c_loc(nmiss_temp)
-    call lib_streamReadVarSlice(streamID_dummy, varID_dummy, levelID_dummy,&
-    & data_vec_dummy, nmiss_ptr)
-    if(present(nmiss)) nmiss = nmiss_temp
-  end subroutine streamReadVarSlice
-
-  subroutine streamReadVarSliceF(streamID_dummy, varID_dummy, levelID_dummy,&
-  & data_vec_dummy, nmiss)
-    integer(c_int), value :: streamID_dummy
-    integer(c_int), value :: varID_dummy
-    integer(c_int), value :: levelID_dummy
-    real(c_float), intent(inout) :: data_vec_dummy(*)
-    integer(c_int), optional, intent(inout) :: nmiss
-    integer(c_int), target :: nmiss_temp
-    type(c_ptr) :: nmiss_ptr
-    interface
-      subroutine lib_streamReadVarSliceF(streamID_dummy, varID_dummy,&
-      & levelID_dummy, data_vec_dummy, nmiss) bind(c, name =&
-      & 'streamReadVarSliceF')
-        import c_float, c_int, c_ptr
-        integer(c_int), value :: streamID_dummy
-        integer(c_int), value :: varID_dummy
-        integer(c_int), value :: levelID_dummy
-        real(c_float), intent(inout) :: data_vec_dummy(*)
-        type(c_ptr), value :: nmiss
-      end subroutine lib_streamReadVarSliceF
-    end interface
-    nmiss_ptr = c_null_ptr
-    if(present(nmiss)) nmiss_ptr = c_loc(nmiss_temp)
-    call lib_streamReadVarSliceF(streamID_dummy, varID_dummy, levelID_dummy,&
-    & data_vec_dummy, nmiss_ptr)
-    if(present(nmiss)) nmiss = nmiss_temp
-  end subroutine streamReadVarSliceF
-
-  subroutine streamInqRecord(streamID_dummy, varID, levelID)
-    integer(c_int), value :: streamID_dummy
-    integer(c_int), optional, intent(inout) :: varID
-    integer(c_int), optional, intent(inout) :: levelID
-    integer(c_int), target :: varID_temp
-    type(c_ptr) :: varID_ptr
-    integer(c_int), target :: levelID_temp
-    type(c_ptr) :: levelID_ptr
-    interface
-      subroutine lib_streamInqRecord(streamID_dummy, varID, levelID) bind(c,&
-      & name = 'streamInqRecord')
-        import c_int, c_ptr
-        integer(c_int), value :: streamID_dummy
-        type(c_ptr), value :: varID
-        type(c_ptr), value :: levelID
-      end subroutine lib_streamInqRecord
-    end interface
-    varID_ptr = c_null_ptr
-    if(present(varID)) varID_ptr = c_loc(varID_temp)
-    levelID_ptr = c_null_ptr
-    if(present(levelID)) levelID_ptr = c_loc(levelID_temp)
-    call lib_streamInqRecord(streamID_dummy, varID_ptr, levelID_ptr)
-    if(present(varID)) varID = varID_temp
-    if(present(levelID)) levelID = levelID_temp
-  end subroutine streamInqRecord
-
-  subroutine streamReadRecord(streamID_dummy, data_vec_dummy, nmiss)
-    integer(c_int), value :: streamID_dummy
-    real(c_double), intent(inout) :: data_vec_dummy(*)
-    integer(c_int), optional, intent(inout) :: nmiss
-    integer(c_int), target :: nmiss_temp
-    type(c_ptr) :: nmiss_ptr
-    interface
-      subroutine lib_streamReadRecord(streamID_dummy, data_vec_dummy, nmiss)&
-      & bind(c, name = 'streamReadRecord')
-        import c_double, c_int, c_ptr
-        integer(c_int), value :: streamID_dummy
-        real(c_double), intent(inout) :: data_vec_dummy(*)
-        type(c_ptr), value :: nmiss
-      end subroutine lib_streamReadRecord
-    end interface
-    nmiss_ptr = c_null_ptr
-    if(present(nmiss)) nmiss_ptr = c_loc(nmiss_temp)
-    call lib_streamReadRecord(streamID_dummy, data_vec_dummy, nmiss_ptr)
-    if(present(nmiss)) nmiss = nmiss_temp
-  end subroutine streamReadRecord
 
   function cdiIterator_new(path_dummy) result(result)
     type(t_CdiIterator) :: result
@@ -3721,116 +3638,103 @@ contains
     call lib_cdiGribIterator_delete(me_dummy%ptr)
   end subroutine cdiGribIterator_delete
 
-  function cdiGribIterator_getLong(me_dummy, key_dummy, value) result(result)
+  function cdiGribIterator_getLong(me_dummy, key_dummy, value_dummy)&
+  & result(result)
     integer(c_int) :: result
     type(t_CdiGribIterator), intent(in) :: me_dummy
     character(kind = c_char, len = *), intent(in) :: key_dummy
-    integer(c_long), optional, intent(inout) :: value
+    integer(c_long), intent(inout) :: value_dummy
     character(kind = c_char) :: key_temp(len(key_dummy) + 1)
     integer :: key_i
-    integer(c_long), target :: value_temp
-    type(c_ptr) :: value_ptr
     interface
-      function lib_cdiGribIterator_getLong(me_dummy, key_dummy, value) bind(c,&
-      & name = 'cdiGribIterator_getLong') result(c_result)
-        import c_char, c_int, c_ptr
+      function lib_cdiGribIterator_getLong(me_dummy, key_dummy, value_dummy)&
+      & bind(c, name = 'cdiGribIterator_getLong') result(c_result)
+        import c_char, c_int, c_long, c_ptr
         integer(c_int) :: c_result
         type(c_ptr), value :: me_dummy
         character(kind = c_char) :: key_dummy(*)
-        type(c_ptr), value :: value
+        integer(c_long), intent(inout) :: value_dummy
       end function lib_cdiGribIterator_getLong
     end interface
     do key_i = 1, len(key_dummy)
       key_temp(key_i) = key_dummy(key_i:key_i)
     end do
     key_temp(len(key_dummy) + 1) = c_null_char
-    value_ptr = c_null_ptr
-    if(present(value)) value_ptr = c_loc(value_temp)
-    result = lib_cdiGribIterator_getLong(me_dummy%ptr, key_temp, value_ptr)
-    if(present(value)) value = value_temp
+    result = lib_cdiGribIterator_getLong(me_dummy%ptr, key_temp, value_dummy)
   end function cdiGribIterator_getLong
 
-  function cdiGribIterator_getDouble(me_dummy, key_dummy, value) result(result)
+  function cdiGribIterator_getDouble(me_dummy, key_dummy, value_dummy)&
+  & result(result)
     integer(c_int) :: result
     type(t_CdiGribIterator), intent(in) :: me_dummy
     character(kind = c_char, len = *), intent(in) :: key_dummy
-    real(c_double), optional, intent(inout) :: value
+    real(c_double), intent(inout) :: value_dummy
     character(kind = c_char) :: key_temp(len(key_dummy) + 1)
     integer :: key_i
-    real(c_double), target :: value_temp
-    type(c_ptr) :: value_ptr
     interface
-      function lib_cdiGribIterator_getDouble(me_dummy, key_dummy, value)&
+      function lib_cdiGribIterator_getDouble(me_dummy, key_dummy, value_dummy)&
       & bind(c, name = 'cdiGribIterator_getDouble') result(c_result)
-        import c_char, c_int, c_ptr
+        import c_char, c_double, c_int, c_ptr
         integer(c_int) :: c_result
         type(c_ptr), value :: me_dummy
         character(kind = c_char) :: key_dummy(*)
-        type(c_ptr), value :: value
+        real(c_double), intent(inout) :: value_dummy
       end function lib_cdiGribIterator_getDouble
     end interface
     do key_i = 1, len(key_dummy)
       key_temp(key_i) = key_dummy(key_i:key_i)
     end do
     key_temp(len(key_dummy) + 1) = c_null_char
-    value_ptr = c_null_ptr
-    if(present(value)) value_ptr = c_loc(value_temp)
-    result = lib_cdiGribIterator_getDouble(me_dummy%ptr, key_temp, value_ptr)
-    if(present(value)) value = value_temp
+    result = lib_cdiGribIterator_getDouble(me_dummy%ptr, key_temp, value_dummy)
   end function cdiGribIterator_getDouble
 
-  function cdiGribIterator_getLength(me_dummy, key_dummy, value) result(result)
+  function cdiGribIterator_getLength(me_dummy, key_dummy, value_dummy)&
+  & result(result)
     integer(c_int) :: result
     type(t_CdiGribIterator), intent(in) :: me_dummy
     character(kind = c_char, len = *), intent(in) :: key_dummy
-    integer(c_size_t), optional, intent(inout) :: value
+    integer(c_size_t), intent(inout) :: value_dummy
     character(kind = c_char) :: key_temp(len(key_dummy) + 1)
     integer :: key_i
-    integer(c_size_t), target :: value_temp
-    type(c_ptr) :: value_ptr
     interface
-      function lib_cdiGribIterator_getLength(me_dummy, key_dummy, value)&
+      function lib_cdiGribIterator_getLength(me_dummy, key_dummy, value_dummy)&
       & bind(c, name = 'cdiGribIterator_getLength') result(c_result)
-        import c_char, c_int, c_ptr
+        import c_char, c_int, c_ptr, c_size_t
         integer(c_int) :: c_result
         type(c_ptr), value :: me_dummy
         character(kind = c_char) :: key_dummy(*)
-        type(c_ptr), value :: value
+        integer(c_size_t), intent(inout) :: value_dummy
       end function lib_cdiGribIterator_getLength
     end interface
     do key_i = 1, len(key_dummy)
       key_temp(key_i) = key_dummy(key_i:key_i)
     end do
     key_temp(len(key_dummy) + 1) = c_null_char
-    value_ptr = c_null_ptr
-    if(present(value)) value_ptr = c_loc(value_temp)
-    result = lib_cdiGribIterator_getLength(me_dummy%ptr, key_temp, value_ptr)
-    if(present(value)) value = value_temp
+    result = lib_cdiGribIterator_getLength(me_dummy%ptr, key_temp, value_dummy)
   end function cdiGribIterator_getLength
 
-  function cdiGribIterator_getString(me_dummy, key_dummy, value_dummy, length)&
-  & result(result)
+  function cdiGribIterator_getString(me_dummy, key_dummy, value_dummy,&
+  & length_dummy) result(result)
     integer(c_int) :: result
     type(t_CdiGribIterator), intent(in) :: me_dummy
     character(kind = c_char, len = *), intent(in) :: key_dummy
     character(kind = c_char, len = *), intent(inout) :: value_dummy
-    integer(c_size_t), optional, intent(inout) :: length
+    integer(c_size_t), intent(inout) :: length_dummy
     character(kind = c_char) :: key_temp(len(key_dummy) + 1)
     integer :: key_i
     character(kind = c_char) :: value_temp(len(value_dummy))
     integer :: value_i
     logical :: value_padding = .true.
-    integer(c_size_t), target :: length_temp
-    type(c_ptr) :: length_ptr
     interface
       function lib_cdiGribIterator_getString(me_dummy, key_dummy, value_dummy,&
-      & length) bind(c, name = 'cdiGribIterator_getString') result(c_result)
-        import c_char, c_int, c_ptr
+      & length_dummy) bind(c, name = 'cdiGribIterator_getString')&
+      & result(c_result)
+        import c_char, c_int, c_ptr, c_size_t
         integer(c_int) :: c_result
         type(c_ptr), value :: me_dummy
         character(kind = c_char) :: key_dummy(*)
         character(kind = c_char) :: value_dummy(*)
-        type(c_ptr), value :: length
+        integer(c_size_t), intent(inout) :: length_dummy
       end function lib_cdiGribIterator_getString
     end interface
     do key_i = 1, len(key_dummy)
@@ -3845,10 +3749,8 @@ contains
         value_temp(value_i) = value_dummy(value_i:value_i)
       end if
     end do
-    length_ptr = c_null_ptr
-    if(present(length)) length_ptr = c_loc(length_temp)
     result = lib_cdiGribIterator_getString(me_dummy%ptr, key_temp, value_temp,&
-    & length_ptr)
+    & length_dummy)
     value_padding = .false.
     do value_i = 1, len(value_dummy)
       if(value_temp(value_i) == c_null_char) value_padding = .true.
@@ -3858,114 +3760,89 @@ contains
         value_dummy(value_i:value_i) = value_temp(value_i)
       end if
     end do
-    if(present(length)) length = length_temp
   end function cdiGribIterator_getString
 
-  function cdiGribIterator_getSize(me_dummy, key_dummy, value) result(result)
+  function cdiGribIterator_getSize(me_dummy, key_dummy, value_dummy)&
+  & result(result)
     integer(c_int) :: result
     type(t_CdiGribIterator), intent(in) :: me_dummy
     character(kind = c_char, len = *), intent(in) :: key_dummy
-    integer(c_size_t), optional, intent(inout) :: value
+    integer(c_size_t), intent(inout) :: value_dummy
     character(kind = c_char) :: key_temp(len(key_dummy) + 1)
     integer :: key_i
-    integer(c_size_t), target :: value_temp
-    type(c_ptr) :: value_ptr
     interface
-      function lib_cdiGribIterator_getSize(me_dummy, key_dummy, value) bind(c,&
-      & name = 'cdiGribIterator_getSize') result(c_result)
-        import c_char, c_int, c_ptr
+      function lib_cdiGribIterator_getSize(me_dummy, key_dummy, value_dummy)&
+      & bind(c, name = 'cdiGribIterator_getSize') result(c_result)
+        import c_char, c_int, c_ptr, c_size_t
         integer(c_int) :: c_result
         type(c_ptr), value :: me_dummy
         character(kind = c_char) :: key_dummy(*)
-        type(c_ptr), value :: value
+        integer(c_size_t), intent(inout) :: value_dummy
       end function lib_cdiGribIterator_getSize
     end interface
     do key_i = 1, len(key_dummy)
       key_temp(key_i) = key_dummy(key_i:key_i)
     end do
     key_temp(len(key_dummy) + 1) = c_null_char
-    value_ptr = c_null_ptr
-    if(present(value)) value_ptr = c_loc(value_temp)
-    result = lib_cdiGribIterator_getSize(me_dummy%ptr, key_temp, value_ptr)
-    if(present(value)) value = value_temp
+    result = lib_cdiGribIterator_getSize(me_dummy%ptr, key_temp, value_dummy)
   end function cdiGribIterator_getSize
 
-  function cdiGribIterator_getLongArray(me_dummy, key_dummy, value, array_size)&
-  & result(result)
+  function cdiGribIterator_getLongArray(me_dummy, key_dummy, value_dummy,&
+  & array_size_dummy) result(result)
     integer(c_int) :: result
     type(t_CdiGribIterator), intent(in) :: me_dummy
     character(kind = c_char, len = *), intent(in) :: key_dummy
-    integer(c_long), optional, intent(inout) :: value
-    integer(c_size_t), optional, intent(inout) :: array_size
+    integer(c_long), intent(inout) :: value_dummy
+    integer(c_size_t), intent(inout) :: array_size_dummy
     character(kind = c_char) :: key_temp(len(key_dummy) + 1)
     integer :: key_i
-    integer(c_long), target :: value_temp
-    type(c_ptr) :: value_ptr
-    integer(c_size_t), target :: array_size_temp
-    type(c_ptr) :: array_size_ptr
     interface
-      function lib_cdiGribIterator_getLongArray(me_dummy, key_dummy, value,&
-      & array_size) bind(c, name = 'cdiGribIterator_getLongArray')&
-      & result(c_result)
-        import c_char, c_int, c_ptr
+      function lib_cdiGribIterator_getLongArray(me_dummy, key_dummy,&
+      & value_dummy, array_size_dummy) bind(c, name =&
+      & 'cdiGribIterator_getLongArray') result(c_result)
+        import c_char, c_int, c_long, c_ptr, c_size_t
         integer(c_int) :: c_result
         type(c_ptr), value :: me_dummy
         character(kind = c_char) :: key_dummy(*)
-        type(c_ptr), value :: value
-        type(c_ptr), value :: array_size
+        integer(c_long), intent(inout) :: value_dummy
+        integer(c_size_t), intent(inout) :: array_size_dummy
       end function lib_cdiGribIterator_getLongArray
     end interface
     do key_i = 1, len(key_dummy)
       key_temp(key_i) = key_dummy(key_i:key_i)
     end do
     key_temp(len(key_dummy) + 1) = c_null_char
-    value_ptr = c_null_ptr
-    if(present(value)) value_ptr = c_loc(value_temp)
-    array_size_ptr = c_null_ptr
-    if(present(array_size)) array_size_ptr = c_loc(array_size_temp)
     result = lib_cdiGribIterator_getLongArray(me_dummy%ptr, key_temp,&
-    & value_ptr, array_size_ptr)
-    if(present(value)) value = value_temp
-    if(present(array_size)) array_size = array_size_temp
+    & value_dummy, array_size_dummy)
   end function cdiGribIterator_getLongArray
 
-  function cdiGribIterator_getDoubleArray(me_dummy, key_dummy, value,&
-  & array_size) result(result)
+  function cdiGribIterator_getDoubleArray(me_dummy, key_dummy, value_dummy,&
+  & array_size_dummy) result(result)
     integer(c_int) :: result
     type(t_CdiGribIterator), intent(in) :: me_dummy
     character(kind = c_char, len = *), intent(in) :: key_dummy
-    real(c_double), optional, intent(inout) :: value
-    integer(c_size_t), optional, intent(inout) :: array_size
+    real(c_double), intent(inout) :: value_dummy
+    integer(c_size_t), intent(inout) :: array_size_dummy
     character(kind = c_char) :: key_temp(len(key_dummy) + 1)
     integer :: key_i
-    real(c_double), target :: value_temp
-    type(c_ptr) :: value_ptr
-    integer(c_size_t), target :: array_size_temp
-    type(c_ptr) :: array_size_ptr
     interface
-      function lib_cdiGribIterator_getDoubleArray(me_dummy, key_dummy, value,&
-      & array_size) bind(c, name = 'cdiGribIterator_getDoubleArray')&
-      & result(c_result)
-        import c_char, c_int, c_ptr
+      function lib_cdiGribIterator_getDoubleArray(me_dummy, key_dummy,&
+      & value_dummy, array_size_dummy) bind(c, name =&
+      & 'cdiGribIterator_getDoubleArray') result(c_result)
+        import c_char, c_double, c_int, c_ptr, c_size_t
         integer(c_int) :: c_result
         type(c_ptr), value :: me_dummy
         character(kind = c_char) :: key_dummy(*)
-        type(c_ptr), value :: value
-        type(c_ptr), value :: array_size
+        real(c_double), intent(inout) :: value_dummy
+        integer(c_size_t), intent(inout) :: array_size_dummy
       end function lib_cdiGribIterator_getDoubleArray
     end interface
     do key_i = 1, len(key_dummy)
       key_temp(key_i) = key_dummy(key_i:key_i)
     end do
     key_temp(len(key_dummy) + 1) = c_null_char
-    value_ptr = c_null_ptr
-    if(present(value)) value_ptr = c_loc(value_temp)
-    array_size_ptr = c_null_ptr
-    if(present(array_size)) array_size_ptr = c_loc(array_size_temp)
     result = lib_cdiGribIterator_getDoubleArray(me_dummy%ptr, key_temp,&
-    & value_ptr, array_size_ptr)
-    if(present(value)) value = value_temp
-    if(present(array_size)) array_size = array_size_temp
+    & value_dummy, array_size_dummy)
   end function cdiGribIterator_getDoubleArray
 
   function cdiGribIterator_inqEdition(me_dummy) result(result)
@@ -4113,43 +3990,6 @@ contains
       result => null()
     end if
   end function cdiGribIterator_inqStringValue
-
-  subroutine vlistInqVar(vlistID_dummy, varID_dummy, gridID, zaxisID,&
-  & tsteptype)
-    integer(c_int), value :: vlistID_dummy
-    integer(c_int), value :: varID_dummy
-    integer(c_int), optional, intent(inout) :: gridID
-    integer(c_int), optional, intent(inout) :: zaxisID
-    integer(c_int), optional, intent(inout) :: tsteptype
-    integer(c_int), target :: gridID_temp
-    type(c_ptr) :: gridID_ptr
-    integer(c_int), target :: zaxisID_temp
-    type(c_ptr) :: zaxisID_ptr
-    integer(c_int), target :: tsteptype_temp
-    type(c_ptr) :: tsteptype_ptr
-    interface
-      subroutine lib_vlistInqVar(vlistID_dummy, varID_dummy, gridID, zaxisID,&
-      & tsteptype) bind(c, name = 'vlistInqVar')
-        import c_int, c_ptr
-        integer(c_int), value :: vlistID_dummy
-        integer(c_int), value :: varID_dummy
-        type(c_ptr), value :: gridID
-        type(c_ptr), value :: zaxisID
-        type(c_ptr), value :: tsteptype
-      end subroutine lib_vlistInqVar
-    end interface
-    gridID_ptr = c_null_ptr
-    if(present(gridID)) gridID_ptr = c_loc(gridID_temp)
-    zaxisID_ptr = c_null_ptr
-    if(present(zaxisID)) zaxisID_ptr = c_loc(zaxisID_temp)
-    tsteptype_ptr = c_null_ptr
-    if(present(tsteptype)) tsteptype_ptr = c_loc(tsteptype_temp)
-    call lib_vlistInqVar(vlistID_dummy, varID_dummy, gridID_ptr, zaxisID_ptr,&
-    & tsteptype_ptr)
-    if(present(gridID)) gridID = gridID_temp
-    if(present(zaxisID)) zaxisID = zaxisID_temp
-    if(present(tsteptype)) tsteptype = tsteptype_temp
-  end subroutine vlistInqVar
 
   subroutine vlistDefVarName(vlistID_dummy, varID_dummy, name_dummy)
     integer(c_int), value :: vlistID_dummy
@@ -4470,46 +4310,6 @@ contains
     end do
   end subroutine vlistInqVarExtra
 
-  function vlistInqVarEnsemble(vlistID_dummy, varID_dummy, ensID, ensCount,&
-  & forecast_type) result(result)
-    integer(c_int) :: result
-    integer(c_int), value :: vlistID_dummy
-    integer(c_int), value :: varID_dummy
-    integer(c_int), optional, intent(inout) :: ensID
-    integer(c_int), optional, intent(inout) :: ensCount
-    integer(c_int), optional, intent(inout) :: forecast_type
-    integer(c_int), target :: ensID_temp
-    type(c_ptr) :: ensID_ptr
-    integer(c_int), target :: ensCount_temp
-    type(c_ptr) :: ensCount_ptr
-    integer(c_int), target :: forecast_type_temp
-    type(c_ptr) :: forecast_type_ptr
-    interface
-      function lib_vlistInqVarEnsemble(vlistID_dummy, varID_dummy, ensID,&
-      & ensCount, forecast_type) bind(c, name = 'vlistInqVarEnsemble')&
-      & result(c_result)
-        import c_int, c_ptr
-        integer(c_int) :: c_result
-        integer(c_int), value :: vlistID_dummy
-        integer(c_int), value :: varID_dummy
-        type(c_ptr), value :: ensID
-        type(c_ptr), value :: ensCount
-        type(c_ptr), value :: forecast_type
-      end function lib_vlistInqVarEnsemble
-    end interface
-    ensID_ptr = c_null_ptr
-    if(present(ensID)) ensID_ptr = c_loc(ensID_temp)
-    ensCount_ptr = c_null_ptr
-    if(present(ensCount)) ensCount_ptr = c_loc(ensCount_temp)
-    forecast_type_ptr = c_null_ptr
-    if(present(forecast_type)) forecast_type_ptr = c_loc(forecast_type_temp)
-    result = lib_vlistInqVarEnsemble(vlistID_dummy, varID_dummy, ensID_ptr,&
-    & ensCount_ptr, forecast_type_ptr)
-    if(present(ensID)) ensID = ensID_temp
-    if(present(ensCount)) ensCount = ensCount_temp
-    if(present(forecast_type)) forecast_type = forecast_type_temp
-  end function vlistInqVarEnsemble
-
   subroutine cdiDefAdditionalKey(string_dummy)
     character(kind = c_char, len = *), intent(in) :: string_dummy
     character(kind = c_char) :: string_temp(len(string_dummy) + 1)
@@ -4655,56 +4455,30 @@ contains
     result = lib_vlistInqVarIntKey(vlistID_dummy, varID_dummy, name_temp)
   end function vlistInqVarIntKey
 
-  function vlistInqNatts(vlistID_dummy, varID_dummy, nattsp) result(result)
-    integer(c_int) :: result
-    integer(c_int), value :: vlistID_dummy
-    integer(c_int), value :: varID_dummy
-    integer(c_int), optional, intent(inout) :: nattsp
-    integer(c_int), target :: nattsp_temp
-    type(c_ptr) :: nattsp_ptr
-    interface
-      function lib_vlistInqNatts(vlistID_dummy, varID_dummy, nattsp) bind(c,&
-      & name = 'vlistInqNatts') result(c_result)
-        import c_int, c_ptr
-        integer(c_int) :: c_result
-        integer(c_int), value :: vlistID_dummy
-        integer(c_int), value :: varID_dummy
-        type(c_ptr), value :: nattsp
-      end function lib_vlistInqNatts
-    end interface
-    nattsp_ptr = c_null_ptr
-    if(present(nattsp)) nattsp_ptr = c_loc(nattsp_temp)
-    result = lib_vlistInqNatts(vlistID_dummy, varID_dummy, nattsp_ptr)
-    if(present(nattsp)) nattsp = nattsp_temp
-  end function vlistInqNatts
-
   function vlistInqAtt(vlistID_dummy, varID_dummy, attrnum_dummy, name_dummy,&
-  & typep, lenp) result(result)
+  & typep_dummy, lenp_dummy) result(result)
     integer(c_int) :: result
     integer(c_int), value :: vlistID_dummy
     integer(c_int), value :: varID_dummy
     integer(c_int), value :: attrnum_dummy
     character(kind = c_char, len = *), intent(inout) :: name_dummy
-    integer(c_int), optional, intent(inout) :: typep
-    integer(c_int), optional, intent(inout) :: lenp
+    integer(c_int), intent(inout) :: typep_dummy
+    integer(c_int), intent(inout) :: lenp_dummy
     character(kind = c_char) :: name_temp(len(name_dummy))
     integer :: name_i
     logical :: name_padding = .true.
-    integer(c_int), target :: typep_temp
-    type(c_ptr) :: typep_ptr
-    integer(c_int), target :: lenp_temp
-    type(c_ptr) :: lenp_ptr
     interface
       function lib_vlistInqAtt(vlistID_dummy, varID_dummy, attrnum_dummy,&
-      & name_dummy, typep, lenp) bind(c, name = 'vlistInqAtt') result(c_result)
-        import c_char, c_int, c_ptr
+      & name_dummy, typep_dummy, lenp_dummy) bind(c, name = 'vlistInqAtt')&
+      & result(c_result)
+        import c_char, c_int
         integer(c_int) :: c_result
         integer(c_int), value :: vlistID_dummy
         integer(c_int), value :: varID_dummy
         integer(c_int), value :: attrnum_dummy
         character(kind = c_char) :: name_dummy(*)
-        type(c_ptr), value :: typep
-        type(c_ptr), value :: lenp
+        integer(c_int), intent(inout) :: typep_dummy
+        integer(c_int), intent(inout) :: lenp_dummy
       end function lib_vlistInqAtt
     end interface
     do name_i = len(name_dummy), 1, -1
@@ -4715,12 +4489,8 @@ contains
         name_temp(name_i) = name_dummy(name_i:name_i)
       end if
     end do
-    typep_ptr = c_null_ptr
-    if(present(typep)) typep_ptr = c_loc(typep_temp)
-    lenp_ptr = c_null_ptr
-    if(present(lenp)) lenp_ptr = c_loc(lenp_temp)
     result = lib_vlistInqAtt(vlistID_dummy, varID_dummy, attrnum_dummy,&
-    & name_temp, typep_ptr, lenp_ptr)
+    & name_temp, typep_dummy, lenp_dummy)
     name_padding = .false.
     do name_i = 1, len(name_dummy)
       if(name_temp(name_i) == c_null_char) name_padding = .true.
@@ -4730,8 +4500,6 @@ contains
         name_dummy(name_i:name_i) = name_temp(name_i)
       end if
     end do
-    if(present(typep)) typep = typep_temp
-    if(present(lenp)) lenp = lenp_temp
   end function vlistInqAtt
 
   function vlistDelAtt(vlistID_dummy, varID_dummy, name_dummy) result(result)
@@ -5483,167 +5251,6 @@ contains
     end do
   end function gridInqReference
 
-  subroutine gridInqLCC(gridID_dummy, originLon, originLat, lonParY, lat1,&
-  & lat2, xinc, yinc, projflag, scanflag)
-    integer(c_int), value :: gridID_dummy
-    real(c_double), optional, intent(inout) :: originLon
-    real(c_double), optional, intent(inout) :: originLat
-    real(c_double), optional, intent(inout) :: lonParY
-    real(c_double), optional, intent(inout) :: lat1
-    real(c_double), optional, intent(inout) :: lat2
-    real(c_double), optional, intent(inout) :: xinc
-    real(c_double), optional, intent(inout) :: yinc
-    integer(c_int), optional, intent(inout) :: projflag
-    integer(c_int), optional, intent(inout) :: scanflag
-    real(c_double), target :: originLon_temp
-    type(c_ptr) :: originLon_ptr
-    real(c_double), target :: originLat_temp
-    type(c_ptr) :: originLat_ptr
-    real(c_double), target :: lonParY_temp
-    type(c_ptr) :: lonParY_ptr
-    real(c_double), target :: lat1_temp
-    type(c_ptr) :: lat1_ptr
-    real(c_double), target :: lat2_temp
-    type(c_ptr) :: lat2_ptr
-    real(c_double), target :: xinc_temp
-    type(c_ptr) :: xinc_ptr
-    real(c_double), target :: yinc_temp
-    type(c_ptr) :: yinc_ptr
-    integer(c_int), target :: projflag_temp
-    type(c_ptr) :: projflag_ptr
-    integer(c_int), target :: scanflag_temp
-    type(c_ptr) :: scanflag_ptr
-    interface
-      subroutine lib_gridInqLCC(gridID_dummy, originLon, originLat, lonParY,&
-      & lat1, lat2, xinc, yinc, projflag, scanflag) bind(c, name =&
-      & 'gridInqLCC')
-        import c_int, c_ptr
-        integer(c_int), value :: gridID_dummy
-        type(c_ptr), value :: originLon
-        type(c_ptr), value :: originLat
-        type(c_ptr), value :: lonParY
-        type(c_ptr), value :: lat1
-        type(c_ptr), value :: lat2
-        type(c_ptr), value :: xinc
-        type(c_ptr), value :: yinc
-        type(c_ptr), value :: projflag
-        type(c_ptr), value :: scanflag
-      end subroutine lib_gridInqLCC
-    end interface
-    originLon_ptr = c_null_ptr
-    if(present(originLon)) originLon_ptr = c_loc(originLon_temp)
-    originLat_ptr = c_null_ptr
-    if(present(originLat)) originLat_ptr = c_loc(originLat_temp)
-    lonParY_ptr = c_null_ptr
-    if(present(lonParY)) lonParY_ptr = c_loc(lonParY_temp)
-    lat1_ptr = c_null_ptr
-    if(present(lat1)) lat1_ptr = c_loc(lat1_temp)
-    lat2_ptr = c_null_ptr
-    if(present(lat2)) lat2_ptr = c_loc(lat2_temp)
-    xinc_ptr = c_null_ptr
-    if(present(xinc)) xinc_ptr = c_loc(xinc_temp)
-    yinc_ptr = c_null_ptr
-    if(present(yinc)) yinc_ptr = c_loc(yinc_temp)
-    projflag_ptr = c_null_ptr
-    if(present(projflag)) projflag_ptr = c_loc(projflag_temp)
-    scanflag_ptr = c_null_ptr
-    if(present(scanflag)) scanflag_ptr = c_loc(scanflag_temp)
-    call lib_gridInqLCC(gridID_dummy, originLon_ptr, originLat_ptr,&
-    & lonParY_ptr, lat1_ptr, lat2_ptr, xinc_ptr, yinc_ptr, projflag_ptr,&
-    & scanflag_ptr)
-    if(present(originLon)) originLon = originLon_temp
-    if(present(originLat)) originLat = originLat_temp
-    if(present(lonParY)) lonParY = lonParY_temp
-    if(present(lat1)) lat1 = lat1_temp
-    if(present(lat2)) lat2 = lat2_temp
-    if(present(xinc)) xinc = xinc_temp
-    if(present(yinc)) yinc = yinc_temp
-    if(present(projflag)) projflag = projflag_temp
-    if(present(scanflag)) scanflag = scanflag_temp
-  end subroutine gridInqLCC
-
-  subroutine gridInqLcc2(gridID_dummy, earth_radius, lon_0, lat_0, lat_1,&
-  & lat_2)
-    integer(c_int), value :: gridID_dummy
-    real(c_double), optional, intent(inout) :: earth_radius
-    real(c_double), optional, intent(inout) :: lon_0
-    real(c_double), optional, intent(inout) :: lat_0
-    real(c_double), optional, intent(inout) :: lat_1
-    real(c_double), optional, intent(inout) :: lat_2
-    real(c_double), target :: earth_radius_temp
-    type(c_ptr) :: earth_radius_ptr
-    real(c_double), target :: lon_0_temp
-    type(c_ptr) :: lon_0_ptr
-    real(c_double), target :: lat_0_temp
-    type(c_ptr) :: lat_0_ptr
-    real(c_double), target :: lat_1_temp
-    type(c_ptr) :: lat_1_ptr
-    real(c_double), target :: lat_2_temp
-    type(c_ptr) :: lat_2_ptr
-    interface
-      subroutine lib_gridInqLcc2(gridID_dummy, earth_radius, lon_0, lat_0,&
-      & lat_1, lat_2) bind(c, name = 'gridInqLcc2')
-        import c_int, c_ptr
-        integer(c_int), value :: gridID_dummy
-        type(c_ptr), value :: earth_radius
-        type(c_ptr), value :: lon_0
-        type(c_ptr), value :: lat_0
-        type(c_ptr), value :: lat_1
-        type(c_ptr), value :: lat_2
-      end subroutine lib_gridInqLcc2
-    end interface
-    earth_radius_ptr = c_null_ptr
-    if(present(earth_radius)) earth_radius_ptr = c_loc(earth_radius_temp)
-    lon_0_ptr = c_null_ptr
-    if(present(lon_0)) lon_0_ptr = c_loc(lon_0_temp)
-    lat_0_ptr = c_null_ptr
-    if(present(lat_0)) lat_0_ptr = c_loc(lat_0_temp)
-    lat_1_ptr = c_null_ptr
-    if(present(lat_1)) lat_1_ptr = c_loc(lat_1_temp)
-    lat_2_ptr = c_null_ptr
-    if(present(lat_2)) lat_2_ptr = c_loc(lat_2_temp)
-    call lib_gridInqLcc2(gridID_dummy, earth_radius_ptr, lon_0_ptr, lat_0_ptr,&
-    & lat_1_ptr, lat_2_ptr)
-    if(present(earth_radius)) earth_radius = earth_radius_temp
-    if(present(lon_0)) lon_0 = lon_0_temp
-    if(present(lat_0)) lat_0 = lat_0_temp
-    if(present(lat_1)) lat_1 = lat_1_temp
-    if(present(lat_2)) lat_2 = lat_2_temp
-  end subroutine gridInqLcc2
-
-  subroutine gridInqLaea(gridID_dummy, earth_radius, lon_0, lat_0)
-    integer(c_int), value :: gridID_dummy
-    real(c_double), optional, intent(inout) :: earth_radius
-    real(c_double), optional, intent(inout) :: lon_0
-    real(c_double), optional, intent(inout) :: lat_0
-    real(c_double), target :: earth_radius_temp
-    type(c_ptr) :: earth_radius_ptr
-    real(c_double), target :: lon_0_temp
-    type(c_ptr) :: lon_0_ptr
-    real(c_double), target :: lat_0_temp
-    type(c_ptr) :: lat_0_ptr
-    interface
-      subroutine lib_gridInqLaea(gridID_dummy, earth_radius, lon_0, lat_0)&
-      & bind(c, name = 'gridInqLaea')
-        import c_int, c_ptr
-        integer(c_int), value :: gridID_dummy
-        type(c_ptr), value :: earth_radius
-        type(c_ptr), value :: lon_0
-        type(c_ptr), value :: lat_0
-      end subroutine lib_gridInqLaea
-    end interface
-    earth_radius_ptr = c_null_ptr
-    if(present(earth_radius)) earth_radius_ptr = c_loc(earth_radius_temp)
-    lon_0_ptr = c_null_ptr
-    if(present(lon_0)) lon_0_ptr = c_loc(lon_0_temp)
-    lat_0_ptr = c_null_ptr
-    if(present(lat_0)) lat_0_ptr = c_loc(lat_0_temp)
-    call lib_gridInqLaea(gridID_dummy, earth_radius_ptr, lon_0_ptr, lat_0_ptr)
-    if(present(earth_radius)) earth_radius = earth_radius_temp
-    if(present(lon_0)) lon_0 = lon_0_temp
-    if(present(lat_0)) lat_0 = lat_0_temp
-  end subroutine gridInqLaea
-
   subroutine zaxisName(zaxistype_dummy, zaxisname_dummy)
     integer(c_int), value :: zaxistype_dummy
     character(kind = c_char, len = *), intent(inout) :: zaxisname_dummy
@@ -5875,58 +5482,6 @@ contains
       end if
     end do
   end subroutine zaxisInqStdname
-
-  subroutine taxisInqVdateBounds(taxisID_dummy, vdate_lb, vdate_ub)
-    integer(c_int), value :: taxisID_dummy
-    integer(c_int), optional, intent(inout) :: vdate_lb
-    integer(c_int), optional, intent(inout) :: vdate_ub
-    integer(c_int), target :: vdate_lb_temp
-    type(c_ptr) :: vdate_lb_ptr
-    integer(c_int), target :: vdate_ub_temp
-    type(c_ptr) :: vdate_ub_ptr
-    interface
-      subroutine lib_taxisInqVdateBounds(taxisID_dummy, vdate_lb, vdate_ub)&
-      & bind(c, name = 'taxisInqVdateBounds')
-        import c_int, c_ptr
-        integer(c_int), value :: taxisID_dummy
-        type(c_ptr), value :: vdate_lb
-        type(c_ptr), value :: vdate_ub
-      end subroutine lib_taxisInqVdateBounds
-    end interface
-    vdate_lb_ptr = c_null_ptr
-    if(present(vdate_lb)) vdate_lb_ptr = c_loc(vdate_lb_temp)
-    vdate_ub_ptr = c_null_ptr
-    if(present(vdate_ub)) vdate_ub_ptr = c_loc(vdate_ub_temp)
-    call lib_taxisInqVdateBounds(taxisID_dummy, vdate_lb_ptr, vdate_ub_ptr)
-    if(present(vdate_lb)) vdate_lb = vdate_lb_temp
-    if(present(vdate_ub)) vdate_ub = vdate_ub_temp
-  end subroutine taxisInqVdateBounds
-
-  subroutine taxisInqVtimeBounds(taxisID_dummy, vtime_lb, vtime_ub)
-    integer(c_int), value :: taxisID_dummy
-    integer(c_int), optional, intent(inout) :: vtime_lb
-    integer(c_int), optional, intent(inout) :: vtime_ub
-    integer(c_int), target :: vtime_lb_temp
-    type(c_ptr) :: vtime_lb_ptr
-    integer(c_int), target :: vtime_ub_temp
-    type(c_ptr) :: vtime_ub_ptr
-    interface
-      subroutine lib_taxisInqVtimeBounds(taxisID_dummy, vtime_lb, vtime_ub)&
-      & bind(c, name = 'taxisInqVtimeBounds')
-        import c_int, c_ptr
-        integer(c_int), value :: taxisID_dummy
-        type(c_ptr), value :: vtime_lb
-        type(c_ptr), value :: vtime_ub
-      end subroutine lib_taxisInqVtimeBounds
-    end interface
-    vtime_lb_ptr = c_null_ptr
-    if(present(vtime_lb)) vtime_lb_ptr = c_loc(vtime_lb_temp)
-    vtime_ub_ptr = c_null_ptr
-    if(present(vtime_ub)) vtime_ub_ptr = c_loc(vtime_ub_temp)
-    call lib_taxisInqVtimeBounds(taxisID_dummy, vtime_lb_ptr, vtime_ub_ptr)
-    if(present(vtime_lb)) vtime_lb = vtime_lb_temp
-    if(present(vtime_ub)) vtime_ub = vtime_ub_temp
-  end subroutine taxisInqVtimeBounds
 
   function tunitNamePtr(tunitID_dummy) result(result)
     character(kind = c_char), dimension(:), pointer :: result
@@ -6396,24 +5951,23 @@ contains
     end do
   end subroutine tableInqPar
 
-  function tableInqParCode(tableID_dummy, name_dummy, code) result(result)
+  function tableInqParCode(tableID_dummy, name_dummy, code_dummy)&
+  & result(result)
     integer(c_int) :: result
     integer(c_int), value :: tableID_dummy
     character(kind = c_char, len = *), intent(inout) :: name_dummy
-    integer(c_int), optional, intent(inout) :: code
+    integer(c_int), intent(inout) :: code_dummy
     character(kind = c_char) :: name_temp(len(name_dummy))
     integer :: name_i
     logical :: name_padding = .true.
-    integer(c_int), target :: code_temp
-    type(c_ptr) :: code_ptr
     interface
-      function lib_tableInqParCode(tableID_dummy, name_dummy, code) bind(c,&
-      & name = 'tableInqParCode') result(c_result)
-        import c_char, c_int, c_ptr
+      function lib_tableInqParCode(tableID_dummy, name_dummy, code_dummy)&
+      & bind(c, name = 'tableInqParCode') result(c_result)
+        import c_char, c_int
         integer(c_int) :: c_result
         integer(c_int), value :: tableID_dummy
         character(kind = c_char) :: name_dummy(*)
-        type(c_ptr), value :: code
+        integer(c_int), intent(inout) :: code_dummy
       end function lib_tableInqParCode
     end interface
     do name_i = len(name_dummy), 1, -1
@@ -6424,9 +5978,7 @@ contains
         name_temp(name_i) = name_dummy(name_i:name_i)
       end if
     end do
-    code_ptr = c_null_ptr
-    if(present(code)) code_ptr = c_loc(code_temp)
-    result = lib_tableInqParCode(tableID_dummy, name_temp, code_ptr)
+    result = lib_tableInqParCode(tableID_dummy, name_temp, code_dummy)
     name_padding = .false.
     do name_i = 1, len(name_dummy)
       if(name_temp(name_i) == c_null_char) name_padding = .true.
@@ -6436,7 +5988,6 @@ contains
         name_dummy(name_i:name_i) = name_temp(name_i)
       end if
     end do
-    if(present(code)) code = code_temp
   end function tableInqParCode
 
   function tableInqParName(tableID_dummy, code_dummy, name_dummy)&
@@ -6681,39 +6232,5 @@ contains
       end if
     end do
   end subroutine streamInqHistoryString
-
-  subroutine gribapiLibraryVersion(major_version, minor_version,&
-  & revision_version)
-    integer(c_int), optional, intent(inout) :: major_version
-    integer(c_int), optional, intent(inout) :: minor_version
-    integer(c_int), optional, intent(inout) :: revision_version
-    integer(c_int), target :: major_version_temp
-    type(c_ptr) :: major_version_ptr
-    integer(c_int), target :: minor_version_temp
-    type(c_ptr) :: minor_version_ptr
-    integer(c_int), target :: revision_version_temp
-    type(c_ptr) :: revision_version_ptr
-    interface
-      subroutine lib_gribapiLibraryVersion(major_version, minor_version,&
-      & revision_version) bind(c, name = 'gribapiLibraryVersion')
-        import c_ptr
-        type(c_ptr), value :: major_version
-        type(c_ptr), value :: minor_version
-        type(c_ptr), value :: revision_version
-      end subroutine lib_gribapiLibraryVersion
-    end interface
-    major_version_ptr = c_null_ptr
-    if(present(major_version)) major_version_ptr = c_loc(major_version_temp)
-    minor_version_ptr = c_null_ptr
-    if(present(minor_version)) minor_version_ptr = c_loc(minor_version_temp)
-    revision_version_ptr = c_null_ptr
-    if(present(revision_version)) revision_version_ptr =&
-    & c_loc(revision_version_temp)
-    call lib_gribapiLibraryVersion(major_version_ptr, minor_version_ptr,&
-    & revision_version_ptr)
-    if(present(major_version)) major_version = major_version_temp
-    if(present(minor_version)) minor_version = minor_version_temp
-    if(present(revision_version)) revision_version = revision_version_temp
-  end subroutine gribapiLibraryVersion
 
 end module mo_cdi

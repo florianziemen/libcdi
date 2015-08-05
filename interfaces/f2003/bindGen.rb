@@ -218,10 +218,13 @@ $argumentTemplates = [
 		:passAs => 'integer(c_<type>), intent(in) :: <name>_dummy(<lineSize>, <lineCount>)',
 		:postcallStatements => ""
 	},
-	#Pointer arguments. These match both pointers and arrays, so they must appear after the more special array templates.
-	#Most of these are wrapped by optional arguments which have to be named in calling code, which is why we don't use the _dummy suffix for them.
+	#Optional pointer arguments. These match both pointers and arrays,
+	#so they must appear after the more special array templates.  Most
+	#of these are wrapped by optional arguments which have to be named
+	#in calling code, which is why we don't use the _dummy suffix for
+	#them.
 	{	#<integerTypes>*
-		:regex => '^\s*(?<type><integerTypes>)\s*\*\s*(?<name>\w+)\s*$',
+		:regex => '^\s*(?<type><integerTypes>)\s*\*\s*(?<name>\w+_optional)\s*$',
 		:placeholders => %w[name type],
 		:dummyName => '<name>',
 		:acceptAs => 'integer(c_<type>), optional, intent(inout) :: <name>',
@@ -231,7 +234,7 @@ $argumentTemplates = [
 		:passAs => 'type(c_ptr), value :: <name>',
 		:postcallStatements => "if(present(<name>)) <name> = <name>_temp"
 	}, {	#<floatTypes>*
-		:regex => '^\s*(?<type><floatTypes>)\s*\*\s*(?<name>\w+)\s*$',
+		:regex => '^\s*(?<type><floatTypes>)\s*\*\s*(?<name>\w+_optional)\s*$',
 		:placeholders => %w[name type],
 		:dummyName => '<name>',
 		:acceptAs => 'real(c_<type>), optional, intent(inout) :: <name>',
@@ -241,15 +244,48 @@ $argumentTemplates = [
 		:passAs => 'type(c_ptr), value :: <name>',
 		:postcallStatements => "if(present(<name>)) <name> = <name>_temp"
 	}, {	#unsigned char (*<name>)[<size>]
-		:regex => '^\s*unsigned\s+char\s*\(\s*\*\s*(?<name>\w+)\s*\)\s*\[\s*(?<size>[^\]]+)\s*\]\s*$',
+		:regex => '^\s*unsigned\s+char\s*\(\s*\*\s*(?<name>\w+_optional)\s*\)\s*\[\s*(?<size>[^\]]+)\s*\]\s*$',
 		:placeholders => %w[name size],
 		:dummyName => '<name>',
-		:acceptAs => 'character(kind = c_char), optional, intent(inout) :: <name>(<size>)',
-		:helperVars => "character(kind = c_char), target :: <name>_temp(<size>)\ntype(c_ptr) :: <name>_ptr",
+		:acceptAs => 'integer(kind = c_signed_char), optional, intent(inout) :: <name>(<size>)',
+		:helperVars => "integer(kind = c_signed_char), target :: <name>_temp(<size>)\ntype(c_ptr) :: <name>_ptr",
 		:precallStatements => "<name>_ptr = c_null_ptr\nif(present(<name>)) <name>_ptr = c_loc(<name>_temp)",
 		:callExpression => '<name>_ptr',
 		:passAs => 'type(c_ptr), value :: <name>',
 		:postcallStatements => "if(present(<name>)) <name> = <name>_temp"
+	},
+	#Non-optional pointer arguments. These match both pointers and
+	#arrays, so they must appear after the more special array templates.
+	{	#<integerTypes>*
+		:regex => '^\s*(?<type><integerTypes>)\s*\*\s*(?<name>\w+)\s*$',
+		:placeholders => %w[name type],
+		:dummyName => '<name>_dummy',
+		:acceptAs => 'integer(c_<type>), intent(inout) :: <name>_dummy',
+		:helperVars => "",
+		:precallStatements => "",
+		:callExpression => '<name>_dummy',
+		:passAs => 'integer(c_<type>), intent(inout) :: <name>_dummy',
+		:postcallStatements => ""
+	}, {	#<floatTypes>*
+		:regex => '^\s*(?<type><floatTypes>)\s*\*\s*(?<name>\w+)\s*$',
+		:placeholders => %w[name type],
+		:dummyName => '<name>_dummy',
+		:acceptAs => 'real(c_<type>), intent(inout) :: <name>_dummy',
+		:helperVars => "",
+		:precallStatements => "",
+		:callExpression => '<name>_dummy',
+		:passAs => 'real(c_<type>), intent(inout) :: <name>_dummy',
+		:postcallStatements => ""
+	}, {	#unsigned char (*<name>)[<size>]
+		:regex => '^\s*unsigned\s+char\s*\(\s*\*\s*(?<name>\w+)\s*\)\s*\[\s*(?<size>[^\]]+)\s*\]\s*$',
+		:placeholders => %w[name size],
+		:dummyName => '<name>_dummy',
+		:acceptAs => 'integer(kind = c_signed_char), intent(inout) :: <name>(<size>)',
+		:helperVars => "",
+		:precallStatements => "",
+		:callExpression => '<name>_dummy',
+		:passAs => 'integer(kind = c_signed_char), intent(inout) :: <name>(<size>)',
+		:postcallStatements => ""
 	},
 	#String arguments.
 	{	#char*	Unsafe buffer passing
