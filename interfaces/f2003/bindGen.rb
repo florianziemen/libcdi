@@ -106,6 +106,7 @@
 #	end subroutine fname
 
 $debug = 0
+$wrapperResultVarName = 'f_result'
 
 ####################################################################################################
 # Template definitions #############################################################################
@@ -377,7 +378,7 @@ $returnTypeTemplates = [
 		:helperVars => '',
 		:precallStatements => '',
 		:receiveAs => 'integer(c_<type>)',
-		:assignVariable => 'result',
+		:assignVariable => $wrapperResultVarName,
 		:postcallStatements => ''
 	}, {	#<floatTypes>
 		:regex => '^\s*(?<type><floatTypes>)\s*$',
@@ -387,7 +388,7 @@ $returnTypeTemplates = [
 		:helperVars => '',
 		:precallStatements => '',
 		:receiveAs => 'real(c_<type>)',
-		:assignVariable => 'result',
+		:assignVariable => $wrapperResultVarName,
 		:postcallStatements => ''
 	}, {	#char*
 		:regex => '^\s*char\s*\*\s*$',
@@ -403,11 +404,11 @@ $returnTypeTemplates = [
 		:postcallStatements => "if(c_associated(cString)) then\n" +
 		                       "\tshape(1) = int(lib_strlen(cString))\n" +
 		                       "\tcall c_f_pointer(cString, temp, shape)\n" +
-		                       "\tallocate(result(shape(1)))\n" +
-		                       "\tresult = temp\n" +
+		                       "\tallocate(#{$wrapperResultVarName}(shape(1)))\n" +
+		                       "\t#{$wrapperResultVarName} = temp\n" +
 		                       "\tcall lib_free(cString)\n" +
 		                       "else\n" +
-		                       "\tresult => null()\n" +
+		                       "\t#{$wrapperResultVarName} => null()\n" +
 		                       "end if"
 	}, {	#const char*
 		:regex => '^\s*const\s+char\s*\*\s*$',
@@ -415,12 +416,12 @@ $returnTypeTemplates = [
 		:isVoid => false,
 		:returnAs => 'character(kind = c_char), dimension(:), pointer',
 		:helperVars => "type(c_ptr) :: ptr\ninteger :: shape(1)",
-		:precallStatements => 'result => null()',
+		:precallStatements => $wrapperResultVarName + ' => null()',
 		:receiveAs => 'type(c_ptr)',
 		:assignVariable => 'ptr',
 		:postcallStatements => "if(c_associated(ptr)) then\n" +
 		                       "\tshape(1) = int(lib_strlen(ptr))\n" +
-		                       "\tcall c_f_pointer(ptr, result, shape)\n" +
+		                       "\tcall c_f_pointer(ptr, #{$wrapperResultVarName}, shape)\n" +
 		                       "end if"
 	}, {	#const int*	This returns the naked pointer because we can't know the length of the returned array within the wrapper. The user has to call c_f_pointer() himself.
 		:regex => '^\s*const\s+(?<type><integerTypes>)\s*\*\s*$',
@@ -430,7 +431,7 @@ $returnTypeTemplates = [
 		:helperVars => '',
 		:precallStatements => '',
 		:receiveAs => 'type(c_ptr)',
-		:assignVariable => 'result',
+		:assignVariable => $wrapperResultVarName,
 		:postcallStatements => ''
 	}, {	#const double*	This returns the naked pointer because we can't know the length of the returned array within the wrapper. The user has to call c_f_pointer() himself.
 		:regex => '^\s*const\s+(?<type><floatTypes>)\s*\*\s*$',
@@ -440,7 +441,7 @@ $returnTypeTemplates = [
 		:helperVars => '',
 		:precallStatements => '',
 		:receiveAs => 'type(c_ptr)',
-		:assignVariable => 'result',
+		:assignVariable => $wrapperResultVarName,
 		:postcallStatements => ''
 	},
 	#Public and opaque types.
@@ -452,7 +453,7 @@ $returnTypeTemplates = [
 		:helperVars => '',
 		:precallStatements => '',
 		:receiveAs => 'type(t_<type>)',
-		:assignVariable => 'result',
+		:assignVariable => $wrapperResultVarName,
 		:postcallStatements => ''
 	}, {	#<opaqueTypes>*
 		:regex => '^\s*(?<type><opaqueTypes>)\s*\*\s*$',
@@ -462,7 +463,7 @@ $returnTypeTemplates = [
 		:helperVars => '',
 		:precallStatements => '',
 		:receiveAs => 'type(c_ptr)',
-		:assignVariable => 'result%ptr',
+		:assignVariable => "#{$wrapperResultVarName}%ptr",
 		:postcallStatements => ''
 	}
 ]
@@ -748,11 +749,12 @@ def defineFunction(name, arguments, returnType)
 	if needWrapper
 		#Generate the wrapper function.
 		line = subprogramtype + ' ' + name + '(' + dummyArguments + ')' +
-			(returnTemplate[:isVoid] ? '' : ' result(result)')
+			(returnTemplate[:isVoid] ? '' : " result(#{$wrapperResultVarName})")
 		formatLines($definitionLines, 1, line)
 		if !returnTemplate[:isVoid]
 			formatLines($definitionLines, 2,
-									returnData.expandTemplate(:returnAs) + ' :: result')
+									returnData.expandTemplate(:returnAs) + ' :: ' +
+									$wrapperResultVarName)
 		end
 		dumpStatements(               2, argArray, :acceptAs, $definitionLines)
 		dumpStatements(               2, argArray, :helperVars, $definitionLines)
@@ -801,7 +803,7 @@ def defineFunction(name, arguments, returnType)
 		baseIndent = 1
 		line = subprogramtype + ' ' + name + '(' + dummyArguments +
 			') bind(c, name = \'' + name + '\')' +
-			(returnTemplate[:isVoid] ? '' : ' result(result)')
+			(returnTemplate[:isVoid] ? '' : " result(#{$wrapperResultVarName})")
 		formatLines($interfaceLines, baseIndent + 1, line)
 		line = importStatement(returnTemplate[:isVoid] ? '' :
 													 returnData.expandTemplate(:returnAs),
@@ -812,7 +814,8 @@ def defineFunction(name, arguments, returnType)
 		dumpStatements(baseIndent + 2, argArray, :passAs, $interfaceLines)
 		if !returnTemplate[:isVoid]
 			formatLines($interfaceLines, baseIndent + 2,
-									returnData.expandTemplate(:returnAs) + ' :: result')
+									returnData.expandTemplate(:returnAs) + ' :: ' +
+									$wrapperResultVarName)
 		end
 		formatLines($interfaceLines, baseIndent + 1, 'end ' + subprogramtype + ' ' + name)
 		formatLines($interfaceLines, 0, '')
