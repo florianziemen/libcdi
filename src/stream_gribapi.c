@@ -2,6 +2,7 @@
 #  include "config.h"
 #endif
 
+#include <limits.h>
 #include <stdio.h>
 
 #include "dmemory.h"
@@ -1036,7 +1037,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
   unsigned char *gribbuffer = NULL;
   size_t buffersize = 0;
   int fileID;
-  DateTime datetime0;
+  DateTime datetime0 = { LONG_MIN, LONG_MIN };
   // int gridID;
   int recID;
   //  int warn_numavg = TRUE;
@@ -1295,7 +1296,7 @@ int gribapiScanTimestep(stream_t * streamptr)
       int nrecs_scanned = streamptr->tsteps[0].nallrecs + streamptr->tsteps[1].nrecs*(tsID-1);    //Only used for debug output.
       int rindex = 0;
       off_t recpos = 0;
-      DateTime datetime0;
+      DateTime datetime0 = { LONG_MIN, LONG_MIN };
       grib_handle *gh = NULL;
       char varname[256];
       while ( TRUE )
