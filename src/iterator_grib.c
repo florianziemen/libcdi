@@ -22,7 +22,7 @@
 //The mode of operation depends on whether me is a NULL pointer on entry:
 //If it is NULL, a new object is allocated and constructed, which is returned if construction is successful.
 //If a non-NULL pointer is passed in, the object is destructed and NULL is returned. In this case, the other arguments are ignored.
-static CdiGribIterator* cdiGribIterator_condestruct(CdiGribIterator* me, const char* path, int filetype)
+static CdiGribIterator *cdiGribIterator_condestruct(CdiGribIterator *me, const char *path, int filetype)
 {
   #define super() (&me->super)
   if(me) goto destruct;
@@ -58,17 +58,17 @@ success:
   #undef super
 }
 
-CdiIterator* cdiGribIterator_new(const char* path, int filetype)
+CdiIterator *cdiGribIterator_new(const char *path, int filetype)
 {
   return &cdiGribIterator_condestruct(NULL, path, filetype)->super;
 }
 
-CdiGribIterator* cdiGribIterator_makeClone(CdiIterator* super)
+CdiGribIterator *cdiGribIterator_makeClone(CdiIterator *super)
 {
-  CdiGribIterator* me = (CdiGribIterator*)super;
+  CdiGribIterator *me = (CdiGribIterator*)super;
 
   //Allocate memory and copy data. (operations that may fail)
-  CdiGribIterator* result = xmalloc(sizeof(*result));
+  CdiGribIterator *result = xmalloc(sizeof(*result));
   if(!result) goto fail;
   *result = (CdiGribIterator)
     {
@@ -116,23 +116,23 @@ fail:
   return NULL;
 }
 
-char* cdiGribIterator_serialize(CdiIterator* super)
+char *cdiGribIterator_serialize(CdiIterator *super)
 {
-  CdiGribIterator* me = (CdiGribIterator*)super;
+  CdiGribIterator *me = (CdiGribIterator*)super;
 
-  const char* path = cdiInputFile_getPath(me->file);
-  char* escapedPath = cdiEscapeSpaces(path);
-  char* result = xmalloc(strlen(escapedPath) + 3 * sizeof(int) * CHAR_BIT/8);
+  const char *path = cdiInputFile_getPath(me->file);
+  char *escapedPath = cdiEscapeSpaces(path);
+  char *result = xmalloc(strlen(escapedPath) + 3 * sizeof(int) * CHAR_BIT/8);
   sprintf(result, "%s %zu", escapedPath, me->fileOffset);
   free(escapedPath);
   return result;
 }
 
 
-CdiGribIterator* cdiGribIterator_deserialize(const char* description)
+CdiGribIterator *cdiGribIterator_deserialize(const char *description)
 {
-  char* path;
-  CdiGribIterator* me = xmalloc(sizeof(*me));
+  char *path;
+  CdiGribIterator *me = xmalloc(sizeof(*me));
   if(!me) goto fail;
 
   description = baseIter_constructFromString(&me->super, description);
@@ -146,7 +146,7 @@ CdiGribIterator* cdiGribIterator_deserialize(const char* description)
   if(!me->file) goto destructSuper;
 
   {
-    const char* savedStart = description;
+    const char *savedStart = description;
     long long decodedOffset = strtoll(description, (char**)&description, 0);    //The cast is a workaround for the wrong signature of strtoll() (it should have been `long long strtoll(const char*, const char**, int)`, not `long long strtoll(const char*, char**, int)`.
     me->fileOffset = (off_t)decodedOffset;
     if(savedStart == description) goto closeFile;
@@ -171,7 +171,7 @@ fail:
   return NULL;
 }
 
-static void cdiGribIterator_ensureBuffer(CdiGribIterator* me, size_t requiredSize)
+static void cdiGribIterator_ensureBuffer(CdiGribIterator *me, size_t requiredSize)
 {
   if(me->bufferSize < requiredSize)
     {
@@ -193,9 +193,9 @@ static bool isGrib1DualLevel(int levelType)
     }
 }
 
-static const unsigned char* positionOfGribMarker(const unsigned char* data, size_t size)
+static const unsigned char *positionOfGribMarker(const unsigned char *data, size_t size)
 {
-  for(const unsigned char* currentPosition = data, *end = data + size; currentPosition < end; currentPosition++)
+  for(const unsigned char *currentPosition = data, *end = data + size; currentPosition < end; currentPosition++)
     {
       currentPosition = memchr(currentPosition, 'G', size - (size_t)(currentPosition - data) - 3);      //-3 to ensure that we don't overrun the buffer during the strncmp() call.
       if(!currentPosition) return NULL;
@@ -206,7 +206,7 @@ static const unsigned char* positionOfGribMarker(const unsigned char* data, size
 
 //This clobbers the contents of the gribBuffer!
 //Returns the file offset of the next 'GRIB' marker.
-static ssize_t scanToGribMarker(CdiGribIterator* me)
+static ssize_t scanToGribMarker(CdiGribIterator *me)
 {
   cdiGribIterator_ensureBuffer(me, 8*1024);
   const size_t kMaxScanSize = 16*1024*1024;
@@ -219,7 +219,7 @@ static ssize_t scanToGribMarker(CdiGribIterator* me)
       int status = cdiInputFile_read(me->file, me->fileOffset + (off_t)scannedBytes, scanSize, &scanSize, me->gribBuffer);
       if(status != CDI_NOERR && status != CDI_EEOF) return status;
 
-      const unsigned char* startPosition = positionOfGribMarker(me->gribBuffer, scanSize);
+      const unsigned char *startPosition = positionOfGribMarker(me->gribBuffer, scanSize);
       if(startPosition)
         {
           return (ssize_t)(me->fileOffset + (off_t)scannedBytes + (off_t)(startPosition - me->gribBuffer));
@@ -233,22 +233,22 @@ static ssize_t scanToGribMarker(CdiGribIterator* me)
   return -1;
 }
 
-static unsigned decode24(void* beData)
+static unsigned decode24(void *beData)
 {
-  unsigned char* bytes = beData;
+  unsigned char *bytes = beData;
   return ((unsigned)bytes[0] << 16) + ((unsigned)bytes[1] << 8) + (unsigned)bytes[2];
 }
 
-static uint64_t decode64(void* beData)
+static uint64_t decode64(void *beData)
 {
-  unsigned char* bytes = beData;
+  unsigned char *bytes = beData;
   uint64_t result = 0;
   for(size_t i = 0; i < 8; i++) result = (result << 8) + bytes[i];
   return result;
 }
 
 //Determine the size of the GRIB record that begins at the given file offset.
-static int getRecordSize(CdiGribIterator* me, off_t gribFileOffset, size_t* outRecordSize)
+static int getRecordSize(CdiGribIterator *me, off_t gribFileOffset, size_t *outRecordSize)
 {
   char buffer[16];
   size_t readSize;
@@ -280,9 +280,9 @@ static int getRecordSize(CdiGribIterator* me, off_t gribFileOffset, size_t* outR
 }
 
 #if 0
-static void hexdump(void* data, size_t size)
+static void hexdump(void *data, size_t size)
 {
-  unsigned char* charData = data;
+  unsigned char *charData = data;
   for(size_t offset = 0; offset < size; )
     {
       printf("%016zx:", offset);
@@ -299,7 +299,7 @@ static void hexdump(void* data, size_t size)
 
 //Read a record into memory and wrap it in a grib_handle.
 //XXX: I have omitted checking for szip compression as it is done in grbReadVarDP() & friends since that appears to be a non-standard extension of the GRIB1 standard: bit 1 in octet 14 of the binary data section which is used to signal szip compressio is defined to be reserved in the standard. As such, it seems prudent not to support this and to encourage people with such szip compressed files to switch to the GRIB2/JPEG2000 format. However, in the case that this reasoning is wrong, this function is probably the place to add the check for zsip compression.
-static int readMessage(CdiGribIterator* me)
+static int readMessage(CdiGribIterator *me)
 {
   //Destroy the old grib_handle.
   if(me->gribHandle) grib_handle_delete(me->gribHandle), me->gribHandle = NULL;
@@ -327,9 +327,9 @@ fail:
   return result;
 }
 
-int cdiGribIterator_nextField(CdiIterator* super)
+int cdiGribIterator_nextField(CdiIterator *super)
 {
-  CdiGribIterator* me = (CdiGribIterator*)super;
+  CdiGribIterator *me = (CdiGribIterator*)super;
 
   if(super->gridId != CDI_UNDEFID) gridDestroy(super->gridId), super->gridId = CDI_UNDEFID;
 
@@ -348,15 +348,15 @@ int cdiGribIterator_nextField(CdiIterator* super)
   return CDI_NOERR;
 }
 
-char* cdiGribIterator_inqTime(CdiIterator* super, bool getEndTime)
+char *cdiGribIterator_inqTime(CdiIterator *super, bool getEndTime)
 {
-  CdiGribIterator* me = (CdiGribIterator*)super;
+  CdiGribIterator *me = (CdiGribIterator*)super;
   return gribMakeTimeString(me->gribHandle, getEndTime);
 }
 
-int cdiGribIterator_levelType(CdiIterator* super, int levelSelector, char** outName, char** outLongName, char** outStdName, char** outUnit)
+int cdiGribIterator_levelType(CdiIterator *super, int levelSelector, char **outName, char **outLongName, char **outStdName, char **outUnit)
 {
-  CdiGribIterator* me = (CdiGribIterator*)super;
+  CdiGribIterator *me = (CdiGribIterator*)super;
 
   //First determine the zaxis type corresponding to the given level.
   int zaxisType = ZAXIS_GENERIC;
@@ -373,7 +373,7 @@ int cdiGribIterator_levelType(CdiIterator* super, int levelSelector, char** outN
     }
 
   //Then lookup the requested names.
-  const char* name, *longName, *stdName, *unit;
+  const char *name, *longName, *stdName, *unit;
   zaxisGetTypeDescription(zaxisType, NULL, &name, &longName, &stdName, &unit);
   if(outName) *outName = strdup(name);
   if(outLongName) *outLongName = strdup(longName);
@@ -403,7 +403,7 @@ static double logicalLevelValue2(long gribType, long storedValue, long power)
 }
 
 //The output values must be preinitialized, this function does not always write them.
-static int readLevel2(grib_handle* gribHandle, const char* levelTypeKey, const char* powerKey, const char* valueKey, double* outValue1, double* outValue2)
+static int readLevel2(grib_handle *gribHandle, const char *levelTypeKey, const char *powerKey, const char *valueKey, double *outValue1, double *outValue2)
 {
   assert(levelTypeKey && powerKey && valueKey && outValue1 && outValue2);
 
@@ -440,9 +440,9 @@ static int readLevel2(grib_handle* gribHandle, const char* levelTypeKey, const c
   return CDI_NOERR;
 }
 
-int cdiGribIterator_level(CdiIterator* super, int levelSelector, double* outValue1, double* outValue2)
+int cdiGribIterator_level(CdiIterator *super, int levelSelector, double *outValue1, double *outValue2)
 {
-  CdiGribIterator* me = (CdiGribIterator*)super;
+  CdiGribIterator *me = (CdiGribIterator*)super;
   double trash;
   if(!outValue1) outValue1 = &trash;
   if(!outValue2) outValue2 = &trash;
@@ -480,9 +480,9 @@ int cdiGribIterator_level(CdiIterator* super, int levelSelector, double* outValu
   return CDI_NOERR;
 }
 
-int cdiGribIterator_zaxisUuid(CdiIterator* super, int* outVgridNumber, int* outLevelCount, unsigned char (*outUuid)[16])
+int cdiGribIterator_zaxisUuid(CdiIterator *super, int *outVgridNumber, int *outLevelCount, unsigned char (*outUuid)[16])
 {
-  CdiGribIterator* me = (CdiGribIterator*)super;
+  CdiGribIterator *me = (CdiGribIterator*)super;
 
   if(outVgridNumber)
     {
@@ -506,15 +506,15 @@ int cdiGribIterator_zaxisUuid(CdiIterator* super, int* outVgridNumber, int* outL
   return CDI_NOERR;
 }
 
-char* cdiGribIterator_copyVariableName(CdiIterator* super)
+char *cdiGribIterator_copyVariableName(CdiIterator *super)
 {
-  CdiGribIterator* me = (CdiGribIterator*)super;
+  CdiGribIterator *me = (CdiGribIterator*)super;
   return gribCopyString(me->gribHandle, "shortName");
 }
 
-void cdiGribIterator_readField(CdiIterator* super, double* buffer, size_t* nmiss)
+void cdiGribIterator_readField(CdiIterator *super, double *buffer, size_t *nmiss)
 {
-  CdiGribIterator* me = (CdiGribIterator*)super;
+  CdiGribIterator *me = (CdiGribIterator*)super;
 
   gribGetDoubleArray(me->gribHandle, "values", buffer);
   long gridType = gribGetLong(me->gribHandle, "gridDefinitionTemplateNumber");
@@ -524,12 +524,12 @@ void cdiGribIterator_readField(CdiIterator* super, double* buffer, size_t* nmiss
     }
 }
 
-void cdiGribIterator_readFieldF(CdiIterator* super, float* buffer, size_t* nmiss)
+void cdiGribIterator_readFieldF(CdiIterator *super, float *buffer, size_t *nmiss)
 {
-  CdiGribIterator* me = (CdiGribIterator*)super;
+  CdiGribIterator *me = (CdiGribIterator*)super;
 
   size_t valueCount = gribGetArraySize(me->gribHandle, "values");
-  double* temp = malloc(valueCount*sizeof(*temp));
+  double *temp = malloc(valueCount*sizeof(*temp));
   cdiGribIterator_readField(super, temp, nmiss);
   for(size_t i = valueCount; i--; ) buffer[i] = (float)temp[i];
   free(temp);
@@ -540,14 +540,14 @@ void cdiGribIterator_readFieldF(CdiIterator* super, float* buffer, size_t* nmiss
 @Function cdiGribIterator_delete
 @Title Dispose off a CdiGribIterator instance.
 
-@Prototype void cdiGribIterator_delete(CdiGribIterator* me)
+@Prototype void cdiGribIterator_delete(CdiGribIterator *me)
 @Parameter
     @item me The iterator to delete.
 
 @Description
     Combined destructor and deallocator. Make sure to match every call to cdiGribIterator_clone() with a call to this function.
 */
-void cdiGribIterator_delete(CdiGribIterator* me)
+void cdiGribIterator_delete(CdiGribIterator *me)
 {
 #ifdef HAVE_LIBGRIB_API
   if(me) cdiGribIterator_condestruct(me, NULL, 0);
@@ -566,7 +566,7 @@ void cdiGribIterator_delete(CdiGribIterator* me)
 @Function cdiGribIterator_inqEdition
 @Title Get the version of the GRIB standard that is used
 
-@Prototype int cdiGribIterator_inqEdition(CdiGribIterator* me)
+@Prototype int cdiGribIterator_inqEdition(CdiGribIterator *me)
 @Parameter
     @item me The iterator to operate on.
 
@@ -575,7 +575,7 @@ void cdiGribIterator_delete(CdiGribIterator* me)
 @Description
     Returns the version of the file format.
 */
-int cdiGribIterator_inqEdition(CdiGribIterator* me)
+int cdiGribIterator_inqEdition(CdiGribIterator *me)
 {
 #ifdef HAVE_LIBGRIB_API
   return (int)gribEditionNumber(me->gribHandle);
@@ -589,7 +589,7 @@ int cdiGribIterator_inqEdition(CdiGribIterator* me)
 @Function cdiGribIterator_getLong
 @Title Access to grib_get_long()
 
-@Prototype int cdiGribIterator_getLong(CdiGribIterator* me, const char* key, long* result)
+@Prototype int cdiGribIterator_getLong(CdiGribIterator *me, const char *key, long *result)
 @Parameter
     @item me The iterator to operate on.
     @item ... The arguments to the underlying GRIB-API function.
@@ -599,7 +599,7 @@ int cdiGribIterator_inqEdition(CdiGribIterator* me)
 @Description
     Callthrough to grib_get_long().
 */
-int cdiGribIterator_getLong(CdiGribIterator* me, const char* key, long* result)
+int cdiGribIterator_getLong(CdiGribIterator *me, const char *key, long *result)
 {
 #ifdef HAVE_LIBGRIB_API
   return grib_get_long(me->gribHandle, key, result);
@@ -615,7 +615,7 @@ int cdiGribIterator_getLong(CdiGribIterator* me, const char* key, long* result)
 @Function cdiGribIterator_getLength
 @Title Access to grib_get_length()
 
-@Prototype int cdiGribIterator_getLength(CdiGribIterator* me, const char* key, size_t* result)
+@Prototype int cdiGribIterator_getLength(CdiGribIterator *me, const char *key, size_t *result)
 @Parameter
     @item me The iterator to operate on.
     @item ... The arguments to the underlying GRIB-API function.
@@ -625,7 +625,7 @@ int cdiGribIterator_getLong(CdiGribIterator* me, const char* key, long* result)
 @Description
     Callthrough to grib_get_length().
 */
-int cdiGribIterator_getLength(CdiGribIterator* me, const char* key, size_t* result)
+int cdiGribIterator_getLength(CdiGribIterator *me, const char *key, size_t *result)
 {
 #ifdef HAVE_GRIB_GET_LENGTH
   return grib_get_length(me->gribHandle, key, result);
@@ -647,7 +647,7 @@ int cdiGribIterator_getLength(CdiGribIterator* me, const char* key, size_t* resu
 @Function cdiGribIterator_getString
 @Title Access to grib_get_string()
 
-@Prototype int cdiGribIterator_getString(CdiGribIterator* me, const char* key, char* result, size_t* length)
+@Prototype int cdiGribIterator_getString(CdiGribIterator *me, const char *key, char *result, size_t *length)
 @Parameter
     @item me The iterator to operate on.
     @item ... The arguments to the underlying GRIB-API function.
@@ -657,7 +657,7 @@ int cdiGribIterator_getLength(CdiGribIterator* me, const char* key, size_t* resu
 @Description
     Callthrough to grib_get_string().
 */
-int cdiGribIterator_getString(CdiGribIterator* me, const char* key, char* result, size_t* length)
+int cdiGribIterator_getString(CdiGribIterator *me, const char *key, char *result, size_t *length)
 {
 #ifdef HAVE_LIBGRIB_API
   return grib_get_string(me->gribHandle, key, result, length);
@@ -674,7 +674,7 @@ int cdiGribIterator_getString(CdiGribIterator* me, const char* key, char* result
 @Function cdiGribIterator_inqLongValue
 @Title Get the value of a GRIB-API key as a long
 
-@Prototype long cdiGribIterator_inqLongValue(CdiGribIterator* me, const char* key)
+@Prototype long cdiGribIterator_inqLongValue(CdiGribIterator *me, const char *key)
 @Parameter
     @item me The iterator to operate on.
     @item key The GRIB-API key to retrieve.
@@ -685,7 +685,7 @@ int cdiGribIterator_getString(CdiGribIterator* me, const char* key, char* result
     Use this to fetch a grib value if you are certain that the given key must be present.
     This will abort the process if the key cannot be retrieved.
 */
-long cdiGribIterator_inqLongValue(CdiGribIterator* me, const char* key)
+long cdiGribIterator_inqLongValue(CdiGribIterator *me, const char *key)
 {
 #ifdef HAVE_LIBGRIB_API
   return gribGetLong(me->gribHandle, key);
@@ -700,7 +700,7 @@ long cdiGribIterator_inqLongValue(CdiGribIterator* me, const char* key)
 @Function cdiGribIterator_inqLongDefaultValue
 @Title Get the value of a GRIB-API key as a long
 
-@Prototype long cdiGribIterator_inqLongDefaultValue(CdiGribIterator* me, const char* key, long defaultValue)
+@Prototype long cdiGribIterator_inqLongDefaultValue(CdiGribIterator *me, const char *key, long defaultValue)
 @Parameter
     @item me The iterator to operate on.
     @item key The GRIB-API key to retrieve.
@@ -712,7 +712,7 @@ long cdiGribIterator_inqLongValue(CdiGribIterator* me, const char* key)
     Use this if you can handle failure to fetch the key by supplying a default value.
     This function cannot fail.
 */
-long cdiGribIterator_inqLongDefaultValue(CdiGribIterator* me, const char* key, long defaultValue)
+long cdiGribIterator_inqLongDefaultValue(CdiGribIterator *me, const char *key, long defaultValue)
 {
 #ifdef HAVE_LIBGRIB_API
   return gribGetLongDefault(me->gribHandle, key, defaultValue);
@@ -728,7 +728,7 @@ long cdiGribIterator_inqLongDefaultValue(CdiGribIterator* me, const char* key, l
 @Function cdiGribIterator_inqStringValue
 @Title Safely retrieve a GRIB-API key with a string value
 
-@Prototype char* cdiGribIterator_inqStringValue(CdiGribIterator* me, const char* key)
+@Prototype char *cdiGribIterator_inqStringValue(CdiGribIterator *me, const char *key)
 @Parameter
     @item me The iterator to operate on.
     @item key The GRIB-API key to retrieve.
@@ -740,7 +740,7 @@ long cdiGribIterator_inqLongDefaultValue(CdiGribIterator* me, const char* key, l
     allocate memory accordingly, call grib_get_string(), and return the pointer to the new string.
     Returns NULL on failure.
 */
-char* cdiGribIterator_inqStringValue(CdiGribIterator* me, const char* key)
+char *cdiGribIterator_inqStringValue(CdiGribIterator *me, const char *key)
 {
 #ifdef HAVE_LIBGRIB_API
   return gribCopyString(me->gribHandle, key);
@@ -755,7 +755,7 @@ char* cdiGribIterator_inqStringValue(CdiGribIterator* me, const char* key)
 @Function cdiGribIterator_getDouble
 @Title Access to grib_get_double()
 
-@Prototype int cdiGribIterator_getDouble(CdiGribIterator* me, const char* key, double* result)
+@Prototype int cdiGribIterator_getDouble(CdiGribIterator *me, const char *key, double *result)
 @Parameter
     @item me The iterator to operate on.
     @item ... The arguments to the underlying GRIB-API function.
@@ -765,7 +765,7 @@ char* cdiGribIterator_inqStringValue(CdiGribIterator* me, const char* key)
 @Description
     Callthrough to grib_get_double().
 */
-int cdiGribIterator_getDouble(CdiGribIterator* me, const char* key, double* result)
+int cdiGribIterator_getDouble(CdiGribIterator *me, const char *key, double *result)
 {
 #ifdef HAVE_LIBGRIB_API
   return grib_get_double(me->gribHandle, key, result);
@@ -781,7 +781,7 @@ int cdiGribIterator_getDouble(CdiGribIterator* me, const char* key, double* resu
 @Function cdiGribIterator_getSize
 @Title Access to grib_get_size()
 
-@Prototype int cdiGribIterator_getSize(CdiGribIterator* me, const char* key, size_t* result)
+@Prototype int cdiGribIterator_getSize(CdiGribIterator *me, const char *key, size_t *result)
 @Parameter
     @item me The iterator to operate on.
     @item ... The arguments to the underlying GRIB-API function.
@@ -791,7 +791,7 @@ int cdiGribIterator_getDouble(CdiGribIterator* me, const char* key, double* resu
 @Description
     Callthrough to grib_get_size().
 */
-int cdiGribIterator_getSize(CdiGribIterator* me, const char* key, size_t* result)
+int cdiGribIterator_getSize(CdiGribIterator *me, const char *key, size_t *result)
 {
 #ifdef HAVE_LIBGRIB_API
   return grib_get_size(me->gribHandle, key, result);
@@ -807,7 +807,7 @@ int cdiGribIterator_getSize(CdiGribIterator* me, const char* key, size_t* result
 @Function cdiGribIterator_getLongArray
 @Title Access to grib_get_long_array()
 
-@Prototype int cdiGribIterator_getLongArray(CdiGribIterator* me, const char* key, long* result, size_t* size)
+@Prototype int cdiGribIterator_getLongArray(CdiGribIterator *me, const char *key, long *result, size_t *size)
 @Parameter
     @item me The iterator to operate on.
     @item ... The arguments to the underlying GRIB-API function.
@@ -817,7 +817,7 @@ int cdiGribIterator_getSize(CdiGribIterator* me, const char* key, size_t* result
 @Description
     Callthrough to grib_get_long_array().
 */
-int cdiGribIterator_getLongArray(CdiGribIterator* me, const char* key, long* result, size_t* size)
+int cdiGribIterator_getLongArray(CdiGribIterator *me, const char *key, long *result, size_t *size)
 {
 #ifdef HAVE_LIBGRIB_API
   return grib_get_long_array(me->gribHandle, key, result, size);
@@ -834,7 +834,7 @@ int cdiGribIterator_getLongArray(CdiGribIterator* me, const char* key, long* res
 @Function cdiGribIterator_getDoubleArray
 @Title Access to grib_get_double_array()
 
-@Prototype int cdiGribIterator_getDoubleArray(CdiGribIterator* me, const char* key, double* result, size_t* size)
+@Prototype int cdiGribIterator_getDoubleArray(CdiGribIterator *me, const char *key, double *result, size_t *size)
 @Parameter
     @item me The iterator to operate on.
     @item ... The arguments to the underlying GRIB-API function.
@@ -844,7 +844,7 @@ int cdiGribIterator_getLongArray(CdiGribIterator* me, const char* key, long* res
 @Description
     Callthrough to grib_get_double_array().
 */
-int cdiGribIterator_getDoubleArray(CdiGribIterator* me, const char* key, double* result, size_t* size)
+int cdiGribIterator_getDoubleArray(CdiGribIterator *me, const char *key, double *result, size_t *size)
 {
 #ifdef HAVE_LIBGRIB_API
   return grib_get_double_array(me->gribHandle, key, result, size);
@@ -861,7 +861,7 @@ int cdiGribIterator_getDoubleArray(CdiGribIterator* me, const char* key, double*
 @Function cdiGribIterator_inqDoubleValue
 @Title Get the value of a GRIB-API key as a double
 
-@Prototype double cdiGribIterator_inqDoubleValue(CdiGribIterator* me, const char* key)
+@Prototype double cdiGribIterator_inqDoubleValue(CdiGribIterator *me, const char *key)
 @Parameter
     @item me The iterator to operate on.
     @item key The GRIB-API key to retrieve.
@@ -872,7 +872,7 @@ int cdiGribIterator_getDoubleArray(CdiGribIterator* me, const char* key, double*
     Use this to fetch a grib value if you are certain that the given key must be present.
     This will abort the process if the key cannot be retrieved.
 */
-double cdiGribIterator_inqDoubleValue(CdiGribIterator* me, const char* key)
+double cdiGribIterator_inqDoubleValue(CdiGribIterator *me, const char *key)
 {
 #ifdef HAVE_LIBGRIB_API
   return gribGetDouble(me->gribHandle, key);
@@ -887,7 +887,7 @@ double cdiGribIterator_inqDoubleValue(CdiGribIterator* me, const char* key)
 @Function cdiGribIterator_inqDoubleDefaultValue
 @Title Get the value of a GRIB-API key as a double
 
-@Prototype double cdiGribIterator_inqDoubleDefaultValue(CdiGribIterator* me, const char* key, double defaultValue)
+@Prototype double cdiGribIterator_inqDoubleDefaultValue(CdiGribIterator *me, const char *key, double defaultValue)
 @Parameter
     @item me The iterator to operate on.
     @item key The GRIB-API key to retrieve.
@@ -899,7 +899,7 @@ double cdiGribIterator_inqDoubleValue(CdiGribIterator* me, const char* key)
     Use this if you can handle failure to fetch the key by supplying a default value.
     This function cannot fail.
 */
-double cdiGribIterator_inqDoubleDefaultValue(CdiGribIterator* me, const char* key, double defaultValue)
+double cdiGribIterator_inqDoubleDefaultValue(CdiGribIterator *me, const char *key, double defaultValue)
 {
 #ifdef HAVE_LIBGRIB_API
   return gribGetDoubleDefault(me->gribHandle, key, defaultValue);
