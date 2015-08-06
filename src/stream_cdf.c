@@ -627,7 +627,7 @@ void defineAttributes(int vlistID, int varID, int fileID, int ncvarID)
               cdf_put_att_float(fileID, ncvarID, attname, NC_FLOAT, len, attflt_sp);
             }
           else
-            cdf_put_att_double(fileID, ncvarID, attname, atttype == DATATYPE_FLT32 ? NC_FLOAT : NC_DOUBLE, len, attflt);
+            cdf_put_att_double(fileID, ncvarID, attname, NC_DOUBLE, len, attflt);
         }
     }
   free(attBuf);
