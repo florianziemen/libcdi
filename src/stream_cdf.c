@@ -5855,6 +5855,13 @@ void verify_coordinate_vars_1(int ndims, ncdim_t *ncdims, ncvar_t *ncvars, int t
 		    ncvars[ncvarid].zaxistype = ZAXIS_HEIGHT;
 		}
 	    }
+          else
+            {
+              if ( (strcmp(ncvars[ncvarid].longname, "generalized_height") == 0 ||
+                    strcmp(ncvars[ncvarid].longname, "generalized height") == 0) &&
+                   strcmp(ncvars[ncvarid].stdname, "height") == 0 )
+                  ncvars[ncvarid].zaxistype = ZAXIS_REFERENCE;
+            }
 
 	  if ( ncvars[ncvarid].islon == FALSE && ncvars[ncvarid].longname[0] != 0 &&
                ncvars[ncvarid].islat == FALSE && ncvars[ncvarid].longname[1] != 0 )
@@ -6926,11 +6933,9 @@ void define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, 
 
   for ( int varID1 = 0; varID1 < nvars; varID1++ )
     {
-      int gridID, zaxisID;
-
       int ncvarid = varids[varID1];
-      gridID  = ncvars[ncvarid].gridID;
-      zaxisID = ncvars[ncvarid].zaxisID;
+      int gridID  = ncvars[ncvarid].gridID;
+      int zaxisID = ncvars[ncvarid].zaxisID;
 
       stream_new_var(streamptr, gridID, zaxisID, CDI_UNDEFID);
       int varID = vlistDefVar(vlistID, gridID, zaxisID, ncvars[ncvarid].tsteptype);
@@ -7447,8 +7452,6 @@ int cdfInqContents(stream_t *streamptr)
   int leadtime_id = UNDEFID;
   int nvars_data;
   int nvcth_id = UNDEFID, vcta_id = UNDEFID, vctb_id = UNDEFID;
-  size_t vctsize = 0;
-  double *vct = NULL;
   int instID  = UNDEFID;
   int modelID = UNDEFID;
   int taxisID;
@@ -7537,7 +7540,7 @@ int cdfInqContents(stream_t *streamptr)
     }
 
   /* scan global attributes */
-  scan_global_attributes(fileID, vlistID, streamptr, ngatts, &instID, &modelID, &ucla_les, 
+  scan_global_attributes(fileID, vlistID, streamptr, ngatts, &instID, &modelID, &ucla_les,
                          uuidOfHGrid, uuidOfVGrid, gridfile, &number_of_grid_used);
 
   /* find time dim */
@@ -7774,6 +7777,8 @@ int cdfInqContents(stream_t *streamptr)
 
 
   /* read VCT */
+  size_t vctsize = 0;
+  double *vct = NULL;
   if ( nvcth_id != UNDEFID && vcta_id != UNDEFID && vctb_id != UNDEFID )
     {
       vctsize = ncdims[nvcth_id].len;
@@ -7786,9 +7791,8 @@ int cdfInqContents(stream_t *streamptr)
 
   /* define all zaxes */
   define_all_zaxes(streamptr, vlistID, ncdims, nvars, ncvars, vctsize, vct, uuidOfVGrid);
-
-
   if ( vct ) free(vct);
+
 
   /* select vars */
   varids = (int *)xmalloc((size_t)nvars * sizeof (int));
