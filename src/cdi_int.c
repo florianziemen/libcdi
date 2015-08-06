@@ -36,6 +36,7 @@ int cdiSplitLtype105   = CDI_UNDEFID;
 int cdiIgnoreAttCoordinates = FALSE;
 int cdiIgnoreValidRange     = FALSE;
 int cdiSkipRecords          = 0;
+int cdiConvention           = CDI_CONVENTION_ECHAM;
 int cdiInventoryMode        = 1;
 size_t CDI_netcdf_hdr_pad   = 0UL;
 
@@ -334,6 +335,17 @@ void cdiInitialize(void)
 	{
 	  cdiSkipRecords = atoi(envString);
 	  cdiSkipRecords = cdiSkipRecords > 0 ? cdiSkipRecords : 0;
+	}
+
+      envString = getenv("CDI_CONVENTION");
+      if ( envString )
+	{
+	  if ( strcmp(envString, "CF") == 0 )
+	    {
+	      cdiConvention = CDI_CONVENTION_CF;
+	      if ( CDI_Debug )
+		Message("CDI convention was set to CF!");
+	    }
 	}
 
       envString = getenv("CDI_INVENTORY_MODE");

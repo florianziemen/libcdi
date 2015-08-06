@@ -2366,6 +2366,114 @@ void cdfDefVCT(stream_t *streamptr, int zaxisID)
     }
 }
 
+static
+void cdfDefZaxisHybridEcham(stream_t *streamptr, int type, int ncvarid, int zaxisID, int zaxisindex, int xtype, size_t dimlen, int *dimID, char *axisname)
+{
+  char tmpname[CDI_MAX_NAME];
+  int fileID  = streamptr->fileID;
+
+  if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
+
+  cdf_def_dim(fileID, axisname, dimlen, dimID);
+  cdf_def_var(fileID, axisname, (nc_type) xtype, 1, dimID,  &ncvarid);
+
+  strcpy(tmpname, "hybrid_sigma_pressure");
+  cdf_put_att_text(fileID, ncvarid, "standard_name", strlen(tmpname), tmpname);
+
+  if ( type == ZAXIS_HYBRID )
+    {
+      strcpy(tmpname, "hybrid level at layer midpoints");
+      cdf_put_att_text(fileID, ncvarid, "long_name", strlen(tmpname), tmpname);
+      strcpy(tmpname, "hyam hybm (mlev=hyam+hybm*aps)");
+      cdf_put_att_text(fileID, ncvarid, "formula", strlen(tmpname), tmpname);
+      strcpy(tmpname, "ap: hyam b: hybm ps: aps");
+      cdf_put_att_text(fileID, ncvarid, "formula_terms", strlen(tmpname), tmpname);
+    }
+  else
+    {
+      strcpy(tmpname, "hybrid level at layer interfaces");
+      cdf_put_att_text(fileID, ncvarid, "long_name", strlen(tmpname), tmpname);
+      strcpy(tmpname, "hyai hybi (ilev=hyai+hybi*aps)");
+      cdf_put_att_text(fileID, ncvarid, "formula", strlen(tmpname), tmpname);
+      strcpy(tmpname, "ap: hyai b: hybi ps: aps");
+      cdf_put_att_text(fileID, ncvarid, "formula_terms", strlen(tmpname), tmpname);
+    }
+
+  strcpy(tmpname, "level");
+  cdf_put_att_text(fileID, ncvarid, "units", strlen(tmpname), tmpname);
+  strcpy(tmpname, "down");
+  cdf_put_att_text(fileID, ncvarid, "positive", strlen(tmpname), tmpname);
+
+  cdf_enddef(fileID);
+  streamptr->ncmode = 2;
+
+  cdf_put_var_double(fileID, ncvarid, zaxisInqLevelsPtr(zaxisID));
+
+  cdfDefVCT(streamptr, zaxisID);
+
+  if ( *dimID == UNDEFID )
+    {
+      if ( type == ZAXIS_HYBRID )
+        streamptr->zaxisID[zaxisindex] = streamptr->vct.mlevID;
+      else
+        streamptr->zaxisID[zaxisindex] = streamptr->vct.ilevID;
+    }
+}
+
+static
+void cdfDefZaxisHybridCF(stream_t *streamptr, int type, int ncvarid, int zaxisID, int zaxisindex, int xtype, size_t dimlen, int *dimID, char *axisname)
+{
+  char tmpname[CDI_MAX_NAME];
+  int fileID  = streamptr->fileID;
+
+  if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
+
+  cdf_def_dim(fileID, axisname, dimlen, dimID);
+  cdf_def_var(fileID, axisname, (nc_type) xtype, 1, dimID,  &ncvarid);
+
+  strcpy(tmpname, "atmosphere_hybrid_sigma_pressure_coordinate");
+  cdf_put_att_text(fileID, ncvarid, "standard_name", strlen(tmpname), tmpname);
+
+  strcpy(tmpname, "hybrid level at layer midpoints");
+  cdf_put_att_text(fileID, ncvarid, "long_name", strlen(tmpname), tmpname);
+  strcpy(tmpname, "p = ap + b*ps");
+  cdf_put_att_text(fileID, ncvarid, "formula", strlen(tmpname), tmpname);
+  strcpy(tmpname, "ap: ap b: b ps: ps");
+  cdf_put_att_text(fileID, ncvarid, "formula_terms", strlen(tmpname), tmpname);
+
+  strcpy(tmpname, "1");
+  cdf_put_att_text(fileID, ncvarid, "units", strlen(tmpname), tmpname);
+  strcpy(tmpname, "Z");
+  cdf_put_att_text(fileID, ncvarid, "axis", strlen(tmpname), tmpname);
+  strcpy(tmpname, "down");
+  cdf_put_att_text(fileID, ncvarid, "positive", strlen(tmpname), tmpname);
+
+  cdf_enddef(fileID);
+  streamptr->ncmode = 2;
+
+  cdf_put_var_double(fileID, ncvarid, zaxisInqLevelsPtr(zaxisID));
+
+  cdfDefVCT(streamptr, zaxisID);
+
+  if ( *dimID == UNDEFID )
+    {
+      if ( type == ZAXIS_HYBRID )
+        streamptr->zaxisID[zaxisindex] = streamptr->vct.mlevID;
+      else
+        streamptr->zaxisID[zaxisindex] = streamptr->vct.ilevID;
+    }
+}
+
+static
+void cdfDefZaxisHybrid(stream_t *streamptr, int type, int ncvarid, int zaxisID, int zaxisindex, int xtype, size_t dimlen, int *dimID, char *axisname)
+{
+  extern int cdiConvention;
+
+  if ( cdiConvention == CDI_CONVENTION_ECHAM || type == ZAXIS_HYBRID_HALF )
+    cdfDefZaxisHybridEcham(streamptr, type, ncvarid, zaxisID, zaxisindex, xtype, dimlen, dimID, axisname);
+  else
+    cdfDefZaxisHybridCF(streamptr, type, ncvarid, zaxisID, zaxisindex, xtype, dimlen, dimID, axisname);
+}
 
 static
 void cdfDefZaxis(stream_t *streamptr, int zaxisID)
@@ -2380,29 +2488,24 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
   int zaxisID0;
   int dimID = UNDEFID;
   int dimIDs[2];
-  int fileID;
   size_t len;
   int ncvarid = UNDEFID, ncbvarid = UNDEFID;
   int nvdimID = UNDEFID;
-  int type;
-  int nzaxis;
   int ilevel = 0;
-  int vlistID;
-  int zaxisindex;
   int xtype = NC_DOUBLE;
   int positive;
 
   if ( zaxisInqPrec(zaxisID) == DATATYPE_FLT32 ) xtype = NC_FLOAT;
 
-  vlistID = streamptr->vlistID;
-  fileID  = streamptr->fileID;
+  int vlistID = streamptr->vlistID;
+  int fileID  = streamptr->fileID;
 
-  zaxisindex = vlistZaxisIndex(vlistID, zaxisID);
+  int zaxisindex = vlistZaxisIndex(vlistID, zaxisID);
 
-  nzaxis = vlistNzaxis(vlistID);
+  int nzaxis = vlistNzaxis(vlistID);
 
   size_t dimlen = (size_t)zaxisInqSize(zaxisID);
-  type   = zaxisInqType(zaxisID);
+  int type   = zaxisInqType(zaxisID);
 
   if (dimlen == 1)
     switch (type)
@@ -2486,70 +2589,7 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
 
       if ( type == ZAXIS_HYBRID || type == ZAXIS_HYBRID_HALF )
         {
-          if ( type == ZAXIS_HYBRID )
-            {
-	      if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
-
-	      cdf_def_dim(fileID, axisname, dimlen, &dimID);
-	      cdf_def_var(fileID, axisname, (nc_type) xtype, 1, &dimID,  &ncvarid);
-
-	      strcpy(tmpname, "hybrid_sigma_pressure");
-	      cdf_put_att_text(fileID, ncvarid, "standard_name", strlen(tmpname), tmpname);
-	      strcpy(tmpname, "hybrid level at layer midpoints");
-	      cdf_put_att_text(fileID, ncvarid, "long_name", strlen(tmpname), tmpname);
-	      strcpy(tmpname, "level");
-	      cdf_put_att_text(fileID, ncvarid, "units", strlen(tmpname), tmpname);
-	      strcpy(tmpname, "down");
-	      cdf_put_att_text(fileID, ncvarid, "positive", strlen(tmpname), tmpname);
-	      strcpy(tmpname, "hyam hybm (mlev=hyam+hybm*aps)");
-	      cdf_put_att_text(fileID, ncvarid, "formula", strlen(tmpname), tmpname);
-	      strcpy(tmpname, "ap: hyam b: hybm ps: aps");
-	      cdf_put_att_text(fileID, ncvarid, "formula_terms", strlen(tmpname), tmpname);
-	      /*
-	      strcpy(tmpname, "ilev");
-	      cdf_put_att_text(fileID, ncvarid, "borders", strlen(tmpname), tmpname);
-	      */
-	      cdf_enddef(fileID);
-	      streamptr->ncmode = 2;
-
-	      cdf_put_var_double(fileID, ncvarid, zaxisInqLevelsPtr(zaxisID));
-            }
-
-          if ( type == ZAXIS_HYBRID_HALF )
-            {
-	      if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
-
-	      cdf_def_dim(fileID, axisname, dimlen, &dimID);
-	      cdf_def_var(fileID, axisname, (nc_type) xtype, 1, &dimID,  &ncvarid);
-
-	      strcpy(tmpname, "hybrid_sigma_pressure");
-	      cdf_put_att_text(fileID, ncvarid, "standard_name", strlen(tmpname), tmpname);
-	      strcpy(tmpname, "hybrid level at layer interfaces");
-	      cdf_put_att_text(fileID, ncvarid, "long_name", strlen(tmpname), tmpname);
-	      strcpy(tmpname, "level");
-	      cdf_put_att_text(fileID, ncvarid, "units", strlen(tmpname), tmpname);
-	      strcpy(tmpname, "down");
-	      cdf_put_att_text(fileID, ncvarid, "positive", strlen(tmpname), tmpname);
-	      strcpy(tmpname, "hyai hybi (ilev=hyai+hybi*aps)");
-	      cdf_put_att_text(fileID, ncvarid, "formula", strlen(tmpname), tmpname);
-	      strcpy(tmpname, "ap: hyai b: hybi ps: aps");
-	      cdf_put_att_text(fileID, ncvarid, "formula_terms", strlen(tmpname), tmpname);
-
-	      cdf_enddef(fileID);
-	      streamptr->ncmode = 2;
-
-	      cdf_put_var_double(fileID, ncvarid, zaxisInqLevelsPtr(zaxisID));
-            }
-
-          cdfDefVCT(streamptr, zaxisID);
-
-          if ( dimID == UNDEFID )
-            {
-              if ( type == ZAXIS_HYBRID )
-                streamptr->zaxisID[zaxisindex] = streamptr->vct.mlevID;
-              else
-                streamptr->zaxisID[zaxisindex] = streamptr->vct.ilevID;
-            }
+          cdfDefZaxisHybrid(streamptr, type, ncvarid, zaxisID, zaxisindex, xtype, dimlen, &dimID, axisname);
         }
       else
         {
@@ -2635,7 +2675,6 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
   if ( dimID != UNDEFID )
     streamptr->zaxisID[zaxisindex] = dimID;
 }
-
 
 static
 void cdfDefPole(stream_t *streamptr, int gridID)
