@@ -620,7 +620,14 @@ void defineAttributes(int vlistID, int varID, int fileID, int ncvarID)
           double *attflt = (double *)resizeBuf(&attBuf, &attBufSize, attSize);
           vlistInqAttFlt(vlistID, varID, attname, attlen, attflt);
           len = (size_t)attlen;
-          cdf_put_att_double(fileID, ncvarID, attname, atttype == DATATYPE_FLT32 ? NC_FLOAT : NC_DOUBLE, len, attflt);
+          if ( atttype == DATATYPE_FLT32 )
+            {
+              float attflt_sp[len];
+              for ( size_t i = 0; i < len; ++i ) attflt_sp[i] = attflt[i];
+              cdf_put_att_float(fileID, ncvarID, attname, NC_FLOAT, len, attflt_sp);
+            }
+          else
+            cdf_put_att_double(fileID, ncvarID, attname, atttype == DATATYPE_FLT32 ? NC_FLOAT : NC_DOUBLE, len, attflt);
         }
     }
   free(attBuf);
