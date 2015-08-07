@@ -35,7 +35,7 @@ static int extDefaultNumber = EXT_REAL;
 #define LIBVERSION      1.3.2
 #define XSTRING(x)	#x
 #define STRING(x)	XSTRING(x)
-static const char ext_libvers[] = STRING(LIBVERSION) " of "__DATE__" "__TIME__;
+static const char ext_libvers[] = STRING(LIBVERSION) " of " __DATE__ " " __TIME__ ;
 
 const char *extLibraryVersion(void)
 {
