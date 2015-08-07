@@ -144,7 +144,11 @@ static void
 compute_curvilinear(double *coords_,
                     const struct cart_coord a[4], size_t sizex, size_t sizey)
 {
+#ifdef __cplusplus
+  auto coords = (double (*)[sizey][sizex])coords_;
+#else
   double (*coords)[sizey][sizex] = (double (*)[sizey][sizex])coords_;
+#endif
   for (size_t j = 0; j < sizey; ++j)
     {
       double g = (double)j / (double)(sizey - 1);
