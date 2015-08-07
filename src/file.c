@@ -153,7 +153,7 @@ static void file_table_print(void);
 #define  LIBVERSION      1.8.2
 #define  XSTRING(x)	 #x
 #define  STRING(x) 	 XSTRING(x)
-const char file_libvers[] = STRING(LIBVERSION) " of "__DATE__" "__TIME__;
+const char file_libvers[] = STRING(LIBVERSION) " of " __DATE__ " " __TIME__;
 
 /*
   21/05/2004  1.3.2 set min I/O Buffersize to 128k

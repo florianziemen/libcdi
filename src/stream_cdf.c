@@ -4061,14 +4061,28 @@ void transpose2dArrayDP(size_t inWidth, size_t inHeight, double* data)
 {
   const size_t cacheBlockSize = 256;    // Purely an optimization parameter. Current value of 32 means we are handling 8kB blocks,
                                        // which should be a decent compromise on many architectures.
+  
+#ifndef __cplusplus
   double (*temp)[inWidth] = (double (*)[inWidth])malloc(inHeight*sizeof(*temp));
   double (*out)[inHeight] = (double (*)[inHeight])data;
   memcpy(temp, data, inHeight*sizeof(*temp));
+  #else
+  double *temp[inWidth];
+  temp[0] =  (double *)malloc(inWidth * inHeight * sizeof(double));
+  for(int i = 1; i < inHeight; i++)
+  {
+    temp[i] = temp[0] + (inWidth * i);
+  }
+
+  double **out = (double **)data;
+#endif
+  
   /*
   for ( size_t y = 0; y < inHeight; ++y )
     for ( size_t x = 0; x < inWidth; ++x )
       out[x][y] = temp[y][x];
   */
+
   for ( size_t yBlock = 0; yBlock < inHeight; yBlock += cacheBlockSize )
     {
       for ( size_t xBlock = 0; xBlock < inWidth; xBlock += cacheBlockSize )
@@ -4083,7 +4097,7 @@ void transpose2dArrayDP(size_t inWidth, size_t inHeight, double* data)
         }
     }
 
-  free(temp);
+  free(temp[0]);
 }
 
 static
@@ -4091,14 +4105,28 @@ void transpose2dArraySP(size_t inWidth, size_t inHeight, float* data)
 {
   const size_t cacheBlockSize = 256;    // Purely an optimization parameter. Current value of 32 means we are handling 8kB blocks,
                                        // which should be a decent compromise on many architectures.
+  
+#ifndef __cplusplus 
   float (*temp)[inWidth] = (float (*)[inWidth])malloc(inHeight*sizeof(*temp));
   float (*out)[inHeight] = (float (*)[inHeight])data;
   memcpy(temp, data, inHeight*sizeof(*temp));
+  #else
+  float *temp[inWidth];
+  temp[0] =  (float *)malloc(inWidth * inHeight * sizeof(float));
+  for(int i = 1; i < inHeight; i++)
+  {
+    temp[i] = temp[0] + (inWidth * i);
+  }
+
+  float **out = (float **)data;
+#endif
+  
   /*
   for ( size_t y = 0; y < inHeight; ++y )
     for ( size_t x = 0; x < inWidth; ++x )
       out[x][y] = temp[y][x];
   */
+  
   for ( size_t yBlock = 0; yBlock < inHeight; yBlock += cacheBlockSize )
     {
       for ( size_t xBlock = 0; xBlock < inWidth; xBlock += cacheBlockSize )

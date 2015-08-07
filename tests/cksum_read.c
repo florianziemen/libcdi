@@ -26,7 +26,7 @@ read_table(const char *table_fname, size_t *table_len)
       *table_len = (size_t)-1;
       return NULL;
     }
-  while (fscanf(tablefp, "%08"PRIx32" %d\n", &cksum_temp, &code) == 2)
+  while (fscanf(tablefp, "%08" PRIx32" %d\n", &cksum_temp, &code) == 2)
     {
       ENSURE_ARRAY_SIZE(table, table_size, table_used + 1);
       table[table_used].code = code;

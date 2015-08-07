@@ -45,7 +45,7 @@ main()
   uint32_t cksum_result = memcrc(test_data, num_blocks * block_size);
   if (cksum_result != UINT32_C(0xc47779cd))
     {
-      printf("unexpected crc result: 0x%8"PRIx32"\n", cksum_result);
+      printf("unexpected crc result: 0x%8" PRIx32"\n", cksum_result);
       return EXIT_FAILURE;
     }
   return EXIT_SUCCESS;
