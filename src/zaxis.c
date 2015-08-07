@@ -54,7 +54,7 @@ ZaxistypeEntry[] = {
   { /* 22 */ 0, "sedimentbottomta",  "sediment_bottom_ta",     "",               ""},
   { /* 23 */ 0, "sedimentbottomtw",  "sediment_bottom_tw",     "",               ""},
   { /* 24 */ 0, "mixlayer",          "mix_layer",              "",               ""},
-  { /* 25 */ 0, "height",            "generalized height",     "height",         ""},
+  { /* 25 */ 0, "height",            "generalized_height",     "height",         ""},
 };
 
 enum {
@@ -1254,12 +1254,14 @@ void zaxisPrintKernel ( zaxis_t * zaxisptr, int index, FILE * fp )
 
   if ( type == ZAXIS_REFERENCE )
     {
-      const unsigned char *d;
       zaxisInqUUID(zaxisID, uuid);
-      d = uuid;
-      fprintf(fp, "uuid      = %02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x\n",
-              d[0], d[1], d[2], d[3], d[4], d[5], d[6], d[7],
-              d[8], d[9], d[10], d[11], d[12], d[13], d[14], d[15]);
+      if ( *uuid )
+        {
+          const unsigned char *d = uuid;
+          fprintf(fp, "uuid      = %02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x\n",
+                  d[0], d[1], d[2], d[3], d[4], d[5], d[6], d[7],
+                  d[8], d[9], d[10], d[11], d[12], d[13], d[14], d[15]);
+        }
     }
 }
 

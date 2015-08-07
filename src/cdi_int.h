@@ -2,7 +2,7 @@
 #define _CDI_INT_H
 
 #if defined (HAVE_CONFIG_H)
-#  include "config.h"
+#include "config.h"
 #endif
 
 #include <assert.h>
@@ -264,6 +264,7 @@ stream_t;
 /* Length of optional keyword/value pair list */
 #define MAX_OPT_GRIB_ENTRIES 500
 
+enum cdi_convention {CDI_CONVENTION_ECHAM, CDI_CONVENTION_CF};
 
 /* Data type specification for optional key/value pairs (GRIB) */
 typedef enum {

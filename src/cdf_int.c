@@ -721,6 +721,20 @@ void cdf_put_att_int(int ncid, int varid, const char *name, nc_type xtype,
 }
 
 
+void cdf_put_att_float(int ncid, int varid, const char *name, nc_type xtype,
+                       size_t len, const float *dp)
+{
+  int status;
+
+  status = nc_put_att_float(ncid, varid, name, xtype, len, dp);
+
+  if ( CDF_Debug || status != NC_NOERR )
+    Message("ncid = %d varid = %d att = %s val = %g", ncid, varid, name, *dp);
+
+  if ( status != NC_NOERR ) Error("%s", nc_strerror(status));
+}
+
+
 void cdf_put_att_double(int ncid, int varid, const char *name, nc_type xtype,
 			size_t len, const double *dp)
 {
@@ -729,7 +743,7 @@ void cdf_put_att_double(int ncid, int varid, const char *name, nc_type xtype,
   status = nc_put_att_double(ncid, varid, name, xtype, len, dp);
 
   if ( CDF_Debug || status != NC_NOERR )
-    Message("%d %d %f", ncid, varid, *dp);
+    Message("ncid = %d varid = %d att = %s val = %g", ncid, varid, name, *dp);
 
   if ( status != NC_NOERR ) Error("%s", nc_strerror(status));
 }
@@ -782,8 +796,7 @@ void cdf_get_att_double(int ncid, int varid, const char *name, double *dp)
   status = nc_get_att_double(ncid, varid, name, dp);
 
   if ( CDF_Debug || status != NC_NOERR )
-    Message("ncid = %d varid = %d att = %s val = %.9g",
-	    ncid, varid, name, *dp);
+    Message("ncid = %d varid = %d att = %s val = %.9g", ncid, varid, name, *dp);
 
   if ( status != NC_NOERR ) Error("%s", nc_strerror(status));
 }
