@@ -2,6 +2,10 @@
 
 	* Version 1.7.0 released
 
+2015-08-07  Uwe Schulzweida
+
+	* cdiStreamSetupVlist: added call to vlist_unlock(vlistID) (bug fix)
+
 2015-06-16  Uwe Schulzweida
 
 	* merge changes from branches/cdi-tiles [from Florian Prill]

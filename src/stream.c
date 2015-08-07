@@ -2169,6 +2169,9 @@ void cdiStreamSetupVlist(stream_t *streamptr, int vlistID, int vlistIDorig)
   /* increase lock counter of the original vlist by 1 */
   if ( CDI_Debug ) Message("attach vlist=%d to stream, stream vlist=%d", vlistIDorig, vlistID);
   vlist_lock(vlistIDorig);
+  vlist_unlock(vlistID); // why is this vlistID sometimes locked?
+                         // without this line "cdo splitmon" gives
+                         // Destroying of a locked object (vlistID=xx) failed
 
   for (int varID = 0; varID < nvars; varID++ )
     {
