@@ -2,6 +2,10 @@
 
 	* Version 1.7.0 released
 
+2015-08-11  Uwe Schulzweida
+
+	* bug fix for scanning the  WRF time axis
+
 2015-08-07  Uwe Schulzweida
 
 	* cdiStreamSetupVlist: added call to vlist_unlock(vlistID) (bug fix)

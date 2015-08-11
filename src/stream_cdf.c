@@ -489,7 +489,7 @@ int xtypeIsText(int xtype)
     isText = TRUE;
 #endif
 
-  return (isText);
+  return isText;
 }
 
 static
@@ -7430,7 +7430,7 @@ void find_time_vars(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimid, 
             if ( ncvarid != streamptr->basetime.ncvarid &&
                  ncvars[ncvarid].ndims == 2 &&
                  timedimid == ncvars[ncvarid].dimids[0] &&
-                 !xtypeIsText(ncvars[ncvarid].xtype) &&
+                 xtypeIsText(ncvars[ncvarid].xtype) &&
                  ncdims[ncvars[ncvarid].dimids[1]].len == 19 )
               {
                 streamptr->basetime.ncvarid = ncvarid;
