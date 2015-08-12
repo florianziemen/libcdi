@@ -1201,7 +1201,9 @@ void splitTimevalue(double timevalue, int timeunit, int *date, int *time)
   else if ( timeunit == TUNIT_MONTH )
     {
       vdate = (int) timevalue*100;
-      vdate += 1;
+      if ( vdate < 0 ) vdate -= 1;
+      else             vdate += 1;
+
       vtime = 0;
     }
   else if ( timeunit == TUNIT_YEAR )
@@ -1346,11 +1348,13 @@ double cdiEncodeTimeval(int date, int time, taxis_t *taxis)
 	{
 	  int year, month, day;
 	  cdiDecodeDate(date, &year, &month, &day);
-	  if ( day == 0 )
-	    timevalue = date/100;
-	  else
-	    timevalue = date/100 + 0.5;
-	}
+          timevalue = date/100;
+	  if ( day != 0 )
+            {
+              if ( date < 0 ) timevalue -= 0.5;
+              else            timevalue += 0.5;
+            }
+        }
       else
 	{
 	  int hour, minute, second;
