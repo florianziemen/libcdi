@@ -340,7 +340,7 @@ void cdiInitialize(void)
       envString = getenv("CDI_CONVENTION");
       if ( envString )
 	{
-	  if ( strcmp(envString, "CF") == 0 )
+	  if ( strcmp(envString, "CF") == 0 || strcmp(envString, "cf") == 0 )
 	    {
 	      cdiConvention = CDI_CONVENTION_CF;
 	      if ( CDI_Debug )
