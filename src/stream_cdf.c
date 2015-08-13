@@ -7596,6 +7596,51 @@ void find_time_vars(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimid, 
     }
 }
 
+static
+void read_vct_echam(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdims, double **vct, size_t *pvctsize)
+{
+  size_t vctsize = 0;
+
+  /* find ECHAM VCT */
+  int nvcth_id = UNDEFID, vcta_id = UNDEFID, vctb_id = UNDEFID;
+
+  for ( int ncvarid = 0; ncvarid < nvars; ncvarid++ )
+    {
+      if ( ncvars[ncvarid].ndims == 1 && ncvars[ncvarid].name[0] == 'h' && ncvars[ncvarid].name[1] == 'y' && ncvars[ncvarid].name[4] == 0 )
+	{
+	  if ( ncvars[ncvarid].name[2] == 'a' && ncvars[ncvarid].name[3] == 'i' ) // hyai
+	    {
+	      vcta_id = ncvarid;
+	      nvcth_id = ncvars[ncvarid].dimids[0];
+              ncvars[ncvarid].isvar = FALSE;
+	    }
+	  else if ( ncvars[ncvarid].name[2] == 'b' && ncvars[ncvarid].name[3] == 'i' ) //hybi
+	    {
+	      vctb_id = ncvarid;
+	      nvcth_id = ncvars[ncvarid].dimids[0];
+              ncvars[ncvarid].isvar = FALSE;
+	    }
+	  else if ( (ncvars[ncvarid].name[2] == 'a' || ncvars[ncvarid].name[2] == 'b') && ncvars[ncvarid].name[3] == 'm' )
+            {
+              ncvars[ncvarid].isvar = FALSE; // hyam or hybm
+            }
+	}
+    }
+
+  /* read VCT */
+  if ( nvcth_id != UNDEFID && vcta_id != UNDEFID && vctb_id != UNDEFID )
+    {
+      vctsize = ncdims[nvcth_id].len;
+      vctsize *= 2;
+      *vct = (double *) malloc(vctsize*sizeof(double));
+      cdf_get_var_double(fileID, vcta_id, *vct);
+      cdf_get_var_double(fileID, vctb_id, *vct+vctsize/2);
+    }
+
+  if ( vctsize ) *pvctsize = vctsize;
+}
+
+
 int cdfInqContents(stream_t *streamptr)
 {
   int ndims, nvars, ngatts, unlimdimid;
@@ -7610,7 +7655,6 @@ int cdfInqContents(stream_t *streamptr)
   int time_climatology = FALSE;
   int leadtime_id = UNDEFID;
   int nvars_data;
-  int nvcth_id = UNDEFID, vcta_id = UNDEFID, vctb_id = UNDEFID;
   int instID  = UNDEFID;
   int modelID = UNDEFID;
   int taxisID;
@@ -7903,49 +7947,16 @@ int cdfInqContents(stream_t *streamptr)
   /* set dim type */
   setDimType(nvars, ncvars, ncdims);
 
-  /* find VCT */
-  for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
-    {
-      if ( ncvars[ncvarid].ndims == 1 )
-	{
-	  if ( memcmp(ncvars[ncvarid].name, "hyai", 4) == 0 )
-	    {
-	      vcta_id = ncvarid;
-	      nvcth_id = ncvars[ncvarid].dimids[0];
-              ncvars[ncvarid].isvar = FALSE;
-	      continue;
-	    }
-	  if ( memcmp(ncvars[ncvarid].name, "hybi", 4) == 0 )
-	    {
-	      vctb_id = ncvarid;
-	      nvcth_id = ncvars[ncvarid].dimids[0];
-              ncvars[ncvarid].isvar = FALSE;
-	      continue;
-	    }
+  /* read ECHAM VCT if present */
+  size_t vctsize = 0;
+  double *vct = NULL;
+  read_vct_echam(fileID, nvars, ncvars, ncdims, &vct, &vctsize);
 
-	  if      ( memcmp(ncvars[ncvarid].name, "hyam", 4) == 0 ) ncvars[ncvarid].isvar = FALSE;
-	  else if ( memcmp(ncvars[ncvarid].name, "hybm", 4) == 0 ) ncvars[ncvarid].isvar = FALSE;
-	}
-    }
 
   if ( CDI_Debug ) printNCvars(ncvars, nvars, "define_all_grids");
 
-
   /* define all grids */
   define_all_grids(streamptr, vlistID, ncdims, nvars, ncvars, timedimid, uuidOfHGrid, gridfile, number_of_grid_used);
-
-
-  /* read VCT */
-  size_t vctsize = 0;
-  double *vct = NULL;
-  if ( nvcth_id != UNDEFID && vcta_id != UNDEFID && vctb_id != UNDEFID )
-    {
-      vctsize = ncdims[nvcth_id].len;
-      vctsize *= 2;
-      vct = (double *) malloc(vctsize*sizeof(double));
-      cdf_get_var_double(fileID, vcta_id, vct);
-      cdf_get_var_double(fileID, vctb_id, vct+vctsize/2);
-    }
 
 
   /* define all zaxes */
