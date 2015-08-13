@@ -7995,15 +7995,15 @@ int cdfInqContents(stream_t *streamptr)
   cdiCreateTimesteps(streamptr);
 
   /* time varID */
-  ncvarid = streamptr->basetime.ncvarid;
+  int nctimevarid = streamptr->basetime.ncvarid;
 
   if ( time_has_units )
     {
       taxis_t *taxis = &streamptr->tsteps[0].taxis;
 
-      if ( setBaseTime(ncvars[ncvarid].units, taxis) == 1 )
+      if ( setBaseTime(ncvars[nctimevarid].units, taxis) == 1 )
         {
-          ncvarid = UNDEFID;
+          nctimevarid = UNDEFID;
           streamptr->basetime.ncvarid = UNDEFID;
         }
 
@@ -8027,23 +8027,21 @@ int cdfInqContents(stream_t *streamptr)
       if ( time_climatology ) streamptr->tsteps[0].taxis.climatology = TRUE;
     }
 
-  if ( ncvarid != UNDEFID )
+  if ( nctimevarid != UNDEFID )
     {
       taxis_t *taxis = &streamptr->tsteps[0].taxis;
-      ptaxisDefName(taxis, ncvars[ncvarid].name);
-      if ( ncvars[ncvarid].longname[0] )
-        ptaxisDefLongname(taxis, ncvars[ncvarid].longname);
+      ptaxisDefName(taxis, ncvars[nctimevarid].name);
+      if ( ncvars[nctimevarid].longname[0] )
+        ptaxisDefLongname(taxis, ncvars[nctimevarid].longname);
     }
 
-  if ( ncvarid != UNDEFID )
-    if ( ncvars[ncvarid].calendar == TRUE )
+  if ( nctimevarid != UNDEFID )
+    if ( ncvars[nctimevarid].calendar == TRUE )
       {
-        enum {
-          attstringlen = 8192,
-        };
+        enum {attstringlen = 8192};
         char attstring[attstringlen];
 
-	cdfGetAttText(fileID, ncvarid, "calendar", attstringlen, attstring);
+	cdfGetAttText(fileID, nctimevarid, "calendar", attstringlen, attstring);
 	strtolower(attstring);
 
 	if ( memcmp(attstring, "standard", 8)  == 0 ||
