@@ -72,6 +72,8 @@ typedef struct {
   int      tabnum;
   int      climatology;
   int      bounds;
+  int      lformula;
+  int      lformulaterms;
   int      gridID;
   int      zaxisID;
   int      gridtype;
@@ -83,6 +85,7 @@ typedef struct {
   int      yvarid;
   int      zvarid;
   int      tvarid;
+  int      psvarid;
   int      ncoordvars;
   int      coordvarids[MAX_COORDVARS];
   int      nauxvars;
@@ -108,8 +111,8 @@ typedef struct {
   int      deflate;
   int      lunsigned;
   int      lvalidrange;
-  size_t   vlen;
-  double  *vdata;
+  size_t   vctsize;
+  double  *vct;
   double   missval;
   double   fillval;
   double   addoffset;
@@ -4837,9 +4840,7 @@ int cdfTimeDimID(int fileID, int ndims, int nvars)
 static
 void init_ncdims(long ndims, ncdim_t *ncdims)
 {
-  long ncdimid;
-
-  for ( ncdimid = 0; ncdimid < ndims; ncdimid++ )
+  for ( long ncdimid = 0; ncdimid < ndims; ncdimid++ )
     {
       ncdims[ncdimid].ncvarid      = UNDEFID;
       ncdims[ncdimid].dimtype      = UNDEFID;
@@ -4851,9 +4852,7 @@ void init_ncdims(long ndims, ncdim_t *ncdims)
 static
 void init_ncvars(long nvars, ncvar_t *ncvars)
 {
-  long ncvarid;
-
-  for ( ncvarid = 0; ncvarid < nvars; ++ncvarid )
+  for ( long ncvarid = 0; ncvarid < nvars; ++ncvarid )
     {
       ncvars[ncvarid].ncid            = UNDEFID;
       ncvars[ncvarid].ignore          = FALSE;
@@ -4870,6 +4869,8 @@ void init_ncvars(long nvars, ncvar_t *ncvars)
       ncvars[ncvarid].calendar        = FALSE;
       ncvars[ncvarid].climatology     = FALSE;
       ncvars[ncvarid].bounds          = UNDEFID;
+      ncvars[ncvarid].lformula        = FALSE;
+      ncvars[ncvarid].lformulaterms   = FALSE;
       ncvars[ncvarid].gridID          = UNDEFID;
       ncvars[ncvarid].zaxisID         = UNDEFID;
       ncvars[ncvarid].gridtype        = UNDEFID;
@@ -4881,6 +4882,7 @@ void init_ncvars(long nvars, ncvar_t *ncvars)
       ncvars[ncvarid].yvarid          = UNDEFID;
       ncvars[ncvarid].zvarid          = UNDEFID;
       ncvars[ncvarid].tvarid          = UNDEFID;
+      ncvars[ncvarid].psvarid         = UNDEFID;
       ncvars[ncvarid].ncoordvars      = 0;
       for ( int i = 0; i < MAX_COORDVARS; ++i )
         ncvars[ncvarid].coordvarids[i]  = UNDEFID;
@@ -4892,8 +4894,8 @@ void init_ncvars(long nvars, ncvar_t *ncvars)
       ncvars[ncvarid].xtype           = 0;
       ncvars[ncvarid].ndims           = 0;
       ncvars[ncvarid].gmapid          = UNDEFID;
-      ncvars[ncvarid].vlen            = 0;
-      ncvars[ncvarid].vdata           = NULL;
+      ncvars[ncvarid].vctsize         = 0;
+      ncvars[ncvarid].vct             = NULL;
       ncvars[ncvarid].truncation      = 0;
       ncvars[ncvarid].position        = 0;
       ncvars[ncvarid].positive        = 0;
@@ -4919,6 +4921,36 @@ void init_ncvars(long nvars, ncvar_t *ncvars)
       ncvars[ncvarid].validrange[1]   = VALIDMISS;
       ncvars[ncvarid].ensdata         = NULL;
     }
+}
+
+static
+void cdfSetVar(ncvar_t *ncvars, int ncvarid, int isvar)
+{
+  if ( ncvars[ncvarid].isvar != UNDEFID &&
+       ncvars[ncvarid].isvar != isvar   &&
+       ncvars[ncvarid].warn  == FALSE )
+    {
+      if ( ! ncvars[ncvarid].ignore )
+        Warning("Inconsistent variable definition for %s!", ncvars[ncvarid].name);
+
+      ncvars[ncvarid].warn = TRUE;
+      isvar = FALSE;
+    }
+
+  ncvars[ncvarid].isvar = isvar;
+}
+
+static
+void cdfSetDim(ncvar_t *ncvars, int ncvarid, int dimid, int dimtype)
+{
+  if ( ncvars[ncvarid].dimtype[dimid] != UNDEFID &&
+       ncvars[ncvarid].dimtype[dimid] != dimtype )
+    {
+      Warning("Inconsistent dimension definition for %s! dimid = %d;  type = %d;  newtype = %d",
+              ncvars[ncvarid].name, dimid, ncvars[ncvarid].dimtype[dimid], dimtype);
+    }
+
+  ncvars[ncvarid].dimtype[dimid] = dimtype;
 }
 
 static
@@ -5053,8 +5085,116 @@ int unitsIsPressure(const char *units)
       status = TRUE;
     }
 
-  return (status);
+  return status;
 }
+
+static
+void scan_hybrid_formula(int ncid, int ncfvarid, int *apvarid, int *bvarid, int *psvarid)
+{
+  *apvarid = -1;
+  *bvarid  = -1;
+  *psvarid = -1;
+  const int attstringlen = 8192; char attstring[8192];
+  cdfGetAttText(ncid, ncfvarid, "formula", attstringlen, attstring);
+  if ( strcmp(attstring, "p = ap + b*ps") == 0 )
+    {
+      int lstop = FALSE;
+      int dimvarid;
+      cdfGetAttText(ncid, ncfvarid, "formula_terms", attstringlen, attstring);
+      char *pstring = attstring;
+
+      for ( int i = 0; i < 3; i++ )
+        {
+          while ( isspace((int) *pstring) ) pstring++;
+          if ( *pstring == 0 ) break;
+          char *tagname = pstring;
+          while ( !isspace((int) *pstring) && *pstring != 0 ) pstring++;
+          if ( *pstring == 0 ) lstop = TRUE;
+          *pstring++ = 0;
+
+          while ( isspace((int) *pstring) ) pstring++;
+          if ( *pstring == 0 ) break;
+          char *varname = pstring;
+          while ( !isspace((int) *pstring) && *pstring != 0 ) pstring++;
+          if ( *pstring == 0 ) lstop = TRUE;
+          *pstring++ = 0;
+
+          int status = nc_inq_varid(ncid, varname, &dimvarid);
+          if ( status == NC_NOERR )
+            {
+              if      ( strcmp(tagname, "ap:") == 0 ) *apvarid = dimvarid;
+              else if ( strcmp(tagname, "b:")  == 0 ) *bvarid  = dimvarid;
+              else if ( strcmp(tagname, "ps:") == 0 ) *psvarid = dimvarid;
+            }
+          else
+            {
+              Warning("%s - %s", nc_strerror(status), varname);
+            }
+
+          if ( lstop ) break;
+        }
+    }
+}
+
+static
+int isHybridSigmaPressureCoordinate(int ncid, int ncvarid, ncvar_t *ncvars, ncdim_t *ncdims)
+{
+  int status = FALSE;
+  int ncfvarid = ncvarid;
+  ncvar_t *ncvar = &ncvars[ncvarid];
+
+  if ( strcmp(ncvar->stdname, "atmosphere_hybrid_sigma_pressure_coordinate") == 0 )
+    {
+      status = TRUE;
+      ncvar->zaxistype = ZAXIS_HYBRID;
+      int dimid = ncvar->dimids[0];
+      int dimlen = (int)ncdims[dimid].len;
+
+      int apvarid1 = -1, bvarid1 = -1, psvarid1 = -1;
+      scan_hybrid_formula(ncid, ncfvarid, &apvarid1, &bvarid1, &psvarid1);
+      if ( apvarid1 != -1 ) ncvars[apvarid1].isvar = FALSE;
+      if ( bvarid1  != -1 ) ncvars[bvarid1].isvar  = FALSE;
+      if ( psvarid1 != -1 ) ncvar->psvarid = psvarid1;
+
+      if ( ncvar->bounds != UNDEFID && ncvars[ncvar->bounds].lformula && ncvars[ncvar->bounds].lformulaterms )
+        {
+          ncfvarid = ncvar->bounds;
+          int apvarid2 = -1, bvarid2 = -1, psvarid2 = -1;
+          scan_hybrid_formula(ncid, ncfvarid, &apvarid2, &bvarid2, &psvarid2);
+          if ( apvarid2 != -1 && bvarid2 != -1 )
+            {
+              ncvars[apvarid2].isvar = FALSE;
+              ncvars[bvarid2].isvar  = FALSE;
+
+              if ( dimid == ncvars[apvarid2].dimids[0] && ncdims[ncvars[apvarid2].dimids[1]].len == 2 )
+                {
+                  double abuf[dimlen*2], bbuf[dimlen*2];
+                  cdf_get_var_double(ncid, apvarid2, abuf);
+                  cdf_get_var_double(ncid, bvarid2, bbuf);
+                  /*
+                  for ( int i = 0; i < dimlen; ++i )
+                    printf("%d  %g %g    %g %g\n", i, abuf[i*2], abuf[i*2+1], bbuf[i*2], bbuf[i*2+1]);
+                  */
+                  int vctsize = (dimlen+1)*2;
+                  double *vct = (double *) malloc(vctsize*sizeof(double));
+                  for ( int i = 0; i < dimlen; ++i )
+                    {
+                      vct[i] = abuf[i*2];
+                      vct[i+dimlen+1] = bbuf[i*2];
+                    }
+                  vct[dimlen]     = abuf[dimlen*2-1];
+                  vct[dimlen*2+1] = abuf[dimlen*2-1];
+
+                  ncvar->vct = vct;
+                  ncvar->vctsize = vctsize;
+                }
+            }
+        }
+    }
+
+  return status;
+}
+
 
 static
 int isGaussGrid(size_t ysize, double yinc, double *yvals)
@@ -5092,39 +5232,6 @@ int isGaussGrid(size_t ysize, double yinc, double *yvals)
     }
 
   return (lgauss);
-}
-
-static
-void cdfSetVar(ncvar_t *ncvars, int ncvarid, int isvar)
-{
-  if ( isvar != TRUE && isvar != FALSE )
-    Error("Internal problem! var %s undefined", ncvars[ncvarid].name);
-
-  if ( ncvars[ncvarid].isvar != UNDEFID &&
-       ncvars[ncvarid].isvar != isvar   &&
-       ncvars[ncvarid].warn  == FALSE )
-    {
-      if ( ! ncvars[ncvarid].ignore )
-        Warning("Inconsistent variable definition for %s!", ncvars[ncvarid].name);
-
-      ncvars[ncvarid].warn = TRUE;
-      isvar = FALSE;
-    }
-
-  ncvars[ncvarid].isvar = isvar;
-}
-
-static
-void cdfSetDim(ncvar_t *ncvars, int ncvarid, int dimid, int dimtype)
-{
-  if ( ncvars[ncvarid].dimtype[dimid] != UNDEFID &&
-       ncvars[ncvarid].dimtype[dimid] != dimtype )
-    {
-      Warning("Inconsistent dimension definition for %s! dimid = %d;  type = %d;  newtype = %d",
-              ncvars[ncvarid].name, dimid, ncvars[ncvarid].dimtype[dimid], dimtype);
-    }
-
-  ncvars[ncvarid].dimtype[dimid] = dimtype;
 }
 
 static
@@ -5186,7 +5293,6 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
   int *dimidsp;
   int iatt;
   int i;
-  int tablenum;
   nc_type xtype, atttype;
   size_t attlen;
   char name[CDI_MAX_NAME];
@@ -5304,6 +5410,7 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
             }
           else if ( strcmp(attname, "table") == 0 && !xtypeIsText(atttype) )
             {
+              int tablenum;
               cdfGetAttInt(ncid, ncvarid, attname, 1, &tablenum);
               if ( tablenum > 0 )
                 {
@@ -5436,12 +5543,9 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
             }
           else if ( strcmp(attname, "climatology") == 0 && xtypeIsText(atttype) )
             {
-              int status, ncboundsid;
-
               cdfGetAttText(ncid, ncvarid, attname, attstringlen, attstring);
-
-              status = nc_inq_varid(ncid, attstring, &ncboundsid);
-
+              int ncboundsid;
+              int status = nc_inq_varid(ncid, attstring, &ncboundsid);
               if ( status == NC_NOERR )
                 {
                   ncvars[ncvarid].climatology = TRUE;
@@ -5452,14 +5556,11 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
               else
                 Warning("%s - %s", nc_strerror(status), attstring);
             }
-          else if ( strcmp(attname, "bounds") == 0 && xtypeIsText(atttype) )
+          else if ( xtypeIsText(atttype) && strcmp(attname, "bounds") == 0 )
             {
-              int status, ncboundsid;
-
               cdfGetAttText(ncid, ncvarid, attname, attstringlen, attstring);
-
-              status = nc_inq_varid(ncid, attstring, &ncboundsid);
-
+              int ncboundsid;
+              int status = nc_inq_varid(ncid, attstring, &ncboundsid);
               if ( status == NC_NOERR )
                 {
                   ncvars[ncvarid].bounds = ncboundsid;
@@ -5469,12 +5570,20 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
               else
                 Warning("%s - %s", nc_strerror(status), attstring);
             }
+          else if ( xtypeIsText(atttype) && strcmp(attname, "formula_terms") == 0 )
+            {
+              ncvars[ncvarid].lformulaterms = TRUE;
+            }
+          else if ( xtypeIsText(atttype) && strcmp(attname, "formula") == 0 )
+            {
+              ncvars[ncvarid].lformula = TRUE;
+            }
           else if ( strcmp(attname, "cell_measures") == 0 && xtypeIsText(atttype) )
             {
-              char *pstring, *cell_measures = NULL, *cell_var = NULL;
+              char *cell_measures = NULL, *cell_var = NULL;
 
               cdfGetAttText(ncid, ncvarid, attname, attstringlen, attstring);
-              pstring = attstring;
+              char *pstring = attstring;
 
               while ( isspace((int) *pstring) ) pstring++;
               cell_measures = pstring;
@@ -5490,10 +5599,8 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
               */
               if ( memcmp(cell_measures, "area", 4) == 0 )
                 {
-                  int status;
                   int nc_cell_id;
-
-                  status = nc_inq_varid(ncid, cell_var, &nc_cell_id);
+                  int status = nc_inq_varid(ncid, cell_var, &nc_cell_id);
                   if ( status == NC_NOERR )
                     {
                       ncvars[ncvarid].cellarea = nc_cell_id;
@@ -5534,16 +5641,16 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
               cdfSetVar(ncvars, ncvarid, TRUE);
             }
           */
-          else if ( (strcmp(attname, "associate")  == 0 || strcmp(attname, "coordinates") == 0) && xtypeIsText(atttype) )
+          else if ( (strcmp(attname, "associate")  == 0 || strcmp(attname, " coordinates") == 0) && xtypeIsText(atttype) )
             {
               int status;
-              char *pstring, *varname = NULL;
+              char *varname = NULL;
               int lstop = FALSE;
               int dimvarid;
               extern int cdiIgnoreAttCoordinates;
 
               cdfGetAttText(ncid, ncvarid, attname, attstringlen, attstring);
-              pstring = attstring;
+              char *pstring = attstring;
 
               for ( i = 0; i < MAX_COORDVARS; i++ )
                 {
@@ -5585,13 +5692,13 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
           else if ( (strcmp(attname, "auxiliary_variable") == 0) && xtypeIsText(atttype) )
             {
               int status;
-              char *pstring, *varname = NULL;
+              char *varname = NULL;
               int lstop = FALSE;
               int dimvarid;
               extern int cdiIgnoreAttCoordinates;
 
               cdfGetAttText(ncid, ncvarid, attname, attstringlen, attstring);
-              pstring = attstring;
+              char *pstring = attstring;
 
               for ( i = 0; i < MAX_AUXVARS; i++ )
                 {
@@ -5622,12 +5729,9 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
             }
           else if ( strcmp(attname, "grid_mapping") == 0 && xtypeIsText(atttype) )
             {
-              int status;
-              int nc_gmap_id;
-
               cdfGetAttText(ncid, ncvarid, attname, attstringlen, attstring);
-
-              status = nc_inq_varid(ncid, attstring, &nc_gmap_id);
+              int nc_gmap_id;
+              int status = nc_inq_varid(ncid, attstring, &nc_gmap_id);
               if ( status == NC_NOERR )
                 {
                   ncvars[ncvarid].gmapid = nc_gmap_id;
@@ -5953,7 +6057,7 @@ void setDimType(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
 
 /* verify coordinate vars - first scan (dimname == varname) */
 static
-void verify_coordinate_vars_1(int ndims, ncdim_t *ncdims, ncvar_t *ncvars, int timedimid)
+void verify_coordinate_vars_1(int ncid, int ndims, ncdim_t *ncdims, ncvar_t *ncvars, int timedimid)
 {
   int ncdimid, ncvarid;
 
@@ -5968,6 +6072,8 @@ void verify_coordinate_vars_1(int ndims, ncdim_t *ncdims, ncvar_t *ncvars, int t
 	      ncdims[ncdimid].dimtype = T_AXIS;
 	      continue;
 	    }
+
+          if ( isHybridSigmaPressureCoordinate(ncid, ncvarid, ncvars, ncdims) ) continue;
 
 	  if ( ncvars[ncvarid].units[0] != 0 )
 	    {
@@ -6894,7 +7000,7 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 /* define all input zaxes */
 static
 void define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars,
-		      size_t vctsize, double *vct, unsigned char *uuidOfVGrid)
+		      size_t vctsize_echam, double *vct_echam, unsigned char *uuidOfVGrid)
 {
   int ncvarid, ncvarid2;
   int i, ilev, ndims;
@@ -6902,7 +7008,10 @@ void define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
   int zprec;
   int nbdims, nvertex, nlevel;
   int positive = 0;
+  int psvarid;
   char *pname, *plongname, *punits;
+  size_t vctsize = vctsize_echam;
+  double *vct = vct_echam;
 
   for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
     {
@@ -6956,6 +7065,15 @@ void define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 		if ( pname[len-2] == '_' && isdigit((int) pname[len-1]) )
 		  pname[len-2] = 0;
 	      */
+              psvarid = -1;
+              if ( zaxisType == ZAXIS_HYBRID && ncvars[zvarid].vct )
+                {
+                  vct = ncvars[zvarid].vct;
+                  vctsize = ncvars[zvarid].vctsize;
+
+                  if ( ncvars[zvarid].psvarid != -1 ) psvarid = ncvars[zvarid].psvarid;
+                }
+
 	      cdf_get_var_double(ncvars[zvarid].ncid, zvarid, zvar);
 
 	      if ( ncvars[zvarid].bounds != UNDEFID )
@@ -7018,6 +7136,8 @@ void define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
               // printf("uuidOfVGrid: defined\n");
               zaxisDefUUID(ncvars[ncvarid].zaxisID, uuidOfVGrid);
             }
+
+          //  if ( zaxisType == ZAXIS_HYBRID && psvarID != -1 ) zaxisDefPsname(ncvars[ncvarid].zaxisID, ncvars[psvarid].name);
 
           if ( positive > 0 ) zaxisDefPositive(ncvars[ncvarid].zaxisID, positive);
 
@@ -7264,7 +7384,9 @@ void define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, 
 		}
 	    }
 
-	  free(ncvars[ncvarid].atts);
+	  if (ncvars[ncvarid].vct) free(ncvars[ncvarid].vct);
+	  if (ncvars[ncvarid].atts) free(ncvars[ncvarid].atts);
+          ncvars[ncvarid].vct = NULL;
           ncvars[ncvarid].atts = NULL;
 	}
     }
@@ -7876,7 +7998,7 @@ int cdfInqContents(stream_t *streamptr)
     }
 
   /* verify coordinate vars - first scan (dimname == varname) */
-  verify_coordinate_vars_1(ndims, ncdims, ncvars, timedimid);
+  verify_coordinate_vars_1(fileID, ndims, ncdims, ncvars, timedimid);
 
   /* verify coordinate vars - second scan (all other variables) */
   verify_coordinate_vars_2(nvars, ncvars);
