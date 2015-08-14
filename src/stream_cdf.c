@@ -7021,9 +7021,9 @@ void define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 	  int zdimid = UNDEFID;
 	  int zvarid = UNDEFID;
 	  int zsize = 1;
+	  int zaxisType;
 	  double *lbounds = NULL;
 	  double *ubounds = NULL;
-	  int zaxisType;
 
           positive = 0;
 
@@ -7137,7 +7137,7 @@ void define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
               zaxisDefUUID(ncvars[ncvarid].zaxisID, uuidOfVGrid);
             }
 
-          //  if ( zaxisType == ZAXIS_HYBRID && psvarID != -1 ) zaxisDefPsname(ncvars[ncvarid].zaxisID, ncvars[psvarid].name);
+          if ( zaxisType == ZAXIS_HYBRID && psvarid != -1 ) zaxisDefPsName(ncvars[ncvarid].zaxisID, ncvars[psvarid].name);
 
           if ( positive > 0 ) zaxisDefPositive(ncvars[ncvarid].zaxisID, positive);
 

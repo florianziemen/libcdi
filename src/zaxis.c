@@ -68,6 +68,7 @@ typedef struct {
   char     longname[CDI_MAX_NAME];
   char     stdname[CDI_MAX_NAME];
   char     units[CDI_MAX_NAME];
+  char     psname[CDI_MAX_NAME];
   double  *vals;
   double  *lbounds;
   double  *ubounds;
@@ -87,7 +88,7 @@ typedef struct {
 }
 zaxis_t;
 
-static int zaxisCompareP(zaxis_t *z1, zaxis_t *z2);
+static int    zaxisCompareP    (zaxis_t *z1, zaxis_t *z2);
 static void   zaxisDestroyP    ( void * zaxisptr );
 static void   zaxisPrintP      ( void * zaxisptr, FILE * fp );
 static int    zaxisGetPackSize ( void * zaxisptr, void *context);
@@ -138,6 +139,7 @@ void zaxisDefaultValue(zaxis_t *zaxisptr)
   zaxisptr->longname[0] = 0;
   zaxisptr->stdname[0]  = 0;
   zaxisptr->units[0]    = 0;
+  zaxisptr->psname[0]   = 0;
   zaxisptr->vals        = NULL;
   zaxisptr->ubounds     = NULL;
   zaxisptr->lbounds     = NULL;
@@ -428,6 +430,19 @@ void zaxisDefUnits(int zaxisID, const char *units)
     }
 }
 
+
+void zaxisDefPsName(int zaxisID, const char *psname)
+{
+  zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
+
+  if ( psname )
+    {
+      strncpy(zaxisptr->psname, psname, CDI_MAX_NAME - 1);
+      zaxisptr->name[CDI_MAX_NAME - 1] = '\0';
+      reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
+    }
+}
+
 /*
 @Function  zaxisInqName
 @Title     Get the name of a Z-axis
@@ -508,6 +523,13 @@ void zaxisInqStdname(int zaxisID, char *stdname)
 {
   zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
   strcpy(stdname, zaxisptr->stdname);
+}
+
+
+void zaxisInqPsName(int zaxisID, char *psname)
+{
+  zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
+  strcpy(psname, zaxisptr->psname);
 }
 
 
