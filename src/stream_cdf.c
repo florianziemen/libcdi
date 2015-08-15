@@ -7008,7 +7008,7 @@ void define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
   int zprec;
   int nbdims, nvertex, nlevel;
   int positive = 0;
-  int psvarid;
+  int psvarid = -1;
   char *pname, *plongname, *punits;
   size_t vctsize = vctsize_echam;
   double *vct = vct_echam;
@@ -7721,30 +7721,32 @@ void find_time_vars(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimid, 
 static
 void read_vct_echam(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdims, double **vct, size_t *pvctsize)
 {
-  size_t vctsize = 0;
-
   /* find ECHAM VCT */
   int nvcth_id = UNDEFID, vcta_id = UNDEFID, vctb_id = UNDEFID;
 
   for ( int ncvarid = 0; ncvarid < nvars; ncvarid++ )
     {
-      if ( ncvars[ncvarid].ndims == 1 && ncvars[ncvarid].name[0] == 'h' && ncvars[ncvarid].name[1] == 'y' && ncvars[ncvarid].name[4] == 0 )
-	{
-	  if ( ncvars[ncvarid].name[2] == 'a' && ncvars[ncvarid].name[3] == 'i' ) // hyai
-	    {
-	      vcta_id = ncvarid;
-	      nvcth_id = ncvars[ncvarid].dimids[0];
-              ncvars[ncvarid].isvar = FALSE;
-	    }
-	  else if ( ncvars[ncvarid].name[2] == 'b' && ncvars[ncvarid].name[3] == 'i' ) //hybi
-	    {
-	      vctb_id = ncvarid;
-	      nvcth_id = ncvars[ncvarid].dimids[0];
-              ncvars[ncvarid].isvar = FALSE;
-	    }
-	  else if ( (ncvars[ncvarid].name[2] == 'a' || ncvars[ncvarid].name[2] == 'b') && ncvars[ncvarid].name[3] == 'm' )
+      if ( ncvars[ncvarid].ndims == 1 )
+        {
+          size_t len = strlen(ncvars[ncvarid].name);
+          if ( len == 4 && ncvars[ncvarid].name[0] == 'h' && ncvars[ncvarid].name[1] == 'y' )
             {
-              ncvars[ncvarid].isvar = FALSE; // hyam or hybm
+              if ( ncvars[ncvarid].name[2] == 'a' && ncvars[ncvarid].name[3] == 'i' ) // hyai
+                {
+                  vcta_id = ncvarid;
+                  nvcth_id = ncvars[ncvarid].dimids[0];
+                  ncvars[ncvarid].isvar = FALSE;
+                }
+              else if ( ncvars[ncvarid].name[2] == 'b' && ncvars[ncvarid].name[3] == 'i' ) //hybi
+                {
+                  vctb_id = ncvarid;
+                  nvcth_id = ncvars[ncvarid].dimids[0];
+                  ncvars[ncvarid].isvar = FALSE;
+                }
+              else if ( (ncvars[ncvarid].name[2] == 'a' || ncvars[ncvarid].name[2] == 'b') && ncvars[ncvarid].name[3] == 'm' )
+                {
+                  ncvars[ncvarid].isvar = FALSE; // hyam or hybm
+                }
             }
 	}
     }
@@ -7752,14 +7754,13 @@ void read_vct_echam(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdims, dou
   /* read VCT */
   if ( nvcth_id != UNDEFID && vcta_id != UNDEFID && vctb_id != UNDEFID )
     {
-      vctsize = ncdims[nvcth_id].len;
+      size_t vctsize = ncdims[nvcth_id].len;
       vctsize *= 2;
       *vct = (double *) malloc(vctsize*sizeof(double));
       cdf_get_var_double(fileID, vcta_id, *vct);
       cdf_get_var_double(fileID, vctb_id, *vct+vctsize/2);
+      *pvctsize = vctsize;
     }
-
-  if ( vctsize ) *pvctsize = vctsize;
 }
 
 
