@@ -1010,16 +1010,14 @@ void zaxisDefVct(int zaxisID, int size, const double *vct)
 {
   zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
 
-  if ( zaxisptr->vct == 0 )
+  if ( zaxisptr->vct == 0 || zaxisptr->vctsize != size )
     {
       zaxisptr->vctsize = size;
-      zaxisptr->vct = (double *)xmalloc((size_t)size * sizeof (double));
-      memcpy(zaxisptr->vct, vct, (size_t)size * sizeof (double));
-      reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
+      zaxisptr->vct = (double *) realloc(zaxisptr->vct, (size_t)size*sizeof(double));
     }
-  else
-    if ( zaxisptr->vctsize != size )
-      Warning("VCT was already defined");
+
+  memcpy(zaxisptr->vct, vct, (size_t)size*sizeof(double));
+  reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
 }
 
 
