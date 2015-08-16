@@ -5151,7 +5151,8 @@ int isHybridSigmaPressureCoordinate(int ncid, int ncvarid, ncvar_t *ncvars, ncdi
       int dimlen = (int)ncdims[dimid].len;
 
       int apvarid1 = -1, bvarid1 = -1, psvarid1 = -1;
-      scan_hybrid_formula(ncid, ncfvarid, &apvarid1, &bvarid1, &psvarid1);
+      if ( ncvars[ncfvarid].lformula && ncvars[ncfvarid].lformulaterms )
+        scan_hybrid_formula(ncid, ncfvarid, &apvarid1, &bvarid1, &psvarid1);
       if ( apvarid1 != -1 ) ncvars[apvarid1].isvar = FALSE;
       if ( bvarid1  != -1 ) ncvars[bvarid1].isvar  = FALSE;
       if ( psvarid1 != -1 ) ncvar->psvarid = psvarid1;
@@ -5160,7 +5161,8 @@ int isHybridSigmaPressureCoordinate(int ncid, int ncvarid, ncvar_t *ncvars, ncdi
         {
           ncfvarid = ncvar->bounds;
           int apvarid2 = -1, bvarid2 = -1, psvarid2 = -1;
-          scan_hybrid_formula(ncid, ncfvarid, &apvarid2, &bvarid2, &psvarid2);
+          if ( ncvars[ncfvarid].lformula && ncvars[ncfvarid].lformulaterms )
+            scan_hybrid_formula(ncid, ncfvarid, &apvarid2, &bvarid2, &psvarid2);
           if ( apvarid2 != -1 && bvarid2 != -1 )
             {
               ncvars[apvarid2].isvar = FALSE;
@@ -8297,6 +8299,7 @@ double get_timevalue(int fileID, int nctimevarid, int tsID, timecache_t *tcache)
 
   return timevalue;
 }
+
 
 int cdfInqTimestep(stream_t * streamptr, int tsID)
 {
