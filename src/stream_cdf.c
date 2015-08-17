@@ -2405,8 +2405,6 @@ void cdf_def_vct_cf(stream_t *streamptr, int zaxisID, int nclevID, int ncbndsID)
 
       cdf_def_var(fileID, "ap", NC_DOUBLE, 1, dimIDs,  &hyamid);
       cdf_def_var(fileID, "b",  NC_DOUBLE, 1, dimIDs,  &hybmid);
-      cdf_def_var(fileID, "ap_bnds", NC_DOUBLE, 2, dimIDs, &hyaiid);
-      cdf_def_var(fileID, "b_bnds",  NC_DOUBLE, 2, dimIDs, &hybiid);
 
       strcpy(tmpname, "vertical coordinate formula term: ap(k)");
       cdf_put_att_text(fileID, hyamid, "long_name", strlen(tmpname), tmpname);
@@ -2416,34 +2414,44 @@ void cdf_def_vct_cf(stream_t *streamptr, int zaxisID, int nclevID, int ncbndsID)
       cdf_put_att_text(fileID, hybmid, "long_name", strlen(tmpname), tmpname);
       strcpy(tmpname, "1");
       cdf_put_att_text(fileID, hybmid, "units", strlen(tmpname), tmpname);
-      strcpy(tmpname, "vertical coordinate formula term: ap(k+1/2)");
-      cdf_put_att_text(fileID, hyaiid, "long_name", strlen(tmpname), tmpname);
-      strcpy(tmpname, "Pa");
-      cdf_put_att_text(fileID, hyaiid, "units", strlen(tmpname), tmpname);
-      strcpy(tmpname, "vertical coordinate formula term: b(k+1/2)");
-      cdf_put_att_text(fileID, hybiid, "long_name", strlen(tmpname), tmpname);
-      strcpy(tmpname, "1");
-      cdf_put_att_text(fileID, hybiid, "units", strlen(tmpname), tmpname);
+
+      if ( ncbndsID != -1 )
+        {
+          cdf_def_var(fileID, "ap_bnds", NC_DOUBLE, 2, dimIDs, &hyaiid);
+          cdf_def_var(fileID, "b_bnds",  NC_DOUBLE, 2, dimIDs, &hybiid);
+
+          strcpy(tmpname, "vertical coordinate formula term: ap(k+1/2)");
+          cdf_put_att_text(fileID, hyaiid, "long_name", strlen(tmpname), tmpname);
+          strcpy(tmpname, "Pa");
+          cdf_put_att_text(fileID, hyaiid, "units", strlen(tmpname), tmpname);
+          strcpy(tmpname, "vertical coordinate formula term: b(k+1/2)");
+          cdf_put_att_text(fileID, hybiid, "long_name", strlen(tmpname), tmpname);
+          strcpy(tmpname, "1");
+          cdf_put_att_text(fileID, hybiid, "units", strlen(tmpname), tmpname);
+        }
 
       cdf_enddef(fileID);
       streamptr->ncmode = 2;
 
       const double *vctptr = zaxisInqVctPtr(zaxisID);
-      double *tarray = (double *) malloc(2*ilev*sizeof(double));
+      double tarray[ilev*2];
 
-      for ( int i = 0; i < mlev; ++i )
+      if ( ncbndsID != -1 )
         {
-          tarray[2*i  ] = vctptr[i];
-          tarray[2*i+1] = vctptr[i+1];
-        }
-      cdf_put_var_double(fileID, hyaiid, tarray);
+          for ( int i = 0; i < mlev; ++i )
+            {
+              tarray[2*i  ] = vctptr[i];
+              tarray[2*i+1] = vctptr[i+1];
+            }
+          cdf_put_var_double(fileID, hyaiid, tarray);
 
-      for ( int i = 0; i < mlev; ++i )
-        {
-          tarray[2*i  ] = vctptr[ilev+i];
-          tarray[2*i+1] = vctptr[ilev+i+1];
+          for ( int i = 0; i < mlev; ++i )
+            {
+              tarray[2*i  ] = vctptr[ilev+i];
+              tarray[2*i+1] = vctptr[ilev+i+1];
+            }
+          cdf_put_var_double(fileID, hybiid, tarray);
         }
-      cdf_put_var_double(fileID, hybiid, tarray);
 
       for ( int i = 0; i < mlev; ++i )
         tarray[i] = (vctptr[i] + vctptr[i+1]) * 0.5;
@@ -2452,8 +2460,6 @@ void cdf_def_vct_cf(stream_t *streamptr, int zaxisID, int nclevID, int ncbndsID)
       for ( int i = 0; i < mlev; ++i )
         tarray[i] = (vctptr[ilev+i] + vctptr[ilev+i+1]) * 0.5;
       cdf_put_var_double(fileID, hybmid, tarray);
-
-      free(tarray);
     }
 }
 
@@ -2544,7 +2550,23 @@ void cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int ncvarid, int zax
   int ncbvarid = UNDEFID;
   int nvdimID = UNDEFID;
 
+  double lbounds[dimlen], ubounds[dimlen], levels[dimlen];
+
+  zaxisInqLevels(zaxisID, levels);
+
   if ( zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL) )
+    {
+      zaxisInqLbounds(zaxisID, lbounds);
+      zaxisInqUbounds(zaxisID, ubounds);
+    }
+  else
+    {
+      for ( size_t i = 0; i < dimlen; ++i ) lbounds[i] = levels[i];
+      for ( size_t i = 0; i < dimlen-1; ++i ) ubounds[i] = levels[i+1];
+      ubounds[dimlen-1] = levels[dimlen-1] + 1;
+    }
+
+  //if ( zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL) )
     {
       int dimIDs[2];
       size_t nvertex = 2;
@@ -2576,21 +2598,16 @@ void cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int ncvarid, int zax
   cdf_enddef(fileID);
   streamptr->ncmode = 2;
 
-  cdf_put_var_double(fileID, ncvarid, zaxisInqLevelsPtr(zaxisID));
+  cdf_put_var_double(fileID, ncvarid, levels);
 
   if ( ncbvarid != UNDEFID )
     {
-      double lbounds[dimlen], ubounds[dimlen], zbounds[2*dimlen];
-
-      zaxisInqLbounds(zaxisID, lbounds);
-      zaxisInqUbounds(zaxisID, ubounds);
-
+      double zbounds[2*dimlen];
       for ( size_t i = 0; i < dimlen; ++i )
         {
           zbounds[2*i  ] = lbounds[i];
           zbounds[2*i+1] = ubounds[i];
         }
-
       cdf_put_var_double(fileID, ncbvarid, zbounds);
     }
 
@@ -5174,7 +5191,7 @@ int isHybridSigmaPressureCoordinate(int ncid, int ncvarid, ncvar_t *ncvars, ncdi
                       vct[i+dimlen+1] = bbuf[i*2];
                     }
                   vct[dimlen]     = abuf[dimlen*2-1];
-                  vct[dimlen*2+1] = abuf[dimlen*2-1];
+                  vct[dimlen*2+1] = bbuf[dimlen*2-1];
 
                   ncvar->vct = vct;
                   ncvar->vctsize = vctsize;
