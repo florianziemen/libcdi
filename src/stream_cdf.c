@@ -2522,6 +2522,10 @@ void cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int ncvarid, int zax
 {
   char tmpname[CDI_MAX_NAME];
   int fileID = streamptr->fileID;
+  char psname[CDI_MAX_NAME];
+  psname[0] = 0;
+  zaxisInqPsName(zaxisID, psname);
+  if ( psname[0] == 0 ) strcpy(psname, "ps");
 
   if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
@@ -2537,7 +2541,8 @@ void cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int ncvarid, int zax
   cdf_put_att_text(fileID, ncvarid, "long_name", strlen(tmpname), tmpname);
   strcpy(tmpname, "p = ap + b*ps");
   cdf_put_att_text(fileID, ncvarid, "formula", strlen(tmpname), tmpname);
-  strcpy(tmpname, "ap: ap b: b ps: ps");
+  strcpy(tmpname, "ap: ap b: b ps: ");
+  strcat(tmpname, psname);
   cdf_put_att_text(fileID, ncvarid, "formula_terms", strlen(tmpname), tmpname);
 
   strcpy(tmpname, "1");
@@ -2587,7 +2592,8 @@ void cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int ncvarid, int zax
 
           strcpy(tmpname, "p = ap + b*ps");
           cdf_put_att_text(fileID, ncbvarid, "formula", strlen(tmpname), tmpname);
-          strcpy(tmpname, "ap: ap_bnds b: b_bnds ps: ps");
+          strcpy(tmpname, "ap: ap_bnds b: b_bnds ps: ");
+          strcat(tmpname, psname);
           cdf_put_att_text(fileID, ncbvarid, "formula_terms", strlen(tmpname), tmpname);
 
           strcpy(tmpname, "1");
