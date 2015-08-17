@@ -2433,15 +2433,15 @@ void cdf_def_vct_cf(stream_t *streamptr, int zaxisID, int nclevID, int ncbndsID)
 
       for ( int i = 0; i < mlev; ++i )
         {
-          tarray[2*i  ] = vctptr[i+1];
-          tarray[2*i+1] = vctptr[i];
+          tarray[2*i  ] = vctptr[i];
+          tarray[2*i+1] = vctptr[i+1];
         }
       cdf_put_var_double(fileID, hyaiid, tarray);
 
       for ( int i = 0; i < mlev; ++i )
         {
-          tarray[2*i  ] = vctptr[ilev+i+1];
-          tarray[2*i+1] = vctptr[ilev+i];
+          tarray[2*i  ] = vctptr[ilev+i];
+          tarray[2*i+1] = vctptr[ilev+i+1];
         }
       cdf_put_var_double(fileID, hybiid, tarray);
 
@@ -2544,7 +2544,7 @@ void cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int ncvarid, int zax
   int ncbvarid = UNDEFID;
   int nvdimID = UNDEFID;
 
-  //  if ( zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL) )
+  if ( zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL) )
     {
       int dimIDs[2];
       size_t nvertex = 2;
@@ -2577,29 +2577,22 @@ void cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int ncvarid, int zax
   streamptr->ncmode = 2;
 
   cdf_put_var_double(fileID, ncvarid, zaxisInqLevelsPtr(zaxisID));
+  free(attflt);
 
   if ( ncbvarid != UNDEFID )
     {
-      double *lbounds = (double *) malloc(dimlen*sizeof(double));
-      double *ubounds = (double *) malloc(dimlen*sizeof(double));
-      double *zbounds = (double *) malloc(2*dimlen*sizeof(double));
+      double lbounds[dimlen], ubounds[dimlen], zbounds[2*dimlen];
 
-      // zaxisInqLbounds(zaxisID, lbounds);
-      // zaxisInqUbounds(zaxisID, ubounds);
-      zaxisInqLevels(zaxisID, lbounds);
-      for (size_t i = 0; i < dimlen; ++i ) ubounds[i] = lbounds[i] + 1;
+      zaxisInqLbounds(zaxisID, lbounds);
+      zaxisInqUbounds(zaxisID, ubounds);
 
-      for (size_t i = 0; i < dimlen; ++i )
+      for ( size_t i = 0; i < dimlen; ++i )
         {
           zbounds[2*i  ] = lbounds[i];
           zbounds[2*i+1] = ubounds[i];
         }
 
       cdf_put_var_double(fileID, ncbvarid, zbounds);
-
-      free(zbounds);
-      free(ubounds);
-      free(lbounds);
     }
 
   cdf_def_vct_cf(streamptr, zaxisID, *dimID, nvdimID);
@@ -2797,9 +2790,7 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
 
           if ( ncbvarid != UNDEFID )
 	    {
-	      double *lbounds = (double *) malloc(dimlen*sizeof(double));
-	      double *ubounds = (double *) malloc(dimlen*sizeof(double));
-	      double *zbounds = (double *) malloc(2*dimlen*sizeof(double));
+              double lbounds[dimlen], ubounds[dimlen], zbounds[2*dimlen];
 
 	      zaxisInqLbounds(zaxisID, lbounds);
 	      zaxisInqUbounds(zaxisID, ubounds);
@@ -2811,10 +2802,6 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
 		}
 
 	      cdf_put_var_double(fileID, ncbvarid, zbounds);
-
-	      free(zbounds);
-	      free(ubounds);
-	      free(lbounds);
 	    }
         }
     }
@@ -5126,7 +5113,7 @@ void scan_hybrid_formula(int ncid, int ncfvarid, int *apvarid, int *bvarid, int 
               else if ( strcmp(tagname, "b:")  == 0 ) *bvarid  = dimvarid;
               else if ( strcmp(tagname, "ps:") == 0 ) *psvarid = dimvarid;
             }
-          else
+          else if ( strcmp(tagname, "ps:") != 0 )
             {
               Warning("%s - %s", nc_strerror(status), varname);
             }
@@ -7087,18 +7074,16 @@ void define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 		      nvertex = (int)ncdims[ncvars[ncvars[zvarid].bounds].dimids[1]].len;
 		      if ( nlevel == zsize && nvertex == 2 )
 			{
-			  double *zbounds;
 			  with_bounds = TRUE;
-			  zbounds = (double *) malloc(2*(size_t)nlevel*sizeof(double));
 			  lbounds = (double *) malloc((size_t)nlevel*sizeof(double));
 			  ubounds = (double *) malloc((size_t)nlevel*sizeof(double));
+			  double zbounds[2*nlevel];
 			  cdf_get_var_double(ncvars[zvarid].ncid, ncvars[zvarid].bounds, zbounds);
 			  for ( i = 0; i < nlevel; ++i )
 			    {
 			      lbounds[i] = zbounds[i*2];
 			      ubounds[i] = zbounds[i*2+1];
 			    }
-			  free(zbounds);
 			}
 		    }
 		}
@@ -7357,23 +7342,21 @@ void define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, 
 
 	      if ( attrtype == NC_SHORT || attrtype == NC_INT )
 		{
-		  int *attint = (int *) malloc(attlen*sizeof(int));
+		  int attint[attlen];
 		  cdfGetAttInt(ncid, ncvarid, attname, (int)attlen, attint);
 		  if ( attrtype == NC_SHORT )
 		    vlistDefAttInt(vlistID, varID, attname, DATATYPE_INT16, (int)attlen, attint);
 		  else
 		    vlistDefAttInt(vlistID, varID, attname, DATATYPE_INT32, (int)attlen, attint);
-		  free(attint);
 		}
 	      else if ( attrtype == NC_FLOAT || attrtype == NC_DOUBLE )
 		{
-		  double *attflt = (double *) malloc(attlen*sizeof(double));
+		  double attflt[attlen];
 		  cdfGetAttDouble(ncid, ncvarid, attname, (int)attlen, attflt);
 		  if ( attrtype == NC_FLOAT )
 		    vlistDefAttFlt(vlistID, varID, attname, DATATYPE_FLT32, (int)attlen, attflt);
 		  else
 		    vlistDefAttFlt(vlistID, varID, attname, DATATYPE_FLT64, (int)attlen, attflt);
-		  free(attflt);
 		}
 	      else if ( xtypeIsText(attrtype) )
 		{
@@ -7568,26 +7551,22 @@ void scan_global_attributes(int fileID, int vlistID, stream_t *streamptr, int ng
 	    }
  	  else
             {
-              int *attint;
-              attint = (int *) malloc(attlen*sizeof(int));
+              int attint[attlen];
               cdfGetAttInt(fileID, NC_GLOBAL, attname, (int)attlen, attint);
               if ( xtype == NC_SHORT )
                 vlistDefAttInt(vlistID, CDI_GLOBAL, attname, DATATYPE_INT16, (int)attlen, attint);
               else
                 vlistDefAttInt(vlistID, CDI_GLOBAL, attname, DATATYPE_INT32, (int)attlen, attint);
-              free(attint);
             }
         }
       else if ( xtype == NC_FLOAT || xtype == NC_DOUBLE )
 	{
-	  double *attflt;
-	  attflt = (double *) malloc(attlen*sizeof(double));
+	  double attflt[attlen];
 	  cdfGetAttDouble(fileID, NC_GLOBAL, attname, (int)attlen, attflt);
 	  if ( xtype == NC_FLOAT )
 	    vlistDefAttFlt(vlistID, CDI_GLOBAL, attname, DATATYPE_FLT32, (int)attlen, attflt);
 	  else
 	    vlistDefAttFlt(vlistID, CDI_GLOBAL, attname, DATATYPE_FLT64, (int)attlen, attflt);
-	  free(attflt);
 	}
     }
 }
