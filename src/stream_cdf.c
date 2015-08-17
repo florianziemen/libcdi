@@ -2577,7 +2577,6 @@ void cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int ncvarid, int zax
   streamptr->ncmode = 2;
 
   cdf_put_var_double(fileID, ncvarid, zaxisInqLevelsPtr(zaxisID));
-  free(attflt);
 
   if ( ncbvarid != UNDEFID )
     {
