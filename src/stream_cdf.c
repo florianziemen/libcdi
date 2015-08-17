@@ -2520,13 +2520,12 @@ void cdf_def_zaxis_hybrid_echam(stream_t *streamptr, int type, int ncvarid, int 
 static
 void cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int ncvarid, int zaxisID, int zaxisindex, int xtype, size_t dimlen, int *dimID, char *axisname)
 {
-  char tmpname[CDI_MAX_NAME];
-  int fileID = streamptr->fileID;
   char psname[CDI_MAX_NAME];
   psname[0] = 0;
   zaxisInqPsName(zaxisID, psname);
   if ( psname[0] == 0 ) strcpy(psname, "ps");
 
+  int fileID = streamptr->fileID;
   if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
   strcpy(axisname, "lev");
@@ -2534,6 +2533,7 @@ void cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int ncvarid, int zax
   cdf_def_dim(fileID, axisname, dimlen, dimID);
   cdf_def_var(fileID, axisname, (nc_type) xtype, 1, dimID,  &ncvarid);
 
+  char tmpname[CDI_MAX_NAME];
   strcpy(tmpname, "atmosphere_hybrid_sigma_pressure_coordinate");
   cdf_put_att_text(fileID, ncvarid, "standard_name", strlen(tmpname), tmpname);
 
