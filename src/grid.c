@@ -1386,11 +1386,9 @@ The function @func{gridDefXvals} defines all values of the X-axis.
 void gridDefXvals(int gridID, const double *xvals)
 {
   grid_t *gridptr = gridID2Ptr(gridID);
+  int gridtype = gridptr->type;
 
-  int gridtype;
   long size;
-
-  gridtype = gridptr->type;
 
   if ( gridtype == GRID_UNSTRUCTURED || gridtype == GRID_CURVILINEAR )
     size = gridptr->size;
@@ -1490,10 +1488,9 @@ double gridInqXval(int gridID, int index)
   double xval = 0;
   grid_t *gridptr = gridID2Ptr(gridID);
 
-  if ( gridptr->xvals )
-    xval = gridptr->xvals[index];
+  if ( gridptr->xvals ) xval = gridptr->xvals[index];
 
-  return (xval);
+  return xval;
 }
 
 /*
@@ -1511,10 +1508,9 @@ double gridInqYval(int gridID, int index)
   double yval = 0;
   grid_t *gridptr = gridID2Ptr(gridID);
 
-  if ( gridptr->yvals )
-    yval = gridptr->yvals[index];
+  if ( gridptr->yvals ) yval = gridptr->yvals[index];
 
-  return (yval);
+  return yval;
 }
 
 /*

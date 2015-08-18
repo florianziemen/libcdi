@@ -983,6 +983,9 @@ int     zaxisInqPrec(int zaxisID);
 void    zaxisDefPositive(int zaxisID, int positive);
 int     zaxisInqPositive(int zaxisID);
 
+void    zaxisDefScalar(int zaxisID);
+int     zaxisInqScalar(int zaxisID);
+
 void    zaxisDefLtype(int zaxisID, int ltype);
 int     zaxisInqLtype(int zaxisID);
 

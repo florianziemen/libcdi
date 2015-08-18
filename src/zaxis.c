@@ -75,6 +75,7 @@ typedef struct {
   double  *weights;
   int      self;
   int      prec;
+  int      scalar;
   int      type;
   int      ltype;    /* GRIB level type */
   int      ltype2;
@@ -148,6 +149,7 @@ void zaxisDefaultValue(zaxis_t *zaxisptr)
   zaxisptr->ltype       = 0;
   zaxisptr->ltype2      = -1;
   zaxisptr->positive    = 0;
+  zaxisptr->scalar      = 0;
   zaxisptr->direction   = 0;
   zaxisptr->prec        = 0;
   zaxisptr->size        = 0;
@@ -296,11 +298,9 @@ int zaxisCreate(int zaxistype, int size)
 
 static void zaxisDestroyKernel( zaxis_t * zaxisptr )
 {
-  int id;
-
   xassert ( zaxisptr );
 
-  id = zaxisptr->self;
+  int id = zaxisptr->self;
 
   if ( zaxisptr->vals )    free ( zaxisptr->vals );
   if ( zaxisptr->lbounds ) free ( zaxisptr->lbounds );
@@ -568,6 +568,21 @@ int zaxisInqPositive(int zaxisID)
 {
   zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
   return zaxisptr->positive;
+}
+
+
+void zaxisDefScalar(int zaxisID)
+{
+  zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
+
+  zaxisptr->scalar = 1;
+  reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
+}
+
+int zaxisInqScalar(int zaxisID)
+{
+  zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
+  return zaxisptr->scalar;
 }
 
 

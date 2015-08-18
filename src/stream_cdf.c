@@ -5876,6 +5876,14 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
 		{
 		    Warning("Unexpected axis attribute length for %s, ignored!", name);
 		}
+              else if ( nvdims == 0 && attlen == 1 )
+                {
+                  if ( attstring[0] == 'z' || attstring[0] == 'Z' )
+                    {
+                      cdfSetVar(ncvars, ncvarid, FALSE);
+                      ncvars[ncvarid].islev = TRUE;
+                    }
+                }
 	      else
 		{
 		  strtolower(attstring);
@@ -5889,7 +5897,7 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
 			}
 		    }
 
-		  if ( i == (int) attlen && ((int) attlen == nvdims || (attlen == 1 && nvdims == 0)) )
+		  if ( i == (int) attlen && (int) attlen == nvdims )
 		    {
 		      while ( attlen-- )
 			{
@@ -5900,21 +5908,13 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
 			    }
 			  else if ( (int) attstring[attlen] == 'z' )
 			    {
-                              if ( nvdims == 0 )
+                              ncvars[ncvarid].zdim = dimidsp[attlen];
+                              cdfSetDim(ncvars, ncvarid, (int)attlen, Z_AXIS);
+
+                              if ( ncvars[ncvarid].ndims == 1 )
                                 {
                                   cdfSetVar(ncvars, ncvarid, FALSE);
-                                  ncvars[ncvarid].islev = TRUE;
-                                }
-                              else
-                                {
-                                  ncvars[ncvarid].zdim = dimidsp[attlen];
-                                  cdfSetDim(ncvars, ncvarid, (int)attlen, Z_AXIS);
-
-                                  if ( ncvars[ncvarid].ndims == 1 )
-                                    {
-                                      cdfSetVar(ncvars, ncvarid, FALSE);
-                                      ncdims[ncvars[ncvarid].dimids[0]].dimtype = Z_AXIS;
-                                    }
+                                  ncdims[ncvars[ncvarid].dimids[0]].dimtype = Z_AXIS;
                                 }
 			    }
 			  else if ( (int) attstring[attlen] == 'y' )
@@ -7024,11 +7024,10 @@ void define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 		      size_t vctsize_echam, double *vct_echam, unsigned char *uuidOfVGrid)
 {
   int ncvarid, ncvarid2;
-  int i, ilev, ndims;
+  int i, ilev;
   int zaxisindex;
   int zprec;
   int nbdims, nvertex, nlevel;
-  int positive = 0;
   int psvarid = -1;
   char *pname, *plongname, *punits;
   size_t vctsize = vctsize_echam;
@@ -7038,6 +7037,7 @@ void define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
     {
       if ( ncvars[ncvarid].isvar == TRUE && ncvars[ncvarid].zaxisID == UNDEFID )
 	{
+          int is_scalar = FALSE;
 	  int with_bounds = FALSE;
 	  int zdimid = UNDEFID;
 	  int zvarid = UNDEFID;
@@ -7046,20 +7046,28 @@ void define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 	  double *lbounds = NULL;
 	  double *ubounds = NULL;
 
-          positive = 0;
+          int positive = 0;
+	  int ndims = ncvars[ncvarid].ndims;
 
-	  ndims = ncvars[ncvarid].ndims;
-	  for ( i = 0; i < ndims; i++ )
-	    {
-	      if ( ncvars[ncvarid].dimtype[i] == Z_AXIS )
-		zdimid = ncvars[ncvarid].dimids[i];
-	    }
+          if ( ncvars[ncvarid].zvarid != -1 && ncvars[ncvars[ncvarid].zvarid].ndims == 0 )
+            {
+              zvarid = ncvars[ncvarid].zvarid;
+              is_scalar = TRUE;
+            }
+          else
+            {
+              for ( i = 0; i < ndims; i++ )
+                {
+                  if ( ncvars[ncvarid].dimtype[i] == Z_AXIS )
+                    zdimid = ncvars[ncvarid].dimids[i];
+                }
 
-	  if ( zdimid != UNDEFID )
-	    {
-	      zvarid = ncdims[zdimid].ncvarid;
-	      zsize  = (int)ncdims[zdimid].len;
-	    }
+              if ( zdimid != UNDEFID )
+                {
+                  zvarid = ncdims[zdimid].ncvarid;
+                  zsize  = (int)ncdims[zdimid].len;
+                }
+            }
 
 	  if ( CDI_Debug ) Message("nlevs = %d", zsize);
 
@@ -7159,6 +7167,7 @@ void define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
           if ( zaxisType == ZAXIS_HYBRID && psvarid != -1 ) zaxisDefPsName(ncvars[ncvarid].zaxisID, ncvars[psvarid].name);
 
           if ( positive > 0 ) zaxisDefPositive(ncvars[ncvarid].zaxisID, positive);
+          if ( is_scalar ) zaxisDefScalar(ncvars[ncvarid].zaxisID);
 
 	  free(zvar);
 	  free(lbounds);
