@@ -5655,7 +5655,7 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
               cdfSetVar(ncvars, ncvarid, TRUE);
             }
           */
-          else if ( (strcmp(attname, "associate")  == 0 || strcmp(attname, " coordinates") == 0) && xtypeIsText(atttype) )
+          else if ( (strcmp(attname, "associate")  == 0 || strcmp(attname, "coordinates") == 0) && xtypeIsText(atttype) )
             {
               int status;
               char *varname = NULL;
@@ -5872,9 +5872,8 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
               cdfGetAttText(ncid, ncvarid, attname, attstringlen, attstring);
 	      attlen = strlen(attstring);
 
-	      if ( (int) attlen > nvdims )
+	      if ( (int) attlen > nvdims && nvdims > 0 && attlen > 1 )
 		{
-		  if ( nvdims > 0 )
 		    Warning("Unexpected axis attribute length for %s, ignored!", name);
 		}
 	      else
@@ -5890,7 +5889,7 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
 			}
 		    }
 
-		  if ( i == (int) attlen && (int) attlen == nvdims)
+		  if ( i == (int) attlen && ((int) attlen == nvdims || (attlen == 1 && nvdims == 0)) )
 		    {
 		      while ( attlen-- )
 			{
@@ -5901,14 +5900,22 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
 			    }
 			  else if ( (int) attstring[attlen] == 'z' )
 			    {
-			      ncvars[ncvarid].zdim = dimidsp[attlen];
-			      cdfSetDim(ncvars, ncvarid, (int)attlen, Z_AXIS);
+                              if ( nvdims == 0 )
+                                {
+                                  cdfSetVar(ncvars, ncvarid, FALSE);
+                                  ncvars[ncvarid].islev = TRUE;
+                                }
+                              else
+                                {
+                                  ncvars[ncvarid].zdim = dimidsp[attlen];
+                                  cdfSetDim(ncvars, ncvarid, (int)attlen, Z_AXIS);
 
-			      if ( ncvars[ncvarid].ndims == 1 )
-				{
-				  cdfSetVar(ncvars, ncvarid, FALSE);
-				  ncdims[ncvars[ncvarid].dimids[0]].dimtype = Z_AXIS;
-				}
+                                  if ( ncvars[ncvarid].ndims == 1 )
+                                    {
+                                      cdfSetVar(ncvars, ncvarid, FALSE);
+                                      ncdims[ncvars[ncvarid].dimids[0]].dimtype = Z_AXIS;
+                                    }
+                                }
 			    }
 			  else if ( (int) attstring[attlen] == 'y' )
 			    {
