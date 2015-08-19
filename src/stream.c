@@ -822,8 +822,6 @@ int streamOpenWrite(const char *filename, int filetype)
 static
 void streamDefaultValue ( stream_t * streamptr )
 {
-  int i;
-
   streamptr->self              = CDI_UNDEFID;
   streamptr->accesstype        = CDI_UNDEFID;
   streamptr->accessmode        = 0;
@@ -861,9 +859,11 @@ void streamDefaultValue ( stream_t * streamptr )
 
   basetimeInit(&streamptr->basetime);
 
+  int i;
   for ( i = 0; i < MAX_GRIDS_PS; i++ ) streamptr->xdimID[i]   = CDI_UNDEFID;
   for ( i = 0; i < MAX_GRIDS_PS; i++ ) streamptr->ydimID[i]   = CDI_UNDEFID;
   for ( i = 0; i < MAX_ZAXES_PS; i++ ) streamptr->zaxisID[i]  = CDI_UNDEFID;
+  for ( i = 0; i < MAX_ZAXES_PS; i++ ) streamptr->nczvarID[i] = CDI_UNDEFID;
   for ( i = 0; i < MAX_GRIDS_PS; i++ ) streamptr->ncxvarID[i] = CDI_UNDEFID;
   for ( i = 0; i < MAX_GRIDS_PS; i++ ) streamptr->ncyvarID[i] = CDI_UNDEFID;
   for ( i = 0; i < MAX_GRIDS_PS; i++ ) streamptr->ncavarID[i] = CDI_UNDEFID;
