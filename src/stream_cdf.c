@@ -4195,19 +4195,27 @@ void transpose2dArrayDP(size_t inWidth, size_t inHeight, double* data)
   const size_t cacheBlockSize = 256;    // Purely an optimization parameter. Current value of 32 means we are handling 8kB blocks,
                                        // which should be a decent compromise on many architectures.
   
-#ifndef __cplusplus
-  double (*temp)[inWidth] = (double (*)[inWidth])malloc(inHeight*sizeof(*temp));
-  double (*out)[inHeight] = (double (*)[inHeight])data;
-  memcpy(temp, data, inHeight*sizeof(*temp));
-  #else
-  double *temp[inWidth];
-  temp[0] =  (double *)malloc(inWidth * inHeight * sizeof(double));
+#ifdef __cplusplus
+  double *temp[inHeight];
+  double *out[inWidth];
+  
+  temp[0] =  (double *)malloc(inHeight * inWidth * sizeof(double));
+  out[0] = data;
+  
+  for(int i = 0; i < inWidth; i++)
+  {
+    out[i] = out[0] + (inHeight * i);
+  }
+
   for(int i = 1; i < inHeight; i++)
   {
     temp[i] = temp[0] + (inWidth * i);
   }
-
-  double **out = (double **)data;
+  memcpy(temp[0], data, inHeight * inWidth * sizeof(double));
+#else
+  double (*temp)[inWidth] = (double (*)[inWidth])malloc(inHeight*sizeof(*temp));
+  double (*out)[inHeight] = (double (*)[inHeight])data;
+  memcpy(temp, data, inHeight*sizeof(*temp));
 #endif
   
   /*
