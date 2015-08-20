@@ -30,9 +30,8 @@ case "${HOSTNAME}" in
                     --enable-iso-c-interface \
                     --enable-swig \
                     --enable-python \
-                    --with-jasper=/opt/local \
-                    --with-grib_api=$HOME/local/gribapi-1.12.3 \
-                    --with-netcdf=$HOME/local \
+                    --with-grib_api=$HOME/local/grib_api-1.13.1 \
+                    --with-netcdf=$HOME/local/netcdf-c-4.3.3.1-threadsafe \
                     --with-szlib=$HOME/local \
 	            CC=gcc CFLAGS="-g -pipe -D_REENTRANT -Wall -W -Wfloat-equal -pedantic -O3 -march=native"
 	;;
