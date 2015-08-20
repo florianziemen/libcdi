@@ -3338,6 +3338,17 @@ int cdfDefVar(stream_t *streamptr, int varID)
   char coordinates[CDI_MAX_NAME];
   coordinates[0] = 0;
 
+  if ( zaxis_is_scalar )
+    {
+      int nczvarID = streamptr->nczvarID[zaxisindex];
+      if ( nczvarID != CDI_UNDEFID )
+        {
+          len = strlen(coordinates);
+          if ( len ) coordinates[len++] = ' ';
+          cdf_inq_varname(fileID, nczvarID, coordinates+len);
+        }
+    }
+
   if ( gridtype != GRID_GENERIC && gridtype != GRID_LONLAT  && gridtype != GRID_CURVILINEAR )
     {
       size_t len = strlen(gridNamePtr(gridtype));
@@ -3370,16 +3381,6 @@ int cdfDefVar(stream_t *streamptr, int varID)
     {
       cdf_put_att_text(fileID, ncvarid, "coordinates", 9, "tlon tlat" );
     }
-  else if ( zaxis_is_scalar )
-    {
-      int nczvarID = streamptr->nczvarID[zaxisindex];
-      if ( nczvarID != CDI_UNDEFID )
-        {
-          len = strlen(coordinates);
-          if ( len ) coordinates[len++] = ' ';
-          cdf_inq_varname(fileID, nczvarID, coordinates+len);
-        }
-    }
   else if ( gridtype == GRID_LONLAT && xid == UNDEFID && yid == UNDEFID && gridsize == 1 )
     {
       int ncxvarID = streamptr->ncxvarID[gridindex];
@@ -3403,6 +3404,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
       int ncxvarID = streamptr->ncxvarID[gridindex];
       int ncyvarID = streamptr->ncyvarID[gridindex];
       int ncavarID = streamptr->ncavarID[gridindex];
+      printf("curvi\n");
       if ( ncyvarID != CDI_UNDEFID )
         {
           len = strlen(coordinates);
@@ -5674,6 +5676,7 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
                   if ( status == NC_NOERR )
                     {
                       cdfSetVar(ncvars, dimvarid, FALSE);
+                      printf("coord varname: %s\n", varname);
                       if ( cdiIgnoreAttCoordinates == FALSE )
                         {
                           ncvars[ncvarid].coordvarids[i] = dimvarid;
