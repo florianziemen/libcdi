@@ -67,6 +67,30 @@ static inline void *gribHandleNew(int editionNumber)
   return gh;
 }
 
+static inline int my_grib_set_double(grib_handle* h, const char* key, double val)
+{
+  if ( cdiGribApiDebug )
+    fprintf(stderr, "grib_set_double(\tgrib_handle* h, \"%s\", %f)\n", key, val);
+
+  return grib_set_double(h, key, val);
+}
+
+static inline int my_grib_set_long(grib_handle* h, const char* key, long val)
+{
+  if ( cdiGribApiDebug )
+    fprintf(stderr, "grib_set_long(  \tgrib_handle* h, \"%s\", %ld)\n", key, val);
+
+  return grib_set_long(h, key, val);
+}
+
+static inline int my_grib_set_string(grib_handle* h, const char* key, const char* val, size_t* length)
+{
+  if ( cdiGribApiDebug )
+    fprintf(stderr, "grib_set_string(\tgrib_handle* h, \"%s\", \"%s\")\n", key, val);
+
+  return grib_set_string(h, key, val, length);
+}
+
 static inline void gribHandleDelete(void *gh)
 {
   grib_handle_delete((struct grib_handle *)gh);

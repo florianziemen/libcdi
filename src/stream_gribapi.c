@@ -47,33 +47,6 @@ typedef struct {
 
 #if  defined  (HAVE_LIBGRIB_API)
 static
-int my_grib_set_double(grib_handle* h, const char* key, double val)
-{
-  if ( cdiGribApiDebug )
-    fprintf(stderr, "grib_set_double(\tgrib_handle* h, \"%s\", %f)\n", key, val);
-
-  return grib_set_double(h, key, val);
-}
-
-static
-int my_grib_set_long(grib_handle* h, const char* key, long val)
-{
-  if ( cdiGribApiDebug )
-    fprintf(stderr, "grib_set_long(  \tgrib_handle* h, \"%s\", %ld)\n", key, val);
-
-  return grib_set_long(h, key, val);
-}
-
-static
-int my_grib_set_string(grib_handle* h, const char* key, const char* val, size_t* length)
-{
-  if ( cdiGribApiDebug )
-    fprintf(stderr, "grib_set_string(\tgrib_handle* h, \"%s\", \"%s\")\n", key, val);
-
-  return grib_set_string(h, key, val, length);
-}
-
-static
 int gribapiGetZaxisType(long editionNumber, int grib_ltype)
 {
   int zaxistype = ZAXIS_GENERIC;

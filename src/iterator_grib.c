@@ -535,6 +535,7 @@ void cdiGribIterator_readField(CdiIterator *super, double *buffer, size_t *nmiss
 {
   CdiGribIterator *me = (CdiGribIterator*)super;
 
+  GRIB_CHECK(my_grib_set_double((grib_handle *)me->gribHandle, "missingValue", cdiDefaultMissval), 0);
   gribGetDoubleArray((grib_handle *)me->gribHandle, "values", buffer);
   long gridType = gribGetLong((grib_handle *)me->gribHandle, "gridDefinitionTemplateNumber");
   if(nmiss)
