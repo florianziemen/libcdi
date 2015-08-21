@@ -56,11 +56,11 @@ union namespaceSwitchValue
 #define NSSW_FUNC(p) ((union namespaceSwitchValue){ .func = (void (*)())(p) })
 #define NSSW_DATA(p) ((union namespaceSwitchValue){ .data = (void *)(p) })
 
-int              namespaceNew();
-void             namespaceDelete(int namespaceID);
+//int              namespaceNew();
+//void             namespaceDelete(int namespaceID);
 void             namespaceCleanup      ( void );
 int              namespaceGetNumber    ( void );
-void namespaceSetActive(int namespaceID);
+//void             namespaceSetActive(int namespaceID);
 int              namespaceGetActive    ( void );
 int              namespaceIdxEncode    ( namespaceTuple_t );
 int              namespaceIdxEncode2   ( int, int );
