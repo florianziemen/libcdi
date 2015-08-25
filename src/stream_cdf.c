@@ -5254,7 +5254,7 @@ int isGaussGrid(size_t ysize, double yinc, const double *yvals)
 }
 
 static
-void printNCvars(ncvar_t *ncvars, int nvars, const char *oname)
+void printNCvars(const ncvar_t *ncvars, int nvars, const char *oname)
 {
   char axis[7];
   int ncvarid, i;
