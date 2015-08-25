@@ -1345,6 +1345,15 @@ Define the number of half levels of a generalized Z-axis.
 Define the reference number for a generalized Z-axis.
 
 
+\section*{\tt \htmlref{zaxisDefPsName}{zaxisDefPsName}}
+
+\begin{verbatim}
+    void zaxisDefPsName (int zaxisID, const char *psname_optional);
+\end{verbatim}
+
+Define the name of the surface pressure variable of a hybrid sigma pressure Z-axis.
+
+
 \section*{\tt \htmlref{zaxisDefUUID}{zaxisDefUUID}}
 
 \begin{verbatim}
@@ -1433,6 +1442,15 @@ Get the number of half levels of a generalized Z-axis.
 \end{verbatim}
 
 Get the reference number to a generalized Z-axis.
+
+
+\section*{\tt \htmlref{zaxisInqPsName}{zaxisInqPsName}}
+
+\begin{verbatim}
+    void zaxisInqPsName (int zaxisID, char *psname);
+\end{verbatim}
+
+Get the name of the surface pressure variable of a hybrid sigma pressure Z-axis.
 
 
 \section*{\tt \htmlref{zaxisInqSize}{zaxisInqSize}}

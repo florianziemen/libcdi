@@ -1980,6 +1980,16 @@
 !                                     CHARACTER*(*)   stdname)
       EXTERNAL        zaxisInqStdname
 
+!                     zaxisDefPsName
+!                                    (INTEGER         zaxisID,
+!                                     CHARACTER*(*)   psname_optional)
+      EXTERNAL        zaxisDefPsName
+
+!                     zaxisInqPsName
+!                                    (INTEGER         zaxisID,
+!                                     CHARACTER*(*)   psname)
+      EXTERNAL        zaxisInqPsName
+
 !                     zaxisDefPrec
 !                                    (INTEGER         zaxisID,
 !                                     INTEGER         prec)
@@ -1997,6 +2007,14 @@
       INTEGER         zaxisInqPositive
 !                                    (INTEGER         zaxisID)
       EXTERNAL        zaxisInqPositive
+
+!                     zaxisDefScalar
+!                                    (INTEGER         zaxisID)
+      EXTERNAL        zaxisDefScalar
+
+      INTEGER         zaxisInqScalar
+!                                    (INTEGER         zaxisID)
+      EXTERNAL        zaxisInqScalar
 
 !                     zaxisDefLtype
 !                                    (INTEGER         zaxisID,
