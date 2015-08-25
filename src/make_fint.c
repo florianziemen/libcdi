@@ -48,7 +48,7 @@ enum {
 
 static Docu cdoc[9999], fdoc[9999];
 static size_t ncdoc = 0, nfdoc = 0;
-static int debug = 0;
+static int debug = 0, verbose = 0;
 
 static int doccmp(const void *s1, const void *s2)
 {
@@ -1129,8 +1129,9 @@ static int detectComment(char **line_, ssize_t *lineLen, size_t *lineBufSize,
             }
         }
         xdes[docMatchLen] = 0;
-        printf("Found documentation for \"%s\": \"%s\"\n", xname,
-               xdes);
+        if (verbose || debug)
+          printf("Found documentation for \"%s\": \"%s\"\n", xname,
+                 xdes);
         matchType = FOUND_DOCCOMMENT;
         break;
       }
