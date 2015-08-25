@@ -783,8 +783,11 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
 	{
           fprintf(stderr, "Found conditional C++ block, skipping to #else\n");
           while ((lineLen = getline(&line, &lineBufSize, fpin)) >= 0)
-            if (!regexec(&cppElseRE, line, maxMatch, reMatch, 0))
-              break;
+            {
+              ++lineno;
+              if (!regexec(&cppElseRE, line, maxMatch, reMatch, 0))
+                break;
+            }
         }
       else if (detectComment(&line, &lineLen, &lineBufSize,
                              maxMatch, reMatch,
