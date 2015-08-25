@@ -5216,7 +5216,7 @@ int isHybridSigmaPressureCoordinate(int ncid, int ncvarid, ncvar_t *ncvars, ncdi
 
 
 static
-int isGaussGrid(size_t ysize, double yinc, double *yvals)
+int isGaussGrid(size_t ysize, double yinc, const double *yvals)
 {
   int lgauss = FALSE;
   double *yv, *yw;
