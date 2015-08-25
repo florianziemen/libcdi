@@ -5165,7 +5165,7 @@ int isHybridSigmaPressureCoordinate(int ncid, int ncvarid, ncvar_t *ncvars, ncdi
       status = TRUE;
       ncvar->zaxistype = ZAXIS_HYBRID;
       int dimid = ncvar->dimids[0];
-      int dimlen = (int)ncdims[dimid].len;
+      size_t dimlen = ncdims[dimid].len;
 
       int apvarid1 = -1, bvarid1 = -1, psvarid1 = -1;
       if ( ncvars[ncfvarid].lformula && ncvars[ncfvarid].lformulaterms )
@@ -5194,9 +5194,9 @@ int isHybridSigmaPressureCoordinate(int ncid, int ncvarid, ncvar_t *ncvars, ncdi
                   for ( int i = 0; i < dimlen; ++i )
                     printf("%d  %g %g    %g %g\n", i, abuf[i*2], abuf[i*2+1], bbuf[i*2], bbuf[i*2+1]);
                   */
-                  int vctsize = (dimlen+1)*2;
-                  double *vct = (double *) malloc(vctsize*sizeof(double));
-                  for ( int i = 0; i < dimlen; ++i )
+                  size_t vctsize = (dimlen+1)*2;
+                  double *vct = (double *)xmalloc(vctsize*sizeof(double));
+                  for ( size_t i = 0; i < dimlen; ++i )
                     {
                       vct[i] = abuf[i*2];
                       vct[i+dimlen+1] = bbuf[i*2];
