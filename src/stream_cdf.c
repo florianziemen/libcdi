@@ -5151,7 +5151,7 @@ void scan_hybrid_formula(int ncid, int ncfvarid, int *apvarid, int *bvarid, int 
 }
 
 static
-int isHybridSigmaPressureCoordinate(int ncid, int ncvarid, ncvar_t *ncvars, ncdim_t *ncdims)
+int isHybridSigmaPressureCoordinate(int ncid, int ncvarid, ncvar_t *ncvars, const ncdim_t *ncdims)
 {
   int status = FALSE;
   int ncfvarid = ncvarid;
