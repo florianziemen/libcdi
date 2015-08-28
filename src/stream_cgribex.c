@@ -857,7 +857,7 @@ int cgribexScanTimestep2(stream_t * streamptr)
   cdi_create_records(streamptr, tsID);
 
   nrecords = streamptr->tsteps[tsID].nallrecs;
-  if ( nrecords ) streamptr->tsteps[1].recIDs = (int *)xmalloc((size_t)nrecords * sizeof(int));
+  if ( nrecords ) streamptr->tsteps[1].recIDs = (int *)malloc((size_t)nrecords * sizeof(int));
   streamptr->tsteps[1].nrecs = 0;
   for ( recID = 0; recID < nrecords; recID++ )
     streamptr->tsteps[1].recIDs[recID] = -1;
@@ -1107,7 +1107,7 @@ int cgribexScanTimestep(stream_t * streamptr)
       nrecs = streamptr->tsteps[1].nrecs;
 
       streamptr->tsteps[tsID].nrecs = nrecs;
-      streamptr->tsteps[tsID].recIDs = (int *)xmalloc((size_t)nrecs * sizeof (int));
+      streamptr->tsteps[tsID].recIDs = (int *)malloc((size_t)nrecs * sizeof (int));
       for ( recID = 0; recID < nrecs; recID++ )
 	streamptr->tsteps[tsID].recIDs[recID] = streamptr->tsteps[1].recIDs[recID];
 

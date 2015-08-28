@@ -46,7 +46,7 @@ static CdiGribIterator *cdiGribIterator_condestruct(CdiGribIterator *me, const c
 {
 #define super() (&me->super)
   if(me) goto destruct;
-  me = (CdiGribIterator *)xmalloc(sizeof(*me));
+  me = (CdiGribIterator *)malloc(sizeof(*me));
   baseIterConstruct(super(), filetype);
 
   me->file = cdiInputFile_make(path);
@@ -88,7 +88,7 @@ CdiGribIterator *cdiGribIterator_makeClone(CdiIterator *super)
   CdiGribIterator *me = (CdiGribIterator*)super;
 
   //Allocate memory and copy data. (operations that may fail)
-  CdiGribIterator* result = (struct CdiGribIterator *)xmalloc(sizeof(*result));
+  CdiGribIterator* result = (struct CdiGribIterator *)malloc(sizeof(*result));
   if(!result) goto fail;
 
   result->file = me->file;
@@ -100,7 +100,7 @@ CdiGribIterator *cdiGribIterator_makeClone(CdiIterator *super)
 
   if(me->gribBuffer)
     {
-      result->gribBuffer = (unsigned char *)xmalloc(me->bufferSize);
+      result->gribBuffer = (unsigned char *)malloc(me->bufferSize);
       if(!result->gribBuffer) goto freeResult;
       memcpy(result->gribBuffer, me->gribBuffer, me->curRecordSize);
     }
@@ -141,7 +141,7 @@ char *cdiGribIterator_serialize(CdiIterator *super)
 
   const char* path = (char *)cdiInputFile_getPath(me->file);
   char* escapedPath = (char *)cdiEscapeSpaces(path);
-  char* result = (char *)xmalloc(strlen(escapedPath) + 3 * sizeof(int) * CHAR_BIT/8);
+  char* result = (char *)malloc(strlen(escapedPath) + 3 * sizeof(int) * CHAR_BIT/8);
   sprintf(result, "%s %zu", escapedPath, me->fileOffset);
   free(escapedPath);
   return result;
@@ -151,7 +151,7 @@ char *cdiGribIterator_serialize(CdiIterator *super)
 CdiGribIterator *cdiGribIterator_deserialize(const char *description)
 {
   char* path;
-  CdiGribIterator* me = (CdiGribIterator *)xmalloc(sizeof(*me));
+  CdiGribIterator* me = (CdiGribIterator *)malloc(sizeof(*me));
   if(!me) goto fail;
 
   description = baseIter_constructFromString(&me->super, description);

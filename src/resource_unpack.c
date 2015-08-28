@@ -25,7 +25,7 @@ void reshUnpackResources(char * unpackBuffer, int unpackBufferSize,
   int unpackBufferPos = 0;
   int numAssociations = 0, sizeAssociations = 16;
   struct streamAssoc *associations
-    = (struct streamAssoc *)xmalloc(sizeof (associations[0])
+    = (struct streamAssoc *)malloc(sizeof (associations[0])
                                     * (size_t)sizeAssociations);
 
   {

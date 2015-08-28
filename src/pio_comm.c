@@ -382,7 +382,7 @@ void commDefCommNode ( void )
 
   size = info->sizePio;
 
-  myHost = (char*) xmalloc(MPI_MAX_PROCESSOR_NAME);
+  myHost = (char*) malloc(MPI_MAX_PROCESSOR_NAME);
   {
     int len;
     xmpi ( MPI_Get_processor_name ( myHost, &len ));
@@ -391,8 +391,8 @@ void commDefCommNode ( void )
     info->hostname[len] = '\0';
   }
 
-  allHosts = xmalloc((size_t)size * MPI_MAX_PROCESSOR_NAME);
-  sortedHosts = xmalloc((size_t)size * sizeof (sortedHosts[0]));
+  allHosts = malloc((size_t)size * MPI_MAX_PROCESSOR_NAME);
+  sortedHosts = malloc((size_t)size * sizeof (sortedHosts[0]));
 
   for (int i = 0; i < size; ++i)
     sortedHosts[i] = allHosts[i];
@@ -507,7 +507,7 @@ void     commRecvNodeMap    ( void )
 
   xdebug ( "info->nProcsColl=%d", info->nProcsColl );
 
-  info->nodeMap = (int *)xmalloc((size_t)info->nProcsColl
+  info->nodeMap = (int *)malloc((size_t)info->nProcsColl
                                  * sizeof (info->nodeMap[0]));
 
   xmpi ( MPI_Recv ( info->nodeMap, info->nProcsColl, MPI_INTEGER, 
@@ -547,7 +547,7 @@ void     commEvalPhysNodes  ( void )
 
   size = info->nProcsIO * sizeNodeInfo;
 
-  nodeInfo = (nodeInfo_t *)xmalloc((size_t)size * sizeof (int));
+  nodeInfo = (nodeInfo_t *)malloc((size_t)size * sizeof (int));
 
   if ( info->rankGlob == info->root )
     {
@@ -587,7 +587,7 @@ void     commEvalPhysNodes  ( void )
 
   xassert ( info->nProcsColl <= info->nProcsModel );
 
-  info->procsCollMap = (int *)xmalloc((size_t)info->nProcsColl
+  info->procsCollMap = (int *)malloc((size_t)info->nProcsColl
                                       * sizeof (info->procsCollMap[0]));
 
   // define nodeSizes
@@ -603,11 +603,11 @@ void     commEvalPhysNodes  ( void )
       }
 
   // define nodeMap
-  info->nodeMap = (int *)xmalloc((size_t)info->nProcsColl
+  info->nodeMap = (int *)malloc((size_t)info->nProcsColl
                                  * sizeof (info->nodeMap[0]));
   // helpers
-  p1 = (int **)xmalloc((size_t)info->nodeInfo.nNodes * sizeof (p1[0]));
-  p2 = (int **)xmalloc((size_t)info->nodeInfo.nNodes * sizeof (p2[0]));
+  p1 = (int **)malloc((size_t)info->nodeInfo.nNodes * sizeof (p1[0]));
+  p2 = (int **)malloc((size_t)info->nodeInfo.nNodes * sizeof (p2[0]));
   idx = 0;
   for ( i = 0; i < info->nodeInfo.nNodes; i++ )
     {
@@ -689,7 +689,7 @@ void     commDefCommsIO     ( void )
            info->nProcsModel != CDI_UNDEFID &&
            info->commGlob != MPI_COMM_NULL );
 
-  info->commsIO = (MPI_Comm *)xmalloc((size_t)info->nProcsColl
+  info->commsIO = (MPI_Comm *)malloc((size_t)info->nProcsColl
                                       * sizeof (info->commsIO[0]));
   for ( collID = 0; collID < info->nProcsColl; collID++ )
     info->commsIO[collID] = MPI_COMM_NULL;
@@ -697,7 +697,7 @@ void     commDefCommsIO     ( void )
   strncpy ( name, "COMMSIO_", 8 );
   name[MAXCOMMIONAME - 1] = '\0';
 
-  ranks = (int *)xmalloc(((size_t)info->nProcsModel + 1) * sizeof (ranks[0]));
+  ranks = (int *)malloc(((size_t)info->nProcsModel + 1) * sizeof (ranks[0]));
   for ( i = 0; i < info->nProcsModel; i++ )
     ranks[i] = i;
 

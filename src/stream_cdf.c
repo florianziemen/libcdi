@@ -181,7 +181,7 @@ int isTimeAxisUnits(const char *timeunits)
   int status = FALSE;
 
   size_t len = strlen(timeunits);
-  tu = (char *)xmalloc((len+1)*sizeof(char));
+  tu = (char *)malloc((len+1)*sizeof(char));
   memcpy(tu, timeunits, (len+1) * sizeof(char));
   ptu = tu;
 
@@ -306,7 +306,7 @@ int setBaseTime(const char *timeunits, taxis_t *taxis)
   int timeunit;
 
   size_t len = strlen(timeunits);
-  tu = (char *)xmalloc((len+1) * sizeof (char));
+  tu = (char *)malloc((len+1) * sizeof (char));
   memcpy(tu, timeunits, (len+1) * sizeof (char));
   ptu = tu;
 
@@ -648,7 +648,7 @@ void cdfCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
   int gridID   = vlistInqVarGrid(vlistID1, ivarID);
   int datasize = gridInqSize(gridID);
 
-  double *data = (double *)xmalloc((size_t)datasize * sizeof (double));
+  double *data = (double *)malloc((size_t)datasize * sizeof (double));
 
   int nmiss;
   cdfReadRecord(streamptr1, data, &nmiss);
@@ -3946,7 +3946,7 @@ cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarid, int dtype, l
         {
           /* malloc and the loop imply nvals >= ysize * xsize,
            * but that is not checked and the types don't match */
-          sdata_sp = (float *)xmalloc((size_t)nvals * sizeof (float));
+          sdata_sp = (float *)malloc((size_t)nvals * sizeof (float));
           for ( size_t j = 0; j < ysize; ++j )
             for ( size_t i = 0; i < xsize; ++i )
               sdata_sp[i*ysize+j] = pdata_sp[j*xsize+i];
@@ -3954,7 +3954,7 @@ cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarid, int dtype, l
         }
       else
         {
-          sdata_dp = (double *)xmalloc((size_t)nvals * sizeof (double));
+          sdata_dp = (double *)malloc((size_t)nvals * sizeof (double));
           for ( size_t j = 0; j < ysize; ++j )
             for ( size_t i = 0; i < xsize; ++i )
               sdata_dp[i*ysize+j] = pdata_dp[j*xsize+i];
@@ -4501,7 +4501,7 @@ void cdfReadVarSliceDP(stream_t *streamptr, int varID, int levelID, double *data
 
   if ( vlistInqVarDatatype(vlistID, varID) == DATATYPE_FLT32 )
     {
-      float *data_fp = (float *)xmalloc(gridsize*sizeof(*data_fp));
+      float *data_fp = (float *)malloc(gridsize*sizeof(*data_fp));
       cdf_get_vara_float(fileID, ncvarid, start, count, data_fp);
       for ( size_t i = 0; i < gridsize; i++ )
         data[i] = (double) data_fp[i];
@@ -4559,7 +4559,7 @@ void cdfReadVarSliceSP(stream_t *streamptr, int varID, int levelID, float *data,
 
   if ( vlistInqVarDatatype(vlistID, varID) == DATATYPE_FLT64 )
     {
-      double *data_dp = (double *)xmalloc(gridsize*sizeof(*data_dp));
+      double *data_dp = (double *)malloc(gridsize*sizeof(*data_dp));
       cdf_get_vara_double(fileID, ncvarid, start, count, data_dp);
       for ( size_t i = 0; i < gridsize; i++ )
         data[i] = (float) data_dp[i];
@@ -4715,12 +4715,12 @@ void cdfCreateRecords(stream_t *streamptr, int tsID)
 
       streamptr->nrecs += nrecs;
 
-      destTstep->records    = (record_t *)xmalloc((size_t)nrecs*sizeof(record_t));
+      destTstep->records    = (record_t *)malloc((size_t)nrecs*sizeof(record_t));
       destTstep->nrecs      = nrecs;
       destTstep->nallrecs   = nrecs;
       destTstep->recordSize = nrecs;
       destTstep->curRecID   = UNDEFID;
-      destTstep->recIDs     = (int *)xmalloc((size_t)nvrecs*sizeof (int));;
+      destTstep->recIDs     = (int *)malloc((size_t)nvrecs*sizeof (int));;
       for ( recID = 0; recID < nvrecs; recID++ ) destTstep->recIDs[recID] = recID;
 
       record_t *records = destTstep->records;
@@ -4753,7 +4753,7 @@ void cdfCreateRecords(stream_t *streamptr, int tsID)
 
       streamptr->nrecs += nvrecs;
 
-      destTstep->records    = (record_t *) xmalloc((size_t)nrecs*sizeof(record_t));
+      destTstep->records    = (record_t *) malloc((size_t)nrecs*sizeof(record_t));
       destTstep->nrecs      = nvrecs;
       destTstep->nallrecs   = nrecs;
       destTstep->recordSize = nrecs;
@@ -4763,7 +4763,7 @@ void cdfCreateRecords(stream_t *streamptr, int tsID)
 
       if ( nvrecs )
         {
-          destTstep->recIDs = (int *) xmalloc((size_t)nvrecs * sizeof (int));
+          destTstep->recIDs = (int *) malloc((size_t)nvrecs * sizeof (int));
           vrecID = 0;
           for ( recID = 0; recID < nrecs; recID++ )
             {
@@ -4783,7 +4783,7 @@ void cdfCreateRecords(stream_t *streamptr, int tsID)
 
       streamptr->nrecs += nvrecs;
 
-      destTstep->records    = (record_t *) xmalloc((size_t)nrecs*sizeof(record_t));
+      destTstep->records    = (record_t *) malloc((size_t)nrecs*sizeof(record_t));
       destTstep->nrecs      = nvrecs;
       destTstep->nallrecs   = nrecs;
       destTstep->recordSize = nrecs;
@@ -4791,7 +4791,7 @@ void cdfCreateRecords(stream_t *streamptr, int tsID)
 
       memcpy(destTstep->records, sourceTstep->records, (size_t)nrecs*sizeof(record_t));
 
-      destTstep->recIDs     = (int *) xmalloc((size_t)nvrecs * sizeof(int));
+      destTstep->recIDs     = (int *) malloc((size_t)nvrecs * sizeof(int));
 
       memcpy(destTstep->recIDs, streamptr->tsteps[1].recIDs, (size_t)nvrecs*sizeof(int));
     }
@@ -5973,7 +5973,7 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
 	    {
 	      if ( ncvars[ncvarid].natts == 0 )
 		ncvars[ncvarid].atts
-                  = (int *)xmalloc((size_t)nvatts * sizeof (int));
+                  = (int *)malloc((size_t)nvatts * sizeof (int));
 
 	      ncvars[ncvarid].atts[ncvars[ncvarid].natts++] = iatt;
 	      /*
@@ -7077,7 +7077,7 @@ void define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 
 	  if ( CDI_Debug ) Message("nlevs = %d", zsize);
 
-	  double *zvar = (double *)xmalloc((size_t)zsize * sizeof (double));
+	  double *zvar = (double *)malloc((size_t)zsize * sizeof (double));
 
 	  zaxisType = UNDEFID;
 
@@ -7228,7 +7228,7 @@ void define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, 
   if ( streamptr->sortname )
     {
       struct varinfo *varInfo
-        = (struct varinfo *)xmalloc((size_t)nvars * sizeof (struct varinfo));
+        = (struct varinfo *)malloc((size_t)nvars * sizeof (struct varinfo));
 
       for ( int varID = 0; varID < nvars; varID++ )
 	{
@@ -7847,13 +7847,13 @@ int cdfInqContents(stream_t *streamptr)
     }
 
   /* alloc ncdims */
-  ncdims = (ncdim_t *)xmalloc((size_t)ndims * sizeof (ncdim_t));
+  ncdims = (ncdim_t *)malloc((size_t)ndims * sizeof (ncdim_t));
   init_ncdims(ndims, ncdims);
 
   if ( nvars > 0 )
     {
       /* alloc ncvars */
-      ncvars = (ncvar_t *)xmalloc((size_t)nvars * sizeof (ncvar_t));
+      ncvars = (ncvar_t *)malloc((size_t)nvars * sizeof (ncvar_t));
       init_ncvars(nvars, ncvars);
 
       for ( ncvarid = 0; ncvarid < nvars; ++ncvarid )
@@ -8116,7 +8116,7 @@ int cdfInqContents(stream_t *streamptr)
 
 
   /* select vars */
-  varids = (int *)xmalloc((size_t)nvars * sizeof (int));
+  varids = (int *)malloc((size_t)nvars * sizeof (int));
   nvarids = 0;
   for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
     if ( ncvars[ncvarid].isvar == TRUE ) varids[nvarids++] = ncvarid;

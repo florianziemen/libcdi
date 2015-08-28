@@ -162,7 +162,7 @@ namespaceNew()
     {
       /* make room for additional namespace */
       struct Namespace *newNameSpaces
-        = (struct Namespace *)xmalloc(((size_t)namespacesSize + 1) * sizeof (namespaces[0]));
+        = (struct Namespace *)malloc(((size_t)namespacesSize + 1) * sizeof (namespaces[0]));
       memcpy(newNameSpaces, namespaces, sizeof (namespaces[0]));
       namespaces = newNameSpaces;
       ++namespacesSize;

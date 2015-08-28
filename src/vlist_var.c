@@ -88,7 +88,7 @@ int vlistvarNewEntry(int vlistID)
   if ( ! vlistvarSize )
     {
       vlistvarSize = 2;
-      vlistvar = (var_t *)xmalloc((size_t)vlistvarSize * sizeof (var_t));
+      vlistvar = (var_t *)malloc((size_t)vlistvarSize * sizeof (var_t));
       for (int i = 0; i < vlistvarSize; i++ )
 	vlistvar[i].isUsed = FALSE;
     }
@@ -219,7 +219,7 @@ cdiVlistCreateVarLevInfo(vlist_t *vlistptr, int varID)
   size_t nlevs = (size_t)zaxisInqSize(zaxisID);
 
   vlistptr->vars[varID].levinfo
-    = (levinfo_t*)xmalloc((size_t)nlevs * sizeof(levinfo_t));
+    = (levinfo_t*)malloc((size_t)nlevs * sizeof(levinfo_t));
 
   for (size_t levID = 0; levID < nlevs; levID++ )
     vlistptr->vars[varID].levinfo[levID] = DEFAULT_LEVINFO((int)levID);
@@ -564,13 +564,13 @@ char* vlistCopyVarName(int vlistId, int varId)
         result = strdup(name);
       {
         //No luck, fall back to outputting a name of the format "var<num>".
-        result = (char *)xmalloc(3 + 3 * sizeof (int) * CHAR_BIT / 8 + 2);
+        result = (char *)malloc(3 + 3 * sizeof (int) * CHAR_BIT / 8 + 2);
         sprintf(result, "var%d", number);
       }
     }
   else
     {
-      result = (char *)xmalloc(5 + 2 + 3 * (3 * sizeof (int) * CHAR_BIT + 1) + 1);
+      result = (char *)malloc(5 + 2 + 3 * (3 * sizeof (int) * CHAR_BIT + 1) + 1);
       sprintf(result, "param%d.%d.%d", number, category, discipline);
     }
   //Finally, we fall back to outputting a name of the format "param<num>.<cat>.<dis>".
@@ -1735,7 +1735,7 @@ void vlistDefVarEnsemble(int vlistID, int varID, int ensID, int ensCount, int fo
 
   if ( vlistptr->vars[varID].ensdata == NULL )
     vlistptr->vars[varID].ensdata
-      = (ensinfo_t *)xmalloc( sizeof( ensinfo_t ) );
+      = (ensinfo_t *)malloc( sizeof( ensinfo_t ) );
 
   vlistptr->vars[varID].ensdata->ens_index          = ensID;
   vlistptr->vars[varID].ensdata->ens_count          = ensCount;
@@ -2171,7 +2171,7 @@ void vlistVarUnpack(int vlistID, char * buf, int size, int *position,
 			 namespaceAdaptKey ( tempbuf[2], originNamespace ),
                              tempbuf[3]);
   if (tempbuf[4] || tempbuf[5] || tempbuf[6] || tempbuf[7])
-    varname = (char *)xmalloc((size_t)imax(imax(imax(tempbuf[4],tempbuf[5]),
+    varname = (char *)malloc((size_t)imax(imax(imax(tempbuf[4],tempbuf[5]),
                                                 tempbuf[6]),
                                            tempbuf[7]) + 1);
   if (tempbuf[4])

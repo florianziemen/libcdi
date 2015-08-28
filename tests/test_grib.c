@@ -30,7 +30,7 @@ int main()
 
 
   size_t datasize = (size_t)nlon * (size_t)nlat;
-  data = (double *)xmalloc(datasize * sizeof (double));
+  data = (double *)malloc(datasize * sizeof (double));
   memset(data, 0, datasize * sizeof (double));
 
   gridID = gridCreate(GRID_GAUSSIAN, (int)datasize);
