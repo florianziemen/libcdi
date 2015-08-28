@@ -67,7 +67,7 @@ void reshUnpackResources(char * unpackBuffer, int unpackBufferSize,
 	case STREAM:
           if (sizeAssociations == numAssociations)
             associations
-              = (struct streamAssoc *)xrealloc(associations,
+              = (struct streamAssoc *)realloc(associations,
                          sizeof (associations[0]) * (size_t)(sizeAssociations *= 2));
 	  associations[numAssociations]
             = streamUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos,

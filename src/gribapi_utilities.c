@@ -34,7 +34,7 @@ char* gribCopyString(grib_handle* gribHandle, const char* key)
     {
     char* result = (char *)malloc(length);
     if(!grib_get_string(gribHandle, key, result, &length))
-    result = (char *)xrealloc(result, length);
+    result = (char *)realloc(result, length);
   
     else
       {
@@ -55,13 +55,13 @@ char* gribCopyString(grib_handle* gribHandle, const char* key)
       if (length <= 1024UL * 1024UL)
         {
           length *= 2;
-          result = xrealloc(result, length);
+          result = realloc(result, length);
         }
       else
         break;
     }
   if (!rc)
-    result = xrealloc(result, length);
+    result = realloc(result, length);
   else
     {
       free(result);

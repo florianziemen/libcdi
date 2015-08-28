@@ -173,7 +173,7 @@ namespaceNew()
       /* make room for additional namespace */
       newNamespaceID = (int)namespacesSize;
       namespaces
-        = (struct Namespace *)xrealloc(namespaces, ((size_t)namespacesSize + 1) * sizeof (namespaces[0]));
+        = (struct Namespace *)realloc(namespaces, ((size_t)namespacesSize + 1) * sizeof (namespaces[0]));
       ++namespacesSize;
     }
   else /* implicit: namespacesSize >= NUM_NAMESPACES */

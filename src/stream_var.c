@@ -80,7 +80,7 @@ int streamvar_new_entry(stream_t *streamptr)
 
       streamvarSize = 2*streamvarSize;
       streamvar
-        = (svarinfo_t *)xrealloc(streamvar,
+        = (svarinfo_t *)realloc(streamvar,
                                  (size_t)streamvarSize * sizeof (svarinfo_t));
       if ( streamvar == NULL )
 	{

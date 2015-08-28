@@ -1404,7 +1404,7 @@ void gridDefXvals(int gridID, const double *xvals)
 
   if (gridptr->xvals && CDI_Debug)
     Warning("values already defined!");
-  gridptr->xvals = (double *)xrealloc(gridptr->xvals,
+  gridptr->xvals = (double *)realloc(gridptr->xvals,
                                       (size_t)size * sizeof(double));
   memcpy(gridptr->xvals, xvals, (size_t)size * sizeof (double));
   reshSetStatus(gridID, &gridOps, RESH_DESYNC_IN_USE);
@@ -1479,7 +1479,7 @@ void gridDefYvals(int gridID, const double *yvals)
   if (gridptr->yvals && CDI_Debug)
     Warning("Values already defined!");
 
-  gridptr->yvals = (double *)xrealloc(gridptr->yvals, (size_t)size * sizeof (double));
+  gridptr->yvals = (double *)realloc(gridptr->yvals, (size_t)size * sizeof (double));
   memcpy(gridptr->yvals, yvals, (size_t)size * sizeof (double));
   reshSetStatus(gridID, &gridOps, RESH_DESYNC_IN_USE);
 }
@@ -2763,19 +2763,19 @@ void gridCompress(int gridID)
 	  gridptr->ysize = (int)gridsize;
 
 	  if ( gridptr->xvals )
-	    gridptr->xvals = (double *)xrealloc(gridptr->xvals, gridsize*sizeof(double));
+	    gridptr->xvals = (double *)realloc(gridptr->xvals, gridsize*sizeof(double));
 
 	  if ( gridptr->yvals )
-	    gridptr->yvals = (double *)xrealloc(gridptr->yvals, gridsize*sizeof(double));
+	    gridptr->yvals = (double *)realloc(gridptr->yvals, gridsize*sizeof(double));
 
 	  if ( gridptr->area )
-	    gridptr->area  = (double *)xrealloc(gridptr->area, gridsize*sizeof(double));
+	    gridptr->area  = (double *)realloc(gridptr->area, gridsize*sizeof(double));
 
 	  if ( gridptr->xbounds )
-	    gridptr->xbounds = (double *)xrealloc(gridptr->xbounds, nv*gridsize*sizeof(double));
+	    gridptr->xbounds = (double *)realloc(gridptr->xbounds, nv*gridsize*sizeof(double));
 
 	  if ( gridptr->ybounds )
-	    gridptr->ybounds = (double *)xrealloc(gridptr->ybounds, nv*gridsize*sizeof(double));
+	    gridptr->ybounds = (double *)realloc(gridptr->ybounds, nv*gridsize*sizeof(double));
 
 	  free(gridptr->mask_gme);
 	  gridptr->mask_gme = NULL;

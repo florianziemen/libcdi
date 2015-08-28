@@ -70,7 +70,7 @@ int recordNewEntry(stream_t *streamptr, int tsID)
       int i;
 
       recordSize = 2*recordSize;
-      records    = (record_t *)xrealloc(records,
+      records    = (record_t *)realloc(records,
                                         (size_t)recordSize * sizeof (record_t));
       if ( records == NULL )
 	{

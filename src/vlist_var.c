@@ -105,7 +105,7 @@ int vlistvarNewEntry(int vlistID)
       int i;
 
       vlistvarSize = 2*vlistvarSize;
-      vlistvar = (var_t *)xrealloc(vlistvar,
+      vlistvar = (var_t *)realloc(vlistvar,
                                    (size_t)vlistvarSize * sizeof(var_t));
       varID = vlistvarSize/2;
 

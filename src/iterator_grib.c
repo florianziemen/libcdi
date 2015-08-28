@@ -196,7 +196,7 @@ static void cdiGribIterator_ensureBuffer(CdiGribIterator *me, size_t requiredSiz
     {
       me->bufferSize *= 2;
       if(me->bufferSize < requiredSize) me->bufferSize = requiredSize;
-      me->gribBuffer = (unsigned char *)xrealloc(me->gribBuffer, me->bufferSize);
+      me->gribBuffer = (unsigned char *)realloc(me->gribBuffer, me->bufferSize);
     }
 }
 

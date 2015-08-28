@@ -262,7 +262,7 @@ resizeVarGatherBuf(int vlistID, int varID, double **buf, int *bufSize)
 {
   int size = vlistInqVarSize(vlistID, varID);
   if (size <= *bufSize) ; else
-    *buf = xrealloc(*buf, (size_t)(*bufSize = size) * sizeof (buf[0][0]));
+    *buf = realloc(*buf, (size_t)(*bufSize = size) * sizeof (buf[0][0]));
 }
 
 static void
@@ -496,7 +496,7 @@ inventorizeStream(struct streamMapping *streamMap, int numStreamIDs,
   int sizeStreamMap = *sizeStreamMap_;
   if (numStreamIDs < sizeStreamMap) ; else
     {
-      streamMap = xrealloc(streamMap,
+      streamMap = realloc(streamMap,
                            (size_t)(sizeStreamMap *= 2)
                            * sizeof (streamMap[0]));
       *sizeStreamMap_ = sizeStreamMap;
@@ -595,7 +595,7 @@ buildStreamMap(struct winHeaderEntry *winDict)
     free(streamIDs);
   }
   /* sort written streams by streamID */
-  streamMap = xrealloc(streamMap, sizeof (streamMap[0]) * (size_t)numStreamIDs);
+  streamMap = realloc(streamMap, sizeof (streamMap[0]) * (size_t)numStreamIDs);
   qsort(streamMap, (size_t)numStreamIDs, sizeof (streamMap[0]), smCmpStreamID);
   return (struct streamMap){ .entries = streamMap, .numEntries = numStreamIDs };
 }
@@ -646,7 +646,7 @@ buildWrittenVars(struct streamMapping *mapping, int **varIsWritten_,
   int nvars = mapping->numVars;
   int *varMap = mapping->varMap;
   int *varIsWritten = *varIsWritten_
-    = xrealloc(*varIsWritten_, sizeof (*varIsWritten) * (size_t)nvars);
+    = realloc(*varIsWritten_, sizeof (*varIsWritten) * (size_t)nvars);
   for (int varID = 0; varID < nvars; ++varID)
     varIsWritten[varID] = ((varMap[varID] != -1)
                            ?myCollRank+1 : 0);
@@ -793,7 +793,7 @@ static void readGetBuffers()
                       xt_idxlist_delete(preRedistChunk);
                       xt_idxlist_delete(preWriteChunk);
                       xt_xmap_delete(xmap);
-                      writeBuf = (double*) xrealloc(writeBuf,
+                      writeBuf = (double*) realloc(writeBuf,
                                                     sizeof (double)
                                                     * PPM_extents_size(3, varChunk));
                       xt_redist_s_exchange1(redist, data, writeBuf);

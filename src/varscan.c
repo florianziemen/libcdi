@@ -265,7 +265,7 @@ static int tileNewEntry(int varID)
       tileID = vartable[varID].nsubtypes_alloc;
       vartable[varID].nsubtypes_alloc *= 2;
       vartable[varID].recordTable   =
-        (subtypetable_t *)xrealloc(vartable[varID].recordTable,
+        (subtypetable_t *)realloc(vartable[varID].recordTable,
                                    (size_t)vartable[varID].nsubtypes_alloc * sizeof (subtypetable_t));
       if (vartable[varID].recordTable == NULL)
         SysError("Reallocation of leveltable failed");
@@ -326,7 +326,7 @@ static int levelNewEntry(unsigned varID, int level1, int level2, int tileID)
       int i;
 
       levelTableSize = 2*levelTableSize;
-      levelTable = (leveltable_t *)xrealloc(levelTable, (size_t)levelTableSize
+      levelTable = (leveltable_t *)realloc(levelTable, (size_t)levelTableSize
                                             * sizeof (leveltable_t));
       if( levelTable == NULL )
 	{
@@ -395,7 +395,7 @@ paramNewEntry(int param)
     {
 
       varTablesize = 2 * varTablesize;
-      vartable = (vartable_t *)xrealloc(vartable, (size_t)varTablesize
+      vartable = (vartable_t *)realloc(vartable, (size_t)varTablesize
                                         * sizeof (vartable_t));
       if( vartable == NULL )
 	{

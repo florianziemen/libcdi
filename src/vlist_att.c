@@ -91,7 +91,7 @@ void fill_att(cdi_att_t *attp, int indtype, int exdtype, size_t nelems, size_t x
 
   if ( xsz > 0 )
     {
-      attp->xvalue = xrealloc(attp->xvalue, xsz);
+      attp->xvalue = realloc(attp->xvalue, xsz);
       memcpy(attp->xvalue, xvalue, xsz);
     }
 }

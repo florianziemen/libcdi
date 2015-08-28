@@ -352,7 +352,7 @@ void vlistCopy(int vlistID2, int vlistID1)
       //vlistptr2->varsAllocated = nvars;
 
       size_t n = (size_t)vlistptr2->varsAllocated;
-      vars2 = (var_t *)xrealloc(vars2, n*sizeof(var_t));
+      vars2 = (var_t *)realloc(vars2, n*sizeof(var_t));
       memcpy(vars2, vars1, n*sizeof(var_t));
       vlistptr2->vars = vars2;
 
@@ -683,7 +683,7 @@ void vlistCat(int vlistID2, int vlistID1)
   if ( nvars > vlistptr2->varsAllocated )
     {
       vlistptr2->varsAllocated = nvars;
-      vars2 = (var_t *)xrealloc(vars2, (size_t)nvars*sizeof(var_t));
+      vars2 = (var_t *)realloc(vars2, (size_t)nvars*sizeof(var_t));
       vlistptr2->vars = vars2;
     }
   memcpy(vars2+nvars2, vars1, (size_t)nvars1 * sizeof(var_t));
@@ -787,7 +787,7 @@ void vlistMerge(int vlistID2, int vlistID1)
           */
           if ( vars1[varID].levinfo )
             {
-              vars2[varID].levinfo = (levinfo_t*)xrealloc(vars2[varID].levinfo,
+              vars2[varID].levinfo = (levinfo_t*)realloc(vars2[varID].levinfo,
                                      (size_t)nlevs * sizeof(levinfo_t));
 
               memcpy(vars2[varID].levinfo+nlevs2, vars1[varID].levinfo,
@@ -1351,7 +1351,7 @@ void vlistChangeZaxisIndex(int vlistID, int index, int zaxisID)
             vlistptr->vars[varID].zaxisID = zaxisID;
             if ( vlistptr->vars[varID].levinfo && nlevs != nlevsOld )
               {
-                vlistptr->vars[varID].levinfo = (levinfo_t *)xrealloc(vlistptr->vars[varID].levinfo, (size_t)nlevs * sizeof (levinfo_t));
+                vlistptr->vars[varID].levinfo = (levinfo_t *)realloc(vlistptr->vars[varID].levinfo, (size_t)nlevs * sizeof (levinfo_t));
 
                 for ( int levID = 0; levID < nlevs; levID++ )
                   vlistptr->vars[varID].levinfo[levID] = DEFAULT_LEVINFO(levID);
@@ -1386,7 +1386,7 @@ void vlistChangeZaxis(int vlistID, int zaxisID1, int zaxisID2)
         if ( vlistptr->vars[varID].levinfo && nlevs2 != nlevs1 )
           {
             vlistptr->vars[varID].levinfo
-              = (levinfo_t *)xrealloc(vlistptr->vars[varID].levinfo,
+              = (levinfo_t *)realloc(vlistptr->vars[varID].levinfo,
                                       (size_t)nlevs2 * sizeof(levinfo_t));
 
             for ( int levID = 0; levID < nlevs2; levID++ )

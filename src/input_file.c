@@ -87,7 +87,7 @@ CdiInputFile* cdiInputFile_make(const char* path)
                 {
                   openFileListSize *= 2;
                   if(openFileListSize < 16) openFileListSize = 16;
-                  openFileList = (CdiInputFile **)xrealloc(openFileList, openFileListSize);
+                  openFileList = (CdiInputFile **)realloc(openFileList, openFileListSize);
                 }
               xassert(openFileCount < openFileListSize);
               openFileList[openFileCount++] = result;

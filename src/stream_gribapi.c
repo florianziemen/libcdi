@@ -991,7 +991,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
     {
       streamptr->tsteps[0].recordSize = nrecords;
       streamptr->tsteps[0].records =
-        (record_t *)xrealloc(streamptr->tsteps[0].records, (size_t)nrecords*sizeof(record_t));
+        (record_t *)realloc(streamptr->tsteps[0].records, (size_t)nrecords*sizeof(record_t));
     }
 
   streamptr->tsteps[0].recIDs = (int *)malloc((size_t)nrecords*sizeof(int));

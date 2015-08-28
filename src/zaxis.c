@@ -1092,7 +1092,7 @@ void zaxisResize(int zaxisID, int size)
   zaxisptr->size = size;
 
   if ( zaxisptr->vals )
-    zaxisptr->vals = (double *)xrealloc(zaxisptr->vals, (size_t)size * sizeof(double));
+    zaxisptr->vals = (double *)realloc(zaxisptr->vals, (size_t)size * sizeof(double));
 }
 
 
