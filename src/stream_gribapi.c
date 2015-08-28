@@ -994,7 +994,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
         (record_t *)xrealloc(streamptr->tsteps[0].records, (size_t)nrecords*sizeof(record_t));
     }
 
-  streamptr->tsteps[0].recIDs = (int *)xmalloc((size_t)nrecords*sizeof(int));
+  streamptr->tsteps[0].recIDs = (int *)malloc((size_t)nrecords*sizeof(int));
   streamptr->tsteps[0].nrecs = nrecords;
   for ( int recID = 0; recID < nrecords; recID++ )
     streamptr->tsteps[0].recIDs[recID] = recID;
@@ -1977,8 +1977,8 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 
 	    nlon = 0;
 
-	    rowlon = (int *)xmalloc((size_t)nlat*sizeof(int));
-	    pl     = (long *)xmalloc((size_t)nlat*sizeof(long));
+	    rowlon = (int *)malloc((size_t)nlat*sizeof(int));
+	    pl     = (long *)malloc((size_t)nlat*sizeof(long));
 	    gridInqRowlon(gridID, rowlon);
 	    for ( i = 0; i < nlat; ++i ) pl[i] = rowlon[i];
 

@@ -879,7 +879,7 @@ static stream_t *stream_new_entry(int resH)
 
   cdiInitialize(); /* ***************** make MT version !!! */
 
-  streamptr = (stream_t *) xmalloc(sizeof(stream_t));
+  streamptr = (stream_t *) malloc(sizeof(stream_t));
   streamDefaultValue ( streamptr );
   if (resH == CDI_UNDEFID)
     streamptr->self = reshPut(streamptr, &streamOps);

@@ -151,7 +151,7 @@ findInstitute(int id, void *res, void *data)
 
 int institutInq(int center, int subcenter, const char *name, const char *longname)
 {
-  institute_t * ip_ref = (institute_t *)xmalloc(sizeof (*ip_ref));
+  institute_t * ip_ref = (institute_t *)malloc(sizeof (*ip_ref));
   ip_ref->self       = UNDEFID;
   ip_ref->used       = 0;
   ip_ref->center     = center;
@@ -171,7 +171,7 @@ static
 institute_t *instituteNewEntry(cdiResH resH, int center, int subcenter,
                                const char *name, const char *longname)
 {
-  institute_t *instituteptr = (institute_t*) xmalloc(sizeof(institute_t));
+  institute_t *instituteptr = (institute_t*) malloc(sizeof(institute_t));
   instituteDefaultValue(instituteptr);
   if (resH == CDI_UNDEFID)
     instituteptr->self = reshPut(instituteptr, &instituteOps);
@@ -333,7 +333,7 @@ int instituteUnpack(void *buf, int size, int *position, int originNamespace,
   int instituteID;
   char *name, *longname;
   serializeUnpack(buf, size, position, tempbuf, institute_nints, DATATYPE_INT, context);
-  name = (char *)xmalloc((size_t)tempbuf[3] + (size_t)tempbuf[4]);
+  name = (char *)malloc((size_t)tempbuf[3] + (size_t)tempbuf[4]);
   longname = name + tempbuf[3];
   serializeUnpack(buf, size, position, name, tempbuf[3], DATATYPE_TXT, context);
   serializeUnpack(buf, size, position, longname, tempbuf[4], DATATYPE_TXT, context);

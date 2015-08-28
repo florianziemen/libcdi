@@ -109,7 +109,7 @@ void pcdiDebugComm ( const char *filename, const char *functionname, int line, M
   int rank = -1, size, len, rankGlob = -1;
   char *name;
 
-  name = ( char * ) xmalloc ( MPI_MAX_OBJECT_NAME );
+  name = ( char * ) malloc ( MPI_MAX_OBJECT_NAME );
   memset ( name, 0, ( MPI_MAX_OBJECT_NAME ) * sizeof ( char ));
   MPI_Comm_get_name ( * comm, name, &len );
   MPI_Comm_size ( * comm, &size );
