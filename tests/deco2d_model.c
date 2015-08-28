@@ -333,7 +333,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
                    / (size_t)nproma) * (size_t)nproma * varLevs;
               if (varslice_size < chunkSize)
                 {
-                  varslice = (double *)xrealloc(varslice, chunkSize * sizeof (var[0]));
+                  varslice = (double *)realloc(varslice, chunkSize * sizeof (var[0]));
                   varslice_size = chunkSize;
                 }
               modelRegionCompute(varslice, (int)varLevs, nlat, nlon,

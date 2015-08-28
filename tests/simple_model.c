@@ -250,7 +250,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
 #endif
               if (varslice_size < (size_t)chunk)
                 {
-                  varslice = (double *)xrealloc(varslice, (size_t)chunk * sizeof (var[0]));
+                  varslice = (double *)realloc(varslice, (size_t)chunk * sizeof (var[0]));
                   varslice_size = (size_t)chunk;
                 }
               modelRegionCompute(varslice, (size_t)start, (size_t)chunk,
