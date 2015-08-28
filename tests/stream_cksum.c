@@ -50,7 +50,7 @@ cksum_stream(const char *fname, size_t *table_len)
         break;
       }
     checksum_state = (uint32_t *)xcalloc((size_t)nvars, sizeof (checksum_state[0]));
-    varSize = (struct var_size_t *)malloc((size_t)nvars * sizeof (varSize[0]));
+    varSize = (struct var_size_t *)xmalloc((size_t)nvars * sizeof (varSize[0]));
 
     for (i = 0; i < nvars; ++i)
       {
@@ -121,7 +121,7 @@ cksum_stream(const char *fname, size_t *table_len)
         ++tsID;
       }
 
-    file_vars = (struct cksum_table *)malloc((size_t)nvars * sizeof (file_vars[0]));
+    file_vars = (struct cksum_table *)xmalloc((size_t)nvars * sizeof (file_vars[0]));
     for (i = 0; i < nvars; ++i)
       {
         file_vars[i].code = vlistInqVarCode(vlistID, i);

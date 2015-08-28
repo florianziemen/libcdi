@@ -32,7 +32,7 @@ char* gribCopyString(grib_handle* gribHandle, const char* key)
 #ifdef HAVE_GRIB_GET_LENGTH
   if(!grib_get_length(gribHandle, key, &length))
     {
-    char* result = (char *)malloc(length);
+    char* result = (char *)xmalloc(length);
     if(!grib_get_string(gribHandle, key, result, &length))
     result = (char *)xrealloc(result, length);
   
@@ -48,7 +48,7 @@ char* gribCopyString(grib_handle* gribHandle, const char* key)
                           * this unlikely in grib_api versions
                           * not providing grib_get_length */
   int rc;
-  result = (char *)malloc(length);
+  result = (char *)xmalloc(length);
   while ((rc = grib_get_string(gribHandle, key, result, &length))
          == GRIB_BUFFER_TOO_SMALL || rc == GRIB_ARRAY_TOO_SMALL)
     {
@@ -80,7 +80,7 @@ bool gribCheckString(grib_handle* gribHandle, const char* key, const char* expec
   size_t length;
   if(grib_get_length(gribHandle, key, &length)) return false;
   if(length != expectedLength) return false;
-  char *value = (char *)malloc(length);
+  char *value = (char *)xmalloc(length);
   if(grib_get_string(gribHandle, key, value, &length)) return false;
   int rc = !strcmp(value, expectedValue);
   free(value);
@@ -259,7 +259,7 @@ static int addToDate(struct tm* me, long long amount, long unit)
 static char* makeDateString(struct tm* me)
 {
   char *result
-    = (char *)malloc(       4+1+ 2+1+ 2+1+ 2+1+ 2+1+ 2+ 4+ 1);
+    = (char *)xmalloc(       4+1+ 2+1+ 2+1+ 2+1+ 2+1+ 2+ 4+ 1);
   sprintf(result, "%04d-%02d-%02dT%02d:%02d:%02d.000", me->tm_year + 1900, me->tm_mon + 1, me->tm_mday, me->tm_hour, me->tm_min, me->tm_sec);
   return result;
 }

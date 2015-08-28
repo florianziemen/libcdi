@@ -222,7 +222,7 @@ int modelRun(MPI_Comm comm)
   }
 
   reshPackBufferCreate ( &sendBuffer, &bufferSize, &comm );
-  recvBuffer = (char *)malloc((size_t)bufferSize);
+  recvBuffer = (char *)xmalloc((size_t)bufferSize);
 #ifdef MPI_MARSHALLING
   xmpi(MPI_Sendrecv(sendBuffer, bufferSize, MPI_PACKED, 0, 0,
                     recvBuffer, bufferSize, MPI_PACKED, 0, 0,

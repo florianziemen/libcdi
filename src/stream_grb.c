@@ -715,7 +715,7 @@ void grbCopyRecord(stream_t * streamptr2, stream_t * streamptr1)
   /* round up recsize to next multiple of 8 */
   size_t gribbuffersize = ((recsize + 7U) & ~7U);
 
-  unsigned char *gribbuffer = (unsigned char *)malloc(gribbuffersize);
+  unsigned char *gribbuffer = (unsigned char *)xmalloc(gribbuffersize);
 
   if (fileRead(fileID1, gribbuffer, recsize) != recsize)
     Error("Could not read GRIB record for copying!");

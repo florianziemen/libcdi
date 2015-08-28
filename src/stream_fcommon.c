@@ -21,7 +21,7 @@ void streamFCopyRecord(stream_t *streamptr2, stream_t *streamptr1,
   if (fileSetPos(fileID1, recpos, SEEK_SET) != 0)
     Error("Cannot seek input file for %s record copy!", container_name);
 
-  char *buffer = (char *)malloc(recsize);
+  char *buffer = (char *)xmalloc(recsize);
 
   if (fileRead(fileID1, buffer, recsize) != recsize)
     Error("Failed to read record from %s file for copying!", container_name);

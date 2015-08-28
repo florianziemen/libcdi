@@ -238,7 +238,7 @@ static int tileNewEntry(int varID)
       vartable[varID].nsubtypes_alloc = 2;
       vartable[varID].nsubtypes       = 0;
       vartable[varID].recordTable     =
-        (subtypetable_t *)malloc((size_t)vartable[varID].nsubtypes_alloc * sizeof (subtypetable_t));
+        (subtypetable_t *)xmalloc((size_t)vartable[varID].nsubtypes_alloc * sizeof (subtypetable_t));
       if( vartable[varID].recordTable == NULL )
         SysError("Allocation of leveltable failed!");
 
@@ -299,7 +299,7 @@ static int levelNewEntry(unsigned varID, int level1, int level2, int tileID)
       int i;
 
       levelTableSize = 2;
-      levelTable = (leveltable_t *)malloc((size_t)levelTableSize
+      levelTable = (leveltable_t *)xmalloc((size_t)levelTableSize
                                            * sizeof (leveltable_t));
       if( levelTable == NULL )
 	{
@@ -364,7 +364,7 @@ paramNewEntry(int param)
   if ( ! varTablesize )
     {
       varTablesize = 2;
-      vartable = (vartable_t *)malloc((size_t)varTablesize
+      vartable = (vartable_t *)xmalloc((size_t)varTablesize
                                        * sizeof (vartable_t));
       if( vartable == NULL )
 	{
@@ -626,12 +626,12 @@ void cdi_generate_vars(stream_t *streamptr)
   double level_sf = 1;
   int vlistID = streamptr->vlistID;
 
-  int *varids = (int *)malloc(nvars*sizeof(int));
+  int *varids = (int *)xmalloc(nvars*sizeof(int));
   for ( unsigned varID = 0; varID < nvars; varID++ ) varids[varID] = (int)varID;
 
   if ( streamptr->sortname )
     {
-      param_t *varInfo = (param_t *)malloc((size_t)nvars * sizeof (param_t));
+      param_t *varInfo = (param_t *)xmalloc((size_t)nvars * sizeof (param_t));
 
       for ( unsigned varID = 0; varID < nvars; varID++ )
 	{
@@ -1172,7 +1172,7 @@ void varDefTable(int varID, int tableID)
 void varDefEnsembleInfo(int varID, int ens_idx, int ens_count, int forecast_type)
 {
   if ( vartable[varID].ensdata == NULL )
-      vartable[varID].ensdata = (ensinfo_t *)malloc( sizeof( ensinfo_t ) );
+      vartable[varID].ensdata = (ensinfo_t *)xmalloc( sizeof( ensinfo_t ) );
 
   vartable[varID].ensdata->ens_index = ens_idx;
   vartable[varID].ensdata->ens_count = ens_count;
@@ -1209,7 +1209,7 @@ void resize_vartable_opt_grib_entries(vartable_t *var, int nentries)
       new_size = (2*var->opt_grib_kvpair_size) > nentries ? (2*var->opt_grib_kvpair_size) : nentries;
       if (CDI_Debug)
         Message("resize vartable opt_grib_entries array to size %d", new_size);
-      opt_key_val_pair_t *tmp = (opt_key_val_pair_t *)malloc((size_t)new_size * sizeof (opt_key_val_pair_t));
+      opt_key_val_pair_t *tmp = (opt_key_val_pair_t *)xmalloc((size_t)new_size * sizeof (opt_key_val_pair_t));
       for (i=0; i<var->opt_grib_kvpair_size; i++) {
         tmp[i] = var->opt_grib_kvpair[i];
       }

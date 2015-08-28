@@ -70,7 +70,7 @@ static char *
 new_refcount_string(size_t len)
 {
   struct refcount_string *container
-    = (struct refcount_string *)malloc(sizeof (*container) + len + 1);
+    = (struct refcount_string *)xmalloc(sizeof (*container) + len + 1);
   container->ref_count = 1;
   return container->string;
 }
@@ -179,7 +179,7 @@ void taxisDefaultValue(taxis_t* taxisptr)
 static taxis_t *
 taxisNewEntry(cdiResH resH)
 {
-  taxis_t *taxisptr = (taxis_t*) malloc(sizeof(taxis_t));
+  taxis_t *taxisptr = (taxis_t*) xmalloc(sizeof(taxis_t));
 
   taxisDefaultValue(taxisptr);
   if (resH == CDI_UNDEFID)

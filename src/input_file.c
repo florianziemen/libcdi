@@ -73,7 +73,7 @@ CdiInputFile* cdiInputFile_make(const char* path)
         }
       else
         {
-          result = (CdiInputFile *)malloc(sizeof(*result));
+          result = (CdiInputFile *)xmalloc(sizeof(*result));
           if(!cdiInputFile_condestruct(result, path))
             {
               //An error occured during construction, avoid a memory leak.

@@ -190,7 +190,7 @@ void file_list_new(void)
 {
   assert(_fileList == NULL);
 
-  _fileList = (filePtrToIdx *)malloc((size_t)_file_max * sizeof (filePtrToIdx));
+  _fileList = (filePtrToIdx *)xmalloc((size_t)_file_max * sizeof (filePtrToIdx));
 }
 
 static
@@ -307,7 +307,7 @@ bfile_t *file_new_entry(void)
 {
   bfile_t *fileptr;
 
-  fileptr = (bfile_t *) malloc(sizeof(bfile_t));
+  fileptr = (bfile_t *)xmalloc(sizeof(bfile_t));
 
   if ( fileptr ) file_init_entry(fileptr);
 

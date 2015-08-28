@@ -94,9 +94,9 @@ modelRun(struct model_config setup, MPI_Comm comm)
   xmpi ( MPI_Comm_size ( comm, &comm_size ));
   if (rank == 0 && setup.compute_checksum)
     {
-      chunks = malloc((size_t)comm_size * sizeof (chunks[0]));
-      displs = malloc((size_t)comm_size * sizeof (displs[0]));
-      var = malloc((size_t)nlon * (size_t)nlat
+      chunks = xmalloc((size_t)comm_size * sizeof (chunks[0]));
+      displs = xmalloc((size_t)comm_size * sizeof (displs[0]));
+      var = xmalloc((size_t)nlon * (size_t)nlat
                     * (size_t)setup.max_nlev * sizeof(var[0]));
     }
 #endif
@@ -106,10 +106,10 @@ modelRun(struct model_config setup, MPI_Comm comm)
   gridID = gridCreate ( GRID_LONLAT, nlon*nlat );
   gridDefXsize ( gridID, nlon );
   gridDefYsize ( gridID, nlat );
-  lons = (double *)malloc((size_t)nlon * sizeof (lons[0]));
+  lons = (double *)xmalloc((size_t)nlon * sizeof (lons[0]));
   for (i = 0; i < nlon; ++i)
     lons[i] = ((double)(i * 360))/nlon;
-  lats = (double *)malloc((size_t)nlat * sizeof (lats[0]));
+  lats = (double *)xmalloc((size_t)nlat * sizeof (lats[0]));
   for (i = 0; i < nlat; ++i)
     lats[i] = ((double)(i * 180))/nlat - 90.0;
   gridDefXvals ( gridID, lons );
@@ -123,7 +123,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
 #endif
     gridDefUUID(gridID, uuid);
   }
-  levs = (double *)malloc((size_t)setup.max_nlev * sizeof (levs[0]));
+  levs = (double *)xmalloc((size_t)setup.max_nlev * sizeof (levs[0]));
   {
     double lscale = 1.0/(double)(setup.max_nlev - 1);
     for (i = 0; i < setup.max_nlev; ++i)
@@ -131,7 +131,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
   }
   vlistID = vlistCreate ();
 
-  varDesc = (struct varDesc_t *)malloc((size_t)nVars * sizeof (varDesc[0]));
+  varDesc = (struct varDesc_t *)xmalloc((size_t)nVars * sizeof (varDesc[0]));
   for (int varIdx = 0; varIdx < nVars; varIdx++ )
     {
       int varLevs = (int)random()%4;

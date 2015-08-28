@@ -943,7 +943,7 @@ void iegScanTimestep1(stream_t *streamptr)
                              (size_t)nrecords * sizeof (record_t));
     }
 
-  streamptr->tsteps[0].recIDs = (int *)malloc((size_t)nrecords * sizeof (int));
+  streamptr->tsteps[0].recIDs = (int *)xmalloc((size_t)nrecords * sizeof (int));
   streamptr->tsteps[0].nrecs = nrecords;
   for ( recID = 0; recID < nrecords; recID++ )
     streamptr->tsteps[0].recIDs[recID] = recID;
@@ -1006,7 +1006,7 @@ int iegScanTimestep2(stream_t *streamptr)
   cdi_create_records(streamptr, tsID);
 
   nrecords = streamptr->tsteps[0].nallrecs;
-  streamptr->tsteps[1].recIDs = (int *)malloc((size_t)nrecords * sizeof(int));
+  streamptr->tsteps[1].recIDs = (int *)xmalloc((size_t)nrecords * sizeof(int));
   streamptr->tsteps[1].nrecs = 0;
   for ( recID = 0; recID < nrecords; recID++ )
     streamptr->tsteps[1].recIDs[recID] = -1;
@@ -1191,7 +1191,7 @@ long iegScanTimestep(stream_t *streamptr)
 
       streamptr->tsteps[tsID].nrecs = nrecs;
       streamptr->tsteps[tsID].recIDs
-        = (int *)malloc((size_t)nrecs * sizeof (int));
+        = (int *)xmalloc((size_t)nrecs * sizeof (int));
       for ( recID = 0; recID < nrecs; recID++ )
 	streamptr->tsteps[tsID].recIDs[recID] = streamptr->tsteps[1].recIDs[recID];
 

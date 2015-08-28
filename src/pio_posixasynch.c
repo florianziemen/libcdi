@@ -60,7 +60,7 @@ initBFiledataPA(char *filename, size_t bs, int nc)
   xdebug ( "filename=%s, buffersize=%zu, ncollectors=%d, nPrefetchStreams=%d",
            filename, bs, nc, nPrefStreams );
 
-  bfd = (bFiledataPA*) malloc( sizeof (*bfd) + strlen(filename) + 1);
+  bfd = (bFiledataPA*) xmalloc( sizeof (*bfd) + strlen(filename) + 1);
   strcpy(bfd->name, filename);
 
   if (( bfd->handle = open ( bfd->name, O_CREAT | O_WRONLY, 0666 )) == -1 )
@@ -250,7 +250,7 @@ void pioWriterAIO(void)
 	{
       	case IO_Open_file:
           {
-            char *messageBuffer = malloc((size_t)messagesize
+            char *messageBuffer = xmalloc((size_t)messagesize
                                           * sizeof (messageBuffer[0]));
             char *pMB = messageBuffer;
 

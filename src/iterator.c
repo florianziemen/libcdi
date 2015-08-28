@@ -301,7 +301,7 @@ char* cdiIterator_serialize(CdiIterator* me)
 
   const char *ftypeStr = fileType2String(me->filetype),
     *advStr = me->isAdvanced ? kAdvancedString : kUnadvancedString;
-  char* result = (char *)malloc(strlen(ftypeStr) + 1 + strlen(advStr) + 1
+  char* result = (char *)xmalloc(strlen(ftypeStr) + 1 + strlen(advStr) + 1
                          + strlen(subclassDescription) + 1);
   sprintf(result, "%s %s %s", ftypeStr, advStr, subclassDescription);
   free(subclassDescription);

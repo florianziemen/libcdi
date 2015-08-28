@@ -111,7 +111,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
 
   if (rank == 0 && setup.compute_checksum)
     {
-      var = (double *)malloc((size_t)nlon * (size_t)nlat
+      var = (double *)xmalloc((size_t)nlon * (size_t)nlat
                     * (size_t)setup.max_nlev * sizeof(var[0]));
     }
 
@@ -129,7 +129,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
       rank_coord[0] = rank % npart[0],
         rank_coord[1] = rank / npart[0];
     }
-  blk_displ = malloc((size_t)setup.max_nlev * sizeof (blk_displ[0]) * 2);
+  blk_displ = xmalloc((size_t)setup.max_nlev * sizeof (blk_displ[0]) * 2);
   blk_lens = blk_displ + setup.max_nlev;
 #endif
 
@@ -138,10 +138,10 @@ modelRun(struct model_config setup, MPI_Comm comm)
   gridID = gridCreate ( GRID_LONLAT, nlon*nlat );
   gridDefXsize ( gridID, nlon );
   gridDefYsize ( gridID, nlat );
-  lons = (double *)malloc((size_t)nlon * sizeof (lons[0]));
+  lons = (double *)xmalloc((size_t)nlon * sizeof (lons[0]));
   for (i = 0; i < nlon; ++i)
     lons[i] = ((double)(i * 360))/nlon;
-  lats = (double *)malloc((size_t)nlat * sizeof (lats[0]));
+  lats = (double *)xmalloc((size_t)nlat * sizeof (lats[0]));
   for (i = 0; i < nlat; ++i)
     lats[i] = ((double)(i * 180))/nlat - 90.0;
   gridDefXvals ( gridID, lons );
@@ -155,7 +155,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
 #endif
     gridDefUUID(gridID, uuid);
   }
-  levs = (double *)malloc((size_t)setup.max_nlev * sizeof (levs[0]));
+  levs = (double *)xmalloc((size_t)setup.max_nlev * sizeof (levs[0]));
   {
     double lscale = 1.0/(double)(setup.max_nlev - 1);
     for (i = 0; i < setup.max_nlev; ++i)
@@ -163,7 +163,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
   }
   vlistID = vlistCreate ();
 
-  varDesc = (struct varDesc_t *)malloc((size_t)nVars * sizeof (varDesc[0]));
+  varDesc = (struct varDesc_t *)xmalloc((size_t)nVars * sizeof (varDesc[0]));
   for (int varIdx = 0; varIdx < nVars; varIdx++ )
     {
       int varLevs = (int)random()%4;
@@ -252,7 +252,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
             Xt_xmap xmap4gather
               = xt_xmap_all2all_new(part_idxlist, gather_idxlist, comm);
             xt_idxlist_delete(gather_idxlist);
-            struct Xt_offset_ext *src_blocks = malloc((size_t)varLevs
+            struct Xt_offset_ext *src_blocks = xmalloc((size_t)varLevs
                                                        * sizeof (*src_blocks));
             struct Xt_offset_ext dst_block = { .start = 0,
                                                .size = nlon * nlat * varLevs,

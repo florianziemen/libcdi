@@ -43,7 +43,7 @@ initRemoteFileBuf(const char *filename, size_t bs)
   xdebug ( "filename=%s, buffersize=%zu, in", filename, bs );
 
   len = strlen(filename);
-  afp = malloc(sizeof (remoteFileBuf) + len + 1);
+  afp = xmalloc(sizeof (remoteFileBuf) + len + 1);
   strcpy(afp->name, filename);
   afp->size = bs;
   afp->tsID = 0;
@@ -261,7 +261,7 @@ pioSendOpen(const char *filename)
   if ( ddebug )
     {
       size_t l = strlen(filename) + strlen(message) + 2;
-      char *temp = malloc(l + 1);
+      char *temp = xmalloc(l + 1);
       strncpy(temp, (char *)afd->db->buffer, l);
       temp[l] = '\0';
       xdebug("filename=%s, put Open file message on buffer:\n%s,\t return",
