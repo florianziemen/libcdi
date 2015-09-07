@@ -3404,7 +3404,6 @@ int cdfDefVar(stream_t *streamptr, int varID)
       int ncxvarID = streamptr->ncxvarID[gridindex];
       int ncyvarID = streamptr->ncyvarID[gridindex];
       int ncavarID = streamptr->ncavarID[gridindex];
-      printf("curvi\n");
       if ( ncyvarID != CDI_UNDEFID )
         {
           len = strlen(coordinates);
@@ -5684,7 +5683,6 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
                   if ( status == NC_NOERR )
                     {
                       cdfSetVar(ncvars, dimvarid, FALSE);
-                      printf("coord varname: %s\n", varname);
                       if ( cdiIgnoreAttCoordinates == FALSE )
                         {
                           ncvars[ncvarid].coordvarids[i] = dimvarid;
