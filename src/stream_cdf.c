@@ -5019,7 +5019,7 @@ int isLatAxis(const char *units, const char *stdname)
       int ioff = 6;
       if ( lc_units[ioff] == 's' ) ioff++;
       if ( lc_units[ioff] == '_' ) ioff++;
-      if ( lc_units[ioff] == 'n' ) status = TRUE;
+      if ( lc_units[ioff] == 'n' || lc_units[ioff] == 's' ) status = TRUE;
     }
 
   return (status);
