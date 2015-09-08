@@ -6499,12 +6499,10 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 		      size = xsize*ysize;
 		      /* Check size of 2 dimensional coordinate variables */
 		      {
-			int dimid;
-			size_t dimsize1, dimsize2;
-			dimid = ncvars[xvarid].dimids[ndims-2];
-			dimsize1 = ncdims[dimid].len;
+			int dimid = ncvars[xvarid].dimids[ndims-2];
+			size_t dimsize1 = ncdims[dimid].len;
 			dimid = ncvars[xvarid].dimids[ndims-1];
-			dimsize2 = ncdims[dimid].len;
+			size_t dimsize2 = ncdims[dimid].len;
 			if ( dimsize1*dimsize2 == size ) skipvar = FALSE;
 		      }
 		    }
@@ -6513,10 +6511,8 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 		      size = xsize;
 		      /* Check size of 1 dimensional coordinate variables */
 		      {
-			int dimid;
-			size_t dimsize;
-			dimid = ncvars[xvarid].dimids[0];
-			dimsize = ncdims[dimid].len;
+			int dimid = ncvars[xvarid].dimids[0];
+			size_t dimsize = ncdims[dimid].len;
 			if ( dimsize == size ) skipvar = FALSE;
 		      }
 		    }
