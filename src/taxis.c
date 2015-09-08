@@ -1201,10 +1201,7 @@ splitTimevalue(double timevalue, int timeunit, int *date, int *time)
     }
   else if ( timeunit == TUNIT_MONTH )
     {
-      vdate = (int) timevalue*100;
-      if ( vdate < 0 ) vdate -= 1;
-      else             vdate += 1;
-
+      vdate = (int) timevalue*100 - ((vdate < 0) * 2 - 1);
       vtime = 0;
     }
   else if ( timeunit == TUNIT_YEAR )
