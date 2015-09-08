@@ -2364,7 +2364,7 @@ struct streamAssoc
 streamUnpack(char * unpackBuffer, int unpackBufferSize,
              int * unpackBufferPos, int originNamespace, void *context)
 {
-  int intBuffer[streamNint], streamID;
+  int intBuffer[streamNint];
   uint32_t d;
   char filename[CDI_MAX_NAME];
 
@@ -2381,8 +2381,8 @@ streamUnpack(char * unpackBuffer, int unpackBufferSize,
   serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
                   &d, 1, DATATYPE_UINT32, context);
   xassert(d == cdiCheckSum(DATATYPE_TXT, intBuffer[2], filename));
-  int targetStreamID = namespaceAdaptKey(intBuffer[0], originNamespace);
-  streamID = streamOpenID(filename, "w", intBuffer[1], targetStreamID);
+  int targetStreamID = namespaceAdaptKey(intBuffer[0], originNamespace),
+    streamID = streamOpenID(filename, "w", intBuffer[1], targetStreamID);
   xassert(streamID >= 0 && targetStreamID == streamID);
   streamDefByteorder(streamID, intBuffer[5]);
   streamDefCompType(streamID, intBuffer[6]);
