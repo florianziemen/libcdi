@@ -244,7 +244,6 @@ elemCheck(void *q, void *nm)
 
 int fowMPINONB ( const char *filename )
 {
-  static aFiledataM *of;
   static unsigned long buffersize = 0;
   int id;
   enum {
@@ -265,7 +264,7 @@ int fowMPINONB ( const char *filename )
   xdebug("buffersize=%ld", buffersize);
 
   listSetForeach(bibAFiledataM, elemCheck, (void *)filename);
-  of = initAFiledataMPINONB(filename, (size_t)buffersize);
+  aFiledataM *of = initAFiledataMPINONB(filename, (size_t)buffersize);
 
   if ((id = listSetAdd(bibAFiledataM, of)) < 0 )
     xabort("filename %s not unique", of->name);
