@@ -1177,7 +1177,8 @@ void conv_timeval(double timevalue, int *rvdate, int *rvtime)
 }
 
 
-void splitTimevalue(double timevalue, int timeunit, int *date, int *time)
+static void
+splitTimevalue(double timevalue, int timeunit, int *date, int *time)
 {
   int vdate = 0, vtime = 0;
   int hour, minute, second;
