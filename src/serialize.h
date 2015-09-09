@@ -78,7 +78,7 @@ serializeStrTabUnpack(const void *buf, int buf_size, int *position,
       serializeUnpack(buf, buf_size, position,
                       strTab[i], len, DATATYPE_TXT, context);
       strTab[i][len] = '\0';
-      d2 ^= cdiCheckSum(DATATYPE_TXT, (size_t)len, strTab[i]);
+      d2 ^= cdiCheckSum(DATATYPE_TXT, len, strTab[i]);
     }
   serializeUnpack(buf, buf_size, position,
                   &d, 1, DATATYPE_UINT32, context);
