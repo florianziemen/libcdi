@@ -369,7 +369,7 @@ int setBaseTime(const char *timeunits, taxis_t *taxis)
 }
 
 static
-void cdfGetAttInt(int fileID, int ncvarid, char *attname, int attlen, int *attint)
+void cdfGetAttInt(int fileID, int ncvarid, const char *attname, int attlen, int *attint)
 {
   nc_type atttype;
   size_t nc_attlen;

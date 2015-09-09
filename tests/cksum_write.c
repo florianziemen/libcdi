@@ -118,7 +118,7 @@ main(int argc, char *argv[])
   int i, j, k, nmiss = 0;
   double *lons, *lats, *var[nvars], *levs, mscale, mrscale;
   size_t varSize[nvars];
-  char *varName[nvars] = { "varname1", "varname2" };
+  const char *varName[nvars] = { "varname1", "varname2" };
 #ifndef TEST_CHUNK_WRITE
   const char *suffix = "grb", *prefix = "example";
   int grid = GRID_LONLAT;

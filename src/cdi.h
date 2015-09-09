@@ -1094,8 +1094,8 @@ const char *institutInqLongnamePtr(int instID);
 /* Model routines */
 
 int     modelDef(int instID, int modelgribID, const char *name);
-int     modelInq(int instID, int modelgribID, char *name);
-int     modelInqInstitut(int modelID);
+int     modelInq(int instID, int modelgribID, const char *name);
+int     modelInqInstitut(int modelID) ;
 int     modelInqGribID(int modelID);
 const char *modelInqNamePtr(int modelID);
 

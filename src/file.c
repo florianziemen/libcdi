@@ -1206,8 +1206,8 @@ int fileClose_serial(int fileID)
 {
   char *name;
   int ret;
-  char *fbtname[] = {"unknown", "standard", "mmap"};
-  char *ftname[] = {"unknown", "open", "fopen"};
+  const char *fbtname[] = {"unknown", "standard", "mmap"};
+  const char *ftname[] = {"unknown", "open", "fopen"};
   bfile_t *fileptr = file_to_pointer(fileID);
   double rout = 0;
 

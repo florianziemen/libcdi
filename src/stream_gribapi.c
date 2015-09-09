@@ -1860,7 +1860,7 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
   int status;
   static short lwarn = TRUE;
   size_t len;
-  char *mesg;
+  const char *mesg;
 
   UNUSED(nmiss);
 

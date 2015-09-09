@@ -134,7 +134,7 @@ void modelInit(void)
 
 struct modelLoc
 {
-  char *name;
+  const char *name;
   int instID, modelgribID, resID;
 };
 
@@ -179,7 +179,7 @@ findModelByName(int resID, void *res, void *data)
   return CDI_APPLY_GO_ON;
 }
 
-int modelInq(int instID, int modelgribID, char *name)
+int modelInq(int instID, int modelgribID, const char *name)
 {
   modelInit ();
 
@@ -332,7 +332,7 @@ modelUnpack(void *buf, int size, int *position, int originNamespace, void *conte
     }
   else
     {
-      name = "";
+      name = (char*)"";
     }
   int targetID = namespaceAdaptKey(tempbuf[0], originNamespace);
   model_t *mp = modelNewEntry(force_id?targetID:CDI_UNDEFID,

@@ -23,10 +23,10 @@
 
 static const struct {
   unsigned char positive;   // 1: up;  2: down
-  char *name;
-  char *longname;
-  char *stdname;
-  char *units;
+  const char *name;
+  const char *longname;
+  const char *stdname;
+  const char *units;
 }
 ZaxistypeEntry[] = {
   { /*  0 */ 0, "sfc",               "surface",                "",               ""},
@@ -336,9 +336,9 @@ void zaxisDestroyP ( void * zaxisptr )
 }
 
 
-char *zaxisNamePtr(int zaxistype)
+const char *zaxisNamePtr(int zaxistype)
 {
-  char *name = (zaxistype >= 0 && zaxistype < CDI_NumZaxistype)
+  const char *name = (zaxistype >= 0 && zaxistype < CDI_NumZaxistype)
     ? ZaxistypeEntry[zaxistype].longname
     : ZaxistypeEntry[ZAXIS_GENERIC].longname;
   return (name);

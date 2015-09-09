@@ -326,7 +326,7 @@ int     streamInqFileID(int streamID);
 void    gridDefHasDims(int gridID, int hasdims);
 int     gridInqHasDims(int gridID);
 const char *gridNamePtr(int gridtype);
-char   *zaxisNamePtr(int leveltype);
+const char   *zaxisNamePtr(int leveltype);
 int     zaxisInqLevelID(int zaxisID, double level);
 
 void    streamCheckID(const char *caller, int streamID);

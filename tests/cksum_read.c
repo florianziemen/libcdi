@@ -41,7 +41,7 @@ read_table(const char *table_fname, size_t *table_len)
 
 int main(int argc, char *argv[])
 {
-  char *fname = "example.grb", *table_fname = "example.cksum";
+  const char *fname = "example.grb", *table_fname = "example.cksum";
 
   if (argc > 1)
     fname = argv[1];

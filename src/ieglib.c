@@ -44,7 +44,7 @@ int IEG_Debug = 0;    /* If set to 1, debugging */
 void iegLibInit()
 {
   char *envString;
-  char *envName = "IEG_PRECISION";
+  const char *envName = "IEG_PRECISION";
 
 
   envString = getenv(envName);
