@@ -5,9 +5,10 @@
 #define _XOPEN_SOURCE 600
 
 #include <errno.h>
+#include <float.h>
+#include <inttypes.h>
 #include <stdio.h>
 #include <string.h>
-#include <float.h>
 #include <sys/types.h>
 
 #include "cdi.h"
@@ -182,9 +183,9 @@ typedef uint32_t u_int32_t;
 void
 create_uuid(unsigned char *uuid)
 {
-  unsigned32 status;
+  uint32_t status;
   uuid_create((uuid_t *)uuid, &status);
-  if (status == -1)
+  if (status != uuid_s_ok)
     {
       perror("uuid generation failed!");
       exit(1);
