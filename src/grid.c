@@ -1527,19 +1527,20 @@ double gridInqXinc(int gridID)
 {
   grid_t *gridptr = gridID2Ptr(gridID);
   double xinc = gridptr->xinc;
+  const double *restrict xvals = gridptr->xvals;
 
-  if ( (! (fabs(xinc) > 0)) && gridptr->xvals )
+  if ( (! (fabs(xinc) > 0)) && xvals )
     {
       int xsize = gridptr->xsize;
       if ( xsize > 1 )
         {
-          double *xvals = gridptr->xvals;
           xinc = fabs(xvals[xsize-1] - xvals[0])/(xsize-1);
-          int i;
-          for ( i = 2; i < xsize; i++ )
-            if ( fabs(fabs(xvals[i-1] - xvals[i]) - xinc) > 0.01*xinc ) break;
-
-          if ( i < xsize ) xinc = 0;
+          for ( size_t i = 2; i < (size_t)xsize; i++ )
+            if ( fabs(fabs(xvals[i-1] - xvals[i]) - xinc) > 0.01*xinc )
+              {
+                xinc = 0;
+                break;
+              }
 
           gridptr->xinc = xinc;
         }
@@ -1562,20 +1563,21 @@ double gridInqYinc(int gridID)
 {
   grid_t *gridptr = gridID2Ptr(gridID);
   double yinc = gridptr->yinc;
+  const double *yvals = gridptr->yvals;
 
-  if ( (! (fabs(yinc) > 0)) && gridptr->yvals )
+  if ( (! (fabs(yinc) > 0)) && yvals )
     {
       int ysize = gridptr->ysize;
       if ( ysize > 1 )
         {
-          double *yvals = gridptr->yvals;
-          yinc = fabs(yvals[1] - yvals[0]);
-          int i;
-          for ( i = 2; i < ysize; i++ )
-            if ( fabs(fabs(yvals[i] - yvals[i-1]) - yinc) > 0.01*yinc ) break;
-
-          if ( i < ysize ) yinc = 0;
-          else             yinc = yvals[1] - yvals[0];
+          yinc = yvals[1] - yvals[0];
+          double abs_yinc = fabs(yinc);
+          for ( size_t i = 2; i < (size_t)ysize; i++ )
+            if ( fabs(fabs(yvals[i] - yvals[i-1]) - abs_yinc) > (0.01*abs_yinc))
+              {
+                yinc = 0;
+                break;
+              }
 
           gridptr->yinc = yinc;
         }
