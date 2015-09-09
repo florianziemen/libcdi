@@ -1877,26 +1877,21 @@ void gridChangeType(int gridID, int gridtype)
 static
 void grid_check_cyclic(grid_t *gridptr)
 {
-  int xsize, ysize;
-  long i1, i2, in, j, k1, k2, nc;
-  double xinc, x0;
-  const double *xvals, *xbounds;
-
   gridptr->isCyclic = FALSE;
 
-  xsize = gridptr->xsize;
-  ysize = gridptr->ysize;
-  xvals = gridptr->xvals;
-  xbounds = gridptr->xbounds;
+  int xsize = gridptr->xsize,
+    ysize = gridptr->ysize;
+  const double *xvals = gridptr->xvals,
+    *xbounds = gridptr->xbounds;
 
   if ( gridptr->type == GRID_GAUSSIAN || gridptr->type == GRID_LONLAT )
     {
       if ( xvals && xsize > 1 )
         {
-          xinc = xvals[1] - xvals[0];
+          double xinc = xvals[1] - xvals[0];
           if ( IS_EQUAL(xinc, 0) ) xinc = (xvals[xsize-1] - xvals[0])/(xsize-1);
 
-          x0 = 2*xvals[xsize-1]-xvals[xsize-2]-360;
+          double x0 = 2*xvals[xsize-1]-xvals[xsize-2]-360;
 
           if ( IS_NOT_EQUAL(xvals[0], xvals[xsize-1]) )
             if ( fabs(x0 - xvals[0]) < 0.01*xinc ) gridptr->isCyclic = TRUE;
@@ -1906,20 +1901,17 @@ void grid_check_cyclic(grid_t *gridptr)
     {
       if ( xvals && xsize > 1 )
         {
-          double val1, val2, valn;
-
-          nc = 0;
-          gridptr->isCyclic = FALSE;
-          for ( j = 0; j < ysize; ++j )
+          long nc = 0;
+          for ( int j = 0; j < ysize; ++j )
             {
-              i1 = j*xsize;
-              i2 = j*xsize+1;
-              in = j*xsize+(xsize-1);
-              val1 = xvals[i1];
-              val2 = xvals[i2];
-              valn = xvals[in];
+              long i1 = j*xsize,
+                i2 = j*xsize+1,
+                in = j*xsize+(xsize-1);
+              double val1 = xvals[i1],
+                val2 = xvals[i2],
+                valn = xvals[in];
 
-              xinc = fabs(val2-val1);
+              double xinc = fabs(val2-val1);
 
 	      if ( val1 <    1 && valn > 300 ) val1 += 360;
 	      if ( valn <    1 && val1 > 300 ) valn += 360;
@@ -1927,31 +1919,27 @@ void grid_check_cyclic(grid_t *gridptr)
 	      if ( valn < -179 && val1 > 120 ) valn += 360;
               if ( fabs(valn-val1) > 180 ) val1 += 360;
 
-              if ( valn > val1 ) x0 = valn - xinc;
-              else               x0 = valn + xinc;
+              double x0 = valn + copysign(xinc, val1 - valn);
 
-              if ( fabs(x0-val1) < 0.5*xinc ) nc++;
+              nc += fabs(x0-val1) < 0.5*xinc;
             }
-
-          if ( nc > 0.5*ysize ) gridptr->isCyclic = TRUE;
+          gridptr->isCyclic = nc > 0.5*ysize ? TRUE : FALSE;
         }
 
       if ( xbounds && xsize > 1 )
 	{
-	  double val1, val2;
-
-	  gridptr->isCyclic = TRUE;
-	  for ( j = 0; j < ysize; ++j )
+          gridptr->isCyclic = TRUE;
+	  for ( int j = 0; j < ysize; ++j )
 	    {
-	      i1 = j*xsize*4;
-	      i2 = j*xsize*4+(xsize-1)*4;
-	      nc = 0;
-	      for ( k1 = 0; k1 < 4; ++k1 )
+	      long i1 = j*xsize*4,
+                i2 = j*xsize*4+(xsize-1)*4;
+	      long nc = 0;
+	      for (unsigned k1 = 0; k1 < 4; ++k1 )
 		{
-		  val1 = xbounds[i1+k1];
-		  for ( k2 = 0; k2 < 4; ++k2 )
+		  double val1 = xbounds[i1+k1];
+		  for (unsigned k2 = 0; k2 < 4; ++k2 )
 		    {
-		      val2 = xbounds[i2+k2];
+		      double val2 = xbounds[i2+k2];
 
 		      if ( val1 <    1 && val2 > 300 ) val1 += 360;
 		      if ( val2 <    1 && val1 > 300 ) val2 += 360;
