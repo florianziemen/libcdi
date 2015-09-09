@@ -1526,7 +1526,6 @@ double gridInqYval(int gridID, int index)
 double gridInqXinc(int gridID)
 {
   grid_t *gridptr = gridID2Ptr(gridID);
-
   double xinc = gridptr->xinc;
 
   if ( (! (fabs(xinc) > 0)) && gridptr->xvals )
@@ -1537,14 +1536,16 @@ double gridInqXinc(int gridID)
           double *xvals = gridptr->xvals;
           xinc = fabs(xvals[xsize-1] - xvals[0])/(xsize-1);
           int i;
-          for (i = 2; i < xsize; i++ )
+          for ( i = 2; i < xsize; i++ )
             if ( fabs(fabs(xvals[i-1] - xvals[i]) - xinc) > 0.01*xinc ) break;
 
           if ( i < xsize ) xinc = 0;
+
+          gridptr->xinc = xinc;
         }
     }
 
-  return (xinc);
+  return xinc;
 }
 
 /*
@@ -1560,30 +1561,27 @@ double gridInqXinc(int gridID)
 double gridInqYinc(int gridID)
 {
   grid_t *gridptr = gridID2Ptr(gridID);
-
   double yinc = gridptr->yinc;
 
   if ( (! (fabs(yinc) > 0)) && gridptr->yvals )
     {
-      int ysize;
-      double *yvals;
-
-      ysize = gridptr->ysize;
-      yvals = gridptr->yvals;
-
+      int ysize = gridptr->ysize;
       if ( ysize > 1 )
         {
+          double *yvals = gridptr->yvals;
           yinc = fabs(yvals[1] - yvals[0]);
           int i;
           for ( i = 2; i < ysize; i++ )
-            if ( fabs(fabs(yvals[i] - yvals[i-1]) - yinc) > (yinc/1000) ) break;
+            if ( fabs(fabs(yvals[i] - yvals[i-1]) - yinc) > 0.01*yinc ) break;
 
           if ( i < ysize ) yinc = 0;
           else             yinc = yvals[1] - yvals[0];
+
+          gridptr->yinc = yinc;
         }
     }
 
-  return (yinc);
+  return yinc;
 }
 
 /*
@@ -1600,7 +1598,7 @@ double gridInqXpole(int gridID)
 {
   grid_t *gridptr = gridID2Ptr(gridID);
 
-  return (gridptr->xpole);
+  return gridptr->xpole;
 }
 
 /*
