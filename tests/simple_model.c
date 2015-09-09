@@ -99,6 +99,8 @@ modelRun(struct model_config setup, MPI_Comm comm)
       var = xmalloc((size_t)nlon * (size_t)nlat
                     * (size_t)setup.max_nlev * sizeof(var[0]));
     }
+#else
+  (void)comm;
 #endif
 
   var_scale(setup.datatype, &mscale, &mrscale);

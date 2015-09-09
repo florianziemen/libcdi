@@ -59,6 +59,9 @@ static void modelRun(MPI_Comm commModel)
   } varDeco[nVars];
 #endif
 
+#ifndef USE_MPI
+  (void)commModel;
+#endif
   gridID = gridCreate ( GRID_LONLAT, nlon*nlat );
   gridDefXsize ( gridID, nlon );
   gridDefYsize ( gridID, nlat );
@@ -240,6 +243,9 @@ int main (int argc, char *argv[])
   if (commModel != MPI_COMM_NULL)
     {
       namespaceSetActive(pioNamespace);
+#else
+      (void)argc;
+      (void)argv;
 #endif
 
       modelRun(commModel);

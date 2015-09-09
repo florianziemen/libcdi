@@ -75,6 +75,10 @@ static void modelRun(MPI_Comm commModel)
     Xt_idxlist partDesc;
   } varDeco[nStreams][nVars];
 #endif
+
+#ifndef USE_MPI
+  (void)commModel;
+#endif
   xassert ( nStreams < MAXNSTREAMS );
 
   gridID = gridCreate ( GRID_LONLAT, nlon*nlat );
@@ -271,6 +275,8 @@ int main (int argc, char *argv[])
   if (commModel != MPI_COMM_NULL)
     {
       namespaceSetActive(pioNamespace);
+#else
+      (void)argc; (void)argv;
 #endif
 
       modelRun(commModel);

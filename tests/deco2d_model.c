@@ -107,6 +107,8 @@ modelRun(struct model_config setup, MPI_Comm comm)
 #if USE_MPI
   xmpi ( MPI_Comm_rank ( comm, &rank ));
   xmpi ( MPI_Comm_size ( comm, &comm_size ));
+#else
+  (void)comm;
 #endif
 
   if (rank == 0 && setup.compute_checksum)

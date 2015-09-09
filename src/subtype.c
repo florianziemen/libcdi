@@ -840,10 +840,17 @@ int vlistInsertTrivialTileSubtype(int vlistID)
 /* ------------------------------------------------------------------- */
 
 static int subtypeGetPackSize( void * subtype_ptr, void *context)
-{  Error("Not yet implemented for subtypes!");  return 0; }
+{
+  (void)subtype_ptr; (void)context;
+  Error("Not yet implemented for subtypes!");
+  return 0;
+}
 
 static void subtypePack( void * subtype_ptr, void * buffer, int size, int *pos, void *context)
-{  Error("Not yet implemented for subtypes!"); }
+{
+  (void)subtype_ptr; (void)buffer; (void)size; (void)pos; (void)context;
+  Error("Not yet implemented for subtypes!");
+}
 
 static int subtypeTxCode( void )
 {  Error("Not yet implemented for subtypes!");  return 0; }
