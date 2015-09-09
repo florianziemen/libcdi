@@ -83,7 +83,6 @@ void cdfComment(int ncid)
     }
 
   cdf_put_att_text(ncid, NC_GLOBAL, "CDI", strlen(comment), comment);
-  cdf_put_att_text(ncid, NC_GLOBAL, "Conventions", 6, "CF-1.4");
 }
 #endif
 
@@ -95,6 +94,7 @@ int cdfOpenFile(const char *filename, const char *mode, int *filetype)
   int writemode = NC_CLOBBER;
   int readmode = NC_NOWRITE;
   int status;
+  extern int CDI_Version_Info;
 
   if ( filename == NULL )
     ncid = CDI_EINVAL;
@@ -126,7 +126,8 @@ int cdfOpenFile(const char *filename, const char *mode, int *filetype)
 	  else if ( *filetype == FILETYPE_NC4C ) writemode |= NC_NETCDF4 | NC_CLASSIC_MODEL;
 #endif
 	  cdf_create(filename, writemode, &ncid);
-	  cdfComment(ncid);
+	  if ( CDI_Version_Info ) cdfComment(ncid);
+          cdf_put_att_text(ncid, NC_GLOBAL, "Conventions", 6, "CF-1.4");
 	  break;
 	case 'a':
 	  cdf_open(filename, NC_WRITE, &ncid);

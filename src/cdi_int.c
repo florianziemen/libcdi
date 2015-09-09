@@ -38,6 +38,7 @@ int cdiIgnoreValidRange     = FALSE;
 int cdiSkipRecords          = 0;
 int cdiConvention           = CDI_CONVENTION_ECHAM;
 int cdiInventoryMode        = 1;
+int CDI_Version_Info        = 1;
 size_t CDI_netcdf_hdr_pad   = 0UL;
 
 char *cdiPartabPath   = NULL;
@@ -273,7 +274,7 @@ void cdiSetChunk(const char *chunkAlgo)
 void cdiInitialize(void)
 {
   static int Init_CDI = FALSE;
-  char *envString;
+  char *envstr;
   long value;
 
   if ( ! Init_CDI )
@@ -309,38 +310,38 @@ void cdiInitialize(void)
       value = cdiGetenvInt("CDI_NETCDF_HDR_PAD");
       if ( value >= 0 ) CDI_netcdf_hdr_pad = (size_t) value;
 
-      envString = getenv("CDI_MISSVAL");
-      if ( envString ) cdiDefaultMissval = atof(envString);
+      envstr = getenv("CDI_MISSVAL");
+      if ( envstr ) cdiDefaultMissval = atof(envstr);
       /*
-      envString = getenv("NC_MISSING_VALUE");
-      if ( envString ) cdiNcMissingValue = atoi(envString);
+      envstr = getenv("NC_MISSING_VALUE");
+      if ( envstr ) cdiNcMissingValue = atoi(envstr);
       */
-      envString = getenv("NC_CHUNKSIZEHINT");
-      if ( envString ) cdiNcChunksizehint = atoi(envString);
+      envstr = getenv("NC_CHUNKSIZEHINT");
+      if ( envstr ) cdiNcChunksizehint = atoi(envstr);
 
-      envString = getenv("CDI_CHUNK_ALGO");
-      if ( envString ) cdiSetChunk(envString);
+      envstr = getenv("CDI_CHUNK_ALGO");
+      if ( envstr ) cdiSetChunk(envstr);
 
-      envString = getenv("SPLIT_LTYPE_105");
-      if ( envString ) cdiSplitLtype105 = atoi(envString);
+      envstr = getenv("SPLIT_LTYPE_105");
+      if ( envstr ) cdiSplitLtype105 = atoi(envstr);
 
-      envString = getenv("IGNORE_ATT_COORDINATES");
-      if ( envString ) cdiIgnoreAttCoordinates = atoi(envString);
+      envstr = getenv("IGNORE_ATT_COORDINATES");
+      if ( envstr ) cdiIgnoreAttCoordinates = atoi(envstr);
 
-      envString = getenv("IGNORE_VALID_RANGE");
-      if ( envString ) cdiIgnoreValidRange = atoi(envString);
+      envstr = getenv("IGNORE_VALID_RANGE");
+      if ( envstr ) cdiIgnoreValidRange = atoi(envstr);
 
-      envString = getenv("CDI_SKIP_RECORDS");
-      if ( envString )
+      envstr = getenv("CDI_SKIP_RECORDS");
+      if ( envstr )
 	{
-	  cdiSkipRecords = atoi(envString);
+	  cdiSkipRecords = atoi(envstr);
 	  cdiSkipRecords = cdiSkipRecords > 0 ? cdiSkipRecords : 0;
 	}
 
-      envString = getenv("CDI_CONVENTION");
-      if ( envString )
+      envstr = getenv("CDI_CONVENTION");
+      if ( envstr )
 	{
-	  if ( strcmp(envString, "CF") == 0 || strcmp(envString, "cf") == 0 )
+	  if ( strcmp(envstr, "CF") == 0 || strcmp(envstr, "cf") == 0 )
 	    {
 	      cdiConvention = CDI_CONVENTION_CF;
 	      if ( CDI_Debug )
@@ -348,10 +349,10 @@ void cdiInitialize(void)
 	    }
 	}
 
-      envString = getenv("CDI_INVENTORY_MODE");
-      if ( envString )
+      envstr = getenv("CDI_INVENTORY_MODE");
+      if ( envstr )
 	{
-	  if ( strncmp(envString, "time", 4) == 0 )
+	  if ( strncmp(envstr, "time", 4) == 0 )
 	    {
 	      cdiInventoryMode = 2;
 	      if ( CDI_Debug )
@@ -359,34 +360,47 @@ void cdiInitialize(void)
 	    }
 	}
 
-      envString = getenv("CDI_CALENDAR");
-      if ( envString )
+      envstr = getenv("CDI_VERSION_INFO");
+      if ( envstr )
+        {
+          int ival = atoi(envstr);
+          if ( ival == 0 || ival == 1 )
+            {
+              CDI_Version_Info = ival;
+              if ( CDI_Debug )
+                Message("CDI_Version_Info = %s", envstr);
+            }
+        }
+
+
+      envstr = getenv("CDI_CALENDAR");
+      if ( envstr )
 	{
-	  if      ( strncmp(envString, "standard", 8) == 0 )
+	  if      ( strncmp(envstr, "standard", 8) == 0 )
 	    cdiDefaultCalendar = CALENDAR_STANDARD;
-	  else if ( strncmp(envString, "proleptic", 9) == 0 )
+	  else if ( strncmp(envstr, "proleptic", 9) == 0 )
 	    cdiDefaultCalendar = CALENDAR_PROLEPTIC;
-	  else if ( strncmp(envString, "360days", 7) == 0 )
+	  else if ( strncmp(envstr, "360days", 7) == 0 )
 	    cdiDefaultCalendar = CALENDAR_360DAYS;
-	  else if ( strncmp(envString, "365days", 7) == 0 )
+	  else if ( strncmp(envstr, "365days", 7) == 0 )
 	    cdiDefaultCalendar = CALENDAR_365DAYS;
-	  else if ( strncmp(envString, "366days", 7) == 0 )
+	  else if ( strncmp(envstr, "366days", 7) == 0 )
 	    cdiDefaultCalendar = CALENDAR_366DAYS;
-	  else if ( strncmp(envString, "none", 4) == 0 )
+	  else if ( strncmp(envstr, "none", 4) == 0 )
 	    cdiDefaultCalendar = CALENDAR_NONE;
 
 	  if ( CDI_Debug )
-	    Message("Default calendar set to %s!", envString);
+	    Message("Default calendar set to %s!", envstr);
 	}
 #if  defined  (HAVE_LIBCGRIBEX)
       gribSetCalendar(cdiDefaultCalendar);
 #endif
 
-      envString = getenv("PARTAB_INTERN");
-      if ( envString ) cdiPartabIntern = atoi(envString);
+      envstr = getenv("PARTAB_INTERN");
+      if ( envstr ) cdiPartabIntern = atoi(envstr);
 
-      envString = getenv("PARTAB_PATH");
-      if ( envString ) cdiPartabPath = strdup(envString);
+      envstr = getenv("PARTAB_PATH");
+      if ( envstr ) cdiPartabPath = strdup(envstr);
     }
 }
 
