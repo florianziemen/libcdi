@@ -626,7 +626,7 @@ void defineAttributes(int vlistID, int varID, int fileID, int ncvarID)
           if ( atttype == DATATYPE_FLT32 )
             {
               float attflt_sp[len];
-              for ( size_t i = 0; i < len; ++i ) attflt_sp[i] = attflt[i];
+              for ( size_t i = 0; i < len; ++i ) attflt_sp[i] = (float)attflt[i];
               cdf_put_att_float(fileID, ncvarID, attname, NC_FLOAT, len, attflt_sp);
             }
           else
