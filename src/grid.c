@@ -534,10 +534,9 @@ void gridDestroyP ( void * gridptr )
 
 const char *gridNamePtr(int gridtype)
 {
-  const char *name;
-  int size = (int) (sizeof(Grids)/sizeof(char *));
+  int size = (int) (sizeof(Grids)/sizeof(Grids[0]));
 
-  name = gridtype >= 0 && gridtype < size ? Grids[gridtype] : Grids[GRID_GENERIC];
+  const char *name = gridtype >= 0 && gridtype < size ? Grids[gridtype] : Grids[GRID_GENERIC];
 
   return (name);
 }
