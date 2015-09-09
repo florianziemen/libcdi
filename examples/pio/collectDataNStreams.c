@@ -103,7 +103,7 @@ static void modelRun(MPI_Comm commModel)
   xmpi ( MPI_Comm_size ( commModel, &comm_size ));
 #endif
   {
-    int maxChunkSize = 0;
+    size_t maxChunkSize = 0;
     for ( i = 0; i < nStreams; i++ )
       for ( j = 0; j < nVars; j++ )
       {
@@ -116,8 +116,8 @@ static void modelRun(MPI_Comm commModel)
                                               comm_size, rank),
             chunkSize = uniform_partition_start((int [2]){ 0, (int)varSize[i][j] - 1 },
                                                 comm_size, rank + 1) - start;
-          if (maxChunkSize < chunkSize)
-            maxChunkSize = chunkSize;
+          if (maxChunkSize < (size_t)chunkSize)
+            maxChunkSize = (size_t)chunkSize;
           fprintf(stderr, "%d: start=%d, chunkSize = %d\n", rank,
                   start, chunkSize);
           Xt_idxlist idxlist
@@ -131,10 +131,10 @@ static void modelRun(MPI_Comm commModel)
         }
 #else
         if (maxChunkSize < varSize[i][j])
-          maxChunkSize = (int)varSize[i][j];
+          maxChunkSize = varSize[i][j];
 #endif
       }
-    var = (double *)malloc((size_t)maxChunkSize * sizeof (var[0]));
+    var = (double *)malloc(maxChunkSize * sizeof (var[0]));
   }
   taxisID = taxisCreate ( TAXIS_ABSOLUTE );
   for ( i = 0; i < nStreams; i++ )
