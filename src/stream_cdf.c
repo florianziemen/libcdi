@@ -429,7 +429,7 @@ void cdfGetAttDouble(int fileID, int ncvarid, char *attname, int attlen, double 
 }
 
 static
-void cdfGetAttText(int fileID, int ncvarid, char *attname, int attlen, char *atttext)
+void cdfGetAttText(int fileID, int ncvarid,const char *attname, int attlen, char *atttext)
 {
   nc_type atttype;
   size_t nc_attlen;

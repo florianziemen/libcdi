@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <sys/types.h>
 /*
-#if defined(__cplusplus)
+#ifdef __cplusplus
 extern "C" {
 #endif
 */
@@ -1175,7 +1175,6 @@ int     vlistInqVarSubtype(int vlistID, int varID);
 
 
 void gribapiLibraryVersion(int *major_version, int *minor_version, int *revision_version);
-
 
 
 /*
