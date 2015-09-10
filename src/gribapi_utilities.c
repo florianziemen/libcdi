@@ -35,7 +35,7 @@ char* gribCopyString(grib_handle* gribHandle, const char* key)
     char* result = (char *)xmalloc(length);
     if(!grib_get_string(gribHandle, key, result, &length))
     result = (char *)xrealloc(result, length);
-  
+
     else
       {
           free(result);
@@ -762,8 +762,9 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
       FAIL_ON_GRIB_ERROR(grib_get_double, gh, "longitudeOfSouthernPoleInDegrees", &grid->xpole);
       FAIL_ON_GRIB_ERROR(grib_get_double, gh, "angleOfRotation", &grid->angle);
       /* change from south to north pole */
-      grid->ypole = -grid->ypole;
+      if ( fabs(grid->ypole) > 0 ) grid->ypole = -grid->ypole;
       grid->xpole =  grid->xpole - 180;
+      if ( fabs(grid->angle) > 0 ) grid->angle = -grid->angle;
     }
 
   grid->xvals = NULL;

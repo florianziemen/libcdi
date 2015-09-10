@@ -1597,6 +1597,7 @@ double gridInqYinc(int gridID)
 */
 double gridInqXpole(int gridID)
 {
+  // Xpole -> grid_north_pole_longitude
   grid_t *gridptr = gridID2Ptr(gridID);
 
   return gridptr->xpole;
@@ -1614,6 +1615,7 @@ double gridInqXpole(int gridID)
 */
 void gridDefXpole(int gridID, double xpole)
 {
+  // Xpole -> grid_north_pole_longitude
   grid_t *gridptr = gridID2Ptr(gridID);
 
   if ( memcmp(gridptr->xstdname, "grid", 4) != 0 )
@@ -1639,6 +1641,7 @@ void gridDefXpole(int gridID, double xpole)
 */
 double gridInqYpole(int gridID)
 {
+  // Ypole -> grid_north_pole_latitude
   grid_t *gridptr = gridID2Ptr(gridID);
 
   return (gridptr->ypole);
@@ -1656,6 +1659,7 @@ double gridInqYpole(int gridID)
 */
 void gridDefYpole(int gridID, double ypole)
 {
+  // Ypole -> grid_north_pole_latitude
   grid_t *gridptr = gridID2Ptr(gridID);
 
   if ( memcmp(gridptr->ystdname, "grid", 4) != 0 )
@@ -1681,6 +1685,7 @@ void gridDefYpole(int gridID, double ypole)
 */
 double gridInqAngle(int gridID)
 {
+  // Angle -> north_pole_grid_longitude
   grid_t *gridptr = gridID2Ptr(gridID);
 
   return (gridptr->angle);
@@ -1698,6 +1703,7 @@ double gridInqAngle(int gridID)
 */
 void gridDefAngle(int gridID, double angle)
 {
+  // Angle -> north_pole_grid_longitude
   grid_t *gridptr = gridID2Ptr(gridID);
 
   if ( gridptr->isRotated != TRUE || IS_NOT_EQUAL(gridptr->angle, angle) )

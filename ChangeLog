@@ -2,6 +2,10 @@
 
 	* Version 1.7.0 released
 
+2015-09-10  Uwe Schulzweida
+
+	* GRIB rotated grids: invert angle of rotation (north to south pole) (bug fix)
+
 2015-08-18  Uwe Schulzweida
 
 	* added support for netCDF Scalar Coordinate Variables

@@ -2037,8 +2037,9 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 	    ypole = gridInqYpole(gridID);
 	    angle = gridInqAngle(gridID);
 	    /* change from north to south pole */
-	    ypole = -ypole;
+	    if ( fabs(ypole) > 0 ) ypole = -ypole;
 	    xpole =  xpole + 180;
+            if ( fabs(angle) > 0 ) angle = -angle;
 	    GRIB_CHECK(my_grib_set_double(gh, "latitudeOfSouthernPoleInDegrees",  ypole), 0);
 	    GRIB_CHECK(my_grib_set_double(gh, "longitudeOfSouthernPoleInDegrees", xpole), 0);
 	    GRIB_CHECK(my_grib_set_double(gh, "angleOfRotation", angle), 0);
