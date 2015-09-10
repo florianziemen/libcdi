@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <sys/types.h>
 /*
-#if defined(__cplusplus)
+#ifdef __cplusplus
 extern "C" {
 #endif
 */
@@ -1103,8 +1103,8 @@ const char *institutInqLongnamePtr(int instID);
 /* Model routines */
 
 int     modelDef(int instID, int modelgribID, const char *name);
-int     modelInq(int instID, int modelgribID, char *name);
-int     modelInqInstitut(int modelID);
+int     modelInq(int instID, int modelgribID, const char *name);
+int     modelInqInstitut(int modelID) ;
 int     modelInqGribID(int modelID);
 const char *modelInqNamePtr(int modelID);
 
@@ -1184,7 +1184,6 @@ int     vlistInqVarSubtype(int vlistID, int varID);
 
 
 void gribapiLibraryVersion(int *major_version, int *minor_version, int *revision_version);
-
 
 
 /*

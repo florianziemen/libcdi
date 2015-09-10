@@ -90,9 +90,9 @@ void cdiParamToString(int param, char *paramstr, int maxlen)
 }
 
 
-char *cdiUnitNamePtr(int cdi_unit)
+const char *cdiUnitNamePtr(int cdi_unit)
 {
-  char *cdiUnits[] = {
+  const char *cdiUnits[] = {
     /*  0 */  "undefined",
     /*  1 */  "Pa",
     /*  2 */  "hPa",
@@ -102,7 +102,7 @@ char *cdiUnitNamePtr(int cdi_unit)
     /*  6 */  "m",
   };
   enum { numUnits = (int) (sizeof(cdiUnits)/sizeof(char *)) };
-  char *name = ( cdi_unit > 0 && cdi_unit < numUnits ) ?
+  const char *name = ( cdi_unit > 0 && cdi_unit < numUnits ) ?
     cdiUnits[cdi_unit] : NULL;
   return name;
 }

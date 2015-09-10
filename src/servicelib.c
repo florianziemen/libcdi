@@ -60,7 +60,7 @@ void srvDebug(int debug)
 void srvLibInit()
 {
   char *envString;
-  char *envName = "SRV_PRECISION";
+  const char *envName = "SRV_PRECISION";
 
 
   envString = getenv(envName);

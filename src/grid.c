@@ -169,7 +169,7 @@ void grid_free(grid_t *gridptr)
 static grid_t *
 gridNewEntry(cdiResH resH)
 {
-  grid_t *gridptr = (grid_t*) xmalloc(sizeof(grid_t));
+  grid_t *gridptr = (grid_t*) malloc(sizeof(grid_t));
   grid_init(gridptr);
   if (resH == CDI_UNDEFID)
     gridptr->self = reshPut(gridptr, &gridOps);
@@ -233,7 +233,7 @@ void gridGenXvals(int xsize, double xfirst, double xlast, double xinc, double *x
 static
 void calc_gaussgrid(double *yvals, int ysize, double yfirst, double ylast)
 {
-  double *restrict yw = (double *)xmalloc((size_t)ysize * sizeof(double));
+  double *restrict yw = (double *)malloc((size_t)ysize * sizeof(double));
   gaussaw(yvals, yw, (size_t)ysize);
   free(yw);
   for (int i = 0; i < ysize; i++ )
@@ -273,7 +273,7 @@ void gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double y
 		/* printf("%g %g %g %g %g %d\n", ylast, yfirst, ylast-yfirst,yinc, 180/yinc, ny); */
 		if ( ny > ysize && ny < 4096 )
 		  {
-		    ytmp = (double *)xmalloc((size_t)ny * sizeof (double));
+		    ytmp = (double *)malloc((size_t)ny * sizeof (double));
 		    calc_gaussgrid(ytmp, ny, yfirst, ylast);
                     int i;
 		    for ( i = 0; i < (ny-ysize); i++ )
@@ -1213,7 +1213,7 @@ void gridDefRowlon(int gridID, int nrowlon, const int rowlon[])
 {
   grid_t *gridptr = gridID2Ptr(gridID);
 
-  gridptr->rowlon = (int *)xmalloc((size_t)nrowlon * sizeof(int));
+  gridptr->rowlon = (int *)malloc((size_t)nrowlon * sizeof(int));
   gridptr->nrowlon = nrowlon;
   memcpy(gridptr->rowlon, rowlon, (size_t)nrowlon * sizeof(int));
   reshSetStatus(gridID, &gridOps, RESH_DESYNC_IN_USE);
@@ -1278,7 +1278,7 @@ void gridDefMask(int gridID, const int *mask)
   else
     {
       if ( gridptr->mask == NULL )
-	gridptr->mask = (mask_t *)xmalloc((size_t)size*sizeof(mask_t));
+	gridptr->mask = (mask_t *)malloc((size_t)size*sizeof(mask_t));
       else if ( CDI_Debug )
 	Warning("grid mask already defined!");
 
@@ -1317,7 +1317,7 @@ void gridDefMaskGME(int gridID, const int *mask)
     Error("Size undefined for gridID = %d", gridID);
 
   if ( gridptr->mask_gme == NULL )
-    gridptr->mask_gme = (mask_t *)xmalloc((size_t)size * sizeof (mask_t));
+    gridptr->mask_gme = (mask_t *)malloc((size_t)size * sizeof (mask_t));
   else if ( CDI_Debug )
     Warning("mask already defined!");
 
@@ -1401,7 +1401,7 @@ void gridDefXvals(int gridID, const double *xvals)
 
   if (gridptr->xvals && CDI_Debug)
     Warning("values already defined!");
-  gridptr->xvals = (double *)xrealloc(gridptr->xvals,
+  gridptr->xvals = (double *)realloc(gridptr->xvals,
                                       (size_t)size * sizeof(double));
   memcpy(gridptr->xvals, xvals, (size_t)size * sizeof (double));
   reshSetStatus(gridID, &gridOps, RESH_DESYNC_IN_USE);
@@ -1476,7 +1476,7 @@ void gridDefYvals(int gridID, const double *yvals)
   if (gridptr->yvals && CDI_Debug)
     Warning("Values already defined!");
 
-  gridptr->yvals = (double *)xrealloc(gridptr->yvals, (size_t)size * sizeof (double));
+  gridptr->yvals = (double *)realloc(gridptr->yvals, (size_t)size * sizeof (double));
   memcpy(gridptr->yvals, yvals, (size_t)size * sizeof (double));
   reshSetStatus(gridID, &gridOps, RESH_DESYNC_IN_USE);
 }
@@ -1997,7 +1997,7 @@ int compareXYvals(int gridID, long xsize, long ysize, double *xvals0, double *yv
 
   if ( !differ && xsize == gridInqXvals(gridID, NULL) )
     {
-      double *xvals = (double *)xmalloc((size_t)xsize * sizeof (double));
+      double *xvals = (double *)malloc((size_t)xsize * sizeof (double));
 
       gridInqXvals(gridID, xvals);
 
@@ -2013,7 +2013,7 @@ int compareXYvals(int gridID, long xsize, long ysize, double *xvals0, double *yv
 
   if ( !differ && ysize == gridInqYvals(gridID, NULL) )
     {
-      double *yvals = (double *)xmalloc((size_t)ysize * sizeof (double));
+      double *yvals = (double *)malloc((size_t)ysize * sizeof (double));
 
       gridInqYvals(gridID, yvals);
 
@@ -2430,7 +2430,7 @@ int gridGenerate(const grid_t *grid)
 	else if ( grid->xdef == 2 )
 	  {
 	    double *xvals
-              = (double *)xmalloc((size_t)grid->xsize * sizeof (double));
+              = (double *)malloc((size_t)grid->xsize * sizeof (double));
 	    gridGenXvals(grid->xsize, grid->xfirst, grid->xlast, grid->xinc, xvals);
 	    gridDefXvals(gridID, xvals);
 	    free(xvals);
@@ -2448,7 +2448,7 @@ int gridGenerate(const grid_t *grid)
 	else if ( grid->ydef == 2 )
 	  {
 	    double *yvals
-              = (double *)xmalloc((size_t)grid->ysize * sizeof (double));
+              = (double *)malloc((size_t)grid->ysize * sizeof (double));
 	    gridGenYvals(grid->type, grid->ysize, grid->yfirst, grid->ylast, grid->yinc, yvals);
 	    gridDefYvals(gridID, yvals);
 	    free(yvals);
@@ -2533,7 +2533,7 @@ int gridGenerate(const grid_t *grid)
 	else if ( grid->ydef == 2 )
 	  {
 	    double *yvals
-              = (double *)xmalloc((size_t)grid->ysize * sizeof (double));
+              = (double *)malloc((size_t)grid->ysize * sizeof (double));
 	    gridGenYvals(grid->type, grid->ysize, grid->yfirst, grid->ylast, grid->yinc, yvals);
 	    gridDefYvals(gridID, yvals);
 	    free(yvals);
@@ -2642,7 +2642,7 @@ int gridDuplicate(int gridID)
   int irregular = gridtype == GRID_CURVILINEAR || gridtype == GRID_UNSTRUCTURED;
   if ( nrowlon )
     {
-      gridptrnew->rowlon = (int *)xmalloc(nrowlon * sizeof (int));
+      gridptrnew->rowlon = (int *)malloc(nrowlon * sizeof (int));
       memcpy(gridptrnew->rowlon, gridptr->rowlon, nrowlon * sizeof(int));
     }
 
@@ -2650,7 +2650,7 @@ int gridDuplicate(int gridID)
     {
       size_t size  = (size_t)(irregular ? gridsize : gridptr->xsize);
 
-      gridptrnew->xvals = (double *)xmalloc(size * sizeof (double));
+      gridptrnew->xvals = (double *)malloc(size * sizeof (double));
       memcpy(gridptrnew->xvals, gridptr->xvals, size * sizeof (double));
     }
 
@@ -2658,7 +2658,7 @@ int gridDuplicate(int gridID)
     {
       size_t size  = (size_t)(irregular ? gridsize : gridptr->ysize);
 
-      gridptrnew->yvals = (double *)xmalloc(size * sizeof (double));
+      gridptrnew->yvals = (double *)malloc(size * sizeof (double));
       memcpy(gridptrnew->yvals, gridptr->yvals, size * sizeof (double));
     }
 
@@ -2667,7 +2667,7 @@ int gridDuplicate(int gridID)
       size_t size  = (size_t)(irregular ? gridsize : gridptr->xsize)
         * (size_t)gridptr->nvertex;
 
-      gridptrnew->xbounds = (double *)xmalloc(size * sizeof (double));
+      gridptrnew->xbounds = (double *)malloc(size * sizeof (double));
       memcpy(gridptrnew->xbounds, gridptr->xbounds, size * sizeof (double));
     }
 
@@ -2676,7 +2676,7 @@ int gridDuplicate(int gridID)
       size_t size = (size_t)(irregular ? gridsize : gridptr->ysize)
         * (size_t)gridptr->nvertex;
 
-      gridptrnew->ybounds = (double *)xmalloc(size * sizeof (double));
+      gridptrnew->ybounds = (double *)malloc(size * sizeof (double));
       memcpy(gridptrnew->ybounds, gridptr->ybounds, size * sizeof (double));
     }
 
@@ -2684,7 +2684,7 @@ int gridDuplicate(int gridID)
     {
       size_t size = (size_t)gridsize;
 
-      gridptrnew->area = (double *)xmalloc(size * sizeof (double));
+      gridptrnew->area = (double *)malloc(size * sizeof (double));
       memcpy(gridptrnew->area, gridptr->area, size * sizeof (double));
     }
 
@@ -2692,7 +2692,7 @@ int gridDuplicate(int gridID)
     {
       size_t size = (size_t)gridsize;
 
-      gridptrnew->mask = (mask_t *)xmalloc(size * sizeof(mask_t));
+      gridptrnew->mask = (mask_t *)malloc(size * sizeof(mask_t));
       memcpy(gridptrnew->mask, gridptr->mask, size * sizeof (mask_t));
     }
 
@@ -2700,7 +2700,7 @@ int gridDuplicate(int gridID)
     {
       size_t size = (size_t)gridsize;
 
-      gridptrnew->mask_gme = (mask_t *)xmalloc(size * sizeof (mask_t));
+      gridptrnew->mask_gme = (mask_t *)malloc(size * sizeof (mask_t));
       memcpy(gridptrnew->mask_gme, gridptr->mask_gme, size * sizeof(mask_t));
     }
 
@@ -2752,19 +2752,19 @@ void gridCompress(int gridID)
 	  gridptr->ysize = (int)gridsize;
 
 	  if ( gridptr->xvals )
-	    gridptr->xvals = (double *)xrealloc(gridptr->xvals, gridsize*sizeof(double));
+	    gridptr->xvals = (double *)realloc(gridptr->xvals, gridsize*sizeof(double));
 
 	  if ( gridptr->yvals )
-	    gridptr->yvals = (double *)xrealloc(gridptr->yvals, gridsize*sizeof(double));
+	    gridptr->yvals = (double *)realloc(gridptr->yvals, gridsize*sizeof(double));
 
 	  if ( gridptr->area )
-	    gridptr->area  = (double *)xrealloc(gridptr->area, gridsize*sizeof(double));
+	    gridptr->area  = (double *)realloc(gridptr->area, gridsize*sizeof(double));
 
 	  if ( gridptr->xbounds )
-	    gridptr->xbounds = (double *)xrealloc(gridptr->xbounds, nv*gridsize*sizeof(double));
+	    gridptr->xbounds = (double *)realloc(gridptr->xbounds, nv*gridsize*sizeof(double));
 
 	  if ( gridptr->ybounds )
-	    gridptr->ybounds = (double *)xrealloc(gridptr->ybounds, nv*gridsize*sizeof(double));
+	    gridptr->ybounds = (double *)realloc(gridptr->ybounds, nv*gridsize*sizeof(double));
 
 	  free(gridptr->mask_gme);
 	  gridptr->mask_gme = NULL;
@@ -2786,7 +2786,7 @@ void gridDefArea(int gridID, const double *area)
     Error("size undefined for gridID = %d", gridID);
 
   if ( gridptr->area == NULL )
-    gridptr->area = (double *)xmalloc(size*sizeof(double));
+    gridptr->area = (double *)malloc(size*sizeof(double));
   else if ( CDI_Debug )
     Warning("values already defined!");
 
@@ -2874,7 +2874,7 @@ void gridDefXbounds(int gridID, const double *xbounds)
     Error("size undefined for gridID = %d", gridID);
 
   if (gridptr->xbounds == NULL)
-    gridptr->xbounds = (double *)xmalloc(size * sizeof (double));
+    gridptr->xbounds = (double *)malloc(size * sizeof (double));
   else if ( CDI_Debug )
     Warning("values already defined!");
 
@@ -2961,7 +2961,7 @@ void gridDefYbounds(int gridID, const double *ybounds)
     Error("size undefined for gridID = %d", gridID);
 
   if ( gridptr->ybounds == NULL )
-    gridptr->ybounds = (double *)xmalloc(size * sizeof (double));
+    gridptr->ybounds = (double *)malloc(size * sizeof (double));
   else if ( CDI_Debug )
     Warning("values already defined!");
 
@@ -3265,7 +3265,7 @@ void gridPrintKernel(grid_t * gridptr, int index, int opt, FILE *fp)
             int *rowlon;
             nbyte0 = fprintf(fp, "rowlon    = ");
             nbyte  = nbyte0;
-            rowlon = (int *)xmalloc((size_t)ysize*sizeof(int));
+            rowlon = (int *)malloc((size_t)ysize*sizeof(int));
             gridInqRowlon(gridID, rowlon);
             for ( i = 0; i < ysize; i++ )
               {
@@ -4066,7 +4066,7 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
   if (memberMask & gridHasRowLonFlag)
     {
       xassert(gridP->nrowlon);
-      gridP->rowlon = (int *)xmalloc((size_t)gridP->nrowlon * sizeof (int));
+      gridP->rowlon = (int *)malloc((size_t)gridP->nrowlon * sizeof (int));
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
                       gridP->rowlon, gridP->nrowlon , DATATYPE_INT, context);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
@@ -4114,7 +4114,7 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
     {
       size = irregular ? gridP->size : gridP->xsize;
 
-      gridP->xvals = (double *)xmalloc((size_t)size * sizeof (double));
+      gridP->xvals = (double *)malloc((size_t)size * sizeof (double));
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
                       gridP->xvals, size, DATATYPE_FLT64, context);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
@@ -4126,7 +4126,7 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
     {
       size = irregular ? gridP->size : gridP->ysize;
 
-      gridP->yvals = (double *)xmalloc((size_t)size * sizeof (double));
+      gridP->yvals = (double *)malloc((size_t)size * sizeof (double));
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
                       gridP->yvals, size, DATATYPE_FLT64, context);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
@@ -4138,7 +4138,7 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
     {
       size = gridP->size;
       xassert(size);
-      gridP->area = (double *)xmalloc((size_t)size * sizeof (double));
+      gridP->area = (double *)malloc((size_t)size * sizeof (double));
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
                       gridP->area, size, DATATYPE_FLT64, context);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
@@ -4151,7 +4151,7 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
       size = gridP->nvertex * (irregular ? gridP->size : gridP->xsize);
       xassert(size);
 
-      gridP->xbounds = (double *)xmalloc((size_t)size * sizeof (double));
+      gridP->xbounds = (double *)malloc((size_t)size * sizeof (double));
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
                       gridP->xbounds, size, DATATYPE_FLT64, context);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
@@ -4164,7 +4164,7 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
       size = gridP->nvertex * (irregular ? gridP->size : gridP->ysize);
       xassert(size);
 
-      gridP->ybounds = (double *)xmalloc((size_t)size * sizeof (double));
+      gridP->ybounds = (double *)malloc((size_t)size * sizeof (double));
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
 			  gridP->ybounds, size, DATATYPE_FLT64, context);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
@@ -4184,7 +4184,7 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
       int referenceSize;
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
                       &referenceSize, 1, DATATYPE_INT, context);
-      gridP->reference = (char *)xmalloc((size_t)referenceSize);
+      gridP->reference = (char *)malloc((size_t)referenceSize);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
                       gridP->reference, referenceSize, DATATYPE_TXT, context);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
@@ -4195,7 +4195,7 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
   if (memberMask & gridHasMaskFlag)
     {
       xassert((size = gridP->size));
-      gridP->mask = (mask_t *)xmalloc((size_t)size * sizeof (mask_t));
+      gridP->mask = (mask_t *)malloc((size_t)size * sizeof (mask_t));
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
                       gridP->mask, gridP->size, DATATYPE_UCHAR, context);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
@@ -4206,7 +4206,7 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
   if (memberMask & gridHasGMEMaskFlag)
     {
       xassert((size = gridP->size));
-      gridP->mask_gme = (mask_t *)xmalloc((size_t)size * sizeof (mask_t));
+      gridP->mask_gme = (mask_t *)malloc((size_t)size * sizeof (mask_t));
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
                       gridP->mask_gme, gridP->size, DATATYPE_UCHAR, context);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,

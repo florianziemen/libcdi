@@ -31,7 +31,7 @@ listSet *listSetNew( valDestroyFunction vD, eqPredicate kC )
 {
   listSet *myq;
 
-  myq = (listSet*) xmalloc( sizeof ( listSet ));
+  myq = (listSet*) malloc( sizeof ( listSet ));
 
   myq->head = NULL;
   myq->tail = NULL;

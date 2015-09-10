@@ -41,7 +41,7 @@ int tstepsNewEntry(stream_t *streamptr)
     {
       if ( tstepsTableSize == 0 ) tstepsTableSize = 1;
       tstepsTableSize = 2*tstepsTableSize;
-      tstepsTable = (tsteps_t *)xrealloc(tstepsTable,
+      tstepsTable = (tsteps_t *)realloc(tstepsTable,
                                          (size_t)tstepsTableSize * sizeof (tsteps_t));
       if ( tstepsTable == NULL )
 	{
@@ -72,7 +72,7 @@ void cdiCreateTimesteps(stream_t *streamptr)
   if ( streamptr->ntsteps == 0 ) ntsteps = 1;    /* <<<<<-------- */
   else ntsteps = streamptr->ntsteps;
 
-  streamptr->tsteps = (tsteps_t *)xmalloc((size_t)ntsteps*sizeof(tsteps_t));
+  streamptr->tsteps = (tsteps_t *)malloc((size_t)ntsteps*sizeof(tsteps_t));
 
   streamptr->tstepsTableSize = (int)ntsteps;
   streamptr->tstepsNextID    = (int)ntsteps;

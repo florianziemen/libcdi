@@ -190,7 +190,7 @@ void file_list_new(void)
 {
   assert(_fileList == NULL);
 
-  _fileList = (filePtrToIdx *)xmalloc((size_t)_file_max * sizeof (filePtrToIdx));
+  _fileList = (filePtrToIdx *)malloc((size_t)_file_max * sizeof (filePtrToIdx));
 }
 
 static
@@ -1206,8 +1206,8 @@ int fileClose_serial(int fileID)
 {
   char *name;
   int ret;
-  char *fbtname[] = {"unknown", "standard", "mmap"};
-  char *ftname[] = {"unknown", "open", "fopen"};
+  const char *fbtname[] = {"unknown", "standard", "mmap"};
+  const char *ftname[] = {"unknown", "open", "fopen"};
   bfile_t *fileptr = file_to_pointer(fileID);
   double rout = 0;
 

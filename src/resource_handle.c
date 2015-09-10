@@ -152,7 +152,7 @@ reshListCreate(int namespaceID)
   LIST_LOCK();
   if (resHListSize <= namespaceID)
     {
-      resHList = (struct resHList_t *)xrealloc(resHList, (size_t)(namespaceID + 1) * sizeof (resHList[0]));
+      resHList = (struct resHList_t *)realloc(resHList, (size_t)(namespaceID + 1) * sizeof (resHList[0]));
       for (int i = resHListSize; i <= namespaceID; ++i)
         reshListClearEntry(i);
       resHListSize = namespaceID + 1;
@@ -235,7 +235,7 @@ void listSizeExtend()
   int oldSize = resHList[nsp].size;
   size_t newListSize = (size_t)oldSize + MIN_LIST_SIZE;
 
-  resHList[nsp].resources = (listElem_t*) xrealloc(resHList[nsp].resources,
+  resHList[nsp].resources = (listElem_t*) realloc(resHList[nsp].resources,
                                                    newListSize * sizeof(listElem_t));
 
   listElem_t *r = resHList[nsp].resources;

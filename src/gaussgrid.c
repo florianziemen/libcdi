@@ -1,7 +1,13 @@
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include <config.h>
 #include <math.h>
 #include <float.h>
 #include <stdio.h>
 #include <stdlib.h>
+
 
 #include "dmemory.h"
 

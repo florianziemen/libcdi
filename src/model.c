@@ -67,7 +67,7 @@ modelNewEntry(cdiResH resH, int instID, int modelgribID, const char *name)
 {
   model_t *modelptr;
 
-  modelptr = (model_t *) xmalloc(sizeof(model_t));
+  modelptr = (model_t *) malloc(sizeof(model_t));
   modelDefaultValue ( modelptr );
   if (resH == CDI_UNDEFID)
     modelptr->self = reshPut(modelptr, &modelOps);
@@ -134,7 +134,7 @@ void modelInit(void)
 
 struct modelLoc
 {
-  char *name;
+  const char *name;
   int instID, modelgribID, resID;
 };
 
@@ -179,7 +179,7 @@ findModelByName(int resID, void *res, void *data)
   return CDI_APPLY_GO_ON;
 }
 
-int modelInq(int instID, int modelgribID, char *name)
+int modelInq(int instID, int modelgribID, const char *name)
 {
   modelInit ();
 
@@ -326,13 +326,13 @@ modelUnpack(void *buf, int size, int *position, int originNamespace, void *conte
   serializeUnpack(buf, size, position, tempbuf, model_nints, DATATYPE_INT, context);
   if (tempbuf[3] != 0)
     {
-      name = (char *)xmalloc((size_t)tempbuf[3]);
+      name = (char *)malloc((size_t)tempbuf[3]);
       serializeUnpack(buf, size, position,
                       name, tempbuf[3], DATATYPE_TXT, context);
     }
   else
     {
-      name = "";
+      name = (char*)"";
     }
   int targetID = namespaceAdaptKey(tempbuf[0], originNamespace);
   model_t *mp = modelNewEntry(force_id?targetID:CDI_UNDEFID,

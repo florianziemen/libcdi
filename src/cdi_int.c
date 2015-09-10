@@ -74,7 +74,7 @@ int cdiSortName = 0;
 int cdiHaveMissval = 0;
 
 
-static long cdiGetenvInt(char *envName)
+static long cdiGetenvInt(const char *envName)
 {
   char *envString;
   long envValue = -1;

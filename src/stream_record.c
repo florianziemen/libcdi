@@ -44,7 +44,7 @@ int recordNewEntry(stream_t *streamptr, int tsID)
     {
       int i;
       recordSize = 1;   /*  <<<<----  */
-      records = (record_t *)xmalloc((size_t)recordSize * sizeof (record_t));
+      records = (record_t *)malloc((size_t)recordSize * sizeof (record_t));
       if ( records == NULL )
 	{
           Message("recordSize = %d", recordSize);
@@ -70,7 +70,7 @@ int recordNewEntry(stream_t *streamptr, int tsID)
       int i;
 
       recordSize = 2*recordSize;
-      records    = (record_t *)xrealloc(records,
+      records    = (record_t *)realloc(records,
                                         (size_t)recordSize * sizeof (record_t));
       if ( records == NULL )
 	{

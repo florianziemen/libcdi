@@ -91,7 +91,7 @@ void fill_att(cdi_att_t *attp, int indtype, int exdtype, size_t nelems, size_t x
 
   if ( xsz > 0 )
     {
-      attp->xvalue = xrealloc(attp->xvalue, xsz);
+      attp->xvalue = realloc(attp->xvalue, xsz);
       memcpy(attp->xvalue, xvalue, xsz);
     }
 }
@@ -569,7 +569,7 @@ vlistAttUnpack(int vlistID, int varID,
 
   serializeUnpack(buf, size, position,
                   tempbuf, vlist_att_nints, DATATYPE_INT, context);
-  char *attName = (char *)xmalloc((size_t)tempbuf[0] + 1);
+  char *attName = (char *)malloc((size_t)tempbuf[0] + 1);
   serializeUnpack(buf, size, position, attName, tempbuf[0], DATATYPE_TXT, context);
   attName[tempbuf[0]] = '\0';
   int attVDt;
@@ -592,7 +592,7 @@ vlistAttUnpack(int vlistID, int varID,
     xabort("Unknown datatype encountered in attribute %s: %d\n",
            attName, tempbuf[2]);
   }
-  void *attData = (void *)xmalloc(elemSize * (size_t)tempbuf[3]);
+  void *attData = (void *)malloc(elemSize * (size_t)tempbuf[3]);
   serializeUnpack(buf, size, position, attData, tempbuf[3], attVDt, context);
   vlist_def_att(tempbuf[2], tempbuf[1], vlistID, varID, attName,
                 (size_t)tempbuf[3], (size_t)tempbuf[3] * elemSize, attData);
