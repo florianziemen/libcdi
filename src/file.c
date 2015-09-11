@@ -1153,6 +1153,12 @@ int fileClose_serial(int fileID)
         }
       fprintf(stderr, " file mode        : %c\n",  fileptr->mode);
 
+      /* since the compile time evaluation makes one of the
+       * alternatives dead code, this warning needs to be disabled */
+#ifdef __clang__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunreachable-code"
+#endif
       if ( sizeof(off_t) > sizeof(long) )
 	{
 #if defined (_WIN32)
@@ -1174,6 +1180,9 @@ int fileClose_serial(int fileID)
 	    fprintf(stderr, " file position    : %ld\n", (long) fileptr->position);
 	  fprintf(stderr, " bytes transfered : %ld\n", (long) fileptr->byteTrans);
 	}
+#ifdef __clang__
+#pragma GCC diagnostic pop
+#endif
 
       if ( fileptr->time_in_sec > 0 )
         rout = (double)fileptr->byteTrans / (1024.*1024.*fileptr->time_in_sec);
