@@ -316,7 +316,9 @@ void cdiStreamWriteVarChunk_(int streamID, int varID, int memtype,
   || defined (HAVE_LIBEXTRA) || defined (HAVE_LIBIEG)
       xabort("streamWriteVarChunk not implemented for filetype %s!",
              strfiletype(filetype));
+#ifndef __GNUC__
       break;
+#endif
 #endif
 #if  defined  (HAVE_LIBNETCDF)
     case CDI_FILETYPE_NC:
