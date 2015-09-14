@@ -360,12 +360,24 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
             "#endif\n"
             "\n", cppMacro, fname);
   }
-  fprintf(fpint, "#if defined (HAVE_CF_INTERFACE)\n");
-  fprintf(fpint, "\n");
-  fprintf(fpint, "#if ! defined (__CFORTRAN_LOADED)\n");
-  fprintf(fpint, "#  include \"cfortran.h\"\n");
-  fprintf(fpint, "#endif\n");
-  fprintf(fpint, "\n");
+  fputs("#if defined (HAVE_CF_INTERFACE)\n"
+        "\n"
+        "#if ! defined (__CFORTRAN_LOADED)\n"
+        "#  if defined __clang__\n"
+        "#    pragma GCC diagnostic push\n"
+        "#    pragma GCC diagnostic ignored \"-Wreserved-id-macro\"\n"
+        "#  endif\n"
+        "#  include \"cfortran.h\"\n"
+        "#  if defined __clang__\n"
+        "#    pragma GCC diagnostic pop\n"
+        "#  endif\n"
+        "#endif\n"
+        "/* These functions are meant to be called from Fortran and don't\n"
+        " * need an interface declaration in a C header. */\n"
+        "#if defined __clang__\n"
+        "#  pragma GCC diagnostic ignored \"-Wmissing-prototypes\"\n"
+        "#endif\n"
+        "\n", fpint);
 
   ssize_t lineLen;
   while ((lineLen = getline(&line, &lineBufSize, fpin)) >= 0)
@@ -815,6 +827,9 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
     }
 
   fputs("\n"
+        "#if defined __clang__\n"
+        "#  pragma GCC diagnostic pop\n"
+        "#endif\n"
         "#endif\n", fpint);
 
   fclose(fpin);

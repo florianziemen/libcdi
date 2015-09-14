@@ -11,7 +11,19 @@
 #if defined (HAVE_CF_INTERFACE)
 
 #if ! defined (__CFORTRAN_LOADED)
+#  if defined __clang__
+#    pragma GCC diagnostic push
+#    pragma GCC diagnostic ignored "-Wreserved-id-macro"
+#  endif
 #  include "cfortran.h"
+#  if defined __clang__
+#    pragma GCC diagnostic pop
+#  endif
+#endif
+/* These functions are meant to be called from Fortran and don't
+ * need an interface declaration in a C header. */
+#if defined __clang__
+#  pragma GCC diagnostic ignored "-Wmissing-prototypes"
 #endif
 
 
@@ -106,4 +118,7 @@ FCALLSCSUB2 (cdiPioConfSetStripeConversion, CDIPIOCONFSETSTRIPECONVERSION, cdipi
 
 FCALLSCFUN1 (INT, cdiPioConfGetStripeConversion, CDIPIOCONFGETSTRIPECONVERSION, cdipioconfgetstripeconversion, INT)
 
+#if defined __clang__
+#  pragma GCC diagnostic pop
+#endif
 #endif
