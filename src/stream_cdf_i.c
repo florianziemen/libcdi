@@ -4,6 +4,9 @@
 
 #ifdef HAVE_LIBNETCDF
 
+#ifdef __clang__
+#pragma GCC diagnostic ignored "-Wc11-extensions"
+#endif
 //#define TEST_GROUPS 1
 
 #include <ctype.h>

@@ -2,6 +2,9 @@
 #  include "config.h"
 #endif
 
+#ifdef __clang__
+#pragma GCC diagnostic ignored "-Wc11-extensions"
+#endif
 #ifdef HAVE_LIBNETCDF
 
 #include "dmemory.h"
