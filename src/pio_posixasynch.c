@@ -60,7 +60,7 @@ initBFiledataPA(char *filename, size_t bs, int nc)
   xdebug ( "filename=%s, buffersize=%zu, ncollectors=%d, nPrefetchStreams=%d",
            filename, bs, nc, nPrefStreams );
 
-  bfd = (bFiledataPA*) malloc( sizeof (*bfd) + strlen(filename) + 1);
+  bfd = (bFiledataPA*) Malloc( sizeof (*bfd) + strlen(filename) + 1);
   strcpy(bfd->name, filename);
 
   if (( bfd->handle = open ( bfd->name, O_CREAT | O_WRONLY, 0666 )) == -1 )
@@ -131,8 +131,8 @@ destroyBFiledataPA ( void *v )
 
   dbuffer_cleanup ( &( bfd->fb ));
 
-  free(bfd->ctrlBlks);
-  free(bfd);
+  Free(bfd->ctrlBlks);
+  Free(bfd);
 
   xdebug("%s", "closed file and cleaned up, return");
 
@@ -250,7 +250,7 @@ void pioWriterAIO(void)
 	{
       	case IO_Open_file:
           {
-            char *messageBuffer = malloc((size_t)messagesize
+            char *messageBuffer = Malloc((size_t)messagesize
                                           * sizeof (messageBuffer[0]));
             char *pMB = messageBuffer;
 
@@ -289,7 +289,7 @@ void pioWriterAIO(void)
 
             writePA(bfd, amount);
 
-            free(messageBuffer);
+            Free(messageBuffer);
           }
 	  break;
 
@@ -356,7 +356,7 @@ void pioWriterAIO(void)
                            " return");
                     listSetDelete(bibBFiledataPA);
                   }
-                free(sentFinalize);
+                Free(sentFinalize);
                 return;
               }
           }

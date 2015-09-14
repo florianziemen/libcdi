@@ -126,7 +126,7 @@ void commDestroy ( void )
       info->commColl = MPI_COMM_NULL;
     }
 
-  free(info->procsCollMap);
+  Free(info->procsCollMap);
 
   if ( info->commNode != MPI_COMM_NULL )
     {
@@ -382,7 +382,7 @@ void commDefCommNode ( void )
 
   size = info->sizePio;
 
-  myHost = (char*) malloc(MPI_MAX_PROCESSOR_NAME);
+  myHost = (char*) Malloc(MPI_MAX_PROCESSOR_NAME);
   {
     int len;
     xmpi ( MPI_Get_processor_name ( myHost, &len ));
@@ -391,8 +391,8 @@ void commDefCommNode ( void )
     info->hostname[len] = '\0';
   }
 
-  allHosts = malloc((size_t)size * MPI_MAX_PROCESSOR_NAME);
-  sortedHosts = malloc((size_t)size * sizeof (sortedHosts[0]));
+  allHosts = Malloc((size_t)size * MPI_MAX_PROCESSOR_NAME);
+  sortedHosts = Malloc((size_t)size * sizeof (sortedHosts[0]));
 
   for (int i = 0; i < size; ++i)
     sortedHosts[i] = allHosts[i];
@@ -436,9 +436,9 @@ void commDefCommNode ( void )
   if ( info->IOMode >= PIO_MINIOMODEWITHSPECIALPROCS )
     info->specialRankNode = info->sizeNode - 1;
 
-  free(sortedHosts);
-  free(allHosts);
-  free(myHost);
+  Free(sortedHosts);
+  Free(allHosts);
+  Free(myHost);
 
   return;
 }

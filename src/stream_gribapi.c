@@ -495,11 +495,11 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
         vctsize = (size_t)lpar;
         if ( vctsize > 0 )
           {
-            vctptr = (double *) malloc(vctsize*sizeof(double));
+            vctptr = (double *) Malloc(vctsize*sizeof(double));
             dummy = vctsize;
             GRIB_CHECK(grib_get_double_array(gh, "pv", vctptr, &dummy), 0);
             varDefVCT(vctsize, vctptr);
-            free(vctptr);
+            Free(vctptr);
           }
         break;
       }
@@ -1036,7 +1036,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
   cdi_create_records(streamptr, tsID);
 
   int nrecords = streamptr->tsteps[tsID].nallrecs;
-  streamptr->tsteps[1].recIDs = (int *) malloc((size_t)nrecords*sizeof(int));
+  streamptr->tsteps[1].recIDs = (int *) Malloc((size_t)nrecords*sizeof(int));
   streamptr->tsteps[1].nrecs = 0;
   for ( recID = 0; recID < nrecords; recID++ )
     streamptr->tsteps[1].recIDs[recID] = -1;
@@ -1258,7 +1258,7 @@ int gribapiScanTimestep(stream_t * streamptr)
       nrecs = streamptr->tsteps[1].nrecs;
 
       streamptr->tsteps[tsID].nrecs = nrecs;
-      streamptr->tsteps[tsID].recIDs = (int *) malloc((size_t)nrecs*sizeof(int));
+      streamptr->tsteps[tsID].recIDs = (int *) Malloc((size_t)nrecs*sizeof(int));
       for ( recID = 0; recID < nrecs; recID++ )
 	streamptr->tsteps[tsID].recIDs[recID] = streamptr->tsteps[1].recIDs[recID];
 
@@ -1957,8 +1957,8 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 
 	    // GRIB_CHECK(my_grib_set_long_array(gh, "pl", pl, nlat), 0);
 
-	    free(pl);
-	    free(rowlon);
+	    Free(pl);
+	    Free(rowlon);
 	  }
 	else
 	  {
@@ -2678,7 +2678,7 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   GRIB_CHECK(grib_get_message(gh, (const void **)&dummy, &recsize), 0);
   recsize += 512; /* add some space for possible filling */
   *gribbuffersize = recsize;
-  *gribbuffer = (unsigned char *) malloc(*gribbuffersize);
+  *gribbuffer = (unsigned char *) Malloc(*gribbuffersize);
 
   /* get a copy of the coded message */
   GRIB_CHECK(grib_get_message_copy(gh, *gribbuffer, &recsize), 0);

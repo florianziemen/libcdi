@@ -195,9 +195,9 @@ varMapGen(int *vSizes, int *sSizes, int *varMapping,
 	if ( * ( streamMapping + j ) == i )
 	  nVarsNode += * ( sSizes + j );
 
-      weightsVarsNode = malloc((size_t)nVarsNode * sizeof (int));
-      varMappingNode = malloc((size_t)nVarsNode * sizeof ( int ));
-      w = malloc((size_t)nodeSizes[i] * sizeof (double));
+      weightsVarsNode = Malloc((size_t)nVarsNode * sizeof (int));
+      varMappingNode = Malloc((size_t)nVarsNode * sizeof ( int ));
+      w = Malloc((size_t)nodeSizes[i] * sizeof (double));
       offset = 0;
       offsetN = 0;
 
@@ -258,9 +258,9 @@ varsMapNDeco(int nNodes, int *nodeSizes)
 
   unsigned nStreams = reshCountType(&streamOps);
 
-  resHs       = malloc(nStreams * sizeof (resHs[0]));
-  streamSizes = malloc(nStreams * sizeof (streamSizes[0]));
-  collectsData = malloc((size_t)nProcsColl * sizeof (collectsData[0]));
+  resHs       = Malloc(nStreams * sizeof (resHs[0]));
+  streamSizes = Malloc(nStreams * sizeof (streamSizes[0]));
+  collectsData = Malloc((size_t)nProcsColl * sizeof (collectsData[0]));
   cdiStreamGetIndexList(nStreams, resHs);
 
   for (unsigned i = 0; i < nStreams; i++ )
@@ -268,7 +268,7 @@ varsMapNDeco(int nNodes, int *nodeSizes)
 
   nVars = sum_int((size_t)nStreams, streamSizes);
   varSizes   = xcalloc((size_t)nVars, sizeof (varSizes[0]));
-  varMapping = malloc((size_t)nVars * sizeof (varMapping[0]));
+  varMapping = Malloc((size_t)nVars * sizeof (varMapping[0]));
 
   for (unsigned i = 0; i < nStreams; i++ )
     {
@@ -327,7 +327,7 @@ void modelWinCleanup ( void )
           xmpi ( MPI_Free_mem ( txWin[collID].buffer ));
           xmpi(MPI_Group_free(&txWin[collID].ioGroup));
         }
-      free(txWin);
+      Free(txWin);
     }
 
   xdebug("%s", "RETURN. CLEANED UP MPI_WIN'S");
@@ -354,7 +354,7 @@ modelWinDefBufferSizes(void)
   xassert(txWin != NULL);
 
   unsigned nstreams = reshCountType ( &streamOps );
-  streamIndexList = malloc((size_t)nstreams * sizeof (streamIndexList[0]));
+  streamIndexList = Malloc((size_t)nstreams * sizeof (streamIndexList[0]));
   collIndex = xcalloc((size_t)nProcsColl, sizeof (collIndex[0]));
   reshGetResHListOfType ( nstreams, streamIndexList, &streamOps );
   for (unsigned streamNo = 0; streamNo < nstreams; streamNo++ )
@@ -413,7 +413,7 @@ modelWinDefBufferSizes(void)
                                              PIO_WIN_ALIGN);
       sumWinBufferSize += (size_t)txWin[collID].size;
     }
-  free(collIndex);
+  Free(collIndex);
   free ( streamIndexList );
 
   xdebug("sumWinBufferSize=%zu, MAXWINBUFFERSIZE=%zu", sumWinBufferSize,

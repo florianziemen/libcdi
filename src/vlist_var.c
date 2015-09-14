@@ -535,11 +535,11 @@ void vlistInqVarName(int vlistID, int varID, char *name)
     @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate} or @fref{streamInqVlist}.
     @Item  varID    Variable identifier.
 
-@Return A pointer to a malloc'ed string. Must be cleaned up with free().
+@Return A pointer to a malloc'ed string. Must be cleaned up with Free().
 
 @Description
 This is the buffer overflow immune version of vlistInqVarName().
-The memory for the returned string is allocated to fit the string via malloc().
+The memory for the returned string is allocated to fit the string via Malloc().
 
 @EndFunction
 */
@@ -917,7 +917,7 @@ void vlistDefVarName(int vlistID, int varID, const char *name)
     {
       if ( vlistptr->vars[varID].name )
 	{
-	  free(vlistptr->vars[varID].name);
+	  Free(vlistptr->vars[varID].name);
 	  vlistptr->vars[varID].name = NULL;
 	}
 
@@ -951,7 +951,7 @@ void vlistDefVarLongname(int vlistID, int varID, const char *longname)
     {
       if ( vlistptr->vars[varID].longname )
 	{
-	  free(vlistptr->vars[varID].longname);
+	  Free(vlistptr->vars[varID].longname);
 	  vlistptr->vars[varID].longname = 0;
 	}
 
@@ -985,7 +985,7 @@ void vlistDefVarStdname(int vlistID, int varID, const char *stdname)
     {
       if ( vlistptr->vars[varID].stdname )
 	{
-	  free(vlistptr->vars[varID].stdname);
+	  Free(vlistptr->vars[varID].stdname);
 	  vlistptr->vars[varID].stdname = 0;
 	}
 
@@ -1019,7 +1019,7 @@ void vlistDefVarUnits(int vlistID, int varID, const char *units)
     {
       if ( vlistptr->vars[varID].units )
 	{
-	  free(vlistptr->vars[varID].units);
+	  Free(vlistptr->vars[varID].units);
 	  vlistptr->vars[varID].units = 0;
 	}
 
@@ -1104,7 +1104,7 @@ void vlistDefVarExtra(int vlistID, int varID, const char *extra)
     {
       if ( vlistptr->vars[varID].extra )
 	{
-	  free(vlistptr->vars[varID].extra);
+	  Free(vlistptr->vars[varID].extra);
 	  vlistptr->vars[varID].extra = NULL;
 	}
 
@@ -1323,7 +1323,7 @@ void vlistDestroyVarName(int vlistID, int varID)
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
   if ( vlistptr->vars[varID].name )
     {
-      free(vlistptr->vars[varID].name);
+      Free(vlistptr->vars[varID].name);
       vlistptr->vars[varID].name = NULL;
       reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
     }
@@ -1336,7 +1336,7 @@ void vlistDestroyVarLongname(int vlistID, int varID)
 
   if ( vlistptr->vars[varID].longname )
     {
-      free(vlistptr->vars[varID].longname);
+      Free(vlistptr->vars[varID].longname);
       vlistptr->vars[varID].longname = NULL;
       reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
     }
@@ -1349,7 +1349,7 @@ void vlistDestroyVarStdname(int vlistID, int varID)
 
   if ( vlistptr->vars[varID].stdname )
     {
-      free(vlistptr->vars[varID].stdname);
+      Free(vlistptr->vars[varID].stdname);
       vlistptr->vars[varID].stdname = NULL;
       reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
     }
@@ -1362,7 +1362,7 @@ void vlistDestroyVarUnits(int vlistID, int varID)
 
   if ( vlistptr->vars[varID].units )
     {
-      free(vlistptr->vars[varID].units);
+      Free(vlistptr->vars[varID].units);
       vlistptr->vars[varID].units = NULL;
       reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
     }
@@ -1894,7 +1894,7 @@ void vlistDefVarDblKey(int vlistID, int varID, const char *name, double value)
 void cdiClearAdditionalKeys()
 {
 #if  defined  (HAVE_LIBGRIB_API)
-  for (int i=0; i<cdiNAdditionalGRIBKeys; i++)  free(cdiAdditionalGRIBKeys[i]);
+  for (int i=0; i<cdiNAdditionalGRIBKeys; i++)  Free(cdiAdditionalGRIBKeys[i]);
   cdiNAdditionalGRIBKeys = 0;
 #endif
 }
@@ -2202,7 +2202,7 @@ void vlistVarUnpack(int vlistID, char * buf, int size, int *position,
     varname[tempbuf[7]] = '\0';
     vlistDefVarUnits(vlistID, newvar, varname);
   }
-  free(varname);
+  Free(varname);
   vlistDefVarDatatype(vlistID, newvar, tempbuf[8]);
   vlistDefVarInstitut ( vlistID, newvar,
 			namespaceAdaptKey ( tempbuf[10], originNamespace ));

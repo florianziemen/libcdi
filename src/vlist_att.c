@@ -71,7 +71,7 @@ cdi_att_t *new_att(cdi_atts_t *attsp, const char *name)
   slen = strlen(name);
   if ( slen > CDI_MAX_NAME ) slen = CDI_MAX_NAME;
 
-  attp->name = (char *) malloc(slen+1);
+  attp->name = (char *) Malloc(slen+1);
   memcpy(attp->name, name, slen+1);
   attp->namesz = slen;
   attp->xvalue = NULL;
@@ -91,7 +91,7 @@ void fill_att(cdi_att_t *attp, int indtype, int exdtype, size_t nelems, size_t x
 
   if ( xsz > 0 )
     {
-      attp->xvalue = realloc(attp->xvalue, xsz);
+      attp->xvalue = Realloc(attp->xvalue, xsz);
       memcpy(attp->xvalue, xvalue, xsz);
     }
 }
@@ -196,8 +196,8 @@ int vlistDelAtts(int vlistID, int varID)
   for ( attid = 0; attid < (int)attsp->nelems; attid++ )
     {
       attp = &(attsp->value[attid]);
-      if ( attp->name   ) free(attp->name);
-      if ( attp->xvalue ) free(attp->xvalue);
+      if ( attp->name   ) Free(attp->name);
+      if ( attp->xvalue ) Free(attp->xvalue);
     }
 
   attsp->nelems = 0;
@@ -596,8 +596,8 @@ vlistAttUnpack(int vlistID, int varID,
   serializeUnpack(buf, size, position, attData, tempbuf[3], attVDt, context);
   vlist_def_att(tempbuf[2], tempbuf[1], vlistID, varID, attName,
                 (size_t)tempbuf[3], (size_t)tempbuf[3] * elemSize, attData);
-  free(attName);
-  free(attData);
+  Free(attName);
+  Free(attData);
 }
 
 void

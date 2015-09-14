@@ -248,7 +248,7 @@ int grbUnzipRecord(unsigned char *gribbuffer, size_t *gribsize)
 	  if ( itmpbuffersize < igribsize )
 	    {
 	      itmpbuffersize = igribsize;
-	      itmpbuffer = (unsigned char *) realloc(itmpbuffer, itmpbuffersize);
+	      itmpbuffer = (unsigned char *) Realloc(itmpbuffer, itmpbuffersize);
 	    }
 
 	  memcpy(itmpbuffer, gribbuffer, itmpbuffersize);
@@ -257,7 +257,7 @@ int grbUnzipRecord(unsigned char *gribbuffer, size_t *gribsize)
 
 	  ogribsize = (size_t)gribUnzip(gribbuffer, unzipsize, itmpbuffer, (long)igribsize);
 
-	  free(itmpbuffer);
+	  Free(itmpbuffer);
 
 	  if ( ogribsize <= 0 ) Error("Decompression problem!");
 	}
@@ -530,7 +530,7 @@ size_t grbEncode(int filetype, int memtype, int varID, int levelID, int vlistID,
   if ( filetype == FILETYPE_GRB )
     {
       size_t gribbuffersize = datasize*4+3000;
-      *gribbuffer = (unsigned char *) malloc(gribbuffersize);
+      *gribbuffer = (unsigned char *) Malloc(gribbuffersize);
 
       nbytes = cgribexEncode(memtype, varID, levelID, vlistID, gridID, zaxisID,
 			     date, time, tsteptype, numavg,
@@ -567,7 +567,7 @@ size_t grbSzip(int filetype, unsigned char *gribbuffer, size_t gribbuffersize)
   static int lszip_warn = 1;
 
   buffersize = gribbuffersize + 1000; /* compressed record can be greater than source record */
-  buffer = (unsigned char *) malloc(buffersize);
+  buffer = (unsigned char *) Malloc(buffersize);
 
   /*  memcpy(buffer, gribbuffer, gribbuffersize); */
 
@@ -582,7 +582,7 @@ size_t grbSzip(int filetype, unsigned char *gribbuffer, size_t gribbuffersize)
       nbytes = gribbuffersize;
     }
 
-  free(buffer);
+  Free(buffer);
 
   return (nbytes);
 }
@@ -625,7 +625,7 @@ void grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
   size_t datasize = (size_t)gridInqSize(gridID);
   /*
   gribbuffersize = datasize*4+3000;
-  gribbuffer = (unsigned char *) malloc(gribbuffersize);
+  gribbuffer = (unsigned char *) Malloc(gribbuffersize);
   */
 #if  defined  (HAVE_LIBCGRIBEX)
   if ( filetype == FILETYPE_GRB )
@@ -672,7 +672,7 @@ void grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
       Error("Failed to write GRIB slice!");
     }
 
-  if ( gribbuffer ) free(gribbuffer);
+  if ( gribbuffer ) Free(gribbuffer);
 }
 
 
@@ -741,7 +741,7 @@ void grbCopyRecord(stream_t * streamptr2, stream_t * streamptr1)
       Error("Could not write record for copying!");
     }
 
-  free(gribbuffer);
+  Free(gribbuffer);
 }
 
 

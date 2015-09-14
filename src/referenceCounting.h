@@ -9,7 +9,7 @@
 /*
 This is a base class for all objects that need reference counting.
 A CdiReferencedObject has a reference count of one when it is constructed, refObjectRetain() increments the reference count, refObject Release() decrements it.
-When the reference count reaches zero, the destructor function is called before the memory of the object is deallocated with free().
+When the reference count reaches zero, the destructor function is called before the memory of the object is deallocated with Free().
 
 >>> Warning <<<
 This code is currently not thread-safe.

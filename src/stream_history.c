@@ -29,7 +29,7 @@ void streamDefHistory(int streamID, int length, const char *history)
                * history argument directly? */
 	      histstring = strdupx(history);
 	      cdfDefHistory(streamptr, length, histstring);
-	      free(histstring);
+	      Free(histstring);
 	    }
 	}
     }

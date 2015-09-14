@@ -300,7 +300,7 @@ void cdiReset(void)
       namespaceDelete((int)namespaceID);
   if (namespaces != &initialNamespace)
     {
-      free(namespaces);
+      Free(namespaces);
       namespaces = &initialNamespace;
     }
   namespacesSize = 1;

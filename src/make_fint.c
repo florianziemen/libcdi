@@ -353,7 +353,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
   fprintf(fpint, "#endif\n");
   fprintf(fpint, "\n");
   {
-    char *cppMacro = (char*) malloc(strlen(fname) + 2);
+    char *cppMacro = (char*) Malloc(strlen(fname) + 2);
     build_header_name(fname, cppMacro);
     fprintf(fpint, "#if ! defined (%s)\n"
             "#  include \"%s\"\n"
@@ -454,7 +454,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
               if ((extLen = getline(&lineExtension, &extSize, fpin)) <= 0)
                 break;
               if ((size_t)(lineLen + extLen) >= lineBufSize)
-                if (!(line = (char*) realloc(line, (size_t)(lineLen + extLen + 1))))
+                if (!(line = (char*) Realloc(line, (size_t)(lineLen + extLen + 1))))
                   exit(EXIT_FAILURE);
               memcpy(line + lineLen, lineExtension, (size_t)extLen + 1);
               lineLen += extLen;
@@ -826,7 +826,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
       }
     /* path to document root, separating /, max of path within root,
      * terminating '\0'  */
-    filename = (char*) malloc(doc_root_len + 1 + max_len + 1);
+    filename = (char*) Malloc(doc_root_len + 1 + max_len + 1);
   }
 
   memcpy(filename, doc_root, doc_root_len);
@@ -910,7 +910,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
       fprintf(stderr, "warning: cannot open documentation output file %s, %s",
               filename, strerror(errno));
     }
-  free(filename);
+  Free(filename);
 }
 
 static void
@@ -1036,7 +1036,7 @@ reCompile(regex_t *restrict RE, const char *restrict REstring,
       char *restrict line;
       size_t resize;
       if (*lineBufSize < REGEX_MAX_ERRSTRLEN
-          && (line = (char*) realloc(*lineBuf, resize = REGEX_MAX_ERRSTRLEN)))
+          && (line = (char*) Realloc(*lineBuf, resize = REGEX_MAX_ERRSTRLEN)))
         {
           *lineBuf = line;
           *lineBufSize = resize;
@@ -1173,7 +1173,7 @@ static int detectComment(char **line_, ssize_t *lineLen, size_t *lineBufSize,
           if ((extLen = getline(&lineExtension, &extSize, fpin)) <= 0)
             break;
           if ((size_t)(*lineLen + extLen) >= *lineBufSize)
-            if (!(line = realloc(line, (size_t)(*lineLen + extLen + 1))))
+            if (!(line = Realloc(line, (size_t)(*lineLen + extLen + 1))))
               exit(EXIT_FAILURE);
           memcpy(line + *lineLen, lineExtension, (size_t)extLen + 1);
           *lineLen += extLen;

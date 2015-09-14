@@ -71,12 +71,12 @@ void gribContainersNew(stream_t * streamptr)
 
 #if defined (GRIBCONTAINER2D)
       gribContainer_t **gribContainers;
-      gribContainers = (gribContainer_t **) malloc(nvars*sizeof(gribContainer_t *));
+      gribContainers = (gribContainer_t **) Malloc(nvars*sizeof(gribContainer_t *));
 
       for ( int varID = 0; varID < nvars; ++varID )
         {
           int nlevs = streamptr->vars[varID].nlevs;
-          gribContainers[varID] = (gribContainer_t *) malloc(nlevs*sizeof(gribContainer_t));
+          gribContainers[varID] = (gribContainer_t *) Malloc(nlevs*sizeof(gribContainer_t));
 
           for ( int levelID = 0; levelID < nlevs; ++levelID )
             {
@@ -118,7 +118,7 @@ void gribContainersDelete(stream_t * streamptr)
             {
               gribHandleDelete(gribContainers[varID][levelID].gribHandle);
             }
-          free(gribContainers[varID]);
+          Free(gribContainers[varID]);
 	}
 #else
       gribContainer_t *gribContainers = (gribContainer_t *) streamptr->gribContainers;
@@ -129,7 +129,7 @@ void gribContainersDelete(stream_t * streamptr)
 	}
 #endif
 
-      free(gribContainers);
+      Free(gribContainers);
 
       streamptr->gribContainers = NULL;
     }

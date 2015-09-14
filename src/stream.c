@@ -438,7 +438,7 @@ int cdiStreamOpenDefaultDelegate(const char *filename, const char *filemode,
         if ( fileID < 0 ) fileID = CDI_ESYSTEM;
         if (recordBufIsToBeCreated)
           {
-            streamptr->record = (Record *) malloc(sizeof(Record));
+            streamptr->record = (Record *) Malloc(sizeof(Record));
             streamptr->record->buffer = NULL;
           }
         break;
@@ -451,7 +451,7 @@ int cdiStreamOpenDefaultDelegate(const char *filename, const char *filemode,
         if ( fileID < 0 ) fileID = CDI_ESYSTEM;
         if (recordBufIsToBeCreated)
           {
-            streamptr->record = (Record *) malloc(sizeof(Record));
+            streamptr->record = (Record *) Malloc(sizeof(Record));
             streamptr->record->buffer = NULL;
             streamptr->record->exsep  = srvNew();
           }
@@ -465,7 +465,7 @@ int cdiStreamOpenDefaultDelegate(const char *filename, const char *filemode,
         if ( fileID < 0 ) fileID = CDI_ESYSTEM;
         if (recordBufIsToBeCreated)
           {
-            streamptr->record = (Record *) malloc(sizeof(Record));
+            streamptr->record = (Record *) Malloc(sizeof(Record));
             streamptr->record->buffer = NULL;
             streamptr->record->exsep  = extNew();
           }
@@ -479,7 +479,7 @@ int cdiStreamOpenDefaultDelegate(const char *filename, const char *filemode,
         if ( fileID < 0 ) fileID = CDI_ESYSTEM;
         if (recordBufIsToBeCreated)
           {
-            streamptr->record = (Record *) malloc(sizeof(Record));
+            streamptr->record = (Record *) Malloc(sizeof(Record));
             streamptr->record->buffer = NULL;
             streamptr->record->exsep   = iegNew();
           }
@@ -544,7 +544,7 @@ streamOpenID(const char *filename, const char *filemode, int filetype,
 
   if (fileID < 0)
     {
-      free(streamptr->record);
+      Free(streamptr->record);
       stream_delete_entry(streamptr);
       streamID = fileID;
     }
@@ -879,7 +879,7 @@ static stream_t *stream_new_entry(int resH)
 
   cdiInitialize(); /* ***************** make MT version !!! */
 
-  streamptr = (stream_t *) malloc(sizeof(stream_t));
+  streamptr = (stream_t *) Malloc(sizeof(stream_t));
   streamDefaultValue ( streamptr );
   if (resH == CDI_UNDEFID)
     streamptr->self = reshPut(streamptr, &streamOps);
@@ -961,8 +961,8 @@ cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDeleted)
 
 static void deallocate_sleveltable_t(sleveltable_t *entry)
 {
-  if (entry->recordID) free(entry->recordID);
-  if (entry->lindex)   free(entry->lindex);
+  if (entry->recordID) Free(entry->recordID);
+  if (entry->lindex)   Free(entry->lindex);
   entry->recordID = NULL;
   entry->lindex   = NULL;
 }
@@ -1003,13 +1003,13 @@ void streamClose(int streamID)
   if ( streamptr->record )
     {
       if ( streamptr->record->buffer )
-        free(streamptr->record->buffer);
+        Free(streamptr->record->buffer);
 
-      free(streamptr->record);
+      Free(streamptr->record);
     }
 
   streamptr->filetype = 0;
-  if ( streamptr->filename ) free(streamptr->filename);
+  if ( streamptr->filename ) Free(streamptr->filename);
 
   for ( index = 0; index < streamptr->nvars; index++ )
     {
@@ -1020,9 +1020,9 @@ void streamClose(int streamID)
         {
           deallocate_sleveltable_t(pslev + isub);
         }
-      if (pslev) free(pslev);
+      if (pslev) Free(pslev);
     }
-  free(streamptr->vars);
+  Free(streamptr->vars);
   streamptr->vars = NULL;
 
   for ( index = 0; index < streamptr->ntsteps; ++index )
@@ -1034,9 +1034,9 @@ void streamClose(int streamID)
       taxisDestroyKernel(&streamptr->tsteps[index].taxis);
     }
 
-  if ( streamptr->tsteps ) free(streamptr->tsteps);
+  if ( streamptr->tsteps ) Free(streamptr->tsteps);
 
-  if ( streamptr->basetime.timevar_cache ) free(streamptr->basetime.timevar_cache);
+  if ( streamptr->basetime.timevar_cache ) Free(streamptr->basetime.timevar_cache);
 
   if ( vlistID != -1 )
     {
@@ -1716,7 +1716,7 @@ void streamReadVarSliceF(int streamID, int varID, int levelID, float *data, int 
       double* conversionBuffer = (double *)malloc(elementCount * sizeof(*conversionBuffer));
       streamReadVarSlice(streamID, varID, levelID, conversionBuffer, nmiss);
       for (size_t i = elementCount; i--; ) data[i] = (float)conversionBuffer[i];
-      free(conversionBuffer);
+      Free(conversionBuffer);
     }
 }
 

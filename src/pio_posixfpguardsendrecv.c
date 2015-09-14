@@ -129,7 +129,7 @@ destroyAFiledataPF(void *v)
   dbuffer_cleanup(&(afd->db1));
   dbuffer_cleanup(&(afd->db2));
 
-  free(afd);
+  Free(afd);
 
   return iret;
 }
@@ -289,7 +289,7 @@ fpgPOSIXFPGUARDSENDRECV(void)
                     xdebug("%s", "destroy set");
                     listSetDelete(bibBFiledataPF);
                   }
-                free(sentFinalize);
+                Free(sentFinalize);
                 return;
               }
           }

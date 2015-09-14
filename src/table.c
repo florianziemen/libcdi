@@ -122,14 +122,14 @@ static void parTableFinalize(void)
         for (int item = 0; item < npars; ++item)
           {
             if (parTable[tableID].pars[item].dupflags & TABLE_DUP_NAME)
-              free((void *)parTable[tableID].pars[item].name);
+              Free((void *)parTable[tableID].pars[item].name);
             if (parTable[tableID].pars[item].dupflags & TABLE_DUP_LONGNAME)
-              free((void *)parTable[tableID].pars[item].longname);
+              Free((void *)parTable[tableID].pars[item].longname);
             if (parTable[tableID].pars[item].dupflags & TABLE_DUP_UNITS)
-              free((void *)parTable[tableID].pars[item].units);
+              Free((void *)parTable[tableID].pars[item].units);
           }
-        free(parTable[tableID].pars);
-        free(parTable[tableID].name);
+        Free(parTable[tableID].pars);
+        Free(parTable[tableID].name);
       }
 }
 
@@ -422,7 +422,7 @@ static int tableFromEnv(int modelID, int tablenum)
       lenf = strlen(tablename);
       /* if (tablePath) printf("tablePath = %s\n", tablePath); */
       /* if (tablename) printf("tableName = %s\n", tablename); */
-      tablefile = (char *) malloc(lenp+lenf+3);
+      tablefile = (char *) Malloc(lenp+lenf+3);
       if ( tablePath )
 	{
 	  strcpy(tablefile, tablePath);
@@ -441,7 +441,7 @@ static int tableFromEnv(int modelID, int tablenum)
 	}
       /* printf("tableID = %d %s\n", tableID, tablefile); */
 
-      free(tablefile);
+      Free(tablefile);
     }
 
   return (tableID);
@@ -545,7 +545,7 @@ int tableDef(int modelID, int tablenum, const char *tablename)
       if ( tablename )
 	parTable[tableID].name = strdupx(tablename);
 
-      parTable[tableID].pars = (PAR *) malloc(MAX_PARS * sizeof(PAR));
+      parTable[tableID].pars = (PAR *) Malloc(MAX_PARS * sizeof(PAR));
     }
 
   return (tableID);

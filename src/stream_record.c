@@ -96,7 +96,7 @@ int recordNewEntry(stream_t *streamptr, int tsID)
 static
 void cdiInitRecord(stream_t *streamptr)
 {
-  streamptr->record = (Record *) malloc(sizeof(Record));
+  streamptr->record = (Record *) Malloc(sizeof(Record));
 
   streamptr->record->param      = 0;
   streamptr->record->level      = 0;
@@ -483,7 +483,7 @@ void cdi_create_records(stream_t *streamptr, int tsID)
   //  printf("tsID, nrecords %d %d\n", tsID, nrecords);
 
   if ( maxrecords > 0 )
-    records = (record_t *) malloc(maxrecords * sizeof(record_t));
+    records = (record_t *) Malloc(maxrecords * sizeof(record_t));
   else
     records = NULL;
 

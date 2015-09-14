@@ -35,6 +35,7 @@
 
 #include "cdi.h"
 #include "cdi_int.h"
+#include "dmemory.h"
 #include "subtype.h"
 #include "vlist.h"
 
@@ -100,7 +101,7 @@ int attribute_to_index(const char *key)
 struct subtype_attr_t* subtypeAttrNewList(struct subtype_entry_t* head, int key, int val)
 {
   if (head == NULL)  Error("Internal error!");
-  struct subtype_attr_t *ptr = (struct subtype_attr_t*) malloc(sizeof(struct subtype_attr_t));
+  struct subtype_attr_t *ptr = (struct subtype_attr_t*) Malloc(sizeof(struct subtype_attr_t));
   if(NULL == ptr)  Error("Node creation failed");
   ptr->key   = key;
   ptr->val   = val;
@@ -124,7 +125,7 @@ struct subtype_attr_t* subtypeAttrInsert(struct subtype_entry_t* head, int key, 
   if (head->atts == NULL)  return (subtypeAttrNewList(head, key, val));
 
   /* create new attribute */
-  struct subtype_attr_t* ptr = (struct subtype_attr_t*) malloc(sizeof(struct subtype_attr_t));
+  struct subtype_attr_t* ptr = (struct subtype_attr_t*) Malloc(sizeof(struct subtype_attr_t));
   if(NULL == ptr)    Error("Node creation failed");
 
   ptr->key   = key;
@@ -153,7 +154,7 @@ void subtypeAttrDestroy(struct subtype_attr_t* head)
 {
   if (head == NULL) return;
   subtypeAttrDestroy(head->next);
-  free(head);
+  Free(head);
   head = NULL; 
 }
 
@@ -221,7 +222,7 @@ void subtypeAttsDuplicate(struct subtype_attr_t *a1, struct subtype_entry_t* dst
 */
 struct subtype_entry_t* subtypeEntryNewList(subtype_t* head)
 {
-  struct subtype_entry_t *ptr = (struct subtype_entry_t*) malloc(sizeof(struct subtype_entry_t));
+  struct subtype_entry_t *ptr = (struct subtype_entry_t*) Malloc(sizeof(struct subtype_entry_t));
   if(NULL == ptr)  Error("Node creation failed");
   ptr->atts      = NULL;
   ptr->next      = NULL;
@@ -244,7 +245,7 @@ struct subtype_entry_t* subtypeEntryInsert(subtype_t* head)
   if (head->entries == NULL)  return (subtypeEntryNewList(head));
 
   /* create new entry */
-  struct subtype_entry_t* ptr = (struct subtype_entry_t*) malloc(sizeof(struct subtype_entry_t));
+  struct subtype_entry_t* ptr = (struct subtype_entry_t*) Malloc(sizeof(struct subtype_entry_t));
   if(NULL == ptr)    Error("Node creation failed");
 
   ptr->atts     = NULL;
@@ -279,7 +280,7 @@ struct subtype_entry_t* subtypeEntryAppend(subtype_t* head)
   if (head->entries == NULL)  return (subtypeEntryNewList(head));
 
   /* create new entry */
-  struct subtype_entry_t* ptr = (struct subtype_entry_t*) malloc(sizeof(struct subtype_entry_t));
+  struct subtype_entry_t* ptr = (struct subtype_entry_t*) Malloc(sizeof(struct subtype_entry_t));
   if(NULL == ptr)    Error("Node creation failed");
 
   ptr->atts     = NULL;
@@ -302,7 +303,7 @@ void subtypeEntryDestroy(struct subtype_entry_t *entry)
   if (entry == NULL) return;
   subtypeEntryDestroy(entry->next);
   subtypeAttrDestroy(entry->atts);
-  free(entry);
+  Free(entry);
   entry = NULL;
 }
 
@@ -396,7 +397,7 @@ static void subtypeDestroyP(void *ptr)
   /* destroy list of subtype entries */
   subtypeEntryDestroy(subtype_ptr->entries);
   subtype_ptr->entries = NULL;
-  free(subtype_ptr);
+  Free(subtype_ptr);
   subtype_ptr = NULL;
 }
 
@@ -448,7 +449,7 @@ static void subtypeDefaultValue(subtype_t *subtype_ptr)
 void subtypeAllocate(subtype_t **subtype_ptr2, int subtype)
 {
   /* allocate new subtype */
-  (*subtype_ptr2) = (subtype_t *) malloc(sizeof(subtype_t));
+  (*subtype_ptr2) = (subtype_t *) Malloc(sizeof(subtype_t));
   subtype_t* subtype_ptr = *subtype_ptr2;
   subtypeDefaultValue(subtype_ptr);
   subtype_ptr->subtype = subtype;

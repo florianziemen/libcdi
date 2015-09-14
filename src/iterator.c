@@ -261,7 +261,7 @@ CdiGribIterator* cdiGribIterator_clone(CdiIterator* me)
 @Result A malloc'ed string that contains the full description of the iterator.
 
 @Description
-    Make sure to call free() on the resulting string.
+    Make sure to call Free() on the resulting string.
 */
 char* cdiIterator_serialize(CdiIterator* me)
 {
@@ -304,7 +304,7 @@ char* cdiIterator_serialize(CdiIterator* me)
   char* result = (char *)malloc(strlen(ftypeStr) + 1 + strlen(advStr) + 1
                          + strlen(subclassDescription) + 1);
   sprintf(result, "%s %s %s", ftypeStr, advStr, subclassDescription);
-  free(subclassDescription);
+  Free(subclassDescription);
   return result;
 }
 
@@ -375,7 +375,7 @@ void cdiIterator_print(CdiIterator* me, FILE* stream)
 {
   char* description = cdiIterator_serialize(me);
   fprintf(stream, "%s\n", description);
-  free(description);
+  Free(description);
 }
 
 
@@ -479,7 +479,7 @@ The returned time is either the time of the data (fields defined at a time point
 or the start time of an integration time range (statistical fields).
 
 Converts the time to the ISO-8601 format and returns it in a newly allocated buffer.
-The caller is responsible to free() the resulting string.
+The caller is responsible to Free() the resulting string.
 
 If the file is a GRIB file, the calendar that is used to resolve the relative times is the proleptic calendar
 as it is implemented by the standard C mktime() function.
@@ -505,7 +505,7 @@ The returned time is the end time of an integration period if such a time exists
 Otherwise, NULL is returned.
 
 Converts the time to the ISO-8601 format and returns it in a newly allocated buffer.
-The caller is responsible to free() the resulting string.
+The caller is responsible to Free() the resulting string.
 
 If the file is a GRIB file, the calendar that is used to resolve the relative times is the proleptic calendar
 as it is implemented by the standard C mktime() function.
@@ -532,7 +532,7 @@ That is, if the field is a time point, its time is returned,
 if it is a statistical field with an integration period, the end time of the integration period is returned.
 
 Converts the time to the ISO-8601 format and returns it in a newly allocated buffer.
-The caller is responsible to free() the resulting string.
+The caller is responsible to Free() the resulting string.
 
 If the file is a GRIB file, the calendar that is used to resolve the relative times is the proleptic calendar
 as it is implemented by the standard C mktime() function.
@@ -552,10 +552,10 @@ char* cdiIterator_inqVTime(CdiIterator* me)
 @Parameter
     @item iterator The iterator to operate on.
     @item levelSelector Zero for the top level, one for the bottom level
-    @item outName Will be set to a malloc()'ed string with the name of the level if not NULL.
-    @item outLongName Will be set to a malloc()'ed string with the long name of the level if not NULL.
-    @item outStdName Will be set to a malloc()'ed string with the standard name of the level if not NULL.
-    @item outUnit Will be set to a malloc()'ed string with the unit of the level if not NULL.
+    @item outName Will be set to a Malloc()'ed string with the name of the level if not NULL.
+    @item outLongName Will be set to a Malloc()'ed string with the long name of the level if not NULL.
+    @item outStdName Will be set to a Malloc()'ed string with the standard name of the level if not NULL.
+    @item outUnit Will be set to a Malloc()'ed string with the unit of the level if not NULL.
 
 @Result An integer indicating the type of the level.
 
@@ -762,11 +762,11 @@ int cdiIterator_inqTsteptype(CdiIterator* me)
 @Parameter
     @item iterator The iterator to operate on.
 
-@Result A pointer to a C-string containing the name. The storage for this string is allocated with malloc(), and it is the responsibility of the caller to free() it.
+@Result A pointer to a C-string containing the name. The storage for this string is allocated with Malloc(), and it is the responsibility of the caller to Free() it.
 
 @Description
     Allocates a buffer to hold the string, copies the current variable name into this buffer, and returns the buffer.
-    The caller is responsible to make the corresponding free() call.
+    The caller is responsible to make the corresponding Free() call.
 */
 char* cdiIterator_inqVariableName(CdiIterator* me)
 {

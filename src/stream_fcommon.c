@@ -29,7 +29,7 @@ void streamFCopyRecord(stream_t *streamptr2, stream_t *streamptr1,
   if (fileWrite(fileID2, buffer, recsize) != recsize)
     Error("Failed to write record to %s file when copying!", container_name);
 
-  free(buffer);
+  Free(buffer);
 }
 
 /*

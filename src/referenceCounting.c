@@ -1,5 +1,6 @@
 #include "referenceCounting.h"
 
+#include "dmemory.h"
 #include "error.h"
 
 void cdiRefObject_construct(CdiReferencedObject* me)
@@ -21,7 +22,7 @@ void cdiRefObject_release(CdiReferencedObject* me)
   if(oldCount == 1)
     {
       me->destructor(me);
-      free(me);
+      Free(me);
     }
 }
 

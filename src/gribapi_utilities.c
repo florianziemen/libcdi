@@ -38,7 +38,7 @@ char* gribCopyString(grib_handle* gribHandle, const char* key)
 
     else
       {
-          free(result);
+          Free(result);
           result = NULL;
       }
     }
@@ -55,16 +55,16 @@ char* gribCopyString(grib_handle* gribHandle, const char* key)
       if (length <= 1024UL * 1024UL)
         {
           length *= 2;
-          result = realloc(result, length);
+          result = Realloc(result, length);
         }
       else
         break;
     }
   if (!rc)
-    result = realloc(result, length);
+    result = Realloc(result, length);
   else
     {
-      free(result);
+      Free(result);
       result = NULL;
     }
 #endif
@@ -83,7 +83,7 @@ bool gribCheckString(grib_handle* gribHandle, const char* key, const char* expec
   char *value = (char *)malloc(length);
   if(grib_get_string(gribHandle, key, value, &length)) return false;
   int rc = !strcmp(value, expectedValue);
-  free(value);
+  Free(value);
 #else
   char *value = gribCopyString(gribHandle, key);
   int rc;
@@ -95,7 +95,7 @@ bool gribCheckString(grib_handle* gribHandle, const char* key, const char* expec
   }
   else
     rc = false;
-  free(value);
+  Free(value);
 #endif
   return rc;
 }
@@ -187,7 +187,7 @@ static void resetTz(char* savedTz)
   if(savedTz)
     {
       setenv("TZ", savedTz, 1);
-      free(savedTz);
+      Free(savedTz);
     }
   else
     {
@@ -561,13 +561,13 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
         /* FIXME: assert(numberOfPoints <= INT_MAX && numberOfPoints >= INT_MIN) */
         grid->size   = (int)numberOfPoints;
 
-        grid->rowlon = (int *) malloc((size_t)nlat * sizeof (int));
-        pl          = (long *) malloc((size_t)nlat * sizeof (long));
+        grid->rowlon = (int *) Malloc((size_t)nlat * sizeof (int));
+        pl          = (long *) Malloc((size_t)nlat * sizeof (long));
         dummy       = (size_t)nlat;
         FAIL_ON_GRIB_ERROR(grib_get_long_array, gh, "pl", pl, &dummy);
         /* FIXME: assert(pl[i] >= INT_MIN && pl[i] <= INT_MIN) */
         for (int i = 0; i < nlat; ++i ) grid->rowlon[i] = (int)pl[i];
-        free(pl);
+        Free(pl);
 
         grid->ysize  = nlat;
         grid->xinc   = 0;

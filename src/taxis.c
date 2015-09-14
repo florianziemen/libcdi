@@ -83,7 +83,7 @@ delete_refcount_string(void *p)
       struct refcount_string *container
         = container_of(p, struct refcount_string, string);
       if (!--(container->ref_count))
-        free(container);
+        Free(container);
     }
 }
 
@@ -179,7 +179,7 @@ void taxisDefaultValue(taxis_t* taxisptr)
 static taxis_t *
 taxisNewEntry(cdiResH resH)
 {
-  taxis_t *taxisptr = (taxis_t*) malloc(sizeof(taxis_t));
+  taxis_t *taxisptr = (taxis_t*) Malloc(sizeof(taxis_t));
 
   taxisDefaultValue(taxisptr);
   if (resH == CDI_UNDEFID)
@@ -290,14 +290,14 @@ void taxisDestroy(int taxisID)
 {
   taxis_t *taxisptr = (taxis_t *)reshGetVal(taxisID, &taxisOps);
   taxisDestroyKernel(taxisptr);
-  free(taxisptr);
+  Free(taxisptr);
 }
 
 
 void taxisDestroyP( void * taxisptr )
 {
   taxisDestroyKernel((taxis_t *)taxisptr);
-  free(taxisptr);
+  Free(taxisptr);
 }
 
 

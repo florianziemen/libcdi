@@ -152,16 +152,16 @@ void grid_init(grid_t *gridptr)
 
 void grid_free(grid_t *gridptr)
 {
-  if ( gridptr->mask      ) free(gridptr->mask);
-  if ( gridptr->mask_gme  ) free(gridptr->mask_gme);
-  if ( gridptr->xvals     ) free(gridptr->xvals);
-  if ( gridptr->yvals     ) free(gridptr->yvals);
-  if ( gridptr->area      ) free(gridptr->area);
-  if ( gridptr->xbounds   ) free(gridptr->xbounds);
-  if ( gridptr->ybounds   ) free(gridptr->ybounds);
-  if ( gridptr->rowlon    ) free(gridptr->rowlon);
-  if ( gridptr->reference ) free(gridptr->reference);
-  if ( gridptr->name      ) free(gridptr->name);
+  if ( gridptr->mask      ) Free(gridptr->mask);
+  if ( gridptr->mask_gme  ) Free(gridptr->mask_gme);
+  if ( gridptr->xvals     ) Free(gridptr->xvals);
+  if ( gridptr->yvals     ) Free(gridptr->yvals);
+  if ( gridptr->area      ) Free(gridptr->area);
+  if ( gridptr->xbounds   ) Free(gridptr->xbounds);
+  if ( gridptr->ybounds   ) Free(gridptr->ybounds);
+  if ( gridptr->rowlon    ) Free(gridptr->rowlon);
+  if ( gridptr->reference ) Free(gridptr->reference);
+  if ( gridptr->name      ) Free(gridptr->name);
 
   grid_init(gridptr);
 }
@@ -169,7 +169,7 @@ void grid_free(grid_t *gridptr)
 static grid_t *
 gridNewEntry(cdiResH resH)
 {
-  grid_t *gridptr = (grid_t*) malloc(sizeof(grid_t));
+  grid_t *gridptr = (grid_t*) Malloc(sizeof(grid_t));
   grid_init(gridptr);
   if (resH == CDI_UNDEFID)
     gridptr->self = reshPut(gridptr, &gridOps);
@@ -235,7 +235,7 @@ void calc_gaussgrid(double *yvals, int ysize, double yfirst, double ylast)
 {
   double *restrict yw = (double *)malloc((size_t)ysize * sizeof(double));
   gaussaw(yvals, yw, (size_t)ysize);
-  free(yw);
+  Free(yw);
   for (int i = 0; i < ysize; i++ )
     yvals[i] = asin(yvals[i])/M_PI*180.0;
 
@@ -297,7 +297,7 @@ void gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double y
 		    yvals[ysize-1] = ylast;
 		  }
 
-		if ( ytmp ) free(ytmp);
+		if ( ytmp ) Free(ytmp);
 	      }
 	}
       else
@@ -494,15 +494,15 @@ void gridDestroyKernel( grid_t * gridptr )
 
   id = gridptr->self;
 
-  if ( gridptr->mask      ) free(gridptr->mask);
-  if ( gridptr->mask_gme  ) free(gridptr->mask_gme);
-  if ( gridptr->xvals     ) free(gridptr->xvals);
-  if ( gridptr->yvals     ) free(gridptr->yvals);
-  if ( gridptr->area      ) free(gridptr->area);
-  if ( gridptr->xbounds   ) free(gridptr->xbounds);
-  if ( gridptr->ybounds   ) free(gridptr->ybounds);
-  if ( gridptr->rowlon    ) free(gridptr->rowlon);
-  if ( gridptr->reference ) free(gridptr->reference);
+  if ( gridptr->mask      ) Free(gridptr->mask);
+  if ( gridptr->mask_gme  ) Free(gridptr->mask_gme);
+  if ( gridptr->xvals     ) Free(gridptr->xvals);
+  if ( gridptr->yvals     ) Free(gridptr->yvals);
+  if ( gridptr->area      ) Free(gridptr->area);
+  if ( gridptr->xbounds   ) Free(gridptr->xbounds);
+  if ( gridptr->ybounds   ) Free(gridptr->ybounds);
+  if ( gridptr->rowlon    ) Free(gridptr->rowlon);
+  if ( gridptr->reference ) Free(gridptr->reference);
 
   free ( gridptr );
 
@@ -1271,7 +1271,7 @@ void gridDefMask(int gridID, const int *mask)
     {
       if ( gridptr->mask )
 	{
-	  free(gridptr->mask);
+	  Free(gridptr->mask);
 	  gridptr->mask = NULL;
 	}
     }
@@ -2008,7 +2008,7 @@ int compareXYvals(int gridID, long xsize, long ysize, double *xvals0, double *yv
 	    break;
 	  }
 
-      free(xvals);
+      Free(xvals);
     }
 
   if ( !differ && ysize == gridInqYvals(gridID, NULL) )
@@ -2024,7 +2024,7 @@ int compareXYvals(int gridID, long xsize, long ysize, double *xvals0, double *yv
 	    break;
 	  }
 
-      free(yvals);
+      Free(yvals);
     }
 
   return (differ);
@@ -2433,7 +2433,7 @@ int gridGenerate(const grid_t *grid)
               = (double *)malloc((size_t)grid->xsize * sizeof (double));
 	    gridGenXvals(grid->xsize, grid->xfirst, grid->xlast, grid->xinc, xvals);
 	    gridDefXvals(gridID, xvals);
-	    free(xvals);
+	    Free(xvals);
 	    /*
 	    gridDefXinc(gridID, grid->xinc);
 	    */
@@ -2451,7 +2451,7 @@ int gridGenerate(const grid_t *grid)
               = (double *)malloc((size_t)grid->ysize * sizeof (double));
 	    gridGenYvals(grid->type, grid->ysize, grid->yfirst, grid->ylast, grid->yinc, yvals);
 	    gridDefYvals(gridID, yvals);
-	    free(yvals);
+	    Free(yvals);
 	    /*
 	    gridDefYinc(gridID, grid->yinc);
 	    */
@@ -2536,7 +2536,7 @@ int gridGenerate(const grid_t *grid)
               = (double *)malloc((size_t)grid->ysize * sizeof (double));
 	    gridGenYvals(grid->type, grid->ysize, grid->yfirst, grid->ylast, grid->yinc, yvals);
 	    gridDefYvals(gridID, yvals);
-	    free(yvals);
+	    Free(yvals);
 	    /*
 	    gridDefYinc(gridID, grid->yinc);
 	    */
@@ -2766,7 +2766,7 @@ void gridCompress(int gridID)
 	  if ( gridptr->ybounds )
 	    gridptr->ybounds = (double *)realloc(gridptr->ybounds, nv*gridsize*sizeof(double));
 
-	  free(gridptr->mask_gme);
+	  Free(gridptr->mask_gme);
 	  gridptr->mask_gme = NULL;
           reshSetStatus(gridID, &gridOps, RESH_DESYNC_IN_USE);
 	}
@@ -3278,7 +3278,7 @@ void gridPrintKernel(grid_t * gridptr, int index, int opt, FILE *fp)
                 nbyte += fprintf(fp, "%d ", rowlon[i]);
               }
             fprintf(fp, "\n");
-            free(rowlon);
+            Free(rowlon);
           }
 
 	break;
@@ -3771,7 +3771,7 @@ void gridDefReference(int gridID, const char *reference)
     {
       if ( gridptr->reference )
         {
-          free(gridptr->reference);
+          Free(gridptr->reference);
           gridptr->reference = NULL;
         }
 

@@ -205,7 +205,7 @@ int isTimeAxisUnits(const char *timeunits)
         }
     }
 
-  free(tu);
+  Free(tu);
 
   return (status);
 }
@@ -363,7 +363,7 @@ int setBaseTime(const char *timeunits, taxis_t *taxis)
   (*taxis).type = timetype;
   (*taxis).unit = timeunit;
 
-  free(tu);
+  Free(tu);
 
   if ( CDI_Debug )
     Message("timetype = %d  unit = %d", timetype, timeunit);
@@ -387,7 +387,7 @@ void cdfGetAttInt(int fileID, int ncvarid, const char *attname, int attlen, int 
       int *pintatt = NULL;
 
       if ( (int)nc_attlen > attlen )
-        pintatt = (int *) malloc(nc_attlen * sizeof (int));
+        pintatt = (int *) Malloc(nc_attlen * sizeof (int));
       else
         pintatt = attint;
 
@@ -396,7 +396,7 @@ void cdfGetAttInt(int fileID, int ncvarid, const char *attname, int attlen, int 
       if ( (int)nc_attlen > attlen )
         {
           memcpy(attint, pintatt, (size_t)attlen * sizeof (int));
-          free(pintatt);
+          Free(pintatt);
         }
     }
 }
@@ -417,7 +417,7 @@ void cdfGetAttDouble(int fileID, int ncvarid, char *attname, int attlen, double 
       double *pdoubleatt = NULL;
 
       if ( (int)nc_attlen > attlen )
-        pdoubleatt = (double *) malloc(nc_attlen * sizeof (double));
+        pdoubleatt = (double *) Malloc(nc_attlen * sizeof (double));
       else
         pdoubleatt = attdouble;
 
@@ -426,7 +426,7 @@ void cdfGetAttDouble(int fileID, int ncvarid, char *attname, int attlen, double 
       if ( (int)nc_attlen > attlen )
         {
           memcpy(attdouble, pdoubleatt, (size_t)attlen * sizeof (double));
-          free(pdoubleatt);
+          Free(pdoubleatt);
         }
     }
 }
@@ -470,7 +470,7 @@ void cdfGetAttText(int fileID, int ncvarid,const char *attname, int attlen, char
           if ( ssize > (size_t)attlen ) ssize = (size_t)attlen;
           memcpy(atttext, attbuf, ssize);
           atttext[ssize - 1] = 0;
-          free(attbuf);
+          Free(attbuf);
         }
       else
         {
@@ -577,7 +577,7 @@ resizeBuf(void **buf, size_t *bufSize, size_t reqSize)
 {
   if (reqSize > *bufSize)
     {
-      *buf = realloc(*buf, reqSize);
+      *buf = Realloc(*buf, reqSize);
       *bufSize = reqSize;
     }
   return *buf;
@@ -633,7 +633,7 @@ void defineAttributes(int vlistID, int varID, int fileID, int ncvarID)
             cdf_put_att_double(fileID, ncvarID, attname, NC_DOUBLE, len, attflt);
         }
     }
-  free(attBuf);
+  Free(attBuf);
 }
 
 
@@ -654,7 +654,7 @@ void cdfCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
   cdfReadRecord(streamptr1, data, &nmiss);
   cdf_write_record(streamptr2, memtype, data, nmiss);
 
-  free(data);
+  Free(data);
 }
 
 /* not used
@@ -3816,7 +3816,7 @@ cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarid, int dtype, l
         {
           if ( memtype == MEMTYPE_FLOAT )
             {
-              mdata_sp = (float *) malloc((size_t)nvals*sizeof(float));
+              mdata_sp = (float *) Malloc((size_t)nvals*sizeof(float));
               memcpy(mdata_sp, pdata_sp, (size_t)nvals * sizeof (float));
               pdata_sp = mdata_sp;
 
@@ -3846,7 +3846,7 @@ cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarid, int dtype, l
             }
           else
             {
-              mdata_dp = (double *) malloc((size_t)nvals * sizeof(double));
+              mdata_dp = (double *) Malloc((size_t)nvals * sizeof(double));
               memcpy(mdata_dp, pdata_dp, (size_t)nvals * sizeof(double));
               pdata_dp = mdata_dp;
 
@@ -3879,7 +3879,7 @@ cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarid, int dtype, l
             {
               if ( mdata_sp == NULL )
                 {
-                  mdata_sp = (float *) malloc((size_t)nvals * sizeof(float));
+                  mdata_sp = (float *) Malloc((size_t)nvals * sizeof(float));
                   memcpy(mdata_sp, pdata_sp, (size_t)nvals * sizeof(float));
                   pdata_sp = mdata_sp;
                 }
@@ -3901,7 +3901,7 @@ cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarid, int dtype, l
             {
               if ( mdata_dp == NULL )
                 {
-                  mdata_dp = (double *) malloc((size_t)nvals * sizeof (double));
+                  mdata_dp = (double *) Malloc((size_t)nvals * sizeof (double));
                   memcpy(mdata_dp, pdata_dp, (size_t)nvals * sizeof (double));
                   pdata_dp = mdata_dp;
                 }
@@ -3966,10 +3966,10 @@ cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarid, int dtype, l
   else
     cdf_put_vara_double(fileID, ncvarid, start, count, pdata_dp);
 
-  if ( mdata_dp ) free(mdata_dp);
-  if ( sdata_dp ) free(sdata_dp);
-  if ( mdata_sp ) free(mdata_sp);
-  if ( sdata_sp ) free(sdata_sp);
+  if ( mdata_dp ) Free(mdata_dp);
+  if ( sdata_dp ) Free(sdata_dp);
+  if ( mdata_sp ) Free(mdata_sp);
+  if ( sdata_sp ) Free(sdata_sp);
 }
 
 
@@ -4237,7 +4237,7 @@ void transpose2dArrayDP(size_t inWidth, size_t inHeight, double* data)
         }
     }
 
-  free(temp[0]);
+  Free(temp[0]);
 }
 
 static
@@ -4281,7 +4281,7 @@ void transpose2dArraySP(size_t inWidth, size_t inHeight, float* data)
         }
     }
 
-  free(temp);
+  Free(temp);
 }
 
 static
@@ -4504,7 +4504,7 @@ void cdfReadVarSliceDP(stream_t *streamptr, int varID, int levelID, double *data
       cdf_get_vara_float(fileID, ncvarid, start, count, data_fp);
       for ( size_t i = 0; i < gridsize; i++ )
         data[i] = (double) data_fp[i];
-      free(data_fp);
+      Free(data_fp);
     }
   else if ( vlistInqVarDatatype(vlistID, varID) == DATATYPE_UINT8 )
     {
@@ -4562,7 +4562,7 @@ void cdfReadVarSliceSP(stream_t *streamptr, int varID, int levelID, float *data,
       cdf_get_vara_double(fileID, ncvarid, start, count, data_dp);
       for ( size_t i = 0; i < gridsize; i++ )
         data[i] = (float) data_dp[i];
-      free(data_dp);
+      Free(data_dp);
     }
   else if ( vlistInqVarDatatype(vlistID, varID) == DATATYPE_UINT8 )
     {
@@ -4752,7 +4752,7 @@ void cdfCreateRecords(stream_t *streamptr, int tsID)
 
       streamptr->nrecs += nvrecs;
 
-      destTstep->records    = (record_t *) malloc((size_t)nrecs*sizeof(record_t));
+      destTstep->records    = (record_t *) Malloc((size_t)nrecs*sizeof(record_t));
       destTstep->nrecs      = nvrecs;
       destTstep->nallrecs   = nrecs;
       destTstep->recordSize = nrecs;
@@ -4762,7 +4762,7 @@ void cdfCreateRecords(stream_t *streamptr, int tsID)
 
       if ( nvrecs )
         {
-          destTstep->recIDs = (int *) malloc((size_t)nvrecs * sizeof (int));
+          destTstep->recIDs = (int *) Malloc((size_t)nvrecs * sizeof (int));
           vrecID = 0;
           for ( recID = 0; recID < nrecs; recID++ )
             {
@@ -4782,7 +4782,7 @@ void cdfCreateRecords(stream_t *streamptr, int tsID)
 
       streamptr->nrecs += nvrecs;
 
-      destTstep->records    = (record_t *) malloc((size_t)nrecs*sizeof(record_t));
+      destTstep->records    = (record_t *) Malloc((size_t)nrecs*sizeof(record_t));
       destTstep->nrecs      = nvrecs;
       destTstep->nallrecs   = nrecs;
       destTstep->recordSize = nrecs;
@@ -4790,7 +4790,7 @@ void cdfCreateRecords(stream_t *streamptr, int tsID)
 
       memcpy(destTstep->records, sourceTstep->records, (size_t)nrecs*sizeof(record_t));
 
-      destTstep->recIDs     = (int *) malloc((size_t)nvrecs * sizeof(int));
+      destTstep->recIDs     = (int *) Malloc((size_t)nvrecs * sizeof(int));
 
       memcpy(destTstep->recIDs, streamptr->tsteps[1].recIDs, (size_t)nvrecs*sizeof(int));
     }
@@ -5223,10 +5223,10 @@ int isGaussGrid(size_t ysize, double yinc, const double *yvals)
   if ( IS_EQUAL(yinc, 0) && ysize > 2 ) /* check if gaussian */
     {
       size_t i;
-      yv = (double *) malloc(ysize*sizeof(double));
-      yw = (double *) malloc(ysize*sizeof(double));
+      yv = (double *) Malloc(ysize*sizeof(double));
+      yw = (double *) Malloc(ysize*sizeof(double));
       gaussaw(yv, yw, ysize);
-      free(yw);
+      Free(yw);
       for ( i = 0; i < ysize; i++ )
         yv[i] = asin(yv[i])/M_PI*180.0;
 
@@ -5246,7 +5246,7 @@ int isGaussGrid(size_t ysize, double yinc, const double *yvals)
           if ( i == ysize ) lgauss = TRUE;
         }
 
-      free(yv);
+      Free(yv);
     }
 
   return (lgauss);
@@ -5954,7 +5954,7 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
 	      int temp;
 
 	      if( ncvars[ncvarid].ensdata == NULL )
-		ncvars[ncvarid].ensdata = (ensinfo_t *) malloc( sizeof( ensinfo_t ) );
+		ncvars[ncvarid].ensdata = (ensinfo_t *) Malloc( sizeof( ensinfo_t ) );
 
 	      cdfGetAttInt(ncid, ncvarid, attname, 1, &temp);
 
@@ -6003,7 +6003,7 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
 	}
     }
 
-  for ( i = 0; i < 9; ++i ) if ( checked_vars[i] ) free(checked_vars[i]);
+  for ( i = 0; i < 9; ++i ) if ( checked_vars[i] ) Free(checked_vars[i]);
 }
 
 static
@@ -6531,7 +6531,7 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
                     }
 
 		  if ( ncvars[xvarid].xtype == NC_FLOAT ) grid.prec = DATATYPE_FLT32;
-		  grid.xvals = (double *) malloc(size*sizeof(double));
+		  grid.xvals = (double *) Malloc(size*sizeof(double));
 
 		  if ( ltgrid )
 		    cdf_get_vara_double(ncvars[xvarid].ncid, xvarid, start, count, grid.xvals);
@@ -6608,7 +6608,7 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
                     }
 
 		  if ( ncvars[yvarid].xtype == NC_FLOAT ) grid.prec = DATATYPE_FLT32;
-		  grid.yvals = (double *) malloc(size*sizeof(double));
+		  grid.yvals = (double *) Malloc(size*sizeof(double));
 
 		  if ( ltgrid )
 		    cdf_get_vara_double(ncvars[yvarid].ncid, yvarid, start, count, grid.yvals);
@@ -6695,7 +6695,7 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 			  {
 			    nvertex = ncdims[ncvars[ncvars[xvarid].bounds].dimids[nbdims-1]].len;
 			    grid.nvertex = (int) nvertex;
-			    grid.xbounds = (double *) malloc(nvertex*size*sizeof(double));
+			    grid.xbounds = (double *) Malloc(nvertex*size*sizeof(double));
 			    cdf_get_var_double(ncvars[xvarid].ncid, ncvars[xvarid].bounds, grid.xbounds);
 			  }
 		      }
@@ -6714,7 +6714,7 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 			      Warning("nvertex problem! nvertex x %d, nvertex y %d",
 				      grid.nvertex, (int) nvertex);
 			    */
-			    grid.ybounds = (double *) malloc(nvertex*size*sizeof(double));
+			    grid.ybounds = (double *) Malloc(nvertex*size*sizeof(double));
 			    cdf_get_var_double(ncvars[yvarid].ncid, ncvars[yvarid].bounds, grid.ybounds);
 			  }
 		      }
@@ -6722,7 +6722,7 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 
 		if ( ncvars[ncvarid].cellarea != UNDEFID )
 		  {
-		    grid.area = (double *) malloc(size*sizeof(double));
+		    grid.area = (double *) Malloc(size*sizeof(double));
 		    cdf_get_var_double(ncvars[ncvarid].ncid, ncvars[ncvarid].cellarea, grid.area);
 		  }
 
@@ -7115,8 +7115,8 @@ void define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 		      if ( nlevel == zsize && nvertex == 2 )
 			{
 			  with_bounds = TRUE;
-			  lbounds = (double *) malloc((size_t)nlevel*sizeof(double));
-			  ubounds = (double *) malloc((size_t)nlevel*sizeof(double));
+			  lbounds = (double *) Malloc((size_t)nlevel*sizeof(double));
+			  ubounds = (double *) Malloc((size_t)nlevel*sizeof(double));
 			  double zbounds[2*nlevel];
 			  cdf_get_var_double(ncvars[zvarid].ncid, ncvars[zvarid].bounds, zbounds);
 			  for ( i = 0; i < nlevel; ++i )
@@ -7169,9 +7169,9 @@ void define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
           if ( positive > 0 ) zaxisDefPositive(ncvars[ncvarid].zaxisID, positive);
           if ( is_scalar ) zaxisDefScalar(ncvars[ncvarid].zaxisID);
 
-	  free(zvar);
-	  free(lbounds);
-	  free(ubounds);
+	  Free(zvar);
+	  Free(lbounds);
+	  Free(ubounds);
 
 	  zaxisindex = vlistZaxisIndex(vlistID, ncvars[ncvarid].zaxisID);
 	  streamptr->zaxisID[zaxisindex]  = zdimid;
@@ -7235,7 +7235,7 @@ void define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, 
 	{
 	  varids[varID] = varInfo[varID].ncvarid;
 	}
-      free(varInfo);
+      Free(varInfo);
     }
 
   for ( int varID1 = 0; varID1 < nvars; varID1++ )
@@ -7349,7 +7349,7 @@ void define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, 
           vlistDefVarEnsemble( vlistID, varID, ncvars[ncvarid].ensdata->ens_index,
                                ncvars[ncvarid].ensdata->ens_count,
                                ncvars[ncvarid].ensdata->forecast_init_type );
-          free(ncvars[ncvarid].ensdata);
+          Free(ncvars[ncvarid].ensdata);
           ncvars[ncvarid].ensdata = NULL;
         }
 
@@ -7410,8 +7410,8 @@ void define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, 
 		}
 	    }
 
-	  if (ncvars[ncvarid].vct) free(ncvars[ncvarid].vct);
-	  if (ncvars[ncvarid].atts) free(ncvars[ncvarid].atts);
+	  if (ncvars[ncvarid].vct) Free(ncvars[ncvarid].vct);
+	  if (ncvars[ncvarid].atts) Free(ncvars[ncvarid].atts);
           ncvars[ncvarid].vct = NULL;
           ncvars[ncvarid].atts = NULL;
 	}
@@ -7419,9 +7419,9 @@ void define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, 
 
   /* release mem of not freed attributes */
   for ( int ncvarid = 0; ncvarid < num_ncvars; ncvarid++ )
-    if ( ncvars[ncvarid].atts ) free(ncvars[ncvarid].atts);
+    if ( ncvars[ncvarid].atts ) Free(ncvars[ncvarid].atts);
 
-  if ( varids ) free(varids);
+  if ( varids ) Free(varids);
 
   for ( int varID = 0; varID < nvars; varID++ )
     {
@@ -7778,7 +7778,7 @@ void read_vct_echam(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdims, dou
     {
       size_t vctsize = ncdims[nvcth_id].len;
       vctsize *= 2;
-      *vct = (double *) malloc(vctsize*sizeof(double));
+      *vct = (double *) Malloc(vctsize*sizeof(double));
       cdf_get_var_double(fileID, vcta_id, *vct);
       cdf_get_var_double(fileID, vctb_id, *vct+vctsize/2);
       *pvctsize = vctsize;
@@ -8106,7 +8106,7 @@ int cdfInqContents(stream_t *streamptr)
 
   /* define all zaxes */
   define_all_zaxes(streamptr, vlistID, ncdims, nvars, ncvars, vctsize, vct, uuidOfVGrid);
-  if ( vct ) free(vct);
+  if ( vct ) Free(vct);
 
 
   /* select vars */
@@ -8256,10 +8256,10 @@ int cdfInqContents(stream_t *streamptr)
   cdfCreateRecords(streamptr, 0);
 
   /* free ncdims */
-  free(ncdims);
+  Free(ncdims);
 
   /* free ncvars */
-  free(ncvars);
+  Free(ncvars);
 
   return (0);
 }
@@ -8357,7 +8357,7 @@ int cdfInqTimestep(stream_t * streamptr, int tsID)
 #if defined (USE_TIMECACHE)
               if ( streamptr->basetime.timevar_cache == NULL )
                 {
-                  streamptr->basetime.timevar_cache = (timecache_t *) malloc(MAX_TIMECACHE_SIZE*sizeof(timecache_t));
+                  streamptr->basetime.timevar_cache = (timecache_t *) Malloc(MAX_TIMECACHE_SIZE*sizeof(timecache_t));
                   streamptr->basetime.timevar_cache->size = 0;
                   streamptr->basetime.timevar_cache->maxvals = streamptr->ntsteps;
                 }

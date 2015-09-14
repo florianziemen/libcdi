@@ -120,7 +120,7 @@ iegrec_t *iegNew(void)
 
   if ( ! initIegLib ) iegLibInit();
 
-  iegp = (iegrec_t *) malloc(sizeof(iegrec_t));
+  iegp = (iegrec_t *) Malloc(sizeof(iegrec_t));
 
   iegInit(iegp);
   iegInitMem(iegp);
@@ -133,8 +133,8 @@ void iegDelete(iegrec_t *iegp)
 {
   if ( iegp )
     {
-      if ( iegp->buffer ) free(iegp->buffer);
-      free(iegp);
+      if ( iegp->buffer ) Free(iegp->buffer);
+      Free(iegp);
     }
 }
 
@@ -322,7 +322,7 @@ int iegDefData(iegrec_t *iegp, int prec, const void *data)
     {
       buffersize = blocklen;
       buffer = iegp->buffer;
-      buffer = realloc(buffer, buffersize);
+      buffer = Realloc(buffer, buffersize);
       iegp->buffer = buffer;
       iegp->buffersize = buffersize;
     }
@@ -487,7 +487,7 @@ int iegRead(int fileID, iegrec_t *iegp)
     {
       buffersize = blocklen;
       buffer = iegp->buffer;
-      buffer = realloc(buffer, buffersize);
+      buffer = Realloc(buffer, buffersize);
       iegp->buffer = buffer;
       iegp->buffersize = buffersize;
     }

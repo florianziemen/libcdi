@@ -115,7 +115,7 @@ void vlist_init_entry(vlist_t *vlistptr)
 static
 vlist_t *vlist_new_entry(cdiResH resH)
 {
-  vlist_t *vlistptr = (vlist_t*) malloc(sizeof(vlist_t));
+  vlist_t *vlistptr = (vlist_t*) Malloc(sizeof(vlist_t));
   vlist_init_entry(vlistptr);
   if (resH == CDI_UNDEFID)
     vlistptr->self = reshPut(vlistptr, &vlistOps);
@@ -136,7 +136,7 @@ void vlist_delete_entry(vlist_t *vlistptr)
 
   reshRemove(idx, &vlistOps );
 
-  free(vlistptr);
+  Free(vlistptr);
 
   if ( VLIST_Debug )
     Message("Removed idx %d from vlist list", idx);
@@ -235,20 +235,20 @@ vlist_delete(vlist_t *vlistptr)
 
   for ( int varID = 0; varID < nvars; varID++ )
     {
-      if ( vars[varID].levinfo )  free(vars[varID].levinfo);
-      if ( vars[varID].name )     free(vars[varID].name);
-      if ( vars[varID].longname ) free(vars[varID].longname);
-      if ( vars[varID].stdname )  free(vars[varID].stdname);
-      if ( vars[varID].units )    free(vars[varID].units);
-      if ( vars[varID].ensdata )  free(vars[varID].ensdata);
+      if ( vars[varID].levinfo )  Free(vars[varID].levinfo);
+      if ( vars[varID].name )     Free(vars[varID].name);
+      if ( vars[varID].longname ) Free(vars[varID].longname);
+      if ( vars[varID].stdname )  Free(vars[varID].stdname);
+      if ( vars[varID].units )    Free(vars[varID].units);
+      if ( vars[varID].ensdata )  Free(vars[varID].ensdata);
 
       if ( vlistptr->vars[varID].opt_grib_kvpair )
         {
           for (int i=0; i<vlistptr->vars[varID].opt_grib_nentries; i++) {
             if ( vlistptr->vars[varID].opt_grib_kvpair[i].keyword )
-              free(vlistptr->vars[varID].opt_grib_kvpair[i].keyword);
+              Free(vlistptr->vars[varID].opt_grib_kvpair[i].keyword);
           }
-          free(vlistptr->vars[varID].opt_grib_kvpair);
+          Free(vlistptr->vars[varID].opt_grib_kvpair);
         }
       vlistptr->vars[varID].opt_grib_nentries    = 0;
       vlistptr->vars[varID].opt_grib_kvpair_size = 0;
@@ -257,7 +257,7 @@ vlist_delete(vlist_t *vlistptr)
       vlistDelAtts(vlistID, varID);
     }
 
-  if ( vars ) free(vars);
+  if ( vars ) Free(vars);
 
   vlist_delete_entry(vlistptr);
 }
@@ -458,7 +458,7 @@ int vlist_generate_zaxis(int vlistID, int zaxistype, int nlevels, const double *
                 }
             }
           reshUnlock();
-          free(zaxisIndexList);
+          Free(zaxisIndexList);
         }
     }
 
@@ -613,12 +613,12 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
                           levID2++;
                         }
 
-                    free(lbounds1);
+                    Free(lbounds1);
                   }
 
 		int zaxisID2 = vlist_generate_zaxis(vlistID2, zaxisType, nlevs2, levels, lbounds, ubounds, nvct, vct);
 		free(levels);
-                free(lbounds);
+                Free(lbounds);
 
                 zaxisInqName(zaxisID, ctemp);
                 zaxisDefName(zaxisID2, ctemp);
@@ -833,7 +833,7 @@ void vlistMerge(int vlistID2, int vlistID1)
           for ( int levID = 0; levID < nlevs1; levID++ )
             zaxisDefLevel(zaxisID, nlevs2+levID, levels[levID]);
 
-          free(levels);
+          Free(levels);
 
           for ( int index = 0; index < vlistptr2->nzaxis; index++ )
             if ( vlistptr2->zaxisIDs[index] == zaxisID2 )
@@ -847,7 +847,7 @@ void vlistMerge(int vlistID2, int vlistID1)
               }
         }
 
-      free(lvar);
+      Free(lvar);
     }
   else
     {
@@ -1549,7 +1549,7 @@ void resize_opt_grib_entries(var_t *var, int nentries)
         tmp[i].keyword =  NULL;
       } // for
       var->opt_grib_kvpair_size = new_size;
-      free(var->opt_grib_kvpair);
+      Free(var->opt_grib_kvpair);
       var->opt_grib_kvpair = tmp;
     }
 }

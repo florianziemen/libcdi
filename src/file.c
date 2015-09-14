@@ -35,7 +35,7 @@ char *strdup(const char *s);
 ({                                                \
    const char *__old = (s);                       \
    size_t __len = strlen(__old) + 1;              \
-   char *__new = (char *) malloc(__len);          \
+   char *__new = (char *) Malloc(__len);          \
    (char *) memcpy(__new, __old, __len);          \
 })
 */
@@ -198,7 +198,7 @@ void file_list_delete(void)
 {
   if ( _fileList )
     {
-      free(_fileList);
+      Free(_fileList);
       _fileList = NULL;
     }
 }
@@ -323,7 +323,7 @@ void file_delete_entry(bfile_t *fileptr)
 
   FILE_LOCK();
 
-  free(fileptr);
+  Free(fileptr);
 
   _fileList[idx].next = _fileAvail;
   _fileList[idx].ptr  = 0;
@@ -903,7 +903,7 @@ void file_set_buffer(bfile_t *fileptr)
     {
       if ( buffersize > 0 )
         {
-          fileptr->buffer = (char *) malloc(buffersize);
+          fileptr->buffer = (char *) Malloc(buffersize);
           if ( fileptr->buffer == NULL )
             SysError("Allocation of file buffer failed!");
         }
@@ -1301,8 +1301,8 @@ int fileClose_serial(int fileID)
 	SysError("EOF returned for close of %s!", name);
     }
 
-  if ( fileptr->name )    free((void*) fileptr->name);
-  if ( fileptr->buffer )  free((void*) fileptr->buffer);
+  if ( fileptr->name )    Free((void*) fileptr->name);
+  if ( fileptr->buffer )  Free((void*) fileptr->buffer);
 
   file_delete_entry(fileptr);
 

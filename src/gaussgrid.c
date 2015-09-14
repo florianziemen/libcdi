@@ -2,7 +2,6 @@
 #include "config.h"
 #endif
 
-#include <config.h>
 #include <math.h>
 #include <float.h>
 #include <stdio.h>
@@ -126,8 +125,8 @@ void gauaw(size_t kn, double *__restrict__ pl, double *__restrict__ pw)
 
   double z, zfnn;
 
-  zfn    = (double *) malloc((kn+1) * (kn+1) * sizeof(double));
-  zfnlat = (double *) malloc((kn/2+1+1)*sizeof(double));
+  zfn    = (double *) Malloc((kn+1) * (kn+1) * sizeof(double));
+  zfnlat = (double *) Malloc((kn/2+1+1)*sizeof(double));
 
   zfn[0] = M_SQRT2;
   for (size_t jn = 1; jn <= kn; jn++)
@@ -195,8 +194,8 @@ void gauaw(size_t kn, double *__restrict__ pl, double *__restrict__ pw)
       pw[isym] =  pw[jglm1];
     }
 
-  free(zfnlat);
-  free(zfn);
+  Free(zfnlat);
+  Free(zfn);
 
   return;
 }

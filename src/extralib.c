@@ -125,7 +125,7 @@ void *extNew(void)
 
   if ( ! initExtLib ) extLibInit();
 
-  extp = (extrec_t *) malloc(sizeof(extrec_t));
+  extp = (extrec_t *) Malloc(sizeof(extrec_t));
 
   extInit(extp);
 
@@ -139,8 +139,8 @@ void extDelete(void *ext)
 
   if ( extp )
     {
-      if ( extp->buffer ) free(extp->buffer);
-      free(extp);
+      if ( extp->buffer ) Free(extp->buffer);
+      Free(extp);
     }
 }
 
@@ -345,7 +345,7 @@ int extDefData(void *ext, int prec, const void *data)
     {
       buffersize = blocklen;
       buffer = extp->buffer;
-      buffer = realloc(buffer, buffersize);
+      buffer = Realloc(buffer, buffersize);
       extp->buffer = buffer;
       extp->buffersize = buffersize;
     }
@@ -476,7 +476,7 @@ int extRead(int fileID, void *ext)
     {
       buffersize = blocklen;
       buffer = extp->buffer;
-      buffer = realloc(buffer, buffersize);
+      buffer = Realloc(buffer, buffersize);
       extp->buffer = buffer;
       extp->buffersize = buffersize;
     }

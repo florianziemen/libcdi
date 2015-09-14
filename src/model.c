@@ -67,7 +67,7 @@ modelNewEntry(cdiResH resH, int instID, int modelgribID, const char *name)
 {
   model_t *modelptr;
 
-  modelptr = (model_t *) malloc(sizeof(model_t));
+  modelptr = (model_t *) Malloc(sizeof(model_t));
   modelDefaultValue ( modelptr );
   if (resH == CDI_UNDEFID)
     modelptr->self = reshPut(modelptr, &modelOps);
@@ -261,8 +261,8 @@ void modelDestroyP ( void * modelptr )
 {
   model_t *mp = (model_t*) modelptr;
   if (mp->name)
-    free(mp->name);
-  free(mp);
+    Free(mp->name);
+  Free(mp);
 }
 
 
@@ -339,7 +339,7 @@ modelUnpack(void *buf, int size, int *position, int originNamespace, void *conte
                               namespaceAdaptKey(tempbuf[1], originNamespace),
                               tempbuf[2], name);
   if (tempbuf[3] != 0)
-    free(name);
+    Free(name);
   xassert(!force_id
           || (mp->self == namespaceAdaptKey(tempbuf[0], originNamespace)));
   return mp->self;

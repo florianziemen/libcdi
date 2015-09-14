@@ -66,11 +66,11 @@ static CdiGribIterator *cdiGribIterator_condestruct(CdiGribIterator *me, const c
 destruct:
   if(me->super.gridId != CDI_UNDEFID) gridDestroy(me->super.gridId);
   if(me->gribHandle) grib_handle_delete((struct grib_handle *)me->gribHandle);
-  free(me->gribBuffer);
+  Free(me->gribBuffer);
   cdiRefObject_release(&me->file->super);
 destructSuper:
   baseIterDestruct(super());
-  free(me);
+  Free(me);
   me = NULL;
 
 success:
@@ -128,9 +128,9 @@ CdiGribIterator *cdiGribIterator_makeClone(CdiIterator *super)
 deleteGribHandle:
   if(result->gribHandle) grib_handle_delete(result->gribHandle);
 freeBuffer:
-  free(result->gribBuffer);
+  Free(result->gribBuffer);
 freeResult:
-  free(result);
+  Free(result);
 fail:
   return NULL;
 }
@@ -143,7 +143,7 @@ char *cdiGribIterator_serialize(CdiIterator *super)
   char* escapedPath = cdiEscapeSpaces(path);
   char* result = (char *)malloc(strlen(escapedPath) + 3 * sizeof(int) * CHAR_BIT/8);
   sprintf(result, "%s %zu", escapedPath, me->fileOffset);
-  free(escapedPath);
+  Free(escapedPath);
   return result;
 }
 
@@ -161,7 +161,7 @@ CdiGribIterator *cdiGribIterator_deserialize(const char *description)
   if(!path) goto destructSuper;
 
   me->file = cdiInputFile_make(path);
-  free(path);
+  Free(path);
   if(!me->file) goto destructSuper;
 
   {
@@ -185,7 +185,7 @@ closeFile:
   cdiRefObject_release(&me->file->super);
 destructSuper:
   baseIterDestruct(&me->super);
-  free(me);
+  Free(me);
 fail:
   return NULL;
 }
@@ -552,7 +552,7 @@ void cdiGribIterator_readFieldF(CdiIterator *super, float *buffer, size_t *nmiss
   double* temp = (double *)malloc(valueCount*sizeof(*temp));
   cdiGribIterator_readField(super, temp, nmiss);
   for(size_t i = valueCount; i--; ) buffer[i] = (float)temp[i];
-  free(temp);
+  Free(temp);
 }
 #endif
 

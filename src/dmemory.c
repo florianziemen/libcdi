@@ -17,15 +17,7 @@
 #  include <malloc.h>
 #endif
 
-//There is no point in avoiding to include our own header, it is likely to be included before this file in the backed cdilib.c.
-//As such, we may as well always include it and let the compiler check our function signatures.
 #include "dmemory.h"
-
-//However, we need to avoid clobbering our own `malloc()` calls, so we ensure that our own malloc calls cannot be interpreted as macro calls.
-#define protected_malloc (malloc)
-#define protected_calloc (calloc)
-#define protected_realloc (realloc)
-#define protected_free (free)
 
 enum             {MALLOC_FUNC=0, CALLOC_FUNC, REALLOC_FUNC, FREE_FUNC};
 static const char *memfunc[] = {"Malloc", "Calloc", "Realloc", "Free"};
@@ -35,7 +27,7 @@ static const char *memfunc[] = {"Malloc", "Calloc", "Realloc", "Free"};
 
 #define  MEM_MAXNAME  32   /* Min = 8, for  "unknown" ! */
 
-int dmemory_ExitOnError = 0;
+int dmemory_ExitOnError = 1;
 
 typedef struct
 {
@@ -46,7 +38,7 @@ typedef struct
   int       mtype;
   int       line;
   char      file[MEM_MAXNAME];
-  char      caller[MEM_MAXNAME];
+  char      functionname[MEM_MAXNAME];
 }
 MemTable_t;
 
@@ -68,14 +60,14 @@ void memDebug(int debug)
 }
 
 static
-void memInternalProblem(const char *caller, const char *fmt, ...)
+void memInternalProblem(const char *functionname, const char *fmt, ...)
 {
   va_list args;
 
   va_start(args, fmt);
 
   printf("\n");
-   fprintf(stderr, "Internal problem (%s) : ", caller);
+   fprintf(stderr, "Internal problem (%s) : ", functionname);
   vfprintf(stderr, fmt, args);
    fprintf(stderr, "\n");
 
@@ -85,11 +77,11 @@ void memInternalProblem(const char *caller, const char *fmt, ...)
 }
 
 static
-void memError(const char *caller, const char *file, int line, size_t size)
+void memError(const char *functionname, const char *file, int line, size_t size)
 {
   printf("\n");
   fprintf(stderr, "Error (%s) : Allocation of %zu bytes failed. [ line %d file %s ]\n",
-	  caller, size, line, file);
+	  functionname, size, line, file);
 
   if ( errno ) perror("System error message ");
 
@@ -98,7 +90,7 @@ void memError(const char *caller, const char *file, int line, size_t size)
 
 static
 void memListPrintEntry(int mtype, int item, size_t size, void *ptr,
-		       const char *caller, const char *file, int line)
+		       const char *functionname, const char *file, int line)
 {
   fprintf(stderr, "[%-7s ", memfunc[mtype]);
 
@@ -110,8 +102,8 @@ void memListPrintEntry(int mtype, int item, size_t size, void *ptr,
       fprintf(stderr, " line %4d", line);
       fprintf(stderr, " file %s", file);
     }
-  if ( caller != NULL )
-    fprintf(stderr, " (%s)", caller);
+  if ( functionname != NULL )
+    fprintf(stderr, " (%s)", functionname);
   fprintf(stderr, "]\n");
 }
 
@@ -125,7 +117,7 @@ void memListPrintTable(void)
       if ( memTable[memID].item != MEM_UNDEFID )
         memListPrintEntry(memTable[memID].mtype, memTable[memID].item,
                           memTable[memID].size*memTable[memID].nobj,
-                          memTable[memID].ptr, memTable[memID].caller,
+                          memTable[memID].ptr, memTable[memID].functionname,
                           memTable[memID].file, memTable[memID].line);
     }
 
@@ -169,7 +161,6 @@ void memGetDebugLevel(void)
   if ( envstr && isdigit((int) envstr[0]) ) MEM_Info = atoi(envstr);
 
   envstr = getenv("MEMORY_DEBUG");
-
   if ( envstr && isdigit((int) envstr[0]) ) MEM_Debug = atoi(envstr);
 
   if ( MEM_Debug && !MEM_Info ) MEM_Info = 1;
@@ -229,7 +220,7 @@ void memTableInitEntry(size_t memID)
 
 static
 int memListNewEntry(int mtype, void *ptr, size_t size, size_t nobj,
-		    const char *caller, const char *file, int line)
+		    const char *functionname, const char *file, int line)
 {
   static int item = 0;
   size_t memSize = 0;
@@ -243,7 +234,7 @@ int memListNewEntry(int mtype, void *ptr, size_t size, size_t nobj,
     {
       memTableSize = 8;
       memSize  = memTableSize * sizeof(MemTable_t);
-      memTable = (MemTable_t *) protected_malloc(memSize);
+      memTable = (MemTable_t *) malloc(memSize);
       if( memTable == NULL ) memError(__func__, __FILE__, __LINE__, memSize);
 
       for ( size_t i = 0; i < memTableSize; i++ )
@@ -264,7 +255,7 @@ int memListNewEntry(int mtype, void *ptr, size_t size, size_t nobj,
     {
       memTableSize = 2*memTableSize;
       memSize  = memTableSize*sizeof(MemTable_t);
-      memTable = (MemTable_t*) protected_realloc(memTable, memSize);
+      memTable = (MemTable_t*) realloc(memTable, memSize);
       if ( memTable == NULL ) memError(__func__, __FILE__, __LINE__, memSize);
 
       for ( size_t i = memID; i < memTableSize; i++ )
@@ -291,17 +282,17 @@ int memListNewEntry(int mtype, void *ptr, size_t size, size_t nobj,
       (void) strcpy(memTable[memID].file, "unknown");
     }
 
-  if ( caller )
+  if ( functionname )
     {
-      size_t len = strlen(caller);
+      size_t len = strlen(functionname);
       if ( len > MEM_MAXNAME-1 ) len = MEM_MAXNAME-1;
 
-      (void) memcpy(memTable[memID].caller, caller, len);
-      memTable[memID].caller[len] = '\0';
+      (void) memcpy(memTable[memID].functionname, functionname, len);
+      memTable[memID].functionname[len] = '\0';
     }
   else
     {
-      (void) strcpy(memTable[memID].caller, "unknown");
+      (void) strcpy(memTable[memID].functionname, "unknown");
     }
 
   MaxMemObjs++;
@@ -314,11 +305,10 @@ int memListNewEntry(int mtype, void *ptr, size_t size, size_t nobj,
 
 static
 int memListChangeEntry(void *ptrold, void *ptr, size_t size,
-		       const char *caller, const char *file, int line)
+		       const char *functionname, const char *file, int line)
 {
   int item = MEM_UNDEFID;
   size_t memID = 0;
-  size_t sizeold;
 
   while( memID < memTableSize )
     {
@@ -336,7 +326,7 @@ int memListChangeEntry(void *ptrold, void *ptr, size_t size,
     {
       item = memTable[memID].item;
 
-      sizeold = memTable[memID].size*memTable[memID].nobj;
+      size_t sizeold = memTable[memID].size*memTable[memID].nobj;
 
       memTable[memID].ptr   = ptr;
       memTable[memID].size  = size;
@@ -357,17 +347,17 @@ int memListChangeEntry(void *ptrold, void *ptr, size_t size,
 	  (void) strcpy(memTable[memID].file, "unknown");
 	}
 
-      if ( caller )
+      if ( functionname )
 	{
-	  size_t len = strlen(caller);
+	  size_t len = strlen(functionname);
 	  if ( len > MEM_MAXNAME-1 ) len = MEM_MAXNAME-1;
 
-	  (void) memcpy(memTable[memID].caller, caller, len);
-	  memTable[memID].caller[len] = '\0';
+	  (void) memcpy(memTable[memID].functionname, functionname, len);
+	  memTable[memID].functionname[len] = '\0';
 	}
       else
 	{
-	  (void) strcpy(memTable[memID].caller, "unknown");
+	  (void) strcpy(memTable[memID].functionname, "unknown");
 	}
 
       MemUsed -= sizeold;
@@ -379,153 +369,157 @@ int memListChangeEntry(void *ptrold, void *ptr, size_t size,
 }
 
 
-void *Calloc(const char *caller, const char *file, int line, size_t nobjs, size_t size)
+void *memCalloc(size_t nobjs, size_t size, const char *file, const char *functionname, int line)
 {
   void *ptr = NULL;
-  int item = MEM_UNDEFID;
 
   memInit();
 
   if ( nobjs*size > 0 )
     {
-      ptr = protected_calloc(nobjs, size);
+      ptr = calloc(nobjs, size);
 
       if ( MEM_Info )
 	{
 	  memAccess++;
 
-	  if ( ptr ) item = memListNewEntry(CALLOC_FUNC, ptr, size, nobjs, caller, file, line);
+          int item = MEM_UNDEFID;
+	  if ( ptr ) item = memListNewEntry(CALLOC_FUNC, ptr, size, nobjs, functionname, file, line);
 
-	  if ( MEM_Debug ) memListPrintEntry(CALLOC_FUNC, item, size*nobjs, ptr, caller, file, line);
+	  if ( MEM_Debug ) memListPrintEntry(CALLOC_FUNC, item, size*nobjs, ptr, functionname, file, line);
 	}
 
       if ( ptr == NULL && dmemory_ExitOnError )
-	memError(caller, file, line, size*nobjs);
+	memError(functionname, file, line, size*nobjs);
     }
   else
-    fprintf(stderr, "Warning (%s) : Allocation of 0 bytes! [ line %d file %s ]\n", caller, line, file);
-
-  return(ptr);
-}
-
-
-void *Malloc(const char *caller, const char *file, int line, size_t size)
-{
-  void *ptr = NULL;
-  int item = MEM_UNDEFID;
-
-  memInit();
-
-  if ( size > 0 )
-    {
-      ptr = protected_malloc(size);
-
-      if ( MEM_Info )
-	{
-	  memAccess++;
-
-	  if ( ptr ) item = memListNewEntry(MALLOC_FUNC, ptr, size, 1, caller, file, line);
-
-	  if ( MEM_Debug ) memListPrintEntry(MALLOC_FUNC, item, size, ptr, caller, file, line);
-	}
-
-      if ( ptr == NULL && dmemory_ExitOnError )
-	memError(caller, file, line, size);
-    }
-  else
-    fprintf(stderr, "Warning (%s) : Allocation of 0 bytes! [ line %d file %s ]\n", caller, line, file);
+    fprintf(stderr, "Warning (%s) : Allocation of 0 bytes! [ line %d file %s ]\n", functionname, line, file);
 
   return ptr;
 }
 
 
-void *Realloc(const char *caller, const char *file, int line, void *ptrold, size_t size)
+void *memMalloc(size_t size, const char *file, const char *functionname, int line)
 {
   void *ptr = NULL;
-  int item = MEM_UNDEFID;
 
   memInit();
 
   if ( size > 0 )
     {
-      ptr = protected_realloc(ptrold, size);
+      ptr = malloc(size);
 
       if ( MEM_Info )
 	{
 	  memAccess++;
 
-	  if ( ptr )
-	    {
-	      item = memListChangeEntry(ptrold, ptr, size, caller, file, line);
+          int item = MEM_UNDEFID;
+	  if ( ptr ) item = memListNewEntry(MALLOC_FUNC, ptr, size, 1, functionname, file, line);
 
-	      if ( item == MEM_UNDEFID ) item = memListNewEntry(REALLOC_FUNC, ptr, size, 1, caller, file, line);
-	    }
-
-	  if ( MEM_Debug ) memListPrintEntry(REALLOC_FUNC, item, size, ptr, caller, file, line);
+	  if ( MEM_Debug ) memListPrintEntry(MALLOC_FUNC, item, size, ptr, functionname, file, line);
 	}
 
       if ( ptr == NULL && dmemory_ExitOnError )
-	memError(caller, file, line, size);
+	memError(functionname, file, line, size);
     }
   else
-    fprintf(stderr, "Warning (%s) : Allocation of 0 bytes! [ line %d file %s ]\n", caller, line, file);
+    fprintf(stderr, "Warning (%s) : Allocation of 0 bytes! [ line %d file %s ]\n", functionname, line, file);
 
-  return (ptr);
+  return ptr;
 }
 
 
-void Free(const char *caller, const char *file, int line, void *ptr)
+void *memRealloc(void *ptrold, size_t size, const char *file, const char *functionname, int line)
 {
-  int item;
-  size_t size;
+  void *ptr = NULL;
 
+  memInit();
+
+  if ( size > 0 )
+    {
+      ptr = realloc(ptrold, size);
+
+      if ( MEM_Info )
+	{
+	  memAccess++;
+
+          int item = MEM_UNDEFID;
+	  if ( ptr )
+	    {
+	      item = memListChangeEntry(ptrold, ptr, size, functionname, file, line);
+
+	      if ( item == MEM_UNDEFID ) item = memListNewEntry(REALLOC_FUNC, ptr, size, 1, functionname, file, line);
+	    }
+
+	  if ( MEM_Debug ) memListPrintEntry(REALLOC_FUNC, item, size, ptr, functionname, file, line);
+	}
+
+      if ( ptr == NULL && dmemory_ExitOnError )
+	memError(functionname, file, line, size);
+    }
+  else
+    fprintf(stderr, "Warning (%s) : Allocation of 0 bytes! [ line %d file %s ]\n", functionname, line, file);
+
+  return ptr;
+}
+
+
+void memFree(void *ptr, const char *file, const char *functionname, int line)
+{
   memInit();
 
   if ( MEM_Info )
     {
+      int item;
+      size_t size;
+
       if ( (item = memListDeleteEntry(ptr, &size)) >= 0 )
 	{
-	  if ( MEM_Debug ) memListPrintEntry(FREE_FUNC, item, size, ptr, caller, file, line);
+	  if ( MEM_Debug ) memListPrintEntry(FREE_FUNC, item, size, ptr, functionname, file, line);
 	}
       else
 	{
 	  if ( ptr && MEM_Debug  )
 	    fprintf(stderr, "%s info: memory entry at %p not found. [line %4d file %s (%s)]\n",
-		    __func__, ptr, line, file, caller);
+		    __func__, ptr, line, file, functionname);
 	}
     }
 
-  protected_free(ptr);
+  free(ptr);
 }
+
 
 #include "error.h" // cdiAbort()
 
 void *cdiXmalloc(size_t size, const char *filename, const char *functionname,
                  int line)
 {
-  void *value = protected_malloc(size);
+  void *value = malloc(size);
   if (size == 0 || value != NULL) ; else
     cdiAbort(filename, functionname, line, "malloc failed: %s", strerror(errno));
   return value;
 }
 
+
 void *cdiXcalloc(size_t nmemb, size_t size, const char *filename,
                  const char *functionname, int line)
 {
-  void *value = protected_calloc(nmemb, size);
+  void *value = calloc(nmemb, size);
   if (size == 0 || value != NULL) ; else
     cdiAbort(filename, functionname, line, "calloc failed: %s", strerror(errno));
   return value;
 }
 
+
 void *cdiXrealloc(void *p, size_t size, const char *functionname,
                   const char *filename, int line)
 {
-  void *value = protected_realloc(p, size);
+  void *value = realloc(p, size);
   if (size == 0 || value != NULL) ; else
     cdiAbort(filename, functionname, line, "realloc failed: %s", strerror(errno));
   return value;
 }
+
 
 size_t memTotal(void)
 {

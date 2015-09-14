@@ -31,7 +31,7 @@ listSet *listSetNew( valDestroyFunction vD, eqPredicate kC )
 {
   listSet *myq;
 
-  myq = (listSet*) malloc( sizeof ( listSet ));
+  myq = (listSet*) Malloc( sizeof ( listSet ));
 
   myq->head = NULL;
   myq->tail = NULL;
@@ -78,7 +78,7 @@ listSetAdd(listSet *q, void *v)
         return -1;
   }
 
-  if ((newCons = (struct cons*) malloc(sizeof(struct cons))) == NULL)
+  if ((newCons = (struct cons*) Malloc(sizeof(struct cons))) == NULL)
     {
       perror ( "pio_listSet: listSetAdd (): Not enough memory" );
       /* FIXME: why not abort? */
@@ -112,7 +112,7 @@ listSetRemove(listSet *q, int (*predicate)(void *, void *),
         if (rem == q->tail) q->tail = NULL;
         int iret = q->valDestroy(rem->val);
         *p = rem->next;
-        free(rem);
+        Free(rem);
         return iret;
       }
   return -1;

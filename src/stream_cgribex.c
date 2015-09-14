@@ -666,7 +666,7 @@ int cgribexScanTimestep1(stream_t * streamptr)
 	  if ( buffersize < (size_t)unzipsize )
 	    {
 	      buffersize = (size_t)unzipsize;
-	      gribbuffer = (unsigned char *) realloc(gribbuffer, buffersize);
+	      gribbuffer = (unsigned char *) Realloc(gribbuffer, buffersize);
 	    }
 	}
 
@@ -786,10 +786,10 @@ int cgribexScanTimestep1(stream_t * streamptr)
     {
       streamptr->tsteps[0].recordSize = (int)nrecords;
       streamptr->tsteps[0].records =
-      (record_t *) realloc(streamptr->tsteps[0].records, nrecords*sizeof(record_t));
+      (record_t *) Realloc(streamptr->tsteps[0].records, nrecords*sizeof(record_t));
     }
 
-  streamptr->tsteps[0].recIDs = (int *) malloc(nrecords*sizeof(int));
+  streamptr->tsteps[0].recIDs = (int *) Malloc(nrecords*sizeof(int));
   streamptr->tsteps[0].nrecs = (int)nrecords;
   for ( recID = 0; recID < nrecords; recID++ )
     streamptr->tsteps[0].recIDs[recID] = (int)recID;
@@ -898,7 +898,7 @@ int cgribexScanTimestep2(stream_t * streamptr)
 	  if ( buffersize < (size_t)unzipsize )
 	    {
 	      buffersize = (size_t)unzipsize;
-	      gribbuffer = (unsigned char *) realloc(gribbuffer, buffersize);
+	      gribbuffer = (unsigned char *) Realloc(gribbuffer, buffersize);
 	    }
 	}
 
@@ -1131,7 +1131,7 @@ int cgribexScanTimestep(stream_t * streamptr)
 	  if ( recsize > 0 && (size_t)recsize > buffersize )
 	    {
 	      buffersize = (size_t)recsize;
-	      gribbuffer = (unsigned char *) realloc(gribbuffer, buffersize);
+	      gribbuffer = (unsigned char *) Realloc(gribbuffer, buffersize);
 	    }
 
 	  if ( rindex >= nrecs ) break;
@@ -1151,7 +1151,7 @@ int cgribexScanTimestep(stream_t * streamptr)
 	      if ( buffersize < (size_t)unzipsize )
 		{
 		  buffersize = (size_t)unzipsize;
-		  gribbuffer = (unsigned char *) realloc(gribbuffer, buffersize);
+		  gribbuffer = (unsigned char *) Realloc(gribbuffer, buffersize);
 		}
 	    }
 

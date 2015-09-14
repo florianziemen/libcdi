@@ -96,7 +96,7 @@ void reshUnpackResources(char * unpackBuffer, int unpackBufferSize,
                           namespaceAdaptKey(associations[i].vlistIDorig,
                                             originNamespace));
     }
-  free(associations);
+  Free(associations);
 }
 
 /*

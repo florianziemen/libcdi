@@ -130,7 +130,7 @@ srvrec_t *srvNew(void)
 
   if ( ! initSrvLib ) srvLibInit();
 
-  srvp = (srvrec_t *) malloc(sizeof(srvrec_t));
+  srvp = (srvrec_t *) Malloc(sizeof(srvrec_t));
 
   srvInit(srvp);
 
@@ -142,8 +142,8 @@ void srvDelete(srvrec_t *srvp)
 {
   if ( srvp )
     {
-      if ( srvp->buffer ) free(srvp->buffer);
-      free(srvp);
+      if ( srvp->buffer ) Free(srvp->buffer);
+      Free(srvp);
     }
 }
 
@@ -359,7 +359,7 @@ int srvDefData(srvrec_t *srvp, int prec, const void *data)
     {
       buffersize = blocklen;
       buffer = srvp->buffer;
-      buffer = realloc(buffer, buffersize);
+      buffer = Realloc(buffer, buffersize);
       srvp->buffer = buffer;
       srvp->buffersize = buffersize;
     }
@@ -490,7 +490,7 @@ int srvRead(int fileID, srvrec_t *srvp)
     {
       buffersize = blocklen;
       buffer = srvp->buffer;
-      buffer = realloc(buffer, buffersize);
+      buffer = Realloc(buffer, buffersize);
       srvp->buffer = buffer;
       srvp->buffersize = buffersize;
     }

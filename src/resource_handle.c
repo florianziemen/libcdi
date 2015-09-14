@@ -179,7 +179,7 @@ reshListDestruct(int namespaceID)
           if (listElem->status & RESH_IN_USE_BIT)
             listElem->res.v.ops->valDestroy(listElem->res.v.val);
         }
-      free(resHList[namespaceID].resources);
+      Free(resHList[namespaceID].resources);
       resHList[namespaceID].resources = NULL;
       reshListClearEntry(namespaceID);
     }
@@ -196,7 +196,7 @@ static void listDestroy ( void )
     if (resHList[i-1].resources)
       namespaceDelete(i-1);
   resHListSize = 0;
-  free(resHList);
+  Free(resHList);
   resHList = NULL;
   cdiReset();
   LIST_UNLOCK();
@@ -235,7 +235,7 @@ void listSizeExtend()
   int oldSize = resHList[nsp].size;
   size_t newListSize = (size_t)oldSize + MIN_LIST_SIZE;
 
-  resHList[nsp].resources = (listElem_t*) realloc(resHList[nsp].resources,
+  resHList[nsp].resources = (listElem_t*) Realloc(resHList[nsp].resources,
                                                    newListSize * sizeof(listElem_t));
 
   listElem_t *r = resHList[nsp].resources;

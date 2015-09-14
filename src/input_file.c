@@ -39,7 +39,7 @@ static CdiInputFile* cdiInputFile_condestruct(CdiInputFile* me, const char* path
 destruct:
   close(me->fileDescriptor);
 freePath:
-  free(me->path);
+  Free(me->path);
 destructSuper:
   cdiRefObject_destruct(super());
   me = NULL;
@@ -77,7 +77,7 @@ CdiInputFile* cdiInputFile_make(const char* path)
           if(!cdiInputFile_condestruct(result, path))
             {
               //An error occured during construction, avoid a memory leak.
-              free(result);
+              Free(result);
               result = NULL;
             }
           else

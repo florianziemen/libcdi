@@ -180,24 +180,24 @@ void varFree(void)
       if ( vartable[varID].recordTable )
         {
           for (int isub=0; isub<vartable[varID].nsubtypes_alloc; isub++)
-            free(vartable[varID].recordTable[isub].levelTable);
-          free(vartable[varID].recordTable);
+            Free(vartable[varID].recordTable[isub].levelTable);
+          Free(vartable[varID].recordTable);
         }
 
-      if ( vartable[varID].name )     free(vartable[varID].name);
-      if ( vartable[varID].stdname )  free(vartable[varID].stdname);
-      if ( vartable[varID].longname ) free(vartable[varID].longname);
-      if ( vartable[varID].units )    free(vartable[varID].units);
-      if ( vartable[varID].ensdata )  free(vartable[varID].ensdata);
+      if ( vartable[varID].name )     Free(vartable[varID].name);
+      if ( vartable[varID].stdname )  Free(vartable[varID].stdname);
+      if ( vartable[varID].longname ) Free(vartable[varID].longname);
+      if ( vartable[varID].units )    Free(vartable[varID].units);
+      if ( vartable[varID].ensdata )  Free(vartable[varID].ensdata);
       if ( vartable[varID].tiles )    subtypeDestroyPtr(vartable[varID].tiles);
 
       if ( vartable[varID].opt_grib_kvpair )
         {
           for (int i=0; i<vartable[varID].opt_grib_nentries; i++) {
             if ( vartable[varID].opt_grib_kvpair[i].keyword )
-              free(vartable[varID].opt_grib_kvpair[i].keyword);
+              Free(vartable[varID].opt_grib_kvpair[i].keyword);
           }
-          free(vartable[varID].opt_grib_kvpair);
+          Free(vartable[varID].opt_grib_kvpair);
         }
       vartable[varID].opt_grib_nentries    = 0;
       vartable[varID].opt_grib_kvpair_size = 0;
@@ -205,14 +205,14 @@ void varFree(void)
     }
 
   if ( vartable )
-    free(vartable);
+    Free(vartable);
 
   vartable = NULL;
   varTablesize = 0;
   nvars = 0;
 
   if ( Vct )
-    free(Vct);
+    Free(Vct);
 
   Vct = NULL;
   Vctsize = 0;
@@ -644,7 +644,7 @@ void cdi_generate_vars(stream_t *streamptr)
 	{
 	  varids[varID] = varInfo[varID].varid;
 	}
-      free(varInfo);
+      Free(varInfo);
     }
 
   for ( unsigned index = 0; index < nvars; index++ )
@@ -708,7 +708,7 @@ void cdi_generate_vars(stream_t *streamptr)
 	   levelTable[0].level1 == 0 )
 	zaxistype = ZAXIS_SURFACE;
 
-      dlevels = (double *) malloc(nlevels*sizeof(double));
+      dlevels = (double *) Malloc(nlevels*sizeof(double));
 
       if ( lbounds && zaxistype != ZAXIS_HYBRID && zaxistype != ZAXIS_HYBRID_HALF )
 	for (unsigned levelID = 0; levelID < nlevels; levelID++ )
@@ -765,10 +765,10 @@ void cdi_generate_vars(stream_t *streamptr)
 
       if ( lbounds )
 	{
-	  dlevels1 = (double *) malloc(nlevels*sizeof(double));
+	  dlevels1 = (double *) Malloc(nlevels*sizeof(double));
 	  for (unsigned levelID = 0; levelID < nlevels; levelID++)
 	    dlevels1[levelID] = level_sf*levelTable[levelID].level1;
-	  dlevels2 = (double *) malloc(nlevels*sizeof(double));
+	  dlevels2 = (double *) Malloc(nlevels*sizeof(double));
 	  for (unsigned levelID = 0; levelID < nlevels; levelID++)
 	    dlevels2[levelID] = level_sf*levelTable[levelID].level2;
         }
@@ -789,9 +789,9 @@ void cdi_generate_vars(stream_t *streamptr)
           if ( !cdiUUIDIsNull(uuidVGrid) ) zaxisDefUUID(zaxisID, uuidVGrid);
         }
 
-      if ( lbounds ) free(dlevels1);
-      if ( lbounds ) free(dlevels2);
-      free(dlevels);
+      if ( lbounds ) Free(dlevels1);
+      if ( lbounds ) Free(dlevels2);
+      Free(dlevels);
 
       /* define new subtype for tile set */
       int tilesetID = CDI_UNDEFID;
@@ -911,7 +911,7 @@ void cdi_generate_vars(stream_t *streamptr)
         }
     }
 
-  free(varids);
+  Free(varids);
 
   varFree();
 }
@@ -922,7 +922,7 @@ void varDefVCT(size_t vctsize, double *vctptr)
   if ( Vct == NULL && vctptr != NULL && vctsize > 0 )
     {
       Vctsize = vctsize;
-      Vct = (double *) malloc(vctsize*sizeof(double));
+      Vct = (double *) Malloc(vctsize*sizeof(double));
       memcpy(Vct, vctptr, vctsize*sizeof(double));
     }
 }
@@ -1220,7 +1220,7 @@ void resize_vartable_opt_grib_entries(vartable_t *var, int nentries)
         tmp[i].keyword =  NULL;
       } // for
       var->opt_grib_kvpair_size = new_size;
-      free(var->opt_grib_kvpair);
+      Free(var->opt_grib_kvpair);
       var->opt_grib_kvpair = tmp;
     }
 }

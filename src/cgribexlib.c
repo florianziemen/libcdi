@@ -1200,7 +1200,7 @@ int main(void)
 
   {
     float fmin, fmax;
-    float *data_sp = (float*) malloc(datasize*sizeof(float));
+    float *data_sp = (float*) Malloc(datasize*sizeof(float));
 
     for ( long i = 0; i < datasize/2; i++ )        data_sp[i] = (float) (i);
     for ( long i = datasize/2; i < datasize; i++ ) data_sp[i] = (float) (-datasize + i);
@@ -1215,12 +1215,12 @@ int main(void)
       }
     t_end = dtime();
     printf("minmax_val: fmin: %ld  fmax: %ld  time: %6.2fs\n", (long)fmin, (long) fmax, t_end-t_begin);
-    free(data_sp);
+    Free(data_sp);
   }
 
   {
     double fmin, fmax;
-    double *data_dp = (double*) malloc(datasize*sizeof(double));
+    double *data_dp = (double*) Malloc(datasize*sizeof(double));
 
     // for ( long i = datasize-1; i >= 0; i-- ) data[i] = (double) (-datasize/2 + i);
     for ( long i = 0; i < datasize/2; i++ )        data_dp[i] = (double) (i);
@@ -1286,7 +1286,7 @@ int main(void)
     t_end = dtime();
     printf("pwr6u6  : fmin: %ld  fmax: %ld  time: %6.2fs\n", (long)fmin, (long) fmax, t_end-t_begin);
 #endif
-    free(data_dp);
+    Free(data_dp);
   }
 
   return (0);
@@ -1680,9 +1680,9 @@ int main(void)
   double t_begin, t_end;
   unsigned char *lgrib;
 
-  dataf = (float*) malloc(datasize*sizeof(float));
-  data  = (double*) malloc(datasize*sizeof(double));
-  lgrib = (unsigned char*) malloc(2*datasize*sizeof(unsigned char));
+  dataf = (float*) Malloc(datasize*sizeof(float));
+  data  = (double*) Malloc(datasize*sizeof(double));
+  lgrib = (unsigned char*) Malloc(2*datasize*sizeof(unsigned char));
 
   for ( long i = 0; i < datasize; ++i ) dataf[i] = (float) (-datasize/2 + i);
   for ( long i = 0; i < datasize; ++i ) data[i] = (double) (-datasize/2 + i);
@@ -2653,7 +2653,7 @@ gribExSP_old(int *isec0, int *isec1, int *isec2, float *fsec2sp, int *isec3,
       fsec3dp[1] = fsec3sp[1];
 
       inum = isec4[0];
-      fsec4dp = (double*) malloc(inum*sizeof(double));
+      fsec4dp = (double*) Malloc(inum*sizeof(double));
       if ( fsec4dp == NULL ) SysError("No Memory!");
 
       for ( j = 0; j < inum; j++ ) fsec4dp[j] = fsec4sp[j];
@@ -2662,13 +2662,13 @@ gribExSP_old(int *isec0, int *isec1, int *isec2, float *fsec2sp, int *isec3,
 	       fsec3dp, isec4, fsec4dp, klenp, kgrib,
 	       kleng, kword, hoper, kret);
 
-      free(fsec4dp);
+      Free(fsec4dp);
     }
   else if ( yfunc == 'D' || yfunc == 'J' || yfunc == 'R' )
     {
       if ( yfunc == 'D' || yfunc == 'R' )
 	{
-	  fsec4dp = (double*) malloc(klenp*sizeof(double));
+	  fsec4dp = (double*) Malloc(klenp*sizeof(double));
 	  if ( fsec4dp == NULL ) SysError("No Memory!");
 	}
 
@@ -2700,7 +2700,7 @@ gribExSP_old(int *isec0, int *isec1, int *isec2, float *fsec2sp, int *isec3,
 		fsec4sp[j] = fsec4dp[j];
 	    }
 
-	  free(fsec4dp);
+	  Free(fsec4dp);
 	}
     }
   else if ( yfunc == 'V' )
@@ -3992,7 +3992,7 @@ void gribPrintSec2SP(int *isec0, int *isec2, float  *fsec2sp)
 
   inum = 10 + isec2[11];
 
-  fsec2 = (double*) malloc(inum*sizeof(double));
+  fsec2 = (double*) Malloc(inum*sizeof(double));
   if ( fsec2 == NULL ) SysError("No Memory!");
 
   for ( j = 0; j < inum; j++ )
@@ -4000,7 +4000,7 @@ void gribPrintSec2SP(int *isec0, int *isec2, float  *fsec2sp)
   
   gribPrintSec2DP(isec0, isec2, fsec2);
 
-  free(fsec2);
+  Free(fsec2);
 }
 
 void gribPrintSec3DP(int *isec0, int *isec3, double *fsec3)
@@ -6511,7 +6511,7 @@ void repair1(unsigned char *gbuf, long gbufsize)
       long nelem;
       unsigned char *pbuf;
       nelem = sourceLen/3;
-      pbuf = (unsigned char*) malloc(sourceLen);
+      pbuf = (unsigned char*) Malloc(sourceLen);
       for ( i = 0; i < nelem; i++ )
 	{
 	  pbuf[3*i  ] = source[        i];
@@ -6519,7 +6519,7 @@ void repair1(unsigned char *gbuf, long gbufsize)
 	  pbuf[3*i+2] = source[2*nelem+i];
 	}
       memcpy(source, pbuf, sourceLen);
-      free(pbuf);
+      Free(pbuf);
     }
 }
 
@@ -6793,7 +6793,7 @@ int  gribZip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbufs
       {
 	long nelem;
 	nelem = sourceLen/3;
-	pbuf = (unsigned char*) malloc(sourceLen);
+	pbuf = (unsigned char*) Malloc(sourceLen);
 	for ( i = 0; i < nelem; i++ )
 	  {
 	    pbuf[        i] = source[3*i  ];
@@ -6835,7 +6835,7 @@ int  gribZip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbufs
       }
 #endif
     
-    if ( pbuf ) free(pbuf);
+    if ( pbuf ) Free(pbuf);
     /*
     fprintf(stderr, "sourceLen, destLen %d %d\n", sourceLen, destLen);
     */
@@ -7151,7 +7151,7 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 	long nelem;
 	unsigned char *pbuf;
 	nelem = tmpLen/3;
-	pbuf = (unsigned char*) malloc(tmpLen);
+	pbuf = (unsigned char*) Malloc(tmpLen);
 	for ( i = 0; i < nelem; i++ )
 	  {
 	    pbuf[3*i  ] = dest[        i];
@@ -7259,14 +7259,14 @@ double calculate_pfactor(const double* spectralField, long fieldTruncation, long
 
   range = (double) (ismax - ismin +1);
 
-  weights = (double*) malloc((ismax+1)*sizeof(double));
+  weights = (double*) Malloc((ismax+1)*sizeof(double));
   for( loop = ismin; loop <= ismax; loop++ )
     weights[loop] = range / (double) (loop-ismin+1);
   /*
   // Compute norms
   // Handle values 2 at a time (real and imaginary parts).
    */
-  norms = (double*) malloc((ismax+1)*sizeof(double));
+  norms = (double*) Malloc((ismax+1)*sizeof(double));
 
   for( loop = 0; loop < ismax+1; loop++ ) norms[loop] = 0.0;
   /*
@@ -7340,8 +7340,8 @@ double calculate_pfactor(const double* spectralField, long fieldTruncation, long
   }
   slope = numerator / denominator;
 
-  free(weights);
-  free(norms);
+  Free(weights);
+  Free(norms);
 
   pFactor = -slope;
   if( pFactor < -9999.9 ) pFactor = -9999.9;
@@ -7535,10 +7535,10 @@ int qu2reg2(double *pfield, int *kpoint, int klat, int klon,
    int iregno, iquano, j210, j220, j230, j240, j225;
 
 
-   zline = (double*) malloc(2*klon*sizeof(double));
+   zline = (double*) Malloc(2*klon*sizeof(double));
    if ( zline == NULL ) SysError("No Memory!");
 
-   zwork = (double*) malloc(3*(2*klon+3)*sizeof(double));
+   zwork = (double*) Malloc(3*(2*klon+3)*sizeof(double));
    if ( zwork == NULL ) SysError("No Memory!");
 
    /* Parameter adjustments */
@@ -7675,8 +7675,8 @@ int qu2reg2(double *pfield, int *kpoint, int klat, int klon,
 
 L900:
 
-   free(zline);
-   free(zwork);
+   Free(zline);
+   Free(zwork);
 
    return 0;
 } /* qu2reg2 */
@@ -7692,7 +7692,7 @@ L900:
 void TEMPLATE(scale_complex,T)(T *fpdata, int pcStart, int pcScale, int trunc, int inv)
 {
   double power;
-  double *scale = (double*) malloc((trunc+1)*sizeof(double));
+  double *scale = (double*) Malloc((trunc+1)*sizeof(double));
   int  n, m;
   int  index;
 
@@ -7745,13 +7745,13 @@ void TEMPLATE(scale_complex,T)(T *fpdata, int pcStart, int pcScale, int trunc, i
 	index += 2;
       }
 
-  free(scale);
+  Free(scale);
 }
 
 
 void TEMPLATE(scatter_complex,T)(T *fpdata, int pcStart, int trunc, int nsp)
 {
-  T *fphelp = (T*) malloc(nsp*sizeof(T));
+  T *fphelp = (T*) Malloc(nsp*sizeof(T));
   int  m, n;
   int  index, inext;
 
@@ -7784,13 +7784,13 @@ void TEMPLATE(scatter_complex,T)(T *fpdata, int pcStart, int trunc, int nsp)
 
   for ( m = 0; m < nsp; m++ ) fpdata[m] = fphelp[m];
 
-  free(fphelp);
+  Free(fphelp);
 }
 
 
 void TEMPLATE(gather_complex,T)(T *fpdata, int pcStart, int trunc, int nsp)
 {
-  T *fphelp = (T*) malloc(nsp*sizeof(T));
+  T *fphelp = (T*) Malloc(nsp*sizeof(T));
   int  m, n;
   int  index, inext;
 
@@ -7823,7 +7823,7 @@ void TEMPLATE(gather_complex,T)(T *fpdata, int pcStart, int trunc, int nsp)
 
   for ( m = 0; m < nsp; m++ ) fpdata[m] = fphelp[m];
 
-  free(fphelp);
+  Free(fphelp);
 }
 
 
@@ -8227,13 +8227,13 @@ C
    T *zline = NULL;
    T *zwork = NULL;
 
-   ztemp = (T*) malloc(klon*klat*sizeof(T));
+   ztemp = (T*) Malloc(klon*klat*sizeof(T));
    if ( ztemp == NULL ) SysError("No Memory!");
 
-   zline = (T*) malloc(2*klon*sizeof(T));
+   zline = (T*) Malloc(2*klon*sizeof(T));
    if ( zline == NULL ) SysError("No Memory!");
 
-   zwork = (T*) malloc(3*(2*klon+3)*sizeof(T));
+   zwork = (T*) Malloc(3*(2*klon+3)*sizeof(T));
    if ( zwork == NULL ) SysError("No Memory!");
 
    /* Parameter adjustments */
@@ -8337,9 +8337,9 @@ C
 
 L900:
 
-   free(zwork);
-   free(zline);
-   free(ztemp);
+   Free(zwork);
+   Free(zline);
+   Free(ztemp);
 
    return 0;
 } /* qu2reg3 */
@@ -8355,7 +8355,7 @@ L900:
 void TEMPLATE(scale_complex,T)(T *fpdata, int pcStart, int pcScale, int trunc, int inv)
 {
   double power;
-  double *scale = (double*) malloc((trunc+1)*sizeof(double));
+  double *scale = (double*) Malloc((trunc+1)*sizeof(double));
   int  n, m;
   int  index;
 
@@ -8408,13 +8408,13 @@ void TEMPLATE(scale_complex,T)(T *fpdata, int pcStart, int pcScale, int trunc, i
 	index += 2;
       }
 
-  free(scale);
+  Free(scale);
 }
 
 
 void TEMPLATE(scatter_complex,T)(T *fpdata, int pcStart, int trunc, int nsp)
 {
-  T *fphelp = (T*) malloc(nsp*sizeof(T));
+  T *fphelp = (T*) Malloc(nsp*sizeof(T));
   int  m, n;
   int  index, inext;
 
@@ -8447,13 +8447,13 @@ void TEMPLATE(scatter_complex,T)(T *fpdata, int pcStart, int trunc, int nsp)
 
   for ( m = 0; m < nsp; m++ ) fpdata[m] = fphelp[m];
 
-  free(fphelp);
+  Free(fphelp);
 }
 
 
 void TEMPLATE(gather_complex,T)(T *fpdata, int pcStart, int trunc, int nsp)
 {
-  T *fphelp = (T*) malloc(nsp*sizeof(T));
+  T *fphelp = (T*) Malloc(nsp*sizeof(T));
   int  m, n;
   int  index, inext;
 
@@ -8486,7 +8486,7 @@ void TEMPLATE(gather_complex,T)(T *fpdata, int pcStart, int trunc, int nsp)
 
   for ( m = 0; m < nsp; m++ ) fpdata[m] = fphelp[m];
 
-  free(fphelp);
+  Free(fphelp);
 }
 
 
@@ -8890,13 +8890,13 @@ C
    T *zline = NULL;
    T *zwork = NULL;
 
-   ztemp = (T*) malloc(klon*klat*sizeof(T));
+   ztemp = (T*) Malloc(klon*klat*sizeof(T));
    if ( ztemp == NULL ) SysError("No Memory!");
 
-   zline = (T*) malloc(2*klon*sizeof(T));
+   zline = (T*) Malloc(2*klon*sizeof(T));
    if ( zline == NULL ) SysError("No Memory!");
 
-   zwork = (T*) malloc(3*(2*klon+3)*sizeof(T));
+   zwork = (T*) Malloc(3*(2*klon+3)*sizeof(T));
    if ( zwork == NULL ) SysError("No Memory!");
 
    /* Parameter adjustments */
@@ -9000,9 +9000,9 @@ C
 
 L900:
 
-   free(zwork);
-   free(zline);
-   free(ztemp);
+   Free(zwork);
+   Free(zline);
+   Free(ztemp);
 
    return 0;
 } /* qu2reg3 */
@@ -9410,7 +9410,7 @@ void TEMPLATE(decode_array,T)(const unsigned char *restrict igrib, long jlend, i
       long jlenc = jlend * numBits / 8;
       if ( jlenc > 0 ) 
 	{
-	  lgrib = (GRIBPACK*) malloc(jlenc*sizeof(GRIBPACK));
+	  lgrib = (GRIBPACK*) Malloc(jlenc*sizeof(GRIBPACK));
 	  if ( lgrib == NULL ) SysError("No Memory!");
 
 	  (void) UNPACK_GRIB(igrib, lgrib, jlenc, -1L);
@@ -9461,7 +9461,7 @@ void TEMPLATE(decode_array,T)(const unsigned char *restrict igrib, long jlend, i
       Error("Unimplemented packing factor %d!", numBits);
     }
 
-  if ( lgrib ) free(lgrib);
+  if ( lgrib ) Free(lgrib);
 
 #else
   if ( numBits ==  0 )
@@ -9668,7 +9668,7 @@ void TEMPLATE(decode_array,T)(const unsigned char *restrict igrib, long jlend, i
       long jlenc = jlend * numBits / 8;
       if ( jlenc > 0 ) 
 	{
-	  lgrib = (GRIBPACK*) malloc(jlenc*sizeof(GRIBPACK));
+	  lgrib = (GRIBPACK*) Malloc(jlenc*sizeof(GRIBPACK));
 	  if ( lgrib == NULL ) SysError("No Memory!");
 
 	  (void) UNPACK_GRIB(igrib, lgrib, jlenc, -1L);
@@ -9719,7 +9719,7 @@ void TEMPLATE(decode_array,T)(const unsigned char *restrict igrib, long jlend, i
       Error("Unimplemented packing factor %d!", numBits);
     }
 
-  if ( lgrib ) free(lgrib);
+  if ( lgrib ) Free(lgrib);
 
 #else
   if ( numBits ==  0 )
@@ -10030,7 +10030,7 @@ int TEMPLATE(decodeGDS,T)(unsigned char  *gds, int *isec0, int *isec2, T *fsec2,
 	}
 #if defined (SX)
       lGribLen = 4*ISEC2_NumVCP;	      
-      lgrib    = (GRIBPACK*) malloc(lGribLen*sizeof(GRIBPACK));
+      lgrib    = (GRIBPACK*) Malloc(lGribLen*sizeof(GRIBPACK));
 
       igrib = &gds[locnv];
       if ( ISEC2_NumVCP > 0 ) (void) UNPACK_GRIB(igrib, lgrib, lGribLen, -1L);
@@ -10043,7 +10043,7 @@ int TEMPLATE(decodeGDS,T)(unsigned char  *gds, int *isec0, int *isec2, T *fsec2,
 	  fsec2[10+i] = POW_2_M24 * imant * pow(16.0, (double)(iexp - 64));
 	}
 
-      free(lgrib);
+      Free(lgrib);
 #else
       for ( i = 0; i < ISEC2_NumVCP; i++ )
 	{
@@ -10577,7 +10577,7 @@ void TEMPLATE(grib_decode,T)(int *isec0, int *isec1, int *isec2, T *fsec2, int *
 	    }
 	  */
 
-	  imask = (GRIBPACK*) malloc(imaskSize*sizeof(GRIBPACK));
+	  imask = (GRIBPACK*) Malloc(imaskSize*sizeof(GRIBPACK));
 
 #if defined (VECTORCODE)
 	  (void) UNPACK_GRIB(BMS_Bitmap, imask, imaskSize/8, -1L);
@@ -10636,7 +10636,7 @@ void TEMPLATE(grib_decode,T)(int *isec0, int *isec1, int *isec2, T *fsec2, int *
 		fsec4[i] = imask[i] ? fsec4[--j] : FSEC3_MissVal;
 	    }
 
-	  free(imask);
+	  Free(imask);
 	}
     }
 
@@ -10962,7 +10962,7 @@ int TEMPLATE(decodeGDS,T)(unsigned char  *gds, int *isec0, int *isec2, T *fsec2,
 	}
 #if defined (SX)
       lGribLen = 4*ISEC2_NumVCP;	      
-      lgrib    = (GRIBPACK*) malloc(lGribLen*sizeof(GRIBPACK));
+      lgrib    = (GRIBPACK*) Malloc(lGribLen*sizeof(GRIBPACK));
 
       igrib = &gds[locnv];
       if ( ISEC2_NumVCP > 0 ) (void) UNPACK_GRIB(igrib, lgrib, lGribLen, -1L);
@@ -10975,7 +10975,7 @@ int TEMPLATE(decodeGDS,T)(unsigned char  *gds, int *isec0, int *isec2, T *fsec2,
 	  fsec2[10+i] = POW_2_M24 * imant * pow(16.0, (double)(iexp - 64));
 	}
 
-      free(lgrib);
+      Free(lgrib);
 #else
       for ( i = 0; i < ISEC2_NumVCP; i++ )
 	{
@@ -11509,7 +11509,7 @@ void TEMPLATE(grib_decode,T)(int *isec0, int *isec1, int *isec2, T *fsec2, int *
 	    }
 	  */
 
-	  imask = (GRIBPACK*) malloc(imaskSize*sizeof(GRIBPACK));
+	  imask = (GRIBPACK*) Malloc(imaskSize*sizeof(GRIBPACK));
 
 #if defined (VECTORCODE)
 	  (void) UNPACK_GRIB(BMS_Bitmap, imask, imaskSize/8, -1L);
@@ -11568,7 +11568,7 @@ void TEMPLATE(grib_decode,T)(int *isec0, int *isec1, int *isec2, T *fsec2, int *
 		fsec4[i] = imask[i] ? fsec4[--j] : FSEC3_MissVal;
 	    }
 
-	  free(imask);
+	  Free(imask);
 	}
     }
 
@@ -13133,7 +13133,7 @@ void TEMPLATE(encodeBMS,T)(GRIBPACK *lGrib, long *gribLen, T *fsec3, int *isec4,
   fsec4size = 0;
 
 #if defined (VECTORCODE)
-  imask = (unsigned int*) malloc(imaskSize*sizeof(unsigned int));
+  imask = (unsigned int*) Malloc(imaskSize*sizeof(unsigned int));
   memset(imask, 0, imaskSize*sizeof(int));
 
 #if defined (CRAY)
@@ -13171,7 +13171,7 @@ void TEMPLATE(encodeBMS,T)(GRIBPACK *lGrib, long *gribLen, T *fsec3, int *isec4,
 	          (imask[i*8+6] << 1) | (imask[i*8+7]);
     }
 
-  free(imask);
+  Free(imask);
 #else
   for ( i = 0; i < imaskSize/8; i++ ) bitmap[i] = 0;
 
@@ -13510,7 +13510,7 @@ void TEMPLATE(grib_encode,T)(int *isec0, int *isec1, int *isec2, T *fsec2, int *
   if ( bmsIncluded ) len += (klenp+7)>>3;
 
 #if defined (VECTORCODE)
-  lGrib = (GRIBPACK*) malloc(len*sizeof(GRIBPACK));
+  lGrib = (GRIBPACK*) Malloc(len*sizeof(GRIBPACK));
   if ( lGrib == NULL ) SysError("No Memory!");
 #else
   lGrib = CGrib;
@@ -13572,7 +13572,7 @@ void TEMPLATE(grib_encode,T)(int *isec0, int *isec1, int *isec2, T *fsec2, int *
 
   (void) PACK_GRIB(lGrib, (unsigned char *)CGrib, gribLen, -1L);
 
-  free(lGrib);
+  Free(lGrib);
 #endif
 
   ISEC0_GRIB_Len     = gribLen;
@@ -13752,7 +13752,7 @@ void TEMPLATE(encodeBMS,T)(GRIBPACK *lGrib, long *gribLen, T *fsec3, int *isec4,
   fsec4size = 0;
 
 #if defined (VECTORCODE)
-  imask = (unsigned int*) malloc(imaskSize*sizeof(unsigned int));
+  imask = (unsigned int*) Malloc(imaskSize*sizeof(unsigned int));
   memset(imask, 0, imaskSize*sizeof(int));
 
 #if defined (CRAY)
@@ -13790,7 +13790,7 @@ void TEMPLATE(encodeBMS,T)(GRIBPACK *lGrib, long *gribLen, T *fsec3, int *isec4,
 	          (imask[i*8+6] << 1) | (imask[i*8+7]);
     }
 
-  free(imask);
+  Free(imask);
 #else
   for ( i = 0; i < imaskSize/8; i++ ) bitmap[i] = 0;
 
@@ -14129,7 +14129,7 @@ void TEMPLATE(grib_encode,T)(int *isec0, int *isec1, int *isec2, T *fsec2, int *
   if ( bmsIncluded ) len += (klenp+7)>>3;
 
 #if defined (VECTORCODE)
-  lGrib = (GRIBPACK*) malloc(len*sizeof(GRIBPACK));
+  lGrib = (GRIBPACK*) Malloc(len*sizeof(GRIBPACK));
   if ( lGrib == NULL ) SysError("No Memory!");
 #else
   lGrib = CGrib;
@@ -14191,7 +14191,7 @@ void TEMPLATE(grib_encode,T)(int *isec0, int *isec1, int *isec2, T *fsec2, int *
 
   (void) PACK_GRIB(lGrib, (unsigned char *)CGrib, gribLen, -1L);
 
-  free(lGrib);
+  Free(lGrib);
 #endif
 
   ISEC0_GRIB_Len     = gribLen;

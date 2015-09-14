@@ -56,12 +56,12 @@ static CdiFallbackIterator *cdiFallbackIterator_condestruct(CdiFallbackIterator 
 // v destructor/error-cleanup code  v
 
 destruct:
-  free(me->path);
+  Free(me->path);
 closeStream:
   streamClose(me->streamId);
 destructSuper:
   baseIterDestruct(&me->super);
-  free(me);
+  Free(me);
   return NULL;
 }
 
@@ -109,7 +109,7 @@ char *cdiFallbackIterator_serialize(CdiIterator *super)
   char *result = (char *)malloc(strlen(escapedPath)
                          + 5 * (3 * sizeof (int) * CHAR_BIT / 8 + 1) + 1);
   sprintf(result, "%s %d %d %d %d %d", escapedPath, me->variableCount, me->curVariable, me->curLevelCount, me->curLevel, me->curTimestep);
-  free(escapedPath);
+  Free(escapedPath);
   return result;
 }
 
@@ -153,10 +153,10 @@ CdiFallbackIterator *cdiFallbackIterator_deserialize(const char *description)
 closeStream:
   streamClose(me->streamId);
 freePath:
-  free(me->path);
+  Free(me->path);
 destructSuper:
   baseIterDestruct(&me->super);
-  free(me);
+  Free(me);
 fail:
   return NULL;
 }

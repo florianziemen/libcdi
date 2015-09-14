@@ -42,7 +42,7 @@ initBFiledataP(char *filename, size_t bs, int nc, int fileID)
 
   xdebug ( "filename=%s, buffersize=%lu, ncollectors=%d", filename, bs, nc );
 
-  bfp = malloc(sizeof (*bfp) + strlen(filename) + 1);
+  bfp = Malloc(sizeof (*bfp) + strlen(filename) + 1);
   strcpy(bfp->name, filename);
 
   if (( bfp->fp = fopen ( filename, "w" )) == NULL ) 
@@ -78,7 +78,7 @@ destroyBFiledataP(void *v)
 
   dbuffer_cleanup ( &( bfp->fb ));
 
-  free(bfp);
+  Free(bfp);
 
   xdebug("%s", "cleaned up, return");
 
@@ -165,7 +165,7 @@ pioWriterStdIO(void)
       	case IO_Open_file:
 
 	  messageBuffer
-            = malloc((size_t)messagesize * sizeof (messageBuffer[0]));
+            = Malloc((size_t)messagesize * sizeof (messageBuffer[0]));
     	  pMB = messageBuffer;
 
 	  xmpi(MPI_Recv(messageBuffer, messagesize, MPI_UNSIGNED_CHAR,
@@ -276,7 +276,7 @@ pioWriterStdIO(void)
                            " return");
                     listSetDelete(bibBFiledataP);
                   }
-                free(sentFinalize);
+                Free(sentFinalize);
                 return;
               }
           }

@@ -162,7 +162,7 @@ int institutInq(int center, int subcenter, const char *name, const char *longnam
   struct instLoc state = { .ip = ip_ref, .id = UNDEFID };
   cdiResHFilterApply(&instituteOps, findInstitute, &state);
 
-  free(ip_ref);
+  Free(ip_ref);
 
   return state.id;
 }
@@ -171,7 +171,7 @@ static
 institute_t *instituteNewEntry(cdiResH resH, int center, int subcenter,
                                const char *name, const char *longname)
 {
-  institute_t *instituteptr = (institute_t*) malloc(sizeof(institute_t));
+  institute_t *instituteptr = (institute_t*) Malloc(sizeof(institute_t));
   instituteDefaultValue(instituteptr);
   if (resH == CDI_UNDEFID)
     instituteptr->self = reshPut(instituteptr, &instituteOps);
@@ -266,10 +266,10 @@ instituteDestroyP(institute_t *instituteptr)
   xassert(instituteptr);
 
   int instituteID = instituteptr->self;
-  free(instituteptr->name);
-  free(instituteptr->longname);
+  Free(instituteptr->name);
+  Free(instituteptr->longname);
   reshRemove(instituteID, &instituteOps);
-  free(instituteptr);
+  Free(instituteptr);
 }
 
 
@@ -342,7 +342,7 @@ int instituteUnpack(void *buf, int size, int *position, int originNamespace,
                                       tempbuf[1], tempbuf[2], name, longname);
   instituteID = ip->self;
   xassert(!force_id || instituteID == targetID);
-  free(name);
+  Free(name);
   return instituteID;
 }
 
