@@ -1713,7 +1713,7 @@ void streamReadVarSliceF(int streamID, int varID, int levelID, float *data, int 
       // In case the file format does not support single precision reading,
       // we fall back to double precision reading, converting the data on the fly.
       size_t elementCount = (size_t)gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
-      double* conversionBuffer = (double *)malloc(elementCount * sizeof(*conversionBuffer));
+      double* conversionBuffer = (double *) Malloc(elementCount * sizeof(*conversionBuffer));
       streamReadVarSlice(streamID, varID, levelID, conversionBuffer, nmiss);
       for (size_t i = elementCount; i--; ) data[i] = (float)conversionBuffer[i];
       Free(conversionBuffer);

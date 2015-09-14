@@ -181,7 +181,7 @@ int isTimeAxisUnits(const char *timeunits)
   int status = FALSE;
 
   size_t len = strlen(timeunits);
-  tu = (char *)malloc((len+1)*sizeof(char));
+  tu = (char *) Malloc((len+1)*sizeof(char));
   memcpy(tu, timeunits, (len+1) * sizeof(char));
   ptu = tu;
 
@@ -306,7 +306,7 @@ int setBaseTime(const char *timeunits, taxis_t *taxis)
   int timeunit;
 
   size_t len = strlen(timeunits);
-  tu = (char *)malloc((len+1) * sizeof (char));
+  tu = (char *) Malloc((len+1) * sizeof (char));
   memcpy(tu, timeunits, (len+1) * sizeof (char));
   ptu = tu;
 
@@ -648,7 +648,7 @@ void cdfCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
   int gridID   = vlistInqVarGrid(vlistID1, ivarID);
   int datasize = gridInqSize(gridID);
 
-  double *data = (double *)malloc((size_t)datasize * sizeof (double));
+  double *data = (double *) Malloc((size_t)datasize * sizeof (double));
 
   int nmiss;
   cdfReadRecord(streamptr1, data, &nmiss);
@@ -3945,7 +3945,7 @@ cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarid, int dtype, l
         {
           /* malloc and the loop imply nvals >= ysize * xsize,
            * but that is not checked and the types don't match */
-          sdata_sp = (float *)malloc((size_t)nvals * sizeof (float));
+          sdata_sp = (float *) Malloc((size_t)nvals * sizeof (float));
           for ( size_t j = 0; j < ysize; ++j )
             for ( size_t i = 0; i < xsize; ++i )
               sdata_sp[i*ysize+j] = pdata_sp[j*xsize+i];
@@ -3953,7 +3953,7 @@ cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarid, int dtype, l
         }
       else
         {
-          sdata_dp = (double *)malloc((size_t)nvals * sizeof (double));
+          sdata_dp = (double *) Malloc((size_t)nvals * sizeof (double));
           for ( size_t j = 0; j < ysize; ++j )
             for ( size_t i = 0; i < xsize; ++i )
               sdata_dp[i*ysize+j] = pdata_dp[j*xsize+i];
@@ -4198,7 +4198,7 @@ void transpose2dArrayDP(size_t inWidth, size_t inHeight, double* data)
   double *temp[inHeight];
   double *out[inWidth];
   
-  temp[0] =  (double *)malloc(inHeight * inWidth * sizeof(double));
+  temp[0] =  (double *) Malloc(inHeight * inWidth * sizeof(double));
   out[0] = data;
   
   for(int i = 0; i < inWidth; i++)
@@ -4212,7 +4212,7 @@ void transpose2dArrayDP(size_t inWidth, size_t inHeight, double* data)
   }
   memcpy(temp[0], data, inHeight * inWidth * sizeof(double));
 #else
-  double (*temp)[inWidth] = (double (*)[inWidth])malloc(inHeight*sizeof(*temp));
+  double (*temp)[inWidth] = (double (*)[inWidth]) Malloc(inHeight*sizeof(*temp));
   double (*out)[inHeight] = (double (*)[inHeight])data;
   memcpy(temp, data, inHeight*sizeof(*temp));
 #endif
@@ -4247,12 +4247,12 @@ void transpose2dArraySP(size_t inWidth, size_t inHeight, float* data)
                                        // which should be a decent compromise on many architectures.
   
 #ifndef __cplusplus 
-  float (*temp)[inWidth] = (float (*)[inWidth])malloc(inHeight*sizeof(*temp));
+  float (*temp)[inWidth] = (float (*)[inWidth]) Malloc(inHeight*sizeof(*temp));
   float (*out)[inHeight] = (float (*)[inHeight])data;
   memcpy(temp, data, inHeight*sizeof(*temp));
   #else
   float *temp[inWidth];
-  temp[0] =  (float *)malloc(inWidth * inHeight * sizeof(float));
+  temp[0] =  (float *) Malloc(inWidth * inHeight * sizeof(float));
   for(int i = 1; i < inHeight; i++)
   {
     temp[i] = temp[0] + (inWidth * i);
@@ -4500,7 +4500,7 @@ void cdfReadVarSliceDP(stream_t *streamptr, int varID, int levelID, double *data
 
   if ( vlistInqVarDatatype(vlistID, varID) == DATATYPE_FLT32 )
     {
-      float *data_fp = (float *)malloc(gridsize*sizeof(*data_fp));
+      float *data_fp = (float *) Malloc(gridsize*sizeof(*data_fp));
       cdf_get_vara_float(fileID, ncvarid, start, count, data_fp);
       for ( size_t i = 0; i < gridsize; i++ )
         data[i] = (double) data_fp[i];
@@ -4558,7 +4558,7 @@ void cdfReadVarSliceSP(stream_t *streamptr, int varID, int levelID, float *data,
 
   if ( vlistInqVarDatatype(vlistID, varID) == DATATYPE_FLT64 )
     {
-      double *data_dp = (double *)malloc(gridsize*sizeof(*data_dp));
+      double *data_dp = (double *) Malloc(gridsize*sizeof(*data_dp));
       cdf_get_vara_double(fileID, ncvarid, start, count, data_dp);
       for ( size_t i = 0; i < gridsize; i++ )
         data[i] = (float) data_dp[i];
@@ -4714,12 +4714,12 @@ void cdfCreateRecords(stream_t *streamptr, int tsID)
 
       streamptr->nrecs += nrecs;
 
-      destTstep->records    = (record_t *)malloc((size_t)nrecs*sizeof(record_t));
+      destTstep->records    = (record_t *) Malloc((size_t)nrecs*sizeof(record_t));
       destTstep->nrecs      = nrecs;
       destTstep->nallrecs   = nrecs;
       destTstep->recordSize = nrecs;
       destTstep->curRecID   = UNDEFID;
-      destTstep->recIDs     = (int *)malloc((size_t)nvrecs*sizeof (int));;
+      destTstep->recIDs     = (int *) Malloc((size_t)nvrecs*sizeof (int));;
       for ( recID = 0; recID < nvrecs; recID++ ) destTstep->recIDs[recID] = recID;
 
       record_t *records = destTstep->records;
@@ -5971,7 +5971,7 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
 	    {
 	      if ( ncvars[ncvarid].natts == 0 )
 		ncvars[ncvarid].atts
-                  = (int *)malloc((size_t)nvatts * sizeof (int));
+                  = (int *) Malloc((size_t)nvatts * sizeof (int));
 
 	      ncvars[ncvarid].atts[ncvars[ncvarid].natts++] = iatt;
 	      /*
@@ -7071,7 +7071,7 @@ void define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 
 	  if ( CDI_Debug ) Message("nlevs = %d", zsize);
 
-	  double *zvar = (double *)malloc((size_t)zsize * sizeof (double));
+	  double *zvar = (double *) Malloc((size_t)zsize * sizeof (double));
 
 	  zaxisType = UNDEFID;
 
@@ -7222,7 +7222,7 @@ void define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, 
   if ( streamptr->sortname )
     {
       struct varinfo *varInfo
-        = (struct varinfo *)malloc((size_t)nvars * sizeof (struct varinfo));
+        = (struct varinfo *) Malloc((size_t)nvars * sizeof (struct varinfo));
 
       for ( int varID = 0; varID < nvars; varID++ )
 	{
@@ -7841,13 +7841,13 @@ int cdfInqContents(stream_t *streamptr)
     }
 
   /* alloc ncdims */
-  ncdims = (ncdim_t *)malloc((size_t)ndims * sizeof (ncdim_t));
+  ncdims = (ncdim_t *) Malloc((size_t)ndims * sizeof (ncdim_t));
   init_ncdims(ndims, ncdims);
 
   if ( nvars > 0 )
     {
       /* alloc ncvars */
-      ncvars = (ncvar_t *)malloc((size_t)nvars * sizeof (ncvar_t));
+      ncvars = (ncvar_t *) Malloc((size_t)nvars * sizeof (ncvar_t));
       init_ncvars(nvars, ncvars);
 
       for ( ncvarid = 0; ncvarid < nvars; ++ncvarid )
@@ -8110,7 +8110,7 @@ int cdfInqContents(stream_t *streamptr)
 
 
   /* select vars */
-  varids = (int *)malloc((size_t)nvars * sizeof (int));
+  varids = (int *) Malloc((size_t)nvars * sizeof (int));
   nvarids = 0;
   for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
     if ( ncvars[ncvarid].isvar == TRUE ) varids[nvarids++] = ncvarid;

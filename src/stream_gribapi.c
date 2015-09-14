@@ -706,7 +706,7 @@ static void ensureBufferSize(size_t requiredSize, size_t* curSize, unsigned char
   if ( *curSize < requiredSize )
     {
       *curSize = requiredSize;
-      *buffer = (unsigned char *)realloc(*buffer, *curSize);
+      *buffer = (unsigned char *) Realloc(*buffer, *curSize);
     }
 }
 
@@ -964,10 +964,10 @@ int gribapiScanTimestep1(stream_t * streamptr)
     {
       streamptr->tsteps[0].recordSize = nrecords;
       streamptr->tsteps[0].records =
-        (record_t *)realloc(streamptr->tsteps[0].records, (size_t)nrecords*sizeof(record_t));
+        (record_t *) Realloc(streamptr->tsteps[0].records, (size_t)nrecords*sizeof(record_t));
     }
 
-  streamptr->tsteps[0].recIDs = (int *)malloc((size_t)nrecords*sizeof(int));
+  streamptr->tsteps[0].recIDs = (int *) Malloc((size_t)nrecords*sizeof(int));
   streamptr->tsteps[0].nrecs = nrecords;
   for ( int recID = 0; recID < nrecords; recID++ )
     streamptr->tsteps[0].recIDs[recID] = recID;
@@ -1950,8 +1950,8 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 
 	    nlon = 0;
 
-	    rowlon = (int *)malloc((size_t)nlat*sizeof(int));
-	    pl     = (long *)malloc((size_t)nlat*sizeof(long));
+	    rowlon = (int *) Malloc((size_t)nlat*sizeof(int));
+	    pl     = (long *) Malloc((size_t)nlat*sizeof(long));
 	    gridInqRowlon(gridID, rowlon);
 	    for ( i = 0; i < nlat; ++i ) pl[i] = rowlon[i];
 

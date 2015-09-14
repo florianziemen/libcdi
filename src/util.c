@@ -103,7 +103,7 @@ char* cdiEscapeSpaces(const char* string)
   for(; string[length]; ++length)
     escapeCount += string[length] == ' ' || string[length] == '\\';
 
-  char* result = (char *)malloc(length + escapeCount + 1);
+  char* result = (char *) Malloc(length + escapeCount + 1);
   if(!result) return NULL;
 
   //Do the escaping.
@@ -133,7 +133,7 @@ char* cdiUnescapeSpaces(const char* string, const char** outStringEnd)
       length++;
     }
 
-  char* result = (char *)malloc(length + 1);
+  char* result = (char *) Malloc(length + 1);
   if(!result) return NULL;
 
   //Do the unescaping.

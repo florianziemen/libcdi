@@ -88,7 +88,7 @@ void gribContainersNew(stream_t * streamptr)
       streamptr->gribContainers = (void **) gribContainers;
 #else
       gribContainer_t *gribContainers
-        = (gribContainer_t *)malloc((size_t)nvars*sizeof(gribContainer_t));
+        = (gribContainer_t *) Malloc((size_t)nvars*sizeof(gribContainer_t));
 
       for ( int varID = 0; varID < nvars; ++varID )
         {

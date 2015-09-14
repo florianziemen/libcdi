@@ -326,7 +326,7 @@ modelUnpack(void *buf, int size, int *position, int originNamespace, void *conte
   serializeUnpack(buf, size, position, tempbuf, model_nints, DATATYPE_INT, context);
   if (tempbuf[3] != 0)
     {
-      name = (char *)malloc((size_t)tempbuf[3]);
+      name = (char *) Malloc((size_t)tempbuf[3]);
       serializeUnpack(buf, size, position,
                       name, tempbuf[3], DATATYPE_TXT, context);
     }

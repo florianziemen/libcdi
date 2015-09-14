@@ -30,7 +30,7 @@ static CdiFallbackIterator *cdiFallbackIterator_condestruct(CdiFallbackIterator 
 {
   if(me) goto destruct;
 
-  me = (CdiFallbackIterator *)malloc(sizeof(*me));
+  me = (CdiFallbackIterator *) Malloc(sizeof(*me));
   baseIterConstruct(&me->super, filetype);
 
   me->streamId = streamOpenRead(path);
@@ -106,7 +106,7 @@ char *cdiFallbackIterator_serialize(CdiIterator *super)
   CdiFallbackIterator *me = (CdiFallbackIterator*)super;
 
   char *escapedPath = cdiEscapeSpaces(me->path);
-  char *result = (char *)malloc(strlen(escapedPath)
+  char *result = (char *) Malloc(strlen(escapedPath)
                          + 5 * (3 * sizeof (int) * CHAR_BIT / 8 + 1) + 1);
   sprintf(result, "%s %d %d %d %d %d", escapedPath, me->variableCount, me->curVariable, me->curLevelCount, me->curLevel, me->curTimestep);
   Free(escapedPath);
@@ -115,7 +115,7 @@ char *cdiFallbackIterator_serialize(CdiIterator *super)
 
 CdiFallbackIterator *cdiFallbackIterator_deserialize(const char *description)
 {
-  CdiFallbackIterator *me = (CdiFallbackIterator *)malloc(sizeof(*me));
+  CdiFallbackIterator *me = (CdiFallbackIterator *) Malloc(sizeof(*me));
   if(!me) goto fail;
 
   description = baseIter_constructFromString(&me->super, description);
@@ -203,7 +203,7 @@ char *cdiFallbackIterator_inqTime(CdiIterator *super, bool getEndTime)
   cdiDecodeDate(date, &year, &month, &day);
   cdiDecodeTime(time, &hour, &minute, &second);
   char *result
-    = (char *)malloc(   4+1 +2+1 +2+1 +2+1 +2+1 +2+4+1);
+    = (char *) Malloc(   4+1 +2+1 +2+1 +2+1 +2+1 +2+4+1);
   sprintf(result,     "%04d-%02d-%02dT%02d:%02d:%02d.000", year, month, day, hour, minute, second);
   return result;
 }

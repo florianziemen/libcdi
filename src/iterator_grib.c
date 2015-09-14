@@ -46,7 +46,7 @@ static CdiGribIterator *cdiGribIterator_condestruct(CdiGribIterator *me, const c
 {
 #define super() (&me->super)
   if(me) goto destruct;
-  me = (CdiGribIterator *)malloc(sizeof(*me));
+  me = (CdiGribIterator *) Malloc(sizeof(*me));
   baseIterConstruct(super(), filetype);
 
   me->file = cdiInputFile_make(path);
@@ -88,7 +88,7 @@ CdiGribIterator *cdiGribIterator_makeClone(CdiIterator *super)
   CdiGribIterator *me = (CdiGribIterator*)super;
 
   //Allocate memory and copy data. (operations that may fail)
-  CdiGribIterator* result = (struct CdiGribIterator *)malloc(sizeof(*result));
+  CdiGribIterator* result = (struct CdiGribIterator *) Malloc(sizeof(*result));
   if(!result) goto fail;
 
   result->file = me->file;
@@ -100,7 +100,7 @@ CdiGribIterator *cdiGribIterator_makeClone(CdiIterator *super)
 
   if(me->gribBuffer)
     {
-      result->gribBuffer = (unsigned char *)malloc(me->bufferSize);
+      result->gribBuffer = (unsigned char *) Malloc(me->bufferSize);
       if(!result->gribBuffer) goto freeResult;
       memcpy(result->gribBuffer, me->gribBuffer, me->curRecordSize);
     }
@@ -141,7 +141,7 @@ char *cdiGribIterator_serialize(CdiIterator *super)
 
   const char* path = cdiInputFile_getPath(me->file);
   char* escapedPath = cdiEscapeSpaces(path);
-  char* result = (char *)malloc(strlen(escapedPath) + 3 * sizeof(int) * CHAR_BIT/8);
+  char* result = (char *) Malloc(strlen(escapedPath) + 3 * sizeof(int) * CHAR_BIT/8);
   sprintf(result, "%s %zu", escapedPath, me->fileOffset);
   Free(escapedPath);
   return result;
@@ -151,7 +151,7 @@ char *cdiGribIterator_serialize(CdiIterator *super)
 CdiGribIterator *cdiGribIterator_deserialize(const char *description)
 {
   char* path;
-  CdiGribIterator* me = (CdiGribIterator *)malloc(sizeof(*me));
+  CdiGribIterator* me = (CdiGribIterator *) Malloc(sizeof(*me));
   if(!me) goto fail;
 
   description = baseIter_constructFromString(&me->super, description);
@@ -196,7 +196,7 @@ static void cdiGribIterator_ensureBuffer(CdiGribIterator *me, size_t requiredSiz
     {
       me->bufferSize *= 2;
       if(me->bufferSize < requiredSize) me->bufferSize = requiredSize;
-      me->gribBuffer = (unsigned char *)realloc(me->gribBuffer, me->bufferSize);
+      me->gribBuffer = (unsigned char *) Realloc(me->gribBuffer, me->bufferSize);
     }
 }
 
@@ -549,7 +549,7 @@ void cdiGribIterator_readFieldF(CdiIterator *super, float *buffer, size_t *nmiss
   CdiGribIterator *me = (CdiGribIterator*)super;
 
   size_t valueCount = gribGetArraySize(me->gribHandle, "values");
-  double* temp = (double *)malloc(valueCount*sizeof(*temp));
+  double* temp = (double *) Malloc(valueCount*sizeof(*temp));
   cdiGribIterator_readField(super, temp, nmiss);
   for(size_t i = valueCount; i--; ) buffer[i] = (float)temp[i];
   Free(temp);

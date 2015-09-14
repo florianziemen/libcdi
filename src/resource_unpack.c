@@ -25,7 +25,7 @@ void reshUnpackResources(char * unpackBuffer, int unpackBufferSize,
   int unpackBufferPos = 0;
   int numAssociations = 0, sizeAssociations = 16;
   struct streamAssoc *associations
-    = (struct streamAssoc *)malloc(sizeof (associations[0])
+    = (struct streamAssoc *) Malloc(sizeof (associations[0])
                                     * (size_t)sizeAssociations);
 
   {
@@ -67,7 +67,7 @@ void reshUnpackResources(char * unpackBuffer, int unpackBufferSize,
 	case STREAM:
           if (sizeAssociations == numAssociations)
             associations
-              = (struct streamAssoc *)realloc(associations,
+              = (struct streamAssoc *) Realloc(associations,
                          sizeof (associations[0]) * (size_t)(sizeAssociations *= 2));
 	  associations[numAssociations]
             = streamUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos,

@@ -178,7 +178,7 @@ varMapGen(int *vSizes, int *sSizes, int *varMapping,
 	weightsStreams[i] += * ( vSizes + offset++ );
     }
 
-  double *w = (double *)malloc((size_t)nNodes * sizeof ( double ));
+  double *w = (double *) Malloc((size_t)nNodes * sizeof ( double ));
   for ( j = 0; j < nNodes; j++ )
     nPEs += * ( nodeSizes + j );
 

@@ -70,7 +70,7 @@ static char *
 new_refcount_string(size_t len)
 {
   struct refcount_string *container
-    = (struct refcount_string *)malloc(sizeof (*container) + len + 1);
+    = (struct refcount_string *) Malloc(sizeof (*container) + len + 1);
   container->ref_count = 1;
   return container->string;
 }
