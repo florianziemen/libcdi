@@ -421,7 +421,7 @@ int cdiStreamDefTimestep_(stream_t *streamptr, int tsID);
 
 void cdiStreamSync_(stream_t *streamptr);
 
-char *cdiUnitNamePtr(int cdi_unit);
+const char *cdiUnitNamePtr(int cdi_unit);
 
 void zaxisGetIndexList(int nzaxis, int *zaxisIndexList);
 

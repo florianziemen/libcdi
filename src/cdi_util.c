@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "cdi_int.h"
+
 void cdiDecodeParam(int param, int *pnum, int *pcat, int *pdis)
 {
   unsigned uparam = (unsigned)param;
