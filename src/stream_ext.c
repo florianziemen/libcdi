@@ -2,6 +2,10 @@
 #  include "config.h"
 #endif
 
+#ifdef __clang__
+#pragma GCC diagnostic ignored "-Wc11-extensions"
+#endif
+
 #include <limits.h>
 #include <stdio.h>
 #include <string.h>
