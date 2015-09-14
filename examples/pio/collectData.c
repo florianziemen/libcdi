@@ -38,8 +38,8 @@ static void modelRun(MPI_Comm commModel)
     nlat        = 6,
     maxlev      = 5 };
 
-  static int nlev[nVars]    = {1,1,5,5,2};
-  const static char * name        = "example";
+  static int nlev[nVars]  = {1,1,5,5,2};
+  static const char *name = "example";
 
   int gridID, zaxisID[nVars], taxisID;
   int vlistID, varID[nVars], streamID, tsID, tfID = 0;

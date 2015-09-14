@@ -1224,8 +1224,7 @@ static const PAR cosmo250[] = {
 };
 
 
-const static void
-tableDefault(void)
+static void tableDefault(void)
 {
   int tableID, instID, modelID;
 
