@@ -88,11 +88,11 @@ int main(void)
 
   for ( varID = 0; varID < nvars; varID++ )
     {
-      int gridID   = vlistInqVarGrid(vlistID, varID);
-      int zaxisID  = vlistInqVarZaxis(vlistID, varID);
-      size_t gridsize = (size_t)gridInqSize(gridID);
-      size_t nlevel = (size_t)zaxisInqSize(zaxisID);
-      if ( gridsize * nlevel > datasize ) datasize = gridsize * nlevel;
+      int varGridID   = vlistInqVarGrid(vlistID, varID);
+      int varZaxisID  = vlistInqVarZaxis(vlistID, varID);
+      size_t gridsize = (size_t)gridInqSize(varGridID);
+      size_t varNlevel = (size_t)zaxisInqSize(varZaxisID);
+      if ( gridsize * varNlevel > datasize ) datasize = gridsize * varNlevel;
     }
 
   data = (double *) malloc(datasize*sizeof(double));
