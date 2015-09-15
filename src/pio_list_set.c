@@ -55,12 +55,12 @@ listSetDelete(listSet *q)
         {
           succ = curr->next;
           ( *( q->valDestroy )) ( curr->val );
-          free ( curr );
+          Free( curr );
           curr = succ;
         }
     }
 
-  free ( q );
+  Free( q );
 
   return;
 }

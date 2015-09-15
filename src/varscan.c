@@ -1247,7 +1247,7 @@ void varDefOptGribInt(int varID, int tile_index, long lval, const char *keyword)
   else
     {
       if (vartable[varID].opt_grib_kvpair[idx].keyword)
-        free (vartable[varID].opt_grib_kvpair[idx].keyword);
+        Free(vartable[varID].opt_grib_kvpair[idx].keyword);
     }
   vartable[varID].opt_grib_kvpair[idx].data_type     = t_int;
   vartable[varID].opt_grib_kvpair[idx].int_val       = (int) lval;
@@ -1278,7 +1278,7 @@ void varDefOptGribDbl(int varID, int tile_index, double dval, const char *keywor
   else
     {
       if (vartable[varID].opt_grib_kvpair[idx].keyword)
-        free (vartable[varID].opt_grib_kvpair[idx].keyword);
+        Free(vartable[varID].opt_grib_kvpair[idx].keyword);
     }
   vartable[varID].opt_grib_kvpair[idx].data_type     = t_double;
   vartable[varID].opt_grib_kvpair[idx].dbl_val       = (int) dval;

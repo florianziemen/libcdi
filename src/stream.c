@@ -1028,9 +1028,9 @@ void streamClose(int streamID)
   for ( index = 0; index < streamptr->ntsteps; ++index )
     {
       if ( streamptr->tsteps[index].records )
-	free(streamptr->tsteps[index].records);
+        Free(streamptr->tsteps[index].records);
       if ( streamptr->tsteps[index].recIDs )
-	free(streamptr->tsteps[index].recIDs);
+        Free(streamptr->tsteps[index].recIDs);
       taxisDestroyKernel(&streamptr->tsteps[index].taxis);
     }
 
@@ -1069,7 +1069,7 @@ static void stream_delete_entry(stream_t *streamptr)
   xassert ( streamptr );
 
   idx = streamptr->self;
-  free ( streamptr );
+  Free( streamptr );
   reshRemove ( idx, &streamOps );
 
   if ( CDI_Debug )

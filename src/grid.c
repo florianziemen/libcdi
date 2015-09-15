@@ -504,7 +504,7 @@ void gridDestroyKernel( grid_t * gridptr )
   if ( gridptr->rowlon    ) Free(gridptr->rowlon);
   if ( gridptr->reference ) Free(gridptr->reference);
 
-  free ( gridptr );
+  Free( gridptr );
 
   reshRemove ( id, &gridOps );
 }

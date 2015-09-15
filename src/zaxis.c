@@ -302,13 +302,13 @@ static void zaxisDestroyKernel( zaxis_t * zaxisptr )
 
   int id = zaxisptr->self;
 
-  if ( zaxisptr->vals )    free ( zaxisptr->vals );
-  if ( zaxisptr->lbounds ) free ( zaxisptr->lbounds );
-  if ( zaxisptr->ubounds ) free ( zaxisptr->ubounds );
-  if ( zaxisptr->weights ) free ( zaxisptr->weights );
-  if ( zaxisptr->vct )     free ( zaxisptr->vct );
+  if ( zaxisptr->vals )    Free( zaxisptr->vals );
+  if ( zaxisptr->lbounds ) Free( zaxisptr->lbounds );
+  if ( zaxisptr->ubounds ) Free( zaxisptr->ubounds );
+  if ( zaxisptr->weights ) Free( zaxisptr->weights );
+  if ( zaxisptr->vct )     Free( zaxisptr->vct );
 
-  free ( zaxisptr );
+  Free( zaxisptr );
 
   reshRemove ( id, &zaxisOps );
 }

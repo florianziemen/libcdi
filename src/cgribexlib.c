@@ -7159,7 +7159,7 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 	    pbuf[3*i+2] = dest[2*nelem+i];
 	  }
 	memcpy(dest, pbuf, tmpLen);
-	free(pbuf);
+        Free(pbuf);
       }
 #endif
 

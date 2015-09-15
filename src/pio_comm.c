@@ -108,15 +108,15 @@ void commDestroy ( void )
 
   xassert ( info != NULL );
 
-  if ( info->nodeMap   != NULL ) free ( info->nodeMap );
-  if ( info->nodeSizes != NULL ) free ( info->nodeSizes );
+  if ( info->nodeMap   != NULL ) Free( info->nodeMap );
+  if ( info->nodeSizes != NULL ) Free( info->nodeSizes );
 
   if ( info->commsIO != NULL )
     {
       for ( collID = 0; collID < info->nProcsColl; collID++ )
 	if ( info->commsIO[collID] != MPI_COMM_NULL )
 	  xmpi(MPI_Comm_free(info->commsIO + collID));
-      free ( info->commsIO );
+      Free( info->commsIO );
       info->commsIO = NULL;
     }
 
@@ -140,7 +140,7 @@ void commDestroy ( void )
       info->commPio = MPI_COMM_NULL;
     }
 
-  free ( info );
+  Free( info );
   info = NULL;
 }
 
@@ -633,9 +633,9 @@ void     commEvalPhysNodes  ( void )
     for ( IOID = info->nProcsModel; IOID < info->sizeGlob; IOID++ )
       xmpi ( MPI_Send ( info->nodeMap, info->nProcsColl, MPI_INTEGER, 
                         IOID, NODEMAP, info->commGlob ));
-  free ( p2 );
-  free ( p1 );
-  free ( nodeInfo );
+  Free( p2 );
+  Free( p1 );
+  Free( nodeInfo );
 }
 
 
@@ -735,7 +735,7 @@ void     commDefCommsIO     ( void )
     }
 
   xmpi ( MPI_Group_free ( &groupGlob ));
-  free ( ranks );
+  Free( ranks );
 
   commPrint ( stdout );
 }

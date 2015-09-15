@@ -101,7 +101,7 @@ destroyAFiledataMPINONB(void *v)
   dbuffer_cleanup ( & ( of->db1 ));
   dbuffer_cleanup ( & ( of->db2 ));
 
-  free ( of );
+  Free( of );
 
   xdebug ( "IOPE%d: closed file, cleaned up, return",
            rankNode );

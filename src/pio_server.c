@@ -132,7 +132,7 @@ collDefBufferSizes()
         + (2 * CDI_MAX_NAME + sizeof (taxis_t));
       rxWin[root].dictSize += numRPCFuncs;
     }
-  free ( streamIndexList );
+  Free( streamIndexList );
 
   for ( modelID = 0; modelID < nProcsModel; modelID++ )
     {

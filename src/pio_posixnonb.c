@@ -203,7 +203,7 @@ pioWriterStdIO(void)
 
 	  writeP(bfd, amount);
 	  
-	  free ( messageBuffer );
+	  Free( messageBuffer );
 
 	  break;
 

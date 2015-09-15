@@ -440,8 +440,8 @@ void cdi_create_records(stream_t *streamptr, int tsID)
   unsigned nrecords, maxrecords;
   record_t *records;
 
-  tsteps_t* sourceTstep = streamptr->tsteps;
-  tsteps_t* destTstep = sourceTstep + tsID;
+  tsteps_t *sourceTstep = streamptr->tsteps;
+  tsteps_t *destTstep = sourceTstep + tsID;
 
   if ( destTstep->records ) return;
 
@@ -483,7 +483,7 @@ void cdi_create_records(stream_t *streamptr, int tsID)
   //  printf("tsID, nrecords %d %d\n", tsID, nrecords);
 
   if ( maxrecords > 0 )
-    records = (record_t *) Malloc(maxrecords * sizeof(record_t));
+    records = (record_t *) Malloc(maxrecords*sizeof(record_t));
   else
     records = NULL;
 
@@ -502,7 +502,7 @@ void cdi_create_records(stream_t *streamptr, int tsID)
 
       for ( unsigned recID = 0; recID < maxrecords; recID++ )
 	{
-          record_t* curRecord = &sourceTstep->records[recID];
+          record_t *curRecord = &sourceTstep->records[recID];
           destTstep->records[recID].used = curRecord->used;
           if ( curRecord->used != CDI_UNDEFID && curRecord->varID != -1 ) /* curRecord->varID = -1 for write mode !!! */
             {

@@ -126,7 +126,7 @@ void pcdiDebugComm ( const char *filename, const char *functionname, int line, M
             "pe%d in %s, %s, line %d: comm: name=%s, size=%d, rank=%d\n",
             rankGlob, functionname, filename, line,
             name, size, rank );
-  free ( name );
+  Free( name );
 
 }
 

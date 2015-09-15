@@ -37,7 +37,7 @@ typedef struct
   size_t    nobj;
   int       mtype;
   int       line;
-  char      file[MEM_MAXNAME];
+  char      filename[MEM_MAXNAME];
   char      functionname[MEM_MAXNAME];
 }
 MemTable_t;
@@ -53,6 +53,17 @@ static size_t  MaxMemUsed    = 0;
 
 static int     MEM_Debug     = 0;   /* If set to 1, debugging */
 static int     MEM_Info      = 0;   /* If set to 1, print mem table at exit */
+
+static
+const char *get_filename(const char *file)
+{
+  char *fnptr = strrchr(file, '/');
+  if ( fnptr ) fnptr++;
+  else         fnptr = (char *) file;
+
+  return fnptr;
+}
+
 
 void memDebug(int debug)
 {
@@ -81,7 +92,7 @@ void memError(const char *functionname, const char *file, int line, size_t size)
 {
   printf("\n");
   fprintf(stderr, "Error (%s) : Allocation of %zu bytes failed. [ line %d file %s ]\n",
-	  functionname, size, line, file);
+	  functionname, size, line, get_filename(file));
 
   if ( errno ) perror("System error message ");
 
@@ -100,7 +111,7 @@ void memListPrintEntry(int mtype, int item, size_t size, void *ptr,
   if ( file != NULL )
     {
       fprintf(stderr, " line %4d", line);
-      fprintf(stderr, " file %s", file);
+      fprintf(stderr, " file %s", get_filename(file));
     }
   if ( functionname != NULL )
     fprintf(stderr, " (%s)", functionname);
@@ -118,7 +129,7 @@ void memListPrintTable(void)
         memListPrintEntry(memTable[memID].mtype, memTable[memID].item,
                           memTable[memID].size*memTable[memID].nobj,
                           memTable[memID].ptr, memTable[memID].functionname,
-                          memTable[memID].file, memTable[memID].line);
+                          memTable[memID].filename, memTable[memID].line);
     }
 
   if ( MemObjs )
@@ -271,15 +282,16 @@ int memListNewEntry(int mtype, void *ptr, size_t size, size_t nobj,
 
   if ( file )
     {
-      size_t len = strlen(file);
+      const char *filename = get_filename(file);
+      size_t len = strlen(filename);
       if ( len > MEM_MAXNAME-1 ) len = MEM_MAXNAME-1;
 
-      (void) memcpy(memTable[memID].file, file, len);
-      memTable[memID].file[len] = '\0';
+      (void) memcpy(memTable[memID].filename, filename, len);
+      memTable[memID].filename[len] = '\0';
     }
   else
     {
-      (void) strcpy(memTable[memID].file, "unknown");
+      (void) strcpy(memTable[memID].filename, "unknown");
     }
 
   if ( functionname )
@@ -336,15 +348,16 @@ int memListChangeEntry(void *ptrold, void *ptr, size_t size,
 
       if ( file )
 	{
-	  size_t len = strlen(file);
+          const char *filename = get_filename(file);
+	  size_t len = strlen(filename);
 	  if ( len > MEM_MAXNAME-1 ) len = MEM_MAXNAME-1;
 
-	  (void) memcpy(memTable[memID].file, file, len);
-	  memTable[memID].file[len] = '\0';
+	  (void) memcpy(memTable[memID].filename, filename, len);
+	  memTable[memID].filename[len] = '\0';
 	}
       else
 	{
-	  (void) strcpy(memTable[memID].file, "unknown");
+	  (void) strcpy(memTable[memID].filename, "unknown");
 	}
 
       if ( functionname )
@@ -458,7 +471,7 @@ void *memRealloc(void *ptrold, size_t size, const char *file, const char *functi
 	memError(functionname, file, line, size);
     }
   else
-    fprintf(stderr, "Warning (%s) : Allocation of 0 bytes! [ line %d file %s ]\n", functionname, line, file);
+    fprintf(stderr, "Warning (%s) : Allocation of 0 bytes! [ line %d file %s ]\n", functionname, line, get_filename(file));
 
   return ptr;
 }
@@ -481,7 +494,7 @@ void memFree(void *ptr, const char *file, const char *functionname, int line)
 	{
 	  if ( ptr && MEM_Debug  )
 	    fprintf(stderr, "%s info: memory entry at %p not found. [line %4d file %s (%s)]\n",
-		    __func__, ptr, line, file, functionname);
+		    __func__, ptr, line, get_filename(file), functionname);
 	}
     }
 

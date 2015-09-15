@@ -110,8 +110,8 @@ void dbuffer_cleanup ( struct dBuffer **dbuffer )
 
   db = *dbuffer;
 
-  free ( db->buffer );
-  free ( db );
+  Free( db->buffer );
+  Free( db );
 
   return;
 }

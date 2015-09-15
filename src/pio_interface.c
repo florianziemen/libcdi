@@ -186,7 +186,7 @@ varMapGen(int *vSizes, int *sSizes, int *varMapping,
     w[j] = ( double ) * ( nodeSizes + j ) / ( double ) nPEs;
 
   mapProblems(weightsStreams, streamMapping, (int)nStreams, nNodes, w);
-  free ( w );
+  Free( w );
 
   for ( i = 0; i < nNodes; i++ )
     {
@@ -228,9 +228,9 @@ varMapGen(int *vSizes, int *sSizes, int *varMapping,
 
       summandRank += * ( nodeSizes + i );
 
-      free ( w );
-      free ( varMappingNode );
-      free ( weightsVarsNode );
+      Free( w );
+      Free( varMappingNode );
+      Free( weightsVarsNode );
     }
 
   if ( ddebug )
@@ -300,11 +300,11 @@ varsMapNDeco(int nNodes, int *nodeSizes)
              "PE%d collects no data",
              commCollID2RankGlob(j));
 
-  if ( varMapping )   free ( varMapping );
-  if ( varSizes )     free ( varSizes );
-  if ( collectsData ) free ( collectsData );
-  if ( streamSizes )  free ( streamSizes );
-  if ( resHs )        free ( resHs );
+  if ( varMapping )   Free( varMapping );
+  if ( varSizes )     Free( varSizes );
+  if ( collectsData ) Free( collectsData );
+  if ( streamSizes )  Free( streamSizes );
+  if ( resHs )        Free( resHs );
 
   xdebug("%s", "RETURN");
 }
@@ -414,7 +414,7 @@ modelWinDefBufferSizes(void)
       sumWinBufferSize += (size_t)txWin[collID].size;
     }
   Free(collIndex);
-  free ( streamIndexList );
+  Free( streamIndexList );
 
   xdebug("sumWinBufferSize=%zu, MAXWINBUFFERSIZE=%zu", sumWinBufferSize,
          (size_t)MAXWINBUFFERSIZE);

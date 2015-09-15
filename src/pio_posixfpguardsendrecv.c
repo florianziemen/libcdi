@@ -142,7 +142,7 @@ destroyBFiledataPF(void *v)
   int iret = 0;
   bFiledataPF *bfd = (bFiledataPF * ) v;
   
-  free ( bfd );
+  Free( bfd );
 
   return iret;
 }
