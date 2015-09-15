@@ -256,6 +256,10 @@ pioSendOpen(const char *filename, const char *mode)
   iret = dbuffer_push(afd->db, message, strlen(message) + 1);
   xassert(iret == 0);
 
+#ifdef __clang__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunreachable-code"
+#endif
   if ( ddebug )
     {
       size_t l = strlen(filename) + strlen(message) + 2;
@@ -266,6 +270,9 @@ pioSendOpen(const char *filename, const char *mode)
              filename, temp);
       Free(temp);
     }
+#ifdef __clang__
+#pragma GCC diagnostic pop
+#endif
   sendP(afd, afd->fileID);
   xmpi(MPI_Barrier(commCollectors));
   return id;
