@@ -1699,7 +1699,7 @@ double gridInqAngle(int gridID)
 @Parameter
     @Item  Grid identifier
 
-@EndFunction
+@EndFunction<
 */
 void gridDefAngle(int gridID, double angle)
 {
@@ -2052,7 +2052,7 @@ int compareXYvals2(int gridID, int gridsize, double *xvals, double *yvals)
 	differ = 1;
     }
 
-  return (differ);
+  return differ;
 }
 
 
@@ -2184,21 +2184,26 @@ int gridCompare(int gridID, const grid_t *grid)
 
               if ( !differ && memcmp(uuidOfHGrid, grid->uuid, CDI_UUID_SIZE) != 0 ) differ = 1;
 
-              if ( !differ && grid->nvertex != gridInqNvertex(gridID) ) differ = 1;
-
-              if ( !differ && grid->number != gridInqNumber(gridID) ) differ = 1;
-              if ( !differ && grid->position != gridInqPosition(gridID) ) differ = 1;
-
-              if ( !differ && grid->nvertex != gridInqNvertex(gridID) ) differ = 1;
-              if ( !differ && grid->number != gridInqNumber(gridID) ) differ = 1;
-              if ( !differ && grid->number > 0 && grid->position != gridInqPosition(gridID) ) differ = 1;
-	      if ( !differ )
-		differ = compareXYvals2(gridID, grid->size, grid->xvals, grid->yvals);
-	    }
+              if ( !differ && uuidOfHGrid[0] &&
+                   ((grid->nvertex == 0 && gridInqNvertex(gridID) != 0) || (grid->nvertex != 0 && gridInqNvertex(gridID) == 0)) &&
+                   ((grid->number == 0 && gridInqNumber(gridID) != 0) || (grid->number != 0 && gridInqNumber(gridID) == 0)) &&
+                   ((grid->xvals == NULL && gridInqXvalsPtr(gridID) != NULL) || (grid->xvals != NULL && gridInqXvalsPtr(gridID) == NULL)) &&
+                   ((grid->yvals == NULL && gridInqYvalsPtr(gridID) != NULL) || (grid->yvals != NULL && gridInqYvalsPtr(gridID) == NULL)) )
+                {
+                }
+              else
+                {
+                  if ( !differ && grid->nvertex != gridInqNvertex(gridID) ) differ = 1;
+                  if ( !differ && grid->number != gridInqNumber(gridID) ) differ = 1;
+                  if ( !differ && grid->number > 0 && grid->position != gridInqPosition(gridID) ) differ = 1;
+                  if ( !differ )
+                    differ = compareXYvals2(gridID, grid->size, grid->xvals, grid->yvals);
+                }
+              }
 	}
     }
 
-  return (differ);
+  return differ;
 }
 
 

@@ -2,6 +2,10 @@
 
 	* Version 1.7.0 released
 
+2015-09-15  Uwe Schulzweida
+
+	* gridCompare: check only UUID of unstructured grids if coordinates are missing
+
 2015-09-10  Uwe Schulzweida
 
 	* GRIB rotated grids: invert angle of rotation (north to south pole) (bug fix)
