@@ -15,6 +15,10 @@
 #include <cdi.h>
 #include <cdi_uuid.h>
 
+#ifdef __clang__
+#pragma GCC diagnostic ignored "-Wc11-extensions"
+#endif
+
 int      vlistInqVarMissvalUsed(int vlistID, int varID);
 #ifndef DBL_IS_NAN
 #if  defined  (HAVE_DECL_ISNAN)
