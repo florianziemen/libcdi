@@ -32,7 +32,15 @@
 #include "pio_rpc.h"
 #include "pio_util.h"
 #ifndef HAVE_NETCDF_PAR_H
+/* the following causes netcdf.h to not try to redefine MPI_Comm etc. */
+#ifdef __clang__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-macros"
+#endif
 #define MPI_INCLUDED
+#ifdef __clang__
+#pragma GCC diagnostic pop
+#endif
 #endif
 #include "pio_cdf_int.h"
 #include "resource_handle.h"
