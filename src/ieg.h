@@ -74,23 +74,21 @@ const char *iegLibraryVersion(void);
 void iegDebug(int debug);
 int  iegCheckFiletype(int fileID, int *swap);
 
-iegrec_t *iegNew(void);
-void iegDelete(iegrec_t *iegp);
-void iegInit(iegrec_t *iegp);
-void iegInitMem(iegrec_t *iegp);
+void *iegNew(void);
+void iegDelete(void *ieg);
+void iegInitMem(void *ieg);
 
-int  iegRead(int fileID, iegrec_t *iegp);
-int  iegWrite(int fileID, iegrec_t *iegp);
+int  iegRead(int fileID, void *ieg);
+int  iegWrite(int fileID, void *ieg);
 
-void iegCopyMeta(iegrec_t *diegp, iegrec_t *siegp);
-int  iegInqHeader(iegrec_t *iegp, int *header);
-int  iegInqDataSP(iegrec_t *iegp, float *data);
-int  iegInqDataDP(iegrec_t *iegp, double *data);
+void iegCopyMeta(void *dieg, void *sieg);
+int  iegInqHeader(void *ieg, int *header);
+int  iegInqDataSP(void *ieg, float *data);
+int  iegInqDataDP(void *ieg, double *data);
 
-int  iegDefHeader(iegrec_t *iegp, const int *header);
-int  iegDefDataSP(iegrec_t *iegp, const float *data);
-int  iegDefDataDP(iegrec_t *iegp, const double *data);
-
+int  iegDefHeader(void *ieg, const int *header);
+int  iegDefDataSP(void *ieg, const float *data);
+int  iegDefDataDP(void *ieg, const double *data);
 
 #endif  /* _IEG_H */
 /*

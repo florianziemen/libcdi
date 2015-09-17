@@ -6,6 +6,8 @@
 
 AC_INIT([cdi], [1.7.0rc5], [http://mpimet.mpg.de/cdi])
 
+AC_DEFINE_UNQUOTED(CDI, ["$PACKAGE_VERSION"], [CDI version])
+
 echo "configuring ${PACKAGE_NAME} ${PACKAGE_VERSION}"
 
 CONFIG_ABORT=yes

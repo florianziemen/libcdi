@@ -111,7 +111,7 @@ void iegReadRecord(stream_t *streamptr, double *data, int *nmiss)
   int varID, gridID;
   int i, size;
   double missval;
-  iegrec_t *iegp = (iegrec_t*) streamptr->record->exsep;
+  void *iegp = streamptr->record->exsep;
 
   vlistID = streamptr->vlistID;
   fileID  = streamptr->fileID;
@@ -1318,7 +1318,7 @@ void iegReadVarDP(stream_t *streamptr, int varID, double *data, int *nmiss)
   int recID;
   int i;
   double missval;
-  iegrec_t *iegp = (iegrec_t*) streamptr->record->exsep;
+  void *iegp = streamptr->record->exsep;
 
   vlistID  = streamptr->vlistID;
   fileID   = streamptr->fileID;
@@ -1364,7 +1364,7 @@ void iegReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, 
   int recID;
   int i;
   double missval;
-  iegrec_t *iegp = (iegrec_t*) streamptr->record->exsep;
+  void *iegp = streamptr->record->exsep;
 
   vlistID  = streamptr->vlistID;
   fileID   = streamptr->fileID;

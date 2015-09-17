@@ -233,6 +233,7 @@ src/docu -text
 src/dtypes.h -text
 src/error.c -text
 src/error.h -text
+src/exse.h -text
 src/extra.h -text
 src/extralib.c -text
 src/file.c -text

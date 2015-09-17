@@ -21,19 +21,19 @@ void srvDebug(int debug);
 
 int  srvCheckFiletype(int fileID, int *swap);
 
-srvrec_t *srvNew(void);
-void srvDelete(srvrec_t *srvp);
+void *srvNew(void);
+void srvDelete(void *srv);
 
-int  srvRead(int fileID, srvrec_t *srvp);
-void srvWrite(int fileID, srvrec_t *srvp);
+int  srvRead(int fileID, void *srv);
+void srvWrite(int fileID, void *srv);
 
-int  srvInqHeader(srvrec_t *srvp, int *header);
-int  srvInqDataSP(srvrec_t *srvp, float *data);
-int  srvInqDataDP(srvrec_t *srvp, double *data);
+int  srvInqHeader(void *srv, int *header);
+int  srvInqDataSP(void *srv, float *data);
+int  srvInqDataDP(void *srv, double *data);
 
-int  srvDefHeader(srvrec_t *srvp, const int *header);
-int  srvDefDataSP(srvrec_t *srvp, const float *data);
-int  srvDefDataDP(srvrec_t *srvp, const double *data);
+int  srvDefHeader(void *srv, const int *header);
+int  srvDefDataSP(void *srv, const float *data);
+int  srvDefDataDP(void *srv, const double *data);
 
 
 #endif  /* _SERVICE_H */

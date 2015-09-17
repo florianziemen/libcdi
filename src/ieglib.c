@@ -3,17 +3,17 @@
 #endif
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
 #include <ctype.h>
 
 #include "dmemory.h"
-
 #include "ieg.h"
 #include "error.h"
 #include "file.h"
 #include "binary.h"
-#include "stream_fcommon.h"
+#include "exse.h"
 #include "swap.h"
 
 
@@ -24,30 +24,26 @@ static int iegDefaultDprec = 0;
 /*
  * A version string.
  */
-
 #undef  LIBVERSION
-#define LIBVERSION      1.3.3
+#define LIBVERSION      1.4.0
 #define XSTRING(x)	#x
 #define STRING(x)	XSTRING(x)
 static const char ieg_libvers[] = STRING(LIBVERSION) " of " __DATE__ " " __TIME__;
 
 const char *iegLibraryVersion(void)
 {
-  return (ieg_libvers);
+  return ieg_libvers;
 }
 
 
-int IEG_Debug = 0;    /* If set to 1, debugging */
+static int IEG_Debug = 0;    /* If set to 1, debugging */
 
-
-
-void iegLibInit()
+static
+void iegLibInit(void)
 {
-  char *envString;
   const char *envName = "IEG_PRECISION";
 
-
-  envString = getenv(envName);
+  char *envString = getenv(envName);
   if ( envString )
     {
       int pos;
@@ -64,8 +60,8 @@ void iegLibInit()
 	      {
 		switch ( (int) envString[pos+1] )
 		  {
-		  case '4': iegDefaultDprec = SINGLE_PRECISION; break;
-		  case '8': iegDefaultDprec = DOUBLE_PRECISION; break;
+		  case '4': iegDefaultDprec = EXSE_SINGLE_PRECISION; break;
+		  case '8': iegDefaultDprec = EXSE_DOUBLE_PRECISION; break;
 		  default:
 		    Message("Invalid digit in %s: %s", envName, envString);
 		  }
@@ -93,7 +89,7 @@ void iegDebug(int debug)
     Message("debug level %d", debug);
 }
 
-
+static
 void iegInit(iegrec_t *iegp)
 {
   iegp->checked    = 0;
@@ -106,31 +102,33 @@ void iegInit(iegrec_t *iegp)
 }
 
 
-void iegInitMem(iegrec_t *iegp)
+void iegInitMem(void *ieg)
 {
+  iegrec_t *iegp = (iegrec_t *) ieg;
+
   memset(iegp->ipdb, 0, sizeof(iegp->ipdb));
   memset(iegp->igdb, 0, sizeof(iegp->igdb));
   memset(iegp->vct,  0, sizeof(iegp->vct));
 }
 
 
-iegrec_t *iegNew(void)
+void *iegNew(void)
 {
-  iegrec_t *iegp;
-
   if ( ! initIegLib ) iegLibInit();
 
-  iegp = (iegrec_t *) Malloc(sizeof(iegrec_t));
+  iegrec_t *iegp = (iegrec_t *) Malloc(sizeof(iegrec_t));
 
   iegInit(iegp);
   iegInitMem(iegp);
 
-  return (iegp);
+  return (void*)iegp;
 }
 
 
-void iegDelete(iegrec_t *iegp)
+void iegDelete(void *ieg)
 {
+  iegrec_t *iegp = (iegrec_t *) ieg;
+
   if ( iegp )
     {
       if ( iegp->buffer ) Free(iegp->buffer);
@@ -141,17 +139,15 @@ void iegDelete(iegrec_t *iegp)
 
 int iegCheckFiletype(int fileID, int *swap)
 {
-  size_t blocklen = 0;
-  size_t sblocklen = 0;
   size_t data = 0;
   size_t dimx = 0, dimy = 0;
   size_t fact = 0;
   unsigned char buffer[1048], *pbuf;
 
-  if ( fileRead(fileID, buffer, 4) != 4 ) return (0);
+  if ( fileRead(fileID, buffer, 4) != 4 ) return 0;
 
-  blocklen  = get_UINT32(buffer);
-  sblocklen = get_SUINT32(buffer);
+  size_t blocklen  = get_UINT32(buffer);
+  size_t sblocklen = get_SUINT32(buffer);
 
   if ( IEG_Debug )
     Message("blocklen = %d sblocklen = %d", blocklen, sblocklen);
@@ -160,7 +156,7 @@ int iegCheckFiletype(int fileID, int *swap)
     {
      *swap = 0;
       fact = 4;
-      if ( fileRead(fileID, buffer, blocklen+8) != blocklen+8 ) return (0);
+      if ( fileRead(fileID, buffer, blocklen+8) != blocklen+8 ) return 0;
       pbuf = buffer+(37+4)*4;    dimx = (size_t) get_UINT32(pbuf);
       pbuf = buffer+(37+5)*4;    dimy = (size_t) get_UINT32(pbuf);
       pbuf = buffer+blocklen+4;  data = (size_t) get_UINT32(pbuf);
@@ -169,7 +165,7 @@ int iegCheckFiletype(int fileID, int *swap)
     {
      *swap = 0;
       fact = 8;
-      if ( fileRead(fileID, buffer, blocklen+8) != blocklen+8 ) return (0);
+      if ( fileRead(fileID, buffer, blocklen+8) != blocklen+8 ) return 0;
       pbuf = buffer+(37+4)*4;    dimx = (size_t) get_UINT32(pbuf);
       pbuf = buffer+(37+5)*4;    dimy = (size_t) get_UINT32(pbuf);
       pbuf = buffer+blocklen+4;  data = (size_t) get_UINT32(pbuf);
@@ -178,7 +174,7 @@ int iegCheckFiletype(int fileID, int *swap)
     {
      *swap = 1;
       fact = 4;
-      if ( fileRead(fileID, buffer, sblocklen+8) != sblocklen+8 ) return (0);
+      if ( fileRead(fileID, buffer, sblocklen+8) != sblocklen+8 ) return 0;
       pbuf = buffer+(37+4)*4;     dimx = (size_t) get_SUINT32(pbuf);
       pbuf = buffer+(37+5)*4;     dimy = (size_t) get_SUINT32(pbuf);
       pbuf = buffer+sblocklen+4;  data = (size_t) get_SUINT32(pbuf);
@@ -187,7 +183,7 @@ int iegCheckFiletype(int fileID, int *swap)
     {
      *swap = 1;
       fact = 8;
-      if ( fileRead(fileID, buffer, sblocklen+8) != sblocklen+8 ) return (0);
+      if ( fileRead(fileID, buffer, sblocklen+8) != sblocklen+8 ) return 0;
       pbuf = buffer+(37+4)*4;     dimx = (size_t) get_SUINT32(pbuf);
       pbuf = buffer+(37+5)*4;     dimy = (size_t) get_SUINT32(pbuf);
       pbuf = buffer+sblocklen+4;  data = (size_t) get_SUINT32(pbuf);
@@ -203,12 +199,15 @@ int iegCheckFiletype(int fileID, int *swap)
       Message("dimx = %lu dimy = %lu data = %lu", dimx, dimy, data);
     }
 
-  return (found);
+  return found;
 }
 
 
-void iegCopyMeta(iegrec_t *diegp, iegrec_t *siegp)
+void iegCopyMeta(void *dieg, void *sieg)
 {
+  iegrec_t *diegp = (iegrec_t *) dieg;
+  iegrec_t *siegp = (iegrec_t *) sieg;
+
   /*  diegp->byteswap = siegp->byteswap; */
   diegp->dprec    = siegp->dprec;
   diegp->refval   = siegp->refval;
@@ -218,26 +217,20 @@ void iegCopyMeta(iegrec_t *diegp, iegrec_t *siegp)
   memcpy(diegp->vct,  siegp->vct,  sizeof(siegp->vct));
 }
 
-
-int iegInqData(iegrec_t *iegp, int prec, void *data)
+static
+int iegInqData(void *ieg, int prec, void *data)
 {
-  size_t datasize;
+  iegrec_t *iegp = (iegrec_t *) ieg;
   size_t i;
   int ierr = 0;
-  int dprec;
-  void *buffer;
   int byteswap = iegp->byteswap;
-
-
-  datasize = iegp->datasize;
-
-  buffer = iegp->buffer;
-
-  dprec = iegp->dprec;
+  size_t datasize = iegp->datasize;
+  void *buffer = iegp->buffer;
+  int dprec = iegp->dprec;
 
   switch ( dprec )
     {
-    case SINGLE_PRECISION:
+    case EXSE_SINGLE_PRECISION:
       {
 	if ( sizeof(FLT32) == 4 )
 	  {
@@ -255,7 +248,7 @@ int iegInqData(iegrec_t *iegp, int prec, void *data)
 	  }
 	break;
       }
-    case DOUBLE_PRECISION:
+    case EXSE_DOUBLE_PRECISION:
 	if ( sizeof(FLT64) == 8 )
 	  {
 	    if ( byteswap ) swap8byte(buffer, datasize);
@@ -278,31 +271,28 @@ int iegInqData(iegrec_t *iegp, int prec, void *data)
       }
     }
 
-  return (ierr);
+  return ierr;
 }
 
 
-int iegInqDataSP(iegrec_t *iegp, float *data)
+int iegInqDataSP(void *ieg, float *data)
 {
-  return (iegInqData(iegp, SINGLE_PRECISION, (void *) data));
+  return iegInqData(ieg, EXSE_SINGLE_PRECISION, (void *) data);
 }
 
 
-int iegInqDataDP(iegrec_t *iegp, double *data)
+int iegInqDataDP(void *ieg, double *data)
 {
-  return (iegInqData(iegp, DOUBLE_PRECISION, (void *) data));
+  return iegInqData(ieg, EXSE_DOUBLE_PRECISION, (void *) data);
 }
 
 
-int iegDefData(iegrec_t *iegp, int prec, const void *data)
+int iegDefData(void *ieg, int prec, const void *data)
 {
-  size_t datasize;
-  size_t blocklen;
-  size_t buffersize;
+  iegrec_t *iegp = (iegrec_t *) ieg;
   size_t i;
   int dprec;
   void *buffer;
-
 
   if ( iegDefaultDprec ) dprec = iegDefaultDprec;
   else                   dprec = iegp->dprec;
@@ -311,12 +301,12 @@ int iegDefData(iegrec_t *iegp, int prec, const void *data)
 
   iegp->dprec = dprec;
 
-  datasize = (size_t)IEG_G_NumLon(iegp->igdb) * (size_t)IEG_G_NumLat(iegp->igdb);
-  blocklen = datasize * (size_t)dprec;
+  size_t datasize = (size_t)IEG_G_NumLon(iegp->igdb) * (size_t)IEG_G_NumLat(iegp->igdb);
+  size_t blocklen = datasize * (size_t)dprec;
 
   iegp->datasize = datasize;
 
-  buffersize = iegp->buffersize;
+  size_t buffersize = iegp->buffersize;
 
   if ( buffersize != blocklen )
     {
@@ -331,7 +321,7 @@ int iegDefData(iegrec_t *iegp, int prec, const void *data)
 
   switch ( dprec )
     {
-    case SINGLE_PRECISION:
+    case EXSE_SINGLE_PRECISION:
       {
 	if ( dprec == prec )
 	  memcpy(buffer, data, datasize*sizeof(FLT32));
@@ -341,7 +331,7 @@ int iegDefData(iegrec_t *iegp, int prec, const void *data)
 
 	break;
       }
-    case DOUBLE_PRECISION:
+    case EXSE_DOUBLE_PRECISION:
       {
 	if ( dprec == prec )
 	  memcpy(buffer, data, datasize*sizeof(FLT64));
@@ -358,31 +348,30 @@ int iegDefData(iegrec_t *iegp, int prec, const void *data)
       }
     }
 
-  return (0);
+  return 0;
 }
 
 
-int iegDefDataSP(iegrec_t *iegp, const float *data)
+int iegDefDataSP(void *ieg, const float *data)
 {
-  return (iegDefData(iegp, SINGLE_PRECISION, (void *) data));
+  return iegDefData(ieg, EXSE_SINGLE_PRECISION, (void *) data);
 }
 
 
-int iegDefDataDP(iegrec_t *iegp, const double *data)
+int iegDefDataDP(void *ieg, const double *data)
 {
-  return (iegDefData(iegp, DOUBLE_PRECISION, (void *) data));
+  return iegDefData(ieg, EXSE_DOUBLE_PRECISION, (void *) data);
 }
 
 
-int iegRead(int fileID, iegrec_t *iegp)
+int iegRead(int fileID, void *ieg)
 {
+  iegrec_t *iegp = (iegrec_t *) ieg;
   size_t datasize;
-  size_t blocklen, blocklen2;
   size_t i;
   char tmpbuffer[800], *tmpbuf = tmpbuffer;
   int dprec = 0;
   void *buffer;
-  int byteswap;
   int status;
 
   if ( ! iegp->checked )
@@ -392,12 +381,12 @@ int iegRead(int fileID, iegrec_t *iegp)
       iegp->checked = 1;
     }
 
-  byteswap = iegp->byteswap;
+  int byteswap = iegp->byteswap;
 
   /* read header record */
-  blocklen = binReadF77Block(fileID, byteswap);
+  size_t blocklen = binReadF77Block(fileID, byteswap);
 
-  if ( fileEOF(fileID) ) return (-1);
+  if ( fileEOF(fileID) ) return -1;
 
   if ( IEG_Debug )
     Message("blocklen = %lu", blocklen);
@@ -409,7 +398,7 @@ int iegRead(int fileID, iegrec_t *iegp)
   else
     {
       Warning("unexpecteted header size %d!", (int) blocklen);
-      return (-1);
+      return -1;
     }
 
   iegp->dprec = dprec;
@@ -436,7 +425,7 @@ int iegRead(int fileID, iegrec_t *iegp)
   binReadInt32(fileID, byteswap, 3, (INT32 *) tmpbuf);
   for ( i = 0; i < 3; i++ ) iegp->igdb[18+i] = (int) ((INT32 *) tmpbuf)[i];
 
-  if ( dprec == SINGLE_PRECISION )
+  if ( dprec == EXSE_SINGLE_PRECISION )
     {
       fileRead(fileID, tmpbuf, 400);
       if ( byteswap ) swap4byte(tmpbuf, 100);
@@ -465,12 +454,12 @@ int iegRead(int fileID, iegrec_t *iegp)
       fprintf(stderr, "gdb: %d %d\n", i, iegp->igdb[i]);
   }
   */
-  blocklen2 = binReadF77Block(fileID, byteswap);
+  size_t blocklen2 = binReadF77Block(fileID, byteswap);
 
   if ( blocklen2 != blocklen )
     {
       Warning("header blocklen differ!");
-      return (-1);
+      return -1;
     }
 
   iegp->datasize = (size_t)IEG_G_NumLon(iegp->igdb)
@@ -500,7 +489,7 @@ int iegRead(int fileID, iegrec_t *iegp)
     {
       Warning("data precision differ! (h = %d; d = %d)",
 	      (int) dprec, (int) (blocklen/datasize));
-      return (-1);
+      return -1;
     }
 
   fileRead(fileID, buffer, blocklen);
@@ -510,31 +499,25 @@ int iegRead(int fileID, iegrec_t *iegp)
   if ( blocklen2 != blocklen )
     {
       Warning("data blocklen differ!");
-      return (-1);
+      return -1;
     }
 
-  return (0);
+  return 0;
 }
 
 
-int iegWrite(int fileID, iegrec_t *iegp)
+int iegWrite(int fileID, void *ieg)
 {
-  size_t datasize;
+  iegrec_t *iegp = (iegrec_t *) ieg;
   size_t blocklen;
   size_t i;
-  int dprec;
-  float refvalf;
-  double refval;
   char tmpbuf[800];
   float fvct[100];
-  void *buffer;
   int byteswap = iegp->byteswap;
-
-
-  dprec  = iegp->dprec;
+  int dprec  = iegp->dprec;
 
   /* write header record */
-  if ( dprec == SINGLE_PRECISION )
+  if ( dprec == EXSE_SINGLE_PRECISION )
     blocklen = 636;
   else
     blocklen = 1040;
@@ -547,9 +530,9 @@ int iegWrite(int fileID, iegrec_t *iegp)
   for ( i = 0; i < 18; i++ ) ((INT32 *) tmpbuf)[i] = (INT32) iegp->igdb[i];
   binWriteInt32(fileID, byteswap, 18, (INT32 *) tmpbuf);
 
-  refval = iegp->refval;
-  refvalf = (float) refval;
-  if ( dprec == SINGLE_PRECISION )
+  double refval = iegp->refval;
+  float refvalf = (float) refval;
+  if ( dprec == EXSE_SINGLE_PRECISION )
     binWriteFlt32(fileID, byteswap, 1, (FLT32 *) &refvalf);
   else
     binWriteFlt64(fileID, byteswap, 1, (FLT64 *) &refval);
@@ -557,7 +540,7 @@ int iegWrite(int fileID, iegrec_t *iegp)
   for ( i = 0; i < 3; i++ ) ((INT32 *) tmpbuf)[i] = (INT32) iegp->igdb[18+i];
   binWriteInt32(fileID, byteswap, 3, (INT32 *) tmpbuf);
 
-  if ( dprec == SINGLE_PRECISION )
+  if ( dprec == EXSE_SINGLE_PRECISION )
     {
       for ( i = 0; i < 100; i++ ) fvct[i] = (float) iegp->vct[i];
       binWriteFlt32(fileID, byteswap, 100, fvct);
@@ -569,23 +552,23 @@ int iegWrite(int fileID, iegrec_t *iegp)
 
   binWriteF77Block(fileID, byteswap, blocklen);
 
-  datasize = (size_t)iegp->igdb[4] * (size_t)iegp->igdb[5];
+  size_t datasize = (size_t)iegp->igdb[4] * (size_t)iegp->igdb[5];
   blocklen = datasize * (size_t)dprec;
 
   binWriteF77Block(fileID, byteswap, blocklen);
 
   iegp->datasize = datasize;
 
-  buffer = iegp->buffer;
+  void *buffer = iegp->buffer;
 
   switch ( dprec )
     {
-    case SINGLE_PRECISION:
+    case EXSE_SINGLE_PRECISION:
       {
 	binWriteFlt32(fileID, byteswap, datasize, (FLT32 *) buffer);
 	break;
       }
-    case DOUBLE_PRECISION:
+    case EXSE_DOUBLE_PRECISION:
       {
 	binWriteFlt64(fileID, byteswap, datasize, (FLT64 *) buffer);
 	break;
@@ -599,7 +582,7 @@ int iegWrite(int fileID, iegrec_t *iegp)
 
   binWriteF77Block(fileID, byteswap, blocklen);
 
-  return (0);
+  return 0;
 }
 /*
  * Local Variables:

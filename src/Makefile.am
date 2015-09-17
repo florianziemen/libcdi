@@ -41,6 +41,7 @@ libcdi_la_SOURCES = 	 \
 	dtypes.h	 \
 	error.c        	 \
 	error.h	 	 \
+	exse.h	 	 \
 	extra.h	 	 \
 	extralib.c       \
 	file.c         	 \

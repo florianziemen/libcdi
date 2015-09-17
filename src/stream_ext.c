@@ -81,7 +81,7 @@ int extInqRecord(stream_t *streamptr, int *varID, int *levelID)
   int zaxisID = -1;
   int header[4];
   int vlistID;
-  extrec_t *extp = (extrec_t*) streamptr->record->exsep;
+  void *extp = streamptr->record->exsep;
 
   vlistID = streamptr->vlistID;
   fileID  = streamptr->fileID;
@@ -119,7 +119,7 @@ void extReadRecord(stream_t *streamptr, double *data, int *nmiss)
   int varID, gridID;
   int i, size;
   double missval;
-  extrec_t *extp = (extrec_t*) streamptr->record->exsep;
+  void *extp = streamptr->record->exsep;
 
   vlistID = streamptr->vlistID;
   fileID  = streamptr->fileID;
@@ -196,7 +196,7 @@ void extDefRecord(stream_t *streamptr)
 void extWriteRecord(stream_t *streamptr, const double *data)
 {
   int fileID = streamptr->fileID;
-  extrec_t *extp = (extrec_t*) streamptr->record->exsep;
+  void *extp = streamptr->record->exsep;
 
   extDefDataDP(extp, data);
   extWrite(fileID, extp);
@@ -403,7 +403,7 @@ int extScanTimestep2(stream_t *streamptr)
   taxis_t *taxis;
   int vlistID;
   extcompvar_t compVar, compVar0;
-  extrec_t *extp = (extrec_t*) streamptr->record->exsep;
+  void *extp = streamptr->record->exsep;
 
   streamptr->curTsID = 1;
 
@@ -575,7 +575,7 @@ long extScanTimestep(stream_t *streamptr)
   int recID;
   int rindex, nrecs = 0;
   extcompvar_t compVar, compVar0;
-  extrec_t *extp = (extrec_t*) streamptr->record->exsep;
+  void *extp = streamptr->record->exsep;
   /*
   if ( CDI_Debug )
     {
@@ -722,7 +722,7 @@ void extReadVarDP(stream_t *streamptr, int varID, double *data, int *nmiss)
   int recID;
   int i;
   double missval;
-  extrec_t *extp = (extrec_t*) streamptr->record->exsep;
+  void *extp = streamptr->record->exsep;
 
   vlistID  = streamptr->vlistID;
   fileID   = streamptr->fileID;
@@ -782,7 +782,7 @@ void extReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, 
   int recID;
   int i;
   double missval;
-  extrec_t *extp = (extrec_t*) streamptr->record->exsep;
+  void *extp = streamptr->record->exsep;
 
   vlistID  = streamptr->vlistID;
   fileID   = streamptr->fileID;

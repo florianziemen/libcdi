@@ -918,7 +918,7 @@ cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDeleted)
         {
           fileClose(fileID);
           if (recordBufIsToBeDeleted)
-            srvDelete((srvrec_t *)streamptr->record->exsep);
+            srvDelete(streamptr->record->exsep);
           break;
         }
 #endif
@@ -936,7 +936,7 @@ cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDeleted)
         {
           fileClose(fileID);
           if (recordBufIsToBeDeleted)
-            iegDelete((iegrec_t *)streamptr->record->exsep);
+            iegDelete(streamptr->record->exsep);
           break;
         }
 #endif
