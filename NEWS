@@ -1,6 +1,16 @@
 CDI NEWS
 --------
 
+Version 1.7.0 (28 October 2015):
+
+   New features:
+     * added support for netCDF Scalar Coordinate Variables
+     * merge changes from branches/cdi-tiles [from Florian Prill]
+   Fixed bugs:
+     * GRIB rotated grids: invert angle of rotation (north to south pole) (bug fix)
+     * bug fix for scanning the  WRF time axis
+     * cdiStreamSetupVlist: added call to vlist_unlock(vlistID) (bug fix)
+
 Version 1.6.8 (26 March 2015):
 
    Fixed bugs:
