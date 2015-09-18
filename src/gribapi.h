@@ -72,7 +72,10 @@ static inline int my_grib_set_double(grib_handle* h, const char* key, double val
   if ( cdiGribApiDebug )
     fprintf(stderr, "grib_set_double(\tgrib_handle* h, \"%s\", %f)\n", key, val);
 
-  return grib_set_double(h, key, val);
+  int ret_val = grib_set_double(h, key, val);
+  if (ret_val != 0)
+    fprintf(stderr, "!!! failed call to grib_set_double(\tgrib_handle* h, \"%s\", %f) !!!\n", key, val);
+  return ret_val;
 }
 
 static inline int my_grib_set_long(grib_handle* h, const char* key, long val)
@@ -80,7 +83,10 @@ static inline int my_grib_set_long(grib_handle* h, const char* key, long val)
   if ( cdiGribApiDebug )
     fprintf(stderr, "grib_set_long(  \tgrib_handle* h, \"%s\", %ld)\n", key, val);
 
-  return grib_set_long(h, key, val);
+  int ret_val = grib_set_long(h, key, val);
+  if (ret_val != 0)
+    fprintf(stderr, "!!! failed call to grib_set_long(  \tgrib_handle* h, \"%s\", %ld) !!!\n", key, val);
+  return ret_val;
 }
 
 static inline int my_grib_set_string(grib_handle* h, const char* key, const char* val, size_t* length)
@@ -88,7 +94,10 @@ static inline int my_grib_set_string(grib_handle* h, const char* key, const char
   if ( cdiGribApiDebug )
     fprintf(stderr, "grib_set_string(\tgrib_handle* h, \"%s\", \"%s\")\n", key, val);
 
-  return grib_set_string(h, key, val, length);
+  int ret_val = grib_set_string(h, key, val, length);
+  if (ret_val != 0)
+    fprintf(stderr, "!!! grib_set_string(\tgrib_handle* h, \"%s\", \"%s\") !!!\n", key, val);
+  return ret_val;
 }
 
 static inline void gribHandleDelete(void *gh)

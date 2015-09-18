@@ -2276,7 +2276,7 @@ void grib2DefLevel(grib_handle *gh, int gcinit, long leveltype1, long leveltype2
 }
 
 static
-void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID, int levelID, int gcinit)
+void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID, int levelID, int gcinit, int proddef_template_num)
 {
   int lbounds = 0;
   static int warning = 1;
@@ -2326,7 +2326,15 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
           }
         else
           {
-            grib2DefLevel(gh, gcinit, grib2ltype, grib2ltype, lbounds, level, dlevel1, dlevel2);
+            /* PRODUCT DEFINITION TEMPLATE NUMBER 32:
+
+               "Analysis or forecast at a horizontal level or in a horizontal layer at a point
+                in time for simulate (synthetic) satellite data"
+
+               The key/value pairs that are set in "grib2DefLevel" do not exist for this template.
+            */
+            if ( proddef_template_num != 32 )
+              grib2DefLevel(gh, gcinit, grib2ltype, grib2ltype, lbounds, level, dlevel1, dlevel2);
           }
 
 	break;
@@ -2624,7 +2632,7 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
 
   gribapiDefGrid((int)editionNumber, gh, gridID, comptype, lieee, datatype, nmiss, gc->init);
 
-  gribapiDefLevel((int)editionNumber, gh, param, zaxisID, levelID, gc->init);
+  gribapiDefLevel((int)editionNumber, gh, param, zaxisID, levelID, gc->init, productDefinitionTemplate);
 
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
   //if (!gc->init)
