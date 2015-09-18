@@ -118,7 +118,7 @@ listInitResources(int nsp)
   xassert(nsp < resHListSize && nsp >= 0);
   int size = resHList[nsp].size = MIN_LIST_SIZE;
   xassert(resHList[nsp].resources == NULL);
-  resHList[nsp].resources = (listElem_t*) xcalloc(MIN_LIST_SIZE, sizeof(listElem_t));
+  resHList[nsp].resources = (listElem_t*) Calloc(MIN_LIST_SIZE, sizeof(listElem_t));
   listElem_t *p = resHList[nsp].resources;
 
   for (int i = 0; i < size; i++ )
@@ -620,7 +620,7 @@ void reshPackBufferCreate(char **packBuffer, int *packBufferSize, void *context)
   int nsp = namespaceGetActive ();
 
   int pBSize = *packBufferSize = getPackBufferSize(context);
-  char *pB = *packBuffer = (char *)xcalloc(1, (size_t)pBSize);
+  char *pB = *packBuffer = (char *) Calloc(1, (size_t)pBSize);
 
   {
     int header[resHPackHeaderNInt] = { START, nsp };

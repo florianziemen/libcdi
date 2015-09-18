@@ -71,7 +71,7 @@ static aFiledataPF *initAFiledataPF ( const char *key, size_t bs)
   int iret;
 
   len = strlen(key);
-  afd = xcalloc(1, sizeof (*afd) + len + 1);
+  afd = Calloc(1, sizeof (*afd) + len + 1);
   strcpy(afd->name, key);
   afd->tsID = 0;
 
@@ -103,7 +103,7 @@ initBFiledataPF(int fileID, int nc)
 {
   bFiledataPF *bfd;
   size_t bfdSize = sizeof (bFiledataPF) + (size_t)nc * sizeof (bool);
-  bfd = xcalloc(1, bfdSize);
+  bfd = Calloc(1, bfdSize);
   bfd->offset = 0;
   bfd->finished = false;
   bfd->fileID = fileID;
@@ -175,7 +175,7 @@ fpgPOSIXFPGUARDSENDRECV(void)
   xdebug ( "ncollectors=%d on this node", nProcsCollNode );
   
   bibBFiledataPF = listSetNew( destroyBFiledataPF, fileIDCmpB);
-  sentFinalize = xcalloc((size_t)nProcsCollNode, sizeof (sentFinalize[0]));
+  sentFinalize = Calloc((size_t)nProcsCollNode, sizeof (sentFinalize[0]));
 
   for ( ;; )
     {

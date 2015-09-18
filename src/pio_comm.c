@@ -97,7 +97,7 @@ void pioInfoInit ( pioInfo_t * p )
 void commInit ( void )
 {
   xassert ( info == 0 );
-  info = xcalloc(1, sizeof (pioInfo_t));
+  info = Calloc(1, sizeof (pioInfo_t));
   pioInfoInit ( info );
 }
 
@@ -592,7 +592,7 @@ void     commEvalPhysNodes  ( void )
 
   // define nodeSizes
   info->nodeInfo.nNodes = nNodes; 
-  info->nodeSizes = xcalloc((size_t)info->nodeInfo.nNodes,
+  info->nodeSizes = Calloc((size_t)info->nodeInfo.nNodes,
                             sizeof (info->nodeSizes[0]));
   collID = 0;
   for ( IOID = 0; IOID < info->nProcsIO; IOID++ )

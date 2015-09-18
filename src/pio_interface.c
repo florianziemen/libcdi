@@ -267,7 +267,7 @@ varsMapNDeco(int nNodes, int *nodeSizes)
     streamSizes[i] = streamInqNvars(resHs[i]);
 
   nVars = sum_int((size_t)nStreams, streamSizes);
-  varSizes   = xcalloc((size_t)nVars, sizeof (varSizes[0]));
+  varSizes   = Calloc((size_t)nVars, sizeof (varSizes[0]));
   varMapping = Malloc((size_t)nVars * sizeof (varMapping[0]));
 
   for (unsigned i = 0; i < nStreams; i++ )
@@ -355,7 +355,7 @@ modelWinDefBufferSizes(void)
 
   unsigned nstreams = reshCountType ( &streamOps );
   streamIndexList = Malloc((size_t)nstreams * sizeof (streamIndexList[0]));
-  collIndex = xcalloc((size_t)nProcsColl, sizeof (collIndex[0]));
+  collIndex = Calloc((size_t)nProcsColl, sizeof (collIndex[0]));
   reshGetResHListOfType ( nstreams, streamIndexList, &streamOps );
   for (unsigned streamNo = 0; streamNo < nstreams; streamNo++ )
     {
@@ -455,7 +455,7 @@ void modelWinCreate ( void )
   int nProcsColl = commInqNProcsColl ();
 
   xdebug("%s", "START");
-  txWin = xcalloc((size_t)nProcsColl, sizeof (txWin[0]));
+  txWin = Calloc((size_t)nProcsColl, sizeof (txWin[0]));
 
   modelWinDefBufferSizes ();
   ranks[0] = commInqNProcsModel ();

@@ -800,7 +800,7 @@ void vlistMerge(int vlistID2, int vlistID1)
             vars1[varID].levinfo[levID].mlevelID = nlevs2 + levID;
 	}
 
-      int *lvar = (int *)xcalloc((size_t)nvars2, sizeof(int));
+      int *lvar = (int *) Calloc((size_t)nvars2, sizeof(int));
 
       for ( varID = 0; varID < nvars2; varID++ )
         {

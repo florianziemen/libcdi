@@ -140,7 +140,7 @@ pioWriterStdIO(void)
   xdebug ( "ncollectors=%d on this node", nProcsCollNode );
 
   bibBFiledataP = listSetNew(destroyBFiledataP, compareNamesBP);
-  sentFinalize = xcalloc((size_t)nProcsCollNode, sizeof (sentFinalize[0]));
+  sentFinalize = Calloc((size_t)nProcsCollNode, sizeof (sentFinalize[0]));
   
   for ( ;; )
     {  

@@ -167,7 +167,7 @@ serverWinCreate(void)
   xmpi ( MPI_Comm_group ( commCalc, &groupCalc ));
   xmpi ( MPI_Group_excl ( groupCalc, 1, ranks, &groupModel ));
 
-  rxWin = xcalloc((size_t)nProcsModel, sizeof (rxWin[0]));
+  rxWin = Calloc((size_t)nProcsModel, sizeof (rxWin[0]));
   size_t totalBufferSize = collDefBufferSizes();
   rxWin[0].buffer = (unsigned char*) Malloc(totalBufferSize);
   size_t ofs = 0;
@@ -1064,7 +1064,7 @@ void cdiPioServer(void (*postCommSetupActions)(void))
   numPioPrimes = PPM_prime_factorization_32((uint32_t)commInqSizeColl(),
                                             &pioPrimes);
 #elif defined (HAVE_LIBNETCDF)
-  cdiSerialOpenFileCount = xcalloc(sizeof (cdiSerialOpenFileCount[0]),
+  cdiSerialOpenFileCount = Calloc(sizeof (cdiSerialOpenFileCount[0]),
                                    (size_t)commInqSizeColl());
   namespaceSwitchSet(NSSWITCH_STREAM_OPEN_BACKEND,
                      NSSW_FUNC(cdiPioStreamCDFOpenWrap));

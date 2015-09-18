@@ -68,7 +68,7 @@ initBFiledataPA(char *filename, size_t bs, int nc)
 
   dbuffer_init(&(bfd->fb), (size_t)nPrefStreams * bs);
 
-  bfd->ctrlBlks = xcalloc((size_t)nPrefStreams, sizeof (bfd->ctrlBlks[0]));
+  bfd->ctrlBlks = Calloc((size_t)nPrefStreams, sizeof (bfd->ctrlBlks[0]));
 
   for (int i = 0; i < nPrefStreams; i++ )
     {
@@ -227,7 +227,7 @@ void pioWriterAIO(void)
   xdebug ( "nProcsCollNode=%d on this node", nProcsCollNode );
  
   bibBFiledataPA = listSetNew(destroyBFiledataPA, compareNamesBPA);
-  sentFinalize = xcalloc((size_t)nProcsCollNode, sizeof (sentFinalize[0]));
+  sentFinalize = Calloc((size_t)nProcsCollNode, sizeof (sentFinalize[0]));
   
   for ( ;; )
     {
