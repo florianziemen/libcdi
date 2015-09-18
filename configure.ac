@@ -4,7 +4,7 @@
 #  autoconf 2.68
 #  libtool  2.4.2
 
-AC_INIT([cdi], [1.7.0rc5], [http://mpimet.mpg.de/cdi])
+AC_INIT([cdi], [1.7.0rc6], [http://mpimet.mpg.de/cdi])
 
 AC_DEFINE_UNQUOTED(CDI, ["$PACKAGE_VERSION"], [CDI version])
 
