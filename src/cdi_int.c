@@ -39,6 +39,7 @@ int cdiSkipRecords          = 0;
 int cdiConvention           = CDI_CONVENTION_ECHAM;
 int cdiInventoryMode        = 1;
 int CDI_Version_Info        = 1;
+int CDI_cmor_mode           = 0;
 size_t CDI_netcdf_hdr_pad   = 0UL;
 
 char *cdiPartabPath   = NULL;
@@ -426,6 +427,7 @@ void cdiDefGlobal(const char *string, int val)
   else if ( strcmp(string, "SORTNAME")         == 0 ) cdiSortName = val;
   else if ( strcmp(string, "HAVE_MISSVAL")     == 0 ) cdiHaveMissval = val;
   else if ( strcmp(string, "NC_CHUNKSIZEHINT") == 0 ) cdiNcChunksizehint = val;
+  else if ( strcmp(string, "CMOR_MODE")        == 0 ) CDI_cmor_mode = val;
   else if ( strcmp(string, "NETCDF_HDR_PAD")   == 0 ) CDI_netcdf_hdr_pad = (size_t) val;
   else Warning("Unsupported global key: %s", string);
 }

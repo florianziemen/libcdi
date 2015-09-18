@@ -2672,7 +2672,16 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
   int type   = zaxisInqType(zaxisID);
 
   int is_scalar = FALSE;
-  if ( dimlen == 1 ) is_scalar = zaxisInqScalar(zaxisID);
+  if ( dimlen == 1 )
+    {
+      is_scalar = zaxisInqScalar(zaxisID);
+      extern int CDI_cmor_mode;
+      if ( !is_scalar && CDI_cmor_mode )
+        {
+          is_scalar = TRUE;
+          zaxisDefScalar(zaxisID);
+        }
+    }
 
   int ndims = 1;
   if ( is_scalar ) ndims = 0;
@@ -4416,6 +4425,7 @@ void cdfGetSliceSlapDescription(stream_t *streamptr, int varId, int levelId, boo
     Error("Internal error, variable %s has an unsupported array structure!", vlistInqVarNamePtr(vlistId, varId));
 }
 
+
 void cdfReadVarDP(stream_t *streamptr, int varID, double *data, int *nmiss)
 {
   if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamptr->self, varID);
@@ -4447,6 +4457,7 @@ void cdfReadVarDP(stream_t *streamptr, int varID, double *data, int *nmiss)
   *nmiss = (int)nmiss_;
 }
 
+
 void cdfReadVarSP(stream_t *streamptr, int varID, float *data, int *nmiss)
 {
   if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamptr->self, varID);
@@ -4477,6 +4488,7 @@ void cdfReadVarSP(stream_t *streamptr, int varID, float *data, int *nmiss)
   assert(nmiss_ <= INT_MAX);
   *nmiss = (int)nmiss_;
 }
+
 
 void cdfReadVarSliceDP(stream_t *streamptr, int varID, int levelID, double *data, int *nmiss)
 {
@@ -7182,6 +7194,10 @@ void define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 	  for ( ncvarid2 = ncvarid+1; ncvarid2 < nvars; ncvarid2++ )
 	    if ( ncvars[ncvarid2].isvar == TRUE && ncvars[ncvarid2].zaxisID == UNDEFID && ncvars[ncvarid2].zaxistype == UNDEFID )
 	      {
+                int zvarid2 = -1;
+                if ( ncvars[ncvarid2].zvarid != -1 && ncvars[ncvars[ncvarid2].zvarid].ndims == 0 )
+                  zvarid2 = ncvars[ncvarid2].zvarid;
+
 		int zdimid2 = -1;
 		ndims = ncvars[ncvarid2].ndims;
 		for ( i = 0; i < ndims; i++ )
@@ -7189,11 +7205,11 @@ void define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 		    if ( ncvars[ncvarid2].dimtype[i] == Z_AXIS )
 		      zdimid2 = ncvars[ncvarid2].dimids[i];
 		  }
-		if ( zdimid == zdimid2 )
+
+		if ( zdimid == zdimid2/* && zvarid == zvarid2 */)
 		  {
 		    if ( CDI_Debug )
-		      Message("zaxisID %d %d %s",
-			      ncvars[ncvarid].zaxisID, ncvarid2, ncvars[ncvarid2].name);
+		      Message("zaxisID %d %d %s", ncvars[ncvarid].zaxisID, ncvarid2, ncvars[ncvarid2].name);
 		    ncvars[ncvarid2].zaxisID = ncvars[ncvarid].zaxisID;
 		  }
 	      }
