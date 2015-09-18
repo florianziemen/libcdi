@@ -49,7 +49,7 @@ cksum_stream(const char *fname, size_t *table_len)
         nvars = -1;
         break;
       }
-    checksum_state = (uint32_t *)xcalloc((size_t)nvars, sizeof (checksum_state[0]));
+    checksum_state = (uint32_t *) Calloc((size_t)nvars, sizeof (checksum_state[0]));
     varSize = (struct var_size_t *)malloc((size_t)nvars * sizeof (varSize[0]));
 
     for (i = 0; i < nvars; ++i)
