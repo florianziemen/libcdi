@@ -307,7 +307,7 @@ bfile_t *file_new_entry(void)
 {
   bfile_t *fileptr;
 
-  fileptr = (bfile_t *)xmalloc(sizeof(bfile_t));
+  fileptr = (bfile_t *) Malloc(sizeof(bfile_t));
 
   if ( fileptr ) file_init_entry(fileptr);
 

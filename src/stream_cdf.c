@@ -5194,7 +5194,7 @@ int isHybridSigmaPressureCoordinate(int ncid, int ncvarid, ncvar_t *ncvars, cons
                     printf("%d  %g %g    %g %g\n", i, abuf[i*2], abuf[i*2+1], bbuf[i*2], bbuf[i*2+1]);
                   */
                   size_t vctsize = (dimlen+1)*2;
-                  double *vct = (double *)xmalloc(vctsize * sizeof(double));
+                  double *vct = (double *) Malloc(vctsize * sizeof(double));
                   for ( size_t i = 0; i < dimlen; ++i )
                     {
                       vct[i] = abuf[i*2];
