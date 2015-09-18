@@ -1028,7 +1028,7 @@ void zaxisDefVct(int zaxisID, int size, const double *vct)
   if ( zaxisptr->vct == 0 || zaxisptr->vctsize != size )
     {
       zaxisptr->vctsize = size;
-      zaxisptr->vct = (double *)xrealloc(zaxisptr->vct, (size_t)size*sizeof(double));
+      zaxisptr->vct = (double *) Realloc(zaxisptr->vct, (size_t)size*sizeof(double));
     }
 
   memcpy(zaxisptr->vct, vct, (size_t)size*sizeof(double));

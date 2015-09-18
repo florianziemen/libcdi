@@ -502,38 +502,6 @@ void memFree(void *ptr, const char *file, const char *functionname, int line)
 }
 
 
-#include "error.h" // cdiAbort()
-
-void *cdiXmalloc(size_t size, const char *filename, const char *functionname,
-                 int line)
-{
-  void *value = malloc(size);
-  if (size == 0 || value != NULL) ; else
-    cdiAbort(filename, functionname, line, "malloc failed: %s", strerror(errno));
-  return value;
-}
-
-
-void *cdiXcalloc(size_t nmemb, size_t size, const char *filename,
-                 const char *functionname, int line)
-{
-  void *value = calloc(nmemb, size);
-  if (size == 0 || value != NULL) ; else
-    cdiAbort(filename, functionname, line, "calloc failed: %s", strerror(errno));
-  return value;
-}
-
-
-void *cdiXrealloc(void *p, size_t size, const char *functionname,
-                  const char *filename, int line)
-{
-  void *value = realloc(p, size);
-  if (size == 0 || value != NULL) ; else
-    cdiAbort(filename, functionname, line, "realloc failed: %s", strerror(errno));
-  return value;
-}
-
-
 size_t memTotal(void)
 {
   size_t memtotal = 0;
