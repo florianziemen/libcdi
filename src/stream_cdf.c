@@ -7038,7 +7038,6 @@ void define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
   int ncvarid, ncvarid2;
   int i, ilev;
   int zaxisindex;
-  int zprec;
   int nbdims, nvertex, nlevel;
   int psvarid = -1;
   char *pname, *plongname, *punits;
@@ -7054,7 +7053,6 @@ void define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 	  int zdimid = UNDEFID;
 	  int zvarid = UNDEFID;
 	  int zsize = 1;
-	  int zaxisType;
 	  double *lbounds = NULL;
 	  double *ubounds = NULL;
 
@@ -7085,13 +7083,11 @@ void define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 
 	  double *zvar = (double *) Malloc((size_t)zsize * sizeof (double));
 
-	  zaxisType = UNDEFID;
-
+	  int zaxisType = UNDEFID;
 	  if ( zvarid != UNDEFID ) zaxisType = ncvars[zvarid].zaxistype;
-
 	  if ( zaxisType == UNDEFID )  zaxisType = ZAXIS_GENERIC;
 
-	  zprec = DATATYPE_FLT64;
+	  int zprec = DATATYPE_FLT64;
 
 	  if ( zvarid != UNDEFID )
 	    {
@@ -7192,13 +7188,13 @@ void define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 	    Message("zaxisID %d %d %s", ncvars[ncvarid].zaxisID, ncvarid, ncvars[ncvarid].name);
 
 	  for ( ncvarid2 = ncvarid+1; ncvarid2 < nvars; ncvarid2++ )
-	    if ( ncvars[ncvarid2].isvar == TRUE && ncvars[ncvarid2].zaxisID == UNDEFID && ncvars[ncvarid2].zaxistype == UNDEFID )
+	    if ( ncvars[ncvarid2].isvar == TRUE && ncvars[ncvarid2].zaxisID == UNDEFID /*&& ncvars[ncvarid2].zaxistype == UNDEFID*/ )
 	      {
-                int zvarid2 = -1;
-                if ( ncvars[ncvarid2].zvarid != -1 && ncvars[ncvars[ncvarid2].zvarid].ndims == 0 )
+                int zvarid2 = UNDEFID;
+                if ( ncvars[ncvarid2].zvarid != UNDEFID && ncvars[ncvars[ncvarid2].zvarid].ndims == 0 )
                   zvarid2 = ncvars[ncvarid2].zvarid;
 
-		int zdimid2 = -1;
+		int zdimid2 = UNDEFID;
 		ndims = ncvars[ncvarid2].ndims;
 		for ( i = 0; i < ndims; i++ )
 		  {
@@ -7206,12 +7202,18 @@ void define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 		      zdimid2 = ncvars[ncvarid2].dimids[i];
 		  }
 
-		if ( zdimid == zdimid2/* && zvarid == zvarid2 */)
+		if ( zdimid == zdimid2 /* && zvarid == zvarid2 */)
 		  {
-		    if ( CDI_Debug )
-		      Message("zaxisID %d %d %s", ncvars[ncvarid].zaxisID, ncvarid2, ncvars[ncvarid2].name);
-		    ncvars[ncvarid2].zaxisID = ncvars[ncvarid].zaxisID;
-		  }
+                    if ( (zdimid != UNDEFID && ncvars[ncvarid2].zaxistype == UNDEFID) ||
+                         (zdimid == UNDEFID && zvarid != UNDEFID && zvarid == zvarid2) ||
+                         (zdimid == UNDEFID && zaxisType == ncvars[ncvarid2].zaxistype) ||
+                         (zdimid == UNDEFID && zvarid2 == UNDEFID && ncvars[ncvarid2].zaxistype == UNDEFID) )
+                      {
+                        if ( CDI_Debug )
+                          Message("zaxisID %d %d %s", ncvars[ncvarid].zaxisID, ncvarid2, ncvars[ncvarid2].name);
+                        ncvars[ncvarid2].zaxisID = ncvars[ncvarid].zaxisID;
+                      }
+                  }
 	      }
 	}
     }
