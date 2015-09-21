@@ -2185,8 +2185,10 @@ int gridCompare(int gridID, const grid_t *grid)
               if ( !differ && memcmp(uuidOfHGrid, grid->uuid, CDI_UUID_SIZE) != 0 ) differ = 1;
 
               if ( !differ && uuidOfHGrid[0] &&
+                   /*
                    ((grid->nvertex == 0 && gridInqNvertex(gridID) != 0) || (grid->nvertex != 0 && gridInqNvertex(gridID) == 0)) &&
                    ((grid->number == 0 && gridInqNumber(gridID) != 0) || (grid->number != 0 && gridInqNumber(gridID) == 0)) &&
+                   */
                    ((grid->xvals == NULL && gridInqXvalsPtr(gridID) != NULL) || (grid->xvals != NULL && gridInqXvalsPtr(gridID) == NULL)) &&
                    ((grid->yvals == NULL && gridInqYvalsPtr(gridID) != NULL) || (grid->yvals != NULL && gridInqYvalsPtr(gridID) == NULL)) )
                 {
