@@ -2634,7 +2634,7 @@ void cdf_def_zaxis_hybrid(stream_t *streamptr, int type, int ncvarid, int zaxisI
 {
   extern int cdiConvention;
 
-  if ( cdiConvention == CDI_CONVENTION_ECHAM || type == ZAXIS_HYBRID_HALF )
+  if ( (!CDI_cmor_mode && cdiConvention == CDI_CONVENTION_ECHAM) || type == ZAXIS_HYBRID_HALF )
     cdf_def_zaxis_hybrid_echam(streamptr, type, ncvarid, zaxisID, zaxisindex, xtype, dimlen, dimID, axisname);
   else
     cdf_def_zaxis_hybrid_cf(streamptr, type, ncvarid, zaxisID, zaxisindex, xtype, dimlen, dimID, axisname);
