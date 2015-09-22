@@ -26,6 +26,7 @@
 #include "vlist.h"
 
 //#define PROJECTION_TEST
+extern int CDI_cmor_mode;
 
 #undef  UNDEFID
 #define UNDEFID  CDI_UNDEFID
@@ -966,7 +967,7 @@ void cdfDefTimeUnits(char *unitstr, taxis_t* taxis0, taxis_t* taxis)
 	   timeunit == TUNIT_6HOURS  ||
 	   timeunit == TUNIT_12HOURS ) timeunit = TUNIT_HOUR;
 
-      sprintf(unitstr, "%s since %d-%02d-%02d %02d:%02d:%02d",
+      sprintf(unitstr, "%s since %d-%d-%d %02d:%02d:%02d",
               tunitNamePtr(timeunit), year, month, day, hour, minute, second);
     }
 }
@@ -2675,7 +2676,6 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
   if ( dimlen == 1 )
     {
       is_scalar = zaxisInqScalar(zaxisID);
-      extern int CDI_cmor_mode;
       if ( !is_scalar && CDI_cmor_mode )
         {
           is_scalar = TRUE;
