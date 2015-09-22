@@ -2182,9 +2182,9 @@ int gridCompare(int gridID, const grid_t *grid)
               unsigned char uuidOfHGrid[CDI_UUID_SIZE];
               gridInqUUID(gridID, uuidOfHGrid);
 
-              if ( !differ && memcmp(uuidOfHGrid, grid->uuid, CDI_UUID_SIZE) != 0 ) differ = 1;
+              if ( !differ && uuidOfHGrid[0] && grid->uuid[0] && memcmp(uuidOfHGrid, grid->uuid, CDI_UUID_SIZE) != 0 ) differ = 1;
 
-              if ( !differ && uuidOfHGrid[0] &&
+              if ( !differ &&
                    ((grid->xvals == NULL && gridInqXvalsPtr(gridID) != NULL) || (grid->xvals != NULL && gridInqXvalsPtr(gridID) == NULL)) &&
                    ((grid->yvals == NULL && gridInqYvalsPtr(gridID) != NULL) || (grid->yvals != NULL && gridInqYvalsPtr(gridID) == NULL)) )
                 {
