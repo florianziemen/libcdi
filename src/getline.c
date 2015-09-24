@@ -52,7 +52,7 @@ getline(char **linebuf, size_t *linebuf_size, FILE *fp)
   if (!*linebuf)
   {
     buf_size = 80;
-    buf = Malloc(buf_size);
+    buf = malloc(buf_size);
     if (!buf) return -1;
   }
   else
@@ -69,7 +69,7 @@ getline(char **linebuf, size_t *linebuf_size, FILE *fp)
       do {
         size_t increment = 2 * buf_size - len <= INT_MAX
           ? 2 * buf_size - len : INT_MAX - (buf_size - len);
-        void *temp = Realloc(buf, buf_size + increment);
+        void *temp = realloc(buf, buf_size + increment);
         if (!temp)
         {
           status = -1;
