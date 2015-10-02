@@ -657,7 +657,8 @@ scatterGatherPackFunc(void *dataDesc, void *buf, int size, int *pos,
   unsigned numBlocks = p->numBlocks;
   const int *bls = p->blocklengths, *disps = p->displacements;
   int pos_ = *pos;
-  unsigned char *dstBuf = buf + pos_, *bufEnd = (unsigned char *)buf + size;
+  unsigned char *dstBuf = (unsigned char *)buf + pos_,
+    *bufEnd = (unsigned char *)buf + size;
   size_t elemSize = p->elemSize;
   xassert(elemSize <= SSIZE_MAX);
   const unsigned char *data = p->data;
