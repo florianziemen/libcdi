@@ -1144,7 +1144,7 @@ void streamSync(int streamID)
 
 int cdiStreamDefTimestep_(stream_t *streamptr, int tsID)
 {
-  int taxisID;
+  int taxisID = 0;
 
   if ( CDI_Debug )
     Message("streamID = %d  tsID = %d", streamptr->self, tsID);
