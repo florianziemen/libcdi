@@ -78,9 +78,9 @@ void pcdiXMPIStat ( int iret, const char *filename, int line, MPI_Status *status
 
   if ( iret == MPI_ERR_IN_STATUS )
     {
+      fprintf ( stderr, "------- checking error in request ----------\n" );
       switch ( status->MPI_ERROR )
         {
-          fprintf ( stderr, "------- checking error in request ----------\n" );
         case MPI_SUCCESS :
           fprintf ( stderr, "-------- mpi_success -----------\n" );
           break;
