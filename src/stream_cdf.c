@@ -7477,9 +7477,9 @@ void define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, 
 
   for ( int varID = 0; varID < nvars; varID++ )
     {
-      int instID  = vlistInqVarInstitut(vlistID, varID);
-      int modelID = vlistInqVarModel(vlistID, varID);
-      int tableID = vlistInqVarTable(vlistID, varID);
+      int varInstID  = vlistInqVarInstitut(vlistID, varID);
+      int varModelID = vlistInqVarModel(vlistID, varID);
+      int varTableID = vlistInqVarTable(vlistID, varID);
       int code = vlistInqVarCode(vlistID, varID);
       if ( cdiDefaultTableID != UNDEFID )
 	{
@@ -7489,7 +7489,7 @@ void define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, 
 	      vlistDestroyVarLongname(vlistID, varID);
 	      vlistDestroyVarUnits(vlistID, varID);
 
-	      if ( tableID != UNDEFID )
+	      if ( varTableID != UNDEFID )
 		{
 		  vlistDefVarName(vlistID, varID, tableInqParNamePtr(cdiDefaultTableID, code));
 		  if ( tableInqParLongnamePtr(cdiDefaultTableID, code) )
@@ -7499,16 +7499,16 @@ void define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, 
 		}
 	      else
 		{
-		  tableID = cdiDefaultTableID;
+		  varTableID = cdiDefaultTableID;
 		}
 	    }
 
-	  if ( cdiDefaultModelID != UNDEFID ) modelID = cdiDefaultModelID;
-	  if ( cdiDefaultInstID  != UNDEFID ) instID  = cdiDefaultInstID;
+	  if ( cdiDefaultModelID != UNDEFID ) varModelID = cdiDefaultModelID;
+	  if ( cdiDefaultInstID  != UNDEFID ) varInstID  = cdiDefaultInstID;
 	}
-      if ( instID  != UNDEFID ) vlistDefVarInstitut(vlistID, varID, instID);
-      if ( modelID != UNDEFID ) vlistDefVarModel(vlistID, varID, modelID);
-      if ( tableID != UNDEFID ) vlistDefVarTable(vlistID, varID, tableID);
+      if ( varInstID  != UNDEFID ) vlistDefVarInstitut(vlistID, varID, varInstID);
+      if ( varModelID != UNDEFID ) vlistDefVarModel(vlistID, varID, varModelID);
+      if ( varTableID != UNDEFID ) vlistDefVarTable(vlistID, varID, varTableID);
     }
 }
 
