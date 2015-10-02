@@ -92,15 +92,15 @@ typedef struct
   int        eof;            /* end of file flag              */
   int        fd;             /* file descriptor used for read */
   FILE      *fp;             /* FILE pointer used for write   */
-  int        mode;           /* file access mode              */
   char      *name;           /* file name                     */
   off_t      size;           /* file size                     */
   off_t      position;       /* file position                 */
   long       access;         /* file access                   */
   off_t      byteTrans;      /*                               */
   size_t     blockSize;      /* file block size               */
-  int        type;           /* file type ( 1:open 2:fopen )  */
-  int        bufferType;     /* buffer type ( 1:std 2:mmap )  */
+  int        mode;           /* file access mode              */
+  short      type;           /* file type ( 1:open 2:fopen )  */
+  short      bufferType;     /* buffer type ( 1:std 2:mmap )  */
   size_t     bufferSize;     /* file buffer size              */
   size_t     mappedSize;     /* mmap buffer size              */
   char      *buffer;         /* file buffer                   */
@@ -135,10 +135,10 @@ static int FileInfo  = FALSE;
 
 static size_t FileBufferSizeMin = MIN_BUF_SIZE;
 static long   FileBufferSizeEnv = -1;
-static int    FileBufferTypeEnv =  0;
+static short  FileBufferTypeEnv =  0;
 
-static int    FileTypeRead  = FILE_TYPE_OPEN;
-static int    FileTypeWrite = FILE_TYPE_FOPEN;
+static short  FileTypeRead  = FILE_TYPE_OPEN;
+static short  FileTypeWrite = FILE_TYPE_FOPEN;
 static int    FileFlagWrite = 0;
 
 static int    FILE_Debug = 0;   /* If set to 1, debugging */
@@ -409,7 +409,7 @@ int fileSetBufferType(int fileID, int type)
 	{
 	case FILE_BUFTYPE_STD:
 	case FILE_BUFTYPE_MMAP:
-	  fileptr->bufferType = type;
+	  fileptr->bufferType = (short)type;
 	  break;
 	default:
 	  Error("File type %d not implemented!", type);
@@ -780,7 +780,7 @@ void file_initialize(void)
 	{
 	case FILE_TYPE_OPEN:
 	case FILE_TYPE_FOPEN:
-	  FileTypeRead = (int)value;
+	  FileTypeRead = (short)value;
 	  break;
 	default:
 	  Warning("File type %d not implemented!", value);
@@ -794,7 +794,7 @@ void file_initialize(void)
 	{
 	case FILE_TYPE_OPEN:
 	case FILE_TYPE_FOPEN:
-	  FileTypeWrite = (int)value;
+	  FileTypeWrite = (short)value;
 	  break;
 	default:
 	  Warning("File type %d not implemented!", value);
@@ -826,7 +826,7 @@ void file_initialize(void)
 	{
 	case FILE_BUFTYPE_STD:
 	case FILE_BUFTYPE_MMAP:
-	  FileBufferTypeEnv = (int)value;
+	  FileBufferTypeEnv = (short)value;
 	  break;
 	default:
 	  Warning("File buffer type %d not implemented!", value);
