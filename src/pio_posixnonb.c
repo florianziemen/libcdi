@@ -128,8 +128,8 @@ pioWriterStdIO(void)
   bFiledataP *bfd; 
   listSet * bibBFiledataP;
   size_t amount, buffersize;
-  char *messageBuffer = NULL;
-  char *pMB, *filename, *temp;
+  unsigned char *messageBuffer = NULL, *pMB;
+  char *filename, *temp;
   int messagesize, source, tag, id;
   struct fileOpTag rtag;
   MPI_Status status;
@@ -173,9 +173,9 @@ pioWriterStdIO(void)
 
 	  xdebug("%s", "after recv, in loop");
 	  
-	  filename = strtok ( pMB, token );
+	  filename = strtok ( (char *)pMB, token );
 	  pMB += ( strlen ( filename ) + 1 );
-	  temp =  strtok ( pMB, token );
+	  temp =  strtok ( (char *)pMB, token );
           buffersize = (size_t)strtol(temp, NULL, 16);
 	  pMB += ( strlen ( temp ) + 1 );
 	  amount = (size_t)(messageBuffer + messagesize - pMB);
