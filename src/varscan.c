@@ -323,19 +323,10 @@ static int levelNewEntry(unsigned varID, int level1, int level2, int tileID)
   */
   if( levelID == levelTableSize )
     {
-      int i;
-
-      levelTableSize = 2*levelTableSize;
-      levelTable = (leveltable_t *) Realloc(levelTable, (size_t)levelTableSize
+      levelTable = (leveltable_t *) Realloc(levelTable,
+                                            (size_t)(levelTableSize *= 2)
                                             * sizeof (leveltable_t));
-      if( levelTable == NULL )
-	{
-          Message("levelTableSize = %d", levelTableSize);
-	  SysError("Reallocation of leveltable failed");
-	}
-      levelID = levelTableSize/2;
-
-      for( i = levelID; i < levelTableSize; i++ )
+      for( int i = levelID; i < levelTableSize; i++ )
         levelTable[i].recID = UNDEFID;
     }
 
