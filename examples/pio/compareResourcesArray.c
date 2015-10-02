@@ -24,9 +24,9 @@ enum {
   nlev             = 5,
   ntsteps          = 3 };
 
-double lons[nlon] = {0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330};
-double lats[nlat] = {-75, -45, -15, 15, 45, 75};
-double levs[nlev] = {101300, 92500, 85000, 50000, 20000};
+static double lons[nlon] = {0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330};
+static double lats[nlat] = {-75, -45, -15, 15, 45, 75};
+static double levs[nlev] = {101300, 92500, 85000, 50000, 20000};
 
 static int defineGrid()
 {
@@ -126,7 +126,7 @@ static int defineTaxis ()
   return taxisID;
 }
 
-void defineStream ( int streamID, int vlistID )
+static void defineStream ( int streamID, int vlistID )
 {
   streamDefByteorder ( streamID, 1 );
   streamDefCompType  ( streamID, 2 );
@@ -134,7 +134,7 @@ void defineStream ( int streamID, int vlistID )
   streamDefVlist(streamID, vlistID);
 }
 
-int defineVlist ( int gridID, int zaxisID, int taxisID )
+static int defineVlist ( int gridID, int zaxisID, int taxisID )
 {
   int vlistID = CDI_UNDEFID;
   int zaxisID2 = zaxisCreate(ZAXIS_SURFACE, 1);
