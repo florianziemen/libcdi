@@ -991,7 +991,6 @@ int varDefZaxis(int vlistID, int zaxistype, int nlevels, double *levels, int lbo
   int zaxisdefined = 0;
   int nzaxis;
   int zaxisID = UNDEFID;
-  int index;
   int zaxisglobdefined = 0;
   vlist_t *vlistptr;
 
@@ -1000,7 +999,7 @@ int varDefZaxis(int vlistID, int zaxistype, int nlevels, double *levels, int lbo
   nzaxis = vlistptr->nzaxis;
 
   if ( mode == 0 )
-    for ( index = 0; index < nzaxis; index++ )
+    for ( int index = 0; index < nzaxis; index++ )
       {
 	zaxisID = vlistptr->zaxisIDs[index];
 
