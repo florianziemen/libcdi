@@ -3072,7 +3072,6 @@ int cdfDefVar(stream_t *streamptr, int varID)
   int tablenum;
   int dimorder[3];
   size_t iax = 0;
-  size_t len;
   char axis[5];
   int ensID, ensCount, forecast_type;
   int retval;
@@ -3352,7 +3351,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
       int nczvarID = streamptr->nczvarID[zaxisindex];
       if ( nczvarID != CDI_UNDEFID )
         {
-          len = strlen(coordinates);
+          size_t len = strlen(coordinates);
           if ( len ) coordinates[len++] = ' ';
           cdf_inq_varname(fileID, nczvarID, coordinates+len);
         }
@@ -3396,13 +3395,13 @@ int cdfDefVar(stream_t *streamptr, int varID)
       int ncyvarID = streamptr->ncyvarID[gridindex];
       if ( ncyvarID != CDI_UNDEFID )
         {
-          len = strlen(coordinates);
+          size_t len = strlen(coordinates);
           if ( len ) coordinates[len++] = ' ';
           cdf_inq_varname(fileID, ncyvarID, coordinates+len);
         }
       if ( ncxvarID != CDI_UNDEFID )
         {
-          len = strlen(coordinates);
+          size_t len = strlen(coordinates);
           if ( len ) coordinates[len++] = ' ';
           cdf_inq_varname(fileID, ncxvarID, coordinates+len);
         }
@@ -3415,20 +3414,20 @@ int cdfDefVar(stream_t *streamptr, int varID)
       int ncavarID = streamptr->ncavarID[gridindex];
       if ( ncyvarID != CDI_UNDEFID )
         {
-          len = strlen(coordinates);
+          size_t len = strlen(coordinates);
           if ( len ) coordinates[len++] = ' ';
           cdf_inq_varname(fileID, ncyvarID, coordinates+len);
         }
       if ( ncxvarID != CDI_UNDEFID )
         {
-          len = strlen(coordinates);
+          size_t len = strlen(coordinates);
           if ( len ) coordinates[len++] = ' ';
           cdf_inq_varname(fileID, ncxvarID, coordinates+len);
         }
 
       if ( ncavarID != CDI_UNDEFID )
         {
-          len = strlen(cellarea);
+          size_t len = strlen(cellarea);
           cdf_inq_varname(fileID, ncavarID, cellarea+len);
           len = strlen(cellarea);
           cdf_put_att_text(fileID, ncvarid, "cell_measures", len, cellarea);
@@ -3450,7 +3449,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
       cdf_put_att_int(fileID, ncvarid, "truncation", NC_INT, 1, &gridTruncation);
     }
 
-  len = strlen(coordinates);
+  size_t len = strlen(coordinates);
   if ( len ) cdf_put_att_text(fileID, ncvarid, "coordinates", len, coordinates);
 
   /*  if ( xtype == NC_BYTE || xtype == NC_SHORT || xtype == NC_INT ) */
