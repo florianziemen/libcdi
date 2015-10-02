@@ -1038,12 +1038,8 @@ cdiPioCdfDefTimestep(stream_t *streamptr, int tsID)
 #endif
 
 /**
-  @brief is encapsulated in CDI library and run on I/O PEs.
-
-  @param
-
-  @return
-*/
+ * @brief is encapsulated in CDI library and run on I/O PEs.
+ */
 
 void cdiPioServer(void (*postCommSetupActions)(void))
 {
