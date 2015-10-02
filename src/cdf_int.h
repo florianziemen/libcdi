@@ -65,6 +65,8 @@ void cdf_put_vara_double(int ncid, int varid, const size_t start[], const size_t
 
 void cdf_get_vara_float(int ncid, int varid, const size_t start[], const size_t count[], float *fp);
 void cdf_put_vara_float(int ncid, int varid, const size_t start[], const size_t count[], const float *fp);
+void  cdf_get_vara_int(int ncid, int varid, const size_t start[],
+                       const size_t count[], int *dp);
 
 void cdf_put_att_text(int ncid, int varid, const char *name, size_t len, const char *tp);
 void cdf_put_att_int(int ncid, int varid, const char *name, nc_type xtype, size_t len, const int *ip);
