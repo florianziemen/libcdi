@@ -104,7 +104,6 @@ collDefBufferSizes()
                   int decoChunk;
                   {
                     int varSize = vlistInqVarSize(vlistID, varID);
-                    int nProcsModel = commInqNProcsModel();
                     decoChunk =
                       (int)(ceilf(cdiPIOpartInflate_
                                   * (float)(varSize + nProcsModel - 1)
