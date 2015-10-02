@@ -575,7 +575,7 @@ streamOpenID(const char *filename, const char *filemode, int filetype,
   return (streamID);
 }
 
-int streamOpen(const char *filename, const char *filemode, int filetype)
+static int streamOpen(const char *filename, const char *filemode, int filetype)
 {
   return streamOpenID(filename, filemode, filetype, CDI_UNDEFID);
 }
@@ -1898,6 +1898,7 @@ cdiStreamwriteVarChunk_(int streamID, int varID, int memtype,
     }
 }
 
+#if 0
 void streamWriteContents(int streamID, char *cname)
 {
   stream_t *streamptr = stream_to_pointer(streamID);
@@ -1993,6 +1994,7 @@ void streamWriteContents(int streamID, char *cname)
 
   fclose(cnp);
 }
+#endif
 
 // This function is used in CDO!
 off_t streamNvals(int streamID)
