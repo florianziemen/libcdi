@@ -302,7 +302,7 @@ int extInqDataDP(void *ext, double *data)
 }
 
 
-int extDefData(void *ext, int prec, const void *data)
+static int extDefData(void *ext, int prec, const void *data)
 {
   extrec_t *extp = (extrec_t *) ext;
   size_t i;
