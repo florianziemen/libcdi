@@ -51,11 +51,9 @@ int recordNewEntry(stream_t *streamptr, int tsID)
     }
   else
     {
-      while ( recordID < recordSize )
-	{
-	  if ( records[recordID].used == CDI_UNDEFID ) break;
-	  recordID++;
-	}
+      while ( recordID < recordSize
+              && records[recordID].used != CDI_UNDEFID )
+        ++recordID;
     }
   /*
     If the table overflows, double its size.
