@@ -95,7 +95,7 @@ sum_int(size_t n, int *a)
 }
 
 
-void printArray ( const char *, char *, const void *, int, int, const char *, const char *, int );
+void printArray ( const char *, const char *, const void *, int, int, const char *, const char *, int );
 #define xprintArray(ps,array,n,datatype)                                \
   if ( ddebug )                                                         \
       printArray ( debugString, ps, array, n, datatype,  __func__, __FILE__, __LINE__ )

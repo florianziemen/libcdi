@@ -159,7 +159,7 @@ void pcdiDebugMsg2 ( const char *filename, const char *functionname, int line,
 
 /****************************************************/
 
-void printArray ( const char * cdiPioDebugString, char * ps, const void * array, int n,
+void printArray ( const char *cdiPioDebugString, const char *ps, const void *array, int n,
                   int datatype, const char * funname, const char * filename, int line )
 {
   int i;
