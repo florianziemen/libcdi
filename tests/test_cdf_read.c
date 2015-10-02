@@ -55,7 +55,6 @@ int main(int argc, const char **argv)
           streamReadVar(streamID, (int)varID, buf, &nmiss);
           allNmissSum += (size_t)nmiss;
         }
-      ++tsID;
     }
   if (countMissingValues)
     printf("missing values count = %zu\n", allNmissSum);
