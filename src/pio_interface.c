@@ -493,7 +493,7 @@ modelWinEnqueue(int collID,
                 valPackFunc packFunc)
 {
   struct winHeaderEntry *winDict
-    = (struct winHeaderEntry *)txWin[collID].buffer;
+    = (struct winHeaderEntry *)(void *)txWin[collID].buffer;
   int targetEntry;
   if (header.id > 0 || header.id == PARTDESCMARKER)
     targetEntry = (txWin[collID].dictDataUsed)++;
