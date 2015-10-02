@@ -11,17 +11,15 @@ extern int CDI_Debug;
 
 static void version(void)
 {
-  fprintf(stderr, "createtable version 1.00 (11 Nov 2001)\n");
-  fprintf(stderr, "\n");
+  fputs("createtable version 1.00 (11 Nov 2001)\n\n", stderr);
 }
 
 static void usage(void)
 {
-  fprintf(stderr, "usage :  createtable  [-options]  ifile  ofile\n");
-  fprintf(stderr, "with:\n");
-
-  fprintf(stderr, "   -debug        debugging mode\n");
-  fprintf(stderr, "   -version      display version number\n");
+  fputs("usage :  createtable  [-options]  ifile  ofile\n"
+        "with:\n"
+        "   -debug        debugging mode\n"
+        "   -version      display version number\n", stderr);
 }
 
 int main(int argc, char *argv[])
