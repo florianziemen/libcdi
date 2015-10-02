@@ -221,7 +221,6 @@ static
 int iegInqData(void *ieg, int prec, void *data)
 {
   iegrec_t *iegp = (iegrec_t *) ieg;
-  size_t i;
   int ierr = 0;
   int byteswap = iegp->byteswap;
   size_t datasize = iegp->datasize;
@@ -239,8 +238,12 @@ int iegInqData(void *ieg, int prec, void *data)
 	    if ( dprec == prec )
 	      memcpy(data, buffer, datasize*sizeof(FLT32));
 	    else
-	      for (i = 0; i < datasize; i++)
-		((double *) data)[i] = (double) ((float *) buffer)[i];
+              {
+                const float *restrict p = buffer;
+                double *restrict q = data;
+                for ( size_t i = 0; i < datasize; i++)
+                  q[i] = p[i];
+              }
 	  }
 	else
 	  {
@@ -256,8 +259,12 @@ int iegInqData(void *ieg, int prec, void *data)
 	    if ( dprec == prec )
 	      memcpy(data, buffer, datasize*sizeof(FLT64));
 	    else
-	      for (i = 0; i < datasize; i++)
-		((float *) data)[i] = (float) ((double *) buffer)[i];
+              {
+                const double *restrict p = buffer;
+                float *restrict q = data;
+                for ( size_t i = 0; i < datasize; i++)
+                  q[i] = (float)p[i];
+              }
 	  }
 	else
 	  {
@@ -290,7 +297,6 @@ int iegInqDataDP(void *ieg, double *data)
 int iegDefData(void *ieg, int prec, const void *data)
 {
   iegrec_t *iegp = (iegrec_t *) ieg;
-  size_t i;
   int dprec;
   void *buffer;
 
@@ -326,9 +332,12 @@ int iegDefData(void *ieg, int prec, const void *data)
 	if ( dprec == prec )
 	  memcpy(buffer, data, datasize*sizeof(FLT32));
 	else
-	  for (i = 0; i < datasize; i++)
-	    ((float *) buffer)[i] = (float) ((double *) data)[i];
-
+          {
+            const double *restrict p = (const double *)data;
+            float *restrict q = (float *)buffer;
+            for (size_t i = 0; i < datasize; i++)
+              q[i] = (float)p[i];
+          }
 	break;
       }
     case EXSE_DOUBLE_PRECISION:
@@ -336,9 +345,12 @@ int iegDefData(void *ieg, int prec, const void *data)
 	if ( dprec == prec )
 	  memcpy(buffer, data, datasize*sizeof(FLT64));
 	else
-	  for (i = 0; i < datasize; i++)
-	    ((double *) buffer)[i] = (double) ((float *) data)[i];
-
+          {
+            const float *restrict p = (const float *)data;
+            double *restrict q = (double *)buffer;
+            for ( size_t i = 0; i < datasize; i++)
+              q[i] = p[i];
+          }
 	break;
       }
     default:
