@@ -342,16 +342,15 @@ const char *fileLibraryVersion(void)
 }
 
 
-#ifndef POSIXIO_DEFAULT_PAGESIZE
-#define POSIXIO_DEFAULT_PAGESIZE 4096
-#endif
-
 static
 int pagesize(void)
 {
 #if defined(_SC_PAGESIZE)
   return ((int) sysconf(_SC_PAGESIZE));
 #else
+#ifndef POSIXIO_DEFAULT_PAGESIZE
+#define POSIXIO_DEFAULT_PAGESIZE 4096
+#endif
   return ((int) POSIXIO_DEFAULT_PAGESIZE);
 #endif
 }
