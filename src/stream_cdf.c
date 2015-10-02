@@ -5320,7 +5320,6 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
   int nvdims, nvatts;
   int *dimidsp;
   int iatt;
-  int i;
   nc_type xtype, atttype;
   size_t attlen;
   char name[CDI_MAX_NAME];
@@ -5328,8 +5327,9 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
   const int attstringlen = 8192; char attstring[8192];
 
   int nchecked_vars = 0;
-  char *checked_vars[9];
-  for ( i = 0; i < 9; ++i ) checked_vars[i] = NULL;
+  enum { max_check_vars = 9 };
+  char *checked_vars[max_check_vars];
+  for ( int i = 0; i < max_check_vars; ++i ) checked_vars[i] = NULL;
 
   for ( int ncvarid = 0; ncvarid < nvars; ncvarid++ )
     {
@@ -5680,7 +5680,7 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
               cdfGetAttText(ncid, ncvarid, attname, attstringlen, attstring);
               char *pstring = attstring;
 
-              for ( i = 0; i < MAX_COORDVARS; i++ )
+              for ( int i = 0; i < MAX_COORDVARS; i++ )
                 {
                   while ( isspace((int) *pstring) ) pstring++;
                   if ( *pstring == 0 ) break;
@@ -5707,7 +5707,7 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
 
                       if ( k == nchecked_vars )
                         {
-                          if ( nchecked_vars < 9 ) checked_vars[nchecked_vars++] = strdup(varname);
+                          if ( nchecked_vars < max_check_vars ) checked_vars[nchecked_vars++] = strdup(varname);
                           Warning("%s - %s", nc_strerror(status), varname);
                         }
                     }
@@ -5728,7 +5728,7 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
               cdfGetAttText(ncid, ncvarid, attname, attstringlen, attstring);
               char *pstring = attstring;
 
-              for ( i = 0; i < MAX_AUXVARS; i++ )
+              for ( int i = 0; i < MAX_AUXVARS; i++ )
                 {
                   while ( isspace((int) *pstring) ) pstring++;
                   if ( *pstring == 0 ) break;
@@ -5901,6 +5901,7 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
 	      else
 		{
 		  strtolower(attstring);
+                  int i;
 		  for ( i = 0; i < (int)attlen; ++i )
 		    {
 		      if ( attstring[i] != '-' && attstring[i] != 't' && attstring[i] != 'z' &&
@@ -6013,7 +6014,7 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
 	}
     }
 
-  for ( i = 0; i < 9; ++i ) if ( checked_vars[i] ) Free(checked_vars[i]);
+  for ( int i = 0; i < max_check_vars; ++i ) if ( checked_vars[i] ) Free(checked_vars[i]);
 }
 
 static
