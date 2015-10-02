@@ -2225,7 +2225,7 @@ static _Icf(2,U,F,CFFUN(UN),0)() {_(F,_cfE) _Icf(3,GZ,F,UN,LN) ABSOFT_cf1(F));_(
 #define         STRING_cfT(M,I,A,B,D)  TTTTSTR( A,B,D)
 #define        STRINGV_cfT(M,I,A,B,D)  TTTTSTRV(A,B,D, num_elem(A,D,_3(M,_STRV_A,I)))
 #define        PSTRING_cfT(M,I,A,B,D)    TTSTR( A,B,D)
-#define       PPSTRING_cfT(M,I,A,B,D)           A
+#define       PPSTRING_cfT(M,I,A,B,D)           ((void)D, A)
 #endif
 #endif
 #define       PNSTRING_cfT(M,I,A,B,D)    STRING_cfT(M,I,A,B,D)
