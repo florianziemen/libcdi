@@ -32,9 +32,9 @@ static int dmemory_ExitOnError = 1;
 typedef struct
 {
   void     *ptr;
-  int       item;
   size_t    size;
   size_t    nobj;
+  int       item;
   int       mtype;
   int       line;
   char      filename[MEM_MAXNAME];
