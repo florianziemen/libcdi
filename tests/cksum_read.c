@@ -60,10 +60,14 @@ int main(int argc, char *argv[])
     struct cksum_table *ref_var_table
       = read_table(table_fname, &num_ref_entries);
     if (num_ref_entries == (size_t)-1)
-      exit(EXIT_FAILURE);
+      {
+        free(file_vars);
+        exit(EXIT_FAILURE);
+      }
     retcode
       = compare_checksums(file_vars, nvars, "file",
                           ref_var_table, num_ref_entries, "reference table");
+    free(file_vars);
     free(ref_var_table);
   }
 
