@@ -109,7 +109,7 @@ enum {
   intbits = sizeof(int) * CHAR_BIT,
   nspbits = 4,
   idxbits = intbits - nspbits,
-  nspmask = (( 1 << nspbits ) - 1) << idxbits,
+  nspmask = (int)((( (unsigned)1 << nspbits ) - 1) << idxbits),
   idxmask = ( 1 << idxbits ) - 1,
 };
 
