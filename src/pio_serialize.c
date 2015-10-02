@@ -97,7 +97,7 @@ serializeUnpackMPI(void *buf, int buf_size, int *position,
                   dtDict[lookupDt(datatype)].mpidt, *(MPI_Comm *)context));
 }
 
-void cdiPioSerializeSetMPI()
+void cdiPioSerializeSetMPI(void)
 {
 #ifdef CDI_DT_MATCH_NEEDED
   if (!dtDictMatchComplete)
