@@ -269,7 +269,7 @@ void    cdiDefMissval(double missval);
 double  cdiInqMissval(void);
 void    cdiDefGlobal(const char *string, int val);
 
-int     namespaceNew();
+int     namespaceNew(void);
 void    namespaceSetActive(int namespaceID);
 void    namespaceDelete(int namespaceID);
 
