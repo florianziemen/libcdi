@@ -43,7 +43,7 @@ lookupDt(int datatype)
   abort();
 }
 
-#if CDI_DT_MATCH_NEEDED
+#ifdef CDI_DT_MATCH_NEEDED
 static int dtDictMatchComplete = 0;
 
 static inline void
@@ -99,7 +99,7 @@ serializeUnpackMPI(void *buf, int buf_size, int *position,
 
 void cdiPioSerializeSetMPI()
 {
-#if CDI_DT_MATCH_NEEDED
+#ifdef CDI_DT_MATCH_NEEDED
   if (!dtDictMatchComplete)
     setupDtDict();
 #endif
