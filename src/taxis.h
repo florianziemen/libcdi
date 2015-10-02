@@ -9,7 +9,8 @@ typedef struct {
   /* Date format  YYYYMMDD */
   /* Time format    hhmmss */
   int     self;
-  int     used;
+  short   used;
+  short   has_bounds;
   int     type;           // time type
   int     vdate;          // verification date
   int     vtime;          // verification time
@@ -21,7 +22,6 @@ typedef struct {
   int     unit;           // time unit
   int     numavg;
   int     climatology;
-  int     has_bounds;
   int     vdate_lb;       // lower bounds of vdate
   int     vtime_lb;       // lower bounds of vtime
   int     vdate_ub;       // upper bounds of vdate

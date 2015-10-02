@@ -1530,7 +1530,7 @@ taxisUnpack(char * unpackBuffer, int unpackBufferSize, int * unpackBufferPos,
 
   xassert(!force_id || targetID == taxisP->self);
 
-  taxisP->used        = intBuffer[idx++];
+  taxisP->used        = (short)intBuffer[idx++];
   taxisP->type        = intBuffer[idx++];
   taxisP->vdate       = intBuffer[idx++];
   taxisP->vtime       = intBuffer[idx++];
@@ -1543,7 +1543,7 @@ taxisUnpack(char * unpackBuffer, int unpackBufferSize, int * unpackBufferPos,
   taxisP->fc_unit     = intBuffer[idx++];
   taxisP->numavg      = intBuffer[idx++];
   taxisP->climatology = intBuffer[idx++];
-  taxisP->has_bounds  = intBuffer[idx++];
+  taxisP->has_bounds  = (short)intBuffer[idx++];
   taxisP->vdate_lb    = intBuffer[idx++];
   taxisP->vtime_lb    = intBuffer[idx++];
   taxisP->vdate_ub    = intBuffer[idx++];
