@@ -2376,7 +2376,7 @@ void cdf_def_vct_cf(stream_t *streamptr, int zaxisID, int nclevID, int ncbndsID)
     {
       int ilev = zaxisInqVctSize(zaxisID)/2;
       int mlev = ilev - 1;
-      int hyaiid, hybiid, hyamid, hybmid;
+      int hyaiid = 0, hybiid = 0, hyamid, hybmid;
       char tmpname[CDI_MAX_NAME];
 
       if ( streamptr->vct.ilev > 0 )
