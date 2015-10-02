@@ -58,8 +58,8 @@ typedef struct {
   int    checked;
   int    byteswap;
   int    dprec;      /* data   precision */
-  double refval;
   int    ipdb[37];
+  double refval;
   int    igdb[22];
   double vct[100];
   size_t datasize;
