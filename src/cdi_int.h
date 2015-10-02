@@ -162,8 +162,8 @@ record_t;
 
 typedef struct {
   record_t *records;
-  int       recordSize;  /* number of allocated records           */
   int      *recIDs;      /* IDs of non constant records           */
+  int       recordSize;  /* number of allocated records           */
   int       nrecs;       /* number of used records                */
                          /* tsID=0 nallrecs                       */
                          /* tsID>0 number of non constant records */
