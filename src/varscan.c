@@ -956,8 +956,8 @@ struct varDefZAxisSearchState
   int resIDValue;
   int zaxistype;
   int nlevels;
-  double *levels;
   int lbounds;
+  double *levels;
   char *longname;
   const char *units;
   int ltype;
