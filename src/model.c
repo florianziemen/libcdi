@@ -7,17 +7,18 @@
 #include "dmemory.h"
 #include "cdi.h"
 #include "cdi_int.h"
+#include "model.h"
+#include "namespace.h"
 #include "resource_handle.h"
 #include "resource_unpack.h"
-#include "namespace.h"
 #include "serialize.h"
 
 #undef  UNDEFID
 #define UNDEFID -1
 
-int ECHAM4 = UNDEFID;
-int ECHAM5 = UNDEFID;
-int COSMO  = UNDEFID;
+static int ECHAM4 = UNDEFID,
+  ECHAM5 = UNDEFID,
+  COSMO  = UNDEFID;
 
 typedef struct
 {
