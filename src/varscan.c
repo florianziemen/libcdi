@@ -393,17 +393,8 @@ paramNewEntry(int param)
   */
   if ( varID == varTablesize )
     {
-
-      varTablesize = 2 * varTablesize;
-      vartable = (vartable_t *) Realloc(vartable, (size_t)varTablesize
+      vartable = (vartable_t *) Realloc(vartable, (size_t)(varTablesize *= 2)
                                         * sizeof (vartable_t));
-      if( vartable == NULL )
-	{
-          Message("varTablesize = %d", varTablesize);
-	  SysError("Reallocation of vartable failed!");
-	}
-      varID = varTablesize/2;
-
       for( unsigned i = varID; i < varTablesize; i++ )
         {
           vartable[i].param = UNDEF_PARAM;
