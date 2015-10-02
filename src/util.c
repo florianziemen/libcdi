@@ -58,7 +58,7 @@ void cdiPrintDatatypes(void)
     fprintf (stderr, "\n  byte ordering is LITTLEENDIAN\n\n");
 }
 
-static char uuidFmt[] = "%02hhx%02hhx%02hhx%02hhx-"
+static const char uuidFmt[] = "%02hhx%02hhx%02hhx%02hhx-"
   "%02hhx%02hhx-%02hhx%02hhx-%02hhx%02hhx-"
   "%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx";
 
