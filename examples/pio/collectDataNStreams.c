@@ -209,9 +209,9 @@ static void modelRun(MPI_Comm commModel)
 
 #ifdef USE_MPI
   pioEndTimestepping ();
-  for (int streamID = 0; streamID < nStreams; ++streamID)
-    for (int varID = 0; varID < nVars; ++varID)
-      xt_idxlist_delete(varDeco[streamID][varID].partDesc);
+  for (size_t streamIdx = 0; streamIdx < (size_t)nStreams; ++streamIdx)
+    for (size_t varIdx = 0; varIdx < (size_t)nVars; ++varIdx)
+      xt_idxlist_delete(varDeco[streamIdx][varIdx].partDesc);
 #endif
 
   for ( i = 0; i < nStreams; i++ )
