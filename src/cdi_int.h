@@ -436,6 +436,9 @@ void zaxisGetIndexList(int nzaxis, int *zaxisIndexList);
 void zaxisDefLtype2(int zaxisID, int ltype2);
 int  zaxisInqLtype2(int zaxisID);
 
+/* used by CDO */
+void cdiDefTableID(int tableID);
+
 #endif  /* _CDI_INT_H */
 /*
  * Local Variables:
