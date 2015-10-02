@@ -150,7 +150,6 @@ in order of vSizes
 
    @param nNodes number of physical nodes hosting I/O PEs
 
-   @return
 */
 
 static void
