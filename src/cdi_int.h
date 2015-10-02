@@ -309,6 +309,7 @@ extern int cdiSkipRecords;
 extern int cdiConvention;
 extern int cdiInventoryMode;
 extern int CDI_Version_Info;
+extern int CDI_cmor_mode;
 extern size_t CDI_netcdf_hdr_pad;
 extern int STREAM_Debug;
 
