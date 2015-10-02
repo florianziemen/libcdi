@@ -644,7 +644,7 @@ void    vlistDefVarEnsemble(int vlistID, int varID, int ensID, int ensCount, int
 int     vlistInqVarEnsemble(int vlistID, int varID, int *ensID, int *ensCount, int *forecast_type);
 
 /* cdiClearAdditionalKeys: Clear the list of additional GRIB keys. */
-void    cdiClearAdditionalKeys();
+void    cdiClearAdditionalKeys(void);
 /* cdiDefAdditionalKey: Register an additional GRIB key which is read when file is opened. */
 void    cdiDefAdditionalKey(const char *string);
 

@@ -145,6 +145,7 @@ const char *vlistInqVarStdnamePtr(int vlistID, int varID);
 const char *vlistInqVarUnitsPtr(int vlistID, int varID);
 void     vlistDestroyVarName(int vlistID, int varID);
 void     vlistDestroyVarLongname(int vlistID, int varID);
+void     vlistDestroyVarStdname(int vlistID, int varID);
 void     vlistDestroyVarUnits(int vlistID, int varID);
 void     vlistDefVarTsteptype(int vlistID, int varID, int tsteptype);
 int      vlistInqVarMissvalUsed(int vlistID, int varID);
