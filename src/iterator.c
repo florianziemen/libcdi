@@ -8,9 +8,12 @@
 #include <assert.h>
 #include <ctype.h>
 
-const char* const kUnexpectedFileTypeMessage = "Internal error: Unexpected file type encountered in iterator.\nThis is either due to an illegal memory access by the application or an internal logical error in CDI (unlikely, but possible).";
-const char* const kAdvancedString = "advanced";
-const char* const kUnadvancedString = "unadvanced";
+static const char kUnexpectedFileTypeMessage[]
+  = "Internal error: Unexpected file type encountered in iterator.\n"
+  "This is either due to an illegal memory access by the application\n"
+  " or an internal logical error in CDI (unlikely, but possible).";
+static const char kAdvancedString[] = "advanced";
+static const char kUnadvancedString[] = "unadvanced";
 
 //Returns a static string.
 static const char* fileType2String(int fileType)
@@ -144,12 +147,12 @@ const char* baseIter_constructFromString(CdiIterator* me, const char* descriptio
   if(result == strstr(result, kAdvancedString))
     {
       me->isAdvanced = true;
-      result += strlen(kAdvancedString);
+      result += sizeof (kAdvancedString) - 1;
     }
   else if(result == strstr(result, kUnadvancedString))
     {
       me->isAdvanced = false;
-      result += strlen(kUnadvancedString);
+      result += sizeof (kUnadvancedString) - 1;
     }
   else
     {
