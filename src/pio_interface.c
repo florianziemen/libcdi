@@ -876,14 +876,9 @@ void  pioEndTimestepping ( void )
 
 
 /**
-  @brief is invoked by the calculator PEs, to inform
-  the I/O PEs that no more data will be written.
-
-  @param
-
-  @return
-*/
-
+ * @brief is invoked by the calculator PEs, to inform
+ * the I/O PEs that no more data will be written.
+ */
 void pioFinalize ( void )
 {
   xdebug("%s", "START");
