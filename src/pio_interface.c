@@ -161,7 +161,7 @@ varMapGen(int *vSizes, int *sSizes, int *varMapping,
   int weightsStreams[nStreams];
   int streamMapping[nStreams];
   int nPEs = 0, nVars = 0;
-  int i, j, k, offset = 0, offsetN = 0;
+  int offset = 0, offsetN = 0;
 
   int * weightsVarsNode;
   int * varMappingNode;
@@ -174,21 +174,21 @@ varMapGen(int *vSizes, int *sSizes, int *varMapping,
     {
       nVars += sSizes[i];
       weightsStreams[i] = 0;
-      for ( j = 0; j < * ( sSizes + i ); j++ )
+      for ( int j = 0; j < * ( sSizes + i ); j++ )
 	weightsStreams[i] += * ( vSizes + offset++ );
     }
 
   double *w = (double *) Malloc((size_t)nNodes * sizeof ( double ));
-  for ( j = 0; j < nNodes; j++ )
+  for ( int j = 0; j < nNodes; j++ )
     nPEs += * ( nodeSizes + j );
 
-  for ( j = 0; j < nNodes; j++ )
+  for ( int j = 0; j < nNodes; j++ )
     w[j] = ( double ) * ( nodeSizes + j ) / ( double ) nPEs;
 
   mapProblems(weightsStreams, streamMapping, (int)nStreams, nNodes, w);
   Free( w );
 
-  for ( i = 0; i < nNodes; i++ )
+  for ( int i = 0; i < nNodes; i++ )
     {
       nVarsNode = 0;
       for (unsigned j = 0; j < nStreams; j++)
@@ -203,12 +203,12 @@ varMapGen(int *vSizes, int *sSizes, int *varMapping,
 
       for (unsigned j = 0; j < nStreams; j++ )
 	if (streamMapping[j] == i)
-	  for ( k = 0; k < * ( sSizes + j ); k ++ )
+	  for ( int k = 0; k < sSizes[j]; k ++ )
 	    weightsVarsNode[offsetN++] = vSizes[offset++];
 	else
 	  offset += sSizes[j];
 
-      for ( j = 0; j < * ( nodeSizes + i ); j ++ )
+      for ( int j = 0; j < nodeSizes[i]; j++ )
 	w[j] = 1.0 / ( double ) * ( nodeSizes + i );
 
       mapProblems ( weightsVarsNode, varMappingNode, nVarsNode,
@@ -219,7 +219,7 @@ varMapGen(int *vSizes, int *sSizes, int *varMapping,
 
       for (unsigned j = 0; j < nStreams; j++)
 	if ( * ( streamMapping + j ) == i )
-	  for ( k = 0; k < * ( sSizes + j ); k ++ )
+	  for ( int k = 0; k < sSizes[j]; k++ )
 	    * ( varMapping + offset ++ ) =
               commCollID2RankGlob ( * ( varMappingNode + offsetN ++ ) +
                                     summandRank );
@@ -236,9 +236,9 @@ varMapGen(int *vSizes, int *sSizes, int *varMapping,
   if ( ddebug )
     {
       xprintArray ( "varMapping", varMapping, nVars, DATATYPE_INT  );
-      for ( i = 0; i < nProcsColl; i++ )
+      for ( int i = 0; i < nProcsColl; i++ )
 	buckets[i] = 0;
-      for ( i = 0; i < nVars; i ++ )
+      for ( int i = 0; i < nVars; i ++ )
 	buckets[commRankGlob2CollID ( *(varMapping + i ))] += * ( vSizes + i );
       xprintArray ( "buckets", buckets, nProcsColl, DATATYPE_INT );
     }
