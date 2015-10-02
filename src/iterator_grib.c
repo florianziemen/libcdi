@@ -556,7 +556,7 @@ void cdiGribIterator_readFieldF(CdiIterator *super, float *buffer, size_t *nmiss
 }
 #endif
 
-/**
+/*
 @Function cdiGribIterator_delete
 @Title Dispose off a CdiGribIterator instance.
 
@@ -582,7 +582,7 @@ void cdiGribIterator_delete(CdiGribIterator *me)
 // callthroughs to provide direct access to the grib keys //////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-/**
+/*
 @Function cdiGribIterator_inqEdition
 @Title Get the version of the GRIB standard that is used
 
@@ -605,7 +605,7 @@ int cdiGribIterator_inqEdition(CdiGribIterator *me)
 #endif
 }
 
-/**
+/*
 @Function cdiGribIterator_getLong
 @Title Access to grib_get_long()
 
@@ -631,7 +631,7 @@ int cdiGribIterator_getLong(CdiGribIterator *me, const char *key, long *result)
 #endif
 }
 
-/**
+/*
 @Function cdiGribIterator_getLength
 @Title Access to grib_get_length()
 
@@ -663,7 +663,7 @@ int cdiGribIterator_getLength(CdiGribIterator *me, const char *key, size_t *resu
 #endif
 }
 
-/**
+/*
 @Function cdiGribIterator_getString
 @Title Access to grib_get_string()
 
@@ -690,7 +690,7 @@ int cdiGribIterator_getString(CdiGribIterator *me, const char *key, char *result
 #endif
 }
 
-/**
+/*
 @Function cdiGribIterator_inqLongValue
 @Title Get the value of a GRIB-API key as a long
 
@@ -716,7 +716,7 @@ long cdiGribIterator_inqLongValue(CdiGribIterator *me, const char *key)
 #endif
 }
 
-/**
+/*
 @Function cdiGribIterator_inqLongDefaultValue
 @Title Get the value of a GRIB-API key as a long
 
@@ -744,7 +744,7 @@ long cdiGribIterator_inqLongDefaultValue(CdiGribIterator *me, const char *key, l
 #endif
 }
 
-/**
+/*
 @Function cdiGribIterator_inqStringValue
 @Title Safely retrieve a GRIB-API key with a string value
 
@@ -771,7 +771,7 @@ char *cdiGribIterator_inqStringValue(CdiGribIterator *me, const char *key)
 #endif
 }
 
-/**
+/*
 @Function cdiGribIterator_getDouble
 @Title Access to grib_get_double()
 
@@ -797,7 +797,7 @@ int cdiGribIterator_getDouble(CdiGribIterator *me, const char *key, double *resu
 #endif
 }
 
-/**
+/*
 @Function cdiGribIterator_getSize
 @Title Access to grib_get_size()
 
@@ -823,7 +823,7 @@ int cdiGribIterator_getSize(CdiGribIterator *me, const char *key, size_t *result
 #endif
 }
 
-/**
+/*
 @Function cdiGribIterator_getLongArray
 @Title Access to grib_get_long_array()
 
@@ -850,7 +850,7 @@ int cdiGribIterator_getLongArray(CdiGribIterator *me, const char *key, long *res
 #endif
 }
 
-/**
+/*
 @Function cdiGribIterator_getDoubleArray
 @Title Access to grib_get_double_array()
 
@@ -877,7 +877,7 @@ int cdiGribIterator_getDoubleArray(CdiGribIterator *me, const char *key, double 
 #endif
 }
 
-/**
+/*
 @Function cdiGribIterator_inqDoubleValue
 @Title Get the value of a GRIB-API key as a double
 
@@ -903,7 +903,7 @@ double cdiGribIterator_inqDoubleValue(CdiGribIterator *me, const char *key)
 #endif
 }
 
-/**
+/*
 @Function cdiGribIterator_inqDoubleDefaultValue
 @Title Get the value of a GRIB-API key as a double
 
