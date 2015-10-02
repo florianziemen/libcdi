@@ -13,6 +13,7 @@
 
 #include "cdi.h"
 #include "cdi_int.h"
+#include "create_uuid.h"
 #include "dmemory.h"
 #include "binary.h"
 
