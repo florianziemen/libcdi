@@ -1,6 +1,11 @@
+#if defined (HAVE_CONFIG_H)
+#  include "config.h"
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "cdi.h"
 #include "cdi_int.h"
 
 void cdiDecodeParam(int param, int *pnum, int *pcat, int *pdis)
