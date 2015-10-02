@@ -369,9 +369,9 @@ modelWinDefBufferSizes(void)
           {
             int varSize = vlistInqVarSize(vlistID, varID);
             int nProcsModel = commInqNProcsModel();
-            collIDchunk = (size_t)ceilf(cdiPIOpartInflate_
-                                        * (float)(varSize + nProcsModel - 1)
-                                        / (float)nProcsModel);
+            collIDchunk = (size_t)(ceilf(cdiPIOpartInflate_
+                                         * (float)(varSize + nProcsModel - 1)
+                                         / (float)nProcsModel));
           }
           xassert ( collID != CDI_UNDEFID && collIDchunk > 0 );
           collIndex[collID].numDataRecords += 2;

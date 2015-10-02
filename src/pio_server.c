@@ -106,9 +106,9 @@ collDefBufferSizes()
                     int varSize = vlistInqVarSize(vlistID, varID);
                     int nProcsModel = commInqNProcsModel();
                     decoChunk =
-                      (int)ceilf(cdiPIOpartInflate_
-                                 * (float)(varSize + nProcsModel - 1)
-                                 / (float)nProcsModel);
+                      (int)(ceilf(cdiPIOpartInflate_
+                                  * (float)(varSize + nProcsModel - 1)
+                                  / (float)nProcsModel));
                   }
                   xassert ( decoChunk > 0 );
                   rxWin[modelID].size += (size_t)decoChunk * sizeof (double)
