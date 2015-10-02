@@ -158,8 +158,8 @@ static void modelRun(MPI_Comm commModel)
     zaxisDestroy ( zaxisID[i] );
   gridDestroy ( gridID );
 #ifdef USE_MPI
-  for (int varID = 0; varID < nVars; ++varID)
-    xt_idxlist_delete(varDeco[varID].partDesc);
+  for (int varIdx = 0; varIdx < nVars; ++varIdx)
+    xt_idxlist_delete(varDeco[varIdx].partDesc);
   MPI_Barrier(commModel);
 #endif
 }
