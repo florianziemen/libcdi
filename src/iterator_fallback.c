@@ -82,7 +82,7 @@ static void fetchSuperInfo(CdiFallbackIterator *me)
 
 CdiFallbackIterator *cdiFallbackIterator_clone(CdiIterator *super)
 {
-  CdiFallbackIterator *me = (CdiFallbackIterator*)super;
+  CdiFallbackIterator *me = (CdiFallbackIterator*)(void *)super;
 
   //Make another stream for this file. This yields an unadvanced iterator.
   CdiFallbackIterator *clone = cdiFallbackIterator_condestruct(NULL, me->path, me->super.filetype);
@@ -103,7 +103,7 @@ CdiFallbackIterator *cdiFallbackIterator_clone(CdiIterator *super)
 
 char *cdiFallbackIterator_serialize(CdiIterator *super)
 {
-  CdiFallbackIterator *me = (CdiFallbackIterator*)super;
+  CdiFallbackIterator *me = (CdiFallbackIterator*)(void *)super;
 
   char *escapedPath = cdiEscapeSpaces(me->path);
   char *result = (char *) Malloc(strlen(escapedPath)
@@ -180,7 +180,7 @@ static int advance(CdiFallbackIterator *me)
 
 int cdiFallbackIterator_nextField(CdiIterator *super)
 {
-  CdiFallbackIterator *me = (CdiFallbackIterator*)super;
+  CdiFallbackIterator *me = (CdiFallbackIterator*)(void *)super;
   int result = advance(me);
   if(result) return result;
 
@@ -194,7 +194,7 @@ int cdiFallbackIterator_nextField(CdiIterator *super)
 
 char *cdiFallbackIterator_inqTime(CdiIterator *super, bool getEndTime)
 {
-  CdiFallbackIterator *me = (CdiFallbackIterator *)super;
+  CdiFallbackIterator *me = (CdiFallbackIterator *)(void *)super;
   if(getEndTime) return NULL;   //The stream interface does not export the start/end times of statistical fields, so we treat all data as point of time data, returning the validity time as the start time.
   int taxisId = vlistInqTaxis(me->vlistId);
   int date = taxisInqVdate(taxisId);
@@ -210,7 +210,7 @@ char *cdiFallbackIterator_inqTime(CdiIterator *super, bool getEndTime)
 
 int cdiFallbackIterator_levelType(CdiIterator *super, int levelSelector, char **outName, char **outLongName, char **outStdName, char **outUnit)
 {
-  CdiFallbackIterator *me = (CdiFallbackIterator*)super;
+  CdiFallbackIterator *me = (CdiFallbackIterator*)(void *)super;
   int zaxisId = vlistInqVarZaxis(me->vlistId, me->curVariable);
   (void)levelSelector;
 #define copyString(outPointer, function) do \
@@ -233,7 +233,7 @@ int cdiFallbackIterator_levelType(CdiIterator *super, int levelSelector, char **
 
 int cdiFallbackIterator_level(CdiIterator *super, int levelSelector, double *outValue1, double *outValue2)
 {
-  CdiFallbackIterator *me = (CdiFallbackIterator*)super;
+  CdiFallbackIterator *me = (CdiFallbackIterator*)(void *)super;
   int zaxisId = vlistInqVarZaxis(me->vlistId, me->curVariable);
 
   //handle NULL pointers once and for all
@@ -269,7 +269,7 @@ int cdiFallbackIterator_level(CdiIterator *super, int levelSelector, double *out
 
 int cdiFallbackIterator_zaxisUuid(CdiIterator *super, int *outVgridNumber, int *outLevelCount, unsigned char outUuid[CDI_UUID_SIZE])
 {
-  CdiFallbackIterator *me = (CdiFallbackIterator*)super;
+  CdiFallbackIterator *me = (CdiFallbackIterator*)(void *)super;
   int zaxisId = vlistInqVarZaxis(me->vlistId, me->curVariable);
   if(zaxisInqLtype(zaxisId) != ZAXIS_HYBRID) return CDI_EINVAL;
   if(outVgridNumber) *outVgridNumber = zaxisInqNumber(zaxisId);
@@ -280,13 +280,13 @@ int cdiFallbackIterator_zaxisUuid(CdiIterator *super, int *outVgridNumber, int *
 
 char *cdiFallbackIterator_copyVariableName(CdiIterator *super)
 {
-  CdiFallbackIterator *me = (CdiFallbackIterator*)super;
+  CdiFallbackIterator *me = (CdiFallbackIterator*)(void *)super;
   return vlistCopyVarName(me->vlistId, me->curVariable);
 }
 
 void cdiFallbackIterator_readField(CdiIterator *super, double *buffer, size_t *nmiss)
 {
-  CdiFallbackIterator *me = (CdiFallbackIterator*)super;
+  CdiFallbackIterator *me = (CdiFallbackIterator*)(void *)super;
   int missingValues = 0;
   streamReadVarSlice(me->streamId, me->curVariable, me->curLevel, buffer, &missingValues);
   if(nmiss) *nmiss = (size_t)missingValues;
@@ -294,7 +294,7 @@ void cdiFallbackIterator_readField(CdiIterator *super, double *buffer, size_t *n
 
 void cdiFallbackIterator_readFieldF(CdiIterator *super, float *buffer, size_t *nmiss)
 {
-  CdiFallbackIterator *me = (CdiFallbackIterator*)super;
+  CdiFallbackIterator *me = (CdiFallbackIterator*)(void *)super;
   int missingValues = 0;
   streamReadVarSliceF(me->streamId, me->curVariable, me->curLevel, buffer, &missingValues);
   if(nmiss) *nmiss = (size_t)missingValues;
@@ -302,7 +302,7 @@ void cdiFallbackIterator_readFieldF(CdiIterator *super, float *buffer, size_t *n
 
 void cdiFallbackIterator_delete(CdiIterator *super)
 {
-  CdiFallbackIterator *me = (CdiFallbackIterator*)super;
+  CdiFallbackIterator *me = (CdiFallbackIterator*)(void *)super;
   cdiFallbackIterator_condestruct(me, NULL, 0);
 }
 
