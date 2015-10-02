@@ -342,7 +342,7 @@ struct collDesc
 static void
 modelWinDefBufferSizes(void)
 {
-  int collID, * streamIndexList, nvars, varID;
+  int *streamIndexList, nvars, varID;
   size_t sumWinBufferSize = 0;
   int nProcsColl  = commInqNProcsColl ();
   int rankGlob    = commInqRankGlob ();
@@ -389,7 +389,7 @@ modelWinDefBufferSizes(void)
       // for remote execution
       // once per stream and timestep for all collprocs only on the modelproc root
       if ( rankGlob == root )
-        for ( collID = 0; collID < nProcsColl; collID++ )
+        for ( int collID = 0; collID < nProcsColl; collID++ )
           {
             collIndex[collID].numRPCRecords += numRPCFuncs;
             txWin[collID].size +=
@@ -399,7 +399,7 @@ modelWinDefBufferSizes(void)
               + (2 * CDI_MAX_NAME + sizeof (taxis_t));
           }
     }
-  for (collID = 0; collID < nProcsColl; ++collID)
+  for ( int collID = 0; collID < nProcsColl; ++collID)
     {
       int numRecords = 1 + collIndex[collID].numDataRecords
         + collIndex[collID].numRPCRecords;
