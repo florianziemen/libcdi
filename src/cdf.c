@@ -86,7 +86,7 @@ void cdfComment(int ncid)
 }
 #endif
 
-int cdfOpenFile(const char *filename, const char *mode, int *filetype)
+static int cdfOpenFile(const char *filename, const char *mode, int *filetype)
 {
   int ncid = -1;
 #if  defined  (HAVE_LIBNETCDF)
@@ -218,7 +218,7 @@ int cdf4Open(const char *filename, const char *mode, int *filetype)
 }
 
 
-void cdfCloseFile(int fileID)
+static void cdfCloseFile(int fileID)
 {
 #if  defined  (HAVE_LIBNETCDF)
   cdf_close(fileID);
