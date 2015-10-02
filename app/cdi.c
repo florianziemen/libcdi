@@ -261,8 +261,6 @@ void printInfo(int vdate, int vtime, char *varname, double level,
     fprintf(stdout, "Found %d of %d missing values!\n", imiss, nmiss);
 }
 
-#define MAXCHARS 82
-
 static const char *tunit2str(int tunits)
 {
   if      ( tunits == TUNIT_YEAR )       return ("years");
