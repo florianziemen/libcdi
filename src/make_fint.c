@@ -316,7 +316,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
   regex_t cppCondRE;
   {
     static const char cppCondREString[]
-      = "^"WS"*#"WS"*((ifn?def)"WS"+"SYMRE"|endif)"WS"*(/\\*[^*]*\\*/|//.*)?";
+      = "^"WS"*#"WS"*((ifn?def)"WS"+\\(?"SYMRE"\\)?|endif)"WS"*(/\\*[^*]*\\*/|//.*)?";
     if (reCompile(&cppCondRE, cppCondREString, &line, &lineBufSize))
       exit(EXIT_FAILURE);
   }
@@ -785,7 +785,13 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
           while ((lineLen = getline(&line, &lineBufSize, fpin)) >= 0)
             {
               ++lineno;
-              if (!regexec(&cppElseRE, line, maxMatch, reMatch, 0))
+              static const char endif_str[] = "endif";
+              if (!regexec(&cppElseRE, line, maxMatch, reMatch, 0)
+                  || (!regexec(&cppCondRE, line, maxMatch, reMatch, 0)
+                      && ((size_t)(cppSymLen = reMatch[1].rm_eo - reMatch[1].rm_so)
+                          == sizeof (endif_str) - 1)
+                      && !memcmp(line + reMatch[1].rm_so, endif_str,
+                                 sizeof (endif_str) - 1)))
                 break;
             }
         }
