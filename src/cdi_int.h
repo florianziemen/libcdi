@@ -178,9 +178,9 @@ tsteps_t;
 
 typedef struct {
   int       nlevs;
+  int       subtypeIndex; /* corresponding tile in subtype_t structure (subtype->self) */
   int      *recordID;     /* record IDs: [nlevs] */
   int      *lindex;       /* level index */
-  int       subtypeIndex; /* corresponding tile in subtype_t structure (subtype->self) */
 } sleveltable_t;
 
 
