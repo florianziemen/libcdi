@@ -87,8 +87,8 @@ modelRun(struct model_config setup, MPI_Comm comm)
 #endif
   } *varDesc;
   int gridID, taxisID, vlistID, streamID, tsID, tfID = 0;
-  int i, nmiss = 0;
-  double *lons, *lats, *levs;
+  enum { nmiss = 0 };
+  double *restrict lons, *restrict lats, *restrict levs;
   double *var = NULL, *varslice = NULL;
   double mscale, mrscale;
   time_t current_time;
@@ -96,7 +96,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
   int rank = 0;
   char filename[1024];
   int nlon = setup.nlon, nlat = setup.nlat;
-  int nVars = setup.nvars;
+  size_t nVars = setup.nvars > 0 ? (size_t)setup.nvars : 0;
   size_t varslice_size = 0;
 #if USE_MPI
   int comm_size = 1;
@@ -141,10 +141,10 @@ modelRun(struct model_config setup, MPI_Comm comm)
   gridDefXsize ( gridID, nlon );
   gridDefYsize ( gridID, nlat );
   lons = (double *)Malloc((size_t)nlon * sizeof (lons[0]));
-  for (i = 0; i < nlon; ++i)
+  for (size_t i = 0; i < (size_t)nlon; ++i)
     lons[i] = ((double)(i * 360))/nlon;
   lats = (double *)Malloc((size_t)nlat * sizeof (lats[0]));
-  for (i = 0; i < nlat; ++i)
+  for (size_t i = 0; i < (size_t)nlat; ++i)
     lats[i] = ((double)(i * 180))/nlat - 90.0;
   gridDefXvals ( gridID, lons );
   gridDefYvals ( gridID, lats );
@@ -160,13 +160,13 @@ modelRun(struct model_config setup, MPI_Comm comm)
   levs = (double *)Malloc((size_t)setup.max_nlev * sizeof (levs[0]));
   {
     double lscale = 1.0/(double)(setup.max_nlev - 1);
-    for (i = 0; i < setup.max_nlev; ++i)
+    for (size_t i = 0; i < (size_t)setup.max_nlev; ++i)
       levs[i] = 101300.0 - 13000.0 * expm1(2.173 * (double)i * lscale);
   }
   vlistID = vlistCreate ();
 
-  varDesc = (struct varDesc_t *)Malloc((size_t)nVars * sizeof (varDesc[0]));
-  for (int varIdx = 0; varIdx < nVars; varIdx++ )
+  varDesc = (struct varDesc_t *)Malloc(nVars * sizeof (varDesc[0]));
+  for (size_t varIdx = 0; varIdx < nVars; varIdx++ )
     {
       int varLevs = (int)random()%4;
       switch (varLevs)
@@ -229,7 +229,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
         Xt_int varSizeXt[3] = { (Xt_int)nlon, (Xt_int)nlat, (Xt_int)varLevs };
         chunkSize[2] = varLevs;
         Xt_int varStartXt[3] = { start[0], start[1], 0 };
-        for (int i = 0; i < varIdx; ++i)
+        for (size_t i = 0; i < varIdx; ++i)
           if (varDesc[i].nlev == varLevs)
             {
               varDesc[varIdx].redist4gather = varDesc[i].redist4gather;
@@ -277,7 +277,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
         gatherRedistSet: ;
       }
 #endif
-      varDesc[varIdx].code = 129 + varIdx;
+      varDesc[varIdx].code = 129 + (int)varIdx;
       vlistDefVarCode(vlistID, varDesc[varIdx].id, varDesc[varIdx].code);
       vlistDefVarDatatype(vlistID, varDesc[varIdx].id, setup.datatype);
     }
@@ -296,7 +296,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
 
   for ( tfID = 0; tfID < ntfiles; tfID++ )
     {
-      for (int varIdx = 0; varIdx < nVars; ++varIdx)
+      for (size_t varIdx = 0; varIdx < nVars; ++varIdx)
         varDesc[varIdx].checksum_state = 0;
       if ( tfID > 0 )
 	{
@@ -316,15 +316,15 @@ modelRun(struct model_config setup, MPI_Comm comm)
 	  taxisDefVdate(taxisID, vdatetime[1]);
 	  taxisDefVtime(taxisID, vdatetime[0]);
 	  streamDefTimestep ( streamID, tsID );
-	  for (int varID = 0; varID < nVars; ++varID)
+	  for (size_t varIdx = 0; varIdx < nVars; ++varIdx)
 	    {
-              size_t varLevs = (size_t)varDesc[varID].nlev;
+              size_t varLevs = (size_t)varDesc[varIdx].nlev;
 #ifdef USE_MPI
-              int start[3] = { varDesc[varID].start[0],
-                               varDesc[varID].start[1],
+              int start[3] = { varDesc[varIdx].start[0],
+                               varDesc[varIdx].start[1],
                                0 };
-              int chunk[3] = { varDesc[varID].chunkSize[0],
-                               varDesc[varID].chunkSize[1],
+              int chunk[3] = { varDesc[varIdx].chunkSize[0],
+                               varDesc[varIdx].chunkSize[1],
                                (int)varLevs };
 #else
               int chunk[3] = { nlon, nlat, (int)varLevs };
@@ -344,7 +344,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
               if (setup.compute_checksum)
                 {
 #if USE_MPI
-                  xt_redist_s_exchange1(varDesc[varID].redist4gather,
+                  xt_redist_s_exchange1(varDesc[varIdx].redist4gather,
                                         varslice, var);
                   size_t layerSize = (size_t)(chunk[0] * chunk[1]);
                   size_t nblk = (layerSize + nproma - 1)/nproma - 1;
@@ -371,26 +371,26 @@ modelRun(struct model_config setup, MPI_Comm comm)
                 }
               if (rank == 0 && setup.compute_checksum)
                 {
-                  memcrc_r(&varDesc[varID].checksum_state,
+                  memcrc_r(&varDesc[varIdx].checksum_state,
                            (const unsigned char *)vdatetime,
                            sizeof (vdatetime));
-                  memcrc_r(&varDesc[varID].checksum_state,
+                  memcrc_r(&varDesc[varIdx].checksum_state,
                            (const unsigned char *)var,
-                           varDesc[varID].size * sizeof (var[0]));
+                           varDesc[varIdx].size * sizeof (var[0]));
                 }
 
 #ifdef USE_MPI
-	      streamWriteScatteredVarPart(streamID, varDesc[varID].id,
+	      streamWriteScatteredVarPart(streamID, varDesc[varIdx].id,
                                           varslice,
                                           (int)varLevs, blk_lens, blk_displ,
-                                          nmiss, varDesc[varID].partDesc);
+                                          nmiss, varDesc[varIdx].partDesc);
 #else
-	      streamWriteVar(streamID, varDesc[varID].id, var, nmiss);
+	      streamWriteVar(streamID, varDesc[varIdx].id, var, nmiss);
 #endif
 	    }
           current_time += 86400;
 #ifdef USE_MPI
-	  pioWriteTimestep ( tsID, vdate, vtime );
+	  pioWriteTimestep();
 #endif
 	}
       if (rank == 0 && setup.compute_checksum)
@@ -403,7 +403,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
                 perror("failed to open table file");
                 exit(EXIT_FAILURE);
               }
-            for (i = 0; i < nVars; ++i)
+            for (size_t i = 0; i < nVars; ++i)
               {
                 uint32_t cksum;
                 int code;
@@ -431,17 +431,17 @@ modelRun(struct model_config setup, MPI_Comm comm)
   streamClose ( streamID );
   vlistDestroy ( vlistID );
   taxisDestroy ( taxisID );
-  for (int varID = 0; varID < nVars; varID++ )
+  for (size_t varIdx = 0; varIdx < nVars; varIdx++ )
     {
-      int zID = varDesc[varID].zaxisID;
+      int zID = varDesc[varIdx].zaxisID;
       if (zID != CDI_UNDEFID)
         {
           zaxisDestroy(zID);
 #if USE_MPI
-          xt_idxlist_delete(varDesc[varID].partDesc);
-          xt_redist_delete(varDesc[varID].redist4gather);
+          xt_idxlist_delete(varDesc[varIdx].partDesc);
+          xt_redist_delete(varDesc[varIdx].redist4gather);
 #endif
-          for (int j = varID + 1; j < nVars; ++j)
+          for (size_t j = varIdx + 1; j < nVars; ++j)
             if (zID == varDesc[j].zaxisID)
               varDesc[j].zaxisID = CDI_UNDEFID;
         }
