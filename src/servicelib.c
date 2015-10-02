@@ -308,7 +308,8 @@ int srvInqDataDP(void *srv, double *data)
 }
 
 
-int srvDefData(void *srv, int prec, const void *data)
+static int
+srvDefData(void *srv, int prec, const void *data)
 {
   srvrec_t *srvp = (srvrec_t *) srv;
   size_t i;
