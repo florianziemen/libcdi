@@ -102,14 +102,9 @@ int vlistvarNewEntry(int vlistID)
   */
   if ( varID == vlistvarSize )
     {
-      int i;
-
-      vlistvarSize = 2*vlistvarSize;
       vlistvar = (var_t *) Realloc(vlistvar,
-                                   (size_t)vlistvarSize * sizeof(var_t));
-      varID = vlistvarSize/2;
-
-      for ( i = varID; i < vlistvarSize; i++ )
+                                   (size_t)(vlistvarSize *= 2) * sizeof(var_t));
+      for ( int i = varID; i < vlistvarSize; i++ )
 	vlistvar[i].isUsed = FALSE;
     }
 
