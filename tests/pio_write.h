@@ -15,4 +15,7 @@ struct model_config
   const char *suffix;
 };
 
+void
+modelRun(struct model_config setup, MPI_Comm comm);
+
 #endif

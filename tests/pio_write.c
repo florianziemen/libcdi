@@ -26,9 +26,6 @@ typedef int MPI_Comm;
 #include "pio_util.h"
 #endif
 
-void
-modelRun(struct model_config setup, MPI_Comm comm);
-
 static const struct model_config default_setup
 #ifdef __cplusplus
 = { 12, 6, 3, 5, 5, FILETYPE_GRB, DATATYPE_PACK24,1,"grb"};
