@@ -117,13 +117,13 @@ int
 main(int argc, char *argv[])
 {
   int gridID, zaxisID[nvars], taxisID;
-  int vlistID, varID[nvars], streamID, tsID;
+  int vlistID, varID[nvars], streamID;
   int nlon = 12, //!< Number of longitudes
     nlat = 6, //!< Number of latitudes
     nlev = 5, //!< Number of levels
     nts = 3; //!< Number of time steps
-  int i, j, k, nmiss = 0;
-  double *lons, *lats, *var[nvars], *levs, mscale, mrscale;
+  enum { nmiss = 0 };
+  double *lons, *lats, *restrict var[nvars], *levs, mscale, mrscale;
   size_t varSize[nvars];
   const char *varName[nvars] = { "varname1", "varname2" };
 #ifndef TEST_CHUNK_WRITE
@@ -197,13 +197,13 @@ main(int argc, char *argv[])
   }
 
   lons = (double *)malloc((size_t)nlon * sizeof (lons[0]));
-  for (i = 0; i < nlon; ++i)
+  for (size_t i = 0; i < (size_t)nlon; ++i)
     lons[i] = ((double)(i * 360))/nlon;
   lats = (double *)malloc((size_t)nlat * sizeof (lats[0]));
-  for (i = 0; i < nlat; ++i)
+  for (size_t i = 0; i < (size_t)nlat; ++i)
     lats[i] = ((double)(i * 180))/nlat - 90.0;
   levs = (double *)malloc((size_t)nlev * sizeof (levs[0]));
-  for (i = 0; i < nlev; ++i)
+  for (size_t i = 0; i < (size_t)nlev; ++i)
     levs[i] = 101300 - floor(3940.3 * (exp(2.3579 * (double)(i)/(nlev - 1)) - 1.0));
 
   varSize[0] = (size_t)nlon * (size_t)nlat;
@@ -251,7 +251,7 @@ main(int argc, char *argv[])
   // Create a variable list
   vlistID = vlistCreate();
 
-  for (i = 0; i < nvars; ++i)
+  for (size_t i = 0; i < nvars; ++i)
     {
       // Define the variables
       varID[i] = vlistDefVar(vlistID, gridID, zaxisID[i], TIME_VARIABLE);
@@ -288,32 +288,32 @@ main(int argc, char *argv[])
   {
     uint32_t checksum_state[nvars] = { 0, 0 };
     // Loop over the number of time steps
-    for ( tsID = 0; tsID < nts; tsID++ )
+    for ( size_t tsID = 0; tsID < (size_t)nts; tsID++ )
       {
-        int vdatetime[2] = { 120000, 19850101+tsID };
+        int vdatetime[2] = { 120000, 19850101+(int)tsID };
         // Set the verification date to 1985-01-01 + tsID
         taxisDefVdate(taxisID, vdatetime[1]);
         // Set the verification time to 12:00:00
         taxisDefVtime(taxisID, vdatetime[0]);
         // Define the time step
-        streamDefTimestep(streamID, tsID);
+        streamDefTimestep(streamID, (int)tsID);
 
         // Init var1 and var2
-        for (j = 0; j < nlat; j++)
-          for (i = 0; i < nlon; i++)
-            var[0][i+j*nlon]
+        for (size_t j = 0; j < (size_t)nlat; j++)
+          for (size_t i = 0; i < (size_t)nlon; i++)
+            var[0][i+j*(size_t)nlon]
               = sign_flat(round(
-                   (sin(2.0 * M_PI * (lons[(i + tsID)%nlon] - lons[0])
+                   (sin(2.0 * M_PI * (lons[(i + tsID)%(size_t)nlon] - lons[0])
                         / (lons[nlon-1] - lons[0]))
                     * cos(2.0 * M_PI * (lats[j] - lats[0])
                           / (lons[nlat-1] - lats[0]))
                     ) * mscale)) * mrscale;
-        for (k = 0; k < nlev; ++k)
-          for (j = 0; j < nlat; j++)
-            for (i = 0; i < nlon; i++)
-              var[1][i+j*nlon+k*nlon*nlat]
+        for (size_t k = 0; k < (size_t)nlev; ++k)
+          for (size_t j = 0; j < (size_t)nlat; j++)
+            for (size_t i = 0; i < (size_t)nlon; i++)
+              var[1][i+j*(size_t)nlon+k*(size_t)nlon*(size_t)nlat]
                 = sign_flat(round(
-                     (cos(2.0 * M_PI * (lons[(i + tsID)%nlon] - lons[0])
+                     (cos(2.0 * M_PI * (lons[(i + tsID)%(size_t)nlon] - lons[0])
                           / (lons[nlon-1] - lons[0]))
                       * sin(2.0 * M_PI * (lats[j] - lats[0])
                             / (lons[nlat-1] - lats[0]))
@@ -379,7 +379,7 @@ main(int argc, char *argv[])
           }
         free(fname);
       }
-      for (i = 0; i < nvars; ++i)
+      for (size_t i = 0; i < (size_t)nvars; ++i)
         {
           uint32_t cksum;
           int code;
@@ -402,7 +402,7 @@ main(int argc, char *argv[])
   streamClose(streamID);
 
   // Destroy the objects
-  for (i = 0; i < nvars; ++i)
+  for (size_t i = 0; i < nvars; ++i)
     free(var[i]);
   vlistDestroy(vlistID);
   taxisDestroy(taxisID);
