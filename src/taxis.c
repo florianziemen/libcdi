@@ -55,7 +55,7 @@ const resOps taxisOps = {
 };
 
 #define container_of(ptr, type, member) \
-  ((type *)((unsigned char *)ptr - offsetof(type,member)))
+  ((type *)(void*)((unsigned char *)ptr - offsetof(type,member)))
 
 struct refcount_string
 {
