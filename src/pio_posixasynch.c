@@ -27,7 +27,7 @@
 #include "pio_util.h"
 #include "dmemory.h"
 
-extern char *token;
+extern const char *token;
 
 typedef struct
 {
