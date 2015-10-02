@@ -2,6 +2,8 @@
 #  include "config.h"
 #endif
 
+#include "cdi.h"
+
 /*
  * A version string.
  */

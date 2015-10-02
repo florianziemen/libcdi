@@ -188,7 +188,8 @@ for file in $fileList ; do
 done
 
 
-cpp -P -DVERSION="${CDILIBVERSION}" $srcdir/version.c >>${PROG}
+cpp -P -DVERSION="${CDILIBVERSION}" -DCDI_H_ \
+  $srcdir/version.c >>${PROG}
 
 # Fortran interface (with -DHAVE_CF_INTERFACE)
 
