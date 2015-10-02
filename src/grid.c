@@ -21,15 +21,6 @@
 #undef  UNDEFID
 #define UNDEFID -1
 
-#ifndef  RAD2DEG
-#define  RAD2DEG  (180./M_PI)   /* conversion for rad to deg */
-#endif
-
-#ifndef  DEG2RAD
-#define  DEG2RAD  (M_PI/180.)   /* conversion for deg to rad */
-#endif
-
-
 /* the value in the second pair of brackets must match the length of
  * the longest string (including terminating NUL) */
 static const char Grids[][17] = {
