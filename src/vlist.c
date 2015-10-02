@@ -594,16 +594,20 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
 
 		zaxisID = vars1[varID].zaxisID;
 		double *levels = (double *) Malloc((size_t)nlevs2 * sizeof (double));
-                int levID2 = 0;
                 if ( !vars1[varID].levinfo )
                   cdiVlistCreateVarLevInfo(vlistptr1, varID);
-                for ( int levID = 0; levID < nlevs; ++levID )
-                  if ( vars1[varID].levinfo[levID].flag )
-                    {
-                      vars1[varID].levinfo[levID].flevelID = levID2;
-                      vars1[varID].levinfo[levID].mlevelID = levID2;
-                      levels[levID2++] = zaxisInqLevel(zaxisID, levID);
-                    }
+
+                {
+                  int levID2 = 0;
+                  for ( int levID = 0; levID < nlevs; ++levID )
+                    if ( vars1[varID].levinfo[levID].flag )
+                      {
+                        vars1[varID].levinfo[levID].flevelID = levID2;
+                        vars1[varID].levinfo[levID].mlevelID = levID2;
+                        levels[levID2++] = zaxisInqLevel(zaxisID, levID);
+                      }
+                }
+
 		int zaxisType = zaxisInqType(zaxisID);
 
 		if ( zaxisType == ZAXIS_HYBRID )
