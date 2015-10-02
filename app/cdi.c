@@ -43,14 +43,14 @@ extern char *optarg;
 extern int optind, opterr, optopt;
 
 
-char *Progname;
+static char *Progname;
 
-int DefaultFileType  = CDI_UNDEFID;
-int DefaultDataType  = CDI_UNDEFID;
-int DefaultByteorder = CDI_UNDEFID;
+static int DefaultFileType  = CDI_UNDEFID;
+static int DefaultDataType  = CDI_UNDEFID;
+static int DefaultByteorder = CDI_UNDEFID;
 
-int comptype  = COMPRESS_NONE;  // Compression type
-int complevel = 0;              // Compression level
+static int comptype  = COMPRESS_NONE;  // Compression type
+static int complevel = 0;              // Compression level
 
 
 static
@@ -263,7 +263,7 @@ void printInfo(int vdate, int vtime, char *varname, double level,
 
 #define MAXCHARS 82
 
-const char * tunit2str(int tunits)
+static const char *tunit2str(int tunits)
 {
   if      ( tunits == TUNIT_YEAR )       return ("years");
   else if ( tunits == TUNIT_MONTH )      return ("months");
@@ -280,7 +280,7 @@ const char * tunit2str(int tunits)
 }
 
 
-const char* calendar2str(int calendar)
+static const char *calendar2str(int calendar)
 {
   if      ( calendar == CALENDAR_STANDARD )  return ("standard");
   else if ( calendar == CALENDAR_PROLEPTIC ) return ("proleptic_gregorian");

@@ -13,7 +13,7 @@ int cdiUUIDIsNull(const unsigned char uuid[CDI_UUID_SIZE])
 }
 
 
-void datetime2str(int date, int time, char *datetimestr, int maxlen)
+static void datetime2str(int date, int time, char *datetimestr, int maxlen)
 {
   int year, month, day;
   cdiDecodeDate(date, &year, &month, &day);
@@ -26,7 +26,7 @@ void datetime2str(int date, int time, char *datetimestr, int maxlen)
 }
 
 
-void date2str(int date, char *datestr, int maxlen)
+static void date2str(int date, char *datestr, int maxlen)
 {
   int year, month, day;
   cdiDecodeDate(date, &year, &month, &day);
@@ -37,7 +37,7 @@ void date2str(int date, char *datestr, int maxlen)
 }
 
 
-void time2str(int time, char *timestr, int maxlen)
+static void time2str(int time, char *timestr, int maxlen)
 {
   int hour, minute, second;
   cdiDecodeTime(time, &hour, &minute, &second);
@@ -48,7 +48,7 @@ void time2str(int time, char *timestr, int maxlen)
 }
 
 
-void printFiletype(int streamID, int vlistID)
+static void printFiletype(int streamID, int vlistID)
 {
   int filetype = streamInqFiletype(streamID);
 
