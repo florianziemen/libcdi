@@ -728,8 +728,10 @@ void     commDefCommsIO     ( void )
   if ( ddebug >= 2 )
     {
       if ( info->rankGlob < info->nProcsModel )
-	for ( collID = 0; collID < info->nProcsColl; collID++ ) 
-          xdebugComm ( info->commsIO + collID );
+        {
+          for ( collID = 0; collID < info->nProcsColl; collID++ )
+            xdebugComm ( info->commsIO + collID );
+        }
       else if ( info->nodeInfo.isProcColl )
 	xdebugComm ( &info->commCalc );
     }
