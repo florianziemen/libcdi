@@ -185,7 +185,7 @@ void
 create_uuid(unsigned char *uuid)
 {
   uint32_t status;
-  uuid_create((uuid_t *)uuid, &status);
+  uuid_create((uuid_t *)(void *)uuid, &status);
   if (status != uuid_s_ok)
     {
       perror("uuid generation failed!");
