@@ -3,6 +3,8 @@
 
 void cdfDebug(int debug);
 
+extern int CDF_Debug;
+
 const char *cdfLibraryVersion(void);
 const char *hdfLibraryVersion(void);
 

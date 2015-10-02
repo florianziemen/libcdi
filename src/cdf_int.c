@@ -9,10 +9,9 @@
 
 #include "cdi.h"
 #include "cdi_int.h"
+#include "cdf.h"
 #include "cdf_int.h"
 #include "namespace.h"
-
-extern int CDF_Debug;
 
 #if  defined  (HAVE_LIBNETCDF)
 /*

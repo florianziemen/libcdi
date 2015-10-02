@@ -21,6 +21,7 @@
 #include "gaussgrid.h"
 #include "cdi_int.h"
 #include "stream_cdf.h"
+#include "cdf.h"
 #include "cdf_int.h"
 #include "varscan.h"
 #include "vlist.h"
@@ -3806,7 +3807,6 @@ cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarid, int dtype, l
   const float *pdata_sp = (const float *) data;
   float *mdata_sp = NULL;
   float *sdata_sp = NULL;
-  extern int CDF_Debug;
 
   /*  if ( dtype == DATATYPE_INT8 || dtype == DATATYPE_INT16 || dtype == DATATYPE_INT32 ) */
     {
