@@ -505,7 +505,6 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
       }
     case ZAXIS_REFERENCE:
       {
-        size_t len;
         unsigned char uuid[CDI_UUID_SIZE];
         long ltmp;
         long nhlev, nvgrid;
@@ -519,7 +518,7 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
         nhlev = ltmp;
         GRIB_CHECK(grib_get_long(gh, "numberOfVGridUsed", &ltmp), 0);
         nvgrid = ltmp;
-        len = (size_t)CDI_UUID_SIZE;
+        size_t len = (size_t)CDI_UUID_SIZE;
         memset(uuid, 0, CDI_UUID_SIZE);
         GRIB_CHECK(grib_get_bytes(gh, "uuidOfVGrid", uuid, &len), 0);
         varDefZAxisReference((int) nhlev, (int) nvgrid, uuid);
@@ -1832,8 +1831,6 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
   int gridtype;
   int status;
   static short lwarn = TRUE;
-  size_t len;
-  const char *mesg;
 
   UNUSED(nmiss);
 
@@ -1889,17 +1886,20 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
         {
           if ( comptype == COMPRESS_JPEG )
             {
-              mesg = "grid_jpeg"; len = strlen(mesg);
+              static const char mesg[] = "grid_jpeg";
+              size_t len = sizeof (mesg) - 1;
               GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
             }
           else if ( comptype == COMPRESS_SZIP )
             {
-              mesg = "grid_ccsds"; len = strlen(mesg);
+              static const char mesg[] = "grid_ccsds";
+              size_t len = sizeof (mesg) - 1;
               GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
             }
           else
             {
-              mesg = "grid_simple"; len = strlen(mesg);
+              static const char mesg[] = "grid_simple";
+              size_t len = sizeof (mesg) - 1;
               GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
             }
         }
@@ -1921,22 +1921,26 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 
 	if ( gridtype == GRID_GAUSSIAN )
 	  {
-	    mesg = "regular_gg"; len = strlen(mesg);
+            static const char mesg[] = "regular_gg";
+            size_t len = sizeof (mesg) -1;
 	    GRIB_CHECK(my_grib_set_string(gh, "gridType", mesg, &len), 0);
 	  }
 	else if ( gridtype == GRID_GAUSSIAN_REDUCED )
 	  {
-	    mesg = "reduced_gg"; len = strlen(mesg);
+            static const char mesg[] = "reduced_gg";
+            size_t len = sizeof (mesg) -1;
 	    GRIB_CHECK(my_grib_set_string(gh, "gridType", mesg, &len), 0);
 	  }
 	else if ( gridtype == GRID_LONLAT && gridIsRotated(gridID) )
 	  {
-	    mesg = "rotated_ll"; len = strlen(mesg);
+            static const char mesg[] = "rotated_ll";
+            size_t len = sizeof (mesg) -1;
 	    GRIB_CHECK(my_grib_set_string(gh, "gridType", mesg, &len), 0);
 	  }
 	else
 	  {
-	    mesg = "regular_ll"; len = strlen(mesg);
+            static const char mesg[] = "regular_ll";
+            size_t len = sizeof (mesg) -1;
 	    GRIB_CHECK(my_grib_set_string(gh, "gridType", mesg, &len), 0);
 	  }
 
@@ -2055,7 +2059,8 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 
         if ( lieee )
           {
-            mesg = "grid_ieee"; len = strlen(mesg);
+            static const char mesg[] = "grid_ieee";
+            size_t len = sizeof (mesg) -1;
             GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
 
 	    if ( datatype == DATATYPE_FLT64 )
@@ -2067,17 +2072,20 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 	  {
             if ( comptype == COMPRESS_JPEG )
               {
-                mesg = "grid_jpeg"; len = strlen(mesg);
+                static const char mesg[] = "grid_jpeg";
+                size_t len = sizeof (mesg) -1;
                 GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
               }
             else if ( comptype == COMPRESS_SZIP )
               {
-                mesg = "grid_ccsds"; len = strlen(mesg);
+                static const char mesg[] = "grid_ccsds";
+                size_t len = sizeof (mesg) -1;
                 GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
               }
             else
               {
-                mesg = "grid_simple"; len = strlen(mesg);
+                static const char mesg[] = "grid_simple";
+                size_t len = sizeof (mesg) -1;
                 GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
               }
 	  }
@@ -2096,7 +2104,8 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 	gridInqLCC(gridID, &originLon, &originLat, &lonParY, &lat1, &lat2, &xincm, &yincm,
 		   &projflag, &scanflag);
 
-        mesg = "lambert"; len = strlen(mesg);
+        static const char mesg[] = "lambert";
+        size_t len = sizeof (mesg) -1;
         GRIB_CHECK(my_grib_set_string(gh, "gridType", mesg, &len), 0);
 
 	GRIB_CHECK(my_grib_set_long(gh, "Nx", xsize), 0);
@@ -2127,7 +2136,8 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
       {
 	int trunc = gridInqTrunc(gridID);
 
-	mesg = "sh"; len = strlen(mesg);
+        static const char mesg[] = "sh";
+        size_t len = sizeof (mesg) -1;
 	GRIB_CHECK(my_grib_set_string(gh, "gridType", mesg, &len), 0);
 
 	GRIB_CHECK(my_grib_set_long(gh, "J", trunc), 0);
@@ -2140,13 +2150,15 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
           {
             printf("spectral_ieee\n");
             if ( editionNumber == 2 ) GRIB_CHECK(my_grib_set_long(gh, "numberOfValues", gridInqSize(gridID)), 0);
-            mesg = "spectral_ieee"; len = strlen(mesg);
+            static const char mesg[] = "spectral_ieee";
+            size_t len = sizeof (mesg) -1;
             GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
           }
         else */ if ( gridInqComplexPacking(gridID) )
 	  {
 	    if ( editionNumber == 2 ) GRIB_CHECK(my_grib_set_long(gh, "numberOfValues", gridInqSize(gridID)), 0);
-	    mesg = "spectral_complex"; len = strlen(mesg);
+            static const char mesg[] = "spectral_complex";
+            size_t len = sizeof (mesg) -1;
 	    GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
 
 	    GRIB_CHECK(my_grib_set_long(gh, "JS", 20), 0);
@@ -2155,7 +2167,8 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 	  }
 	else
 	  {
-	    mesg = "spectral_simple"; len = strlen(mesg);
+            static const char mesg[] = "spectral_simple";
+            size_t len = sizeof (mesg) -1;
 	    GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
 	  }
 
@@ -2177,7 +2190,8 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 
         if ( comptype == COMPRESS_SZIP )
           {
-            mesg = "grid_ccsds"; len = strlen(mesg);
+            static const char mesg[] = "grid_ccsds";
+            size_t len = sizeof (mesg) -1;
             GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
           }
 
@@ -2204,7 +2218,7 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
             if ( number < 0 ) number = 0;
 	    GRIB_CHECK(my_grib_set_long(gh, "numberOfGridUsed", number), 0);
 	    GRIB_CHECK(my_grib_set_long(gh, "numberOfGridInReference", position), 0);
-            len = CDI_UUID_SIZE;
+            size_t len = CDI_UUID_SIZE;
             gridInqUUID(gridID, uuid);
 	    if (grib_set_bytes(gh, "uuidOfHGrid", uuid, &len) != 0)
 	      Warning("Can't write UUID!");
@@ -2212,7 +2226,8 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 
         if ( comptype == COMPRESS_SZIP )
           {
-            mesg = "grid_ccsds"; len = strlen(mesg);
+            static const char mesg[] = "grid_ccsds";
+            size_t len = sizeof (mesg) -1;
             GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
           }
 
