@@ -74,7 +74,7 @@ static int string2FileType(const char* fileType, const char **outRestString)
   return FILETYPE_UNDEF;
 }
 
-/**
+/*
 @Function cdiIterator_new
 @Title Create an iterator for an input file
 
@@ -167,7 +167,7 @@ const char* baseIter_constructFromString(CdiIterator* me, const char* descriptio
     if(!me->isAdvanced) xabort("Calling %s is not allowed without calling cdiIterator_nextField() first.", __func__); \
 } while(0)
 
-/**
+/*
 @Function cdiIterator_clone
 @Title Make a copy of an iterator
 
@@ -221,7 +221,7 @@ CdiIterator* cdiIterator_clone(CdiIterator* me)
     }
 }
 
-/**
+/*
 @Function cdiGribIterator_clone
 @Title Gain access to GRIB specific functionality
 
@@ -253,7 +253,7 @@ CdiGribIterator* cdiGribIterator_clone(CdiIterator* me)
     }
 }
 
-/**
+/*
 @Function cdiIterator_serialize
 @Title Serialize an iterator for sending it to another process
 
@@ -311,7 +311,7 @@ char* cdiIterator_serialize(CdiIterator* me)
   return result;
 }
 
-/**
+/*
 @Function cdiIterator_deserialize
 @Title Recreate an iterator from its textual description
 
@@ -362,7 +362,7 @@ CdiIterator* cdiIterator_deserialize(const char* description)
 }
 
 
-/**
+/*
 @Function cdiIterator_print
 @Title Print a textual description of the iterator to a stream
 
@@ -382,7 +382,7 @@ void cdiIterator_print(CdiIterator* me, FILE* stream)
 }
 
 
-/**
+/*
 @Function cdiIterator_nextField
 @Title Advance an iterator to the next field in the file
 
@@ -467,7 +467,7 @@ static char* cdiIterator_inqTime(CdiIterator* me, bool getEndTime)
     }
 }
 
-/**
+/*
 @Function cdiIterator_inqStartTime
 @Title Get the start time of a measurement
 
@@ -493,7 +493,7 @@ char* cdiIterator_inqStartTime(CdiIterator* me)
   return cdiIterator_inqTime(me, false);
 }
 
-/**
+/*
 @Function cdiIterator_inqEndTime
 @Title Get the end time of a measurement
 
@@ -519,7 +519,7 @@ char* cdiIterator_inqEndTime(CdiIterator* me)
   return cdiIterator_inqTime(me, true);
 }
 
-/**
+/*
 @Function cdiIterator_inqVTime
 @Title Get the validity time of the current field
 
@@ -547,7 +547,7 @@ char* cdiIterator_inqVTime(CdiIterator* me)
   return (result) ? result : cdiIterator_inqStartTime(me);
 }
 
-/**
+/*
 @Function cdiIterator_inqLevelType
 @Title Get the type of a level
 
@@ -600,7 +600,7 @@ int cdiIterator_inqLevelType(CdiIterator* me, int levelSelector, char **outName,
     }
 }
 
-/**
+/*
 @Function cdiIterator_inqLevel
 @Title Get the value of the z-coordinate
 
@@ -650,7 +650,7 @@ int cdiIterator_inqLevel(CdiIterator* me, int levelSelector, double* outValue1, 
     }
 }
 
-/**
+/*
 @Function cdiIterator_inqLevelUuid
 @Title Get the UUID of the z-axis used by this field
 
@@ -700,7 +700,7 @@ int cdiIterator_inqLevelUuid(CdiIterator* me, int* outVgridNumber, int* outLevel
     }
 }
 
-/**
+/*
 @Function cdiIterator_inqParam
 @Title Get discipline, category, and number
 
@@ -719,7 +719,7 @@ CdiParam cdiIterator_inqParam(CdiIterator* me)
   return me->param;
 }
 
-/**
+/*
 @Function cdiIterator_inqDatatype
 @Title Get the datatype of the current field
 
@@ -738,7 +738,7 @@ int cdiIterator_inqDatatype(CdiIterator* me)
   return me->datatype;
 }
 
-/**
+/*
 @Function cdiIterator_inqTsteptype
 @Title Get the timestep type
 
@@ -757,7 +757,7 @@ int cdiIterator_inqTsteptype(CdiIterator* me)
   return me->timesteptype;
 }
 
-/**
+/*
 @Function cdiIterator_inqVariableName
 @Title Get the variable name of the current field
 
@@ -805,7 +805,7 @@ char* cdiIterator_inqVariableName(CdiIterator* me)
     }
 }
 
-/**
+/*
 @Function cdiIterator_inqGridId
 @Title Get the ID of the current grid
 
@@ -825,7 +825,7 @@ int cdiIterator_inqGridId(CdiIterator* me)
   return me->gridId;
 }
 
-/**
+/*
 @Function cdiIterator_readField
 @Title Read the whole field into a double buffer
 
@@ -874,7 +874,7 @@ void cdiIterator_readField(CdiIterator* me, double* buffer, size_t* nmiss)
     }
 }
 
-/**
+/*
 @Function cdiIterator_readFieldF
 @Title Read the whole field into a double buffer
 
@@ -923,7 +923,7 @@ void cdiIterator_readFieldF(CdiIterator* me, float* buffer, size_t* nmiss)
     }
 }
 
-/**
+/*
 @Function cdiIterator_delete
 @Title Destroy an iterator
 
