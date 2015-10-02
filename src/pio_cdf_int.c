@@ -57,7 +57,7 @@ cdiPioCdfDefVar(int ncid, const char *name, nc_type xtype, int ndims,
 }
 
 void
-cdiPioEnableNetCDFParAccess()
+cdiPioEnableNetCDFParAccess(void)
 {
   namespaceSwitchSet(NSSWITCH_NC__CREATE, NSSW_FUNC(cdiPio_nc__create));
   namespaceSwitchSet(NSSWITCH_CDF_DEF_VAR, NSSW_FUNC(cdiPioCdfDefVar));

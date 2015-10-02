@@ -9,7 +9,7 @@
 #include "cdf_int.h"
 
 void
-cdiPioEnableNetCDFParAccess();
+cdiPioEnableNetCDFParAccess(void);
 
 #endif
 #endif
