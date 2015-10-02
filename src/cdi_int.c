@@ -47,7 +47,7 @@ int   cdiPartabIntern = 1;
 
 double cdiDefaultMissval = -9.E33;
 
-const char Filetypes[][9] = {
+static const char Filetypes[][9] = {
   "UNKNOWN",
   "GRIB",
   "GRIB2",
