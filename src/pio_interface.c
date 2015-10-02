@@ -760,12 +760,12 @@ static int xtInitByCDI = 0;
 
   Collective call
 
-  @param comm MPI_Communicator of all calling PEs
-  @param nIOP number of I/O PEs
+  @param commGlob MPI_Communicator of all calling PEs
+  @param nProcsIO number of I/O PEs
   @param partInflate allow for array partitions on comute
   PE that are at most sized \f$ partInflate * \lceil arraySize /
   numComputePEs \rceil \f$
-  @param postSetupActions function which is called by all I/O servers
+  @param postCommSetupActions function which is called by all I/O servers
   after communicator split
   @return int indicating wether the calling PE is a calcutator (1) or not (0)
 */
