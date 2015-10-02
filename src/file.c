@@ -422,20 +422,6 @@ int fileSetBufferType(int fileID, int type)
   return (ret);
 }
 
-
-int fileGetBufferType(int fileID)
-{
-  bfile_t *fileptr;
-  int bufferType = 0;
-
-  fileptr = file_to_pointer(fileID);
-
-  if ( fileptr ) bufferType = fileptr->bufferType;
-
-  return (bufferType);
-}
-
-
 int fileFlush(int fileID)
 {
   bfile_t *fileptr;
@@ -485,20 +471,6 @@ int fileEOF(int fileID)
 
   return (retval);
 }
-
-
-int fileError(int fileID)
-{
-  bfile_t *fileptr;
-  int retval = 0;
-
-  fileptr = file_to_pointer(fileID);
-
-  if ( fileptr ) retval = (fileptr->flag & FILE_ERROR) != 0;
-
-  return (retval);
-}
-
 
 void fileRewind(int fileID)
 {
