@@ -273,21 +273,22 @@ void gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double y
 		  {
 		    ytmp = (double *) Malloc((size_t)ny * sizeof (double));
 		    calc_gaussgrid(ytmp, ny, yfirst, ylast);
-                    int i;
-		    for ( i = 0; i < (ny-ysize); i++ )
-		      if ( fabs(ytmp[i] - yfirst) < deleps ) break;
-
-		    nstart = i;
+                    {
+                      int i;
+                      for ( i = 0; i < (ny-ysize); i++ )
+                        if ( fabs(ytmp[i] - yfirst) < deleps ) break;
+                      nstart = i;
+                    }
 
 		    lfound = (nstart+ysize-1) < ny
                       && fabs(ytmp[nstart+ysize-1] - ylast) < deleps;
+                    if ( lfound )
+                      {
+                        for (int i = 0; i < ysize; i++) yvals[i] = ytmp[i+nstart];
+                      }
 		  }
 
-		if ( lfound )
-		  {
-		    for (int i = 0; i < ysize; i++) yvals[i] = ytmp[i+nstart];
-		  }
-		else
+		if ( !lfound )
 		  {
 		    Warning("Cannot calculate gaussian latitudes for lat1 = %g latn = %g!", yfirst, ylast);
 		    for (int i = 0; i < ysize; i++ ) yvals[i] = 0;
