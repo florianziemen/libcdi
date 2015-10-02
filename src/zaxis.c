@@ -16,6 +16,7 @@
 #include "varscan.h"
 #include "namespace.h"
 #include "serialize.h"
+#include "zaxis.h"
 
 #define  LevelUp    1
 #define  LevelDown  2
@@ -105,7 +106,7 @@ static const resOps zaxisOps = {
   zaxisTxCode
 };
 
-const resOps *getZaxisOps()
+const resOps *getZaxisOps(void)
 {
   return &zaxisOps;
 }
@@ -1188,7 +1189,7 @@ int zaxisDuplicate(int zaxisID)
 }
 
 
-void zaxisPrintKernel ( zaxis_t * zaxisptr, int index, FILE * fp )
+static void zaxisPrintKernel ( zaxis_t * zaxisptr, int index, FILE * fp )
 {
   unsigned char uuid[CDI_UUID_SIZE];
   int levelID;
