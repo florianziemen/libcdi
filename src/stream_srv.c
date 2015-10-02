@@ -36,7 +36,7 @@ typedef struct {
 } SRVCOMPVAR;
 
 
-int srvInqDatatype(int prec)
+static int srvInqDatatype(int prec)
 {
   int datatype;
 
@@ -47,7 +47,7 @@ int srvInqDatatype(int prec)
 }
 
 
-int srvDefDatatype(int datatype)
+static int srvDefDatatype(int datatype)
 {
   int prec;
 

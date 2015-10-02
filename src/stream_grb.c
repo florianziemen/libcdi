@@ -220,7 +220,7 @@ int grbDecode(int filetype, unsigned char *gribbuffer, int gribsize, double *dat
 }
 
 
-int grbUnzipRecord(unsigned char *gribbuffer, size_t *gribsize)
+static int grbUnzipRecord(unsigned char *gribbuffer, size_t *gribsize)
 {
   int zip = 0;
   int izip;

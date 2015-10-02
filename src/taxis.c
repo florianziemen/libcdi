@@ -23,7 +23,7 @@ static int DefaultTimeType = TAXIS_ABSOLUTE;
 static int DefaultTimeUnit = TUNIT_HOUR;
 
 
-const char *Timeunits[] = {
+static const char *Timeunits[] = {
   "undefined",
   "seconds",
   "minutes",
@@ -1152,7 +1152,7 @@ double vtime2timeval(int vdate, int vtime, taxis_t *taxis)
 }
 
 
-void conv_timeval(double timevalue, int *rvdate, int *rvtime)
+static void conv_timeval(double timevalue, int *rvdate, int *rvtime)
 {
   int vdate = 0, vtime = 0;
   int hour, minute, second;
@@ -1444,7 +1444,7 @@ taxisPrintKernel(taxis_t * taxisptr, FILE * fp)
   fprintf ( fp, "\n");
 }
 
-void taxisPrint ( int taxisID )
+static void taxisPrint ( int taxisID )
 {
   taxis_t * taxisptr;
 

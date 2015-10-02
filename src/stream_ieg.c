@@ -38,7 +38,7 @@ typedef struct {
 } IEGCOMPVAR;
 
 
-int iegInqDatatype(int prec)
+static int iegInqDatatype(int prec)
 {
   int datatype;
 
@@ -49,7 +49,7 @@ int iegInqDatatype(int prec)
 }
 
 
-int iegDefDatatype(int datatype)
+static int iegDefDatatype(int datatype)
 {
   int prec;
 
@@ -200,7 +200,7 @@ int iegGetZaxisType(int iegleveltype)
 }
 
 
-void iegDefTime(int *pdb, int date, int time, int taxisID)
+static void iegDefTime(int *pdb, int date, int time, int taxisID)
 {
   int year, month, day, hour, minute, second;
   int timetype = -1;
@@ -815,7 +815,7 @@ void iegCmpRecord(stream_t *streamptr, int tsID, int recID, off_t position, int 
 }
 #endif
 
-void iegDateTime(int *pdb, int *date, int *time)
+static void iegDateTime(int *pdb, int *date, int *time)
 {
   int ryear, rmonth, rday, rhour, rminute;
 

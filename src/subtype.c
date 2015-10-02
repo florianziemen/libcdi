@@ -41,7 +41,7 @@
 
 /* Literal constants corresponding to the different subtypes of the
    enumeration "subtype_kind". */
-const char* subtypeName[] = {
+static const char* subtypeName[] = {
   "tileset"
 };
 
@@ -83,7 +83,7 @@ enum {
 /* ------------------------------------------------------------------- */
 
 
-int attribute_to_index(const char *key)
+static int attribute_to_index(const char *key)
 {
   if (key == NULL)  Error("Internal error!");
   for (int i=0; i<nSubtypeAttributes; i++)
@@ -98,7 +98,7 @@ int attribute_to_index(const char *key)
   @Title     Create new linked list of subtype attributes.
   @EndFunction
 */
-struct subtype_attr_t* subtypeAttrNewList(struct subtype_entry_t* head, int key, int val)
+static struct subtype_attr_t* subtypeAttrNewList(struct subtype_entry_t* head, int key, int val)
 {
   if (head == NULL)  Error("Internal error!");
   struct subtype_attr_t *ptr = (struct subtype_attr_t*) Malloc(sizeof(struct subtype_attr_t));
@@ -119,7 +119,7 @@ struct subtype_attr_t* subtypeAttrNewList(struct subtype_entry_t* head, int key,
          smallest-to-largest ordered list.
   @EndFunction
 */
-struct subtype_attr_t* subtypeAttrInsert(struct subtype_entry_t* head, int key, int val)
+static struct subtype_attr_t* subtypeAttrInsert(struct subtype_entry_t* head, int key, int val)
 {
   if (head == NULL)  Error("Internal error!");
   if (head->atts == NULL)  return (subtypeAttrNewList(head, key, val));
@@ -150,7 +150,7 @@ struct subtype_attr_t* subtypeAttrInsert(struct subtype_entry_t* head, int key, 
 
 
 /* Recursively free a linked list with attributes. */
-void subtypeAttrDestroy(struct subtype_attr_t* head)
+static void subtypeAttrDestroy(struct subtype_attr_t* head)
 {
   if (head == NULL) return;
   subtypeAttrDestroy(head->next);
@@ -161,7 +161,7 @@ void subtypeAttrDestroy(struct subtype_attr_t* head)
 
 /* Find an attribute in linked list by its key or return NULL
    otherwise. */
-struct subtype_attr_t* subtypeAttrFind(struct subtype_attr_t* head, int key)
+static struct subtype_attr_t* subtypeAttrFind(struct subtype_attr_t* head, int key)
 {
   if (head == NULL) 
     return NULL;
@@ -200,7 +200,7 @@ static int subtypeAttsCompare(struct subtype_attr_t *a1, struct subtype_attr_t *
 
 
 /* (Recursively) duplicate linked list of attributes. */
-void subtypeAttsDuplicate(struct subtype_attr_t *a1, struct subtype_entry_t* dst)
+static void subtypeAttsDuplicate(struct subtype_attr_t *a1, struct subtype_entry_t* dst)
 {
   if (a1 == NULL)  return;
   /* duplicate "a1->key", "a1->val" */
@@ -220,7 +220,7 @@ void subtypeAttsDuplicate(struct subtype_attr_t *a1, struct subtype_entry_t* dst
   @Title     Create new linked list of subtype entries.
   @EndFunction
 */
-struct subtype_entry_t* subtypeEntryNewList(subtype_t* head)
+static struct subtype_entry_t* subtypeEntryNewList(subtype_t* head)
 {
   struct subtype_entry_t *ptr = (struct subtype_entry_t*) Malloc(sizeof(struct subtype_entry_t));
   if(NULL == ptr)  Error("Node creation failed");
@@ -274,7 +274,7 @@ struct subtype_entry_t* subtypeEntryInsert(subtype_t* head)
   @Title Append subtype entry to the end of a linked list.
   @EndFunction
 */
-struct subtype_entry_t* subtypeEntryAppend(subtype_t* head)
+static struct subtype_entry_t* subtypeEntryAppend(subtype_t* head)
 {
   if (head == NULL)  Error("Internal error!");
   if (head->entries == NULL)  return (subtypeEntryNewList(head));
@@ -298,7 +298,7 @@ struct subtype_entry_t* subtypeEntryAppend(subtype_t* head)
 
 
 /* Recursively free a list of subtype entries. */
-void subtypeEntryDestroy(struct subtype_entry_t *entry)
+static void subtypeEntryDestroy(struct subtype_entry_t *entry)
 {
   if (entry == NULL) return;
   subtypeEntryDestroy(entry->next);
@@ -320,7 +320,7 @@ static int subtypeEntryCompare(struct subtype_entry_t *e1, struct subtype_entry_
 
 
 /* (Recursively) duplicate list of entries. */
-void subtypeEntryDuplicate(struct subtype_entry_t *a1, subtype_t* dst)
+static void subtypeEntryDuplicate(struct subtype_entry_t *a1, subtype_t* dst)
 {
   if (a1 == NULL) return;
   /* append entry to dst pointer */
@@ -339,7 +339,7 @@ void subtypeEntryDuplicate(struct subtype_entry_t *a1, subtype_t* dst)
 /* ------------------------------------------------------------------- */
 
 /* Print-out subtype data structure together with its attributes. */
-void subtypePrintKernel(subtype_t *subtype_ptr, FILE *fp)
+static void subtypePrintKernel(subtype_t *subtype_ptr, FILE *fp)
 {
   if (subtype_ptr == NULL)  Error("Internal error!");
   fprintf(fp, "# %s (subtype ID %d)\n", subtypeName[subtype_ptr->subtype], subtype_ptr->self);
