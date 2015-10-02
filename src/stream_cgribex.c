@@ -1452,7 +1452,7 @@ int cgribexDefTimerange(int tsteptype, int factor, int calendar,
 
   (void) julday_sub(julday1, secofday1, julday2, secofday2, &days, &secs);
 
-  if ( !(int) fmod(days*86400.0 + secs, factor) )
+  if ( !(int)(fmod(days*86400.0 + secs, factor)) )
     {
       ip = (int) ((days*86400.0 + secs)/factor);
 
@@ -1880,7 +1880,7 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
     case ZAXIS_SURFACE:
       {
 	ISEC1_LevelType = GRIB1_LTYPE_SURFACE;
-	ISEC1_Level1    = (int) zaxisInqLevel(zaxisID, levelID);
+	ISEC1_Level1    = (int)(zaxisInqLevel(zaxisID, levelID));
 	ISEC1_Level2    = 0;
 	break;
       }
@@ -1929,7 +1929,7 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
     case ZAXIS_MEANSEA:
       {
 	ISEC1_LevelType = GRIB1_LTYPE_MEANSEA;
-	ISEC1_Level1    = (int) zaxisInqLevel(zaxisID, levelID);
+	ISEC1_Level1    = (int)(zaxisInqLevel(zaxisID, levelID));
 	ISEC1_Level2    = 0;
 	break;
       }
@@ -1941,13 +1941,13 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
 	if ( zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL) )
 	  {
 	    ISEC1_LevelType = GRIB1_LTYPE_HYBRID_LAYER;
-	    ISEC1_Level1    = (int) zaxisInqLbound(zaxisID, levelID);
-	    ISEC1_Level2    = (int) zaxisInqUbound(zaxisID, levelID);
+	    ISEC1_Level1    = (int)(zaxisInqLbound(zaxisID, levelID));
+	    ISEC1_Level2    = (int)(zaxisInqUbound(zaxisID, levelID));
 	  }
 	else
 	  {
 	    ISEC1_LevelType = GRIB1_LTYPE_HYBRID;
-	    ISEC1_Level1    = (int) zaxisInqLevel(zaxisID, levelID);
+	    ISEC1_Level1    = (int)(zaxisInqLevel(zaxisID, levelID));
 	    ISEC1_Level2    = 0;
 	  }
 
@@ -2027,8 +2027,8 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
 	if ( zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL) )
 	  {
 	    ISEC1_LevelType = GRIB1_LTYPE_SIGMA_LAYER;
-	    ISEC1_Level1    = (int) zaxisInqLbound(zaxisID, levelID);
-	    ISEC1_Level2    = (int) zaxisInqUbound(zaxisID, levelID);
+	    ISEC1_Level1    = (int)(zaxisInqLbound(zaxisID, levelID));
+	    ISEC1_Level2    = (int)(zaxisInqUbound(zaxisID, levelID));
 	  }
 	else
 	  {
@@ -2231,10 +2231,10 @@ size_t cgribexEncode(int memtype, int varID, int levelID, int vlistID, int gridI
 
   if ( memtype == MEMTYPE_FLOAT )
     gribExSP(isec0, isec1, isec2, fsec2f, isec3, fsec3f, isec4, (float*) data,
-             (int)datasize, (int *) gribbuffer, gribsize, &iword, "C", &iret);
+             (int)datasize, (int *)(void *)gribbuffer, gribsize, &iword, "C", &iret);
   else
     gribExDP(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, (double*) data,
-             (int)datasize, (int *) gribbuffer, gribsize, &iword, "C", &iret);
+             (int)datasize, (int *)(void *)gribbuffer, gribsize, &iword, "C", &iret);
 
   if ( iret ) Error("Problem during GRIB encode (errno = %d)!", iret);
 

@@ -170,7 +170,7 @@ void streamDefRecord(int streamID, int varID, int levelID)
   int gridID  = vlistInqVarGrid(vlistID, varID);
   int zaxisID = vlistInqVarZaxis(vlistID, varID);
   int param   = vlistInqVarParam(vlistID, varID);
-  int level   = (int) zaxisInqLevel(zaxisID, levelID);
+  int level   = (int)(zaxisInqLevel(zaxisID, levelID));
 
   streamptr->record->varID    = varID;
   streamptr->record->levelID  = levelID;
