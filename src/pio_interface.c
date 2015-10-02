@@ -589,7 +589,7 @@ collProbe(int collID)
 }
 
 void
-cdiPioRDMAProgress()
+cdiPioRDMAProgress(void)
 {
   int nProcsColl = commInqNProcsColl();
   for (int collID = 0; collID < nProcsColl; collID++)
@@ -906,7 +906,7 @@ void pioFinalize ( void )
 
  /************************************************************************/
 
-void pioWriteTimestep()
+void pioWriteTimestep(void)
 {
   int collID, iAssert = MPI_MODE_NOPUT;
   /* int tokenEnd = END; */

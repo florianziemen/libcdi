@@ -35,8 +35,8 @@ void cdiPioNoPostCommSetup(void);
 MPI_Comm pioInit(MPI_Comm commSuper, int nProcsIO, int IOMode,
                  int *pioNamespace, float partInflate,
                  void (*postCommSetupActions)(void));
-void     pioWriteTimestep();
-void     cdiPioRDMAProgress();
+void     pioWriteTimestep(void);
+void     cdiPioRDMAProgress(void);
 
 void     streamWriteVarPart    (int streamID, int varID,
                                 const void *data, int nmiss,
