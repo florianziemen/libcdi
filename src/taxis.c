@@ -17,8 +17,6 @@
 #include "resource_handle.h"
 #include "resource_unpack.h"
 
-extern int cdiDefaultCalendar;
-
 static int DefaultTimeType = TAXIS_ABSOLUTE;
 static int DefaultTimeUnit = TUNIT_HOUR;
 

@@ -2633,8 +2633,6 @@ void cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int ncvarid, int zax
 static
 void cdf_def_zaxis_hybrid(stream_t *streamptr, int type, int ncvarid, int zaxisID, int zaxisindex, int xtype, size_t dimlen, int *dimID, char *axisname)
 {
-  extern int cdiConvention;
-
   if ( (!CDI_cmor_mode && cdiConvention == CDI_CONVENTION_ECHAM) || type == ZAXIS_HYBRID_HALF )
     cdf_def_zaxis_hybrid_echam(streamptr, type, ncvarid, zaxisID, zaxisindex, xtype, dimlen, dimID, axisname);
   else
@@ -5168,7 +5166,6 @@ int isHybridSigmaPressureCoordinate(int ncid, int ncvarid, ncvar_t *ncvars, cons
 
   if ( strcmp(ncvar->stdname, "atmosphere_hybrid_sigma_pressure_coordinate") == 0 )
     {
-      extern int cdiConvention;
       cdiConvention = CDI_CONVENTION_CF;
 
       status = TRUE;
@@ -5675,7 +5672,6 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
               char *varname = NULL;
               int lstop = FALSE;
               int dimvarid;
-              extern int cdiIgnoreAttCoordinates;
 
               cdfGetAttText(ncid, ncvarid, attname, attstringlen, attstring);
               char *pstring = attstring;
@@ -5723,7 +5719,6 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
               char *varname = NULL;
               int lstop = FALSE;
               int dimvarid;
-              extern int cdiIgnoreAttCoordinates;
 
               cdfGetAttText(ncid, ncvarid, attname, attstringlen, attstring);
               char *pstring = attstring;
@@ -8438,8 +8433,6 @@ void cdfEndDef(stream_t *streamptr)
 
       if ( streamptr->ncmode == 2 )
         {
-          extern size_t CDI_netcdf_hdr_pad;
-
           if ( CDI_netcdf_hdr_pad == 0UL )
             cdf_enddef(fileID);
           else

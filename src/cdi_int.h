@@ -295,6 +295,7 @@ extern int cdiDefaultInstID;
 extern int cdiDefaultModelID;
 extern int cdiDefaultTableID;
 extern int cdiDefaultLeveltype;
+extern int cdiDefaultCalendar;
 //extern int cdiNcMissingValue;
 extern int cdiNcChunksizehint;
 extern int cdiChunkType;
@@ -302,6 +303,13 @@ extern int cdiSplitLtype105;
 extern int cdiDataUnreduced;
 extern int cdiSortName;
 extern int cdiHaveMissval;
+extern int cdiIgnoreAttCoordinates;
+extern int cdiIgnoreValidRange;
+extern int cdiSkipRecords;
+extern int cdiConvention;
+extern int cdiInventoryMode;
+extern int CDI_Version_Info;
+extern size_t CDI_netcdf_hdr_pad;
 extern int STREAM_Debug;
 
 

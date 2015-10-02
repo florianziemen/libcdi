@@ -20,8 +20,6 @@
 #  include "cgribex.h"
 #endif
 
-extern int cdiInventoryMode;
-
 typedef struct {
   int param;
   int level1;
@@ -606,7 +604,6 @@ int cgribexScanTimestep1(stream_t * streamptr)
   int comptype;
   long unzipsize;
   char paramstr[32];
-  extern int cdiSkipRecords;
   int nskip = cdiSkipRecords;
 
   streamptr->curTsID = 0;

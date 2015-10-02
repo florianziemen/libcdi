@@ -94,7 +94,6 @@ static int cdfOpenFile(const char *filename, const char *mode, int *filetype)
   int writemode = NC_CLOBBER;
   int readmode = NC_NOWRITE;
   int status;
-  extern int CDI_Version_Info;
 
   if ( filename == NULL )
     ncid = CDI_EINVAL;
