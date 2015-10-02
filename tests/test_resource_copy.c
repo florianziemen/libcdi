@@ -28,11 +28,11 @@ enum {
   nlev             = 5,
   ntsteps          = 3 };
 
-double lons[nlon] = {0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330};
-double lats[nlat] = {-75, -45, -15, 15, 45, 75};
-double levs[nlev] = {101300, 92500, 85000, 50000, 20000};
+static double lons[nlon] = {0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330};
+static double lats[nlat] = {-75, -45, -15, 15, 45, 75};
+static double levs[nlev] = {101300, 92500, 85000, 50000, 20000};
 
-int defineGrid ()
+static int defineGrid (void)
 {
   int gridID = CDI_UNDEFID;
   int mask_vec[nlon*nlat];
@@ -94,7 +94,7 @@ int defineGrid ()
   return gridID;
 }
 
-int defineZaxis ()
+static int defineZaxis (void)
 {
   int zaxisID = CDI_UNDEFID;
   double vct[3] = { 3.0, 3.3, 3.6 };
@@ -120,7 +120,7 @@ int defineZaxis ()
   return zaxisID;
 }
 
-int defineTaxis ()
+static int defineTaxis (void)
 {
   int taxisID = CDI_UNDEFID;
 
@@ -140,7 +140,7 @@ int defineTaxis ()
   return taxisID;
 }
 
-void defineStream ( int streamID, int vlistID )
+static void defineStream ( int streamID, int vlistID )
 {
   streamDefByteorder ( streamID, 1 );
   streamDefCompType  ( streamID, 2 );
@@ -152,7 +152,7 @@ struct idPair {
   int id1, id2;
 };
 
-struct idPair defineVlist ( int gridID, int zaxisID, int taxisID )
+static struct idPair defineVlist ( int gridID, int zaxisID, int taxisID )
 {
   int vlistID = CDI_UNDEFID;
   int zaxisID2 = zaxisCreate(ZAXIS_SURFACE, 1);
@@ -176,7 +176,7 @@ struct idPair defineVlist ( int gridID, int zaxisID, int taxisID )
   return (struct idPair){ vlistID, vlistID2 };
 }
 
-int defineInstitute ()
+static int defineInstitute ()
 {
   int instID = CDI_UNDEFID;
 
@@ -185,7 +185,7 @@ int defineInstitute ()
   return instID;
 }
 
-int defineModel ( int instID )
+static int defineModel ( int instID )
 {
   int modelID = CDI_UNDEFID;
 
@@ -196,7 +196,7 @@ int defineModel ( int instID )
 
 static int destNamespace;
 
-int modelRun(MPI_Comm comm)
+static int modelRun(MPI_Comm comm)
 {
   int gridID, zaxisID, taxisID, instID, vlistID, streamID;
 
