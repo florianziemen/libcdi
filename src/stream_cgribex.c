@@ -1241,13 +1241,13 @@ int cgribexScanTimestep(stream_t * streamptr)
 	    {
 	      if ( streamptr->tsteps[tsID].records[recID].used )
 		{
-		  char paramstr[32];
-		  cdiParamToString(param, paramstr, sizeof(paramstr));
+		  char paramstr_[32];
+		  cdiParamToString(param, paramstr_, sizeof(paramstr_));
 
 		  if ( datetimeCmp(datetime, datetime0) != 0 ) break;
 
 		  if ( CDI_Debug )
-                    gribWarning("Parameter already exist, skipped!", nrecs_scanned, tsID+1, paramstr, level1, level2);
+                    gribWarning("Parameter already exist, skipped!", nrecs_scanned, tsID+1, paramstr_, level1, level2);
 
 		  continue;
 		}
