@@ -2863,8 +2863,8 @@ void cdfDefPole(stream_t *streamptr, int gridID)
 
   cdf_redef(fileID);
 
-  int ncerr = nc_def_var(fileID, varname, (nc_type) NC_CHAR, 0, NULL, &ncvarid);
-  if ( ncerr == NC_NOERR )
+  int ncerrcode = nc_def_var(fileID, varname, (nc_type) NC_CHAR, 0, NULL, &ncvarid);
+  if ( ncerrcode == NC_NOERR )
     {
       cdf_put_att_text(fileID, ncvarid, "grid_mapping_name", strlen(mapname), mapname);
       cdf_put_att_double(fileID, ncvarid, "grid_north_pole_latitude", NC_DOUBLE, 1, &ypole);
@@ -2882,7 +2882,6 @@ void cdfDefMapping(stream_t *streamptr, int gridID)
 {
   int ncvarid = UNDEFID;
   int fileID  = streamptr->fileID;
-  int ncerr;
 
   if ( gridInqType(gridID) == GRID_SINUSOIDAL )
     {
@@ -2891,8 +2890,8 @@ void cdfDefMapping(stream_t *streamptr, int gridID)
 
       cdf_redef(fileID);
 
-      ncerr = nc_def_var(fileID, varname, (nc_type) NC_CHAR, 0, NULL, &ncvarid);
-      if ( ncerr == NC_NOERR )
+      int ncerrcode = nc_def_var(fileID, varname, (nc_type) NC_CHAR, 0, NULL, &ncvarid);
+      if ( ncerrcode == NC_NOERR )
         {
           cdf_put_att_text(fileID, ncvarid, "grid_mapping_name", strlen(mapname), mapname);
           /*
@@ -2910,8 +2909,8 @@ void cdfDefMapping(stream_t *streamptr, int gridID)
 
       cdf_redef(fileID);
 
-      ncerr = nc_def_var(fileID, varname, (nc_type) NC_CHAR, 0, NULL, &ncvarid);
-      if ( ncerr == NC_NOERR )
+      int ncerrcode = nc_def_var(fileID, varname, (nc_type) NC_CHAR, 0, NULL, &ncvarid);
+      if ( ncerrcode == NC_NOERR )
         {
           double a, lon_0, lat_0;
 
@@ -2932,8 +2931,8 @@ void cdfDefMapping(stream_t *streamptr, int gridID)
 
       cdf_redef(fileID);
 
-      ncerr = nc_def_var(fileID, varname, (nc_type) NC_CHAR, 0, NULL, &ncvarid);
-      if ( ncerr == NC_NOERR )
+      int ncerrcode = nc_def_var(fileID, varname, (nc_type) NC_CHAR, 0, NULL, &ncvarid);
+      if ( ncerrcode == NC_NOERR )
         {
           double radius, lon_0, lat_0, lat_1, lat_2;
 
