@@ -216,12 +216,12 @@ typedef struct {
   int         byteorder;
   int         fileID;
   int         filemode;
+  int         nrecs;        /* number of records                  */
   off_t       numvals;
   char       *filename;
   Record     *record;
-  int         nrecs;        /* number of records                  */
-  int         nvars;        /* number of variables                */
   svarinfo_t *vars;
+  int         nvars;        /* number of variables                */
   int         varsAllocated;
   int         curTsID;      /* current timestep ID */
   int         rtsteps;      /* number of tsteps accessed       */
