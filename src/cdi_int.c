@@ -61,10 +61,6 @@ static const char Filetypes[][9] = {
   "HDF5",
 };
 
-#undef  UNDEFID
-#define UNDEFID  CDI_UNDEFID
-
-
 int CDI_Debug   = 0;    /* If set to 1, debugging           */
 int CDI_Recopt = 0;
 
