@@ -284,11 +284,8 @@ static int tileNewEntry(int varID)
 static int levelNewEntry(unsigned varID, int level1, int level2, int tileID)
 {
   int levelID = 0;
-  int levelTableSize;
-  leveltable_t *levelTable;
-
-  levelTableSize = vartable[varID].recordTable[tileID].levelTableSize;
-  levelTable     = vartable[varID].recordTable[tileID].levelTable;
+  int levelTableSize = vartable[varID].recordTable[tileID].levelTableSize;
+  leveltable_t *levelTable = vartable[varID].recordTable[tileID].levelTable;
 
   /*
     Look for a free slot in levelTable.
@@ -296,27 +293,17 @@ static int levelNewEntry(unsigned varID, int level1, int level2, int tileID)
   */
   if ( ! levelTableSize )
     {
-      int i;
-
       levelTableSize = 2;
       levelTable = (leveltable_t *) Malloc((size_t)levelTableSize
                                            * sizeof (leveltable_t));
-      if( levelTable == NULL )
-	{
-          Message("levelTableSize = %d", levelTableSize);
-	  SysError("Allocation of leveltable failed!");
-	}
-
-      for( i = 0; i < levelTableSize; i++ )
+      for ( int i = 0; i < levelTableSize; i++ )
         levelTable[i].recID = UNDEFID;
     }
   else
     {
-      while( levelID < levelTableSize )
-	{
-	  if ( levelTable[levelID].recID == UNDEFID ) break;
-	  levelID++;
-	}
+      while( levelID < levelTableSize
+             && levelTable[levelID].recID != UNDEFID )
+        ++levelID;
     }
   /*
     If the table overflows, double its size.
