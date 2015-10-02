@@ -25,8 +25,8 @@
 typedef struct
 {
   int    used;
-  PAR   *pars;
   int    npars;
+  PAR   *pars;
   int    modelID;
   int    number;
   char  *name;
