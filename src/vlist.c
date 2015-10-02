@@ -416,6 +416,33 @@ void vlistClearFlag(int vlistID)
     }
 }
 
+
+struct vgzSearchState
+{
+  int resIDValue;
+  int zaxistype;
+  int nlevels;
+  int lbounds;
+  const double *levels;
+};
+
+static enum cdiApplyRet
+vgzZAxisSearch(int id, void *res, void *data)
+{
+  struct vgzSearchState *state = (struct vgzSearchState *)data;
+  (void)res;
+  if (zaxisCompare(id, state->zaxistype, state->nlevels, state->lbounds,
+                   state->levels, NULL, NULL, 0)
+      == 0)
+    {
+      state->resIDValue = id;
+      return CDI_APPLY_STOP;
+    }
+  else
+    return CDI_APPLY_GO_ON;
+}
+
+
 static
 int vlist_generate_zaxis(int vlistID, int zaxistype, int nlevels, const double *levels,
                          const double *lbounds, const double *ubounds, int vctsize, const double *vct)
@@ -442,24 +469,16 @@ int vlist_generate_zaxis(int vlistID, int zaxistype, int nlevels, const double *
 
   if ( ! zaxisdefined )
     {
-      unsigned nzaxis = cdiZaxisCount();
-      if ( nzaxis > 0 )
-        {
-          int *zaxisIndexList = (int *) Malloc((size_t)nzaxis * sizeof (int));
-          reshLock();
-          cdiZaxisGetIndexList(nzaxis, zaxisIndexList);
-          for (unsigned index = 0; index < nzaxis; ++index)
-            {
-              zaxisID = zaxisIndexList[index];
-              if ( zaxisCompare(zaxisID, zaxistype, nlevels, has_bounds, levels, NULL, NULL, 0) == 0 )
-                {
-                  zaxisglobdefined = 1;
-                  break;
-                }
-            }
-          reshUnlock();
-          Free(zaxisIndexList);
-        }
+      struct vgzSearchState query;
+      query.zaxistype = zaxistype;
+      query.nlevels = nlevels;
+      query.levels = levels;
+      query.lbounds = has_bounds;
+
+      if ((zaxisglobdefined
+           = (cdiResHFilterApply(getZaxisOps(), vgzZAxisSearch, &query)
+              == CDI_APPLY_STOP)))
+        zaxisID = query.resIDValue;
     }
 
   if ( ! zaxisdefined )
