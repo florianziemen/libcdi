@@ -265,12 +265,10 @@ void gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double y
 	  if ( ! (IS_EQUAL(yfirst, 0) && IS_EQUAL(ylast, 0)) )
 	    if ( fabs(yvals[0] - yfirst) > deleps || fabs(yvals[ysize-1] - ylast) > deleps )
 	      {
-		double yinc = fabs(ylast-yfirst)/(ysize-1);
 		double *restrict ytmp = NULL;
 		int nstart, lfound = 0;
-		int ny = (int) (180./yinc + 0.5);
+		int ny = (int) (180./fabs(ylast-yfirst)/(ysize-1) + 0.5);
 		ny -= ny%2;
-		/* printf("%g %g %g %g %g %d\n", ylast, yfirst, ylast-yfirst,yinc, 180/yinc, ny); */
 		if ( ny > ysize && ny < 4096 )
 		  {
 		    ytmp = (double *) Malloc((size_t)ny * sizeof (double));
