@@ -16,8 +16,6 @@ void zaxisDefLtype2(int zaxisID, int ltype2);
 
 const resOps *getZaxisOps();
 
-//extern const resOps zaxisOps;
-
 #endif
 
 /*
