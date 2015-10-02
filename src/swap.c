@@ -7,6 +7,7 @@
 
 #include "error.h"
 #include "binary.h"
+#include "swap.h"
 
 void swap4byte(void *ptr, size_t size)
 {
