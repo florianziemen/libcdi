@@ -930,7 +930,7 @@ void pioWriteTimestep(void)
             = { .numDataEntries = txWin[collID].dictDataUsed,
                 .numRPCEntries = txWin[collID].dictRPCUsed } };
       struct winHeaderEntry *winDict
-        = (struct winHeaderEntry *)txWin[collID].buffer;
+        = (struct winHeaderEntry *)(void *)txWin[collID].buffer;
       winDict[0] = header;
 
       xmpi(MPI_Win_post(txWin[collID].ioGroup, iAssert, txWin[collID].win));
