@@ -250,16 +250,16 @@ void pioWriterAIO(void)
 	{
       	case IO_Open_file:
           {
-            char *messageBuffer = Malloc((size_t)messagesize
-                                          * sizeof (messageBuffer[0]));
-            char *pMB = messageBuffer;
+            unsigned char *messageBuffer = Malloc((size_t)messagesize
+                                                   * sizeof (messageBuffer[0])),
+              *pMB = messageBuffer;
 
             xmpi(MPI_Recv(messageBuffer, messagesize, MPI_UNSIGNED_CHAR, source,
                           tag, commNode, &status ));
 
-            char *filename = strtok(pMB, token);
+            char *filename = strtok((char *)pMB, token);
             pMB += (strlen(filename) + 1);
-            char *temp = strtok(pMB, token);
+            char *temp = strtok((char *)pMB, token);
             long buffersize =  strtol(temp, NULL, 16);
             pMB += (strlen(temp) + 1);
             size_t amount = (size_t)(messageBuffer + messagesize - pMB);
