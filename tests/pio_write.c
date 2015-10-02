@@ -43,7 +43,7 @@ static const struct model_config default_setup
 
 #ifdef USE_MPI
 static const struct {
-  char *text;
+  const char text[12];
   int mode;
 } mode_map[] = {
   { "PIO_MPI", PIO_MPI },
