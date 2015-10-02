@@ -13,9 +13,6 @@
 #include "gribapi.h"
 #include "dmemory.h"
 
-#define XSTRING(x)	#x
-#define STRING(x)	XSTRING(x)
-
 static char gribapi_libvers[64] = "";
 #if  defined  (HAVE_LIBGRIB_API)
 static int gribapi_libvers_init;
