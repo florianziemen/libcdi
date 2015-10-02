@@ -166,7 +166,7 @@ static void modelRun(MPI_Comm commModel)
 
 #ifdef USE_MPI
 static struct {
-  char *text;
+  const char text[12];
   int mode;
 } mode_map[] = {
   { "PIO_MPI", PIO_MPI },
