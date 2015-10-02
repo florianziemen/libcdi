@@ -18,7 +18,7 @@
 #include "pio_impl.h"
 #include "pio_util.h"
 
-bool localDebug    =false;
+static bool localDebug    =false;
 
 
 int dbuffer_init ( struct dBuffer **dbuffer, size_t size )
