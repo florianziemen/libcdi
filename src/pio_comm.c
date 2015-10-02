@@ -515,13 +515,6 @@ void     commRecvNodeMap    ( void )
 }
 
 
-void     commDefNNodes      ( int nNodes )
-{
-  xassert ( info != NULL );
-  info->nodeInfo.nNodes = nNodes;
-}
-
-
 int      commInqNNodes      ( void )
 {
   xassert ( info != NULL &&
