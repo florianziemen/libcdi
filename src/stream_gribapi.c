@@ -555,8 +555,8 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
 	       datatype, &varID, &levelID, tsteptype, numavg, leveltype1, leveltype2,
 	       varname, stdname, longname, units, tiles, &tile_index);
 
-  (*record).varID   = (short)varID;
-  (*record).levelID = (short)levelID;
+  record->varID   = (short)varID;
+  record->levelID = (short)levelID;
 
   varDefCompType(varID, comptype);
 
