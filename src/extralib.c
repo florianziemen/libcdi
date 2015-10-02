@@ -503,7 +503,7 @@ int extWrite(int fileID, void *ext)
 {
   extrec_t *extp = (extrec_t *) ext;
   size_t i;
-  char tempheader[32];
+  union { INT32 i32[EXT_HEADER_LEN]; INT64 i64[EXT_HEADER_LEN]; } tempheader;
   int byteswap = extp->byteswap;
   int rprec  = extp->prec;
   int number = extp->number;
@@ -519,18 +519,18 @@ int extWrite(int fileID, void *ext)
     case EXSE_SINGLE_PRECISION:
       {
 	for ( i = 0; i < EXT_HEADER_LEN; i++ )
-          ((INT32 *) tempheader)[i] = (INT32) header[i];
+          tempheader.i32[i] = (INT32) header[i];
 
-	binWriteInt32(fileID, byteswap, EXT_HEADER_LEN, (INT32 *) tempheader);
+	binWriteInt32(fileID, byteswap, EXT_HEADER_LEN, tempheader.i32);
 
 	break;
       }
     case EXSE_DOUBLE_PRECISION:
       {
 	for ( i = 0; i < EXT_HEADER_LEN; i++ )
-          ((INT64 *) tempheader)[i] = (INT64) header[i];
+          tempheader.i64[i] = (INT64) header[i];
 
-	binWriteInt64(fileID, byteswap, EXT_HEADER_LEN, (INT64 *) tempheader);
+	binWriteInt64(fileID, byteswap, EXT_HEADER_LEN, tempheader.i64);
 
 	break;
       }
