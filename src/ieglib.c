@@ -294,9 +294,9 @@ int iegInqDataDP(void *ieg, double *data)
 }
 
 
-int iegDefData(void *ieg, int prec, const void *data)
+static int
+iegDefData(iegrec_t *iegp, int prec, const void *data)
 {
-  iegrec_t *iegp = (iegrec_t *) ieg;
   int dprec;
   void *buffer;
 
@@ -366,13 +366,13 @@ int iegDefData(void *ieg, int prec, const void *data)
 
 int iegDefDataSP(void *ieg, const float *data)
 {
-  return iegDefData(ieg, EXSE_SINGLE_PRECISION, (void *) data);
+  return iegDefData((iegrec_t *)ieg, EXSE_SINGLE_PRECISION, (void *) data);
 }
 
 
 int iegDefDataDP(void *ieg, const double *data)
 {
-  return iegDefData(ieg, EXSE_DOUBLE_PRECISION, (void *) data);
+  return iegDefData((iegrec_t *)ieg, EXSE_DOUBLE_PRECISION, (void *) data);
 }
 
 
