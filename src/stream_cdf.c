@@ -1875,16 +1875,16 @@ void cdfDefCurvilinear(stream_t *streamptr, int gridID)
 
       if ( gridInqAreaPtr(gridID) )
         {
-          char yaxisname[] = "cell_area";
-          char units[] = "m2";
-          char longname[] = "area of grid cell";
-          char stdname[] = "cell_area";
+          static const char yaxisname_[] = "cell_area";
+          static const char units[] = "m2";
+          static const char longname[] = "area of grid cell";
+          static const char stdname[] = "cell_area";
 
-          cdf_def_var(fileID, yaxisname, (nc_type) xtype, 2, dimIDs, &ncavarid);
+          cdf_def_var(fileID, yaxisname_, (nc_type) xtype, 2, dimIDs, &ncavarid);
 
-          cdf_put_att_text(fileID, ncavarid, "standard_name", strlen(stdname), stdname);
-          cdf_put_att_text(fileID, ncavarid, "long_name", strlen(longname), longname);
-          cdf_put_att_text(fileID, ncavarid, "units", strlen(units), units);
+          cdf_put_att_text(fileID, ncavarid, "standard_name", sizeof (stdname) - 1, stdname);
+          cdf_put_att_text(fileID, ncavarid, "long_name", sizeof (longname) - 1, longname);
+          cdf_put_att_text(fileID, ncavarid, "units", sizeof (units) - 1, units);
         }
 
       cdf_enddef(fileID);
@@ -2257,16 +2257,16 @@ void cdfDefUnstructured(stream_t *streamptr, int gridID)
 
       if ( gridInqAreaPtr(gridID) )
         {
-          char yaxisname[] = "cell_area";
-          char units[] = "m2";
-          char longname[] = "area of grid cell";
-          char stdname[] = "cell_area";
+          static const char yaxisname_[] = "cell_area";
+          static const char units[] = "m2";
+          static const char longname[] = "area of grid cell";
+          static const char stdname[] = "cell_area";
 
-          cdf_def_var(fileID, yaxisname, (nc_type) xtype, 1, &dimID, &ncavarid);
+          cdf_def_var(fileID, yaxisname_, (nc_type) xtype, 1, &dimID, &ncavarid);
 
-          cdf_put_att_text(fileID, ncavarid, "standard_name", strlen(stdname), stdname);
-          cdf_put_att_text(fileID, ncavarid, "long_name", strlen(longname), longname);
-          cdf_put_att_text(fileID, ncavarid, "units", strlen(units), units);
+          cdf_put_att_text(fileID, ncavarid, "standard_name", sizeof (stdname) - 1, stdname);
+          cdf_put_att_text(fileID, ncavarid, "long_name", sizeof (longname) - 1, longname);
+          cdf_put_att_text(fileID, ncavarid, "units", sizeof (units) - 1, units);
         }
 
       cdf_enddef(fileID);
