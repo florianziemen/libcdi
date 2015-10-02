@@ -29,7 +29,7 @@ void cpledn(size_t kn, size_t kodd, double *pfn, double pdx, int kflag,
   double zdlmod;
   double zdlxn;
 
-  size_t ik, jn;
+  size_t ik;
 
   /* 1.0 Newton iteration step */
 
@@ -65,7 +65,7 @@ void cpledn(size_t kn, size_t kodd, double *pfn, double pdx, int kflag,
 
   if (kflag == 1) 
     {
-      for(jn = 2-kodd; jn <= kn; jn += 2) 
+      for(size_t jn = 2-kodd; jn <= kn; jn += 2) 
 	{
 	  /* normalised derivative */
 	  zdlldn = zdlldn - pfn[ik]*(double)(jn)*sin((double)(jn)*zdlx);
