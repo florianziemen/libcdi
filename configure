@@ -2551,6 +2551,48 @@ fi
   as_fn_set_status $ac_retval
 
 } # ac_fn_fc_try_run
+
+# ac_fn_f77_try_run LINENO
+# ------------------------
+# Try to link conftest.$ac_ext, and return whether this succeeded. Assumes
+# that executables *can* be run.
+ac_fn_f77_try_run ()
+{
+  as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
+  if { { ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
+$as_echo "$ac_try_echo"; } >&5
+  (eval "$ac_link") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } && { ac_try='./conftest$ac_exeext'
+  { { case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
+$as_echo "$ac_try_echo"; } >&5
+  (eval "$ac_try") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; }; then :
+  ac_retval=0
+else
+  $as_echo "$as_me: program exited with status $ac_status" >&5
+       $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+       ac_retval=$ac_status
+fi
+  rm -rf conftest.dSYM conftest_ipa8_conftest.oo
+  eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
+  as_fn_set_status $ac_retval
+
+} # ac_fn_f77_try_run
 cat >config.log <<_ACEOF
 This file contains any messages produced by compilers while
 running configure, to aid debugging if configure makes a mistake.
@@ -30278,9 +30320,9 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 ac_link="./libtool --mode=link --tag=CC $ac_link"
 
 fi
-                        if test -z "$FC" -o X"$FC" != Xno; then :
+                        if test -z "$F77" -o X"$F77" = Xno; then :
   acx_cv_cf_flag="$acx_cv_fc_cf_flag (probed)"
-elif test -z "$F77" -o X"$F77" != Xno; then :
+elif test -z "$FC" -o X"$FC" = Xno; then :
   acx_cv_cf_flag="$acx_cv_f77_cf_flag (probed)"
 else
   if test x"$acx_cv_f77_cf_flag" = x"$acx_cv_fc_cf_flag"; then :
@@ -30356,12 +30398,12 @@ ac_link="./libtool --mode=link --tag=CC $ac_link"
 #include <stdio.h>
 #include <stdlib.h>
 
-PROTOCCALLSFFUN1(FLOAT,CONFTEST_F,conftest_f,FLOAT)
+PROTOCCALLSFFUN1(FLOAT,CFTSTF,cftstf,FLOAT)
 #define conftest_F(v) \
-  CCALLSFFUN1(CONFTEST_F,conftest_f,FLOAT,(v));
+  CCALLSFFUN1(CFTSTF,cftstf,FLOAT,(v));
 
 static float
-conftest_C(int i, float v, int *p, float *q)
+cftstC(int i, float v, int *p, float *q)
 {
   float f;
   *p = (int)roundf(v * i);
@@ -30369,19 +30411,19 @@ conftest_C(int i, float v, int *p, float *q)
   return f;
 }
 
-FCALLSCFUN4(FLOAT,conftest_C,CONFTEST_C,conftest_c,INT,FLOAT,PINT,PFLOAT)
+FCALLSCFUN4(FLOAT,cftstC,CFTSTC,cftstc,INT,FLOAT,PINT,PFLOAT)
 
 /* test string returns */
 static const char *
 conftest_str_C(void)
 {
-  static const char msg[100] = "aaaaaaaaaaaaaaaaaaaa"
-    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+  static const char msg[100] = "AAAAAAAAAAAAAAAAAAAA"
+    "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
   return msg;
 }
 
-FCALLSCFUN0(STRING,conftest_str_C,CONFTEST_STR_C,conftest_str_c)
+FCALLSCFUN0(STRING,conftest_str_C,CHTST,chtst)
 
 /* This function is required simply because some Fortran compilers
  * won't stop with exit code n when encountering STOP n */
@@ -30415,13 +30457,13 @@ ac_link="./libtool --mode=link --tag=FC $ac_link"
       PUBLIC :: ri
       END MODULE conftest_data
 
-      FUNCTION conftest_f(v) RESULT(r)
+      FUNCTION cftstf(v) RESULT(r)
       USE conftest_data, ONLY: ri
       REAL, INTENT(in) :: v
       REAL :: r
       r = v * 100.0
       ri = 1.0 / v
-      END FUNCTION conftest_f
+      END FUNCTION cftstf
 _ACEOF
 if ac_fn_fc_try_compile "$LINENO"; then :
   { { $as_echo "$as_me:${as_lineno-$LINENO}: Renaming Fortran object file." >&5; } >&5
@@ -30443,16 +30485,16 @@ else
       USE conftest_data, ONLY: ri
       IMPLICIT NONE
       INTERFACE
-       FUNCTION conftest_c(i, v, p, q) RESULT(f)
+       FUNCTION cftstc(i, v, p, q) RESULT(f)
          INTEGER, INTENT(in) :: i
          REAL, INTENT(in) :: v
          INTEGER, INTENT(out) :: p
          REAL, INTENT(out) :: q
          REAL :: f
-       END FUNCTION conftest_c
-       FUNCTION conftest_str_c() result(s)
+       END FUNCTION cftstc
+       FUNCTION chtst() result(s)
          CHARACTER(99) :: s
-       END FUNCTION conftest_str_c
+       END FUNCTION chtst
       END INTERFACE
       REAL, PARAMETER :: eps = 10e-6
       REAL :: foo, boo, too
@@ -30460,7 +30502,7 @@ else
       CHARACTER(99) :: aaaaaa
       bar = 5
       foo = 0.3
-      too = conftest_c(bar, foo, baz, boo)
+      too = cftstc(bar, foo, baz, boo)
       IF (ABS(baz - NINT(bar * foo)) /= 0) THEN
         WRITE (0, '(2(a,i0))') "error checking, when baz, baz=", baz, &
              ", NINT(bar * foo) =", NINT(bar * foo)
@@ -30485,9 +30527,9 @@ else
         FLUSH(0)
         CALL err_exit
       END IF
-      aaaaaa = conftest_str_c()
+      aaaaaa = chtst()
       DO i = 1, 99
-        IF (aaaaaa(i:i) /= 'a') THEN
+        IF (aaaaaa(i:i) /= 'A') THEN
           WRITE (0, '(a,i0,a)') "error checking aaaaaa(", i, ")=", &
               aaaaaa(i:i)
           FLUSH(0)
@@ -30516,6 +30558,104 @@ ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 ac_link="./libtool --mode=link --tag=CC $ac_link"
+
+         ac_ext=f
+ac_compile='$F77 -c $FFLAGS conftest.$ac_ext >&5'
+ac_link='$F77 -o conftest$ac_exeext $FFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_f77_compiler_gnu
+ac_link="./libtool --mode=link --tag=F77 $ac_link"
+
+         cat > conftest.$ac_ext <<_ACEOF
+      REAL FUNCTION CFTSTF(v)
+      REAL RI
+      COMMON /CFTSTD/ RI
+      REAL V
+      REAL R
+      CFTSTF = V * 100.0
+      RI = 1.0 / V
+      END FUNCTION CFTSTF
+_ACEOF
+if ac_fn_f77_try_compile "$LINENO"; then :
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: Renaming Fortran object file." >&5; } >&5
+  (mv "conftest.$ac_objext" "conftest_f.$ac_objext") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+            save_LIBS=$LIBS
+            LIBS="conftest_c.$ac_objext conftest_f.$ac_objext $LIBS"
+            if test "$cross_compiling" = yes; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: Skipping run test for cfortran.h in cross-compilation mode," >&5
+$as_echo "$as_me: Skipping run test for cfortran.h in cross-compilation mode," >&6;}
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: link test succeeded." >&5
+$as_echo "$as_me: link test succeeded." >&6;}
+               acx_cv_cfortran_works=yes
+else
+  cat > conftest.$ac_ext <<_ACEOF
+      program main
+      REAL RI
+      COMMON /CFTSTD/ RI
+      REAL EPS
+      PARAMETER(EPS=10E-6)
+      REAL FOO, BOO, TOO
+      INTEGER BAR, BAZ, I
+      CHARACTER(99) AAAAAA
+      EXTERNAL CFTSTC, CFTSTF, CHTST, ERR_EXIT
+      REAL CFTSTC, CFTSTF
+      CHARACTER(99) CHTST
+      BAR = 5
+      FOO = 0.3
+      TOO = CFTSTC(BAR, FOO, BAZ, BOO)
+      IF (ABS(BAZ - NINT(BAR * FOO)) /= 0) THEN
+        WRITE (0, '(2(A,I0))') "ERROR CHECKING, WHEN BAZ, BAZ=", BAZ,
+     &       ", NINT(BAR * FOO) =", NINT(BAR * FOO)
+        CALL ERR_EXIT
+      END IF
+      IF (ABS((RI - 1.0 / (BAR * FOO)) / ABS(RI)) > EPS)  THEN
+        WRITE (0, '(2(A,F24.15))') "ERROR CHECKING RI, RI=", RI, ",
+     &       1.0 / (BAR * FOO) = ", 1.0 / (BAR * FOO)
+        CALL err_exit
+      END IF
+      IF (ABS((BOO - (BAR * FOO * 100.0))/ABS(BOO)) > EPS)  THEN
+        WRITE (0, '(2(A,F24.15))') "ERROR CHECKING BOO, BOO=", BOO,
+     &       ", BAR * FOO * 100.0 = ", BAR * FOO * 100.0
+        CALL ERR_EXIT
+      END IF
+      IF (TOO /= BOO) THEN
+        WRITE (0, '(2(A,F24.15))') "ERROR CHECKING TOO VS. BOO, TOO=",
+     &       TOO, ", BOO = ", BOO
+        CALL ERR_EXIT
+      END IF
+      AAAAAA = CHTST()
+      DO i = 1, 99
+        IF (AAAAAA(I:I) /= 'A') THEN
+          WRITE (0, '(A,I0,2A)') "ERROR CHECKING AAAAAA(", I, ")=",
+     &        AAAAAA(I:I)
+          CALL ERR_EXIT
+        END IF
+      END DO
+      end
+_ACEOF
+if ac_fn_f77_try_run "$LINENO"; then :
+  acx_cv_cfortran_works=yes
+else
+  acx_cv_cfortran_works="error"
+fi
+rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
+  conftest.$ac_objext conftest.beam conftest.$ac_ext
+fi
+
+	    LIBS=$save_LIBS
+else
+  acx_cv_cfortran_works="error compiling Fortran subroutine"
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+         ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+ac_link="./libtool --mode=link --tag=CC $ac_link"
+
 
 else
   acx_cv_cfortran_works="compiling with cfortran.h failed"
