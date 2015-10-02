@@ -379,16 +379,11 @@ int iegDefDataDP(void *ieg, const double *data)
 int iegRead(int fileID, void *ieg)
 {
   iegrec_t *iegp = (iegrec_t *) ieg;
-  size_t datasize;
-  size_t i;
-  char tmpbuffer[800], *tmpbuf = tmpbuffer;
-  int dprec = 0;
-  void *buffer;
-  int status;
+  union { double d[200]; float f[200]; int32_t i32[200]; } buf;
 
   if ( ! iegp->checked )
     {
-      status = iegCheckFiletype(fileID, &iegp->byteswap);
+      int status = iegCheckFiletype(fileID, &iegp->byteswap);
       if ( status == 0 ) Error("Not a IEG file!");
       iegp->checked = 1;
     }
@@ -403,6 +398,7 @@ int iegRead(int fileID, void *ieg)
   if ( IEG_Debug )
     Message("blocklen = %lu", blocklen);
 
+  int dprec = 0;
   if ( blocklen == 636 || blocklen == 640 )
     dprec = 4;
   else if ( blocklen == 1040 || blocklen == 1036 )
@@ -415,54 +411,54 @@ int iegRead(int fileID, void *ieg)
 
   iegp->dprec = dprec;
 
-  binReadInt32(fileID, byteswap, 37, (INT32 *) tmpbuf);
-  for ( i = 0; i < 37; i++ ) iegp->ipdb[i] = (int) ((INT32 *) tmpbuf)[i];
+  binReadInt32(fileID, byteswap, 37, buf.i32);
+  for ( size_t i = 0; i < 37; i++ ) iegp->ipdb[i] = (int)buf.i32[i];
 
-  binReadInt32(fileID, byteswap, 18, (INT32 *) tmpbuf);
-  for ( i = 0; i < 18; i++ ) iegp->igdb[i] = (int) ((INT32 *) tmpbuf)[i];
+  binReadInt32(fileID, byteswap, 18, buf.i32);
+  for ( size_t i = 0; i < 18; i++ ) iegp->igdb[i] = (int)buf.i32[i];
 
   if ( blocklen == 636 || blocklen == 1036 )
     {
-      fileRead(fileID, tmpbuf, 4);
-      if ( byteswap ) swap4byte(tmpbuf, 1);
-      iegp->refval = (double) ((float *) tmpbuf)[0];
+      fileRead(fileID, buf.f, 4);
+      if ( byteswap ) swap4byte(buf.f, 1);
+      iegp->refval = (double)buf.f[0];
     }
   else
     {
-      fileRead(fileID, tmpbuf, 8);
-      if ( byteswap ) swap8byte(tmpbuf, 1);
-      iegp->refval = (double) ((double *) tmpbuf)[0];
+      fileRead(fileID, buf.d, 8);
+      if ( byteswap ) swap8byte(buf.d, 1);
+      iegp->refval = (double)buf.d[0];
     }
 
-  binReadInt32(fileID, byteswap, 3, (INT32 *) tmpbuf);
-  for ( i = 0; i < 3; i++ ) iegp->igdb[18+i] = (int) ((INT32 *) tmpbuf)[i];
+  binReadInt32(fileID, byteswap, 3, buf.i32);
+  for ( size_t i = 0; i < 3; i++ ) iegp->igdb[18+i] = (int)buf.i32[i];
 
   if ( dprec == EXSE_SINGLE_PRECISION )
     {
-      fileRead(fileID, tmpbuf, 400);
-      if ( byteswap ) swap4byte(tmpbuf, 100);
-      for ( i = 0; i < 100; i++ )
-	iegp->vct[i] = (double) ((float *) tmpbuf)[i];
+      fileRead(fileID, buf.f, 400);
+      if ( byteswap ) swap4byte(buf.f, 100);
+      for ( size_t i = 0; i < 100; i++ )
+	iegp->vct[i] = (double)buf.f[i];
     }
   else
     {
-      fileRead(fileID, tmpbuf, 800);
-      if ( byteswap ) swap8byte(tmpbuf, 100);
-      for ( i = 0; i < 100; i++ )
-	iegp->vct[i] = (double) ((double *) tmpbuf)[i];
+      fileRead(fileID, buf.d, 800);
+      if ( byteswap ) swap8byte(buf.d, 100);
+      for ( size_t i = 0; i < 100; i++ )
+	iegp->vct[i] = buf.d[i];
     }
 
   /*
   fprintf(stderr, "refval %g\n", iegp->refval);
 
-  for ( i = 0; i < 100; i++ )
+  for ( size_t i = 0; i < 100; i++ )
     fprintf(stderr, "%3d %g\n", i, iegp->vct[i]);
 
   {
     int i;
-    for ( i = 0; i < 37; i++ )
+    for ( size_t i = 0; i < 37; i++ )
       fprintf(stderr, "pdb: %d %d\n", i, iegp->ipdb[i]);
-    for ( i = 0; i < 22; i++ )
+    for ( size_t i = 0; i < 22; i++ )
       fprintf(stderr, "gdb: %d %d\n", i, iegp->igdb[i]);
   }
   */
@@ -474,28 +470,21 @@ int iegRead(int fileID, void *ieg)
       return -1;
     }
 
-  iegp->datasize = (size_t)IEG_G_NumLon(iegp->igdb)
-    * (size_t)IEG_G_NumLat(iegp->igdb);
+  size_t datasize = iegp->datasize
+    = (size_t)IEG_G_NumLon(iegp->igdb) * (size_t)IEG_G_NumLat(iegp->igdb);
 
   if ( IEG_Debug )
     Message("datasize = %lu", iegp->datasize);
 
   blocklen = binReadF77Block(fileID, byteswap);
 
-  size_t buffersize = iegp->buffersize;
 
-  if ( buffersize < blocklen )
+  void *buffer = iegp->buffer;
+  if ( iegp->buffersize < blocklen )
     {
-      buffersize = blocklen;
-      buffer = iegp->buffer;
-      buffer = Realloc(buffer, buffersize);
-      iegp->buffer = buffer;
-      iegp->buffersize = buffersize;
+      iegp->buffer = buffer = Realloc(buffer, blocklen);
+      iegp->buffersize = blocklen;
     }
-  else
-    buffer = iegp->buffer;
-
-  datasize = iegp->datasize;
 
   if ( dprec != (int) (blocklen/datasize) )
     {
@@ -521,41 +510,35 @@ int iegRead(int fileID, void *ieg)
 int iegWrite(int fileID, void *ieg)
 {
   iegrec_t *iegp = (iegrec_t *) ieg;
-  size_t blocklen;
-  size_t i;
-  char tmpbuf[800];
-  float fvct[100];
-  int byteswap = iegp->byteswap;
+  union { INT32 i32[200]; float fvct[100]; } buf;
   int dprec  = iegp->dprec;
+  int byteswap = iegp->byteswap;
 
   /* write header record */
-  if ( dprec == EXSE_SINGLE_PRECISION )
-    blocklen = 636;
-  else
-    blocklen = 1040;
+  size_t blocklen = ( dprec == EXSE_SINGLE_PRECISION ) ? 636 : 1040;
 
   binWriteF77Block(fileID, byteswap, blocklen);
 
-  for ( i = 0; i < 37; i++ ) ((INT32 *) tmpbuf)[i] = (INT32) iegp->ipdb[i];
-  binWriteInt32(fileID, byteswap, 37, (INT32 *) tmpbuf);
+  for ( size_t i = 0; i < 37; i++ ) buf.i32[i] = (INT32) iegp->ipdb[i];
+  binWriteInt32(fileID, byteswap, 37, buf.i32);
 
-  for ( i = 0; i < 18; i++ ) ((INT32 *) tmpbuf)[i] = (INT32) iegp->igdb[i];
-  binWriteInt32(fileID, byteswap, 18, (INT32 *) tmpbuf);
+  for ( size_t i = 0; i < 18; i++ ) buf.i32[i] = (INT32) iegp->igdb[i];
+  binWriteInt32(fileID, byteswap, 18, buf.i32);
 
-  double refval = iegp->refval;
-  float refvalf = (float) refval;
+  FLT64 refval = (FLT64)iegp->refval;
+  FLT32 refvalf = (FLT32)iegp->refval;
   if ( dprec == EXSE_SINGLE_PRECISION )
-    binWriteFlt32(fileID, byteswap, 1, (FLT32 *) &refvalf);
+    binWriteFlt32(fileID, byteswap, 1, &refvalf);
   else
-    binWriteFlt64(fileID, byteswap, 1, (FLT64 *) &refval);
+    binWriteFlt64(fileID, byteswap, 1, &refval);
 
-  for ( i = 0; i < 3; i++ ) ((INT32 *) tmpbuf)[i] = (INT32) iegp->igdb[18+i];
-  binWriteInt32(fileID, byteswap, 3, (INT32 *) tmpbuf);
+  for ( size_t i = 0; i < 3; i++ ) buf.i32[i] = (INT32) iegp->igdb[18+i];
+  binWriteInt32(fileID, byteswap, 3, buf.i32);
 
   if ( dprec == EXSE_SINGLE_PRECISION )
     {
-      for ( i = 0; i < 100; i++ ) fvct[i] = (float) iegp->vct[i];
-      binWriteFlt32(fileID, byteswap, 100, fvct);
+      for ( size_t i = 0; i < 100; i++ ) buf.fvct[i] = (float) iegp->vct[i];
+      binWriteFlt32(fileID, byteswap, 100, buf.fvct);
     }
   else
     {
