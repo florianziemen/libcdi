@@ -399,7 +399,10 @@ int srvRead(int fileID, void *srv)
 {
   srvrec_t *srvp = (srvrec_t *) srv;
   size_t i;
-  char tempheader[64];
+  union {
+    INT32 i32[SRV_HEADER_LEN];
+    INT64 i64[SRV_HEADER_LEN];
+  } tempheader;
   void *buffer;
   int status;
 
@@ -428,19 +431,19 @@ int srvRead(int fileID, void *srv)
     {
     case EXSE_SINGLE_PRECISION:
       {
-	binReadInt32(fileID, byteswap, SRV_HEADER_LEN, (INT32 *) tempheader);
+	binReadInt32(fileID, byteswap, SRV_HEADER_LEN, tempheader.i32);
 
 	for ( i = 0; i < SRV_HEADER_LEN; i++ )
-          srvp->header[i] = (int) ((INT32 *) tempheader)[i];
+          srvp->header[i] = (int)tempheader.i32[i];
 
 	break;
       }
     case EXSE_DOUBLE_PRECISION:
       {
-	binReadInt64(fileID, byteswap, SRV_HEADER_LEN, (INT64 *) tempheader);
+	binReadInt64(fileID, byteswap, SRV_HEADER_LEN, tempheader.i64);
 
 	for ( i = 0; i < SRV_HEADER_LEN; i++ )
-          srvp->header[i] = (int) ((INT64 *) tempheader)[i];
+          srvp->header[i] = (int)tempheader.i64[i];
 
 	break;
       }
@@ -509,11 +512,15 @@ void srvWrite(int fileID, void *srv)
 {
   srvrec_t *srvp = (srvrec_t *) srv;
   size_t i;
-  char tempheader[64];
+  union
+  {
+    INT32 i32[SRV_HEADER_LEN];
+    INT64 i64[SRV_HEADER_LEN];
+  } tempheader;
   int byteswap = srvp->byteswap;
   int dprec  = srvp->dprec;
   int hprec  = srvp->hprec;
-  int *header = srvp->header;
+  int *restrict header = srvp->header;
 
   /* write header record */
   size_t blocklen = SRV_HEADER_LEN * (size_t)hprec;
@@ -524,19 +531,19 @@ void srvWrite(int fileID, void *srv)
     {
     case EXSE_SINGLE_PRECISION:
       {
-	for ( i = 0; i < SRV_HEADER_LEN; i++ )
-          ((INT32 *) tempheader)[i] = (INT32) header[i];
+	for (i = 0; i < SRV_HEADER_LEN; i++)
+          tempheader.i32[i] = (INT32) header[i];
 
-	binWriteInt32(fileID, byteswap, SRV_HEADER_LEN, (INT32 *) tempheader);
+	binWriteInt32(fileID, byteswap, SRV_HEADER_LEN, tempheader.i32);
 
 	break;
       }
     case EXSE_DOUBLE_PRECISION:
       {
-	for ( i = 0; i < SRV_HEADER_LEN; i++ )
-          ((INT64 *) tempheader)[i] = (INT64) header[i];
+	for (i = 0; i < SRV_HEADER_LEN; i++)
+          tempheader.i64[i] = (INT64) header[i];
 
-	binWriteInt64(fileID, byteswap, SRV_HEADER_LEN, (INT64 *) tempheader);
+	binWriteInt64(fileID, byteswap, SRV_HEADER_LEN, tempheader.i64);
 
 	break;
       }
