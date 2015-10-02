@@ -3021,7 +3021,7 @@ const double *gridInqYboundsPtr(int gridID)
 }
 
 
-void gridPrintKernel(grid_t * gridptr, int index, int opt, FILE *fp)
+static void gridPrintKernel(grid_t * gridptr, int index, int opt, FILE *fp)
 {
   int xdim, ydim;
   int nbyte;
