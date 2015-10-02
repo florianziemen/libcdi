@@ -270,7 +270,7 @@ gatherArray(int root, int nProcsModel, int headerIdx,
             double *gatherBuf, int *nmiss)
 {
   struct winHeaderEntry *winDict
-    = (struct winHeaderEntry *)rxWin[root].buffer;
+    = (struct winHeaderEntry *)(void *)rxWin[root].buffer;
   int streamID = winDict[headerIdx].id;
   int varID = winDict[headerIdx].specific.dataRecord.varID;
   int varShape[3] = { 0, 0, 0 };
@@ -289,15 +289,15 @@ gatherArray(int root, int nProcsModel, int headerIdx,
     for (int modelID = 0; modelID < nProcsModel; modelID++)
       {
         struct dataRecord *dataHeader
-          = &((struct winHeaderEntry *)
+          = &((struct winHeaderEntry *)(void *)
               rxWin[modelID].buffer)[headerIdx].specific.dataRecord;
-        int position =
-          ((struct winHeaderEntry *)rxWin[modelID].buffer)[headerIdx + 1].offset;
-        xassert(namespaceAdaptKey2(((struct winHeaderEntry *)
+        int position = ((struct winHeaderEntry *)(void *)
+                        rxWin[modelID].buffer)[headerIdx + 1].offset;
+        xassert(namespaceAdaptKey2(((struct winHeaderEntry *)(void *)
                                     rxWin[modelID].buffer)[headerIdx].id)
                 == streamID
                 && dataHeader->varID == varID
-                && ((struct winHeaderEntry *)
+                && ((struct winHeaderEntry *)(void *)
                     rxWin[modelID].buffer)[headerIdx + 1].id == PARTDESCMARKER
                 && position > 0
                 && ((size_t)position
@@ -308,7 +308,7 @@ gatherArray(int root, int nProcsModel, int headerIdx,
                                           &position, commCalc);
         unsigned partSize = (unsigned)xt_idxlist_get_num_indices(part[modelID]);
         size_t charOfs = (size_t)((rxWin[modelID].buffer
-                                   + ((struct winHeaderEntry *)
+                                   + ((struct winHeaderEntry *)(void *)
                                       rxWin[modelID].buffer)[headerIdx].offset)
                                   - rxWin[0].buffer);
         xassert(charOfs % sizeof (double) == 0
@@ -665,7 +665,7 @@ static void readGetBuffers()
   xdebug("%s", "START");
 
   struct winHeaderEntry *winDict
-    = (struct winHeaderEntry *)rxWin[root].buffer;
+    = (struct winHeaderEntry *)(void *)rxWin[root].buffer;
   xassert(winDict[0].id == HEADERSIZEMARKER);
   {
     int dictSize = rxWin[root].dictSize,
