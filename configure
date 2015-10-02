@@ -652,6 +652,8 @@ CREATE_ISOC_TRUE
 RUBY
 ENABLE_MPI
 USE_MPI
+HAVE_PARALLEL_NC4_FALSE
+HAVE_PARALLEL_NC4_TRUE
 USE_PPM_CORE_FALSE
 USE_PPM_CORE_TRUE
 USE_MPI_FALSE
@@ -29617,6 +29619,14 @@ else
   USE_PPM_CORE_FALSE=
 fi
 
+ if test $HAVE_PARALLEL_NC4 -gt 0; then
+  HAVE_PARALLEL_NC4_TRUE=
+  HAVE_PARALLEL_NC4_FALSE='#'
+else
+  HAVE_PARALLEL_NC4_TRUE='#'
+  HAVE_PARALLEL_NC4_FALSE=
+fi
+
 
 ENABLE_MPI=`test x"$enable_mpi" = xyes && echo true || echo false`
 
@@ -30735,6 +30745,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${USE_PPM_CORE_TRUE}" && test -z "${USE_PPM_CORE_FALSE}"; then
   as_fn_error $? "conditional \"USE_PPM_CORE\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${HAVE_PARALLEL_NC4_TRUE}" && test -z "${HAVE_PARALLEL_NC4_FALSE}"; then
+  as_fn_error $? "conditional \"HAVE_PARALLEL_NC4\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${CREATE_ISOC_TRUE}" && test -z "${CREATE_ISOC_FALSE}"; then

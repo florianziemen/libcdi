@@ -89,14 +89,15 @@ host_triplet = @host@
 @ENABLE_CDI_LIB_TRUE@@USE_MPI_TRUE@am__append_4 = libcdipio.la
 @ENABLE_CDI_LIB_TRUE@@USE_MPI_TRUE@am__append_5 = cdipio.h cdipio.inc
 @ENABLE_CDI_LIB_FALSE@@USE_MPI_TRUE@am__append_6 = libcdipio.la
-@ENABLE_CDI_LIB_TRUE@am__append_7 = pkgconfig/cdi.pc
-@ENABLE_CDI_LIB_TRUE@@USE_MPI_TRUE@am__append_8 = pkgconfig/cdipio.pc
-@CREATE_ISOC_TRUE@am__append_9 = mo_cdi.$(OBJEXT)
+@HAVE_PARALLEL_NC4_TRUE@@USE_MPI_TRUE@am__append_7 = $(libcdipio_la_HAVE_PARALLEL_NC4_extra_sources)
+@ENABLE_CDI_LIB_TRUE@am__append_8 = pkgconfig/cdi.pc
+@ENABLE_CDI_LIB_TRUE@@USE_MPI_TRUE@am__append_9 = pkgconfig/cdipio.pc
+@CREATE_ISOC_TRUE@am__append_10 = mo_cdi.$(OBJEXT)
 #CLEANFILES += cdilib.c
-@CREATE_ISOC_TRUE@am__append_10 = mo_cdi.$(FCMODEXT) mo_cdi.$(OBJEXT)
-@ENABLE_CDI_LIB_TRUE@am__append_11 = pkgconfig/cdi.pc
-@ENABLE_CDI_LIB_TRUE@@USE_MPI_TRUE@am__append_12 = pkgconfig/cdipio.pc
+@CREATE_ISOC_TRUE@am__append_11 = mo_cdi.$(FCMODEXT) mo_cdi.$(OBJEXT)
+@ENABLE_CDI_LIB_TRUE@am__append_12 = pkgconfig/cdi.pc
 @ENABLE_CDI_LIB_TRUE@@USE_MPI_TRUE@am__append_13 = pkgconfig/cdipio.pc
+@ENABLE_CDI_LIB_TRUE@@USE_MPI_TRUE@am__append_14 = pkgconfig/cdipio.pc
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(srcdir)/config.h.in $(top_srcdir)/config/mkinstalldirs \
@@ -216,12 +217,23 @@ am__v_lt_1 =
 @ENABLE_CDI_LIB_TRUE@am_libcdi_la_rpath = -rpath $(libdir)
 libcdipio_la_DEPENDENCIES = libcdi.la $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+am__libcdipio_la_SOURCES_DIST = cdipio.h cdipioFortran.c cfortran.h \
+	pio.c pio.h pio_comm.c pio_comm.h pio_dbuffer.c pio_impl.h \
+	pio_interface.c pio_interface.h pio_mpinonb.c \
+	pio_record_send.c pio_posixasynch.c pio_posixfpguardsendrecv.c \
+	pio_posixnonb.c pio_list_set.c resource_unpack.h \
+	resource_unpack.c pio_rpc.h pio_client.c pio_client.h \
+	pio_server.c pio_server.h pio_serialize.h pio_serialize.c \
+	pio_util.c pio_util.h pio_cdf_int.h pio_cdf_int.c
+am__objects_5 = pio_cdf_int.lo
+@HAVE_PARALLEL_NC4_TRUE@@USE_MPI_TRUE@am__objects_6 =  \
+@HAVE_PARALLEL_NC4_TRUE@@USE_MPI_TRUE@	$(am__objects_5)
 am_libcdipio_la_OBJECTS = cdipioFortran.lo pio.lo pio_comm.lo \
 	pio_dbuffer.lo pio_interface.lo pio_mpinonb.lo \
 	pio_record_send.lo pio_posixasynch.lo \
 	pio_posixfpguardsendrecv.lo pio_posixnonb.lo pio_list_set.lo \
 	resource_unpack.lo pio_client.lo pio_server.lo \
-	pio_serialize.lo pio_util.lo pio_cdf_int.lo
+	pio_serialize.lo pio_util.lo $(am__objects_6)
 libcdipio_la_OBJECTS = $(am_libcdipio_la_OBJECTS)
 @ENABLE_CDI_LIB_FALSE@@USE_MPI_TRUE@am_libcdipio_la_rpath =
 @ENABLE_CDI_LIB_TRUE@@USE_MPI_TRUE@am_libcdipio_la_rpath = -rpath \
@@ -265,8 +277,8 @@ am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
 SOURCES = $(libcdi_la_SOURCES) $(libcdipio_la_SOURCES) \
 	$(libcdiresunpack_la_SOURCES)
-DIST_SOURCES = $(am__libcdi_la_SOURCES_DIST) $(libcdipio_la_SOURCES) \
-	$(libcdiresunpack_la_SOURCES)
+DIST_SOURCES = $(am__libcdi_la_SOURCES_DIST) \
+	$(am__libcdipio_la_SOURCES_DIST) $(libcdiresunpack_la_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -490,7 +502,8 @@ top_srcdir = @top_srcdir@
 
 #
 EXTRA_DIST = cdilib.c mo_cdi.f90 $(libcdi_la_USE_FC_extra_sources) \
-	$(libcdi_la_HAVE_LIBGRIB_API_extra_sources)
+	$(libcdi_la_HAVE_LIBGRIB_API_extra_sources) \
+	$(libcdipio_la_HAVE_PARALLEL_NC4_extra_sources)
 noinst_LTLIBRARIES = libcdiresunpack.la $(am__append_1) \
 	$(am__append_6)
 @ENABLE_CDI_LIB_TRUE@lib_LTLIBRARIES = libcdi.la $(am__append_4)
@@ -533,37 +546,16 @@ libcdi_la_HAVE_LIBGRIB_API_extra_sources = \
 libcdiresunpack_la_SOURCES = \
 	resource_unpack.c
 
-libcdipio_la_SOURCES = \
-	cdipio.h							\
-	cdipioFortran.c							\
-	cfortran.h							\
-	pio.c								\
-	pio.h								\
-	pio_comm.c							\
-	pio_comm.h							\
-	pio_dbuffer.c							\
-	pio_impl.h							\
-	pio_interface.c							\
-	pio_interface.h							\
-	pio_mpinonb.c							\
-	pio_record_send.c						\
-	pio_posixasynch.c						\
-	pio_posixfpguardsendrecv.c					\
-	pio_posixnonb.c							\
-	pio_list_set.c							\
-	resource_unpack.h						\
-	resource_unpack.c						\
-	pio_rpc.h							\
-	pio_client.c							\
-	pio_client.h							\
-	pio_server.c							\
-	pio_server.h							\
-	pio_serialize.h							\
-	pio_serialize.c							\
-	pio_util.c							\
-	pio_util.h							\
-	pio_cdf_int.c							\
-	pio_cdf_int.h
+libcdipio_la_SOURCES = cdipio.h cdipioFortran.c cfortran.h pio.c pio.h \
+	pio_comm.c pio_comm.h pio_dbuffer.c pio_impl.h pio_interface.c \
+	pio_interface.h pio_mpinonb.c pio_record_send.c \
+	pio_posixasynch.c pio_posixfpguardsendrecv.c pio_posixnonb.c \
+	pio_list_set.c resource_unpack.h resource_unpack.c pio_rpc.h \
+	pio_client.c pio_client.h pio_server.c pio_server.h \
+	pio_serialize.h pio_serialize.c pio_util.c pio_util.h \
+	pio_cdf_int.h $(am__append_7)
+libcdipio_la_HAVE_PARALLEL_NC4_extra_sources = \
+	pio_cdf_int.c
 
 libcdipio_la_LIBADD = libcdi.la $(PPM_CORE_LIBS) $(YAXT_LIBS) $(MPI_C_LIB)
 libcdi_la_LIBADD = $(UUID_C_LIB)
@@ -573,12 +565,12 @@ libcdi_la_LIBADD = $(UUID_C_LIB)
 #
 #cdilib.o: cdilib.c
 #	$(COMPILE) -c $<
-LOCALTARGETS = $(am__append_7) $(am__append_8) $(am__append_9)
+LOCALTARGETS = $(am__append_8) $(am__append_9) $(am__append_10)
 #
-CLEANFILES = `ls *~` $(am__append_10) $(am__append_11) \
-	$(am__append_12)
+CLEANFILES = `ls *~` $(am__append_11) $(am__append_12) \
+	$(am__append_13)
 @ENABLE_CDI_LIB_TRUE@PKGCONFIG_FILES = pkgconfig/cdi.pc \
-@ENABLE_CDI_LIB_TRUE@	$(am__append_13)
+@ENABLE_CDI_LIB_TRUE@	$(am__append_14)
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 

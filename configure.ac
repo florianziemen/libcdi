@@ -234,6 +234,7 @@ AS_IF([test $HAVE_PARALLEL_NC4 -gt 0],
 AC_SUBST([HAVE_PARALLEL_NC4])
 AM_CONDITIONAL([USE_MPI],[test x"$USE_MPI" = xyes])
 AM_CONDITIONAL([USE_PPM_CORE],[test $enable_ppm = yes])
+AM_CONDITIONAL([HAVE_PARALLEL_NC4],[test $HAVE_PARALLEL_NC4 -gt 0])
 AC_SUBST([USE_MPI])
 AC_SUBST([ENABLE_MPI],[`test x"$enable_mpi" = xyes && echo true || echo false`])
 #  ----------------------------------------------------------------------

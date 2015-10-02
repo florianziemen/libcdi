@@ -63,7 +63,7 @@ cdiPioEnableNetCDFParAccess(void)
   namespaceSwitchSet(NSSWITCH_CDF_DEF_VAR, NSSW_FUNC(cdiPioCdfDefVar));
 }
 
-#endif
+#endif  /* defined (HAVE_NETCDF4) && defined (HAVE_PARALLEL_NC4) */
 /*
  * Local Variables:
  * c-file-style: "Java"

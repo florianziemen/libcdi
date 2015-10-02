@@ -145,7 +145,8 @@ endif
 
 EXTRA_DIST += \
 	$(libcdi_la_USE_FC_extra_sources) \
-	$(libcdi_la_HAVE_LIBGRIB_API_extra_sources)
+	$(libcdi_la_HAVE_LIBGRIB_API_extra_sources) \
+	$(libcdipio_la_HAVE_PARALLEL_NC4_extra_sources)
 
 
 
@@ -190,8 +191,16 @@ libcdipio_la_SOURCES =							\
 	pio_serialize.c							\
 	pio_util.c							\
 	pio_util.h							\
-	pio_cdf_int.c							\
 	pio_cdf_int.h
+
+libcdipio_la_HAVE_PARALLEL_NC4_extra_sources =				\
+	pio_cdf_int.c
+
+if USE_MPI
+if HAVE_PARALLEL_NC4
+libcdipio_la_SOURCES += $(libcdipio_la_HAVE_PARALLEL_NC4_extra_sources)
+endif
+endif
 
 libcdipio_la_LIBADD    = libcdi.la $(PPM_CORE_LIBS) $(YAXT_LIBS) $(MPI_C_LIB)
 
