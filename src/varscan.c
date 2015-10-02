@@ -1053,16 +1053,6 @@ int varDefZaxis(int vlistID, int zaxistype, int nlevels, double *levels, int lbo
       query.units = units;
       query.ltype = ltype1;
 
-      //  = {
-      //   .zaxistype = zaxistype,
-      //   .nlevels = nlevels,
-      //   .levels = levels,
-      //   .lbounds = lbounds,
-      //   .longname = longname,
-      //   .units = units,
-      //   .ltype = ltype1,
-      // };
-
       if ((zaxisglobdefined
            = (cdiResHFilterApply(getZaxisOps(), varDefZAxisSearch, &query)
               == CDI_APPLY_STOP)))
