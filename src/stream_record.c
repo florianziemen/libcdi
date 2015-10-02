@@ -2,6 +2,7 @@
 #  include "config.h"
 #endif
 
+#include <limits.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -33,8 +34,8 @@ void recordInitEntry(record_t *record)
 
 int recordNewEntry(stream_t *streamptr, int tsID)
 {
-  int recordID = 0;
-  int recordSize = streamptr->tsteps[tsID].recordSize;
+  size_t recordID = 0;
+  size_t recordSize = (size_t)streamptr->tsteps[tsID].recordSize;
   record_t *records = streamptr->tsteps[tsID].records;
   /*
     Look for a free slot in record.
@@ -42,16 +43,10 @@ int recordNewEntry(stream_t *streamptr, int tsID)
   */
   if ( ! recordSize )
     {
-      int i;
       recordSize = 1;   /*  <<<<----  */
-      records = (record_t *) Malloc((size_t)recordSize * sizeof (record_t));
-      if ( records == NULL )
-	{
-          Message("recordSize = %d", recordSize);
-	  SysError("Allocation of records failed");
-	}
+      records = (record_t *) Malloc(recordSize * sizeof (record_t));
 
-      for ( i = 0; i < recordSize; i++ )
+      for ( size_t i = 0; i < recordSize; i++ )
 	records[i].used = CDI_UNDEFID;
     }
   else
@@ -67,19 +62,16 @@ int recordNewEntry(stream_t *streamptr, int tsID)
   */
   if ( recordID == recordSize )
     {
-      int i;
+      if (recordSize <= INT_MAX / 2)
+        recordSize *= 2;
+      else if (recordSize < INT_MAX)
+        recordSize = INT_MAX;
+      else
+        Error("Cannot handle this many records!\n");
+      records = (record_t *) Realloc(records,
+                                     recordSize * sizeof (record_t));
 
-      recordSize = 2*recordSize;
-      records    = (record_t *) Realloc(records,
-                                        (size_t)recordSize * sizeof (record_t));
-      if ( records == NULL )
-	{
-          Message("recordSize = %d", recordSize);
-	  SysError("Reallocation of records failed");
-	}
-      recordID = recordSize/2;
-
-      for ( i = recordID; i < recordSize; i++ )
+      for ( size_t i = recordID; i < recordSize; i++ )
 	records[i].used = CDI_UNDEFID;
     }
 
@@ -87,10 +79,10 @@ int recordNewEntry(stream_t *streamptr, int tsID)
 
   records[recordID].used = 1;
 
-  streamptr->tsteps[tsID].recordSize = recordSize;
+  streamptr->tsteps[tsID].recordSize = (int)recordSize;
   streamptr->tsteps[tsID].records    = records;
 
-  return (recordID);
+  return (int)recordID;
 }
 
 static
