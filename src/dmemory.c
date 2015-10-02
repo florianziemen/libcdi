@@ -27,7 +27,7 @@ static const char *memfunc[] = {"Malloc", "Calloc", "Realloc", "Free"};
 
 #define  MEM_MAXNAME  32   /* Min = 8, for  "unknown" ! */
 
-int dmemory_ExitOnError = 1;
+static int dmemory_ExitOnError = 1;
 
 typedef struct
 {
