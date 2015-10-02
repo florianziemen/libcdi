@@ -10,11 +10,19 @@
 #if !defined (NAMESPACE_H)
 #include "namespace.h"
 #endif
+#include "error.h"
 
 int _ExitOnError   = 1;	/* If set to 1, exit on error       */
 int _Verbose = 1;	/* If set to 1, errors are reported */
 int _Debug   = 0;       /* If set to 1, debugging           */
 
+/* If we're not using GNU C, elide __attribute__ */
+#if ! defined __GNUC__ && ! defined __attribute__
+#  define  __attribute__(x)  /*NOTHING*/
+#endif
+
+void SysError_(const char *caller, const char *fmt, ...)
+  __attribute__((noreturn));
 
 void SysError_(const char *caller, const char *fmt, ...)
 {

@@ -70,6 +70,18 @@ void memDebug(int debug)
   MEM_Debug = debug;
 }
 
+/* If we're not using GNU C, elide __attribute__ */
+#if ! defined __GNUC__ && ! defined __attribute__
+#  define  __attribute__(x)  /*NOTHING*/
+#endif
+
+static
+void memInternalProblem(const char *caller, const char *fmt, ...)
+  __attribute__((noreturn));
+static
+void memError(const char *caller, const char *file, int line, size_t size)
+  __attribute__((noreturn));
+
 static
 void memInternalProblem(const char *functionname, const char *fmt, ...)
 {
