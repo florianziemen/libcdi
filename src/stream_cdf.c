@@ -62,8 +62,8 @@ ncdim_t;
 typedef struct {
   int      ncid;
   int      ignore;
-  int      isvar;
-  int      islon;
+  short    isvar;
+  short    islon;
   int      islat;
   int      islev;
   int      istime;
@@ -109,10 +109,10 @@ typedef struct {
   int      chunked;
   int      chunktype;
   int      natts;
-  int     *atts;
   int      deflate;
   int      lunsigned;
   int      lvalidrange;
+  int     *atts;
   size_t   vctsize;
   double  *vct;
   double   missval;
@@ -4947,7 +4947,7 @@ void init_ncvars(long nvars, ncvar_t *ncvars)
 }
 
 static
-void cdfSetVar(ncvar_t *ncvars, int ncvarid, int isvar)
+void cdfSetVar(ncvar_t *ncvars, int ncvarid, short isvar)
 {
   if ( ncvars[ncvarid].isvar != UNDEFID &&
        ncvars[ncvarid].isvar != isvar   &&
