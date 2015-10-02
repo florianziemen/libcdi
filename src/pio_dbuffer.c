@@ -13,6 +13,8 @@
 #include <unistd.h>
 #include <string.h>
 
+#include "dmemory.h"
+
 #include "pio_impl.h"
 #include "pio_util.h"
 
