@@ -18,10 +18,9 @@
 #undef  UNDEFID
 #define UNDEFID  -1
 
-int ECMWF  = UNDEFID;
-int MPIMET = UNDEFID;
-int DWD    = UNDEFID;
-int MCH    = UNDEFID;
+static int ECMWF  = UNDEFID,
+  MPIMET = UNDEFID,
+  MCH    = UNDEFID;
 
 typedef struct
 {
