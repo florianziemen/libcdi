@@ -21,8 +21,6 @@
 #include "cgribex.h"
 #endif
 
-extern int cdiPioSerialOpenFileMap(int streamID);
-
 int cdiDefaultCalendar = CALENDAR_PROLEPTIC;
 
 int cdiDefaultInstID   = CDI_UNDEFID;

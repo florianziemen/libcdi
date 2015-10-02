@@ -416,7 +416,7 @@ myVarPart(struct PPM_extent varShape[3], struct xyzDims collGrid,
 #elif defined (HAVE_LIBNETCDF)
 /* needed for writing when some files are only written to by a single process */
 /* cdiOpenFileMap(fileID) gives the writer process */
-int cdiPioSerialOpenFileMap(int streamID)
+static int cdiPioSerialOpenFileMap(int streamID)
 {
   return stream_to_pointer(streamID)->ownerRank;
 }
