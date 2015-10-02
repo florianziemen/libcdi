@@ -50,7 +50,6 @@ libcdi_la_SOURCES = 	 \
 	gaussgrid.h	 \
 	gribapi.c  	 \
 	gribapi.h	 \
-	gribapi_utilities.c \
 	gribapi_utilities.h \
 	grid.c           \
 	grid.h	 	 \
@@ -130,12 +129,23 @@ libcdi_la_USE_FC_extra_sources = \
 	cfortran.h       \
 	cdiFortran.c
 
+# these only contain code iff grib_api is available
+libcdi_la_HAVE_LIBGRIB_API_extra_sources = \
+	gribapi_utilities.c
+
 if USE_FC
 libcdi_la_SOURCES += 	 \
 	$(libcdi_la_USE_FC_extra_sources)
 endif
+
+if HAVE_LIBGRIB_API
+libcdi_la_SOURCES += 	 \
+	$(libcdi_la_HAVE_LIBGRIB_API_extra_sources)
+endif
+
 EXTRA_DIST += \
-	$(libcdi_la_USE_FC_extra_sources)
+	$(libcdi_la_USE_FC_extra_sources) \
+	$(libcdi_la_HAVE_LIBGRIB_API_extra_sources)
 
 
 
