@@ -16,7 +16,9 @@
 #include "cdi.h"
 
 /* dummy use of unused parameters to silence compiler warnings */
+#ifndef UNUSED
 #define  UNUSED(x) (void)x
+#endif
 
 #ifndef strdupx
 #ifndef strdup
