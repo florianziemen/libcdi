@@ -53,7 +53,6 @@ typedef struct
   int            param;
   int            prec;
   int            tsteptype;
-  int            timave;
   int            timaccu;
   int            gridID;
   int            zaxistype;
@@ -73,7 +72,8 @@ typedef struct
   int            tableID;
   int            comptype;       // compression type
   int            complevel;      // compression level
-  int            lmissval;
+  short          timave;
+  short          lmissval;
   double         missval;
   char          *name;
   char          *stdname;
