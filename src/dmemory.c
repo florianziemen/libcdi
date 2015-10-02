@@ -102,7 +102,7 @@ void memInternalProblem(const char *functionname, const char *fmt, ...)
 static
 void memError(const char *functionname, const char *file, int line, size_t size)
 {
-  printf("\n");
+  fputs("\n", stdout);
   fprintf(stderr, "Error (%s) : Allocation of %zu bytes failed. [ line %d file %s ]\n",
 	  functionname, size, line, get_filename(file));
 
