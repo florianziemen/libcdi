@@ -5,14 +5,13 @@
 #include <stddef.h>
 #include <string.h>
 
-#include "dmemory.h"
-
 #include "cdi.h"
+#include "calendar.h"
+#include "dmemory.h"
 #include "error.h"
 #include "taxis.h"
 #include "cdi_cksum.h"
 #include "cdi_int.h"
-#include "calendar.h"
 #include "namespace.h"
 #include "serialize.h"
 #include "resource_handle.h"
@@ -1012,8 +1011,6 @@ void cdiEncodeTimevalue(int days, int secs, int timeunit, double *timevalue)
 	}
     }
 }
-
-int days_per_month(int calendar, int year, int month);
 
 void timeval2vtime(double timevalue, taxis_t *taxis, int *vdate, int *vtime)
 {

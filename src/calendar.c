@@ -2,6 +2,7 @@
 #include <stdio.h>
 
 #include "cdi.h"  		/* CALENDAR_ */
+#include "calendar.h"
 #include "error.h"
 #include "timebase.h"
 
@@ -128,7 +129,7 @@ static int encode_day(int dpy, int year, int month, int day)
 }
 
 
-int date_to_calday(int calendar, int date)
+static int date_to_calday(int calendar, int date)
 {
   int calday;
   int dpy;
@@ -147,7 +148,7 @@ int date_to_calday(int calendar, int date)
 }
 
 
-int calday_to_date(int calendar, int calday)
+static int calday_to_date(int calendar, int calday)
 {
   int date;
   int dpy;
