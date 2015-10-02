@@ -60,7 +60,7 @@ static void   gridPack        ( void * gridptr, void * buff, int size,
 				int *position, void *context);
 static int    gridTxCode      ( void );
 
-const resOps gridOps = {
+static const resOps gridOps = {
   gridCompareP,
   gridDestroyP,
   gridPrintP,
