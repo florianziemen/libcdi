@@ -773,7 +773,7 @@ void cdi_generate_vars(stream_t *streamptr)
 	    dlevels2[levelID] = level_sf*levelTable[levelID].level2;
         }
 
-      char *unitptr = cdiUnitNamePtr(vartable[varid].level_unit);
+      const char *unitptr = cdiUnitNamePtr(vartable[varid].level_unit);
       zaxisID = varDefZaxis(vlistID, zaxistype, (int)nlevels, dlevels, lbounds, dlevels1, dlevels2,
                             (int)Vctsize, Vct, NULL, NULL, unitptr, 0, 0, ltype1);
 
@@ -936,7 +936,7 @@ void varDefZAxisReference(int nhlev, int nvgrid, unsigned char uuid[CDI_UUID_SIZ
 }
 
 
-int zaxisCompare(int zaxisID, int zaxistype, int nlevels, int lbounds, const double *levels, char *longname, char *units, int ltype1)
+int zaxisCompare(int zaxisID, int zaxistype, int nlevels, int lbounds, const double *levels, char *longname, const char *units, int ltype1)
 {
   int differ = 1;
   int levelID;
@@ -989,7 +989,8 @@ struct varDefZAxisSearchState
   int nlevels;
   double *levels;
   int lbounds;
-  char *longname, *units;
+  char *longname;
+  const char *units;
   int ltype;
 };
 
@@ -1012,7 +1013,7 @@ varDefZAxisSearch(int id, void *res, void *data)
 
 int varDefZaxis(int vlistID, int zaxistype, int nlevels, double *levels, int lbounds,
 		double *levels1, double *levels2, int vctsize, double *vct, char *name,
-		char *longname, char *units, int prec, int mode, int ltype1)
+		char *longname, const char *units, int prec, int mode, int ltype1)
 {
   /*
     mode: 0 search in vlist and zaxis table
