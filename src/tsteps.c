@@ -2,6 +2,8 @@
 #  include "config.h"
 #endif
 
+#include <limits.h>
+
 #include "dmemory.h"
 
 #include "cdi.h"
@@ -9,7 +11,7 @@
 
 
 static
-void tstepsInitEntry(stream_t *streamptr, int tsID)
+void tstepsInitEntry(stream_t *streamptr, size_t tsID)
 {
   streamptr->tsteps[tsID].curRecID     = CDI_UNDEFID;
   streamptr->tsteps[tsID].position     = 0;
@@ -26,13 +28,9 @@ void tstepsInitEntry(stream_t *streamptr, int tsID)
 
 int tstepsNewEntry(stream_t *streamptr)
 {
-  int tsID = 0;
-  int tstepsTableSize;
-  tsteps_t *tstepsTable;
-
-  tsID            = streamptr->tstepsNextID++;
-  tstepsTableSize = streamptr->tstepsTableSize;
-  tstepsTable     = streamptr->tsteps;
+  size_t tsID            = (size_t)streamptr->tstepsNextID++;
+  size_t tstepsTableSize = (size_t)streamptr->tstepsTableSize;
+  tsteps_t *tstepsTable  = streamptr->tsteps;
 
   /*
     If the table overflows, double its size.
@@ -40,24 +38,24 @@ int tstepsNewEntry(stream_t *streamptr)
   if ( tsID == tstepsTableSize )
     {
       if ( tstepsTableSize == 0 ) tstepsTableSize = 1;
-      tstepsTableSize = 2*tstepsTableSize;
+      if ( tstepsTableSize <= INT_MAX / 2)
+        tstepsTableSize *= 2;
+      else if ( tstepsTableSize < INT_MAX)
+        tstepsTableSize = INT_MAX;
+      else
+        Error("Resizing of tstep table failed!");
       tstepsTable = (tsteps_t *) Realloc(tstepsTable,
-                                         (size_t)tstepsTableSize * sizeof (tsteps_t));
-      if ( tstepsTable == NULL )
-	{
-          Message("tstepsTableSize = %d", tstepsTableSize);
-	  SysError("Reallocation of tsteps_t failed");
-	}
+                                         tstepsTableSize * sizeof (tsteps_t));
     }
 
-  streamptr->tstepsTableSize = tstepsTableSize;
+  streamptr->tstepsTableSize = (int)tstepsTableSize;
   streamptr->tsteps          = tstepsTable;
 
   tstepsInitEntry(streamptr, tsID);
 
   streamptr->tsteps[tsID].taxis.used = TRUE;
 
-  return (tsID);
+  return (int)tsID;
 }
 
 
@@ -79,7 +77,7 @@ void cdiCreateTimesteps(stream_t *streamptr)
 
   for ( tsID = 0; tsID < ntsteps; tsID++ )
     {
-      tstepsInitEntry(streamptr, (int)tsID);
+      tstepsInitEntry(streamptr, (size_t)tsID);
       streamptr->tsteps[tsID].taxis.used = TRUE;
     }
 }
