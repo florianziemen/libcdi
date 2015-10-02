@@ -14,6 +14,7 @@
 #include "datetime.h"
 #include "vlist.h"
 #include "stream_grb.h"
+#include "stream_cgribex.h"
 
 #if  defined  (HAVE_LIBCGRIBEX)
 #  include "cgribex.h"
@@ -583,7 +584,7 @@ int cgribexScanTimestep1(stream_t * streamptr)
   double fsec2[512], fsec3[2], *fsec4 = NULL;
   int lmv = 0, iret = 0;
   off_t recpos = 0;
-  unsigned char *gribbuffer = NULL;
+  void *gribbuffer = NULL;
   size_t buffersize = 0;
   int rstatus;
   int fileID;
@@ -651,22 +652,22 @@ int cgribexScanTimestep1(stream_t * streamptr)
       if ( (size_t)recsize > buffersize )
 	{
 	  buffersize = (size_t)recsize;
-	  gribbuffer = (unsigned char *) Realloc(gribbuffer, buffersize);
+	  gribbuffer = Realloc(gribbuffer, buffersize);
 	}
 
       readsize = (size_t)recsize;
-      rstatus = gribRead(fileID, gribbuffer, &readsize);
+      rstatus = gribRead(fileID, (unsigned char *)gribbuffer, &readsize);
       if ( rstatus ) break;
 
       comptype = COMPRESS_NONE;
-      if ( gribGetZip(recsize, gribbuffer, &unzipsize) > 0 )
+      if ( gribGetZip(recsize, (unsigned char *)gribbuffer, &unzipsize) > 0 )
 	{
 	  comptype = COMPRESS_SZIP;
 	  unzipsize += 100; /* need 0 to 1 bytes for rounding of bds */
 	  if ( buffersize < (size_t)unzipsize )
 	    {
 	      buffersize = (size_t)unzipsize;
-	      gribbuffer = (unsigned char *) Realloc(gribbuffer, buffersize);
+	      gribbuffer = Realloc(gribbuffer, buffersize);
 	    }
 	}
 
@@ -811,7 +812,7 @@ int cgribexScanTimestep2(stream_t * streamptr)
   double fsec2[512], fsec3[2], *fsec4 = NULL;
   int lmv = 0, iret = 0;
   off_t recpos = 0;
-  unsigned char *gribbuffer = NULL;
+  void *gribbuffer = NULL;
   size_t buffersize = 0;
   int fileID;
   int param = 0;
@@ -843,7 +844,7 @@ int cgribexScanTimestep2(stream_t * streamptr)
   vlistID = streamptr->vlistID;
   taxisID = vlistInqTaxis(vlistID);
 
-  gribbuffer = (unsigned char *) streamptr->record->buffer;
+  gribbuffer = streamptr->record->buffer;
   buffersize = streamptr->record->buffersize;
 
   tsID = streamptr->rtsteps;
@@ -885,20 +886,20 @@ int cgribexScanTimestep2(stream_t * streamptr)
       if ( (size_t)recsize > buffersize )
 	{
 	  buffersize = (size_t)recsize;
-	  gribbuffer = (unsigned char *) Realloc(gribbuffer, buffersize);
+	  gribbuffer = Realloc(gribbuffer, buffersize);
 	}
 
       readsize = (size_t)recsize;
-      rstatus = gribRead(fileID, gribbuffer, &readsize);
+      rstatus = gribRead(fileID, (unsigned char *)gribbuffer, &readsize);
       if ( rstatus ) break;
 
-      if ( gribGetZip(recsize, gribbuffer, &unzipsize) > 0 )
+      if ( gribGetZip(recsize, (unsigned char *)gribbuffer, &unzipsize) > 0 )
 	{
 	  unzipsize += 100; /* need 0 to 1 bytes for rounding of bds */
 	  if ( buffersize < (size_t)unzipsize )
 	    {
 	      buffersize = (size_t)unzipsize;
-	      gribbuffer = (unsigned char *) Realloc(gribbuffer, buffersize);
+	      gribbuffer = Realloc(gribbuffer, buffersize);
 	    }
 	}
 
@@ -1064,7 +1065,7 @@ int cgribexScanTimestep(stream_t * streamptr)
   int lmv = 0, iret = 0;
   long recsize = 0;
   off_t recpos = 0;
-  unsigned char *gribbuffer;
+  void *gribbuffer;
   size_t buffersize = 0;
   int fileID;
   int param = 0;
@@ -1099,7 +1100,7 @@ int cgribexScanTimestep(stream_t * streamptr)
 
   if ( streamptr->tsteps[tsID].recordSize == 0 )
     {
-      gribbuffer = (unsigned char *) streamptr->record->buffer;
+      gribbuffer = streamptr->record->buffer;
       buffersize = streamptr->record->buffersize;
 
       cdi_create_records(streamptr, tsID);
@@ -1131,13 +1132,13 @@ int cgribexScanTimestep(stream_t * streamptr)
 	  if ( recsize > 0 && (size_t)recsize > buffersize )
 	    {
 	      buffersize = (size_t)recsize;
-	      gribbuffer = (unsigned char *) Realloc(gribbuffer, buffersize);
+	      gribbuffer = Realloc(gribbuffer, buffersize);
 	    }
 
 	  if ( rindex >= nrecs ) break;
 
 	  readsize = (size_t)recsize;
-	  rstatus = gribRead(fileID, gribbuffer, &readsize);
+	  rstatus = gribRead(fileID, (unsigned char *)gribbuffer, &readsize);
 	  if ( rstatus )
 	    {
 	      Warning("Inconsistent timestep %d (GRIB record %d/%d)!", tsID+1, rindex+1,
@@ -1145,13 +1146,13 @@ int cgribexScanTimestep(stream_t * streamptr)
 	      break;
 	    }
 
-	  if ( gribGetZip(recsize, gribbuffer, &unzipsize) > 0 )
+	  if ( gribGetZip(recsize, (unsigned char *)gribbuffer, &unzipsize) > 0 )
 	    {
 	      unzipsize += 100; /* need 0 to 1 bytes for rounding of bds */
 	      if ( buffersize < (size_t)unzipsize )
 		{
 		  buffersize = (size_t)unzipsize;
-		  gribbuffer = (unsigned char *) Realloc(gribbuffer, buffersize);
+		  gribbuffer = Realloc(gribbuffer, buffersize);
 		}
 	    }
 
