@@ -13,19 +13,6 @@ int cdiUUIDIsNull(const unsigned char uuid[CDI_UUID_SIZE])
 }
 
 
-static void datetime2str(int date, int time, char *datetimestr, int maxlen)
-{
-  int year, month, day;
-  cdiDecodeDate(date, &year, &month, &day);
-  int hour, minute, second;
-  cdiDecodeTime(time, &hour, &minute, &second);
-
-  int len = sprintf(datetimestr, DATE_FORMAT "T" TIME_FORMAT, year, month, day, hour, minute, second);
-  if ( len > ( maxlen-1) )
-    fprintf(stderr, "Internal problem (%s): sizeof input string is too small!\n", __func__);
-}
-
-
 static void date2str(int date, char *datestr, int maxlen)
 {
   int year, month, day;
