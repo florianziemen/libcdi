@@ -9,13 +9,13 @@
 static char *Progname;
 extern int CDI_Debug;
 
-void version(void)
+static void version(void)
 {
   fprintf(stderr, "createtable version 1.00 (11 Nov 2001)\n");
   fprintf(stderr, "\n");
 }
 
-void usage(void)
+static void usage(void)
 {
   fprintf(stderr, "usage :  createtable  [-options]  ifile  ofile\n");
   fprintf(stderr, "with:\n");
