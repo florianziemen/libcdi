@@ -741,6 +741,9 @@ cdiPioNoPostCommSetup(void)
 
 /*****************************************************************************/
 
+static int pioNamespace_ = -1;
+static int xtInitByCDI = 0;
+
 /* pioInit definition must currently compile even in non-MPI configurations */
 /**
    @brief initializes the MPI_Communicators needed for the
@@ -766,9 +769,6 @@ cdiPioNoPostCommSetup(void)
   after communicator split
   @return int indicating wether the calling PE is a calcutator (1) or not (0)
 */
-
-static int pioNamespace_ = -1;
-static int xtInitByCDI = 0;
 
 MPI_Comm
 pioInit(MPI_Comm commGlob, int nProcsIO, int IOMode,
