@@ -97,6 +97,15 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
 
 int  varDefGrid(int vlistID, const grid_t *grid, int mode);
 
+/* These are used by CDO. */
+void gridGenXvals(int xsize, double xfirst, double xlast,
+                  double xinc, double *xvals);
+void gridGenYvals(int gridtype, int ysize, double yfirst, double ylast,
+                  double yinc, double *yvals);
+
+
+
+
 #endif
 /*
  * Local Variables:
