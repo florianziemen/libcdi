@@ -1341,7 +1341,7 @@ int cgribexDecode(unsigned char *gribbuffer, int gribsize, double *data, int gri
   FSEC3_MissVal = missval;
 
   gribExDP(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, data,
-	   gridsize, (int *) gribbuffer, gribsize, &iword, hoper, &iret);
+	   gridsize, (int *)(void *)gribbuffer, gribsize, &iword, hoper, &iret);
 
   if ( ISEC1_Sec2Or3Flag & 64 )
     *nmiss = ISEC4_NumValues - ISEC4_NumNonMissValues;
