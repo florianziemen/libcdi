@@ -21,6 +21,7 @@ int  varDefZaxis(int vlistID, int zaxistype, int nlevels, double *levels, int lb
 
 void varDefMissval(int varID, double missval);
 void varDefCompType(int varID, int comptype);
+void varDefCompLevel(int varID, int complevel);
 void varDefInst(int varID, int instID);
 int  varInqInst(int varID);
 void varDefModel(int varID, int modelID);
