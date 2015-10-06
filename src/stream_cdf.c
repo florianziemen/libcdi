@@ -6322,7 +6322,6 @@ static
 void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars, int timedimid, unsigned char *uuidOfHGrid, char *gridfile, int number_of_grid_used)
 {
   int ncvarid, ncvarid2;
-  int ndims;
   int nbdims;
   int i;
   int nvatts;
@@ -6331,7 +6330,6 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
   grid_t grid;
   grid_t proj;
   int gridindex;
-  size_t size = 0, xsize, ysize, np;
   char name[CDI_MAX_NAME];
   int iatt;
   int ltwarn = TRUE;
@@ -6348,13 +6346,11 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 	  int xvarid = -1, yvarid = -1;
 	  int islon = 0, islat = 0;
 	  int nxdims = 0, nydims = 0;
+          size_t size = 0, np = 0;
+          size_t xsize = 0, ysize = 0;
 	  double xinc = 0, yinc = 0;
 
-	  xsize = 0;
-	  ysize = 0;
-          np    = 0;
-
-	  ndims = ncvars[ncvarid].ndims;
+	  int ndims = ncvars[ncvarid].ndims;
 	  for ( i = 0; i < ndims; i++ )
 	    {
 	      if ( ncvars[ncvarid].dimtype[i] == X_AXIS && nxdims < 2 )
@@ -6420,7 +6416,7 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 	    }
 
 	  if ( ncvars[ncvarid].gridtype == UNDEFID || ncvars[ncvarid].gridtype == GRID_GENERIC )
-	    if ( xdimid != UNDEFID && xdimid == ydimid ) ncvars[ncvarid].gridtype = GRID_UNSTRUCTURED;
+	    if ( xdimid != UNDEFID && xdimid == ydimid && nydims == 0 ) ncvars[ncvarid].gridtype = GRID_UNSTRUCTURED;
 
 	  grid_init(&grid);
 	  grid_init(&proj);
