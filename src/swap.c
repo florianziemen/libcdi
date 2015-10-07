@@ -5,34 +5,26 @@
 #include <inttypes.h>
 #include <stdio.h>
 
-#include "error.h"
-#include "binary.h"
 #include "swap.h"
 
 void swap4byte(void *ptr, size_t size)
 {
   int32_t *ptrtmp = (int32_t *)ptr;
 
-  if (sizeof (int32_t) == 4)
-    for (size_t i = 0; i < size; ++i)
-      ptrtmp[i] = (((ptrtmp[i] >> 24) & 0x00ff) | ((ptrtmp[i] & 0x00ff) << 24) |
-                   ((ptrtmp[i] >>  8) & 0xff00) | ((ptrtmp[i] & 0xff00) <<  8));
-  else
-    Error("not implemented for %d byte data", sizeof(int32_t));
+  for (size_t i = 0; i < size; ++i)
+    ptrtmp[i] = (((ptrtmp[i] >> 24) & 0x00ff) | ((ptrtmp[i] & 0x00ff) << 24) |
+                 ((ptrtmp[i] >>  8) & 0xff00) | ((ptrtmp[i] & 0xff00) <<  8));
 }
 
 void swap8byte(void *ptr, size_t size)
 {
   int64_t *ptrtmp = (int64_t *)ptr;
 
-  if (sizeof (int64_t) == 8)
-    for (size_t i = 0; i < size; ++i)
-      ptrtmp[i] = (((ptrtmp[i] >> 56) & 0x000000ff) | ((ptrtmp[i] & 0x000000ff) << 56) |
-                   ((ptrtmp[i] >> 40) & 0x0000ff00) | ((ptrtmp[i] & 0x0000ff00) << 40) |
-                   ((ptrtmp[i] >> 24) & 0x00ff0000) | ((ptrtmp[i] & 0x00ff0000) << 24) |
-                   ((ptrtmp[i] >>  8) & 0xff000000) | ((ptrtmp[i] & 0xff000000) <<  8));
-  else
-    Error("not implemented for %d byte data", sizeof(int64_t));
+  for (size_t i = 0; i < size; ++i)
+    ptrtmp[i] = (((ptrtmp[i] >> 56) & 0x000000ff) | ((ptrtmp[i] & 0x000000ff) << 56) |
+                 ((ptrtmp[i] >> 40) & 0x0000ff00) | ((ptrtmp[i] & 0x0000ff00) << 40) |
+                 ((ptrtmp[i] >> 24) & 0x00ff0000) | ((ptrtmp[i] & 0x00ff0000) << 24) |
+                 ((ptrtmp[i] >>  8) & 0xff000000) | ((ptrtmp[i] & 0xff000000) <<  8));
 }
 /*
  * Local Variables:
