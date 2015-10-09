@@ -57,7 +57,7 @@ static int     MEM_Info      = 0;   /* If set to 1, print mem table at exit */
 static
 const char *get_filename(const char *file)
 {
-  char *fnptr = strrchr(file, '/');
+  const char *fnptr = strrchr(file, '/');
   if ( fnptr ) fnptr++;
   else         fnptr = (char *) file;
 

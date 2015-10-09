@@ -239,8 +239,8 @@ int iegInqData(void *ieg, int prec, void *data)
 	      memcpy(data, buffer, datasize*sizeof(FLT32));
 	    else
               {
-                const float *restrict p = buffer;
-                double *restrict q = data;
+                const float *restrict p = (float *)buffer;
+                double *restrict q = (double *)data;
                 for ( size_t i = 0; i < datasize; i++)
                   q[i] = p[i];
               }
@@ -260,8 +260,8 @@ int iegInqData(void *ieg, int prec, void *data)
 	      memcpy(data, buffer, datasize*sizeof(FLT64));
 	    else
               {
-                const double *restrict p = buffer;
-                float *restrict q = data;
+                const double *restrict p = (double *)buffer;
+                float *restrict q = (float *)data;
                 for ( size_t i = 0; i < datasize; i++)
                   q[i] = (float)p[i];
               }

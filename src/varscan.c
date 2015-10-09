@@ -905,7 +905,7 @@ void varDefZAxisReference(int nhlev, int nvgrid, unsigned char uuid[CDI_UUID_SIZ
 }
 
 
-int zaxisCompare(int zaxisID, int zaxistype, int nlevels, int lbounds, const double *levels, char *longname, const char *units, int ltype1)
+int zaxisCompare(int zaxisID, int zaxistype, int nlevels, int lbounds, const double *levels, const char *longname, const char *units, int ltype1)
 {
   int differ = 1;
   int levelID;
@@ -958,7 +958,7 @@ struct varDefZAxisSearchState
   int nlevels;
   int lbounds;
   double *levels;
-  char *longname;
+  const char *longname;
   const char *units;
   int ltype;
 };
