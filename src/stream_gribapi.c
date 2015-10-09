@@ -121,24 +121,29 @@ int gribapiGetTimeUnits(grib_handle *gh)
 }
 
 static
-int gribapiGetEndStep(grib_handle *gh, int startStep, int timeunits)
+void gribapiGetSteps(grib_handle *gh, int timeunits, int *startStep, int *endStep)
 {
-  int endStep = startStep;
   int timeunits2 = timeunits;
-
   long unitsOfTime;
   int status = grib_get_long(gh, "stepUnits", &unitsOfTime);
   if ( status == 0 ) timeunits2 = getTimeunits(unitsOfTime);
   //timeunits2 = gribapiGetTimeUnits(gh);
 
   long lpar;
+  status = grib_get_long(gh, "forecastTime", &lpar);
+  if ( status == 0 ) *startStep = (int) lpar;
+  else
+    {
+      status = grib_get_long(gh, "startStep", &lpar);
+      if ( status == 0 )
+        *startStep = (int) (((double)lpar * timeunit_factor(timeunits, timeunits2)) + 0.5);
+    }
+
+  *endStep = *startStep;
   status = grib_get_long(gh, "endStep", &lpar);
-
   if ( status == 0 )
-    endStep = (int) (((double)lpar * timeunit_factor(timeunits, timeunits2)) + 0.5);
-  // printf("%d %d %d %d %d %g\n", startStep, endStep, lpar, timeunits, timeunits2, timeunit_factor(timeunits, timeunits2));
-
-  return (endStep);
+    *endStep = (int) (((double)lpar * timeunit_factor(timeunits, timeunits2)) + 0.5);
+  // printf("%d %d %d %d %d %g\n", *startStep, *endStep, lpar, timeunits, timeunits2, timeunit_factor(timeunits, timeunits2));
 }
 
 static
@@ -166,8 +171,6 @@ int gribapiGetValidityDateTime(grib_handle *gh, int *vdate, int *vtime)
   int timeUnits, startStep = 0, endStep;
   int tstepRange = 0;
   int range;
-  int status;
-  long lpar;
   long sigofrtime = 3;
 
   if ( gribEditionNumber(gh) > 1 )
@@ -187,10 +190,8 @@ int gribapiGetValidityDateTime(grib_handle *gh, int *vdate, int *vtime)
     {
       gribapiGetDataDateTime(gh, &rdate, &rtime);
 
-      status = grib_get_long(gh, "forecastTime", &lpar);
-      if ( status == 0 ) startStep = (int) lpar;
       timeUnits = gribapiGetTimeUnits(gh);
-      endStep = gribapiGetEndStep(gh, startStep, timeUnits);
+      gribapiGetSteps(gh, timeUnits, &startStep, &endStep);
 
       range = endStep - startStep;
 
@@ -829,7 +830,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
       ensureBufferSize(recsize, &buffersize, &gribbuffer);
 
       size_t readsize = recsize;
-      int rstatus = gribRead(fileID, gribbuffer, &readsize);        //Search for next 'GRIB', read the following record, and position file offset after it.
+      int rstatus = gribRead(fileID, gribbuffer, &readsize); //Search for next 'GRIB', read the following record, and position file offset after it.
       if ( rstatus ) break;
 
       int datatype, comptype = 0;
