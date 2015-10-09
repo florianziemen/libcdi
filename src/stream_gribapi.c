@@ -662,8 +662,8 @@ static compvar2_t gribapiVarSet(int param, int level1, int level2, int leveltype
   compVar.tsteptype = tsteptype;
   memset(compVar.name, 0, maxlen);
   memcpy(compVar.name, name, len);
-
   compVar.tiles = tiles_data;
+
   return (compVar);
 }
 #endif
@@ -673,14 +673,12 @@ static
 int gribapiVarCompare(compvar2_t compVar, record_t record, int flag)
 {
   compvar2_t compVar0;
-  size_t maxlen = sizeof(compVar.name);
-
   compVar0.param     = record.param;
   compVar0.level1    = record.ilevel;
   compVar0.level2    = record.ilevel2;
   compVar0.ltype     = record.ltype;
   compVar0.tsteptype = record.tsteptype;
-  memcpy(compVar0.name, record.varname, maxlen);
+  memcpy(compVar0.name, record.varname, sizeof(compVar.name));
 
   if ( flag == 0 )
     {
@@ -758,7 +756,7 @@ grib_handle* gribapiGetDiskRepresentation(size_t recsize, size_t* buffersize, un
 #if  defined  (HAVE_LIBGRIB_API)
 typedef enum { CHECKTIME_OK, CHECKTIME_SKIP, CHECKTIME_STOP, CHECKTIME_INCONSISTENT } checkTimeResult;
 static checkTimeResult checkTime(stream_t* streamptr, compvar2_t compVar, const DateTime* verificationTime, const DateTime* expectedVTime) {
-  //First determine whether the current record exists already.
+  // First determine whether the current record exists already.
   int recID = 0;
   for ( ; recID < streamptr->nrecs; recID++ )
     {
@@ -766,10 +764,10 @@ static checkTimeResult checkTime(stream_t* streamptr, compvar2_t compVar, const 
     }
   int recordExists = recID < streamptr->nrecs;
 
-  //Then we need to know whether the verification time is consistent.
+  // Then we need to know whether the verification time is consistent.
   int consistentTime = !memcmp(verificationTime, expectedVTime, sizeof(*verificationTime));
 
-  //Finally, we make a decision.
+  // Finally, we make a decision.
   if ( cdiInventoryMode == 1 )
     {
       if ( recordExists ) return CHECKTIME_STOP;
@@ -780,6 +778,7 @@ static checkTimeResult checkTime(stream_t* streamptr, compvar2_t compVar, const 
       if ( !consistentTime ) return CHECKTIME_STOP;
       if ( recordExists ) return CHECKTIME_SKIP;
     }
+
   return CHECKTIME_OK;
 }
 #endif
@@ -850,6 +849,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
       gribapiGetString(gh, "shortName", varname, sizeof(varname));
 
       int tsteptype = gribapiGetTsteptype(gh);
+
       int vdate = 0, vtime = 0;
       gribapiGetValidityDateTime(gh, &vdate, &vtime);
       DateTime datetime = { .date = vdate, .time = vtime };
@@ -857,7 +857,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
       printf("%d %d %d\n", vdate, vtime, leveltype1);
       */
 
-      if( datetime0.date == 10101 && datetime0.time == 0 )
+      if ( datetime0.date == 10101 && datetime0.time == 0 )
         {
           if( datetimeCmp(datetime, datetime0) || !nrecs )       //Do we really need this condition? I have included it in order not to change the number of times gribapiGetDataDateTime() etc. get called. But if those are sideeffect-free, this condition should be removed.
             {
@@ -870,19 +870,19 @@ int gribapiScanTimestep1(stream_t * streamptr)
             }
         }
 
-      if(nrecs)
+      if ( nrecs )
         {
           checkTimeResult result = checkTime(streamptr, gribapiVarSet(param, level1, level2, leveltype1, tsteptype, varname, tiles), &datetime, &datetime0);
-          if(result == CHECKTIME_STOP)
+          if ( result == CHECKTIME_STOP )
             {
               break;
             }
-          else if(result == CHECKTIME_SKIP)
+          else if ( result == CHECKTIME_SKIP )
             {
               gribWarning("Parameter already exist, skipped!", nrecs_scanned, tsID+1, varname, param, level1, level2);
               continue;
             }
-          else if(result == CHECKTIME_INCONSISTENT && warn_time)
+          else if ( result == CHECKTIME_INCONSISTENT && warn_time )
             {
               gribWarning("Inconsistent verification time!", nrecs_scanned, tsID+1, varname, param, level1, level2);
               warn_time = FALSE;
