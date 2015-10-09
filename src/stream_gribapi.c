@@ -427,29 +427,23 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
                       int leveltype1, int leveltype2, int lbounds, int level1, int level2, int level_sf, int level_unit,
                       const var_tile_t *tiles, int lread_additional_keys)
 {
-  int zaxistype;
-  int gridID = CDI_UNDEFID, varID;
+  int varID;
   int levelID = 0;
-  int tsID, recID;
-  int numavg;
-  int tsteptype;
-  record_t *record;
   grid_t grid;
-  int vlistID;
   long lpar;
   int status;
   char stdname[CDI_MAX_NAME], longname[CDI_MAX_NAME], units[CDI_MAX_NAME];
   size_t vlen;
   long ens_index = 0, ens_count = 0, ens_forecast_type = 0;
 
-  vlistID = streamptr->vlistID;
-  tsID    = streamptr->curTsID;
-  recID   = recordNewEntry(streamptr, tsID);
-  record  = &streamptr->tsteps[tsID].records[recID];
+  int vlistID = streamptr->vlistID;
+  int tsID    = streamptr->curTsID;
+  int recID   = recordNewEntry(streamptr, tsID);
+  record_t *record  = &streamptr->tsteps[tsID].records[recID];
 
-  tsteptype = gribapiGetTsteptype(gh);
+  int tsteptype = gribapiGetTsteptype(gh);
   // numavg  = ISEC1_AvgNum;
-  numavg  = 0;
+  int numavg  = 0;
 
   // fprintf(stderr, "param %d %d %d %d\n", param, level1, level2, leveltype1);
 
@@ -477,9 +471,9 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
 
   gribapiGetGrid(gh, &grid);
 
-  gridID = varDefGrid(vlistID, &grid, 0);
+  int gridID = varDefGrid(vlistID, &grid, 0);
 
-  zaxistype = gribapiGetZaxisType(gribEditionNumber(gh), leveltype1);
+  int zaxistype = gribapiGetZaxisType(gribEditionNumber(gh), leveltype1);
 
   switch (zaxistype)
     {
@@ -1006,9 +1000,6 @@ int gribapiScanTimestep2(stream_t * streamptr)
 {
   int rstatus = 0;
   off_t recpos = 0;
-  unsigned char *gribbuffer = NULL;
-  size_t buffersize = 0;
-  int fileID;
   DateTime datetime0 = { LONG_MIN, LONG_MIN };
   // int gridID;
   int recID;
@@ -1017,12 +1008,12 @@ int gribapiScanTimestep2(stream_t * streamptr)
 
   streamptr->curTsID = 1;
 
-  fileID  = streamptr->fileID;
+  int fileID  = streamptr->fileID;
   int vlistID = streamptr->vlistID;
   int taxisID = vlistInqTaxis(vlistID);
 
-  gribbuffer = (unsigned char *) streamptr->record->buffer;
-  buffersize = streamptr->record->buffersize;
+  unsigned char *gribbuffer = (unsigned char *) streamptr->record->buffer;
+  size_t buffersize = streamptr->record->buffersize;
 
   int tsID = streamptr->rtsteps;
   if ( tsID != 1 )
@@ -1471,8 +1462,7 @@ int gribapiDecode(unsigned char *gribbuffer, int gribsize, double *data, int gri
   int status = 0;
   long lpar;
   long numberOfPoints;
-  size_t datasize, dummy, recsize;
-  grib_handle *gh = NULL;
+  size_t datasize;
 
   UNUSED(vlistID);
   UNUSED(varID);
@@ -1488,8 +1478,8 @@ int gribapiDecode(unsigned char *gribbuffer, int gribsize, double *data, int gri
 	}
     }
 
-  recsize = (size_t)gribsize;
-  gh = grib_handle_new_from_message(NULL, (void *) gribbuffer, recsize);
+  size_t recsize = (size_t)gribsize;
+  grib_handle *gh = grib_handle_new_from_message(NULL, (void *) gribbuffer, recsize);
   GRIB_CHECK(my_grib_set_double(gh, "missingValue", missval), 0);
 
   /* get the size of the values array*/
@@ -1500,12 +1490,11 @@ int gribapiDecode(unsigned char *gribbuffer, int gribsize, double *data, int gri
 
   if ( gridsize != (int) datasize )
     Error("Internal problem: gridsize(%d) != datasize(%d)!", gridsize, datasize);
-  dummy = datasize;
+  size_t dummy = datasize;
   GRIB_CHECK(grib_get_double_array(gh, "values", data, &dummy), 0);
 
-  int gridtype;
   GRIB_CHECK(grib_get_long(gh, "gridDefinitionTemplateNumber", &lpar), 0);
-  gridtype = (int) lpar;
+  int gridtype = (int) lpar;
 
   *nmiss = 0;
   if ( gridtype < 50 || gridtype > 53 )
@@ -1735,7 +1724,6 @@ int gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, int rdate, int rti
   int status = -1;
   int year, month, day, hour, minute, second;
   int julday1, secofday1, julday2, secofday2, days, secs;
-  int factor;
   long startStep = 0, endStep;
 
   cdiDecodeDate(rdate, &year, &month, &day);
@@ -1750,7 +1738,7 @@ int gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, int rdate, int rti
 
   (void) julday_sub(julday1, secofday1, julday2, secofday2, &days, &secs);
 
-  factor = getTimeunitFactor(timeunit);
+  int factor = getTimeunitFactor(timeunit);
 
   if ( !(int) fmod(days*86400.0 + secs, factor) )
     {
@@ -1828,13 +1816,12 @@ void gribapiDefTime(int editionNumber, int productDefinitionTemplate, int typeOf
 static
 void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype, int lieee, int datatype, int nmiss, int gcinit)
 {
-  int gridtype;
   int status;
   static short lwarn = TRUE;
 
   UNUSED(nmiss);
 
-  gridtype = gridInqType(gridID);
+  int gridtype = gridInqType(gridID);
 
   if ( editionNumber <= 1 )
     if ( gridtype == GRID_GME || gridtype == GRID_UNSTRUCTURED )

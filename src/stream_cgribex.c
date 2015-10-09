@@ -578,18 +578,15 @@ cgribexScanTsConstAdjust(stream_t *streamptr, taxis_t *taxis)
 
 int cgribexScanTimestep1(stream_t * streamptr)
 {
-  int *isec0, *isec1, *isec2, *isec3, *isec4;
   double fsec2[512], fsec3[2], *fsec4 = NULL;
   int lmv = 0, iret = 0;
   off_t recpos = 0;
   void *gribbuffer = NULL;
   size_t buffersize = 0;
   int rstatus;
-  int fileID;
   int param = 0;
   int level1 = 0, level2 = 0, vdate = 0, vtime = 0;
   DateTime datetime, datetime0 = { LONG_MIN, LONG_MIN };
-  int tsID;
   size_t readsize;
   unsigned nrecords, recID;
   int nrecs_scanned = 0;
@@ -599,7 +596,6 @@ int cgribexScanTimestep1(stream_t * streamptr)
   int warn_numavg = TRUE;
   int taxisID = -1;
   int rdate = 0, rtime = 0, tunit = 0, fcast = 0;
-  taxis_t *taxis;
   int vlistID;
   int comptype;
   long unzipsize;
@@ -608,19 +604,19 @@ int cgribexScanTimestep1(stream_t * streamptr)
 
   streamptr->curTsID = 0;
 
-  isec0 = streamptr->record->sec0;
-  isec1 = streamptr->record->sec1;
-  isec2 = streamptr->record->sec2;
-  isec3 = streamptr->record->sec3;
-  isec4 = streamptr->record->sec4;
+  int *isec0 = streamptr->record->sec0;
+  int *isec1 = streamptr->record->sec1;
+  int *isec2 = streamptr->record->sec2;
+  int *isec3 = streamptr->record->sec3;
+  int *isec4 = streamptr->record->sec4;
 
-  tsID  = tstepsNewEntry(streamptr);
-  taxis = &streamptr->tsteps[tsID].taxis;
+  int tsID  = tstepsNewEntry(streamptr);
+  taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
 
   if ( tsID != 0 )
     Error("Internal problem! tstepsNewEntry returns %d", tsID);
 
-  fileID = streamptr->fileID;
+  int fileID = streamptr->fileID;
 
   while ( nskip-- > 0 )
     {
@@ -700,9 +696,7 @@ int cgribexScanTimestep1(stream_t * streamptr)
 	{
 	  datetime.date  = vdate;
 	  datetime.time  = vtime;
-
 	  compvar_t compVar = cgribexVarSet(param, level1, level2, ISEC1_LevelType, ISEC1_TimeRange);
-
 	  for ( recID = 0; recID < nrecs; recID++ )
 	    {
 	      if ( cgribexVarCompare(compVar, streamptr->tsteps[0].records[recID], 0) == 0 ) break;
@@ -805,56 +799,47 @@ int cgribexScanTimestep1(stream_t * streamptr)
 int cgribexScanTimestep2(stream_t * streamptr)
 {
   int rstatus = 0;
-  int *isec0, *isec1, *isec2, *isec3, *isec4;
   double fsec2[512], fsec3[2], *fsec4 = NULL;
   int lmv = 0, iret = 0;
   off_t recpos = 0;
-  void *gribbuffer = NULL;
-  size_t buffersize = 0;
-  int fileID;
   int param = 0;
   int level1 = 0, level2 = 0, vdate = 0, vtime = 0;
   DateTime datetime, datetime0 = { LONG_MIN, LONG_MIN };
-  int tsID;
   int varID, gridID;
   size_t readsize;
-  int nrecords, nrecs, recID, rindex;
-  int nrecs_scanned = 0;
+  int nrecs, recID;
   long recsize = 0;
   int warn_numavg = TRUE;
   int tsteptype;
-  int taxisID = -1;
-  taxis_t *taxis;
-  int vlistID;
   long unzipsize;
   char paramstr[32];
 
   streamptr->curTsID = 1;
 
-  isec0 = streamptr->record->sec0;
-  isec1 = streamptr->record->sec1;
-  isec2 = streamptr->record->sec2;
-  isec3 = streamptr->record->sec3;
-  isec4 = streamptr->record->sec4;
+  int *isec0 = streamptr->record->sec0;
+  int *isec1 = streamptr->record->sec1;
+  int *isec2 = streamptr->record->sec2;
+  int *isec3 = streamptr->record->sec3;
+  int *isec4 = streamptr->record->sec4;
 
-  fileID  = streamptr->fileID;
-  vlistID = streamptr->vlistID;
-  taxisID = vlistInqTaxis(vlistID);
+  int fileID  = streamptr->fileID;
+  int vlistID = streamptr->vlistID;
+  int taxisID = vlistInqTaxis(vlistID);
 
-  gribbuffer = streamptr->record->buffer;
-  buffersize = streamptr->record->buffersize;
+  void *gribbuffer = streamptr->record->buffer;
+  size_t buffersize = streamptr->record->buffersize;
 
-  tsID = streamptr->rtsteps;
+  int tsID = streamptr->rtsteps;
   if ( tsID != 1 )
     Error("Internal problem! unexpected timestep %d", tsID+1);
 
-  taxis = &streamptr->tsteps[tsID].taxis;
+  taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
 
   fileSetPos(fileID, streamptr->tsteps[tsID].position, SEEK_SET);
 
   cdi_create_records(streamptr, tsID);
 
-  nrecords = streamptr->tsteps[tsID].nallrecs;
+  int nrecords = streamptr->tsteps[tsID].nallrecs;
   if ( nrecords ) streamptr->tsteps[1].recIDs = (int *) Malloc((size_t)nrecords * sizeof(int));
   streamptr->tsteps[1].nrecs = 0;
   for ( recID = 0; recID < nrecords; recID++ )
@@ -867,8 +852,8 @@ int cgribexScanTimestep2(stream_t * streamptr)
       streamptr->tsteps[tsID].records[recID].size     =	streamptr->tsteps[0].records[recID].size;
     }
 
-  nrecs_scanned = nrecords;
-  rindex = 0;
+  int nrecs_scanned = nrecords;
+  int rindex = 0;
   while ( TRUE )
     {
       if ( rindex > nrecords ) break;
