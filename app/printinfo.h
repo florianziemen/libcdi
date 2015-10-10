@@ -1,3 +1,5 @@
+// This file is used in CDI and CDO !!!
+
 #define DATE_FORMAT "%5.4d-%2.2d-%2.2d"
 #define TIME_FORMAT "%2.2d:%2.2d:%2.2d"
 
@@ -13,7 +15,20 @@ int cdiUUIDIsNull(const unsigned char uuid[CDI_UUID_SIZE])
 }
 
 
-static void date2str(int date, char *datestr, int maxlen)
+void datetime2str(int date, int time, char *datetimestr, int maxlen)
+{
+  int year, month, day;
+  cdiDecodeDate(date, &year, &month, &day);
+  int hour, minute, second;
+  cdiDecodeTime(time, &hour, &minute, &second);
+
+  int len = sprintf(datetimestr, DATE_FORMAT "T" TIME_FORMAT, year, month, day, hour, minute, second);
+  if ( len > ( maxlen-1) )
+    fprintf(stderr, "Internal problem (%s): sizeof input string is too small!\n", __func__);
+}
+
+
+void date2str(int date, char *datestr, int maxlen)
 {
   int year, month, day;
   cdiDecodeDate(date, &year, &month, &day);
@@ -24,7 +39,7 @@ static void date2str(int date, char *datestr, int maxlen)
 }
 
 
-static void time2str(int time, char *timestr, int maxlen)
+void time2str(int time, char *timestr, int maxlen)
 {
   int hour, minute, second;
   cdiDecodeTime(time, &hour, &minute, &second);
@@ -35,7 +50,7 @@ static void time2str(int time, char *timestr, int maxlen)
 }
 
 
-static void printFiletype(int streamID, int vlistID)
+void printFiletype(int streamID, int vlistID)
 {
   int filetype = streamInqFiletype(streamID);
 
