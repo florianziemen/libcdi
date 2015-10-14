@@ -129,6 +129,41 @@ static int encode_day(int dpy, int year, int month, int day)
 }
 
 
+void encode_caldaysec(int calendar, int year, int month, int day, int hour, int minute, int second,
+		      int *julday, int *secofday)
+{
+  int dpy;
+
+  dpy = calendar_dpy(calendar);
+
+  if ( dpy == 360 || dpy == 365 || dpy == 366 )
+    *julday = encode_day(dpy, year, month, day);
+  else
+    *julday = encode_julday(calendar, year, month, day);
+
+  *secofday = hour*3600 + minute*60 + second;
+}
+
+
+void decode_caldaysec(int calendar, int julday, int secofday, 
+		      int *year, int *month, int *day, int *hour, int *minute, int *second)
+{
+  int dpy;
+
+  dpy = calendar_dpy(calendar);
+
+  if ( dpy == 360 || dpy == 365 || dpy == 366 )
+    decode_day(dpy, julday, year, month, day);
+  else
+    decode_julday(calendar, julday, year, month, day);
+
+  *hour   = secofday/3600;
+  *minute = secofday/60 - *hour*60;
+  *second = secofday - *hour*3600 - *minute*60;
+}
+
+
+#ifdef TEST
 static int date_to_calday(int calendar, int date)
 {
   int calday;
@@ -167,41 +202,6 @@ static int calday_to_date(int calendar, int calday)
 }
 
 
-void encode_caldaysec(int calendar, int year, int month, int day, int hour, int minute, int second,
-		      int *julday, int *secofday)
-{
-  int dpy;
-
-  dpy = calendar_dpy(calendar);
-
-  if ( dpy == 360 || dpy == 365 || dpy == 366 )
-    *julday = encode_day(dpy, year, month, day);
-  else
-    *julday = encode_julday(calendar, year, month, day);
-
-  *secofday = hour*3600 + minute*60 + second;
-}
-
-
-void decode_caldaysec(int calendar, int julday, int secofday, 
-		      int *year, int *month, int *day, int *hour, int *minute, int *second)
-{
-  int dpy;
-
-  dpy = calendar_dpy(calendar);
-
-  if ( dpy == 360 || dpy == 365 || dpy == 366 )
-    decode_day(dpy, julday, year, month, day);
-  else
-    decode_julday(calendar, julday, year, month, day);
-
-  *hour   = secofday/3600;
-  *minute = secofday/60 - *hour*60;
-  *second = secofday - *hour*3600 - *minute*60;
-}
-
-
-#ifdef TEST
 int main(void)
 {
   int calendar = CALENDAR_STANDARD;
