@@ -1065,7 +1065,6 @@ void cdiPioCollectorMessageLoop(void)
 #elif defined (HAVE_LIBNETCDF)
           Free(cdiSerialOpenFileCount);
 #endif
-          /* listDestroy(); */
           xdebug("%s", "RETURN");
           return;
 	case RESOURCES:
