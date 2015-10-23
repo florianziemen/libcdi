@@ -18,8 +18,8 @@
 
 /*****************************************************************************/
 
-void reshUnpackResources(char * unpackBuffer, int unpackBufferSize,
-                         void *context)
+int reshUnpackResources(char * unpackBuffer, int unpackBufferSize,
+                        void *context)
 {
   int updateType, resH, originNamespace;
   int unpackBufferPos = 0;
@@ -97,6 +97,7 @@ void reshUnpackResources(char * unpackBuffer, int unpackBufferSize,
                                             originNamespace));
     }
   Free(associations);
+  return unpackBufferPos;
 }
 
 /*

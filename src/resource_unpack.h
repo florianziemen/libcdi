@@ -18,8 +18,8 @@ enum
   END       = 99999999
 };
 
-void reshUnpackResources(char * unpackBuffer, int unpackBufferSize,
-                         void *context);
+int reshUnpackResources(char * unpackBuffer, int unpackBufferSize,
+                        void *context);
 
 #endif
 
