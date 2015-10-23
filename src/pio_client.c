@@ -30,10 +30,10 @@ cdiPioClientStreamOpen(const char *filename, char filemode,
   int fileID;
   if ( filemode == 'w' )
     {
-      statusCode nspStatus = namespaceInqResStatus ();
+      enum namespaceStatus nspStatus = namespaceInqResStatus ();
       switch ( nspStatus )
         {
-        case STAGE_DEFINITION:
+        case NAMESPACE_STATUS_INUSE:
           {
             MPI_Comm comm = cdiPioInqInterComm();
             int clientRank = commInqRankModel(),
@@ -96,11 +96,11 @@ cdiPioClientStreamOpen(const char *filename, char filemode,
 static void
 cdiPioClientStreamDefVlist_(int streamID, int vlistID)
 {
-  statusCode nspStatus = namespaceInqResStatus ();
+  enum namespaceStatus nspStatus = namespaceInqResStatus ();
   cdiStreamDefVlist_(streamID, vlistID);
   switch ( nspStatus )
     {
-    case STAGE_DEFINITION:
+    case NAMESPACE_STATUS_INUSE:
       {
         int clientRank = commInqRankModel(),
           numClients = cdiPioCommInqSizeClients(),
@@ -184,7 +184,7 @@ cdiPioClientStreamWriteVarPart(int streamID, int varID, const void *data,
 {
   switch (namespaceInqResStatus())
     {
-    case STAGE_DEFINITION:
+    case NAMESPACE_STATUS_INUSE:
       pioBufferPartData(streamID, varID, data, nmiss, partDesc);
       return;
     default:
@@ -201,7 +201,7 @@ cdiPioClientStreamWriteScatteredVarPart(int streamID, int varID,
 {
   switch (namespaceInqResStatus())
     {
-    case STAGE_DEFINITION:
+    case NAMESPACE_STATUS_INUSE:
       cdiPioBufferPartDataGather(streamID, varID, data, numBlocks,
                                  blocklengths, displacements, nmiss, partDesc);
       return;
@@ -228,12 +228,12 @@ cdiPioClientStreamNOP(stream_t *streamptr)
 static void
 cdiPioClientStreamClose(stream_t *streamptr, int recordBufIsToBeDeleted)
 {
-  statusCode nspStatus = namespaceInqResStatus ();
+  enum namespaceStatus nspStatus = namespaceInqResStatus ();
   (void)recordBufIsToBeDeleted;
   int streamID = streamptr->self;
   switch ( nspStatus )
     {
-    case STAGE_DEFINITION:
+    case NAMESPACE_STATUS_INUSE:
       {
         int clientRank = commInqRankModel(),
           numClients = cdiPioCommInqSizeClients(),
@@ -281,11 +281,11 @@ static int
 cdiPioClientStreamDefTimestep_(stream_t *streamptr, int tsID)
 {
   struct winHeaderEntry header;
-  statusCode nspStatus = namespaceInqResStatus ();
+  enum namespaceStatus nspStatus = namespaceInqResStatus ();
   int taxisID;
   switch ( nspStatus )
     {
-    case STAGE_DEFINITION:
+    case NAMESPACE_STATUS_INUSE:
       taxisID = vlistInqTaxis(streamptr->vlistID);
       header = (struct winHeaderEntry){
         .id = STREAMDEFTIMESTEP,

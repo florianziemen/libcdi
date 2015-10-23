@@ -64,10 +64,10 @@ static const union namespaceSwitchValue
 
 static struct Namespace
 {
-  statusCode resStage;
+  enum namespaceStatus resStage;
   union namespaceSwitchValue switches[NUM_NAMESPACE_SWITCH];
 } initialNamespace = {
-  .resStage = STAGE_DEFINITION,
+  .resStage = NAMESPACE_STATUS_INUSE,
   .switches = defaultSwitches
 };
 
@@ -153,7 +153,7 @@ namespaceNew()
     {
       /* namespace is already available and only needs reinitialization */
       for (unsigned i = 0; i < namespacesSize; ++i)
-        if (namespaces[i].resStage == STAGE_UNUSED)
+        if (namespaces[i].resStage == NAMESPACE_STATUS_UNUSED)
           {
             newNamespaceID = (int)i;
             break;
@@ -184,16 +184,16 @@ namespaceNew()
     }
   xassert(newNamespaceID >= 0 && newNamespaceID < NUM_NAMESPACES);
   ++nNamespaces;
-  namespaces[newNamespaceID].resStage = STAGE_DEFINITION;
-  #if defined (SX) || defined (__cplusplus)
+  namespaces[newNamespaceID].resStage = NAMESPACE_STATUS_INUSE;
+#if defined (SX) || defined (__cplusplus)
   memcpy(namespaces[newNamespaceID].switches,
          defaultSwitches_,
          sizeof (namespaces[newNamespaceID].switches));
-  #else
+#else
     memcpy(namespaces[newNamespaceID].switches,
            (union namespaceSwitchValue[NUM_NAMESPACE_SWITCH])defaultSwitches,
            sizeof (namespaces[newNamespaceID].switches));
-  #endif
+#endif
   reshListCreate(newNamespaceID);
   NAMESPACE_UNLOCK();
   return newNamespaceID;
@@ -207,7 +207,7 @@ namespaceDelete(int namespaceID)
   xassert(namespaceID >= 0 && (unsigned)namespaceID < namespacesSize
           && nNamespaces);
   reshListDestruct(namespaceID);
-  namespaces[namespaceID].resStage = STAGE_UNUSED;
+  namespaces[namespaceID].resStage = NAMESPACE_STATUS_UNUSED;
   --nNamespaces;
   NAMESPACE_UNLOCK();
 }
@@ -221,7 +221,7 @@ int namespaceGetNumber ()
 void namespaceSetActive ( int nId )
 {
   xassert((unsigned)nId < namespacesSize
-          && namespaces[nId].resStage != STAGE_UNUSED);
+          && namespaces[nId].resStage != NAMESPACE_STATUS_UNUSED);
   activeNamespace = nId;
 }
 
@@ -265,14 +265,14 @@ int namespaceAdaptKey2 ( int originResH )
 }
 
 
-void namespaceDefResStatus ( statusCode argResStatus )
+void namespaceDefResStatus (enum namespaceStatus argResStatus )
 {
   int nsp = namespaceGetActive ();
   namespaces[nsp].resStage = argResStatus;
 }
 
 
-statusCode namespaceInqResStatus ( void )
+enum namespaceStatus namespaceInqResStatus ( void )
 {
   int nsp = namespaceGetActive ();
   return namespaces[nsp].resStage;
@@ -297,7 +297,7 @@ void cdiReset(void)
   NAMESPACE_INIT();
   NAMESPACE_LOCK();
   for (unsigned namespaceID = 0; namespaceID < namespacesSize; ++namespaceID)
-    if (namespaces[namespaceID].resStage != STAGE_UNUSED)
+    if (namespaces[namespaceID].resStage != NAMESPACE_STATUS_UNUSED)
       namespaceDelete((int)namespaceID);
   if (namespaces != &initialNamespace)
     {
