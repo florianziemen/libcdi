@@ -254,8 +254,6 @@ typedef struct {
 #else
   void       *gribContainers;
 #endif
-  /* only used by MPI-parallelized version of library */
-  int       ownerRank;    // MPI rank of owner process
 
   void *gh; // grib handle
 }

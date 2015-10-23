@@ -51,6 +51,9 @@ static struct
 {
   MPI_Win getWin;
   struct clientBuf *clientBuf;
+#if defined HAVE_LIBNETCDF && ! defined HAVE_PARALLEL_NC4
+  int ownerRank;
+#endif
 } *rxWin;
 
 static struct idList openStreams;
@@ -442,11 +445,13 @@ writeNetCDFStream(size_t streamIdx,
 /* cdiOpenFileMap(fileID) gives the writer process */
 static int cdiPioSerialOpenFileMap(int streamID)
 {
-  return stream_to_pointer(streamID)->ownerRank;
+  size_t streamIdx = indexOfID(&openStreams, streamID);
+  xassert(streamIdx < SIZE_MAX);
+  return rxWin[streamIdx].ownerRank;
 }
 /* for load-balancing purposes, count number of files per process */
 /* cdiOpenFileCounts[rank] gives number of open files rank has to himself */
-static int *cdiSerialOpenFileCount = NULL;
+static int *cdiSerialOpenFileCount;
 
 static int
 cdiPioNextOpenRank()
@@ -807,14 +812,16 @@ cdiPioServerStreamOpen(const char *filename, char filemode,
                        int recordBufIsToBeCreated)
 {
   int fileID;
+#if defined HAVE_LIBNETCDF && ! defined HAVE_PARALLEL_NC4
+  /* Only needs initialization to shut up gcc */
+  int rank = -1;
+#endif
   switch (filetype)
     {
-#if defined (HAVE_LIBNETCDF) && ! defined (HAVE_PARALLEL_NC4)
+#if defined HAVE_LIBNETCDF && ! defined HAVE_PARALLEL_NC4
     case FILETYPE_NC4:
     case FILETYPE_NC4C:
       {
-        /* Only needs initialization to shut up gcc */
-        int rank = -1;
         int ioMode = commInqIOMode();
         if (ioMode == PIO_NONE
             || commInqRankColl() == (rank = cdiPioNextOpenRank()))
@@ -825,7 +832,6 @@ cdiPioServerStreamOpen(const char *filename, char filemode,
           streamptr->filetype = filetype;
         if (ioMode != PIO_NONE)
           xmpi(MPI_Bcast(&fileID, 1, MPI_INT, rank, commInqCommColl()));
-        streamptr->ownerRank = rank;
         cdiPioOpenFileOnRank(rank);
       }
       break;
@@ -851,6 +857,9 @@ cdiPioServerStreamOpen(const char *filename, char filemode,
         for (size_t i = oldNumStreams; i < numStreams; ++i)
           rxWin[i].clientBuf = newClientBufs + i * (size_t)numClients_;
       rxWin[streamIdx].getWin = MPI_WIN_NULL;
+#if defined HAVE_LIBNETCDF && ! defined HAVE_PARALLEL_NC4
+      rxWin[streamIdx].ownerRank = rank;
+#endif
     }
   return fileID;
 }
