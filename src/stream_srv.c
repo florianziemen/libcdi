@@ -264,7 +264,7 @@ void srvScanTimestep1(stream_t *streamptr)
   int tsID;
   int varID;
   off_t recpos;
-  int nrecords, nrecs, recID;
+  int nrecords, nrecs;
   int taxisID = -1;
   taxis_t *taxis;
   int vlistID;
@@ -311,6 +311,7 @@ void srvScanTimestep1(stream_t *streamptr)
 	}
       else
 	{
+          int recID;
 	  for ( recID = 0; recID < nrecs; recID++ )
             if (    streamptr->tsteps[0].records[recID].param  == param
                  && streamptr->tsteps[0].records[recID].ilevel == rlevel )
@@ -354,7 +355,7 @@ void srvScanTimestep1(stream_t *streamptr)
 
   streamptr->tsteps[0].recIDs = (int *) Malloc((size_t)nrecords * sizeof (int));
   streamptr->tsteps[0].nrecs = nrecords;
-  for ( recID = 0; recID < nrecords; recID++ )
+  for ( int recID = 0; recID < nrecords; recID++ )
     streamptr->tsteps[0].recIDs[recID] = recID;
 
   if ( streamptr->ntsteps == -1 )
