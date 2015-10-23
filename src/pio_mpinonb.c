@@ -173,7 +173,7 @@ writeMPINONB(aFiledataM *of)
 
 /***************************************************************/
 
-size_t fwMPINONB ( int fileID, int tsID, const void *buffer, size_t len )
+size_t fwMPINONB(int fileID, const void *buffer, size_t len, int tsID)
 {
   int error = 0;
   int filled = 0;

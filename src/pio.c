@@ -41,7 +41,7 @@ cdiPioFileWrite(int fileID, const void *restrict buffer, size_t len, int tsID)
   switch ( commInqIOMode ())
     {
     case PIO_MPI:
-      iret = fwMPINONB ( fileID, tsID, buffer, len );
+      iret = fwMPINONB(fileID, buffer, len, tsID);
       break;
 #ifndef _SX
     case PIO_ASYNCH:

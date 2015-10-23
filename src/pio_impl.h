@@ -91,7 +91,7 @@ typedef void (*elemOp)(void *elem, void *data);
 void listSetForeach(listSet *q, elemOp func, void *data);
 
 /* pio_mpinonb.c */
-size_t    fwMPINONB( int, int, const void *, size_t );
+size_t fwMPINONB(int, const void *, size_t, int);
 void initMPINONB(void);
 void      finalizeMPINONB ( void );
 
