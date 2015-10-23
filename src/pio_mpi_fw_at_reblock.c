@@ -394,6 +394,10 @@ fwFileWriteAtReblock(int fileID, const void *buffer, size_t len)
   int numBlockBuf = of->numBlockBuf;
   int numMsg = of->numMsg;
   const unsigned char *inBuf = buffer;
+  const unsigned char *directWriteBuf;
+  /* positive value iff direct write occurs */
+  int directWriteSize = -1;
+  MPI_Offset directWriteOfs;
   for (int collRank = 0; collRank < sizePio; ++collRank)
     if (of->collWriteSize[collRank])
     {
@@ -404,7 +408,19 @@ fwFileWriteAtReblock(int fileID, const void *buffer, size_t len)
         int inBlockPos =  (int)(fWOfs % (MPI_Offset)blockSize);
         int txLen = (int)lmin(blockSize - inBlockPos, remaining);
         int destRank = (int)(fWOfs / (MPI_Offset)blockSize) % sizePio;
-        if (destRank == rankPio)
+        if (txLen == blockSize)
+          {
+            /* a properly aligned portion can be written directly */
+            txLen = (int)(remaining - remaining % blockSize);
+            if (collRank == rankPio)
+              {
+                directWriteBuf = inBuf;
+                inBuf += txLen;
+                directWriteSize = txLen;
+                directWriteOfs = fWOfs;
+              }
+          }
+        else if (destRank == rankPio)
           {
             int blockBufIdx = (int)(fWOfs / collBlockSize) % numBlockBuf;
             if (of->pending[blockBufIdx].pass >= 0
@@ -466,6 +482,11 @@ fwFileWriteAtReblock(int fileID, const void *buffer, size_t len)
         remaining -= txLen;
       } while (remaining);
     }
+  if (directWriteSize > -1)
+    xmpi(MPI_File_write_at(of->fh, directWriteOfs,
+                           (unsigned char *)directWriteBuf,
+                           directWriteSize, MPI_UNSIGNED_CHAR,
+                           MPI_STATUS_IGNORE));
   of->numMsg = numMsg;
   of->pos = fWOfs;
   return len;
