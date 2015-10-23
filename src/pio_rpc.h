@@ -10,15 +10,11 @@
 #include <mpi.h>
 #include <yaxt.h>
 
-typedef enum
-  {
-    FINALIZE,
-    RESOURCES,
-    WINCREATE,
-    WRITETS,
-    COLLBUFTX,
-    COLLBUFNMISS,
-  } command;
+enum collectorCommandTags {
+  FINALIZE,
+  RESOURCES,
+  WRITETS,
+};
 
 #define MAXWINBUFFERSIZE ((size_t)2048 * 1024 * 1024)
 

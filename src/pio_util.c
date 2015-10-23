@@ -13,10 +13,9 @@
 #include "dmemory.h"
 
 static
-char commands[][13] = { "FINALIZE\0",
-                        "RESOURCES\0",
-                        "WINCREATE\0",
-                        "WRITETS\0"};
+char commands[][13] = { "FINALIZE",
+                        "RESOURCES",
+                        "WRITETS"};
 
 /*****************************************************************************/
 void
