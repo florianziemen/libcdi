@@ -7,8 +7,33 @@
 
 #include "pio_util.h"
 
+static int
+cdiPioCSRSelectRange(MPI_Comm commSuper, int IOMode,
+                     int clientRangeStart, int clientRangeEnd,
+                     int specialRank);
+
 int
 cdiPioCSRLastN(MPI_Comm commSuper, int IOMode, int nProcsIO)
+{
+  int commSize;
+  xmpi(MPI_Comm_size(commSuper, &commSize));
+  return cdiPioCSRSelectRange(commSuper, IOMode, 0, commSize - nProcsIO - 1,
+                              commSize - 1);
+}
+
+int
+cdiPioCSRFirstN(MPI_Comm commSuper, int IOMode, int nProcsIO)
+{
+  int commSize;
+  xmpi(MPI_Comm_size(commSuper, &commSize));
+  return cdiPioCSRSelectRange(commSuper, IOMode, nProcsIO, commSize - 1,
+                              nProcsIO - 1);
+}
+
+static int
+cdiPioCSRSelectRange(MPI_Comm commSuper, int IOMode,
+                     int clientRangeStart, int clientRangeEnd,
+                     int specialRank)
 {
   int commRank, commSize;
   xmpi(MPI_Comm_size(commSuper, &commSize));
@@ -21,19 +46,19 @@ cdiPioCSRLastN(MPI_Comm commSuper, int IOMode, int nProcsIO)
     role = PIO_NONE;
     break;
   case PIO_MPI:
-    role = (commRank < commSize - nProcsIO)
+    role = (commRank >= clientRangeStart && commRank <= clientRangeEnd)
       ? PIO_ROLE_CLIENT : PIO_ROLE_WRITER_COLLECTOR;
     break;
   case PIO_WRITER:
   case PIO_ASYNCH:
-    role = (commRank < commSize - nProcsIO)
-      ? PIO_ROLE_CLIENT : ((commRank == commSize - 1)
+    role = (commRank >= clientRangeStart && commRank <= clientRangeEnd)
+      ? PIO_ROLE_CLIENT : ((commRank == specialRank)
                            ? PIO_ROLE_WRITER
                            : PIO_ROLE_COLLECTOR);
     break;
   case PIO_FPGUARD:
-    role = (commRank < commSize - nProcsIO)
-      ? PIO_ROLE_CLIENT : ((commRank == commSize - 1)
+    role = (commRank >= clientRangeStart && commRank <= clientRangeEnd)
+      ? PIO_ROLE_CLIENT : ((commRank == specialRank)
                            ? PIO_ROLE_FPGUARD
                            : PIO_ROLE_WRITER_COLLECTOR);
     break;
@@ -42,4 +67,3 @@ cdiPioCSRLastN(MPI_Comm commSuper, int IOMode, int nProcsIO)
   }
   return role;
 }
-

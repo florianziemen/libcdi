@@ -94,3 +94,9 @@
 !                                     INTEGER         nProcsIO)
       EXTERNAL        cdiPioCSRLastN
 
+      INTEGER         cdiPioCSRFirstN
+!                                    (INTEGER         commSuper,
+!                                     INTEGER         IOMode,
+!                                     INTEGER         nProcsIO)
+      EXTERNAL        cdiPioCSRFirstN
+

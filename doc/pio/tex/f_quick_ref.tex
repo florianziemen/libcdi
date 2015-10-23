@@ -4,6 +4,28 @@
 This appendix provide a brief listing of the Fortran language bindings of the
 CDI library routines:
 
+\section*{\tt \htmlref{cdiPioCSRFirstN}{cdiPioCSRFirstN}}
+
+\begin{verbatim}
+    INTEGER FUNCTION cdiPioCSRFirstN (INTEGER commSuper, INTEGER IOMode,
+                                      INTEGER nProcsIO)
+\end{verbatim}
+
+return role codes appropriate to use the first
+\textit{nProcsIO} tasks as I/O servers.
+
+
+\section*{\tt \htmlref{cdiPioCSRLastN}{cdiPioCSRLastN}}
+
+\begin{verbatim}
+    INTEGER FUNCTION cdiPioCSRLastN (INTEGER commSuper, INTEGER IOMode,
+                                     INTEGER nProcsIO)
+\end{verbatim}
+
+return role codes appropriate to use the last
+\textit{nProcsIO} tasks as I/O servers.
+
+
 \section*{\tt \htmlref{cdiPioInit}{cdiPioInit}}
 
 \begin{verbatim}

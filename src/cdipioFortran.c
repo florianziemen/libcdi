@@ -63,5 +63,12 @@ static int cdiPioCSRLastN_fwrap(int commSuper, int IOMode, int nProcsIO)
   return v;
 }
 FCALLSCFUN3 (INT, cdiPioCSRLastN_fwrap, CDIPIOCSRLASTN, cdipiocsrlastn, INT, INT, INT)
+static int cdiPioCSRFirstN_fwrap(int commSuper, int IOMode, int nProcsIO)
+{
+  int v;
+  v = cdiPioCSRFirstN(MPI_Comm_f2c(commSuper), IOMode, nProcsIO);
+  return v;
+}
+FCALLSCFUN3 (INT, cdiPioCSRFirstN_fwrap, CDIPIOCSRFIRSTN, cdipiocsrfirstn, INT, INT, INT)
 
 #endif
