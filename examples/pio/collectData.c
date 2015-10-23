@@ -164,35 +164,6 @@ static void modelRun(MPI_Comm commModel)
 #endif
 }
 
-#ifdef USE_MPI
-static struct {
-  const char text[12];
-  int mode;
-} mode_map[] = {
-  { "PIO_MPI", PIO_MPI },
-  { "PIO_FPGUARD", PIO_FPGUARD },
-  { "PIO_ASYNCH", PIO_ASYNCH },
-  { "PIO_WRITER", PIO_WRITER },
-  { "PIO_FPGUARD", PIO_FPGUARD},
-};
-
-static inline int
-search_iomode_str(const char *modestr)
-{
-  int retval = -1;
-  for (size_t i = 0;
-       i < sizeof (mode_map) / sizeof (mode_map[0]);
-       ++i)
-    if (!strcmp(modestr, mode_map[i].text))
-      {
-        retval = (int)i;
-        break;
-      }
-  return retval;
-}
-#endif
-
-
 int main (int argc, char *argv[])
 {
   MPI_Comm commModel = MPI_COMM_NULL;
@@ -214,15 +185,12 @@ int main (int argc, char *argv[])
     while ((opt = getopt(argc, argv, "p:w:")) != -1)
       switch (opt) {
       case 'p':
-        {
-          int entry = search_iomode_str(optarg);
-          if (entry < 0)
-            {
-              fprintf(stderr, "Unsupported PIO mode requested: %s\n", optarg);
-              exit(EXIT_FAILURE);
-            }
-          IOMode = mode_map[entry].mode;
-        }
+        IOMode = cdiPioStr2IOMode(optarg);
+        if (IOMode < 0)
+          {
+            fprintf(stderr, "Unsupported PIO mode requested: %s\n", optarg);
+            exit(EXIT_FAILURE);
+          }
         break;
       case 'w':
         {
