@@ -416,6 +416,10 @@ cdiStreamOpenDefaultDelegate(const char *filename, char filemode,
                              int filetype, stream_t *streamptr,
                              int recordBufIsToBeCreated);
 
+int
+streamOpenID(const char *filename, char filemode, int filetype,
+             int resH);
+
 void
 cdiStreamDefVlist_(int streamID, int vlistID);
 void

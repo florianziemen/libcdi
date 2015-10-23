@@ -517,7 +517,7 @@ int cdiStreamOpenDefaultDelegate(const char *filename, char filemode,
 }
 
 
-static int
+int
 streamOpenID(const char *filename, char filemode, int filetype,
              int resH)
 {
