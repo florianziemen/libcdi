@@ -112,6 +112,7 @@ listSetRemove(listSet *q, int (*predicate)(void *, void *),
         if (rem == q->tail) q->tail = NULL;
         int iret = q->valDestroy(rem->val);
         *p = rem->next;
+        q->count--;
         Free(rem);
         return iret;
       }
