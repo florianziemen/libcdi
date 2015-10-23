@@ -81,7 +81,9 @@ int reshUnpackResources(char * unpackBuffer, int unpackBufferSize,
         case RESH_DELETE:
           serializeUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos,
                           &resH, 1, DATATYPE_INT, context);
-          reshDestroy(namespaceAdaptKey(resH, originNamespace));
+          resH = namespaceAdaptKey(resH, originNamespace);
+          reshDestroy(resH);
+          reshSetStatus(resH, NULL, RESH_UNUSED);
           break;
 	default:
 	  xabort("Invalid/unexpected serialization type %d or transfer error!",

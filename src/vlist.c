@@ -1527,6 +1527,8 @@ void vlistUnpack(char * buf, int size, int *position, int originNamespace,
   vlistAttsUnpack(targetID, CDI_GLOBAL, buf, size, position, context);
   for (int varID = 0; varID < nvars; varID++ )
     vlistVarUnpack(targetID, buf, size, position, originNamespace, context);
+  reshSetStatus(targetID, &vlistOps,
+                reshGetStatus(targetID, &vlistOps) & ~RESH_SYNC_BIT);
 }
 
 

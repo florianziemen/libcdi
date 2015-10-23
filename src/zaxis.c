@@ -1594,6 +1594,8 @@ zaxisUnpack(char * unpackBuffer, int unpackBufferSize,
     serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
                     zaxisP->uuid, CDI_UUID_SIZE, DATATYPE_UCHAR, context);
 
+  reshSetStatus(zaxisP->self, &zaxisOps,
+                reshGetStatus(zaxisP->self, &zaxisOps) & ~RESH_SYNC_BIT);
 }
 
 static void

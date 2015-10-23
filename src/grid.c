@@ -4214,6 +4214,9 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
                       gridP->uuid, CDI_UUID_SIZE, DATATYPE_UCHAR, context);
     }
+
+  reshSetStatus(gridP->self, &gridOps,
+                reshGetStatus(gridP->self, &gridOps) & ~RESH_SYNC_BIT);
 }
 
 

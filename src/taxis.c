@@ -1565,6 +1565,9 @@ taxisUnpack(char * unpackBuffer, int unpackBufferSize, int * unpackBufferPos,
       taxisP->longname = longname;
     }
 
+  reshSetStatus(taxisP->self, &taxisOps,
+                reshGetStatus(taxisP->self, &taxisOps) & ~RESH_SYNC_BIT);
+
   return taxisP->self;
 }
 

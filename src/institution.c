@@ -342,6 +342,8 @@ int instituteUnpack(void *buf, int size, int *position, int originNamespace,
   instituteID = ip->self;
   xassert(!force_id || instituteID == targetID);
   Free(name);
+  reshSetStatus(instituteID, &instituteOps,
+                reshGetStatus(instituteID, &instituteOps) & ~RESH_SYNC_BIT);
   return instituteID;
 }
 

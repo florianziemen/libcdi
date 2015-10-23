@@ -343,6 +343,8 @@ modelUnpack(void *buf, int size, int *position, int originNamespace, void *conte
     Free(name);
   xassert(!force_id
           || (mp->self == namespaceAdaptKey(tempbuf[0], originNamespace)));
+  reshSetStatus(mp->self, &modelOps,
+                reshGetStatus(mp->self, &modelOps) & ~RESH_SYNC_BIT);
   return mp->self;
 }
 
