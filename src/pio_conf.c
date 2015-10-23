@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <yaxt.h>
+
 #include "dmemory.h"
 #include "error.h"
 #include "resource_handle.h"
@@ -162,6 +164,7 @@ int cdiPioConfCreate(void)
   conf->largePageAlign = false;
   conf->cacheRedists = false;
   conf->recordAggBufLimMB = 128;
+  conf->xmap_new = xt_xmap_dist_dir_new;
   int resH = reshPut(conf, &cdiPioConfOps);
   /* configuration objects are never forwarded */
   reshSetStatus(resH, &cdiPioConfOps,
@@ -264,5 +267,17 @@ int cdiPioConfGetRecordAggBufLim(int confResH)
 {
   struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
   return (int)conf->recordAggBufLimMB;
+}
+
+void cdiPioConfSetXmapNew(int confResH, xmap_new_func_ptr xmap_new)
+{
+  struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
+  conf->xmap_new = xmap_new;
+}
+
+xmap_new_func_ptr cdiPioConfGetXmapNew(int confResH)
+{
+  struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
+  return conf->xmap_new;
 }
 

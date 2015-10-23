@@ -4,12 +4,18 @@
 
 #include <stdbool.h>
 
+#include <yaxt.h>
+
 /*
  * declare data structures and functions to manipulate/query CDI-PIO
  * configuration object.
  */
 
 #include "resource_handle.h"
+
+typedef Xt_xmap (*xmap_new_func_ptr)(Xt_idxlist src_idxlist,
+                                     Xt_idxlist dst_idxlist,
+                                     MPI_Comm comm);
 
 /*
  * cdiPioConf is meant to be internal to the library and not to be
@@ -20,8 +26,9 @@ struct cdiPioConf {
   int IOMode;
   int clientServerRole;
   float partInflate;
-  void (*postCommSetupActions)(void);
   unsigned recordAggBufLimMB;
+  void (*postCommSetupActions)(void);
+  xmap_new_func_ptr xmap_new;
   bool largePageAlign;
   bool cacheRedists;
 };
@@ -68,5 +75,8 @@ void cdiPioConfSetRecordAggBufLim(int confResH, int lim_mb);
 
 int cdiPioConfGetRecordAggBufLim(int confResH);
 
+void cdiPioConfSetXmapNew(int confResH, xmap_new_func_ptr xmap_new);
+
+xmap_new_func_ptr cdiPioConfGetXmapNew(int confResH);
 
 #endif

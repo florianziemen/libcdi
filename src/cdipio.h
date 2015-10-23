@@ -132,4 +132,16 @@ void cdiPioConfSetRedistCache(int confResH, int doCache);
  * be cached? */
 int cdiPioConfGetRedistCache(int confResH);
 
+/* cdiPioConfSetXmapNew: set method to compute part intersections,
+ * defaults to xt_xmap_dist_dir_new */
+void cdiPioConfSetXmapNew(int confResH,
+                          Xt_xmap (*xmap_new)(Xt_idxlist src_idxlist,
+                                              Xt_idxlist dst_idxlist,
+                                              MPI_Comm comm));
+
+/* cdiPioConfSetXmapNew: get method to compute part intersections */
+Xt_xmap (*cdiPioConfGetXmapNew(int confResH))(Xt_idxlist src_idxlist,
+                                              Xt_idxlist dst_idxlist,
+                                              MPI_Comm comm);
+
 #endif
