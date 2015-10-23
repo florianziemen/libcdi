@@ -107,4 +107,13 @@ void cdiPioConfSetPostCommSetupActions(int confResH,
  * setup of client/server communications from configuration object */
 void (*cdiPioConfGetPostCommSetupActions(int confResH))(void);
 
+/* cdiPioConfSetLargePageAlign should block buffer be aligned to
+ * large pages instead of normal pages? */
+void cdiPioConfSetLargePageAlign(int confResH, int largePageAlign);
+
+/* cdiPioConfSetLargePageAlign: should block buffer be aligned to
+ * large pages instead of normal pages? */
+int cdiPioConfGetLargePageAlign(int confResH);
+
+
 #endif

@@ -22,6 +22,7 @@
 #include "namespace.h"
 #include "pio.h"
 #include "pio_comm.h"
+#include "pio_conf.h"
 #include "pio_impl.h"
 #include "pio_rpc.h"
 #include "pio_util.h"
@@ -116,21 +117,37 @@ enum {
   commonPageSize = 8192,
 };
 
+static bool largePageAlign;
+
 static size_t
 getPageSize(void)
 {
   long pagesize = -1L;
+  bool nameAssigned = false;
 #if HAVE_DECL__SC_LARGE_PAGESIZE || HAVE_DECL__SC_PAGE_SIZE || HAVE_DECL__SC_PAGESIZE
-  int name =
+  int name;
 #if HAVE_DECL__SC_LARGE_PAGESIZE
-    _SC_LARGE_PAGESIZE
-#elif HAVE_DECL__SC_PAGESIZE
-    _SC_PAGESIZE
-#elif HAVE_DECL__SC_PAGE_SIZE
-    _SC_PAGE_SIZE
+  if (largePageAlign)
+    {
+      name = _SC_LARGE_PAGESIZE;
+      nameAssigned = true;
+    }
+  else
 #endif
-    ;
-  pagesize = sysconf(name);
+    {
+#if HAVE_DECL__SC_PAGESIZE || HAVE_DECL__SC_PAGE_SIZE
+      name =
+#if HAVE_DECL__SC_PAGESIZE
+        _SC_PAGESIZE
+#elif HAVE_DECL__SC_PAGE_SIZE
+        _SC_PAGE_SIZE
+#endif
+        ;
+      nameAssigned = true;
+#endif
+    }
+  if (nameAssigned)
+    pagesize = sysconf(name);
 #endif
   if (pagesize == -1L)
     pagesize =
@@ -567,13 +584,15 @@ static void finalizeFileWriteAtReblock(void)
 /***************************************************************/
 
 void
-cdiPioFileWriteAtReblockInit(void)
+cdiPioFileWriteAtReblockInit(const struct cdiPioConf *conf)
 {
   bibAFiledataM = listSetNew( destroyAFiledataFileWriteAtReblock, compareNamesFileWriteAtReblock );
   namespaceSwitchSet(NSSWITCH_FILE_OPEN, NSSW_FUNC(fowFileWriteAtReblock));
   namespaceSwitchSet(NSSWITCH_FILE_CLOSE, NSSW_FUNC(fcFileWriteAtReblock));
   namespaceSwitchSet(NSSWITCH_FILE_WRITE, NSSW_FUNC(fwFileWriteAtReblock));
   cdiPioFileWritingFinalize = finalizeFileWriteAtReblock;
+
+  largePageAlign = conf->largePageAlign;
 
   if ( bibAFiledataM == NULL )
     xabort ( "listSetNew did not succeed" );

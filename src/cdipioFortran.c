@@ -81,4 +81,10 @@ FCALLSCFUN1 (INT, cdiPioConfGetCSRole, CDIPIOCONFGETCSROLE, cdipioconfgetcsrole,
 #define ROUTINE_2 (void (*)(void))
 FCALLSCSUB2 (cdiPioConfSetPostCommSetupActions, CDIPIOCONFSETPOSTCOMMSETUPACTIONS, cdipioconfsetpostcommsetupactions, INT, ROUTINE)
 
+/*  cdiPioConfSetLargePageAlign should block buffer be aligned to
+ * large pages instead of normal pages?  */
+
+FCALLSCSUB2 (cdiPioConfSetLargePageAlign, CDIPIOCONFSETLARGEPAGEALIGN, cdipioconfsetlargepagealign, INT, INT)
+FCALLSCFUN1 (INT, cdiPioConfGetLargePageAlign, CDIPIOCONFGETLARGEPAGEALIGN, cdipioconfgetlargepagealign, INT)
+
 #endif

@@ -142,8 +142,10 @@ cdiPioConfPrintP(void *cdiPioConfPtr, FILE * fp)
           "IOMode = %s\n"
           "client/server = %s\n"
           "part data imbalance = %f\n"
+          "aligning of block buffers to large pages is %sabled\n"
           "callback after setup of communication = %p\n",
           cdiPioConfPtr, iomodeStr, CSRoleStr, conf->partInflate,
+          conf->largePageAlign ? "en" : "dis",
           (void *)conf->postCommSetupActions);
 }
 
@@ -155,6 +157,7 @@ int cdiPioConfCreate(void)
   conf->clientServerRole = PIO_ROLE_CLIENT;
   conf->partInflate = 1.1f;
   conf->postCommSetupActions = cdiPioNoPostCommSetup;
+  conf->largePageAlign = false;
   int resH = reshPut(conf, &cdiPioConfOps);
   /* configuration objects are never forwarded */
   reshSetStatus(resH, &cdiPioConfOps,
@@ -219,3 +222,16 @@ void (*cdiPioConfGetPostCommSetupActions(int confResH))(void)
   struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
   return conf->postCommSetupActions;
 }
+
+void cdiPioConfSetLargePageAlign(int confResH, int largePageAlign)
+{
+  struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
+  conf->largePageAlign = largePageAlign != 0;
+}
+
+int cdiPioConfGetLargePageAlign(int confResH)
+{
+  struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
+  return conf->largePageAlign;
+}
+

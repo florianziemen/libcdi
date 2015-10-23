@@ -9,6 +9,8 @@
 
 #include <mpi.h>
 
+#include "pio_conf.h"
+
 enum IO_Server_command
 {
   IO_Open_file,
@@ -100,7 +102,7 @@ void cdiPioFileWriteOrderedInit(void);
 void cdiPioFileWriteAtAllInit(void);
 
 /* pio_mpi_fw_at_reblock.c */
-void cdiPioFileWriteAtReblockInit(void);
+void cdiPioFileWriteAtReblockInit(const struct cdiPioConf *conf);
 
 /* common functionality for file split between collectors and writer(s) */
 void pioSendInitialize(void);

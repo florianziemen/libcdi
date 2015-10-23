@@ -146,3 +146,16 @@
 !                                     PROCEDURE       postCommSetupActions)
       EXTERNAL        cdiPioConfSetPostCommSetupActions
 
+!
+!  cdiPioConfSetLargePageAlign should block buffer be aligned to
+!  large pages instead of normal pages?
+!
+!                     cdiPioConfSetLargePageAlign
+!                                    (INTEGER         confResH,
+!                                     INTEGER         largePageAlign)
+      EXTERNAL        cdiPioConfSetLargePageAlign
+
+      INTEGER         cdiPioConfGetLargePageAlign
+!                                    (INTEGER         confResH)
+      EXTERNAL        cdiPioConfGetLargePageAlign
+

@@ -1,6 +1,9 @@
 #ifndef PIO_CONF_H
 #define PIO_CONF_H
 
+
+#include <stdbool.h>
+
 /*
  * declare data structures and functions to manipulate/query CDI-PIO
  * configuration object.
@@ -18,6 +21,7 @@ struct cdiPioConf {
   int clientServerRole;
   float partInflate;
   void (*postCommSetupActions)(void);
+  bool largePageAlign;
 };
 
 extern const resOps cdiPioConfOps;
@@ -49,5 +53,9 @@ cdiPioIOModeStr2Code(const char *modeStr);
 
 const char *
 cdiPioIOMode2Str(int IOMode);
+
+int cdiPioConfGetLargePageAlign(int confResH);
+
+void cdiPioConfSetLargePageAlign(int confResH, int largePageAlign);
 
 #endif

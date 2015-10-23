@@ -464,7 +464,7 @@ pioInit(MPI_Comm commGlob, int nProcsIO, int IOMode,
   return retcomm;
 }
 
-static void cdiPioFileWritingInit(void);
+static void cdiPioFileWritingInit(const struct cdiPioConf *conf);
 
 MPI_Comm
 cdiPioInit(MPI_Comm commGlob, int confResH, int *pioNamespace)
@@ -510,7 +510,7 @@ cdiPioInit(MPI_Comm commGlob, int confResH, int *pioNamespace)
     {
       cdiPioSerializeSetMPI();
       conf->postCommSetupActions();
-      cdiPioFileWritingInit();
+      cdiPioFileWritingInit(conf);
       if (commInqRankColl() >= 0)
         {
           cdiPioCollectorMessageLoop();
@@ -531,7 +531,7 @@ cdiPioInit(MPI_Comm commGlob, int confResH, int *pioNamespace)
 }
 
 static void
-cdiPioFileWritingInit(void)
+cdiPioFileWritingInit(const struct cdiPioConf *conf)
 {
   int IOMode = commInqIOMode ();
 
@@ -560,7 +560,7 @@ cdiPioFileWritingInit(void)
       cdiPioFileWriteAtAllInit();
       break;
     case PIO_MPI_FW_AT_REBLOCK:
-      cdiPioFileWriteAtReblockInit();
+      cdiPioFileWriteAtReblockInit(conf);
       break;
     }
 }
