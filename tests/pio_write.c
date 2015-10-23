@@ -137,8 +137,8 @@ int main(int argc, char *argv[])
 #endif
 
   /* seed random generator */
+  unsigned randSeed;
   {
-    unsigned seed;
 #ifdef USE_MPI
     if (rankGlob == 0)
 #endif
@@ -150,13 +150,8 @@ int main(int argc, char *argv[])
             perror("failed seed generation!");
             exit(1);
           }
-        seed = (unsigned)(tv.tv_sec ^ tv.tv_usec);
-        fprintf(stderr, "random seed=%u\n", seed);
+        randSeed = (unsigned)(tv.tv_sec ^ tv.tv_usec);
       }
-#ifdef USE_MPI
-    MPI_Bcast(&seed, 1, MPI_UNSIGNED, 0, MPI_COMM_WORLD);
-#endif
-    srandom(seed);
   }
 
   {
@@ -249,10 +244,7 @@ int main(int argc, char *argv[])
         setup.compute_checksum = 0;
         break;
       case 's':
-        {
-          unsigned seed = parse_unsignedarg("error parsing random seed");
-          srandom(seed);
-        }
+        randSeed = parse_unsignedarg("error parsing random seed");
         break;
       default: /* '?' */
         fprintf(stderr, "Usage: %s "
@@ -265,6 +257,15 @@ int main(int argc, char *argv[])
       }
 
   }
+
+#ifdef USE_MPI
+  MPI_Bcast(&randSeed, 1, MPI_UNSIGNED, 0, MPI_COMM_WORLD);
+#endif
+  srandom(randSeed);
+#ifdef USE_MPI
+  if (rankGlob == 0)
+#endif
+    fprintf(stderr, "random seed=%u\n", randSeed);
 
 #ifdef USE_MPI
   int pioNamespace;
