@@ -173,6 +173,7 @@ setup_python_vars=LIBTOOL="$(SHELL) $(abs_top_builddir)/libtool" \
 	  INCFLAGS="-I.. -I$(abs_srcdir) -I$(abs_top_srcdir)/src" \
 	  OPT= \
 	  BASECFLAGS= \
+	  PYTHONDONTWRITEBYTECODE=1 \
 	  abs_srcdir='$(abs_srcdir)/python' ; \
 	  abs_builddir='$(abs_builddir)' \
 	  abs_builddir_python='$(abs_builddir)/python' \
