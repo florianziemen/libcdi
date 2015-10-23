@@ -107,6 +107,8 @@ int main(int argc, char *argv[])
   xmpi ( MPI_Comm_set_errhandler ( commGlob, MPI_ERRORS_RETURN ));
   xmpi ( MPI_Comm_size ( commGlob, &sizeGlob ));
   xmpi ( MPI_Comm_rank ( commGlob, &rankGlob ));
+
+  int pioConfHandle = cdiPioConfCreate();
 #endif
 
   /* seed random generator */
@@ -239,8 +241,12 @@ int main(int argc, char *argv[])
 
 #ifdef USE_MPI
   int pioNamespace;
-  commModel = pioInit(commGlob, nProcsIO, IOMode, &pioNamespace, 1.0,
-                      cdiPioNoPostCommSetup);
+  cdiPioConfSetIOMode(pioConfHandle, IOMode);
+  cdiPioConfSetCSRole(pioConfHandle, cdiPioCSRLastN(commGlob, IOMode,
+                                                    nProcsIO));
+  cdiPioConfSetPartInflate(pioConfHandle, 1.0f);
+  int initNamespace = namespaceGetActive();
+  commModel = cdiPioInit(commGlob, pioConfHandle, &pioNamespace);
   if (commModel != MPI_COMM_NULL)
     {
       namespaceSetActive(pioNamespace);
@@ -252,6 +258,8 @@ int main(int argc, char *argv[])
 
 #ifdef USE_MPI
     }
+  namespaceSetActive(initNamespace);
+  cdiPioConfDestroy(pioConfHandle);
   pioFinalize ();
   xt_finalize();
   MPI_Finalize ();
