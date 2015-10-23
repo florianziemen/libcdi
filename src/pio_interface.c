@@ -560,6 +560,9 @@ cdiPioFileWritingInit(void)
     case PIO_FPGUARD:
       initPOSIXFPGUARDSENDRECV();
       break;
+    case PIO_MPI_FW_ORDERED:
+      cdiPioFileWriteOrderedInit();
+      break;
     }
 }
 

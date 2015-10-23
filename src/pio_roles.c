@@ -3,8 +3,9 @@
 #endif
 
 #include <stdlib.h>
-#include "cdipio.h"
 
+#include "cdipio.h"
+#include "error.h"
 #include "pio_util.h"
 
 static int
@@ -46,6 +47,7 @@ cdiPioCSRSelectRange(MPI_Comm commSuper, int IOMode,
     role = PIO_NONE;
     break;
   case PIO_MPI:
+  case PIO_MPI_FW_ORDERED:
     role = (commRank >= clientRangeStart && commRank <= clientRangeEnd)
       ? PIO_ROLE_CLIENT : PIO_ROLE_WRITER_COLLECTOR;
     break;
@@ -63,7 +65,7 @@ cdiPioCSRSelectRange(MPI_Comm commSuper, int IOMode,
                            : PIO_ROLE_WRITER_COLLECTOR);
     break;
   default:
-    abort();
+    xabort("Invalid mode requested %d", IOMode);
   }
   return role;
 }

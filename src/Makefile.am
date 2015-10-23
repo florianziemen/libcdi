@@ -176,6 +176,7 @@ libcdipio_la_SOURCES =							\
 	pio_interface.c							\
 	pio_interface.h							\
 	pio_mpinonb.c							\
+	pio_mpi_fw_ordered.c						\
 	pio_record_send.c						\
 	pio_posixasynch.c						\
 	pio_posixfpguardsendrecv.c					\

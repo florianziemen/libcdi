@@ -20,6 +20,8 @@
       PARAMETER (PIO_ASYNCH             =  3)
       INTEGER    PIO_FPGUARD           
       PARAMETER (PIO_FPGUARD            =  4)
+      INTEGER    PIO_MPI_FW_ORDERED    
+      PARAMETER (PIO_MPI_FW_ORDERED     =  5)
       INTEGER    PIO_ROLE_CLIENT       
       PARAMETER (PIO_ROLE_CLIENT        =  0)
       INTEGER    PIO_ROLE_COLLECTOR    

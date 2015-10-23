@@ -41,13 +41,14 @@ static const struct model_config default_setup
 
 #ifdef USE_MPI
 static const struct {
-  const char text[12];
+  const char text[20];
   int mode;
 } mode_map[] = {
   { "PIO_MPI", PIO_MPI },
   { "PIO_FPGUARD", PIO_FPGUARD },
   { "PIO_ASYNCH", PIO_ASYNCH },
-  { "PIO_WRITER", PIO_WRITER }
+  { "PIO_WRITER", PIO_WRITER },
+  { "PIO_MPI_FW_ORDERED", PIO_MPI_FW_ORDERED },
 };
 
 static inline int

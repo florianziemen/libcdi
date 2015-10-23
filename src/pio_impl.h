@@ -93,6 +93,9 @@ void listSetForeach(listSet *q, elemOp func, void *data);
 /* pio_mpinonb.c */
 void initMPINONB(void);
 
+/* pio_mpi_fw_ordered.c */
+void cdiPioFileWriteOrderedInit(void);
+
 /* common functionality for file split between collectors and writer(s) */
 void pioSendInitialize(void);
 
