@@ -620,7 +620,7 @@ int reshPackBufferCreate(char **packBuffer, int *packBufferSize, void *context)
   int nsp = namespaceGetActive ();
 
   int pBSize = *packBufferSize = getPackBufferSize(context);
-  char *pB = *packBuffer = (char *) Calloc(1, (size_t)pBSize);
+  char *pB = *packBuffer = (char *) Malloc((size_t)pBSize);
 
   {
     int header[resHPackHeaderNInt] = { START, nsp };
