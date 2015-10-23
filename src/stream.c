@@ -423,7 +423,7 @@ int cdiInqContents(stream_t * streamptr)
   return (status);
 }
 
-int cdiStreamOpenDefaultDelegate(const char *filename, const char *filemode,
+int cdiStreamOpenDefaultDelegate(const char *filename, char filemode,
                                  int filetype, stream_t *streamptr,
                                  int recordBufIsToBeCreated)
 {
@@ -434,7 +434,7 @@ int cdiStreamOpenDefaultDelegate(const char *filename, const char *filemode,
     case FILETYPE_GRB:
     case FILETYPE_GRB2:
       {
-        fileID = gribOpen(filename, filemode);
+        fileID = gribOpen(filename, (char [2]){filemode, 0});
         if ( fileID < 0 ) fileID = CDI_ESYSTEM;
         if (recordBufIsToBeCreated)
           {
@@ -447,7 +447,7 @@ int cdiStreamOpenDefaultDelegate(const char *filename, const char *filemode,
 #if  defined  (HAVE_LIBSERVICE)
     case FILETYPE_SRV:
       {
-        fileID = fileOpen(filename, filemode);
+        fileID = fileOpen(filename, (char [2]){filemode, 0});
         if ( fileID < 0 ) fileID = CDI_ESYSTEM;
         if (recordBufIsToBeCreated)
           {
@@ -461,7 +461,7 @@ int cdiStreamOpenDefaultDelegate(const char *filename, const char *filemode,
 #if  defined  (HAVE_LIBEXTRA)
     case FILETYPE_EXT:
       {
-        fileID = fileOpen(filename, filemode);
+        fileID = fileOpen(filename, (char [2]){filemode, 0});
         if ( fileID < 0 ) fileID = CDI_ESYSTEM;
         if (recordBufIsToBeCreated)
           {
@@ -475,7 +475,7 @@ int cdiStreamOpenDefaultDelegate(const char *filename, const char *filemode,
 #if  defined  (HAVE_LIBIEG)
     case FILETYPE_IEG:
       {
-        fileID = fileOpen(filename, filemode);
+        fileID = fileOpen(filename, (char [2]){filemode, 0});
         if ( fileID < 0 ) fileID = CDI_ESYSTEM;
         if (recordBufIsToBeCreated)
           {
@@ -489,18 +489,18 @@ int cdiStreamOpenDefaultDelegate(const char *filename, const char *filemode,
 #if  defined  (HAVE_LIBNETCDF)
     case FILETYPE_NC:
       {
-        fileID = cdfOpen(filename, filemode);
+        fileID = cdfOpen(filename, (char [2]){filemode, 0});
         break;
       }
     case FILETYPE_NC2:
       {
-        fileID = cdfOpen64(filename, filemode);
+        fileID = cdfOpen64(filename, (char [2]){filemode, 0});
         break;
       }
     case FILETYPE_NC4:
     case FILETYPE_NC4C:
       {
-        fileID = cdf4Open(filename, filemode, &filetype);
+        fileID = cdf4Open(filename, (char [2]){filemode, 0}, &filetype);
         break;
       }
 #endif
@@ -518,25 +518,25 @@ int cdiStreamOpenDefaultDelegate(const char *filename, const char *filemode,
 
 
 static int
-streamOpenID(const char *filename, const char *filemode, int filetype,
+streamOpenID(const char *filename, char filemode, int filetype,
              int resH)
 {
   int fileID = CDI_UNDEFID;
   int status;
 
   if ( CDI_Debug )
-    Message("Open %s mode %c file %s", strfiletype(filetype), (int) *filemode,
+    Message("Open %s mode %c file %s", strfiletype(filetype), filemode,
             filename?filename:"(NUL)");
 
-  if ( ! filename || ! filemode || filetype < 0 ) return (CDI_EINVAL);
+  if ( ! filename || filetype < 0 ) return (CDI_EINVAL);
 
   stream_t *streamptr = stream_new_entry(resH);
   int streamID = CDI_ESYSTEM;
 
   {
-    int (*streamOpenDelegate)(const char *filename, const char *filemode,
+    int (*streamOpenDelegate)(const char *filename, char filemode,
                               int filetype, stream_t *streamptr, int recordBufIsToBeCreated)
-      = (int (*)(const char *, const char *, int, stream_t *, int))
+      = (int (*)(const char *, char, int, stream_t *, int))
       namespaceSwitchGet(NSSWITCH_STREAM_OPEN_BACKEND).func;
 
     fileID = streamOpenDelegate(filename, filemode, filetype, streamptr, 1);
@@ -554,11 +554,11 @@ streamOpenID(const char *filename, const char *filemode, int filetype,
 
       if ( streamID < 0 ) return (CDI_ELIMIT);
 
-      streamptr->filemode = tolower(*filemode);
+      streamptr->filemode = filemode;
       streamptr->filename = strdupx(filename);
       streamptr->fileID   = fileID;
 
-      if ( streamptr->filemode == 'r' )
+      if ( filemode == 'r' )
 	{
 	  int vlistID = vlistCreate();
 	  if ( vlistID < 0 ) return(CDI_ELIMIT);
@@ -577,7 +577,9 @@ streamOpenID(const char *filename, const char *filemode, int filetype,
 
 static int streamOpen(const char *filename, const char *filemode, int filetype)
 {
-  return streamOpenID(filename, filemode, filetype, CDI_UNDEFID);
+  if (!filemode || strlen(filemode) != 1) return CDI_EINVAL;
+  return streamOpenID(filename, (char)tolower(filemode[0]),
+                      filetype, CDI_UNDEFID);
 }
 
 static int streamOpenA(const char *filename, const char *filemode, int filetype)
@@ -2384,7 +2386,7 @@ streamUnpack(char * unpackBuffer, int unpackBufferSize,
                   &d, 1, DATATYPE_UINT32, context);
   xassert(d == cdiCheckSum(DATATYPE_TXT, intBuffer[2], filename));
   int targetStreamID = namespaceAdaptKey(intBuffer[0], originNamespace),
-    streamID = streamOpenID(filename, "w", intBuffer[1], targetStreamID);
+    streamID = streamOpenID(filename, 'w', intBuffer[1], targetStreamID);
   xassert(streamID >= 0 && targetStreamID == streamID);
   streamDefByteorder(streamID, intBuffer[5]);
   streamDefCompType(streamID, intBuffer[6]);

@@ -967,7 +967,7 @@ void getTimeStepData()
 
 #if defined (HAVE_LIBNETCDF) && ! defined (HAVE_PARALLEL_NC4)
 static int
-cdiPioStreamCDFOpenWrap(const char *filename, const char *filemode,
+cdiPioStreamCDFOpenWrap(const char *filename, char filemode,
                         int filetype, stream_t *streamptr,
                         int recordBufIsToBeCreated)
 {

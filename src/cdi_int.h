@@ -412,7 +412,7 @@ streamUnpack(char *unpackBuffer, int unpackBufferSize,
              int *unpackBufferPos, int originNamespace, void *context);
 
 int
-cdiStreamOpenDefaultDelegate(const char *filename, const char *filemode,
+cdiStreamOpenDefaultDelegate(const char *filename, char filemode,
                              int filetype, stream_t *streamptr,
                              int recordBufIsToBeCreated);
 

@@ -28,14 +28,14 @@ nullPackFunc(void *obj, void *buf, int size, int *pos, void *context)
 
 
 static int
-cdiPioClientStreamOpen(const char *filename, const char *filemode,
+cdiPioClientStreamOpen(const char *filename, char filemode,
                        int filetype, stream_t *streamptr,
                        int recordBufIsToBeCreated)
 {
   struct winHeaderEntry header;
   size_t filename_len;
   (void)streamptr; (void)recordBufIsToBeCreated;
-  if ( tolower ( * filemode ) == 'w' )
+  if ( filemode == 'w' )
     {
       statusCode nspStatus = namespaceInqResStatus ();
       switch ( nspStatus )
