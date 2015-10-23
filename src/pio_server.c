@@ -987,15 +987,12 @@ cdiPioCdfDefTimestep(stream_t *streamptr, int tsID)
  * @brief is encapsulated in CDI library and run on I/O PEs.
  */
 
-void cdiPioServer(void)
+void cdiPioCollectorMessageLoop(void)
 {
   MPI_Status status;
 
   xdebug("%s", "START");
 
-  cdiPioFileWritingInit();
-  if (commInqRankPio() >= commInqSizeColl())
-    return;
   MPI_Comm pioInterComm = cdiPioInqInterComm();
 #ifdef HAVE_PARALLEL_NC4
   cdiPioEnableNetCDFParAccess();

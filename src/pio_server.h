@@ -7,7 +7,7 @@
 
 #include <mpi.h>
 
-void cdiPioServer(void);
+void cdiPioCollectorMessageLoop(void);
 
 #endif
 /*
