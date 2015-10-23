@@ -266,11 +266,8 @@ int taxisCreate(int taxistype)
 
 void taxisDestroyKernel(taxis_t *taxisptr)
 {
-  int id = taxisptr->self;
   delete_refcount_string(taxisptr->name);
   delete_refcount_string(taxisptr->longname);
-  if (id != CDI_UNDEFID)
-    reshRemove(id, &taxisOps);
 }
 
 /*
@@ -286,6 +283,7 @@ void taxisDestroyKernel(taxis_t *taxisptr)
 void taxisDestroy(int taxisID)
 {
   taxis_t *taxisptr = (taxis_t *)reshGetVal(taxisID, &taxisOps);
+  reshRemove(taxisID, &taxisOps);
   taxisDestroyKernel(taxisptr);
   Free(taxisptr);
 }
