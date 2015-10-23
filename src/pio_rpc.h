@@ -101,7 +101,7 @@ struct collSpec
 };
 
 struct clientBufSize
-computeClientStreamBufSize(int streamID, struct collSpec *collector);
+computeClientStreamBufSize(int streamID, const struct collSpec *collector);
 
 #endif
 

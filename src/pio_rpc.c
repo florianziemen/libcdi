@@ -16,7 +16,7 @@
 
 
 struct clientBufSize
-computeClientStreamBufSize(int streamID, struct collSpec *collector)
+computeClientStreamBufSize(int streamID, const struct collSpec *collector)
 {
   /* 1 record is filled in last to indicate number of records in total */
   struct clientBufSize rmaSizeSpec
