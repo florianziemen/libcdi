@@ -97,7 +97,7 @@ void      finalizeMPINONB ( void );
 
 
 /* common functionality for file split between collectors and writer(s) */
-size_t pioSendWrite(int, int, const void *, size_t);
+size_t pioSendWrite(int, const void *, size_t, int);
 void pioSendInitialize(void);
 void pioSendFinalize(void);
 

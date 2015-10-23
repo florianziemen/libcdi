@@ -47,7 +47,7 @@ cdiPioFileWrite(int fileID, const void *restrict buffer, size_t len, int tsID)
     case PIO_ASYNCH:
 #endif
     case PIO_WRITER:
-      iret = pioSendWrite(fileID, tsID, buffer, len);
+      iret = pioSendWrite(fileID, buffer, len, tsID);
       break;
     case PIO_FPGUARD:
       iret = fwPOSIXFPGUARDSENDRECV ( fileID, tsID, buffer, len );

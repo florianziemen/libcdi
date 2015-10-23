@@ -150,7 +150,7 @@ flushOp(remoteFileBuf *fb, int tsID)
 
 
 size_t
-pioSendWrite(int id, int tsID, const void *buffer, size_t len)
+pioSendWrite(int id, const void *buffer, size_t len, int tsID)
 {
   int error = 0;
   int flush = 0;
