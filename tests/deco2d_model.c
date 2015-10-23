@@ -271,7 +271,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
               = xt_redist_p2p_ext_new(xmap4gather,
                                       varLevs, src_blocks, 1, &dst_block,
                                       MPI_DOUBLE);
-            free(src_blocks);
+            Free(src_blocks);
             xt_xmap_delete(xmap4gather);
           }
         gatherRedistSet: ;
@@ -424,7 +424,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
           }
         }
     }
-  free(varslice);
+  Free(varslice);
 #ifdef USE_MPI
   pioEndTimestepping ();
 #endif
@@ -447,14 +447,14 @@ modelRun(struct model_config setup, MPI_Comm comm)
         }
     }
   gridDestroy ( gridID );
-  free(var);
+  Free(var);
 #if USE_MPI
-  free(blk_displ);
+  Free(blk_displ);
 #endif
-  free(varDesc);
-  free(levs);
-  free(lats);
-  free(lons);
+  Free(varDesc);
+  Free(levs);
+  Free(lats);
+  Free(lons);
 }
 
 #ifdef USE_MPI
@@ -512,7 +512,7 @@ findPartition2D(int npart[2], int num_parts)
         }
       } while (pattern <= lastPattern);
     }
-  free(factors);
+  Free(factors);
 }
 #endif
 

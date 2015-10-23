@@ -329,7 +329,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
           }
         }
     }
-  free(varslice);
+  Free(varslice);
 #ifdef USE_MPI
   pioEndTimestepping ();
 #endif
@@ -349,16 +349,14 @@ modelRun(struct model_config setup, MPI_Comm comm)
     }
   gridDestroy ( gridID );
 #if USE_MPI
-  for (size_t varIdx = 0; varIdx < nVars; ++varIdx)
-    xt_idxlist_delete(varDesc[varIdx].partDesc);
-  free(displs);
-  free(chunks);
-  free(var);
+  Free(displs);
+  Free(chunks);
+  Free(var);
 #endif
-  free(varDesc);
-  free(levs);
-  free(lats);
-  free(lons);
+  Free(varDesc);
+  Free(levs);
+  Free(lats);
+  Free(lons);
 }
 
 /*
