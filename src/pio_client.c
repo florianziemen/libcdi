@@ -85,9 +85,6 @@ cdiPioClientStreamOpen(const char *filename, char filemode,
               }
           }
           break;
-        case STAGE_CLEANUP:
-          xabort ( "TRANSITION TO IO PROCESSES ALREADY FINISHED." );
-          break;
         default:
           xabort ( "INTERNAL ERROR" );
         }
@@ -142,9 +139,6 @@ cdiPioClientStreamDefVlist_(int streamID, int vlistID)
         cdiPioClientStreamWinCreate(streamID, &cspec);
       }
       break;
-    case STAGE_CLEANUP:
-      xabort ( "TRANSITION TO IO PROCESSES ALREADY FINISHED." );
-      break;
     default:
       xabort ( "INTERNAL ERROR" );
     }
@@ -198,9 +192,6 @@ cdiPioClientStreamWriteVarPart(int streamID, int varID, const void *data,
     case STAGE_TIMELOOP:
       pioBufferPartData(streamID, varID, data, nmiss, partDesc);
       return;
-    case STAGE_CLEANUP:
-      xabort("CLEANUP STAGE: PARALLEL WRITING NOT POSSIBLE.");
-      break;
     default:
       xabort("INTERNAL ERROR");
     }
@@ -222,9 +213,6 @@ cdiPioClientStreamWriteScatteredVarPart(int streamID, int varID,
       cdiPioBufferPartDataGather(streamID, varID, data, numBlocks,
                                  blocklengths, displacements, nmiss, partDesc);
       return;
-    case STAGE_CLEANUP:
-      xabort("CLEANUP STAGE: PARALLEL WRITING NOT POSSIBLE.");
-      break;
     default:
       xabort("INTERNAL ERROR");
     }
@@ -255,7 +243,6 @@ cdiPioClientStreamClose(stream_t *streamptr, int recordBufIsToBeDeleted)
     {
     case STAGE_DEFINITION:
     case STAGE_TIMELOOP:
-    case STAGE_CLEANUP:
       {
         int clientRank = commInqRankModel(),
           numClients = cdiPioCommInqSizeClients(),
@@ -316,8 +303,6 @@ cdiPioClientStreamDefTimestep_(stream_t *streamptr, int tsID)
       xassert(sizeof (void *) >= sizeof (int));
       pioBufferFuncCall(streamptr->self, header,
                         (void *)(intptr_t)taxisID, cdiPioTaxisPackWrap);
-      break;
-    case STAGE_CLEANUP:
       break;
     default:
       xabort ( "INTERNAL ERROR" );
