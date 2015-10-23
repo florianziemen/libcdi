@@ -1045,7 +1045,6 @@ void cdiPioCollectorMessageLoop(void)
         {
         case FINALIZE:
           xmpi(MPI_Recv(NULL, 0, MPI_INT, source, tag, pioInterComm, &status));
-          xdebug("%s", "RECEIVED MESSAGE WITH TAG \"FINALIZE\"");
           {
             unsigned nStreams = reshCountType(&streamOps);
             if ( nStreams > 0 )

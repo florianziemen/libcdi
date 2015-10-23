@@ -652,8 +652,7 @@ void pioFinalize ( void )
     collRank = cdiPioCollRank(clientRank, numClients, numColl);
 
   if (clientRank == cdiPioClientRangeStart(collRank, numClients, numColl))
-    xmpi(MPI_Send(NULL, 0, MPI_INT, collRank,
-                  FINALIZE, cdiPioInqInterComm()));
+    xmpi(MPI_Send(NULL, 0, MPI_INT, collRank, FINALIZE, cdiPioInqInterComm()));
   xdebug("%s", "SENT MESSAGE WITH TAG \"FINALIZE\"");
   modelWinDelete();
   cdiPioCommFinalize();
