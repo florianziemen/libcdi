@@ -1017,6 +1017,7 @@ uninstall-am: uninstall-binPROGRAMS uninstall-libLTLIBRARIES
 @ENABLE_PYTHON_TRUE@	@set -e ; cd python ; \
 @ENABLE_PYTHON_TRUE@	  $(setup_python_vars) \
 @ENABLE_PYTHON_TRUE@	  $(setup_cdilib_py_vars) \
+@ENABLE_PYTHON_TRUE@	  PYTHONDONTWRITEBYTECODE=1 \
 @ENABLE_PYTHON_TRUE@	  $(PYTHON) "$${setupLib_py}" build_ext -v
 @ENABLE_PYTHON_TRUE@	touch $@
 
@@ -1025,6 +1026,7 @@ uninstall-am: uninstall-binPROGRAMS uninstall-libLTLIBRARIES
 @ENABLE_PYTHON_TRUE@	@set -e ; cd python ; \
 @ENABLE_PYTHON_TRUE@	  $(setup_python_vars) \
 @ENABLE_PYTHON_TRUE@	  $(setup_cdilib_py_vars) \
+@ENABLE_PYTHON_TRUE@	  PYTHONDONTWRITEBYTECODE=1 \
 @ENABLE_PYTHON_TRUE@	  $(PYTHON) \
 @ENABLE_PYTHON_TRUE@	  `test -f testLib.py || echo '$(abs_srcdir)/python/'`testLib.py \
 @ENABLE_PYTHON_TRUE@	  $(select_test_file)
@@ -1047,6 +1049,7 @@ uninstall-am: uninstall-binPROGRAMS uninstall-libLTLIBRARIES
 @ENABLE_PYTHON_TRUE@	@set -e ; cd python; $(setup_python_vars) \
 @ENABLE_PYTHON_TRUE@	  $(setup_python_cxx_vars) \
 @ENABLE_PYTHON_TRUE@	  $(setup_cdiobj_py_vars) \
+@ENABLE_PYTHON_TRUE@	  PYTHONDONTWRITEBYTECODE=1 \
 @ENABLE_PYTHON_TRUE@	  $(PYTHON) "$${setupObj_py}" \
 @ENABLE_PYTHON_TRUE@	  build_ext -v
 @ENABLE_PYTHON_TRUE@	touch $@
@@ -1057,6 +1060,7 @@ uninstall-am: uninstall-binPROGRAMS uninstall-libLTLIBRARIES
 @ENABLE_PYTHON_TRUE@	  $(setup_python_vars) \
 @ENABLE_PYTHON_TRUE@	  $(setup_python_cxx_vars) \
 @ENABLE_PYTHON_TRUE@	  $(setup_cdiobj_py_vars) \
+@ENABLE_PYTHON_TRUE@	  PYTHONDONTWRITEBYTECODE=1 \
 @ENABLE_PYTHON_TRUE@	  $(PYTHON) `test -f testObj.py || echo '$(abs_srcdir)/python/'`testObj.py \
 @ENABLE_PYTHON_TRUE@	  $(select_test_file)
 

@@ -205,6 +205,7 @@ python/CdiLib.stamp: python/cdilib_wrap.c
 	@set -e ; cd python ; \
 	  $(setup_python_vars) \
 	  $(setup_cdilib_py_vars) \
+	  PYTHONDONTWRITEBYTECODE=1 \
 	  $(PYTHON) "$${setupLib_py}" build_ext -v
 	touch $@
 
@@ -213,6 +214,7 @@ pythonLibTest: pythonLib
 	@set -e ; cd python ; \
 	  $(setup_python_vars) \
 	  $(setup_cdilib_py_vars) \
+	  PYTHONDONTWRITEBYTECODE=1 \
 	  $(PYTHON) \
 	  `test -f testLib.py || echo '$(abs_srcdir)/python/'`testLib.py \
 	  $(select_test_file)
@@ -250,6 +252,7 @@ python/CdiObj.stamp: python/cdiobj_wrap.cpp cdi.lo
 	@set -e ; cd python; $(setup_python_vars) \
 	  $(setup_python_cxx_vars) \
 	  $(setup_cdiobj_py_vars) \
+	  PYTHONDONTWRITEBYTECODE=1 \
 	  $(PYTHON) "$${setupObj_py}" \
 	  build_ext -v
 	touch $@
@@ -260,6 +263,7 @@ pythonObjTest: pythonObj
 	  $(setup_python_vars) \
 	  $(setup_python_cxx_vars) \
 	  $(setup_cdiobj_py_vars) \
+	  PYTHONDONTWRITEBYTECODE=1 \
 	  $(PYTHON) `test -f testObj.py || echo '$(abs_srcdir)/python/'`testObj.py \
 	  $(select_test_file)
 
