@@ -422,7 +422,7 @@ void
 cdiStreamWriteVar_(int streamID, int varID, int memtype, const void *data,
                    int nmiss);
 void
-cdiStreamwriteVarChunk_(int streamID, int varID, int memtype,
+cdiStreamWriteVarChunk_(int streamID, int varID, int memtype,
                         const int rect[][2], const void *data, int nmiss);
 void
 cdiStreamCloseDefaultDelegate(stream_t *streamptr,

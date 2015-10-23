@@ -1849,7 +1849,7 @@ streamWriteVarChunk(int streamID, int varID,
 
 /* single image implementation */
 void
-cdiStreamwriteVarChunk_(int streamID, int varID, int memtype,
+cdiStreamWriteVarChunk_(int streamID, int varID, int memtype,
                         const int rect[][2], const void *data, int nmiss)
 {
   if ( CDI_Debug ) Message("streamID = %d varID = %d", streamID, varID);
