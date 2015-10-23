@@ -81,7 +81,7 @@ cdiResHFilterApply(const resOps *p,
                                             void *data),
                    void *data);
 
-void   reshPackBufferCreate ( char **, int *, void *context );
+int reshPackBufferCreate(char **packBuf, int *packBufSize, void *context);
 void   reshPackBufferDestroy ( char ** );
 int    reshResourceGetPackSize_intern(int resh, const resOps *ops, void *context, const char* caller, const char* expressionString);
 #define reshResourceGetPackSize(resh, ops, context) reshResourceGetPackSize_intern(resh, ops, context, __func__, #resh)

@@ -608,7 +608,7 @@ void reshPackBufferDestroy ( char ** buffer )
 
 /**************************************************************/
 
-void reshPackBufferCreate(char **packBuffer, int *packBufferSize, void *context)
+int reshPackBufferCreate(char **packBuffer, int *packBufferSize, void *context)
 {
   int i, packBufferPos = 0;
   int end = END;
@@ -655,6 +655,7 @@ void reshPackBufferCreate(char **packBuffer, int *packBufferSize, void *context)
   LIST_UNLOCK();
 
   serializePack(&end, 1,  DATATYPE_INT, pB, pBSize, &packBufferPos, context);
+  return packBufferPos;
 }
 
 /**************************************************************/
