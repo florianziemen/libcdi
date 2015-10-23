@@ -176,7 +176,6 @@ serverWinCreate(void)
 {
   struct serverBufferSetup setup;
   serverBufSizes(&setup);
-  setupClientRanks();
   MPI_Comm collClientIntraComm = cdiPioInqCollClientIntraComm();
   MPI_Info no_locks_info;
   xmpi(MPI_Info_create(&no_locks_info));
@@ -1034,6 +1033,7 @@ void cdiPioCollectorMessageLoop(void)
 #endif
 
   int *streamActivity = NULL;
+  setupClientRanks();
   for ( ;; )
     {
       xmpi ( MPI_Probe ( MPI_ANY_SOURCE, MPI_ANY_TAG, pioInterComm, &status ));
