@@ -366,9 +366,8 @@ Cdi::~Cdi() {}
 
 void
 Cdi::getTaxes() {
-  int taxisID;
   ntaxes         = 1;
-  taxisID        = vlistInqTaxis(vlistID);
+  int taxisID        = vlistInqTaxis(vlistID);
   taxes[taxisID] = CdiTaxis(vlistID);
 }
 
