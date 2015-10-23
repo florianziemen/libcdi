@@ -314,14 +314,11 @@ AC_ARG_ENABLE(python,
        break])
      CPPFLAGS=$save_CPPFLAGS
    done
-   AS_IF([test "x$enable_python" != "xno"],
-         [AS_IF([test "x$SWIG" = "x"],
-                [AC_MSG_NOTICE([Python bindings: Swig is disabled, pregenerated files will be used. Use '--enable-swig' for swig usage])],
-                [PYTHON=])],
-                [AS_IF([test `$SWIG -help 2>&1 | $GREP -c '\-python *- Generate'` = 0],
-                       [AC_MSG_NOTICE([No (swig does not support -python option)])
-                        enable_python=no
-                       ])])],
+   AS_IF([test "x$enable_python" != xno -a "x$SWIG" = x],
+         [AC_MSG_NOTICE([Python bindings: Swig is disabled, pregenerated files will be used. Use '--enable-swig' for swig usage])],
+         [test `$SWIG -help 2>&1 | $GREP -c '\-python *- Generate'` = 0],
+         [AC_MSG_NOTICE([No (swig does not support -python option)])
+          enable_python=no])],
   [enable_python=no])
 AM_CONDITIONAL(ENABLE_PYTHON, [test "x$enable_python" != "xno"])
 AS_IF([test "x$enable_python" != "xno"],[AC_SUBST([ENABLE_PYTHON],[true])],[AC_SUBST([ENABLE_PYTHON],[false])])

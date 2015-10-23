@@ -30216,20 +30216,13 @@ fi
 
      CPPFLAGS=$save_CPPFLAGS
    done
-   if test "x$enable_python" != "xno"; then :
-  if test "x$SWIG" = "x"; then :
+   if test "x$enable_python" != xno -a "x$SWIG" = x; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: Python bindings: Swig is disabled, pregenerated files will be used. Use '--enable-swig' for swig usage" >&5
 $as_echo "$as_me: Python bindings: Swig is disabled, pregenerated files will be used. Use '--enable-swig' for swig usage" >&6;}
-else
-  PYTHON=
-fi
-else
-  if test `$SWIG -help 2>&1 | $GREP -c '\-python *- Generate'` = 0; then :
+elif test `$SWIG -help 2>&1 | $GREP -c '\-python *- Generate'` = 0; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: No (swig does not support -python option)" >&5
 $as_echo "$as_me: No (swig does not support -python option)" >&6;}
-                        enable_python=no
-
-fi
+          enable_python=no
 fi
 else
   enable_python=no
