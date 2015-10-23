@@ -3,6 +3,7 @@
 #endif
 
 #include <inttypes.h>
+#include <limits.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
@@ -64,9 +65,19 @@ static aFiledataM *initAFiledataMPINONB ( const char *filename, size_t bs )
 
   of->tsID = CDI_UNDEFID;
 
-  /* open file */
+
+  MPI_Info open_info = MPI_INFO_NULL;
+  /* tell IBM PE to buffer just as much as one buffer holds */
+  {
+    xmpi(MPI_Info_create(&open_info));
+    char buf_size_str[3*sizeof(size_t)*CHAR_BIT/8+1];
+    snprintf(buf_size_str, sizeof (buf_size_str), "%zu", bs);
+    xmpi(MPI_Info_set(open_info, "IBM_io_buffer_size", buf_size_str));
+    xmpi(MPI_Info_set(open_info, "IBM_largeblock_io", "true"));
+  }
   xmpi(MPI_File_open(commNode, of->name, MPI_MODE_CREATE|MPI_MODE_WRONLY,
-                     MPI_INFO_NULL, &( of->fh )));
+                     open_info, &of->fh));
+  xmpi(MPI_Info_free(&open_info));
   of->request = MPI_REQUEST_NULL;
   of->finished = false;
 
