@@ -4,6 +4,17 @@
 This appendix provide a brief listing of the Fortran language bindings of the
 CDI library routines:
 
+\section*{\tt \htmlref{cdiPioInit}{cdiPioInit}}
+
+\begin{verbatim}
+    INTEGER FUNCTION cdiPioInit (INTEGER commSuper, INTEGER IOMode,
+                                 INTEGER clientServerRole, INTEGER pioNamespace,
+                                 REAL partInflate, PROCEDURE postCommSetupActions)
+\end{verbatim}
+
+initialize I/O server processes and communication.
+
+
 \section*{\tt \htmlref{cdiPioNoPostCommSetup}{cdiPioNoPostCommSetup}}
 
 \begin{verbatim}

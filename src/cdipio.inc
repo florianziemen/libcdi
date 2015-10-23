@@ -20,6 +20,16 @@
       PARAMETER (PIO_ASYNCH             =  3)
       INTEGER    PIO_FPGUARD           
       PARAMETER (PIO_FPGUARD            =  4)
+      INTEGER    PIO_ROLE_CLIENT       
+      PARAMETER (PIO_ROLE_CLIENT        =  0)
+      INTEGER    PIO_ROLE_COLLECTOR    
+      PARAMETER (PIO_ROLE_COLLECTOR     =  1)
+      INTEGER    PIO_ROLE_WRITER       
+      PARAMETER (PIO_ROLE_WRITER        =  2)
+      INTEGER    PIO_ROLE_WRITER_COLLECTOR
+      PARAMETER (PIO_ROLE_WRITER_COLLECTOR =  3)
+      INTEGER    PIO_ROLE_FPGUARD      
+      PARAMETER (PIO_ROLE_FPGUARD       =  4)
 !
 !  parallel IO routines
 !
@@ -43,6 +53,15 @@
 !                                     REAL            partInflate,
 !                                     PROCEDURE       postCommSetupActions)
       EXTERNAL        pioInit
+
+      INTEGER         cdiPioInit
+!                                    (INTEGER         commSuper,
+!                                     INTEGER         IOMode,
+!                                     INTEGER         clientServerRole,
+!                                     INTEGER         pioNamespace,
+!                                     REAL            partInflate,
+!                                     PROCEDURE       postCommSetupActions)
+      EXTERNAL        cdiPioInit
 
 !                     pioWriteTimestep
       EXTERNAL        pioWriteTimestep
@@ -68,4 +87,10 @@
 !                                     INTEGER         nmiss,
 !                                     TYPE(XT_IDXLIST)partDesc)
       EXTERNAL        streamWriteScatteredVarPart
+
+      INTEGER         cdiPioCSRLastN
+!                                    (INTEGER         commSuper,
+!                                     INTEGER         IOMode,
+!                                     INTEGER         nProcsIO)
+      EXTERNAL        cdiPioCSRLastN
 

@@ -744,6 +744,46 @@ cdiPioNoPostCommSetup(void)
 static int pioNamespace_ = -1;
 static int xtInitByCDI = 0;
 
+MPI_Comm
+cdiPioInit(MPI_Comm commGlob, int IOMode, int clientServerRole,
+           int *pioNamespace, float partInflate,
+           void (*postCommSetupActions)(void))
+{
+  /* construct new communicator such that old interface can be used
+   * i.e. push all processes not being clients to ranks succeeding
+   * clients and non-collectors even further
+   */
+  int key;
+  switch (clientServerRole)
+    {
+    case PIO_ROLE_CLIENT:
+      key = 0;
+      break;
+    case PIO_ROLE_COLLECTOR:
+    case PIO_ROLE_WRITER_COLLECTOR:
+      key = 1;
+      break;
+    case PIO_ROLE_WRITER:
+    case PIO_ROLE_FPGUARD:
+      key = 2;
+      break;
+    default:
+      xabort("Invalid client/server-role specified: %d", clientServerRole);
+    }
+  MPI_Comm rearrangedCommGlob;
+  xmpi(MPI_Comm_split(commGlob, 0, key, &rearrangedCommGlob));
+  int serverCount = (key > 0);
+  xmpi(MPI_Allreduce(MPI_IN_PLACE, &serverCount,
+                     1, MPI_INT, MPI_SUM, commGlob));
+  MPI_Comm retComm
+    = pioInit(rearrangedCommGlob, IOMode, serverCount, pioNamespace,
+              partInflate, postCommSetupActions);
+  MPI_Comm_free(&rearrangedCommGlob);
+  return retComm;
+}
+
+
+
 /* pioInit definition must currently compile even in non-MPI configurations */
 /**
    @brief initializes the MPI_Communicators needed for the

@@ -182,9 +182,10 @@ libcdipio_la_SOURCES =							\
 	pio_list_set.c							\
 	resource_unpack.h						\
 	resource_unpack.c						\
-	pio_rpc.h							\
 	pio_client.c							\
 	pio_client.h							\
+	pio_roles.c							\
+	pio_rpc.h							\
 	pio_server.c							\
 	pio_server.h							\
 	pio_serialize.h							\

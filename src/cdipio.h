@@ -22,6 +22,12 @@
 #define  PIO_MAXIOMODE                  PIO_FPGUARD
 #define  PIO_MINIOMODEWITHSPECIALPROCS  PIO_WRITER
 
+#define PIO_ROLE_CLIENT 0
+#define PIO_ROLE_COLLECTOR 1
+#define PIO_ROLE_WRITER 2
+#define PIO_ROLE_WRITER_COLLECTOR 3
+#define PIO_ROLE_FPGUARD 4
+
 /* parallel IO routines */
 #include <yaxt.h>
 
@@ -35,6 +41,10 @@ void cdiPioNoPostCommSetup(void);
 MPI_Comm pioInit(MPI_Comm commSuper, int nProcsIO, int IOMode,
                  int *pioNamespace, float partInflate,
                  void (*postCommSetupActions)(void));
+/*      cdiPioInit: initialize I/O server processes and communication */
+MPI_Comm cdiPioInit(MPI_Comm commSuper, int IOMode, int clientServerRole,
+                    int *pioNamespace, float partInflate,
+                    void (*postCommSetupActions)(void));
 void     pioWriteTimestep(void);
 void     cdiPioRDMAProgress(void);
 
@@ -45,5 +55,7 @@ void     streamWriteScatteredVarPart(int streamID, int varID, const void *data,
                                      int numBlocks, const int blocklengths[],
                                      const int displacements[],
                                      int nmiss, Xt_idxlist partDesc);
+
+int cdiPioCSRLastN(MPI_Comm commSuper, int IOMode, int nProcsIO);
 
 #endif

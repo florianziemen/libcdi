@@ -34,6 +34,16 @@ static int pioInit_fwrap(int commSuper, int nProcsIO, int IOMode, int *pioNamesp
   return MPI_Comm_c2f(v);
 }
 FCALLSCFUN6 (INT, pioInit_fwrap, PIOINIT, pioinit, INT, INT, INT, PINT, FLOAT, ROUTINE)
+
+#undef ROUTINE_6
+#define ROUTINE_6 (void (*)(void))
+static int cdiPioInit_fwrap(int commSuper, int IOMode, int clientServerRole, int *pioNamespace, float partInflate, void (*postCommSetupActions)(void))
+{
+  MPI_Comm v;
+  v = cdiPioInit(MPI_Comm_f2c(commSuper), IOMode, clientServerRole, pioNamespace, partInflate, postCommSetupActions);
+  return MPI_Comm_c2f(v);
+}
+FCALLSCFUN6 (INT, cdiPioInit_fwrap, CDIPIOINIT, cdipioinit, INT, INT, INT, PINT, FLOAT, ROUTINE)
 FCALLSCSUB0 (pioWriteTimestep, PIOWRITETIMESTEP, piowritetimestep)
 FCALLSCSUB0 (cdiPioRDMAProgress, CDIPIORDMAPROGRESS, cdipiordmaprogress)
 static void streamWriteVarPart_fwrap(int streamID, int varID, const void *data, int nmiss, void *partDesc)
@@ -46,5 +56,12 @@ static void streamWriteScatteredVarPart_fwrap(int streamID, int varID, const voi
   streamWriteScatteredVarPart(streamID, varID, data, numBlocks, blocklengths, displacements, nmiss, (*(Xt_idxlist *)partDesc));
 }
 FCALLSCSUB8 (streamWriteScatteredVarPart_fwrap, STREAMWRITESCATTEREDVARPART, streamwritescatteredvarpart, INT, INT, PVOID, INT, INTV, INTV, INT, PVOID)
+static int cdiPioCSRLastN_fwrap(int commSuper, int IOMode, int nProcsIO)
+{
+  int v;
+  v = cdiPioCSRLastN(MPI_Comm_f2c(commSuper), IOMode, nProcsIO);
+  return v;
+}
+FCALLSCFUN3 (INT, cdiPioCSRLastN_fwrap, CDIPIOCSRLASTN, cdipiocsrlastn, INT, INT, INT)
 
 #endif

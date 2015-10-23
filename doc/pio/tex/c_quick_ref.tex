@@ -4,6 +4,17 @@
 This appendix provide a brief listing of the C language bindings of the
 CDI library routines:
 
+\section*{\tt \htmlref{cdiPioInit}{cdiPioInit}}
+
+\begin{verbatim}
+    MPI_Comm cdiPioInit (MPI_Comm commSuper, int IOMode, int clientServerRole,
+                         int *pioNamespace, float partInflate,
+                         void (*postCommSetupActions)(void));
+\end{verbatim}
+
+initialize I/O server processes and communication.
+
+
 \section*{\tt \htmlref{cdiPioNoPostCommSetup}{cdiPioNoPostCommSetup}}
 
 \begin{verbatim}
