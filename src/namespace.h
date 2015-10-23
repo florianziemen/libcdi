@@ -8,7 +8,6 @@
 
 typedef enum {
   STAGE_DEFINITION = 0,
-  STAGE_TIMELOOP   = 1,
   STAGE_UNUSED     = 3,
 } statusCode;
 

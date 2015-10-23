@@ -580,23 +580,14 @@ void  pioEndDef ( void )
     numColl = commInqSizeColl(),
     collRank = cdiPioCollRank(clientRank, numClients, numColl);
 
-  xdebug("%s", "START");
-
   if (clientRank == cdiPioClientRangeStart(collRank, numClients, numColl))
     {
       MPI_Comm comm = cdiPioInqInterComm();
       reshPackBufferCreate(&buffer, &bufferSize, &comm);
-
       xmpi(MPI_Send(buffer, bufferSize, MPI_PACKED, collRank,
                     RESOURCES, comm));
-
-      xdebug("%s", "SENT MESSAGE WITH TAG \"RESOURCES\"");
-
-      reshPackBufferDestroy ( &buffer );
+      reshPackBufferDestroy(&buffer);
     }
-
-  namespaceDefResStatus ( STAGE_TIMELOOP );
-  xdebug("%s", "RETURN");
 }
 
 /************************************************************************/

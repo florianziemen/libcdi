@@ -34,7 +34,6 @@ cdiPioClientStreamOpen(const char *filename, char filemode,
       switch ( nspStatus )
         {
         case STAGE_DEFINITION:
-        case STAGE_TIMELOOP:
           {
             MPI_Comm comm = cdiPioInqInterComm();
             int clientRank = commInqRankModel(),
@@ -102,7 +101,6 @@ cdiPioClientStreamDefVlist_(int streamID, int vlistID)
   switch ( nspStatus )
     {
     case STAGE_DEFINITION:
-    case STAGE_TIMELOOP:
       {
         int clientRank = commInqRankModel(),
           numClients = cdiPioCommInqSizeClients(),
@@ -187,9 +185,6 @@ cdiPioClientStreamWriteVarPart(int streamID, int varID, const void *data,
   switch (namespaceInqResStatus())
     {
     case STAGE_DEFINITION:
-      xabort("DEFINITION STAGE: PARALLEL WRITING NOT POSSIBLE.");
-      break;
-    case STAGE_TIMELOOP:
       pioBufferPartData(streamID, varID, data, nmiss, partDesc);
       return;
     default:
@@ -207,9 +202,6 @@ cdiPioClientStreamWriteScatteredVarPart(int streamID, int varID,
   switch (namespaceInqResStatus())
     {
     case STAGE_DEFINITION:
-      xabort("DEFINITION STAGE: PARALLEL WRITING NOT POSSIBLE.");
-      break;
-    case STAGE_TIMELOOP:
       cdiPioBufferPartDataGather(streamID, varID, data, numBlocks,
                                  blocklengths, displacements, nmiss, partDesc);
       return;
@@ -242,7 +234,6 @@ cdiPioClientStreamClose(stream_t *streamptr, int recordBufIsToBeDeleted)
   switch ( nspStatus )
     {
     case STAGE_DEFINITION:
-    case STAGE_TIMELOOP:
       {
         int clientRank = commInqRankModel(),
           numClients = cdiPioCommInqSizeClients(),
@@ -295,7 +286,6 @@ cdiPioClientStreamDefTimestep_(stream_t *streamptr, int tsID)
   switch ( nspStatus )
     {
     case STAGE_DEFINITION:
-    case STAGE_TIMELOOP:
       taxisID = vlistInqTaxis(streamptr->vlistID);
       header = (struct winHeaderEntry){
         .id = STREAMDEFTIMESTEP,
