@@ -22,6 +22,7 @@ struct cdiPioConf {
   float partInflate;
   void (*postCommSetupActions)(void);
   bool largePageAlign;
+  bool cacheRedists;
 };
 
 extern const resOps cdiPioConfOps;
@@ -57,5 +58,10 @@ cdiPioIOMode2Str(int IOMode);
 int cdiPioConfGetLargePageAlign(int confResH);
 
 void cdiPioConfSetLargePageAlign(int confResH, int largePageAlign);
+
+void cdiPioConfSetRedistCache(int confResH, int doCache);
+
+int cdiPioConfGetRedistCache(int confResH);
+
 
 #endif

@@ -513,7 +513,7 @@ cdiPioInit(MPI_Comm commGlob, int confResH, int *pioNamespace)
       cdiPioFileWritingInit(conf);
       if (commInqRankColl() >= 0)
         {
-          cdiPioCollectorMessageLoop();
+          cdiPioCollectorMessageLoop(conf);
           cdiPioFileWritingFinalize();
         }
       cdiPioCommFinalize();

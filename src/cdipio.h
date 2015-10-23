@@ -115,5 +115,17 @@ void cdiPioConfSetLargePageAlign(int confResH, int largePageAlign);
  * large pages instead of normal pages? */
 int cdiPioConfGetLargePageAlign(int confResH);
 
+/* cdiPioConfSetRedistCache: set doCache to anything non-zero if data
+ * for internal data exchanges is to be cached. This makes sense when
+ * the data passed via streamWriteVarPart or streamWriteScatteredVarPart
+ * is always decomposed statically using the same partitioning
+ * description objects and the sequence of calls to streamWriteVarPart
+ * or streamWriteScatteredVarPart for a stream matches the sequence
+ * of the previous sequence (divided by pioWriteTimestep) */
+void cdiPioConfSetRedistCache(int confResH, int doCache);
+
+/* cdiPioConfSetRedistCache: will data for internal data exchanges
+ * be cached? */
+int cdiPioConfGetRedistCache(int confResH);
 
 #endif

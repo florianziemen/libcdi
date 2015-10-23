@@ -7,7 +7,9 @@
 
 #include <mpi.h>
 
-void cdiPioCollectorMessageLoop(void);
+#include "pio_conf.h"
+
+void cdiPioCollectorMessageLoop(const struct cdiPioConf *conf);
 
 #endif
 /*

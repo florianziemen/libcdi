@@ -158,6 +158,7 @@ int cdiPioConfCreate(void)
   conf->partInflate = 1.1f;
   conf->postCommSetupActions = cdiPioNoPostCommSetup;
   conf->largePageAlign = false;
+  conf->cacheRedists = false;
   int resH = reshPut(conf, &cdiPioConfOps);
   /* configuration objects are never forwarded */
   reshSetStatus(resH, &cdiPioConfOps,
@@ -233,5 +234,17 @@ int cdiPioConfGetLargePageAlign(int confResH)
 {
   struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
   return conf->largePageAlign;
+}
+
+void cdiPioConfSetRedistCache(int confResH, int doCache)
+{
+  struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
+  conf->cacheRedists = doCache;
+}
+
+int cdiPioConfGetRedistCache(int confResH)
+{
+  struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
+  return conf->cacheRedists;
 }
 

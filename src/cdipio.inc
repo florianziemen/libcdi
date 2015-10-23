@@ -159,3 +159,12 @@
 !                                    (INTEGER         confResH)
       EXTERNAL        cdiPioConfGetLargePageAlign
 
+!                     cdiPioConfSetRedistCache
+!                                    (INTEGER         confResH,
+!                                     INTEGER         doCache)
+      EXTERNAL        cdiPioConfSetRedistCache
+
+      INTEGER         cdiPioConfGetRedistCache
+!                                    (INTEGER         confResH)
+      EXTERNAL        cdiPioConfGetRedistCache
+
