@@ -96,4 +96,14 @@ FCALLSCFUN1 (INT, cdiPioConfGetLargePageAlign, CDIPIOCONFGETLARGEPAGEALIGN, cdip
 FCALLSCSUB2 (cdiPioConfSetRedistCache, CDIPIOCONFSETREDISTCACHE, cdipioconfsetredistcache, INT, INT)
 FCALLSCFUN1 (INT, cdiPioConfGetRedistCache, CDIPIOCONFGETREDISTCACHE, cdipioconfgetredistcache, INT)
 
+/*  convert index lists to stripes prior to intersection computation,
+ * defaults to true  */
+
+FCALLSCSUB2 (cdiPioConfSetStripeConversion, CDIPIOCONFSETSTRIPECONVERSION, cdipioconfsetstripeconversion, INT, INT)
+
+/*  are index lists of parts converted stripes before being passed
+ * to the xmap constructor?  */
+
+FCALLSCFUN1 (INT, cdiPioConfGetStripeConversion, CDIPIOCONFGETSTRIPECONVERSION, cdipioconfgetstripeconversion, INT)
+
 #endif

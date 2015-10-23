@@ -174,3 +174,20 @@
 !                                    (INTEGER         confResH)
       EXTERNAL        cdiPioConfGetRedistCache
 
+!
+!  convert index lists to stripes prior to intersection computation,
+!  defaults to true
+!
+!                     cdiPioConfSetStripeConversion
+!                                    (INTEGER         confResH,
+!                                     INTEGER         doStripify)
+      EXTERNAL        cdiPioConfSetStripeConversion
+
+!
+!  are index lists of parts converted stripes before being passed
+!  to the xmap constructor?
+!
+      INTEGER         cdiPioConfGetStripeConversion
+!                                    (INTEGER         confResH)
+      EXTERNAL        cdiPioConfGetStripeConversion
+

@@ -257,6 +257,12 @@ buildVarRedist(int headerIdx, size_t streamIdx,
   for (size_t clientIdx = 0; clientIdx < (size_t)numClients_; ++clientIdx)
     xt_idxlist_delete(part[clientIdx]);
   Free(part);
+  if (conf->stripify)
+    {
+      Xt_idxlist srcListStriped = xt_idxstripes_from_idxlist_new(srcList);
+      xt_idxlist_delete(srcList);
+      srcList = srcListStriped;
+    }
   Xt_xmap gatherXmap = conf->xmap_new(srcList, dstList, collComm);
   xt_idxlist_delete(srcList);
   struct Xt_offset_ext gatherExt

@@ -143,5 +143,12 @@ void cdiPioConfSetXmapNew(int confResH,
 Xt_xmap (*cdiPioConfGetXmapNew(int confResH))(Xt_idxlist src_idxlist,
                                               Xt_idxlist dst_idxlist,
                                               MPI_Comm comm);
+/* convert index lists to stripes prior to intersection computation,
+ * defaults to true */
+void cdiPioConfSetStripeConversion(int confResH, int doStripify);
+
+/* are index lists of parts converted stripes before being passed
+ * to the xmap constructor? */
+int cdiPioConfGetStripeConversion(int confResH);
 
 #endif

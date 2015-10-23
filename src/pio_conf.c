@@ -165,6 +165,7 @@ int cdiPioConfCreate(void)
   conf->cacheRedists = true;
   conf->recordAggBufLimMB = 128;
   conf->xmap_new = xt_xmap_dist_dir_new;
+  conf->stripify = true;
   int resH = reshPut(conf, &cdiPioConfOps);
   /* configuration objects are never forwarded */
   reshSetStatus(resH, &cdiPioConfOps,
@@ -279,5 +280,17 @@ xmap_new_func_ptr cdiPioConfGetXmapNew(int confResH)
 {
   struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
   return conf->xmap_new;
+}
+
+void cdiPioConfSetStripeConversion(int confResH, int doConversion)
+{
+  struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
+  conf->stripify = doConversion;
+}
+
+int cdiPioConfGetStripeConversion(int confResH)
+{
+  struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
+  return conf->stripify;
 }
 
