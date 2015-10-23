@@ -215,6 +215,7 @@ module mo_cdi
   public :: cdiDefGlobal
   public :: namespaceNew
   public :: namespaceSetActive
+  public :: namespaceGetActive
   public :: namespaceDelete
   public :: cdiParamToString
   public :: cdiDecodeParam
@@ -667,6 +668,12 @@ module mo_cdi
       import c_int
       integer(c_int), value :: namespaceID_dummy
     end subroutine namespaceSetActive
+
+    function namespaceGetActive() bind(c, name = 'namespaceGetActive')&
+    & result(f_result)
+      import c_int
+      integer(c_int) :: f_result
+    end function namespaceGetActive
 
     subroutine namespaceDelete(namespaceID_dummy) bind(c, name =&
     & 'namespaceDelete')

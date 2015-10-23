@@ -440,6 +440,9 @@
 !                                    (INTEGER         namespaceID)
       EXTERNAL        namespaceSetActive
 
+      INTEGER         namespaceGetActive
+      EXTERNAL        namespaceGetActive
+
 !                     namespaceDelete
 !                                    (INTEGER         namespaceID)
       EXTERNAL        namespaceDelete

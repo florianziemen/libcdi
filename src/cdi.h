@@ -272,6 +272,7 @@ void    cdiDefGlobal(const char *string, int val);
 
 int     namespaceNew(void);
 void    namespaceSetActive(int namespaceID);
+int     namespaceGetActive(void);
 void    namespaceDelete(int namespaceID);
 
 
