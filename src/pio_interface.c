@@ -3,9 +3,10 @@
 #endif
 
 #include <limits.h>
+#include <stdarg.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <stdarg.h>
 
 #include <mpi.h>
 #include <yaxt.h>
@@ -17,6 +18,7 @@
 #include "namespace.h"
 #include "pio.h"
 #include "pio_client.h"
+#include "pio_id_set.h"
 #include "pio_serialize.h"
 #include "pio_interface.h"
 #include "pio_comm.h"
@@ -33,11 +35,13 @@ static struct rdmaWin
   size_t size;
   unsigned char *buffer, *head;
   MPI_Win win;
-  int postSet, refuseFuncCall;
-  MPI_Group ioGroup;
   int dictSize, dictDataUsed, dictRPCUsed;
+  bool postSet, refuseFuncCall;
+  /** data or meta-data updates on this stream are to be communicated */
+  bool pendingUpdate;
 } *txWin = NULL;
 
+static struct idList openStreams;
 
 const char * const funcMap[numRPCFuncs] = {
   "streamOpen",
@@ -49,16 +53,6 @@ const char * const funcMap[numRPCFuncs] = {
 float cdiPIOpartInflate_;
 
 /****************************************************/
-
-static int cmp ( const void * va, const void * vb )
-{
-    const int ** a, ** b;
-
-  a = ( const int ** ) va;
-  b = ( const int ** ) vb;
-
-  return (( **a < **b ) - ( **a > **b ));
-}
 
 void memcpyPackFunc(void *dataDesc, void *buf, int size, int *pos,
                     void *context)
@@ -72,259 +66,64 @@ void memcpyPackFunc(void *dataDesc, void *buf, int size, int *pos,
 
 /****************************************************/
 
-static void
-mapProblems(int problemSizes[], int * problemMapping, int nProblems,
-            int nWriter, double * w)
+struct clientBufferSetup
 {
-  int *ip[nProblems];
-  int dummy[nProblems];
-  int buckets[nWriter];
-  int currCapacity, nextCapacity;
-  double meanBucket[nWriter];
-  int sum = 0;
-  int writerIdx = 0;
-  int i, j;
+  struct collSpec collectData;
+  struct clientBufSize *bufSizes;
+  size_t bufSizesCount;
+};
 
-
-  for ( i = 0; i < nProblems; i++ )
-    {
-      ip[i] = &problemSizes[i];
-      sum += problemSizes[i];
-    }
-
-  qsort(ip, (size_t)nProblems, sizeof ( int * ), cmp );
-
-  for ( i = 0; i < nProblems; i++ )
-    dummy[i] = (int)(ip[i] - problemSizes);
-
-  for ( j = 0; j < nWriter; j++ )
-    meanBucket[j] = ( double ) sum * ( * ( w + j ));
-
-  memset(buckets, 0, sizeof (buckets));
-
-  for ( i = 0; i < nProblems; i++ )
-    {
-      currCapacity = INT_MIN;
-
-      for ( j = 0; j < nWriter; j++ )
-	{
-	  nextCapacity = (int)meanBucket[j] - ( buckets[j] + ( *ip[i] ));
-
-	  if ( nextCapacity > currCapacity )
-	    {
-	      currCapacity = nextCapacity;
-	      writerIdx = j;
-	    }
-	}
-      problemMapping[ dummy[i] ] = writerIdx;
-      buckets[writerIdx] +=  *ip[i];
-    }
-
-  if ( ddebug )
-    {
-      xprintArray3 (  "problemSizes = ", problemSizes, nProblems, DATATYPE_INT );
-      xprintArray3 ( "vector of indices, qsort of problemSizes", dummy,
-                    nProblems, DATATYPE_INT );
-      xprintArray3 ( "problemMapping", problemMapping, nProblems, DATATYPE_INT );
-      xprintArray3 ( "meanBucket", meanBucket, nWriter, DATATYPE_FLT );
-      xprintArray3 ( "actual buckets", buckets, nWriter, DATATYPE_INT );
-    }
+static enum cdiApplyRet
+clientStreamBufSizeIter(int id, void *res, void *data)
+{
+  (void)res;
+  struct clientBufferSetup *setup = data;
+  size_t bufSizesCount = setup->bufSizesCount;
+  setup->bufSizes[bufSizesCount]
+    = computeClientStreamBufSize(id, &setup->collectData);
+  setup->bufSizesCount = ++bufSizesCount;
+  size_t insertPos = insertID(&openStreams, id);
+  xassert(insertPos == bufSizesCount - 1);
+  return CDI_APPLY_GO_ON;
 }
 
-/****************************************************/
-
-/**
-   @brief is encapsulated in CDI library.
-
-   @param vSizes array with number of levels for all var_t 's in order of streams
-
-   @param sSizes array with number of var_t for all stream_t 's
-
-   @param varMapping return value, array with ranks of I/O PEs assigned to var_t 's
-in order of vSizes
-
-   @param nStreams number of stream_t 's
-
-   @param nodeSizes array of number of I/O PEs on each physical nodes, increasing
-   order of ranks assumed
-
-   @param nNodes number of physical nodes hosting I/O PEs
-
-*/
 
 static void
-varMapGen(int *vSizes, int *sSizes, int *varMapping,
-          unsigned nStreams, int *nodeSizes, int nNodes)
+clientBufSizes(struct clientBufferSetup *setup)
 {
-
-  int weightsStreams[nStreams];
-  int streamMapping[nStreams];
-  int nPEs = 0, nVars = 0;
-  int offset = 0, offsetN = 0;
-
-  int * weightsVarsNode;
-  int * varMappingNode;
-  int nVarsNode, summandRank = 0;
-  int nProcsColl = commInqNProcsColl ();
-
-  int buckets[nProcsColl];
-
-  for (unsigned i = 0; i < nStreams; i++ )
-    {
-      nVars += sSizes[i];
-      weightsStreams[i] = 0;
-      for ( int j = 0; j < * ( sSizes + i ); j++ )
-	weightsStreams[i] += * ( vSizes + offset++ );
-    }
-
-  double *w = (double *) Malloc((size_t)nNodes * sizeof ( double ));
-  for ( int j = 0; j < nNodes; j++ )
-    nPEs += * ( nodeSizes + j );
-
-  for ( int j = 0; j < nNodes; j++ )
-    w[j] = ( double ) * ( nodeSizes + j ) / ( double ) nPEs;
-
-  mapProblems(weightsStreams, streamMapping, (int)nStreams, nNodes, w);
-  Free( w );
-
-  for ( int i = 0; i < nNodes; i++ )
-    {
-      nVarsNode = 0;
-      for (unsigned j = 0; j < nStreams; j++)
-	if ( * ( streamMapping + j ) == i )
-	  nVarsNode += * ( sSizes + j );
-
-      weightsVarsNode = Malloc((size_t)nVarsNode * sizeof (int));
-      varMappingNode = Malloc((size_t)nVarsNode * sizeof ( int ));
-      w = Malloc((size_t)nodeSizes[i] * sizeof (double));
-      offset = 0;
-      offsetN = 0;
-
-      for (unsigned j = 0; j < nStreams; j++ )
-	if (streamMapping[j] == i)
-	  for ( int k = 0; k < sSizes[j]; k ++ )
-	    weightsVarsNode[offsetN++] = vSizes[offset++];
-	else
-	  offset += sSizes[j];
-
-      for ( int j = 0; j < nodeSizes[i]; j++ )
-	w[j] = 1.0 / ( double ) * ( nodeSizes + i );
-
-      mapProblems ( weightsVarsNode, varMappingNode, nVarsNode,
-		    * ( nodeSizes + i ),  w );
-
-      offset = 0;
-      offsetN = 0;
-
-      for (unsigned j = 0; j < nStreams; j++)
-	if ( * ( streamMapping + j ) == i )
-	  for ( int k = 0; k < sSizes[j]; k++ )
-	    * ( varMapping + offset ++ ) =
-              commCollID2RankGlob ( * ( varMappingNode + offsetN ++ ) +
-                                    summandRank );
-	else
-	  offset += * ( sSizes + j );
-
-      summandRank += * ( nodeSizes + i );
-
-      Free( w );
-      Free( varMappingNode );
-      Free( weightsVarsNode );
-    }
-
-  if ( ddebug )
-    {
-      xprintArray ( "varMapping", varMapping, nVars, DATATYPE_INT  );
-      for ( int i = 0; i < nProcsColl; i++ )
-	buckets[i] = 0;
-      for ( int i = 0; i < nVars; i ++ )
-	buckets[commRankGlob2CollID ( *(varMapping + i ))] += * ( vSizes + i );
-      xprintArray ( "buckets", buckets, nProcsColl, DATATYPE_INT );
-    }
+  int numClients = cdiPioCommInqSizeClients(),
+    clientRank = commInqRankModel(),
+    numColl = commInqSizeColl(),
+    collRank = cdiPioCollRank(clientRank, numClients, numColl);
+  setup->collectData = (struct collSpec){
+    .numClients = numClients,
+    .numServers = numColl,
+    .sendRPCData
+    = (clientRank == cdiPioClientRangeStart(collRank, numClients, numColl)),
+  };
+  reshLock();
+  unsigned streamCount = reshCountType(&streamOps);
+  setup->bufSizesCount = 0;
+  setup->bufSizes = Malloc(streamCount * sizeof (setup->bufSizes[0]));
+  cdiResHFilterApply(&streamOps, clientStreamBufSizeIter, setup);
+  reshUnlock();
 }
+
 
 /************************************************************************/
 
 static void
-varsMapNDeco(int nNodes, int *nodeSizes)
+modelWinDelete(void)
 {
-  int nVars, * resHs, * streamSizes, * varSizes, * varMapping,
-    * collectsData;
-  int k = 0;
-  int nProcsColl = commInqNProcsColl ();
-
-  xdebug ( "START, nProcsColl=%d", nProcsColl );
-
-  unsigned nStreams = reshCountType(&streamOps);
-
-  resHs       = Malloc(nStreams * sizeof (resHs[0]));
-  streamSizes = Malloc(nStreams * sizeof (streamSizes[0]));
-  collectsData = Malloc((size_t)nProcsColl * sizeof (collectsData[0]));
-  cdiStreamGetIndexList(nStreams, resHs);
-
-  for (unsigned i = 0; i < nStreams; i++ )
-    streamSizes[i] = streamInqNvars(resHs[i]);
-
-  nVars = sum_int((size_t)nStreams, streamSizes);
-  varSizes   = Calloc((size_t)nVars, sizeof (varSizes[0]));
-  varMapping = Malloc((size_t)nVars * sizeof (varMapping[0]));
-
-  for (unsigned i = 0; i < nStreams; i++ )
-    {
-      int vlistID = streamInqVlist(resHs[i]);
-      for (int j = 0; j < streamSizes[i]; j++ )
-        varSizes[k++] += vlistInqVarSize(vlistID, j);
-    }
-
-  xassert ( k == nVars );
-
-  varMapGen ( varSizes, streamSizes, varMapping,
-	      nStreams, nodeSizes, nNodes );
-
-  k = 0;
-  for (unsigned i = 0; i < nStreams; i++ )
-    for (int j = 0; j < * ( streamSizes + i ); j++ )
-      {
-        vlistDefVarIOrank ( streamInqVlist ( * ( resHs + i )), j,
-                            * ( varMapping + k ));
-        vlistDefVarIOrank ( streamInqVlistIDorig ( * ( resHs + i )), j,
-                            * ( varMapping + k ));
-        collectsData[commRankGlob2CollID ( varMapping[k++] )] = 1;
-      }
-
-  for (int j = 0; j < nProcsColl; j++ )
-    if ( collectsData[j] == 0 )
-      xabort("AT LEAST ONE COLLECTOR PROCESS IDLES, "
-             "CURRENTLY NOT COVERED: "
-             "PE%d collects no data",
-             commCollID2RankGlob(j));
-
-  if ( varMapping )   Free( varMapping );
-  if ( varSizes )     Free( varSizes );
-  if ( collectsData ) Free( collectsData );
-  if ( streamSizes )  Free( streamSizes );
-  if ( resHs )        Free( resHs );
-
-  xdebug("%s", "RETURN");
-}
-
-/************************************************************************/
-
-static
-void modelWinCleanup ( void )
-{
-  int collID;
-
   xdebug("%s", "START");
   if (txWin != NULL)
     {
-      for ( collID = 0; collID < commInqNProcsColl (); collID ++ )
+      for (size_t streamIdx = 0; streamIdx < openStreams.size; ++streamIdx)
         {
-          if (txWin[collID].postSet)
-            xmpi(MPI_Win_wait(txWin[collID].win));
-          xmpi(MPI_Win_free(&txWin[collID].win));
-          xmpi ( MPI_Free_mem ( txWin[collID].buffer ));
-          xmpi(MPI_Group_free(&txWin[collID].ioGroup));
+          if (txWin[streamIdx].postSet)
+            xmpi(MPI_Win_wait(txWin[streamIdx].win));
+          xmpi(MPI_Win_free(&txWin[streamIdx].win));
+          xmpi(MPI_Free_mem(txWin[streamIdx].buffer));
         }
       Free(txWin);
     }
@@ -334,181 +133,84 @@ void modelWinCleanup ( void )
 
 /************************************************************************/
 
-struct collDesc
+static void
+modelWinFlushBuffer(size_t streamIdx)
 {
-  int numDataRecords, numRPCRecords;
-};
+  size_t numStreams = openStreams.size;
+
+  xassert(streamIdx < numStreams
+          && openStreams.entries[streamIdx] != CDI_UNDEFID
+          && txWin != NULL
+          && txWin[streamIdx].buffer != NULL);
+  memset(txWin[streamIdx].buffer, 0, txWin[streamIdx].size);
+  txWin[streamIdx].head = txWin[streamIdx].buffer
+    + (size_t)txWin[streamIdx].dictSize * sizeof (struct winHeaderEntry);
+  txWin[streamIdx].refuseFuncCall = 0;
+  txWin[streamIdx].dictDataUsed = 1;
+  txWin[streamIdx].dictRPCUsed = 0;
+  txWin[streamIdx].pendingUpdate = false;
+  txWin[streamIdx].postSet = false;
+  *(struct winHeaderEntry *)txWin[streamIdx].buffer
+    = (struct winHeaderEntry){
+    .id = HEADERSIZEMARKER,
+    .specific.headerSize = { .numDataEntries = 0, .numRPCEntries = 0 },
+  };
+}
+
+
+/************************************************************************/
 
 static void
-modelWinDefBufferSizes(void)
+cdiPioClientWinCreate(struct clientBufferSetup *setup)
 {
-  int *streamIndexList, nvars, varID;
-  size_t sumWinBufferSize = 0;
-  int nProcsColl  = commInqNProcsColl ();
-  int rankGlob    = commInqRankGlob ();
-  int root = commInqRootGlob ();
-  struct collDesc *collIndex;
-
-  xdebug("%s", "START");
-  xassert(txWin != NULL);
-
-  unsigned nstreams = reshCountType ( &streamOps );
-  streamIndexList = Malloc((size_t)nstreams * sizeof (streamIndexList[0]));
-  collIndex = Calloc((size_t)nProcsColl, sizeof (collIndex[0]));
-  reshGetResHListOfType ( nstreams, streamIndexList, &streamOps );
-  for (unsigned streamNo = 0; streamNo < nstreams; streamNo++ )
-    {
-      // memory required for data
-      int streamID = streamIndexList[streamNo];
-      int vlistID = streamInqVlist(streamID);
-      nvars = vlistNvars ( vlistID );
-      for ( varID = 0; varID < nvars; varID++ )
-        {
-          int collID = commRankGlob2CollID(vlistInqVarIOrank(vlistID, varID));
-          size_t collIDchunk;
-          {
-            int varSize = vlistInqVarSize(vlistID, varID);
-            int nProcsModel = commInqNProcsModel();
-            collIDchunk = (size_t)(ceilf(cdiPIOpartInflate_
-                                         * (float)(varSize + nProcsModel - 1)
-                                         / (float)nProcsModel));
-          }
-          xassert ( collID != CDI_UNDEFID && collIDchunk > 0 );
-          collIndex[collID].numDataRecords += 2;
-          txWin[collID].size += (size_t)collIDchunk * sizeof (double)
-            /* re-align chunks to multiple of double size */
-            + sizeof (double) - 1
-            /* one header for data record, one for corresponding part
-             * descriptor*/
-            + 2 * sizeof (struct winHeaderEntry)
-            /* FIXME: heuristic for size of packed Xt_idxlist */
-            + sizeof (Xt_int) * collIDchunk * 3;
-        }
-
-      // memory required for the function calls encoded
-      // for remote execution
-      // once per stream and timestep for all collprocs only on the modelproc root
-      if ( rankGlob == root )
-        for ( int collID = 0; collID < nProcsColl; collID++ )
-          {
-            collIndex[collID].numRPCRecords += numRPCFuncs;
-            txWin[collID].size +=
-              numRPCFuncs * sizeof (struct winHeaderEntry)
-              + MAXDATAFILENAME
-              /* data part of streamDefTimestep */
-              + (2 * CDI_MAX_NAME + sizeof (taxis_t));
-          }
-    }
-  for ( int collID = 0; collID < nProcsColl; ++collID)
-    {
-      int numRecords = 1 + collIndex[collID].numDataRecords
-        + collIndex[collID].numRPCRecords;
-      txWin[collID].dictSize = numRecords;
-      txWin[collID].dictDataUsed = 1;
-      txWin[collID].dictRPCUsed = 0;
-      /* account for size header */
-      txWin[collID].size += sizeof (struct winHeaderEntry);
-      txWin[collID].size = roundUpToMultiple(txWin[collID].size,
-                                             PIO_WIN_ALIGN);
-      sumWinBufferSize += (size_t)txWin[collID].size;
-    }
-  Free(collIndex);
-  Free( streamIndexList );
-
-  xdebug("sumWinBufferSize=%zu, MAXWINBUFFERSIZE=%zu", sumWinBufferSize,
-         (size_t)MAXWINBUFFERSIZE);
-  xassert ( sumWinBufferSize <= (size_t)MAXWINBUFFERSIZE );
-  xdebug("%s", "RETURN");
-}
-
-
-/************************************************************************/
-
-
-static
-  void modelWinFlushBuffer ( int collID )
-{
-  int nProcsColl = commInqNProcsColl ();
-
-  xassert ( collID                >= 0         &&
-            collID                < nProcsColl &&
-            txWin != NULL      &&
-            txWin[collID].buffer     != NULL      &&
-            txWin[collID].size <= MAXWINBUFFERSIZE);
-  memset(txWin[collID].buffer, 0, txWin[collID].size);
-  txWin[collID].head = txWin[collID].buffer
-    + (size_t)txWin[collID].dictSize * sizeof (struct winHeaderEntry);
-  txWin[collID].refuseFuncCall = 0;
-  txWin[collID].dictDataUsed = 1;
-  txWin[collID].dictRPCUsed = 0;
-}
-
-
-/************************************************************************/
-
-
-static
-void modelWinCreate ( void )
-{
-  int collID, ranks[1];
-  int nProcsColl = commInqNProcsColl ();
-
-  xdebug("%s", "START");
-  txWin = Calloc((size_t)nProcsColl, sizeof (txWin[0]));
-
-  modelWinDefBufferSizes ();
-  ranks[0] = commInqNProcsModel ();
-
   MPI_Info no_locks_info;
   xmpi(MPI_Info_create(&no_locks_info));
   xmpi(MPI_Info_set(no_locks_info, "no_locks", "true"));
-  for ( collID = 0; collID < nProcsColl; collID ++ )
+  size_t numStreams = setup->bufSizesCount;
+  txWin = Malloc(numStreams * sizeof (txWin[0]));
+  struct clientBufSize *restrict bufSpec = setup->bufSizes;
+  MPI_Comm collClientIntraComm = cdiPioInqCollClientIntraComm();
+  for (size_t streamIdx = 0; streamIdx < numStreams; ++streamIdx)
     {
-      xassert(txWin[collID].size > 0);
-      txWin[collID].buffer = NULL;
-      xmpi(MPI_Alloc_mem((MPI_Aint)txWin[collID].size, MPI_INFO_NULL,
-                         &txWin[collID].buffer));
-      xassert ( txWin[collID].buffer != NULL );
-      txWin[collID].head = txWin[collID].buffer
-        + (size_t)txWin[collID].dictSize * sizeof (struct winHeaderEntry);
-      xmpi(MPI_Win_create(txWin[collID].buffer, (MPI_Aint)txWin[collID].size, 1,
-                          no_locks_info, commInqCommsIO(collID),
-                          &txWin[collID].win));
-      MPI_Group commGroup;
-      xmpi(MPI_Comm_group(commInqCommsIO(collID), &commGroup));
-      xmpi(MPI_Group_incl(commGroup, 1, ranks, &txWin[collID].ioGroup));
-      xmpi(MPI_Group_free(&commGroup));
+      int dictSize = bufSpec[streamIdx].numDataRecords + bufSpec[streamIdx].numRPCRecords;
+      size_t streamBufSize = bufSpec[streamIdx].bufSize;
+      txWin[streamIdx].dictSize = dictSize;
+      txWin[streamIdx].size = streamBufSize;
+      xmpi(MPI_Alloc_mem((MPI_Aint)streamBufSize, MPI_INFO_NULL,
+                         &txWin[streamIdx].buffer));
+      txWin[streamIdx].head = txWin[streamIdx].buffer
+        + (size_t)dictSize * sizeof (struct winHeaderEntry);
+      xmpi(MPI_Win_create(txWin[streamIdx].buffer, (MPI_Aint)streamBufSize, 1,
+                          no_locks_info, collClientIntraComm,
+                          &txWin[streamIdx].win));
+      modelWinFlushBuffer(streamIdx);
     }
-
   xmpi(MPI_Info_free(&no_locks_info));
-
-  xdebug("%s", "RETURN, CREATED MPI_WIN'S");
 }
-
 /************************************************************************/
 
 static void
-modelWinEnqueue(int collID,
+modelWinEnqueue(size_t streamIdx,
                 struct winHeaderEntry header, const void *data,
                 valPackFunc packFunc)
 {
   struct winHeaderEntry *winDict
-    = (struct winHeaderEntry *)(void *)txWin[collID].buffer;
+    = (struct winHeaderEntry *)(void *)txWin[streamIdx].buffer;
   int targetEntry;
   if (header.id > 0 || header.id == PARTDESCMARKER)
-    targetEntry = (txWin[collID].dictDataUsed)++;
+    targetEntry = (txWin[streamIdx].dictDataUsed)++;
   else
-    targetEntry = txWin[collID].dictSize - ++(txWin[collID].dictRPCUsed);
+    targetEntry = txWin[streamIdx].dictSize - ++(txWin[streamIdx].dictRPCUsed);
   if (header.id > 0)
     {
       int offset = header.offset
-        = (int)roundUpToMultiple((size_t)(txWin[collID].head
-                                          - txWin[collID].buffer),
+        = (int)roundUpToMultiple((size_t)(txWin[streamIdx].head
+                                          - txWin[streamIdx].buffer),
                                  sizeof (double));
-      MPI_Comm comm = commInqCommsIO(collID);
-      packFunc((void *)data, txWin[collID].buffer, (int)txWin[collID].size,
+      MPI_Comm comm = cdiPioInqInterComm();
+      packFunc((void *)data, txWin[streamIdx].buffer, (int)txWin[streamIdx].size,
                &offset, &comm);
-      txWin[collID].head = txWin[collID].buffer + offset;
+      txWin[streamIdx].head = txWin[streamIdx].buffer + offset;
     }
   else if (header.id == PARTDESCMARKER)
     {
@@ -529,11 +231,11 @@ modelWinEnqueue(int collID,
           /* not yet used partition descriptor, serialize at
            * current position */
           int position = header.offset
-            = (int)(txWin[collID].head - txWin[collID].buffer);
-          MPI_Comm comm = commInqCommsIO(collID);
-          packFunc((void *)data, txWin[collID].buffer, (int)txWin[collID].size,
+            = (int)(txWin[streamIdx].head - txWin[streamIdx].buffer);
+          MPI_Comm comm = cdiPioInqInterComm();
+          packFunc((void *)data, txWin[streamIdx].buffer, (int)txWin[streamIdx].size,
                    &position, &comm);
-          txWin[collID].head = txWin[collID].buffer + position;
+          txWin[streamIdx].head = txWin[streamIdx].buffer + position;
         }
       else
         /* duplicate entries are copied only once per timestep */
@@ -542,12 +244,13 @@ modelWinEnqueue(int collID,
   else
     {
       int position = header.offset
-        = (int)(txWin[collID].head - txWin[collID].buffer);
-      MPI_Comm comm = commInqCommsIO(collID);
-      packFunc((void *)data, txWin[collID].buffer, (int)txWin[collID].size,
-               &position, &comm);
-      txWin[collID].head = txWin[collID].buffer + position;
+        = (int)(txWin[streamIdx].head - txWin[streamIdx].buffer);
+      MPI_Comm comm = cdiPioInqInterComm();
+      packFunc((void *)data, txWin[streamIdx].buffer,
+               (int)txWin[streamIdx].size, &position, &comm);
+      txWin[streamIdx].head = txWin[streamIdx].buffer + position;
     }
+  txWin[streamIdx].pendingUpdate = true;
   winDict[targetEntry] = header;
 }
 
@@ -563,37 +266,33 @@ cdiPio_xt_idxlist_pack_wrap(void *data, void *buf, int size, int *pos,
 }
 
 static inline void
-collWait(int collID)
+collWait(size_t streamIdx)
 {
-  if (txWin[collID].postSet)
+  if (txWin[streamIdx].postSet)
     {
-      xmpi(MPI_Win_wait(txWin[collID].win));
-      txWin[collID].postSet = 0;
-      modelWinFlushBuffer(collID);
+      xmpi(MPI_Win_wait(txWin[streamIdx].win));
+      modelWinFlushBuffer(streamIdx);
     }
 }
 
 static inline void
-collProbe(int collID)
+collProbe(size_t streamIdx)
 {
-  if (txWin[collID].postSet)
-    {
-      int flag;
-      xmpi(MPI_Win_test(txWin[collID].win, &flag));
-      if (flag)
-        {
-          txWin[collID].postSet = 0;
-          modelWinFlushBuffer(collID);
-        }
-    }
+  if (!txWin[streamIdx].postSet)
+    return;
+  int flag;
+  xmpi(MPI_Win_test(txWin[streamIdx].win, &flag));
+  if (flag)
+    modelWinFlushBuffer(streamIdx);
 }
 
 void
 cdiPioRDMAProgress(void)
 {
-  int nProcsColl = commInqNProcsColl();
-  for (int collID = 0; collID < nProcsColl; collID++)
-    collProbe(collID);
+  size_t nStreams = openStreams.size;
+  for (size_t streamIdx = 0; streamIdx < nStreams; ++streamIdx)
+    if (openStreams.entries[streamIdx] != CDI_UNDEFID)
+      collProbe(streamIdx);
 }
 
 
@@ -602,29 +301,22 @@ pioBufferPartData_(int streamID, int varID,
                    const void *packData, valPackFunc packDataFunc,
                    int nmiss, Xt_idxlist partDesc)
 {
-  int vlistID, collID = CDI_UNDEFID;
-
-  vlistID  = streamInqVlist ( streamID );
-  collID   = commRankGlob2CollID ( vlistInqVarIOrank ( vlistID, varID ));
-  xassert ( collID         >= 0                    &&
-            collID         <  commInqNProcsColl () &&
-            txWin != NULL);
-
-  collWait(collID);
-
+  size_t streamIdx = indexOfID(&openStreams, streamID);
+  xassert(streamIdx != SIZE_MAX);
+  xassert(varID >= 0 && varID < streamInqNvars(streamID));
+  collWait(streamIdx);
 
   struct winHeaderEntry dataHeader
     = { .id = streamID, .specific.dataRecord = { varID, nmiss }, .offset = -1 };
-  modelWinEnqueue(collID, dataHeader, packData, packDataFunc);
+  modelWinEnqueue(streamIdx, dataHeader, packData, packDataFunc);
   {
     struct winHeaderEntry partHeader
       = { .id = PARTDESCMARKER,
           .specific.partDesc = { .uid = xt_idxlist_get_uid(partDesc) },
           .offset = 0 };
-    modelWinEnqueue(collID, partHeader, partDesc, cdiPio_xt_idxlist_pack_wrap);
+    modelWinEnqueue(streamIdx, partHeader, partDesc, cdiPio_xt_idxlist_pack_wrap);
   }
-
-  txWin[collID].refuseFuncCall = 1;
+  txWin[streamIdx].refuseFuncCall = 1;
 }
 
 void
@@ -706,30 +398,34 @@ cdiPioBufferPartDataGather(int streamID, int varID, const double *data,
 
 /************************************************************************/
 
-void pioBufferFuncCall(struct winHeaderEntry header,
+void pioBufferFuncCall(int streamID,
+                       struct winHeaderEntry header,
                        const void *data, valPackFunc dataPackFunc)
 {
-  int rankGlob = commInqRankGlob ();
-  int root = commInqRootGlob ();
-  int collID, nProcsColl = commInqNProcsColl ();
   int funcID = header.id;
+  int clientRank = commInqRankModel(),
+    numClients = cdiPioCommInqSizeClients(),
+    numColl = commInqSizeColl(),
+    collRank = cdiPioCollRank(clientRank, numClients, numColl);
 
   xassert(funcID >= MINFUNCID && funcID <= MAXFUNCID);
   xdebug("%s, func: %s", "START", funcMap[(-1 - funcID)]);
 
-  if ( rankGlob != root ) return;
+  /* FIXME: move this check to cdiPioClientSetup */
+  if (clientRank != cdiPioClientRangeStart(collRank, numClients, numColl))
+    return;
 
   xassert(txWin != NULL);
 
-  for (collID = 0; collID < nProcsColl; ++collID)
-    {
-      collWait(collID);
-      xassert(txWin[collID].dictRPCUsed + txWin[collID].dictDataUsed
-              < txWin[collID].dictSize);
-      xassert(txWin[collID].refuseFuncCall == 0);
-      modelWinEnqueue(collID, header, data, dataPackFunc);
-    }
-
+  size_t streamIdx = indexOfID(&openStreams, streamID);
+  if (streamIdx == SIZE_MAX)
+    streamIdx = insertID(&openStreams, streamID);
+  /* FIXME: handle stream close specially */
+  collWait(streamIdx);
+  xassert(txWin[streamIdx].dictRPCUsed + txWin[streamIdx].dictDataUsed
+          < txWin[streamIdx].dictSize
+          && txWin[streamIdx].refuseFuncCall == 0);
+  modelWinEnqueue(streamIdx, header, data, dataPackFunc);
   xdebug("%s", "RETURN");
 }
 
@@ -744,46 +440,6 @@ cdiPioNoPostCommSetup(void)
 static int pioNamespace_ = -1;
 static int xtInitByCDI = 0;
 
-MPI_Comm
-cdiPioInit(MPI_Comm commGlob, int IOMode, int clientServerRole,
-           int *pioNamespace, float partInflate,
-           void (*postCommSetupActions)(void))
-{
-  /* construct new communicator such that old interface can be used
-   * i.e. push all processes not being clients to ranks succeeding
-   * clients and non-collectors even further
-   */
-  int key;
-  switch (clientServerRole)
-    {
-    case PIO_ROLE_CLIENT:
-      key = 0;
-      break;
-    case PIO_ROLE_COLLECTOR:
-    case PIO_ROLE_WRITER_COLLECTOR:
-      key = 1;
-      break;
-    case PIO_ROLE_WRITER:
-    case PIO_ROLE_FPGUARD:
-      key = 2;
-      break;
-    default:
-      xabort("Invalid client/server-role specified: %d", clientServerRole);
-    }
-  MPI_Comm rearrangedCommGlob;
-  xmpi(MPI_Comm_split(commGlob, 0, key, &rearrangedCommGlob));
-  int serverCount = (key > 0);
-  xmpi(MPI_Allreduce(MPI_IN_PLACE, &serverCount,
-                     1, MPI_INT, MPI_SUM, commGlob));
-  MPI_Comm retComm
-    = pioInit(rearrangedCommGlob, IOMode, serverCount, pioNamespace,
-              partInflate, postCommSetupActions);
-  MPI_Comm_free(&rearrangedCommGlob);
-  return retComm;
-}
-
-
-
 /* pioInit definition must currently compile even in non-MPI configurations */
 /**
    @brief initializes the MPI_Communicators needed for the
@@ -796,8 +452,6 @@ cdiPioInit(MPI_Comm commGlob, int IOMode, int clientServerRole,
 
   commModel: calculating PEs, no I/O PEs
 
-  commsIO[i]:
-
   Collective call
 
   @param commGlob MPI_Communicator of all calling PEs
@@ -809,14 +463,24 @@ cdiPioInit(MPI_Comm commGlob, int IOMode, int clientServerRole,
   after communicator split
   @return int indicating wether the calling PE is a calcutator (1) or not (0)
 */
-
 MPI_Comm
 pioInit(MPI_Comm commGlob, int nProcsIO, int IOMode,
         int *pioNamespace, float partInflate,
         void (*postCommSetupActions)(void))
 {
+  return cdiPioInit(commGlob, IOMode,
+                    cdiPioCSRLastN(commGlob, IOMode, nProcsIO),
+                    pioNamespace, partInflate, postCommSetupActions);
+}
+
+MPI_Comm
+cdiPioInit(MPI_Comm commGlob, int IOMode, int clientServerRole,
+           int *pioNamespace, float partInflate,
+           void (*postCommSetupActions)(void))
+{
   int sizeGlob;
 
+  namespaceSwitchSet(NSSWITCH_ABORT, NSSW_FUNC(cdiAbortC_MPI));
   namespaceSwitchSet(NSSWITCH_WARNING, NSSW_FUNC(cdiPioWarning));
 
   if ( IOMode < PIO_MINIOMODE || IOMode > PIO_MAXIOMODE )
@@ -829,18 +493,14 @@ pioInit(MPI_Comm commGlob, int nProcsIO, int IOMode,
 
   if ((xtInitByCDI = (!xt_initialized() || xt_finalized())))
     xt_initialize(commGlob);
-  commInit ();
-  commDefCommGlob ( commGlob );
+  int nProcsIO = cdiPioCommInit(commGlob, IOMode, clientServerRole);
   sizeGlob = commInqSizeGlob ();
+
 
   if (((IOMode != PIO_NONE && (nProcsIO <= 0 || nProcsIO > sizeGlob - 1)))
       || (IOMode == PIO_NONE && nProcsIO != 1))
     xabort("DISTRIBUTION OF TASKS ON PROCS IS NOT VALID.\n"
            "nProcsIO=%d, sizeGlob=%d\n", nProcsIO, sizeGlob);
-
-  commDefNProcsIO ( nProcsIO );
-  commDefIOMode   ( IOMode );
-  commDefCommPio  ();
 
   xassert(partInflate >= 1.0);
   cdiPIOpartInflate_ = partInflate;
@@ -855,12 +515,11 @@ pioInit(MPI_Comm commGlob, int nProcsIO, int IOMode,
   if ( commInqIsProcIO ())
     {
       cdiPioSerializeSetMPI();
-      namespaceSwitchSet(NSSWITCH_ABORT, NSSW_FUNC(cdiAbortC_MPI));
       namespaceSwitchSet(NSSWITCH_FILE_OPEN, NSSW_FUNC(pioFileOpen));
       namespaceSwitchSet(NSSWITCH_FILE_CLOSE, NSSW_FUNC(pioFileClose));
       cdiPioServer(postCommSetupActions);
       namespaceNew();
-      commDestroy ();
+      cdiPioCommFinalize();
       if (xtInitByCDI)
         xt_finalize();
       return MPI_COMM_NULL;
@@ -878,26 +537,31 @@ void  pioEndDef ( void )
 {
   char   * buffer;
   int bufferSize;
-  int rankGlob = commInqRankGlob ();
+  int clientRank = commInqRankModel(),
+    numClients = cdiPioCommInqSizeClients(),
+    numColl = commInqSizeColl(),
+    collRank = cdiPioCollRank(clientRank, numClients, numColl);
 
   xdebug("%s", "START");
 
-  varsMapNDeco ( commInqNNodes (), commInqNodeSizes ());
+  struct clientBufferSetup setup;
+  clientBufSizes(&setup);
 
-  if ( rankGlob < commInqNProcsColl ())
+  if (clientRank == cdiPioClientRangeStart(collRank, numClients, numColl))
     {
-      MPI_Comm comm = commInqCommsIO ( rankGlob );
+      MPI_Comm comm = cdiPioInqInterComm();
       reshPackBufferCreate(&buffer, &bufferSize, &comm);
 
-      xmpi ( MPI_Send ( buffer, bufferSize, MPI_PACKED, commInqNProcsModel (),
-                        RESOURCES, commInqCommsIO ( rankGlob )));
+      xmpi(MPI_Send(buffer, bufferSize, MPI_PACKED, collRank,
+                    RESOURCES, comm));
 
       xdebug("%s", "SENT MESSAGE WITH TAG \"RESOURCES\"");
 
       reshPackBufferDestroy ( &buffer );
     }
 
-  modelWinCreate ();
+  cdiPioClientWinCreate(&setup);
+  Free(setup.bufSizes);
   namespaceDefResStatus ( STAGE_TIMELOOP );
   xdebug("%s", "RETURN");
 }
@@ -927,14 +591,19 @@ void pioFinalize ( void )
   if (pioNamespace_ == -1)
     return;
   namespaceDelete(pioNamespace_);
-  for (int collID = 0; collID < commInqNProcsColl (); collID++ )
-    {
-      xmpi(MPI_Send(NULL, 0, MPI_INT, commInqNProcsModel(),
-                    FINALIZE, commInqCommsIO ( collID )));
-      xdebug("%s", "SENT MESSAGE WITH TAG \"FINALIZE\"");
-    }
-  modelWinCleanup ();
-  commDestroy ();
+
+  int clientRank = commInqRankModel(),
+    numClients = cdiPioCommInqSizeClients(),
+    numColl = commInqSizeColl(),
+    collRank = cdiPioCollRank(clientRank, numClients, numColl);
+
+  if (clientRank == cdiPioClientRangeStart(collRank, numClients, numColl))
+    xmpi(MPI_Send(NULL, 0, MPI_INT, collRank,
+                  FINALIZE, cdiPioInqInterComm()));
+  xdebug("%s", "SENT MESSAGE WITH TAG \"FINALIZE\"");
+  modelWinDelete();
+  cdiPioCommFinalize();
+  idSetDestroy(&openStreams);
   if (xtInitByCDI)
     xt_finalize();
   xdebug("%s", "RETURN");
@@ -944,39 +613,49 @@ void pioFinalize ( void )
 
 void pioWriteTimestep(void)
 {
-  int collID, iAssert = MPI_MODE_NOPUT;
-  /* int tokenEnd = END; */
-  int rankGlob = commInqRankGlob ();
-  int nProcsColl = commInqNProcsColl ();
-  int nProcsModel = commInqNProcsModel ();
+  int clientRank = commInqRankModel(),
+    numClients = cdiPioCommInqSizeClients(),
+    numColl = commInqSizeColl(),
+    collRank = cdiPioCollRank(clientRank, numClients, numColl);
 
   xdebug("%s", "START");
 
   xassert(txWin != NULL);
 
-  if ( rankGlob < nProcsColl )
+  size_t nStreams = openStreams.size;
+  int *hasUpdates = Malloc(nStreams * sizeof (hasUpdates[0]));
+  for (size_t streamIdx = 0; streamIdx < nStreams; ++streamIdx)
     {
-      xmpi(MPI_Send(NULL, 0, MPI_INT, nProcsModel,
-                    WRITETS, commInqCommsIO(rankGlob)));
+      collWait(streamIdx);
+      hasUpdates[streamIdx] = txWin[streamIdx].pendingUpdate;
+    }
+
+  if (clientRank == cdiPioClientRangeStart(collRank, numClients, numColl))
+    {
+      xmpi(MPI_Send(hasUpdates, (int)nStreams, MPI_INT,
+                    collRank, WRITETS, cdiPioInqInterComm()));
       xdebug("%s", "SENT MESSAGE WITH TAG \"WRITETS\"");
     }
 
-  for ( collID = 0; collID < nProcsColl; collID++ )
+  MPI_Group remoteGroup = cdiPioInqRemoteGroup();
+  for (size_t streamIdx = 0; streamIdx < nStreams; ++streamIdx)
     {
-      collWait(collID);
+      if (openStreams.entries[streamIdx] != CDI_UNDEFID
+          && hasUpdates[streamIdx]) { }
+      else continue;
       struct winHeaderEntry header
         = { .id = HEADERSIZEMARKER,
             .specific.headerSize
-            = { .numDataEntries = txWin[collID].dictDataUsed,
-                .numRPCEntries = txWin[collID].dictRPCUsed } };
+            = { .numDataEntries = txWin[streamIdx].dictDataUsed,
+                .numRPCEntries = txWin[streamIdx].dictRPCUsed } };
       struct winHeaderEntry *winDict
-        = (struct winHeaderEntry *)(void *)txWin[collID].buffer;
+        = (struct winHeaderEntry *)(void *)txWin[streamIdx].buffer;
       winDict[0] = header;
-
-      xmpi(MPI_Win_post(txWin[collID].ioGroup, iAssert, txWin[collID].win));
-      txWin[collID].postSet = 1;
+      xmpi(MPI_Win_post(remoteGroup, MPI_MODE_NOPUT, txWin[streamIdx].win));
+      txWin[streamIdx].postSet = true;
     }
 
+  Free(hasUpdates);
   xdebug("%s", "RETURN. messages sent, windows posted");
 }
 

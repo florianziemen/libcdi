@@ -5,6 +5,8 @@
 #  include "config.h"
 #endif
 
+#include <stdbool.h>
+
 #include <mpi.h>
 #include <yaxt.h>
 
@@ -91,6 +93,22 @@ enum
   /* align window base addresses and sizes to this value */
   PIO_WIN_ALIGN = sizeof (double),
 };
+
+struct clientBufSize
+{
+  size_t bufSize;
+  int numDataRecords, numRPCRecords;
+};
+
+struct collSpec
+{
+  int numClients;
+  int numServers;
+  bool sendRPCData;
+};
+
+struct clientBufSize
+computeClientStreamBufSize(int streamID, struct collSpec *collector);
 
 #endif
 

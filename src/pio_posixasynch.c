@@ -1,6 +1,6 @@
-/* 
-   todo  
-   README: specialRank Pe closes down, when all output files are closed    
+/*
+   todo
+   README: specialRank Pe closes down, when all output files are closed
 */
 #ifdef HAVE_CONFIG_H
 #  include "config.h"
@@ -75,11 +75,11 @@ initBFiledataPA(char *filename, size_t bs, int nc)
       bfd->ctrlBlks[i].aio_fildes     = bfd->handle;
       bfd->ctrlBlks[i].aio_buf = bfd->fb->buffer + (size_t)i * bs;
       bfd->ctrlBlks[i].aio_reqprio    = 0;
-      bfd->ctrlBlks[i].aio_sigevent.sigev_notify = SIGEV_NONE;   
+      bfd->ctrlBlks[i].aio_sigevent.sigev_notify = SIGEV_NONE;
     }
-  
+
   bfd->nextOpIndex = 0;
-  bfd->prefIndex = 0; 
+  bfd->prefIndex = 0;
   bfd->offset = 0;
   bfd->activeCollectors = nc;
 
@@ -158,7 +158,7 @@ writePA(bFiledataPA *bfd, size_t amount)
   ssize_t iret;
 
   xdebug ( "file %s, in", bfd->name );
-  
+
   bfd->ctrlBlks[bfd->currOpIndex].aio_nbytes = amount;
   bfd->ctrlBlks[bfd->currOpIndex].aio_offset = bfd->offset;
 
@@ -172,18 +172,18 @@ writePA(bFiledataPA *bfd, size_t amount)
            "iret=aio_write()=%d",
            bfd->name, bfd->ctrlBlks[bfd->currOpIndex].aio_nbytes,
            bfd->ctrlBlks[bfd->currOpIndex].aio_offset, (int)iret );
-   
-  if ( iret == -1 ) 
+
+  if ( iret == -1 )
     {
       xabort ( "did not succeed writing buffer" );
     }
   else
     xdebug ( "buffer written to %s",  bfd->name );
-     
+
   bfd->offset += (off_t)amount;
   bfd->prefIndex ++;
 
-  if ( bfd->prefIndex >= nPrefStreams ) 
+  if ( bfd->prefIndex >= nPrefStreams )
     {
       ccBP[0] = ( bfd->ctrlBlks + bfd->nextOpIndex );
       do
@@ -217,22 +217,21 @@ elemCheck(void *q, void *nm)
 
 void pioWriterAIO(void)
 {
-  bFiledataPA *bfd; 
+  bFiledataPA *bfd;
   listSet * bibBFiledataPA;
-  MPI_Comm commNode = commInqCommNode ();
-  int nProcsCollNode = commInqSizeNode () - commInqSizeColl ();
-  bool * sentFinalize, doFinalize;
+  MPI_Comm commPio = commInqCommPio ();
+  int nProcsColl = commInqSizeColl ();
 
   if ( nPrefStreams < 1 ) xabort("USAGE: # PREFETCH STREAMS >= 1");
-  xdebug ( "nProcsCollNode=%d on this node", nProcsCollNode );
- 
+  xdebug ( "nProcsColl=%d ", nProcsColl );
+
   bibBFiledataPA = listSetNew(destroyBFiledataPA, compareNamesBPA);
-  sentFinalize = Calloc((size_t)nProcsCollNode, sizeof (sentFinalize[0]));
-  
+  bool *sentFinalize = Calloc((size_t)nProcsColl, sizeof (sentFinalize[0]));
+
   for ( ;; )
     {
       MPI_Status status;
-      xmpiStat(MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, commNode,
+      xmpiStat(MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, commPio,
                          &status ), &status);
 
       int source = status.MPI_SOURCE;
@@ -255,7 +254,7 @@ void pioWriterAIO(void)
               *pMB = messageBuffer;
 
             xmpi(MPI_Recv(messageBuffer, messagesize, MPI_UNSIGNED_CHAR, source,
-                          tag, commNode, &status ));
+                          tag, commPio, &status ));
 
             char *filename = strtok((char *)pMB, token);
             pMB += (strlen(filename) + 1);
@@ -271,7 +270,7 @@ void pioWriterAIO(void)
                                    (void *)(intptr_t)rtag.id)))
               {
                 listSetForeach(bibBFiledataPA, elemCheck, filename);
-                bfd = initBFiledataPA(filename, (size_t)buffersize, nProcsCollNode);
+                bfd = initBFiledataPA(filename, (size_t)buffersize, nProcsColl);
                 int id;
                 if ((id = listSetAdd(bibBFiledataPA, bfd)) < 0)
                   xabort("fileID=%d not unique", rtag.id);
@@ -306,7 +305,7 @@ void pioWriterAIO(void)
 	  bfd->nextOpIndex = ( bfd->nextOpIndex + 1 ) % nPrefStreams;
 
 	  xmpi(MPI_Recv((void *)bfd->ctrlBlks[bfd->currOpIndex].aio_buf,
-                        messagesize, MPI_UNSIGNED_CHAR, source, tag, commNode,
+                        messagesize, MPI_UNSIGNED_CHAR, source, tag, commPio,
                         &status));
 	  writePA(bfd, (size_t)messagesize);
 	  break;
@@ -326,13 +325,13 @@ void pioWriterAIO(void)
 
 	  xmpi(MPI_Recv((void *)bfd->ctrlBlks[bfd->currOpIndex].aio_buf,
                         messagesize, MPI_UNSIGNED_CHAR,
-                        source, tag, commNode, &status));
+                        source, tag, commPio, &status));
 
 	  writePA(bfd, (size_t)messagesize);
 
 	  if ( ! --(bfd->activeCollectors))
 	    {
-              xdebug ( "all are finished with file %d, delete node", rtag.id);
+              xdebug ( "all are finished with file %d, delete entry", rtag.id);
               listSetRemove(bibBFiledataPA, fileIDTest,
                             (void *)(intptr_t)rtag.id);
 	    }
@@ -341,10 +340,10 @@ void pioWriterAIO(void)
           {
             int buffer, collID;
 
-            xmpi ( MPI_Recv ( &buffer, 1, MPI_INT, source, tag, commNode, &status ));
+            xmpi ( MPI_Recv ( &buffer, 1, MPI_INT, source, tag, commPio, &status ));
             sentFinalize[source] = true;
-            doFinalize = true;
-            for ( collID = 0; collID < nProcsCollNode; collID++ )
+            bool doFinalize = true;
+            for ( collID = 0; collID < nProcsColl; collID++ )
               doFinalize &= sentFinalize[collID];
             if ( doFinalize )
               {

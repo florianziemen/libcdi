@@ -112,7 +112,7 @@ sendP(remoteFileBuf *afd, int id)
 
   /* FIXME: amount > INT_MAX unhandled */
   xmpi(MPI_Issend(afd->db->buffer, (int)amount, MPI_UNSIGNED_CHAR,
-                  commInqSpecialRankNode(), tag, commInqCommNode(),
+                  commInqSizePio() - 1, tag, commInqCommPio(),
                   &afd->request));
 
   /* change outputBuffer */
@@ -276,12 +276,12 @@ pioSendOpen(const char *filename)
 void
 pioSendFinalize(void)
 {
-  int buffer = 0, tag, specialRank = commInqSpecialRankNode ();
-  MPI_Comm commNode = commInqCommNode ();
+  int buffer = 0, tag, specialRank = commInqSizePio() - 1;
+  MPI_Comm commPio = commInqCommPio();
 
   tag = encodeFileOpTag(0, IO_Finalize);
 
-  xmpi(MPI_Send(&buffer, 1, MPI_INT, specialRank, tag, commNode));
+  xmpi(MPI_Send(&buffer, 1, MPI_INT, specialRank, tag, commPio));
   xdebug("%s", "SENT MESSAGE WITH TAG \"IO_FINALIZE\" TO SPECIAL PROCESS");
 
   if (!listSetIsEmpty(bibRemoteFileBuf))
@@ -296,15 +296,12 @@ pioSendFinalize(void)
 void
 pioSendInitialize(void (*postCommSetupActions)(void))
 {
-  if (commInqSizeNode() < 2)
-    xabort ( "USAGE: # IO PROCESSES ON A PHYSICAL NODE >= 2" );
+  int numIOServers = commInqSizePio();
+  if (numIOServers < 2)
+    xabort("error: # of I/O processes must be >= 2 for mode, but is %d",
+           numIOServers);
 
-
-  int isCollector = commInqRankNode () != commInqSpecialRankNode ();
-  commDefCommColl(isCollector);
-  commSendNodeInfo();
-  commRecvNodeMap();
-  commDefCommsIO();
+  int isCollector = commInqRankColl() != -1;
   postCommSetupActions();
   if (!isCollector)
     switch ( commInqIOMode ())

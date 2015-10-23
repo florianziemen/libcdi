@@ -285,6 +285,7 @@ src/pio_client.h -text
 src/pio_comm.c -text
 src/pio_comm.h -text
 src/pio_dbuffer.c -text
+src/pio_id_set.h -text
 src/pio_impl.h -text
 src/pio_interface.c -text
 src/pio_interface.h -text
@@ -295,6 +296,7 @@ src/pio_posixfpguardsendrecv.c -text
 src/pio_posixnonb.c -text
 src/pio_record_send.c -text
 src/pio_roles.c -text
+src/pio_rpc.c -text
 src/pio_rpc.h -text
 src/pio_serialize.c -text
 src/pio_serialize.h -text

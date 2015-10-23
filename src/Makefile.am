@@ -171,6 +171,7 @@ libcdipio_la_SOURCES =							\
 	pio_comm.c							\
 	pio_comm.h							\
 	pio_dbuffer.c							\
+	pio_id_set.h							\
 	pio_impl.h							\
 	pio_interface.c							\
 	pio_interface.h							\
@@ -185,6 +186,7 @@ libcdipio_la_SOURCES =							\
 	pio_client.c							\
 	pio_client.h							\
 	pio_roles.c							\
+	pio_rpc.c							\
 	pio_rpc.h							\
 	pio_server.c							\
 	pio_server.h							\

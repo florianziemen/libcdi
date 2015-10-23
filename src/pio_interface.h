@@ -20,7 +20,8 @@ cdiPioBufferPartDataGather(int streamID, int varID, const double *data,
                            const int displacements[],
                            int nmiss, Xt_idxlist partDesc);
 
-void pioBufferFuncCall(struct winHeaderEntry header,
+void pioBufferFuncCall(int streamID,
+                       struct winHeaderEntry header,
                        const void *data, valPackFunc dataPackFunc);
 
 

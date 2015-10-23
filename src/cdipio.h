@@ -20,7 +20,6 @@
 
 #define  PIO_MINIOMODE                  PIO_NONE
 #define  PIO_MAXIOMODE                  PIO_FPGUARD
-#define  PIO_MINIOMODEWITHSPECIALPROCS  PIO_WRITER
 
 #define PIO_ROLE_CLIENT 0
 #define PIO_ROLE_COLLECTOR 1

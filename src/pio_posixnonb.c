@@ -45,7 +45,7 @@ initBFiledataP(char *filename, size_t bs, int nc, int fileID)
   bfp = Malloc(sizeof (*bfp) + strlen(filename) + 1);
   strcpy(bfp->name, filename);
 
-  if (( bfp->fp = fopen ( filename, "w" )) == NULL ) 
+  if (( bfp->fp = fopen ( filename, "w" )) == NULL )
     xabort("Failed to open %s", bfp->name);
   int fd = fileno(bfp->fp);
   ftruncate(fd, (off_t)0);
@@ -125,7 +125,7 @@ elemCheck(void *q, void *nm)
 void
 pioWriterStdIO(void)
 {
-  bFiledataP *bfd; 
+  bFiledataP *bfd;
   listSet * bibBFiledataP;
   size_t amount, buffersize;
   unsigned char *messageBuffer = NULL, *pMB;
@@ -133,25 +133,25 @@ pioWriterStdIO(void)
   int messagesize, source, tag, id;
   struct fileOpTag rtag;
   MPI_Status status;
-  MPI_Comm commNode = commInqCommNode ();
-  int nProcsCollNode = commInqSizeNode () - commInqSizeColl ();
+  MPI_Comm commPio = commInqCommPio ();
+  int nProcsColl = commInqSizeColl ();
   bool * sentFinalize, doFinalize;
 
-  xdebug ( "ncollectors=%d on this node", nProcsCollNode );
+  xdebug ( "ncollectors=%d", nProcsColl );
 
   bibBFiledataP = listSetNew(destroyBFiledataP, compareNamesBP);
-  sentFinalize = Calloc((size_t)nProcsCollNode, sizeof (sentFinalize[0]));
-  
+  sentFinalize = Calloc((size_t)nProcsColl, sizeof (sentFinalize[0]));
+
   for ( ;; )
-    {  
-        
-      xmpiStat ( MPI_Probe ( MPI_ANY_SOURCE, MPI_ANY_TAG, commNode, 
+    {
+
+      xmpiStat ( MPI_Probe ( MPI_ANY_SOURCE, MPI_ANY_TAG, commPio,
                              &status ), &status );
-      
-      
+
+
       source = status.MPI_SOURCE;
       tag    = status.MPI_TAG;
-      
+
       rtag = decodeFileOpTag(tag);
 
       xmpi(MPI_Get_count(&status, MPI_UNSIGNED_CHAR, &messagesize));
@@ -169,28 +169,27 @@ pioWriterStdIO(void)
     	  pMB = messageBuffer;
 
 	  xmpi(MPI_Recv(messageBuffer, messagesize, MPI_UNSIGNED_CHAR,
-                        source, tag, commNode, &status));
+                        source, tag, commPio, &status));
 
 	  xdebug("%s", "after recv, in loop");
-	  
+
 	  filename = strtok ( (char *)pMB, token );
 	  pMB += ( strlen ( filename ) + 1 );
 	  temp =  strtok ( (char *)pMB, token );
           buffersize = (size_t)strtol(temp, NULL, 16);
 	  pMB += ( strlen ( temp ) + 1 );
 	  amount = (size_t)(messageBuffer + messagesize - pMB);
-	  
+
 	  xdebug("command %s, filename=%s, buffersize=%zu, amount=%zu",
                  cdiPioCmdStrTab[rtag.command], filename, buffersize, amount);
-	  
-	  
+
           if (!(bfd = listSetGet(bibBFiledataP, fileIDTest,
                                (void *)(intptr_t)rtag.id)))
 	    {
 	      listSetForeach(bibBFiledataP, elemCheck, filename);
-	      bfd = initBFiledataP(filename, buffersize, nProcsCollNode,
+	      bfd = initBFiledataP(filename, buffersize, nProcsColl,
                                    rtag.id);
-	      
+
 	      if ((id = listSetAdd(bibBFiledataP, bfd)) < 0)
                 xabort("fileID=%d not unique", rtag.id);
               bfd->fileID = id;
@@ -202,8 +201,8 @@ pioWriterStdIO(void)
 	  memcpy(bfd->fb->buffer, pMB, amount);
 
 	  writeP(bfd, amount);
-	  
-	  Free( messageBuffer );
+
+	  Free(messageBuffer);
 
 	  break;
 
@@ -219,7 +218,7 @@ pioWriterStdIO(void)
                  rtag.id, bfd->name);
 
 	  xmpi(MPI_Recv(bfd->fb->buffer, messagesize, MPI_UNSIGNED_CHAR,
-                        source, tag, commNode, &status));
+                        source, tag, commPio, &status));
 
 	  writeP(bfd, amount);
 	  break;
@@ -239,7 +238,7 @@ pioWriterStdIO(void)
                  cdiPioCmdStrTab[rtag.command], rtag.id, bfd->name, amount);
 
 	  xmpi(MPI_Recv(bfd->fb->buffer, messagesize, MPI_UNSIGNED_CHAR,
-                        source, tag, commNode, &status));
+                        source, tag, commPio, &status));
 
 	  writeP ( bfd, amount );
 
@@ -254,18 +253,18 @@ pioWriterStdIO(void)
           {
             int buffer = CDI_UNDEFID, collID;
 
-            xmpi ( MPI_Recv ( &buffer, 1, MPI_INT, source, tag, commNode, &status ));
-            
+            xmpi ( MPI_Recv ( &buffer, 1, MPI_INT, source, tag, commPio, &status ));
+
             sentFinalize[source] = true;
             doFinalize = true;
-            
-            for ( collID = 0; collID < nProcsCollNode; collID++ )
-              if ( !sentFinalize[collID] ) 
+
+            for ( collID = 0; collID < nProcsColl; collID++ )
+              if ( !sentFinalize[collID] )
                 {
                   doFinalize = false;
                   break;
                 }
-            
+
             if ( doFinalize )
               {
                 if (!listSetIsEmpty(bibBFiledataP))

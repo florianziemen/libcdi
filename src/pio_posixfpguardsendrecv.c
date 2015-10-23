@@ -1,6 +1,6 @@
-/* 
-   todo 
-   build in control, for consistance of pairs filename / filenumber 
+/*
+   todo
+   build in control, for consistance of pairs filename / filenumber
    ( pioOpenFile member name, recv in tmpbuffer, if(!uniqueName(q,v,n))abort )
 */
 
@@ -63,7 +63,7 @@ fileIDCmpB(void *a, void *b)
 static listSet *bibAFiledataPF;
 
 /***************************************************************/
-  
+
 static aFiledataPF *initAFiledataPF ( const char *key, size_t bs)
 {
   aFiledataPF *afd;
@@ -78,7 +78,7 @@ static aFiledataPF *initAFiledataPF ( const char *key, size_t bs)
   /* init output buffer */
 
   xdebug ( " name=%s, init output buffer",  afd->name );
-   
+
   iret = dbuffer_init(&(afd->db1), bs);
   iret += dbuffer_init(&(afd->db2), bs);
 
@@ -87,10 +87,10 @@ static aFiledataPF *initAFiledataPF ( const char *key, size_t bs)
 
   afd->db = afd->db1;
 
-  /* open file */ 
+  /* open file */
   xdebug ( "name=%s, open file",  afd->name );
 
-  if ( ( afd->fp = fopen ( afd->name, "w" )) == NULL ) 
+  if ( ( afd->fp = fopen ( afd->name, "w" )) == NULL )
     xabort("Failed to open %s", afd->name);
 
   afd->command = IO_Open_file;
@@ -141,8 +141,8 @@ destroyBFiledataPF(void *v)
 {
   int iret = 0;
   bFiledataPF *bfd = (bFiledataPF * ) v;
-  
-  Free( bfd );
+
+  Free ( bfd );
 
   return iret;
 }
@@ -165,24 +165,24 @@ fpgPOSIXFPGUARDSENDRECV(void)
   int i, source, iret;
   struct fileOpTag rtag;
   MPI_Status status;
-  bFiledataPF *bfd; 
+  bFiledataPF *bfd;
   listSet *bibBFiledataPF;
   long amount;
-  MPI_Comm commNode = commInqCommNode ();
-  int nProcsCollNode =  commInqSizeNode () - commInqSizeColl ();
+  MPI_Comm commPio = commInqCommPio();
+  int nProcsColl =  commInqSizeColl();
   bool * sentFinalize, doFinalize = false;
 
-  xdebug ( "ncollectors=%d on this node", nProcsCollNode );
-  
+  xdebug ( "ncollectors=%d", nProcsColl );
+
   bibBFiledataPF = listSetNew( destroyBFiledataPF, fileIDCmpB);
-  sentFinalize = Calloc((size_t)nProcsCollNode, sizeof (sentFinalize[0]));
+  sentFinalize = Calloc((size_t)nProcsColl, sizeof (sentFinalize[0]));
 
   for ( ;; )
     {
-      xmpi ( MPI_Probe ( MPI_ANY_SOURCE, MPI_ANY_TAG, commNode, &status ));
+      xmpi ( MPI_Probe ( MPI_ANY_SOURCE, MPI_ANY_TAG, commPio, &status ));
       source = status.MPI_SOURCE;
       rtag = decodeFileOpTag(status.MPI_TAG);
-      
+
       xdebug("receive message from source=%d, id=%d, command=%d ( %s )",
              source, rtag.id, rtag.command, cdiPioCmdStrTab[rtag.command]);
 
@@ -193,7 +193,7 @@ fpgPOSIXFPGUARDSENDRECV(void)
           if (!(bfd = listSetGet(bibBFiledataPF, fileIDTestB,
                                  (void *)(intptr_t)rtag.id)))
 	    {
-	      bfd = initBFiledataPF(rtag.id, nProcsCollNode);
+	      bfd = initBFiledataPF(rtag.id, nProcsColl);
 
 	      if ((iret = listSetAdd(bibBFiledataPF, bfd)) < 0)
 		xabort("fileID=%d not unique", rtag.id);
@@ -201,14 +201,14 @@ fpgPOSIXFPGUARDSENDRECV(void)
 	    }
 
           xdebug("id=%d, command=%d ( %s ), send offset=%ld", rtag.id,
-                 rtag.command, cdiPioCmdStrTab[rtag.command], bfd->offset);
+rtag.command, cdiPioCmdStrTab[rtag.command], bfd->offset);
 
 	  xmpi ( MPI_Sendrecv ( &( bfd->offset ), 1, MPI_LONG, source,  status.MPI_TAG,
                                 &amount, 1, MPI_LONG, source,  status.MPI_TAG,
-                                commNode, &status ));
+                                commPio, &status ));
 
-	  bfd->offset += amount; 
- 
+	  bfd->offset += amount;
+
           xdebug("id=%d, command=%d ( %s ), recv amount=%ld, set offset=%ld",
                  rtag.id, rtag.command, cdiPioCmdStrTab[rtag.command], amount,
                  bfd->offset);
@@ -226,7 +226,7 @@ fpgPOSIXFPGUARDSENDRECV(void)
 
 	  xmpi ( MPI_Sendrecv ( &( bfd->offset ), 1, MPI_LONG, source,  status.MPI_TAG,
                                 &amount, 1, MPI_LONG, source,  status.MPI_TAG,
-                                commNode, &status ));
+                                commPio, &status ));
 
 	  bfd->offset += amount;
 
@@ -247,7 +247,7 @@ fpgPOSIXFPGUARDSENDRECV(void)
 
 	  xmpi ( MPI_Sendrecv ( &( bfd->offset ), 1, MPI_LONG, source,  status.MPI_TAG,
                                 &amount, 1, MPI_LONG, source,  status.MPI_TAG,
-                                commNode, &status ));
+                                commPio, &status ));
 
 	  bfd->offset += amount;
 
@@ -256,10 +256,10 @@ fpgPOSIXFPGUARDSENDRECV(void)
                  bfd->offset);
 
 
-	  bfd->nfinished[source] = true;  
+	  bfd->nfinished[source] = true;
 	  bfd->finished          = true;
-	  
-	  for ( i = 0; i < nProcsCollNode; i++ )
+
+	  for ( i = 0; i < nProcsColl; i++ )
 	    if ( !( bfd->nfinished[i] ))
 	      {
 		bfd->finished = false;
@@ -271,14 +271,14 @@ fpgPOSIXFPGUARDSENDRECV(void)
                           (void *)(intptr_t)rtag.id);
           break;
         case IO_Finalize:
-          {  
-            int buffer = CDI_UNDEFID, collID; 
+          {
+            int buffer = CDI_UNDEFID, collID;
 
             xmpi ( MPI_Recv ( &buffer, 1, MPI_INT, source, status.MPI_TAG,
-                              commNode, &status ));
+                              commPio, &status ));
             sentFinalize[source] = true;
             doFinalize = true;
-            for ( collID = 0; collID < nProcsCollNode; collID++ )
+            for ( collID = 0; collID < nProcsColl; collID++ )
               doFinalize &= sentFinalize[collID];
             if ( doFinalize )
               {
@@ -298,7 +298,7 @@ fpgPOSIXFPGUARDSENDRECV(void)
           xabort ( "COMMAND NOT IMPLEMENTED" );
 	}
     }
-}   
+}
 
 //*******************************************************
 
@@ -310,51 +310,52 @@ writePF(aFiledataPF *afd)
   long amountL;
   int error, tag;
   MPI_Status status;
-  int specialRank = commInqSpecialRankNode ();
-  MPI_Comm commNode = commInqCommNode ();
-  
+  /* FIXME: pretend there's only one special rank for now */
+  int specialRank = commInqSizePio() - 1;
+  MPI_Comm commPio = commInqCommPio();
+
   /* send buffersize, recv offset */
 
   amount = dbuffer_data_size ( afd->db );
   amountL = ( long ) amount;
   int id = afd->fileID;
   tag = encodeFileOpTag(id, afd->command);
-  
+
   xmpi ( MPI_Sendrecv ( &amountL, 1, MPI_LONG, specialRank, tag,
                         &offset, 1, MPI_LONG, specialRank, tag,
-                        commNode, &status ));
-  xdebug ( "id=%d, command=%d, amount=%zu, send amountL=%ld, recv offset=%ld", 
+                        commPio, &status ));
+  xdebug ( "id=%d, command=%d, amount=%zu, send amountL=%ld, recv offset=%ld",
            id, afd->command, amount, amountL, offset );
-  
+
   /* write buffer */
-  
+
   if (( error = fseek ( afd->fp, offset, SEEK_SET )) != 0 )
     xabort ( "did not succeed seeking fp" );
 
-  if (( written = 
+  if (( written =
 	fwrite ( afd->db->buffer, sizeof ( char ), amount, afd->fp )) !=
       amount )
     xabort("fileId=%d, expect to write %zu byte, written %zu byte",
            id, amount, written);
- 
+
   xdebug("written %zu bytes in file %d with offset %ld",
          written, id, offset);
-  
+
   /* change outputBuffer */
-  
+
   dbuffer_reset ( afd->db );
-  
+
   if ( afd->db == afd->db1 )
     {
       xdebug ( "id=%d, change to buffer 2 ...", id );
       afd->db =  afd->db2;
     }
-  else 
+  else
     {
       xdebug ( "id=%d, change to buffer 1 ...", id );
       afd->db =  afd->db1;
     }
-  
+
   afd->command = IO_Set_fp;
 }
 
@@ -364,7 +365,7 @@ writePF(aFiledataPF *afd)
 static void
 defTimestepPF(aFiledataPF *afd, int tsID)
 {
-  if ( afd == NULL || tsID < 0 || tsID != afd->tsID + 1 ) 
+  if ( afd == NULL || tsID < 0 || tsID != afd->tsID + 1 )
     xabort ( " defTimestepPF() didn't succeed." );
   afd->tsID = tsID;
 }
@@ -393,29 +394,29 @@ size_t fwPOSIXFPGUARDSENDRECV( int fileID, int tsID, const void *buffer, size_t 
     {
       xdebug("fileID %d, tsID = %d, flush buffer", fileID, tsID);
       flushOp(afd, tsID);
-      xmpi ( MPI_Barrier ( commInqCommColl ())); 
+      xmpi ( MPI_Barrier ( commInqCommColl ()));
     }
 
   filled = dbuffer_push(afd->db, ( unsigned char * ) buffer, len);
 
-  xdebug ( "fileID = %d, tsID = %d, pushed data on buffer, filled = %d", 
-           fileID, tsID, filled ); 
+  xdebug ( "fileID = %d, tsID = %d, pushed data on buffer, filled = %d",
+           fileID, tsID, filled );
 
-  if ( filled == 1 ) 
+  if ( filled == 1 )
     {
       if ( flush )
 	error = filled;
       else
 	{
 	  writePF(afd);
-     
+
 	  error = dbuffer_push ( afd->db, ( unsigned char * ) buffer, len );
 	}
     }
-  
+
   if ( error == 1 )
     xabort("did not succeed filling output buffer, fileID=%d", fileID);
-  
+
   return len;
 }
 
@@ -483,12 +484,12 @@ int fowPOSIXFPGUARDSENDRECV ( const char *filename )
   {
     long offset, amount = 0L;
     int tag = encodeFileOpTag(afd->fileID, afd->command);
-    int specialRank = commInqSpecialRankNode ();
+    int specialRank = commInqSpecialRank ();
     MPI_Status status;
-    MPI_Comm commNode = commInqCommNode ();
+    MPI_Comm commPio = commInqCommPio ();
     xmpi(MPI_Sendrecv(&amount, 1, MPI_LONG, specialRank, tag,
                       &offset, 1, MPI_LONG, specialRank, tag,
-                      commNode, &status));
+                      commPio, &status));
   }
   afd->command = IO_Set_fp;
   return id;
@@ -501,8 +502,8 @@ finalizePOSIXFPGUARDSENDRECV(void)
 {
   int buffer = 0, tag = encodeFileOpTag(0, IO_Finalize);
 
-  xmpi(MPI_Send(&buffer, 1, MPI_INT, commInqSpecialRankNode(),
-                tag, commInqCommNode()));
+  xmpi(MPI_Send(&buffer, 1, MPI_INT, commInqSpecialRank(),
+                tag, commInqCommPio()));
 
   if (!listSetIsEmpty(bibAFiledataPF))
     xabort("set bibAFiledataM not empty");
@@ -518,14 +519,12 @@ finalizePOSIXFPGUARDSENDRECV(void)
 void
 initPOSIXFPGUARDSENDRECV(void (*postCommSetupActions)(void))
 {
-  if ( commInqSizeNode () < 2 ) 
-    xabort ( "USAGE: # IO PROCESSES ON A PHYSICAL NODE >= 2" );
+  int numIOServers = commInqSizePio();
+  if (numIOServers < 2)
+    xabort("error: # of I/O processes must be >= 2 for mode, but is %d",
+           numIOServers);
 
-  int isCollector = commInqRankNode () != commInqSpecialRankNode ();
-  commDefCommColl(isCollector);
-  commSendNodeInfo ();
-  commRecvNodeMap ();
-  commDefCommsIO ();
+  int isCollector = commInqRankColl() != -1;
   postCommSetupActions();
   if (!isCollector)
     fpgPOSIXFPGUARDSENDRECV ();

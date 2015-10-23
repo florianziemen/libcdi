@@ -9,65 +9,70 @@
 #include <stdio.h>
 
 
-typedef struct {
-  int hostID;
-  int isProcColl;
-  int nNodes;
-} nodeInfo_t;
+int cdiPioCommInit(MPI_Comm commGlob, int IOMode, int clientServerRole);
+void cdiPioCommFinalize(void);
 
-enum { MAXNPROCSIO   = 256,
-       MAXCOMMIONAME = 12 };
-
-enum { sizeNodeInfo  = 3,
-       NODEINFO      = 1111, 
-       NODEMAP       = 2222};
-
-void     commInit               ( void );
-void     commDestroy            ( void );
-
-void     commDefCommGlob        ( MPI_Comm ); 
 MPI_Comm commInqCommGlob        ( void );
 int      commInqSizeGlob        ( void );
 int      commInqRankGlob        ( void );
 int      commInqRootGlob        ( void );
 
-void     commDefNProcsIO        ( int );
-int      commInqNProcsIO        ( void );
-int      commInqNProcsModel     ( void );
+/* returns the inter-communicator used to connect from
+ * client to server group */
+MPI_Comm cdiPioInqInterComm(void);
+
 int      commInqIsProcIO        ( void );
-void     commDefIOMode          ( int );
 int      commInqIOMode          ( void );
 
 void     commDefCommPio         ( void );
-MPI_Comm commInqCommPio         ( void );
-MPI_Comm commInqCommModel       ( void );
-int      commInqRankPio         ( void );
-int      commInqRankModel       ( void );
+MPI_Comm commInqCommPio(void);
+int commInqSizePio(void);
+int commInqRankPio(void);
 
-void     commDefCommNode        ( void );
-MPI_Comm commInqCommNode        ( void );
-int      commInqSizeNode        ( void );
-int      commInqRankNode        ( void );
-int      commInqSpecialRankNode ( void );
+MPI_Comm commInqCommModel(void);
+int commInqRankModel(void);
+int cdiPioCommInqSizeClients(void);
 
-void     commDefCommColl        ( int ); 
+int commInqSpecialRank(void);
+
+void     commDefCommColl        ( int );
 MPI_Comm commInqCommColl        ( void );
-int      commInqSizeColl        ( void ); 
-int      commInqRankColl        ( void ); 
-                                
-void     commSendNodeInfo       ( void );
-void     commRecvNodeMap        ( void );// todo switch to gatherNodeInfo inside commpio
-int *    commInqNodeSizes       ( void );
-int      commInqNNodes          ( void );
-void     commEvalPhysNodes      ( void );
-int      commCollID2RankGlob    ( int );
-int      commRankGlob2CollID    ( int );
-void     commDefCommsIO         ( void ); 
-MPI_Comm commInqCommsIO         ( int );
+int commRankGlob2CollID(int rankGlob);
+int      commInqSizeColl        ( void );
+int      commInqRankColl        ( void );
 MPI_Comm commInqCommCalc        ( void );
 int      commInqNProcsColl      ( void );
 
 void     commPrint              ( FILE * );
+
+/* query rank of collector responsible for client on inter-communicator
+ * returns -1 on server processes.
+ */
+int cdiPioInqCollectorOfClient();
+
+/* query communicator containing clients and collectors,
+ * the collectors occupy the top-ranks
+ */
+MPI_Comm cdiPioInqCollClientIntraComm(void);
+
+/* query group of corresponding processes in other group on
+   intra-communicator */
+MPI_Group cdiPioInqRemoteGroup(void);
+
+static inline int
+cdiPioCollRank(int clientRank, int numClients, int numColl)
+{
+  return (int)(((long long)clientRank * (long long)numColl
+                + (long long)(numColl - 1))
+               / numClients);
+}
+
+static inline int
+cdiPioClientRangeStart(int collRank, int numClients, int numColl)
+{
+  return (int)(((long long)collRank * (long long)numClients)
+               / (long long)numColl);
+}
 
 #endif
 /*

@@ -115,17 +115,11 @@ void cdiPioFileWritingInit(void (*postCommSetupActions)(void))
 {
   int IOMode = commInqIOMode ();
 
-  commDefCommNode ();
-
-  xassert ( IOMode != PIO_NONE  || commInqSizeNode () == 1 );
+  xassert ( IOMode != PIO_NONE  || commInqSizeGlob() == 1 );
 
   switch ( IOMode )
     {
     case PIO_NONE:
-      commDefCommColl ( 1 );
-      commSendNodeInfo ();
-      commRecvNodeMap ();
-      commDefCommsIO ();
       break;
     case PIO_MPI:
       initMPINONB(postCommSetupActions);

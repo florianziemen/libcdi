@@ -51,7 +51,7 @@ cdiPioClientStreamOpen(const char *filename, char filemode,
             .specific.funcArgs.newFile
             = { .fnamelen = (int)filename_len,
                 .filetype = filetype } };
-          pioBufferFuncCall(header,
+          pioBufferFuncCall(streamptr->self, header,
                             &(struct memCpyDataDesc){filename,
                                 filename_len + 1}, memcpyPackFunc);
           xdebug("WROTE FUNCTION CALL IN BUFFER OF WINS:  %s, filenamesz=%zu,"
@@ -85,7 +85,7 @@ cdiPioClientStreamDefVlist_(int streamID, int vlistID)
       header = (struct winHeaderEntry){
         .id = STREAMDEFVLIST,
         .specific.funcArgs.streamChange = { streamID, vlistID } };
-      pioBufferFuncCall(header, NULL, nullPackFunc);
+      pioBufferFuncCall(streamID, header, NULL, nullPackFunc);
       xdebug("WROTE FUNCTION CALL IN BUFFER OF WINS:  %s, streamID=%d,"
              " vlistID=%d", funcMap[(-1 - STREAMDEFVLIST)], streamID, vlistID);
       break;
@@ -208,7 +208,7 @@ cdiPioClientStreamClose(stream_t *streamptr, int recordBufIsToBeDeleted)
         .id = STREAMCLOSE,
         .specific.funcArgs.streamChange
         = { streamptr->self, CDI_UNDEFID } };
-      pioBufferFuncCall(header, NULL, nullPackFunc);
+      pioBufferFuncCall(streamptr->self, header, NULL, nullPackFunc);
       xdebug("WROTE FUNCTION CALL IN BUFFER OF WINS:  %s, streamID=%d",
              funcMap[-1 - STREAMCLOSE], streamptr->self);
       break;
@@ -243,7 +243,8 @@ cdiPioClientStreamDefTimestep_(stream_t *streamptr, int tsID)
         .id = STREAMDEFTIMESTEP,
         .specific.funcArgs.streamNewTimestep = { streamptr->self, tsID } };
       xassert(sizeof (void *) >= sizeof (int));
-      pioBufferFuncCall(header, (void *)(intptr_t)taxisID, cdiPioTaxisPackWrap);
+      pioBufferFuncCall(streamptr->self, header,
+                        (void *)(intptr_t)taxisID, cdiPioTaxisPackWrap);
       break;
     case STAGE_CLEANUP:
       break;
@@ -256,12 +257,12 @@ cdiPioClientStreamDefTimestep_(stream_t *streamptr, int tsID)
 void
 cdiPioClientSetup(int *pioNamespace_, int *pioNamespace)
 {
-  commEvalPhysNodes ();
-  commDefCommsIO ();
   *pioNamespace_ = *pioNamespace = namespaceNew();
   int callerCDINamespace = namespaceGetActive();
   namespaceSetActive(*pioNamespace_);
   cdiPioSerializeSetMPI();
+  namespaceSwitchSet(NSSWITCH_ABORT, NSSW_FUNC(cdiAbortC_MPI));
+  namespaceSwitchSet(NSSWITCH_WARNING, NSSW_FUNC(cdiPioWarning));
   namespaceSwitchSet(NSSWITCH_STREAM_OPEN_BACKEND,
                      NSSW_FUNC(cdiPioClientStreamOpen));
   namespaceSwitchSet(NSSWITCH_STREAM_DEF_VLIST_,
