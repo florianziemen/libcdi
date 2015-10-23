@@ -9,6 +9,12 @@
 #include <math.h>
 #include <time.h>
 
+
+enum {
+  /* 129 is the first user-defined code of the GRIB format */
+  GRIB_USERDEF = 129,
+};
+
 void
 var_scale(int datatype, double *mscale, double *mrscale);
 

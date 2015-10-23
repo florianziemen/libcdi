@@ -277,7 +277,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
         gatherRedistSet: ;
       }
 #endif
-      varDesc[varIdx].code = 129 + (int)varIdx;
+      varDesc[varIdx].code = GRIB_USERDEF + (int)varIdx;
       vlistDefVarCode(vlistID, varDesc[varIdx].id, varDesc[varIdx].code);
       vlistDefVarDatatype(vlistID, varDesc[varIdx].id, setup.datatype);
     }
