@@ -2053,7 +2053,7 @@ int vlistVarCompare(vlist_t *a, int varIDA, vlist_t *b, int varIDB)
 
 
 enum {
-  vlistvar_nints = 20,
+  vlistvar_nints = 21,
   vlistvar_ndbls = 3,
 };
 
@@ -2070,6 +2070,8 @@ int vlistVarGetPackSize(vlist_t *p, int varID, void *context)
     varsize += serializeGetSize((int)strlen(var->stdname), DATATYPE_TXT, context);
   if (var->units)
     varsize += serializeGetSize((int)strlen(var->units), DATATYPE_TXT, context);
+  if (var->extra)
+    varsize += serializeGetSize((int)strlen(var->extra), DATATYPE_TXT, context);
   varsize += serializeGetSize(4 * zaxisInqSize(var->zaxisID),
                               DATATYPE_INT, context);
   varsize += vlistAttsGetSize(p, varID, context);
@@ -2081,7 +2083,8 @@ void vlistVarPack(vlist_t *p, int varID, char * buf, int size, int *position,
 {
   double dtempbuf[vlistvar_ndbls];
   var_t *var = p->vars + varID;
-  int tempbuf[vlistvar_nints], namesz, longnamesz, stdnamesz, unitssz;
+  int tempbuf[vlistvar_nints], namesz, longnamesz, stdnamesz, unitssz,
+    extralen;
 
   tempbuf[0] = var->flag;
   tempbuf[1] = var->gridID;
@@ -2104,6 +2107,7 @@ void vlistVarPack(vlist_t *p, int varID, char * buf, int size, int *position,
   int nlevs = var->levinfo ? zaxisInqSize(var->zaxisID) : 0;
   tempbuf[18] = nlevs;
   tempbuf[19] = var->iorank;
+  tempbuf[20] = extralen = var->extra?(int)strlen(var->extra):0;
   dtempbuf[0] = var->missval;
   dtempbuf[1] = var->scalefactor;
   dtempbuf[2] = var->addoffset;
@@ -2121,6 +2125,9 @@ void vlistVarPack(vlist_t *p, int varID, char * buf, int size, int *position,
                   buf, size, position, context);
   if (unitssz)
     serializePack(var->units, unitssz, DATATYPE_TXT,
+                  buf, size, position, context);
+  if (extralen)
+    serializePack(var->extra, extralen, DATATYPE_TXT,
                   buf, size, position, context);
   if (nlevs)
     {
@@ -2164,11 +2171,12 @@ void vlistVarUnpack(int vlistID, char * buf, int size, int *position,
   int newvar = vlistDefVar ( vlistID,
 			 namespaceAdaptKey ( tempbuf[1], originNamespace ),
 			 namespaceAdaptKey ( tempbuf[2], originNamespace ),
-                             tempbuf[3]);
-  if (tempbuf[4] || tempbuf[5] || tempbuf[6] || tempbuf[7])
-    varname = (char *) Malloc((size_t)imax(imax(imax(tempbuf[4],tempbuf[5]),
-                                                tempbuf[6]),
-                                           tempbuf[7]) + 1);
+			 tempbuf[3]);
+  if (tempbuf[4] || tempbuf[5] || tempbuf[6] || tempbuf[7] || tempbuf[20])
+    varname = (char *)Malloc((size_t)imax(imax(imax(imax(tempbuf[4],
+                                                         tempbuf[5]),
+                                                    tempbuf[6]),
+                                               tempbuf[7]), tempbuf[20]) + 1);
   if (tempbuf[4])
   {
     serializeUnpack(buf, size, position,
@@ -2197,6 +2205,13 @@ void vlistVarUnpack(int vlistID, char * buf, int size, int *position,
     varname[tempbuf[7]] = '\0';
     vlistDefVarUnits(vlistID, newvar, varname);
   }
+  if (tempbuf[20])
+    {
+      serializeUnpack(buf, size, position,
+                      varname, tempbuf[20], DATATYPE_TXT, context);
+      varname[tempbuf[20]] = '\0';
+      vlistDefVarExtra(vlistID, newvar, varname);
+    }
   Free(varname);
   vlistDefVarDatatype(vlistID, newvar, tempbuf[8]);
   vlistDefVarInstitut ( vlistID, newvar,
