@@ -2248,48 +2248,42 @@ void streamPrintP   ( void * streamptr, FILE * fp )
 
   if ( !sp ) return;
 
-  fprintf ( fp, "#\n");
-  fprintf ( fp, "# streamID %d\n", sp->self);
-  fprintf ( fp, "#\n");
-  fprintf ( fp, "self          = %d\n", sp->self );
-  fprintf ( fp, "accesstype    = %d\n", sp->accesstype );
-  fprintf ( fp, "accessmode    = %d\n", sp->accessmode );
-  fprintf ( fp, "filetype      = %d\n", sp->filetype );
-  fprintf ( fp, "byteorder     = %d\n", sp->byteorder );
-  fprintf ( fp, "fileID        = %d\n", sp->fileID );
-  fprintf ( fp, "filemode      = %d\n", sp->filemode );
-  fprintf ( fp, "//off_t numvals;\n" );
-  fprintf ( fp, "filename      = %s\n", sp->filename );
-  fprintf ( fp, "//Record   *record;\n" );
-  fprintf ( fp, "nrecs         = %d\n", sp->nrecs );
-  fprintf ( fp, "nvars         = %d\n", sp->nvars );
-  fprintf ( fp, "//svarinfo_t *vars;\n" );
-  fprintf ( fp, "varsAllocated = %d\n", sp->varsAllocated );
-  fprintf ( fp, "curTsID       = %d\n", sp->curTsID );
-  fprintf ( fp, "rtsteps       = %d\n", sp->rtsteps );
-  fprintf ( fp, "//long ntsteps;\n" );
-  fprintf ( fp, "//  tsteps_t   *tsteps;\n" );
-  fprintf ( fp, "tstepsTableSize= %d\n", sp->tstepsTableSize );
-  fprintf ( fp, "tstepsNextID  = %d\n", sp->tstepsNextID );
-  fprintf ( fp, "//basetime_t  basetime;\n" );
-  fprintf ( fp, "ncmode        = %d\n", sp->ncmode );
-  fprintf ( fp, "vlistID       = %d\n", sp->vlistID );
-  fprintf ( fp, "//  int       xdimID[MAX_GRIDS_PS];\n" );
-  fprintf ( fp, "//  int       ydimID[MAX_GRIDS_PS];\n" );
-  fprintf ( fp, "//  int       zaxisID[MAX_ZAXES_PS];\n" );
-  fprintf ( fp, "//  int       ncxvarID[MAX_GRIDS_PS];\n" );
-  fprintf ( fp, "//  int       ncyvarID[MAX_GRIDS_PS];\n" );
-  fprintf ( fp, "//  int       ncavarID[MAX_GRIDS_PS];\n" );
-  fprintf ( fp, "historyID     = %d\n", sp->historyID );
-  fprintf ( fp, "globalatts    = %d\n", sp->globalatts );
-  fprintf ( fp, "localatts     = %d\n", sp->localatts );
-  fprintf ( fp, "//  VCT       vct;\n" );
-  fprintf ( fp, "unreduced     = %d\n", sp->unreduced );
-  fprintf ( fp, "sortname      = %d\n", sp->sortname );
-  fprintf ( fp, "have_missval  = %d\n", sp->have_missval );
-  fprintf ( fp, "ztype         = %d\n", sp->comptype );
-  fprintf ( fp, "zlevel        = %d\n", sp->complevel );
-  fprintf ( fp, "//  void    **gribContainers;\n" );
+  fprintf(fp, "#\n"
+          "# streamID %d\n"
+          "#\n"
+          "self          = %d\n"
+          "accesstype    = %d\n"
+          "accessmode    = %d\n"
+          "filetype      = %d\n"
+          "byteorder     = %d\n"
+          "fileID        = %d\n"
+          "filemode      = %d\n"
+          "filename      = %s\n"
+          "nrecs         = %d\n"
+          "nvars         = %d\n"
+          "varsAllocated = %d\n"
+          "curTsID       = %d\n"
+          "rtsteps       = %d\n"
+          "ntsteps       = %ld\n"
+          "tstepsTableSize= %d\n"
+          "tstepsNextID  = %d\n"
+          "ncmode        = %d\n"
+          "vlistID       = %d\n"
+          "historyID     = %d\n"
+          "globalatts    = %d\n"
+          "localatts     = %d\n"
+          "unreduced     = %d\n"
+          "sortname      = %d\n"
+          "have_missval  = %d\n"
+          "ztype         = %d\n"
+          "zlevel        = %d\n",
+          sp->self, sp->self, sp->accesstype, sp->accessmode,
+          sp->filetype, sp->byteorder, sp->fileID, sp->filemode,
+          sp->filename, sp->nrecs, sp->nvars, sp->varsAllocated,
+          sp->curTsID, sp->rtsteps, sp->ntsteps, sp->tstepsTableSize,
+          sp->tstepsNextID, sp->ncmode, sp->vlistID, sp->historyID,
+          sp->globalatts, sp->localatts, sp->unreduced, sp->sortname,
+          sp->have_missval, sp->comptype, sp->complevel);
 }
 
 enum {
