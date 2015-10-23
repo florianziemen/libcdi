@@ -1051,7 +1051,6 @@ void cdiPioCollectorMessageLoop(void)
                 Free(resHs);
               }
           }
-          cdiPioFileWritingFinalize();
           serverWinCleanup();
           idSetDestroy(&openStreams);
           Free(streamActivity);

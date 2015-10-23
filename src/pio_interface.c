@@ -520,7 +520,11 @@ cdiPioInit(MPI_Comm commGlob, int IOMode, int clientServerRole,
       postCommSetupActions();
       cdiPioFileWritingInit();
       if (commInqRankColl() >= 0)
-        cdiPioCollectorMessageLoop();
+        {
+          cdiPioCollectorMessageLoop();
+          cdiPioFileWritingFinalize();
+        }
+      /* ensure cleanup of namespace succeeds */
       namespaceNew();
       cdiPioCommFinalize();
       if (xtInitByCDI)
