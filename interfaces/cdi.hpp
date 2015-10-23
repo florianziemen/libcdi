@@ -1,6 +1,10 @@
 #include <string>
 #include <vector>
 #include <map>
+// the following include is only needed for buggy versions of SWIG
+// (2.0.7 and earlier) with newer STL which no longer include cstddef
+#include <cstddef>
+
 #define CHARSIZE      128
 
 class CdiGrid {
@@ -16,7 +20,7 @@ class CdiGrid {
 
 
     std::string xname, xlongname, xstdname, xunits;
-    std::string yname, ylongname, ystdname, yunits;      
+    std::string yname, ylongname, ystdname, yunits;
     std::string name;
 
     void getValues();
@@ -25,7 +29,7 @@ class CdiGrid {
     void getBoundsAsPointer(double *xbnds, double *ybnds);
     void getFloatVals(float *xvals, float * yvals);
     void getFloatBounds(float *xbnds, float *ybnds);
-      
+
   private:
     void determineGrid(int gridID);
 };
@@ -35,7 +39,7 @@ class CdiTaxis {
     CdiTaxis();
     CdiTaxis(int vlistID);
     ~CdiTaxis();
-    
+
     int taxisID;
     int ntsteps, unit;
     int rdate, rtime, vdate, vtime;
@@ -57,7 +61,7 @@ class CdiZaxis {
     std::string name, longname, units;
 };
 
-class CdiVariable { 
+class CdiVariable {
   public:
     CdiVariable();
     CdiVariable(int streamid,int vlistid, int varid);
@@ -77,7 +81,7 @@ class CdiVariable {
     CdiTaxis taxis;
 
     void sinfo();
-    void getValues(); 
+    void getValues();
     void getValuesWithLevel(int tsID = 0);
     std::vector<float>   getFValues();
     std::vector< std::vector<float> > getFValuesWithLevel(int tsID = 0);
@@ -94,7 +98,7 @@ class Cdi {
 
     std::vector <std::string> varnames;
     std::vector <int> codes;
-    
+
     std::vector<CdiVariable>           variables;
     std::map<std::string, CdiVariable> var;
     std::map<int,         CdiVariable> varByCode;

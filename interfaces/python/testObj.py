@@ -1,8 +1,18 @@
+#! /usr/bin/env python
+from __future__ import print_function
+import sys, os
+for env_var in [ 'abs_srcdir', 'abs_builddir_python_build',  'abs_builddir' ]:
+  v = os.getenv(env_var)
+  if v != None:
+    sys.path.insert(0, v)
+
 import CdiObj
 
-ifile = "../testdata/mulval.grb"
+ifile_name = "../testdata/mulval.grb"
+if 'abs_srcdir' in os.environ:
+  ifile_name = os.path.join(os.environ['abs_srcdir'], ifile_name)
 
-cdi = CdiObj.Cdi(ifile)
+cdi = CdiObj.Cdi(ifile_name)
 
 print('Stream: ',cdi.streamID,' vlistID:',cdi.vlistID,' nvars:{d}', cdi.nvars)
 
