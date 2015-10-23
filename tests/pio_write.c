@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/time.h>
 #include <unistd.h>
 
 #ifdef USE_MPI
@@ -96,6 +97,25 @@ parse_intarg(const char msg[])
   return (int)temp;
 }
 
+static unsigned
+parse_unsignedarg(const char msg[])
+{
+  char *end;
+  unsigned long temp = strtoul(optarg, &end, 0);
+  if ((errno == ERANGE && (temp == ULONG_MAX))
+      || (errno != 0 && temp == 0))
+    {
+      perror(msg);
+      exit(EXIT_FAILURE);
+    }
+  if (temp > UINT_MAX)
+    {
+      fprintf(stderr, "range error: %ld\n", temp);
+      exit(EXIT_FAILURE);
+    }
+  return (unsigned)temp;
+}
+
 int main(int argc, char *argv[])
 {
   struct model_config setup = default_setup;
@@ -116,9 +136,32 @@ int main(int argc, char *argv[])
   xmpi ( MPI_Comm_rank ( commGlob, &rankGlob ));
 #endif
 
+  /* seed random generator */
+  {
+    unsigned seed;
+#ifdef USE_MPI
+    if (rankGlob == 0)
+#endif
+      {
+        struct timeval tv;
+        int status = gettimeofday(&tv, NULL);
+        if (status != 0)
+          {
+            perror("failed seed generation!");
+            exit(1);
+          }
+        seed = (unsigned)(tv.tv_sec ^ tv.tv_usec);
+        fprintf(stderr, "random seed=%u\n", seed);
+      }
+#ifdef USE_MPI
+    MPI_Bcast(&seed, 1, MPI_UNSIGNED, 0, MPI_COMM_WORLD);
+#endif
+    srandom(seed);
+  }
+
   {
     int opt;
-    while ((opt = getopt(argc, argv, "f:m:n:z:t:y:c"
+    while ((opt = getopt(argc, argv, "f:m:n:z:t:y:cs:"
 #ifdef USE_MPI
                          "p:w:"
 #endif
@@ -204,6 +247,12 @@ int main(int argc, char *argv[])
         break;
       case 'c':
         setup.compute_checksum = 0;
+        break;
+      case 's':
+        {
+          unsigned seed = parse_unsignedarg("error parsing random seed");
+          srandom(seed);
+        }
         break;
       default: /* '?' */
         fprintf(stderr, "Usage: %s "
