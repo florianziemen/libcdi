@@ -16333,7 +16333,7 @@ fi
 	    export_dynamic_flag_spec_CXX='$wl--export-dynamic'
 	    whole_archive_flag_spec_CXX='$wl--whole-archive$convenience $wl--no-whole-archive'
 	    ;;
-          pgCC* | pgcpp*)
+          pgCC* | pgcpp* | pgc++* )
             # Portland Group C++ compiler
 	    case `$CC -V` in
 	    *pgCC\ [1-5].* | *pgcpp\ [1-5].*)
@@ -17119,7 +17119,7 @@ lt_prog_compiler_static_CXX=
 	    lt_prog_compiler_pic_CXX='-fPIC'
 	    lt_prog_compiler_static_CXX='-static'
 	    ;;
-	  pgCC* | pgcpp*)
+	  pgCC* | pgcpp* | pgc++* )
 	    # Portland Group C++ compiler
 	    lt_prog_compiler_wl_CXX='-Wl,'
 	    lt_prog_compiler_pic_CXX='-fpic'
