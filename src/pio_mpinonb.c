@@ -44,11 +44,8 @@ fileIDTest(void *a, void *fileID)
 
 static aFiledataM *initAFiledataMPINONB ( const char *filename, size_t bs )
 {
-  aFiledataM *of = NULL;
-  int iret;
   MPI_Comm commPio = commInqCommPio();
-
-  of = (aFiledataM*) Malloc(sizeof (*of) + strlen(filename) + 1);
+  aFiledataM *of = (aFiledataM *)Malloc(sizeof (*of) + strlen(filename) + 1);
 
   strcpy(of->name, filename);
   of->size = bs;
@@ -56,8 +53,7 @@ static aFiledataM *initAFiledataMPINONB ( const char *filename, size_t bs )
   of->db2 = NULL;
 
   /* init output buffer */
-
-  iret = dbuffer_init ( &( of->db1 ), of->size );
+  int iret = dbuffer_init ( &( of->db1 ), of->size );
   iret += dbuffer_init ( &( of->db2 ), of->size );
 
   if ( iret > 0 ) xabort ( "dbuffer_init did not succeed" );
@@ -225,10 +221,9 @@ fwMPINONB(int fileID, const void *buffer, size_t len, int tsID)
 static int fcMPINONB(int fileID)
 {
   aFiledataM *of;
-  int rankPio = commInqRankPio ();
 
   xdebug("IOPE%d: write buffer, close file and cleanup, in %d",
-         rankPio, fileID );
+         commInqRankPio(), fileID );
 
   if (!(of = listSetGet(bibAFiledataM, fileIDTest, (void *)(intptr_t)fileID)))
     xabort("listSet, fileID=%d not found", fileID);

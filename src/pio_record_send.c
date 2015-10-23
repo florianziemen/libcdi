@@ -12,8 +12,6 @@
 #include "pio_impl.h"
 #include "pio_util.h"
 
-extern const char *token;
-
 typedef struct
 {
   size_t size;
@@ -251,14 +249,10 @@ pioSendOpen(const char *filename, const char *mode)
          filename, id);
 
   /* put filename, id and buffersize on buffer */
-  iret = dbuffer_push ( afd->db, filename, strlen ( filename ));
-  xassert(iret == 0);
-  iret = dbuffer_push ( afd->db, token, 1);
+  iret = dbuffer_push(afd->db, filename, strlen(filename) + 1);
   xassert(iret == 0);
   sprintf ( message,"%lX", buffersize);
-  iret = dbuffer_push ( afd->db, message, strlen ( message ));
-  xassert(iret == 0);
-  iret = dbuffer_push ( afd->db, token, 1);
+  iret = dbuffer_push(afd->db, message, strlen(message) + 1);
   xassert(iret == 0);
 
   if ( ddebug )

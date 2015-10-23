@@ -16,8 +16,6 @@
 #include "pio_impl.h"
 #include "pio_util.h"
 
-extern const char *token;
-
 typedef struct
 {
   struct dBuffer *fb;
@@ -127,9 +125,7 @@ pioWriterStdIO(void)
 {
   bFiledataP *bfd;
   listSet * bibBFiledataP;
-  size_t amount, buffersize;
-  unsigned char *messageBuffer = NULL, *pMB;
-  char *filename, *temp;
+  size_t amount;
   int messagesize, source, tag, id;
   struct fileOpTag rtag;
   MPI_Status status;
@@ -163,47 +159,45 @@ pioWriterStdIO(void)
       switch (rtag.command)
 	{
       	case IO_Open_file:
+          {
+            char *messageBuffer
+              = Malloc((size_t)messagesize * sizeof (messageBuffer[0]));
+            char *pMB = messageBuffer;
+            xmpi(MPI_Recv(messageBuffer, messagesize, MPI_UNSIGNED_CHAR,
+                          source, tag, commPio, &status));
 
-	  messageBuffer
-            = Malloc((size_t)messagesize * sizeof (messageBuffer[0]));
-    	  pMB = messageBuffer;
+            xdebug("%s", "after recv, in loop");
 
-	  xmpi(MPI_Recv(messageBuffer, messagesize, MPI_UNSIGNED_CHAR,
-                        source, tag, commPio, &status));
+            char *filename = pMB;
+            pMB += (strlen(filename) + 1);
+            char *temp = pMB;
+            long buffersize = strtol(temp, NULL, 16);
+            pMB += (strlen(temp) + 1);
+            size_t amount = (size_t)(messageBuffer + messagesize - pMB);
 
-	  xdebug("%s", "after recv, in loop");
+            xdebug("command %s, filename=%s, buffersize=%ld, amount=%zu",
+                   cdiPioCmdStrTab[rtag.command], filename, buffersize, amount);
 
-	  filename = strtok ( (char *)pMB, token );
-	  pMB += ( strlen ( filename ) + 1 );
-	  temp =  strtok ( (char *)pMB, token );
-          buffersize = (size_t)strtol(temp, NULL, 16);
-	  pMB += ( strlen ( temp ) + 1 );
-	  amount = (size_t)(messageBuffer + messagesize - pMB);
 
-	  xdebug("command %s, filename=%s, buffersize=%zu, amount=%zu",
-                 cdiPioCmdStrTab[rtag.command], filename, buffersize, amount);
+            if (!(bfd = listSetGet(bibBFiledataP, fileIDTest,
+                                   (void *)(intptr_t)rtag.id)))
+              {
+                listSetForeach(bibBFiledataP, elemCheck, filename);
+                bfd = initBFiledataP(filename, (size_t)buffersize, nProcsColl,
+                                     rtag.id);
+                if ((id = listSetAdd(bibBFiledataP, bfd)) < 0)
+                  xabort("fileID=%d not unique", rtag.id);
+                bfd->fileID = id;
+              }
+            else
+              if (strcmp(filename, bfd->name) != 0)
+                xabort("filename is not consistent, fileID=%d", rtag.id);
+            memcpy(bfd->fb->buffer, pMB, amount);
 
-          if (!(bfd = listSetGet(bibBFiledataP, fileIDTest,
-                               (void *)(intptr_t)rtag.id)))
-	    {
-	      listSetForeach(bibBFiledataP, elemCheck, filename);
-	      bfd = initBFiledataP(filename, buffersize, nProcsColl,
-                                   rtag.id);
+            writeP(bfd, amount);
 
-	      if ((id = listSetAdd(bibBFiledataP, bfd)) < 0)
-                xabort("fileID=%d not unique", rtag.id);
-              bfd->fileID = id;
-	    }
-	  else
-	    if (strcmp(filename, bfd->name) != 0)
-              xabort("filename is not consistent, fileID=%d", rtag.id);
-
-	  memcpy(bfd->fb->buffer, pMB, amount);
-
-	  writeP(bfd, amount);
-
-	  Free(messageBuffer);
-
+            Free(messageBuffer);
+          }
 	  break;
 
 	case IO_Send_buffer:

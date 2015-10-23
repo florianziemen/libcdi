@@ -28,9 +28,6 @@ const char *const cdiPioCmdStrTab[] = {
   "IO_Finalize"
 };
 
-extern const char *token;
-const char *token = "%";
-
 /***************************************************************/
 
 void cdiPioFileWritingInit(void)

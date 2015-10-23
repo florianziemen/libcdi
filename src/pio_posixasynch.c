@@ -27,8 +27,6 @@
 #include "pio_util.h"
 #include "dmemory.h"
 
-extern const char *token;
-
 typedef struct
 {
   struct dBuffer *fb;
@@ -256,10 +254,10 @@ void pioWriterAIO(void)
             xmpi(MPI_Recv(messageBuffer, messagesize, MPI_UNSIGNED_CHAR, source,
                           tag, commPio, &status ));
 
-            char *filename = strtok((char *)pMB, token);
+            char *filename = (char *)pMB;
             pMB += (strlen(filename) + 1);
-            char *temp = strtok((char *)pMB, token);
-            long buffersize =  strtol(temp, NULL, 16);
+            char *temp = (char *)pMB;
+            long buffersize = strtol(temp, NULL, 16);
             pMB += (strlen(temp) + 1);
             size_t amount = (size_t)(messageBuffer + messagesize - pMB);
 
