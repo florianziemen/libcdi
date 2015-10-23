@@ -162,7 +162,7 @@ int cdiPioConfCreate(void)
   conf->partInflate = 1.1f;
   conf->postCommSetupActions = cdiPioNoPostCommSetup;
   conf->largePageAlign = false;
-  conf->cacheRedists = false;
+  conf->cacheRedists = true;
   conf->recordAggBufLimMB = 128;
   conf->xmap_new = xt_xmap_dist_dir_new;
   int resH = reshPut(conf, &cdiPioConfOps);
