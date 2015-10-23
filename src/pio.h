@@ -11,8 +11,6 @@
 
 void cdiPioFileWritingInit(void);
 void cdiPioFileWritingFinalize(void);
-int pioFileOpen(const char *filename, const char *mode);
-int    pioFileClose    ( int );
 size_t cdiPioFileWrite(int fileID, const void *restrict buffer, size_t len,
                        int tsID);
 

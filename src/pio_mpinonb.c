@@ -11,6 +11,7 @@
 
 #include "cdi.h"
 #include "dmemory.h"
+#include "namespace.h"
 #include "pio.h"
 #include "pio_comm.h"
 #include "pio_impl.h"
@@ -220,7 +221,7 @@ size_t fwMPINONB ( int fileID, int tsID, const void *buffer, size_t len )
 
 /***************************************************************/
 
-int fcMPINONB ( int fileID )
+static int fcMPINONB(int fileID)
 {
   aFiledataM *of;
   int rankPio = commInqRankPio ();
@@ -251,7 +252,8 @@ elemCheck(void *q, void *nm)
 }
 
 
-int fowMPINONB ( const char *filename )
+static int
+fowMPINONB(const char *filename, const char *mode)
 {
   static unsigned long buffersize = 0;
   int id;
@@ -260,6 +262,9 @@ int fowMPINONB ( const char *filename )
   };
   MPI_Comm commPio = commInqCommPio ();
   int rankPio = commInqRankPio ();
+
+  if ((mode[0] != 'w' && mode[0] != 'W') || mode[0] == 0 || mode[1] != 0)
+    xabort("Unsupported mode \"%s\" in parallel file open.", mode);
 
   /* broadcast buffersize to collectors ( just once, for all files )*/
 
@@ -303,6 +308,9 @@ void
 initMPINONB(void)
 {
   bibAFiledataM = listSetNew( destroyAFiledataMPINONB, compareNamesMPINONB );
+
+  namespaceSwitchSet(NSSWITCH_FILE_OPEN, NSSW_FUNC(fowMPINONB));
+  namespaceSwitchSet(NSSWITCH_FILE_CLOSE, NSSW_FUNC(fcMPINONB));
 
   if ( bibAFiledataM == NULL )
     xabort ( "listSetNew did not succeed" );

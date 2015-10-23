@@ -59,58 +59,6 @@ cdiPioFileWrite(int fileID, const void *restrict buffer, size_t len, int tsID)
 
 /***************************************************************/
 
-int pioFileClose ( int id )
-{
-  int iret = CDI_UNDEFID;
-  switch ( commInqIOMode ())
-    {
-    case PIO_MPI:
-      iret = fcMPINONB ( id );
-      break;
-#ifndef _SX
-    case PIO_ASYNCH:
-#endif
-    case PIO_WRITER:
-      iret = pioSendClose(id);
-      break;
-    case PIO_FPGUARD:
-      iret = fcPOSIXFPGUARDSENDRECV ( id );
-      break;
-    }
-
-  return iret;
-}
-
-/***************************************************************/
-
-int pioFileOpen(const char *filename, const char *mode)
-{
-  int iret = CDI_UNDEFID;
-
-  if ((mode[0] != 'w' && mode[0] != 'W') || mode[0] == 0 || mode[1] != 0)
-    xabort("Unsupported mode \"%s\" in parallel file open.", mode);
-
-  switch ( commInqIOMode ())
-    {
-    case PIO_MPI:
-      iret = fowMPINONB ( filename );
-      break;
-#ifndef _SX
-    case PIO_ASYNCH:
-#endif
-    case PIO_WRITER:
-      iret = pioSendOpen(filename);
-      break;
-    case PIO_FPGUARD:
-      iret = fowPOSIXFPGUARDSENDRECV ( filename );
-      break;
-    }
-
-  return iret;
-}
-
-/***************************************************************/
-
 void cdiPioFileWritingInit(void)
 {
   int IOMode = commInqIOMode ();

@@ -17,7 +17,7 @@
 
 #include "cdi.h"
 #include "dmemory.h"
-
+#include "namespace.h"
 #include "pio.h"
 #include "pio_comm.h"
 #include "pio_impl.h"
@@ -422,7 +422,8 @@ size_t fwPOSIXFPGUARDSENDRECV( int fileID, int tsID, const void *buffer, size_t 
 
 /***************************************************************/
 
-int fcPOSIXFPGUARDSENDRECV ( int id )
+static int
+fcPOSIXFPGUARDSENDRECV(int id)
 {
   aFiledataPF *afd;
   int iret;
@@ -453,12 +454,15 @@ elemCheck(void *q, void *nm)
     xabort("Filename %s has already been added to set\n", name);
 }
 
-int fowPOSIXFPGUARDSENDRECV ( const char *filename )
+static int
+fowPOSIXFPGUARDSENDRECV(const char *filename, const char *mode)
 {
   int id;
   enum {
     bcastRoot = 0
   };
+  if ((mode[0] != 'w' && mode[0] != 'W') || mode[0] == 0 || mode[1] != 0)
+    xabort("Unsupported mode \"%s\" in parallel file open.", mode);
   aFiledataPF *afd;
   static unsigned long buffersize = 0;
 
@@ -528,7 +532,13 @@ initPOSIXFPGUARDSENDRECV(void)
   if (!isCollector)
     fpgPOSIXFPGUARDSENDRECV ();
   else
-    bibAFiledataPF = listSetNew( destroyAFiledataPF, compareNamesAPF );
+    {
+      namespaceSwitchSet(NSSWITCH_FILE_OPEN,
+                         NSSW_FUNC(fowPOSIXFPGUARDSENDRECV));
+      namespaceSwitchSet(NSSWITCH_FILE_CLOSE,
+                         NSSW_FUNC(fcPOSIXFPGUARDSENDRECV));
+      bibAFiledataPF = listSetNew(destroyAFiledataPF, compareNamesAPF);
+    }
 }
 
 /*

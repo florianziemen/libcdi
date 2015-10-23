@@ -6,10 +6,11 @@
 #include <stdlib.h>
 
 #include "cdipio.h"
+#include "dmemory.h"
+#include "namespace.h"
 #include "pio_comm.h"
 #include "pio_impl.h"
 #include "pio_util.h"
-#include "dmemory.h"
 
 extern const char *token;
 
@@ -195,7 +196,7 @@ pioSendWrite(int id, int tsID, const void *buffer, size_t len)
 }
 
 
-int
+static int
 pioSendClose(int id)
 {
   remoteFileBuf *afd;
@@ -216,9 +217,11 @@ pioSendClose(int id)
   return iret;
 }
 
-int
-pioSendOpen(const char *filename)
+static int
+pioSendOpen(const char *filename, const char *mode)
 {
+  if ((mode[0] != 'w' && mode[0] != 'W') || mode[0] == 0 || mode[1] != 0)
+    xabort("Unsupported mode \"%s\" in parallel file open.", mode);
   remoteFileBuf *afd;
   static unsigned long buffersize = 0;
   int id, iret;
@@ -313,7 +316,11 @@ pioSendInitialize(void)
         break;
       }
   else
-    bibRemoteFileBuf = listSetNew(destroyRemoteFileBuf, compareNames);
+    {
+      namespaceSwitchSet(NSSWITCH_FILE_OPEN, NSSW_FUNC(pioSendOpen));
+      namespaceSwitchSet(NSSWITCH_FILE_CLOSE, NSSW_FUNC(pioSendClose));
+      bibRemoteFileBuf = listSetNew(destroyRemoteFileBuf, compareNames);
+    }
 }
 
 /*

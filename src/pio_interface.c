@@ -515,8 +515,6 @@ cdiPioInit(MPI_Comm commGlob, int IOMode, int clientServerRole,
   if ( commInqIsProcIO ())
     {
       cdiPioSerializeSetMPI();
-      namespaceSwitchSet(NSSWITCH_FILE_OPEN, NSSW_FUNC(pioFileOpen));
-      namespaceSwitchSet(NSSWITCH_FILE_CLOSE, NSSW_FUNC(pioFileClose));
       postCommSetupActions();
       cdiPioFileWritingInit();
       if (commInqRankColl() >= 0)
@@ -524,8 +522,6 @@ cdiPioInit(MPI_Comm commGlob, int IOMode, int clientServerRole,
           cdiPioCollectorMessageLoop();
           cdiPioFileWritingFinalize();
         }
-      /* ensure cleanup of namespace succeeds */
-      namespaceNew();
       cdiPioCommFinalize();
       if (xtInitByCDI)
         xt_finalize();
