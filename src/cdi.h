@@ -23,6 +23,7 @@ extern "C" {
 
 #define  CDI_BIGENDIAN            0   /* Byte order BIGENDIAN                 */
 #define  CDI_LITTLEENDIAN         1   /* Byte order LITTLEENDIAN              */
+#define  CDI_PDPENDIAN            2
 
 #define  CDI_REAL                 1   /* Real numbers                         */
 #define  CDI_COMP                 2   /* Complex numbers                      */

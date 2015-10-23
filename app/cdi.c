@@ -2,6 +2,7 @@
 #  include "../src/config.h"
 #endif
 
+#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -32,6 +33,14 @@ int      vlistInqVarMissvalUsed(int vlistID, int varID);
 #  define IS_EQUAL(x,y)     (!IS_NOT_EQUAL(x,y))
 #endif
 
+#ifndef HOST_ENDIANNESS
+#ifdef __cplusplus
+static const uint32_t HOST_ENDIANNESS_temp[1] = { UINT32_C(0x00030201) };
+#define HOST_ENDIANNESS (((const unsigned char *)HOST_ENDIANNESS_temp)[0])
+#else
+#define HOST_ENDIANNESS (((const unsigned char *)&(const uint32_t[1]){UINT32_C(0x00030201)})[0])
+#endif
+#endif
 
 #include "printinfo.h"
 
@@ -499,14 +508,10 @@ void printShortinfo(int streamID, int vlistID, int vardis)
 }
 
 
-#undef  IsBigendian
-#define IsBigendian()  ( u_byteorder.c[sizeof(long) - 1] )
-
 
 static
 void setDefaultDataType(char *datatypestr)
 {
-  static union {unsigned long l; unsigned char c[sizeof(long)];} u_byteorder = {1};
   int nbits = -1;
   enum {D_UINT, D_INT, D_FLT, D_CPX};
   int dtype = -1;
@@ -609,12 +614,12 @@ void setDefaultDataType(char *datatypestr)
     {
       if ( *datatypestr == 'l' || *datatypestr == 'L' )
 	{
-	  if ( IsBigendian() ) DefaultByteorder = CDI_LITTLEENDIAN;
+	  if ( HOST_ENDIANNESS == CDI_BIGENDIAN ) DefaultByteorder = CDI_LITTLEENDIAN;
 	  datatypestr++;
 	}
       else if ( *datatypestr == 'b' || *datatypestr == 'B' )
 	{
-	  if ( ! IsBigendian() ) DefaultByteorder = CDI_BIGENDIAN;
+	  if ( HOST_ENDIANNESS == CDI_LITTLEENDIAN ) DefaultByteorder = CDI_BIGENDIAN;
 	  datatypestr++;
 	}
       else

@@ -27,6 +27,7 @@ module mo_cdi
   integer(c_int), public, parameter :: CDI_GLOBAL = -1
   integer(c_int), public, parameter :: CDI_BIGENDIAN = 0
   integer(c_int), public, parameter :: CDI_LITTLEENDIAN = 1
+  integer(c_int), public, parameter :: CDI_PDPENDIAN = 2
   integer(c_int), public, parameter :: CDI_REAL = 1
   integer(c_int), public, parameter :: CDI_COMP = 2
   integer(c_int), public, parameter :: CDI_BOTH = 3

@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "binary.h"
 #include "cdi.h"
 #include "cdi_int.h"
 #include "cdi_cksum.h"
@@ -56,29 +57,25 @@ const resOps streamOps = {
 
 
 
-
-#undef  IsBigendian
-#define IsBigendian()  ( u_byteorder.c[sizeof(long) - 1] )
-
-
 static
 int getByteorder(int byteswap)
 {
-  static union {unsigned long l; unsigned char c[sizeof(long)];} u_byteorder = {1};
   int byteorder = -1;
 
-  if ( IsBigendian() )
+  switch (HOST_ENDIANNESS)
     {
-      if ( byteswap ) byteorder = CDI_LITTLEENDIAN;
-      else            byteorder = CDI_BIGENDIAN;
+    case CDI_BIGENDIAN:
+      byteorder = byteswap ? CDI_LITTLEENDIAN : CDI_BIGENDIAN;
+      break;
+    case CDI_LITTLEENDIAN:
+      byteorder = byteswap ? CDI_BIGENDIAN : CDI_LITTLEENDIAN;
+      break;
+    /* FIXME: does not currently adjust for PDP endianness */
+    case CDI_PDPENDIAN:
+    default:
+      Error("unhandled endianness");
     }
-  else
-    {
-      if ( byteswap ) byteorder = CDI_BIGENDIAN;
-      else            byteorder = CDI_LITTLEENDIAN;
-    }
-
-  return (byteorder);
+  return byteorder;
 }
 
 // used also in CDO
@@ -206,16 +203,17 @@ int streamInqFiletype(int streamID)
 
 int getByteswap(int byteorder)
 {
-  static union {unsigned long l; unsigned char c[sizeof(long)];} u_byteorder = {1};
-  int byteswap = 0;
+  int byteswap = -1;
 
-  if ( IsBigendian() )
+  switch (byteorder)
     {
-      if ( byteorder == CDI_LITTLEENDIAN ) byteswap = TRUE;
-    }
-  else
-    {
-      if ( byteorder == CDI_BIGENDIAN ) byteswap = TRUE;
+    case CDI_BIGENDIAN:
+    case CDI_LITTLEENDIAN:
+    case CDI_PDPENDIAN:
+      byteswap = (HOST_ENDIANNESS != byteorder);
+      break;
+    default:
+      Error("unexpected byteorder %d query!", byteorder);
     }
 
   return (byteswap);

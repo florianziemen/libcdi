@@ -18,45 +18,45 @@
 #include "binary.h"
 
 
-#undef  IsBigendian
-#define IsBigendian()  ( u_byteorder.c[sizeof(long) - 1] )
-
 void cdiPrintDatatypes(void)
 {
-  /* IsBigendian returns 1 for big endian byte order */
-  static union {unsigned long l; unsigned char c[sizeof(long)];} u_byteorder = {1};
-
-  fprintf (stderr, "+-------------+-------+\n");
-  fprintf (stderr, "| types       | bytes |\n");
-  fprintf (stderr, "+-------------+-------+\n");
-  fprintf (stderr, "| void *      |   %3d |\n", (int) sizeof(void *));
-  fprintf (stderr, "+-------------+-------+\n");
-  fprintf (stderr, "| char        |   %3d |\n", (int) sizeof(char));
-  fprintf (stderr, "+-------------+-------+\n");
-  fprintf (stderr, "| short       |   %3d |\n", (int) sizeof(short));
-  fprintf (stderr, "| int         |   %3d |\n", (int) sizeof(int));
-  fprintf (stderr, "| long        |   %3d |\n", (int) sizeof(long));
-  fprintf (stderr, "| long long   |   %3d |\n", (int) sizeof(long long));
-  fprintf (stderr, "| size_t      |   %3d |\n", (int) sizeof(size_t));
-  fprintf (stderr, "| off_t       |   %3d |\n", (int) sizeof(off_t));
-  fprintf (stderr, "+-------------+-------+\n");
-  fprintf (stderr, "| float       |   %3d |\n", (int) sizeof(float));
-  fprintf (stderr, "| double      |   %3d |\n", (int) sizeof(double));
-  fprintf (stderr, "| long double |   %3d |\n", (int) sizeof(long double));
-  fprintf (stderr, "+-------------+-------+\n\n");
 #define XSTRING(x)	#x
 #define STRING(x)	XSTRING(x)
-  fprintf (stderr, "+-------------+-----------+\n");
-  fprintf (stderr, "| INT32       | %-9s |\n", STRING(INT32));
-  fprintf (stderr, "| INT64       | %-9s |\n", STRING(INT64));
-  fprintf (stderr, "| FLT32       | %-9s |\n", STRING(FLT32));
-  fprintf (stderr, "| FLT64       | %-9s |\n", STRING(FLT64));
-  fprintf (stderr, "+-------------+-----------+\n");
-
-  if ( IsBigendian() )
-    fprintf (stderr, "\n  byte ordering is BIGENDIAN\n\n");
-  else
-    fprintf (stderr, "\n  byte ordering is LITTLEENDIAN\n\n");
+  fprintf (stderr, "+-------------+-------+\n"
+           "| types       | bytes |\n"
+           "+-------------+-------+\n"
+           "| void *      |   %3d |\n"
+           "+-------------+-------+\n"
+           "| char        |   %3d |\n"
+           "+-------------+-------+\n"
+           "| short       |   %3d |\n"
+           "| int         |   %3d |\n"
+           "| long        |   %3d |\n"
+           "| long long   |   %3d |\n"
+           "| size_t      |   %3d |\n"
+           "| off_t       |   %3d |\n"
+           "+-------------+-------+\n"
+           "| float       |   %3d |\n"
+           "| double      |   %3d |\n"
+           "| long double |   %3d |\n"
+           "+-------------+-------+\n\n"
+           "+-------------+-----------+\n"
+           "| INT32       | %-9s |\n"
+           "| INT64       | %-9s |\n"
+           "| FLT32       | %-9s |\n"
+           "| FLT64       | %-9s |\n"
+           "+-------------+-----------+\n"
+           "\n  byte ordering is %s\n\n",
+           (int) sizeof(void *), (int) sizeof(char),
+           (int) sizeof(short), (int) sizeof(int), (int) sizeof(long), (int) sizeof(long long),
+           (int) sizeof(size_t), (int) sizeof(off_t),
+           (int) sizeof(float), (int) sizeof(double), (int) sizeof(long double),
+           STRING(INT32), STRING(INT64), STRING(FLT32), STRING(FLT64),
+           ((HOST_ENDIANNESS == CDI_BIGENDIAN) ? "BIGENDIAN"
+            : ((HOST_ENDIANNESS == CDI_LITTLEENDIAN) ? "LITTLEENDIAN"
+               : "Unhandled endianness!")));
+#undef STRING
+#undef XSTRING
 }
 
 static const char uuidFmt[] = "%02hhx%02hhx%02hhx%02hhx-"

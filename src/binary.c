@@ -2,65 +2,76 @@
 #  include "config.h"
 #endif
 
+#include <inttypes.h>
+
+#include "cdi.h"
 #include "error.h"
 #include "file.h"
 #include "swap.h"
 #include "binary.h"
 
 
-#undef  IsBigendian
-#define IsBigendian()  ( u_byteorder.c[sizeof(long) - 1] )
-
-
 UINT32 get_UINT32(unsigned char *x)
 {
-  /* IsBigendian returns 1 for big endian byte order */
-  static union {unsigned long l; unsigned char c[sizeof(long)];} u_byteorder = {1};
-
-  if ( IsBigendian() )
-    return((UINT32)(((UINT32)x[0]<<24)+((UINT32)x[1]<<16)+((UINT32)x[2]<< 8)+ (UINT32)x[3]));
-  else
-    return((UINT32)(((UINT32)x[3]<<24)+((UINT32)x[2]<<16)+((UINT32)x[1]<< 8)+ (UINT32)x[0]));
+  switch (HOST_ENDIANNESS)
+    {
+    case CDI_BIGENDIAN:
+      return((UINT32)(((UINT32)x[0]<<24)+((UINT32)x[1]<<16)+((UINT32)x[2]<< 8)+ (UINT32)x[3]));
+    case CDI_LITTLEENDIAN:
+      return ((UINT32)(((UINT32)x[3]<<24)+((UINT32)x[2]<<16)+((UINT32)x[1]<< 8)+ (UINT32)x[0]));
+    default:
+      Error("unhandled endianness %d", HOST_ENDIANNESS);
+      return UINT32_C(0xFFFFFFFF);
+    }
 }
 
 
 UINT32 get_SUINT32(unsigned char *x)
 {
-  /* IsBigendian returns 1 for big endian byte order */
-  static union {unsigned long l; unsigned char c[sizeof(long)];} u_byteorder = {1};
-
-  if ( IsBigendian() )
-    return((UINT32)(((UINT32)x[3]<<24)+((UINT32)x[2]<<16)+((UINT32)x[1]<< 8)+ (UINT32)x[0]));
-  else
-    return((UINT32)(((UINT32)x[0]<<24)+((UINT32)x[1]<<16)+((UINT32)x[2]<< 8)+ (UINT32)x[3]));
+  switch (HOST_ENDIANNESS)
+    {
+    case CDI_BIGENDIAN:
+      return((UINT32)(((UINT32)x[3]<<24)+((UINT32)x[2]<<16)+((UINT32)x[1]<< 8)+ (UINT32)x[0]));
+    case CDI_LITTLEENDIAN:
+      return((UINT32)(((UINT32)x[0]<<24)+((UINT32)x[1]<<16)+((UINT32)x[2]<< 8)+ (UINT32)x[3]));
+    default:
+      Error("unhandled endianness %d", HOST_ENDIANNESS);
+      return UINT32_C(0xFFFFFFFF);
+    }
 }
 
 
 UINT64 get_UINT64(unsigned char *x)
 {
-  /* IsBigendian returns 1 for big endian byte order */
-  static union {unsigned long l; unsigned char c[sizeof(long)];} u_byteorder = {1};
-
-  if ( IsBigendian() )
-    return((UINT64)(((UINT64)x[0]<<56)+((UINT64)x[1]<<48)+((UINT64)x[2]<<40)+((UINT64)x[3]<<32)+
-		    ((UINT64)x[4]<<24)+((UINT64)x[5]<<16)+((UINT64)x[6]<< 8)+ (UINT64)x[7]));
-  else
-    return((UINT64)(((UINT64)x[7]<<56)+((UINT64)x[6]<<48)+((UINT64)x[5]<<40)+((UINT64)x[4]<<32)+
-		    ((UINT64)x[3]<<24)+((UINT64)x[2]<<16)+((UINT64)x[1]<< 8)+ (UINT64)x[0]));
+  switch (HOST_ENDIANNESS)
+    {
+    case CDI_BIGENDIAN:
+      return((UINT64)(((UINT64)x[0]<<56)+((UINT64)x[1]<<48)+((UINT64)x[2]<<40)+((UINT64)x[3]<<32)+
+                      ((UINT64)x[4]<<24)+((UINT64)x[5]<<16)+((UINT64)x[6]<< 8)+ (UINT64)x[7]));
+    case CDI_LITTLEENDIAN:
+      return((UINT64)(((UINT64)x[7]<<56)+((UINT64)x[6]<<48)+((UINT64)x[5]<<40)+((UINT64)x[4]<<32)+
+                      ((UINT64)x[3]<<24)+((UINT64)x[2]<<16)+((UINT64)x[1]<< 8)+ (UINT64)x[0]));
+    default:
+      Error("unhandled endianness %d", HOST_ENDIANNESS);
+      return UINT64_C(0xFFFFFFFFFFFFFFFF);
+    }
 }
 
 
 UINT64 get_SUINT64(unsigned char *x)
 {
-  /* IsBigendian returns 1 for big endian byte order */
-  static union {unsigned long l; unsigned char c[sizeof(long)];} u_byteorder = {1};
-
-  if ( IsBigendian() )
-    return((UINT64)(((UINT64)x[7]<<56)+((UINT64)x[6]<<48)+((UINT64)x[5]<<40)+((UINT64)x[4]<<32)+
-		    ((UINT64)x[3]<<24)+((UINT64)x[2]<<16)+((UINT64)x[1]<< 8)+ (UINT64)x[0]));
-  else
-    return((UINT64)(((UINT64)x[0]<<56)+((UINT64)x[1]<<48)+((UINT64)x[2]<<40)+((UINT64)x[3]<<32)+
-		    ((UINT64)x[4]<<24)+((UINT64)x[5]<<16)+((UINT64)x[6]<< 8)+ (UINT64)x[7]));
+  switch (HOST_ENDIANNESS)
+    {
+    case CDI_BIGENDIAN:
+      return((UINT64)(((UINT64)x[7]<<56)+((UINT64)x[6]<<48)+((UINT64)x[5]<<40)+((UINT64)x[4]<<32)+
+                      ((UINT64)x[3]<<24)+((UINT64)x[2]<<16)+((UINT64)x[1]<< 8)+ (UINT64)x[0]));
+    case CDI_LITTLEENDIAN:
+      return((UINT64)(((UINT64)x[0]<<56)+((UINT64)x[1]<<48)+((UINT64)x[2]<<40)+((UINT64)x[3]<<32)+
+                      ((UINT64)x[4]<<24)+((UINT64)x[5]<<16)+((UINT64)x[6]<< 8)+ (UINT64)x[7]));
+    default:
+      Error("unhandled endianness %d", HOST_ENDIANNESS);
+      return UINT64_C(0xFFFFFFFFFFFFFFFF);
+    }
 }
 
 
@@ -83,11 +94,11 @@ size_t binReadF77Block(int fileID, int byteswap)
 
 void binWriteF77Block(int fileID, int byteswap, size_t blocksize)
 {
-  static union {unsigned long l; unsigned char c[sizeof(long)];} u_byteorder = {1};
   unsigned char f77block[4];
 
-  if ( IsBigendian() )
+  switch (HOST_ENDIANNESS)
     {
+    case CDI_BIGENDIAN:
       if ( byteswap )
 	{
 	  f77block[0] = (unsigned char) (blocksize);
@@ -102,9 +113,8 @@ void binWriteF77Block(int fileID, int byteswap, size_t blocksize)
 	  f77block[1] = (unsigned char) (blocksize >> 16);
 	  f77block[0] = (unsigned char) (blocksize >> 24);
 	}
-    }
-  else
-    {
+      break;
+    case CDI_LITTLEENDIAN:
       if ( byteswap )
 	{
 	  f77block[3] = (unsigned char) (blocksize);
@@ -119,6 +129,9 @@ void binWriteF77Block(int fileID, int byteswap, size_t blocksize)
 	  f77block[2] = (unsigned char) (blocksize >> 16);
 	  f77block[3] = (unsigned char) (blocksize >> 24);
 	}
+      break;
+    default:
+      Error("unhandled endianness %d", HOST_ENDIANNESS);
     }
 
   if ( fileWrite(fileID, f77block, 4) != 4 )

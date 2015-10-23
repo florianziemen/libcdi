@@ -20,6 +20,8 @@
       PARAMETER (CDI_BIGENDIAN          =  0)
       INTEGER    CDI_LITTLEENDIAN      
       PARAMETER (CDI_LITTLEENDIAN       =  1)
+      INTEGER    CDI_PDPENDIAN         
+      PARAMETER (CDI_PDPENDIAN          =  2)
       INTEGER    CDI_REAL              
       PARAMETER (CDI_REAL               =  1)
       INTEGER    CDI_COMP              

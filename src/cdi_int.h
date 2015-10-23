@@ -98,7 +98,6 @@ char *strdup(const char *s);
 #  define IS_EQUAL(x,y)     (!IS_NOT_EQUAL(x,y))
 #endif
 
-
 #define  FALSE  0
 #define  TRUE   1
 
