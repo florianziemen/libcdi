@@ -50,7 +50,7 @@ cdiPioFileWrite(int fileID, const void *restrict buffer, size_t len, int tsID)
       iret = pioSendWrite(fileID, buffer, len, tsID);
       break;
     case PIO_FPGUARD:
-      iret = fwPOSIXFPGUARDSENDRECV ( fileID, tsID, buffer, len );
+      iret = fwPOSIXFPGUARDSENDRECV(fileID, buffer, len, tsID);
       break;
     }
 

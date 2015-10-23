@@ -108,7 +108,7 @@ void pioWriterAIO(void);
 #endif
 
 /* pio_posixfpguardsendrecv.c */
-size_t    fwPOSIXFPGUARDSENDRECV ( int, int, const void *, size_t );
+size_t fwPOSIXFPGUARDSENDRECV(int, const void *, size_t, int);
 void      initPOSIXFPGUARDSENDRECV(void);
 void      finalizePOSIXFPGUARDSENDRECV ( void );
 
