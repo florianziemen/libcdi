@@ -96,6 +96,9 @@ void initMPINONB(void);
 /* pio_mpi_fw_ordered.c */
 void cdiPioFileWriteOrderedInit(void);
 
+/* pio_mpi_fw_at_all.c */
+void cdiPioFileWriteAtAllInit(void);
+
 /* common functionality for file split between collectors and writer(s) */
 void pioSendInitialize(void);
 

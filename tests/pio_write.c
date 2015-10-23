@@ -49,6 +49,7 @@ static const struct {
   { "PIO_ASYNCH", PIO_ASYNCH },
   { "PIO_WRITER", PIO_WRITER },
   { "PIO_MPI_FW_ORDERED", PIO_MPI_FW_ORDERED },
+  { "PIO_MPI_FW_AT_ALL", PIO_MPI_FW_AT_ALL },
 };
 
 static inline int

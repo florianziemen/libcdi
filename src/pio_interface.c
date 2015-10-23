@@ -563,6 +563,9 @@ cdiPioFileWritingInit(void)
     case PIO_MPI_FW_ORDERED:
       cdiPioFileWriteOrderedInit();
       break;
+    case PIO_MPI_FW_AT_ALL:
+      cdiPioFileWriteAtAllInit();
+      break;
     }
 }
 

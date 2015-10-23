@@ -18,9 +18,10 @@
 #define  PIO_ASYNCH               3
 #define  PIO_FPGUARD              4
 #define  PIO_MPI_FW_ORDERED       5
+#define  PIO_MPI_FW_AT_ALL        6
 
 #define  PIO_MINIOMODE                  PIO_NONE
-#define  PIO_MAXIOMODE                  PIO_MPI_FW_ORDERED
+#define  PIO_MAXIOMODE                  PIO_MPI_FW_AT_ALL
 
 #define PIO_ROLE_CLIENT 0
 #define PIO_ROLE_COLLECTOR 1

@@ -48,6 +48,7 @@ cdiPioCSRSelectRange(MPI_Comm commSuper, int IOMode,
     break;
   case PIO_MPI:
   case PIO_MPI_FW_ORDERED:
+  case PIO_MPI_FW_AT_ALL:
     role = (commRank >= clientRangeStart && commRank <= clientRangeEnd)
       ? PIO_ROLE_CLIENT : PIO_ROLE_WRITER_COLLECTOR;
     break;
