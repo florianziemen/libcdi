@@ -91,13 +91,11 @@ typedef void (*elemOp)(void *elem, void *data);
 void listSetForeach(listSet *q, elemOp func, void *data);
 
 /* pio_mpinonb.c */
-size_t fwMPINONB(int, const void *, size_t, int);
 void initMPINONB(void);
 void      finalizeMPINONB ( void );
 
 
 /* common functionality for file split between collectors and writer(s) */
-size_t pioSendWrite(int, const void *, size_t, int);
 void pioSendInitialize(void);
 void pioSendFinalize(void);
 
@@ -108,7 +106,6 @@ void pioWriterAIO(void);
 #endif
 
 /* pio_posixfpguardsendrecv.c */
-size_t fwPOSIXFPGUARDSENDRECV(int, const void *, size_t, int);
 void      initPOSIXFPGUARDSENDRECV(void);
 void      finalizePOSIXFPGUARDSENDRECV ( void );
 

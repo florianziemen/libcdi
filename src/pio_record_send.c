@@ -149,7 +149,7 @@ flushOp(remoteFileBuf *fb, int tsID)
 }
 
 
-size_t
+static size_t
 pioSendWrite(int id, const void *buffer, size_t len, int tsID)
 {
   int error = 0;
@@ -319,6 +319,7 @@ pioSendInitialize(void)
     {
       namespaceSwitchSet(NSSWITCH_FILE_OPEN, NSSW_FUNC(pioSendOpen));
       namespaceSwitchSet(NSSWITCH_FILE_CLOSE, NSSW_FUNC(pioSendClose));
+      namespaceSwitchSet(NSSWITCH_FILE_WRITE, NSSW_FUNC(pioSendWrite));
       bibRemoteFileBuf = listSetNew(destroyRemoteFileBuf, compareNames);
     }
 }

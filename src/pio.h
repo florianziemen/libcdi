@@ -11,8 +11,6 @@
 
 void cdiPioFileWritingInit(void);
 void cdiPioFileWritingFinalize(void);
-size_t cdiPioFileWrite(int fileID, const void *restrict buffer, size_t len,
-                       int tsID);
 
 #endif
 /*

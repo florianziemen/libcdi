@@ -381,7 +381,7 @@ flushOp(aFiledataPF *a, int tsID)
 }
 
 
-size_t
+static size_t
 fwPOSIXFPGUARDSENDRECV(int fileID, const void *buffer, size_t len, int tsID)
 {
   int error = 0;
@@ -538,6 +538,8 @@ initPOSIXFPGUARDSENDRECV(void)
                          NSSW_FUNC(fowPOSIXFPGUARDSENDRECV));
       namespaceSwitchSet(NSSWITCH_FILE_CLOSE,
                          NSSW_FUNC(fcPOSIXFPGUARDSENDRECV));
+      namespaceSwitchSet(NSSWITCH_FILE_WRITE,
+                         NSSW_FUNC(fwPOSIXFPGUARDSENDRECV));
       bibAFiledataPF = listSetNew(destroyAFiledataPF, compareNamesAPF);
     }
 }

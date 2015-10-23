@@ -173,7 +173,8 @@ writeMPINONB(aFiledataM *of)
 
 /***************************************************************/
 
-size_t fwMPINONB(int fileID, const void *buffer, size_t len, int tsID)
+static size_t
+fwMPINONB(int fileID, const void *buffer, size_t len, int tsID)
 {
   int error = 0;
   int filled = 0;
@@ -311,6 +312,7 @@ initMPINONB(void)
 
   namespaceSwitchSet(NSSWITCH_FILE_OPEN, NSSW_FUNC(fowMPINONB));
   namespaceSwitchSet(NSSWITCH_FILE_CLOSE, NSSW_FUNC(fcMPINONB));
+  namespaceSwitchSet(NSSWITCH_FILE_WRITE, NSSW_FUNC(fwMPINONB));
 
   if ( bibAFiledataM == NULL )
     xabort ( "listSetNew did not succeed" );

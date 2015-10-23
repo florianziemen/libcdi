@@ -33,32 +33,6 @@ const char *token = "%";
 
 /***************************************************************/
 
-size_t
-cdiPioFileWrite(int fileID, const void *restrict buffer, size_t len, int tsID)
-{
-  size_t iret = 0;
-
-  switch ( commInqIOMode ())
-    {
-    case PIO_MPI:
-      iret = fwMPINONB(fileID, buffer, len, tsID);
-      break;
-#ifndef _SX
-    case PIO_ASYNCH:
-#endif
-    case PIO_WRITER:
-      iret = pioSendWrite(fileID, buffer, len, tsID);
-      break;
-    case PIO_FPGUARD:
-      iret = fwPOSIXFPGUARDSENDRECV(fileID, buffer, len, tsID);
-      break;
-    }
-
-  return iret;
-}
-
-/***************************************************************/
-
 void cdiPioFileWritingInit(void)
 {
   int IOMode = commInqIOMode ();

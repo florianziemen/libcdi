@@ -1024,8 +1024,6 @@ void cdiPioCollectorMessageLoop(void)
   namespaceSwitchSet(NSSWITCH_CDF_STREAM_SETUP,
                      NSSW_FUNC(cdiPioServerCdfDefVars));
 #endif
-  namespaceSwitchSet(NSSWITCH_FILE_WRITE,
-                     NSSW_FUNC(cdiPioFileWrite));
 
   int *streamActivity = NULL;
   for ( ;; )
