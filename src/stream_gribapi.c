@@ -1671,21 +1671,32 @@ int gribapiDefSteptype(int editionNumber, grib_handle *gh, int productDefinition
 {
   long proDefTempNum = 0;
   size_t len = 64;
-  char stepType[len];
+  const char *stepType;
 
-  switch ( tsteptype )
+  static struct {
+    long productionTemplate;
+    const char sname[8];
+  } ts_tab[] = {
+    [TSTEP_INSTANT] = {  0, "instant" },
+    [TSTEP_AVG] = { 8, "avg" },
+    [TSTEP_ACCUM] = {  8, "accum" },
+    [TSTEP_MAX] = {  8, "max" },
+    [TSTEP_MIN] = {  8, "min" },
+    [TSTEP_DIFF] = {  8, "diff" },
+    [TSTEP_RMS] = {  8, "rms" },
+    [TSTEP_SD] = {  8, "sd" },
+    [TSTEP_COV] = { 8, "cov" },
+    [TSTEP_RATIO] = {  8, "ratio" }
+  };
+  if (tsteptype >= TSTEP_INSTANT && tsteptype <= TSTEP_RATIO)
     {
-    case TSTEP_AVG:      strcpy(stepType, "avg");     proDefTempNum = 8; break;
-    case TSTEP_ACCUM:    strcpy(stepType, "accum");   proDefTempNum = 8; break;
-    case TSTEP_MAX:      strcpy(stepType, "max");     proDefTempNum = 8; break;
-    case TSTEP_MIN:      strcpy(stepType, "min");     proDefTempNum = 8; break;
-    case TSTEP_DIFF:     strcpy(stepType, "diff");    proDefTempNum = 8; break;
-    case TSTEP_RMS:      strcpy(stepType, "rms");     proDefTempNum = 8; break;
-    case TSTEP_SD:       strcpy(stepType, "sd");      proDefTempNum = 8; break;
-    case TSTEP_COV:      strcpy(stepType, "cov");     proDefTempNum = 8; break;
-    case TSTEP_RATIO:    strcpy(stepType, "ratio");   proDefTempNum = 8; break;
-    case TSTEP_INSTANT:  strcpy(stepType, "instant"); proDefTempNum = 0; break;
-    default:             strcpy(stepType, "instant"); proDefTempNum = 0; break;
+      stepType = ts_tab[tsteptype].sname;
+      proDefTempNum = ts_tab[tsteptype].productionTemplate;
+    }
+  else
+    {
+      stepType = "instant";
+      proDefTempNum = 0;
     }
 
   if ( typeOfGeneratingProcess == 4 )
