@@ -287,7 +287,7 @@ fowMPINONB(const char *filename, const char *mode)
 
 /***************************************************************/
 
-void finalizeMPINONB(void)
+static void finalizeMPINONB(void)
 {
   if (!listSetIsEmpty(bibAFiledataM))
     xabort("set bibAFiledataM not empty");
@@ -308,6 +308,7 @@ initMPINONB(void)
   namespaceSwitchSet(NSSWITCH_FILE_OPEN, NSSW_FUNC(fowMPINONB));
   namespaceSwitchSet(NSSWITCH_FILE_CLOSE, NSSW_FUNC(fcMPINONB));
   namespaceSwitchSet(NSSWITCH_FILE_WRITE, NSSW_FUNC(fwMPINONB));
+  cdiPioFileWritingFinalize = finalizeMPINONB;
 
   if ( bibAFiledataM == NULL )
     xabort ( "listSetNew did not succeed" );

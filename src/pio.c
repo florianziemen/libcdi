@@ -57,29 +57,13 @@ void cdiPioFileWritingInit(void)
 
 /***************************************************************/
 
-void cdiPioFileWritingFinalize(void)
+static void cdiPioFileWritingFinalizeDefault(void)
 {
-  int IOMode = commInqIOMode ();
-  switch ( IOMode )
-    {
-    case PIO_NONE:
-      break;
-    case PIO_MPI:
-      finalizeMPINONB ();
-      break;
-#ifndef _SX
-    case PIO_ASYNCH:
-#endif
-    case PIO_WRITER:
-      pioSendFinalize();
-      break;
-    case PIO_FPGUARD:
-      finalizePOSIXFPGUARDSENDRECV ();
-      break;
-    default:
-      xdebug("%s", " BACKENDCLEANUP FUNCTION NOT IMPLEMENTED YET.");
-    }
+  xabort("error: failed to setup file writing finalization function!");
 }
+
+void (*cdiPioFileWritingFinalize)(void) = cdiPioFileWritingFinalizeDefault;
+
 
 /***************************************************************/
 

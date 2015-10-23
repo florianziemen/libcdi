@@ -10,7 +10,7 @@
 
 
 void cdiPioFileWritingInit(void);
-void cdiPioFileWritingFinalize(void);
+extern void (*cdiPioFileWritingFinalize)(void);
 
 #endif
 /*

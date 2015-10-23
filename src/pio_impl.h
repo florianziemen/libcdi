@@ -92,12 +92,9 @@ void listSetForeach(listSet *q, elemOp func, void *data);
 
 /* pio_mpinonb.c */
 void initMPINONB(void);
-void      finalizeMPINONB ( void );
-
 
 /* common functionality for file split between collectors and writer(s) */
 void pioSendInitialize(void);
-void pioSendFinalize(void);
 
 
 /* pio_posixasynch.c */
@@ -107,7 +104,6 @@ void pioWriterAIO(void);
 
 /* pio_posixfpguardsendrecv.c */
 void      initPOSIXFPGUARDSENDRECV(void);
-void      finalizePOSIXFPGUARDSENDRECV ( void );
 
 /* pio_posixnonb.c */
 void pioWriterStdIO(void);

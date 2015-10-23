@@ -8,6 +8,7 @@
 #include "cdipio.h"
 #include "dmemory.h"
 #include "namespace.h"
+#include "pio.h"
 #include "pio_comm.h"
 #include "pio_impl.h"
 #include "pio_util.h"
@@ -270,7 +271,7 @@ pioSendOpen(const char *filename, const char *mode)
   return id;
 }
 
-void
+static void
 pioSendFinalize(void)
 {
   int buffer = 0, tag, specialRank = commInqSizePio() - 1;
@@ -314,6 +315,7 @@ pioSendInitialize(void)
       namespaceSwitchSet(NSSWITCH_FILE_OPEN, NSSW_FUNC(pioSendOpen));
       namespaceSwitchSet(NSSWITCH_FILE_CLOSE, NSSW_FUNC(pioSendClose));
       namespaceSwitchSet(NSSWITCH_FILE_WRITE, NSSW_FUNC(pioSendWrite));
+      cdiPioFileWritingFinalize = pioSendFinalize;
       bibRemoteFileBuf = listSetNew(destroyRemoteFileBuf, compareNames);
     }
 }

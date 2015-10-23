@@ -502,7 +502,7 @@ fowPOSIXFPGUARDSENDRECV(const char *filename, const char *mode)
 
 /***************************************************************/
 
-void
+static void
 finalizePOSIXFPGUARDSENDRECV(void)
 {
   int buffer = 0, tag = encodeFileOpTag(0, IO_Finalize);
@@ -540,6 +540,7 @@ initPOSIXFPGUARDSENDRECV(void)
                          NSSW_FUNC(fcPOSIXFPGUARDSENDRECV));
       namespaceSwitchSet(NSSWITCH_FILE_WRITE,
                          NSSW_FUNC(fwPOSIXFPGUARDSENDRECV));
+      cdiPioFileWritingFinalize = finalizePOSIXFPGUARDSENDRECV;
       bibAFiledataPF = listSetNew(destroyAFiledataPF, compareNamesAPF);
     }
 }
