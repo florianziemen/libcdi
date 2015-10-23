@@ -1,4 +1,4 @@
-require './CdiObj'
+require 'CdiObj'
 include CdiObj
 require "pp"
 
@@ -31,13 +31,8 @@ cdi.zaxes.each {|k,v|
 }
 
 puts "#========== VARIABLES ================================#"
-cdi.variables.each_with_index {|k,i| 
-  print k.name[0,5] + " " + k.size.to_s + " "
-  puts if i%16==0
-}
-cdi.variables.each_with_index {|k,i| 
-  print k.missval
-  puts if i%16==0
+cdi.variables.each_with_index {|k,i|
+  print(k.name[0,5], ' ', k.size.to_s, ' ', k.missval, "\n")
 }
 
 puts "#========== VARNAMES =================================#"
@@ -52,7 +47,7 @@ puts "#========== VAR by index ======================================#"
 var = cdi.variables[1]
 var.getValues()
 val = var.values
-pp val[-5..-1]
+pp val[0..5]
 puts "#========= Var by name ===============================#"
 name ="tsurf"
 newvar = cdi.var[name]

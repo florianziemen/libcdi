@@ -83,11 +83,9 @@ bin_PROGRAMS =
 noinst_PROGRAMS = $(am__EXEEXT_1)
 @CREATE_INTERFACES_TRUE@am__append_1 = CdiInfo
 @CREATE_INTERFACES_TRUE@am__append_2 = libcdipp.la
-#
-#
-@ENABLE_RUBY_TRUE@am__append_3 = rubyObj
+@ENABLE_RUBY_TRUE@am__append_3 = rubyObj rubyLib
 @ENABLE_RUBY_TRUE@am__append_4 = rubyObjInstall
-@ENABLE_RUBY_TRUE@am__append_5 = rubyObjTest
+@ENABLE_RUBY_TRUE@am__append_5 = rubyObjTest rubyLibTest
 # =========================================================
 @ENABLE_PYTHON_TRUE@am__append_6 = pythonObj pythonLib
 @ENABLE_PYTHON_TRUE@am__append_7 = pythonObjInstall pythonLibInstall
@@ -166,18 +164,12 @@ AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
-libcdipp_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
-	$(CXXFLAGS) $(libcdipp_la_LDFLAGS) $(LDFLAGS) -o $@
 @CREATE_INTERFACES_TRUE@am_libcdipp_la_rpath = -rpath $(libdir)
 @CREATE_INTERFACES_TRUE@am__EXEEXT_1 = CdiInfo$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 am_CdiInfo_OBJECTS = CdiInfo.$(OBJEXT)
 CdiInfo_OBJECTS = $(am_CdiInfo_OBJECTS)
 CdiInfo_DEPENDENCIES = libcdipp.la
-CdiInfo_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
-	$(CXXFLAGS) $(CdiInfo_LDFLAGS) $(LDFLAGS) -o $@
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -475,39 +467,63 @@ lib_LTLIBRARIES = $(am__append_2)
 locallibs = $(top_builddir)/src/.libs/libcdi.so @LTLIBOBJS@ @NETCDF_LIBS@ @HDF5_LIBS@ @SZLIB_LIBS@ @ZLIB_LIBS@
 libcdipp_la_SOURCES = cdi.cpp cdi.hpp
 libcdipp_la_LIBADD = $(top_builddir)/src/libcdi.la
-libcdipp_la_LDFLAGS = @NETCDF_LIBS@ @HDF5_LIBS@ @SZLIB_LIBS@ @ZLIB_LIBS@ $(LDFLAGS)
 CdiInfo_SOURCES = CdiInfo.cpp
 CdiInfo_LDADD = libcdipp.la
-CdiInfo_LDFLAGS = @NETCDF_LIBS@ @HDF5_LIBS@ @SZLIB_LIBS@ @ZLIB_LIBS@ $(LDFLAGS)
+#
+#
+select_test_file = \
+	`if test $(ENABLE_NETCDF) = yes ; then test -f ../testdata/mulval.nc && echo ../testdata/mulval.nc || echo '$(abs_srcdir)/testdata/mulval.nc' ; elif test $(ENABLE_GRIB) = yes -o $(ENABLE_CGRIBEX) = yes ; then test -f ../testdata/mulval.grb && echo ../testdata/mulval.grb || echo '$(abs_srcdir)/testdata/mulval.grb' ; else exit 1; fi`
+
+# Ruby ====================================================
+@ENABLE_RUBY_TRUE@rubyLibDir = rubyLibOut
+
+# =========================================================
+@ENABLE_RUBY_TRUE@rubyObjDir = rubyObjOut
+# Python ==================================================
 @ENABLE_PYTHON_TRUE@setup_python_vars = LIBTOOL="$(SHELL) $(abs_top_builddir)/libtool" \
 @ENABLE_PYTHON_TRUE@	  AM_LIBTOOLFLAGS="$(AM_LIBTOOLFLAGS)" \
 @ENABLE_PYTHON_TRUE@	  LIBTOOLFLAGS="$(LIBTOOLFLAGS) --mode=install" \
 @ENABLE_PYTHON_TRUE@	  INSTALL="$(INSTALL) $(INSTALL_STRIP_FLAG)" \
-@ENABLE_PYTHON_TRUE@	  CC="$${LIBTOOL} --mode=compile --tag=CXX $(CXX)" \
+@ENABLE_PYTHON_TRUE@	  CC="$${LIBTOOL} --mode=compile --tag=CC $(CC) -shared" \
+@ENABLE_PYTHON_TRUE@	  CFLAGS="$(CFLAGS) $(DEFS)" \
+@ENABLE_PYTHON_TRUE@	  LDSHARED="$${LIBTOOL} --mode=link --tag=CC $(CC) -module -shared" \
 @ENABLE_PYTHON_TRUE@	  BUILDLIBDIR="$(top_builddir)/src" \
 @ENABLE_PYTHON_TRUE@	  LIBDIR="$(libdir)" \
-@ENABLE_PYTHON_TRUE@	  CFLAGS="$(CXXFLAGS)" \
 @ENABLE_PYTHON_TRUE@	  LIBS="$(LIBS)" \
-@ENABLE_PYTHON_TRUE@	  CDIOBJ_WRAP=`test -f cdiobj_wrap.cpp || echo '../$(srcdir)/python/'`cdiobj_wrap.cpp \
 @ENABLE_PYTHON_TRUE@	  LDFLAGS="-L../../src $(LDFLAGS)" \
-@ENABLE_PYTHON_TRUE@	  INCFLAGS="-I.. -I$(abs_srcdir)" \
+@ENABLE_PYTHON_TRUE@	  INCFLAGS="-I.. -I$(abs_srcdir) -I$(abs_top_srcdir)/src" \
 @ENABLE_PYTHON_TRUE@	  OPT= \
 @ENABLE_PYTHON_TRUE@	  BASECFLAGS= \
-@ENABLE_PYTHON_TRUE@	  LDSHARED="$${LIBTOOL} --mode=link --tag=CXX $(CXX) -module" \
-@ENABLE_PYTHON_TRUE@	  CXX="$${LIBTOOL} --mode=link --tag=CXX $(CXX) -module" \
 @ENABLE_PYTHON_TRUE@	  abs_srcdir='$(abs_srcdir)/python' ; \
+@ENABLE_PYTHON_TRUE@	  abs_builddir='$(abs_builddir)' \
+@ENABLE_PYTHON_TRUE@	  abs_builddir_python='$(abs_builddir)/python' \
+@ENABLE_PYTHON_TRUE@	  abs_builddir_python_build='$(abs_builddir)/python/'"$${py_build_libdir}/.libs" ; \
 @ENABLE_PYTHON_TRUE@	  export LIBTOOL AM_LIBTOOLFLAGS LIBTOOLFLAGS INSTALL \
 @ENABLE_PYTHON_TRUE@	  CC BUILDLIBDIR LIBDIR CFLAGS OPT LIBS CDIOBJ_WRAP LDFLAGS \
-@ENABLE_PYTHON_TRUE@	  BASECFLAGS INCFLAGS LDSHARED CXX abs_srcdir ; \
-@ENABLE_PYTHON_TRUE@	  setupObj_py=`test -f setupObj.py || echo '$(abs_srcdir)/python/'`setupObj.py ; \
-@ENABLE_PYTHON_TRUE@	  py_libdir=`$(PYTHON) $${setupObj_py} install --print-libdir --prefix="$(prefix)"` ; \
-@ENABLE_PYTHON_TRUE@	  py_build_libdir=`$(PYTHON) $${setupObj_py} install --print-build-libdir --prefix="$(prefix)"` ; \
-@ENABLE_PYTHON_TRUE@	  LDFLAGS="$${LDFLAGS} -rpath $${py_libdir}" ;
+@ENABLE_PYTHON_TRUE@	  BASECFLAGS INCFLAGS LDSHARED CXX abs_srcdir abs_builddir \
+@ENABLE_PYTHON_TRUE@	  abs_builddir_python abs_builddir_python_build ;
+
+@ENABLE_PYTHON_TRUE@setup_cdilib_py_vars = \
+@ENABLE_PYTHON_TRUE@  setupLib_py=`test -f setupLib.py || echo '$(abs_srcdir)/python/'`setupLib.py ; \
+@ENABLE_PYTHON_TRUE@  py_libdir=`$(PYTHON) $${setupLib_py} install --print-libdir --prefix="$(prefix)"` ; \
+@ENABLE_PYTHON_TRUE@  py_build_libdir=`$(PYTHON) $${setupLib_py} install --print-build-libdir --prefix="$(prefix)"` ; \
+@ENABLE_PYTHON_TRUE@  LDFLAGS="$${LDFLAGS} -rpath $${py_libdir}" ; \
+@ENABLE_PYTHON_TRUE@  abs_builddir_python_build="$(abs_builddir)/python/$${py_build_libdir}/.libs"
+
+@ENABLE_PYTHON_TRUE@setup_python_cxx_vars = CFLAGS="$(CXXFLAGS) $(DEFS)" \
+@ENABLE_PYTHON_TRUE@	  CC="$${LIBTOOL} --mode=compile --tag=CXX $(CXX) -shared" \
+@ENABLE_PYTHON_TRUE@	  LDSHARED="$${LIBTOOL} --mode=link --tag=CXX $(CXX) -module -shared" \
+@ENABLE_PYTHON_TRUE@	  CXX="$${LIBTOOL} --mode=link --tag=CXX $(CXX) -module -shared"
+
+@ENABLE_PYTHON_TRUE@setup_cdiobj_py_vars = \
+@ENABLE_PYTHON_TRUE@  setupObj_py=`test -f setupObj.py || echo '$(abs_srcdir)/python/'`setupObj.py ; \
+@ENABLE_PYTHON_TRUE@  py_libdir=`$(PYTHON) $${setupObj_py} install --print-libdir --prefix="$(prefix)"` ; \
+@ENABLE_PYTHON_TRUE@  py_build_libdir=`$(PYTHON) $${setupObj_py} install --print-build-libdir --prefix="$(prefix)"` ; \
+@ENABLE_PYTHON_TRUE@  LDFLAGS="$${LDFLAGS} -shared -rpath $${py_libdir}" \
+@ENABLE_PYTHON_TRUE@  abs_builddir_python_build='$(abs_builddir)/python/'"$${py_build_libdir}/.libs"
 
 #
 AM_CPPFLAGS = -I$(top_srcdir)/src
-#
-CLEANFILES = `ls *~`
 all: all-am
 
 .SUFFIXES:
@@ -579,7 +595,7 @@ clean-libLTLIBRARIES:
 	}
 
 libcdipp.la: $(libcdipp_la_OBJECTS) $(libcdipp_la_DEPENDENCIES) $(EXTRA_libcdipp_la_DEPENDENCIES) 
-	$(AM_V_CXXLD)$(libcdipp_la_LINK) $(am_libcdipp_la_rpath) $(libcdipp_la_OBJECTS) $(libcdipp_la_LIBADD) $(LIBS)
+	$(AM_V_CXXLD)$(CXXLINK) $(am_libcdipp_la_rpath) $(libcdipp_la_OBJECTS) $(libcdipp_la_LIBADD) $(LIBS)
 install-binPROGRAMS: $(bin_PROGRAMS)
 	@$(NORMAL_INSTALL)
 	@list='$(bin_PROGRAMS)'; test -n "$(bindir)" || list=; \
@@ -641,7 +657,7 @@ clean-noinstPROGRAMS:
 
 CdiInfo$(EXEEXT): $(CdiInfo_OBJECTS) $(CdiInfo_DEPENDENCIES) $(EXTRA_CdiInfo_DEPENDENCIES) 
 	@rm -f CdiInfo$(EXEEXT)
-	$(AM_V_CXXLD)$(CdiInfo_LINK) $(CdiInfo_OBJECTS) $(CdiInfo_LDADD) $(LIBS)
+	$(AM_V_CXXLD)$(CXXLINK) $(CdiInfo_OBJECTS) $(CdiInfo_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -793,7 +809,6 @@ install-strip:
 mostlyclean-generic:
 
 clean-generic:
-	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
@@ -805,7 +820,7 @@ maintainer-clean-generic:
 clean: clean-am
 
 clean-am: clean-binPROGRAMS clean-generic clean-libLTLIBRARIES \
-	clean-libtool clean-noinstPROGRAMS mostlyclean-am
+	clean-libtool clean-local clean-noinstPROGRAMS mostlyclean-am
 
 distclean: distclean-am
 	-rm -rf ./$(DEPDIR)
@@ -878,13 +893,14 @@ uninstall-am: uninstall-binPROGRAMS uninstall-libLTLIBRARIES
 
 .PHONY: CTAGS GTAGS TAGS all all-am all-local check check-am \
 	check-local clean clean-binPROGRAMS clean-generic \
-	clean-libLTLIBRARIES clean-libtool clean-noinstPROGRAMS \
-	cscopelist-am ctags ctags-am distclean distclean-compile \
-	distclean-generic distclean-libtool distclean-tags distdir dvi \
-	dvi-am html html-am info info-am install install-am \
-	install-binPROGRAMS install-data install-data-am install-dvi \
-	install-dvi-am install-exec install-exec-am install-exec-local \
-	install-html install-html-am install-info install-info-am \
+	clean-libLTLIBRARIES clean-libtool clean-local \
+	clean-noinstPROGRAMS cscopelist-am ctags ctags-am distclean \
+	distclean-compile distclean-generic distclean-libtool \
+	distclean-tags distdir dvi dvi-am html html-am info info-am \
+	install install-am install-binPROGRAMS install-data \
+	install-data-am install-dvi install-dvi-am install-exec \
+	install-exec-am install-exec-local install-html \
+	install-html-am install-info install-info-am \
 	install-libLTLIBRARIES install-man install-pdf install-pdf-am \
 	install-ps install-ps-am install-strip installcheck \
 	installcheck-am installdirs maintainer-clean \
@@ -893,56 +909,131 @@ uninstall-am: uninstall-binPROGRAMS uninstall-libLTLIBRARIES
 	tags tags-am uninstall uninstall-am uninstall-binPROGRAMS \
 	uninstall-libLTLIBRARIES
 
-# Ruby ====================================================
-@ENABLE_RUBY_TRUE@rubyLibMakefile:
-@ENABLE_RUBY_TRUE@	cd ruby; CFLAGS="$(CFLAGS)" LIBS="$(LIBS)" LDFLAGS="$(locallibs) $(LDFLAGS)" INCFLAGS="-I../../src" ruby extconfLib.rb
 
-@ENABLE_RUBY_TRUE@rubyLibWrapper: cdilib.i ../src/cdi.h
-@ENABLE_RUBY_TRUE@@ENABLE_SWIG_TRUE@	$(SWIG) -ruby -module CdiLib -o ruby/cdilib_wrap.c $(AM_CPPFLAGS) cdilib.i
-
-@ENABLE_RUBY_TRUE@rubyLib: rubyLibWrapper rubyLibMakefile
-@ENABLE_RUBY_TRUE@	@cd ruby; $(MAKE)
-
-@ENABLE_RUBY_TRUE@rubyLibTest: rubyLib
-@ENABLE_RUBY_TRUE@	@cd ruby; ruby testLib.rb
-# =========================================================
-@ENABLE_RUBY_TRUE@rubyObjMakefile: ruby/Makefile
-@ENABLE_RUBY_TRUE@ruby/Makefile: ruby/extconfObj.rb
-@ENABLE_RUBY_TRUE@	cd ruby; CFLAGS="$(CFLAGS)" LIBS="$(LIBS)" LDFLAGS="$(LDFLAGS)" \
-@ENABLE_RUBY_TRUE@	  INCFLAGS="-I$(abs_srcdir)" \
+@ENABLE_RUBY_TRUE@rubyLibMakefile: $(rubyLibDir)/Makefile
+@ENABLE_RUBY_TRUE@$(rubyLibDir)/Makefile: ruby/extconfLib.rb Makefile
+@ENABLE_RUBY_TRUE@	$(MKDIR_P) $(rubyLibDir)
+@ENABLE_RUBY_TRUE@	@cd $(rubyLibDir) && CFLAGS="$(CFLAGS)" LIBS="$(LIBS)" \
+@ENABLE_RUBY_TRUE@	  LDFLAGS="$(LDFLAGS)" \
+@ENABLE_RUBY_TRUE@	  INCFLAGS="-I$(abs_top_srcdir)/src" \
 @ENABLE_RUBY_TRUE@	  ruby -I"$(abs_srcdir)/ruby" \
-@ENABLE_RUBY_TRUE@	  `test -f extconfObj.rb || echo '$(abs_srcdir)/ruby/'`extconfObj.rb
-@ENABLE_RUBY_TRUE@	$(SED) -i '/^\.cpp.o:/s/^\.cpp.o/.cpp.lo/;/^.SUFFIXES:/s/$$/ .lo/' ruby/Makefile
+@ENABLE_RUBY_TRUE@	  `test -f ../ruby/extconfLib.rb && echo ../ruby || echo '$(abs_srcdir)/ruby/'`extconfLib.rb
+@ENABLE_RUBY_TRUE@	$(SED) -i -e '/^\.c\.o:/s/^\.c\.o/.c.lo/;/^.SUFFIXES:/s/$$/ .lo/' \
+@ENABLE_RUBY_TRUE@	  -e '/^install-so: \$$(RUBYARCHDIR)\/\$$(DLLIB)/{' \
+@ENABLE_RUBY_TRUE@	  -e 's/^install-so:.*$$/install-so: $$(DLLIB)/;p;n;d' \
+@ENABLE_RUBY_TRUE@	  -e '}' \
+@ENABLE_RUBY_TRUE@	  -e 's/\$$(\@D)/\$$(RUBYARCHDIR)/' \
+@ENABLE_RUBY_TRUE@	  $(rubyLibDir)/Makefile
 
-@ENABLE_RUBY_TRUE@rubyObjWrapper: ruby/cdiobj_wrap.cpp
-@ENABLE_RUBY_TRUE@ruby/cdiobj_wrap.cpp: cdiobj.i cdi.hpp
-@ENABLE_RUBY_TRUE@@ENABLE_SWIG_TRUE@	$(MKDIR_P) ruby
-@ENABLE_RUBY_TRUE@@ENABLE_SWIG_TRUE@	$(SWIG) -ruby -c++ -module CdiObj -o ruby/cdiobj_wrap.cpp \
+@ENABLE_RUBY_TRUE@rubyLibWrapper: $(rubyLibDir)/cdilib_wrap.c
+@ENABLE_RUBY_TRUE@$(rubyLibDir)/cdilib_wrap.c: cdilib.i ../src/cdi.h
+@ENABLE_RUBY_TRUE@@ENABLE_SWIG_TRUE@	$(MKDIR_P) $(rubyLibDir)
+@ENABLE_RUBY_TRUE@@ENABLE_SWIG_TRUE@	$(SWIG) -ruby -module CdiLib -o $(rubyLibDir)/cdilib_wrap.c \
 @ENABLE_RUBY_TRUE@@ENABLE_SWIG_TRUE@	  $(AM_CPPFLAGS) $<
 
-@ENABLE_RUBY_TRUE@rubyObj: rubyObjWrapper rubyObjMakefile
-@ENABLE_RUBY_TRUE@	@cd ruby; $(MAKE) \
-@ENABLE_RUBY_TRUE@	  CXX="$(abs_top_builddir)/libtool --mode=compile --tag=CXX $(CXX)" \
+@ENABLE_RUBY_TRUE@rubyLib: rubyLibMakefile $(rubyLibDir)/CdiLib.la
+@ENABLE_RUBY_TRUE@$(rubyLibDir)/CdiLib.la: $(rubyLibDir)/cdilib_wrap.c
+@ENABLE_RUBY_TRUE@	$(MKDIR_P) $(rubyLibDir)
+@ENABLE_RUBY_TRUE@	@cd $(rubyLibDir) && $(MAKE) \
+@ENABLE_RUBY_TRUE@	  prefix="$(prefix)" libdir="$(libdir)" sitedir="$(libdir)/site_ruby" \
+@ENABLE_RUBY_TRUE@	  CC="$(abs_top_builddir)/libtool --mode=compile --tag=CC $(CC) -shared" \
+@ENABLE_RUBY_TRUE@	  OBJS=cdilib_wrap.lo \
+@ENABLE_RUBY_TRUE@	  LDSHARED="$(abs_top_builddir)/libtool --mode=link --tag=CC $(CC) -shared -module -rpath "'$$(sitearchdir)' \
+@ENABLE_RUBY_TRUE@	  DLLIB='$$(TARGET).la'
+
+@ENABLE_RUBY_TRUE@rubyLibTest: rubyLib
+@ENABLE_RUBY_TRUE@	$(MKDIR_P) $(rubyLibDir)
+@ENABLE_RUBY_TRUE@	@cd $(rubyLibDir) && ruby -I ./.libs \
+@ENABLE_RUBY_TRUE@	  `test -f ../ruby/testLib.rb && echo ../ruby || echo '$(abs_srcdir)/ruby'`/testLib.rb \
+@ENABLE_RUBY_TRUE@	  $(select_test_file)
+
+@ENABLE_RUBY_TRUE@rubyLibInstall: rubyLib
+@ENABLE_RUBY_TRUE@	$(MKDIR_P) $(rubyLibDir)
+@ENABLE_RUBY_TRUE@	@cd $(rubyLibDir) && $(MAKE) \
+@ENABLE_RUBY_TRUE@	  prefix="$(prefix)" libdir="$(libdir)" sitedir="$(libdir)/site_ruby" \
+@ENABLE_RUBY_TRUE@	  CC="$(abs_top_builddir)/libtool --mode=compile --tag=CC $(CC) -shared" \
+@ENABLE_RUBY_TRUE@	  OBJS=cdilib_wrap.lo \
+@ENABLE_RUBY_TRUE@	  LDSHARED="$(abs_top_builddir)/libtool --mode=link --tag=CC $(CC) -shared -module -rpath "'$$(sitearchdir)' \
+@ENABLE_RUBY_TRUE@	  INSTALL_PROG="$(SHELL) $(abs_top_builddir)/libtool --mode=install $(install_sh_PROGRAM)" \
+@ENABLE_RUBY_TRUE@	  DLLIB='$$(TARGET).la' install
+
+@ENABLE_RUBY_TRUE@rubyObjMakefile: $(rubyObjDir)/Makefile
+@ENABLE_RUBY_TRUE@$(rubyObjDir)/Makefile: ruby/extconfObj.rb
+@ENABLE_RUBY_TRUE@	$(MKDIR_P) $(rubyObjDir)
+@ENABLE_RUBY_TRUE@	@cd $(rubyObjDir) && CFLAGS="$(CFLAGS)" LIBS="$(LIBS)" \
+@ENABLE_RUBY_TRUE@	  LDFLAGS="$(LDFLAGS)" \
+@ENABLE_RUBY_TRUE@	  INCFLAGS="-I$(abs_srcdir)" \
+@ENABLE_RUBY_TRUE@	  ruby -I"$(abs_srcdir)/ruby" \
+@ENABLE_RUBY_TRUE@	  `test -f ../ruby/extconfObj.rb && echo ../ruby || echo '$(abs_srcdir)/ruby/'`extconfObj.rb
+@ENABLE_RUBY_TRUE@	$(SED) -i -e '/^\.cpp\.o:/s/^\.cpp\.o/.cpp.lo/;/^.SUFFIXES:/s/$$/ .lo/' \
+@ENABLE_RUBY_TRUE@	  -e '/^install-so: \$$(RUBYARCHDIR)\/\$$(DLLIB)/{' \
+@ENABLE_RUBY_TRUE@	  -e 's/^install-so:.*$$/install-so: $$(DLLIB)/;p;n;d' \
+@ENABLE_RUBY_TRUE@	  -e '}' \
+@ENABLE_RUBY_TRUE@	  -e 's/\$$(\@D)/\$$(RUBYARCHDIR)/' \
+@ENABLE_RUBY_TRUE@	  $(rubyObjDir)/Makefile
+
+@ENABLE_RUBY_TRUE@rubyObjWrapper: $(rubyObjDir)/cdiobj_wrap.cpp
+@ENABLE_RUBY_TRUE@$(rubyObjDir)/cdiobj_wrap.cpp: cdiobj.i cdi.hpp
+@ENABLE_RUBY_TRUE@@ENABLE_SWIG_TRUE@	$(MKDIR_P) $(rubyObjDir)
+@ENABLE_RUBY_TRUE@@ENABLE_SWIG_TRUE@	$(SWIG) -ruby -c++ -module CdiObj -o $(rubyObjDir)/cdiobj_wrap.cpp \
+@ENABLE_RUBY_TRUE@@ENABLE_SWIG_TRUE@	  $(AM_CPPFLAGS) $<
+
+@ENABLE_RUBY_TRUE@rubyObj: $(rubyObjDir)/CdiObj.la
+@ENABLE_RUBY_TRUE@$(rubyObjDir)/CdiObj.la: $(rubyObjDir)/cdiobj_wrap.cpp $(rubyObjDir)/Makefile
+@ENABLE_RUBY_TRUE@	$(MKDIR_P) $(rubyObjDir)
+@ENABLE_RUBY_TRUE@	@cd $(rubyObjDir) && $(MAKE) \
+@ENABLE_RUBY_TRUE@	  prefix="$(prefix)" libdir="$(libdir)" sitedir="$(libdir)/site_ruby" \
+@ENABLE_RUBY_TRUE@	  CXX="$(abs_top_builddir)/libtool --mode=compile --tag=CXX $(CXX) -shared" \
 @ENABLE_RUBY_TRUE@	  OBJS=cdiobj_wrap.lo \
-@ENABLE_RUBY_TRUE@	  LDSHAREDXX="$(abs_top_builddir)/libtool --mode=link --tag=CXX $(CXX) -module" \
+@ENABLE_RUBY_TRUE@	  LDSHAREDXX="$(abs_top_builddir)/libtool --mode=link --tag=CXX $(CXX) -shared -module -rpath "'$$(sitearchdir)' \
 @ENABLE_RUBY_TRUE@	  DLLIB='$$(TARGET).la'
 
 @ENABLE_RUBY_TRUE@rubyObjTest: rubyObj
-@ENABLE_RUBY_TRUE@	@cd ruby; ruby testObj.rb
+@ENABLE_RUBY_TRUE@	$(MKDIR_P) $(rubyObjDir)
+@ENABLE_RUBY_TRUE@	@cd $(rubyObjDir) && \
+@ENABLE_RUBY_TRUE@	  ruby -I ./.libs \
+@ENABLE_RUBY_TRUE@	  `test -f ../ruby/testObj.rb && echo ../ruby || echo '$(abs_srcdir)/ruby'`/testObj.rb \
+@ENABLE_RUBY_TRUE@	  $(select_test_file)
 
 @ENABLE_RUBY_TRUE@rubyObjInstall: rubyObj
-@ENABLE_RUBY_TRUE@	@cd ruby; $(MAKE) install
-# Python ==================================================
-@ENABLE_PYTHON_TRUE@pythonLibWrapper: python/cdilib_wrap.c
-@ENABLE_PYTHON_TRUE@python/cdilib_wrap.c: cdilib.i
-@ENABLE_PYTHON_TRUE@@ENABLE_SWIG_TRUE@	$(SWIG) -python -module CdiLib -o python/cdilib_wrap.c \
-@ENABLE_PYTHON_TRUE@@ENABLE_SWIG_TRUE@	  $(AM_CPPFLAGS) cdilib.i
+@ENABLE_RUBY_TRUE@	$(MKDIR_P) $(rubyObjDir)
+@ENABLE_RUBY_TRUE@	@cd $(rubyObjDir) && $(MAKE) \
+@ENABLE_RUBY_TRUE@	  prefix="$(prefix)" libdir="$(libdir)" sitedir="$(libdir)/site_ruby" \
+@ENABLE_RUBY_TRUE@	  CXX="$(abs_top_builddir)/libtool --mode=compile --tag=CXX $(CXX) -shared" \
+@ENABLE_RUBY_TRUE@	  OBJS=cdiobj_wrap.lo \
+@ENABLE_RUBY_TRUE@	  LDSHAREDXX="$(abs_top_builddir)/libtool --mode=link --tag=CXX $(CXX) -shared -module -rpath "'$$(sitearchdir)' \
+@ENABLE_RUBY_TRUE@	  INSTALL_PROG="$(SHELL) $(abs_top_builddir)/libtool --mode=install $(install_sh_PROGRAM)" \
+@ENABLE_RUBY_TRUE@	  DLLIB='$$(TARGET).la' install
 
-@ENABLE_PYTHON_TRUE@pythonLib: pythonLibWrapper
-@ENABLE_PYTHON_TRUE@	@cd python; CFLAGS="$(CFLAGS)" LIBS="$(LIBS)" LDFLAGS="$(LDFLAGS)" INCFLAGS="-I../../src" $(PYTHON) setupLib.py build_ext --inplace
+@ENABLE_PYTHON_TRUE@pythonLibWrapper: python/cdilib_wrap.c
+@ENABLE_PYTHON_TRUE@python/cdilib_wrap.c: cdilib.i ../src/cdi.h
+@ENABLE_PYTHON_TRUE@@ENABLE_SWIG_TRUE@	$(MKDIR_P) python
+@ENABLE_PYTHON_TRUE@@ENABLE_SWIG_TRUE@	$(SWIG) -python -module CdiLib -o python/cdilib_wrap.c \
+@ENABLE_PYTHON_TRUE@@ENABLE_SWIG_TRUE@	  $(AM_CPPFLAGS) $<
+
+@ENABLE_PYTHON_TRUE@pythonLib: python/CdiLib.stamp
+@ENABLE_PYTHON_TRUE@python/CdiLib.stamp: python/cdilib_wrap.c
+@ENABLE_PYTHON_TRUE@	$(MKDIR_P) python
+@ENABLE_PYTHON_TRUE@	@set -e ; cd python ; \
+@ENABLE_PYTHON_TRUE@	  $(setup_python_vars) \
+@ENABLE_PYTHON_TRUE@	  $(setup_cdilib_py_vars) \
+@ENABLE_PYTHON_TRUE@	  $(PYTHON) "$${setupLib_py}" build_ext -v
+@ENABLE_PYTHON_TRUE@	touch $@
 
 @ENABLE_PYTHON_TRUE@pythonLibTest: pythonLib
-@ENABLE_PYTHON_TRUE@	@cd python; $(PYTHON) testLib.py
+@ENABLE_PYTHON_TRUE@	$(MKDIR_P) python
+@ENABLE_PYTHON_TRUE@	@set -e ; cd python ; \
+@ENABLE_PYTHON_TRUE@	  $(setup_python_vars) \
+@ENABLE_PYTHON_TRUE@	  $(setup_cdilib_py_vars) \
+@ENABLE_PYTHON_TRUE@	  $(PYTHON) \
+@ENABLE_PYTHON_TRUE@	  `test -f testLib.py || echo '$(abs_srcdir)/python/'`testLib.py \
+@ENABLE_PYTHON_TRUE@	  $(select_test_file)
+
+@ENABLE_PYTHON_TRUE@pythonLibInstall:
+@ENABLE_PYTHON_TRUE@	@set -e ; cd python; $(setup_python_vars) $(setup_cdilib_py_vars) \
+@ENABLE_PYTHON_TRUE@	  $(PYTHON) "$${setupLib_py}" \
+@ENABLE_PYTHON_TRUE@	  install --prefix="$(DESTDIR)$(prefix)"
+
 # =========================================================
 @ENABLE_PYTHON_TRUE@pythonObjWrapper: python/cdiobj_wrap.cpp
 @ENABLE_PYTHON_TRUE@python/cdiobj_wrap.cpp: cdiobj.i cdi.hpp
@@ -951,23 +1042,26 @@ uninstall-am: uninstall-binPROGRAMS uninstall-libLTLIBRARIES
 @ENABLE_PYTHON_TRUE@@ENABLE_SWIG_TRUE@	  $(AM_CPPFLAGS) $<
 
 @ENABLE_PYTHON_TRUE@pythonObj: python/CdiObj.stamp
-@ENABLE_PYTHON_TRUE@python/CdiObj.stamp: python/cdiobj_wrap.cpp
+@ENABLE_PYTHON_TRUE@python/CdiObj.stamp: python/cdiobj_wrap.cpp cdi.lo
 @ENABLE_PYTHON_TRUE@	$(MKDIR_P) python
 @ENABLE_PYTHON_TRUE@	@set -e ; cd python; $(setup_python_vars) \
+@ENABLE_PYTHON_TRUE@	  $(setup_python_cxx_vars) \
+@ENABLE_PYTHON_TRUE@	  $(setup_cdiobj_py_vars) \
 @ENABLE_PYTHON_TRUE@	  $(PYTHON) "$${setupObj_py}" \
 @ENABLE_PYTHON_TRUE@	  build_ext -v
-@ENABLE_PYTHON_TRUE@	touch python/CdiObj.stamp
+@ENABLE_PYTHON_TRUE@	touch $@
 
 @ENABLE_PYTHON_TRUE@pythonObjTest: pythonObj
 @ENABLE_PYTHON_TRUE@	$(MKDIR_P) python
-@ENABLE_PYTHON_TRUE@	set -e ; cd python ; \
+@ENABLE_PYTHON_TRUE@	@set -e ; cd python ; \
 @ENABLE_PYTHON_TRUE@	  $(setup_python_vars) \
-@ENABLE_PYTHON_TRUE@	  abs_builddir="$(abs_builddir)/python" \
-@ENABLE_PYTHON_TRUE@	  abs_builddir_python_build="$(abs_builddir)/python/$${py_build_libdir}/.libs" \
-@ENABLE_PYTHON_TRUE@	  $(PYTHON) `test -f testObj.py || echo '$(abs_srcdir)/python/'`testObj.py
+@ENABLE_PYTHON_TRUE@	  $(setup_python_cxx_vars) \
+@ENABLE_PYTHON_TRUE@	  $(setup_cdiobj_py_vars) \
+@ENABLE_PYTHON_TRUE@	  $(PYTHON) `test -f testObj.py || echo '$(abs_srcdir)/python/'`testObj.py \
+@ENABLE_PYTHON_TRUE@	  $(select_test_file)
 
 @ENABLE_PYTHON_TRUE@pythonObjInstall:
-@ENABLE_PYTHON_TRUE@	@set -e ; cd python; $(setup_python_vars) \
+@ENABLE_PYTHON_TRUE@	@set -e ; cd python; $(setup_python_vars) $(setup_cdiobj_py_vars) \
 @ENABLE_PYTHON_TRUE@	  $(PYTHON) "$${setupObj_py}" \
 @ENABLE_PYTHON_TRUE@	  install --prefix="$(DESTDIR)$(prefix)"
 # =========================================================
@@ -991,6 +1085,18 @@ help:
 all-local: $(BINDINGS)
 install-exec-local: $(BINDINGS_INSTALL)
 check-local: $(BINDINGS_TESTS)
+#
+clean-local:
+	rm -f *~ python/CdiLib.py python/CdiLib.pyc python/CdiLib.stamp \
+		python/CdiObj.py python/CdiObj.pyc python/CdiObj.stamp \
+		python/cdilib_wrap.c python/cdiobj_wrap.cpp
+	rm -rf python/build
+	-cd $(rubyObjDir) && \rm -f CdiObj.la Makefile cdiobj_wrap.cpp \
+		cdiobj_wrap.lo cdiobj_wrap.o
+	-cd $(rubyLibDir) && \rm -f CdiLib.la Makefile cdilib_wrap.c \
+		cdilib_wrap.lo cdilib_wrap.o
+	rm -rf python/.libs $(rubyLibDir)/.libs $(rubyObjDir)/.libs
+	-rmdir python $(rubyLibDir) $(rubyObjDir)
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
