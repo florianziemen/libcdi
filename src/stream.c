@@ -237,13 +237,12 @@ with the file format type @func{FILETYPE_SRV}, @func{FILETYPE_EXT} or @func{FILE
 */
 void streamDefByteorder(int streamID, int byteorder)
 {
-  int filetype;
   stream_t *streamptr = stream_to_pointer(streamID);
 
   stream_check_ptr(__func__, streamptr);
 
   streamptr->byteorder = byteorder;
-  filetype = streamptr->filetype;
+  int filetype = streamptr->filetype;
 
   switch (filetype)
     {
