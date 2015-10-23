@@ -5,6 +5,7 @@
 #include <errno.h>
 #include <inttypes.h>
 #include <limits.h>
+#include <stdarg.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -89,11 +90,48 @@ parse_unsignedarg(const char msg[])
   return (unsigned)temp;
 }
 
+
+static void
+invalidOptionDie(const char *format, ...)
+{
+  va_list ap;
+  va_start(ap, format);
+  vfprintf(stderr, format, ap);
+  exit(EXIT_FAILURE);
+}
+
+
+static void
+parse_long_option(int pioConfHandle, const char *str)
+{
+  static const char cacheRedistStr[] = "cache-redists";
+  if (!strncmp(str, cacheRedistStr, sizeof (cacheRedistStr) - 1))
+    {
+#ifdef USE_MPI
+      if (str[sizeof (cacheRedistStr) - 1] == '\0'
+          || !strcmp(str + sizeof (cacheRedistStr) - 1, "=true"))
+        cdiPioConfSetRedistCache(pioConfHandle, 1);
+      else if (!strcmp(str + sizeof (cacheRedistStr) - 1, "=false"))
+        cdiPioConfSetRedistCache(pioConfHandle, 0);
+      else
+        invalidOptionDie("invalid option argument to -qcache-redists: %s\n",
+                         optarg + sizeof (cacheRedistStr) - 1);
+#else
+      invalidOptionDie("CDI-PIO option -q%s ignored in non-MPI mode\n",
+                       cacheRedistStr);
+#endif
+    }
+  else
+    invalidOptionDie("unknown long option: %s\n", str);
+}
+
+
 int main(int argc, char *argv[])
 {
   struct model_config setup = default_setup;
 
   MPI_Comm commModel;
+  int pioConfHandle = 0;
 #ifdef USE_MPI
   MPI_Comm commGlob;
   int sizeGlob;
@@ -108,7 +146,7 @@ int main(int argc, char *argv[])
   xmpi ( MPI_Comm_size ( commGlob, &sizeGlob ));
   xmpi ( MPI_Comm_rank ( commGlob, &rankGlob ));
 
-  int pioConfHandle = cdiPioConfCreate();
+  pioConfHandle = cdiPioConfCreate();
 #endif
 
   /* seed random generator */
@@ -131,7 +169,7 @@ int main(int argc, char *argv[])
 
   {
     int opt;
-    while ((opt = getopt(argc, argv, "f:m:n:z:t:y:cs:"
+    while ((opt = getopt(argc, argv, "f:m:n:z:t:y:cs:q:"
 #ifdef USE_MPI
                          "p:w:"
 #endif
@@ -158,6 +196,9 @@ int main(int argc, char *argv[])
         }
         break;
 #endif
+      case 'q':
+        parse_long_option(pioConfHandle, optarg);
+        break;
       case 'f':
         {
           int found = 0;
