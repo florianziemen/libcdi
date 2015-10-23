@@ -317,8 +317,6 @@ void    streamDefVlist(int streamID, int vlistID);
 
 /*      streamInqVlist: Get the Vlist of a stream */
 int     streamInqVlist(int streamID);
-/*      PIO: */
-int     streamInqVlistIDorig(int streamID);
 
 /*      streamInqFiletype: Get the filetype */
 int     streamInqFiletype(int streamID);

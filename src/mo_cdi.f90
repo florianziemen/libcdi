@@ -231,7 +231,6 @@ module mo_cdi
   public :: streamSync
   public :: streamDefVlist
   public :: streamInqVlist
-  public :: streamInqVlistIDorig
   public :: streamInqFiletype
   public :: streamDefByteorder
   public :: streamInqByteorder
@@ -752,13 +751,6 @@ module mo_cdi
       integer(c_int), value :: streamID_dummy
       integer(c_int) :: f_result
     end function streamInqVlist
-
-    function streamInqVlistIDorig(streamID_dummy) bind(c, name =&
-    & 'streamInqVlistIDorig') result(f_result)
-      import c_int
-      integer(c_int), value :: streamID_dummy
-      integer(c_int) :: f_result
-    end function streamInqVlistIDorig
 
     function streamInqFiletype(streamID_dummy) bind(c, name =&
     & 'streamInqFiletype') result(f_result)

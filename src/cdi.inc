@@ -539,13 +539,6 @@
 !                                    (INTEGER         streamID)
       EXTERNAL        streamInqVlist
 
-!
-!  PIO:
-!
-      INTEGER         streamInqVlistIDorig
-!                                    (INTEGER         streamID)
-      EXTERNAL        streamInqVlistIDorig
-
       INTEGER         streamInqFiletype
 !                                    (INTEGER         streamID)
       EXTERNAL        streamInqFiletype

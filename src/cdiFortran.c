@@ -119,10 +119,6 @@ FCALLSCSUB1 (streamClose, STREAMCLOSE, streamclose, INT)
 FCALLSCSUB1 (streamSync, STREAMSYNC, streamsync, INT)
 FCALLSCSUB2 (streamDefVlist, STREAMDEFVLIST, streamdefvlist, INT, INT)
 FCALLSCFUN1 (INT, streamInqVlist, STREAMINQVLIST, streaminqvlist, INT)
-
-/*  PIO:  */
-
-FCALLSCFUN1 (INT, streamInqVlistIDorig, STREAMINQVLISTIDORIG, streaminqvlistidorig, INT)
 FCALLSCFUN1 (INT, streamInqFiletype, STREAMINQFILETYPE, streaminqfiletype, INT)
 FCALLSCSUB2 (streamDefByteorder, STREAMDEFBYTEORDER, streamdefbyteorder, INT, INT)
 FCALLSCFUN1 (INT, streamInqByteorder, STREAMINQBYTEORDER, streaminqbyteorder, INT)
