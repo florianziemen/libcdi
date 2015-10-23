@@ -2140,10 +2140,19 @@ int streamTxCode(void)
   return STREAM;
 }
 
-
 void
 cdiStreamSetupVlist(stream_t *streamptr, int vlistID)
 {
+  void (*myStreamSetupVlist)(stream_t *streamptr, int vlistID)
+    = (void (*)(stream_t *, int))
+    namespaceSwitchGet(NSSWITCH_STREAM_SETUP_VLIST).func;
+  myStreamSetupVlist(streamptr, vlistID);
+}
+
+void
+cdiStreamSetupVlist_(stream_t *streamptr, int vlistID)
+{
+  vlist_lock(vlistID);
   int nvars = vlistNvars(vlistID);
   streamptr->vlistID = vlistID;
   for (int varID = 0; varID < nvars; varID++ )
@@ -2157,7 +2166,7 @@ cdiStreamSetupVlist(stream_t *streamptr, int vlistID)
                            vlistInqVarMissval(vlistID, varID));
     }
 
-  if (streamptr->filemode == 'w' )
+  if (streamptr->filemode == 'w')
     switch (streamptr->filetype)
       {
 #ifdef HAVE_LIBNETCDF

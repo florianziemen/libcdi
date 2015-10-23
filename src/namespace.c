@@ -46,6 +46,7 @@ static int activeNamespace = 0;
     { .func = (void (*)()) fileClose_serial },              \
     { .func = (void (*)()) cdiStreamOpenDefaultDelegate },  \
     { .func = (void (*)()) cdiStreamDefVlist_ },            \
+    { .func = (void (*)()) cdiStreamSetupVlist_ },          \
     { .func = (void (*)()) cdiStreamWriteVar_ },            \
     { .func = (void (*)()) cdiStreamWriteVarChunk_ },       \
     { .func = (void (*)()) 0 },                             \
