@@ -83,18 +83,20 @@ static int numPioPrimes;
 
 /************************************************************************/
 
+static void
+deleteServerStreamWin(size_t streamIdx)
+{
+  free(rxWin[streamIdx].clientBuf[0].mem);
+  free(rxWin[streamIdx].clientBuf);
+  xmpi(MPI_Win_free(&rxWin[streamIdx].getWin));
+}
+
 static
-void serverWinCleanup ()
+void serverWinCleanup(void)
 {
   for (size_t streamIdx = 0; streamIdx < openStreams.size; ++streamIdx)
-    {
-      Free(rxWin[streamIdx].clientBuf[0].mem);
-      Free(rxWin[streamIdx].clientBuf);
-      xmpi(MPI_Win_free(&rxWin[streamIdx].getWin));
-    }
-  Free(rxWin);
-
-  xdebug("%s", "cleaned up mpi_win");
+    deleteServerStreamWin(streamIdx);
+  free(rxWin);
 }
 
 
