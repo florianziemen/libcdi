@@ -63,6 +63,10 @@ int cdiPioCSRLastN(MPI_Comm commSuper, int IOMode, int nProcsIO);
    \textit{nProcsIO} tasks as I/O servers */
 int cdiPioCSRFirstN(MPI_Comm commSuper, int IOMode, int nProcsIO);
 
+/* cdiPioCSRBalanced: return role codes appropriate to use \textit{nProcsIO}
+ * tasks distributed on evenly spaced ranks as I/O servers */
+int cdiPioCSRBalanced(MPI_Comm commSuper, int IOMode, int nProcsIO);
+
 /* cdiPioStr2IOMode: return integer code corresponding to string
  * representation of mode or -1 if no match was found */
 int cdiPioStr2IOMode(const char *modeStr);

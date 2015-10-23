@@ -93,10 +93,14 @@ parse_unsignedarg(const char msg[])
   return (unsigned)temp;
 }
 
+typedef int (*pioRoleFunc)(MPI_Comm commSuper, int IOMode, int nProcsIO);
+
 static void
-parse_long_option(int pioConfHandle, const char *str)
+parse_long_option(int pioConfHandle, pioRoleFunc *pioRoleAssign,
+                  const char *str)
 {
-  static const char cacheRedistStr[] = "cache-redists";
+  static const char cacheRedistStr[] = "cache-redists",
+    pioRoleSchemeOptionStr[] = "pio-role-scheme";
   if (!strncmp(str, cacheRedistStr, sizeof (cacheRedistStr) - 1))
     {
 #ifdef USE_MPI
@@ -113,6 +117,33 @@ parse_long_option(int pioConfHandle, const char *str)
                        cacheRedistStr);
 #endif
     }
+  else if (!strncmp(str, pioRoleSchemeOptionStr,
+                    sizeof (pioRoleSchemeOptionStr) - 1))
+    {
+#ifdef USE_MPI
+      static const char pioRoleSchemeLastN[]="last",
+        pioRoleSchemeFirstN[]="first", pioRoleSchemeBalanced[]="balanced";
+      if (str[sizeof (pioRoleSchemeOptionStr) - 1] == '=')
+        {
+          const char *optargarg = str + sizeof (pioRoleSchemeOptionStr);
+          if (!strcmp(optargarg, pioRoleSchemeLastN))
+            *pioRoleAssign = cdiPioCSRLastN;
+          else if (!strcmp(optargarg, pioRoleSchemeFirstN))
+            *pioRoleAssign = cdiPioCSRFirstN;
+          else if (!strcmp(optargarg, pioRoleSchemeBalanced))
+            *pioRoleAssign = cdiPioCSRBalanced;
+          else
+            invalidOptionDie("unknown scheme argument \"%s\" to -q%s",
+                             optargarg, pioRoleSchemeOptionStr);
+        }
+      else
+        invalidOptionDie("long option %s needs argument\n",
+                         pioRoleSchemeOptionStr);
+#else
+      invalidOptionDie("CDI-PIO option -q%s ignored in non-MPI mode\n",
+                       pioRoleSchemeOptionStr);
+#endif
+    }
   else
     invalidOptionDie("unknown long option: %s\n", str);
 }
@@ -124,6 +155,7 @@ int main(int argc, char *argv[])
 
   MPI_Comm commModel;
   int pioConfHandle = 0;
+  pioRoleFunc pioRoleAssign = 0;
 #ifdef USE_MPI
   MPI_Comm commGlob;
   int sizeGlob;
@@ -139,6 +171,7 @@ int main(int argc, char *argv[])
   xmpi ( MPI_Comm_rank ( commGlob, &rankGlob ));
 
   pioConfHandle = cdiPioConfCreate();
+  pioRoleAssign = cdiPioCSRLastN;
 #endif
 
   /* seed random generator */
@@ -189,7 +222,7 @@ int main(int argc, char *argv[])
         break;
 #endif
       case 'q':
-        parse_long_option(pioConfHandle, optarg);
+        parse_long_option(pioConfHandle, &pioRoleAssign, optarg);
         break;
       case 'f':
         {
@@ -275,8 +308,8 @@ int main(int argc, char *argv[])
 #ifdef USE_MPI
   int pioNamespace;
   cdiPioConfSetIOMode(pioConfHandle, IOMode);
-  cdiPioConfSetCSRole(pioConfHandle, cdiPioCSRLastN(commGlob, IOMode,
-                                                    nProcsIO));
+  cdiPioConfSetCSRole(pioConfHandle, pioRoleAssign(commGlob, IOMode,
+                                                   nProcsIO));
   cdiPioConfSetPartInflate(pioConfHandle, 1.0f);
   int initNamespace = namespaceGetActive();
   commModel = cdiPioInit(commGlob, pioConfHandle, &pioNamespace);

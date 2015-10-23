@@ -71,3 +71,62 @@ cdiPioCSRSelectRange(MPI_Comm commSuper, int IOMode,
   }
   return role;
 }
+
+int
+cdiPioCSRBalanced(MPI_Comm commSuper, int IOMode, int nProcsIO)
+{
+  int commRank, commSize, numClients, clientsPerCollectorMin,
+    clientsPerCollectorMax, rest;
+  xmpi(MPI_Comm_size(commSuper, &commSize));
+  xmpi(MPI_Comm_rank(commSuper, &commRank));
+  numClients = commSize - nProcsIO;
+  int role, specialRole = PIO_ROLE_FPGUARD,
+    collType = PIO_ROLE_WRITER_COLLECTOR;
+  switch (IOMode)
+  {
+  case PIO_NONE:
+    xassert(commRank == 0 && commSize == 1);
+    role = PIO_NONE;
+    break;
+  case PIO_MPI:
+  case PIO_MPI_FW_ORDERED:
+  case PIO_MPI_FW_AT_ALL:
+  case PIO_MPI_FW_AT_REBLOCK:
+    clientsPerCollectorMin = numClients / nProcsIO;
+    rest = numClients % nProcsIO;
+    clientsPerCollectorMax = clientsPerCollectorMin + (rest != 0);
+    if (commRank == commSize - 1)
+      role = PIO_ROLE_WRITER_COLLECTOR;
+    else if (commRank <= (clientsPerCollectorMax + 1) * (nProcsIO - rest))
+      role = ((commRank + 1) % (clientsPerCollectorMax + 1)) != 0
+        ? PIO_ROLE_CLIENT : PIO_ROLE_WRITER_COLLECTOR;
+    else
+      role = ((commRank - clientsPerCollectorMax * (nProcsIO - rest) + 1)
+              % (clientsPerCollectorMin + 1)) != 0
+        ? PIO_ROLE_CLIENT : PIO_ROLE_WRITER_COLLECTOR;
+    break;
+  case PIO_WRITER:
+  case PIO_ASYNCH:
+    specialRole = PIO_ROLE_WRITER;
+    collType = PIO_ROLE_COLLECTOR;
+    /* fallthrough intentional */
+  case PIO_FPGUARD:
+    clientsPerCollectorMin = numClients / (nProcsIO - 1);
+    rest = numClients % nProcsIO;
+    clientsPerCollectorMax = clientsPerCollectorMin + (rest != 0);
+    if (commRank == commSize - 1)
+      role = specialRole;
+    else if (commRank <= clientsPerCollectorMax * (nProcsIO - 1 - rest))
+      role = (commRank + 1 % (clientsPerCollectorMax + 1)) != 0
+        ? PIO_ROLE_CLIENT : collType;
+    else
+      role = ((commRank - clientsPerCollectorMax * (nProcsIO - 1 - rest) + 1)
+              % (clientsPerCollectorMin + 1)) != 0
+        ? PIO_ROLE_CLIENT : collType;
+    break;
+  default:
+    xabort("Invalid mode requested %d", IOMode);
+  }
+  return role;
+}
+

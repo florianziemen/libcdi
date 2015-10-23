@@ -4,6 +4,16 @@
 This appendix provide a brief listing of the C language bindings of the
 CDI library routines:
 
+\section*{\tt \htmlref{cdiPioCSRBalanced}{cdiPioCSRBalanced}}
+
+\begin{verbatim}
+    int cdiPioCSRBalanced (MPI_Comm commSuper, int IOMode, int nProcsIO);
+\end{verbatim}
+
+return role codes appropriate to use \textit{nProcsIO}
+tasks distributed on evenly spaced ranks as I/O servers.
+
+
 \section*{\tt \htmlref{cdiPioCSRFirstN}{cdiPioCSRFirstN}}
 
 \begin{verbatim}

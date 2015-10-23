@@ -103,6 +103,12 @@
 !                                     INTEGER         nProcsIO)
       EXTERNAL        cdiPioCSRFirstN
 
+      INTEGER         cdiPioCSRBalanced
+!                                    (INTEGER         commSuper,
+!                                     INTEGER         IOMode,
+!                                     INTEGER         nProcsIO)
+      EXTERNAL        cdiPioCSRBalanced
+
       INTEGER         cdiPioStr2IOMode
 !                                    (CHARACTER*(*)   modeStr)
       EXTERNAL        cdiPioStr2IOMode

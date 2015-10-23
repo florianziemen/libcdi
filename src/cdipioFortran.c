@@ -67,6 +67,13 @@ static int cdiPioCSRFirstN_fwrap(int commSuper, int IOMode, int nProcsIO)
   return v;
 }
 FCALLSCFUN3 (INT, cdiPioCSRFirstN_fwrap, CDIPIOCSRFIRSTN, cdipiocsrfirstn, INT, INT, INT)
+static int cdiPioCSRBalanced_fwrap(int commSuper, int IOMode, int nProcsIO)
+{
+  int v;
+  v = cdiPioCSRBalanced(MPI_Comm_f2c(commSuper), IOMode, nProcsIO);
+  return v;
+}
+FCALLSCFUN3 (INT, cdiPioCSRBalanced_fwrap, CDIPIOCSRBALANCED, cdipiocsrbalanced, INT, INT, INT)
 FCALLSCFUN1 (INT, cdiPioStr2IOMode, CDIPIOSTR2IOMODE, cdipiostr2iomode, STRING)
 FCALLSCFUN0 (INT, cdiPioConfCreate, CDIPIOCONFCREATE, cdipioconfcreate)
 FCALLSCSUB1 (cdiPioConfDestroy, CDIPIOCONFDESTROY, cdipioconfdestroy, INT)
