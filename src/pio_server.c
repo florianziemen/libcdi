@@ -172,6 +172,29 @@ setupClientRanks(void)
 }
 
 static void
+createStreamWin(size_t streamIdx, MPI_Info no_locks_info,
+                MPI_Comm collClientIntraComm, struct clientBufSize *bufSizes)
+{
+  rxWin[streamIdx].clientBuf
+    = Malloc((size_t)numClients_ * sizeof (rxWin[streamIdx].clientBuf[0]));
+  xmpi(MPI_Win_create(MPI_BOTTOM, 0, 1, no_locks_info, collClientIntraComm,
+                      &rxWin[streamIdx].getWin));
+  size_t streamBufferSize = 0;
+  for (size_t i = 0; i < (size_t)numClients_; ++i)
+    {
+      streamBufferSize +=
+        (rxWin[streamIdx].clientBuf[i].size = bufSizes[i].bufSize);
+      rxWin[streamIdx].clientBuf[i].dictSize
+        = bufSizes[i].numDataRecords + bufSizes[i].numRPCRecords;
+    }
+  rxWin[streamIdx].clientBuf[0].mem = Malloc(streamBufferSize);
+  for (size_t i = 1; i < (size_t)numClients_; ++i)
+    rxWin[streamIdx].clientBuf[i].mem
+      = rxWin[streamIdx].clientBuf[i-1].mem + bufSizes[i-1].bufSize;
+}
+
+
+static void
 serverWinCreate(void)
 {
   struct serverBufferSetup setup;
@@ -186,29 +209,9 @@ serverWinCreate(void)
   struct clientBufSize (*bufSizes)[numClients_]
     = (struct clientBufSize (*)[numClients_])setup.bufSizes;
   for (size_t streamIdx = 0; streamIdx < openStreams.size; ++streamIdx)
-    {
-      rxWin[streamIdx].clientBuf
-        = Malloc((size_t)numClients_ * sizeof (rxWin[streamIdx].clientBuf[0]));
-
-      if (openStreams.entries[streamIdx] != CDI_UNDEFID) { } else
-        continue;
-      xmpi(MPI_Win_create(MPI_BOTTOM, 0, 1, no_locks_info, collClientIntraComm,
-                          &rxWin[streamIdx].getWin));
-      size_t streamBufferSize = 0;
-      for (size_t i = 0; i < (size_t)numClients_; ++i)
-        {
-          streamBufferSize +=
-            (rxWin[streamIdx].clientBuf[i].size
-             = bufSizes[streamIdx][i].bufSize);
-          rxWin[streamIdx].clientBuf[i].dictSize
-            = bufSizes[streamIdx][i].numDataRecords
-            + bufSizes[streamIdx][i].numRPCRecords;
-        }
-      rxWin[streamIdx].clientBuf[0].mem = Malloc(streamBufferSize);
-      for (size_t i = 1; i < (size_t)numClients_; ++i)
-        rxWin[streamIdx].clientBuf[i].mem = rxWin[streamIdx].clientBuf[i-1].mem
-          + bufSizes[streamIdx][i-1].bufSize;
-    }
+    if (openStreams.entries[streamIdx] != CDI_UNDEFID)
+      createStreamWin(streamIdx, no_locks_info, collClientIntraComm,
+                      bufSizes[streamIdx]);
 
   xmpi(MPI_Info_free(&no_locks_info));
   Free(setup.bufSizes);
