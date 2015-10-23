@@ -195,6 +195,10 @@ main(int argc, char **argv)
      ])
    AS_IF([test "x$MPI_LAUNCH" = xtrue],
      [AC_MSG_WARN([MPI launch command unavailable])])
+   AC_CHECK_DECLS([_SC_LARGE_PAGESIZE, PAGESIZE, PAGE_SIZE, _SC_PAGE_SIZE, dnl
+_SC_PAGESIZE, _PC_REC_XFER_ALIGN, POSIX_REC_XFER_ALIGN],,,[AC_INCLUDES_DEFAULT
+@%:@include <limits.h>
+@%:@include <unistd.h>])
 
    PKG_CHECK_MODULES([YAXT],[yaxt],
      [AC_DEFINE([HAVE_YAXT],,[yaxt library is available])],

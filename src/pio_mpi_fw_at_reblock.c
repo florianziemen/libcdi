@@ -93,6 +93,75 @@ initReblockPendingMsg(aFiledataM *of, size_t i)
   of->reqs[i] = MPI_REQUEST_NULL;
 }
 
+static inline size_t
+gcd(size_t a, size_t b)
+{
+  while (b != 0)
+    {
+      size_t t = a;
+      a = b;
+      b = t % b;
+    }
+  return a;
+}
+
+static inline size_t
+lcm(size_t a, size_t b)
+{
+  return a / gcd(a, b) * b;
+}
+
+enum {
+  /* 8192 is known to work on most systems (4096 isn't on Alpha) */
+  commonPageSize = 8192,
+};
+
+static size_t
+getPageSize(void)
+{
+  long pagesize = -1L;
+#if HAVE_DECL__SC_LARGE_PAGESIZE || HAVE_DECL__SC_PAGE_SIZE || HAVE_DECL__SC_PAGESIZE
+  int name =
+#if HAVE_DECL__SC_LARGE_PAGESIZE
+    _SC_LARGE_PAGESIZE
+#elif HAVE_DECL__SC_PAGESIZE
+    _SC_PAGESIZE
+#elif HAVE_DECL__SC_PAGE_SIZE
+    _SC_PAGE_SIZE
+#endif
+    ;
+  pagesize = sysconf(name);
+#endif
+  if (pagesize == -1L)
+    pagesize =
+#if HAVE_DECL_PAGESIZE
+      PAGESIZE
+#elif HAVE_DECL_PAGE_SIZE
+      PAGE_SIZE
+#else
+      commonPageSize
+#endif
+      ;
+  return (size_t)pagesize;
+}
+
+static size_t
+getXferBufAlign(const char *path)
+{
+  long align = -1L;
+#if HAVE_DECL__PC_REC_XFER_ALIGN
+  align = pathconf(path, _PC_REC_XFER_ALIGN);
+#endif
+  if (align == -1L)
+    align =
+#if HAVE_DECL_POSIX_REC_XFER_ALIGN
+      POSIX_REC_XFER_ALIGN
+#else
+      commonPageSize
+#endif
+      ;
+  return (size_t)align;
+}
 
 static aFiledataM *
 initAFiledataFileWriteAtReblock(const char *filename, size_t bufSize)
@@ -114,7 +183,7 @@ initAFiledataFileWriteAtReblock(const char *filename, size_t bufSize)
                      open_info, &fh));
   xmpi(MPI_Info_free(&open_info));
   /* find block size of underlying file system */
-  size_t blockSize;
+  size_t blockSize, bufBlockAlign;
   {
     struct stat posixstat;
     int rc = stat(filename, &posixstat);
@@ -127,11 +196,28 @@ initAFiledataFileWriteAtReblock(const char *filename, size_t bufSize)
     blockSize = (size_t)posixstat.st_blksize < SIZE_MAX
       ? (size_t)posixstat.st_blksize
       : SIZE_MAX/2;
+    /* prevent inefficiently small writes on granular file systems */
+#define MINBLOCKSIZE ((size_t)1 << 19)
+    if ((blockSize < MINBLOCKSIZE) & !(MINBLOCKSIZE % blockSize))
+      blockSize = MINBLOCKSIZE;
+#undef MINBLOCKSIZE
+    /* ensure block size also meets page and direct I/O buffer
+     * alignment requirements */
+    size_t pageSize = getPageSize(),
+      IOAlign = getXferBufAlign(filename);
+    bufBlockAlign = lcm(pageSize, IOAlign);
+    blockSize = lcm(blockSize, bufBlockAlign);
   }
-  /* round bufSize to next multiple of block size */
+  /* round bufSize to next multiple of block size and I/O alignment */
   bufSize = roundUpToMultiple(bufSize, blockSize);
   size_t numBlockBuf = bufSize / blockSize;
   assert(blockSize <= INT_MAX && numBlockBuf <= INT_MAX);
+  /* never go less than double-buffering */
+  if (numBlockBuf < 2)
+    {
+      numBlockBuf = 2;
+      bufSize = blockSize * 2;
+    }
   aFiledataM *of
     = Malloc(sizeof (*of) + sizeof (of->collWriteSize[0]) * (size_t)sizePio
               + nameSize);
@@ -139,7 +225,15 @@ initAFiledataFileWriteAtReblock(const char *filename, size_t bufSize)
   of->name = (char *)((unsigned char *)of + sizeof (*of)
                       + sizeof (of->collWriteSize[0]) * (size_t)sizePio);
   memcpy(of->name, filename, nameSize);
-  of->blockBuf = Malloc(bufSize);
+  {
+    void *ptr;
+    int err = posix_memalign(&ptr, bufBlockAlign, bufSize);
+    if (!err)
+      of->blockBuf = ptr;
+    else
+      cdiAbort(__FILE__, __func__, __LINE__, "posix_memalign failed: %s",
+               strerror(errno));
+  }
   of->pending = (struct pendingBufWrite *)
     Malloc(numBlockBuf * sizeof (struct pendingBufWrite));
   for (size_t i = 0; i < numBlockBuf; ++i)
@@ -198,7 +292,7 @@ destroyAFiledataFileWriteAtReblock(void *v)
   int iret = MPI_File_close(&of->fh);
   for (size_t i = 0; i < (size_t)of->msgSize; ++i)
     Free(of->msgs[i].sendBuf);
-  Free(of->blockBuf);
+  free(of->blockBuf);
   Free(of->msgs);
   Free(of->reqs);
   Free(of->pending);
