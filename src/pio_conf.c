@@ -55,6 +55,7 @@ static const struct intCodeStrMap modeMap[] = {
   { "PIO_WRITER", PIO_WRITER },
   { "PIO_MPI_FW_ORDERED", PIO_MPI_FW_ORDERED },
   { "PIO_MPI_FW_AT_ALL", PIO_MPI_FW_AT_ALL },
+  { "PIO_MPI_FW_AT_REBLOCK", PIO_MPI_FW_AT_REBLOCK },
 };
 
 int

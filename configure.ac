@@ -386,6 +386,7 @@ AC_CONFIG_FILES([tests/test_cksum_grib \
                  tests/pio_cksum_mpinonb \
                  tests/pio_cksum_mpi_fw_ordered \
                  tests/pio_cksum_mpi_fw_at_all \
+                 tests/pio_cksum_mpi_fw_at_reblock \
                  tests/pio_cksum_fpguard \
                  tests/pio_cksum_asynch \
                  tests/pio_cksum_writer \

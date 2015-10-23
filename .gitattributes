@@ -294,6 +294,7 @@ src/pio_interface.c -text
 src/pio_interface.h -text
 src/pio_list_set.c -text
 src/pio_mpi_fw_at_all.c -text
+src/pio_mpi_fw_at_reblock.c -text
 src/pio_mpi_fw_ordered.c -text
 src/pio_mpinonb.c -text
 src/pio_posixasynch.c -text
@@ -397,6 +398,7 @@ tests/pio_cksum_asynch.in -text
 tests/pio_cksum_cdf.in -text
 tests/pio_cksum_fpguard.in -text
 tests/pio_cksum_mpi_fw_at_all.in -text
+tests/pio_cksum_mpi_fw_at_reblock.in -text
 tests/pio_cksum_mpi_fw_ordered.in -text
 tests/pio_cksum_mpinonb.in -text
 tests/pio_cksum_writer.in -text

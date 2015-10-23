@@ -180,6 +180,7 @@ libcdipio_la_SOURCES =							\
 	pio_mpinonb.c							\
 	pio_mpi_fw_ordered.c						\
 	pio_mpi_fw_at_all.c						\
+	pio_mpi_fw_at_reblock.c						\
 	pio_record_send.c						\
 	pio_posixasynch.c						\
 	pio_posixfpguardsendrecv.c					\

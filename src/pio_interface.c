@@ -559,6 +559,9 @@ cdiPioFileWritingInit(void)
     case PIO_MPI_FW_AT_ALL:
       cdiPioFileWriteAtAllInit();
       break;
+    case PIO_MPI_FW_AT_REBLOCK:
+      cdiPioFileWriteAtReblockInit();
+      break;
     }
 }
 

@@ -221,22 +221,22 @@ am__libcdipio_la_SOURCES_DIST = cdipio.h cdipioFortran.c cfortran.h \
 	pio.c pio.h pio_comm.c pio_comm.h pio_conf.c pio_conf.h \
 	pio_dbuffer.c pio_id_set.h pio_impl.h pio_interface.c \
 	pio_interface.h pio_mpinonb.c pio_mpi_fw_ordered.c \
-	pio_mpi_fw_at_all.c pio_record_send.c pio_posixasynch.c \
-	pio_posixfpguardsendrecv.c pio_posixnonb.c pio_list_set.c \
-	resource_unpack.h resource_unpack.c pio_client.c pio_client.h \
-	pio_roles.c pio_rpc.c pio_rpc.h pio_server.c pio_server.h \
-	pio_serialize.h pio_serialize.c pio_util.c pio_util.h \
-	pio_cdf_int.h pio_cdf_int.c
+	pio_mpi_fw_at_all.c pio_mpi_fw_at_reblock.c pio_record_send.c \
+	pio_posixasynch.c pio_posixfpguardsendrecv.c pio_posixnonb.c \
+	pio_list_set.c resource_unpack.h resource_unpack.c \
+	pio_client.c pio_client.h pio_roles.c pio_rpc.c pio_rpc.h \
+	pio_server.c pio_server.h pio_serialize.h pio_serialize.c \
+	pio_util.c pio_util.h pio_cdf_int.h pio_cdf_int.c
 am__objects_5 = pio_cdf_int.lo
 @HAVE_PARALLEL_NC4_TRUE@@USE_MPI_TRUE@am__objects_6 =  \
 @HAVE_PARALLEL_NC4_TRUE@@USE_MPI_TRUE@	$(am__objects_5)
 am_libcdipio_la_OBJECTS = cdipioFortran.lo pio.lo pio_comm.lo \
 	pio_conf.lo pio_dbuffer.lo pio_interface.lo pio_mpinonb.lo \
-	pio_mpi_fw_ordered.lo pio_mpi_fw_at_all.lo pio_record_send.lo \
-	pio_posixasynch.lo pio_posixfpguardsendrecv.lo \
-	pio_posixnonb.lo pio_list_set.lo resource_unpack.lo \
-	pio_client.lo pio_roles.lo pio_rpc.lo pio_server.lo \
-	pio_serialize.lo pio_util.lo $(am__objects_6)
+	pio_mpi_fw_ordered.lo pio_mpi_fw_at_all.lo \
+	pio_mpi_fw_at_reblock.lo pio_record_send.lo pio_posixasynch.lo \
+	pio_posixfpguardsendrecv.lo pio_posixnonb.lo pio_list_set.lo \
+	resource_unpack.lo pio_client.lo pio_roles.lo pio_rpc.lo \
+	pio_server.lo pio_serialize.lo pio_util.lo $(am__objects_6)
 libcdipio_la_OBJECTS = $(am_libcdipio_la_OBJECTS)
 @ENABLE_CDI_LIB_FALSE@@USE_MPI_TRUE@am_libcdipio_la_rpath =
 @ENABLE_CDI_LIB_TRUE@@USE_MPI_TRUE@am_libcdipio_la_rpath = -rpath \
@@ -553,12 +553,12 @@ libcdipio_la_SOURCES = cdipio.h cdipioFortran.c cfortran.h pio.c pio.h \
 	pio_comm.c pio_comm.h pio_conf.c pio_conf.h pio_dbuffer.c \
 	pio_id_set.h pio_impl.h pio_interface.c pio_interface.h \
 	pio_mpinonb.c pio_mpi_fw_ordered.c pio_mpi_fw_at_all.c \
-	pio_record_send.c pio_posixasynch.c pio_posixfpguardsendrecv.c \
-	pio_posixnonb.c pio_list_set.c resource_unpack.h \
-	resource_unpack.c pio_client.c pio_client.h pio_roles.c \
-	pio_rpc.c pio_rpc.h pio_server.c pio_server.h pio_serialize.h \
-	pio_serialize.c pio_util.c pio_util.h pio_cdf_int.h \
-	$(am__append_7)
+	pio_mpi_fw_at_reblock.c pio_record_send.c pio_posixasynch.c \
+	pio_posixfpguardsendrecv.c pio_posixnonb.c pio_list_set.c \
+	resource_unpack.h resource_unpack.c pio_client.c pio_client.h \
+	pio_roles.c pio_rpc.c pio_rpc.h pio_server.c pio_server.h \
+	pio_serialize.h pio_serialize.c pio_util.c pio_util.h \
+	pio_cdf_int.h $(am__append_7)
 libcdipio_la_HAVE_PARALLEL_NC4_extra_sources = \
 	pio_cdf_int.c
 
@@ -726,6 +726,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_interface.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_list_set.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_mpi_fw_at_all.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_mpi_fw_at_reblock.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_mpi_fw_ordered.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_mpinonb.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_posixasynch.Plo@am__quote@
