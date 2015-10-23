@@ -62,6 +62,11 @@ static const union namespaceSwitchValue
   defaultSwitches_[NUM_NAMESPACE_SWITCH] = defaultSwitches;
 #endif
 
+enum namespaceStatus {
+  NAMESPACE_STATUS_INUSE,
+  NAMESPACE_STATUS_UNUSED,
+};
+
 static struct Namespace
 {
   enum namespaceStatus resStage;
@@ -264,20 +269,6 @@ int namespaceAdaptKey2 ( int originResH )
   return namespaceIdxEncode2 ( nsp, tin.idx );
 }
 
-
-void namespaceDefResStatus (enum namespaceStatus argResStatus )
-{
-  int nsp = namespaceGetActive ();
-  namespaces[nsp].resStage = argResStatus;
-}
-
-
-enum namespaceStatus namespaceInqResStatus ( void )
-{
-  int nsp = namespaceGetActive ();
-  return namespaces[nsp].resStage;
-}
-
 void namespaceSwitchSet(enum namespaceSwitch sw, union namespaceSwitchValue value)
 {
   xassert(sw > NSSWITCH_NO_SUCH_SWITCH && sw < NUM_NAMESPACE_SWITCH);
@@ -303,10 +294,10 @@ void cdiReset(void)
     {
       Free(namespaces);
       namespaces = &initialNamespace;
+      namespaces[0].resStage = NAMESPACE_STATUS_UNUSED;
     }
   namespacesSize = 1;
-  nNamespaces = 1;
-  activeNamespace = 0;
+  nNamespaces = 0;
   NAMESPACE_UNLOCK();
 }
 

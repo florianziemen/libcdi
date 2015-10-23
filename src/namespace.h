@@ -6,11 +6,6 @@
 #endif
 
 
-enum namespaceStatus {
-  NAMESPACE_STATUS_INUSE,
-  NAMESPACE_STATUS_UNUSED,
-};
-
 typedef struct {
   int idx;
   int nsp;
@@ -66,8 +61,6 @@ int              namespaceIdxEncode2   ( int, int );
 namespaceTuple_t namespaceResHDecode   ( int );
 int              namespaceAdaptKey     ( int originResH, int originNamespace);
 int              namespaceAdaptKey2    ( int );
-void             namespaceDefResStatus ( enum namespaceStatus );
-enum namespaceStatus       namespaceInqResStatus ( void );
 void namespaceSwitchSet(enum namespaceSwitch sw,
                         union namespaceSwitchValue value);
 union namespaceSwitchValue namespaceSwitchGet(enum namespaceSwitch sw);
