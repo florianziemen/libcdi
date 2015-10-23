@@ -112,55 +112,7 @@ lcm(size_t a, size_t b)
   return a / gcd(a, b) * b;
 }
 
-enum {
-  /* 8192 is known to work on most systems (4096 isn't on Alpha) */
-  commonPageSize = 8192,
-};
-
 static bool largePageAlign;
-
-static size_t
-getPageSize(void)
-{
-  long pagesize = -1L;
-  bool nameAssigned = false;
-#if HAVE_DECL__SC_LARGE_PAGESIZE || HAVE_DECL__SC_PAGE_SIZE || HAVE_DECL__SC_PAGESIZE
-  int name;
-#if HAVE_DECL__SC_LARGE_PAGESIZE
-  if (largePageAlign)
-    {
-      name = _SC_LARGE_PAGESIZE;
-      nameAssigned = true;
-    }
-  else
-#endif
-    {
-#if HAVE_DECL__SC_PAGESIZE || HAVE_DECL__SC_PAGE_SIZE
-      name =
-#if HAVE_DECL__SC_PAGESIZE
-        _SC_PAGESIZE
-#elif HAVE_DECL__SC_PAGE_SIZE
-        _SC_PAGE_SIZE
-#endif
-        ;
-      nameAssigned = true;
-#endif
-    }
-  if (nameAssigned)
-    pagesize = sysconf(name);
-#endif
-  if (pagesize == -1L)
-    pagesize =
-#if HAVE_DECL_PAGESIZE
-      PAGESIZE
-#elif HAVE_DECL_PAGE_SIZE
-      PAGE_SIZE
-#else
-      commonPageSize
-#endif
-      ;
-  return (size_t)pagesize;
-}
 
 static size_t
 getXferBufAlign(const char *path)
@@ -220,7 +172,7 @@ initAFiledataFileWriteAtReblock(const char *filename, size_t bufSize)
 #undef MINBLOCKSIZE
     /* ensure block size also meets page and direct I/O buffer
      * alignment requirements */
-    size_t pageSize = getPageSize(),
+    size_t pageSize = cdiPioGetPageSize(largePageAlign),
       IOAlign = getXferBufAlign(filename);
     bufBlockAlign = lcm(pageSize, IOAlign);
     blockSize = lcm(blockSize, bufBlockAlign);

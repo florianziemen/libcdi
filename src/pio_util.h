@@ -105,6 +105,15 @@ void printArray ( const char *, const char *, const void *, int, int, const char
 int
 cdiPioQueryVarDims(int varShape[3], int vlistID, int varID);
 
+enum {
+  /* 8192 is known to work on most systems (4096 isn't on Alpha) */
+  commonPageSize = 8192,
+};
+
+size_t
+cdiPioGetPageSize(bool largePageAlign);
+
+
 #endif
 /*
  * Local Variables:
