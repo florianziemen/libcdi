@@ -53,6 +53,15 @@ static const struct {
   { "ieg", FILETYPE_IEG, DATATYPE_FLT64, GRID_LONLAT },
 };
 
+static void
+invalidOptionDie(const char *format, ...)
+{
+  va_list ap;
+  va_start(ap, format);
+  vfprintf(stderr, format, ap);
+  exit(EXIT_FAILURE);
+}
+
 static int
 parse_intarg(const char msg[])
 {
@@ -64,10 +73,7 @@ parse_intarg(const char msg[])
     exit(EXIT_FAILURE);
   }
   if (temp > INT_MAX || temp < INT_MIN)
-  {
-    fprintf(stderr, "range error: %ld\n", temp);
-    exit(EXIT_FAILURE);
-  }
+    invalidOptionDie("range error: %ld\n", temp);
   return (int)temp;
 }
 
@@ -83,23 +89,9 @@ parse_unsignedarg(const char msg[])
       exit(EXIT_FAILURE);
     }
   if (temp > UINT_MAX)
-    {
-      fprintf(stderr, "range error: %ld\n", temp);
-      exit(EXIT_FAILURE);
-    }
+    invalidOptionDie("range error: %ld\n", temp);
   return (unsigned)temp;
 }
-
-
-static void
-invalidOptionDie(const char *format, ...)
-{
-  va_list ap;
-  va_start(ap, format);
-  vfprintf(stderr, format, ap);
-  exit(EXIT_FAILURE);
-}
-
 
 static void
 parse_long_option(int pioConfHandle, const char *str)
