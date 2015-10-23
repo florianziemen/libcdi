@@ -18,6 +18,7 @@
 #include "namespace.h"
 #include "pio.h"
 #include "pio_client.h"
+#include "pio_conf.h"
 #include "pio_id_set.h"
 #include "pio_impl.h"
 #include "pio_serialize.h"
@@ -469,22 +470,28 @@ pioInit(MPI_Comm commGlob, int nProcsIO, int IOMode,
         int *pioNamespace, float partInflate,
         void (*postCommSetupActions)(void))
 {
-  return cdiPioInit(commGlob, IOMode,
-                    cdiPioCSRLastN(commGlob, IOMode, nProcsIO),
-                    pioNamespace, partInflate, postCommSetupActions);
+  int confH = cdiPioConfCreate();
+  cdiPioConfSetIOMode(confH, IOMode);
+  cdiPioConfSetPartInflate(confH, partInflate);
+  cdiPioConfSetCSRole(confH, cdiPioCSRLastN(commGlob, IOMode, nProcsIO));
+  cdiPioConfSetPostCommSetupActions(confH, postCommSetupActions);
+  MPI_Comm retcomm = cdiPioInit(commGlob, confH, pioNamespace);
+  cdiPioConfDestroy(confH);
+  return retcomm;
 }
 
 static void cdiPioFileWritingInit(void);
 
 MPI_Comm
-cdiPioInit(MPI_Comm commGlob, int IOMode, int clientServerRole,
-           int *pioNamespace, float partInflate,
-           void (*postCommSetupActions)(void))
+cdiPioInit(MPI_Comm commGlob, int confResH, int *pioNamespace)
 {
   int sizeGlob;
 
   namespaceSwitchSet(NSSWITCH_ABORT, NSSW_FUNC(cdiAbortC_MPI));
   namespaceSwitchSet(NSSWITCH_WARNING, NSSW_FUNC(cdiPioWarning));
+
+  struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
+  int IOMode = conf->IOMode;
 
   if ( IOMode < PIO_MINIOMODE || IOMode > PIO_MAXIOMODE )
     xabort ( "IOMODE IS NOT VALID." );
@@ -496,7 +503,7 @@ cdiPioInit(MPI_Comm commGlob, int IOMode, int clientServerRole,
 
   if ((xtInitByCDI = (!xt_initialized() || xt_finalized())))
     xt_initialize(commGlob);
-  int nProcsIO = cdiPioCommInit(commGlob, IOMode, clientServerRole);
+  int nProcsIO = cdiPioCommInit(commGlob, IOMode, conf->clientServerRole);
   sizeGlob = commInqSizeGlob ();
 
 
@@ -505,8 +512,7 @@ cdiPioInit(MPI_Comm commGlob, int IOMode, int clientServerRole,
     xabort("DISTRIBUTION OF TASKS ON PROCS IS NOT VALID.\n"
            "nProcsIO=%d, sizeGlob=%d\n", nProcsIO, sizeGlob);
 
-  xassert(partInflate >= 1.0);
-  cdiPIOpartInflate_ = partInflate;
+  cdiPIOpartInflate_ = conf->partInflate;
 
   // JUST FOR TEST CASES WITH ONLY ONE MPI TASK
   if ( commInqSizeGlob () == 1 )
@@ -515,10 +521,11 @@ cdiPioInit(MPI_Comm commGlob, int IOMode, int clientServerRole,
       return commInqCommGlob ();
     }
 
+  reshRemove(confResH, &cdiPioConfOps);
   if ( commInqIsProcIO ())
     {
       cdiPioSerializeSetMPI();
-      postCommSetupActions();
+      conf->postCommSetupActions();
       cdiPioFileWritingInit();
       if (commInqRankColl() >= 0)
         {
@@ -528,11 +535,13 @@ cdiPioInit(MPI_Comm commGlob, int IOMode, int clientServerRole,
       cdiPioCommFinalize();
       if (xtInitByCDI)
         xt_finalize();
+      reshReplace(confResH, conf, &cdiPioConfOps);
       return MPI_COMM_NULL;
     }
   else
     cdiPioClientSetup(&pioNamespace_, pioNamespace);
 
+  reshReplace(confResH, conf, &cdiPioConfOps);
   xdebug ( "nProcsGlob=%d, RETURN", sizeGlob );
   return commInqCommModel ();
 }

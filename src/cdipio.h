@@ -43,9 +43,7 @@ MPI_Comm pioInit(MPI_Comm commSuper, int nProcsIO, int IOMode,
                  int *pioNamespace, float partInflate,
                  void (*postCommSetupActions)(void));
 /*      cdiPioInit: initialize I/O server processes and communication */
-MPI_Comm cdiPioInit(MPI_Comm commSuper, int IOMode, int clientServerRole,
-                    int *pioNamespace, float partInflate,
-                    void (*postCommSetupActions)(void));
+MPI_Comm cdiPioInit(MPI_Comm commSuper, int confResH, int *pioNamespace);
 void     pioWriteTimestep(void);
 void     cdiPioRDMAProgress(void);
 
@@ -63,5 +61,49 @@ int cdiPioCSRLastN(MPI_Comm commSuper, int IOMode, int nProcsIO);
 /* cdiPioCSRFirstN: return role codes appropriate to use the first
    \textit{nProcsIO} tasks as I/O servers */
 int cdiPioCSRFirstN(MPI_Comm commSuper, int IOMode, int nProcsIO);
+
+/* cdiPioStr2IOMode: return integer code corresponding to string
+ * representation of mode or -1 if no match was found */
+int cdiPioStr2IOMode(const char *modeStr);
+
+/* cdiPioStr2IOMode: return string corresponding to integer
+ * code of mode or empty string if code is not valid */
+const char *
+cdiPioIOMode2Str(int IOMode);
+
+/* cdiPioConfCreate: create new configuration object and return its handle */
+int cdiPioConfCreate(void);
+
+/* cdiPioConfDestroy: delete configuration object */
+void cdiPioConfDestroy(int confResH);
+
+/* cdiPioConfSetPartInflate: set partition imbalance attribute of
+ * configuration object */
+void cdiPioConfSetPartInflate(int confResH, float partInflate);
+
+/* cdiPioConfGetPartInflate: query partition imbalance attribute of
+ * configuration object */
+float cdiPioConfGetPartInflate(int confResH);
+
+/* cdiPioConfSetIOMode: set IOMode attribute of configuration object */
+void cdiPioConfSetIOMode(int confResH, int IOMode);
+
+/* cdiPioConfGetIOMode: query IOMode attribute of configuration object */
+int cdiPioConfGetIOMode(int confResH);
+
+/* cdiPioConfSetCSRole: set role attribute of configuration object */
+void cdiPioConfSetCSRole(int confResH, int CSRole);
+
+/* cdiPioConfGetCSRole: query role attribute of configuration object */
+int cdiPioConfGetCSRole(int confResH);
+
+/* cdiPioConfSetPostCommSetupActions: set function to be called after
+ * setup of client/server communications of configuration object */
+void cdiPioConfSetPostCommSetupActions(int confResH,
+                                       void (*postCommSetupActions)(void));
+
+/* cdiPioConfGetPostCommSetupActions: get function to be called after
+ * setup of client/server communications from configuration object */
+void (*cdiPioConfGetPostCommSetupActions(int confResH))(void);
 
 #endif

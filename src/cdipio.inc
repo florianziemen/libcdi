@@ -60,11 +60,8 @@
 
       INTEGER         cdiPioInit
 !                                    (INTEGER         commSuper,
-!                                     INTEGER         IOMode,
-!                                     INTEGER         clientServerRole,
-!                                     INTEGER         pioNamespace,
-!                                     REAL            partInflate,
-!                                     PROCEDURE       postCommSetupActions)
+!                                     INTEGER         confResH,
+!                                     INTEGER         pioNamespace)
       EXTERNAL        cdiPioInit
 
 !                     pioWriteTimestep
@@ -103,4 +100,47 @@
 !                                     INTEGER         IOMode,
 !                                     INTEGER         nProcsIO)
       EXTERNAL        cdiPioCSRFirstN
+
+      INTEGER         cdiPioStr2IOMode
+!                                    (CHARACTER*(*)   modeStr)
+      EXTERNAL        cdiPioStr2IOMode
+
+      INTEGER         cdiPioConfCreate
+      EXTERNAL        cdiPioConfCreate
+
+!                     cdiPioConfDestroy
+!                                    (INTEGER         confResH)
+      EXTERNAL        cdiPioConfDestroy
+
+!                     cdiPioConfSetPartInflate
+!                                    (INTEGER         confResH,
+!                                     REAL            partInflate)
+      EXTERNAL        cdiPioConfSetPartInflate
+
+      REAL            cdiPioConfGetPartInflate
+!                                    (INTEGER         confResH)
+      EXTERNAL        cdiPioConfGetPartInflate
+
+!                     cdiPioConfSetIOMode
+!                                    (INTEGER         confResH,
+!                                     INTEGER         IOMode)
+      EXTERNAL        cdiPioConfSetIOMode
+
+      INTEGER         cdiPioConfGetIOMode
+!                                    (INTEGER         confResH)
+      EXTERNAL        cdiPioConfGetIOMode
+
+!                     cdiPioConfSetCSRole
+!                                    (INTEGER         confResH,
+!                                     INTEGER         CSRole)
+      EXTERNAL        cdiPioConfSetCSRole
+
+      INTEGER         cdiPioConfGetCSRole
+!                                    (INTEGER         confResH)
+      EXTERNAL        cdiPioConfGetCSRole
+
+!                     cdiPioConfSetPostCommSetupActions
+!                                    (INTEGER         confResH,
+!                                     PROCEDURE       postCommSetupActions)
+      EXTERNAL        cdiPioConfSetPostCommSetupActions
 

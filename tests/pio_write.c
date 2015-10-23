@@ -39,35 +39,6 @@ static const struct model_config default_setup
 };
 #endif
 
-#ifdef USE_MPI
-static const struct {
-  const char text[20];
-  int mode;
-} mode_map[] = {
-  { "PIO_MPI", PIO_MPI },
-  { "PIO_FPGUARD", PIO_FPGUARD },
-  { "PIO_ASYNCH", PIO_ASYNCH },
-  { "PIO_WRITER", PIO_WRITER },
-  { "PIO_MPI_FW_ORDERED", PIO_MPI_FW_ORDERED },
-  { "PIO_MPI_FW_AT_ALL", PIO_MPI_FW_AT_ALL },
-};
-
-static inline int
-search_iomode_str(const char *modestr)
-{
-  int retval = -1;
-  for (size_t i = 0;
-       i < sizeof (mode_map) / sizeof (mode_map[0]);
-       ++i)
-    if (!strcmp(modestr, mode_map[i].text))
-      {
-        retval = (int)i;
-        break;
-      }
-  return retval;
-}
-#endif
-
 static const struct {
   char suffix[4];
   int type, defaultDT, defaultGrid;
@@ -166,15 +137,12 @@ int main(int argc, char *argv[])
       switch (opt) {
 #ifdef USE_MPI
       case 'p':
-        {
-          int entry = search_iomode_str(optarg);
-          if (entry < 0)
-            {
-              fprintf(stderr, "Unsupported PIO mode requested: %s\n", optarg);
-              exit(EXIT_FAILURE);
-            }
-          IOMode = mode_map[entry].mode;
-        }
+        IOMode = cdiPioStr2IOMode(optarg);
+        if (IOMode < 0)
+          {
+            fprintf(stderr, "Unsupported PIO mode requested: %s\n", optarg);
+            exit(EXIT_FAILURE);
+          }
         break;
       case 'w':
         {

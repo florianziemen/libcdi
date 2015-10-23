@@ -170,6 +170,8 @@ libcdipio_la_SOURCES =							\
 	pio.h								\
 	pio_comm.c							\
 	pio_comm.h							\
+	pio_conf.c							\
+	pio_conf.h							\
 	pio_dbuffer.c							\
 	pio_id_set.h							\
 	pio_impl.h							\

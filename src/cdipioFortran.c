@@ -34,16 +34,13 @@ static int pioInit_fwrap(int commSuper, int nProcsIO, int IOMode, int *pioNamesp
   return MPI_Comm_c2f(v);
 }
 FCALLSCFUN6 (INT, pioInit_fwrap, PIOINIT, pioinit, INT, INT, INT, PINT, FLOAT, ROUTINE)
-
-#undef ROUTINE_6
-#define ROUTINE_6 (void (*)(void))
-static int cdiPioInit_fwrap(int commSuper, int IOMode, int clientServerRole, int *pioNamespace, float partInflate, void (*postCommSetupActions)(void))
+static int cdiPioInit_fwrap(int commSuper, int confResH, int *pioNamespace)
 {
   MPI_Comm v;
-  v = cdiPioInit(MPI_Comm_f2c(commSuper), IOMode, clientServerRole, pioNamespace, partInflate, postCommSetupActions);
+  v = cdiPioInit(MPI_Comm_f2c(commSuper), confResH, pioNamespace);
   return MPI_Comm_c2f(v);
 }
-FCALLSCFUN6 (INT, cdiPioInit_fwrap, CDIPIOINIT, cdipioinit, INT, INT, INT, PINT, FLOAT, ROUTINE)
+FCALLSCFUN3 (INT, cdiPioInit_fwrap, CDIPIOINIT, cdipioinit, INT, INT, PINT)
 FCALLSCSUB0 (pioWriteTimestep, PIOWRITETIMESTEP, piowritetimestep)
 FCALLSCSUB0 (cdiPioRDMAProgress, CDIPIORDMAPROGRESS, cdipiordmaprogress)
 static void streamWriteVarPart_fwrap(int streamID, int varID, const void *data, int nmiss, void *partDesc)
@@ -70,5 +67,18 @@ static int cdiPioCSRFirstN_fwrap(int commSuper, int IOMode, int nProcsIO)
   return v;
 }
 FCALLSCFUN3 (INT, cdiPioCSRFirstN_fwrap, CDIPIOCSRFIRSTN, cdipiocsrfirstn, INT, INT, INT)
+FCALLSCFUN1 (INT, cdiPioStr2IOMode, CDIPIOSTR2IOMODE, cdipiostr2iomode, STRING)
+FCALLSCFUN0 (INT, cdiPioConfCreate, CDIPIOCONFCREATE, cdipioconfcreate)
+FCALLSCSUB1 (cdiPioConfDestroy, CDIPIOCONFDESTROY, cdipioconfdestroy, INT)
+FCALLSCSUB2 (cdiPioConfSetPartInflate, CDIPIOCONFSETPARTINFLATE, cdipioconfsetpartinflate, INT, FLOAT)
+FCALLSCFUN1 (FLOAT, cdiPioConfGetPartInflate, CDIPIOCONFGETPARTINFLATE, cdipioconfgetpartinflate, INT)
+FCALLSCSUB2 (cdiPioConfSetIOMode, CDIPIOCONFSETIOMODE, cdipioconfsetiomode, INT, INT)
+FCALLSCFUN1 (INT, cdiPioConfGetIOMode, CDIPIOCONFGETIOMODE, cdipioconfgetiomode, INT)
+FCALLSCSUB2 (cdiPioConfSetCSRole, CDIPIOCONFSETCSROLE, cdipioconfsetcsrole, INT, INT)
+FCALLSCFUN1 (INT, cdiPioConfGetCSRole, CDIPIOCONFGETCSROLE, cdipioconfgetcsrole, INT)
+
+#undef ROUTINE_2
+#define ROUTINE_2 (void (*)(void))
+FCALLSCSUB2 (cdiPioConfSetPostCommSetupActions, CDIPIOCONFSETPOSTCOMMSETUPACTIONS, cdipioconfsetpostcommsetupactions, INT, ROUTINE)
 
 #endif

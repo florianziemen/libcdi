@@ -285,6 +285,8 @@ src/pio_client.c -text
 src/pio_client.h -text
 src/pio_comm.c -text
 src/pio_comm.h -text
+src/pio_conf.c -text
+src/pio_conf.h -text
 src/pio_dbuffer.c -text
 src/pio_id_set.h -text
 src/pio_impl.h -text
