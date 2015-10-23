@@ -240,11 +240,39 @@ cdiPioGetPageSize(bool largePageAlign)
 }
 
 
+
+void
+deco1D_CCP(size_t nelems, const size_t *restrict weightPfxSums,
+           size_t nparts, size_t *restrict separators)
+{
+  separators[0] = 0;
+  separators[nparts] = nelems;
+  size_t i = 0, k = 1;
+  size_t weightTotal = weightPfxSums[nelems];
+  while (k < nparts)
+    {
+      size_t target = k * weightTotal / nparts;
+      do {
+        ++i;
+      } while (i < nelems && weightPfxSums[i] < target);
+      separators[k] = i;
+      ++k;
+      --i;
+    }
+  /* todo: implement h2 and dp+ algorithms from
+   * A. Pınar, C. Aykanat
+   * Fast optimal load balancing algorithms for 1D partitioning
+   */
+}
+
+
+
 /****************************************************/
 /*
  * Local Variables:
  * c-file-style: "Java"
  * c-basic-offset: 2
+ * coding: utf-8
  * indent-tabs-mode: nil
  * show-trailing-whitespace: t
  * require-trailing-newline: t

@@ -143,9 +143,11 @@ cdiPioConfPrintP(void *cdiPioConfPtr, FILE * fp)
           "client/server = %s\n"
           "part data imbalance = %f\n"
           "aligning of block buffers to large pages is %sabled\n"
+          "record aggregation buffer size %zu\n"
           "callback after setup of communication = %p\n",
           cdiPioConfPtr, iomodeStr, CSRoleStr, conf->partInflate,
           conf->largePageAlign ? "en" : "dis",
+          (size_t)conf->recordAggBufLimMB * 1024 * 1024,
           (void *)conf->postCommSetupActions);
 }
 
@@ -159,6 +161,7 @@ int cdiPioConfCreate(void)
   conf->postCommSetupActions = cdiPioNoPostCommSetup;
   conf->largePageAlign = false;
   conf->cacheRedists = false;
+  conf->recordAggBufLimMB = 128;
   int resH = reshPut(conf, &cdiPioConfOps);
   /* configuration objects are never forwarded */
   reshSetStatus(resH, &cdiPioConfOps,
@@ -246,5 +249,20 @@ int cdiPioConfGetRedistCache(int confResH)
 {
   struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
   return conf->cacheRedists;
+}
+
+void cdiPioConfSetRecordAggBufLim(int confResH, int lim_mb)
+{
+  struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
+  if (lim_mb > 0)
+    conf->recordAggBufLimMB = (unsigned)lim_mb;
+  else
+    Error("unexpected negative buffer size value %d requested", lim_mb);
+}
+
+int cdiPioConfGetRecordAggBufLim(int confResH)
+{
+  struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
+  return (int)conf->recordAggBufLimMB;
 }
 

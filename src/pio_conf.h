@@ -21,6 +21,7 @@ struct cdiPioConf {
   int clientServerRole;
   float partInflate;
   void (*postCommSetupActions)(void);
+  unsigned recordAggBufLimMB;
   bool largePageAlign;
   bool cacheRedists;
 };
@@ -62,6 +63,10 @@ void cdiPioConfSetLargePageAlign(int confResH, int largePageAlign);
 void cdiPioConfSetRedistCache(int confResH, int doCache);
 
 int cdiPioConfGetRedistCache(int confResH);
+
+void cdiPioConfSetRecordAggBufLim(int confResH, int lim_mb);
+
+int cdiPioConfGetRecordAggBufLim(int confResH);
 
 
 #endif
