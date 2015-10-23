@@ -291,7 +291,7 @@ pioBufferPartData_(int streamID, int varID,
   size_t streamIdx = indexOfID(&openStreams, streamID);
   xassert(streamIdx != SIZE_MAX);
   xassert(varID >= 0 && varID < streamInqNvars(streamID));
-  collWait(streamIdx);
+  collWaitAll();
 
   struct winHeaderEntry dataHeader
     = { .id = streamID, .specific.dataRecord = { varID, nmiss }, .offset = -1 };
@@ -407,8 +407,7 @@ void pioBufferFuncCall(int streamID,
   size_t streamIdx = indexOfID(&openStreams, streamID);
   if (streamIdx == SIZE_MAX)
     streamIdx = insertID(&openStreams, streamID);
-  /* FIXME: handle stream close specially */
-  collWait(streamIdx);
+  collWaitAll();
   xassert(txWin[streamIdx].dictRPCUsed + txWin[streamIdx].dictDataUsed
           < txWin[streamIdx].dictSize
           && txWin[streamIdx].refuseFuncCall == 0);
@@ -656,7 +655,6 @@ void pioWriteTimestep(void)
   int *hasUpdates = Malloc(nStreams * sizeof (hasUpdates[0]));
   for (size_t streamIdx = 0; streamIdx < nStreams; ++streamIdx)
     {
-      collWait(streamIdx);
       hasUpdates[streamIdx] = txWin[streamIdx].pendingUpdate;
     }
 
