@@ -58,17 +58,17 @@ void tableDefEntry(int tableID, int id, const char *name,
   parTable[tableID].pars[item].longname = NULL;
   parTable[tableID].pars[item].units    = NULL;
 
-  if ( name && strlen(name) > 0 )
+  if ( name && name[0] )
     {
       parTable[tableID].pars[item].name     = strdupx(name);
       parTable[tableID].pars[item].dupflags |= TABLE_DUP_NAME;
     }
-  if ( longname && strlen(longname) > 0 )
+  if ( longname && longname[0] )
     {
       parTable[tableID].pars[item].longname = strdupx(longname);
       parTable[tableID].pars[item].dupflags |= TABLE_DUP_LONGNAME;
     }
-  if ( units && strlen(units) > 0 )
+  if ( units && units[0] )
     {
       parTable[tableID].pars[item].units    = strdupx(units);
       parTable[tableID].pars[item].dupflags |= TABLE_DUP_UNITS;
@@ -193,8 +193,7 @@ decodeForm1(char *pline, char *name, char *longname, char *units)
   else
     return (0);
 
-  len = strlen(pline);
-  if ( len == 0 ) return (0);
+  if ( pline[0] == 0 ) return (0);
 
   /* Format 1 : code name add mult longname [units] */
   /* FIXME: successful parse isn't verified */
@@ -370,7 +369,7 @@ int tableRead(const char *tablefile)
 
       if ( err ) continue;
 
-      if ( strlen(name) == 0 ) sprintf(name, "var%d", id);
+      if ( name[0] ) sprintf(name, "var%d", id);
 
       tableDefEntry(tableID, id, name, longname, units);
     }
