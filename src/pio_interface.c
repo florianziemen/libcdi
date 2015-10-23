@@ -19,6 +19,7 @@
 #include "pio.h"
 #include "pio_client.h"
 #include "pio_id_set.h"
+#include "pio_impl.h"
 #include "pio_serialize.h"
 #include "pio_interface.h"
 #include "pio_comm.h"
@@ -473,6 +474,8 @@ pioInit(MPI_Comm commGlob, int nProcsIO, int IOMode,
                     pioNamespace, partInflate, postCommSetupActions);
 }
 
+static void cdiPioFileWritingInit(void);
+
 MPI_Comm
 cdiPioInit(MPI_Comm commGlob, int IOMode, int clientServerRole,
            int *pioNamespace, float partInflate,
@@ -533,6 +536,39 @@ cdiPioInit(MPI_Comm commGlob, int IOMode, int clientServerRole,
   xdebug ( "nProcsGlob=%d, RETURN", sizeGlob );
   return commInqCommModel ();
 }
+
+static void
+cdiPioFileWritingInit(void)
+{
+  int IOMode = commInqIOMode ();
+
+  xassert ( IOMode != PIO_NONE  || commInqSizeGlob() == 1 );
+
+  switch ( IOMode )
+    {
+    case PIO_NONE:
+      break;
+    case PIO_MPI:
+      initMPINONB();
+      break;
+#ifndef _SX
+    case PIO_ASYNCH:
+#endif
+    case PIO_WRITER:
+      pioSendInitialize();
+      break;
+    case PIO_FPGUARD:
+      initPOSIXFPGUARDSENDRECV();
+      break;
+    }
+}
+
+static void cdiPioFileWritingFinalizeDefault(void)
+{
+  xabort("error: failed to setup file writing finalization function!");
+}
+
+void (*cdiPioFileWritingFinalize)(void) = cdiPioFileWritingFinalizeDefault;
 
 /*****************************************************************************/
 

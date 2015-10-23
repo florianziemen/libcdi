@@ -9,7 +9,6 @@
 #include <mpi.h>
 
 
-void cdiPioFileWritingInit(void);
 extern void (*cdiPioFileWritingFinalize)(void);
 
 #endif
