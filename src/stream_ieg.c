@@ -3,6 +3,7 @@
 #endif
 
 #include <limits.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -228,30 +229,38 @@ static void iegDefTime(int *pdb, int date, int time, int taxisID)
   pdb[5] = 128;
 }
 
-static
-int calc_resfac(double xfirst, double xlast, double xinc, double yfirst, double ylast, double yinc)
+/* find smallest power of 10 in [1000,10000000] that upon
+ * multiplication results in fractional part close to zero for all
+ * arguments */
+static double
+calc_resfac(double xfirst, double xlast, double xinc, double yfirst, double ylast, double yinc)
 {
-  int i, j;
-  int iresfac = 1000;
-  int ifact;
-  int ifacarr[5] = {1000, 10000, 100000, 1000000, 10000000};
-  double vals[6] = {xfirst, xlast, xinc, yfirst, ylast, yinc};
+  double resfac = 1000.0;
+  enum {
+    nPwrOf10 = 5,
+    nMultTests = 6,
+  };
+  static const double scaleFactors[nPwrOf10]
+    = { 1000, 10000, 100000, 1000000, 10000000 };
+  double vals[nMultTests] = { xfirst, xlast, xinc, yfirst, ylast, yinc };
 
-  for ( j = 0; j < 5; ++j )
+  for (size_t j = 0; j < nPwrOf10; ++j )
     {
-      ifact = ifacarr[j];
-      for ( i = 0; i < 6; ++i )
+      double scaleBy = scaleFactors[j];
+      bool fractionalScale = false;
+      for (size_t i = 0; i < nMultTests; ++i )
         {
-          if ( fabs(vals[i]*ifact - round(vals[i]*ifact)) > FLT_EPSILON ) break;
+          fractionalScale = fractionalScale
+            || fabs(vals[i]*scaleBy - round(vals[i]*scaleBy)) > FLT_EPSILON;
         }
-      if ( i == 6 )
+      if ( !fractionalScale )
         {
-          iresfac = ifact;
+          resfac = scaleBy;
           break;
         }
     }
 
-  return (iresfac);
+  return (resfac);
 }
 
 static
@@ -328,8 +337,8 @@ void iegDefGrid(int *gdb, int gridID)
       else
 	IEG_G_GridType(gdb) = 0;
 
-      int iresfac = calc_resfac(xfirst, xlast, xinc, yfirst, ylast, yinc);
-      double resfac = (double) iresfac;
+      double resfac = calc_resfac(xfirst, xlast, xinc, yfirst, ylast, yinc);
+      int iresfac = (int)resfac;
       if ( iresfac == 1000 ) iresfac = 0;
 
       IEG_G_ResFac(gdb)   = iresfac;
