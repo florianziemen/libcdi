@@ -300,9 +300,8 @@ void finalizeMPINONB(void)
 /***************************************************************/
 
 void
-initMPINONB(void (*postCommSetupActions)(void))
+initMPINONB(void)
 {
-  postCommSetupActions();
   bibAFiledataM = listSetNew( destroyAFiledataMPINONB, compareNamesMPINONB );
 
   if ( bibAFiledataM == NULL )

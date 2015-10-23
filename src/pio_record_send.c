@@ -294,7 +294,7 @@ pioSendFinalize(void)
 }
 
 void
-pioSendInitialize(void (*postCommSetupActions)(void))
+pioSendInitialize(void)
 {
   int numIOServers = commInqSizePio();
   if (numIOServers < 2)
@@ -302,7 +302,6 @@ pioSendInitialize(void (*postCommSetupActions)(void))
            numIOServers);
 
   int isCollector = commInqRankColl() != -1;
-  postCommSetupActions();
   if (!isCollector)
     switch ( commInqIOMode ())
       {

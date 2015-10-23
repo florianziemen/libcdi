@@ -9,7 +9,7 @@
 #include <mpi.h>
 
 
-void cdiPioFileWritingInit(void (*postCommSetupActions)(void));
+void cdiPioFileWritingInit(void);
 void cdiPioFileWritingFinalize(void);
 int pioFileOpen(const char *filename, const char *mode);
 int    pioFileClose    ( int );

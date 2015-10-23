@@ -517,7 +517,8 @@ cdiPioInit(MPI_Comm commGlob, int IOMode, int clientServerRole,
       cdiPioSerializeSetMPI();
       namespaceSwitchSet(NSSWITCH_FILE_OPEN, NSSW_FUNC(pioFileOpen));
       namespaceSwitchSet(NSSWITCH_FILE_CLOSE, NSSW_FUNC(pioFileClose));
-      cdiPioServer(postCommSetupActions);
+      postCommSetupActions();
+      cdiPioServer();
       namespaceNew();
       cdiPioCommFinalize();
       if (xtInitByCDI)

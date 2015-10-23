@@ -517,7 +517,7 @@ finalizePOSIXFPGUARDSENDRECV(void)
 /***************************************************************/
 
 void
-initPOSIXFPGUARDSENDRECV(void (*postCommSetupActions)(void))
+initPOSIXFPGUARDSENDRECV(void)
 {
   int numIOServers = commInqSizePio();
   if (numIOServers < 2)
@@ -525,7 +525,6 @@ initPOSIXFPGUARDSENDRECV(void (*postCommSetupActions)(void))
            numIOServers);
 
   int isCollector = commInqRankColl() != -1;
-  postCommSetupActions();
   if (!isCollector)
     fpgPOSIXFPGUARDSENDRECV ();
   else

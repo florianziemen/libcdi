@@ -111,7 +111,7 @@ int pioFileOpen(const char *filename, const char *mode)
 
 /***************************************************************/
 
-void cdiPioFileWritingInit(void (*postCommSetupActions)(void))
+void cdiPioFileWritingInit(void)
 {
   int IOMode = commInqIOMode ();
 
@@ -122,16 +122,16 @@ void cdiPioFileWritingInit(void (*postCommSetupActions)(void))
     case PIO_NONE:
       break;
     case PIO_MPI:
-      initMPINONB(postCommSetupActions);
+      initMPINONB();
       break;
 #ifndef _SX
     case PIO_ASYNCH:
 #endif
     case PIO_WRITER:
-      pioSendInitialize(postCommSetupActions);
+      pioSendInitialize();
       break;
     case PIO_FPGUARD:
-      initPOSIXFPGUARDSENDRECV(postCommSetupActions);
+      initPOSIXFPGUARDSENDRECV();
       break;
     }
 }
