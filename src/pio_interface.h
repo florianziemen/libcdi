@@ -35,6 +35,13 @@ void memcpyPackFunc(void *dataDesc, void *buf, int size, int *pos, void *context
 
 extern float cdiPIOpartInflate_;
 
+void
+cdiPioClientStreamWinInit(int streamID);
+void
+cdiPioClientStreamWinCreate(int streamID, struct collSpec *cspec);
+void
+cdiPioClientStreamWinDestroy(int streamID);
+
 #endif
 /*
  * Local Variables:

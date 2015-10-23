@@ -46,13 +46,25 @@ static struct rdmaWin
 static struct idList openStreams;
 
 const char * const funcMap[numRPCFuncs] = {
-  "streamOpen",
-  "streamDefVlist",
-  "streamClose",
   "streamDefTimestep",
 };
 
 float cdiPIOpartInflate_;
+
+static inline void
+collWait(size_t streamIdx);
+
+static inline void
+collWaitAll()
+{
+  size_t openStreamsSize = openStreams.size;
+  for (size_t streamIdx = 0; streamIdx < openStreamsSize; ++streamIdx)
+    if (openStreams.entries[streamIdx] != CDI_UNDEFID)
+      collWait(streamIdx);
+}
+
+
+
 
 /****************************************************/
 
@@ -74,64 +86,6 @@ struct clientBufferSetup
   struct clientBufSize *bufSizes;
   size_t bufSizesCount;
 };
-
-static enum cdiApplyRet
-clientStreamBufSizeIter(int id, void *res, void *data)
-{
-  (void)res;
-  struct clientBufferSetup *setup = data;
-  size_t bufSizesCount = setup->bufSizesCount;
-  setup->bufSizes[bufSizesCount]
-    = computeClientStreamBufSize(id, &setup->collectData);
-  setup->bufSizesCount = ++bufSizesCount;
-  size_t insertPos = insertID(&openStreams, id);
-  xassert(insertPos == bufSizesCount - 1);
-  return CDI_APPLY_GO_ON;
-}
-
-
-static void
-clientBufSizes(struct clientBufferSetup *setup)
-{
-  int numClients = cdiPioCommInqSizeClients(),
-    clientRank = commInqRankModel(),
-    numColl = commInqSizeColl(),
-    collRank = cdiPioCollRank(clientRank, numClients, numColl);
-  setup->collectData = (struct collSpec){
-    .numClients = numClients,
-    .numServers = numColl,
-    .sendRPCData
-    = (clientRank == cdiPioClientRangeStart(collRank, numClients, numColl)),
-  };
-  reshLock();
-  unsigned streamCount = reshCountType(&streamOps);
-  setup->bufSizesCount = 0;
-  setup->bufSizes = Malloc(streamCount * sizeof (setup->bufSizes[0]));
-  cdiResHFilterApply(&streamOps, clientStreamBufSizeIter, setup);
-  reshUnlock();
-}
-
-
-/************************************************************************/
-
-static void
-modelWinDelete(void)
-{
-  xdebug("%s", "START");
-  if (txWin != NULL)
-    {
-      for (size_t streamIdx = 0; streamIdx < openStreams.size; ++streamIdx)
-        {
-          if (txWin[streamIdx].postSet)
-            xmpi(MPI_Win_wait(txWin[streamIdx].win));
-          xmpi(MPI_Win_free(&txWin[streamIdx].win));
-          xmpi(MPI_Free_mem(txWin[streamIdx].buffer));
-        }
-      Free(txWin);
-    }
-
-  xdebug("%s", "RETURN. CLEANED UP MPI_WIN'S");
-}
 
 /************************************************************************/
 
@@ -162,33 +116,64 @@ modelWinFlushBuffer(size_t streamIdx)
 
 /************************************************************************/
 
-static void
-cdiPioClientWinCreate(struct clientBufferSetup *setup)
+void
+cdiPioClientStreamWinInit(int streamID)
 {
+  size_t streamIdx = insertID(&openStreams, streamID);
+  txWin = Realloc(txWin, openStreams.size * sizeof (txWin[0]));
+  txWin[streamIdx].win = MPI_WIN_NULL;
+  txWin[streamIdx].buffer = NULL;
+  txWin[streamIdx].postSet = false;
+}
+
+void
+cdiPioClientStreamWinDestroy(int streamID)
+{
+  /* no operation on any other window must overlap this call for
+   * platforms that block the servers in MPI_Win_complete
+   */
+  collWaitAll();
+  size_t streamIdx = indexOfID(&openStreams, streamID);
+  if (txWin[streamIdx].postSet)
+    xmpi(MPI_Win_wait(txWin[streamIdx].win));
+  if (txWin[streamIdx].win != MPI_WIN_NULL)
+    xmpi(MPI_Win_free(&txWin[streamIdx].win));
+  if (txWin[streamIdx].buffer)
+    xmpi(MPI_Free_mem(txWin[streamIdx].buffer));
+  removeID(&openStreams, streamID);
+}
+
+
+void
+cdiPioClientStreamWinCreate(int streamID, struct collSpec *cspec)
+{
+  /* no operation on any other window must overlap this call for
+   * platforms that block the servers in MPI_Win_complete
+   */
+  collWaitAll();
+  struct clientBufSize bufSize
+    =  computeClientStreamBufSize(streamID, cspec);
   MPI_Info no_locks_info;
   xmpi(MPI_Info_create(&no_locks_info));
   xmpi(MPI_Info_set(no_locks_info, "no_locks", "true"));
-  size_t numStreams = setup->bufSizesCount;
-  txWin = Malloc(numStreams * sizeof (txWin[0]));
-  struct clientBufSize *restrict bufSpec = setup->bufSizes;
+  size_t streamIdx = indexOfID(&openStreams, streamID);
+  int dictSize = bufSize.numDataRecords + bufSize.numRPCRecords;
+  size_t streamBufSize = bufSize.bufSize;
+  txWin[streamIdx].dictSize = dictSize;
+  txWin[streamIdx].size = streamBufSize;
+  xmpi(MPI_Alloc_mem((MPI_Aint)streamBufSize, MPI_INFO_NULL,
+                     &txWin[streamIdx].buffer));
+  txWin[streamIdx].head = txWin[streamIdx].buffer
+    + (size_t)dictSize * sizeof (struct winHeaderEntry);
   MPI_Comm collClientIntraComm = cdiPioInqCollClientIntraComm();
-  for (size_t streamIdx = 0; streamIdx < numStreams; ++streamIdx)
-    {
-      int dictSize = bufSpec[streamIdx].numDataRecords + bufSpec[streamIdx].numRPCRecords;
-      size_t streamBufSize = bufSpec[streamIdx].bufSize;
-      txWin[streamIdx].dictSize = dictSize;
-      txWin[streamIdx].size = streamBufSize;
-      xmpi(MPI_Alloc_mem((MPI_Aint)streamBufSize, MPI_INFO_NULL,
-                         &txWin[streamIdx].buffer));
-      txWin[streamIdx].head = txWin[streamIdx].buffer
-        + (size_t)dictSize * sizeof (struct winHeaderEntry);
-      xmpi(MPI_Win_create(txWin[streamIdx].buffer, (MPI_Aint)streamBufSize, 1,
-                          no_locks_info, collClientIntraComm,
-                          &txWin[streamIdx].win));
-      modelWinFlushBuffer(streamIdx);
-    }
+  xmpi(MPI_Win_create(txWin[streamIdx].buffer, (MPI_Aint)streamBufSize, 1,
+                      no_locks_info, collClientIntraComm,
+                      &txWin[streamIdx].win));
+  modelWinFlushBuffer(streamIdx);
   xmpi(MPI_Info_free(&no_locks_info));
 }
+
+
 /************************************************************************/
 
 static void
@@ -598,9 +583,6 @@ void  pioEndDef ( void )
 
   xdebug("%s", "START");
 
-  struct clientBufferSetup setup;
-  clientBufSizes(&setup);
-
   if (clientRank == cdiPioClientRangeStart(collRank, numClients, numColl))
     {
       MPI_Comm comm = cdiPioInqInterComm();
@@ -614,8 +596,6 @@ void  pioEndDef ( void )
       reshPackBufferDestroy ( &buffer );
     }
 
-  cdiPioClientWinCreate(&setup);
-  Free(setup.bufSizes);
   namespaceDefResStatus ( STAGE_TIMELOOP );
   xdebug("%s", "RETURN");
 }
@@ -624,9 +604,6 @@ void  pioEndDef ( void )
 
 void  pioEndTimestepping ( void )
 {
-  xdebug("%s", "START");
-  namespaceDefResStatus ( STAGE_CLEANUP );
-  xdebug("%s", "RETURN");
 }
 
 
@@ -654,7 +631,7 @@ void pioFinalize ( void )
   if (clientRank == cdiPioClientRangeStart(collRank, numClients, numColl))
     xmpi(MPI_Send(NULL, 0, MPI_INT, collRank, FINALIZE, cdiPioInqInterComm()));
   xdebug("%s", "SENT MESSAGE WITH TAG \"FINALIZE\"");
-  modelWinDelete();
+  Free(txWin);
   cdiPioCommFinalize();
   idSetDestroy(&openStreams);
   if (xtInitByCDI)

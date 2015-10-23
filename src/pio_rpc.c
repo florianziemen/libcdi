@@ -52,7 +52,6 @@ computeClientStreamBufSize(int streamID, struct collSpec *collector)
       rmaSizeSpec.numRPCRecords = numRPCFuncs;
       rmaSizeSpec.bufSize +=
         numRPCFuncs * sizeof (struct winHeaderEntry)
-        + MAXDATAFILENAME
         /* data part of streamDefTimestep */
         + (2 * CDI_MAX_NAME + sizeof (taxis_t));
     }

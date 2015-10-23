@@ -8,6 +8,7 @@
 
 #include "cdi.h"
 #include "cdi_int.h"
+#include "dmemory.h"
 #include "namespace.h"
 #include "taxis.h"
 
@@ -20,45 +21,69 @@
 #include "pio_util.h"
 #include "pio_serialize.h"
 
-static void
-nullPackFunc(void *obj, void *buf, int size, int *pos, void *context)
-{
-  (void)obj; (void)buf; (void)size; (void)pos; (void)context;
-}
-
-
 static int
 cdiPioClientStreamOpen(const char *filename, char filemode,
                        int filetype, stream_t *streamptr,
                        int recordBufIsToBeCreated)
 {
-  struct winHeaderEntry header;
-  size_t filename_len;
   (void)streamptr; (void)recordBufIsToBeCreated;
+  int fileID;
   if ( filemode == 'w' )
     {
       statusCode nspStatus = namespaceInqResStatus ();
       switch ( nspStatus )
         {
         case STAGE_DEFINITION:
-          streamptr->filetype = filetype;
-          break;
         case STAGE_TIMELOOP:
-          filename_len = strlen(filename);
-          xassert(filename_len > 0 && filename_len < MAXDATAFILENAME);
-          header = (struct winHeaderEntry){
-            .id = STREAMOPEN,
-            .specific.funcArgs.newFile
-            = { .fnamelen = (int)filename_len,
-                .filetype = filetype } };
-          pioBufferFuncCall(streamptr->self, header,
-                            &(struct memCpyDataDesc){filename,
-                                filename_len + 1}, memcpyPackFunc);
-          xdebug("WROTE FUNCTION CALL IN BUFFER OF WINS:  %s, filenamesz=%zu,"
-                 " filename=%s, filetype=%d",
-                 funcMap[(-1 - STREAMOPEN)], filename_len + 1, filename,
-                 filetype);
-          streamptr->filetype = filetype;
+          {
+            MPI_Comm comm = cdiPioInqInterComm();
+            int clientRank = commInqRankModel(),
+              numClients = cdiPioCommInqSizeClients(),
+              numColl = commInqSizeColl(),
+              collRank = cdiPioCollRank(clientRank, numClients, numColl);
+            int streamID = streamptr->self;
+            if (clientRank
+                == cdiPioClientRangeStart(collRank, numClients, numColl))
+              {
+                reshSetStatus(streamID, &streamOps,
+                              reshGetStatus(streamID, &streamOps)
+                              & ~RESH_SYNC_BIT);
+                char *msgBuffer;
+                int msgSize = 0;
+                int msgBufPos = reshPackBufferCreate(&msgBuffer, &msgSize, &comm);
+                int size;
+                size_t filename_len = strlen(filename);
+                xassert(filename_len < (size_t)(INT_MAX - msgBufPos));
+                int soHdr[3] = { streamptr->self, filetype, (int)filename_len };
+                xmpi(MPI_Pack_size(3, MPI_INT, comm, &size));
+                msgSize += size;
+                xmpi(MPI_Pack_size(1, MPI_CHAR, comm, &size));
+                msgSize += size;
+                xmpi(MPI_Pack_size((int)filename_len, MPI_CHAR, comm, &size));
+                msgSize += size;
+                /* optimize to pos + size */
+                msgBuffer = (char *)Realloc(msgBuffer, (size_t)msgSize);
+                xmpi(MPI_Pack(soHdr, 3, MPI_INT,
+                              msgBuffer, msgSize, &msgBufPos, comm));
+                xmpi(MPI_Pack(&filemode, 1, MPI_CHAR,
+                              msgBuffer, msgSize, &msgBufPos, comm));
+                xmpi(MPI_Pack((void *)filename, (int)filename_len, MPI_CHAR,
+                              msgBuffer, msgSize, &msgBufPos, comm));
+                xmpi(MPI_Sendrecv(msgBuffer, msgSize, MPI_PACKED, collRank,
+                                  STREAMOPEN,
+                                  &fileID, 1, MPI_INT, collRank, STREAMOPEN,
+                                  comm, MPI_STATUS_IGNORE));
+                Free(msgBuffer);
+              }
+            else
+              xmpi(MPI_Recv(&fileID, 1, MPI_INT, collRank, STREAMOPEN,
+                            comm, MPI_STATUS_IGNORE));
+            if (fileID >= 0)
+              {
+                streamptr->filetype = filetype;
+                cdiPioClientStreamWinInit(streamID);
+              }
+          }
           break;
         case STAGE_CLEANUP:
           xabort ( "TRANSITION TO IO PROCESSES ALREADY FINISHED." );
@@ -69,25 +94,53 @@ cdiPioClientStreamOpen(const char *filename, char filemode,
     }
   else
     Error("cdiPIO read support not implemented");
-  return 1;
+  return fileID;
 }
 
 static void
 cdiPioClientStreamDefVlist_(int streamID, int vlistID)
 {
-  struct winHeaderEntry header;
   statusCode nspStatus = namespaceInqResStatus ();
+  cdiStreamDefVlist_(streamID, vlistID);
   switch ( nspStatus )
     {
     case STAGE_DEFINITION:
-      break;
     case STAGE_TIMELOOP:
-      header = (struct winHeaderEntry){
-        .id = STREAMDEFVLIST,
-        .specific.funcArgs.streamChange = { streamID, vlistID } };
-      pioBufferFuncCall(streamID, header, NULL, nullPackFunc);
-      xdebug("WROTE FUNCTION CALL IN BUFFER OF WINS:  %s, streamID=%d,"
-             " vlistID=%d", funcMap[(-1 - STREAMDEFVLIST)], streamID, vlistID);
+      {
+        int clientRank = commInqRankModel(),
+          numClients = cdiPioCommInqSizeClients(),
+          numColl = commInqSizeColl(),
+          collRank = cdiPioCollRank(clientRank, numClients, numColl);
+        int sendRPCData
+          = (clientRank
+             == cdiPioClientRangeStart(collRank, numClients, numColl));
+        if (sendRPCData)
+          {
+            MPI_Comm comm = cdiPioInqInterComm();
+            reshSetStatus(streamID, &streamOps,
+                          reshGetStatus(streamID, &streamOps) & ~RESH_SYNC_BIT);
+            char *msgBuffer;
+            int msgSize = 0;
+            int msgBufPos = reshPackBufferCreate(&msgBuffer, &msgSize, &comm);
+            {
+              int size;
+              xmpi(MPI_Pack_size(defVlistNInts, MPI_INT, comm, &size));
+              msgSize += size;
+            }
+            /* optimize: pos + size */
+            msgBuffer = Realloc(msgBuffer, (size_t)msgSize);
+            int msgData[defVlistNInts] = { streamID, streamInqVlist(streamID) };
+            xmpi(MPI_Pack(&msgData, defVlistNInts, MPI_INT,
+                          msgBuffer, msgSize, &msgBufPos, comm));
+            xmpi(MPI_Send(msgBuffer, msgBufPos, MPI_PACKED, collRank,
+                          STREAMDEFVLIST, comm));
+            Free(msgBuffer);
+          }
+        struct collSpec cspec = { .numClients = numClients,
+                                  .numServers = numColl,
+                                  .sendRPCData = sendRPCData };
+        cdiPioClientStreamWinCreate(streamID, &cspec);
+      }
       break;
     case STAGE_CLEANUP:
       xabort ( "TRANSITION TO IO PROCESSES ALREADY FINISHED." );
@@ -95,7 +148,6 @@ cdiPioClientStreamDefVlist_(int streamID, int vlistID)
     default:
       xabort ( "INTERNAL ERROR" );
     }
-  cdiStreamDefVlist_(streamID, vlistID);
 }
 
 static void
@@ -196,23 +248,43 @@ cdiPioClientStreamNOP(stream_t *streamptr)
 static void
 cdiPioClientStreamClose(stream_t *streamptr, int recordBufIsToBeDeleted)
 {
-  struct winHeaderEntry header;
   statusCode nspStatus = namespaceInqResStatus ();
   (void)recordBufIsToBeDeleted;
+  int streamID = streamptr->self;
   switch ( nspStatus )
     {
     case STAGE_DEFINITION:
-      break;
     case STAGE_TIMELOOP:
-      header = (struct winHeaderEntry){
-        .id = STREAMCLOSE,
-        .specific.funcArgs.streamChange
-        = { streamptr->self, CDI_UNDEFID } };
-      pioBufferFuncCall(streamptr->self, header, NULL, nullPackFunc);
-      xdebug("WROTE FUNCTION CALL IN BUFFER OF WINS:  %s, streamID=%d",
-             funcMap[-1 - STREAMCLOSE], streamptr->self);
-      break;
     case STAGE_CLEANUP:
+      {
+        int clientRank = commInqRankModel(),
+          numClients = cdiPioCommInqSizeClients(),
+          numColl = commInqSizeColl(),
+          collRank = cdiPioCollRank(clientRank, numClients, numColl);
+        if (clientRank
+            == cdiPioClientRangeStart(collRank, numClients, numColl))
+          {
+            MPI_Comm comm = cdiPioInqInterComm();
+            reshSetStatus(streamID, &streamOps,
+                          reshGetStatus(streamID, &streamOps) & ~RESH_SYNC_BIT);
+            char *msgBuffer;
+            int msgSize = 0;
+            int msgBufPos = reshPackBufferCreate(&msgBuffer, &msgSize, &comm);
+            {
+              int size;
+              xmpi(MPI_Pack_size(1, MPI_INT, comm, &size));
+              msgSize += size;
+            }
+            /* optimize: pos + size */
+            msgBuffer = Realloc(msgBuffer, (size_t)msgSize);
+            xmpi(MPI_Pack(&streamptr->self, 1, MPI_INT,
+                          msgBuffer, msgSize, &msgBufPos, comm));
+            xmpi(MPI_Send(msgBuffer, msgBufPos, MPI_PACKED, collRank,
+                          STREAMCLOSE, comm));
+            Free(msgBuffer);
+          }
+        cdiPioClientStreamWinDestroy(streamID);
+      }
       break;
     default:
       xabort ( "INTERNAL ERROR" );
@@ -236,7 +308,6 @@ cdiPioClientStreamDefTimestep_(stream_t *streamptr, int tsID)
   switch ( nspStatus )
     {
     case STAGE_DEFINITION:
-      break;
     case STAGE_TIMELOOP:
       taxisID = vlistInqTaxis(streamptr->vlistID);
       header = (struct winHeaderEntry){

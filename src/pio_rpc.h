@@ -13,6 +13,9 @@
 enum collectorCommandTags {
   FINALIZE,
   RESOURCES,
+  STREAMOPEN,
+  STREAMCLOSE,
+  STREAMDEFVLIST,
   WRITETS,
 };
 
@@ -20,15 +23,16 @@ enum collectorCommandTags {
 
 enum
 {
-  numRPCFuncs = 4,
-  STREAMOPEN = -1,
-  STREAMDEFVLIST = -2,
-  STREAMCLOSE = -3,
-  STREAMDEFTIMESTEP = -4,
+  numRPCFuncs = 1,
+  STREAMDEFTIMESTEP = -1,
   HEADERSIZEMARKER = -numRPCFuncs - 1,
   PARTDESCMARKER = -numRPCFuncs - 2,
 };
-enum { MAXDATAFILENAME = 256, MINFUNCID = -numRPCFuncs, MAXFUNCID = -1 };
+enum {
+  MINFUNCID = -numRPCFuncs,
+  MAXFUNCID = -1,
+  defVlistNInts = 2,
+};
 extern const char * const funcMap[numRPCFuncs];
 
 struct headerSize
@@ -45,16 +49,8 @@ union funcArgs
 {
   struct
   {
-    int streamID, vlistID;
-  } streamChange;
-  struct
-  {
     int streamID, tsID;
   } streamNewTimestep;
-  struct
-  {
-    int fnamelen, filetype;
-  } newFile;
 };
 
 /* Describes offset and ID of serialized partition descriptor.

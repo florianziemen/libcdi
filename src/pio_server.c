@@ -84,73 +84,14 @@ static int numPioPrimes;
 /************************************************************************/
 
 static void
-deleteServerStreamWin(size_t streamIdx)
+cdiPioServerStreamWinDestroy(size_t streamIdx)
 {
-  free(rxWin[streamIdx].clientBuf[0].mem);
-  xmpi(MPI_Win_free(&rxWin[streamIdx].getWin));
-}
-
-static
-void serverWinCleanup(void)
-{
-  for (size_t streamIdx = 0; streamIdx < openStreams.size; ++streamIdx)
-    deleteServerStreamWin(streamIdx);
-  free(rxWin);
-}
-
-
-struct serverBufferSetup
-{
-  int numClientsOfServer;
-  struct collSpec collectorData;
-  struct clientBufSize *bufSizes;
-  unsigned numStreams;
-};
-
-static enum cdiApplyRet
-serverStreamBufSizeIter(int id, void *res, void *data)
-{
-  (void)res;
-  struct serverBufferSetup *setup = data;
-  size_t numClientsOfServer = (size_t)setup->numClientsOfServer;
-  struct clientBufSize (*bufSizes)[numClientsOfServer]
-    = (struct clientBufSize (*)[numClientsOfServer])setup->bufSizes;
-  size_t streamIdx = indexOfID(&openStreams, id);
-  xassert(streamIdx < setup->numStreams);
-  setup->collectorData.sendRPCData = 1;
-  for (size_t i = 0; i < numClientsOfServer; ++i)
+  if (rxWin[streamIdx].getWin != MPI_WIN_NULL)
     {
-      bufSizes[streamIdx][i]
-        = computeClientStreamBufSize(id, &setup->collectorData);
-      setup->collectorData.sendRPCData = 0;
+      Free(rxWin[streamIdx].clientBuf[0].mem);
+      xmpi(MPI_Win_free(&rxWin[streamIdx].getWin));
     }
-  return CDI_APPLY_GO_ON;
 }
-
-static size_t
-serverBufSizes(struct serverBufferSetup *setup)
-{
-  int numClients = cdiPioCommInqSizeClients(),
-    numColl = commInqSizeColl(),
-    collRank = commInqRankColl(),
-    numClientsOfServer
-    = cdiPioClientRangeStart(collRank + 1, numClients, numColl)
-    - cdiPioClientRangeStart(collRank, numClients, numColl);
-  setup->numClientsOfServer = numClientsOfServer;
-  setup->collectorData = (struct collSpec){
-    .numClients = numClients,
-    .numServers = numColl,
-  };
-  reshLock();
-  unsigned streamCount = reshCountType(&streamOps);
-  setup->numStreams = streamCount;
-  setup->bufSizes = Malloc((size_t)numClientsOfServer * streamCount
-                            * sizeof (setup->bufSizes[0]));
-  cdiResHFilterApply(&streamOps, serverStreamBufSizeIter, setup);
-  reshUnlock();
-  return 0;
-}
-
 
 static int numClients_, *clientRanks_;
 
@@ -173,8 +114,9 @@ setupClientRanks(void)
 }
 
 static void
-createStreamWin(size_t streamIdx, MPI_Info no_locks_info,
-                MPI_Comm collClientIntraComm, struct clientBufSize *bufSizes)
+cdiPioServerStreamWinCreate(size_t streamIdx, MPI_Info no_locks_info,
+                            MPI_Comm collClientIntraComm,
+                            struct clientBufSize *bufSizes)
 {
   xmpi(MPI_Win_create(MPI_BOTTOM, 0, 1, no_locks_info, collClientIntraComm,
                       &rxWin[streamIdx].getWin));
@@ -193,28 +135,6 @@ createStreamWin(size_t streamIdx, MPI_Info no_locks_info,
 }
 
 
-static void
-serverWinCreate(void)
-{
-  struct serverBufferSetup setup;
-  serverBufSizes(&setup);
-  MPI_Comm collClientIntraComm = cdiPioInqCollClientIntraComm();
-  MPI_Info no_locks_info;
-  xmpi(MPI_Info_create(&no_locks_info));
-  xmpi(MPI_Info_set(no_locks_info, "no_locks", "true"));
-
-  struct clientBufSize (*bufSizes)[numClients_]
-    = (struct clientBufSize (*)[numClients_])setup.bufSizes;
-  for (size_t streamIdx = 0; streamIdx < openStreams.size; ++streamIdx)
-    if (openStreams.entries[streamIdx] != CDI_UNDEFID)
-      createStreamWin(streamIdx, no_locks_info, collClientIntraComm,
-                      bufSizes[streamIdx]);
-
-  xmpi(MPI_Info_free(&no_locks_info));
-  Free(setup.bufSizes);
-  xdebug("%s", "created mpi_win, allocated getBuffer");
-}
-
 /************************************************************************/
 
 static void
@@ -226,43 +146,6 @@ readFuncCall(struct winHeaderEntry *header, size_t streamIdx)
   xassert(funcID >= MINFUNCID && funcID <= MAXFUNCID);
   switch ( funcID )
     {
-    case STREAMCLOSE:
-      {
-        int streamID
-          = namespaceAdaptKey2(funcArgs->streamChange.streamID);
-        streamClose(streamID);
-        xdebug("READ FUNCTION CALL FROM WIN:  %s, streamID=%d,"
-               " closed stream",
-               funcMap[(-1 - funcID)], streamID);
-      }
-      break;
-    case STREAMOPEN:
-      {
-        size_t filenamesz = (size_t)funcArgs->newFile.fnamelen;
-        xassert ( filenamesz > 0 && filenamesz < MAXDATAFILENAME );
-        const char *filename
-          = (const char *)(rxWin[streamIdx].clientBuf[0].mem + header->offset);
-        xassert(filename[filenamesz] == '\0');
-        int filetype = funcArgs->newFile.filetype;
-        int streamID = streamOpenWrite(filename, filetype);
-        xassert(streamID != CDI_ELIBNAVAIL);
-        xdebug("READ FUNCTION CALL FROM WIN:  %s, filenamesz=%zu,"
-               " filename=%s, filetype=%d, OPENED STREAM %d",
-               funcMap[(-1 - funcID)], filenamesz, filename,
-               filetype, streamID);
-      }
-      break;
-    case STREAMDEFVLIST:
-      {
-        int streamID
-          = namespaceAdaptKey2(funcArgs->streamChange.streamID);
-        int vlistID = namespaceAdaptKey2(funcArgs->streamChange.vlistID);
-        streamDefVlist(streamID, vlistID);
-        xdebug("READ FUNCTION CALL FROM WIN:  %s, streamID=%d,"
-               " vlistID=%d, called streamDefVlist ().",
-               funcMap[(-1 - funcID)], streamID, vlistID);
-      }
-      break;
     case STREAMDEFTIMESTEP:
       {
         MPI_Comm pioInterComm = cdiPioInqInterComm();
@@ -865,10 +748,6 @@ static void readGetBuffers(size_t streamIdx)
     Free(map);
     Free(data);
   }
-#ifdef HAVE_NETCDF4
-#ifdef HAVE_PARALLEL_NC4
-#endif
-#endif
   xdebug("%s", "RETURN");
 }
 
@@ -957,7 +836,8 @@ cdiPioServerStreamOpen(const char *filename, char filemode,
     }
   if (fileID >= 0)
     {
-      insertID(&openStreams, streamptr->self);
+      size_t oldNumStreams = openStreams.size;
+      size_t streamIdx = insertID(&openStreams, streamptr->self);
       size_t numStreams = openStreams.size;
       struct clientBuf *oldClientBufs = rxWin ? rxWin[0].clientBuf : NULL;
       rxWin = Realloc(rxWin, numStreams * sizeof (rxWin[0]));
@@ -967,9 +847,10 @@ cdiPioServerStreamOpen(const char *filename, char filemode,
       if (newClientBufs != oldClientBufs)
         for (size_t i = 0; i < numStreams; ++i)
           rxWin[i].clientBuf = newClientBufs + i * (size_t)numClients_;
-      /*
-       * rxWin[streamIdx].getWin = MPI_WIN_NULL;
-       */
+      else if (oldNumStreams < numStreams)
+        for (size_t i = oldNumStreams; i < numStreams; ++i)
+          rxWin[i].clientBuf = newClientBufs + i * (size_t)numClients_;
+      rxWin[streamIdx].getWin = MPI_WIN_NULL;
     }
   return fileID;
 }
@@ -1002,7 +883,10 @@ cdiPioServerStreamClose(stream_t *streamptr, int recordBufIsToBeDeleted)
         default:
           cdiStreamCloseDefaultDelegate(streamptr, recordBufIsToBeDeleted);
         }
-      removeID(&openStreams, streamptr->self);
+      int streamID = streamptr->self;
+      size_t streamIdx = indexOfID(&openStreams, streamID);
+      cdiPioServerStreamWinDestroy(streamIdx);
+      removeID(&openStreams, streamID);
     }
 }
 
@@ -1017,6 +901,87 @@ cdiPioCdfDefTimestep(stream_t *streamptr, int tsID)
     cdfDefTimestep(streamptr, tsID);
 }
 #endif
+
+static void
+cdiPioRecvStreamOpen(void *buffer, int size, int *pos, MPI_Comm pioInterComm)
+{
+  int clientStreamID, filetype, fname_len;
+  {
+    int soHdr[3];
+    xmpi(MPI_Unpack(buffer, size, pos,
+                    soHdr, 3, MPI_INT, pioInterComm));
+    clientStreamID = soHdr[0];
+    filetype = soHdr[1];
+    fname_len = soHdr[2];
+  }
+  char filemode;
+  xmpi(MPI_Unpack(buffer, size, pos,
+                  &filemode, 1, MPI_CHAR, pioInterComm));
+  MPI_Request *requests = Malloc((size_t)numClients_ * sizeof (requests[0])
+                                  + (size_t)fname_len + 1);
+  char *filename = (char *)((unsigned char *)requests
+                            + (size_t)numClients_ * sizeof (requests[0]));
+  xmpi(MPI_Unpack(buffer, size, pos,
+                  filename, fname_len, MPI_CHAR, pioInterComm));
+  filename[fname_len] = '\0';
+  xassert(filemode == 'w');
+  int serverStreamID = namespaceAdaptKey2(clientStreamID);
+  int curStatus = reshGetStatus(serverStreamID, &streamOps);
+  xassert(!(curStatus & RESH_IN_USE_BIT));
+  int streamID = streamOpenID(filename, filemode, filetype, serverStreamID);
+  int fileID = (streamID >= 0) ? streamInqFileID(streamID) : streamID;
+  for (size_t i = 0; i < (size_t)numClients_; ++i)
+    xmpi(MPI_Isend(&fileID, 1, MPI_INT, clientRanks_[i], STREAMOPEN,
+                   pioInterComm, requests + i));
+  xmpi(MPI_Waitall(numClients_, requests, MPI_STATUSES_IGNORE));
+  Free(requests);
+}
+
+static void
+cdiPioRecvStreamClose(void *buffer, int size, int *pos, MPI_Comm pioInterComm)
+{
+  int clientStreamID;
+  xmpi(MPI_Unpack(buffer, size, pos,
+                  &clientStreamID, 1, MPI_INT, pioInterComm));
+  int serverStreamID = namespaceAdaptKey2(clientStreamID);
+  streamClose(serverStreamID);
+}
+
+static void
+cdiPioRecvStreamDefVlist(void *buffer, int size, int *pos,
+                         MPI_Comm pioInterComm)
+{
+  int serverStreamID, serverVlistID;
+  {
+    int msgData[defVlistNInts];
+    xmpi(MPI_Unpack(buffer, size, pos,
+                    &msgData, defVlistNInts, MPI_INT, pioInterComm));
+    serverStreamID = namespaceAdaptKey2(msgData[0]);
+    serverVlistID = namespaceAdaptKey2(msgData[1]);
+  }
+  cdiStreamSetupVlist(stream_to_pointer(serverStreamID), serverVlistID);
+  MPI_Info no_locks_info;
+  xmpi(MPI_Info_create(&no_locks_info));
+  xmpi(MPI_Info_set(no_locks_info, "no_locks", "true"));
+  size_t streamIdx = indexOfID(&openStreams, serverStreamID);
+  int numClients = cdiPioCommInqSizeClients(),
+    numColl = commInqSizeColl();
+  struct collSpec collectorData = {
+    .numClients = numClients,
+    .numServers = numColl,
+    .sendRPCData = 1,
+  };
+  struct clientBufSize bufSizes[numClients_];
+  bufSizes[0] = computeClientStreamBufSize(serverStreamID, &collectorData);
+  collectorData.sendRPCData = 0;
+  for (size_t i = 1; i < (size_t)numClients_; ++i)
+    bufSizes[i] = computeClientStreamBufSize(serverStreamID, &collectorData);
+  cdiPioServerStreamWinCreate(streamIdx, no_locks_info,
+                              cdiPioInqCollClientIntraComm(), bufSizes);
+  xmpi(MPI_Info_free(&no_locks_info));
+
+}
+
 
 /**
  * @brief is encapsulated in CDI library and run on I/O PEs.
@@ -1059,18 +1024,17 @@ void cdiPioCollectorMessageLoop(void)
         {
         case FINALIZE:
           xmpi(MPI_Recv(NULL, 0, MPI_INT, source, tag, pioInterComm, &status));
-          {
-            unsigned nStreams = reshCountType(&streamOps);
-            if ( nStreams > 0 )
-              {
-                int *resHs = Malloc(nStreams * sizeof (resHs[0]));
-                cdiStreamGetIndexList(nStreams, resHs);
-                for (unsigned streamNo = 0; streamNo < nStreams; ++streamNo)
-                  streamClose(resHs[streamNo]);
-                Free(resHs);
-              }
-          }
-          serverWinCleanup();
+          for (size_t streamIdx = 0; streamIdx < openStreams.size; ++streamIdx)
+            {
+              int streamID = openStreams.entries[streamIdx];
+              if (streamID != CDI_UNDEFID)
+                streamClose(streamID);
+            }
+          if (rxWin)
+            {
+              Free(rxWin[0].clientBuf);
+              Free(rxWin);
+            }
           idSetDestroy(&openStreams);
           Free(streamActivity);
           Free(clientRanks_);
@@ -1081,6 +1045,9 @@ void cdiPioCollectorMessageLoop(void)
 #endif
           xdebug("%s", "RETURN");
           return;
+        case STREAMOPEN:
+        case STREAMCLOSE:
+        case STREAMDEFVLIST:
 	case RESOURCES:
           {
             int size;
@@ -1088,15 +1055,24 @@ void cdiPioCollectorMessageLoop(void)
             char *buffer = Malloc((size_t)size);
             xmpi(MPI_Recv(buffer, size, MPI_PACKED, source,
                           tag, pioInterComm, &status));
-            xdebug("%s", "RECEIVED MESSAGE WITH TAG \"RESOURCES\"");
-            reshUnpackResources(buffer, size, &pioInterComm);
-            xdebug("%s", "");
+            int pos = reshUnpackResources(buffer, size, &pioInterComm);
+            switch (tag)
+              {
+              case STREAMOPEN:
+                cdiPioRecvStreamOpen(buffer, size, &pos, pioInterComm);
+                break;
+              case STREAMCLOSE:
+                cdiPioRecvStreamClose(buffer, size, &pos, pioInterComm);
+                break;
+              case STREAMDEFVLIST:
+                cdiPioRecvStreamDefVlist(buffer, size, &pos, pioInterComm);
+                break;
+              }
             Free(buffer);
+            streamActivity = Realloc(streamActivity, openStreams.size
+                                     * sizeof (streamActivity[0]));
           }
-          serverWinCreate ();
-          streamActivity = Realloc(streamActivity, openStreams.size
-                                   * sizeof (streamActivity[0]));
-	  break;
+          break;
 	case WRITETS:
           {
             xmpi(MPI_Recv(streamActivity, (int)openStreams.size,
