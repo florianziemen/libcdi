@@ -87,7 +87,6 @@ static void
 deleteServerStreamWin(size_t streamIdx)
 {
   free(rxWin[streamIdx].clientBuf[0].mem);
-  free(rxWin[streamIdx].clientBuf);
   xmpi(MPI_Win_free(&rxWin[streamIdx].getWin));
 }
 
@@ -177,8 +176,6 @@ static void
 createStreamWin(size_t streamIdx, MPI_Info no_locks_info,
                 MPI_Comm collClientIntraComm, struct clientBufSize *bufSizes)
 {
-  rxWin[streamIdx].clientBuf
-    = Malloc((size_t)numClients_ * sizeof (rxWin[streamIdx].clientBuf[0]));
   xmpi(MPI_Win_create(MPI_BOTTOM, 0, 1, no_locks_info, collClientIntraComm,
                       &rxWin[streamIdx].getWin));
   size_t streamBufferSize = 0;
@@ -205,8 +202,6 @@ serverWinCreate(void)
   MPI_Info no_locks_info;
   xmpi(MPI_Info_create(&no_locks_info));
   xmpi(MPI_Info_set(no_locks_info, "no_locks", "true"));
-
-  rxWin = Calloc((size_t)setup.numStreams, sizeof (rxWin[0]));
 
   struct clientBufSize (*bufSizes)[numClients_]
     = (struct clientBufSize (*)[numClients_])setup.bufSizes;
@@ -961,7 +956,21 @@ cdiPioServerStreamOpen(const char *filename, char filemode,
                                             streamptr, recordBufIsToBeCreated);
     }
   if (fileID >= 0)
-    insertID(&openStreams, streamptr->self);
+    {
+      insertID(&openStreams, streamptr->self);
+      size_t numStreams = openStreams.size;
+      struct clientBuf *oldClientBufs = rxWin ? rxWin[0].clientBuf : NULL;
+      rxWin = Realloc(rxWin, numStreams * sizeof (rxWin[0]));
+      struct clientBuf *restrict newClientBufs
+        = Realloc(oldClientBufs, sizeof (rxWin[0].clientBuf[0])
+                   * (size_t)numClients_ * numStreams);
+      if (newClientBufs != oldClientBufs)
+        for (size_t i = 0; i < numStreams; ++i)
+          rxWin[i].clientBuf = newClientBufs + i * (size_t)numClients_;
+      /*
+       * rxWin[streamIdx].getWin = MPI_WIN_NULL;
+       */
+    }
   return fileID;
 }
 
