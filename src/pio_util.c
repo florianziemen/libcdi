@@ -103,34 +103,6 @@ void pcdiXMPIStat ( int iret, const char *filename, int line, MPI_Status *status
 
 /****************************************************/
 
-void pcdiDebugComm ( const char *filename, const char *functionname, int line, MPI_Comm *comm )
-{
-  int rank = -1, size, len, rankGlob = -1;
-  char *name;
-
-  name = ( char * ) malloc ( MPI_MAX_OBJECT_NAME );
-  memset ( name, 0, ( MPI_MAX_OBJECT_NAME ) * sizeof ( char ));
-  MPI_Comm_get_name ( * comm, name, &len );
-  MPI_Comm_size ( * comm, &size );
-  {
-    int init_flag = 0, finished_flag = 0;
-    if (MPI_Initialized(&init_flag) == MPI_SUCCESS && init_flag
-        && MPI_Finalized(&finished_flag) == MPI_SUCCESS && !finished_flag)
-      {
-        MPI_Comm_rank(*comm, &rank);
-        MPI_Comm_rank(MPI_COMM_WORLD, &rankGlob);
-      }
-  }
-  fprintf ( stdout,
-            "pe%d in %s, %s, line %d: comm: name=%s, size=%d, rank=%d\n",
-            rankGlob, functionname, filename, line,
-            name, size, rank );
-  Free( name );
-
-}
-
-/****************************************************/
-
 void pcdiDebugMsg ( const char * cdiPioDebugString, const char *filename,
                     const char *functionname, int line, int tag, int source,
                     int nfinished )
