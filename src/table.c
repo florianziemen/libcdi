@@ -822,6 +822,9 @@ int tableInqParName(int tableID, int code, char *varname)
 {
   int err = 1;
 
+  if ( tableID >= 0 && tableID < MAX_TABLE ) { } else
+    Error("Invalid table ID %d", tableID);
+
   if ( tableID != UNDEFID )
     {
       int npars = parTable[tableID].npars;
