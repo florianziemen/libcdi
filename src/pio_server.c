@@ -296,20 +296,18 @@ xyzGridSize(struct xyzDims dims)
 static Xt_idxlist
 buildVarSlicesIdxList(int vlistID, int varID, int startLvl, int numLvl)
 {
-  /* doubles as slice shape later */
   int varShape[3] = { 0, 0, 0 };
   cdiPioQueryVarDims(varShape, vlistID, varID);
   /* int varSize = varShape[0] * varShape[1] * varShape[2]; */
-  Xt_int varShapeXt[3];
-  Xt_int origin[3] = { 0, 0, 0 };
+  Xt_int varShapeXt[3],
+    origin[3] = { startLvl >= 0 ? (Xt_int)startLvl:0, 0, 0 };
+  int sliceShape[3];
   for (unsigned i = 0; i < 3; ++i)
-    varShapeXt[2 - i] = varShape[i];
-  if (startLvl >= 0) origin[0] = (Xt_int)startLvl;
-  varShape[0] = varShapeXt[0];
-  varShape[2] = varShapeXt[2];
-  if (numLvl >= 0) varShape[0] = numLvl;
-  return xt_idxsection_new(0, 3, varShapeXt, varShape,
-                           origin);
+    varShapeXt[2 - i] = (Xt_int)varShape[i];
+  sliceShape[0] = numLvl >= 0 ? numLvl : (int)varShape[2];
+  sliceShape[1] = varShape[1];
+  sliceShape[2] = varShape[0];
+  return xt_idxsection_new(0, 3, varShapeXt, sliceShape, origin);
 }
 
 static int
