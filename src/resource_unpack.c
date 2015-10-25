@@ -93,8 +93,8 @@ int reshUnpackResources(char * unpackBuffer, int unpackBufferSize,
   for (int i = 0; i < numAssociations; ++i)
     {
       cdiStreamSetupVlist(stream_to_pointer(associations[i].streamID),
-                          namespaceAdaptKey(associations[i].vlistID,
-                                            originNamespace));
+                          namespaceAdaptKey(associations[i].vlistID, originNamespace),
+                          namespaceAdaptKey(associations[i].vlistIDorig, originNamespace));
     }
   Free(associations);
   return unpackBufferPos;
