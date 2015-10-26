@@ -84,12 +84,13 @@ TESTS = cksum_verify$(EXEEXT) test_cksum_grib test_cksum_nc \
 	pio_cksum_writer pio_cksum_cdf pio_cksum_mpi_fw_ordered \
 	pio_cksum_mpi_fw_at_all pio_cksum_mpi_fw_at_reblock \
 	test_resource_copy$(EXEEXT) pio_write_deco2d_run test_f2003 \
-	test_cdf_transformation test_table$(EXEEXT) $(am__append_2)
+	test_cdf_transformation test_table$(EXEEXT) \
+	test_byteswap$(EXEEXT) $(am__append_2)
 check_PROGRAMS = cksum_verify$(EXEEXT) test_grib$(EXEEXT) \
 	cksum_write$(EXEEXT) cksum_read$(EXEEXT) pio_write$(EXEEXT) \
 	test_resource_copy$(EXEEXT) cksum_write_chunk$(EXEEXT) \
-	pio_write_deco2d$(EXEEXT) test_table$(EXEEXT) $(am__EXEEXT_1) \
-	$(am__EXEEXT_2)
+	pio_write_deco2d$(EXEEXT) test_table$(EXEEXT) \
+	test_byteswap$(EXEEXT) $(am__EXEEXT_1) $(am__EXEEXT_2)
 @ENABLE_NETCDF_TRUE@am__append_1 = test_cdf_write test_cdf_read
 @USE_MPI_TRUE@am__append_2 = test_resource_copy_mpi_run
 @USE_MPI_TRUE@am__append_3 = test_resource_copy_mpi
@@ -194,6 +195,10 @@ pio_write_deco2d_OBJECTS = $(am_pio_write_deco2d_OBJECTS)
 @USE_MPI_FALSE@	$(am__DEPENDENCIES_2)
 @USE_MPI_TRUE@pio_write_deco2d_DEPENDENCIES = ../src/libcdipio.la \
 @USE_MPI_TRUE@	$(am__DEPENDENCIES_2) $(am__DEPENDENCIES_2)
+am_test_byteswap_OBJECTS = test_byteswap.$(OBJEXT)
+test_byteswap_OBJECTS = $(am_test_byteswap_OBJECTS)
+test_byteswap_LDADD = $(LDADD)
+test_byteswap_DEPENDENCIES = ../src/libcdi.la
 am_test_cdf_read_OBJECTS = test_cdf_read.$(OBJEXT)
 test_cdf_read_OBJECTS = $(am_test_cdf_read_OBJECTS)
 test_cdf_read_LDADD = $(LDADD)
@@ -262,14 +267,16 @@ am__v_CCLD_1 =
 SOURCES = $(cksum_read_SOURCES) $(cksum_verify_SOURCES) \
 	$(cksum_write_SOURCES) $(cksum_write_chunk_SOURCES) \
 	$(pio_write_SOURCES) $(pio_write_deco2d_SOURCES) \
-	$(test_cdf_read_SOURCES) $(test_cdf_write_SOURCES) \
-	$(test_grib_SOURCES) $(test_resource_copy_SOURCES) \
+	$(test_byteswap_SOURCES) $(test_cdf_read_SOURCES) \
+	$(test_cdf_write_SOURCES) $(test_grib_SOURCES) \
+	$(test_resource_copy_SOURCES) \
 	$(test_resource_copy_mpi_SOURCES) $(test_table_SOURCES)
 DIST_SOURCES = $(cksum_read_SOURCES) $(cksum_verify_SOURCES) \
 	$(cksum_write_SOURCES) $(cksum_write_chunk_SOURCES) \
 	$(pio_write_SOURCES) $(pio_write_deco2d_SOURCES) \
-	$(test_cdf_read_SOURCES) $(test_cdf_write_SOURCES) \
-	$(test_grib_SOURCES) $(test_resource_copy_SOURCES) \
+	$(test_byteswap_SOURCES) $(test_cdf_read_SOURCES) \
+	$(test_cdf_write_SOURCES) $(test_grib_SOURCES) \
+	$(test_resource_copy_SOURCES) \
 	$(test_resource_copy_mpi_SOURCES) $(test_table_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
@@ -533,6 +540,7 @@ test_resource_copy_mpi_SOURCES = test_resource_copy.c
 test_cdf_write_SOURCES = test_cdf_write.c
 test_cdf_read_SOURCES = test_cdf_read.c
 test_table_SOURCES = test_table.c
+test_byteswap_SOURCES = test_byteswap.c
 #
 AM_CFLAGS = $(PPM_CORE_CFLAGS) $(YAXT_CFLAGS) $(MPI_C_INCLUDE)
 @USE_MPI_FALSE@pio_write_LDADD = $(LDADD) $(UUID_C_LIB)
@@ -662,6 +670,10 @@ pio_write_deco2d$(EXEEXT): $(pio_write_deco2d_OBJECTS) $(pio_write_deco2d_DEPEND
 	@rm -f pio_write_deco2d$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(pio_write_deco2d_OBJECTS) $(pio_write_deco2d_LDADD) $(LIBS)
 
+test_byteswap$(EXEEXT): $(test_byteswap_OBJECTS) $(test_byteswap_DEPENDENCIES) $(EXTRA_test_byteswap_DEPENDENCIES) 
+	@rm -f test_byteswap$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(test_byteswap_OBJECTS) $(test_byteswap_LDADD) $(LIBS)
+
 test_cdf_read$(EXEEXT): $(test_cdf_read_OBJECTS) $(test_cdf_read_DEPENDENCIES) $(EXTRA_test_cdf_read_DEPENDENCIES) 
 	@rm -f test_cdf_read$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_cdf_read_OBJECTS) $(test_cdf_read_LDADD) $(LIBS)
@@ -702,6 +714,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/simple_model.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/simple_model_helper.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_cksum.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_byteswap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_cdf_read.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_cdf_write.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_grib.Po@am__quote@

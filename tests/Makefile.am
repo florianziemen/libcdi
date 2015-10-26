@@ -12,9 +12,11 @@ TESTS = cksum_verify \
 	pio_cksum_mpi_fw_at_reblock \
 	test_resource_copy pio_write_deco2d_run \
 	test_f2003 test_cdf_transformation \
-	test_table
+	test_table test_byteswap
+
 check_PROGRAMS = cksum_verify test_grib cksum_write cksum_read pio_write \
-	test_resource_copy cksum_write_chunk pio_write_deco2d test_table
+	test_resource_copy cksum_write_chunk pio_write_deco2d test_table \
+	test_byteswap
 
 if ENABLE_NETCDF
 check_PROGRAMS += test_cdf_write test_cdf_read
@@ -39,6 +41,7 @@ test_resource_copy_mpi_SOURCES = test_resource_copy.c
 test_cdf_write_SOURCES = test_cdf_write.c
 test_cdf_read_SOURCES = test_cdf_read.c
 test_table_SOURCES = test_table.c
+test_byteswap_SOURCES = test_byteswap.c
 #
 AM_CFLAGS = $(PPM_CORE_CFLAGS) $(YAXT_CFLAGS) $(MPI_C_INCLUDE)
 if USE_MPI
