@@ -598,7 +598,7 @@ static int streamOpenA(const char *filename, const char *filemode, int filetype)
   {
     int (*streamOpenDelegate)(const char *filename, char filemode,
                               int filetype, stream_t *streamptr, int recordBufIsToBeCreated)
-      = (int (*)(const char *, const char *, int, stream_t *, int))
+      = (int (*)(const char *, char, int, stream_t *, int))
       namespaceSwitchGet(NSSWITCH_STREAM_OPEN_BACKEND).func;
 
     fileID = streamOpenDelegate(filename, 'r', filetype, streamptr, 1);
