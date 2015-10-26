@@ -203,7 +203,7 @@ int streamInqFiletype(int streamID)
 
 int getByteswap(int byteorder)
 {
-  int byteswap;
+  int byteswap = -1;
 
   switch (byteorder)
     {
@@ -213,7 +213,6 @@ int getByteswap(int byteorder)
       byteswap = (HOST_ENDIANNESS != byteorder);
       break;
     case -1:
-      byteswap = -1;
       break;
     default:
       Error("unexpected byteorder %d query!", byteorder);
