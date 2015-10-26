@@ -835,7 +835,7 @@ int tableInqParName(int tableID, int code, char *varname)
 	    }
 	}
     }
-  if ( tableID == UNDEFID )
+  else if ( tableID == UNDEFID )
     { }
   else
     Error("Invalid table ID %d", tableID);
