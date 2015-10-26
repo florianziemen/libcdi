@@ -254,7 +254,6 @@ typedef struct {
 #else
   void       *gribContainers;
 #endif
-  int         vlistIDorig;
 
   void *gh; // grib handle
 }
@@ -344,9 +343,9 @@ void    streamDefineTaxis(int streamID);
 
 int     streamsNewEntry(int filetype);
 void    streamsInitEntry(int streamID);
-void    cdiStreamSetupVlist(stream_t *streamptr, int vlistID, int vlistIDorig);
+void    cdiStreamSetupVlist(stream_t *streamptr, int vlistID);
 /* default implementation of the overridable function */
-void    cdiStreamSetupVlist_(stream_t *streamptr, int vlistID, int vlistIDorig);
+void    cdiStreamSetupVlist_(stream_t *streamptr, int vlistID);
 int     stream_new_var(stream_t *streamptr, int gridID, int zaxisID, int tilesetID);
 
 int     tstepsNewEntry(stream_t *streamptr);
@@ -403,7 +402,7 @@ char *cdiUnescapeSpaces(const char *string, const char **outStringEnd);
 
 struct streamAssoc
 {
-  int streamID, vlistID, vlistIDorig;
+  int streamID, vlistID;
 };
 
 struct streamAssoc
