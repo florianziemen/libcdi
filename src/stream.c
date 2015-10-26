@@ -596,12 +596,12 @@ static int streamOpenA(const char *filename, const char *filemode, int filetype)
   if ( ! filename || ! filemode || filetype < 0 ) return (CDI_EINVAL);
 
   {
-    int (*streamOpenDelegate)(const char *filename, const char *filemode,
+    int (*streamOpenDelegate)(const char *filename, char filemode,
                               int filetype, stream_t *streamptr, int recordBufIsToBeCreated)
       = (int (*)(const char *, const char *, int, stream_t *, int))
       namespaceSwitchGet(NSSWITCH_STREAM_OPEN_BACKEND).func;
 
-    fileID = streamOpenDelegate(filename, "r", filetype, streamptr, 1);
+    fileID = streamOpenDelegate(filename, 'r', filetype, streamptr, 1);
   }
 
   if ( fileID == CDI_UNDEFID || fileID == CDI_ELIBNAVAIL || fileID == CDI_ESYSTEM ) return (fileID);
