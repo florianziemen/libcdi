@@ -84,11 +84,12 @@ TESTS = cksum_verify$(EXEEXT) test_cksum_grib test_cksum_nc \
 	pio_cksum_writer pio_cksum_cdf pio_cksum_mpi_fw_ordered \
 	pio_cksum_mpi_fw_at_all pio_cksum_mpi_fw_at_reblock \
 	test_resource_copy$(EXEEXT) pio_write_deco2d_run test_f2003 \
-	test_cdf_transformation $(am__append_2)
+	test_cdf_transformation test_table$(EXEEXT) $(am__append_2)
 check_PROGRAMS = cksum_verify$(EXEEXT) test_grib$(EXEEXT) \
 	cksum_write$(EXEEXT) cksum_read$(EXEEXT) pio_write$(EXEEXT) \
 	test_resource_copy$(EXEEXT) cksum_write_chunk$(EXEEXT) \
-	pio_write_deco2d$(EXEEXT) $(am__EXEEXT_1) $(am__EXEEXT_2)
+	pio_write_deco2d$(EXEEXT) test_table$(EXEEXT) $(am__EXEEXT_1) \
+	$(am__EXEEXT_2)
 @ENABLE_NETCDF_TRUE@am__append_1 = test_cdf_write test_cdf_read
 @USE_MPI_TRUE@am__append_2 = test_resource_copy_mpi_run
 @USE_MPI_TRUE@am__append_3 = test_resource_copy_mpi
@@ -220,6 +221,10 @@ test_resource_copy_mpi_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
 	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
 	$(test_resource_copy_mpi_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
+am_test_table_OBJECTS = test_table.$(OBJEXT)
+test_table_OBJECTS = $(am_test_table_OBJECTS)
+test_table_LDADD = $(LDADD)
+test_table_DEPENDENCIES = ../src/libcdi.la
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -259,13 +264,13 @@ SOURCES = $(cksum_read_SOURCES) $(cksum_verify_SOURCES) \
 	$(pio_write_SOURCES) $(pio_write_deco2d_SOURCES) \
 	$(test_cdf_read_SOURCES) $(test_cdf_write_SOURCES) \
 	$(test_grib_SOURCES) $(test_resource_copy_SOURCES) \
-	$(test_resource_copy_mpi_SOURCES)
+	$(test_resource_copy_mpi_SOURCES) $(test_table_SOURCES)
 DIST_SOURCES = $(cksum_read_SOURCES) $(cksum_verify_SOURCES) \
 	$(cksum_write_SOURCES) $(cksum_write_chunk_SOURCES) \
 	$(pio_write_SOURCES) $(pio_write_deco2d_SOURCES) \
 	$(test_cdf_read_SOURCES) $(test_cdf_write_SOURCES) \
 	$(test_grib_SOURCES) $(test_resource_copy_SOURCES) \
-	$(test_resource_copy_mpi_SOURCES)
+	$(test_resource_copy_mpi_SOURCES) $(test_table_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -527,6 +532,7 @@ test_resource_copy_LDADD = $(UUID_C_LIB) ../src/libcdiresunpack.la $(LDADD)
 test_resource_copy_mpi_SOURCES = test_resource_copy.c
 test_cdf_write_SOURCES = test_cdf_write.c
 test_cdf_read_SOURCES = test_cdf_read.c
+test_table_SOURCES = test_table.c
 #
 AM_CFLAGS = $(PPM_CORE_CFLAGS) $(YAXT_CFLAGS) $(MPI_C_INCLUDE)
 @USE_MPI_FALSE@pio_write_LDADD = $(LDADD) $(UUID_C_LIB)
@@ -676,6 +682,10 @@ test_resource_copy_mpi$(EXEEXT): $(test_resource_copy_mpi_OBJECTS) $(test_resour
 	@rm -f test_resource_copy_mpi$(EXEEXT)
 	$(AM_V_CCLD)$(test_resource_copy_mpi_LINK) $(test_resource_copy_mpi_OBJECTS) $(test_resource_copy_mpi_LDADD) $(LIBS)
 
+test_table$(EXEEXT): $(test_table_OBJECTS) $(test_table_DEPENDENCIES) $(EXTRA_test_table_DEPENDENCIES) 
+	@rm -f test_table$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(test_table_OBJECTS) $(test_table_LDADD) $(LIBS)
+
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
 
@@ -697,6 +707,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_grib.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_resource_copy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_resource_copy_mpi-test_resource_copy.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_table.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/var_cksum.Po@am__quote@
 
 .c.o:

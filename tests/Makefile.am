@@ -11,9 +11,10 @@ TESTS = cksum_verify \
 	pio_cksum_mpi_fw_at_all \
 	pio_cksum_mpi_fw_at_reblock \
 	test_resource_copy pio_write_deco2d_run \
-	test_f2003 test_cdf_transformation
+	test_f2003 test_cdf_transformation \
+	test_table
 check_PROGRAMS = cksum_verify test_grib cksum_write cksum_read pio_write \
-	test_resource_copy cksum_write_chunk pio_write_deco2d
+	test_resource_copy cksum_write_chunk pio_write_deco2d test_table
 
 if ENABLE_NETCDF
 check_PROGRAMS += test_cdf_write test_cdf_read
@@ -37,6 +38,7 @@ test_resource_copy_LDADD = $(UUID_C_LIB) ../src/libcdiresunpack.la $(LDADD)
 test_resource_copy_mpi_SOURCES = test_resource_copy.c
 test_cdf_write_SOURCES = test_cdf_write.c
 test_cdf_read_SOURCES = test_cdf_read.c
+test_table_SOURCES = test_table.c
 #
 AM_CFLAGS = $(PPM_CORE_CFLAGS) $(YAXT_CFLAGS) $(MPI_C_INCLUDE)
 if USE_MPI
