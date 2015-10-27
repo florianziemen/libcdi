@@ -341,6 +341,7 @@ src/stream_record.c -text
 src/stream_srv.c -text
 src/stream_srv.h -text
 src/stream_var.c -text
+src/stream_write.c -text
 src/subtype.c -text
 src/subtype.h -text
 src/swap.c -text

@@ -121,6 +121,7 @@ files="basetime.c \
    serialize.c \
    servicelib.c \
    stream.c \
+   stream_write.c \
    stream_cdf.c \
    stream_cgribex.c \
    stream_ext.c \

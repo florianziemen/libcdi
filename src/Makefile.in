@@ -187,7 +187,7 @@ am__libcdi_la_SOURCES_DIST = basetime.c basetime.h binary.c binary.h \
 	tablepar.h taxis.c taxis.h timebase.c timebase.h tsteps.c \
 	util.c varscan.c varscan.h version.c vlist.c vlist.h \
 	vlist_att.c vlist_att.h vlist_var.c vlist_var.h zaxis.c \
-	zaxis.h stream.c swap.c iterator.c iterator.h \
+	zaxis.h stream.c stream_write.c swap.c iterator.c iterator.h \
 	iterator_fallback.c iterator_fallback.h iterator_grib.c \
 	iterator_grib.h cfortran.h cdiFortran.c gribapi_utilities.c
 am__objects_1 = cdiFortran.lo
@@ -205,9 +205,9 @@ am_libcdi_la_OBJECTS = basetime.lo binary.lo calendar.lo cdf.lo \
 	stream_fcommon.lo cdi_int.lo stream_record.lo stream_srv.lo \
 	stream_var.lo subtype.lo table.lo taxis.lo timebase.lo \
 	tsteps.lo util.lo varscan.lo version.lo vlist.lo vlist_att.lo \
-	vlist_var.lo zaxis.lo stream.lo swap.lo iterator.lo \
-	iterator_fallback.lo iterator_grib.lo $(am__objects_2) \
-	$(am__objects_4)
+	vlist_var.lo zaxis.lo stream.lo stream_write.lo swap.lo \
+	iterator.lo iterator_fallback.lo iterator_grib.lo \
+	$(am__objects_2) $(am__objects_4)
 libcdi_la_OBJECTS = $(am_libcdi_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -531,10 +531,10 @@ libcdi_la_SOURCES = basetime.c basetime.h binary.c binary.h calendar.c \
 	subtype.c subtype.h swap.h table.c table.h tablepar.h taxis.c \
 	taxis.h timebase.c timebase.h tsteps.c util.c varscan.c \
 	varscan.h version.c vlist.c vlist.h vlist_att.c vlist_att.h \
-	vlist_var.c vlist_var.h zaxis.c zaxis.h stream.c swap.c \
-	iterator.c iterator.h iterator_fallback.c iterator_fallback.h \
-	iterator_grib.c iterator_grib.h $(am__append_2) \
-	$(am__append_3)
+	vlist_var.c vlist_var.h zaxis.c zaxis.h stream.c \
+	stream_write.c swap.c iterator.c iterator.h \
+	iterator_fallback.c iterator_fallback.h iterator_grib.c \
+	iterator_grib.h $(am__append_2) $(am__append_3)
 
 # cfortran.h is an optional part of libcdi
 libcdi_la_USE_FC_extra_sources = \
@@ -755,6 +755,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_record.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_srv.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_var.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_write.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/subtype.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/swap.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/table.Plo@am__quote@
