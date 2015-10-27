@@ -125,7 +125,6 @@ void grid_init(grid_t *gridptr)
   gridptr->xpole        = 0.0;
   gridptr->ypole        = 0.0;
   gridptr->angle        = 0.0;
-  gridptr->locked       = FALSE;
   gridptr->lcomplex     = 0;
   gridptr->hasdims      = TRUE;
   gridptr->xname[0]     = 0;
@@ -2232,7 +2231,6 @@ int gridCompareP ( void * gridptr1, void * gridptr2 )
   if ( g1->size          != g2->size         ) return differ;
   if ( g1->xsize         != g2->xsize        ) return differ;
   if ( g1->ysize         != g2->ysize        ) return differ;
-  if ( g1->locked        != g2->locked       ) return differ;
   if ( g1->lcomplex      != g2->lcomplex     ) return differ;
 
   if ( g1->rowlon )
@@ -3861,7 +3859,7 @@ gridTxCode ()
   return GRID;
 }
 
-enum { gridNint    = 27,
+enum { gridNint    = 26,
        gridNdouble = 24,
        gridHasMaskFlag = 1 << 0,
        gridHasGMEMaskFlag = 1 << 1,
@@ -4054,9 +4052,8 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
     gridP->size          =   intBuffer[21];
     gridP->xsize         =   intBuffer[22];
     gridP->ysize         =   intBuffer[23];
-    gridP->locked        =   intBuffer[24];
-    gridP->lcomplex      =   intBuffer[25];
-    memberMask           =   intBuffer[26];
+    gridP->lcomplex      =   intBuffer[24];
+    memberMask           =   intBuffer[25];
   }
 
   if (memberMask & gridHasRowLonFlag)
@@ -4256,9 +4253,8 @@ gridPack(void * voidP, void * packBuffer, int packBufferSize,
     intBuffer[21] = gridP->size;
     intBuffer[22] = gridP->xsize;
     intBuffer[23] = gridP->ysize;
-    intBuffer[24] = gridP->locked;
-    intBuffer[25] = gridP->lcomplex;
-    intBuffer[26] = memberMask = gridGetComponentFlags(gridP);
+    intBuffer[24] = gridP->lcomplex;
+    intBuffer[25] = memberMask = gridGetComponentFlags(gridP);
 
     serializePack(intBuffer, gridNint, DATATYPE_INT,
                   packBuffer, packBufferSize, packBufferPos, context);
