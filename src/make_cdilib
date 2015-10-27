@@ -133,6 +133,7 @@ files="basetime.c \
    stream_record.c \
    stream_srv.c \
    stream_var.c \
+   cdf_write.c \
    subtype.c \
    swap.c \
    table.c \

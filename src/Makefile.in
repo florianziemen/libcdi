@@ -183,9 +183,9 @@ am__libcdi_la_SOURCES_DIST = basetime.c basetime.h binary.c binary.h \
 	stream_gribapi.c stream_gribapi.h stream_history.c \
 	stream_ieg.c stream_ieg.h stream_fcommon.c stream_fcommon.h \
 	cdi_int.c cdi_int.h stream_record.c stream_srv.c stream_srv.h \
-	stream_var.c subtype.c subtype.h swap.h table.c table.h \
-	tablepar.h taxis.c taxis.h timebase.c timebase.h tsteps.c \
-	util.c varscan.c varscan.h version.c vlist.c vlist.h \
+	stream_var.c cdf_write.c subtype.c subtype.h swap.h table.c \
+	table.h tablepar.h taxis.c taxis.h timebase.c timebase.h \
+	tsteps.c util.c varscan.c varscan.h version.c vlist.c vlist.h \
 	vlist_att.c vlist_att.h vlist_var.c vlist_var.h zaxis.c \
 	zaxis.h stream.c stream_write.c swap.c iterator.c iterator.h \
 	iterator_fallback.c iterator_fallback.h iterator_grib.c \
@@ -203,10 +203,10 @@ am_libcdi_la_OBJECTS = basetime.lo binary.lo calendar.lo cdf.lo \
 	stream_cdf.lo stream_cgribex.lo stream_ext.lo stream_grb.lo \
 	stream_gribapi.lo stream_history.lo stream_ieg.lo \
 	stream_fcommon.lo cdi_int.lo stream_record.lo stream_srv.lo \
-	stream_var.lo subtype.lo table.lo taxis.lo timebase.lo \
-	tsteps.lo util.lo varscan.lo version.lo vlist.lo vlist_att.lo \
-	vlist_var.lo zaxis.lo stream.lo stream_write.lo swap.lo \
-	iterator.lo iterator_fallback.lo iterator_grib.lo \
+	stream_var.lo cdf_write.lo subtype.lo table.lo taxis.lo \
+	timebase.lo tsteps.lo util.lo varscan.lo version.lo vlist.lo \
+	vlist_att.lo vlist_var.lo zaxis.lo stream.lo stream_write.lo \
+	swap.lo iterator.lo iterator_fallback.lo iterator_grib.lo \
 	$(am__objects_2) $(am__objects_4)
 libcdi_la_OBJECTS = $(am_libcdi_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
@@ -528,11 +528,11 @@ libcdi_la_SOURCES = basetime.c basetime.h binary.c binary.h calendar.c \
 	stream_gribapi.h stream_history.c stream_ieg.c stream_ieg.h \
 	stream_fcommon.c stream_fcommon.h cdi_int.c cdi_int.h \
 	stream_record.c stream_srv.c stream_srv.h stream_var.c \
-	subtype.c subtype.h swap.h table.c table.h tablepar.h taxis.c \
-	taxis.h timebase.c timebase.h tsteps.c util.c varscan.c \
-	varscan.h version.c vlist.c vlist.h vlist_att.c vlist_att.h \
-	vlist_var.c vlist_var.h zaxis.c zaxis.h stream.c \
-	stream_write.c swap.c iterator.c iterator.h \
+	cdf_write.c subtype.c subtype.h swap.h table.c table.h \
+	tablepar.h taxis.c taxis.h timebase.c timebase.h tsteps.c \
+	util.c varscan.c varscan.h version.c vlist.c vlist.h \
+	vlist_att.c vlist_att.h vlist_var.c vlist_var.h zaxis.c \
+	zaxis.h stream.c stream_write.c swap.c iterator.c iterator.h \
 	iterator_fallback.c iterator_fallback.h iterator_grib.c \
 	iterator_grib.h $(am__append_2) $(am__append_3)
 
@@ -693,6 +693,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/calendar.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cdf.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cdf_int.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cdf_write.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cdiFortran.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cdi_cksum.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cdi_error.Plo@am__quote@

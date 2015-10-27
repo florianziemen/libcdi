@@ -29,6 +29,9 @@ void   cdf_write_var_slice(stream_t *streamptr, int varID, int levelID, int memt
 void   cdf_write_var_chunk(stream_t *streamptr, int varID, int memtype,
                            const int rect[][2], const void *data, int nmiss);
 
+void cdfDefVarDeflate(int ncid, int ncvarid, int deflate_level);
+void cdfDefTime(stream_t* streamptr);
+
 #endif
 /*
  * Local Variables:
