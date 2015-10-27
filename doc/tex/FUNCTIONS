@@ -17,12 +17,15 @@ Function catalog:
    streamInqVlist       Get the variable list
    streamDefTimestep    Define time step
    streamInqTimestep    Get time step
+   streamReadVar        Read a variable
+   streamReadVarSlice   Read a horizontal slice of a variable
+-------------------------------------------------------------
+   stream_write
+-------------------------------------------------------------
    streamWriteVar       Write a variable
    streamWriteVarF      Write a variable
-   streamReadVar        Read a variable
    streamWriteVarSlice  Write a horizontal slice of a variable
    streamWriteVarSliceF Write a horizontal slice of a variable
-   streamReadVarSlice   Read a horizontal slice of a variable
 -------------------------------------------------------------
    stream_record
 -------------------------------------------------------------

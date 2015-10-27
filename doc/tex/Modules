@@ -8,12 +8,12 @@ streamDefVlist      stream
 streamInqVlist      stream
 streamDefTimestep   stream
 streamInqTimestep   stream
-streamWriteVar      stream
-streamWriteVarF     stream
 streamReadVar       stream
-streamWriteVarSlice stream
-streamWriteVarSliceF stream
 streamReadVarSlice  stream
+streamWriteVar      stream_write
+streamWriteVarF     stream_write
+streamWriteVarSlice stream_write
+streamWriteVarSliceF stream_write
  streamDefRecord     stream_record
  streamInqRecord     stream_record
  streamWriteRecord   stream_record
