@@ -183,17 +183,25 @@ modelRun(struct model_config setup, MPI_Comm comm)
         = (size_t)nlon * (size_t)nlat * (size_t)varDesc[varIdx].nlev;
 #ifdef USE_MPI
       {
+        for (size_t i = 0; i < varIdx; ++i)
+          if (varDesc[i].nlev == varLevs)
+            {
+              varDesc[varIdx].partDesc = varDesc[i].partDesc;
+              varDesc[varIdx].start = varDesc[i].start;
+              varDesc[varIdx].chunkSize = varDesc[i].chunkSize;
+              goto partDescriptionSet;
+            }
         struct PPM_extent range
           = PPM_uniform_partition((struct PPM_extent){ 0,
                 (int32_t)varDesc[varIdx].size }, comm_size, rank);
         int start = range.first;
         int chunkSize = range.size;
-        Xt_idxlist idxlist
-          = xt_idxstripes_new(&(struct Xt_stripe){ .start = start,
-                .nstrides = chunkSize, .stride = 1 }, 1);
         varDesc[varIdx].start = start;
         varDesc[varIdx].chunkSize = chunkSize;
-        varDesc[varIdx].partDesc = idxlist;
+        varDesc[varIdx].partDesc
+          = xt_idxstripes_new(&(struct Xt_stripe){ .start = start,
+                .nstrides = chunkSize, .stride = 1 }, 1);
+        partDescriptionSet: ;
       }
 #endif
       varDesc[varIdx].code = GRIB_USERDEF + (int)varIdx;
@@ -247,23 +255,24 @@ modelRun(struct model_config setup, MPI_Comm comm)
 	    {
 #ifdef USE_MPI
               int start = varDesc[varIdx].start;
-              int chunk = varDesc[varIdx].chunkSize;
+              size_t chunkSize = (size_t)varDesc[varIdx].chunkSize;
 #else
-              int chunk = (int)varDesc[varIdx].size;
+              size_t chunkSize = varDesc[varIdx].size;
               int start = 0;
 #endif
-              if (varslice_size < (size_t)chunk)
+              if (varslice_size < chunkSize)
                 {
-                  varslice = (double *)realloc(varslice, (size_t)chunk * sizeof (var[0]));
-                  varslice_size = (size_t)chunk;
+                  varslice = (double *)Realloc(varslice, chunkSize * sizeof (var[0]));
+                  varslice_size = chunkSize;
                 }
-              modelRegionCompute(varslice, (size_t)start, (size_t)chunk,
+              modelRegionCompute(varslice, (size_t)start, chunkSize,
                                  varDesc[varIdx].nlev, nlat, nlon,
                                  tsID, lons, lats,
                                  mscale, mrscale);
               if (setup.compute_checksum)
                 {
 #if USE_MPI
+                  int chunk = (int)chunkSize;
                   xmpi(MPI_Gather(&chunk, 1, MPI_INT,
                                   chunks, 1, MPI_INT, 0, comm));
                   if (rank == 0)
@@ -272,7 +281,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
                       for (size_t i = 1; i < (size_t)comm_size; ++i)
                         displs[i] = displs[i - 1] + chunks[i - 1];
                     }
-                  xmpi(MPI_Gatherv(varslice, chunk, MPI_DOUBLE,
+                  xmpi(MPI_Gatherv(varslice, (size_t)chunkSize, MPI_DOUBLE,
                                    var, chunks, displs, MPI_DOUBLE, 0, comm));
 #else
                   var = varslice;
@@ -344,6 +353,9 @@ modelRun(struct model_config setup, MPI_Comm comm)
       if (zID != CDI_UNDEFID)
         {
           zaxisDestroy(zID);
+#if USE_MPI
+          xt_idxlist_delete(varDesc[varIdx].partDesc);
+#endif
           for (size_t j = varIdx + 1; j < nVars; ++j)
             if (zID == varDesc[j].zaxisID)
               varDesc[j].zaxisID = CDI_UNDEFID;

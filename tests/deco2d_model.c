@@ -38,6 +38,7 @@ enum {
   nproma = 16,
 };
 
+
 static void
 modelRegionCompute(double region[], int nlev, int nlat, int nlon,
                    const int chunkStart[3], const int chunkSize[3],
@@ -215,6 +216,18 @@ modelRun(struct model_config setup, MPI_Comm comm)
         = (size_t)nlon * (size_t)nlat * (size_t)varDesc[varIdx].nlev;
 #ifdef USE_MPI
       {
+        for (size_t i = 0; i < varIdx; ++i)
+          if (varDesc[i].nlev == varLevs)
+            {
+              varDesc[varIdx].redist4gather = varDesc[i].redist4gather;
+              varDesc[varIdx].partDesc = varDesc[i].partDesc;
+              for (size_t j = 0; j < 2; ++j)
+                {
+                  varDesc[varIdx].start[j] = varDesc[i].start[j];
+                  varDesc[varIdx].chunkSize[j] = varDesc[i].chunkSize[j];
+                }
+              goto partDescriptionSet;
+            }
         int start[2], chunkSize[3], varSize[2] = { nlon, nlat };
         for (size_t i = 0; i < 2; ++i)
           {
@@ -231,13 +244,6 @@ modelRun(struct model_config setup, MPI_Comm comm)
         Xt_int varSizeXt[3] = { (Xt_int)nlon, (Xt_int)nlat, (Xt_int)varLevs };
         chunkSize[2] = varLevs;
         Xt_int varStartXt[3] = { start[0], start[1], 0 };
-        for (size_t i = 0; i < varIdx; ++i)
-          if (varDesc[i].nlev == varLevs)
-            {
-              varDesc[varIdx].redist4gather = varDesc[i].redist4gather;
-              varDesc[varIdx].partDesc = varDesc[i].partDesc;
-              goto gatherRedistSet;
-            }
         Xt_idxlist part_idxlist
           = xt_idxsection_new(0, (varLevs > 1 ? 3 : 2), varSizeXt,
                               chunkSize, varStartXt),
@@ -276,7 +282,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
             Free(src_blocks);
             xt_xmap_delete(xmap4gather);
           }
-        gatherRedistSet: ;
+        partDescriptionSet: ;
       }
 #endif
       varDesc[varIdx].code = GRIB_USERDEF + (int)varIdx;
@@ -318,6 +324,14 @@ modelRun(struct model_config setup, MPI_Comm comm)
 	  taxisDefVdate(taxisID, vdatetime[1]);
 	  taxisDefVtime(taxisID, vdatetime[0]);
 	  streamDefTimestep ( streamID, tsID );
+          if (setup.filetype == FILETYPE_EXT)
+            {
+              /* EXTRA doesn't store time, only date
+               * set the value to 0 before checksumming, because a
+               * time field of 0 is what reading an EXTRA file will
+               * return */
+              vdatetime[0] = 0;
+            }
 	  for (size_t varIdx = 0; varIdx < nVars; ++varIdx)
 	    {
               size_t varLevs = (size_t)varDesc[varIdx].nlev;
