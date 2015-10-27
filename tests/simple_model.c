@@ -116,6 +116,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
     lats[i] = ((double)(i * 180))/nlat - 90.0;
   gridDefXvals ( gridID, lons );
   gridDefYvals ( gridID, lats );
+  if (setup.create_uuid)
   {
     unsigned char uuid[CDI_UUID_SIZE];
     if (rank == 0)
@@ -165,6 +166,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
             = zaxisCreate(ZAXIS_PRESSURE, varDesc[varIdx].nlev);
           zaxisDefLevels(varDesc[varIdx].zaxisID, levs);
         }
+      if (setup.create_uuid)
       {
         unsigned char uuid[16];
         if (rank == 0)

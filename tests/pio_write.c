@@ -34,7 +34,7 @@ static const struct model_config default_setup
 #else
   = { .nlon = 12, .nts = 3, .nlat = 6, .nvars = 5,
       .filetype = FILETYPE_GRB, .datatype = DATATYPE_PACK24,
-      .compute_checksum = 1,
+      .compute_checksum = 1, .create_uuid = 0,
       .suffix = "grb",
       .max_nlev = 5,
 };
@@ -96,11 +96,13 @@ parse_unsignedarg(const char msg[])
 typedef int (*pioRoleFunc)(MPI_Comm commSuper, int IOMode, int nProcsIO);
 
 static void
-parse_long_option(int pioConfHandle, pioRoleFunc *pioRoleAssign,
+parse_long_option(struct model_config *restrict setup,
+                  int pioConfHandle, pioRoleFunc *pioRoleAssign,
                   const char *str)
 {
   static const char cacheRedistStr[] = "cache-redists",
-    pioRoleSchemeOptionStr[] = "pio-role-scheme";
+    pioRoleSchemeOptionStr[] = "pio-role-scheme",
+    uuidCreateOptionStr[] = "no-create-uuid";
   if (!strncmp(str, cacheRedistStr, sizeof (cacheRedistStr) - 1))
     {
 #ifdef USE_MPI
@@ -143,6 +145,14 @@ parse_long_option(int pioConfHandle, pioRoleFunc *pioRoleAssign,
       invalidOptionDie("CDI-PIO option -q%s ignored in non-MPI mode\n",
                        pioRoleSchemeOptionStr);
 #endif
+    }
+  else if (!strcmp(str, uuidCreateOptionStr + 3))
+    {
+      setup->create_uuid = true;
+    }
+  else if (!strcmp(str, uuidCreateOptionStr))
+    {
+      setup->create_uuid = false;
     }
   else
     invalidOptionDie("unknown long option: %s\n", str);
@@ -222,7 +232,7 @@ int main(int argc, char *argv[])
         break;
 #endif
       case 'q':
-        parse_long_option(pioConfHandle, &pioRoleAssign, optarg);
+        parse_long_option(&setup, pioConfHandle, &pioRoleAssign, optarg);
         break;
       case 'f':
         {

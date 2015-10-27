@@ -11,7 +11,7 @@ struct model_config
 {
   int nlon, nlat, nts, max_nlev, nvars;
   int filetype, datatype;
-  bool compute_checksum;
+  bool compute_checksum, create_uuid;
   const char *suffix;
 };
 
