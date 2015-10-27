@@ -278,21 +278,6 @@ buildVarRedist(int headerIdx, size_t streamIdx,
 }
 
 
-static void
-gatherArray(int headerIdx, size_t streamIdx,
-            double *gatherBuf,
-            /* index list representing the data elements gathered on
-             * this rank */
-            Xt_idxlist dstList,
-            const struct cdiPioConf *conf)
-{
-  Xt_redist gatherRedist = buildVarRedist(headerIdx, streamIdx,
-                                          dstList, conf);
-  xt_redist_s_exchange1(gatherRedist,
-                        rxWin[streamIdx].clientBuf[0].mem, gatherBuf);
-  xt_redist_delete(gatherRedist);
-}
-
 struct xyzDims
 {
   int sizes[3];
@@ -329,6 +314,23 @@ countVarChunkMissingVals(int vlistID, int varID,
     }
   return nmiss;
 }
+
+#ifdef HAVE_LIBNETCDF
+static void
+gatherArray(int headerIdx, size_t streamIdx,
+            double *gatherBuf,
+            /* index list representing the data elements gathered on
+             * this rank */
+            Xt_idxlist dstList,
+            const struct cdiPioConf *conf)
+{
+  Xt_redist gatherRedist = buildVarRedist(headerIdx, streamIdx,
+                                          dstList, conf);
+  xt_redist_s_exchange1(gatherRedist,
+                        rxWin[streamIdx].clientBuf[0].mem, gatherBuf);
+  xt_redist_delete(gatherRedist);
+}
+#endif
 
 #ifdef HAVE_PARALLEL_NC4
 static void
