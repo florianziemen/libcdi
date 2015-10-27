@@ -61,6 +61,8 @@ static int DefaultByteorder = CDI_UNDEFID;
 static int comptype  = COMPRESS_NONE;  // Compression type
 static int complevel = 0;              // Compression level
 
+enum datamode {SP_MODE, DP_MODE};
+static int datamode = DP_MODE;
 
 static
 void version(void)
@@ -749,7 +751,7 @@ int main(int argc, char *argv[])
   if (Progname == 0) Progname = argv[0];
   else               Progname++;
 
-  while ( (c = getopt(argc, argv, "b:f:t:w:z:cdhlMmqRrsvVZ")) != EOF )
+  while ( (c = getopt(argc, argv, "b:f:t:w:z:cdhlMmqRrsvVxZ")) != EOF )
     {
       switch (c)
 	{
@@ -797,6 +799,9 @@ int main(int argc, char *argv[])
 	  break;
 	case 'w':
 	  wTable = optarg;
+	  break;
+	case 'x':
+	  datamode = SP_MODE;
 	  break;
 	case 'z':
 	  defineCompress(optarg);
@@ -925,8 +930,7 @@ int main(int argc, char *argv[])
 	nts = cdiInqTimeSize(streamID1);
       */
       if (Debug)
-	printf("nts = %d\n"
-               "streamID1 = %d, streamID2 = %d\n",
+	printf("nts = %d streamID1 = %d, streamID2 = %d\n",
                nts, streamID1, streamID2);
 
       if ( Shortinfo )
