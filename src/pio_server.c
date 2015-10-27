@@ -298,12 +298,6 @@ struct xyzDims
   int sizes[3];
 };
 
-static inline int
-xyzGridSize(struct xyzDims dims)
-{
-  return dims.sizes[0] * dims.sizes[1] * dims.sizes[2];
-}
-
 static Xt_idxlist
 buildVarSlicesIdxList(int vlistID, int varID, int startLvl, int numLvl)
 {
