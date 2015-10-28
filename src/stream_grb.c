@@ -678,22 +678,32 @@ void grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
 
 void grb_write_var(stream_t *streamptr, int varID, int memtype, const void *data, int nmiss)
 {
-  int vlistID, gridID, zaxisID, levelID, nlevs;
-  int gridsize;
+  int vlistID  = streamptr->vlistID,
+    gridID   = vlistInqVarGrid(vlistID, varID),
+    gridsize = gridInqSize(gridID),
+    zaxisID  = vlistInqVarZaxis(vlistID, varID),
+    nlevs    = zaxisInqSize(zaxisID);
+  double missval = vlistInqVarMissval(vlistID, varID);
 
-  vlistID  = streamptr->vlistID;
-  gridID   = vlistInqVarGrid(vlistID, varID);
-  gridsize = gridInqSize(gridID);
-  zaxisID  = vlistInqVarZaxis(vlistID, varID);
-  nlevs    = zaxisInqSize(zaxisID);
-
-  for ( levelID = 0; levelID < nlevs; levelID++ )
-    {
-      if ( memtype == MEMTYPE_FLOAT )
-        grb_write_var_slice(streamptr, varID, levelID, memtype, ((float*)data)+levelID*gridsize, nmiss);
-      else
-        grb_write_var_slice(streamptr, varID, levelID, memtype, ((double*)data)+levelID*gridsize, nmiss);
-    }
+  size_t chunkLen = (size_t)gridsize;
+  if ( memtype == MEMTYPE_FLOAT )
+    for ( int levelID = 0; levelID < nlevs; levelID++ )
+      {
+        int nmiss_slice = 0;
+        const float *restrict fdata = ((const float *)data)+levelID*gridsize;
+        for ( size_t i = 0; i < chunkLen; ++i )
+          nmiss_slice += DBL_IS_EQUAL(fdata[i], missval);
+        grb_write_var_slice(streamptr, varID, levelID, memtype, fdata, nmiss_slice);
+      }
+  else
+    for ( int levelID = 0; levelID < nlevs; levelID++ )
+      {
+        int nmiss_slice = 0;
+        const double *restrict ddata = ((const double *)data)+levelID*gridsize;
+        for ( size_t i = 0; i < chunkLen; ++i )
+          nmiss_slice += DBL_IS_EQUAL(ddata[i], missval);
+        grb_write_var_slice(streamptr, varID, levelID, memtype, ddata, nmiss_slice);
+      }
 }
 
 
