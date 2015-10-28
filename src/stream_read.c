@@ -271,8 +271,8 @@ void streamReadVarSliceF(int streamID, int varID, int levelID, float *data, int 
     }
 }
 
-
-void streamReadRecord(int streamID, double *data, int *nmiss)
+static
+void stream_read_record(int streamID, int memtype, void *data, int *nmiss)
 {
   check_parg(data);
   check_parg(nmiss);
@@ -287,21 +287,25 @@ void streamReadRecord(int streamID, double *data, int *nmiss)
 #if  defined  (HAVE_LIBGRIB)
     case FILETYPE_GRB:
     case FILETYPE_GRB2:
+      if ( memtype == MEMTYPE_FLOAT ) Error("grbReadRecord not implemented for memtype float!");
       grbReadRecord(streamptr, data, nmiss);
       break;
 #endif
 #if  defined  (HAVE_LIBSERVICE)
     case FILETYPE_SRV:
+      if ( memtype == MEMTYPE_FLOAT ) Error("srvReadRecord not implemented for memtype float!");
       srvReadRecord(streamptr, data, nmiss);
       break;
 #endif
 #if  defined  (HAVE_LIBEXTRA)
     case FILETYPE_EXT:
+      if ( memtype == MEMTYPE_FLOAT ) Error("extReadRecord not implemented for memtype float!");
       extReadRecord(streamptr, data, nmiss);
       break;
 #endif
 #if  defined  (HAVE_LIBIEG)
     case FILETYPE_IEG:
+      if ( memtype == MEMTYPE_FLOAT ) Error("iegReadRecord not implemented for memtype float!");
       iegReadRecord(streamptr, data, nmiss);
       break;
 #endif
@@ -310,6 +314,7 @@ void streamReadRecord(int streamID, double *data, int *nmiss)
     case FILETYPE_NC2:
     case FILETYPE_NC4:
     case FILETYPE_NC4C:
+      if ( memtype == MEMTYPE_FLOAT ) Error("cdfReadRecord not implemented for memtype float!");
       cdfReadRecord(streamptr, data, nmiss);
       break;
 #endif
@@ -319,4 +324,16 @@ void streamReadRecord(int streamID, double *data, int *nmiss)
 	break;
       }
     }
+}
+
+
+void streamReadRecord(int streamID, double *data, int *nmiss)
+{
+  stream_read_record(streamID, MEMTYPE_DOUBLE, (void *) data, nmiss);
+}
+
+
+void streamReadRecordF(int streamID, float *data, int *nmiss)
+{
+  stream_read_record(streamID, MEMTYPE_FLOAT, (void *) data, nmiss);
 }
