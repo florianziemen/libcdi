@@ -187,9 +187,10 @@ am__libcdi_la_SOURCES_DIST = basetime.c basetime.h binary.c binary.h \
 	table.h tablepar.h taxis.c taxis.h timebase.c timebase.h \
 	tsteps.c util.c varscan.c varscan.h version.c vlist.c vlist.h \
 	vlist_att.c vlist_att.h vlist_var.c vlist_var.h zaxis.c \
-	zaxis.h stream.c stream_write.c swap.c iterator.c iterator.h \
-	iterator_fallback.c iterator_fallback.h iterator_grib.c \
-	iterator_grib.h cfortran.h cdiFortran.c gribapi_utilities.c
+	zaxis.h stream.c stream_write.c stream_read.c swap.c \
+	iterator.c iterator.h iterator_fallback.c iterator_fallback.h \
+	iterator_grib.c iterator_grib.h cfortran.h cdiFortran.c \
+	gribapi_utilities.c
 am__objects_1 = cdiFortran.lo
 @USE_FC_TRUE@am__objects_2 = $(am__objects_1)
 am__objects_3 = gribapi_utilities.lo
@@ -206,8 +207,8 @@ am_libcdi_la_OBJECTS = basetime.lo binary.lo calendar.lo cdf.lo \
 	stream_var.lo cdf_write.lo subtype.lo table.lo taxis.lo \
 	timebase.lo tsteps.lo util.lo varscan.lo version.lo vlist.lo \
 	vlist_att.lo vlist_var.lo zaxis.lo stream.lo stream_write.lo \
-	swap.lo iterator.lo iterator_fallback.lo iterator_grib.lo \
-	$(am__objects_2) $(am__objects_4)
+	stream_read.lo swap.lo iterator.lo iterator_fallback.lo \
+	iterator_grib.lo $(am__objects_2) $(am__objects_4)
 libcdi_la_OBJECTS = $(am_libcdi_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -532,9 +533,10 @@ libcdi_la_SOURCES = basetime.c basetime.h binary.c binary.h calendar.c \
 	tablepar.h taxis.c taxis.h timebase.c timebase.h tsteps.c \
 	util.c varscan.c varscan.h version.c vlist.c vlist.h \
 	vlist_att.c vlist_att.h vlist_var.c vlist_var.h zaxis.c \
-	zaxis.h stream.c stream_write.c swap.c iterator.c iterator.h \
-	iterator_fallback.c iterator_fallback.h iterator_grib.c \
-	iterator_grib.h $(am__append_2) $(am__append_3)
+	zaxis.h stream.c stream_write.c stream_read.c swap.c \
+	iterator.c iterator.h iterator_fallback.c iterator_fallback.h \
+	iterator_grib.c iterator_grib.h $(am__append_2) \
+	$(am__append_3)
 
 # cfortran.h is an optional part of libcdi
 libcdi_la_USE_FC_extra_sources = \
@@ -753,6 +755,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_gribapi.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_history.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_ieg.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_read.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_record.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_srv.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_var.Plo@am__quote@

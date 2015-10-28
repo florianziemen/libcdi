@@ -768,6 +768,22 @@ Read a variable
 
 \section*{\tt 
 \ifpdf
+\hyperref[streamReadVarF]{streamReadVarF}
+\else
+streamReadVarF
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE streamReadVar(INTEGER streamID, INTEGER varID, REAL*4 data, 
+                             INTEGER nmiss)
+\end{verbatim}
+
+Read a variable
+\ifpdfoutput{}{(\ref{streamReadVarF})}
+
+
+\section*{\tt 
+\ifpdf
 \hyperref[streamReadVarSlice]{streamReadVarSlice}
 \else
 streamReadVarSlice
@@ -780,6 +796,22 @@ streamReadVarSlice
 
 Read a horizontal slice of a variable
 \ifpdfoutput{}{(\ref{streamReadVarSlice})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[streamReadVarSliceF]{streamReadVarSliceF}
+\else
+streamReadVarSliceF
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE streamReadVarSliceF(INTEGER streamID, INTEGER varID, INTEGER levelID, 
+                                   REAL*4 data, INTEGER nmiss)
+\end{verbatim}
+
+Read a horizontal slice of a variable
+\ifpdfoutput{}{(\ref{streamReadVarSliceF})}
 
 
 \section*{\tt 

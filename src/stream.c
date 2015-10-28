@@ -7,8 +7,6 @@
 #endif
 
 #include <ctype.h>
-#include <stdio.h>
-#include <string.h>
 
 #include "binary.h"
 #include "cdi.h"
@@ -25,15 +23,10 @@
 #include "file.h"
 #include "cgribex.h"
 #include "gribapi.h"
-#include "cdf.h"
-#include "service.h"
-#include "extra.h"
-#include "ieg.h"
 #include "vlist.h"
 #include "serialize.h"
 #include "resource_handle.h"
 #include "resource_unpack.h"
-
 #include "namespace.h"
 
 
@@ -1331,264 +1324,6 @@ int streamInqTimestep(int streamID, int tsID)
   return (nrecs);
 }
 
-/* the single image implementation */
-static
-void cdiStreamReadVar(int streamID, int varID, int memtype, void *data, int *nmiss)
-{
-  if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamID, varID);
-
-  check_parg(data);
-  check_parg(nmiss);
-
-  stream_t *streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
-
-  int filetype = streamptr->filetype;
-
-  *nmiss = 0;
-
-  switch (filetype)
-    {
-#if  defined  (HAVE_LIBGRIB)
-    case FILETYPE_GRB:
-    case FILETYPE_GRB2:
-      {
-        if ( memtype == MEMTYPE_FLOAT ) Error("grbReadVar not implemented for memtype float!");
-        grbReadVarDP(streamptr, varID, (double *)data, nmiss);
-	break;
-      }
-#endif
-#if  defined  (HAVE_LIBSERVICE)
-    case FILETYPE_SRV:
-      {
-        if ( memtype == MEMTYPE_FLOAT ) Error("srvReadVar not implemented for memtype float!");
-        srvReadVarDP(streamptr, varID, (double *)data, nmiss);
-	break;
-      }
-#endif
-#if  defined  (HAVE_LIBEXTRA)
-    case FILETYPE_EXT:
-      {
-        if ( memtype == MEMTYPE_FLOAT ) Error("extReadVar not implemented for memtype float!");
-        extReadVarDP(streamptr, varID, (double *)data, nmiss);
-	break;
-      }
-#endif
-#if  defined  (HAVE_LIBIEG)
-    case FILETYPE_IEG:
-      {
-        if ( memtype == MEMTYPE_FLOAT ) Error("iegReadVar not implemented for memtype float!");
-        iegReadVarDP(streamptr, varID, (double *)data, nmiss);
-	break;
-      }
-#endif
-#if  defined  (HAVE_LIBNETCDF)
-    case FILETYPE_NC:
-    case FILETYPE_NC2:
-    case FILETYPE_NC4:
-    case FILETYPE_NC4C:
-      {
-        if ( memtype == MEMTYPE_FLOAT )
-          cdfReadVarSP(streamptr, varID, (float *)data, nmiss);
-        else
-          cdfReadVarDP(streamptr, varID, (double *)data, nmiss);
-
-	break;
-      }
-#endif
-    default:
-      {
-	Error("%s support not compiled in!", strfiletype(filetype));
-	break;
-      }
-    }
-}
-
-/*
-@Function  streamReadVar
-@Title     Read a variable
-
-@Prototype void streamReadVar(int streamID, int varID, double *data, int *nmiss)
-@Parameter
-    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead}.
-    @Item  varID     Variable identifier.
-    @Item  data      Pointer to the location into which the data values are read.
-                     The caller must allocate space for the returned values.
-    @Item  nmiss     Number of missing values.
-
-@Description
-The function streamReadVar reads all the values of one time step of a variable
-from an open dataset.
-@EndFunction
-*/
-void streamReadVar(int streamID, int varID, double *data, int *nmiss)
-{
-  cdiStreamReadVar(streamID, varID, MEMTYPE_DOUBLE, data, nmiss);
-}
-
-/*
-@Function  streamReadVarF
-@Title     Read a variable
-
-@Prototype void streamReadVar(int streamID, int varID, float *data, int *nmiss)
-@Parameter
-    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead}.
-    @Item  varID     Variable identifier.
-    @Item  data      Pointer to the location into which the data values are read.
-                     The caller must allocate space for the returned values.
-    @Item  nmiss     Number of missing values.
-
-@Description
-The function streamReadVar reads all the values of one time step of a variable
-from an open dataset.
-@EndFunction
-*/
-void streamReadVarF(int streamID, int varID, float *data, int *nmiss)
-{
-  cdiStreamReadVar(streamID, varID, MEMTYPE_FLOAT, data, nmiss);
-}
-
-
-static
-int cdiStreamReadVarSlice(int streamID, int varID, int levelID, int memtype, void *data, int *nmiss)
-{
-  // May fail if memtype == MEMTYPE_FLOAT and the file format does not support single precision reading.
-  // A value > 0 is returned in this case, otherwise it returns zero.
-  int status = 0;
-
-  if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamID, varID);
-
-  check_parg(data);
-  check_parg(nmiss);
-
-  stream_t *streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
-
-  int filetype = streamptr->filetype;
-
-  *nmiss = 0;
-
-  switch (filetype)
-    {
-#if  defined  (HAVE_LIBGRIB)
-    case FILETYPE_GRB:
-    case FILETYPE_GRB2:
-      {
-        if ( memtype == MEMTYPE_FLOAT ) return 1;
-        grbReadVarSliceDP(streamptr, varID, levelID, (double *)data, nmiss);
-	break;
-      }
-#endif
-#if  defined  (HAVE_LIBSERVICE)
-    case FILETYPE_SRV:
-      {
-        if ( memtype == MEMTYPE_FLOAT ) return 1;
-        srvReadVarSliceDP(streamptr, varID, levelID, (double *)data, nmiss);
-	break;
-      }
-#endif
-#if  defined  (HAVE_LIBEXTRA)
-    case FILETYPE_EXT:
-      {
-        if ( memtype == MEMTYPE_FLOAT ) return 1;
-        extReadVarSliceDP(streamptr, varID, levelID, (double *)data, nmiss);
-	break;
-      }
-#endif
-#if  defined  (HAVE_LIBIEG)
-    case FILETYPE_IEG:
-      {
-        if ( memtype == MEMTYPE_FLOAT ) return 1;
-        iegReadVarSliceDP(streamptr, varID, levelID, (double *)data, nmiss);
-	break;
-      }
-#endif
-#if  defined  (HAVE_LIBNETCDF)
-    case FILETYPE_NC:
-    case FILETYPE_NC2:
-    case FILETYPE_NC4:
-    case FILETYPE_NC4C:
-      {
-        if ( memtype == MEMTYPE_FLOAT )
-          cdfReadVarSliceSP(streamptr, varID, levelID, (float *)data, nmiss);
-        else
-          cdfReadVarSliceDP(streamptr, varID, levelID, (double *)data, nmiss);
-        break;
-      }
-#endif
-    default:
-      {
-	Error("%s support not compiled in!", strfiletype(filetype));
-        status = 2;
-	break;
-      }
-    }
-
-  return status;
-}
-
-/*
-@Function  streamReadVarSlice
-@Title     Read a horizontal slice of a variable
-
-@Prototype void streamReadVarSlice(int streamID, int varID, int levelID, double *data, int *nmiss)
-@Parameter
-    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead}.
-    @Item  varID     Variable identifier.
-    @Item  levelID   Level identifier.
-    @Item  data      Pointer to the location into which the data values are read.
-                     The caller must allocate space for the returned values.
-    @Item  nmiss     Number of missing values.
-
-@Description
-The function streamReadVarSlice reads all the values of a horizontal slice of a variable
-from an open dataset.
-@EndFunction
-*/
-void streamReadVarSlice(int streamID, int varID, int levelID, double *data, int *nmiss)
-{
-  if ( cdiStreamReadVarSlice(streamID, varID, levelID, MEMTYPE_DOUBLE, data, nmiss) )
-    {
-      Warning("Unexpected error returned from cdiStreamReadVarSlice()!");
-      size_t elementCount = (size_t)gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
-      memset(data, 0, elementCount * sizeof(*data));
-    }
-}
-
-/*
-@Function  streamReadVarSliceF
-@Title     Read a horizontal slice of a variable
-
-@Prototype void streamReadVarSliceF(int streamID, int varID, int levelID, float *data, int *nmiss)
-@Parameter
-    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead}.
-    @Item  varID     Variable identifier.
-    @Item  levelID   Level identifier.
-    @Item  data      Pointer to the location into which the data values are read.
-                     The caller must allocate space for the returned values.
-    @Item  nmiss     Number of missing values.
-
-@Description
-The function streamReadVarSliceF reads all the values of a horizontal slice of a variable
-from an open dataset.
-@EndFunction
-*/
-void streamReadVarSliceF(int streamID, int varID, int levelID, float *data, int *nmiss)
-{
-  if ( cdiStreamReadVarSlice(streamID, varID, levelID, MEMTYPE_FLOAT, data, nmiss) )
-    {
-      // In case the file format does not support single precision reading,
-      // we fall back to double precision reading, converting the data on the fly.
-      size_t elementCount = (size_t)gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
-      double *conversionBuffer = (double *) Malloc(elementCount * sizeof(*conversionBuffer));
-      streamReadVarSlice(streamID, varID, levelID, conversionBuffer, nmiss);
-      for (size_t i = elementCount; i--; ) data[i] = (float)conversionBuffer[i];
-      Free(conversionBuffer);
-    }
-}
-
 #if 0
 void streamWriteContents(int streamID, char *cname)
 {
@@ -2068,8 +1803,6 @@ streamUnpack(char * unpackBuffer, int unpackBufferSize,
   struct streamAssoc retval = { streamID, intBuffer[3] };
   return retval;
 }
-
-
 
 /*
  * Local Variables:

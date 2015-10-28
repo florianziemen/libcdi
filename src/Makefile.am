@@ -118,6 +118,7 @@ libcdi_la_SOURCES = 	 \
 	zaxis.h		 \
 	stream.c         \
 	stream_write.c   \
+	stream_read.c    \
 	swap.c           \
 	iterator.c          \
 	iterator.h          \

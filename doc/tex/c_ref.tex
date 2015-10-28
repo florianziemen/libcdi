@@ -767,6 +767,21 @@ Read a variable
 
 \section*{\tt 
 \ifpdf
+\hyperref[streamReadVarF]{streamReadVarF}
+\else
+streamReadVarF
+\fi
+}
+\begin{verbatim}
+    void streamReadVar(int streamID, int varID, float *data, int *nmiss);
+\end{verbatim}
+
+Read a variable
+\ifpdfoutput{}{(\ref{streamReadVarF})}
+
+
+\section*{\tt 
+\ifpdf
 \hyperref[streamReadVarSlice]{streamReadVarSlice}
 \else
 streamReadVarSlice
@@ -779,6 +794,22 @@ streamReadVarSlice
 
 Read a horizontal slice of a variable
 \ifpdfoutput{}{(\ref{streamReadVarSlice})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[streamReadVarSliceF]{streamReadVarSliceF}
+\else
+streamReadVarSliceF
+\fi
+}
+\begin{verbatim}
+    void streamReadVarSliceF(int streamID, int varID, int levelID, float *data, 
+                             int *nmiss);
+\end{verbatim}
+
+Read a horizontal slice of a variable
+\ifpdfoutput{}{(\ref{streamReadVarSliceF})}
 
 
 \section*{\tt 
