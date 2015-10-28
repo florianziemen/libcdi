@@ -220,56 +220,6 @@ void streamDefRecord(int streamID, int varID, int levelID)
 }
 
 
-void streamReadRecord(int streamID, double *data, int *nmiss)
-{
-  check_parg(data);
-  check_parg(nmiss);
-
-  stream_t *streamptr = stream_to_pointer(streamID);
-  stream_check_ptr(__func__, streamptr);
-
-  *nmiss = 0;
-
-  switch (streamptr->filetype)
-    {
-#if  defined  (HAVE_LIBGRIB)
-    case FILETYPE_GRB:
-    case FILETYPE_GRB2:
-      grbReadRecord(streamptr, data, nmiss);
-      break;
-#endif
-#if  defined  (HAVE_LIBSERVICE)
-    case FILETYPE_SRV:
-      srvReadRecord(streamptr, data, nmiss);
-      break;
-#endif
-#if  defined  (HAVE_LIBEXTRA)
-    case FILETYPE_EXT:
-      extReadRecord(streamptr, data, nmiss);
-      break;
-#endif
-#if  defined  (HAVE_LIBIEG)
-    case FILETYPE_IEG:
-      iegReadRecord(streamptr, data, nmiss);
-      break;
-#endif
-#if  defined  (HAVE_LIBNETCDF)
-    case FILETYPE_NC:
-    case FILETYPE_NC2:
-    case FILETYPE_NC4:
-    case FILETYPE_NC4C:
-      cdfReadRecord(streamptr, data, nmiss);
-      break;
-#endif
-    default:
-      {
-	Error("%s support not compiled in!", strfiletype(streamptr->filetype));
-	break;
-      }
-    }
-}
-
-
 void streamCopyRecord(int streamID2, int streamID1)
 {
   stream_t *streamptr1 = stream_to_pointer(streamID1);
