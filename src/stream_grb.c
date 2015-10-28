@@ -756,10 +756,8 @@ void grbCopyRecord(stream_t * streamptr2, stream_t * streamptr1)
 
 void grb_write_record(stream_t * streamptr, int memtype, const void *data, int nmiss)
 {
-  int varID, levelID;
-
-  varID   = streamptr->record->varID;
-  levelID = streamptr->record->levelID;
+  int varID   = streamptr->record->varID;
+  int levelID = streamptr->record->levelID;
 
   grb_write_var_slice(streamptr, varID, levelID, memtype, data, nmiss);
 }
