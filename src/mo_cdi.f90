@@ -259,6 +259,7 @@ module mo_cdi
   public :: streamWriteRecord
   public :: streamWriteRecordF
   public :: streamReadRecord
+  public :: streamReadRecordF
   public :: streamCopyRecord
   public :: cdiIterator_new
   public :: cdiIterator_clone
@@ -963,6 +964,14 @@ module mo_cdi
       real(c_double), intent(inout) :: data_dummy(*)
       integer(c_int), intent(inout) :: nmiss_dummy
     end subroutine streamReadRecord
+
+    subroutine streamReadRecordF(streamID_dummy, data_dummy, nmiss_dummy)&
+    & bind(c, name = 'streamReadRecordF')
+      import c_float, c_int
+      integer(c_int), value :: streamID_dummy
+      real(c_float), intent(inout) :: data_dummy(*)
+      integer(c_int), intent(inout) :: nmiss_dummy
+    end subroutine streamReadRecordF
 
     subroutine streamCopyRecord(streamIDdest_dummy, streamIDsrc_dummy) bind(c,&
     & name = 'streamCopyRecord')

@@ -384,6 +384,7 @@ void    streamInqRecord(int streamID, int *varID, int *levelID);
 void    streamWriteRecord(int streamID, const double data[], int nmiss);
 void    streamWriteRecordF(int streamID, const float data[], int nmiss);
 void    streamReadRecord(int streamID, double data[], int *nmiss);
+void    streamReadRecordF(int streamID, float data[], int *nmiss);
 void    streamCopyRecord(int streamIDdest, int streamIDsrc);
 
 void    streamInqGRIBinfo(int streamID, int *intnum, float *fltnum, off_t *bignum);
