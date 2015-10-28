@@ -1151,7 +1151,7 @@ int cdiStreamDefTimestep_(stream_t *streamptr, int tsID)
        streamptr->filetype == FILETYPE_NC2 ||
        streamptr->filetype == FILETYPE_NC4 ||
        streamptr->filetype == FILETYPE_NC4C)
-      && vlistHasTime(vlistID))
+      && time_is_varying)
     {
       void (*myCdfDefTimestep)(stream_t *streamptr, int tsID)
         = (void (*)(stream_t *, int))
