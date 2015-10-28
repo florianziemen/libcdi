@@ -1453,13 +1453,10 @@ taxisPrintKernel(taxis_t * taxisptr, FILE * fp)
 static int
 taxisCompareP(void *taxisptr1, void *taxisptr2)
 {
-  taxis_t * t1, * t2;
+  const taxis_t *t1 = ( const taxis_t * ) taxisptr1,
+    *t2 = ( const taxis_t * ) taxisptr2;
 
-  t1 = ( taxis_t * ) taxisptr1;
-  t2 = ( taxis_t * ) taxisptr2;
-
-  xassert ( t1 );
-  xassert ( t2 );
+  xassert ( t1 && t2 );
 
   return ! ( t1->used        == t2->used        &&
 	     t1->type        == t2->type        &&
