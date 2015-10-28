@@ -295,12 +295,12 @@ void transpose2dArrayDP(size_t inWidth, size_t inHeight, double *data)
   const size_t cacheBlockSize = 256;   // Purely an optimization parameter. Current value of 32 means we are handling 8kB blocks,
                                        // which should be a decent compromise on many architectures.
 #ifdef __cplusplus
-  double *out[inWidth];
-  double *temp[inHeight];
+  double *out[inHeight];
+  double *temp[inWidth];
   temp[0] = (double *) Malloc(inHeight*inWidth*sizeof(double));
   memcpy(temp[0], data, inHeight*inWidth*sizeof(double));
-  for(int i = 0; i < inWidth; i++) out[i] = data + (inHeight*i);
-  for(int i = 1; i < inHeight; i++) temp[i] = temp[0] + (inWidth*i);
+  for(int i = 0; i < inHeight; i++) out[i] = data + (inWidth*i);
+  for(int i = 1; i < inWidth; i++) temp[i] = temp[0] + (inHeight*i);
 #else
   double (*out)[inHeight] = (double (*)[inHeight])data;
   double (*temp)[inWidth] = (double (*)[inWidth]) Malloc(inHeight*sizeof(*temp));
@@ -336,12 +336,12 @@ void transpose2dArraySP(size_t inWidth, size_t inHeight, float *data)
   const size_t cacheBlockSize = 256;   // Purely an optimization parameter. Current value of 32 means we are handling 8kB blocks,
                                        // which should be a decent compromise on many architectures.
 #ifdef __cplusplus
-  float *out[inWidth];
-  float *temp[inHeight];
+  float *out[inHeight];
+  float *temp[inWidth];
   temp[0] = (float *) Malloc(inHeight*inWidth*sizeof(float));
   memcpy(temp[0], data, inHeight*inWidth*sizeof(float));
-  for(int i = 0; i < inWidth; i++) out[i] = data + (inHeight*i);
-  for(int i = 1; i < inHeight; i++) temp[i] = temp[0] + (inWidth*i);
+  for(int i = 0; i < inHeight; i++) out[i] = data + (inWidth*i);
+  for(int i = 1; i < inWidth; i++) temp[i] = temp[0] + (inHeight*i);
 #else
   float (*out)[inHeight] = (float (*)[inHeight])data;
   float (*temp)[inWidth] = (float (*)[inWidth]) Malloc(inHeight*sizeof(*temp));
