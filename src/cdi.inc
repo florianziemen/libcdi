@@ -703,6 +703,12 @@
 !                                     INTEGER         nmiss)
       EXTERNAL        streamReadRecord
 
+!                     streamReadRecordF
+!                                    (INTEGER         streamID,
+!                                     REAL            data(*),
+!                                     INTEGER         nmiss)
+      EXTERNAL        streamReadRecordF
+
 !                     streamCopyRecord
 !                                    (INTEGER         streamIDdest,
 !                                     INTEGER         streamIDsrc)

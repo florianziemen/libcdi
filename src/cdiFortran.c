@@ -153,6 +153,7 @@ FCALLSCSUB3 (streamInqRecord, STREAMINQRECORD, streaminqrecord, INT, PINT, PINT)
 FCALLSCSUB3 (streamWriteRecord, STREAMWRITERECORD, streamwriterecord, INT, DOUBLEV, INT)
 FCALLSCSUB3 (streamWriteRecordF, STREAMWRITERECORDF, streamwriterecordf, INT, FLOATV, INT)
 FCALLSCSUB3 (streamReadRecord, STREAMREADRECORD, streamreadrecord, INT, DOUBLEV, PINT)
+FCALLSCSUB3 (streamReadRecordF, STREAMREADRECORDF, streamreadrecordf, INT, FLOATV, PINT)
 FCALLSCSUB2 (streamCopyRecord, STREAMCOPYRECORD, streamcopyrecord, INT, INT)
 
 /*  File driven I/O (may yield better performance than using the streamXXX functions)  */
