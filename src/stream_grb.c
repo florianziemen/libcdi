@@ -737,8 +737,7 @@ void grbCopyRecord(stream_t * streamptr2, stream_t * streamptr1)
       long unzipsize;
       int izip = gribGetZip((long)recsize, gribbuffer, &unzipsize);
 
-      if ( izip == 0 )
-        if ( streamptr2->comptype == COMPRESS_SZIP )
+      if ( izip == 0 && streamptr2->comptype == COMPRESS_SZIP )
           nbytes = grbSzip(filetype, gribbuffer, nbytes);
     }
 
