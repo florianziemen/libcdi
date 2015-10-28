@@ -1414,38 +1414,40 @@ taxisPrintKernel(taxis_t * taxisptr, FILE * fp)
   taxisInqVdateBounds ( taxisptr->self, &vdate_lb, &vdate_ub);
   taxisInqVtimeBounds ( taxisptr->self, &vtime_lb, &vtime_ub);
 
-  fprintf ( fp, "#\n");
-  fprintf ( fp, "# taxisID %d\n", taxisptr->self);
-  fprintf ( fp, "#\n");
-  fprintf ( fp, "self        = %d\n", taxisptr->self );
-  fprintf ( fp, "used        = %d\n", taxisptr->used );
-  fprintf ( fp, "type        = %d\n", taxisptr->type );
-  fprintf ( fp, "vdate       = %d\n", taxisptr->vdate );
-  fprintf ( fp, "vtime       = %d\n", taxisptr->vtime );
-  fprintf ( fp, "rdate       = %d\n", taxisptr->rdate );
-  fprintf ( fp, "rtime       = %d\n", taxisptr->rtime );
-  fprintf ( fp, "fdate       = %d\n", taxisptr->fdate );
-  fprintf ( fp, "ftime       = %d\n", taxisptr->ftime );
-  fprintf ( fp, "calendar    = %d\n", taxisptr->calendar );
-  fprintf ( fp, "unit        = %d\n", taxisptr->unit );
-  fprintf ( fp, "numavg      = %d\n", taxisptr->numavg );
-  fprintf ( fp, "climatology = %d\n", taxisptr->climatology );
-  fprintf ( fp, "has_bounds  = %d\n", taxisptr->has_bounds );
-  fprintf ( fp, "vdate_lb    = %d\n", vdate_lb );
-  fprintf ( fp, "vtime_lb    = %d\n", vtime_lb );
-  fprintf ( fp, "vdate_ub    = %d\n", vdate_ub );
-  fprintf ( fp, "vtime_ub    = %d\n", vtime_ub );
-  fprintf ( fp, "fc_unit     = %d\n", taxisptr->fc_unit );
-  fprintf ( fp, "fc_period   = %g\n", taxisptr->fc_period );
-  fprintf ( fp, "\n");
-}
-
-static void taxisPrint ( int taxisID )
-{
-  taxis_t * taxisptr;
-
-  taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
-  taxisPrintKernel ( taxisptr, stdout );
+  fprintf(fp,
+          "#\n"
+          "# taxisID %d\n"
+          "#\n"
+          "self        = %d\n"
+          "used        = %d\n"
+          "type        = %d\n"
+          "vdate       = %d\n"
+          "vtime       = %d\n"
+          "rdate       = %d\n"
+          "rtime       = %d\n"
+          "fdate       = %d\n"
+          "ftime       = %d\n"
+          "calendar    = %d\n"
+          "unit        = %d\n"
+          "numavg      = %d\n"
+          "climatology = %d\n"
+          "has_bounds  = %d\n"
+          "vdate_lb    = %d\n"
+          "vtime_lb    = %d\n"
+          "vdate_ub    = %d\n"
+          "vtime_ub    = %d\n"
+          "fc_unit     = %d\n"
+          "fc_period   = %g\n"
+          "\n", taxisptr->self, taxisptr->self,
+          taxisptr->used, taxisptr->type,
+          taxisptr->vdate, taxisptr->vtime,
+          taxisptr->rdate, taxisptr->rtime,
+          taxisptr->fdate, taxisptr->ftime,
+          taxisptr->calendar, taxisptr->unit,
+          taxisptr->numavg, taxisptr->climatology,
+          taxisptr->has_bounds,
+          vdate_lb, vtime_lb, vdate_ub, vtime_ub,
+          taxisptr->fc_unit, taxisptr->fc_period );
 }
 
 static int
