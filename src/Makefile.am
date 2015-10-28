@@ -55,8 +55,8 @@ libcdi_la_SOURCES = 	 \
 	grid.h	 	 \
 	ieg.h	 	 \
 	ieglib.c         \
-	input_file.c	\
-	input_file.h	\
+	input_file.c	 \
+	input_file.h     \
 	institution.c  	 \
 	institution.h  	 \
 	model.c        	 \
@@ -93,6 +93,7 @@ libcdi_la_SOURCES = 	 \
 	stream_srv.h	 \
 	stream_var.c     \
         cdf_write.c      \
+        cdf_read.c       \
         subtype.c        \
         subtype.h        \
 	swap.h	 	 \

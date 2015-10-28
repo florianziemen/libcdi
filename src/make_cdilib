@@ -135,6 +135,7 @@ files="basetime.c \
    stream_srv.c \
    stream_var.c \
    cdf_write.c \
+   cdf_read.c \
    subtype.c \
    swap.c \
    table.c \

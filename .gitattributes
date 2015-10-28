@@ -214,6 +214,7 @@ src/cdf.c -text
 src/cdf.h -text
 src/cdf_int.c -text
 src/cdf_int.h -text
+src/cdf_read.c -text
 src/cdf_write.c -text
 src/cdi.h -text
 src/cdi.inc -text
