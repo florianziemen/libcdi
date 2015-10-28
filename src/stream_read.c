@@ -23,9 +23,6 @@ void cdiStreamReadVar(int streamID, int varID, int memtype, void *data, int *nmi
   check_parg(nmiss);
 
   stream_t *streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
-
   int filetype = streamptr->filetype;
 
   *nmiss = 0;
@@ -145,9 +142,6 @@ int cdiStreamReadVarSlice(int streamID, int varID, int levelID, int memtype, voi
   check_parg(nmiss);
 
   stream_t *streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
-
   int filetype = streamptr->filetype;
 
   *nmiss = 0;
@@ -278,7 +272,6 @@ void stream_read_record(int streamID, int memtype, void *data, int *nmiss)
   check_parg(nmiss);
 
   stream_t *streamptr = stream_to_pointer(streamID);
-  stream_check_ptr(__func__, streamptr);
 
   *nmiss = 0;
 

@@ -767,8 +767,6 @@ void streamInqGRIBinfo(int streamID, int *intnum, float *fltnum, off_t *bignum)
 {
   stream_t *streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(__func__, streamptr);
-
   int filetype = streamptr->filetype;
 
   if ( filetype == FILETYPE_GRB )

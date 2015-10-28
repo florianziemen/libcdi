@@ -187,9 +187,6 @@ The valid CDI file format types are @func{FILETYPE_GRB}, @func{FILETYPE_GRB2}, @
 int streamInqFiletype(int streamID)
 {
   stream_t *streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
-
   return (streamptr->filetype);
 }
 
@@ -233,9 +230,6 @@ with the file format type @func{FILETYPE_SRV}, @func{FILETYPE_EXT} or @func{FILE
 void streamDefByteorder(int streamID, int byteorder)
 {
   stream_t *streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
-
   streamptr->byteorder = byteorder;
   int filetype = streamptr->filetype;
 
@@ -293,9 +287,6 @@ The valid CDI byte order types are @func{CDI_BIGENDIAN} and @func{CDI_LITTLEENDI
 int streamInqByteorder(int streamID)
 {
   stream_t *streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
-
   return (streamptr->byteorder);
 }
 
@@ -319,9 +310,6 @@ const char *streamFilesuffix(int filetype)
 const char *streamFilename(int streamID)
 {
   stream_t *streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
-
   return (streamptr->filename);
 }
 
@@ -330,9 +318,6 @@ long cdiInqTimeSize(int streamID)
 {
   int tsID = 0, nrecs;
   stream_t *streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
-
   long ntsteps = streamptr->ntsteps;
 
   if ( ntsteps == (long)CDI_UNDEFID )
@@ -979,8 +964,6 @@ void streamClose(int streamID)
   int index;
   stream_t *streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(__func__, streamptr);
-
   if ( CDI_Debug )
     Message("streamID = %d filename = %s", streamID, streamptr->filename);
 
@@ -1117,8 +1100,6 @@ void streamSync(int streamID)
 {
   stream_t *streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(__func__, streamptr);
-
   void (*myStreamSync_)(stream_t *streamptr)
     = (void (*)(stream_t *))namespaceSwitchGet(NSSWITCH_STREAM_SYNC).func;
   myStreamSync_(streamptr);
@@ -1129,10 +1110,10 @@ int cdiStreamDefTimestep_(stream_t *streamptr, int tsID)
 {
   int taxisID = 0;
 
+  stream_check_ptr(__func__, streamptr);
+
   if ( CDI_Debug )
     Message("streamID = %d  tsID = %d", streamptr->self, tsID);
-
-  stream_check_ptr(__func__, streamptr);
 
   int vlistID = streamptr->vlistID;
 
@@ -1239,9 +1220,6 @@ int streamInqTimestep(int streamID, int tsID)
   int nrecs = 0;
   int taxisID;
   stream_t *streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
-
   int vlistID = streamptr->vlistID;
 
   if ( tsID < streamptr->rtsteps )
@@ -1328,8 +1306,6 @@ int streamInqTimestep(int streamID, int tsID)
 void streamWriteContents(int streamID, char *cname)
 {
   stream_t *streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
 
   int vlistID = streamptr->vlistID;
 
@@ -1427,8 +1403,6 @@ off_t streamNvals(int streamID)
 {
   stream_t *streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(__func__, streamptr);
-
   return (streamptr->numvals);
 }
 
@@ -1459,8 +1433,6 @@ cdiStreamDefVlist_(int streamID, int vlistID)
 {
   stream_t *streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(__func__, streamptr);
-
   if ( streamptr->vlistID == CDI_UNDEFID )
     cdiStreamSetupVlist(streamptr, vlistDuplicate(vlistID));
   else
@@ -1486,9 +1458,6 @@ The function @func{streamInqVlist} returns the variable list of a stream.
 int streamInqVlist(int streamID)
 {
   stream_t *streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
-
   return (streamptr->vlistID);
 }
 
@@ -1496,9 +1465,6 @@ int streamInqVlist(int streamID)
 void streamDefCompType(int streamID, int comptype)
 {
   stream_t *streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
-
   if (streamptr->comptype != comptype)
     {
       streamptr->comptype = comptype;
@@ -1510,9 +1476,6 @@ void streamDefCompType(int streamID, int comptype)
 void streamDefCompLevel(int streamID, int complevel)
 {
   stream_t *streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
-
   if (streamptr->complevel != complevel)
     {
       streamptr->complevel = complevel;
@@ -1524,9 +1487,6 @@ void streamDefCompLevel(int streamID, int complevel)
 int streamInqCompType(int streamID)
 {
   stream_t *streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
-
   return (streamptr->comptype);
 }
 
@@ -1534,9 +1494,6 @@ int streamInqCompType(int streamID)
 int streamInqCompLevel(int streamID)
 {
   stream_t *streamptr = stream_to_pointer(streamID);
-
-  stream_check_ptr(__func__, streamptr);
-
   return (streamptr->complevel);
 }
 

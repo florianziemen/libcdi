@@ -23,8 +23,6 @@ void cdiStreamWriteVar_(int streamID, int varID, int memtype, const void *data, 
   if (subtypeInqActiveIndex(streamptr->vars[varID].subtypeID) != 0)
     Error("Writing of non-trivial subtypes not yet implemented!");
 
-  stream_check_ptr(__func__, streamptr);
-
   // check taxis
   if ( streamptr->curTsID == CDI_UNDEFID ) streamDefTimestep(streamID, 0);
 
@@ -144,8 +142,6 @@ void cdiStreamWriteVarSlice(int streamID, int varID, int levelID, int memtype, c
   stream_t *streamptr = stream_to_pointer(streamID);
   if (subtypeInqActiveIndex(streamptr->vars[varID].subtypeID) != 0)
     Error("Writing of non-trivial subtypes not yet implemented!");
-
-  stream_check_ptr(__func__, streamptr);
 
   // check taxis
   if ( streamptr->curTsID == CDI_UNDEFID ) streamDefTimestep(streamID, 0);
@@ -270,8 +266,6 @@ cdiStreamWriteVarChunk_(int streamID, int varID, int memtype,
 
   stream_t *streamptr = stream_to_pointer(streamID);
 
-  stream_check_ptr(__func__, streamptr);
-
   // streamDefineTaxis(streamID);
 
   int filetype = streamptr->filetype;
@@ -318,7 +312,6 @@ void stream_write_record(int streamID, int memtype, const void *data, int nmiss)
   check_parg(data);
 
   stream_t *streamptr = stream_to_pointer(streamID);
-  stream_check_ptr(__func__, streamptr);
 
   switch (streamptr->filetype)
     {

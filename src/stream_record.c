@@ -107,7 +107,6 @@ void streamInqRecord(int streamID, int *varID, int *levelID)
   check_parg(levelID);
 
   stream_t *streamptr = stream_to_pointer(streamID);
-  stream_check_ptr(__func__, streamptr);
 
   cdiDefAccesstype(streamID, TYPE_REC);
 
@@ -154,7 +153,6 @@ The function streamDefRecord defines the meta-data of the next record.
 void streamDefRecord(int streamID, int varID, int levelID)
 {
   stream_t *streamptr = stream_to_pointer(streamID);
-  stream_check_ptr(__func__, streamptr);
 
   int tsID = streamptr->curTsID;
 
@@ -222,15 +220,11 @@ void streamDefRecord(int streamID, int varID, int levelID)
 
 void streamCopyRecord(int streamID2, int streamID1)
 {
-  stream_t *streamptr1 = stream_to_pointer(streamID1);
-  stream_t *streamptr2 = stream_to_pointer(streamID2);
-
-  stream_check_ptr(__func__, streamptr1);
-  stream_check_ptr(__func__, streamptr2);
-
-  int filetype1 = streamptr1->filetype;
-  int filetype2 = streamptr2->filetype;
-  int filetype  = FILETYPE_UNDEF;
+  stream_t *streamptr1 = stream_to_pointer(streamID1),
+    *streamptr2 = stream_to_pointer(streamID2);
+  int filetype1 = streamptr1->filetype,
+    filetype2 = streamptr2->filetype,
+    filetype  = FILETYPE_UNDEF;
 
   if ( filetype1 == filetype2 ) filetype = filetype2;
   else
