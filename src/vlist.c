@@ -730,12 +730,12 @@ void vlistCat(int vlistID2, int vlistID1)
 
       var_copy_entries(&vars2[varID2], &vars1[varID]);
 
-      int nlevs = zaxisInqSize(vars1[varID].zaxisID);
       if ( vars1[varID].levinfo )
         {
-          vars2[varID2].levinfo = (levinfo_t *) Malloc((size_t)nlevs * sizeof(levinfo_t));
+          size_t nlevs = (size_t)zaxisInqSize(vars1[varID].zaxisID);
+          vars2[varID2].levinfo = (levinfo_t *) Malloc(nlevs * sizeof(levinfo_t));
           memcpy(vars2[varID2].levinfo, vars1[varID].levinfo,
-                 (size_t)nlevs * sizeof(levinfo_t));
+                 nlevs * sizeof(levinfo_t));
         }
 
       vars2[varID2].atts.nelems = 0;
