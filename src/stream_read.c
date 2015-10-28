@@ -314,8 +314,7 @@ void stream_read_record(int streamID, int memtype, void *data, int *nmiss)
     case FILETYPE_NC2:
     case FILETYPE_NC4:
     case FILETYPE_NC4C:
-      if ( memtype == MEMTYPE_FLOAT ) Error("cdfReadRecord not implemented for memtype float!");
-      cdfReadRecord(streamptr, data, nmiss);
+      cdf_read_record(streamptr, memtype, data, nmiss);
       break;
 #endif
     default:

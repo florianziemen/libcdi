@@ -1254,7 +1254,6 @@ void cdf_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
   long nvals = gridInqSize(gridID);
 
   cdf_write_var_data(fileID, vlistID, varID, ncvarid, dtype, nvals, xsize, ysize, swapxy, start, count, memtype, data, nmiss);
-
 }
 
 

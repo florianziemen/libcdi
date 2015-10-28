@@ -683,7 +683,7 @@ void cdfReadVarSliceSP(stream_t *streamptr, int varID, int levelID, float *data,
 }
 
 
-void cdfReadRecord(stream_t *streamptr, double *data, int *nmiss)
+void cdf_read_record(stream_t *streamptr, int memtype, void *data, int *nmiss)
 {
   if ( CDI_Debug ) Message("streamID = %d", streamptr->self);
 
@@ -693,7 +693,10 @@ void cdfReadRecord(stream_t *streamptr, double *data, int *nmiss)
   int varID   = streamptr->tsteps[tsID].records[recID].varID;
   int levelID = streamptr->tsteps[tsID].records[recID].levelID;
 
-  cdfReadVarSliceDP(streamptr, varID, levelID, data, nmiss);
+  if ( memtype == MEMTYPE_DOUBLE )
+    cdfReadVarSliceDP(streamptr, varID, levelID, data, nmiss);
+  else
+    cdfReadVarSliceSP(streamptr, varID, levelID, data, nmiss);
 }
 
 #endif

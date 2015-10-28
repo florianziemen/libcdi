@@ -542,7 +542,7 @@ void cdfCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
   double *data = (double *) Malloc((size_t)datasize * sizeof (double));
 
   int nmiss;
-  cdfReadRecord(streamptr1, data, &nmiss);
+  cdf_read_record(streamptr1, memtype, data, &nmiss);
   cdf_write_record(streamptr2, memtype, data, nmiss);
 
   Free(data);

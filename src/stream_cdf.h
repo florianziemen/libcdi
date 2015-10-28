@@ -14,7 +14,7 @@ void   cdfDefRecord(stream_t * streamptr);
 
 void   cdfCopyRecord(stream_t *streamptr2, stream_t *streamptr1);
 
-void   cdfReadRecord(stream_t *streamptr, double *data, int *nmiss);
+void   cdf_read_record(stream_t *streamptr, int memtype, void *data, int *nmiss);
 void   cdf_write_record(stream_t *streamptr, int memtype, const void *data, int nmiss);
 
 void   cdfReadVarDP(stream_t *streamptr, int varID, double *data, int *nmiss);
