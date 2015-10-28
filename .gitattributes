@@ -338,6 +338,7 @@ src/stream_gribapi.h -text
 src/stream_history.c -text
 src/stream_ieg.c -text
 src/stream_ieg.h -text
+src/stream_read.c -text
 src/stream_record.c -text
 src/stream_srv.c -text
 src/stream_srv.h -text
