@@ -667,6 +667,16 @@ double intpow2(int x)
     return (pow(2.0, (double) x));
 }
 /* 
+icc -g -Wall -O3 -march=native -std=c99 -qopt-report=5 -DTEST_MINMAXVAL -openmp -DOMP_SIMD minmax_val.c
+ result on hama2 (icc 16.0.0):
+     float:
+minmax_val: fmin: -500000  fmax: 499999  time:   0.63s
+    double:
+minmax_val: fmin: -500000  fmax: 499999  time:   2.98s
+orig      : fmin: -500000  fmax: 499999  time:   2.83s
+simd      : fmin: -500000  fmax: 499999  time:   2.82s
+avx       : fmin: -500000  fmax: 499999  time:   3.17s
+
 gcc -g -Wall -O3 -march=native -std=c99 -DTEST_MINMAXVAL minmax_val.c
  result on bailung (gcc 4.8.2):
   orig    : fmin: -500000  fmax: 499999  time:   4.82s
@@ -683,16 +693,6 @@ icc -g -Wall -O3 -march=native -std=c99 -qopt-report=5 -DTEST_MINMAXVAL -openmp 
   orig    : fmin: -500000  fmax: 499999  time:   2.83s
   simd    : fmin: -500000  fmax: 499999  time:   2.83s
   avx     : fmin: -500000  fmax: 499999  time:   2.92s
-
-icc -g -Wall -O3 -march=native -std=c99 -qopt-report=5 -DTEST_MINMAXVAL -openmp -DOMP_SIMD minmax_val.c
- result on hama (icc 15.0.1):
- float:
-  minmax_val: fmin: -500000  fmax: 499999  time:   0.60s
- double:
-  minmax_val: fmin: -500000  fmax: 499999  time:   3.06s
-  orig      : fmin: -500000  fmax: 499999  time:   2.66s
-  simd      : fmin: -500000  fmax: 499999  time:   6.65s
-  avx       : fmin: -500000  fmax: 499999  time:   3.11s
 
 xlc_r -g -O3 -qhot -q64 -qarch=auto -qtune=auto -qreport -DTEST_MINMAXVAL minmax_val.c
  result on blizzard (xlc 12):
@@ -998,7 +998,6 @@ void minmax_val_double_simd(const double *restrict data, long idatasize, double 
 static
 void minmax_val_double_orig(const double *restrict data, long idatasize, double *fmin, double *fmax)
 {
-  size_t i;
   size_t datasize = idatasize;
   double dmin = *fmin, dmax = *fmax;
 
@@ -1011,7 +1010,7 @@ void minmax_val_double_orig(const double *restrict data, long idatasize, double 
 #elif defined (__ICC)
 #pragma ivdep
 #endif
-  for ( i = 0; i < datasize; ++i )
+  for ( size_t i = 0; i < datasize; ++i )
     {
       dmin = dmin < data[i] ? dmin : data[i];
       dmax = dmax > data[i] ? dmax : data[i];
@@ -1024,7 +1023,6 @@ void minmax_val_double_orig(const double *restrict data, long idatasize, double 
 static
 void minmax_val_float(const float *restrict data, long idatasize, float *fmin, float *fmax)
 {
-  size_t i;
   size_t datasize = idatasize;
   float dmin = *fmin, dmax = *fmax;
 
@@ -1037,7 +1035,7 @@ void minmax_val_float(const float *restrict data, long idatasize, float *fmin, f
 #elif defined (__ICC)
 #pragma ivdep
 #endif
-  for ( i = 0; i < datasize; ++i )
+  for ( size_t i = 0; i < datasize; ++i )
     {
       dmin = dmin < data[i] ? dmin : data[i];
       dmax = dmax > data[i] ? dmax : data[i];
@@ -1053,9 +1051,6 @@ void minmax_val_float(const float *restrict data, long idatasize, float *fmin, f
 // TEST
 #if defined(OMP_SIMD)
 
-//#pragma omp declare reduction(xmin : double : omp_out = omp_in > omp_out ? omp_out : omp_in) initializer( omp_priv = { 1.e300 })
-//#pragma omp declare reduction(xmax : double : omp_out = omp_in < omp_out ? omp_out : omp_in) initializer( omp_priv = { -1.e300 })
-
 #if defined(GNUC_PUSH_POP)
 #pragma GCC push_options
 #pragma GCC optimize ("O3", "fast-math")
@@ -1063,15 +1058,13 @@ void minmax_val_float(const float *restrict data, long idatasize, float *fmin, f
 static
 void minmax_val_double_simd(const double *restrict data, long idatasize, double *fmin, double *fmax)
 {
-  size_t i;
   size_t datasize = idatasize;
   double dmin = *fmin, dmax = *fmax;
 
 #if defined(_OPENMP)
-  //#pragma omp simd reduction(xmin:dmin) reduction(xmax:dmax)
-#pragma omp simd
+#pragma omp simd reduction(min:dmin) reduction(max:dmax)
 #endif
-  for ( i = 0; i < datasize; ++i )
+  for ( size_t i = 0; i < datasize; ++i )
     {
       dmin = dmin < data[i] ? dmin : data[i];
       dmax = dmax > data[i] ? dmax : data[i];
@@ -1202,7 +1195,7 @@ int main(void)
 
   {
     float fmin, fmax;
-    float *data_sp = (float*) Malloc(datasize*sizeof(float));
+    float *data_sp = (float*) malloc(datasize*sizeof(float));
 
     for ( long i = 0; i < datasize/2; i++ )        data_sp[i] = (float) (i);
     for ( long i = datasize/2; i < datasize; i++ ) data_sp[i] = (float) (-datasize + i);
@@ -1217,12 +1210,12 @@ int main(void)
       }
     t_end = dtime();
     printf("minmax_val: fmin: %ld  fmax: %ld  time: %6.2fs\n", (long)fmin, (long) fmax, t_end-t_begin);
-    Free(data_sp);
+    free(data_sp);
   }
 
   {
     double fmin, fmax;
-    double *data_dp = (double*) Malloc(datasize*sizeof(double));
+    double *data_dp = (double*) malloc(datasize*sizeof(double));
 
     // for ( long i = datasize-1; i >= 0; i-- ) data[i] = (double) (-datasize/2 + i);
     for ( long i = 0; i < datasize/2; i++ )        data_dp[i] = (double) (i);
@@ -1288,7 +1281,7 @@ int main(void)
     t_end = dtime();
     printf("pwr6u6  : fmin: %ld  fmax: %ld  time: %6.2fs\n", (long)fmin, (long) fmax, t_end-t_begin);
 #endif
-    Free(data_dp);
+    free(data_dp);
   }
 
   return (0);
@@ -1798,240 +1791,6 @@ int main(void)
   return 0;
 }
 #endif // TEST_ENCODE
-
-#undef DISABLE_SIMD
-#undef _ENABLE_AVX
-#undef _ENABLE_SSE4_1
-//#undef _GET_X86_COUNTER
-//#undef _GET_MACH_COUNTER
-//#undef _GET_IBM_COUNTER
-//#undef _ARCH_PWR6
-
-#if defined _GET_IBM_COUNTER
-#include <libhpc.h>
-#elif defined _GET_X86_COUNTER
-#include <x86intrin.h>
-#elif defined _GET_MACH_COUNTER
-#include <mach/mach_time.h>
-#endif
-
-#ifdef __cplusplus
-#define __STDC_FORMAT_MACROS
-#endif
-#include <inttypes.h>
-
-#if   defined(__GNUC__) && (__GNUC__ >= 4)
-#elif defined(__ICC)    && (__ICC >= 1100)
-#elif defined(__clang__)
-#else
-#define DISABLE_SIMD
-#endif
-
-#define DISABLE_SIMD
-
-#ifdef DISABLE_SIMD
-# ifdef ENABLE_AVX
-#  define _ENABLE_AVX
-# endif
-# ifdef ENABLE_SSE4_1
-#  define _ENABLE_SSE4_1
-# endif
-#endif
-
-#ifndef DISABLE_SIMD
-# ifdef __AVX__
-#  define _ENABLE_AVX
-# endif
-# ifdef __SSE4_1__
-#  define _ENABLE_SSE4_1
-# endif
-#endif
-
-#if defined _ENABLE_AVX
-#include <immintrin.h>
-#elif defined _ENABLE_SSE4_1
-#include <smmintrin.h>
-#endif
-
-#if defined _ENABLE_AVX
-
-static
-void avx_decode_array_2byte_double(size_t datasize, const unsigned char * restrict igrib,
-				     double * restrict fpdata, double fmin, double zscale)
-{
-  size_t i, j;
-  size_t nframes = datasize;
-  size_t residual;
-  size_t ofs;
-
-  double dval;
-
-  double *data = fpdata;
-  __m128i *sgrib;
-  
-  __m128i mask = _mm_set_epi8(14, 15, 12, 13, 10, 11, 8, 9, 6, 7, 4, 5, 2, 3, 0, 1);
-
-  __m256d ymm0 = _mm256_set1_pd(fmin);
-  __m256d ymm1 = _mm256_set1_pd(zscale);
-  
-  __m128i xmm0, xmm1, xmm2, xmm3;
-  __m256d ymm2, ymm3;
-
-  i = -1;
-  while ( ((unsigned long) data) % 32 != 0 && datasize > 0)
-    {
-      i++;
-      dval = (((int)igrib[2*i] <<  8) | (int)igrib[2*i+1]);
-      fpdata[i] = fmin + zscale * dval;
-      data++;
-      nframes--;
-    }
-  
-  if (i == -1) i = 0;
-  sgrib = (__m128i *) (igrib+i);
-
-  while (nframes >= 16)
-    { 
-      xmm0 = _mm_loadu_si128((__m128i *) sgrib);
-      xmm0 = _mm_shuffle_epi8(xmm0, mask);
-      xmm1 = _mm_shuffle_epi32(xmm0, _MM_SHUFFLE(1, 0, 3, 2));
-      xmm2 = _mm_cvtepu16_epi32(xmm0);
-      xmm3 = _mm_cvtepu16_epi32(xmm1);
-
-      ymm2 = _mm256_cvtepi32_pd(xmm2);
-      ymm2 = _mm256_add_pd(_mm256_mul_pd(ymm2, ymm1), ymm0);
-      (void) _mm256_stream_pd(data, ymm2);
-      ymm3 = _mm256_cvtepi32_pd(xmm3);
-      ymm3 = _mm256_add_pd(_mm256_mul_pd(ymm3, ymm1), ymm0);
-      (void) _mm256_stream_pd(data+4, ymm3);  
-      
-      xmm0 = _mm_loadu_si128((__m128i *) sgrib + 1);
-      xmm0 = _mm_shuffle_epi8(xmm0, mask);
-      xmm1 = _mm_shuffle_epi32(xmm0, _MM_SHUFFLE(1, 0, 3, 2));
-      xmm2 = _mm_cvtepu16_epi32(xmm0);
-      xmm3 = _mm_cvtepu16_epi32(xmm1);
-      
-      ymm2 = _mm256_cvtepi32_pd(xmm2);
-      ymm2 = _mm256_add_pd(_mm256_mul_pd(ymm2, ymm1), ymm0);
-      (void) _mm256_stream_pd(data+8, ymm2);
-      ymm3 = _mm256_cvtepi32_pd(xmm3);
-      ymm3 = _mm256_add_pd(_mm256_mul_pd(ymm3, ymm1), ymm0);
-      (void) _mm256_stream_pd(data+12, ymm3);  
-      
-      data += 16;
-      sgrib += 2;
-      nframes -= 16;
-    }
-
-  residual = nframes;
-  ofs = datasize - residual;
-  for ( j = 0; j < residual; j++ )
-    {
-      dval = (((int)igrib[2*(ofs+j)] <<  8) | (int)igrib[2*(ofs+j)+1]);
-      fpdata[ofs+j] = fmin + zscale * dval;
-    }
-
-  return;
-}
-
-#elif defined _ENABLE_SSE4_1
-
-static
-void sse41_decode_array_2byte_double(size_t datasize, const unsigned char * restrict igrib,
-				     double * restrict fpdata, double fmin, double zscale)
-{
-  size_t i, j;
-  size_t nframes = datasize;
-  size_t residual;
-  size_t ofs;
-
-  double dval;
-
-  double *data = fpdata;
-  __m128i *sgrib;
-  
-  __m128i mask = _mm_set_epi8(14, 15, 12, 13, 10, 11, 8, 9, 6, 7, 4, 5, 2, 3, 0, 1);
-  __m128d dmm8 = _mm_set1_pd(fmin);
-  __m128d dmm9 = _mm_set1_pd(zscale);
-  
-  __m128i xmm4, xmm5;
-  __m128i xmm6, xmm7;
-  
-  __m128d dmm0, dmm1, dmm2, dmm3;
-  __m128d dmm4, dmm5, dmm6, dmm7;
-
-  i = -1;
-  while ( ((unsigned long) data) % 32 != 0 && datasize > 0)
-    {
-      i++;
-      dval = (((int)igrib[2*i] <<  8) | (int)igrib[2*i+1]);
-      fpdata[i] = fmin + zscale * dval;
-      data++;
-      nframes--;
-    }
-  
-  if (i == -1) i = 0;
-  sgrib = (__m128i *) (igrib+i);
-  
-  while (nframes >= 16)
-    {
-      xmm5 = _mm_loadu_si128((__m128i *) sgrib);
-      xmm5 = _mm_shuffle_epi8(xmm5, mask);
-      xmm4 = _mm_srli_si128(xmm5, 8);
-      xmm6 = _mm_cvtepu16_epi32(xmm5);
-      dmm0 = _mm_cvtepi32_pd(xmm6);
-      dmm0 = _mm_add_pd(_mm_mul_pd(dmm0, dmm9), dmm8);
-      (void) _mm_stream_pd(data, dmm0);
-      xmm7 = _mm_srli_si128(xmm6, 8);
-      dmm1 = _mm_cvtepi32_pd(xmm7);
-      dmm1 = _mm_add_pd(_mm_mul_pd(dmm1, dmm9), dmm8);
-      (void) _mm_stream_pd(data+2, dmm1);
-      xmm6 = _mm_cvtepu16_epi32(xmm4);
-      dmm2 = _mm_cvtepi32_pd(xmm6);
-      dmm2 = _mm_add_pd(_mm_mul_pd(dmm2, dmm9), dmm8);
-      (void) _mm_stream_pd(data+4, dmm2);
-      xmm7 = _mm_srli_si128(xmm6, 8);
-      dmm3 = _mm_cvtepi32_pd(xmm7);
-      dmm3 = _mm_add_pd(_mm_mul_pd(dmm3, dmm9), dmm8);
-      (void) _mm_stream_pd(data+6, dmm3);
-      
-      xmm5 = _mm_loadu_si128((__m128i *) sgrib+1);
-      xmm5 = _mm_shuffle_epi8(xmm5, mask);
-      xmm4 = _mm_srli_si128(xmm5, 8);
-      xmm6 = _mm_cvtepu16_epi32(xmm5);
-      dmm4 = _mm_cvtepi32_pd(xmm6);
-      dmm4 = _mm_add_pd(_mm_mul_pd(dmm4, dmm9), dmm8);
-      (void) _mm_stream_pd(data+8, dmm4);
-      xmm7 = _mm_srli_si128(xmm6, 8);
-      dmm5 = _mm_cvtepi32_pd(xmm7);
-      dmm5 = _mm_add_pd(_mm_mul_pd(dmm5, dmm9), dmm8);
-      (void) _mm_stream_pd(data+10, dmm5);
-      xmm6 = _mm_cvtepu16_epi32(xmm4);
-      dmm6 = _mm_cvtepi32_pd(xmm6);
-      dmm6 = _mm_add_pd(_mm_mul_pd(dmm6, dmm9), dmm8);
-      (void) _mm_stream_pd(data+12, dmm6);
-      xmm7 = _mm_srli_si128(xmm6, 8);
-      dmm7 = _mm_cvtepi32_pd(xmm7);
-      dmm7 = _mm_add_pd(_mm_mul_pd(dmm7, dmm9), dmm8);
-      (void) _mm_stream_pd(data+14, dmm7);
-
-      data += 16;
-      sgrib += 2;
-      nframes -= 16;
-    }
-
-  residual = nframes;
-  ofs = datasize - residual;
-  for ( j = 0; j < residual; j++ )
-    {
-      dval = (((int)igrib[2*(ofs+j)] <<  8) | (int)igrib[2*(ofs+j)+1]);
-      fpdata[ofs+j] = fmin + zscale * dval;
-    }
-
-  return;
-}
-
-#endif
 
 #undef DISABLE_SIMD
 #undef _ENABLE_AVX
@@ -9327,7 +9086,6 @@ void gribPrintSec3_float(int *isec0, int *isec3, float *fsec3) {gribPrintSec3SP(
 void gribPrintSec4_float(int *isec0, int *isec4, float *fsec4) {gribPrintSec4SP(isec0, isec4, fsec4);}
 
 
-
 #ifdef T
 #undef T
 #endif
@@ -9335,8 +9093,8 @@ void gribPrintSec4_float(int *isec0, int *isec4, float *fsec4) {gribPrintSec4SP(
 #ifdef T
 
 static 
-void TEMPLATE(decode_array_common,T)(const unsigned char * restrict igrib, long jlend, int NumBits, 
-				     T fmin, T zscale, T * restrict fpdata)
+void TEMPLATE(decode_array_common,T)(const unsigned char *restrict igrib, long jlend, int NumBits, 
+				     T fmin, T zscale, T *restrict fpdata)
 {
   /* code from wgrib routine BDS_unpack */
   const unsigned char *bits = igrib;
@@ -9376,8 +9134,8 @@ static double shift[9] = {1.0, 2.0, 4.0, 8.0, 16.0, 32.0, 64.0, 128.0, 256.0};
 #endif
 
 static 
-void TEMPLATE(decode_array_common2,T)(const unsigned char * restrict igrib, long jlend, int NumBits, 
-				      T fmin, T zscale, T * restrict fpdata)
+void TEMPLATE(decode_array_common2,T)(const unsigned char *restrict igrib, long jlend, int NumBits, 
+				      T fmin, T zscale, T *restrict fpdata)
 {
   /* code from wgrib routine BDS_unpack */
   const unsigned char *bits = igrib;
@@ -9417,6 +9175,33 @@ void TEMPLATE(decode_array_common2,T)(const unsigned char * restrict igrib, long
       fpdata[i] = fmin + zscale*jj;
     }
 } 
+
+#define gribSwapByteOrder_uint16(ui16)  ((ui16<<8) | (ui16>>8))
+
+static
+void TEMPLATE(decode_array_2byte,T)(size_t jlend, const unsigned char *restrict igrib,
+                                    T *fpdata, T fmin, T zscale)
+{
+  U_BYTEORDER;
+  const uint16_t *restrict sgrib = (uint16_t *) (igrib);
+
+  if ( IS_BIGENDIAN() )
+    {
+      for ( size_t i = 0; i < jlend; i++ )
+        {
+          fpdata[i] = fmin + zscale * sgrib[i];
+        }
+    }
+  else
+    {
+      uint16_t ui16;
+      for ( size_t i = 0; i < jlend; i++ )
+        {
+          ui16 = gribSwapByteOrder_uint16(sgrib[i]);
+          fpdata[i] = fmin + zscale * ui16;
+        }
+    }
+}
 
 static 
 void TEMPLATE(decode_array,T)(const unsigned char *restrict igrib, long jlend, int numBits, 
@@ -9503,57 +9288,7 @@ void TEMPLATE(decode_array,T)(const unsigned char *restrict igrib, long jlend, i
       }
   else if ( numBits == 16 )
     {
-#ifdef _GET_IBM_COUNTER 
-      hpmStart(6, "unpack 16 bit base");
-#elif defined _GET_X86_COUNTER 
-      start_decode = _rdtsc();
-#elif defined _GET_MACH_COUNTER 
-      start_decode = mach_absolute_time();
-#endif
-      
-      if ( sizeof(T) == sizeof(double) )
-      	{ 
-#if defined _ENABLE_AVX
-	  printf("AVX selected ...\n");
-	  avx_decode_array_2byte_double((size_t) jlend, igrib, fpdata, fmin, zscale);
-#elif defined _ENABLE_SSE4_1
-	  printf("SSE4 selected ...\n");
-	  sse41_decode_array_2byte_double((size_t) jlend, igrib, fpdata, fmin, zscale);
-#else
-	  for ( i = 0; i < jlend; i++ )
-	    {
-	      dval = (((int)igrib[2*i  ] <<  8) |  (int)igrib[2*i+1]);
-	      fpdata[i] = fmin + zscale * dval;
-	    }
-#endif
-	}
-      else
-	{
-	  for ( i = 0; i < jlend; i++ )
-	    {
-	      dval = (((int)igrib[2*i  ] <<  8) |  (int)igrib[2*i+1]);
-	      fpdata[i] = fmin + zscale * dval;
-	    }
-	}
-
-#if defined _GET_X86_COUNTER || defined _GET_MACH_COUNTER
-#if defined _GET_X86_COUNTER 
-      end_decode = _rdtsc();
-#elif defined _GET_MACH_COUNTER 
-      end_decode = mach_absolute_time();
-#endif
-#if defined _ENABLE_AVX
-      printf("AVX encoding cycles:: %" PRIu64 "\n", end_decode-start_decode);
-#elif defined _ENABLE_SSE4_1
-      printf("SSE 4.1 encoding cycles:: %" PRIu64 "\n", end_decode-start_decode);
-#else
-      printf("loop encoding cycles:: %" PRIu64 "\n", end_decode-start_decode);
-#endif  
-#endif
-      
-#ifdef _GET_IBM_COUNTER 
-      hpmStop(6);
-#endif
+      TEMPLATE(decode_array_2byte,T)((size_t) jlend, igrib, fpdata, fmin, zscale);
     }
   else if ( numBits == 24 )
     for ( i = 0; i < jlend; i++ )
@@ -9593,8 +9328,8 @@ void TEMPLATE(decode_array,T)(const unsigned char *restrict igrib, long jlend, i
 #ifdef T
 
 static 
-void TEMPLATE(decode_array_common,T)(const unsigned char * restrict igrib, long jlend, int NumBits, 
-				     T fmin, T zscale, T * restrict fpdata)
+void TEMPLATE(decode_array_common,T)(const unsigned char *restrict igrib, long jlend, int NumBits, 
+				     T fmin, T zscale, T *restrict fpdata)
 {
   /* code from wgrib routine BDS_unpack */
   const unsigned char *bits = igrib;
@@ -9634,8 +9369,8 @@ static double shift[9] = {1.0, 2.0, 4.0, 8.0, 16.0, 32.0, 64.0, 128.0, 256.0};
 #endif
 
 static 
-void TEMPLATE(decode_array_common2,T)(const unsigned char * restrict igrib, long jlend, int NumBits, 
-				      T fmin, T zscale, T * restrict fpdata)
+void TEMPLATE(decode_array_common2,T)(const unsigned char *restrict igrib, long jlend, int NumBits, 
+				      T fmin, T zscale, T *restrict fpdata)
 {
   /* code from wgrib routine BDS_unpack */
   const unsigned char *bits = igrib;
@@ -9675,6 +9410,33 @@ void TEMPLATE(decode_array_common2,T)(const unsigned char * restrict igrib, long
       fpdata[i] = fmin + zscale*jj;
     }
 } 
+
+#define gribSwapByteOrder_uint16(ui16)  ((ui16<<8) | (ui16>>8))
+
+static
+void TEMPLATE(decode_array_2byte,T)(size_t jlend, const unsigned char *restrict igrib,
+                                    T *fpdata, T fmin, T zscale)
+{
+  U_BYTEORDER;
+  const uint16_t *restrict sgrib = (uint16_t *) (igrib);
+
+  if ( IS_BIGENDIAN() )
+    {
+      for ( size_t i = 0; i < jlend; i++ )
+        {
+          fpdata[i] = fmin + zscale * sgrib[i];
+        }
+    }
+  else
+    {
+      uint16_t ui16;
+      for ( size_t i = 0; i < jlend; i++ )
+        {
+          ui16 = gribSwapByteOrder_uint16(sgrib[i]);
+          fpdata[i] = fmin + zscale * ui16;
+        }
+    }
+}
 
 static 
 void TEMPLATE(decode_array,T)(const unsigned char *restrict igrib, long jlend, int numBits, 
@@ -9761,57 +9523,7 @@ void TEMPLATE(decode_array,T)(const unsigned char *restrict igrib, long jlend, i
       }
   else if ( numBits == 16 )
     {
-#ifdef _GET_IBM_COUNTER 
-      hpmStart(6, "unpack 16 bit base");
-#elif defined _GET_X86_COUNTER 
-      start_decode = _rdtsc();
-#elif defined _GET_MACH_COUNTER 
-      start_decode = mach_absolute_time();
-#endif
-      
-      if ( sizeof(T) == sizeof(double) )
-      	{ 
-#if defined _ENABLE_AVX
-	  printf("AVX selected ...\n");
-	  avx_decode_array_2byte_double((size_t) jlend, igrib, fpdata, fmin, zscale);
-#elif defined _ENABLE_SSE4_1
-	  printf("SSE4 selected ...\n");
-	  sse41_decode_array_2byte_double((size_t) jlend, igrib, fpdata, fmin, zscale);
-#else
-	  for ( i = 0; i < jlend; i++ )
-	    {
-	      dval = (((int)igrib[2*i  ] <<  8) |  (int)igrib[2*i+1]);
-	      fpdata[i] = fmin + zscale * dval;
-	    }
-#endif
-	}
-      else
-	{
-	  for ( i = 0; i < jlend; i++ )
-	    {
-	      dval = (((int)igrib[2*i  ] <<  8) |  (int)igrib[2*i+1]);
-	      fpdata[i] = fmin + zscale * dval;
-	    }
-	}
-
-#if defined _GET_X86_COUNTER || defined _GET_MACH_COUNTER
-#if defined _GET_X86_COUNTER 
-      end_decode = _rdtsc();
-#elif defined _GET_MACH_COUNTER 
-      end_decode = mach_absolute_time();
-#endif
-#if defined _ENABLE_AVX
-      printf("AVX encoding cycles:: %" PRIu64 "\n", end_decode-start_decode);
-#elif defined _ENABLE_SSE4_1
-      printf("SSE 4.1 encoding cycles:: %" PRIu64 "\n", end_decode-start_decode);
-#else
-      printf("loop encoding cycles:: %" PRIu64 "\n", end_decode-start_decode);
-#endif  
-#endif
-      
-#ifdef _GET_IBM_COUNTER 
-      hpmStop(6);
-#endif
+      TEMPLATE(decode_array_2byte,T)((size_t) jlend, igrib, fpdata, fmin, zscale);
     }
   else if ( numBits == 24 )
     for ( i = 0; i < jlend; i++ )
@@ -14374,7 +14086,7 @@ void encode_dummy(void)
   (void) encode_array_unrolled_double(0, 0, 0, NULL, NULL, 0, 0, NULL);
   (void) encode_array_unrolled_float(0, 0, 0, NULL, NULL, 0, 0, NULL);
 }
-static const char grb_libvers[] = "1.7.4" " of ""Oct 30 2015"" ""13:45:58";
+static const char grb_libvers[] = "1.7.4" " of ""Oct 30 2015"" ""16:20:41";
 const char *
 cgribexLibraryVersion(void)
 {
