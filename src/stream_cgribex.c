@@ -1534,9 +1534,16 @@ void cgribexDefTime(int *isec1, int vdate, int vtime, int tsteptype, int numavg,
       rtime    = taxisInqRtime(taxisID);
 
       factor = cgribexDefDateTime(isec1, timeunit, rdate, rtime);
-
       timerange = cgribexDefTimerange(tsteptype, factor, calendar,
 				      rdate, rtime, vdate, vtime, &ip1, &ip2);
+
+      if ( ip2 > 0xFF && timeunit < TUNIT_YEAR )
+        {
+          timeunit++;
+          factor = cgribexDefDateTime(isec1, timeunit, rdate, rtime);
+          timerange = cgribexDefTimerange(tsteptype, factor, calendar,
+                                          rdate, rtime, vdate, vtime, &ip1, &ip2);
+        }
 
       if ( timerange == -1 || timerange == 3 )
 	{
