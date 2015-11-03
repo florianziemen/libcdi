@@ -272,6 +272,7 @@ src/iterator_fallback.h -text
 src/iterator_grib.c -text
 src/iterator_grib.h -text
 src/make_cdilib -text
+src/make_cdilib_nc -text
 src/make_fint.c -text
 src/mo_cdi.f90 -text
 src/model.c -text

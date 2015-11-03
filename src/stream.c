@@ -144,6 +144,7 @@ int cdiGetFiletype(const char *filename, int *byteorder)
       if ( CDI_Debug ) Message("found IEG file = %s", filename);
     }
 #endif
+#if  defined  (HAVE_LIBCGRIBEX)
   else if ( gribCheckSeek(fileID, &recpos, &version) == 0 )
     {
       if ( version <= 1 )
@@ -157,6 +158,7 @@ int cdiGetFiletype(const char *filename, int *byteorder)
 	  if ( CDI_Debug ) Message("found seeked GRIB2 file = %s", filename);
 	}
     }
+#endif
 
   fileClose(fileID);
 
@@ -1576,10 +1578,14 @@ cdiStreamSetupVlist_(stream_t *streamptr, int vlistID)
         }
         break;
 #endif
+#ifdef HAVE_LIBGRIB
       case FILETYPE_GRB:
       case FILETYPE_GRB2:
         gribContainersNew(streamptr);
         break;
+#endif
+      default:
+        ;
       }
 }
 
