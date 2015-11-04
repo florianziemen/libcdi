@@ -183,10 +183,10 @@ am__libcdi_la_SOURCES_DIST = basetime.c basetime.h binary.c binary.h \
 	stream_gribapi.c stream_gribapi.h stream_history.c \
 	stream_ieg.c stream_ieg.h stream_fcommon.c stream_fcommon.h \
 	cdi_int.c cdi_int.h stream_record.c stream_srv.c stream_srv.h \
-	stream_var.c cdf_write.c cdf_read.c subtype.c subtype.h swap.h \
-	table.c table.h tablepar.h taxis.c taxis.h timebase.c \
-	timebase.h tsteps.c util.c varscan.c varscan.h version.c \
-	vlist.c vlist.h vlist_att.c vlist_att.h vlist_var.c \
+	stream_var.c grb_write.c cdf_write.c cdf_read.c subtype.c \
+	subtype.h swap.h table.c table.h tablepar.h taxis.c taxis.h \
+	timebase.c timebase.h tsteps.c util.c varscan.c varscan.h \
+	version.c vlist.c vlist.h vlist_att.c vlist_att.h vlist_var.c \
 	vlist_var.h zaxis.c zaxis.h stream.c stream_write.c \
 	stream_read.c swap.c iterator.c iterator.h iterator_fallback.c \
 	iterator_fallback.h iterator_grib.c iterator_grib.h cfortran.h \
@@ -204,10 +204,10 @@ am_libcdi_la_OBJECTS = basetime.lo binary.lo calendar.lo cdf.lo \
 	stream_cdf.lo stream_cgribex.lo stream_ext.lo stream_grb.lo \
 	stream_gribapi.lo stream_history.lo stream_ieg.lo \
 	stream_fcommon.lo cdi_int.lo stream_record.lo stream_srv.lo \
-	stream_var.lo cdf_write.lo cdf_read.lo subtype.lo table.lo \
-	taxis.lo timebase.lo tsteps.lo util.lo varscan.lo version.lo \
-	vlist.lo vlist_att.lo vlist_var.lo zaxis.lo stream.lo \
-	stream_write.lo stream_read.lo swap.lo iterator.lo \
+	stream_var.lo grb_write.lo cdf_write.lo cdf_read.lo subtype.lo \
+	table.lo taxis.lo timebase.lo tsteps.lo util.lo varscan.lo \
+	version.lo vlist.lo vlist_att.lo vlist_var.lo zaxis.lo \
+	stream.lo stream_write.lo stream_read.lo swap.lo iterator.lo \
 	iterator_fallback.lo iterator_grib.lo $(am__objects_2) \
 	$(am__objects_4)
 libcdi_la_OBJECTS = $(am_libcdi_la_OBJECTS)
@@ -530,14 +530,14 @@ libcdi_la_SOURCES = basetime.c basetime.h binary.c binary.h calendar.c \
 	stream_gribapi.h stream_history.c stream_ieg.c stream_ieg.h \
 	stream_fcommon.c stream_fcommon.h cdi_int.c cdi_int.h \
 	stream_record.c stream_srv.c stream_srv.h stream_var.c \
-	cdf_write.c cdf_read.c subtype.c subtype.h swap.h table.c \
-	table.h tablepar.h taxis.c taxis.h timebase.c timebase.h \
-	tsteps.c util.c varscan.c varscan.h version.c vlist.c vlist.h \
-	vlist_att.c vlist_att.h vlist_var.c vlist_var.h zaxis.c \
-	zaxis.h stream.c stream_write.c stream_read.c swap.c \
-	iterator.c iterator.h iterator_fallback.c iterator_fallback.h \
-	iterator_grib.c iterator_grib.h $(am__append_2) \
-	$(am__append_3)
+	grb_write.c cdf_write.c cdf_read.c subtype.c subtype.h swap.h \
+	table.c table.h tablepar.h taxis.c taxis.h timebase.c \
+	timebase.h tsteps.c util.c varscan.c varscan.h version.c \
+	vlist.c vlist.h vlist_att.c vlist_att.h vlist_var.c \
+	vlist_var.h zaxis.c zaxis.h stream.c stream_write.c \
+	stream_read.c swap.c iterator.c iterator.h iterator_fallback.c \
+	iterator_fallback.h iterator_grib.c iterator_grib.h \
+	$(am__append_2) $(am__append_3)
 
 # cfortran.h is an optional part of libcdi
 libcdi_la_USE_FC_extra_sources = \
@@ -711,6 +711,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extralib.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/file.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gaussgrid.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/grb_write.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gribapi.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gribapi_utilities.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/grid.Plo@am__quote@
