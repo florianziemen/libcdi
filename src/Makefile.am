@@ -93,6 +93,7 @@ libcdi_la_SOURCES = 	 \
 	stream_srv.h	 \
 	stream_var.c     \
         grb_write.c      \
+        grb_read.c       \
         cdf_write.c      \
         cdf_read.c       \
         subtype.c        \

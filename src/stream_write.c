@@ -69,7 +69,7 @@ void cdiStreamWriteVar_(int streamID, int varID, int memtype, const void *data, 
     case FILETYPE_NC4C:
       {
 	if ( streamptr->accessmode == 0 ) cdfEndDef(streamptr);
-        cdf_write_var(streamptr, varID, memtype, (double *)data, nmiss);
+        cdf_write_var(streamptr, varID, memtype, data, nmiss);
 	break;
       }
 #endif
@@ -103,7 +103,7 @@ void streamWriteVar(int streamID, int varID, const double *data, int nmiss)
                                const void *data, int nmiss)
     = (void (*)(int, int, int, const void *, int))
     namespaceSwitchGet(NSSWITCH_STREAM_WRITE_VAR_).func;
-  myCdiStreamWriteVar_(streamID, varID, MEMTYPE_DOUBLE, data, nmiss);
+  myCdiStreamWriteVar_(streamID, varID, MEMTYPE_DOUBLE, (const void *) data, nmiss);
 }
 
 /*
@@ -129,7 +129,7 @@ void streamWriteVarF(int streamID, int varID, const float *data, int nmiss)
                                const void *data, int nmiss)
     = (void (*)(int, int, int, const void *, int))
     namespaceSwitchGet(NSSWITCH_STREAM_WRITE_VAR_).func;
-  myCdiStreamWriteVar_(streamID, varID, MEMTYPE_FLOAT, data, nmiss);
+  myCdiStreamWriteVar_(streamID, varID, MEMTYPE_FLOAT, (const void *) data, nmiss);
 }
 
 static
@@ -218,7 +218,7 @@ The values are converted to the external data type of the variable, if necessary
 */
 void streamWriteVarSlice(int streamID, int varID, int levelID, const double *data, int nmiss)
 {
-  cdiStreamWriteVarSlice(streamID, varID, levelID, MEMTYPE_DOUBLE, data, nmiss);
+  cdiStreamWriteVarSlice(streamID, varID, levelID, MEMTYPE_DOUBLE, (const void *) data, nmiss);
 }
 
 /*
@@ -241,7 +241,7 @@ Only support for netCDF was implemented in this function.
 */
 void streamWriteVarSliceF(int streamID, int varID, int levelID, const float *data, int nmiss)
 {
-  cdiStreamWriteVarSlice(streamID, varID, levelID, MEMTYPE_FLOAT, data, nmiss);
+  cdiStreamWriteVarSlice(streamID, varID, levelID, MEMTYPE_FLOAT, (const void *) data, nmiss);
 }
 
 
