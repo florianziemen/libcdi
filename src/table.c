@@ -360,7 +360,7 @@ int tableRead(const char *tablefile)
       */
       if ( id == 0 ) continue;
 
-      while ( isdigit((int) *pline) ) pline++; 
+      while ( isdigit((int) *pline) ) pline++;
 
       if ( strchr(pline, '|') )
 	err = decodeForm2(pline, name, longname, units);
@@ -369,7 +369,7 @@ int tableRead(const char *tablefile)
 
       if ( err ) continue;
 
-      if ( name[0] ) sprintf(name, "var%d", id);
+      if ( name[0] == 0 ) sprintf(name, "var%d", id);
 
       tableDefEntry(tableID, id, name, longname, units);
     }
