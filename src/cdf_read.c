@@ -502,7 +502,7 @@ void cdfGetSliceSlapDescription(stream_t *streamptr, int varId, int levelId, boo
     Error("Internal error, variable %s has an unsupported array structure!", vlistInqVarNamePtr(vlistId, varId));
 }
 
-
+static
 void cdfReadVarDP(stream_t *streamptr, int varID, double *data, int *nmiss)
 {
   if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamptr->self, varID);
@@ -534,7 +534,7 @@ void cdfReadVarDP(stream_t *streamptr, int varID, double *data, int *nmiss)
   *nmiss = (int)nmiss_;
 }
 
-
+static
 void cdfReadVarSP(stream_t *streamptr, int varID, float *data, int *nmiss)
 {
   if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamptr->self, varID);
@@ -567,6 +567,15 @@ void cdfReadVarSP(stream_t *streamptr, int varID, float *data, int *nmiss)
 }
 
 
+void cdf_read_var(stream_t *streamptr, int varID, int memtype, void *data, int *nmiss)
+{
+  if ( memtype == MEMTYPE_DOUBLE )
+    cdfReadVarDP(streamptr, varID, (double*) data, nmiss);
+  else
+    cdfReadVarSP(streamptr, varID, (float*) data, nmiss);
+}
+
+static
 void cdfReadVarSliceDP(stream_t *streamptr, int varID, int levelID, double *data, int *nmiss)
 {
   size_t start[4];
@@ -624,7 +633,7 @@ void cdfReadVarSliceDP(stream_t *streamptr, int varID, int levelID, double *data
   *nmiss = (int)nmiss_;
 }
 
-
+static
 void cdfReadVarSliceSP(stream_t *streamptr, int varID, int levelID, float *data, int *nmiss)
 {
   size_t start[4];
@@ -683,6 +692,15 @@ void cdfReadVarSliceSP(stream_t *streamptr, int varID, int levelID, float *data,
 }
 
 
+void cdf_read_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, void *data, int *nmiss)
+{
+  if ( memtype == MEMTYPE_DOUBLE )
+    cdfReadVarSliceDP(streamptr, varID, levelID, (double*) data, nmiss);
+  else
+    cdfReadVarSliceSP(streamptr, varID, levelID, (float*) data, nmiss);
+}
+
+
 void cdf_read_record(stream_t *streamptr, int memtype, void *data, int *nmiss)
 {
   if ( CDI_Debug ) Message("streamID = %d", streamptr->self);
@@ -694,9 +712,9 @@ void cdf_read_record(stream_t *streamptr, int memtype, void *data, int *nmiss)
   int levelID = streamptr->tsteps[tsID].records[recID].levelID;
 
   if ( memtype == MEMTYPE_DOUBLE )
-    cdfReadVarSliceDP(streamptr, varID, levelID, data, nmiss);
+    cdfReadVarSliceDP(streamptr, varID, levelID, (double*) data, nmiss);
   else
-    cdfReadVarSliceSP(streamptr, varID, levelID, data, nmiss);
+    cdfReadVarSliceSP(streamptr, varID, levelID, (float*) data, nmiss);
 }
 
 #endif

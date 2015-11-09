@@ -17,13 +17,10 @@ void   cdfCopyRecord(stream_t *streamptr2, stream_t *streamptr1);
 void   cdf_read_record(stream_t *streamptr, int memtype, void *data, int *nmiss);
 void   cdf_write_record(stream_t *streamptr, int memtype, const void *data, int nmiss);
 
-void   cdfReadVarDP(stream_t *streamptr, int varID, double *data, int *nmiss);
-void   cdfReadVarSP(stream_t *streamptr, int varID, float *data, int *nmiss);
-
+void   cdf_read_var(stream_t *streamptr, int varID, int memtype, void *data, int *nmiss);
 void   cdf_write_var(stream_t *streamptr, int varID, int memtype, const void *data, int nmiss);
 
-void   cdfReadVarSliceDP(stream_t *streamptr, int varID, int levelID, double *data, int *nmiss);
-void   cdfReadVarSliceSP(stream_t *streamptr, int varID, int levelID, float *data, int *nmiss);
+void   cdf_read_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, void *data, int *nmiss);
 void   cdf_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, const void *data, int nmiss);
 
 void   cdf_write_var_chunk(stream_t *streamptr, int varID, int memtype,

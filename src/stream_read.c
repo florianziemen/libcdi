@@ -68,11 +68,7 @@ void cdiStreamReadVar(int streamID, int varID, int memtype, void *data, int *nmi
     case FILETYPE_NC4:
     case FILETYPE_NC4C:
       {
-        if ( memtype == MEMTYPE_FLOAT )
-          cdfReadVarSP(streamptr, varID, (float *)data, nmiss);
-        else
-          cdfReadVarDP(streamptr, varID, (double *)data, nmiss);
-
+        cdf_read_var(streamptr, varID, memtype, data, nmiss);
 	break;
       }
 #endif
@@ -187,10 +183,7 @@ int cdiStreamReadVarSlice(int streamID, int varID, int levelID, int memtype, voi
     case FILETYPE_NC4:
     case FILETYPE_NC4C:
       {
-        if ( memtype == MEMTYPE_FLOAT )
-          cdfReadVarSliceSP(streamptr, varID, levelID, (float *)data, nmiss);
-        else
-          cdfReadVarSliceDP(streamptr, varID, levelID, (double *)data, nmiss);
+        cdf_read_var_slice(streamptr, varID, levelID, memtype, data, nmiss);
         break;
       }
 #endif
