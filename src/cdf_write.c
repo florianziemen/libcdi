@@ -165,7 +165,7 @@ void *resizeBuf(void **buf, size_t *bufSize, size_t reqSize)
 }
 
 static
-void defineAttributes(int vlistID, int varID, int fileID, int ncvarID)
+void cdfDefineAttributes(int vlistID, int varID, int fileID, int ncvarID)
 {
   int atttype, attlen;
   size_t len;
@@ -234,7 +234,7 @@ void cdfDefGlobalAtts(stream_t *streamptr)
 
   if ( natts > 0 && streamptr->ncmode == 2 ) cdf_redef(fileID);
 
-  defineAttributes(vlistID, CDI_GLOBAL, fileID, NC_GLOBAL);
+  cdfDefineAttributes(vlistID, CDI_GLOBAL, fileID, NC_GLOBAL);
 
   if ( natts > 0 && streamptr->ncmode == 2 ) cdf_enddef(fileID);
 
@@ -742,7 +742,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
     }
 
   /* Attributes */
-  defineAttributes(vlistID, varID, fileID, ncvarid);
+  cdfDefineAttributes(vlistID, varID, fileID, ncvarid);
 
   /* if ( streamptr->ncmode == 2 ) cdf_enddef(fileID); */
 
@@ -1065,7 +1065,6 @@ void cdf_write_var(stream_t *streamptr, int varID, int memtype, const void *data
   long nvals = gridInqSize(gridID)*zaxisInqSize(zaxisID);
 
   cdf_write_var_data(fileID, vlistID, varID, ncvarid, dtype, nvals, xsize, ysize, swapxy, start, count, memtype, data, nmiss);
-
 }
 
 
