@@ -1308,7 +1308,7 @@ int cgribexScanTimestep(stream_t * streamptr)
 #endif
 
 #if  defined  (HAVE_LIBCGRIBEX)
-int cgribexDecode(unsigned char *gribbuffer, int gribsize, double *data, int gridsize,
+int cgribexDecode(int memtype, unsigned char *gribbuffer, int gribsize, double *data, int gridsize,
 		  int unreduced, int *nmiss, double missval)
 {
   int status = 0;
@@ -1322,7 +1322,7 @@ int cgribexDecode(unsigned char *gribbuffer, int gribsize, double *data, int gri
 
   FSEC3_MissVal = missval;
 
-  gribExDP(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, data,
+  gribExDP(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, (double*) data,
 	   gridsize, (int *)(void *)gribbuffer, gribsize, &iword, hoper, &iret);
 
   if ( ISEC1_Sec2Or3Flag & 64 )
@@ -2160,7 +2160,7 @@ void cgribexDefEnsembleVar(int *isec1, int vlistID, int varID)
 #if  defined  (HAVE_LIBCGRIBEX)
 size_t cgribexEncode(int memtype, int varID, int levelID, int vlistID, int gridID, int zaxisID,
 		     int vdate, int vtime, int tsteptype, int numavg,
-		     long datasize, const double *data, int nmiss, unsigned char *gribbuffer, size_t gribbuffersize)
+		     long datasize, const void *data, int nmiss, unsigned char *gribbuffer, size_t gribbuffersize)
 {
   size_t nbytes = 0;
   int gribsize;
