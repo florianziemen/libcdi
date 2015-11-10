@@ -86,10 +86,8 @@ size_t grbSzip(int filetype, unsigned char *gribbuffer, size_t gribbuffersize)
 void grbCopyRecord(stream_t * streamptr2, stream_t * streamptr1)
 {
   int filetype = streamptr1->filetype;
-
   int fileID1 = streamptr1->fileID;
   int fileID2 = streamptr2->fileID;
-
   int tsID    = streamptr1->curTsID;
   int vrecID  = streamptr1->tsteps[tsID].curRecID;
   int recID   = streamptr1->tsteps[tsID].recIDs[vrecID];
@@ -141,9 +139,7 @@ void grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
   int gridID    = vlistInqVarGrid(vlistID, varID);
   int zaxisID   = vlistInqVarZaxis(vlistID, varID);
   int tsteptype = vlistInqVarTsteptype(vlistID, varID);
-
   int comptype  = streamptr->comptype;
-
   int tsID      = streamptr->curTsID;
   int date      = streamptr->tsteps[tsID].taxis.vdate;
   int time      = streamptr->tsteps[tsID].taxis.vtime;
@@ -219,19 +215,25 @@ void grb_write_var(stream_t *streamptr, int varID, int memtype, const void *data
   if ( memtype == MEMTYPE_FLOAT )
     for ( int levelID = 0; levelID < nlevs; levelID++ )
       {
-        int nmiss_slice = 0;
         const float *restrict fdata = ((const float *)data)+levelID*gridsize;
-        for ( size_t i = 0; i < chunkLen; ++i )
-          nmiss_slice += DBL_IS_EQUAL(fdata[i], missval);
+        
+        int nmiss_slice = 0;
+        if ( nmiss )
+          for ( size_t i = 0; i < chunkLen; ++i )
+            nmiss_slice += DBL_IS_EQUAL(fdata[i], missval);
+
         grb_write_var_slice(streamptr, varID, levelID, memtype, fdata, nmiss_slice);
       }
   else
     for ( int levelID = 0; levelID < nlevs; levelID++ )
       {
-        int nmiss_slice = 0;
         const double *restrict ddata = ((const double *)data)+levelID*gridsize;
-        for ( size_t i = 0; i < chunkLen; ++i )
-          nmiss_slice += DBL_IS_EQUAL(ddata[i], missval);
+        
+        int nmiss_slice = 0;
+        if ( nmiss )
+          for ( size_t i = 0; i < chunkLen; ++i )
+            nmiss_slice += DBL_IS_EQUAL(ddata[i], missval);
+
         grb_write_var_slice(streamptr, varID, levelID, memtype, ddata, nmiss_slice);
       }
 }
