@@ -17,7 +17,7 @@
 
 
 static
-int grbDecode(int memtype, int filetype, unsigned char *gribbuffer, int gribsize, double *data, int gridsize,
+int grbDecode(int memtype, int filetype, unsigned char *gribbuffer, int gribsize, double *data, size_t datasize,
 	      int unreduced, int *nmiss, double missval, int vlistID, int varID)
 {
   int status = 0;
@@ -30,12 +30,26 @@ int grbDecode(int memtype, int filetype, unsigned char *gribbuffer, int gribsize
       if ( cdiNAdditionalGRIBKeys > 0 )
 	Error("CGRIBEX decode does not support reading of additional GRIB keys!");
 #endif
-      status = cgribexDecode(memtype, gribbuffer, gribsize, data, gridsize, unreduced, nmiss, missval);
+      status = cgribexDecode(memtype, gribbuffer, gribsize, data, (long) datasize, unreduced, nmiss, missval);
     }
   else
 #endif
 #ifdef HAVE_LIBGRIB_API
-    status = gribapiDecode(gribbuffer, gribsize, data, gridsize, unreduced, nmiss, missval, vlistID, varID);
+    {
+      void *datap = data;
+      if ( memtype == MEMTYPE_FLOAT )
+        datap = Malloc(datasize*sizeof(double));
+
+      status = gribapiDecode(gribbuffer, gribsize, datap, (long) datasize, unreduced, nmiss, missval, vlistID, varID);
+
+      if ( memtype == MEMTYPE_FLOAT )
+        {
+          float *dataf = (float*) data;
+          double *datad = (double*) datap;
+          for ( size_t i = 0; i < datasize; ++i ) dataf[i] = (float) datad[i];
+          free((void*)datap);
+        }
+    }
 #else
     {
       (void)vlistID; (void)varID;

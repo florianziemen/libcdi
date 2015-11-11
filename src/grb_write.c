@@ -32,7 +32,7 @@ size_t grbEncode(int filetype, int memtype, int varID, int levelID, int vlistID,
 
       nbytes = cgribexEncode(memtype, varID, levelID, vlistID, gridID, zaxisID,
 			     date, time, tsteptype, numavg,
-			     (long)datasize, data, nmiss, *gribbuffer, gribbuffersize);
+			     (long) datasize, data, nmiss, *gribbuffer, gribbuffersize);
     }
   else
 #endif
@@ -50,7 +50,7 @@ size_t grbEncode(int filetype, int memtype, int varID, int levelID, int vlistID,
       size_t gribbuffersize;
       nbytes = gribapiEncode(varID, levelID, vlistID, gridID, zaxisID,
 			     date, time, tsteptype, numavg,
-			     (long)datasize, data, nmiss, gribbuffer, &gribbuffersize,
+			     (long) datasize, datap, nmiss, gribbuffer, &gribbuffersize,
 			     comptype, gribContainer);
       
       if ( memtype == MEMTYPE_FLOAT ) free((void*)datap);

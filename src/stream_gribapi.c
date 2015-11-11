@@ -1459,7 +1459,7 @@ int gribapiScanTimestep(stream_t * streamptr)
 #endif
 
 #ifdef HAVE_LIBGRIB_API
-int gribapiDecode(void *gribbuffer, int gribsize, double *data, int gridsize,
+int gribapiDecode(void *gribbuffer, int gribsize, double *data, long gridsize,
 		  int unreduced, int *nmiss, double missval, int vlistID, int varID)
 {
   int status = 0;
@@ -1491,8 +1491,8 @@ int gribapiDecode(void *gribbuffer, int gribsize, double *data, int gridsize,
 
   // printf("values_size = %d  numberOfPoints = %ld\n", datasize, numberOfPoints);
 
-  if ( gridsize != (int) datasize )
-    Error("Internal problem: gridsize(%d) != datasize(%d)!", gridsize, datasize);
+  if ( gridsize != (long) datasize )
+    Error("Internal problem: gridsize(%ld) != datasize(%zu)!", gridsize, datasize);
   size_t dummy = datasize;
   GRIB_CHECK(grib_get_double_array(gh, "values", data, &dummy), 0);
 
@@ -1509,7 +1509,7 @@ int gribapiDecode(void *gribbuffer, int gribsize, double *data, int gridsize,
 
   grib_handle_delete(gh);
 
-  return (status);
+  return status;
 }
 #endif
 
@@ -2713,7 +2713,7 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
 
   gc->init = TRUE;
 
-  return (recsize);
+  return recsize;
 }
 #endif
 

@@ -1307,12 +1307,13 @@ int cgribexScanTimestep(stream_t * streamptr)
 #endif
 
 #if  defined  (HAVE_LIBCGRIBEX)
-int cgribexDecode(int memtype, unsigned char *gribbuffer, int gribsize, double *data, int gridsize,
+int cgribexDecode(int memtype, void *gribbuffer, int gribsize, void *data, long datasize,
 		  int unreduced, int *nmiss, double missval)
 {
   int status = 0;
   int iret = 0, iword = 0;
   int isec0[2], isec1[4096], isec2[4096], isec3[2], isec4[512];
+  float fsec2f[512], fsec3f[2];
   double fsec2[512], fsec3[2];
   char hoper[2];
 
@@ -1321,8 +1322,12 @@ int cgribexDecode(int memtype, unsigned char *gribbuffer, int gribsize, double *
 
   FSEC3_MissVal = missval;
 
-  gribExDP(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, (double*) data,
-	   gridsize, (int *)(void *)gribbuffer, gribsize, &iword, hoper, &iret);
+  if ( memtype == MEMTYPE_FLOAT )
+    gribExSP(isec0, isec1, isec2, fsec2f, isec3, fsec3f, isec4, (float*) data,
+             (int) datasize, (int*) gribbuffer, gribsize, &iword, hoper, &iret);
+  else
+    gribExDP(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, (double*) data,
+             (int) datasize, (int*) gribbuffer, gribsize, &iword, hoper, &iret);
 
   if ( ISEC1_Sec2Or3Flag & 64 )
     *nmiss = ISEC4_NumValues - ISEC4_NumNonMissValues;
@@ -1332,19 +1337,30 @@ int cgribexDecode(int memtype, unsigned char *gribbuffer, int gribsize, double *
   if ( ISEC1_CenterID == 215 && (isec1[34] != 0 && isec1[34] != 255) )
     {
       double undef_pds, undef_eps;
-      int i;
-
       MCH_get_undef(isec1, &undef_pds, &undef_eps);
 
       *nmiss = 0;
-      for ( i = 0; i < gridsize; i++ )
-        if ( (fabs(data[i]-undef_pds) < undef_eps) || IS_EQUAL(data[i],FSEC3_MissVal) ) {
-          data[i] = missval;
-          (*nmiss)++;
+      if ( memtype == MEMTYPE_FLOAT )
+        {
+          float *dataf = (float*) data;
+          for ( long i = 0; i < datasize; i++ )
+            if ( (fabs(dataf[i]-undef_pds) < undef_eps) || IS_EQUAL(dataf[i],FSEC3_MissVal) ) {
+              dataf[i] = missval;
+              (*nmiss)++;
+            }
+        }
+      else
+        {
+          double *datad = (double*) data;
+          for ( long i = 0; i < datasize; i++ )
+            if ( (fabs(datad[i]-undef_pds) < undef_eps) || IS_EQUAL(datad[i],FSEC3_MissVal) ) {
+              datad[i] = missval;
+              (*nmiss)++;
+            }
         }
     }
 
-  return (status);
+  return status;
 }
 #endif
 
@@ -2153,7 +2169,7 @@ void cgribexDefEnsembleVar(int *isec1, int vlistID, int varID)
 #if  defined  (HAVE_LIBCGRIBEX)
 size_t cgribexEncode(int memtype, int varID, int levelID, int vlistID, int gridID, int zaxisID,
 		     int vdate, int vtime, int tsteptype, int numavg,
-		     long datasize, const void *data, int nmiss, unsigned char *gribbuffer, size_t gribbuffersize)
+		     long datasize, const void *data, int nmiss, void *gribbuffer, size_t gribbuffersize)
 {
   size_t nbytes = 0;
   int gribsize;
@@ -2216,10 +2232,10 @@ size_t cgribexEncode(int memtype, int varID, int levelID, int vlistID, int gridI
 
   if ( memtype == MEMTYPE_FLOAT )
     gribExSP(isec0, isec1, isec2, fsec2f, isec3, fsec3f, isec4, (float*) data,
-             (int)datasize, (int *)(void *)gribbuffer, gribsize, &iword, "C", &iret);
+             (int) datasize, (int*) gribbuffer, gribsize, &iword, "C", &iret);
   else
     gribExDP(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, (double*) data,
-             (int)datasize, (int *)(void *)gribbuffer, gribsize, &iword, "C", &iret);
+             (int) datasize, (int*) gribbuffer, gribsize, &iword, "C", &iret);
 
   if ( iret ) Error("Problem during GRIB encode (errno = %d)!", iret);
 
