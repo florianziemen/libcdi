@@ -2417,86 +2417,6 @@ gribExSP(int *isec0, int *isec1, int *isec2, float *fsec2, int *isec3,
     }
 }
 
-
-void
-gribExSP_old(int *isec0, int *isec1, int *isec2, float *fsec2sp, int *isec3,
-	     float *fsec3sp, int *isec4, float *fsec4sp, int klenp, int *kgrib,
-	     int kleng, int *kword, char *hoper, int *kret)
-{
-  int inum, j;
-  double fsec2dp[1024];
-  double fsec3dp[2];
-  double *fsec4dp = NULL;
-  int yfunc = *hoper;
-
-  if ( yfunc == 'C' )
-    {
-      inum = 10 + isec2[11];
-      for ( j = 0; j < inum; j++ ) fsec2dp[j] = fsec2sp[j];
-
-      fsec3dp[0] = fsec3sp[0];
-      fsec3dp[1] = fsec3sp[1];
-
-      inum = isec4[0];
-      fsec4dp = (double*) Malloc(inum*sizeof(double));
-      if ( fsec4dp == NULL ) SysError("No Memory!");
-
-      for ( j = 0; j < inum; j++ ) fsec4dp[j] = fsec4sp[j];
-
-      gribExDP(isec0, isec1, isec2, fsec2dp, isec3,
-	       fsec3dp, isec4, fsec4dp, klenp, kgrib,
-	       kleng, kword, hoper, kret);
-
-      Free(fsec4dp);
-    }
-  else if ( yfunc == 'D' || yfunc == 'J' || yfunc == 'R' )
-    {
-      if ( yfunc == 'D' || yfunc == 'R' )
-	{
-	  fsec4dp = (double*) Malloc(klenp*sizeof(double));
-	  if ( fsec4dp == NULL ) SysError("No Memory!");
-	}
-
-      for ( j = 0; j < 10; j++ ) fsec2dp[j] = 0.0;
-      for ( j = 0; j <  2; j++ ) fsec3dp[j] = 0.0;
-
-      gribExDP(isec0, isec1, isec2, fsec2dp, isec3,
-	       fsec3dp, isec4, fsec4dp, klenp, kgrib,
-	       kleng, kword, hoper, kret);
-
-      inum = 10 + isec2[11];
-      for ( j = 0; j < inum; j++ ) fsec2sp[j] = fsec2dp[j];
-
-      fsec3sp[0] = fsec3dp[0];
-      fsec3sp[1] = fsec3dp[1];
-
-      if ( yfunc == 'D' || yfunc == 'R' )
-	{
-	  inum = isec4[0];
-	  for ( j = 0; j < inum; j++ )
-	    {
-	      if ( fsec4dp[j] > -FLT_MIN && fsec4dp[j] < FLT_MIN )
-		fsec4sp[j] = 0;
-	      else if ( fsec4dp[j] > FLT_MAX )
-		fsec4sp[j] = FLT_MAX;
-	      else if ( fsec4dp[j] < -FLT_MAX )
-		fsec4sp[j] = -FLT_MAX;
-	      else
-		fsec4sp[j] = fsec4dp[j];
-	    }
-
-	  Free(fsec4dp);
-	}
-    }
-  else if ( yfunc == 'V' )
-    fprintf(stderr, " c-gribex: Version is %s\n", cgribexLibraryVersion());
-  else
-    {
-      Error("oper %c unsupported!", yfunc);
-      *kret=-9;
-    }
-}
-
 int CGRIBEX_Fix_ZSE  = 0;    /* 1: Fix ZeroShiftError of simple packed spherical harmonics */
 int CGRIBEX_Const    = 0;    /* 1: Don't pack constant fields on regular grids */
 int CGRIBEX_Debug    = 0;    /* 1: Debugging */
@@ -14195,7 +14115,7 @@ void encode_dummy(void)
   (void) encode_array_unrolled_double(0, 0, 0, NULL, NULL, 0, 0, NULL);
   (void) encode_array_unrolled_float(0, 0, 0, NULL, NULL, 0, 0, NULL);
 }
-static const char grb_libvers[] = "1.7.4" " of ""Nov 11 2015"" ""14:13:54";
+static const char grb_libvers[] = "1.7.4" " of ""Nov 11 2015"" ""17:50:24";
 const char *
 cgribexLibraryVersion(void)
 {
