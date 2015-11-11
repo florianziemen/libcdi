@@ -11,11 +11,12 @@
 
 struct CdiFallbackIterator {
   CdiIterator super;
-  int streamId, vlistId;
+  int streamId, vlistId, subtypeId;
   char *path;   //needed for clone() & serialize()
 
   int variableCount, curVariable;
   int curLevelCount, curLevel;
+  int curSubtypeCount, curSubtype;
   int curTimestep;
 };
 
@@ -39,12 +40,15 @@ static CdiFallbackIterator *cdiFallbackIterator_condestruct(CdiFallbackIterator 
   if(me->vlistId == CDI_UNDEFID) goto closeStream;
   me->variableCount = vlistNvars(me->vlistId);
   if(me->variableCount <= 0) goto closeStream;
+  me->subtypeId = CDI_UNDEFID;   //Will be set in cdiFallbackIterator_nextField()
+  me->curSubtypeCount = -1;      //Will be set in cdiFallbackIterator_nextField()
   me->curLevelCount = -1;        //Will be set in cdiFallbackIterator_nextField()
 
   //These values are chosen so that the natural increment at the start of cdiFallbackIterator_nextField() will correctly position us at the first slice.
   me->curTimestep = 0;
   if(streamInqTimestep(me->streamId, me->curTimestep) <= 0) goto closeStream;
   me->curVariable = 0;
+  me->curSubtype = 0;
   me->curLevel = -1;
   me->path = strdup(path);
   if(!me->path) goto closeStream;
@@ -70,14 +74,20 @@ CdiIterator *cdiFallbackIterator_new(const char *path, int filetype)
   return &cdiFallbackIterator_condestruct(NULL, path, filetype)->super;
 }
 
-//Fetches the info that is published by the variables in the base class from the current field.
-static void fetchSuperInfo(CdiFallbackIterator *me)
+//Fetches the info that is derived from the current variable. Most of this is published by the data members in the base class.
+static void fetchVariableInfo(CdiFallbackIterator *me)
 {
+  //Fetch data that's published via base class data members.
   me->super.datatype = vlistInqVarDatatype(me->vlistId, me->curVariable);
   me->super.timesteptype = vlistInqVarTsteptype(me->vlistId, me->curVariable);
   me->super.gridId = vlistInqVarGrid(me->vlistId, me->curVariable);
   int param = vlistInqVarParam(me->vlistId, me->curVariable);
   cdiDecodeParam(param, &me->super.param.number, &me->super.param.category, &me->super.param.discipline);
+
+  //Fetch the current level and subtype counts.
+  me->curLevelCount = zaxisInqSize(vlistInqVarZaxis(me->vlistId, me->curVariable));
+  me->subtypeId = vlistInqVarSubtype(me->vlistId, me->curVariable);
+  me->curSubtypeCount = (me->subtypeId == CDI_UNDEFID) ? 1 : subtypeInqSize(me->subtypeId);
 }
 
 CdiFallbackIterator *cdiFallbackIterator_clone(CdiIterator *super)
@@ -93,10 +103,12 @@ CdiFallbackIterator *cdiFallbackIterator_clone(CdiIterator *super)
   clone->curVariable = me->curVariable;
   clone->curLevelCount = me->curLevelCount;
   clone->curLevel = me->curLevel;
+  clone->curSubtypeCount = me->curSubtypeCount;
+  clone->curSubtype = me->curSubtype;
   clone->curTimestep = me->curTimestep;
 
   clone->super.isAdvanced = super->isAdvanced;
-  if(super->isAdvanced) fetchSuperInfo(clone);
+  if(super->isAdvanced) fetchVariableInfo(clone);
 
   return clone;
 }
@@ -107,8 +119,8 @@ char *cdiFallbackIterator_serialize(CdiIterator *super)
 
   char *escapedPath = cdiEscapeSpaces(me->path);
   char *result = (char *) Malloc(strlen(escapedPath)
-                         + 5 * (3 * sizeof (int) * CHAR_BIT / 8 + 1) + 1);
-  sprintf(result, "%s %d %d %d %d %d", escapedPath, me->variableCount, me->curVariable, me->curLevelCount, me->curLevel, me->curTimestep);
+                         + 7 * (3 * sizeof (int) * CHAR_BIT / 8 + 1) + 1);
+  sprintf(result, "%s %d %d %d %d %d %d %d", escapedPath, me->variableCount, me->curVariable, me->curLevelCount, me->curLevel, me->curSubtypeCount, me->curSubtype, me->curTimestep);
   Free(escapedPath);
   return result;
 }
@@ -142,11 +154,13 @@ CdiFallbackIterator *cdiFallbackIterator_deserialize(const char *description)
   decodeValue(me->curVariable, description);
   decodeValue(me->curLevelCount, description);
   decodeValue(me->curLevel, description);
+  decodeValue(me->curSubtypeCount, description);
+  decodeValue(me->curSubtype, description);
   decodeValue(me->curTimestep, description);
 #undef decodeValue
 
   if(streamInqTimestep(me->streamId, me->curTimestep) <= 0) goto closeStream;
-  if(me->super.isAdvanced) fetchSuperInfo(me);
+  if(me->super.isAdvanced) fetchVariableInfo(me);
 
   return me;
 
@@ -164,15 +178,20 @@ fail:
 static int advance(CdiFallbackIterator *me)
 {
   me->curLevel++;
-  if(me->curLevel == me->curLevelCount)
+  if(me->curLevel >= me->curLevelCount)
     {
       me->curLevel = 0;
-      me->curVariable++;
-      if(me->curVariable == me->variableCount)
+      me->curSubtype++;
+      if(me->curSubtype >= me->curSubtypeCount)
         {
-          me->curVariable = 0;
-          me->curTimestep++;
-          if(streamInqTimestep(me->streamId, me->curTimestep) <= 0) return CDI_EEOF;
+          me->curSubtype = 0;
+          me->curVariable++;
+          if(me->curVariable >= me->variableCount)
+            {
+              me->curVariable = 0;
+              me->curTimestep++;
+              if(streamInqTimestep(me->streamId, me->curTimestep) <= 0) return CDI_EEOF;
+            }
         }
     }
   return CDI_NOERR;
@@ -184,11 +203,7 @@ int cdiFallbackIterator_nextField(CdiIterator *super)
   int result = advance(me);
   if(result) return result;
 
-  if(!me->curLevel)
-    { //Fetch the information that may have changed (we are processing a new variable/timestep if this point is reached).
-      fetchSuperInfo(me);
-      me->curLevelCount = zaxisInqSize(vlistInqVarZaxis(me->vlistId, me->curVariable));
-    }
+  if(!me->curLevel && !me->curSubtype) fetchVariableInfo(me);   //Check whether we are processing a new variable/timestep and fetch the information that may have changed in this case.
   return CDI_NOERR;
 }
 
@@ -275,6 +290,32 @@ int cdiFallbackIterator_zaxisUuid(CdiIterator *super, int *outVgridNumber, int *
   if(outVgridNumber) *outVgridNumber = zaxisInqNumber(zaxisId);
   if(outLevelCount) *outLevelCount = zaxisInqNlevRef(zaxisId);
   if(outUuid) zaxisInqUUID(zaxisId, outUuid);
+  return CDI_NOERR;
+}
+
+int cdiFallbackIterator_inqTile(CdiIterator *super, int *outTileIndex, int *outTileAttribute)
+{
+  CdiFallbackIterator *me = (CdiFallbackIterator*)super;
+  if(!outTileIndex) outTileIndex = &(int){0};
+  if(!outTileAttribute) outTileAttribute = &(int){0};
+
+  int error = CDI_NOERR;
+  if(subtypeInqAttribute(me->subtypeId, me->curSubtype, "tileIndex", outTileIndex)) error = CDI_EINVAL;
+  if(subtypeInqAttribute(me->subtypeId, me->curSubtype, "tileAttribute", outTileAttribute)) error = CDI_EINVAL;
+  if(error) *outTileIndex = *outTileAttribute = -1; //Guarantee defined values in case of an error.
+  return error;
+}
+
+int cdiFallbackIterator_inqTileCount(CdiIterator *super, int *outTileCount, int *outTileAttributeCount)
+{
+  CdiFallbackIterator *me = (CdiFallbackIterator*)super;
+  if(!outTileCount) outTileCount = &(int){0};
+  if(!outTileAttributeCount) outTileAttributeCount = &(int){0};
+
+  int error = CDI_NOERR;
+  if(subtypeInqAttribute(me->subtypeId, me->curSubtype, "numberOfTiles", outTileCount)) error = CDI_EINVAL;
+  if(subtypeInqAttribute(me->subtypeId, me->curSubtype, "numberOfTileAttributes", outTileAttributeCount)) error = CDI_EINVAL;
+  if(error) *outTileCount = *outTileAttributeCount = -1; //Guarantee defined values in case of an error.
   return CDI_NOERR;
 }
 

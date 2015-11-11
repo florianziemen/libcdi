@@ -26,6 +26,8 @@ int cdiFallbackIterator_levelType(CdiIterator *me, int levelSelector, char **out
 int cdiFallbackIterator_level(CdiIterator *me, int levelSelector, double *outValue1, double *outValue2);
 int cdiFallbackIterator_zaxisUuid(CdiIterator *me, int *outVgridNumber, int *outLevelCount, unsigned char outUuid[CDI_UUID_SIZE]);
 char *cdiFallbackIterator_copyVariableName(CdiIterator *me);
+int cdiFallbackIterator_inqTile(CdiIterator* me, int* outTileIndex, int* outTileAttribute);
+int cdiFallbackIterator_inqTileCount(CdiIterator* me, int* outTileCount, int* outTileAttributeCount);
 
 void cdiFallbackIterator_readField(CdiIterator *me, double *buffer, size_t *nmiss);
 void cdiFallbackIterator_readFieldF(CdiIterator *me, float *buffer, size_t *nmiss);

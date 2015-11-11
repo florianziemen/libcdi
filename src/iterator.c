@@ -701,6 +701,105 @@ int cdiIterator_inqLevelUuid(CdiIterator* me, int* outVgridNumber, int* outLevel
 }
 
 /*
+@Function cdiIterator_inqTile
+@Title Inquire the tile information for the current field
+
+@Prototype int cdiIterator_inqTile(CdiIterator* me, int* outTileIndex, int* outTileAttribute)
+@Parameter
+    @item iterator The iterator to operate on.
+    @item outTileIndex The index of the current tile, -1 if no tile information is available.
+    @item outTileAttribute The attribute of the current tile, -1 if no tile information is available.
+
+@Result An error code. CDI_EINVAL if there is no tile information associated with the current field.
+
+@Description
+Inquire the tile index and attribute for the current field.
+*/
+int cdiIterator_inqTile(CdiIterator* me, int* outTileIndex, int* outTileAttribute)
+{
+  sanityCheck(me);
+  switch(me->filetype)
+    {
+      #ifdef HAVE_LIBGRIB_API
+        case FILETYPE_GRB:
+        case FILETYPE_GRB2:
+          return cdiGribIterator_inqTile(me, outTileIndex, outTileAttribute);
+      #endif
+
+      #ifdef HAVE_LIBNETCDF
+        case FILETYPE_NC:
+        case FILETYPE_NC2:
+        case FILETYPE_NC4:
+        case FILETYPE_NC4C:
+      #endif
+      #ifdef HAVE_LIBSERVICE
+        case FILETYPE_SRV:
+      #endif
+      #ifdef HAVE_LIBEXTRA
+        case FILETYPE_EXT:
+      #endif
+      #ifdef HAVE_LIBIEG
+        case FILETYPE_IEG:
+      #endif
+          return cdiFallbackIterator_inqTile(me, outTileIndex, outTileAttribute);
+
+      default:
+        Error(kUnexpectedFileTypeMessage);
+        return CDI_ELIBNAVAIL;
+    }
+}
+
+/**
+@Function cdiIterator_inqTileCount
+@Title Inquire the tile count and tile attribute counts for the current field
+
+@Prototype int cdiIterator_inqTileCount(CdiIterator* me, int* outTileCount, int* outTileAttributeCount)
+@Parameter
+    @item iterator The iterator to operate on.
+    @item outTileCount The number of tiles used for this variable, zero if no tile information is available.
+    @item outTileAttributeCount The number of attributes available for the tile of this field, zero if no tile information is available.
+          Note: This is not the global attribute count, which would be impossible to infer without reading the entire file if it's a GRIB file.
+
+@Result An error code. CDI_EINVAL if there is no tile information associated with the current field.
+
+@Description
+Inquire the tile count and tile attribute counts for the current field.
+*/
+int cdiIterator_inqTileCount(CdiIterator* me, int* outTileCount, int* outTileAttributeCount)
+{
+  sanityCheck(me);
+  switch(me->filetype)
+    {
+      #ifdef HAVE_LIBGRIB_API
+        case FILETYPE_GRB:
+        case FILETYPE_GRB2:
+          return cdiGribIterator_inqTileCount(me, outTileCount, outTileAttributeCount);
+      #endif
+
+      #ifdef HAVE_LIBNETCDF
+        case FILETYPE_NC:
+        case FILETYPE_NC2:
+        case FILETYPE_NC4:
+        case FILETYPE_NC4C:
+      #endif
+      #ifdef HAVE_LIBSERVICE
+        case FILETYPE_SRV:
+      #endif
+      #ifdef HAVE_LIBEXTRA
+        case FILETYPE_EXT:
+      #endif
+      #ifdef HAVE_LIBIEG
+        case FILETYPE_IEG:
+      #endif
+          return cdiFallbackIterator_inqTileCount(me, outTileCount, outTileAttributeCount);
+
+      default:
+        Error(kUnexpectedFileTypeMessage);
+        return CDI_ELIBNAVAIL;
+    }
+}
+
+/*
 @Function cdiIterator_inqParam
 @Title Get discipline, category, and number
 

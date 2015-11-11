@@ -29,6 +29,8 @@ char *cdiGribIterator_inqTime(CdiIterator *me, bool getEndTime);
 int cdiGribIterator_levelType(CdiIterator *me, int levelSelector, char **outName, char **outLongName, char **outStdName, char **outUnit);
 int cdiGribIterator_level(CdiIterator *me, int levelSelector, double *outValue1, double *outValue2);
 int cdiGribIterator_zaxisUuid(CdiIterator *me, int *outVgridNumber, int *outLevelCount, unsigned char outUuid[CDI_UUID_SIZE]);
+int cdiGribIterator_inqTile(CdiIterator *me, int *outTileIndex, int *outTileAttribute);
+int cdiGribIterator_inqTileCount(CdiIterator *me, int *outTileCount, int *outTileAttributeCount);
 char *cdiGribIterator_copyVariableName(CdiIterator *me);
 
 void cdiGribIterator_readField(CdiIterator *me, double *buffer, size_t *nmiss);

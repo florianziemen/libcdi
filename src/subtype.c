@@ -781,6 +781,41 @@ int subtypeInqTile(int subtypeID, int tileindex, int attribute)
 				     keyValuePair(cdiSubtypeAttributeName[SUBTYPE_ATT_TILEATTRIBUTE], attribute)));
 }
 
+int subtypeInqAttribute(int subtypeID, int index, const char* key, int* outValue)
+{
+  //Validate input params.
+  if(subtypeID == CDI_UNDEFID) xabort("CDI_UNDEFID was passed to %s() as a subtypeID. Please check the origin of that ID.", __func__);
+  subtype_t *subtype_ptr = reshGetVal(subtypeID, &subtypeOps);
+  if(!subtype_ptr) xabort("Internal error: subtypeID %d resolved to NULL.", subtypeID);
+
+  if((unsigned)index >= (unsigned)subtype_ptr->nentries)
+    {
+      xabort("index argument of %s() is out of range. Expected 0 <= index < %d, but got index = %d.", __func__, subtype_ptr->nentries, index);
+    }
+
+  if(!outValue) outValue = &(int){0};
+
+  if(!key) return CDI_EINVAL;
+  int iKey = attribute_to_index(key);
+  if(iKey < 0) return CDI_EINVAL;
+
+  //Find the entry.
+  struct subtype_entry_t* entry = subtype_ptr->entries;
+  for(; index--; entry = entry->next) if(!entry) xabort("internal error: preliminary end of subtype entry list");
+
+  //Find the attribute.
+  for(struct subtype_attr_t* attribute = entry->atts; attribute; attribute = attribute->next)
+    {
+      if(attribute->key == iKey)
+        {
+          *outValue = attribute->val;
+          return CDI_NOERR;
+        }
+    }
+
+  //Failed to find the attribute if this point is reached.
+  return CDI_EINVAL;
+}
 
 /* Construct a new subtype for a tile set. If a corresponding subtype
  * already exists, then we return this subtype ID instead. 

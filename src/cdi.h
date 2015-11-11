@@ -411,6 +411,8 @@ char *cdiIterator_inqVTime(CdiIterator *me);      //Returns the validity date as
 int cdiIterator_inqLevelType(CdiIterator *me, int levelSelector, char **outName_optional, char **outLongName_optional, char **outStdName_optional, char **outUnit_optional);      //callers are responsible to Free() strings that they request
 int cdiIterator_inqLevel(CdiIterator *me, int levelSelector, double *outValue1_optional, double *outValue2_optional);       //outValue2 is only written to if the level is a hybrid level
 int cdiIterator_inqLevelUuid(CdiIterator *me, int *outVgridNumber_optional, int *outLevelCount_optional, unsigned char outUuid_optional[CDI_UUID_SIZE]);   //outUuid must point to a buffer of 16 bytes, returns an error code if no generalized zaxis is used.
+int cdiIterator_inqTile(CdiIterator *me, int *outTileIndex, int *outTileAttribute); //Returns CDI_EINVAL if there is no tile information connected to the current field, *outTileIndex and *outTileAttribute will be set to -1 in this case.
+int cdiIterator_inqTileCount(CdiIterator *me, int *outTileCount, int *outTileAttributeCount); //outTileAttributeCount is the count for the tile associated with the current field, a total attribute count cannot be inquired. Returns CDI_EINVAL if there is no tile information connected to the current field, *outTileCount and *outTileAttributeCount will be set to 0 in this case.
 CdiParam cdiIterator_inqParam(CdiIterator *me);
 int cdiIterator_inqDatatype(CdiIterator *me);
 int cdiIterator_inqTsteptype(CdiIterator *me);
@@ -1179,6 +1181,9 @@ int     subtypeInqSubEntry(int subtypeID, subtype_query_t criterion);
 
 /*      subtypeInqTile: Specialized version of subtypeInqSubEntry looking for tile/attribute pair. */
 int     subtypeInqTile(int subtypeID, int tileindex, int attribute);
+
+/*      subtypeInqAttribute: Inquire the value of a subtype attribute. Returns CDI_EINVAL if the attribute does not exist.*/
+int     subtypeInqAttribute(int subtypeID, int index, const char *key, int *outValue);
 
 /*      vlistInqVarSubtype: Return subtype ID for a given variable. */
 int     vlistInqVarSubtype(int vlistID, int varID);

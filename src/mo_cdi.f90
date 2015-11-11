@@ -273,6 +273,8 @@ module mo_cdi
   public :: cdiIterator_inqLevelType
   public :: cdiIterator_inqLevel
   public :: cdiIterator_inqLevelUuid
+  public :: cdiIterator_inqTile
+  public :: cdiIterator_inqTileCount
   public :: cdiIterator_inqParam
   public :: cdiIterator_inqDatatype
   public :: cdiIterator_inqTsteptype
@@ -627,6 +629,7 @@ module mo_cdi
   public :: subtypeInqActiveIndex
   public :: subtypeDefActiveIndex
   public :: subtypeInqTile
+  public :: subtypeInqAttribute
   public :: vlistInqVarSubtype
   public :: gribapiLibraryVersion
 
@@ -3458,6 +3461,48 @@ contains
     & outLevelCount_cptr, outUuid_cptr)
   end function cdiIterator_inqLevelUuid
 
+  function cdiIterator_inqTile(me_dummy, outTileIndex_dummy,&
+  & outTileAttribute_dummy) result(f_result)
+    integer(c_int) :: f_result
+    type(t_CdiIterator), intent(in) :: me_dummy
+    integer(c_int), intent(inout) :: outTileIndex_dummy
+    integer(c_int), intent(inout) :: outTileAttribute_dummy
+    interface
+      function lib_cdiIterator_inqTile(me_dummy, outTileIndex_dummy,&
+      & outTileAttribute_dummy) bind(c, name = 'cdiIterator_inqTile')&
+      & result(c_result)
+        import c_int, c_ptr
+        integer(c_int) :: c_result
+        type(c_ptr), value :: me_dummy
+        integer(c_int), intent(inout) :: outTileIndex_dummy
+        integer(c_int), intent(inout) :: outTileAttribute_dummy
+      end function lib_cdiIterator_inqTile
+    end interface
+    f_result = lib_cdiIterator_inqTile(me_dummy%ptr, outTileIndex_dummy,&
+    & outTileAttribute_dummy)
+  end function cdiIterator_inqTile
+
+  function cdiIterator_inqTileCount(me_dummy, outTileCount_dummy,&
+  & outTileAttributeCount_dummy) result(f_result)
+    integer(c_int) :: f_result
+    type(t_CdiIterator), intent(in) :: me_dummy
+    integer(c_int), intent(inout) :: outTileCount_dummy
+    integer(c_int), intent(inout) :: outTileAttributeCount_dummy
+    interface
+      function lib_cdiIterator_inqTileCount(me_dummy, outTileCount_dummy,&
+      & outTileAttributeCount_dummy) bind(c, name = 'cdiIterator_inqTileCount')&
+      & result(c_result)
+        import c_int, c_ptr
+        integer(c_int) :: c_result
+        type(c_ptr), value :: me_dummy
+        integer(c_int), intent(inout) :: outTileCount_dummy
+        integer(c_int), intent(inout) :: outTileAttributeCount_dummy
+      end function lib_cdiIterator_inqTileCount
+    end interface
+    f_result = lib_cdiIterator_inqTileCount(me_dummy%ptr, outTileCount_dummy,&
+    & outTileAttributeCount_dummy)
+  end function cdiIterator_inqTileCount
+
   function cdiIterator_inqParam(me_dummy) result(f_result)
     type(t_CdiParam) :: f_result
     type(t_CdiIterator), intent(in) :: me_dummy
@@ -6235,5 +6280,33 @@ contains
       history_dummy(history_i:history_i) = ' '
     end do
   end subroutine streamInqHistoryString
+
+  function subtypeInqAttribute(subtypeID_dummy, index_dummy, key_dummy,&
+  & outValue_dummy) result(f_result)
+    integer(c_int) :: f_result
+    integer(c_int), value :: subtypeID_dummy
+    integer(c_int), value :: index_dummy
+    character(kind = c_char, len = *), intent(in) :: key_dummy
+    integer(c_int), intent(inout) :: outValue_dummy
+    character(kind = c_char) :: key_temp(len(key_dummy) + 1)
+    integer :: key_i
+    interface
+      function lib_subtypeInqAttribute(subtypeID_dummy, index_dummy, key_dummy,&
+      & outValue_dummy) bind(c, name = 'subtypeInqAttribute') result(c_result)
+        import c_char, c_int
+        integer(c_int) :: c_result
+        integer(c_int), value :: subtypeID_dummy
+        integer(c_int), value :: index_dummy
+        character(kind = c_char) :: key_dummy(*)
+        integer(c_int), intent(inout) :: outValue_dummy
+      end function lib_subtypeInqAttribute
+    end interface
+    do key_i = 1, len(key_dummy)
+      key_temp(key_i) = key_dummy(key_i:key_i)
+    end do
+    key_temp(len(key_dummy) + 1) = c_null_char
+    f_result = lib_subtypeInqAttribute(subtypeID_dummy, index_dummy, key_temp,&
+    & outValue_dummy)
+  end function subtypeInqAttribute
 
 end module mo_cdi

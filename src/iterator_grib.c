@@ -21,14 +21,14 @@
 struct CdiGribIterator {
   CdiIterator super;
 
-  CdiInputFile* file;
+  CdiInputFile *file;
   off_t fileOffset;
-  unsigned char* gribBuffer;
+  unsigned char *gribBuffer;
   size_t bufferSize, curRecordSize;
 #ifdef HAVE_LIBGRIB_API
-  grib_handle* gribHandle;
+  grib_handle *gribHandle;
 #else
-  void* gribHandle;
+  void *gribHandle;
 #endif
 };
 
@@ -88,7 +88,7 @@ CdiGribIterator *cdiGribIterator_makeClone(CdiIterator *super)
   CdiGribIterator *me = (CdiGribIterator*)super;
 
   //Allocate memory and copy data. (operations that may fail)
-  CdiGribIterator* result = (struct CdiGribIterator *) Malloc(sizeof(*result));
+  CdiGribIterator *result = (struct CdiGribIterator *) Malloc(sizeof(*result));
   if(!result) goto fail;
 
   result->file = me->file;
@@ -139,9 +139,9 @@ char *cdiGribIterator_serialize(CdiIterator *super)
 {
   CdiGribIterator *me = (CdiGribIterator*)super;
 
-  const char* path = cdiInputFile_getPath(me->file);
-  char* escapedPath = cdiEscapeSpaces(path);
-  char* result = (char *) Malloc(strlen(escapedPath) + 3 * sizeof(int) * CHAR_BIT/8);
+  const char *path = cdiInputFile_getPath(me->file);
+  char *escapedPath = cdiEscapeSpaces(path);
+  char *result = (char *) Malloc(strlen(escapedPath) + 3 * sizeof(int) * CHAR_BIT/8);
   sprintf(result, "%s %zu", escapedPath, me->fileOffset);
   Free(escapedPath);
   return result;
@@ -150,8 +150,8 @@ char *cdiGribIterator_serialize(CdiIterator *super)
 
 CdiGribIterator *cdiGribIterator_deserialize(const char *description)
 {
-  char* path;
-  CdiGribIterator* me = (CdiGribIterator *) Malloc(sizeof(*me));
+  char *path;
+  CdiGribIterator *me = (CdiGribIterator *) Malloc(sizeof(*me));
   if(!me) goto fail;
 
   description = baseIter_constructFromString(&me->super, description);
@@ -254,13 +254,13 @@ static ssize_t scanToGribMarker(CdiGribIterator *me)
 
 static unsigned decode24(void *beData)
 {
-  unsigned char* bytes = (unsigned char *)beData;
+  unsigned char *bytes = (unsigned char *)beData;
   return ((unsigned)bytes[0] << 16) + ((unsigned)bytes[1] << 8) + (unsigned)bytes[2];
 }
 
 static uint64_t decode64(void *beData)
 {
-  unsigned char* bytes = (unsigned char *)beData;
+  unsigned char *bytes = (unsigned char *)beData;
   uint64_t result = 0;
   for(size_t i = 0; i < 8; i++) result = (result << 8) + bytes[i];
   return result;
@@ -525,6 +525,46 @@ int cdiGribIterator_zaxisUuid(CdiIterator *super, int *outVgridNumber, int *outL
   return CDI_NOERR;
 }
 
+int cdiGribIterator_inqTile(CdiIterator *super, int *outTileIndex, int *outTileAttribute)
+{
+  CdiGribIterator *me = (CdiGribIterator*)super;
+  int trash;
+  if(!outTileIndex) outTileIndex = &trash;
+  if(!outTileAttribute) outTileAttribute = &trash;
+
+  //Get the values if possible.
+  int error = CDI_NOERR;
+  long value;
+  if(grib_get_long(me->gribHandle, "tileIndex", &value)) error = CDI_EINVAL;
+  *outTileIndex = (int)value;
+  if(grib_get_long(me->gribHandle, "tileAttribute", &value)) error = CDI_EINVAL;
+  *outTileAttribute = (int)value;
+
+  //Ensure defined return values in case of failure.
+  if(error) *outTileIndex = *outTileAttribute = -1;
+  return error;
+}
+
+int cdiGribIterator_inqTileCount(CdiIterator *super, int *outTileCount, int *outTileAttributeCount)
+{
+  CdiGribIterator *me = (CdiGribIterator*)super;
+  int trash;
+  if(!outTileCount) outTileCount = &trash;
+  if(!outTileAttributeCount) outTileAttributeCount = &trash;
+
+  //Get the values if possible.
+  int error = CDI_NOERR;
+  long value;
+  if(grib_get_long(me->gribHandle, "numberOfTiles", &value)) error = CDI_EINVAL;
+  *outTileCount = (int)value;
+  if(grib_get_long(me->gribHandle, "numberOfTileAttributes", &value)) error = CDI_EINVAL;
+  *outTileAttributeCount = (int)value;
+
+  //Ensure defined return values in case of failure.
+  if(error) *outTileCount = *outTileAttributeCount = 0;
+  return error;
+}
+
 char *cdiGribIterator_copyVariableName(CdiIterator *super)
 {
   CdiGribIterator *me = (CdiGribIterator*)super;
@@ -549,7 +589,7 @@ void cdiGribIterator_readFieldF(CdiIterator *super, float *buffer, size_t *nmiss
   CdiGribIterator *me = (CdiGribIterator*)super;
 
   size_t valueCount = gribGetArraySize(me->gribHandle, "values");
-  double* temp = (double *) Malloc(valueCount*sizeof(*temp));
+  double *temp = (double *) Malloc(valueCount*sizeof(*temp));
   cdiGribIterator_readField(super, temp, nmiss);
   for(size_t i = valueCount; i--; ) buffer[i] = (float)temp[i];
   Free(temp);
