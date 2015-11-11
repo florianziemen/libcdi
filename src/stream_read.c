@@ -148,8 +148,7 @@ int cdiStreamReadVarSlice(int streamID, int varID, int levelID, int memtype, voi
     case FILETYPE_GRB:
     case FILETYPE_GRB2:
       {
-        if ( memtype == MEMTYPE_FLOAT ) return 1;
-        grbReadVarSliceDP(streamptr, varID, levelID, (double *)data, nmiss);
+        grb_read_var_slice(streamptr, varID, levelID, memtype, data, nmiss);
 	break;
       }
 #endif

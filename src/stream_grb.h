@@ -15,7 +15,7 @@ void  grbCopyRecord(stream_t * streamptr2, stream_t * streamptr1);
 void  grbReadVarDP(stream_t * streamptr, int varID, double *data, int *nmiss);
 void  grb_write_var(stream_t * streamptr, int varID, int memtype, const void *data, int nmiss);
 
-void  grbReadVarSliceDP(stream_t * streamptr, int varID, int levelID, double *data, int *nmiss);
+void  grb_read_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, void *data, int *nmiss);
 void  grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, const void *data, int nmiss);
 
 int   grib1ltypeToZaxisType(int grib_ltype);
