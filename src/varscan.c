@@ -395,39 +395,22 @@ int varInsertTileSubtype(vartable_t *vptr, const var_tile_t *tiles)
 {
   if ( tiles == NULL ) return -1;
 
-  int totalno_of_tileattr_pairs = -1;
-  int tileClassification = -1;
-  int numberOfTiles = -1;
-  int numberOfAttributes = -1;
-  int tileindex = -1;
-  int attribute = -1;
-
-  if ( tiles )
-    {
-      totalno_of_tileattr_pairs = tiles->totalno_of_tileattr_pairs;
-      tileClassification =  tiles->tileClassification;
-      numberOfTiles = tiles->numberOfTiles;
-      numberOfAttributes = tiles->numberOfAttributes;
-      tileindex = tiles->tileindex;
-      attribute = tiles->attribute;
-    }
-
   /* first, generate a subtype based on the info in "tiles". */
 
   subtype_t *subtype_ptr;
   subtypeAllocate(&subtype_ptr, SUBTYPE_TILES);
-  subtypeDefGlobalDataP(subtype_ptr, SUBTYPE_ATT_TOTALNO_OF_TILEATTR_PAIRS, totalno_of_tileattr_pairs);
-  subtypeDefGlobalDataP(subtype_ptr, SUBTYPE_ATT_TILE_CLASSIFICATION      , tileClassification);
-  subtypeDefGlobalDataP(subtype_ptr, SUBTYPE_ATT_NUMBER_OF_TILES          , numberOfTiles);
+  subtypeDefGlobalDataP(subtype_ptr, SUBTYPE_ATT_TOTALNO_OF_TILEATTR_PAIRS, tiles->totalno_of_tileattr_pairs);
+  subtypeDefGlobalDataP(subtype_ptr, SUBTYPE_ATT_TILE_CLASSIFICATION      , tiles->tileClassification);
+  subtypeDefGlobalDataP(subtype_ptr, SUBTYPE_ATT_NUMBER_OF_TILES          , tiles->numberOfTiles);
 
   /*
    * Here, we create a tile set for comparison that contains only one
    * tile/attribute pair (based on "tiles").
    */
   struct subtype_entry_t *entry = subtypeEntryInsert(subtype_ptr);
-  subtypeDefEntryDataP(entry, SUBTYPE_ATT_NUMBER_OF_ATTR,            numberOfAttributes);
-  subtypeDefEntryDataP(entry, SUBTYPE_ATT_TILEINDEX,                 tileindex);
-  subtypeDefEntryDataP(entry, SUBTYPE_ATT_TILEATTRIBUTE,             attribute);
+  subtypeDefEntryDataP(entry, SUBTYPE_ATT_NUMBER_OF_ATTR,            tiles->numberOfAttributes);
+  subtypeDefEntryDataP(entry, SUBTYPE_ATT_TILEINDEX,                 tiles->tileindex);
+  subtypeDefEntryDataP(entry, SUBTYPE_ATT_TILEATTRIBUTE,             tiles->attribute);
 
   if (vptr->tiles == NULL) {
     vptr->tiles = subtype_ptr;

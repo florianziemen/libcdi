@@ -1437,12 +1437,10 @@ int vlistSubtypeIndex(int vlistID, int subtypeID)
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
   int index;
-  for ( index = 0 ; index < vlistptr->nsubtypes ; index++ )
+  for(index = vlistptr->nsubtypes; index--; )
     if ( subtypeID == vlistptr->subtypeIDs[index] ) break;
 
-  if ( index == vlistptr->nsubtypes ) index = -1;
-
-  return (index);
+  return index;
 }
 
 
