@@ -79,7 +79,7 @@ enum {
 
 
 /* ------------------------------------------------------------------- */
-/* SUBROUTINES FOR ATTRIBUTE LISTS				       */
+/* SUBROUTINES FOR ATTRIBUTE LISTS                                     */
 /* ------------------------------------------------------------------- */
 
 
@@ -211,7 +211,7 @@ static void subtypeAttsDuplicate(struct subtype_attr_t *a1, struct subtype_entry
 
 
 /* ------------------------------------------------------------------- */
-/* SUBROUTINES FOR LIST OF ENTRIES				       */
+/* SUBROUTINES FOR LIST OF ENTRIES                                     */
 /* ------------------------------------------------------------------- */
 
 
@@ -335,7 +335,7 @@ static void subtypeEntryDuplicate(struct subtype_entry_t *a1, subtype_t* dst)
 
 
 /* ------------------------------------------------------------------- */
-/* SUBROUTINES FOR THE SUBTYPE ITSELF				       */
+/* SUBROUTINES FOR THE SUBTYPE ITSELF                                  */
 /* ------------------------------------------------------------------- */
 
 /* Print-out subtype data structure together with its attributes. */
@@ -546,7 +546,7 @@ void subtypeDefEntryDataP(struct subtype_entry_t *subtype_entry_ptr, int key, in
 
 
 /* ------------------------------------------------------------------- */
-/* IMPLEMENTATIONS FOR KEY-VALUE-PAIR QUERIES			       */
+/* IMPLEMENTATIONS FOR KEY-VALUE-PAIR QUERIES                          */
 /* ------------------------------------------------------------------- */
 
 
@@ -595,7 +595,7 @@ subtype_query_t matchAND(subtype_query_t q1, subtype_query_t q2)
 
 
 /* ------------------------------------------------------------------- */
-/* SPECIFIC IMPLEMENTATIONS FOR TILE SETS			       */
+/* SPECIFIC IMPLEMENTATIONS FOR TILE SETS                              */
 /* ------------------------------------------------------------------- */
 
 
@@ -607,39 +607,39 @@ void tilesetInsertP(subtype_t *s1, subtype_t *s2)
 {
   if (s1 == NULL)  Error("Internal error!");
   if (s2 == NULL)  Error("Internal error!");
-  struct subtype_entry_t 
+  struct subtype_entry_t
     *entry1 = s1->entries,
     *entry2 = s2->entries;
   struct subtype_attr_t *att_ptr2;
 
   /* test all entries of set 2 against set 1, to check if entry
      already exists: */
-  if (subtypeAttsCompare(s1->globals.atts, s2->globals.atts) != differ) 
+  if (subtypeAttsCompare(s1->globals.atts, s2->globals.atts) != differ)
     {
       while (entry1 != NULL) {
-	int found = 1;
-	entry2 = s2->entries;
-	while (entry2 != NULL) {
-	  found &= (subtypeAttsCompare(entry1->atts, entry2->atts) != differ);
-	  entry2 = entry2->next;
-	}
-	if (found) 
-	  {
-	    return;
-	  }
-	entry1 = entry1->next;
+        int found = 1;
+        entry2 = s2->entries;
+        while (entry2 != NULL) {
+          found &= (subtypeAttsCompare(entry1->atts, entry2->atts) != differ);
+          entry2 = entry2->next;
+        }
+        if (found)
+          {
+            return;
+          }
+        entry1 = entry1->next;
       }
-    
+
       entry2 = s2->entries;
       while (entry2 != NULL) {
-	entry1 = subtypeEntryInsert(s1);
-	
-	att_ptr2 = entry2->atts;
-	while (att_ptr2 != NULL) {
-	  (void) subtypeAttrInsert(entry1, att_ptr2->key, att_ptr2->val);
-	  att_ptr2 = att_ptr2->next;
-	}
-	entry2 = entry2->next;
+        entry1 = subtypeEntryInsert(s1);
+
+        att_ptr2 = entry2->atts;
+        while (att_ptr2 != NULL) {
+          (void) subtypeAttrInsert(entry1, att_ptr2->key, att_ptr2->val);
+          att_ptr2 = att_ptr2->next;
+        }
+        entry2 = entry2->next;
       }
     }
   else
@@ -655,7 +655,7 @@ void tilesetInsertP(subtype_t *s1, subtype_t *s2)
 
 
 /* ------------------------------------------------------------------- */
-/* IMPLEMENTATIONS FOR ROUTINES VISIBLE THROUGH CDI.H		       */
+/* IMPLEMENTATIONS FOR ROUTINES VISIBLE THROUGH CDI.H                  */
 /* ------------------------------------------------------------------- */
 
 
@@ -750,22 +750,22 @@ int subtypeInqSubEntry(int subtypeID, subtype_query_t criterion)
       int match = 1;
       /* test if this entry matches ALL criteria. */
       for (int j=0; (j<criterion.nAND) && (match); j++)
-	{
-	  if (CDI_Debug)  Message("check criterion %d :  %d --?-- %d", j,
-				  criterion.key_value_pairs[0][j], criterion.key_value_pairs[1][j]);
-	  struct subtype_attr_t* att_ptr = 
-	    subtypeAttrFind(entry->atts, criterion.key_value_pairs[0][j]);
-	  if (att_ptr == NULL)
-	    {
-	      match = 0;
-	      if (CDI_Debug)  Message("did not find %d", criterion.key_value_pairs[0][j]);
-	    }
-	  else
-	    {
-	      if (CDI_Debug)  Message("found %d", criterion.key_value_pairs[0][j]);
-	      match &= (att_ptr->val == criterion.key_value_pairs[1][j]);
-	    }
-	}
+        {
+          if (CDI_Debug)  Message("check criterion %d :  %d --?-- %d", j,
+                                  criterion.key_value_pairs[0][j], criterion.key_value_pairs[1][j]);
+          struct subtype_attr_t* att_ptr =
+            subtypeAttrFind(entry->atts, criterion.key_value_pairs[0][j]);
+          if (att_ptr == NULL)
+            {
+              match = 0;
+              if (CDI_Debug)  Message("did not find %d", criterion.key_value_pairs[0][j]);
+            }
+          else
+            {
+              if (CDI_Debug)  Message("found %d", criterion.key_value_pairs[0][j]);
+              match &= (att_ptr->val == criterion.key_value_pairs[1][j]);
+            }
+        }
       if (match) return entry->self;
     }
     entry = entry->next;
@@ -777,8 +777,8 @@ int subtypeInqSubEntry(int subtypeID, subtype_query_t criterion)
 int subtypeInqTile(int subtypeID, int tileindex, int attribute)
 {
   return subtypeInqSubEntry(subtypeID, 
-			    matchAND(keyValuePair(cdiSubtypeAttributeName[SUBTYPE_ATT_TILEINDEX], tileindex),
-				     keyValuePair(cdiSubtypeAttributeName[SUBTYPE_ATT_TILEATTRIBUTE], attribute)));
+                            matchAND(keyValuePair(cdiSubtypeAttributeName[SUBTYPE_ATT_TILEINDEX], tileindex),
+                                     keyValuePair(cdiSubtypeAttributeName[SUBTYPE_ATT_TILEATTRIBUTE], attribute)));
 }
 
 int subtypeInqAttribute(int subtypeID, int index, const char* key, int* outValue)
@@ -872,7 +872,7 @@ int vlistInsertTrivialTileSubtype(int vlistID)
 
 
 /* ------------------------------------------------------------------- */
-/* NOT YET IMPLEMENTED						       */
+/* NOT YET IMPLEMENTED                                                 */
 /* ------------------------------------------------------------------- */
 
 static int subtypeGetPackSize( void * subtype_ptr, void *context)
