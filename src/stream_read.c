@@ -33,8 +33,7 @@ void cdiStreamReadVar(int streamID, int varID, int memtype, void *data, int *nmi
     case FILETYPE_GRB:
     case FILETYPE_GRB2:
       {
-        if ( memtype == MEMTYPE_FLOAT ) Error("grbReadVar not implemented for memtype float!");
-        grbReadVarDP(streamptr, varID, (double *)data, nmiss);
+        grb_read_var(streamptr, varID, memtype, data, nmiss);
 	break;
       }
 #endif
