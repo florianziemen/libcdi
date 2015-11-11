@@ -647,6 +647,16 @@ Set the currently active index of a subtype (e.g. current tile index)..
 Get the currently active index of a subtype (e.g. current tile index)..
 
 
+\section*{\tt \htmlref{subtypeInqAttribute}{subtypeInqAttribute}}
+
+\begin{verbatim}
+    INTEGER FUNCTION subtypeInqAttribute (INTEGER subtypeID, INTEGER index,
+                                          CHARACTER*(*) key, INTEGER outValue)
+\end{verbatim}
+
+Inquire the value of a subtype attribute. Returns CDI_EINVAL if the attribute does not exist..
+
+
 \section*{\tt \htmlref{subtypeInqSize}{subtypeInqSize}}
 
 \begin{verbatim}

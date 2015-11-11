@@ -4,7 +4,7 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   October 2015
+! Uwe Schulzweida, MPI-MET, Hamburg,   November 2015
 !
 
       INTEGER    CDI_MAX_NAME          
@@ -2480,6 +2480,13 @@
 !                                     INTEGER         tileindex,
 !                                     INTEGER         attribute)
       EXTERNAL        subtypeInqTile
+
+      INTEGER         subtypeInqAttribute
+!                                    (INTEGER         subtypeID,
+!                                     INTEGER         index,
+!                                     CHARACTER*(*)   key,
+!                                     INTEGER         outValue)
+      EXTERNAL        subtypeInqAttribute
 
       INTEGER         vlistInqVarSubtype
 !                                    (INTEGER         vlistID,
