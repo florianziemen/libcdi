@@ -271,8 +271,7 @@ void stream_read_record(int streamID, int memtype, void *data, int *nmiss)
 #if  defined  (HAVE_LIBGRIB)
     case FILETYPE_GRB:
     case FILETYPE_GRB2:
-      if ( memtype == MEMTYPE_FLOAT ) Error("grbReadRecord not implemented for memtype float!");
-      grbReadRecord(streamptr, data, nmiss);
+      grb_read_record(streamptr, memtype, data, nmiss);
       break;
 #endif
 #if  defined  (HAVE_LIBSERVICE)

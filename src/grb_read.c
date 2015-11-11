@@ -112,7 +112,7 @@ int grbUnzipRecord(void *gribbuffer, size_t *gribsize)
 }
 
 
-void grbReadRecord(stream_t * streamptr, double *data, int *nmiss)
+void grb_read_record(stream_t * streamptr, int memtype, void *data, int *nmiss)
 {
   int filetype = streamptr->filetype;
 
@@ -141,7 +141,7 @@ void grbReadRecord(stream_t * streamptr, double *data, int *nmiss)
 
   streamptr->tsteps[tsID].records[recID].zip = grbUnzipRecord(gribbuffer, &recsize);
 
-  grbDecode(filetype, MEMTYPE_DOUBLE, gribbuffer, (int)recsize, data, gridsize, streamptr->unreduced, nmiss, missval, vlistID, varID);
+  grbDecode(filetype, memtype, gribbuffer, (int)recsize, data, gridsize, streamptr->unreduced, nmiss, missval, vlistID, varID);
 }
 
 
