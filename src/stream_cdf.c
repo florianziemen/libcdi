@@ -150,7 +150,7 @@ int get_timeunit(size_t len, const char *ptu)
       if ( ptu[0] == 's' ) timeunit = TUNIT_SECOND;
     }
 
-  return (timeunit);
+  return timeunit;
 }
 
 static
@@ -164,7 +164,7 @@ int isTimeUnits(const char *timeunits)
        strncmp(timeunits, "day",    3) == 0 ||
        strncmp(timeunits, "month",  5) == 0 ) status = 1;
 
-  return (status);
+  return status;
 }
 
 static
@@ -202,7 +202,7 @@ int isTimeAxisUnits(const char *timeunits)
 
   Free(tu);
 
-  return (status);
+  return status;
 }
 
 static
@@ -265,24 +265,21 @@ void scanTimeString(const char *ptu, int *rdate, int *rtime)
 static
 int scanTimeUnit(const char *unitstr)
 {
-  int timeunit = -1;
   size_t len = strlen(unitstr);
-  timeunit = get_timeunit(len, unitstr);
+  int timeunit = get_timeunit(len, unitstr);
   if ( timeunit == -1 )
     Message("Unsupported TIMEUNIT: %s!", unitstr);
 
-  return (timeunit);
+  return timeunit;
 }
 
 static
 void setForecastTime(const char *timestr, taxis_t *taxis)
 {
-  int len;
-
   (*taxis).fdate = 0;
   (*taxis).ftime = 0;
 
-  len = (int) strlen(timestr);
+  int len = (int) strlen(timestr);
   if ( len == 0 ) return;
 
   int fdate = 0, ftime = 0;
@@ -295,19 +292,17 @@ void setForecastTime(const char *timestr, taxis_t *taxis)
 static
 int setBaseTime(const char *timeunits, taxis_t *taxis)
 {
-  char *ptu, *tu;
   int timetype = TAXIS_ABSOLUTE;
   int rdate = -1, rtime = -1;
-  int timeunit;
 
   size_t len = strlen(timeunits);
-  tu = (char *) Malloc((len+1) * sizeof (char));
+  char *tu = (char *) Malloc((len+1) * sizeof (char));
   memcpy(tu, timeunits, (len+1) * sizeof (char));
-  ptu = tu;
+  char *ptu = tu;
 
   for ( size_t i = 0; i < len; i++ ) ptu[i] = (char)tolower((int) ptu[i]);
 
-  timeunit = get_timeunit(len, ptu);
+  int timeunit = get_timeunit(len, ptu);
   if ( timeunit == -1 )
     {
       Message("Unsupported TIMEUNIT: %s!", timeunits);
@@ -363,7 +358,7 @@ int setBaseTime(const char *timeunits, taxis_t *taxis)
   if ( CDI_Debug )
     Message("timetype = %d  unit = %d", timetype, timeunit);
 
-  return (0);
+  return 0;
 }
 
 static
@@ -524,7 +519,7 @@ int cdfInqDatatype(int xtype, int lunsigned)
   else if ( xtype == NC_UINT64 )  datatype = DATATYPE_FLT64;
 #endif
 
-  return (datatype);
+  return datatype;
 }
 
 
@@ -873,7 +868,6 @@ void cdfDefComplex(stream_t *streamptr, int gridID)
 {
   char axisname[] = "nc2";
   int dimID = UNDEFID;
-  int gridID0, gridtype0;
   int vlistID = streamptr->vlistID;
   int fileID  = streamptr->fileID;
 
@@ -883,8 +877,8 @@ void cdfDefComplex(stream_t *streamptr, int gridID)
     {
       if ( streamptr->xdimID[index] != UNDEFID )
         {
-          gridID0 = vlistGrid(vlistID, index);
-          gridtype0 = gridInqType(gridID0);
+          int gridID0 = vlistGrid(vlistID, index);
+          int gridtype0 = gridInqType(gridID0);
           if ( gridtype0 == GRID_SPECTRAL || gridtype0 == GRID_FOURIER )
             {
               dimID = streamptr->xdimID[index];
@@ -918,16 +912,12 @@ void cdfDefSP(stream_t *streamptr, int gridID)
   */
   char axisname[5] = "nspX";
   int index, iz = 0;
-  int gridID0, gridtype0, gridindex;
   int dimID = UNDEFID;
-  int ngrids;
-  int fileID;
-  int vlistID;
 
-  vlistID = streamptr->vlistID;
-  fileID  = streamptr->fileID;
+  int vlistID = streamptr->vlistID;
+  int fileID  = streamptr->fileID;
 
-  ngrids = vlistNgrids(vlistID);
+  int ngrids = vlistNgrids(vlistID);
 
   size_t dimlen = (size_t)gridInqSize(gridID)/2;
 
@@ -935,8 +925,8 @@ void cdfDefSP(stream_t *streamptr, int gridID)
     {
       if ( streamptr->ydimID[index] != UNDEFID )
         {
-          gridID0 = vlistGrid(vlistID, index);
-          gridtype0 = gridInqType(gridID0);
+          int gridID0 = vlistGrid(vlistID, index);
+          int gridtype0 = gridInqType(gridID0);
           if ( gridtype0 == GRID_SPECTRAL )
             {
               size_t dimlen0 = (size_t)gridInqSize(gridID0)/2;
@@ -964,7 +954,7 @@ void cdfDefSP(stream_t *streamptr, int gridID)
       streamptr->ncmode = 2;
     }
 
-  gridindex = vlistGridIndex(vlistID, gridID);
+  int gridindex = vlistGridIndex(vlistID, gridID);
   streamptr->ydimID[gridindex] = dimID;
 }
 
@@ -974,16 +964,12 @@ void cdfDefFC(stream_t *streamptr, int gridID)
 {
   char axisname[5] = "nfcX";
   int index, iz = 0;
-  int gridID0, gridtype0, gridindex;
   int dimID = UNDEFID;
-  int ngrids;
-  int fileID;
-  int vlistID;
 
-  vlistID = streamptr->vlistID;
-  fileID  = streamptr->fileID;
+  int vlistID = streamptr->vlistID;
+  int fileID  = streamptr->fileID;
 
-  ngrids = vlistNgrids(vlistID);
+  int ngrids = vlistNgrids(vlistID);
 
   size_t dimlen = (size_t)gridInqSize(gridID)/2;
 
@@ -991,8 +977,8 @@ void cdfDefFC(stream_t *streamptr, int gridID)
     {
       if ( streamptr->ydimID[index] != UNDEFID )
         {
-          gridID0 = vlistGrid(vlistID, index);
-          gridtype0 = gridInqType(gridID0);
+          int gridID0 = vlistGrid(vlistID, index);
+          int gridtype0 = gridInqType(gridID0);
           if ( gridtype0 == GRID_FOURIER )
             {
               size_t dimlen0 = (size_t)gridInqSize(gridID0)/2;
@@ -1020,7 +1006,7 @@ void cdfDefFC(stream_t *streamptr, int gridID)
       streamptr->ncmode = 2;
     }
 
-  gridindex = vlistGridIndex(vlistID, gridID);
+  int gridindex = vlistGridIndex(vlistID, gridID);
   streamptr->ydimID[gridindex] = dimID;
 }
 
@@ -1032,26 +1018,19 @@ void cdfDefTrajLon(stream_t *streamptr, int gridID)
   char longname[CDI_MAX_NAME];
   char stdname[CDI_MAX_NAME];
   char axisname[CDI_MAX_NAME];
-  int gridtype, gridindex;
-  int dimID = UNDEFID;
-  int fileID;
-  int dimlen;
-  size_t len;
-  int ncvarid;
-  int vlistID;
-  int xtype = NC_DOUBLE;
+  nc_type xtype = NC_DOUBLE;
 
   if ( gridInqPrec(gridID) == DATATYPE_FLT32 ) xtype = NC_FLOAT;
 
-  vlistID = streamptr->vlistID;
-  fileID  = streamptr->fileID;
+  int vlistID = streamptr->vlistID;
+  int fileID  = streamptr->fileID;
 
-  gridtype = gridInqType(gridID);
-  dimlen = gridInqXsize(gridID);
+  int gridtype = gridInqType(gridID);
+  int dimlen = gridInqXsize(gridID);
   if ( dimlen != 1 ) Error("Xsize isn't 1 for %s grid!", gridNamePtr(gridtype));
 
-  gridindex = vlistGridIndex(vlistID, gridID);
-  ncvarid = streamptr->xdimID[gridindex];
+  int gridindex = vlistGridIndex(vlistID, gridID);
+  int ncvarid = streamptr->xdimID[gridindex];
 
   gridInqXname(gridID, axisname);
   gridInqXlongname(gridID, longname);
@@ -1060,11 +1039,12 @@ void cdfDefTrajLon(stream_t *streamptr, int gridID)
 
   if ( ncvarid == UNDEFID )
     {
-      dimID = streamptr->basetime.ncvarid;
+      size_t len;
+      int dimID = streamptr->basetime.ncvarid;
 
       if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
-      cdf_def_var(fileID, axisname, (nc_type) xtype, 1, &dimID, &ncvarid);
+      cdf_def_var(fileID, axisname, xtype, 1, &dimID, &ncvarid);
 
       if ( (len = strlen(stdname)) )
         cdf_put_att_text(fileID, ncvarid, "standard_name", len, stdname);
@@ -1088,26 +1068,19 @@ void cdfDefTrajLat(stream_t *streamptr, int gridID)
   char longname[] = "latitude";
   char stdname[] = "latitude";
   char axisname[] = "tlat";
-  int gridtype, gridindex;
-  int dimID = UNDEFID;
-  int fileID;
-  int dimlen;
-  size_t len;
-  int ncvarid;
-  int vlistID;
-  int xtype = NC_DOUBLE;
+  nc_type xtype = NC_DOUBLE;
 
   if ( gridInqPrec(gridID) == DATATYPE_FLT32 ) xtype = NC_FLOAT;
 
-  vlistID = streamptr->vlistID;
-  fileID = streamptr->fileID;
+  int vlistID = streamptr->vlistID;
+  int fileID = streamptr->fileID;
 
-  gridtype = gridInqType(gridID);
-  dimlen = gridInqYsize(gridID);
+  int gridtype = gridInqType(gridID);
+  int dimlen = gridInqYsize(gridID);
   if ( dimlen != 1 ) Error("Ysize isn't 1 for %s grid!", gridNamePtr(gridtype));
 
-  gridindex = vlistGridIndex(vlistID, gridID);
-  ncvarid = streamptr->ydimID[gridindex];
+  int gridindex = vlistGridIndex(vlistID, gridID);
+  int ncvarid = streamptr->ydimID[gridindex];
 
   gridInqYname(gridID, axisname);
   gridInqYlongname(gridID, longname);
@@ -1116,11 +1089,12 @@ void cdfDefTrajLat(stream_t *streamptr, int gridID)
 
   if ( ncvarid == UNDEFID )
     {
-      dimID = streamptr->basetime.ncvarid;
+      size_t len;
+      int dimID = streamptr->basetime.ncvarid;
 
       if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
-      cdf_def_var(fileID, axisname, (nc_type) xtype, 1, &dimID, &ncvarid);
+      cdf_def_var(fileID, axisname, xtype, 1, &dimID, &ncvarid);
 
       if ( (len = strlen(stdname)) )
         cdf_put_att_text(fileID, ncvarid, "standard_name", len, stdname);
@@ -1140,17 +1114,16 @@ void cdfDefTrajLat(stream_t *streamptr, int gridID)
 static
 int checkGridName(int type, char *axisname, int fileID, int vlistID, int gridID, int ngrids, int mode)
 {
-  int iz, index;
+  int index;
   int gridID0;
   int ncdimid;
   char axisname0[CDI_MAX_NAME];
   char axisname2[CDI_MAX_NAME];
-  int checkname;
   int status;
 
   /* check that the name is not already defined */
-  checkname = TRUE;
-  iz = 0;
+  int checkname = TRUE;
+  int iz = 0;
 
   do
     {
@@ -1196,9 +1169,8 @@ int checkGridName(int type, char *axisname, int fileID, int vlistID, int gridID,
 
   if ( iz ) sprintf(&axisname[strlen(axisname)], "_%d", iz+1);
 
-  return (iz);
+  return iz;
 }
-
 
 static
 void cdfDefXaxis(stream_t *streamptr, int gridID, int ndims)
@@ -1209,26 +1181,23 @@ void cdfDefXaxis(stream_t *streamptr, int gridID, int ndims)
   char axisname[CDI_MAX_NAME];
   int index;
   /*  int index2; */
-  int gridID0, gridtype0, gridindex;
   int dimID = UNDEFID;
   int dimIDs[2];
   int ngrids = 0;
-  int fileID;
   size_t len;
   int ncvarid = UNDEFID, ncbvarid = UNDEFID;
   int nvdimID = UNDEFID;
-  int vlistID;
-  int xtype = NC_DOUBLE;
+  nc_type xtype = NC_DOUBLE;
 
   if ( gridInqPrec(gridID) == DATATYPE_FLT32 ) xtype = NC_FLOAT;
 
-  vlistID = streamptr->vlistID;
-  fileID  = streamptr->fileID;
+  int vlistID = streamptr->vlistID;
+  int fileID  = streamptr->fileID;
 
   if ( ndims ) ngrids = vlistNgrids(vlistID);
 
   size_t dimlen = (size_t)gridInqXsize(gridID);
-  gridindex = vlistGridIndex(vlistID, gridID);
+  int gridindex = vlistGridIndex(vlistID, gridID);
 
   gridInqXname(gridID, axisname);
   gridInqXlongname(gridID, longname);
@@ -1241,8 +1210,8 @@ void cdfDefXaxis(stream_t *streamptr, int gridID, int ndims)
     {
       if ( streamptr->xdimID[index] != UNDEFID )
         {
-          gridID0 = vlistGrid(vlistID, index);
-          gridtype0 = gridInqType(gridID0);
+          int gridID0 = vlistGrid(vlistID, index);
+          int gridtype0 = gridInqType(gridID0);
           if ( gridtype0 == GRID_GAUSSIAN    ||
                gridtype0 == GRID_LONLAT      ||
                gridtype0 == GRID_CURVILINEAR ||
@@ -1268,8 +1237,7 @@ void cdfDefXaxis(stream_t *streamptr, int gridID, int ndims)
 
   if ( dimID == UNDEFID )
     {
-      int status;
-      status = checkGridName('V', axisname, fileID, vlistID, gridID, ngrids, 'X');
+      int status = checkGridName('V', axisname, fileID, vlistID, gridID, ngrids, 'X');
       if ( status == 0 && ndims )
         status = checkGridName('D', axisname, fileID, vlistID, gridID, ngrids, 'X');
 
@@ -1289,7 +1257,7 @@ void cdfDefXaxis(stream_t *streamptr, int gridID, int ndims)
 
       if ( gridInqXvalsPtr(gridID) )
         {
-          cdf_def_var(fileID, axisname, (nc_type) xtype, ndims, &dimID, &ncvarid);
+          cdf_def_var(fileID, axisname, xtype, ndims, &dimID, &ncvarid);
 
           if ( (len = strlen(stdname)) )
             cdf_put_att_text(fileID, ncvarid, "standard_name", len, stdname);
@@ -1306,7 +1274,7 @@ void cdfDefXaxis(stream_t *streamptr, int gridID, int ndims)
               strcat(axisname, BNDS_NAME);
               dimIDs[0] = dimID;
               dimIDs[1] = nvdimID;
-              cdf_def_var(fileID, axisname, (nc_type) xtype, 2, dimIDs, &ncbvarid);
+              cdf_def_var(fileID, axisname, xtype, 2, dimIDs, &ncbvarid);
               cdf_put_att_text(fileID, ncvarid, "bounds", strlen(axisname), axisname);
             }
           /*
@@ -1330,7 +1298,6 @@ void cdfDefXaxis(stream_t *streamptr, int gridID, int ndims)
   streamptr->xdimID[gridindex] = dimID;
 }
 
-
 static
 void cdfDefYaxis(stream_t *streamptr, int gridID, int ndims)
 {
@@ -1340,26 +1307,23 @@ void cdfDefYaxis(stream_t *streamptr, int gridID, int ndims)
   char axisname[CDI_MAX_NAME];
   int index;
   /*  int index2; */
-  int gridID0, gridtype0, gridindex;
   int dimID = UNDEFID;
   int dimIDs[2];
   int ngrids = 0;
-  int fileID;
   size_t len;
   int ncvarid = UNDEFID, ncbvarid = UNDEFID;
   int nvdimID = UNDEFID;
-  int vlistID;
-  int xtype = NC_DOUBLE;
+  nc_type xtype = NC_DOUBLE;
 
   if ( gridInqPrec(gridID) == DATATYPE_FLT32 ) xtype = NC_FLOAT;
 
-  vlistID = streamptr->vlistID;
-  fileID  = streamptr->fileID;
+  int vlistID = streamptr->vlistID;
+  int fileID  = streamptr->fileID;
 
   if ( ndims ) ngrids = vlistNgrids(vlistID);
 
   size_t dimlen = (size_t)gridInqYsize(gridID);
-  gridindex = vlistGridIndex(vlistID, gridID);
+  int gridindex = vlistGridIndex(vlistID, gridID);
 
   gridInqYname(gridID, axisname);
   gridInqYlongname(gridID, longname);
@@ -1372,8 +1336,8 @@ void cdfDefYaxis(stream_t *streamptr, int gridID, int ndims)
     {
       if ( streamptr->ydimID[index] != UNDEFID )
         {
-          gridID0 = vlistGrid(vlistID, index);
-          gridtype0 = gridInqType(gridID0);
+          int gridID0 = vlistGrid(vlistID, index);
+          int gridtype0 = gridInqType(gridID0);
           if ( gridtype0 == GRID_GAUSSIAN    ||
                gridtype0 == GRID_LONLAT      ||
                gridtype0 == GRID_CURVILINEAR ||
@@ -1420,7 +1384,7 @@ void cdfDefYaxis(stream_t *streamptr, int gridID, int ndims)
 
       if ( gridInqYvalsPtr(gridID) )
         {
-          cdf_def_var(fileID, axisname, (nc_type) xtype, ndims, &dimID, &ncvarid);
+          cdf_def_var(fileID, axisname, xtype, ndims, &dimID, &ncvarid);
 
           if ( (len = strlen(stdname)) )
             cdf_put_att_text(fileID, ncvarid, "standard_name", len, stdname);
@@ -1437,7 +1401,7 @@ void cdfDefYaxis(stream_t *streamptr, int gridID, int ndims)
               strcat(axisname, BNDS_NAME);
               dimIDs[0] = dimID;
               dimIDs[1] = nvdimID;
-              cdf_def_var(fileID, axisname, (nc_type) xtype, 2, dimIDs, &ncbvarid);
+              cdf_def_var(fileID, axisname, xtype, 2, dimIDs, &ncbvarid);
               cdf_put_att_text(fileID, ncvarid, "bounds", strlen(axisname), axisname);
             }
           /*
@@ -1488,29 +1452,25 @@ void cdfDefCurvilinear(stream_t *streamptr, int gridID)
   char xdimname[4] = "x";
   char ydimname[4] = "y";
   int index;
-  int gridID0, gridtype0, gridindex;
   int xdimID = UNDEFID;
   int ydimID = UNDEFID;
   int dimIDs[3];
-  int ngrids;
-  int fileID;
   size_t len;
   int ncxvarid = UNDEFID, ncyvarid = UNDEFID;
   int ncbxvarid = UNDEFID, ncbyvarid = UNDEFID, ncavarid = UNDEFID;
   int nvdimID = UNDEFID;
-  int vlistID;
-  int xtype = NC_DOUBLE;
+  nc_type xtype = NC_DOUBLE;
 
   if ( gridInqPrec(gridID) == DATATYPE_FLT32 ) xtype = NC_FLOAT;
 
-  vlistID = streamptr->vlistID;
-  fileID  = streamptr->fileID;
+  int vlistID = streamptr->vlistID;
+  int fileID  = streamptr->fileID;
 
-  ngrids = vlistNgrids(vlistID);
+  int ngrids = vlistNgrids(vlistID);
 
   size_t xdimlen = (size_t)gridInqXsize(gridID);
   size_t ydimlen = (size_t)gridInqYsize(gridID);
-  gridindex = vlistGridIndex(vlistID, gridID);
+  int gridindex = vlistGridIndex(vlistID, gridID);
 
   gridInqXname(gridID, xaxisname);
   gridInqXlongname(gridID, xlongname);
@@ -1525,8 +1485,8 @@ void cdfDefCurvilinear(stream_t *streamptr, int gridID)
     {
       if ( streamptr->xdimID[index] != UNDEFID )
         {
-          gridID0 = vlistGrid(vlistID, index);
-          gridtype0 = gridInqType(gridID0);
+          int gridID0 = vlistGrid(vlistID, index);
+          int gridtype0 = gridInqType(gridID0);
           if ( gridtype0 == GRID_GAUSSIAN    ||
                gridtype0 == GRID_LONLAT      ||
                gridtype0 == GRID_CURVILINEAR ||
@@ -1578,7 +1538,7 @@ void cdfDefCurvilinear(stream_t *streamptr, int gridID)
 
       if ( gridInqXvalsPtr(gridID) )
         {
-          cdf_def_var(fileID, xaxisname, (nc_type) xtype, 2, dimIDs, &ncxvarid);
+          cdf_def_var(fileID, xaxisname, xtype, 2, dimIDs, &ncxvarid);
           cdfGridCompress(fileID, ncxvarid, (int)(xdimlen*ydimlen), streamptr->filetype, streamptr->comptype);
 
           if ( (len = strlen(xstdname)) )
@@ -1598,7 +1558,7 @@ void cdfDefCurvilinear(stream_t *streamptr, int gridID)
               dimIDs[0] = ydimID;
               dimIDs[1] = xdimID;
               dimIDs[2] = nvdimID;
-              cdf_def_var(fileID, xaxisname, (nc_type) xtype, 3, dimIDs, &ncbxvarid);
+              cdf_def_var(fileID, xaxisname, xtype, 3, dimIDs, &ncbxvarid);
               cdfGridCompress(fileID, ncbxvarid, (int)(xdimlen*ydimlen), streamptr->filetype, streamptr->comptype);
 
               cdf_put_att_text(fileID, ncxvarid, "bounds", strlen(xaxisname), xaxisname);
@@ -1607,7 +1567,7 @@ void cdfDefCurvilinear(stream_t *streamptr, int gridID)
 
       if ( gridInqYvalsPtr(gridID) )
         {
-          cdf_def_var(fileID, yaxisname, (nc_type) xtype, 2, dimIDs, &ncyvarid);
+          cdf_def_var(fileID, yaxisname, xtype, 2, dimIDs, &ncyvarid);
           cdfGridCompress(fileID, ncyvarid, (int)(xdimlen*ydimlen), streamptr->filetype, streamptr->comptype);
 
           if ( (len = strlen(ystdname)) )
@@ -1627,7 +1587,7 @@ void cdfDefCurvilinear(stream_t *streamptr, int gridID)
               dimIDs[0] = ydimID;
               dimIDs[1] = xdimID;
               dimIDs[2] = nvdimID;
-              cdf_def_var(fileID, yaxisname, (nc_type) xtype, 3, dimIDs, &ncbyvarid);
+              cdf_def_var(fileID, yaxisname, xtype, 3, dimIDs, &ncbyvarid);
               cdfGridCompress(fileID, ncbyvarid, (int)(xdimlen*ydimlen), streamptr->filetype, streamptr->comptype);
 
               cdf_put_att_text(fileID, ncyvarid, "bounds", strlen(yaxisname), yaxisname);
@@ -1641,7 +1601,7 @@ void cdfDefCurvilinear(stream_t *streamptr, int gridID)
           static const char longname[] = "area of grid cell";
           static const char stdname[] = "cell_area";
 
-          cdf_def_var(fileID, yaxisname_, (nc_type) xtype, 2, dimIDs, &ncavarid);
+          cdf_def_var(fileID, yaxisname_, xtype, 2, dimIDs, &ncavarid);
 
           cdf_put_att_text(fileID, ncavarid, "standard_name", sizeof (stdname) - 1, stdname);
           cdf_put_att_text(fileID, ncavarid, "long_name", sizeof (longname) - 1, longname);
@@ -1665,23 +1625,18 @@ void cdfDefCurvilinear(stream_t *streamptr, int gridID)
   streamptr->ncavarID[gridindex] = ncavarid;
 }
 
-
 static
 void cdfDefRgrid(stream_t *streamptr, int gridID)
 {
   char axisname[7] = "rgridX";
   int index, iz = 0;
-  int gridID0, gridtype0, gridindex;
   int dimID = UNDEFID;
-  int ngrids;
-  int fileID;
-  int vlistID;
   int lwarn = TRUE;
 
-  vlistID = streamptr->vlistID;
-  fileID  = streamptr->fileID;
+  int vlistID = streamptr->vlistID;
+  int fileID  = streamptr->fileID;
 
-  ngrids = vlistNgrids(vlistID);
+  int ngrids = vlistNgrids(vlistID);
 
   size_t dimlen = (size_t)gridInqSize(gridID);
 
@@ -1689,8 +1644,8 @@ void cdfDefRgrid(stream_t *streamptr, int gridID)
     {
       if ( streamptr->xdimID[index] != UNDEFID )
         {
-          gridID0 = vlistGrid(vlistID, index);
-          gridtype0 = gridInqType(gridID0);
+          int gridID0 = vlistGrid(vlistID, index);
+          int gridtype0 = gridInqType(gridID0);
           if ( gridtype0 == GRID_GAUSSIAN_REDUCED )
             {
               size_t dimlen0 = (size_t)gridInqSize(gridID0);
@@ -1726,25 +1681,20 @@ void cdfDefRgrid(stream_t *streamptr, int gridID)
       streamptr->ncmode = 2;
     }
 
-  gridindex = vlistGridIndex(vlistID, gridID);
+  int gridindex = vlistGridIndex(vlistID, gridID);
   streamptr->xdimID[gridindex] = dimID;
 }
-
 
 static
 void cdfDefGdim(stream_t *streamptr, int gridID)
 {
   int index, iz = 0;
-  int gridID0, gridtype0, gridindex;
   int dimID = UNDEFID;
-  int ngrids;
-  int fileID;
-  int vlistID;
 
-  vlistID = streamptr->vlistID;
-  fileID  = streamptr->fileID;
+  int vlistID = streamptr->vlistID;
+  int fileID  = streamptr->fileID;
 
-  ngrids = vlistNgrids(vlistID);
+  int ngrids = vlistNgrids(vlistID);
 
   size_t dimlen = (size_t)gridInqSize(gridID);
 
@@ -1753,8 +1703,8 @@ void cdfDefGdim(stream_t *streamptr, int gridID)
       {
         if ( streamptr->xdimID[index] != UNDEFID )
           {
-            gridID0 = vlistGrid(vlistID, index);
-            gridtype0 = gridInqType(gridID0);
+            int gridID0 = vlistGrid(vlistID, index);
+            int gridtype0 = gridInqType(gridID0);
             if ( gridtype0 == GRID_GENERIC )
               {
                 size_t dimlen0 = (size_t)gridInqSize(gridID0);
@@ -1774,8 +1724,8 @@ void cdfDefGdim(stream_t *streamptr, int gridID)
       {
         if ( streamptr->ydimID[index] != UNDEFID )
           {
-            gridID0 = vlistGrid(vlistID, index);
-            gridtype0 = gridInqType(gridID0);
+            int gridID0 = vlistGrid(vlistID, index);
+            int gridtype0 = gridInqType(gridID0);
             if ( gridtype0 == GRID_GENERIC )
               {
                 size_t dimlen0 = (size_t)gridInqSize(gridID0);
@@ -1809,10 +1759,9 @@ void cdfDefGdim(stream_t *streamptr, int gridID)
       streamptr->ncmode = 2;
     }
 
-  gridindex = vlistGridIndex(vlistID, gridID);
+  int gridindex = vlistGridIndex(vlistID, gridID);
   streamptr->xdimID[gridindex] = dimID;
 }
-
 
 static
 void cdfDefGridReference(stream_t *streamptr, int gridID)
@@ -1887,26 +1836,22 @@ void cdfDefUnstructured(stream_t *streamptr, int gridID)
   char xaxisname[CDI_MAX_NAME];
   char yaxisname[CDI_MAX_NAME];
   int index;
-  int gridID0, gridtype0, gridindex;
   int dimID = UNDEFID;
-  int ngrids;
-  int fileID;
   size_t len;
   int ncxvarid = UNDEFID, ncyvarid = UNDEFID;
   int ncbxvarid = UNDEFID, ncbyvarid = UNDEFID, ncavarid = UNDEFID;
   int nvdimID = UNDEFID;
-  int vlistID;
-  int xtype = NC_DOUBLE;
+  nc_type xtype = NC_DOUBLE;
 
   if ( gridInqPrec(gridID) == DATATYPE_FLT32 ) xtype = NC_FLOAT;
 
-  vlistID = streamptr->vlistID;
-  fileID  = streamptr->fileID;
+  int vlistID = streamptr->vlistID;
+  int fileID  = streamptr->fileID;
 
-  ngrids = vlistNgrids(vlistID);
+  int ngrids = vlistNgrids(vlistID);
 
   size_t dimlen = (size_t)gridInqSize(gridID);
-  gridindex = vlistGridIndex(vlistID, gridID);
+  int gridindex = vlistGridIndex(vlistID, gridID);
 
   gridInqXname(gridID, xaxisname);
   gridInqXlongname(gridID, xlongname);
@@ -1921,8 +1866,8 @@ void cdfDefUnstructured(stream_t *streamptr, int gridID)
     {
       if ( streamptr->xdimID[index] != UNDEFID )
         {
-          gridID0 = vlistGrid(vlistID, index);
-          gridtype0 = gridInqType(gridID0);
+          int gridID0 = vlistGrid(vlistID, index);
+          int gridtype0 = gridInqType(gridID0);
           if ( gridtype0 == GRID_UNSTRUCTURED )
             {
               size_t dimlen0 = (size_t)gridInqSize(gridID0);
@@ -1966,7 +1911,7 @@ void cdfDefUnstructured(stream_t *streamptr, int gridID)
 
       if ( gridInqXvalsPtr(gridID) )
         {
-          cdf_def_var(fileID, xaxisname, (nc_type) xtype, 1, &dimID, &ncxvarid);
+          cdf_def_var(fileID, xaxisname, xtype, 1, &dimID, &ncxvarid);
           cdfGridCompress(fileID, ncxvarid, (int)dimlen, streamptr->filetype, streamptr->comptype);
 
           if ( (len = strlen(xstdname)) )
@@ -1983,7 +1928,7 @@ void cdfDefUnstructured(stream_t *streamptr, int gridID)
               dimIDs[1] = nvdimID;
               strcat(xaxisname, "_");
               strcat(xaxisname, BNDS_NAME);
-              cdf_def_var(fileID, xaxisname, (nc_type) xtype, 2, dimIDs, &ncbxvarid);
+              cdf_def_var(fileID, xaxisname, xtype, 2, dimIDs, &ncbxvarid);
               cdfGridCompress(fileID, ncbxvarid, (int)dimlen, streamptr->filetype, streamptr->comptype);
 
               cdf_put_att_text(fileID, ncxvarid, "bounds", strlen(xaxisname), xaxisname);
@@ -1992,7 +1937,7 @@ void cdfDefUnstructured(stream_t *streamptr, int gridID)
 
       if ( gridInqYvalsPtr(gridID) )
         {
-          cdf_def_var(fileID, yaxisname, (nc_type) xtype, 1, &dimID, &ncyvarid);
+          cdf_def_var(fileID, yaxisname, xtype, 1, &dimID, &ncyvarid);
           cdfGridCompress(fileID, ncyvarid, (int)dimlen, streamptr->filetype, streamptr->comptype);
 
           if ( (len = strlen(ystdname)) )
@@ -2009,7 +1954,7 @@ void cdfDefUnstructured(stream_t *streamptr, int gridID)
               dimIDs[1] = nvdimID;
               strcat(yaxisname, "_");
               strcat(yaxisname, BNDS_NAME);
-              cdf_def_var(fileID, yaxisname, (nc_type) xtype, 2, dimIDs, &ncbyvarid);
+              cdf_def_var(fileID, yaxisname, xtype, 2, dimIDs, &ncbyvarid);
               cdfGridCompress(fileID, ncbyvarid, (int)dimlen, streamptr->filetype, streamptr->comptype);
 
               cdf_put_att_text(fileID, ncyvarid, "bounds", strlen(yaxisname), yaxisname);
@@ -2023,7 +1968,7 @@ void cdfDefUnstructured(stream_t *streamptr, int gridID)
           static const char longname[] = "area of grid cell";
           static const char stdname[] = "cell_area";
 
-          cdf_def_var(fileID, yaxisname_, (nc_type) xtype, 1, &dimID, &ncavarid);
+          cdf_def_var(fileID, yaxisname_, xtype, 1, &dimID, &ncavarid);
 
           cdf_put_att_text(fileID, ncavarid, "standard_name", sizeof (stdname) - 1, stdname);
           cdf_put_att_text(fileID, ncavarid, "long_name", sizeof (longname) - 1, longname);

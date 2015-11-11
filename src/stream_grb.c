@@ -1,11 +1,7 @@
-#if defined (HAVE_CONFIG_H)
+#ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
-#include <stdio.h>
-#include <string.h>
-
-#include "dmemory.h"
 #include "cdi.h"
 #include "cdi_int.h"
 #include "stream_cgribex.h"
@@ -14,8 +10,6 @@
 #include "file.h"
 #include "cgribex.h"  /* gribZip gribGetZip gribGinfo */
 #include "gribapi.h"
-#include "namespace.h"
-
 
 
 int grib1ltypeToZaxisType(int grib_ltype)
@@ -51,7 +45,7 @@ int grib1ltypeToZaxisType(int grib_ltype)
     case GRIB1_LTYPE_MIX_LAYER:          { zaxistype = ZAXIS_MIX_LAYER;              break; }
     }
 
-  return (zaxistype);
+  return zaxistype;
 }
 
 
@@ -88,7 +82,7 @@ int grib2ltypeToZaxisType(int grib_ltype)
     case GRIB2_LTYPE_REFERENCE:          { zaxistype = ZAXIS_REFERENCE;              break; }
     }
 
-  return (zaxistype);
+  return zaxistype;
 }
 
 
@@ -148,7 +142,7 @@ int zaxisTypeToGrib2ltype(int zaxistype)
     case ZAXIS_ATMOSPHERE:            { grib_ltype = GRIB2_LTYPE_ATMOSPHERE;         break; }
     }
 
-  return (grib_ltype);
+  return grib_ltype;
 }
 
 
@@ -169,7 +163,7 @@ int grbBitsPerValue(int datatype)
 	bitsPerValue = 16;
     }
 
-  return (bitsPerValue);
+  return bitsPerValue;
 }
 
 
@@ -207,7 +201,7 @@ int grbScanTimestep1(stream_t * streamptr)
     status = gribapiScanTimestep1(streamptr);
 #endif
 
-  return (status);
+  return status;
 }
 
 static
@@ -230,7 +224,7 @@ int grbScanTimestep2(stream_t * streamptr)
     status = gribapiScanTimestep2(streamptr);
 #endif
 
-  return (status);
+  return status;
 }
 
 static
@@ -254,7 +248,7 @@ int grbScanTimestep(stream_t * streamptr)
     Error("Sufficient GRIB support unavailable!");
 #endif
 
-  return (status);
+  return status;
 }
 
 
@@ -274,7 +268,7 @@ int grbInqContents(stream_t * streamptr)
 
   fileSetPos(fileID, 0, SEEK_SET);
 
-  return (status);
+  return status;
 }
 #endif
 
@@ -309,7 +303,7 @@ int grbInqTimestep(stream_t * streamptr, int tsID)
       nrecs = streamptr->tsteps[tsID].nrecs;
     }
 
-  return (nrecs);
+  return nrecs;
 }
 
 
