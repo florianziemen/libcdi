@@ -976,6 +976,8 @@ void cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarid, int dty
 
 void cdf_write_var(stream_t *streamptr, int varID, int memtype, const void *data, int nmiss)
 {
+  if ( streamptr->accessmode == 0 ) cdfEndDef(streamptr);
+
   size_t xsize = 0, ysize = 0;
   size_t size;
   size_t start[5];
@@ -1070,6 +1072,8 @@ void cdf_write_var(stream_t *streamptr, int varID, int memtype, const void *data
 void cdf_write_var_chunk(stream_t *streamptr, int varID, int memtype,
                          const int rect[][2], const void *data, int nmiss)
 {
+  if ( streamptr->accessmode == 0 ) cdfEndDef(streamptr);
+
   int xid = UNDEFID, yid = UNDEFID;
   size_t xsize = 0, ysize = 0;
   size_t start[5];
@@ -1170,6 +1174,8 @@ void cdf_write_var_chunk(stream_t *streamptr, int varID, int memtype,
 
 void cdf_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, const void *data, int nmiss)
 {
+  if ( streamptr->accessmode == 0 ) cdfEndDef(streamptr);
+
   size_t xsize = 0, ysize = 0;
   size_t start[5];
   size_t count[5];

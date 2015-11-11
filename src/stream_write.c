@@ -68,7 +68,6 @@ void cdiStreamWriteVar_(int streamID, int varID, int memtype, const void *data, 
     case FILETYPE_NC4:
     case FILETYPE_NC4C:
       {
-	if ( streamptr->accessmode == 0 ) cdfEndDef(streamptr);
         cdf_write_var(streamptr, varID, memtype, data, nmiss);
 	break;
       }
@@ -187,7 +186,6 @@ void cdiStreamWriteVarSlice(int streamID, int varID, int levelID, int memtype, c
     case FILETYPE_NC2:
     case FILETYPE_NC4:
     case FILETYPE_NC4C:
-      if ( streamptr->accessmode == 0 ) cdfEndDef(streamptr);
       cdf_write_var_slice(streamptr, varID, levelID, memtype, data, nmiss);
       break;
 #endif
@@ -296,7 +294,6 @@ cdiStreamWriteVarChunk_(int streamID, int varID, int memtype,
     case FILETYPE_NC2:
     case FILETYPE_NC4:
     case FILETYPE_NC4C:
-      if ( streamptr->accessmode == 0 ) cdfEndDef(streamptr);
       cdf_write_var_chunk(streamptr, varID, memtype, rect, data, nmiss);
       break;
 #endif
