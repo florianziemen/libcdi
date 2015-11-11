@@ -694,20 +694,22 @@ int gribapiVarCompare(compvar2_t compVar, record_t record, int flag)
   return (rstatus);
 }
 
-static void ensureBufferSize(size_t requiredSize, size_t* curSize, unsigned char **buffer) {
+static
+void ensureBufferSize(size_t requiredSize, size_t *curSize, void **buffer)
+{
   if ( *curSize < requiredSize )
     {
       *curSize = requiredSize;
-      *buffer = (unsigned char *) Realloc(*buffer, *curSize);
+      *buffer = Realloc(*buffer, *curSize);
     }
 }
 
 static
-grib_handle* gribapiGetDiskRepresentation(size_t recsize, size_t* buffersize, unsigned char** gribbuffer, int* outDatatype, int* outCompressionType, long* outUnzipsize)
+grib_handle *gribapiGetDiskRepresentation(size_t recsize, size_t *buffersize, void **gribbuffer, int *outDatatype, int *outCompressionType, long *outUnzipsize)
 {
   int lieee = FALSE;
 
-  grib_handle* gh = grib_handle_new_from_message(NULL, (void *) *gribbuffer, recsize);
+  grib_handle *gh = grib_handle_new_from_message(NULL, *gribbuffer, recsize);
   if(gribEditionNumber(gh) > 1)
     {
       size_t len = 256;
@@ -796,7 +798,7 @@ while(0)
 int gribapiScanTimestep1(stream_t * streamptr)
 {
   off_t recpos = 0;
-  unsigned char *gribbuffer = NULL;
+  void *gribbuffer = NULL;
   size_t buffersize = 0;
   DateTime datetime0 = { .date = 10101, .time = 0 };
   int nrecs_scanned = 0;        //Only used for debug output.
@@ -1013,7 +1015,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
   int vlistID = streamptr->vlistID;
   int taxisID = vlistInqTaxis(vlistID);
 
-  unsigned char *gribbuffer = (unsigned char *) streamptr->record->buffer;
+  void *gribbuffer = streamptr->record->buffer;
   size_t buffersize = streamptr->record->buffersize;
 
   int tsID = streamptr->rtsteps;
@@ -1062,7 +1064,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
         ensureBufferSize((size_t)unzipsize + 100, &buffersize, &gribbuffer);
 
       nrecs_scanned++;
-      gh = grib_handle_new_from_message(NULL, (void *) gribbuffer, recsize);
+      gh = grib_handle_new_from_message(NULL, gribbuffer, recsize);
       GRIB_CHECK(my_grib_set_double(gh, "missingValue", cdiDefaultMissval), 0);
 
       int param = gribapiGetParam(gh);
@@ -1241,7 +1243,7 @@ int gribapiScanTimestep(stream_t * streamptr)
 
   if ( streamptr->tsteps[tsID].recordSize == 0 )
     {
-      unsigned char* gribbuffer = (unsigned char *) streamptr->record->buffer;
+      void *gribbuffer = streamptr->record->buffer;
       size_t buffersize = streamptr->record->buffersize;
 
       cdi_create_records(streamptr, tsID);
@@ -1292,7 +1294,7 @@ int gribapiScanTimestep(stream_t * streamptr)
             ensureBufferSize((size_t)unzipsize + 100, &buffersize, &gribbuffer);
 
           nrecs_scanned++;
-	  gh = grib_handle_new_from_message(NULL, (void *) gribbuffer, recsize);
+	  gh = grib_handle_new_from_message(NULL, gribbuffer, recsize);
 	  GRIB_CHECK(my_grib_set_double(gh, "missingValue", cdiDefaultMissval), 0);
 
           int param = gribapiGetParam(gh);
@@ -1457,7 +1459,7 @@ int gribapiScanTimestep(stream_t * streamptr)
 #endif
 
 #ifdef HAVE_LIBGRIB_API
-int gribapiDecode(unsigned char *gribbuffer, int gribsize, double *data, int gridsize,
+int gribapiDecode(void *gribbuffer, int gribsize, double *data, int gridsize,
 		  int unreduced, int *nmiss, double missval, int vlistID, int varID)
 {
   int status = 0;
@@ -1480,7 +1482,7 @@ int gribapiDecode(unsigned char *gribbuffer, int gribsize, double *data, int gri
     }
 
   size_t recsize = (size_t)gribsize;
-  grib_handle *gh = grib_handle_new_from_message(NULL, (void *) gribbuffer, recsize);
+  grib_handle *gh = grib_handle_new_from_message(NULL, gribbuffer, recsize);
   GRIB_CHECK(my_grib_set_double(gh, "missingValue", missval), 0);
 
   /* get the size of the values array*/
