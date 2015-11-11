@@ -38,20 +38,30 @@ size_t grbEncode(int filetype, int memtype, int varID, int levelID, int vlistID,
 #endif
 #ifdef HAVE_LIBGRIB_API
     {
-      if ( memtype == MEMTYPE_FLOAT ) Error("gribapiEncode() not implemented for memtype float!");
+      const void *datap = data;
+      if ( memtype == MEMTYPE_FLOAT )
+        {
+          const float *dataf = (const float*) data;
+          double *datad = (double*) Malloc(datasize*sizeof(double));
+          for ( size_t i = 0; i < datasize; ++i ) datad[i] = (double) dataf[i];
+          datap = (const void*) datad;
+        }
 
       size_t gribbuffersize;
       nbytes = gribapiEncode(varID, levelID, vlistID, gridID, zaxisID,
 			     date, time, tsteptype, numavg,
 			     (long)datasize, data, nmiss, gribbuffer, &gribbuffersize,
 			     comptype, gribContainer);
+      
+      if ( memtype == MEMTYPE_FLOAT ) free((void*)datap);
     }
 #else
-    Error("GRIB_API support not compiled in!");
-    (void)gribContainer;
-    (void)comptype;
+    {
+      Error("GRIB_API support not compiled in!");
+      (void)gribContainer;
+      (void)comptype;
+    }
 #endif
-
 
   return nbytes;
 }
@@ -59,12 +69,12 @@ size_t grbEncode(int filetype, int memtype, int varID, int levelID, int vlistID,
 static
 size_t grbSzip(int filetype, void *gribbuffer, size_t gribbuffersize)
 {
-  size_t nbytes = 0;
   size_t buffersize = gribbuffersize + 1000; /* compressed record can be greater than source record */
-  void *buffer =  Malloc(buffersize);
+  void *buffer = Malloc(buffersize);
 
   /*  memcpy(buffer, gribbuffer, gribbuffersize); */
 
+  size_t nbytes = 0;
   if ( filetype == FILETYPE_GRB )
     {
       nbytes = (size_t)gribZip(gribbuffer, (long) gribbuffersize, buffer, (long) buffersize);

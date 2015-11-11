@@ -4,7 +4,6 @@
 
 #include <limits.h>
 #include <stdio.h>
-// #include <float.h>  /* FLT_EPSILON */
 
 #include "dmemory.h"
 #include "cdi.h"
@@ -1721,8 +1720,6 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
 	    ISEC2_LonIncr  = (int)lround(xinc*1000);
 	  }
 
-	// if ( fabs(xinc*1000 - ISEC2_LonIncr) > FLT_EPSILON ) ISEC2_LonIncr = 0;
-
 	if ( gridtype == GRID_GAUSSIAN || gridtype == GRID_GAUSSIAN_REDUCED )
           {
             int np = gridInqNP(gridID);
@@ -1732,8 +1729,6 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
 	else
 	  {
 	    ISEC2_LatIncr = (int)lround(yinc*1000);
-	    // if ( fabs(yinc*1000 - ISEC2_LatIncr) > FLT_EPSILON ) ISEC2_LatIncr = 0;
-
 	    if ( ISEC2_LatIncr < 0 ) ISEC2_LatIncr = -ISEC2_LatIncr;
 	  }
 
@@ -2123,9 +2118,7 @@ void cgribexDefaultSec1(int *isec1)
 static
 void cgribexDefaultSec4(int *isec4)
 {
-  long i;
-
-  for ( i = 2; i <= 10; ++i ) isec4[i] = 0;
+  for ( int i = 2; i <= 10; ++i ) isec4[i] = 0;
 }
 
 static
