@@ -19,7 +19,7 @@
 static
 size_t grbEncode(int filetype, int memtype, int varID, int levelID, int vlistID, int gridID, int zaxisID,
 		 int date, int time, int tsteptype, int numavg,
-		 size_t datasize, const double *data, int nmiss, unsigned char **gribbuffer,
+		 size_t datasize, const void *data, int nmiss, void **gribbuffer,
 		 int comptype, void *gribContainer)
 {
   size_t nbytes = 0;
@@ -28,7 +28,7 @@ size_t grbEncode(int filetype, int memtype, int varID, int levelID, int vlistID,
   if ( filetype == FILETYPE_GRB )
     {
       size_t gribbuffersize = datasize*4+3000;
-      *gribbuffer = (unsigned char *) Malloc(gribbuffersize);
+      *gribbuffer = Malloc(gribbuffersize);
 
       nbytes = cgribexEncode(memtype, varID, levelID, vlistID, gridID, zaxisID,
 			     date, time, tsteptype, numavg,
@@ -57,11 +57,11 @@ size_t grbEncode(int filetype, int memtype, int varID, int levelID, int vlistID,
 }
 
 static
-size_t grbSzip(int filetype, unsigned char *gribbuffer, size_t gribbuffersize)
+size_t grbSzip(int filetype, void *gribbuffer, size_t gribbuffersize)
 {
   size_t nbytes = 0;
   size_t buffersize = gribbuffersize + 1000; /* compressed record can be greater than source record */
-  unsigned char *buffer = (unsigned char *) Malloc(buffersize);
+  void *buffer =  Malloc(buffersize);
 
   /*  memcpy(buffer, gribbuffer, gribbuffersize); */
 
@@ -130,7 +130,7 @@ void grbCopyRecord(stream_t * streamptr2, stream_t * streamptr1)
 
 void grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, const void *data, int nmiss)
 {
-  unsigned char *gribbuffer = NULL;
+  void *gribbuffer = NULL;
   void *gc = NULL;
 
   int filetype  = streamptr->filetype;
@@ -151,10 +151,7 @@ void grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
     Message("gridID = %d zaxisID = %d", gridID, zaxisID);
 
   size_t datasize = (size_t)gridInqSize(gridID);
-  /*
-  gribbuffersize = datasize*4+3000;
-  gribbuffer = (unsigned char *) Malloc(gribbuffersize);
-  */
+
 #ifdef HAVE_LIBCGRIBEX
   if ( filetype == FILETYPE_GRB )
     {
@@ -181,7 +178,7 @@ void grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
     }
 
   size_t nbytes = grbEncode(filetype, memtype, varID, levelID, vlistID, gridID, zaxisID, date, time, tsteptype, numavg,
-                            datasize, (const double*) data, nmiss, &gribbuffer, comptype, gc);
+                            datasize, data, nmiss, &gribbuffer, comptype, gc);
 
   if ( filetype == FILETYPE_GRB && streamptr->comptype == COMPRESS_SZIP )
     nbytes = grbSzip(filetype, gribbuffer, nbytes);

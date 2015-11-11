@@ -2582,7 +2582,7 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
 #ifdef HAVE_LIBGRIB_API
 size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisID,
 		     int vdate, int vtime, int tsteptype, int numavg,
-		     long datasize, const double *data, int nmiss, unsigned char **gribbuffer, size_t *gribbuffersize,
+		     long datasize, const double *data, int nmiss, void **gribbuffer, size_t *gribbuffersize,
 		     int comptype, void *gribContainer)
 {
   size_t recsize = 0;
@@ -2700,7 +2700,7 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   GRIB_CHECK(grib_get_message(gh, (const void **)&dummy, &recsize), 0);
   recsize += 512; /* add some space for possible filling */
   *gribbuffersize = recsize;
-  *gribbuffer = (unsigned char *) Malloc(*gribbuffersize);
+  *gribbuffer = Malloc(*gribbuffersize);
 
   /* get a copy of the coded message */
   GRIB_CHECK(grib_get_message_copy(gh, *gribbuffer, &recsize), 0);

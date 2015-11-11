@@ -2228,7 +2228,7 @@ size_t cgribexEncode(int memtype, int varID, int levelID, int vlistID, int gridI
   if ( iret ) Error("Problem during GRIB encode (errno = %d)!", iret);
 
   nbytes = (size_t)iword * sizeof (int);
-  return (nbytes);
+  return nbytes;
 }
 #endif
 /*
