@@ -243,7 +243,8 @@ int   gribVersion(unsigned char *buffer, size_t buffersize);
 
 int   grib_info_for_grads(off_t recpos, long recsize, unsigned char *gribbuffer, int *intnum, float *fltnum, off_t *bignum);
 
-double calculate_pfactor(const double* spectralField, long fieldTruncation, long subsetTruncation);
+double calculate_pfactor_float(const float* spectralField, long fieldTruncation, long subsetTruncation);
+double calculate_pfactor_double(const double* spectralField, long fieldTruncation, long subsetTruncation);
 
 #endif  /* _CGRIBEX_H */ 
 
