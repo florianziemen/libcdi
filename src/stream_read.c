@@ -248,17 +248,21 @@ void streamReadVarSliceF(int streamID, int varID, int levelID, float *data, int 
     {
       // In case the file format does not support single precision reading,
       // we fall back to double precision reading, converting the data on the fly.
-      size_t elementCount = (size_t)gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
-      double *conversionBuffer = (double *) Malloc(elementCount * sizeof(*conversionBuffer));
-      streamReadVarSlice(streamID, varID, levelID, conversionBuffer, nmiss);
-      for (size_t i = elementCount; i--; ) data[i] = (float)conversionBuffer[i];
+      size_t elementCount = (size_t) gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
+      double *conversionBuffer = (double *) Malloc(elementCount*sizeof(*conversionBuffer));
+      streamReadVarSlice(streamID, varID, levelID, (void *) conversionBuffer, nmiss);
+      for ( size_t i = elementCount; i--; ) data[i] = (float) conversionBuffer[i];
       Free(conversionBuffer);
     }
 }
 
 static
-void stream_read_record(int streamID, int memtype, void *data, int *nmiss)
+int stream_read_record(int streamID, int memtype, void *data, int *nmiss)
 {
+  // May fail if memtype == MEMTYPE_FLOAT and the file format does not support single precision reading.
+  // A value > 0 is returned in this case, otherwise it returns zero.
+  int status = 0;
+
   check_parg(data);
   check_parg(nmiss);
 
@@ -276,19 +280,19 @@ void stream_read_record(int streamID, int memtype, void *data, int *nmiss)
 #endif
 #if  defined  (HAVE_LIBSERVICE)
     case FILETYPE_SRV:
-      if ( memtype == MEMTYPE_FLOAT ) Error("srvReadRecord not implemented for memtype float!");
+      if ( memtype == MEMTYPE_FLOAT ) return 1;
       srvReadRecord(streamptr, data, nmiss);
       break;
 #endif
 #if  defined  (HAVE_LIBEXTRA)
     case FILETYPE_EXT:
-      if ( memtype == MEMTYPE_FLOAT ) Error("extReadRecord not implemented for memtype float!");
+      if ( memtype == MEMTYPE_FLOAT ) return 1;
       extReadRecord(streamptr, data, nmiss);
       break;
 #endif
 #if  defined  (HAVE_LIBIEG)
     case FILETYPE_IEG:
-      if ( memtype == MEMTYPE_FLOAT ) Error("iegReadRecord not implemented for memtype float!");
+      if ( memtype == MEMTYPE_FLOAT ) return 1;
       iegReadRecord(streamptr, data, nmiss);
       break;
 #endif
@@ -306,6 +310,8 @@ void stream_read_record(int streamID, int memtype, void *data, int *nmiss)
 	break;
       }
     }
+
+  return status;
 }
 
 
@@ -317,5 +323,19 @@ void streamReadRecord(int streamID, double *data, int *nmiss)
 
 void streamReadRecordF(int streamID, float *data, int *nmiss)
 {
-  stream_read_record(streamID, MEMTYPE_FLOAT, (void *) data, nmiss);
+  if ( stream_read_record(streamID, MEMTYPE_FLOAT, (void *) data, nmiss) )
+    {
+      // In case the file format does not support single precision reading,
+      // we fall back to double precision reading, converting the data on the fly.
+      stream_t *streamptr = stream_to_pointer(streamID);
+      int tsID   = streamptr->curTsID;
+      int vrecID = streamptr->tsteps[tsID].curRecID;
+      int recID  = streamptr->tsteps[tsID].recIDs[vrecID];
+      int varID  = streamptr->tsteps[tsID].records[recID].varID;
+      size_t elementCount = (size_t) gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
+      double *conversionBuffer = (double *) Malloc(elementCount*sizeof(*conversionBuffer));
+      stream_read_record(streamID, MEMTYPE_DOUBLE, (void *) conversionBuffer, nmiss);
+      for ( size_t i = elementCount; i--; ) data[i] = (float) conversionBuffer[i];
+      Free(conversionBuffer);
+    }
 }

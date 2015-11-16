@@ -102,23 +102,20 @@ int srvInqRecord(stream_t *streamptr, int *varID, int *levelID)
 
 void srvReadRecord(stream_t *streamptr, double *data, int *nmiss)
 {
-  int vlistID, fileID;
   int status;
-  int recID, vrecID, tsID;
-  off_t recpos;
   int header[8];
-  int varID, gridID;
+  int gridID;
   int i, size;
   double missval;
   void *srvp = streamptr->record->exsep;
 
-  vlistID = streamptr->vlistID;
-  fileID  = streamptr->fileID;
-  tsID    = streamptr->curTsID;
-  vrecID  = streamptr->tsteps[tsID].curRecID;
-  recID   = streamptr->tsteps[tsID].recIDs[vrecID];
-  recpos  = streamptr->tsteps[tsID].records[recID].position;
-  varID   = streamptr->tsteps[tsID].records[recID].varID;
+  int vlistID  = streamptr->vlistID;
+  int fileID   = streamptr->fileID;
+  int tsID     = streamptr->curTsID;
+  int vrecID   = streamptr->tsteps[tsID].curRecID;
+  int recID    = streamptr->tsteps[tsID].recIDs[vrecID];
+  int varID    = streamptr->tsteps[tsID].records[recID].varID;
+  off_t recpos = streamptr->tsteps[tsID].records[recID].position;
 
   fileSetPos(fileID, recpos, SEEK_SET);
 
