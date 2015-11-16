@@ -15,8 +15,12 @@
 
 /* the single image implementation */
 static
-void cdiStreamReadVar(int streamID, int varID, int memtype, void *data, int *nmiss)
+int cdiStreamReadVar(int streamID, int varID, int memtype, void *data, int *nmiss)
 {
+  // May fail if memtype == MEMTYPE_FLOAT and the file format does not support single precision reading.
+  // A value > 0 is returned in this case, otherwise it returns zero.
+  int status = 0;
+
   if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamID, varID);
 
   check_parg(data);
@@ -40,7 +44,7 @@ void cdiStreamReadVar(int streamID, int varID, int memtype, void *data, int *nmi
 #if  defined  (HAVE_LIBSERVICE)
     case FILETYPE_SRV:
       {
-        if ( memtype == MEMTYPE_FLOAT ) Error("srvReadVar not implemented for memtype float!");
+        if ( memtype == MEMTYPE_FLOAT ) return 1;
         srvReadVarDP(streamptr, varID, (double *)data, nmiss);
 	break;
       }
@@ -48,7 +52,7 @@ void cdiStreamReadVar(int streamID, int varID, int memtype, void *data, int *nmi
 #if  defined  (HAVE_LIBEXTRA)
     case FILETYPE_EXT:
       {
-        if ( memtype == MEMTYPE_FLOAT ) Error("extReadVar not implemented for memtype float!");
+        if ( memtype == MEMTYPE_FLOAT ) return 1;
         extReadVarDP(streamptr, varID, (double *)data, nmiss);
 	break;
       }
@@ -56,7 +60,7 @@ void cdiStreamReadVar(int streamID, int varID, int memtype, void *data, int *nmi
 #if  defined  (HAVE_LIBIEG)
     case FILETYPE_IEG:
       {
-        if ( memtype == MEMTYPE_FLOAT ) Error("iegReadVar not implemented for memtype float!");
+        if ( memtype == MEMTYPE_FLOAT ) return 1;
         iegReadVarDP(streamptr, varID, (double *)data, nmiss);
 	break;
       }
@@ -77,6 +81,8 @@ void cdiStreamReadVar(int streamID, int varID, int memtype, void *data, int *nmi
 	break;
       }
     }
+
+  return status;
 }
 
 /*
@@ -120,7 +126,17 @@ from an open dataset.
 */
 void streamReadVarF(int streamID, int varID, float *data, int *nmiss)
 {
-  cdiStreamReadVar(streamID, varID, MEMTYPE_FLOAT, data, nmiss);
+  if ( cdiStreamReadVar(streamID, varID, MEMTYPE_FLOAT, data, nmiss) )
+    {
+      // In case the file format does not support single precision reading,
+      // we fall back to double precision reading, converting the data on the fly.
+      size_t elementCount = (size_t) gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
+      elementCount *= (size_t) zaxisInqSize(vlistInqVarZaxis(streamInqVlist(streamID), varID));
+      double *conversionBuffer = (double *) Malloc(elementCount*sizeof(*conversionBuffer));
+      cdiStreamReadVar(streamID, varID, MEMTYPE_DOUBLE, (void *) conversionBuffer, nmiss);
+      for ( size_t i = elementCount; i--; ) data[i] = (float) conversionBuffer[i];
+      Free(conversionBuffer);
+    }
 }
 
 
