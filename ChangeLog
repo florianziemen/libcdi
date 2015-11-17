@@ -3,6 +3,10 @@
 	* Version 1.7.1 released
         * using CGRIBEX library version 1.7.4
 
+2015-11-17  Uwe Schulzweida
+
+       * cdfCopyRecord: use MEMTYPE_FLOAT for DATATYPE_FLT32 
+
 2015-11-04  Uwe Schulzweida
 
 	* tableRead: name is not interpreted correctly (bug introduced in 1.7.0 #3933)
