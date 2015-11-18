@@ -5,10 +5,9 @@
 #include "file.h"
 #include "stream_fcommon.h"
 
-void streamFCopyRecord(stream_t *streamptr2, stream_t *streamptr1,
-                       const char *container_name)
-{
 
+void streamFCopyRecord(stream_t *streamptr2, stream_t *streamptr1, const char *container_name)
+{
   int fileID1 = streamptr1->fileID;
   int fileID2 = streamptr2->fileID;
 

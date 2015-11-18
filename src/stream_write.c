@@ -1,5 +1,5 @@
-#if defined (HAVE_CONFIG_H)
-#  include "config.h"
+#ifdef HAVE_CONFIG_H
+#include "config.h"
 #endif
 
 #include "cdi.h"
@@ -9,6 +9,7 @@
 #include "stream_srv.h"
 #include "stream_ext.h"
 #include "stream_ieg.h"
+#include "dmemory.h"
 #include "namespace.h"
 
 
@@ -304,8 +305,12 @@ cdiStreamWriteVarChunk_(int streamID, int varID, int memtype,
 }
 
 static
-void stream_write_record(int streamID, int memtype, const void *data, int nmiss)
+int stream_write_record(int streamID, int memtype, const void *data, int nmiss)
 {
+  // May fail if memtype == MEMTYPE_FLOAT and the file format does not support single precision writing.
+  // A value > 0 is returned in this case, otherwise it returns zero.
+  int status = 0;
+
   check_parg(data);
 
   stream_t *streamptr = stream_to_pointer(streamID);
@@ -320,19 +325,19 @@ void stream_write_record(int streamID, int memtype, const void *data, int nmiss)
 #endif
 #if  defined  (HAVE_LIBSERVICE)
     case FILETYPE_SRV:
-      if ( memtype == MEMTYPE_FLOAT ) Error("srvWriteRecord not implemented for memtype float!");
+      if ( memtype == MEMTYPE_FLOAT ) return 1;
       srvWriteRecord(streamptr, (const double *)data);
       break;
 #endif
 #if  defined  (HAVE_LIBEXTRA)
     case FILETYPE_EXT:
-      if ( memtype == MEMTYPE_FLOAT ) Error("extWriteRecord not implemented for memtype float!");
+      if ( memtype == MEMTYPE_FLOAT ) return 1;
       extWriteRecord(streamptr, (const double *)data);
       break;
 #endif
 #if  defined  (HAVE_LIBIEG)
     case FILETYPE_IEG:
-      if ( memtype == MEMTYPE_FLOAT ) Error("iegWriteRecord not implemented for memtype float!");
+      if ( memtype == MEMTYPE_FLOAT ) return 1;
       iegWriteRecord(streamptr, (const double *)data);
       break;
 #endif
@@ -352,6 +357,8 @@ void stream_write_record(int streamID, int memtype, const void *data, int nmiss)
 	break;
       }
     }
+
+  return status;
 }
 
 /*
@@ -374,8 +381,23 @@ void streamWriteRecord(int streamID, const double *data, int nmiss)
   stream_write_record(streamID, MEMTYPE_DOUBLE, (const void *) data, nmiss);
 }
 
+
 void streamWriteRecordF(int streamID, const float *data, int nmiss)
 {
-  stream_write_record(streamID, MEMTYPE_FLOAT, (const void *) data, nmiss);
+  if ( stream_write_record(streamID, MEMTYPE_FLOAT, (const void *) data, nmiss) )
+    {
+      // In case the file format does not support single precision reading,
+      // we fall back to double precision writing, converting the data on the fly.
+      stream_t *streamptr = stream_to_pointer(streamID);
+      int tsID   = streamptr->curTsID;
+      int vrecID = streamptr->tsteps[tsID].curRecID;
+      int recID  = streamptr->tsteps[tsID].recIDs[vrecID];
+      int varID  = streamptr->tsteps[tsID].records[recID].varID;
+      size_t elementCount = (size_t) gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
+      double *conversionBuffer = (double *) Malloc(elementCount*sizeof(*conversionBuffer));
+      for ( size_t i = elementCount; i--; ) conversionBuffer[i] = (double) data[i];
+      stream_write_record(streamID, MEMTYPE_DOUBLE, (const void *) conversionBuffer, nmiss);
+      Free(conversionBuffer);
+    }
 }
 
