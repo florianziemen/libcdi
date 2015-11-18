@@ -127,7 +127,6 @@ void streamWriteVar(int streamID, int varID, const double *data, int nmiss)
 @Description
 The function streamWriteVarF writes the values of one time step of a variable to an open dataset.
 The values are converted to the external data type of the variable, if necessary.
-Only support for netCDF was implemented in this function.
 @EndFunction
 */
 void streamWriteVarF(int streamID, int varID, const float *data, int nmiss)
@@ -259,7 +258,6 @@ void streamWriteVarSlice(int streamID, int varID, int levelID, const double *dat
 @Description
 The function streamWriteVarSliceF writes the values of a horizontal slice of a variable to an open dataset.
 The values are converted to the external data type of the variable, if necessary.
-Only support for netCDF was implemented in this function.
 @EndFunction
 */
 void streamWriteVarSliceF(int streamID, int varID, int levelID, const float *data, int nmiss)

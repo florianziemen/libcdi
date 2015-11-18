@@ -35,7 +35,6 @@ Function catalog:
    stream_record
 -------------------------------------------------------------
    streamDefRecord      Define the next record
-   streamWriteRecord    Write a horizontal slice of a variable
 -------------------------------------------------------------
    vlist
 -------------------------------------------------------------

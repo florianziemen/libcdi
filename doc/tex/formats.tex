@@ -101,20 +101,20 @@ This feature is not tested regulary and the status is experimental!
 
 NetCDF \cite{NetCDF} (Network Common Data Form) is an interface for array-oriented data
 access and a library that provides an implementation of the interface.
-The netCDF library also defines a machine-independent format for 
+The NetCDF library also defines a machine-independent format for 
 representing scientific data. Together, the interface, library, and 
 format support the creation, access, and sharing of scientific data.
 
-{\CDI} only supports the classic data model of netCDF and arrays up to 4 dimensions.
+{\CDI} only supports the classic data model of NetCDF and arrays up to 4 dimensions.
 These dimensions should only be used by the horizontal and vertical grid and the time.
-The netCDF attributes should follow the
+The NetCDF attributes should follow the
 \href{http://ftp.unidata.ucar.edu/software/netcdf/docs/conventions.html}
      {GDT, COARDS or CF Conventions}.
 
-NetCDF is an external library and not part of {\CDI}. To use netCDF with
-{\CDI} the netCDF library must be installed before the configuration
+NetCDF is an external library and not part of {\CDI}. To use NetCDF with
+{\CDI} the NetCDF library must be installed before the configuration
 of the {\CDI} library. Use the configure option {\tt --with-netcdf} to
-enable netCDF support (see \htmlref{Build}{build}).
+enable NetCDF support (see \htmlref{Build}{build}).
 
 %\subsection{ncdap}
 
