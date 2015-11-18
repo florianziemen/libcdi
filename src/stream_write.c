@@ -389,10 +389,7 @@ void streamWriteRecordF(int streamID, const float *data, int nmiss)
       // In case the file format does not support single precision reading,
       // we fall back to double precision writing, converting the data on the fly.
       stream_t *streamptr = stream_to_pointer(streamID);
-      int tsID   = streamptr->curTsID;
-      int vrecID = streamptr->tsteps[tsID].curRecID;
-      int recID  = streamptr->tsteps[tsID].recIDs[vrecID];
-      int varID  = streamptr->tsteps[tsID].records[recID].varID;
+      int varID  = streamptr->record->varID;
       size_t elementCount = (size_t) gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
       double *conversionBuffer = (double *) Malloc(elementCount*sizeof(*conversionBuffer));
       for ( size_t i = elementCount; i--; ) conversionBuffer[i] = (double) data[i];
