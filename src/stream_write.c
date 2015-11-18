@@ -133,8 +133,12 @@ void streamWriteVarF(int streamID, int varID, const float *data, int nmiss)
 }
 
 static
-void cdiStreamWriteVarSlice(int streamID, int varID, int levelID, int memtype, const void *data, int nmiss)
+int cdiStreamWriteVarSlice(int streamID, int varID, int levelID, int memtype, const void *data, int nmiss)
 {
+  // May fail if memtype == MEMTYPE_FLOAT and the file format does not support single precision writing.
+  // A value > 0 is returned in this case, otherwise it returns zero.
+  int status = 0;
+
   if ( CDI_Debug ) Message("streamID = %d varID = %d", streamID, varID);
 
   check_parg(data);
@@ -161,7 +165,7 @@ void cdiStreamWriteVarSlice(int streamID, int varID, int levelID, int memtype, c
 #if  defined  (HAVE_LIBSERVICE)
     case FILETYPE_SRV:
       {
-        if ( memtype == MEMTYPE_FLOAT ) Error("srvWriteVarSlice not implemented for memtype float!");
+        if ( memtype == MEMTYPE_FLOAT ) return 1;
         srvWriteVarSliceDP(streamptr, varID, levelID, (double *)data);
 	break;
       }
@@ -169,7 +173,7 @@ void cdiStreamWriteVarSlice(int streamID, int varID, int levelID, int memtype, c
 #if  defined  (HAVE_LIBEXTRA)
     case FILETYPE_EXT:
       {
-        if ( memtype == MEMTYPE_FLOAT ) Error("extWriteVarSlice not implemented for memtype float!");
+        if ( memtype == MEMTYPE_FLOAT ) return 1;
         extWriteVarSliceDP(streamptr, varID, levelID, (double *)data);
 	break;
       }
@@ -177,7 +181,7 @@ void cdiStreamWriteVarSlice(int streamID, int varID, int levelID, int memtype, c
 #if  defined  (HAVE_LIBIEG)
     case FILETYPE_IEG:
       {
-        if ( memtype == MEMTYPE_FLOAT ) Error("iegWriteVarSlice not implemented for memtype float!");
+        if ( memtype == MEMTYPE_FLOAT ) return 1;
         iegWriteVarSliceDP(streamptr, varID, levelID, (double *)data);
 	break;
       }
@@ -196,6 +200,8 @@ void cdiStreamWriteVarSlice(int streamID, int varID, int levelID, int memtype, c
 	break;
       }
     }
+
+  return status;
 }
 
 /*
@@ -240,7 +246,16 @@ Only support for netCDF was implemented in this function.
 */
 void streamWriteVarSliceF(int streamID, int varID, int levelID, const float *data, int nmiss)
 {
-  cdiStreamWriteVarSlice(streamID, varID, levelID, MEMTYPE_FLOAT, (const void *) data, nmiss);
+  if ( cdiStreamWriteVarSlice(streamID, varID, levelID, MEMTYPE_FLOAT, (const void *) data, nmiss) )
+    {
+      // In case the file format does not support single precision reading,
+      // we fall back to double precision writing, converting the data on the fly.
+      size_t elementCount = (size_t) gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
+      double *conversionBuffer = (double *) Malloc(elementCount*sizeof(*conversionBuffer));
+      for ( size_t i = elementCount; i--; ) conversionBuffer[i] = (double) data[i];
+      streamWriteVarSlice(streamID, varID, levelID, (const void *) conversionBuffer, nmiss);
+      Free(conversionBuffer);
+    }
 }
 
 
@@ -393,7 +408,7 @@ void streamWriteRecordF(int streamID, const float *data, int nmiss)
       size_t elementCount = (size_t) gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
       double *conversionBuffer = (double *) Malloc(elementCount*sizeof(*conversionBuffer));
       for ( size_t i = elementCount; i--; ) conversionBuffer[i] = (double) data[i];
-      stream_write_record(streamID, MEMTYPE_DOUBLE, (const void *) conversionBuffer, nmiss);
+      streamWriteRecord(streamID, (const void *) conversionBuffer, nmiss);
       Free(conversionBuffer);
     }
 }

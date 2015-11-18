@@ -1,5 +1,5 @@
-#if defined (HAVE_CONFIG_H)
-#  include "config.h"
+#ifdef HAVE_CONFIG_H
+#include "config.h"
 #endif
 
 #include "cdi.h"
@@ -133,7 +133,7 @@ void streamReadVarF(int streamID, int varID, float *data, int *nmiss)
       size_t elementCount = (size_t) gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
       elementCount *= (size_t) zaxisInqSize(vlistInqVarZaxis(streamInqVlist(streamID), varID));
       double *conversionBuffer = (double *) Malloc(elementCount*sizeof(*conversionBuffer));
-      cdiStreamReadVar(streamID, varID, MEMTYPE_DOUBLE, (void *) conversionBuffer, nmiss);
+      streamReadVar(streamID, varID, (void *) conversionBuffer, nmiss);
       for ( size_t i = elementCount; i--; ) data[i] = (float) conversionBuffer[i];
       Free(conversionBuffer);
     }
@@ -350,7 +350,7 @@ void streamReadRecordF(int streamID, float *data, int *nmiss)
       int varID  = streamptr->tsteps[tsID].records[recID].varID;
       size_t elementCount = (size_t) gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
       double *conversionBuffer = (double *) Malloc(elementCount*sizeof(*conversionBuffer));
-      stream_read_record(streamID, MEMTYPE_DOUBLE, (void *) conversionBuffer, nmiss);
+      streamReadRecord(streamID, (void *) conversionBuffer, nmiss);
       for ( size_t i = elementCount; i--; ) data[i] = (float) conversionBuffer[i];
       Free(conversionBuffer);
     }
