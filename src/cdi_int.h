@@ -420,9 +420,10 @@ streamOpenID(const char *filename, char filemode, int filetype,
 
 void
 cdiStreamDefVlist_(int streamID, int vlistID);
-void
-cdiStreamWriteVar_(int streamID, int varID, int memtype, const void *data,
-                   int nmiss);
+
+int
+cdiStreamWriteVar_(int streamID, int varID, int memtype, const void *data, int nmiss);
+
 void
 cdiStreamWriteVarChunk_(int streamID, int varID, int memtype,
                         const int rect[][2], const void *data, int nmiss);

@@ -14,8 +14,12 @@
 
 
 /* the single image implementation */
-void cdiStreamWriteVar_(int streamID, int varID, int memtype, const void *data, int nmiss)
+int cdiStreamWriteVar_(int streamID, int varID, int memtype, const void *data, int nmiss)
 {
+  // May fail if memtype == MEMTYPE_FLOAT and the file format does not support single precision writing.
+  // A value > 0 is returned in this case, otherwise it returns zero.
+  int status = 0;
+
   if ( CDI_Debug ) Message("streamID = %d varID = %d", streamID, varID);
 
   check_parg(data);
@@ -42,7 +46,7 @@ void cdiStreamWriteVar_(int streamID, int varID, int memtype, const void *data, 
 #if  defined  (HAVE_LIBSERVICE)
     case FILETYPE_SRV:
       {
-        if ( memtype == MEMTYPE_FLOAT ) Error("srvWriteVar not implemented for memtype float!");
+        if ( memtype == MEMTYPE_FLOAT ) return 1;
         srvWriteVarDP(streamptr, varID, (double *)data);
 	break;
       }
@@ -50,7 +54,7 @@ void cdiStreamWriteVar_(int streamID, int varID, int memtype, const void *data, 
 #if  defined  (HAVE_LIBEXTRA)
     case FILETYPE_EXT:
       {
-        if ( memtype == MEMTYPE_FLOAT ) Error("extWriteVar not implemented for memtype float!");
+        if ( memtype == MEMTYPE_FLOAT ) return 1;
         extWriteVarDP(streamptr, varID, (double *)data);
 	break;
       }
@@ -58,7 +62,7 @@ void cdiStreamWriteVar_(int streamID, int varID, int memtype, const void *data, 
 #if  defined  (HAVE_LIBIEG)
     case FILETYPE_IEG:
       {
-        if ( memtype == MEMTYPE_FLOAT ) Error("iegWriteVar not implemented for memtype float!");
+        if ( memtype == MEMTYPE_FLOAT ) return 1;
         iegWriteVarDP(streamptr, varID, (double *)data);
 	break;
       }
@@ -79,6 +83,8 @@ void cdiStreamWriteVar_(int streamID, int varID, int memtype, const void *data, 
 	break;
       }
     }
+
+  return status;
 }
 
 /*
@@ -103,6 +109,7 @@ void streamWriteVar(int streamID, int varID, const double *data, int nmiss)
                                const void *data, int nmiss)
     = (void (*)(int, int, int, const void *, int))
     namespaceSwitchGet(NSSWITCH_STREAM_WRITE_VAR_).func;
+
   myCdiStreamWriteVar_(streamID, varID, MEMTYPE_DOUBLE, (const void *) data, nmiss);
 }
 
@@ -125,11 +132,22 @@ Only support for netCDF was implemented in this function.
 */
 void streamWriteVarF(int streamID, int varID, const float *data, int nmiss)
 {
-  void (*myCdiStreamWriteVar_)(int streamID, int varID, int memtype,
-                               const void *data, int nmiss)
-    = (void (*)(int, int, int, const void *, int))
+  int (*myCdiStreamWriteVar_)(int streamID, int varID, int memtype,
+                              const void *data, int nmiss)
+    = (int (*)(int, int, int, const void *, int))
     namespaceSwitchGet(NSSWITCH_STREAM_WRITE_VAR_).func;
-  myCdiStreamWriteVar_(streamID, varID, MEMTYPE_FLOAT, (const void *) data, nmiss);
+  
+  if ( myCdiStreamWriteVar_(streamID, varID, MEMTYPE_FLOAT, (const void *) data, nmiss) )
+    {
+      // In case the file format does not support single precision writing,
+      // we fall back to double precision writing, converting the data on the fly.
+      size_t elementCount = (size_t) gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
+      elementCount *= (size_t) zaxisInqSize(vlistInqVarZaxis(streamInqVlist(streamID), varID));
+      double *conversionBuffer = (double *) Malloc(elementCount*sizeof(*conversionBuffer));
+      for ( size_t i = elementCount; i--; ) conversionBuffer[i] = (double) data[i];
+      myCdiStreamWriteVar_(streamID, varID, MEMTYPE_DOUBLE, (const void *) conversionBuffer, nmiss);
+      Free(conversionBuffer);
+    }
 }
 
 static
@@ -248,7 +266,7 @@ void streamWriteVarSliceF(int streamID, int varID, int levelID, const float *dat
 {
   if ( cdiStreamWriteVarSlice(streamID, varID, levelID, MEMTYPE_FLOAT, (const void *) data, nmiss) )
     {
-      // In case the file format does not support single precision reading,
+      // In case the file format does not support single precision writing,
       // we fall back to double precision writing, converting the data on the fly.
       size_t elementCount = (size_t) gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
       double *conversionBuffer = (double *) Malloc(elementCount*sizeof(*conversionBuffer));
@@ -401,7 +419,7 @@ void streamWriteRecordF(int streamID, const float *data, int nmiss)
 {
   if ( stream_write_record(streamID, MEMTYPE_FLOAT, (const void *) data, nmiss) )
     {
-      // In case the file format does not support single precision reading,
+      // In case the file format does not support single precision writing,
       // we fall back to double precision writing, converting the data on the fly.
       stream_t *streamptr = stream_to_pointer(streamID);
       int varID  = streamptr->record->varID;
