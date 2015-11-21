@@ -9,11 +9,12 @@
 
 #include <stdio.h>
 #include <sys/types.h>
-/*
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-*/
+
+
 #define  CDI_MAX_NAME           256   /* max length of a name                 */
 
 #define  CDI_UNDEFID             -1
@@ -1188,15 +1189,13 @@ int     subtypeInqAttribute(int subtypeID, int index, const char *key, int *outV
 /*      vlistInqVarSubtype: Return subtype ID for a given variable. */
 int     vlistInqVarSubtype(int vlistID, int varID);
 
-
 void gribapiLibraryVersion(int *major_version, int *minor_version, int *revision_version);
 
-
-/*
+  
 #if defined (__cplusplus)
 }
 #endif
-*/
+
 #endif  /* CDI_H_ */
 /*
  * Local Variables:
