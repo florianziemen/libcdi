@@ -12,6 +12,10 @@
 #define  _VERBOSE   2     /* Error flag: report errors  */
 #define  _DEBUG     4     /* Error flag: debug          */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 extern int _ExitOnError;  /* If set to 1, exit on error (default 1)       */
 extern int _Verbose;      /* If set to 1, errors are reported (default 1) */
 extern int _Debug;        /* If set to 1, debuggig (default 0)            */
@@ -65,6 +69,10 @@ cdiAbortC_serial(const char *caller, const char *filename,
                  const char *functionname, int line,
                  const char *errorString, va_list ap)
   __attribute__((noreturn));
+
+#if defined (__cplusplus)
+}
+#endif
 
 #endif  /* _ERROR_H */
 /*
