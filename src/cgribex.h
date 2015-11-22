@@ -175,6 +175,9 @@
 #define  ISEC4_NumNonMissValues     (isec4[20])  /* Number of non-missing values                  */
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 
 void  gribFixZSE(int flag);     /* 1: Fix ZeroShiftError of simple packed spherical harmonics */
@@ -245,6 +248,11 @@ int   grib_info_for_grads(off_t recpos, long recsize, unsigned char *gribbuffer,
 
 double calculate_pfactor_float(const float* spectralField, long fieldTruncation, long subsetTruncation);
 double calculate_pfactor_double(const double* spectralField, long fieldTruncation, long subsetTruncation);
+
+
+#if defined (__cplusplus)
+}
+#endif
 
 #endif  /* _CGRIBEX_H */ 
 
