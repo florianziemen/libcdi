@@ -3,6 +3,10 @@
 
 #include <inttypes.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* date format:  YYYYMMDD */
 /* time format:  hhmmss   */
 
@@ -21,6 +25,10 @@ double julday_sub(int julday1, int secofday1, int julday2, int secofday2, int *d
 
 void encode_juldaysec(int calendar, int year, int month, int day, int hour, int minute, int second, int *julday, int *secofday);
 void decode_juldaysec(int calendar, int julday, int secofday, int *year, int *month, int *day, int *hour, int *minute, int *second);
+
+#if defined (__cplusplus)
+}
+#endif
 
 #endif  /* _TIMEBASE_H */
 
