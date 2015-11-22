@@ -429,8 +429,20 @@ void zaxisGetIndexList(int nzaxis, int *zaxisIndexList);
 void zaxisDefLtype2(int zaxisID, int ltype2);
 int  zaxisInqLtype2(int zaxisID);
 
-/* used by CDO */
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+// functions used in CDO !!!
+
 void cdiDefTableID(int tableID);
+
+void gridGenXvals(int xsize, double xfirst, double xlast, double xinc, double *xvals);
+void gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double yinc, double *yvals);
+
+#if defined (__cplusplus)
+}
+#endif
 
 #endif  /* _CDI_INT_H */
 /*
