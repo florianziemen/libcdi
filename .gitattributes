@@ -226,6 +226,7 @@ src/cdi_int.c -text
 src/cdi_int.h -text
 src/cdi_limits.h -text
 src/cdi_util.c -text
+src/cdi_uuid.h -text
 src/cdilib.c -text
 src/cdipio.h -text
 src/cdipio.inc -text
@@ -237,7 +238,6 @@ src/cgribexlib.c -text
 src/cksum.c -text
 src/cksum.h -text
 src/config.h.in -text
-src/create_uuid.h -text
 src/datetime.h -text
 src/dmemory.c -text
 src/dmemory.h -text

@@ -11,6 +11,7 @@
 #include "cdi.h"
 #include "cdi_cksum.h"
 #include "cdi_int.h"
+#include "cdi_uuid.h"
 #include "resource_handle.h"
 #include "resource_unpack.h"
 #include "varscan.h"

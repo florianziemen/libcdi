@@ -375,20 +375,7 @@ int     getByteswap(int byteorder);
 
 void cdiStreamGetIndexList(unsigned numIDs, int IDs[]);
 
-
 void  cdiInitialize(void);
-
-void uuid2str(const unsigned char uuid[], char uuidstr[]);
-int str2uuid(const char *uuidstr, unsigned char uuid[]);
-
-static inline int cdiUUIDIsNull(const unsigned char uuid[])
-{
-  int isNull = 1;
-  for (size_t i = 0; i < CDI_UUID_SIZE; ++i)
-    isNull &= (uuid[i] == 0);
-  return isNull;
-}
-
 
 char *cdiEscapeSpaces(const char *string);
 char *cdiUnescapeSpaces(const char *string, const char **outStringEnd);

@@ -8,6 +8,7 @@
 
 #include "cdi.h"
 #include "cdi_int.h"
+#include "cdi_uuid.h"
 #include "dmemory.h"
 #include "resource_handle.h"
 #include "varscan.h"

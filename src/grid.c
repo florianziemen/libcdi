@@ -10,6 +10,7 @@
 #include "cdi.h"
 #include "cdi_cksum.h"
 #include "cdi_int.h"
+#include "cdi_uuid.h"
 #include "grid.h"
 #include "gaussgrid.h"
 #include "resource_handle.h"
@@ -3328,7 +3329,7 @@ static void gridPrintKernel(grid_t * gridptr, int index, int opt, FILE *fp)
   if ( !cdiUUIDIsNull(uuidOfHGrid) )
     {
       char uuidOfHGridStr[37];
-      uuid2str(uuidOfHGrid, uuidOfHGridStr);
+      cdiUUID2Str(uuidOfHGrid, uuidOfHGridStr);
       if ( uuidOfHGridStr[0] != 0 && strlen(uuidOfHGridStr) == 36 )
         fprintf(fp, "uuid      = %s\n", uuidOfHGridStr);
     }

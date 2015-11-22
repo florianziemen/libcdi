@@ -12,6 +12,7 @@
 #include <unistd.h>
 
 #include "cdi.h"
+#include "cdi_uuid.h"
 
 #include "cksum.h"
 #include "simple_model_helper.h"
@@ -226,11 +227,10 @@ main(int argc, char *argv[])
   /* add uuids to zaxis and grid */
   {
     unsigned char uuid[16];
-    int str2uuid(const char *uuidstr, unsigned char *uuid);
 
     static char gridUUIDTxt[] = "107d7a5b-348c-4d1a-90a9-d745914f2fb6";
 
-    str2uuid(gridUUIDTxt, uuid);
+    cdiStr2UUID(gridUUIDTxt, uuid);
     gridDefUUID(gridID, uuid);
 
     static char zaxisUUIDTxt[2][37] = {
@@ -240,7 +240,7 @@ main(int argc, char *argv[])
 
     for (int i = 0; i < 2; ++i)
       {
-        str2uuid(zaxisUUIDTxt[i], uuid);
+        cdiStr2UUID(zaxisUUIDTxt[i], uuid);
         zaxisDefUUID(zaxisID[i], uuid);
       }
   }

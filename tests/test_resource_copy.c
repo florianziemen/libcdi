@@ -6,7 +6,7 @@
 #include <string.h>
 
 #include "cdi.h"
-#include "create_uuid.h"
+#include "cdi_uuid.h"
 #include "dmemory.h"
 #include "error.h"
 #include "resource_handle.h"
@@ -87,7 +87,7 @@ static int defineGrid (void)
   gridDefComplexPacking ( gridID, 1 );
   {
     unsigned char uuid[CDI_UUID_SIZE];
-    create_uuid(uuid);
+    cdiCreateUUID(uuid);
     gridDefUUID(gridID, uuid);
   }
 
@@ -113,7 +113,7 @@ static int defineZaxis (void)
   zaxisDefWeights ( zaxisID, &levs[0] );
   {
     unsigned char uuid[CDI_UUID_SIZE];
-    create_uuid(uuid);
+    cdiCreateUUID(uuid);
     zaxisDefUUID(zaxisID, uuid);
   }
 

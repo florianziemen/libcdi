@@ -13,7 +13,7 @@
 
 #include "cdi.h"
 #include "cdi_int.h"
-#include "create_uuid.h"
+#include "cdi_uuid.h"
 #include "dmemory.h"
 #include "binary.h"
 
@@ -67,7 +67,8 @@ enum {
   uuidNumHexChars = 36,
 };
 
-void uuid2str(const unsigned char *uuid, char *uuidstr)
+
+void cdiUUID2Str(const unsigned char *uuid, char *uuidstr)
 {
 
   if ( uuid == NULL || uuidstr == NULL ) return;
@@ -82,7 +83,7 @@ void uuid2str(const unsigned char *uuid, char *uuidstr)
 }
 
 
-int str2uuid(const char *uuidstr, unsigned char *uuid)
+int cdiStr2UUID(const char *uuidstr, unsigned char *uuid)
 {
   if ( uuid == NULL || uuidstr == NULL || strlen(uuidstr) != uuidNumHexChars)
     return -1;
@@ -151,8 +152,7 @@ char* cdiUnescapeSpaces(const char* string, const char** outStringEnd)
 #ifdef HAVE_DECL_UUID_GENERATE
 #include <sys/time.h>
 #include <uuid/uuid.h>
-void
-create_uuid(unsigned char *uuid)
+void cdiCreateUUID(unsigned char *uuid)
 {
   static int uuid_seeded = 0;
   static char uuid_rand_state[31 * sizeof (long)];
@@ -181,8 +181,7 @@ typedef uint8_t u_int8_t;
 typedef uint16_t u_int16_t;
 typedef uint32_t u_int32_t;
 #include <uuid.h>
-void
-create_uuid(unsigned char *uuid)
+void cdiCreateUUID(unsigned char *uuid)
 {
   uint32_t status;
   uuid_create((uuid_t *)(void *)uuid, &status);
@@ -194,8 +193,7 @@ create_uuid(unsigned char *uuid)
 }
 #else
 #include <sys/time.h>
-void
-create_uuid(unsigned char *uuid)
+void cdiCreateUUID(unsigned char *uuid)
 {
   static int uuid_seeded = 0;
   static char uuid_rand_state[31 * sizeof (long)];

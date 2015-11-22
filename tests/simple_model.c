@@ -29,7 +29,7 @@ typedef int MPI_Comm;
 #include "pio_write.h"
 
 #include "simple_model_helper.h"
-#include "create_uuid.h"
+#include "cdi_uuid.h"
 
 enum {
   ntfiles     = 2,
@@ -120,7 +120,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
   {
     unsigned char uuid[CDI_UUID_SIZE];
     if (rank == 0)
-      create_uuid(uuid);
+      cdiCreateUUID(uuid);
 #if USE_MPI
     MPI_Bcast(uuid, CDI_UUID_SIZE, MPI_UNSIGNED_CHAR, 0, comm);
 #endif
@@ -170,7 +170,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
       {
         unsigned char uuid[16];
         if (rank == 0)
-          create_uuid(uuid);
+          cdiCreateUUID(uuid);
 #if USE_MPI
         MPI_Bcast(uuid, CDI_UUID_SIZE, MPI_UNSIGNED_CHAR, 0, comm);
 #endif

@@ -20,6 +20,7 @@
 #include "basetime.h"
 #include "gaussgrid.h"
 #include "cdi_int.h"
+#include "cdi_uuid.h"
 #include "stream_cdf.h"
 #include "cdf.h"
 #include "cdf_int.h"
@@ -1800,7 +1801,7 @@ void cdfDefGridUUID(stream_t *streamptr, int gridID)
   if ( !cdiUUIDIsNull(uuidOfHGrid) )
     {
       char uuidOfHGridStr[37];
-      uuid2str(uuidOfHGrid, uuidOfHGridStr);
+      cdiUUID2Str(uuidOfHGrid, uuidOfHGridStr);
       if ( uuidOfHGridStr[0] != 0 && strlen(uuidOfHGridStr) == 36 )
         {
           int fileID  = streamptr->fileID;
@@ -1820,7 +1821,7 @@ void cdfDefZaxisUUID(stream_t *streamptr, int zaxisID)
   if ( uuidOfVGrid[0] != 0 )
     {
       char uuidOfVGridStr[37];
-      uuid2str(uuidOfVGrid, uuidOfVGridStr);
+      cdiUUID2Str(uuidOfVGrid, uuidOfVGridStr);
       if ( uuidOfVGridStr[0] != 0 && strlen(uuidOfVGridStr) == 36 )
         {
           int fileID  = streamptr->fileID;
@@ -5664,13 +5665,13 @@ void scan_global_attributes(int fileID, int vlistID, stream_t *streamptr, int ng
 	      else if ( strcmp(attname, "uuidOfHGrid") == 0 && attstrlen == 36 )
 		{
                   attstring[36] = 0;
-                  str2uuid(attstring, uuidOfHGrid);
+                  cdiStr2UUID(attstring, uuidOfHGrid);
                   //   printf("uuid: %d %s\n", attlen, attstring);
 		}
 	      else if ( strcmp(attname, "uuidOfVGrid") == 0 && attstrlen == 36 )
 		{
                   attstring[36] = 0;
-                  str2uuid(attstring, uuidOfVGrid);
+                  cdiStr2UUID(attstring, uuidOfVGrid);
 		}
 	      else
 		{
