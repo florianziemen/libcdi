@@ -1,7 +1,15 @@
 #ifndef _GAUSSGRID_H
 #define _GAUSSGRID_H
 
-void   gaussaw(double *restrict pa, double *restrict pw, size_t nlat);
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void gaussaw(double *restrict pa, double *restrict pw, size_t nlat);
+
+#if defined (__cplusplus)
+}
+#endif
 
 #endif  /* _GAUSSGRID_H */
 /*
