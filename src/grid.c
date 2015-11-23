@@ -2588,9 +2588,7 @@ int gridGenerate(const grid_t *grid)
 
         if ( grid->xdef == 2 )
           {
-            double xvals[2];
-            xvals[0] = grid->xfirst;
-            xvals[1] = grid->xlast;
+            double xvals[2] = { grid->xfirst, grid->xlast };
             gridDefXvals(gridID, xvals);
           }
 
