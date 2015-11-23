@@ -475,17 +475,13 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
     case ZAXIS_HYBRID:
     case ZAXIS_HYBRID_HALF:
       {
-        size_t vctsize;
-        size_t dummy;
-        double *vctptr;
-
         GRIB_CHECK(grib_get_long(gh, "NV", &lpar), 0);
         /* FIXME: assert(lpar >= 0) */
-        vctsize = (size_t)lpar;
+        size_t vctsize = (size_t)lpar;
         if ( vctsize > 0 )
           {
-            vctptr = (double *) Malloc(vctsize*sizeof(double));
-            dummy = vctsize;
+            double *vctptr = (double *) Malloc(vctsize*sizeof(double));
+            size_t dummy = vctsize;
             GRIB_CHECK(grib_get_double_array(gh, "pv", vctptr, &dummy), 0);
             varDefVCT(vctsize, vctptr);
             Free(vctptr);
