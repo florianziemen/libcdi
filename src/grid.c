@@ -43,6 +43,23 @@ static const char Grids[][17] = {
   /* 15 */  "projection",
 };
 
+/* must match table below */
+enum xystdname_idx {
+  grid_xystdname_grid_latlon,
+  grid_xystdname_latlon,
+  grid_xystdname_projection,
+};
+static const char xystdname_tab[][2][24] = {
+  [grid_xystdname_grid_latlon] = { "grid_longitude",
+                                   "grid_latitude" },
+  [grid_xystdname_latlon] = { "longitude",
+                              "latitude" },
+  [grid_xystdname_projection] = { "projection_x_coordinate",
+                                  "projection_y_coordinate" },
+
+};
+
+
 
 static int    gridCompareP    ( void * gridptr1, void * gridptr2 );
 static void   gridDestroyP    ( void * gridptr );
@@ -135,8 +152,8 @@ void grid_init(grid_t *gridptr)
   gridptr->ylongname[0] = 0;
   gridptr->xunits[0]    = 0;
   gridptr->yunits[0]    = 0;
-  gridptr->xstdname[0]  = 0;
-  gridptr->ystdname[0]  = 0;
+  gridptr->xstdname  = NULL;
+  gridptr->ystdname  = NULL;
   memset(gridptr->uuid, 0, CDI_UUID_SIZE);
   gridptr->name         = NULL;
 }
@@ -420,16 +437,16 @@ int gridCreate(int gridtype, int size)
         /*
         if ( gridtype == GRID_CURVILINEAR )
           {
-            strcpy(gridptr->xstdname, "grid_longitude");
-            strcpy(gridptr->ystdname, "grid_latitude");
+            gridptr->xstdname = xystdname_tab[grid_xystdname_grid_latlon][0];
+            gridptr->ystdname = xystdname_tab[grid_xystdname_grid_latlon][1];
             gridDefXunits(gridID, "degrees");
             gridDefYunits(gridID, "degrees");
           }
         else
         */
           {
-            strcpy(gridptr->xstdname, "longitude");
-            strcpy(gridptr->ystdname, "latitude");
+            gridptr->xstdname = xystdname_tab[grid_xystdname_latlon][0];
+            gridptr->ystdname = xystdname_tab[grid_xystdname_latlon][1];
             gridDefXunits(gridID, "degrees_east");
             gridDefYunits(gridID, "degrees_north");
           }
@@ -441,8 +458,8 @@ int gridCreate(int gridtype, int size)
       {
         gridDefXname(gridID, "lon");
         gridDefYname(gridID, "lat");
-        strcpy(gridptr->xstdname, "longitude");
-        strcpy(gridptr->ystdname, "latitude");
+        gridptr->xstdname = xystdname_tab[grid_xystdname_latlon][0];
+        gridptr->ystdname = xystdname_tab[grid_xystdname_latlon][1];
         gridDefXunits(gridID, "degrees_east");
         gridDefYunits(gridID, "degrees_north");
         break;
@@ -454,6 +471,8 @@ int gridCreate(int gridtype, int size)
         /*
         strcpy(gridptr->xstdname, "grid_longitude");
         strcpy(gridptr->ystdname, "grid_latitude");
+        gridptr->xstdname = xystdname_tab[grid_xystdname_grid_latlon][0];
+        gridptr->ystdname = xystdname_tab[grid_xystdname_grid_latlon][1];
         gridDefXunits(gridID, "degrees");
         gridDefYunits(gridID, "degrees");
         */
@@ -465,8 +484,8 @@ int gridCreate(int gridtype, int size)
       {
         gridDefXname(gridID, "x");
         gridDefYname(gridID, "y");
-        strcpy(gridptr->xstdname, "projection_x_coordinate");
-        strcpy(gridptr->ystdname, "projection_y_coordinate");
+        gridptr->xstdname = xystdname_tab[grid_xystdname_projection][0];
+        gridptr->ystdname = xystdname_tab[grid_xystdname_projection][1];
         gridDefXunits(gridID, "m");
         gridDefYunits(gridID, "m");
         break;
@@ -775,8 +794,10 @@ void gridInqXunits(int gridID, char *xunits)
 void gridInqXstdname(int gridID, char *xstdname)
 {
   grid_t *gridptr = gridID2Ptr(gridID);
-
-  strcpy(xstdname, gridptr->xstdname);
+  if ( gridptr->xstdname )
+    strcpy(xstdname, gridptr->xstdname);
+  else
+    xstdname[0] = 0;
 }
 
 /*
@@ -860,8 +881,10 @@ void gridInqYunits(int gridID, char *yunits)
 void gridInqYstdname(int gridID, char *ystdname)
 {
   grid_t *gridptr = gridID2Ptr(gridID);
-
-  strcpy(ystdname, gridptr->ystdname);
+  if ( gridptr->ystdname )
+    strcpy(ystdname, gridptr->ystdname);
+  else
+    ystdname[0] = 0;
 }
 
 /*
@@ -1611,8 +1634,8 @@ void gridDefXpole(int gridID, double xpole)
   // Xpole -> grid_north_pole_longitude
   grid_t *gridptr = gridID2Ptr(gridID);
 
-  if ( memcmp(gridptr->xstdname, "grid", 4) != 0 )
-    strcpy(gridptr->xstdname, "grid_longitude");
+  if ( gridptr->xstdname && memcmp(gridptr->xstdname, "grid", 4) != 0 )
+    gridptr->xstdname = xystdname_tab[grid_xystdname_grid_latlon][0];
 
   if ( gridptr->isRotated != TRUE || IS_NOT_EQUAL(gridptr->xpole, xpole) )
     {
@@ -1655,8 +1678,8 @@ void gridDefYpole(int gridID, double ypole)
   // Ypole -> grid_north_pole_latitude
   grid_t *gridptr = gridID2Ptr(gridID);
 
-  if ( memcmp(gridptr->ystdname, "grid", 4) != 0 )
-    strcpy(gridptr->ystdname, "grid_latitude");
+  if ( gridptr->ystdname && memcmp(gridptr->ystdname, "grid", 4) != 0 )
+    gridptr->ystdname = xystdname_tab[grid_xystdname_grid_latlon][1];
 
   if ( gridptr->isRotated != TRUE || IS_NOT_EQUAL(gridptr->ypole, ypole) )
     {
@@ -2360,8 +2383,8 @@ int gridCompareP ( void * gridptr1, void * gridptr2 )
   if (strcmp(g1->yname, g2->yname)) return differ;
   if (strcmp(g1->xlongname, g2->xlongname)) return differ;
   if (strcmp(g1->ylongname, g2->ylongname)) return differ;
-  if (strcmp(g1->xstdname, g2->xstdname)) return differ;
-  if (strcmp(g1->ystdname, g2->ystdname)) return differ;
+  if (g1->xstdname != g2->xstdname) return differ;
+  if (g1->ystdname != g2->ystdname) return differ;
   if (strcmp(g1->xunits, g2->xunits)) return differ;
   if (strcmp(g1->yunits, g2->yunits)) return differ;
 
@@ -2469,8 +2492,8 @@ int gridGenerate(const grid_t *grid)
 	    gridDefYname(gridID, "rlat");
 	    gridDefXlongname(gridID, "longitude in rotated pole grid");
 	    gridDefYlongname(gridID, "latitude in rotated pole grid");
-	    strcpy(gridptr->xstdname, "grid_longitude");
-	    strcpy(gridptr->ystdname, "grid_latitude");
+            gridptr->xstdname = xystdname_tab[grid_xystdname_grid_latlon][0];
+            gridptr->ystdname = xystdname_tab[grid_xystdname_grid_latlon][1];
 	    gridDefXunits(gridID, "degrees");
 	    gridDefYunits(gridID, "degrees");
 
@@ -2638,8 +2661,8 @@ int gridDuplicate(int gridID)
   strcpy(gridptrnew->ylongname, gridptr->ylongname);
   strcpy(gridptrnew->xunits, gridptr->xunits);
   strcpy(gridptrnew->yunits, gridptr->yunits);
-  strcpy(gridptrnew->xstdname, gridptr->xstdname);
-  strcpy(gridptrnew->ystdname, gridptr->ystdname);
+  gridptrnew->xstdname = gridptr->xstdname;
+  gridptrnew->ystdname = gridptr->ystdname;
 
   if (gridptr->reference)
     gridptrnew->reference = strdupx(gridptr->reference);
@@ -3871,7 +3894,7 @@ gridTxCode ()
   return GRID;
 }
 
-enum { gridNint    = 26,
+enum { gridNint    = 28,
        gridNdouble = 24,
        gridHasMaskFlag = 1 << 0,
        gridHasGMEMaskFlag = 1 << 1,
@@ -3904,7 +3927,6 @@ static int gridGetComponentFlags(const grid_t * gridP)
 
 #define GRID_STR_SERIALIZE { gridP->xname, gridP->yname, \
     gridP->xlongname, gridP->ylongname, \
-    gridP->xstdname, gridP->ystdname, \
     gridP->xunits, gridP->yunits }
 
 static int
@@ -4066,6 +4088,8 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
     gridP->ysize         =   intBuffer[23];
     gridP->lcomplex      =   intBuffer[24];
     memberMask           =   intBuffer[25];
+    gridP->xstdname      =   xystdname_tab[intBuffer[26]][0];
+    gridP->ystdname      =   xystdname_tab[intBuffer[27]][1];
   }
 
   if (memberMask & gridHasRowLonFlag)
@@ -4267,6 +4291,10 @@ gridPack(void * voidP, void * packBuffer, int packBufferSize,
     intBuffer[23] = gridP->ysize;
     intBuffer[24] = gridP->lcomplex;
     intBuffer[25] = memberMask = gridGetComponentFlags(gridP);
+    intBuffer[26] = (int)((const char (*)[2][24])gridP->xstdname
+                          - xystdname_tab);
+    intBuffer[27] = (int)((const char (*)[2][24])gridP->ystdname
+                          - (const char (*)[2][24])xystdname_tab[0][1]);
 
     serializePack(intBuffer, gridNint, DATATYPE_INT,
                   packBuffer, packBufferSize, packBufferPos, context);
