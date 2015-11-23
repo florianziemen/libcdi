@@ -203,25 +203,27 @@ cdiPioGetPageSize(bool largePageAlign)
   bool nameAssigned = false;
 #if HAVE_DECL__SC_LARGE_PAGESIZE || HAVE_DECL__SC_PAGE_SIZE || HAVE_DECL__SC_PAGESIZE
   int name;
-#if HAVE_DECL__SC_LARGE_PAGESIZE
+#  if HAVE_DECL__SC_LARGE_PAGESIZE
   if (largePageAlign)
     {
       name = _SC_LARGE_PAGESIZE;
       nameAssigned = true;
     }
   else
-#endif
+#  else
+    (void)largePageAlign;
+#  endif
     {
-#if HAVE_DECL__SC_PAGESIZE || HAVE_DECL__SC_PAGE_SIZE
+#  if HAVE_DECL__SC_PAGESIZE || HAVE_DECL__SC_PAGE_SIZE
       name =
-#if HAVE_DECL__SC_PAGESIZE
+#    if HAVE_DECL__SC_PAGESIZE
         _SC_PAGESIZE
-#elif HAVE_DECL__SC_PAGE_SIZE
+#    elif HAVE_DECL__SC_PAGE_SIZE
         _SC_PAGE_SIZE
-#endif
+#    endif
         ;
       nameAssigned = true;
-#endif
+#  endif
     }
   if (nameAssigned)
     pagesize = sysconf(name);
