@@ -93,7 +93,8 @@ vlist_t *vlist_to_pointer(int vlistID)
 static
 void vlist_init_entry(vlist_t *vlistptr)
 {
-  vlistptr->locked         = 0;
+  vlistptr->immutable      = 0;
+  vlistptr->internal       = 0;
   vlistptr->self           = CDI_UNDEFID;
   vlistptr->nvars          = 0;
   vlistptr->vars           = NULL;
@@ -158,32 +159,22 @@ static
 void vlist_copy(vlist_t *vlistptr2, vlist_t *vlistptr1)
 {
   int vlistID2 = vlistptr2->self;
+  int vlist2internal = vlistptr2->internal;
   memcpy(vlistptr2, vlistptr1, sizeof(vlist_t));
+  vlistptr2->internal = vlist2internal;    //the question who's responsible to destroy the vlist is tied to its containing memory region, so we retain this flag
+  vlistptr2->immutable = 0;    //this is a copy, so it's mutable, independent of whether the original is mutable or not
   vlistptr2->atts.nelems = 0;
   vlistptr2->self = vlistID2;
 }
 
-void vlist_lock(int vlistID)
+void cdiVlistMakeInternal(int vlistID)
 {
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-
-  if ( !vlistptr->locked )
-    {
-      vlistptr->locked += 1;
-      reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
-    }
+  vlist_to_pointer(vlistID)->internal = 1;
 }
 
-
-void vlist_unlock(int vlistID)
+void cdiVlistMakeImmutable(int vlistID)
 {
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-
-  if ( vlistptr->locked )
-    {
-      vlistptr->locked -= 1;
-      reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
-    }
+  vlist_to_pointer(vlistID)->immutable = 1;
 }
 
 /*
@@ -277,10 +268,23 @@ void vlistDestroy(int vlistID)
 {
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
-  if ( vlistptr->locked != 0 )
-    Warning("Destroying of a locked object (vlistID=%d) failed!", vlistID);
+  if ( vlistptr->internal )
+    Warning("Attempt to destroy an internal vlist object by the user (vlistID=%d).", vlistID);
   else
     vlist_delete(vlistptr);
+}
+
+// destroy an internal vlist object
+void cdiVlistDestroy_(int vlistID)
+{
+  vlist_t *vlistptr = vlist_to_pointer(vlistID);
+
+  if(!vlistptr->internal)
+    Warning("Destroying a vlist object that is owned by the user.\n"
+            "This is most likely because of a missing vlistDestroy() in the application code.\n"
+            "If that's not the case, and you are absolutely certain about it, please report the bug.");
+
+  vlist_delete(vlistptr);
 }
 
 static
@@ -1517,6 +1521,7 @@ void vlistUnpack(char * buf, int size, int *position, int originNamespace,
   xassert(!force_id || p->self == targetID);
   if (!force_id)
     targetID = p->self;
+  cdiVlistMakeInternal(p->self);
   p->taxisID = namespaceAdaptKey(tempbuf[2], originNamespace);
   p->tableID = tempbuf[3];
   p->instID = namespaceAdaptKey(tempbuf[4], originNamespace);

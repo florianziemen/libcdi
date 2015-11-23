@@ -116,7 +116,8 @@ var_t;
 
 typedef struct
 {
-  int         locked;
+  unsigned    immutable : 1;    //set when a vlist is passed to streamDefVlist() to safeguard against modifications of the wrong vlist object
+  unsigned    internal : 1;     //set if this vlist has been created by CDI itself, and must not be destroyed by the user, consequently
   int         self;
   int         nvars;        /* number of variables                */
   int         ngrids;
@@ -138,6 +139,8 @@ vlist_t;
 
 
 vlist_t *vlist_to_pointer(int vlistID);
+void cdiVlistMakeInternal(int vlistID);
+void cdiVlistMakeImmutable(int vlistID);
 void vlistCheckVarID(const char *caller, int vlistID, int varID);
 const char *vlistInqVarNamePtr(int vlistID, int varID);
 const char *vlistInqVarLongnamePtr(int vlistID, int varID);
@@ -147,6 +150,7 @@ void     vlistDestroyVarName(int vlistID, int varID);
 void     vlistDestroyVarLongname(int vlistID, int varID);
 void     vlistDestroyVarStdname(int vlistID, int varID);
 void     vlistDestroyVarUnits(int vlistID, int varID);
+void     cdiVlistDestroy_(int vlistID);
 void     vlistDefVarTsteptype(int vlistID, int varID, int tsteptype);
 int      vlistInqVarMissvalUsed(int vlistID, int varID);
 int      vlistHasTime(int vlistID);
@@ -166,9 +170,6 @@ int     vlistInqVarValidrange(int vlistID, int varID, double *validrange);
 void vlistInqVarDimorder(int vlistID, int varID, int (*outDimorder)[3]);
 
 int vlist_att_compare(vlist_t *a, int varIDA, vlist_t *b, int varIDB, int attnum);
-
-void vlist_lock(int vlistID);
-void vlist_unlock(int vlistID);
 
 void resize_opt_grib_entries(var_t *var, int nentries);
 

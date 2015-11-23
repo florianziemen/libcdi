@@ -538,17 +538,19 @@ streamOpenID(const char *filename, char filemode, int filetype,
       streamptr->fileID   = fileID;
 
       if ( filemode == 'r' )
-	{
-	  int vlistID = vlistCreate();
-	  if ( vlistID < 0 ) return(CDI_ELIMIT);
+        {
+          int vlistID = vlistCreate();
+          if ( vlistID < 0 ) return(CDI_ELIMIT);
 
-	  streamptr->vlistID = vlistID;
-	  /* cdiReadByteorder(streamID); */
-	  status = cdiInqContents(streamptr);
-	  if ( status < 0 ) return (status);
-	  vlist_t *vlistptr = vlist_to_pointer(streamptr->vlistID);
-	  vlistptr->ntsteps = streamptr->ntsteps;
-	}
+          cdiVlistMakeInternal(vlistID);
+          streamptr->vlistID = vlistID;
+          /* cdiReadByteorder(streamID); */
+          status = cdiInqContents(streamptr);
+          if ( status < 0 ) return (status);
+          vlist_t *vlistptr = vlist_to_pointer(streamptr->vlistID);
+          vlistptr->ntsteps = streamptr->ntsteps;
+          cdiVlistMakeImmutable(vlistID);
+        }
     }
 
   return (streamID);
@@ -593,11 +595,13 @@ static int streamOpenA(const char *filename, const char *filemode, int filetype)
   streamptr->fileID   = fileID;
 
   streamptr->vlistID = vlistCreate();
+  cdiVlistMakeInternal(streamptr->vlistID);
   /* cdiReadByteorder(streamID); */
   status = cdiInqContents(streamptr);
   if ( status < 0 ) return (status);
   vlistptr = vlist_to_pointer(streamptr->vlistID);
   vlistptr->ntsteps = (int)cdiInqTimeSize(streamID);
+  if(!strcmp(filemode, "r")) cdiVlistMakeImmutable(streamptr->vlistID);
 
   {
     void (*streamCloseDelegate)(stream_t *streamptr, int recordBufIsToBeDeleted)
@@ -1023,8 +1027,7 @@ void streamClose(int streamID)
 	    taxisDestroy(vlistInqTaxis(vlistID));
 	  }
 
-      vlist_unlock(vlistID);
-      vlistDestroy(vlistID);
+      cdiVlistDestroy_(vlistID);
     }
 
   stream_delete_entry(streamptr);
@@ -1420,6 +1423,10 @@ off_t streamNvals(int streamID)
 @Description
 The function @func{streamDefVlist} defines the variable list of a stream.
 
+To safeguard against errors by modifying the wrong vlist object,
+this function makes the passed vlist object immutable.
+All further vlist changes have to use the vlist object returned by streamInqVlist().
+
 @EndFunction
 */
 void streamDefVlist(int streamID, int vlistID)
@@ -1436,7 +1443,12 @@ cdiStreamDefVlist_(int streamID, int vlistID)
   stream_t *streamptr = stream_to_pointer(streamID);
 
   if ( streamptr->vlistID == CDI_UNDEFID )
-    cdiStreamSetupVlist(streamptr, vlistDuplicate(vlistID));
+    {
+      int vlistCopy = vlistDuplicate(vlistID);
+      cdiVlistMakeInternal(vlistCopy);
+      cdiVlistMakeImmutable(vlistID);
+      cdiStreamSetupVlist(streamptr, vlistCopy);
+    }
   else
     Warning("vlist already defined for %s!", streamptr->filename);
 }
@@ -1548,7 +1560,6 @@ cdiStreamSetupVlist(stream_t *streamptr, int vlistID)
 void
 cdiStreamSetupVlist_(stream_t *streamptr, int vlistID)
 {
-  vlist_lock(vlistID);
   int nvars = vlistNvars(vlistID);
   streamptr->vlistID = vlistID;
   for (int varID = 0; varID < nvars; varID++ )

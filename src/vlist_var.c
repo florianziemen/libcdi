@@ -1768,9 +1768,10 @@ void vlistDefVarIntKey(int vlistID, int varID, const char *name, int value)
   if (vlistptr == NULL)  Error("Internal error!");
   int idx;
 
-  if ( vlistptr->locked != 0 )
-    Error("User defined vlist object (vlistID=%d) isn't allowed!\n"
-          "Need a CDI internal vlist object from streamInqVlist(streamID).", vlistID);
+  if ( vlistptr->immutable )
+    Error("vlistDefVarIntKey() was called on an immutable vlist object (vlistID = %d)\n"
+          "Either call vlistDefVarIntKey() before passing the vlist object to streamDefVlist(),\n"
+          "or use the stream-internal vlist by calling streamInqVlist().", vlistID);
 
   for ( idx=0; idx<vlistptr->vars[varID].opt_grib_nentries; idx++)
     if ( (strcmp(name, vlistptr->vars[varID].opt_grib_kvpair[idx].keyword) == 0 ) &&
@@ -1830,9 +1831,10 @@ void vlistDefVarDblKey(int vlistID, int varID, const char *name, double value)
   if (vlistptr == NULL)  Error("Internal error!");
   int idx;
 
-  if ( vlistptr->locked != 0 )
-    Error("User defined vlist object (vlistID=%d) isn't allowed!\n"
-          "Need a CDI internal vlist object from streamInqVlist(streamID).", vlistID);
+  if ( vlistptr->immutable )
+    Error("vlistDefVarDblKey() was called on an immutable vlist object (vlistID = %d)\n"
+          "Either call vlistDefVarIntKey() before passing the vlist object to streamDefVlist(),\n"
+          "or use the stream-internal vlist by calling streamInqVlist().", vlistID);
 
   for ( idx=0; idx<vlistptr->vars[varID].opt_grib_nentries; idx++)
     if ( (strcmp(name, vlistptr->vars[varID].opt_grib_kvpair[idx].keyword) == 0 ) &&

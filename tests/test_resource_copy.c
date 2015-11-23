@@ -218,6 +218,7 @@ static int modelRun(MPI_Comm comm)
     streamID = streamOpenWrite("example.grb", FILETYPE_GRB);
     if ( streamID < 0 ) xabort ( "Could not open file" );
     defineStream ( streamID, vlistID );
+    vlistDestroy(temp.id1);
     vlistDestroy(temp.id2);
   }
 
