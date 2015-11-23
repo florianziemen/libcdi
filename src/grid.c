@@ -64,6 +64,7 @@ static const resOps gridOps = {
 static int  GRID_Debug = 0;   /* If set to 1, debugging */
 
 #define gridID2Ptr(gridID) (grid_t *)reshGetVal(gridID, &gridOps)
+#define gridMark4Update(gridID) reshSetStatus(gridID, &gridOps, RESH_DESYNC_IN_USE)
 
 void grid_init(grid_t *gridptr)
 {
@@ -559,7 +560,7 @@ void gridDefXname(int gridID, const char *xname)
     {
       strncpy(gridptr->xname, xname, CDI_MAX_NAME);
       gridptr->xname[CDI_MAX_NAME - 1] = 0;
-      reshSetStatus(gridID, &gridOps, RESH_DESYNC_IN_USE);
+      gridMark4Update(gridID);
     }
 }
 
@@ -584,7 +585,7 @@ void gridDefXlongname(int gridID, const char *xlongname)
     {
       strncpy(gridptr->xlongname, xlongname, CDI_MAX_NAME);
       gridptr->xlongname[CDI_MAX_NAME - 1] = 0;
-      reshSetStatus(gridID, &gridOps, RESH_DESYNC_IN_USE);
+      gridMark4Update(gridID);
     }
 }
 
@@ -610,7 +611,7 @@ void gridDefXunits(int gridID, const char *xunits)
     {
       strncpy(gridptr->xunits, xunits, CDI_MAX_NAME);
       gridptr->xunits[CDI_MAX_NAME - 1] = 0;
-      reshSetStatus(gridID, &gridOps, RESH_DESYNC_IN_USE);
+      gridMark4Update(gridID);
     }
 }
 
@@ -636,7 +637,7 @@ void gridDefYname(int gridID, const char *yname)
     {
       strncpy(gridptr->yname, yname, CDI_MAX_NAME);
       gridptr->yname[CDI_MAX_NAME - 1] = 0;
-      reshSetStatus(gridID, &gridOps, RESH_DESYNC_IN_USE);
+      gridMark4Update(gridID);
     }
 }
 
@@ -662,7 +663,7 @@ void gridDefYlongname(int gridID, const char *ylongname)
     {
       strncpy(gridptr->ylongname, ylongname, CDI_MAX_NAME);
       gridptr->ylongname[CDI_MAX_NAME - 1] = 0;
-      reshSetStatus(gridID, &gridOps, RESH_DESYNC_IN_USE);
+      gridMark4Update(gridID);
     }
 }
 
@@ -688,7 +689,7 @@ void gridDefYunits(int gridID, const char *yunits)
     {
       strncpy(gridptr->yunits, yunits, CDI_MAX_NAME);
       gridptr->yunits[CDI_MAX_NAME - 1] = 0;
-      reshSetStatus(gridID, &gridOps, RESH_DESYNC_IN_USE);
+      gridMark4Update(gridID);
     }
 }
 
@@ -969,7 +970,7 @@ void gridDefTrunc(int gridID, int trunc)
 
   if (gridptr->trunc != trunc)
     {
-      reshSetStatus(gridID, &gridOps, RESH_DESYNC_IN_USE);
+      gridMark4Update(gridID);
       gridptr->trunc = trunc;
     }
 }
@@ -1001,7 +1002,7 @@ void gridDefXsize(int gridID, int xsize)
 
   if (gridptr->xsize != xsize)
     {
-      reshSetStatus(gridID, &gridOps, RESH_DESYNC_IN_USE);
+      gridMark4Update(gridID);
       gridptr->xsize = xsize;
     }
 
@@ -1030,7 +1031,7 @@ void gridDefPrec(int gridID, int prec)
 
   if (gridptr->prec != prec)
     {
-      reshSetStatus(gridID, &gridOps, RESH_DESYNC_IN_USE);
+      gridMark4Update(gridID);
       gridptr->prec = prec;
     }
 }
@@ -1103,7 +1104,7 @@ void gridDefYsize(int gridID, int ysize)
 
   if (gridptr->ysize != ysize)
     {
-      reshSetStatus(gridID, &gridOps, RESH_DESYNC_IN_USE);
+      gridMark4Update(gridID);
       gridptr->ysize = ysize;
     }
 
@@ -1160,7 +1161,7 @@ void gridDefNP(int gridID, int np)
 
   if (gridptr->np != np)
     {
-      reshSetStatus(gridID, &gridOps, RESH_DESYNC_IN_USE);
+      gridMark4Update(gridID);
       gridptr->np = np;
     }
 }
@@ -1206,7 +1207,7 @@ void gridDefRowlon(int gridID, int nrowlon, const int rowlon[])
   gridptr->rowlon = (int *) Malloc((size_t)nrowlon * sizeof(int));
   gridptr->nrowlon = nrowlon;
   memcpy(gridptr->rowlon, rowlon, (size_t)nrowlon * sizeof(int));
-  reshSetStatus(gridID, &gridOps, RESH_DESYNC_IN_USE);
+  gridMark4Update(gridID);
 }
 
 /*
@@ -1275,6 +1276,7 @@ void gridDefMask(int gridID, const int *mask)
       for (long i = 0; i < size; ++i )
 	gridptr->mask[i] = (mask_t)(mask[i] != 0);
     }
+  gridMark4Update(gridID);
 }
 
 
@@ -1313,6 +1315,7 @@ void gridDefMaskGME(int gridID, const int *mask)
 
   for (long i = 0; i < size; ++i)
     gridptr->mask_gme[i] = (mask_t)(mask[i] != 0);
+  gridMark4Update(gridID);
 }
 
 /*
@@ -1394,7 +1397,7 @@ void gridDefXvals(int gridID, const double *xvals)
   gridptr->xvals = (double *) Realloc(gridptr->xvals,
                                       (size_t)size * sizeof(double));
   memcpy(gridptr->xvals, xvals, (size_t)size * sizeof (double));
-  reshSetStatus(gridID, &gridOps, RESH_DESYNC_IN_USE);
+  gridMark4Update(gridID);
 }
 
 /*
@@ -1468,7 +1471,7 @@ void gridDefYvals(int gridID, const double *yvals)
 
   gridptr->yvals = (double *) Realloc(gridptr->yvals, (size_t)size * sizeof (double));
   memcpy(gridptr->yvals, yvals, (size_t)size * sizeof (double));
-  reshSetStatus(gridID, &gridOps, RESH_DESYNC_IN_USE);
+  gridMark4Update(gridID);
 }
 
 
@@ -1615,7 +1618,7 @@ void gridDefXpole(int gridID, double xpole)
     {
       gridptr->isRotated = TRUE;
       gridptr->xpole = xpole;
-      reshSetStatus(gridID, &gridOps, RESH_DESYNC_IN_USE);
+      gridMark4Update(gridID);
     }
 }
 
@@ -1659,7 +1662,7 @@ void gridDefYpole(int gridID, double ypole)
     {
       gridptr->isRotated = TRUE;
       gridptr->ypole = ypole;
-      reshSetStatus(gridID, &gridOps, RESH_DESYNC_IN_USE);
+      gridMark4Update(gridID);
     }
 }
 
@@ -1700,7 +1703,7 @@ void gridDefAngle(int gridID, double angle)
     {
       gridptr->isRotated = TRUE;
       gridptr->angle = angle;
-      reshSetStatus(gridID, &gridOps, RESH_DESYNC_IN_USE);
+      gridMark4Update(gridID);
     }
 }
 
@@ -1738,7 +1741,7 @@ void gridDefGMEnd(int gridID, int nd)
   if (gridptr->nd != nd)
     {
       gridptr->nd = nd;
-      reshSetStatus(gridID, &gridOps, RESH_DESYNC_IN_USE);
+      gridMark4Update(gridID);
     }
 }
 
@@ -1776,7 +1779,7 @@ void gridDefGMEni(int gridID, int ni)
   if (gridptr->ni != ni)
     {
       gridptr->ni = ni;
-      reshSetStatus(gridID, &gridOps, RESH_DESYNC_IN_USE);
+      gridMark4Update(gridID);
     }
 }
 
@@ -1814,7 +1817,7 @@ void gridDefGMEni2(int gridID, int ni2)
   if (gridptr->ni2 != ni2)
     {
       gridptr->ni2 = ni2;
-      reshSetStatus(gridID, &gridOps, RESH_DESYNC_IN_USE);
+      gridMark4Update(gridID);
     }
 }
 
@@ -1842,7 +1845,7 @@ void gridDefGMEni3(int gridID, int ni3)
   if (gridptr->ni3 != ni3)
     {
       gridptr->ni3 = ni3;
-      reshSetStatus(gridID, &gridOps, RESH_DESYNC_IN_USE);
+      gridMark4Update(gridID);
     }
 }
 
@@ -1866,7 +1869,7 @@ void gridChangeType(int gridID, int gridtype)
   if (gridptr->type != gridtype)
     {
       gridptr->type = gridtype;
-      reshSetStatus(gridID, &gridOps, RESH_DESYNC_IN_USE);
+      gridMark4Update(gridID);
     }
 }
 
@@ -2763,7 +2766,7 @@ void gridCompress(int gridID)
 
 	  Free(gridptr->mask_gme);
 	  gridptr->mask_gme = NULL;
-          reshSetStatus(gridID, &gridOps, RESH_DESYNC_IN_USE);
+          gridMark4Update(gridID);
 	}
     }
   else
@@ -2786,7 +2789,7 @@ void gridDefArea(int gridID, const double *area)
     Warning("values already defined!");
 
   memcpy(gridptr->area, area, size * sizeof(double));
-  reshSetStatus(gridID, &gridOps, RESH_DESYNC_IN_USE);
+  gridMark4Update(gridID);
 }
 
 
@@ -2824,7 +2827,7 @@ void gridDefNvertex(int gridID, int nvertex)
   if (gridptr->nvertex != nvertex)
     {
       gridptr->nvertex = nvertex;
-      reshSetStatus(gridID, &gridOps, RESH_DESYNC_IN_USE);
+      gridMark4Update(gridID);
     }
 }
 
@@ -2874,7 +2877,7 @@ void gridDefXbounds(int gridID, const double *xbounds)
     Warning("values already defined!");
 
   memcpy(gridptr->xbounds, xbounds, size * sizeof (double));
-  reshSetStatus(gridID, &gridOps, RESH_DESYNC_IN_USE);
+  gridMark4Update(gridID);
 }
 
 /*
@@ -2961,7 +2964,7 @@ void gridDefYbounds(int gridID, const double *ybounds)
     Warning("values already defined!");
 
   memcpy(gridptr->ybounds, ybounds, size * sizeof (double));
-  reshSetStatus(gridID, &gridOps, RESH_DESYNC_IN_USE);
+  gridMark4Update(gridID);
 }
 
 /*
@@ -3475,7 +3478,7 @@ void gridDefLCC(int gridID, double originLon, double originLat, double lonParY,
       gridptr->lcc_projflag  = projflag;
       gridptr->lcc_scanflag  = scanflag;
       gridptr->lcc_defined   = TRUE;
-      reshSetStatus(gridID, &gridOps, RESH_DESYNC_IN_USE);
+      gridMark4Update(gridID);
     }
 }
 
@@ -3544,7 +3547,7 @@ void gridDefLcc2(int gridID, double earth_radius, double lon_0, double lat_0, do
       gridptr->lcc2_lat_1   = lat_1;
       gridptr->lcc2_lat_2   = lat_2;
       gridptr->lcc2_defined = TRUE;
-      reshSetStatus(gridID, &gridOps, RESH_DESYNC_IN_USE);
+      gridMark4Update(gridID);
     }
 }
 
@@ -3584,7 +3587,7 @@ void gridDefLaea(int gridID, double earth_radius, double lon_0, double lat_0)
       gridptr->laea_lon_0   = lon_0;
       gridptr->laea_lat_0   = lat_0;
       gridptr->laea_defined = TRUE;
-      reshSetStatus(gridID, &gridOps, RESH_DESYNC_IN_USE);
+      gridMark4Update(gridID);
     }
 }
 
@@ -3618,7 +3621,7 @@ void gridDefComplexPacking(int gridID, int lcomplex)
   if (gridptr->lcomplex != lcomplex)
     {
       gridptr->lcomplex = lcomplex;
-      reshSetStatus(gridID, &gridOps, RESH_DESYNC_IN_USE);
+      gridMark4Update(gridID);
     }
 }
 
@@ -3638,7 +3641,7 @@ void gridDefHasDims(int gridID, int hasdims)
   if (gridptr->hasdims != hasdims)
     {
       gridptr->hasdims = hasdims;
-      reshSetStatus(gridID, &gridOps, RESH_DESYNC_IN_USE);
+      gridMark4Update(gridID);
     }
 }
 
@@ -3671,7 +3674,7 @@ void gridDefNumber(int gridID, const int number)
   if (gridptr->number != number)
     {
       gridptr->number = number;
-      reshSetStatus(gridID, &gridOps, RESH_DESYNC_IN_USE);
+      gridMark4Update(gridID);
     }
 }
 
@@ -3718,7 +3721,7 @@ void gridDefPosition(int gridID, int position)
   if (gridptr->position != position)
     {
       gridptr->position = position;
-      reshSetStatus(gridID, &gridOps, RESH_DESYNC_IN_USE);
+      gridMark4Update(gridID);
     }
 }
 
@@ -3771,7 +3774,7 @@ void gridDefReference(int gridID, const char *reference)
         }
 
       gridptr->reference = strdupx(reference);
-      reshSetStatus(gridID, &gridOps, RESH_DESYNC_IN_USE);
+      gridMark4Update(gridID);
     }
 }
 
@@ -3822,7 +3825,7 @@ void gridDefUUID(int gridID, const unsigned char uuid[CDI_UUID_SIZE])
   grid_t* gridptr = gridID2Ptr(gridID);
 
   memcpy(gridptr->uuid, uuid, CDI_UUID_SIZE);
-  reshSetStatus(gridID, &gridOps, RESH_DESYNC_IN_USE);
+  gridMark4Update(gridID);
 }
 
 /*
