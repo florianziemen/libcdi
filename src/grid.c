@@ -4505,7 +4505,6 @@ int varDefGrid(int vlistID, const grid_t *grid, int mode)
   if ( ! griddefined )
     {
       if ( ! gridglobdefined ) gridID = gridGenerate(grid);
-      ngrids = (unsigned)vlistptr->ngrids;
       vlistptr->gridIDs[ngrids] = gridID;
       vlistptr->ngrids++;
     }
