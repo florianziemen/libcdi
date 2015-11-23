@@ -3925,7 +3925,7 @@ static int gridGetComponentFlags(const grid_t * gridP)
 }
 
 
-#define GRID_STR_SERIALIZE { gridP->xname, gridP->yname, \
+#define GRID_STR_SERIALIZE(gridP) { gridP->xname, gridP->yname, \
     gridP->xlongname, gridP->ylongname, \
     gridP->xunits, gridP->yunits }
 
@@ -4004,7 +4004,7 @@ gridGetPackSize(void * voidP, void *context)
     }
 
   {
-    const char *strTab[] = GRID_STR_SERIALIZE;
+    const char *strTab[] = GRID_STR_SERIALIZE(gridP);
     int numStr = (int)(sizeof (strTab) / sizeof (strTab[0]));
     packBuffSize
       += serializeStrTabGetPackSize(strTab, numStr, context);
@@ -4202,7 +4202,7 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
     }
 
   {
-    char *strTab[] = GRID_STR_SERIALIZE;
+    char *strTab[] = GRID_STR_SERIALIZE(gridP);
     int numStr = sizeof (strTab) / sizeof (strTab[0]);
     serializeStrTabUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
                           strTab, numStr, context);
@@ -4422,7 +4422,7 @@ gridPack(void * voidP, void * packBuffer, int packBufferSize,
     }
 
   {
-    const char *strTab[] = GRID_STR_SERIALIZE;
+    const char *strTab[] = GRID_STR_SERIALIZE(gridP);
     int numStr = sizeof (strTab) / sizeof (strTab[0]);
     serializeStrTabPack(strTab, numStr,
                         packBuffer, packBufferSize, packBufferPos, context);
