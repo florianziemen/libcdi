@@ -247,38 +247,29 @@ void srv_add_record(stream_t *streamptr, int param, int level, int xsize, int ys
 static
 void srvScanTimestep1(stream_t *streamptr)
 {
-  int header[8];
-  int prec = 0;
-  int status;
-  int fileID;
-  int rxsize = 0, rysize = 0;
-  int param = 0;
-  int rcode = 0, rlevel = 0, vdate = 0, vtime = 0;
   DateTime datetime0 = { LONG_MIN, LONG_MIN };
-  int tsID;
-  int varID;
   off_t recpos;
-  int nrecords, nrecs, recID;
-  int taxisID = -1;
   taxis_t *taxis;
-  int vlistID;
   srvrec_t *srvp = (srvrec_t*) streamptr->record->exsep;
 
   streamptr->curTsID = 0;
 
-  tsID  = tstepsNewEntry(streamptr);
-  taxis = &streamptr->tsteps[tsID].taxis;
+  {
+    int tsID  = tstepsNewEntry(streamptr);
+    if ( tsID != 0 )
+      Error("Internal problem! tstepsNewEntry returns %d", tsID);
+    taxis = &streamptr->tsteps[tsID].taxis;
+  }
 
-  if ( tsID != 0 )
-    Error("Internal problem! tstepsNewEntry returns %d", tsID);
 
-  fileID = streamptr->fileID;
+  int fileID = streamptr->fileID;
 
-  nrecs = 0;
+  int nrecs = 0;
   while ( TRUE )
     {
+      int header[8];
       recpos = fileGetPos(fileID);
-      status = srvRead(fileID, srvp);
+      int status = srvRead(fileID, srvp);
       if ( status != 0 )
 	{
 	  streamptr->ntsteps = 1;
@@ -288,15 +279,15 @@ void srvScanTimestep1(stream_t *streamptr)
 
       srvInqHeader(srvp, header);
 
-      prec   = srvp->dprec;
-      rcode  = header[0];
-      rlevel = header[1];
-      vdate  = header[2];
-      vtime  = header[3];
-      rxsize = header[4];
-      rysize = header[5];
+      int prec   = srvp->dprec;
+      int rcode  = header[0];
+      int rlevel = header[1];
+      int vdate  = header[2];
+      int vtime  = header[3];
+      int rxsize = header[4];
+      int rysize = header[5];
 
-      param = cdiEncodeParam(rcode, 255, 255);
+      int param = cdiEncodeParam(rcode, 255, 255);
 
       if ( nrecs == 0 )
 	{
@@ -305,11 +296,10 @@ void srvScanTimestep1(stream_t *streamptr)
 	}
       else
 	{
-	  for ( recID = 0; recID < nrecs; recID++ )
+	  for ( int recID = 0; recID < nrecs; recID++ )
             if (    streamptr->tsteps[0].records[recID].param  == param
                  && streamptr->tsteps[0].records[recID].ilevel == rlevel )
-              break;
-	  if ( recID < nrecs ) break;
+              goto tstepScanLoopFinished;
 	  DateTime datetime = { .date = vdate, .time = vtime };
 	  if ( datetimeCmp(datetime, datetime0) )
 	    Warning("Inconsistent verification time for code %d level %d", rcode, rlevel);
@@ -323,21 +313,22 @@ void srvScanTimestep1(stream_t *streamptr)
       srv_add_record(streamptr, param, rlevel, rxsize, rysize, recsize, recpos, prec);
     }
 
+  tstepScanLoopFinished:
   streamptr->rtsteps = 1;
 
   cdi_generate_vars(streamptr);
 
-  taxisID = taxisCreate(TAXIS_ABSOLUTE);
+  int taxisID = taxisCreate(TAXIS_ABSOLUTE);
   taxis->type  = TAXIS_ABSOLUTE;
   taxis->vdate = (int)datetime0.date;
   taxis->vtime = (int)datetime0.time;
 
-  vlistID = streamptr->vlistID;
+  int vlistID = streamptr->vlistID;
   vlistDefTaxis(vlistID, taxisID);
 
   vlist_check_contents(vlistID);
 
-  nrecords = streamptr->tsteps[0].nallrecs;
+  int nrecords = streamptr->tsteps[0].nallrecs;
   if ( nrecords < streamptr->tsteps[0].recordSize )
     {
       streamptr->tsteps[0].recordSize = nrecords;
@@ -348,12 +339,12 @@ void srvScanTimestep1(stream_t *streamptr)
 
   streamptr->tsteps[0].recIDs = (int *) Malloc((size_t)nrecords * sizeof (int));
   streamptr->tsteps[0].nrecs = nrecords;
-  for ( recID = 0; recID < nrecords; recID++ )
+  for ( int recID = 0; recID < nrecords; recID++ )
     streamptr->tsteps[0].recIDs[recID] = recID;
 
   if ( streamptr->ntsteps == -1 )
     {
-      tsID = tstepsNewEntry(streamptr);
+      int tsID = tstepsNewEntry(streamptr);
       if ( tsID != streamptr->rtsteps )
 	Error("Internal error. tsID = %d", tsID);
 
@@ -366,10 +357,8 @@ void srvScanTimestep1(stream_t *streamptr)
       if ( taxis->vdate == 0 && taxis->vtime == 0 )
 	{
 	  streamptr->ntsteps = 0;
-	  for ( varID = 0; varID < streamptr->nvars; varID++ )
-	    {
-	      vlistDefVarTsteptype(vlistID, varID, TSTEP_CONSTANT);
-	    }
+	  for ( int varID = 0; varID < streamptr->nvars; varID++ )
+            vlistDefVarTsteptype(vlistID, varID, TSTEP_CONSTANT);
 	}
     }
 }
