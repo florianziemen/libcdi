@@ -4460,11 +4460,10 @@ int varDefGrid(int vlistID, const grid_t *grid, int mode)
           1 search in grid table
    */
   int gridglobdefined = FALSE;
-  int griddefined;
+  int griddefined = FALSE;
   int gridID = CDI_UNDEFID;
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
-  griddefined = FALSE;
   unsigned ngrids = (unsigned)vlistptr->ngrids;
 
   if ( mode == 0 )
