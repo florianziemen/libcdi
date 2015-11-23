@@ -519,13 +519,10 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
       gribapiGetString(gh, "name", longname, vlen);
       vlen = CDI_MAX_NAME;
       gribapiGetString(gh, "units", units, vlen);
-
-      {
-        vlen = CDI_MAX_NAME;
-        int status = grib_get_string(gh, "cfName", stdname, &vlen);
-        if ( status != 0 || vlen <= 1 || strncmp(stdname, "unknown", 7) == 0 )
-          stdname[0] = 0;
-      }
+      vlen = CDI_MAX_NAME;
+      int status = grib_get_string(gh, "cfName", stdname, &vlen);
+      if ( status != 0 || vlen <= 1 || strncmp(stdname, "unknown", 7) == 0 )
+        stdname[0] = 0;
     }
   // fprintf(stderr, "param %d name %s %s %s\n", param, name, longname, units);
 
@@ -667,9 +664,7 @@ int gribapiVarCompare(compvar2_t compVar, record_t record, int flag)
 
   compVar0.tiles = record.tiles;
 
-  int rstatus = memcmp(&compVar0, &compVar, sizeof(compvar2_t));
-
-  return (rstatus);
+  return memcmp(&compVar0, &compVar, sizeof(compvar2_t));
 }
 
 static
