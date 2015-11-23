@@ -4418,7 +4418,6 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
   int i;
   int nvatts;
   int skipvar;
-  size_t nvertex;
   grid_t grid;
   grid_t proj;
   int gridindex;
@@ -4787,7 +4786,7 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 			int nbdims = ncvars[ncvars[xvarid].bounds].ndims;
 			if ( nbdims == 2 || nbdims == 3 )
 			  {
-			    nvertex = ncdims[ncvars[ncvars[xvarid].bounds].dimids[nbdims-1]].len;
+			    size_t nvertex = ncdims[ncvars[ncvars[xvarid].bounds].dimids[nbdims-1]].len;
 			    grid.nvertex = (int) nvertex;
 			    grid.xbounds = (double *) Malloc(nvertex*size*sizeof(double));
 			    cdf_get_var_double(ncvars[xvarid].ncid, ncvars[xvarid].bounds, grid.xbounds);
@@ -4802,7 +4801,7 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 			int nbdims = ncvars[ncvars[yvarid].bounds].ndims;
 			if ( nbdims == 2 || nbdims == 3 )
 			  {
-			    nvertex = ncdims[ncvars[ncvars[yvarid].bounds].dimids[nbdims-1]].len;
+			    size_t nvertex = ncdims[ncvars[ncvars[yvarid].bounds].dimids[nbdims-1]].len;
 			    /*
 			    if ( nvertex != grid.nvertex )
 			      Warning("nvertex problem! nvertex x %d, nvertex y %d",
