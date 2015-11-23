@@ -2175,23 +2175,31 @@ int gridCompare(int gridID, const grid_t *grid)
               unsigned char uuidOfHGrid[CDI_UUID_SIZE];
               gridInqUUID(gridID, uuidOfHGrid);
 
-              if ( !differ && uuidOfHGrid[0] && grid->uuid[0] && memcmp(uuidOfHGrid, grid->uuid, CDI_UUID_SIZE) != 0 ) differ = 1;
+              /* FIXME: not octet 0 but octet 7 is guaranteed  non-zero
+               * for any non-NULL UUID */
+              differ = differ || ( uuidOfHGrid[0] && grid->uuid[0] && memcmp(uuidOfHGrid, grid->uuid, CDI_UUID_SIZE) != 0 );
 
               if ( !differ &&
                    ((grid->xvals == NULL && gridInqXvalsPtr(gridID) != NULL) || (grid->xvals != NULL && gridInqXvalsPtr(gridID) == NULL)) &&
                    ((grid->yvals == NULL && gridInqYvalsPtr(gridID) != NULL) || (grid->yvals != NULL && gridInqYvalsPtr(gridID) == NULL)) )
                 {
-                  if ( !differ && grid->nvertex && gridInqNvertex(gridID) && grid->nvertex != gridInqNvertex(gridID) ) differ = 1;
-                  if ( !differ && grid->number && gridInqNumber(gridID) && grid->number != gridInqNumber(gridID) ) differ = 1;
-                  if ( !differ && grid->number && gridInqNumber(gridID) && grid->position != gridInqPosition(gridID) ) differ = 1;
+                  int nvertexA, nvertexB, numberA, numberB,
+                    positionA, positionB;
+                  differ = ( (nvertexA = grid->nvertex)
+                             && (nvertexB = gridInqNvertex(gridID))
+                             && (nvertexA != nvertexB) )
+                    || ( (numberA = grid->number)
+                         && (numberB = gridInqNumber(gridID))
+                         && (numberA != numberB) )
+                    || ( (numberA && numberB)
+                         && (positionA = grid->position) != (positionB = gridInqPosition(gridID)) );
                 }
-              else
+              else if ( !differ )
                 {
-                  if ( !differ && grid->nvertex != gridInqNvertex(gridID) ) differ = 1;
-                  if ( !differ && grid->number != gridInqNumber(gridID) ) differ = 1;
-                  if ( !differ && grid->number > 0 && grid->position != gridInqPosition(gridID) ) differ = 1;
-                  if ( !differ )
-                    differ = compareXYvals2(gridID, grid->size, grid->xvals, grid->yvals);
+                  differ = grid->nvertex != gridInqNvertex(gridID)
+                    || grid->number != gridInqNumber(gridID)
+                    || (grid->number > 0 && grid->position != gridInqPosition(gridID))
+                    || compareXYvals2(gridID, grid->size, grid->xvals, grid->yvals);
                 }
               }
 	}
