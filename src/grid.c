@@ -2748,34 +2748,42 @@ void gridCompress(int gridID)
 	{
           size_t gridsize = (size_t)gridInqSize(gridID);
 	  size_t nv = (size_t)gridptr->nvertex;
-
-	  size_t j = 0;
-          double *area = gridptr->area,
-            *xvals = gridptr->xvals,
-            *yvals = gridptr->yvals,
-            *xbounds = gridptr->xbounds,
-            *ybounds = gridptr->ybounds;
-          mask_t *mask_gme = gridptr->mask_gme;
-	  for (size_t i = 0; i < gridsize; i++ )
-	    {
-	      if (mask_gme[i])
-		{
-		  if (xvals) xvals[j] = xvals[i];
-		  if (yvals) yvals[j] = yvals[i];
-		  if (area) area[j]  = area[i];
-		  if (xbounds != NULL)
-		    for (size_t iv = 0; iv < nv; iv++)
-		      xbounds[j * nv + iv] = xbounds[i * nv + iv];
-		  if (ybounds != NULL)
-		    for (size_t iv = 0; iv < nv; iv++)
-		      ybounds[j * nv + iv] = ybounds[i * nv + iv];
-
-		  j++;
-		}
-	    }
+          double *restrict area = gridptr->area,
+            *restrict xvals = gridptr->xvals,
+            *restrict yvals = gridptr->yvals,
+            *restrict xbounds = gridptr->xbounds,
+            *restrict ybounds = gridptr->ybounds;
+          mask_t *restrict mask_gme = gridptr->mask_gme;
+          size_t *restrict selection = (size_t *)Malloc(gridsize * sizeof (selection[0]));
+          size_t nselect;
+          {
+            size_t j = 0;
+            for (size_t i = 0; i < gridsize; i++ )
+              selection[j] = i, j += (mask_gme[i] != 0);
+            nselect = j;
+          }
+          selection = (size_t *)Realloc(selection, nselect * sizeof (selection[0]));
+          if (xvals)
+            for (size_t i = 0; i < nselect; i++ )
+	      xvals[i] = xvals[selection[i]];
+          if (yvals)
+            for (size_t i = 0; i < nselect; i++ )
+              yvals[i] = yvals[selection[i]];
+          if (area)
+            for (size_t i = 0; i < nselect; i++ )
+              area[i] = area[selection[i]];
+          if (xbounds)
+            for (size_t i = 0; i < nselect; i++ )
+              for (size_t iv = 0; iv < nv; iv++)
+                xbounds[i * nv + iv] = xbounds[selection[i] * nv + iv];
+          if (ybounds)
+            for (size_t i = 0; i < nselect; i++ )
+              for (size_t iv = 0; iv < nv; iv++)
+                ybounds[i * nv + iv] = ybounds[selection[i] * nv + iv];
+          Free(selection);
 
 	  /* fprintf(stderr, "grid compress %d %d %d\n", i, j, gridsize); */
-	  gridsize = j;
+	  gridsize = nselect;
 	  gridptr->size  = (int)gridsize;
 	  gridptr->xsize = (int)gridsize;
 	  gridptr->ysize = (int)gridsize;
