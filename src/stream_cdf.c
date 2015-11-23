@@ -5084,7 +5084,9 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
                 if ( xdimid == xdimid2 &&
 		    (ydimid == ydimid2 || (xdimid == ydimid && ydimid2 == UNDEFID)) )
 		  {
-		    int same_grid = TRUE;
+		    int same_grid = ncvars[ncvarid].xvarid == ncvars[ncvarid2].xvarid
+                      && ncvars[ncvarid].yvarid == ncvars[ncvarid2].yvarid
+                      && ncvars[ncvarid].position == ncvars[ncvarid2].position;
                     /*
 		    if ( xvarid != -1 && ncvars[ncvarid2].xvarid != UNDEFID &&
 			 xvarid != ncvars[ncvarid2].xvarid ) same_grid = FALSE;
@@ -5092,10 +5094,6 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 		    if ( yvarid != -1 && ncvars[ncvarid2].yvarid != UNDEFID &&
 			 yvarid != ncvars[ncvarid2].yvarid ) same_grid = FALSE;
                     */
-		    if ( ncvars[ncvarid].xvarid != ncvars[ncvarid2].xvarid ) same_grid = FALSE;
-		    if ( ncvars[ncvarid].yvarid != ncvars[ncvarid2].yvarid ) same_grid = FALSE;
-
-		    if ( ncvars[ncvarid].position != ncvars[ncvarid2].position ) same_grid = FALSE;
 
 		    if ( same_grid )
 		      {
