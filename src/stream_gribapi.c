@@ -448,15 +448,14 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
 
   // fprintf(stderr, "param %d %d %d %d\n", param, level1, level2, leveltype1);
 
-  (*record).size      = recsize;
-  (*record).position  = position;
-  (*record).param     = param;
-  (*record).ilevel    = level1;
-  (*record).ilevel2   = level2;
-  (*record).ltype     = leveltype1;
-  (*record).tsteptype = tsteptype;
-  if ( tiles ) (*record).tiles = *tiles;
-  else         (*record).tiles = dummy_tiles;
+  record->size      = recsize;
+  record->position  = position;
+  record->param     = param;
+  record->ilevel    = level1;
+  record->ilevel2   = level2;
+  record->ltype     = leveltype1;
+  record->tsteptype = tsteptype;
+  record->tiles = tiles ? *tiles : dummy_tiles;
 
   //FIXME: This may leave the variable name unterminated (which is the behavior that I found in the code).
   //       I don't know precisely how this field is used, so I did not change this behavior to avoid regressions,
