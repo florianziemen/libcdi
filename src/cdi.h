@@ -584,7 +584,7 @@ void    vlistDefVarName(int vlistID, int varID, const char *name);
 void    vlistInqVarName(int vlistID, int varID, char *name);
 
 /*      vlistCopyVarName: Safe and convenient version of vlistInqVarName */
-char *vlistCopyVarName(int vlistId, int varId);
+char   *vlistCopyVarName(int vlistId, int varId);
 
 /*      vlistDefVarStdname: Define the standard name of a Variable */
 void    vlistDefVarStdname(int vlistID, int varID, const char *stdname);
@@ -664,6 +664,10 @@ double  vlistInqVarDblKey(int vlistID, int varID, const char *name);
 /* vlistInqVarIntKey: raw access to GRIB meta-data */
 int     vlistInqVarIntKey(int vlistID, int varID, const char *name);
 
+/* needed only for CDO operator after */
+const char *vlistInqVarNamePtr(int vlistID, int varID);
+const char *vlistInqVarLongnamePtr(int vlistID, int varID);
+const char *vlistInqVarUnitsPtr(int vlistID, int varID);
 
 /* VLIST attributes */
 
@@ -1140,6 +1144,7 @@ int     tableInqParName(int tableID, int code, char *name);
 int     tableInqParLongname(int tableID, int code, char *longname);
 int     tableInqParUnits(int tableID, int code, char *units);
 
+/* needed only for CDO operator after */
 const char *tableInqParNamePtr(int tableID, int parID);
 const char *tableInqParLongnamePtr(int tableID, int parID);
 const char *tableInqParUnitsPtr(int tableID, int parID);
@@ -1191,7 +1196,7 @@ int     vlistInqVarSubtype(int vlistID, int varID);
 
 void gribapiLibraryVersion(int *major_version, int *minor_version, int *revision_version);
 
-  
+
 #if defined (__cplusplus)
 }
 #endif

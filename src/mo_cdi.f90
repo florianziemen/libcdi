@@ -407,6 +407,9 @@ module mo_cdi
   public :: vlistHasVarKey
   public :: vlistInqVarDblKey
   public :: vlistInqVarIntKey
+  public :: vlistInqVarNamePtr
+  public :: vlistInqVarLongnamePtr
+  public :: vlistInqVarUnitsPtr
   public :: vlistInqNatts
   public :: vlistInqAtt
   public :: vlistDelAtt
@@ -4448,6 +4451,75 @@ contains
     name_temp(len(name_dummy) + 1) = c_null_char
     f_result = lib_vlistInqVarIntKey(vlistID_dummy, varID_dummy, name_temp)
   end function vlistInqVarIntKey
+
+  function vlistInqVarNamePtr(vlistID_dummy, varID_dummy) result(f_result)
+    character(kind = c_char), dimension(:), pointer :: f_result
+    integer(c_int), value :: vlistID_dummy
+    integer(c_int), value :: varID_dummy
+    type(c_ptr) :: ptr
+    integer :: rv_shape(1)
+    interface
+      function lib_vlistInqVarNamePtr(vlistID_dummy, varID_dummy) bind(c, name&
+      & = 'vlistInqVarNamePtr') result(c_result)
+        import c_int, c_ptr
+        type(c_ptr) :: c_result
+        integer(c_int), value :: vlistID_dummy
+        integer(c_int), value :: varID_dummy
+      end function lib_vlistInqVarNamePtr
+    end interface
+    f_result => null()
+    ptr = lib_vlistInqVarNamePtr(vlistID_dummy, varID_dummy)
+    if(c_associated(ptr)) then
+      rv_shape(1) = int(lib_strlen(ptr))
+      call c_f_pointer(ptr, f_result, rv_shape)
+    end if
+  end function vlistInqVarNamePtr
+
+  function vlistInqVarLongnamePtr(vlistID_dummy, varID_dummy) result(f_result)
+    character(kind = c_char), dimension(:), pointer :: f_result
+    integer(c_int), value :: vlistID_dummy
+    integer(c_int), value :: varID_dummy
+    type(c_ptr) :: ptr
+    integer :: rv_shape(1)
+    interface
+      function lib_vlistInqVarLongnamePtr(vlistID_dummy, varID_dummy) bind(c,&
+      & name = 'vlistInqVarLongnamePtr') result(c_result)
+        import c_int, c_ptr
+        type(c_ptr) :: c_result
+        integer(c_int), value :: vlistID_dummy
+        integer(c_int), value :: varID_dummy
+      end function lib_vlistInqVarLongnamePtr
+    end interface
+    f_result => null()
+    ptr = lib_vlistInqVarLongnamePtr(vlistID_dummy, varID_dummy)
+    if(c_associated(ptr)) then
+      rv_shape(1) = int(lib_strlen(ptr))
+      call c_f_pointer(ptr, f_result, rv_shape)
+    end if
+  end function vlistInqVarLongnamePtr
+
+  function vlistInqVarUnitsPtr(vlistID_dummy, varID_dummy) result(f_result)
+    character(kind = c_char), dimension(:), pointer :: f_result
+    integer(c_int), value :: vlistID_dummy
+    integer(c_int), value :: varID_dummy
+    type(c_ptr) :: ptr
+    integer :: rv_shape(1)
+    interface
+      function lib_vlistInqVarUnitsPtr(vlistID_dummy, varID_dummy) bind(c, name&
+      & = 'vlistInqVarUnitsPtr') result(c_result)
+        import c_int, c_ptr
+        type(c_ptr) :: c_result
+        integer(c_int), value :: vlistID_dummy
+        integer(c_int), value :: varID_dummy
+      end function lib_vlistInqVarUnitsPtr
+    end interface
+    f_result => null()
+    ptr = lib_vlistInqVarUnitsPtr(vlistID_dummy, varID_dummy)
+    if(c_associated(ptr)) then
+      rv_shape(1) = int(lib_strlen(ptr))
+      call c_f_pointer(ptr, f_result, rv_shape)
+    end if
+  end function vlistInqVarUnitsPtr
 
   function vlistInqAtt(vlistID_dummy, varID_dummy, attrnum_dummy, name_dummy,&
   & typep_dummy, lenp_dummy) result(f_result)
