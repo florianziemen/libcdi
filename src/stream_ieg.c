@@ -266,9 +266,7 @@ calc_resfac(double xfirst, double xlast, double xinc, double yfirst, double ylas
 static
 void iegDefGrid(int *gdb, int gridID)
 {
-  int gridtype;
-
-  gridtype = gridInqType(gridID);
+  int gridtype = gridInqType(gridID);
 
   if ( gridtype == GRID_GENERIC )
     {
@@ -647,20 +645,12 @@ void iegAddRecord(stream_t *streamptr, int param, int *pdb, int *gdb, double *vc
   int leveltype;
   int gridID = UNDEFID;
   int levelID = 0;
-  int tsID, recID, varID;
-  int datatype;
+  int vlistID = streamptr->vlistID;
+  int tsID    = streamptr->curTsID;
+  int recID   = recordNewEntry(streamptr, tsID);
+  record_t *record = &streamptr->tsteps[tsID].records[recID];
+
   int level1, level2;
-  int gridtype;
-  int lbounds = 0;
-  record_t *record;
-  grid_t grid;
-  int vlistID;
-
-  vlistID = streamptr->vlistID;
-  tsID    = streamptr->curTsID;
-  recID   = recordNewEntry(streamptr, tsID);
-  record  = &streamptr->tsteps[tsID].records[recID];
-
   if ( IEG_P_LevelType(pdb) == IEG_LTYPE_HYBRID_LAYER )
     {
       level1 = IEG_P_Level1(pdb);
@@ -680,13 +670,11 @@ void iegAddRecord(stream_t *streamptr, int param, int *pdb, int *gdb, double *vc
   record->ilevel2  = level2;
   record->ltype    = IEG_P_LevelType(pdb);
 
-  if ( IEG_G_GridType(gdb) == 0 || IEG_G_GridType(gdb) == 10 )
-    gridtype = GRID_LONLAT;
-  else if ( IEG_G_GridType(gdb) == 4 )
-    gridtype = GRID_GAUSSIAN;
-  else
-    gridtype = GRID_GENERIC;
+  int gridtype =
+   ( IEG_G_GridType(gdb) == 0 || IEG_G_GridType(gdb) == 10 ) ? GRID_LONLAT :
+    ( IEG_G_GridType(gdb) == 4 ) ? GRID_GAUSSIAN : GRID_GENERIC;
 
+  grid_t grid;
   memset(&grid, 0, sizeof(grid_t));
   grid.type  = gridtype;
   grid.size  = IEG_G_NumLon(gdb)*IEG_G_NumLat(gdb);
@@ -776,10 +764,11 @@ void iegAddRecord(stream_t *streamptr, int param, int *pdb, int *gdb, double *vc
       varDefVCT(vctsize, tmpvct);
     }
 
-  if ( IEG_P_LevelType(pdb) == IEG_LTYPE_HYBRID_LAYER ) lbounds = 1;
+  int lbounds = IEG_P_LevelType(pdb) == IEG_LTYPE_HYBRID_LAYER ? 1 : 0;
 
-  datatype = iegInqDatatype(prec);
+  int datatype = iegInqDatatype(prec);
 
+  int varID;
   varAddRecord(recID, param, gridID, leveltype, lbounds, level1, level2, 0, 0,
 	       datatype, &varID, &levelID, TSTEP_INSTANT, 0, 0, -1,
                NULL, NULL, NULL, NULL, NULL, NULL);
