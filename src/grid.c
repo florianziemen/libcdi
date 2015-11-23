@@ -219,6 +219,48 @@ unsigned cdiGridCount(void)
   return reshCountType(&gridOps);
 }
 
+static inline void
+gridSetXname(grid_t *gridptr, const char *xname)
+{
+  strncpy(gridptr->xname, xname, CDI_MAX_NAME);
+  gridptr->xname[CDI_MAX_NAME - 1] = 0;
+}
+
+static inline void
+gridSetXlongname(grid_t *gridptr, const char *xlongname)
+{
+  strncpy(gridptr->xlongname, xlongname, CDI_MAX_NAME);
+  gridptr->xlongname[CDI_MAX_NAME - 1] = 0;
+}
+
+static inline void
+gridSetXunits(grid_t *gridptr, const char *xunits)
+{
+  strncpy(gridptr->xunits, xunits, CDI_MAX_NAME);
+  gridptr->xunits[CDI_MAX_NAME - 1] = 0;
+}
+
+static inline void
+gridSetYname(grid_t *gridptr, const char *yname)
+{
+  strncpy(gridptr->yname, yname, CDI_MAX_NAME);
+  gridptr->yname[CDI_MAX_NAME - 1] = 0;
+}
+
+static inline void
+gridSetYlongname(grid_t *gridptr, const char *ylongname)
+{
+  strncpy(gridptr->ylongname, ylongname, CDI_MAX_NAME);
+  gridptr->ylongname[CDI_MAX_NAME - 1] = 0;
+}
+
+static inline void
+gridSetYunits(grid_t *gridptr, const char *yunits)
+{
+  strncpy(gridptr->yunits, yunits, CDI_MAX_NAME);
+  gridptr->yunits[CDI_MAX_NAME - 1] = 0;
+}
+
 // used also in CDO
 void gridGenXvals(int xsize, double xfirst, double xlast, double xinc, double *xvals)
 {
@@ -577,11 +619,11 @@ void gridDefXname(int gridID, const char *xname)
 
   if ( xname )
     {
-      strncpy(gridptr->xname, xname, CDI_MAX_NAME);
-      gridptr->xname[CDI_MAX_NAME - 1] = 0;
+      gridSetXname(gridptr, xname);
       gridMark4Update(gridID);
     }
 }
+
 
 /*
 @Function  gridDefXlongname
@@ -602,8 +644,7 @@ void gridDefXlongname(int gridID, const char *xlongname)
   grid_t *gridptr = gridID2Ptr(gridID);
   if ( xlongname )
     {
-      strncpy(gridptr->xlongname, xlongname, CDI_MAX_NAME);
-      gridptr->xlongname[CDI_MAX_NAME - 1] = 0;
+      gridSetXlongname(gridptr, xlongname);
       gridMark4Update(gridID);
     }
 }
@@ -628,8 +669,7 @@ void gridDefXunits(int gridID, const char *xunits)
 
   if ( xunits )
     {
-      strncpy(gridptr->xunits, xunits, CDI_MAX_NAME);
-      gridptr->xunits[CDI_MAX_NAME - 1] = 0;
+      gridSetXunits(gridptr, xunits);
       gridMark4Update(gridID);
     }
 }
@@ -654,8 +694,7 @@ void gridDefYname(int gridID, const char *yname)
 
   if ( yname )
     {
-      strncpy(gridptr->yname, yname, CDI_MAX_NAME);
-      gridptr->yname[CDI_MAX_NAME - 1] = 0;
+      gridSetYname(gridptr, yname);
       gridMark4Update(gridID);
     }
 }
@@ -680,8 +719,7 @@ void gridDefYlongname(int gridID, const char *ylongname)
 
   if ( ylongname )
     {
-      strncpy(gridptr->ylongname, ylongname, CDI_MAX_NAME);
-      gridptr->ylongname[CDI_MAX_NAME - 1] = 0;
+      gridSetYlongname(gridptr, ylongname);
       gridMark4Update(gridID);
     }
 }
@@ -706,8 +744,7 @@ void gridDefYunits(int gridID, const char *yunits)
 
   if ( yunits )
     {
-      strncpy(gridptr->yunits, yunits, CDI_MAX_NAME);
-      gridptr->yunits[CDI_MAX_NAME - 1] = 0;
+      gridSetYunits(gridptr, yunits);
       gridMark4Update(gridID);
     }
 }
