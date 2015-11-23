@@ -423,13 +423,8 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
                       int leveltype1, int leveltype2, int lbounds, int level1, int level2, int level_sf, int level_unit,
                       const var_tile_t *tiles, int lread_additional_keys)
 {
-  int varID;
   int levelID = 0;
-  grid_t grid;
-  long lpar;
-  int status;
   char stdname[CDI_MAX_NAME], longname[CDI_MAX_NAME], units[CDI_MAX_NAME];
-  size_t vlen;
   long ens_index = 0, ens_count = 0, ens_forecast_type = 0;
 
   int vlistID = streamptr->vlistID;
@@ -464,6 +459,7 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
   //       I. e. kick the fixed size array and allocate enough space, whatever that may be.
   strncpy(record->varname, varname, sizeof(record->varname));
 
+  grid_t grid;
   gribapiGetGrid(gh, &grid);
 
   int gridID = varDefGrid(vlistID, &grid, 0);
@@ -475,6 +471,7 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
     case ZAXIS_HYBRID:
     case ZAXIS_HYBRID_HALF:
       {
+        long lpar;
         GRIB_CHECK(grib_get_long(gh, "NV", &lpar), 0);
         /* FIXME: assert(lpar >= 0) */
         size_t vctsize = (size_t)lpar;
@@ -491,22 +488,20 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
     case ZAXIS_REFERENCE:
       {
         unsigned char uuid[CDI_UUID_SIZE];
-        long ltmp;
-        long nhlev, nvgrid;
-
+        long lpar;
         GRIB_CHECK(grib_get_long(gh, "NV", &lpar), 0);
         if ( lpar != 6 )
           {
             fprintf(stderr, "Warning ...\n");
           }
-        GRIB_CHECK(grib_get_long(gh, "nlev", &ltmp), 0);
-        nhlev = ltmp;
-        GRIB_CHECK(grib_get_long(gh, "numberOfVGridUsed", &ltmp), 0);
-        nvgrid = ltmp;
+        GRIB_CHECK(grib_get_long(gh, "nlev", &lpar), 0);
+        int nhlev = (int)lpar;
+        GRIB_CHECK(grib_get_long(gh, "numberOfVGridUsed", &lpar), 0);
+        int nvgrid = (int)lpar;
         size_t len = (size_t)CDI_UUID_SIZE;
         memset(uuid, 0, CDI_UUID_SIZE);
         GRIB_CHECK(grib_get_bytes(gh, "uuidOfVGrid", uuid, &len), 0);
-        varDefZAxisReference((int) nhlev, (int) nvgrid, uuid);
+        varDefZAxisReference(nhlev, nvgrid, uuid);
         break;
       }
     }
@@ -520,22 +515,22 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
 
   if ( varname[0] != 0 )
     {
-      vlen = CDI_MAX_NAME;
+      size_t vlen = CDI_MAX_NAME;
       gribapiGetString(gh, "name", longname, vlen);
       vlen = CDI_MAX_NAME;
       gribapiGetString(gh, "units", units, vlen);
 
       {
         vlen = CDI_MAX_NAME;
-        status = grib_get_string(gh, "cfName", stdname, &vlen);
-        if ( status != 0 || vlen <= 1 ) stdname[0] = 0;
-        else if ( strncmp(stdname, "unknown", 7) == 0 ) stdname[0] = 0;
+        int status = grib_get_string(gh, "cfName", stdname, &vlen);
+        if ( status != 0 || vlen <= 1 || strncmp(stdname, "unknown", 7) == 0 )
+          stdname[0] = 0;
       }
     }
   // fprintf(stderr, "param %d name %s %s %s\n", param, name, longname, units);
 
   /* add the previously read record data to the (intermediate) list of records */
-  int tile_index = -1;
+  int tile_index = -1, varID;
   varAddRecord(recID, param, gridID, zaxistype, lbounds, level1, level2, level_sf, level_unit,
 	       datatype, &varID, &levelID, tsteptype, numavg, leveltype1, leveltype2,
 	       varname, stdname, longname, units, tiles, &tile_index);
@@ -549,8 +544,7 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
     Get the ensemble Info from the grib-2 Tables and update the intermediate datastructure.
     Further update to the "vlist" is handled in the same way as for GRIB-1 by "cdi_generate_vars"
   */
-  status = grib_get_long(gh, "typeOfEnsembleForecast", &ens_forecast_type );
-  if ( status == 0 )
+  if ( grib_get_long(gh, "typeOfEnsembleForecast", &ens_forecast_type) == 0 )
     {
       GRIB_CHECK(grib_get_long(gh, "numberOfForecastsInEnsemble", &ens_count ), 0);
       GRIB_CHECK(grib_get_long(gh, "perturbationNumber", &ens_index ), 0);
@@ -560,13 +554,11 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
     varDefEnsembleInfo(varID, (int)ens_index, (int)ens_count, (int)ens_forecast_type);
 
   long typeOfGeneratingProcess = 0;
-  status = grib_get_long(gh, "typeOfGeneratingProcess", &typeOfGeneratingProcess);
-  if ( status == 0 )
+  if ( grib_get_long(gh, "typeOfGeneratingProcess", &typeOfGeneratingProcess) == 0 )
     varDefTypeOfGeneratingProcess(varID, (int) typeOfGeneratingProcess);
 
   long productDefinitionTemplate = 0;
-  status = grib_get_long(gh, "productDefinitionTemplateNumber", &productDefinitionTemplate);
-  if ( status == 0 )
+  if ( grib_get_long(gh, "productDefinitionTemplateNumber", &productDefinitionTemplate) == 0 )
     varDefProductDefinitionTemplate(varID, (int) productDefinitionTemplate);
 
   int    i;
@@ -599,8 +591,7 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
     {
       int modelID;
       long processID;
-      status = grib_get_long(gh, "generatingProcessIdentifier", &processID);
-      if ( status == 0 )
+      if ( grib_get_long(gh, "generatingProcessIdentifier", &processID) == 0 )
 	{
           /* FIXME: assert(processID >= INT_MIN && processID <= INT_MAX) */
 	  modelID = modelInq(varInqInst(varID), (int)processID, NULL);
