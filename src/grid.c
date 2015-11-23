@@ -2614,13 +2614,13 @@ The function @func{gridDuplicate} duplicates a horizontal Grid.
 */
 int gridDuplicate(int gridID)
 {
-  grid_t *gridptr = (grid_t *)reshGetVal(gridID, &gridOps);
+  grid_t *gridptr = gridID2Ptr(gridID);
 
   int gridtype = gridInqType(gridID);
   int gridsize = gridInqSize(gridID);
 
   int gridIDnew = gridCreate(gridtype, gridsize);
-  grid_t *gridptrnew = (grid_t *)reshGetVal(gridIDnew, &gridOps);
+  grid_t *gridptrnew = gridID2Ptr(gridIDnew);
 
   grid_copy(gridptrnew, gridptr);
 
