@@ -281,6 +281,12 @@ FCALLSCFUN3 (INT, vlistHasVarKey, VLISTHASVARKEY, vlisthasvarkey, INT, INT, STRI
 FCALLSCFUN3 (DOUBLE, vlistInqVarDblKey, VLISTINQVARDBLKEY, vlistinqvardblkey, INT, INT, STRING)
 FCALLSCFUN3 (INT, vlistInqVarIntKey, VLISTINQVARINTKEY, vlistinqvarintkey, INT, INT, STRING)
 
+/*  needed only for CDO operator after  */
+
+FCALLSCFUN2 (STRING, vlistInqVarNamePtr, VLISTINQVARNAMEPTR, vlistinqvarnameptr, INT, INT)
+FCALLSCFUN2 (STRING, vlistInqVarLongnamePtr, VLISTINQVARLONGNAMEPTR, vlistinqvarlongnameptr, INT, INT)
+FCALLSCFUN2 (STRING, vlistInqVarUnitsPtr, VLISTINQVARUNITSPTR, vlistinqvarunitsptr, INT, INT)
+
 /*  VLIST attributes  */
 
 FCALLSCFUN3 (INT, vlistInqNatts, VLISTINQNATTS, vlistinqnatts, INT, INT, PINT)
@@ -523,6 +529,9 @@ FCALLSCFUN3 (INT, tableInqParCode, TABLEINQPARCODE, tableinqparcode, INT, PSTRIN
 FCALLSCFUN3 (INT, tableInqParName, TABLEINQPARNAME, tableinqparname, INT, INT, PSTRING)
 FCALLSCFUN3 (INT, tableInqParLongname, TABLEINQPARLONGNAME, tableinqparlongname, INT, INT, PSTRING)
 FCALLSCFUN3 (INT, tableInqParUnits, TABLEINQPARUNITS, tableinqparunits, INT, INT, PSTRING)
+
+/*  needed only for CDO operator after  */
+
 FCALLSCFUN2 (STRING, tableInqParNamePtr, TABLEINQPARNAMEPTR, tableinqparnameptr, INT, INT)
 FCALLSCFUN2 (STRING, tableInqParLongnamePtr, TABLEINQPARLONGNAMEPTR, tableinqparlongnameptr, INT, INT)
 FCALLSCFUN2 (STRING, tableInqParUnitsPtr, TABLEINQPARUNITSPTR, tableinqparunitsptr, INT, INT)

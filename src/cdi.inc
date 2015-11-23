@@ -1322,6 +1322,24 @@
       EXTERNAL        vlistInqVarIntKey
 
 !
+!  needed only for CDO operator after
+!
+      CHARACTER(80)   vlistInqVarNamePtr
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID)
+      EXTERNAL        vlistInqVarNamePtr
+
+      CHARACTER(80)   vlistInqVarLongnamePtr
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID)
+      EXTERNAL        vlistInqVarLongnamePtr
+
+      CHARACTER(80)   vlistInqVarUnitsPtr
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID)
+      EXTERNAL        vlistInqVarUnitsPtr
+
+!
 !  VLIST attributes
 !
       INTEGER         vlistInqNatts
@@ -2400,6 +2418,9 @@
 !                                     CHARACTER*(*)   units)
       EXTERNAL        tableInqParUnits
 
+!
+!  needed only for CDO operator after
+!
       CHARACTER(80)   tableInqParNamePtr
 !                                    (INTEGER         tableID,
 !                                     INTEGER         parID)
