@@ -3291,10 +3291,9 @@ static void gridPrintKernel(grid_t * gridptr, int index, int opt, FILE *fp)
 
         if ( type == GRID_GAUSSIAN_REDUCED )
           {
-            int *rowlon;
             nbyte0 = fprintf(fp, "rowlon    = ");
             nbyte  = nbyte0;
-            rowlon = (int *) Malloc((size_t)ysize*sizeof(int));
+            int *rowlon = (int *) Malloc((size_t)ysize*sizeof(int));
             gridInqRowlon(gridID, rowlon);
             for ( i = 0; i < ysize; i++ )
               {
