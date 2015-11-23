@@ -2897,8 +2897,7 @@ void gridDefXbounds(int gridID, const double *xbounds)
 
   int irregular = gridptr->type == GRID_CURVILINEAR
     || gridptr->type == GRID_UNSTRUCTURED;
-  size_t size = nvertex
-    * (size_t)(irregular ? gridptr->size : gridptr->xsize);
+  size_t size = nvertex * (size_t)(irregular ? gridptr->size : gridptr->xsize);
   if ( size == 0 )
     Error("size undefined for gridID = %d", gridID);
 
