@@ -261,6 +261,101 @@ gridSetYunits(grid_t *gridptr, const char *yunits)
   gridptr->yunits[CDI_MAX_NAME - 1] = 0;
 }
 
+void
+cdiGridTypeInit(grid_t *gridptr, int gridtype, int size)
+{
+
+  gridptr->type = gridtype;
+  gridptr->size = size;
+
+  switch (gridtype)
+    {
+    case GRID_CURVILINEAR:
+      gridptr->nvertex = 4;
+      /* Fall through */
+    case GRID_LONLAT:
+    case GRID_GAUSSIAN:
+    case GRID_GAUSSIAN_REDUCED:
+    case GRID_TRAJECTORY:
+      {
+        if ( gridtype == GRID_TRAJECTORY )
+          {
+            gridSetXname(gridptr, "tlon");
+            gridSetYname(gridptr, "tlat");
+          }
+        else
+          {
+            gridSetXname(gridptr, "lon");
+            gridSetYname(gridptr, "lat");
+          }
+        gridSetXlongname(gridptr, "longitude");
+        gridSetYlongname(gridptr, "latitude");
+
+        /*
+        if ( gridtype == GRID_CURVILINEAR )
+          {
+            gridptr->xstdname = xystdname_tab[grid_xystdname_grid_latlon][0];
+            gridptr->ystdname = xystdname_tab[grid_xystdname_grid_latlon][1];
+            gridDefXunits(gridID, "degrees");
+            gridDefYunits(gridID, "degrees");
+          }
+        else
+        */
+          {
+            gridptr->xstdname = xystdname_tab[grid_xystdname_latlon][0];
+            gridptr->ystdname = xystdname_tab[grid_xystdname_latlon][1];
+            gridSetXunits(gridptr, "degrees_east");
+            gridSetYunits(gridptr, "degrees_north");
+          }
+
+        break;
+      }
+    case GRID_UNSTRUCTURED:
+      gridptr->xsize = size;
+      /* Fall through */
+    case GRID_GME:
+      {
+        gridSetXname(gridptr, "lon");
+        gridSetYname(gridptr, "lat");
+        gridptr->xstdname = xystdname_tab[grid_xystdname_latlon][0];
+        gridptr->ystdname = xystdname_tab[grid_xystdname_latlon][1];
+        gridSetXunits(gridptr, "degrees_east");
+        gridSetYunits(gridptr, "degrees_north");
+        break;
+      }
+    case GRID_GENERIC:
+      {
+
+        /* gridptr->xsize = size; */
+        gridSetXname(gridptr, "x");
+        gridSetYname(gridptr, "y");
+        /*
+        strcpy(gridptr->xstdname, "grid_longitude");
+        strcpy(gridptr->ystdname, "grid_latitude");
+        gridptr->xstdname = xystdname_tab[grid_xystdname_grid_latlon][0];
+        gridptr->ystdname = xystdname_tab[grid_xystdname_grid_latlon][1];
+        gridDefXunits(gridID, "degrees");
+        gridDefYunits(gridID, "degrees");
+        */
+        break;
+      }
+    case GRID_LCC2:
+    case GRID_SINUSOIDAL:
+    case GRID_LAEA:
+      {
+        gridSetXname(gridptr, "x");
+        gridSetYname(gridptr, "y");
+        gridptr->xstdname = xystdname_tab[grid_xystdname_projection][0];
+        gridptr->ystdname = xystdname_tab[grid_xystdname_projection][1];
+        gridSetXunits(gridptr, "m");
+        gridSetYunits(gridptr, "m");
+        break;
+      }
+    }
+
+}
+
+
 // used also in CDO
 void gridGenXvals(int xsize, double xfirst, double xlast, double xinc, double *xvals)
 {
@@ -448,91 +543,7 @@ int gridCreate(int gridtype, int size)
 
   if ( CDI_Debug ) Message("gridID: %d", gridID);
 
-  gridptr->type = gridtype;
-  gridptr->size = size;
-
-  /*  if ( gridtype == GRID_GENERIC )     gridptr->xsize = size; */
-  if ( gridtype == GRID_UNSTRUCTURED )  gridptr->xsize = size;
-  if ( gridtype == GRID_CURVILINEAR  )  gridptr->nvertex = 4;
-
-  switch (gridtype)
-    {
-    case GRID_LONLAT:
-    case GRID_GAUSSIAN:
-    case GRID_GAUSSIAN_REDUCED:
-    case GRID_CURVILINEAR:
-    case GRID_TRAJECTORY:
-      {
-        if ( gridtype == GRID_TRAJECTORY )
-          {
-            gridDefXname(gridID, "tlon");
-            gridDefYname(gridID, "tlat");
-          }
-        else
-          {
-            gridDefXname(gridID, "lon");
-            gridDefYname(gridID, "lat");
-          }
-        gridDefXlongname(gridID, "longitude");
-        gridDefYlongname(gridID, "latitude");
-
-        /*
-        if ( gridtype == GRID_CURVILINEAR )
-          {
-            gridptr->xstdname = xystdname_tab[grid_xystdname_grid_latlon][0];
-            gridptr->ystdname = xystdname_tab[grid_xystdname_grid_latlon][1];
-            gridDefXunits(gridID, "degrees");
-            gridDefYunits(gridID, "degrees");
-          }
-        else
-        */
-          {
-            gridptr->xstdname = xystdname_tab[grid_xystdname_latlon][0];
-            gridptr->ystdname = xystdname_tab[grid_xystdname_latlon][1];
-            gridDefXunits(gridID, "degrees_east");
-            gridDefYunits(gridID, "degrees_north");
-          }
-
-        break;
-      }
-    case GRID_GME:
-    case GRID_UNSTRUCTURED:
-      {
-        gridDefXname(gridID, "lon");
-        gridDefYname(gridID, "lat");
-        gridptr->xstdname = xystdname_tab[grid_xystdname_latlon][0];
-        gridptr->ystdname = xystdname_tab[grid_xystdname_latlon][1];
-        gridDefXunits(gridID, "degrees_east");
-        gridDefYunits(gridID, "degrees_north");
-        break;
-      }
-    case GRID_GENERIC:
-      {
-        gridDefXname(gridID, "x");
-        gridDefYname(gridID, "y");
-        /*
-        strcpy(gridptr->xstdname, "grid_longitude");
-        strcpy(gridptr->ystdname, "grid_latitude");
-        gridptr->xstdname = xystdname_tab[grid_xystdname_grid_latlon][0];
-        gridptr->ystdname = xystdname_tab[grid_xystdname_grid_latlon][1];
-        gridDefXunits(gridID, "degrees");
-        gridDefYunits(gridID, "degrees");
-        */
-        break;
-      }
-    case GRID_LCC2:
-    case GRID_SINUSOIDAL:
-    case GRID_LAEA:
-      {
-        gridDefXname(gridID, "x");
-        gridDefYname(gridID, "y");
-        gridptr->xstdname = xystdname_tab[grid_xystdname_projection][0];
-        gridptr->ystdname = xystdname_tab[grid_xystdname_projection][1];
-        gridDefXunits(gridID, "m");
-        gridDefYunits(gridID, "m");
-        break;
-      }
-    }
+  cdiGridTypeInit(gridptr, gridtype, size);
 
   return (gridID);
 }
