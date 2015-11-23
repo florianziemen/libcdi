@@ -4415,7 +4415,6 @@ static
 void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars, int timedimid, unsigned char *uuidOfHGrid, char *gridfile, int number_of_grid_used)
 {
   int ncvarid, ncvarid2;
-  int nbdims;
   int i;
   int nvatts;
   int skipvar;
@@ -4785,7 +4784,7 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 		    grid.xdef  = 1;
 		    if ( ncvars[xvarid].bounds != UNDEFID )
 		      {
-			nbdims = ncvars[ncvars[xvarid].bounds].ndims;
+			int nbdims = ncvars[ncvars[xvarid].bounds].ndims;
 			if ( nbdims == 2 || nbdims == 3 )
 			  {
 			    nvertex = ncdims[ncvars[ncvars[xvarid].bounds].dimids[nbdims-1]].len;
@@ -4800,7 +4799,7 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 		    grid.ydef  = 1;
 		    if ( ncvars[yvarid].bounds != UNDEFID )
 		      {
-			nbdims = ncvars[ncvars[yvarid].bounds].ndims;
+			int nbdims = ncvars[ncvars[yvarid].bounds].ndims;
 			if ( nbdims == 2 || nbdims == 3 )
 			  {
 			    nvertex = ncdims[ncvars[ncvars[yvarid].bounds].dimids[nbdims-1]].len;
