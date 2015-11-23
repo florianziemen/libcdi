@@ -87,7 +87,19 @@ AC_CHECK_DECLS([isnan],,,[AC_INCLUDES_DEFAULT
 
 #
 # Check for non-standard builtin
-AC_CHECK_DECLS([__builtin_ctz])
+AS_FOR([builtin_macro],[builtin],[__builtin_ctz],
+  [AS_VAR_PUSHDEF([builtin_cache],[acx_cv_have_decl_]builtin_macro)
+   AC_CACHE_CHECK([whether ]builtin_macro[ is declared],
+     [builtin_cache],
+     [AC_LINK_IFELSE([AC_LANG_PROGRAM(,[  unsigned lbz = builtin_macro][[(56U)]])],
+        [AS_VAR_SET([builtin_cache],[yes])],
+        [AS_VAR_SET([builtin_cache],[no])])])
+   AS_VAR_IF([builtin_cache],[yes],
+     [AC_DEFINE_UNQUOTED([HAVE_DECL_]AS_TR_CPP([builtin_macro]),[1])
+      break],
+     [AC_DEFINE_UNQUOTED([HAVE_DECL_]AS_TR_CPP([builtin_macro]),[0])])])
+AH_TEMPLATE([HAVE_DECL___BUILTIN_CTZ],
+  [Define to 1 if __builtin_ctz is available, 0 if not])
 
 # Check compiler version
 case "$CC" in
