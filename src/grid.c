@@ -261,7 +261,7 @@ void calc_gaussgrid(double *yvals, int ysize, double yfirst, double ylast)
 }
 
 // used also in CDO
-void gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double yinc, double *yvals)
+void gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double yinc, double *restrict yvals)
 {
   const double deleps = 0.002;
 
