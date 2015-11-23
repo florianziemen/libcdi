@@ -150,23 +150,20 @@ void srvCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
 
 void srvDefRecord(stream_t *streamptr)
 {
-  int gridID;
   int header[8];
-  int xsize, ysize;
-  int datatype;
+  Record *restrict record = streamptr->record;
+  srvrec_t *restrict srvp = (srvrec_t*) record->exsep;
+  int gridID = record->gridID;
+
   int pdis, pcat, pnum;
-  srvrec_t *srvp = (srvrec_t*) streamptr->record->exsep;
-
-  gridID = streamptr->record->gridID;
-
-  cdiDecodeParam(streamptr->record->param, &pnum, &pcat, &pdis);
+  cdiDecodeParam(record->param, &pnum, &pcat, &pdis);
   header[0] = pnum;
-  header[1] = streamptr->record->level;
-  header[2] = streamptr->record->date;
-  header[3] = streamptr->record->time;
+  header[1] = record->level;
+  header[2] = record->date;
+  header[3] = record->time;
 
-  xsize = gridInqXsize(gridID);
-  ysize = gridInqYsize(gridID);
+  int xsize = gridInqXsize(gridID),
+    ysize = gridInqYsize(gridID);
   if ( xsize == 0 || ysize == 0 )
     {
       xsize = gridInqSize(gridID);
@@ -181,7 +178,7 @@ void srvDefRecord(stream_t *streamptr)
   header[6] = 0;
   header[7] = 0;
 
-  datatype = streamptr->record->prec;
+  int datatype = record->prec;
 
   srvp->dprec = srvDefDatatype(datatype);
 
