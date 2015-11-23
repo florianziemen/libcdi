@@ -381,13 +381,13 @@ int cdiGribIterator_levelType(CdiIterator *super, int levelSelector, char **outN
   int zaxisType = ZAXIS_GENERIC;
   if(gribEditionNumber(me->gribHandle) <= 1)
     {
-      int levelType = gribGetLongDefault(me->gribHandle, "indicatorOfTypeOfLevel", 255);
+      int levelType = (int)gribGetLongDefault(me->gribHandle, "indicatorOfTypeOfLevel", 255);
       if(levelSelector && !isGrib1DualLevel(levelType)) levelType = 255;
       zaxisType = grib1ltypeToZaxisType(levelType);
     }
   else
     {
-      int levelType = gribGetLongDefault(me->gribHandle, levelSelector ? "typeOfSecondFixedSurface" : "typeOfFirstFixedSurface", 255);
+      int levelType = (int)gribGetLongDefault(me->gribHandle, levelSelector ? "typeOfSecondFixedSurface" : "typeOfFirstFixedSurface", 255);
       zaxisType = grib2ltypeToZaxisType(levelType);
     }
 
