@@ -159,19 +159,21 @@ void grid_init(grid_t *gridptr)
 }
 
 
+static void
+grid_free_components(grid_t *gridptr)
+{
+  void *p2free[] = { gridptr->mask, gridptr->mask_gme,
+                   gridptr->xvals, gridptr->yvals,
+                   gridptr->xbounds, gridptr->ybounds,
+                   gridptr->rowlon, gridptr->area,
+                   gridptr->reference, gridptr->name };
+  for (size_t i = 0; i < sizeof (p2free) / sizeof (p2free[0]); ++i)
+    if (p2free[i]) Free(p2free[i]);
+}
+
 void grid_free(grid_t *gridptr)
 {
-  if ( gridptr->mask      ) Free(gridptr->mask);
-  if ( gridptr->mask_gme  ) Free(gridptr->mask_gme);
-  if ( gridptr->xvals     ) Free(gridptr->xvals);
-  if ( gridptr->yvals     ) Free(gridptr->yvals);
-  if ( gridptr->area      ) Free(gridptr->area);
-  if ( gridptr->xbounds   ) Free(gridptr->xbounds);
-  if ( gridptr->ybounds   ) Free(gridptr->ybounds);
-  if ( gridptr->rowlon    ) Free(gridptr->rowlon);
-  if ( gridptr->reference ) Free(gridptr->reference);
-  if ( gridptr->name      ) Free(gridptr->name);
-
+  grid_free_components(gridptr);
   grid_init(gridptr);
 }
 
@@ -557,16 +559,7 @@ void gridDestroyKernel( grid_t * gridptr )
 
   id = gridptr->self;
 
-  if ( gridptr->mask      ) Free(gridptr->mask);
-  if ( gridptr->mask_gme  ) Free(gridptr->mask_gme);
-  if ( gridptr->xvals     ) Free(gridptr->xvals);
-  if ( gridptr->yvals     ) Free(gridptr->yvals);
-  if ( gridptr->area      ) Free(gridptr->area);
-  if ( gridptr->xbounds   ) Free(gridptr->xbounds);
-  if ( gridptr->ybounds   ) Free(gridptr->ybounds);
-  if ( gridptr->rowlon    ) Free(gridptr->rowlon);
-  if ( gridptr->reference ) Free(gridptr->reference);
-
+  grid_free_components(gridptr);
   Free( gridptr );
 
   reshRemove ( id, &gridOps );
