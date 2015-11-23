@@ -2,6 +2,7 @@
 #  include "config.h"
 #endif
 
+#if  defined  (HAVE_LIBGRIB_API)
 #include <limits.h>
 #include <stdio.h>
 
@@ -19,18 +20,14 @@
 #include "subtype.h"
 
 
-#if  defined  (HAVE_LIBGRIB_API)
 #  include "cgribex.h"      /* gribGetSize, gribRead, gribGetZip, GRIB1_LTYPE_99 */
 #  include "gribapi.h"
 
 #  include <grib_api.h>
-#endif
 
 extern int cdiInventoryMode;
 
-#if  defined  (HAVE_LIBGRIB_API)
 static const var_tile_t dummy_tiles = { -1, -1, -1, -1, -1, -1 };
-#endif
 
 typedef struct {
   int param;
@@ -45,7 +42,6 @@ typedef struct {
 } compvar2_t;
 
 
-#if  defined  (HAVE_LIBGRIB_API)
 static
 int gribapiGetZaxisType(long editionNumber, int grib_ltype)
 {
@@ -320,7 +316,7 @@ int calcLevel(int level_sf, long factor, long level)
 }
 
 static
-void grib2GetLevel(grib_handle *gh, int *leveltype1, int *leveltype2, int *lbounds, int *level1, 
+void grib2GetLevel(grib_handle *gh, int *leveltype1, int *leveltype2, int *lbounds, int *level1,
                    int *level2, int *level_sf, int *level_unit)
 {
   int status;
@@ -421,7 +417,6 @@ void gribapiGetString(grib_handle *gh, const char *key, char *string, size_t len
   else if ( length == 2 && memcmp(string, "~", length)       == 0 ) string[0] = 0;
 }
 
-#if  defined  (HAVE_LIBGRIB_API)
 static
 void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
                       size_t recsize, off_t position, int datatype, int comptype, const char *varname,
@@ -645,7 +640,6 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
     Message("varID = %d  param = %d  zaxistype = %d  gridID = %d  levelID = %d",
 	    varID, param, zaxistype, gridID, levelID);
 }
-#endif
 
 static compvar2_t gribapiVarSet(int param, int level1, int level2, int leveltype, 
                                 int tsteptype, char *name, var_tile_t tiles_data)
@@ -666,9 +660,7 @@ static compvar2_t gribapiVarSet(int param, int level1, int level2, int leveltype
 
   return (compVar);
 }
-#endif
 
-#ifdef HAVE_LIBGRIB_API
 static
 int gribapiVarCompare(compvar2_t compVar, record_t record, int flag)
 {
@@ -753,9 +745,7 @@ grib_handle *gribapiGetDiskRepresentation(size_t recsize, size_t *buffersize, vo
     }
   return gh;
 }
-#endif
 
-#if  defined  (HAVE_LIBGRIB_API)
 typedef enum { CHECKTIME_OK, CHECKTIME_SKIP, CHECKTIME_STOP, CHECKTIME_INCONSISTENT } checkTimeResult;
 static checkTimeResult checkTime(stream_t* streamptr, compvar2_t compVar, const DateTime* verificationTime, const DateTime* expectedVTime) {
   // First determine whether the current record exists already.
@@ -783,7 +773,6 @@ static checkTimeResult checkTime(stream_t* streamptr, compvar2_t compVar, const 
 
   return CHECKTIME_OK;
 }
-#endif
 
 #define gribWarning(text, nrecs, timestep, varname, param, level1, level2) do \
   { \
@@ -793,7 +782,6 @@ static checkTimeResult checkTime(stream_t* streamptr, compvar2_t compVar, const 
   } \
 while(0)
 
-#if  defined  (HAVE_LIBGRIB_API)
 int gribapiScanTimestep1(stream_t * streamptr)
 {
   off_t recpos = 0;
@@ -994,10 +982,8 @@ int gribapiScanTimestep1(stream_t * streamptr)
 
   return (0);
 }
-#endif
 
 
-#ifdef HAVE_LIBGRIB_API
 int gribapiScanTimestep2(stream_t * streamptr)
 {
   int rstatus = 0;
@@ -1218,10 +1204,8 @@ int gribapiScanTimestep2(stream_t * streamptr)
 
   return (rstatus);
 }
-#endif
 
 
-#if  defined  (HAVE_LIBGRIB_API)
 int gribapiScanTimestep(stream_t * streamptr)
 {
   int vrecID, recID;
@@ -1451,13 +1435,11 @@ int gribapiScanTimestep(stream_t * streamptr)
 
   return (int)streamptr->ntsteps;
 }
-#endif
 
 #ifdef gribWarning
 #undef gribWarning
 #endif
 
-#ifdef HAVE_LIBGRIB_API
 int gribapiDecode(void *gribbuffer, int gribsize, double *data, long gridsize,
 		  int unreduced, int *nmiss, double missval, int vlistID, int varID)
 {
@@ -1510,10 +1492,8 @@ int gribapiDecode(void *gribbuffer, int gribsize, double *data, long gridsize,
 
   return status;
 }
-#endif
 
 
-#if  defined  (HAVE_LIBGRIB_API)
 static
 void gribapiDefInstitut(grib_handle *gh, int vlistID, int varID)
 {
@@ -2576,11 +2556,9 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
       }
     }
 }
-#endif
 
 /* #define GRIBAPIENCODETEST 1 */
 
-#ifdef HAVE_LIBGRIB_API
 size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisID,
 		     int vdate, int vtime, int tsteptype, int numavg,
 		     long datasize, const double *data, int nmiss, void **gribbuffer, size_t *gribbuffersize,
