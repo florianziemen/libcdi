@@ -2780,20 +2780,14 @@ void gridCompress(int gridID)
 	  gridptr->xsize = (int)gridsize;
 	  gridptr->ysize = (int)gridsize;
 
-	  if ( gridptr->xvals )
-	    gridptr->xvals = (double *) Realloc(gridptr->xvals, gridsize*sizeof(double));
-
-	  if ( gridptr->yvals )
-	    gridptr->yvals = (double *) Realloc(gridptr->yvals, gridsize*sizeof(double));
-
-	  if ( gridptr->area )
-	    gridptr->area  = (double *) Realloc(gridptr->area, gridsize*sizeof(double));
-
-	  if ( gridptr->xbounds )
-	    gridptr->xbounds = (double *) Realloc(gridptr->xbounds, nv*gridsize*sizeof(double));
-
-	  if ( gridptr->ybounds )
-	    gridptr->ybounds = (double *) Realloc(gridptr->ybounds, nv*gridsize*sizeof(double));
+          double **resizeP[] = { &gridptr->xvals, &gridptr->yvals,
+                                 &gridptr->area,
+                                 &gridptr->xbounds, &gridptr->ybounds };
+          size_t newSize[] = { gridsize, gridsize, gridsize, nv*gridsize,
+                               nv*gridsize };
+          for ( size_t i = 0; i < sizeof (resizeP) / sizeof (resizeP[0]); ++i)
+            if ( *(resizeP[i]) )
+              *(resizeP[i]) = (double *)Realloc(*(resizeP[i]), newSize[i]*sizeof(double));
 
 	  Free(gridptr->mask_gme);
 	  gridptr->mask_gme = NULL;
