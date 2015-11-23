@@ -4468,14 +4468,17 @@ int varDefGrid(int vlistID, const grid_t *grid, int mode)
     for (unsigned index = 0; index < ngrids; index++ )
       {
 	gridID = vlistptr->gridIDs[index];
-	if ( gridID == UNDEFID )
-	  Error("Internal problem: undefined gridID %d!", gridID);
+	if ( gridID != UNDEFID )
+          {
+            if ( gridCompare(gridID, grid) == 0 )
+              {
+                griddefined = TRUE;
+                break;
+              }
+          }
+        else
+          Error("Internal problem: undefined gridID %d!", gridID);
 
-	if ( gridCompare(gridID, grid) == 0 )
-	  {
-	    griddefined = TRUE;
-	    break;
-	  }
       }
 
   if ( ! griddefined )
