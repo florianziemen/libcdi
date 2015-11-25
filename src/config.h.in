@@ -58,8 +58,7 @@
    don't. */
 #undef HAVE_DECL__SC_PAGE_SIZE
 
-/* Define to 1 if you have the declaration of `__builtin_ctz', and to 0 if you
-   don't. */
+/* Define to 1 if __builtin_ctz is available, 0 if not */
 #undef HAVE_DECL___BUILTIN_CTZ
 
 /* Define to 1 if you have the <dlfcn.h> header file. */

@@ -1251,19 +1251,13 @@ void cdfDefXaxis(stream_t *streamptr, int gridID, int ndims)
 
       if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
-      if ( ndims )
-        {
-          cdf_def_dim(fileID, axisname, dimlen, &dimID);
+      if ( ndims ) cdf_def_dim(fileID, axisname, dimlen, &dimID);
 
-          if ( gridInqXboundsPtr(gridID) || gridInqYboundsPtr(gridID) )
-            {
-              size_t nvertex = 2;
-              if ( nc_inq_dimid(fileID, BNDS_NAME, &nvdimID) != NC_NOERR )
-                cdf_def_dim(fileID, BNDS_NAME, nvertex, &nvdimID);
-            }
-        }
-
-      if ( gridInqXvalsPtr(gridID) )
+      int gen_bounds = FALSE;
+      int grid_is_cyclic = gridIsCircular(gridID);
+      const double *pvals = gridInqXvalsPtr(gridID);
+      double *pbounds = NULL;
+      if ( pvals )
         {
           cdf_def_var(fileID, axisname, xtype, ndims, &dimID, &ncvarid);
 
@@ -1276,7 +1270,28 @@ void cdfDefXaxis(stream_t *streamptr, int gridID, int ndims)
 
           cdf_put_att_text(fileID, ncvarid, "axis", 1, "X");
 
-          if ( gridInqXboundsPtr(gridID) && nvdimID != UNDEFID )
+          if ( gridInqXboundsPtr(gridID) )
+            pbounds = (double*) gridInqXboundsPtr(gridID);
+
+          if ( CDI_cmor_mode && grid_is_cyclic && !pbounds )
+            {
+              gen_bounds = TRUE;
+              pbounds = (double*) malloc(2*dimlen*sizeof(double));
+              for ( size_t i = 0; i < dimlen-1; ++i )
+                {
+                  pbounds[i*2+1]   = (pvals[i] + pvals[i+1])/2;
+                  pbounds[(i+1)*2] = (pvals[i] + pvals[i+1])/2;
+                }
+              pbounds[0] = (pvals[0] + pvals[dimlen-1]-360)/2;
+              pbounds[2*dimlen-1] = (pvals[dimlen-1] + pvals[0]+360)/2;
+            }
+          if ( pbounds )
+            {
+              size_t nvertex = 2;
+              if ( nc_inq_dimid(fileID, BNDS_NAME, &nvdimID) != NC_NOERR )
+                cdf_def_dim(fileID, BNDS_NAME, nvertex, &nvdimID);
+            }
+          if ( pbounds && nvdimID != UNDEFID )
             {
               strcat(axisname, "_");
               strcat(axisname, BNDS_NAME);
@@ -1297,8 +1312,9 @@ void cdfDefXaxis(stream_t *streamptr, int gridID, int ndims)
       cdf_enddef(fileID);
       streamptr->ncmode = 2;
 
-      if ( ncvarid  != UNDEFID ) cdf_put_var_double(fileID, ncvarid, gridInqXvalsPtr(gridID));
-      if ( ncbvarid != UNDEFID ) cdf_put_var_double(fileID, ncbvarid, gridInqXboundsPtr(gridID));
+      if ( ncvarid  != UNDEFID ) cdf_put_var_double(fileID, ncvarid, pvals);
+      if ( ncbvarid != UNDEFID ) cdf_put_var_double(fileID, ncbvarid, pbounds);
+      if ( gen_bounds ) Free(pbounds);
 
       if ( ndims == 0 ) streamptr->ncxvarID[gridindex] = ncvarid;
     }
@@ -1378,19 +1394,13 @@ void cdfDefYaxis(stream_t *streamptr, int gridID, int ndims)
 
       if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
-      if ( ndims )
-        {
-          cdf_def_dim(fileID, axisname, dimlen, &dimID);
+      if ( ndims ) cdf_def_dim(fileID, axisname, dimlen, &dimID);
 
-          if ( gridInqXboundsPtr(gridID) || gridInqYboundsPtr(gridID) )
-            {
-              size_t nvertex = 2;
-              if ( nc_inq_dimid(fileID, BNDS_NAME, &nvdimID) != NC_NOERR )
-                cdf_def_dim(fileID, BNDS_NAME, nvertex, &nvdimID);
-            }
-        }
-
-      if ( gridInqYvalsPtr(gridID) )
+      int gen_bounds = FALSE;
+      int grid_is_cyclic = gridIsCircular(gridID);
+      const double *pvals = gridInqYvalsPtr(gridID);
+      double *pbounds = NULL;
+      if ( pvals )
         {
           cdf_def_var(fileID, axisname, xtype, ndims, &dimID, &ncvarid);
 
@@ -1403,7 +1413,28 @@ void cdfDefYaxis(stream_t *streamptr, int gridID, int ndims)
 
           cdf_put_att_text(fileID, ncvarid, "axis", 1, "Y");
 
-          if ( gridInqYboundsPtr(gridID) && nvdimID != UNDEFID )
+          if ( gridInqYboundsPtr(gridID) )
+            pbounds = (double*) gridInqYboundsPtr(gridID);
+
+          if ( CDI_cmor_mode && grid_is_cyclic && !pbounds )
+            {
+              gen_bounds = TRUE;
+              pbounds = (double*) malloc(2*dimlen*sizeof(double));
+              for ( size_t i = 0; i < dimlen-1; ++i )
+                {
+                  pbounds[i*2+1]   = (pvals[i] + pvals[i+1])/2;
+                  pbounds[(i+1)*2] = (pvals[i] + pvals[i+1])/2;
+                }
+              pbounds[0] = (pvals[0] < 0) ? -90 : 90;
+              pbounds[2*dimlen-1] = (pvals[dimlen-1] < 0) ? -90 : 90;
+            }
+          if ( pbounds )
+            {
+              size_t nvertex = 2;
+              if ( nc_inq_dimid(fileID, BNDS_NAME, &nvdimID) != NC_NOERR )
+                cdf_def_dim(fileID, BNDS_NAME, nvertex, &nvdimID);
+            }
+          if ( pbounds && nvdimID != UNDEFID )
             {
               strcat(axisname, "_");
               strcat(axisname, BNDS_NAME);
@@ -1424,8 +1455,9 @@ void cdfDefYaxis(stream_t *streamptr, int gridID, int ndims)
       cdf_enddef(fileID);
       streamptr->ncmode = 2;
 
-      if ( ncvarid  != UNDEFID ) cdf_put_var_double(fileID, ncvarid, gridInqYvalsPtr(gridID));
-      if ( ncbvarid != UNDEFID ) cdf_put_var_double(fileID, ncbvarid, gridInqYboundsPtr(gridID));
+      if ( ncvarid  != UNDEFID ) cdf_put_var_double(fileID, ncvarid, pvals);
+      if ( ncbvarid != UNDEFID ) cdf_put_var_double(fileID, ncbvarid, pbounds);
+      if ( gen_bounds ) Free(pbounds);
 
       if ( ndims == 0 ) streamptr->ncyvarID[gridindex] = ncvarid;
     }

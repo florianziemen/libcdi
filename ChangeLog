@@ -3,6 +3,10 @@
 	* Version 1.7.1 released
         * using CGRIBEX library version 1.7.4
 
+2015-11-25  Uwe Schulzweida
+
+	* cdfDefXaxis/cdfDefXaxis: generate bounds for CDI_cmor_mode
+
 2015-11-23  Nathanael Huebbe
 
 	* replaced the vlist locked flag by two other flags
