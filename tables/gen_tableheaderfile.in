@@ -43,8 +43,8 @@ done
 #
 cat >> $OFILE <<EOF
 
-static void
-tableDefault(void)
+static
+void tableDefault(void)
 {
   int tableID, instID, modelID;
 

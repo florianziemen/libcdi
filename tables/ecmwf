@@ -61,8 +61,8 @@
  052 |  MN2T24     | Minimum 2 metre temperature              | K
  053 |  MONT       | Montgomery potential                     | m**2 s**-2
  054 |  PRES       | Pressure                                 | Pa
- 055 |  MN2T24     | Mean 2 metre temperature past 24 hours   | K
- 056 |  MN2D24     | Mean 2 metre dewpoint temperature past 24 hours | K
+ 055 |  MEAN2T24   | Mean 2 metre temperature past 24 hours   | K
+ 056 |  MEAN2D24   | Mean 2 metre dewpoint temperature past 24 hours | K
  060 |  PV         | Potential vorticity                      | K m**2 kg**-1 s**-1
  127 |  AT         | Atmospheric tide
  128 |  BV         | Budget values
