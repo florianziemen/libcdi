@@ -70,7 +70,7 @@ int grbUnzipRecord(void *gribbuffer, size_t *gribsize)
   size_t igribsize = *gribsize;
   size_t ogribsize = *gribsize;
 
-  if ( (izip = gribGetZip((long)igribsize, gribbuffer, &unzipsize)) > 0 )
+  if ( (izip = gribGetZip((long)igribsize, (unsigned char *)gribbuffer, &unzipsize)) > 0 )
     {
       zip = izip;
       if ( izip == 128 ) /* szip */
@@ -94,7 +94,7 @@ int grbUnzipRecord(void *gribbuffer, size_t *gribsize)
 
 	  unzipsize += 100; /* need 0 to 1 bytes for rounding of bds */
 
-	  ogribsize = (size_t)gribUnzip(gribbuffer, unzipsize, itmpbuffer, (long)igribsize);
+	  ogribsize = (size_t)gribUnzip((unsigned char *)gribbuffer, unzipsize, itmpbuffer, (long)igribsize);
 
 	  Free(itmpbuffer);
 

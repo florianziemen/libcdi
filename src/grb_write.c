@@ -77,7 +77,7 @@ size_t grbSzip(int filetype, void *gribbuffer, size_t gribbuffersize)
   size_t nbytes = 0;
   if ( filetype == FILETYPE_GRB )
     {
-      nbytes = (size_t)gribZip(gribbuffer, (long) gribbuffersize, buffer, (long) buffersize);
+      nbytes = (size_t)gribZip((unsigned char *)gribbuffer, (long) gribbuffersize, (unsigned char *)buffer, (long) buffersize);
     }
   else
     {
