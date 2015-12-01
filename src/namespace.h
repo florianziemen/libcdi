@@ -55,7 +55,7 @@ union namespaceSwitchValue
 void             namespaceCleanup      ( void );
 int              namespaceGetNumber    ( void );
 //void             namespaceSetActive(int namespaceID);
-int              namespaceGetActive    ( void );
+//int              namespaceGetActive    ( void );
 int              namespaceIdxEncode    ( namespaceTuple_t );
 int              namespaceIdxEncode2   ( int, int );
 namespaceTuple_t namespaceResHDecode   ( int );
