@@ -413,7 +413,12 @@ int cdiStreamOpenDefaultDelegate(const char *filename, char filemode,
     case FILETYPE_GRB:
     case FILETYPE_GRB2:
       {
+#ifndef __cplusplus
         fileID = gribOpen(filename, (char [2]){filemode, 0});
+#else
+        char temp[2] = { filemode, 0 };
+        fileID = gribOpen(filename, temp);
+#endif
         if ( fileID < 0 ) fileID = CDI_ESYSTEM;
         if (recordBufIsToBeCreated)
           {
@@ -426,7 +431,12 @@ int cdiStreamOpenDefaultDelegate(const char *filename, char filemode,
 #if  defined  (HAVE_LIBSERVICE)
     case FILETYPE_SRV:
       {
+#ifndef __cplusplus
         fileID = fileOpen(filename, (char [2]){filemode, 0});
+#else
+        char temp[2] = { filemode, 0 };
+        fileID = fileOpen(filename, temp);
+#endif
         if ( fileID < 0 ) fileID = CDI_ESYSTEM;
         if (recordBufIsToBeCreated)
           {
@@ -440,7 +450,13 @@ int cdiStreamOpenDefaultDelegate(const char *filename, char filemode,
 #if  defined  (HAVE_LIBEXTRA)
     case FILETYPE_EXT:
       {
+#ifndef __cplusplus
         fileID = fileOpen(filename, (char [2]){filemode, 0});
+#else
+        char temp[2] = { filemode, 0 };
+        fileID = fileOpen(filename, temp);
+#endif
+
         if ( fileID < 0 ) fileID = CDI_ESYSTEM;
         if (recordBufIsToBeCreated)
           {
@@ -454,7 +470,12 @@ int cdiStreamOpenDefaultDelegate(const char *filename, char filemode,
 #if  defined  (HAVE_LIBIEG)
     case FILETYPE_IEG:
       {
+#ifndef __cplusplus
         fileID = fileOpen(filename, (char [2]){filemode, 0});
+#else
+        char temp[2] = { filemode, 0 };
+        fileID = fileOpen(filename, temp);
+#endif
         if ( fileID < 0 ) fileID = CDI_ESYSTEM;
         if (recordBufIsToBeCreated)
           {
@@ -468,18 +489,33 @@ int cdiStreamOpenDefaultDelegate(const char *filename, char filemode,
 #if  defined  (HAVE_LIBNETCDF)
     case FILETYPE_NC:
       {
+#ifndef __cplusplus
         fileID = cdfOpen(filename, (char [2]){filemode, 0});
+#else
+        char temp[2] = { filemode, 0 };
+        fileID = cdfOpen(filename, temp);
+#endif
         break;
       }
     case FILETYPE_NC2:
       {
+#ifndef __cplusplus
         fileID = cdfOpen64(filename, (char [2]){filemode, 0});
+#else
+        char temp[2] = { filemode, 0 };
+        fileID = cdfOpen64(filename, temp);
+#endif
         break;
       }
     case FILETYPE_NC4:
     case FILETYPE_NC4C:
       {
+#ifndef __cplusplus
         fileID = cdf4Open(filename, (char [2]){filemode, 0}, &filetype);
+#else
+        char temp[2] = { filemode, 0 };
+        fileID = cdf4Open(filename, temp, &filetype);
+#endif
         break;
       }
 #endif
