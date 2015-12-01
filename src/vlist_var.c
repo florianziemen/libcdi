@@ -2028,6 +2028,7 @@ int vlistVarCompare(vlist_t *a, int varIDA, vlist_t *b, int varIDB)
     | FCMPFLT(validrange[0]) | FCMPFLT(validrange[1]);
 #undef FCMP
 #undef FCMPFLT
+#undef FCMPSTR
 #undef FCMP2
   if ((diff |= ((pva->levinfo == NULL) ^ (pvb->levinfo == NULL))))
     return 1;
