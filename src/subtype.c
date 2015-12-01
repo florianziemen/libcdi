@@ -785,7 +785,7 @@ int subtypeInqAttribute(int subtypeID, int index, const char* key, int* outValue
 {
   //Validate input params.
   if(subtypeID == CDI_UNDEFID) xabort("CDI_UNDEFID was passed to %s() as a subtypeID. Please check the origin of that ID.", __func__);
-  subtype_t *subtype_ptr = reshGetVal(subtypeID, &subtypeOps);
+  subtype_t *subtype_ptr = (subtype_t *)reshGetVal(subtypeID, &subtypeOps);
   if(!subtype_ptr) xabort("Internal error: subtypeID %d resolved to NULL.", subtypeID);
 
   if((unsigned)index >= (unsigned)subtype_ptr->nentries)
@@ -793,7 +793,12 @@ int subtypeInqAttribute(int subtypeID, int index, const char* key, int* outValue
       xabort("index argument of %s() is out of range. Expected 0 <= index < %d, but got index = %d.", __func__, subtype_ptr->nentries, index);
     }
 
+#ifndef __cplusplus
   if(!outValue) outValue = &(int){0};
+#else
+  int dummy = 0;
+  if(!outValue) outValue = &dummy;
+#endif
 
   if(!key) return CDI_EINVAL;
   int iKey = attribute_to_index(key);
