@@ -46,7 +46,13 @@ static const uint32_t HOST_ENDIANNESS_temp[1] = { UINT32_C(0x00030201) };
 
 #include "printinfo.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 void cdiDefTableID(int tableID);
+#if defined (__cplusplus)
+}
+#endif
 
 int getopt(int argc, char *const argv[], const char *optstring);
 
