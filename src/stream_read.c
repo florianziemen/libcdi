@@ -133,7 +133,7 @@ void streamReadVarF(int streamID, int varID, float *data, int *nmiss)
       size_t elementCount = (size_t) gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
       elementCount *= (size_t) zaxisInqSize(vlistInqVarZaxis(streamInqVlist(streamID), varID));
       double *conversionBuffer = (double *) Malloc(elementCount*sizeof(*conversionBuffer));
-      streamReadVar(streamID, varID, (void *) conversionBuffer, nmiss);
+      streamReadVar(streamID, varID, conversionBuffer, nmiss);
       for ( size_t i = elementCount; i--; ) data[i] = (float) conversionBuffer[i];
       Free(conversionBuffer);
     }
@@ -266,7 +266,7 @@ void streamReadVarSliceF(int streamID, int varID, int levelID, float *data, int 
       // we fall back to double precision reading, converting the data on the fly.
       size_t elementCount = (size_t) gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
       double *conversionBuffer = (double *) Malloc(elementCount*sizeof(*conversionBuffer));
-      streamReadVarSlice(streamID, varID, levelID, (void *) conversionBuffer, nmiss);
+      streamReadVarSlice(streamID, varID, levelID, conversionBuffer, nmiss);
       for ( size_t i = elementCount; i--; ) data[i] = (float) conversionBuffer[i];
       Free(conversionBuffer);
     }
@@ -297,19 +297,19 @@ int stream_read_record(int streamID, int memtype, void *data, int *nmiss)
 #if  defined  (HAVE_LIBSERVICE)
     case FILETYPE_SRV:
       if ( memtype == MEMTYPE_FLOAT ) return 1;
-      srvReadRecord(streamptr, data, nmiss);
+      srvReadRecord(streamptr, (double *)data, nmiss);
       break;
 #endif
 #if  defined  (HAVE_LIBEXTRA)
     case FILETYPE_EXT:
       if ( memtype == MEMTYPE_FLOAT ) return 1;
-      extReadRecord(streamptr, data, nmiss);
+      extReadRecord(streamptr, (double *)data, nmiss);
       break;
 #endif
 #if  defined  (HAVE_LIBIEG)
     case FILETYPE_IEG:
       if ( memtype == MEMTYPE_FLOAT ) return 1;
-      iegReadRecord(streamptr, data, nmiss);
+      iegReadRecord(streamptr, (double *)data, nmiss);
       break;
 #endif
 #if  defined  (HAVE_LIBNETCDF)
@@ -350,7 +350,7 @@ void streamReadRecordF(int streamID, float *data, int *nmiss)
       int varID  = streamptr->tsteps[tsID].records[recID].varID;
       size_t elementCount = (size_t) gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
       double *conversionBuffer = (double *) Malloc(elementCount*sizeof(*conversionBuffer));
-      streamReadRecord(streamID, (void *) conversionBuffer, nmiss);
+      streamReadRecord(streamID, conversionBuffer, nmiss);
       for ( size_t i = elementCount; i--; ) data[i] = (float) conversionBuffer[i];
       Free(conversionBuffer);
     }

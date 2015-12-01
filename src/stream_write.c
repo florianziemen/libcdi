@@ -269,7 +269,7 @@ void streamWriteVarSliceF(int streamID, int varID, int levelID, const float *dat
       size_t elementCount = (size_t) gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
       double *conversionBuffer = (double *) Malloc(elementCount*sizeof(*conversionBuffer));
       for ( size_t i = elementCount; i--; ) conversionBuffer[i] = (double) data[i];
-      streamWriteVarSlice(streamID, varID, levelID, (const void *) conversionBuffer, nmiss);
+      streamWriteVarSlice(streamID, varID, levelID, conversionBuffer, nmiss);
       Free(conversionBuffer);
     }
 }
@@ -424,7 +424,7 @@ void streamWriteRecordF(int streamID, const float *data, int nmiss)
       size_t elementCount = (size_t) gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
       double *conversionBuffer = (double *) Malloc(elementCount*sizeof(*conversionBuffer));
       for ( size_t i = elementCount; i--; ) conversionBuffer[i] = (double) data[i];
-      streamWriteRecord(streamID, (const void *) conversionBuffer, nmiss);
+      streamWriteRecord(streamID, conversionBuffer, nmiss);
       Free(conversionBuffer);
     }
 }
