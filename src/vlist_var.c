@@ -637,7 +637,7 @@ The function @func{vlistInqVarStdname} returns the standard name of a variable i
 otherwise the result is an empty string.
 
 @Result
-@func{vlistInqVarName} returns the standard name of the variable to the parameter stdname.
+@func{vlistInqVarStdname} returns the standard name of the variable to the parameter stdname.
 
 @EndFunction
 */
