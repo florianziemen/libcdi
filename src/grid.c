@@ -3089,10 +3089,11 @@ gridInqXBoundsSerial(grid_t *gridptr, double *xbounds)
     || gridptr->type == GRID_UNSTRUCTURED;
   size_t size = nvertex * (size_t)(irregular ? gridptr->size : gridptr->xsize);
 
-  if ( gridptr->xbounds )
+  const double *gridptr_xbounds = gridptr->vtable->inqXBoundsPtr(gridptr);
+  if ( gridptr_xbounds )
     {
       if ( size && xbounds )
-        memcpy(xbounds, gridptr->xbounds, size * sizeof (double));
+        memcpy(xbounds, gridptr_xbounds, size * sizeof (double));
     }
   else
     size = 0;
@@ -3175,10 +3176,11 @@ gridInqYBoundsSerial(grid_t *gridptr, double *ybounds)
     || gridptr->type == GRID_UNSTRUCTURED;
   size_t size = nvertex * (size_t)(irregular ? gridptr->size : gridptr->ysize);
 
-  if ( gridptr->ybounds )
+  const double *gridptr_ybounds = gridptr->vtable->inqYBoundsPtr(gridptr);
+  if ( gridptr_ybounds )
     {
       if ( size && ybounds )
-        memcpy(ybounds, gridptr->ybounds, size * sizeof (double));
+        memcpy(ybounds, gridptr_ybounds, size * sizeof (double));
     }
   else
     size = 0;
