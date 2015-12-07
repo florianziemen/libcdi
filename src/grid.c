@@ -2576,8 +2576,7 @@ static void gridComplete(grid_t *grid)
 	    double *xvals
               = (double *) Malloc((size_t)grid->xsize * sizeof (double));
 	    gridGenXvals(grid->xsize, grid->xfirst, grid->xlast, grid->xinc, xvals);
-	    gridDefXvals(gridID, xvals);
-	    Free(xvals);
+	    grid->xvals = xvals;
 	    /*
 	    gridDefXinc(gridID, grid->xinc);
 	    */
@@ -2590,8 +2589,7 @@ static void gridComplete(grid_t *grid)
 	    double *yvals
               = (double *) Malloc((size_t)grid->ysize * sizeof (double));
 	    gridGenYvals(gridtype, grid->ysize, grid->yfirst, grid->ylast, grid->yinc, yvals);
-	    gridDefYvals(gridID, yvals);
-	    Free(yvals);
+	    grid->yvals = yvals;
 	    /*
 	    gridDefYinc(gridID, grid->yinc);
 	    */
@@ -2677,8 +2675,7 @@ static void gridComplete(grid_t *grid)
 	    double *yvals
               = (double *) Malloc((size_t)grid->ysize * sizeof (double));
 	    gridGenYvals(gridtype, grid->ysize, grid->yfirst, grid->ylast, grid->yinc, yvals);
-	    gridDefYvals(gridID, yvals);
-	    Free(yvals);
+            grid->yvals = yvals;
 	    /*
 	    gridDefYinc(gridID, grid->yinc);
 	    */
