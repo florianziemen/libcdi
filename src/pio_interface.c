@@ -470,8 +470,6 @@ static void cdiPioFileWritingInit(const struct cdiPioConf *conf);
 MPI_Comm
 cdiPioInit(MPI_Comm commGlob, int confResH, int *pioNamespace)
 {
-  int sizeGlob;
-
   namespaceSwitchSet(NSSWITCH_ABORT, NSSW_FUNC(cdiAbortC_MPI));
   namespaceSwitchSet(NSSWITCH_WARNING, NSSW_FUNC(cdiPioWarning));
 
@@ -489,7 +487,7 @@ cdiPioInit(MPI_Comm commGlob, int confResH, int *pioNamespace)
   if ((xtInitByCDI = (!xt_initialized() || xt_finalized())))
     xt_initialize(commGlob);
   int nProcsIO = cdiPioCommInit(commGlob, IOMode, conf->clientServerRole);
-  sizeGlob = commInqSizeGlob ();
+  int sizeGlob = commInqSizeGlob ();
 
 
   if (((IOMode != PIO_NONE && (nProcsIO <= 0 || nProcsIO > sizeGlob - 1)))
@@ -500,7 +498,7 @@ cdiPioInit(MPI_Comm commGlob, int confResH, int *pioNamespace)
   cdiPIOpartInflate_ = conf->partInflate;
 
   // JUST FOR TEST CASES WITH ONLY ONE MPI TASK
-  if ( commInqSizeGlob () == 1 )
+  if ( sizeGlob == 1 )
     {
       pioNamespace_ = *pioNamespace = namespaceNew();
       return commInqCommGlob ();
