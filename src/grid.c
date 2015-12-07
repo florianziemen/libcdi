@@ -2824,17 +2824,17 @@ int gridGenerate(const grid_t *grid)
   gridptr->ni = grid->ni;
   gridptr->ni2 = grid->ni2;
   gridptr->ni3 = grid->ni3;
-  if ( grid->xname[0]     )
+  if ( grid->xname[0] )
     memcpy(gridptr->xname, grid->xname, CDI_MAX_NAME);
-  if ( grid->yname[0]     )
+  if ( grid->yname[0] )
     memcpy(gridptr->yname, grid->yname, CDI_MAX_NAME);
   if ( grid->xlongname[0] )
     memcpy(gridptr->xlongname, grid->xlongname, CDI_MAX_NAME);
-  if ( grid->ylongname[0]     )
+  if ( grid->ylongname[0] )
     memcpy(gridptr->ylongname, grid->ylongname, CDI_MAX_NAME);
-  if ( grid->xunits[0]     )
+  if ( grid->xunits[0] )
     memcpy(gridptr->xunits, grid->xunits, CDI_MAX_NAME);
-  if ( grid->yunits[0]     )
+  if ( grid->yunits[0] )
     memcpy(gridptr->yunits, grid->yunits, CDI_MAX_NAME);
   gridComplete(gridptr);
   return (gridID);
