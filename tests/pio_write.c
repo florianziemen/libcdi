@@ -338,9 +338,9 @@ int main(int argc, char *argv[])
 
 #ifdef USE_MPI
     }
+  pioFinalize ();
   namespaceSetActive(initNamespace);
   cdiPioConfDestroy(pioConfHandle);
-  pioFinalize ();
   xt_finalize();
   MPI_Finalize ();
 #endif
