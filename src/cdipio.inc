@@ -195,3 +195,15 @@
 !                                    (INTEGER         confResH)
       EXTERNAL        cdiPioConfGetStripeConversion
 
+      INTEGER         cdiPioDistGridCreate
+!                                    (INTEGER         gridtype,
+!                                     INTEGER         size,
+!                                     INTEGER         xsize,
+!                                     INTEGER         ysize,
+!                                     INTEGER         nvertex,
+!                                     INTEGER         xy_decomposition_optional(2,*),
+!                                     TYPE(XT_IDXLIST)partDesc2D,
+!                                     TYPE(XT_IDXLIST)partDescX,
+!                                     TYPE(XT_IDXLIST)partDescY)
+      EXTERNAL        cdiPioDistGridCreate
+

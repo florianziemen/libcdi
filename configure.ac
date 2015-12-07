@@ -251,6 +251,24 @@ main(int argc, char **argv)
    PKG_CHECK_MODULES([YAXT],[yaxt],
      [AC_DEFINE([HAVE_YAXT],,[yaxt library is available])],
      [AC_MSG_FAILURE([Required yaxt library unavailable.])])
+   dnl parallel netCDF support still requires ScalES-PPM and YAXT to
+   dnl re-arrange the data when running with more than one collector
+   PKG_CHECK_MODULES([PPM_CORE],[scales-ppm-core],
+     [enable_ppm=yes
+      AC_DEFINE([HAVE_PPM_CORE],,
+        [ScalES PPM C core library is available])
+      saved_CPPFLAGS=$CPPFLAGS
+      CPPFLAGS="$CPPFLAGS $PPM_CORE_CFLAGS"
+      AC_CHECK_HEADERS(
+        [ppm/dist_array.h],
+        [HAVE_PPM_DIST_ARRAY=yes],,
+        [AC_INCLUDES_DEFAULT])
+      AC_SUBST([HAVE_PPM_DIST_ARRAY])
+      AM_SUBST_NOTMAKE([HAVE_PPM_DIST_ARRAY])
+      CPPFLAGS=$saved_CPPFLAGS
+     ],
+     [enable_ppm=no])
+
    AS_IF([test x"$ENABLE_NC4" = xyes],
      [AC_CHECK_HEADERS([netcdf_par.h],
         [AC_CHECK_DECL([MPI_Bcast],
@@ -263,14 +281,6 @@ main(int argc, char **argv)
            [AC_MSG_WARN([The supplied netCDF library does not support MPI parallel invocations])],
            [AC_INCLUDES_DEFAULT
 @%:@include <netcdf.h>])], [AC_INCLUDES_DEFAULT])
-      dnl parallel netCDF support still requires ScalES-PPM and YAXT to
-      dnl re-arrange the data when running with more than one collector
-      PKG_CHECK_MODULES([PPM_CORE],[scales-ppm-core],
-        [enable_ppm=yes
-         AC_DEFINE([HAVE_PPM_CORE],,
-           [ScalES PPM C core library is available])
-        ],
-        [enable_ppm=no])
       dnl if not both scales-ppm and yaxt are available, netcdf can only be
       dnl used in serial mode
       AS_IF([test x$enable_ppm != xyes],
