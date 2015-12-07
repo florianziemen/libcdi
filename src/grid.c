@@ -1422,11 +1422,13 @@ gridInqXValsSerial(grid_t *gridptr, double *xvals)
   if ( CDI_Debug && size == 0 )
     Warning("size undefined for gridID = %d", gridptr->self);
 
-  const double *gridptr_xvals = gridptr->vtable->inqXValsPtr(gridptr);
-  if (gridptr_xvals)
+  if ( gridptr->xvals )
     {
       if ( size && xvals )
-        memcpy(xvals, gridptr_xvals, (size_t)size * sizeof (double));
+        {
+          const double *gridptr_xvals = gridptr->vtable->inqXValsPtr(gridptr);
+          memcpy(xvals, gridptr_xvals, (size_t)size * sizeof (double));
+        }
     }
   else
     size = 0;
@@ -1518,7 +1520,10 @@ gridInqYValsSerial(grid_t *gridptr, double *yvals)
   if ( gridptr->yvals )
     {
       if ( size && yvals )
-        memcpy(yvals, gridptr->yvals, (size_t)size * sizeof (double));
+        {
+          const double *gridptr_yvals = gridptr->vtable->inqYValsPtr(gridptr);
+          memcpy(yvals, gridptr_yvals, (size_t)size * sizeof (double));
+        }
     }
   else
     size = 0;
