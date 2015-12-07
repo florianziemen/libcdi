@@ -2633,12 +2633,6 @@ static void gridComplete(grid_t *grid)
                   gridDefNumber(gridID, number);
                   gridDefPosition(gridID, position);
                 }
-              if ( grid->reference )
-                {
-                  const char *reference = grid->reference;
-                  grid->reference = NULL;
-                  gridDefReference(gridID, reference);
-                }
             }
             break;
           case GRID_PROJECTION:
@@ -2796,7 +2790,8 @@ int gridGenerate(const grid_t *grid)
   gridptr->number = grid->number;
   gridptr->position = grid->position;
   memcpy(gridptr->uuid, grid->uuid, CDI_UUID_SIZE);
-  gridptr->reference = grid->reference;
+  if ( gridtype == GRID_UNSTRUCTURED && grid->reference )
+    gridDefReference(gridID, grid->reference);
   gridptr->name = grid->name;
   gridptr->rowlon = grid->rowlon;
   gridptr->trunc = grid->trunc;
