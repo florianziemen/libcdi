@@ -4468,6 +4468,12 @@ struct cdfLazyGrid
   struct {
     int datasetNCId, varNCId;
   } cellAreaGet;
+  struct xyValGet {
+    double scalefactor, addoffset;
+    size_t start[3], count[3], size, dimsize;
+    int datasetNCId, varNCId;
+    short ndims;
+  } xValsGet, yValsGet;
 };
 
 static void cdfLazyGridDestroy(struct cdfLazyGrid *lazyGrid)
@@ -4475,6 +4481,10 @@ static void cdfLazyGridDestroy(struct cdfLazyGrid *lazyGrid)
   lazyGrid->base.extraData = NULL;
   if (lazyGrid->base.area == cdfPendingLoad)
     lazyGrid->base.area = NULL;
+  if (lazyGrid->base.xvals == cdfPendingLoad)
+    lazyGrid->base.xvals = NULL;
+  if (lazyGrid->base.yvals == cdfPendingLoad)
+    lazyGrid->base.yvals = NULL;
 }
 
 static void cdfLazyGridDelete(grid_t *grid)
@@ -4514,6 +4524,99 @@ cdfLazyGridInqArea(grid_t *grid, double *area)
   lazyGrid->baseVtable->inqArea(grid, area);
 }
 
+
+static void
+cdfLazyLoadXYVals(struct xyValGet *valsGet, double **valsp)
+{
+  double *grid_vals
+    = (double *)Malloc(valsGet->size * sizeof (double));
+  *valsp = grid_vals;
+  if ( valsGet->ndims == 3 )
+    cdf_get_vara_double(valsGet->datasetNCId, valsGet->varNCId,
+                        valsGet->start, valsGet->count, grid_vals);
+  else
+    cdf_get_var_double(valsGet->datasetNCId, valsGet->varNCId, grid_vals);
+  scale_add(valsGet->size, grid_vals, valsGet->addoffset, valsGet->scalefactor);
+}
+
+
+static const double *
+cdfLazyGridInqXValsPtr(grid_t *grid)
+{
+  struct cdfLazyGrid *lazyGrid = (struct cdfLazyGrid *)grid;
+  if (grid->xvals == cdfPendingLoad)
+    cdfLazyLoadXYVals(&lazyGrid->xValsGet, &grid->xvals);
+  return lazyGrid->baseVtable->inqXValsPtr(grid);
+}
+
+static const double *
+cdfLazyGridInqYValsPtr(grid_t *grid)
+{
+  struct cdfLazyGrid *lazyGrid = (struct cdfLazyGrid *)grid;
+  if (grid->yvals == cdfPendingLoad)
+    cdfLazyLoadXYVals(&lazyGrid->yValsGet, &grid->yvals);
+  return lazyGrid->baseVtable->inqYValsPtr(grid);
+}
+
+static double
+cdfLazyGridInqXYVal(grid_t *grid, size_t index,
+                    const struct xyValGet *valsGet, double *vals,
+                    const double *(*inqValsPtr)(grid_t *gridptr))
+{
+  size_t size = valsGet->size;
+  double v;
+  if ( vals == cdfPendingLoad )
+    {
+      /* prevent full load if only first/last values get inspected */
+      if ( index == 0 || index == size - 1 )
+        {
+          size_t indexND[3];
+          if ( valsGet->ndims == 3 )
+            {
+              indexND[0] = 0;
+              indexND[1] = index / valsGet->count[2];
+              indexND[2] = index % valsGet->count[2];
+            }
+          else if ( valsGet->ndims == 2)
+            {
+              indexND[0] = index / (size_t)grid->xsize;
+              indexND[1] = index % (size_t)grid->xsize;
+            }
+          else
+            indexND[0] = index;
+          cdf_get_var1_double(valsGet->datasetNCId, valsGet->varNCId,
+                              indexND, &v);
+        }
+      else
+        {
+          const double *grid_vals = inqValsPtr(grid);
+          v = grid_vals[index];
+        }
+    }
+  else if ( vals )
+    v = vals[index];
+  else
+    v = 0.0;
+  return v;
+}
+
+static double
+cdfLazyGridInqXVal(grid_t *grid, int index)
+{
+  struct cdfLazyGrid *lazyGrid = (struct cdfLazyGrid *)grid;
+  return cdfLazyGridInqXYVal(grid, (size_t)index, &lazyGrid->xValsGet,
+                             grid->xvals, grid->vtable->inqXValsPtr);
+}
+
+static double
+cdfLazyGridInqYVal(grid_t *grid, int index)
+{
+  struct cdfLazyGrid *lazyGrid = (struct cdfLazyGrid *)grid;
+  return cdfLazyGridInqXYVal(grid, (size_t)index, &lazyGrid->yValsGet,
+                             grid->yvals, grid->vtable->inqYValsPtr);
+}
+
+
 static void
 cdfLazyGridInitOnce(void)
 {
@@ -4521,6 +4624,10 @@ cdfLazyGridInitOnce(void)
   cdfLazyGridVtable.destroy = cdfLazyGridDelete;
   cdfLazyGridVtable.inqAreaPtr = cdfLazyGridInqAreaPtr;
   cdfLazyGridVtable.inqArea = cdfLazyGridInqArea;
+  cdfLazyGridVtable.inqXValsPtr = cdfLazyGridInqXValsPtr;
+  cdfLazyGridVtable.inqYValsPtr = cdfLazyGridInqYValsPtr;
+  cdfLazyGridVtable.inqXVal = cdfLazyGridInqXVal;
+  cdfLazyGridVtable.inqYVal = cdfLazyGridInqYVal;
   /* create inaccessible memory area, if possible, this serves as
    * dummy value for pointers to data not yet loaded */
 #ifdef HAVE_MMAP
@@ -4603,7 +4710,7 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 	  int nxdims = 0, nydims = 0;
           size_t size = 0, np = 0;
           size_t xsize = 0, ysize = 0;
-	  double xinc = 0, yinc = 0;
+	  double yinc = 0;
           struct addIffNewRes projAdded = { .Id = CDI_UNDEFID, .isNew = 0 },
             gridAdded  = { .Id = CDI_UNDEFID, .isNew = 0 };
 
@@ -4790,14 +4897,17 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
                     }
 
 		  if ( ncvars[xvarid].xtype == NC_FLOAT ) grid->prec = DATATYPE_FLT32;
-		  grid->xvals = (double *) Malloc(size*sizeof(double));
-
-		  if ( ltgrid )
-		    cdf_get_vara_double(ncvars[xvarid].ncid, xvarid, start, count, grid->xvals);
-		  else
-		    cdf_get_var_double(ncvars[xvarid].ncid, xvarid, grid->xvals);
-
-                  scale_add(size, grid->xvals, ncvars[xvarid].addoffset, ncvars[xvarid].scalefactor);
+                  lazyGrid->xValsGet = (struct xyValGet){
+                    .scalefactor = ncvars[xvarid].scalefactor,
+                    .addoffset = ncvars[xvarid].addoffset,
+                    .start = { start[0], start[1], start[2] },
+                    .count = { count[0], count[1], count[2] },
+                    .size = size,
+                    .datasetNCId = ncvars[xvarid].ncid,
+                    .varNCId = xvarid,
+                    .ndims = (short)ndims,
+                  };
+                  grid->xvals = cdfPendingLoad;
 
 		  strcpy(grid->xname, ncvars[xvarid].name);
 		  strcpy(grid->xlongname, ncvars[xvarid].longname);
@@ -4808,14 +4918,6 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 		    if ( grid->xname[len-2] == '_' && isdigit((int) grid->xname[len-1]) )
 		      grid->xname[len-2] = 0;
 		  */
-		  if ( islon && xsize > 1 )
-		    {
-		      xinc = fabs(grid->xvals[0] - grid->xvals[1]);
-		      for ( i = 2; i < (int) xsize; i++ )
-			if ( (fabs(grid->xvals[i-1] - grid->xvals[i]) - xinc) > (xinc/1000) ) break;
-
-		      if ( i < (int) xsize ) xinc = 0;
-		    }
 		}
 
 	      if ( yvarid != UNDEFID )
@@ -4867,32 +4969,53 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
                     }
 
 		  if ( ncvars[yvarid].xtype == NC_FLOAT ) grid->prec = DATATYPE_FLT32;
-		  grid->yvals = (double *) Malloc(size*sizeof(double));
+                  /* see below for when it's impossible to operate
+                   * without y values */
+                  if ( (ncvars[ncvarid].gridtype == UNDEFID ||
+                        ncvars[ncvarid].gridtype == GRID_GENERIC)
+                       && islat && (islon || xsize == 0) )
+                    {
+                      grid->yvals = (double *) Malloc(size*sizeof(double));
 
-		  if ( ltgrid )
-		    cdf_get_vara_double(ncvars[yvarid].ncid, yvarid, start, count, grid->yvals);
-		  else
-		    cdf_get_var_double(ncvars[yvarid].ncid, yvarid, grid->yvals);
+                      if ( ltgrid )
+                        cdf_get_vara_double(ncvars[yvarid].ncid, yvarid, start, count, grid->yvals);
+                      else
+                        cdf_get_var_double(ncvars[yvarid].ncid, yvarid, grid->yvals);
 
-                  scale_add(size, grid->yvals, ncvars[yvarid].addoffset, ncvars[yvarid].scalefactor);
+                      scale_add(size, grid->yvals, ncvars[yvarid].addoffset, ncvars[yvarid].scalefactor);
 
-		  strcpy(grid->yname, ncvars[yvarid].name);
-		  strcpy(grid->ylongname, ncvars[yvarid].longname);
-		  strcpy(grid->yunits, ncvars[yvarid].units);
-		  /* don't change the name !!! */
-		  /*
-		  if ( (len = strlen(grid->yname)) > 2 )
-		    if ( grid->yname[len-2] == '_' && isdigit((int) grid->yname[len-1]) )
-		      grid->yname[len-2] = 0;
-		  */
-		  if ( islon && (int) ysize > 1 )
-		    {
-		      yinc = fabs(grid->yvals[0] - grid->yvals[1]);
-		      for ( i = 2; i < (int) ysize; i++ )
-			if ( (fabs(grid->yvals[i-1] - grid->yvals[i]) - yinc) > (yinc/1000) ) break;
+                      /* don't change the name !!! */
+                      /*
+                        if ( (len = strlen(grid->yname)) > 2 )
+                        if ( grid->yname[len-2] == '_' && isdigit((int) grid->yname[len-1]) )
+                        grid->yname[len-2] = 0;
+                      */
+                      if ( islon && (int) ysize > 1 )
+                        {
+                          yinc = fabs(grid->yvals[0] - grid->yvals[1]);
+                          for ( i = 2; i < (int) ysize; i++ )
+                            if ( (fabs(grid->yvals[i-1] - grid->yvals[i]) - yinc) > (yinc/1000) ) break;
 
-		      if ( i < (int) ysize ) yinc = 0;
-		    }
+                          if ( i < (int) ysize ) yinc = 0;
+                        }
+                    }
+                  else
+                    {
+                      lazyGrid->xValsGet = (struct xyValGet){
+                        .scalefactor = ncvars[yvarid].scalefactor,
+                        .addoffset = ncvars[yvarid].addoffset,
+                        .start = { start[0], start[1], start[2] },
+                        .count = { count[0], count[1], count[2] },
+                        .size = size,
+                        .datasetNCId = ncvars[yvarid].ncid,
+                        .varNCId = yvarid,
+                        .ndims = (short)ndims,
+                      };
+                      grid->yvals = cdfPendingLoad;
+                    }
+                  strcpy(grid->yname, ncvars[yvarid].name);
+                  strcpy(grid->ylongname, ncvars[yvarid].longname);
+                  strcpy(grid->yunits, ncvars[yvarid].units);
 		}
 
 	      if      ( (int) ysize == 0 ) size = xsize;
