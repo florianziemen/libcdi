@@ -27,6 +27,7 @@ void SysError_(const char *caller, const char *fmt, ...)
 void SysError_(const char *caller, const char *fmt, ...)
 {
   va_list args;
+  int saved_errno = errno;
 
   va_start(args, fmt);
 
@@ -37,8 +38,11 @@ void SysError_(const char *caller, const char *fmt, ...)
 
   va_end(args);
 
-  if ( errno )
-    perror("System error message ");
+  if ( saved_errno )
+    {
+      errno = saved_errno;
+      perror("System error message");
+    }
 
   exit(EXIT_FAILURE);
 }

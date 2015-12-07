@@ -78,8 +78,6 @@ static const resOps gridOps = {
   gridTxCode
 };
 
-static const struct gridVirtTable serialGridVtable;
-
 static int  GRID_Debug = 0;   /* If set to 1, debugging */
 
 grid_t *gridID2Ptr(int gridID)
@@ -163,7 +161,7 @@ void grid_init(grid_t *gridptr)
   gridptr->ystdname  = NULL;
   memset(gridptr->uuid, 0, CDI_UUID_SIZE);
   gridptr->name         = NULL;
-  gridptr->vtable       = &serialGridVtable;
+  gridptr->vtable       = &cdiGridVtable;
   gridptr->extraData    = NULL;
 }
 
@@ -4697,7 +4695,7 @@ int varDefGrid(int vlistID, const grid_t *grid, int mode)
   return (gridID);
 }
 
-static const struct gridVirtTable serialGridVtable
+const struct gridVirtTable cdiGridVtable
   = {
   .destroy = gridDestroyKernel,
   .duplicateData = gridDuplicateData,
