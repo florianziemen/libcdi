@@ -4725,7 +4725,6 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
   int ltwarn = TRUE;
   size_t attlen;
   char attname[CDI_MAX_NAME];
-  double datt;
   struct cdfLazyGrid *restrict lazyGrid = NULL, *restrict lazyProj = NULL;
 #define grid (&lazyGrid->base)
 #define proj (&lazyProj->base)
@@ -5218,6 +5217,7 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 		    }
 		  else if ( strcmp(attname, "earth_radius") == 0 )
 		    {
+                      double datt;
 		      cdfGetAttDouble(ncvars[ncvarid].ncid, ncvars[ncvarid].gmapid, attname, 1, &datt);
 		      grid->laea_a = datt;
 		      grid->lcc2_a = datt;
@@ -5232,6 +5232,7 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 		    }
 		  else if ( strcmp(attname, "latitude_of_projection_origin") == 0 )
 		    {
+                      double datt;
 		      cdfGetAttDouble(ncvars[ncvarid].ncid, ncvars[ncvarid].gmapid, attname, 1, &datt);
 		      grid->laea_lat_0 = datt;
 		      grid->lcc2_lat_0 = datt;
@@ -5240,6 +5241,7 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 		    {
 		      if ( attlen == 1 )
 			{
+                          double datt;
 			  cdfGetAttDouble(ncvars[ncvarid].ncid, ncvars[ncvarid].gmapid, attname, 1, &datt);
 			  grid->lcc2_lat_1 = datt;
 			  grid->lcc2_lat_2 = datt;
