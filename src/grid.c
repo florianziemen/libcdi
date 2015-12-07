@@ -2635,9 +2635,6 @@ static void gridComplete(grid_t *grid)
                 }
             }
             break;
-          case GRID_PROJECTION:
-            grid->name = strdup(grid->name);
-            break;
 	  }
 
 	break;
@@ -2646,9 +2643,6 @@ static void gridComplete(grid_t *grid)
       {
 	gridDefNP(gridID, grid->np);
 	gridDefYsize(gridID, grid->ysize);
-        const int *rowlon = grid->rowlon;
-        grid->rowlon = NULL;
-	gridDefRowlon(gridID, grid->ysize, rowlon);
 
         if ( grid->xdef == 2 )
           {
@@ -2792,8 +2786,10 @@ int gridGenerate(const grid_t *grid)
   memcpy(gridptr->uuid, grid->uuid, CDI_UUID_SIZE);
   if ( gridtype == GRID_UNSTRUCTURED && grid->reference )
     gridDefReference(gridID, grid->reference);
-  gridptr->name = grid->name;
-  gridptr->rowlon = grid->rowlon;
+  if ( gridtype == GRID_PROJECTION )
+    gridptr->name = strdup(grid->name);
+  if ( gridtype == GRID_GAUSSIAN_REDUCED )
+    gridDefRowlon(gridID, grid->ysize, grid->rowlon);
   gridptr->trunc = grid->trunc;
   gridptr->lcomplex = grid->lcomplex;
   gridptr->nd = grid->nd;
