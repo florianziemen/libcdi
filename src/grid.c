@@ -2546,7 +2546,8 @@ static void gridComplete(grid_t *grid)
   int gridID = grid->self;
   gridDefPrec(gridID, grid->prec);
 
-  switch (grid->type)
+  int gridtype = grid->type;
+  switch (gridtype)
     {
     case GRID_LONLAT:
     case GRID_GAUSSIAN:
@@ -2562,7 +2563,7 @@ static void gridComplete(grid_t *grid)
 	if ( grid->xsize > 0 ) gridDefXsize(gridID, grid->xsize);
 	if ( grid->ysize > 0 ) gridDefYsize(gridID, grid->ysize);
 
-        if ( grid->type == GRID_GAUSSIAN ) gridDefNP(gridID, grid->np);
+        if ( gridtype == GRID_GAUSSIAN ) gridDefNP(gridID, grid->np);
 
 	if ( grid->nvertex > 0 )
 	  gridDefNvertex(gridID, grid->nvertex);
@@ -2603,7 +2604,7 @@ static void gridComplete(grid_t *grid)
 	  {
 	    double *yvals
               = (double *) Malloc((size_t)grid->ysize * sizeof (double));
-	    gridGenYvals(grid->type, grid->ysize, grid->yfirst, grid->ylast, grid->yinc, yvals);
+	    gridGenYvals(gridtype, grid->ysize, grid->yfirst, grid->ylast, grid->yinc, yvals);
 	    gridDefYvals(gridID, yvals);
 	    Free(yvals);
 	    /*
@@ -2635,18 +2636,18 @@ static void gridComplete(grid_t *grid)
 	    gridDefArea(gridID, area);
 	  }
 
-	if ( grid->type == GRID_LAEA )
+	if ( gridtype == GRID_LAEA )
 	  gridDefLaea(gridID, grid->laea_a, grid->laea_lon_0, grid->laea_lat_0);
 
-	if ( grid->type == GRID_LCC2 )
+	if ( gridtype == GRID_LCC2 )
 	  gridDefLcc2(gridID, grid->lcc2_a, grid->lcc2_lon_0, grid->lcc2_lat_0, grid->lcc2_lat_1, grid->lcc2_lat_2);
 
-	if ( grid->type == GRID_LCC )
+	if ( gridtype == GRID_LCC )
 	  gridDefLCC(gridID, grid->lcc_originLon, grid->lcc_originLat, grid->lcc_lonParY,
 		     grid->lcc_lat1, grid->lcc_lat2, grid->lcc_xinc, grid->lcc_yinc,
 		     grid->lcc_projflag, grid->lcc_scanflag);
 
-	if ( grid->type == GRID_UNSTRUCTURED )
+	if ( gridtype == GRID_UNSTRUCTURED )
           {
             int number = grid->number;
             int position = grid->position >= 0 ? grid->position : 0;
@@ -2663,7 +2664,7 @@ static void gridComplete(grid_t *grid)
               }
           }
 
-	if ( grid->type == GRID_PROJECTION )
+	if ( gridtype == GRID_PROJECTION )
 	  {
 	    grid->name = strdup(grid->name);
 	  }
@@ -2698,7 +2699,7 @@ static void gridComplete(grid_t *grid)
 	  {
 	    double *yvals
               = (double *) Malloc((size_t)grid->ysize * sizeof (double));
-	    gridGenYvals(grid->type, grid->ysize, grid->yfirst, grid->ylast, grid->yinc, yvals);
+	    gridGenYvals(gridtype, grid->ysize, grid->yfirst, grid->ylast, grid->yinc, yvals);
 	    gridDefYvals(gridID, yvals);
 	    Free(yvals);
 	    /*
@@ -2747,7 +2748,7 @@ static void gridComplete(grid_t *grid)
       }
     default:
       {
-	Error("Gridtype %s unsupported!", gridNamePtr(grid->type));
+	Error("Gridtype %s unsupported!", gridNamePtr(gridtype));
 	break;
       }
     }
