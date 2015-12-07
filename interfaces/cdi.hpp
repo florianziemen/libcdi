@@ -14,7 +14,7 @@ class CdiGrid {
     bool hasXValues, hasYValues, hasBounds;
     std::vector<double> xvalues, yvalues, xbounds, ybounds;
 
-
+  // [xy]stdname cannot be set arbitrarily
     std::string xname, xlongname, xstdname, xunits;
     std::string yname, ylongname, ystdname, yunits;      
     std::string name;
