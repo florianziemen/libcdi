@@ -209,15 +209,16 @@ void srv_add_record(stream_t *streamptr, int param, int level, int xsize, int ys
   record->param    = param;
   record->ilevel   = level;
 
-  grid_t grid;
-  grid_init(&grid);
-  grid.type  = GRID_GENERIC;
-  grid.size  = xsize*ysize;
-  grid.xsize = xsize;
-  grid.ysize = ysize;
-  grid.xvals = NULL;
-  grid.yvals = NULL;
-  int gridID = varDefGrid(vlistID, &grid, 0);
+  grid_t *grid = (grid_t *)Malloc(sizeof (*grid));
+  grid_init(grid);
+  grid->type  = GRID_GENERIC;
+  grid->size  = xsize*ysize;
+  grid->xsize = xsize;
+  grid->ysize = ysize;
+  grid->xvals = NULL;
+  grid->yvals = NULL;
+  int gridID = varDefGrid(vlistID, grid, 0);
+  Free(grid);
   /*
   if ( level == 0 ) leveltype = ZAXIS_SURFACE;
   else              leveltype = ZAXIS_GENERIC;
