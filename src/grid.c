@@ -2224,9 +2224,7 @@ int gridCompare(int gridID, const grid_t *grid)
 			}
 		    }
 		  else if ( grid->xvals && grid->yvals )
-		    {
-                      differ = compareXYvals(gridRef, (grid_t *)grid);
-		    }
+                    differ = gridRef->vtable->compareXYFull(gridRef, (grid_t *)grid);
 		}
 	      else
 		differ = 1;
@@ -2237,7 +2235,7 @@ int gridCompare(int gridID, const grid_t *grid)
 		{
 		  if ( grid->xdef == 1 && grid->ydef == 1
                        && grid->xvals && grid->yvals )
-                    differ = compareXYvals(gridRef, (grid_t *)grid);
+                    differ = gridRef->vtable->compareXYFull(gridRef, (grid_t *)grid);
 		}
 	      else if ( (grid->ysize == 0 || grid->ysize == 1) &&
 			grid->xsize == gridInqXsize(gridID)*gridInqYsize(gridID) )
@@ -2262,9 +2260,7 @@ int gridCompare(int gridID, const grid_t *grid)
 			  }
 		    }
 		  else if ( grid->xvals && grid->yvals )
-		    {
-                      differ = compareXYvals(gridRef, (grid_t *)grid);
-		    }
+                    differ = gridRef->vtable->compareXYFull(gridRef, (grid_t *)grid);
 		}
 	      else
 		differ = 1;
@@ -2287,7 +2283,7 @@ int gridCompare(int gridID, const grid_t *grid)
 	      printf("grid nv     %d\n", gridInqNvertex(gridID));
 	      */
 	      if ( grid->xsize == gridInqXsize(gridID) && grid->ysize == gridInqYsize(gridID) )
-                differ = compareXYvals2(gridRef, (grid_t *)grid);
+                differ = gridRef->vtable->compareXYAO(gridRef, (grid_t *)grid);
 	    }
 	  else if ( grid->type == GRID_UNSTRUCTURED )
 	    {
@@ -2318,7 +2314,7 @@ int gridCompare(int gridID, const grid_t *grid)
                   differ = grid->nvertex != gridInqNvertex(gridID)
                     || grid->number != gridInqNumber(gridID)
                     || (grid->number > 0 && grid->position != gridInqPosition(gridID))
-                    || compareXYvals2(gridRef, (grid_t *)grid);
+                    || gridRef->vtable->compareXYAO(gridRef, (grid_t *)grid);
                 }
               }
 	}
@@ -4800,6 +4796,8 @@ const struct gridVirtTable cdiGridVtable
   .inqYVals = gridInqYValsSerial,
   .inqXValsPtr = gridInqXValsPtrSerial,
   .inqYValsPtr = gridInqYValsPtrSerial,
+  .compareXYFull = compareXYvals,
+  .compareXYAO = compareXYvals2,
   .inqArea = gridInqAreaSerial,
   .inqAreaPtr = gridInqAreaPtrBase,
   .hasArea = gridHasAreaBase,
