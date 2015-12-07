@@ -4718,13 +4718,12 @@ cdfLazyGridRenew(struct cdfLazyGrid *restrict *restrict gridpptr, int gridtype)
 static
 void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars, int timedimid, unsigned char *uuidOfHGrid, char *gridfile, int number_of_grid_used)
 {
-  int ncvarid, ncvarid2;
   int ltwarn = TRUE;
   struct cdfLazyGrid *restrict lazyGrid = NULL, *restrict lazyProj = NULL;
 #define grid (&lazyGrid->base)
 #define proj (&lazyProj->base)
 
-  for ( ncvarid = 0; ncvarid < nvars; ++ncvarid )
+  for ( int ncvarid = 0; ncvarid < nvars; ++ncvarid )
     {
       if ( ncvars[ncvarid].isvar && ncvars[ncvarid].gridID == UNDEFID )
 	{
@@ -5367,7 +5366,7 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 	  if ( CDI_Debug )
 	    Message("gridID %d %d %s", ncvars[ncvarid].gridID, ncvarid, ncvars[ncvarid].name);
 
-	  for ( ncvarid2 = ncvarid+1; ncvarid2 < nvars; ncvarid2++ )
+	  for ( int ncvarid2 = ncvarid+1; ncvarid2 < nvars; ncvarid2++ )
 	    if ( ncvars[ncvarid2].isvar == TRUE && ncvars[ncvarid2].gridID == UNDEFID )
 	      {
 		int xdimid2 = UNDEFID, ydimid2 = UNDEFID, zdimid2 = UNDEFID;
