@@ -257,11 +257,12 @@ cdiPioClientStreamDefTimestep_(stream_t *streamptr, int tsID)
 }
 
 void
-cdiPioClientSetup(int *pioNamespace_, int *pioNamespace)
+cdiPioClientSetup(int *pioNamespace_)
 {
-  *pioNamespace_ = *pioNamespace = namespaceNew();
+  int pioNamespace = namespaceNew();
+  *pioNamespace_ = pioNamespace;
   int callerCDINamespace = namespaceGetActive();
-  namespaceSetActive(*pioNamespace_);
+  namespaceSetActive(pioNamespace);
   cdiPioSerializeSetMPI();
   namespaceSwitchSet(NSSWITCH_ABORT, NSSW_FUNC(cdiAbortC_MPI));
   namespaceSwitchSet(NSSWITCH_WARNING, NSSW_FUNC(cdiPioWarning));

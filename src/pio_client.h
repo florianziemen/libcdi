@@ -2,7 +2,7 @@
 #define PIO_CLIENT_H
 
 void
-cdiPioClientSetup(int *pioNamespace_, int *pioNamespace);
+cdiPioClientSetup(int *pioNamespace);
 
 #endif
 
