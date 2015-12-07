@@ -14,6 +14,7 @@ enum
   MODEL = 5,
   STREAM = 6,
   VLIST = 7,
+  DIST_GRID = 8,
   RESH_DELETE,
   START = 55555555,
   END = 99999999
@@ -21,6 +22,8 @@ enum
 
 int reshUnpackResources(char *unpackBuffer, int unpackBufferSize, void *context);
 
+extern void (*reshDistGridUnpack)(char *unpackBuffer, int unpackBufferSize, int *unpackBufferPos, int originNamespace,
+                                  void *context, int force_id);
 #endif
 
 /*
