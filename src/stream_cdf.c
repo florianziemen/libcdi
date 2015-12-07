@@ -5043,17 +5043,7 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 	  if ( ncvars[ncvarid].gridtype == UNDEFID ||
 	       ncvars[ncvarid].gridtype == GRID_GENERIC )
 	    {
-	      if ( islat && islon )
-		{
-		  if ( isGaussGrid(ysize, yinc, grid->yvals) )
-                    {
-                      ncvars[ncvarid].gridtype = GRID_GAUSSIAN;
-                      grid->np = (int)(ysize/2);
-                    }
-                  else
-		    ncvars[ncvarid].gridtype = GRID_LONLAT;
-		}
-	      else if ( islat && !islon && xsize == 0 )
+	      if ( islat && (islon || xsize == 0) )
 		{
 		  if ( isGaussGrid(ysize, yinc, grid->yvals) )
                     {
