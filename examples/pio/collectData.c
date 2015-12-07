@@ -148,9 +148,6 @@ static void modelRun(MPI_Comm commModel)
 #endif
 	}
     }
-#ifdef USE_MPI
-  pioEndTimestepping ();
-#endif
   streamClose ( streamID );
   vlistDestroy ( vlistID );
   taxisDestroy ( taxisID );
