@@ -2424,16 +2424,18 @@ int gridCompareP ( void * gridptr1, void * gridptr2 )
   else if ( g2->yvals )
     return differ;
 
-  if ( g1->area )
+  const double *restrict g1_area;
+  if ( (g1_area = g1->vtable->inqAreaPtr(g1)) )
     {
       xassert ( g1->size );
 
-      if ( !g2->area ) return differ;
+      const double *restrict g2_area = g2->vtable->inqAreaPtr(g2);
+      if ( !g2_area ) return differ;
 
       for ( i = 0; i < g1->size; i++ )
-	if ( IS_NOT_EQUAL(g1->area[i], g2->area[i]) ) return differ;
+	if ( IS_NOT_EQUAL(g1_area[i], g2_area[i]) ) return differ;
     }
-  else if ( g2->area )
+  else if ( g2->vtable->inqAreaPtr(g2) )
     return differ;
 
   {
@@ -2603,9 +2605,10 @@ int gridGenerate(const grid_t *grid)
 	    gridDefAngle(gridID, grid->angle);
 	  }
 
-	if ( grid->area )
+        const double *grid_area = grid->vtable->inqAreaPtr((grid_t*)grid);
+	if ( grid_area )
 	  {
-	    gridDefArea(gridID, grid->area);
+	    gridDefArea(gridID, grid_area);
 	  }
 
 	if ( grid->type == GRID_LAEA )
@@ -2775,13 +2778,17 @@ gridDuplicateData(grid_t *gridptrOrig, grid_t *gridptrDup)
       memcpy(gridptrDup->ybounds, gridptrOrig->ybounds, size * sizeof (double));
     }
 
-  if ( gridptrOrig->area != NULL )
-    {
-      size_t size = gridsize;
+  {
+    const double *gridptrOrig_area
+      = gridptrOrig->vtable->inqAreaPtr(gridptrOrig);
+    if ( gridptrOrig_area != NULL )
+      {
+        size_t size = gridsize;
 
-      gridptrDup->area = (double *)Malloc(size * sizeof (double));
-      memcpy(gridptrDup->area, gridptrOrig->area, size * sizeof (double));
-    }
+        gridptrDup->area = (double *)Malloc(size * sizeof (double));
+        memcpy(gridptrDup->area, gridptrOrig_area, size * sizeof (double));
+      }
+  }
 
   if ( gridptrOrig->mask != NULL )
     {
@@ -2859,7 +2866,8 @@ void gridCompress(int gridID)
 	{
           size_t gridsize = (size_t)gridInqSize(gridID);
 	  size_t nv = (size_t)gridptr->nvertex;
-          double *restrict area = gridptr->area,
+          double *restrict area
+            = (double *)gridptr->vtable->inqAreaPtr(gridptr),
             *restrict xvals = gridptr->xvals,
             *restrict yvals = gridptr->yvals,
             *restrict xbounds = (double *)gridptr->vtable->inqXBoundsPtr(gridptr),
@@ -2960,17 +2968,21 @@ int gridHasArea(int gridID)
 {
   grid_t *gridptr = gridID2Ptr(gridID);
 
-  int hasArea = (gridptr->area != NULL);
+  int hasArea = (gridptr->vtable->inqAreaPtr(gridptr) != NULL);
 
   return (hasArea);
 }
 
 
+static const double *gridInqAreaPtrBase(grid_t *gridptr)
+{
+  return gridptr->area;
+}
+
 const double *gridInqAreaPtr(int gridID)
 {
   grid_t *gridptr = gridID2Ptr(gridID);
-
-  return (gridptr->area);
+  return gridptr->vtable->inqAreaPtr(gridptr);
 }
 
 
@@ -4063,7 +4075,9 @@ static int gridGetComponentFlags(const grid_t * gridP)
     | (gridHasGMEMaskFlag & (int)((unsigned)(gridP->mask_gme == NULL) - 1U))
     | (gridHasXValsFlag & (int)((unsigned)(gridP->xvals == NULL) - 1U))
     | (gridHasYValsFlag & (int)((unsigned)(gridP->yvals == NULL) - 1U))
-    | (gridHasAreaFlag & (int)((unsigned)(gridP->area == NULL) - 1U))
+    | (gridHasAreaFlag
+       & (int)((unsigned)(gridP->vtable->inqAreaPtr((grid_t *)gridP) == NULL)
+               - 1U))
     | (gridHasXBoundsFlag & (int)((unsigned)(gridP->xbounds == NULL) - 1U))
     | (gridHasYBoundsFlag & (int)((unsigned)(gridP->ybounds == NULL) - 1U))
     | (gridHasReferenceFlag & (int)((unsigned)(gridP->reference == NULL) - 1U))
@@ -4117,7 +4131,7 @@ gridGetPackSize(void * voidP, void *context)
         + serializeGetSize(1, DATATYPE_UINT32, context);
     }
 
-  if (gridP->area)
+  if (gridP->vtable->inqAreaPtr(gridP))
     {
       xassert(gridP->size);
       packBuffSize +=
@@ -4713,6 +4727,7 @@ const struct gridVirtTable cdiGridVtable
   .inqXValsPtr = gridInqXValsPtrSerial,
   .inqYValsPtr = gridInqYValsPtrSerial,
   .inqArea = gridInqAreaSerial,
+  .inqAreaPtr = gridInqAreaPtrBase,
   .inqMask = gridInqMaskSerial,
   .inqMaskGME = gridInqMaskGMESerial,
   .inqXBounds = gridInqXBoundsSerial,

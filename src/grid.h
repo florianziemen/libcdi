@@ -25,6 +25,7 @@ struct gridVirtTable
   const double *(*inqXValsPtr)(grid_t *gridptr);
   const double *(*inqYValsPtr)(grid_t *gridptr);
   void (*inqArea)(grid_t *gridptr, double *area);
+  const double *(*inqAreaPtr)(grid_t *gridptr);
   int (*inqMask)(grid_t *gridptr, int *mask);
   int (*inqMaskGME)(grid_t *gridptr, int *mask_gme);
   int (*inqXBounds)(grid_t *gridptr, double *xbounds);
