@@ -2611,14 +2611,6 @@ static void gridComplete(grid_t *grid)
 	    gridDefAngle(gridID, grid->angle);
 	  }
 
-        const double *grid_area = grid->vtable->inqAreaPtr((grid_t*)grid);
-	if ( grid_area )
-	  {
-            const double *area = grid->area;
-            grid->area = NULL;
-	    gridDefArea(gridID, area);
-	  }
-
         switch (gridtype)
           {
           case GRID_LAEA:
@@ -2782,7 +2774,8 @@ int gridGenerate(const grid_t *grid)
   gridptr->xpole = grid->xpole;
   gridptr->ypole = grid->ypole;
   gridptr->angle = grid->angle;
-  gridptr->area = grid->area;
+  if ( valdef_group1 && grid->area)
+    gridDefArea(gridID, grid->area);
   gridptr->laea_a = grid->laea_a;
   gridptr->laea_lon_0 = grid->laea_lon_0;
   gridptr->laea_lat_0 = grid->laea_lat_0;
