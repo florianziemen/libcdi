@@ -2,6 +2,7 @@
 #  include "config.h"
 #endif
 
+#include <assert.h>
 #include <string.h>
 #include <float.h>  /* FLT_EPSILON */
 #include <limits.h> /* INT_MAX     */
@@ -2580,6 +2581,8 @@ static void gridComplete(grid_t *grid)
 	  }
 	else if ( grid->xdef == 2 )
 	  {
+            assert(gridtype != GRID_UNSTRUCTURED
+                   && gridtype != GRID_CURVILINEAR);
 	    double *xvals
               = (double *) Malloc((size_t)grid->xsize * sizeof (double));
 	    gridGenXvals(grid->xsize, grid->xfirst, grid->xlast, grid->xinc, xvals);
@@ -2602,6 +2605,8 @@ static void gridComplete(grid_t *grid)
 	  }
 	else if ( grid->ydef == 2 )
 	  {
+            assert(gridtype != GRID_UNSTRUCTURED
+                   && gridtype != GRID_CURVILINEAR);
 	    double *yvals
               = (double *) Malloc((size_t)grid->ysize * sizeof (double));
 	    gridGenYvals(gridtype, grid->ysize, grid->yfirst, grid->ylast, grid->yinc, yvals);
