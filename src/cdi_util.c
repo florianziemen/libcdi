@@ -120,8 +120,8 @@ size_t
 cdiGetPageSize(bool largePageAlign)
 {
   long pagesize = -1L;
-  bool nameAssigned = false;
 #if HAVE_DECL__SC_LARGE_PAGESIZE || HAVE_DECL__SC_PAGE_SIZE || HAVE_DECL__SC_PAGESIZE
+  bool nameAssigned = false;
   int name;
 #  if HAVE_DECL__SC_LARGE_PAGESIZE
   if (largePageAlign)
