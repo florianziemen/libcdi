@@ -2569,17 +2569,7 @@ static void gridComplete(grid_t *grid)
 	if ( grid->nvertex > 0 )
 	  gridDefNvertex(gridID, grid->nvertex);
 
-	if ( grid->xdef == 1 )
-	  {
-            const double *xvals = grid->xvals;
-            grid->xvals = NULL;
-	    gridDefXvals(gridID, xvals);
-            const double *grid_xbounds
-              = grid->vtable->inqXBoundsPtr((grid_t *)grid);
-            if ( grid_xbounds )
-	      gridDefXbounds(gridID, grid_xbounds);
-	  }
-	else if ( grid->xdef == 2 )
+	if ( grid->xdef == 2 )
 	  {
             assert(gridtype != GRID_UNSTRUCTURED
                    && gridtype != GRID_CURVILINEAR);
@@ -2593,17 +2583,7 @@ static void gridComplete(grid_t *grid)
 	    */
 	  }
 
-	if ( grid->ydef == 1 )
-	  {
-            const double *yvals = grid->yvals;
-            grid->yvals = NULL;
-	    gridDefYvals(gridID, yvals);
-            const double *grid_ybounds
-              = grid->vtable->inqYBoundsPtr((grid_t *)grid);
-            if ( grid_ybounds && grid->nvertex )
-	      gridDefYbounds(gridID, grid_ybounds);
-	  }
-	else if ( grid->ydef == 2 )
+	if ( grid->ydef == 2 )
 	  {
             assert(gridtype != GRID_UNSTRUCTURED
                    && gridtype != GRID_CURVILINEAR);
@@ -2692,17 +2672,7 @@ static void gridComplete(grid_t *grid)
             gridDefXvals(gridID, xvals);
           }
 
-	if ( grid->ydef == 1 )
-	  {
-            const double *yvals = grid->yvals;
-            grid->yvals = NULL;
-	    gridDefYvals(gridID, yvals);
-            const double *grid_ybounds
-              = grid->vtable->inqYBoundsPtr((grid_t *)grid);
-	    if ( grid_ybounds && grid->nvertex )
-	      gridDefYbounds(gridID, grid_ybounds);
-	  }
-	else if ( grid->ydef == 2 )
+        if ( grid->ydef == 2 )
 	  {
 	    double *yvals
               = (double *) Malloc((size_t)grid->ysize * sizeof (double));
@@ -2775,22 +2745,39 @@ static void gridComplete(grid_t *grid)
 
 int gridGenerate(const grid_t *grid)
 {
-  int gridID = gridCreate(grid->type, grid->size);
-  grid_t *gridptr = gridID2Ptr(gridID);
+  int gridtype = grid->type;
+  int gridID = gridCreate(gridtype, grid->size);
+  grid_t *restrict gridptr = gridID2Ptr(gridID);
   gridptr->prec = grid->prec;
   gridptr->xsize = grid->xsize;
   gridptr->ysize = grid->ysize;
   gridptr->np = grid->np;
   gridptr->nvertex = grid->nvertex;
   gridptr->xdef = grid->xdef;
-  gridptr->xvals = grid->xvals;
-  gridptr->xbounds = grid->xbounds;
+  int valdef_group1 = 0;
+  static const int valdef_group1_tab[] = {
+    GRID_LONLAT, GRID_GAUSSIAN, GRID_UNSTRUCTURED, GRID_CURVILINEAR,
+    GRID_GENERIC, GRID_LCC, GRID_LCC2, GRID_SINUSOIDAL, GRID_LAEA,
+    GRID_PROJECTION
+  };
+  for ( size_t i = 0; i < sizeof (valdef_group1_tab) / sizeof (valdef_group1_tab[0]); ++i)
+    valdef_group1 |= (gridtype == valdef_group1_tab[i]);
+  if ( valdef_group1 && grid->xdef == 1 )
+    {
+      gridDefXvals(gridID, grid->xvals);
+      if ( grid->xbounds )
+        gridDefXbounds(gridID, grid->xbounds);
+    }
   gridptr->xfirst = grid->xfirst;
   gridptr->xlast = grid->xlast;
   gridptr->xinc = grid->xinc;
   gridptr->ydef = grid->ydef;
-  gridptr->yvals = grid->yvals;
-  gridptr->ybounds = grid->ybounds;
+  if ( (valdef_group1 || gridtype == GRID_GAUSSIAN_REDUCED) && grid->ydef == 1)
+    {
+      gridDefYvals(gridID, grid->yvals);
+      if ( grid->ybounds )
+        gridDefYbounds(gridID, grid->ybounds);
+    }
   gridptr->yfirst = grid->yfirst;
   gridptr->ylast = grid->ylast;
   gridptr->yinc = grid->yinc;
