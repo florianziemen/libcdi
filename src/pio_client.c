@@ -15,6 +15,7 @@
 #include "cdipio.h"
 #include "pio.h"
 #include "pio_client.h"
+#include "pio_dist_grid.h"
 #include "pio_comm.h"
 #include "pio_interface.h"
 #include "pio_rpc.h"
@@ -59,7 +60,12 @@ cdiPioClientStreamOpen(const char *filename, char filemode, int filetype, stream
           Free(msgBuffer);
         }
       else
-        xmpi(MPI_Recv(&fileID, 1, MPI_INT, collRank, STREAMOPEN, comm, MPI_STATUS_IGNORE));
+        {
+#ifdef HAVE_PPM_DIST_ARRAY_H
+          cdiPioDistGridPackAssist();
+#endif
+          xmpi(MPI_Recv(&fileID, 1, MPI_INT, collRank, STREAMOPEN, comm, MPI_STATUS_IGNORE));
+        }
       if (fileID >= 0)
         {
           streamptr->filetype = filetype;
@@ -97,6 +103,10 @@ cdiPioClientStreamDefVlist_(int streamID, int vlistID)
       xmpi(MPI_Send(msgBuffer, msgBufPos, MPI_PACKED, collRank, STREAMDEFVLIST, comm));
       Free(msgBuffer);
     }
+#ifdef HAVE_PPM_DIST_ARRAY_H
+  else
+    cdiPioDistGridPackAssist();
+#endif
   struct collSpec cspec = { .numClients = numClients, .numServers = numColl, .sendRPCData = sendRPCData };
   cdiPioClientStreamWinCreate(streamID, &cspec);
 }
@@ -194,6 +204,10 @@ cdiPioClientStreamClose(stream_t *streamptr, int recordBufIsToBeDeleted)
       xmpi(MPI_Send(msgBuffer, msgBufPos, MPI_PACKED, collRank, STREAMCLOSE, comm));
       Free(msgBuffer);
     }
+#ifdef HAVE_PPM_DIST_ARRAY_H
+  else
+    cdiPioDistGridPackAssist();
+#endif
   cdiPioClientStreamWinDestroy(streamID);
 }
 
