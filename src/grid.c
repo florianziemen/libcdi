@@ -4748,8 +4748,7 @@ struct addIffNewRes cdiVlistAddGridIfNew(int vlistID, grid_t *grid, int mode)
   if ( mode == 0 )
     for (unsigned index = 0; index < ngrids; index++ )
       {
-	gridID = vlistptr->gridIDs[index];
-	if ( gridID != UNDEFID )
+	if ( (gridID = vlistptr->gridIDs[index]) != UNDEFID )
           {
             if ( gridCompare(gridID, grid) == 0 )
               {
@@ -4758,7 +4757,8 @@ struct addIffNewRes cdiVlistAddGridIfNew(int vlistID, grid_t *grid, int mode)
               }
           }
         else
-          Error("Internal problem: undefined gridID %d!", gridID);
+          Error("Internal problem: undefined gridID in vlist "
+                "%d, position %u!", vlistID, index);
 
       }
 
