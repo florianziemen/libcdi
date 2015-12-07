@@ -4719,7 +4719,6 @@ static
 void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars, int timedimid, unsigned char *uuidOfHGrid, char *gridfile, int number_of_grid_used)
 {
   int ncvarid, ncvarid2;
-  char name[CDI_MAX_NAME];
   int ltwarn = TRUE;
   struct cdfLazyGrid *restrict lazyGrid = NULL, *restrict lazyProj = NULL;
 #define grid (&lazyGrid->base)
@@ -4813,9 +4812,9 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 	  if ( ncvars[ncvarid].gridtype == GRID_TRAJECTORY )
 	    {
 	      if ( ncvars[ncvarid].xvarid == UNDEFID )
-		Error("Longitude coordinate undefined for %s!", name);
+		Error("Longitude coordinate undefined for %s!", ncvars[ncvarid].name);
 	      if ( ncvars[ncvarid].yvarid == UNDEFID )
-		Error("Latitude coordinate undefined for %s!", name);
+		Error("Latitude coordinate undefined for %s!", ncvars[ncvarid].name);
 	    }
 	  else
 	    {
