@@ -61,8 +61,10 @@ int namespaceIdxEncode2(int, int);
 namespaceTuple_t namespaceResHDecode(int);
 int namespaceAdaptKey(int originResH, int originNamespace);
 int namespaceAdaptKey2(int);
-void namespaceSwitchSet(enum namespaceSwitch sw, union namespaceSwitchValue value);
-union namespaceSwitchValue namespaceSwitchGet(enum namespaceSwitch sw);
+void namespaceSwitchSet(int sw, union namespaceSwitchValue value);
+union namespaceSwitchValue namespaceSwitchGet(int sw);
+/* reserve new dynamic key */
+int cdiNamespaceSwitchNewKey(void);
 
 #endif
 /*
