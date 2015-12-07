@@ -4737,7 +4737,6 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 	{
           int xdimids[2] = {-1,-1}, ydimids[2] = {-1,-1};
 	  int xdimid = -1, ydimid = -1;
-	  int xvarid = -1, yvarid = -1;
 	  int islon = 0, islat = 0;
 	  int nxdims = 0, nydims = 0;
           size_t size = 0, np = 0;
@@ -4777,15 +4776,12 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 	      ydimid = ydimids[0];
 	    }
 
-	  if ( ncvars[ncvarid].xvarid != UNDEFID )
-	    xvarid = ncvars[ncvarid].xvarid;
-	  else if ( xdimid != UNDEFID )
-	    xvarid = ncdims[xdimid].ncvarid;
-
-	  if ( ncvars[ncvarid].yvarid != UNDEFID )
-	    yvarid = ncvars[ncvarid].yvarid;
-	  else if ( ydimid != UNDEFID )
-	    yvarid = ncdims[ydimid].ncvarid;
+	  int xvarid = ncvars[ncvarid].xvarid != UNDEFID
+	    ? ncvars[ncvarid].xvarid
+            : (xdimid != UNDEFID ? ncdims[xdimid].ncvarid : -1);
+          int yvarid = ncvars[ncvarid].yvarid != UNDEFID
+            ? ncvars[ncvarid].yvarid
+            : (ydimid != UNDEFID ? ncdims[ydimid].ncvarid : -1);
 
 	  /*
 	  if ( xdimid != UNDEFID )
