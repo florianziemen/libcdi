@@ -1740,13 +1740,13 @@ double gridInqXinc(int gridID)
 {
   grid_t *gridptr = grid_to_pointer(gridID);
   double xinc = gridptr->x.inc;
-  const double *restrict xvals = gridptr->vtable->inqXValsPtr(gridptr);
 
-  if ( (! (fabs(xinc) > 0)) && xvals )
+  if ( (! (fabs(xinc) > 0)) && gridptr->x.vals )
     {
       int xsize = gridptr->x.size;
       if ( xsize > 1 )
         {
+          const double *restrict xvals = gridptr->vtable->inqXValsPtr(gridptr);
           xinc = fabs(xvals[xsize-1] - xvals[0])/(xsize-1);
           for ( int i = 2; i < xsize; i++ )
             if ( fabs(fabs(xvals[i-1] - xvals[i]) - xinc) > 0.01*xinc )
@@ -1776,13 +1776,13 @@ double gridInqYinc(int gridID)
 {
   grid_t *gridptr = grid_to_pointer(gridID);
   double yinc = gridptr->y.inc;
-  const double *yvals = gridptr->vtable->inqYValsPtr(gridptr);
 
-  if ( (! (fabs(yinc) > 0)) && yvals )
+  if ( (! (fabs(yinc) > 0)) && gridptr->y.vals )
     {
       int ysize = gridptr->y.size;
       if ( ysize > 1 )
         {
+          const double *yvals = gridptr->vtable->inqYValsPtr(gridptr);
           yinc = yvals[1] - yvals[0];
           double abs_yinc = fabs(yinc);
           for ( size_t i = 2; i < (size_t)ysize; i++ )
@@ -3010,11 +3010,13 @@ gridInqXBoundsSerial(grid_t *gridptr, double *xbounds)
     || gridptr->type == GRID_UNSTRUCTURED;
   size_t size = nvertex * (size_t)(irregular ? gridptr->size : gridptr->x.size);
 
-  const double *gridptr_xbounds = gridptr->vtable->inqXBoundsPtr(gridptr);
-  if ( gridptr_xbounds )
+  if ( gridptr->x.bounds )
     {
       if ( size && xbounds )
-        memcpy(xbounds, gridptr_xbounds, size * sizeof (double));
+        {
+          const double *gridptr_xbounds = gridptr->vtable->inqXBoundsPtr(gridptr);
+          memcpy(xbounds, gridptr_xbounds, size * sizeof (double));
+        }
     }
   else
     size = 0;
@@ -3097,11 +3099,13 @@ gridInqYBoundsSerial(grid_t *gridptr, double *ybounds)
     || gridptr->type == GRID_UNSTRUCTURED;
   size_t size = nvertex * (size_t)(irregular ? gridptr->size : gridptr->y.size);
 
-  const double *gridptr_ybounds = gridptr->vtable->inqYBoundsPtr(gridptr);
-  if ( gridptr_ybounds )
+  if ( gridptr->y.bounds )
     {
       if ( size && ybounds )
-        memcpy(ybounds, gridptr_ybounds, size * sizeof (double));
+        {
+          const double *gridptr_ybounds = gridptr->vtable->inqYBoundsPtr(gridptr);
+          memcpy(ybounds, gridptr_ybounds, size * sizeof (double));
+        }
     }
   else
     size = 0;
