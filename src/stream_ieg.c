@@ -674,8 +674,7 @@ void iegAddRecord(stream_t *streamptr, int param, int *pdb, int *gdb, double *vc
 
   grid_t *grid = (grid_t *)Malloc(sizeof (*grid));
   grid_init(grid);
-  grid->type  = gridtype;
-  grid->size  = IEG_G_NumLon(gdb)*IEG_G_NumLat(gdb);
+  cdiGridTypeInit(grid, gridtype, IEG_G_NumLon(gdb)*IEG_G_NumLat(gdb));
   grid->xsize = IEG_G_NumLon(gdb);
   grid->ysize = IEG_G_NumLat(gdb);
   grid->xinc  = 0;
@@ -747,8 +746,9 @@ void iegAddRecord(stream_t *streamptr, int param, int *pdb, int *gdb, double *vc
       grid->angle     = 0;
     }
 
-  int gridID = varDefGrid(vlistID, grid, 0);
-  Free(grid);
+  struct addIffNewRes gridAdded = cdiVlistAddGridIfNew(vlistID, grid, 0);
+  int gridID = gridAdded.Id;
+  if (!gridAdded.isNew) Free(grid);
 
   int leveltype = iegGetZaxisType(IEG_P_LevelType(pdb));
 

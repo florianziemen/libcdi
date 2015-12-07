@@ -218,14 +218,14 @@ void extAddRecord(stream_t *streamptr, int param, int level, int xysize,
 
   grid_t *grid = (grid_t *)Malloc(sizeof (*grid));
   grid_init(grid);
-  grid->type  = GRID_GENERIC;
-  grid->size  = xysize;
+  cdiGridTypeInit(grid, GRID_GENERIC, xysize);
   grid->xsize = xysize;
   grid->ysize = 0;
   grid->xvals = NULL;
   grid->yvals = NULL;
-  int gridID = varDefGrid(vlistID, grid, 0);
-  Free(grid);
+  struct addIffNewRes gridAdded = cdiVlistAddGridIfNew(vlistID, grid, 0);
+  int gridID = gridAdded.Id;
+  if (!gridAdded.isNew) Free(grid);
   /*
   if ( level == 0 ) leveltype = ZAXIS_SURFACE;
   else              leveltype = ZAXIS_GENERIC;

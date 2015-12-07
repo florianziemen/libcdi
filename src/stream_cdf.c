@@ -4450,9 +4450,6 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
   int i;
   int nvatts;
   int skipvar;
-  grid_t *restrict grid;
-  grid_t proj;
-  int gridindex;
   char name[CDI_MAX_NAME];
   int iatt;
   int ltwarn = TRUE;
@@ -4464,7 +4461,7 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
     {
       if ( ncvars[ncvarid].isvar && ncvars[ncvarid].gridID == UNDEFID )
 	{
-	  int xdimids[2] = {-1,-1}, ydimids[2] = {-1,-1};
+          int xdimids[2] = {-1,-1}, ydimids[2] = {-1,-1};
 	  int xdimid = -1, ydimid = -1;
 	  int xvarid = -1, yvarid = -1;
 	  int islon = 0, islat = 0;
@@ -4472,6 +4469,8 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
           size_t size = 0, np = 0;
           size_t xsize = 0, ysize = 0;
 	  double xinc = 0, yinc = 0;
+          struct addIffNewRes projAdded = { .Id = CDI_UNDEFID, .isNew = 0 },
+            gridAdded  = { .Id = CDI_UNDEFID, .isNew = 0 };
 
 	  int ndims = ncvars[ncvarid].ndims;
 	  for ( i = 0; i < ndims; i++ )
@@ -4541,9 +4540,12 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 	  if ( ncvars[ncvarid].gridtype == UNDEFID || ncvars[ncvarid].gridtype == GRID_GENERIC )
 	    if ( xdimid != UNDEFID && xdimid == ydimid && nydims == 0 ) ncvars[ncvarid].gridtype = GRID_UNSTRUCTURED;
 
-          grid = (grid_t *)Malloc(sizeof (*grid));
+          grid_t *restrict grid = (grid_t *)Malloc(sizeof (*grid));
 	  grid_init(grid);
-	  grid_init(&proj);
+          cdiGridTypeInit(grid, ncvars[ncvarid].gridtype, 0);
+          grid_t *restrict proj = (grid_t *)Malloc(sizeof (*proj));
+          grid_init(proj);
+          cdiGridTypeInit(grid, GRID_PROJECTION, 0);
 
 	  grid->prec  = DATATYPE_FLT64;
 	  grid->trunc = ncvars[ncvarid].truncation;
@@ -4928,8 +4930,8 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 			grid->type = GRID_LCC2;
 		      else if ( strcmp(attstring, "lambert_cylindrical_equal_area") == 0 )
 			{
-			  proj.type = GRID_PROJECTION;
-			  proj.name = strdup(attstring);
+			  proj->type = GRID_PROJECTION;
+			  proj->name = strdup(attstring);
 			}
 		    }
 		  else if ( strcmp(attname, "earth_radius") == 0 )
@@ -5027,7 +5029,7 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
             }
 
 #if defined (PROJECTION_TEST)
-	  if ( proj.type == GRID_PROJECTION )
+	  if ( proj->type == GRID_PROJECTION )
 	    {
 	      if ( grid->type == GRID_GENERIC )
 		{
@@ -5036,9 +5038,9 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 
 	      if ( grid->type == GRID_CURVILINEAR )
 		{
-		  proj.size  = grid->size;
-		  proj.xsize = grid->xsize;
-                  proj.ysize = grid->ysize;
+                  proj->size  = grid->size;
+                  proj->xsize = grid->xsize;
+                  proj->ysize = grid->ysize;
 		}
 
 	      //  grid->proj = gridGenerate(proj);
@@ -5050,18 +5052,22 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 	      Message("grid: type = %d, size = %d, nx = %d, ny %d",
 		      grid->type, grid->size, grid->xsize, grid->ysize);
 	      Message("proj: type = %d, size = %d, nx = %d, ny %d",
-		      proj.type, proj.size, proj.xsize, proj.ysize);
+		      proj->type, proj->size, proj->xsize, proj->ysize);
 	    }
 
 #if defined (PROJECTION_TEST)
-	  if ( proj.type == GRID_PROJECTION )
+	  if ( proj->type == GRID_PROJECTION )
 	    {
-	      ncvars[ncvarid].gridID = varDefGrid(vlistID, &proj, 1);
+              projAdded = cdiVlistAddGridIfNew(vlistID, proj, 1);
+              ncvars[ncvarid].gridID = projAdded.Id;
 	      copy_numeric_projatts(ncvars[ncvarid].gridID, ncvars[ncvarid].gmapid, ncvars[ncvarid].ncid);
 	    }
 	  else
 #endif
-	    ncvars[ncvarid].gridID = varDefGrid(vlistID, grid, 1);
+            {
+              gridAdded = cdiVlistAddGridIfNew(vlistID, grid, 1);
+              ncvars[ncvarid].gridID = gridAdded.Id;
+            }
 
           if ( grid->type == GRID_UNSTRUCTURED )
             {
@@ -5070,7 +5076,7 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 
           if ( ncvars[ncvarid].chunked ) grid_set_chunktype(grid, &ncvars[ncvarid]);
 
-	  gridindex = vlistGridIndex(vlistID, ncvars[ncvarid].gridID);
+	  int gridindex = vlistGridIndex(vlistID, ncvars[ncvarid].gridID);
 	  streamptr->xdimID[gridindex] = xdimid;
 	  streamptr->ydimID[gridindex] = ydimid;
           if ( xdimid == -1 && ydimid == -1 && grid->size == 1 )
@@ -5136,9 +5142,16 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 		  }
 	      }
 
-	  grid_free(grid);
-          Free(grid);
-	  grid_free(&proj);
+          if (!gridAdded.isNew)
+            {
+              grid_free(grid);
+              Free(grid);
+            }
+          if (!projAdded.isNew)
+            {
+              grid_free(proj);
+              Free(proj);
+            }
 	}
     }
 }

@@ -4711,16 +4711,16 @@ gridPack(void * voidP, void * packBuffer, int packBufferSize,
 #undef GRID_STR_SERIALIZE
 
 
-struct varDefGridSearchState
+struct gridCompareSearchState
 {
   int resIDValue;
   const grid_t *queryKey;
 };
 
 static enum cdiApplyRet
-varDefGridSearch(int id, void *res, void *data)
+gridCompareSearch(int id, void *res, void *data)
 {
-  struct varDefGridSearchState *state = (struct varDefGridSearchState*)data;
+  struct gridCompareSearchState *state = (struct gridCompareSearchState*)data;
   (void)res;
   if (gridCompare(id, state->queryKey) == 0)
     {
@@ -4731,7 +4731,7 @@ varDefGridSearch(int id, void *res, void *data)
     return CDI_APPLY_GO_ON;
 }
 
-int varDefGrid(int vlistID, const grid_t *grid, int mode)
+struct addIffNewRes cdiVlistAddGridIfNew(int vlistID, grid_t *grid, int mode)
 {
   /*
     mode: 0 search in vlist and grid table
@@ -4763,10 +4763,10 @@ int varDefGrid(int vlistID, const grid_t *grid, int mode)
 
   if ( ! griddefined )
     {
-      struct varDefGridSearchState query;
+      struct gridCompareSearchState query;
       query.queryKey = grid;// = { .queryKey = grid };
       if ((gridglobdefined
-           = (cdiResHFilterApply(&gridOps, varDefGridSearch, &query)
+           = (cdiResHFilterApply(&gridOps, gridCompareSearch, &query)
               == CDI_APPLY_STOP)))
         gridID = query.resIDValue;
 
@@ -4781,12 +4781,17 @@ int varDefGrid(int vlistID, const grid_t *grid, int mode)
 
   if ( ! griddefined )
     {
-      if ( ! gridglobdefined ) gridID = gridGenerate(grid);
+      if ( ! gridglobdefined )
+        {
+          grid->self = gridID = reshPut(grid, &gridOps);
+          gridComplete(grid);
+        }
       vlistptr->gridIDs[ngrids] = gridID;
       vlistptr->ngrids++;
     }
 
-  return (gridID);
+  return (struct addIffNewRes){ .Id = gridID,
+      .isNew = !griddefined && !gridglobdefined };
 }
 
 const struct gridVirtTable cdiGridVtable

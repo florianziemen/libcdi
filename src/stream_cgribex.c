@@ -168,6 +168,7 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, double *fsec2, int *isec4, 
     }
 
   grid_init(grid);
+  cdiGridTypeInit(grid, gridtype, 0);
   switch (gridtype)
     {
     case GRID_LONLAT:
@@ -386,8 +387,9 @@ void cgribexAddRecord(stream_t * streamptr, int param, int *isec1, int *isec2, d
 
   cgribexGetGrid(streamptr, isec2, fsec2, isec4, grid, iret);
 
-  int gridID = varDefGrid(vlistID, grid, 0);
-  Free(grid);
+  struct addIffNewRes gridAdded = cdiVlistAddGridIfNew(vlistID, grid, 0);
+  int gridID = gridAdded.Id;
+  if (!gridAdded.isNew) Free(grid);
 
   int zaxistype = grib1ltypeToZaxisType(ISEC1_LevelType);
 

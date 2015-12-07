@@ -103,6 +103,8 @@ struct grid_t {
 
 
 void grid_init(grid_t *gridptr);
+void
+cdiGridTypeInit(grid_t *gridptr, int gridtype, int size);
 void grid_free(grid_t *gridptr);
 grid_t *gridID2Ptr(int gridID);
 extern const struct gridVirtTable cdiGridVtable;
@@ -126,7 +128,13 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
            int * unpackBufferPos, int originNamespace, void *context,
            int force_id);
 
-int  varDefGrid(int vlistID, const grid_t *grid, int mode);
+struct addIffNewRes
+{
+  int Id;
+  int isNew;
+};
+
+struct addIffNewRes cdiVlistAddGridIfNew(int vlistID, grid_t *grid, int mode);
 
 #endif
 /*

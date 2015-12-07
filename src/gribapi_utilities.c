@@ -464,6 +464,7 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
     }
   */
   grid_init(grid);
+  cdiGridTypeInit(grid, gridtype, 0);
 
   size_t datasize;
   FAIL_ON_GRIB_ERROR(grib_get_size, gh, "values", &datasize);
