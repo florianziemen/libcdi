@@ -4467,7 +4467,7 @@ struct cdfLazyGrid
   const struct gridVirtTable *baseVtable;
   struct {
     int datasetNCId, varNCId;
-  } cellAreaGet;
+  } cellAreaGet, xBoundsGet, yBoundsGet;
   struct xyValGet {
     double scalefactor, addoffset;
     size_t start[3], count[3], size, dimsize;
@@ -4485,6 +4485,10 @@ static void cdfLazyGridDestroy(struct cdfLazyGrid *lazyGrid)
     lazyGrid->base.xvals = NULL;
   if (lazyGrid->base.yvals == cdfPendingLoad)
     lazyGrid->base.yvals = NULL;
+  if (lazyGrid->base.xbounds == cdfPendingLoad)
+    lazyGrid->base.xbounds = NULL;
+  if (lazyGrid->base.ybounds == cdfPendingLoad)
+    lazyGrid->base.ybounds = NULL;
 }
 
 static void cdfLazyGridDelete(grid_t *grid)
@@ -4538,7 +4542,6 @@ cdfLazyLoadXYVals(struct xyValGet *valsGet, double **valsp)
     cdf_get_var_double(valsGet->datasetNCId, valsGet->varNCId, grid_vals);
   scale_add(valsGet->size, grid_vals, valsGet->addoffset, valsGet->scalefactor);
 }
-
 
 static const double *
 cdfLazyGridInqXValsPtr(grid_t *grid)
@@ -4617,6 +4620,34 @@ cdfLazyGridInqYVal(grid_t *grid, int index)
 }
 
 
+static const double *
+cdfLazyGridInqXBoundsPtr(grid_t *grid)
+{
+  struct cdfLazyGrid *lazyGrid = (struct cdfLazyGrid *)grid;
+  if (grid->xbounds == cdfPendingLoad)
+    {
+      grid->xbounds = (double *)Malloc((size_t)grid->nvertex
+                                       * (size_t)grid->size * sizeof(double));
+      cdf_get_var_double(lazyGrid->xBoundsGet.datasetNCId,
+                         lazyGrid->xBoundsGet.varNCId, grid->xbounds);
+    }
+  return lazyGrid->baseVtable->inqXBoundsPtr(grid);
+}
+
+static const double *
+cdfLazyGridInqYBoundsPtr(grid_t *grid)
+{
+  struct cdfLazyGrid *lazyGrid = (struct cdfLazyGrid *)grid;
+  if (grid->ybounds == cdfPendingLoad)
+    {
+      grid->ybounds = (double *)Malloc((size_t)grid->nvertex
+                                       * (size_t)grid->size * sizeof(double));
+      cdf_get_var_double(lazyGrid->yBoundsGet.datasetNCId,
+                         lazyGrid->yBoundsGet.varNCId, grid->ybounds);
+    }
+  return lazyGrid->baseVtable->inqYBoundsPtr(grid);
+}
+
 static void
 cdfLazyGridInitOnce(void)
 {
@@ -4628,6 +4659,8 @@ cdfLazyGridInitOnce(void)
   cdfLazyGridVtable.inqYValsPtr = cdfLazyGridInqYValsPtr;
   cdfLazyGridVtable.inqXVal = cdfLazyGridInqXVal;
   cdfLazyGridVtable.inqYVal = cdfLazyGridInqYVal;
+  cdfLazyGridVtable.inqXBoundsPtr = cdfLazyGridInqXBoundsPtr;
+  cdfLazyGridVtable.inqYBoundsPtr = cdfLazyGridInqYBoundsPtr;
   /* create inaccessible memory area, if possible, this serves as
    * dummy value for pointers to data not yet loaded */
 #ifdef HAVE_MMAP
@@ -5076,9 +5109,12 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 			if ( nbdims == 2 || nbdims == 3 )
 			  {
 			    size_t nvertex = ncdims[ncvars[ncvars[xvarid].bounds].dimids[nbdims-1]].len;
-			    grid->nvertex = (int) nvertex;
-			    grid->xbounds = (double *) Malloc(nvertex*size*sizeof(double));
-			    cdf_get_var_double(ncvars[xvarid].ncid, ncvars[xvarid].bounds, grid->xbounds);
+			    grid->nvertex = (int)nvertex;
+                            lazyGrid->xBoundsGet.datasetNCId
+                              = ncvars[xvarid].ncid;
+                            lazyGrid->xBoundsGet.varNCId
+                              = ncvars[xvarid].bounds;
+                            grid->xbounds = cdfPendingLoad;
 			  }
 		      }
 		  }
@@ -5090,14 +5126,16 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 			int nbdims = ncvars[ncvars[yvarid].bounds].ndims;
 			if ( nbdims == 2 || nbdims == 3 )
 			  {
-			    size_t nvertex = ncdims[ncvars[ncvars[yvarid].bounds].dimids[nbdims-1]].len;
-			    /*
+			    /* size_t nvertex = ncdims[ncvars[ncvars[yvarid].bounds].dimids[nbdims-1]].len;
 			    if ( nvertex != grid->nvertex )
 			      Warning("nvertex problem! nvertex x %d, nvertex y %d",
 				      grid->nvertex, (int) nvertex);
 			    */
-			    grid->ybounds = (double *) Malloc(nvertex*size*sizeof(double));
-			    cdf_get_var_double(ncvars[yvarid].ncid, ncvars[yvarid].bounds, grid->ybounds);
+                            lazyGrid->yBoundsGet.datasetNCId
+                              = ncvars[yvarid].ncid;
+                            lazyGrid->yBoundsGet.varNCId
+                              = ncvars[yvarid].bounds;
+                            grid->ybounds = cdfPendingLoad;
 			  }
 		      }
 		  }
