@@ -220,12 +220,6 @@ CONTAINS
 #endif
     END DO
 
-#ifdef USE_MPI
-    ! For parallel IO:
-    ! Preparation for local cleanup
-    CALL pioEndTimestepping ()
-#endif
-
     !     Close the output stream
     CALL streamClose(streamID)
 
