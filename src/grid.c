@@ -1421,10 +1421,11 @@ gridInqXValsSerial(grid_t *gridptr, double *xvals)
   if ( CDI_Debug && size == 0 )
     Warning("size undefined for gridID = %d", gridptr->self);
 
-  if (gridptr->xvals)
+  const double *gridptr_xvals = gridptr->vtable->inqXValsPtr(gridptr);
+  if (gridptr_xvals)
     {
       if ( size && xvals )
-        memcpy(xvals, gridptr->xvals, (size_t)size * sizeof (double));
+        memcpy(xvals, gridptr_xvals, (size_t)size * sizeof (double));
     }
   else
     size = 0;
@@ -2105,7 +2106,7 @@ int gridIsRotated(int gridID)
 }
 
 static
-int compareXYvals(int gridID, long xsize, long ysize, double *xvals0, double *yvals0)
+int compareXYvals(int gridID, long xsize, long ysize, const double *xvals0, const double *yvals0)
 {
   long i;
   int differ = 0;
@@ -2138,7 +2139,7 @@ int compareXYvals(int gridID, long xsize, long ysize, double *xvals0, double *yv
 }
 
 static
-int compareXYvals2(int gridID, int gridsize, double *xvals, double *yvals)
+int compareXYvals2(int gridID, int gridsize, const double *xvals, const double *yvals)
 {
   int differ = 0;
 
@@ -2216,8 +2217,11 @@ int gridCompare(int gridID, const grid_t *grid)
 		    }
 		  else
 		    {
-		      if ( grid->xvals && grid->yvals )
-			differ = compareXYvals(gridID, grid->xsize, grid->ysize, grid->xvals, grid->yvals);
+                      const double
+                        *grid_xvals = grid->vtable->inqXValsPtr((grid_t *)grid),
+                        *grid_yvals = grid->vtable->inqYValsPtr((grid_t *)grid);
+		      if ( grid_xvals && grid_yvals )
+			differ = compareXYvals(gridID, grid->xsize, grid->ysize, grid_xvals, grid_yvals);
 		    }
 		}
 	      else
@@ -2229,8 +2233,11 @@ int gridCompare(int gridID, const grid_t *grid)
 		{
 		  if ( grid->xdef == 1 && grid->ydef == 1 )
 		    {
+                      const double
+                        *grid_xvals = grid->vtable->inqXValsPtr((grid_t *)grid),
+                        *grid_yvals = grid->vtable->inqYValsPtr((grid_t *)grid);
 		      if ( grid->xvals && grid->yvals )
-			differ = compareXYvals(gridID, grid->xsize, grid->ysize, grid->xvals, grid->yvals);
+			differ = compareXYvals(gridID, grid->xsize, grid->ysize, grid_xvals, grid_yvals);
 		    }
 		}
 	      else if ( (grid->ysize == 0 || grid->ysize == 1) &&
@@ -2257,8 +2264,11 @@ int gridCompare(int gridID, const grid_t *grid)
 		    }
 		  else
 		    {
-		      if ( grid->xvals && grid->yvals )
-			differ = compareXYvals(gridID, grid->xsize, grid->ysize, grid->xvals, grid->yvals);
+                      const double
+                        *grid_xvals = grid->vtable->inqXValsPtr((grid_t *)grid),
+                        *grid_yvals = grid->vtable->inqYValsPtr((grid_t *)grid);
+		      if ( grid_xvals && grid_yvals )
+			differ = compareXYvals(gridID, grid->xsize, grid->ysize, grid_xvals, grid_yvals);
 		    }
 		}
 	      else
@@ -2282,7 +2292,12 @@ int gridCompare(int gridID, const grid_t *grid)
 	      printf("grid nv     %d\n", gridInqNvertex(gridID));
 	      */
 	      if ( grid->xsize == gridInqXsize(gridID) && grid->ysize == gridInqYsize(gridID) )
-		differ = compareXYvals2(gridID, grid->size, grid->xvals, grid->yvals);
+                {
+                  const double
+                    *grid_xvals = grid->vtable->inqXValsPtr((grid_t *)grid),
+                    *grid_yvals = grid->vtable->inqYValsPtr((grid_t *)grid);
+                  differ = compareXYvals2(gridID, grid->size, grid_xvals, grid_yvals);
+                }
 	    }
 	  else if ( grid->type == GRID_UNSTRUCTURED )
 	    {
@@ -2293,9 +2308,12 @@ int gridCompare(int gridID, const grid_t *grid)
                * for any non-NULL UUID */
               differ = differ || ( uuidOfHGrid[0] && grid->uuid[0] && memcmp(uuidOfHGrid, grid->uuid, CDI_UUID_SIZE) != 0 );
 
+              const double
+                *grid_xvals = grid->vtable->inqXValsPtr((grid_t *)grid),
+                *grid_yvals = grid->vtable->inqYValsPtr((grid_t *)grid);
               if ( !differ &&
-                   ((grid->xvals == NULL && gridInqXvalsPtr(gridID) != NULL) || (grid->xvals != NULL && gridInqXvalsPtr(gridID) == NULL)) &&
-                   ((grid->yvals == NULL && gridInqYvalsPtr(gridID) != NULL) || (grid->yvals != NULL && gridInqYvalsPtr(gridID) == NULL)) )
+                   ((grid_xvals == NULL && gridInqXvalsPtr(gridID) != NULL) || (grid_xvals != NULL && gridInqXvalsPtr(gridID) == NULL)) &&
+                   ((grid_yvals == NULL && gridInqYvalsPtr(gridID) != NULL) || (grid_yvals != NULL && gridInqYvalsPtr(gridID) == NULL)) )
                 {
                   int nvertexA, nvertexB, numberA, numberB,
                     positionA, positionB;
@@ -2313,7 +2331,7 @@ int gridCompare(int gridID, const grid_t *grid)
                   differ = grid->nvertex != gridInqNvertex(gridID)
                     || grid->number != gridInqNumber(gridID)
                     || (grid->number > 0 && grid->position != gridInqPosition(gridID))
-                    || compareXYvals2(gridID, grid->size, grid->xvals, grid->yvals);
+                    || compareXYvals2(gridID, grid->size, grid_xvals, grid_yvals);
                 }
               }
 	}
@@ -2392,23 +2410,27 @@ int gridCompareP ( void * gridptr1, void * gridptr2 )
   if ( IS_NOT_EQUAL(g1->ypole         , g2->ypole)         ) return differ;
   if ( IS_NOT_EQUAL(g1->angle         , g2->angle)         ) return differ;
 
-  if ( g1->xvals )
+  const double *restrict g1_xvals = g1->vtable->inqXValsPtr(g1),
+    *restrict g2_xvals = g2->vtable->inqXValsPtr(g2);
+  if ( g1_xvals )
     {
       if ( g1->type == GRID_UNSTRUCTURED || g1->type == GRID_CURVILINEAR )
-	size = g1->size;
+        size = g1->size;
       else
-	size = g1->xsize;
+        size = g1->xsize;
       xassert ( size );
 
-      if ( !g2->xvals ) return differ;
+      if ( !g2_xvals ) return differ;
 
       for ( i = 0; i < size; i++ )
-	if ( IS_NOT_EQUAL(g1->xvals[i], g2->xvals[i]) ) return differ;
+        if ( IS_NOT_EQUAL(g1_xvals[i], g2_xvals[i]) ) return differ;
     }
-  else if ( g2->xvals )
+  else if ( g2_xvals )
     return differ;
 
-  if ( g1->yvals )
+  const double *restrict g1_yvals = g1->vtable->inqXValsPtr(g1),
+    *restrict g2_yvals = g2->vtable->inqXValsPtr(g2);
+  if ( g1_yvals )
     {
       if ( g1->type == GRID_UNSTRUCTURED || g1->type == GRID_CURVILINEAR )
 	size = g1->size;
@@ -2416,26 +2438,26 @@ int gridCompareP ( void * gridptr1, void * gridptr2 )
 	size = g1->ysize;
       xassert ( size );
 
-      if ( !g2->yvals ) return differ;
+      if ( !g2_yvals ) return differ;
 
       for ( i = 0; i < size; i++ )
-        if ( IS_NOT_EQUAL(g1->yvals[i], g2->yvals[i]) ) return differ;
+        if ( IS_NOT_EQUAL(g1_yvals[i], g2_yvals[i]) ) return differ;
     }
-  else if ( g2->yvals )
+  else if ( g2_yvals )
     return differ;
 
-  const double *restrict g1_area;
-  if ( (g1_area = g1->vtable->inqAreaPtr(g1)) )
+  const double *restrict g1_area = g1->vtable->inqAreaPtr(g1),
+    *restrict g2_area = g2->vtable->inqAreaPtr(g2);
+  if ( g1_area )
     {
       xassert ( g1->size );
 
-      const double *restrict g2_area = g2->vtable->inqAreaPtr(g2);
       if ( !g2_area ) return differ;
 
       for ( i = 0; i < g1->size; i++ )
 	if ( IS_NOT_EQUAL(g1_area[i], g2_area[i]) ) return differ;
     }
-  else if ( g2->vtable->inqAreaPtr(g2) )
+  else if ( g2_area )
     return differ;
 
   {
@@ -2868,8 +2890,8 @@ void gridCompress(int gridID)
 	  size_t nv = (size_t)gridptr->nvertex;
           double *restrict area
             = (double *)gridptr->vtable->inqAreaPtr(gridptr),
-            *restrict xvals = gridptr->xvals,
-            *restrict yvals = gridptr->yvals,
+            *restrict xvals = (double *)gridptr->vtable->inqXValsPtr((grid_t *)gridptr),
+            *restrict yvals = (double *)gridptr->vtable->inqYValsPtr((grid_t *)gridptr),
             *restrict xbounds = (double *)gridptr->vtable->inqXBoundsPtr(gridptr),
             *restrict ybounds = (double *)gridptr->vtable->inqYBoundsPtr(gridptr);
           mask_t *restrict mask_gme = gridptr->mask_gme;
@@ -3603,7 +3625,7 @@ void gridPrintP ( void * voidptr, FILE * fp )
     }
 }
 
-const double *gridInqXValsPtrSerial(grid_t *gridptr)
+static const double *gridInqXValsPtrSerial(grid_t *gridptr)
 {
   return gridptr->xvals;
 }
@@ -4073,8 +4095,10 @@ static int gridGetComponentFlags(const grid_t * gridP)
 {
   int flags = (gridHasMaskFlag & (int)((unsigned)(gridP->mask == NULL) - 1U))
     | (gridHasGMEMaskFlag & (int)((unsigned)(gridP->mask_gme == NULL) - 1U))
-    | (gridHasXValsFlag & (int)((unsigned)(gridP->xvals == NULL) - 1U))
-    | (gridHasYValsFlag & (int)((unsigned)(gridP->yvals == NULL) - 1U))
+    | (gridHasXValsFlag
+       & (int)((unsigned)(gridP->vtable->inqXValsPtr((grid_t *)gridP) == NULL) - 1U))
+    | (gridHasYValsFlag
+       & (int)((unsigned)(gridP->vtable->inqYValsPtr((grid_t *)gridP) == NULL) - 1U))
     | (gridHasAreaFlag
        & (int)((unsigned)(gridP->vtable->inqAreaPtr((grid_t *)gridP) == NULL)
                - 1U))
@@ -4109,7 +4133,7 @@ gridGetPackSize(void * voidP, void *context)
 
   packBuffSize += serializeGetSize(gridNdouble, DATATYPE_FLT64, context);
 
-  if (gridP->xvals)
+  if (gridP->vtable->inqXValsPtr(gridP))
     {
       if (gridP->type == GRID_UNSTRUCTURED || gridP->type == GRID_CURVILINEAR)
 	count = gridP->size;
@@ -4120,7 +4144,7 @@ gridGetPackSize(void * voidP, void *context)
         + serializeGetSize(1, DATATYPE_UINT32, context);
     }
 
-  if (gridP->yvals)
+  if (gridP->vtable->inqYValsPtr(gridP))
     {
       if (gridP->type == GRID_UNSTRUCTURED || gridP->type == GRID_CURVILINEAR)
 	count = gridP->size;
@@ -4519,9 +4543,10 @@ gridPack(void * voidP, void * packBuffer, int packBufferSize,
 	size = gridP->xsize;
       xassert(size);
 
-      serializePack(gridP->xvals, size, DATATYPE_FLT64,
+      const double *gridP_xvals = gridP->vtable->inqXValsPtr(gridP);
+      serializePack(gridP_xvals, size, DATATYPE_FLT64,
                     packBuffer, packBufferSize, packBufferPos, context);
-      d = cdiCheckSum(DATATYPE_FLT, size, gridP->xvals);
+      d = cdiCheckSum(DATATYPE_FLT, size, gridP_xvals);
       serializePack(&d, 1, DATATYPE_UINT32,
                     packBuffer, packBufferSize, packBufferPos, context);
     }
@@ -4533,9 +4558,10 @@ gridPack(void * voidP, void * packBuffer, int packBufferSize,
       else
 	size = gridP->ysize;
       xassert(size);
-      serializePack(gridP->yvals, size, DATATYPE_FLT64,
+      const double *gridP_yvals = gridP->vtable->inqYValsPtr(gridP);
+      serializePack(gridP_yvals, size, DATATYPE_FLT64,
                     packBuffer, packBufferSize, packBufferPos, context);
-      d = cdiCheckSum(DATATYPE_FLT, size, gridP->yvals);
+      d = cdiCheckSum(DATATYPE_FLT, size, gridP_yvals);
       serializePack(&d, 1, DATATYPE_UINT32,
                     packBuffer, packBufferSize, packBufferPos, context);
     }
