@@ -361,7 +361,7 @@ void cgribexAddRecord(stream_t * streamptr, int param, int *isec1, int *isec2, d
 {
   int varID;
   int levelID = 0;
-  grid_t grid;
+  grid_t *grid = (grid_t *)Malloc(sizeof (*grid));
 
   int vlistID = streamptr->vlistID;
   int tsID    = streamptr->curTsID;
@@ -384,9 +384,10 @@ void cgribexAddRecord(stream_t * streamptr, int param, int *isec1, int *isec2, d
   record->ltype     = ISEC1_LevelType;
   record->tsteptype = tsteptype;
 
-  cgribexGetGrid(streamptr, isec2, fsec2, isec4, &grid, iret);
+  cgribexGetGrid(streamptr, isec2, fsec2, isec4, grid, iret);
 
-  int gridID = varDefGrid(vlistID, &grid, 0);
+  int gridID = varDefGrid(vlistID, grid, 0);
+  Free(grid);
 
   int zaxistype = grib1ltypeToZaxisType(ISEC1_LevelType);
 
