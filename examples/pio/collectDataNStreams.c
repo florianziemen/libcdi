@@ -172,14 +172,9 @@ static void modelRun(MPI_Comm commModel)
           hoursPassingHack ( &vdate, &vtime, hourStep );
 	  taxisDefVdate ( taxisID, vdate );
 	  taxisDefVtime ( taxisID, vtime );
-          /* temporary fix for problem calling streamDefTimestep after
-           * streamWriteVarPart
-           * FIXME: this can be merged with the loop below again once
-           * per-stream RDMA windows are realized */
-          for ( i = 0; i < nStreams; i++ )
-            streamDefTimestep(streamID[i], tsID);
           for ( i = 0; i < nStreams; i++ )
             {
+              streamDefTimestep(streamID[i], tsID);
               for ( j = 0; j < nVars; j++ )
                 {
 #ifdef USE_MPI
@@ -208,7 +203,6 @@ static void modelRun(MPI_Comm commModel)
     }
 
 #ifdef USE_MPI
-  pioEndTimestepping ();
   for (size_t streamIdx = 0; streamIdx < (size_t)nStreams; ++streamIdx)
     for (size_t varIdx = 0; varIdx < (size_t)nVars; ++varIdx)
       xt_idxlist_delete(varDeco[streamIdx][varIdx].partDesc);
