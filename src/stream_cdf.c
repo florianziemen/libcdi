@@ -4456,6 +4456,7 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
   size_t attlen;
   char attname[CDI_MAX_NAME];
   double datt;
+  grid_t *restrict grid = NULL, *restrict proj = NULL;
 
   for ( ncvarid = 0; ncvarid < nvars; ++ncvarid )
     {
@@ -4540,10 +4541,10 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 	  if ( ncvars[ncvarid].gridtype == UNDEFID || ncvars[ncvarid].gridtype == GRID_GENERIC )
 	    if ( xdimid != UNDEFID && xdimid == ydimid && nydims == 0 ) ncvars[ncvarid].gridtype = GRID_UNSTRUCTURED;
 
-          grid_t *restrict grid = (grid_t *)Malloc(sizeof (*grid));
+          grid = (grid_t *)Realloc(grid, sizeof (*grid));
 	  grid_init(grid);
           cdiGridTypeInit(grid, ncvars[ncvarid].gridtype, 0);
-          grid_t *restrict proj = (grid_t *)Malloc(sizeof (*proj));
+          proj = (grid_t *)Realloc(proj, sizeof (*proj));
           grid_init(proj);
           cdiGridTypeInit(grid, GRID_PROJECTION, 0);
 
@@ -5142,18 +5143,14 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 		  }
 	      }
 
-          if (!gridAdded.isNew)
-            {
-              grid_free(grid);
-              Free(grid);
-            }
-          if (!projAdded.isNew)
-            {
-              grid_free(proj);
-              Free(proj);
-            }
+          if (gridAdded.isNew)
+            grid = NULL;
+          if (projAdded.isNew)
+            proj = NULL;
 	}
     }
+  Free(grid);
+  Free(proj);
 }
 
 /* define all input zaxes */

@@ -4731,6 +4731,7 @@ gridCompareSearch(int id, void *res, void *data)
     return CDI_APPLY_GO_ON;
 }
 
+/* Add grid (which must be Malloc'ed to vlist if not already found */
 struct addIffNewRes cdiVlistAddGridIfNew(int vlistID, grid_t *grid, int mode)
 {
   /*
