@@ -4719,12 +4719,8 @@ static
 void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars, int timedimid, unsigned char *uuidOfHGrid, char *gridfile, int number_of_grid_used)
 {
   int ncvarid, ncvarid2;
-  int nvatts;
   char name[CDI_MAX_NAME];
-  int iatt;
   int ltwarn = TRUE;
-  size_t attlen;
-  char attname[CDI_MAX_NAME];
   struct cdfLazyGrid *restrict lazyGrid = NULL, *restrict lazyProj = NULL;
 #define grid (&lazyGrid->base)
 #define proj (&lazyProj->base)
@@ -5184,10 +5180,13 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 
 	  if ( ncvars[ncvarid].gmapid >= 0 && ncvars[ncvarid].gridtype != GRID_CURVILINEAR )
 	    {
+              int nvatts;
 	      cdf_inq_varnatts(ncvars[ncvarid].ncid, ncvars[ncvarid].gmapid, &nvatts);
 
-	      for ( iatt = 0; iatt < nvatts; iatt++ )
+	      for ( int iatt = 0; iatt < nvatts; iatt++ )
 		{
+                  size_t attlen;
+                  char attname[CDI_MAX_NAME];
 		  cdf_inq_attname(ncvars[ncvarid].ncid, ncvars[ncvarid].gmapid, iatt, attname);
 		  cdf_inq_attlen(ncvars[ncvarid].ncid, ncvars[ncvarid].gmapid, attname, &attlen);
 
