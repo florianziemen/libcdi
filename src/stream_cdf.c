@@ -4739,7 +4739,7 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 	  int xdimid = -1, ydimid = -1;
 	  int islon = 0, islat = 0;
 	  int nxdims = 0, nydims = 0;
-          size_t size = 0, np = 0;
+          size_t size = 0;
           size_t xsize = 0, ysize = 0;
 	  double yinc = 0;
           struct addIffNewRes projAdded = { .Id = CDI_UNDEFID, .isNew = 0 },
@@ -5054,7 +5054,7 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 		  if ( isGaussGrid(ysize, yinc, grid->yvals) )
                     {
                       ncvars[ncvarid].gridtype = GRID_GAUSSIAN;
-                      np = ysize/2;
+                      grid->np = (int)(ysize/2);
                     }
                   else
 		    ncvars[ncvarid].gridtype = GRID_LONLAT;
@@ -5064,7 +5064,7 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 		  if ( isGaussGrid(ysize, yinc, grid->yvals) )
                     {
                       ncvars[ncvarid].gridtype = GRID_GAUSSIAN;
-                      np = ysize/2;
+                      grid->np = (int)(ysize/2);
                     }
                   else
 		    ncvars[ncvarid].gridtype = GRID_LONLAT;
@@ -5088,7 +5088,6 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 		grid->size  = (int)size;
 		grid->xsize = (int)xsize;
 		grid->ysize = (int)ysize;
-                grid->np    = (int)np;
 		if ( xvarid != UNDEFID )
 		  {
 		    grid->xdef  = 1;
