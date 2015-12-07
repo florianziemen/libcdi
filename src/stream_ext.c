@@ -217,7 +217,7 @@ void extAddRecord(stream_t *streamptr, int param, int level, int xysize,
   record->ilevel   = level;
 
   grid_t grid;
-  memset(&grid, 0, sizeof(grid_t));
+  grid_init(&grid);
   grid.type  = GRID_GENERIC;
   grid.size  = xysize;
   grid.xsize = xysize;

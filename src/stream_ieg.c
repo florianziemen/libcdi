@@ -673,7 +673,7 @@ void iegAddRecord(stream_t *streamptr, int param, int *pdb, int *gdb, double *vc
     ( IEG_G_GridType(gdb) == 4 ) ? GRID_GAUSSIAN : GRID_GENERIC;
 
   grid_t grid;
-  memset(&grid, 0, sizeof(grid_t));
+  grid_init(&grid);
   grid.type  = gridtype;
   grid.size  = IEG_G_NumLon(gdb)*IEG_G_NumLat(gdb);
   grid.xsize = IEG_G_NumLon(gdb);

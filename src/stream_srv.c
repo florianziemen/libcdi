@@ -210,7 +210,7 @@ void srv_add_record(stream_t *streamptr, int param, int level, int xsize, int ys
   record->ilevel   = level;
 
   grid_t grid;
-  memset(&grid, 0, sizeof(grid_t));
+  grid_init(&grid);
   grid.type  = GRID_GENERIC;
   grid.size  = xsize*ysize;
   grid.xsize = xsize;

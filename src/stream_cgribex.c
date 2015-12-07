@@ -167,7 +167,7 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, double *fsec2, int *isec4, 
       compyinc = FALSE;
     }
 
-  memset(grid, 0, sizeof(grid_t));
+  grid_init(grid);
   switch (gridtype)
     {
     case GRID_LONLAT:

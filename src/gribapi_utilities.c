@@ -10,6 +10,7 @@
 #include "dmemory.h"
 #include "error.h"
 #include "gribapi.h"
+#include "grid.h"
 
 #include <assert.h>
 #include <time.h>
@@ -462,7 +463,7 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
       ISEC4_NumValues = ISEC2_NumLon*ISEC2_NumLat;
     }
   */
-  memset(grid, 0, sizeof(grid_t));
+  grid_init(grid);
 
   size_t datasize;
   FAIL_ON_GRIB_ERROR(grib_get_size, gh, "values", &datasize);

@@ -5,7 +5,35 @@
 
 typedef unsigned char mask_t;
 
-typedef struct {
+typedef struct grid_t grid_t;
+
+struct gridVirtTable
+{
+  void (*destroy)(grid_t *gridptr);
+  void (*duplicateData)(grid_t *gridptrOrig, grid_t *gridptrDup);
+  void (*defXVals)(grid_t *gridptr, const double *xvals);
+  void (*defYVals)(grid_t *gridptr, const double *yvals);
+  void (*defMask)(grid_t *gridptr, const int *mask);
+  void (*defMaskGME)(grid_t *gridptr, const int *mask);
+  void (*defXBounds)(grid_t *gridptr, const double *xbounds);
+  void (*defYBounds)(grid_t *gridptr, const double *ybounds);
+  void (*defArea)(grid_t *gridptr, const double *area);
+  double (*inqXVal)(grid_t *gridptr, int index);
+  double (*inqYVal)(grid_t *gridptr, int index);
+  int (*inqXVals)(grid_t *gridptr, double *xvals);
+  int (*inqYVals)(grid_t *gridptr, double *yvals);
+  const double *(*inqXValsPtr)(grid_t *gridptr);
+  const double *(*inqYValsPtr)(grid_t *gridptr);
+  void (*inqArea)(grid_t *gridptr, double *area);
+  int (*inqMask)(grid_t *gridptr, int *mask);
+  int (*inqMaskGME)(grid_t *gridptr, int *mask_gme);
+  int (*inqXBounds)(grid_t *gridptr, double *xbounds);
+  int (*inqYBounds)(grid_t *gridptr, double *ybounds);
+  const double *(*inqXBoundsPtr)(grid_t *gridptr);
+  const double *(*inqYBoundsPtr)(grid_t *gridptr);
+};
+
+struct grid_t {
   int     self;
   int     type;                   /* grid type                      */
   int     prec;                   /* grid precision                 */
@@ -68,12 +96,14 @@ typedef struct {
   char    xunits[CDI_MAX_NAME];
   char    yunits[CDI_MAX_NAME];
   char   *name;
-}
-grid_t;
+  const struct gridVirtTable *vtable;
+  void *extraData;
+};
 
 
 void grid_init(grid_t *gridptr);
 void grid_free(grid_t *gridptr);
+grid_t *gridID2Ptr(int gridID);
 
 unsigned cdiGridCount(void);
 

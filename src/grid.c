@@ -78,10 +78,17 @@ static const resOps gridOps = {
   gridTxCode
 };
 
+static const struct gridVirtTable serialGridVtable;
+
 static int  GRID_Debug = 0;   /* If set to 1, debugging */
 
+grid_t *gridID2Ptr(int gridID)
+{
+  return (grid_t *)reshGetVal(gridID, &gridOps);
+}
 #define gridID2Ptr(gridID) (grid_t *)reshGetVal(gridID, &gridOps)
 #define gridMark4Update(gridID) reshSetStatus(gridID, &gridOps, RESH_DESYNC_IN_USE)
+
 
 void grid_init(grid_t *gridptr)
 {
@@ -156,6 +163,8 @@ void grid_init(grid_t *gridptr)
   gridptr->ystdname  = NULL;
   memset(gridptr->uuid, 0, CDI_UUID_SIZE);
   gridptr->name         = NULL;
+  gridptr->vtable       = &serialGridVtable;
+  gridptr->extraData    = NULL;
 }
 
 
@@ -359,7 +368,7 @@ cdiGridTypeInit(grid_t *gridptr, int gridtype, int size)
 
 
 // used also in CDO
-void gridGenXvals(int xsize, double xfirst, double xlast, double xinc, double *xvals)
+void gridGenXvals(int xsize, double xfirst, double xlast, double xinc, double *restrict xvals)
 {
   if ( (! (fabs(xinc) > 0)) && xsize > 1 )
     {
@@ -379,7 +388,7 @@ void gridGenXvals(int xsize, double xfirst, double xlast, double xinc, double *x
 }
 
 static
-void calc_gaussgrid(double *yvals, int ysize, double yfirst, double ylast)
+void calc_gaussgrid(double *restrict yvals, int ysize, double yfirst, double ylast)
 {
   double *restrict yw = (double *) Malloc((size_t)ysize * sizeof(double));
   gaussaw(yvals, yw, (size_t)ysize);
@@ -578,13 +587,12 @@ void gridDestroyKernel( grid_t * gridptr )
 void gridDestroy(int gridID)
 {
   grid_t *gridptr = gridID2Ptr(gridID);
-
-  gridDestroyKernel ( gridptr );
+  gridptr->vtable->destroy(gridptr);
 }
 
 void gridDestroyP ( void * gridptr )
 {
-  gridDestroyKernel (( grid_t * ) gridptr );
+  ((grid_t *)gridptr)->vtable->destroy((grid_t *)gridptr);
 }
 
 
@@ -986,7 +994,7 @@ int gridInqSize(int gridID)
       ysize = gridptr->ysize;
 
       if ( ysize )
-        size = xsize *ysize;
+        size = xsize * ysize;
       else
         size = xsize;
 
@@ -1061,7 +1069,8 @@ void gridDefXsize(int gridID, int xsize)
   if ( xsize > gridSize )
     Error("xsize %d is greater then gridsize %d", xsize, gridSize);
 
-  if ( gridInqType(gridID) == GRID_UNSTRUCTURED && xsize != gridSize )
+  int gridType = gridInqType(gridID);
+  if ( gridType == GRID_UNSTRUCTURED && xsize != gridSize )
     Error("xsize %d must be equal to gridsize %d for gridtype: UNSTRUCTURED", xsize, gridSize);
 
   if (gridptr->xsize != xsize)
@@ -1070,7 +1079,7 @@ void gridDefXsize(int gridID, int xsize)
       gridptr->xsize = xsize;
     }
 
-  if ( gridInqType(gridID) != GRID_UNSTRUCTURED )
+  if ( gridType != GRID_UNSTRUCTURED )
     {
       long axisproduct = gridptr->xsize*gridptr->ysize;
       if ( axisproduct > 0 && axisproduct != gridSize )
@@ -1293,34 +1302,48 @@ void gridInqRowlon(int gridID, int *rowlon)
   memcpy(rowlon, gridptr->rowlon, (size_t)gridptr->nrowlon * sizeof(int));
 }
 
-
-int gridInqMask(int gridID, int *mask)
+static int
+gridInqMaskSerialGeneric(grid_t *gridptr, mask_t **internalMask,
+                        int *restrict mask)
 {
-  grid_t *gridptr = gridID2Ptr(gridID);
-
   long size = gridptr->size;
 
   if ( CDI_Debug && size == 0 )
-    Warning("Size undefined for gridID = %d", gridID);
+    Warning("Size undefined for gridID = %d", gridptr->self);
 
-  if (mask && gridptr->mask)
-    for (long i = 0; i < size; ++i)
-      mask[i] = (int)gridptr->mask[i];
-
-  if ( gridptr->mask == NULL ) size = 0;
+  const mask_t *restrict mask_src = *internalMask;
+  if (mask_src)
+    {
+      if (mask && size > 0)
+        for (size_t i = 0; i < (size_t)size; ++i)
+          mask[i] = (int)mask_src[i];
+    }
+  else
+    size = 0;
 
   return (int)size;
 }
 
+static int
+gridInqMaskSerial(grid_t *gridptr, int *mask)
+{
+  return gridInqMaskSerialGeneric(gridptr, &gridptr->mask, mask);
+}
 
-void gridDefMask(int gridID, const int *mask)
+
+int gridInqMask(int gridID, int *mask)
 {
   grid_t *gridptr = gridID2Ptr(gridID);
+  return gridptr->vtable->inqMask(gridptr, mask);
+}
 
+static void
+gridDefMaskSerial(grid_t *gridptr, const int *mask)
+{
   long size = gridptr->size;
 
   if ( size == 0 )
-    Error("Size undefined for gridID = %d", gridID);
+    Error("Size undefined for gridID = %d", gridptr->self);
 
   if ( mask == NULL )
     {
@@ -1340,37 +1363,34 @@ void gridDefMask(int gridID, const int *mask)
       for (long i = 0; i < size; ++i )
 	gridptr->mask[i] = (mask_t)(mask[i] != 0);
     }
+}
+
+void gridDefMask(int gridID, const int *mask)
+{
+  grid_t *gridptr = gridID2Ptr(gridID);
+  gridptr->vtable->defMask(gridptr, mask);
   gridMark4Update(gridID);
 }
 
+static int
+gridInqMaskGMESerial(grid_t *gridptr, int *mask_gme)
+{
+  return gridInqMaskSerialGeneric(gridptr, &gridptr->mask_gme, mask_gme);
+}
 
 int gridInqMaskGME(int gridID, int *mask)
 {
   grid_t *gridptr = gridID2Ptr(gridID);
-
-  long size = gridptr->size;
-
-  if ( CDI_Debug && size == 0 )
-    Warning("Size undefined for gridID = %d", gridID);
-
-  if ( mask && gridptr->mask_gme )
-    for (long i = 0; i < size; ++i)
-      mask[i] = (int)gridptr->mask_gme[i];
-
-  if ( gridptr->mask_gme == NULL ) size = 0;
-
-  return (int)size;
+  return gridptr->vtable->inqMaskGME(gridptr, mask);
 }
 
-
-void gridDefMaskGME(int gridID, const int *mask)
+static void
+gridDefMaskGMESerial(grid_t *gridptr, const int *mask)
 {
-  grid_t *gridptr = gridID2Ptr(gridID);
-
   long size = gridptr->size;
 
   if ( size == 0 )
-    Error("Size undefined for gridID = %d", gridID);
+    Error("Size undefined for gridID = %d", gridptr->self);
 
   if ( gridptr->mask_gme == NULL )
     gridptr->mask_gme = (mask_t *) Malloc((size_t)size * sizeof (mask_t));
@@ -1379,7 +1399,38 @@ void gridDefMaskGME(int gridID, const int *mask)
 
   for (long i = 0; i < size; ++i)
     gridptr->mask_gme[i] = (mask_t)(mask[i] != 0);
+}
+
+void gridDefMaskGME(int gridID, const int *mask)
+{
+  grid_t *gridptr = gridID2Ptr(gridID);
+  gridptr->vtable->defMaskGME(gridptr, mask);
   gridMark4Update(gridID);
+}
+
+
+static int
+gridInqXValsSerial(grid_t *gridptr, double *xvals)
+{
+  long size;
+  if ( gridptr->type == GRID_CURVILINEAR || gridptr->type == GRID_UNSTRUCTURED )
+    size = gridptr->size;
+  else if ( gridptr->type == GRID_GAUSSIAN_REDUCED )
+    size = 2;
+  else
+    size = gridptr->xsize;
+
+  if ( CDI_Debug && size == 0 )
+    Warning("size undefined for gridID = %d", gridptr->self);
+
+  if (gridptr->xvals)
+    {
+      if ( size && xvals )
+        memcpy(xvals, gridptr->xvals, (size_t)size * sizeof (double));
+    }
+  else
+    size = 0;
+  return (int)size;
 }
 
 /*
@@ -1405,24 +1456,31 @@ Otherwise, 0 is returned and @func{xvals} is empty.
 int gridInqXvals(int gridID, double *xvals)
 {
   grid_t *gridptr = gridID2Ptr(gridID);
+  return gridptr->vtable->inqXVals(gridptr, xvals);
+}
+
+
+static void
+gridDefXValsSerial(grid_t *gridptr, const double *xvals)
+{
+  int gridtype = gridptr->type;
 
   long size;
-  if ( gridptr->type == GRID_CURVILINEAR || gridptr->type == GRID_UNSTRUCTURED )
+  if ( gridtype == GRID_UNSTRUCTURED || gridtype == GRID_CURVILINEAR )
     size = gridptr->size;
-  else if ( gridptr->type == GRID_GAUSSIAN_REDUCED )
+  else if ( gridtype == GRID_GAUSSIAN_REDUCED )
     size = 2;
   else
     size = gridptr->xsize;
 
-  if ( CDI_Debug && size == 0 )
-    Warning("size undefined for gridID = %d", gridID);
+  if ( size == 0 )
+    Error("Size undefined for gridID = %d", gridptr->self);
 
-  if ( size && xvals && gridptr->xvals )
-    memcpy(xvals, gridptr->xvals, (size_t)size * sizeof (double));
-
-  if ( gridptr->xvals == NULL ) size = 0;
-
-  return (int)size;
+  if (gridptr->xvals && CDI_Debug)
+    Warning("values already defined!");
+  gridptr->xvals = (double *)Realloc(gridptr->xvals,
+                                      (size_t)size * sizeof(double));
+  memcpy(gridptr->xvals, xvals, (size_t)size * sizeof (double));
 }
 
 /*
@@ -1442,26 +1500,30 @@ The function @func{gridDefXvals} defines all values of the X-axis.
 void gridDefXvals(int gridID, const double *xvals)
 {
   grid_t *gridptr = gridID2Ptr(gridID);
-  int gridtype = gridptr->type;
-
-  long size;
-
-  if ( gridtype == GRID_UNSTRUCTURED || gridtype == GRID_CURVILINEAR )
-    size = gridptr->size;
-  else if ( gridtype == GRID_GAUSSIAN_REDUCED )
-    size = 2;
-  else
-    size = gridptr->xsize;
-
-  if ( size == 0 )
-    Error("Size undefined for gridID = %d", gridID);
-
-  if (gridptr->xvals && CDI_Debug)
-    Warning("values already defined!");
-  gridptr->xvals = (double *) Realloc(gridptr->xvals,
-                                      (size_t)size * sizeof(double));
-  memcpy(gridptr->xvals, xvals, (size_t)size * sizeof (double));
+  gridptr->vtable->defXVals(gridptr, xvals);
   gridMark4Update(gridID);
+}
+
+static int
+gridInqYValsSerial(grid_t *gridptr, double *yvals)
+{
+  int gridtype = gridptr->type;
+  long size
+    = (gridtype == GRID_CURVILINEAR || gridtype == GRID_UNSTRUCTURED)
+    ? gridptr->size : gridptr->ysize;
+
+  if ( CDI_Debug && size == 0 )
+    Warning("size undefined for gridID = %d!", gridptr->self);
+
+  if ( gridptr->yvals )
+    {
+      if ( size && yvals )
+        memcpy(yvals, gridptr->yvals, (size_t)size * sizeof (double));
+    }
+  else
+    size = 0;
+
+  return (int)size;
 }
 
 /*
@@ -1487,22 +1549,27 @@ Otherwise, 0 is returned and @func{yvals} is empty.
 int gridInqYvals(int gridID, double *yvals)
 {
   grid_t *gridptr = gridID2Ptr(gridID);
+  return gridptr->vtable->inqYVals(gridptr, yvals);
+}
 
+static void
+gridDefYValsSerial(grid_t *gridptr, const double *yvals)
+{
   int gridtype = gridptr->type;
   long size
     = (gridtype == GRID_CURVILINEAR || gridtype == GRID_UNSTRUCTURED)
     ? gridptr->size : gridptr->ysize;
 
-  if ( CDI_Debug && size == 0 )
-    Warning("size undefined for gridID = %d!", gridID);
+  if ( size == 0 )
+    Error("Size undefined for gridID = %d!", gridptr->self);
 
-  if ( size && yvals && gridptr->yvals )
-    memcpy(yvals, gridptr->yvals, (size_t)size * sizeof (double));
+  if (gridptr->yvals && CDI_Debug)
+    Warning("Values already defined!");
 
-  if ( gridptr->yvals == NULL ) size = 0;
-
-  return (int)size;
+  gridptr->yvals = (double *)Realloc(gridptr->yvals, (size_t)size * sizeof (double));
+  memcpy(gridptr->yvals, yvals, (size_t)size * sizeof (double));
 }
+
 
 /*
 @Function  gridDefYvals
@@ -1521,32 +1588,29 @@ The function @func{gridDefYvals} defines all values of the Y-axis.
 void gridDefYvals(int gridID, const double *yvals)
 {
   grid_t *gridptr = gridID2Ptr(gridID);
-
-  int gridtype = gridptr->type;
-  long size
-    = (gridtype == GRID_CURVILINEAR || gridtype == GRID_UNSTRUCTURED)
-    ? gridptr->size : gridptr->ysize;
-
-  if ( size == 0 )
-    Error("Size undefined for gridID = %d!", gridID);
-
-  if (gridptr->yvals && CDI_Debug)
-    Warning("Values already defined!");
-
-  gridptr->yvals = (double *) Realloc(gridptr->yvals, (size_t)size * sizeof (double));
-  memcpy(gridptr->yvals, yvals, (size_t)size * sizeof (double));
+  gridptr->vtable->defYVals(gridptr, yvals);
   gridMark4Update(gridID);
+}
+
+static double
+gridInqXValSerial(grid_t *gridptr, int index)
+{
+  double xval = gridptr->xvals ? gridptr->xvals[index] : 0;
+  return xval;
 }
 
 
 double gridInqXval(int gridID, int index)
 {
-  double xval = 0;
   grid_t *gridptr = gridID2Ptr(gridID);
+  return gridptr->vtable->inqXVal(gridptr, index);
+}
 
-  if ( gridptr->xvals ) xval = gridptr->xvals[index];
-
-  return xval;
+static double
+gridInqYValSerial(grid_t *gridptr, int index)
+{
+  double yval = gridptr->yvals ? gridptr->yvals[index] : 0;
+  return yval;
 }
 
 /*
@@ -1561,12 +1625,8 @@ double gridInqXval(int gridID, int index)
 */
 double gridInqYval(int gridID, int index)
 {
-  double yval = 0;
   grid_t *gridptr = gridID2Ptr(gridID);
-
-  if ( gridptr->yvals ) yval = gridptr->yvals[index];
-
-  return yval;
+  return gridptr->vtable->inqYVal(gridptr, index);
 }
 
 /*
@@ -1583,7 +1643,7 @@ double gridInqXinc(int gridID)
 {
   grid_t *gridptr = gridID2Ptr(gridID);
   double xinc = gridptr->xinc;
-  const double *restrict xvals = gridptr->xvals;
+  const double *restrict xvals = gridptr->vtable->inqXValsPtr(gridptr);
 
   if ( (! (fabs(xinc) > 0)) && xvals )
     {
@@ -1591,7 +1651,7 @@ double gridInqXinc(int gridID)
       if ( xsize > 1 )
         {
           xinc = fabs(xvals[xsize-1] - xvals[0])/(xsize-1);
-          for ( size_t i = 2; i < (size_t)xsize; i++ )
+          for (size_t i = 2; i < (size_t)xsize; i++ )
             if ( fabs(fabs(xvals[i-1] - xvals[i]) - xinc) > 0.01*xinc )
               {
                 xinc = 0;
@@ -1619,7 +1679,7 @@ double gridInqYinc(int gridID)
 {
   grid_t *gridptr = gridID2Ptr(gridID);
   double yinc = gridptr->yinc;
-  const double *yvals = gridptr->yvals;
+  const double *yvals = gridptr->vtable->inqYValsPtr(gridptr);
 
   if ( (! (fabs(yinc) > 0)) && yvals )
     {
@@ -1628,8 +1688,8 @@ double gridInqYinc(int gridID)
         {
           yinc = yvals[1] - yvals[0];
           double abs_yinc = fabs(yinc);
-          for ( size_t i = 2; i < (size_t)ysize; i++ )
-            if ( fabs(fabs(yvals[i] - yvals[i-1]) - abs_yinc) > (0.01*abs_yinc))
+          for (size_t i = 2; i < (size_t)ysize; i++ )
+            if ( fabs(fabs(yvals[i] - yvals[i-1]) - abs_yinc) > (0.01*abs_yinc) )
               {
                 yinc = 0;
                 break;
@@ -1944,8 +2004,8 @@ void grid_check_cyclic(grid_t *gridptr)
 
   int xsize = gridptr->xsize,
     ysize = gridptr->ysize;
-  const double *xvals = gridptr->xvals,
-    *xbounds = gridptr->xbounds;
+  const double *xvals = gridptr->vtable->inqXValsPtr(gridptr),
+    *xbounds = gridptr->vtable->inqXBoundsPtr(gridptr);
 
   if ( gridptr->type == GRID_GAUSSIAN || gridptr->type == GRID_LONLAT )
     {
@@ -2052,11 +2112,9 @@ int compareXYvals(int gridID, long xsize, long ysize, double *xvals0, double *yv
   long i;
   int differ = 0;
 
-  if ( !differ && xsize == gridInqXvals(gridID, NULL) )
+  if ( !differ && xsize > 0 && xsize == gridInqXvals(gridID, NULL) )
     {
-      double *xvals = (double *) Malloc((size_t)xsize * sizeof (double));
-
-      gridInqXvals(gridID, xvals);
+      const double *restrict xvals = gridInqXvalsPtr(gridID);
 
       for ( i = 0; i < xsize; ++i )
 	if ( fabs(xvals0[i] - xvals[i]) > 1.e-10 )
@@ -2064,24 +2122,18 @@ int compareXYvals(int gridID, long xsize, long ysize, double *xvals0, double *yv
 	    differ = 1;
 	    break;
 	  }
-
-      Free(xvals);
     }
 
-  if ( !differ && ysize == gridInqYvals(gridID, NULL) )
+  if ( !differ && ysize > 0 && ysize == gridInqYvals(gridID, NULL) )
     {
-      double *yvals = (double *) Malloc((size_t)ysize * sizeof (double));
+      const double *restrict yvals = gridInqYvalsPtr(gridID);
 
-      gridInqYvals(gridID, yvals);
-
-      for ( i = 0; i < ysize; ++i )
+      for ( size_t i = 0; i < (size_t)ysize; ++i )
 	if ( fabs(yvals0[i] - yvals[i]) > 1.e-10 )
 	  {
 	    differ = 1;
 	    break;
 	  }
-
-      Free(yvals);
     }
 
   return (differ);
@@ -2386,39 +2438,45 @@ int gridCompareP ( void * gridptr1, void * gridptr2 )
   else if ( g2->area )
     return differ;
 
-  if ( g1->xbounds )
-    {
-      xassert ( g1->nvertex );
-      if ( g1->type == GRID_CURVILINEAR || g1->type == GRID_UNSTRUCTURED )
-	size = g1->nvertex * g1->size;
-      else
-	size = g1->nvertex * g1->xsize;
-      xassert ( size );
+  {
+    const double *restrict g1_xbounds, *restrict g2_xbounds;
+    if ( (g1_xbounds = g1->vtable->inqXBoundsPtr(g1)) )
+      {
+        xassert ( g1->nvertex );
+        if ( g1->type == GRID_CURVILINEAR || g1->type == GRID_UNSTRUCTURED )
+          size = g1->nvertex * g1->size;
+        else
+          size = g1->nvertex * g1->xsize;
+        xassert ( size );
 
-      if ( !g2->xbounds ) return differ;
+        if ( !(g2_xbounds = g2->vtable->inqXBoundsPtr(g2)) ) return differ;
 
-      for ( i = 0; i < size; i++ )
-	if ( IS_NOT_EQUAL(g1->xbounds[i], g2->xbounds[i]) ) return differ;
-    }
-  else if ( g2->xbounds )
-    return differ;
+        for ( i = 0; i < size; i++ )
+          if ( IS_NOT_EQUAL(g1_xbounds[i], g2_xbounds[i]) ) return differ;
+      }
+    else if ( g2->vtable->inqXBoundsPtr(g2) )
+      return differ;
+  }
 
-  if ( g1->ybounds )
-    {
-      xassert ( g1->nvertex );
-      if ( g1->type == GRID_CURVILINEAR || g1->type == GRID_UNSTRUCTURED )
-	size = g1->nvertex * g1->size;
-      else
-	size = g1->nvertex * g1->ysize;
-      xassert ( size );
+  {
+    const double *restrict g1_ybounds, *restrict g2_ybounds;
+    if ( (g1_ybounds = g1->vtable->inqYBoundsPtr(g1)) )
+      {
+        xassert ( g1->nvertex );
+        if ( g1->type == GRID_CURVILINEAR || g1->type == GRID_UNSTRUCTURED )
+          size = g1->nvertex * g1->size;
+        else
+          size = g1->nvertex * g1->ysize;
+        xassert ( size );
 
-      if ( !g2->ybounds ) return differ;
+        if ( ! (g2_ybounds = g2->vtable->inqYBoundsPtr(g2)) ) return differ;
 
-      for ( i = 0; i < size; i++ )
-	if ( IS_NOT_EQUAL(g1->ybounds[i], g2->ybounds[i]) ) return differ;
-    }
-  else if ( g2->ybounds )
-    return differ;
+        for ( i = 0; i < size; i++ )
+          if ( IS_NOT_EQUAL(g1->ybounds[i], g2->ybounds[i]) ) return differ;
+      }
+    else if ( g2->vtable->inqYBoundsPtr(g2) )
+      return differ;
+  }
 
   if (strcmp(g1->xname, g2->xname)) return differ;
   if (strcmp(g1->yname, g2->yname)) return differ;
@@ -2494,8 +2552,10 @@ int gridGenerate(const grid_t *grid)
 	if ( grid->xdef == 1 )
 	  {
 	    gridDefXvals(gridID, grid->xvals);
-	    if ( grid->xbounds )
-	      gridDefXbounds(gridID, grid->xbounds);
+            const double *grid_xbounds
+              = grid->vtable->inqXBoundsPtr((grid_t *)grid);
+            if ( grid_xbounds )
+	      gridDefXbounds(gridID, grid_xbounds);
 	  }
 	else if ( grid->xdef == 2 )
 	  {
@@ -2512,8 +2572,10 @@ int gridGenerate(const grid_t *grid)
 	if ( grid->ydef == 1 )
 	  {
 	    gridDefYvals(gridID, grid->yvals);
-	    if ( grid->ybounds && grid->nvertex )
-	      gridDefYbounds(gridID, grid->ybounds);
+            const double *grid_ybounds
+              = grid->vtable->inqYBoundsPtr((grid_t *)grid);
+            if ( grid_ybounds && grid->nvertex )
+	      gridDefYbounds(gridID, grid_ybounds);
 	  }
 	else if ( grid->ydef == 2 )
 	  {
@@ -2595,8 +2657,10 @@ int gridGenerate(const grid_t *grid)
 	if ( grid->ydef == 1 )
 	  {
 	    gridDefYvals(gridID, grid->yvals);
-	    if ( grid->ybounds && grid->nvertex )
-	      gridDefYbounds(gridID, grid->ybounds);
+            const double *grid_ybounds
+              = grid->vtable->inqYBoundsPtr((grid_t *)grid);
+	    if ( grid_ybounds && grid->nvertex )
+	      gridDefYbounds(gridID, grid_ybounds);
 	  }
 	else if ( grid->ydef == 2 )
 	  {
@@ -2666,6 +2730,80 @@ int gridGenerate(const grid_t *grid)
   return (gridID);
 }
 
+static void
+gridDuplicateData(grid_t *gridptrOrig, grid_t *gridptrDup)
+{
+  size_t nrowlon = (size_t)gridptrOrig->nrowlon;
+  size_t gridsize = (size_t)gridptrOrig->size;
+  int gridtype = gridptrOrig->type;
+  int irregular = gridtype == GRID_CURVILINEAR || gridtype == GRID_UNSTRUCTURED;
+  if ( nrowlon )
+    {
+      gridptrDup->rowlon = (int *)Malloc(nrowlon * sizeof (int));
+      memcpy(gridptrDup->rowlon, gridptrOrig->rowlon, nrowlon * sizeof(int));
+    }
+
+  if ( gridptrOrig->xvals != NULL )
+    {
+      size_t size  = irregular ? gridsize : (size_t)gridptrOrig->xsize;
+
+      gridptrDup->xvals = (double *)Malloc(size * sizeof (double));
+      memcpy(gridptrDup->xvals, gridptrOrig->xvals, size * sizeof (double));
+    }
+
+  if ( gridptrOrig->yvals != NULL )
+    {
+      size_t size  = irregular ? gridsize : (size_t)gridptrOrig->ysize;
+
+      gridptrDup->yvals = (double *)Malloc(size * sizeof (double));
+      memcpy(gridptrDup->yvals, gridptrOrig->yvals, size * sizeof (double));
+    }
+
+  if ( gridptrOrig->xbounds != NULL )
+    {
+      size_t size  = (irregular ? gridsize : (size_t)gridptrOrig->xsize)
+        * (size_t)gridptrOrig->nvertex;
+
+      gridptrDup->xbounds = (double *)Malloc(size * sizeof (double));
+      memcpy(gridptrDup->xbounds, gridptrOrig->xbounds, size * sizeof (double));
+    }
+
+  if ( gridptrOrig->ybounds != NULL )
+    {
+      size_t size = (irregular ? gridsize : (size_t)gridptrOrig->ysize)
+        * (size_t)gridptrOrig->nvertex;
+
+      gridptrDup->ybounds = (double *)Malloc(size * sizeof (double));
+      memcpy(gridptrDup->ybounds, gridptrOrig->ybounds, size * sizeof (double));
+    }
+
+  if ( gridptrOrig->area != NULL )
+    {
+      size_t size = gridsize;
+
+      gridptrDup->area = (double *)Malloc(size * sizeof (double));
+      memcpy(gridptrDup->area, gridptrOrig->area, size * sizeof (double));
+    }
+
+  if ( gridptrOrig->mask != NULL )
+    {
+      size_t size = gridsize;
+
+      gridptrDup->mask = (mask_t *)Malloc(size * sizeof(mask_t));
+      memcpy(gridptrDup->mask, gridptrOrig->mask, size * sizeof (mask_t));
+    }
+
+  if ( gridptrOrig->mask_gme != NULL )
+    {
+      size_t size = gridsize;
+
+      gridptrDup->mask_gme = (mask_t *)Malloc(size * sizeof (mask_t));
+      memcpy(gridptrDup->mask_gme, gridptrOrig->mask_gme, size * sizeof(mask_t));
+    }
+
+}
+
+
 /*
 @Function  gridDuplicate
 @Title     Duplicate a horizontal Grid
@@ -2706,71 +2844,7 @@ int gridDuplicate(int gridID)
   if (gridptr->reference)
     gridptrnew->reference = strdupx(gridptr->reference);
 
-  size_t nrowlon = (size_t)gridptr->nrowlon;
-  int irregular = gridtype == GRID_CURVILINEAR || gridtype == GRID_UNSTRUCTURED;
-  if ( nrowlon )
-    {
-      gridptrnew->rowlon = (int *) Malloc(nrowlon * sizeof (int));
-      memcpy(gridptrnew->rowlon, gridptr->rowlon, nrowlon * sizeof(int));
-    }
-
-  if ( gridptr->xvals != NULL )
-    {
-      size_t size  = (size_t)(irregular ? gridsize : gridptr->xsize);
-
-      gridptrnew->xvals = (double *) Malloc(size * sizeof (double));
-      memcpy(gridptrnew->xvals, gridptr->xvals, size * sizeof (double));
-    }
-
-  if ( gridptr->yvals != NULL )
-    {
-      size_t size  = (size_t)(irregular ? gridsize : gridptr->ysize);
-
-      gridptrnew->yvals = (double *) Malloc(size * sizeof (double));
-      memcpy(gridptrnew->yvals, gridptr->yvals, size * sizeof (double));
-    }
-
-  if ( gridptr->xbounds != NULL )
-    {
-      size_t size  = (size_t)(irregular ? gridsize : gridptr->xsize)
-        * (size_t)gridptr->nvertex;
-
-      gridptrnew->xbounds = (double *) Malloc(size * sizeof (double));
-      memcpy(gridptrnew->xbounds, gridptr->xbounds, size * sizeof (double));
-    }
-
-  if ( gridptr->ybounds != NULL )
-    {
-      size_t size = (size_t)(irregular ? gridsize : gridptr->ysize)
-        * (size_t)gridptr->nvertex;
-
-      gridptrnew->ybounds = (double *) Malloc(size * sizeof (double));
-      memcpy(gridptrnew->ybounds, gridptr->ybounds, size * sizeof (double));
-    }
-
-  if ( gridptr->area != NULL )
-    {
-      size_t size = (size_t)gridsize;
-
-      gridptrnew->area = (double *) Malloc(size * sizeof (double));
-      memcpy(gridptrnew->area, gridptr->area, size * sizeof (double));
-    }
-
-  if ( gridptr->mask != NULL )
-    {
-      size_t size = (size_t)gridsize;
-
-      gridptrnew->mask = (mask_t *) Malloc(size * sizeof(mask_t));
-      memcpy(gridptrnew->mask, gridptr->mask, size * sizeof (mask_t));
-    }
-
-  if ( gridptr->mask_gme != NULL )
-    {
-      size_t size = (size_t)gridsize;
-
-      gridptrnew->mask_gme = (mask_t *) Malloc(size * sizeof (mask_t));
-      memcpy(gridptrnew->mask_gme, gridptr->mask_gme, size * sizeof(mask_t));
-    }
+  gridptr->vtable->duplicateData(gridptr, gridptrnew);
 
   return (gridIDnew);
 }
@@ -2790,8 +2864,8 @@ void gridCompress(int gridID)
           double *restrict area = gridptr->area,
             *restrict xvals = gridptr->xvals,
             *restrict yvals = gridptr->yvals,
-            *restrict xbounds = gridptr->xbounds,
-            *restrict ybounds = gridptr->ybounds;
+            *restrict xbounds = (double *)gridptr->vtable->inqXBoundsPtr(gridptr),
+            *restrict ybounds = (double *)gridptr->vtable->inqYBoundsPtr(gridptr);
           mask_t *restrict mask_gme = gridptr->mask_gme;
           size_t *restrict selection = (size_t *)Malloc(gridsize * sizeof (selection[0]));
           size_t nselect;
@@ -2845,15 +2919,13 @@ void gridCompress(int gridID)
     Warning("Unsupported grid type: %s", gridNamePtr(gridtype));
 }
 
-
-void gridDefArea(int gridID, const double *area)
+static void
+gridDefAreaSerial(grid_t *gridptr, const double *area)
 {
-  grid_t *gridptr = gridID2Ptr(gridID);
-
   size_t size = (size_t)gridptr->size;
 
   if ( size == 0 )
-    Error("size undefined for gridID = %d", gridID);
+    Error("size undefined for gridID = %d", gridptr->self);
 
   if ( gridptr->area == NULL )
     gridptr->area = (double *) Malloc(size*sizeof(double));
@@ -2861,16 +2933,28 @@ void gridDefArea(int gridID, const double *area)
     Warning("values already defined!");
 
   memcpy(gridptr->area, area, size * sizeof(double));
+}
+
+
+void gridDefArea(int gridID, const double *area)
+{
+  grid_t *gridptr = gridID2Ptr(gridID);
+  gridptr->vtable->defArea(gridptr, area);
   gridMark4Update(gridID);
+}
+
+static void
+gridInqAreaSerial(grid_t *gridptr, double *area)
+{
+  if (gridptr->area)
+    memcpy(area, gridptr->area, (size_t)gridptr->size * sizeof (double));
 }
 
 
 void gridInqArea(int gridID, double *area)
 {
   grid_t *gridptr = gridID2Ptr(gridID);
-
-  if (gridptr->area)
-    memcpy(area, gridptr->area, (size_t)gridptr->size * sizeof (double));
+  gridptr->vtable->inqArea(gridptr, area);
 }
 
 
@@ -2911,6 +2995,38 @@ int gridInqNvertex(int gridID)
   return (gridptr->nvertex);
 }
 
+static void
+gridDefBoundsGeneric(grid_t *gridptr, const double *bounds, int regularSize,
+                     double **field)
+{
+  int irregular = gridptr->type == GRID_CURVILINEAR
+    || gridptr->type == GRID_UNSTRUCTURED;
+  size_t nvertex = (size_t)gridptr->nvertex;
+  if ( nvertex == 0 )
+    {
+      Warning("nvertex undefined for gridID = %d. Cannot define bounds!",
+              gridptr->self);
+      return;
+    }
+  size_t size = nvertex * (size_t)(irregular ? gridptr->size : regularSize);
+  if ( size == 0 )
+    Error("size undefined for gridID = %d", gridptr->self);
+
+  if (*field == NULL)
+    *field = (double *)Malloc(size * sizeof (double));
+  else if ( CDI_Debug )
+    Warning("values already defined!");
+
+  memcpy(*field, bounds, size * sizeof (double));
+}
+
+
+static void
+gridDefXBoundsSerial(grid_t *gridptr, const double *xbounds)
+{
+  gridDefBoundsGeneric(gridptr, xbounds, gridptr->xsize, &gridptr->xbounds);
+}
+
 /*
 @Function  gridDefXbounds
 @Title     Define the bounds of a X-axis
@@ -2928,27 +3044,28 @@ The function @func{gridDefXbounds} defines all bounds of the X-axis.
 void gridDefXbounds(int gridID, const double *xbounds)
 {
   grid_t *gridptr = gridID2Ptr(gridID);
+  gridptr->vtable->defXBounds(gridptr, xbounds);
+  gridMark4Update(gridID);
+}
 
+static int
+gridInqXBoundsSerial(grid_t *gridptr, double *xbounds)
+{
   size_t nvertex = (size_t)gridptr->nvertex;
-  if ( nvertex == 0 )
-    {
-      Warning("nvertex undefined for gridID = %d. Cannot define bounds!", gridID);
-      return;
-    }
 
   int irregular = gridptr->type == GRID_CURVILINEAR
     || gridptr->type == GRID_UNSTRUCTURED;
   size_t size = nvertex * (size_t)(irregular ? gridptr->size : gridptr->xsize);
-  if ( size == 0 )
-    Error("size undefined for gridID = %d", gridID);
 
-  if (gridptr->xbounds == NULL)
-    gridptr->xbounds = (double *) Malloc(size * sizeof (double));
-  else if ( CDI_Debug )
-    Warning("values already defined!");
+  if ( gridptr->xbounds )
+    {
+      if ( size && xbounds )
+        memcpy(xbounds, gridptr->xbounds, size * sizeof (double));
+    }
+  else
+    size = 0;
 
-  memcpy(gridptr->xbounds, xbounds, size * sizeof (double));
-  gridMark4Update(gridID);
+  return ((int)size);
 }
 
 /*
@@ -2974,27 +3091,26 @@ Otherwise, 0 is returned and @func{xbounds} is empty.
 int gridInqXbounds(int gridID, double *xbounds)
 {
   grid_t *gridptr = gridID2Ptr(gridID);
+  return gridptr->vtable->inqXBounds(gridptr, xbounds);
+}
 
-  size_t nvertex = (size_t)gridptr->nvertex;
-
-  int irregular = gridptr->type == GRID_CURVILINEAR
-    || gridptr->type == GRID_UNSTRUCTURED;
-  size_t size = nvertex * (size_t)(irregular ? gridptr->size : gridptr->xsize);
-
-  if ( size && xbounds && gridptr->xbounds )
-    memcpy(xbounds, gridptr->xbounds, size * sizeof (double));
-
-  if ( gridptr->xbounds == NULL ) size = 0;
-
-  return ((int)size);
+static const double *
+gridInqXBoundsPtrSerial(grid_t *gridptr)
+{
+  return gridptr->xbounds;
 }
 
 
 const double *gridInqXboundsPtr(int gridID)
 {
   grid_t *gridptr = gridID2Ptr(gridID);
+  return gridptr->vtable->inqXBoundsPtr(gridptr);
+}
 
-  return (gridptr->xbounds);
+static void
+gridDefYBoundsSerial(grid_t *gridptr, const double *ybounds)
+{
+  gridDefBoundsGeneric(gridptr, ybounds, gridptr->ysize, &gridptr->ybounds);
 }
 
 /*
@@ -3014,29 +3130,30 @@ The function @func{gridDefYbounds} defines all bounds of the Y-axis.
 void gridDefYbounds(int gridID, const double *ybounds)
 {
   grid_t *gridptr = gridID2Ptr(gridID);
+  gridptr->vtable->defYBounds(gridptr, ybounds);
+  gridMark4Update(gridID);
+}
 
+static int
+gridInqYBoundsSerial(grid_t *gridptr, double *ybounds)
+{
   size_t nvertex = (size_t)gridptr->nvertex;
-  if ( nvertex == 0 )
-    {
-      Warning("nvertex undefined for gridID = %d. Cannot define bounds!", gridID);
-      return;
-    }
 
   int irregular = gridptr->type == GRID_CURVILINEAR
     || gridptr->type == GRID_UNSTRUCTURED;
   size_t size = nvertex * (size_t)(irregular ? gridptr->size : gridptr->ysize);
 
-  if ( size == 0 )
-    Error("size undefined for gridID = %d", gridID);
+  if ( gridptr->ybounds )
+    {
+      if ( size && ybounds )
+        memcpy(ybounds, gridptr->ybounds, size * sizeof (double));
+    }
+  else
+    size = 0;
 
-  if ( gridptr->ybounds == NULL )
-    gridptr->ybounds = (double *) Malloc(size * sizeof (double));
-  else if ( CDI_Debug )
-    Warning("values already defined!");
-
-  memcpy(gridptr->ybounds, ybounds, size * sizeof (double));
-  gridMark4Update(gridID);
+  return ((int)size);
 }
+
 
 /*
 @Function  gridInqYbounds
@@ -3061,27 +3178,20 @@ Otherwise, 0 is returned and @func{ybounds} is empty.
 int gridInqYbounds(int gridID, double *ybounds)
 {
   grid_t *gridptr = gridID2Ptr(gridID);
+  return gridptr->vtable->inqYBounds(gridptr, ybounds);
+}
 
-  size_t nvertex = (size_t)gridptr->nvertex;
-
-  int irregular = gridptr->type == GRID_CURVILINEAR
-    || gridptr->type == GRID_UNSTRUCTURED;
-  size_t size = nvertex * (size_t)(irregular ? gridptr->size : gridptr->ysize);
-
-  if ( size && ybounds && gridptr->ybounds )
-    memcpy(ybounds, gridptr->ybounds, size * sizeof (double));
-
-  if ( gridptr->ybounds == NULL ) size = 0;
-
-  return ((int)size);
+static const double *
+gridInqYBoundsPtrSerial(grid_t *gridptr)
+{
+  return gridptr->ybounds;
 }
 
 
 const double *gridInqYboundsPtr(int gridID)
 {
   grid_t *gridptr = gridID2Ptr(gridID);
-
-  return (gridptr->ybounds);
+  return gridptr->vtable->inqYBoundsPtr(gridptr);
 }
 
 static void
@@ -3483,20 +3593,27 @@ void gridPrintP ( void * voidptr, FILE * fp )
     }
 }
 
+const double *gridInqXValsPtrSerial(grid_t *gridptr)
+{
+  return gridptr->xvals;
+}
 
 const double *gridInqXvalsPtr(int gridID)
 {
   grid_t *gridptr = gridID2Ptr(gridID);
-
-  return ( gridptr->xvals );
+  return gridptr->vtable->inqXValsPtr(gridptr);
 }
 
+
+const double *gridInqYValsPtrSerial(grid_t *gridptr)
+{
+  return gridptr->yvals;
+}
 
 const double *gridInqYvalsPtr(int gridID)
 {
   grid_t *gridptr = gridID2Ptr(gridID);
-
-  return ( gridptr->yvals );
+  return gridptr->vtable->inqYValsPtr(gridptr);
 }
 
 /*
@@ -4579,6 +4696,32 @@ int varDefGrid(int vlistID, const grid_t *grid, int mode)
 
   return (gridID);
 }
+
+static const struct gridVirtTable serialGridVtable
+  = {
+  .destroy = gridDestroyKernel,
+  .duplicateData = gridDuplicateData,
+  .defXVals = gridDefXValsSerial,
+  .defYVals = gridDefYValsSerial,
+  .defMask = gridDefMaskSerial,
+  .defMaskGME = gridDefMaskGMESerial,
+  .defXBounds = gridDefXBoundsSerial,
+  .defYBounds = gridDefYBoundsSerial,
+  .defArea = gridDefAreaSerial,
+  .inqXVal = gridInqXValSerial,
+  .inqYVal = gridInqYValSerial,
+  .inqXVals = gridInqXValsSerial,
+  .inqYVals = gridInqYValsSerial,
+  .inqXValsPtr = gridInqXValsPtrSerial,
+  .inqYValsPtr = gridInqYValsPtrSerial,
+  .inqArea = gridInqAreaSerial,
+  .inqMask = gridInqMaskSerial,
+  .inqMaskGME = gridInqMaskGMESerial,
+  .inqXBounds = gridInqXBoundsSerial,
+  .inqYBounds = gridInqYBoundsSerial,
+  .inqXBoundsPtr = gridInqXBoundsPtrSerial,
+  .inqYBoundsPtr = gridInqYBoundsPtrSerial,
+};
 
 /*
  * Local Variables:
