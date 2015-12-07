@@ -4721,7 +4721,6 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
   int ncvarid, ncvarid2;
   int i;
   int nvatts;
-  int skipvar;
   char name[CDI_MAX_NAME];
   int iatt;
   int ltwarn = TRUE;
@@ -4889,7 +4888,7 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 
               if ( xvarid != UNDEFID )
 		{
-                  skipvar = TRUE;
+                  bool skipvar = true;
 		  islon = ncvars[xvarid].islon;
 		  ndims = ncvars[xvarid].ndims;
 		  if ( ndims == 2 || ndims == 3 )
@@ -4897,29 +4896,24 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 		      ncvars[ncvarid].gridtype = GRID_CURVILINEAR;
 		      size = xsize*ysize;
 		      /* Check size of 2 dimensional coordinate variables */
-		      {
-			int dimid = ncvars[xvarid].dimids[ndims-2];
-			size_t dimsize1 = ncdims[dimid].len;
-			dimid = ncvars[xvarid].dimids[ndims-1];
-			size_t dimsize2 = ncdims[dimid].len;
-			if ( dimsize1*dimsize2 == size ) skipvar = FALSE;
-		      }
+                      int dimid = ncvars[xvarid].dimids[ndims-2];
+                      size_t dimsize1 = ncdims[dimid].len;
+                      dimid = ncvars[xvarid].dimids[ndims-1];
+                      size_t dimsize2 = ncdims[dimid].len;
+                      skipvar = dimsize1*dimsize2 != size;
 		    }
 		  else if ( ndims == 1 )
 		    {
 		      size = xsize;
 		      /* Check size of 1 dimensional coordinate variables */
-		      {
-			int dimid = ncvars[xvarid].dimids[0];
-			size_t dimsize = ncdims[dimid].len;
-			if ( dimsize == size ) skipvar = FALSE;
-		      }
+                      int dimid = ncvars[xvarid].dimids[0];
+                      size_t dimsize = ncdims[dimid].len;
+                      skipvar = dimsize != size;
 		    }
 		  else if ( ndims == 0 && xsize == 0 )
 		    {
-                      xsize = 1;
-		      size = xsize;
-                      skipvar = FALSE;
+                      size = xsize = 1;
+                      skipvar = false;
 		    }
 
                   if ( skipvar )
@@ -4955,7 +4949,7 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 
 	      if ( yvarid != UNDEFID )
 		{
-                  skipvar = TRUE;
+                  bool skipvar = true;
 		  islat = ncvars[yvarid].islat;
 		  ndims = ncvars[yvarid].ndims;
 		  if ( ndims == 2 || ndims == 3 )
@@ -4970,7 +4964,7 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 			dimsize1 = ncdims[dimid].len;
 			dimid = ncvars[yvarid].dimids[ndims-1];
 			dimsize2 = ncdims[dimid].len;
-			if ( dimsize1*dimsize2 == size ) skipvar = FALSE;
+			skipvar = dimsize1*dimsize2 != size;
 		      }
 		    }
 		  else if ( ndims == 1 )
@@ -4984,14 +4978,13 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 			size_t dimsize;
 			dimid = ncvars[yvarid].dimids[0];
 			dimsize = ncdims[dimid].len;
-			if ( dimsize == size ) skipvar = FALSE;
+			skipvar = dimsize != size;
 		      }
 		    }
 		  else if ( ndims == 0 && ysize == 0 )
 		    {
-                      ysize = 1;
-		      size = ysize;
-                      skipvar = FALSE;
+                      size = ysize = 1;
+                      skipvar = false;
 		    }
 
                   if ( skipvar )
