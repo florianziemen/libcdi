@@ -4619,6 +4619,44 @@ cdfLazyGridInqYVal(grid_t *grid, int index)
                              grid->yvals, grid->vtable->inqYValsPtr);
 }
 
+static int
+cdfLazyXYValGetCompare(struct cdfLazyGrid *lazyGridRef,
+                       struct cdfLazyGrid *lazyGridTest)
+{
+  struct xyValGet *valsGetXRef = &lazyGridRef->xValsGet,
+    *valsGetYRef = &lazyGridRef->yValsGet,
+    *valsGetXTest = &lazyGridTest->xValsGet,
+    *valsGetYTest = &lazyGridTest->yValsGet;
+  return valsGetXRef->datasetNCId == valsGetXTest->datasetNCId
+    &&   valsGetXRef->varNCId     == valsGetXTest->varNCId
+    &&   valsGetYRef->datasetNCId == valsGetYTest->datasetNCId
+    &&   valsGetYRef->varNCId     == valsGetYTest->varNCId;
+}
+
+static int
+cdfLazyCompareXYFull(grid_t *gridRef, grid_t *gridTest)
+{
+  int diff;
+  struct cdfLazyGrid *lazyGridRef = (struct cdfLazyGrid *)gridRef;
+  if (gridTest->vtable == &cdfLazyGridVtable)
+    diff = cdfLazyXYValGetCompare(lazyGridRef, (struct cdfLazyGrid *)gridTest);
+  else
+    diff = lazyGridRef->baseVtable->compareXYFull(gridRef, gridTest);
+  return diff;
+}
+
+static int
+cdfLazyCompareXYAO(grid_t *gridRef, grid_t *gridTest)
+{
+  int diff;
+  struct cdfLazyGrid *lazyGridRef = (struct cdfLazyGrid *)gridRef;
+  if (gridTest->vtable == &cdfLazyGridVtable)
+    diff = cdfLazyXYValGetCompare(lazyGridRef, (struct cdfLazyGrid *)gridTest);
+  else
+    diff = lazyGridRef->baseVtable->compareXYAO(gridRef, gridTest);
+  return diff;
+}
+
 
 static const double *
 cdfLazyGridInqXBoundsPtr(grid_t *grid)
@@ -4659,6 +4697,8 @@ cdfLazyGridInitOnce(void)
   cdfLazyGridVtable.inqYValsPtr = cdfLazyGridInqYValsPtr;
   cdfLazyGridVtable.inqXVal = cdfLazyGridInqXVal;
   cdfLazyGridVtable.inqYVal = cdfLazyGridInqYVal;
+  cdfLazyGridVtable.compareXYFull = cdfLazyCompareXYFull;
+  cdfLazyGridVtable.compareXYAO = cdfLazyCompareXYAO;
   cdfLazyGridVtable.inqXBoundsPtr = cdfLazyGridInqXBoundsPtr;
   cdfLazyGridVtable.inqYBoundsPtr = cdfLazyGridInqYBoundsPtr;
   /* create inaccessible memory area, if possible, this serves as
