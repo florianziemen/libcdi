@@ -459,10 +459,11 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
   //       I. e. kick the fixed size array and allocate enough space, whatever that may be.
   strncpy(record->varname, varname, sizeof(record->varname));
 
-  grid_t grid;
-  gribapiGetGrid(gh, &grid);
+  grid_t *grid = (grid_t *)Malloc(sizeof (*grid));
+  gribapiGetGrid(gh, grid);
 
-  int gridID = varDefGrid(vlistID, &grid, 0);
+  int gridID = varDefGrid(vlistID, grid, 0);
+  Free(grid);
 
   int zaxistype = gribapiGetZaxisType(gribEditionNumber(gh), leveltype1);
 
