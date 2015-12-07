@@ -20,6 +20,7 @@ enum collectorCommandTags
   STREAMDEFVLIST,
   WRITETS,
   BLOCK_XFER,
+  DIST_DATA_AGG,
 };
 
 #define MAXWINBUFFERSIZE ((size_t) 2048 * 1024 * 1024)

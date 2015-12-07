@@ -229,6 +229,7 @@ libcdipio_la_SOURCES =							\
 	pio_conf.c							\
 	pio_conf.h							\
 	pio_dbuffer.c							\
+	pio_dist_grid.c							\
 	pio_id_set.h							\
 	pio_impl.h							\
 	pio_interface.c							\
