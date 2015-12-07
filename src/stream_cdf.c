@@ -4719,7 +4719,6 @@ static
 void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars, int timedimid, unsigned char *uuidOfHGrid, char *gridfile, int number_of_grid_used)
 {
   int ncvarid, ncvarid2;
-  int i;
   int nvatts;
   char name[CDI_MAX_NAME];
   int iatt;
@@ -4746,7 +4745,7 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
             gridAdded  = { .Id = CDI_UNDEFID, .isNew = 0 };
 
 	  int ndims = ncvars[ncvarid].ndims;
-	  for ( i = 0; i < ndims; i++ )
+	  for ( int i = 0; i < ndims; i++ )
 	    {
 	      if ( ncvars[ncvarid].dimtype[i] == X_AXIS && nxdims < 2 )
 		{
@@ -5015,10 +5014,12 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
                       if ( islon && (int) ysize > 1 )
                         {
                           yinc = fabs(grid->yvals[0] - grid->yvals[1]);
-                          for ( i = 2; i < (int) ysize; i++ )
-                            if ( (fabs(grid->yvals[i-1] - grid->yvals[i]) - yinc) > (yinc/1000) ) break;
-
-                          if ( i < (int) ysize ) yinc = 0;
+                          for ( size_t i = 2; i < ysize; i++ )
+                            if ( (fabs(grid->yvals[i-1] - grid->yvals[i]) - yinc) > (yinc/1000) )
+                              {
+                                yinc = 0;
+                                break;
+                              }
                         }
                     }
                   else
@@ -5271,7 +5272,7 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
               int zdimid = UNDEFID;
               int xdimidx = -1, ydimidx = -1;
 
-              for ( i = 0; i < ndims; i++ )
+              for ( int i = 0; i < ndims; i++ )
                 {
                   if      ( ncvars[ncvarid].dimtype[i] == X_AXIS ) xdimidx = i;
                   else if ( ncvars[ncvarid].dimtype[i] == Y_AXIS ) ydimidx = i;
@@ -5373,7 +5374,7 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
                 int xdimidx = -1, ydimidx = -1;
 		int ndims2 = ncvars[ncvarid2].ndims;
 
-		for ( i = 0; i < ndims2; i++ )
+		for ( int i = 0; i < ndims2; i++ )
 		  {
 		    if ( ncvars[ncvarid2].dimtype[i] == X_AXIS )
 		      { xdimid2 = ncvars[ncvarid2].dimids[i]; xdimidx = i; }
