@@ -2107,29 +2107,31 @@ int gridIsRotated(int gridID)
 }
 
 static
-int compareXYvals(int gridID, long xsize, long ysize, const double *xvals0, const double *yvals0)
+int compareXYvals(grid_t *gridRef, long xsize, long ysize, const double *xvals0, const double *yvals0)
 {
   long i;
   int differ = 0;
 
-  if ( !differ && xsize > 0 && xsize == gridInqXvals(gridID, NULL) )
+  int xsizeRef;
+  if ( !differ && xsize > 0 && xsize == (xsizeRef = gridRef->vtable->inqXVals(gridRef, NULL)) )
     {
-      const double *restrict xvals = gridInqXvalsPtr(gridID);
+      const double *restrict xvalsRef = gridRef->vtable->inqXValsPtr(gridRef);
 
       for ( i = 0; i < xsize; ++i )
-	if ( fabs(xvals0[i] - xvals[i]) > 1.e-10 )
+	if ( fabs(xvals0[i] - xvalsRef[i]) > 1.e-10 )
 	  {
 	    differ = 1;
 	    break;
 	  }
     }
 
-  if ( !differ && ysize > 0 && ysize == gridInqYvals(gridID, NULL) )
+  int ysizeRef;
+  if ( !differ && ysize > 0 && ysize == (ysizeRef = gridRef->vtable->inqYVals(gridRef, NULL) ) )
     {
-      const double *restrict yvals = gridInqYvalsPtr(gridID);
+      const double *restrict yvalsRef = gridRef->vtable->inqYValsPtr(gridRef);
 
       for ( size_t i = 0; i < (size_t)ysize; ++i )
-	if ( fabs(yvals0[i] - yvals[i]) > 1.e-10 )
+	if ( fabs(yvals0[i] - yvalsRef[i]) > 1.e-10 )
 	  {
 	    differ = 1;
 	    break;
@@ -2168,6 +2170,7 @@ int compareXYvals2(int gridID, int gridsize, const double *xvals, const double *
 int gridCompare(int gridID, const grid_t *grid)
 {
   int differ = 1;
+  grid_t *gridRef = gridID2Ptr(gridID);
 
   if ( grid->type == gridInqType(gridID) || grid->type == GRID_GENERIC )
     {
@@ -2222,7 +2225,7 @@ int gridCompare(int gridID, const grid_t *grid)
                         *grid_xvals = grid->vtable->inqXValsPtr((grid_t *)grid),
                         *grid_yvals = grid->vtable->inqYValsPtr((grid_t *)grid);
 		      if ( grid_xvals && grid_yvals )
-			differ = compareXYvals(gridID, grid->xsize, grid->ysize, grid_xvals, grid_yvals);
+			differ = compareXYvals(gridRef, grid->xsize, grid->ysize, grid_xvals, grid_yvals);
 		    }
 		}
 	      else
@@ -2238,7 +2241,7 @@ int gridCompare(int gridID, const grid_t *grid)
                         *grid_xvals = grid->vtable->inqXValsPtr((grid_t *)grid),
                         *grid_yvals = grid->vtable->inqYValsPtr((grid_t *)grid);
 		      if ( grid->xvals && grid->yvals )
-			differ = compareXYvals(gridID, grid->xsize, grid->ysize, grid_xvals, grid_yvals);
+			differ = compareXYvals(gridRef, grid->xsize, grid->ysize, grid_xvals, grid_yvals);
 		    }
 		}
 	      else if ( (grid->ysize == 0 || grid->ysize == 1) &&
@@ -2269,7 +2272,7 @@ int gridCompare(int gridID, const grid_t *grid)
                         *grid_xvals = grid->vtable->inqXValsPtr((grid_t *)grid),
                         *grid_yvals = grid->vtable->inqYValsPtr((grid_t *)grid);
 		      if ( grid_xvals && grid_yvals )
-			differ = compareXYvals(gridID, grid->xsize, grid->ysize, grid_xvals, grid_yvals);
+			differ = compareXYvals(gridRef, grid->xsize, grid->ysize, grid_xvals, grid_yvals);
 		    }
 		}
 	      else
