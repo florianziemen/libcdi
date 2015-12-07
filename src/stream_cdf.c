@@ -4465,11 +4465,16 @@ struct cdfLazyGrid
 {
   grid_t base;
   const struct gridVirtTable *baseVtable;
+  struct {
+    int datasetNCId, varNCId;
+  } cellAreaGet;
 };
 
 static void cdfLazyGridDestroy(struct cdfLazyGrid *lazyGrid)
 {
   lazyGrid->base.extraData = NULL;
+  if (lazyGrid->base.area == cdfPendingLoad)
+    lazyGrid->base.area = NULL;
 }
 
 static void cdfLazyGridDelete(grid_t *grid)
@@ -4488,11 +4493,34 @@ static void cdfLazyGridDestroyOnce(void)
 #endif
 }
 
+static const double *
+cdfLazyGridInqAreaPtr(grid_t *grid)
+{
+  struct cdfLazyGrid *lazyGrid = (struct cdfLazyGrid *)grid;
+  if (grid->area == cdfPendingLoad)
+    {
+      grid->area = (double *)Malloc((size_t)grid->size * sizeof(double));
+      cdf_get_var_double(lazyGrid->cellAreaGet.datasetNCId,
+                         lazyGrid->cellAreaGet.varNCId, grid->area);
+    }
+  return lazyGrid->baseVtable->inqAreaPtr(grid);
+}
+
+static void
+cdfLazyGridInqArea(grid_t *grid, double *area)
+{
+  grid->vtable->inqAreaPtr(grid);
+  struct cdfLazyGrid *lazyGrid = (struct cdfLazyGrid *)grid;
+  lazyGrid->baseVtable->inqArea(grid, area);
+}
+
 static void
 cdfLazyGridInitOnce(void)
 {
   cdfLazyGridVtable = cdiGridVtable;
   cdfLazyGridVtable.destroy = cdfLazyGridDelete;
+  cdfLazyGridVtable.inqAreaPtr = cdfLazyGridInqAreaPtr;
+  cdfLazyGridVtable.inqArea = cdfLazyGridInqArea;
   /* create inaccessible memory area, if possible, this serves as
    * dummy value for pointers to data not yet loaded */
 #ifdef HAVE_MMAP
@@ -4532,6 +4560,8 @@ cdfLazyGridInit(struct cdfLazyGrid *grid, int gridtype)
   grid_init(&grid->base);
   cdiGridTypeInit(&grid->base, gridtype, 0);
   grid->baseVtable = grid->base.vtable;
+  grid->cellAreaGet.datasetNCId = -1;
+  grid->cellAreaGet.varNCId = -1;
   grid->base.vtable = &cdfLazyGridVtable;
 }
 
@@ -4543,8 +4573,6 @@ cdfLazyGridRenew(struct cdfLazyGrid *restrict *restrict gridpptr, int gridtype)
     *gridpptr = grid = (struct cdfLazyGrid *)Malloc(sizeof (*grid));
   cdfLazyGridInit(grid, gridtype);
 }
-
-
 
 /* define all input grids */
 static
@@ -4953,8 +4981,9 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 
 		if ( ncvars[ncvarid].cellarea != UNDEFID )
 		  {
-		    grid->area = (double *) Malloc(size*sizeof(double));
-		    cdf_get_var_double(ncvars[ncvarid].ncid, ncvars[ncvarid].cellarea, grid->area);
+                    grid->area = cdfPendingLoad;
+                    lazyGrid->cellAreaGet.datasetNCId = ncvars[ncvarid].ncid;
+                    lazyGrid->cellAreaGet.varNCId = ncvars[ncvarid].cellarea;
 		  }
 
 		break;
