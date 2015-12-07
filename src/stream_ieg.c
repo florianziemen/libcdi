@@ -672,15 +672,15 @@ void iegAddRecord(stream_t *streamptr, int param, int *pdb, int *gdb, double *vc
    ( IEG_G_GridType(gdb) == 0 || IEG_G_GridType(gdb) == 10 ) ? GRID_LONLAT :
     ( IEG_G_GridType(gdb) == 4 ) ? GRID_GAUSSIAN : GRID_GENERIC;
 
-  grid_t grid;
-  grid_init(&grid);
-  grid.type  = gridtype;
-  grid.size  = IEG_G_NumLon(gdb)*IEG_G_NumLat(gdb);
-  grid.xsize = IEG_G_NumLon(gdb);
-  grid.ysize = IEG_G_NumLat(gdb);
-  grid.xinc  = 0;
-  grid.yinc  = 0;
-  grid.xdef  = 0;
+  grid_t *grid = (grid_t *)Malloc(sizeof (*grid));
+  grid_init(grid);
+  grid->type  = gridtype;
+  grid->size  = IEG_G_NumLon(gdb)*IEG_G_NumLat(gdb);
+  grid->xsize = IEG_G_NumLon(gdb);
+  grid->ysize = IEG_G_NumLat(gdb);
+  grid->xinc  = 0;
+  grid->yinc  = 0;
+  grid->xdef  = 0;
 
   int iresfac = IEG_G_ResFac(gdb);
   if ( iresfac == 0 ) iresfac = 1000;
@@ -688,66 +688,67 @@ void iegAddRecord(stream_t *streamptr, int param, int *pdb, int *gdb, double *vc
 
   /* if ( IEG_G_FirstLon != 0 || IEG_G_LastLon != 0 ) */
   {
-    if ( grid.xsize > 1 )
+    if ( grid->xsize > 1 )
       {
 	if ( IEG_G_ResFlag(gdb) && IEG_G_LonIncr(gdb) > 0 )
-	  grid.xinc = IEG_G_LonIncr(gdb) * resfac;
+	  grid->xinc = IEG_G_LonIncr(gdb) * resfac;
 	else
-	  grid.xinc = (IEG_G_LastLon(gdb) - IEG_G_FirstLon(gdb)) * resfac / (grid.xsize - 1);
+	  grid->xinc = (IEG_G_LastLon(gdb) - IEG_G_FirstLon(gdb)) * resfac / (grid->xsize - 1);
 
 	/* correct xinc if necessary */
 	if ( IEG_G_FirstLon(gdb) == 0 && IEG_G_LastLon(gdb) > 354000 )
 	  {
-	    double xinc = 360. / grid.xsize;
-            /* FIXME: why not use grid.xinc != xinc as condition? */
-	    if ( fabs(grid.xinc-xinc) > 0.0 )
+	    double xinc = 360. / grid->xsize;
+            /* FIXME: why not use grid->xinc != xinc as condition? */
+	    if ( fabs(grid->xinc-xinc) > 0.0 )
 	      {
-		grid.xinc = xinc;
-		if ( CDI_Debug ) Message("set xinc to %g", grid.xinc);
+		grid->xinc = xinc;
+		if ( CDI_Debug ) Message("set xinc to %g", grid->xinc);
 	      }
 	  }
       }
-    grid.xfirst = IEG_G_FirstLon(gdb) * resfac;
-    grid.xlast  = IEG_G_LastLon(gdb)  * resfac;
-    grid.xdef   = 2;
+    grid->xfirst = IEG_G_FirstLon(gdb) * resfac;
+    grid->xlast  = IEG_G_LastLon(gdb)  * resfac;
+    grid->xdef   = 2;
   }
-  grid.ydef  = 0;
+  grid->ydef  = 0;
   /* if ( IEG_G_FirstLat != 0 || IEG_G_LastLat != 0 ) */
   {
-    if ( grid.ysize > 1 )
+    if ( grid->ysize > 1 )
       {
 	if ( IEG_G_ResFlag(gdb) && IEG_G_LatIncr(gdb) > 0 )
-	  grid.yinc = IEG_G_LatIncr(gdb) * resfac;
+	  grid->yinc = IEG_G_LatIncr(gdb) * resfac;
 	else
-	  grid.yinc = (IEG_G_LastLat(gdb) - IEG_G_FirstLat(gdb)) * resfac / (grid.ysize - 1);
+	  grid->yinc = (IEG_G_LastLat(gdb) - IEG_G_FirstLat(gdb)) * resfac / (grid->ysize - 1);
       }
-    grid.yfirst = IEG_G_FirstLat(gdb) * resfac;
-    grid.ylast  = IEG_G_LastLat(gdb)  * resfac;
-    grid.ydef   = 2;
+    grid->yfirst = IEG_G_FirstLat(gdb) * resfac;
+    grid->ylast  = IEG_G_LastLat(gdb)  * resfac;
+    grid->ydef   = 2;
   }
   /*
-  grid.xfirst= IEG_G_FirstLon(gdb) * resfac;
-  grid.xlast = IEG_G_LastLon(gdb) * resfac;
-  grid.xinc  = IEG_G_LonIncr(gdb) * resfac;
-  grid.xdef  = 2;
-  grid.yfirst= IEG_G_FirstLat(gdb) * resfac;
-  grid.ylast = IEG_G_LastLat(gdb) * resfac;
-  grid.yinc  = IEG_G_LatIncr(gdb) * resfac;
-  grid.ydef  = 2;
+  grid->xfirst= IEG_G_FirstLon(gdb) * resfac;
+  grid->xlast = IEG_G_LastLon(gdb) * resfac;
+  grid->xinc  = IEG_G_LonIncr(gdb) * resfac;
+  grid->xdef  = 2;
+  grid->yfirst= IEG_G_FirstLat(gdb) * resfac;
+  grid->ylast = IEG_G_LastLat(gdb) * resfac;
+  grid->yinc  = IEG_G_LatIncr(gdb) * resfac;
+  grid->ydef  = 2;
   */
-  grid.xvals = NULL;
-  grid.yvals = NULL;
+  grid->xvals = NULL;
+  grid->yvals = NULL;
 
-  grid.isRotated = FALSE;
+  grid->isRotated = FALSE;
   if ( IEG_G_GridType(gdb) == 10 )
     {
-      grid.isRotated = TRUE;
-      grid.ypole     = - IEG_G_LatSP(gdb) * resfac;
-      grid.xpole     =   IEG_G_LonSP(gdb) * resfac - 180;
-      grid.angle     = 0;
+      grid->isRotated = TRUE;
+      grid->ypole     = - IEG_G_LatSP(gdb) * resfac;
+      grid->xpole     =   IEG_G_LonSP(gdb) * resfac - 180;
+      grid->angle     = 0;
     }
 
-  int gridID = varDefGrid(vlistID, &grid, 0);
+  int gridID = varDefGrid(vlistID, grid, 0);
+  Free(grid);
 
   int leveltype = iegGetZaxisType(IEG_P_LevelType(pdb));
 
