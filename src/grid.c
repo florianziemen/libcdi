@@ -3023,14 +3023,16 @@ void gridInqArea(int gridID, double *area)
   gridptr->vtable->inqArea(gridptr, area);
 }
 
+static int
+gridHasAreaBase(grid_t *gridptr)
+{
+  return gridptr->area != NULL;
+}
 
 int gridHasArea(int gridID)
 {
   grid_t *gridptr = gridID2Ptr(gridID);
-
-  int hasArea = (gridptr->vtable->inqAreaPtr(gridptr) != NULL);
-
-  return (hasArea);
+  return gridptr->vtable->hasArea(gridptr);
 }
 
 
@@ -4800,6 +4802,7 @@ const struct gridVirtTable cdiGridVtable
   .inqYValsPtr = gridInqYValsPtrSerial,
   .inqArea = gridInqAreaSerial,
   .inqAreaPtr = gridInqAreaPtrBase,
+  .hasArea = gridHasAreaBase,
   .inqMask = gridInqMaskSerial,
   .inqMaskGME = gridInqMaskGMESerial,
   .inqXBounds = gridInqXBoundsSerial,
