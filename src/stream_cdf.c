@@ -12,6 +12,17 @@
 #include <ctype.h>
 #include <math.h>
 #include <float.h>
+#include <stdbool.h>
+#ifdef HAVE_MMAP
+#include <unistd.h>
+#include <sys/mman.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#endif
+#ifdef HAVE_LIBPTHREAD
+#include <pthread.h>
+#endif
 
 #include <netcdf.h>
 
@@ -4442,6 +4453,99 @@ void grid_set_chunktype(grid_t *grid, ncvar_t *ncvar)
     }
 }
 
+static struct gridVirtTable cdfLazyGridVtable;
+static double *cdfPendingLoad;
+#ifdef HAVE_LIBPTHREAD
+static pthread_once_t cdfLazyInitialized = PTHREAD_ONCE_INIT;
+#else
+static bool cdfLazyInitialized;
+#endif
+
+struct cdfLazyGrid
+{
+  grid_t base;
+  const struct gridVirtTable *baseVtable;
+};
+
+static void cdfLazyGridDestroy(struct cdfLazyGrid *lazyGrid)
+{
+  lazyGrid->base.extraData = NULL;
+}
+
+static void cdfLazyGridDelete(grid_t *grid)
+{
+  struct cdfLazyGrid *cdfGrid = (struct cdfLazyGrid *)grid;
+  void (*baseDestroy)(grid_t *grid) = cdfGrid->baseVtable->destroy;
+  cdfLazyGridDestroy(cdfGrid);
+  baseDestroy(grid);
+}
+
+static void cdfLazyGridDestroyOnce(void)
+{
+#ifdef HAVE_MMAP
+  size_t pgSize = cdiGetPageSize(false);
+  munmap(cdfPendingLoad, pgSize);
+#endif
+}
+
+static void
+cdfLazyGridInitOnce(void)
+{
+  cdfLazyGridVtable = cdiGridVtable;
+  cdfLazyGridVtable.destroy = cdfLazyGridDelete;
+  /* create inaccessible memory area, if possible, this serves as
+   * dummy value for pointers to data not yet loaded */
+#ifdef HAVE_MMAP
+  {
+    size_t pgSize = cdiGetPageSize(false);
+    static const char devZero[] = "/dev/zero";
+    int fd = open(devZero, O_RDWR);
+    if (fd == -1)
+      SysError("Could not open %s to map anonymous memory", devZero);
+    void *cdfInvalid = mmap(NULL, pgSize, PROT_NONE, MAP_PRIVATE, fd, 0);
+    if (cdfInvalid == MAP_FAILED)
+      SysError("Could not mmap anonymous memory");
+    cdfPendingLoad = cdfInvalid;
+    int rc = close(fd);
+    if (rc == -1)
+      SysError("Could not close %s file handle %d after mapping anonymous"
+               " memory", devZero, fd);
+  }
+#else
+  cdfPendingLoad = (double *)&cdfPendingLoad;
+#endif
+  atexit(cdfLazyGridDestroyOnce);
+#ifndef HAVE_LIBPTHREAD
+  cdfLazyInitialized = true;
+#endif
+}
+
+
+static void
+cdfLazyGridInit(struct cdfLazyGrid *grid, int gridtype)
+{
+#ifdef HAVE_LIBPTHREAD
+  pthread_once(&cdfLazyInitialized, cdfLazyGridInitOnce);
+#else
+  if (cdfLazyInitialized) ; else cdfLazyGridInitOnce();
+#endif
+  grid_init(&grid->base);
+  cdiGridTypeInit(&grid->base, gridtype, 0);
+  grid->baseVtable = grid->base.vtable;
+  grid->base.vtable = &cdfLazyGridVtable;
+}
+
+static void
+cdfLazyGridRenew(struct cdfLazyGrid *restrict *restrict gridpptr, int gridtype)
+{
+  struct cdfLazyGrid *restrict grid = *gridpptr;
+  if (!grid)
+    *gridpptr = grid = (struct cdfLazyGrid *)Malloc(sizeof (*grid));
+  cdfLazyGridInit(grid, gridtype);
+}
+
+
+
 /* define all input grids */
 static
 void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars, int timedimid, unsigned char *uuidOfHGrid, char *gridfile, int number_of_grid_used)
@@ -4456,7 +4560,9 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
   size_t attlen;
   char attname[CDI_MAX_NAME];
   double datt;
-  grid_t *restrict grid = NULL, *restrict proj = NULL;
+  struct cdfLazyGrid *restrict lazyGrid = NULL, *restrict lazyProj = NULL;
+#define grid (&lazyGrid->base)
+#define proj (&lazyProj->base)
 
   for ( ncvarid = 0; ncvarid < nvars; ++ncvarid )
     {
@@ -4541,12 +4647,8 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 	  if ( ncvars[ncvarid].gridtype == UNDEFID || ncvars[ncvarid].gridtype == GRID_GENERIC )
 	    if ( xdimid != UNDEFID && xdimid == ydimid && nydims == 0 ) ncvars[ncvarid].gridtype = GRID_UNSTRUCTURED;
 
-          grid = (grid_t *)Realloc(grid, sizeof (*grid));
-	  grid_init(grid);
-          cdiGridTypeInit(grid, ncvars[ncvarid].gridtype, 0);
-          proj = (grid_t *)Realloc(proj, sizeof (*proj));
-          grid_init(proj);
-          cdiGridTypeInit(grid, GRID_PROJECTION, 0);
+          cdfLazyGridRenew(&lazyGrid, ncvars[ncvarid].gridtype);
+          cdfLazyGridRenew(&lazyProj, GRID_PROJECTION);
 
 	  grid->prec  = DATATYPE_FLT64;
 	  grid->trunc = ncvars[ncvarid].truncation;
@@ -5144,13 +5246,25 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 	      }
 
           if (gridAdded.isNew)
-            grid = NULL;
+            lazyGrid = NULL;
           if (projAdded.isNew)
-            proj = NULL;
+            lazyProj = NULL;
 	}
     }
-  Free(grid);
-  Free(proj);
+  if (lazyGrid)
+    {
+      cdfLazyGridDestroy(lazyGrid);
+      grid_free(grid);
+      Free(grid);
+    }
+  if (lazyProj)
+    {
+      cdfLazyGridDestroy(lazyProj);
+      grid_free(proj);
+      Free(proj);
+    }
+#undef proj
+#undef grid
 }
 
 /* define all input zaxes */
