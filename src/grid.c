@@ -2636,37 +2636,39 @@ static void gridComplete(grid_t *grid)
 	    gridDefArea(gridID, area);
 	  }
 
-	if ( gridtype == GRID_LAEA )
-	  gridDefLaea(gridID, grid->laea_a, grid->laea_lon_0, grid->laea_lat_0);
-
-	if ( gridtype == GRID_LCC2 )
-	  gridDefLcc2(gridID, grid->lcc2_a, grid->lcc2_lon_0, grid->lcc2_lat_0, grid->lcc2_lat_1, grid->lcc2_lat_2);
-
-	if ( gridtype == GRID_LCC )
-	  gridDefLCC(gridID, grid->lcc_originLon, grid->lcc_originLat, grid->lcc_lonParY,
-		     grid->lcc_lat1, grid->lcc_lat2, grid->lcc_xinc, grid->lcc_yinc,
-		     grid->lcc_projflag, grid->lcc_scanflag);
-
-	if ( gridtype == GRID_UNSTRUCTURED )
+        switch (gridtype)
           {
-            int number = grid->number;
-            int position = grid->position >= 0 ? grid->position : 0;
-            if ( number > 0 )
-              {
-                gridDefNumber(gridID, number);
-                gridDefPosition(gridID, position);
-              }
-            if ( grid->reference )
-              {
-                const char *reference = grid->reference;
-                grid->reference = NULL;
-                gridDefReference(gridID, reference);
-              }
-          }
-
-	if ( gridtype == GRID_PROJECTION )
-	  {
-	    grid->name = strdup(grid->name);
+          case GRID_LAEA:
+            gridDefLaea(gridID, grid->laea_a, grid->laea_lon_0, grid->laea_lat_0);
+            break;
+          case GRID_LCC2:
+            gridDefLcc2(gridID, grid->lcc2_a, grid->lcc2_lon_0, grid->lcc2_lat_0, grid->lcc2_lat_1, grid->lcc2_lat_2);
+            break;
+          case GRID_LCC:
+            gridDefLCC(gridID, grid->lcc_originLon, grid->lcc_originLat, grid->lcc_lonParY,
+                       grid->lcc_lat1, grid->lcc_lat2, grid->lcc_xinc, grid->lcc_yinc,
+                       grid->lcc_projflag, grid->lcc_scanflag);
+            break;
+          case GRID_UNSTRUCTURED:
+            {
+              int number = grid->number;
+              int position = grid->position >= 0 ? grid->position : 0;
+              if ( number > 0 )
+                {
+                  gridDefNumber(gridID, number);
+                  gridDefPosition(gridID, position);
+                }
+              if ( grid->reference )
+                {
+                  const char *reference = grid->reference;
+                  grid->reference = NULL;
+                  gridDefReference(gridID, reference);
+                }
+            }
+            break;
+          case GRID_PROJECTION:
+            grid->name = strdup(grid->name);
+            break;
 	  }
 
 	break;
