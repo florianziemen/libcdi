@@ -2541,13 +2541,9 @@ int gridCompareP ( void * gridptr1, void * gridptr2 )
   return equal;
 }
 
-
-int gridGenerate(const grid_t *grid)
+static void gridComplete(grid_t *grid)
 {
-  int gridID = gridCreate(grid->type, grid->size);
-
-  grid_t *gridptr = gridID2Ptr(gridID);
-
+  int gridID = grid->self;
   gridDefPrec(gridID, grid->prec);
 
   switch (grid->type)
@@ -2573,7 +2569,9 @@ int gridGenerate(const grid_t *grid)
 
 	if ( grid->xdef == 1 )
 	  {
-	    gridDefXvals(gridID, grid->xvals);
+            const double *xvals = grid->xvals;
+            grid->xvals = NULL;
+	    gridDefXvals(gridID, xvals);
             const double *grid_xbounds
               = grid->vtable->inqXBoundsPtr((grid_t *)grid);
             if ( grid_xbounds )
@@ -2593,7 +2591,9 @@ int gridGenerate(const grid_t *grid)
 
 	if ( grid->ydef == 1 )
 	  {
-	    gridDefYvals(gridID, grid->yvals);
+            const double *yvals = grid->yvals;
+            grid->yvals = NULL;
+	    gridDefYvals(gridID, yvals);
             const double *grid_ybounds
               = grid->vtable->inqYBoundsPtr((grid_t *)grid);
             if ( grid_ybounds && grid->nvertex )
@@ -2617,8 +2617,8 @@ int gridGenerate(const grid_t *grid)
 	    gridDefYname(gridID, "rlat");
 	    gridDefXlongname(gridID, "longitude in rotated pole grid");
 	    gridDefYlongname(gridID, "latitude in rotated pole grid");
-            gridptr->xstdname = xystdname_tab[grid_xystdname_grid_latlon][0];
-            gridptr->ystdname = xystdname_tab[grid_xystdname_grid_latlon][1];
+            grid->xstdname = xystdname_tab[grid_xystdname_grid_latlon][0];
+            grid->ystdname = xystdname_tab[grid_xystdname_grid_latlon][1];
 	    gridDefXunits(gridID, "degrees");
 	    gridDefYunits(gridID, "degrees");
 
@@ -2630,7 +2630,9 @@ int gridGenerate(const grid_t *grid)
         const double *grid_area = grid->vtable->inqAreaPtr((grid_t*)grid);
 	if ( grid_area )
 	  {
-	    gridDefArea(gridID, grid_area);
+            const double *area = grid->area;
+            grid->area = NULL;
+	    gridDefArea(gridID, area);
 	  }
 
 	if ( grid->type == GRID_LAEA )
@@ -2647,20 +2649,23 @@ int gridGenerate(const grid_t *grid)
 	if ( grid->type == GRID_UNSTRUCTURED )
           {
             int number = grid->number;
-            int position = grid->position;
-            if ( position < 0 ) position = 0;
+            int position = grid->position >= 0 ? grid->position : 0;
             if ( number > 0 )
               {
                 gridDefNumber(gridID, number);
                 gridDefPosition(gridID, position);
               }
-            gridDefUUID(gridID, grid->uuid);
-            if ( grid->reference ) gridDefReference(gridID, grid->reference);
+            if ( grid->reference )
+              {
+                const char *reference = grid->reference;
+                grid->reference = NULL;
+                gridDefReference(gridID, reference);
+              }
           }
 
 	if ( grid->type == GRID_PROJECTION )
 	  {
-	    gridptr->name = strdup(grid->name);
+	    grid->name = strdup(grid->name);
 	  }
 
 	break;
@@ -2669,7 +2674,9 @@ int gridGenerate(const grid_t *grid)
       {
 	gridDefNP(gridID, grid->np);
 	gridDefYsize(gridID, grid->ysize);
-	gridDefRowlon(gridID, grid->ysize, grid->rowlon);
+        const int *rowlon = grid->rowlon;
+        grid->rowlon = NULL;
+	gridDefRowlon(gridID, grid->ysize, rowlon);
 
         if ( grid->xdef == 2 )
           {
@@ -2679,7 +2686,9 @@ int gridGenerate(const grid_t *grid)
 
 	if ( grid->ydef == 1 )
 	  {
-	    gridDefYvals(gridID, grid->yvals);
+            const double *yvals = grid->yvals;
+            grid->yvals = NULL;
+	    gridDefYvals(gridID, yvals);
             const double *grid_ybounds
               = grid->vtable->inqYBoundsPtr((grid_t *)grid);
 	    if ( grid_ybounds && grid->nvertex )
@@ -2743,13 +2752,83 @@ int gridGenerate(const grid_t *grid)
       }
     }
 
-  if ( grid->xname[0]     ) gridDefXname(gridID, grid->xname);
-  if ( grid->xlongname[0] ) gridDefXlongname(gridID, grid->xlongname);
-  if ( grid->xunits[0]    ) gridDefXunits(gridID, grid->xunits);
-  if ( grid->yname[0]     ) gridDefYname(gridID, grid->yname);
-  if ( grid->ylongname[0] ) gridDefYlongname(gridID, grid->ylongname);
-  if ( grid->yunits[0]    ) gridDefYunits(gridID, grid->yunits);
+  grid->xname[CDI_MAX_NAME - 1] = 0;
+  grid->xlongname[CDI_MAX_NAME - 1] = 0;
+  grid->xunits[CDI_MAX_NAME - 1] = 0;
+  grid->yname[CDI_MAX_NAME - 1] = 0;
+  grid->ylongname[CDI_MAX_NAME - 1] = 0;
+  grid->yunits[CDI_MAX_NAME - 1] = 0;
 
+}
+
+int gridGenerate(const grid_t *grid)
+{
+  int gridID = gridCreate(grid->type, grid->size);
+  grid_t *gridptr = gridID2Ptr(gridID);
+  gridptr->prec = grid->prec;
+  gridptr->xsize = grid->xsize;
+  gridptr->ysize = grid->ysize;
+  gridptr->np = grid->np;
+  gridptr->nvertex = grid->nvertex;
+  gridptr->xdef = grid->xdef;
+  gridptr->xvals = grid->xvals;
+  gridptr->xbounds = grid->xbounds;
+  gridptr->xfirst = grid->xfirst;
+  gridptr->xlast = grid->xlast;
+  gridptr->xinc = grid->xinc;
+  gridptr->ydef = grid->ydef;
+  gridptr->yvals = grid->yvals;
+  gridptr->ybounds = grid->ybounds;
+  gridptr->yfirst = grid->yfirst;
+  gridptr->ylast = grid->ylast;
+  gridptr->yinc = grid->yinc;
+  gridptr->isRotated = grid->isRotated;
+  gridptr->xpole = grid->xpole;
+  gridptr->ypole = grid->ypole;
+  gridptr->angle = grid->angle;
+  gridptr->area = grid->area;
+  gridptr->laea_a = grid->laea_a;
+  gridptr->laea_lon_0 = grid->laea_lon_0;
+  gridptr->laea_lat_0 = grid->laea_lat_0;
+  gridptr->lcc2_a = grid->lcc2_a;
+  gridptr->lcc2_lon_0 = grid->lcc2_lon_0;
+  gridptr->lcc2_lat_0 = grid->lcc2_lat_0;
+  gridptr->lcc2_lat_1 = grid->lcc2_lat_1;
+  gridptr->lcc2_lat_2 = grid->lcc2_lat_2;
+  gridptr->lcc_originLon = grid->lcc_originLon;
+  gridptr->lcc_originLat = grid->lcc_originLat;
+  gridptr->lcc_lonParY = grid->lcc_lonParY;
+  gridptr->lcc_lat1 = grid->lcc_lat1;
+  gridptr->lcc_lat2 = grid->lcc_lat2;
+  gridptr->lcc_xinc = grid->lcc_xinc;
+  gridptr->lcc_yinc = grid->lcc_yinc;
+  gridptr->lcc_projflag = grid->lcc_projflag;
+  gridptr->lcc_scanflag = grid->lcc_scanflag;
+  gridptr->number = grid->number;
+  gridptr->position = grid->position;
+  memcpy(gridptr->uuid, grid->uuid, CDI_UUID_SIZE);
+  gridptr->reference = grid->reference;
+  gridptr->name = grid->name;
+  gridptr->rowlon = grid->rowlon;
+  gridptr->trunc = grid->trunc;
+  gridptr->lcomplex = grid->lcomplex;
+  gridptr->nd = grid->nd;
+  gridptr->ni = grid->ni;
+  gridptr->ni2 = grid->ni2;
+  gridptr->ni3 = grid->ni3;
+  if ( grid->xname[0]     )
+    memcpy(gridptr->xname, grid->xname, CDI_MAX_NAME);
+  if ( grid->yname[0]     )
+    memcpy(gridptr->yname, grid->yname, CDI_MAX_NAME);
+  if ( grid->xlongname[0] )
+    memcpy(gridptr->xlongname, grid->xlongname, CDI_MAX_NAME);
+  if ( grid->ylongname[0]     )
+    memcpy(gridptr->ylongname, grid->ylongname, CDI_MAX_NAME);
+  if ( grid->xunits[0]     )
+    memcpy(gridptr->xunits, grid->xunits, CDI_MAX_NAME);
+  if ( grid->yunits[0]     )
+    memcpy(gridptr->yunits, grid->yunits, CDI_MAX_NAME);
+  gridComplete(gridptr);
   return (gridID);
 }
 
