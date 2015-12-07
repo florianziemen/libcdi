@@ -117,6 +117,13 @@ FCALLSCSUB2 (cdiPioConfSetStripeConversion, CDIPIOCONFSETSTRIPECONVERSION, cdipi
  * to the xmap constructor?  */
 
 FCALLSCFUN1 (INT, cdiPioConfGetStripeConversion, CDIPIOCONFGETSTRIPECONVERSION, cdipioconfgetstripeconversion, INT)
+static int cdiPioDistGridCreate_fwrap(int gridtype, int size, int xsize, int ysize, int nvertex, const int xy_decomposition_optional[][2], void *partDesc2D, void *partDescX, void *partDescY)
+{
+  int v;
+  v = cdiPioDistGridCreate(gridtype, size, xsize, ysize, nvertex, xy_decomposition_optional, (*(Xt_idxlist *)partDesc2D), (*(Xt_idxlist *)partDescX), (*(Xt_idxlist *)partDescY));
+  return v;
+}
+FCALLSCFUN9 (INT, cdiPioDistGridCreate_fwrap, CDIPIODISTGRIDCREATE, cdipiodistgridcreate, INT, INT, INT, INT, INT, INTVV, PVOID, PVOID, PVOID)
 
 #if defined __clang__
 #  pragma GCC diagnostic pop

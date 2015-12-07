@@ -143,3 +143,9 @@ for "first", ranks 0-NUMSERVERS-1 become I/O servers and in the case
 
 Use this option to generate UUID for the created grids/zaxis data structures.
 This feature is off by default.
+
+-quse-dist-grid[=(true|false)], -qno-use-dist-grid[=(true|false)]
+
+If true, generate a distributed grid on the I/O clients and servers. This
+feature is only available when CDI was built with a PPM library including
+the distributed multi-array feature.

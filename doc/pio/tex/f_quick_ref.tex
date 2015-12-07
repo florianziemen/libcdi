@@ -137,6 +137,30 @@ or streamWriteScatteredVarPart for a stream matches the sequence
 of the previous sequence (divided by pioWriteTimestep).
 
 
+\section*{\tt \htmlref{cdiPioDistGridCreate}{cdiPioDistGridCreate}}
+
+\begin{verbatim}
+    INTEGER FUNCTION cdiPioDistGridCreate (INTEGER gridtype, INTEGER size,
+                                           INTEGER xsize, INTEGER ysize,
+                                           INTEGER nvertex,
+                                           INTEGER xy_decomposition_optional(2,*),
+                                           TYPE(XT_IDXLIST) partDesc2D,
+                                           TYPE(XT_IDXLIST) partDescX,
+                                           TYPE(XT_IDXLIST) partDescY)
+\end{verbatim}
+
+create a grid data structure where the
+per-coordinate data is distributed over the client tasks
+chunk_decomposition specifies how to distribute the data of each of
+the following arrays:
+x-values, y-values, x-bounds, y-bounds, area, mask and gme mask
+
+for 2D grids (all but gridtype == GRID_UNSTRUCTURED), four values specifiy the start and size of each dimension
+where e.g. chunk_decomposition[1][0] would
+specify the part size of the y-dimension and chunk_decomposition[0][0] the x dimension start
+index. For unstructured grids only the x-dimension applies..
+
+
 \section*{\tt \htmlref{cdiPioInit}{cdiPioInit}}
 
 \begin{verbatim}
