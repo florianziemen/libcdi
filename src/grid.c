@@ -1785,12 +1785,15 @@ double
 gridInqXinc(int gridID)
 {
   grid_t *gridptr = grid_to_pointer(gridID);
-  const double *xvals = gridptr->vtable->inqXValsPtr(gridptr);
 
-  if (fabs(gridptr->x.inc) <= 0 && xvals)
+  if (fabs(gridptr->x.inc) <= 0 && gridptr->x.vals)
     {
       const size_t xsize = gridptr->x.size;
-      if (xsize > 1) gridptr->x.inc = grid_calc_increment(xsize, xvals);
+      if (xsize > 1)
+        {
+          const double *xvals = gridptr->vtable->inqXValsPtr(gridptr);
+          gridptr->x.inc = grid_calc_increment(xsize, xvals);
+        }
     }
 
   return gridptr->x.inc;
@@ -1825,12 +1828,15 @@ double
 gridInqYinc(int gridID)
 {
   grid_t *gridptr = grid_to_pointer(gridID);
-  const double *yvals = gridptr->vtable->inqYValsPtr(gridptr);
 
-  if (fabs(gridptr->y.inc) <= 0 && yvals)
+  if (fabs(gridptr->y.inc) <= 0 && gridptr->y.vals)
     {
       const size_t ysize = gridptr->y.size;
-      if (ysize > 1) gridptr->y.inc = grid_calc_increment(ysize, yvals);
+      if (ysize > 1)
+        {
+          const double *yvals = gridptr->vtable->inqYValsPtr(gridptr);
+          gridptr->y.inc = grid_calc_increment(ysize, yvals);
+        }
     }
 
   return gridptr->y.inc;
@@ -3104,10 +3110,13 @@ gridInqXBoundsSerial(grid_t *gridptr, double *xbounds)
   const int irregular = (gridptr->type == GRID_CURVILINEAR || gridptr->type == GRID_UNSTRUCTURED);
   size_t size = nvertex * (irregular ? gridptr->size : gridptr->x.size);
 
-  const double *gridptr_xbounds = gridptr->vtable->inqXBoundsPtr(gridptr);
-  if (gridptr_xbounds)
+  if (gridptr->x.bounds)
     {
-      if (size && xbounds) copy_darray(size, gridptr_xbounds, xbounds);
+      if (size && xbounds)
+        {
+          const double *gridptr_xbounds = gridptr->vtable->inqXBoundsPtr(gridptr);
+          copy_darray(size, gridptr_xbounds, xbounds);
+        }
     }
   else
     size = 0;
@@ -3215,10 +3224,13 @@ gridInqYBoundsSerial(grid_t *gridptr, double *ybounds)
   const int irregular = (gridptr->type == GRID_CURVILINEAR || gridptr->type == GRID_UNSTRUCTURED);
   size_t size = nvertex * (irregular ? gridptr->size : gridptr->y.size);
 
-  const double *gridptr_ybounds = gridptr->vtable->inqYBoundsPtr(gridptr);
-  if (gridptr_ybounds)
+  if (gridptr->y.bounds)
     {
-      if (size && ybounds) copy_darray(size, gridptr_ybounds, ybounds);
+      if (size && ybounds)
+        {
+          const double *gridptr_ybounds = gridptr->vtable->inqYBoundsPtr(gridptr);
+          copy_darray(size, gridptr_ybounds, ybounds);
+        }
     }
   else
     size = 0;
