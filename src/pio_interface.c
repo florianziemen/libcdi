@@ -12,6 +12,10 @@
 #include <mpi.h>
 #include <yaxt.h>
 
+#ifdef HAVE_PPM_CORE
+#include <ppm/ppm.h>
+#endif
+
 #include "cdi.h"
 #include "cdipio.h"
 #include "cdi_int.h"
@@ -20,6 +24,7 @@
 #include "pio.h"
 #include "pio_client.h"
 #include "pio_conf.h"
+#include "pio_dist_grid.h"
 #include "pio_id_set.h"
 #include "pio_impl.h"
 #include "pio_serialize.h"
@@ -29,6 +34,7 @@
 #include "pio_server.h"
 #include "pio_util.h"
 #include "resource_handle.h"
+#include "resource_unpack.h"
 #include "vlist.h"
 #include "vlist_var.h"
 
@@ -426,6 +432,9 @@ cdiPioNoPostCommSetup(void)
 /*****************************************************************************/
 
 static int xtInitByCDI = 0;
+#ifdef HAVE_PPM_CORE
+static int ppmInitByCDI = 0;
+#endif
 
 /* pioInit definition must currently compile even in non-MPI configurations */
 /**
@@ -486,6 +495,10 @@ cdiPioInit(MPI_Comm commGlob, int confResH, int *pioNamespace)
       IOMode == PIO_ASYNCH )
     xabort ( "CDI-PIO Output method PIO_ASYNCH is unsupported on this system!" );
 
+#ifdef HAVE_PPM_CORE
+  if ((ppmInitByCDI = (!PPM_initialized() || PPM_finalized())))
+    PPM_initialize(&commGlob, NULL, NULL);
+#endif
   if ((xtInitByCDI = (!xt_initialized() || xt_finalized())))
     xt_initialize(commGlob);
   int nProcsIO = cdiPioCommInit(commGlob, IOMode, conf->clientServerRole);
@@ -508,6 +521,11 @@ cdiPioInit(MPI_Comm commGlob, int confResH, int *pioNamespace)
   reshRemove(confResH, &cdiPioConfOps);
   if (cdiPioExtraNSKeys[cdiPioEKXmapNew] == 0)
     cdiPioExtraNSKeys[cdiPioEKXmapNew] = cdiNamespaceSwitchNewKey();
+
+#ifdef HAVE_PPM_DIST_ARRAY_H
+  reshDistGridUnpack = cdiPioDistGridUnpack;
+#endif
+
   if ( commInqIsProcIO ())
     {
       int prevNamespace = namespaceGetActive(),
@@ -525,12 +543,20 @@ cdiPioInit(MPI_Comm commGlob, int confResH, int *pioNamespace)
             = namespaceSwitchGet(cdiPioExtraNSKeys[cdiPioEKFileWritingFinalize]).func;
           cdiPioFileWritingFinalize();
         }
-      cdiPioCommFinalize();
-      if (xtInitByCDI)
-        xt_finalize();
       namespaceSetActive(prevNamespace);
       reshReplace(confResH, conf, &cdiPioConfOps);
       namespaceDelete(serverNamespace);
+#ifdef HAVE_PPM_DIST_ARRAY_H
+      if (commInqRankColl() >= 0)
+        cdiPioDistGridFinalizeOnce(serverNamespace);
+#endif
+      cdiPioCommFinalize();
+      if (xtInitByCDI)
+        xt_finalize();
+#ifdef HAVE_PPM_CORE
+      if (ppmInitByCDI)
+        PPM_finalize();
+#endif
       return MPI_COMM_NULL;
     }
   else
@@ -605,6 +631,10 @@ void  pioEndDef ( void )
                     RESOURCES, comm));
       reshPackBufferDestroy(&buffer);
     }
+#if HAVE_PPM_DIST_ARRAY_H
+  else
+    cdiPioDistGridPackAssist();
+#endif
 }
 
 /************************************************************************/
@@ -629,8 +659,11 @@ void pioFinalize ( void )
   int pioNamespace = namespaceGetActive();
   if (pioNamespace == 0)
     return;
+  reshListDestruct(pioNamespace);
+#ifdef HAVE_PPM_DIST_ARRAY_H
+  cdiPioDistGridFinalizeOnce(pioNamespace);
+#endif
   namespaceDelete(pioNamespace);
-
   int clientRank = commInqRankModel(),
     numClients = cdiPioCommInqSizeClients(),
     numColl = commInqSizeColl(),
@@ -644,6 +677,10 @@ void pioFinalize ( void )
   idSetDestroy(&openStreams);
   if (xtInitByCDI)
     xt_finalize();
+#ifdef HAVE_PPM_CORE
+  if (ppmInitByCDI)
+    PPM_finalize();
+#endif
   xdebug("%s", "RETURN");
 }
 

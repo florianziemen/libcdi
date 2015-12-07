@@ -157,6 +157,9 @@
 /* ScalES PPM C core library is available */
 #undef HAVE_PPM_CORE
 
+/* Define to 1 if you have the <ppm/dist_array.h> header file. */
+#undef HAVE_PPM_DIST_ARRAY_H
+
 /* Define to 1 if you have the <pthread.h> header file. */
 #undef HAVE_PTHREAD_H
 

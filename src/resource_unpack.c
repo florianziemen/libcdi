@@ -16,6 +16,11 @@
 #include "taxis.h"
 #include "zaxis.h"
 
+void
+(*reshDistGridUnpack)(char *unpackBuffer, int unpackBufferSize,
+                      int *unpackBufferPos, int originNamespace, void *context,
+                      int force_id);
+
 /*****************************************************************************/
 
 int reshUnpackResources(char * unpackBuffer, int unpackBufferSize,
@@ -78,6 +83,10 @@ int reshUnpackResources(char * unpackBuffer, int unpackBufferSize,
           vlistUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos,
                       originNamespace, context, 1);
 	  break;
+        case DIST_GRID:
+          reshDistGridUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos,
+                             originNamespace, context, 1);
+          break;
         case RESH_DELETE:
           serializeUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos,
                           &resH, 1, CDI_DATATYPE_INT, context);

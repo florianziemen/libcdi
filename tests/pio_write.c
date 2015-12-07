@@ -17,6 +17,9 @@
 #include <mpi.h>
 #include <yaxt.h>
 #endif
+#ifdef HAVE_PPM_CORE
+#include <ppm/ppm.h>
+#endif
 
 #include "cdi.h"
 #include "dmemory.h"
@@ -140,7 +143,8 @@ parse_long_option(struct model_config *restrict setup,
   static const char cacheRedistStr[] = "no-cache-redists",
     pioRoleSchemeOptionStr[] = "pio-role-scheme",
     curvilinearGridOptionStr[] = "no-create-curvilinear-grid",
-    uuidCreateOptionStr[] = "no-create-uuid";
+    uuidCreateOptionStr[] = "no-create-uuid",
+    useDistGridOptionStr[] = "no-use-dist-grid";
   struct boolOptionParse bop;
   if ((bop = parseBooleanLongOption(sizeof (cacheRedistStr), cacheRedistStr,
                                     str)).matched)
@@ -177,6 +181,23 @@ parse_long_option(struct model_config *restrict setup,
 #else
       invalidOptionDie("CDI-PIO option -q%s ignored in non-MPI mode\n",
                        pioRoleSchemeOptionStr);
+#endif
+    }
+  else if ((bop = parseBooleanLongOption(sizeof (useDistGridOptionStr),
+                                         useDistGridOptionStr, str)).matched)
+    {
+#if defined USE_MPI && defined HAVE_PPM_DIST_ARRAY_H
+      setup->flags = (setup->flags & ~~PIO_WRITE_CONFIG_USE_DIST_GRID_FLAG)
+        | (bop.value << PIO_WRITE_CONFIG_USE_DIST_GRID_BIT);
+#else
+      invalidOptionDie("CDI-PIO option -q%s feature unavailable %s\n",
+                       useDistGridOptionStr + (bop.invert ? 0 : 3),
+#  ifndef USE_MPI
+                       "in non-MPI mode"
+#  else
+                       "without PPM feature distributed multi-array"
+#  endif
+                       );
 #endif
     }
   else if ((bop = parseBooleanLongOption(sizeof (uuidCreateOptionStr),

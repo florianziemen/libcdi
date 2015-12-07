@@ -659,6 +659,7 @@ USE_PPM_CORE_TRUE
 USE_MPI_FALSE
 USE_MPI_TRUE
 HAVE_PARALLEL_NC4
+HAVE_PPM_DIST_ARRAY
 PPM_CORE_LIBS
 PPM_CORE_CFLAGS
 YAXT_LIBS
@@ -28768,40 +28769,6 @@ $as_echo "yes" >&6; }
 $as_echo "#define HAVE_YAXT /**/" >>confdefs.h
 
 fi
-   if test x"$ENABLE_NC4" = xyes; then :
-  for ac_header in netcdf_par.h
-do :
-  ac_fn_c_check_header_mongrel "$LINENO" "netcdf_par.h" "ac_cv_header_netcdf_par_h" "$ac_includes_default"
-if test "x$ac_cv_header_netcdf_par_h" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_NETCDF_PAR_H 1
-_ACEOF
- ac_fn_c_check_decl "$LINENO" "MPI_Bcast" "ac_cv_have_decl_MPI_Bcast" "$ac_includes_default
-#include <netcdf_par.h>
-"
-if test "x$ac_cv_have_decl_MPI_Bcast" = xyes; then :
-  HAVE_PARALLEL_NC4=1
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: The supplied netCDF library does not support MPI parallel invocations" >&5
-$as_echo "$as_me: WARNING: The supplied netCDF library does not support MPI parallel invocations" >&2;}
-fi
-
-else
-  ac_fn_c_check_decl "$LINENO" "MPI_Bcast" "ac_cv_have_decl_MPI_Bcast" "$ac_includes_default
-#include <netcdf.h>
-"
-if test "x$ac_cv_have_decl_MPI_Bcast" = xyes; then :
-  HAVE_PARALLEL_NC4=1
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: The supplied netCDF library does not support MPI parallel invocations" >&5
-$as_echo "$as_me: WARNING: The supplied netCDF library does not support MPI parallel invocations" >&2;}
-fi
-
-
-fi
-
-done
-
 
 pkg_failed=no
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for PPM_CORE" >&5
@@ -28875,8 +28842,60 @@ $as_echo "yes" >&6; }
 
 $as_echo "#define HAVE_PPM_CORE /**/" >>confdefs.h
 
+      saved_CPPFLAGS=$CPPFLAGS
+      CPPFLAGS="$CPPFLAGS $PPM_CORE_CFLAGS"
+      for ac_header in ppm/dist_array.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "ppm/dist_array.h" "ac_cv_header_ppm_dist_array_h" "$ac_includes_default"
+if test "x$ac_cv_header_ppm_dist_array_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_PPM_DIST_ARRAY_H 1
+_ACEOF
+ HAVE_PPM_DIST_ARRAY=yes
+fi
+
+done
+
+
+
+      CPPFLAGS=$saved_CPPFLAGS
 
 fi
+
+   if test x"$ENABLE_NC4" = xyes; then :
+  for ac_header in netcdf_par.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "netcdf_par.h" "ac_cv_header_netcdf_par_h" "$ac_includes_default"
+if test "x$ac_cv_header_netcdf_par_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_NETCDF_PAR_H 1
+_ACEOF
+ ac_fn_c_check_decl "$LINENO" "MPI_Bcast" "ac_cv_have_decl_MPI_Bcast" "$ac_includes_default
+#include <netcdf_par.h>
+"
+if test "x$ac_cv_have_decl_MPI_Bcast" = xyes; then :
+  HAVE_PARALLEL_NC4=1
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: The supplied netCDF library does not support MPI parallel invocations" >&5
+$as_echo "$as_me: WARNING: The supplied netCDF library does not support MPI parallel invocations" >&2;}
+fi
+
+else
+  ac_fn_c_check_decl "$LINENO" "MPI_Bcast" "ac_cv_have_decl_MPI_Bcast" "$ac_includes_default
+#include <netcdf.h>
+"
+if test "x$ac_cv_have_decl_MPI_Bcast" = xyes; then :
+  HAVE_PARALLEL_NC4=1
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: The supplied netCDF library does not support MPI parallel invocations" >&5
+$as_echo "$as_me: WARNING: The supplied netCDF library does not support MPI parallel invocations" >&2;}
+fi
+
+
+fi
+
+done
+
                   if test x$enable_ppm != xyes; then :
   HAVE_PARALLEL_NC4=0
 fi
