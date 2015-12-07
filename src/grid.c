@@ -2176,9 +2176,9 @@ int gridCompare(int gridID, const grid_t *grid)
   int differ = 1;
   grid_t *gridRef = gridID2Ptr(gridID);
 
-  if ( grid->type == gridInqType(gridID) || grid->type == GRID_GENERIC )
+  if ( grid->type == gridRef->type || grid->type == GRID_GENERIC )
     {
-      if ( grid->size == gridInqSize(gridID) )
+      if ( grid->size == gridRef->size )
 	{
 	  differ = 0;
 	  if ( grid->type == GRID_LONLAT )
@@ -2198,7 +2198,7 @@ int gridCompare(int gridID, const grid_t *grid)
 	      printf("grid.xinc   %f\n", gridInqXinc(gridID));
 	      printf("grid.yinc   %f\n", gridInqYinc(gridID));
 	      */
-	      if ( grid->xsize == gridInqXsize(gridID) && grid->ysize == gridInqYsize(gridID) )
+	      if ( grid->xsize == gridRef->xsize && grid->ysize == grid->ysize )
 		{
 		  if ( grid->xdef == 2 && grid->ydef == 2 )
 		    {
@@ -2212,12 +2212,12 @@ int gridCompare(int gridID, const grid_t *grid)
 			      differ = 1;
 			    }
 			  if ( !differ && fabs(grid->xinc) > 0 &&
-			       fabs(fabs(grid->xinc) - fabs(gridInqXinc(gridID))) > fabs(grid->xinc/1000))
+			       fabs(fabs(grid->xinc) - fabs(gridRef->xinc)) > fabs(grid->xinc/1000))
 			    {
 			      differ = 1;
 			    }
 			  if ( !differ && fabs(grid->yinc) > 0 &&
-			       fabs(fabs(grid->yinc) - fabs(gridInqYinc(gridID))) > fabs(grid->yinc/1000))
+			       fabs(fabs(grid->yinc) - fabs(gridRef->yinc)) > fabs(grid->yinc/1000))
 			    {
 			      differ = 1;
 			    }
@@ -2231,14 +2231,14 @@ int gridCompare(int gridID, const grid_t *grid)
 	    }
 	  else if ( grid->type == GRID_GENERIC )
 	    {
-	      if ( grid->xsize == gridInqXsize(gridID) && grid->ysize == gridInqYsize(gridID) )
+	      if ( grid->xsize == gridRef->xsize && grid->ysize == gridRef->ysize )
 		{
 		  if ( grid->xdef == 1 && grid->ydef == 1
                        && grid->xvals && grid->yvals )
                     differ = gridRef->vtable->compareXYFull(gridRef, (grid_t *)grid);
 		}
 	      else if ( (grid->ysize == 0 || grid->ysize == 1) &&
-			grid->xsize == gridInqXsize(gridID)*gridInqYsize(gridID) )
+			grid->xsize == gridRef->xsize*gridRef->ysize )
 		{
 		}
 	      else
@@ -2246,7 +2246,7 @@ int gridCompare(int gridID, const grid_t *grid)
 	    }
 	  else if ( grid->type == GRID_GAUSSIAN )
 	    {
-	      if ( grid->xsize == gridInqXsize(gridID) && grid->ysize == gridInqYsize(gridID) )
+	      if ( grid->xsize == gridRef->xsize && grid->ysize == gridRef->ysize )
 		{
 		  if ( grid->xdef == 2 && grid->ydef == 2 )
 		    {
@@ -2254,7 +2254,7 @@ int gridCompare(int gridID, const grid_t *grid)
 			   ! (IS_EQUAL(grid->yfirst, 0) && IS_EQUAL(grid->ylast, 0)) )
 			if ( fabs(grid->xfirst - gridInqXval(gridID, 0)) > 0.0015 ||
 			     fabs(grid->yfirst - gridInqYval(gridID, 0)) > 0.0015 ||
-			     (fabs(grid->xinc)>0 && fabs(fabs(grid->xinc) - fabs(gridInqXinc(gridID))) > fabs(grid->xinc/1000)) )
+			     (fabs(grid->xinc)>0 && fabs(fabs(grid->xinc) - fabs(gridRef->xinc)) > fabs(grid->xinc/1000)) )
 			  {
 			    differ = 1;
 			  }
@@ -2282,17 +2282,14 @@ int gridCompare(int gridID, const grid_t *grid)
 	      printf("grid.nv     %d\n", grid->nvertex);
 	      printf("grid nv     %d\n", gridInqNvertex(gridID));
 	      */
-	      if ( grid->xsize == gridInqXsize(gridID) && grid->ysize == gridInqYsize(gridID) )
+	      if ( grid->xsize == gridRef->xsize && grid->ysize == gridRef->ysize )
                 differ = gridRef->vtable->compareXYAO(gridRef, (grid_t *)grid);
 	    }
 	  else if ( grid->type == GRID_UNSTRUCTURED )
 	    {
-              unsigned char uuidOfHGrid[CDI_UUID_SIZE];
-              gridInqUUID(gridID, uuidOfHGrid);
-
               /* FIXME: not octet 0 but octet 7 is guaranteed  non-zero
                * for any non-NULL UUID */
-              differ = differ || ( uuidOfHGrid[0] && grid->uuid[0] && memcmp(uuidOfHGrid, grid->uuid, CDI_UUID_SIZE) != 0 );
+              differ = differ || ( gridRef->uuid[0] && grid->uuid[0] && memcmp(gridRef->uuid, grid->uuid, CDI_UUID_SIZE) != 0 );
 
               if ( !differ &&
                    ((grid->xvals == NULL) ^ (gridRef->xvals == NULL)) &&
@@ -2301,19 +2298,19 @@ int gridCompare(int gridID, const grid_t *grid)
                   int nvertexA, nvertexB, numberA, numberB,
                     positionA, positionB;
                   differ = ( (nvertexA = grid->nvertex)
-                             && (nvertexB = gridInqNvertex(gridID))
+                             && (nvertexB = gridRef->nvertex)
                              && (nvertexA != nvertexB) )
                     || ( (numberA = grid->number)
-                         && (numberB = gridInqNumber(gridID))
+                         && (numberB = gridRef->number)
                          && (numberA != numberB) )
                     || ( (numberA && numberB)
-                         && (positionA = grid->position) != (positionB = gridInqPosition(gridID)) );
+                         && (positionA = grid->position) != (positionB = gridRef->position) );
                 }
               else if ( !differ )
                 {
-                  differ = grid->nvertex != gridInqNvertex(gridID)
-                    || grid->number != gridInqNumber(gridID)
-                    || (grid->number > 0 && grid->position != gridInqPosition(gridID))
+                  differ = grid->nvertex != gridRef->nvertex
+                    || grid->number != gridRef->number
+                    || (grid->number > 0 && grid->position != gridRef->position)
                     || gridRef->vtable->compareXYAO(gridRef, (grid_t *)grid);
                 }
               }
@@ -3947,8 +3944,7 @@ The function @func{gridInqNumber} returns the reference number to an unstructure
 int gridInqNumber(int gridID)
 {
   grid_t* gridptr = gridID2Ptr(gridID);
-
-  return (gridptr->number);
+  return gridptr->number;
 }
 
 /*
