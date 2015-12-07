@@ -424,7 +424,6 @@ cdiPioNoPostCommSetup(void)
 
 /*****************************************************************************/
 
-static int pioNamespace_ = -1;
 static int xtInitByCDI = 0;
 
 /* pioInit definition must currently compile even in non-MPI configurations */
@@ -500,7 +499,7 @@ cdiPioInit(MPI_Comm commGlob, int confResH, int *pioNamespace)
   // JUST FOR TEST CASES WITH ONLY ONE MPI TASK
   if ( sizeGlob == 1 )
     {
-      pioNamespace_ = *pioNamespace = namespaceNew();
+      *pioNamespace = namespaceNew();
       return commInqCommGlob ();
     }
 
@@ -522,7 +521,7 @@ cdiPioInit(MPI_Comm commGlob, int confResH, int *pioNamespace)
       return MPI_COMM_NULL;
     }
   else
-    cdiPioClientSetup(&pioNamespace_, pioNamespace);
+    cdiPioClientSetup(pioNamespace);
 
   reshReplace(confResH, conf, &cdiPioConfOps);
   xdebug ( "nProcsGlob=%d, RETURN", sizeGlob );
@@ -610,10 +609,11 @@ void pioFinalize ( void )
 {
   xdebug("%s", "START");
 
-  /* pioNamespace_ is unchanged on I/O servers */
-  if (pioNamespace_ == -1)
+  /* namespace is unchanged on I/O servers */
+  int pioNamespace = namespaceGetActive();
+  if (pioNamespace == 0)
     return;
-  namespaceDelete(pioNamespace_);
+  namespaceDelete(pioNamespace);
 
   int clientRank = commInqRankModel(),
     numClients = cdiPioCommInqSizeClients(),
