@@ -249,17 +249,15 @@ int namespaceGetActive ()
 
 int namespaceAdaptKey ( int originResH, int originNamespace )
 {
-  namespaceTuple_t tin;
-  int nsp;
-
   if ( originResH == CDI_UNDEFID ) return CDI_UNDEFID;
 
-  tin.idx = originResH & idxmask;
-  tin.nsp = (int)(((unsigned)( originResH & nspmask )) >> idxbits);
-
+  namespaceTuple_t tin = {
+    .idx = originResH & idxmask,
+    .nsp = (int)(((unsigned)( originResH & nspmask )) >> idxbits)
+  };
   xassert ( tin.nsp == originNamespace );
 
-  nsp = namespaceGetActive ();
+  int nsp = namespaceGetActive ();
 
   return namespaceIdxEncode2 ( nsp, tin.idx );
 }
@@ -267,17 +265,15 @@ int namespaceAdaptKey ( int originResH, int originNamespace )
 
 int namespaceAdaptKey2 ( int originResH )
 {
-  namespaceTuple_t tin;
-  int nsp;
 
   if ( originResH == CDI_UNDEFID ) return CDI_UNDEFID;
 
-  tin.idx = originResH & idxmask;
-  tin.nsp = (int)(((unsigned)( originResH & nspmask )) >> idxbits);
-
-  nsp = namespaceGetActive ();
-
-  return namespaceIdxEncode2 ( nsp, tin.idx );
+  namespaceTuple_t tin = {
+    .idx = originResH & idxmask,
+    .nsp = (int)(((unsigned)( originResH & nspmask )) >> idxbits)
+  };
+  int nsp = namespaceGetActive ();
+  return namespaceIdxEncode2(nsp, tin.idx);
 }
 
 void namespaceSwitchSet(int sw, union namespaceSwitchValue value)
