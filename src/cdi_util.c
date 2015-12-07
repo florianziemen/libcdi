@@ -2,8 +2,10 @@
 #  include "config.h"
 #endif
 
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "cdi.h"
 #include "cdi_int.h"
@@ -113,6 +115,52 @@ const char *cdiUnitNamePtr(int cdi_unit)
     cdiUnits[cdi_unit] : NULL;
   return name;
 }
+
+size_t
+cdiGetPageSize(bool largePageAlign)
+{
+  long pagesize = -1L;
+  bool nameAssigned = false;
+#if HAVE_DECL__SC_LARGE_PAGESIZE || HAVE_DECL__SC_PAGE_SIZE || HAVE_DECL__SC_PAGESIZE
+  int name;
+#  if HAVE_DECL__SC_LARGE_PAGESIZE
+  if (largePageAlign)
+    {
+      name = _SC_LARGE_PAGESIZE;
+      nameAssigned = true;
+    }
+  else
+#  else
+    (void)largePageAlign;
+#  endif
+    {
+#  if HAVE_DECL__SC_PAGESIZE || HAVE_DECL__SC_PAGE_SIZE
+      name =
+#    if HAVE_DECL__SC_PAGESIZE
+        _SC_PAGESIZE
+#    elif HAVE_DECL__SC_PAGE_SIZE
+        _SC_PAGE_SIZE
+#    endif
+        ;
+      nameAssigned = true;
+#  endif
+    }
+  if (nameAssigned)
+    pagesize = sysconf(name);
+#endif
+  if (pagesize == -1L)
+    pagesize =
+#if HAVE_DECL_PAGESIZE
+      PAGESIZE
+#elif HAVE_DECL_PAGE_SIZE
+      PAGE_SIZE
+#else
+      commonPageSize
+#endif
+      ;
+  return (size_t)pagesize;
+}
+
 
 /*
  * Local Variables:

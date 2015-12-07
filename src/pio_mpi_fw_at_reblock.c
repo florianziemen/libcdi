@@ -17,6 +17,7 @@
 #include <mpi.h>
 
 #include "cdi.h"
+#include "cdi_int.h"
 #include "dmemory.h"
 #include "error.h"
 #include "namespace.h"
@@ -172,7 +173,7 @@ initAFiledataFileWriteAtReblock(const char *filename, size_t bufSize)
 #undef MINBLOCKSIZE
     /* ensure block size also meets page and direct I/O buffer
      * alignment requirements */
-    size_t pageSize = cdiPioGetPageSize(largePageAlign),
+    size_t pageSize = cdiGetPageSize(largePageAlign),
       IOAlign = getXferBufAlign(filename);
     bufBlockAlign = lcm(pageSize, IOAlign);
     blockSize = lcm(blockSize, bufBlockAlign);

@@ -424,6 +424,13 @@ void cdiStreamSync_(stream_t *streamptr);
 
 const char *cdiUnitNamePtr(int cdi_unit);
 
+enum {
+  /* 8192 is known to work on most systems (4096 isn't on Alpha) */
+  commonPageSize = 8192,
+};
+
+size_t cdiGetPageSize(bool largePageAlign);
+
 void zaxisGetIndexList(int nzaxis, int *zaxisIndexList);
 
 void zaxisDefLtype2(int zaxisID, int ltype2);

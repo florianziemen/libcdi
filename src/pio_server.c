@@ -1048,7 +1048,7 @@ writeGribStream(size_t streamIdx,
                                     * (size_t)1024 * (size_t)1024,
                                     sizeof (double) * myAggSize);
           if (posix_memalign(&rxWin[streamIdx].aggBuf,
-                             cdiPioGetPageSize(conf->largePageAlign),
+                             cdiGetPageSize(conf->largePageAlign),
                              aggBufSize) == 0) ;
           else
             rxWin[streamIdx].aggBuf = Malloc(aggBufSize);
