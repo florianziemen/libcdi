@@ -540,7 +540,8 @@ initPOSIXFPGUARDSENDRECV(void)
                          NSSW_FUNC(fcPOSIXFPGUARDSENDRECV));
       namespaceSwitchSet(NSSWITCH_FILE_WRITE,
                          NSSW_FUNC(fwPOSIXFPGUARDSENDRECV));
-      cdiPioFileWritingFinalize = finalizePOSIXFPGUARDSENDRECV;
+      namespaceSwitchSet(cdiPioExtraNSKeys[cdiPioEKFileWritingFinalize],
+                         NSSW_FUNC(finalizePOSIXFPGUARDSENDRECV));
       bibAFiledataPF = listSetNew(destroyAFiledataPF, compareNamesAPF);
     }
 }
