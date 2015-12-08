@@ -184,7 +184,7 @@ cdiPioFileWriteOrderedInit(void)
   namespaceSwitchSet(NSSWITCH_FILE_OPEN, NSSW_FUNC(fowFileWriteOrdered));
   namespaceSwitchSet(NSSWITCH_FILE_CLOSE, NSSW_FUNC(fcFileWriteOrdered));
   namespaceSwitchSet(NSSWITCH_FILE_WRITE, NSSW_FUNC(fwFileWriteOrdered));
-  cdiPioFileWritingFinalize = finalizeFileWriteOrdered;
+  namespaceSwitchSet(cdiPioExtraNSKeys[cdiPioEKFileWritingFinalize], NSSW_FUNC(finalizeFileWriteOrdered));
 
   if (bibAFiledataM == NULL) xabort("listSetNew did not succeed");
 }

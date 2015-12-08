@@ -439,17 +439,20 @@ cdiPioInit(MPI_Comm commGlob, int confResH, int *pioNamespace)
   reshRemove(confResH, &cdiPioConfOps);
   if (commInqIsProcIO())
     {
+      int serverNamespace = namespaceNew();
       cdiPioSerializeSetMPI();
       conf->postCommSetupActions();
       cdiPioFileWritingInit(conf);
       if (commInqRankColl() >= 0)
         {
           cdiPioCollectorMessageLoop(conf);
+          void (*cdiPioFileWritingFinalize)(void) = namespaceSwitchGet(cdiPioExtraNSKeys[cdiPioEKFileWritingFinalize]).func;
           cdiPioFileWritingFinalize();
         }
       cdiPioCommFinalize();
       if (xtInitByCDI) xt_finalize();
       reshReplace(confResH, conf, &cdiPioConfOps);
+      namespaceDelete(serverNamespace);
       return MPI_COMM_NULL;
     }
   else
@@ -461,8 +464,20 @@ cdiPioInit(MPI_Comm commGlob, int confResH, int *pioNamespace)
 }
 
 static void
+cdiPioFileWritingFinalizeDefault(void)
+{
+  xabort("error: failed to setup file writing finalization function!");
+}
+
+static void
 cdiPioFileWritingInit(const struct cdiPioConf *conf)
 {
+  if (cdiPioExtraNSKeys[cdiPioEKFileWritingFinalize] == 0)
+    {
+      cdiPioExtraNSKeys[cdiPioEKFileWritingFinalize] = cdiNamespaceSwitchNewKey();
+    }
+
+  namespaceSwitchSet(cdiPioExtraNSKeys[cdiPioEKFileWritingFinalize], NSSW_FUNC(cdiPioFileWritingFinalizeDefault));
   int IOMode = commInqIOMode();
 
   xassert(IOMode != PIO_NONE || commInqSizeGlob() == 1);
@@ -481,14 +496,6 @@ cdiPioFileWritingInit(const struct cdiPioConf *conf)
     case PIO_MPI_FW_AT_REBLOCK: cdiPioFileWriteAtReblockInit(conf); break;
     }
 }
-
-static void
-cdiPioFileWritingFinalizeDefault(void)
-{
-  xabort("error: failed to setup file writing finalization function!");
-}
-
-void (*cdiPioFileWritingFinalize)(void) = cdiPioFileWritingFinalizeDefault;
 
 /*****************************************************************************/
 
