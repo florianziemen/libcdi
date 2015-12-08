@@ -296,7 +296,7 @@ pioSendInitialize(void)
       namespaceSwitchSet(NSSWITCH_FILE_OPEN, NSSW_FUNC(pioSendOpen));
       namespaceSwitchSet(NSSWITCH_FILE_CLOSE, NSSW_FUNC(pioSendClose));
       namespaceSwitchSet(NSSWITCH_FILE_WRITE, NSSW_FUNC(pioSendWrite));
-      cdiPioFileWritingFinalize = pioSendFinalize;
+      namespaceSwitchSet(cdiPioExtraNSKeys[cdiPioEKFileWritingFinalize], NSSW_FUNC(pioSendFinalize));
       bibRemoteFileBuf = listSetNew(destroyRemoteFileBuf, compareNames);
     }
 }

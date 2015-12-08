@@ -296,7 +296,7 @@ initMPINONB(void)
   namespaceSwitchSet(NSSWITCH_FILE_OPEN, NSSW_FUNC(fowMPINONB));
   namespaceSwitchSet(NSSWITCH_FILE_CLOSE, NSSW_FUNC(fcMPINONB));
   namespaceSwitchSet(NSSWITCH_FILE_WRITE, NSSW_FUNC(fwMPINONB));
-  cdiPioFileWritingFinalize = finalizeMPINONB;
+  namespaceSwitchSet(cdiPioExtraNSKeys[cdiPioEKFileWritingFinalize], NSSW_FUNC(finalizeMPINONB));
 
   if (bibAFiledataM == NULL) xabort("listSetNew did not succeed");
 }

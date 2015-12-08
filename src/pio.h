@@ -1,5 +1,5 @@
-#ifndef _PIO_H
-#define _PIO_H
+#ifndef CDI_PIO_H
+#define CDI_PIO_H
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -8,7 +8,15 @@
 #include <stdlib.h>
 #include <mpi.h>
 
-extern void (*cdiPioFileWritingFinalize)(void);
+/* indices of extra keys put into cdiPioExtraNSKeys */
+
+enum
+{
+  cdiPioEKFileWritingFinalize,
+  cdiPioExtraNSKeysSize
+};
+
+extern int cdiPioExtraNSKeys[cdiPioExtraNSKeysSize];
 
 #endif
 /*

@@ -504,7 +504,7 @@ cdiPioFileWriteAtReblockInit(const struct cdiPioConf *conf)
   namespaceSwitchSet(NSSWITCH_FILE_OPEN, NSSW_FUNC(fowFileWriteAtReblock));
   namespaceSwitchSet(NSSWITCH_FILE_CLOSE, NSSW_FUNC(fcFileWriteAtReblock));
   namespaceSwitchSet(NSSWITCH_FILE_WRITE, NSSW_FUNC(fwFileWriteAtReblock));
-  cdiPioFileWritingFinalize = finalizeFileWriteAtReblock;
+  namespaceSwitchSet(cdiPioExtraNSKeys[cdiPioEKFileWritingFinalize], NSSW_FUNC(finalizeFileWriteAtReblock));
 
   largePageAlign = conf->largePageAlign;
 
