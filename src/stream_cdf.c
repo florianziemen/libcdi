@@ -4501,10 +4501,12 @@ static void cdfLazyGridDelete(grid_t *grid)
 
 static void cdfLazyGridDestroyOnce(void)
 {
+  /*
 #ifdef HAVE_MMAP
   size_t pgSize = cdiGetPageSize(false);
   munmap(cdfPendingLoad, pgSize);
 #endif
+  */
 }
 
 static const double *
@@ -4703,6 +4705,7 @@ cdfLazyGridInitOnce(void)
   cdfLazyGridVtable.inqYBoundsPtr = cdfLazyGridInqYBoundsPtr;
   /* create inaccessible memory area, if possible, this serves as
    * dummy value for pointers to data not yet loaded */
+  /*
 #ifdef HAVE_MMAP
   {
     size_t pgSize = cdiGetPageSize(false);
@@ -4720,8 +4723,9 @@ cdfLazyGridInitOnce(void)
                " memory", devZero, fd);
   }
 #else
+  */
   cdfPendingLoad = (double *)&cdfPendingLoad;
-#endif
+  //#endif
   atexit(cdfLazyGridDestroyOnce);
 #ifndef HAVE_LIBPTHREAD
   cdfLazyInitialized = true;

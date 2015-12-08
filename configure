@@ -26087,6 +26087,99 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
 
+# check for sysconf names
+ac_fn_c_check_decl "$LINENO" "_SC_LARGE_PAGESIZE" "ac_cv_have_decl__SC_LARGE_PAGESIZE" "$ac_includes_default
+#include <limits.h>
+#include <unistd.h>
+"
+if test "x$ac_cv_have_decl__SC_LARGE_PAGESIZE" = xyes; then :
+  ac_have_decl=1
+else
+  ac_have_decl=0
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL__SC_LARGE_PAGESIZE $ac_have_decl
+_ACEOF
+ac_fn_c_check_decl "$LINENO" "PAGESIZE" "ac_cv_have_decl_PAGESIZE" "$ac_includes_default
+#include <limits.h>
+#include <unistd.h>
+"
+if test "x$ac_cv_have_decl_PAGESIZE" = xyes; then :
+  ac_have_decl=1
+else
+  ac_have_decl=0
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_PAGESIZE $ac_have_decl
+_ACEOF
+ac_fn_c_check_decl "$LINENO" "PAGE_SIZE" "ac_cv_have_decl_PAGE_SIZE" "$ac_includes_default
+#include <limits.h>
+#include <unistd.h>
+"
+if test "x$ac_cv_have_decl_PAGE_SIZE" = xyes; then :
+  ac_have_decl=1
+else
+  ac_have_decl=0
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_PAGE_SIZE $ac_have_decl
+_ACEOF
+ac_fn_c_check_decl "$LINENO" "_SC_PAGE_SIZE" "ac_cv_have_decl__SC_PAGE_SIZE" "$ac_includes_default
+#include <limits.h>
+#include <unistd.h>
+"
+if test "x$ac_cv_have_decl__SC_PAGE_SIZE" = xyes; then :
+  ac_have_decl=1
+else
+  ac_have_decl=0
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL__SC_PAGE_SIZE $ac_have_decl
+_ACEOF
+ac_fn_c_check_decl "$LINENO" "_SC_PAGESIZE" "ac_cv_have_decl__SC_PAGESIZE" "$ac_includes_default
+#include <limits.h>
+#include <unistd.h>
+"
+if test "x$ac_cv_have_decl__SC_PAGESIZE" = xyes; then :
+  ac_have_decl=1
+else
+  ac_have_decl=0
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL__SC_PAGESIZE $ac_have_decl
+_ACEOF
+ac_fn_c_check_decl "$LINENO" "_PC_REC_XFER_ALIGN" "ac_cv_have_decl__PC_REC_XFER_ALIGN" "$ac_includes_default
+#include <limits.h>
+#include <unistd.h>
+"
+if test "x$ac_cv_have_decl__PC_REC_XFER_ALIGN" = xyes; then :
+  ac_have_decl=1
+else
+  ac_have_decl=0
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL__PC_REC_XFER_ALIGN $ac_have_decl
+_ACEOF
+ac_fn_c_check_decl "$LINENO" "POSIX_REC_XFER_ALIGN" "ac_cv_have_decl_POSIX_REC_XFER_ALIGN" "$ac_includes_default
+#include <limits.h>
+#include <unistd.h>
+"
+if test "x$ac_cv_have_decl_POSIX_REC_XFER_ALIGN" = xyes; then :
+  ac_have_decl=1
+else
+  ac_have_decl=0
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_POSIX_REC_XFER_ALIGN $ac_have_decl
+_ACEOF
+
 #
 # Check for non-standard builtin
 for builtin in __builtin_ctz
@@ -29472,98 +29565,6 @@ fi
   { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: MPI launch command unavailable" >&5
 $as_echo "$as_me: WARNING: MPI launch command unavailable" >&2;}
 fi
-   ac_fn_c_check_decl "$LINENO" "_SC_LARGE_PAGESIZE" "ac_cv_have_decl__SC_LARGE_PAGESIZE" "$ac_includes_default
-#include <limits.h>
-#include <unistd.h>
-"
-if test "x$ac_cv_have_decl__SC_LARGE_PAGESIZE" = xyes; then :
-  ac_have_decl=1
-else
-  ac_have_decl=0
-fi
-
-cat >>confdefs.h <<_ACEOF
-#define HAVE_DECL__SC_LARGE_PAGESIZE $ac_have_decl
-_ACEOF
-ac_fn_c_check_decl "$LINENO" "PAGESIZE" "ac_cv_have_decl_PAGESIZE" "$ac_includes_default
-#include <limits.h>
-#include <unistd.h>
-"
-if test "x$ac_cv_have_decl_PAGESIZE" = xyes; then :
-  ac_have_decl=1
-else
-  ac_have_decl=0
-fi
-
-cat >>confdefs.h <<_ACEOF
-#define HAVE_DECL_PAGESIZE $ac_have_decl
-_ACEOF
-ac_fn_c_check_decl "$LINENO" "PAGE_SIZE" "ac_cv_have_decl_PAGE_SIZE" "$ac_includes_default
-#include <limits.h>
-#include <unistd.h>
-"
-if test "x$ac_cv_have_decl_PAGE_SIZE" = xyes; then :
-  ac_have_decl=1
-else
-  ac_have_decl=0
-fi
-
-cat >>confdefs.h <<_ACEOF
-#define HAVE_DECL_PAGE_SIZE $ac_have_decl
-_ACEOF
-ac_fn_c_check_decl "$LINENO" "_SC_PAGE_SIZE" "ac_cv_have_decl__SC_PAGE_SIZE" "$ac_includes_default
-#include <limits.h>
-#include <unistd.h>
-"
-if test "x$ac_cv_have_decl__SC_PAGE_SIZE" = xyes; then :
-  ac_have_decl=1
-else
-  ac_have_decl=0
-fi
-
-cat >>confdefs.h <<_ACEOF
-#define HAVE_DECL__SC_PAGE_SIZE $ac_have_decl
-_ACEOF
-ac_fn_c_check_decl "$LINENO" "_SC_PAGESIZE" "ac_cv_have_decl__SC_PAGESIZE" "$ac_includes_default
-#include <limits.h>
-#include <unistd.h>
-"
-if test "x$ac_cv_have_decl__SC_PAGESIZE" = xyes; then :
-  ac_have_decl=1
-else
-  ac_have_decl=0
-fi
-
-cat >>confdefs.h <<_ACEOF
-#define HAVE_DECL__SC_PAGESIZE $ac_have_decl
-_ACEOF
-ac_fn_c_check_decl "$LINENO" "_PC_REC_XFER_ALIGN" "ac_cv_have_decl__PC_REC_XFER_ALIGN" "$ac_includes_default
-#include <limits.h>
-#include <unistd.h>
-"
-if test "x$ac_cv_have_decl__PC_REC_XFER_ALIGN" = xyes; then :
-  ac_have_decl=1
-else
-  ac_have_decl=0
-fi
-
-cat >>confdefs.h <<_ACEOF
-#define HAVE_DECL__PC_REC_XFER_ALIGN $ac_have_decl
-_ACEOF
-ac_fn_c_check_decl "$LINENO" "POSIX_REC_XFER_ALIGN" "ac_cv_have_decl_POSIX_REC_XFER_ALIGN" "$ac_includes_default
-#include <limits.h>
-#include <unistd.h>
-"
-if test "x$ac_cv_have_decl_POSIX_REC_XFER_ALIGN" = xyes; then :
-  ac_have_decl=1
-else
-  ac_have_decl=0
-fi
-
-cat >>confdefs.h <<_ACEOF
-#define HAVE_DECL_POSIX_REC_XFER_ALIGN $ac_have_decl
-_ACEOF
-
 
 
 pkg_failed=no
