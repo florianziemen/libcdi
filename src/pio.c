@@ -16,6 +16,8 @@ const char *const cdiPioCmdStrTab[] = {
   "IO_Finalize"
 };
 
+int cdiPioExtraNSKeys[cdiPioExtraNSKeysSize];
+
 /*
  * Local Variables:
  * c-file-style: "Java"

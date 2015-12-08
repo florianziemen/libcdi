@@ -19,6 +19,7 @@ char commands[][13] = { "FINALIZE",
                         "RESOURCES",
                         "WRITETS"};
 
+
 /*****************************************************************************/
 void
 cdiAbortC_MPI(const char *caller, const char *filename,
