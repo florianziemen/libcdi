@@ -198,7 +198,7 @@ cdiPioFileWriteAtAllInit(void)
   namespaceSwitchSet(NSSWITCH_FILE_OPEN, NSSW_FUNC(fowFileWriteAtAll));
   namespaceSwitchSet(NSSWITCH_FILE_CLOSE, NSSW_FUNC(fcFileWriteAtAll));
   namespaceSwitchSet(NSSWITCH_FILE_WRITE, NSSW_FUNC(fwFileWriteAtAll));
-  cdiPioFileWritingFinalize = finalizeFileWriteAtAll;
+  namespaceSwitchSet(cdiPioExtraNSKeys[cdiPioEKFileWritingFinalize], NSSW_FUNC(finalizeFileWriteAtAll));
 
   if (bibAFiledataM == NULL) xabort("listSetNew did not succeed");
 }
