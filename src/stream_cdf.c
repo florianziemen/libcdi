@@ -5061,7 +5061,7 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
                     }
                   else
                     {
-                      lazyGrid->xValsGet = (struct xyValGet){
+                      lazyGrid->yValsGet = (struct xyValGet){
                         .scalefactor = ncvars[yvarid].scalefactor,
                         .addoffset = ncvars[yvarid].addoffset,
                         .start = { start[0], start[1], start[2] },
