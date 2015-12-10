@@ -3,6 +3,10 @@
 	* Version 1.7.1 released
         * using CGRIBEX library version 1.7.4
 
+2015-12-10  Uwe Schulzweida
+
+	* gridGenYvals: bug fix [Bug #6373]
+
 2015-11-25  Uwe Schulzweida
 
 	* cdfDefXaxis/cdfDefXaxis: generate bounds for CDI_cmor_mode

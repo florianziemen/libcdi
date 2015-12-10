@@ -423,7 +423,7 @@ void gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double y
 	      {
 		double *restrict ytmp = NULL;
 		int nstart, lfound = 0;
-		int ny = (int) (180./fabs(ylast-yfirst)/(ysize-1) + 0.5);
+		int ny = (int) (180./(fabs(ylast-yfirst)/(ysize-1)) + 0.5);
 		ny -= ny%2;
 		if ( ny > ysize && ny < 4096 )
 		  {
