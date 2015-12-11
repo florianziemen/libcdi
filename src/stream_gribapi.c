@@ -2258,7 +2258,6 @@ static
 void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID, int levelID, int gcinit, int proddef_template_num)
 {
   int lbounds = 0;
-  static int warning = 1;
   double dlevel1 = 0, dlevel2 = 0;
 
   int zaxistype = zaxisInqType(zaxisID);
@@ -2375,15 +2374,11 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
         if ( !gcinit )
           {
             int vctsize = zaxisInqVctSize(zaxisID);
-            if ( vctsize == 0 && warning )
+            if ( vctsize > 0 )
               {
-                char paramstr[32];
-                cdiParamToString(param, paramstr, sizeof(paramstr));
-                Warning("VCT missing ( param = %s, zaxisID = %d )", paramstr, zaxisID);
-                warning = 0;
+                GRIB_CHECK(my_grib_set_long(gh, "PVPresent", 1), 0);
+                GRIB_CHECK(grib_set_double_array(gh, "pv", zaxisInqVctPtr(zaxisID), (size_t)vctsize), 0);
               }
-            GRIB_CHECK(my_grib_set_long(gh, "PVPresent", 1), 0);
-            GRIB_CHECK(grib_set_double_array(gh, "pv", zaxisInqVctPtr(zaxisID), (size_t)vctsize), 0);
           }
 
 	break;

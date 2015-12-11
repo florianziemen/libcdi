@@ -497,13 +497,8 @@ int vlist_generate_zaxis(int vlistID, int zaxistype, int nlevels, const double *
 	      zaxisDefUbounds(zaxisID, ubounds);
 	    }
 
-	  if ( zaxistype == ZAXIS_HYBRID )
-	    {
-	      if ( vctsize > 0 )
-		zaxisDefVct(zaxisID, vctsize, vct);
-	      else
-		Warning("VCT missing");
-	    }
+	  if ( zaxistype == ZAXIS_HYBRID && vctsize > 0 )
+            zaxisDefVct(zaxisID, vctsize, vct);
 	}
 
       nzaxis = vlistptr->nzaxis;

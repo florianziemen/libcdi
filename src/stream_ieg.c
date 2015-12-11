@@ -397,7 +397,6 @@ void iegDefLevel(int *pdb, int *gdb, double *vct, int zaxisID, int levelID)
 {
   double level;
   int ilevel, leveltype;
-  static int warning = 1;
   static int vct_warning = 1;
 
   leveltype = zaxisInqType(zaxisID);
@@ -441,12 +440,6 @@ void iegDefLevel(int *pdb, int *gdb, double *vct, int zaxisID, int levelID)
 	  }
 
 	vctsize = zaxisInqVctSize(zaxisID);
-	if ( vctsize == 0 && warning )
-	  {
-	    Warning("VCT missing. ( code = %d, zaxisID = %d )",
-		    IEG_P_Parameter(pdb), zaxisID);
-	    warning = 0;
-	  }
 	if ( vctsize > 100 )
 	  {
 	    /*	    IEG_G_NumVCP(gdb) = 0; */

@@ -1031,15 +1031,8 @@ int varDefZaxis(int vlistID, int zaxistype, int nlevels, double *levels, int lbo
 	      zaxisDefUbounds(zaxisID, levels2);
 	    }
 
-	  if ( zaxistype == ZAXIS_HYBRID || zaxistype == ZAXIS_HYBRID_HALF )
-	    {
-	      /* if ( vctsize > 0 && vctsize >= 2*(nlevels+1)) */
-	      /* if ( vctsize > 0 && vctsize >= 2*(nlevels)) */
-	      if ( vctsize > 0 )
-		zaxisDefVct(zaxisID, vctsize, vct);
-	      else
-		Warning("VCT missing");
-	    }
+	  if ( (zaxistype == ZAXIS_HYBRID || zaxistype == ZAXIS_HYBRID_HALF) && vctsize > 0 )
+            zaxisDefVct(zaxisID, vctsize, vct);
 
 	  zaxisDefName(zaxisID, name);
 	  zaxisDefLongname(zaxisID, longname);

@@ -2050,6 +2050,8 @@ void cdf_def_vct_echam(stream_t *streamptr, int zaxisID)
   if ( type == ZAXIS_HYBRID || type == ZAXIS_HYBRID_HALF )
     {
       int ilev = zaxisInqVctSize(zaxisID)/2;
+      if ( ilev == 0 ) return;
+
       int mlev = ilev - 1;
       size_t start;
       size_t count = 1;
@@ -2062,12 +2064,6 @@ void cdf_def_vct_echam(stream_t *streamptr, int zaxisID)
         {
           if ( streamptr->vct.ilev != ilev )
             Error("more than one VCT for each file unsupported!");
-          return;
-        }
-
-      if ( ilev == 0 )
-        {
-          Warning("VCT missing");
           return;
         }
 
@@ -2132,6 +2128,8 @@ void cdf_def_vct_cf(stream_t *streamptr, int zaxisID, int nclevID, int ncbndsID)
   if ( type == ZAXIS_HYBRID || type == ZAXIS_HYBRID_HALF )
     {
       int ilev = zaxisInqVctSize(zaxisID)/2;
+      if ( ilev == 0 ) return;
+
       int mlev = ilev - 1;
       int hyaiid = 0, hybiid = 0, hyamid, hybmid;
       char tmpname[CDI_MAX_NAME];
@@ -2140,12 +2138,6 @@ void cdf_def_vct_cf(stream_t *streamptr, int zaxisID, int nclevID, int ncbndsID)
         {
           if ( streamptr->vct.ilev != ilev )
             Error("more than one VCT for each file unsupported!");
-          return;
-        }
-
-      if ( ilev == 0 )
-        {
-          Warning("VCT missing");
           return;
         }
 

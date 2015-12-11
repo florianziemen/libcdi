@@ -1860,7 +1860,6 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
 {
   double level;
   int ilevel, zaxistype, ltype;
-  static bool lwarning = true;
   static bool lwarning_vct = true;
 
   zaxistype = zaxisInqType(zaxisID);
@@ -1955,11 +1954,6 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
 	  }
 
 	vctsize = zaxisInqVctSize(zaxisID);
-	if ( vctsize == 0 && lwarning )
-	  {
-	    Warning("VCT missing. ( param = %d, zaxisID = %d )", ISEC1_Parameter, zaxisID);
-	    lwarning = false;
-	  }
 	if ( vctsize > 255 )
 	  {
 	    ISEC2_NumVCP = 0;
