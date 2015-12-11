@@ -4689,10 +4689,113 @@ cdfLazyGridInqYBoundsPtr(grid_t *grid)
 }
 
 static void
+cdfLazyGridCopyScalarFields(grid_t *gridptrOrig, grid_t *gridptrDup)
+{
+  struct cdfLazyGrid *lazyGridDup = (struct cdfLazyGrid *)gridptrDup,
+    *lazyGridOrig = (struct cdfLazyGrid *)gridptrOrig;
+  lazyGridOrig->baseVtable->copyScalarFields(gridptrOrig, &lazyGridDup->base);
+  lazyGridDup->baseVtable = lazyGridOrig->baseVtable;
+  lazyGridDup->cellAreaGet = lazyGridOrig->cellAreaGet;
+  lazyGridDup->xBoundsGet = lazyGridOrig->xBoundsGet;
+  lazyGridDup->yBoundsGet = lazyGridOrig->yBoundsGet;
+  lazyGridDup->xValsGet = lazyGridOrig->xValsGet;
+  lazyGridDup->yValsGet = lazyGridOrig->yValsGet;
+}
+
+static void
+cdfLazyGridCopyArrayFields(grid_t *gridptrOrig, grid_t *gridptrDup)
+{
+  struct cdfLazyGrid *lazyGridDup = (struct cdfLazyGrid *)gridptrDup,
+    *lazyGridOrig = (struct cdfLazyGrid *)gridptrOrig;
+  size_t nrowlon = (size_t)gridptrOrig->nrowlon;
+  size_t gridsize = (size_t)gridptrOrig->size;
+  int gridtype = gridptrOrig->type;
+  int irregular = gridtype == GRID_CURVILINEAR || gridtype == GRID_UNSTRUCTURED;
+  if ( nrowlon )
+    {
+      gridptrDup->rowlon = (int *)Malloc(nrowlon * sizeof (int));
+      memcpy(gridptrDup->rowlon, gridptrOrig->rowlon, nrowlon * sizeof(int));
+    }
+
+  if ( gridptrOrig->xvals != NULL && gridptrOrig->xvals != cdfPendingLoad )
+    {
+      size_t size  = irregular ? gridsize : (size_t)gridptrOrig->xsize;
+
+      gridptrDup->xvals = (double *)Malloc(size * sizeof (double));
+      memcpy(gridptrDup->xvals, gridptrOrig->xvals, size * sizeof (double));
+    }
+
+  if ( gridptrOrig->yvals != NULL && gridptrOrig->yvals != cdfPendingLoad )
+    {
+      size_t size  = irregular ? gridsize : (size_t)gridptrOrig->ysize;
+
+      gridptrDup->yvals = (double *)Malloc(size * sizeof (double));
+      memcpy(gridptrDup->yvals, gridptrOrig->yvals, size * sizeof (double));
+    }
+
+  if ( gridptrOrig->xbounds != NULL && gridptrOrig->xbounds != cdfPendingLoad )
+    {
+      size_t size  = (irregular ? gridsize : (size_t)gridptrOrig->xsize)
+        * (size_t)gridptrOrig->nvertex;
+
+      gridptrDup->xbounds = (double *)Malloc(size * sizeof (double));
+      memcpy(gridptrDup->xbounds, gridptrOrig->xbounds, size * sizeof (double));
+    }
+
+  if ( gridptrOrig->ybounds != NULL && gridptrOrig->ybounds != cdfPendingLoad )
+    {
+      size_t size = (irregular ? gridsize : (size_t)gridptrOrig->ysize)
+        * (size_t)gridptrOrig->nvertex;
+
+      gridptrDup->ybounds = (double *)Malloc(size * sizeof (double));
+      memcpy(gridptrDup->ybounds, gridptrOrig->ybounds, size * sizeof (double));
+    }
+
+  {
+    if ( gridptrOrig->area != NULL && gridptrOrig->area != cdfPendingLoad )
+      {
+        size_t size = gridsize;
+
+        gridptrDup->area = (double *)Malloc(size * sizeof (double));
+        memcpy(gridptrDup->area, gridptrOrig->area, size * sizeof (double));
+      }
+  }
+
+  if ( gridptrOrig->mask != NULL )
+    {
+      size_t size = gridsize;
+
+      gridptrDup->mask = (mask_t *)Malloc(size * sizeof(mask_t));
+      memcpy(gridptrDup->mask, gridptrOrig->mask, size * sizeof (mask_t));
+    }
+
+  if ( gridptrOrig->mask_gme != NULL )
+    {
+      size_t size = gridsize;
+
+      gridptrDup->mask_gme = (mask_t *)Malloc(size * sizeof (mask_t));
+      memcpy(gridptrDup->mask_gme, gridptrOrig->mask_gme, size * sizeof(mask_t));
+    }
+}
+
+static grid_t *
+cdfLazyGridCopy(grid_t *gridptrOrig)
+{
+  struct cdfLazyGrid *lazyGridDup
+    = (struct cdfLazyGrid *)Malloc(sizeof (*lazyGridDup));
+  gridptrOrig->vtable->copyScalarFields(gridptrOrig, &lazyGridDup->base);
+  gridptrOrig->vtable->copyArrayFields(gridptrOrig, &lazyGridDup->base);
+  return &lazyGridDup->base;
+}
+
+static void
 cdfLazyGridInitOnce(void)
 {
   cdfLazyGridVtable = cdiGridVtable;
   cdfLazyGridVtable.destroy = cdfLazyGridDelete;
+  cdfLazyGridVtable.copy = cdfLazyGridCopy;
+  cdfLazyGridVtable.copyScalarFields = cdfLazyGridCopyScalarFields;
+  cdfLazyGridVtable.copyArrayFields = cdfLazyGridCopyArrayFields;
   cdfLazyGridVtable.inqAreaPtr = cdfLazyGridInqAreaPtr;
   cdfLazyGridVtable.inqArea = cdfLazyGridInqArea;
   cdfLazyGridVtable.inqXValsPtr = cdfLazyGridInqXValsPtr;
