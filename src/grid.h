@@ -10,7 +10,9 @@ typedef struct grid_t grid_t;
 struct gridVirtTable
 {
   void (*destroy)(grid_t *gridptr);
-  void (*duplicateData)(grid_t *gridptrOrig, grid_t *gridptrDup);
+  grid_t *(*copy)(grid_t *gridptr);
+  void (*copyScalarFields)(grid_t *gridptrOrig, grid_t *gridptrDup);
+  void (*copyArrayFields)(grid_t *gridptrOrig, grid_t *gridptrDup);
   void (*defXVals)(grid_t *gridptr, const double *xvals);
   void (*defYVals)(grid_t *gridptr, const double *yvals);
   void (*defMask)(grid_t *gridptr, const int *mask);

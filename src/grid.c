@@ -214,14 +214,23 @@ void gridInit (void)
   if ( env ) GRID_Debug = atoi(env);
 }
 
-static
-void grid_copy(grid_t *gridptr2, grid_t *gridptr1)
+static void
+grid_copy_base_scalar_fields(grid_t *gridptrOrig, grid_t *gridptrDup)
 {
-  int gridID2;
+  memcpy(gridptrDup, gridptrOrig, sizeof(grid_t));
+  gridptrDup->self = CDI_UNDEFID;
+  if (gridptrOrig->reference)
+    gridptrDup->reference = strdupx(gridptrOrig->reference);
+}
 
-  gridID2 = gridptr2->self;
-  memcpy(gridptr2, gridptr1, sizeof(grid_t));
-  gridptr2->self = gridID2;
+
+static grid_t *
+grid_copy_base(grid_t *gridptrOrig)
+{
+  grid_t *gridptrDup = (grid_t *)Malloc(sizeof (*gridptrDup));
+  gridptrOrig->vtable->copyScalarFields(gridptrOrig, gridptrDup);
+  gridptrOrig->vtable->copyArrayFields(gridptrOrig, gridptrDup);
+  return gridptrDup;
 }
 
 unsigned cdiGridCount(void)
@@ -2785,7 +2794,7 @@ int gridGenerate(const grid_t *grid)
 }
 
 static void
-gridDuplicateData(grid_t *gridptrOrig, grid_t *gridptrDup)
+grid_copy_base_array_fields(grid_t *gridptrOrig, grid_t *gridptrDup)
 {
   size_t nrowlon = (size_t)gridptrOrig->nrowlon;
   size_t gridsize = (size_t)gridptrOrig->size;
@@ -2881,29 +2890,9 @@ The function @func{gridDuplicate} duplicates a horizontal Grid.
 int gridDuplicate(int gridID)
 {
   grid_t *gridptr = gridID2Ptr(gridID);
-
-  int gridtype = gridInqType(gridID);
-  int gridsize = gridInqSize(gridID);
-
-  int gridIDnew = gridCreate(gridtype, gridsize);
-  grid_t *gridptrnew = gridID2Ptr(gridIDnew);
-
-  grid_copy(gridptrnew, gridptr);
-
-  strcpy(gridptrnew->xname, gridptr->xname);
-  strcpy(gridptrnew->yname, gridptr->yname);
-  strcpy(gridptrnew->xlongname, gridptr->xlongname);
-  strcpy(gridptrnew->ylongname, gridptr->ylongname);
-  strcpy(gridptrnew->xunits, gridptr->xunits);
-  strcpy(gridptrnew->yunits, gridptr->yunits);
-  gridptrnew->xstdname = gridptr->xstdname;
-  gridptrnew->ystdname = gridptr->ystdname;
-
-  if (gridptr->reference)
-    gridptrnew->reference = strdupx(gridptr->reference);
-
-  gridptr->vtable->duplicateData(gridptr, gridptrnew);
-
+  grid_t *gridptrnew = gridptr->vtable->copy(gridptr);
+  int gridIDnew = reshPut(gridptrnew, &gridOps);
+  gridptrnew->self = gridIDnew;
   return (gridIDnew);
 }
 
@@ -4778,7 +4767,9 @@ struct addIffNewRes cdiVlistAddGridIfNew(int vlistID, grid_t *grid, int mode)
 const struct gridVirtTable cdiGridVtable
   = {
   .destroy = gridDestroyKernel,
-  .duplicateData = gridDuplicateData,
+  .copy = grid_copy_base,
+  .copyScalarFields = grid_copy_base_scalar_fields,
+  .copyArrayFields = grid_copy_base_array_fields,
   .defXVals = gridDefXValsSerial,
   .defYVals = gridDefYValsSerial,
   .defMask = gridDefMaskSerial,
