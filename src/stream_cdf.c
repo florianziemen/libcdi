@@ -4621,10 +4621,10 @@ cdfLazyXYValGetCompare(struct cdfLazyGrid *lazyGridRef,
     *valsGetYRef = &lazyGridRef->yValsGet,
     *valsGetXTest = &lazyGridTest->xValsGet,
     *valsGetYTest = &lazyGridTest->yValsGet;
-  return valsGetXRef->datasetNCId == valsGetXTest->datasetNCId
-    &&   valsGetXRef->varNCId     == valsGetXTest->varNCId
-    &&   valsGetYRef->datasetNCId == valsGetYTest->datasetNCId
-    &&   valsGetYRef->varNCId     == valsGetYTest->varNCId;
+  return valsGetXRef->datasetNCId != valsGetXTest->datasetNCId
+    ||   valsGetXRef->varNCId     != valsGetXTest->varNCId
+    ||   valsGetYRef->datasetNCId != valsGetYTest->datasetNCId
+    ||   valsGetYRef->varNCId     != valsGetYTest->varNCId;
 }
 
 static int
