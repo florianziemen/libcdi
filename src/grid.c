@@ -635,10 +635,9 @@ The function @func{gridDefXname} defines the name of a X-axis.
 */
 void gridDefXname(int gridID, const char *xname)
 {
-  grid_t *gridptr = gridID2Ptr(gridID);
-
-  if ( xname )
+  if ( xname && *xname )
     {
+      grid_t *gridptr = gridID2Ptr(gridID);
       gridSetXname(gridptr, xname);
       gridMark4Update(gridID);
     }
@@ -661,9 +660,9 @@ The function @func{gridDefXlongname} defines the longname of a X-axis.
 */
 void gridDefXlongname(int gridID, const char *xlongname)
 {
-  grid_t *gridptr = gridID2Ptr(gridID);
   if ( xlongname )
     {
+      grid_t *gridptr = gridID2Ptr(gridID);
       gridSetXlongname(gridptr, xlongname);
       gridMark4Update(gridID);
     }
@@ -685,10 +684,9 @@ The function @func{gridDefXunits} defines the units of a X-axis.
 */
 void gridDefXunits(int gridID, const char *xunits)
 {
-  grid_t *gridptr = gridID2Ptr(gridID);
-
   if ( xunits )
     {
+      grid_t *gridptr = gridID2Ptr(gridID);
       gridSetXunits(gridptr, xunits);
       gridMark4Update(gridID);
     }
@@ -710,10 +708,9 @@ The function @func{gridDefYname} defines the name of a Y-axis.
 */
 void gridDefYname(int gridID, const char *yname)
 {
-  grid_t *gridptr = gridID2Ptr(gridID);
-
-  if ( yname )
+  if ( yname && *yname )
     {
+      grid_t *gridptr = gridID2Ptr(gridID);
       gridSetYname(gridptr, yname);
       gridMark4Update(gridID);
     }
@@ -735,10 +732,9 @@ The function @func{gridDefYlongname} defines the longname of a Y-axis.
 */
 void gridDefYlongname(int gridID, const char *ylongname)
 {
-  grid_t *gridptr = gridID2Ptr(gridID);
-
   if ( ylongname )
     {
+      grid_t *gridptr = gridID2Ptr(gridID);
       gridSetYlongname(gridptr, ylongname);
       gridMark4Update(gridID);
     }
@@ -760,10 +756,9 @@ The function @func{gridDefYunits} defines the units of a Y-axis.
 */
 void gridDefYunits(int gridID, const char *yunits)
 {
-  grid_t *gridptr = gridID2Ptr(gridID);
-
   if ( yunits )
     {
+      grid_t *gridptr = gridID2Ptr(gridID);
       gridSetYunits(gridptr, yunits);
       gridMark4Update(gridID);
     }
