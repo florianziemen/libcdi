@@ -1219,8 +1219,7 @@ void cdfDefXaxis(stream_t *streamptr, int gridID, int ndims)
   int gridindex = vlistGridIndex(vlistID, gridID);
 
   gridInqXname(gridID, axisname);
-  //  if ( axisname[0] == 0 ) Error("axis name undefined!");
-  if ( axisname[0] == 0 ) return;
+  if ( axisname[0] == 0 ) Error("axis name undefined!");
 
   gridInqXlongname(gridID, longname);
   gridInqXstdname(gridID, stdname);
@@ -1362,8 +1361,7 @@ void cdfDefYaxis(stream_t *streamptr, int gridID, int ndims)
   int gridindex = vlistGridIndex(vlistID, gridID);
 
   gridInqYname(gridID, axisname);
-  // if ( axisname[0] == 0 ) Error("axis name undefined!");
-  if ( axisname[0] == 0 ) return;
+  if ( axisname[0] == 0 ) Error("axis name undefined!");
 
   gridInqYlongname(gridID, longname);
   gridInqYstdname(gridID, stdname);
