@@ -5278,7 +5278,12 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 	      }
 	    }
 
-	  grid->type = ncvars[ncvarid].gridtype;
+          if (grid->type != ncvars[ncvarid].gridtype)
+            {
+              int gridtype = ncvars[ncvarid].gridtype;
+              grid->type = gridtype;
+              cdiGridTypeInit(grid, gridtype, grid->size);
+            }
 
 	  if ( grid->size == 0 )
 	    {
