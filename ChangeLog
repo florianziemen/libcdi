@@ -3,6 +3,10 @@
 	* Version 1.7.1 released
         * using CGRIBEX library version 1.7.4
 
+2015-12-19  Uwe Schulzweida
+
+	* gribapiDecode internal problem when processing 1x1 GRIB2 data with JPEG compression [Bug #6402]
+
 2015-12-10  Uwe Schulzweida
 
 	* gridGenYvals: bug fix [Bug #6373]

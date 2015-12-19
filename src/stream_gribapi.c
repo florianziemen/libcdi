@@ -1799,6 +1799,7 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
   UNUSED(nmiss);
 
   int gridtype = gridInqType(gridID);
+  int gridsize = gridInqSize(gridID);
 
   if ( editionNumber <= 1 )
     if ( gridtype == GRID_GME || gridtype == GRID_UNSTRUCTURED )
@@ -1806,11 +1807,8 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 
   if ( gridtype == GRID_GENERIC )
     {
-      int xsize, ysize, gridsize;
-
-      gridsize = gridInqSize(gridID);
-      xsize = gridInqXsize(gridID);
-      ysize = gridInqYsize(gridID);
+      int xsize = gridInqXsize(gridID);
+      int ysize = gridInqYsize(gridID);
 
       if ( (ysize ==  32 || ysize ==  48 || ysize ==  64 ||
 	    ysize ==  96 || ysize == 160 || ysize == 192 ||
@@ -1834,7 +1832,7 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
     }
   else if ( gridtype == GRID_CURVILINEAR )
     {
-      if ( lwarn && gridInqSize(gridID) > 1 )
+      if ( lwarn && gridsize > 1 )
 	{
 	  lwarn = FALSE;
 	  Warning("Curvilinear grids are unsupported in GRIB format! Created wrong GDS!");
@@ -1848,13 +1846,13 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 
       if ( comptype )
         {
-          if ( comptype == COMPRESS_JPEG )
+          if ( comptype == COMPRESS_JPEG && gridsize > 1 )
             {
               static const char mesg[] = "grid_jpeg";
               size_t len = sizeof (mesg) - 1;
               GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
             }
-          else if ( comptype == COMPRESS_SZIP )
+          else if ( comptype == COMPRESS_SZIP && gridsize > 1 )
             {
               static const char mesg[] = "grid_ccsds";
               size_t len = sizeof (mesg) - 1;
@@ -1878,7 +1876,6 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
     case GRID_GAUSSIAN_REDUCED:
     case GRID_TRAJECTORY:
       {
-	int nlon = 0, nlat;
 	double xfirst = 0, xlast = 0, xinc = 0;
 	double yfirst = 0, ylast = 0, yinc = 0;
 	double latIncr;
@@ -1908,8 +1905,8 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 	    GRIB_CHECK(my_grib_set_string(gh, "gridType", mesg, &len), 0);
 	  }
 
-	nlon = gridInqXsize(gridID);
-	nlat = gridInqYsize(gridID);
+	int nlon = gridInqXsize(gridID);
+	int nlat = gridInqYsize(gridID);
 
 	if ( gridtype == GRID_GAUSSIAN_REDUCED )
 	  {
@@ -2000,10 +1997,9 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 	*/
 	if ( gridIsRotated(gridID) )
 	  {
-	    double xpole, ypole, angle;
-	    xpole = gridInqXpole(gridID);
-	    ypole = gridInqYpole(gridID);
-	    angle = gridInqAngle(gridID);
+	    double xpole = gridInqXpole(gridID);
+	    double ypole = gridInqYpole(gridID);
+	    double angle = gridInqAngle(gridID);
 	    /* change from north to south pole */
 	    if ( fabs(ypole) > 0 ) ypole = -ypole;
 	    xpole =  xpole + 180;
@@ -2034,13 +2030,13 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
           }
         else
 	  {
-            if ( comptype == COMPRESS_JPEG )
+            if ( comptype == COMPRESS_JPEG && gridsize > 1 )
               {
                 static const char mesg[] = "grid_jpeg";
                 size_t len = sizeof (mesg) -1;
                 GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
               }
-            else if ( comptype == COMPRESS_SZIP )
+            else if ( comptype == COMPRESS_SZIP && gridsize > 1 )
               {
                 static const char mesg[] = "grid_ccsds";
                 size_t len = sizeof (mesg) -1;
@@ -2059,11 +2055,10 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
     case GRID_LCC:
       {
 	double originLon, originLat, lonParY, lat1, lat2, xincm, yincm;
-	int xsize, ysize;
 	int projflag, scanflag;
 
-	xsize = gridInqXsize(gridID);
-	ysize = gridInqYsize(gridID);
+	int xsize = gridInqXsize(gridID);
+	int ysize = gridInqYsize(gridID);
 
 	gridInqLCC(gridID, &originLon, &originLat, &lonParY, &lat1, &lat2, &xincm, &yincm,
 		   &projflag, &scanflag);
@@ -2108,19 +2103,19 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 	GRIB_CHECK(my_grib_set_long(gh, "K", trunc), 0);
 	GRIB_CHECK(my_grib_set_long(gh, "M", trunc), 0);
 
-	// GRIB_CHECK(my_grib_set_long(gh, "numberOfDataPoints", gridInqSize(gridID)), 0);
+	// GRIB_CHECK(my_grib_set_long(gh, "numberOfDataPoints", gridsize), 0);
         /*
         if ( lieee )
           {
             printf("spectral_ieee\n");
-            if ( editionNumber == 2 ) GRIB_CHECK(my_grib_set_long(gh, "numberOfValues", gridInqSize(gridID)), 0);
+            if ( editionNumber == 2 ) GRIB_CHECK(my_grib_set_long(gh, "numberOfValues", gridsize, 0);
             static const char mesg[] = "spectral_ieee";
             size_t len = sizeof (mesg) -1;
             GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
           }
         else */ if ( gridInqComplexPacking(gridID) )
 	  {
-	    if ( editionNumber == 2 ) GRIB_CHECK(my_grib_set_long(gh, "numberOfValues", gridInqSize(gridID)), 0);
+	    if ( editionNumber == 2 ) GRIB_CHECK(my_grib_set_long(gh, "numberOfValues", gridsize), 0);
             static const char mesg[] = "spectral_complex";
             size_t len = sizeof (mesg) -1;
 	    GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
@@ -2149,8 +2144,8 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 	GRIB_CHECK(my_grib_set_long(gh, "latitudeOfThePolePoint", 90000000), 0);
 	GRIB_CHECK(my_grib_set_long(gh, "longitudeOfThePolePoint", 0), 0);
 
-	GRIB_CHECK(my_grib_set_long(gh, "numberOfDataPoints", gridInqSize(gridID)), 0);
-	GRIB_CHECK(my_grib_set_long(gh, "totalNumberOfGridPoints", gridInqSize(gridID)), 0);
+	GRIB_CHECK(my_grib_set_long(gh, "numberOfDataPoints", gridsize), 0);
+	GRIB_CHECK(my_grib_set_long(gh, "totalNumberOfGridPoints", gridsize), 0);
 
         if ( comptype == COMPRESS_SZIP )
           {
