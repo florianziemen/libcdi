@@ -31,8 +31,8 @@
 #include "calendar.h"
 #include "timebase.h"
 
-#ifndef _TEMPLATES_H
-#define _TEMPLATES_H
+#ifndef CGRIBEX_TEMPLATES_H
+#define CGRIBEX_TEMPLATES_H
 
 #define CAT(X,Y)      X##_##Y
 #define TEMPLATE(X,Y) CAT(X,Y)
@@ -45,19 +45,20 @@
 #  include "config.h"
 #endif
 
+#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <float.h>
 
 
-#if ! defined   (_CGRIBEX_H)
+#if ! defined   (CGRIBEX_H)
 #  include "cgribex.h"
 #endif
 #if ! defined   (ERROR_H)
 #  include "error.h"
 #endif
-#if ! defined   (_DTYPES_H)
+#if ! defined   (DTYPES_H)
 #  include "dtypes.h"
 #endif
 
@@ -93,8 +94,17 @@
 #  define  GRIBPACK     unsigned char
 #endif
 
-#define  U_BYTEORDER     static union {unsigned long l; unsigned char c[sizeof(long)];} u_byteorder = {1}
-#define  IS_BIGENDIAN()  (u_byteorder.c[sizeof(long) - 1])
+#ifndef HOST_ENDIANNESS
+#ifdef __cplusplus
+static const uint32_t HOST_ENDIANNESS_temp[1] = { UINT32_C(0x00030201) };
+#define HOST_ENDIANNESS (((const unsigned char *)HOST_ENDIANNESS_temp)[0])
+#else
+#define HOST_ENDIANNESS (((const unsigned char *)&(const uint32_t[1]){UINT32_C(0x00030201)})[0])
+#endif
+#endif
+
+#define  U_BYTEORDER
+#define  IS_BIGENDIAN()  (HOST_ENDIANNESS == 0)
 
 #if defined (__xlC__) /* performance problems on IBM */
 #ifndef DBL_IS_NAN
@@ -132,7 +142,25 @@ extern "C" {
 
 #define intpow2(x) (ldexp(1.0, (x)))
 
-int gribrec_len(unsigned b1, unsigned b2, unsigned b3);
+static inline int
+gribrec_len(unsigned b1, unsigned b2, unsigned b3)
+{
+  /*
+    If bit 7 of b1 is set, we have to rescale by factor of 120.
+    This is a fixup to get round the restriction on product lengths
+    due to the count being only 24 bits. It is only possible because
+    the (default) rounding for GRIB products is 120 bytes.
+  */
+  int needRescaling = b1 & (1 << 7);
+
+  int gribsize = (int)((((b1&127) << 16)+(b2<<8) + b3));
+
+  if ( needRescaling ) gribsize *= 120;
+
+  return gribsize;
+
+}
+
 int correct_bdslen(int bdslen, long recsize, long gribpos);
 
 /* CDI converter routines */
@@ -162,7 +190,8 @@ int     cdiEncodeTime(int hour, int minute, int second);
 
 extern FILE *grprsm;
 
-extern int  CGRIBEX_Debug;
+extern int  CGRIBEX_Debug, CGRIBEX_Fix_ZSE, CGRIBEX_Const;
+extern int  CGRIBEX_grib_calendar;
 
 void   gprintf(const char *caller, const char *fmt, ...);
 
@@ -180,7 +209,6 @@ void   scatter_complex_float(float *fpdata, int pcStart, int trunc, int nsp);
 void   gather_complex_double(double *fpdata, size_t pcStart, size_t trunc, size_t nsp);
 void   gather_complex_float(float *fpdata, size_t pcStart, size_t trunc, size_t nsp);
 
-void   scm0_double(double *pdl, double *pdr, double *pfl, double *pfr, int klg);
 int    qu2reg2(double *pfield, int *kpoint, int klat, int klon,
 	       double *ztemp, double msval, int *kret);
 int    qu2reg3_double(double *pfield, int *kpoint, int klat, int klon,
@@ -223,8 +251,8 @@ int grib2Sections(unsigned char *gribbuffer, long gribbufsize, unsigned char **i
 #endif
 
 #endif  /* GRIB_INT_H */
-#ifndef _GRIBDECODE_H
-#define _GRIBDECODE_H
+#ifndef GRIBDECODE_H
+#define GRIBDECODE_H
 
 #define  UNDEFINED          9.999e20
 
@@ -340,7 +368,6 @@ int grib2Sections(unsigned char *gribbuffer, long gribbufsize, unsigned char **i
 
 #define  BMS_Len	     ((bms) == NULL ? 0 : (int) (bms[0]<<16)+(bms[1]<<8)+bms[2])
 #define  BMS_UnusedBits      (bms[3])
-#define  BMS_Numeric         
 #define  BMS_Bitmap	     ((bms) == NULL ? NULL : (bms)+6)
 #define  BMS_BitmapSize      (((((bms[0]<<16)+(bms[1]<<8)+bms[2]) - 6)<<3) - bms[3])
 
@@ -363,15 +390,15 @@ int grib2Sections(unsigned char *gribbuffer, long gribbufsize, unsigned char **i
 #define  GRIB2_SECLEN(section)   (GET_UINT4(section[0], section[1], section[2], section[3]))
 #define  GRIB2_SECNUM(section)   (GET_UINT1(section[4]))
 
-#endif  /* _GRIBDECODE_H */
-#ifndef _GRIB_ENCODE_H
-#define _GRIB_ENCODE_H
+#endif  /* GRIBDECODE_H */
+#ifndef CGRIBEX_GRIB_ENCODE_H
+#define CGRIBEX_GRIB_ENCODE_H
 
 #include <limits.h>
 
 #define PutnZero(n) \
 { \
-  for ( size_t i = z >= 0 ? (size_t)z : 0; i < (size_t)(z+n); i++ ) lGrib[i] = 0; \
+  for ( size_t i___ = z >= 0 ? (size_t)z : 0; i___ < (size_t)(z+n); i___++ ) lGrib[i___] = 0; \
   z += n; \
 }
 
@@ -402,7 +429,7 @@ enum {
   Put3Byte(mantissa);            \
 }
 
-#endif  /* _GRIB_ENCODE_H */
+#endif  /* CGRIBEX_GRIB_ENCODE_H */
 #ifndef CODEC_COMMON_H
 #define CODEC_COMMON_H
 #define gribSwapByteOrder_uint16(ui16)  ((uint16_t)((ui16<<8) | (ui16>>8)))
@@ -2024,7 +2051,6 @@ void gribDateTime(int *isec1, int *date, int *time)
   int julday, secofday;
   int64_t addsec = 0;
   int64_t time_period = 0;
-  extern int grib_calendar;
 
   int century = ISEC1_Century;
   int ryear   = ISEC1_Year;
@@ -2075,7 +2101,7 @@ void gribDateTime(int *isec1, int *date, int *time)
 
   if ( time_period > 0 && rday > 0 )
     {
-      encode_caldaysec(grib_calendar, ryear, rmonth, rday, rhour, rminute, second, &julday, &secofday);
+      encode_caldaysec(CGRIBEX_grib_calendar, ryear, rmonth, rday, rhour, rminute, second, &julday, &secofday);
 
       addsec = 0;
       switch ( ISEC1_TimeUnit )
@@ -2099,7 +2125,7 @@ void gribDateTime(int *isec1, int *date, int *time)
 
       julday_add_seconds(addsec, &julday, &secofday);
 
-      decode_caldaysec(grib_calendar, julday, secofday, &ryear, &rmonth, &rday, &rhour, &rminute, &second);
+      decode_caldaysec(CGRIBEX_grib_calendar, julday, secofday, &ryear, &rmonth, &rday, &rhour, &rminute, &second);
     }
   /*
   printf("new %d/%d/%d %d:%d\n", ryear, rmonth, rday, rhour, rminute);
@@ -2121,7 +2147,7 @@ void gprintf(const char *caller, const char *fmt, ...)
 
    fprintf(grprsm, "%-18s : ", caller);
   vfprintf(grprsm, fmt, args);
-   fprintf(grprsm, "\n");
+   fputs("\n", grprsm);
 
   va_end(args);
 }
@@ -3022,7 +3048,7 @@ void gribPrintSec1(int *isec0, int *isec1)
     }
 }
 
-void printQuasi(int *isec2)
+static void printQuasi(int *isec2)
 {
   /*
 
@@ -3768,35 +3794,6 @@ off_t gribGetPos(int fileID)
   return fileGetPos(fileID);
 }
 
-
-int gribCheckFiletype(int fileID)
-{
-  int found = 0;
-  char buffer[4];
-
-  if ( fileRead(fileID, buffer, 4) != 4 ) return found;
-
-  if ( memcmp(buffer, "GRIB", 4) == 0 )
-    {
-      found = 1;
-      if ( CGRIBEX_Debug ) Message("found GRIB file = %s", fileInqName(fileID));
-    }
-  else
-    {
-      long offset;
-      int ierr = gribFileSeek(fileID, &offset);
-      fileRewind(fileID);
-      if ( !ierr )
-	{
-	  found = 1;
-	  if ( CGRIBEX_Debug ) Message("found seek GRIB file = %s", fileInqName(fileID));
-	}
-    }
-
-  return found;
-}
-
-
 int gribCheckSeek(int fileID, long *offset, int *version)
 {
   int ierr = gribFileSeek(fileID, offset);
@@ -3810,59 +3807,6 @@ int gribCheckSeek(int fileID, long *offset, int *version)
     }
 
   return ierr;
-}
-
-
-int gribFileSeekOld(int fileID, long *offset)
-{
-  /* position file pointer after GRIB */
-  enum { buffersize = 4096 };
-  unsigned char buffer[buffersize];
-  int retry = 4096;
-
-  *offset = 0;
-
-  void *fileptr = filePtr(fileID);
-
-  for ( size_t i = 0; i < 4; ++i)
-    {
-      int ch = filePtrGetc(fileptr);
-      if ( ch == EOF ) return (-1);
-      buffer[i] = (unsigned char)ch;
-    }
-  /*
-  fileRead(fileID, buffer, 4);
-  */
-
-  while ( retry-- )
-    {
-      size_t i;
-      for ( i = 0; i < buffersize-4; ++i )
-	{
-	  if (buffer[i  ] == 'G' &&
-	      buffer[i+1] == 'R' &&
-	      buffer[i+2] == 'I' &&
-	      buffer[i+3] == 'B')
-	    {
-	      if ( CGRIBEX_Debug )
-		Message("record offset = %d", (int) *offset);
-	      return (0);
-	    }
-	  else
-	    {
-	      int ch = filePtrGetc(fileptr); if ( ch == EOF ) return (-1); buffer[i+4] = (unsigned char)ch;
-	      (*offset)++;
-	    }
-	}
-      buffer[0] = buffer[i  ];
-      buffer[1] = buffer[i+1];
-      buffer[2] = buffer[i+2];
-      buffer[3] = buffer[i+3];
-    }
-
-  if ( CGRIBEX_Debug ) Message("record offset = %d", (int) *offset);
-
-  return 1;
 }
 
 
@@ -3900,53 +3844,6 @@ int gribFileSeek(int fileID, long *offset)
   return 1;
 }
 
-
-int gribFileSeekTest(int fileID, long *offset)
-{
-  /* position file pointer after GRIB */
-  const long GRIB = 0x47524942L;
-  long code = 0;
-  int ch;
-  int i = 0;
-  enum { buffersize = 8 };
-  unsigned char buffer[buffersize];
-  unsigned long retry = 4096L*4096L;
-  int nread = 0;
-
-  *offset = 0;
-
-  void *fileptr = filePtr(fileID);
-
-  while ( retry-- )
-    {
-      if ( i >= nread )
-	{
-	  nread = (int) filePtrRead(fileptr, buffer, buffersize);
-	  if ( nread == 0 ) return (-1);
-	  i = 0;
-	}
-
-      ch = buffer[i++];
-      code = ( (code << 8) + ch ) & 0xFFFFFFFFL;
-
-      if ( code == GRIB )
-	{
-	  /* printf("end: %d %d\n", nread, i); */
-	  if ( CGRIBEX_Debug )
-	    Message("record offset = %d", (int) *offset);
-
-	  if ( i != nread ) fileSetPos(fileID, (off_t) i-nread, SEEK_CUR);
-
-	  return (0);
-	}
-
-      (*offset)++;
-    }
-
-  if ( CGRIBEX_Debug ) Message("record offset = %d", (int) *offset);
-
-  return 1;
-}
 
 static inline int
 read3ByteMSBFirst(void *fileptr)
@@ -4019,7 +3916,7 @@ size_t gribReadSize(int fileID)
 	{
 	  int pdssize = 0, gdssize = 0, bmssize = 0, bdssize = 0;
 	  int issize = 4, essize = 4;
-	  int flag;
+	  int flag = 0;
 
 	  pdssize = read3ByteMSBFirst(fileptr);
 	  if ( CGRIBEX_Debug ) Message("pdssize     = %d", pdssize);
@@ -4150,50 +4047,18 @@ int gribWrite(int fileID, unsigned char *buffer, size_t buffersize)
 
   return nwrite;
 }
-
-
-int gribrec_len(unsigned b1, unsigned b2, unsigned b3)
-{
-  /*
-    If bit 7 of b1 is set, we have to rescale by factor of 120.
-    This is a fixup to get round the restriction on product lengths
-    due to the count being only 24 bits. It is only possible because
-    the (default) rounding for GRIB products is 120 bytes.
-  */
-  int needRescaling = b1 & (1 << 7);
-  
-  int gribsize = (int)((((b1&127) << 16)+(b2<<8) + b3));
-
-  if ( needRescaling ) gribsize *= 120;
-
-  return gribsize;
-}
-
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 
 
 FILE *grprsm = NULL;
-double fref;
-double fmaxval;
-int nfref;
-int nfmaxval;
-int nrnd;
-int ndbg;
-int nvck;
-int nonoff;
-int noabort;
-int num2ok;
-int next2o;
-int nloc2o;
-int nsubce;
-int grib_calendar = -1;
+int CGRIBEX_grib_calendar = -1;
 
 
 void gribSetCalendar(int calendar)
 {
-  grib_calendar = calendar;
+  CGRIBEX_grib_calendar = calendar;
 }
 
 
@@ -4280,66 +4145,30 @@ C     ----------------------------------------------------------------
   */
   /*
     Common area variables have not been set. Set them.
-    
-    User supplied reference value.
   */
-  fref   = 0.0;
-  /*
-    Reference value supplied by user flag. Set to off.
-  */
-  nfref  = 0;
-  /*
-    User supplied maximum value.
-  */
-  fmaxval   = 0.0;
-  /*
-    Maximum value supplied by user flag. Set to off.
-  */
-  nfmaxval  = 0;
-  /*
-    Set rounding to 120 bytes on.
-  */
-  nrnd   = 1;
   /*
     Set GRIB calendar.
   */
-  if ( grib_calendar == -1 )
+  if ( CGRIBEX_grib_calendar == -1 )
     {
-      grib_calendar = CALENDAR_PROLEPTIC;
+      CGRIBEX_grib_calendar = CALENDAR_PROLEPTIC;
   
       envString = getenv("GRIB_CALENDAR");
       if ( envString )
 	{
 	  if      ( strncmp(envString, "standard", 8) == 0 )
-	    grib_calendar = CALENDAR_STANDARD;
+	    CGRIBEX_grib_calendar = CALENDAR_STANDARD;
 	  else if ( strncmp(envString, "proleptic", 9) == 0 )
-	    grib_calendar = CALENDAR_PROLEPTIC;
+	    CGRIBEX_grib_calendar = CALENDAR_PROLEPTIC;
 	  else if ( strncmp(envString, "360days", 7) == 0 )
-	    grib_calendar = CALENDAR_360DAYS;
+	    CGRIBEX_grib_calendar = CALENDAR_360DAYS;
 	  else if ( strncmp(envString, "365days", 7) == 0 )
-	    grib_calendar = CALENDAR_365DAYS;
+	    CGRIBEX_grib_calendar = CALENDAR_365DAYS;
 	  else if ( strncmp(envString, "366days", 7) == 0 )
-	    grib_calendar = CALENDAR_366DAYS;
+	    CGRIBEX_grib_calendar = CALENDAR_366DAYS;
 	  else if ( strncmp(envString, "none", 4) == 0 )
-	    grib_calendar = CALENDAR_NONE;
+	    CGRIBEX_grib_calendar = CALENDAR_NONE;
 	}
-    }
-  /*
-    Set debug print off.
-  */
-  ndbg   = 0;
-  
-  envString = getenv("GRIBEX_DEBUG");
-  if ( envString != NULL )
-    {
-      if ( !strncmp(envString, "ON", 2) )
-        ndbg = 1;
-      else if( *envString == '1')
-        ndbg = 1;
-      else if( *envString == '2')
-        ndbg = 2;
-      else
-        ndbg = 0;
     }
   /*
     Set GRIBEX compatibility mode.
@@ -4350,19 +4179,6 @@ C     ----------------------------------------------------------------
       if ( atoi(envString) == 1 ) CGRIBEX_Const = 0;
     }
 
-  /*
-    Set GRIB value checking on.
-  */
-  nvck   = 1;
-  
-  envString = getenv("GRIBEX_CHECK");
-  if ( envString )
-    {
-      if ( !strncmp(envString, "OFF", 3) )
-        nvck = 0;
-      else
-        nvck = 1;
-    }
   /*
     See if output stream needs changing
   */
@@ -4400,37 +4216,9 @@ C     ----------------------------------------------------------------
 	}
     }
   /*
-    Set P factor switch to default, user supplies the P factor.
-  */
-  nonoff = 0;
-  /*
-    Set abort flag to NO abort
-  */
-  noabort = 1;
-  /*
     Mark common area values set by user.
   */
   lfirst = FALSE;
-  /*
-    Exhaustive use of all possible second-order packing methods
-    for HOPER='K'. Set to off.
-  */
-  num2ok  = 0;
-  /*
-    Use of extended second-order packing methods for grid-point
-    encoding (HOPER='C' and 'K'). Set to on.
-  */
-  next2o  = 1;
-  /*
-    Use of non-local second-order packing methods for grid-point
-    encoding (HOPER='C' and 'K'). Set to on.
-  */
-  nloc2o  = 1;
-  /*
-    Use of (all valid) sub-centre values for ECMWF fields encoding .
-    encoding. Set to off.
-  */
-  nsubce  = 0;
 }
 
 /* pack 8-bit bytes from 64-bit words to a packed buffer */
@@ -4472,7 +4260,7 @@ long packInt64(unsigned INT64 *up, unsigned char *cp, long bc, long tc)
   ip6 = ip0 + 6;
   ip7 = ip0 + 7;
 
-  up0 = (unsigned INT64 *) (cp + head);
+  up0 = (unsigned INT64 *)(void *)(cp + head);
 
   /* Here we should process any bytes until the first word boundary 
    * of our destination buffer 
@@ -4549,7 +4337,6 @@ long unpackInt64(const unsigned char *cp, unsigned INT64 *up, long bc, long tc)
 {
   U_BYTEORDER;
   const unsigned char *cp0;
-  unsigned INT64 *up0;
   unsigned INT64 *ip0, *ip1, *ip2, *ip3, *ip4, *ip5, *ip6, *ip7;
   long head, trail, inner, i, j;
   long offset;
@@ -4583,7 +4370,7 @@ long unpackInt64(const unsigned char *cp, unsigned INT64 *up, long bc, long tc)
   ip6 = ip0 + 6;
   ip7 = ip0 + 7;
 
-  up0 = (unsigned INT64 *) (cp + head);
+  const unsigned INT64 *up0 = (const unsigned INT64 *)(const void *)(cp + head);
 
   /* Process any bytes until the first word boundary 
    * of our source buffer 
@@ -4682,7 +4469,7 @@ long packInt32(unsigned INT32 *up, unsigned char *cp, long bc, long tc)
   ip2 = ip0 + 2;
   ip3 = ip0 + 3;
 
-  up0 = (unsigned INT32 *) (cp + head);
+  up0 = (unsigned INT32 *)(void *)(cp + head);
 
   /* Here we should process any bytes until the first word boundary 
    * of our destination buffer 
@@ -4753,7 +4540,6 @@ long unpackInt32(const unsigned char *cp, unsigned INT32 *up, long bc, long tc)
 {
   U_BYTEORDER;
   const unsigned char *cp0;
-  unsigned INT32 *up0;
   unsigned INT32 *ip0, *ip1, *ip2, *ip3;
   long head, trail, inner, i, j;
   long offset;
@@ -4783,7 +4569,7 @@ long unpackInt32(const unsigned char *cp, unsigned INT32 *up, long bc, long tc)
   ip2 = ip0 + 2;
   ip3 = ip0 + 3;
 
-  up0 = (unsigned INT32 *) (cp + head);
+  const unsigned INT32 *up0 = (const unsigned INT32 *)(const void *)(cp + head);
 
   /* Process any bytes until the first word boundary 
    * of our source buffer 
@@ -4843,6 +4629,7 @@ long unpackInt32(const unsigned char *cp, unsigned INT32 *up, long bc, long tc)
 }
 #endif
 #include <stdio.h>
+
 
 void prtbin(int kin, int knbit, int *kout, int *kerr)
 {
@@ -4972,9 +4759,9 @@ void ref2ibm(double *pref, int kbits)
 
   */
 
-  static int itrnd;
-  static int kexp, kmant;
-  static double ztemp, zdumm;
+  int itrnd;
+  int kexp, kmant;
+  double ztemp, zdumm;
   extern int CGRIBEX_Debug;
 
   /* ----------------------------------------------------------------- */
@@ -5005,7 +4792,7 @@ void ref2ibm(double *pref, int kbits)
       /*  number is smaller than the original one.      */
 
       itrnd = 0;
-      zdumm = *pref = ztemp;
+      zdumm = ztemp;
       confp3(zdumm, &kexp, &kmant, kbits, itrnd);
 
       /*  Set reference value to that stored in the GRIB code. */
@@ -5427,7 +5214,7 @@ int grib_info_for_grads(off_t recpos, long recsize, unsigned char *gribbuffer,
 }
 
 
-void grib1PrintALL(int nrec, long offset, long recpos, long recsize, unsigned char *gribbuffer)
+static void grib1PrintALL(int nrec, long offset, long recpos, long recsize, unsigned char *gribbuffer)
 {
   static int header = 1;
   int GridType, level, nerr;
@@ -5491,7 +5278,7 @@ void grib1PrintALL(int nrec, long offset, long recpos, long recsize, unsigned ch
 }
 
 
-void grib2PrintALL(int nrec, long offset, long recpos, long recsize, unsigned char *gribbuffer)
+static void grib2PrintALL(int nrec, long offset, long recpos, long recsize, unsigned char *gribbuffer)
 {
   static int header = 1;
   int nerr;
@@ -5573,7 +5360,7 @@ void gribPrintALL(int nrec, long offset, long recpos, long recsize, unsigned cha
 }
 
 
-void grib1PrintPDS(int nrec, long recpos, long recsize, unsigned char *gribbuffer)
+static void grib1PrintPDS(int nrec, long recpos, long recsize, unsigned char *gribbuffer)
 {
   static int header = 1;
   unsigned char *is = NULL, *pds = NULL, *gds = NULL, *bms = NULL, *bds = NULL;
@@ -5667,7 +5454,7 @@ void gribPrintPDS(int nrec, long recpos, long recsize, unsigned char *gribbuffer
 }
 
 
-void grib1PrintGDS(int nrec, long recpos, long recsize, unsigned char *gribbuffer)
+static void grib1PrintGDS(int nrec, long recpos, long recsize, unsigned char *gribbuffer)
 {
   static int header = 1;
   int nerr;
@@ -5728,7 +5515,7 @@ void gribPrintGDS(int nrec, long recpos, long recsize, unsigned char *gribbuffer
 }
 
 
-void grib1PrintBMS(int nrec, long recpos, long recsize, unsigned char *gribbuffer)
+static void grib1PrintBMS(int nrec, long recpos, long recsize, unsigned char *gribbuffer)
 {
   static int header = 1;
   int level, nerr;
@@ -5793,7 +5580,7 @@ void gribPrintBMS(int nrec, long recpos, long recsize, unsigned char *gribbuffer
 }
 
 
-void grib1PrintBDS(int nrec, long recpos, long recsize, unsigned char *gribbuffer)
+static void grib1PrintBDS(int nrec, long recpos, long recsize, unsigned char *gribbuffer)
 {
   static int header = 1;
   int level, nerr;
@@ -6071,7 +5858,7 @@ extern "C" {
 
 #define  Z_SZIP  128
 
-
+#if  defined (HAVE_LIBSZ) || defined (HAVE_LIBAEC)
 #define SetLen3(var, offset, value) ((var[offset+0] = 0xFF & (value >> 16)), \
 				     (var[offset+1] = 0xFF & (value >>  8)), \
 				     (var[offset+2] = 0xFF & (value      )))
@@ -6079,7 +5866,7 @@ extern "C" {
 				     (var[offset+1] = 0xFF & (value >> 16)), \
 				     (var[offset+2] = 0xFF & (value >>  8)), \
 				     (var[offset+3] = 0xFF & (value      )))
-
+#endif
 
 int gribGetZip(size_t recsize, unsigned char *gribbuffer, size_t *urecsize)
 {
@@ -6602,6 +6389,9 @@ int  gribUnzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbu
 #include <math.h>
 
 
+static void
+scm0_double(double *pdl, double *pdr, double *pfl, double *pfr, int klg);
+
 
 static
 int rowina2(double *p, int ko, int ki, double *pw,
@@ -7052,91 +6842,80 @@ double TEMPLATE(calculate_pfactor,T)(const T *spectralField, long fieldTruncatio
 
 void TEMPLATE(scale_complex,T)(T *fpdata, int pcStart, int pcScale, int trunc, int inv)
 {
-  double power;
-  double *scale = (double*) Malloc(((size_t)trunc+1)*sizeof(double));
-
-  if ( scale == NULL ) SysError("No Memory!");
 
   if ( pcScale < -10000 || pcScale > 10000 )
     {
       fprintf(stderr, " %s: Invalid power given %6d\n", __func__, pcScale);
       return;
-   }
+    }
 
   /* Setup scaling factors = n(n+1)^^p for n = 1 to truncation */
 
-  if ( pcScale == 0 ) return;
+  if ( pcScale != 0 )
+    {
+      double *scale = (double*) Malloc(((size_t)trunc+1)*sizeof(double));
+      double power = (double) pcScale / 1000.;
+      scale[0] = 1.0;
 
-  power = (double) pcScale / 1000.;
-  scale[0] = 1.0;
+      if (pcScale != 1000)
+        for ( int n = 1; n <= trunc; n++ )
+          scale[n] = pow((double) (n*(n+1)), power);
+      else
+        for ( int n = 1; n <= trunc; n++ )
+          scale[n] =     (double) (n*(n+1));
 
-  if (pcScale != 1000)
-    for ( int n = 1; n <= trunc; n++ )
-      scale[n] = pow((double) (n*(n+1)), power);
-  else
-    for ( int n = 1; n <= trunc; n++ )
-      scale[n] =     (double) (n*(n+1));
+      if ( inv )
+        for ( int n = 1; n <= trunc; n++ ) scale[n] = 1.0 / scale[n];
 
-  if ( inv )
-    for ( int n = 1; n <= trunc; n++ ) scale[n] = 1.0 / scale[n];
+      /* Scale the values */
 
-  /* Scale the values */
+      size_t index = 0;
 
-  size_t index = 0;
+      for ( int m = 0;   m < pcStart; m++ )
+        for ( int n = m; n <= trunc; n++, index += 2 )
+          if ( n >= pcStart )
+            {
+              fpdata[index  ] = (T)(fpdata[index  ] * scale[n]);
+              fpdata[index+1] = (T)(fpdata[index+1] * scale[n]);
+            }
 
-  for ( int m = 0;   m < pcStart; m++ )
-    for ( int n = m; n <= trunc; n++, index += 2 )
-      if ( n >= pcStart )
-        {
-          fpdata[index  ] = (T)(fpdata[index  ] * scale[n]);
-          fpdata[index+1] = (T)(fpdata[index+1] * scale[n]);
-        }
-
-  for ( int m = pcStart; m <= trunc; m++ )
-    for ( int n = m;     n <= trunc; n++, index += 2 )
-      {
-	fpdata[index  ] = (T)(fpdata[index  ] * scale[n]);
-	fpdata[index+1] = (T)(fpdata[index+1] * scale[n]);
-      }
-
-  Free(scale);
+      for ( int m = pcStart; m <= trunc; m++ )
+        for ( int n = m;     n <= trunc; n++, index += 2 )
+          {
+            fpdata[index  ] = (T)(fpdata[index  ] * scale[n]);
+            fpdata[index+1] = (T)(fpdata[index+1] * scale[n]);
+          }
+      Free(scale);
+    }
 }
 
 
 void TEMPLATE(scatter_complex,T)(T *fpdata, int pcStart, int trunc, int nsp)
 {
   T *fphelp = (T*) Malloc((size_t)nsp*sizeof(T));
-  int  m, n;
-  int  index, inext;
-
-  if ( fphelp == NULL ) SysError("No Memory!");
-
-  index = inext = 0;
-
-  for ( m = 0;   m <= pcStart; m++ )
-    for ( n = m; n <= trunc; n++ )
-      {
-	if ( pcStart >= n )
-	  {
-	    fphelp[index  ] = fpdata[inext++];
-	    fphelp[index+1] = fpdata[inext++];
-	  }
-	index += 2;
-      }
-
-  index = 0;
-  for ( m = 0;   m <= trunc; m++ )
-    for ( n = m; n <= trunc; n++ )
-      {
-	if ( n > pcStart )
-	  {
-	    fphelp[index  ] = fpdata[inext++];
-	    fphelp[index+1] = fpdata[inext++];
-	  }
-	index += 2;
-      }
-
-  for ( m = 0; m < nsp; m++ ) fpdata[m] = fphelp[m];
+  size_t inext = 0;
+  size_t pcStart_ = pcStart >= 0 ? (size_t)pcStart : 0U;
+  size_t trunc_ = trunc >= 0 ? (size_t)trunc : 0U;
+  for ( size_t m = 0, index = 0; m <= pcStart_; m++ )
+    {
+      size_t n_copies = pcStart_ <= trunc_ ? (pcStart_ + 1 - m) * 2 : 0;
+      for ( size_t i = 0; i < n_copies; ++i )
+        fphelp[index + i] = fpdata[inext + i];
+      inext += n_copies;
+      index += m <= trunc_ ? (trunc_ - m + 1) * 2 : 0;
+    }
+  for ( size_t m = 0, index = 0; m <= trunc_; m++ )
+    {
+      size_t advIdx = m <= pcStart_ ? (pcStart_ - m + 1) * 2 : 0;
+      index += advIdx;
+      size_t copyStart = m > pcStart_ ? m : pcStart_ + 1;
+      size_t n_copies = copyStart <= trunc_ ? (trunc_ - copyStart + 1) * 2 : 0;
+      for ( size_t i = 0; i < n_copies; ++i )
+        fphelp[index + i] = fpdata[inext + i];
+      inext += n_copies;
+      index += n_copies;
+    }
+  for ( size_t m = 0; m < (size_t)nsp; m++ ) fpdata[m] = fphelp[m];
 
   Free(fphelp);
 }
@@ -7175,7 +6954,7 @@ void TEMPLATE(gather_complex,T)(T *fpdata, size_t pcStart, size_t trunc, size_t 
 }
 
 
-void TEMPLATE(scm0,T)(T *pdl, T *pdr, T *pfl, T *pfr, int klg)
+static void TEMPLATE(scm0,T)(T *pdl, T *pdr, T *pfl, T *pfr, int klg)
 {
   /* System generated locals */
   double r_1;
@@ -7694,6 +7473,11 @@ L900:
 /*
  * Local Variables:
  * mode: c
+ * c-file-style: "Java"
+ * c-basic-offset: 2
+ * indent-tabs-mode: nil
+ * show-trailing-whitespace: t
+ * require-trailing-newline: t
  * End:
  */
 
@@ -7813,91 +7597,80 @@ double TEMPLATE(calculate_pfactor,T)(const T *spectralField, long fieldTruncatio
 
 void TEMPLATE(scale_complex,T)(T *fpdata, int pcStart, int pcScale, int trunc, int inv)
 {
-  double power;
-  double *scale = (double*) Malloc(((size_t)trunc+1)*sizeof(double));
-
-  if ( scale == NULL ) SysError("No Memory!");
 
   if ( pcScale < -10000 || pcScale > 10000 )
     {
       fprintf(stderr, " %s: Invalid power given %6d\n", __func__, pcScale);
       return;
-   }
+    }
 
   /* Setup scaling factors = n(n+1)^^p for n = 1 to truncation */
 
-  if ( pcScale == 0 ) return;
+  if ( pcScale != 0 )
+    {
+      double *scale = (double*) Malloc(((size_t)trunc+1)*sizeof(double));
+      double power = (double) pcScale / 1000.;
+      scale[0] = 1.0;
 
-  power = (double) pcScale / 1000.;
-  scale[0] = 1.0;
+      if (pcScale != 1000)
+        for ( int n = 1; n <= trunc; n++ )
+          scale[n] = pow((double) (n*(n+1)), power);
+      else
+        for ( int n = 1; n <= trunc; n++ )
+          scale[n] =     (double) (n*(n+1));
 
-  if (pcScale != 1000)
-    for ( int n = 1; n <= trunc; n++ )
-      scale[n] = pow((double) (n*(n+1)), power);
-  else
-    for ( int n = 1; n <= trunc; n++ )
-      scale[n] =     (double) (n*(n+1));
+      if ( inv )
+        for ( int n = 1; n <= trunc; n++ ) scale[n] = 1.0 / scale[n];
 
-  if ( inv )
-    for ( int n = 1; n <= trunc; n++ ) scale[n] = 1.0 / scale[n];
+      /* Scale the values */
 
-  /* Scale the values */
+      size_t index = 0;
 
-  size_t index = 0;
+      for ( int m = 0;   m < pcStart; m++ )
+        for ( int n = m; n <= trunc; n++, index += 2 )
+          if ( n >= pcStart )
+            {
+              fpdata[index  ] = (T)(fpdata[index  ] * scale[n]);
+              fpdata[index+1] = (T)(fpdata[index+1] * scale[n]);
+            }
 
-  for ( int m = 0;   m < pcStart; m++ )
-    for ( int n = m; n <= trunc; n++, index += 2 )
-      if ( n >= pcStart )
-        {
-          fpdata[index  ] = (T)(fpdata[index  ] * scale[n]);
-          fpdata[index+1] = (T)(fpdata[index+1] * scale[n]);
-        }
-
-  for ( int m = pcStart; m <= trunc; m++ )
-    for ( int n = m;     n <= trunc; n++, index += 2 )
-      {
-	fpdata[index  ] = (T)(fpdata[index  ] * scale[n]);
-	fpdata[index+1] = (T)(fpdata[index+1] * scale[n]);
-      }
-
-  Free(scale);
+      for ( int m = pcStart; m <= trunc; m++ )
+        for ( int n = m;     n <= trunc; n++, index += 2 )
+          {
+            fpdata[index  ] = (T)(fpdata[index  ] * scale[n]);
+            fpdata[index+1] = (T)(fpdata[index+1] * scale[n]);
+          }
+      Free(scale);
+    }
 }
 
 
 void TEMPLATE(scatter_complex,T)(T *fpdata, int pcStart, int trunc, int nsp)
 {
   T *fphelp = (T*) Malloc((size_t)nsp*sizeof(T));
-  int  m, n;
-  int  index, inext;
-
-  if ( fphelp == NULL ) SysError("No Memory!");
-
-  index = inext = 0;
-
-  for ( m = 0;   m <= pcStart; m++ )
-    for ( n = m; n <= trunc; n++ )
-      {
-	if ( pcStart >= n )
-	  {
-	    fphelp[index  ] = fpdata[inext++];
-	    fphelp[index+1] = fpdata[inext++];
-	  }
-	index += 2;
-      }
-
-  index = 0;
-  for ( m = 0;   m <= trunc; m++ )
-    for ( n = m; n <= trunc; n++ )
-      {
-	if ( n > pcStart )
-	  {
-	    fphelp[index  ] = fpdata[inext++];
-	    fphelp[index+1] = fpdata[inext++];
-	  }
-	index += 2;
-      }
-
-  for ( m = 0; m < nsp; m++ ) fpdata[m] = fphelp[m];
+  size_t inext = 0;
+  size_t pcStart_ = pcStart >= 0 ? (size_t)pcStart : 0U;
+  size_t trunc_ = trunc >= 0 ? (size_t)trunc : 0U;
+  for ( size_t m = 0, index = 0; m <= pcStart_; m++ )
+    {
+      size_t n_copies = pcStart_ <= trunc_ ? (pcStart_ + 1 - m) * 2 : 0;
+      for ( size_t i = 0; i < n_copies; ++i )
+        fphelp[index + i] = fpdata[inext + i];
+      inext += n_copies;
+      index += m <= trunc_ ? (trunc_ - m + 1) * 2 : 0;
+    }
+  for ( size_t m = 0, index = 0; m <= trunc_; m++ )
+    {
+      size_t advIdx = m <= pcStart_ ? (pcStart_ - m + 1) * 2 : 0;
+      index += advIdx;
+      size_t copyStart = m > pcStart_ ? m : pcStart_ + 1;
+      size_t n_copies = copyStart <= trunc_ ? (trunc_ - copyStart + 1) * 2 : 0;
+      for ( size_t i = 0; i < n_copies; ++i )
+        fphelp[index + i] = fpdata[inext + i];
+      inext += n_copies;
+      index += n_copies;
+    }
+  for ( size_t m = 0; m < (size_t)nsp; m++ ) fpdata[m] = fphelp[m];
 
   Free(fphelp);
 }
@@ -7936,7 +7709,7 @@ void TEMPLATE(gather_complex,T)(T *fpdata, size_t pcStart, size_t trunc, size_t 
 }
 
 
-void TEMPLATE(scm0,T)(T *pdl, T *pdr, T *pfl, T *pfr, int klg)
+static void TEMPLATE(scm0,T)(T *pdl, T *pdr, T *pfl, T *pfr, int klg)
 {
   /* System generated locals */
   double r_1;
@@ -8455,6 +8228,11 @@ L900:
 /*
  * Local Variables:
  * mode: c
+ * c-file-style: "Java"
+ * c-basic-offset: 2
+ * indent-tabs-mode: nil
+ * show-trailing-whitespace: t
+ * require-trailing-newline: t
  * End:
  */
 #include <string.h>
@@ -8743,12 +8521,12 @@ int decodePDS(unsigned char *pds, int *isec0, int *isec1)
 }
 
 
-void gribPrintSec2_double(int *isec0, int *isec2, double *fsec2) {gribPrintSec2DP(isec0, isec2, fsec2);}
-void gribPrintSec3_double(int *isec0, int *isec3, double *fsec3) {gribPrintSec3DP(isec0, isec3, fsec3);}
-void gribPrintSec4_double(int *isec0, int *isec4, double *fsec4) {gribPrintSec4DP(isec0, isec4, fsec4);}
-void gribPrintSec2_float(int *isec0, int *isec2, float *fsec2) {gribPrintSec2SP(isec0, isec2, fsec2);}
-void gribPrintSec3_float(int *isec0, int *isec3, float *fsec3) {gribPrintSec3SP(isec0, isec3, fsec3);}
-void gribPrintSec4_float(int *isec0, int *isec4, float *fsec4) {gribPrintSec4SP(isec0, isec4, fsec4);}
+static void gribPrintSec2_double(int *isec0, int *isec2, double *fsec2) {gribPrintSec2DP(isec0, isec2, fsec2);}
+static void gribPrintSec3_double(int *isec0, int *isec3, double *fsec3) {gribPrintSec3DP(isec0, isec3, fsec3);}
+static void gribPrintSec4_double(int *isec0, int *isec4, double *fsec4) {gribPrintSec4DP(isec0, isec4, fsec4);}
+static void gribPrintSec2_float(int *isec0, int *isec2, float *fsec2) {gribPrintSec2SP(isec0, isec2, fsec2);}
+static void gribPrintSec3_float(int *isec0, int *isec3, float *fsec3) {gribPrintSec3SP(isec0, isec3, fsec3);}
+static void gribPrintSec4_float(int *isec0, int *isec4, float *fsec4) {gribPrintSec4SP(isec0, isec4, fsec4);}
 
 
 #ifdef T
@@ -8843,7 +8621,7 @@ void TEMPLATE(decode_array_2byte,T)(size_t jlend, const unsigned char *restrict 
                                     T *fpdata, T fmin, T zscale)
 {
   U_BYTEORDER;
-  const uint16_t *restrict sgrib = (uint16_t *) (igrib);
+  const uint16_t *restrict sgrib = (const uint16_t *)(const void *)(igrib);
 
   if ( IS_BIGENDIAN() )
     {
@@ -8854,10 +8632,9 @@ void TEMPLATE(decode_array_2byte,T)(size_t jlend, const unsigned char *restrict 
     }
   else
     {
-      uint16_t ui16;
       for ( size_t i = 0; i < jlend; i++ )
         {
-          ui16 = gribSwapByteOrder_uint16(sgrib[i]);
+          uint16_t ui16 = gribSwapByteOrder_uint16(sgrib[i]);
           fpdata[i] = fmin + zscale * ui16;
         }
     }
@@ -9078,7 +8855,7 @@ void TEMPLATE(decode_array_2byte,T)(size_t jlend, const unsigned char *restrict 
                                     T *fpdata, T fmin, T zscale)
 {
   U_BYTEORDER;
-  const uint16_t *restrict sgrib = (uint16_t *) (igrib);
+  const uint16_t *restrict sgrib = (const uint16_t *)(const void *)(igrib);
 
   if ( IS_BIGENDIAN() )
     {
@@ -9089,10 +8866,9 @@ void TEMPLATE(decode_array_2byte,T)(size_t jlend, const unsigned char *restrict 
     }
   else
     {
-      uint16_t ui16;
       for ( size_t i = 0; i < jlend; i++ )
         {
-          ui16 = gribSwapByteOrder_uint16(sgrib[i]);
+          uint16_t ui16 = gribSwapByteOrder_uint16(sgrib[i]);
           fpdata[i] = fmin + zscale * ui16;
         }
     }
@@ -9228,7 +9004,7 @@ void TEMPLATE(decode_array,T)(const unsigned char *restrict igrib, long jlend, i
 #define T double
 #ifdef T
 
-static 
+static
 int TEMPLATE(decodeGDS,T)(unsigned char  *gds, int *isec0, int *isec2, T *fsec2, int *numGridVals)
 {
   /* int imisng = 0; */
@@ -9458,6 +9234,8 @@ int TEMPLATE(decodeGDS,T)(unsigned char  *gds, int *isec0, int *isec2, T *fsec2,
 
 #define ldexp_double ldexp
 #define ldexp_float ldexpf
+#define pow_double pow
+#define pow_float powf
 
 static
 int TEMPLATE(decodeBDS,T)(int decscale, unsigned char *bds, int *isec2, int *isec4, 
@@ -9473,12 +9251,11 @@ int TEMPLATE(decodeBDS,T)(int decscale, unsigned char *bds, int *isec2, int *ise
   int ioff = 0;
   int iexp, imant;
   int zoff;
-  int bds_head = 11;
+  enum { bds_head = 11 };
   T zscale = 0.;
   T fmin = 0.;
   T *fpdata = fsec4;
   int bdsLen;
-  extern int CGRIBEX_Fix_ZSE;
 
   *iret = 0;
   igrib = bds;
@@ -9736,7 +9513,7 @@ int TEMPLATE(decodeBDS,T)(int decscale, unsigned char *bds, int *isec2, int *ise
 
   if ( decscale )
     {
-      T scale = (T) pow(10.0, (double)-decscale);
+      T scale = TEMPLATE(pow,T)((T)10.0, (T)-decscale);
       for ( int i = 0; i < ISEC4_NumValues; i++ ) fsec4[i] *= scale;
     }
 
@@ -9744,16 +9521,11 @@ int TEMPLATE(decodeBDS,T)(int decscale, unsigned char *bds, int *isec2, int *ise
 }
 
 
-void TEMPLATE(grib_decode,T)(int *isec0, int *isec1, int *isec2, T *fsec2, int *isec3,
+void TEMPLATE(grib_decode,T)(int *restrict isec0, int *isec1, int *isec2, T *fsec2, int *isec3,
 			     T *fsec3, int *isec4, T *fsec4, int fsec4len, int *kgrib,
 			     int kleng, int *kword, int dfunc, int *iret)
 {
-  UCHAR *is = NULL, *pds = NULL, *gds = NULL, *bms = NULL, *bds = NULL;
-  int isLen = 0, pdsLen = 0, gdsLen = 0, bmsLen = 0, bdsLen = 0, esLen = 0;
-  int gdsIncluded = FALSE;
-  int bmsIncluded = FALSE;
-  int bitmapSize = 0;
-  int imaskSize = 0;
+  UCHAR *bms = NULL;
   int ldebug = FALSE;
   int llarge = FALSE, l_iorj = FALSE;
   int lsect2 = FALSE, lsect3 = FALSE;
@@ -9773,9 +9545,9 @@ void TEMPLATE(grib_decode,T)(int *isec0, int *isec1, int *isec2, T *fsec2, int *
     IS Indicator Section (Section 0)
     ----------------------------------------------------------------
   */
-  is = (unsigned char *) &kgrib[0];
+  UCHAR *is = (unsigned char *) &kgrib[0];
 
-  isLen = decodeIS(is, isec0, iret);
+  int isLen = decodeIS(is, isec0, iret);
 
   /*
     If count is negative, have to rescale by factor of -120.
@@ -9863,7 +9635,7 @@ void TEMPLATE(grib_decode,T)(int *isec0, int *isec1, int *isec2, T *fsec2, int *
     octet 8 is 0, it is safe to assume edition 0 of the code.
 
   */
-  if ( ISEC0_GRIB_Len == 24 && ISEC0_GRIB_Version == 0 )
+  else if ( ISEC0_GRIB_Len == 24 && ISEC0_GRIB_Version == 0 )
     {
       /*
 	Set length of GRIB message to missing data value.
@@ -9879,21 +9651,20 @@ void TEMPLATE(grib_decode,T)(int *isec0, int *isec1, int *isec2, T *fsec2, int *
     ----------------------------------------------------------------
     PDS Product Definition Section (Section 1)
     ----------------------------------------------------------------
-  */ 
-  pds = is + isLen;
-
-  pdsLen = decodePDS(pds, isec0, isec1);
+  */
+  int pdsLen = decodePDS(is + isLen, isec0, isec1);
 
   /*
     ----------------------------------------------------------------
     GDS Grid Description Section (Section 2)
     ----------------------------------------------------------------
   */
-  gdsIncluded = ISEC1_Sec2Or3Flag & 128;
+  int gdsIncluded = ISEC1_Sec2Or3Flag & 128;
 
+  int gdsLen = 0;
   if ( gdsIncluded )
     {
-      gds = is + isLen + pdsLen;
+      UCHAR *gds = is + isLen + pdsLen;
 
       gdsLen = TEMPLATE(decodeGDS,T)(gds, isec0, isec2, fsec2, &numGridVals);
     }
@@ -9902,10 +9673,11 @@ void TEMPLATE(grib_decode,T)(int *isec0, int *isec1, int *isec2, T *fsec2, int *
     ----------------------------------------------------------------
     BMS Bit-Map Section Section (Section 3)
     ----------------------------------------------------------------
-  */ 
-  bmsIncluded = ISEC1_Sec2Or3Flag & 64;
+  */
+  int bmsIncluded = ISEC1_Sec2Or3Flag & 64;
 
   isec3[0] = 0;
+  int bmsLen = 0, bitmapSize = 0, imaskSize = 0;
   if ( bmsIncluded )
     {
       bms = is + isLen + pdsLen + gdsLen;
@@ -9923,12 +9695,14 @@ void TEMPLATE(grib_decode,T)(int *isec0, int *isec1, int *isec2, T *fsec2, int *
     BDS Binary Data Section (Section 4)
     ----------------------------------------------------------------
   */
-  bds = is + isLen + pdsLen + gdsLen + bmsLen;
 
-  bdsLen = ISEC0_GRIB_Len - (isLen + pdsLen + gdsLen + bmsLen);
-
-  bdsLen = TEMPLATE(decodeBDS,T)(ISEC1_DecScaleFactor, bds, isec2, isec4, 
-				 fsec4, fsec4len, dfunc, bdsLen, numGridVals, llarge, iret);
+  int bdsLen = ISEC0_GRIB_Len - (isLen + pdsLen + gdsLen + bmsLen);
+  {
+    UCHAR *bds = is + isLen + pdsLen + gdsLen + bmsLen;
+    bdsLen = TEMPLATE(decodeBDS,T)(ISEC1_DecScaleFactor, bds, isec2, isec4,
+                                   fsec4, fsec4len, dfunc, bdsLen, numGridVals,
+                                   llarge, iret);
+  }
 
   if ( *iret != 0 ) return;
 
@@ -10077,7 +9851,7 @@ void TEMPLATE(grib_decode,T)(int *isec0, int *isec1, int *isec2, T *fsec2, int *
 
 
   if ( ISEC0_GRIB_Version == 1 ) isLen = 8;
-  esLen = 4;
+  int esLen = 4;
 
   int gribLen = isLen + pdsLen + gdsLen + bmsLen + bdsLen + esLen;
 
@@ -10144,7 +9918,7 @@ void TEMPLATE(grib_decode,T)(int *isec0, int *isec1, int *isec2, T *fsec2, int *
 #define T float
 #ifdef T
 
-static 
+static
 int TEMPLATE(decodeGDS,T)(unsigned char  *gds, int *isec0, int *isec2, T *fsec2, int *numGridVals)
 {
   /* int imisng = 0; */
@@ -10374,6 +10148,8 @@ int TEMPLATE(decodeGDS,T)(unsigned char  *gds, int *isec0, int *isec2, T *fsec2,
 
 #define ldexp_double ldexp
 #define ldexp_float ldexpf
+#define pow_double pow
+#define pow_float powf
 
 static
 int TEMPLATE(decodeBDS,T)(int decscale, unsigned char *bds, int *isec2, int *isec4, 
@@ -10389,12 +10165,11 @@ int TEMPLATE(decodeBDS,T)(int decscale, unsigned char *bds, int *isec2, int *ise
   int ioff = 0;
   int iexp, imant;
   int zoff;
-  int bds_head = 11;
+  enum { bds_head = 11 };
   T zscale = 0.;
   T fmin = 0.;
   T *fpdata = fsec4;
   int bdsLen;
-  extern int CGRIBEX_Fix_ZSE;
 
   *iret = 0;
   igrib = bds;
@@ -10652,7 +10427,7 @@ int TEMPLATE(decodeBDS,T)(int decscale, unsigned char *bds, int *isec2, int *ise
 
   if ( decscale )
     {
-      T scale = (T) pow(10.0, (double)-decscale);
+      T scale = TEMPLATE(pow,T)((T)10.0, (T)-decscale);
       for ( int i = 0; i < ISEC4_NumValues; i++ ) fsec4[i] *= scale;
     }
 
@@ -10660,16 +10435,11 @@ int TEMPLATE(decodeBDS,T)(int decscale, unsigned char *bds, int *isec2, int *ise
 }
 
 
-void TEMPLATE(grib_decode,T)(int *isec0, int *isec1, int *isec2, T *fsec2, int *isec3,
+void TEMPLATE(grib_decode,T)(int *restrict isec0, int *isec1, int *isec2, T *fsec2, int *isec3,
 			     T *fsec3, int *isec4, T *fsec4, int fsec4len, int *kgrib,
 			     int kleng, int *kword, int dfunc, int *iret)
 {
-  UCHAR *is = NULL, *pds = NULL, *gds = NULL, *bms = NULL, *bds = NULL;
-  int isLen = 0, pdsLen = 0, gdsLen = 0, bmsLen = 0, bdsLen = 0, esLen = 0;
-  int gdsIncluded = FALSE;
-  int bmsIncluded = FALSE;
-  int bitmapSize = 0;
-  int imaskSize = 0;
+  UCHAR *bms = NULL;
   int ldebug = FALSE;
   int llarge = FALSE, l_iorj = FALSE;
   int lsect2 = FALSE, lsect3 = FALSE;
@@ -10689,9 +10459,9 @@ void TEMPLATE(grib_decode,T)(int *isec0, int *isec1, int *isec2, T *fsec2, int *
     IS Indicator Section (Section 0)
     ----------------------------------------------------------------
   */
-  is = (unsigned char *) &kgrib[0];
+  UCHAR *is = (unsigned char *) &kgrib[0];
 
-  isLen = decodeIS(is, isec0, iret);
+  int isLen = decodeIS(is, isec0, iret);
 
   /*
     If count is negative, have to rescale by factor of -120.
@@ -10779,7 +10549,7 @@ void TEMPLATE(grib_decode,T)(int *isec0, int *isec1, int *isec2, T *fsec2, int *
     octet 8 is 0, it is safe to assume edition 0 of the code.
 
   */
-  if ( ISEC0_GRIB_Len == 24 && ISEC0_GRIB_Version == 0 )
+  else if ( ISEC0_GRIB_Len == 24 && ISEC0_GRIB_Version == 0 )
     {
       /*
 	Set length of GRIB message to missing data value.
@@ -10795,21 +10565,20 @@ void TEMPLATE(grib_decode,T)(int *isec0, int *isec1, int *isec2, T *fsec2, int *
     ----------------------------------------------------------------
     PDS Product Definition Section (Section 1)
     ----------------------------------------------------------------
-  */ 
-  pds = is + isLen;
-
-  pdsLen = decodePDS(pds, isec0, isec1);
+  */
+  int pdsLen = decodePDS(is + isLen, isec0, isec1);
 
   /*
     ----------------------------------------------------------------
     GDS Grid Description Section (Section 2)
     ----------------------------------------------------------------
   */
-  gdsIncluded = ISEC1_Sec2Or3Flag & 128;
+  int gdsIncluded = ISEC1_Sec2Or3Flag & 128;
 
+  int gdsLen = 0;
   if ( gdsIncluded )
     {
-      gds = is + isLen + pdsLen;
+      UCHAR *gds = is + isLen + pdsLen;
 
       gdsLen = TEMPLATE(decodeGDS,T)(gds, isec0, isec2, fsec2, &numGridVals);
     }
@@ -10818,10 +10587,11 @@ void TEMPLATE(grib_decode,T)(int *isec0, int *isec1, int *isec2, T *fsec2, int *
     ----------------------------------------------------------------
     BMS Bit-Map Section Section (Section 3)
     ----------------------------------------------------------------
-  */ 
-  bmsIncluded = ISEC1_Sec2Or3Flag & 64;
+  */
+  int bmsIncluded = ISEC1_Sec2Or3Flag & 64;
 
   isec3[0] = 0;
+  int bmsLen = 0, bitmapSize = 0, imaskSize = 0;
   if ( bmsIncluded )
     {
       bms = is + isLen + pdsLen + gdsLen;
@@ -10839,12 +10609,14 @@ void TEMPLATE(grib_decode,T)(int *isec0, int *isec1, int *isec2, T *fsec2, int *
     BDS Binary Data Section (Section 4)
     ----------------------------------------------------------------
   */
-  bds = is + isLen + pdsLen + gdsLen + bmsLen;
 
-  bdsLen = ISEC0_GRIB_Len - (isLen + pdsLen + gdsLen + bmsLen);
-
-  bdsLen = TEMPLATE(decodeBDS,T)(ISEC1_DecScaleFactor, bds, isec2, isec4, 
-				 fsec4, fsec4len, dfunc, bdsLen, numGridVals, llarge, iret);
+  int bdsLen = ISEC0_GRIB_Len - (isLen + pdsLen + gdsLen + bmsLen);
+  {
+    UCHAR *bds = is + isLen + pdsLen + gdsLen + bmsLen;
+    bdsLen = TEMPLATE(decodeBDS,T)(ISEC1_DecScaleFactor, bds, isec2, isec4,
+                                   fsec4, fsec4len, dfunc, bdsLen, numGridVals,
+                                   llarge, iret);
+  }
 
   if ( *iret != 0 ) return;
 
@@ -10993,7 +10765,7 @@ void TEMPLATE(grib_decode,T)(int *isec0, int *isec1, int *isec2, T *fsec2, int *
 
 
   if ( ISEC0_GRIB_Version == 1 ) isLen = 8;
-  esLen = 4;
+  int esLen = 4;
 
   int gribLen = isLen + pdsLen + gdsLen + bmsLen + bdsLen + esLen;
 
@@ -11402,6 +11174,9 @@ void encodePDS(GRIBPACK *lpds, long pdsLen, int *isec1)
 #ifdef T
 
 
+#define round_float roundf
+#define round_double round
+
 static
 void TEMPLATE(encode_array_common,T)(int numBits, size_t packStart, size_t datasize, GRIBPACK *lGrib,
 				     const T *data, T zref, T factor, size_t *gz)
@@ -11410,8 +11185,7 @@ void TEMPLATE(encode_array_common,T)(int numBits, size_t packStart, size_t datas
   unsigned int ival;
   int cbits, jbits;
   unsigned int c;
-  static unsigned int mask[] = {0,1,3,7,15,31,63,127,255};
-    
+
   /* code from gribw routine flist2bitstream */
 
   cbits = 8;
@@ -11419,7 +11193,7 @@ void TEMPLATE(encode_array_common,T)(int numBits, size_t packStart, size_t datas
   for ( i = packStart; i < datasize; i++ )
     {
       /* note float -> unsigned int .. truncate */
-      ival = (unsigned int) ((data[i] - zref) * factor + (T)0.5);
+      ival = (unsigned int)(TEMPLATE(round,T)((data[i] - zref) * factor));
       /*
 	if ( ival > max_nbpv_pow2 ) ival = max_nbpv_pow2;
 	if ( ival < 0 ) ival = 0;
@@ -11435,7 +11209,8 @@ void TEMPLATE(encode_array_common,T)(int numBits, size_t packStart, size_t datas
 	  else
 	    {
 	      jbits -= cbits;
-	      lGrib[z++] = (GRIBPACK)((c << cbits) + ((ival >> jbits) & mask[cbits]));
+	      lGrib[z++] = (GRIBPACK)((c << cbits)
+                                      + ((ival >> jbits) & ((1U << cbits) - 1)));
 	      cbits = 8;
 	      c = 0;
 	    }
@@ -11443,7 +11218,7 @@ void TEMPLATE(encode_array_common,T)(int numBits, size_t packStart, size_t datas
       /* now jbits < cbits */
       if ( jbits )
 	{
-	  c = (c << jbits) + (ival & mask[jbits]);
+	  c = (c << jbits) + (ival & ((1U << jbits)-1));
 	  cbits -= jbits;
 	}
     }
@@ -11458,13 +11233,13 @@ void TEMPLATE(encode_array_2byte,T)(size_t datasize, GRIBPACK *restrict lGrib,
 				    const T *restrict data, T zref, T factor, size_t *gz)
 {
   U_BYTEORDER;
-  uint16_t *restrict sgrib = (uint16_t *) (lGrib+*gz);
+  uint16_t *restrict sgrib = (uint16_t *)(void *)(lGrib+*gz);
 
   if ( IS_BIGENDIAN() )
     {
       for ( size_t i = 0; i < datasize; i++ )
         {
-          sgrib[i] = (uint16_t) ((data[i] - zref) * factor + (T)0.5);
+          sgrib[i] = (uint16_t)(TEMPLATE(round,T)((data[i] - zref) * factor));
         }
     }
   else
@@ -11472,7 +11247,7 @@ void TEMPLATE(encode_array_2byte,T)(size_t datasize, GRIBPACK *restrict lGrib,
       uint16_t ui16;
       for ( size_t i = 0; i < datasize; i++ )
         {
-          ui16 = (uint16_t) ((data[i] - zref) * factor + (T)0.5);
+          ui16 = (uint16_t)(TEMPLATE(round,T)((data[i] - zref) * factor));
           sgrib[i] = gribSwapByteOrder_uint16(ui16);
         }
     }
@@ -11499,7 +11274,7 @@ void TEMPLATE(encode_array_2byte,T)(size_t datasize, GRIBPACK *restrict lGrib,
 #endif
   for ( i = 0; i < datasize; i++ )
     {
-      tmp = ((data[i] - zref) * factor + (T)0.5);
+      tmp = TEMPLATE(round,T)((data[i] - zref) * factor);
       ui16 = (uint16_t) tmp;
       lGrib[z  ] = ui16 >>  8;
       lGrib[z+1] = ui16;
@@ -11542,7 +11317,7 @@ void TEMPLATE(encode_array,T)(int numBits, size_t packStart, size_t datasize,
 #endif
       for ( i = 0; i < datasize; i++ )
 	{
-	  tmp = ((data[i] - zref) * factor + (T)0.5);
+	  tmp = TEMPLATE(round,T)((data[i] - zref) * factor);
 	  lGrib[z  ] = (GRIBPACK)tmp;
           z++;
 	}
@@ -11562,7 +11337,7 @@ void TEMPLATE(encode_array,T)(int numBits, size_t packStart, size_t datasize,
 #endif
       if ( sizeof(T) == sizeof(double) )
       	{
-          grib_encode_array_2byte_double(datasize, lGrib, (const double *) data, zref, factor, &z);
+          grib_encode_array_2byte_double(datasize, lGrib, (const double *)(const void *)data, zref, factor, &z);
         }
       else
         {
@@ -11605,7 +11380,7 @@ void TEMPLATE(encode_array,T)(int numBits, size_t packStart, size_t datasize,
 #endif
       for ( i = 0; i < datasize; i++ )
 	{
-	  tmp = ((data[i] - zref) * factor + (T)0.5);
+	  tmp = TEMPLATE(round,T)((data[i] - zref) * factor);
           ui32 = (uint32_t) tmp;
           lGrib[z  ] =  (GRIBPACK)(ui32 >> 16);
           lGrib[z+1] =  (GRIBPACK)(ui32 >>  8);
@@ -11634,7 +11409,7 @@ void TEMPLATE(encode_array,T)(int numBits, size_t packStart, size_t datasize,
 #endif
       for ( i = 0; i < datasize; i++ )
 	{
-	  tmp = ((data[i] - zref) * factor + (T)0.5);
+	  tmp = TEMPLATE(round,T)((data[i] - zref) * factor);
           ui32 = (uint32_t) tmp;
           lGrib[z  ] =  (GRIBPACK)(ui32 >> 24);
           lGrib[z+1] =  (GRIBPACK)(ui32 >> 16);
@@ -11671,17 +11446,17 @@ void TEMPLATE(encode_array_unrolled,T)(int numBits, size_t packStart, size_t dat
   U_BYTEORDER;
   size_t i, j, z = *gz;
 #ifdef _ARCH_PWR6
-#define __UNROLL_DEPTH_2 8
+  enum { CGRIBEX__UNROLL_DEPTH_2 = 8 };
 #else
-#define __UNROLL_DEPTH_2 128
+  enum { CGRIBEX__UNROLL_DEPTH_2 = 128 };
 #endif
   size_t residual;
   size_t ofs;
-  T dval[__UNROLL_DEPTH_2];
+  T dval[CGRIBEX__UNROLL_DEPTH_2];
 
   data += packStart;
   datasize -= packStart;
-  residual =  datasize % __UNROLL_DEPTH_2;
+  residual =  datasize % CGRIBEX__UNROLL_DEPTH_2;
   ofs = datasize - residual;
 
   // reducing FP operations to single FMA is slowing down on pwr6 ...
@@ -11692,13 +11467,13 @@ void TEMPLATE(encode_array_unrolled,T)(int numBits, size_t packStart, size_t dat
       hpmStart(2, "pack 8 bit unrolled");
 #endif
       unsigned char *cgrib = (unsigned char *) (lGrib + z);
-      for ( i = 0; i < datasize - residual; i += __UNROLL_DEPTH_2 ) 
+      for ( i = 0; i < datasize - residual; i += CGRIBEX__UNROLL_DEPTH_2 )
 	{
-	  for (j = 0; j < __UNROLL_DEPTH_2; j++) 
+	  for (j = 0; j < CGRIBEX__UNROLL_DEPTH_2; j++)
 	    {
-	      dval[j] = ((data[i+j] - zref) * factor + (T)0.5);
+	      dval[j] = TEMPLATE(round,T)((data[i+j] - zref) * factor);
 	    }
-	  for (j = 0; j < __UNROLL_DEPTH_2; j++) 
+	  for (j = 0; j < CGRIBEX__UNROLL_DEPTH_2; j++)
 	    {
 #ifdef _ARCH_PWR6
 	      *cgrib++ =  (unsigned long) dval[j];
@@ -11706,11 +11481,11 @@ void TEMPLATE(encode_array_unrolled,T)(int numBits, size_t packStart, size_t dat
 	      *cgrib++ =  (unsigned char) dval[j];
 #endif
 	    }
-	  z += __UNROLL_DEPTH_2;
+	  z += CGRIBEX__UNROLL_DEPTH_2;
 	}
       for (j = 0; j < residual; j++) 
 	{
-	  dval[j] = ((data[ofs+j] - zref) * factor + (T)0.5);
+	  dval[j] = TEMPLATE(round,T)((data[ofs+j] - zref) * factor);
 	}
       for (j = 0; j < residual; j++) 
 	{
@@ -11736,17 +11511,17 @@ void TEMPLATE(encode_array_unrolled,T)(int numBits, size_t packStart, size_t dat
 #else
       uint16_t ival;
 #endif
-      uint16_t *sgrib = (uint16_t *) (lGrib+z);
+      uint16_t *sgrib = (uint16_t *)(void *)(lGrib+z);
 
-      for ( i = 0; i < datasize - residual; i += __UNROLL_DEPTH_2 ) 
+      for ( i = 0; i < datasize - residual; i += CGRIBEX__UNROLL_DEPTH_2 )
 	{
-	  for (j = 0; j < __UNROLL_DEPTH_2; j++) 
+	  for (j = 0; j < CGRIBEX__UNROLL_DEPTH_2; j++)
 	    {
-	      dval[j] = ((data[i+j] - zref) * factor + (T)0.5);
+	      dval[j] = TEMPLATE(round,T)((data[i+j] - zref) * factor);
 	    }
 	  if ( IS_BIGENDIAN() )
 	    {
-	      for (j = 0; j < __UNROLL_DEPTH_2; j++) 
+	      for (j = 0; j < CGRIBEX__UNROLL_DEPTH_2; j++)
 		{
 #ifdef _ARCH_PWR6
 		  *sgrib++ = (unsigned long) dval[j];
@@ -11754,21 +11529,21 @@ void TEMPLATE(encode_array_unrolled,T)(int numBits, size_t packStart, size_t dat
 		  *sgrib++ = (uint16_t) dval[j];
 #endif
 		}
-	      z += 2*__UNROLL_DEPTH_2;
+	      z += 2*CGRIBEX__UNROLL_DEPTH_2;
 	    }
 	  else
 	    {
-	      for (j = 0; j < __UNROLL_DEPTH_2; j++) 
+	      for (j = 0; j < CGRIBEX__UNROLL_DEPTH_2; j++)
 		{
 		  ival = (uint16_t) dval[j];
                   *sgrib++ = gribSwapByteOrder_uint16(ival);
 		}
-	      z += 2*__UNROLL_DEPTH_2;
+	      z += 2*CGRIBEX__UNROLL_DEPTH_2;
 	    }
 	}
       for (j = 0; j < residual; j++) 
 	{
-	  dval[j] = ((data[ofs+j] - zref) * factor + (T)0.5);
+	  dval[j] = TEMPLATE(round,T)((data[ofs+j] - zref) * factor);
 	}
       if ( IS_BIGENDIAN() )
 	{
@@ -11806,13 +11581,13 @@ void TEMPLATE(encode_array_unrolled,T)(int numBits, size_t packStart, size_t dat
 #else
       uint32_t ival;
 #endif
-      for ( i = 0; i < datasize - residual; i += __UNROLL_DEPTH_2 ) 
+      for ( i = 0; i < datasize - residual; i += CGRIBEX__UNROLL_DEPTH_2 )
 	{
-	  for (j = 0; j < __UNROLL_DEPTH_2; j++) 
+	  for (j = 0; j < CGRIBEX__UNROLL_DEPTH_2; j++)
 	    {
-	      dval[j] = ((data[i+j] - zref) * factor + (T)0.5);
+	      dval[j] = TEMPLATE(round,T)((data[i+j] - zref) * factor);
 	    }
-	  for (j = 0; j < __UNROLL_DEPTH_2; j++) 
+	  for (j = 0; j < CGRIBEX__UNROLL_DEPTH_2; j++)
 	    {
 #ifdef _ARCH_PWR6
 	      ival = (unsigned long) dval[j];
@@ -11827,7 +11602,7 @@ void TEMPLATE(encode_array_unrolled,T)(int numBits, size_t packStart, size_t dat
 	}
       for (j = 0; j < residual; j++) 
 	{
-	  dval[j] = ((data[ofs+j] - zref) * factor + (T)0.5);
+	  dval[j] = TEMPLATE(round,T)((data[ofs+j] - zref) * factor);
 	}
       for (j = 0; j < residual; j++) 
 	{
@@ -11851,16 +11626,16 @@ void TEMPLATE(encode_array_unrolled,T)(int numBits, size_t packStart, size_t dat
 #else
       uint32_t ival;
 #endif
-      unsigned int *igrib = (unsigned int *) (lGrib + z);
-      for ( i = 0; i < datasize - residual; i += __UNROLL_DEPTH_2 ) 
- {
-	  for (j = 0; j < __UNROLL_DEPTH_2; j++) 
+      unsigned int *igrib = (unsigned int *)(void *)(lGrib + z);
+      for ( i = 0; i < datasize - residual; i += CGRIBEX__UNROLL_DEPTH_2 )
+        {
+	  for (j = 0; j < CGRIBEX__UNROLL_DEPTH_2; j++)
 	    {
-	      dval[j] = ((data[i+j] - zref) * factor + (T)0.5);
+	      dval[j] = TEMPLATE(round,T)((data[i+j] - zref) * factor);
 	    }
 	  if ( IS_BIGENDIAN() )
 	    {
-	      for (j = 0; j < __UNROLL_DEPTH_2; j++) 
+	      for (j = 0; j < CGRIBEX__UNROLL_DEPTH_2; j++)
 		{
 #ifdef _ARCH_PWR6
 		  *igrib = (unsigned long) dval[j];
@@ -11873,7 +11648,7 @@ void TEMPLATE(encode_array_unrolled,T)(int numBits, size_t packStart, size_t dat
 	    }
 	  else
 	    {
-	      for (j = 0; j < __UNROLL_DEPTH_2; j++) 
+	      for (j = 0; j < CGRIBEX__UNROLL_DEPTH_2; j++)
 		{
                   ival = (uint32_t) dval[j];
 		  lGrib[z  ] =  (GRIBPACK)(ival >> 24);
@@ -11886,7 +11661,7 @@ void TEMPLATE(encode_array_unrolled,T)(int numBits, size_t packStart, size_t dat
 	}
       for (j = 0; j < residual; j++) 
 	{
-	  dval[j] = ((data[ofs+j] - zref) * factor + (T)0.5);
+	  dval[j] = TEMPLATE(round,T)((data[ofs+j] - zref) * factor);
 	}
       if ( IS_BIGENDIAN() )
 	{
@@ -11930,7 +11705,6 @@ void TEMPLATE(encode_array_unrolled,T)(int numBits, size_t packStart, size_t dat
     }
 
   *gz = z;
-#undef __UNROLL_DEPTH_2
 }
 
 #endif /* T */
@@ -11948,6 +11722,9 @@ void TEMPLATE(encode_array_unrolled,T)(int numBits, size_t packStart, size_t dat
 #ifdef T
 
 
+#define round_float roundf
+#define round_double round
+
 static
 void TEMPLATE(encode_array_common,T)(int numBits, size_t packStart, size_t datasize, GRIBPACK *lGrib,
 				     const T *data, T zref, T factor, size_t *gz)
@@ -11956,8 +11733,7 @@ void TEMPLATE(encode_array_common,T)(int numBits, size_t packStart, size_t datas
   unsigned int ival;
   int cbits, jbits;
   unsigned int c;
-  static unsigned int mask[] = {0,1,3,7,15,31,63,127,255};
-    
+
   /* code from gribw routine flist2bitstream */
 
   cbits = 8;
@@ -11965,7 +11741,7 @@ void TEMPLATE(encode_array_common,T)(int numBits, size_t packStart, size_t datas
   for ( i = packStart; i < datasize; i++ )
     {
       /* note float -> unsigned int .. truncate */
-      ival = (unsigned int) ((data[i] - zref) * factor + (T)0.5);
+      ival = (unsigned int)(TEMPLATE(round,T)((data[i] - zref) * factor));
       /*
 	if ( ival > max_nbpv_pow2 ) ival = max_nbpv_pow2;
 	if ( ival < 0 ) ival = 0;
@@ -11981,7 +11757,8 @@ void TEMPLATE(encode_array_common,T)(int numBits, size_t packStart, size_t datas
 	  else
 	    {
 	      jbits -= cbits;
-	      lGrib[z++] = (GRIBPACK)((c << cbits) + ((ival >> jbits) & mask[cbits]));
+	      lGrib[z++] = (GRIBPACK)((c << cbits)
+                                      + ((ival >> jbits) & ((1U << cbits) - 1)));
 	      cbits = 8;
 	      c = 0;
 	    }
@@ -11989,7 +11766,7 @@ void TEMPLATE(encode_array_common,T)(int numBits, size_t packStart, size_t datas
       /* now jbits < cbits */
       if ( jbits )
 	{
-	  c = (c << jbits) + (ival & mask[jbits]);
+	  c = (c << jbits) + (ival & ((1U << jbits)-1));
 	  cbits -= jbits;
 	}
     }
@@ -12004,13 +11781,13 @@ void TEMPLATE(encode_array_2byte,T)(size_t datasize, GRIBPACK *restrict lGrib,
 				    const T *restrict data, T zref, T factor, size_t *gz)
 {
   U_BYTEORDER;
-  uint16_t *restrict sgrib = (uint16_t *) (lGrib+*gz);
+  uint16_t *restrict sgrib = (uint16_t *)(void *)(lGrib+*gz);
 
   if ( IS_BIGENDIAN() )
     {
       for ( size_t i = 0; i < datasize; i++ )
         {
-          sgrib[i] = (uint16_t) ((data[i] - zref) * factor + (T)0.5);
+          sgrib[i] = (uint16_t)(TEMPLATE(round,T)((data[i] - zref) * factor));
         }
     }
   else
@@ -12018,7 +11795,7 @@ void TEMPLATE(encode_array_2byte,T)(size_t datasize, GRIBPACK *restrict lGrib,
       uint16_t ui16;
       for ( size_t i = 0; i < datasize; i++ )
         {
-          ui16 = (uint16_t) ((data[i] - zref) * factor + (T)0.5);
+          ui16 = (uint16_t)(TEMPLATE(round,T)((data[i] - zref) * factor));
           sgrib[i] = gribSwapByteOrder_uint16(ui16);
         }
     }
@@ -12045,7 +11822,7 @@ void TEMPLATE(encode_array_2byte,T)(size_t datasize, GRIBPACK *restrict lGrib,
 #endif
   for ( i = 0; i < datasize; i++ )
     {
-      tmp = ((data[i] - zref) * factor + (T)0.5);
+      tmp = TEMPLATE(round,T)((data[i] - zref) * factor);
       ui16 = (uint16_t) tmp;
       lGrib[z  ] = ui16 >>  8;
       lGrib[z+1] = ui16;
@@ -12088,7 +11865,7 @@ void TEMPLATE(encode_array,T)(int numBits, size_t packStart, size_t datasize,
 #endif
       for ( i = 0; i < datasize; i++ )
 	{
-	  tmp = ((data[i] - zref) * factor + (T)0.5);
+	  tmp = TEMPLATE(round,T)((data[i] - zref) * factor);
 	  lGrib[z  ] = (GRIBPACK)tmp;
           z++;
 	}
@@ -12108,7 +11885,7 @@ void TEMPLATE(encode_array,T)(int numBits, size_t packStart, size_t datasize,
 #endif
       if ( sizeof(T) == sizeof(double) )
       	{
-          grib_encode_array_2byte_double(datasize, lGrib, (const double *) data, zref, factor, &z);
+          grib_encode_array_2byte_double(datasize, lGrib, (const double *)(const void *)data, zref, factor, &z);
         }
       else
         {
@@ -12151,7 +11928,7 @@ void TEMPLATE(encode_array,T)(int numBits, size_t packStart, size_t datasize,
 #endif
       for ( i = 0; i < datasize; i++ )
 	{
-	  tmp = ((data[i] - zref) * factor + (T)0.5);
+	  tmp = TEMPLATE(round,T)((data[i] - zref) * factor);
           ui32 = (uint32_t) tmp;
           lGrib[z  ] =  (GRIBPACK)(ui32 >> 16);
           lGrib[z+1] =  (GRIBPACK)(ui32 >>  8);
@@ -12180,7 +11957,7 @@ void TEMPLATE(encode_array,T)(int numBits, size_t packStart, size_t datasize,
 #endif
       for ( i = 0; i < datasize; i++ )
 	{
-	  tmp = ((data[i] - zref) * factor + (T)0.5);
+	  tmp = TEMPLATE(round,T)((data[i] - zref) * factor);
           ui32 = (uint32_t) tmp;
           lGrib[z  ] =  (GRIBPACK)(ui32 >> 24);
           lGrib[z+1] =  (GRIBPACK)(ui32 >> 16);
@@ -12217,17 +11994,17 @@ void TEMPLATE(encode_array_unrolled,T)(int numBits, size_t packStart, size_t dat
   U_BYTEORDER;
   size_t i, j, z = *gz;
 #ifdef _ARCH_PWR6
-#define __UNROLL_DEPTH_2 8
+  enum { CGRIBEX__UNROLL_DEPTH_2 = 8 };
 #else
-#define __UNROLL_DEPTH_2 128
+  enum { CGRIBEX__UNROLL_DEPTH_2 = 128 };
 #endif
   size_t residual;
   size_t ofs;
-  T dval[__UNROLL_DEPTH_2];
+  T dval[CGRIBEX__UNROLL_DEPTH_2];
 
   data += packStart;
   datasize -= packStart;
-  residual =  datasize % __UNROLL_DEPTH_2;
+  residual =  datasize % CGRIBEX__UNROLL_DEPTH_2;
   ofs = datasize - residual;
 
   // reducing FP operations to single FMA is slowing down on pwr6 ...
@@ -12238,13 +12015,13 @@ void TEMPLATE(encode_array_unrolled,T)(int numBits, size_t packStart, size_t dat
       hpmStart(2, "pack 8 bit unrolled");
 #endif
       unsigned char *cgrib = (unsigned char *) (lGrib + z);
-      for ( i = 0; i < datasize - residual; i += __UNROLL_DEPTH_2 ) 
+      for ( i = 0; i < datasize - residual; i += CGRIBEX__UNROLL_DEPTH_2 )
 	{
-	  for (j = 0; j < __UNROLL_DEPTH_2; j++) 
+	  for (j = 0; j < CGRIBEX__UNROLL_DEPTH_2; j++)
 	    {
-	      dval[j] = ((data[i+j] - zref) * factor + (T)0.5);
+	      dval[j] = TEMPLATE(round,T)((data[i+j] - zref) * factor);
 	    }
-	  for (j = 0; j < __UNROLL_DEPTH_2; j++) 
+	  for (j = 0; j < CGRIBEX__UNROLL_DEPTH_2; j++)
 	    {
 #ifdef _ARCH_PWR6
 	      *cgrib++ =  (unsigned long) dval[j];
@@ -12252,11 +12029,11 @@ void TEMPLATE(encode_array_unrolled,T)(int numBits, size_t packStart, size_t dat
 	      *cgrib++ =  (unsigned char) dval[j];
 #endif
 	    }
-	  z += __UNROLL_DEPTH_2;
+	  z += CGRIBEX__UNROLL_DEPTH_2;
 	}
       for (j = 0; j < residual; j++) 
 	{
-	  dval[j] = ((data[ofs+j] - zref) * factor + (T)0.5);
+	  dval[j] = TEMPLATE(round,T)((data[ofs+j] - zref) * factor);
 	}
       for (j = 0; j < residual; j++) 
 	{
@@ -12282,17 +12059,17 @@ void TEMPLATE(encode_array_unrolled,T)(int numBits, size_t packStart, size_t dat
 #else
       uint16_t ival;
 #endif
-      uint16_t *sgrib = (uint16_t *) (lGrib+z);
+      uint16_t *sgrib = (uint16_t *)(void *)(lGrib+z);
 
-      for ( i = 0; i < datasize - residual; i += __UNROLL_DEPTH_2 ) 
+      for ( i = 0; i < datasize - residual; i += CGRIBEX__UNROLL_DEPTH_2 )
 	{
-	  for (j = 0; j < __UNROLL_DEPTH_2; j++) 
+	  for (j = 0; j < CGRIBEX__UNROLL_DEPTH_2; j++)
 	    {
-	      dval[j] = ((data[i+j] - zref) * factor + (T)0.5);
+	      dval[j] = TEMPLATE(round,T)((data[i+j] - zref) * factor);
 	    }
 	  if ( IS_BIGENDIAN() )
 	    {
-	      for (j = 0; j < __UNROLL_DEPTH_2; j++) 
+	      for (j = 0; j < CGRIBEX__UNROLL_DEPTH_2; j++)
 		{
 #ifdef _ARCH_PWR6
 		  *sgrib++ = (unsigned long) dval[j];
@@ -12300,21 +12077,21 @@ void TEMPLATE(encode_array_unrolled,T)(int numBits, size_t packStart, size_t dat
 		  *sgrib++ = (uint16_t) dval[j];
 #endif
 		}
-	      z += 2*__UNROLL_DEPTH_2;
+	      z += 2*CGRIBEX__UNROLL_DEPTH_2;
 	    }
 	  else
 	    {
-	      for (j = 0; j < __UNROLL_DEPTH_2; j++) 
+	      for (j = 0; j < CGRIBEX__UNROLL_DEPTH_2; j++)
 		{
 		  ival = (uint16_t) dval[j];
                   *sgrib++ = gribSwapByteOrder_uint16(ival);
 		}
-	      z += 2*__UNROLL_DEPTH_2;
+	      z += 2*CGRIBEX__UNROLL_DEPTH_2;
 	    }
 	}
       for (j = 0; j < residual; j++) 
 	{
-	  dval[j] = ((data[ofs+j] - zref) * factor + (T)0.5);
+	  dval[j] = TEMPLATE(round,T)((data[ofs+j] - zref) * factor);
 	}
       if ( IS_BIGENDIAN() )
 	{
@@ -12352,13 +12129,13 @@ void TEMPLATE(encode_array_unrolled,T)(int numBits, size_t packStart, size_t dat
 #else
       uint32_t ival;
 #endif
-      for ( i = 0; i < datasize - residual; i += __UNROLL_DEPTH_2 ) 
+      for ( i = 0; i < datasize - residual; i += CGRIBEX__UNROLL_DEPTH_2 )
 	{
-	  for (j = 0; j < __UNROLL_DEPTH_2; j++) 
+	  for (j = 0; j < CGRIBEX__UNROLL_DEPTH_2; j++)
 	    {
-	      dval[j] = ((data[i+j] - zref) * factor + (T)0.5);
+	      dval[j] = TEMPLATE(round,T)((data[i+j] - zref) * factor);
 	    }
-	  for (j = 0; j < __UNROLL_DEPTH_2; j++) 
+	  for (j = 0; j < CGRIBEX__UNROLL_DEPTH_2; j++)
 	    {
 #ifdef _ARCH_PWR6
 	      ival = (unsigned long) dval[j];
@@ -12373,7 +12150,7 @@ void TEMPLATE(encode_array_unrolled,T)(int numBits, size_t packStart, size_t dat
 	}
       for (j = 0; j < residual; j++) 
 	{
-	  dval[j] = ((data[ofs+j] - zref) * factor + (T)0.5);
+	  dval[j] = TEMPLATE(round,T)((data[ofs+j] - zref) * factor);
 	}
       for (j = 0; j < residual; j++) 
 	{
@@ -12397,16 +12174,16 @@ void TEMPLATE(encode_array_unrolled,T)(int numBits, size_t packStart, size_t dat
 #else
       uint32_t ival;
 #endif
-      unsigned int *igrib = (unsigned int *) (lGrib + z);
-      for ( i = 0; i < datasize - residual; i += __UNROLL_DEPTH_2 ) 
- {
-	  for (j = 0; j < __UNROLL_DEPTH_2; j++) 
+      unsigned int *igrib = (unsigned int *)(void *)(lGrib + z);
+      for ( i = 0; i < datasize - residual; i += CGRIBEX__UNROLL_DEPTH_2 )
+        {
+	  for (j = 0; j < CGRIBEX__UNROLL_DEPTH_2; j++)
 	    {
-	      dval[j] = ((data[i+j] - zref) * factor + (T)0.5);
+	      dval[j] = TEMPLATE(round,T)((data[i+j] - zref) * factor);
 	    }
 	  if ( IS_BIGENDIAN() )
 	    {
-	      for (j = 0; j < __UNROLL_DEPTH_2; j++) 
+	      for (j = 0; j < CGRIBEX__UNROLL_DEPTH_2; j++)
 		{
 #ifdef _ARCH_PWR6
 		  *igrib = (unsigned long) dval[j];
@@ -12419,7 +12196,7 @@ void TEMPLATE(encode_array_unrolled,T)(int numBits, size_t packStart, size_t dat
 	    }
 	  else
 	    {
-	      for (j = 0; j < __UNROLL_DEPTH_2; j++) 
+	      for (j = 0; j < CGRIBEX__UNROLL_DEPTH_2; j++)
 		{
                   ival = (uint32_t) dval[j];
 		  lGrib[z  ] =  (GRIBPACK)(ival >> 24);
@@ -12432,7 +12209,7 @@ void TEMPLATE(encode_array_unrolled,T)(int numBits, size_t packStart, size_t dat
 	}
       for (j = 0; j < residual; j++) 
 	{
-	  dval[j] = ((data[ofs+j] - zref) * factor + (T)0.5);
+	  dval[j] = TEMPLATE(round,T)((data[ofs+j] - zref) * factor);
 	}
       if ( IS_BIGENDIAN() )
 	{
@@ -12476,7 +12253,6 @@ void TEMPLATE(encode_array_unrolled,T)(int numBits, size_t packStart, size_t dat
     }
 
   *gz = z;
-#undef __UNROLL_DEPTH_2
 }
 
 #endif /* T */
@@ -12500,7 +12276,6 @@ void TEMPLATE(encodeGDS,T)(GRIBPACK *lGrib, long *gribLen, int *isec2, T *fsec2)
 {
   long z = *gribLen;
   int exponent, mantissa;
-  long i;
   int ival;
   int pvoffset = 0xFF;
   int gdslen = 32;
@@ -12614,13 +12389,13 @@ void TEMPLATE(encodeGDS,T)(GRIBPACK *lGrib, long *gribLen, int *isec2, T *fsec2)
 #if defined (SX)
 #pragma vdir novector     /* vectorization gives wrong results on NEC */
 #endif
-  for ( i = 0; i < ISEC2_NumVCP; ++i )
+  for ( long i = 0; i < ISEC2_NumVCP; ++i )
     {
       Put1Real((double)(fsec2[10+i]));
     }
 
   if ( ISEC2_Reduced )
-    for ( i = 0; i < ISEC2_NumLat; i++ ) Put2Byte(ISEC2_RowLon(i));
+    for ( long i = 0; i < ISEC2_NumLat; i++ ) Put2Byte(ISEC2_RowLon(i));
 
   *gribLen = z;
 }
@@ -12718,6 +12493,9 @@ void TEMPLATE(encodeBMS,T)(GRIBPACK *lGrib, long *gribLen, T *fsec3, int *isec4,
   *datasize = fsec4size;
 }
 
+#define pow_double pow
+#define pow_float powf
+
 /* GRIB BLOCK 4 - BINARY DATA SECTION */
 static
 int TEMPLATE(encodeBDS,T)(GRIBPACK *lGrib, long *gribLen, int decscale, int *isec2, int *isec4, long datasize, T *data,
@@ -12799,7 +12577,7 @@ int TEMPLATE(encodeBDS,T)(GRIBPACK *lGrib, long *gribLen, int decscale, int *ise
 
   if ( decscale )
     {
-      T scale = (T) pow(10.0, (double) decscale);
+      T scale = TEMPLATE(pow,T)((T)10.0, (T)decscale);
       for ( i = 0; i < datasize; ++i ) data[i] *= scale;
     }
 
@@ -13109,7 +12887,6 @@ void TEMPLATE(encodeGDS,T)(GRIBPACK *lGrib, long *gribLen, int *isec2, T *fsec2)
 {
   long z = *gribLen;
   int exponent, mantissa;
-  long i;
   int ival;
   int pvoffset = 0xFF;
   int gdslen = 32;
@@ -13223,13 +13000,13 @@ void TEMPLATE(encodeGDS,T)(GRIBPACK *lGrib, long *gribLen, int *isec2, T *fsec2)
 #if defined (SX)
 #pragma vdir novector     /* vectorization gives wrong results on NEC */
 #endif
-  for ( i = 0; i < ISEC2_NumVCP; ++i )
+  for ( long i = 0; i < ISEC2_NumVCP; ++i )
     {
       Put1Real((double)(fsec2[10+i]));
     }
 
   if ( ISEC2_Reduced )
-    for ( i = 0; i < ISEC2_NumLat; i++ ) Put2Byte(ISEC2_RowLon(i));
+    for ( long i = 0; i < ISEC2_NumLat; i++ ) Put2Byte(ISEC2_RowLon(i));
 
   *gribLen = z;
 }
@@ -13327,6 +13104,9 @@ void TEMPLATE(encodeBMS,T)(GRIBPACK *lGrib, long *gribLen, T *fsec3, int *isec4,
   *datasize = fsec4size;
 }
 
+#define pow_double pow
+#define pow_float powf
+
 /* GRIB BLOCK 4 - BINARY DATA SECTION */
 static
 int TEMPLATE(encodeBDS,T)(GRIBPACK *lGrib, long *gribLen, int decscale, int *isec2, int *isec4, long datasize, T *data,
@@ -13408,7 +13188,7 @@ int TEMPLATE(encodeBDS,T)(GRIBPACK *lGrib, long *gribLen, int decscale, int *ise
 
   if ( decscale )
     {
-      T scale = (T) pow(10.0, (double) decscale);
+      T scale = TEMPLATE(pow,T)((T)10.0, (T)decscale);
       for ( i = 0; i < datasize; ++i ) data[i] *= scale;
     }
 
@@ -13706,6 +13486,7 @@ void TEMPLATE(grib_encode,T)(int *isec0, int *isec1, int *isec2, T *fsec2, int *
  * End:
  */
 
+void encode_dummy(void);
 void encode_dummy(void)
 {
   (void) encode_array_unrolled_double(0, 0, 0, NULL, NULL, 0, 0, NULL);

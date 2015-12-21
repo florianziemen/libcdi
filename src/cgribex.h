@@ -1,5 +1,5 @@
-#ifndef _CGRIBEX_H
-#define _CGRIBEX_H
+#ifndef CGRIBEX_H
+#define CGRIBEX_H
 
 #include <stdio.h>
 #include <sys/types.h>
@@ -254,5 +254,5 @@ double calculate_pfactor_double(const double* spectralField, long fieldTruncatio
 }
 #endif
 
-#endif  /* _CGRIBEX_H */ 
+#endif  /* CGRIBEX_H */ 
 
