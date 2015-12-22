@@ -1802,7 +1802,7 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
 	ISEC2_Lambert_dx     = (int)lround(xincm);
 	ISEC2_Lambert_dy     = (int)lround(yincm);
 	ISEC2_Lambert_LatSP  = 0;
-	ISEC2_Lambert_LatSP  = 0;
+	ISEC2_Lambert_LonSP  = 0;
 	ISEC2_Lambert_ProjFlag = projflag;
 	ISEC2_ScanFlag = scanflag;
 

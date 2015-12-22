@@ -2085,10 +2085,7 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
             GRIB_CHECK(my_grib_set_long(gh, "projectionCenterFlag", projflag), 0);
             GRIB_CHECK(my_grib_set_long(gh, "scanningMode", scanflag), 0);
           }
-        /*
-	ISEC2_Lambert_LatSP  = 0;
-	ISEC2_Lambert_LatSP  = 0;
-        */
+
 	break;
       }
     case GRID_SPECTRAL:
