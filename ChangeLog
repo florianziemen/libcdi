@@ -3,6 +3,10 @@
 	* Version 1.7.1 released
         * using CGRIBEX library version 1.7.4
 
+2015-12-23  Uwe Schulzweida
+
+	* ZAXIS_HEIGHT: added support for units cm, dm and km
+
 2015-12-19  Uwe Schulzweida
 
 	* gribapiDecode internal problem when processing 1x1 GRIB2 data with JPEG compression [Bug #6402]

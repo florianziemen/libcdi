@@ -2289,7 +2289,26 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
     case ZAXIS_DEPTH_BELOW_SEA:
     case ZAXIS_ISENTROPIC:
       {
-	if ( editionNumber <= 1 )
+        if ( zaxistype == ZAXIS_HEIGHT )
+          {
+            double sf = 1;
+            char units[128];
+            zaxisInqUnits(zaxisID, units);
+            if ( units[1] == 'm' && !units[2] )
+              {
+                if      ( units[0] == 'c' ) sf = 0.01;
+                else if ( units[0] == 'd' ) sf = 0.1;
+                else if ( units[0] == 'k' ) sf = 1000;
+              }
+            if ( IS_NOT_EQUAL(sf, 1) )
+              {
+                level   *= sf;
+                dlevel1 *= sf;
+                dlevel2 *= sf;
+              }
+          }
+
+        if ( editionNumber <= 1 )
           {
             gribapiDefLevelType(gh, gcinit, "indicatorOfTypeOfLevel", zaxisTypeToGrib1ltype(zaxistype));
             GRIB_CHECK(my_grib_set_long(gh, "level", (long)level), 0);

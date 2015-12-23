@@ -149,7 +149,7 @@ extern "C" {
 #define  ZAXIS_HYBRID               2  /* Hybrid level                                          */
 #define  ZAXIS_HYBRID_HALF          3  /* Hybrid half level                                     */
 #define  ZAXIS_PRESSURE             4  /* Isobaric pressure level in Pascal                     */
-#define  ZAXIS_HEIGHT               5  /* Height above ground in meters                         */
+#define  ZAXIS_HEIGHT               5  /* Height above ground                                   */
 #define  ZAXIS_DEPTH_BELOW_SEA      6  /* Depth below sea level in meters                       */
 #define  ZAXIS_DEPTH_BELOW_LAND     7  /* Depth below land surface in centimeters               */
 #define  ZAXIS_ISENTROPIC           8  /* Isentropic                                            */

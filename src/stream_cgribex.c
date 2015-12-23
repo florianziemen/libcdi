@@ -2001,6 +2001,15 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
       {
 	level = zaxisInqLevel(zaxisID, levelID);
 
+	char units[128];
+	zaxisInqUnits(zaxisID, units);
+        if ( units[1] == 'm' && !units[2] )
+          {
+            if      ( units[0] == 'c' ) level *= 0.01;
+            else if ( units[0] == 'd' ) level *= 0.1;
+            else if ( units[0] == 'k' ) level *= 1000;
+          }
+
 	ilevel = (int) level;
 	ISEC1_LevelType = GRIB1_LTYPE_HEIGHT;
 	ISEC1_Level1    = ilevel;
