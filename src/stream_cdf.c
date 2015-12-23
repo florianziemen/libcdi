@@ -7,12 +7,9 @@
 //#define TEST_GROUPS 1
 
 #include <limits.h>
-#include <stdio.h>
-#include <string.h>
 #include <ctype.h>
 #include <math.h>
 #include <float.h>
-#include <stdbool.h>
 #ifdef HAVE_MMAP
 #include <unistd.h>
 #include <sys/mman.h>
@@ -166,26 +163,26 @@ int get_timeunit(size_t len, const char *ptu)
 }
 
 static
-int isTimeUnits(const char *timeunits)
+bool isTimeUnits(const char *timeunits)
 {
-  int status = 0;
+  bool status = false;
 
   if ( strncmp(timeunits, "sec",    3) == 0 ||
        strncmp(timeunits, "minute", 6) == 0 ||
        strncmp(timeunits, "hour",   4) == 0 ||
        strncmp(timeunits, "day",    3) == 0 ||
-       strncmp(timeunits, "month",  5) == 0 ) status = 1;
+       strncmp(timeunits, "month",  5) == 0 ) status = true;
 
   return status;
 }
 
 static
-int isTimeAxisUnits(const char *timeunits)
+bool isTimeAxisUnits(const char *timeunits)
 {
   char *ptu, *tu;
   int timetype = -1;
   int timeunit;
-  int status = FALSE;
+  bool status = false;
 
   size_t len = strlen(timeunits);
   tu = (char *) Malloc((len+1)*sizeof(char));
@@ -208,7 +205,7 @@ int isTimeAxisUnits(const char *timeunits)
           else if ( memcmp(ptu, "since", 5) == 0 )
             timetype = TAXIS_RELATIVE;
 
-          if ( timetype != -1 ) status = TRUE;
+          if ( timetype != -1 ) status = true;
         }
     }
 
@@ -3103,9 +3100,9 @@ void cdfSetDim(ncvar_t *ncvars, int ncvarid, int dimid, int dimtype)
 }
 
 static
-int isLonAxis(const char *units, const char *stdname)
+bool isLonAxis(const char *units, const char *stdname)
 {
-  int status = FALSE;
+  bool status = false;
   char lc_units[16];
 
   memcpy(lc_units, units, 15);
@@ -3115,26 +3112,26 @@ int isLonAxis(const char *units, const char *stdname)
   if ( ((memcmp(lc_units, "degree", 6) == 0 || memcmp(lc_units, "radian", 6) == 0) &&
         (memcmp(stdname, "grid_longitude", 14) == 0 || memcmp(stdname, "longitude", 9) == 0)) )
     {
-      status = TRUE;
+      status = true;
     }
 
-  if ( status == FALSE &&
+  if ( status == false &&
        memcmp(stdname, "grid_latitude", 13) && memcmp(stdname, "latitude", 8) &&
        memcmp(lc_units, "degree", 6) == 0 )
     {
       int ioff = 6;
       if ( lc_units[ioff] == 's' ) ioff++;
       if ( lc_units[ioff] == '_' ) ioff++;
-      if ( lc_units[ioff] == 'e' ) status = TRUE;
+      if ( lc_units[ioff] == 'e' ) status = true;
     }
 
-  return (status);
+  return status;
 }
 
 static
-int isLatAxis(const char *units, const char *stdname)
+bool isLatAxis(const char *units, const char *stdname)
 {
-  int status = FALSE;
+  bool status = false;
   char lc_units[16];
 
   memcpy(lc_units, units, 15);
@@ -3144,26 +3141,26 @@ int isLatAxis(const char *units, const char *stdname)
   if ( ((memcmp(lc_units, "degree", 6) == 0 || memcmp(lc_units, "radian", 6) == 0) &&
         (memcmp(stdname, "grid_latitude", 13) == 0 || memcmp(stdname, "latitude", 8) == 0)) )
     {
-      status = TRUE;
+      status = true;
     }
 
-  if ( status == FALSE &&
+  if ( status == false &&
        memcmp(stdname, "grid_longitude", 14) && memcmp(stdname, "longitude", 9) &&
        memcmp(lc_units, "degree", 6) == 0 )
     {
       int ioff = 6;
       if ( lc_units[ioff] == 's' ) ioff++;
       if ( lc_units[ioff] == '_' ) ioff++;
-      if ( lc_units[ioff] == 'n' || lc_units[ioff] == 's' ) status = TRUE;
+      if ( lc_units[ioff] == 'n' || lc_units[ioff] == 's' ) status = true;
     }
 
-  return (status);
+  return status;
 }
 
 static
-int isDBLAxis(/*const char *units,*/ const char *longname)
+bool isDBLAxis(/*const char *units,*/ const char *longname)
 {
-  int status = FALSE;
+  bool status = false;
 
   if ( strcmp(longname, "depth below land")         == 0 ||
        strcmp(longname, "depth_below_land")         == 0 ||
@@ -3174,56 +3171,65 @@ int isDBLAxis(/*const char *units,*/ const char *longname)
            strcmp(ncvars[ncvarid].units, "dm") == 0 ||
            strcmp(ncvars[ncvarid].units, "m")  == 0 )
       */
-        status = TRUE;
+        status = true;
     }
 
-  return (status);
+  return status;
 }
 
 static
-int unitsIsMeter(const char *units)
+bool unitsIsHeight(const char *units)
 {
-  return (units[0] == 'm' && (!units[1] || strncmp(units, "meter", 5) == 0));
+  bool status = false;
+  int u0 = units[0];
+
+  if ( (u0=='m' && (!units[1] || strncmp(units, "meter", 5) == 0)) ||
+       (!units[2] && units[1]=='m' && (u0=='c' || u0=='d' || u0=='k')) )
+    {
+      status = true;
+    }
+
+  return status;
 }
 
 static
-int isDepthAxis(const char *stdname, const char *longname)
+bool isDepthAxis(const char *stdname, const char *longname)
 {
-  int status = FALSE;
+  bool status = false;
 
-  if ( strcmp(stdname, "depth") == 0 ) status = TRUE;
+  if ( strcmp(stdname, "depth") == 0 ) status = true;
 
-  if ( status == FALSE )
+  if ( status == false )
     if ( strcmp(longname, "depth_below_sea") == 0 ||
          strcmp(longname, "depth below sea") == 0 )
       {
-        status = TRUE;
+        status = true;
       }
 
-  return (status);
+  return status;
 }
 
 static
-int isHeightAxis(const char *stdname, const char *longname)
+bool isHeightAxis(const char *stdname, const char *longname)
 {
-  int status = FALSE;
+  bool status = false;
 
-  if ( strcmp(stdname, "height") == 0 ) status = TRUE;
+  if ( strcmp(stdname, "height") == 0 ) status = true;
 
-  if ( status == FALSE )
+  if ( status == false )
     if ( strcmp(longname, "height") == 0 ||
          strcmp(longname, "height above the surface") == 0 )
       {
-        status = TRUE;
+        status = true;
       }
 
-  return (status);
+  return status;
 }
 
 static
-int unitsIsPressure(const char *units)
+bool unitsIsPressure(const char *units)
 {
-  int status = FALSE;
+  bool status = false;
 
   if ( memcmp(units, "millibar", 8) == 0 ||
        memcmp(units, "mb", 2)       == 0 ||
@@ -3231,7 +3237,7 @@ int unitsIsPressure(const char *units)
        memcmp(units, "hPa", 3)      == 0 ||
        memcmp(units, "Pa", 2)       == 0 )
     {
-      status = TRUE;
+      status = true;
     }
 
   return status;
@@ -3286,9 +3292,9 @@ void scan_hybrid_formula(int ncid, int ncfvarid, int *apvarid, int *bvarid, int 
 }
 
 static
-int isHybridSigmaPressureCoordinate(int ncid, int ncvarid, ncvar_t *ncvars, const ncdim_t *ncdims)
+bool isHybridSigmaPressureCoordinate(int ncid, int ncvarid, ncvar_t *ncvars, const ncdim_t *ncdims)
 {
-  int status = FALSE;
+  bool status = false;
   int ncfvarid = ncvarid;
   ncvar_t *ncvar = &ncvars[ncvarid];
 
@@ -3296,7 +3302,7 @@ int isHybridSigmaPressureCoordinate(int ncid, int ncvarid, ncvar_t *ncvars, cons
     {
       cdiConvention = CDI_CONVENTION_CF;
 
-      status = TRUE;
+      status = true;
       ncvar->zaxistype = ZAXIS_HYBRID;
       int dimid = ncvar->dimids[0];
       size_t dimlen = ncdims[dimid].len;
@@ -4271,7 +4277,7 @@ void verify_coordinate_vars_1(int ncid, int ndims, ncdim_t *ncdims, ncvar_t *ncv
                 {
                   ncvars[ncvarid].zaxistype = ZAXIS_DEPTH_BELOW_LAND;
 		}
-	      else if ( unitsIsMeter(ncvars[ncvarid].units) )
+	      else if ( unitsIsHeight(ncvars[ncvarid].units) )
 		{
 		  if ( isDepthAxis(ncvars[ncvarid].stdname, ncvars[ncvarid].longname) )
 		    ncvars[ncvarid].zaxistype = ZAXIS_DEPTH_BELOW_SEA;
@@ -4365,7 +4371,7 @@ void verify_coordinate_vars_2(int nvars, ncvar_t *ncvars)
                   ncvars[ncvarid].zaxistype = ZAXIS_DEPTH_BELOW_LAND;
 		  continue;
 		}
-	      else if ( unitsIsMeter(ncvars[ncvarid].units) )
+	      else if ( unitsIsHeight(ncvars[ncvarid].units) )
 		{
 		  if ( isDepthAxis(ncvars[ncvarid].stdname, ncvars[ncvarid].longname) )
 		    ncvars[ncvarid].zaxistype = ZAXIS_DEPTH_BELOW_SEA;
