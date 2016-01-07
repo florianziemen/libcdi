@@ -1139,12 +1139,12 @@ int checkGridName(int type, char *axisname, int fileID, int vlistID, int gridID,
 
   /* check that the name is not already defined */
   int checkname = TRUE;
-  int iz = 0;
+  unsigned iz = 0;
 
   do
     {
       strcpy(axisname2, axisname);
-      if ( iz ) sprintf(&axisname2[strlen(axisname2)], "_%d", iz+1);
+      if ( iz ) sprintf(&axisname2[strlen(axisname2)], "_%u", iz+1);
 
       //status = nc_inq_varid(fileID, axisname2, &ncvarid);
       if ( type == 'V' ) /* type Var oder Dim */
@@ -1183,9 +1183,9 @@ int checkGridName(int type, char *axisname, int fileID, int vlistID, int gridID,
   while (checkname && iz <= 99);
 
 
-  if ( iz ) sprintf(&axisname[strlen(axisname)], "_%d", iz+1);
+  if ( iz ) sprintf(&axisname[strlen(axisname)], "_%u", iz+1);
 
-  return iz;
+  return (int)iz;
 }
 
 static
