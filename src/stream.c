@@ -532,9 +532,7 @@ int cdiStreamOpenDefaultDelegate(const char *filename, char filemode,
 }
 
 
-int
-streamOpenID(const char *filename, char filemode, int filetype,
-             int resH)
+int streamOpenID(const char *filename, char filemode, int filetype, int resH)
 {
   int fileID = CDI_UNDEFID;
   int status;
@@ -557,17 +555,15 @@ streamOpenID(const char *filename, char filemode, int filetype,
     fileID = streamOpenDelegate(filename, filemode, filetype, streamptr, 1);
   }
 
-  if (fileID < 0)
+  if ( fileID < 0 )
     {
-      Free(streamptr->record);
-      stream_delete_entry(streamptr);
       streamID = fileID;
     }
   else
     {
-      streamID  = streamptr->self;
+      streamID = streamptr->self;
 
-      if ( streamID < 0 ) return (CDI_ELIMIT);
+      if ( streamID < 0 ) return CDI_ELIMIT;
 
       streamptr->filemode = filemode;
       streamptr->filename = strdupx(filename);
@@ -582,14 +578,26 @@ streamOpenID(const char *filename, char filemode, int filetype,
           streamptr->vlistID = vlistID;
           /* cdiReadByteorder(streamID); */
           status = cdiInqContents(streamptr);
-          if ( status < 0 ) return (status);
-          vlist_t *vlistptr = vlist_to_pointer(streamptr->vlistID);
-          vlistptr->ntsteps = streamptr->ntsteps;
-          cdiVlistMakeImmutable(vlistID);
+          if ( status < 0 )
+            {
+              streamID = status;
+            }
+          else
+            {
+              vlist_t *vlistptr = vlist_to_pointer(streamptr->vlistID);
+              vlistptr->ntsteps = streamptr->ntsteps;
+              cdiVlistMakeImmutable(vlistID);
+            }
         }
     }
 
-  return (streamID);
+  if ( streamID < 0 )
+    {
+      Free(streamptr->record);
+      stream_delete_entry(streamptr);
+    }
+
+  return streamID;
 }
 
 static int streamOpen(const char *filename, const char *filemode, int filetype)
