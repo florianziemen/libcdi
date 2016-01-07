@@ -2629,8 +2629,8 @@ void cdfDefMapping(stream_t *streamptr, int gridID)
 
   if ( gridInqType(gridID) == GRID_SINUSOIDAL )
     {
-      char varname[] = "sinusoidal";
-      char mapname[] = "sinusoidal";
+      static const char varname[] = "sinusoidal";
+      static const char mapname[] = "sinusoidal";
 
       cdf_redef(fileID);
 
@@ -2648,8 +2648,8 @@ void cdfDefMapping(stream_t *streamptr, int gridID)
     }
   else if ( gridInqType(gridID) == GRID_LAEA )
     {
-      char varname[] = "laea";
-      char mapname[] = "lambert_azimuthal_equal_area";
+      static const char varname[] = "laea";
+      static const char mapname[] = "lambert_azimuthal_equal_area";
 
       cdf_redef(fileID);
 
@@ -2670,8 +2670,8 @@ void cdfDefMapping(stream_t *streamptr, int gridID)
     }
   else if ( gridInqType(gridID) == GRID_LCC2 )
     {
-      char varname[] = "Lambert_Conformal";
-      char mapname[] = "lambert_conformal_conic";
+      static const char varname[] = "Lambert_Conformal";
+      static const char mapname[] = "lambert_conformal_conic";
 
       cdf_redef(fileID);
 
