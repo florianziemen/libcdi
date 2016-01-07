@@ -2824,14 +2824,11 @@ void scale_add(size_t size, double *data, double addoffset, double scalefactor)
 static
 void cdfCreateRecords(stream_t *streamptr, int tsID)
 {
-  int varID, levelID, recID, vrecID, zaxisID;
-  int nlev, nvrecs;
-
-  int vlistID  = streamptr->vlistID;
-
   if ( tsID < 0 || (tsID >= streamptr->ntsteps && tsID > 0) ) return;
 
   if ( streamptr->tsteps[tsID].nallrecs > 0 ) return;
+
+  int vlistID  = streamptr->vlistID;
 
   tsteps_t* sourceTstep = streamptr->tsteps;
   tsteps_t* destTstep = sourceTstep + tsID;
@@ -2843,7 +2840,7 @@ void cdfCreateRecords(stream_t *streamptr, int tsID)
 
   if ( tsID == 0 )
     {
-      nvrecs = nrecs; /* use all records at first timestep */
+      int nvrecs = nrecs; /* use all records at first timestep */
 
       streamptr->nrecs += nrecs;
 
@@ -2853,16 +2850,15 @@ void cdfCreateRecords(stream_t *streamptr, int tsID)
       destTstep->recordSize = nrecs;
       destTstep->curRecID   = UNDEFID;
       destTstep->recIDs     = (int *) Malloc((size_t)nvrecs*sizeof (int));;
-      for ( recID = 0; recID < nvrecs; recID++ ) destTstep->recIDs[recID] = recID;
+      for ( int recID = 0; recID < nvrecs; recID++ ) destTstep->recIDs[recID] = recID;
 
       record_t *records = destTstep->records;
 
-      recID = 0;
-      for ( varID = 0; varID < nvars; varID++ )
+      for ( int varID = 0, recID = 0; varID < nvars; varID++ )
         {
-          zaxisID = vlistInqVarZaxis(vlistID, varID);
-          nlev    = zaxisInqSize(zaxisID);
-          for ( levelID = 0; levelID < nlev; levelID++ )
+          int zaxisID = vlistInqVarZaxis(vlistID, varID);
+          int nlev    = zaxisInqSize(zaxisID);
+          for ( int levelID = 0; levelID < nlev; levelID++ )
             {
               recordInitEntry(&records[recID]);
               records[recID].varID   = (short)varID;
@@ -2873,12 +2869,12 @@ void cdfCreateRecords(stream_t *streamptr, int tsID)
     }
   else if ( tsID == 1 )
     {
-      nvrecs = 0;
-      for ( varID = 0; varID < nvars; varID++ )
+      int nvrecs = 0;
+      for ( int varID = 0; varID < nvars; varID++ )
         {
           if ( vlistInqVarTsteptype(vlistID, varID) != TSTEP_CONSTANT )
             {
-              zaxisID = vlistInqVarZaxis(vlistID, varID);
+              int zaxisID = vlistInqVarZaxis(vlistID, varID);
               nvrecs += zaxisInqSize(zaxisID);
             }
         }
@@ -2896,10 +2892,9 @@ void cdfCreateRecords(stream_t *streamptr, int tsID)
       if ( nvrecs )
         {
           destTstep->recIDs = (int *) Malloc((size_t)nvrecs * sizeof (int));
-          vrecID = 0;
-          for ( recID = 0; recID < nrecs; recID++ )
+          for ( int recID = 0, vrecID = 0; recID < nrecs; recID++ )
             {
-              varID = destTstep->records[recID].varID;
+              int varID = destTstep->records[recID].varID;
               if ( vlistInqVarTsteptype(vlistID, varID) != TSTEP_CONSTANT )
                 {
                   destTstep->recIDs[vrecID++] = recID;
@@ -2911,7 +2906,7 @@ void cdfCreateRecords(stream_t *streamptr, int tsID)
     {
       if ( streamptr->tsteps[1].records == 0 ) cdfCreateRecords(streamptr, 1);
 
-      nvrecs = streamptr->tsteps[1].nrecs;
+      int nvrecs = streamptr->tsteps[1].nrecs;
 
       streamptr->nrecs += nvrecs;
 
