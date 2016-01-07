@@ -1082,17 +1082,8 @@ void cdfDefTrajLon(stream_t *streamptr, int gridID)
 static
 void cdfDefTrajLat(stream_t *streamptr, int gridID)
 {
-  char units[] = "degrees_north";
-  char longname[] = "latitude";
-  char stdname[] = "latitude";
-  char axisname[] = "tlat";
-  nc_type xtype = NC_DOUBLE;
-
-  if ( gridInqPrec(gridID) == DATATYPE_FLT32 ) xtype = NC_FLOAT;
-
+  nc_type xtype = gridInqPrec(gridID) == DATATYPE_FLT32 ? NC_FLOAT : NC_DOUBLE;
   int vlistID = streamptr->vlistID;
-  int fileID = streamptr->fileID;
-
   int gridtype = gridInqType(gridID);
   int dimlen = gridInqYsize(gridID);
   if ( dimlen != 1 ) Error("Ysize isn't 1 for %s grid!", gridNamePtr(gridtype));
@@ -1100,27 +1091,37 @@ void cdfDefTrajLat(stream_t *streamptr, int gridID)
   int gridindex = vlistGridIndex(vlistID, gridID);
   int ncvarid = streamptr->ydimID[gridindex];
 
-  gridInqYname(gridID, axisname);
-  gridInqYlongname(gridID, longname);
-  gridInqYstdname(gridID, stdname);
-  gridInqYunits(gridID, units);
-
   if ( ncvarid == UNDEFID )
     {
       size_t len;
       int dimID = streamptr->basetime.ncvarid;
+      int fileID = streamptr->fileID;
 
       if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
-      cdf_def_var(fileID, axisname, xtype, 1, &dimID, &ncvarid);
-
-      if ( (len = strlen(stdname)) )
-        cdf_put_att_text(fileID, ncvarid, "standard_name", len, stdname);
-      if ( (len = strlen(longname)) )
-        cdf_put_att_text(fileID, ncvarid, "long_name", len, longname);
-      if ( (len = strlen(units)) )
-        cdf_put_att_text(fileID, ncvarid, "units", len, units);
-
+      {
+        char axisname[CDI_MAX_NAME];
+        gridInqYname(gridID, axisname);
+        cdf_def_var(fileID, axisname, xtype, 1, &dimID, &ncvarid);
+      }
+      {
+        char stdname[CDI_MAX_NAME];
+        gridInqYstdname(gridID, stdname);
+        if ( (len = strlen(stdname)) )
+          cdf_put_att_text(fileID, ncvarid, "standard_name", len, stdname);
+      }
+      {
+        char longname[CDI_MAX_NAME];
+        gridInqYlongname(gridID, longname);
+        if ( (len = strlen(longname)) )
+          cdf_put_att_text(fileID, ncvarid, "long_name", len, longname);
+      }
+      {
+        char units[CDI_MAX_NAME];
+        gridInqYunits(gridID, units);
+        if ( (len = strlen(units)) )
+          cdf_put_att_text(fileID, ncvarid, "units", len, units);
+      }
       cdf_enddef(fileID);
       streamptr->ncmode = 2;
     }
