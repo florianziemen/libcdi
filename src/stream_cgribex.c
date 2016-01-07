@@ -1781,12 +1781,12 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
       }
     case GRID_LCC:
       {
-	double originLon, originLat, lonParY, lat1, lat2, xincm, yincm;
-	int xsize, ysize;
-	int projflag, scanflag;
+	double originLon = 0.0, originLat = 0.0, lonParY = 0.0,
+          lat1 = 0.0, lat2 = 0.0, xincm = 0.0, yincm = 0.0;
+	int projflag = 0, scanflag = 0;
 
-	xsize = gridInqXsize(gridID);
-	ysize = gridInqYsize(gridID);
+	int xsize = gridInqXsize(gridID),
+          ysize = gridInqYsize(gridID);
 
 	gridInqLCC(gridID, &originLon, &originLat, &lonParY, &lat1, &lat2, &xincm, &yincm,
 		   &projflag, &scanflag);
