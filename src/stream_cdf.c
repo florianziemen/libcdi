@@ -2928,54 +2928,38 @@ void cdfCreateRecords(stream_t *streamptr, int tsID)
 static
 int cdfTimeDimID(int fileID, int ndims, int nvars)
 {
-  int dimid = UNDEFID;
-  int timedimid = UNDEFID;
-  char dimname[80];
-  char timeunits[CDI_MAX_NAME];
-  char attname[CDI_MAX_NAME];
-  char name[CDI_MAX_NAME];
-  nc_type xtype;
-  int nvdims, nvatts;
-  int dimids[9];
-  int varid, iatt;
-
-  for ( dimid = 0; dimid < ndims; dimid++ )
+  for ( int dimid = 0; dimid < ndims; dimid++ )
     {
+      char dimname[80];
       cdf_inq_dimname(fileID, dimid, dimname);
       if ( memcmp(dimname, "time", 4) == 0 )
-        {
-          timedimid = dimid;
-          break;
-        }
+        return dimid;
     }
 
-  if ( timedimid == UNDEFID )
-    {
-      for ( varid = 0; varid < nvars; varid++ )
-        {
-          cdf_inq_var(fileID, varid, name, &xtype, &nvdims, dimids, &nvatts);
-          if ( nvdims == 1 )
-            {
-              for ( iatt = 0; iatt < nvatts; iatt++ )
-                {
-                  cdf_inq_attname(fileID, varid, iatt, attname);
-                  if ( strncmp(attname, "units", 5) == 0 )
-                    {
-                      cdfGetAttText(fileID, varid, "units", sizeof(timeunits), timeunits);
-                      strtolower(timeunits);
 
-                      if ( isTimeUnits(timeunits) )
-                        {
-                          timedimid = dimids[0];
-                          break;
-                        }
-                    }
+  for ( int varid = 0; varid < nvars; varid++ )
+    {
+      int nvdims, nvatts, dimids[9];
+      cdf_inq_var(fileID, varid, NULL, NULL, &nvdims, dimids, &nvatts);
+      if ( nvdims == 1 )
+        {
+          for ( int iatt = 0; iatt < nvatts; iatt++ )
+            {
+              char sbuf[CDI_MAX_NAME];
+              cdf_inq_attname(fileID, varid, iatt, sbuf);
+              if ( strncmp(sbuf, "units", 5) == 0 )
+                {
+                  cdfGetAttText(fileID, varid, "units", sizeof(sbuf), sbuf);
+                  strtolower(sbuf);
+
+                  if ( isTimeUnits(sbuf) )
+                    return dimids[0];
                 }
             }
         }
     }
 
-  return (timedimid);
+  return UNDEFID;
 }
 
 static
