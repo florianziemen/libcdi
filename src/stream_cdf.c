@@ -4682,8 +4682,6 @@ cdfLazyGridCopyScalarFields(grid_t *gridptrOrig, grid_t *gridptrDup)
 static void
 cdfLazyGridCopyArrayFields(grid_t *gridptrOrig, grid_t *gridptrDup)
 {
-  struct cdfLazyGrid *lazyGridDup = (struct cdfLazyGrid *)gridptrDup,
-    *lazyGridOrig = (struct cdfLazyGrid *)gridptrOrig;
   size_t nrowlon = (size_t)gridptrOrig->nrowlon;
   size_t gridsize = (size_t)gridptrOrig->size;
   int gridtype = gridptrOrig->type;
