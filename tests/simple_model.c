@@ -331,7 +331,11 @@ modelRun(struct model_config setup, MPI_Comm comm)
                     exit(EXIT_FAILURE);
                   }
               }
-            fclose(tablefp);
+            if (fclose(tablefp) != 0)
+              {
+                perror("failed to close table file");
+                exit(EXIT_FAILURE);
+              }
           }
         }
     }
