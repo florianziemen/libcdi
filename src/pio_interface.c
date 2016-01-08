@@ -437,9 +437,12 @@ cdiPioInit(MPI_Comm commGlob, int confResH, int *pioNamespace)
     }
 
   reshRemove(confResH, &cdiPioConfOps);
+  if (cdiPioExtraNSKeys[cdiPioEKXmapNew] == 0) cdiPioExtraNSKeys[cdiPioEKXmapNew] = cdiNamespaceSwitchNewKey();
   if (commInqIsProcIO())
     {
-      int serverNamespace = namespaceNew();
+      int prevNamespace = namespaceGetActive(), serverNamespace = namespaceNew();
+      namespaceSetActive(serverNamespace);
+      namespaceSwitchSet(cdiPioExtraNSKeys[cdiPioEKXmapNew], NSSW_FUNC(conf->xmap_new));
       cdiPioSerializeSetMPI();
       conf->postCommSetupActions();
       cdiPioFileWritingInit(conf);
@@ -451,13 +454,14 @@ cdiPioInit(MPI_Comm commGlob, int confResH, int *pioNamespace)
         }
       cdiPioCommFinalize();
       if (xtInitByCDI) xt_finalize();
+      namespaceSetActive(prevNamespace);
       reshReplace(confResH, conf, &cdiPioConfOps);
       namespaceDelete(serverNamespace);
       return MPI_COMM_NULL;
     }
   else
     cdiPioClientSetup(pioNamespace);
-
+  namespaceSwitchSet(cdiPioExtraNSKeys[cdiPioEKXmapNew], NSSW_FUNC(conf->xmap_new));
   reshReplace(confResH, conf, &cdiPioConfOps);
   xdebug("nProcsGlob=%d, RETURN", sizeGlob);
   return commInqCommModel();
@@ -473,9 +477,7 @@ static void
 cdiPioFileWritingInit(const struct cdiPioConf *conf)
 {
   if (cdiPioExtraNSKeys[cdiPioEKFileWritingFinalize] == 0)
-    {
-      cdiPioExtraNSKeys[cdiPioEKFileWritingFinalize] = cdiNamespaceSwitchNewKey();
-    }
+    cdiPioExtraNSKeys[cdiPioEKFileWritingFinalize] = cdiNamespaceSwitchNewKey();
 
   namespaceSwitchSet(cdiPioExtraNSKeys[cdiPioEKFileWritingFinalize], NSSW_FUNC(cdiPioFileWritingFinalizeDefault));
   int IOMode = commInqIOMode();
