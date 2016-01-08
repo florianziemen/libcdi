@@ -323,8 +323,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
               {
                 uint32_t cksum
                   = memcrc_finish(&varDesc[i].checksum_state,
-                                  (off_t)((varDesc[i].size
-                                           * sizeof (var[0])
+                                  (off_t)((varDesc[i].size * sizeof (var[0])
                                            + sizeof (int) * 2)
                                           * (size_t)setup.nts));
                 int code = vlistInqVarCode(vlistID, varDesc[i].id);
