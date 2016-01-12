@@ -444,7 +444,7 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
   record->ilevel    = level1;
   record->ilevel2   = level2;
   record->ltype     = leveltype1;
-  record->tsteptype = tsteptype;
+  record->tsteptype = (short)tsteptype;
   record->tiles = tiles ? *tiles : dummy_tiles;
 
   //FIXME: This may leave the variable name unterminated (which is the behavior that I found in the code).

@@ -383,7 +383,7 @@ void cgribexAddRecord(stream_t * streamptr, int param, int *isec1, int *isec2, d
   record->ilevel    = level1;
   record->ilevel2   = level2;
   record->ltype     = ISEC1_LevelType;
-  record->tsteptype = tsteptype;
+  record->tsteptype = (short)tsteptype;
 
   cgribexGetGrid(streamptr, isec2, fsec2, isec4, grid, iret);
 
