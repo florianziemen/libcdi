@@ -3852,7 +3852,7 @@ void gridDefComplexPacking(int gridID, int lcomplex)
 
   if (gridptr->lcomplex != lcomplex)
     {
-      gridptr->lcomplex = lcomplex;
+      gridptr->lcomplex = (short)(lcomplex != 0);
       gridMark4Update(gridID);
     }
 }
@@ -3870,9 +3870,9 @@ void gridDefHasDims(int gridID, int hasdims)
 {
   grid_t* gridptr = gridID2Ptr(gridID);
 
-  if (gridptr->hasdims != hasdims)
+  if (gridptr->hasdims != (hasdims != 0))
     {
-      gridptr->hasdims = hasdims;
+      gridptr->hasdims = hasdims != 0;
       gridMark4Update(gridID);
     }
 }
@@ -4290,7 +4290,7 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
     gridP->size          =   intBuffer[21];
     gridP->xsize         =   intBuffer[22];
     gridP->ysize         =   intBuffer[23];
-    gridP->lcomplex      =   intBuffer[24];
+    gridP->lcomplex      =   (short)intBuffer[24];
     memberMask           =   intBuffer[25];
     gridP->xstdname      =   xystdname_tab[intBuffer[26]][0];
     gridP->ystdname      =   xystdname_tab[intBuffer[27]][1];

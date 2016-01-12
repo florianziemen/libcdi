@@ -94,8 +94,8 @@ struct grid_t {
   int     xsize;                  /* number of values along X */
   int     ysize;                  /* number of values along Y */
   int     np;                     /* number of parallels between a pole and the equator */
-  int     lcomplex;
-  int     hasdims;
+  short   lcomplex;
+  short   hasdims;
   const char *xstdname;
   const char *ystdname;
   char    xname[CDI_MAX_NAME];
