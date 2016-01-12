@@ -79,7 +79,6 @@ libcdi_la_SOURCES = 	 \
 	stream_ext.h	 \
 	stream_grb.c     \
 	stream_grb.h     \
-	stream_gribapi.c \
 	stream_gribapi.h \
 	stream_history.c \
 	stream_ieg.c     \
@@ -137,7 +136,7 @@ libcdi_la_USE_FC_extra_sources = \
 
 # these only contain code iff grib_api is available
 libcdi_la_HAVE_LIBGRIB_API_extra_sources = \
-	gribapi_utilities.c
+	gribapi_utilities.c stream_gribapi.c
 
 if USE_FC
 libcdi_la_SOURCES += 	 \
