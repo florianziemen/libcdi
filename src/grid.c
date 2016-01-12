@@ -3656,7 +3656,7 @@ const double *gridInqXvalsPtr(int gridID)
 }
 
 
-const double *gridInqYValsPtrSerial(grid_t *gridptr)
+static const double *gridInqYValsPtrSerial(grid_t *gridptr)
 {
   return gridptr->yvals;
 }
