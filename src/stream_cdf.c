@@ -4439,7 +4439,22 @@ struct cdfLazyGrid
     int datasetNCId, varNCId;
     short ndims;
   } xValsGet, yValsGet;
+#ifdef HAVE_LIBPTHREAD
+  pthread_mutex_t loadSerialize;
+#endif
 };
+
+#ifdef HAVE_LIBPTHREAD
+#define lock_lazy_load(plGrid) pthread_mutex_lock(&((plGrid)->loadSerialize))
+#define unlock_lazy_load(plGrid) pthread_mutex_unlock(&((plGrid)->loadSerialize))
+#define destroy_lazy_load_lock(plGrid) pthread_mutex_destroy(&((plGrid)->loadSerialize))
+#define init_lazy_load_lock(plGrid) pthread_mutex_init(&((plGrid)->loadSerialize), NULL)
+#else
+#define lock_lazy_load(plGrid)
+#define unlock_lazy_load(plGrid)
+#define destroy_lazy_load_lock(plGrid)
+#define init_lazy_load_lock(plGrid)
+#endif
 
 static void cdfLazyGridDestroy(struct cdfLazyGrid *lazyGrid)
 {
@@ -4454,6 +4469,7 @@ static void cdfLazyGridDestroy(struct cdfLazyGrid *lazyGrid)
     lazyGrid->base.xbounds = NULL;
   if (lazyGrid->base.ybounds == cdfPendingLoad)
     lazyGrid->base.ybounds = NULL;
+  destroy_lazy_load_lock(lazyGrid);
 }
 
 static void cdfLazyGridDelete(grid_t *grid)
@@ -4478,12 +4494,14 @@ static const double *
 cdfLazyGridInqAreaPtr(grid_t *grid)
 {
   struct cdfLazyGrid *lazyGrid = (struct cdfLazyGrid *)grid;
+  lock_lazy_load(lazyGrid);
   if (grid->area == cdfPendingLoad)
     {
       grid->area = (double *)Malloc((size_t)grid->size * sizeof(double));
       cdf_get_var_double(lazyGrid->cellAreaGet.datasetNCId,
                          lazyGrid->cellAreaGet.varNCId, grid->area);
     }
+  unlock_lazy_load(lazyGrid);
   return lazyGrid->baseVtable->inqAreaPtr(grid);
 }
 
@@ -4514,8 +4532,10 @@ static const double *
 cdfLazyGridInqXValsPtr(grid_t *grid)
 {
   struct cdfLazyGrid *lazyGrid = (struct cdfLazyGrid *)grid;
+  lock_lazy_load(lazyGrid);
   if (grid->xvals == cdfPendingLoad)
     cdfLazyLoadXYVals(&lazyGrid->xValsGet, &grid->xvals);
+  unlock_lazy_load(lazyGrid);
   return lazyGrid->baseVtable->inqXValsPtr(grid);
 }
 
@@ -4523,8 +4543,10 @@ static const double *
 cdfLazyGridInqYValsPtr(grid_t *grid)
 {
   struct cdfLazyGrid *lazyGrid = (struct cdfLazyGrid *)grid;
+  lock_lazy_load(lazyGrid);
   if (grid->yvals == cdfPendingLoad)
     cdfLazyLoadXYVals(&lazyGrid->yValsGet, &grid->yvals);
+  unlock_lazy_load(lazyGrid);
   return lazyGrid->baseVtable->inqYValsPtr(grid);
 }
 
@@ -4574,16 +4596,22 @@ static double
 cdfLazyGridInqXVal(grid_t *grid, int index)
 {
   struct cdfLazyGrid *lazyGrid = (struct cdfLazyGrid *)grid;
-  return cdfLazyGridInqXYVal(grid, (size_t)index, &lazyGrid->xValsGet,
-                             grid->xvals, grid->vtable->inqXValsPtr);
+  lock_lazy_load(lazyGrid);
+  double rv = cdfLazyGridInqXYVal(grid, (size_t)index, &lazyGrid->xValsGet,
+                                  grid->xvals, grid->vtable->inqXValsPtr);
+  unlock_lazy_load(lazyGrid);
+  return rv;
 }
 
 static double
 cdfLazyGridInqYVal(grid_t *grid, int index)
 {
   struct cdfLazyGrid *lazyGrid = (struct cdfLazyGrid *)grid;
-  return cdfLazyGridInqXYVal(grid, (size_t)index, &lazyGrid->yValsGet,
-                             grid->yvals, grid->vtable->inqYValsPtr);
+  lock_lazy_load(lazyGrid);
+  double rv = cdfLazyGridInqXYVal(grid, (size_t)index, &lazyGrid->yValsGet,
+                                  grid->yvals, grid->vtable->inqYValsPtr);
+  unlock_lazy_load(lazyGrid);
+  return rv;
 }
 
 static int
@@ -4629,6 +4657,7 @@ static const double *
 cdfLazyGridInqXBoundsPtr(grid_t *grid)
 {
   struct cdfLazyGrid *lazyGrid = (struct cdfLazyGrid *)grid;
+  lock_lazy_load(lazyGrid);
   if (grid->xbounds == cdfPendingLoad)
     {
       grid->xbounds = (double *)Malloc((size_t)grid->nvertex
@@ -4636,6 +4665,7 @@ cdfLazyGridInqXBoundsPtr(grid_t *grid)
       cdf_get_var_double(lazyGrid->xBoundsGet.datasetNCId,
                          lazyGrid->xBoundsGet.varNCId, grid->xbounds);
     }
+  unlock_lazy_load(lazyGrid);
   return lazyGrid->baseVtable->inqXBoundsPtr(grid);
 }
 
@@ -4643,6 +4673,7 @@ static const double *
 cdfLazyGridInqYBoundsPtr(grid_t *grid)
 {
   struct cdfLazyGrid *lazyGrid = (struct cdfLazyGrid *)grid;
+  lock_lazy_load(lazyGrid);
   if (grid->ybounds == cdfPendingLoad)
     {
       grid->ybounds = (double *)Malloc((size_t)grid->nvertex
@@ -4650,6 +4681,7 @@ cdfLazyGridInqYBoundsPtr(grid_t *grid)
       cdf_get_var_double(lazyGrid->yBoundsGet.datasetNCId,
                          lazyGrid->yBoundsGet.varNCId, grid->ybounds);
     }
+  unlock_lazy_load(lazyGrid);
   return lazyGrid->baseVtable->inqYBoundsPtr(grid);
 }
 
@@ -4665,6 +4697,7 @@ cdfLazyGridCopyScalarFields(grid_t *gridptrOrig, grid_t *gridptrDup)
   lazyGridDup->yBoundsGet = lazyGridOrig->yBoundsGet;
   lazyGridDup->xValsGet = lazyGridOrig->xValsGet;
   lazyGridDup->yValsGet = lazyGridOrig->yValsGet;
+  init_lazy_load_lock(lazyGridDup);
 }
 
 static void
@@ -4813,6 +4846,7 @@ cdfLazyGridInit(struct cdfLazyGrid *grid, int gridtype)
   grid->cellAreaGet.datasetNCId = -1;
   grid->cellAreaGet.varNCId = -1;
   grid->base.vtable = &cdfLazyGridVtable;
+  init_lazy_load_lock(grid);
 }
 
 static void
