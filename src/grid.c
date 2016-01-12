@@ -2299,16 +2299,16 @@ int gridCompare(int gridID, const grid_t *grid)
                    ((grid->xvals == NULL) ^ (gridRef->xvals == NULL)) &&
                    ((grid->yvals == NULL) ^ (gridRef->yvals == NULL)) )
                 {
-                  int nvertexA, nvertexB, numberA, numberB,
-                    positionA, positionB;
+                  int nvertexA, nvertexB, numberA, numberB;
                   differ = ( (nvertexA = grid->nvertex)
                              && (nvertexB = gridRef->nvertex)
                              && (nvertexA != nvertexB) )
-                    || ( (numberA = grid->number)
-                         && (numberB = gridRef->number)
-                         && (numberA != numberB) )
-                    || ( (numberA && numberB)
-                         && (positionA = grid->position) != (positionB = gridRef->position) );
+                    || (numberA = grid->number, numberB = gridRef->number,
+                        ( (numberA)
+                          && numberB
+                          && (numberA != numberB) )
+                        || ( (numberA && numberB)
+                             && (grid->position) != (gridRef->position) ) );
                 }
               else if ( !differ )
                 {
