@@ -613,8 +613,8 @@ void cdiGribIterator_delete(CdiGribIterator *me)
 #ifdef HAVE_LIBGRIB_API
   if(me) cdiGribIterator_condestruct(me, NULL, 0);
 #else
-  (void)me;
-  xabort("CDI was compiled without GribAPI support, so you can't possibly have a valid CdiGribIterator* to call this function with");
+  if (me)
+    xabort("CDI was compiled without GribAPI support, so you can't possibly have a valid CdiGribIterator* to call this function with");
 #endif
 }
 
