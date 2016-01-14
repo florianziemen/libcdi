@@ -8,10 +8,6 @@
 #define  WITH_CALLER_NAME
 #endif
 
-#define  _FATAL     1     /* Error flag: exit on error  */
-#define  _VERBOSE   2     /* Error flag: report errors  */
-#define  _DEBUG     4     /* Error flag: debug          */
-
 #ifdef __cplusplus
 extern "C" {
 #endif
