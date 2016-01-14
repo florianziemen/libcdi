@@ -297,15 +297,9 @@ int iegInqDataDP(void *ieg, double *data)
 static int
 iegDefData(iegrec_t *iegp, int prec, const void *data)
 {
-  int dprec;
-  void *buffer;
+  int dprec = iegDefaultDprec ? iegDefaultDprec : iegp->dprec;
 
-  if ( iegDefaultDprec ) dprec = iegDefaultDprec;
-  else                   dprec = iegp->dprec;
-
-  if ( ! dprec ) dprec = prec;
-
-  iegp->dprec = dprec;
+  iegp->dprec = dprec = dprec ? dprec : prec;
 
   size_t datasize = (size_t)IEG_G_NumLon(iegp->igdb) * (size_t)IEG_G_NumLat(iegp->igdb);
   size_t blocklen = datasize * (size_t)dprec;
@@ -314,16 +308,14 @@ iegDefData(iegrec_t *iegp, int prec, const void *data)
 
   size_t buffersize = iegp->buffersize;
 
+  void *buffer = iegp->buffer;
   if ( buffersize != blocklen )
     {
       buffersize = blocklen;
-      buffer = iegp->buffer;
       buffer = Realloc(buffer, buffersize);
       iegp->buffer = buffer;
       iegp->buffersize = buffersize;
     }
-  else
-    buffer = iegp->buffer;
 
   switch ( dprec )
     {
