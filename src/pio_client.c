@@ -122,6 +122,16 @@ cdiPioClientStreamDefVlist_(int streamID, int vlistID)
   cdiPioClientStreamWinCreate(streamID, &cspec);
 }
 
+/* If we're not using GNU C, elide __attribute__ */
+#if ! defined __GNUC__ && ! defined __attribute__
+#  define  __attribute__(x)  /*NOTHING*/
+#endif
+
+static void
+cdiPioClientStreamWriteVar_(int streamID, int varID, int memtype,
+                            const void *data, int nmiss)
+  __attribute__((noreturn));
+
 static void
 cdiPioClientStreamWriteVar_(int streamID, int varID, int memtype,
                             const void *data, int nmiss)
