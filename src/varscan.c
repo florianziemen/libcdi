@@ -941,7 +941,7 @@ struct varDefZAxisSearchState
   int zaxistype;
   int nlevels;
   int lbounds;
-  double *levels;
+  const double *levels;
   const char *longname;
   const char *units;
   int ltype;
@@ -964,23 +964,19 @@ varDefZAxisSearch(int id, void *res, void *data)
 }
 
 
-int varDefZaxis(int vlistID, int zaxistype, int nlevels, double *levels, int lbounds,
-		double *levels1, double *levels2, int vctsize, double *vct, char *name,
-		char *longname, const char *units, int prec, int mode, int ltype1)
+int varDefZaxis(int vlistID, int zaxistype, int nlevels, const double *levels, int lbounds,
+		const double *levels1, const double *levels2, int vctsize, const double *vct, char *name,
+		const char *longname, const char *units, int prec, int mode, int ltype1)
 {
   /*
     mode: 0 search in vlist and zaxis table
           1 search in zaxis table
    */
   int zaxisdefined = 0;
-  int nzaxis;
   int zaxisID = UNDEFID;
   int zaxisglobdefined = 0;
-  vlist_t *vlistptr;
-
-  vlistptr = vlist_to_pointer(vlistID);
-
-  nzaxis = vlistptr->nzaxis;
+  vlist_t *vlistptr = vlist_to_pointer(vlistID);
+  int nzaxis = vlistptr->nzaxis;
 
   if ( mode == 0 )
     for ( int index = 0; index < nzaxis; index++ )
