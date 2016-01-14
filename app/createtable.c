@@ -64,7 +64,6 @@ int main(int argc, char *argv[])
 	  usage();
 	  fprintf(stderr, "illegal option %s\n", cstring);
 	  return EXIT_FAILURE;
-	  break;
         }
     }
 
