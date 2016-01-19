@@ -6993,7 +6993,22 @@ void cdfInqHistoryString(stream_t *streamptr, char *history)
 {
   int ncid = streamptr->fileID;
   if ( streamptr->historyID != UNDEFID )
-    cdf_get_att_text(ncid, NC_GLOBAL, "history", history);
+    {
+      nc_type atttype;
+      cdf_inq_atttype(ncid, NC_GLOBAL, "history", &atttype);
+
+      if ( atttype == NC_CHAR )
+        {
+          cdf_get_att_text(ncid, NC_GLOBAL, "history", history);
+        }
+#if  defined  (HAVE_NETCDF4)
+      else if ( atttype == NC_STRING )
+        {
+          // ToDo
+          Warning("History attribute with type NC_STRING unsupported!");
+        }
+#endif
+    }
 }
 
 
