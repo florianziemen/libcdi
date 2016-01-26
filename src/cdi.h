@@ -408,6 +408,7 @@ int cdiIterator_nextField(CdiIterator *me);      //Points the iterator at the ne
 //All outXXX arguments to these functions may be NULL.
 char *cdiIterator_inqStartTime(CdiIterator *me);      //Returns the (start) time as an ISO-8601 coded string. The caller is responsible to Free() the returned string.
 char *cdiIterator_inqEndTime(CdiIterator *me);      //Returns the end time of an integration period as an ISO-8601 coded string, or NULL if there is no end time. The caller is responsible to Free() the returned string.
+char *cdiIterator_inqRTime(CdiIterator *me);      //Returns the reference date as an ISO-8601 coded string. The caller is responsible to Free() the returned string.
 char *cdiIterator_inqVTime(CdiIterator *me);      //Returns the validity date as an ISO-8601 coded string. The caller is responsible to Free() the returned string.
 int cdiIterator_inqLevelType(CdiIterator *me, int levelSelector, char **outName_optional, char **outLongName_optional, char **outStdName_optional, char **outUnit_optional);      //callers are responsible to Free() strings that they request
 int cdiIterator_inqLevel(CdiIterator *me, int levelSelector, double *outValue1_optional, double *outValue2_optional);       //outValue2 is only written to if the level is a hybrid level

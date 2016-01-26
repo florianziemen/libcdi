@@ -3,6 +3,7 @@
 
 #ifdef HAVE_LIBGRIB_API
 
+#include "cdi_int.h"
 #include "grid.h"
 
 #include <grib_api.h>
@@ -24,7 +25,7 @@ void gribGetDoubleArray(grib_handle* gribHandle, const char* key, double* array)
 void gribGetLongArray(grib_handle* gribHandle, const char* key, long* array);   //The caller is responsible to ensure a sufficiently large buffer.
 
 long gribEditionNumber(grib_handle* gh);
-char* gribMakeTimeString(grib_handle* gh, bool getEndTime);     //For statistical fields, setting getEndTime produces the time of the end of the integration period, otherwise the time of the start of the integration period is returned. Returns NULL if getEndTime is set and the field does not have an integration period.
+char* gribMakeTimeString(grib_handle* gh, CdiTimeType timeType);     //Returns NULL if timeType is kCdiTimeType_endTime and the field does not have an integration period (statistical data).
 int gribapiTimeIsFC(grib_handle *gh);
 int gribapiGetTsteptype(grib_handle *gh);
 int gribGetDatatype(grib_handle* gribHandle);

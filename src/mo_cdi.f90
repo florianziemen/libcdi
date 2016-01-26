@@ -269,6 +269,7 @@ module mo_cdi
   public :: cdiIterator_nextField
   public :: cdiIterator_inqStartTime
   public :: cdiIterator_inqEndTime
+  public :: cdiIterator_inqRTime
   public :: cdiIterator_inqVTime
   public :: cdiIterator_inqLevelType
   public :: cdiIterator_inqLevel
@@ -3280,6 +3281,32 @@ contains
       f_result => null()
     end if
   end function cdiIterator_inqEndTime
+
+  function cdiIterator_inqRTime(me_dummy) result(f_result)
+    character(kind = c_char), dimension(:), pointer :: f_result
+    type(t_CdiIterator), intent(in) :: me_dummy
+    type(c_ptr) :: cString
+    integer :: rv_shape(1)
+    character(kind = c_char), dimension(:), pointer :: temp
+    interface
+      function lib_cdiIterator_inqRTime(me_dummy) bind(c, name =&
+      & 'cdiIterator_inqRTime') result(c_result)
+        import c_ptr
+        type(c_ptr) :: c_result
+        type(c_ptr), value :: me_dummy
+      end function lib_cdiIterator_inqRTime
+    end interface
+    cString = lib_cdiIterator_inqRTime(me_dummy%ptr)
+    if(c_associated(cString)) then
+      rv_shape(1) = int(lib_strlen(cString))
+      call c_f_pointer(cString, temp, rv_shape)
+      allocate(f_result(rv_shape(1)))
+      f_result = temp
+      call lib_free(cString)
+    else
+      f_result => null()
+    end if
+  end function cdiIterator_inqRTime
 
   function cdiIterator_inqVTime(me_dummy) result(f_result)
     character(kind = c_char), dimension(:), pointer :: f_result

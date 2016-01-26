@@ -367,10 +367,10 @@ int cdiGribIterator_nextField(CdiIterator *super)
   return CDI_NOERR;
 }
 
-char *cdiGribIterator_inqTime(CdiIterator *super, bool getEndTime)
+char *cdiGribIterator_inqTime(CdiIterator *super, CdiTimeType timeType)
 {
   CdiGribIterator *me = (CdiGribIterator*)super;
-  return gribMakeTimeString(me->gribHandle, getEndTime);
+  return gribMakeTimeString(me->gribHandle, timeType);
 }
 
 int cdiGribIterator_levelType(CdiIterator *super, int levelSelector, char **outName, char **outLongName, char **outStdName, char **outUnit)

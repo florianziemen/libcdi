@@ -9,6 +9,7 @@
 #define INCLUDE_GUARD_CDI_ITERATOR_FALLBACK_H
 
 #include "cdi.h"
+#include "cdi_int.h"
 #include "iterator.h"
 
 typedef struct CdiFallbackIterator CdiFallbackIterator;
@@ -21,7 +22,7 @@ CdiFallbackIterator *cdiFallbackIterator_deserialize(const char *me);
 
 int cdiFallbackIterator_nextField(CdiIterator *me);
 
-char *cdiFallbackIterator_inqTime(CdiIterator *me, bool getEndTime);
+char *cdiFallbackIterator_inqTime(CdiIterator *me, CdiTimeType timeType);
 int cdiFallbackIterator_levelType(CdiIterator *me, int levelSelector, char **outName, char **outLongName, char **outStdName, char **outUnit);
 int cdiFallbackIterator_level(CdiIterator *me, int levelSelector, double *outValue1, double *outValue2);
 int cdiFallbackIterator_zaxisUuid(CdiIterator *me, int *outVgridNumber, int *outLevelCount, unsigned char outUuid[CDI_UUID_SIZE]);

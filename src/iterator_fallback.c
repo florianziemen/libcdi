@@ -207,13 +207,33 @@ int cdiFallbackIterator_nextField(CdiIterator *super)
   return CDI_NOERR;
 }
 
-char *cdiFallbackIterator_inqTime(CdiIterator *super, bool getEndTime)
+char *cdiFallbackIterator_inqTime(CdiIterator *super, CdiTimeType timeType)
 {
   CdiFallbackIterator *me = (CdiFallbackIterator *)(void *)super;
-  if(getEndTime) return NULL;   //The stream interface does not export the start/end times of statistical fields, so we treat all data as point of time data, returning the validity time as the start time.
+
+  //retrieve the time information
   int taxisId = vlistInqTaxis(me->vlistId);
-  int date = taxisInqVdate(taxisId);
-  int time = taxisInqVtime(taxisId);
+  int date = 0, time = 0;
+  switch(timeType)
+    {
+      case kCdiTimeType_referenceTime:
+        date = taxisInqRdate(taxisId);
+        time = taxisInqRtime(taxisId);
+        break;
+
+      case kCdiTimeType_startTime:
+        date = taxisInqVdate(taxisId);
+        time = taxisInqVtime(taxisId);
+        break;
+
+      case kCdiTimeType_endTime:
+        return NULL;   //The stream interface does not export the start/end times of statistical fields, so we treat all data as point of time data, returning the validity time as the start time.
+
+      default:
+        assert(0 && "internal error, please report this bug");
+    }
+
+  //decode the time information and reencode it into an ISO-compliant string
   int year, month, day, hour, minute, second;
   cdiDecodeDate(date, &year, &month, &day);
   cdiDecodeTime(time, &hour, &minute, &second);

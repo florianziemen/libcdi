@@ -282,6 +282,13 @@ typedef struct
   int                    subtype_index;  /* tile index for this key-value pair */
 } opt_key_val_pair_t;
 
+//enum for differenciating between the different times that we handle
+typedef enum {
+  kCdiTimeType_referenceTime,
+  kCdiTimeType_startTime,
+  kCdiTimeType_endTime
+} CdiTimeType;
+
 
 
 

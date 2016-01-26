@@ -433,7 +433,7 @@ int cdiIterator_nextField(CdiIterator* me)
     }
 }
 
-static char* cdiIterator_inqTime(CdiIterator* me, bool getEndTime)
+static char* cdiIterator_inqTime(CdiIterator* me, CdiTimeType timeType)
 {
   sanityCheck(me);
   switch(me->filetype)
@@ -441,7 +441,7 @@ static char* cdiIterator_inqTime(CdiIterator* me, bool getEndTime)
 #ifdef HAVE_LIBGRIB_API
         case FILETYPE_GRB:
         case FILETYPE_GRB2:
-          return cdiGribIterator_inqTime(me, getEndTime);
+          return cdiGribIterator_inqTime(me, timeType);
 #endif
 
 #ifdef HAVE_LIBNETCDF
@@ -459,7 +459,7 @@ static char* cdiIterator_inqTime(CdiIterator* me, bool getEndTime)
 #ifdef HAVE_LIBIEG
         case FILETYPE_IEG:
 #endif
-          return cdiFallbackIterator_inqTime(me, getEndTime);
+          return cdiFallbackIterator_inqTime(me, timeType);
 
       default:
         Error(kUnexpectedFileTypeMessage);
@@ -490,7 +490,7 @@ This is due to the fact that GRIB-API version 1.12.3 still does not implement th
 */
 char* cdiIterator_inqStartTime(CdiIterator* me)
 {
-  return cdiIterator_inqTime(me, false);
+  return cdiIterator_inqTime(me, kCdiTimeType_startTime);
 }
 
 /*
@@ -516,7 +516,34 @@ This is due to the fact that GRIB-API version 1.12.3 still does not implement th
 */
 char* cdiIterator_inqEndTime(CdiIterator* me)
 {
-  return cdiIterator_inqTime(me, true);
+  return cdiIterator_inqTime(me, kCdiTimeType_endTime);
+}
+
+/*
+@Function cdiIterator_inqRTime
+@Title Get the validity time of the current field
+
+@Prototype char* cdiIterator_inqRTime(CdiIterator* me)
+@Parameter
+    @item iterator The iterator to operate on.
+
+@Result A malloc'ed string containing the validity time of the current field in the format "YYYY-MM-DDTHH:MM:SS.mmm".
+
+@Description
+The returned time is the validity time as it is returned by taxisInqVtime(), only more precise.
+That is, if the field is a time point, its time is returned,
+if it is a statistical field with an integration period, the end time of the integration period is returned.
+
+Converts the time to the ISO-8601 format and returns it in a newly allocated buffer.
+The caller is responsible to Free() the resulting string.
+
+If the file is a GRIB file, the calendar that is used to resolve the relative times is the proleptic calendar
+as it is implemented by the standard C mktime() function.
+This is due to the fact that GRIB-API version 1.12.3 still does not implement the calendar identification fields.
+*/
+char* cdiIterator_inqRTime(CdiIterator* me)
+{
+  return cdiIterator_inqTime(me, kCdiTimeType_referenceTime);
 }
 
 /*
