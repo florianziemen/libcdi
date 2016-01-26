@@ -47,8 +47,8 @@ static CdiFallbackIterator *cdiFallbackIterator_condestruct(CdiFallbackIterator 
   //These values are chosen so that the natural increment at the start of cdiFallbackIterator_nextField() will correctly position us at the first slice.
   me->curTimestep = 0;
   if(streamInqTimestep(me->streamId, me->curTimestep) <= 0) goto closeStream;
-  me->curVariable = 0;
-  me->curSubtype = 0;
+  me->curVariable = -1;
+  me->curSubtype = -1;
   me->curLevel = -1;
   me->path = strdup(path);
   if(!me->path) goto closeStream;
