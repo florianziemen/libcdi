@@ -819,6 +819,31 @@ CdiParam cdiIterator_inqParam(CdiIterator* me)
 }
 
 /*
+@Function cdiIterator_inqParamParts
+@Title Get discipline, category, and number
+
+@Prototype void cdiIterator_inqParamParts(CdiIterator *me, int *outDiscipline, int *outCategory, int *outNumber)
+@Parameter
+    @item iterator The iterator to operate on.
+    @item outDiscipline This is used to return the discipline.
+    @item outCategory This is used to return the category.
+    @item outNumber This is used to return the number.
+
+@Description
+    Simple metadata inspection function.
+
+    Some FORTRAN compilers produce wrong code for the cdiIterator_inqParam()-wrapper,
+    rendering it unusable from FORTRAN. This function is the workaround.
+*/
+void cdiIterator_inqParamParts(CdiIterator *me, int *outDiscipline, int *outCategory, int *outNumber)
+{
+  CdiParam result = cdiIterator_inqParam(me);
+  if(outDiscipline) *outDiscipline = result.discipline;
+  if(outCategory) *outCategory = result.category;
+  if(outNumber) *outNumber = result.number;
+}
+
+/*
 @Function cdiIterator_inqDatatype
 @Title Get the datatype of the current field
 

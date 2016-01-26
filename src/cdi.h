@@ -415,6 +415,7 @@ int cdiIterator_inqLevelUuid(CdiIterator *me, int *outVgridNumber_optional, int 
 int cdiIterator_inqTile(CdiIterator *me, int *outTileIndex, int *outTileAttribute); //Returns CDI_EINVAL if there is no tile information connected to the current field, *outTileIndex and *outTileAttribute will be set to -1 in this case.
 int cdiIterator_inqTileCount(CdiIterator *me, int *outTileCount, int *outTileAttributeCount); //outTileAttributeCount is the count for the tile associated with the current field, a total attribute count cannot be inquired. Returns CDI_EINVAL if there is no tile information connected to the current field, *outTileCount and *outTileAttributeCount will be set to 0 in this case.
 CdiParam cdiIterator_inqParam(CdiIterator *me);
+void cdiIterator_inqParamParts(CdiIterator *me, int *outDiscipline, int *outCategory, int *outNumber);	//Some FORTRAN compilers produce wrong code for the cdiIterator_inqParam()-wrapper, rendering it unusable from FORTRAN. This function is the workaround.
 int cdiIterator_inqDatatype(CdiIterator *me);
 int cdiIterator_inqTsteptype(CdiIterator *me);
 char *cdiIterator_inqVariableName(CdiIterator *me);        //The caller is responsible to Free() the returned buffer.

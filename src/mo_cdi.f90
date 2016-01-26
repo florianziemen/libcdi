@@ -276,6 +276,7 @@ module mo_cdi
   public :: cdiIterator_inqTile
   public :: cdiIterator_inqTileCount
   public :: cdiIterator_inqParam
+  public :: cdiIterator_inqParamParts
   public :: cdiIterator_inqDatatype
   public :: cdiIterator_inqTsteptype
   public :: cdiIterator_inqVariableName
@@ -3519,6 +3520,27 @@ contains
     end interface
     f_result = lib_cdiIterator_inqParam(me_dummy%ptr)
   end function cdiIterator_inqParam
+
+  subroutine cdiIterator_inqParamParts(me_dummy, outDiscipline_dummy,&
+  & outCategory_dummy, outNumber_dummy)
+    type(t_CdiIterator), intent(in) :: me_dummy
+    integer(c_int), intent(inout) :: outDiscipline_dummy
+    integer(c_int), intent(inout) :: outCategory_dummy
+    integer(c_int), intent(inout) :: outNumber_dummy
+    interface
+      subroutine lib_cdiIterator_inqParamParts(me_dummy, outDiscipline_dummy,&
+      & outCategory_dummy, outNumber_dummy) bind(c, name =&
+      & 'cdiIterator_inqParamParts')
+        import c_int, c_ptr
+        type(c_ptr), value :: me_dummy
+        integer(c_int), intent(inout) :: outDiscipline_dummy
+        integer(c_int), intent(inout) :: outCategory_dummy
+        integer(c_int), intent(inout) :: outNumber_dummy
+      end subroutine lib_cdiIterator_inqParamParts
+    end interface
+    call lib_cdiIterator_inqParamParts(me_dummy%ptr, outDiscipline_dummy,&
+    & outCategory_dummy, outNumber_dummy)
+  end subroutine cdiIterator_inqParamParts
 
   function cdiIterator_inqDatatype(me_dummy) result(f_result)
     integer(c_int) :: f_result
