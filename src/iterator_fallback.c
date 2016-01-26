@@ -306,8 +306,15 @@ int cdiFallbackIterator_inqTile(CdiIterator *super, int *outTileIndex, int *outT
 #endif
 
   int error = CDI_NOERR;
-  if(subtypeInqAttribute(me->subtypeId, me->curSubtype, "tileIndex", outTileIndex)) error = CDI_EINVAL;
-  if(subtypeInqAttribute(me->subtypeId, me->curSubtype, "tileAttribute", outTileAttribute)) error = CDI_EINVAL;
+  if(me->subtypeId == CDI_UNDEFID)	//must not call subtypeInqAttribute() with an invalid subtype ID, because it would abort the program instead of returning an error
+    {
+      error = CDI_EINVAL;
+    }
+  else
+    {
+      if(subtypeInqAttribute(me->subtypeId, me->curSubtype, "tileIndex", outTileIndex)) error = CDI_EINVAL;
+      if(subtypeInqAttribute(me->subtypeId, me->curSubtype, "tileAttribute", outTileAttribute)) error = CDI_EINVAL;
+    }
   if(error) *outTileIndex = *outTileAttribute = -1; //Guarantee defined values in case of an error.
   return error;
 }
@@ -325,8 +332,15 @@ int cdiFallbackIterator_inqTileCount(CdiIterator *super, int *outTileCount, int 
 #endif
 
   int error = CDI_NOERR;
-  if(subtypeInqAttribute(me->subtypeId, me->curSubtype, "numberOfTiles", outTileCount)) error = CDI_EINVAL;
-  if(subtypeInqAttribute(me->subtypeId, me->curSubtype, "numberOfTileAttributes", outTileAttributeCount)) error = CDI_EINVAL;
+  if(me->subtypeId == CDI_UNDEFID)	//must not call subtypeInqAttribute() with an invalid subtype ID, because it would abort the program instead of returning an error
+    {
+      error = CDI_EINVAL;
+    }
+  else
+    {
+      if(subtypeInqAttribute(me->subtypeId, me->curSubtype, "numberOfTiles", outTileCount)) error = CDI_EINVAL;
+      if(subtypeInqAttribute(me->subtypeId, me->curSubtype, "numberOfTileAttributes", outTileAttributeCount)) error = CDI_EINVAL;
+    }
   if(error) *outTileCount = *outTileAttributeCount = -1; //Guarantee defined values in case of an error.
   return CDI_NOERR;
 }
