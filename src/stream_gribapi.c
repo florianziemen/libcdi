@@ -27,7 +27,7 @@
 
 extern int cdiInventoryMode;
 
-static const var_tile_t dummy_tiles = { -1, -1, -1, -1, -1, -1 };
+static const var_tile_t dummy_tiles = { 0, -1, -1, -1, -1, -1 };
 
 typedef struct {
   int param;
@@ -529,7 +529,7 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
   // fprintf(stderr, "param %d name %s %s %s\n", param, name, longname, units);
 
   /* add the previously read record data to the (intermediate) list of records */
-  int tile_index = -1, varID;
+  int tile_index = 0, varID;
   varAddRecord(recID, param, gridID, zaxistype, lbounds, level1, level2, level_sf, level_unit,
 	       datatype, &varID, &levelID, tsteptype, numavg, leveltype1, leveltype2,
 	       varname, stdname, longname, units, tiles, &tile_index);
