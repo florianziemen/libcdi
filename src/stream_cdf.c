@@ -5791,6 +5791,10 @@ int cmpvarname(const void *s1, const void *s2)
 static
 void define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, int *varids, int nvars, int num_ncvars, ncvar_t *ncvars)
 {
+  if ( CDI_Debug )
+    {
+      for(int i = 0; i < nvars; i++) Message("varids[%d] = %d", i, varids[i]);
+    }
   if ( streamptr->sortname )
     {
       struct varinfo *varInfo
@@ -5808,6 +5812,10 @@ void define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, 
 	  varids[varID] = varInfo[varID].ncvarid;
 	}
       Free(varInfo);
+      if ( CDI_Debug )
+        {
+          for(int i = 0; i < nvars; i++) Message("sorted varids[%d] = %d", i, varids[i]);
+        }
     }
 
   for ( int varID1 = 0; varID1 < nvars; varID1++ )

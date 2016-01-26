@@ -493,7 +493,7 @@ void cdfGetSliceSlapDescription(stream_t *streamptr, int varId, int levelId, boo
 
   if ( CDI_Debug )
     for (int idim = 0; idim < ndims; idim++)
-      Message("dim = %d  start = %d  count = %d", idim, start[idim], count[idim]);
+      Message("dim = %d  start = %d  count = %d", idim, (*start)[idim], (*count)[idim]);
 
   int nvdims;
   cdf_inq_varndims(fileId, ncvarid, &nvdims);
