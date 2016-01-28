@@ -49,10 +49,10 @@ static const char Filetypes[][9] = {
   "UNKNOWN",
   "GRIB",
   "GRIB2",
-  "netCDF",
-  "netCDF2",
-  "netCDF4",
-  "netCDF4c",
+  "NetCDF",
+  "NetCDF2",
+  "NetCDF4",
+  "NetCDF4c",
   "SERVICE",
   "EXTRA",
   "IEG",
@@ -129,7 +129,7 @@ void cdiPrintVersion(void)
   fprintf(stderr, "GRIB_API library version : %s\n", gribapiLibraryVersionString());
 #endif
 #if  defined  (HAVE_LIBNETCDF)
-  fprintf(stderr, "  netCDF library version : %s\n", cdfLibraryVersion());
+  fprintf(stderr, "  NetCDF library version : %s\n", cdfLibraryVersion());
 #endif
 #if  defined  (HAVE_LIBHDF5)
   fprintf(stderr, "    HDF5 library version : %s\n", hdfLibraryVersion());

@@ -232,6 +232,10 @@ The valid {\CDI} byte order types are {\tt CDI\_BIGENDIAN} and {\tt CDI\_LITTLEE
 
 The function {\tt streamDefVlist} defines the variable list of a stream.
 
+To safeguard against errors by modifying the wrong vlist object,
+this function makes the passed vlist object immutable.
+All further vlist changes have to use the vlist object returned by streamInqVlist().
+
 \subsubsection*{Usage}
 
 \begin{verbatim}

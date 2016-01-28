@@ -13,7 +13,7 @@ const char *cdiStringError(int cdiErrno)
   static const char _EUFTYPE[]     = "Unsupported file type";
   static const char _ELIBNAVAIL[]  = "Unsupported file type (library support not compiled in)";
   static const char _EUFSTRUCT[]   = "Unsupported file structure";
-  static const char _EUNC4[]       = "Unsupported netCDF4 structure";
+  static const char _EUNC4[]       = "Unsupported NetCDF4 structure";
   static const char _ELIMIT[]      = "Internal limits exceeded";
 
   switch (cdiErrno) {

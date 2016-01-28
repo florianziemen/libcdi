@@ -610,7 +610,7 @@ void cdfDefVarSzip(int ncid, int ncvarid)
           if ( lwarn )
             {
               lwarn = FALSE;
-              Warning("netCDF4/Szip compression not compiled in!");
+              Warning("NetCDF4/Szip compression not compiled in!");
             }
         }
       else
@@ -1701,7 +1701,7 @@ void cdfDefRgrid(stream_t *streamptr, int gridID)
     {
       if ( lwarn )
         {
-          Warning("Creating a netCDF file with data on a gaussian reduced grid.");
+          Warning("Creating a NetCDF file with data on a gaussian reduced grid.");
           Warning("The further processing of the resulting file is unsupported!");
           lwarn = FALSE;
         }
@@ -3590,7 +3590,7 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
                   if ( warn )
                     {
                       warn = FALSE;
-                      Warning("netCDF attribute grid_type='%s' unsupported!", attstring);
+                      Warning("NetCDF attribute grid_type='%s' unsupported!", attstring);
                     }
                 }
 
@@ -3629,7 +3629,7 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
                   if ( warn )
                     {
                       warn = FALSE;
-                      Warning("netCDF attribute level_type='%s' unsupported!", attstring);
+                      Warning("NetCDF attribute level_type='%s' unsupported!", attstring);
                     }
                 }
 

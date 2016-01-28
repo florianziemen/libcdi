@@ -746,7 +746,7 @@ open stream. Otherwise, a negative number with the error status is returned.
 @EndList
 
 @Example
-Here is an example using @func{streamOpenRead} to open an existing netCDF
+Here is an example using @func{streamOpenRead} to open an existing NetCDF
 file named @func{foo.nc} for reading:
 
 @Source
@@ -828,7 +828,7 @@ open stream. Otherwise, a negative number with the error status is returned.
 @EndList
 
 @Example
-Here is an example using @func{streamOpenWrite} to create a new netCDF file named @func{foo.nc} for writing:
+Here is an example using @func{streamOpenWrite} to create a new NetCDF file named @func{foo.nc} for writing:
 
 @Source
 #include "cdi.h"

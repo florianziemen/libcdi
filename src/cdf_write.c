@@ -37,7 +37,7 @@ void cdfDefVarDeflate(int ncid, int ncvarid, int deflate_level)
   if ( lwarn )
     {
       lwarn = FALSE;
-      Warning("Deflate compression failed, netCDF4 not available!");
+      Warning("Deflate compression failed, NetCDF4 not available!");
     }
 #endif
 }
@@ -48,7 +48,7 @@ int cdfDefDatatype(int datatype, int filetype)
   int xtype = NC_FLOAT;
 
   if ( datatype == DATATYPE_CPX32 || datatype == DATATYPE_CPX64 )
-    Error("CDI/netCDF library does not support complex numbers!");
+    Error("CDI/NetCDF library does not support complex numbers!");
 
   if ( filetype == FILETYPE_NC4 )
     {
@@ -497,7 +497,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
               if ( lwarn )
                 {
                   lwarn = FALSE;
-                  Warning("Deflate compression is only available for netCDF4!");
+                  Warning("Deflate compression is only available for NetCDF4!");
                 }
             }
         }
@@ -515,7 +515,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
           if ( lwarn )
             {
               lwarn = FALSE;
-              Warning("netCDF4/SZIP compression not available!");
+              Warning("NetCDF4/SZIP compression not available!");
             }
 #endif
         }
@@ -526,7 +526,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
           if ( lwarn )
             {
               lwarn = FALSE;
-              Warning("SZIP compression is only available for netCDF4!");
+              Warning("SZIP compression is only available for NetCDF4!");
             }
         }
     }

@@ -39,7 +39,7 @@ extern "C" {
 #define  CDI_EUFTYPE            -21   /* Unsupported file type                */
 #define  CDI_ELIBNAVAIL         -22   /* xxx library not available            */
 #define  CDI_EUFSTRUCT          -23   /* Unsupported file structure           */
-#define  CDI_EUNC4              -24   /* Unsupported netCDF4 structure        */
+#define  CDI_EUNC4              -24   /* Unsupported NetCDF4 structure        */
 #define  CDI_ELIMIT             -99   /* Internal limits exceeded             */
 
 /* File types */
@@ -47,10 +47,10 @@ extern "C" {
 #define  FILETYPE_UNDEF          -1   /* Unknown/not yet defined file type */
 #define  FILETYPE_GRB             1   /* File type GRIB                       */
 #define  FILETYPE_GRB2            2   /* File type GRIB version 2             */
-#define  FILETYPE_NC              3   /* File type netCDF                     */
-#define  FILETYPE_NC2             4   /* File type netCDF version 2 (64-bit)  */
-#define  FILETYPE_NC4             5   /* File type netCDF version 4           */
-#define  FILETYPE_NC4C            6   /* File type netCDF version 4 (classic) */
+#define  FILETYPE_NC              3   /* File type NetCDF                     */
+#define  FILETYPE_NC2             4   /* File type NetCDF version 2 (64-bit)  */
+#define  FILETYPE_NC4             5   /* File type NetCDF version 4           */
+#define  FILETYPE_NC4C            6   /* File type NetCDF version 4 (classic) */
 #define  FILETYPE_SRV             7   /* File type SERVICE                    */
 #define  FILETYPE_EXT             8   /* File type EXTRA                      */
 #define  FILETYPE_IEG             9   /* File type IEG                        */
