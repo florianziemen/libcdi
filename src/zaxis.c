@@ -1195,7 +1195,6 @@ static void zaxisPrintKernel ( zaxis_t * zaxisptr, int index, FILE * fp )
   unsigned char uuid[CDI_UUID_SIZE];
   int levelID;
   int nbyte;
-  double level;
 
   xassert ( zaxisptr );
 
@@ -1224,16 +1223,14 @@ static void zaxisPrintKernel ( zaxis_t * zaxisptr, int index, FILE * fp )
 	  fprintf(fp, "%*s", nbyte0, "");
 	  nbyte = nbyte0;
 	}
-      level = zaxisInqLevel(zaxisID, levelID);
-      nbyte += fprintf(fp, "%.9g ", level);
+      nbyte += fprintf(fp, "%.9g ", zaxisptr->vals[levelID]);
     }
   fprintf(fp, "\n");
 
   if ( zaxisptr->lbounds && zaxisptr->ubounds )
     {
-      double level1, level2;
+      nbyte0 = fprintf(fp, "lbounds   = ");
       nbyte = nbyte0;
-      nbyte0 = fprintf(fp, "bounds    = ");
       for ( levelID = 0; levelID < nlevels; levelID++ )
 	{
 	  if ( nbyte > 80 )
@@ -1242,27 +1239,35 @@ static void zaxisPrintKernel ( zaxis_t * zaxisptr, int index, FILE * fp )
 	      fprintf(fp, "%*s", nbyte0, "");
 	      nbyte = nbyte0;
 	    }
-	  level1 = zaxisInqLbound(zaxisID, levelID);
-	  level2 = zaxisInqUbound(zaxisID, levelID);
-	  nbyte += fprintf(fp, "%.9g-%.9g ", level1, level2);
+	  nbyte += fprintf(fp, "%.9g ", zaxisptr->lbounds[levelID]);
+	}
+      fprintf(fp, "\n");
+
+      nbyte0 = fprintf(fp, "ubounds   = ");
+      nbyte = nbyte0;
+      for ( levelID = 0; levelID < nlevels; levelID++ )
+	{
+	  if ( nbyte > 80 )
+	    {
+	      fprintf(fp, "\n");
+	      fprintf(fp, "%*s", nbyte0, "");
+	      nbyte = nbyte0;
+	    }
+	  nbyte += fprintf(fp, "%.9g ", zaxisptr->ubounds[levelID]);
 	}
       fprintf(fp, "\n");
     }
 
   if ( type == ZAXIS_HYBRID || type == ZAXIS_HYBRID_HALF )
     {
-      int i;
-      int vctsize;
-      const double *vct;
-
-      vctsize = zaxisptr->vctsize;
-      vct     = zaxisptr->vct;
+      int vctsize = zaxisptr->vctsize;
+      const double *vct = zaxisptr->vct;
       fprintf(fp, "vctsize   = %d\n", vctsize);
       if ( vctsize )
         {
           nbyte0 = fprintf(fp, "vct       = ");
           nbyte = nbyte0;
-          for ( i = 0; i < vctsize; i++ )
+          for ( int i = 0; i < vctsize; i++ )
             {
               if ( nbyte > 70 || i == vctsize/2 )
                 {
