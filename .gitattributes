@@ -30,6 +30,8 @@ config/mkinstalldirs -text
 /configure.ac -text
 doc/Doxyfile -text
 doc/README.pio_write -text
+doc/cdi_cman.pdf -text svneol=unset#application/pdf
+doc/cdi_fman.pdf -text svneol=unset#application/pdf
 doc/coding_standards/README -text
 doc/coding_standards/footer.c -text
 doc/coding_standards/ref-example.c -text
