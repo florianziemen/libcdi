@@ -4490,6 +4490,20 @@ static void cdfLazyGridDestroyOnce(void)
   */
 }
 
+static void
+cdfLazyGridDefArea(grid_t *grid, const double *area)
+{
+  struct cdfLazyGrid *cdfGrid = (struct cdfLazyGrid *)grid;
+  lock_lazy_load(cdfGrid);
+  if (grid->area == cdfPendingLoad)
+    grid->area = NULL;
+  cdfGrid->cellAreaGet.datasetNCId = -1;
+  cdfGrid->cellAreaGet.varNCId = -1;
+  cdfGrid->baseVtable->defArea(grid, area);
+  unlock_lazy_load(cdfGrid);
+}
+
+
 static const double *
 cdfLazyGridInqAreaPtr(grid_t *grid)
 {
@@ -4824,6 +4838,7 @@ cdfLazyGridInitOnce(void)
   cdfLazyGridVtable.copy = cdfLazyGridCopy;
   cdfLazyGridVtable.copyScalarFields = cdfLazyGridCopyScalarFields;
   cdfLazyGridVtable.copyArrayFields = cdfLazyGridCopyArrayFields;
+  cdfLazyGridVtable.defArea = cdfLazyGridDefArea;
   cdfLazyGridVtable.inqAreaPtr = cdfLazyGridInqAreaPtr;
   cdfLazyGridVtable.inqArea = cdfLazyGridInqArea;
   cdfLazyGridVtable.inqXValsPtr = cdfLazyGridInqXValsPtr;
