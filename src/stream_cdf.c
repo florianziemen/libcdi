@@ -4592,6 +4592,32 @@ cdfLazyGridInqXYVal(grid_t *grid, size_t index,
   return v;
 }
 
+static void
+cdfLazyGridDefXVals(grid_t *grid, const double *vals)
+{
+  struct cdfLazyGrid *cdfGrid = (struct cdfLazyGrid *)grid;
+  lock_lazy_load(cdfGrid);
+  if (grid->xvals == cdfPendingLoad)
+    grid->xvals = NULL;
+  cdfGrid->xValsGet.datasetNCId = -1;
+  cdfGrid->xValsGet.varNCId = -1;
+  cdfGrid->baseVtable->defXVals(grid, vals);
+  unlock_lazy_load(cdfGrid);
+}
+
+static void
+cdfLazyGridDefYVals(grid_t *grid, const double *vals)
+{
+  struct cdfLazyGrid *cdfGrid = (struct cdfLazyGrid *)grid;
+  lock_lazy_load(cdfGrid);
+  if (grid->yvals == cdfPendingLoad)
+    grid->yvals = NULL;
+  cdfGrid->yValsGet.datasetNCId = -1;
+  cdfGrid->yValsGet.varNCId = -1;
+  cdfGrid->baseVtable->defYVals(grid, vals);
+  unlock_lazy_load(cdfGrid);
+}
+
 static double
 cdfLazyGridInqXVal(grid_t *grid, int index)
 {
@@ -4622,6 +4648,12 @@ cdfLazyXYValGetCompare(struct cdfLazyGrid *lazyGridRef,
     *valsGetYRef = &lazyGridRef->yValsGet,
     *valsGetXTest = &lazyGridTest->xValsGet,
     *valsGetYTest = &lazyGridTest->yValsGet;
+  if (valsGetXRef->datasetNCId == -1
+      || valsGetXTest->datasetNCId == -1
+      || valsGetYRef->datasetNCId == -1
+      || valsGetYTest->datasetNCId == -1)
+    return lazyGridRef->baseVtable->compareXYFull(&lazyGridRef->base,
+                                                  &lazyGridTest->base);
   return valsGetXRef->datasetNCId != valsGetXTest->datasetNCId
     ||   valsGetXRef->varNCId     != valsGetXTest->varNCId
     ||   valsGetYRef->datasetNCId != valsGetYTest->datasetNCId
@@ -4798,6 +4830,8 @@ cdfLazyGridInitOnce(void)
   cdfLazyGridVtable.inqYValsPtr = cdfLazyGridInqYValsPtr;
   cdfLazyGridVtable.inqXVal = cdfLazyGridInqXVal;
   cdfLazyGridVtable.inqYVal = cdfLazyGridInqYVal;
+  cdfLazyGridVtable.defXVals = cdfLazyGridDefXVals;
+  cdfLazyGridVtable.defYVals = cdfLazyGridDefYVals;
   cdfLazyGridVtable.compareXYFull = cdfLazyCompareXYFull;
   cdfLazyGridVtable.compareXYAO = cdfLazyCompareXYAO;
   cdfLazyGridVtable.inqXBoundsPtr = cdfLazyGridInqXBoundsPtr;
@@ -4845,6 +4879,14 @@ cdfLazyGridInit(struct cdfLazyGrid *grid, int gridtype)
   grid->baseVtable = grid->base.vtable;
   grid->cellAreaGet.datasetNCId = -1;
   grid->cellAreaGet.varNCId = -1;
+  grid->xValsGet.datasetNCId = -1;
+  grid->xValsGet.varNCId = -1;
+  grid->yValsGet.datasetNCId = -1;
+  grid->yValsGet.varNCId = -1;
+  grid->xBoundsGet.datasetNCId = -1;
+  grid->xBoundsGet.varNCId = -1;
+  grid->yBoundsGet.datasetNCId = -1;
+  grid->yBoundsGet.varNCId = -1;
   grid->base.vtable = &cdfLazyGridVtable;
   init_lazy_load_lock(grid);
 }
