@@ -4715,6 +4715,32 @@ cdfLazyGridInqXBoundsPtr(grid_t *grid)
   return lazyGrid->baseVtable->inqXBoundsPtr(grid);
 }
 
+static void
+cdfLazyGridDefXBounds(grid_t *grid, const double *xbounds)
+{
+  struct cdfLazyGrid *cdfGrid = (struct cdfLazyGrid *)grid;
+  lock_lazy_load(cdfGrid);
+  if (grid->xbounds == cdfPendingLoad)
+    grid->xbounds = NULL;
+  cdfGrid->xBoundsGet.datasetNCId = -1;
+  cdfGrid->xBoundsGet.varNCId = -1;
+  cdfGrid->baseVtable->defXBounds(grid, xbounds);
+  unlock_lazy_load(cdfGrid);
+}
+
+static void
+cdfLazyGridDefYBounds(grid_t *grid, const double *ybounds)
+{
+  struct cdfLazyGrid *cdfGrid = (struct cdfLazyGrid *)grid;
+  lock_lazy_load(cdfGrid);
+  if (grid->ybounds == cdfPendingLoad)
+    grid->ybounds = NULL;
+  cdfGrid->yBoundsGet.datasetNCId = -1;
+  cdfGrid->yBoundsGet.varNCId = -1;
+  cdfGrid->baseVtable->defYBounds(grid, ybounds);
+  unlock_lazy_load(cdfGrid);
+}
+
 static const double *
 cdfLazyGridInqYBoundsPtr(grid_t *grid)
 {
@@ -4849,6 +4875,8 @@ cdfLazyGridInitOnce(void)
   cdfLazyGridVtable.defYVals = cdfLazyGridDefYVals;
   cdfLazyGridVtable.compareXYFull = cdfLazyCompareXYFull;
   cdfLazyGridVtable.compareXYAO = cdfLazyCompareXYAO;
+  cdfLazyGridVtable.defXBounds = cdfLazyGridDefXBounds;
+  cdfLazyGridVtable.defYBounds = cdfLazyGridDefYBounds;
   cdfLazyGridVtable.inqXBoundsPtr = cdfLazyGridInqXBoundsPtr;
   cdfLazyGridVtable.inqYBoundsPtr = cdfLazyGridInqYBoundsPtr;
   /* create inaccessible memory area, if possible, this serves as
