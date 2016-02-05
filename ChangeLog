@@ -3,6 +3,10 @@
 	* Version 1.7.1 released
         * using CGRIBEX library version 1.7.4
 
+2016-02-05  Uwe Schulzweida
+
+	* timeval2vtime: set vtime=rtime if timevalue=0 [Bug: #6496]
+
 2015-12-23  Uwe Schulzweida
 
 	* ZAXIS_HEIGHT: added support for units cm, dm and km

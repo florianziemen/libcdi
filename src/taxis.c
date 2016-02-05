@@ -1008,27 +1008,25 @@ void cdiEncodeTimevalue(int days, int secs, int timeunit, double *timevalue)
     }
 }
 
+
 void timeval2vtime(double timevalue, taxis_t *taxis, int *vdate, int *vtime)
 {
+  int rdate = taxis->rdate;
+  int rtime = taxis->rtime;
+
+  if ( DBL_IS_EQUAL(timevalue, 0.) )
+    {
+      *vdate = rdate;
+      *vtime = rtime;
+      return;
+    }
+
   int year, month, day, hour, minute, second;
-  int rdate, rtime;
-  int timeunit;
-  int calendar;
-  int julday, secofday, days, secs;
-
-  *vdate = 0;
-  *vtime = 0;
-
-  timeunit = (*taxis).unit;
-  calendar = (*taxis).calendar;
-
-  rdate  = (*taxis).rdate;
-  rtime  = (*taxis).rtime;
-
-  if ( rdate == 0 && rtime == 0 && DBL_IS_EQUAL(timevalue, 0.) ) return;
-
   cdiDecodeDate(rdate, &year, &month, &day);
   cdiDecodeTime(rtime, &hour, &minute, &second);
+
+  int timeunit = taxis->unit;
+  int calendar = taxis->calendar;
 
   if ( timeunit == TUNIT_MONTH && calendar == CALENDAR_360DAYS )
     {
@@ -1038,24 +1036,22 @@ void timeval2vtime(double timevalue, taxis_t *taxis, int *vdate, int *vtime)
 
   if ( timeunit == TUNIT_MONTH || timeunit == TUNIT_YEAR )
     {
-      int nmon, dpm;
-      double fmon;
-
       if ( timeunit == TUNIT_YEAR ) timevalue *= 12;
 
-      nmon = (int) timevalue;
-      fmon = timevalue - nmon;
+      int nmon = (int) timevalue;
+      double fmon = timevalue - nmon;
 
       month += nmon;
 
       while ( month > 12 ) { month -= 12; year++; }
       while ( month <  1 ) { month += 12; year--; }
 
-      dpm = days_per_month(calendar, year, month);
+      int dpm = days_per_month(calendar, year, month);
       timeunit = TUNIT_DAY;
       timevalue = fmon*dpm;
     }
 
+  int julday, secofday, days, secs;
   encode_caldaysec(calendar, year, month, day, hour, minute, second, &julday, &secofday);
 
   cdiDecodeTimevalue(timeunit, timevalue, &days, &secs);
