@@ -67,7 +67,7 @@ void instituteDefaultEntries ( void )
     = { ECMWF   = institutDef( 98,   0, "ECMWF",     "European Centre for Medium-Range Weather Forecasts"),
         MPIMET  = institutDef( 98, 232, "MPIMET",    "Max-Planck-Institute for Meteorology"),
         institutDef( 98, 255, "MPIMET",    "Max-Planck-Institute for Meteorology"),
-        institutDef( 98, 232, "MPIMET",    "Max-Planck Institute for Meteorology"),
+        institutDef( 98, 232, "MPIMET",    "Max Planck Institute for Meteorology"),
         institutDef( 78,   0, "DWD",       "Deutscher Wetterdienst"),
         institutDef( 78, 255, "DWD",       "Deutscher Wetterdienst"),
         MCH     = institutDef(215, 255, "MCH",       "MeteoSwiss"),
