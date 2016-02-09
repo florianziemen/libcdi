@@ -218,7 +218,7 @@ char *cdiFallbackIterator_inqTime(CdiIterator *super, CdiTimeType timeType)
   //retrieve the time information
   int taxisId = vlistInqTaxis(me->vlistId);
   int date = 0, time = 0;
-  switch(timeType)
+  switch((int)timeType)
     {
       case kCdiTimeType_referenceTime:
         date = taxisInqRdate(taxisId);
