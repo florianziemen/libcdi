@@ -315,7 +315,7 @@ int cdiFallbackIterator_zaxisUuid(CdiIterator *super, int *outVgridNumber, int *
 
 int cdiFallbackIterator_inqTile(CdiIterator *super, int *outTileIndex, int *outTileAttribute)
 {
-  CdiFallbackIterator *me = (CdiFallbackIterator*)super;
+  CdiFallbackIterator *me = (CdiFallbackIterator*)(void *)super;
 #ifndef __cplusplus
   if(!outTileIndex) outTileIndex = &(int){0};
   if(!outTileAttribute) outTileAttribute = &(int){0};
@@ -341,7 +341,7 @@ int cdiFallbackIterator_inqTile(CdiIterator *super, int *outTileIndex, int *outT
 
 int cdiFallbackIterator_inqTileCount(CdiIterator *super, int *outTileCount, int *outTileAttributeCount)
 {
-  CdiFallbackIterator *me = (CdiFallbackIterator*)super;
+  CdiFallbackIterator *me = (CdiFallbackIterator*)(void *)super;
 #ifndef __cplusplus
   if(!outTileCount) outTileCount = &(int){0};
   if(!outTileAttributeCount) outTileAttributeCount = &(int){0};
