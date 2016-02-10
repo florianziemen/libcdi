@@ -2010,18 +2010,20 @@ static
 void grid_check_cyclic(grid_t *gridptr)
 {
   gridptr->isCyclic = FALSE;
-
-  int xsize = gridptr->xsize,
-    ysize = gridptr->ysize;
+  enum { numVertices = 4 };
+  size_t xsize = gridptr->xsize >= 0 ? (size_t)gridptr->xsize : 0,
+    ysize = gridptr->ysize >= 0 ? (size_t)gridptr->ysize : 0;
   const double *xvals = gridptr->vtable->inqXValsPtr(gridptr),
-    *xbounds = gridptr->vtable->inqXBoundsPtr(gridptr);
+    (*xbounds)[numVertices]
+    = (const double (*)[numVertices])gridptr->vtable->inqXBoundsPtr(gridptr);
 
   if ( gridptr->type == GRID_GAUSSIAN || gridptr->type == GRID_LONLAT )
     {
       if ( xvals && xsize > 1 )
         {
           double xinc = xvals[1] - xvals[0];
-          if ( IS_EQUAL(xinc, 0) ) xinc = (xvals[xsize-1] - xvals[0])/(xsize-1);
+          if ( IS_EQUAL(xinc, 0) )
+            xinc = (xvals[xsize-1] - xvals[0])/(double)(xsize-1);
 
           double x0 = 2*xvals[xsize-1]-xvals[xsize-2]-360;
 
@@ -2033,10 +2035,10 @@ void grid_check_cyclic(grid_t *gridptr)
     {
       if ( xvals && xsize > 1 )
         {
-          long nc = 0;
-          for ( int j = 0; j < ysize; ++j )
+          size_t nc = 0;
+          for ( size_t j = 0; j < ysize; ++j )
             {
-              long i1 = j*xsize,
+              size_t i1 = j*xsize,
                 i2 = j*xsize+1,
                 in = j*xsize+(xsize-1);
               double val1 = xvals[i1],
@@ -2055,23 +2057,22 @@ void grid_check_cyclic(grid_t *gridptr)
 
               nc += fabs(x0-val1) < 0.5*xinc;
             }
-          gridptr->isCyclic = nc > 0.5*ysize ? TRUE : FALSE;
+          gridptr->isCyclic = nc > ysize/2 ? TRUE : FALSE;
         }
 
       if ( xbounds && xsize > 1 )
 	{
-          gridptr->isCyclic = TRUE;
-	  for ( int j = 0; j < ysize; ++j )
+          short isCyclic = TRUE;
+	  for ( size_t j = 0; j < ysize; ++j )
 	    {
-	      long i1 = j*xsize*4,
-                i2 = j*xsize*4+(xsize-1)*4;
-	      long nc = 0;
-	      for (unsigned k1 = 0; k1 < 4; ++k1 )
+	      size_t i1 = j*xsize,
+                i2 = j*xsize+(xsize-1);
+	      for (size_t k1 = 0; k1 < numVertices; ++k1 )
 		{
-		  double val1 = xbounds[i1+k1];
-		  for (unsigned k2 = 0; k2 < 4; ++k2 )
+		  double val1 = xbounds[i1][k1];
+		  for (size_t k2 = 0; k2 < numVertices; ++k2 )
 		    {
-		      double val2 = xbounds[i2+k2];
+		      double val2 = xbounds[i2][k2];
 
 		      if ( val1 <    1 && val2 > 300 ) val1 += 360;
 		      if ( val2 <    1 && val1 > 300 ) val2 += 360;
@@ -2080,19 +2081,16 @@ void grid_check_cyclic(grid_t *gridptr)
                       if ( fabs(val2-val1) > 180 ) val1 += 360;
 
 		      if ( fabs(val1-val2) < 0.001 )
-			{
-			  nc++;
-			  break;
-			}
+                        goto foundCloseVertices;
 		    }
 		}
-
-	      if ( nc < 1 )
-		{
-		  gridptr->isCyclic = FALSE;
-		  break;
-		}
+              /* all vertices more than 0.001 degrees apart */
+              isCyclic = FALSE;
+              break;
+              foundCloseVertices:
+              ;
 	    }
+          gridptr->isCyclic = isCyclic;
 	}
     }
 }
