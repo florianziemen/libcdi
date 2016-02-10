@@ -36,7 +36,6 @@
 #include "vlist.h"
 
 //#define PROJECTION_TEST
-extern int CDI_cmor_mode;
 
 #undef  UNDEFID
 #define UNDEFID  CDI_UNDEFID
@@ -4908,6 +4907,12 @@ cdfLazyGridInitOnce(void)
 #endif
 }
 
+static void
+cdfBaseGridInit(grid_t *grid, int gridtype)
+{
+  grid_init(grid);
+  cdiGridTypeInit(grid, gridtype, 0);
+}
 
 static void
 cdfLazyGridInit(struct cdfLazyGrid *grid, int gridtype)
@@ -4917,8 +4922,7 @@ cdfLazyGridInit(struct cdfLazyGrid *grid, int gridtype)
 #else
   if (cdfLazyInitialized) ; else cdfLazyGridInitOnce();
 #endif
-  grid_init(&grid->base);
-  cdiGridTypeInit(&grid->base, gridtype, 0);
+  cdfBaseGridInit(&grid->base, gridtype);
   grid->baseVtable = grid->base.vtable;
   grid->cellAreaGet.datasetNCId = -1;
   grid->cellAreaGet.varNCId = -1;
@@ -4942,6 +4946,16 @@ cdfLazyGridRenew(struct cdfLazyGrid *restrict *restrict gridpptr, int gridtype)
     *gridpptr = grid = (struct cdfLazyGrid *)Malloc(sizeof (*grid));
   cdfLazyGridInit(grid, gridtype);
 }
+
+static void
+cdfBaseGridRenew(struct cdfLazyGrid *restrict *restrict gridpptr, int gridtype)
+{
+  struct cdfLazyGrid *restrict grid = *gridpptr;
+  if (!grid)
+    *gridpptr = grid = (struct cdfLazyGrid *)Malloc(sizeof (grid_t));
+  cdfBaseGridInit((grid_t*)grid, gridtype);
+}
+
 
 /* define all input grids */
 static
@@ -5031,8 +5045,16 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 	  if ( ncvars[ncvarid].gridtype == UNDEFID || ncvars[ncvarid].gridtype == GRID_GENERIC )
 	    if ( xdimid != UNDEFID && xdimid == ydimid && nydims == 0 ) ncvars[ncvarid].gridtype = GRID_UNSTRUCTURED;
 
-          cdfLazyGridRenew(&lazyGrid, ncvars[ncvarid].gridtype);
-          cdfLazyGridRenew(&lazyProj, GRID_PROJECTION);
+          if (CDI_netcdf_lazy_grid_load)
+            {
+              cdfLazyGridRenew(&lazyGrid, ncvars[ncvarid].gridtype);
+              cdfLazyGridRenew(&lazyProj, GRID_PROJECTION);
+            }
+          else
+            {
+              cdfBaseGridRenew(&lazyGrid, ncvars[ncvarid].gridtype);
+              cdfBaseGridRenew(&lazyProj, GRID_PROJECTION);
+            }
 
 	  grid->prec  = DATATYPE_FLT64;
 	  grid->trunc = ncvars[ncvarid].truncation;
@@ -5141,18 +5163,33 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
                     }
 
 		  if ( ncvars[xvarid].xtype == NC_FLOAT ) grid->prec = DATATYPE_FLT32;
-                  lazyGrid->xValsGet = (struct xyValGet){
-                    .scalefactor = ncvars[xvarid].scalefactor,
-                    .addoffset = ncvars[xvarid].addoffset,
-                    .start = { start[0], start[1], start[2] },
-                    .count = { count[0], count[1], count[2] },
-                    .size = size,
-                    .datasetNCId = ncvars[xvarid].ncid,
-                    .varNCId = xvarid,
-                    .ndims = (short)ndims,
-                  };
-                  grid->xvals = cdfPendingLoad;
-
+                  if (CDI_netcdf_lazy_grid_load)
+                    {
+                      lazyGrid->xValsGet = (struct xyValGet){
+                        .scalefactor = ncvars[xvarid].scalefactor,
+                        .addoffset = ncvars[xvarid].addoffset,
+                        .start = { start[0], start[1], start[2] },
+                        .count = { count[0], count[1], count[2] },
+                        .size = size,
+                        .datasetNCId = ncvars[xvarid].ncid,
+                        .varNCId = xvarid,
+                        .ndims = (short)ndims,
+                      };
+                      grid->xvals = cdfPendingLoad;
+                    }
+                  else
+                    {
+                      grid->xvals = (double *) Malloc(size*sizeof(double));
+                      if ( ltgrid )
+                        cdf_get_vara_double(ncvars[xvarid].ncid, xvarid,
+                                            start, count, grid->xvals);
+                      else
+                        cdf_get_var_double(ncvars[xvarid].ncid, xvarid,
+                                           grid->xvals);
+                      scale_add(size, grid->xvals,
+                                ncvars[xvarid].addoffset,
+                                ncvars[xvarid].scalefactor);
+                    }
 		  strcpy(grid->xname, ncvars[xvarid].name);
 		  strcpy(grid->xlongname, ncvars[xvarid].longname);
 		  strcpy(grid->xunits, ncvars[xvarid].units);
@@ -5214,9 +5251,10 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 		  if ( ncvars[yvarid].xtype == NC_FLOAT ) grid->prec = DATATYPE_FLT32;
                   /* see below for when it's impossible to operate
                    * without y values */
-                  if ( (ncvars[ncvarid].gridtype == UNDEFID ||
-                        ncvars[ncvarid].gridtype == GRID_GENERIC)
-                       && islat && (islon || xsize == 0) )
+                  if ( !CDI_netcdf_lazy_grid_load
+                       || ((ncvars[ncvarid].gridtype == UNDEFID ||
+                            ncvars[ncvarid].gridtype == GRID_GENERIC)
+                           && islat && (islon || xsize == 0)) )
                     {
                       grid->yvals = (double *) Malloc(size*sizeof(double));
 
@@ -5311,11 +5349,23 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 			  {
 			    size_t nvertex = ncdims[ncvars[ncvars[xvarid].bounds].dimids[nbdims-1]].len;
 			    grid->nvertex = (int)nvertex;
-                            lazyGrid->xBoundsGet.datasetNCId
-                              = ncvars[xvarid].ncid;
-                            lazyGrid->xBoundsGet.varNCId
-                              = ncvars[xvarid].bounds;
-                            grid->xbounds = cdfPendingLoad;
+                            if (CDI_netcdf_lazy_grid_load)
+                              {
+                                lazyGrid->xBoundsGet.datasetNCId
+                                  = ncvars[xvarid].ncid;
+                                lazyGrid->xBoundsGet.varNCId
+                                  = ncvars[xvarid].bounds;
+                                grid->xbounds = cdfPendingLoad;
+                              }
+                            else
+                              {
+                                grid->xbounds
+                                  = (double *)Malloc(nvertex * size
+                                                     * sizeof(double));
+                                cdf_get_var_double(ncvars[xvarid].ncid,
+                                                   ncvars[xvarid].bounds,
+                                                   grid->xbounds);
+                              }
 			  }
 		      }
 		  }
@@ -5332,21 +5382,53 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 			      Warning("nvertex problem! nvertex x %d, nvertex y %d",
 				      grid->nvertex, (int) nvertex);
 			    */
-                            lazyGrid->yBoundsGet.datasetNCId
-                              = ncvars[yvarid].ncid;
-                            lazyGrid->yBoundsGet.varNCId
-                              = ncvars[yvarid].bounds;
-                            grid->ybounds = cdfPendingLoad;
+                            if (CDI_netcdf_lazy_grid_load)
+                              {
+                                lazyGrid->yBoundsGet.datasetNCId
+                                  = ncvars[yvarid].ncid;
+                                lazyGrid->yBoundsGet.varNCId
+                                  = ncvars[yvarid].bounds;
+                                grid->ybounds = cdfPendingLoad;
+                              }
+                            else
+                              {
+                                int vid
+                                  = ncvars[ncvars[yvarid].bounds].dimids[nbdims-1];
+                                size_t nvertex = ncdims[vid].len;
+                                /*
+                                  if ( nvertex != grid->nvertex )
+                                  Warning("nvertex problem! nvertex x %d, nvertex y %d",
+                                  grid->nvertex, (int) nvertex);
+                                */
+                                grid->ybounds
+                                  = (double *)Malloc(nvertex * size
+                                                     * sizeof(double));
+                                cdf_get_var_double(ncvars[yvarid].ncid,
+                                                   ncvars[yvarid].bounds,
+                                                   grid->ybounds);
+                              }
 			  }
 		      }
 		  }
 
 		if ( ncvars[ncvarid].cellarea != UNDEFID )
-		  {
-                    grid->area = cdfPendingLoad;
-                    lazyGrid->cellAreaGet.datasetNCId = ncvars[ncvarid].ncid;
-                    lazyGrid->cellAreaGet.varNCId = ncvars[ncvarid].cellarea;
-		  }
+                  {
+                    if (CDI_netcdf_lazy_grid_load)
+                      {
+                        grid->area = cdfPendingLoad;
+                        lazyGrid->cellAreaGet.datasetNCId
+                          = ncvars[ncvarid].ncid;
+                        lazyGrid->cellAreaGet.varNCId
+                          = ncvars[ncvarid].cellarea;
+                      }
+                    else
+                      {
+                        grid->area = (double *) Malloc(size*sizeof(double));
+                        cdf_get_var_double(ncvars[ncvarid].ncid,
+                                           ncvars[ncvarid].cellarea,
+                                           grid->area);
+                      }
+                  }
 
 		break;
 	      }
@@ -5655,13 +5737,13 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
     }
   if (lazyGrid)
     {
-      cdfLazyGridDestroy(lazyGrid);
+      if (CDI_netcdf_lazy_grid_load) cdfLazyGridDestroy(lazyGrid);
       grid_free(grid);
       Free(grid);
     }
   if (lazyProj)
     {
-      cdfLazyGridDestroy(lazyProj);
+      if (CDI_netcdf_lazy_grid_load) cdfLazyGridDestroy(lazyProj);
       grid_free(proj);
       Free(proj);
     }
