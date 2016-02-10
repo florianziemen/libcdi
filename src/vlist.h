@@ -116,8 +116,10 @@ var_t;
 
 typedef struct
 {
-  unsigned    immutable : 1;    //set when a vlist is passed to streamDefVlist() to safeguard against modifications of the wrong vlist object
-  unsigned    internal : 1;     //set if this vlist has been created by CDI itself, and must not be destroyed by the user, consequently
+  //set when a vlist is passed to streamDefVlist() to safeguard against modifications of the wrong vlist object
+  bool    immutable;
+  //set if this vlist has been created by CDI itself, and must not be destroyed by the user, consequently
+  bool    internal;
   int         self;
   int         nvars;        /* number of variables                */
   int         ngrids;
