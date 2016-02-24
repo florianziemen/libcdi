@@ -89,6 +89,7 @@ typedef struct {
   int      zvarid;
   int      tvarid;
   int      psvarid;
+  int      p0varid;
   int      ncoordvars;
   int      coordvarids[MAX_COORDVARS];
   int      nauxvars;
@@ -2995,6 +2996,7 @@ void init_ncvars(long nvars, ncvar_t *ncvars)
       ncvars[ncvarid].zvarid          = UNDEFID;
       ncvars[ncvarid].tvarid          = UNDEFID;
       ncvars[ncvarid].psvarid         = UNDEFID;
+      ncvars[ncvarid].p0varid         = UNDEFID;
       ncvars[ncvarid].ncoordvars      = 0;
       for ( int i = 0; i < MAX_COORDVARS; ++i )
         ncvars[ncvarid].coordvarids[i]  = UNDEFID;
@@ -3210,15 +3212,19 @@ bool unitsIsPressure(const char *units)
 }
 
 static
-void scan_hybrid_formula(int ncid, int ncfvarid, int *apvarid, int *bvarid, int *psvarid)
+int scan_hybrid_formula(int ncid, int ncfvarid, int *apvarid, int *bvarid, int *psvarid, int *avarid, int *p0varid)
 {
+  int status = 0;
   *apvarid = -1;
   *bvarid  = -1;
   *psvarid = -1;
+  *avarid  = -1;
+  *p0varid = -1;
   const int attstringlen = 8192; char attstring[8192];
   cdfGetAttText(ncid, ncfvarid, "formula", attstringlen, attstring);
   if ( strcmp(attstring, "p = ap + b*ps") == 0 )
     {
+      status = 1;
       int lstop = FALSE;
       int dimvarid;
       cdfGetAttText(ncid, ncfvarid, "formula_terms", attstringlen, attstring);
@@ -3255,6 +3261,48 @@ void scan_hybrid_formula(int ncid, int ncfvarid, int *apvarid, int *bvarid, int 
           if ( lstop ) break;
         }
     }
+  else if ( strcmp(attstring, "xxxp = a*p0 + b*ps") == 0 )
+    {
+      status = 2;
+      int lstop = FALSE;
+      int dimvarid;
+      cdfGetAttText(ncid, ncfvarid, "formula_terms", attstringlen, attstring);
+      char *pstring = attstring;
+
+      for ( int i = 0; i < 4; i++ )
+        {
+          while ( isspace((int) *pstring) ) pstring++;
+          if ( *pstring == 0 ) break;
+          char *tagname = pstring;
+          while ( !isspace((int) *pstring) && *pstring != 0 ) pstring++;
+          if ( *pstring == 0 ) lstop = TRUE;
+          *pstring++ = 0;
+
+          while ( isspace((int) *pstring) ) pstring++;
+          if ( *pstring == 0 ) break;
+          char *varname = pstring;
+          while ( !isspace((int) *pstring) && *pstring != 0 ) pstring++;
+          if ( *pstring == 0 ) lstop = TRUE;
+          *pstring++ = 0;
+
+          int status = nc_inq_varid(ncid, varname, &dimvarid);
+          if ( status == NC_NOERR )
+            {
+              if      ( strcmp(tagname, "a:")  == 0 ) *avarid  = dimvarid;
+              else if ( strcmp(tagname, "b:")  == 0 ) *bvarid  = dimvarid;
+              else if ( strcmp(tagname, "ps:") == 0 ) *psvarid = dimvarid;
+              else if ( strcmp(tagname, "p0:") == 0 ) *p0varid = dimvarid;
+            }
+          else if ( strcmp(tagname, "ps:") != 0 )
+            {
+              Warning("%s - %s", nc_strerror(status), varname);
+            }
+
+          if ( lstop ) break;
+        }
+    }
+
+  return status;
 }
 
 static
@@ -3273,28 +3321,37 @@ bool isHybridSigmaPressureCoordinate(int ncid, int ncvarid, ncvar_t *ncvars, con
       int dimid = ncvar->dimids[0];
       size_t dimlen = ncdims[dimid].len;
 
-      int apvarid1 = -1, bvarid1 = -1, psvarid1 = -1;
+      int ret;
+      int apvarid1 = -1, bvarid1 = -1, psvarid1 = -1, avarid1 = -1, p0varid1 = -1;
       if ( ncvars[ncfvarid].lformula && ncvars[ncfvarid].lformulaterms )
-        scan_hybrid_formula(ncid, ncfvarid, &apvarid1, &bvarid1, &psvarid1);
+        ret = scan_hybrid_formula(ncid, ncfvarid, &apvarid1, &bvarid1, &psvarid1, &avarid1, &p0varid1);
       if ( apvarid1 != -1 ) ncvars[apvarid1].isvar = FALSE;
       if ( bvarid1  != -1 ) ncvars[bvarid1].isvar  = FALSE;
       if ( psvarid1 != -1 ) ncvar->psvarid = psvarid1;
+      if ( avarid1  != -1 ) ncvars[avarid1].isvar = FALSE;
+      if ( p0varid1 != -1 ) ncvar->p0varid = p0varid1;
 
       if ( ncvar->bounds != UNDEFID && ncvars[ncvar->bounds].lformula && ncvars[ncvar->bounds].lformulaterms )
         {
           ncfvarid = ncvar->bounds;
-          int apvarid2 = -1, bvarid2 = -1, psvarid2 = -1;
+          int apvarid2 = -1, bvarid2 = -1, psvarid2 = -1, avarid2 = -1, p0varid2 = -1;
+          ret = 0;
           if ( ncvars[ncfvarid].lformula && ncvars[ncfvarid].lformulaterms )
-            scan_hybrid_formula(ncid, ncfvarid, &apvarid2, &bvarid2, &psvarid2);
-          if ( apvarid2 != -1 && bvarid2 != -1 )
+            ret = scan_hybrid_formula(ncid, ncfvarid, &apvarid2, &bvarid2, &psvarid2, &avarid2, &p0varid2);
+          if ( ret == 1 ) avarid2 = apvarid2;
+          if ( avarid2 != -1 && bvarid2 != -1 )
             {
-              ncvars[apvarid2].isvar = FALSE;
+              ncvars[avarid2].isvar = FALSE;
               ncvars[bvarid2].isvar  = FALSE;
 
-              if ( dimid == ncvars[apvarid2].dimids[0] && ncdims[ncvars[apvarid2].dimids[1]].len == 2 )
+              if ( dimid == ncvars[avarid2].dimids[0] && ncdims[ncvars[avarid2].dimids[1]].len == 2 )
                 {
+                  double px = 1;
+                  if ( ret == 2 && p0varid1 == p0varid2 )
+                    cdf_get_var_double(ncid, p0varid2, &px);
+
                   double abuf[dimlen*2], bbuf[dimlen*2];
-                  cdf_get_var_double(ncid, apvarid2, abuf);
+                  cdf_get_var_double(ncid, avarid2, abuf);
                   cdf_get_var_double(ncid, bvarid2, bbuf);
                   /*
                   for ( int i = 0; i < dimlen; ++i )
@@ -3309,6 +3366,9 @@ bool isHybridSigmaPressureCoordinate(int ncid, int ncvarid, ncvar_t *ncvars, con
                     }
                   vct[dimlen]     = abuf[dimlen*2-1];
                   vct[dimlen*2+1] = bbuf[dimlen*2-1];
+
+                  if ( ret == 2 && IS_NOT_EQUAL(px, 1) )
+                    for ( size_t i = 0; i < dimlen+1; ++i ) vct[i] *= px;
 
                   ncvar->vct = vct;
                   ncvar->vctsize = vctsize;
