@@ -444,12 +444,14 @@ module mo_cdi
   public :: gridInqXvals
   public :: gridDefYvals
   public :: gridInqYvals
+  public :: gridDefXdimname
   public :: gridDefXname
   public :: gridInqXname
   public :: gridDefXlongname
   public :: gridInqXlongname
   public :: gridDefXunits
   public :: gridInqXunits
+  public :: gridDefYdimname
   public :: gridDefYname
   public :: gridInqYname
   public :: gridDefYlongname
@@ -4901,6 +4903,26 @@ contains
     end if
   end function gridNamePtr
 
+  subroutine gridDefXdimname(gridID_dummy, xdimname_dummy)
+    integer(c_int), value :: gridID_dummy
+    character(kind = c_char, len = *), intent(in) :: xdimname_dummy
+    character(kind = c_char) :: xdimname_temp(len(xdimname_dummy) + 1)
+    integer :: xdimname_i
+    interface
+      subroutine lib_gridDefXdimname(gridID_dummy, xdimname_dummy) bind(c, name&
+      & = 'gridDefXdimname')
+        import c_char, c_int
+        integer(c_int), value :: gridID_dummy
+        character(kind = c_char) :: xdimname_dummy(*)
+      end subroutine lib_gridDefXdimname
+    end interface
+    do xdimname_i = 1, len(xdimname_dummy)
+      xdimname_temp(xdimname_i) = xdimname_dummy(xdimname_i:xdimname_i)
+    end do
+    xdimname_temp(len(xdimname_dummy) + 1) = c_null_char
+    call lib_gridDefXdimname(gridID_dummy, xdimname_temp)
+  end subroutine gridDefXdimname
+
   subroutine gridDefXname(gridID_dummy, xname_dummy)
     integer(c_int), value :: gridID_dummy
     character(kind = c_char, len = *), intent(in) :: xname_dummy
@@ -5053,6 +5075,26 @@ contains
       xunits_dummy(xunits_i:xunits_i) = ' '
     end do
   end subroutine gridInqXunits
+
+  subroutine gridDefYdimname(gridID_dummy, ydimname_dummy)
+    integer(c_int), value :: gridID_dummy
+    character(kind = c_char, len = *), intent(in) :: ydimname_dummy
+    character(kind = c_char) :: ydimname_temp(len(ydimname_dummy) + 1)
+    integer :: ydimname_i
+    interface
+      subroutine lib_gridDefYdimname(gridID_dummy, ydimname_dummy) bind(c, name&
+      & = 'gridDefYdimname')
+        import c_char, c_int
+        integer(c_int), value :: gridID_dummy
+        character(kind = c_char) :: ydimname_dummy(*)
+      end subroutine lib_gridDefYdimname
+    end interface
+    do ydimname_i = 1, len(ydimname_dummy)
+      ydimname_temp(ydimname_i) = ydimname_dummy(ydimname_i:ydimname_i)
+    end do
+    ydimname_temp(len(ydimname_dummy) + 1) = c_null_char
+    call lib_gridDefYdimname(gridID_dummy, ydimname_temp)
+  end subroutine gridDefYdimname
 
   subroutine gridDefYname(gridID_dummy, yname_dummy)
     integer(c_int), value :: gridID_dummy

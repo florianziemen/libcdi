@@ -98,6 +98,8 @@ struct grid_t {
   short   hasdims;
   const char *xstdname;
   const char *ystdname;
+  char    xdimname[CDI_MAX_NAME];
+  char    ydimname[CDI_MAX_NAME];
   char    xname[CDI_MAX_NAME];
   char    yname[CDI_MAX_NAME];
   char    xlongname[CDI_MAX_NAME];

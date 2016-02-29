@@ -152,6 +152,8 @@ void grid_init(grid_t *gridptr)
   gridptr->angle        = 0.0;
   gridptr->lcomplex     = 0;
   gridptr->hasdims      = TRUE;
+  gridptr->xdimname[0]  = 0;
+  gridptr->ydimname[0]  = 0;
   gridptr->xname[0]     = 0;
   gridptr->yname[0]     = 0;
   gridptr->xlongname[0] = 0;
@@ -239,51 +241,15 @@ unsigned cdiGridCount(void)
 }
 
 static inline void
-gridSetXname(grid_t *gridptr, const char *xname)
+gridSetName(char *gridstrname, const char *name)
 {
-  strncpy(gridptr->xname, xname, CDI_MAX_NAME);
-  gridptr->xname[CDI_MAX_NAME - 1] = 0;
-}
-
-static inline void
-gridSetXlongname(grid_t *gridptr, const char *xlongname)
-{
-  strncpy(gridptr->xlongname, xlongname, CDI_MAX_NAME);
-  gridptr->xlongname[CDI_MAX_NAME - 1] = 0;
-}
-
-static inline void
-gridSetXunits(grid_t *gridptr, const char *xunits)
-{
-  strncpy(gridptr->xunits, xunits, CDI_MAX_NAME);
-  gridptr->xunits[CDI_MAX_NAME - 1] = 0;
-}
-
-static inline void
-gridSetYname(grid_t *gridptr, const char *yname)
-{
-  strncpy(gridptr->yname, yname, CDI_MAX_NAME);
-  gridptr->yname[CDI_MAX_NAME - 1] = 0;
-}
-
-static inline void
-gridSetYlongname(grid_t *gridptr, const char *ylongname)
-{
-  strncpy(gridptr->ylongname, ylongname, CDI_MAX_NAME);
-  gridptr->ylongname[CDI_MAX_NAME - 1] = 0;
-}
-
-static inline void
-gridSetYunits(grid_t *gridptr, const char *yunits)
-{
-  strncpy(gridptr->yunits, yunits, CDI_MAX_NAME);
-  gridptr->yunits[CDI_MAX_NAME - 1] = 0;
+  strncpy(gridstrname, name, CDI_MAX_NAME);
+  gridstrname[CDI_MAX_NAME - 1] = 0;
 }
 
 void
 cdiGridTypeInit(grid_t *gridptr, int gridtype, int size)
 {
-
   gridptr->type = gridtype;
   gridptr->size = size;
 
@@ -299,16 +265,16 @@ cdiGridTypeInit(grid_t *gridptr, int gridtype, int size)
       {
         if ( gridtype == GRID_TRAJECTORY )
           {
-            gridSetXname(gridptr, "tlon");
-            gridSetYname(gridptr, "tlat");
+            gridSetName(gridptr->xname, "tlon");
+            gridSetName(gridptr->yname, "tlat");
           }
         else
           {
-            gridSetXname(gridptr, "lon");
-            gridSetYname(gridptr, "lat");
+            gridSetName(gridptr->xname, "lon");
+            gridSetName(gridptr->yname, "lat");
           }
-        gridSetXlongname(gridptr, "longitude");
-        gridSetYlongname(gridptr, "latitude");
+        gridSetName(gridptr->xlongname, "longitude");
+        gridSetName(gridptr->ylongname, "latitude");
 
         /*
         if ( gridtype == GRID_CURVILINEAR )
@@ -323,8 +289,8 @@ cdiGridTypeInit(grid_t *gridptr, int gridtype, int size)
           {
             gridptr->xstdname = xystdname_tab[grid_xystdname_latlon][0];
             gridptr->ystdname = xystdname_tab[grid_xystdname_latlon][1];
-            gridSetXunits(gridptr, "degrees_east");
-            gridSetYunits(gridptr, "degrees_north");
+            gridSetName(gridptr->xunits, "degrees_east");
+            gridSetName(gridptr->yunits, "degrees_north");
           }
 
         break;
@@ -334,20 +300,20 @@ cdiGridTypeInit(grid_t *gridptr, int gridtype, int size)
       /* Fall through */
     case GRID_GME:
       {
-        gridSetXname(gridptr, "lon");
-        gridSetYname(gridptr, "lat");
+        gridSetName(gridptr->xname, "lon");
+        gridSetName(gridptr->yname, "lat");
         gridptr->xstdname = xystdname_tab[grid_xystdname_latlon][0];
         gridptr->ystdname = xystdname_tab[grid_xystdname_latlon][1];
-        gridSetXunits(gridptr, "degrees_east");
-        gridSetYunits(gridptr, "degrees_north");
+        gridSetName(gridptr->xunits, "degrees_east");
+        gridSetName(gridptr->yunits, "degrees_north");
         break;
       }
     case GRID_GENERIC:
       {
 
         /* gridptr->xsize = size; */
-        gridSetXname(gridptr, "x");
-        gridSetYname(gridptr, "y");
+        gridSetName(gridptr->xname, "x");
+        gridSetName(gridptr->yname, "y");
         /*
         strcpy(gridptr->xstdname, "grid_longitude");
         strcpy(gridptr->ystdname, "grid_latitude");
@@ -362,12 +328,12 @@ cdiGridTypeInit(grid_t *gridptr, int gridtype, int size)
     case GRID_SINUSOIDAL:
     case GRID_LAEA:
       {
-        gridSetXname(gridptr, "x");
-        gridSetYname(gridptr, "y");
+        gridSetName(gridptr->xname, "x");
+        gridSetName(gridptr->yname, "y");
         gridptr->xstdname = xystdname_tab[grid_xystdname_projection][0];
         gridptr->ystdname = xystdname_tab[grid_xystdname_projection][1];
-        gridSetXunits(gridptr, "m");
-        gridSetYunits(gridptr, "m");
+        gridSetName(gridptr->xunits, "m");
+        gridSetName(gridptr->yunits, "m");
         break;
       }
     }
@@ -620,6 +586,30 @@ void gridName(int gridtype, char *gridname)
 }
 
 /*
+@Function  gridDefXdimname
+@Title     Define the dimension name of a X-axis
+
+@Prototype void gridDefXdimname(int gridID, const char *dimname)
+@Parameter
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  dimname  Dimension name of the X-axis.
+
+@Description
+The function @func{gridDefXdimname} defines the dimension name of a X-axis.
+
+@EndFunction
+*/
+void gridDefXdimname(int gridID, const char *xdimname)
+{
+  if ( xdimname && *xdimname )
+    {
+      grid_t *gridptr = gridID2Ptr(gridID);
+      gridSetName(gridptr->xdimname, xdimname);
+      gridMark4Update(gridID);
+    }
+}
+
+/*
 @Function  gridDefXname
 @Title     Define the name of a X-axis
 
@@ -638,11 +628,10 @@ void gridDefXname(int gridID, const char *xname)
   if ( xname && *xname )
     {
       grid_t *gridptr = gridID2Ptr(gridID);
-      gridSetXname(gridptr, xname);
+      gridSetName(gridptr->xname, xname);
       gridMark4Update(gridID);
     }
 }
-
 
 /*
 @Function  gridDefXlongname
@@ -663,7 +652,7 @@ void gridDefXlongname(int gridID, const char *xlongname)
   if ( xlongname )
     {
       grid_t *gridptr = gridID2Ptr(gridID);
-      gridSetXlongname(gridptr, xlongname);
+      gridSetName(gridptr->xlongname, xlongname);
       gridMark4Update(gridID);
     }
 }
@@ -687,7 +676,31 @@ void gridDefXunits(int gridID, const char *xunits)
   if ( xunits )
     {
       grid_t *gridptr = gridID2Ptr(gridID);
-      gridSetXunits(gridptr, xunits);
+      gridSetName(gridptr->xunits, xunits);
+      gridMark4Update(gridID);
+    }
+}
+
+/*
+@Function  gridDefYdimname
+@Title     Define the dimension name of a Y-axis
+
+@Prototype void gridDefYdimname(int gridID, const char *dimname)
+@Parameter
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  dimname  Dimension name of the Y-axis.
+
+@Description
+The function @func{gridDefYdimname} defines the dimension name of a Y-axis.
+
+@EndFunction
+*/
+void gridDefYdimname(int gridID, const char *ydimname)
+{
+  if ( ydimname && *ydimname )
+    {
+      grid_t *gridptr = gridID2Ptr(gridID);
+      gridSetName(gridptr->ydimname, ydimname);
       gridMark4Update(gridID);
     }
 }
@@ -711,7 +724,7 @@ void gridDefYname(int gridID, const char *yname)
   if ( yname && *yname )
     {
       grid_t *gridptr = gridID2Ptr(gridID);
-      gridSetYname(gridptr, yname);
+      gridSetName(gridptr->yname, yname);
       gridMark4Update(gridID);
     }
 }
@@ -735,7 +748,7 @@ void gridDefYlongname(int gridID, const char *ylongname)
   if ( ylongname )
     {
       grid_t *gridptr = gridID2Ptr(gridID);
-      gridSetYlongname(gridptr, ylongname);
+      gridSetName(gridptr->ylongname, ylongname);
       gridMark4Update(gridID);
     }
 }
@@ -759,7 +772,7 @@ void gridDefYunits(int gridID, const char *yunits)
   if ( yunits )
     {
       grid_t *gridptr = gridID2Ptr(gridID);
-      gridSetYunits(gridptr, yunits);
+      gridSetName(gridptr->yunits, yunits);
       gridMark4Update(gridID);
     }
 }

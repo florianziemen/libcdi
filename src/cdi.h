@@ -756,6 +756,9 @@ void    gridDefYvals(int gridID, const double yvals[]);
 /*      gridInqYvals: Get all values of a Y-axis */
 int     gridInqYvals(int gridID, double yvals[]);
 
+/*      gridDefXdimname: Define the dimension name of a X-axis */
+void    gridDefXdimname(int gridID, const char *xdimname);
+
 /*      gridDefXname: Define the name of a X-axis */
 void    gridDefXname(int gridID, const char *xname);
 
@@ -773,6 +776,9 @@ void    gridDefXunits(int gridID, const char *xunits);
 
 /*      gridInqXunits: Get the units of a X-axis */
 void    gridInqXunits(int gridID, char *xunits);
+
+/*      gridDefYdimname: Define the dimension name of a Y-axis */
+void    gridDefYdimname(int gridID, const char *ydimname);
 
 /*      gridDefYname: Define the name of a Y-axis */
 void    gridDefYname(int gridID, const char *yname);
