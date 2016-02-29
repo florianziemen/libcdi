@@ -516,7 +516,7 @@ void gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double y
     @Item  gridtype  The type of the grid, one of the set of predefined CDI grid types.
                      The valid CDI grid types are @func{GRID_GENERIC}, @func{GRID_GAUSSIAN},
                      @func{GRID_LONLAT}, @func{GRID_LCC}, @func{GRID_SPECTRAL},
-                     @func{GRID_GME}, @func{GRID_CURVILINEAR} and @func{GRID_UNSTRUCTURED} and.
+                     @func{GRID_GME}, @func{GRID_CURVILINEAR} and @func{GRID_UNSTRUCTURED}.
     @Item  size      Number of gridpoints.
 
 @Description

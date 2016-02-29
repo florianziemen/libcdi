@@ -539,6 +539,8 @@ int     vlistInqVarZaxis(int vlistID, int varID);
 int     vlistInqVarID(int vlistID, int code);
 
 void    vlistDefVarTsteptype(int vlistID, int varID, int tsteptype);
+
+/*      vlistInqVarTsteptype: Get the timestep type of a Variable */
 int     vlistInqVarTsteptype(int vlistID, int varID);
 
 void    vlistDefVarCompType(int vlistID, int varID, int comptype);

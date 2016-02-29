@@ -22,7 +22,8 @@ Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}}.
 Z-axis ID, from a previous call to {\htmlref{\tt zaxisCreate}{zaxisCreate}}.
 \item[{\tt tsteptype}]
 One of the set of predefined {\CDI} timestep types.
-                     The valid {\CDI} timestep types are {\tt TSTEP\_CONSTANT} and {\tt TSTEP\_INSTANT}.
+                     The valid {\CDI} timestep types are {\tt TSTEP\_CONSTANT}, {\tt TSTEP\_INSTANT},
+                     {\tt TSTEP\_ACCUM}, {\tt TSTEP\_AVG}, {\tt TSTEP\_MAX}, {\tt TSTEP\_MIN} and {\tt TSTEP\_SD}.
 
 \end{deflist}
 \end{minipage}
@@ -57,7 +58,7 @@ and add a variable with {\tt vlistDefVar}.
 \index{vlistInqVarGrid}
 \label{vlistInqVarGrid}
 
-The function {\tt vlistInqVarGrid} returns the grid ID of a variable.
+The function {\tt vlistInqVarGrid} returns the grid ID of a Variable.
 
 \subsubsection*{Usage}
 
@@ -77,7 +78,7 @@ Variable identifier.
 
 \subsubsection*{Result}
 
-{\tt vlistInqVarGrid} returns the grid ID of the variable.
+{\tt vlistInqVarGrid} returns the grid ID of the Variable.
 
 
 
@@ -106,6 +107,37 @@ Variable identifier.
 \subsubsection*{Result}
 
 {\tt vlistInqVarZaxis} returns the zaxis ID of the variable.
+
+
+
+\subsection{Get the timestep type of a Variable: {\tt vlistInqVarTsteptype}}
+\index{vlistInqVarTsteptype}
+\label{vlistInqVarTsteptype}
+
+The function {\tt vlistInqVarTsteptype} returns the timestep type of a Variable.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    int vlistInqVarTsteptype(int vlistID, int varID);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt vlistID\ }
+\item[{\tt vlistID}]
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}} or {\htmlref{\tt streamInqVlist}{streamInqVlist}}.
+\item[{\tt varID}]
+Variable identifier.
+
+\end{deflist}
+\end{minipage}
+
+\subsubsection*{Result}
+
+{\tt vlistInqVarTsteptype} returns the timestep type of the Variable,
+one of the set of predefined {\CDI} timestep types.
+The valid {\CDI} timestep types are {\tt TSTEP\_CONSTANT}, {\tt TSTEP\_INSTANT},
+{\tt TSTEP\_ACCUM}, {\tt TSTEP\_AVG}, {\tt TSTEP\_MAX}, {\tt TSTEP\_MIN} and {\tt TSTEP\_SD}.
 
 
 

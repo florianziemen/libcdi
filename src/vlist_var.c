@@ -17,7 +17,6 @@
 
 #if  defined  (HAVE_LIBGRIB_API)
 #  include "file.h"
-
 #  include <grib_api.h>
 #endif
 
@@ -172,7 +171,8 @@ int vlistDefVarTiles(int vlistID, int gridID, int zaxisID, int tsteptype, int ti
     @Item  gridID    Grid ID, from a previous call to @fref{gridCreate}.
     @Item  zaxisID   Z-axis ID, from a previous call to @fref{zaxisCreate}.
     @Item  tsteptype One of the set of predefined CDI timestep types.
-                     The valid CDI timestep types are @func{TSTEP_CONSTANT} and @func{TSTEP_INSTANT}.
+                     The valid CDI timestep types are @func{TSTEP_CONSTANT}, @func{TSTEP_INSTANT},
+                     @func{TSTEP_ACCUM}, @func{TSTEP_AVG}, @func{TSTEP_MAX}, @func{TSTEP_MIN} and @func{TSTEP_SD}.
 
 @Description
 The function @func{vlistDefVar} adds a new variable to vlistID.
@@ -304,10 +304,10 @@ void vlistInqVar(int vlistID, int varID, int *gridID, int *zaxisID, int *tstepty
     @Item  varID    Variable identifier.
 
 @Description
-The function @func{vlistInqVarGrid} returns the grid ID of a variable.
+The function @func{vlistInqVarGrid} returns the grid ID of a Variable.
 
 @Result
-@func{vlistInqVarGrid} returns the grid ID of the variable.
+@func{vlistInqVarGrid} returns the grid ID of the Variable.
 
 @EndFunction
 */
@@ -1231,7 +1231,26 @@ void vlistDefVarTsteptype(int vlistID, int varID, int tsteptype)
     }
 }
 
+/*
+@Function  vlistInqVarTsteptype
+@Title     Get the timestep type of a Variable
 
+@Prototype int vlistInqVarTsteptype(int vlistID, int varID)
+@Parameter
+    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate} or @fref{streamInqVlist}.
+    @Item  varID    Variable identifier.
+
+@Description
+The function @func{vlistInqVarTsteptype} returns the timestep type of a Variable.
+
+@Result
+@func{vlistInqVarTsteptype} returns the timestep type of the Variable,
+one of the set of predefined CDI timestep types.
+The valid CDI timestep types are @func{TSTEP_CONSTANT}, @func{TSTEP_INSTANT},
+@func{TSTEP_ACCUM}, @func{TSTEP_AVG}, @func{TSTEP_MAX}, @func{TSTEP_MIN} and @func{TSTEP_SD}.
+
+@EndFunction
+*/
 int vlistInqVarTsteptype(int vlistID, int varID)
 {
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
