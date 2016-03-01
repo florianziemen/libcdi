@@ -1,3 +1,11 @@
+2016-06-??  Uwe Schulzweida
+
+	* Version 1.7.2 released
+
+2016-03-01  Uwe Schulzweida
+
+	* NetCDF: added support for dimension name of x and y axis
+
 2016-02-19  Uwe Schulzweida
 
 	* Version 1.7.1 released

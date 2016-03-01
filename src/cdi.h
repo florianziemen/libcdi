@@ -759,6 +759,9 @@ int     gridInqYvals(int gridID, double yvals[]);
 /*      gridDefXdimname: Define the dimension name of a X-axis */
 void    gridDefXdimname(int gridID, const char *xdimname);
 
+/*      gridInqXdimname: Get the dimension name of a X-axis */
+void    gridInqXdimname(int gridID, char *xdimname);
+
 /*      gridDefXname: Define the name of a X-axis */
 void    gridDefXname(int gridID, const char *xname);
 
@@ -779,6 +782,9 @@ void    gridInqXunits(int gridID, char *xunits);
 
 /*      gridDefYdimname: Define the dimension name of a Y-axis */
 void    gridDefYdimname(int gridID, const char *ydimname);
+
+/*      gridInqYdimname: Get the dimension name of a Y-axis */
+void    gridInqYdimname(int gridID, char *ydimname);
 
 /*      gridDefYname: Define the name of a Y-axis */
 void    gridDefYname(int gridID, const char *yname);

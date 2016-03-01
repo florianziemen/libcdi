@@ -445,6 +445,7 @@ module mo_cdi
   public :: gridDefYvals
   public :: gridInqYvals
   public :: gridDefXdimname
+  public :: gridInqXdimname
   public :: gridDefXname
   public :: gridInqXname
   public :: gridDefXlongname
@@ -452,6 +453,7 @@ module mo_cdi
   public :: gridDefXunits
   public :: gridInqXunits
   public :: gridDefYdimname
+  public :: gridInqYdimname
   public :: gridDefYname
   public :: gridInqYname
   public :: gridDefYlongname
@@ -4923,6 +4925,37 @@ contains
     call lib_gridDefXdimname(gridID_dummy, xdimname_temp)
   end subroutine gridDefXdimname
 
+  subroutine gridInqXdimname(gridID_dummy, xdimname_dummy)
+    integer(c_int), value :: gridID_dummy
+    character(kind = c_char, len = *), intent(inout) :: xdimname_dummy
+    character(kind = c_char) :: xdimname_temp(len(xdimname_dummy) + 1)
+    integer :: xdimname_i
+    interface
+      subroutine lib_gridInqXdimname(gridID_dummy, xdimname_dummy) bind(c, name&
+      & = 'gridInqXdimname')
+        import c_char, c_int
+        integer(c_int), value :: gridID_dummy
+        character(kind = c_char) :: xdimname_dummy(*)
+      end subroutine lib_gridInqXdimname
+    end interface
+    xdimname_temp(len(xdimname_dummy) + 1) = c_null_char
+    do xdimname_i = len(xdimname_dummy), 1, -1
+      if(xdimname_dummy(xdimname_i:xdimname_i) /= ' ') exit
+      xdimname_temp(xdimname_i) = c_null_char
+    end do
+    do xdimname_i = xdimname_i, 1, -1
+        xdimname_temp(xdimname_i) = xdimname_dummy(xdimname_i:xdimname_i)
+    end do
+    call lib_gridInqXdimname(gridID_dummy, xdimname_temp)
+    do xdimname_i = 1, len(xdimname_dummy)
+      if(xdimname_temp(xdimname_i) == c_null_char) exit
+      xdimname_dummy(xdimname_i:xdimname_i) = xdimname_temp(xdimname_i)
+    end do
+    do xdimname_i = xdimname_i, len(xdimname_dummy)
+      xdimname_dummy(xdimname_i:xdimname_i) = ' '
+    end do
+  end subroutine gridInqXdimname
+
   subroutine gridDefXname(gridID_dummy, xname_dummy)
     integer(c_int), value :: gridID_dummy
     character(kind = c_char, len = *), intent(in) :: xname_dummy
@@ -5095,6 +5128,37 @@ contains
     ydimname_temp(len(ydimname_dummy) + 1) = c_null_char
     call lib_gridDefYdimname(gridID_dummy, ydimname_temp)
   end subroutine gridDefYdimname
+
+  subroutine gridInqYdimname(gridID_dummy, ydimname_dummy)
+    integer(c_int), value :: gridID_dummy
+    character(kind = c_char, len = *), intent(inout) :: ydimname_dummy
+    character(kind = c_char) :: ydimname_temp(len(ydimname_dummy) + 1)
+    integer :: ydimname_i
+    interface
+      subroutine lib_gridInqYdimname(gridID_dummy, ydimname_dummy) bind(c, name&
+      & = 'gridInqYdimname')
+        import c_char, c_int
+        integer(c_int), value :: gridID_dummy
+        character(kind = c_char) :: ydimname_dummy(*)
+      end subroutine lib_gridInqYdimname
+    end interface
+    ydimname_temp(len(ydimname_dummy) + 1) = c_null_char
+    do ydimname_i = len(ydimname_dummy), 1, -1
+      if(ydimname_dummy(ydimname_i:ydimname_i) /= ' ') exit
+      ydimname_temp(ydimname_i) = c_null_char
+    end do
+    do ydimname_i = ydimname_i, 1, -1
+        ydimname_temp(ydimname_i) = ydimname_dummy(ydimname_i:ydimname_i)
+    end do
+    call lib_gridInqYdimname(gridID_dummy, ydimname_temp)
+    do ydimname_i = 1, len(ydimname_dummy)
+      if(ydimname_temp(ydimname_i) == c_null_char) exit
+      ydimname_dummy(ydimname_i:ydimname_i) = ydimname_temp(ydimname_i)
+    end do
+    do ydimname_i = ydimname_i, len(ydimname_dummy)
+      ydimname_dummy(ydimname_i:ydimname_i) = ' '
+    end do
+  end subroutine gridInqYdimname
 
   subroutine gridDefYname(gridID_dummy, yname_dummy)
     integer(c_int), value :: gridID_dummy
