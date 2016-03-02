@@ -1534,14 +1534,16 @@
       PARAMETER (CDI_GRID_XDIMNAME      = 903)
       INTEGER    CDI_GRID_YDIMNAME     
       PARAMETER (CDI_GRID_YDIMNAME      = 904)
+      INTEGER    CDI_GRID_VDIMNAME     
+      PARAMETER (CDI_GRID_VDIMNAME      = 905)
       INTEGER    CDI_GRID_XLONGNAME    
-      PARAMETER (CDI_GRID_XLONGNAME     = 905)
+      PARAMETER (CDI_GRID_XLONGNAME     = 906)
       INTEGER    CDI_GRID_YLONGNAME    
-      PARAMETER (CDI_GRID_YLONGNAME     = 906)
+      PARAMETER (CDI_GRID_YLONGNAME     = 907)
       INTEGER    CDI_GRID_XUNITS       
-      PARAMETER (CDI_GRID_XUNITS        = 907)
+      PARAMETER (CDI_GRID_XUNITS        = 908)
       INTEGER    CDI_GRID_YUNITS       
-      PARAMETER (CDI_GRID_YUNITS        = 908)
+      PARAMETER (CDI_GRID_YUNITS        = 909)
       INTEGER         cdiGridDefString
 !                                    (INTEGER         gridID,
 !                                     INTEGER         key,

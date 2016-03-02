@@ -1508,6 +1508,8 @@ void cdfDefCurvilinear(stream_t *streamptr, int gridID)
 
   char xdimname[CDI_MAX_NAME+3];
   char ydimname[CDI_MAX_NAME+3];
+  xdimname[0] = 0;
+  ydimname[0] = 0;
   cdiGridInqString(gridID, CDI_GRID_XDIMNAME, CDI_MAX_NAME, xdimname);
   cdiGridInqString(gridID, CDI_GRID_YDIMNAME, CDI_MAX_NAME, ydimname);
   if ( xdimname[0] == 0 ) xdimname[0] = 'x';
@@ -1569,9 +1571,13 @@ void cdfDefCurvilinear(stream_t *streamptr, int gridID)
 
       if ( gridInqXboundsPtr(gridID) || gridInqYboundsPtr(gridID) )
         {
+          char vdimname[CDI_MAX_NAME+3];
+          vdimname[0] = 0;
+          cdiGridInqString(gridID, CDI_GRID_VDIMNAME, CDI_MAX_NAME, vdimname);
+          if ( vdimname[0] == 0 ) strcpy(vdimname, "nv4");
           size_t nvertex = 4;
-          if ( nc_inq_dimid(fileID, "nv4", &nvdimID) != NC_NOERR )
-            cdf_def_dim(fileID, "nv4", nvertex, &nvdimID);
+          if ( nc_inq_dimid(fileID, vdimname, &nvdimID) != NC_NOERR )
+            cdf_def_dim(fileID, vdimname, nvertex, &nvdimID);
         }
 
       dimIDs[0] = ydimID;
@@ -1895,6 +1901,7 @@ void cdfDefUnstructured(stream_t *streamptr, int gridID)
   int gridindex = vlistGridIndex(vlistID, gridID);
 
   char xdimname[CDI_MAX_NAME+3];
+  xdimname[0] = 0;
   cdiGridInqString(gridID, CDI_GRID_XDIMNAME, CDI_MAX_NAME, xdimname);
   if ( xdimname[0] == 0 ) strcpy(xdimname, "ncells");
 
@@ -1933,20 +1940,24 @@ void cdfDefUnstructured(stream_t *streamptr, int gridID)
 
   if ( dimID == UNDEFID )
     {
-      char vertname[CDI_MAX_NAME];
-      strcpy(vertname, "vertices");
-
       checkGridName('V', xaxisname, fileID, vlistID, gridID, ngrids, 'X');
       checkGridName('V', yaxisname, fileID, vlistID, gridID, ngrids, 'Y');
       checkGridName('D', xdimname, fileID, vlistID, gridID, ngrids, 'X');
-      checkGridName('D', vertname, fileID, vlistID, gridID, ngrids, 'X');
 
       if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
       cdf_def_dim(fileID, xdimname, dimlen, &dimID);
 
       size_t nvertex = (size_t)gridInqNvertex(gridID);
-      if ( nvertex > 0 ) cdf_def_dim(fileID, vertname, nvertex, &nvdimID);
+      if ( nvertex > 0 )
+        {
+          char vdimname[CDI_MAX_NAME+3];
+          vdimname[0] = 0;
+          cdiGridInqString(gridID, CDI_GRID_VDIMNAME, CDI_MAX_NAME, vdimname);
+          if ( vdimname[0] == 0 ) strcpy(vdimname, "vertices");
+          checkGridName('D', vdimname, fileID, vlistID, gridID, ngrids, 'X');
+          cdf_def_dim(fileID, vdimname, nvertex, &nvdimID);
+        }
 
       cdfDefGridReference(streamptr, gridID);
 
@@ -5039,6 +5050,7 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 	{
           int xdimids[2] = {-1,-1}, ydimids[2] = {-1,-1};
 	  int xdimid = -1, ydimid = -1;
+          int vdimid = -1;
 	  int islon = 0, islat = 0;
 	  int nxdims = 0, nydims = 0;
           size_t size = 0;
@@ -5414,7 +5426,8 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 			int nbdims = ncvars[ncvars[xvarid].bounds].ndims;
 			if ( nbdims == 2 || nbdims == 3 )
 			  {
-			    size_t nvertex = ncdims[ncvars[ncvars[xvarid].bounds].dimids[nbdims-1]].len;
+                            vdimid = ncvars[ncvars[xvarid].bounds].dimids[nbdims-1];
+			    size_t nvertex = ncdims[vdimid].len;
 			    grid->nvertex = (int)nvertex;
                             if (CDI_netcdf_lazy_grid_load)
                               {
@@ -5459,9 +5472,8 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
                               }
                             else
                               {
-                                int vid
-                                  = ncvars[ncvars[yvarid].bounds].dimids[nbdims-1];
-                                size_t nvertex = ncdims[vid].len;
+                                vdimid = ncvars[ncvars[yvarid].bounds].dimids[nbdims-1];
+                                size_t nvertex = ncdims[vdimid].len;
                                 /*
                                   if ( nvertex != grid->nvertex )
                                   Warning("nvertex problem! nvertex x %d, nvertex y %d",
@@ -5740,6 +5752,8 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
             cdiGridDefString(ncvars[ncvarid].gridID, CDI_GRID_XDIMNAME, strlen(ncdims[xdimid].name)+1, ncdims[xdimid].name);
           if ( ydimid != -1 )
             cdiGridDefString(ncvars[ncvarid].gridID, CDI_GRID_YDIMNAME, strlen(ncdims[ydimid].name)+1, ncdims[ydimid].name);
+          if ( vdimid != -1 )
+            cdiGridDefString(ncvars[ncvarid].gridID, CDI_GRID_VDIMNAME, strlen(ncdims[vdimid].name)+1, ncdims[vdimid].name);
 
 	  if ( CDI_Debug )
 	    Message("gridID %d %d %s", ncvars[ncvarid].gridID, ncvarid, ncvars[ncvarid].name);

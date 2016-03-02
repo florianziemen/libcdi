@@ -448,10 +448,11 @@ module mo_cdi
   integer(c_int), public, parameter :: CDI_GRID_YNAME = 902
   integer(c_int), public, parameter :: CDI_GRID_XDIMNAME = 903
   integer(c_int), public, parameter :: CDI_GRID_YDIMNAME = 904
-  integer(c_int), public, parameter :: CDI_GRID_XLONGNAME = 905
-  integer(c_int), public, parameter :: CDI_GRID_YLONGNAME = 906
-  integer(c_int), public, parameter :: CDI_GRID_XUNITS = 907
-  integer(c_int), public, parameter :: CDI_GRID_YUNITS = 908
+  integer(c_int), public, parameter :: CDI_GRID_VDIMNAME = 905
+  integer(c_int), public, parameter :: CDI_GRID_XLONGNAME = 906
+  integer(c_int), public, parameter :: CDI_GRID_YLONGNAME = 907
+  integer(c_int), public, parameter :: CDI_GRID_XUNITS = 908
+  integer(c_int), public, parameter :: CDI_GRID_YUNITS = 909
   public :: cdiGridDefString
   public :: cdiGridInqString
   public :: gridDefXname

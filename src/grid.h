@@ -100,6 +100,7 @@ struct grid_t {
   const char *ystdname;
   char    xdimname[CDI_MAX_NAME];
   char    ydimname[CDI_MAX_NAME];
+  char    vdimname[CDI_MAX_NAME];
   char    xname[CDI_MAX_NAME];
   char    yname[CDI_MAX_NAME];
   char    xlongname[CDI_MAX_NAME];
