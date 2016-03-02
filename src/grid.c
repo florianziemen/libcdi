@@ -2771,7 +2771,8 @@ static void gridComplete(grid_t *grid)
 
 }
 
-#define GRID_STR_SERIALIZE(gridP) { gridP->xname, gridP->yname, \
+#define GRID_STR_SERIALIZE(gridP) { gridP->xdimname, gridP->ydimname,  \
+    gridP->vdimname, gridP->xname, gridP->yname,  \
     gridP->xlongname, gridP->ylongname, \
     gridP->xunits, gridP->yunits }
 
@@ -4199,11 +4200,6 @@ static int gridGetComponentFlags(const grid_t * gridP)
     | (gridHasUUIDFlag & (int)((unsigned)cdiUUIDIsNull(gridP->uuid) - 1U));
   return flags;
 }
-
-
-#define GRID_STR_SERIALIZE(gridP) { gridP->xname, gridP->yname, \
-    gridP->xlongname, gridP->ylongname, \
-    gridP->xunits, gridP->yunits }
 
 static int
 gridGetPackSize(void * voidP, void *context)
