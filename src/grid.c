@@ -837,32 +837,6 @@ void gridDefYunits(int gridID, const char *yunits)
 }
 
 /*
-@Function  gridInqXdimname
-@Title     Get the dimension name of a X-axis
-
-@Prototype void gridInqXdimname(int gridID, char *dimname)
-@Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate} or @fref{vlistInqVarGrid}.
-    @Item  dimname  Dimension name of the X-axis. The caller must allocate space for the
-                    returned string. The maximum possible length, in characters, of
-                    the string is given by the predefined constant @func{CDI_MAX_NAME}.
-
-@Description
-The function @func{gridInqXdimname} returns the dimension name of a X-axis.
-
-@Result
-@func{gridInqXname} returns the dimension name of the X-axis to the parameter dimname.
-
-@EndFunction
-*/
-void gridInqXdimname(int gridID, char *xdimname)
-{
-  grid_t *gridptr = gridID2Ptr(gridID);
-
-  strcpy(xdimname, gridptr->xdimname);
-}
-
-/*
 @Function  gridInqXname
 @Title     Get the name of a X-axis
 
@@ -948,32 +922,6 @@ void gridInqXstdname(int gridID, char *xstdname)
     strcpy(xstdname, gridptr->xstdname);
   else
     xstdname[0] = 0;
-}
-
-/*
-@Function  gridInqYdimname
-@Title     Get the dimension name of a Y-axis
-
-@Prototype void gridInqYdimname(int gridID, char *dimname)
-@Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate} or @fref{vlistInqVarGrid}.
-    @Item  dimname  Dimension name of the Y-axis. The caller must allocate space for the
-                    returned string. The maximum possible length, in characters, of
-                    the string is given by the predefined constant @func{CDI_MAX_NAME}.
-
-@Description
-The function @func{gridInqYdimname} returns the dimension name of a Y-axis.
-
-@Result
-@func{gridInqYname} returns the dimension name of the Y-axis to the parameter dimname.
-
-@EndFunction
-*/
-void gridInqYdimname(int gridID, char *ydimname)
-{
-  grid_t *gridptr = gridID2Ptr(gridID);
-
-  strcpy(ydimname, gridptr->ydimname);
 }
 
 /*

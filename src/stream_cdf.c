@@ -1485,8 +1485,6 @@ void cdfDefCurvilinear(stream_t *streamptr, int gridID)
   char ystdname[CDI_MAX_NAME];
   char xaxisname[CDI_MAX_NAME];
   char yaxisname[CDI_MAX_NAME];
-  char xdimname[CDI_MAX_NAME+3];
-  char ydimname[CDI_MAX_NAME+3];
   int index;
   int xdimID = UNDEFID;
   int ydimID = UNDEFID;
@@ -1508,19 +1506,21 @@ void cdfDefCurvilinear(stream_t *streamptr, int gridID)
   size_t ydimlen = (size_t)gridInqYsize(gridID);
   int gridindex = vlistGridIndex(vlistID, gridID);
 
-  gridInqXdimname(gridID, xdimname);
+  char xdimname[CDI_MAX_NAME+3];
+  char ydimname[CDI_MAX_NAME+3];
+  cdiGridInqString(gridID, CDI_GRID_XDIMNAME, CDI_MAX_NAME, xdimname);
+  cdiGridInqString(gridID, CDI_GRID_YDIMNAME, CDI_MAX_NAME, ydimname);
+  if ( xdimname[0] == 0 ) xdimname[0] = 'x';
+  if ( ydimname[0] == 0 ) ydimname[0] = 'y';
+
   gridInqXname(gridID, xaxisname);
   gridInqXlongname(gridID, xlongname);
   gridInqXstdname(gridID, xstdname);
   gridInqXunits(gridID, xunits);
-  gridInqYdimname(gridID, ydimname);
   gridInqYname(gridID, yaxisname);
   gridInqYlongname(gridID, ylongname);
   gridInqYstdname(gridID, ystdname);
   gridInqYunits(gridID, yunits);
-
-  if ( xdimname[0] == 0 ) xdimname[0] = 'x';
-  if ( ydimname[0] == 0 ) ydimname[0] = 'y';
 
   for ( index = 0; index < ngrids; index++ )
     {
@@ -1876,7 +1876,6 @@ void cdfDefUnstructured(stream_t *streamptr, int gridID)
   char ystdname[CDI_MAX_NAME];
   char xaxisname[CDI_MAX_NAME];
   char yaxisname[CDI_MAX_NAME];
-  char xdimname[CDI_MAX_NAME+3];
   int index;
   int dimID = UNDEFID;
   size_t len;
@@ -1895,7 +1894,10 @@ void cdfDefUnstructured(stream_t *streamptr, int gridID)
   size_t dimlen = (size_t)gridInqSize(gridID);
   int gridindex = vlistGridIndex(vlistID, gridID);
 
-  gridInqXdimname(gridID, xdimname);
+  char xdimname[CDI_MAX_NAME+3];
+  cdiGridInqString(gridID, CDI_GRID_XDIMNAME, CDI_MAX_NAME, xdimname);
+  if ( xdimname[0] == 0 ) strcpy(xdimname, "ncells");
+
   gridInqXname(gridID, xaxisname);
   gridInqXlongname(gridID, xlongname);
   gridInqXstdname(gridID, xstdname);
@@ -1904,8 +1906,6 @@ void cdfDefUnstructured(stream_t *streamptr, int gridID)
   gridInqYlongname(gridID, ylongname);
   gridInqYstdname(gridID, ystdname);
   gridInqYunits(gridID, yunits);
-
-  if ( xdimname[0] == 0 ) strcpy(xdimname, "ncells");
 
   for ( index = 0; index < ngrids; index++ )
     {

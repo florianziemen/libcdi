@@ -772,9 +772,6 @@ int     cdiGridDefString(int gridID, int key, int size, const char *mesg);
 //      cdiGridInqString: Get a CDI grid string value from a key
 int     cdiGridInqString(int gridID, int key, int size, char *mesg);
 
-/*      gridInqXdimname: Get the dimension name of a X-axis */
-void    gridInqXdimname(int gridID, char *xdimname);
-
 /*      gridDefXname: Define the name of a X-axis */
 void    gridDefXname(int gridID, const char *xname);
 
@@ -792,9 +789,6 @@ void    gridDefXunits(int gridID, const char *xunits);
 
 /*      gridInqXunits: Get the units of a X-axis */
 void    gridInqXunits(int gridID, char *xunits);
-
-/*      gridInqYdimname: Get the dimension name of a Y-axis */
-void    gridInqYdimname(int gridID, char *ydimname);
 
 /*      gridDefYname: Define the name of a Y-axis */
 void    gridDefYname(int gridID, const char *yname);
