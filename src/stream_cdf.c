@@ -5736,8 +5736,10 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
           if ( xdimid == -1 && ydimid == -1 && grid->size == 1 )
             gridDefHasDims(ncvars[ncvarid].gridID, FALSE);
 
-          if ( xdimid != -1 ) gridDefXdimname(ncvars[ncvarid].gridID, ncdims[xdimid].name);
-          if ( ydimid != -1 ) gridDefYdimname(ncvars[ncvarid].gridID, ncdims[ydimid].name);
+          if ( xdimid != -1 )
+            cdiGridDefString(ncvars[ncvarid].gridID, CDI_GRID_XDIMNAME, strlen(ncdims[xdimid].name)+1, ncdims[xdimid].name);
+          if ( ydimid != -1 )
+            cdiGridDefString(ncvars[ncvarid].gridID, CDI_GRID_YDIMNAME, strlen(ncdims[ydimid].name)+1, ncdims[ydimid].name);
 
 	  if ( CDI_Debug )
 	    Message("gridID %d %d %s", ncvars[ncvarid].gridID, ncvarid, ncvars[ncvarid].name);

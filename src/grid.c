@@ -601,6 +601,20 @@ void gridName(int gridtype, char *gridname)
   strcpy(gridname, gridNamePtr(gridtype));
 }
 
+static
+char *grid_key_to_string(grid_t *gridptr, int key)
+{
+  char *gridstring = NULL;
+
+  switch (key)
+    {
+    case CDI_GRID_XDIMNAME: gridstring = gridptr->xdimname; break;
+    case CDI_GRID_YDIMNAME: gridstring = gridptr->ydimname; break;
+    }
+
+  return gridstring;
+}
+
 /*
 @Function  cdiGridDefString
 @Title     Define a CDI grid string value from a key
@@ -625,12 +639,10 @@ int cdiGridDefString(int gridID, int key, int size, const char *mesg)
   if ( size == 0 || mesg == NULL || *mesg == 0 ) return -1;
 
   grid_t *gridptr = gridID2Ptr(gridID);
-  char *gridstring = NULL;
 
-  switch (key)
+  char *gridstring = grid_key_to_string(gridptr, key);
+  if ( gridstring == NULL)
     {
-    case CDI_GRID_XDIMNAME: gridstring = gridptr->xdimname; break;
-    default:
       Warning("CDI grid string key %d not supported!", key);
       return -1;
     }
@@ -668,12 +680,9 @@ int cdiGridInqString(int gridID, int key, int size, char *mesg)
   if ( size == 0 || mesg == NULL || *mesg == 0 ) return -1;
 
   grid_t *gridptr = gridID2Ptr(gridID);
-  const char *gridstring = NULL;
-
-  switch (key)
+  const char *gridstring = grid_key_to_string(gridptr, key);
+  if ( gridstring == NULL)
     {
-    case CDI_GRID_XDIMNAME: gridstring = gridptr->xdimname; break;
-    default:
       Warning("CDI grid string key %d not supported!", key);
       return -1;
     }
@@ -681,30 +690,6 @@ int cdiGridInqString(int gridID, int key, int size, char *mesg)
   gridGetString(mesg, gridstring, size);
 
   return 0;
-}
-
-/*
-@Function  gridDefXdimname
-@Title     Define the dimension name of a X-axis
-
-@Prototype void gridDefXdimname(int gridID, const char *dimname)
-@Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
-    @Item  dimname  Dimension name of the X-axis.
-
-@Description
-The function @func{gridDefXdimname} defines the dimension name of a X-axis.
-
-@EndFunction
-*/
-void gridDefXdimname(int gridID, const char *xdimname)
-{
-  if ( xdimname && *xdimname )
-    {
-      grid_t *gridptr = gridID2Ptr(gridID);
-      gridSetName(gridptr->xdimname, xdimname);
-      gridMark4Update(gridID);
-    }
 }
 
 /*
@@ -775,30 +760,6 @@ void gridDefXunits(int gridID, const char *xunits)
     {
       grid_t *gridptr = gridID2Ptr(gridID);
       gridSetName(gridptr->xunits, xunits);
-      gridMark4Update(gridID);
-    }
-}
-
-/*
-@Function  gridDefYdimname
-@Title     Define the dimension name of a Y-axis
-
-@Prototype void gridDefYdimname(int gridID, const char *dimname)
-@Parameter
-    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
-    @Item  dimname  Dimension name of the Y-axis.
-
-@Description
-The function @func{gridDefYdimname} defines the dimension name of a Y-axis.
-
-@EndFunction
-*/
-void gridDefYdimname(int gridID, const char *ydimname)
-{
-  if ( ydimname && *ydimname )
-    {
-      grid_t *gridptr = gridID2Ptr(gridID);
-      gridSetName(gridptr->ydimname, ydimname);
       gridMark4Update(gridID);
     }
 }
