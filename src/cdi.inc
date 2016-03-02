@@ -1556,16 +1556,6 @@
 !                                     CHARACTER*(*)   mesg)
       EXTERNAL        cdiGridInqString
 
-!                     gridDefXdimname
-!                                    (INTEGER         gridID,
-!                                     CHARACTER*(*)   xdimname)
-      EXTERNAL        gridDefXdimname
-
-!                     gridInqXdimname
-!                                    (INTEGER         gridID,
-!                                     CHARACTER*(*)   xdimname)
-      EXTERNAL        gridInqXdimname
-
 !                     gridDefXname
 !                                    (INTEGER         gridID,
 !                                     CHARACTER*(*)   xname)
@@ -1595,16 +1585,6 @@
 !                                    (INTEGER         gridID,
 !                                     CHARACTER*(*)   xunits)
       EXTERNAL        gridInqXunits
-
-!                     gridDefYdimname
-!                                    (INTEGER         gridID,
-!                                     CHARACTER*(*)   ydimname)
-      EXTERNAL        gridDefYdimname
-
-!                     gridInqYdimname
-!                                    (INTEGER         gridID,
-!                                     CHARACTER*(*)   ydimname)
-      EXTERNAL        gridInqYdimname
 
 !                     gridDefYname
 !                                    (INTEGER         gridID,
