@@ -103,6 +103,15 @@ Define the UUID of an unstructured grid.
 Define the bounds of a X-axis.
 
 
+\section*{\tt \htmlref{gridDefXdimname}{gridDefXdimname}}
+
+\begin{verbatim}
+    SUBROUTINE gridDefXdimname (INTEGER gridID, CHARACTER*(*) xdimname)
+\end{verbatim}
+
+Define the dimension name of a X-axis.
+
+
 \section*{\tt \htmlref{gridDefXlongname}{gridDefXlongname}}
 
 \begin{verbatim}
@@ -155,6 +164,15 @@ Define the values of a X-axis.
 \end{verbatim}
 
 Define the bounds of a Y-axis.
+
+
+\section*{\tt \htmlref{gridDefYdimname}{gridDefYdimname}}
+
+\begin{verbatim}
+    SUBROUTINE gridDefYdimname (INTEGER gridID, CHARACTER*(*) ydimname)
+\end{verbatim}
+
+Define the dimension name of a Y-axis.
 
 
 \section*{\tt \htmlref{gridDefYlongname}{gridDefYlongname}}
@@ -310,6 +328,15 @@ Get the UUID of an unstructured grid.
 Get the bounds of a X-axis.
 
 
+\section*{\tt \htmlref{gridInqXdimname}{gridInqXdimname}}
+
+\begin{verbatim}
+    SUBROUTINE gridInqXdimname (INTEGER gridID, CHARACTER*(*) xdimname)
+\end{verbatim}
+
+Get the dimension name of a X-axis.
+
+
 \section*{\tt \htmlref{gridInqXlongname}{gridInqXlongname}}
 
 \begin{verbatim}
@@ -380,6 +407,15 @@ Get all values of a X-axis.
 \end{verbatim}
 
 Get the bounds of a Y-axis.
+
+
+\section*{\tt \htmlref{gridInqYdimname}{gridInqYdimname}}
+
+\begin{verbatim}
+    SUBROUTINE gridInqYdimname (INTEGER gridID, CHARACTER*(*) ydimname)
+\end{verbatim}
+
+Get the dimension name of a Y-axis.
 
 
 \section*{\tt \htmlref{gridInqYlongname}{gridInqYlongname}}
@@ -1248,6 +1284,15 @@ Get the standard name of a Variable.
 \end{verbatim}
 
 Return subtype ID for a given variable..
+
+
+\section*{\tt \htmlref{vlistInqVarTsteptype}{vlistInqVarTsteptype}}
+
+\begin{verbatim}
+    INTEGER FUNCTION vlistInqVarTsteptype (INTEGER vlistID, INTEGER varID)
+\end{verbatim}
+
+Get the timestep type of a Variable.
 
 
 \section*{\tt \htmlref{vlistInqVarUnits}{vlistInqVarUnits}}

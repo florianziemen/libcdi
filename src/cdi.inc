@@ -1,10 +1,10 @@
 ! This file was automatically generated, don't edit!
 !
-! Fortran interface for CDI library version 1.7.1
+! Fortran interface for CDI library version 1.7.2
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   February 2016
+! Uwe Schulzweida, MPI-MET, Hamburg,   March 2016
 !
 
       INTEGER    CDI_MAX_NAME          
@@ -1523,6 +1523,49 @@
 !                                     DOUBLEPRECISION yvals(*))
       EXTERNAL        gridInqYvals
 
+!
+!  CDI grid string key values
+!
+      INTEGER    CDI_GRID_XNAME        
+      PARAMETER (CDI_GRID_XNAME         = 901)
+      INTEGER    CDI_GRID_YNAME        
+      PARAMETER (CDI_GRID_YNAME         = 902)
+      INTEGER    CDI_GRID_XDIMNAME     
+      PARAMETER (CDI_GRID_XDIMNAME      = 903)
+      INTEGER    CDI_GRID_YDIMNAME     
+      PARAMETER (CDI_GRID_YDIMNAME      = 904)
+      INTEGER    CDI_GRID_XLONGNAME    
+      PARAMETER (CDI_GRID_XLONGNAME     = 905)
+      INTEGER    CDI_GRID_YLONGNAME    
+      PARAMETER (CDI_GRID_YLONGNAME     = 906)
+      INTEGER    CDI_GRID_XUNITS       
+      PARAMETER (CDI_GRID_XUNITS        = 907)
+      INTEGER    CDI_GRID_YUNITS       
+      PARAMETER (CDI_GRID_YUNITS        = 908)
+      INTEGER         cdiGridDefString
+!                                    (INTEGER         gridID,
+!                                     INTEGER         key,
+!                                     INTEGER         size,
+!                                     CHARACTER*(*)   mesg)
+      EXTERNAL        cdiGridDefString
+
+      INTEGER         cdiGridInqString
+!                                    (INTEGER         gridID,
+!                                     INTEGER         key,
+!                                     INTEGER         size,
+!                                     CHARACTER*(*)   mesg)
+      EXTERNAL        cdiGridInqString
+
+!                     gridDefXdimname
+!                                    (INTEGER         gridID,
+!                                     CHARACTER*(*)   xdimname)
+      EXTERNAL        gridDefXdimname
+
+!                     gridInqXdimname
+!                                    (INTEGER         gridID,
+!                                     CHARACTER*(*)   xdimname)
+      EXTERNAL        gridInqXdimname
+
 !                     gridDefXname
 !                                    (INTEGER         gridID,
 !                                     CHARACTER*(*)   xname)
@@ -1552,6 +1595,16 @@
 !                                    (INTEGER         gridID,
 !                                     CHARACTER*(*)   xunits)
       EXTERNAL        gridInqXunits
+
+!                     gridDefYdimname
+!                                    (INTEGER         gridID,
+!                                     CHARACTER*(*)   ydimname)
+      EXTERNAL        gridDefYdimname
+
+!                     gridInqYdimname
+!                                    (INTEGER         gridID,
+!                                     CHARACTER*(*)   ydimname)
+      EXTERNAL        gridInqYdimname
 
 !                     gridDefYname
 !                                    (INTEGER         gridID,

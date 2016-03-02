@@ -240,6 +240,22 @@ unsigned cdiGridCount(void)
   return reshCountType(&gridOps);
 }
 
+static inline
+void gridSetString(char *gridstrname, const char *name, size_t len)
+{
+  if ( len > CDI_MAX_NAME ) len = CDI_MAX_NAME;
+  strncpy(gridstrname, name, len);
+  gridstrname[len - 1] = 0;
+}
+
+static inline
+void gridGetString(char *name, const char *gridstrname, size_t len)
+{
+  if ( len > CDI_MAX_NAME ) len = CDI_MAX_NAME;
+  strncpy(name, gridstrname, len);
+  name[len - 1] = 0;
+}
+
 static inline void
 gridSetName(char *gridstrname, const char *name)
 {
@@ -583,6 +599,88 @@ const char *gridNamePtr(int gridtype)
 void gridName(int gridtype, char *gridname)
 {
   strcpy(gridname, gridNamePtr(gridtype));
+}
+
+/*
+@Function  cdiGridDefString
+@Title     Define a CDI grid string value from a key
+
+@Prototype int cdiGridDefString(int gridID, int key, int size, const char *mesg)
+@Parameter
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  key      The key to be searched
+    @Item  size     The allocated length of the string on input
+    @Item  mesg     The address of a string where the data will be read
+
+@Description
+The function @func{cdiGridDefString} defines a CDI grid string value from a key.
+
+@Result
+@func{cdiGridDefString} returns 0 if OK and integer value on error.
+
+@EndFunction
+*/
+int cdiGridDefString(int gridID, int key, int size, const char *mesg)
+{
+  if ( size == 0 || mesg == NULL || *mesg == 0 ) return -1;
+
+  grid_t *gridptr = gridID2Ptr(gridID);
+  char *gridstring = NULL;
+
+  switch (key)
+    {
+    case CDI_GRID_XDIMNAME: gridstring = gridptr->xdimname; break;
+    default:
+      Warning("CDI grid string key %d not supported!", key);
+      return -1;
+    }
+
+  gridSetString(gridstring, mesg, size);
+  gridMark4Update(gridID);
+
+  return 0;
+}
+
+/*
+@Function  cdiGridInqString
+@Title     Get a CDI grid string value from a key
+
+@Prototype int cdiGridInqString(int gridID, int key, int size, char *mesg)
+@Parameter
+    @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  key      The key to be searched.
+    @Item  size     The allocated length of the string on input.
+    @Item  mesg     The address of a string where the data will be retrieved.
+                    The caller must allocate space for the returned string.
+                    The maximum possible length, in characters, of the string
+                    is given by the predefined constant @func{CDI_MAX_NAME}.
+
+@Description
+The function @func{cdiGridInqString} return a CDI grid string value from a key.
+
+@Result
+@func{cdiGridInqString} returns 0 if OK and integer value on error.
+
+@EndFunction
+*/
+int cdiGridInqString(int gridID, int key, int size, char *mesg)
+{
+  if ( size == 0 || mesg == NULL || *mesg == 0 ) return -1;
+
+  grid_t *gridptr = gridID2Ptr(gridID);
+  const char *gridstring = NULL;
+
+  switch (key)
+    {
+    case CDI_GRID_XDIMNAME: gridstring = gridptr->xdimname; break;
+    default:
+      Warning("CDI grid string key %d not supported!", key);
+      return -1;
+    }
+
+  gridGetString(mesg, gridstring, size);
+
+  return 0;
 }
 
 /*

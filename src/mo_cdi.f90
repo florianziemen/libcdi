@@ -444,6 +444,16 @@ module mo_cdi
   public :: gridInqXvals
   public :: gridDefYvals
   public :: gridInqYvals
+  integer(c_int), public, parameter :: CDI_GRID_XNAME = 901
+  integer(c_int), public, parameter :: CDI_GRID_YNAME = 902
+  integer(c_int), public, parameter :: CDI_GRID_XDIMNAME = 903
+  integer(c_int), public, parameter :: CDI_GRID_YDIMNAME = 904
+  integer(c_int), public, parameter :: CDI_GRID_XLONGNAME = 905
+  integer(c_int), public, parameter :: CDI_GRID_YLONGNAME = 906
+  integer(c_int), public, parameter :: CDI_GRID_XUNITS = 907
+  integer(c_int), public, parameter :: CDI_GRID_YUNITS = 908
+  public :: cdiGridDefString
+  public :: cdiGridInqString
   public :: gridDefXdimname
   public :: gridInqXdimname
   public :: gridDefXname
@@ -4904,6 +4914,73 @@ contains
       call c_f_pointer(ptr, f_result, rv_shape)
     end if
   end function gridNamePtr
+
+  function cdiGridDefString(gridID_dummy, key_dummy, size_dummy, mesg_dummy)&
+  & result(f_result)
+    integer(c_int) :: f_result
+    integer(c_int), value :: gridID_dummy
+    integer(c_int), value :: key_dummy
+    integer(c_int), value :: size_dummy
+    character(kind = c_char, len = *), intent(in) :: mesg_dummy
+    character(kind = c_char) :: mesg_temp(len(mesg_dummy) + 1)
+    integer :: mesg_i
+    interface
+      function lib_cdiGridDefString(gridID_dummy, key_dummy, size_dummy,&
+      & mesg_dummy) bind(c, name = 'cdiGridDefString') result(c_result)
+        import c_char, c_int
+        integer(c_int) :: c_result
+        integer(c_int), value :: gridID_dummy
+        integer(c_int), value :: key_dummy
+        integer(c_int), value :: size_dummy
+        character(kind = c_char) :: mesg_dummy(*)
+      end function lib_cdiGridDefString
+    end interface
+    do mesg_i = 1, len(mesg_dummy)
+      mesg_temp(mesg_i) = mesg_dummy(mesg_i:mesg_i)
+    end do
+    mesg_temp(len(mesg_dummy) + 1) = c_null_char
+    f_result = lib_cdiGridDefString(gridID_dummy, key_dummy, size_dummy,&
+    & mesg_temp)
+  end function cdiGridDefString
+
+  function cdiGridInqString(gridID_dummy, key_dummy, size_dummy, mesg_dummy)&
+  & result(f_result)
+    integer(c_int) :: f_result
+    integer(c_int), value :: gridID_dummy
+    integer(c_int), value :: key_dummy
+    integer(c_int), value :: size_dummy
+    character(kind = c_char, len = *), intent(inout) :: mesg_dummy
+    character(kind = c_char) :: mesg_temp(len(mesg_dummy) + 1)
+    integer :: mesg_i
+    interface
+      function lib_cdiGridInqString(gridID_dummy, key_dummy, size_dummy,&
+      & mesg_dummy) bind(c, name = 'cdiGridInqString') result(c_result)
+        import c_char, c_int
+        integer(c_int) :: c_result
+        integer(c_int), value :: gridID_dummy
+        integer(c_int), value :: key_dummy
+        integer(c_int), value :: size_dummy
+        character(kind = c_char) :: mesg_dummy(*)
+      end function lib_cdiGridInqString
+    end interface
+    mesg_temp(len(mesg_dummy) + 1) = c_null_char
+    do mesg_i = len(mesg_dummy), 1, -1
+      if(mesg_dummy(mesg_i:mesg_i) /= ' ') exit
+      mesg_temp(mesg_i) = c_null_char
+    end do
+    do mesg_i = mesg_i, 1, -1
+        mesg_temp(mesg_i) = mesg_dummy(mesg_i:mesg_i)
+    end do
+    f_result = lib_cdiGridInqString(gridID_dummy, key_dummy, size_dummy,&
+    & mesg_temp)
+    do mesg_i = 1, len(mesg_dummy)
+      if(mesg_temp(mesg_i) == c_null_char) exit
+      mesg_dummy(mesg_i:mesg_i) = mesg_temp(mesg_i)
+    end do
+    do mesg_i = mesg_i, len(mesg_dummy)
+      mesg_dummy(mesg_i:mesg_i) = ' '
+    end do
+  end function cdiGridInqString
 
   subroutine gridDefXdimname(gridID_dummy, xdimname_dummy)
     integer(c_int), value :: gridID_dummy

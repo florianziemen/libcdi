@@ -756,6 +756,22 @@ void    gridDefYvals(int gridID, const double yvals[]);
 /*      gridInqYvals: Get all values of a Y-axis */
 int     gridInqYvals(int gridID, double yvals[]);
 
+/* CDI grid string key values */
+#define  CDI_GRID_XNAME      901  // X-axis name
+#define  CDI_GRID_YNAME      902  // Y-axis name
+#define  CDI_GRID_XDIMNAME   903  // X-axis dimension name
+#define  CDI_GRID_YDIMNAME   904  // Y-axis dimension name
+#define  CDI_GRID_XLONGNAME  905  // X-axis longname
+#define  CDI_GRID_YLONGNAME  906  // Y-axis longname
+#define  CDI_GRID_XUNITS     907  // X-axis units
+#define  CDI_GRID_YUNITS     908  // Y-axis units
+
+//      cdiGridDefString: Define a CDI grid string value from a key
+int     cdiGridDefString(int gridID, int key, int size, const char *mesg);
+
+//      cdiGridInqString: Get a CDI grid string value from a key
+int     cdiGridInqString(int gridID, int key, int size, char *mesg);
+
 /*      gridDefXdimname: Define the dimension name of a X-axis */
 void    gridDefXdimname(int gridID, const char *xdimname);
 
