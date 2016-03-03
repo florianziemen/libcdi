@@ -2534,6 +2534,7 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
         {
           if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
+          //printf("def dim %s %d\n", axisname, dimlen);
           if ( ndims ) cdf_def_dim(fileID, axisname, dimlen, &dimID);
 
           zaxisInqLongname(zaxisID, longname);
@@ -5993,6 +5994,12 @@ void define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
           if ( positive > 0 ) zaxisDefPositive(ncvars[ncvarid].zaxisID, positive);
           if ( is_scalar ) zaxisDefScalar(ncvars[ncvarid].zaxisID);
 
+          if ( zdimid != -1 )
+            cdiZaxisDefString(ncvars[ncvarid].zaxisID, CDI_ZAXIS_DIMNAME, strlen(ncdims[zdimid].name)+1, ncdims[zdimid].name);
+          /*
+          if ( vdimid != -1 )
+            cdiZaxisDefString(ncvars[ncvarid].zaxisID, CDI_ZAXIS_VDIMNAME, strlen(ncdims[vdimid].name)+1, ncdims[vdimid].name);
+          */
 	  Free(zvar);
 	  Free(lbounds);
 	  Free(ubounds);
