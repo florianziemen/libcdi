@@ -1241,13 +1241,18 @@ void cdfDefXaxis(stream_t *streamptr, int gridID, int ndims)
 
   if ( dimID == UNDEFID )
     {
+      char dimname[CDI_MAX_NAME+3];
+      dimname[0] = 0;
+      cdiGridInqString(gridID, CDI_GRID_XDIMNAME, CDI_MAX_NAME, dimname);
+      if ( dimname[0] == 0 ) strcpy(dimname, axisname);
+
       int status = checkGridName('V', axisname, fileID, vlistID, gridID, ngrids, 'X');
       if ( status == 0 && ndims )
-        status = checkGridName('D', axisname, fileID, vlistID, gridID, ngrids, 'X');
+        status = checkGridName('D', dimname, fileID, vlistID, gridID, ngrids, 'X');
 
       if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
-      if ( ndims ) cdf_def_dim(fileID, axisname, dimlen, &dimID);
+      if ( ndims ) cdf_def_dim(fileID, dimname, dimlen, &dimID);
 
       int gen_bounds = FALSE;
       int grid_is_cyclic = gridIsCircular(gridID);
@@ -1383,14 +1388,18 @@ void cdfDefYaxis(stream_t *streamptr, int gridID, int ndims)
 
   if ( dimID == UNDEFID )
     {
-      int status;
-      status = checkGridName('V', axisname, fileID, vlistID, gridID, ngrids, 'Y');
+      char dimname[CDI_MAX_NAME+3];
+      dimname[0] = 0;
+      cdiGridInqString(gridID, CDI_GRID_YDIMNAME, CDI_MAX_NAME, dimname);
+      if ( dimname[0] == 0 ) strcpy(dimname, axisname);
+
+      int status = checkGridName('V', axisname, fileID, vlistID, gridID, ngrids, 'Y');
       if ( status == 0 && ndims )
-        status = checkGridName('D', axisname, fileID, vlistID, gridID, ngrids, 'Y');
+        status = checkGridName('D', dimname, fileID, vlistID, gridID, ngrids, 'Y');
 
       if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
-      if ( ndims ) cdf_def_dim(fileID, axisname, dimlen, &dimID);
+      if ( ndims ) cdf_def_dim(fileID, dimname, dimlen, &dimID);
 
       int gen_bounds = FALSE;
       int grid_is_cyclic = gridIsCircular(gridID);
@@ -5529,7 +5538,7 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 	      }
 	    }
 
-          if (grid->type != ncvars[ncvarid].gridtype)
+          if ( grid->type != ncvars[ncvarid].gridtype )
             {
               int gridtype = ncvars[ncvarid].gridtype;
               grid->type = gridtype;
