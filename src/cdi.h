@@ -979,6 +979,19 @@ void    zaxisDefUUID(int zaxisID, const unsigned char uuid[CDI_UUID_SIZE]);
 /*      zaxisInqUUID: Get the UUID of a generalized Z-axis */
 void    zaxisInqUUID(int zaxisID, unsigned char uuid[CDI_UUID_SIZE]);
 
+/* CDI zaxis string key values */
+#define  CDI_ZAXIS_NAME      801  // Z-axis name
+#define  CDI_ZAXIS_DIMNAME   802  // Z-axis dimension name
+#define  CDI_ZAXIS_VDIMNAME  803  // Vertex dimension name
+#define  CDI_ZAXIS_LONGNAME  804  // Z-axis longname
+#define  CDI_ZAXIS_UNITS     805  // Z-axis units
+
+//      cdiZaxisDefString: Define a CDI Z-axis string value from a key
+int     cdiZaxisDefString(int zaxisID, int key, int size, const char *mesg);
+
+//      cdiZaxisInqString: Get a CDI Z-axis string value from a key
+int     cdiZaxisInqString(int zaxisID, int key, int size, char *mesg);
+
 /*      zaxisDefName: Define the name of a Z-axis */
 void    zaxisDefName(int zaxisID, const char *name_optional);
 
