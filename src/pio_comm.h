@@ -48,7 +48,7 @@ void     commPrint              ( FILE * );
 /* query rank of collector responsible for client on inter-communicator
  * returns -1 on server processes.
  */
-int cdiPioInqCollectorOfClient();
+int cdiPioInqCollectorOfClient(void);
 
 /* query communicator containing clients and collectors,
  * the collectors occupy the top-ranks
