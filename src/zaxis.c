@@ -65,7 +65,6 @@ enum {
 
 
 typedef struct {
-  unsigned char positive;
   char     dimname[CDI_MAX_NAME];
   char     vdimname[CDI_MAX_NAME];
   char     name[CDI_MAX_NAME];
@@ -86,6 +85,7 @@ typedef struct {
   int      size;
   int      direction;
   int      vctsize;
+  unsigned positive;
   double  *vct;
   int      number;   /* Reference number to a generalized Z-axis */
   int      nhlev;
@@ -667,9 +667,9 @@ void zaxisDefPositive(int zaxisID, int positive)
 {
   zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
 
-  if (zaxisptr->positive != positive)
+  if (zaxisptr->positive != (unsigned)(positive != 0))
     {
-      zaxisptr->positive = (unsigned char)positive;
+      zaxisptr->positive = (unsigned)(positive != 0);
       reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
     }
 }
@@ -678,7 +678,7 @@ void zaxisDefPositive(int zaxisID, int positive)
 int zaxisInqPositive(int zaxisID)
 {
   zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
-  return zaxisptr->positive;
+  return (int)zaxisptr->positive;
 }
 
 
