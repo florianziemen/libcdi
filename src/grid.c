@@ -637,7 +637,7 @@ The function @func{cdiGridDefString} defines a CDI grid string value from a key.
 */
 int cdiGridDefString(int gridID, int key, int size, const char *mesg)
 {
-  if ( size == 0 || mesg == NULL || *mesg == 0 ) return -1;
+  if ( size < 1 || mesg == NULL || *mesg == 0 ) return -1;
 
   grid_t *gridptr = gridID2Ptr(gridID);
 
@@ -648,7 +648,7 @@ int cdiGridDefString(int gridID, int key, int size, const char *mesg)
       return -1;
     }
 
-  gridSetString(gridstring, mesg, size);
+  gridSetString(gridstring, mesg, (size_t)size);
   gridMark4Update(gridID);
 
   return 0;
@@ -678,7 +678,7 @@ The function @func{cdiGridInqString} return a CDI grid string value from a key.
 */
 int cdiGridInqString(int gridID, int key, int size, char *mesg)
 {
-  if ( size == 0 || mesg == NULL ) return -1;
+  if ( size < 1 || mesg == NULL ) return -1;
 
   grid_t *gridptr = gridID2Ptr(gridID);
   const char *gridstring = grid_key_to_string(gridptr, key);
@@ -688,7 +688,7 @@ int cdiGridInqString(int gridID, int key, int size, char *mesg)
       return -1;
     }
 
-  gridGetString(mesg, gridstring, size);
+  gridGetString(mesg, gridstring, (size_t)size);
 
   return 0;
 }
