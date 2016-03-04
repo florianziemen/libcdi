@@ -407,7 +407,7 @@ The function @func{cdiZaxisDefString} defines a CDI Z-axis string value from a k
 */
 int cdiZaxisDefString(int zaxisID, int key, int size, const char *mesg)
 {
-  if ( size == 0 || mesg == NULL || *mesg == 0 ) return -1;
+  if ( size <= 0 || mesg == NULL || *mesg == 0 ) return -1;
 
   zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
 
@@ -418,7 +418,7 @@ int cdiZaxisDefString(int zaxisID, int key, int size, const char *mesg)
       return -1;
     }
 
-  zaxisSetString(zaxisstring, mesg, size);
+  zaxisSetString(zaxisstring, mesg, (size_t)size);
   reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
 
   return 0;
@@ -448,7 +448,7 @@ The function @func{cdiZaxisInqString} return a CDI Z-axis string value from a ke
 */
 int cdiZaxisInqString(int zaxisID, int key, int size, char *mesg)
 {
-  if ( size == 0 || mesg == NULL ) return -1;
+  if ( size <= 0 || mesg == NULL ) return -1;
 
   zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
   const char *zaxisstring = zaxis_key_to_string(zaxisptr, key);
@@ -458,7 +458,7 @@ int cdiZaxisInqString(int zaxisID, int key, int size, char *mesg)
       return -1;
     }
 
-  zaxisGetString(mesg, zaxisstring, size);
+  zaxisGetString(mesg, zaxisstring, (size_t)size);
 
   return 0;
 }
