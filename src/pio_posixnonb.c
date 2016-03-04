@@ -125,7 +125,6 @@ pioWriterStdIO(void)
 {
   bFiledataP *bfd;
   listSet * bibBFiledataP;
-  size_t amount;
   int messagesize, source, tag, id;
   struct fileOpTag rtag;
   MPI_Status status;
@@ -201,47 +200,46 @@ pioWriterStdIO(void)
 	  break;
 
 	case IO_Send_buffer:
+          {
+            if (!(bfd = listSetGet(bibBFiledataP, fileIDTest,
+                                   (void *)(intptr_t)rtag.id)))
+              xabort("fileID=%d is not in set", rtag.id );
+            size_t amount = (size_t)messagesize;
 
-          if (!(bfd = listSetGet(bibBFiledataP, fileIDTest,
-                               (void *)(intptr_t)rtag.id)))
-            xabort("fileID=%d is not in set", rtag.id );
+            xdebug("COMMAND %s, ID=%d, NAME=%s", cdiPioCmdStrTab[rtag.command],
+                   rtag.id, bfd->name);
 
-	  amount = (size_t)messagesize;
+            xmpi(MPI_Recv(bfd->fb->buffer, messagesize, MPI_UNSIGNED_CHAR,
+                          source, tag, commPio, &status));
 
-	  xdebug("COMMAND %s, ID=%d, NAME=%s", cdiPioCmdStrTab[rtag.command],
-                 rtag.id, bfd->name);
-
-	  xmpi(MPI_Recv(bfd->fb->buffer, messagesize, MPI_UNSIGNED_CHAR,
-                        source, tag, commPio, &status));
-
-	  writeP(bfd, amount);
-	  break;
+            writeP(bfd, amount);
+          }
+          break;
 
 	case IO_Close_file:
+          {
+            xdebug("COMMAND %s,  FILE%d, SOURCE%d",
+                   cdiPioCmdStrTab[rtag.command], rtag.id, source);
 
-	  xdebug("COMMAND %s,  FILE%d, SOURCE%d",
-                 cdiPioCmdStrTab[rtag.command], rtag.id, source);
+            if (!(bfd = listSetGet(bibBFiledataP, fileIDTest,
+                                   (void *)(intptr_t)rtag.id)))
+              xabort("fileID=%d is not in set", rtag.id);
+            size_t amount = (size_t)messagesize;
+            xdebug("COMMAND %s, ID=%d, NAME=%s, AMOUNT=%zu",
+                   cdiPioCmdStrTab[rtag.command], rtag.id, bfd->name, amount);
 
-          if (!(bfd = listSetGet(bibBFiledataP, fileIDTest,
-                               (void *)(intptr_t)rtag.id)))
-            xabort("fileID=%d is not in set", rtag.id);
+            xmpi(MPI_Recv(bfd->fb->buffer, messagesize, MPI_UNSIGNED_CHAR,
+                          source, tag, commPio, &status));
 
-          amount = (size_t)messagesize;
+            writeP ( bfd, amount );
 
-	  xdebug("COMMAND %s, ID=%d, NAME=%s, AMOUNT=%zu",
-                 cdiPioCmdStrTab[rtag.command], rtag.id, bfd->name, amount);
-
-	  xmpi(MPI_Recv(bfd->fb->buffer, messagesize, MPI_UNSIGNED_CHAR,
-                        source, tag, commPio, &status));
-
-	  writeP ( bfd, amount );
-
-	  if ( ! --(bfd->activeCollectors))
-	    {
-	      xdebug("all are finished with file %d, delete node", rtag.id);
-	      listSetRemove(bibBFiledataP, fileIDTest,
-                            (void *)(intptr_t)rtag.id);
-	    }
+            if ( ! --(bfd->activeCollectors))
+              {
+                xdebug("all are finished with file %d, delete node", rtag.id);
+                listSetRemove(bibBFiledataP, fileIDTest,
+                              (void *)(intptr_t)rtag.id);
+              }
+          }
           break;
         case IO_Finalize:
           {
