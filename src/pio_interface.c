@@ -106,7 +106,7 @@ modelWinFlushBuffer(size_t streamIdx)
   txWin[streamIdx].dictRPCUsed = 0;
   txWin[streamIdx].pendingUpdate = false;
   txWin[streamIdx].postSet = false;
-  *(struct winHeaderEntry *)txWin[streamIdx].buffer
+  *(struct winHeaderEntry *)(void *)txWin[streamIdx].buffer
     = (struct winHeaderEntry){
     .id = HEADERSIZEMARKER,
     .specific.headerSize = { .numDataEntries = 0, .numRPCEntries = 0 },
