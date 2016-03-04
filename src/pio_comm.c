@@ -278,15 +278,6 @@ int      commInqIsProcIO     ( void )
   return info->isProcIO;
 }
 
-
-int commInqNProcsModel ( void )
-{
-  xassert ( info != NULL &&
-           info->sizeCalc != -1 );
-  return info->sizeCalc;
-}
-
-
 int commInqIOMode(void)
 {
   return info != NULL ? info->IOMode : PIO_NONE;
