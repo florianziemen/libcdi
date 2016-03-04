@@ -1114,7 +1114,6 @@ void cdfDefTrajLat(stream_t *streamptr, int gridID)
   cdfDefTrajLatLon(streamptr, gridID, &inqs, streamptr->ydimID, "Ysize");
 }
 
-
 static
 int checkGridName(int type, char *axisname, int fileID, int vlistID, int gridID, int ngrids, int mode)
 {
@@ -1159,6 +1158,63 @@ int checkGridName(int type, char *axisname, int fileID, int vlistID, int gridID,
                     }
                 }
               if ( index == ngrids ) checkname = FALSE;
+            }
+          else
+            {
+              checkname = FALSE;
+            }
+        }
+
+      if ( checkname ) iz++;
+    }
+  while (checkname && iz <= 99);
+
+
+  if ( iz ) sprintf(&axisname[strlen(axisname)], "_%u", iz+1);
+
+  return (int)iz;
+}
+
+static
+int checkZaxisName(int type, char *axisname, int fileID, int vlistID, int zaxisID, int nzaxis)
+{
+  int index;
+  int zaxisID0;
+  int ncdimid;
+  char axisname0[CDI_MAX_NAME];
+  char axisname2[CDI_MAX_NAME];
+  int status;
+
+  /* check that the name is not already defined */
+  int checkname = TRUE;
+  unsigned iz = 0;
+
+  do
+    {
+      strcpy(axisname2, axisname);
+      if ( iz ) sprintf(&axisname2[strlen(axisname2)], "_%u", iz+1);
+
+      //status = nc_inq_varid(fileID, axisname2, &ncvarid);
+      if ( type == 'V' ) /* type Var oder Dim */
+        status = nc_inq_varid(fileID, axisname2, &ncdimid);
+      else
+        status = nc_inq_dimid(fileID, axisname2, &ncdimid);
+
+      if ( status != NC_NOERR )
+        {
+          if ( iz )
+            {
+              /* check that the name does not exist for other zaxes */
+              for ( index = 0; index < nzaxis; index++ )
+                {
+                  zaxisID0 = vlistZaxis(vlistID, index);
+                  if ( zaxisID != zaxisID0 )
+                    {
+                      zaxisInqName(zaxisID0, axisname0);
+                      if ( strcmp(axisname0, axisname2) == 0 ) break;
+                    }
+                }
+              if ( index == nzaxis ) checkname = FALSE;
             }
           else
             {
@@ -2409,14 +2465,11 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
   char longname[CDI_MAX_NAME];
   char units[CDI_MAX_NAME];
   char tmpname[CDI_MAX_NAME];
-  int index;
-  int zaxisID0;
   int dimID = UNDEFID;
   int dimIDs[2];
   size_t len;
   int ncvarid = UNDEFID, ncbvarid = UNDEFID;
   int nvdimID = UNDEFID;
-  int ilevel = 0;
   int xtype = NC_DOUBLE;
   int positive;
 
@@ -2479,50 +2532,16 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
   */
   if ( dimID == UNDEFID )
     {
-      char axisname0[CDI_MAX_NAME];
-      char axisname2[CDI_MAX_NAME];
-      int checkname = FALSE;
-      int status;
+      char dimname[CDI_MAX_NAME+3];
+      dimname[0] = 0;
+      cdiZaxisInqString(zaxisID, CDI_ZAXIS_DIMNAME, CDI_MAX_NAME, dimname);
+      if ( dimname[0] == 0 ) strcpy(dimname, axisname);
 
-      /* check that the name is not already defined */
-      checkname = TRUE;
-      ilevel = 0;
-
-      while ( checkname )
-        {
-          strcpy(axisname2, axisname);
-          if ( ilevel ) sprintf(&axisname2[strlen(axisname2)], "_%d", ilevel+1);
-
-          status = nc_inq_varid(fileID, axisname2, &ncvarid);
-          if ( status != NC_NOERR )
-            {
-              if ( ilevel )
-                {
-                  /* check that the name does not exist for other zaxes */
-                  for ( index = 0; index < nzaxis; index++ )
-                    {
-                      zaxisID0 = vlistZaxis(vlistID, index);
-                      if ( zaxisID != zaxisID0 )
-                        {
-                          zaxisInqName(zaxisID0, axisname0);
-                          if ( strcmp(axisname0, axisname2) == 0 ) break;
-                        }
-                    }
-                  if ( index == nzaxis ) checkname = FALSE;
-                }
-              else
-                {
-                  checkname = FALSE;
-                }
-            }
-
-          if ( checkname ) ilevel++;
-
-          if ( ilevel > 99 ) break;
-        }
-
-      if ( ilevel ) sprintf(&axisname[strlen(axisname)], "_%1d", ilevel+1);
-
+      int status = checkZaxisName('V', axisname, fileID, vlistID, zaxisID, nzaxis);
+      /*
+      if ( status == 0 && ndims )
+        status = checkZaxisName('D', dimname, fileID, vlistID, zaxisID, nzaxis);
+      */
       if ( type == ZAXIS_REFERENCE )
 	cdfDefZaxisUUID(streamptr, zaxisID);
 
@@ -2534,7 +2553,7 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
         {
           if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
-          //printf("def dim %s %d\n", axisname, dimlen);
+          //printf("def dim %s  %s %d\n", dimname, axisname, dimlen);
           if ( ndims ) cdf_def_dim(fileID, axisname, dimlen, &dimID);
 
           zaxisInqLongname(zaxisID, longname);
