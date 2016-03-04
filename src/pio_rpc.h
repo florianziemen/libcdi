@@ -5,6 +5,7 @@
 #  include "config.h"
 #endif
 
+#include <limits.h>
 #include <stdbool.h>
 
 #include <mpi.h>
@@ -54,12 +55,37 @@ union funcArgs
   } streamNewTimestep;
 };
 
+enum {
+  /* number of unsigned vector elements to pack an Xt_uid into */
+  uidInts = (sizeof(Xt_uid) + sizeof(unsigned) - 1)/sizeof (unsigned),
+  packUIDShift = (sizeof (unsigned) % sizeof(Xt_uid)) * CHAR_BIT,
+};
 /* Describes offset and ID of serialized partition descriptor.
  * partDescMarker == PARTDESCMARKER, always. */
 struct partDescRecord
 {
-  Xt_uid uid;
+  unsigned packedUID[uidInts];
 };
+
+static inline void
+packXTUID(unsigned *restrict packedUID, Xt_uid uid)
+{
+  for (size_t i = 0; i < uidInts; ++i)
+    {
+      packedUID[i] = uid & ~0U;
+      uid >>= packUIDShift;
+    }
+}
+
+static inline Xt_uid
+unpackXTUID(const unsigned *packedUID)
+{
+  Xt_uid uid = 0;
+  for (size_t i = uidInts; i > 0; --i)
+    uid = (uid << packUIDShift) | packedUID[i - 1];
+  return uid;
+}
+
 
 struct winHeaderEntry
 {

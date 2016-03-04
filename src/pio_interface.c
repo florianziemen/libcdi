@@ -201,13 +201,13 @@ modelWinEnqueue(size_t streamIdx,
     }
   else if (header.id == PARTDESCMARKER)
     {
-      Xt_uid uid = header.specific.partDesc.uid;
+      Xt_uid uid = unpackXTUID(header.specific.partDesc.packedUID);
       int offset = -1;
       /* search if same uid entry has already been enqueued */
       for (int entry = 2; entry < targetEntry; entry += 2)
         {
           xassert(winDict[entry].id == PARTDESCMARKER);
-          if (winDict[entry].specific.partDesc.uid == uid)
+          if (unpackXTUID(winDict[entry].specific.partDesc.packedUID) == uid)
             {
               offset = winDict[entry].offset;
               break;
@@ -299,8 +299,9 @@ pioBufferPartData_(int streamID, int varID,
   {
     struct winHeaderEntry partHeader
       = { .id = PARTDESCMARKER,
-          .specific.partDesc = { .uid = xt_idxlist_get_uid(partDesc) },
           .offset = 0 };
+    packXTUID(partHeader.specific.partDesc.packedUID,
+              xt_idxlist_get_uid(partDesc));
     modelWinEnqueue(streamIdx, partHeader, partDesc, cdiPio_xt_idxlist_pack_wrap);
   }
   txWin[streamIdx].refuseFuncCall = 1;

@@ -592,7 +592,7 @@ getLayout(size_t streamIdx)
           = winDictEntry(streamIdx, client, headerIdx);
         size_t varID = (size_t)varHeader[0].specific.dataRecord.varID;
         size_t offset = (size_t)varHeader[0].offset;
-        Xt_uid uid = varHeader[1].specific.partDesc.uid;
+        Xt_uid uid = unpackXTUID(varHeader[1].specific.partDesc.packedUID);
         layout[client][varID] = (struct streamMemLayout){
           .varPartIdxListUID = uid, .offset = offset };
       }
