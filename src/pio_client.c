@@ -79,7 +79,7 @@ cdiPioClientStreamOpen(const char *filename, char filemode,
         }
     }
   else
-    Error("cdiPIO read support not implemented");
+    xabort("cdiPIO read support not implemented");
   return fileID;
 }
 
