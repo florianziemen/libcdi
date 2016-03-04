@@ -49,13 +49,13 @@ typedef struct  {
   int                     subtype;               /* subtype kind: TILES, ... */
   int                     nentries;              /* counter: total no. of entries in list */
 
+  /* currently active subtype, e.g. GRIB2 tile index (for example for
+     stream/vlist accesses): */
+  int                     active_subtype_index;
   struct subtype_entry_t  globals;               /* global attributes */
 
   /* list of subtype entries, e.g. the list of tiles, ordered by entry->self. */
   struct subtype_entry_t *entries;
-  /* currently active subtype, e.g. GRIB2 tile index (for example for
-     stream/vlist accesses): */
-  int                     active_subtype_index;
 } subtype_t;
 
 
