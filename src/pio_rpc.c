@@ -28,9 +28,9 @@ computeClientStreamBufSize(int streamID, const struct collSpec *collector)
       size_t chunkSize;
       {
         int varSize = vlistInqVarSize(vlistID, (int)varID);
-        chunkSize = (size_t)ceilf(cdiPIOpartInflate_
-                                    * (float)varSize
-                                    / (float)collector->numClients);
+        chunkSize = (size_t)(ceilf(cdiPIOpartInflate_
+                                   * (float)varSize
+                                   / (float)collector->numClients));
       }
       rmaSizeSpec.numDataRecords += 2;
       rmaSizeSpec.bufSize += chunkSize * sizeof (double)
