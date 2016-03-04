@@ -300,9 +300,9 @@ flushReblockBuffer(aFiledataM *of, int blockBufIdx)
       xmpi(MPI_Waitany(numMsg, of->reqs, &finIdx, MPI_STATUS_IGNORE));
       if (finIdx != MPI_UNDEFINED)
         {
-          int blockBufIdx = of->msgs[finIdx].pos;
-          if (blockBufIdx >= 0 && of->msgs[finIdx].direction == RECV)
-            --(of->pending[blockBufIdx].incoming);
+          int blockBufIdxOfTx = of->msgs[finIdx].pos;
+          if (blockBufIdxOfTx >= 0 && of->msgs[finIdx].direction == RECV)
+            --(of->pending[blockBufIdxOfTx].incoming);
           else if (of->msgs[finIdx].direction == SEND)
             Free(of->msgs[finIdx].sendBuf);
           else
