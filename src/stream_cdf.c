@@ -1115,6 +1115,49 @@ void cdfDefTrajLat(stream_t *streamptr, int gridID)
 }
 
 static
+int checkDimName(int fileID, size_t dimlen, char *dimname)
+{
+  /* check whether the dimenion name is already defined with the same length */
+  int checkname = TRUE;
+  unsigned iz = 0;
+  int dimid0 = UNDEFID;
+  int dimid = UNDEFID;
+  char name[CDI_MAX_NAME];
+
+  size_t len = strlen(dimname);
+  strcpy(name, dimname);
+
+  do
+    {
+      if ( iz ) sprintf(&name[len], "_%u", iz+1);
+
+      int status = nc_inq_dimid(fileID, name, &dimid0);
+      if ( status != NC_NOERR )
+        {
+          checkname = FALSE;
+        }
+      else
+        {
+          size_t dimlen0;
+          cdf_inq_dimlen(fileID, dimid0, &dimlen0);
+          if ( dimlen0 == dimlen )
+            {
+              dimid = dimid0;
+              checkname = FALSE;
+            }
+        }
+
+      if ( checkname ) iz++;
+    }
+  while ( checkname && (iz <= 99) );
+
+
+  if ( iz ) sprintf(&dimname[strlen(dimname)], "_%u", iz+1);
+
+  return dimid;
+}
+
+static
 int checkGridName(int type, char *axisname, int fileID, int vlistID, int gridID, int ngrids, int mode)
 {
   int index;
@@ -1133,7 +1176,6 @@ int checkGridName(int type, char *axisname, int fileID, int vlistID, int gridID,
       strcpy(axisname2, axisname);
       if ( iz ) sprintf(&axisname2[strlen(axisname2)], "_%u", iz+1);
 
-      //status = nc_inq_varid(fileID, axisname2, &ncvarid);
       if ( type == 'V' ) /* type Var oder Dim */
         status = nc_inq_varid(fileID, axisname2, &ncdimid);
       else
@@ -1304,11 +1346,11 @@ void cdfDefXaxis(stream_t *streamptr, int gridID, int ndims)
 
       int status = checkGridName('V', axisname, fileID, vlistID, gridID, ngrids, 'X');
       if ( status == 0 && ndims )
-        status = checkGridName('D', dimname, fileID, vlistID, gridID, ngrids, 'X');
+        dimID = checkDimName(fileID, dimlen, dimname);
 
       if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
-      if ( ndims ) cdf_def_dim(fileID, dimname, dimlen, &dimID);
+      if ( ndims && dimID == UNDEFID ) cdf_def_dim(fileID, dimname, dimlen, &dimID);
 
       int gen_bounds = FALSE;
       int grid_is_cyclic = gridIsCircular(gridID);
@@ -1451,11 +1493,11 @@ void cdfDefYaxis(stream_t *streamptr, int gridID, int ndims)
 
       int status = checkGridName('V', axisname, fileID, vlistID, gridID, ngrids, 'Y');
       if ( status == 0 && ndims )
-        status = checkGridName('D', dimname, fileID, vlistID, gridID, ngrids, 'Y');
+        dimID = checkDimName(fileID, dimlen, dimname);
 
       if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
-      if ( ndims ) cdf_def_dim(fileID, dimname, dimlen, &dimID);
+      if ( ndims && dimID == UNDEFID ) cdf_def_dim(fileID, dimname, dimlen, &dimID);
 
       int gen_bounds = FALSE;
       int grid_is_cyclic = gridIsCircular(gridID);
@@ -1626,13 +1668,13 @@ void cdfDefCurvilinear(stream_t *streamptr, int gridID)
     {
       checkGridName('V', xaxisname, fileID, vlistID, gridID, ngrids, 'X');
       checkGridName('V', yaxisname, fileID, vlistID, gridID, ngrids, 'Y');
-      checkGridName('D', xdimname, fileID, vlistID, gridID, ngrids, 'X');
-      checkGridName('D', ydimname, fileID, vlistID, gridID, ngrids, 'Y');
+      xdimID = checkDimName(fileID, xdimlen, xdimname);
+      ydimID = checkDimName(fileID, ydimlen, ydimname);
 
       if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
-      cdf_def_dim(fileID, xdimname, xdimlen, &xdimID);
-      cdf_def_dim(fileID, ydimname, ydimlen, &ydimID);
+      if ( xdimID == UNDEFID ) cdf_def_dim(fileID, xdimname, xdimlen, &xdimID);
+      if ( ydimID == UNDEFID ) cdf_def_dim(fileID, ydimname, ydimlen, &ydimID);
 
       if ( gridInqXboundsPtr(gridID) || gridInqYboundsPtr(gridID) )
         {
@@ -1641,8 +1683,8 @@ void cdfDefCurvilinear(stream_t *streamptr, int gridID)
           cdiGridInqString(gridID, CDI_GRID_VDIMNAME, CDI_MAX_NAME, vdimname);
           if ( vdimname[0] == 0 ) strcpy(vdimname, "nv4");
           size_t nvertex = 4;
-          if ( nc_inq_dimid(fileID, vdimname, &nvdimID) != NC_NOERR )
-            cdf_def_dim(fileID, vdimname, nvertex, &nvdimID);
+          nvdimID = checkDimName(fileID, nvertex, vdimname);
+          if ( nvdimID == UNDEFID ) cdf_def_dim(fileID, vdimname, nvertex, &nvdimID);
         }
 
       dimIDs[0] = ydimID;
@@ -1854,18 +1896,14 @@ void cdfDefGdim(stream_t *streamptr, int gridID)
 
   if ( dimID == UNDEFID )
     {
-      char axisname[CDI_MAX_NAME];
-      strcpy(axisname, "gsize");
+      char dimname[CDI_MAX_NAME];
+      strcpy(dimname, "gsize");
 
-      checkGridName('D', axisname, fileID, vlistID, gridID, ngrids, 'X');
-      /*
-      if ( iz == 0 ) axisname[5] = '\0';
-      else           sprintf(&axisname[5], "%1d", iz+1);
-      */
+      dimID = checkDimName(fileID, dimlen, dimname);
+
       if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
-      //printf("axisname, dimlen %s %d\n", axisname, dimlen);
-      cdf_def_dim(fileID, axisname, dimlen, &dimID);
+      if ( dimID == UNDEFID ) cdf_def_dim(fileID, dimname, dimlen, &dimID);
 
       cdf_enddef(fileID);
       streamptr->ncmode = 2;
@@ -2007,11 +2045,11 @@ void cdfDefUnstructured(stream_t *streamptr, int gridID)
     {
       checkGridName('V', xaxisname, fileID, vlistID, gridID, ngrids, 'X');
       checkGridName('V', yaxisname, fileID, vlistID, gridID, ngrids, 'Y');
-      checkGridName('D', xdimname, fileID, vlistID, gridID, ngrids, 'X');
+      dimID = checkDimName(fileID, dimlen, xdimname);
 
       if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
-      cdf_def_dim(fileID, xdimname, dimlen, &dimID);
+      if ( dimID == UNDEFID ) cdf_def_dim(fileID, xdimname, dimlen, &dimID);
 
       size_t nvertex = (size_t)gridInqNvertex(gridID);
       if ( nvertex > 0 )
@@ -2020,8 +2058,8 @@ void cdfDefUnstructured(stream_t *streamptr, int gridID)
           vdimname[0] = 0;
           cdiGridInqString(gridID, CDI_GRID_VDIMNAME, CDI_MAX_NAME, vdimname);
           if ( vdimname[0] == 0 ) strcpy(vdimname, "vertices");
-          checkGridName('D', vdimname, fileID, vlistID, gridID, ngrids, 'X');
-          cdf_def_dim(fileID, vdimname, nvertex, &nvdimID);
+          nvdimID = checkDimName(fileID, nvertex, vdimname);
+          if ( nvdimID == UNDEFID ) cdf_def_dim(fileID, vdimname, nvertex, &nvdimID);
         }
 
       cdfDefGridReference(streamptr, gridID);
