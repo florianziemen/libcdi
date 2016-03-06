@@ -2,6 +2,10 @@
 
 	* Version 1.7.2 released
 
+2016-03-06  Uwe Schulzweida
+
+	* NetCDF: added support for dimension name of z axis
+
 2016-03-01  Uwe Schulzweida
 
 	* NetCDF: added support for dimension name of x and y axis

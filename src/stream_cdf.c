@@ -2557,17 +2557,7 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
       }
 
   zaxisInqName(zaxisID, axisname);
-  /*
-  for ( index = 0; index < nzaxis; index++ )
-    {
-      if ( streamptr->zaxisID[index] != UNDEFID )
-        {
-          zaxisID0 = vlistZaxis(vlistID, index);
-          zaxisInqName(zaxisID0, zaxisname0);
-          if ( strcmp(zaxisname0, axisname) == 0 ) ilevel++;
-        }
-    }
-  */
+
   if ( dimID == UNDEFID )
     {
       char dimname[CDI_MAX_NAME+3];
@@ -2575,13 +2565,9 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
       cdiZaxisInqString(zaxisID, CDI_ZAXIS_DIMNAME, CDI_MAX_NAME, dimname);
       if ( dimname[0] == 0 ) strcpy(dimname, axisname);
 
-      int status = checkZaxisName('V', axisname, fileID, vlistID, zaxisID, nzaxis);
-      /*
-      if ( status == 0 && ndims )
-        status = checkZaxisName('D', dimname, fileID, vlistID, zaxisID, nzaxis);
-      */
-      if ( type == ZAXIS_REFERENCE )
-	cdfDefZaxisUUID(streamptr, zaxisID);
+      checkZaxisName('V', axisname, fileID, vlistID, zaxisID, nzaxis);
+
+      if ( type == ZAXIS_REFERENCE ) cdfDefZaxisUUID(streamptr, zaxisID);
 
       if ( type == ZAXIS_HYBRID || type == ZAXIS_HYBRID_HALF )
         {
@@ -2589,10 +2575,11 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
         }
       else
         {
+          dimID = checkDimName(fileID, dimlen, dimname);
+
           if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
-          //printf("def dim %s  %s %d\n", dimname, axisname, dimlen);
-          if ( ndims ) cdf_def_dim(fileID, axisname, dimlen, &dimID);
+          if ( ndims && dimID == UNDEFID ) cdf_def_dim(fileID, dimname, dimlen, &dimID);
 
           zaxisInqLongname(zaxisID, longname);
           zaxisInqUnits(zaxisID, units);
