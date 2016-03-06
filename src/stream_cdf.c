@@ -1214,14 +1214,13 @@ int checkGridName(char *axisname, int fileID, int vlistID, int gridID, int ngrid
 }
 
 static
-int checkZaxisName(int type, char *axisname, int fileID, int vlistID, int zaxisID, int nzaxis)
+int checkZaxisName(char *axisname, int fileID, int vlistID, int zaxisID, int nzaxis)
 {
   int index;
   int zaxisID0;
   int ncdimid;
   char axisname0[CDI_MAX_NAME];
   char axisname2[CDI_MAX_NAME];
-  int status;
 
   /* check that the name is not already defined */
   int checkname = TRUE;
@@ -1232,11 +1231,7 @@ int checkZaxisName(int type, char *axisname, int fileID, int vlistID, int zaxisI
       strcpy(axisname2, axisname);
       if ( iz ) sprintf(&axisname2[strlen(axisname2)], "_%u", iz+1);
 
-      //status = nc_inq_varid(fileID, axisname2, &ncvarid);
-      if ( type == 'V' ) /* type Var oder Dim */
-        status = nc_inq_varid(fileID, axisname2, &ncdimid);
-      else
-        status = nc_inq_dimid(fileID, axisname2, &ncdimid);
+      int status = nc_inq_varid(fileID, axisname2, &ncdimid);
 
       if ( status != NC_NOERR )
         {
@@ -2561,7 +2556,7 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
       cdiZaxisInqString(zaxisID, CDI_ZAXIS_DIMNAME, CDI_MAX_NAME, dimname);
       if ( dimname[0] == 0 ) strcpy(dimname, axisname);
 
-      checkZaxisName('V', axisname, fileID, vlistID, zaxisID, nzaxis);
+      checkZaxisName(axisname, fileID, vlistID, zaxisID, nzaxis);
 
       if ( type == ZAXIS_REFERENCE ) cdfDefZaxisUUID(streamptr, zaxisID);
 
