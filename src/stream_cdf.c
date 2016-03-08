@@ -1673,7 +1673,7 @@ void cdfDefRgrid(stream_t *streamptr, int gridID)
 static
 void cdfDefGdim(stream_t *streamptr, int gridID)
 {
-  int index, iz = 0;
+  int iz = 0;
   int dimID = UNDEFID;
 
   int vlistID = streamptr->vlistID;
@@ -1684,7 +1684,7 @@ void cdfDefGdim(stream_t *streamptr, int gridID)
   size_t dimlen = (size_t)gridInqSize(gridID);
 
   if ( gridInqYsize(gridID) == 0 )
-    for ( index = 0; index < ngrids; index++ )
+    for ( int index = 0; index < ngrids; index++ )
       {
         if ( streamptr->xdimID[index] != UNDEFID )
           {
@@ -1705,7 +1705,7 @@ void cdfDefGdim(stream_t *streamptr, int gridID)
       }
 
   if ( gridInqXsize(gridID) == 0 )
-    for ( index = 0; index < ngrids; index++ )
+    for ( int index = 0; index < ngrids; index++ )
       {
         if ( streamptr->ydimID[index] != UNDEFID )
           {
