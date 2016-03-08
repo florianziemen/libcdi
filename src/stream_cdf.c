@@ -919,14 +919,10 @@ void cdfDefComplex(stream_t *streamptr, int gridID)
   streamptr->xdimID[gridindex] = dimID;
 }
 
-
-static
-void cdfDefSP(stream_t *streamptr, int gridID)
+static void
+cdfDefSPorFC(stream_t *streamptr, int gridID,
+             char *restrict axisname, int gridRefType)
 {
-  /*
-  char longname[] = "Spherical harmonic coefficient";
-  */
-  char axisname[5] = "nspX";
   int index, iz = 0;
   int dimID = UNDEFID;
 
@@ -943,7 +939,7 @@ void cdfDefSP(stream_t *streamptr, int gridID)
         {
           int gridID0 = vlistGrid(vlistID, index);
           int gridtype0 = gridInqType(gridID0);
-          if ( gridtype0 == GRID_SPECTRAL )
+          if ( gridtype0 == gridRefType )
             {
               size_t dimlen0 = (size_t)gridInqSize(gridID0)/2;
               if ( dimlen == dimlen0 )
@@ -974,56 +970,22 @@ void cdfDefSP(stream_t *streamptr, int gridID)
   streamptr->ydimID[gridindex] = dimID;
 }
 
+static
+void cdfDefSP(stream_t *streamptr, int gridID)
+{
+  /*
+  char longname[] = "Spherical harmonic coefficient";
+  */
+  char axisname[5] = "nspX";
+  cdfDefSPorFC(streamptr, gridID, axisname, GRID_SPECTRAL);
+}
+
 
 static
 void cdfDefFC(stream_t *streamptr, int gridID)
 {
   char axisname[5] = "nfcX";
-  int index, iz = 0;
-  int dimID = UNDEFID;
-
-  int vlistID = streamptr->vlistID;
-  int fileID  = streamptr->fileID;
-
-  int ngrids = vlistNgrids(vlistID);
-
-  size_t dimlen = (size_t)gridInqSize(gridID)/2;
-
-  for ( index = 0; index < ngrids; index++ )
-    {
-      if ( streamptr->ydimID[index] != UNDEFID )
-        {
-          int gridID0 = vlistGrid(vlistID, index);
-          int gridtype0 = gridInqType(gridID0);
-          if ( gridtype0 == GRID_FOURIER )
-            {
-              size_t dimlen0 = (size_t)gridInqSize(gridID0)/2;
-              if ( dimlen == dimlen0 )
-                {
-                  dimID = streamptr->ydimID[index];
-                  break;
-                }
-              else
-                iz++;
-            }
-        }
-    }
-
-  if ( dimID == UNDEFID )
-    {
-      if ( iz == 0 ) axisname[3] = '\0';
-      else           sprintf(&axisname[3], "%1d", iz+1);
-
-      if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
-
-      cdf_def_dim(fileID, axisname, dimlen, &dimID);
-
-      cdf_enddef(fileID);
-      streamptr->ncmode = 2;
-    }
-
-  int gridindex = vlistGridIndex(vlistID, gridID);
-  streamptr->ydimID[gridindex] = dimID;
+  cdfDefSPorFC(streamptr, gridID, axisname, GRID_FOURIER);
 }
 
 struct cdfDefTrajLatLonInqs {
