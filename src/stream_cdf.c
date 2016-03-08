@@ -1111,7 +1111,7 @@ int checkDimName(int fileID, size_t dimlen, char *dimname)
         }
       iz++;
     }
-  while ( (iz <= 99) );
+  while ( iz <= 99 );
 
 
   if ( iz ) sprintf(dimname + len, "_%u", iz+1);
