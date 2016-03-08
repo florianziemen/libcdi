@@ -431,6 +431,11 @@ FCALLSCSUB2 (zaxisDefNumber, ZAXISDEFNUMBER, zaxisdefnumber, INT, INT)
 FCALLSCFUN1 (INT, zaxisInqNumber, ZAXISINQNUMBER, zaxisinqnumber, INT)
 FCALLSCSUB2 (zaxisDefUUID, ZAXISDEFUUID, zaxisdefuuid, INT, PVOID)
 FCALLSCSUB2 (zaxisInqUUID, ZAXISINQUUID, zaxisinquuid, INT, PVOID)
+
+/*  CDI zaxis string key values  */
+
+FCALLSCFUN4 (INT, cdiZaxisDefString, CDIZAXISDEFSTRING, cdizaxisdefstring, INT, INT, INT, STRING)
+FCALLSCFUN4 (INT, cdiZaxisInqString, CDIZAXISINQSTRING, cdizaxisinqstring, INT, INT, INT, PSTRING)
 FCALLSCSUB2 (zaxisDefName, ZAXISDEFNAME, zaxisdefname, INT, STRING)
 FCALLSCSUB2 (zaxisInqName, ZAXISINQNAME, zaxisinqname, INT, PSTRING)
 FCALLSCSUB2 (zaxisDefLongname, ZAXISDEFLONGNAME, zaxisdeflongname, INT, STRING)

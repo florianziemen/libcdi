@@ -2002,6 +2002,33 @@
 !                                     INTEGER*1(16)   uuid)
       EXTERNAL        zaxisInqUUID
 
+!
+!  CDI zaxis string key values
+!
+      INTEGER    CDI_ZAXIS_NAME        
+      PARAMETER (CDI_ZAXIS_NAME         = 801)
+      INTEGER    CDI_ZAXIS_DIMNAME     
+      PARAMETER (CDI_ZAXIS_DIMNAME      = 802)
+      INTEGER    CDI_ZAXIS_VDIMNAME    
+      PARAMETER (CDI_ZAXIS_VDIMNAME     = 803)
+      INTEGER    CDI_ZAXIS_LONGNAME    
+      PARAMETER (CDI_ZAXIS_LONGNAME     = 804)
+      INTEGER    CDI_ZAXIS_UNITS       
+      PARAMETER (CDI_ZAXIS_UNITS        = 805)
+      INTEGER         cdiZaxisDefString
+!                                    (INTEGER         zaxisID,
+!                                     INTEGER         key,
+!                                     INTEGER         size,
+!                                     CHARACTER*(*)   mesg)
+      EXTERNAL        cdiZaxisDefString
+
+      INTEGER         cdiZaxisInqString
+!                                    (INTEGER         zaxisID,
+!                                     INTEGER         key,
+!                                     INTEGER         size,
+!                                     CHARACTER*(*)   mesg)
+      EXTERNAL        cdiZaxisInqString
+
 !                     zaxisDefName
 !                                    (INTEGER         zaxisID,
 !                                     CHARACTER*(*)   name_optional)
