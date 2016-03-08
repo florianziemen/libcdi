@@ -1088,41 +1088,33 @@ static
 int checkDimName(int fileID, size_t dimlen, char *dimname)
 {
   /* check whether the dimenion name is already defined with the same length */
-  int checkname = TRUE;
   unsigned iz = 0;
-  int dimid0 = UNDEFID;
   int dimid = UNDEFID;
   char name[CDI_MAX_NAME];
 
   size_t len = strlen(dimname);
-  strcpy(name, dimname);
+  memcpy(name, dimname, len + 1);
 
   do
     {
-      if ( iz ) sprintf(&name[len], "_%u", iz+1);
+      if ( iz ) sprintf(name + len, "_%u", iz+1);
 
-      int status = nc_inq_dimid(fileID, name, &dimid0);
+      int dimid0, status = nc_inq_dimid(fileID, name, &dimid0);
       if ( status != NC_NOERR )
+        break;
+      size_t dimlen0;
+      cdf_inq_dimlen(fileID, dimid0, &dimlen0);
+      if ( dimlen0 == dimlen )
         {
-          checkname = FALSE;
+          dimid = dimid0;
+          break;
         }
-      else
-        {
-          size_t dimlen0;
-          cdf_inq_dimlen(fileID, dimid0, &dimlen0);
-          if ( dimlen0 == dimlen )
-            {
-              dimid = dimid0;
-              checkname = FALSE;
-            }
-        }
-
-      if ( checkname ) iz++;
+      iz++;
     }
-  while ( checkname && (iz <= 99) );
+  while ( (iz <= 99) );
 
 
-  if ( iz ) sprintf(&dimname[strlen(dimname)], "_%u", iz+1);
+  if ( iz ) sprintf(dimname + len, "_%u", iz+1);
 
   return dimid;
 }
@@ -1130,13 +1122,10 @@ int checkDimName(int fileID, size_t dimlen, char *dimname)
 static
 int checkGridName(char *axisname, int fileID, int vlistID, int gridID, int ngrids, int mode)
 {
-  int index;
-  int gridID0;
   int ncdimid;
   char axisname2[CDI_MAX_NAME];
 
   /* check that the name is not already defined */
-  int checkname = TRUE;
   unsigned iz = 0;
 
   size_t axisnameLen = strlen(axisname);
@@ -1152,29 +1141,25 @@ int checkGridName(char *axisname, int fileID, int vlistID, int gridID, int ngrid
           if ( iz )
             {
               /* check that the name does not exist for other grids */
-              for ( index = 0; index < ngrids; index++ )
+              for ( int index = 0; index < ngrids; index++ )
                 {
-                  gridID0 = vlistGrid(vlistID, index);
+                  int gridID0 = vlistGrid(vlistID, index);
                   if ( gridID != gridID0 )
                     {
                        /* mode X or Y */
                       const char *(*query)(int)
                         = mode == 'X' ? gridInqXnamePtr : gridInqYnamePtr;
                       const char *axisname0 = query(gridID0);
-                      if ( strcmp(axisname0, axisname2) == 0 ) break;
+                      if ( strcmp(axisname0, axisname2) == 0 ) goto nextSuffix;
                     }
                 }
-              if ( index == ngrids ) checkname = FALSE;
             }
-          else
-            {
-              checkname = FALSE;
-            }
+          break;
         }
-
-      if ( checkname ) iz++;
+      nextSuffix:
+      ++iz;
     }
-  while (checkname && iz <= 99);
+  while ( iz <= 99 );
 
 
   if ( iz ) sprintf(axisname + axisnameLen, "_%u", iz+1);
