@@ -1179,51 +1179,44 @@ int checkGridName(char *axisname, int fileID, int vlistID, int gridID, int ngrid
 static
 int checkZaxisName(char *axisname, int fileID, int vlistID, int zaxisID, int nzaxis)
 {
-  int index;
-  int zaxisID0;
-  int ncdimid;
   char axisname0[CDI_MAX_NAME];
   char axisname2[CDI_MAX_NAME];
 
   /* check that the name is not already defined */
-  int checkname = TRUE;
   unsigned iz = 0;
 
+  size_t axisnameLen = strlen(axisname);
+  memcpy(axisname2, axisname, axisnameLen + 1);
   do
     {
-      strcpy(axisname2, axisname);
-      if ( iz ) sprintf(&axisname2[strlen(axisname2)], "_%u", iz+1);
+      if ( iz ) sprintf(axisname2 + axisnameLen, "_%u", iz+1);
 
-      int status = nc_inq_varid(fileID, axisname2, &ncdimid);
+      int ncdimid, status = nc_inq_varid(fileID, axisname2, &ncdimid);
 
       if ( status != NC_NOERR )
         {
           if ( iz )
             {
               /* check that the name does not exist for other zaxes */
-              for ( index = 0; index < nzaxis; index++ )
+              for ( int index = 0; index < nzaxis; index++ )
                 {
-                  zaxisID0 = vlistZaxis(vlistID, index);
+                  int zaxisID0 = vlistZaxis(vlistID, index);
                   if ( zaxisID != zaxisID0 )
                     {
                       zaxisInqName(zaxisID0, axisname0);
-                      if ( strcmp(axisname0, axisname2) == 0 ) break;
+                      if ( strcmp(axisname0, axisname2) == 0 ) goto nextSuffix;
                     }
                 }
-              if ( index == nzaxis ) checkname = FALSE;
             }
-          else
-            {
-              checkname = FALSE;
-            }
+          break;
         }
-
-      if ( checkname ) iz++;
+      nextSuffix:
+      ++iz;
     }
-  while (checkname && iz <= 99);
+  while (iz <= 99);
 
 
-  if ( iz ) sprintf(&axisname[strlen(axisname)], "_%u", iz+1);
+  if ( iz ) sprintf(axisname + axisnameLen, "_%u", iz+1);
 
   return (int)iz;
 }
