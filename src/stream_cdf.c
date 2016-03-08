@@ -34,6 +34,7 @@
 #include "cdf_int.h"
 #include "varscan.h"
 #include "vlist.h"
+#include "zaxis.h"
 
 //#define PROJECTION_TEST
 
@@ -1179,7 +1180,6 @@ int checkGridName(char *axisname, int fileID, int vlistID, int gridID, int ngrid
 static
 int checkZaxisName(char *axisname, int fileID, int vlistID, int zaxisID, int nzaxis)
 {
-  char axisname0[CDI_MAX_NAME];
   char axisname2[CDI_MAX_NAME];
 
   /* check that the name is not already defined */
@@ -1203,7 +1203,7 @@ int checkZaxisName(char *axisname, int fileID, int vlistID, int zaxisID, int nza
                   int zaxisID0 = vlistZaxis(vlistID, index);
                   if ( zaxisID != zaxisID0 )
                     {
-                      zaxisInqName(zaxisID0, axisname0);
+                      const char *axisname0 = zaxisInqNamePtr(zaxisID0);
                       if ( strcmp(axisname0, axisname2) == 0 ) goto nextSuffix;
                     }
                 }

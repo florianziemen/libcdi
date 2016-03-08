@@ -579,6 +579,12 @@ void zaxisInqName(int zaxisID, char *name)
   strcpy(name, zaxisptr->name);
 }
 
+const char *zaxisInqNamePtr(int zaxisID)
+{
+  zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
+  return zaxisptr->name;
+}
+
 /*
 @Function  zaxisInqLongname
 @Title     Get the longname of a Z-axis

@@ -16,6 +16,8 @@ void zaxisDefLtype2(int zaxisID, int ltype2);
 
 const resOps *getZaxisOps(void);
 
+const char *zaxisInqNamePtr(int zaxisID);
+
 #endif
 
 /*
