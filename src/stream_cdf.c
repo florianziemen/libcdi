@@ -3053,9 +3053,9 @@ bool isDepthAxis(const char *stdname, const char *longname)
 {
   bool status = false;
 
-  if ( strcmp(stdname, "depth") == 0 ) status = true;
-
-  if ( status == false )
+  if ( strcmp(stdname, "depth") == 0 )
+    status = true;
+  else
     if ( strcmp(longname, "depth_below_sea") == 0 ||
          strcmp(longname, "depth below sea") == 0 )
       {
@@ -3070,9 +3070,9 @@ bool isHeightAxis(const char *stdname, const char *longname)
 {
   bool status = false;
 
-  if ( strcmp(stdname, "height") == 0 ) status = true;
-
-  if ( status == false )
+  if ( strcmp(stdname, "height") == 0 )
+    status = true;
+  else
     if ( strcmp(longname, "height") == 0 ||
          strcmp(longname, "height above the surface") == 0 )
       {
