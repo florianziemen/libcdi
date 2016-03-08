@@ -1126,7 +1126,6 @@ int checkGridName(char *axisname, int fileID, int vlistID, int gridID, int ngrid
   int index;
   int gridID0;
   int ncdimid;
-  char axisname0[CDI_MAX_NAME];
   char axisname2[CDI_MAX_NAME];
 
   /* check that the name is not already defined */
@@ -1151,11 +1150,10 @@ int checkGridName(char *axisname, int fileID, int vlistID, int gridID, int ngrid
                   gridID0 = vlistGrid(vlistID, index);
                   if ( gridID != gridID0 )
                     {
-                      if ( mode == 'X' ) /* mode X or Y */
-                        gridInqXname(gridID0, axisname0);
-                      else
-                        gridInqYname(gridID0, axisname0);
-
+                       /* mode X or Y */
+                      const char *(*query)(int)
+                        = mode == 'X' ? gridInqXnamePtr : gridInqYnamePtr;
+                      const char *axisname0 = query(gridID0);
                       if ( strcmp(axisname0, axisname2) == 0 ) break;
                     }
                 }

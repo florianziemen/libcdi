@@ -863,6 +863,12 @@ void gridInqXname(int gridID, char *xname)
   strcpy(xname, gridptr->xname);
 }
 
+const char *gridInqXnamePtr(int gridID)
+{
+  grid_t *gridptr = gridID2Ptr(gridID);
+  return gridptr->xname;
+}
+
 /*
 @Function  gridInqXlongname
 @Title     Get the longname of a X-axis
@@ -949,6 +955,12 @@ void gridInqYname(int gridID, char *yname)
   grid_t *gridptr = gridID2Ptr(gridID);
 
   strcpy(yname, gridptr->yname);
+}
+
+const char *gridInqYnamePtr(int gridID)
+{
+  grid_t *gridptr = gridID2Ptr(gridID);
+  return gridptr->yname;
 }
 
 /*

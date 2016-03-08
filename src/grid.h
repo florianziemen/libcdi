@@ -129,6 +129,9 @@ const double *gridInqXboundsPtr(int gridID);
 const double *gridInqYboundsPtr(int gridID);
 const double *gridInqAreaPtr(int gridID);
 
+const char *gridInqXnamePtr(int gridID);
+const char *gridInqYnamePtr(int gridID);
+
 int gridCompare(int gridID, const grid_t *grid);
 int gridGenerate(const grid_t *grid);
 
