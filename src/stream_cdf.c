@@ -1740,14 +1740,9 @@ void cdfDefGridReference(stream_t *streamptr, int gridID)
       cdf_put_att_int(fileID, NC_GLOBAL, "number_of_grid_used", NC_INT, 1, &number);
     }
 
-  if ( gridInqReference(gridID, NULL) )
-    {
-      char gridfile[8912];
-      gridInqReference(gridID, gridfile);
-
-      if ( gridfile[0] != 0 )
-        cdf_put_att_text(fileID, NC_GLOBAL, "grid_file_uri", strlen(gridfile), gridfile);
-    }
+  const char *gridfile = gridInqReferencePtr(gridID);
+  if ( gridfile && gridfile[0] != 0 )
+    cdf_put_att_text(fileID, NC_GLOBAL, "grid_file_uri", strlen(gridfile), gridfile);
 }
 
 static

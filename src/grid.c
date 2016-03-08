@@ -4121,6 +4121,12 @@ int gridInqReference(int gridID, char *reference)
   return (len);
 }
 
+const char *gridInqReferencePtr(int gridID)
+{
+  grid_t *gridptr = gridID2Ptr(gridID);
+  return gridptr->reference;
+}
+
 /*
 @Function  gridDefUUID
 @Title     Define the UUID for an unstructured grid
