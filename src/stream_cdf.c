@@ -2610,8 +2610,8 @@ static
 void cdfDefPole(stream_t *streamptr, int gridID)
 {
   int ncvarid = UNDEFID;
-  char varname[] = "rotated_pole";
-  char mapname[] = "rotated_latitude_longitude";
+  static const char varname[] = "rotated_pole";
+  static const char mapname[] = "rotated_latitude_longitude";
 
   int fileID  = streamptr->fileID;
 
@@ -2624,7 +2624,7 @@ void cdfDefPole(stream_t *streamptr, int gridID)
   int ncerrcode = nc_def_var(fileID, varname, (nc_type) NC_CHAR, 0, NULL, &ncvarid);
   if ( ncerrcode == NC_NOERR )
     {
-      cdf_put_att_text(fileID, ncvarid, "grid_mapping_name", strlen(mapname), mapname);
+      cdf_put_att_text(fileID, ncvarid, "grid_mapping_name", sizeof (mapname) - 1, mapname);
       cdf_put_att_double(fileID, ncvarid, "grid_north_pole_latitude", NC_DOUBLE, 1, &ypole);
       cdf_put_att_double(fileID, ncvarid, "grid_north_pole_longitude", NC_DOUBLE, 1, &xpole);
       if ( IS_NOT_EQUAL(angle, 0) )
