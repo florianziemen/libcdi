@@ -1170,10 +1170,11 @@ int checkGridName(char *axisname, int fileID, int vlistID, int gridID, int ngrid
   int checkname = TRUE;
   unsigned iz = 0;
 
+  size_t axisnameLen = strlen(axisname);
+  memcpy(axisname2, axisname, axisnameLen + 1);
   do
     {
-      strcpy(axisname2, axisname);
-      if ( iz ) sprintf(&axisname2[strlen(axisname2)], "_%u", iz+1);
+      if ( iz ) sprintf(axisname2 + axisnameLen, "_%u", iz+1);
 
       int status = nc_inq_varid(fileID, axisname2, &ncdimid);
 
@@ -1208,7 +1209,7 @@ int checkGridName(char *axisname, int fileID, int vlistID, int gridID, int ngrid
   while (checkname && iz <= 99);
 
 
-  if ( iz ) sprintf(&axisname[strlen(axisname)], "_%u", iz+1);
+  if ( iz ) sprintf(axisname + axisnameLen, "_%u", iz+1);
 
   return (int)iz;
 }
