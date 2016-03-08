@@ -1222,14 +1222,10 @@ int checkZaxisName(char *axisname, int fileID, int vlistID, int zaxisID, int nza
 static
 void cdfDefXaxis(stream_t *streamptr, int gridID, int ndims)
 {
-  char units[CDI_MAX_NAME];
-  char longname[CDI_MAX_NAME];
-  char stdname[CDI_MAX_NAME];
   char axisname[CDI_MAX_NAME];
   int index;
   /*  int index2; */
   int dimID = UNDEFID;
-  int dimIDs[2];
   int ngrids = 0;
   size_t len;
   int ncvarid = UNDEFID, ncbvarid = UNDEFID;
@@ -1249,9 +1245,6 @@ void cdfDefXaxis(stream_t *streamptr, int gridID, int ndims)
   gridInqXname(gridID, axisname);
   if ( axisname[0] == 0 ) Error("axis name undefined!");
 
-  gridInqXlongname(gridID, longname);
-  gridInqXstdname(gridID, stdname);
-  gridInqXunits(gridID, units);
 
   for ( index = 0; index < ngrids; index++ )
     {
@@ -1305,13 +1298,24 @@ void cdfDefXaxis(stream_t *streamptr, int gridID, int ndims)
         {
           cdf_def_var(fileID, axisname, xtype, ndims, &dimID, &ncvarid);
 
-          if ( (len = strlen(stdname)) )
-            cdf_put_att_text(fileID, ncvarid, "standard_name", len, stdname);
-          if ( (len = strlen(longname)) )
-            cdf_put_att_text(fileID, ncvarid, "long_name", len, longname);
-          if ( (len = strlen(units)) )
-            cdf_put_att_text(fileID, ncvarid, "units", len, units);
-
+          {
+            char stdname[CDI_MAX_NAME];
+            gridInqXstdname(gridID, stdname);
+            if ( (len = strlen(stdname)) )
+              cdf_put_att_text(fileID, ncvarid, "standard_name", len, stdname);
+          }
+          {
+            char longname[CDI_MAX_NAME];
+            gridInqXlongname(gridID, longname);
+            if ( (len = strlen(longname)) )
+              cdf_put_att_text(fileID, ncvarid, "long_name", len, longname);
+          }
+          {
+            char units[CDI_MAX_NAME];
+            gridInqXunits(gridID, units);
+            if ( (len = strlen(units)) )
+              cdf_put_att_text(fileID, ncvarid, "units", len, units);
+          }
           cdf_put_att_text(fileID, ncvarid, "axis", 1, "X");
 
           if ( gridInqXboundsPtr(gridID) )
@@ -1339,8 +1343,7 @@ void cdfDefXaxis(stream_t *streamptr, int gridID, int ndims)
             {
               strcat(axisname, "_");
               strcat(axisname, BNDS_NAME);
-              dimIDs[0] = dimID;
-              dimIDs[1] = nvdimID;
+              int dimIDs[2] = { dimID, nvdimID };
               cdf_def_var(fileID, axisname, xtype, 2, dimIDs, &ncbvarid);
               cdf_put_att_text(fileID, ncvarid, "bounds", strlen(axisname), axisname);
             }
@@ -1369,14 +1372,10 @@ void cdfDefXaxis(stream_t *streamptr, int gridID, int ndims)
 static
 void cdfDefYaxis(stream_t *streamptr, int gridID, int ndims)
 {
-  char units[CDI_MAX_NAME];
-  char longname[CDI_MAX_NAME];
-  char stdname[CDI_MAX_NAME];
   char axisname[CDI_MAX_NAME];
   int index;
   /*  int index2; */
   int dimID = UNDEFID;
-  int dimIDs[2];
   int ngrids = 0;
   size_t len;
   int ncvarid = UNDEFID, ncbvarid = UNDEFID;
@@ -1395,10 +1394,6 @@ void cdfDefYaxis(stream_t *streamptr, int gridID, int ndims)
 
   gridInqYname(gridID, axisname);
   if ( axisname[0] == 0 ) Error("axis name undefined!");
-
-  gridInqYlongname(gridID, longname);
-  gridInqYstdname(gridID, stdname);
-  gridInqYunits(gridID, units);
 
   for ( index = 0; index < ngrids; index++ )
     {
@@ -1452,12 +1447,24 @@ void cdfDefYaxis(stream_t *streamptr, int gridID, int ndims)
         {
           cdf_def_var(fileID, axisname, xtype, ndims, &dimID, &ncvarid);
 
-          if ( (len = strlen(stdname)) )
-            cdf_put_att_text(fileID, ncvarid, "standard_name", len, stdname);
-          if ( (len = strlen(longname)) )
-            cdf_put_att_text(fileID, ncvarid, "long_name", len, longname);
-          if ( (len = strlen(units)) )
-            cdf_put_att_text(fileID, ncvarid, "units", len, units);
+          {
+            char stdname[CDI_MAX_NAME];
+            gridInqYstdname(gridID, stdname);
+            if ( (len = strlen(stdname)) )
+              cdf_put_att_text(fileID, ncvarid, "standard_name", len, stdname);
+          }
+          {
+            char longname[CDI_MAX_NAME];
+            gridInqYlongname(gridID, longname);
+            if ( (len = strlen(longname)) )
+              cdf_put_att_text(fileID, ncvarid, "long_name", len, longname);
+          }
+          {
+            char units[CDI_MAX_NAME];
+            gridInqYunits(gridID, units);
+            if ( (len = strlen(units)) )
+              cdf_put_att_text(fileID, ncvarid, "units", len, units);
+          }
 
           cdf_put_att_text(fileID, ncvarid, "axis", 1, "Y");
 
@@ -1486,8 +1493,7 @@ void cdfDefYaxis(stream_t *streamptr, int gridID, int ndims)
             {
               strcat(axisname, "_");
               strcat(axisname, BNDS_NAME);
-              dimIDs[0] = dimID;
-              dimIDs[1] = nvdimID;
+              int dimIDs[2] = { dimID, nvdimID };
               cdf_def_var(fileID, axisname, xtype, 2, dimIDs, &ncbvarid);
               cdf_put_att_text(fileID, ncvarid, "bounds", strlen(axisname), axisname);
             }
