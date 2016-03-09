@@ -143,6 +143,8 @@ void zaxisDefaultValue(zaxis_t *zaxisptr)
   zaxisptr->name[0]     = 0;
   zaxisptr->longname[0] = 0;
   zaxisptr->stdname[0]  = 0;
+  zaxisptr->dimname[0]  = 0;
+  zaxisptr->vdimname[0] = 0;
   zaxisptr->units[0]    = 0;
   zaxisptr->psname[0]   = 0;
   zaxisptr->vals        = NULL;
