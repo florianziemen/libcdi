@@ -22,7 +22,7 @@ typedef void (*valDestroyFunc)(void *);
 typedef void (*valPrintFunc)(void *, FILE *);
 typedef int (*valGetPackSizeFunc)(void *, void *context);
 typedef void (*valPackFunc)(void *, void *buf, int size, int *pos, void *context);
-typedef int (*valTxCodeFunc)(void);
+typedef int (*valTxCodeFunc)(void *);
 
 typedef struct
 {

@@ -61,7 +61,7 @@ static void gridDestroyP(void *gridptr);
 static void gridPrintP(void *gridptr, FILE *fp);
 static int gridGetPackSize(void *gridptr, void *context);
 static void gridPack(void *gridptr, void *buff, int size, int *position, void *context);
-static int gridTxCode(void);
+static int gridTxCode(void *gridptr);
 
 static const resOps gridOps = { gridCompareP, gridDestroyP, gridPrintP, gridGetPackSize, gridPack, gridTxCode };
 
@@ -4171,8 +4171,9 @@ cdiGridGetIndexList(unsigned ngrids, int *gridIndexList)
 }
 
 static int
-gridTxCode()
+gridTxCode(void *gridptr)
 {
+  (void) gridptr;
   return GRID;
 }
 
