@@ -597,7 +597,7 @@ int reshGetTxCode(cdiResH resH)
     {
       listElem_t *listElem = resHList[nsp].resources + nspT.idx;
       xassert ( listElem->res.v.ops );
-      type = listElem->res.v.ops->valTxCode();
+      type = listElem->res.v.ops->valTxCode(listElem->res.v.val);
     }
 
   LIST_UNLOCK();
@@ -641,7 +641,7 @@ int reshPackBufferCreate(char **packBuffer, int *packBufferSize, void *context)
           {
             listElem_t * curr = r + i;
             xassert ( curr->res.v.ops );
-            int type = curr->res.v.ops->valTxCode();
+            int type = curr->res.v.ops->valTxCode(curr->res.v.val);
             if ( ! type ) continue;
             serializePack(&type, 1, CDI_DATATYPE_INT, pB,
                           pBSize, &packBufferPos, context);

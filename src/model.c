@@ -42,7 +42,7 @@ static void   modelPrintP   ( void * modelptr, FILE * fp );
 static int    modelGetSizeP ( void * modelptr, void *context);
 static void   modelPackP    ( void * modelptr, void * buff, int size,
                               int *position, void *context);
-static int    modelTxCode   ( void );
+static int modelTxCode(void *modelptr);
 
 static const resOps modelOps = {
   modelCompareP,
@@ -285,8 +285,9 @@ void modelPrintP   ( void * modelptr, FILE * fp )
 
 
 static int
-modelTxCode ( void )
+modelTxCode(void *modelptr)
 {
+  (void)modelptr;
   return MODEL;
 }
 

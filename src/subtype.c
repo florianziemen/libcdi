@@ -61,7 +61,7 @@ static void   subtypeDestroyP    ( void * subtype_ptr );
 static void   subtypePrintP      ( void * subtype_ptr, FILE * fp );
 static int    subtypeGetPackSize ( void * subtype_ptr, void *context);
 static void   subtypePack        ( void * subtype_ptr, void * buffer, int size, int *pos, void *context);
-static int    subtypeTxCode      ( void );
+static int subtypeTxCode(void *subtype_ptr);
 
 static const resOps subtypeOps = {
   (int (*) (void *, void *)) subtypeCompareP,
@@ -893,8 +893,10 @@ static void subtypePack( void * subtype_ptr, void * buffer, int size, int *pos, 
   Error("Not yet implemented for subtypes!");
 }
 
-static int subtypeTxCode( void )
-{  Error("Not yet implemented for subtypes!");  return 0; }
+static int subtypeTxCode(void *subtypePtr)
+{
+  (void)subtypePtr;
+  Error("Not yet implemented for subtypes!");  return 0; }
 
 
 /*
