@@ -24,7 +24,7 @@ static void taxisDestroyP(void *taxisptr);
 static void taxisPrintKernel(taxis_t *taxisptr, FILE *fp);
 static int taxisGetPackSize(void *taxisptr, void *context);
 static void taxisPack(void *taxisptr, void *buf, int size, int *position, void *context);
-static int taxisTxCode(void);
+static int taxisTxCode(void *taxisptr);
 
 const resOps taxisOps
     = { taxisCompareP, taxisDestroyP, (void (*)(void *, FILE *)) taxisPrintKernel, taxisGetPackSize, taxisPack, taxisTxCode };
@@ -1422,8 +1422,9 @@ taxisCompareP(void *taxisptr1, void *taxisptr2)
 }
 
 static int
-taxisTxCode(void)
+taxisTxCode(void *taxisptr)
 {
+  (void) taxisptr;
   return TAXIS;
 }
 

@@ -25,7 +25,7 @@ static void instituteDestroyP(institute_t *instituteptr);
 static void institutePrintP(institute_t *instituteptr, FILE *fp);
 static int instituteGetPackSize(institute_t *instituteptr, void *context);
 static void institutePackP(void *instituteptr, void *buf, int size, int *position, void *context);
-static int instituteTxCode(void);
+static int instituteTxCode(void *instituteptr);
 
 static const resOps instituteOps = { (int (*)(void *, void *)) instituteCompareKernel,
                                      (void (*)(void *)) instituteDestroyP,
@@ -262,8 +262,9 @@ institutePrintP(institute_t *ip, FILE *fp)
 }
 
 static int
-instituteTxCode(void)
+instituteTxCode(void *instituteptr)
 {
+  (void) instituteptr;
   return INSTITUTE;
 }
 
