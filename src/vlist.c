@@ -63,7 +63,7 @@ static void vlist_delete(vlist_t *vlistptr);
 
 static int vlistGetSizeP(void *vlistptr, void *context);
 static void vlistPackP(void *vlistptr, void *buff, int size, int *position, void *context);
-static int vlistTxCode(void);
+static int vlistTxCode(void *vlistptr);
 
 #if !defined(__cplusplus)
 const
@@ -1517,8 +1517,9 @@ enum
 };
 
 static int
-vlistTxCode(void)
+vlistTxCode(void *vlistptr)
 {
+  (void) vlistptr;
   return VLIST;
 }
 

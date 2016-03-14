@@ -45,7 +45,7 @@ static void streamDestroyP(void *streamptr);
 static void streamPrintP(void *streamptr, FILE *fp);
 static int streamGetPackSize(void *streamptr, void *context);
 static void streamPack(void *streamptr, void *buff, int size, int *position, void *context);
-static int streamTxCode(void);
+static int streamTxCode(void *streamptr);
 
 const resOps streamOps = { streamCompareP, streamDestroyP, streamPrintP, streamGetPackSize, streamPack, streamTxCode };
 
@@ -1715,8 +1715,9 @@ cdiInqAccesstype(int streamID)
 }
 
 static int
-streamTxCode(void)
+streamTxCode(void *streamptr)
 {
+  (void) streamptr;
   return STREAM;
 }
 
