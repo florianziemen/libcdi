@@ -2284,11 +2284,10 @@ int gridIsEqual(int gridID1, int gridID2)
 
 int gridCompareP(void *gridptr1, void *gridptr2)
 {
-  grid_t *g1 = ( grid_t * ) gridptr1;
-  grid_t *g2 = ( grid_t * ) gridptr2;
+  grid_t *g1 = (grid_t *)gridptr1;
+  grid_t *g2 = (grid_t *)gridptr2;
   enum { equal = 0,
          differ = -1 };
-  int i, size;
 
   xassert ( g1 );
   xassert ( g2 );
@@ -2321,94 +2320,82 @@ int gridCompareP(void *gridptr1, void *gridptr2)
   if ( IS_NOT_EQUAL(g1->uvRelativeToGrid     , g2->uvRelativeToGrid)     ) return differ;
   if ( IS_NOT_EQUAL(g1->scanningMode         , g2->scanningMode)         ) return differ;
 
-  const double *restrict g1_xvals = g1->vtable->inqXValsPtr(g1),
-               *restrict g2_xvals = g2->vtable->inqXValsPtr(g2);
-  if ( g1_xvals )
-    {
-      if ( g1->type == GRID_UNSTRUCTURED || g1->type == GRID_CURVILINEAR )
-        size = g1->size;
-      else
-        size = g1->x.size;
-      xassert ( size );
 
-      if ( !g2_xvals ) return differ;
-
-      for ( i = 0; i < size; i++ )
-        if ( IS_NOT_EQUAL(g1_xvals[i], g2_xvals[i]) ) return differ;
-    }
-  else if ( g2_xvals )
-    return differ;
-
-  const double *restrict g1_yvals = g1->vtable->inqYValsPtr(g1),
-               *restrict g2_yvals = g2->vtable->inqYValsPtr(g2);
-  if ( g1_yvals )
-    {
-      if ( g1->type == GRID_UNSTRUCTURED || g1->type == GRID_CURVILINEAR )
-	size = g1->size;
-      else
-	size = g1->y.size;
-      xassert ( size );
-
-      if ( !g2_yvals ) return differ;
-
-      for ( i = 0; i < size; i++ )
-        if ( IS_NOT_EQUAL(g1_yvals[i], g2_yvals[i]) ) return differ;
-    }
-  else if ( g2_yvals )
-    return differ;
-
-  const double *restrict g1_area = g1->vtable->inqAreaPtr(g1),
-               *restrict g2_area = g2->vtable->inqAreaPtr(g2);
-  if ( g1_area )
-    {
-      xassert ( g1->size );
-
-      if ( !g2_area ) return differ;
-
-      for ( i = 0; i < g1->size; i++ )
-	if ( IS_NOT_EQUAL(g1_area[i], g2_area[i]) ) return differ;
-    }
-  else if ( g2_area )
-    return differ;
-
+  bool irregular
+    = g1->type == GRID_UNSTRUCTURED || g1->type == GRID_CURVILINEAR;
   {
-    const double *restrict g1_xbounds, *restrict g2_xbounds;
-    if ( (g1_xbounds = g1->vtable->inqXBoundsPtr(g1)) )
-      {
-        xassert ( g1->nvertex );
-        if ( g1->type == GRID_CURVILINEAR || g1->type == GRID_UNSTRUCTURED )
-          size = g1->nvertex * g1->size;
-        else
-          size = g1->nvertex * g1->x.size;
-        xassert ( size );
-
-        if ( !(g2_xbounds = g2->vtable->inqXBoundsPtr(g2)) ) return differ;
-
-        for ( i = 0; i < size; i++ )
-          if ( IS_NOT_EQUAL(g1_xbounds[i], g2_xbounds[i]) ) return differ;
-      }
-    else if ( g2->vtable->inqXBoundsPtr(g2) )
+    const double *restrict g1_xvals = g1->vtable->inqXValsPtr(g1),
+      *restrict g2_xvals = g2->vtable->inqXValsPtr(g2);
+    if ( (g1_xvals != NULL) ^ (g2_xvals != NULL) )
       return differ;
+    if ( g1_xvals )
+      {
+        int size = irregular ? g1->size : g1->x.size;
+        xassert(size);
+        for ( int i = 0; i < size; i++ )
+          if ( IS_NOT_EQUAL(g1_xvals[i], g2_xvals[i]) ) return differ;
+      }
   }
 
   {
-    const double *restrict g1_ybounds, *restrict g2_ybounds;
-    if ( (g1_ybounds = g1->vtable->inqYBoundsPtr(g1)) )
+    const double *restrict g1_yvals = g1->vtable->inqYValsPtr(g1),
+      *restrict g2_yvals = g2->vtable->inqYValsPtr(g2);
+    if ( (g1_yvals != NULL) ^ (g2_yvals != NULL) )
+      return differ;
+    if ( g1_yvals )
+      {
+        int size = irregular ? g1->size : g1->y.size;
+        xassert(size);
+        for ( int i = 0; i < size; i++ )
+          if ( IS_NOT_EQUAL(g1_yvals[i], g2_yvals[i]) ) return differ;
+      }
+  }
+
+  {
+    const double *restrict g1_area = g1->vtable->inqAreaPtr(g1),
+      *restrict g2_area = g2->vtable->inqAreaPtr(g2);
+    if ( (g1_area != NULL) ^ (g2_area != NULL) )
+      return differ;
+    if ( g1_area )
+      {
+        int size = g1->size;
+        xassert(size);
+
+        for ( int i = 0; i < size; i++ )
+          if ( IS_NOT_EQUAL(g1_area[i], g2_area[i]) ) return differ;
+      }
+  }
+
+  {
+    const double *restrict g1_xbounds = g1->vtable->inqXBoundsPtr(g1),
+      *restrict g2_xbounds = g2->vtable->inqXBoundsPtr(g2);
+    if ( (g1_xbounds != NULL) ^ (g2_xbounds != NULL) )
+      return differ;
+    if (g1_xbounds)
       {
         xassert ( g1->nvertex );
-        if ( g1->type == GRID_CURVILINEAR || g1->type == GRID_UNSTRUCTURED )
-          size = g1->nvertex * g1->size;
-        else
-          size = g1->nvertex * g1->y.size;
-        xassert ( size );
+        int size = g1->nvertex * (irregular ? g1->size : g1->x.size);
+        xassert(size);
 
-        if ( ! (g2_ybounds = g2->vtable->inqYBoundsPtr(g2)) ) return differ;
-
-        for ( i = 0; i < size; i++ )
-          if ( IS_NOT_EQUAL(g1->y.bounds[i], g2->y.bounds[i]) ) return differ;
+        for ( int i = 0; i < size; i++ )
+          if ( IS_NOT_EQUAL(g1_xbounds[i], g2_xbounds[i]) ) return differ;
       }
-    else if ( g2->vtable->inqYBoundsPtr(g2) )
+  }
+
+  {
+    const double *restrict g1_ybounds = g1->vtable->inqYBoundsPtr(g1),
+      *restrict g2_ybounds = g2->vtable->inqYBoundsPtr(g2);
+    if ( (g1_ybounds != NULL) ^ (g2_ybounds != NULL) )
       return differ;
+    if ( g1_ybounds )
+      {
+        xassert(g1->nvertex);
+        int size = g1->nvertex * (irregular ? g1->size : g1->y.size);
+        xassert(size);
+
+        for ( int i = 0; i < size; i++ )
+          if ( IS_NOT_EQUAL(g1_ybounds[i], g2_ybounds[i]) ) return differ;
+      }
   }
 
   if (strcmp(g1->x.name, g2->x.name)) return differ;
@@ -2422,12 +2409,11 @@ int gridCompareP(void *gridptr1, void *gridptr2)
 
   if (strcmp(g1->mapping, g2->mapping)) return differ;
 
-  if ( g1->reference )
+  if ( (g1->reference != NULL) == (g2->reference != NULL) )
     {
-      if ( !g2->reference ) return differ;
-      if ( strcmp(g1->reference, g2->reference) ) return differ;
+      if (g1->reference && strcmp(g1->reference, g2->reference) ) return differ;
     }
-  else if ( g2->reference )
+  else
     return differ;
 
   if ( g1->mask )
