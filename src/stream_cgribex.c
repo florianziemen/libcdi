@@ -1440,7 +1440,7 @@ int cgribexDefTimerange(int tsteptype, int factor, int calendar,
   int timerange = -1;
   int year, month, day, hour, minute, second;
   int julday1, secofday1, julday2, secofday2, days, secs;
-  int ip, ip1 = 0, ip2 = 0;
+  int ip1 = 0, ip2 = 0;
 
   cdiDecodeDate(rdate, &year, &month, &day);
   cdiDecodeTime(rtime, &hour, &minute, &second);
@@ -1454,7 +1454,9 @@ int cgribexDefTimerange(int tsteptype, int factor, int calendar,
 
   if ( !(int)(fmod(days*86400.0 + secs, factor)) )
     {
-      ip = (int) ((days*86400.0 + secs)/factor);
+      int ip = (int) ((days*86400.0 + secs)/factor);
+
+      if ( (ip > 255) && (tsteptype == TSTEP_INSTANT) ) tsteptype = TSTEP_INSTANT3;
 
       switch ( tsteptype )
 	{
@@ -1465,14 +1467,14 @@ int cgribexDefTimerange(int tsteptype, int factor, int calendar,
 	case TSTEP_ACCUM:    timerange =  4; ip1 = 0;  ip2 = ip; break;
 	case TSTEP_DIFF:     timerange =  5; ip1 = 0;  ip2 = ip; break;
 	case TSTEP_INSTANT3:
-	default:             timerange = 10; ip1 = ip/256; ip2 = ip%256;  break;
+	default:             timerange = 10; ip1 = ip/256; ip2 = ip%256; break;
 	}
     }
 
   *pip1 = ip1;
   *pip2 = ip2;
 
-  return (timerange);
+  return timerange;
 }
 
 static
