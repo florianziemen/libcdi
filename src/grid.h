@@ -65,6 +65,7 @@ struct gridVirtTable
   SizeType (*inqYBounds)(grid_t *gridptr, double *ybounds);
   const double *(*inqXBoundsPtr)(grid_t *gridptr);
   const double *(*inqYBoundsPtr)(grid_t *gridptr);
+  int txCode;
 };
 
 struct gridaxis_t
