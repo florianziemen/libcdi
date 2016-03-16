@@ -4161,10 +4161,10 @@ cdiGridGetIndexList(unsigned ngrids, int *gridIndexList)
 }
 
 static int
-gridTxCode(void *gridptr)
+gridTxCode(void *voidP)
 {
-  (void) gridptr;
-  return GRID;
+  grid_t *gridptr = (grid_t *) voidP;
+  return gridptr->vtable->txCode;
 }
 
 enum
@@ -4730,6 +4730,7 @@ const struct gridVirtTable cdiGridVtable = {
   .inqYBounds = gridInqYBoundsSerial,
   .inqXBoundsPtr = gridInqXBoundsPtrSerial,
   .inqYBoundsPtr = gridInqYBoundsPtrSerial,
+  .txCode = GRID,
 };
 
 /*
