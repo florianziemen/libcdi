@@ -61,6 +61,27 @@ struct gridVirtTable
   const double *(*inqXBoundsPtr)(grid_t *gridptr);
   const double *(*inqYBoundsPtr)(grid_t *gridptr);
   int txCode;
+  int (*getPackSize)(grid_t *gridptr, void *context);
+  int (*getPackSizeScalars)(grid_t *gridptr, void *context);
+  int (*getPackSizeArrays)(grid_t *gridptr, void *context);
+  void (*unpack)(char * unpackBuffer, int unpackBufferSize,
+                 int * unpackBufferPos, int originNamespace, void *context,
+                 int force_id);
+  grid_t *(*unpackScalars)(char * unpackBuffer, int unpackBufferSize,
+                           int * unpackBufferPos, int originNamespace,
+                           void *context, int force_id, int *memberMaskP);
+  void (*unpackArrays)(grid_t *gridptr, int memberMask,
+                       char * unpackBuffer, int unpackBufferSize,
+                       int * unpackBufferPos, int originNamespace,
+                       void *context);
+  void (*pack)(grid_t *gridptr, void * packBuffer, int packBufferSize,
+               int * packBufferPos, void *context);
+  /* return member mask */
+  int (*packScalars)(grid_t *gridptr, void *packBuffer, int packBufferSize,
+                     int *packBufferPos, void *context);
+  void (*packArrays)(grid_t *gridptr, int memberMask,
+                     void *packBuffer, int packBufferSize, int *packBufferPos,
+                     void *context);
 };
 
 struct gridaxis_t {
