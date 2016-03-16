@@ -21,6 +21,28 @@ uint32_t cdiCheckSum(int type, int count, const void *buffer)
   return s;
 }
 
+void cdiCheckSumRStart(struct cdiCheckSumState *state)
+{
+  state->sum = 0U;
+  state->len = 0;
+}
+
+void cdiCheckSumRAdd(struct cdiCheckSumState *state,
+                     int type, int count, const void *buffer)
+{
+  size_t elemSize = (size_t)serializeGetSizeInCore(1, type, NULL);
+  memcrc_r_eswap(&state->sum,
+                 (const unsigned char *)buffer, (size_t)count, elemSize);
+  state->len += (off_t)(elemSize * (size_t)count);
+}
+
+
+uint32_t cdiCheckSumRValue(struct cdiCheckSumState state)
+{
+  return memcrc_finish(&state.sum, state.len);
+}
+
+
 /*
  * Local Variables:
  * c-file-style: "Java"
