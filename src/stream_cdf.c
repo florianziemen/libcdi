@@ -1019,6 +1019,10 @@ static const struct cdfDefGridAxisInqs {
   .axisVal = gridInqYval,
   .axisValsPtr = gridInqYvalsPtr,
   .axisBoundsPtr = gridInqYboundsPtr,
+}, gridInqsZ = {
+  .axisStdname = zaxisInqStdname,
+  .axisLongname = zaxisInqLongname,
+  .axisUnits = zaxisInqUnits,
 };
 
 static void
@@ -2250,7 +2254,6 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
   char tmpname[CDI_MAX_NAME];
   int dimID = UNDEFID;
   int dimIDs[2];
-  size_t len;
   int ncvarid = UNDEFID, ncbvarid = UNDEFID;
   int nvdimID = UNDEFID;
   int xtype = NC_DOUBLE;
@@ -2328,24 +2331,7 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
 
           cdf_def_var(fileID, axisname, (nc_type) xtype, ndims, &dimID, &ncvarid);
 
-          {
-            char stdname[CDI_MAX_NAME];
-            zaxisInqStdname(zaxisID, stdname);
-            if ( (len = strlen(stdname)) )
-              cdf_put_att_text(fileID, ncvarid, "standard_name", len, stdname);
-          }
-          {
-            char longname[CDI_MAX_NAME];
-            zaxisInqLongname(zaxisID, longname);
-            if ( (len = strlen(longname)) )
-              cdf_put_att_text(fileID, ncvarid, "long_name", len, longname);
-          }
-          {
-            char units[CDI_MAX_NAME];
-            zaxisInqUnits(zaxisID, units);
-            if ( (len = strlen(units)) )
-              cdf_put_att_text(fileID, ncvarid, "units", len, units);
-          }
+          cdfPutGridStdAtts(fileID, ncvarid, zaxisID, &gridInqsZ);
 
 	  positive = zaxisInqPositive(zaxisID);
 	  if ( positive == POSITIVE_UP )
