@@ -370,35 +370,68 @@ void cdfDefComplex(stream_t *streamptr, int gridID, int gridindex)
   ncgrid[gridindex].ncIDs[CDF_DIMID_X] = dimID;
 }
 
+struct idSearch
+{
+  int numNonMatching, foundID;
+  size_t foundIdx;
+};
+
+static inline struct idSearch
+cdfSearchIDBySize(size_t startIdx, size_t numIDs, const ncgrid_t ncgrid[numIDs],
+                  int ncIDType, int searchType, int searchSize,
+                  int (*typeInq)(int id), int (*sizeInq)(int id))
+{
+  int numNonMatching = 0,
+    foundID = CDI_UNDEFID;
+  size_t foundIdx = SIZE_MAX;
+  for ( size_t index = startIdx; index < numIDs; index++ )
+    {
+      if ( ncgrid[index].ncIDs[ncIDType] != CDI_UNDEFID )
+        {
+          int id0 = ncgrid[index].gridID,
+            id0Type = typeInq(id0);
+          if ( id0Type == searchType )
+            {
+              int size0 = sizeInq(id0);
+              if ( searchSize == size0 )
+                {
+                  foundID = ncgrid[index].ncIDs[ncIDType];
+                  foundIdx = index;
+                  break;
+                }
+              numNonMatching++;
+            }
+        }
+    }
+  return (struct idSearch){ .numNonMatching = numNonMatching,
+      .foundID = foundID, .foundIdx = foundIdx };
+}
+
+static int
+cdfGridInqHalfSize(int gridID)
+{
+  return gridInqSize(gridID)/2;
+}
+
+
 static void
 cdfDefSPorFC(stream_t *streamptr, int gridID, int gridindex,
              char *restrict axisname, int gridRefType)
 {
-  int iz = 0;
-  int dimID = CDI_UNDEFID;
   ncgrid_t *ncgrid = streamptr->ncgrid;
 
-  size_t dimlen = (size_t)gridInqSize(gridID)/2;
+  size_t dimlen = (size_t)(gridInqSize(gridID))/2;
 
-  for ( int index = 0; index < gridindex; index++ )
-    {
-      if ( ncgrid[index].ncIDs[CDF_DIMID_Y] != CDI_UNDEFID )
-        {
-          int gridID0 = ncgrid[index].gridID;
-          int gridtype0 = gridInqType(gridID0);
-          if ( gridtype0 == gridRefType )
-            {
-              size_t dimlen0 = (size_t)gridInqSize(gridID0)/2;
-              if ( dimlen == dimlen0 )
-                {
-                  dimID = ncgrid[index].ncIDs[CDF_DIMID_Y];
-                  break;
-                }
-              else
-                iz++;
-            }
-        }
-    }
+  int iz;
+  int dimID;
+  {
+    struct idSearch search
+      = cdfSearchIDBySize(0, (size_t)gridindex, ncgrid, CDF_DIMID_Y,
+                          gridRefType, (int)dimlen,
+                          gridInqType, cdfGridInqHalfSize);
+    dimID = search.foundID;
+    iz = search.numNonMatching;
+  }
 
   if ( dimID == CDI_UNDEFID )
     {
@@ -983,30 +1016,19 @@ static
 void cdfDefRgrid(stream_t *streamptr, int gridID, int gridindex)
 {
   ncgrid_t *ncgrid = streamptr->ncgrid;
-  int dimID = CDI_UNDEFID;
 
   size_t dimlen = (size_t)gridInqSize(gridID);
 
-  int iz = 0;
-  for ( int index = 0; index < gridindex; index++ )
-    {
-      if ( ncgrid[index].ncIDs[CDF_DIMID_X] != CDI_UNDEFID )
-        {
-          int gridID0 = ncgrid[index].gridID;
-          int gridtype0 = gridInqType(gridID0);
-          if ( gridtype0 == GRID_GAUSSIAN_REDUCED )
-            {
-              size_t dimlen0 = (size_t)gridInqSize(gridID0);
-
-              if ( dimlen == dimlen0 )
-                {
-                  dimID = ncgrid[index].ncIDs[CDF_DIMID_X];
-                  break;
-                }
-              iz++;
-            }
-        }
-    }
+  int iz;
+  int dimID;
+  {
+    struct idSearch search
+      = cdfSearchIDBySize(0, (size_t)gridindex, ncgrid, CDF_DIMID_X,
+                          GRID_GAUSSIAN_REDUCED, (int)dimlen,
+                          gridInqType, gridInqSize);
+    iz = search.numNonMatching;
+    dimID = search.foundID;
+  }
 
   if ( dimID == CDI_UNDEFID )
     {
@@ -1045,46 +1067,24 @@ void cdfDefGdim(stream_t *streamptr, int gridID, int gridindex)
   size_t dimlen = (size_t)gridInqSize(gridID);
 
   if ( gridInqYsize(gridID) == 0 )
-    for ( int index = 0; index < gridindex; index++ )
-      {
-        if ( ncgrid[index].ncIDs[CDF_DIMID_X] != CDI_UNDEFID )
-          {
-            int gridID0 = ncgrid[index].gridID;
-            int gridtype0 = gridInqType(gridID0);
-            if ( gridtype0 == GRID_GENERIC )
-              {
-                size_t dimlen0 = (size_t)gridInqSize(gridID0);
-                if ( dimlen == dimlen0 )
-                  {
-                    dimID = ncgrid[index].ncIDs[CDF_DIMID_X];
-                    break;
-                  }
-                else
-                  iz++;
-              }
-          }
-      }
+    {
+      struct idSearch search
+        = cdfSearchIDBySize(0, (size_t)gridindex, ncgrid, CDF_DIMID_X,
+                            GRID_GENERIC, (int)dimlen,
+                            gridInqType, gridInqSize);
+      iz = search.numNonMatching;
+      dimID = search.foundID;
+    }
 
   if ( gridInqXsize(gridID) == 0 )
-    for ( int index = 0; index < gridindex; index++ )
-      {
-        if ( ncgrid[index].ncIDs[CDF_DIMID_Y] != CDI_UNDEFID )
-          {
-            int gridID0 = ncgrid[index].gridID;
-            int gridtype0 = gridInqType(gridID0);
-            if ( gridtype0 == GRID_GENERIC )
-              {
-                size_t dimlen0 = (size_t)gridInqSize(gridID0);
-                if ( dimlen == dimlen0 )
-                  {
-                    dimID = ncgrid[index].ncIDs[CDF_DIMID_Y];
-                    break;
-                  }
-                else
-                  iz++;
-              }
-          }
-      }
+    {
+      struct idSearch search
+        = cdfSearchIDBySize(0, (size_t)gridindex, ncgrid, CDF_DIMID_Y,
+                            GRID_GENERIC, (int)dimlen,
+                            gridInqType, gridInqSize);
+      iz += search.numNonMatching;
+      dimID = search.foundID;
+    }
 
   if ( dimID == CDI_UNDEFID )
     {
@@ -1162,8 +1162,6 @@ void cdfDefZaxisUUID(stream_t *streamptr, int zaxisID)
 static
 void cdfDefUnstructured(stream_t *streamptr, int gridID, int gridindex)
 {
-  int dimID = CDI_UNDEFID;
-  int ncxvarid = CDI_UNDEFID, ncyvarid = CDI_UNDEFID;
   int ncbxvarid = CDI_UNDEFID, ncbyvarid = CDI_UNDEFID, ncavarid = CDI_UNDEFID;
   int nvdimID = CDI_UNDEFID;
   nc_type xtype = (nc_type)cdfDefDatatype(gridInqPrec(gridID), streamptr->filetype);
@@ -1171,31 +1169,39 @@ void cdfDefUnstructured(stream_t *streamptr, int gridID, int gridindex)
 
   size_t dimlen = (size_t)gridInqSize(gridID);
 
-  for ( int index = 0; index < gridindex; index++ )
-    {
-      if ( ncgrid[index].ncIDs[CDF_DIMID_X] != CDI_UNDEFID )
+  int dimID = CDI_UNDEFID;
+  int ncxvarid = CDI_UNDEFID, ncyvarid = CDI_UNDEFID;
+  {
+    size_t ofs = 0;
+    do {
+      struct idSearch search
+        = cdfSearchIDBySize(ofs, (size_t)gridindex, ncgrid, CDF_DIMID_X,
+                            GRID_UNSTRUCTURED, (int)dimlen,
+                            gridInqType, gridInqSize);
+      size_t index = search.foundIdx;
+      if ( index != SIZE_MAX )
         {
           int gridID0 = ncgrid[index].gridID;
-          int gridtype0 = gridInqType(gridID0);
-          if ( gridtype0 == GRID_UNSTRUCTURED )
+          if ( gridInqNvertex(gridID0) == gridInqNvertex(gridID) &&
+               IS_EQUAL(gridInqXval(gridID0, 0), gridInqXval(gridID, 0)) &&
+               IS_EQUAL(gridInqXval(gridID0, (int)dimlen-1),
+                        gridInqXval(gridID, (int)dimlen-1)) &&
+               IS_EQUAL(gridInqYval(gridID0, 0), gridInqYval(gridID, 0)) &&
+               IS_EQUAL(gridInqYval(gridID0, (int)dimlen-1),
+                        gridInqYval(gridID, (int)dimlen-1)) )
             {
-              size_t dimlen0 = (size_t)gridInqSize(gridID0);
-              if ( dimlen == dimlen0 )
-		if ( gridInqNvertex(gridID0) == gridInqNvertex(gridID) &&
-		     IS_EQUAL(gridInqXval(gridID0, 0), gridInqXval(gridID, 0)) &&
-                     IS_EQUAL(gridInqXval(gridID0, (int)dimlen-1), gridInqXval(gridID, (int)dimlen-1)) &&
-		     IS_EQUAL(gridInqYval(gridID0, 0), gridInqYval(gridID, 0)) &&
-                     IS_EQUAL(gridInqYval(gridID0, (int)dimlen-1), gridInqYval(gridID, (int)dimlen-1)) )
-		  {
-		    dimID = ncgrid[index].ncIDs[CDF_DIMID_X];
-                    ncxvarid = ncgrid[index].ncIDs[CDF_VARID_X];
-                    ncyvarid = ncgrid[index].ncIDs[CDF_VARID_Y];
-                    ncavarid = ncgrid[index].ncIDs[CDF_VARID_A];
-		    break;
-		  }
+              dimID = ncgrid[index].ncIDs[CDF_DIMID_X];
+              ncxvarid = ncgrid[index].ncIDs[CDF_VARID_X];
+              ncyvarid = ncgrid[index].ncIDs[CDF_VARID_Y];
+              ncavarid = ncgrid[index].ncIDs[CDF_VARID_A];
+              break;
             }
+          ofs = search.foundIdx;
+          if (ofs < (size_t)gridindex)
+            continue;
         }
-    }
+    } while (false);
+  }
 
   if ( dimID == CDI_UNDEFID )
     {
