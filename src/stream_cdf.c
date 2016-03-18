@@ -760,7 +760,7 @@ void cdfDefForecastTimeUnits(char *unitstr, int timeunit)
        timeunit == TUNIT_6HOURS  ||
        timeunit == TUNIT_12HOURS ) timeunit = TUNIT_HOUR;
 
-  sprintf(unitstr, "%s", tunitNamePtr(timeunit));
+  strcpy(unitstr, tunitNamePtr(timeunit));
 }
 
 static
