@@ -2495,8 +2495,8 @@ int gridCompareP ( void * gridptr1, void * gridptr2 )
   else if ( g2_xvals )
     return differ;
 
-  const double *restrict g1_yvals = g1->vtable->inqXValsPtr(g1),
-    *restrict g2_yvals = g2->vtable->inqXValsPtr(g2);
+  const double *restrict g1_yvals = g1->vtable->inqYValsPtr(g1),
+    *restrict g2_yvals = g2->vtable->inqYValsPtr(g2);
   if ( g1_yvals )
     {
       if ( g1->type == GRID_UNSTRUCTURED || g1->type == GRID_CURVILINEAR )
