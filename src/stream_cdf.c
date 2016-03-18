@@ -883,7 +883,7 @@ void cdfDefTimestep(stream_t *streamptr, int tsID)
 static
 void cdfDefComplex(stream_t *streamptr, int gridID)
 {
-  char axisname[] = "nc2";
+  static const char axisname[] = "nc2";
   int dimID = UNDEFID;
   int vlistID = streamptr->vlistID;
   int fileID  = streamptr->fileID;
