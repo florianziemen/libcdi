@@ -1179,8 +1179,6 @@ void cdfDefUnstructured(stream_t *streamptr, int gridID, int gridindex)
   nc_type xtype = (nc_type)cdfDefDatatype(gridInqPrec(gridID), streamptr->filetype);
   ncgrid_t *ncgrid = streamptr->ncgrid;
 
-  int fileID  = streamptr->fileID;
-
   size_t dimlen = (size_t)gridInqSize(gridID);
 
   for ( int index = 0; index < gridindex; index++ )
@@ -1211,6 +1209,7 @@ void cdfDefUnstructured(stream_t *streamptr, int gridID, int gridindex)
 
   if ( dimID == CDI_UNDEFID )
     {
+      int fileID  = streamptr->fileID;
       if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
       {
         char xdimname[CDI_MAX_NAME+3];
