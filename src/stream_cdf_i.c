@@ -2708,8 +2708,6 @@ void cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 	  int zsize = 1;
           int psvarid = -1;
           int p0varid = -1;
-	  double *lbounds = NULL;
-	  double *ubounds = NULL;
 
           int positive = 0;
 	  int ndims = ncvar->ndims;
@@ -2743,6 +2741,8 @@ void cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 	  if ( zaxisType == CDI_UNDEFID ) zaxisType = ZAXIS_GENERIC;
 
 	  int zprec = CDI_DATATYPE_FLT64;
+	  double *restrict lbounds = NULL;
+	  double *restrict ubounds = NULL;
 
 	  if ( zvarid != CDI_UNDEFID )
 	    {
@@ -2779,9 +2779,9 @@ void cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 		      if ( nlevel == zsize && nvertex == 2 )
 			{
 			  with_bounds = true;
-			  lbounds = (double *) Malloc((size_t)nlevel*sizeof(double));
-			  ubounds = (double *) Malloc((size_t)nlevel*sizeof(double));
-			  double zbounds[2*nlevel];
+			  lbounds = (double *) Malloc(4 * (size_t)nlevel*sizeof(double));
+			  ubounds = lbounds + nlevel;
+			  double *restrict zbounds = lbounds + 2 * nlevel;
 			  cdf_get_var_double(ncvars[zvarid].ncid, ncvars[zvarid].bounds, zbounds);
 			  for ( int i = 0; i < nlevel; ++i )
 			    {
@@ -2843,7 +2843,6 @@ void cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
           */
 	  if ( zvar    ) Free(zvar);
 	  if ( lbounds ) Free(lbounds);
-	  if ( ubounds ) Free(ubounds);
 
           if ( zvarid != CDI_UNDEFID )
             {
