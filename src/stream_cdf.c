@@ -1276,32 +1276,35 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int ndims,
 
   if ( dimID == UNDEFID )
     {
-      /*
-      char dimname[CDI_MAX_NAME+3];
-      dimname[0] = 0;
-      cdiGridInqString(gridID, dimKey, CDI_MAX_NAME, dimname);
-      if ( dimname[0] == 0 ) strcpy(dimname, axisname);
-      */
-      checkGridName(axisname, fileID, vlistID, gridID, ngrids, axisLetter);
-      if ( ndims ) dimID = checkDimName(fileID, dimlen, axisname);
+      const double *pvals = gridAxisInq->axisValsPtr(gridID);
 
-     /* enough to append _ plus up to 100 decimal and trailing \0 */
+      /* enough to append _ plus up to 100 decimal and trailing \0 */
       char extendedAxisname[axisnameLen + 4 + 1];
       memcpy(extendedAxisname, axisname, axisnameLen + 1);
 
       checkGridName(extendedAxisname, fileID, vlistID, gridID, ngrids, axisLetter);
-      if ( ndims ) dimID = checkDimName(fileID, dimlen, extendedAxisname);
 
       size_t extendedAxisnameLen
         = axisnameLen + strlen(extendedAxisname + axisnameLen);
 
       if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
-      if ( ndims && dimID == UNDEFID ) cdf_def_dim(fileID, extendedAxisname, dimlen, &dimID);
+      if ( ndims )
+        {
+          char dimname[CDI_MAX_NAME+3];
+          dimname[0] = 0;
+
+          if ( pvals == NULL )
+            cdiGridInqString(gridID, dimKey, CDI_MAX_NAME, dimname);
+
+          if ( dimname[0] == 0 ) strcpy(dimname, extendedAxisname);
+          dimID = checkDimName(fileID, dimlen, dimname);
+
+          if ( dimID == UNDEFID ) cdf_def_dim(fileID, dimname, dimlen, &dimID);
+        }
 
       int gen_bounds = FALSE;
       int grid_is_cyclic = gridIsCircular(gridID);
-      const double *pvals = gridAxisInq->axisValsPtr(gridID);
       double *pbounds = NULL;
       if ( pvals )
         {
