@@ -11,8 +11,6 @@
 #ifdef USE_MPI
 #include <mpi.h>
 #include <yaxt.h>
-#else
-typedef int MPI_Comm;
 #endif
 
 #include "cdi.h"
@@ -29,6 +27,7 @@ typedef int MPI_Comm;
 #include "dmemory.h"
 #include "error.h"
 #include "pio_write.h"
+#include "pio_write_setup_grid.h"
 
 #include "simple_model_helper.h"
 #include "cdi_uuid.h"
@@ -81,7 +80,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
   {
     nmiss = 0
   };
-  double *restrict lons, *restrict lats, *restrict levs;
+  double *levs;
   double *var = NULL, *varslice = NULL;
   double mscale, mrscale;
   time_t current_time;
@@ -128,24 +127,9 @@ modelRun(struct model_config setup, MPI_Comm comm)
 
   var_scale(setup.datatype, &mscale, &mrscale);
 
-  gridID = gridCreate(GRID_LONLAT, nlon * nlat);
-  gridDefXsize(gridID, nlon);
-  gridDefYsize(gridID, nlat);
-  lons = (double *) Malloc((size_t) nlon * sizeof(lons[0]));
-  for (size_t i = 0; i < (size_t) nlon; ++i) lons[i] = ((double) (i * 360)) / nlon;
-  lats = (double *) Malloc((size_t) nlat * sizeof(lats[0]));
-  for (size_t i = 0; i < (size_t) nlat; ++i) lats[i] = ((double) (i * 180)) / nlat - 90.0;
-  gridDefXvals(gridID, lons);
-  gridDefYvals(gridID, lats);
-  if (setup.create_uuid)
-    {
-      unsigned char uuid[CDI_UUID_SIZE];
-      if (rank == 0) cdiCreateUUID(uuid);
-#if USE_MPI
-      MPI_Bcast(uuid, CDI_UUID_SIZE, MPI_UNSIGNED_CHAR, 0, comm);
-#endif
-      gridDefUUID(gridID, uuid);
-    }
+  gridID = setupGrid(&setup, comm);
+  const double *lons = gridInqXvalsPtr(gridID), *lats = gridInqYvalsPtr(gridID);
+
   levs = (double *) Malloc((size_t) setup.max_nlev * sizeof(levs[0]));
   {
     double lscale = 1.0 / (double) (setup.max_nlev - 1);
@@ -405,8 +389,6 @@ modelRun(struct model_config setup, MPI_Comm comm)
 #endif
   Free(varDesc);
   Free(levs);
-  Free(lats);
-  Free(lons);
 }
 
 #ifdef USE_MPI

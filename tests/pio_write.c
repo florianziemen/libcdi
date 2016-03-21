@@ -16,8 +16,6 @@
 #ifdef USE_MPI
 #include <mpi.h>
 #include <yaxt.h>
-#else
-typedef int MPI_Comm;
 #endif
 
 #include "cdi.h"
