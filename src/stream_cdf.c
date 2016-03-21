@@ -2330,12 +2330,12 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
 
   if ( dimID == UNDEFID )
     {
+      checkZaxisName(axisname, fileID, vlistID, zaxisID, nzaxis);
+
       char dimname[CDI_MAX_NAME+3];
       dimname[0] = 0;
-      cdiZaxisInqString(zaxisID, CDI_ZAXIS_DIMNAME, CDI_MAX_NAME, dimname);
+      //cdiZaxisInqString(zaxisID, CDI_ZAXIS_DIMNAME, CDI_MAX_NAME, dimname);
       if ( dimname[0] == 0 ) strcpy(dimname, axisname);
-
-      checkZaxisName(axisname, fileID, vlistID, zaxisID, nzaxis);
 
       if ( type == ZAXIS_REFERENCE ) cdfDefZaxisUUID(streamptr, zaxisID);
 
