@@ -5565,11 +5565,11 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
             gridDefHasDims(ncvars[ncvarid].gridID, FALSE);
 
           if ( xdimid != -1 )
-            cdiGridDefString(ncvars[ncvarid].gridID, CDI_GRID_XDIMNAME, strlen(ncdims[xdimid].name)+1, ncdims[xdimid].name);
+            cdiGridDefString(ncvars[ncvarid].gridID, CDI_GRID_XDIMNAME, (int)(strlen(ncdims[xdimid].name)+1), ncdims[xdimid].name);
           if ( ydimid != -1 )
-            cdiGridDefString(ncvars[ncvarid].gridID, CDI_GRID_YDIMNAME, strlen(ncdims[ydimid].name)+1, ncdims[ydimid].name);
+            cdiGridDefString(ncvars[ncvarid].gridID, CDI_GRID_YDIMNAME, (int)(strlen(ncdims[ydimid].name)+1), ncdims[ydimid].name);
           if ( vdimid != -1 )
-            cdiGridDefString(ncvars[ncvarid].gridID, CDI_GRID_VDIMNAME, strlen(ncdims[vdimid].name)+1, ncdims[vdimid].name);
+            cdiGridDefString(ncvars[ncvarid].gridID, CDI_GRID_VDIMNAME, (int)(strlen(ncdims[vdimid].name)+1), ncdims[vdimid].name);
 
 	  if ( CDI_Debug )
 	    Message("gridID %d %d %s", ncvars[ncvarid].gridID, ncvarid, ncvars[ncvarid].name);
@@ -5801,7 +5801,7 @@ void define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
           if ( is_scalar ) zaxisDefScalar(ncvars[ncvarid].zaxisID);
 
           if ( zdimid != -1 )
-            cdiZaxisDefString(ncvars[ncvarid].zaxisID, CDI_ZAXIS_DIMNAME, strlen(ncdims[zdimid].name)+1, ncdims[zdimid].name);
+            cdiZaxisDefString(ncvars[ncvarid].zaxisID, CDI_ZAXIS_DIMNAME, (int)(strlen(ncdims[zdimid].name)+1), ncdims[zdimid].name);
           /*
           if ( vdimid != -1 )
             cdiZaxisDefString(ncvars[ncvarid].zaxisID, CDI_ZAXIS_VDIMNAME, strlen(ncdims[vdimid].name)+1, ncdims[vdimid].name);
