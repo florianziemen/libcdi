@@ -50,7 +50,7 @@ pio_write_deco2d_LDADD = ../src/libcdipio.la $(UUID_C_LIB) $(MPI_C_LIB)
 TESTS +=  test_resource_copy_mpi_run
 check_PROGRAMS += test_resource_copy_mpi
 test_resource_copy_mpi_LDADD = ../src/libcdipio.la $(UUID_C_LIB)
-test_resource_copy_mpi_CFLAGS = $(AM_CFLAGS) $(CFLAGS) \
+test_resource_copy_mpi_CPPFLAGS = $(AM_CPPFLAGS) $(CPPFLAGS) \
 	-DMPI_MARSHALLING
 else
 pio_write_LDADD = $(LDADD) $(UUID_C_LIB)
