@@ -181,7 +181,7 @@ cksum_write_chunk_OBJECTS = $(am_cksum_write_chunk_OBJECTS)
 cksum_write_chunk_LDADD = $(LDADD)
 cksum_write_chunk_DEPENDENCIES = ../src/libcdi.la
 am_pio_write_OBJECTS = pio_write.$(OBJEXT) simple_model.$(OBJEXT) \
-	simple_model_helper.$(OBJEXT)
+	simple_model_helper.$(OBJEXT) pio_write_setup_grid.$(OBJEXT)
 pio_write_OBJECTS = $(am_pio_write_OBJECTS)
 am__DEPENDENCIES_1 = ../src/libcdi.la
 am__DEPENDENCIES_2 =
@@ -190,7 +190,8 @@ am__DEPENDENCIES_2 =
 @USE_MPI_TRUE@pio_write_DEPENDENCIES = ../src/libcdipio.la \
 @USE_MPI_TRUE@	$(am__DEPENDENCIES_2) $(am__DEPENDENCIES_2)
 am_pio_write_deco2d_OBJECTS = pio_write.$(OBJEXT) \
-	deco2d_model.$(OBJEXT) simple_model_helper.$(OBJEXT)
+	deco2d_model.$(OBJEXT) simple_model_helper.$(OBJEXT) \
+	pio_write_setup_grid.$(OBJEXT)
 pio_write_deco2d_OBJECTS = $(am_pio_write_deco2d_OBJECTS)
 @USE_MPI_FALSE@pio_write_deco2d_DEPENDENCIES = $(am__DEPENDENCIES_1) \
 @USE_MPI_FALSE@	$(am__DEPENDENCIES_2)
@@ -518,10 +519,12 @@ cksum_read_SOURCES = cksum_read.c \
 	ensure_array_size.h ensure_array_size.c
 
 pio_write_SOURCES = pio_write.c pio_write.h simple_model.c \
-	simple_model_helper.h simple_model_helper.c
+	simple_model_helper.h simple_model_helper.c \
+	pio_write_setup_grid.h pio_write_setup_grid.c
 
 pio_write_deco2d_SOURCES = pio_write.c pio_write.h deco2d_model.c \
-	simple_model_helper.h simple_model_helper.c
+	simple_model_helper.h simple_model_helper.c \
+	pio_write_setup_grid.h pio_write_setup_grid.c
 
 test_resource_copy_SOURCES = test_resource_copy.c
 test_resource_copy_LDADD = $(UUID_C_LIB) ../src/libcdiresunpack.la $(LDADD)
@@ -702,6 +705,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/deco2d_model.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ensure_array_size.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_write.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_write_setup_grid.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/simple_model.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/simple_model_helper.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_cksum.Po@am__quote@

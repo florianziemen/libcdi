@@ -5,6 +5,12 @@
 #  include "config.h"
 #endif
 
+#ifdef USE_MPI
+#include <mpi.h>
+#else
+typedef int MPI_Comm;
+#endif
+
 #include <stdbool.h>
 
 struct model_config
