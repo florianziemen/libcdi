@@ -1130,7 +1130,7 @@ int checkDimName(int fileID, size_t dimlen, char *dimname)
 }
 
 static
-int checkGridName(char *axisname, int fileID, int vlistID, int gridID, int ngrids, int mode)
+void checkGridName(char *axisname, int fileID, int vlistID, int gridID, int ngrids, int mode)
 {
   int ncdimid;
   char axisname2[CDI_MAX_NAME];
@@ -1173,8 +1173,6 @@ int checkGridName(char *axisname, int fileID, int vlistID, int gridID, int ngrid
 
 
   if ( iz ) sprintf(axisname + axisnameLen, "_%u", iz+1);
-
-  return (int)iz;
 }
 
 static
@@ -1278,25 +1276,28 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int ndims,
 
   if ( dimID == UNDEFID )
     {
+      /*
       char dimname[CDI_MAX_NAME+3];
       dimname[0] = 0;
       cdiGridInqString(gridID, dimKey, CDI_MAX_NAME, dimname);
       if ( dimname[0] == 0 ) strcpy(dimname, axisname);
+      */
+      checkGridName(axisname, fileID, vlistID, gridID, ngrids, axisLetter);
+      if ( ndims ) dimID = checkDimName(fileID, dimlen, axisname);
 
-      /* enough to append _ plus up to 100 decimal and trailing \0 */
+     /* enough to append _ plus up to 100 decimal and trailing \0 */
       char extendedAxisname[axisnameLen + 4 + 1];
       memcpy(extendedAxisname, axisname, axisnameLen + 1);
 
-      int status = checkGridName(extendedAxisname, fileID, vlistID, gridID, ngrids, axisLetter);
-      if ( status == 0 && ndims )
-        dimID = checkDimName(fileID, dimlen, dimname);
+      checkGridName(extendedAxisname, fileID, vlistID, gridID, ngrids, axisLetter);
+      if ( ndims ) dimID = checkDimName(fileID, dimlen, extendedAxisname);
 
       size_t extendedAxisnameLen
         = axisnameLen + strlen(extendedAxisname + axisnameLen);
 
       if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
-      if ( ndims && dimID == UNDEFID ) cdf_def_dim(fileID, dimname, dimlen, &dimID);
+      if ( ndims && dimID == UNDEFID ) cdf_def_dim(fileID, extendedAxisname, dimlen, &dimID);
 
       int gen_bounds = FALSE;
       int grid_is_cyclic = gridIsCircular(gridID);
@@ -1421,6 +1422,14 @@ void cdfDefCurvilinear(stream_t *streamptr, int gridID)
   size_t ydimlen = (size_t)gridInqYsize(gridID);
   int gridindex = vlistGridIndex(vlistID, gridID);
 
+  char xdimname[CDI_MAX_NAME+3];
+  char ydimname[CDI_MAX_NAME+3];
+  xdimname[0] = 0;
+  ydimname[0] = 0;
+  cdiGridInqString(gridID, CDI_GRID_XDIMNAME, CDI_MAX_NAME, xdimname);
+  cdiGridInqString(gridID, CDI_GRID_YDIMNAME, CDI_MAX_NAME, ydimname);
+  if ( xdimname[0] == 0 ) { xdimname[0] = 'x'; xdimname[1] = 0; }
+  if ( ydimname[0] == 0 ) { ydimname[0] = 'y'; ydimname[1] = 0; }
 
   for ( index = 0; index < ngrids; index++ )
     {
