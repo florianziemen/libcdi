@@ -4554,14 +4554,20 @@ cdfInqContents(stream_t *streamptr)
 static void
 wrf_read_timestep(int fileID, int nctimevarid, int tsID, taxis_t *taxis)
 {
-  const size_t start[2] = { tsID, 0 }, count[2] = { 1, 19 };
-  char stvalue[128];
+  enum
+  {
+    /* position of terminator separating date and time from rest of  */
+    dateTimeSepPos = 19,
+    dateTimeStrSize = 128,
+  };
+  const size_t start[2] = { tsID, 0 }, count[2] = { 1, dateTimeSepPos };
+  char stvalue[dateTimeStrSize];
   stvalue[0] = 0;
   cdf_get_vara_text(fileID, nctimevarid, start, count, stvalue);
-  stvalue[19] = 0;
+  stvalue[dateTimeSepPos] = 0;
   {
     int year = 1, month = 1, day = 1, hour = 0, minute = 0, second = 0;
-    if (strlen(stvalue) == 19) sscanf(stvalue, "%d-%d-%d_%d:%d:%d", &year, &month, &day, &hour, &minute, &second);
+    if (strlen(stvalue) == dateTimeSepPos) sscanf(stvalue, "%d-%d-%d_%d:%d:%d", &year, &month, &day, &hour, &minute, &second);
     taxis->vDateTime = cdiDateTime_set(cdiEncodeDate(year, month, day), cdiEncodeTime(hour, minute, second));
     taxis->type = TAXIS_ABSOLUTE;
   }
