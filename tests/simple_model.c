@@ -72,7 +72,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
     Xt_idxlist partDesc;
 #endif
   } *varDesc;
-  int gridID, taxisID, vlistID, streamID, tsID, tfID = 0;
+  int gridID, taxisID, vlistID, tsID, tfID = 0;
   enum { nmiss = 0 };
   double *levs;
   double *var = NULL, *varslice = NULL;
@@ -194,29 +194,16 @@ modelRun(struct model_config setup, MPI_Comm comm)
   taxisID = taxisCreate ( TAXIS_ABSOLUTE );
   vlistDefTaxis ( vlistID, taxisID );
 
-  composeFilename(&filename, fname_prefix, tfID, setup.suffix);
-
-  streamID = streamOpenWrite ( filename, setup.filetype );
-  xassert ( streamID >= 0 );
-  streamDefVlist ( streamID, vlistID);
-
-#ifdef USE_MPI
-  pioEndDef ();
-#endif
-
   for ( tfID = 0; tfID < ntfiles; tfID++ )
     {
       for (size_t varIdx = 0; varIdx < nVars; ++varIdx)
         varDesc[varIdx].checksum_state = 0;
-      if ( tfID > 0 )
-	{
-	  streamClose ( streamID );
 
-          composeFilename(&filename, fname_prefix, tfID, setup.suffix);
-	  streamID = streamOpenWrite ( filename, setup.filetype );
-	  xassert ( streamID >= 0 );
-	  streamDefVlist ( streamID, vlistID );
-	}
+      composeFilename(&filename, fname_prefix, tfID, setup.suffix);
+      int streamID = streamOpenWrite(filename, setup.filetype);
+      xassert ( streamID >= 0 );
+      streamDefVlist(streamID, vlistID);
+
       vdate = 19850101;
       vtime = 120000;
       current_time = cditime2time_t(vdate, vtime);
@@ -293,6 +280,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
 	  pioWriteTimestep();
 #endif
 	}
+      streamClose(streamID);
       if (rank == 0 && setup.compute_checksum)
         {
           FILE *tablefp;
@@ -324,11 +312,10 @@ modelRun(struct model_config setup, MPI_Comm comm)
             }
         }
     }
-  Free(varslice);
 #ifdef USE_MPI
   pioEndTimestepping ();
 #endif
-  streamClose ( streamID );
+  Free(varslice);
   vlistDestroy ( vlistID );
   taxisDestroy ( taxisID );
   for (size_t varIdx = 0; varIdx < nVars; varIdx++ )
