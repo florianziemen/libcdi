@@ -38,6 +38,8 @@ void time_t2cditime(time_t t, int *date, int *timeofday);
 
 void composeFilename(char **buf, const char *fname_prefix, int tfID, const char *suffix);
 
+int composeStream(char **buf, const char *fname_prefix, int tfID, const char *suffix, int filetype);
+
 #if defined(USE_MPI) && !defined(HAVE_PPM_CORE)
 struct PPM_extent
 {
