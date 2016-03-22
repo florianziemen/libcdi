@@ -338,28 +338,26 @@ modelRun(struct model_config setup, MPI_Comm comm)
       if (rank == 0 && setup.compute_checksum)
         {
           FILE *tablefp;
-          {
-            composeFilename(&filename, fname_prefix, tfID, "cksum");
-            if (!(tablefp = fopen(filename, "w")))
-              {
-                perror("failed to open table file");
-                exit(EXIT_FAILURE);
-              }
-            for (size_t i = 0; i < nVars; ++i)
-              {
-                uint32_t cksum;
-                int code;
-                cksum = memcrc_finish(&varDesc[i].checksum_state,
-                                      (off_t) ((varDesc[i].size * sizeof(var[0]) + sizeof(int) * 2) * (size_t) setup.nts));
-                code = vlistInqVarCode(vlistID, varDesc[i].id);
-                if (fprintf(tablefp, "%08lx %d\n", (unsigned long) cksum, code) < 0)
-                  {
-                    perror("failed to write table file");
-                    exit(EXIT_FAILURE);
-                  }
-              }
-            fclose(tablefp);
-          }
+          composeFilename(&filename, fname_prefix, tfID, "cksum");
+          if (!(tablefp = fopen(filename, "w")))
+            {
+              perror("failed to open table file");
+              exit(EXIT_FAILURE);
+            }
+          for (size_t i = 0; i < nVars; ++i)
+            {
+              uint32_t cksum;
+              int code;
+              cksum = memcrc_finish(&varDesc[i].checksum_state,
+                                    (off_t) ((varDesc[i].size * sizeof(var[0]) + sizeof(int) * 2) * (size_t) setup.nts));
+              code = vlistInqVarCode(vlistID, varDesc[i].id);
+              if (fprintf(tablefp, "%08lx %d\n", (unsigned long) cksum, code) < 0)
+                {
+                  perror("failed to write table file");
+                  exit(EXIT_FAILURE);
+                }
+            }
+          fclose(tablefp);
         }
     }
   Free(varslice);
