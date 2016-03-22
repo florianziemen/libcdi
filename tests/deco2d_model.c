@@ -45,22 +45,23 @@ modelRegionCompute(double region[], int nlev, int nlat, int nlon,
                    double mscale, double mrscale)
 {
   (void)nlev;
-  unsigned is = (unsigned)chunkStart[0],
-    js = (unsigned)chunkStart[1],
-    ks = (unsigned)chunkStart[2],
-    m = (unsigned)chunkSize[0],
-    n = (unsigned)chunkSize[1],
-    o = (unsigned)chunkSize[2],
-    jstride = (unsigned)chunkSize[0],
-    kstride = ((jstride * (unsigned)chunkSize[1] + nproma - 1)/nproma)*nproma;
+  int is = chunkStart[0],
+    js = chunkStart[1],
+    ks = chunkStart[2],
+    m = chunkSize[0],
+    n = chunkSize[1],
+    o = chunkSize[2],
+    jstride = chunkSize[0],
+    kstride = ((jstride * chunkSize[1] + nproma - 1)/nproma)*nproma;
 
-  for (unsigned k = 0; k < o; ++k)
-    for (unsigned j = 0; j < n; ++j)
-      for (unsigned i = 0; i < m; ++i)
+  tsID %= nlon;
+  for (int k = 0; k < o; ++k)
+    for (int j = 0; j < n; ++j)
+      for (int i = 0; i < m; ++i)
         region[k * kstride + j * jstride + i]
-          = dg_wobble((lons[(i + is + (unsigned)tsID)%(unsigned)nlon] - lons[0])
+          = dg_wobble((lons[(i + is + tsID)%nlon] - lons[0])
                       / (lons[nlon-1] - lons[0]),
-                      (lats[(j + js + k + ks)%(unsigned)nlat] - lats[0])
+                      (lats[(j + js + k + ks)%nlat] - lats[0])
                       / (lats[nlat-1] - lats[0]),
                       mscale, mrscale);
 }
