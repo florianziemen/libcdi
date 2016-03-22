@@ -5,6 +5,7 @@
 #include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "cdi.h"
 #include "dmemory.h"
@@ -76,6 +77,24 @@ time_t2cditime(time_t t, int *date, int *timeofday)
   *timeofday = t_s->tm_hour * 10000 + t_s->tm_min * 100 + t_s->tm_sec;
 }
 
+void
+composeFilename(char **buf, const char *fname_prefix, int tfID, const char *suffix)
+{
+  size_t fnSize = strlen(fname_prefix) + 1 + sizeof(int) * 3 + 1 + strlen(suffix) + 1;
+  char *filename = Realloc(*buf, fnSize);
+  int plen;
+  if ((size_t) (plen = snprintf(filename, fnSize, "%s_%d.%s", fname_prefix, tfID, suffix)) >= fnSize)
+    {
+      fprintf(stderr,
+              "unexpected error: printing to string of size %zu"
+              " results in %d chars to write\n",
+              fnSize, plen);
+      abort();
+    }
+  filename[fnSize - 1] = 0;
+  *buf = filename;
+}
+
 #if defined USE_MPI && ! defined HAVE_PPM_CORE
 
 static int32_t
@@ -133,3 +152,12 @@ PPM_prime_factorization_32(uint32_t n, uint32_t **factors)
 
 #endif
 
+/*
+ * Local Variables:
+ * c-file-style: "Java"
+ * c-basic-offset: 2
+ * indent-tabs-mode: nil
+ * show-trailing-whitespace: t
+ * require-trailing-newline: t
+ * End:
+ */
