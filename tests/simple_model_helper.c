@@ -97,6 +97,21 @@ composeFilename(char **buf, const char *fname_prefix, int tfID,
   *buf = filename;
 }
 
+int
+composeStream(char **buf, const char *fname_prefix, int tfID,
+              const char *suffix, int filetype)
+{
+  composeFilename(buf, fname_prefix, tfID, suffix);
+  int streamID = streamOpenWrite(*buf, filetype);
+  if (streamID < 0)
+    {
+      fprintf(stderr, "Failed to open stream: %s\n", cdiStringError(streamID));
+      abort();
+    }
+  return streamID;
+}
+
+
 
 #if defined USE_MPI && ! defined HAVE_PPM_CORE
 
