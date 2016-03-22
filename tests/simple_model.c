@@ -80,7 +80,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
   time_t current_time;
   int vdate = 19850101, vtime = 120000;
   int rank = 0;
-  char filename[1024];
+  char *filename = NULL;
   int nlon = setup.nlon, nlat = setup.nlat;
   size_t nVars = (size_t)setup.nvars;
   size_t varslice_size = 0;
@@ -194,7 +194,8 @@ modelRun(struct model_config setup, MPI_Comm comm)
   taxisID = taxisCreate ( TAXIS_ABSOLUTE );
   vlistDefTaxis ( vlistID, taxisID );
 
-  sprintf ( &filename[0], "%s_%d.%s", fname_prefix, tfID, setup.suffix );
+  composeFilename(&filename, fname_prefix, tfID, setup.suffix);
+
   streamID = streamOpenWrite ( filename, setup.filetype );
   xassert ( streamID >= 0 );
   streamDefVlist ( streamID, vlistID);
@@ -210,7 +211,8 @@ modelRun(struct model_config setup, MPI_Comm comm)
       if ( tfID > 0 )
 	{
 	  streamClose ( streamID );
-	  sprintf ( &filename[0], "%s_%d.%s", fname_prefix, tfID, setup.suffix );
+
+          composeFilename(&filename, fname_prefix, tfID, setup.suffix);
 	  streamID = streamOpenWrite ( filename, setup.filetype );
 	  xassert ( streamID >= 0 );
 	  streamDefVlist ( streamID, vlistID );
@@ -295,7 +297,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
         {
           FILE *tablefp;
           {
-            sprintf(filename, "%s_%d.cksum", fname_prefix, tfID);
+            composeFilename(&filename, fname_prefix, tfID, "cksum");
             if (!(tablefp = fopen(filename, "w")))
               {
                 perror("failed to open table file");
@@ -353,6 +355,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
 #endif
   Free(varDesc);
   Free(levs);
+  Free(filename);
 }
 
 /*
