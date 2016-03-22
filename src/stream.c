@@ -421,7 +421,7 @@ int cdiStreamOpenDefaultDelegate(const char *filename, char filemode,
         fileID = gribOpen(filename, temp);
 #endif
         if ( fileID < 0 ) fileID = CDI_ESYSTEM;
-        if (recordBufIsToBeCreated)
+        else if (recordBufIsToBeCreated)
           {
             streamptr->record = (Record *) Malloc(sizeof(Record));
             streamptr->record->buffer = NULL;
@@ -439,7 +439,7 @@ int cdiStreamOpenDefaultDelegate(const char *filename, char filemode,
         fileID = fileOpen(filename, temp);
 #endif
         if ( fileID < 0 ) fileID = CDI_ESYSTEM;
-        if (recordBufIsToBeCreated)
+        else if (recordBufIsToBeCreated)
           {
             streamptr->record = (Record *) Malloc(sizeof(Record));
             streamptr->record->buffer = NULL;
@@ -459,7 +459,7 @@ int cdiStreamOpenDefaultDelegate(const char *filename, char filemode,
 #endif
 
         if ( fileID < 0 ) fileID = CDI_ESYSTEM;
-        if (recordBufIsToBeCreated)
+        else if (recordBufIsToBeCreated)
           {
             streamptr->record = (Record *) Malloc(sizeof(Record));
             streamptr->record->buffer = NULL;
@@ -478,7 +478,7 @@ int cdiStreamOpenDefaultDelegate(const char *filename, char filemode,
         fileID = fileOpen(filename, temp);
 #endif
         if ( fileID < 0 ) fileID = CDI_ESYSTEM;
-        if (recordBufIsToBeCreated)
+        else if (recordBufIsToBeCreated)
           {
             streamptr->record = (Record *) Malloc(sizeof(Record));
             streamptr->record->buffer = NULL;
@@ -587,7 +587,6 @@ int streamOpenID(const char *filename, char filemode, int filetype, int resH)
 
   if ( streamID < 0 )
     {
-      Free(streamptr->record);
       stream_delete_entry(streamptr);
     }
 
