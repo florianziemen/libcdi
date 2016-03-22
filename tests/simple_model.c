@@ -179,9 +179,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
     {
       for (size_t varIdx = 0; varIdx < nVars; ++varIdx) varDesc[varIdx].checksum_state = 0;
 
-      composeFilename(&filename, fname_prefix, tfID, setup.suffix);
-      int streamID = streamOpenWrite(filename, setup.filetype);
-      xassert(streamID >= 0);
+      int streamID = composeStream(&filename, fname_prefix, tfID, setup.suffix, setup.filetype);
       streamDefVlist(streamID, vlistID);
 
       vdate = 19850101;
