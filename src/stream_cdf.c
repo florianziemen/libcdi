@@ -1409,7 +1409,6 @@ void cdfDefCurvilinear(stream_t *streamptr, int gridID)
   int index;
   int xdimID = UNDEFID;
   int ydimID = UNDEFID;
-  int dimIDs[3];
   int ncxvarid = UNDEFID, ncyvarid = UNDEFID;
   int ncbxvarid = UNDEFID, ncbyvarid = UNDEFID, ncavarid = UNDEFID;
   nc_type xtype = NC_DOUBLE;
@@ -1484,6 +1483,7 @@ void cdfDefCurvilinear(stream_t *streamptr, int gridID)
       if ( ydimID == UNDEFID ) cdf_def_dim(fileID, ydimname, ydimlen, &ydimID);
 
       int nvdimID = UNDEFID;
+      int dimIDs[3];
       if ( gridInqXboundsPtr(gridID) || gridInqYboundsPtr(gridID) )
         {
           char vdimname[CDI_MAX_NAME+3];
