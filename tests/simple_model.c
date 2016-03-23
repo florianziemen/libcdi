@@ -93,10 +93,9 @@ modelRun(struct model_config setup, MPI_Comm comm)
   xmpi ( MPI_Comm_size ( comm, &comm_size ));
   if (rank == 0 && setup.compute_checksum)
     {
-      chunks = malloc((size_t)comm_size * sizeof (chunks[0]));
-      displs = malloc((size_t)comm_size * sizeof (displs[0]));
-      var = malloc((size_t)nlon * (size_t)nlat
-                    * (size_t)setup.max_nlev * sizeof(var[0]));
+      chunks = Malloc((size_t) comm_size * sizeof(chunks[0]));
+      displs = Malloc((size_t) comm_size * sizeof(displs[0]));
+      var = Malloc((size_t) nlon * (size_t) nlat * (size_t) setup.max_nlev * sizeof(var[0]));
     }
 #else
   (void)comm;
@@ -107,7 +106,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
   gridID = setupGrid(&setup, comm);
   const double *lons = gridInqXvalsPtr(gridID), *lats = gridInqYvalsPtr(gridID);
 
-  levs = (double *)malloc((size_t)setup.max_nlev * sizeof (levs[0]));
+  levs = (double *) Malloc((size_t) setup.max_nlev * sizeof(levs[0]));
   {
     double lscale = 1.0/(double)(setup.max_nlev - 1);
     for (size_t i = 0; i < (size_t)setup.max_nlev; ++i)
@@ -115,7 +114,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
   }
   vlistID = vlistCreate ();
 
-  varDesc = (struct varDesc_t *)malloc(nVars * sizeof (varDesc[0]));
+  varDesc = (struct varDesc_t *) Malloc(nVars * sizeof(varDesc[0]));
   for (size_t varIdx = 0; varIdx < nVars; varIdx++ )
     {
       int varLevs = (int)random()%4;
