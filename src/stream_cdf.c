@@ -1425,15 +1425,6 @@ void cdfDefCurvilinear(stream_t *streamptr, int gridID)
   size_t ydimlen = (size_t)gridInqYsize(gridID);
   int gridindex = vlistGridIndex(vlistID, gridID);
 
-  char xdimname[CDI_MAX_NAME+3];
-  char ydimname[CDI_MAX_NAME+3];
-  xdimname[0] = 0;
-  ydimname[0] = 0;
-  cdiGridInqString(gridID, CDI_GRID_XDIMNAME, CDI_MAX_NAME, xdimname);
-  cdiGridInqString(gridID, CDI_GRID_YDIMNAME, CDI_MAX_NAME, ydimname);
-  if ( xdimname[0] == 0 ) { xdimname[0] = 'x'; xdimname[1] = 0; }
-  if ( ydimname[0] == 0 ) { ydimname[0] = 'y'; ydimname[1] = 0; }
-
   for ( index = 0; index < ngrids; index++ )
     {
       if ( streamptr->xdimID[index] != UNDEFID )
@@ -1479,8 +1470,8 @@ void cdfDefCurvilinear(stream_t *streamptr, int gridID)
       ydimname[0] = 0;
       cdiGridInqString(gridID, CDI_GRID_XDIMNAME, CDI_MAX_NAME, xdimname);
       cdiGridInqString(gridID, CDI_GRID_YDIMNAME, CDI_MAX_NAME, ydimname);
-      if ( xdimname[0] == 0 ) xdimname[0] = 'x';
-      if ( ydimname[0] == 0 ) ydimname[0] = 'y';
+      if ( xdimname[0] == 0 ) { xdimname[0] = 'x'; xdimname[1] = 0; }
+      if ( ydimname[0] == 0 ) { ydimname[0] = 'y'; ydimname[1] = 0; }
 
       checkGridName(xaxisname, fileID, vlistID, gridID, ngrids, 'X');
       checkGridName(yaxisname, fileID, vlistID, gridID, ngrids, 'Y');
