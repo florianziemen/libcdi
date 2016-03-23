@@ -3080,8 +3080,8 @@ int scan_hybrid_formula(int ncid, int ncfvarid, int *apvarid, int *bvarid, int *
           if ( *pstring == 0 ) lstop = TRUE;
           *pstring++ = 0;
 
-          int status = nc_inq_varid(ncid, varname, &dimvarid);
-          if ( status == NC_NOERR )
+          int status_nc = nc_inq_varid(ncid, varname, &dimvarid);
+          if ( status_nc == NC_NOERR )
             {
               if      ( strcmp(tagname, "ap:") == 0 ) *apvarid = dimvarid;
               else if ( strcmp(tagname, "b:")  == 0 ) *bvarid  = dimvarid;
@@ -3089,7 +3089,7 @@ int scan_hybrid_formula(int ncid, int ncfvarid, int *apvarid, int *bvarid, int *
             }
           else if ( strcmp(tagname, "ps:") != 0 )
             {
-              Warning("%s - %s", nc_strerror(status), varname);
+              Warning("%s - %s", nc_strerror(status_nc), varname);
             }
 
           if ( lstop ) break;
@@ -3119,8 +3119,8 @@ int scan_hybrid_formula(int ncid, int ncfvarid, int *apvarid, int *bvarid, int *
           if ( *pstring == 0 ) lstop = TRUE;
           *pstring++ = 0;
 
-          int status = nc_inq_varid(ncid, varname, &dimvarid);
-          if ( status == NC_NOERR )
+          int status_nc = nc_inq_varid(ncid, varname, &dimvarid);
+          if ( status_nc == NC_NOERR )
             {
               if      ( strcmp(tagname, "a:")  == 0 ) *avarid  = dimvarid;
               else if ( strcmp(tagname, "b:")  == 0 ) *bvarid  = dimvarid;
@@ -3129,7 +3129,7 @@ int scan_hybrid_formula(int ncid, int ncfvarid, int *apvarid, int *bvarid, int *
             }
           else if ( strcmp(tagname, "ps:") != 0 )
             {
-              Warning("%s - %s", nc_strerror(status), varname);
+              Warning("%s - %s", nc_strerror(status_nc), varname);
             }
 
           if ( lstop ) break;
