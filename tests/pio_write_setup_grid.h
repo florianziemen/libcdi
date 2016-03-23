@@ -11,9 +11,6 @@
 
 #include "pio_write.h"
 
-const double *gridInqXvalsPtr(int gridID);
-const double *gridInqYvalsPtr(int gridID);
-
 int setupGrid(struct model_config *setup, MPI_Comm comm);
 
 #endif
