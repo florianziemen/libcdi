@@ -38,8 +38,7 @@ enum {
 static void
 modelRegionCompute(double region[], size_t offset, size_t len,
                    int nlev, int nlat, int nlon,
-                   int tsID, const double lons[], const double lats[],
-                   double mscale, double mrscale)
+                   int tsID, double mscale, double mrscale)
 {
   size_t local_pos;
   (void)nlev;
@@ -50,10 +49,8 @@ modelRegionCompute(double region[], size_t offset, size_t len,
       int j = (int)(global_pos % (size_t)(nlon * nlat) / (size_t)nlon);
       int i = (int)(global_pos % (size_t)nlon);
       region[local_pos]
-        = dg_wobble((lons[(i + tsID)%nlon] - lons[0])
-                    / (lons[nlon-1] - lons[0]),
-                    (lats[(j + k)%nlat] - lats[0])
-                    / (lats[nlat-1] - lats[0]), mscale, mrscale);
+        = dg_wobble((double)((i + tsID)%nlon) / (double)(nlon-1),
+                    (double)((j + k)%nlat) / (double)(nlat-1), mscale, mrscale);
     }
 }
 
@@ -105,8 +102,6 @@ modelRun(struct model_config setup, MPI_Comm comm)
   var_scale(setup.datatype, &mscale, &mrscale);
 
   gridID = setupGrid(&setup, comm);
-  const double *lons = gridInqXvalsPtr(gridID),
-    *lats = gridInqYvalsPtr(gridID);
 
   levs = (double *)Malloc((size_t)setup.max_nlev * sizeof (levs[0]));
   {
@@ -237,8 +232,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
                 }
               modelRegionCompute(varslice, (size_t)start, chunkSize,
                                  varDesc[varIdx].nlev, nlat, nlon,
-                                 tsID, lons, lats,
-                                 mscale, mrscale);
+                                 tsID, mscale, mrscale);
               if (setup.compute_checksum)
                 {
 #if USE_MPI
