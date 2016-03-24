@@ -117,6 +117,12 @@ grid_axis_init(struct gridaxis_t *axisptr)
   cdiInitKeys(&axisptr->keys);
 }
 
+enum cdiApplyRet
+cdiGridApply(enum cdiApplyRet (*func)(int id, void *res, void *data), void *data)
+{
+  return cdiResHFilterApply(&gridOps, func, data);
+}
+
 void
 grid_init(grid_t *gridptr)
 {
@@ -4718,8 +4724,7 @@ cdiVlistAddGridIfNew(int vlistID, grid_t *grid, int mode)
     {
       struct gridCompareSearchState query;
       query.queryKey = grid;  // = { .queryKey = grid };
-      if ((gridglobdefined = (cdiResHFilterApply(&gridOps, gridCompareSearch, &query) == CDI_APPLY_STOP)))
-        gridID = query.resIDValue;
+      if ((gridglobdefined = (cdiGridApply(gridCompareSearch, &query) == CDI_APPLY_STOP))) gridID = query.resIDValue;
 
       if (mode == 1 && gridglobdefined)
         for (unsigned index = 0; index < ngrids; index++)
