@@ -302,22 +302,15 @@ main(int argc, char *argv[])
         for (size_t j = 0; j < (size_t)nlat; j++)
           for (size_t i = 0; i < (size_t)nlon; i++)
             var[0][i+j*(size_t)nlon]
-              = sign_flat(round(
-                   (sin(2.0 * M_PI * (lons[(i + tsID)%(size_t)nlon] - lons[0])
-                        / (lons[nlon-1] - lons[0]))
-                    * cos(2.0 * M_PI * (lats[j] - lats[0])
-                          / (lons[nlat-1] - lats[0]))
-                    ) * mscale)) * mrscale;
+              = dg_wobble((double)((i + tsID)%(size_t)nlon)/(double)(nlon-1),
+                          (double)j / (double)(nlat-1), mscale, mrscale);
         for (size_t k = 0; k < (size_t)nlev; ++k)
           for (size_t j = 0; j < (size_t)nlat; j++)
             for (size_t i = 0; i < (size_t)nlon; i++)
               var[1][i+j*(size_t)nlon+k*(size_t)nlon*(size_t)nlat]
-                = sign_flat(round(
-                     (cos(2.0 * M_PI * (lons[(i + tsID)%(size_t)nlon] - lons[0])
-                          / (lons[nlon-1] - lons[0]))
-                      * sin(2.0 * M_PI * (lats[j] - lats[0])
-                            / (lons[nlat-1] - lats[0]))
-                      ) * mscale)) * mrscale;
+                = dg_wobble((double)j / (double)(nlat-1),
+                            (double)((i + tsID)%(size_t)nlon)/(double)(nlon-1),
+                            mscale, mrscale);
 
         if (filetype == CDI_FILETYPE_EXT)
           {
