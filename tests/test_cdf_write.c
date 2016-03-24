@@ -10,19 +10,12 @@
 
 #include "dmemory.h"
 
-struct cart_coord {
-  double lat, lon;
-};
+#include "simple_model_helper.h"
 
 static double
 my_gamma_dist(double x);
 
-static void
-compute_curvilinear(double *coords_,
-                    const struct cart_coord a[4], size_t sizex, size_t sizey);
 
-#define DEG2RAD(phi) ((M_PI / 180.0) * (phi))
-#define RAD2DEG(phi) ((180./M_PI) * (phi))
 #define missValue (-50.0)
 
 int main(int argc, const char **argv)
@@ -45,33 +38,7 @@ int main(int argc, const char **argv)
     sizex = 2 * sizey,
   };
 
-  size_t datasize = (size_t)sizex * (size_t)sizey;
-  int gridID = gridCreate(GRID_CURVILINEAR, (int)datasize);
-  gridDefXsize(gridID, sizex);
-  gridDefYsize(gridID, sizey);
-  {
-    /* anti-clockwise coordinates around Amazonia */
-    static struct cart_coord region[4]
-#ifdef __cplusplus
-      = { { DEG2RAD(-25.0), DEG2RAD(-85.0) },
-          { DEG2RAD(-18.0), DEG2RAD(-44.0) },
-          { DEG2RAD(-7.0),  DEG2RAD(-50.0) },
-          { DEG2RAD(10.0),  DEG2RAD(-80.0) } };
-#else
-    = { { .lon = DEG2RAD(-85.0), .lat = DEG2RAD(-25.0) },
-          { .lon = DEG2RAD(-44.0), .lat = DEG2RAD(-18.0) },
-          { .lon = DEG2RAD(-50.0), .lat = DEG2RAD(7.0) },
-          { .lon = DEG2RAD(-80.0), .lat = DEG2RAD(10.0) } };
-#endif
-    double (*gridCoords)[sizey][sizex]
-      = (double (*)[sizey][sizex])
-      Malloc(sizeof (*gridCoords) * sizey * sizex * 2);
-    compute_curvilinear((double *)gridCoords, region, sizex, sizey);
-    gridDefXvals(gridID, (double *)(gridCoords[1]));
-    gridDefYvals(gridID, (double *)(gridCoords[0]));
-    Free(gridCoords);
-  }
-
+  int gridID = createLocalCurvilinearGrid(sizex, sizey);
   int zaxisID = zaxisCreate(ZAXIS_SURFACE, 1);
 
   int vlistID = vlistCreate();
@@ -105,56 +72,6 @@ int main(int argc, const char **argv)
   streamClose(streamID);
 
   return EXIT_SUCCESS;
-}
-
-static inline double
-cart_distance(struct cart_coord p1, struct cart_coord p2)
-{
-  double d_lat = sin((p1.lat-p2.lat)/2.0),
-    d_lon = sin((p1.lon - p2.lon)/2.0),
-    d = 2.0 * asin(sqrt(d_lat * d_lat +
-                        cos(p1.lat)*cos(p2.lat) * (d_lon * d_lon)));
-  return d;
-}
-
-static inline struct cart_coord
-intermediate_coord(struct cart_coord p1, struct cart_coord p2, double f)
-{
-  double d = cart_distance(p1, p2),
-    sine_of_d = sin(d),
-    A = sin((1 - f) * d) / sine_of_d,
-    B = sin(f * d) / sine_of_d,
-    x = A * cos(p1.lat) * cos(p1.lon) + B * cos(p2.lat) * cos(p2.lon),
-    y = A * cos(p1.lat) * sin(p1.lon) + B * cos(p2.lat) * sin(p2.lon),
-    z = A * sin(p1.lat) + B * sin(p2.lat);
-  struct cart_coord ic = { .lat = atan2(z, sqrt(x * x + y * y)),
-                           .lon = atan2(y, x) };
-  return ic;
-}
-
-static void
-compute_curvilinear(double *coords_,
-                    const struct cart_coord a[4], size_t sizex, size_t sizey)
-{
-#ifdef __cplusplus
-  auto coords = (double (*)[sizey][sizex])coords_;
-#else
-  double (*coords)[sizey][sizex] = (double (*)[sizey][sizex])coords_;
-#endif
-  for (size_t j = 0; j < sizey; ++j)
-    {
-      double g = (double)j / (double)(sizey - 1);
-      /* compute start/end coordinates of great circle in x direction */
-      struct cart_coord gc_left = intermediate_coord(a[0], a[3], g),
-        gc_right = intermediate_coord(a[1], a[2], g);
-      for (size_t i = 0; i < sizex; ++i)
-        {
-          double f = (double)i / (double)(sizex - 1);
-          struct cart_coord pij = intermediate_coord(gc_left, gc_right, f);
-          coords[0][j][i] = RAD2DEG(pij.lat);
-          coords[1][j][i] = RAD2DEG(pij.lon);
-        }
-    }
 }
 
 static double
