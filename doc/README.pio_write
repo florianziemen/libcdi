@@ -120,3 +120,26 @@ MPI-mode-only flags:
 The program will write to two files named example_0.$SUFFIX and
 example_1.$SUFFIX in sequence, each composed of variables over NTSTEPS
 time steps to the current working directory.
+
+The following long options exist to further tune the program behaviour:
+
+-qcache-redists[=(true|false)], -qno-cache-redists[=(true|false)]
+
+Takes optionally =true or =false as argument, (=true is assumed if no
+argument is specified). If true (the default), YAXT redist descriptors
+are cached. Since data decomposition changes for dynamically
+repartitioning models, it might be beneficial for tests of
+load-balanced applications to turn this off.
+
+-qpio-role-scheme=(last|first|balanced)
+
+Use this option to change which MPI processes become I/O servers:
+
+In the default configuration (last), it's the highest-ranking processes,
+for "first", ranks 0-NUMSERVERS-1 become I/O servers and in the case
+"balanced" it's those processes for which rank % NUMSERVERS == 0
+
+-qcreate-uuid[=(true|false)], -qno-create-uuid[=(true|false)]
+
+Use this option to generate UUID for the created grids/zaxis data structures.
+This feature is off by default.
