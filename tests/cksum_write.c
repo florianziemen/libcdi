@@ -63,14 +63,13 @@ static void
 get_chunk(double *chunkBuf, double *var, int varShape[3], int chunk[3][2])
 {
   size_t ofs = 0;
-  unsigned start_k = (unsigned) chunk[2][0], start_j = (unsigned) chunk[1][0], start_i = (unsigned) chunk[0][0];
-  unsigned size_k = (unsigned) chunk[2][1] - (unsigned) chunk[2][0] + 1,
-           size_j = (unsigned) chunk[1][1] - (unsigned) chunk[1][0] + 1,
-           size_i = (unsigned) chunk[0][1] - (unsigned) chunk[0][0] + 1;
+  size_t start_k = (size_t) chunk[2][0], start_j = (size_t) chunk[1][0], start_i = (size_t) chunk[0][0];
+  size_t size_k = (size_t) chunk[2][1] - (size_t) chunk[2][0] + 1, size_j = (size_t) chunk[1][1] - (size_t) chunk[1][0] + 1,
+         size_i = (size_t) chunk[0][1] - (size_t) chunk[0][0] + 1;
   size_t stride_k = (size_t) varShape[0] * (size_t) varShape[1], stride_j = (size_t) varShape[0];
-  for (unsigned k = 0; k < size_k; ++k)
-    for (unsigned j = 0; j < size_j; ++j)
-      for (unsigned i = 0; i < size_i; ++i)
+  for (size_t k = 0; k < size_k; ++k)
+    for (size_t j = 0; j < size_j; ++j)
+      for (size_t i = 0; i < size_i; ++i)
         chunkBuf[ofs++] = var[(k + start_k) * stride_k + (j + start_j) * stride_j + (i + start_i)];
 }
 #endif
