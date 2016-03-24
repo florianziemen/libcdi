@@ -95,6 +95,26 @@ composeStream(char **buf, const char *fname_prefix, int tfID, const char *suffix
   return streamID;
 }
 
+int
+createGlobalLatLonGrid(int nlon, int nlat)
+{
+  int gridID = gridCreate(GRID_LONLAT, nlon * nlat);
+  gridDefXsize(gridID, nlon);
+  gridDefYsize(gridID, nlat);
+  size_t maxAxisSize = (size_t) (nlon > nlat ? nlon : nlat);
+  double *restrict coords = (double *) Malloc(maxAxisSize * sizeof(coords[0]));
+  {
+    for (size_t i = 0; i < (size_t) nlon; ++i) coords[i] = ((double) (i * 360)) / nlon;
+    gridDefXvals(gridID, coords);
+  }
+  {
+    for (size_t i = 0; i < (size_t) nlat; ++i) coords[i] = ((double) (i * 180)) / nlat - 90.0;
+    gridDefYvals(gridID, coords);
+  }
+  Free(coords);
+  return gridID;
+}
+
 #if defined USE_MPI && !defined HAVE_PPM_CORE
 
 static int32_t uniform_partition_start(struct PPM_extent set_interval, int nparts, int part_idx);
