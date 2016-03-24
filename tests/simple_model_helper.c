@@ -140,7 +140,7 @@ createLocalCurvilinearGrid(int sizex, int sizey)
   gridDefYsize(gridID, sizey);
   {
     /* anti-clockwise coordinates around Amazonia */
-    static struct cart_coord region[4]
+    static const struct cart_coord region[4]
 #ifdef __cplusplus
         = { { DEG2RAD(-25.0), DEG2RAD(-85.0) },
             { DEG2RAD(-18.0), DEG2RAD(-44.0) },
