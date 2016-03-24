@@ -124,7 +124,7 @@ main(int argc, char *argv[])
     nlev = 5, //!< Number of levels
     nts = 3; //!< Number of time steps
   enum { nmiss = 0 };
-  double *lons, *lats, *restrict var[nvars], *levs, mscale, mrscale;
+  double *lons, *lats, *restrict var[nvars], mscale, mrscale;
   size_t varSize[nvars];
   const char *varName[nvars] = { "varname1", "varname2" };
 #ifndef TEST_CHUNK_WRITE
@@ -203,9 +203,6 @@ main(int argc, char *argv[])
   lats = (double *)malloc((size_t)nlat * sizeof (lats[0]));
   for (size_t i = 0; i < (size_t)nlat; ++i)
     lats[i] = ((double)(i * 180))/nlat - 90.0;
-  levs = (double *)malloc((size_t)nlev * sizeof (levs[0]));
-  for (size_t i = 0; i < (size_t)nlev; ++i)
-    levs[i] = 101300 - floor(3940.3 * (exp(2.3579 * (double)(i)/(nlev - 1)) - 1.0));
 
   varSize[0] = (size_t)nlon * (size_t)nlat;
   varSize[1] = (size_t)nlon * (size_t)nlat * (size_t)nlev;
@@ -222,7 +219,12 @@ main(int argc, char *argv[])
 
   // Create a pressure level Z-axis
   zaxisID[1] = zaxisCreate(ZAXIS_PRESSURE, nlev);
-  zaxisDefLevels(zaxisID[1], levs);
+  {
+    double *levs = (double *) malloc((size_t) nlev * sizeof(levs[0]));
+    for (size_t i = 0; i < (size_t) nlev; ++i) levs[i] = 101300 - floor(3940.3 * (exp(2.3579 * (double) (i) / (nlev - 1)) - 1.0));
+    zaxisDefLevels(zaxisID[1], levs);
+    free(levs);
+  }
 
   /* add uuids to zaxis and grid */
   {
@@ -399,7 +401,6 @@ main(int argc, char *argv[])
   zaxisDestroy(zaxisID[0]);
   zaxisDestroy(zaxisID[1]);
   gridDestroy(gridID);
-  free(levs);
   free(lats);
   free(lons);
   return 0;
