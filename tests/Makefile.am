@@ -42,7 +42,8 @@ pio_write_deco2d_SOURCES = pio_write.c pio_write.h deco2d_model.c \
 test_resource_copy_SOURCES = test_resource_copy.c
 test_resource_copy_LDADD = ../src/libcdiresunpack.la $(LDADD)
 test_resource_copy_mpi_SOURCES = test_resource_copy.c
-test_cdf_write_SOURCES = test_cdf_write.c
+test_cdf_write_SOURCES = test_cdf_write.c \
+	simple_model_helper.h simple_model_helper.c
 test_cdf_read_SOURCES = test_cdf_read.c
 test_table_SOURCES = test_table.c
 test_byteswap_SOURCES = test_byteswap.c
