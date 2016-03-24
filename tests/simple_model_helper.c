@@ -2,6 +2,7 @@
 #  include "config.h"
 #endif
 
+#include <assert.h>
 #include <inttypes.h>
 #include <math.h>
 #include <stdio.h>
@@ -140,7 +141,8 @@ struct cart_coord
   double lat, lon;
 };
 
-static void computeCurvilinear(double *coords_, const struct cart_coord a[4], size_t sizex, size_t sizey);
+static void computeCurvilinearChunk(double *coords_, const struct cart_coord a[4], size_t sizex, size_t sizey,
+                                    const size_t xyRange[2][2]);
 
 int
 createLocalCurvilinearGrid(int sizex, int sizey)
@@ -164,7 +166,10 @@ createLocalCurvilinearGrid(int sizex, int sizey)
             { .lon = DEG2RAD(-80.0), .lat = DEG2RAD(10.0) } };
 #endif
     double(*gridCoords)[sizey][sizex] = (double(*)[sizey][sizex]) Malloc(sizeof(*gridCoords) * gridsize * 2);
-    computeCurvilinear((double *) gridCoords, region, (size_t) sizex, (size_t) sizey);
+    {
+      const size_t xyRange[2][2] = { { 0, 0 }, { (size_t) sizex, (size_t) sizey } };
+      computeCurvilinearChunk((double *) gridCoords, region, (size_t) sizex, (size_t) sizey, xyRange);
+    }
     gridDefXvals(gridID, (double *) (gridCoords[1]));
     gridDefYvals(gridID, (double *) (gridCoords[0]));
     Free(gridCoords);
@@ -191,24 +196,27 @@ intermediateCoord(struct cart_coord p1, struct cart_coord p2, double f)
 }
 
 static void
-computeCurvilinear(double *coords_, const struct cart_coord a[4], size_t sizex, size_t sizey)
+computeCurvilinearChunk(double *coords_, const struct cart_coord a[4], size_t sizex, size_t sizey, const size_t xyRange[2][2])
 {
+  size_t startx = xyRange[0][0], starty = xyRange[0][1], endx = xyRange[1][0], endy = xyRange[1][1], chunkSizeX = endx - startx,
+         chunkSizeY = endy - starty;
+  assert(startx <= endx && endx <= sizex && starty <= endy && endy <= sizey);
 #ifdef __cplusplus
-  auto coords = (double(*)[sizey][sizex]) coords_;
+  auto coords = (double(*)[chunkSizeY][chunkSizeX]) coords_;
 #else
-  double(*coords)[sizey][sizex] = (double(*)[sizey][sizex]) coords_;
+  double(*coords)[chunkSizeY][chunkSizeX] = (double(*)[sizey][sizex]) coords_;
 #endif
-  for (size_t j = 0; j < sizey; ++j)
+  for (size_t j = starty; j < endy; ++j)
     {
       double g = (double) j / (double) (sizey - 1);
       /* compute start/end coordinates of great circle in x direction */
       struct cart_coord gc_left = intermediateCoord(a[0], a[3], g), gc_right = intermediateCoord(a[1], a[2], g);
-      for (size_t i = 0; i < sizex; ++i)
+      for (size_t i = startx; i < endx; ++i)
         {
           double f = (double) i / (double) (sizex - 1);
           struct cart_coord pij = intermediateCoord(gc_left, gc_right, f);
-          coords[0][j][i] = RAD2DEG(pij.lat);
-          coords[1][j][i] = RAD2DEG(pij.lon);
+          coords[0][j - starty][i - startx] = RAD2DEG(pij.lat);
+          coords[1][j - starty][i - startx] = RAD2DEG(pij.lon);
         }
     }
 }
