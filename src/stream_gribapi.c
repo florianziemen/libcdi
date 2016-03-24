@@ -666,7 +666,7 @@ gribapiDefProjSTERE(grib_handle *gh, int gridID)
 static void
 gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh, size_t recsize, off_t position, int datatype, int comptype,
                  const char *varname, int leveltype1, int leveltype2, int lbounds, int level1, int level2, int level_sf,
-                 int level_unit, VarScanKeys *scanKeys, const var_tile_t *tiles, int lread_additional_keys, void *fdbItem)
+                 int level_unit, VarScanKeys *scanKeys, const var_tile_t *tiles, bool lread_additional_keys, void *fdbItem)
 {
   const int vlistID = streamptr->vlistID;
   const int tsID = streamptr->curTsID;
@@ -1073,7 +1073,7 @@ fdbScanTimesteps(stream_t *streamptr)
       var_tile_t *ptiles = memcmp(&tiles, &dummy_tiles, sizeof(var_tile_t)) ? &tiles : NULL;
       int recpos = 0;
       gribapiAddRecord(streamptr, param, gh, recsize, recpos, datatype, comptype, varname, leveltype1, leveltype2, lbounds, level1,
-                       level2, level_sf, level_unit, &scanKeys, ptiles, 1, fdbItemList[recID]);
+                       level2, level_sf, level_unit, &scanKeys, ptiles, true, fdbItemList[recID]);
       fdbItemList[recID] = NULL;
 
       grib_handle_delete(gh);
@@ -1267,7 +1267,7 @@ gribapiScanTimestep1(stream_t *streamptr)
 
       var_tile_t *ptiles = memcmp(&tiles, &dummy_tiles, sizeof(var_tile_t)) ? &tiles : NULL;
       gribapiAddRecord(streamptr, param, gh, recsize, recpos, datatype, comptype, varname, leveltype1, leveltype2, lbounds, level1,
-                       level2, level_sf, level_unit, &scanKeys, ptiles, 1, NULL);
+                       level2, level_sf, level_unit, &scanKeys, ptiles, true, NULL);
 
       grib_handle_delete(gh);
       gh = NULL;
