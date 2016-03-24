@@ -48,19 +48,6 @@ allocError(const char *msg)
   exit(EXIT_FAILURE);
 }
 
-static char *
-fname_create(const char *prefix, const char *suffix)
-{
-  size_t prefix_len, suffix_len;
-  char *fname;
-  if (!(fname = (char *) malloc((prefix_len = strlen(prefix)) + 1 + (suffix_len = strlen(suffix)) + 1)))
-    allocError("cannot create string");
-  strcpy(fname, prefix);
-  fname[prefix_len] = '.';
-  strcpy(fname + prefix_len + 1, suffix);
-  return fname;
-}
-
 static inline void
 check_positive(int v, const char *msg)
 {
@@ -254,15 +241,7 @@ main(int argc, char *argv[])
   vlistDefTaxis(vlistID, taxisID);
 
   // Create a dataset
-  {
-    char *fname = fname_create(prefix, suffix);
-    if ((streamID = streamOpenWrite(fname, filetype)) < 0)
-      {
-        fprintf(stderr, "error opening output file %s: %s\n", fname, cdiStringError(streamID));
-        exit(EXIT_FAILURE);
-      }
-    free(fname);
-  }
+  streamID = composeStream(NULL, prefix, -1, suffix, filetype);
 
   // Assign the variable list to the dataset
   streamDefVlist(streamID, vlistID);
@@ -339,7 +318,8 @@ main(int argc, char *argv[])
     {
       FILE *tablefp;
       {
-        char *fname = fname_create(prefix, "cksum");
+        char *fname = NULL;
+        composeFilename(&fname, prefix, -1, "cksum");
         if (!(tablefp = fopen(fname, "w")))
           {
             perror("failed to open table file");
