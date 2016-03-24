@@ -18,6 +18,9 @@ enum {
 void
 var_scale(int datatype, double *mscale, double *mrscale);
 
+#define DEG2RAD(phi) ((M_PI / 180.0) * (phi))
+#define RAD2DEG(phi) ((180. / M_PI) * (phi))
+
 static inline double
 sign_flat(double v)
 {
@@ -45,6 +48,8 @@ void composeFilename(char **buf, const char *fname_prefix, int tfID, const char 
 int composeStream(char **buf, const char *fname_prefix, int tfID, const char *suffix, int filetype);
 
 int createGlobalLatLonGrid(int nlon, int nlat);
+
+int createLocalCurvilinearGrid(int sizex, int sizey);
 
 #if defined (USE_MPI) && ! defined(HAVE_PPM_CORE)
 struct PPM_extent
