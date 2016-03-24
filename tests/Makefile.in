@@ -205,7 +205,8 @@ am_test_cdf_read_OBJECTS = test_cdf_read.$(OBJEXT)
 test_cdf_read_OBJECTS = $(am_test_cdf_read_OBJECTS)
 test_cdf_read_LDADD = $(LDADD)
 test_cdf_read_DEPENDENCIES = ../src/libcdi.la
-am_test_cdf_write_OBJECTS = test_cdf_write.$(OBJEXT)
+am_test_cdf_write_OBJECTS = test_cdf_write.$(OBJEXT) \
+	simple_model_helper.$(OBJEXT)
 test_cdf_write_OBJECTS = $(am_test_cdf_write_OBJECTS)
 test_cdf_write_LDADD = $(LDADD)
 test_cdf_write_DEPENDENCIES = ../src/libcdi.la
@@ -529,7 +530,9 @@ pio_write_deco2d_SOURCES = pio_write.c pio_write.h deco2d_model.c \
 test_resource_copy_SOURCES = test_resource_copy.c
 test_resource_copy_LDADD = $(UUID_C_LIB) ../src/libcdiresunpack.la $(LDADD)
 test_resource_copy_mpi_SOURCES = test_resource_copy.c
-test_cdf_write_SOURCES = test_cdf_write.c
+test_cdf_write_SOURCES = test_cdf_write.c \
+	simple_model_helper.h simple_model_helper.c
+
 test_cdf_read_SOURCES = test_cdf_read.c
 test_table_SOURCES = test_table.c
 test_byteswap_SOURCES = test_byteswap.c
