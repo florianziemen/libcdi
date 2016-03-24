@@ -107,6 +107,33 @@ parse_unsignedarg(const char msg[])
 
 typedef int (*pioRoleFunc)(MPI_Comm commSuper, int IOMode, int nProcsIO);
 
+struct boolOptionParse
+{
+  bool matched, value, invert;
+};
+
+static struct boolOptionParse
+parseBooleanLongOption(size_t optionStrSize, const char *optionStr, const char *argStr)
+{
+  bool invert;
+  struct boolOptionParse result;
+  if ((invert = !strncmp(argStr, optionStr, optionStrSize - 1)) || !strncmp(argStr, optionStr + 3, optionStrSize - 4))
+    {
+      result.matched = true;
+      result.invert = invert;
+      size_t valOfs = optionStrSize - (invert ? 1 : 4);
+      if (argStr[valOfs] == '\0' || !strcmp(argStr + valOfs, "=true"))
+        result.value = !invert;
+      else if (!strcmp(argStr + valOfs, "=false"))
+        result.value = invert;
+      else
+        invalidOptionDie("invalid option argument to -q%s: %s\n", optionStr + (invert ? 0 : 3), argStr + valOfs);
+    }
+  else
+    result = (struct boolOptionParse){ .matched = false, .value = false };
+  return result;
+}
+
 static void
 parse_long_option(struct model_config *restrict setup, int pioConfHandle, pioRoleFunc *pioRoleAssign, const char *str)
 {
@@ -114,19 +141,15 @@ parse_long_option(struct model_config *restrict setup, int pioConfHandle, pioRol
   (void) pioConfHandle;
   (void) pioRoleAssign;
 #endif
-  static const char cacheRedistStr[] = "cache-redists", pioRoleSchemeOptionStr[] = "pio-role-scheme",
+  static const char cacheRedistStr[] = "no-cache-redists", pioRoleSchemeOptionStr[] = "pio-role-scheme",
                     uuidCreateOptionStr[] = "no-create-uuid";
-  if (!strncmp(str, cacheRedistStr, sizeof(cacheRedistStr) - 1))
+  struct boolOptionParse bop;
+  if ((bop = parseBooleanLongOption(sizeof(cacheRedistStr), cacheRedistStr, str)).matched)
     {
 #ifdef USE_MPI
-      if (str[sizeof(cacheRedistStr) - 1] == '\0' || !strcmp(str + sizeof(cacheRedistStr) - 1, "=true"))
-        cdiPioConfSetRedistCache(pioConfHandle, 1);
-      else if (!strcmp(str + sizeof(cacheRedistStr) - 1, "=false"))
-        cdiPioConfSetRedistCache(pioConfHandle, 0);
-      else
-        invalidOptionDie("invalid option argument to -qcache-redists: %s\n", optarg + sizeof(cacheRedistStr) - 1);
+      cdiPioConfSetRedistCache(pioConfHandle, bop.value);
 #else
-      invalidOptionDie("CDI-PIO option -q%s ignored in non-MPI mode\n", cacheRedistStr);
+      invalidOptionDie("CDI-PIO option -q%s unavailable in non-MPI mode\n", cacheRedistStr + (bop.invert ? 0 : 3));
 #endif
     }
   else if (!strncmp(str, pioRoleSchemeOptionStr, sizeof(pioRoleSchemeOptionStr) - 1))
@@ -135,15 +158,15 @@ parse_long_option(struct model_config *restrict setup, int pioConfHandle, pioRol
       static const char pioRoleSchemeLastN[] = "last", pioRoleSchemeFirstN[] = "first", pioRoleSchemeBalanced[] = "balanced";
       if (str[sizeof(pioRoleSchemeOptionStr) - 1] == '=')
         {
-          const char *optargarg = str + sizeof(pioRoleSchemeOptionStr);
-          if (!strcmp(optargarg, pioRoleSchemeLastN))
+          const char *optargArg = str + sizeof(pioRoleSchemeOptionStr);
+          if (!strcmp(optargArg, pioRoleSchemeLastN))
             *pioRoleAssign = cdiPioCSRLastN;
-          else if (!strcmp(optargarg, pioRoleSchemeFirstN))
+          else if (!strcmp(optargArg, pioRoleSchemeFirstN))
             *pioRoleAssign = cdiPioCSRFirstN;
-          else if (!strcmp(optargarg, pioRoleSchemeBalanced))
+          else if (!strcmp(optargArg, pioRoleSchemeBalanced))
             *pioRoleAssign = cdiPioCSRBalanced;
           else
-            invalidOptionDie("unknown scheme argument \"%s\" to -q%s", optargarg, pioRoleSchemeOptionStr);
+            invalidOptionDie("unknown scheme argument \"%s\" to -q%s", optargArg, pioRoleSchemeOptionStr);
         }
       else
         invalidOptionDie("long option %s needs argument\n", pioRoleSchemeOptionStr);
@@ -151,13 +174,9 @@ parse_long_option(struct model_config *restrict setup, int pioConfHandle, pioRol
       invalidOptionDie("CDI-PIO option -q%s ignored in non-MPI mode\n", pioRoleSchemeOptionStr);
 #endif
     }
-  else if (!strcmp(str, uuidCreateOptionStr + 3))
+  else if ((bop = parseBooleanLongOption(sizeof(uuidCreateOptionStr), uuidCreateOptionStr, str)).matched)
     {
-      setup->create_uuid = true;
-    }
-  else if (!strcmp(str, uuidCreateOptionStr))
-    {
-      setup->create_uuid = false;
+      setup->create_uuid = bop.value;
     }
   else
     invalidOptionDie("unknown long option: %s\n", str);
