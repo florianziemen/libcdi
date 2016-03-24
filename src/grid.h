@@ -5,6 +5,7 @@
 #include <stdbool.h>
 
 #include "cdi_att.h"
+#include "resource_handle.h"
 
 extern double grid_missval;
 extern int (*proj_lonlat_to_lcc_func)();
@@ -190,6 +191,11 @@ void
 gridUnpack(char * unpackBuffer, int unpackBufferSize,
            int * unpackBufferPos, int originNamespace, void *context,
            int force_id);
+
+/* apply func to each grid */
+enum cdiApplyRet
+cdiGridApply(enum cdiApplyRet (*func)(int id, void *res, void *data),
+             void *data);
 
 struct addIfNewRes
 {
