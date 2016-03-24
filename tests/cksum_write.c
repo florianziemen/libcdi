@@ -133,16 +133,14 @@ main(int argc, char *argv[])
   {
     nmiss = 0
   };
-  double *lons, *lats, *restrict var[nvars], mscale, mrscale;
+  double *restrict var[nvars], mscale, mrscale;
   size_t varSize[nvars];
   const char *varName[nvars] = { "varname1", "varname2" };
 #ifndef TEST_CHUNK_WRITE
   const char *suffix = "grb", *prefix = "example";
-  int grid = GRID_LONLAT;
   int filetype = CDI_FILETYPE_GRB, datatype = CDI_DATATYPE_PACK24;
 #else
   const char *suffix = "nc", *prefix = "example";
-  int grid = GRID_LONLAT;
   int filetype = CDI_FILETYPE_NC, datatype = CDI_DATATYPE_FLT64;
 #endif
   {
@@ -194,20 +192,11 @@ main(int argc, char *argv[])
         }
   }
 
-  lons = (double *) malloc((size_t) nlon * sizeof(lons[0]));
-  for (size_t i = 0; i < (size_t) nlon; ++i) lons[i] = ((double) (i * 360)) / nlon;
-  lats = (double *) malloc((size_t) nlat * sizeof(lats[0]));
-  for (size_t i = 0; i < (size_t) nlat; ++i) lats[i] = ((double) (i * 180)) / nlat - 90.0;
-
   varSize[0] = (size_t) nlon * (size_t) nlat;
   varSize[1] = (size_t) nlon * (size_t) nlat * (size_t) nlev;
 
   // Create a regular lon/lat grid
-  gridID = gridCreate(grid, nlon * nlat);
-  gridDefXsize(gridID, nlon);
-  gridDefYsize(gridID, nlat);
-  gridDefXvals(gridID, lons);
-  gridDefYvals(gridID, lats);
+  gridID = createGlobalLatLonGrid(nlon, nlat);
 
   // Create a surface level Z-axis
   zaxisID[0] = zaxisCreate(ZAXIS_SURFACE, 1);
@@ -216,7 +205,7 @@ main(int argc, char *argv[])
   zaxisID[1] = zaxisCreate(ZAXIS_PRESSURE, nlev);
   {
     double *levs = (double *) malloc((size_t) nlev * sizeof(levs[0]));
-    for (size_t i = 0; i < (size_t) nlev; ++i) levs[i] = 101300 - floor(3940.3 * (exp(2.3579 * (double) (i) / (nlev - 1)) - 1.0));
+    for (size_t i = 0; i < (size_t) nlev; ++i) levs[i] = 101300 - floor(3940.3 * expm1(2.3579 * (double) i / (nlev - 1)));
     zaxisDefLevels(zaxisID[1], levs);
     free(levs);
   }
@@ -384,8 +373,6 @@ main(int argc, char *argv[])
   zaxisDestroy(zaxisID[0]);
   zaxisDestroy(zaxisID[1]);
   gridDestroy(gridID);
-  free(lats);
-  free(lons);
   return 0;
 }
 
