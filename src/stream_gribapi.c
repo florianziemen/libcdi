@@ -430,7 +430,7 @@ static
 void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
                       size_t recsize, off_t position, int datatype, int comptype, const char *varname,
                       int leveltype1, int leveltype2, int lbounds, int level1, int level2, int level_sf, int level_unit,
-                      const var_tile_t *tiles, int lread_additional_keys)
+                      const var_tile_t *tiles, bool lread_additional_keys)
 {
   int levelID = 0;
   char stdname[CDI_MAX_NAME], longname[CDI_MAX_NAME], units[CDI_MAX_NAME];
@@ -937,7 +937,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
       var_tile_t *ptiles = NULL;
       if ( memcmp(&tiles, &dummy_tiles, sizeof(var_tile_t)) != 0 ) ptiles = &tiles;
       gribapiAddRecord(streamptr, param, gh, recsize, recpos, datatype, comptype, varname,
-                       leveltype1, leveltype2, lbounds, level1, level2, level_sf, level_unit, ptiles, 1);
+                       leveltype1, leveltype2, lbounds, level1, level2, level_sf, level_unit, ptiles, true);
 
       grib_handle_delete(gh);
       gh = NULL;
