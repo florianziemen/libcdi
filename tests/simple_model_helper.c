@@ -68,10 +68,11 @@ time_t2cditime(time_t t, int *date, int *timeofday)
 void
 composeFilename(char **buf, const char *fname_prefix, int tfID, const char *suffix)
 {
-  size_t fnSize = strlen(fname_prefix) + 1 + sizeof(int) * 3 + 1 + strlen(suffix) + 1;
+  size_t fnSize = strlen(fname_prefix) + (tfID >= 0 ? 1 + sizeof(int) * 3 : 0) + 1 + strlen(suffix) + 1;
   char *filename = Realloc(*buf, fnSize);
-  int plen;
-  if ((size_t) (plen = snprintf(filename, fnSize, "%s_%d.%s", fname_prefix, tfID, suffix)) >= fnSize)
+  int plen = tfID >= 0 ? snprintf(filename, fnSize, "%s_%d.%s", fname_prefix, tfID, suffix)
+                       : snprintf(filename, fnSize, "%s.%s", fname_prefix, suffix);
+  if ((size_t) plen >= fnSize)
     {
       fprintf(stderr,
               "unexpected error: printing to string of size %zu"
@@ -86,13 +87,18 @@ composeFilename(char **buf, const char *fname_prefix, int tfID, const char *suff
 int
 composeStream(char **buf, const char *fname_prefix, int tfID, const char *suffix, int filetype)
 {
-  composeFilename(buf, fname_prefix, tfID, suffix);
-  int streamID = streamOpenWrite(*buf, filetype);
+  char *temp = buf ? *buf : NULL;
+  composeFilename(&temp, fname_prefix, tfID, suffix);
+  int streamID = streamOpenWrite(temp, filetype);
   if (streamID < 0)
     {
       fprintf(stderr, "Failed to open stream: %s\n", cdiStringError(streamID));
       abort();
     }
+  if (!buf)
+    free(temp);
+  else
+    *buf = temp;
   return streamID;
 }
 
