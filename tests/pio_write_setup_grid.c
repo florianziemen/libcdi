@@ -12,28 +12,13 @@
 
 #include "pio_write_setup_grid.h"
 #include "cdi_uuid.h"
+#include "simple_model_helper.h"
 
 int
 setupGrid(struct model_config *setup, MPI_Comm comm)
 {
   int nlon = setup->nlon, nlat = setup->nlat;
-  int gridID = gridCreate ( GRID_LONLAT, nlon*nlat );
-  gridDefXsize ( gridID, nlon );
-  gridDefYsize ( gridID, nlat );
-  {
-    double *lons = (double *)Malloc((size_t)nlon * sizeof (lons[0]));
-    for (size_t i = 0; i < (size_t)nlon; ++i)
-      lons[i] = ((double)(i * 360))/nlon;
-    gridDefXvals ( gridID, lons );
-    Free(lons);
-  }
-  {
-    double *lats = (double *)Malloc((size_t)nlat * sizeof (lats[0]));
-    for (size_t i = 0; i < (size_t)nlat; ++i)
-      lats[i] = ((double)(i * 180))/nlat - 90.0;
-    gridDefYvals ( gridID, lats );
-    Free(lats);
-  }
+  int gridID = createGlobalLatLonGrid(nlon, nlat);
   if (setup->create_uuid)
   {
     int rank = 0;
