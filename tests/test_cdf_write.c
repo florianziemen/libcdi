@@ -8,6 +8,8 @@
 
 #include "cdi.h"
 
+#include "dmemory.h"
+
 struct cart_coord
 {
   double lat, lon;
@@ -58,16 +60,11 @@ main(int argc, const char **argv)
             { .lon = DEG2RAD(-50.0), .lat = DEG2RAD(7.0) },
             { .lon = DEG2RAD(-80.0), .lat = DEG2RAD(10.0) } };
 #endif
-    double(*gridCoords)[sizey][sizex] = (double(*)[sizey][sizex]) malloc(sizeof(*gridCoords) * sizey * sizex * 2);
-    if (gridCoords == NULL)
-      {
-        perror("grid coordinate memory allocation failed");
-        return EXIT_FAILURE;
-      }
+    double(*gridCoords)[sizey][sizex] = (double(*)[sizey][sizex]) Malloc(sizeof(*gridCoords) * sizey * sizex * 2);
     compute_curvilinear((double *) gridCoords, region, sizex, sizey);
     gridDefXvals(gridID, (double *) (gridCoords[1]));
     gridDefYvals(gridID, (double *) (gridCoords[0]));
-    free(gridCoords);
+    Free(gridCoords);
   }
 
   int zaxisID = zaxisCreate(ZAXIS_SURFACE, 1);
@@ -88,12 +85,7 @@ main(int argc, const char **argv)
   (void) streamDefTimestep(streamID, 0);
 
   {
-    double(*data)[sizex] = (double(*)[sizex]) malloc(sizeof(**data) * sizex * sizey);
-    if (!data)
-      {
-        perror("data values memory allocation failed");
-        return EXIT_FAILURE;
-      }
+    double(*data)[sizex] = (double(*)[sizex]) Malloc(sizeof(**data) * sizex * sizey);
     for (size_t j = 0; j < sizey; ++j)
       for (size_t i = 0; i < sizex; ++i)
         {
@@ -101,7 +93,7 @@ main(int argc, const char **argv)
         }
     data[sizey / 3][sizex / 2] = missValue;
     streamWriteVar(streamID, 0, (const double *) data, 1);
-    free(data);
+    Free(data);
   }
 
   streamClose(streamID);
