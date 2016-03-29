@@ -8,6 +8,7 @@
 #include <float.h>
 #include <inttypes.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
 
@@ -197,6 +198,7 @@ void cdiCreateUUID(unsigned char *uuid)
 {
   static int uuid_seeded = 0;
   static char uuid_rand_state[31 * sizeof (long)];
+#ifndef _SX
   char *caller_rand_state;
   if (uuid_seeded)
     caller_rand_state = setstate(uuid_rand_state);
@@ -216,11 +218,17 @@ void cdiCreateUUID(unsigned char *uuid)
     }
   for (size_t i = 0; i < CDI_UUID_SIZE; ++i)
     uuid[i] = (unsigned char)random();
+#else
+  for (size_t i = 0; i < CDI_UUID_SIZE; ++i)
+    uuid[i] = (unsigned char)lrand48();
+#endif
   /* encode variant into msb of octet 8 */
   uuid[8] = (unsigned char)((uuid[8] & 0x3f) | (1 << 7));
   /* encode version 4 ((pseudo-)random uuid) into msb of octet 7 */
   uuid[7] = (unsigned char)((uuid[7] & 0x0f) | (4 << 4));
+#ifndef _SX
   setstate(caller_rand_state);
+#endif
 }
 #endif
 
