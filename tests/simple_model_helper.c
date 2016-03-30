@@ -9,8 +9,14 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef HAVE_PPM_CORE
+#include <ppm/ppm_uniform_partition.h>
+#include <core/ppm_combinatorics.h>
+#endif
+
 #include "cdi.h"
 #include "dmemory.h"
+#include "error.h"
 
 #include "simple_model_helper.h"
 
@@ -140,16 +146,6 @@ createGlobalLatLonGrid(int nlon, int nlat)
   return gridID;
 }
 
-struct cart_coord {
-  double lat, lon;
-};
-
-static void
-computeCurvilinearChunk(double *coords_,
-                        const struct cart_coord a[4],
-                        size_t sizex, size_t sizey,
-                        const size_t xyRange[2][2]);
-
 int
 createLocalCurvilinearGrid(int sizex, int sizey)
 {
@@ -213,7 +209,7 @@ intermediateCoord(struct cart_coord p1, struct cart_coord p2, double f)
   return ic;
 }
 
-static void
+void
 computeCurvilinearChunk(double *coords_,
                         const struct cart_coord a[4],
                         size_t sizex, size_t sizey,
@@ -221,10 +217,10 @@ computeCurvilinearChunk(double *coords_,
 {
   size_t startx = xyRange[0][0],
     starty = xyRange[0][1],
-    endx = xyRange[1][0],
-    endy = xyRange[1][1],
-    chunkSizeX = endx - startx,
-    chunkSizeY = endy - starty;
+    chunkSizeX = xyRange[1][0],
+    chunkSizeY = xyRange[1][1],
+    endx = startx + chunkSizeX,
+    endy = starty + chunkSizeY;
   assert(startx <= endx && endx <= sizex && starty <= endy && endy <= sizey);
 #ifdef __cplusplus
   auto coords = (double (*)[chunkSizeY][chunkSizeX])coords_;
@@ -247,9 +243,7 @@ computeCurvilinearChunk(double *coords_,
     }
 }
 
-
 #if defined USE_MPI && ! defined HAVE_PPM_CORE
-
 static int32_t
 uniform_partition_start(struct PPM_extent set_interval, int nparts,
                         int part_idx);
@@ -302,7 +296,6 @@ PPM_prime_factorization_32(uint32_t n, uint32_t **factors)
   *factors = pfactors;
   return numFactors;
 }
-
 #endif
 
 /*

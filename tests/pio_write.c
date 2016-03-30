@@ -105,7 +105,7 @@ struct boolOptionParse
 
 static struct boolOptionParse
 parseBooleanLongOption(size_t optionStrSize, const char *optionStr,
-                          const char *argStr)
+                       const char *argStr)
 {
   bool invert;
   struct boolOptionParse result;
@@ -187,7 +187,7 @@ parse_long_option(struct model_config *restrict setup,
                                          useDistGridOptionStr, str)).matched)
     {
 #if defined USE_MPI && defined HAVE_PPM_DIST_ARRAY_H
-      setup->flags = (setup->flags & ~~PIO_WRITE_CONFIG_USE_DIST_GRID_FLAG)
+      setup->flags = (setup->flags & ~PIO_WRITE_CONFIG_USE_DIST_GRID_FLAG)
         | (bop.value << PIO_WRITE_CONFIG_USE_DIST_GRID_BIT);
 #else
       invalidOptionDie("CDI-PIO option -q%s feature unavailable %s\n",
