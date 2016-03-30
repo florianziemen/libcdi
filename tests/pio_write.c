@@ -28,7 +28,7 @@
 
 static const struct model_config default_setup
 #ifdef __cplusplus
-    = { 12, 6, 3, 5, 5, FILETYPE_GRB, CDI_DATATYPE_PACK24, 1, 0, "grb" };
+    = { 12, 6, 3, 5, 5, CDI_FILETYPE_GRB, CDI_DATATYPE_PACK24, PIO_WRITE_CONFIG_CHECKSUM_FLAG, "grb" };
 #else
     = {
         .nlon = 12,
@@ -38,8 +38,7 @@ static const struct model_config default_setup
         .nvars = 5,
         .filetype = CDI_FILETYPE_GRB,
         .datatype = CDI_DATATYPE_PACK24,
-        .compute_checksum = 1,
-        .create_uuid = 0,
+        .flags = PIO_WRITE_CONFIG_CHECKSUM_FLAG,
         .suffix = "grb",
       };
 #endif
@@ -176,7 +175,7 @@ parse_long_option(struct model_config *restrict setup, int pioConfHandle, pioRol
     }
   else if ((bop = parseBooleanLongOption(sizeof(uuidCreateOptionStr), uuidCreateOptionStr, str)).matched)
     {
-      setup->create_uuid = bop.value;
+      setup->flags = (setup->flags & ~PIO_WRITE_CONFIG_CREATE_UUID_FLAG) | (bop.value << PIO_WRITE_CONFIG_CREATE_UUID_BIT);
     }
   else
     invalidOptionDie("unknown long option: %s\n", str);
@@ -302,7 +301,7 @@ main(int argc, char *argv[])
             }
           break;
         case 't': setup.nts = parse_intarg("error parsing number of timesteps"); break;
-        case 'c': setup.compute_checksum = 0; break;
+        case 'c': setup.flags &= ~PIO_WRITE_CONFIG_CHECKSUM_FLAG; break;
         case 's': randSeed = parse_unsignedarg("error parsing random seed"); break;
         default: /* '?' */
           fprintf(stderr,
