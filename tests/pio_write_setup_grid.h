@@ -11,6 +11,11 @@
 
 #include "pio_write.h"
 
+#ifdef USE_MPI
+void
+findPartition2D(int npart[2], int num_parts);
+#endif
+
 int
 setupGrid(struct model_config *setup, MPI_Comm comm);
 
