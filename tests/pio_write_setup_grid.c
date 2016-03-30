@@ -19,7 +19,7 @@ setupGrid(struct model_config *setup, MPI_Comm comm)
 {
   int nlon = setup->nlon, nlat = setup->nlat;
   int gridID = createGlobalLatLonGrid(nlon, nlat);
-  if (setup->create_uuid)
+  if (setup->flags & PIO_WRITE_CONFIG_CREATE_UUID_FLAG)
   {
     int rank = 0;
 #if USE_MPI
