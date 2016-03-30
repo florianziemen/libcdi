@@ -109,7 +109,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
   (void)comm;
 #endif
 
-  if (rank == 0 && setup.compute_checksum)
+  if (rank == 0 && (setup.flags & PIO_WRITE_CONFIG_CHECKSUM_FLAG))
     {
       var = (double *)Malloc((size_t)nlon * (size_t)nlat
                     * (size_t)setup.max_nlev * sizeof(var[0]));
@@ -177,7 +177,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
             = zaxisCreate(ZAXIS_PRESSURE, varDesc[varIdx].nlev);
           zaxisDefLevels(varDesc[varIdx].zaxisID, levs);
         }
-      if (setup.create_uuid)
+      if (setup.flags & PIO_WRITE_CONFIG_CREATE_UUID_FLAG)
       {
         unsigned char uuid[16];
         if (rank == 0)
@@ -227,7 +227,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
                               chunkSize, varStartXt),
           gather_idxlist;
         varDesc[varIdx].partDesc = part_idxlist;
-        if (setup.compute_checksum)
+        if (setup.flags & PIO_WRITE_CONFIG_CHECKSUM_FLAG)
           {
             if (rank == 0)
               {
@@ -322,7 +322,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
                 }
               modelRegionCompute(varslice, (int)varLevs, nlat, nlon,
                                  start, chunk, tsID, mscale, mrscale);
-              if (setup.compute_checksum)
+              if (setup.flags & PIO_WRITE_CONFIG_CHECKSUM_FLAG)
                 {
 #if USE_MPI
                   xt_redist_s_exchange1(varDesc[varIdx].redist4gather,
@@ -350,7 +350,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
                     }
 #endif
                 }
-              if (rank == 0 && setup.compute_checksum)
+              if (rank == 0 && (setup.flags & PIO_WRITE_CONFIG_CHECKSUM_FLAG))
                 {
                   memcrc_r(&varDesc[varIdx].checksum_state,
                            (const unsigned char *)vdatetime,
@@ -375,7 +375,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
 #endif
 	}
       streamClose(streamID);
-      if (rank == 0 && setup.compute_checksum)
+      if (rank == 0 && (setup.flags & PIO_WRITE_CONFIG_CHECKSUM_FLAG))
         {
           FILE *tablefp;
           composeFilename(&filename, fname_prefix, tfID, "cksum");
