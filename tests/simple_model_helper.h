@@ -47,7 +47,25 @@ int createGlobalLatLonGrid(int nlon, int nlat);
 
 int createLocalCurvilinearGrid(int sizex, int sizey);
 
-#if defined(USE_MPI) && !defined(HAVE_PPM_CORE)
+struct cart_coord
+{
+  double lat, lon;
+};
+
+/*
+ * coords_: points to array of size xyRange[0][0] * xyRange[0][1] * 2, where
+ * the first half of xyRange[0][0] * xyRange[0][1] elements will be
+ * initialized to longitude values and the second half to the latitude values
+ * a: cartesian coordinates of rectangular part of globe in
+ * anti-clockwise order
+ * sizex, sizey: number of grid points in x and y directions respectively
+ * xyRange: subset of the ranges [0,sizex) and [0,sizey) to compute,
+ * given as start in xyRange[0] and count values in xyRange[1] for x
+ * at index 0 and y at index 1
+ */
+void computeCurvilinearChunk(double *coords_, const struct cart_coord a[4], size_t sizex, size_t sizey, const size_t xyRange[2][2]);
+
+#if defined USE_MPI && !defined HAVE_PPM_CORE
 struct PPM_extent
 {
   int32_t first, size;
