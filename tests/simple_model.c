@@ -89,7 +89,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
 #if USE_MPI
   xmpi(MPI_Comm_rank(comm, &rank));
   xmpi(MPI_Comm_size(comm, &comm_size));
-  if (rank == 0 && setup.compute_checksum)
+  if (rank == 0 && (setup.flags & PIO_WRITE_CONFIG_CHECKSUM_FLAG))
     {
       chunks = Malloc((size_t) comm_size * sizeof(chunks[0]));
       displs = Malloc((size_t) comm_size * sizeof(displs[0]));
@@ -135,7 +135,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
           varDesc[varIdx].zaxisID = zaxisCreate(ZAXIS_PRESSURE, varDesc[varIdx].nlev);
           zaxisDefLevels(varDesc[varIdx].zaxisID, levs);
         }
-      if (setup.create_uuid)
+      if (setup.flags & PIO_WRITE_CONFIG_CREATE_UUID_FLAG)
         {
           unsigned char uuid[CDI_UUID_SIZE];
           if (rank == 0) cdiCreateUUID(uuid);
@@ -214,7 +214,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
                   varslice_size = chunkSize;
                 }
               modelRegionCompute(varslice, (size_t) start, chunkSize, varDesc[varIdx].nlev, nlat, nlon, tsID, mscale, mrscale);
-              if (setup.compute_checksum)
+              if (setup.flags & PIO_WRITE_CONFIG_CHECKSUM_FLAG)
                 {
 #if USE_MPI
                   int chunk = (int) chunkSize;
@@ -229,7 +229,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
                   var = varslice;
 #endif
                 }
-              if (rank == 0 && setup.compute_checksum)
+              if (rank == 0 && (setup.flags & PIO_WRITE_CONFIG_CHECKSUM_FLAG))
                 {
                   memcrc_r(&varDesc[varIdx].checksum_state, (const unsigned char *) vdatetime, sizeof(vdatetime));
                   memcrc_r(&varDesc[varIdx].checksum_state, (const unsigned char *) var, varDesc[varIdx].size * sizeof(var[0]));
@@ -247,7 +247,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
 #endif
         }
       streamClose(streamID);
-      if (rank == 0 && setup.compute_checksum)
+      if (rank == 0 && (setup.flags & PIO_WRITE_CONFIG_CHECKSUM_FLAG))
         {
           FILE *tablefp;
           composeFilename(&filename, fname_prefix, tfID, "cksum");

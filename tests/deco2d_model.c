@@ -103,7 +103,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
   (void) comm;
 #endif
 
-  if (rank == 0 && setup.compute_checksum)
+  if (rank == 0 && (setup.flags & PIO_WRITE_CONFIG_CHECKSUM_FLAG))
     {
       var = (double *) Malloc((size_t) nlon * (size_t) nlat * (size_t) setup.max_nlev * sizeof(var[0]));
     }
@@ -161,7 +161,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
           varDesc[varIdx].zaxisID = zaxisCreate(ZAXIS_PRESSURE, varDesc[varIdx].nlev);
           zaxisDefLevels(varDesc[varIdx].zaxisID, levs);
         }
-      if (setup.create_uuid)
+      if (setup.flags & PIO_WRITE_CONFIG_CREATE_UUID_FLAG)
         {
           unsigned char uuid[CDI_UUID_SIZE];
           if (rank == 0) cdiCreateUUID(uuid);
@@ -202,7 +202,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
         Xt_int varStartXt[3] = { start[0], start[1], 0 };
         Xt_idxlist part_idxlist = xt_idxsection_new(0, (varLevs > 1 ? 3 : 2), varSizeXt, chunkSize, varStartXt), gather_idxlist;
         varDesc[varIdx].partDesc = part_idxlist;
-        if (setup.compute_checksum)
+        if (setup.flags & PIO_WRITE_CONFIG_CHECKSUM_FLAG)
           {
             if (rank == 0)
               {
@@ -277,7 +277,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
                   varslice_size = chunkSize;
                 }
               modelRegionCompute(varslice, (int) varLevs, nlat, nlon, start, chunk, tsID, mscale, mrscale);
-              if (setup.compute_checksum)
+              if (setup.flags & PIO_WRITE_CONFIG_CHECKSUM_FLAG)
                 {
 #if USE_MPI
                   xt_redist_s_exchange1(varDesc[varIdx].redist4gather, varslice, var);
@@ -302,7 +302,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
                     }
 #endif
                 }
-              if (rank == 0 && setup.compute_checksum)
+              if (rank == 0 && (setup.flags & PIO_WRITE_CONFIG_CHECKSUM_FLAG))
                 {
                   memcrc_r(&varDesc[varIdx].checksum_state, (const unsigned char *) vdatetime, sizeof(vdatetime));
                   memcrc_r(&varDesc[varIdx].checksum_state, (const unsigned char *) var, varDesc[varIdx].size * sizeof(var[0]));
@@ -321,7 +321,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
 #endif
         }
       streamClose(streamID);
-      if (rank == 0 && setup.compute_checksum)
+      if (rank == 0 && (setup.flags & PIO_WRITE_CONFIG_CHECKSUM_FLAG))
         {
           FILE *tablefp;
           composeFilename(&filename, fname_prefix, tfID, "cksum");
