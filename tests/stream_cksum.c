@@ -113,7 +113,7 @@ cksum_stream(const char *fname, size_t *table_len)
           else
             varDesc[varIdx].zDirection = DIRECTION_NONE;
           if (nvars == -1) break;
-          if ((gridType = gridInqType(grid)) != GRID_LONLAT && gridType != GRID_GENERIC)
+          if ((gridType = gridInqType(grid)) != GRID_LONLAT && gridType != GRID_GENERIC && gridType != GRID_CURVILINEAR)
             {
               fprintf(stderr, "unexpected non-lonlat grid found: %d\n", gridType);
               nvars = -1;

@@ -165,6 +165,7 @@ cdiPioQueryVarDims(int varShape[3], int vlistID, int varID)
     {
     case GRID_LONLAT:
     case GRID_GAUSSIAN:
+    case GRID_CURVILINEAR:
       varShape[0] = gridInqXsize(gridID);
       varShape[1] = gridInqYsize(gridID);
       break;
@@ -175,7 +176,6 @@ cdiPioQueryVarDims(int varShape[3], int vlistID, int varID)
     case GRID_GENERIC:
     case GRID_PROJECTION:
     case GRID_GME:
-    case GRID_CURVILINEAR:
     case GRID_UNSTRUCTURED: xabort("unimplemented grid type: %d", gridType);
     }
   varShape[2] = zaxisInqSize(zaxisID);
