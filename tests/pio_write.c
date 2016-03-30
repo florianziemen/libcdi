@@ -138,6 +138,7 @@ parse_long_option(struct model_config *restrict setup,
 #endif
   static const char cacheRedistStr[] = "no-cache-redists",
     pioRoleSchemeOptionStr[] = "pio-role-scheme",
+    curvilinearGridOptionStr[] = "no-create-curvilinear-grid",
     uuidCreateOptionStr[] = "no-create-uuid";
   struct boolOptionParse bop;
   if ((bop = parseBooleanLongOption(sizeof (cacheRedistStr), cacheRedistStr,
@@ -182,6 +183,12 @@ parse_long_option(struct model_config *restrict setup,
     {
       setup->flags = (setup->flags & ~PIO_WRITE_CONFIG_CREATE_UUID_FLAG)
         | (bop.value << PIO_WRITE_CONFIG_CREATE_UUID_BIT);
+    }
+  else if ((bop = parseBooleanLongOption(sizeof (curvilinearGridOptionStr),
+                                         curvilinearGridOptionStr, str)).matched)
+    {
+      setup->flags = (setup->flags & ~PIO_WRITE_CONFIG_CREATE_CURVILINEAR_GRID_FLAG)
+        | (bop.value << PIO_WRITE_CONFIG_CREATE_CURVILINEAR_GRID_BIT);
     }
   else
     invalidOptionDie("unknown long option: %s\n", str);
