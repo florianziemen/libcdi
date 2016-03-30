@@ -18,7 +18,11 @@ int
 setupGrid(struct model_config *setup, MPI_Comm comm)
 {
   int nlon = setup->nlon, nlat = setup->nlat;
-  int gridID = createGlobalLatLonGrid(nlon, nlat);
+  int gridID;
+  if (setup->flags & PIO_WRITE_CONFIG_CREATE_CURVILINEAR_GRID_FLAG)
+    gridID = createLocalCurvilinearGrid(nlon, nlat);
+  else
+    gridID = createGlobalLatLonGrid(nlon, nlat);
   if (setup->flags & PIO_WRITE_CONFIG_CREATE_UUID_FLAG)
     {
       int rank = 0;
