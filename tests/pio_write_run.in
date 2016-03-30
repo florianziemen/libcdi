@@ -1,6 +1,6 @@
 #! @SHELL@
 set -e
-LOG="${LOG-pio_write.log}"
+LOG=${LOG-pio_write.log}
 if [ @ENABLE_GRIB@ != yes ]; then
   # skip tests for unsupported formats
   exit 77
@@ -10,11 +10,13 @@ suffix="${suffix-grb}"
 if [ "@USE_MPI@" = yes ]; then
   variations="-qcache-redists -qcreate-curvilinear-grid"
 else
-  unset variations
+  variations="-qcreate-curvilinear-grid"
 fi
-for variation in "" $variations ; do
+test_variation()
+{
   exec 5>&1 6>&2 >"$LOG" 2>&1
   echo "creating data" >&2
+  variation=$1
   ../libtool --mode=execute \
     @MPI_LAUNCH@ \
     -n ${mpi_task_num} ${tool_wrap_mpi} \
@@ -25,9 +27,18 @@ for variation in "" $variations ; do
   echo "checking example_1.$suffix" >&2
   ../libtool --mode=execute \
     ${tool_wrap} ./cksum_read example_1.${suffix} example_1.cksum
-  exec 2>&6 1>&5 5>&- 6>&-
-  \rm "$LOG"
+}
+
+exec 5>&1 6>&2 >"$LOG" 2>&1
+for variation in "" $variations ; do
+  test_variation "$variation"
 done
+
+if [ x"@USE_MPI@" = xyes -a x"@HAVE_PPM_DIST_ARRAY@" = xyes ]; then
+  test_variation "-qcreate-curvilinear-grid -quse-dist-grid"
+fi
+exec 2>&6 1>&5 5>&- 6>&-
+\rm "$LOG"
 #
 # Local Variables:
 # mode: sh

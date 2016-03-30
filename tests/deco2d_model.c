@@ -54,11 +54,6 @@ modelRegionCompute(double region[], int nlev, int nlat, int nlon, const int chun
                         (double) ((j + js + k + ks) % nlat) / (double) (nlat - 1), mscale, mrscale);
 }
 
-#ifdef USE_MPI
-static void
-findPartition2D(int npart[2], int num_parts);
-#endif
-
 void
 modelRun(struct model_config setup, MPI_Comm comm)
 {
@@ -418,65 +413,6 @@ modelRun(struct model_config setup, MPI_Comm comm)
   Free(levs);
   Free(filename);
 }
-
-#ifdef USE_MPI
-static void
-findPartition2D(int npart[2], int num_parts)
-{
-  const uint64_t rscale = 256;
-  uint32_t *factors = NULL;
-  xassert(num_parts > 0);
-  int numFactors
-    = PPM_prime_factorization_32((uint32_t)num_parts, &factors);
-  /* try to distribute prime factors on dimensions to get
-   * approx. 2 times as many parts in x dim than y dim */
-  const uint64_t optimumRatio = rscale * 2;
-  npart[0] = num_parts, npart[1] = 1;
-  uint_fast32_t npart_attempt[2];
-  uint64_t bestRatio = (uint64_t)num_parts * rscale,
-    bestDiff = (uint64_t)llabs((long long)(bestRatio - optimumRatio));
-  /* test all assignments of factors to dimensions, starting with
-   * only one assigned to x dim (omitting 0 because that would
-   * always give npart[1] > npart[0] */
-  for (int assign2X = 1; assign2X <= numFactors; ++assign2X)
-    {
-      uint_fast32_t pattern = (UINT32_C(1) << assign2X) - 1,
-        lastPattern = pattern << (numFactors - assign2X);
-      do {
-        npart_attempt[0] = 1;
-        npart_attempt[1] = 1;
-        /* loop over all factors */
-        for (uint_fast32_t i = 0; i < (uint_fast32_t)numFactors; ++i)
-          {
-            uint_fast32_t dim_idx = (pattern >> i) & 1;
-            npart_attempt[dim_idx] *= factors[i];
-          }
-        uint64_t ratio = ((uint64_t)npart_attempt[0] * rscale)
-          / (uint64_t)npart_attempt[1];
-        uint64_t diff = (uint64_t)llabs((long long)(ratio - optimumRatio));
-        if (diff < bestDiff)
-          {
-            npart[0] = (int)npart_attempt[0];
-            npart[1] = (int)npart_attempt[1];
-            bestDiff = diff;
-            bestRatio = ratio;
-          }
-        {
-          uint_fast32_t t;
-#if HAVE_DECL___BUILTIN_CTZ
-          t = pattern | (pattern - 1);
-          pattern = (t + 1)
-            | (((~t & -~t) - 1) >> (__builtin_ctz((unsigned)pattern) + 1));
-#else
-          t = (pattern | (pattern - 1)) + 1;
-          pattern = t | ((((t & -t) / (pattern & -pattern)) >> 1) - 1);
-#endif
-        }
-      } while (pattern <= lastPattern);
-    }
-  Free(factors);
-}
-#endif
 
 /*
  * Local Variables:

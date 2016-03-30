@@ -189,7 +189,7 @@ parse_long_option(struct model_config *restrict setup,
   else if ((bop = parseBooleanLongOption(sizeof(useDistGridOptionStr), useDistGridOptionStr, str)).matched)
     {
 #if defined USE_MPI && defined HAVE_PPM_DIST_ARRAY_H
-      setup->flags = (setup->flags & ~~PIO_WRITE_CONFIG_USE_DIST_GRID_FLAG) | (bop.value << PIO_WRITE_CONFIG_USE_DIST_GRID_BIT);
+      setup->flags = (setup->flags & ~PIO_WRITE_CONFIG_USE_DIST_GRID_FLAG) | (bop.value << PIO_WRITE_CONFIG_USE_DIST_GRID_BIT);
 #else
       invalidOptionDie("CDI-PIO option -q%s feature unavailable %s\n", useDistGridOptionStr + (bop.invert ? 0 : 3),
 #ifndef USE_MPI
