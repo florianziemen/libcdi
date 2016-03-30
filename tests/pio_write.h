@@ -13,11 +13,19 @@ typedef int MPI_Comm;
 
 #include <stdbool.h>
 
+enum
+{
+  PIO_WRITE_CONFIG_CHECKSUM_BIT = 0,
+  PIO_WRITE_CONFIG_CREATE_UUID_BIT,
+  PIO_WRITE_CONFIG_CHECKSUM_FLAG = 1 << PIO_WRITE_CONFIG_CHECKSUM_BIT,
+  PIO_WRITE_CONFIG_CREATE_UUID_FLAG = 1 << PIO_WRITE_CONFIG_CREATE_UUID_BIT,
+};
+
 struct model_config
 {
   int nlon, nlat, nts, max_nlev, nvars;
   int filetype, datatype;
-  bool compute_checksum, create_uuid;
+  int flags;
   const char *suffix;
 };
 
