@@ -198,8 +198,8 @@ void cdiCreateUUID(unsigned char *uuid)
 void cdiCreateUUID(unsigned char *uuid)
 {
   static int uuid_seeded = 0;
-  static char uuid_rand_state[31 * sizeof (long)];
 #ifndef _SX
+  static char uuid_rand_state[31 * sizeof (long)];
   char *caller_rand_state;
   if (uuid_seeded)
     caller_rand_state = setstate(uuid_rand_state);
@@ -220,6 +220,27 @@ void cdiCreateUUID(unsigned char *uuid)
   for (size_t i = 0; i < CDI_UUID_SIZE; ++i)
     uuid[i] = (unsigned char)random();
 #else
+  unsigned short caller_rand_state[3];
+  {
+    static unsigned short our_rand_state[3];
+    if (!uuid_seeded)
+      {
+        struct timeval tv;
+        int status = gettimeofday(&tv, NULL);
+        if (status != 0)
+          {
+            perror("failed seed generation!");
+            exit(1);
+          }
+        unsigned seed = tv.tv_sec ^ tv.tv_usec;
+        our_rand_state[0] = 0x330E;
+        our_rand_state[1] = (unsigned short)(seed & 0xFFFFU);
+        our_rand_state[2] = (unsigned short)((seed >> 16) & 0xFFFFU);
+      }
+    unsigned short *p = seed48(our_rand_state);
+    uuid_seeded = 1;
+    memcpy(caller_rand_state, p, sizeof (caller_rand_state));
+  }
   for (size_t i = 0; i < CDI_UUID_SIZE; ++i)
     uuid[i] = (unsigned char)lrand48();
 #endif
@@ -229,6 +250,8 @@ void cdiCreateUUID(unsigned char *uuid)
   uuid[7] = (unsigned char)((uuid[7] & 0x0f) | (4 << 4));
 #ifndef _SX
   setstate(caller_rand_state);
+#else
+  seed48(caller_rand_state);
 #endif
 }
 #endif
