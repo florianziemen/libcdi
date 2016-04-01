@@ -125,7 +125,7 @@ CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 @ENABLE_CDI_LIB_FALSE@am__EXEEXT_2 = cdi$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
-am_cdi_OBJECTS = cdi.$(OBJEXT)
+am_cdi_OBJECTS = cdi.$(OBJEXT) printinfo_extern.$(OBJEXT)
 cdi_OBJECTS = $(am_cdi_OBJECTS)
 cdi_DEPENDENCIES = $(top_builddir)/src/libcdi.la
 AM_V_lt = $(am__v_lt_@AM_V@)
@@ -387,7 +387,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 #
-cdi_SOURCES = cdi.c printinfo.h
+cdi_SOURCES = cdi.c printinfo.h printinfo_extern.c
 cdi_LDADD = $(top_builddir)/src/libcdi.la @LIBS@
 @ENABLE_ALL_STATIC_TRUE@cdi_LDFLAGS = -all-static
 #
@@ -507,6 +507,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cdi.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/createtable.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/printinfo_extern.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

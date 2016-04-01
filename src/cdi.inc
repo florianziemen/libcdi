@@ -4,7 +4,7 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   April 2017
+! Uwe Schulzweida, MPI-MET, Hamburg,   May 2017
 !
 
       INTEGER    CDI_MAX_NAME
@@ -47,6 +47,8 @@
       PARAMETER (CDI_EUFSTRUCT          = -23)
       INTEGER    CDI_EUNC4
       PARAMETER (CDI_EUNC4              = -24)
+      INTEGER    CDI_EDIMSIZE
+      PARAMETER (CDI_EDIMSIZE           = -25)
       INTEGER    CDI_ELIMIT
       PARAMETER (CDI_ELIMIT             = -99)
 !

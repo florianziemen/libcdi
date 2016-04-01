@@ -39,6 +39,7 @@ module mo_cdi
   integer(c_int), public, parameter :: CDI_ELIBNAVAIL = -22
   integer(c_int), public, parameter :: CDI_EUFSTRUCT = -23
   integer(c_int), public, parameter :: CDI_EUNC4 = -24
+  integer(c_int), public, parameter :: CDI_EDIMSIZE = -25
   integer(c_int), public, parameter :: CDI_ELIMIT = -99
   integer(c_int), public, parameter :: CDI_FILETYPE_GRB = 1
   integer(c_int), public, parameter :: CDI_FILETYPE_GRB2 = 2
