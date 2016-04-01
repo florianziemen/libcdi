@@ -15,7 +15,7 @@ check_PROGRAMS += cdi
 endif !ENABLE_CDI_APP
 #
 #
-cdi_SOURCES         = cdi.c printinfo.h
+cdi_SOURCES         = cdi.c printinfo.h printinfo_extern.c
 cdi_LDADD           = $(top_builddir)/src/libcdi.la @LIBS@
 if ENABLE_ALL_STATIC
 cdi_LDFLAGS         = -all-static
