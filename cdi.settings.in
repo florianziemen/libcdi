@@ -36,10 +36,6 @@
         "fclibs"   : "@MPI_FC_LIB@",
         "fcflags"  : "@MPI_FC_INCLUDE@"
       },
-      "zlib"     : {
-        "lib"      : "@ZLIB_LIBS@",
-        "include"  : "@ZLIB_INCLUDE@"
-      },
       "szlib"    : {
         "lib"      : "@SZLIB_LIBS@",
         "include"  : "@SZLIB_INCLUDE@"

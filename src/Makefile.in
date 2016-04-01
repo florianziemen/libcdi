@@ -445,8 +445,6 @@ UUID_C_LIB = @UUID_C_LIB@
 VERSION = @VERSION@
 YAXT_CFLAGS = @YAXT_CFLAGS@
 YAXT_LIBS = @YAXT_LIBS@
-ZLIB_INCLUDE = @ZLIB_INCLUDE@
-ZLIB_LIBS = @ZLIB_LIBS@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
@@ -946,8 +944,8 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
-@ENABLE_CDI_LIB_FALSE@install-exec-local:
 @ENABLE_CDI_LIB_FALSE@uninstall-local:
+@ENABLE_CDI_LIB_FALSE@install-exec-local:
 clean: clean-am
 
 clean-am: clean-generic clean-libLTLIBRARIES clean-libtool \

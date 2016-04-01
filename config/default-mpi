@@ -40,8 +40,6 @@ case "${HOSTNAME}" in
     $CONFIG_SHELL "$confpath/configure" \
       --prefix="$HOME/opt/cdi-powerpc-ibm-aix6-netcdf4-pe" \
       --with-netcdf=/sw/aix61/netcdf-4.2.1.1-64bit-parallel \
-      --with-hdf5=/sw/aix61/hdf5-1.8.10-64bit-parallel \
-      --with-zlib=/sw/aix61/zlib-1.2.6 \
       --with-szlib=/sw/aix61/szip-2.1-64bit \
       AR='ar -X 64' \
       LDFLAGS='-g -q64 -Wl,-brtl' \

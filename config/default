@@ -78,7 +78,6 @@ case "${HOSTNAME}" in
                     --with-grib_api=$HOME/local/etch-ia32/grib_api-1.9.8 \
 	            --with-netcdf=/sw/etch-ia32/netcdf-4.0.1 \
 	            --with-hdf5=/sw/etch-ia32/hdf5-1.8.2 \
-                    --with-zlib=/sw/etch-ia32/zlib-1.2.3 \
                     --with-szlib=$HOME/local/etch-ia32 \
 	            CC=gcc CFLAGS="-g -O2 -Wall -W -Wfloat-equal -pedantic"
 	;;
@@ -137,7 +136,6 @@ case "${HOSTNAME}" in
                     ./configure --prefix=$HOME/local \
                     --with-netcdf=/sw/aix61/netcdf-4.2 \
                     --with-hdf5=/sw/aix61/hdf5-1.8.8-threadsafe \
-                    --with-zlib=/sw/aix61/zlib-1.2.6 \
                     --with-szlib=/sw/aix61/szip-2.1-threadsafe \
                     AR="ar -X 64" LDFLAGS="-brtl" FC=xlf2003_r CC=xlc_r \
                     CFLAGS="-g -O3 -qhot -q64 -qarch=auto -qtune=auto -qlistfmt=html=transforms -DHAVE_MMAP" \

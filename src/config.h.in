@@ -136,9 +136,6 @@
 /* Define to 1 for SZIP support */
 #undef HAVE_LIBSZ
 
-/* Define 1 for ZLIB support */
-#undef HAVE_LIBZ
-
 /* Define to 1 if you have the `mallinfo' function. */
 #undef HAVE_MALLINFO
 
@@ -222,9 +219,6 @@
 
 /* yaxt library is available */
 #undef HAVE_YAXT
-
-/* Define to 1 if you have the <zlib.h> header file. */
-#undef HAVE_ZLIB_H
 
 /* Host name */
 #undef HOST_NAME

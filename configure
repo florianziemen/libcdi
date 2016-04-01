@@ -704,8 +704,6 @@ HDF5_INCLUDE
 HDF5_ROOT
 SZLIB_LIBS
 SZLIB_INCLUDE
-ZLIB_LIBS
-ZLIB_INCLUDE
 THREADS_LIBS
 THREADS_INCLUDE
 PTHREAD_CFLAGS
@@ -864,7 +862,6 @@ with_sysroot
 enable_libtool_lock
 enable_largefile
 with_threads
-with_zlib
 with_szlib
 with_hdf5
 with_netcdf
@@ -1593,15 +1590,11 @@ Optional Packages:
                         (or the compiler's sysroot if not specified).
   --with-threads=<yes/no/directory>
                           Compile + link for multithreading [default=yes]
-  --with-zlib=<yes|no|directory> (default=yes)
-                          location of ZLIB compression library (lib and
-                          include subdirs), nec. for HDF5/NETCDF4
   --with-szlib=<yes|no|directory> (default=no)
                           location of szlib library, optional for GRIB1 and
                           NETCDF4 compression
   --with-hdf5=<yes|no|directory> (default=no)
-                          location of hdf5 library, NETCDF4 requires hdf5 high
-                          level interface
+                          location of HDF5 library
   --with-netcdf=<yes|no|directory> (default=no)
                           location of netcdf library (lib and include subdirs)
   --with-jasper=<directory>
@@ -26867,246 +26860,6 @@ esac
 
 
 #  ----------------------------------------------------------------------
-#  Link application to ZLIB library, needed for netcdf
-ZLIB_INCLUDE=''
-ZLIB_LIBS=''
-
-# Check whether --with-zlib was given.
-if test "${with_zlib+set}" = set; then :
-  withval=$with_zlib; case "$with_zlib" in #(
-  no) :
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ZLIB library" >&5
-$as_echo_n "checking for ZLIB library... " >&6; }
-                           { $as_echo "$as_me:${as_lineno-$LINENO}: result: suppressed" >&5
-$as_echo "suppressed" >&6; } ;; #(
-  yes) :
-    for ac_header in zlib.h
-do :
-  ac_fn_c_check_header_mongrel "$LINENO" "zlib.h" "ac_cv_header_zlib_h" "$ac_includes_default"
-if test "x$ac_cv_header_zlib_h" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_ZLIB_H 1
-_ACEOF
-
-fi
-
-done
-
-                            { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing deflate" >&5
-$as_echo_n "checking for library containing deflate... " >&6; }
-if ${ac_cv_search_deflate+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_func_search_save_LIBS=$LIBS
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char deflate ();
-int
-main ()
-{
-return deflate ();
-  ;
-  return 0;
-}
-_ACEOF
-for ac_lib in '' z; do
-  if test -z "$ac_lib"; then
-    ac_res="none required"
-  else
-    ac_res=-l$ac_lib
-    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
-  fi
-  if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_search_deflate=$ac_res
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext
-  if ${ac_cv_search_deflate+:} false; then :
-  break
-fi
-done
-if ${ac_cv_search_deflate+:} false; then :
-
-else
-  ac_cv_search_deflate=no
-fi
-rm conftest.$ac_ext
-LIBS=$ac_func_search_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_deflate" >&5
-$as_echo "$ac_cv_search_deflate" >&6; }
-ac_res=$ac_cv_search_deflate
-if test "$ac_res" != no; then :
-  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
-
-$as_echo "#define HAVE_LIBZ 1" >>confdefs.h
-
-fi
-
-                            ZLIB_LIBS=" -lz" ;; #(
-  *) :
-    ZLIB_ROOT=$with_zlib
-                          LDFLAGS="-L$ZLIB_ROOT/lib $LDFLAGS"
-                          CPPFLAGS="-I$ZLIB_ROOT/include $CPPFLAGS"
-                          for ac_header in zlib.h
-do :
-  ac_fn_c_check_header_mongrel "$LINENO" "zlib.h" "ac_cv_header_zlib_h" "$ac_includes_default"
-if test "x$ac_cv_header_zlib_h" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_ZLIB_H 1
-_ACEOF
-
-fi
-
-done
-
-                          { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing deflate" >&5
-$as_echo_n "checking for library containing deflate... " >&6; }
-if ${ac_cv_search_deflate+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_func_search_save_LIBS=$LIBS
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char deflate ();
-int
-main ()
-{
-return deflate ();
-  ;
-  return 0;
-}
-_ACEOF
-for ac_lib in '' z; do
-  if test -z "$ac_lib"; then
-    ac_res="none required"
-  else
-    ac_res=-l$ac_lib
-    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
-  fi
-  if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_search_deflate=$ac_res
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext
-  if ${ac_cv_search_deflate+:} false; then :
-  break
-fi
-done
-if ${ac_cv_search_deflate+:} false; then :
-
-else
-  ac_cv_search_deflate=no
-fi
-rm conftest.$ac_ext
-LIBS=$ac_func_search_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_deflate" >&5
-$as_echo "$ac_cv_search_deflate" >&6; }
-ac_res=$ac_cv_search_deflate
-if test "$ac_res" != no; then :
-  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
-
-$as_echo "#define HAVE_LIBZ 1" >>confdefs.h
-
-fi
-
-                          ZLIB_INCLUDE=" -I$ZLIB_ROOT/include"
-                          ZLIB_LIBS=" -L$ZLIB_ROOT/lib -lz" ;; #(
-  *) :
-     ;;
-esac
-else
-  for ac_header in zlib.h
-do :
-  ac_fn_c_check_header_mongrel "$LINENO" "zlib.h" "ac_cv_header_zlib_h" "$ac_includes_default"
-if test "x$ac_cv_header_zlib_h" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_ZLIB_H 1
-_ACEOF
-
-fi
-
-done
-
-                      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing deflate" >&5
-$as_echo_n "checking for library containing deflate... " >&6; }
-if ${ac_cv_search_deflate+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_func_search_save_LIBS=$LIBS
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char deflate ();
-int
-main ()
-{
-return deflate ();
-  ;
-  return 0;
-}
-_ACEOF
-for ac_lib in '' z; do
-  if test -z "$ac_lib"; then
-    ac_res="none required"
-  else
-    ac_res=-l$ac_lib
-    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
-  fi
-  if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_search_deflate=$ac_res
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext
-  if ${ac_cv_search_deflate+:} false; then :
-  break
-fi
-done
-if ${ac_cv_search_deflate+:} false; then :
-
-else
-  ac_cv_search_deflate=no
-fi
-rm conftest.$ac_ext
-LIBS=$ac_func_search_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_deflate" >&5
-$as_echo "$ac_cv_search_deflate" >&6; }
-ac_res=$ac_cv_search_deflate
-if test "$ac_res" != no; then :
-  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
-
-$as_echo "#define HAVE_LIBZ 1" >>confdefs.h
-
-fi
-
-              ZLIB_LIBS=" -lz"
-fi
-
-
-
-#  ----------------------------------------------------------------------
 #  Compile application with SZLIB library, needed for GRIB1 or for
 #  linking against hdf5/netcdf4
 SZLIB_INCLUDE=''
@@ -27373,7 +27126,7 @@ if test "$ac_res" != no; then :
 $as_echo "#define HAVE_LIBHDF5 1" >>confdefs.h
 
 else
-  as_fn_error $? "Cannot link to hdf5 library! It is required for Netcdf4" "$LINENO" 5
+  as_fn_error $? "Cannot link to hdf5 library!" "$LINENO" 5
 fi
 
                             { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing H5DSis_scale" >&5
@@ -27431,8 +27184,8 @@ if test "$ac_res" != no; then :
   test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
   have_hdf5_hl=yes
 else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: Cannot find hdf5 high level interface! It is required for netCDF4." >&5
-$as_echo "$as_me: Cannot find hdf5 high level interface! It is required for netCDF4." >&6;}
+  { $as_echo "$as_me:${as_lineno-$LINENO}: Cannot find hdf5 high level interface!" >&5
+$as_echo "$as_me: Cannot find hdf5 high level interface!" >&6;}
                                             have_hdf5_hl=no
 fi
 
@@ -27516,7 +27269,7 @@ if test "$ac_res" != no; then :
 $as_echo "#define HAVE_LIBHDF5 1" >>confdefs.h
 
 else
-  as_fn_error $? "Cannot link to hdf5! It is required for netCDF4." "$LINENO" 5
+  as_fn_error $? "Cannot link to hdf5!" "$LINENO" 5
 fi
 
                                  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing H5DSis_scale" >&5
@@ -27574,14 +27327,8 @@ if test "$ac_res" != no; then :
   test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
   have_hdf5_hl=yes
 else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: Cannot link to hdf5 high level interface! It is required for netCDF4.\
-                                                                HDF5 must be built with zlib; the location of zlib must be specified for HDF5 with the \
-                                                                --with-zlib option. If HDF5 was also built with szlib, then the location of szlib must also be \
-                                                                specified with the --with-szlib option.." >&5
-$as_echo "$as_me: Cannot link to hdf5 high level interface! It is required for netCDF4.\
-                                                                HDF5 must be built with zlib; the location of zlib must be specified for HDF5 with the \
-                                                                --with-zlib option. If HDF5 was also built with szlib, then the location of szlib must also be \
-                                                                specified with the --with-szlib option.." >&6;}
+  { $as_echo "$as_me:${as_lineno-$LINENO}: Cannot link to hdf5 high level interface!" >&5
+$as_echo "$as_me: Cannot link to hdf5 high level interface!" >&6;}
                                                 have_hdf5_hl=no
 fi
 
