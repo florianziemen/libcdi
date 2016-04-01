@@ -122,9 +122,7 @@ print_xvals(int gridID, int dig)
           fprintf(stdout, " to %.*g", dig, xlast);
           if (IS_NOT_EQUAL(xinc, 0)) fprintf(stdout, " by %.*g", dig, xinc);
         }
-      fprintf(stdout, " %s", xunits);
-      if (gridIsCircular(gridID)) fprintf(stdout, "  circular");
-      fprintf(stdout, "\n");
+      fprintf(stdout, " %s%s\n", xunits, gridIsCircular(gridID) ? "  circular" : "");
     }
 }
 
@@ -151,8 +149,7 @@ print_yvals(int gridID, int dig)
           if (IS_NOT_EQUAL(yinc, 0) && gridtype != GRID_GAUSSIAN && gridtype != GRID_GAUSSIAN_REDUCED)
             fprintf(stdout, " by %.*g", dig, yinc);
         }
-      fprintf(stdout, " %s", yunits);
-      fprintf(stdout, "\n");
+      fprintf(stdout, " %s\n", yunits);
     }
 }
 
@@ -248,14 +245,11 @@ print_xyvals2D(int gridID, int dig)
       fprintf(stdout, "%33s : %.*g", xname, dig, xfirst);
       if (gridsize > 1) fprintf(stdout, " to %.*g", dig, xlast);
       if (IS_NOT_EQUAL(xinc, 0)) fprintf(stdout, " by %.*g", dig, xinc);
-      fprintf(stdout, " %s", xunits);
-      if (gridIsCircular(gridID)) fprintf(stdout, "  circular");
-      fprintf(stdout, "\n");
+      fprintf(stdout, " %s%s\n", xunits, gridIsCircular(gridID) ? "  circular" : "");
       fprintf(stdout, "%33s : %.*g", yname, dig, yfirst);
       if (gridsize > 1) fprintf(stdout, " to %.*g", dig, ylast);
       if (IS_NOT_EQUAL(yinc, 0)) fprintf(stdout, " by %.*g", dig, yinc);
-      fprintf(stdout, " %s", yunits);
-      fprintf(stdout, "\n");
+      fprintf(stdout, " %s\n", yunits);
 
       free(xvals2D);
       free(yvals2D);
@@ -329,18 +323,15 @@ printGridInfoKernel(int gridID, int index, bool lproj)
 
       if (gridInqXbounds(gridID, NULL) || gridInqYbounds(gridID, NULL))
         {
-          fprintf(stdout, "%33s :", "available");
-          if (gridInqXbounds(gridID, NULL) && gridInqYbounds(gridID, NULL)) fprintf(stdout, " cellbounds");
-          if (gridHasArea(gridID)) fprintf(stdout, " area");
-          if (gridInqMask(gridID, NULL)) fprintf(stdout, " mask");
-          fprintf(stdout, "\n");
+          fprintf(stdout, "%33s :%s%s%s\n", "available",
+                  (gridInqXbounds(gridID, NULL) && gridInqYbounds(gridID, NULL) ? " cellbounds" : ""),
+                  gridHasArea(gridID) ? " area" : "", gridInqMask(gridID, NULL) ? " mask" : "");
         }
     }
   else if (gridtype == GRID_SPECTRAL)
     {
-      fprintf(stdout, "points=%zu  nsp=%zu  T%d", gridsize, gridsize / 2, trunc);
-      if (gridInqComplexPacking(gridID)) fprintf(stdout, "  complexPacking");
-      fprintf(stdout, "\n");
+      fprintf(stdout, "points=%zu  nsp=%zu  T%d%s\n", gridsize, gridsize / 2, trunc,
+              gridInqComplexPacking(gridID) ? "  complexPacking" : "");
     }
   else if (gridtype == GRID_FOURIER)
     {
@@ -391,11 +382,9 @@ printGridInfoKernel(int gridID, int index, bool lproj)
     {
       if (gridHasArea(gridID) || gridInqXbounds(gridID, NULL) || gridInqYbounds(gridID, NULL))
         {
-          fprintf(stdout, "%33s :", "available");
-          if (gridInqXbounds(gridID, NULL) && gridInqYbounds(gridID, NULL)) fprintf(stdout, " cellbounds");
-          if (gridHasArea(gridID)) fprintf(stdout, " area");
-          if (gridInqMask(gridID, NULL)) fprintf(stdout, " mask");
-          fprintf(stdout, "\n");
+          fprintf(stdout, "%33s :%s%s%s\n", "available",
+                  (gridInqXbounds(gridID, NULL) && gridInqYbounds(gridID, NULL)) ? " cellbounds" : "",
+                  gridHasArea(gridID) ? " area" : "", gridInqMask(gridID, NULL) ? " mask" : "");
         }
     }
 
@@ -428,11 +417,9 @@ printGridInfo(int vlistID)
 static void
 printZaxisBoundsInfo(const int zaxisID, const int dig, const int levelsize, const double zinc, const char *zunits)
 {
-  fprintf(stdout, "%33s : ", "bounds");
-
   double level1 = zaxisInqLbound(zaxisID, 0);
   double level2 = zaxisInqUbound(zaxisID, 0);
-  fprintf(stdout, "%.*g-%.*g", dig, level1, dig, level2);
+  fprintf(stdout, "%33s : %.*g-%.*g", "bounds", dig, level1, dig, level2);
   if (levelsize > 1)
     {
       level1 = zaxisInqLbound(zaxisID, levelsize - 1);
@@ -440,8 +427,7 @@ printZaxisBoundsInfo(const int zaxisID, const int dig, const int levelsize, cons
       fprintf(stdout, " to %.*g-%.*g", dig, level1, dig, level2);
       if (IS_NOT_EQUAL(zinc, 0)) fprintf(stdout, " by %.*g", dig, zinc);
     }
-  fprintf(stdout, " %s", zunits);
-  fprintf(stdout, "\n");
+  fprintf(stdout, " %s\n", zunits);
 }
 
 static void
@@ -472,8 +458,7 @@ printZaxisLevelInfo(const int levelsize, const int zaxisID, const int zaxistype,
           fprintf(stdout, " to %.*g", dig, zlast);
           if (IS_NOT_EQUAL(zinc, 0)) fprintf(stdout, " by %.*g", dig, zinc);
         }
-      fprintf(stdout, " %s", zunits);
-      fprintf(stdout, "\n");
+      fprintf(stdout, " %s\n", zunits);
     }
 
   free(levels);
@@ -488,10 +473,7 @@ printZaxisHybridInfo(const int zaxisID)
   const int vctsize = zaxisInqVctSize(zaxisID);
   if (vctsize || psname[0])
     {
-      fprintf(stdout, "%33s :", "available");
-      if (vctsize) fprintf(stdout, " vct");
-      if (psname[0]) fprintf(stdout, "  ps: %s", psname);
-      fprintf(stdout, "\n");
+      fprintf(stdout, "%33s :%s%s%s\n", "available", vctsize ? " vct" : "", psname[0] ? "  ps: " : "", psname);
     }
 }
 
@@ -511,8 +493,7 @@ printZaxisReferenceInfo(const int zaxisID)
   cdiInqKeyInt(zaxisID, CDI_GLOBAL, CDI_KEY_NUMBEROFVGRIDUSED, &referenceNumber);
   if (referenceNumber > 0)
     {
-      fprintf(stdout, "%33s : ", "zaxis");
-      fprintf(stdout, "number=%d\n", referenceNumber);
+      fprintf(stdout, "%33s : number=%d\n", "zaxis", referenceNumber);
     }
 
   unsigned char uuidOfVGrid[CDI_UUID_SIZE];
@@ -524,8 +505,7 @@ printZaxisReferenceInfo(const int zaxisID)
       cdiUUID2Str(uuidOfVGrid, uuidOfVGridStr);
       if (uuidOfVGridStr[0] != 0 && strlen(uuidOfVGridStr) == 36)
         {
-          fprintf(stdout, "%33s : ", "uuid");
-          fprintf(stdout, "%s\n", uuidOfVGridStr);
+          fprintf(stdout, "%33s : %s\n", "uuid", uuidOfVGridStr);
         }
     }
 }
@@ -562,10 +542,8 @@ printZaxisInfo(int vlistID)
 
       fprintf(stdout, " :");
 
-      fprintf(stdout, " levels=%d", levelsize);
       const bool zscalar = (levelsize == 1) ? zaxisInqScalar(zaxisID) : false;
-      if (zscalar) fprintf(stdout, "  scalar");
-      fprintf(stdout, "\n");
+      fprintf(stdout, " levels=%d%s\n", levelsize, zscalar ? "  scalar" : "");
 
       if (zaxisInqLevels(zaxisID, NULL))
         {
@@ -592,9 +570,7 @@ printSubtypeInfo(int vlistID)
       const int subtypeID = vlistSubtype(vlistID, index);
       const int subtypesize = subtypeInqSize(subtypeID);
       // subtypePrint(subtypeID);
-      fprintf(stdout, "  %4d : %-24s :", vlistSubtypeIndex(vlistID, subtypeID) + 1, "tiles");
-      fprintf(stdout, " ntiles=%d", subtypesize);
-      fprintf(stdout, "\n");
+      fprintf(stdout, "  %4d : %-24s : ntiles=%d\n", vlistSubtypeIndex(vlistID, subtypeID) + 1, "tiles", subtypesize);
     }
 }
 
