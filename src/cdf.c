@@ -23,8 +23,8 @@ const char *cdfLibraryVersion(void)
 #endif
 }
 
-#if  defined(HAVE_LIBHDF5)
-#if defined(__cplusplus)
+#if  defined(HAVE_NC4HDF5)
+#if  defined(__cplusplus)
 extern "C" {
 #endif
   int H5get_libversion(unsigned *, unsigned *, unsigned *);
@@ -35,7 +35,7 @@ extern "C" {
 
 const char *hdfLibraryVersion(void)
 {
-#if  defined(HAVE_LIBHDF5)
+#if  defined(HAVE_NC4HDF5)
   static char hdf_libvers[256];
   unsigned majnum, minnum, relnum;
 

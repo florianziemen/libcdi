@@ -132,7 +132,7 @@ void cdiPrintVersion(void)
 #if  defined  (HAVE_LIBNETCDF)
   fprintf(stderr, "  NetCDF library version : %s\n", cdfLibraryVersion());
 #endif
-#if  defined  (HAVE_LIBHDF5)
+#if  defined  (HAVE_NC4HDF5)
   fprintf(stderr, "    HDF5 library version : %s\n", hdfLibraryVersion());
 #endif
 #if  defined  (HAVE_LIBSERVICE)
