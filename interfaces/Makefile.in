@@ -286,9 +286,6 @@ GREP = @GREP@
 GRIB_API_INCLUDE = @GRIB_API_INCLUDE@
 GRIB_API_LIBS = @GRIB_API_LIBS@
 HAVE_PARALLEL_NC4 = @HAVE_PARALLEL_NC4@
-HDF5_INCLUDE = @HDF5_INCLUDE@
-HDF5_LIBS = @HDF5_LIBS@
-HDF5_ROOT = @HDF5_ROOT@
 HOST_NAME = @HOST_NAME@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
@@ -439,13 +436,13 @@ EXTRA_DIST = $(SWIGCDIOBJ) $(SWIGCDILIB) \
 
 noinst_LTLIBRARIES = $(am__append_3)
 #
-locallibs = $(top_builddir)/src/.libs/libcdi.so @LTLIBOBJS@ @NETCDF_LIBS@ @HDF5_LIBS@ @SZLIB_LIBS@
+locallibs = $(top_builddir)/src/.libs/libcdi.so @LTLIBOBJS@ @NETCDF_LIBS@ @SZLIB_LIBS@
 libcdipp_la_SOURCES = cdi.cpp cdi.hpp
 libcdipp_la_LIBADD = $(top_builddir)/src/libcdi.la
-libcdipp_la_LDFLAGS = @NETCDF_LIBS@ @HDF5_LIBS@ @SZLIB_LIBS@ $(LDFLAGS)
+libcdipp_la_LDFLAGS = @NETCDF_LIBS@ @SZLIB_LIBS@ $(LDFLAGS)
 CdiInfo_SOURCES = CdiInfo.cpp
 CdiInfo_LDADD = libcdipp.la
-CdiInfo_LDFLAGS = @NETCDF_LIBS@ @HDF5_LIBS@ @SZLIB_LIBS@ $(LDFLAGS)
+CdiInfo_LDFLAGS = @NETCDF_LIBS@ @SZLIB_LIBS@ $(LDFLAGS)
 #
 AM_CPPFLAGS = -I$(top_srcdir)/src
 #

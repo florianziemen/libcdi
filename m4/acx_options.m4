@@ -59,54 +59,6 @@ AC_ARG_WITH([szlib],
 AC_SUBST([SZLIB_INCLUDE])
 AC_SUBST([SZLIB_LIBS])
 #  ----------------------------------------------------------------------
-#  Link application with HDF5 library, required for netcdf4
-HDF5_ROOT=''
-HDF5_INCLUDE=''
-HDF5_LIBS=''
-AC_ARG_WITH([hdf5],
-            [AS_HELP_STRING([--with-hdf5=<yes|no|directory> (default=no)],[location of HDF5 library])],
-            [AS_CASE(["$with_hdf5"],
-                     [no],[AC_MSG_CHECKING([for hdf5 library])
-                           AC_MSG_RESULT([suppressed])],
-                     [yes],[AC_CHECK_HEADERS([hdf5.h])
-                            AC_SEARCH_LIBS([H5Fopen],
-                                           [hdf5],
-                                           [AC_DEFINE([HAVE_LIBHDF5],[1],[Define to 1 for HDF5 support])],
-                                           [AC_MSG_ERROR([Cannot link to hdf5 library!])])
-                            AC_SEARCH_LIBS([H5DSis_scale],
-                                           [hdf5_hl],
-                                           [have_hdf5_hl=yes],
-                                           [AC_MSG_NOTICE([Cannot find hdf5 high level interface!])
-                                            have_hdf5_hl=no])
-                            AS_IF([test "x$have_libhdf5_hl" = xyes],
-                                  [HDF5_LIBS=" -lhdf5_hl -lhdf5"],
-                                  [HDF5_LIBS=" -lhdf5"])
-                            ],
-                     [*],[AS_IF([test -d "$with_hdf5"],
-                                [HDF5_ROOT="$with_hdf5"
-                                 LDFLAGS="-L$HDF5_ROOT/lib $LDFLAGS"
-                                 CPPFLAGS="-I$HDF5_ROOT/include $CPPFLAGS"
-                                 AC_CHECK_HEADERS([hdf5.h])
-                                 AC_SEARCH_LIBS([H5Fopen],
-                                                [hdf5],
-                                                [AC_DEFINE([HAVE_LIBHDF5],[1],[Define to 1 for HDF5 support])],
-                                                [AC_MSG_ERROR([Cannot link to hdf5!])])
-                                 AC_SEARCH_LIBS([H5DSis_scale],
-                                                [hdf5_hl],
-                                                [have_hdf5_hl=yes],
-                                                [AC_MSG_NOTICE([Cannot link to hdf5 high level interface!])
-                                                have_hdf5_hl=no])
-                                 AS_IF([test "x$have_libhdf5_hl" = 'xyes'],
-                                       [HDF5_LIBS=" -L$HDF5_ROOT/lib -lhdf5_hl -lhdf5"],
-                                       [HDF5_LIBS=" -L$HDF5_ROOT/lib -lhdf5"])
-                                 HDF5_INCLUDE=" -I$HDF5_ROOT/include"],
-                                [AC_MSG_NOTICE([$with_hdf5 is not a directory! HDF5 suppressed])])])],
-            [AC_MSG_CHECKING([for hdf5 library])
-             AC_MSG_RESULT([suppressed])])
-AC_SUBST([HDF5_ROOT])
-AC_SUBST([HDF5_INCLUDE])
-AC_SUBST([HDF5_LIBS])
-#  ----------------------------------------------------------------------
 #  Compile application with netcdf
 NETCDF_ROOT=''
 NETCDF_INCLUDE=''

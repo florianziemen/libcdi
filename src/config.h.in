@@ -79,9 +79,6 @@
 /* Define to 1 if you have the `grib_get_length' function. */
 #undef HAVE_GRIB_GET_LENGTH
 
-/* Define to 1 if you have the <hdf5.h> header file. */
-#undef HAVE_HDF5_H
-
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
@@ -99,9 +96,6 @@
 
 /* GRIB_API library is present if defined to 1 */
 #undef HAVE_LIBGRIB_API
-
-/* Define to 1 for HDF5 support */
-#undef HAVE_LIBHDF5
 
 /* Define to 1 for IEG interface */
 #undef HAVE_LIBIEG
