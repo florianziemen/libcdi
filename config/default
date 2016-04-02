@@ -46,7 +46,6 @@ case "${HOSTNAME}" in
                     --with-libpng=/opt/local \
                     --with-grib_api=/opt/local \
                     --with-netcdf=/opt/local \
-                    --with-hdf5=/opt/local \
                     --with-szlib=/opt/local \
 	            CC=gcc CFLAGS="-g -pipe -D_REENTRANT -Wall -W -Wfloat-equal -pedantic -O2"
 	;;
@@ -77,14 +76,12 @@ case "${HOSTNAME}" in
                     --with-jasper=/sw/etch-ia32/jasper-1.900.1 \
                     --with-grib_api=$HOME/local/etch-ia32/grib_api-1.9.8 \
 	            --with-netcdf=/sw/etch-ia32/netcdf-4.0.1 \
-	            --with-hdf5=/sw/etch-ia32/hdf5-1.8.2 \
                     --with-szlib=$HOME/local/etch-ia32 \
 	            CC=gcc CFLAGS="-g -O2 -Wall -W -Wfloat-equal -pedantic"
 	;;
     thingol)
       ./configure --prefix=`pwd`/build \
 	            --with-netcdf=$HOME/builds/libs4cdo \
-	              --with-hdf5=$HOME/builds/libs4cdo \
                      --with-szlib=$HOME/builds/libs4cdo \
                   --with-grib_api=$HOME/builds/libs4cdo \
                     --with-jasper=$HOME/builds/libs4cdo \
@@ -135,7 +132,6 @@ case "${HOSTNAME}" in
         CONFIG_SHELL=/bin/bash /bin/bash \
                     ./configure --prefix=$HOME/local \
                     --with-netcdf=/sw/aix61/netcdf-4.2 \
-                    --with-hdf5=/sw/aix61/hdf5-1.8.8-threadsafe \
                     --with-szlib=/sw/aix61/szip-2.1-threadsafe \
                     AR="ar -X 64" LDFLAGS="-brtl" FC=xlf2003_r CC=xlc_r \
                     CFLAGS="-g -O3 -qhot -q64 -qarch=auto -qtune=auto -qlistfmt=html=transforms -DHAVE_MMAP" \

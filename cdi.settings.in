@@ -40,10 +40,6 @@
         "lib"      : "@SZLIB_LIBS@",
         "include"  : "@SZLIB_INCLUDE@"
       },
-      "hdf5"     : {
-        "lib"      : "@HDF5_LIBS@",
-        "include"  : "@HDF5_INCLUDE@"
-      },
       "netcdf"   : {
         "lib"      : "@NETCDF_LIBS@",
         "include"  : "@NETCDF_INCLUDE@"
