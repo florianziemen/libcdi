@@ -471,27 +471,24 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
     case GRID_LONLAT:
     case GRID_GAUSSIAN:
       {
-        long lpar;
-        FAIL_ON_GRIB_ERROR(grib_get_long, gh, "Ni", &lpar);
-        /* FIXME: assert(lpar <= INT_MAX && lpar >= INT_MIN) */
-        int nlon = (int)lpar;
-        FAIL_ON_GRIB_ERROR(grib_get_long, gh, "Nj", &lpar);
-        /* FIXME: assert(lpar <= INT_MAX && lpar >= INT_MIN) */
-        int nlat = (int)lpar;
+        long nlon, nlat;
+        FAIL_ON_GRIB_ERROR(grib_get_long, gh, "Ni", &nlon);
+        FAIL_ON_GRIB_ERROR(grib_get_long, gh, "Nj", &nlat);
 
         if ( gridtype == GRID_GAUSSIAN )
           {
+            long lpar;
             FAIL_ON_GRIB_ERROR(grib_get_long, gh, "numberOfParallelsBetweenAPoleAndTheEquator", &lpar);
             grid->np = (int)lpar;
           }
 
         if ( numberOfPoints != nlon*nlat )
-          Error("numberOfPoints (%ld) and gridSize (%d) differ!", numberOfPoints, nlon*nlat);
+          Error("numberOfPoints (%ld) and gridSize (%ld) differ!", numberOfPoints, nlon*nlat);
 
         /* FIXME: assert(numberOfPoints <= INT_MAX && numberOfPoints >= INT_MIN) */
         grid->size  = (int)numberOfPoints;
-        grid->xsize = nlon;
-        grid->ysize = nlat;
+        grid->xsize = (int)nlon;
+        grid->ysize = (int)nlat;
         grid->xinc  = 0;
         grid->yinc  = 0;
         grid->xdef  = 0;
@@ -506,6 +503,8 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
 
         if ( grid->xinc < -999 || grid->xinc > 999 ) grid->xinc = 0;
         if ( grid->yinc < -999 || grid->yinc > 999 ) grid->yinc = 0;
+
+        if ( grid->yinc > 0 && grid->yfirst > grid->ylast ) grid->yinc = -grid->yinc;
 
         /* if ( IS_NOT_EQUAL(grid->xfirst, 0) || IS_NOT_EQUAL(grid->xlast, 0) ) */
           {
