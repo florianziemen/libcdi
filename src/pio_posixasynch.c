@@ -164,7 +164,7 @@ writePA(bFiledataPA *bfd, size_t amount)
 
   if (iret == -1)
     {
-      xabort("did not succeed writing buffer");
+      SysError("did not succeed writing buffer");
     }
   else
     xdebug("buffer written to %s", bfd->name);
