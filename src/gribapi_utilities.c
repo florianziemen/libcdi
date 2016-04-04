@@ -499,8 +499,9 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
         FAIL_ON_GRIB_ERROR(grib_get_double, gh, "longitudeOfLastGridPointInDegrees",  &grid->xlast);
         FAIL_ON_GRIB_ERROR(grib_get_double, gh, "latitudeOfFirstGridPointInDegrees",  &grid->yfirst);
         FAIL_ON_GRIB_ERROR(grib_get_double, gh, "latitudeOfLastGridPointInDegrees",   &grid->ylast);
-        FAIL_ON_GRIB_ERROR(grib_get_double, gh, "iDirectionIncrementInDegrees", &grid->xinc);
-        if ( gridtype == GRID_LONLAT )
+        if ( nlon > 1 )
+          FAIL_ON_GRIB_ERROR(grib_get_double, gh, "iDirectionIncrementInDegrees", &grid->xinc);
+        if ( gridtype == GRID_LONLAT && nlat > 1 )
           FAIL_ON_GRIB_ERROR(grib_get_double, gh, "jDirectionIncrementInDegrees", &grid->yinc);
 
         if ( grid->xinc < -999 || grid->xinc > 999 ) grid->xinc = 0;
@@ -575,9 +576,9 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
         FAIL_ON_GRIB_ERROR(grib_get_double, gh, "longitudeOfLastGridPointInDegrees",  &grid->xlast);
         FAIL_ON_GRIB_ERROR(grib_get_double, gh, "latitudeOfFirstGridPointInDegrees",  &grid->yfirst);
         FAIL_ON_GRIB_ERROR(grib_get_double, gh, "latitudeOfLastGridPointInDegrees",   &grid->ylast);
-        FAIL_ON_GRIB_ERROR(grib_get_double, gh, "iDirectionIncrementInDegrees", &grid->xinc);
 
-        if ( IS_EQUAL(grid->xinc, GRIB_MISSING_DOUBLE) ) grid->xinc = 0;
+        // FAIL_ON_GRIB_ERROR(grib_get_double, gh, "iDirectionIncrementInDegrees", &grid->xinc);
+        // if ( IS_EQUAL(grid->xinc, GRIB_MISSING_DOUBLE) ) grid->xinc = 0;
 
         /* if ( IS_NOT_EQUAL(grid->xfirst, 0) || IS_NOT_EQUAL(grid->xlast, 0) ) */
           {
