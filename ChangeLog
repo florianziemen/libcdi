@@ -2,6 +2,10 @@
 
 	* Version 1.7.2 released
 
+2016-04-04  Uwe Schulzweida
+
+	* GRIB1/GRIB_API (accumulation) encoding error [Bug #6638]
+
 2016-03-15  Uwe Schulzweida
 
 	* GRIB1 output with forecast times > 255 [Bug: #6600]

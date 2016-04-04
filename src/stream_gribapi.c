@@ -56,7 +56,7 @@ int gribapiGetZaxisType(long editionNumber, int grib_ltype)
       zaxistype = grib2ltypeToZaxisType(grib_ltype);
     }
 
-  return (zaxistype);
+  return zaxistype;
 }
 
 static
@@ -76,7 +76,7 @@ int getTimeunits(long unitsOfTime)
     default:  timeunits = TUNIT_HOUR;    break;
     }
 
-  return (timeunits);
+  return timeunits;
 }
 
 static
@@ -98,7 +98,7 @@ double timeunit_factor(int tu1, int tu2)
         }
     }
 
-  return (factor);
+  return factor;
 }
 
 static
@@ -113,7 +113,7 @@ int gribapiGetTimeUnits(grib_handle *gh)
 
   timeunits = getTimeunits(unitsOfTime);
 
-  return (timeunits);
+  return timeunits;
 }
 
 static
@@ -241,7 +241,7 @@ int gribapiGetValidityDateTime(grib_handle *gh, int *vdate, int *vtime)
       }
     }
 
-  return (tstepRange);
+  return tstepRange;
 }
 
 static
@@ -644,7 +644,7 @@ static compvar2_t gribapiVarSet(int param, int level1, int level2, int leveltype
   memcpy(compVar.name, name, len);
   compVar.tiles = tiles_data;
 
-  return (compVar);
+  return compVar;
 }
 
 static
@@ -901,7 +901,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
 
   streamptr->rtsteps = 1;
 
-  if ( nrecs == 0 ) return (CDI_EUFSTRUCT);
+  if ( nrecs == 0 ) return CDI_EUFSTRUCT;
 
   cdi_generate_vars(streamptr);
 
@@ -964,7 +964,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
         }
     }
 
-  return (0);
+  return 0;
 }
 
 
@@ -1097,7 +1097,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
       if ( recID == nrecords )
 	{
 	  gribWarning("Parameter not defined at timestep 1!", nrecs_scanned, tsID+1, varname, param, level1, level2);
-	  return (CDI_EUFSTRUCT);
+	  return CDI_EUFSTRUCT;
 	}
 
       if ( streamptr->tsteps[tsID].records[recID].used )
@@ -1131,7 +1131,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
 		  tsID, recID,
 		  streamptr->tsteps[tsID].records[recID].param, param,
 		  streamptr->tsteps[tsID].records[recID].ilevel, level1);
-	  return (CDI_EUFSTRUCT);
+	  return CDI_EUFSTRUCT;
 	}
 
       streamptr->tsteps[1].records[recID].position = recpos;
@@ -1186,7 +1186,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
   streamptr->record->buffer     = gribbuffer;
   streamptr->record->buffersize = buffersize;
 
-  return (rstatus);
+  return rstatus;
 }
 
 
@@ -1332,7 +1332,7 @@ int gribapiScanTimestep(stream_t * streamptr)
 	      gribWarning("Parameter not defined at timestep 1!", nrecs_scanned, tsID+1, varname, param, level1, level2);
 
 	      if ( cdiInventoryMode == 1 )
-		return (CDI_EUFSTRUCT);
+		return CDI_EUFSTRUCT;
 	      else
 		continue;
 	    }
@@ -1389,7 +1389,7 @@ int gribapiScanTimestep(stream_t * streamptr)
 	{
 	  gribWarning("Paramameter not found!", nrecs_scanned, tsID+1, varname, streamptr->tsteps[tsID].records[recID].param,
                       streamptr->tsteps[tsID].records[recID].ilevel, streamptr->tsteps[tsID].records[recID].ilevel2);
-	  return (CDI_EUFSTRUCT);
+	  return CDI_EUFSTRUCT;
 	}
 
       streamptr->rtsteps++;
@@ -1602,11 +1602,42 @@ int getTimeunitFactor(int timeunit)
     default:            factor =  3600;  break;
     }
 
-  return (factor);
+  return factor;
 }
 
 static
-void gribapiDefStepUnits(grib_handle *gh, int timeunit, int proDefTempNum, int gcinit)
+int grib2ProDefTempHasStatisticalDef(int proDefTempNum)
+{
+  int hasStatisticalDef = 0;
+
+  switch (proDefTempNum)
+    {
+      case 8:
+      case 9:
+      case 10:
+      case 11:
+      case 12:
+      case 13:
+      case 14:
+      case 34:
+      case 42:
+      case 43:
+      case 46:
+      case 47:
+      case 61:
+      case 91:
+      case 1001:
+      case 1101:
+      case 40034:
+               hasStatisticalDef = 1;  break;
+      default: hasStatisticalDef = 0;  break;
+    }
+
+  return hasStatisticalDef;
+}
+
+static
+void gribapiDefStepUnits(int editionNumber, grib_handle *gh, int timeunit, int proDefTempNum, int gcinit)
 {
   long unitsOfTime;
 
@@ -1625,9 +1656,19 @@ void gribapiDefStepUnits(grib_handle *gh, int timeunit, int proDefTempNum, int g
   if ( !gcinit )
     {
       GRIB_CHECK(my_grib_set_long(gh, "stepUnits", unitsOfTime), 0);
-      if ( proDefTempNum == 8 || proDefTempNum == 11 )
-        GRIB_CHECK(my_grib_set_long(gh, "indicatorOfUnitForTimeRange", unitsOfTime), 0);
-      GRIB_CHECK(my_grib_set_long(gh, "indicatorOfUnitOfTimeRange", unitsOfTime), 0);
+      if ( editionNumber == 1 )
+        {
+          GRIB_CHECK(my_grib_set_long(gh, "unitOfTimeRange", unitsOfTime), 0);
+        }
+      else if ( grib2ProDefTempHasStatisticalDef(proDefTempNum) )
+        {
+          GRIB_CHECK(my_grib_set_long(gh, "indicatorOfUnitForTimeRange", unitsOfTime), 0);
+          //  GRIB_CHECK(my_grib_set_long(gh, "indicatorOfUnitOfTimeRange", unitsOfTime), 0);
+        }
+      else
+        {
+          GRIB_CHECK(my_grib_set_long(gh, "indicatorOfUnitOfTimeRange", unitsOfTime), 0);
+        }
     }
 }
 
@@ -1679,7 +1720,7 @@ int gribapiDefSteptype(int editionNumber, grib_handle *gh, int productDefinition
       GRIB_CHECK(my_grib_set_string(gh, "stepType", stepType, &len), 0);
     }
 
-  return ((int)proDefTempNum);
+  return (int)proDefTempNum;
 }
 
 static
@@ -1721,7 +1762,7 @@ int gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, int rdate, int rti
     {
       int proDefTempNum = gribapiDefSteptype(editionNumber, gh, productDefinitionTemplate, typeOfGeneratingProcess, tsteptype, gcinit);
 
-      gribapiDefStepUnits(gh, timeunit, proDefTempNum, gcinit);
+      gribapiDefStepUnits(editionNumber, gh, timeunit, proDefTempNum, gcinit);
 
       endStep = (int) ((days*86400.0 + secs)/factor);
 
@@ -1745,7 +1786,7 @@ int gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, int rdate, int rti
       status = 0;
     }
 
-  return (status);
+  return status;
 }
 
 static
