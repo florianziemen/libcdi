@@ -28,3 +28,8 @@ collectData2003_SOURCES=collectData2003.F90
 collectDataNStreams_SOURCES = collectDataNStreams.c
 
 compareResourcesArray_SOURCES = compareResourcesArray.c
+#
+clean-local: clean-local-dirs
+.PHONY: clean-local-dirs
+clean-local-dirs:
+	-rm -rf *.dSYM
