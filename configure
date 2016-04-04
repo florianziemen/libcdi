@@ -26855,8 +26855,7 @@ esac
 
 
 #  ----------------------------------------------------------------------
-#  Compile application with SZLIB library, needed for GRIB1 or for
-#  linking against hdf5/netcdf4
+#  Compile application with SZLIB library, needed for GRIB1
 SZLIB_INCLUDE=''
 SZLIB_LIBS=''
 
@@ -27430,7 +27429,7 @@ for ac_lib in '' netcdf; do
     ac_res="none required"
   else
     ac_res=-l$ac_lib
-    LIBS="-l$ac_lib -lhdf5_hl -lhdf5 $ac_func_search_save_LIBS"
+    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
   fi
   if ac_fn_c_try_link "$LINENO"; then :
   ac_cv_search_H5TS_mutex_lock=$ac_res
@@ -27456,6 +27455,67 @@ if test "$ac_res" != no; then :
   test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
 
 $as_echo "#define HAVE_NC4HDF5_THREADSAFE 1" >>confdefs.h
+
+fi
+
+fi
+
+if test "x$ENABLE_NC4HDF5" = "xyes"; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing H5get_libversion" >&5
+$as_echo_n "checking for library containing H5get_libversion... " >&6; }
+if ${ac_cv_search_H5get_libversion+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_func_search_save_LIBS=$LIBS
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char H5get_libversion ();
+int
+main ()
+{
+return H5get_libversion ();
+  ;
+  return 0;
+}
+_ACEOF
+for ac_lib in '' netcdf; do
+  if test -z "$ac_lib"; then
+    ac_res="none required"
+  else
+    ac_res=-l$ac_lib
+    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
+  fi
+  if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_search_H5get_libversion=$ac_res
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext
+  if ${ac_cv_search_H5get_libversion+:} false; then :
+  break
+fi
+done
+if ${ac_cv_search_H5get_libversion+:} false; then :
+
+else
+  ac_cv_search_H5get_libversion=no
+fi
+rm conftest.$ac_ext
+LIBS=$ac_func_search_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_H5get_libversion" >&5
+$as_echo "$ac_cv_search_H5get_libversion" >&6; }
+ac_res=$ac_cv_search_H5get_libversion
+if test "$ac_res" != no; then :
+  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
+
+$as_echo "#define HAVE_H5GET_LIBVERSION 1" >>confdefs.h
 
 fi
 

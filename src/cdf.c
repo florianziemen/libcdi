@@ -17,13 +17,13 @@
 const char *cdfLibraryVersion(void)
 {
 #if  defined  (HAVE_LIBNETCDF)
-  return (nc_inq_libvers());
+  return nc_inq_libvers();
 #else
-  return ("library undefined");
+  return "library undefined";
 #endif
 }
 
-#if  defined(HAVE_NC4HDF5)
+#if  defined(HAVE_H5GET_LIBVERSION)
 #if  defined(__cplusplus)
 extern "C" {
 #endif
@@ -35,7 +35,7 @@ extern "C" {
 
 const char *hdfLibraryVersion(void)
 {
-#if  defined(HAVE_NC4HDF5)
+#if  defined(HAVE_H5GET_LIBVERSION)
   static char hdf_libvers[256];
   unsigned majnum, minnum, relnum;
 
@@ -43,9 +43,9 @@ const char *hdfLibraryVersion(void)
 
   sprintf(hdf_libvers, "%u.%u.%u", majnum, minnum, relnum);
 
-  return (hdf_libvers);
+  return hdf_libvers;
 #else
-  return ("library undefined");
+  return "library undefined";
 #endif
 }
 
@@ -137,24 +137,23 @@ static int cdfOpenFile(const char *filename, const char *mode, int *filetype)
     }
 #endif
 
-  return (ncid);
+  return ncid;
 }
 
 
 int cdfOpen(const char *filename, const char *mode)
 {
-  int fileID = 0;
   int filetype = FILETYPE_NC;
 
   if ( CDF_Debug )
     Message("Open %s with mode %c", filename, *mode);
 
-  fileID = cdfOpenFile(filename, mode, &filetype);
+  int fileID = cdfOpenFile(filename, mode, &filetype);
 
   if ( CDF_Debug )
     Message("File %s opened with id %d", filename, fileID);
 
-  return (fileID);
+  return fileID;
 }
 
 
@@ -185,7 +184,7 @@ int cdfOpen64(const char *filename, const char *mode)
       fileID = CDI_ELIBNAVAIL;
     }
 
-  return (fileID);
+  return fileID;
 }
 
 
@@ -213,7 +212,7 @@ int cdf4Open(const char *filename, const char *mode, int *filetype)
       fileID = CDI_ELIBNAVAIL;
     }
 
-  return (fileID);
+  return fileID;
 }
 
 

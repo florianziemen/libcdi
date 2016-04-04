@@ -79,6 +79,9 @@
 /* Define to 1 if you have the `grib_get_length' function. */
 #undef HAVE_GRIB_GET_LENGTH
 
+/* Define to 1 for H5get_libversion support */
+#undef HAVE_H5GET_LIBVERSION
+
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 

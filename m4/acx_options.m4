@@ -27,8 +27,7 @@ AS_CASE([$with_threads],
 AC_SUBST([THREADS_INCLUDE])
 AC_SUBST([THREADS_LIBS])
 #  ----------------------------------------------------------------------
-#  Compile application with SZLIB library, needed for GRIB1 or for
-#  linking against hdf5/netcdf4
+#  Compile application with SZLIB library, needed for GRIB1
 SZLIB_INCLUDE=''
 SZLIB_LIBS=''
 AC_ARG_WITH([szlib],
@@ -138,8 +137,11 @@ AC_ARG_WITH([netcdf],
 
 AS_IF([test "x$ENABLE_NC4HDF5" = "xyes"],
       [AC_SEARCH_LIBS([H5TS_mutex_lock], [netcdf],
-               [AC_DEFINE([HAVE_NC4HDF5_THREADSAFE],[1],[Define to 1 for NetCDF4/HDF5 threadsafe support])],,
-	       [-lhdf5_hl -lhdf5])])
+               [AC_DEFINE([HAVE_NC4HDF5_THREADSAFE],[1],[Define to 1 for NetCDF4/HDF5 threadsafe support])],,)])
+
+AS_IF([test "x$ENABLE_NC4HDF5" = "xyes"],
+      [AC_SEARCH_LIBS([H5get_libversion], [netcdf],
+               [AC_DEFINE([HAVE_H5GET_LIBVERSION],[1],[Define to 1 for H5get_libversion support])],,)])
 
 AC_SUBST([ENABLE_NETCDF])
 AC_SUBST([ENABLE_NC2])
