@@ -41,4 +41,8 @@ cdi_copy_LDFLAGS         = -all-static
 cdi_read_f2003_LDFLAGS   = -all-static
 cdi_write_f2003_LDFLAGS  = -all-static
 endif
-
+#
+clean-local: clean-local-dirs
+.PHONY: clean-local-dirs
+clean-local-dirs:
+	-rm -rf *.dSYM

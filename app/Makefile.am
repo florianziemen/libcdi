@@ -25,3 +25,8 @@ endif
 AM_CPPFLAGS         = -I$(top_srcdir)/src
 #
 CLEANFILES          = `ls *~`
+#
+clean-local: clean-local-dirs
+.PHONY: clean-local-dirs
+clean-local-dirs:
+	-rm -rf *.dSYM

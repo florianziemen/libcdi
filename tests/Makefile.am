@@ -66,3 +66,8 @@ EXTRA_DIST = test_cdf_write.c test_cdf_read.c
 CLEANFILES  = `ls *~ *.grb *.nc *.srv *.ext example_*.cksum`
 #
 AUTOMAKE_OPTIONS = color-tests
+#
+clean-local: clean-local-dirs
+.PHONY: clean-local-dirs
+clean-local-dirs:
+	-rm -rf *.dSYM
