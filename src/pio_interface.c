@@ -531,7 +531,7 @@ cdiPioInit(MPI_Comm commGlob, int confResH, int *pioNamespace)
       return MPI_COMM_NULL;
     }
   else
-    cdiPioClientSetup(pioNamespace);
+    cdiPioClientSetup(pioNamespace, conf);
   namespaceSwitchSet(cdiPioExtraNSKeys[cdiPioEKXmapNew],
                      NSSW_FUNC(conf->xmap_new));
   reshReplace(confResH, conf, &cdiPioConfOps);
