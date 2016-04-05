@@ -359,11 +359,7 @@ grbCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
   else
     {
       const size_t nwrite = fileWrite(fileID2, gribbuffer, nbytes);
-      if (nwrite != nbytes)
-        {
-          perror(__func__);
-          Error("Could not write record for copying!");
-        }
+      if (nwrite != nbytes) SysError("Could not write record for copying!");
     }
 
   Free(gribbuffer);
@@ -408,11 +404,7 @@ grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, co
     case CDI_PROTOCOL_ACROSS:
       {
 #ifdef HAVE_ACROSS
-        if (across_write_grib_message(streamptr, gribbuffer, nbytes))
-          {
-            Error("Failed to write GRIB slice!");
-            break;
-          }
+        if (across_write_grib_message(streamptr, gribbuffer, nbytes)) SysError("Failed to write GRIB slice!");
 #endif
       }
       break;
@@ -445,11 +437,7 @@ grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, co
             = (size_t(*)(int, const void *restrict, size_t)) namespaceSwitchGet(NSSWITCH_FILE_WRITE).func;
 
         const size_t nwrite = myFileWrite(fileID, gribbuffer, nbytes);
-        if (nwrite != nbytes)
-          {
-            perror(__func__);
-            Error("Failed to write GRIB slice!");
-          }
+        if (nwrite != nbytes) SysError("Failed to write GRIB slice!");
       }
       break;
     }
