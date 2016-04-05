@@ -212,10 +212,7 @@ void grbCopyRecord(stream_t * streamptr2, stream_t * streamptr1)
 
   size_t nwrite = fileWrite(fileID2, gribbuffer, nbytes);
   if ( nwrite != nbytes )
-    {
-      perror(__func__);
-      Error("Could not write record for copying!");
-    }
+    SysError("Could not write record for copying!");
 
   Free(gribbuffer);
 }
@@ -280,10 +277,7 @@ void grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
   size_t nwrite = myFileWrite(fileID, gribbuffer, nbytes, tsID);
 
   if ( nwrite != nbytes )
-    {
-      perror(__func__);
-      Error("Failed to write GRIB slice!");
-    }
+    SysError("Failed to write GRIB slice!");
 
   if ( gribbuffer ) Free(gribbuffer);
 }
