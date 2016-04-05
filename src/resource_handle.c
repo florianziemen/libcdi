@@ -654,8 +654,6 @@ reshSetStatus(cdiResH resH, const resOps *ops, int status)
   namespaceTuple_t nspT;
   listElem_t *listElem;
 
-  xassert((ops != NULL) ^ !(status & RESH_IN_USE_BIT));
-
   LIST_INIT(1);
 
   LIST_LOCK();
@@ -696,7 +694,7 @@ reshGetStatus(cdiResH resH, const resOps *ops)
     {
       listElem_t *listElem = resHList[nsp].resources + nspT.idx;
       const resOps *elemOps = listElem->res.v.ops;
-      xassert(listElem && (!(listElem->status & RESH_IN_USE_BIT) || elemOps == ops));
+      xassert(listElem && (!(listElem->status & RESH_IN_USE_BIT) || elemOps == ops || !ops));
       status = listElem->status;
     }
 
