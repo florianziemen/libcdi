@@ -1777,21 +1777,9 @@ grid_calc_increment_in_meter(SizeType size, const double *vals)
   return 0.0;
 }
 
-/*
-@Function
-@Title
-
-@Prototype
-@Parameter
-    @Item  Grid identifier
-
-@EndFunction
-*/
-double
-gridInqXinc(int gridID)
+static double
+gridInqXIncBase(grid_t *gridptr)
 {
-  grid_t *gridptr = grid_to_pointer(gridID);
-
   if (fabs(gridptr->x.inc) <= 0 && gridptr->x.vals)
     {
       const size_t xsize = gridptr->x.size;
@@ -1831,10 +1819,15 @@ gridInqXincInMeter(int gridID)
 @EndFunction
 */
 double
-gridInqYinc(int gridID)
+gridInqXinc(int gridID)
 {
   grid_t *gridptr = grid_to_pointer(gridID);
+  return gridptr->vtable->inqXInc(gridptr);
+}
 
+static double
+gridInqYIncBase(grid_t *gridptr)
+{
   if (fabs(gridptr->y.inc) <= 0 && gridptr->y.vals)
     {
       const size_t ysize = gridptr->y.size;
@@ -1861,6 +1854,23 @@ gridInqYincInMeter(int gridID)
     }
 
   return gridptr->y.inc;
+}
+
+/*
+@Function
+@Title
+
+@Prototype
+@Parameter
+    @Item  Grid identifier
+
+@EndFunction
+*/
+double
+gridInqYinc(int gridID)
+{
+  grid_t *gridptr = grid_to_pointer(gridID);
+  return gridptr->vtable->inqYInc(gridptr);
 }
 
 /*
@@ -4775,6 +4785,8 @@ const struct gridVirtTable cdiGridVtable = {
   .inqXCvalsPtr = gridInqXCvalsPtrSerial,
   .inqYCvalsPtr = gridInqYCvalsPtrSerial,
 #endif
+  .inqXInc = gridInqXIncBase,
+  .inqYInc = gridInqYIncBase,
   .compareXYFull = compareXYvals,
   .compareXYAO = compareXYvals2,
   .inqArea = gridInqAreaSerial,
