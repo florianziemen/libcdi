@@ -4233,14 +4233,10 @@ enum
 static int
 gridGetComponentFlags(const grid_t *gridP)
 {
-  int flags = (gridHasMaskFlag & (int) ((unsigned) (gridP->mask == NULL) - 1U))
-              | (gridHasGMEMaskFlag & (int) ((unsigned) (gridP->mask_gme == NULL) - 1U))
-              | (gridHasXValsFlag & (int) ((unsigned) (gridP->vtable->inqXValsPtr((grid_t *) gridP) == NULL) - 1U))
-              | (gridHasYValsFlag & (int) ((unsigned) (gridP->vtable->inqYValsPtr((grid_t *) gridP) == NULL) - 1U))
-              | (gridHasAreaFlag & (int) ((unsigned) (gridP->vtable->inqAreaPtr((grid_t *) gridP) == NULL) - 1U))
-              | (gridHasXBoundsFlag & (int) ((unsigned) (gridP->x.bounds == NULL) - 1U))
-              | (gridHasYBoundsFlag & (int) ((unsigned) (gridP->y.bounds == NULL) - 1U))
-              | (gridHasReducedPointsFlag & (int) ((unsigned) (gridP->reducedPoints == NULL) - 1U));
+  int flags = 0;
+  for (int prop = 0; prop < GRID_PROP_YBOUNDS + 1; ++prop)
+    flags |= (gridP->vtable->inqPropPresence((grid_t *) gridP, (enum gridPropInq) prop) << prop);
+  flags |= (gridHasReducedPointsFlag & (int) ((unsigned) (gridP->reducedPoints == NULL) - 1U));
   return flags;
 }
 
