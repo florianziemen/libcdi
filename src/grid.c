@@ -1734,19 +1734,10 @@ double gridInqYval(int gridID, int index)
   return gridptr->vtable->inqYVal(gridptr, index);
 }
 
-/*
-@Function
-@Title
 
-@Prototype
-@Parameter
-    @Item  Grid identifier
-
-@EndFunction
-*/
-double gridInqXinc(int gridID)
+static double
+gridInqXIncBase(grid_t *gridptr)
 {
-  grid_t *gridptr = grid_to_pointer(gridID);
   double xinc = gridptr->x.inc;
 
   if ( (! (fabs(xinc) > 0)) && gridptr->x.vals )
@@ -1780,9 +1771,16 @@ double gridInqXinc(int gridID)
 
 @EndFunction
 */
-double gridInqYinc(int gridID)
+double gridInqXinc(int gridID)
 {
   grid_t *gridptr = grid_to_pointer(gridID);
+  return gridptr->vtable->inqXInc(gridptr);
+}
+
+
+static double
+gridInqYIncBase(grid_t *gridptr)
+{
   double yinc = gridptr->y.inc;
 
   if ( (! (fabs(yinc) > 0)) && gridptr->y.vals )
@@ -1805,6 +1803,22 @@ double gridInqYinc(int gridID)
     }
 
   return yinc;
+}
+
+/*
+@Function
+@Title
+
+@Prototype
+@Parameter
+    @Item  Grid identifier
+
+@EndFunction
+*/
+double gridInqYinc(int gridID)
+{
+  grid_t *gridptr = grid_to_pointer(gridID);
+  return gridptr->vtable->inqYInc(gridptr);
 }
 
 /*
@@ -4863,6 +4877,8 @@ const struct gridVirtTable cdiGridVtable
   .inqYVals = gridInqYValsSerial,
   .inqXValsPtr = gridInqXValsPtrSerial,
   .inqYValsPtr = gridInqYValsPtrSerial,
+  .inqXInc = gridInqXIncBase,
+  .inqYInc = gridInqYIncBase,
   .compareXYFull = compareXYvals,
   .compareXYAO = compareXYvals2,
   .inqArea = gridInqAreaSerial,
