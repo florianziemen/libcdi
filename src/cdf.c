@@ -41,8 +41,11 @@ const char *hdfLibraryVersion(void)
 
   H5get_libversion(&majnum, &minnum, &relnum);
 
+#if  defined(HAVE_NC4HDF5_THREADSAFE)
+  sprintf(hdf_libvers, "%u.%u.%u threadsafe", majnum, minnum, relnum);
+#else
   sprintf(hdf_libvers, "%u.%u.%u", majnum, minnum, relnum);
-
+#endif
   return hdf_libvers;
 #else
   return "library undefined";
