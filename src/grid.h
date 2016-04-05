@@ -52,6 +52,8 @@ struct gridVirtTable
   const char **(*inqXCvalsPtr)(grid_t *gridptr);
   const double *(*inqYValsPtr)(grid_t *gridptr);
   const char **(*inqYCvalsPtr)(grid_t *gridptr);
+  double (*inqXInc)(grid_t *gridptr);
+  double (*inqYInc)(grid_t *gridptr);
   /* return if for both grids, all xval and all yval are equal */
   bool (*compareXYFull)(grid_t *gridRef, grid_t *gridTest);
   /* return if for both grids, x[0], y[0], x[size-1] and y[size-1] are
