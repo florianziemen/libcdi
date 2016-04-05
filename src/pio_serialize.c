@@ -11,13 +11,20 @@
 #include "pio_serialize.h"
 #include "pio_util.h"
 
-static struct
+#if MPI_VERSION == 1 || (MPI_VERSION == 2 && MPI_SUBVERSION < 2)
+#define CDI_DT_MATCH_NEEDED 1
+#endif
+
+static
+#ifndef CDI_DT_MATCH_NEEDED
+    const
+#endif
+    struct
 {
   int cdidt;
   MPI_Datatype mpidt;
 } dtDict[] = {
-#if MPI_VERSION == 1 || (MPI_VERSION == 2 && MPI_SUBVERSION < 2)
-#define CDI_DT_MATCH_NEEDED 1
+#ifdef CDI_DT_MATCH_NEEDED
   { CDI_DATATYPE_INT8, MPI_SIGNED_CHAR }, { CDI_DATATYPE_INT16, MPI_SHORT },         { CDI_DATATYPE_UINT32, MPI_INT },
 #else
   { CDI_DATATYPE_INT8, MPI_INT8_T }, { CDI_DATATYPE_INT16, MPI_INT16_T },       { CDI_DATATYPE_UINT32, MPI_UINT32_T },
