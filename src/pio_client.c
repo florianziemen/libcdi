@@ -218,8 +218,7 @@ cdiPioClientStreamDefTimestep_(stream_t *streamptr, int tsID)
 void
 cdiPioClientSetup(int *pioNamespace_)
 {
-  int pioNamespace = namespaceNew();
-  *pioNamespace_ = pioNamespace;
+  int pioNamespace = *pioNamespace_ = namespaceNew();
   int callerCDINamespace = namespaceGetActive();
   namespaceSetActive(pioNamespace);
   cdiPioSerializeSetMPI();
