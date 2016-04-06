@@ -181,6 +181,7 @@ reshListDestruct(int namespaceID)
         {
           listElem_t *listElem = resHList[namespaceID].resources + j;
           if (listElem->status & RESH_IN_USE_BIT) listElem->res.v.ops->valDestroy(listElem->res.v.val);
+          listElem->status = RESH_UNUSED;
         }
       Free(resHList[namespaceID].resources);
       resHList[namespaceID].resources = NULL;
