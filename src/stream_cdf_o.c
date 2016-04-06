@@ -1744,12 +1744,8 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
   /*  char zaxisname0[CDI_MAX_NAME]; */
   char axisname[CDI_MAX_NAME];
   int dimID = CDI_UNDEFID;
-  int dimIDs[2];
   int ncvarid = CDI_UNDEFID, ncbvarid = CDI_UNDEFID;
-  int nvdimID = CDI_UNDEFID;
-  int xtype = NC_DOUBLE;
-
-  if ( zaxisInqPrec(zaxisID) == CDI_DATATYPE_FLT32 ) xtype = NC_FLOAT;
+  int xtype = zaxisInqPrec(zaxisID) == CDI_DATATYPE_FLT32 ? NC_FLOAT : NC_DOUBLE;
 
   int vlistID = streamptr->vlistID;
   int fileID  = streamptr->fileID;
@@ -1772,8 +1768,7 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
         }
     }
 
-  int ndims = 1;
-  if ( is_scalar ) ndims = 0;
+  int ndims = is_scalar ? 0 : 1;
 
   if ( dimlen == 1 )
     switch (type)
@@ -1848,6 +1843,7 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
 
               if ( zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL) )
                 {
+                  int nvdimID = CDI_UNDEFID;
                   size_t nvertex = 2;
                   if ( nc_inq_dimid(fileID, bndsName, &nvdimID) != NC_NOERR )
                     cdf_def_dim(fileID, bndsName, nvertex, &nvdimID);
@@ -1857,6 +1853,7 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
                       size_t axisnameLen = strlen(axisname);
                       axisname[axisnameLen] = '_';
                       memcpy(axisname + axisnameLen + 1, bndsName, sizeof (bndsName));
+                      int dimIDs[2];
                       dimIDs[0] = dimID;
                       dimIDs[ndims] = nvdimID;
                       cdf_def_var(fileID, axisname, (nc_type) xtype, ndims+1, dimIDs, &ncbvarid);
@@ -1968,9 +1965,8 @@ void cdfDefGrid(stream_t *streamptr, int gridID, int gridindex)
         }
       else
         {
-          int ndims = 1;
-          if ( gridtype == GRID_LONLAT && size == 1 && gridInqHasDims(gridID) == FALSE )
-            ndims = 0;
+          int ndims = !( gridtype == GRID_LONLAT && size == 1
+                         && gridInqHasDims(gridID) == FALSE );
 
           if ( gridInqXsize(gridID) > 0 ) cdfDefXaxis(streamptr, gridID, gridindex, ndims);
           if ( gridInqYsize(gridID) > 0 ) cdfDefYaxis(streamptr, gridID, gridindex, ndims);
