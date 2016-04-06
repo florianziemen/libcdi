@@ -462,13 +462,20 @@ void cdf_scale_add(size_t size, double *data, double addoffset, double scalefact
   bool laddoffset   = IS_NOT_EQUAL(addoffset, 0);
   bool lscalefactor = IS_NOT_EQUAL(scalefactor, 1);
 
-  if ( laddoffset || lscalefactor )
+  if ( laddoffset && lscalefactor )
     {
-      for ( size_t i = 0; i < size; ++i )
-        {
-          if ( lscalefactor ) data[i] *= scalefactor;
-          if ( laddoffset )   data[i] += addoffset;
-        }
+      for (size_t i = 0; i < size; ++i )
+        data[i] = data[i] * scalefactor + addoffset;
+    }
+  else if (lscalefactor)
+    {
+      for (size_t i = 0; i < size; ++i )
+        data[i] *= scalefactor;
+    }
+  else if (laddoffset)
+    {
+      for (size_t i = 0; i < size; ++i )
+        data[i] += addoffset;
     }
 }
 
