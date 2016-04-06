@@ -1518,10 +1518,9 @@ void cdf_def_zaxis_hybrid_echam(stream_t *streamptr, int type, int *ncvaridp, in
 
   if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
-  int ncvarid;
   cdf_def_dim(fileID, axisname, dimlen, dimID);
-  cdf_def_var(fileID, axisname, (nc_type) xtype, 1, dimID,  &ncvarid);
-  *ncvaridp = ncvarid;
+  cdf_def_var(fileID, axisname, (nc_type) xtype, 1, dimID,  ncvaridp);
+  int ncvarid = *ncvaridp;
 
   {
     static const char sname[] = "hybrid_sigma_pressure";
@@ -1615,10 +1614,9 @@ void cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int *ncvaridp, int z
   if ( zlongname[0] == 0 ) strcpy(zlongname, "hybrid sigma pressure coordinate");
   if ( zunits[0] == 0 ) strcpy(zunits, "1");
 
-  int ncvarid;
   cdf_def_dim(fileID, axisname, dimlen, dimID);
-  cdf_def_var(fileID, axisname, (nc_type) xtype, 1, dimID,  &ncvarid);
-  *ncvaridp = ncvarid;
+  cdf_def_var(fileID, axisname, (nc_type) xtype, 1, dimID, ncvaridp);
+  int ncvarid = *ncvaridp;
 
   {
     static const char sname[] = "standard_name",
@@ -1733,10 +1731,11 @@ void cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int *ncvaridp, int z
 static
 void cdf_def_zaxis_hybrid(stream_t *streamptr, int type, int *ncvarid, int zaxisID, int zaxisindex, int xtype, size_t dimlen, int *dimID, char *axisname)
 {
-  if ( (!CDI_cmor_mode && cdiConvention == CDI_CONVENTION_ECHAM) || type == ZAXIS_HYBRID_HALF )
-    cdf_def_zaxis_hybrid_echam(streamptr, type, ncvarid, zaxisID, zaxisindex, xtype, dimlen, dimID, axisname);
-  else
-    cdf_def_zaxis_hybrid_cf(streamptr, type, ncvarid, zaxisID, zaxisindex, xtype, dimlen, dimID, axisname);
+  void (*def_zaxis_hybrid_delegate)(stream_t *streamptr, int type, int *ncvarid, int zaxisID, int zaxisindex, int xtype, size_t dimlen, int *dimID, char *axisname)
+    = ( (!CDI_cmor_mode && cdiConvention == CDI_CONVENTION_ECHAM)
+        || type == ZAXIS_HYBRID_HALF )
+    ? cdf_def_zaxis_hybrid_echam : cdf_def_zaxis_hybrid_cf;
+  def_zaxis_hybrid_delegate(streamptr, type, ncvarid, zaxisID, zaxisindex, xtype, dimlen, dimID, axisname);
 }
 
 static
