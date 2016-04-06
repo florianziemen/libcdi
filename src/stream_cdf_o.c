@@ -1576,12 +1576,8 @@ void cdf_def_zaxis_hybrid_echam(stream_t *streamptr, int type, int *ncvaridp, in
   cdf_def_vct_echam(streamptr, zaxisID);
 
   if ( *dimID == CDI_UNDEFID )
-    {
-      if ( type == ZAXIS_HYBRID )
-        streamptr->zaxisID[zaxisindex] = streamptr->vct.mlevID;
-      else
-        streamptr->zaxisID[zaxisindex] = streamptr->vct.ilevID;
-    }
+    streamptr->zaxisID[zaxisindex] = type == ZAXIS_HYBRID
+      ? streamptr->vct.mlevID : streamptr->vct.ilevID;
 }
 
 static
@@ -1730,12 +1726,8 @@ void cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int *ncvaridp, int z
   cdf_def_vct_cf(streamptr, zaxisID, *dimID, nvdimID, p0status, p0value);
 
   if ( *dimID == CDI_UNDEFID )
-    {
-      if ( type == ZAXIS_HYBRID )
-        streamptr->zaxisID[zaxisindex] = streamptr->vct.mlevID;
-      else
-        streamptr->zaxisID[zaxisindex] = streamptr->vct.ilevID;
-    }
+    streamptr->zaxisID[zaxisindex] = type == ZAXIS_HYBRID
+      ? streamptr->vct.mlevID : streamptr->vct.ilevID;
 }
 
 static
