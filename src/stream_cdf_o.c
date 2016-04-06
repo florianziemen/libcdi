@@ -852,17 +852,205 @@ void cdfGridCompress(int fileID, int ncvarid, int gridsize, int filetype, int co
 }
 
 static
-void cdfDefCurvilinear(stream_t *streamptr, int gridID, int gridindex)
+void cdfDefGridReference(stream_t *streamptr, int gridID)
+{
+  int fileID  = streamptr->fileID;
+  int number = gridInqNumber(gridID);
+
+  if ( number > 0 )
+    {
+      cdf_put_att_int(fileID, NC_GLOBAL, "number_of_grid_used", NC_INT, 1, &number);
+    }
+
+  const char *gridfile = gridInqReferencePtr(gridID);
+  if ( gridfile && gridfile[0] != 0 )
+    cdf_put_att_text(fileID, NC_GLOBAL, "grid_file_uri", strlen(gridfile), gridfile);
+}
+
+static
+void cdfDefGridUUID(stream_t *streamptr, int gridID)
+{
+  unsigned char uuidOfHGrid[CDI_UUID_SIZE];
+
+  gridInqUUID(gridID, uuidOfHGrid);
+  if ( !cdiUUIDIsNull(uuidOfHGrid) )
+    {
+      char uuidOfHGridStr[37];
+      cdiUUID2Str(uuidOfHGrid, uuidOfHGridStr);
+      if ( uuidOfHGridStr[0] != 0 && strlen(uuidOfHGridStr) == 36 )
+        {
+          int fileID  = streamptr->fileID;
+          //if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
+          cdf_put_att_text(fileID, NC_GLOBAL, "uuidOfHGrid", 36, uuidOfHGridStr);
+          //if ( streamptr->ncmode == 2 ) cdf_enddef(fileID);
+        }
+    }
+}
+
+struct cdfDefIrregularGridCommonIDs
+{
+  int xdimID, ydimID, ncxvarid, ncyvarid, ncavarid;
+};
+
+static struct cdfDefIrregularGridCommonIDs
+cdfDefIrregularGridCommon(stream_t *streamptr, int gridID,
+                          size_t xdimlen, size_t ydimlen,
+                          int ndims, const char *xdimname_default,
+                          size_t nvertex, const char *vdimname_default,
+                          bool setVdimname)
 {
   nc_type xtype = (nc_type)cdfDefDatatype(gridInqPrec(gridID), streamptr->filetype);
+  int xdimID = CDI_UNDEFID;
+  int ydimID = CDI_UNDEFID;
+  int ncxvarid = CDI_UNDEFID, ncyvarid = CDI_UNDEFID, ncavarid = CDI_UNDEFID;
+  int ncbxvarid = CDI_UNDEFID, ncbyvarid = CDI_UNDEFID;
+  int fileID  = streamptr->fileID;
+  if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
+
+  {
+    char xdimname[CDI_MAX_NAME+3];
+    xdimname[0] = 0;
+    cdiGridInqKeyStr(gridID, CDI_KEY_XDIMNAME, CDI_MAX_NAME, xdimname);
+    if ( xdimname[0] == 0 ) strcpy(xdimname, xdimname_default);
+    xdimID = checkDimName(fileID, xdimlen, xdimname);
+    if ( xdimID == CDI_UNDEFID ) cdf_def_dim(fileID, xdimname, xdimlen, &xdimID);
+  }
+
+  if ( ndims == 3 )
+    {
+      char ydimname[CDI_MAX_NAME+3];
+      ydimname[0] = 0;
+      cdiGridInqKeyStr(gridID, CDI_KEY_YDIMNAME, CDI_MAX_NAME, ydimname);
+      if ( ydimname[0] == 0 ) { ydimname[0] = 'y'; ydimname[1] = 0; }
+      ydimID = checkDimName(fileID, ydimlen, ydimname);
+      if ( ydimID == CDI_UNDEFID ) cdf_def_dim(fileID, ydimname, ydimlen, &ydimID);
+    }
+
+  int nvdimID = CDI_UNDEFID;
+  int dimIDs[3];
+  dimIDs[ndims-1] = CDI_UNDEFID;
+  if ( setVdimname )
+    {
+      char vdimname[CDI_MAX_NAME+3]; vdimname[0] = 0;
+      cdiGridInqKeyStr(gridID, CDI_KEY_VDIMNAME, CDI_MAX_NAME, vdimname);
+      if ( vdimname[0] == 0 ) strcpy(vdimname, vdimname_default);
+      nvdimID = dimIDs[ndims-1] = checkDimName(fileID, nvertex, vdimname);
+      if ( nvdimID == CDI_UNDEFID )
+        {
+          cdf_def_dim(fileID, vdimname, nvertex, dimIDs+ndims-1);
+          nvdimID = dimIDs[ndims-1];
+        }
+    }
+
+  if ( ndims == 3 )
+    {
+      dimIDs[0] = ydimID;
+      dimIDs[1] = xdimID;
+    }
+  else /* ndims == 2 */
+    {
+      dimIDs[0] = xdimID;
+      cdfDefGridReference(streamptr, gridID);
+      cdfDefGridUUID(streamptr, gridID);
+    }
+
+  const double *xvalsPtr = gridInqXvalsPtr(gridID),
+    *xboundsPtr = NULL;
+  if ( xvalsPtr )
+    {
+      char xaxisname[CDI_MAX_NAME]; xaxisname[0] = 0;
+      cdiGridInqKeyStr(gridID, CDI_KEY_XNAME, CDI_MAX_NAME, xaxisname);
+      checkGridName(xaxisname, fileID);
+      cdf_def_var(fileID, xaxisname, xtype, ndims-1, dimIDs, &ncxvarid);
+      cdfGridCompress(fileID, ncxvarid, (int)(xdimlen*ydimlen), streamptr->filetype, streamptr->comptype);
+
+      cdfPutGridStdAtts(fileID, ncxvarid, gridID, 'X', &gridInqsX);
+
+      /* attribute for Panoply */
+      if ( ndims == 3 )
+        cdf_put_att_text(fileID, ncxvarid, "_CoordinateAxisType", 3, "Lon");
+
+      if ( (xboundsPtr = gridInqXboundsPtr(gridID)) && nvdimID != CDI_UNDEFID )
+        {
+          size_t xaxisnameLen = strlen(xaxisname);
+          xaxisname[xaxisnameLen] = '_';
+          memcpy(xaxisname + xaxisnameLen + 1, bndsName, sizeof (bndsName));
+          cdf_def_var(fileID, xaxisname, xtype, ndims, dimIDs, &ncbxvarid);
+          cdfGridCompress(fileID, ncbxvarid, (int)(xdimlen*ydimlen), streamptr->filetype, streamptr->comptype);
+
+          cdf_put_att_text(fileID, ncxvarid, "bounds", xaxisnameLen + sizeof (bndsName), xaxisname);
+        }
+    }
+
+  const double *yvalsPtr = gridInqYvalsPtr(gridID),
+    *yboundsPtr = NULL;
+  if ( yvalsPtr )
+    {
+      char yaxisname[CDI_MAX_NAME];
+      gridInqYname(gridID, yaxisname);
+      checkGridName(yaxisname, fileID);
+
+      cdf_def_var(fileID, yaxisname, xtype, ndims - 1, dimIDs, &ncyvarid);
+      cdfGridCompress(fileID, ncyvarid, (int)(xdimlen*ydimlen), streamptr->filetype, streamptr->comptype);
+
+      cdfPutGridStdAtts(fileID, ncyvarid, gridID, 'Y', &gridInqsY);
+
+      /* attribute for Panoply */
+      if ( ndims == 3 )
+        cdf_put_att_text(fileID, ncyvarid, "_CoordinateAxisType", 3, "Lat");
+
+      if ( (yboundsPtr = gridInqYboundsPtr(gridID)) && nvdimID != CDI_UNDEFID )
+        {
+          size_t yaxisnameLen = strlen(yaxisname);
+          yaxisname[yaxisnameLen] = '_';
+          memcpy(yaxisname + yaxisnameLen + 1, bndsName, sizeof (bndsName));
+          cdf_def_var(fileID, yaxisname, xtype, ndims, dimIDs, &ncbyvarid);
+          cdfGridCompress(fileID, ncbyvarid, (int)(xdimlen*ydimlen), streamptr->filetype, streamptr->comptype);
+
+          cdf_put_att_text(fileID, ncyvarid, "bounds", yaxisnameLen + sizeof (bndsName), yaxisname);
+        }
+    }
+
+  const double *areaPtr = gridInqAreaPtr(gridID);
+  if ( areaPtr )
+    {
+      static const char yaxisname_[] = "cell_area";
+      static const char units[] = "m2";
+      static const char longname[] = "area of grid cell";
+      static const char stdname[] = "cell_area";
+
+      cdf_def_var(fileID, yaxisname_, xtype, ndims-1, dimIDs, &ncavarid);
+
+      cdf_put_att_text(fileID, ncavarid, "standard_name", sizeof (stdname) - 1, stdname);
+      cdf_put_att_text(fileID, ncavarid, "long_name", sizeof (longname) - 1, longname);
+      cdf_put_att_text(fileID, ncavarid, "units", sizeof (units) - 1, units);
+    }
+
+  cdf_enddef(fileID);
+  streamptr->ncmode = 2;
+
+  if ( ncxvarid  != CDI_UNDEFID ) cdf_put_var_double(fileID, ncxvarid,  xvalsPtr);
+  if ( ncbxvarid != CDI_UNDEFID ) cdf_put_var_double(fileID, ncbxvarid, xboundsPtr);
+  if ( ncyvarid  != CDI_UNDEFID ) cdf_put_var_double(fileID, ncyvarid,  yvalsPtr);
+  if ( ncbyvarid != CDI_UNDEFID ) cdf_put_var_double(fileID, ncbyvarid, yboundsPtr);
+  if ( ncavarid  != CDI_UNDEFID ) cdf_put_var_double(fileID, ncavarid,  areaPtr);
+
+  return (struct cdfDefIrregularGridCommonIDs) {
+    .xdimID=xdimID, .ydimID = ydimID,
+    .ncxvarid=ncxvarid, .ncyvarid=ncyvarid, .ncavarid=ncavarid
+  };
+}
+
+static
+void cdfDefCurvilinear(stream_t *streamptr, int gridID, int gridindex)
+{
   ncgrid_t *ncgrid = streamptr->ncgrid;
 
   size_t dimlen = (size_t)gridInqSize(gridID);
   size_t xdimlen = (size_t)gridInqXsize(gridID);
   size_t ydimlen = (size_t)gridInqYsize(gridID);
 
-  int xdimID = CDI_UNDEFID;
-  int ydimID = CDI_UNDEFID;
+  int xdimID = CDI_UNDEFID, ydimID = CDI_UNDEFID;
   int ncxvarid = CDI_UNDEFID, ncyvarid = CDI_UNDEFID, ncavarid = CDI_UNDEFID;
   {
     size_t ofs = 0;
@@ -897,125 +1085,16 @@ void cdfDefCurvilinear(stream_t *streamptr, int gridID, int gridindex)
 
   if ( xdimID == CDI_UNDEFID || ydimID == CDI_UNDEFID )
     {
-      int ncbxvarid = CDI_UNDEFID, ncbyvarid = CDI_UNDEFID;
-      int fileID  = streamptr->fileID;
-
-      if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
-      {
-        char xdimname[CDI_MAX_NAME+3];
-        xdimname[0] = 0;
-        cdiGridInqKeyStr(gridID, CDI_KEY_XDIMNAME, CDI_MAX_NAME, xdimname);
-        if ( xdimname[0] == 0 ) { xdimname[0] = 'x'; xdimname[1] = 0; }
-        xdimID = checkDimName(fileID, xdimlen, xdimname);
-        if ( xdimID == CDI_UNDEFID ) cdf_def_dim(fileID, xdimname, xdimlen, &xdimID);
-      }
-      {
-        char ydimname[CDI_MAX_NAME+3];
-        ydimname[0] = 0;
-        cdiGridInqKeyStr(gridID, CDI_KEY_YDIMNAME, CDI_MAX_NAME, ydimname);
-        if ( ydimname[0] == 0 ) { ydimname[0] = 'y'; ydimname[1] = 0; }
-        ydimID = checkDimName(fileID, ydimlen, ydimname);
-        if ( ydimID == CDI_UNDEFID ) cdf_def_dim(fileID, ydimname, ydimlen, &ydimID);
-      }
-
-      int nvdimID = CDI_UNDEFID;
-      int dimIDs[3];
-      if ( gridInqXboundsPtr(gridID) || gridInqYboundsPtr(gridID) )
-        {
-          char vdimname[CDI_MAX_NAME+3]; vdimname[0] = 0;
-          cdiGridInqKeyStr(gridID, CDI_KEY_VDIMNAME, CDI_MAX_NAME, vdimname);
-          if ( vdimname[0] == 0 ) strcpy(vdimname, "nv4");
-          size_t nvertex = 4;
-          nvdimID = dimIDs[2] = checkDimName(fileID, nvertex, vdimname);
-          if ( nvdimID == CDI_UNDEFID )
-            {
-              cdf_def_dim(fileID, vdimname, nvertex, dimIDs+2);
-              nvdimID = dimIDs[2];
-            }
-        }
-
-      dimIDs[0] = ydimID;
-      dimIDs[1] = xdimID;
-
-      const double *xvalsPtr = gridInqXvalsPtr(gridID),
-        *xboundsPtr = NULL;
-      if ( xvalsPtr )
-        {
-          char xaxisname[CDI_MAX_NAME]; xaxisname[0] = 0;
-          cdiGridInqKeyStr(gridID, CDI_KEY_XNAME, CDI_MAX_NAME, xaxisname);
-          checkGridName(xaxisname, fileID);
-
-          cdf_def_var(fileID, xaxisname, xtype, 2, dimIDs, &ncxvarid);
-          cdfGridCompress(fileID, ncxvarid, (int)(xdimlen*ydimlen), streamptr->filetype, streamptr->comptype);
-
-          cdfPutGridStdAtts(fileID, ncxvarid, gridID, 'X', &gridInqsX);
-
-          /* attribute for Panoply */
-          cdf_put_att_text(fileID, ncxvarid, "_CoordinateAxisType", 3, "Lon");
-
-          if ( (xboundsPtr = gridInqXboundsPtr(gridID)) && nvdimID != CDI_UNDEFID )
-            {
-              size_t xaxisnameLen = strlen(xaxisname);
-              xaxisname[xaxisnameLen] = '_';
-              memcpy(xaxisname + xaxisnameLen + 1, bndsName, sizeof (bndsName));
-              cdf_def_var(fileID, xaxisname, xtype, 3, dimIDs, &ncbxvarid);
-              cdfGridCompress(fileID, ncbxvarid, (int)(xdimlen*ydimlen), streamptr->filetype, streamptr->comptype);
-
-              cdf_put_att_text(fileID, ncxvarid, "bounds", xaxisnameLen + sizeof (bndsName), xaxisname);
-            }
-        }
-
-      const double *yvalsPtr = gridInqYvalsPtr(gridID),
-        *yboundsPtr = NULL;
-      if ( yvalsPtr )
-        {
-          char yaxisname[CDI_MAX_NAME];
-          gridInqYname(gridID, yaxisname);
-          checkGridName(yaxisname, fileID);
-
-          cdf_def_var(fileID, yaxisname, xtype, 2, dimIDs, &ncyvarid);
-          cdfGridCompress(fileID, ncyvarid, (int)(xdimlen*ydimlen), streamptr->filetype, streamptr->comptype);
-
-          cdfPutGridStdAtts(fileID, ncyvarid, gridID, 'Y', &gridInqsY);
-
-          /* attribute for Panoply */
-          cdf_put_att_text(fileID, ncyvarid, "_CoordinateAxisType", 3, "Lat");
-
-          if ( (yboundsPtr = gridInqYboundsPtr(gridID)) && nvdimID != CDI_UNDEFID )
-            {
-              size_t yaxisnameLen = strlen(yaxisname);
-              yaxisname[yaxisnameLen] = '_';
-              memcpy(yaxisname + yaxisnameLen + 1, bndsName, sizeof (bndsName));
-              cdf_def_var(fileID, yaxisname, xtype, 3, dimIDs, &ncbyvarid);
-              cdfGridCompress(fileID, ncbyvarid, (int)(xdimlen*ydimlen), streamptr->filetype, streamptr->comptype);
-
-              cdf_put_att_text(fileID, ncyvarid, "bounds", yaxisnameLen + sizeof (bndsName), yaxisname);
-            }
-        }
-
-      const double *areaPtr = gridInqAreaPtr(gridID);
-      if ( areaPtr )
-        {
-          static const char yaxisname_[] = "cell_area";
-          static const char units[] = "m2";
-          static const char longname[] = "area of grid cell";
-          static const char stdname[] = "cell_area";
-
-          cdf_def_var(fileID, yaxisname_, xtype, 2, dimIDs, &ncavarid);
-
-          cdf_put_att_text(fileID, ncavarid, "standard_name", sizeof (stdname) - 1, stdname);
-          cdf_put_att_text(fileID, ncavarid, "long_name", sizeof (longname) - 1, longname);
-          cdf_put_att_text(fileID, ncavarid, "units", sizeof (units) - 1, units);
-        }
-
-      cdf_enddef(fileID);
-      streamptr->ncmode = 2;
-
-      if ( ncxvarid  != CDI_UNDEFID ) cdf_put_var_double(fileID, ncxvarid,  xvalsPtr);
-      if ( ncbxvarid != CDI_UNDEFID ) cdf_put_var_double(fileID, ncbxvarid, xboundsPtr);
-      if ( ncyvarid  != CDI_UNDEFID ) cdf_put_var_double(fileID, ncyvarid,  yvalsPtr);
-      if ( ncbyvarid != CDI_UNDEFID ) cdf_put_var_double(fileID, ncbyvarid, yboundsPtr);
-      if ( ncavarid  != CDI_UNDEFID ) cdf_put_var_double(fileID, ncavarid,  areaPtr);
+      struct cdfDefIrregularGridCommonIDs createdIDs
+        = cdfDefIrregularGridCommon(streamptr, gridID,
+                                    xdimlen, ydimlen, 3, "x", 4, "nv4",
+                                    gridInqXboundsPtr(gridID)
+                                    || gridInqYboundsPtr(gridID));
+      xdimID = createdIDs.xdimID;
+      ydimID = createdIDs.ydimID;
+      ncxvarid = createdIDs.ncxvarid;
+      ncyvarid = createdIDs.ncyvarid;
+      ncavarid = createdIDs.ncavarid;
     }
 
   ncgrid[gridindex].gridID = gridID;
@@ -1121,39 +1200,6 @@ void cdfDefGdim(stream_t *streamptr, int gridID, int gridindex)
 }
 
 static
-void cdfDefGridReference(stream_t *streamptr, int gridID)
-{
-  int fileID  = streamptr->fileID;
-  int number = gridInqNumber(gridID);
-  if ( number > 0 )
-    cdf_put_att_int(fileID, NC_GLOBAL, "number_of_grid_used", NC_INT, 1, &number);
-
-  const char *gridfile = gridInqReferencePtr(gridID);
-  if ( gridfile && gridfile[0] != 0 )
-    cdf_put_att_text(fileID, NC_GLOBAL, "grid_file_uri", strlen(gridfile), gridfile);
-}
-
-static
-void cdfDefGridUUID(stream_t *streamptr, int gridID)
-{
-  unsigned char uuidOfHGrid[CDI_UUID_SIZE];
-
-  gridInqUUID(gridID, uuidOfHGrid);
-  if ( !cdiUUIDIsNull(uuidOfHGrid) )
-    {
-      char uuidOfHGridStr[37];
-      cdiUUID2Str(uuidOfHGrid, uuidOfHGridStr);
-      if ( uuidOfHGridStr[0] != 0 && strlen(uuidOfHGridStr) == 36 )
-        {
-          int fileID  = streamptr->fileID;
-          //if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
-          cdf_put_att_text(fileID, NC_GLOBAL, "uuidOfHGrid", 36, uuidOfHGridStr);
-          //if ( streamptr->ncmode == 2 ) cdf_enddef(fileID);
-        }
-    }
-}
-
-static
 void cdfDefZaxisUUID(stream_t *streamptr, int zaxisID)
 {
   unsigned char uuidOfVGrid[CDI_UUID_SIZE];
@@ -1176,7 +1222,6 @@ void cdfDefZaxisUUID(stream_t *streamptr, int zaxisID)
 static
 void cdfDefUnstructured(stream_t *streamptr, int gridID, int gridindex)
 {
-  nc_type xtype = (nc_type)cdfDefDatatype(gridInqPrec(gridID), streamptr->filetype);
   ncgrid_t *ncgrid = streamptr->ncgrid;
 
   size_t dimlen = (size_t)gridInqSize(gridID);
@@ -1217,112 +1262,15 @@ void cdfDefUnstructured(stream_t *streamptr, int gridID, int gridindex)
 
   if ( dimID == CDI_UNDEFID )
     {
-      int ncbxvarid = CDI_UNDEFID, ncbyvarid = CDI_UNDEFID;
-      int fileID  = streamptr->fileID;
-
-      if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
-      {
-        char xdimname[CDI_MAX_NAME+3];
-        xdimname[0] = 0;
-        cdiGridInqKeyStr(gridID, CDI_KEY_XDIMNAME, CDI_MAX_NAME, xdimname);
-        if ( xdimname[0] == 0 ) strcpy(xdimname, "ncells");
-        dimID = checkDimName(fileID, dimlen, xdimname);
-        if ( dimID == CDI_UNDEFID ) cdf_def_dim(fileID, xdimname, dimlen, &dimID);
-      }
-
       size_t nvertex = (size_t)gridInqNvertex(gridID);
-      int nvdimID = CDI_UNDEFID;
-      int dimIDs[2];
-      if ( nvertex > 0 )
-        {
-          char vdimname[CDI_MAX_NAME+3];
-          vdimname[0] = 0;
-          cdiGridInqKeyStr(gridID, CDI_KEY_VDIMNAME, CDI_MAX_NAME, vdimname);
-          if ( vdimname[0] == 0 ) strcpy(vdimname, "vertices");
-          nvdimID = dimIDs[1] = checkDimName(fileID, nvertex, vdimname);
-          if ( nvdimID == CDI_UNDEFID )
-            {
-              cdf_def_dim(fileID, vdimname, nvertex, dimIDs+1);
-              nvdimID = dimIDs[1];
-            }
-        }
-      dimIDs[0] = dimID;
-
-      cdfDefGridReference(streamptr, gridID);
-
-      cdfDefGridUUID(streamptr, gridID);
-
-      const double *xvalsPtr = gridInqXvalsPtr(gridID),
-        *xboundsPtr = NULL;
-      if ( xvalsPtr )
-        {
-          char xaxisname[CDI_MAX_NAME]; xaxisname[0] = 0;
-          cdiGridInqKeyStr(gridID, CDI_KEY_XNAME, CDI_MAX_NAME, xaxisname);
-          checkGridName(xaxisname, fileID);
-          cdf_def_var(fileID, xaxisname, xtype, 1, &dimID, &ncxvarid);
-          cdfGridCompress(fileID, ncxvarid, (int)dimlen, streamptr->filetype, streamptr->comptype);
-
-          cdfPutGridStdAtts(fileID, ncxvarid, gridID, 'X', &gridInqsX);
-
-          if ( (xboundsPtr = gridInqXboundsPtr(gridID)) && nvdimID != CDI_UNDEFID )
-            {
-              size_t xaxisnameLen = strlen(xaxisname);
-              xaxisname[xaxisnameLen] = '_';
-              memcpy(xaxisname + xaxisnameLen + 1, bndsName, sizeof (bndsName));
-              cdf_def_var(fileID, xaxisname, xtype, 2, dimIDs, &ncbxvarid);
-              cdfGridCompress(fileID, ncbxvarid, (int)dimlen, streamptr->filetype, streamptr->comptype);
-
-              cdf_put_att_text(fileID, ncxvarid, "bounds", xaxisnameLen + sizeof (bndsName), xaxisname);
-            }
-        }
-
-      const double *yvalsPtr = gridInqYvalsPtr(gridID),
-        *yboundsPtr = NULL;
-      if ( yvalsPtr )
-        {
-          char yaxisname[CDI_MAX_NAME];
-          gridInqYname(gridID, yaxisname);
-          checkGridName(yaxisname, fileID);
-          cdf_def_var(fileID, yaxisname, xtype, 1, &dimID, &ncyvarid);
-          cdfGridCompress(fileID, ncyvarid, (int)dimlen, streamptr->filetype, streamptr->comptype);
-
-          cdfPutGridStdAtts(fileID, ncyvarid, gridID, 'Y', &gridInqsY);
-
-          if ( (yboundsPtr = gridInqYboundsPtr(gridID)) && nvdimID != CDI_UNDEFID )
-            {
-              size_t yaxisnameLen = strlen(yaxisname);
-              yaxisname[yaxisnameLen] = '_';
-              memcpy(yaxisname + yaxisnameLen + 1, bndsName, sizeof (bndsName));
-              cdf_def_var(fileID, yaxisname, xtype, 2, dimIDs, &ncbyvarid);
-              cdfGridCompress(fileID, ncbyvarid, (int)dimlen, streamptr->filetype, streamptr->comptype);
-
-              cdf_put_att_text(fileID, ncyvarid, "bounds", yaxisnameLen + sizeof (bndsName), yaxisname);
-            }
-        }
-
-      const double *areaPtr = gridInqAreaPtr(gridID);
-      if ( areaPtr )
-        {
-          static const char yaxisname_[] = "cell_area";
-          static const char units[] = "m2";
-          static const char longname[] = "area of grid cell";
-          static const char stdname[] = "cell_area";
-
-          cdf_def_var(fileID, yaxisname_, xtype, 1, dimIDs, &ncavarid);
-
-          cdf_put_att_text(fileID, ncavarid, "standard_name", sizeof (stdname) - 1, stdname);
-          cdf_put_att_text(fileID, ncavarid, "long_name", sizeof (longname) - 1, longname);
-          cdf_put_att_text(fileID, ncavarid, "units", sizeof (units) - 1, units);
-        }
-
-      cdf_enddef(fileID);
-      streamptr->ncmode = 2;
-
-      if ( ncxvarid  != CDI_UNDEFID ) cdf_put_var_double(fileID, ncxvarid,  xvalsPtr);
-      if ( ncbxvarid != CDI_UNDEFID ) cdf_put_var_double(fileID, ncbxvarid, xboundsPtr);
-      if ( ncyvarid  != CDI_UNDEFID ) cdf_put_var_double(fileID, ncyvarid,  yvalsPtr);
-      if ( ncbyvarid != CDI_UNDEFID ) cdf_put_var_double(fileID, ncbyvarid, yboundsPtr);
-      if ( ncavarid  != CDI_UNDEFID ) cdf_put_var_double(fileID, ncavarid,  areaPtr);
+      struct cdfDefIrregularGridCommonIDs createdIDs
+        = cdfDefIrregularGridCommon(streamptr, gridID,
+                                    dimlen, 1, 2, "ncells",
+                                    nvertex, "vertices", nvertex > 0);
+      dimID = createdIDs.xdimID;
+      ncxvarid = createdIDs.ncxvarid;
+      ncyvarid = createdIDs.ncyvarid;
+      ncavarid = createdIDs.ncavarid;
     }
 
   ncgrid[gridindex].gridID = gridID;
