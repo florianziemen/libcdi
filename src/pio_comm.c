@@ -5,6 +5,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <mpi.h>
+#include <yaxt.h>
+
 #include "pio_comm.h"
 #include "cdi.h"
 #include "dmemory.h"
@@ -138,7 +141,10 @@ pioInfoInit(pioInfo_t *p, MPI_Comm commGlob, int clientServerRole)
         xmpi(MPI_Group_range_incl(pioGroup, 1, collRange, &collGroup));
         xmpi(MPI_Comm_create(p->commPio, collGroup, &temp));
         if (isCollector)
-          xmpi(MPI_Comm_rank(temp, &p->rankColl));
+          {
+            xmpi(MPI_Comm_rank(temp, &p->rankColl));
+            xt_mpi_comm_mark_exclusive(temp);
+          }
         xmpi(MPI_Group_free(&pioGroup));
         xmpi(MPI_Group_free(&collGroup));
         p->commColl = temp;
