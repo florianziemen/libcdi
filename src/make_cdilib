@@ -127,6 +127,7 @@ files="basetime.c \
    stream_read.c \
    stream_cdf_i.c \
    stream_cdf_o.c \
+   stream_cdf_time.c \
    stream_cgribex.c \
    stream_ext.c \
    stream_grb.c \
