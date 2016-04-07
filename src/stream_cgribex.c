@@ -1675,10 +1675,11 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
 	int nlon = 0, nlat;
 	double xfirst = 0, xlast = 0, xinc = 0;
 	double yfirst = 0, ylast = 0, yinc = 0;
+        bool isRotated = gridIsRotated(gridID);
 
 	if ( gridtype == GRID_GAUSSIAN || gridtype == GRID_GAUSSIAN_REDUCED )
           ISEC2_GridType = GRIB1_GTYPE_GAUSSIAN;
-        else if ( gridtype == GRID_LONLAT && gridIsRotated(gridID) )
+        else if ( gridtype == GRID_LONLAT && isRotated )
 	  ISEC2_GridType = GRIB1_GTYPE_LATLON_ROT;
 	else
 	  ISEC2_GridType = GRIB1_GTYPE_LATLON;
@@ -1764,7 +1765,7 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
 	else
 	  ISEC2_ResFlag = 128;
 
-	if ( gridIsRotated(gridID) )
+	if ( isRotated )
 	  {
 	    ISEC2_LatSP = - (int)lround(gridInqYpole(gridID) * 1000);
 	    ISEC2_LonSP =   (int)lround((gridInqXpole(gridID) + 180) * 1000);
