@@ -2329,13 +2329,11 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
 {
   /*  char zaxisname0[CDI_MAX_NAME]; */
   char axisname[CDI_MAX_NAME];
-  char tmpname[CDI_MAX_NAME];
   int dimID = UNDEFID;
   int dimIDs[2];
   int ncvarid = UNDEFID, ncbvarid = UNDEFID;
   int nvdimID = UNDEFID;
   int xtype = NC_DOUBLE;
-  int positive;
 
   if ( zaxisInqPrec(zaxisID) == DATATYPE_FLT32 ) xtype = NC_FLOAT;
 
@@ -2411,18 +2409,21 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
 
           cdfPutGridStdAtts(fileID, ncvarid, zaxisID, &gridInqsZ);
 
-	  positive = zaxisInqPositive(zaxisID);
-	  if ( positive == POSITIVE_UP )
-	    {
-	      strcpy(tmpname, "up");
-	      cdf_put_att_text(fileID, ncvarid, "positive", strlen(tmpname), tmpname);
-	    }
-	  else if ( positive == POSITIVE_DOWN )
-	    {
-	      strcpy(tmpname, "down");
-	      cdf_put_att_text(fileID, ncvarid, "positive", strlen(tmpname), tmpname);
-	    }
-
+          {
+            int positive = zaxisInqPositive(zaxisID);
+            static const char positive_up[] = "up",
+              positive_down[] = "down";
+            static const struct attTxtTab tab[2] = {
+              { positive_up, sizeof (positive_up) - 1 },
+              { positive_down, sizeof (positive_down) - 1 },
+            };
+            if ( positive == POSITIVE_UP || positive == POSITIVE_DOWN )
+              {
+                size_t select = positive == POSITIVE_DOWN;
+                cdf_put_att_text(fileID, ncvarid, "positive",
+                                 tab[select].txtLen, tab[select].txt);
+              }
+          }
           cdf_put_att_text(fileID, ncvarid, "axis", 1, "Z");
 
 	  if ( zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL) )
