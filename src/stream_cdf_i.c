@@ -395,15 +395,13 @@ void cdfGetAttText(int fileID, int ncvarid, const char *attname, size_t attlen, 
 }
 
 static
-bool xtypeIsText(nc_type xtype)
+bool xtypeIsText(int xtype)
 {
-  bool isText = false;
-
-  if      ( xtype == NC_CHAR ) isText = true;
+  bool isText = ( xtype == NC_CHAR )
 #if  defined  (HAVE_NETCDF4)
-  else if ( xtype == NC_STRING ) isText = true;
+    || ( xtype == NC_STRING )
 #endif
-
+    ;
   return isText;
 }
 
