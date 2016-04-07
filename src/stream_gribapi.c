@@ -1727,25 +1727,10 @@ int gribapiDefSteptype(int editionNumber, grib_handle *gh, int productDefinition
   size_t len = 64;
   const char *stepType;
 
-  static struct {
-    long productionTemplate;
-    const char sname[8];
-  } ts_tab[] = {
-    [TSTEP_INSTANT] = {  0, "instant" },
-    [TSTEP_AVG] = { 8, "avg" },
-    [TSTEP_ACCUM] = {  8, "accum" },
-    [TSTEP_MAX] = {  8, "max" },
-    [TSTEP_MIN] = {  8, "min" },
-    [TSTEP_DIFF] = {  8, "diff" },
-    [TSTEP_RMS] = {  8, "rms" },
-    [TSTEP_SD] = {  8, "sd" },
-    [TSTEP_COV] = { 8, "cov" },
-    [TSTEP_RATIO] = {  8, "ratio" }
-  };
   if (tsteptype >= TSTEP_INSTANT && tsteptype <= TSTEP_RATIO)
     {
-      stepType = ts_tab[tsteptype].sname;
-      proDefTempNum = ts_tab[tsteptype].productionTemplate;
+      stepType = cdiGribAPI_ts_str_map[tsteptype].sname;
+      proDefTempNum = cdiGribAPI_ts_str_map[tsteptype].productionTemplate;
     }
   else
     {
