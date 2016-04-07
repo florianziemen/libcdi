@@ -281,7 +281,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
                       for (size_t i = 1; i < (size_t)comm_size; ++i)
                         displs[i] = displs[i - 1] + chunks[i - 1];
                     }
-                  xmpi(MPI_Gatherv(varslice, (size_t)chunkSize, MPI_DOUBLE,
+                  xmpi(MPI_Gatherv(varslice, chunk, MPI_DOUBLE,
                                    var, chunks, displs, MPI_DOUBLE, 0, comm));
 #else
                   var = varslice;
