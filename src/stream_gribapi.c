@@ -1831,6 +1831,38 @@ void gribapiDefTime(int editionNumber, int productDefinitionTemplate, int typeOf
     }
 }
 
+struct gribApiMsg {
+  size_t msgLen;
+  const char *msg;
+};
+
+static struct gribApiMsg
+getGribApiCompTypeMsg(grib_handle *gh, int comptype, int gridsize)
+{
+  const char *mesg;
+  size_t len;
+  if ( comptype == COMPRESS_JPEG && gridsize > 1 )
+    {
+      static const char mesg_grid_jpeg[] = "grid_jpeg";
+      len = sizeof (mesg_grid_jpeg) - 1;
+      mesg = mesg_grid_jpeg;
+    }
+  else if ( comptype == COMPRESS_SZIP && gridsize > 1 )
+    {
+      static const char mesg_grid_ccsds[] = "grid_ccsds";
+      len = sizeof (mesg_grid_ccsds) - 1;
+      mesg = mesg_grid_ccsds;
+    }
+  else
+    {
+      static const char mesg_simple[] = "grid_simple";
+      len = sizeof (mesg_simple) - 1;
+      mesg = mesg_simple;
+    }
+  return (struct gribApiMsg){ .msgLen = len, .msg = mesg };
+}
+
+
 static
 void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype, int lieee, int datatype, int nmiss, int gcinit)
 {
@@ -1887,24 +1919,11 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 
       if ( comptype )
         {
-          if ( comptype == COMPRESS_JPEG && gridsize > 1 )
-            {
-              static const char mesg[] = "grid_jpeg";
-              size_t len = sizeof (mesg) - 1;
-              GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
-            }
-          else if ( comptype == COMPRESS_SZIP && gridsize > 1 )
-            {
-              static const char mesg[] = "grid_ccsds";
-              size_t len = sizeof (mesg) - 1;
-              GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
-            }
-          else
-            {
-              static const char mesg[] = "grid_simple";
-              size_t len = sizeof (mesg) - 1;
-              GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
-            }
+          struct gribApiMsg gaMsg
+            = getGribApiCompTypeMsg(gh, comptype, gridsize);
+          size_t len = gaMsg.msgLen;
+          const char *mesg = gaMsg.msg;
+          GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
         }
     }
 
@@ -2074,24 +2093,10 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
             }
           else
             {
-              if ( comptype == COMPRESS_JPEG && gridsize > 1 )
-                {
-                  static const char mesg_grid_jpeg[] = "grid_jpeg";
-                  len = sizeof (mesg_grid_jpeg) - 1;
-                  mesg = mesg_grid_jpeg;
-                }
-              else if ( comptype == COMPRESS_SZIP && gridsize > 1 )
-                {
-                  static const char mesg_grid_ccsds[] = "grid_ccsds";
-                  len = sizeof (mesg_grid_ccsds) - 1;
-                  mesg = mesg_grid_ccsds;
-                }
-              else
-                {
-                  static const char mesg_simple[] = "grid_simple";
-                  len = sizeof (mesg_simple) - 1;
-                  mesg = mesg_simple;
-                }
+              struct gribApiMsg gaMsg
+                = getGribApiCompTypeMsg(gh, comptype, gridsize);
+              len = gaMsg.msgLen;
+              mesg = gaMsg.msg;
             }
           GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
           if ( lieee )
