@@ -766,21 +766,26 @@ void cdfDefForecastTimeUnits(char *unitstr, int timeunit)
 static
 void cdfDefCalendar(int fileID, int ncvarid, int calendar)
 {
-  size_t len;
-  char calstr[80];
+  size_t len = 0;
+  const char *calstr;
+  static const struct { int calCode; const char *calStr; } calTab[] = {
+    { CALENDAR_STANDARD, "standard" },
+    { CALENDAR_PROLEPTIC, "proleptic_gregorian" },
+    { CALENDAR_NONE, "none" },
+    { CALENDAR_360DAYS, "360_day" },
+    { CALENDAR_365DAYS, "365_day" },
+    { CALENDAR_366DAYS, "366_day" },
+  };
+  enum { calTabSize = sizeof calTab / sizeof calTab[0] };
 
-  calstr[0] = 0;
-
-  if      ( calendar == CALENDAR_STANDARD )  strcpy(calstr, "standard");
-  else if ( calendar == CALENDAR_PROLEPTIC ) strcpy(calstr, "proleptic_gregorian");
-  else if ( calendar == CALENDAR_NONE )      strcpy(calstr, "none");
-  else if ( calendar == CALENDAR_360DAYS )   strcpy(calstr, "360_day");
-  else if ( calendar == CALENDAR_365DAYS )   strcpy(calstr, "365_day");
-  else if ( calendar == CALENDAR_366DAYS )   strcpy(calstr, "366_day");
-
-  len = strlen(calstr);
-
-  if ( len ) cdf_put_att_text(fileID, ncvarid, "calendar", len, calstr);
+  for (size_t i = 0; i < calTabSize; ++i)
+    if (calTab[i].calCode == calendar)
+      {
+        calstr = calTab[i].calStr;
+        len = strlen(calstr);
+        cdf_put_att_text(fileID, ncvarid, "calendar", len, calstr);
+        break;
+      }
 }
 
 
