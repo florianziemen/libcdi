@@ -221,9 +221,7 @@ int setBaseTime(const char *timeunits, taxis_t *taxis)
     {
       while ( isspace(*ptu) ) ptu++;
 
-      if ( str_is_equal(ptu, "as") )
-        timetype = TAXIS_ABSOLUTE;
-      else if ( str_is_equal(ptu, "since") )
+      if ( str_is_equal(ptu, "since") )
         timetype = TAXIS_RELATIVE;
 
       while ( ! isspace(*ptu) && *ptu != 0 ) ptu++;
