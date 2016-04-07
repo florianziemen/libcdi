@@ -89,9 +89,9 @@ void cdfDefTimeUnits(char *unitstr, taxis_t* taxis0, taxis_t* taxis)
 
           if ( timeunit == TUNIT_QUARTER   ) timeunit = TUNIT_MINUTE;
           else if ( timeunit == TUNIT_30MINUTES ) timeunit = TUNIT_MINUTE;
-          else if ( timeunit == TUNIT_3HOURS  ||
-                    timeunit == TUNIT_6HOURS  ||
-                    timeunit == TUNIT_12HOURS ) timeunit = TUNIT_HOUR;
+          else if (    timeunit == TUNIT_3HOURS
+                    || timeunit == TUNIT_6HOURS
+                    || timeunit == TUNIT_12HOURS ) timeunit = TUNIT_HOUR;
 
           sprintf(unitstr, "%s since %d-%d-%d %02d:%02d:%02d",
                   tunitNamePtr(timeunit), year, month, day, hour, minute, second);
@@ -105,12 +105,11 @@ void cdfDefForecastTimeUnits(char *unitstr, int timeunit)
   unitstr[0] = 0;
 
   if ( timeunit == -1 ) timeunit = TUNIT_HOUR;
-
-  if ( timeunit == TUNIT_QUARTER   ) timeunit = TUNIT_MINUTE;
-  if ( timeunit == TUNIT_30MINUTES ) timeunit = TUNIT_MINUTE;
-  if ( timeunit == TUNIT_3HOURS  ||
-       timeunit == TUNIT_6HOURS  ||
-       timeunit == TUNIT_12HOURS ) timeunit = TUNIT_HOUR;
+  else if ( timeunit == TUNIT_QUARTER   ) timeunit = TUNIT_MINUTE;
+  else if ( timeunit == TUNIT_30MINUTES ) timeunit = TUNIT_MINUTE;
+  else if (    timeunit == TUNIT_3HOURS
+            || timeunit == TUNIT_6HOURS
+            || timeunit == TUNIT_12HOURS ) timeunit = TUNIT_HOUR;
 
   strcpy(unitstr, tunitNamePtr(timeunit));
 }
