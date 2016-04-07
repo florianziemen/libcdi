@@ -29996,7 +29996,7 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
 
-ac_config_files="$ac_config_files tests/test_cksum_grib tests/test_cksum_nc tests/test_cksum_nc2 tests/test_cksum_nc4 tests/test_cksum_extra tests/test_cksum_service tests/test_cksum_ieg tests/test_chunk_cksum tests/test_f2003 tests/pio_write_run tests/pio_write_deco2d_run tests/pio_cksum_mpinonb tests/pio_cksum_mpi_fw_ordered tests/pio_cksum_mpi_fw_at_all tests/pio_cksum_mpi_fw_at_reblock tests/pio_cksum_fpguard tests/pio_cksum_asynch tests/pio_cksum_writer tests/pio_cksum_cdf tests/test_resource_copy_mpi_run tests/test_cdf_transformation tables/gen_tableheaderfile util/serialrun"
+ac_config_files="$ac_config_files tests/test_cksum_grib tests/test_cksum_nc tests/test_cksum_nc2 tests/test_cksum_nc4 tests/test_cksum_extra tests/test_cksum_service tests/test_cksum_ieg tests/test_chunk_cksum tests/test_f2003 tests/pio_write_run tests/pio_write_deco2d_run tests/pio_cksum_mpinonb tests/pio_cksum_mpi_fw_ordered tests/pio_cksum_mpi_fw_at_all tests/pio_cksum_mpi_fw_at_reblock tests/pio_cksum_fpguard tests/pio_cksum_asynch tests/pio_cksum_writer tests/pio_cksum_cdf tests/test_resource_copy_mpi_run tests/test_cdf_transformation tests/test_cdf_const tables/gen_tableheaderfile util/serialrun"
 
 
 ac_config_files="$ac_config_files Makefile src/Makefile interfaces/Makefile app/Makefile tests/Makefile examples/Makefile cdi.settings examples/pio/Makefile src/pkgconfig/cdi.pc src/pkgconfig/cdipio.pc"
@@ -31387,6 +31387,7 @@ do
     "tests/pio_cksum_cdf") CONFIG_FILES="$CONFIG_FILES tests/pio_cksum_cdf" ;;
     "tests/test_resource_copy_mpi_run") CONFIG_FILES="$CONFIG_FILES tests/test_resource_copy_mpi_run" ;;
     "tests/test_cdf_transformation") CONFIG_FILES="$CONFIG_FILES tests/test_cdf_transformation" ;;
+    "tests/test_cdf_const") CONFIG_FILES="$CONFIG_FILES tests/test_cdf_const" ;;
     "tables/gen_tableheaderfile") CONFIG_FILES="$CONFIG_FILES tables/gen_tableheaderfile" ;;
     "util/serialrun") CONFIG_FILES="$CONFIG_FILES util/serialrun" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
@@ -33211,6 +33212,7 @@ _LT_EOF
     "tests/pio_cksum_cdf":F) chmod a+x "$ac_file" ;;
     "tests/test_resource_copy_mpi_run":F) chmod a+x "$ac_file" ;;
     "tests/test_cdf_transformation":F) chmod a+x "$ac_file" ;;
+    "tests/test_cdf_const":F) chmod a+x "$ac_file" ;;
     "tables/gen_tableheaderfile":F) chmod a+x "$ac_file" ;;
     "util/serialrun":F) chmod a+x "$ac_file" ;;
 

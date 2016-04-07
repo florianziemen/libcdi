@@ -412,6 +412,7 @@ AC_CONFIG_FILES([tests/test_cksum_grib \
                  tests/pio_cksum_cdf \
                  tests/test_resource_copy_mpi_run \
                  tests/test_cdf_transformation \
+                 tests/test_cdf_const \
                  tables/gen_tableheaderfile \
                  util/serialrun],[chmod a+x "$ac_file"])
 
