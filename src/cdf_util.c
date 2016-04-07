@@ -94,14 +94,11 @@ bool is_timeaxis_units(const char *timeunits)
 
 bool is_height_units(const char *units)
 {
-  bool status = false;
   int u0 = units[0];
 
-  if ( (u0=='m' && (!units[1] || strncmp(units, "meter", 5) == 0)) ||
-       (!units[2] && units[1]=='m' && (u0=='c' || u0=='d' || u0=='k')) )
-    {
-      status = true;
-    }
+  bool status
+    = (u0=='m' && (!units[1] || strncmp(units, "meter", 5) == 0))
+    || (!units[2] && units[1]=='m' && (u0=='c' || u0=='d' || u0=='k'));
 
   return status;
 }
