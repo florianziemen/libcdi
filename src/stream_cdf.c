@@ -672,7 +672,7 @@ printf("fileID = %d %d %d %f\n", fileID, time_varid, index, timevalue);
 }
 
 static
-int cdfDefTimeBounds(int fileID, int nctimevarid, int nctimedimid, char* taxis_name, taxis_t* taxis)
+int cdfDefTimeBounds(int fileID, int nctimevarid, int nctimedimid, const char *taxis_name, taxis_t* taxis)
 {
   int time_bndsid = -1;
   int dims[2];
@@ -794,10 +794,7 @@ void cdfDefTime(stream_t* streamptr)
   int time_varid;
   int time_dimid;
   int time_bndsid = -1;
-  char unitstr[CDI_MAX_NAME];
-  char tmpstr[CDI_MAX_NAME];
-  char default_name[] = "time";
-  char* taxis_name = default_name;
+  static const char default_name[] = "time";
 
   if ( streamptr->basetime.ncvarid != UNDEFID ) return;
 
@@ -808,7 +805,7 @@ void cdfDefTime(stream_t* streamptr)
 
   taxis_t *taxis = &streamptr->tsteps[0].taxis;
 
-  if ( taxis->name && taxis->name[0] ) taxis_name = taxis->name;
+  const char *taxis_name = (taxis->name && taxis->name[0]) ? taxis->name : default_name ;
 
   cdf_def_dim(fileID, taxis_name, NC_UNLIMITED, &time_dimid);
   streamptr->basetime.ncdimid = time_dimid;
@@ -817,8 +814,10 @@ void cdfDefTime(stream_t* streamptr)
 
   streamptr->basetime.ncvarid = time_varid;
 
-  strcpy(tmpstr, "time");
-  cdf_put_att_text(fileID, time_varid, "standard_name", strlen(tmpstr), tmpstr);
+  {
+    static const char timeStr[] = "time";
+    cdf_put_att_text(fileID, time_varid, "standard_name", sizeof(timeStr) - 1, timeStr);
+  }
 
   if ( taxis->longname && taxis->longname[0] )
     cdf_put_att_text(fileID, time_varid, "long_name", strlen(taxis->longname), taxis->longname);
@@ -829,17 +828,19 @@ void cdfDefTime(stream_t* streamptr)
       streamptr->basetime.ncvarboundsid = time_bndsid;
     }
 
-  cdfDefTimeUnits(unitstr, &streamptr->tsteps[0].taxis, taxis);
-
-  size_t len = strlen(unitstr);
-  if ( len )
-    {
-      cdf_put_att_text(fileID, time_varid, "units", len, unitstr);
-      /*
-      if ( taxis->has_bounds )
-        cdf_put_att_text(fileID, time_bndsid, "units", len, unitstr);
-      */
-    }
+  {
+    char unitstr[CDI_MAX_NAME];
+    cdfDefTimeUnits(unitstr, &streamptr->tsteps[0].taxis, taxis);
+    size_t len = strlen(unitstr);
+    if ( len )
+      {
+        cdf_put_att_text(fileID, time_varid, "units", len, unitstr);
+        /*
+          if ( taxis->has_bounds )
+          cdf_put_att_text(fileID, time_bndsid, "units", len, unitstr);
+        */
+      }
+  }
 
   if ( taxis->calendar != -1 )
     {
@@ -858,16 +859,23 @@ void cdfDefTime(stream_t* streamptr)
 
       streamptr->basetime.leadtimeid = leadtimeid;
 
-      strcpy(tmpstr, "forecast_period");
-      cdf_put_att_text(fileID, leadtimeid, "standard_name", strlen(tmpstr), tmpstr);
+      {
+        static const char stdname[] = "forecast_period";
+        cdf_put_att_text(fileID, leadtimeid, "standard_name", sizeof(stdname) - 1, stdname);
+      }
 
-      strcpy(tmpstr, "Time elapsed since the start of the forecast");
-      cdf_put_att_text(fileID, leadtimeid, "long_name", strlen(tmpstr), tmpstr);
+      {
+        static const char lname[] = "Time elapsed since the start of the forecast";
+        cdf_put_att_text(fileID, leadtimeid, "long_name", sizeof(lname) - 1, lname);
+      }
 
-      cdfDefForecastTimeUnits(unitstr, taxis->fc_unit);
-
-      len = strlen(unitstr);
-      if ( len ) cdf_put_att_text(fileID, leadtimeid, "units", len, unitstr);
+      {
+          char unitstr[CDI_MAX_NAME];
+          cdfDefForecastTimeUnits(unitstr, taxis->fc_unit);
+          size_t len = strlen(unitstr);
+          if ( len )
+            cdf_put_att_text(fileID, leadtimeid, "units", len, unitstr);
+      }
     }
 
   cdf_put_att_text(fileID, time_varid, "axis", 1, "T");
