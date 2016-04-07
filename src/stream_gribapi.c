@@ -1921,30 +1921,35 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 	double yfirst = 0, ylast = 0, yinc = 0;
 	double latIncr;
 
-	if ( gridtype == GRID_GAUSSIAN )
-	  {
-            static const char mesg[] = "regular_gg";
-            size_t len = sizeof (mesg) -1;
-	    GRIB_CHECK(my_grib_set_string(gh, "gridType", mesg, &len), 0);
+        {
+          const char *mesg;
+          size_t len;
+          if ( gridtype == GRID_GAUSSIAN )
+            {
+              static const char mesg_gaussian[] = "regular_gg";
+              len = sizeof (mesg_gaussian) - 1;
+              mesg = mesg_gaussian;
+            }
+          else if ( gridtype == GRID_GAUSSIAN_REDUCED )
+            {
+              static const char mesg_gaussian_reduced[] = "reduced_gg";
+              len = sizeof (mesg_gaussian_reduced) - 1;
+              mesg = mesg_gaussian_reduced;
+            }
+          else if ( gridtype == GRID_LONLAT && gridIsRotated(gridID) )
+            {
+              static const char mesg_rot_lonlat[] = "rotated_ll";
+              len = sizeof (mesg_rot_lonlat) - 1;
+              mesg = mesg_rot_lonlat;
+            }
+          else
+            {
+              static const char mesg_regular_ll[] = "regular_ll";
+              len = sizeof (mesg_regular_ll) - 1;
+              mesg = mesg_regular_ll;
 	  }
-	else if ( gridtype == GRID_GAUSSIAN_REDUCED )
-	  {
-            static const char mesg[] = "reduced_gg";
-            size_t len = sizeof (mesg) -1;
-	    GRIB_CHECK(my_grib_set_string(gh, "gridType", mesg, &len), 0);
-	  }
-	else if ( gridtype == GRID_LONLAT && gridIsRotated(gridID) )
-	  {
-            static const char mesg[] = "rotated_ll";
-            size_t len = sizeof (mesg) -1;
-	    GRIB_CHECK(my_grib_set_string(gh, "gridType", mesg, &len), 0);
-	  }
-	else
-	  {
-            static const char mesg[] = "regular_ll";
-            size_t len = sizeof (mesg) -1;
-	    GRIB_CHECK(my_grib_set_string(gh, "gridType", mesg, &len), 0);
-	  }
+          GRIB_CHECK(my_grib_set_string(gh, "gridType", mesg, &len), 0);
+        }
 
 	int nlon = gridInqXsize(gridID);
 	int nlat = gridInqYsize(gridID);
@@ -2058,38 +2063,42 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 
         if ( editionNumber != 2 ) { lieee = 0; comptype = 0; }
 
-        if ( lieee )
-          {
-            static const char mesg[] = "grid_ieee";
-            size_t len = sizeof (mesg) -1;
-            GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
+        {
+          const char *mesg;
+          size_t len;
+          if ( lieee )
+            {
+              static const char mesg_grid_ieee[] = "grid_ieee";
+              len = sizeof (mesg_grid_ieee) - 1;
+              mesg = mesg_grid_ieee;
+            }
+          else
+            {
+              if ( comptype == COMPRESS_JPEG && gridsize > 1 )
+                {
+                  static const char mesg_grid_jpeg[] = "grid_jpeg";
+                  len = sizeof (mesg_grid_jpeg) - 1;
+                  mesg = mesg_grid_jpeg;
+                }
+              else if ( comptype == COMPRESS_SZIP && gridsize > 1 )
+                {
+                  static const char mesg_grid_ccsds[] = "grid_ccsds";
+                  len = sizeof (mesg_grid_ccsds) - 1;
+                  mesg = mesg_grid_ccsds;
+                }
+              else
+                {
+                  static const char mesg_simple[] = "grid_simple";
+                  len = sizeof (mesg_simple) - 1;
+                  mesg = mesg_simple;
+                }
+            }
+          GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
+          if ( lieee )
+            GRIB_CHECK(my_grib_set_long(gh, "precision",
+                                        datatype == DATATYPE_FLT64 ? 2 : 1), 0);
 
-	    if ( datatype == DATATYPE_FLT64 )
-	      GRIB_CHECK(my_grib_set_long(gh, "precision", 2), 0);
-	    else
-	      GRIB_CHECK(my_grib_set_long(gh, "precision", 1), 0);
-          }
-        else
-	  {
-            if ( comptype == COMPRESS_JPEG && gridsize > 1 )
-              {
-                static const char mesg[] = "grid_jpeg";
-                size_t len = sizeof (mesg) -1;
-                GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
-              }
-            else if ( comptype == COMPRESS_SZIP && gridsize > 1 )
-              {
-                static const char mesg[] = "grid_ccsds";
-                size_t len = sizeof (mesg) -1;
-                GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
-              }
-            else
-              {
-                static const char mesg[] = "grid_simple";
-                size_t len = sizeof (mesg) -1;
-                GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
-              }
-	  }
+        }
 
 	break;
       }
