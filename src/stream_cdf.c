@@ -1585,7 +1585,6 @@ static
 void cdfDefRgrid(stream_t *streamptr, int gridID)
 {
   char axisname[7] = "rgridX";
-  int index, iz = 0;
   int dimID = UNDEFID;
   int lwarn = TRUE;
 
@@ -1596,7 +1595,8 @@ void cdfDefRgrid(stream_t *streamptr, int gridID)
 
   size_t dimlen = (size_t)gridInqSize(gridID);
 
-  for ( index = 0; index < ngrids; index++ )
+  int iz = 0;
+  for ( int index = 0; index < ngrids; index++ )
     {
       if ( streamptr->xdimID[index] != UNDEFID )
         {
@@ -2009,7 +2009,6 @@ void cdf_def_vct_cf(stream_t *streamptr, int zaxisID, int nclevID, int ncbndsID)
 
       int mlev = ilev - 1;
       int hyaiid = 0, hybiid = 0, hyamid, hybmid;
-      char tmpname[CDI_MAX_NAME];
 
       if ( streamptr->vct.ilev > 0 )
         {
@@ -2034,28 +2033,43 @@ void cdf_def_vct_cf(stream_t *streamptr, int zaxisID, int nclevID, int ncbndsID)
       cdf_def_var(fileID, "ap", NC_DOUBLE, 1, dimIDs,  &hyamid);
       cdf_def_var(fileID, "b",  NC_DOUBLE, 1, dimIDs,  &hybmid);
 
-      strcpy(tmpname, "vertical coordinate formula term: ap(k)");
-      cdf_put_att_text(fileID, hyamid, "long_name", strlen(tmpname), tmpname);
-      strcpy(tmpname, "Pa");
-      cdf_put_att_text(fileID, hyamid, "units", strlen(tmpname), tmpname);
-      strcpy(tmpname, "vertical coordinate formula term: b(k)");
-      cdf_put_att_text(fileID, hybmid, "long_name", strlen(tmpname), tmpname);
-      strcpy(tmpname, "1");
-      cdf_put_att_text(fileID, hybmid, "units", strlen(tmpname), tmpname);
+      {
+        static const char lname[] = "vertical coordinate formula term: ap(k)";
+        cdf_put_att_text(fileID, hyamid, "long_name", sizeof (lname) - 1, lname);
+      }
+      {
+        static const char units[] = "Pa";
+        cdf_put_att_text(fileID, hyamid, "units", sizeof (units) - 1, units);
+      }
+      {
+        static const char lname[] = "vertical coordinate formula term: b(k)";
+        cdf_put_att_text(fileID, hybmid, "long_name", sizeof (lname) - 1, lname);
+      }
+      {
+        static const char units[] = "1";
+        cdf_put_att_text(fileID, hybmid, "units", sizeof (units) - 1, units);
+      }
 
       if ( ncbndsID != -1 )
         {
           cdf_def_var(fileID, "ap_bnds", NC_DOUBLE, 2, dimIDs, &hyaiid);
           cdf_def_var(fileID, "b_bnds",  NC_DOUBLE, 2, dimIDs, &hybiid);
-
-          strcpy(tmpname, "vertical coordinate formula term: ap(k+1/2)");
-          cdf_put_att_text(fileID, hyaiid, "long_name", strlen(tmpname), tmpname);
-          strcpy(tmpname, "Pa");
-          cdf_put_att_text(fileID, hyaiid, "units", strlen(tmpname), tmpname);
-          strcpy(tmpname, "vertical coordinate formula term: b(k+1/2)");
-          cdf_put_att_text(fileID, hybiid, "long_name", strlen(tmpname), tmpname);
-          strcpy(tmpname, "1");
-          cdf_put_att_text(fileID, hybiid, "units", strlen(tmpname), tmpname);
+          {
+            static const char lname[] = "vertical coordinate formula term: ap(k+1/2)";
+            cdf_put_att_text(fileID, hyaiid, "long_name", sizeof (lname) - 1, lname);
+          }
+          {
+            static const char units[] = "Pa";
+            cdf_put_att_text(fileID, hyaiid, "units", sizeof (units) - 1, units);
+          }
+          {
+            static const char lname[] = "vertical coordinate formula term: b(k+1/2)";
+            cdf_put_att_text(fileID, hybiid, "long_name", sizeof (lname) - 1, lname);
+          }
+          {
+            static const char units[] = "1";
+            cdf_put_att_text(fileID, hybiid, "units", sizeof (units) - 1, units);
+          }
         }
 
       cdf_enddef(fileID);
