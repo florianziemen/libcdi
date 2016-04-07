@@ -189,9 +189,9 @@ bool is_lon_axis(const char *units, const char *stdname)
     {
       status = true;
     }
-
-  if ( status == false && str_is_equal(lc_units, "degree") &&
-       !str_is_equal(stdname, "grid_latitude") && !str_is_equal(stdname, "latitude") )
+  else if ( str_is_equal(lc_units, "degree")
+            && !str_is_equal(stdname, "grid_latitude")
+            && !str_is_equal(stdname, "latitude") )
     {
       int ioff = 6;
       if ( lc_units[ioff] == 's' ) ioff++;
@@ -217,9 +217,9 @@ bool is_lat_axis(const char *units, const char *stdname)
     {
       status = true;
     }
-
-  if ( status == false && str_is_equal(lc_units, "degree") &&
-       !str_is_equal(stdname, "grid_longitude") && !str_is_equal(stdname, "longitude") )
+  else if ( str_is_equal(lc_units, "degree")
+            && !str_is_equal(stdname, "grid_longitude")
+            && !str_is_equal(stdname, "longitude") )
     {
       int ioff = 6;
       if ( lc_units[ioff] == 's' ) ioff++;
