@@ -3111,7 +3111,7 @@ int scan_hybrid_formula(int ncid, int ncfvarid, int *apvarid, int *bvarid, int *
   *psvarid = -1;
   *avarid  = -1;
   *p0varid = -1;
-  const int attstringlen = 8192; char attstring[8192];
+  enum { attstringlen = 8192 }; char attstring[attstringlen];
   cdfGetAttText(ncid, ncfvarid, "formula", attstringlen, attstring);
   if ( strcmp(attstring, "p = ap + b*ps") == 0 )
     {
