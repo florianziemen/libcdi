@@ -2105,10 +2105,11 @@ void cdf_def_vct_cf(stream_t *streamptr, int zaxisID, int nclevID, int ncbndsID)
     }
 }
 
+struct attTxtTab { const char *txt; size_t txtLen; };
+
 static
 void cdf_def_zaxis_hybrid_echam(stream_t *streamptr, int type, int ncvarid, int zaxisID, int zaxisindex, int xtype, size_t dimlen, int *dimID, char *axisname)
 {
-  char tmpname[CDI_MAX_NAME];
   int fileID  = streamptr->fileID;
 
   if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
@@ -2116,32 +2117,50 @@ void cdf_def_zaxis_hybrid_echam(stream_t *streamptr, int type, int ncvarid, int 
   cdf_def_dim(fileID, axisname, dimlen, dimID);
   cdf_def_var(fileID, axisname, (nc_type) xtype, 1, dimID,  &ncvarid);
 
-  strcpy(tmpname, "hybrid_sigma_pressure");
-  cdf_put_att_text(fileID, ncvarid, "standard_name", strlen(tmpname), tmpname);
+  {
+    static const char sname[] = "hybrid_sigma_pressure";
+    cdf_put_att_text(fileID, ncvarid, "standard_name", sizeof (sname) - 1, sname);
+  }
+  {
+    static const char *attName[] = {
+      "long_name",
+      "formula",
+      "formula_terms"
+    };
+    enum { nAtt = sizeof (attName) / sizeof (attName[0]) };
+    static const char lname_m[] = "hybrid level at layer midpoints",
+      formula_m[] = "hyam hybm (mlev=hyam+hybm*aps)",
+      fterms_m[] = "ap: hyam b: hybm ps: aps",
+      lname_i[] = "hybrid level at layer interfaces",
+      formula_i[] = "hyai hybi (ilev=hyai+hybi*aps)",
+      fterms_i[] = "ap: hyai b: hybi ps: aps";
+    static const struct attTxtTab tab[2][nAtt] = {
+      {
+        { lname_i, sizeof (lname_i) - 1 },
+        { formula_i, sizeof (formula_i) - 1 },
+        { fterms_i, sizeof (fterms_i) - 1 }
+      },
+      {
+        { lname_m, sizeof (lname_m) - 1 },
+        { formula_m, sizeof (formula_m) - 1 },
+        { fterms_m, sizeof (fterms_m) - 1 }
+      }
+    };
 
-  if ( type == ZAXIS_HYBRID )
-    {
-      strcpy(tmpname, "hybrid level at layer midpoints");
-      cdf_put_att_text(fileID, ncvarid, "long_name", strlen(tmpname), tmpname);
-      strcpy(tmpname, "hyam hybm (mlev=hyam+hybm*aps)");
-      cdf_put_att_text(fileID, ncvarid, "formula", strlen(tmpname), tmpname);
-      strcpy(tmpname, "ap: hyam b: hybm ps: aps");
-      cdf_put_att_text(fileID, ncvarid, "formula_terms", strlen(tmpname), tmpname);
-    }
-  else
-    {
-      strcpy(tmpname, "hybrid level at layer interfaces");
-      cdf_put_att_text(fileID, ncvarid, "long_name", strlen(tmpname), tmpname);
-      strcpy(tmpname, "hyai hybi (ilev=hyai+hybi*aps)");
-      cdf_put_att_text(fileID, ncvarid, "formula", strlen(tmpname), tmpname);
-      strcpy(tmpname, "ap: hyai b: hybi ps: aps");
-      cdf_put_att_text(fileID, ncvarid, "formula_terms", strlen(tmpname), tmpname);
-    }
+    size_t tabSelect = type == ZAXIS_HYBRID;
+    for (size_t i = 0; i < nAtt; ++i)
+      cdf_put_att_text(fileID, ncvarid, attName[i],
+                       tab[tabSelect][i].txtLen, tab[tabSelect][i].txt);
+  }
 
-  strcpy(tmpname, "level");
-  cdf_put_att_text(fileID, ncvarid, "units", strlen(tmpname), tmpname);
-  strcpy(tmpname, "down");
-  cdf_put_att_text(fileID, ncvarid, "positive", strlen(tmpname), tmpname);
+  {
+    static const char units[] = "level";
+    cdf_put_att_text(fileID, ncvarid, "units", sizeof (units) - 1, units);
+  }
+  {
+    static const char direction[] = "down";
+    cdf_put_att_text(fileID, ncvarid, "positive", sizeof (direction) - 1, direction);
+  }
 
   cdf_enddef(fileID);
   streamptr->ncmode = 2;
