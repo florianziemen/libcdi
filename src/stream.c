@@ -1604,6 +1604,9 @@ void cdiStreamSetupVlist_(stream_t *streamptr, int vlistID)
       case CDI_FILETYPE_NC4:
       case CDI_FILETYPE_NC4C:
         {
+          /* calls cdfDefVars in serial mode but
+           * cdiPioClientStreamNOP (i.e. nothing) on client ranks
+           * and cdiPioServerCdfDefVars on server ranks in parallel mode*/
           void (*myCdfDefVars)(stream_t *streamptr)
             = (void (*)(stream_t *)) namespaceSwitchGet(NSSWITCH_CDF_STREAM_SETUP).func;
           myCdfDefVars(streamptr);
