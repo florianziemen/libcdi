@@ -1105,119 +1105,6 @@ void cdfDefCurvilinear(stream_t *streamptr, int gridID, int gridindex)
   ncgrid[gridindex].ncIDs[CDF_VARID_A] = ncavarid;
 }
 
-static
-void cdfDefRgrid(stream_t *streamptr, int gridID, int gridindex)
-{
-  ncgrid_t *ncgrid = streamptr->ncgrid;
-
-  size_t dimlen = (size_t)gridInqSize(gridID);
-
-  int iz;
-  int dimID;
-  {
-    struct idSearch search
-      = cdfSearchIDBySize(0, (size_t)gridindex, ncgrid, CDF_DIMID_X,
-                          GRID_GAUSSIAN_REDUCED, (int)dimlen,
-                          gridInqType, gridInqSize);
-    iz = search.numNonMatching;
-    dimID = search.foundID;
-  }
-
-  if ( dimID == CDI_UNDEFID )
-    {
-      int fileID  = streamptr->fileID;
-      static bool lwarn = true;
-      if ( lwarn )
-        {
-          Warning("Creating a NetCDF file with data on a gaussian reduced grid.");
-          Warning("The further processing of the resulting file is unsupported!");
-          lwarn = false;
-        }
-
-      char axisname[7] = "rgridX";
-      if ( iz == 0 ) axisname[5] = '\0';
-      else           sprintf(&axisname[5], "%1d", iz+1);
-
-      if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
-
-      cdf_def_dim(fileID, axisname, dimlen, &dimID);
-
-      cdf_enddef(fileID);
-      streamptr->ncmode = 2;
-    }
-
-  ncgrid[gridindex].gridID = gridID;
-  ncgrid[gridindex].ncIDs[CDF_DIMID_X] = dimID;
-}
-
-static
-void cdfDefGdim(stream_t *streamptr, int gridID, int gridindex)
-{
-  ncgrid_t *ncgrid = streamptr->ncgrid;
-  int iz = 0;
-  int dimID = CDI_UNDEFID;
-
-  size_t dimlen = (size_t)gridInqSize(gridID);
-
-  if ( gridInqYsize(gridID) == 0 )
-    {
-      struct idSearch search
-        = cdfSearchIDBySize(0, (size_t)gridindex, ncgrid, CDF_DIMID_X,
-                            GRID_GENERIC, (int)dimlen,
-                            gridInqType, gridInqSize);
-      iz = search.numNonMatching;
-      dimID = search.foundID;
-    }
-
-  if ( gridInqXsize(gridID) == 0 )
-    {
-      struct idSearch search
-        = cdfSearchIDBySize(0, (size_t)gridindex, ncgrid, CDF_DIMID_Y,
-                            GRID_GENERIC, (int)dimlen,
-                            gridInqType, gridInqSize);
-      iz += search.numNonMatching;
-      dimID = search.foundID;
-    }
-
-  if ( dimID == CDI_UNDEFID )
-    {
-      int fileID  = streamptr->fileID;
-      char dimname[CDI_MAX_NAME];
-      strcpy(dimname, "gsize");
-
-      dimID = checkDimName(fileID, dimlen, dimname);
-
-      if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
-
-      if ( dimID == CDI_UNDEFID ) cdf_def_dim(fileID, dimname, dimlen, &dimID);
-
-      cdf_enddef(fileID);
-      streamptr->ncmode = 2;
-    }
-
-  ncgrid[gridindex].gridID = gridID;
-  ncgrid[gridindex].ncIDs[CDF_DIMID_X] = dimID;
-}
-
-static
-void cdfDefZaxisUUID(stream_t *streamptr, int zaxisID)
-{
-  unsigned char uuidOfVGrid[CDI_UUID_SIZE];
-  zaxisInqUUID(zaxisID, uuidOfVGrid);
-
-  if ( uuidOfVGrid[0] != 0 )
-    {
-      char uuidOfVGridStr[37];
-      cdiUUID2Str(uuidOfVGrid, uuidOfVGridStr);
-      if ( uuidOfVGridStr[0] != 0 && strlen(uuidOfVGridStr) == 36 )
-        {
-          int fileID  = streamptr->fileID;
-          if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
-          cdf_put_att_text(fileID, NC_GLOBAL, "uuidOfVGrid", 36, uuidOfVGridStr);
-          if ( streamptr->ncmode == 2 ) cdf_enddef(fileID);
-        }
-    }
-}
 
 static
 void cdfDefUnstructured(stream_t *streamptr, int gridID, int gridindex)
@@ -1739,6 +1626,26 @@ void cdf_def_zaxis_hybrid(stream_t *streamptr, int type, int *ncvarid, int zaxis
 }
 
 static
+void cdfDefZaxisUUID(stream_t *streamptr, int zaxisID)
+{
+  unsigned char uuidOfVGrid[CDI_UUID_SIZE];
+  zaxisInqUUID(zaxisID, uuidOfVGrid);
+
+  if ( uuidOfVGrid[0] != 0 )
+    {
+      char uuidOfVGridStr[37];
+      cdiUUID2Str(uuidOfVGrid, uuidOfVGridStr);
+      if ( uuidOfVGridStr[0] != 0 && strlen(uuidOfVGridStr) == 36 )
+        {
+          int fileID  = streamptr->fileID;
+          if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
+          cdf_put_att_text(fileID, NC_GLOBAL, "uuidOfVGrid", 36, uuidOfVGridStr);
+          if ( streamptr->ncmode == 2 ) cdf_enddef(fileID);
+        }
+    }
+}
+
+static
 void cdfDefZaxis(stream_t *streamptr, int zaxisID)
 {
   /*  char zaxisname0[CDI_MAX_NAME]; */
@@ -1920,6 +1827,100 @@ void cdf_def_mapping(stream_t *streamptr, int gridID)
           cdf_put_var_int(fileID, ncvarid, &dummy);
         }
     }
+}
+
+static
+void cdfDefRgrid(stream_t *streamptr, int gridID, int gridindex)
+{
+  ncgrid_t *ncgrid = streamptr->ncgrid;
+
+  size_t dimlen = (size_t)gridInqSize(gridID);
+
+  int iz;
+  int dimID;
+  {
+    struct idSearch search
+      = cdfSearchIDBySize(0, (size_t)gridindex, ncgrid, CDF_DIMID_X,
+                          GRID_GAUSSIAN_REDUCED, (int)dimlen,
+                          gridInqType, gridInqSize);
+    iz = search.numNonMatching;
+    dimID = search.foundID;
+  }
+
+  if ( dimID == CDI_UNDEFID )
+    {
+      int fileID  = streamptr->fileID;
+      static bool lwarn = true;
+      if ( lwarn )
+        {
+          Warning("Creating a NetCDF file with data on a gaussian reduced grid.");
+          Warning("The further processing of the resulting file is unsupported!");
+          lwarn = false;
+        }
+
+      char axisname[7] = "rgridX";
+      if ( iz == 0 ) axisname[5] = '\0';
+      else           sprintf(&axisname[5], "%1d", iz+1);
+
+      if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
+
+      cdf_def_dim(fileID, axisname, dimlen, &dimID);
+
+      cdf_enddef(fileID);
+      streamptr->ncmode = 2;
+    }
+
+  ncgrid[gridindex].gridID = gridID;
+  ncgrid[gridindex].ncIDs[CDF_DIMID_X] = dimID;
+}
+
+static
+void cdfDefGdim(stream_t *streamptr, int gridID, int gridindex)
+{
+  ncgrid_t *ncgrid = streamptr->ncgrid;
+  int iz = 0;
+  int dimID = CDI_UNDEFID;
+
+  size_t dimlen = (size_t)gridInqSize(gridID);
+
+  if ( gridInqYsize(gridID) == 0 )
+    {
+      struct idSearch search
+        = cdfSearchIDBySize(0, (size_t)gridindex, ncgrid, CDF_DIMID_X,
+                            GRID_GENERIC, (int)dimlen,
+                            gridInqType, gridInqSize);
+      iz = search.numNonMatching;
+      dimID = search.foundID;
+    }
+
+  if ( gridInqXsize(gridID) == 0 )
+    {
+      struct idSearch search
+        = cdfSearchIDBySize(0, (size_t)gridindex, ncgrid, CDF_DIMID_Y,
+                            GRID_GENERIC, (int)dimlen,
+                            gridInqType, gridInqSize);
+      iz += search.numNonMatching;
+      dimID = search.foundID;
+    }
+
+  if ( dimID == CDI_UNDEFID )
+    {
+      int fileID  = streamptr->fileID;
+      char dimname[CDI_MAX_NAME];
+      strcpy(dimname, "gsize");
+
+      dimID = checkDimName(fileID, dimlen, dimname);
+
+      if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
+
+      if ( dimID == CDI_UNDEFID ) cdf_def_dim(fileID, dimname, dimlen, &dimID);
+
+      cdf_enddef(fileID);
+      streamptr->ncmode = 2;
+    }
+
+  ncgrid[gridindex].gridID = gridID;
+  ncgrid[gridindex].ncIDs[CDF_DIMID_X] = dimID;
 }
 
 static
