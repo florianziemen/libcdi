@@ -1317,21 +1317,15 @@ double cdiEncodeTimeval(int date, int time, taxis_t *taxis)
 	{
 	  int year, month, day;
 	  cdiDecodeDate(date, &year, &month, &day);
-          timevalue = date/100;
-	  if ( day != 0 )
-            {
-              if ( date < 0 ) timevalue -= 0.5;
-              else            timevalue += 0.5;
-            }
+          timevalue = date/100
+            + copysign((double)(day != 0) * 0.5, (double)date);
         }
       else
 	{
 	  int hour, minute, second;
 	  cdiDecodeTime(time, &hour, &minute, &second);
-	  if ( date < 0 )
-	    timevalue = -(-date + (hour*3600 + minute*60 + second)/86400.);
-	  else
-	    timevalue =    date + (hour*3600 + minute*60 + second)/86400.;
+          timevalue = copysign(1.0, (double)date)
+            * (fabs((double)date) + (hour*3600 + minute*60 + second)/86400.);
 	}
     }
   else
