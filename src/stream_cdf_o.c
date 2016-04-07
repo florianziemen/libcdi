@@ -107,8 +107,7 @@ void cdfDefTimestep(stream_t *streamptr, int tsID)
 static
 void cdfDefComplex(stream_t *streamptr, int gridID, int gridindex)
 {
-  int dimID = CDI_UNDEFID;
-  int fileID  = streamptr->fileID;
+  int dimID;
   ncgrid_t *ncgrid = streamptr->ncgrid;
 
   for ( int index = 0; index < gridindex; ++index )
@@ -120,23 +119,22 @@ void cdfDefComplex(stream_t *streamptr, int gridID, int gridindex)
           if ( gridtype0 == GRID_SPECTRAL || gridtype0 == GRID_FOURIER )
             {
               dimID = ncgrid[index].ncIDs[CDF_DIMID_X];
-              break;
+              goto dimIDEstablished;
             }
         }
     }
 
-  if ( dimID == CDI_UNDEFID )
-    {
-      static const char axisname[] = "nc2";
-      size_t dimlen = 2;
+  {
+    static const char axisname[] = "nc2";
+    size_t dimlen = 2;
+    int fileID  = streamptr->fileID;
 
-      if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
-      cdf_def_dim(fileID, axisname, dimlen, &dimID);
-      cdf_enddef(fileID);
-
-      streamptr->ncmode = 2;
-    }
-
+    if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
+    cdf_def_dim(fileID, axisname, dimlen, &dimID);
+    cdf_enddef(fileID);
+    streamptr->ncmode = 2;
+  }
+  dimIDEstablished:
   ncgrid[gridindex].gridID = gridID;
   ncgrid[gridindex].ncIDs[CDF_DIMID_X] = dimID;
 }
