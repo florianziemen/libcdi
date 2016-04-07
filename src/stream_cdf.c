@@ -2178,6 +2178,12 @@ void cdf_def_zaxis_hybrid_echam(stream_t *streamptr, int type, int ncvarid, int 
     }
 }
 
+struct attTxtTab2
+{
+  const char *attName, *attVal;
+  size_t valLen;
+};
+
 static
 void cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int ncvarid, int zaxisID, int zaxisindex, int xtype, size_t dimlen, int *dimID, char *axisname)
 {
@@ -2194,24 +2200,34 @@ void cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int ncvarid, int zax
   cdf_def_dim(fileID, axisname, dimlen, dimID);
   cdf_def_var(fileID, axisname, (nc_type) xtype, 1, dimID,  &ncvarid);
 
-  char tmpname[CDI_MAX_NAME];
-  strcpy(tmpname, "atmosphere_hybrid_sigma_pressure_coordinate");
-  cdf_put_att_text(fileID, ncvarid, "standard_name", strlen(tmpname), tmpname);
-
-  strcpy(tmpname, "hybrid sigma pressure coordinate");
-  cdf_put_att_text(fileID, ncvarid, "long_name", strlen(tmpname), tmpname);
-  strcpy(tmpname, "p = ap + b*ps");
-  cdf_put_att_text(fileID, ncvarid, "formula", strlen(tmpname), tmpname);
-  strcpy(tmpname, "ap: ap b: b ps: ");
-  strcat(tmpname, psname);
-  cdf_put_att_text(fileID, ncvarid, "formula_terms", strlen(tmpname), tmpname);
-
-  strcpy(tmpname, "1");
-  cdf_put_att_text(fileID, ncvarid, "units", strlen(tmpname), tmpname);
-  strcpy(tmpname, "Z");
-  cdf_put_att_text(fileID, ncvarid, "axis", strlen(tmpname), tmpname);
-  strcpy(tmpname, "down");
-  cdf_put_att_text(fileID, ncvarid, "positive", strlen(tmpname), tmpname);
+  {
+    static const char sname[] = "standard_name",
+      sname_v[] = "atmosphere_hybrid_sigma_pressure_coordinate",
+      lname[] = "long_name",
+      lname_v[] = "hybrid sigma pressure coordinate",
+      formula[] = "formula",
+      formula_v[] = "p = ap + b*ps",
+      fterms[] = "formula_terms",
+      fterms_v[] = "ap: ap b: b ps: ",
+      units[] = "units",
+      units_v[] = "1",
+      axis[] = "axis",
+      axis_v[] = "Z",
+      direction[] = "positive",
+      direction_v[] = "down";
+    struct attTxtTab2 tab[] = {
+      { sname, sname_v, sizeof (sname_v) - 1 },
+      { lname, lname_v, sizeof (lname_v) - 1 },
+      { formula, formula_v, sizeof (formula_v) - 1 },
+      { fterms, fterms_v, sizeof (fterms_v) - 1 },
+      { units, units_v, sizeof (units_v) - 1 },
+      { axis, axis_v, sizeof (axis_v) - 1 },
+      { direction, direction_v, sizeof (direction_v) - 1 },
+    };
+    enum { nAtt = sizeof (tab) / sizeof (tab[0]) };
+    for (size_t i = 0; i < nAtt; ++i)
+      cdf_put_att_text(fileID, ncvarid, tab[i].attName, tab[i].valLen, tab[i].attVal);
+  }
 
   int ncbvarid = UNDEFID;
   int nvdimID = UNDEFID;
@@ -2247,18 +2263,28 @@ void cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int ncvarid, int zax
           int dimIDs[2] = { *dimID, nvdimID };
           cdf_def_var(fileID, axisname, (nc_type) xtype, 2, dimIDs, &ncbvarid);
           cdf_put_att_text(fileID, ncvarid, "bounds", axisnameLen, axisname);
-
-          strcpy(tmpname, "atmosphere_hybrid_sigma_pressure_coordinate");
-          cdf_put_att_text(fileID, ncbvarid, "standard_name", strlen(tmpname), tmpname);
-
-          strcpy(tmpname, "p = ap + b*ps");
-          cdf_put_att_text(fileID, ncbvarid, "formula", strlen(tmpname), tmpname);
-          strcpy(tmpname, "ap: ap_bnds b: b_bnds ps: ");
-          strcat(tmpname, psname);
-          cdf_put_att_text(fileID, ncbvarid, "formula_terms", strlen(tmpname), tmpname);
-
-          strcpy(tmpname, "1");
-          cdf_put_att_text(fileID, ncbvarid, "units", strlen(tmpname), tmpname);
+          {
+            static const char sname[] = "standard_name",
+              sname_v[] = "atmosphere_hybrid_sigma_pressure_coordinate",
+              formula[] = "formula",
+              formula_v[] = "p = ap + b*ps";
+            struct attTxtTab2 tab[] = {
+              { sname, sname_v, sizeof (sname_v) - 1 },
+              { formula, formula_v, sizeof (formula_v) - 1 },
+            };
+            enum { nAtt = sizeof (tab) / sizeof (tab[0]) };
+            for (size_t i = 0; i < nAtt; ++i)
+              cdf_put_att_text(fileID, ncbvarid, tab[i].attName, tab[i].valLen, tab[i].attVal);
+          }
+          {
+            char txt[CDI_MAX_NAME];
+            size_t len = (size_t)(sprintf(txt, "%s%s", "ap: ap_bnds b: b_bnds ps: ", psname));
+            cdf_put_att_text(fileID, ncbvarid, "formula_terms", len, txt);
+          }
+          {
+            static const char units[] = "1";
+            cdf_put_att_text(fileID, ncbvarid, "units", sizeof (units) - 1, units);
+          }
         }
     }
 
