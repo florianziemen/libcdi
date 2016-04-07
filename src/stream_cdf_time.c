@@ -69,30 +69,29 @@ void cdfDefTimeUnits(char *unitstr, taxis_t* taxis0, taxis_t* taxis)
 
       if ( taxis0->type == TAXIS_ABSOLUTE )
         {
-          if      ( taxis0->unit == TUNIT_YEAR  ) sprintf(unitstr, "year as %s", "%Y.%f");
-          else if ( taxis0->unit == TUNIT_MONTH ) sprintf(unitstr, "month as %s", "%Y%m.%f");
-          else                                    sprintf(unitstr, "day as %s", "%Y%m%d.%f");
+          static const char *const unitstrfmt[3]
+            = { "year as %Y.%f",
+                "month as %Y%m.%f",
+                "day as %Y%m%d.%f" };
+          size_t fmtidx = (taxis0->unit == TUNIT_YEAR ? 0
+                           : (taxis0->unit == TUNIT_MONTH ? 1
+                              : 2));
+          strcpy(unitstr, unitstrfmt[fmtidx]);
         }
       else
         {
           int timeunit = taxis->unit != -1 ? taxis->unit : TUNIT_HOUR;
-          int rdate    = taxis->rdate;
-          int rtime    = taxis->rtime;
-          if ( rdate == -1 )
-            {
-              rdate  = taxis->vdate;
-              rtime  = taxis->vtime;
-            }
-
+          int rdate    = taxis->rdate != -1 ? taxis->rdate : taxis->vdate;
+          int rtime    = taxis->rdate != -1 ? taxis->rtime : taxis->vtime;
           int year, month, day, hour, minute, second;
           cdiDecodeDate(rdate, &year, &month, &day);
           cdiDecodeTime(rtime, &hour, &minute, &second);
 
           if ( timeunit == TUNIT_QUARTER   ) timeunit = TUNIT_MINUTE;
-          if ( timeunit == TUNIT_30MINUTES ) timeunit = TUNIT_MINUTE;
-          if ( timeunit == TUNIT_3HOURS  ||
-               timeunit == TUNIT_6HOURS  ||
-               timeunit == TUNIT_12HOURS ) timeunit = TUNIT_HOUR;
+          else if ( timeunit == TUNIT_30MINUTES ) timeunit = TUNIT_MINUTE;
+          else if ( timeunit == TUNIT_3HOURS  ||
+                    timeunit == TUNIT_6HOURS  ||
+                    timeunit == TUNIT_12HOURS ) timeunit = TUNIT_HOUR;
 
           sprintf(unitstr, "%s since %d-%d-%d %02d:%02d:%02d",
                   tunitNamePtr(timeunit), year, month, day, hour, minute, second);
