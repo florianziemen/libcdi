@@ -1702,10 +1702,7 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
 	    else
 	      {
 		xfirst = gridInqXval(gridID,      0);
-		if ( lcurvi )
-		  xlast  = gridInqXval(gridID, nlon*nlat-1);
-		else
-		  xlast  = gridInqXval(gridID, nlon-1);
+                xlast  = gridInqXval(gridID, (lcurvi ? nlon*nlat : nlon) - 1);
 		xinc   = gridInqXinc(gridID);
 	      }
 	  }
@@ -1717,10 +1714,7 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
 	else
 	  {
 	    yfirst = gridInqYval(gridID,      0);
-	    if ( lcurvi )
-	      ylast  = gridInqYval(gridID, nlon*nlat-1);
-	    else
-	      ylast  = gridInqYval(gridID, nlat-1);
+            ylast  = gridInqYval(gridID, (lcurvi ? nlon*nlat : nlat) - 1);
 	    yinc   = gridInqYinc(gridID);
 	    if ( yinc < 0 ) yinc = -yinc;
 	  }
