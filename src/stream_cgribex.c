@@ -1611,7 +1611,6 @@ void cgribexDefTime(int *isec1, int vdate, int vtime, int tsteptype, int numavg,
 static
 void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridID)
 {
-  int gridtype;
   bool lcurvi = false;
   static bool lwarning = true;
 
@@ -1619,7 +1618,7 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
 
   ISEC1_Sec2Or3Flag = 128;
 
-  gridtype = gridInqType(gridID);
+  int gridtype = gridInqType(gridID);
 
   ISEC1_GridDefinition = 255;
 
@@ -1715,8 +1714,7 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
 	  {
 	    yfirst = gridInqYval(gridID,      0);
             ylast  = gridInqYval(gridID, (lcurvi ? nlon*nlat : nlat) - 1);
-	    yinc   = gridInqYinc(gridID);
-	    if ( yinc < 0 ) yinc = -yinc;
+	    yinc   = fabs(gridInqYinc(gridID));
 	  }
 
 	ISEC2_NumLon   = nlon;
@@ -1754,10 +1752,7 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
 	if ( ISEC2_NumLon == 1 && ISEC2_NumLat > 1 )
 	  if ( ISEC2_LonIncr == 0 && ISEC2_LatIncr != 0 ) ISEC2_LonIncr = ISEC2_LatIncr;
 
-	if ( ISEC2_LatIncr == 0 || ISEC2_LonIncr == 0 )
-	  ISEC2_ResFlag = 0;
-	else
-	  ISEC2_ResFlag = 128;
+        ISEC2_ResFlag = ( ISEC2_LatIncr == 0 || ISEC2_LonIncr == 0 ) ? 0 : 128;
 
 	if ( isRotated )
 	  {
