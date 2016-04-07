@@ -3396,7 +3396,6 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
 #if  defined  (HAVE_NETCDF4)
       if ( format == NC_FORMAT_NETCDF4_CLASSIC || format == NC_FORMAT_NETCDF4 )
         {
-          char buf[CDI_MAX_NAME];
           int shuffle, deflate, deflate_level;
           size_t chunks[nvdims];
           int storage_in;
@@ -3415,14 +3414,19 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
                       for ( int i = 0; i < nvdims; ++i ) fprintf(stderr, "%ld ", chunks[i]);
                       fprintf(stderr, "\n");
                     }
-                  strcat(ncvars[ncvarid].extra, "chunks=");
-                  for ( int i = nvdims-1; i >= 0; --i )
-                    {
-                      sprintf(buf, "%ld", (long) chunks[i]);
-                      strcat(ncvars[ncvarid].extra, buf);
-                      if ( i > 0 ) strcat(ncvars[ncvarid].extra, "x");
-                    }
-                  strcat(ncvars[ncvarid].extra, " ");
+                  {
+                    char *buf = ncvars[ncvarid].extra;
+                    size_t pos = strlen(buf);
+                    static const char prefix[] = "chunks=";
+                    memcpy(buf + pos, prefix, sizeof (prefix));
+                    pos += sizeof (prefix) - 1;
+                    for ( int i = nvdims-1; i >= 0; --i )
+                      {
+                        pos += (size_t)(sprintf(buf + pos, "%zu%s", chunks[i],
+                                                i > 0 ? "x" : ""));
+                      }
+                    buf[pos] = ' '; buf[pos + 1] = 0;
+                  }
                 }
             }
         }
