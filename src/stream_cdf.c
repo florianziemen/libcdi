@@ -166,14 +166,11 @@ int get_timeunit(size_t len, const char *ptu)
 static
 bool isTimeUnits(const char *timeunits)
 {
-  bool status = false;
-
-  if ( strncmp(timeunits, "sec",    3) == 0 ||
-       strncmp(timeunits, "minute", 6) == 0 ||
-       strncmp(timeunits, "hour",   4) == 0 ||
-       strncmp(timeunits, "day",    3) == 0 ||
-       strncmp(timeunits, "month",  5) == 0 ) status = true;
-
+  bool status = strncmp(timeunits, "sec",    3) == 0
+    || strncmp(timeunits, "minute", 6) == 0
+    || strncmp(timeunits, "hour",   4) == 0
+    || strncmp(timeunits, "day",    3) == 0
+    || strncmp(timeunits, "month",  5) == 0;
   return status;
 }
 
