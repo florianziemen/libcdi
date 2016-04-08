@@ -744,10 +744,6 @@ struct passPlan
   int varStart, varEnd;
 };
 
-void
-deco1D_CCP(size_t n, const size_t weightPfxSums[n],
-           size_t nparts, size_t separators[nparts + 1]);
-
 /**
  * @param[out] passes_ pointer to pointer to 2-dimensional array of
  * records of dimensions $number of passes \cdot number of collectors$,
@@ -793,8 +789,8 @@ planPasses(size_t streamIdx, const struct streamMapping *mapping,
        * instead */
       numPasses = 1;
       struct passPlan *passes = Malloc(sizeof (*passes) * collSize);
-      deco1D_CCP(numWrittenRecords, recordDataSizePfxSums,
-                 collSize, recordSeparations);
+      cdiPioDeco1D_CCP(numWrittenRecords, recordDataSizePfxSums,
+                       collSize, recordSeparations);
       for (size_t rank = 0; rank < collSize; ++rank)
         {
           size_t startRecord = recordSeparations[rank],

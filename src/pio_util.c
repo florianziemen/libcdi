@@ -198,8 +198,8 @@ cdiPioQueryVarDims(int varShape[3], int vlistID, int varID)
 
 
 void
-deco1D_CCP(size_t nelems, const size_t *restrict weightPfxSums,
-           size_t nparts, size_t *restrict separators)
+cdiPioDeco1D_CCP(size_t nelems, const size_t *restrict weightPfxSums,
+                 size_t nparts, size_t *restrict separators)
 {
   separators[0] = 0;
   separators[nparts] = nelems;

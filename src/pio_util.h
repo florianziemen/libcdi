@@ -105,6 +105,10 @@ void printArray ( const char *, const char *, const void *, int, int, const char
 int
 cdiPioQueryVarDims(int varShape[3], int vlistID, int varID);
 
+void
+cdiPioDeco1D_CCP(size_t n, const size_t weightPfxSums[n],
+                 size_t nparts, size_t separators[nparts + 1]);
+
 #endif
 /*
  * Local Variables:
