@@ -486,10 +486,7 @@ int xtypeIsText(int xtype)
 static
 int xtypeIsFloat(int xtype)
 {
-  int isFloat = FALSE;
-
-  if ( xtype == NC_FLOAT || xtype == NC_DOUBLE ) isFloat = TRUE;
-
+  int isFloat = xtype == NC_FLOAT || xtype == NC_DOUBLE;
   return isFloat;
 }
 
@@ -710,8 +707,7 @@ void cdfDefTimeUnits(char *unitstr, taxis_t* taxis0, taxis_t* taxis)
     }
   else
     {
-      int timeunit = taxis->unit;
-      if ( timeunit == -1 ) timeunit = TUNIT_HOUR;
+      int timeunit = taxis->unit != -1 ? taxis->unit : TUNIT_HOUR;
       int rdate    = taxis->rdate;
       int rtime    = taxis->rtime;
       if ( rdate == -1 )
