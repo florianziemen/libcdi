@@ -376,12 +376,8 @@ void cdfGetAttInt(int fileID, int ncvarid, const char *attname, int attlen, int 
 
   if ( atttype != NC_CHAR )
     {
-      int *pintatt = NULL;
-
-      if ( (int)nc_attlen > attlen )
-        pintatt = (int *) Malloc(nc_attlen * sizeof (int));
-      else
-        pintatt = attint;
+      int *pintatt = (int)nc_attlen > attlen
+        ? (int *)(Malloc(nc_attlen * sizeof (int))) : attint;
 
       cdf_get_att_int(fileID, ncvarid, attname, pintatt);
 
