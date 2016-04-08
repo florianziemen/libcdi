@@ -203,6 +203,8 @@ resizeVarGatherBuf(int size, double **buf, int *bufSize)
     *buf = Realloc(*buf, (size_t)(*bufSize = size) * sizeof (buf[0][0]));
 }
 
+#define wHECast struct winHeaderEntry *)(void *
+
 static Xt_redist
 buildVarRedist(int headerIdx, size_t streamIdx,
                /* index list representing the data elements gathered on
@@ -212,7 +214,7 @@ buildVarRedist(int headerIdx, size_t streamIdx,
 {
   const struct clientBuf *restrict clientBuf = rxWin[streamIdx].clientBuf;
   const struct winHeaderEntry *winDict
-    = (struct winHeaderEntry *)clientBuf[0].mem;
+    = (wHECast)clientBuf[0].mem;
   int streamID = openStreams.entries[streamIdx];
   int varID = winDict[headerIdx].specific.dataRecord.varID;
   struct Xt_offset_ext *partExts
@@ -224,14 +226,11 @@ buildVarRedist(int headerIdx, size_t streamIdx,
     {
       unsigned char *clientMem = clientBuf[clientIdx].mem;
       struct dataRecord *dataHeader
-        = &((struct winHeaderEntry *)clientMem)[headerIdx].specific.dataRecord;
-      int position = ((struct winHeaderEntry *)clientMem)[headerIdx + 1].offset;
-      xassert(namespaceAdaptKey2(((struct winHeaderEntry *)
-                                  clientMem)[headerIdx].id)
-              == streamID
+        = &((wHECast)clientMem)[headerIdx].specific.dataRecord;
+      int position = ((wHECast)clientMem)[headerIdx + 1].offset;
+      xassert(namespaceAdaptKey2(((wHECast)clientMem)[headerIdx].id) == streamID
               && dataHeader->varID == varID
-              && (((struct winHeaderEntry *)clientMem)[headerIdx + 1].id
-                  == PARTDESCMARKER)
+              && (((wHECast)clientMem)[headerIdx + 1].id == PARTDESCMARKER)
               && position > 0
               && ((size_t)position
                   >= sizeof (struct winHeaderEntry)
@@ -243,8 +242,7 @@ buildVarRedist(int headerIdx, size_t streamIdx,
       unsigned partSize
         = (unsigned)xt_idxlist_get_num_indices(part[clientIdx]);
       size_t charOfs = (size_t)((clientMem
-                                 + ((struct winHeaderEntry *)
-                                    clientMem)[headerIdx].offset)
+                                 + ((wHECast)clientMem)[headerIdx].offset)
                                 - clientBuf[0].mem);
       xassert(charOfs % sizeof (double) == 0
               && charOfs / sizeof (double) + partSize <= INT_MAX);
@@ -568,7 +566,7 @@ writeNetCDFStream(size_t streamIdx,
 static inline struct winHeaderEntry *
 winDictEntry(size_t streamIdx, size_t client, size_t entry)
 {
-  return ((struct winHeaderEntry *)rxWin[streamIdx].clientBuf[client].mem)
+  return ((wHECast)rxWin[streamIdx].clientBuf[client].mem)
     + entry;
 }
 
@@ -1098,7 +1096,7 @@ readGetBuffers(size_t streamIdx, const struct cdiPioConf *conf)
   xdebug("%s", "START");
 
   struct winHeaderEntry *winDict
-    = (struct winHeaderEntry *)rxWin[streamIdx].clientBuf[0].mem;
+    = (wHECast)rxWin[streamIdx].clientBuf[0].mem;
   xassert(winDict[0].id == HEADERSIZEMARKER);
   {
     int dictSize = rxWin[streamIdx].clientBuf[0].dictSize,
