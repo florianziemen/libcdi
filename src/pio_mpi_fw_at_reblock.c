@@ -364,10 +364,10 @@ fwFileWriteAtReblock(int fileID, const void *buffer, size_t len)
   int numBlockBuf = of->numBlockBuf;
   int numMsg = of->numMsg;
   const unsigned char *inBuf = buffer;
-  const unsigned char *directWriteBuf;
+  const unsigned char *directWriteBuf = NULL;
   /* positive value iff direct write occurs */
   int directWriteSize = -1;
-  MPI_Offset directWriteOfs;
+  MPI_Offset directWriteOfs = 0;
   for (int collRank = 0; collRank < sizePio; ++collRank)
     if (of->collWriteSize[collRank])
     {
