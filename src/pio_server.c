@@ -1201,7 +1201,7 @@ cdiPioServerStreamOpen(const char *filename, char filemode,
                        int filetype, stream_t *streamptr,
                        int recordBufIsToBeCreated)
 {
-  int fileID;
+  int fileID = -1;
 #if defined HAVE_LIBNETCDF && ! defined HAVE_PARALLEL_NC4
   /* Only needs initialization to shut up gcc */
   int rank = -1;
