@@ -834,7 +834,7 @@ cdfGenVarname(int fileID, char name[CDI_MAX_NAME], int pnum, int pcat, int *pdis
   *pdis = 255;
 }
 
-static int
+int
 cdfDefVar(stream_t *streamptr, int varID)
 {
   if (streamptr->vars[varID].ncvarid != CDI_UNDEFID) return streamptr->vars[varID].ncvarid;
@@ -903,6 +903,12 @@ cdfDefVar(stream_t *streamptr, int varID)
 
   const int dtype = vlistInqVarDatatype(vlistID, varID);
   const nc_type xtype = cdfDefDatatype(dtype, streamptr);
+
+  if (streamptr->ncmode == 2)
+    {
+      cdf_redef(fileID);
+      streamptr->ncmode = 1;
+    }
 
   int ncvarID = -1;
   cdf_def_var(fileID, name, xtype, ndims, dims, &ncvarID);
@@ -986,17 +992,22 @@ cdfEndDef(stream_t *streamptr)
   if (streamptr->accessmode == 0)
     {
       const int fileID = streamptr->fileID;
-      if (streamptr->ncmode == 2) cdf_redef(fileID);
+      if (streamptr->ncmode == 2)
+        {
+          cdf_redef(fileID);
+          streamptr->ncmode = 1;
+        }
 
       const int nvars = streamptr->nvars;
       for (int varID = 0; varID < nvars; ++varID) cdfDefVar(streamptr, varID);
 
-      if (streamptr->ncmode == 2)
+      if (streamptr->ncmode != 2)
         {
           if (CDI_Netcdf_Hdr_Pad == 0UL)
             cdf_enddef(fileID);
           else
             cdf__enddef(fileID, CDI_Netcdf_Hdr_Pad);
+          streamptr->ncmode = 2;
         }
 
       streamptr->accessmode = 1;
