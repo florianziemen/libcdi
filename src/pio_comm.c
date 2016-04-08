@@ -116,19 +116,19 @@ pioInfoInit(pioInfo_t *p, MPI_Comm commGlob, int clientServerRole)
     int nProcsIO;
     {
       enum { numGlobSums = 4 };
-      int temp[numGlobSums] = {
+      int iBuf[numGlobSums] = {
         isProcIO,
         (clientServerRole & PIO_ROLE_COLLECTOR),
         globRankOfGroupLeader[0],
         globRankOfGroupLeader[1]
       };
-      xmpi(MPI_Allreduce(MPI_IN_PLACE, temp, numGlobSums, MPI_INT, MPI_SUM,
+      xmpi(MPI_Allreduce(MPI_IN_PLACE, iBuf, numGlobSums, MPI_INT, MPI_SUM,
                          commGlob));
-      p->sizePio = nProcsIO = temp[0];
+      p->sizePio = nProcsIO = iBuf[0];
       p->sizeCalc = p->sizeGlob - nProcsIO;
-      p->sizeColl = temp[1];
-      globRankOfGroupLeader[0] = temp[2];
-      globRankOfGroupLeader[1] = temp[3];
+      p->sizeColl = iBuf[1];
+      globRankOfGroupLeader[0] = iBuf[2];
+      globRankOfGroupLeader[1] = iBuf[3];
     }
     if (isProcIO)
       {
