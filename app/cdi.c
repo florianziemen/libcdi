@@ -30,9 +30,8 @@ int      vlistInqVarMissvalUsed(int vlistID, int varID);
 #  define DBL_IS_EQUAL(x,y) (DBL_IS_NAN(x)||DBL_IS_NAN(y)?(DBL_IS_NAN(x)&&DBL_IS_NAN(y)?1:0):!(x < y || y < x))
 #endif
 
-#ifndef IS_EQUAL
+#ifndef IS_NOT_EQUAL
 #  define IS_NOT_EQUAL(x,y) (x < y || y < x)
-#  define IS_EQUAL(x,y)     (!IS_NOT_EQUAL(x,y))
 #endif
 
 #ifndef HOST_ENDIANNESS
