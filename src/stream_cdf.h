@@ -2,7 +2,21 @@
 #define _STREAM_CDF_H
 
 #include "cdi_int.h"
+#include "taxis.h"
 
+enum {
+  CDF_MAX_TIME_UNIT_STR         /* maximum length of time unit string */
+  = TAXIS_MAX_UNIT_STR_LEN      /* longest result from tunitNamePtr */
+  + 7                           /* room for " since " */
+  + 7 + 1 + 2 + 1 + 2           /* room for year with 7 digits,
+                                 * dashes and 2 digits for month and day */
+  + 1 + 2 + 1 + 2 + 1 + 2       /* room for " " and 2 digit hour, minute,
+                                 *                          second */
+  + 1                           /* and terminating '\0' */
+};
+
+
+int    cdfDefVar(stream_t *streamptr, int varID);
 void   cdfDefVars(stream_t *streamptr);
 void   cdfDefTimestep(stream_t *streamptr, int tsID);
 int    cdfInqTimestep(stream_t *streamptr, int tsID);
@@ -31,6 +45,7 @@ void   cdf_write_var_chunk(stream_t *streamptr, int varID, int memtype,
                            const int rect[][2], const void *data, int nmiss);
 
 void cdfDefVarDeflate(int ncid, int ncvarid, int deflate_level);
+const char *cdfGetTimeUnits(taxis_t *taxis);
 void cdfDefTime(stream_t* streamptr);
 
 void cdf_scale_add(size_t size, double *data, double addoffset, double scalefactor);

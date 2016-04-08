@@ -11,6 +11,7 @@
 
 #  include "cdi.h"
 #  include "cdi_int.h"
+#  include "dmemory.h"
 #  include "stream_cdf.h"
 #  include "cdf_int.h"
 
@@ -56,27 +57,26 @@ int cdfDefTimeBounds(int fileID, int nctimevarid, int nctimedimid, const char *t
   return time_bndsid;
 }
 
-static
-void cdfDefTimeUnits(char *unitstr, taxis_t* taxis0, taxis_t* taxis)
+const char *
+cdfGetTimeUnits(taxis_t *taxis)
 {
+  const char *unitstr;
   if ( taxis->units && taxis->units[0] )
     {
-      strcpy(unitstr, taxis->units);
+      unitstr = taxis->units;
     }
   else
     {
-      unitstr[0] = 0;
-
-      if ( taxis0->type == TAXIS_ABSOLUTE )
+      if ( taxis->type == TAXIS_ABSOLUTE )
         {
           static const char *const unitstrfmt[3]
             = { "year as %Y.%f",
                 "month as %Y%m.%f",
                 "day as %Y%m%d.%f" };
-          size_t fmtidx = (taxis0->unit == TUNIT_YEAR ? 0
-                           : (taxis0->unit == TUNIT_MONTH ? 1
+          size_t fmtidx = (taxis->unit == TUNIT_YEAR ? 0
+                           : (taxis->unit == TUNIT_MONTH ? 1
                               : 2));
-          strcpy(unitstr, unitstrfmt[fmtidx]);
+          unitstr = unitstrfmt[fmtidx];
         }
       else
         {
@@ -93,10 +93,13 @@ void cdfDefTimeUnits(char *unitstr, taxis_t* taxis0, taxis_t* taxis)
                     || timeunit == TUNIT_6HOURS
                     || timeunit == TUNIT_12HOURS ) timeunit = TUNIT_HOUR;
 
-          sprintf(unitstr, "%s since %d-%d-%d %02d:%02d:%02d",
+          char *unitstr_ =  ptaxisAllocUnits(taxis, CDF_MAX_TIME_UNIT_STR);
+          sprintf(unitstr_, "%s since %d-%d-%d %02d:%02d:%02d",
                   tunitNamePtr(timeunit), year, month, day, hour, minute, second);
+          unitstr = unitstr_;
         }
     }
+  return unitstr;
 }
 
 static
@@ -152,7 +155,7 @@ void cdfDefTime(stream_t* streamptr)
   if ( streamptr->ncmode == 0 ) streamptr->ncmode = 1;
   if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
-  taxis_t *taxis = &streamptr->tsteps[0].taxis;
+  taxis_t *taxis = taxisPtr(vlistInqTaxis(streamptr->vlistID));
 
   const char *taxis_name = (taxis->name && taxis->name[0]) ? taxis->name : default_name ;
 
@@ -188,17 +191,30 @@ void cdfDefTime(stream_t* streamptr)
     }
 
   {
-    char unitstr[CDI_MAX_NAME];
-    cdfDefTimeUnits(unitstr, &streamptr->tsteps[0].taxis, taxis);
-    size_t len = strlen(unitstr);
-    if ( len )
+    char unitstr_[CDF_MAX_TIME_UNIT_STR];
+    const char *unitstr;
+    size_t unitstrLen;
+    if (taxis->units && taxis->units[0])
       {
-        cdf_put_att_text(fileID, time_varid, "units", len, unitstr);
-        /*
-          if ( taxis->has_bounds )
-          cdf_put_att_text(fileID, time_bndsid, "units", len, unitstr);
-        */
+        unitstr = taxis->units;
+        unitstrLen = strlen(taxis->units);
       }
+    else
+      {
+        /* define bogus value since at this time, streamDefTimestep has
+         * not been called yet
+         * but since taxis->units is not set, it clearly will not
+         * exceed the size of unitstr_, i.e. when defining the units
+         * attribute to this value, a later redefinition will not
+         * cause a recreation of on-disk data
+         */
+        for (size_t i = 0; i < CDF_MAX_TIME_UNIT_STR; ++i)
+          unitstr_[i] = 'a';
+        unitstr_[CDF_MAX_TIME_UNIT_STR-1] = '\0';
+        unitstr = unitstr_;
+        unitstrLen = CDF_MAX_TIME_UNIT_STR-1;
+      }
+    cdf_put_att_text(fileID, time_varid, "units", unitstrLen, unitstr);
   }
 
   if ( taxis->calendar != -1 )
