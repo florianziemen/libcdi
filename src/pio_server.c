@@ -83,7 +83,6 @@ struct recordWrite
 };
 
 struct streamMapping {
-  int numVars;
   /* data entry varMap[i] contains data for variable i or -1 if no
    * data entry for i has been transferred */
   int *varMap;
@@ -93,6 +92,7 @@ struct streamMapping {
   /* nMiss[i] = missing values were provided for variable i */
   int *hasMissing;
   int numWrittenRecords;
+  int numVars;
   struct streamMemLayout *layout;
   struct recordWrite writtenRecords[];
 };
