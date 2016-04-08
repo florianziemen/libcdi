@@ -177,19 +177,16 @@ bool isTimeUnits(const char *timeunits)
 static
 bool isTimeAxisUnits(const char *timeunits)
 {
-  char *ptu, *tu;
-  int timetype = -1;
-  int timeunit;
   bool status = false;
 
   size_t len = strlen(timeunits);
-  tu = (char *) Malloc((len+1)*sizeof(char));
+  char *tu = (char *) Malloc((len+1)*sizeof(char));
   memcpy(tu, timeunits, (len+1) * sizeof(char));
-  ptu = tu;
+  char *ptu = tu;
 
   for (size_t i = 0; i < len; i++ ) ptu[i] = (char)tolower((int)ptu[i]);
 
-  timeunit = get_timeunit(len, ptu);
+  int timeunit = get_timeunit(len, ptu);
   if ( timeunit != -1 )
     {
 
@@ -198,12 +195,10 @@ bool isTimeAxisUnits(const char *timeunits)
         {
           while ( isspace(*ptu) ) ptu++;
 
-          if ( memcmp(ptu, "as", 2) == 0 )
-            timetype = TAXIS_ABSOLUTE;
-          else if ( memcmp(ptu, "since", 5) == 0 )
-            timetype = TAXIS_RELATIVE;
+          int timetype = memcmp(ptu, "as", 2) == 0 ? TAXIS_ABSOLUTE :
+            memcmp(ptu, "since", 5) == 0 ? TAXIS_RELATIVE : -1;
 
-          if ( timetype != -1 ) status = true;
+          status = timetype != -1;
         }
     }
 
