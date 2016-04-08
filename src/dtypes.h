@@ -1,5 +1,5 @@
-#ifndef _DTYPES_H
-#define _DTYPES_H
+#ifndef DTYPES_H
+#define DTYPES_H
 
 #include <stdio.h>
 #include <limits.h>
@@ -45,7 +45,7 @@
 #define  UINT32   unsigned INT32
 #define  UINT64   unsigned INT64
 
-#endif  /* _DTYPES_H */
+#endif  /* DTYPES_H */
 /*
  * Local Variables:
  * c-file-style: "Java"
