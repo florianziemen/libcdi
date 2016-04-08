@@ -257,7 +257,11 @@ void cdfDefLocalAtts(stream_t *streamptr)
 
   streamptr->localatts = 1;
 
-  if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
+  if ( streamptr->ncmode == 2 )
+    {
+      cdf_redef(fileID);
+      streamptr->ncmode = 1;
+    }
 
   for ( int varID = 0; varID < streamptr->nvars; varID++ )
     {
@@ -274,7 +278,6 @@ void cdfDefLocalAtts(stream_t *streamptr)
 	}
       }
 
-  if ( streamptr->ncmode == 2 ) cdf_enddef(fileID);
 }
 
 static
@@ -312,7 +315,6 @@ int nc_grid_index(stream_t *streamptr, int gridID)
   return index;
 }
 
-static
 int cdfDefVar(stream_t *streamptr, int varID)
 {
   int ncvarid = -1;
@@ -502,6 +504,12 @@ int cdfDefVar(stream_t *streamptr, int varID)
 
   int dtype = vlistInqVarDatatype(vlistID, varID);
   int xtype = cdfDefDatatype(dtype, streamptr->filetype);
+
+  if ( streamptr->ncmode == 2 )
+    {
+      cdf_redef(fileID);
+      streamptr->ncmode = 1;
+    }
 
   cdf_def_var(fileID, name, (nc_type) xtype, ndims, dims, &ncvarid);
 
@@ -769,18 +777,23 @@ void cdfEndDef(stream_t *streamptr)
   if ( streamptr->accessmode == 0 )
     {
       int fileID  = streamptr->fileID;
-      if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
+      if ( streamptr->ncmode == 2 )
+        {
+          cdf_redef(fileID);
+          streamptr->ncmode = 1;
+        }
 
       int nvars =  streamptr->nvars;
       for ( int varID = 0; varID < nvars; varID++ )
 	cdfDefVar(streamptr, varID);
 
-      if ( streamptr->ncmode == 2 )
+      if ( streamptr->ncmode != 2 )
         {
           if ( CDI_netcdf_hdr_pad == 0UL )
             cdf_enddef(fileID);
           else
             cdf__enddef(fileID, CDI_netcdf_hdr_pad);
+          streamptr->ncmode = 2;
         }
 
       streamptr->accessmode = 1;
