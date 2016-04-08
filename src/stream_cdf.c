@@ -3090,11 +3090,11 @@ bool unitsIsPressure(const char *units)
 {
   bool status = false;
 
-  if ( memcmp(units, "millibar", 8) == 0 ||
-       memcmp(units, "mb", 2)       == 0 ||
-       memcmp(units, "hectopas", 8) == 0 ||
-       memcmp(units, "hPa", 3)      == 0 ||
-       memcmp(units, "Pa", 2)       == 0 )
+  if ( strncmp(units, "millibar", 8) == 0 ||
+       strncmp(units, "mb", 2)       == 0 ||
+       strncmp(units, "hectopas", 8) == 0 ||
+       strncmp(units, "hPa", 3)      == 0 ||
+       strncmp(units, "Pa", 2)       == 0 )
     {
       status = true;
     }
