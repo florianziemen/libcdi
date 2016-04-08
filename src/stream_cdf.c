@@ -3836,8 +3836,7 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
               if ( ncvars[ncvarid].lvalidrange == FALSE )
                 {
                   extern int cdiIgnoreValidRange;
-                  int lignore = FALSE;
-                  if ( xtypeIsFloat(atttype) != xtypeIsFloat(xtype) ) lignore = TRUE;
+                  int lignore = xtypeIsFloat(atttype) != xtypeIsFloat(xtype);
                   if ( cdiIgnoreValidRange == FALSE && lignore == FALSE )
                     {
                       cdfGetAttDouble(ncid, ncvarid, attname, 2, ncvars[ncvarid].validrange);
@@ -3857,8 +3856,7 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
               if ( ncvars[ncvarid].lvalidrange == FALSE )
                 {
                   extern int cdiIgnoreValidRange;
-                  int lignore = FALSE;
-                  if ( xtypeIsFloat(atttype) != xtypeIsFloat(xtype) ) lignore = TRUE;
+                  int lignore = xtypeIsFloat(atttype) != xtypeIsFloat(xtype);
                   if ( cdiIgnoreValidRange == FALSE && lignore == FALSE )
                     {
                       cdfGetAttDouble(ncid, ncvarid, attname, 1, &(ncvars[ncvarid].validrange)[0]);
@@ -3875,8 +3873,7 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
               if ( ncvars[ncvarid].lvalidrange == FALSE )
                 {
                   extern int cdiIgnoreValidRange;
-                  int lignore = FALSE;
-                  if ( xtypeIsFloat(atttype) != xtypeIsFloat(xtype) ) lignore = TRUE;
+                  int lignore = xtypeIsFloat(atttype) != xtypeIsFloat(xtype);
                   if ( cdiIgnoreValidRange == FALSE && lignore == FALSE )
                     {
                       cdfGetAttDouble(ncid, ncvarid, attname, 1, &(ncvars[ncvarid].validrange)[1]);
