@@ -848,18 +848,6 @@ planPasses(size_t streamIdx, const struct streamMapping *mapping,
   return numPasses;
 }
 
-static inline unsigned
-umax(unsigned a, unsigned b)
-{
-  return a >= b ? a : b;
-}
-
-static inline unsigned
-umin(unsigned a, unsigned b)
-{
-  return a <= b ? a : b;
-}
-
 static inline size_t
 szmin(size_t a, size_t b)
 {
