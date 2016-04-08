@@ -45,6 +45,16 @@ cdfDefRecord(stream_t *streamptr)
 void
 cdfDefTimestep(stream_t *streamptr, int tsID)
 {
+  const int time_varid = streamptr->basetime.ncvarid;
+  if (time_varid != CDI_UNDEFID && tsID == 0)
+    {
+      taxis_t *taxis = taxisPtr(vlistInqTaxis(streamptr->vlistID));
+      const int fileID = streamptr->fileID;
+      const char *unitstr = cdfGetTimeUnits(taxis);
+      const size_t len = strlen(unitstr);
+      if (len) cdf_put_att_text(fileID, time_varid, "units", len, unitstr);
+    }
+
   const int fileID = streamptr->fileID;
 
   if (CDI_Debug) Message("streamID = %d, fileID = %d, tsID = %d", streamptr->self, fileID, tsID);
@@ -1945,10 +1955,12 @@ cdfDefCoordinateVars(stream_t *streamptr)
 
   const int ngrids = vlistNgrids(vlistID);
   if (2 * ngrids > MAX_GRIDS_PS) Error("Internal problem! Too many grids per stream (max=%d)\n", MAX_GRIDS_PS);
+
+  ncgrid_t *restrict ncgrid = streamptr->ncgrid;
   for (int index = 0; index < 2 * ngrids; ++index)
     {
-      streamptr->ncgrid[index].gridID = CDI_UNDEFID;
-      for (size_t i = 0; i < CDF_SIZE_ncIDs; ++i) streamptr->ncgrid[index].ncIDs[i] = CDI_UNDEFID;
+      ncgrid[index].gridID = CDI_UNDEFID;
+      for (size_t i = 0; i < CDF_SIZE_ncIDs; ++i) ncgrid[index].ncIDs[i] = CDI_UNDEFID;
     }
 
   for (int index = 0; index < ngrids; ++index)
@@ -1978,6 +1990,11 @@ cdfDefCoordinateVars(stream_t *streamptr)
       cdf_enddef(streamptr->fileID);
       streamptr->ncmode = 2;
     }
+
+  int nvars = vlistNvars(vlistID);
+  for (int varID = 0; varID < nvars; varID++) cdfDefVar(streamptr, varID);
+
+  cdfEndDef(streamptr);
 }
 
 #endif
