@@ -749,9 +749,9 @@ deco1D_CCP(size_t n, const size_t weightPfxSums[n],
            size_t nparts, size_t separators[nparts + 1]);
 
 /**
- * @param[out] passes pointer to pointer to 2-dimensional array of
+ * @param[out] passes_ pointer to pointer to 2-dimensional array of
  * records of dimensions $number of passes \cdot number of collectors$,
- * where $(*passes)[pass][i]$ details the records written by collector
+ * where $(*passes_)[pass][i]$ details the records written by collector
  * rank \a i
  * @return number of passes
  */
