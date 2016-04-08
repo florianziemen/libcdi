@@ -1057,7 +1057,7 @@ writeGribStream(size_t streamIdx,
       {
         size_t varIdx = (size_t)-1;
         int varID = -1;
-        size_t base = 0;
+        size_t recordDataOfs = 0;
         const double *data = *data_;
         for (size_t recordIdx = myRecordStart;
              recordIdx <= myRecordEnd;
@@ -1071,9 +1071,9 @@ writeGribStream(size_t streamIdx,
             size_t nvals = recordSize / sizeof (double);
             int nmiss
               = countVarChunkMissingVals(vlistID, varID, mapping, (int)nvals,
-                                         data + base);
-            streamWriteVarSlice(streamID, varID, level, data + base, nmiss);
-            base += nvals;
+                                         data + recordDataOfs);
+            streamWriteVarSlice(streamID, varID, level, data + recordDataOfs, nmiss);
+            recordDataOfs += nvals;
           }
         aggBufFlush(streamIdx, cdiPioFileWrite);
       }
