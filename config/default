@@ -18,7 +18,6 @@ case "${HOSTNAME}" in
                     --enable-iso-c-interface \
                     --enable-swig \
                     --enable-python \
-                    --with-jasper=/opt/local \
                     --with-grib_api=$HOME/local/gribapi-1.12.3 \
                     --with-netcdf=$HOME/local \
                     --with-szlib=$HOME/local \
@@ -41,9 +40,6 @@ case "${HOSTNAME}" in
                     --enable-maintainer-mode \
                     --enable-swig \
                     --enable-python \
-                    --with-jasper=/opt/local \
-                    --with-openjpeg=/opt/local \
-                    --with-libpng=/opt/local \
                     --with-grib_api=/opt/local \
                     --with-netcdf=/opt/local \
                     --with-szlib=/opt/local \
@@ -80,7 +76,6 @@ case "${HOSTNAME}" in
                     --enable-all-static \
                     --enable-swig \
                     --enable-python \
-                    --with-jasper=/sw/etch-ia32/jasper-1.900.1 \
                     --with-grib_api=$HOME/local/etch-ia32/grib_api-1.9.8 \
 	            --with-netcdf=/sw/etch-ia32/netcdf-4.0.1 \
                     --with-szlib=$HOME/local/etch-ia32 \
@@ -91,7 +86,6 @@ case "${HOSTNAME}" in
 	            --with-netcdf=$HOME/builds/libs4cdo \
                      --with-szlib=$HOME/builds/libs4cdo \
                   --with-grib_api=$HOME/builds/libs4cdo \
-                    --with-jasper=$HOME/builds/libs4cdo \
                       --with-pic --enable-swig --enable-ruby --enable-python \
                       CC=gcc CFLAGS="-g -O2 -Wall" LIBS=-lopenjpeg
 	;;
