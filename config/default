@@ -63,6 +63,7 @@ case "${HOSTNAME}" in
     thunder*)
         ./configure --with-grib_api=/sw/squeeze-x64/grib_api-1.13.0-static-gccsys \
                     --with-netcdf=/sw/squeeze-x64/netcdf-4.2-static \
+                    --disable-cf-interface \
 	            CC=gcc CFLAGS="-g -Wall -O3" 
 	;;
 # ia64-nec-linux
