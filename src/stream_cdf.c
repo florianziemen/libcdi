@@ -1278,9 +1278,7 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int ndims,
       /* enough to append _ plus up to 100 decimal and trailing \0 */
       char extendedAxisname[axisnameLen + 4 + 1];
       memcpy(extendedAxisname, axisname, axisnameLen + 1);
-
       checkGridName(extendedAxisname, fileID, vlistID, gridID, ngrids, axisLetter);
-
       size_t extendedAxisnameLen
         = axisnameLen + strlen(extendedAxisname + axisnameLen);
 
@@ -1300,7 +1298,7 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int ndims,
           if ( dimID == UNDEFID ) cdf_def_dim(fileID, dimname, dimlen, &dimID);
         }
 
-      int gen_bounds = FALSE;
+      bool gen_bounds = false;
       int grid_is_cyclic = gridIsCircular(gridID);
       double *pbounds = NULL;
       if ( pvals )
@@ -1317,7 +1315,7 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int ndims,
 
           if ( CDI_cmor_mode && grid_is_cyclic && !pbounds )
             {
-              gen_bounds = TRUE;
+              gen_bounds = true;
               pbounds = (double*) Malloc(2*dimlen*sizeof(double));
               for ( size_t i = 0; i < dimlen-1; ++i )
                 {
