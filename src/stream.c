@@ -1322,6 +1322,9 @@ cdiStreamDefTimestep_(stream_t *streamptr, int tsID)
 #ifdef HAVE_LIBNETCDF
   if (cdiBaseFiletype(streamptr->filetype) == CDI_FILETYPE_NETCDF && timeIsVarying)
     {
+      /* usually points to cdfDefTimestep in serial mode but
+       * cdiPioCdfDefTimestep on servers on a null-op on
+       * clients in client/server mode */
       void (*myCdfDefTimestep)(stream_t * streamptr, int tsID)
           = (void (*)(stream_t *, int)) namespaceSwitchGet(NSSWITCH_CDF_DEF_TIMESTEP).func;
       myCdfDefTimestep(streamptr, tsID);
