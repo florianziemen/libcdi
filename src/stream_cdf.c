@@ -1500,7 +1500,7 @@ void cdfDefCurvilinear(stream_t *streamptr, int gridID)
               cdf_def_var(fileID, xaxisname, xtype, 3, dimIDs, &ncbxvarid);
               cdfGridCompress(fileID, ncbxvarid, (int)(xdimlen*ydimlen), streamptr->filetype, streamptr->comptype);
 
-              cdf_put_att_text(fileID, ncxvarid, "bounds", strlen(xaxisname), xaxisname);
+              cdf_put_att_text(fileID, ncxvarid, "bounds", xaxisnameLen + sizeof (bndsName), xaxisname);
             }
         }
 
@@ -1526,7 +1526,7 @@ void cdfDefCurvilinear(stream_t *streamptr, int gridID)
               cdf_def_var(fileID, yaxisname, xtype, 3, dimIDs, &ncbyvarid);
               cdfGridCompress(fileID, ncbyvarid, (int)(xdimlen*ydimlen), streamptr->filetype, streamptr->comptype);
 
-              cdf_put_att_text(fileID, ncyvarid, "bounds", strlen(yaxisname), yaxisname);
+              cdf_put_att_text(fileID, ncyvarid, "bounds", yaxisnameLen + sizeof (bndsName), yaxisname);
             }
         }
 
@@ -1842,7 +1842,7 @@ void cdfDefUnstructured(stream_t *streamptr, int gridID)
               cdf_def_var(fileID, xaxisname, xtype, 2, dimIDs, &ncbxvarid);
               cdfGridCompress(fileID, ncbxvarid, (int)dimlen, streamptr->filetype, streamptr->comptype);
 
-              cdf_put_att_text(fileID, ncxvarid, "bounds", strlen(xaxisname), xaxisname);
+              cdf_put_att_text(fileID, ncxvarid, "bounds", xaxisnameLen + sizeof (bndsName), xaxisname);
             }
         }
 
@@ -1865,7 +1865,7 @@ void cdfDefUnstructured(stream_t *streamptr, int gridID)
               cdf_def_var(fileID, yaxisname, xtype, 2, dimIDs, &ncbyvarid);
               cdfGridCompress(fileID, ncbyvarid, (int)dimlen, streamptr->filetype, streamptr->comptype);
 
-              cdf_put_att_text(fileID, ncyvarid, "bounds", strlen(yaxisname), yaxisname);
+              cdf_put_att_text(fileID, ncyvarid, "bounds", yaxisnameLen + sizeof (bndsName), yaxisname);
             }
         }
 
