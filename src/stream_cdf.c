@@ -1225,7 +1225,6 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int ndims,
                                             const double *pvals),
                  int *ncAxisVarIDs)
 {
-  int index;
   int dimID = UNDEFID;
   int ngrids = 0;
   int ncvarid = UNDEFID, ncbvarid = UNDEFID;
@@ -1245,7 +1244,7 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int ndims,
 
   if ( axisname[0] == 0 ) Error("axis name undefined!");
 
-  for ( index = 0; index < ngrids; index++ )
+  for ( int index = 0; index < ngrids; index++ )
     {
       if ( axisDimIDs[index] != UNDEFID )
         {
