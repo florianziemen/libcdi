@@ -665,24 +665,31 @@ int cdfDefTimeBounds(int fileID, int nctimevarid, int nctimedimid, const char *t
   if ( nc_inq_dimid(fileID, bndsName, &dims[1]) != NC_NOERR )
     cdf_def_dim(fileID, bndsName, 2, &dims[1]);
 
+  const char *bndsAttName, *bndsAttVal;
+  size_t bndsAttValLen;
+  char tmpstr[CDI_MAX_NAME];
   if ( taxis->climatology )
     {
-      static const char climatology_bndsName[] = "climatology_bnds";
-      cdf_def_var(fileID, climatology_bndsName, NC_DOUBLE, 2, dims, &time_bndsid);
-
-      cdf_put_att_text(fileID, nctimevarid, "climatology", sizeof (climatology_bndsName) - 1, climatology_bndsName);
+      static const char climatology_bndsName[] = "climatology_bnds",
+        climatology_bndsAttName[] = "climatology";
+      bndsAttName = climatology_bndsAttName;
+      bndsAttValLen = sizeof (climatology_bndsName) - 1;
+      bndsAttVal = climatology_bndsName;
     }
   else
     {
-      char tmpstr[CDI_MAX_NAME];
       size_t taxisnameLen = strlen(taxis_name);
       memcpy(tmpstr, taxis_name, taxisnameLen);
       tmpstr[taxisnameLen] = '_';
       memcpy(tmpstr + taxisnameLen + 1, bndsName, sizeof (bndsName));
-      cdf_def_var(fileID, tmpstr, NC_DOUBLE, 2, dims, &time_bndsid);
       size_t tmpstrLen = taxisnameLen + sizeof (bndsName);
-      cdf_put_att_text(fileID, nctimevarid, "bounds", tmpstrLen, tmpstr);
+      static const char generic_bndsAttName[] = "bounds";
+      bndsAttName = generic_bndsAttName;
+      bndsAttValLen = tmpstrLen;
+      bndsAttVal = tmpstr;
     }
+  cdf_def_var(fileID, bndsAttVal, NC_DOUBLE, 2, dims, &time_bndsid);
+  cdf_put_att_text(fileID, nctimevarid, bndsAttName, bndsAttValLen, bndsAttVal);
 
   return (time_bndsid);
 }
