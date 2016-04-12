@@ -1593,8 +1593,7 @@ void cdfDefRgrid(stream_t *streamptr, int gridID)
                   dimID = streamptr->xdimID[index];
                   break;
                 }
-              else
-                iz++;
+              iz++;
             }
         }
     }
