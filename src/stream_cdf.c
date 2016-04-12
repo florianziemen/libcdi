@@ -1404,9 +1404,7 @@ void cdfDefCurvilinear(stream_t *streamptr, int gridID)
   int ydimID = UNDEFID;
   int ncxvarid = UNDEFID, ncyvarid = UNDEFID;
   int ncbxvarid = UNDEFID, ncbyvarid = UNDEFID, ncavarid = UNDEFID;
-  nc_type xtype = NC_DOUBLE;
-
-  if ( gridInqPrec(gridID) == DATATYPE_FLT32 ) xtype = NC_FLOAT;
+  nc_type xtype = gridInqPrec(gridID) == DATATYPE_FLT32 ? NC_FLOAT : NC_DOUBLE;
 
   int vlistID = streamptr->vlistID;
   int fileID  = streamptr->fileID;
