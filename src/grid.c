@@ -4110,15 +4110,17 @@ The function @func{gridInqReference} returns the reference URI to an unstructure
 */
 int gridInqReference(int gridID, char *reference)
 {
-  int len = 0;
+  size_t len = 0;
   grid_t* gridptr = gridID2Ptr(gridID);
 
-  if ( gridptr->reference && reference )
+  if ( gridptr->reference )
     {
-      strcpy(reference, gridptr->reference);
+      len = strlen(gridptr->reference);
+      if ( reference )
+        strcpy(reference, gridptr->reference);
     }
 
-  return (len);
+  return (int)len;
 }
 
 const char *gridInqReferencePtr(int gridID)
