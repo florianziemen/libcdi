@@ -1903,6 +1903,12 @@ void cdfDefUnstructured(stream_t *streamptr, int gridID)
   streamptr->ncavarID[gridindex] = ncavarid;
 }
 
+struct attTxtTab2
+{
+  const char *attName, *attVal;
+  size_t valLen;
+};
+
 static
 void cdf_def_vct_echam(stream_t *streamptr, int zaxisID)
 {
@@ -1919,7 +1925,6 @@ void cdf_def_vct_echam(stream_t *streamptr, int zaxisID)
       int ncdimid, ncdimid2;
       int hyaiid, hybiid, hyamid, hybmid;
       double mval;
-      char tmpname[CDI_MAX_NAME];
 
       if ( streamptr->vct.ilev > 0 )
         {
@@ -1945,22 +1950,34 @@ void cdf_def_vct_echam(stream_t *streamptr, int zaxisID)
       cdf_def_var(fileID, "hyam", NC_DOUBLE, 1, &ncdimid,  &hyamid);
       cdf_def_var(fileID, "hybm", NC_DOUBLE, 1, &ncdimid,  &hybmid);
 
-      strcpy(tmpname, "hybrid A coefficient at layer interfaces");
-      cdf_put_att_text(fileID, hyaiid, "long_name", strlen(tmpname), tmpname);
-      strcpy(tmpname, "Pa");
-      cdf_put_att_text(fileID, hyaiid, "units", strlen(tmpname), tmpname);
-      strcpy(tmpname, "hybrid B coefficient at layer interfaces");
-      cdf_put_att_text(fileID, hybiid, "long_name", strlen(tmpname), tmpname);
-      strcpy(tmpname, "1");
-      cdf_put_att_text(fileID, hybiid, "units", strlen(tmpname), tmpname);
-      strcpy(tmpname, "hybrid A coefficient at layer midpoints");
-      cdf_put_att_text(fileID, hyamid, "long_name", strlen(tmpname), tmpname);
-      strcpy(tmpname, "Pa");
-      cdf_put_att_text(fileID, hyamid, "units", strlen(tmpname), tmpname);
-      strcpy(tmpname, "hybrid B coefficient at layer midpoints");
-      cdf_put_att_text(fileID, hybmid, "long_name", strlen(tmpname), tmpname);
-      strcpy(tmpname, "1");
-      cdf_put_att_text(fileID, hybmid, "units", strlen(tmpname), tmpname);
+      {
+        static const char lname_n[] = "long_name",
+          lname_v_ai[] = "hybrid A coefficient at layer interfaces",
+          units_n[] = "units",
+          units_v_ai[] = "Pa",
+          lname_v_bi[] = "hybrid B coefficient at layer interfaces",
+          units_v_bi[] = "1",
+          lname_v_am[] = "hybrid A coefficient at layer midpoints",
+          units_v_am[] = "Pa",
+          lname_v_bm[] = "hybrid B coefficient at layer midpoints",
+          units_v_bm[] = "1";
+        static const struct attTxtTab2 tab[]
+          = {
+          { lname_n, lname_v_ai, sizeof (lname_v_ai) - 1 },
+          { units_n, units_v_ai, sizeof (units_v_ai) - 1 },
+          { lname_n, lname_v_bi, sizeof (lname_v_bi) - 1 },
+          { units_n, units_v_bi, sizeof (units_v_bi) - 1 },
+          { lname_n, lname_v_am, sizeof (lname_v_am) - 1 },
+          { units_n, units_v_am, sizeof (units_v_am) - 1 },
+          { lname_n, lname_v_bm, sizeof (lname_v_bm) - 1 },
+          { units_n, units_v_bm, sizeof (units_v_bm) - 1 },
+        };
+        enum { tabLen = sizeof (tab) / sizeof (tab[0]) };
+        int ids[tabLen] = { hyaiid, hyaiid, hybiid, hybiid,
+                            hyamid, hyamid, hybmid, hybmid };
+        for ( size_t i = 0; i < tabLen; ++i )
+          cdf_put_att_text(fileID, ids[i], tab[i].attName, tab[i].valLen, tab[i].attVal);
+      }
 
       cdf_enddef(fileID);
       streamptr->ncmode = 2;
@@ -2161,12 +2178,6 @@ void cdf_def_zaxis_hybrid_echam(stream_t *streamptr, int type, int ncvarid, int 
         streamptr->zaxisID[zaxisindex] = streamptr->vct.ilevID;
     }
 }
-
-struct attTxtTab2
-{
-  const char *attName, *attVal;
-  size_t valLen;
-};
 
 static
 void cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int ncvarid, int zaxisID, int zaxisindex, int xtype, size_t dimlen, int *dimID, char *axisname)
