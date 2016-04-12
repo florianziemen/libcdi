@@ -1565,7 +1565,6 @@ static
 void cdfDefRgrid(stream_t *streamptr, int gridID)
 {
   int dimID = UNDEFID;
-  int lwarn = TRUE;
 
   int vlistID = streamptr->vlistID;
   int ngrids = vlistNgrids(vlistID);
@@ -1596,11 +1595,12 @@ void cdfDefRgrid(stream_t *streamptr, int gridID)
   if ( dimID == UNDEFID )
     {
       int fileID  = streamptr->fileID;
+      static bool lwarn = true;
       if ( lwarn )
         {
           Warning("Creating a NetCDF file with data on a gaussian reduced grid.");
           Warning("The further processing of the resulting file is unsupported!");
-          lwarn = FALSE;
+          lwarn = false;
         }
 
       char axisname[7] = "rgridX";
