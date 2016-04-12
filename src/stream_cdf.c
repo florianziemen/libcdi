@@ -1564,13 +1564,10 @@ void cdfDefCurvilinear(stream_t *streamptr, int gridID)
 static
 void cdfDefRgrid(stream_t *streamptr, int gridID)
 {
-  char axisname[7] = "rgridX";
   int dimID = UNDEFID;
   int lwarn = TRUE;
 
   int vlistID = streamptr->vlistID;
-  int fileID  = streamptr->fileID;
-
   int ngrids = vlistNgrids(vlistID);
 
   size_t dimlen = (size_t)gridInqSize(gridID);
@@ -1598,6 +1595,7 @@ void cdfDefRgrid(stream_t *streamptr, int gridID)
 
   if ( dimID == UNDEFID )
     {
+      int fileID  = streamptr->fileID;
       if ( lwarn )
         {
           Warning("Creating a NetCDF file with data on a gaussian reduced grid.");
@@ -1605,6 +1603,7 @@ void cdfDefRgrid(stream_t *streamptr, int gridID)
           lwarn = FALSE;
         }
 
+      char axisname[7] = "rgridX";
       if ( iz == 0 ) axisname[5] = '\0';
       else           sprintf(&axisname[5], "%1d", iz+1);
 
@@ -1627,8 +1626,6 @@ void cdfDefGdim(stream_t *streamptr, int gridID)
   int dimID = UNDEFID;
 
   int vlistID = streamptr->vlistID;
-  int fileID  = streamptr->fileID;
-
   int ngrids = vlistNgrids(vlistID);
 
   size_t dimlen = (size_t)gridInqSize(gridID);
@@ -1677,6 +1674,7 @@ void cdfDefGdim(stream_t *streamptr, int gridID)
 
   if ( dimID == UNDEFID )
     {
+      int fileID  = streamptr->fileID;
       char dimname[CDI_MAX_NAME];
       strcpy(dimname, "gsize");
 
