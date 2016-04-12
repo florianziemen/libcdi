@@ -926,7 +926,6 @@ cdfDefSPorFC(stream_t *streamptr, int gridID,
   int dimID = UNDEFID;
 
   int vlistID = streamptr->vlistID;
-  int fileID  = streamptr->fileID;
 
   int ngrids = vlistNgrids(vlistID);
 
@@ -954,6 +953,7 @@ cdfDefSPorFC(stream_t *streamptr, int gridID,
 
   if ( dimID == UNDEFID )
     {
+      int fileID  = streamptr->fileID;
       if ( iz == 0 ) axisname[3] = '\0';
       else           sprintf(&axisname[3], "%1d", iz+1);
 
