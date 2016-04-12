@@ -753,8 +753,6 @@ void cdfDefForecastTimeUnits(char *unitstr, int timeunit)
 static
 void cdfDefCalendar(int fileID, int ncvarid, int calendar)
 {
-  size_t len = 0;
-  const char *calstr;
   static const struct { int calCode; const char *calStr; } calTab[] = {
     { CALENDAR_STANDARD, "standard" },
     { CALENDAR_PROLEPTIC, "proleptic_gregorian" },
@@ -768,8 +766,8 @@ void cdfDefCalendar(int fileID, int ncvarid, int calendar)
   for (size_t i = 0; i < calTabSize; ++i)
     if (calTab[i].calCode == calendar)
       {
-        calstr = calTab[i].calStr;
-        len = strlen(calstr);
+        const char *calstr = calTab[i].calStr;
+        size_t len = strlen(calstr);
         cdf_put_att_text(fileID, ncvarid, "calendar", len, calstr);
         break;
       }
