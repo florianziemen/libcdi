@@ -3644,17 +3644,15 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
             }
           else if ( strcmp(attname, "cell_measures") == 0 && xtypeIsText(atttype) )
             {
-              char *cell_measures = NULL, *cell_var = NULL;
-
               cdfGetAttText(ncid, ncvarid, attname, attstringlen, attstring);
               char *pstring = attstring;
 
               while ( isspace((int) *pstring) ) pstring++;
-              cell_measures = pstring;
+              char *cell_measures = pstring;
               while ( isalnum((int) *pstring) ) pstring++;
               *pstring++ = 0;
               while ( isspace((int) *pstring) ) pstring++;
-              cell_var = pstring;
+              char *cell_var = pstring;
               while ( ! isspace((int) *pstring) && *pstring != 0 ) pstring++;
               *pstring++ = 0;
               /*
@@ -3707,8 +3705,6 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
           */
           else if ( (strcmp(attname, "associate")  == 0 || strcmp(attname, "coordinates") == 0) && xtypeIsText(atttype) )
             {
-              int status;
-              char *varname = NULL;
               int lstop = FALSE;
               int dimvarid;
 
@@ -3719,12 +3715,12 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
                 {
                   while ( isspace((int) *pstring) ) pstring++;
                   if ( *pstring == 0 ) break;
-                  varname = pstring;
+                  char *varname = pstring;
                   while ( !isspace((int) *pstring) && *pstring != 0 ) pstring++;
                   if ( *pstring == 0 ) lstop = TRUE;
                   *pstring++ = 0;
 
-                  status = nc_inq_varid(ncid, varname, &dimvarid);
+                  int status = nc_inq_varid(ncid, varname, &dimvarid);
                   if ( status == NC_NOERR )
                     {
                       cdfSetVar(ncvars, dimvarid, FALSE);
@@ -3754,8 +3750,6 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
             }
           else if ( (strcmp(attname, "auxiliary_variable") == 0) && xtypeIsText(atttype) )
             {
-              int status;
-              char *varname = NULL;
               int lstop = FALSE;
               int dimvarid;
 
@@ -3766,12 +3760,12 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
                 {
                   while ( isspace((int) *pstring) ) pstring++;
                   if ( *pstring == 0 ) break;
-                  varname = pstring;
+                  char *varname = pstring;
                   while ( !isspace((int) *pstring) && *pstring != 0 ) pstring++;
                   if ( *pstring == 0 ) lstop = TRUE;
                   *pstring++ = 0;
 
-                  status = nc_inq_varid(ncid, varname, &dimvarid);
+                  int status = nc_inq_varid(ncid, varname, &dimvarid);
                   if ( status == NC_NOERR )
                     {
                       cdfSetVar(ncvars, dimvarid, FALSE);
