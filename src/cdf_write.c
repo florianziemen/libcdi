@@ -724,17 +724,18 @@ int cdfDefVar(stream_t *streamptr, int varID)
 
   if ( zid == -1 )
     {
-      if ( zaxisInqType(zaxisID) == ZAXIS_CLOUD_BASE          ||
-           zaxisInqType(zaxisID) == ZAXIS_CLOUD_TOP           ||
-           zaxisInqType(zaxisID) == ZAXIS_ISOTHERM_ZERO       ||
-           zaxisInqType(zaxisID) == ZAXIS_TOA                 ||
-           zaxisInqType(zaxisID) == ZAXIS_SEA_BOTTOM          ||
-           zaxisInqType(zaxisID) == ZAXIS_LAKE_BOTTOM         ||
-           zaxisInqType(zaxisID) == ZAXIS_SEDIMENT_BOTTOM     ||
-           zaxisInqType(zaxisID) == ZAXIS_SEDIMENT_BOTTOM_TA  ||
-           zaxisInqType(zaxisID) == ZAXIS_SEDIMENT_BOTTOM_TW  ||
-           zaxisInqType(zaxisID) == ZAXIS_MIX_LAYER           ||
-           zaxisInqType(zaxisID) == ZAXIS_ATMOSPHERE )
+      int ztype = zaxisInqType(zaxisID);
+      if ( ztype == ZAXIS_CLOUD_BASE          ||
+           ztype == ZAXIS_CLOUD_TOP           ||
+           ztype == ZAXIS_ISOTHERM_ZERO       ||
+           ztype == ZAXIS_TOA                 ||
+           ztype == ZAXIS_SEA_BOTTOM          ||
+           ztype == ZAXIS_LAKE_BOTTOM         ||
+           ztype == ZAXIS_SEDIMENT_BOTTOM     ||
+           ztype == ZAXIS_SEDIMENT_BOTTOM_TA  ||
+           ztype == ZAXIS_SEDIMENT_BOTTOM_TW  ||
+           ztype == ZAXIS_MIX_LAYER           ||
+           ztype == ZAXIS_ATMOSPHERE )
         {
           zaxisInqName(zaxisID, varname);
           cdf_put_att_text(fileID, ncvarid, "level_type", strlen(varname), varname);
