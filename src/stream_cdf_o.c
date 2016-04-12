@@ -263,15 +263,24 @@ cdfDefTrajLatLon(stream_t *streamptr, int gridID, int gridindex,
     {
       int dimNcID = streamptr->basetime.ncvarid;
       int fileID  = streamptr->fileID;
-      if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
+      bool switch2Data = false;
+      if ( streamptr->ncmode == 2 )
+        {
+          cdf_redef(fileID);
+          switch2Data = true;
+          streamptr->ncmode = 1;
+        }
 
       char axisname[CDI_MAX_NAME]; axisname[0] = 0;
       int keyname = (dimtype == 'X') ? CDI_KEY_XNAME : CDI_KEY_YNAME;
       inqs->axisName(gridID, keyname, CDI_MAX_NAME, axisname);
       cdf_def_var(fileID, axisname, xtype, 1, &dimNcID, &ncvarid);
       cdfPutGridStdAtts(fileID, ncvarid, gridID, dimtype, inqs);
-      cdf_enddef(fileID);
-      streamptr->ncmode = 2;
+      if (switch2Data)
+        {
+          cdf_enddef(fileID);
+          streamptr->ncmode = 2;
+        }
     }
 
   ncgrid[gridindex].gridID = gridID;
