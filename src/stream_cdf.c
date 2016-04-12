@@ -520,7 +520,6 @@ int cdfInqDatatype(int xtype, int lunsigned)
 
 void cdfCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
 {
-  int memtype  = MEMTYPE_DOUBLE;
   int vlistID1 = streamptr1->vlistID;
   int tsID     = streamptr1->curTsID;
   int vrecID   = streamptr1->tsteps[tsID].curRecID;
@@ -529,14 +528,11 @@ void cdfCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
   int gridID   = vlistInqVarGrid(vlistID1, ivarID);
   int datasize = gridInqSize(gridID);
   int datatype = vlistInqVarDatatype(vlistID1, ivarID);
+  int memtype  = datatype != DATATYPE_FLT32 ? MEMTYPE_DOUBLE : MEMTYPE_FLOAT;
 
-  if ( datatype == DATATYPE_FLT32 ) memtype = MEMTYPE_FLOAT;
-
-  void *data = NULL;
-  if ( memtype == MEMTYPE_DOUBLE )
-    data = Malloc((size_t)datasize*sizeof(double));
-  else
-    data = Malloc((size_t)datasize*sizeof(float));
+  void *data
+    = Malloc((size_t)datasize
+             * (memtype == MEMTYPE_DOUBLE ? sizeof(double) : sizeof(float)));
 
   int nmiss;
   cdf_read_record(streamptr1, memtype, data, &nmiss);
