@@ -12,6 +12,7 @@
 #include "dmemory.h"
 #include "stream_cdf.h"
 #include "cdf_int.h"
+#include "vlist.h"
 
 static int
 cdfDefTimeBounds(int fileID, int nctimevarid, int nctimedimid, const char *taxis_name, taxis_t *taxis)
@@ -53,7 +54,7 @@ cdfDefTimeBounds(int fileID, int nctimevarid, int nctimedimid, const char *taxis
   return time_bndsid;
 }
 
-const char *
+static const char *
 cdfGetTimeUnits(taxis_t *taxis)
 {
   const char *unitstr;
@@ -236,6 +237,68 @@ cdfDefTime(stream_t *streamptr)
   cdf_put_att_text(fileID, timeVarId, "axis", 1, "T");
 
   if (streamptr->ncmode == 2) cdf_enddef(fileID);
+}
+
+void
+cdfDefTimestep(stream_t *streamptr, int tsID)
+{
+  const int time_varid = streamptr->basetime.ncvarid;
+  if (time_varid != CDI_UNDEFID && tsID == 0)
+    {
+      taxis_t *taxis = taxisPtr(vlistInqTaxis(streamptr->vlistID));
+      const int fileID = streamptr->fileID;
+      const char *unitstr = cdfGetTimeUnits(taxis);
+      const size_t len = strlen(unitstr);
+      if (len) cdf_put_att_text(fileID, time_varid, "units", len, unitstr);
+    }
+
+  const int fileID = streamptr->fileID;
+
+  if (CDI_Debug) Message("streamID = %d, fileID = %d, tsID = %d", streamptr->self, fileID, tsID);
+
+  taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
+
+  if (streamptr->ncmode == 1)
+    {
+      cdf_enddef(fileID);
+      streamptr->ncmode = 2;
+    }
+
+  if (streamptr->accessmode == 0)
+    {
+      cdfEndDef(streamptr);
+    }
+
+  double timeValue = cdi_encode_timeval(taxis->vDateTime, &streamptr->tsteps[0].taxis);
+  if (CDI_Debug) Message("tsID = %d  timeValue = %f", tsID, timeValue);
+
+  int ncvarid = streamptr->basetime.ncvarid;
+  size_t index = (size_t) tsID;
+  cdf_put_var1_double(fileID, ncvarid, &index, &timeValue);
+
+  if (taxis->has_bounds)
+    {
+      ncvarid = streamptr->basetime.ncvarboundsid;
+      if (ncvarid == CDI_UNDEFID) Error("Call to taxisWithBounds() missing!");
+
+      timeValue = cdi_encode_timeval(taxis->vDateTime_lb, &streamptr->tsteps[0].taxis);
+      size_t start[2] = { tsID, 0 }, count[2] = { 1, 1 };
+      cdf_put_vara_double(fileID, ncvarid, start, count, &timeValue);
+
+      timeValue = cdi_encode_timeval(taxis->vDateTime_ub, &streamptr->tsteps[0].taxis);
+      start[0] = (size_t) tsID;
+      count[0] = 1;
+      start[1] = 1;
+      count[1] = 1;
+      cdf_put_vara_double(fileID, ncvarid, start, count, &timeValue);
+    }
+
+  ncvarid = streamptr->basetime.leadtimeid;
+  if (taxis->type == TAXIS_FORECAST && ncvarid != CDI_UNDEFID)
+    {
+      timeValue = taxis->fc_period;
+      cdf_put_var1_double(fileID, ncvarid, &index, &timeValue);
+    }
 }
 
 #endif

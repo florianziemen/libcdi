@@ -47,7 +47,6 @@ void cdf_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
 void cdf_write_var_chunk(stream_t *streamptr, int varID, int memtype, const int rect[][2], const void *data, size_t nmiss);
 
 void cdfDefVarDeflate(int ncid, int ncvarid, int deflateLevel);
-const char *cdfGetTimeUnits(taxis_t *taxis);
 void cdfDefTime(stream_t *streamptr);
 
 void cdf_scale_add(size_t size, double *data, double addoffset, double scalefactor);
