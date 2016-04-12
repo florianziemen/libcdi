@@ -14,6 +14,7 @@
 #  include "dmemory.h"
 #  include "stream_cdf.h"
 #  include "cdf_int.h"
+#  include "vlist.h"
 
 static
 int cdfDefTimeBounds(int fileID, int nctimevarid, int nctimedimid, const char *taxis_name, taxis_t* taxis)
@@ -57,7 +58,7 @@ int cdfDefTimeBounds(int fileID, int nctimevarid, int nctimedimid, const char *t
   return time_bndsid;
 }
 
-const char *
+static const char *
 cdfGetTimeUnits(taxis_t *taxis)
 {
   const char *unitstr;
@@ -256,6 +257,77 @@ void cdfDefTime(stream_t* streamptr)
   if ( streamptr->ncmode == 2 ) cdf_enddef(fileID);
 }
 
+
+static
+void cdfDefTimeValue(stream_t *streamptr, int tsID)
+{
+  int fileID = streamptr->fileID;
+
+  if ( CDI_Debug )
+    Message("streamID = %d, fileID = %d", streamptr->self, fileID);
+
+  taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
+
+  if ( streamptr->ncmode == 1 )
+    {
+      cdf_enddef(fileID);
+      streamptr->ncmode = 2;
+    }
+
+  double timevalue = cdiEncodeTimeval(taxis->vdate, taxis->vtime, &streamptr->tsteps[0].taxis);
+  if ( CDI_Debug ) Message("tsID = %d  timevalue = %f", tsID, timevalue);
+
+  int ncvarid = streamptr->basetime.ncvarid;
+  size_t index = (size_t)tsID;
+  cdf_put_var1_double(fileID, ncvarid, &index, &timevalue);
+
+  if ( taxis->has_bounds )
+    {
+      size_t start[2], count[2];
+
+      ncvarid = streamptr->basetime.ncvarboundsid;
+
+      timevalue = cdiEncodeTimeval(taxis->vdate_lb, taxis->vtime_lb, &streamptr->tsteps[0].taxis);
+      start[0] = (size_t)tsID; count[0] = 1; start[1] = 0; count[1] = 1;
+      cdf_put_vara_double(fileID, ncvarid, start, count, &timevalue);
+
+      timevalue = cdiEncodeTimeval(taxis->vdate_ub, taxis->vtime_ub, &streamptr->tsteps[0].taxis);
+      start[0] = (size_t)tsID; count[0] = 1; start[1] = 1; count[1] = 1;
+      cdf_put_vara_double(fileID, ncvarid, start, count, &timevalue);
+    }
+
+  ncvarid = streamptr->basetime.leadtimeid;
+  if ( taxis->type == TAXIS_FORECAST && ncvarid != CDI_UNDEFID )
+    {
+      timevalue = taxis->fc_period;
+      cdf_put_var1_double(fileID, ncvarid, &index, &timevalue);
+    }
+}
+
+
+void cdfDefTimestep(stream_t *streamptr, int tsID)
+{
+  int vlistID = streamptr->vlistID;
+
+  int time_varid = streamptr->basetime.ncvarid;
+  if ( vlistHasTime(vlistID) ) cdfDefTime(streamptr);
+  if ( time_varid != CDI_UNDEFID && tsID == 0 )
+    {
+      taxis_t *taxis = taxisPtr(vlistInqTaxis(vlistID));
+      const char *unitstr = cdfGetTimeUnits(taxis);
+      size_t len = strlen(unitstr);
+      if ( len )
+        {
+          int fileID = streamptr->fileID;
+          cdf_put_att_text(fileID, time_varid, "units", len, unitstr);
+          /*
+            if ( taxis->has_bounds )
+            cdf_put_att_text(fileID, time_bndsid, "units", len, unitstr);
+          */
+        }
+    }
+  cdfDefTimeValue(streamptr, tsID);
+}
 
 #endif
 /*
