@@ -1358,7 +1358,7 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int ndims,
 static void
 finishCyclicXBounds(double *pbounds, size_t dimlen, const double *pvals)
 {
-  pbounds[0] = (pvals[0] + pvals[dimlen-1]-360)/2;
+  pbounds[0] = (pvals[0] + pvals[dimlen-1]-360)*0.5;
   pbounds[2*dimlen-1] = (pvals[dimlen-1] + pvals[0]+360)*0.5;
 }
 
@@ -1373,8 +1373,8 @@ void cdfDefXaxis(stream_t *streamptr, int gridID, int ndims)
 static void
 finishCyclicYBounds(double *pbounds, size_t dimlen, const double *pvals)
 {
-  pbounds[0] = (pvals[0] < 0) ? -90 : 90;
-  pbounds[2*dimlen-1] = (pvals[dimlen-1] < 0) ? -90 : 90;
+  pbounds[0] = copysign(90.0, pvals[0]);
+  pbounds[2*dimlen-1] = copysign(90.0, pvals[dimlen-1]);
 }
 
 static
