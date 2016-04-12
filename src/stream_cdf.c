@@ -1338,7 +1338,7 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int ndims,
               memcpy(boundsname + extendedAxisnameLen + 1, bndsName, sizeof bndsName);
               int dimIDs[2] = { dimID, nvdimID };
               cdf_def_var(fileID, boundsname, xtype, 2, dimIDs, &ncbvarid);
-              cdf_put_att_text(fileID, ncvarid, "bounds", extendedAxisnameLen + sizeof (bndsName), axisname);
+              cdf_put_att_text(fileID, ncvarid, "bounds", extendedAxisnameLen + sizeof (bndsName), boundsname);
             }
         }
 
