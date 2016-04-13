@@ -1154,9 +1154,9 @@ cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int *ncvaridp, int zaxisI
       if (p0name[0] == 0) strcpy(p0name, "p0");
       cdf_def_var(fileID, p0name, NC_DOUBLE, 0, 0, &p0varid);
       static const char longname[] = "reference pressure";
-      cdf_put_att_text(fileID, p0varid, "long_name", strlen(longname), longname);
+      cdf_put_att_text(fileID, p0varid, "long_name", sizeof(longname) - 1, longname);
       static const char units[] = "Pa";
-      cdf_put_att_text(fileID, p0varid, "units", strlen(units), units);
+      cdf_put_att_text(fileID, p0varid, "units", sizeof(units) - 1, units);
     }
 
   char zname[CDI_MAX_NAME];
@@ -1166,35 +1166,46 @@ cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int *ncvaridp, int zaxisI
   cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_NAME, zname, &length);
   if (zname[0]) strcpy(axisname, zname);
   zlongname[0] = 0;
-  if (zlongname[0] == 0) strcpy(zlongname, "hybrid sigma pressure coordinate");
+  size_t zlongnameLen;
+  if (zlongname[0] == 0)
+    {
+      static const char default_zlongname[] = "hybrid sigma pressure coordinate";
+      memcpy(zlongname, default_zlongname, sizeof(default_zlongname));
+      zlongnameLen = sizeof(default_zlongname) - 1;
+    }
+  else
+    zlongnameLen = strlen(zlongname);
   length = CDI_MAX_NAME;
   cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_UNITS, zunits, &length);
+  size_t zunitsLen;
   if (zunits[0] == 0)
     {
       zunits[0] = '1';
       zunits[1] = '\0';
+      zunitsLen = 1;
     }
+  else
+    zunitsLen = strlen(zunits);
 
   cdf_def_dim(fileID, axisname, dimlen, dimID);
   cdf_def_var(fileID, axisname, (nc_type) xtype, 1, dimID, ncvaridp);
   int ncvarid = *ncvaridp;
 
   {
-    static const char sname[] = "standard_name", sname_v[] = "atmosphere_hybrid_sigma_pressure_coordinate", axis[] = "axis",
-                      axis_v[] = "Z", direction[] = "positive", direction_v[] = "down";
-    static const struct attTxtTab2 tab[] = {
+    static const char sname[] = "standard_name", lname[] = "long_name", sname_v[] = "atmosphere_hybrid_sigma_pressure_coordinate",
+                      axis[] = "axis", axis_v[] = "Z", direction[] = "positive", direction_v[] = "down", units[] = "units";
+    struct attTxtTab2 tab[] = {
       { sname, sname_v, sizeof(sname_v) - 1 },
       { axis, axis_v, sizeof(axis_v) - 1 },
       { direction, direction_v, sizeof(direction_v) - 1 },
+      { units, zunits, zunitsLen },
+      { lname, zlongname, zlongnameLen },
     };
     enum
     {
       nAtt = sizeof(tab) / sizeof(tab[0])
     };
     for (size_t i = 0; i < nAtt; ++i) cdf_put_att_text(fileID, ncvarid, tab[i].attName, tab[i].valLen, tab[i].attVal);
-
-    cdf_put_att_text(fileID, ncvarid, "long_name", strlen(zlongname), zlongname);
-    cdf_put_att_text(fileID, ncvarid, "units", strlen(zunits), zunits);
   }
 
   size_t len = 0;
@@ -1244,24 +1255,25 @@ cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int *ncvaridp, int zaxisI
         int dimIDs[2] = { *dimID, nvdimID };
         cdf_def_var(fileID, axisname, (nc_type) xtype, 2, dimIDs, &ncbvarid);
         cdf_put_att_text(fileID, ncvarid, "bounds", axisnameLen, axisname);
+        size_t formulatermsLen;
+        if (p0status == 0)
+          formulatermsLen = (size_t) (sprintf(txt, "%s%s %s%s", "a: a_bnds b: b_bnds p0: ", p0name, "ps: ", psname));
+        else
+          formulatermsLen = (size_t) (sprintf(txt, "%s%s", "ap: ap_bnds b: b_bnds ps: ", psname));
         {
-          static const char sname[] = "standard_name", sname_v[] = "atmosphere_hybrid_sigma_pressure_coordinate";
-          static const struct attTxtTab2 tab[] = {
+          static const char sname[] = "standard_name", sname_v[] = "atmosphere_hybrid_sigma_pressure_coordinate",
+                            formulaterms[] = "formula_terms", units[] = "units";
+          struct attTxtTab2 tab[] = {
             { sname, sname_v, sizeof(sname_v) - 1 },
+            { units, zunits, zunitsLen },
+            { formulaterms, txt, formulatermsLen },
           };
           enum
           {
             nAtt = sizeof(tab) / sizeof(tab[0])
           };
           for (size_t i = 0; i < nAtt; ++i) cdf_put_att_text(fileID, ncbvarid, tab[i].attName, tab[i].valLen, tab[i].attVal);
-          cdf_put_att_text(fileID, ncbvarid, "units", strlen(zunits), zunits);
         }
-
-        if (p0status == 0)
-          len = (size_t) (snprintf(txt, sizeof(txt), "%s%s %s%s", "a: a_bnds b: b_bnds p0: ", p0name, "ps: ", psname));
-        else
-          len = (size_t) (snprintf(txt, sizeof(txt), "%s%s", "ap: ap_bnds b: b_bnds ps: ", psname));
-        cdf_put_att_text(fileID, ncbvarid, "formula_terms", len, txt);
       }
   }
 
