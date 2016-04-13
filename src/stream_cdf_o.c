@@ -1026,9 +1026,7 @@ void cdf_def_vct_cf(stream_t *streamptr, int zaxisID, int nclevID, int ncbndsID,
 
       if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
-      int dimIDs[2];
-      dimIDs[0] = nclevID;
-      dimIDs[1] = ncbndsID;
+      int dimIDs[2] = { nclevID, ncbndsID };
 
       streamptr->vct.mlev   = mlev;
       streamptr->vct.ilev   = ilev;
