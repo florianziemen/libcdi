@@ -756,7 +756,6 @@ cdfDefIrregularGridCommon(stream_t *streamptr, int gridID, size_t xdimlen, size_
   int xdimID = CDI_UNDEFID;
   int ydimID = CDI_UNDEFID;
   int ncxvarid = CDI_UNDEFID, ncyvarid = CDI_UNDEFID, ncavarid = CDI_UNDEFID;
-  int ncbxvarid = CDI_UNDEFID, ncbyvarid = CDI_UNDEFID;
   const int fileID = streamptr->fileID;
   bool switchNCMode = streamptr->ncmode == 2;
   if (switchNCMode)
@@ -840,6 +839,7 @@ cdfDefIrregularGridCommon(stream_t *streamptr, int gridID, size_t xdimlen, size_
           const size_t xaxisnameLen = strlen(xaxisname);
           xaxisname[xaxisnameLen] = '_';
           memcpy(xaxisname + xaxisnameLen + 1, bndsName, sizeof(bndsName));
+          int ncbxvarid;
           cdf_def_var(fileID, xaxisname, xtype, ndims, dimIDs, &ncbxvarid);
           cdfGridCompress(fileID, ncbxvarid, xdimlen * ydimlen, streamptr->filetype, streamptr->comptype);
 
@@ -870,6 +870,7 @@ cdfDefIrregularGridCommon(stream_t *streamptr, int gridID, size_t xdimlen, size_
           const size_t yaxisnameLen = strlen(yaxisname);
           yaxisname[yaxisnameLen] = '_';
           memcpy(yaxisname + yaxisnameLen + 1, bndsName, sizeof(bndsName));
+          int ncbyvarid;
           cdf_def_var(fileID, yaxisname, xtype, ndims, dimIDs, &ncbyvarid);
           cdfGridCompress(fileID, ncbyvarid, xdimlen * ydimlen, streamptr->filetype, streamptr->comptype);
 
