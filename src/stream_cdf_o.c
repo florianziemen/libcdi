@@ -1373,16 +1373,8 @@ static void
 cdfDefZaxis(stream_t *streamptr, int zaxisID)
 {
   // char zaxisname0[CDI_MAX_NAME];
-  int dimID = CDI_UNDEFID;
   int ncvarid = CDI_UNDEFID, ncbvarid = CDI_UNDEFID;
   const int xtype = zaxis_inq_xtype(zaxisID);
-
-  const int vlistID = streamptr->vlistID;
-  const int fileID = streamptr->fileID;
-
-  const int zaxisindex = vlistZaxisIndex(vlistID, zaxisID);
-
-  const int nzaxis = vlistNzaxis(vlistID);
 
   const size_t dimlen = (size_t) zaxisInqSize(zaxisID);
   const int type = zaxisInqType(zaxisID);
@@ -1420,113 +1412,115 @@ cdfDefZaxis(stream_t *streamptr, int zaxisID)
         }
     }
 
+  const int vlistID = streamptr->vlistID;
   char axisname[CDI_MAX_NAME];
   int length = CDI_MAX_NAME;
   cdiInqKeyString(zaxisID, CDI_GLOBAL, CDI_KEY_NAME, axisname, &length);
+  const int zaxisindex = vlistZaxisIndex(vlistID, zaxisID);
+  const int nzaxis = vlistNzaxis(vlistID);
+  const int fileID = streamptr->fileID;
 
-  if (dimID == CDI_UNDEFID)
+  checkZaxisName(axisname, fileID, vlistID, zaxisID, nzaxis);
+
+  char dimname[CDI_MAX_NAME + 3];
+  dimname[0] = 0;
+  if (dimname[0] == 0) strcpy(dimname, axisname);
+
+  if (type == ZAXIS_REFERENCE) cdfDefZaxisUUID(streamptr, zaxisID);
+
+  int dimID;
+  if (type == ZAXIS_HYBRID || type == ZAXIS_HYBRID_HALF)
     {
-      checkZaxisName(axisname, fileID, vlistID, zaxisID, nzaxis);
+      cdf_def_zaxis_hybrid(streamptr, type, &ncvarid, zaxisID, zaxisindex, xtype, dimlen, &dimID, axisname);
 
-      char dimname[CDI_MAX_NAME + 3];
-      dimname[0] = 0;
-      if (dimname[0] == 0) strcpy(dimname, axisname);
-
-      if (type == ZAXIS_REFERENCE) cdfDefZaxisUUID(streamptr, zaxisID);
-
-      if (type == ZAXIS_HYBRID || type == ZAXIS_HYBRID_HALF)
-        {
-          cdf_def_zaxis_hybrid(streamptr, type, &ncvarid, zaxisID, zaxisindex, xtype, dimlen, &dimID, axisname);
-
-          int natts;
-          cdiInqNatts(zaxisID, CDI_GLOBAL, &natts);
-          if (natts > 0 && streamptr->ncmode == 2) cdf_redef(fileID);
-          cdfDefineAttributes(zaxisID, CDI_GLOBAL, fileID, ncvarid);
-          if (natts > 0 && streamptr->ncmode == 2) cdf_enddef(fileID);
-        }
+      int natts;
+      cdiInqNatts(zaxisID, CDI_GLOBAL, &natts);
+      if (natts > 0 && streamptr->ncmode == 2) cdf_redef(fileID);
+      cdfDefineAttributes(zaxisID, CDI_GLOBAL, fileID, ncvarid);
+      if (natts > 0 && streamptr->ncmode == 2) cdf_enddef(fileID);
+    }
 #ifndef USE_MPI
-      else if (type == ZAXIS_CHAR)
-        cdfDefZaxisChar(streamptr, zaxisID, axisname, &dimID, dimlen, zaxisindex);
+  else if (type == ZAXIS_CHAR)
+    cdfDefZaxisChar(streamptr, zaxisID, axisname, &dimID, dimlen, zaxisindex);
 #endif
-      else
+  else
+    {
+      dimID = checkDimName(fileID, dimlen, dimname);
+
+      if (streamptr->ncmode == 2) cdf_redef(fileID);
+
+      if (ndims && dimID == CDI_UNDEFID) cdf_def_dim(fileID, dimname, dimlen, &dimID);
+
+      if (zaxisInqLevels(zaxisID, NULL))
         {
-          dimID = checkDimName(fileID, dimlen, dimname);
+          cdf_def_var(fileID, axisname, (nc_type) xtype, ndims, &dimID, &ncvarid);
 
-          if (streamptr->ncmode == 2) cdf_redef(fileID);
+          cdfPutGridStdAtts(fileID, ncvarid, zaxisID, 'Z');
 
-          if (ndims && dimID == CDI_UNDEFID) cdf_def_dim(fileID, dimname, dimlen, &dimID);
-
-          if (zaxisInqLevels(zaxisID, NULL))
-            {
-              cdf_def_var(fileID, axisname, (nc_type) xtype, ndims, &dimID, &ncvarid);
-
-              cdfPutGridStdAtts(fileID, ncvarid, zaxisID, 'Z');
-
+          {
+            const int positive = zaxisInqPositive(zaxisID);
+            static const char positive_up[] = "up", positive_down[] = "down";
+            static const struct attTxtTab tab[2] = {
+              { positive_up, sizeof(positive_up) - 1 },
+              { positive_down, sizeof(positive_down) - 1 },
+            };
+            if (positive == POSITIVE_UP || positive == POSITIVE_DOWN)
               {
-                const int positive = zaxisInqPositive(zaxisID);
-                static const char positive_up[] = "up", positive_down[] = "down";
-                static const struct attTxtTab tab[2] = {
-                  { positive_up, sizeof(positive_up) - 1 },
-                  { positive_down, sizeof(positive_down) - 1 },
-                };
-                if (positive == POSITIVE_UP || positive == POSITIVE_DOWN)
-                  {
-                    const size_t select = (positive == POSITIVE_DOWN);
-                    cdf_put_att_text(fileID, ncvarid, "positive", tab[select].txtLen, tab[select].txt);
-                  }
+                const size_t select = (positive == POSITIVE_DOWN);
+                cdf_put_att_text(fileID, ncvarid, "positive", tab[select].txtLen, tab[select].txt);
               }
-              cdf_put_att_text(fileID, ncvarid, "axis", 1, "Z");
+          }
+          cdf_put_att_text(fileID, ncvarid, "axis", 1, "Z");
 
-              if (zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL))
-                {
-                  int nvdimID = CDI_UNDEFID;
-                  const size_t nvertex = 2;
-                  if (nc_inq_dimid(fileID, bndsName, &nvdimID) != NC_NOERR) cdf_def_dim(fileID, bndsName, nvertex, &nvdimID);
-
-                  if (nvdimID != CDI_UNDEFID)
-                    {
-                      const size_t axisnameLen = strlen(axisname);
-                      axisname[axisnameLen] = '_';
-                      memcpy(axisname + axisnameLen + 1, bndsName, sizeof(bndsName));
-                      int dimIDs[2];
-                      dimIDs[0] = dimID;
-                      dimIDs[ndims] = nvdimID;
-                      cdf_def_var(fileID, axisname, (nc_type) xtype, ndims + 1, dimIDs, &ncbvarid);
-                      cdf_put_att_text(fileID, ncvarid, "bounds", strlen(axisname), axisname);
-                    }
-                }
-
-              cdfDefineAttributes(zaxisID, CDI_GLOBAL, fileID, ncvarid);
-            }
-
-          cdf_enddef(fileID);
-          streamptr->ncmode = 2;
-
-          if (zaxisInqLevels(zaxisID, NULL))
+          if (zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL))
             {
-              cdf_put_var_double(fileID, ncvarid, zaxisInqLevelsPtr(zaxisID));
+              int nvdimID = CDI_UNDEFID;
+              const size_t nvertex = 2;
+              if (nc_inq_dimid(fileID, bndsName, &nvdimID) != NC_NOERR) cdf_def_dim(fileID, bndsName, nvertex, &nvdimID);
 
-              if (ncbvarid != CDI_UNDEFID)
+              if (nvdimID != CDI_UNDEFID)
                 {
-                  double *buffer = (double *) malloc(4 * dimlen * sizeof(double));
-                  double *zbounds = buffer;
-                  double *lbounds = buffer + 2 * dimlen;
-                  double *ubounds = buffer + 3 * dimlen;
-                  zaxisInqLbounds(zaxisID, lbounds);
-                  zaxisInqUbounds(zaxisID, ubounds);
-                  for (size_t i = 0; i < dimlen; ++i)
-                    {
-                      zbounds[2 * i] = lbounds[i];
-                      zbounds[2 * i + 1] = ubounds[i];
-                    }
+                  const size_t axisnameLen = strlen(axisname);
+                  axisname[axisnameLen] = '_';
+                  memcpy(axisname + axisnameLen + 1, bndsName, sizeof(bndsName));
+                  int dimIDs[2];
+                  dimIDs[0] = dimID;
+                  dimIDs[ndims] = nvdimID;
+                  cdf_def_var(fileID, axisname, (nc_type) xtype, ndims + 1, dimIDs, &ncbvarid);
+                  cdf_put_att_text(fileID, ncvarid, "bounds", strlen(axisname), axisname);
+                }
+            }
 
-                  cdf_put_var_double(fileID, ncbvarid, zbounds);
+          cdfDefineAttributes(zaxisID, CDI_GLOBAL, fileID, ncvarid);
+        }
 
-                  free(buffer);
+      cdf_enddef(fileID);
+      streamptr->ncmode = 2;
+
+      if (zaxisInqLevels(zaxisID, NULL))
+        {
+          cdf_put_var_double(fileID, ncvarid, zaxisInqLevelsPtr(zaxisID));
+
+          if (ncbvarid != CDI_UNDEFID)
+            {
+              double *buffer = (double *) malloc(4 * dimlen * sizeof(double));
+              double *zbounds = buffer;
+              double *lbounds = buffer + 2 * dimlen;
+              double *ubounds = buffer + 3 * dimlen;
+              zaxisInqLbounds(zaxisID, lbounds);
+              zaxisInqUbounds(zaxisID, ubounds);
+              for (size_t i = 0; i < dimlen; ++i)
+                {
+                  zbounds[2 * i] = lbounds[i];
+                  zbounds[2 * i + 1] = ubounds[i];
                 }
 
-              if (ndims == 0) streamptr->nczvarID[zaxisindex] = ncvarid;
+              cdf_put_var_double(fileID, ncbvarid, zbounds);
+
+              free(buffer);
             }
+
+          if (ndims == 0) streamptr->nczvarID[zaxisindex] = ncvarid;
         }
     }
 
