@@ -1154,7 +1154,7 @@ cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int *ncvaridp, int zaxisI
   {
     static const char sname[] = "standard_name", sname_v[] = "atmosphere_hybrid_sigma_pressure_coordinate", axis[] = "axis",
                       axis_v[] = "Z", direction[] = "positive", direction_v[] = "down";
-    struct attTxtTab2 tab[] = {
+    static const struct attTxtTab2 tab[] = {
       { sname, sname_v, sizeof(sname_v) - 1 },
       { axis, axis_v, sizeof(axis_v) - 1 },
       { direction, direction_v, sizeof(direction_v) - 1 },
@@ -1218,7 +1218,7 @@ cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int *ncvaridp, int zaxisI
         cdf_put_att_text(fileID, ncvarid, "bounds", axisnameLen, axisname);
         {
           static const char sname[] = "standard_name", sname_v[] = "atmosphere_hybrid_sigma_pressure_coordinate";
-          struct attTxtTab2 tab[] = {
+          static const struct attTxtTab2 tab[] = {
             { sname, sname_v, sizeof(sname_v) - 1 },
           };
           enum
