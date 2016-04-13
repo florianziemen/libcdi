@@ -1289,12 +1289,17 @@ void cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int *ncvaridp, int z
   int ncbvarid = CDI_UNDEFID;
   int nvdimID = CDI_UNDEFID;
 
-  double lbounds[dimlen], ubounds[dimlen], levels[dimlen];
+  double lbounds[dimlen], ubounds[dimlen];
+  double *restrict levels;
 
-  if ( zaxisInqLevels(zaxisID, NULL) )
-    zaxisInqLevels(zaxisID, levels);
+  bool hasLevels = zaxisInqLevels(zaxisID, NULL) != 0;
+  if ( hasLevels )
+    levels = (double *)zaxisInqLevelsPtr(zaxisID);
   else
-    for ( size_t i = 0; i < dimlen; ++i ) levels[i] = i+1;
+    {
+      levels = (double *)Malloc(sizeof (*levels) * dimlen);
+      for ( size_t i = 0; i < dimlen; ++i ) levels[i] = (double)(i+1);
+    }
 
   if ( zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL) )
     {
@@ -1350,6 +1355,7 @@ void cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int *ncvaridp, int z
   streamptr->ncmode = 2;
 
   cdf_put_var_double(fileID, ncvarid, levels);
+  if ( !hasLevels ) Free(levels);
 
   if ( p0varid != CDI_UNDEFID ) cdf_put_var_double(fileID, p0varid, &p0value);
 
