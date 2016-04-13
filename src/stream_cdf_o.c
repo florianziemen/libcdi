@@ -906,11 +906,10 @@ void cdf_def_vct_echam(stream_t *streamptr, int zaxisID)
 {
   int type = zaxisInqType(zaxisID);
 
-  if ( type == ZAXIS_HYBRID || type == ZAXIS_HYBRID_HALF )
+  int ilev;
+  if ( (type == ZAXIS_HYBRID || type == ZAXIS_HYBRID_HALF)
+       && (ilev = zaxisInqVctSize(zaxisID)/2) != 0 )
     {
-      int ilev = zaxisInqVctSize(zaxisID)/2;
-      if ( ilev == 0 ) return;
-
       int mlev = ilev - 1;
 
       if ( streamptr->vct.ilev > 0 )
@@ -1009,11 +1008,10 @@ void cdf_def_vct_cf(stream_t *streamptr, int zaxisID, int nclevID, int ncbndsID,
 {
   int type = zaxisInqType(zaxisID);
 
-  if ( type == ZAXIS_HYBRID || type == ZAXIS_HYBRID_HALF )
+  int ilev;
+  if ( (type == ZAXIS_HYBRID || type == ZAXIS_HYBRID_HALF)
+       && (ilev = zaxisInqVctSize(zaxisID)/2) != 0 )
     {
-      int ilev = zaxisInqVctSize(zaxisID)/2;
-      if ( ilev == 0 ) return;
-
       int mlev = ilev - 1;
       int hyaiid = 0, hybiid = 0, hyamid, hybmid;
 
