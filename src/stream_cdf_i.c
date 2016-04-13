@@ -4615,8 +4615,6 @@ cdfInqTimestep(stream_t *streamptr, int tsID)
       taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
       if (tsID > 0) ptaxisCopy(taxis, &streamptr->tsteps[0].taxis);
 
-      double timevalue = tsID;
-
       const int nctimevarid = streamptr->basetime.ncvarid;
       if (nctimevarid != CDI_UNDEFID && streamptr->basetime.lunits)
         {
@@ -4636,27 +4634,33 @@ cdfInqTimestep(stream_t *streamptr, int tsID)
                   streamptr->basetime.timevar_cache->maxvals = streamptr->ntsteps;
                 }
 #endif
-              timevalue = get_timevalue(fileID, nctimevarid, tsID, streamptr->basetime.timevar_cache);
+              double timevalue = get_timevalue(fileID, nctimevarid, tsID, streamptr->basetime.timevar_cache);
               taxis->vDateTime = cdi_decode_timeval(timevalue, taxis);
             }
 
           const int nctimeboundsid = streamptr->basetime.ncvarboundsid;
           if (nctimeboundsid != CDI_UNDEFID)
             {
-              double values[2];
-              const size_t start[2] = { tsID, 0 }, count[2] = { 1, 2 };
-              cdf_get_vara_double(fileID, nctimeboundsid, start, count, values);
-              if (values[0] >= NC_FILL_DOUBLE || values[0] < -NC_FILL_DOUBLE) values[0] = 0.0;
-              if (values[1] >= NC_FILL_DOUBLE || values[1] < -NC_FILL_DOUBLE) values[1] = 0.0;
+              enum
+              {
+                numBnds = 2,
+                tbNdims = 2
+              };
+              const size_t start[tbNdims] = { tsID, 0 };
+              static const size_t count[tbNdims] = { 1, numBnds };
+              double timeBnds[numBnds];
+              cdf_get_vara_double(fileID, nctimeboundsid, start, count, timeBnds);
+              for (size_t i = 0; i < numBnds; ++i)
+                if (timeBnds[i] >= NC_FILL_DOUBLE || timeBnds[i] < -NC_FILL_DOUBLE) timeBnds[i] = 0;
 
-              taxis->vDateTime_lb = cdi_decode_timeval(values[0], taxis);
-              taxis->vDateTime_ub = cdi_decode_timeval(values[1], taxis);
+              taxis->vDateTime_lb = cdi_decode_timeval(timeBnds[0], taxis);
+              taxis->vDateTime_ub = cdi_decode_timeval(timeBnds[1], taxis);
             }
 
           const int leadtimeid = streamptr->basetime.leadtimeid;
           if (leadtimeid != CDI_UNDEFID)
             {
-              timevalue = get_timevalue(fileID, leadtimeid, tsID, NULL);
+              double timevalue = get_timevalue(fileID, leadtimeid, tsID, NULL);
               cdiSetForecastPeriod(timevalue, taxis);
             }
         }
