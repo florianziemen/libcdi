@@ -1514,7 +1514,7 @@ cdfDefZaxis(stream_t *streamptr, int zaxisID)
                   dimIDs[0] = dimID;
                   dimIDs[ndims] = nvdimID;
                   cdf_def_var(fileID, axisname, (nc_type) xtype, ndims + 1, dimIDs, &ncbvarid);
-                  cdf_put_att_text(fileID, ncvarid, "bounds", strlen(axisname), axisname);
+                  cdf_put_att_text(fileID, ncvarid, "bounds", axisnameLen + sizeof(bndsName), axisname);
                 }
             }
 
