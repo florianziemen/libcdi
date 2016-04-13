@@ -893,6 +893,8 @@ void cdfDefUnstructured(stream_t *streamptr, int gridID, int gridindex)
   ncgrid[gridindex].ncIDs[CDF_VARID_A] = ncavarid;
 }
 
+struct attTxtTab { const char *txt; size_t txtLen; };
+
 struct attTxtTab2
 {
   const char *attName, *attVal;
@@ -1035,52 +1037,64 @@ void cdf_def_vct_cf(stream_t *streamptr, int zaxisID, int nclevID, int ncbndsID,
       streamptr->vct.mlevID = nclevID;
       streamptr->vct.ilevID = nclevID;
 
-      if ( p0status == 0 )
-        cdf_def_var(fileID, "a", NC_DOUBLE, 1, dimIDs,  &hyamid);
-      else
-        cdf_def_var(fileID, "ap", NC_DOUBLE, 1, dimIDs,  &hyamid);
+      cdf_def_var(fileID, p0status == 0 ? "a" : "ap", NC_DOUBLE, 1, dimIDs,
+                  &hyamid);
       cdf_def_var(fileID, "b",  NC_DOUBLE, 1, dimIDs,  &hybmid);
 
       {
-        static const char lname[] = "vertical coordinate formula term: ap(k)";
-        cdf_put_att_text(fileID, hyamid, "long_name", sizeof (lname) - 1, lname);
-      }
-      {
-        static const char units[] = "Pa";
-        cdf_put_att_text(fileID, hyamid, "units", sizeof (units) - 1, units);
-      }
-      {
-        static const char lname[] = "vertical coordinate formula term: b(k)";
-        cdf_put_att_text(fileID, hybmid, "long_name", sizeof (lname) - 1, lname);
-      }
-      {
-        static const char units[] = "1";
-        cdf_put_att_text(fileID, hybmid, "units", sizeof (units) - 1, units);
+        static const char *anametab[]
+          = { "long_name", "units" };
+        static const char
+          lname_v_a[] = "vertical coordinate formula term: ap(k)",
+          lname_v_b[] = "vertical coordinate formula term: b(k)",
+          units_v_a[] = "Pa",
+          units_v_b[] = "1";
+        static struct attTxtTab attvtab[][2]
+          = { { { lname_v_a, sizeof(lname_v_a) - 1 },
+                { units_v_a, sizeof(units_v_a) - 1 } },
+              { { lname_v_b, sizeof(lname_v_b) - 1 },
+                { units_v_b, sizeof(units_v_b) - 1 }} };
+        int termid[] = { hyamid, hybmid };
+        enum
+        {
+          numTerms = sizeof (termid) / sizeof (termid[0]),
+          numAtts = sizeof (anametab) / sizeof (anametab[0]),
+        };
+        for (size_t termIdx = 0; termIdx < numTerms; ++termIdx)
+          for (size_t attIdx = 0; attIdx < numAtts; ++attIdx)
+            cdf_put_att_text(fileID, termid[termIdx], anametab[attIdx],
+                             attvtab[termIdx][attIdx].txtLen,
+                             attvtab[termIdx][attIdx].txt);
       }
 
       if ( ncbndsID != -1 )
         {
-          if ( p0status == 0 )
-            cdf_def_var(fileID, "a_bnds", NC_DOUBLE, 2, dimIDs, &hyaiid);
-          else
-            cdf_def_var(fileID, "ap_bnds", NC_DOUBLE, 2, dimIDs, &hyaiid);
+          cdf_def_var(fileID, p0status == 0 ? "a_bnds" : "ap_bnds",
+                      NC_DOUBLE, 2, dimIDs, &hyaiid);
           cdf_def_var(fileID, "b_bnds",  NC_DOUBLE, 2, dimIDs, &hybiid);
+          static const char *anametab[]
+            = { "long_name", "units" };
+          static const char
+            lname_v_a[] = "vertical coordinate formula term: ap(k+1/2)",
+            lname_v_b[] = "vertical coordinate formula term: b(k+1/2)",
+            units_v_a[] = "Pa",
+            units_v_b[] = "1";
+          static struct attTxtTab attvtab[][2]
+            = { { { lname_v_a, sizeof(lname_v_a) - 1 },
+                  { units_v_a, sizeof(units_v_a) - 1 } },
+                { { lname_v_b, sizeof(lname_v_b) - 1 },
+                  { units_v_b, sizeof(units_v_b) - 1 }} };
+          int termid[] = { hyaiid, hybiid };
+          enum
           {
-            static const char lname[] = "vertical coordinate formula term: ap(k+1/2)";
-            cdf_put_att_text(fileID, hyaiid, "long_name", sizeof (lname) - 1, lname);
-          }
-          {
-            static const char units[] = "Pa";
-            cdf_put_att_text(fileID, hyaiid, "units", sizeof (units) - 1, units);
-          }
-          {
-            static const char lname[] = "vertical coordinate formula term: b(k+1/2)";
-            cdf_put_att_text(fileID, hybiid, "long_name", sizeof (lname) - 1, lname);
-          }
-          {
-            static const char units[] = "1";
-            cdf_put_att_text(fileID, hybiid, "units", sizeof (units) - 1, units);
-          }
+            numTerms = sizeof (termid) / sizeof (termid[0]),
+            numAtts = sizeof (anametab) / sizeof (anametab[0]),
+          };
+          for (size_t termIdx = 0; termIdx < numTerms; ++termIdx)
+            for (size_t attIdx = 0; attIdx < numAtts; ++attIdx)
+              cdf_put_att_text(fileID, termid[termIdx], anametab[attIdx],
+                               attvtab[termIdx][attIdx].txtLen,
+                               attvtab[termIdx][attIdx].txt);
         }
 
       cdf_enddef(fileID);
@@ -1121,8 +1135,6 @@ void cdf_def_vct_cf(stream_t *streamptr, int zaxisID, int nclevID, int ncbndsID,
       cdf_put_var_double(fileID, hybmid, tarray);
     }
 }
-
-struct attTxtTab { const char *txt; size_t txtLen; };
 
 static
 void cdf_def_zaxis_hybrid_echam(stream_t *streamptr, int type, int *ncvaridp, int zaxisID, int zaxisindex, int xtype, size_t dimlen, int *dimID, char *axisname)
