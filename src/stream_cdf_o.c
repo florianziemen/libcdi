@@ -1242,7 +1242,7 @@ void cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int *ncvaridp, int z
       axis_v[] = "Z",
       direction[] = "positive",
       direction_v[] = "down";
-    struct attTxtTab2 tab[] = {
+    static const struct attTxtTab2 tab[] = {
       { sname, sname_v, sizeof (sname_v) - 1 },
       { axis, axis_v, sizeof (axis_v) - 1 },
       { direction, direction_v, sizeof (direction_v) - 1 },
@@ -1303,7 +1303,7 @@ void cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int *ncvaridp, int z
           {
             static const char sname[] = "standard_name",
               sname_v[] = "atmosphere_hybrid_sigma_pressure_coordinate";
-            struct attTxtTab2 tab[] = {
+            static const struct attTxtTab2 tab[] = {
               { sname, sname_v, sizeof (sname_v) - 1 },
             };
             enum { nAtt = sizeof (tab) / sizeof (tab[0]) };
