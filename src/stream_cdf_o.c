@@ -646,7 +646,7 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridindex, int ndims,
       checkGridName(extendedAxisname, fileID);
       size_t extendedAxisnameLen = axisnameLen + strlen(extendedAxisname + axisnameLen);
 
-      bool switchNCMode = streamptr->ncmode == 2;
+      bool switchNCMode = streamptr->ncmode == 2 && (pvals || ndims);
       if ( switchNCMode ) {
         cdf_redef(fileID);
         streamptr->ncmode = 1;
@@ -1997,19 +1997,22 @@ void cdfDefGdim(stream_t *streamptr, int gridID, int gridindex)
 
       dimID = checkDimName(fileID, dimlen, dimname);
 
-      bool switchNCMode = streamptr->ncmode == 2;
-      if ( switchNCMode )
+      if ( dimID == CDI_UNDEFID )
         {
-          streamptr->ncmode = 1;
-          cdf_redef(fileID);
-        }
+          bool switchNCMode = streamptr->ncmode == 2;
+          if ( switchNCMode )
+            {
+              streamptr->ncmode = 1;
+              cdf_redef(fileID);
+            }
 
-      if ( dimID == CDI_UNDEFID ) cdf_def_dim(fileID, dimname, dimlen, &dimID);
+          cdf_def_dim(fileID, dimname, dimlen, &dimID);
 
-      if ( switchNCMode )
-        {
-          cdf_enddef(fileID);
-          streamptr->ncmode = 2;
+          if ( switchNCMode )
+            {
+              cdf_enddef(fileID);
+              streamptr->ncmode = 2;
+            }
         }
     }
 
