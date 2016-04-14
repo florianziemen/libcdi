@@ -13,6 +13,7 @@
 
 #include "cdi.h"
 #include "cdi_uuid.h"
+#include "dmemory.h"
 
 #include "cksum.h"
 #include "simple_model_helper.h"
@@ -39,14 +40,6 @@ parse_intarg(const char msg[])
 #if !defined __GNUC__ && !defined __attribute__
 #define __attribute__(x) /*NOTHING*/
 #endif
-static void allocError(const char *msg) __attribute__((noreturn));
-
-static void
-allocError(const char *msg)
-{
-  perror(msg);
-  exit(EXIT_FAILURE);
-}
 
 static inline void
 check_positive(int v, const char *msg)
@@ -190,7 +183,7 @@ main(int argc, char *argv[])
   // Create a pressure level Z-axis
   zaxisID[1] = zaxisCreate(ZAXIS_PRESSURE, nlev);
   {
-    double *levs = (double *) malloc((size_t) nlev * sizeof(levs[0]));
+    double *levs = (double *) Malloc((size_t) nlev * sizeof(levs[0]));
     for (size_t i = 0; i < (size_t) nlev; ++i) levs[i] = 101300 - floor(3940.3 * expm1(2.3579 * (double) i / (nlev - 1)));
     zaxisDefLevels(zaxisID[1], levs);
     free(levs);
@@ -231,7 +224,7 @@ main(int argc, char *argv[])
       // and set the data type
       vlistDefVarDatatype(vlistID, varID[i], datatype);
       // create memory for variables
-      var[i] = (double *) malloc(varSize[i] * sizeof(var[i][0]));
+      var[i] = (double *) Malloc(varSize[i] * sizeof(var[i][0]));
     }
 
   var_scale(datatype, &mscale, &mrscale);
@@ -286,10 +279,9 @@ main(int argc, char *argv[])
 #ifdef TEST_CHUNK_WRITE
         {
           size_t maxChunkSize = ((size_t) nlon + 1) / 2 * (size_t) nlat * (size_t) nlev;
-          double *chunkBuf = (double *) malloc(maxChunkSize * sizeof(double));
+          double *chunkBuf = (double *) Malloc(maxChunkSize * sizeof(double));
           int varShape[2][3] = { { nlon, nlat, 1 }, { nlon, nlat, nlev } },
               chunk[3][2] = { { 0, nlon / 2 - 1 }, { 0, nlat - 1 }, { 0, 0 } };
-          if (!chunkBuf) allocError("cannot create chunk buffer");
           chunk[0][0] = 0;
           chunk[0][1] = nlon / 2 - 1;
           chunk[2][1] = 0;
