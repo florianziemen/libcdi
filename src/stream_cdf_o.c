@@ -591,7 +591,6 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridindex, int ndims,
 {
   int dimID = CDI_UNDEFID;
   int nvdimID = CDI_UNDEFID;
-  int fileID  = streamptr->fileID;
   size_t dimlen = (size_t)gridAxisInq->axisSize(gridID);
   nc_type xtype = (nc_type)cdfDefDatatype(gridInqPrec(gridID), streamptr->filetype);
 
@@ -636,6 +635,7 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridindex, int ndims,
       int ncvarid = CDI_UNDEFID;
       char axisname[CDI_MAX_NAME]; axisname[0] = 0;
       int keyname = (axisLetter == 'X') ? CDI_KEY_XNAME : CDI_KEY_YNAME;
+      int fileID = streamptr->fileID;
       gridAxisInq->axisName(gridID, keyname, CDI_MAX_NAME, axisname);
       if ( axisname[0] == 0 ) Error("axis name undefined!");
       size_t axisnameLen = strlen(axisname);
