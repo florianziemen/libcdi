@@ -100,6 +100,10 @@ parse_long_option(struct model_config *restrict setup,
                   int pioConfHandle, pioRoleFunc *pioRoleAssign,
                   const char *str)
 {
+#ifndef USE_MPI
+  (void)pioConfHandle;
+  (void)pioRoleAssign;
+#endif
   static const char cacheRedistStr[] = "cache-redists",
     pioRoleSchemeOptionStr[] = "pio-role-scheme",
     uuidCreateOptionStr[] = "no-create-uuid";
