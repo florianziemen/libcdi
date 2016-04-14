@@ -2874,15 +2874,47 @@ void gridInqArea(int gridID, double *area)
 }
 
 static int
-gridHasAreaBase(grid_t *gridptr)
+gridInqPropPresenceBase(grid_t *gridptr, enum gridPropInq inq)
 {
-  return gridptr->area != NULL;
+  bool present = false;
+  switch (inq)
+    {
+    case GRID_PROP_MASK:
+      present = gridptr->mask != NULL;
+      break;
+    case GRID_PROP_MASK_GME:
+      present = gridptr->mask != NULL;
+      break;
+    case GRID_PROP_AREA:
+      present = gridptr->area != NULL;
+      break;
+    case GRID_PROP_XVALS:
+      present = gridptr->x.vals != NULL;
+      break;
+    case GRID_PROP_YVALS:
+      present = gridptr->y.vals != NULL;
+      break;
+    case GRID_PROP_XBOUNDS:
+      present = gridptr->x.bounds != NULL;
+      break;
+    case GRID_PROP_YBOUNDS:
+      present = gridptr->y.bounds != NULL;
+      break;
+    }
+  return present;
 }
+
+int gridInqPropPresence(int gridID, enum gridPropInq inq)
+{
+  grid_t *gridptr = grid_to_pointer(gridID);
+  return gridptr->vtable->inqPropPresence(gridptr, inq);
+}
+
 
 int gridHasArea(int gridID)
 {
   grid_t *gridptr = grid_to_pointer(gridID);
-  return gridptr->vtable->hasArea(gridptr);
+  return gridptr->vtable->inqPropPresence(gridptr, GRID_PROP_AREA);;
 }
 
 
@@ -3116,6 +3148,7 @@ const double *gridInqYboundsPtr(int gridID)
   grid_t *gridptr = grid_to_pointer(gridID);
   return gridptr->vtable->inqYBoundsPtr(gridptr);
 }
+
 
 static void
 printDblsPrefixAutoBrk(FILE *fp, int dig, const char prefix[], size_t nbyte0,
@@ -4737,7 +4770,7 @@ const struct gridVirtTable cdiGridVtable
   .compareXYAO = compareXYvals2,
   .inqArea = gridInqAreaSerial,
   .inqAreaPtr = gridInqAreaPtrBase,
-  .hasArea = gridHasAreaBase,
+  .inqPropPresence = gridInqPropPresenceBase,
   .inqMask = gridInqMaskSerial,
   .inqMaskGME = gridInqMaskGMESerial,
   .inqXBounds = gridInqXBoundsSerial,
