@@ -190,6 +190,7 @@ static const struct cdfDefGridAxisInqs
   const double *(*axisBoundsPtr)(int gridID);
   enum cdfIDIdx dimIdx, varIdx;
   char axisSym;
+  enum gridPropInq bndsQueryKey;
 } gridInqsX = {
   .axisSize = gridInqXsize,
   .axisVal = gridInqXval,
@@ -198,6 +199,7 @@ static const struct cdfDefGridAxisInqs
   .dimIdx = CDF_DIMID_X,
   .varIdx = CDF_VARID_X,
   .axisSym = 'X',
+  .bndsQueryKey = GRID_PROP_XBOUNDS,
 }, gridInqsY = {
   .axisSize = gridInqYsize,
   .axisVal = gridInqYval,
@@ -206,6 +208,7 @@ static const struct cdfDefGridAxisInqs
   .dimIdx = CDF_DIMID_Y,
   .varIdx = CDF_VARID_Y,
   .axisSym = 'Y',
+  .bndsQueryKey = GRID_PROP_YBOUNDS,
 };
 
 static void
@@ -644,12 +647,11 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridIndex, int ndims, bool
           }
           cdfPostDefActionAddPutVal(&delayed, fileID, ncvarid, pvals, (void (*)(void *)) memFree);
 
-          bool gen_bounds = false;
+          bool gen_bounds = false, hasBounds = gridInqPropPresence(gridID, gridAxisInq->bndsQueryKey);
           const bool grid_is_cyclic = gridIsCircular(gridID) > 0;
-          double *pbounds = (double *) gridAxisInq->axisBoundsPtr(gridID);
+          double *pbounds;
           size_t nvertex = gridInqNvertex(gridID);
-
-          if (CDI_CMOR_Mode && grid_is_cyclic && !pbounds)
+          if (CDI_CMOR_Mode && grid_is_cyclic && !hasBounds)
             {
               gen_bounds = true;
               nvertex = 2;
@@ -661,6 +663,8 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridIndex, int ndims, bool
                 }
               finishCyclicBounds(pbounds, dimlen, pvals);
             }
+          else
+            pbounds = (double *) gridAxisInq->axisBoundsPtr(gridID);
 
           int nvdimID = CDI_UNDEFID;
           if (pbounds)
@@ -974,7 +978,8 @@ cdfDefCurvilinear(stream_t *streamptr, int gridID, int gridIndex)
   if (xdimID == CDI_UNDEFID || ydimID == CDI_UNDEFID)
     {
       struct cdfDefIrregularGridCommonIDs createdIDs = cdfDefIrregularGridCommon(
-          streamptr, gridID, xdimlen, ydimlen, 3, "x", 4, "nv4", gridInqXboundsPtr(gridID) || gridInqYboundsPtr(gridID));
+          streamptr, gridID, xdimlen, ydimlen, 3, "x", 4, "nv4",
+          gridInqPropPresence(gridID, GRID_PROP_XBOUNDS) || gridInqPropPresence(gridID, GRID_PROP_YBOUNDS));
       xdimID = createdIDs.xdimID;
       ydimID = createdIDs.ydimID;
       ncxvarid = createdIDs.ncxvarid;
