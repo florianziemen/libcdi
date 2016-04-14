@@ -11,6 +11,17 @@ typedef unsigned char mask_t;
 
 typedef struct grid_t grid_t;
 
+enum gridPropInq
+{
+  GRID_PROP_MASK,
+  GRID_PROP_MASK_GME,
+  GRID_PROP_XVALS,
+  GRID_PROP_YVALS,
+  GRID_PROP_AREA,
+  GRID_PROP_XBOUNDS,
+  GRID_PROP_YBOUNDS,
+};
+
 struct gridVirtTable
 {
   void (*destroy)(grid_t *gridptr);
@@ -46,7 +57,8 @@ struct gridVirtTable
   bool (*compareXYAO)(grid_t *gridRef, grid_t *gridTest);
   void (*inqArea)(grid_t *gridptr, double *area);
   const double *(*inqAreaPtr)(grid_t *gridptr);
-  int (*hasArea)(grid_t *gridptr);
+  /* return 1 if inq property is set */
+  int (*inqPropPresence)(grid_t *gridptr, enum gridPropInq inq);
   SizeType (*inqMask)(grid_t *gridptr, int *mask);
   int (*inqMaskGME)(grid_t *gridptr, int *mask_gme);
   SizeType (*inqXBounds)(grid_t *gridptr, double *xbounds);
@@ -128,6 +140,8 @@ const char **gridInqYCvalsPtr(int gridID);
 // const double *gridInqXboundsPtr(int gridID);
 // const double *gridInqYboundsPtr(int gridID);
 const double *gridInqAreaPtr(int gridID);
+
+int gridInqPropPresence(int gridID, enum gridPropInq inq);
 
 int gridGenerate(const grid_t *grid);
 
