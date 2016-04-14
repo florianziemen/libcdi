@@ -7,6 +7,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <unistd.h>
 
 #include <mpi.h>
 #include <yaxt.h>
@@ -414,9 +415,12 @@ cdiPioInit(MPI_Comm commGlob, int confResH, int *pioNamespace)
 
   if (IOMode < PIO_MINIOMODE || IOMode > PIO_MAXIOMODE) xabort("IOMODE IS NOT VALID.");
 
-#ifdef _SX
-  if (IOMode == PIO_ASYNCH) xabort("PIO_ASYNCH DOES NOT WORK ON SX.");
+  if (
+#ifdef _POSIX_ASYNCHRONOUS_IO
+      !sysconf(_SC_ASYNCHRONOUS_IO) &&
 #endif
+      IOMode == PIO_ASYNCH)
+    xabort("CDI-PIO Output method PIO_ASYNCH is unsupported on this system!");
 
   if ((xtInitByCDI = (!xt_initialized() || xt_finalized()))) xt_initialize(commGlob);
   int nProcsIO = cdiPioCommInit(commGlob, IOMode, conf->clientServerRole);
@@ -488,9 +492,7 @@ cdiPioFileWritingInit(const struct cdiPioConf *conf)
     {
     case PIO_NONE: break;
     case PIO_MPI: initMPINONB(); break;
-#ifndef _SX
     case PIO_ASYNCH:
-#endif
     case PIO_WRITER: pioSendInitialize(); break;
     case PIO_FPGUARD: initPOSIXFPGUARDSENDRECV(); break;
     case PIO_MPI_FW_ORDERED: cdiPioFileWriteOrderedInit(); break;

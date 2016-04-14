@@ -6,8 +6,9 @@
 #include "config.h"
 #endif
 
-#ifndef _SX
+#include <unistd.h>
 
+#ifdef _POSIX_ASYNCHRONOUS_IO
 #include <aio.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -16,7 +17,6 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>
 
 #include <mpi.h>
 
