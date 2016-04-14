@@ -57,7 +57,7 @@ cat > ${PROG} << EOR
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
-#ifndef _SX
+#ifdef _POSIX_ASYNCHRONOUS_IO
 #include <aio.h>
 #endif
 #include <stdbool.h>
