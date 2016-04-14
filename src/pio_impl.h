@@ -6,6 +6,7 @@
 #endif
 
 #include <stdbool.h>
+#include <unistd.h>
 
 #include <mpi.h>
 
@@ -101,7 +102,7 @@ void cdiPioFileWriteAtReblockInit(const struct cdiPioConf *conf);
 void pioSendInitialize(void);
 
 /* pio_posixasynch.c */
-#ifndef _SX
+#ifdef _POSIX_ASYNCHRONOUS_IO
 void pioWriterAIO(void);
 #endif
 
