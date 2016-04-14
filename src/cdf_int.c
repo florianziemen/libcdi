@@ -2,6 +2,7 @@
 #  include "config.h"
 #endif
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -76,13 +77,16 @@ void cdf_create(const char *path, int cmode, int *ncidp)
 int cdf_open(const char *path, int omode, int *ncidp)
 {
   int status = 0;
-  int dapfile = FALSE;
   struct stat filestat;
   size_t chunksizehint = 0;
 
+  bool dapfile =
 #if  defined  (HAVE_LIBNC_DAP)
-  if ( strncmp(path, "http:", 5) == 0 || strncmp(path, "https:", 6) == 0 ) dapfile = TRUE;
+    ( strncmp(path, "http:", 5) == 0 || strncmp(path, "https:", 6) == 0 )
+#else
+    false
 #endif
+    ;
 
   if ( dapfile )
     {
