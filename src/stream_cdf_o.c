@@ -214,6 +214,7 @@ static const struct cdfDefGridAxisInqs {
   double (*axisVal)(int gridID, int index);
   const double *(*axisValsPtr)(int gridID);
   const double *(*axisBoundsPtr)(int gridID);
+  enum gridPropInq bndsQueryKey;
 } gridInqsX = {
   .axisSize = gridInqXsize,
   .axisDimname = cdiGridInqKeyStr,
@@ -224,6 +225,7 @@ static const struct cdfDefGridAxisInqs {
   .axisVal = gridInqXval,
   .axisValsPtr = gridInqXvalsPtr,
   .axisBoundsPtr = gridInqXboundsPtr,
+  .bndsQueryKey = GRID_PROP_XBOUNDS,
 }, gridInqsY = {
   .axisSize = gridInqYsize,
   .axisDimname = cdiGridInqKeyStr,
@@ -234,6 +236,7 @@ static const struct cdfDefGridAxisInqs {
   .axisVal = gridInqYval,
   .axisValsPtr = gridInqYvalsPtr,
   .axisBoundsPtr = gridInqYboundsPtr,
+  .bndsQueryKey = GRID_PROP_YBOUNDS,
 }, gridInqsZ = {
   .axisLongname = cdiZaxisInqKeyStr,
   .axisUnits = cdiZaxisInqKeyStr,
@@ -672,10 +675,11 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridindex, int ndims,
           cdfPostDefActionAddPutVal(&delayed, fileID, ncvarid, pvals,
                                     (void (*)(void *))memFree);
 
-          bool gen_bounds = false;
+          bool gen_bounds = false,
+            hasBounds = gridInqPropPresence(gridID, gridAxisInq->bndsQueryKey);
           bool grid_is_cyclic = gridIsCircular(gridID) > 0;
-          double *pbounds = (double *)gridAxisInq->axisBoundsPtr(gridID);
-          if ( CDI_cmor_mode && grid_is_cyclic && !pbounds )
+          double *pbounds;
+          if ( CDI_cmor_mode && grid_is_cyclic && !hasBounds )
             {
               gen_bounds = true;
               pbounds = (double*) Malloc(2*dimlen*sizeof(double));
@@ -686,6 +690,8 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridindex, int ndims,
                 }
               finishCyclicBounds(pbounds, dimlen, pvals);
             }
+          else
+            pbounds = (double *)gridAxisInq->axisBoundsPtr(gridID);
           if ( pbounds )
             {
               size_t nvertex = 2;
@@ -1022,8 +1028,8 @@ cdfDefCurvilinear(stream_t *streamptr, int gridID, int gridindex)
       struct cdfDefIrregularGridCommonIDs createdIDs
         = cdfDefIrregularGridCommon(streamptr, gridID,
                                     xdimlen, ydimlen, 3, "x", 4, "nv4",
-                                    gridInqXboundsPtr(gridID)
-                                    || gridInqYboundsPtr(gridID));
+                                    gridInqPropPresence(gridID, GRID_PROP_XBOUNDS)
+                                    || gridInqPropPresence(gridID, GRID_PROP_YBOUNDS));
       xdimID = createdIDs.xdimID;
       ydimID = createdIDs.ydimID;
       ncxvarid = createdIDs.ncxvarid;
