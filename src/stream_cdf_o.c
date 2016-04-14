@@ -558,7 +558,6 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridIndex, int ndims, bool
                  void (*finishCyclicBounds)(double *pbounds, size_t dimlen, const double *pvals))
 {
   int dimID = CDI_UNDEFID;
-  const int fileID = streamptr->fileID;
   const size_t dimlen = gridAxisInq->axisSize(gridID);
   const nc_type xtype = grid_inq_xtype(gridID);
 
@@ -603,6 +602,7 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridIndex, int ndims, bool
       char axisname[CDI_MAX_NAME];
       length = CDI_MAX_NAME;
       cdiInqKeyString(gridID, axisKey, CDI_KEY_NAME, axisname, &length);
+      const int fileID = streamptr->fileID;
       if (axisname[0] == 0) Error("axis name undefined!");
 
       checkGridName(axisname, fileID);
