@@ -4,6 +4,7 @@
 
 #include <inttypes.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "cdipio.h"
 #include "dmemory.h"
@@ -313,9 +314,11 @@ pioSendInitialize(void)
       case PIO_WRITER:
         pioWriterStdIO();
         break;
+#ifdef _POSIX_ASYNCHRONOUS_IO
       case PIO_ASYNCH:
         pioWriterAIO();
         break;
+#endif
       }
   else
     {
