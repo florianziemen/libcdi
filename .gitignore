@@ -1,0 +1,11 @@
+*.test
+*~
+*.la
+*.lo
+*.o
+.deps
+.libs
+stamp-h1
+config.log
+config.status
+config.h
