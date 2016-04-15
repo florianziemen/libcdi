@@ -217,7 +217,7 @@ typedef struct {
 VCT;
 
 #ifdef HAVE_LIBNETCDF
-enum {
+enum cdfIDIdx {
   CDF_DIMID_X,
   CDF_DIMID_Y,
   CDF_VARID_X,
