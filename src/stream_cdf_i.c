@@ -1230,8 +1230,8 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
           cdf_inq_attlen(ncid, ncvarid, attname, &attlen);
 
           size_t attstringsize = sizeof(attstring);
-          const bool isText = xtypeIsText(atttype);
-          const bool isNumber = (xtypeIsFloat(atttype) || xtypeIsInt(atttype));
+          const bool isText = xtypeIsText(atttype), isNumber = xtypeIsFloat(atttype) || xtypeIsInt(atttype);
+          bool isRealization = false, isEnsembleMembers = false, isForecastInitType = false;
           if (isText)
             {
               cdfGetAttText(ncid, ncvarid, attname, sizeof(attstring), attstring);
@@ -1597,17 +1597,18 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
                 }
             }
           else if (isNumber
-                   && (strIsEqual(attname, "realization") || strIsEqual(attname, "ensemble_members")
-                       || strIsEqual(attname, "forecast_init_type")))
+                   && ((isRealization = strIsEqual(attname, "realization"))
+                       || (isEnsembleMembers = strIsEqual(attname, "ensemble_members"))
+                       || (isForecastInitType = strIsEqual(attname, "forecast_init_type"))))
             {
               int temp;
               cdfGetAttInt(ncid, ncvarid, attname, 1, &temp);
 
-              if (strIsEqual(attname, "realization"))
+              if (isRealization)
                 ncvar->perturbationNumber = temp;
-              else if (strIsEqual(attname, "ensemble_members"))
+              else if (isEnsembleMembers)
                 ncvar->numberOfForecastsInEnsemble = temp;
-              else if (strIsEqual(attname, "forecast_init_type"))
+              else if (isForecastInitType)
                 ncvar->typeOfEnsembleForecast = temp;
 
               cdf_set_var(ncvar, DataVar);
