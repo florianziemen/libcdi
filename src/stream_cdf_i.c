@@ -1773,6 +1773,7 @@ cdf_set_dimtype(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
             {
               if (ncvar->dimtype[i] == -1)
                 {
+                  int dimtype;
                   if (!lxdim)
                     {
                       if (lcdim && ncvar->xvarid == CDI_UNDEFID)
@@ -1781,7 +1782,7 @@ cdf_set_dimtype(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
                           ncvar->xvarid = cdimvar;
                           lcdim--;
                         }
-                      cdf_set_dim(ncvar, i, X_AXIS);
+                      dimtype = X_AXIS;
                       lxdim = true;
                     }
                   else if (!lydim && ncvar->gridtype != GRID_UNSTRUCTURED)
@@ -1794,7 +1795,7 @@ cdf_set_dimtype(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
                           ncvar->yvarid = cdimvar;
                           lcdim--;
                         }
-                      cdf_set_dim(ncvar, i, Y_AXIS);
+                      dimtype = Y_AXIS;
                       lydim = true;
                     }
                   else if (!lzdim)
@@ -1806,9 +1807,12 @@ cdf_set_dimtype(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
                           lcdim--;
                           ncvars[cdimvar].zaxistype = ZAXIS_CHAR;
                         }
-                      cdf_set_dim(ncvar, i, Z_AXIS);
+                      dimtype = Z_AXIS;
                       lzdim = true;
                     }
+                  else
+                    continue;
+                  cdf_set_dim(ncvar, i, dimtype);
                 }
             }
           if (lcdim > 0) Warning("Could not assign all character coordinates to data variable!");
