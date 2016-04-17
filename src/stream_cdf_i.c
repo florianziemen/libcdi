@@ -3420,22 +3420,23 @@ void read_vct_echam(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdims, dou
     {
       if ( ncvars[ncvarid].ndims == 1 )
         {
-          size_t len = strlen(ncvars[ncvarid].name);
-          if ( len == 4 && ncvars[ncvarid].name[0] == 'h' && ncvars[ncvarid].name[1] == 'y' )
+          const char *varname = ncvars[ncvarid].name;
+          size_t len = strlen(varname);
+          if ( len == 4 && varname[0] == 'h' && varname[1] == 'y' )
             {
-              if ( ncvars[ncvarid].name[2] == 'a' && ncvars[ncvarid].name[3] == 'i' ) // hyai
+              if ( varname[2] == 'a' && varname[3] == 'i' ) // hyai
                 {
                   vcta_id = ncvarid;
                   nvcth_id = ncvars[ncvarid].dimids[0];
                   ncvars[ncvarid].isvar = FALSE;
                 }
-              else if ( ncvars[ncvarid].name[2] == 'b' && ncvars[ncvarid].name[3] == 'i' ) //hybi
+              else if ( varname[2] == 'b' && varname[3] == 'i' ) //hybi
                 {
                   vctb_id = ncvarid;
                   nvcth_id = ncvars[ncvarid].dimids[0];
                   ncvars[ncvarid].isvar = FALSE;
                 }
-              else if ( (ncvars[ncvarid].name[2] == 'a' || ncvars[ncvarid].name[2] == 'b') && ncvars[ncvarid].name[3] == 'm' )
+              else if ( (varname[2] == 'a' || varname[2] == 'b') && varname[3] == 'm' )
                 {
                   ncvars[ncvarid].isvar = FALSE; // hyam or hybm
                 }
@@ -3461,13 +3462,14 @@ void cdf_set_ucla_dimtype(int ndims, ncdim_t *ncdims, ncvar_t *ncvars)
   for ( int ncdimid = 0; ncdimid < ndims; ncdimid++ )
     {
       int ncvarid = ncdims[ncdimid].ncvarid;
+      const char *varname = ncvars[ncvarid].name;
       if ( ncvarid != -1 )
         {
           if ( ncdims[ncdimid].dimtype == CDI_UNDEFID && ncvars[ncvarid].units[0] == 'm' )
             {
-              if      ( ncvars[ncvarid].name[0] == 'x' ) ncdims[ncdimid].dimtype = X_AXIS;
-              else if ( ncvars[ncvarid].name[0] == 'y' ) ncdims[ncdimid].dimtype = Y_AXIS;
-              else if ( ncvars[ncvarid].name[0] == 'z' ) ncdims[ncdimid].dimtype = Z_AXIS;
+              if      ( varname[0] == 'x' ) ncdims[ncdimid].dimtype = X_AXIS;
+              else if ( varname[0] == 'y' ) ncdims[ncdimid].dimtype = Y_AXIS;
+              else if ( varname[0] == 'z' ) ncdims[ncdimid].dimtype = Z_AXIS;
             }
         }
     }
@@ -3478,6 +3480,7 @@ int cdf_check_vars(int nvars, ncvar_t *ncvars, size_t ntsteps, int timedimid)
 {
   for ( int ncvarid = 0; ncvarid < nvars; ncvarid++ )
     {
+      const char *varname = ncvars[ncvarid].name;
       if ( timedimid != CDI_UNDEFID )
 	if ( ncvars[ncvarid].isvar == -1 &&
 	     ncvars[ncvarid].ndims > 1   &&
@@ -3494,7 +3497,7 @@ int cdf_check_vars(int nvars, ncvar_t *ncvars, size_t ntsteps, int timedimid)
       if ( ncvars[ncvarid].isvar == -1 )
 	{
 	  ncvars[ncvarid].isvar = 0;
-	  Warning("Variable %s has an unknown type, skipped!", ncvars[ncvarid].name);
+	  Warning("Variable %s has an unknown type, skipped!", varname);
 	  continue;
 	}
 
@@ -3502,7 +3505,7 @@ int cdf_check_vars(int nvars, ncvar_t *ncvars, size_t ntsteps, int timedimid)
 	{
 	  ncvars[ncvarid].isvar = 0;
 	  Warning("%d dimensional variables are not supported, skipped variable %s!",
-		ncvars[ncvarid].ndims, ncvars[ncvarid].name);
+		ncvars[ncvarid].ndims, varname);
 	  continue;
 	}
 
@@ -3510,7 +3513,7 @@ int cdf_check_vars(int nvars, ncvar_t *ncvars, size_t ntsteps, int timedimid)
 	{
 	  ncvars[ncvarid].isvar = 0;
 	  Warning("%d dimensional variables without time dimension are not supported, skipped variable %s!",
-		ncvars[ncvarid].ndims, ncvars[ncvarid].name);
+		ncvars[ncvarid].ndims, varname);
 	  continue;
 	}
 
@@ -3523,7 +3526,7 @@ int cdf_check_vars(int nvars, ncvar_t *ncvars, size_t ntsteps, int timedimid)
       if ( cdfInqDatatype(ncvars[ncvarid].xtype, ncvars[ncvarid].lunsigned) == -1 )
 	{
 	  ncvars[ncvarid].isvar = 0;
-	  Warning("Unsupported data type, skipped variable %s!", ncvars[ncvarid].name);
+	  Warning("Unsupported data type, skipped variable %s!", varname);
 	  continue;
 	}
 
@@ -3532,7 +3535,7 @@ int cdf_check_vars(int nvars, ncvar_t *ncvars, size_t ntsteps, int timedimid)
 	  if ( timedimid == ncvars[ncvarid].dimids[0] )
 	    {
 	      ncvars[ncvarid].isvar = 0;
-	      Warning("Number of time steps undefined, skipped variable %s!", ncvars[ncvarid].name);
+	      Warning("Number of time steps undefined, skipped variable %s!", varname);
 	      continue;
 	    }
 	}
