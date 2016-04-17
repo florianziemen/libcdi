@@ -1143,8 +1143,10 @@ void cdf_scan_var_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimi
           cdf_inq_attlen(ncid, ncvarid, attname, &attlen);
 
           size_t attstringsize = sizeof(attstring);
-          bool isText = xtypeIsText(atttype);
-          bool isNumber = xtypeIsFloat(atttype) || xtypeIsInt(atttype);
+          bool isText = xtypeIsText(atttype),
+            isNumber = xtypeIsFloat(atttype) || xtypeIsInt(atttype),
+            isRealization = false, isEnsembleMembers = false,
+            isForecastInitType = false;
           if ( isText )
             {
               cdfGetAttText(ncid, ncvarid, attname, sizeof(attstring), attstring);
@@ -1519,9 +1521,11 @@ void cdf_scan_var_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimi
 		}
 	    }
 	  else if ( isNumber &&
-                    (strcmp(attname, "realization") == 0       ||
-                     strcmp(attname, "ensemble_members") == 0  ||
-                     strcmp(attname, "forecast_init_type") == 0) )
+                    (   ( isRealization = strcmp(attname, "realization") == 0 )
+                     || ( isEnsembleMembers
+                          = strcmp(attname, "ensemble_members") == 0 )
+                     || ( isForecastInitType
+                          = strcmp(attname, "forecast_init_type") == 0 ) ) )
 	    {
 	      int temp;
 
@@ -1530,11 +1534,11 @@ void cdf_scan_var_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimi
 
 	      cdfGetAttInt(ncid, ncvarid, attname, 1, &temp);
 
-	      if( strcmp(attname, "realization") == 0 )
+	      if( isRealization )
 		ncvars[ncvarid].ensdata->ens_index = temp;
-	      else if( strcmp(attname, "ensemble_members") == 0 )
+	      else if ( isEnsembleMembers )
 		ncvars[ncvarid].ensdata->ens_count = temp;
-	      else if( strcmp(attname, "forecast_init_type") == 0 )
+	      else if ( isForecastInitType )
 		ncvars[ncvarid].ensdata->forecast_init_type = temp;
 
 	      cdf_set_var(ncvars, ncvarid, TRUE);
