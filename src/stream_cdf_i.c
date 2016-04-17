@@ -952,58 +952,53 @@ static
 void cdf_scan_attr_axis(ncvar_t *ncvars, ncdim_t *ncdims, int ncvarid, const char *attstring, size_t attlen,
                         int nvdims, int *dimidsp, const char *name)
 {
-  int i;
-  for ( i = 0; i < (int)attlen; ++i )
+  static const char accept[] = "-tTzZyYxX";
+  if ( strspn(attstring, accept) != attlen )
     {
-      if ( attstring[i] != '-' && attstring[i] != 't' && attstring[i] != 'z' &&
-           attstring[i] != 'y' && attstring[i] != 'x' )
-        {
-          Warning("Unexpected character in axis attribute for %s, ignored!", name);
-          break;
-        }
+      Warning("Unexpected character in axis attribute for %s, ignored!", name);
     }
-
-  if ( i == (int) attlen && (int) attlen == nvdims )
+  else if ( (int)attlen == nvdims )
     {
       while ( attlen-- )
         {
-          if ( (int) attstring[attlen] == 't' )
+          int dimtype;
+          bool setVar = false;
+          switch ( attstring[attlen] )
             {
+            case 't':
+            case 'T':
               if ( attlen != 0 ) Warning("axis attribute 't' not on first position");
-              cdf_set_dim(ncvars, ncvarid, (int)attlen, T_AXIS);
-            }
-          else if ( (int) attstring[attlen] == 'z' )
-            {
+              dimtype = T_AXIS;
+              break;
+            case 'z':
+            case 'Z':
               ncvars[ncvarid].zdim = dimidsp[attlen];
-              cdf_set_dim(ncvars, ncvarid, (int)attlen, Z_AXIS);
+              dimtype = Z_AXIS;
 
-              if ( ncvars[ncvarid].ndims == 1 )
-                {
-                  cdf_set_var(ncvars, ncvarid, FALSE);
-                  ncdims[ncvars[ncvarid].dimids[0]].dimtype = Z_AXIS;
-                }
-            }
-          else if ( (int) attstring[attlen] == 'y' )
-            {
+              setVar = ncvars[ncvarid].ndims == 1;
+              break;
+            case 'y':
+            case 'Y':
               ncvars[ncvarid].ydim = dimidsp[attlen];
-              cdf_set_dim(ncvars, ncvarid, (int)attlen, Y_AXIS);
+              dimtype = Y_AXIS;
 
-              if ( ncvars[ncvarid].ndims == 1 )
-                {
-                  cdf_set_var(ncvars, ncvarid, FALSE);
-                  ncdims[ncvars[ncvarid].dimids[0]].dimtype = Y_AXIS;
-                }
-            }
-          else if ( (int) attstring[attlen] == 'x' )
-            {
+              setVar = ncvars[ncvarid].ndims == 1;
+              break;
+            case 'x':
+            case 'X':
               ncvars[ncvarid].xdim = dimidsp[attlen];
-              cdf_set_dim(ncvars, ncvarid, (int)attlen, X_AXIS);
+              dimtype = X_AXIS;
 
-              if ( ncvars[ncvarid].ndims == 1 )
-                {
-                  cdf_set_var(ncvars, ncvarid, FALSE);
-                  ncdims[ncvars[ncvarid].dimids[0]].dimtype = X_AXIS;
-                }
+              setVar = ncvars[ncvarid].ndims == 1;
+              break;
+            default:
+              continue;
+            }
+          cdf_set_dim(ncvars, ncvarid, (int)attlen, dimtype);
+          if (setVar)
+            {
+              cdf_set_var(ncvars, ncvarid, FALSE);
+              ncdims[ncvars[ncvarid].dimids[0]].dimtype = dimtype;
             }
         }
     }
@@ -1520,7 +1515,6 @@ void cdf_scan_var_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimi
                 }
 	      else
 		{
-		  str_tolower(attstring);
                   cdf_scan_attr_axis(ncvars, ncdims, ncvarid, attstring, attlen, nvdims, dimidsp, name);
 		}
 	    }
