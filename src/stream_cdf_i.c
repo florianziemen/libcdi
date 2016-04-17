@@ -1584,63 +1584,59 @@ static
 void cdf_set_dimtype(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
 {
   for ( int ncvarid = 0; ncvarid < nvars; ncvarid++ )
-    {
-      if ( ncvars[ncvarid].isvar == TRUE )
-	{
-	  int ndims = ncvars[ncvarid].ndims;
-	  for ( int i = 0; i < ndims; i++ )
-	    {
-	      int ncdimid = ncvars[ncvarid].dimids[i];
-              int dimtype = ncdims[ncdimid].dimtype;
-	      if ( dimtype >= X_AXIS && dimtype <= T_AXIS )
-                cdf_set_dim(ncvars, ncvarid, i, dimtype);
-	    }
+    if ( ncvars[ncvarid].isvar == TRUE )
+      {
+        int ndims = ncvars[ncvarid].ndims;
+        for ( int i = 0; i < ndims; i++ )
+          {
+            int ncdimid = ncvars[ncvarid].dimids[i];
+            int dimtype = ncdims[ncdimid].dimtype;
+            if ( dimtype >= X_AXIS && dimtype <= T_AXIS )
+              cdf_set_dim(ncvars, ncvarid, i, dimtype);
+          }
 
-	  if ( CDI_Debug )
-	    {
-	      Message("var %d %s", ncvarid, ncvars[ncvarid].name);
-	      for ( int i = 0; i < ndims; i++ )
-		printf("  dim%d type=%d  ", i, ncvars[ncvarid].dimtype[i]);
-	      printf("\n");
-	    }
+        if ( CDI_Debug )
+          {
+            Message("var %d %s", ncvarid, ncvars[ncvarid].name);
+            for ( int i = 0; i < ndims; i++ )
+              printf("  dim%d type=%d  ", i, ncvars[ncvarid].dimtype[i]);
+            printf("\n");
           }
       }
 
   for ( int ncvarid = 0; ncvarid < nvars; ncvarid++ )
-    {
-      if ( ncvars[ncvarid].isvar == TRUE )
-	{
-	  bool lxdim = false, lydim = false, lzdim = false/* , ltdim = false */;
-	  int ndims = ncvars[ncvarid].ndims;
-	  for ( int i = 0; i < ndims; i++ )
-	    {
-              int dimtype = ncvars[ncvarid].dimtype[i];
-              lxdim |= (dimtype == X_AXIS);
-	      lydim |= (dimtype == Y_AXIS);
-	      lzdim |= (dimtype == Z_AXIS);
-	      /* ltdim |= (dimtype == T_AXIS); */
-	    }
+    if ( ncvars[ncvarid].isvar == TRUE )
+      {
+        bool lxdim = false, lydim = false, lzdim = false/* , ltdim = false */;
+        int ndims = ncvars[ncvarid].ndims;
+        for ( int i = 0; i < ndims; i++ )
+          {
+            int dimtype = ncvars[ncvarid].dimtype[i];
+            lxdim |= (dimtype == X_AXIS);
+            lydim |= (dimtype == Y_AXIS);
+            lzdim |= (dimtype == Z_AXIS);
+            /* ltdim |= (dimtype == T_AXIS); */
+          }
 
-          if ( !lxdim && ncvars[ncvarid].xvarid != CDI_UNDEFID
-               && ncvars[ncvars[ncvarid].xvarid].ndims == 0 ) lxdim = true;
+        if ( !lxdim && ncvars[ncvarid].xvarid != CDI_UNDEFID
+             && ncvars[ncvars[ncvarid].xvarid].ndims == 0 ) lxdim = true;
 
-          if ( !lydim && ncvars[ncvarid].yvarid != CDI_UNDEFID
-               && ncvars[ncvars[ncvarid].yvarid].ndims == 0 ) lydim = true;
+        if ( !lydim && ncvars[ncvarid].yvarid != CDI_UNDEFID
+             && ncvars[ncvars[ncvarid].yvarid].ndims == 0 ) lydim = true;
 
-          if ( lxdim && (lydim || ncvars[ncvarid].gridtype == GRID_UNSTRUCTURED) )
-            for ( int i = ndims-1; i >= 0; i-- )
-              {
-                if ( ncvars[ncvarid].dimtype[i] == -1 && !lzdim)
-                  {
-                    cdf_set_dim(ncvars, ncvarid, i, Z_AXIS);
-                    lzdim = true;
-                    int ncdimid = ncvars[ncvarid].dimids[i];
-                    if ( ncdims[ncdimid].dimtype == CDI_UNDEFID )
-                      ncdims[ncdimid].dimtype = Z_AXIS;
-                  }
-              }
-	}
-    }
+        if ( lxdim && (lydim || ncvars[ncvarid].gridtype == GRID_UNSTRUCTURED) )
+          for ( int i = ndims-1; i >= 0; i-- )
+            {
+              if ( ncvars[ncvarid].dimtype[i] == -1 && !lzdim)
+                {
+                  cdf_set_dim(ncvars, ncvarid, i, Z_AXIS);
+                  lzdim = true;
+                  int ncdimid = ncvars[ncvarid].dimids[i];
+                  if ( ncdims[ncdimid].dimtype == CDI_UNDEFID )
+                    ncdims[ncdimid].dimtype = Z_AXIS;
+                }
+            }
+      }
 
   for ( int ncvarid = 0; ncvarid < nvars; ncvarid++ )
     {
