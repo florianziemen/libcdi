@@ -3730,7 +3730,6 @@ cdf_scan_global_attr(int fileID, int vlistID, int ngatts, int *instID, int *mode
   nc_type xtype;
   size_t attlen;
   char attname[CDI_MAX_NAME];
-  char attstring[65636];
 
   for (int iatt = 0; iatt < ngatts; iatt++)
     {
@@ -3740,7 +3739,13 @@ cdf_scan_global_attr(int fileID, int vlistID, int ngatts, int *instID, int *mode
 
       if (xtypeIsText(xtype))
         {
-          cdfGetAttText(fileID, NC_GLOBAL, attname, sizeof(attstring), attstring);
+          enum
+          {
+            attstringsize = 65636
+          };
+          char attstring[attstringsize];
+
+          cdfGetAttText(fileID, NC_GLOBAL, attname, attstringsize, attstring);
 
           const size_t attstrlen = strlen(attstring);
 
