@@ -942,8 +942,8 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
-@ENABLE_CDI_LIB_FALSE@uninstall-local:
 @ENABLE_CDI_LIB_FALSE@install-exec-local:
+@ENABLE_CDI_LIB_FALSE@uninstall-local:
 clean: clean-am
 
 clean-am: clean-generic clean-libLTLIBRARIES clean-libtool \
@@ -1050,6 +1050,8 @@ pkgconfig/cdi.pc: pkgconfig/cdi.pc.in ../config.status
 
 pkgconfig/cdipio.pc: pkgconfig/cdipio.pc.in ../config.status
 	(cd .. ; ./config.status src/pkgconfig/cdipio.pc)
+cdilib.c: 
+	(cd $(top_srcdir)/src ; ./make_cdilib )
 #
 all-local: $(LOCALTARGETS)
 

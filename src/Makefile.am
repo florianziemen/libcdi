@@ -248,6 +248,8 @@ pkgconfig/cdi.pc: pkgconfig/cdi.pc.in ../config.status
 
 pkgconfig/cdipio.pc: pkgconfig/cdipio.pc.in ../config.status
 	(cd .. ; ./config.status src/pkgconfig/cdipio.pc)
+cdilib.c: 
+	(cd $(top_srcdir)/src ; ./make_cdilib )
 #
 all-local: $(LOCALTARGETS)
 #
