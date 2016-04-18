@@ -3,6 +3,7 @@
 
 #include "cdi_int.h"
 #include "taxis.h"
+#include "grid.h"
 
 enum
 {

@@ -18,18 +18,22 @@
 #include "cdf_int.h"
 #include "file.h"
 #include "cdi_int.h"
+#ifdef HAVE_LIBNETCDF
 #include "stream_cdf.h"
+#include "stream_cdf_postdef.h"
+#endif
 
 static unsigned nNamespaces = 1;
 static int activeNamespace = 0;
 
 #ifdef HAVE_LIBNETCDF
 // clang-format off
-#define CDI_NETCDF_SWITCHES                     \
-  { .func = (void (*)()) nc__create },          \
-  { .func = (void (*)()) cdf_def_var_serial },  \
-  { .func = (void (*)()) cdfDefTimestep },      \
-  { .func = (void (*)()) cdfDefCoordinateVars }
+#define CDI_NETCDF_SWITCHES                          \
+  { .func = (void (*)()) nc__create },               \
+  { .func = (void (*)()) cdf_def_var_serial },       \
+  { .func = (void (*)()) cdfDefTimestep },           \
+  { .func = (void (*)()) cdfDefCoordinateVars },     \
+  { .func = (void (*)()) cdfPostDefActionGridProp }
 // clang-format on
 #else
 #define CDI_NETCDF_SWITCHES
