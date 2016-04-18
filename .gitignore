@@ -3,9 +3,15 @@
 *.la
 *.lo
 *.o
+*.log
+*.trs
+*.dSYM
 .deps
 .libs
+.dirstamp
 stamp-h1
 config.log
 config.status
 config.h
+build
+autom4te.cache
