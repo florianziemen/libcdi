@@ -11,7 +11,9 @@
 #include "cdi_int.h"
 #include "cdi_uuid.h"
 #include "stream_cdf.h"
+#include "stream_cdf_postdef.h"
 #include "cdf_int.h"
+#include "namespace.h"
 #include "varscan.h"
 #include "vlist.h"
 #include "zaxis.h"
@@ -444,13 +446,6 @@ int checkZaxisName(char *axisname, int fileID, int vlistID, int zaxisID, int nza
   return (int)iz;
 }
 
-struct cdfPostDefAction
-{
-  void *data;
-  void (*action)(void *data);
-  void (*cleanup)(void *data);
-};
-
 struct cdfPostDefPutVar
 {
   int fileID, ncvarid;
@@ -489,12 +484,6 @@ cdfPostDefActionApply(size_t numActions, struct cdfPostDefAction *actions)
     actions[i].action(actions[i].data);
 }
 
-
-struct cdfPostDefActionList
-{
-  size_t size, len;
-  struct cdfPostDefAction actions[];
-};
 
 static void
 cdfPostDefActionListDelete(struct cdfPostDefActionList *list)
@@ -820,6 +809,38 @@ void cdfDefGridUUID(stream_t *streamptr, int gridID)
     }
 }
 
+void
+cdfPostDefActionGridProp(int gridID, int fileID, int ncvarid,
+                         enum gridPropInq gridProp,
+                         struct cdfPostDefActionList **delayed)
+{
+  const void *valsPtr = NULL;
+  switch (gridProp)
+    {
+    case GRID_PROP_MASK:
+    case GRID_PROP_MASK_GME:
+      Error("unsupported key: %d", (int)gridProp);
+      break;
+    case GRID_PROP_XVALS:
+      valsPtr = gridInqXvalsPtr(gridID);
+      break;
+    case GRID_PROP_YVALS:
+      valsPtr = gridInqYvalsPtr(gridID);
+      break;
+    case GRID_PROP_AREA:
+      valsPtr = gridInqAreaPtr(gridID);
+      break;
+    case GRID_PROP_XBOUNDS:
+      valsPtr = gridInqXboundsPtr(gridID);
+      break;
+    case GRID_PROP_YBOUNDS:
+      valsPtr = gridInqYboundsPtr(gridID);
+      break;
+    }
+  cdfPostDefActionAddPutVal(delayed, fileID, ncvarid, valsPtr,
+                            (void (*)(void *))memFree);
+}
+
 static int
 cdfDefIrregularGridAxisSetup(stream_t *streamptr, int gridID, nc_type xtype,
                              int dimlens, int ndims, int dimIDs[ndims],
@@ -837,17 +858,19 @@ cdfDefIrregularGridAxisSetup(stream_t *streamptr, int gridID, nc_type xtype,
       cdfGridCompress(fileID, ncvarid, dimlens, streamptr->filetype, streamptr->comptype);
 
       cdfPutGridStdAtts(fileID, ncvarid, gridID, inqs);
-      const double *valsPtr = inqs->axisValsPtr(gridID);
-      cdfPostDefActionAddPutVal(delayed, fileID, ncvarid, valsPtr,
-                                (void (*)(void *))memFree);
+      void (*mycdfPostDefActionGridProp)(int, int, int, enum gridPropInq,
+                                       struct cdfPostDefActionList **)
+        = namespaceSwitchGet(NSSWITCH_CDF_POSTDEFACTION_GRID_PROP).func;
+      mycdfPostDefActionGridProp(gridID, fileID, ncvarid, inqs->valsQueryKey,
+                                 delayed);
 
       /* attribute for Panoply */
       if ( ndims == 3 )
         cdf_put_att_text(fileID, ncvarid, "_CoordinateAxisType", 3,
                          inqs->axisPanoplyName);
 
-      const double *boundsPtr = inqs->axisBoundsPtr(gridID);
-      if ( boundsPtr && dimIDs[ndims-1] != CDI_UNDEFID )
+      if ( gridInqPropPresence(gridID, inqs->bndsQueryKey)
+           && dimIDs[ndims-1] != CDI_UNDEFID )
         {
           size_t axisnameLen = strlen(axisname);
           axisname[axisnameLen] = '_';
@@ -857,8 +880,8 @@ cdfDefIrregularGridAxisSetup(stream_t *streamptr, int gridID, nc_type xtype,
           cdfGridCompress(fileID, ncbvarid, dimlens, streamptr->filetype, streamptr->comptype);
 
           cdf_put_att_text(fileID, ncvarid, "bounds", axisnameLen + sizeof (bndsName), axisname);
-          cdfPostDefActionAddPutVal(delayed, fileID, ncbvarid, boundsPtr,
-                                    (void (*)(void *))memFree);
+          mycdfPostDefActionGridProp(gridID, fileID, ncbvarid, inqs->bndsQueryKey,
+                                     delayed);
         }
     }
   return ncvarid;
@@ -958,9 +981,11 @@ cdfDefIrregularGridCommon(stream_t *streamptr, int gridID,
       cdf_put_att_text(fileID, ncavarid, "standard_name", sizeof (stdname) - 1, stdname);
       cdf_put_att_text(fileID, ncavarid, "long_name", sizeof (longname) - 1, longname);
       cdf_put_att_text(fileID, ncavarid, "units", sizeof (units) - 1, units);
-      const double *areaPtr = gridInqAreaPtr(gridID);
-      cdfPostDefActionAddPutVal(&delayed, fileID, ncavarid, areaPtr,
-                                (void (*)(void *))memFree);
+      void (*mycdfPostDefActionGridProp)(int, int, int, enum gridPropInq,
+                                       struct cdfPostDefActionList **)
+        = namespaceSwitchGet(NSSWITCH_CDF_POSTDEFACTION_GRID_PROP).func;
+      mycdfPostDefActionGridProp(gridID, fileID, ncavarid, GRID_PROP_AREA,
+                                 &delayed);
     }
 
   if ( switchNCMode )
