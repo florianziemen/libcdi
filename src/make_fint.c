@@ -228,7 +228,7 @@ build_header_name(const char *fname, char *cppMacro);
 static int detectComment(char **line_, ssize_t *lineLen, size_t *lineBufSize,
                          size_t maxMatch, regmatch_t reMatch[],
                          char *xname, size_t *xnameLen,
-                         char *xdes,
+                         char **xdes,
                          FILE *fpin, FILE *fpinc, FILE *fpint);
 
 static regex_t commentStartRE, commentEndRE, commentRE, docCommentRE;
@@ -241,7 +241,8 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
   char *line = NULL, *pline;
   size_t lineBufSize = 0;
   char sname[128], *parname;
-  char xname[128], xdes[128];
+  char xname[128];
+  char *xdes = calloc(128, 1);
   xname[0] = 0;
   size_t xnameLen = 0;
   int parvalue;
@@ -308,8 +309,8 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
   }
   /* compile documentation comment regular expression */
   {
-    static const char docCommentREString[] = "^"WS"*/\\*"WS"*"SYMRE":"
-      WS"*("NWS".*"NWS")"WS"*\\*/";
+    static const char docCommentREString[] = "^"WS"*/\\*"WS"*"SYMRE":("
+      WS"*).*"NWS"("WS"*)\\*/";
     if (reCompile(&docCommentRE, docCommentREString, &line, &lineBufSize))
       exit(EXIT_FAILURE);
   }
@@ -815,7 +816,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
         }
       else if (detectComment(&line, &lineLen, &lineBufSize,
                              maxMatch, reMatch,
-                             xname, &xnameLen, xdes,
+                             xname, &xnameLen, &xdes,
                              fpin, fpinc, fpint))
         ;
       else
@@ -1128,7 +1129,7 @@ enum {
 static int detectComment(char **line_, ssize_t *lineLen, size_t *lineBufSize,
                          size_t maxMatch, regmatch_t reMatch[],
                          char *xname, size_t *xnameLen,
-                         char *xdes,
+                         char **xdes_,
                          FILE *fpin, FILE *fpinc, FILE *fpint)
 {
   char *restrict line = *line_;
@@ -1138,11 +1139,13 @@ static int detectComment(char **line_, ssize_t *lineLen, size_t *lineBufSize,
       {
         /* found documentation comment */
         size_t nameMatchLen = (size_t)(reMatch[1].rm_eo - reMatch[1].rm_so),
-          docMatchLen = (size_t)(reMatch[2].rm_eo - reMatch[2].rm_so);
+          docMatchLen = (size_t)(reMatch[3].rm_so - reMatch[2].rm_eo);
         memcpy(xname, line + reMatch[1].rm_so, nameMatchLen);
         xname[nameMatchLen] = 0;
         *xnameLen = nameMatchLen;
-        memcpy(xdes, line + reMatch[2].rm_so, docMatchLen);
+        char *xdes = *xdes_ = realloc(*xdes_, docMatchLen + 1);
+        memcpy(xdes, line + reMatch[2].rm_eo, docMatchLen);
+        xdes[docMatchLen] = 0;
         {
           char *eol = xdes;
           while ((eol = strchr(eol, '\n')))
@@ -1151,11 +1154,12 @@ static int detectComment(char **line_, ssize_t *lineLen, size_t *lineBufSize,
               /* delete whitespace following newline */
               size_t squeezeLen = strspn(eol, " \t*");
               char *startoftext = eol + squeezeLen;
-              memmove(eol, startoftext, docMatchLen - (size_t)(eol - xdes));
+              memmove(eol, startoftext,
+                      docMatchLen - (size_t)(startoftext - xdes));
               docMatchLen -= squeezeLen;
+              xdes[docMatchLen] = 0;
             }
         }
-        xdes[docMatchLen] = 0;
         if (verbose || debug)
           printf("Found documentation for \"%s\": \"%s\"\n", xname,
                  xdes);
