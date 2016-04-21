@@ -407,6 +407,8 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
     {
       static const char cplusplus_macro[] = "__cplusplus";
       lineno++;
+      if (line[0] == '\n')
+        continue;
       functype = ISVOID;
       size_t funcargc = 0;
       pline = line;
