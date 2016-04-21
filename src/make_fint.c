@@ -239,9 +239,8 @@ build_header_name(const char *fname, char *cppMacro);
 
 static int detectComment(char **line_, ssize_t *lineLen, size_t *lineBufSize,
                          size_t maxMatch, regmatch_t reMatch[],
-                         char *xname, size_t *xnameLen,
-                         char **xdes,
-                         FILE *fpin, FILE *fpinc, FILE *fpint);
+                         char *xname, size_t *xnameLen, char **xdes,
+                         int *lineno, FILE *fpin, FILE *fpinc, FILE *fpint);
 
 static regex_t commentStartRE, commentEndRE, commentRE, docCommentRE;
 
@@ -499,6 +498,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
               memcpy(line + lineLen, lineExtension, (size_t)extLen + 1);
               lineLen += extLen;
               pline = line + plineOff;
+              ++lineno;
             } while (1);
           }
 
@@ -867,7 +867,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
         }
       else if (detectComment(&line, &lineLen, &lineBufSize,
                              maxMatch, reMatch,
-                             xname, &xnameLen, &xdes,
+                             xname, &xnameLen, &xdes, &lineno,
                              fpin, fpinc, fpint))
         ;
       else
@@ -1181,9 +1181,8 @@ enum {
 
 static int detectComment(char **line_, ssize_t *lineLen, size_t *lineBufSize,
                          size_t maxMatch, regmatch_t reMatch[],
-                         char *xname, size_t *xnameLen,
-                         char **xdes_,
-                         FILE *fpin, FILE *fpinc, FILE *fpint)
+                         char *xname, size_t *xnameLen, char **xdes_,
+                         int *lineno, FILE *fpin, FILE *fpinc, FILE *fpint)
 {
   char *restrict line = *line_;
   int matchType;
@@ -1261,6 +1260,7 @@ static int detectComment(char **line_, ssize_t *lineLen, size_t *lineBufSize,
               exit(EXIT_FAILURE);
           memcpy(line + *lineLen, lineExtension, (size_t)extLen + 1);
           *lineLen += extLen;
+          ++(*lineno);
           foundCommentEnd
             = !regexec(&commentEndRE, lineExtension, maxMatch, reMatch, 0);
         } while (!foundCommentEnd);
