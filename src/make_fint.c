@@ -410,7 +410,6 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
       if (line[0] == '\n')
         continue;
       functype = ISVOID;
-      size_t funcargc = 0;
       pline = line;
       int needsExtraWrapper = 0, needsPrologue = 0;
       size_t funcnameLen;
@@ -448,6 +447,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
 
       if (declType == FUNC_DECL)
         {
+          size_t funcargc = 0;
 	  funcargname[funcargc].rm_so = (regoff_t)(pline - line);
           {
             ssize_t i = 0;
@@ -499,7 +499,6 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
             } while (1);
           }
 
-	  /*  printf("funcargc = %d\n", funcargc);*/
             /* test if argument list is actually empty */
           if (funcargc == 1
               && !regexec(&emptyStringRE, line + funcargname[0].rm_so, 1,
