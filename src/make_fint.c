@@ -1266,8 +1266,11 @@ static int detectComment(char **line_, ssize_t *lineLen, size_t *lineBufSize,
         } while (!foundCommentEnd);
       }
     else
-      /* found no comment at all */
-      break;
+      {
+        /* found no comment at all */
+        matchType = 0;
+        break;
+      }
   } while (1);
   *line_ = line;
   return matchType;
