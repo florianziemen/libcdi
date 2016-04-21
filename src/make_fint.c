@@ -128,6 +128,11 @@ struct symbol {
 /* white-space */
 #define WS "[[:blank:]\n]"
 #define NWS "[^[:blank:]\n]"
+
+#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 5) || defined (__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
+#endif
 /* Note: size of this table must match the cftype enum */
 static struct symbol funArgSym[]
   = { { "",                "",        "void",
@@ -203,6 +208,9 @@ static struct symbol funRet[] = {
   { "INTEGER",         "INT",     "MPI_Comm %.*s",
     "MPI_Comm"WS"+"SYMRE WS"*\\(", 1, 0, 0, cfMPICommConvert, "int %.*s" },
 };
+#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 5)
+#pragma GCC diagnostic pop
+#endif
 
 enum { NUM_RET_TYPES = sizeof (funRet) / sizeof (funRet[0]) };
 enum decl { UNKNOWN_DECL, FUNC_DECL, PARAM_DECL };
