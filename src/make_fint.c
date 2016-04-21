@@ -88,7 +88,7 @@ static void doctotxt(FILE *fp, Docu *doc, size_t ndoc)
 
 enum cftype {ISVOID, ISCONSTSTRING, ISINT, ISREAL, ISDOUBLE, ISMPI_COMM,
              ISXT_IDXLIST, ISCHOICE, ISINTP, ISFLOATV, ISFLOATVV,
-             ISDOUBLEV, ISDOUBLEVV, ISINTV, ISINTVV, ISREALP,
+             ISDOUBLEV, ISDOUBLEVV, ISINTV, ISINTVV, ISINTVVV, ISREALP,
              ISDOUBLEP, ISCBUF, ISUUID, ISUCHAR, ISSTRING, ISSTRINGP,
              VOIDFUNCVOID,
              NUM_KNOWN_ARG_TYPES};
@@ -174,6 +174,9 @@ static struct symbol funArgSym[]
       { "INTEGER",         "INTVV",    "int %.*s%s",
         "^"WS"*(const"WS"+)?int("WS"+"SYMRE")?"WS"*"ARRAY_BOUND
         ARRAY_BOUND "[,\\)]", 3, 0, 0 },
+      { "INTEGER",         "INTVVV",    "int %.*s%s",
+        "^"WS"*(const"WS"+)?int("WS"+"SYMRE")?"WS"*"ARRAY_BOUND
+        ARRAY_BOUND ARRAY_BOUND"[,\\)]", 3, 0, 0 },
       { "REAL",            "PFLOAT",  "float *%.*s",
         "^"WS"*(const"WS"+)?float"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2, 0, 0 },
       { "DOUBLEPRECISION", "PDOUBLE", "double *%.*s",
@@ -1278,7 +1281,8 @@ isArrayArgType(int argType)
     || argType == ISDOUBLEV
     || argType == ISDOUBLEVV
     || argType == ISINTV
-    || argType == ISINTVV;
+    || argType == ISINTVV
+    || argType == ISINTVVV;
 }
 
 static inline int
@@ -1295,6 +1299,9 @@ arrayArgRank(int argType)
   case ISFLOATVV:
   case ISDOUBLEVV:
     rank = 2;
+    break;
+  case ISINTVVV:
+    rank = 3;
     break;
   }
   return rank;
