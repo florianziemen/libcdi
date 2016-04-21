@@ -709,7 +709,7 @@
 !                     streamWriteVarChunk
 !                                    (INTEGER         streamID,
 !                                     INTEGER         varID,
-!                                     INTEGER         rect(*),
+!                                     INTEGER         rect(2,3),
 !                                     DOUBLEPRECISION data(*),
 !                                     INTEGER         nmiss)
       EXTERNAL        streamWriteVarChunk

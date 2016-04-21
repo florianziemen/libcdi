@@ -128,6 +128,7 @@ struct symbol {
 /* white-space */
 #define WS "[[:blank:]\n]"
 #define NWS "[^[:blank:]\n]"
+#define ARRAY_BOUND "\\[([^]]*)\\]"WS"*"
 
 #if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 5) || defined (__clang__)
 #pragma GCC diagnostic push
@@ -156,23 +157,23 @@ static struct symbol funArgSym[]
       { "INTEGER",         "PINT",    "int *%.*s",
         "^"WS"*(const"WS"+)?int"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2, 0, 0 },
       { "REAL",            "FLOATV",  "float %.*s[]",
-        "^"WS"*(const"WS"+)?float("WS"+"SYMRE")?"WS"*\\[[^]]*\\]"
-        WS"*[,\\)]", 3, 0, 0 },
-      { "REAL",            "FLOATVV", "float %.*s[][]",
-        "^"WS"*(const"WS"+)?float("WS"+"SYMRE")?"WS"*\\[[^]]*\\]"
-        WS"*\\[[^]]*\\]"WS"*[,\\)]", 3, 0, 0 },
+        "^"WS"*(const"WS"+)?float("WS"+"SYMRE")?"WS"*"ARRAY_BOUND
+        "[,\\)]", 3, 0, 0 },
+      { "REAL",            "FLOATVV", "float %.*s%s",
+        "^"WS"*(const"WS"+)?float("WS"+"SYMRE")?"WS"*"ARRAY_BOUND
+        ARRAY_BOUND"[,\\)]", 3, 0, 0 },
       { "DOUBLEPRECISION", "DOUBLEV",  "double %.*s[]",
-        "^"WS"*(const"WS"+)?double("WS"+"SYMRE")?"WS"*\\[[^]]*\\]"
-        WS"*[,\\)]", 3, 0, 0 },
-      { "DOUBLEPRECISION", "DOUBLEVV", "double %.*s[][]",
-        "^"WS"*(const"WS"+)?double("WS"+"SYMRE")?"WS"*\\[[^]]*\\]"
-        WS"*\\[[^]]*\\]"WS"*[,\\)]", 3, 0, 0 },
+        "^"WS"*(const"WS"+)?double("WS"+"SYMRE")?"WS"*"ARRAY_BOUND
+        "[,\\)]", 3, 0, 0 },
+      { "DOUBLEPRECISION", "DOUBLEVV", "double %.*s%s",
+        "^"WS"*(const"WS"+)?double("WS"+"SYMRE")?"WS"*"ARRAY_BOUND
+        ARRAY_BOUND"[,\\)]", 3, 0, 0 },
       { "INTEGER",         "INTV",    "int  %.*s[]",
-        "^"WS"*(const"WS"+)?int("WS"+"SYMRE")?"WS"*\\[[^]]*\\]"
-        WS"*[,\\)]", 3, 0, 0 },
-      { "INTEGER",         "INTVV",    "int %.*s[][]",
-        "^"WS"*(const"WS"+)?int("WS"+"SYMRE")?"WS"*\\[[^]]*\\]"
-        WS"*\\[[^]]*\\]"WS"*[,\\)]", 3, 0, 0 },
+        "^"WS"*(const"WS"+)?int("WS"+"SYMRE")?"WS"*"ARRAY_BOUND
+        "[,\\)]", 3, 0, 0 },
+      { "INTEGER",         "INTVV",    "int %.*s%s",
+        "^"WS"*(const"WS"+)?int("WS"+"SYMRE")?"WS"*"ARRAY_BOUND
+        ARRAY_BOUND "[,\\)]", 3, 0, 0 },
       { "REAL",            "PFLOAT",  "float *%.*s",
         "^"WS"*(const"WS"+)?float"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2, 0, 0 },
       { "DOUBLEPRECISION", "PDOUBLE", "double *%.*s",
@@ -241,6 +242,19 @@ static int detectComment(char **line_, ssize_t *lineLen, size_t *lineBufSize,
 
 static regex_t commentStartRE, commentEndRE, commentRE, docCommentRE;
 
+static inline int
+arrayArgRank(int argType);
+
+static void
+sprintFortranArrayArgDims(size_t argDimsFSize, char argDimsF[argDimsFSize],
+                          int argType, const char *argSpecC,
+                          size_t maxMatch, regmatch_t reMatch[]);
+
+static void
+sprintCArrayArgDims(size_t argDimsCSize, char argDimsC[argDimsCSize],
+                    int argType, const char *argSpecC,
+                    size_t maxMatch, regmatch_t reMatch[]);
+
 static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
                               const char *doc_root)
 {
@@ -289,7 +303,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
   /* complete symbol table data */
   {
     maxMatch = symRegexCompile(NUM_KNOWN_ARG_TYPES, funArgSym,
-                             &line, &lineBufSize);
+                               &line, &lineBufSize);
     size_t maxFunMatch = symRegexCompile(NUM_RET_TYPES, funRet,
                                          &line, &lineBufSize);
     if (maxFunMatch > maxMatch)
@@ -551,10 +565,18 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
 		fprintf(fpinc, ",\n!%36s ", "");
               int argType = funcargtype[i];
               int isArray = isArrayArgType(argType);
+              enum { argDimsFSize = 128 };
+              char argDimsF[argDimsFSize];
+              if (!isArray)
+                argDimsF[0] = 0;
+              else
+                sprintFortranArrayArgDims(argDimsFSize, argDimsF, argType,
+                                          line + funcargfull[i].rm_so,
+                                          maxMatch, reMatch);
 	      fprintf(fpinc, "%-16s%.*s%s", funArgSym[argType].f77name,
                       (int)(funcargname[i].rm_eo - funcargname[i].rm_so),
                       line + funcargname[i].rm_so,
-                      isArray ? "(*)" : "");
+                      argDimsF);
 	    }
 	  if ( funcargc )
 	    fprintf(fpinc, ")\n");
@@ -591,11 +613,21 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
                 {
                   if (i > 0)
                     fputs(", ", fpint);
-                  fprintf(fpint, (funArgSym[funcargtype[i]].convert
-                                  ?funArgSym[funcargtype[i]].convcfmt
-                                  :funArgSym[funcargtype[i]].cfmt),
+                  enum { arrayDimsCSize = 128 };
+                  char arrayDimsC[arrayDimsCSize];
+                  int argType = funcargtype[i];
+                  int isArray = isArrayArgType(argType);
+                  if (!isArray)
+                    arrayDimsC[0] = 0;
+                  else
+                    sprintCArrayArgDims(arrayDimsCSize, arrayDimsC,
+                                        argType, line + funcargfull[i].rm_so,
+                                        maxMatch, reMatch);
+                  fprintf(fpint, (funArgSym[argType].convert
+                                  ?funArgSym[argType].convcfmt
+                                  :funArgSym[argType].cfmt),
                           (int)(funcargname[i].rm_eo - funcargname[i].rm_so),
-                          line + funcargname[i].rm_so);
+                          line + funcargname[i].rm_so, arrayDimsC);
                 }
               fputs(")\n{\n", fpint);
               if (functype != ISVOID)
@@ -741,17 +773,24 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
                       xlineLen += 2U;
                     }
 
-                  char farg[128];
+                  enum { argDimsFSize = 128 };
+                  char farg[128], argDimsF[argDimsFSize];
                   /* FIXME: optional empty argument name unhandled */
                   int argType = funcargtype[i];
                   int isArray = isArrayArgType(argType);
+                  if (!isArray)
+                    argDimsF[0] = 0;
+                  else
+                    sprintFortranArrayArgDims(argDimsFSize, argDimsF, argType,
+                                              line + funcargfull[i].rm_so,
+                                              maxMatch, reMatch);
 		  int nchn
                     = snprintf(farg, sizeof (farg), "%s %.*s%s",
                                funArgSym[argType].f77name,
                                (int)(funcargname[i].rm_eo
                                      - funcargname[i].rm_so),
                                line + funcargname[i].rm_so,
-                               isArray ? "(*)" : "");
+                               argDimsF);
                   if (nchn < 0)
                     abort();
 		  if ( (xlineLen + (size_t)nchn) > 80 )
@@ -1056,8 +1095,10 @@ symRegexCompile(size_t numSyms, struct symbol symList[],
       if (reCompile(&symList[sym].preg, symList[sym].parseRE,
                     line, lineBufSize))
         exit(EXIT_FAILURE);
-      if (symList[sym].nameMatch > maxMatch)
-        maxMatch = symList[sym].nameMatch;
+      size_t numMatches = symList[sym].nameMatch
+        + (size_t)arrayArgRank((int)sym);
+      if (numMatches > maxMatch)
+        maxMatch = numMatches;
     }
   return maxMatch;
 }
@@ -1237,6 +1278,94 @@ isArrayArgType(int argType)
     || argType == ISDOUBLEVV
     || argType == ISINTV
     || argType == ISINTVV;
+}
+
+static inline int
+arrayArgRank(int argType)
+{
+  int rank = 0;
+  switch (argType) {
+  case ISFLOATV:
+  case ISDOUBLEV:
+  case ISINTV:
+    rank = 1;
+    break;
+  case ISINTVV:
+  case ISFLOATVV:
+  case ISDOUBLEVV:
+    rank = 2;
+    break;
+  }
+  return rank;
+}
+
+static void
+sprintCArrayArgDims(size_t argDimsCSize, char argDimsC[argDimsCSize],
+                    int argType, const char *argSpecC,
+                    size_t maxMatch, regmatch_t reMatch[])
+{
+  if (regexec(&funArgSym[argType].preg, argSpecC, maxMatch,
+              reMatch, 0))
+    {
+      fprintf(stderr, "unexpected non-matching of array argument regexp!\n");
+      exit(1);
+    }
+  size_t argDimsCPos = 0;
+  int arank = arrayArgRank(argType);
+  for (int rank = 1; rank <= arank; ++rank)
+    {
+      size_t rankBoundMatch
+        = funArgSym[argType].nameMatch + (size_t)rank;
+      size_t boundStringLen
+        = (size_t)(reMatch[rankBoundMatch].rm_eo
+                   - reMatch[rankBoundMatch].rm_so);
+      argDimsC[argDimsCPos++] = '[';
+      if (boundStringLen)
+        {
+          memcpy(argDimsC + argDimsCPos,
+                 argSpecC + reMatch[rankBoundMatch].rm_so,
+                 boundStringLen);
+          argDimsCPos += boundStringLen;
+        }
+      argDimsC[argDimsCPos++] = ']';
+    }
+  argDimsC[argDimsCPos++] = 0;
+}
+
+
+static void
+sprintFortranArrayArgDims(size_t argDimsFSize, char argDimsF[argDimsFSize],
+                          int argType, const char *argSpecC,
+                          size_t maxMatch, regmatch_t reMatch[])
+{
+  if (regexec(&funArgSym[argType].preg, argSpecC, maxMatch,
+              reMatch, 0))
+    {
+      fprintf(stderr, "unexpected non-matching of array argument regexp!\n");
+      exit(1);
+    }
+  argDimsF[0] = '(';
+  size_t argDimsFPos = 1;
+  int arank = arrayArgRank(argType);
+  for (int rank = arank; rank > 0; --rank)
+    {
+      size_t rankBoundMatch
+        = funArgSym[argType].nameMatch + (size_t)rank;
+      size_t boundStringLen
+        = (size_t)(reMatch[rankBoundMatch].rm_eo
+                   - reMatch[rankBoundMatch].rm_so);
+      if (!boundStringLen)
+        argDimsF[argDimsFPos++] = '*';
+      else
+        {
+          memcpy(argDimsF + argDimsFPos,
+                 argSpecC + reMatch[rankBoundMatch].rm_so,
+                 boundStringLen);
+          argDimsFPos += boundStringLen;
+        }
+      argDimsF[argDimsFPos++] = rank > 1 ? ',' : ')';
+    }
+  argDimsF[argDimsFPos++] = 0;
 }
 
 
