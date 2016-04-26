@@ -437,7 +437,7 @@ void gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double y
 
 		if ( !lfound )
 		  {
-		    Warning("Cannot calculate gaussian latitudes for lat1 = %g latn = %g!", yfirst, ylast);
+		    Warning("Cannot calculate gaussian latitudes for lat1 = %.9g latn = %.9g!", yfirst, ylast);
 		    for (int i = 0; i < ysize; i++ ) yvals[i] = 0;
 		    yvals[0] = yfirst;
 		    yvals[ysize-1] = ylast;
@@ -3508,28 +3508,28 @@ static void gridPrintKernel(grid_t * gridptr, int index, int opt, FILE *fp)
 	  {
 	    double a = 0, lon_0 = 0, lat_0 = 0;
 	    gridInqLaea(gridID, &a, &lon_0, &lat_0);
-	    fprintf(fp, "a         = %g\n"
-                    "lon_0     = %g\n"
-                    "lat_0     = %g\n", a, lon_0, lat_0);
+	    fprintf(fp, "a         = %.9g\n"
+                    "lon_0     = %.9g\n"
+                    "lat_0     = %.9g\n", a, lon_0, lat_0);
 	  }
 
 	if ( type == GRID_LCC2 )
 	  {
 	    double a = 0, lon_0 = 0, lat_0 = 0, lat_1 = 0, lat_2 = 0;
 	    gridInqLcc2(gridID, &a, &lon_0, &lat_0, &lat_1, &lat_2);
-	    fprintf(fp, "a         = %g\n"
-                    "lon_0     = %g\n"
-                    "lat_0     = %g\n"
-                    "lat_1     = %g\n"
-                    "lat_2     = %g\n",
+	    fprintf(fp, "a         = %.9g\n"
+                    "lon_0     = %.9g\n"
+                    "lat_0     = %.9g\n"
+                    "lat_1     = %.9g\n"
+                    "lat_2     = %.9g\n",
                     a, lon_0, lat_0, lat_1, lat_2);
 	  }
 
 	if ( gridptr->isRotated )
 	  {
-	    if ( xsize > 0 ) fprintf(fp, "xnpole    = %g\n", gridptr->xpole);
-	    if ( ysize > 0 ) fprintf(fp, "ynpole    = %g\n", gridptr->ypole);
-	    if ( IS_NOT_EQUAL(gridptr->angle, 0) ) fprintf(fp, "angle     = %g\n", gridptr->angle);
+	    if ( xsize > 0 ) fprintf(fp, "xnpole    = %.9g\n", gridptr->xpole);
+	    if ( ysize > 0 ) fprintf(fp, "ynpole    = %.9g\n", gridptr->ypole);
+	    if ( IS_NOT_EQUAL(gridptr->angle, 0) ) fprintf(fp, "angle     = %.9g\n", gridptr->angle);
  	  }
 
 	if ( xvals )
@@ -3546,8 +3546,8 @@ static void gridPrintKernel(grid_t * gridptr, int index, int opt, FILE *fp)
 
 	    if ( IS_NOT_EQUAL(xinc, 0) && opt )
 	      {
-                fprintf(fp, "xfirst    = %g\n"
-                        "xinc      = %g\n", xfirst, xinc);
+                fprintf(fp, "xfirst    = %.9g\n"
+                        "xinc      = %.9g\n", xfirst, xinc);
 	      }
 	    else
 	      {
@@ -3578,8 +3578,8 @@ static void gridPrintKernel(grid_t * gridptr, int index, int opt, FILE *fp)
 
 	    if ( IS_NOT_EQUAL(yinc, 0) && opt )
 	      {
-	  	fprintf(fp, "yfirst    = %g\n"
-                        "yinc      = %g\n", yfirst, yinc);
+	  	fprintf(fp, "yfirst    = %.9g\n"
+                        "yinc      = %.9g\n", yfirst, yinc);
 	      }
 	    else
 	      {
@@ -3626,13 +3626,13 @@ static void gridPrintKernel(grid_t * gridptr, int index, int opt, FILE *fp)
 	fprintf(fp,
                 "xsize     = %d\n"
                 "ysize     = %d\n"
-                "originLon = %g\n"
-                "originLat = %g\n"
-                "lonParY   = %g\n"
-                "lat1      = %g\n"
-                "lat2      = %g\n"
-                "xinc      = %g\n"
-                "yinc      = %g\n"
+                "originLon = %.9g\n"
+                "originLat = %.9g\n"
+                "lonParY   = %.9g\n"
+                "lat1      = %.9g\n"
+                "lat2      = %.9g\n"
+                "xinc      = %.9g\n"
+                "yinc      = %.9g\n"
                 "projection = %s\n"
                 , xsize, ysize, originLon, originLat, lonParY, lat1, lat2,
                 xincm, yincm,
