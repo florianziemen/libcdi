@@ -58,22 +58,12 @@ int days_per_year(int calendar, int year)
 
   if ( daysperyear == 0 )
     {
-      if ( calendar == CALENDAR_STANDARD )
-	{
-	  if ( year == 1582 )
-	    daysperyear = 355;
-	  else if ( (year%4 == 0 && year%100 != 0) || year%400 == 0 )
-	    daysperyear = 366;
-	  else
-	    daysperyear = 365;
-	}
+      if ( year == 1582 && calendar == CALENDAR_STANDARD )
+        daysperyear = 355;
+      else if ( (year%4 == 0 && year%100 != 0) || year%400 == 0 )
+        daysperyear = 366;
       else
-	{
-	  if ( (year%4 == 0 && year%100 != 0) || year%400 == 0 )
-	    daysperyear = 366;
-	  else
-	    daysperyear = 365;
-	}
+        daysperyear = 365;
     }
 
   return daysperyear;
