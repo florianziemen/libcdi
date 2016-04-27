@@ -2,6 +2,10 @@
 
 	* Version 1.7.2 released
 
+2016-04-27  Uwe Schulzweida
+
+	* cdfReadVarSlice: fix bug with DATATYPE_UINT8
+
 2016-04-04  Uwe Schulzweida
 
 	* GRIB1/GRIB_API (accumulation) encoding error [Bug #6638]
