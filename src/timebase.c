@@ -176,7 +176,7 @@ double julday_sub(int julday1, int secofday1, int julday2, int secofday2, int *d
 
   *secs = (int) sec_of_day;
 
-  int64_t seconds = *days * 86400 + sec_of_day;
+  int64_t seconds = (int64_t)(*days) * (int64_t)86400 + sec_of_day;
 
   return (double)seconds;
 }
