@@ -96,7 +96,6 @@ static void decode_day(int dpy, int days, int *year, int *month, int *day)
 
 static int encode_day(int dpy, int year, int month, int day)
 {
-  int i;
   int *dpm = NULL;
   long rval = (long)dpy * year + day;
 
@@ -104,7 +103,7 @@ static int encode_day(int dpy, int year, int month, int day)
   else if ( dpy == 365 ) dpm = month_365;
   else if ( dpy == 366 ) dpm = month_366;
 
-  if ( dpm ) for ( i = 0; i < month-1; i++ ) rval += dpm[i];
+  if ( dpm ) for ( int i = 0; i < month-1; i++ ) rval += dpm[i];
   if ( rval > INT_MAX || rval < INT_MIN )
     Error("Unhandled date: %ld", rval);
 
