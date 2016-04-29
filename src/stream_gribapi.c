@@ -2279,16 +2279,14 @@ void gribapiDefLevelType(grib_handle *gh, int gcinit, const char *keyname, long 
 }
 
 static
-void grib2DefLevel(grib_handle *gh, int gcinit, long leveltype1, long leveltype2, int lbounds, double level, double dlevel1, double dlevel2)
+void grib2DefLevel(grib_handle *gh, int gcinit, long leveltype1, long leveltype2, bool lbounds, double level, double dlevel1, double dlevel2)
 {
-  long scaled_level;
-  long factor;
-
   gribapiDefLevelType(gh, gcinit, "typeOfFirstFixedSurface", leveltype1);
   if ( lbounds ) gribapiDefLevelType(gh, gcinit, "typeOfSecondFixedSurface", leveltype2);
 
   if ( !lbounds ) dlevel1 = level;
 
+  long scaled_level, factor;
   getLevelFactor(dlevel1, &factor, &scaled_level);
   GRIB_CHECK(my_grib_set_long(gh, "scaleFactorOfFirstFixedSurface", factor), 0);
   GRIB_CHECK(my_grib_set_long(gh, "scaledValueOfFirstFixedSurface", scaled_level), 0);
@@ -2304,7 +2302,7 @@ void grib2DefLevel(grib_handle *gh, int gcinit, long leveltype1, long leveltype2
 static
 void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID, int levelID, int gcinit, int proddef_template_num)
 {
-  int lbounds = 0;
+  bool lbounds = false;
   double dlevel1 = 0, dlevel2 = 0;
 
   int zaxistype = zaxisInqType(zaxisID);
@@ -2314,7 +2312,7 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
 
   if ( zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL) )
     {
-      lbounds = 1;
+      lbounds = true;
       dlevel1 = zaxisInqLbound(zaxisID, levelID);
       dlevel2 = zaxisInqUbound(zaxisID, levelID);
     }
@@ -2498,7 +2496,6 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
     case ZAXIS_DEPTH_BELOW_LAND:
       {
 	char units[128];
-
 	zaxisInqUnits(zaxisID, units);
 
 	if ( editionNumber <= 1 )
@@ -2531,54 +2528,32 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
       }
     case ZAXIS_REFERENCE:
       {
-        unsigned char uuid[CDI_UUID_SIZE];
+        if ( !gcinit ) GRIB_CHECK(my_grib_set_long(gh, "genVertHeightCoords", 1), 0);
 
-        if ( !gcinit )
+        if ( editionNumber <= 1 )
+          ; // not available
+        else
           {
-            GRIB_CHECK(my_grib_set_long(gh, "genVertHeightCoords", 1), 0);
-          }
-
-        if ( lbounds )
-          {
-            if ( editionNumber <= 1 )
-              ; // not available
-            else
+            if ( lbounds )
               {
-                int number = zaxisInqNumber(zaxisID);
                 gribapiDefLevelType(gh, gcinit, "typeOfFirstFixedSurface", GRIB2_LTYPE_REFERENCE);
                 gribapiDefLevelType(gh, gcinit, "typeOfSecondFixedSurface", GRIB2_LTYPE_REFERENCE);
-                GRIB_CHECK(my_grib_set_long(gh, "NV", 6), 0);
-                GRIB_CHECK(my_grib_set_long(gh, "nlev", zaxisInqNlevRef(zaxisID)), 0);
-                GRIB_CHECK(my_grib_set_long(gh, "numberOfVGridUsed", number), 0);
-                size_t len = CDI_UUID_SIZE;
-                zaxisInqUUID(zaxisID, uuid);
-                if (grib_set_bytes(gh, "uuidOfVGrid", uuid, &len) != 0)
-                  {
-                    Warning("Can't write UUID!");
-                  }
                 GRIB_CHECK(my_grib_set_long(gh, "topLevel", (long) dlevel1), 0);
                 GRIB_CHECK(my_grib_set_long(gh, "bottomLevel", (long) dlevel2), 0);
               }
-          }
-        else
-          {
-            if ( editionNumber <= 1 )
-              ; // not available
             else
               {
-                int number = zaxisInqNumber(zaxisID);
-                gribapiDefLevelType(gh, gcinit, "typeOfFirstFixedSurface", GRIB2_LTYPE_REFERENCE);
-                GRIB_CHECK(my_grib_set_long(gh, "NV", 6), 0);
-                GRIB_CHECK(my_grib_set_long(gh, "nlev", zaxisInqNlevRef(zaxisID)), 0);
-                GRIB_CHECK(my_grib_set_long(gh, "numberOfVGridUsed", number), 0);
-                size_t len = CDI_UUID_SIZE;
-                zaxisInqUUID(zaxisID, uuid);
-                if (grib_set_bytes(gh, "uuidOfVGrid", uuid, &len) != 0)
-                  {
-                    Warning("Can't write UUID!");
-                  }
-                GRIB_CHECK(my_grib_set_double(gh, "level", level), 0);
+                grib2DefLevel(gh, gcinit, GRIB2_LTYPE_REFERENCE, GRIB2_LTYPE_REFERENCE, lbounds, level, dlevel1, dlevel2);
               }
+
+            int number = zaxisInqNumber(zaxisID);
+            unsigned char uuid[CDI_UUID_SIZE];
+            GRIB_CHECK(my_grib_set_long(gh, "NV", 6), 0);
+            GRIB_CHECK(my_grib_set_long(gh, "nlev", zaxisInqNlevRef(zaxisID)), 0);
+            GRIB_CHECK(my_grib_set_long(gh, "numberOfVGridUsed", number), 0);
+            size_t len = CDI_UUID_SIZE;
+            zaxisInqUUID(zaxisID, uuid);
+            if ( grib_set_bytes(gh, "uuidOfVGrid", uuid, &len) != 0 ) Warning("Can't write UUID!");
           }
 
         break;
@@ -2586,11 +2561,14 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
     case ZAXIS_GENERIC:
       {
 	if ( editionNumber <= 1 )
-          gribapiDefLevelType(gh, gcinit, "indicatorOfTypeOfLevel", ltype);
+          {
+            gribapiDefLevelType(gh, gcinit, "indicatorOfTypeOfLevel", ltype);
+            GRIB_CHECK(my_grib_set_double(gh, "level", level), 0);
+          }
         else
-          gribapiDefLevelType(gh, gcinit, "typeOfFirstFixedSurface", ltype);
-
-	GRIB_CHECK(my_grib_set_double(gh, "level", level), 0);
+          {
+            grib2DefLevel(gh, gcinit, ltype, ltype, lbounds, level, dlevel1, dlevel2);
+          }
 
 	break;
       }
