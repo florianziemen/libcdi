@@ -21,13 +21,13 @@
 static int
 cdiPio_nc__create(const char *path, int cmode, size_t initialsz, size_t *chunksizehintp, int *ncidp)
 {
-  int status;
-  if (cmode & NC_NETCDF4 && commInqIOMode() != PIO_NONE)
+  int status, ioMode = commInqIOMode();
+  if (cmode & NC_NETCDF4 && ioMode != PIO_NONE)
     {
       cmode |= NC_MPIPOSIX;
       status = nc_create_par(path, cmode, commInqCommColl(), MPI_INFO_NULL, ncidp);
     }
-  else if (cmode & (NC_64BIT_OFFSET | NC_CLASSIC_MODEL) && commInqIOMode() != PIO_NONE)
+  else if (cmode & (NC_64BIT_OFFSET | NC_CLASSIC_MODEL) && ioMode != PIO_NONE)
     {
       /* FIXME: improve handling of pnetcdf here */
       abort();
