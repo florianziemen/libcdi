@@ -618,7 +618,7 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridindex, int ndims, bool
 
           bool gen_bounds = false, hasBounds = gridInqPropPresence(gridID, gridAxisInq->bndsQueryKey);
           const bool grid_is_cyclic = gridIsCircular(gridID) > 0;
-          double *pbounds;
+          double *restrict pbounds;
           size_t nvertex = gridInqNvertex(gridID);
           if (CDI_CMOR_Mode && grid_is_cyclic && !hasBounds)
             {
@@ -627,8 +627,8 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridindex, int ndims, bool
               pbounds = (double *) Malloc(2 * dimlen * sizeof(double));
               for (size_t i = 0; i < dimlen - 1; ++i)
                 {
-                  pbounds[i * 2 + 1] = (pvals[i] + pvals[i + 1]) / 2;
-                  pbounds[(i + 1) * 2] = (pvals[i] + pvals[i + 1]) / 2;
+                  pbounds[i * 2 + 1] = (pvals[i] + pvals[i + 1]) * 0.5;
+                  pbounds[i * 2 + 2] = (pvals[i] + pvals[i + 1]) * 0.5;
                 }
               finishCyclicBounds(pbounds, dimlen, pvals);
             }
