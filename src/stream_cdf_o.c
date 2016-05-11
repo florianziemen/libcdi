@@ -560,11 +560,11 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridIndex, int ndims, bool
 
   ncgrid_t *ncgrid = streamptr->ncgrid;
 
-  const double *pvals = gridAxisInq->axisValsPtr(gridID);
+  bool hasVals = gridInqPropPresence(gridID, gridAxisInq->valsQueryKey);
   char dimname[CDI_MAX_NAME + 3];
   dimname[0] = 0;
   int length = sizeof(dimname);
-  if (ndims && pvals == NULL) cdiInqKeyString(gridID, axisKey, CDI_KEY_DIMNAME, dimname, &length);
+  if (ndims && hasVals) cdiInqKeyString(gridID, axisKey, CDI_KEY_DIMNAME, dimname, &length);
 
   for (int index = 0; index < gridIndex; ++index)
     {
@@ -605,7 +605,7 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridIndex, int ndims, bool
       checkGridName(axisname, fileID);
       const size_t axisnameLen = strlen(axisname);
 
-      bool switchNCMode = streamptr->ncmode == 2 && (pvals || ndims);
+      bool switchNCMode = streamptr->ncmode == 2 && (hasVals || ndims);
       if (switchNCMode)
         {
           cdf_redef(fileID);
@@ -620,7 +620,7 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridIndex, int ndims, bool
           if (dimID == CDI_UNDEFID) cdf_def_dim(fileID, dimname, dimlen, &dimID);
         }
 
-      if (pvals)
+      if (hasVals)
         {
           cdf_def_var(fileID, axisname, xtype, ndims, &dimID, &ncvarid);
 
@@ -640,15 +640,18 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridIndex, int ndims, bool
             char axisStr[2] = { axisLetter, '\0' };
             cdf_put_att_text(fileID, ncvarid, "axis", 1, axisStr);
           }
-          cdfPostDefActionAddPutVal(&delayed, fileID, ncvarid, pvals, (void (*)(void *)) memFree);
+          void (*mycdfPostDefActionGridProp)(int, int, int, enum gridPropInq, struct cdfPostDefActionList **)
+              = namespaceSwitchGet(NSSWITCH_CDF_POSTDEFACTION_GRID_PROP).func;
+          mycdfPostDefActionGridProp(gridID, fileID, ncvarid, gridAxisInq->valsQueryKey, &delayed);
 
-          bool gen_bounds = false, hasBounds = gridInqPropPresence(gridID, gridAxisInq->bndsQueryKey);
+          bool genBounds = false, hasBounds = gridInqPropPresence(gridID, gridAxisInq->bndsQueryKey);
           const bool grid_is_cyclic = gridIsCircular(gridID) > 0;
           double *restrict pbounds;
           size_t nvertex = gridInqNvertex(gridID);
           if (CDI_CMOR_Mode && grid_is_cyclic && !hasBounds)
             {
-              gen_bounds = true;
+              const double *pvals = gridAxisInq->axisValsPtr(gridID);
+              genBounds = true;
               nvertex = 2;
               pbounds = (double *) Malloc(2 * dimlen * sizeof(double));
               for (size_t i = 0; i < dimlen - 1; ++i)
@@ -666,7 +669,7 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridIndex, int ndims, bool
             {
               if (nc_inq_dimid(fileID, bndsName, &nvdimID) != NC_NOERR) cdf_def_dim(fileID, bndsName, nvertex, &nvdimID);
             }
-          if (pbounds && nvdimID != CDI_UNDEFID)
+          if ((hasBounds || genBounds) && nvdimID != CDI_UNDEFID)
             {
               char boundsname[CDI_MAX_NAME];
               memcpy(boundsname, axisname, axisnameLen);
@@ -677,7 +680,7 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridIndex, int ndims, bool
               cdf_def_var(fileID, boundsname, xtype, 2, dimIDs, &ncbvarid);
               cdf_put_att_text(fileID, ncvarid, "bounds", axisnameLen + sizeof(bndsName), boundsname);
               cdfPostDefActionAddPutVal(&delayed, fileID, ncbvarid, pbounds,
-                                        gen_bounds ? cdfDelayedPutVarDeepCleanup : (void (*)(void *)) memFree);
+                                        genBounds ? cdfDelayedPutVarDeepCleanup : (void (*)(void *)) memFree);
             }
         }
 
