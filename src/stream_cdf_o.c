@@ -679,15 +679,15 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridindex, int ndims,
           bool gen_bounds = false,
             hasBounds = gridInqPropPresence(gridID, gridAxisInq->bndsQueryKey);
           bool grid_is_cyclic = gridIsCircular(gridID) > 0;
-          double *pbounds;
+          double *restrict pbounds;
           if ( CDI_cmor_mode && grid_is_cyclic && !hasBounds )
             {
               gen_bounds = true;
               pbounds = (double*) Malloc(2*dimlen*sizeof(double));
               for ( size_t i = 0; i < dimlen-1; ++i )
                 {
-                  pbounds[i*2+1]   = (pvals[i] + pvals[i+1])/2;
-                  pbounds[(i+1)*2] = (pvals[i] + pvals[i+1])/2;
+                  pbounds[i*2+1] = (pvals[i] + pvals[i+1])*0.5;
+                  pbounds[i*2+2] = (pvals[i] + pvals[i+1])*0.5;
                 }
               finishCyclicBounds(pbounds, dimlen, pvals);
             }
