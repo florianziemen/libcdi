@@ -432,7 +432,7 @@ cdfDelayedPutVarInt1(void *data)
   cdf_put_var_int(put->fileID, put->ncvarid, &put->values.int1);
 }
 
-static void
+void
 cdfDelayedPutVarDeepCleanup(void *data)
 {
   struct cdfPostDefPutVar *what = (struct cdfPostDefPutVar *) data;
@@ -462,7 +462,7 @@ cdfPostDefActionListDelete(struct cdfPostDefActionList *list)
   Free(list);
 }
 
-static struct cdfPostDefActionList *
+struct cdfPostDefActionList *
 cdfPostDefActionAdd(struct cdfPostDefActionList *list, struct cdfPostDefAction addendum)
 {
   size_t appendPos = list ? list->len : 0;
@@ -513,7 +513,7 @@ cdfPostDefActionConcat(struct cdfPostDefActionList *listA, const struct cdfPostD
   return listA;
 }
 
-static inline void
+void
 cdfPostDefActionAddPutVal(struct cdfPostDefActionList **list_, int fileID, int ncvarid, const double *values,
                           void (*cleanup)(void *))
 {
