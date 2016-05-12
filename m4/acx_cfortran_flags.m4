@@ -42,7 +42,7 @@ dnl Add -Dappendus to CPPFLAGS if the above applies.
 dnl
 AC_DEFUN([ACX_XLF_QEXTNAME_ADD_APPENDUS],
   [AS_CASE([$host],
-     [*-ibm-aix*],
+     [*-ibm-aix*|powerpc64-*-linux-*|powerpc-*-linux-*],
      [AC_MSG_CHECKING([if -Dappendus needs to be added to CPPFLAGS for cfortran.h])
       AS_IF([$CC -qversion 2>&1 | grep '^IBM XL C' >/dev/null],
         [acx_temp_qextname_f77flags=`echo "$FFLAGS" | sed -n '/-qextname/{ s/^\(.* \)*-qextname\( .*\)*$/-qextname/;p;}'`
@@ -72,8 +72,8 @@ dnl automate flag elicitation for cfortran.h
 AC_DEFUN([_ACX_FIND_CFORTRAN_DEF],
   [AC_REQUIRE([AC_CANONICAL_HOST])
    _AC_FORTRAN_ASSERT
-   AC_LANG_CASE([Fortran],[save_FC=$FC ; acx_FC=$FC],
-     [Fortran 77],[save_F77=$F77 ; acx_FC=$F77])
+   AC_LANG_CASE([Fortran],[acx_FC=$FC],
+     [Fortran 77],[acx_FC=$F77])
    AS_CASE([$host],
      [x86_64-*-linux-*|i*86-*-linux-*|*-apple-darwin*|ia64-*-linux-*|x86_64-*-freebsd*|i*86-*-freebsd*],
      [acx_temp=`$acx_FC -V 2>&1`
@@ -98,6 +98,10 @@ dnl check if compiling with f2c bindings or with default bindings
         [acx_temp=`$acx_FC -v 2>&1` \
          && echo $acx_temp | grep '^f2c'],
         [AS_VAR_SET([acx_cf_flag],[-Df2cFortran])])],
+     [powerpc64-*-linux-*|powerpc-*-linux-*],
+     [AS_IF([acx_temp=`$acx_FC -qversion 2>&1` \
+         && echo $acx_temp | grep '^IBM XL Fortran' >/dev/null],
+        [AS_VAR_SET([acx_cf_flag],[-DIBMR2Fortran])])],
      [*-ibm-aix*],
      [dnl xlc set _IBMR2 so nothing needs to be done
       AS_IF([$CC -qversion 2>&1 | grep '^IBM XL C' >/dev/null],,
@@ -146,17 +150,15 @@ dnl check f77 flag matches fc flag
          AC_PROVIDE_IFELSE([AC_PROG_F77],
            [AC_PROVIDE_IFELSE([AC_PROG_FC],
               [dnl both FC and F77 are configured
-               AS_IF([test -z "$F77" -o X"$F77" = Xno],
+               AS_IF([test -z "$FC" -o X"$FC" != Xno],
                  [acx_cv_cf_flag="$acx_cv_fc_cf_flag (probed)"],
-                 [test -z "$FC" -o X"$FC" = Xno],
+                 [test -z "$F77" -o X"$F77" != Xno],
                  [acx_cv_cf_flag="$acx_cv_f77_cf_flag (probed)"],
                  [AS_IF([test x"$acx_cv_f77_cf_flag" = x"$acx_cv_fc_cf_flag"],
                     [acx_cv_cf_flag="$acx_cv_f77_cf_flag (probed)"],
                     [AC_MSG_ERROR([cfortran.h flag for $F77 does not match the flag for $FC.
 Have you configured compatible compilers?])])])
-              ],
-              [acx_cv_cf_flag="$acx_cv_f77_cf_flag (probed)"])],
-           [acx_cv_cf_flag="$acx_cv_fc_cf_flag (probed)"])
+              ])],[acx_cv_cf_flag="$acx_cv_fc_cf_flag (probed)"])
         ])
      ])
 dnl now that flag is established, add (probed) defines to CPPFLAGS
