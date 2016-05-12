@@ -5349,7 +5349,7 @@ else
       end
 _ACEOF
    ac_tmp=conftest.fppout
-   if { {        ac_try="$FPP $FPPFLAGS conftest.$acx_sl_fpp_srcext >$ac_tmp"
+   if { { ac_try="$FPP $FPPFLAGS conftest.$acx_sl_fpp_srcext >$ac_tmp"
 case "(($ac_try" in
   *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
   *) ac_try_echo=$ac_try;;
@@ -5415,7 +5415,7 @@ fi
       end
 _ACEOF
    ac_tmp=conftest.fppout
-   if { {        ac_try="$ac_fpp $FPPFLAGS conftest.$acx_sl_fpp_srcext >$ac_tmp"
+   if { { ac_try="$ac_fpp $FPPFLAGS conftest.$acx_sl_fpp_srcext >$ac_tmp"
 case "(($ac_try" in
   *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
   *) ac_try_echo=$ac_try;;
@@ -5468,7 +5468,7 @@ fi
       end
 _ACEOF
    ac_tmp=conftest.fppout
-   if { {        ac_try="$ac_fpp -P $FPPFLAGS conftest.$acx_sl_fpp_srcext >$ac_tmp"
+   if { { ac_try="$ac_fpp -P $FPPFLAGS conftest.$acx_sl_fpp_srcext >$ac_tmp"
 case "(($ac_try" in
   *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
   *) ac_try_echo=$ac_try;;
@@ -5547,47 +5547,7 @@ else
    ac_fpp_need_CSTYLE=no
    ac_fpp_need_cxxstyle=yes
    ac_fpp_need_CXXSTYLE=no
-         for _t in  nil
-   do
-     case $_t in #(
-  define) :
-    ac_fpp_need_d=yes ;; #(
-  nodefine) :
-    ac_fpp_need_d=no ;; #(
-  include) :
-    ac_fpp_need_i=yes ;; #(
-  noinclude) :
-    ac_fpp_need_i=no ;; #(
-  substitute) :
-    ac_fpp_need_subs=yes ;; #(
-  nosubstitute) :
-    ac_fpp_need_subs=no ;; #(
-  wrap) :
-    ac_fpp_need_wrap=yes ;; #(
-  nowwrap) :
-    ac_fpp_need_wrap=no ;; #(
-  cstyle) :
-    ac_fpp_need_cstyle=yes ;; #(
-  nocstyle) :
-    ac_fpp_need_cstyle=no ;; #(
-  CSTYLE) :
-    ac_fpp_need_CSTYLE=yes ;; #(
-  noCSTYLE) :
-    ac_fpp_need_CSTYLE=no ;; #(
-  cxxstyle) :
-    ac_fpp_need_cxxstyle=yes ;; #(
-  nocxxstyle) :
-    ac_fpp_need_cxxstyle=no ;; #(
-  CXXSTYLE) :
-    ac_fpp_need_CXXSTYLE=yes ;; #(
-  noCXXSTYLE) :
-    ac_fpp_need_CXXSTYLE=no ;; #(
-  nil) :
-     ;; #(
-  *) :
-     ;;
-esac
-   done
+
    # Wrapping requires substitution
    test $ac_fpp_need_wrap = yes && ac_fpp_need_subs=yes
    # CSTYLE and cstyle are mutually exclusive.
@@ -5791,7 +5751,7 @@ fi
 fi
       if test $ac_fpp_need_wrap = yes; then :
   acx_sl_prog_fc_cpp_wrap=no
-         $as_echo "$as_me:${as_lineno-$LINENO}: Testing wether preprocessor wraps long lines." >&5
+         $as_echo "$as_me:${as_lineno-$LINENO}: Testing whether preprocessor wraps long lines." >&5
 
    ac_ext=${ac_fc_srcext-f}
 ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
@@ -5835,7 +5795,7 @@ fi
 
 fi
       if test $ac_fpp_need_CSTYLE = yes; then :
-  $as_echo "$as_me:${as_lineno-$LINENO}: Testing wether preprocessor removes C-style comments." >&5
+  $as_echo "$as_me:${as_lineno-$LINENO}: Testing whether preprocessor removes C-style comments." >&5
 
    ac_ext=${ac_fc_srcext-f}
 ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
@@ -5877,7 +5837,7 @@ fi
 
 fi
       if test $ac_fpp_need_cstyle = yes; then :
-  $as_echo "$as_me:${as_lineno-$LINENO}: Testing wether preprocessor leaves C-style comments in place." >&5
+  $as_echo "$as_me:${as_lineno-$LINENO}: Testing whether preprocessor leaves C-style comments in place." >&5
 
    ac_ext=${ac_fc_srcext-f}
 ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
@@ -28114,7 +28074,7 @@ $as_echo_n "checking for library containing MPI_Waitall... " >&6; }
    if ${acx_cv_option_search_MPI_Waitall_c+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-       while :; do
+  while :; do
         acx_option_func_search_save_LIBS="$LIBS"
    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
@@ -28166,21 +28126,21 @@ fi
 fi
 
    if ${acx_cv_option_search_MPI_Waitall_c+:} false; then :
-       if test x"$acx_cv_option_search_MPI_Waitall_c" = x; then :
-          { $as_echo "$as_me:${as_lineno-$LINENO}: result: (none required)" >&5
+  if test x"$acx_cv_option_search_MPI_Waitall_c" = x; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: (none required)" >&5
 $as_echo "(none required)" >&6; }
 else
-          { $as_echo "$as_me:${as_lineno-$LINENO}: result: $acx_cv_option_search_MPI_Waitall_c" >&5
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $acx_cv_option_search_MPI_Waitall_c" >&5
 $as_echo "$acx_cv_option_search_MPI_Waitall_c" >&6; }
 fi
 else
-       { $as_echo "$as_me:${as_lineno-$LINENO}: result: not found" >&5
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: not found" >&5
 $as_echo "not found" >&6; }
 fi
    if ${acx_cv_option_search_MPI_Waitall_c+:} false; then :
 
 else
-             have_MPI_c_bindings=no
+  have_MPI_c_bindings=no
             { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
 $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
 as_fn_error $? "Cannot link C MPI programs.
@@ -28334,7 +28294,7 @@ $as_echo_n "checking for library containing mpi_waitall... " >&6; }
    if ${acx_cv_option_search_mpi_waitall_fc+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-       while :; do
+  while :; do
         acx_option_func_search_save_LIBS="$LIBS"
    cat > conftest.$ac_ext <<_ACEOF
       program conftest
@@ -28367,7 +28327,7 @@ fi
         if ${acx_cv_option_search_mpi_waitall_fc+:} false; then :
   break
 fi
-                  acx_option_func_search_save_LIBS="$LIBS"
+        acx_option_func_search_save_LIBS="$LIBS"
    cat > conftest.$ac_ext <<_ACEOF
       program conftest
       call mpi_waitall
@@ -28399,7 +28359,7 @@ fi
            if ${acx_cv_option_search_mpi_waitall_fc+:} false; then :
   break
 fi
-                    acx_option_func_search_save_LIBS="$LIBS"
+          acx_option_func_search_save_LIBS="$LIBS"
    cat > conftest.$ac_ext <<_ACEOF
       program conftest
       call mpi_waitall
@@ -28437,21 +28397,21 @@ fi
 fi
 
    if ${acx_cv_option_search_mpi_waitall_fc+:} false; then :
-       if test x"$acx_cv_option_search_mpi_waitall_fc" = x; then :
-          { $as_echo "$as_me:${as_lineno-$LINENO}: result: (none required)" >&5
+  if test x"$acx_cv_option_search_mpi_waitall_fc" = x; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: (none required)" >&5
 $as_echo "(none required)" >&6; }
 else
-          { $as_echo "$as_me:${as_lineno-$LINENO}: result: $acx_cv_option_search_mpi_waitall_fc" >&5
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $acx_cv_option_search_mpi_waitall_fc" >&5
 $as_echo "$acx_cv_option_search_mpi_waitall_fc" >&6; }
 fi
 else
-       { $as_echo "$as_me:${as_lineno-$LINENO}: result: not found" >&5
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: not found" >&5
 $as_echo "not found" >&6; }
 fi
    if ${acx_cv_option_search_mpi_waitall_fc+:} false; then :
 
 else
-             have_MPI_fc_bindings=no
+  have_MPI_fc_bindings=no
             { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
 $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
 as_fn_error $? "Cannot link Fortran MPI programs.
@@ -29164,42 +29124,47 @@ fi
 
 #  Check the module extension of the fortran compiler
 if test -n "$FC" && test "X$FC" != "Xno"; then :
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for suffix of module files" >&5
-$as_echo_n "checking for suffix of module files... " >&6; }
 
-   ac_fc_mod_uppercase=no
-   ac_ext=${ac_fc_srcext-f}
+   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for conftest_module module file name" >&5
+$as_echo_n "checking for conftest_module module file name... " >&6; }
+if ${acx_cv_fc_mod_name+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_ext=${ac_fc_srcext-f}
 ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
 ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $ac_fcflags_srcext conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 ac_link="./libtool --mode=link --tag=FC $ac_link"
 
-   cat > conftest.$ac_ext <<_ACEOF
-      module conftest
+      cat > conftest.$ac_ext <<_ACEOF
+      module conftest_module
       implicit none
       integer :: i
-      end module conftest
+      end module conftest_module
 _ACEOF
 if ac_fn_fc_try_compile "$LINENO"; then :
 
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
    while :; do
-     acx_fc_mod_name=
-        if test -n "conftest.$FCMODEXT" -a -f "conftest.$FCMODEXT"; then :
-          acx_fc_mod_name="conftest.$FCMODEXT" ; break
+     acx_cv_fc_mod_name=
+   if test -n "conftest_module.$FCMODEXT" -a -f "conftest_module.$FCMODEXT"; then :
+  acx_cv_fc_mod_name="conftest_module.$FCMODEXT" ; break
 fi
-          if test -n "conftest.mod" -a -f "conftest.mod"; then :
-          acx_fc_mod_name="conftest.mod" ; break
+     if test -n "conftest_module.mod" -a -f "conftest_module.mod"; then :
+  acx_cv_fc_mod_name="conftest_module.mod" ; break
 fi
-          if test -n "conftest.MOD" -a -f "conftest.MOD"; then :
-          acx_fc_mod_name="conftest.MOD" ; break
+     if test -n "conftest_module.MOD" -a -f "conftest_module.MOD"; then :
+  acx_cv_fc_mod_name="conftest_module.MOD" ; break
 fi
-          if test -n "conftest.M" -a -f "conftest.M"; then :
-          acx_fc_mod_name="conftest.M" ; break
+     if test -n "conftest_module.M" -a -f "conftest_module.M"; then :
+  acx_cv_fc_mod_name="conftest_module.M" ; break
 fi
-          if test -n "CONFTEST.MOD" -a -f "CONFTEST.MOD"; then :
-          acx_fc_mod_name="CONFTEST.MOD" ; break
+     if test -n "CONFTEST_MODULE.MOD" -a -f "CONFTEST_MODULE.MOD"; then :
+  acx_cv_fc_mod_name="CONFTEST_MODULE.MOD" ; break
+fi
+     if test -n "CONFTEST_MODULE.mod" -a -f "CONFTEST_MODULE.mod"; then :
+  acx_cv_fc_mod_name="CONFTEST_MODULE.mod" ; break
 fi
 
      break
@@ -29212,20 +29177,27 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 ac_link="./libtool --mode=link --tag=CC $ac_link"
 
-   case "$acx_fc_mod_name" in #(
-       conftest.$FCMODEXT) :
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $acx_cv_fc_mod_name" >&5
+$as_echo "$acx_cv_fc_mod_name" >&6; }
+   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for suffix of module files" >&5
+$as_echo_n "checking for suffix of module files... " >&6; }
+   ac_fc_mod_uppercase=no
+   case "$acx_cv_fc_mod_name" in #(
+  conftest_module.$FCMODEXT) :
     : ;; #(
-  CONFTEST.$FCMODEXT) :
+  CONFTEST_MODULE.$FCMODEXT) :
     ac_fc_mod_uppercase=yes ;; #(
-  conftest.mod) :
+  conftest_module.mod) :
     FCMODEXT=mod ;; #(
-  conftest.MOD) :
+  conftest_module.MOD) :
     FCMODEXT=MOD ;; #(
-  conftest.M) :
+  conftest_module.M) :
     FCMODEXT=M ;; #(
-  CONFTEST.MOD) :
-    FCMODEXT=MOD
-        ac_fc_mod_uppercase=yes ;; #(
+  CONFTEST_MODULE.MOD) :
+    FCMODEXT=MOD ; ac_fc_mod_uppercase=yes ;; #(
+  CONFTEST_MODULE.mod) :
+    FCMODEXT=mod ; ac_fc_mod_uppercase=yes ;; #(
   *) :
      ;;
 esac
@@ -29490,7 +29462,7 @@ ac_link="./libtool --mode=link --tag=FC $ac_link"
 
 
 
-   save_FC=$FC ; acx_FC=$FC
+   acx_FC=$FC
    case $host in #(
   x86_64-*-linux-*|i*86-*-linux-*|*-apple-darwin*|ia64-*-linux-*|x86_64-*-freebsd*|i*86-*-freebsd*) :
     acx_temp=`$acx_FC -V 2>&1`
@@ -29516,6 +29488,11 @@ fi
 elif acx_temp=`$acx_FC -v 2>&1` \
          && echo $acx_temp | grep '^f2c'; then :
   acx_cv_fc_cf_flag=-Df2cFortran
+fi ;; #(
+  powerpc64-*-linux-*|powerpc-*-linux-*) :
+    if acx_temp=`$acx_FC -qversion 2>&1` \
+         && echo $acx_temp | grep '^IBM XL Fortran' >/dev/null; then :
+  acx_cv_fc_cf_flag=-DIBMR2Fortran
 fi ;; #(
   *-ibm-aix*) :
           if $CC -qversion 2>&1 | grep '^IBM XL C' >/dev/null; then :
@@ -29550,7 +29527,7 @@ ac_link="./libtool --mode=link --tag=F77 $ac_link"
 
 
 
-   save_F77=$F77 ; acx_FC=$F77
+   acx_FC=$F77
    case $host in #(
   x86_64-*-linux-*|i*86-*-linux-*|*-apple-darwin*|ia64-*-linux-*|x86_64-*-freebsd*|i*86-*-freebsd*) :
     acx_temp=`$acx_FC -V 2>&1`
@@ -29577,6 +29554,11 @@ elif acx_temp=`$acx_FC -v 2>&1` \
          && echo $acx_temp | grep '^f2c'; then :
   acx_cv_f77_cf_flag=-Df2cFortran
 fi ;; #(
+  powerpc64-*-linux-*|powerpc-*-linux-*) :
+    if acx_temp=`$acx_FC -qversion 2>&1` \
+         && echo $acx_temp | grep '^IBM XL Fortran' >/dev/null; then :
+  acx_cv_f77_cf_flag=-DIBMR2Fortran
+fi ;; #(
   *-ibm-aix*) :
           if $CC -qversion 2>&1 | grep '^IBM XL C' >/dev/null; then :
 
@@ -29600,9 +29582,9 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 ac_link="./libtool --mode=link --tag=CC $ac_link"
 
 fi
-                        if test -z "$F77" -o X"$F77" = Xno; then :
+                        if test -z "$FC" -o X"$FC" != Xno; then :
   acx_cv_cf_flag="$acx_cv_fc_cf_flag (probed)"
-elif test -z "$FC" -o X"$FC" = Xno; then :
+elif test -z "$F77" -o X"$F77" != Xno; then :
   acx_cv_cf_flag="$acx_cv_f77_cf_flag (probed)"
 else
   if test x"$acx_cv_f77_cf_flag" = x"$acx_cv_fc_cf_flag"; then :
@@ -29624,7 +29606,7 @@ $as_echo "$acx_cv_cf_flag" >&6; }
 fi
 
 case $host in #(
-  *-ibm-aix*) :
+  *-ibm-aix*|powerpc64-*-linux-*|powerpc-*-linux-*) :
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking if -Dappendus needs to be added to CPPFLAGS for cfortran.h" >&5
 $as_echo_n "checking if -Dappendus needs to be added to CPPFLAGS for cfortran.h... " >&6; }
       if $CC -qversion 2>&1 | grep '^IBM XL C' >/dev/null; then :
