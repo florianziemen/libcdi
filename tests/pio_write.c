@@ -301,7 +301,7 @@ int main(int argc, char *argv[])
         setup.nvars = parse_intarg("error parsing number of variables");
         if (setup.nvars < 1)
           {
-            fputs("number of levels must be greater than zero!\n",
+            fputs("number of variables must be greater than zero!\n",
                   stderr);
             exit(EXIT_FAILURE);
           }
