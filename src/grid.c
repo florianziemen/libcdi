@@ -2443,15 +2443,7 @@ int gridCompareP ( void * gridptr1, void * gridptr2 )
   if ( g1->xsize         != g2->xsize        ) return differ;
   if ( g1->ysize         != g2->ysize        ) return differ;
   if ( g1->lcomplex      != g2->lcomplex     ) return differ;
-  /*
-  if ( g1->rowlon )
-    {
-      for ( i = 0; i < g1->nrowlon; i++ )
-	if ( g1->rowlon[i] != g2->rowlon[i] ) return differ;
-    }
-  else if ( g2->rowlon )
-    return differ;
-  */
+
   if ( IS_NOT_EQUAL(g1->xfirst        , g2->xfirst)        ) return differ;
   if ( IS_NOT_EQUAL(g1->yfirst	      , g2->yfirst)        ) return differ;
   if ( IS_NOT_EQUAL(g1->xlast         , g2->xlast)         ) return differ;
@@ -4772,7 +4764,7 @@ gridCompareSearch(int id, void *res, void *data)
 {
   struct gridCompareSearchState *state = (struct gridCompareSearchState*)data;
   (void)res;
-  if (gridCompare(id, state->queryKey) == 0)
+  if ( gridCompare(id, state->queryKey) == 0 )
     {
       state->resIDValue = id;
       return CDI_APPLY_STOP;
@@ -4786,23 +4778,23 @@ struct addIffNewRes cdiVlistAddGridIfNew(int vlistID, grid_t *grid, int mode)
 {
   /*
     mode: 0 search in vlist and grid table
-          1 search in grid table
+          1 search in grid table only
    */
-  int gridglobdefined = FALSE;
-  int griddefined = FALSE;
+  bool gridglobdefined = false;
+  bool griddefined = false;
   int gridID = CDI_UNDEFID;
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
   unsigned ngrids = (unsigned)vlistptr->ngrids;
 
   if ( mode == 0 )
-    for (unsigned index = 0; index < ngrids; index++ )
+    for ( unsigned index = 0; index < ngrids; index++ )
       {
 	if ( (gridID = vlistptr->gridIDs[index]) != UNDEFID )
           {
             if ( gridCompare(gridID, grid) == 0 )
               {
-                griddefined = TRUE;
+                griddefined = true;
                 break;
               }
           }
@@ -4821,11 +4813,11 @@ struct addIffNewRes cdiVlistAddGridIfNew(int vlistID, grid_t *grid, int mode)
               == CDI_APPLY_STOP)))
         gridID = query.resIDValue;
 
-      if ( mode == 1 && gridglobdefined)
+      if ( mode == 1 && gridglobdefined )
 	for (unsigned index = 0; index < ngrids; index++ )
 	  if ( vlistptr->gridIDs[index] == gridID )
 	    {
-	      gridglobdefined = FALSE;
+	      gridglobdefined = false;
 	      break;
 	    }
     }
