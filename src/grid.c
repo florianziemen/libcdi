@@ -2197,9 +2197,9 @@ int gridIsRotated(int gridID)
 }
 
 static
-int compareXYvals(grid_t *gridRef, grid_t *gridTest)
+bool compareXYvals(grid_t *gridRef, grid_t *gridTest)
 {
-  int differ = 0;
+  bool differ = false;
 
   int xsizeTest = gridTest->xsize, ysizeTest = gridTest->ysize;
   if ( !differ && xsizeTest > 0 && xsizeTest == gridRef->vtable->inqXVals(gridRef, NULL) )
@@ -2210,7 +2210,7 @@ int compareXYvals(grid_t *gridRef, grid_t *gridTest)
       for ( size_t i = 0; i < (size_t)xsizeTest; ++i )
 	if ( fabs(xvalsTest[i] - xvalsRef[i]) > 1.e-10 )
 	  {
-	    differ = 1;
+	    differ = true;
 	    break;
 	  }
     }
@@ -2222,7 +2222,7 @@ int compareXYvals(grid_t *gridRef, grid_t *gridTest)
       for ( size_t i = 0; i < (size_t)ysizeTest; ++i )
 	if ( fabs(yvalsTest[i] - yvalsRef[i]) > 1.e-10 )
 	  {
-	    differ = 1;
+	    differ = true;
 	    break;
 	  }
     }
@@ -2231,10 +2231,10 @@ int compareXYvals(grid_t *gridRef, grid_t *gridTest)
 }
 
 static
-int compareXYvals2(grid_t *gridRef, grid_t *gridTest)
+bool compareXYvals2(grid_t *gridRef, grid_t *gridTest)
 {
   int gridsize = gridTest->size;
-  int differ
+  bool differ
     = ((gridTest->xvals == NULL) ^ (gridRef->xvals == NULL))
     || ((gridTest->yvals == NULL) ^ (gridRef->yvals == NULL));
 
@@ -2255,17 +2255,17 @@ int compareXYvals2(grid_t *gridRef, grid_t *gridTest)
   return differ;
 }
 
-
-int gridCompare(int gridID, const grid_t *grid)
+static
+bool gridCompare(int gridID, const grid_t *grid)
 {
-  int differ = 1;
+  bool differ = true;
   grid_t *gridRef = gridID2Ptr(gridID);
 
   if ( grid->type == gridRef->type || grid->type == GRID_GENERIC )
     {
       if ( grid->size == gridRef->size )
 	{
-	  differ = 0;
+	  differ = false;
 	  if ( grid->type == GRID_LONLAT )
 	    {
 	      /*
@@ -2294,17 +2294,17 @@ int gridCompare(int gridID, const grid_t *grid)
 			  if ( IS_NOT_EQUAL(grid->xfirst, gridInqXval(gridID, 0)) ||
 			       IS_NOT_EQUAL(grid->yfirst, gridInqYval(gridID, 0)))
 			    {
-			      differ = 1;
+			      differ = true;
 			    }
 			  if ( !differ && fabs(grid->xinc) > 0 &&
 			       fabs(fabs(grid->xinc) - fabs(gridRef->xinc)) > fabs(grid->xinc/1000))
 			    {
-			      differ = 1;
+			      differ = true;
 			    }
 			  if ( !differ && fabs(grid->yinc) > 0 &&
 			       fabs(fabs(grid->yinc) - fabs(gridRef->yinc)) > fabs(grid->yinc/1000))
 			    {
-			      differ = 1;
+			      differ = true;
 			    }
 			}
 		    }
@@ -2312,7 +2312,7 @@ int gridCompare(int gridID, const grid_t *grid)
                     differ = gridRef->vtable->compareXYFull(gridRef, (grid_t *)grid);
 		}
 	      else
-		differ = 1;
+		differ = true;
 	    }
 	  else if ( grid->type == GRID_GENERIC )
 	    {
@@ -2327,7 +2327,7 @@ int gridCompare(int gridID, const grid_t *grid)
 		{
 		}
 	      else
-		differ = 1;
+		differ = true;
 	    }
 	  else if ( grid->type == GRID_GAUSSIAN )
 	    {
@@ -2341,14 +2341,14 @@ int gridCompare(int gridID, const grid_t *grid)
 			     fabs(grid->yfirst - gridInqYval(gridID, 0)) > 0.0015 ||
 			     (fabs(grid->xinc)>0 && fabs(fabs(grid->xinc) - fabs(gridRef->xinc)) > fabs(grid->xinc/1000)) )
 			  {
-			    differ = 1;
+			    differ = true;
 			  }
 		    }
 		  else if ( grid->xvals && grid->yvals )
                     differ = gridRef->vtable->compareXYFull(gridRef, (grid_t *)grid);
 		}
 	      else
-		differ = 1;
+		differ = true;
 	    }
 	  else if ( grid->type == GRID_CURVILINEAR )
 	    {
@@ -4759,7 +4759,7 @@ gridCompareSearch(int id, void *res, void *data)
 {
   struct gridCompareSearchState *state = (struct gridCompareSearchState*)data;
   (void)res;
-  if ( gridCompare(id, state->queryKey) == 0 )
+  if ( gridCompare(id, state->queryKey) == false )
     {
       state->resIDValue = id;
       return CDI_APPLY_STOP;
@@ -4787,7 +4787,7 @@ struct addIffNewRes cdiVlistAddGridIfNew(int vlistID, grid_t *grid, int mode)
       {
 	if ( (gridID = vlistptr->gridIDs[index]) != UNDEFID )
           {
-            if ( gridCompare(gridID, grid) == 0 )
+            if ( gridCompare(gridID, grid) == false )
               {
                 griddefined = true;
                 break;

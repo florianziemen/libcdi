@@ -4587,7 +4587,7 @@ cdfLazyGridInqYVal(grid_t *grid, int index)
   return rv;
 }
 
-static int
+static bool
 cdfLazyXYValGetCompare(struct cdfLazyGrid *lazyGridRef,
                        struct cdfLazyGrid *lazyGridTest)
 {
@@ -4607,10 +4607,10 @@ cdfLazyXYValGetCompare(struct cdfLazyGrid *lazyGridRef,
     ||   valsGetYRef->varNCId     != valsGetYTest->varNCId;
 }
 
-static int
+static bool
 cdfLazyCompareXYFull(grid_t *gridRef, grid_t *gridTest)
 {
-  int diff;
+  bool diff;
   struct cdfLazyGrid *lazyGridRef = (struct cdfLazyGrid *)gridRef;
   if (gridTest->vtable == &cdfLazyGridVtable)
     diff = cdfLazyXYValGetCompare(lazyGridRef, (struct cdfLazyGrid *)gridTest);
@@ -4619,10 +4619,10 @@ cdfLazyCompareXYFull(grid_t *gridRef, grid_t *gridTest)
   return diff;
 }
 
-static int
+static bool
 cdfLazyCompareXYAO(grid_t *gridRef, grid_t *gridTest)
 {
-  int diff;
+  bool diff;
   struct cdfLazyGrid *lazyGridRef = (struct cdfLazyGrid *)gridRef;
   if (gridTest->vtable == &cdfLazyGridVtable)
     diff = cdfLazyXYValGetCompare(lazyGridRef, (struct cdfLazyGrid *)gridTest);
