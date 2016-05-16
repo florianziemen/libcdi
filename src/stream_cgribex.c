@@ -245,13 +245,14 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, double *fsec2, int *isec4, 
       }
     case GRID_GAUSSIAN_REDUCED:
       {
-        grid->np     = ISEC2_NumPar;
-	grid->size   = ISEC4_NumValues;
-        grid->rowlon = ISEC2_RowLonPtr;
-	grid->ysize  = ISEC2_NumLat;
-	grid->xinc   = 0;
-	grid->yinc   = 0;
-	grid->xdef   = 0;
+        grid->np      = ISEC2_NumPar;
+	grid->size    = ISEC4_NumValues;
+        grid->rowlon  = ISEC2_RowLonPtr;
+	grid->nrowlon = ISEC2_NumLat;
+	grid->ysize   = ISEC2_NumLat;
+	grid->xinc    = 0;
+	grid->yinc    = 0;
+	grid->xdef    = 0;
 	/* if ( ISEC2_FirstLon != 0 || ISEC2_LastLon != 0 ) */
 	  {
 	    if ( grid->xsize > 1 )
@@ -362,12 +363,11 @@ void cgribexAddRecord(stream_t * streamptr, int param, int *isec1, int *isec2, d
 {
   int varID;
   int levelID = 0;
-  grid_t *grid = (grid_t *)Malloc(sizeof (*grid));
 
   int vlistID = streamptr->vlistID;
   int tsID    = streamptr->curTsID;
   int recID   = recordNewEntry(streamptr, tsID);
-  record_t *record  = &streamptr->tsteps[tsID].records[recID];
+  record_t *record = &streamptr->tsteps[tsID].records[recID];
 
   int tsteptype = cgribexGetTsteptype(ISEC1_TimeRange);
   int numavg    = ISEC1_AvgNum;
@@ -385,11 +385,23 @@ void cgribexAddRecord(stream_t * streamptr, int param, int *isec1, int *isec2, d
   record->ltype     = ISEC1_LevelType;
   record->tsteptype = (short)tsteptype;
 
-  cgribexGetGrid(streamptr, isec2, fsec2, isec4, grid, iret);
+  grid_t *gridptr = (grid_t*) Malloc(sizeof(*gridptr));
+  cgribexGetGrid(streamptr, isec2, fsec2, isec4, gridptr, iret);
 
-  struct addIffNewRes gridAdded = cdiVlistAddGridIfNew(vlistID, grid, 0);
+  struct addIffNewRes gridAdded = cdiVlistAddGridIfNew(vlistID, gridptr, 0);
   int gridID = gridAdded.Id;
-  if (!gridAdded.isNew) Free(grid);
+  if ( gridAdded.isNew )
+    {
+      if ( gridptr->nrowlon )
+        {
+          size_t nrowlon = (size_t) gridptr->nrowlon;
+          int *rowlon = gridptr->rowlon;
+          gridptr->rowlon = (int*) Malloc(nrowlon * sizeof(int));
+          memcpy(gridptr->rowlon, rowlon, nrowlon * sizeof(int));
+        }
+    }
+  else
+    Free(gridptr);
 
   int zaxistype = grib1ltypeToZaxisType(ISEC1_LevelType);
 
