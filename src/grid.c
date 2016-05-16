@@ -2147,7 +2147,7 @@ void grid_check_cyclic(grid_t *gridptr)
 
       if ( xbounds && xsize > 1 )
 	{
-          short isCyclic = TRUE;
+          bool isCyclic = true;
 	  for ( size_t j = 0; j < ysize; ++j )
 	    {
 	      size_t i1 = j*xsize,
@@ -2170,12 +2170,12 @@ void grid_check_cyclic(grid_t *gridptr)
 		    }
 		}
               /* all vertices more than 0.001 degrees apart */
-              isCyclic = FALSE;
+              isCyclic = false;
               break;
               foundCloseVertices:
               ;
 	    }
-          gridptr->isCyclic = isCyclic;
+          gridptr->isCyclic = (int) isCyclic;
 	}
     }
 }
