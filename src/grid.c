@@ -204,7 +204,7 @@ gridNewEntry(cdiResH resH)
 }
 
 static
-void gridInit (void)
+void gridInit(void)
 {
   static int gridInitialized = 0;
   char *env;
@@ -2443,7 +2443,7 @@ int gridCompareP ( void * gridptr1, void * gridptr2 )
   if ( g1->xsize         != g2->xsize        ) return differ;
   if ( g1->ysize         != g2->ysize        ) return differ;
   if ( g1->lcomplex      != g2->lcomplex     ) return differ;
-
+  /*
   if ( g1->rowlon )
     {
       for ( i = 0; i < g1->nrowlon; i++ )
@@ -2451,7 +2451,7 @@ int gridCompareP ( void * gridptr1, void * gridptr2 )
     }
   else if ( g2->rowlon )
     return differ;
-
+  */
   if ( IS_NOT_EQUAL(g1->xfirst        , g2->xfirst)        ) return differ;
   if ( IS_NOT_EQUAL(g1->yfirst	      , g2->yfirst)        ) return differ;
   if ( IS_NOT_EQUAL(g1->xlast         , g2->xlast)         ) return differ;
@@ -2709,7 +2709,6 @@ static void gridComplete(grid_t *grid)
       {
 	gridDefNP(gridID, grid->np);
 	gridDefYsize(gridID, grid->ysize);
-
         if ( grid->xdef == 2 )
           {
             double xvals[2] = { grid->xfirst, grid->xlast };
@@ -2881,7 +2880,7 @@ grid_copy_base_array_fields(grid_t *gridptrOrig, grid_t *gridptrDup)
   int irregular = gridtype == GRID_CURVILINEAR || gridtype == GRID_UNSTRUCTURED;
   if ( nrowlon )
     {
-      gridptrDup->rowlon = (int *)Malloc(nrowlon * sizeof (int));
+      gridptrDup->rowlon = (int*) Malloc(nrowlon * sizeof(int));
       memcpy(gridptrDup->rowlon, gridptrOrig->rowlon, nrowlon * sizeof(int));
     }
 
