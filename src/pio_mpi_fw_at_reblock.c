@@ -320,7 +320,7 @@ flushReblockBuffer(aFiledataM *of, int blockBufIdx)
         * of->numBlockBuf)
        + (MPI_Offset)blockBufIdx * (MPI_Offset)sizePio
        + (MPI_Offset)rankPio);
-  int wsize = of->pos >= ofs + blockSize ? blockSize : (int)(of->pos - ofs);
+  int wsize = (of->pos >= ofs + blockSize) ? blockSize : (int)(of->pos - ofs);
   xmpi(MPI_File_write_at(of->fh, ofs, blockBuf, wsize, MPI_UNSIGNED_CHAR,
                          MPI_STATUS_IGNORE));
   of->pending[blockBufIdx].pass = -1;
