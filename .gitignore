@@ -37,6 +37,7 @@ Makefile.in
 /tests/pio_cksum_asynch
 /tests/pio_cksum_cdf
 /tests/pio_cksum_fpguard
+/tests/pio_cksum_grb2
 /tests/pio_cksum_mpi_fw_at_all
 /tests/pio_cksum_mpi_fw_at_reblock
 /tests/pio_cksum_mpi_fw_ordered
@@ -50,6 +51,7 @@ Makefile.in
 /tests/test_chunk_cksum
 /tests/test_cksum_extra
 /tests/test_cksum_grib
+/tests/test_cksum_grib2
 /tests/test_cksum_ieg
 /tests/test_cksum_nc
 /tests/test_cksum_nc2
@@ -114,9 +116,11 @@ Makefile
 /tests/example.svc
 /tests/example_0.cksum
 /tests/example_0.grb
+/tests/example_0.grb2
 /tests/example_0.nc4
 /tests/example_1.cksum
 /tests/example_1.grb
+/tests/example_1.grb2
 /tests/example_1.nc4
 /tests/pio_write
 /tests/pio_write_deco2d
