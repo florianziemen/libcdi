@@ -44,15 +44,26 @@ static const struct model_config default_setup
 #endif
 
 static const struct {
-  char suffix[4];
+  char suffix[5];
   int type, defaultDT, defaultGrid;
 } suffix2type[] = {
-  { "nc",  CDI_FILETYPE_NC,  CDI_DATATYPE_FLT64, GRID_LONLAT },
+  { "nc", CDI_FILETYPE_NC, CDI_DATATYPE_FLT64, GRID_LONLAT },
   { "grb", CDI_FILETYPE_GRB, CDI_DATATYPE_PACK24, GRID_LONLAT },
+  { "grb2", CDI_FILETYPE_GRB2, CDI_DATATYPE_PACK24, GRID_LONLAT },
   { "nc2", CDI_FILETYPE_NC2, CDI_DATATYPE_FLT64, GRID_LONLAT },
   { "nc4", CDI_FILETYPE_NC4, CDI_DATATYPE_FLT64, GRID_LONLAT },
-  { "ext", CDI_FILETYPE_EXT, CDI_DATATYPE_FLT64, GRID_GENERIC, },
-  { "srv", CDI_FILETYPE_SRV, CDI_DATATYPE_FLT64, GRID_GENERIC, },
+  {
+      "ext",
+      CDI_FILETYPE_EXT,
+      CDI_DATATYPE_FLT64,
+      GRID_GENERIC,
+  },
+  {
+      "srv",
+      CDI_FILETYPE_SRV,
+      CDI_DATATYPE_FLT64,
+      GRID_GENERIC,
+  },
   { "ieg", CDI_FILETYPE_IEG, CDI_DATATYPE_FLT64, GRID_LONLAT },
 };
 

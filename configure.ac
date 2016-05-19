@@ -151,6 +151,10 @@ AC_SEARCH_LIBS(floor, m)
 ACX_CDI_OPTIONS
 AM_CONDITIONAL([ENABLE_NETCDF],[test x$ENABLE_NETCDF = xyes])
 AC_CHECK_FUNCS([grib_get_length])
+AS_IF([test "x$with_grib_api" != 'x' -a "x$with_grib_api" != 'xno' ],
+  [ENABLE_LIBGRIB_API=yes],[ENABLE_LIBGRIB_API=no])
+AC_SUBST([ENABLE_LIBGRIB_API])
+AM_SUBST_NOTMAKE([ENABLE_LIBGRIB_API])
 #  ----------------------------------------------------------------------
 # Compile with MPI support
 AC_ARG_ENABLE([mpi],
@@ -411,6 +415,7 @@ COMPILER="$CC $CFLAGS"
 AC_DEFINE_UNQUOTED(COMPILER, ["$COMPILER"], [Compiler])
 
 AC_CONFIG_FILES([tests/test_cksum_grib \
+                 tests/test_cksum_grib2 \
                  tests/test_cksum_nc \
                  tests/test_cksum_nc2 \
                  tests/test_cksum_nc4 \
@@ -431,6 +436,7 @@ AC_CONFIG_FILES([tests/test_cksum_grib \
                  tests/pio_cksum_cdf \
                  tests/test_byteswap_run \
                  tests/test_resource_copy_run \
+                 tests/pio_cksum_grb2 \
                  tests/test_resource_copy_mpi_run \
                  tests/test_cdf_transformation \
                  tests/test_cdf_const \
