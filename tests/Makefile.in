@@ -77,15 +77,16 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-TESTS = cksum_verify$(EXEEXT) test_cksum_grib test_cksum_nc \
-	test_cksum_extra test_cksum_service test_cksum_nc2 \
-	test_cksum_nc4 test_cksum_ieg test_chunk_cksum pio_write_run \
-	pio_cksum_mpinonb pio_cksum_fpguard pio_cksum_asynch \
-	pio_cksum_writer pio_cksum_cdf pio_cksum_mpi_fw_ordered \
-	pio_cksum_mpi_fw_at_all pio_cksum_mpi_fw_at_reblock \
-	test_resource_copy$(EXEEXT) pio_write_deco2d_run test_f2003 \
-	test_cdf_transformation test_cdf_const test_table$(EXEEXT) \
-	test_byteswap$(EXEEXT) $(am__append_2)
+TESTS = cksum_verify$(EXEEXT) test_cksum_grib test_cksum_grib2 \
+	test_cksum_nc test_cksum_extra test_cksum_service \
+	test_cksum_nc2 test_cksum_nc4 test_cksum_ieg test_chunk_cksum \
+	pio_write_run pio_cksum_mpinonb pio_cksum_fpguard \
+	pio_cksum_asynch pio_cksum_writer pio_cksum_cdf pio_cksum_grb2 \
+	pio_cksum_mpi_fw_ordered pio_cksum_mpi_fw_at_all \
+	pio_cksum_mpi_fw_at_reblock test_resource_copy$(EXEEXT) \
+	pio_write_deco2d_run test_f2003 test_cdf_transformation \
+	test_cdf_const test_table$(EXEEXT) test_byteswap$(EXEEXT) \
+	$(am__append_2)
 check_PROGRAMS = cksum_verify$(EXEEXT) test_grib$(EXEEXT) \
 	cksum_write$(EXEEXT) cksum_read$(EXEEXT) pio_write$(EXEEXT) \
 	test_resource_copy$(EXEEXT) cksum_write_chunk$(EXEEXT) \
@@ -97,18 +98,19 @@ check_PROGRAMS = cksum_verify$(EXEEXT) test_grib$(EXEEXT) \
 subdir = tests
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/config/mkinstalldirs \
-	$(srcdir)/test_cksum_grib.in $(srcdir)/test_cksum_nc.in \
-	$(srcdir)/test_cksum_nc2.in $(srcdir)/test_cksum_nc4.in \
-	$(srcdir)/test_cksum_extra.in $(srcdir)/test_cksum_service.in \
-	$(srcdir)/test_cksum_ieg.in $(srcdir)/test_chunk_cksum.in \
-	$(srcdir)/test_f2003.in $(srcdir)/pio_write_run.in \
-	$(srcdir)/pio_write_deco2d_run.in \
+	$(srcdir)/test_cksum_grib.in $(srcdir)/test_cksum_grib2.in \
+	$(srcdir)/test_cksum_nc.in $(srcdir)/test_cksum_nc2.in \
+	$(srcdir)/test_cksum_nc4.in $(srcdir)/test_cksum_extra.in \
+	$(srcdir)/test_cksum_service.in $(srcdir)/test_cksum_ieg.in \
+	$(srcdir)/test_chunk_cksum.in $(srcdir)/test_f2003.in \
+	$(srcdir)/pio_write_run.in $(srcdir)/pio_write_deco2d_run.in \
 	$(srcdir)/pio_cksum_mpinonb.in \
 	$(srcdir)/pio_cksum_mpi_fw_ordered.in \
 	$(srcdir)/pio_cksum_mpi_fw_at_all.in \
 	$(srcdir)/pio_cksum_mpi_fw_at_reblock.in \
 	$(srcdir)/pio_cksum_fpguard.in $(srcdir)/pio_cksum_asynch.in \
 	$(srcdir)/pio_cksum_writer.in $(srcdir)/pio_cksum_cdf.in \
+	$(srcdir)/pio_cksum_grb2.in \
 	$(srcdir)/test_resource_copy_mpi_run.in \
 	$(srcdir)/test_cdf_transformation.in \
 	$(srcdir)/test_cdf_const.in $(top_srcdir)/config/depcomp
@@ -145,14 +147,15 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/config.h
-CONFIG_CLEAN_FILES = test_cksum_grib test_cksum_nc test_cksum_nc2 \
-	test_cksum_nc4 test_cksum_extra test_cksum_service \
-	test_cksum_ieg test_chunk_cksum test_f2003 pio_write_run \
-	pio_write_deco2d_run pio_cksum_mpinonb \
+CONFIG_CLEAN_FILES = test_cksum_grib test_cksum_grib2 test_cksum_nc \
+	test_cksum_nc2 test_cksum_nc4 test_cksum_extra \
+	test_cksum_service test_cksum_ieg test_chunk_cksum test_f2003 \
+	pio_write_run pio_write_deco2d_run pio_cksum_mpinonb \
 	pio_cksum_mpi_fw_ordered pio_cksum_mpi_fw_at_all \
 	pio_cksum_mpi_fw_at_reblock pio_cksum_fpguard pio_cksum_asynch \
-	pio_cksum_writer pio_cksum_cdf test_resource_copy_mpi_run \
-	test_cdf_transformation test_cdf_const
+	pio_cksum_writer pio_cksum_cdf pio_cksum_grb2 \
+	test_resource_copy_mpi_run test_cdf_transformation \
+	test_cdf_const
 CONFIG_CLEAN_VPATH_FILES =
 @ENABLE_NETCDF_TRUE@am__EXEEXT_1 = test_cdf_write$(EXEEXT) \
 @ENABLE_NETCDF_TRUE@	test_cdf_read$(EXEEXT)
@@ -591,6 +594,8 @@ $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 $(am__aclocal_m4_deps):
 test_cksum_grib: $(top_builddir)/config.status $(srcdir)/test_cksum_grib.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+test_cksum_grib2: $(top_builddir)/config.status $(srcdir)/test_cksum_grib2.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 test_cksum_nc: $(top_builddir)/config.status $(srcdir)/test_cksum_nc.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 test_cksum_nc2: $(top_builddir)/config.status $(srcdir)/test_cksum_nc2.in
@@ -626,6 +631,8 @@ pio_cksum_asynch: $(top_builddir)/config.status $(srcdir)/pio_cksum_asynch.in
 pio_cksum_writer: $(top_builddir)/config.status $(srcdir)/pio_cksum_writer.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 pio_cksum_cdf: $(top_builddir)/config.status $(srcdir)/pio_cksum_cdf.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+pio_cksum_grb2: $(top_builddir)/config.status $(srcdir)/pio_cksum_grb2.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 test_resource_copy_mpi_run: $(top_builddir)/config.status $(srcdir)/test_resource_copy_mpi_run.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
