@@ -3021,7 +3021,6 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
 		     long datasize, const double *data, int nmiss, void **gribbuffer, size_t *gribbuffersize,
 		     int comptype, void *gribContainer)
 {
-  size_t recsize = 0;
   /*  int ensID, ensCount, forecast_type; *//* Ensemble Data */
   long editionNumber = 2;
 
@@ -3138,6 +3137,7 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
 
   /* get the size of coded message  */
   const void *dummy = NULL;
+  size_t recsize = 0;
   GRIB_CHECK(grib_get_message(gh, &dummy, &recsize), 0);
   recsize += 512; /* add some space for possible filling */
   *gribbuffersize = recsize;
