@@ -248,8 +248,10 @@ FCALLSCSUB0(errExit,ERR_EXIT,err_exit)
 ])],
         [_AC_RUN_LOG([mv "conftest.$ac_objext" "conftest_c.$ac_objext"],
            [_AS_ECHO_LOG([Renaming C object file.])])
-         AC_PROVIDE_IFELSE([AC_PROG_FC],[_ACX_CHECK_CFORTRAN_FC])
-         AC_PROVIDE_IFELSE([AC_PROG_F77],[_ACX_CHECK_CFORTRAN_F77])
+         AC_PROVIDE_IFELSE([AC_PROG_FC],
+           [AS_IF([test -n "$FC" -a X"$FC" != Xno],[_ACX_CHECK_CFORTRAN_FC])])
+         AC_PROVIDE_IFELSE([AC_PROG_F77],
+           [AS_IF([test -n "$F77" -a X"$F77" != Xno],[_ACX_CHECK_CFORTRAN_F77])])
         ],
         [acx_cv_cfortran_works="compiling with cfortran.h failed"])
       AC_LANG_POP([C])
