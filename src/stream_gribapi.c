@@ -3313,6 +3313,7 @@ gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisID, CdiD
   gribapiDefLevel((int) editionNumber, gh, zaxisID, levelID, gc->init, productDefinitionTemplate);
 
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
+  int zaxisSize = zaxisInqSize(zaxisID);
   // if (!gc->init)
   {
     int ret = 0;
@@ -3324,7 +3325,7 @@ gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisID, CdiD
         if (vlistptr->vars[varID].opt_grib_kvpair[i].update)
           {
             // DR: Fix for multi-level fields (otherwise only the 1st level is correct)
-            if (zaxisInqSize(zaxisID) == (levelID + 1)) vlistptr->vars[varID].opt_grib_kvpair[i].update = false;
+            if (zaxisSize == (levelID + 1)) vlistptr->vars[varID].opt_grib_kvpair[i].update = false;
 
             if (vlistptr->vars[varID].opt_grib_kvpair[i].data_type == t_double)
               {
