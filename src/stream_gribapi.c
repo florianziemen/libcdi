@@ -3023,7 +3023,6 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
 		     int comptype, void *gribContainer)
 {
   size_t recsize = 0;
-  bool lieee = false;
   /*  int ensID, ensCount, forecast_type; *//* Ensemble Data */
   long bitsPerValue;
   long editionNumber = 2;
@@ -3075,7 +3074,7 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
       gribapiDefParam((int)editionNumber, gh, param, name, stdname);
     }
 
-  if ( editionNumber == 2 && (datatype == CDI_DATATYPE_FLT32 || datatype == CDI_DATATYPE_FLT64) ) lieee = true;
+  bool lieee = ( editionNumber == 2 && (datatype == CDI_DATATYPE_FLT32 || datatype == CDI_DATATYPE_FLT64) );
 
   /* bitsPerValue have to be defined before call to DefGrid (complex packing) */
   //  if ( lieee == false )
