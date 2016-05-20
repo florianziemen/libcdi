@@ -328,7 +328,6 @@ static
 void grib2GetLevel(grib_handle *gh, int *leveltype1, int *leveltype2, int *lbounds, int *level1,
                    int *level2, int *level_sf, int *level_unit)
 {
-  int status;
   long lpar;
   long factor;
 
@@ -340,7 +339,7 @@ void grib2GetLevel(grib_handle *gh, int *leveltype1, int *leveltype2, int *lboun
   *level_sf   = 0;
   *level_unit = 0;
 
-  status = grib_get_long(gh, "typeOfFirstFixedSurface", &lpar); //1 byte
+  int status = grib_get_long(gh, "typeOfFirstFixedSurface", &lpar); //1 byte
   if ( status == 0 )
     {
       long llevel;
@@ -1892,9 +1891,8 @@ getGribApiCompTypeMsg(int comptype, int gridsize)
 
 
 static
-void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype, bool lieee, int datatype, int nmiss, int gcinit)
+void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype, bool lieee, int datatype, int gcinit)
 {
-  UNUSED(nmiss);
   bool lrotated = false;
   bool lcurvi = false;
 
@@ -3081,7 +3079,7 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
       GRIB_CHECK(my_grib_set_long(gh, "bitsPerValue", bitsPerValue), 0);
     }
 
-  gribapiDefGrid((int)editionNumber, gh, gridID, comptype, lieee, datatype, nmiss, gc->init);
+  gribapiDefGrid((int)editionNumber, gh, gridID, comptype, lieee, datatype, gc->init);
 
   gribapiDefLevel((int)editionNumber, gh, zaxisID, levelID, gc->init, productDefinitionTemplate);
 
