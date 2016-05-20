@@ -3183,7 +3183,6 @@ gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisID, CdiD
               size_t datasize, const void *data, size_t nmiss, void **gribbuffer, size_t *gribbuffersize, int comptype,
               void *gribContainer)
 {
-  void *dummy = NULL;
   long editionNumber = 2;
 
   // extern unsigned char _grib_template_GRIB2[];
@@ -3365,8 +3364,9 @@ gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisID, CdiD
     }
 
   // get the size of coded message
+  const void *dummy = NULL;
   size_t recsize = 0;
-  GRIB_CHECK(grib_get_message(gh, (const void **) &dummy, &recsize), 0);
+  GRIB_CHECK(grib_get_message(gh, &dummy, &recsize), 0);
   recsize += 512;  // add some space for possible filling
   *gribbuffersize = recsize;
   *gribbuffer = Malloc(*gribbuffersize);
