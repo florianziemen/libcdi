@@ -3224,10 +3224,6 @@ gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisID, int6
   int uvRelativeToGrid = -1;
   cdiInqKeyInt(vlistID, varID, CDI_KEY_UVRELATIVETOGRID, &uvRelativeToGrid);
 
-  char name[256], stdname[256];
-  vlistInqVarName(vlistID, varID, name);
-  vlistInqVarStdname(vlistID, varID, stdname);
-
 #ifdef GRIBAPIENCODETEST
   grib_handle *gh = (grib_handle *) gribHandleNew(editionNumber);
 #else
@@ -3284,7 +3280,13 @@ gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisID, int6
   if (!gc->init) gribapiDefInstitut(gh, vlistID, varID);
   if (!gc->init) gribapiDefModel(gh, vlistID, varID);
 
-  if (!gc->init) gribapiDefParam((int) editionNumber, gh, param, name, stdname);
+  if (!gc->init)
+    {
+      char name[256], stdname[256];
+      vlistInqVarName(vlistID, varID, name);
+      vlistInqVarStdname(vlistID, varID, stdname);
+      gribapiDefParam((int) editionNumber, gh, param, name, stdname);
+    }
 
   if (!gc->init && editionNumber == 2)
     {
