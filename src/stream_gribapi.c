@@ -2597,6 +2597,10 @@ gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelID, in
   }
   long grib_ltype2 = (ltype != ltype2 && ltype2 != -1) ? ltype2 : grib_ltype;
 
+  void (*defLevel)(grib_handle * gh, int gcinit, long leveltype1, long leveltype2, bool hasBounds, double level, double dlevel1,
+                   double dlevel2)
+      = editionNumber <= 1 ? grib1DefLevel : grib2DefLevel;
+
   switch (zaxistype)
     {
     case ZAXIS_SURFACE:
@@ -2614,10 +2618,6 @@ gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelID, in
             dlevel1 *= sf;
             dlevel2 *= sf;
           }
-
-        void (*defLevel)(grib_handle * gh, int gcinit, long leveltype1, long leveltype2, bool hasBounds, double level,
-                         double dlevel1, double dlevel2)
-            = editionNumber <= 1 ? grib1DefLevel : grib2DefLevel;
 
         /* GRIB2: PRODUCT DEFINITION TEMPLATE NUMBER 32:
 
@@ -2645,18 +2645,12 @@ gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelID, in
     case ZAXIS_MIX_LAYER:
     case ZAXIS_ATMOSPHERE:
       {
-        void (*defLevel)(grib_handle * gh, int gcinit, long leveltype1, long leveltype2, bool hasBounds, double level,
-                         double dlevel1, double dlevel2)
-            = editionNumber <= 1 ? grib1DefLevel : grib2DefLevel;
         defLevel(gh, gcinit, grib_ltype, grib_ltype, hasBounds, level, dlevel1, dlevel2);
       }
       break;
     case ZAXIS_HYBRID:
     case ZAXIS_HYBRID_HALF:
       {
-        void (*defLevel)(grib_handle * gh, int gcinit, long leveltype1, long leveltype2, bool hasBounds, double level,
-                         double dlevel1, double dlevel2)
-            = editionNumber <= 1 ? grib1DefLevel : grib2DefLevel;
         if (editionNumber <= 1)
           {
             grib_ltype = hasBounds ? GRIB1_LTYPE_HYBRID_LAYER : GRIB1_LTYPE_HYBRID;
@@ -2686,9 +2680,6 @@ gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelID, in
             dlevel2 *= 100;
           }
 
-        void (*defLevel)(grib_handle * gh, int gcinit, long leveltype1, long leveltype2, bool hasBounds, double level,
-                         double dlevel1, double dlevel2)
-            = editionNumber <= 1 ? grib1DefLevel : grib2DefLevel;
         if (editionNumber <= 1)
           {
             double dum;
@@ -2716,9 +2707,6 @@ gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelID, in
       {
         double sf = editionNumber <= 1 ? zaxis_units_to_centimeter(zaxisID) : zaxis_units_to_meter(zaxisID);
         grib_ltype = editionNumber <= 1 ? (hasBounds ? GRIB1_LTYPE_LANDDEPTH_LAYER : GRIB1_LTYPE_LANDDEPTH) : grib_ltype;
-        void (*defLevel)(grib_handle * gh, int gcinit, long leveltype1, long leveltype2, bool hasBounds, double level,
-                         double dlevel1, double dlevel2)
-            = editionNumber <= 1 ? grib1DefLevel : grib2DefLevel;
         defLevel(gh, gcinit, grib_ltype, grib_ltype, hasBounds, level * sf, dlevel1 * sf, dlevel2 * sf);
 
         break;
@@ -2762,9 +2750,6 @@ gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelID, in
       }
     case ZAXIS_GENERIC:
       {
-        void (*defLevel)(grib_handle * gh, int gcinit, long leveltype1, long leveltype2, bool hasBounds, double level,
-                         double dlevel1, double dlevel2)
-            = editionNumber <= 1 ? grib1DefLevel : grib2DefLevel;
         defLevel(gh, gcinit, ltype, ltype, hasBounds, level, dlevel1, dlevel2);
         break;
       }
