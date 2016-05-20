@@ -3026,8 +3026,6 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   /*  int ensID, ensCount, forecast_type; *//* Ensemble Data */
   long bitsPerValue;
   long editionNumber = 2;
-  char name[256];
-  char stdname[256];
 
   // extern unsigned char _grib_template_GRIB2[];
 
@@ -3036,8 +3034,6 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   int typeOfGeneratingProcess = vlistInqVarTypeOfGeneratingProcess(vlistID, varID);
   int productDefinitionTemplate = vlistInqVarProductDefinitionTemplate(vlistID, varID);
 
-  vlistInqVarName(vlistID, varID, name);
-  vlistInqVarStdname(vlistID, varID, stdname);
 
 #if defined(GRIBAPIENCODETEST)
   grib_handle *gh = (grib_handle *) gribHandleNew(editionNumber);
@@ -3070,7 +3066,13 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   if ( ! gc->init ) gribapiDefInstitut(gh, vlistID, varID);
   if ( ! gc->init ) gribapiDefModel(gh, vlistID, varID);
 
-  if ( ! gc->init ) gribapiDefParam((int)editionNumber, gh, param, name, stdname);
+  if ( ! gc->init )
+    {
+      char name[256], stdname[256];
+      vlistInqVarName(vlistID, varID, name);
+      vlistInqVarStdname(vlistID, varID, stdname);
+      gribapiDefParam((int)editionNumber, gh, param, name, stdname);
+    }
 
   if ( editionNumber == 2 && (datatype == CDI_DATATYPE_FLT32 || datatype == CDI_DATATYPE_FLT64) ) lieee = true;
 
