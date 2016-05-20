@@ -65,36 +65,74 @@ int grib1ltypeToZaxisType(int grib_ltype)
 {
   int zaxistype = ZAXIS_GENERIC;
 
-  switch ( grib_ltype )
+  enum { ltypeMapSize = 27 };
+  static const int ltypeMap[2][ltypeMapSize] =
     {
-    case GRIB1_LTYPE_SURFACE:            zaxistype = ZAXIS_SURFACE;                break;
-    case GRIB1_LTYPE_CLOUD_BASE:         zaxistype = ZAXIS_CLOUD_BASE;             break;
-    case GRIB1_LTYPE_CLOUD_TOP:          zaxistype = ZAXIS_CLOUD_TOP;              break;
-    case GRIB1_LTYPE_ISOTHERM0:          zaxistype = ZAXIS_ISOTHERM_ZERO;          break;
-    case GRIB1_LTYPE_TROPOPAUSE:         zaxistype = ZAXIS_TROPOPAUSE;             break;
-    case GRIB1_LTYPE_TOA:                zaxistype = ZAXIS_TOA;                    break;
-    case GRIB1_LTYPE_SEA_BOTTOM:         zaxistype = ZAXIS_SEA_BOTTOM;             break;
-    case GRIB1_LTYPE_ATMOSPHERE:         zaxistype = ZAXIS_ATMOSPHERE;             break;
-    case GRIB1_LTYPE_MEANSEA:            zaxistype = ZAXIS_MEANSEA;                break;
-    case GRIB1_LTYPE_99:
-    case GRIB1_LTYPE_ISOBARIC_PA:
-    case GRIB1_LTYPE_ISOBARIC:           zaxistype = ZAXIS_PRESSURE;               break;
-    case GRIB1_LTYPE_HEIGHT:             zaxistype = ZAXIS_HEIGHT;                 break;
-    case GRIB1_LTYPE_ALTITUDE:           zaxistype = ZAXIS_ALTITUDE;	           break;
-    case GRIB1_LTYPE_SIGMA:
-    case GRIB1_LTYPE_SIGMA_LAYER:        zaxistype = ZAXIS_SIGMA;	           break;
-    case GRIB1_LTYPE_HYBRID:
-    case GRIB1_LTYPE_HYBRID_LAYER:       zaxistype = ZAXIS_HYBRID;	           break;
-    case GRIB1_LTYPE_LANDDEPTH:
-    case GRIB1_LTYPE_LANDDEPTH_LAYER:    zaxistype = ZAXIS_DEPTH_BELOW_LAND;       break;
-    case GRIB1_LTYPE_ISENTROPIC:         zaxistype = ZAXIS_ISENTROPIC;             break;
-    case GRIB1_LTYPE_SEADEPTH:           zaxistype = ZAXIS_DEPTH_BELOW_SEA;        break;
-    case GRIB1_LTYPE_LAKE_BOTTOM:        zaxistype = ZAXIS_LAKE_BOTTOM;            break;
-    case GRIB1_LTYPE_SEDIMENT_BOTTOM:    zaxistype = ZAXIS_SEDIMENT_BOTTOM;        break;
-    case GRIB1_LTYPE_SEDIMENT_BOTTOM_TA: zaxistype = ZAXIS_SEDIMENT_BOTTOM_TA;     break;
-    case GRIB1_LTYPE_SEDIMENT_BOTTOM_TW: zaxistype = ZAXIS_SEDIMENT_BOTTOM_TW;     break;
-    case GRIB1_LTYPE_MIX_LAYER:          zaxistype = ZAXIS_MIX_LAYER;              break;
-    }
+      {
+        GRIB1_LTYPE_SURFACE,
+        GRIB1_LTYPE_CLOUD_BASE,
+        GRIB1_LTYPE_CLOUD_TOP,
+        GRIB1_LTYPE_ISOTHERM0,
+        GRIB1_LTYPE_TROPOPAUSE,
+        GRIB1_LTYPE_TOA,
+        GRIB1_LTYPE_SEA_BOTTOM,
+        GRIB1_LTYPE_ATMOSPHERE,
+        GRIB1_LTYPE_MEANSEA,
+        GRIB1_LTYPE_99,
+        GRIB1_LTYPE_ISOBARIC,
+        GRIB1_LTYPE_ISOBARIC_PA,
+        GRIB1_LTYPE_HEIGHT,
+        GRIB1_LTYPE_ALTITUDE,
+        GRIB1_LTYPE_SIGMA,
+        GRIB1_LTYPE_SIGMA_LAYER,
+        GRIB1_LTYPE_HYBRID,
+        GRIB1_LTYPE_HYBRID_LAYER,
+        GRIB1_LTYPE_LANDDEPTH,
+        GRIB1_LTYPE_LANDDEPTH_LAYER,
+        GRIB1_LTYPE_ISENTROPIC,
+        GRIB1_LTYPE_SEADEPTH,
+        GRIB1_LTYPE_LAKE_BOTTOM,
+        GRIB1_LTYPE_SEDIMENT_BOTTOM,
+        GRIB1_LTYPE_SEDIMENT_BOTTOM_TA,
+        GRIB1_LTYPE_SEDIMENT_BOTTOM_TW,
+        GRIB1_LTYPE_MIX_LAYER,
+      },
+      {
+        ZAXIS_SURFACE,
+        ZAXIS_CLOUD_BASE,
+        ZAXIS_CLOUD_TOP,
+        ZAXIS_ISOTHERM_ZERO,
+        ZAXIS_TROPOPAUSE,
+        ZAXIS_TOA,
+        ZAXIS_SEA_BOTTOM,
+        ZAXIS_ATMOSPHERE,
+        ZAXIS_MEANSEA,
+        ZAXIS_PRESSURE,
+        ZAXIS_PRESSURE,
+        ZAXIS_PRESSURE,
+        ZAXIS_HEIGHT,
+        ZAXIS_ALTITUDE,
+        ZAXIS_SIGMA,
+        ZAXIS_SIGMA,
+        ZAXIS_HYBRID,
+        ZAXIS_HYBRID,
+        ZAXIS_DEPTH_BELOW_LAND,
+        ZAXIS_DEPTH_BELOW_LAND,
+        ZAXIS_ISENTROPIC,
+        ZAXIS_DEPTH_BELOW_SEA,
+        ZAXIS_LAKE_BOTTOM,
+        ZAXIS_SEDIMENT_BOTTOM,
+        ZAXIS_SEDIMENT_BOTTOM_TA,
+        ZAXIS_SEDIMENT_BOTTOM_TW,
+        ZAXIS_MIX_LAYER,
+      },
+    };
+  for (size_t i = 0; i < ltypeMapSize; ++i)
+    if (ltypeMap[0][i] == grib_ltype)
+      {
+        zaxistype = ltypeMap[1][i];
+        break;
+      }
 
   return zaxistype;
 }
