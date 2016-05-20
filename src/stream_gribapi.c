@@ -3024,7 +3024,6 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
 {
   size_t recsize = 0;
   /*  int ensID, ensCount, forecast_type; *//* Ensemble Data */
-  long bitsPerValue;
   long editionNumber = 2;
 
   // extern unsigned char _grib_template_GRIB2[];
@@ -3079,7 +3078,7 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   /* bitsPerValue have to be defined before call to DefGrid (complex packing) */
   //  if ( lieee == false )
     {
-      bitsPerValue = grbBitsPerValue(datatype);
+      long bitsPerValue = grbBitsPerValue(datatype);
       GRIB_CHECK(my_grib_set_long(gh, "bitsPerValue", bitsPerValue), 0);
     }
 
