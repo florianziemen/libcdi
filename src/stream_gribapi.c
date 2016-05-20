@@ -3026,8 +3026,6 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   void *dummy = NULL;
   bool lieee = false;
   /*  int ensID, ensCount, forecast_type; *//* Ensemble Data */
-  int typeOfGeneratingProcess;
-  int productDefinitionTemplate;
   long bitsPerValue;
   long editionNumber = 2;
   char name[256];
@@ -3037,8 +3035,8 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
 
   int param    = vlistInqVarParam(vlistID, varID);
   int datatype = vlistInqVarDatatype(vlistID, varID);
-  typeOfGeneratingProcess = vlistInqVarTypeOfGeneratingProcess(vlistID, varID);
-  productDefinitionTemplate = vlistInqVarProductDefinitionTemplate(vlistID, varID);
+  int typeOfGeneratingProcess = vlistInqVarTypeOfGeneratingProcess(vlistID, varID);
+  int productDefinitionTemplate = vlistInqVarProductDefinitionTemplate(vlistID, varID);
 
   vlistInqVarName(vlistID, varID, name);
   vlistInqVarStdname(vlistID, varID, stdname);
