@@ -2,6 +2,10 @@
 
 	* Version 1.7.2 released
 
+2016-05-23  Uwe Schulzweida
+
+	* zaxisTypeToGrib2ltype: added ZAXIS_DEPTH_BELOW_LAND (bug fix)
+
 2016-05-16  Uwe Schulzweida
 
 	* Seg fault in VCT with GRIB1 (introduced in 1.7.1) [Bug #6780]
