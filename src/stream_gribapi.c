@@ -2279,6 +2279,22 @@ void gribapiDefLevelType(grib_handle *gh, int gcinit, const char *keyname, long 
 }
 
 static
+void grib1DefLevel(grib_handle *gh, int gcinit, long leveltype, bool lbounds, double level, double dlevel1, double dlevel2)
+{
+  gribapiDefLevelType(gh, gcinit, "indicatorOfTypeOfLevel", leveltype);
+
+  if ( lbounds )
+    {
+      GRIB_CHECK(my_grib_set_long(gh, "topLevel", lround(dlevel1)), 0);
+      GRIB_CHECK(my_grib_set_long(gh, "bottomLevel", lround(dlevel2)), 0);
+    }
+  else
+    {
+      GRIB_CHECK(my_grib_set_long(gh, "level", lround(level)), 0);
+    }
+}
+
+static
 void grib2DefLevel(grib_handle *gh, int gcinit, long leveltype1, long leveltype2, bool lbounds, double level, double dlevel1, double dlevel2)
 {
   gribapiDefLevelType(gh, gcinit, "typeOfFirstFixedSurface", leveltype1);
@@ -2306,8 +2322,8 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
   double dlevel1 = 0, dlevel2 = 0;
 
   int zaxistype = zaxisInqType(zaxisID);
-  int ltype = zaxisInqLtype(zaxisID);
-  int ltype2 = zaxisInqLtype2(zaxisID);
+  long ltype = zaxisInqLtype(zaxisID);
+  long ltype2 = zaxisInqLtype2(zaxisID);
   double level = zaxisInqLevel(zaxisID, levelID);
 
   if ( zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL) )
@@ -2330,7 +2346,11 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
       zaxisDefUnits(zaxisID, "Pa");
     }
 
-  int grib2ltype = zaxisTypeToGrib2ltype(zaxistype);
+  long grib_ltype = -1;
+  if ( editionNumber <= 1 )
+    grib_ltype = zaxisTypeToGrib1ltype(zaxistype);
+  else
+    grib_ltype = zaxisTypeToGrib2ltype(zaxistype);
 
   switch (zaxistype)
     {
@@ -2363,8 +2383,7 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
 
         if ( editionNumber <= 1 )
           {
-            gribapiDefLevelType(gh, gcinit, "indicatorOfTypeOfLevel", zaxisTypeToGrib1ltype(zaxistype));
-            GRIB_CHECK(my_grib_set_long(gh, "level", (long)level), 0);
+            grib1DefLevel(gh, gcinit, grib_ltype, lbounds, level, dlevel1, dlevel2);
           }
         else
           {
@@ -2376,7 +2395,7 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
                The key/value pairs that are set in "grib2DefLevel" do not exist for this template.
             */
             if ( proddef_template_num != 32 )
-              grib2DefLevel(gh, gcinit, grib2ltype, grib2ltype, lbounds, level, dlevel1, dlevel2);
+              grib2DefLevel(gh, gcinit, grib_ltype, grib_ltype, lbounds, level, dlevel1, dlevel2);
           }
 
 	break;
@@ -2395,20 +2414,11 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
       {
         if ( editionNumber <= 1 )
           {
-            gribapiDefLevelType(gh, gcinit, "indicatorOfTypeOfLevel", zaxisTypeToGrib1ltype(zaxistype));
-            if ( lbounds )
-              {
-                GRIB_CHECK(my_grib_set_long(gh, "topLevel", (long) dlevel1), 0);
-                GRIB_CHECK(my_grib_set_long(gh, "bottomLevel", (long) dlevel2), 0);
-              }
-            else
-              {
-                GRIB_CHECK(my_grib_set_long(gh, "level", (long) level), 0);
-              }
+            grib1DefLevel(gh, gcinit, grib_ltype, lbounds, level, dlevel1, dlevel2);
           }
         else
           {
-            grib2DefLevel(gh, gcinit, grib2ltype, grib2ltype, lbounds, level, dlevel1, dlevel2);
+            grib2DefLevel(gh, gcinit, grib_ltype, grib_ltype, lbounds, level, dlevel1, dlevel2);
           }
 
         break;
@@ -2418,21 +2428,12 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
       {
         if ( editionNumber <= 1 )
           {
-            if ( lbounds )
-              {
-                gribapiDefLevelType(gh, gcinit, "indicatorOfTypeOfLevel", GRIB1_LTYPE_HYBRID_LAYER);
-                GRIB_CHECK(my_grib_set_long(gh, "topLevel", (long) dlevel1), 0);
-                GRIB_CHECK(my_grib_set_long(gh, "bottomLevel", (long) dlevel2), 0);
-              }
-            else
-              {
-                gribapiDefLevelType(gh, gcinit, "indicatorOfTypeOfLevel", GRIB1_LTYPE_HYBRID);
-                GRIB_CHECK(my_grib_set_long(gh, "level", (long) level), 0);
-              }
+            grib_ltype = lbounds ? GRIB1_LTYPE_HYBRID_LAYER : GRIB1_LTYPE_HYBRID;
+            grib1DefLevel(gh, gcinit, grib_ltype, lbounds, level, dlevel1, dlevel2);
           }
         else
           {
-            grib2DefLevel(gh, gcinit, grib2ltype, grib2ltype, lbounds, level, dlevel1, dlevel2);
+            grib2DefLevel(gh, gcinit, grib_ltype, grib_ltype, lbounds, level, dlevel1, dlevel2);
           }
 
         if ( !gcinit )
@@ -2449,11 +2450,9 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
       }
     case ZAXIS_PRESSURE:
       {
-	double dum;
-	char units[128];
-
 	if ( level < 0 ) Warning("Pressure level of %f Pa is below zero!", level);
 
+	char units[128];
 	zaxisInqUnits(zaxisID, units);
 	if ( memcmp(units, "Pa", 2) != 0 )
           {
@@ -2464,15 +2463,13 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
 
         if ( editionNumber <= 1 )
           {
-            long leveltype = GRIB1_LTYPE_ISOBARIC;
-
+            double dum;
             if ( level < 32768 && (level < 100 || modf(level/100, &dum) > 0) )
-              leveltype = GRIB1_LTYPE_99;
+              grib_ltype = GRIB1_LTYPE_99;
             else
               level /= 100;
 
-            gribapiDefLevelType(gh, gcinit, "indicatorOfTypeOfLevel", leveltype);
-            GRIB_CHECK(my_grib_set_double(gh, "level", level), 0);
+            grib1DefLevel(gh, gcinit, grib_ltype, lbounds, level, dlevel1, dlevel2);
 	  }
 	else
 	  {
@@ -2488,7 +2485,7 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
           ; // not available
 	else
           {
-            grib2DefLevel(gh, gcinit, grib2ltype, grib2ltype, lbounds, level, dlevel1, dlevel2);
+            grib2DefLevel(gh, gcinit, grib_ltype, grib_ltype, lbounds, level, dlevel1, dlevel2);
           }
 
 	break;
@@ -2506,8 +2503,7 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
 	    else if ( memcmp(units, "dm", 2) == 0 ) scalefactor =  10;
 	    else                                    scalefactor = 100;
 
-	    gribapiDefLevelType(gh, gcinit, "indicatorOfTypeOfLevel", GRIB1_LTYPE_LANDDEPTH);
-	    GRIB_CHECK(my_grib_set_double(gh, "level", level*scalefactor), 0);
+            grib1DefLevel(gh, gcinit, grib_ltype, lbounds, level*scalefactor, dlevel1, dlevel2);
 	  }
 	else
 	  {
@@ -2521,7 +2517,7 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
             dlevel1 *= scalefactor;
             dlevel2 *= scalefactor;
 
-            grib2DefLevel(gh, gcinit, grib2ltype, grib2ltype, lbounds, level, dlevel1, dlevel2);
+            grib2DefLevel(gh, gcinit, grib_ltype, grib_ltype, lbounds, level, dlevel1, dlevel2);
 	  }
 
 	break;
@@ -2536,8 +2532,8 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
           {
             if ( lbounds )
               {
-                gribapiDefLevelType(gh, gcinit, "typeOfFirstFixedSurface", grib2ltype);
-                gribapiDefLevelType(gh, gcinit, "typeOfSecondFixedSurface", grib2ltype);
+                gribapiDefLevelType(gh, gcinit, "typeOfFirstFixedSurface", grib_ltype);
+                gribapiDefLevelType(gh, gcinit, "typeOfSecondFixedSurface", grib_ltype);
                 GRIB_CHECK(my_grib_set_long(gh, "topLevel", (long) dlevel1), 0);
                 GRIB_CHECK(my_grib_set_long(gh, "bottomLevel", (long) dlevel2), 0);
               }
@@ -2562,8 +2558,7 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
       {
 	if ( editionNumber <= 1 )
           {
-            gribapiDefLevelType(gh, gcinit, "indicatorOfTypeOfLevel", ltype);
-            GRIB_CHECK(my_grib_set_double(gh, "level", level), 0);
+            grib1DefLevel(gh, gcinit, ltype, lbounds, level, dlevel1, dlevel2);
           }
         else
           {
