@@ -49,7 +49,7 @@ int cgribexGetGridType(int *isec2)
     case  GRIB1_GTYPE_GME:        { gridtype = GRID_GME;      break; }
     }
 
-  return (gridtype);
+  return gridtype;
 }
 
 static
@@ -62,7 +62,7 @@ int cgribexGetIsRotated(int *isec2)
       isRotated = 1;
     }
 
-  return (isRotated);
+  return isRotated;
 }
 
 static
@@ -81,7 +81,7 @@ int cgribexGetZaxisHasBounds(int grb_ltype)
       }
     }
 
-  return (lbounds);
+  return lbounds;
 }
 
 static
@@ -109,7 +109,7 @@ int cgribexGetTimeUnit(int *isec1)
       break;
     }
 
-  return (timeunit);
+  return timeunit;
 }
 
 static
@@ -120,7 +120,7 @@ int cgribexTimeIsFC(int *isec1)
   if ( ISEC1_TimeRange == 10 && ISEC1_TimePeriod1 == 0 && ISEC1_TimePeriod2 == 0 )
     isFC = FALSE;
 
-  return (isFC);
+  return isFC;
 }
 
 static
@@ -147,7 +147,7 @@ int cgribexGetTsteptype(int timerange)
       break;
     }
 
-  return (tsteptype);
+  return tsteptype;
 }
 
 static
@@ -533,7 +533,7 @@ compvar_t cgribexVarSet(int param, int level1, int level2, int leveltype, int tr
   compVar.ltype     = leveltype;
   compVar.tsteptype = tsteptype;
 
-  return (compVar);
+  return compVar;
 }
 
 static inline int
@@ -549,7 +549,7 @@ cgribexVarCompare(compvar_t compVar, record_t record, int flag)
     |           (compVar.level2 != record.ilevel2)
     |           (compVar.ltype != record.ltype)
     |           tstepDiff;
-  return (rstatus);
+  return rstatus;
 }
 #endif
 
@@ -762,7 +762,7 @@ int cgribexScanTimestep1(stream_t * streamptr)
 
   streamptr->rtsteps = 1;
 
-  if ( nrecs == 0 ) return (CDI_EUFSTRUCT);
+  if ( nrecs == 0 ) return CDI_EUFSTRUCT;
 
   cdi_generate_vars(streamptr);
 
@@ -806,7 +806,7 @@ int cgribexScanTimestep1(stream_t * streamptr)
   cgribexScanTsFixNtsteps(streamptr, recpos);
   cgribexScanTsConstAdjust(streamptr, taxis);
 
-  return (0);
+  return 0;
 }
 
 
@@ -965,7 +965,7 @@ int cgribexScanTimestep2(stream_t * streamptr)
       if ( recID == nrecords )
 	{
 	  gribWarning("Parameter not defined at timestep 1!", nrecs_scanned, tsID+1, paramstr, level1, level2);
-	  return (CDI_EUFSTRUCT);
+	  return CDI_EUFSTRUCT;
 	}
 
       if ( cdiInventoryMode == 1 )
@@ -1007,7 +1007,7 @@ int cgribexScanTimestep2(stream_t * streamptr)
 		  tsID, recID,
 		  streamptr->tsteps[tsID].records[recID].param, param,
 		  streamptr->tsteps[tsID].records[recID].ilevel, level1);
-	  return (CDI_EUFSTRUCT);
+	  return CDI_EUFSTRUCT;
 	}
 
       streamptr->tsteps[1].records[recID].position = recpos;
@@ -1048,7 +1048,7 @@ int cgribexScanTimestep2(stream_t * streamptr)
   streamptr->record->buffer     = gribbuffer;
   streamptr->record->buffersize = buffersize;
 
-  return (rstatus);
+  return rstatus;
 }
 #endif
 
@@ -1223,7 +1223,7 @@ int cgribexScanTimestep(stream_t * streamptr)
 	      gribWarning("Parameter not defined at timestep 1!", nrecs_scanned, tsID+1, paramstr, level1, level2);
 
 	      if ( cdiInventoryMode == 1 )
-		return (CDI_EUFSTRUCT);
+		return CDI_EUFSTRUCT;
 	      else
 		continue;
 	    }
@@ -1283,7 +1283,7 @@ int cgribexScanTimestep(stream_t * streamptr)
 	  cdiParamToString(streamptr->tsteps[tsID].records[recID].param, paramstr, sizeof(paramstr));
 	  gribWarning("Paramameter not found!", nrecs_scanned, tsID+1, paramstr,
                       streamptr->tsteps[tsID].records[recID].ilevel, streamptr->tsteps[tsID].records[recID].ilevel2);
-	  return (CDI_EUFSTRUCT);
+	  return CDI_EUFSTRUCT;
 	}
 
       streamptr->rtsteps++;
@@ -1313,7 +1313,7 @@ int cgribexScanTimestep(stream_t * streamptr)
 
   rstatus = (int)streamptr->ntsteps;
 
-  return (rstatus);
+  return rstatus;
 }
 #endif
 
@@ -1538,7 +1538,7 @@ int cgribexDefDateTime(int *isec1, int timeunit, int date, int time)
     default:              factor =  3600; ISEC1_TimeUnit = ISEC1_TABLE4_HOUR;      break;
     }
 
-  return (factor);
+  return factor;
 }
 
 static
@@ -1862,12 +1862,11 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
 static
 void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int levelID)
 {
-  double level;
-  int ilevel, zaxistype, ltype;
   static bool lwarning_vct = true;
+  double level;
 
-  zaxistype = zaxisInqType(zaxisID);
-  ltype = zaxisInqLtype(zaxisID);
+  int zaxistype = zaxisInqType(zaxisID);
+  int ltype = zaxisInqLtype(zaxisID);
 
   if ( zaxistype == ZAXIS_GENERIC && ltype == 0 )
     {
@@ -1881,83 +1880,50 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
 
   ISEC2_NumVCP = 0;
 
+  int grib_ltype = zaxisTypeToGrib1ltype(zaxistype);
+
   switch (zaxistype)
     {
     case ZAXIS_SURFACE:
+    case ZAXIS_MEANSEA:
+    case ZAXIS_ALTITUDE:
+    case ZAXIS_DEPTH_BELOW_SEA:
+    case ZAXIS_ISENTROPIC:
       {
-	ISEC1_LevelType = GRIB1_LTYPE_SURFACE;
-	ISEC1_Level1    = (int)(zaxisInqLevel(zaxisID, levelID));
+        ISEC1_LevelType = grib_ltype;
+	ISEC1_Level1    = (int) (zaxisInqLevel(zaxisID, levelID));
 	ISEC1_Level2    = 0;
 	break;
       }
     case ZAXIS_CLOUD_BASE:
-      {
-	ISEC1_LevelType = GRIB1_LTYPE_CLOUD_BASE;
-	ISEC1_Level1    = 0;
-	ISEC1_Level2    = 0;
-	break;
-      }
     case ZAXIS_CLOUD_TOP:
-      {
-	ISEC1_LevelType = GRIB1_LTYPE_CLOUD_TOP;
-	ISEC1_Level1    = 0;
-	ISEC1_Level2    = 0;
-	break;
-      }
     case ZAXIS_ISOTHERM_ZERO:
-      {
-	ISEC1_LevelType = GRIB1_LTYPE_ISOTHERM0;
-	ISEC1_Level1    = 0;
-	ISEC1_Level2    = 0;
-	break;
-      }
     case ZAXIS_TOA:
-      {
-	ISEC1_LevelType = GRIB1_LTYPE_TOA;
-	ISEC1_Level1    = 0;
-	ISEC1_Level2    = 0;
-	break;
-      }
     case ZAXIS_SEA_BOTTOM:
-      {
-	ISEC1_LevelType = GRIB1_LTYPE_SEA_BOTTOM;
-	ISEC1_Level1    = 0;
-	ISEC1_Level2    = 0;
-	break;
-      }
     case ZAXIS_ATMOSPHERE:
       {
-	ISEC1_LevelType = GRIB1_LTYPE_ATMOSPHERE;
+        ISEC1_LevelType = grib_ltype;
 	ISEC1_Level1    = 0;
-	ISEC1_Level2    = 0;
-	break;
-      }
-    case ZAXIS_MEANSEA:
-      {
-	ISEC1_LevelType = GRIB1_LTYPE_MEANSEA;
-	ISEC1_Level1    = (int)(zaxisInqLevel(zaxisID, levelID));
 	ISEC1_Level2    = 0;
 	break;
       }
     case ZAXIS_HYBRID:
     case ZAXIS_HYBRID_HALF:
       {
-	int vctsize;
-
 	if ( zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL) )
 	  {
 	    ISEC1_LevelType = GRIB1_LTYPE_HYBRID_LAYER;
-	    ISEC1_Level1    = (int)(zaxisInqLbound(zaxisID, levelID));
-	    ISEC1_Level2    = (int)(zaxisInqUbound(zaxisID, levelID));
+	    ISEC1_Level1    = (int) (zaxisInqLbound(zaxisID, levelID));
+	    ISEC1_Level2    = (int) (zaxisInqUbound(zaxisID, levelID));
 	  }
 	else
 	  {
 	    ISEC1_LevelType = GRIB1_LTYPE_HYBRID;
-	    ISEC1_Level1    = (int)(zaxisInqLevel(zaxisID, levelID));
+	    ISEC1_Level1    = (int) (zaxisInqLevel(zaxisID, levelID));
 	    ISEC1_Level2    = 0;
 	  }
 
-	vctsize = zaxisInqVctSize(zaxisID);
+	int vctsize = zaxisInqVctSize(zaxisID);
 	if ( vctsize > 255 )
 	  {
 	    ISEC2_NumVCP = 0;
@@ -1976,29 +1942,26 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
       }
     case ZAXIS_PRESSURE:
       {
-	double dum;
-	char units[128];
-
 	level = zaxisInqLevel(zaxisID, levelID);
 	if ( level < 0 )
 	  Warning("Pressure level of %f Pa is below zero!", level);
 
+	char units[128];
 	zaxisInqUnits(zaxisID, units);
 	if ( (units[0] != 'P') | (units[1] != 'a') ) level *= 100;
 
-	ilevel = (int) level;
+	double dum;
 	if ( level < 32768 && (level < 100 || modf(level/100, &dum) > 0) )
 	  {
-	    ISEC1_LevelType = GRIB1_LTYPE_99;
-	    ISEC1_Level1    = ilevel;
-	    ISEC1_Level2    = 0;
+	    grib_ltype = GRIB1_LTYPE_99;
 	  }
 	else
 	  {
-	    ISEC1_LevelType = GRIB1_LTYPE_ISOBARIC;
-	    ISEC1_Level1    = ilevel/100;
-	    ISEC1_Level2    = 0;
+	    level = level/100;
 	  }
+        ISEC1_LevelType = grib_ltype;
+        ISEC1_Level1    = (int) level;
+        ISEC1_Level2    = 0;
 	break;
       }
     case ZAXIS_HEIGHT:
@@ -2014,20 +1977,8 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
             else if ( units[0] == 'k' ) level *= 1000;
           }
 
-	ilevel = (int) level;
-	ISEC1_LevelType = GRIB1_LTYPE_HEIGHT;
-	ISEC1_Level1    = ilevel;
-	ISEC1_Level2    = 0;
-
-	break;
-      }
-    case ZAXIS_ALTITUDE:
-      {
-	level = zaxisInqLevel(zaxisID, levelID);
-
-	ilevel = (int) level;
-	ISEC1_LevelType = GRIB1_LTYPE_ALTITUDE;
-	ISEC1_Level1    = ilevel;
+	ISEC1_LevelType = grib_ltype;
+	ISEC1_Level1    = (int) level;
 	ISEC1_Level2    = 0;
 
 	break;
@@ -2037,16 +1988,13 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
 	if ( zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL) )
 	  {
 	    ISEC1_LevelType = GRIB1_LTYPE_SIGMA_LAYER;
-	    ISEC1_Level1    = (int)(zaxisInqLbound(zaxisID, levelID));
-	    ISEC1_Level2    = (int)(zaxisInqUbound(zaxisID, levelID));
+	    ISEC1_Level1    = (int) zaxisInqLbound(zaxisID, levelID);
+	    ISEC1_Level2    = (int) zaxisInqUbound(zaxisID, levelID);
 	  }
 	else
 	  {
-            level = zaxisInqLevel(zaxisID, levelID);
-
-            ilevel = (int) level;
             ISEC1_LevelType = GRIB1_LTYPE_SIGMA;
-            ISEC1_Level1    = ilevel;
+            ISEC1_Level1    = (int) zaxisInqLevel(zaxisID, levelID);
             ISEC1_Level2    = 0;
           }
 
@@ -2055,10 +2003,9 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
     case ZAXIS_DEPTH_BELOW_LAND:
       {
 	char units[128];
-	double factor;
-
 	zaxisInqUnits(zaxisID, units);
 
+	double factor;
         if      ( units[0] == 'm' && units[1] == 'm' ) factor =   0.1;
         else if ( units[0] == 'c' && units[1] == 'm' ) factor =   1;
         else if ( units[0] == 'd' && units[1] == 'm' ) factor =  10;
@@ -2066,54 +2013,23 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
 
 	if ( zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL) )
 	  {
-            double level1, level2;
-            level1 = zaxisInqLbound(zaxisID, levelID);
-            level2 = zaxisInqUbound(zaxisID, levelID);
 	    ISEC1_LevelType = GRIB1_LTYPE_LANDDEPTH_LAYER;
-	    ISEC1_Level1    = (int) (level1*factor);
-	    ISEC1_Level2    = (int) (level2*factor);
+	    ISEC1_Level1    = (int) (factor*zaxisInqLbound(zaxisID, levelID));
+	    ISEC1_Level2    = (int) (factor*zaxisInqUbound(zaxisID, levelID));
 	  }
 	else
 	  {
-	    level = zaxisInqLevel(zaxisID, levelID);
-
-	    ilevel = (int) (level*factor);
 	    ISEC1_LevelType = GRIB1_LTYPE_LANDDEPTH;
-	    ISEC1_Level1    = ilevel;
+	    ISEC1_Level1    = (int) (factor*zaxisInqLevel(zaxisID, levelID));
 	    ISEC1_Level2    = 0;
 	  }
 
 	break;
       }
-    case ZAXIS_DEPTH_BELOW_SEA:
-      {
-	level = zaxisInqLevel(zaxisID, levelID);
-
-	ilevel = (int) level;
-	ISEC1_LevelType = GRIB1_LTYPE_SEADEPTH;
-	ISEC1_Level1    = ilevel;
-	ISEC1_Level2    = 0;
-
-	break;
-      }
-    case ZAXIS_ISENTROPIC:
-      {
-	level = zaxisInqLevel(zaxisID, levelID);
-
-	ilevel = (int) level;
-	ISEC1_LevelType = GRIB1_LTYPE_ISENTROPIC;
-	ISEC1_Level1    = ilevel;
-	ISEC1_Level2    = 0;
-
-	break;
-      }
     case ZAXIS_GENERIC:
       {
-	level = zaxisInqLevel(zaxisID, levelID);
-
-	ilevel = (int) level;
 	ISEC1_LevelType = ltype;
-	ISEC1_Level1    = ilevel;
+	ISEC1_Level1    = (int) zaxisInqLevel(zaxisID, levelID);
 	ISEC1_Level2    = 0;
 
 	break;
