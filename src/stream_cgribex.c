@@ -53,14 +53,9 @@ int cgribexGetGridType(int *isec2)
 }
 
 static
-int cgribexGetIsRotated(int *isec2)
+bool cgribexGetIsRotated(int *isec2)
 {
-  int isRotated = 0;
-
-  if ( ISEC2_GridType == GRIB1_GTYPE_LATLON_ROT )
-    {
-      isRotated = 1;
-    }
+  bool isRotated = (ISEC2_GridType == GRIB1_GTYPE_LATLON_ROT) ? true : false;
 
   return isRotated;
 }
@@ -88,7 +83,7 @@ static
 int cgribexGetTimeUnit(int *isec1)
 {
   int timeunit = TUNIT_HOUR;
-  static int lprint = TRUE;
+  static bool lprint = true;
 
   switch ( ISEC1_TimeUnit )
     {
@@ -104,7 +99,7 @@ int cgribexGetTimeUnit(int *isec1)
       if ( lprint )
 	{
 	  Message("GRIB time unit %d unsupported!", ISEC1_TimeUnit);
-	  lprint = FALSE;
+	  lprint = false;
 	}
       break;
     }
@@ -113,12 +108,9 @@ int cgribexGetTimeUnit(int *isec1)
 }
 
 static
-int cgribexTimeIsFC(int *isec1)
+bool cgribexTimeIsFC(int *isec1)
 {
-  int isFC = TRUE;
-
-  if ( ISEC1_TimeRange == 10 && ISEC1_TimePeriod1 == 0 && ISEC1_TimePeriod2 == 0 )
-    isFC = FALSE;
+  bool isFC = (ISEC1_TimeRange == 10 && ISEC1_TimePeriod1 == 0 && ISEC1_TimePeriod2 == 0) ? false : true;
 
   return isFC;
 }
@@ -127,7 +119,7 @@ static
 int cgribexGetTsteptype(int timerange)
 {
   int tsteptype = TSTEP_INSTANT;
-  static int lprint = TRUE;
+  static bool lprint = true;
 
   switch ( timerange )
     {
@@ -142,7 +134,7 @@ int cgribexGetTsteptype(int timerange)
       if ( lprint )
 	{
 	  Message("Time range indicator %d unsupported, set to 0!", timerange);
-	  lprint = FALSE;
+	  lprint = false;
 	}
       break;
     }
@@ -153,7 +145,7 @@ int cgribexGetTsteptype(int timerange)
 static
 void cgribexGetGrid(stream_t *streamptr, int *isec2, double *fsec2, int *isec4, grid_t *grid, int iret)
 {
-  int compyinc = TRUE;
+  bool compyinc = true;
   int gridtype = cgribexGetGridType(isec2);
 
   if ( streamptr->unreduced && gridtype == GRID_GAUSSIAN_REDUCED && iret != -801 )
@@ -164,7 +156,7 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, double *fsec2, int *isec4, 
       gridtype = GRID_GAUSSIAN;
       ISEC2_NumLon = nlon;
       ISEC4_NumValues = nlon*ISEC2_NumLat;
-      compyinc = FALSE;
+      compyinc = false;
     }
 
   grid_init(grid);
@@ -187,7 +179,7 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, double *fsec2, int *isec4, 
 	  {
 	    if ( grid->xsize > 1 )
 	      {
-                int recompinc = TRUE;
+                bool recompinc = true;
 
                 if ( ISEC2_LastLon < ISEC2_FirstLon && ISEC2_LastLon < 0 ) ISEC2_LastLon += 360000;
 
@@ -195,7 +187,7 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, double *fsec2, int *isec4, 
                   {
                     if ( abs(ISEC2_LastLon - (ISEC2_FirstLon+ISEC2_LonIncr*(grid->xsize-1))) <= 2 )
                       {
-                        recompinc = FALSE;
+                        recompinc = false;
                         grid->xinc = ISEC2_LonIncr * 0.001;
                       }
                   }
@@ -224,12 +216,12 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, double *fsec2, int *isec4, 
 	  {
 	    if ( grid->ysize > 1 && compyinc )
 	      {
-                int recompinc = TRUE;
+                bool recompinc = true;
 		if ( ISEC2_ResFlag && ISEC2_LatIncr > 0 )
                   {
                     if ( abs(ISEC2_LastLat - (ISEC2_FirstLat+ISEC2_LatIncr*(grid->ysize-1))) <= 2 )
                       {
-                        recompinc = FALSE;
+                        recompinc = false;
                         grid->yinc = ISEC2_LatIncr * 0.001;
                       }
                   }
@@ -606,10 +598,11 @@ int cgribexScanTimestep1(stream_t * streamptr)
   int nrecs_scanned = 0;
   int datatype;
   long recsize = 0;
-  int warn_time = TRUE;
-  int warn_numavg = TRUE;
+  bool warn_time = true;
+  bool warn_numavg = true;
   int taxisID = -1;
-  int rdate = 0, rtime = 0, tunit = 0, fcast = 0;
+  int rdate = 0, rtime = 0, tunit = 0;
+  bool fcast = false;
   int vlistID;
   int comptype;
   long unzipsize;
@@ -723,7 +716,7 @@ int cgribexScanTimestep1(stream_t * streamptr)
 		if ( datetimeCmp(datetime, datetime0) != 0 )
 		  {
                     gribWarning("Inconsistent verification time!", nrecs_scanned, tsID+1, paramstr, level1, level2);
-		    warn_time = FALSE;
+		    warn_time = false;
 		  }
 	    }
 	  else
@@ -743,7 +736,7 @@ int cgribexScanTimestep1(stream_t * streamptr)
 	  if (  taxis->numavg && warn_numavg && (taxis->numavg != ISEC1_AvgNum) )
 	    {
 	      Warning("Changing numavg from %d to %d not supported!", taxis->numavg, ISEC1_AvgNum);
-	      warn_numavg = FALSE;
+	      warn_numavg = false;
 	    }
 	  else
 	    {
@@ -823,7 +816,7 @@ int cgribexScanTimestep2(stream_t * streamptr)
   size_t readsize;
   int nrecs, recID;
   long recsize = 0;
-  int warn_numavg = TRUE;
+  bool warn_numavg = true;
   int tsteptype;
   long unzipsize;
   char paramstr[32];
@@ -944,7 +937,7 @@ int cgribexScanTimestep2(stream_t * streamptr)
 	  /*
 	      Warning("Changing numavg from %d to %d not supported!", taxis->numavg, ISEC1_AvgNum);
 	  */
-	      warn_numavg = FALSE;
+	      warn_numavg = false;
 	    }
 	  else
 	    {
@@ -1068,7 +1061,7 @@ int cgribexScanTimestep(stream_t * streamptr)
   int level1 = 0, level2 = 0, vdate = 0, vtime = 0;
   DateTime datetime, datetime0 = { LONG_MIN, LONG_MIN };
   int vrecID, recID;
-  int warn_numavg = TRUE;
+  bool warn_numavg = true;
   size_t readsize;
   int taxisID = -1;
   int rindex, nrecs = 0;
@@ -1199,7 +1192,7 @@ int cgribexScanTimestep(stream_t * streamptr)
 	      /*
 	          Warning("Changing numavg from %d to %d not supported!", streamptr->tsteps[tsID].taxis.numavg, ISEC1_AvgNum);
 	      */
-		  warn_numavg = FALSE;
+		  warn_numavg = false;
 		}
 	      else
 		{
