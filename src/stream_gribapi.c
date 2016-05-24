@@ -682,7 +682,7 @@ void ensureBufferSize(size_t requiredSize, size_t *curSize, void **buffer)
 static
 grib_handle *gribapiGetDiskRepresentation(size_t recsize, size_t *buffersize, void **gribbuffer, int *outDatatype, int *outCompressionType, long *outUnzipsize)
 {
-  int lieee = FALSE;
+  bool lieee = false;
 
   grib_handle *gh = grib_handle_new_from_message(NULL, *gribbuffer, recsize);
   if(gribEditionNumber(gh) > 1)
@@ -695,7 +695,7 @@ grib_handle *gribapiGetDiskRepresentation(size_t recsize, size_t *buffersize, vo
           // fprintf(stderr, "packingType %d %s\n", len, typeOfPacking);
           if      ( strncmp(typeOfPacking, "grid_jpeg", len) == 0 ) *outCompressionType = COMPRESS_JPEG;
           else if ( strncmp(typeOfPacking, "grid_ccsds", len) == 0 ) *outCompressionType = COMPRESS_SZIP;
-          else if ( strncmp(typeOfPacking, "grid_ieee", len) == 0 ) lieee = TRUE;
+          else if ( strncmp(typeOfPacking, "grid_ieee", len) == 0 ) lieee = true;
         }
     }
   else
@@ -1864,7 +1864,7 @@ getGribApiCompTypeMsg(grib_handle *gh, int comptype, int gridsize)
 
 
 static
-void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype, int lieee, int datatype, int nmiss, int gcinit)
+void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype, bool lieee, int datatype, int nmiss, int gcinit)
 {
   int status;
   static short lwarn = TRUE;
@@ -2080,7 +2080,7 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 	/* South -> North */
 	//if ( ISEC2_LastLat > ISEC2_FirstLat ) ISEC2_ScanFlag += 64;
 
-        if ( editionNumber != 2 ) { lieee = 0; comptype = 0; }
+        if ( editionNumber != 2 ) { lieee = false; comptype = 0; }
 
         {
           const char *mesg;
@@ -2584,7 +2584,7 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
 {
   size_t recsize = 0;
   void *dummy = NULL;
-  int lieee = FALSE;
+  bool lieee = false;
   /*  int ensID, ensCount, forecast_type; *//* Ensemble Data */
   int typeOfGeneratingProcess;
   int productDefinitionTemplate;
@@ -2632,10 +2632,10 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
 
   if ( ! gc->init ) gribapiDefParam((int)editionNumber, gh, param, name, stdname);
 
-  if ( editionNumber == 2 && (datatype == DATATYPE_FLT32 || datatype == DATATYPE_FLT64) ) lieee = TRUE;
+  if ( editionNumber == 2 && (datatype == DATATYPE_FLT32 || datatype == DATATYPE_FLT64) ) lieee = true;
 
   /* bitsPerValue have to be defined before call to DefGrid (complex packing) */
-  //  if ( lieee == FALSE )
+  //  if ( lieee == false )
     {
       bitsPerValue = grbBitsPerValue(datatype);
       GRIB_CHECK(my_grib_set_long(gh, "bitsPerValue", bitsPerValue), 0);
