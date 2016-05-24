@@ -1437,11 +1437,11 @@ int gribapiDecode(void *gribbuffer, int gribsize, double *data, long gridsize,
 
   if ( unreduced )
     {
-      static int lwarn = 1;
+      static bool lwarn = true;
 
       if ( lwarn )
 	{
-	  lwarn = 0;
+	  lwarn = false;
 	  Warning("Conversion of gaussian reduced grids unsupported!");
 	}
     }
@@ -1841,6 +1841,7 @@ getGribApiCompTypeMsg(grib_handle *gh, int comptype, int gridsize)
 {
   const char *mesg;
   size_t len;
+
   if ( comptype == COMPRESS_JPEG && gridsize > 1 )
     {
       static const char mesg_grid_jpeg[] = "grid_jpeg";
@@ -1859,6 +1860,7 @@ getGribApiCompTypeMsg(grib_handle *gh, int comptype, int gridsize)
       len = sizeof (mesg_simple) - 1;
       mesg = mesg_simple;
     }
+
   return (struct gribApiMsg){ .msgLen = len, .msg = mesg };
 }
 
@@ -1866,9 +1868,6 @@ getGribApiCompTypeMsg(grib_handle *gh, int comptype, int gridsize)
 static
 void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype, bool lieee, int datatype, int nmiss, int gcinit)
 {
-  int status;
-  static short lwarn = TRUE;
-
   UNUSED(nmiss);
 
   int gridtype = gridInqType(gridID);
@@ -1905,9 +1904,10 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
     }
   else if ( gridtype == GRID_CURVILINEAR )
     {
+      static bool lwarn = true;
       if ( lwarn && gridsize > 1 )
 	{
-	  lwarn = FALSE;
+	  lwarn = false;
 	  Warning("Curvilinear grids are unsupported in GRIB format! Created wrong GDS!");
 	}
       gridtype = GRID_LONLAT;
@@ -1970,25 +1970,28 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
           GRIB_CHECK(my_grib_set_string(gh, "gridType", mesg, &len), 0);
         }
 
-	int nlon = gridInqXsize(gridID);
-	int nlat = gridInqYsize(gridID);
+	long nlon = gridInqXsize(gridID);
+	long nlat = gridInqYsize(gridID);
 
 	if ( gridtype == GRID_GAUSSIAN_REDUCED )
 	  {
-	    int *rowlon, i;
-	    long *pl = NULL;
+            //GRIB_CHECK(my_grib_set_long(gh, "numberOfValues", gridsize), 0);
 
 	    nlon = 0;
 
-	    rowlon = (int *) Malloc((size_t)nlat*sizeof(int));
-	    pl     = (long *) Malloc((size_t)nlat*sizeof(long));
+	    int *rowlon = (int *) Malloc((size_t)nlat*sizeof(int));
+	    long *pl    = (long *) Malloc((size_t)nlat*sizeof(long));
 	    gridInqRowlon(gridID, rowlon);
-	    for ( i = 0; i < nlat; ++i ) pl[i] = rowlon[i];
+	    for ( int i = 0; i < nlat; ++i ) pl[i] = rowlon[i];
 
-	    // GRIB_CHECK(my_grib_set_long_array(gh, "pl", pl, nlat), 0);
+            GRIB_CHECK(grib_set_long_array(gh, "pl", pl, nlat), 0);
 
 	    Free(pl);
 	    Free(rowlon);
+
+	    xfirst = 0;
+	    xlast  = 360.-360./(nlat*2);
+	    xinc   = 360./(nlat*2);
 	  }
 	else
 	  {
@@ -2015,13 +2018,14 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 	    yinc   = gridInqYinc(gridID);
 	  }
 
-	GRIB_CHECK(my_grib_set_long(gh, "Ni", nlon), 0);
-	GRIB_CHECK(my_grib_set_long(gh, "Nj", nlat), 0);
+	if ( gridtype != GRID_GAUSSIAN_REDUCED ) GRIB_CHECK(my_grib_set_long(gh, "Ni", nlon), 0);
 	GRIB_CHECK(my_grib_set_double(gh, "longitudeOfFirstGridPointInDegrees", xfirst), 0);
 	GRIB_CHECK(my_grib_set_double(gh, "longitudeOfLastGridPointInDegrees",  xlast), 0);
+	GRIB_CHECK(my_grib_set_double(gh, "iDirectionIncrementInDegrees", xinc), 0);
+
+	GRIB_CHECK(my_grib_set_long(gh, "Nj", nlat), 0);
 	GRIB_CHECK(my_grib_set_double(gh, "latitudeOfFirstGridPointInDegrees",  yfirst), 0);
 	GRIB_CHECK(my_grib_set_double(gh, "latitudeOfLastGridPointInDegrees",   ylast), 0);
-	GRIB_CHECK(my_grib_set_double(gh, "iDirectionIncrementInDegrees", xinc), 0);
 
         {
           long jscan = 0;
@@ -2145,12 +2149,11 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
       }
     case GRID_SPECTRAL:
       {
-	int trunc = gridInqTrunc(gridID);
-
         static const char mesg[] = "sh";
         size_t len = sizeof (mesg) -1;
 	GRIB_CHECK(my_grib_set_string(gh, "gridType", mesg, &len), 0);
 
+	int trunc = gridInqTrunc(gridID);
 	GRIB_CHECK(my_grib_set_long(gh, "J", trunc), 0);
 	GRIB_CHECK(my_grib_set_long(gh, "K", trunc), 0);
 	GRIB_CHECK(my_grib_set_long(gh, "M", trunc), 0);
@@ -2210,12 +2213,12 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
       }
     case GRID_UNSTRUCTURED:
       {
-	static int warning = 1;
+	static bool warning = true;
 
-	status = my_grib_set_long(gh, "gridDefinitionTemplateNumber", GRIB2_GTYPE_UNSTRUCTURED);
+	int status = my_grib_set_long(gh, "gridDefinitionTemplateNumber", GRIB2_GTYPE_UNSTRUCTURED);
 	if ( status != 0 && warning )
 	  {
-	    warning = 0;
+	    warning = false;
 	    Warning("Can't write reference grid!");
 	    Warning("gridDefinitionTemplateNumber %d not found (grib2/template.3.%d.def)!",
 		    GRIB2_GTYPE_UNSTRUCTURED, GRIB2_GTYPE_UNSTRUCTURED);

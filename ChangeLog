@@ -2,6 +2,10 @@
 
 	* Version 1.7.2 released
 
+2016-05-24 Uwe Schulzweida
+
+	* GRIB_API: added support for Gaussian reduced grids
+
 2016-05-23  Uwe Schulzweida
 
 	* zaxisTypeToGrib2ltype: added ZAXIS_DEPTH_BELOW_LAND (bug fix)
