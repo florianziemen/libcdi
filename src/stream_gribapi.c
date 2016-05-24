@@ -253,7 +253,7 @@ void grib1GetLevel(grib_handle *gh, int *leveltype, int *lbounds, int *level1, i
   *level2    = 0;
 
   long lpar;
-  if(!grib_get_long(gh, "indicatorOfTypeOfLevel", &lpar))       //1 byte
+  if ( !grib_get_long(gh, "indicatorOfTypeOfLevel", &lpar) )       //1 byte
     {
       *leveltype = (int) lpar;
 
@@ -2278,7 +2278,13 @@ void getLevelFactor(double level, long *factor, long *out_scaled_value)
 static
 void gribapiDefLevelType(grib_handle *gh, int gcinit, const char *keyname, long leveltype)
 {
-  if ( !gcinit ) GRIB_CHECK(my_grib_set_long(gh, keyname, leveltype), 0);
+  bool lset = false;
+  if ( (leveltype == 99 || leveltype == 100) && gribEditionNumber(gh) == 1 )
+    {
+      if ( gribGetLong(gh, "indicatorOfTypeOfLevel") != leveltype ) lset = true;
+    }
+
+  if ( !gcinit || lset ) GRIB_CHECK(my_grib_set_long(gh, keyname, leveltype), 0);
 }
 
 static
