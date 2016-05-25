@@ -2283,7 +2283,7 @@ bool gridCompare(int gridID, const grid_t *grid)
 	      printf("grid.xinc   %f\n", gridInqXinc(gridID));
 	      printf("grid.yinc   %f\n", gridInqYinc(gridID));
 	      */
-	      if ( grid->xsize == gridRef->xsize && grid->ysize == grid->ysize )
+	      if ( grid->xsize == gridRef->xsize && grid->ysize == gridRef->ysize )
 		{
 		  if ( grid->xdef == 2 && grid->ydef == 2 )
 		    {
