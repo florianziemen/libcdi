@@ -29766,8 +29766,8 @@ if ac_fn_fc_try_compile "$LINENO"; then :
             if test "$cross_compiling" = yes; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: Skipping run test for cfortran.h in cross-compilation mode," >&5
 $as_echo "$as_me: Skipping run test for cfortran.h in cross-compilation mode," >&6;}
-	       { $as_echo "$as_me:${as_lineno-$LINENO}: link test succeeded." >&5
-$as_echo "$as_me: link test succeeded." >&6;}
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: cfortran.h link test succeeded for $FC." >&5
+$as_echo "$as_me: cfortran.h link test succeeded for $FC." >&6;}
                acx_cv_cfortran_works=yes
 else
   cat > conftest.$ac_ext <<_ACEOF
@@ -29849,8 +29849,10 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 ac_link="./libtool --mode=link --tag=CC $ac_link"
 
+else
+  acx_cv_cfortran_works=${acx_cv_cfortran_works-yes}
 fi
-         if test -n "$F77" -a X"$F77" != Xno; then :
+         if test -n "$F77" -a X"$F77" != Xno -a x"$acx_cv_cfortran_works" = xyes; then :
   ac_ext=f
 ac_compile='$F77 -c $FFLAGS conftest.$ac_ext >&5'
 ac_link='$F77 -o conftest$ac_exeext $FFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
@@ -29878,8 +29880,8 @@ if ac_fn_f77_try_compile "$LINENO"; then :
             if test "$cross_compiling" = yes; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: Skipping run test for cfortran.h in cross-compilation mode," >&5
 $as_echo "$as_me: Skipping run test for cfortran.h in cross-compilation mode," >&6;}
-	       { $as_echo "$as_me:${as_lineno-$LINENO}: link test succeeded." >&5
-$as_echo "$as_me: link test succeeded." >&6;}
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: cfortran.h link test succeeded for $F77." >&5
+$as_echo "$as_me: cfortran.h link test succeeded for $F77." >&6;}
                acx_cv_cfortran_works=yes
 else
   cat > conftest.$ac_ext <<_ACEOF
