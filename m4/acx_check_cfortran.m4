@@ -117,7 +117,7 @@ AC_DEFUN([_ACX_CHECK_CFORTRAN_FC],
               [acx_cv_cfortran_works=yes],
               [acx_cv_cfortran_works="error"],
               [AC_MSG_NOTICE([Skipping run test for cfortran.h in cross-compilation mode,])
-	       AC_MSG_NOTICE([link test succeeded.])
+	       AC_MSG_NOTICE([cfortran.h link test succeeded for $FC.])
                acx_cv_cfortran_works=yes])
 	    LIBS=$save_LIBS],
            [acx_cv_cfortran_works="error compiling Fortran subroutine"])
@@ -184,7 +184,7 @@ AC_DEFUN([_ACX_CHECK_CFORTRAN_F77],
               [acx_cv_cfortran_works=yes],
               [acx_cv_cfortran_works="error"],
               [AC_MSG_NOTICE([Skipping run test for cfortran.h in cross-compilation mode,])
-	       AC_MSG_NOTICE([link test succeeded.])
+	       AC_MSG_NOTICE([cfortran.h link test succeeded for $F77.])
                acx_cv_cfortran_works=yes])
 	    LIBS=$save_LIBS],
            [acx_cv_cfortran_works="error compiling Fortran subroutine"])
@@ -249,9 +249,11 @@ FCALLSCSUB0(errExit,ERR_EXIT,err_exit)
         [_AC_RUN_LOG([mv "conftest.$ac_objext" "conftest_c.$ac_objext"],
            [_AS_ECHO_LOG([Renaming C object file.])])
          AC_PROVIDE_IFELSE([AC_PROG_FC],
-           [AS_IF([test -n "$FC" -a X"$FC" != Xno],[_ACX_CHECK_CFORTRAN_FC])])
+           [AS_IF([test -n "$FC" -a X"$FC" != Xno],
+              [_ACX_CHECK_CFORTRAN_FC],
+              [acx_cv_cfortran_works=${acx_cv_cfortran_works-yes}])])
          AC_PROVIDE_IFELSE([AC_PROG_F77],
-           [AS_IF([test -n "$F77" -a X"$F77" != Xno],[_ACX_CHECK_CFORTRAN_F77])])
+           [AS_IF([test -n "$F77" -a X"$F77" != Xno AC_PROVIDE_IFELSE([AC_PROG_FC],[-a x"$acx_cv_cfortran_works" = xyes])],[_ACX_CHECK_CFORTRAN_F77])])
         ],
         [acx_cv_cfortran_works="compiling with cfortran.h failed"])
       AC_LANG_POP([C])
