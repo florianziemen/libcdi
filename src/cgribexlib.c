@@ -503,7 +503,7 @@ xlc_r -g -O3 -qhot -q64 -qarch=auto -qtune=auto -qreport -DTEST_MINMAXVAL minmax
 # endif
 #endif
 
-#ifdef DISABLE_SIMD_MINMAXVAL
+#ifndef DISABLE_SIMD_MINMAXVAL
 # if defined(__AVX__)
 #  define _ENABLE_AVX
 # endif
@@ -13823,7 +13823,7 @@ void encode_dummy(void)
   (void) encode_array_unrolled_double(0, 0, 0, NULL, NULL, 0, 0, NULL);
   (void) encode_array_unrolled_float(0, 0, 0, NULL, NULL, 0, 0, NULL);
 }
-static const char grb_libvers[] = "1.7.5" " of ""Jun  3 2016"" ""10:32:59";
+static const char grb_libvers[] = "1.7.5" " of ""Jun  3 2016"" ""14:44:00";
 const char *
 cgribexLibraryVersion(void)
 {
