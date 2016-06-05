@@ -436,7 +436,7 @@ void gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double y
 
 		if ( !lfound )
 		  {
-		    Warning("Cannot calculate gaussian latitudes for lat1 = %.9g latn = %.9g!", yfirst, ylast);
+		    Warning("Cannot calculate gaussian latitudes for lat1 = %g latn = %g!", yfirst, ylast);
 		    for (int i = 0; i < ysize; i++ ) yvals[i] = 0;
 		    yvals[0] = yfirst;
 		    yvals[ysize-1] = ylast;
@@ -3317,7 +3317,7 @@ const double *gridInqYboundsPtr(int gridID)
 }
 
 static void
-printDblsPrefixAutoBrk(FILE *fp, const char prefix[], size_t nbyte0,
+printDblsPrefixAutoBrk(FILE *fp, int dig, const char prefix[], size_t nbyte0,
                        size_t n, const double vals[])
 {
   fputs(prefix, fp);
@@ -3329,7 +3329,7 @@ printDblsPrefixAutoBrk(FILE *fp, const char prefix[], size_t nbyte0,
           fprintf(fp, "\n%*s", (int)nbyte0, "");
           nbyte = nbyte0;
         }
-      nbyte += (size_t)fprintf(fp, "%.g ", vals[i]);
+      nbyte += (size_t)fprintf(fp, "%.*g ", dig, vals[i]);
     }
   fputs("\n", fp);
 }
@@ -3353,19 +3353,19 @@ printIntsPrefixAutoBrk(FILE *fp, const char prefix[], size_t nbyte0,
 }
 
 static void
-printBounds(FILE *fp, const char prefix[], size_t nbyte0,
+printBounds(FILE *fp, int dig, const char prefix[], size_t nbyte0,
             size_t n, size_t nvertex, const double bounds[])
 {
   fputs(prefix, fp);
   if ( n > 0 )
     {
       for ( size_t iv = 0; iv < nvertex; iv++ )
-        fprintf(fp, "%.9g ", bounds[iv]);
+        fprintf(fp, "%.*g ", dig, bounds[iv]);
       for ( size_t i = 1; i < (size_t)n; i++ )
         {
           fprintf(fp, "\n%*s", (int)nbyte0, "");
           for ( size_t iv = 0; iv < nvertex; iv++ )
-            fprintf(fp, "%.9g ", bounds[i*nvertex+iv]);
+            fprintf(fp, "%.*g ", dig, bounds[i*nvertex+iv]);
         }
       fputs("\n", fp);
     }
@@ -3406,6 +3406,9 @@ static void gridPrintKernel(grid_t * gridptr, int index, int opt, FILE *fp)
   int xsize    = gridInqXsize(gridID);
   int ysize    = gridInqYsize(gridID);
   int nvertex  = gridInqNvertex(gridID);
+  int prec     = gridInqPrec(gridID);
+
+  int dig = (prec == DATATYPE_FLT64) ? 15 : 7;
 
   fprintf(fp, "#\n"
           "# gridID %d\n"
@@ -3495,28 +3498,28 @@ static void gridPrintKernel(grid_t * gridptr, int index, int opt, FILE *fp)
 	  {
 	    double a = 0, lon_0 = 0, lat_0 = 0;
 	    gridInqLaea(gridID, &a, &lon_0, &lat_0);
-	    fprintf(fp, "a         = %.9g\n"
-                    "lon_0     = %.9g\n"
-                    "lat_0     = %.9g\n", a, lon_0, lat_0);
+	    fprintf(fp, "a         = %.*g\n"
+                    "lon_0     = %.*g\n"
+                    "lat_0     = %.*g\n", dig, a, dig, lon_0, dig, lat_0);
 	  }
 
 	if ( type == GRID_LCC2 )
 	  {
 	    double a = 0, lon_0 = 0, lat_0 = 0, lat_1 = 0, lat_2 = 0;
 	    gridInqLcc2(gridID, &a, &lon_0, &lat_0, &lat_1, &lat_2);
-	    fprintf(fp, "a         = %.9g\n"
-                    "lon_0     = %.9g\n"
-                    "lat_0     = %.9g\n"
-                    "lat_1     = %.9g\n"
-                    "lat_2     = %.9g\n",
-                    a, lon_0, lat_0, lat_1, lat_2);
+	    fprintf(fp, "a         = %.*g\n"
+                    "lon_0     = %.*g\n"
+                    "lat_0     = %.*g\n"
+                    "lat_1     = %.*g\n"
+                    "lat_2     = %.*g\n",
+                    dig, a, dig, lon_0, dig, lat_0, dig, lat_1, dig, lat_2);
 	  }
 
 	if ( gridptr->isRotated )
 	  {
-	    if ( xsize > 0 ) fprintf(fp, "xnpole    = %.9g\n", gridptr->xpole);
-	    if ( ysize > 0 ) fprintf(fp, "ynpole    = %.9g\n", gridptr->ypole);
-	    if ( IS_NOT_EQUAL(gridptr->angle, 0) ) fprintf(fp, "angle     = %.9g\n", gridptr->angle);
+	    if ( xsize > 0 ) fprintf(fp, "xnpole    = %.*g\n", dig, gridptr->xpole);
+	    if ( ysize > 0 ) fprintf(fp, "ynpole    = %.*g\n", dig, gridptr->ypole);
+	    if ( IS_NOT_EQUAL(gridptr->angle, 0) ) fprintf(fp, "angle     = %.*g\n", dig, gridptr->angle);
  	  }
 
 	if ( xvals )
@@ -3533,13 +3536,13 @@ static void gridPrintKernel(grid_t * gridptr, int index, int opt, FILE *fp)
 
 	    if ( IS_NOT_EQUAL(xinc, 0) && opt )
 	      {
-                fprintf(fp, "xfirst    = %.9g\n"
-                        "xinc      = %.9g\n", xfirst, xinc);
+                fprintf(fp, "xfirst    = %.*g\n"
+                        "xinc      = %.*g\n", dig, xfirst, dig, xinc);
 	      }
 	    else
 	      {
                 static const char prefix[] = "xvals     = ";
-                printDblsPrefixAutoBrk(fp, prefix, sizeof(prefix)-1,
+                printDblsPrefixAutoBrk(fp, dig, prefix, sizeof(prefix)-1,
                                        (size_t)(xdim > 0 ? xdim : 0), xvals);
 	      }
 	  }
@@ -3547,7 +3550,7 @@ static void gridPrintKernel(grid_t * gridptr, int index, int opt, FILE *fp)
 	if ( xbounds )
 	  {
             static const char prefix[] = "xbounds   = ";
-            printBounds(fp, prefix, sizeof(prefix)-1,
+            printBounds(fp, dig, prefix, sizeof(prefix)-1,
                         (size_t)(xdim > 0 ? xdim : 0),
                         (size_t)(nvertex > 0 ? nvertex : 0), xbounds);
 	  }
@@ -3565,13 +3568,13 @@ static void gridPrintKernel(grid_t * gridptr, int index, int opt, FILE *fp)
 
 	    if ( IS_NOT_EQUAL(yinc, 0) && opt )
 	      {
-	  	fprintf(fp, "yfirst    = %.9g\n"
-                        "yinc      = %.9g\n", yfirst, yinc);
+	  	fprintf(fp, "yfirst    = %.*g\n"
+                        "yinc      = %.*g\n", dig, yfirst, dig, yinc);
 	      }
 	    else
 	      {
                 static const char prefix[] = "yvals     = ";
-                printDblsPrefixAutoBrk(fp, prefix, sizeof(prefix)-1,
+                printDblsPrefixAutoBrk(fp, dig, prefix, sizeof(prefix)-1,
                                        (size_t)(ydim > 0 ? ydim : 0), yvals);
 	      }
 	  }
@@ -3579,7 +3582,7 @@ static void gridPrintKernel(grid_t * gridptr, int index, int opt, FILE *fp)
 	if ( ybounds )
 	  {
             static const char prefix[] = "ybounds   = ";
-            printBounds(fp, prefix, sizeof(prefix)-1,
+            printBounds(fp, dig, prefix, sizeof(prefix)-1,
                         (size_t)(ydim > 0 ? ydim : 0),
                         (size_t)(nvertex > 0 ? nvertex : 0), ybounds);
 	  }
@@ -3587,7 +3590,7 @@ static void gridPrintKernel(grid_t * gridptr, int index, int opt, FILE *fp)
 	if ( area )
 	  {
             static const char prefix[] = "area      = ";
-            printDblsPrefixAutoBrk(fp, prefix, sizeof(prefix)-1,
+            printDblsPrefixAutoBrk(fp, dig, prefix, sizeof(prefix)-1,
                                    (size_t)(gridsize > 0 ? gridsize : 0), area);
 	  }
 
@@ -3613,16 +3616,16 @@ static void gridPrintKernel(grid_t * gridptr, int index, int opt, FILE *fp)
 	fprintf(fp,
                 "xsize     = %d\n"
                 "ysize     = %d\n"
-                "originLon = %.9g\n"
-                "originLat = %.9g\n"
-                "lonParY   = %.9g\n"
-                "lat1      = %.9g\n"
-                "lat2      = %.9g\n"
-                "xinc      = %.9g\n"
-                "yinc      = %.9g\n"
-                "projection = %s\n"
-                , xsize, ysize, originLon, originLat, lonParY, lat1, lat2,
-                xincm, yincm,
+                "originLon = %.*g\n"
+                "originLat = %.*g\n"
+                "lonParY   = %.*g\n"
+                "lat1      = %.*g\n"
+                "lat2      = %.*g\n"
+                "xinc      = %.*g\n"
+                "yinc      = %.*g\n"
+                "projection = %s\n",
+                xsize, ysize, dig, originLon, dig, originLat, dig, lonParY,
+                dig, lat1, dig, lat2, dig, xincm, dig, yincm,
                 (projflag & 128) == 0 ? "northpole" : "southpole");
 	break;
       }
