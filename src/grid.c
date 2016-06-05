@@ -3329,7 +3329,7 @@ printDblsPrefixAutoBrk(FILE *fp, const char prefix[], size_t nbyte0,
           fprintf(fp, "\n%*s", (int)nbyte0, "");
           nbyte = nbyte0;
         }
-      nbyte += (size_t)fprintf(fp, "%.9g ", vals[i]);
+      nbyte += (size_t)fprintf(fp, "%.g ", vals[i]);
     }
   fputs("\n", fp);
 }
@@ -3539,7 +3539,7 @@ static void gridPrintKernel(grid_t * gridptr, int index, int opt, FILE *fp)
 	    else
 	      {
                 static const char prefix[] = "xvals     = ";
-                printDblsPrefixAutoBrk(fp, prefix, sizeof (prefix),
+                printDblsPrefixAutoBrk(fp, prefix, sizeof(prefix)-1,
                                        (size_t)(xdim > 0 ? xdim : 0), xvals);
 	      }
 	  }
@@ -3547,7 +3547,7 @@ static void gridPrintKernel(grid_t * gridptr, int index, int opt, FILE *fp)
 	if ( xbounds )
 	  {
             static const char prefix[] = "xbounds   = ";
-            printBounds(fp, prefix, sizeof (prefix),
+            printBounds(fp, prefix, sizeof(prefix)-1,
                         (size_t)(xdim > 0 ? xdim : 0),
                         (size_t)(nvertex > 0 ? nvertex : 0), xbounds);
 	  }
@@ -3571,7 +3571,7 @@ static void gridPrintKernel(grid_t * gridptr, int index, int opt, FILE *fp)
 	    else
 	      {
                 static const char prefix[] = "yvals     = ";
-                printDblsPrefixAutoBrk(fp, prefix, sizeof (prefix),
+                printDblsPrefixAutoBrk(fp, prefix, sizeof(prefix)-1,
                                        (size_t)(ydim > 0 ? ydim : 0), yvals);
 	      }
 	  }
@@ -3579,7 +3579,7 @@ static void gridPrintKernel(grid_t * gridptr, int index, int opt, FILE *fp)
 	if ( ybounds )
 	  {
             static const char prefix[] = "ybounds   = ";
-            printBounds(fp, prefix, sizeof (prefix),
+            printBounds(fp, prefix, sizeof(prefix)-1,
                         (size_t)(ydim > 0 ? ydim : 0),
                         (size_t)(nvertex > 0 ? nvertex : 0), ybounds);
 	  }
@@ -3587,7 +3587,7 @@ static void gridPrintKernel(grid_t * gridptr, int index, int opt, FILE *fp)
 	if ( area )
 	  {
             static const char prefix[] = "area      = ";
-            printDblsPrefixAutoBrk(fp, prefix, sizeof (prefix),
+            printDblsPrefixAutoBrk(fp, prefix, sizeof(prefix)-1,
                                    (size_t)(gridsize > 0 ? gridsize : 0), area);
 	  }
 
@@ -3596,7 +3596,7 @@ static void gridPrintKernel(grid_t * gridptr, int index, int opt, FILE *fp)
             static const char prefix[] = "rowlon    = ";
             int *rowlon = (int *)Malloc((size_t)ysize*sizeof(int));
             gridInqRowlon(gridID, rowlon);
-            printIntsPrefixAutoBrk(fp, prefix, sizeof (prefix),
+            printIntsPrefixAutoBrk(fp, prefix, sizeof(prefix)-1,
                                    (size_t)(ysize > 0 ? ysize : 0), rowlon);
             Free(rowlon);
           }
@@ -3661,7 +3661,7 @@ static void gridPrintKernel(grid_t * gridptr, int index, int opt, FILE *fp)
   if ( gridptr->mask )
     {
       static const char prefix[] = "mask      = ";
-      printMask(fp, prefix, sizeof (prefix),
+      printMask(fp, prefix, sizeof(prefix)-1,
                 (size_t)(gridsize > 0 ? gridsize : 0), gridptr->mask);
     }
 }
@@ -3701,7 +3701,7 @@ void gridPrintP ( void * voidptr, FILE * fp )
   if ( gridptr->rowlon )
     {
       static const char prefix[] = "rowlon    = ";
-      printIntsPrefixAutoBrk(fp, prefix, sizeof (prefix),
+      printIntsPrefixAutoBrk(fp, prefix, sizeof(prefix)-1,
                              (size_t)(gridptr->nrowlon > 0
                                       ? gridptr->nrowlon : 0), gridptr->rowlon);
     }
@@ -3709,7 +3709,7 @@ void gridPrintP ( void * voidptr, FILE * fp )
   if ( gridptr->mask_gme )
     {
       static const char prefix[] = "mask_gme  = ";
-      printMask(fp, prefix, sizeof (prefix),
+      printMask(fp, prefix, sizeof(prefix)-1,
                 (size_t)(gridptr->size > 0 ? gridptr->size : 0),
                 gridptr->mask_gme);
     }
