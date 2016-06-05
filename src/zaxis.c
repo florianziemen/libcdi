@@ -1319,6 +1319,9 @@ static void zaxisPrintKernel ( zaxis_t * zaxisptr, int index, FILE * fp )
 
   int type    = zaxisptr->type;
   int nlevels = zaxisptr->size;
+  int prec    = zaxisptr->prec;
+
+  int dig = (prec == DATATYPE_FLT64) ? 15 : 7;
 
   int nbyte0 = 0;
   fprintf(fp, "#\n");
@@ -1340,7 +1343,7 @@ static void zaxisPrintKernel ( zaxis_t * zaxisptr, int index, FILE * fp )
 	  fprintf(fp, "%*s", nbyte0, "");
 	  nbyte = nbyte0;
 	}
-      nbyte += fprintf(fp, "%.9g ", zaxisptr->vals[levelID]);
+      nbyte += fprintf(fp, "%.*g ", dig, zaxisptr->vals[levelID]);
     }
   fprintf(fp, "\n");
 
@@ -1356,7 +1359,7 @@ static void zaxisPrintKernel ( zaxis_t * zaxisptr, int index, FILE * fp )
 	      fprintf(fp, "%*s", nbyte0, "");
 	      nbyte = nbyte0;
 	    }
-	  nbyte += fprintf(fp, "%.9g ", zaxisptr->lbounds[levelID]);
+	  nbyte += fprintf(fp, "%.*g ", dig, zaxisptr->lbounds[levelID]);
 	}
       fprintf(fp, "\n");
 
@@ -1370,7 +1373,7 @@ static void zaxisPrintKernel ( zaxis_t * zaxisptr, int index, FILE * fp )
 	      fprintf(fp, "%*s", nbyte0, "");
 	      nbyte = nbyte0;
 	    }
-	  nbyte += fprintf(fp, "%.9g ", zaxisptr->ubounds[levelID]);
+	  nbyte += fprintf(fp, "%.*g ", dig, zaxisptr->ubounds[levelID]);
 	}
       fprintf(fp, "\n");
     }
@@ -1391,7 +1394,7 @@ static void zaxisPrintKernel ( zaxis_t * zaxisptr, int index, FILE * fp )
                   fprintf(fp, "\n%*s", nbyte0, "");
                   nbyte = nbyte0;
                 }
-              nbyte += fprintf(fp, "%.9g ", vct[i]);
+              nbyte += fprintf(fp, "%.15g ", vct[i]);
             }
           fprintf(fp, "\n");
           /*
@@ -1404,7 +1407,7 @@ static void zaxisPrintKernel ( zaxis_t * zaxisptr, int index, FILE * fp )
                   fprintf(fp, "\n%*s", nbyte0, "");
                   nbyte = nbyte0;
                 }
-              nbyte += fprintf(fp, "%.9g ", vct[vctsize/2+i]);
+              nbyte += fprintf(fp, "%.15g ", vct[vctsize/2+i]);
             }
           fprintf(fp, "\n");
           */
