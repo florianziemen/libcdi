@@ -1629,11 +1629,9 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
 
   if ( gridtype == GRID_GENERIC )
     {
-      int xsize, ysize, gridsize;
-
-      gridsize = gridInqSize(gridID);
-      xsize = gridInqXsize(gridID);
-      ysize = gridInqYsize(gridID);
+      int gridsize = gridInqSize(gridID);
+      int xsize = gridInqXsize(gridID);
+      int ysize = gridInqYsize(gridID);
 
       if ( (ysize ==  32 || ysize ==  48 || ysize ==  64 ||
 	    ysize ==  96 || ysize == 160 || ysize == 192 ||
@@ -1660,7 +1658,7 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
       if ( lwarning && gridInqSize(gridID) > 1 )
 	{
 	  lwarning = false;
-	  Warning("Curvilinear grids are unsupported in GRIB1! Created wrong GDS!");
+	  Warning("Curvilinear grids are unsupported in GRIB1! Created wrong Grid Description Section!");
 	}
       gridtype = GRID_LONLAT;
       lcurvi = true;
@@ -1676,7 +1674,6 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
     case GRID_GAUSSIAN_REDUCED:
     case GRID_TRAJECTORY:
       {
-	int nlon = 0, nlat;
 	double xfirst = 0, xlast = 0, xinc = 0;
 	double yfirst = 0, ylast = 0, yinc = 0;
         bool isRotated = gridIsRotated(gridID);
@@ -1688,8 +1685,8 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
 	else
 	  ISEC2_GridType = GRIB1_GTYPE_LATLON;
 
-	nlon = gridInqXsize(gridID);
-	nlat = gridInqYsize(gridID);
+	int nlon = gridInqXsize(gridID);
+	int nlat = gridInqYsize(gridID);
 
 	if ( gridtype == GRID_GAUSSIAN_REDUCED )
 	  {

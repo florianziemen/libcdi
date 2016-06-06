@@ -1908,7 +1908,7 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
       if ( lwarn && gridsize > 1 )
 	{
 	  lwarn = false;
-	  Warning("Curvilinear grids are unsupported in GRIB format! Created wrong GDS!");
+	  Warning("Curvilinear grids are unsupported in GRIB format! Created wrong Grid Description Section!");
 	}
       gridtype = GRID_LONLAT;
     }
