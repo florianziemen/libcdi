@@ -2324,6 +2324,24 @@ void grib2DefLevel(grib_handle *gh, int gcinit, long leveltype1, long leveltype2
     }
 }
 
+
+/*
+void grib_verfiy_zaxis(int zaxisID, double sf)
+{
+  printf("grb_verfiy_vlist called\n");
+  int zaxisID = vlistZaxis(vlistID, index);
+  int nlevels = zaxisInqSize(zaxisID);
+  int zaxistype = zaxisInqType(zaxisID);
+  double *levels = (double *) Malloc(nlevels*sizeof(double));
+  int *ilevels = (int *) Malloc(nlevels*sizeof(int));
+  zaxisInqLevels(zaxisID, levels);
+  for ( int i = 0; i < nlevels; ++i )
+    printf("level %d %g\n", i+1, levels[i]);
+  Free(ilevels);
+  Free(levels);
+}
+*/
+
 static
 void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID, int levelID, int gcinit, int proddef_template_num)
 {
@@ -2503,30 +2521,25 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
       {
 	char units[128];
 	zaxisInqUnits(zaxisID, units);
+        double sf; //scalefactor
 
 	if ( editionNumber <= 1 )
 	  {
-            double scalefactor;
-	    if      ( memcmp(units, "mm", 2) == 0 ) scalefactor =   0.1;
-	    else if ( memcmp(units, "cm", 2) == 0 ) scalefactor =   1; // cm
-	    else if ( memcmp(units, "dm", 2) == 0 ) scalefactor =  10;
-	    else                                    scalefactor = 100;
+	    if      ( memcmp(units, "mm", 2) == 0 ) sf =   0.1;
+	    else if ( memcmp(units, "cm", 2) == 0 ) sf =   1; // cm
+	    else if ( memcmp(units, "dm", 2) == 0 ) sf =  10;
+	    else                                    sf = 100;
 
-            grib1DefLevel(gh, gcinit, grib_ltype, lbounds, level*scalefactor, dlevel1, dlevel2);
+            grib1DefLevel(gh, gcinit, grib_ltype, lbounds, level*sf, dlevel1*sf, dlevel2*sf);
 	  }
 	else
 	  {
-            double scalefactor;
-	    if      ( memcmp(units, "mm", 2) == 0 ) scalefactor = 0.001;
-	    else if ( memcmp(units, "cm", 2) == 0 ) scalefactor = 0.01;
-	    else if ( memcmp(units, "dm", 2) == 0 ) scalefactor = 0.1;
-	    else                                    scalefactor = 1; // meter
+	    if      ( memcmp(units, "mm", 2) == 0 ) sf = 0.001;
+	    else if ( memcmp(units, "cm", 2) == 0 ) sf = 0.01;
+	    else if ( memcmp(units, "dm", 2) == 0 ) sf = 0.1;
+	    else                                    sf = 1; // meter
 
-            level   *= scalefactor;
-            dlevel1 *= scalefactor;
-            dlevel2 *= scalefactor;
-
-            grib2DefLevel(gh, gcinit, grib_ltype, grib_ltype, lbounds, level, dlevel1, dlevel2);
+            grib2DefLevel(gh, gcinit, grib_ltype, grib_ltype, lbounds, level*sf, dlevel1*sf, dlevel2*sf);
 	  }
 
 	break;
