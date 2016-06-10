@@ -578,15 +578,13 @@ void cdf_read_var(stream_t *streamptr, int varID, int memtype, void *data, int *
 static
 void cdfReadVarSliceDP(stream_t *streamptr, int varID, int levelID, double *data, int *nmiss)
 {
-  size_t start[4];
-  size_t count[4];
-
   if ( CDI_Debug )
     Message("streamID = %d  varID = %d  levelID = %d", streamptr->self, varID, levelID);
 
   int vlistID = streamptr->vlistID;
   int fileID = streamptr->fileID;
 
+  size_t start[4], count[4];
   bool swapxy;
   cdfGetSliceSlapDescription(streamptr, varID, levelID, &swapxy, &start, &count);
 
@@ -604,19 +602,20 @@ void cdfReadVarSliceDP(stream_t *streamptr, int varID, int levelID, double *data
         data[i] = (double) data_fp[i];
       Free(data_fp);
     }
-  else if ( vlistInqVarDatatype(vlistID, varID) == DATATYPE_UINT8 )
-    {
-      nc_type xtype;
-      cdf_inq_vartype(fileID, ncvarid, &xtype);
-      if ( xtype == NC_BYTE )
-        {
-          for ( size_t i = 0; i < gridsize; i++ )
-            if ( data[i] < 0 ) data[i] += 256;
-        }
-    }
   else
     {
       cdf_get_vara_double(fileID, ncvarid, start, count, data);
+      
+      if ( vlistInqVarDatatype(vlistID, varID) == DATATYPE_UINT8 )
+        {
+          nc_type xtype;
+          cdf_inq_vartype(fileID, ncvarid, &xtype);
+          if ( xtype == NC_BYTE )
+            {
+              for ( size_t i = 0; i < gridsize; i++ )
+                if ( data[i] < 0 ) data[i] += 256;
+            }
+        }
     }
 
   if ( swapxy ) transpose2dArrayDP(ysize, xsize, data);
@@ -636,15 +635,13 @@ void cdfReadVarSliceDP(stream_t *streamptr, int varID, int levelID, double *data
 static
 void cdfReadVarSliceSP(stream_t *streamptr, int varID, int levelID, float *data, int *nmiss)
 {
-  size_t start[4];
-  size_t count[4];
-
   if ( CDI_Debug )
     Message("streamID = %d  varID = %d  levelID = %d", streamptr->self, varID, levelID);
 
   int vlistID = streamptr->vlistID;
   int fileID = streamptr->fileID;
 
+  size_t start[4], count[4];
   bool swapxy;
   cdfGetSliceSlapDescription(streamptr, varID, levelID, &swapxy, &start, &count);
 
@@ -662,19 +659,20 @@ void cdfReadVarSliceSP(stream_t *streamptr, int varID, int levelID, float *data,
         data[i] = (float) data_dp[i];
       Free(data_dp);
     }
-  else if ( vlistInqVarDatatype(vlistID, varID) == DATATYPE_UINT8 )
-    {
-      nc_type xtype;
-      cdf_inq_vartype(fileID, ncvarid, &xtype);
-      if ( xtype == NC_BYTE )
-        {
-          for ( size_t i = 0; i < gridsize; i++ )
-            if ( data[i] < 0 ) data[i] += 256;
-        }
-    }
   else
     {
       cdf_get_vara_float(fileID, ncvarid, start, count, data);
+
+      if ( vlistInqVarDatatype(vlistID, varID) == DATATYPE_UINT8 )
+        {
+          nc_type xtype;
+          cdf_inq_vartype(fileID, ncvarid, &xtype);
+          if ( xtype == NC_BYTE )
+            {
+              for ( size_t i = 0; i < gridsize; i++ )
+                if ( data[i] < 0 ) data[i] += 256;
+            }
+        }
     }
 
   if ( swapxy ) transpose2dArraySP(ysize, xsize, data);

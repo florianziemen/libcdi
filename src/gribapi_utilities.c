@@ -544,9 +544,6 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
       }
     case GRID_GAUSSIAN_REDUCED:
       {
-        size_t dummy;
-        long *pl;
-
         long lpar;
         FAIL_ON_GRIB_ERROR(grib_get_long, gh, "numberOfParallelsBetweenAPoleAndTheEquator", &lpar);
         /* FIXME: assert(lpar <= INT_MAX && lpar >= INT_MIN) */
@@ -559,12 +556,13 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
         /* FIXME: assert(numberOfPoints <= INT_MAX && numberOfPoints >= INT_MIN) */
         grid->size   = (int)numberOfPoints;
 
+        grid->nrowlon = nlat;
         grid->rowlon = (int *) Malloc((size_t)nlat * sizeof (int));
-        pl          = (long *) Malloc((size_t)nlat * sizeof (long));
-        dummy       = (size_t)nlat;
+        long *pl     = (long *) Malloc((size_t)nlat * sizeof (long));
+        size_t dummy = (size_t)nlat;
         FAIL_ON_GRIB_ERROR(grib_get_long_array, gh, "pl", pl, &dummy);
         /* FIXME: assert(pl[i] >= INT_MIN && pl[i] <= INT_MIN) */
-        for (int i = 0; i < nlat; ++i ) grid->rowlon[i] = (int)pl[i];
+        for ( int i = 0; i < nlat; ++i ) grid->rowlon[i] = (int)pl[i];
         Free(pl);
 
         grid->ysize  = nlat;

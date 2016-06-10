@@ -246,12 +246,13 @@ void grb_write_var(stream_t *streamptr, int varID, int memtype, const void *data
 }
 
 
-void grb_write_record(stream_t * streamptr, int memtype, const void *data, int nmiss)
+void grb_write_record(stream_t *streamptr, int memtype, const void *data, int nmiss)
 {
   int varID   = streamptr->record->varID;
   int levelID = streamptr->record->levelID;
 
   grb_write_var_slice(streamptr, varID, levelID, memtype, data, nmiss);
 }
+
 
 #endif

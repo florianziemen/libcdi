@@ -2,6 +2,7 @@
 #define _GRID_H
 
 #include "cdi.h"
+#include <stdbool.h>
 
 typedef unsigned char mask_t;
 
@@ -27,10 +28,10 @@ struct gridVirtTable
   const double *(*inqXValsPtr)(grid_t *gridptr);
   const double *(*inqYValsPtr)(grid_t *gridptr);
   /* return if for both grids, all xval and all yval are equal */
-  int (*compareXYFull)(grid_t *gridRef, grid_t *gridTest);
+  bool (*compareXYFull)(grid_t *gridRef, grid_t *gridTest);
   /* return if for both grids, x[0], y[0], x[size-1] and y[size-1] are
    * respectively equal */
-  int (*compareXYAO)(grid_t *gridRef, grid_t *gridTest);
+  bool (*compareXYAO)(grid_t *gridRef, grid_t *gridTest);
   void (*inqArea)(grid_t *gridptr, double *area);
   const double *(*inqAreaPtr)(grid_t *gridptr);
   int (*hasArea)(grid_t *gridptr);
@@ -134,7 +135,6 @@ const char *gridInqYnamePtr(int gridID);
 
 const char *gridInqReferencePtr(int gridID);
 
-int gridCompare(int gridID, const grid_t *grid);
 int gridGenerate(const grid_t *grid);
 
 void cdiGridGetIndexList(unsigned, int * );

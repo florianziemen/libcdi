@@ -2,6 +2,26 @@
 
 	* Version 1.7.2 released
 
+2016-05-24 Uwe Schulzweida
+
+	* GRIB_API: added support for Gaussian reduced grids
+
+2016-05-23  Uwe Schulzweida
+
+	* zaxisTypeToGrib2ltype: added ZAXIS_DEPTH_BELOW_LAND (bug fix)
+
+2016-05-16  Uwe Schulzweida
+
+	* Seg fault in VCT with GRIB1 (introduced in 1.7.1) [Bug #6780]
+
+2016-04-29  Uwe Schulzweida
+
+	* gribapiDefLevel: replace grib_set_double(gh, "level", level) by grib2DefLevel() [Bug #6732]
+
+2016-04-27  Uwe Schulzweida
+
+	* cdfReadVarSlice: fix bug with DATATYPE_UINT8
+
 2016-04-04  Uwe Schulzweida
 
 	* GRIB1/GRIB_API (accumulation) encoding error [Bug #6638]
