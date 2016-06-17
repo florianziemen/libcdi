@@ -30,6 +30,7 @@ void cdiPrintDatatypes(void)
            "+-------------+-------+\n"
            "| char        |   %3d |\n"
            "+-------------+-------+\n"
+           "| bool        |   %3d |\n"
            "| short       |   %3d |\n"
            "| int         |   %3d |\n"
            "| long        |   %3d |\n"
@@ -48,7 +49,7 @@ void cdiPrintDatatypes(void)
            "| FLT64       | %-9s |\n"
            "+-------------+-----------+\n"
            "\n  byte ordering is %s\n\n",
-           (int) sizeof(void *), (int) sizeof(char),
+           (int) sizeof(void *), (int) sizeof(char), (int) sizeof(bool),
            (int) sizeof(short), (int) sizeof(int), (int) sizeof(long), (int) sizeof(long long),
            (int) sizeof(size_t), (int) sizeof(off_t),
            (int) sizeof(float), (int) sizeof(double), (int) sizeof(long double),
