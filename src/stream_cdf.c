@@ -5078,14 +5078,17 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 		    }
 		  if ( ndims > 1 )
 		    {
-		      if ( ndims <= 3 && ncvars[xvarid].dimids[0] == timedimid && ncvars[yvarid].dimids[0] == timedimid )
-			{
-			  if ( ltwarn )
-			    Warning("Time varying grids unsupported, using grid at time step 1!");
-			  ntdims = 1;
-			  ltwarn = false;
-			  start[0] = start[1] = start[2] = 0;
-			  count[0] = 1; count[1] = ysize; count[ndims-1] = xsize;
+		      if ( ndims <= 3 )
+                        {
+                          if ( ncvars[xvarid].dimids[0] == timedimid && ncvars[yvarid].dimids[0] == timedimid )
+                            {
+                              if ( ltwarn )
+                                Warning("Time varying grids unsupported, using grid at time step 1!");
+                              ntdims = 1;
+                              ltwarn = false;
+                              start[0] = start[1] = start[2] = 0;
+                              count[0] = 1; count[1] = ysize; count[ndims-1] = xsize;
+                            }
 			}
 		      else
 			{
