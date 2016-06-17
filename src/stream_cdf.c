@@ -63,13 +63,13 @@ ncdim_t;
 
 typedef struct {
   int      ncid;
-  int      ignore;
-  short    isvar;
-  short    islon;
-  int      islat;
-  int      islev;
-  int      istime;
-  int      warn;
+  int      isvar;
+  bool     ignore;
+  bool     islon;
+  bool     islat;
+  bool     islev;
+  bool     istime;
+  bool     warn;
   int      tsteptype;
   int      param;
   int      code;
@@ -2847,13 +2847,13 @@ void init_ncvars(long nvars, ncvar_t *ncvars)
   for ( long ncvarid = 0; ncvarid < nvars; ++ncvarid )
     {
       ncvars[ncvarid].ncid            = UNDEFID;
-      ncvars[ncvarid].ignore          = FALSE;
       ncvars[ncvarid].isvar           = UNDEFID;
-      ncvars[ncvarid].islon           = FALSE;
-      ncvars[ncvarid].islat           = FALSE;
-      ncvars[ncvarid].islev           = FALSE;
-      ncvars[ncvarid].istime          = FALSE;
-      ncvars[ncvarid].warn            = FALSE;
+      ncvars[ncvarid].ignore          = false;
+      ncvars[ncvarid].islon           = false;
+      ncvars[ncvarid].islat           = false;
+      ncvars[ncvarid].islev           = false;
+      ncvars[ncvarid].istime          = false;
+      ncvars[ncvarid].warn            = false;
       ncvars[ncvarid].tsteptype       = TSTEP_CONSTANT;
       ncvars[ncvarid].param           = UNDEFID;
       ncvars[ncvarid].code            = UNDEFID;
@@ -2921,12 +2921,12 @@ void cdfSetVar(ncvar_t *ncvars, int ncvarid, short isvar)
 {
   if ( ncvars[ncvarid].isvar != UNDEFID &&
        ncvars[ncvarid].isvar != isvar   &&
-       ncvars[ncvarid].warn  == FALSE )
+       ncvars[ncvarid].warn  == false )
     {
       if ( ! ncvars[ncvarid].ignore )
         Warning("Inconsistent variable definition for %s!", ncvars[ncvarid].name);
 
-      ncvars[ncvarid].warn = TRUE;
+      ncvars[ncvarid].warn = true;
       isvar = FALSE;
     }
 
@@ -3728,7 +3728,7 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
                   if ( status == NC_NOERR )
                     {
                       cdfSetVar(ncvars, dimvarid, FALSE);
-                      if ( cdiIgnoreAttCoordinates == FALSE )
+                      if ( cdiIgnoreAttCoordinates == false )
                         {
                           ncvars[ncvarid].coordvarids[i] = dimvarid;
                           ncvars[ncvarid].ncoordvars++;
@@ -3906,7 +3906,7 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
 
 	      if ( memcmp(attstring, "ignore", 6) == 0 )
 		{
-		  ncvars[ncvarid].ignore = TRUE;
+		  ncvars[ncvarid].ignore = true;
 		  cdfSetVar(ncvars, ncvarid, FALSE);
 		}
             }
@@ -3924,7 +3924,7 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
                   if ( attstring[0] == 'z' || attstring[0] == 'Z' )
                     {
                       cdfSetVar(ncvars, ncvarid, FALSE);
-                      ncvars[ncvarid].islev = TRUE;
+                      ncvars[ncvarid].islev = true;
                     }
                 }
 	      else
@@ -4133,7 +4133,7 @@ void verify_coordinate_vars_1(int ncid, int ndims, ncdim_t *ncdims, ncvar_t *ncv
 	{
 	  if ( ncvars[ncvarid].dimids[0] == timedimid )
 	    {
-              ncvars[ncvarid].istime = TRUE;
+              ncvars[ncvarid].istime = true;
 	      ncdims[ncdimid].dimtype = T_AXIS;
 	      continue;
 	    }
@@ -4144,14 +4144,14 @@ void verify_coordinate_vars_1(int ncid, int ndims, ncdim_t *ncdims, ncvar_t *ncv
 	    {
 	      if ( isLonAxis(ncvars[ncvarid].units, ncvars[ncvarid].stdname) )
 		{
-		  ncvars[ncvarid].islon = TRUE;
+		  ncvars[ncvarid].islon = true;
 		  cdfSetVar(ncvars, ncvarid, FALSE);
 		  cdfSetDim(ncvars, ncvarid, 0, X_AXIS);
 		  ncdims[ncdimid].dimtype = X_AXIS;
 		}
 	      else if ( isLatAxis(ncvars[ncvarid].units, ncvars[ncvarid].stdname) )
 		{
-		  ncvars[ncvarid].islat = TRUE;
+		  ncvars[ncvarid].islat = true;
 		  cdfSetVar(ncvars, ncvarid, FALSE);
 		  cdfSetDim(ncvars, ncvarid, 0, Y_AXIS);
 		  ncdims[ncdimid].dimtype = Y_AXIS;
@@ -4193,12 +4193,12 @@ void verify_coordinate_vars_1(int ncid, int ndims, ncdim_t *ncdims, ncvar_t *ncv
                   ncvars[ncvarid].zaxistype = ZAXIS_REFERENCE;
             }
 
-	  if ( ncvars[ncvarid].islon == FALSE && ncvars[ncvarid].longname[0] != 0 &&
-               ncvars[ncvarid].islat == FALSE && ncvars[ncvarid].longname[1] != 0 )
+	  if ( ncvars[ncvarid].islon == false && ncvars[ncvarid].longname[0] != 0 &&
+               ncvars[ncvarid].islat == false && ncvars[ncvarid].longname[1] != 0 )
 	    {
 	      if ( memcmp(ncvars[ncvarid].longname+1, "ongitude", 8) == 0 )
 		{
-		  ncvars[ncvarid].islon = TRUE;
+		  ncvars[ncvarid].islon = true;
 		  cdfSetVar(ncvars, ncvarid, FALSE);
 		  cdfSetDim(ncvars, ncvarid, 0, X_AXIS);
 		  ncdims[ncdimid].dimtype = X_AXIS;
@@ -4206,7 +4206,7 @@ void verify_coordinate_vars_1(int ncid, int ndims, ncdim_t *ncdims, ncvar_t *ncv
 		}
 	      else if ( memcmp(ncvars[ncvarid].longname+1, "atitude", 7) == 0 )
 		{
-		  ncvars[ncvarid].islat = TRUE;
+		  ncvars[ncvarid].islat = true;
 		  cdfSetVar(ncvars, ncvarid, FALSE);
 		  cdfSetDim(ncvars, ncvarid, 0, Y_AXIS);
 		  ncdims[ncdimid].dimtype = Y_AXIS;
@@ -4216,7 +4216,7 @@ void verify_coordinate_vars_1(int ncid, int ndims, ncdim_t *ncdims, ncvar_t *ncv
 
 	  if ( ncvars[ncvarid].zaxistype != UNDEFID )
 	    {
-              ncvars[ncvarid].islev = TRUE;
+              ncvars[ncvarid].islev = true;
 	      cdfSetVar(ncvars, ncvarid, FALSE);
 	      cdfSetDim(ncvars, ncvarid, 0, Z_AXIS);
 	      ncdims[ncdimid].dimtype = Z_AXIS;
@@ -4239,12 +4239,12 @@ void verify_coordinate_vars_2(int nvars, ncvar_t *ncvars)
 	    {
 	      if ( isLonAxis(ncvars[ncvarid].units, ncvars[ncvarid].stdname) )
 		{
-		  ncvars[ncvarid].islon = TRUE;
+		  ncvars[ncvarid].islon = true;
 		  continue;
 		}
 	      else if ( isLatAxis(ncvars[ncvarid].units, ncvars[ncvarid].stdname) )
 		{
-		  ncvars[ncvarid].islat = TRUE;
+		  ncvars[ncvarid].islat = true;
 		  continue;
 		}
 	      else if ( unitsIsPressure(ncvars[ncvarid].units) )
@@ -4282,17 +4282,17 @@ void verify_coordinate_vars_2(int nvars, ncvar_t *ncvars)
             }
 
 	  /* not needed anymore for rotated grids */
-	  if ( ncvars[ncvarid].islon == FALSE && ncvars[ncvarid].longname[0] != 0 &&
-               ncvars[ncvarid].islat == FALSE && ncvars[ncvarid].longname[1] != 0 )
+	  if ( ncvars[ncvarid].islon == false && ncvars[ncvarid].longname[0] != 0 &&
+               ncvars[ncvarid].islat == false && ncvars[ncvarid].longname[1] != 0 )
 	    {
 	      if ( memcmp(ncvars[ncvarid].longname+1, "ongitude", 8) == 0 )
 		{
-		  ncvars[ncvarid].islon = TRUE;
+		  ncvars[ncvarid].islon = true;
 		  continue;
 		}
 	      else if ( memcmp(ncvars[ncvarid].longname+1, "atitude", 7) == 0 )
 		{
-		  ncvars[ncvarid].islat = TRUE;
+		  ncvars[ncvarid].islat = true;
 		  continue;
 		}
 	    }
@@ -4969,7 +4969,7 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
           int xdimids[2] = {-1,-1}, ydimids[2] = {-1,-1};
 	  int xdimid = -1, ydimid = -1;
           int vdimid = -1;
-	  int islon = 0, islat = 0;
+	  bool islon = false, islat = false;
 	  int nxdims = 0, nydims = 0;
           size_t size = 0;
           size_t xsize = 0, ysize = 0;
@@ -5582,15 +5582,15 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
                 if ( xdimid == xdimid2 &&
 		    (ydimid == ydimid2 || (xdimid == ydimid && ydimid2 == UNDEFID)) )
 		  {
-		    int same_grid = ncvars[ncvarid].xvarid == ncvars[ncvarid2].xvarid
+		    bool same_grid = ncvars[ncvarid].xvarid == ncvars[ncvarid2].xvarid
                       && ncvars[ncvarid].yvarid == ncvars[ncvarid2].yvarid
                       && ncvars[ncvarid].position == ncvars[ncvarid2].position;
                     /*
 		    if ( xvarid != -1 && ncvars[ncvarid2].xvarid != UNDEFID &&
-			 xvarid != ncvars[ncvarid2].xvarid ) same_grid = FALSE;
+			 xvarid != ncvars[ncvarid2].xvarid ) same_grid = false;
 
 		    if ( yvarid != -1 && ncvars[ncvarid2].yvarid != UNDEFID &&
-			 yvarid != ncvars[ncvarid2].yvarid ) same_grid = FALSE;
+			 yvarid != ncvars[ncvarid2].yvarid ) same_grid = false;
                     */
 
 		    if ( same_grid )
