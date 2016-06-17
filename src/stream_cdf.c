@@ -5040,7 +5040,7 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 	  else
 	    {
 	      size_t start[3], count[3];
-	      int ltgrid = FALSE;
+	      bool ltgrid = false;
 
 	      if ( xvarid != UNDEFID && yvarid != UNDEFID )
 		{
@@ -5060,7 +5060,7 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 			{
 			  if ( ltwarn )
 			    Warning("Time varying grids unsupported, using grid at time step 1!");
-			  ltgrid = TRUE;
+			  ltgrid = true;
 			  ltwarn = FALSE;
 			  start[0] = start[1] = start[2] = 0;
 			  count[0] = 1; count[1] = ysize; count[2] = xsize;
@@ -5078,7 +5078,7 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 
               if ( xvarid != UNDEFID )
                 {
-                  if ( ncvars[xvarid].ndims > 3 || (ncvars[xvarid].ndims == 3 && ltgrid == FALSE) )
+                  if ( ncvars[xvarid].ndims > 3 || (ncvars[xvarid].ndims == 3 && !ltgrid) )
                     {
                       Warning("Coordinate variable %s has to many dimensions (%d), skipped!", ncvars[xvarid].name, ncvars[xvarid].ndims);
                       //ncvars[ncvarid].xvarid = UNDEFID;
@@ -5088,7 +5088,7 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 
               if ( yvarid != UNDEFID )
                 {
-                  if ( ncvars[yvarid].ndims > 3 || (ncvars[yvarid].ndims == 3 && ltgrid == FALSE) )
+                  if ( ncvars[yvarid].ndims > 3 || (ncvars[yvarid].ndims == 3 && !ltgrid) )
                     {
                       Warning("Coordinate variable %s has to many dimensions (%d), skipped!", ncvars[yvarid].name, ncvars[yvarid].ndims);
                       //ncvars[ncvarid].yvarid = UNDEFID;
