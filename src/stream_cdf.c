@@ -4973,7 +4973,6 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 	  int nxdims = 0, nydims = 0;
           size_t size = 0;
           size_t xsize = 0, ysize = 0;
-	  double yinc = 0;
           struct addIffNewRes projAdded = { .Id = CDI_UNDEFID, .isNew = 0 },
             gridAdded  = { .Id = CDI_UNDEFID, .isNew = 0 };
 
@@ -5217,47 +5216,10 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
                     }
 
 		  if ( ncvars[yvarid].xtype == NC_FLOAT ) grid->prec = DATATYPE_FLT32;
-                  /* see below for when it's impossible to operate
-                   * without y values */
-                  if ( !CDI_netcdf_lazy_grid_load
-                       || ((ncvars[ncvarid].gridtype == UNDEFID ||
-                            ncvars[ncvarid].gridtype == GRID_GENERIC)
-                           && islat && (islon || xsize == 0)) )
-                    {
-                      grid->yvals = (double *) Malloc(size*sizeof(double));
 
-                      if ( ltgrid )
-                        cdf_get_vara_double(ncvars[yvarid].ncid, yvarid, start, count, grid->yvals);
-                      else
-                        cdf_get_var_double(ncvars[yvarid].ncid, yvarid, grid->yvals);
+                  cdf_load_vals(size, ndims, yvarid, &ncvars[yvarid], &grid->yvals, &lazyGrid->yValsGet,
+                                ltgrid, start, count);
 
-                      scale_add(size, grid->yvals, ncvars[yvarid].addoffset, ncvars[yvarid].scalefactor);
-
-                      if ( islon && (int) ysize > 1 )
-                        {
-                          yinc = fabs(grid->yvals[0] - grid->yvals[1]);
-                          for ( size_t i = 2; i < ysize; i++ )
-                            if ( (fabs(grid->yvals[i-1] - grid->yvals[i]) - yinc) > (yinc/1000) )
-                              {
-                                yinc = 0;
-                                break;
-                              }
-                        }
-                    }
-                  else
-                    {
-                      lazyGrid->yValsGet = (struct xyValGet){
-                        .scalefactor = ncvars[yvarid].scalefactor,
-                        .addoffset = ncvars[yvarid].addoffset,
-                        .start = { start[0], start[1], start[2] },
-                        .count = { count[0], count[1], count[2] },
-                        .size = size,
-                        .datasetNCId = ncvars[yvarid].ncid,
-                        .varNCId = yvarid,
-                        .ndims = (short)ndims,
-                      };
-                      grid->yvals = cdfPendingLoad;
-                    }
                   strcpy(grid->yname, ncvars[yvarid].name);
                   strcpy(grid->ylongname, ncvars[yvarid].longname);
                   strcpy(grid->yunits, ncvars[yvarid].units);
@@ -5274,6 +5236,17 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 	    {
 	      if ( islat && (islon || xsize == 0) )
 		{
+                  double yinc = 0;
+                  if ( islon && (int) ysize > 1 )
+                    {
+                      yinc = fabs(grid->yvals[0] - grid->yvals[1]);
+                      for ( size_t i = 2; i < ysize; i++ )
+                        if ( (fabs(grid->yvals[i-1] - grid->yvals[i]) - yinc) > (yinc/1000) )
+                          {
+                            yinc = 0;
+                            break;
+                          }
+                    }
 		  if ( isGaussGrid(ysize, yinc, grid->yvals) )
                     {
                       ncvars[ncvarid].gridtype = GRID_GAUSSIAN;
