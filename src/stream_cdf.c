@@ -4893,6 +4893,22 @@ cdfBaseGridRenew(struct cdfLazyGrid *restrict *restrict gridpptr, int gridtype)
 
 /* define all input grids */
 static
+void cdf_load_cellarea(size_t size, ncvar_t *ncvar, double *gridarea, struct cdfLazyGrid *restrict lazyGrid)
+{
+  if ( CDI_netcdf_lazy_grid_load )
+    {
+      gridarea = cdfPendingLoad;
+      lazyGrid->cellAreaGet.datasetNCId = ncvar->ncid;
+      lazyGrid->cellAreaGet.varNCId = ncvar->cellarea;
+    }
+  else
+    {
+      gridarea = (double *) Malloc(size*sizeof(double));
+      cdf_get_var_double(ncvar->ncid, ncvar->cellarea, gridarea);
+    }
+}
+
+static
 void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars, int timedimid, unsigned char *uuidOfHGrid, char *gridfile, int number_of_grid_used)
 {
   int ltwarn = TRUE;
@@ -5347,23 +5363,7 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 		  }
 
 		if ( ncvars[ncvarid].cellarea != UNDEFID )
-                  {
-                    if (CDI_netcdf_lazy_grid_load)
-                      {
-                        grid->area = cdfPendingLoad;
-                        lazyGrid->cellAreaGet.datasetNCId
-                          = ncvars[ncvarid].ncid;
-                        lazyGrid->cellAreaGet.varNCId
-                          = ncvars[ncvarid].cellarea;
-                      }
-                    else
-                      {
-                        grid->area = (double *) Malloc(size*sizeof(double));
-                        cdf_get_var_double(ncvars[ncvarid].ncid,
-                                           ncvars[ncvarid].cellarea,
-                                           grid->area);
-                      }
-                  }
+                  cdf_load_cellarea(size, &ncvars[ncvarid], grid->area, lazyGrid);
 
 		break;
 	      }
