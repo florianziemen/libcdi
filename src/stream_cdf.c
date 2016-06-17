@@ -2795,32 +2795,33 @@ void cdfCreateRecords(stream_t *streamptr, int tsID)
 static
 int cdfTimeDimID(int fileID, int ndims, int nvars)
 {
-  for ( int dimid = 0; dimid < ndims; dimid++ )
+  char dimname[80];
+  for ( int dimid = 0; dimid < ndims; ++dimid )
     {
-      char dimname[80];
+      dimname[0] = 0;
       cdf_inq_dimname(fileID, dimid, dimname);
-      if ( memcmp(dimname, "time", 4) == 0 )
-        return dimid;
+      size_t len = strlen(dimname);
+      if ( len >= 4 && memcmp(dimname, "time", 4) == 0 ) return dimid;
     }
 
-
-  for ( int varid = 0; varid < nvars; varid++ )
+  for ( int varid = 0; varid < nvars; ++varid )
     {
+      nc_type xtype;
       int nvdims, nvatts, dimids[9];
-      cdf_inq_var(fileID, varid, NULL, NULL, &nvdims, dimids, &nvatts);
+      cdf_inq_var(fileID, varid, NULL, &xtype, &nvdims, dimids, &nvatts);
       if ( nvdims == 1 )
         {
-          for ( int iatt = 0; iatt < nvatts; iatt++ )
+          char sbuf[CDI_MAX_NAME];
+          for ( int iatt = 0; iatt < nvatts; ++iatt )
             {
-              char sbuf[CDI_MAX_NAME];
+              sbuf[0] = 0;
               cdf_inq_attname(fileID, varid, iatt, sbuf);
               if ( strncmp(sbuf, "units", 5) == 0 )
                 {
                   cdfGetAttText(fileID, varid, "units", sizeof(sbuf), sbuf);
                   strtolower(sbuf);
 
-                  if ( isTimeUnits(sbuf) )
-                    return dimids[0];
+                  if ( isTimeUnits(sbuf) ) return dimids[0];
                 }
             }
         }
@@ -6466,8 +6467,8 @@ int cdfInqContents(stream_t *streamptr)
 
   if ( ndims == 0 )
     {
-      Warning("ndims = %d", ndims);
-      return (CDI_EUFSTRUCT);
+      Warning("No dimensions found!");
+      return CDI_EUFSTRUCT;
     }
 
   /* alloc ncdims */
@@ -6497,7 +6498,7 @@ int cdfInqContents(stream_t *streamptr)
       for ( int i = 0; i < numgrps; ++i )
         {
           ncid = ncids[i];
-          nc_inq_grpname (ncid, name1);
+          nc_inq_grpname(ncid, name1);
           cdf_inq(ncid, &gndims , &gnvars, &gngatts, &gunlimdimid);
 
           if ( CDI_Debug )
@@ -6513,8 +6514,8 @@ int cdfInqContents(stream_t *streamptr)
 
   if ( nvars == 0 )
     {
-      Warning("nvars = %d", nvars);
-      return (CDI_EUFSTRUCT);
+      Warning("No arrays found!");
+      return CDI_EUFSTRUCT;
     }
 
   /* scan global attributes */
