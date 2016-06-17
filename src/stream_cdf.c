@@ -4359,16 +4359,13 @@ static pthread_once_t cdfLazyInitialized = PTHREAD_ONCE_INIT;
 static bool cdfLazyInitialized;
 #endif
 
-struct cdfLazyGridIds
-{
-  int datasetNCId, varNCId;
-};
-
 struct cdfLazyGrid
 {
   grid_t base;
   const struct gridVirtTable *baseVtable;
-  struct cdfLazyGridIds cellAreaGet, xBoundsGet, yBoundsGet;
+  struct cdfLazyGridIds {
+    int datasetNCId, varNCId;
+  } cellAreaGet, xBoundsGet, yBoundsGet;
   struct xyValGet {
     double scalefactor, addoffset;
     size_t start[3], count[3], size, dimsize;
@@ -4896,34 +4893,63 @@ cdfBaseGridRenew(struct cdfLazyGrid *restrict *restrict gridpptr, int gridtype)
 
 /* define all input grids */
 static
-void cdf_load_bounds(size_t size, ncvar_t *ncvar, double *gridbounds, struct cdfLazyGridIds *cellBoundsGet)
+void cdf_load_vals(size_t size, int ndims, int varid, ncvar_t *ncvar, double **gridvals, struct xyValGet *valsGet,
+                   bool ltgrid, size_t *start, size_t *count)
+{
+  if ( CDI_netcdf_lazy_grid_load )
+    {
+      *valsGet = (struct xyValGet){
+        .scalefactor = ncvar->scalefactor,
+        .addoffset = ncvar->addoffset,
+        .start = { start[0], start[1], start[2] },
+        .count = { count[0], count[1], count[2] },
+        .size = size,
+        .datasetNCId = ncvar->ncid,
+        .varNCId = varid,
+        .ndims = (short)ndims,
+      };
+      *gridvals = cdfPendingLoad;
+    }
+  else
+    {
+      *gridvals = (double*) Malloc(size*sizeof(double));
+      if ( ltgrid )
+        cdf_get_vara_double(ncvar->ncid, varid, start, count, *gridvals);
+      else
+        cdf_get_var_double(ncvar->ncid, varid, *gridvals);
+      scale_add(size, *gridvals, ncvar->addoffset, ncvar->scalefactor);
+    }
+}
+
+static
+void cdf_load_bounds(size_t size, ncvar_t *ncvar, double **gridbounds, struct cdfLazyGridIds *cellBoundsGet)
 {
   if ( CDI_netcdf_lazy_grid_load )
     {
       cellBoundsGet->datasetNCId = ncvar->ncid;
       cellBoundsGet->varNCId  = ncvar->bounds;
-      gridbounds = cdfPendingLoad;
+      *gridbounds = cdfPendingLoad;
     }
   else
     {
-      gridbounds = (double*) Malloc(size*sizeof(double));
-      cdf_get_var_double(ncvar->ncid, ncvar->bounds, gridbounds);
+      *gridbounds = (double*) Malloc(size*sizeof(double));
+      cdf_get_var_double(ncvar->ncid, ncvar->bounds, *gridbounds);
     }
 }
 
 static
-void cdf_load_cellarea(size_t size, ncvar_t *ncvar, double *gridarea, struct cdfLazyGridIds *cellAreaGet)
+void cdf_load_cellarea(size_t size, ncvar_t *ncvar, double **gridarea, struct cdfLazyGridIds *cellAreaGet)
 {
   if ( CDI_netcdf_lazy_grid_load )
     {
       cellAreaGet->datasetNCId = ncvar->ncid;
       cellAreaGet->varNCId = ncvar->cellarea;
-      gridarea = cdfPendingLoad;
+      *gridarea = cdfPendingLoad;
     }
   else
     {
-      gridarea = (double*) Malloc(size*sizeof(double));
-      cdf_get_var_double(ncvar->ncid, ncvar->cellarea, gridarea);
+      *gridarea = (double*) Malloc(size*sizeof(double));
+      cdf_get_var_double(ncvar->ncid, ncvar->cellarea, *gridarea);
     }
 }
 
@@ -5134,42 +5160,13 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
                     }
 
 		  if ( ncvars[xvarid].xtype == NC_FLOAT ) grid->prec = DATATYPE_FLT32;
-                  if (CDI_netcdf_lazy_grid_load)
-                    {
-                      lazyGrid->xValsGet = (struct xyValGet){
-                        .scalefactor = ncvars[xvarid].scalefactor,
-                        .addoffset = ncvars[xvarid].addoffset,
-                        .start = { start[0], start[1], start[2] },
-                        .count = { count[0], count[1], count[2] },
-                        .size = size,
-                        .datasetNCId = ncvars[xvarid].ncid,
-                        .varNCId = xvarid,
-                        .ndims = (short)ndims,
-                      };
-                      grid->xvals = cdfPendingLoad;
-                    }
-                  else
-                    {
-                      grid->xvals = (double *) Malloc(size*sizeof(double));
-                      if ( ltgrid )
-                        cdf_get_vara_double(ncvars[xvarid].ncid, xvarid,
-                                            start, count, grid->xvals);
-                      else
-                        cdf_get_var_double(ncvars[xvarid].ncid, xvarid,
-                                           grid->xvals);
-                      scale_add(size, grid->xvals,
-                                ncvars[xvarid].addoffset,
-                                ncvars[xvarid].scalefactor);
-                    }
+
+                  cdf_load_vals(size, ndims, xvarid, &ncvars[xvarid], &grid->xvals, &lazyGrid->xValsGet,
+                                ltgrid, start, count);
+
 		  strcpy(grid->xname, ncvars[xvarid].name);
 		  strcpy(grid->xlongname, ncvars[xvarid].longname);
 		  strcpy(grid->xunits, ncvars[xvarid].units);
-		  /* don't change the name !!! */
-		  /*
-		  if ( (len = strlen(grid->xname)) > 2 )
-		    if ( grid->xname[len-2] == '_' && isdigit((int) grid->xname[len-1]) )
-		      grid->xname[len-2] = 0;
-		  */
 		}
 
 	      if ( yvarid != UNDEFID )
@@ -5236,12 +5233,6 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 
                       scale_add(size, grid->yvals, ncvars[yvarid].addoffset, ncvars[yvarid].scalefactor);
 
-                      /* don't change the name !!! */
-                      /*
-                        if ( (len = strlen(grid->yname)) > 2 )
-                        if ( grid->yname[len-2] == '_' && isdigit((int) grid->yname[len-1]) )
-                        grid->yname[len-2] = 0;
-                      */
                       if ( islon && (int) ysize > 1 )
                         {
                           yinc = fabs(grid->yvals[0] - grid->yvals[1]);
@@ -5321,7 +5312,7 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
                             vdimid = ncvars[ncvars[xvarid].bounds].dimids[nbdims-1];
 			    size_t nvertex = ncdims[vdimid].len;
 			    grid->nvertex = (int)nvertex;
-                            cdf_load_bounds(size*grid->nvertex, &ncvars[xvarid], grid->xbounds, &lazyGrid->xBoundsGet);
+                            cdf_load_bounds(size*grid->nvertex, &ncvars[xvarid], &grid->xbounds, &lazyGrid->xBoundsGet);
 			  }
 		      }
 		  }
@@ -5339,13 +5330,13 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
                                 size_t nvertex = ncdims[vdimid].len;
                                 grid->nvertex = (int)nvertex;
                               }
-                            cdf_load_bounds(size*grid->nvertex, &ncvars[yvarid], grid->ybounds, &lazyGrid->yBoundsGet);
+                            cdf_load_bounds(size*grid->nvertex, &ncvars[yvarid], &grid->ybounds, &lazyGrid->yBoundsGet);
 			  }
 		      }
 		  }
 
 		if ( ncvars[ncvarid].cellarea != UNDEFID )
-                  cdf_load_cellarea(size, &ncvars[ncvarid], grid->area, &lazyGrid->cellAreaGet);
+                  cdf_load_cellarea(size, &ncvars[ncvarid], &grid->area, &lazyGrid->cellAreaGet);
 
 		break;
 	      }
