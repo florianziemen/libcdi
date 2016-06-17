@@ -4359,13 +4359,16 @@ static pthread_once_t cdfLazyInitialized = PTHREAD_ONCE_INIT;
 static bool cdfLazyInitialized;
 #endif
 
+struct cdfLazyGridIds
+{
+  int datasetNCId, varNCId;
+};
+
 struct cdfLazyGrid
 {
   grid_t base;
   const struct gridVirtTable *baseVtable;
-  struct {
-    int datasetNCId, varNCId;
-  } cellAreaGet, xBoundsGet, yBoundsGet;
+  struct cdfLazyGridIds cellAreaGet, xBoundsGet, yBoundsGet;
   struct xyValGet {
     double scalefactor, addoffset;
     size_t start[3], count[3], size, dimsize;
@@ -4893,13 +4896,13 @@ cdfBaseGridRenew(struct cdfLazyGrid *restrict *restrict gridpptr, int gridtype)
 
 /* define all input grids */
 static
-void cdf_load_cellarea(size_t size, ncvar_t *ncvar, double *gridarea, struct cdfLazyGrid *restrict lazyGrid)
+void cdf_load_cellarea(size_t size, ncvar_t *ncvar, double *gridarea, struct cdfLazyGridIds *cellAreaGet)
 {
   if ( CDI_netcdf_lazy_grid_load )
     {
       gridarea = cdfPendingLoad;
-      lazyGrid->cellAreaGet.datasetNCId = ncvar->ncid;
-      lazyGrid->cellAreaGet.varNCId = ncvar->cellarea;
+      cellAreaGet->datasetNCId = ncvar->ncid;
+      cellAreaGet->varNCId = ncvar->cellarea;
     }
   else
     {
@@ -5364,7 +5367,7 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 		  }
 
 		if ( ncvars[ncvarid].cellarea != UNDEFID )
-                  cdf_load_cellarea(size, &ncvars[ncvarid], grid->area, lazyGrid);
+                  cdf_load_cellarea(size, &ncvars[ncvarid], grid->area, &lazyGrid->cellAreaGet);
 
 		break;
 	      }
