@@ -4896,17 +4896,33 @@ cdfBaseGridRenew(struct cdfLazyGrid *restrict *restrict gridpptr, int gridtype)
 
 /* define all input grids */
 static
+void cdf_load_bounds(size_t size, ncvar_t *ncvar, double *gridbounds, struct cdfLazyGridIds *cellBoundsGet)
+{
+  if ( CDI_netcdf_lazy_grid_load )
+    {
+      cellBoundsGet->datasetNCId = ncvar->ncid;
+      cellBoundsGet->varNCId  = ncvar->bounds;
+      gridbounds = cdfPendingLoad;
+    }
+  else
+    {
+      gridbounds = (double*) Malloc(size*sizeof(double));
+      cdf_get_var_double(ncvar->ncid, ncvar->bounds, gridbounds);
+    }
+}
+
+static
 void cdf_load_cellarea(size_t size, ncvar_t *ncvar, double *gridarea, struct cdfLazyGridIds *cellAreaGet)
 {
   if ( CDI_netcdf_lazy_grid_load )
     {
-      gridarea = cdfPendingLoad;
       cellAreaGet->datasetNCId = ncvar->ncid;
       cellAreaGet->varNCId = ncvar->cellarea;
+      gridarea = cdfPendingLoad;
     }
   else
     {
-      gridarea = (double *) Malloc(size*sizeof(double));
+      gridarea = (double*) Malloc(size*sizeof(double));
       cdf_get_var_double(ncvar->ncid, ncvar->cellarea, gridarea);
     }
 }
@@ -5305,23 +5321,7 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
                             vdimid = ncvars[ncvars[xvarid].bounds].dimids[nbdims-1];
 			    size_t nvertex = ncdims[vdimid].len;
 			    grid->nvertex = (int)nvertex;
-                            if (CDI_netcdf_lazy_grid_load)
-                              {
-                                lazyGrid->xBoundsGet.datasetNCId
-                                  = ncvars[xvarid].ncid;
-                                lazyGrid->xBoundsGet.varNCId
-                                  = ncvars[xvarid].bounds;
-                                grid->xbounds = cdfPendingLoad;
-                              }
-                            else
-                              {
-                                grid->xbounds
-                                  = (double *)Malloc(nvertex * size
-                                                     * sizeof(double));
-                                cdf_get_var_double(ncvars[xvarid].ncid,
-                                                   ncvars[xvarid].bounds,
-                                                   grid->xbounds);
-                              }
+                            cdf_load_bounds(size*grid->nvertex, &ncvars[xvarid], grid->xbounds, &lazyGrid->xBoundsGet);
 			  }
 		      }
 		  }
@@ -5333,35 +5333,13 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 			int nbdims = ncvars[ncvars[yvarid].bounds].ndims;
 			if ( nbdims == 2 || nbdims == 3 )
 			  {
-			    /* size_t nvertex = ncdims[ncvars[ncvars[yvarid].bounds].dimids[nbdims-1]].len;
-			    if ( nvertex != grid->nvertex )
-			      Warning("nvertex problem! nvertex x %d, nvertex y %d",
-				      grid->nvertex, (int) nvertex);
-			    */
-                            if (CDI_netcdf_lazy_grid_load)
+                            if ( vdimid == -1 )
                               {
-                                lazyGrid->yBoundsGet.datasetNCId
-                                  = ncvars[yvarid].ncid;
-                                lazyGrid->yBoundsGet.varNCId
-                                  = ncvars[yvarid].bounds;
-                                grid->ybounds = cdfPendingLoad;
-                              }
-                            else
-                              {
-                                vdimid = ncvars[ncvars[yvarid].bounds].dimids[nbdims-1];
+                                vdimid = ncvars[ncvars[xvarid].bounds].dimids[nbdims-1];
                                 size_t nvertex = ncdims[vdimid].len;
-                                /*
-                                  if ( nvertex != grid->nvertex )
-                                  Warning("nvertex problem! nvertex x %d, nvertex y %d",
-                                  grid->nvertex, (int) nvertex);
-                                */
-                                grid->ybounds
-                                  = (double *)Malloc(nvertex * size
-                                                     * sizeof(double));
-                                cdf_get_var_double(ncvars[yvarid].ncid,
-                                                   ncvars[yvarid].bounds,
-                                                   grid->ybounds);
+                                grid->nvertex = (int)nvertex;
                               }
+                            cdf_load_bounds(size*grid->nvertex, &ncvars[yvarid], grid->ybounds, &lazyGrid->yBoundsGet);
 			  }
 		      }
 		  }
