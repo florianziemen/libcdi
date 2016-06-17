@@ -4931,7 +4931,7 @@ static
 void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars,
                           int timedimid, unsigned char *uuidOfHGrid, char *gridfile, int number_of_grid_used)
 {
-  int ltwarn = TRUE;
+  bool ltwarn = true;
   struct cdfLazyGrid *restrict lazyGrid = NULL, *restrict lazyProj = NULL;
 #define grid (&lazyGrid->base)
 #define proj (&lazyProj->base)
@@ -5061,7 +5061,7 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 			  if ( ltwarn )
 			    Warning("Time varying grids unsupported, using grid at time step 1!");
 			  ltgrid = true;
-			  ltwarn = FALSE;
+			  ltwarn = false;
 			  start[0] = start[1] = start[2] = 0;
 			  count[0] = 1; count[1] = ysize; count[2] = xsize;
 			}
