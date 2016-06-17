@@ -4909,7 +4909,8 @@ void cdf_load_cellarea(size_t size, ncvar_t *ncvar, double *gridarea, struct cdf
 }
 
 static
-void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars, int timedimid, unsigned char *uuidOfHGrid, char *gridfile, int number_of_grid_used)
+void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars,
+                          int timedimid, unsigned char *uuidOfHGrid, char *gridfile, int number_of_grid_used)
 {
   int ltwarn = TRUE;
   struct cdfLazyGrid *restrict lazyGrid = NULL, *restrict lazyProj = NULL;
@@ -5695,8 +5696,8 @@ void define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nva
 
 /* define all input zaxes */
 static
-void define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars,
-		      size_t vctsize_echam, double *vct_echam, unsigned char *uuidOfVGrid)
+void cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars,
+                          size_t vctsize_echam, double *vct_echam, unsigned char *uuidOfVGrid)
 {
   int ncvarid, ncvarid2;
   int i, ilev;
@@ -6796,11 +6797,11 @@ int cdfInqContents(stream_t *streamptr)
   if ( CDI_Debug ) printNCvars(ncvars, nvars, "define_all_grids");
 
   /* define all grids */
-  define_all_grids(streamptr, vlistID, ncdims, nvars, ncvars, timedimid, uuidOfHGrid, gridfile, number_of_grid_used);
+  cdf_define_all_grids(streamptr, vlistID, ncdims, nvars, ncvars, timedimid, uuidOfHGrid, gridfile, number_of_grid_used);
 
 
   /* define all zaxes */
-  define_all_zaxes(streamptr, vlistID, ncdims, nvars, ncvars, vctsize, vct, uuidOfVGrid);
+  cdf_define_all_zaxes(streamptr, vlistID, ncdims, nvars, ncvars, vctsize, vct, uuidOfVGrid);
   if ( vct ) Free(vct);
 
 
