@@ -277,7 +277,7 @@ void printInfo(int vdate, int vtime, char *varname, double level,
       fprintf(stdout, "  -  (%#12.5g,%#12.5g)  -", arrmean_r, arrmean_i);
     }
 
-  fprintf(stdout, " : %-11s\n", varname);
+  fprintf(stdout, " : %-14s\n", varname);
 
   if ( imiss != nmiss && nmiss > 0 )
     fprintf(stdout, "Found %d of %d missing values!\n", imiss, nmiss);
@@ -448,10 +448,10 @@ void printShortinfo(int streamID, int vlistID, int vardis)
 	  if (vardis)
             {
               vlistInqVarName(vlistID, varID, varname);
-              fprintf(stdout, "%-11s", varname);
+              fprintf(stdout, "%-14s", varname);
             }
 	  else
-	    fprintf(stdout, "%-11s", paramstr);
+	    fprintf(stdout, "%-14s", paramstr);
 
 	  fprintf(stdout, "\n");
 	}
