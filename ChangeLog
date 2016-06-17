@@ -1,4 +1,8 @@
-2016-06-??  Uwe Schulzweida
+2016-06-17  Uwe Schulzweida
+
+	* netCDF4: added support for attribute type NC_USHORT and NC_UINT
+
+2016-06-10  Uwe Schulzweida
 
 	* Version 1.7.2 released
 

@@ -5997,38 +5997,41 @@ void define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, 
 
       if ( ncvars[ncvarid].natts )
 	{
-	  int attnum;
-	  int iatt;
 	  nc_type attrtype;
 	  size_t attlen;
 	  char attname[CDI_MAX_NAME];
 	  const int attstringlen = 8192; char attstring[8192];
 	  int nvatts = ncvars[ncvarid].natts;
 
-	  for ( iatt = 0; iatt < nvatts; iatt++ )
+	  for ( int iatt = 0; iatt < nvatts; ++iatt )
 	    {
-	      attnum = ncvars[ncvarid].atts[iatt];
+	      int attnum = ncvars[ncvarid].atts[iatt];
 	      cdf_inq_attname(ncid, ncvarid, attnum, attname);
 	      cdf_inq_attlen(ncid, ncvarid, attname, &attlen);
 	      cdf_inq_atttype(ncid, ncvarid, attname, &attrtype);
 
-	      if ( attrtype == NC_SHORT || attrtype == NC_INT )
+	      if ( attrtype == NC_SHORT || attrtype == NC_INT
+#if  defined  (HAVE_NETCDF4)
+                  || attrtype == NC_USHORT || attrtype == NC_UINT
+#endif
+                   )
 		{
 		  int attint[attlen];
 		  cdfGetAttInt(ncid, ncvarid, attname, (int)attlen, attint);
-		  if ( attrtype == NC_SHORT )
-		    vlistDefAttInt(vlistID, varID, attname, DATATYPE_INT16, (int)attlen, attint);
-		  else
-		    vlistDefAttInt(vlistID, varID, attname, DATATYPE_INT32, (int)attlen, attint);
+                  int datatype = (attrtype == NC_SHORT) ? DATATYPE_INT16 :
+#if  defined  (HAVE_NETCDF4)
+                                 (attrtype == NC_USHORT) ? DATATYPE_UINT16 :
+                                 (attrtype == NC_UINT) ? DATATYPE_UINT32 :
+#endif
+                                 DATATYPE_INT32;
+                  vlistDefAttInt(vlistID, varID, attname, datatype, (int)attlen, attint);
 		}
 	      else if ( attrtype == NC_FLOAT || attrtype == NC_DOUBLE )
 		{
 		  double attflt[attlen];
 		  cdfGetAttDouble(ncid, ncvarid, attname, (int)attlen, attflt);
-		  if ( attrtype == NC_FLOAT )
-		    vlistDefAttFlt(vlistID, varID, attname, DATATYPE_FLT32, (int)attlen, attflt);
-		  else
-		    vlistDefAttFlt(vlistID, varID, attname, DATATYPE_FLT64, (int)attlen, attflt);
+                  int datatype = (attrtype == NC_FLOAT) ? DATATYPE_FLT32 : DATATYPE_FLT64;
+                  vlistDefAttFlt(vlistID, varID, attname, datatype, (int)attlen, attflt);
 		}
 	      else if ( xtypeIsText(attrtype) )
 		{
@@ -6225,20 +6228,16 @@ void scan_global_attributes(int fileID, int vlistID, stream_t *streamptr, int ng
             {
               int attint[attlen];
               cdfGetAttInt(fileID, NC_GLOBAL, attname, (int)attlen, attint);
-              if ( xtype == NC_SHORT )
-                vlistDefAttInt(vlistID, CDI_GLOBAL, attname, DATATYPE_INT16, (int)attlen, attint);
-              else
-                vlistDefAttInt(vlistID, CDI_GLOBAL, attname, DATATYPE_INT32, (int)attlen, attint);
+              int datatype = (xtype == NC_SHORT) ? DATATYPE_INT16 : DATATYPE_INT32;
+              vlistDefAttInt(vlistID, CDI_GLOBAL, attname, datatype, (int)attlen, attint);
             }
         }
       else if ( xtype == NC_FLOAT || xtype == NC_DOUBLE )
 	{
 	  double attflt[attlen];
 	  cdfGetAttDouble(fileID, NC_GLOBAL, attname, (int)attlen, attflt);
-	  if ( xtype == NC_FLOAT )
-	    vlistDefAttFlt(vlistID, CDI_GLOBAL, attname, DATATYPE_FLT32, (int)attlen, attflt);
-	  else
-	    vlistDefAttFlt(vlistID, CDI_GLOBAL, attname, DATATYPE_FLT64, (int)attlen, attflt);
+          int datatype = (xtype == NC_FLOAT) ? DATATYPE_FLT32 : DATATYPE_FLT64;
+          vlistDefAttFlt(vlistID, CDI_GLOBAL, attname, datatype, (int)attlen, attflt);
 	}
     }
 }

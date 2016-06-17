@@ -190,13 +190,20 @@ void cdfDefineAttributes(int vlistID, int varID, int fileID, int ncvarID)
           len = (size_t)attlen;
           cdf_put_att_text(fileID, ncvarID, attname, len, atttxt);
         }
-      else if ( atttype == DATATYPE_INT16 || atttype == DATATYPE_INT32 )
+      else if ( atttype == DATATYPE_INT16 || atttype == DATATYPE_INT32 ||
+                atttype == DATATYPE_UINT16 || atttype == DATATYPE_UINT32 )
         {
           size_t attSize = (size_t)attlen*sizeof(int);
           int *attint = (int *)resizeBuf(&attBuf, &attBufSize, attSize);
           vlistInqAttInt(vlistID, varID, attname, attlen, &attint[0]);
           len = (size_t)attlen;
-          cdf_put_att_int(fileID, ncvarID, attname, atttype == DATATYPE_INT16 ? NC_SHORT : NC_INT, len, attint);
+          nc_type xtype = (atttype == DATATYPE_INT16) ? NC_SHORT :
+#if  defined  (HAVE_NETCDF4)
+                          (atttype == DATATYPE_UINT16) ? NC_USHORT :
+                          (atttype == DATATYPE_UINT32) ? NC_UINT :
+#endif
+                          NC_INT;
+          cdf_put_att_int(fileID, ncvarID, attname, xtype, len, attint);
         }
       else if ( atttype == DATATYPE_FLT32 || atttype == DATATYPE_FLT64 )
         {
