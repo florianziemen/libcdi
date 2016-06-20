@@ -1,6 +1,6 @@
 2016-06-17  Uwe Schulzweida
 
-	* netCDF4: added support for attribute type NC_USHORT and NC_UINT
+	* netCDF4: added support for attribute type NC_BYTE, NC_UBYTE, NC_USHORT and NC_UINT
 
 2016-06-10  Uwe Schulzweida
 

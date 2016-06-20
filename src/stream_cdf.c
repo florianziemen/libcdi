@@ -490,6 +490,20 @@ bool xtypeIsFloat(nc_type xtype)
 }
 
 static
+bool xtypeIsInt(nc_type xtype)
+{
+  bool isInt = xtype == NC_SHORT || xtype == NC_INT
+            || xtype == NC_BYTE
+#if  defined  (HAVE_NETCDF4)
+            || xtype == NC_USHORT || xtype == NC_UINT
+            || xtype == NC_UBYTE
+#endif
+             ;
+
+  return isInt;
+}
+
+static
 int cdfInqDatatype(int xtype, bool lunsigned)
 {
   int datatype = -1;
@@ -5999,23 +6013,21 @@ void define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, 
 	      cdf_inq_attlen(ncid, ncvarid, attname, &attlen);
 	      cdf_inq_atttype(ncid, ncvarid, attname, &attrtype);
 
-	      if ( attrtype == NC_SHORT || attrtype == NC_INT
-#if  defined  (HAVE_NETCDF4)
-                  || attrtype == NC_USHORT || attrtype == NC_UINT
-#endif
-                   )
+	      if ( xtypeIsInt(attrtype) )
 		{
 		  int attint[attlen];
 		  cdfGetAttInt(ncid, ncvarid, attname, (int)attlen, attint);
                   int datatype = (attrtype == NC_SHORT) ? DATATYPE_INT16 :
+                                 (attrtype == NC_BYTE)  ? DATATYPE_INT8 :
 #if  defined  (HAVE_NETCDF4)
+                                 (attrtype == NC_UBYTE)  ? DATATYPE_UINT8 :
                                  (attrtype == NC_USHORT) ? DATATYPE_UINT16 :
                                  (attrtype == NC_UINT) ? DATATYPE_UINT32 :
 #endif
                                  DATATYPE_INT32;
                   vlistDefAttInt(vlistID, varID, attname, datatype, (int)attlen, attint);
 		}
-	      else if ( attrtype == NC_FLOAT || attrtype == NC_DOUBLE )
+	      else if ( xtypeIsFloat(attrtype) )
 		{
 		  double attflt[attlen];
 		  cdfGetAttDouble(ncid, ncvarid, attname, (int)attlen, attflt);

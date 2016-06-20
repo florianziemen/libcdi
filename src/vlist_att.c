@@ -336,7 +336,7 @@ The function @func{vlistDefAttInt} defines an integer attribute.
 */
 int vlistDefAttInt(int vlistID, int varID, const char *name, int type, int len, const int *ip)
 {
-  return vlist_def_att(DATATYPE_INT, type, vlistID, varID, name, (size_t)len, (size_t)len * sizeof (int), ip);
+  return vlist_def_att(DATATYPE_INT, type, vlistID, varID, name, (size_t)len, (size_t)len * sizeof(int), ip);
 }
 
 /*
@@ -360,7 +360,7 @@ The function @func{vlistDefAttFlt} defines a floating point attribute.
 */
 int vlistDefAttFlt(int vlistID, int varID, const char *name, int type, int len, const double *dp)
 {
-  return vlist_def_att(DATATYPE_FLT, type, vlistID, varID, name, (size_t)len, (size_t)len * sizeof (double), dp);
+  return vlist_def_att(DATATYPE_FLT, type, vlistID, varID, name, (size_t)len, (size_t)len * sizeof(double), dp);
 }
 
 /*
@@ -405,7 +405,7 @@ The function @func{vlistInqAttInt} gets the values(s) of an integer attribute.
 */
 int vlistInqAttInt(int vlistID, int varID, const char *name, int mlen, int *ip)
 {
-  return vlist_inq_att(DATATYPE_INT, vlistID, varID, name, (size_t)mlen * sizeof (int), ip);
+  return vlist_inq_att(DATATYPE_INT, vlistID, varID, name, (size_t)mlen * sizeof(int), ip);
 }
 
 /*
@@ -427,7 +427,7 @@ The function @func{vlistInqAttFlt} gets the values(s) of a floating point attrib
 */
 int vlistInqAttFlt(int vlistID, int varID, const char *name, int mlen, double *dp)
 {
-  return vlist_inq_att(DATATYPE_FLT, vlistID, varID, name, (size_t)mlen * sizeof (double), dp);
+  return vlist_inq_att(DATATYPE_FLT, vlistID, varID, name, (size_t)mlen * sizeof(double), dp);
 }
 
 /*
@@ -449,7 +449,7 @@ The function @func{vlistInqAttTxt} gets the values(s) of a text attribute.
 */
 int vlistInqAttTxt(int vlistID, int varID, const char *name, int mlen, char *tp)
 {
-  return vlist_inq_att(DATATYPE_TXT, vlistID, varID, name, (size_t)mlen * sizeof (char), tp);
+  return vlist_inq_att(DATATYPE_TXT, vlistID, varID, name, (size_t)mlen * sizeof(char), tp);
 }
 
 enum {
