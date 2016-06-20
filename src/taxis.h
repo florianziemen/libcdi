@@ -1,6 +1,8 @@
 #ifndef _TAXIS_H
 #define _TAXIS_H
 
+#include <stdbool.h>
+
 #ifndef RESOURCE_HANDLE_H
 #include "resource_handle.h"
 #endif
@@ -9,7 +11,7 @@ typedef struct {
   /* Date format  YYYYMMDD */
   /* Time format    hhmmss */
   int     self;
-  short   used;
+  bool    used;
   short   has_bounds;
   int     type;           // time type
   int     vdate;          // verification date
@@ -21,7 +23,7 @@ typedef struct {
   int     calendar;
   int     unit;           // time unit
   int     numavg;
-  int     climatology;
+  bool    climatology;
   int     vdate_lb;       // lower bounds of vdate
   int     vtime_lb;       // lower bounds of vtime
   int     vdate_ub;       // upper bounds of vdate

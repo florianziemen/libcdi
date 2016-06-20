@@ -1,6 +1,8 @@
 #ifndef _BASETIME_H
 #define _BASETIME_H
 
+#include <stdbool.h>
+
 //#define USE_TIMECACHE 1
 #define MAX_TIMECACHE_SIZE 1024
 
@@ -17,7 +19,7 @@ typedef struct {
   int   ncdimid;
   int   ncvarboundsid;
   int   leadtimeid;
-  int   lwrf;     /* TRUE for time axis in WRF format */
+  bool  lwrf;     /* true for time axis in WRF format */
   timecache_t *timevar_cache;
 }
 basetime_t;
