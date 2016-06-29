@@ -157,8 +157,8 @@ void grid_init(grid_t *gridptr)
   gridptr->vdimname[0]   = 0;
   gridptr->x.name[0]      = 0;
   gridptr->y.name[0]      = 0;
-  gridptr->xlongname[0]  = 0;
-  gridptr->ylongname[0]  = 0;
+  gridptr->x.longname[0]  = 0;
+  gridptr->y.longname[0]  = 0;
   gridptr->xunits[0]     = 0;
   gridptr->yunits[0]     = 0;
   gridptr->xstdname      = NULL;
@@ -289,8 +289,8 @@ cdiGridTypeInit(grid_t *gridptr, int gridtype, int size)
             if ( gridptr->x.name[0] == 0 ) gridSetName(gridptr->x.name, "lon");
             if ( gridptr->y.name[0] == 0 ) gridSetName(gridptr->y.name, "lat");
           }
-        gridSetName(gridptr->xlongname, "longitude");
-        gridSetName(gridptr->ylongname, "latitude");
+        gridSetName(gridptr->x.longname, "longitude");
+        gridSetName(gridptr->y.longname, "latitude");
 
         /*
         if ( gridtype == GRID_CURVILINEAR )
@@ -735,7 +735,7 @@ void gridDefXlongname(int gridID, const char *xlongname)
   if ( xlongname )
     {
       grid_t *gridptr = gridID2Ptr(gridID);
-      gridSetName(gridptr->xlongname, xlongname);
+      gridSetName(gridptr->x.longname, xlongname);
       gridMark4Update(gridID);
     }
 }
@@ -807,7 +807,7 @@ void gridDefYlongname(int gridID, const char *ylongname)
   if ( ylongname )
     {
       grid_t *gridptr = gridID2Ptr(gridID);
-      gridSetName(gridptr->ylongname, ylongname);
+      gridSetName(gridptr->y.longname, ylongname);
       gridMark4Update(gridID);
     }
 }
@@ -891,7 +891,7 @@ void gridInqXlongname(int gridID, char *xlongname)
 {
   grid_t *gridptr = gridID2Ptr(gridID);
 
-  strcpy(xlongname, gridptr->xlongname);
+  strcpy(xlongname, gridptr->x.longname);
 }
 
 /*
@@ -985,7 +985,7 @@ void gridInqYlongname(int gridID, char *ylongname)
 {
   grid_t *gridptr = gridID2Ptr(gridID);
 
-  strcpy(ylongname, gridptr->ylongname);
+  strcpy(ylongname, gridptr->y.longname);
 }
 
 /*
@@ -2559,8 +2559,8 @@ int gridCompareP ( void * gridptr1, void * gridptr2 )
 
   if (strcmp(g1->x.name, g2->x.name)) return differ;
   if (strcmp(g1->y.name, g2->y.name)) return differ;
-  if (strcmp(g1->xlongname, g2->xlongname)) return differ;
-  if (strcmp(g1->ylongname, g2->ylongname)) return differ;
+  if (strcmp(g1->x.longname, g2->x.longname)) return differ;
+  if (strcmp(g1->y.longname, g2->y.longname)) return differ;
   if (g1->xstdname != g2->xstdname) return differ;
   if (g1->ystdname != g2->ystdname) return differ;
   if (strcmp(g1->xunits, g2->xunits)) return differ;
@@ -2763,16 +2763,16 @@ static void gridComplete(grid_t *grid)
     }
 
   grid->x.name[CDI_MAX_NAME - 1] = 0;
-  grid->xlongname[CDI_MAX_NAME - 1] = 0;
+  grid->x.longname[CDI_MAX_NAME - 1] = 0;
   grid->xunits[CDI_MAX_NAME - 1] = 0;
   grid->y.name[CDI_MAX_NAME - 1] = 0;
-  grid->ylongname[CDI_MAX_NAME - 1] = 0;
+  grid->y.longname[CDI_MAX_NAME - 1] = 0;
   grid->yunits[CDI_MAX_NAME - 1] = 0;
 }
 
 #define GRID_STR_SERIALIZE(gridP) { gridP->xdimname, gridP->ydimname,  \
     gridP->vdimname, gridP->x.name, gridP->y.name,  \
-    gridP->xlongname, gridP->ylongname, \
+    gridP->x.longname, gridP->y.longname, \
     gridP->xunits, gridP->yunits }
 
 int gridGenerate(const grid_t *grid)
@@ -3421,13 +3421,13 @@ static void gridPrintKernel(grid_t * gridptr, int index, int opt, FILE *fp)
       if ( xvals )
         {
           if ( gridptr->x.name[0]     )     fprintf(fp, "xname     = %s\n", gridptr->x.name);
-          if ( gridptr->xlongname[0] )     fprintf(fp, "xlongname = %s\n", gridptr->xlongname);
+          if ( gridptr->x.longname[0] )     fprintf(fp, "xlongname = %s\n", gridptr->x.longname);
           if ( gridptr->xunits[0]    )     fprintf(fp, "xunits    = %s\n", gridptr->xunits);
         }
       if ( yvals )
         {
           if ( gridptr->y.name[0]     )     fprintf(fp, "yname     = %s\n", gridptr->y.name);
-          if ( gridptr->ylongname[0] )     fprintf(fp, "ylongname = %s\n", gridptr->ylongname);
+          if ( gridptr->y.longname[0] )     fprintf(fp, "ylongname = %s\n", gridptr->y.longname);
           if ( gridptr->yunits[0]    )     fprintf(fp, "yunits    = %s\n", gridptr->yunits);
         }
       if ( type == GRID_UNSTRUCTURED && nvertex > 0 ) fprintf(fp, "nvertex   = %d\n", nvertex);
