@@ -90,7 +90,7 @@ int extInqRecord(stream_t *streamptr, int *varID, int *levelID)
   *levelID = -1;
 
   status = extRead(fileID, extp);
-  if ( status != 0 ) return (0);
+  if ( status != 0 ) return 0;
 
   extInqHeader(extp, header);
 
@@ -105,7 +105,7 @@ int extInqRecord(stream_t *streamptr, int *varID, int *levelID)
 
   *levelID = zaxisInqLevelID(zaxisID, (double) ilevel);
 
-  return (1);
+  return 1;
 }
 */
 
@@ -366,7 +366,6 @@ int extScanTimestep2(stream_t *streamptr)
   int varID;
   off_t recpos = 0;
   int nrecs, recID, rindex;
-  int nextstep;
   extcompvar_t compVar, compVar0;
   void *extp = streamptr->record->exsep;
 
@@ -430,7 +429,7 @@ int extScanTimestep2(stream_t *streamptr)
 
       compVar.param = param;
       compVar.level = rlevel;
-      nextstep = FALSE;
+      bool nextstep = false;
       for ( recID = 0; recID < nrecords; recID++ )
 	{
 	  compVar0.param = streamptr->tsteps[tsID].records[recID].param;
@@ -440,7 +439,7 @@ int extScanTimestep2(stream_t *streamptr)
 	    {
 	      if ( streamptr->tsteps[tsID].records[recID].used )
 		{
-		  nextstep = TRUE;
+		  nextstep = true;
 		}
 	      else
 		{
@@ -453,7 +452,7 @@ int extScanTimestep2(stream_t *streamptr)
       if ( recID == nrecords )
 	{
 	  Warning("Code %d level %d not found at timestep %d", rcode, rlevel, tsID+1);
-	  return (CDI_EUFSTRUCT);
+	  return CDI_EUFSTRUCT;
 	}
 
       if ( nextstep ) break;
@@ -472,7 +471,7 @@ int extScanTimestep2(stream_t *streamptr)
 		  tsID, recID,
 		  streamptr->tsteps[tsID].records[recID].param, param,
 		  streamptr->tsteps[tsID].records[recID].ilevel, rlevel);
-	  return (CDI_EUFSTRUCT);
+	  return CDI_EUFSTRUCT;
 	}
 
       streamptr->tsteps[1].records[recID].position = recpos;
