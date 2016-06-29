@@ -630,20 +630,20 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
         grid->xsize = nlon;
         grid->ysize = nlat;
 
-        FAIL_ON_GRIB_ERROR(grib_get_double, gh, "DxInMetres", &grid->lcc_xinc);
-        FAIL_ON_GRIB_ERROR(grib_get_double, gh, "DyInMetres", &grid->lcc_yinc);
-        FAIL_ON_GRIB_ERROR(grib_get_double, gh, "longitudeOfFirstGridPointInDegrees", &grid->lcc_originLon);
-        FAIL_ON_GRIB_ERROR(grib_get_double, gh, "latitudeOfFirstGridPointInDegrees", &grid->lcc_originLat);
-        FAIL_ON_GRIB_ERROR(grib_get_double, gh, "LoVInDegrees", &grid->lcc_lonParY);
-        FAIL_ON_GRIB_ERROR(grib_get_double, gh, "Latin1InDegrees", &grid->lcc_lat1);
-        FAIL_ON_GRIB_ERROR(grib_get_double, gh, "Latin2InDegrees", &grid->lcc_lat2);
+        FAIL_ON_GRIB_ERROR(grib_get_double, gh, "DxInMetres", &grid->lcc.xinc);
+        FAIL_ON_GRIB_ERROR(grib_get_double, gh, "DyInMetres", &grid->lcc.yinc);
+        FAIL_ON_GRIB_ERROR(grib_get_double, gh, "longitudeOfFirstGridPointInDegrees", &grid->lcc.originLon);
+        FAIL_ON_GRIB_ERROR(grib_get_double, gh, "latitudeOfFirstGridPointInDegrees", &grid->lcc.originLat);
+        FAIL_ON_GRIB_ERROR(grib_get_double, gh, "LoVInDegrees", &grid->lcc.lonParY);
+        FAIL_ON_GRIB_ERROR(grib_get_double, gh, "Latin1InDegrees", &grid->lcc.lat1);
+        FAIL_ON_GRIB_ERROR(grib_get_double, gh, "Latin2InDegrees", &grid->lcc.lat2);
 
         if ( editionNumber <= 1 )
           {
             FAIL_ON_GRIB_ERROR(grib_get_long, gh, "projectionCenterFlag", &lpar);
-            grid->lcc_projflag  = (int) lpar;
+            grid->lcc.projflag  = (int) lpar;
             FAIL_ON_GRIB_ERROR(grib_get_long, gh, "scanningMode", &lpar);
-            grid->lcc_scanflag  = (int) lpar;
+            grid->lcc.scanflag  = (int) lpar;
           }
 
         grid->xdef   = 0;

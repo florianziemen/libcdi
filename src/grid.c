@@ -109,16 +109,16 @@ void grid_init(grid_t *gridptr)
   gridptr->yfirst        = 0.0;
   gridptr->ylast         = 0.0;
   gridptr->yinc          = 0.0;
-  gridptr->lcc_originLon = 0.0;
-  gridptr->lcc_originLat = 0.0;
-  gridptr->lcc_lonParY   = 0.0;
-  gridptr->lcc_lat1      = 0.0;
-  gridptr->lcc_lat2      = 0.0;
-  gridptr->lcc_xinc      = 0.0;
-  gridptr->lcc_yinc      = 0.0;
-  gridptr->lcc_projflag  = 0;
-  gridptr->lcc_scanflag  = 0;
-  gridptr->lcc_defined   = FALSE;
+  gridptr->lcc.originLon = 0.0;
+  gridptr->lcc.originLat = 0.0;
+  gridptr->lcc.lonParY   = 0.0;
+  gridptr->lcc.lat1      = 0.0;
+  gridptr->lcc.lat2      = 0.0;
+  gridptr->lcc.xinc      = 0.0;
+  gridptr->lcc.yinc      = 0.0;
+  gridptr->lcc.projflag  = 0;
+  gridptr->lcc.scanflag  = 0;
+  gridptr->lcc.defined   = FALSE;
   gridptr->lcc2.lon_0    = 0.0;
   gridptr->lcc2.lat_0    = 0.0;
   gridptr->lcc2.lat_1    = 0.0;
@@ -2419,9 +2419,9 @@ int gridCompareP ( void * gridptr1, void * gridptr2 )
 
   if ( g1->type          != g2->type         ) return differ;
   if ( g1->prec          != g2->prec         ) return differ;
-  if ( g1->lcc_projflag  != g2->lcc_projflag ) return differ;
-  if ( g1->lcc_scanflag  != g2->lcc_scanflag ) return differ;
-  if ( g1->lcc_defined   != g2->lcc_defined  ) return differ;
+  if ( g1->lcc.projflag  != g2->lcc.projflag ) return differ;
+  if ( g1->lcc.scanflag  != g2->lcc.scanflag ) return differ;
+  if ( g1->lcc.defined   != g2->lcc.defined  ) return differ;
   if ( g1->lcc2.defined  != g2->lcc2.defined ) return differ;
   if ( g1->laea_defined  != g2->laea_defined ) return differ;
   if ( g1->isCyclic      != g2->isCyclic     ) return differ;
@@ -2448,13 +2448,13 @@ int gridCompareP ( void * gridptr1, void * gridptr2 )
   if ( IS_NOT_EQUAL(g1->ylast         , g2->ylast)         ) return differ;
   if ( IS_NOT_EQUAL(g1->xinc	      , g2->xinc)          ) return differ;
   if ( IS_NOT_EQUAL(g1->yinc	      , g2->yinc)          ) return differ;
-  if ( IS_NOT_EQUAL(g1->lcc_originLon , g2->lcc_originLon) ) return differ;
-  if ( IS_NOT_EQUAL(g1->lcc_originLat , g2->lcc_originLat) ) return differ;
-  if ( IS_NOT_EQUAL(g1->lcc_lonParY   , g2->lcc_lonParY)   ) return differ;
-  if ( IS_NOT_EQUAL(g1->lcc_lat1      , g2->lcc_lat1)      ) return differ;
-  if ( IS_NOT_EQUAL(g1->lcc_lat2      , g2->lcc_lat2)      ) return differ;
-  if ( IS_NOT_EQUAL(g1->lcc_xinc      , g2->lcc_xinc)      ) return differ;
-  if ( IS_NOT_EQUAL(g1->lcc_yinc      , g2->lcc_yinc)      ) return differ;
+  if ( IS_NOT_EQUAL(g1->lcc.originLon , g2->lcc.originLon) ) return differ;
+  if ( IS_NOT_EQUAL(g1->lcc.originLat , g2->lcc.originLat) ) return differ;
+  if ( IS_NOT_EQUAL(g1->lcc.lonParY   , g2->lcc.lonParY)   ) return differ;
+  if ( IS_NOT_EQUAL(g1->lcc.lat1      , g2->lcc.lat1)      ) return differ;
+  if ( IS_NOT_EQUAL(g1->lcc.lat2      , g2->lcc.lat2)      ) return differ;
+  if ( IS_NOT_EQUAL(g1->lcc.xinc      , g2->lcc.xinc)      ) return differ;
+  if ( IS_NOT_EQUAL(g1->lcc.yinc      , g2->lcc.yinc)      ) return differ;
   if ( IS_NOT_EQUAL(g1->lcc2.lon_0    , g2->lcc2.lon_0)    ) return differ;
   if ( IS_NOT_EQUAL(g1->lcc2.lat_0    , g2->lcc2.lat_0)    ) return differ;
   if ( IS_NOT_EQUAL(g1->lcc2.lat_1    , g2->lcc2.lat_1)    ) return differ;
@@ -2676,9 +2676,9 @@ static void gridComplete(grid_t *grid)
             gridDefLcc2(gridID, grid->lcc2.a, grid->lcc2.lon_0, grid->lcc2.lat_0, grid->lcc2.lat_1, grid->lcc2.lat_2);
             break;
           case GRID_LCC:
-            gridDefLCC(gridID, grid->lcc_originLon, grid->lcc_originLat, grid->lcc_lonParY,
-                       grid->lcc_lat1, grid->lcc_lat2, grid->lcc_xinc, grid->lcc_yinc,
-                       grid->lcc_projflag, grid->lcc_scanflag);
+            gridDefLCC(gridID, grid->lcc.originLon, grid->lcc.originLat, grid->lcc.lonParY,
+                       grid->lcc.lat1, grid->lcc.lat2, grid->lcc.xinc, grid->lcc.yinc,
+                       grid->lcc.projflag, grid->lcc.scanflag);
             break;
           case GRID_UNSTRUCTURED:
             {
@@ -2827,15 +2827,15 @@ int gridGenerate(const grid_t *grid)
   gridptr->lcc2.lat_0 = grid->lcc2.lat_0;
   gridptr->lcc2.lat_1 = grid->lcc2.lat_1;
   gridptr->lcc2.lat_2 = grid->lcc2.lat_2;
-  gridptr->lcc_originLon = grid->lcc_originLon;
-  gridptr->lcc_originLat = grid->lcc_originLat;
-  gridptr->lcc_lonParY = grid->lcc_lonParY;
-  gridptr->lcc_lat1 = grid->lcc_lat1;
-  gridptr->lcc_lat2 = grid->lcc_lat2;
-  gridptr->lcc_xinc = grid->lcc_xinc;
-  gridptr->lcc_yinc = grid->lcc_yinc;
-  gridptr->lcc_projflag = grid->lcc_projflag;
-  gridptr->lcc_scanflag = grid->lcc_scanflag;
+  gridptr->lcc.originLon = grid->lcc.originLon;
+  gridptr->lcc.originLat = grid->lcc.originLat;
+  gridptr->lcc.lonParY = grid->lcc.lonParY;
+  gridptr->lcc.lat1 = grid->lcc.lat1;
+  gridptr->lcc.lat2 = grid->lcc.lat2;
+  gridptr->lcc.xinc = grid->lcc.xinc;
+  gridptr->lcc.yinc = grid->lcc.yinc;
+  gridptr->lcc.projflag = grid->lcc.projflag;
+  gridptr->lcc.scanflag = grid->lcc.scanflag;
   gridptr->number = grid->number;
   gridptr->position = grid->position;
   memcpy(gridptr->uuid, grid->uuid, CDI_UUID_SIZE);
@@ -3774,16 +3774,16 @@ void gridDefLCC(int gridID, double originLon, double originLat, double lonParY,
 	    gridNamePtr(gridptr->type));
   else
     {
-      gridptr->lcc_originLon = originLon;
-      gridptr->lcc_originLat = originLat;
-      gridptr->lcc_lonParY   = lonParY;
-      gridptr->lcc_lat1      = lat1;
-      gridptr->lcc_lat2      = lat2;
-      gridptr->lcc_xinc      = xinc;
-      gridptr->lcc_yinc      = yinc;
-      gridptr->lcc_projflag  = projflag;
-      gridptr->lcc_scanflag  = scanflag;
-      gridptr->lcc_defined   = TRUE;
+      gridptr->lcc.originLon = originLon;
+      gridptr->lcc.originLat = originLat;
+      gridptr->lcc.lonParY   = lonParY;
+      gridptr->lcc.lat1      = lat1;
+      gridptr->lcc.lat2      = lat2;
+      gridptr->lcc.xinc      = xinc;
+      gridptr->lcc.yinc      = yinc;
+      gridptr->lcc.projflag  = projflag;
+      gridptr->lcc.scanflag  = scanflag;
+      gridptr->lcc.defined   = TRUE;
       gridMark4Update(gridID);
     }
 }
@@ -3821,17 +3821,17 @@ void gridInqLCC(int gridID, double *originLon, double *originLat, double *lonPar
 	    gridNamePtr(gridptr->type));
   else
     {
-      if ( gridptr->lcc_defined )
+      if ( gridptr->lcc.defined )
         {
-          *originLon = gridptr->lcc_originLon;
-          *originLat = gridptr->lcc_originLat;
-          *lonParY   = gridptr->lcc_lonParY;
-          *lat1      = gridptr->lcc_lat1;
-          *lat2      = gridptr->lcc_lat2;
-          *xinc      = gridptr->lcc_xinc;
-          *yinc      = gridptr->lcc_yinc;
-          *projflag  = gridptr->lcc_projflag;
-          *scanflag  = gridptr->lcc_scanflag;
+          *originLon = gridptr->lcc.originLon;
+          *originLat = gridptr->lcc.originLat;
+          *lonParY   = gridptr->lcc.lonParY;
+          *lat1      = gridptr->lcc.lat1;
+          *lat2      = gridptr->lcc.lat2;
+          *xinc      = gridptr->lcc.xinc;
+          *yinc      = gridptr->lcc.yinc;
+          *projflag  = gridptr->lcc.projflag;
+          *scanflag  = gridptr->lcc.scanflag;
         }
       else
 	Warning("Lambert Conformal grid undefined (gridID = %d)", gridID);
@@ -4345,9 +4345,9 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
 
     gridP->type          =   intBuffer[1];
     gridP->prec          =   intBuffer[2];
-    gridP->lcc_projflag  =   intBuffer[3];
-    gridP->lcc_scanflag  =   intBuffer[4];
-    gridP->lcc_defined   =   (short)intBuffer[5];
+    gridP->lcc.projflag  =   intBuffer[3];
+    gridP->lcc.scanflag  =   intBuffer[4];
+    gridP->lcc.defined   =   (short)intBuffer[5];
     gridP->lcc2.defined  =   (short)intBuffer[6];
     gridP->laea_defined  =   intBuffer[7];
     gridP->isCyclic      =   (short)intBuffer[8];
@@ -4397,13 +4397,13 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
     gridP->ylast = doubleBuffer[3];
     gridP->xinc = doubleBuffer[4];
     gridP->yinc = doubleBuffer[5];
-    gridP->lcc_originLon = doubleBuffer[6];
-    gridP->lcc_originLat = doubleBuffer[7];
-    gridP->lcc_lonParY = doubleBuffer[8];
-    gridP->lcc_lat1 = doubleBuffer[9];
-    gridP->lcc_lat2 = doubleBuffer[10];
-    gridP->lcc_xinc = doubleBuffer[11];
-    gridP->lcc_yinc = doubleBuffer[12];
+    gridP->lcc.originLon = doubleBuffer[6];
+    gridP->lcc.originLat = doubleBuffer[7];
+    gridP->lcc.lonParY = doubleBuffer[8];
+    gridP->lcc.lat1 = doubleBuffer[9];
+    gridP->lcc.lat2 = doubleBuffer[10];
+    gridP->lcc.xinc = doubleBuffer[11];
+    gridP->lcc.yinc = doubleBuffer[12];
     gridP->lcc2.lon_0 = doubleBuffer[13];
     gridP->lcc2.lat_0 = doubleBuffer[14];
     gridP->lcc2.lat_1 = doubleBuffer[15];
@@ -4548,9 +4548,9 @@ gridPack(void * voidP, void * packBuffer, int packBufferSize,
     intBuffer[0]  = gridP->self;
     intBuffer[1]  = gridP->type;
     intBuffer[2]  = gridP->prec;
-    intBuffer[3]  = gridP->lcc_projflag;
-    intBuffer[4]  = gridP->lcc_scanflag;
-    intBuffer[5]  = gridP->lcc_defined;
+    intBuffer[3]  = gridP->lcc.projflag;
+    intBuffer[4]  = gridP->lcc.scanflag;
+    intBuffer[5]  = gridP->lcc.defined;
     intBuffer[6]  = gridP->lcc2.defined;
     intBuffer[7]  = gridP->laea_defined;
     intBuffer[8]  = gridP->isCyclic;
@@ -4603,13 +4603,13 @@ gridPack(void * voidP, void * packBuffer, int packBufferSize,
     doubleBuffer[3]  = gridP->ylast;
     doubleBuffer[4]  = gridP->xinc;
     doubleBuffer[5]  = gridP->yinc;
-    doubleBuffer[6]  = gridP->lcc_originLon;
-    doubleBuffer[7]  = gridP->lcc_originLat;
-    doubleBuffer[8]  = gridP->lcc_lonParY;
-    doubleBuffer[9]  = gridP->lcc_lat1;
-    doubleBuffer[10] = gridP->lcc_lat2;
-    doubleBuffer[11] = gridP->lcc_xinc;
-    doubleBuffer[12] = gridP->lcc_yinc;
+    doubleBuffer[6]  = gridP->lcc.originLon;
+    doubleBuffer[7]  = gridP->lcc.originLat;
+    doubleBuffer[8]  = gridP->lcc.lonParY;
+    doubleBuffer[9]  = gridP->lcc.lat1;
+    doubleBuffer[10] = gridP->lcc.lat2;
+    doubleBuffer[11] = gridP->lcc.xinc;
+    doubleBuffer[12] = gridP->lcc.yinc;
     doubleBuffer[13] = gridP->lcc2.lon_0;
     doubleBuffer[14] = gridP->lcc2.lat_0;
     doubleBuffer[15] = gridP->lcc2.lat_1;

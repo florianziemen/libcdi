@@ -286,15 +286,15 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, double *fsec2, int *isec4, 
 	grid->xsize = ISEC2_NumLon;
 	grid->ysize = ISEC2_NumLat;
 
-	grid->lcc_xinc      = ISEC2_Lambert_dx;
-	grid->lcc_yinc      = ISEC2_Lambert_dy;
-	grid->lcc_originLon = ISEC2_FirstLon * 0.001;
-	grid->lcc_originLat = ISEC2_FirstLat * 0.001;
-	grid->lcc_lonParY   = ISEC2_Lambert_Lov * 0.001;
-	grid->lcc_lat1      = ISEC2_Lambert_LatS1 * 0.001;
-	grid->lcc_lat2      = ISEC2_Lambert_LatS2 * 0.001;
-	grid->lcc_projflag  = ISEC2_Lambert_ProjFlag;
-	grid->lcc_scanflag  = ISEC2_ScanFlag;
+	grid->lcc.xinc      = ISEC2_Lambert_dx;
+	grid->lcc.yinc      = ISEC2_Lambert_dy;
+	grid->lcc.originLon = ISEC2_FirstLon * 0.001;
+	grid->lcc.originLat = ISEC2_FirstLat * 0.001;
+	grid->lcc.lonParY   = ISEC2_Lambert_Lov * 0.001;
+	grid->lcc.lat1      = ISEC2_Lambert_LatS1 * 0.001;
+	grid->lcc.lat2      = ISEC2_Lambert_LatS2 * 0.001;
+	grid->lcc.projflag  = ISEC2_Lambert_ProjFlag;
+	grid->lcc.scanflag  = ISEC2_ScanFlag;
 
 	grid->xdef   = 0;
 	grid->ydef   = 0;
