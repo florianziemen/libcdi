@@ -43,6 +43,10 @@ struct gridVirtTable
   const double *(*inqYBoundsPtr)(grid_t *gridptr);
 };
 
+struct gridaxis_t {
+  char    name[CDI_MAX_NAME];
+};
+
 struct grid_t {
   int     self;
   int     type;                   /* grid type                      */
@@ -102,13 +106,15 @@ struct grid_t {
   char    xdimname[CDI_MAX_NAME];
   char    ydimname[CDI_MAX_NAME];
   char    vdimname[CDI_MAX_NAME];
-  char    xname[CDI_MAX_NAME];
-  char    yname[CDI_MAX_NAME];
+  //  char    xname[CDI_MAX_NAME];
+  //  char    yname[CDI_MAX_NAME];
   char    xlongname[CDI_MAX_NAME];
   char    ylongname[CDI_MAX_NAME];
   char    xunits[CDI_MAX_NAME];
   char    yunits[CDI_MAX_NAME];
   char   *name;
+  struct gridaxis_t x;
+  struct gridaxis_t y;
   const struct gridVirtTable *vtable;
   void *extraData;
 };

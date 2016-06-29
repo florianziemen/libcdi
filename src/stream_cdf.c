@@ -5166,7 +5166,7 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
                   cdf_load_vals(size, ndims, xvarid, &ncvars[xvarid], &grid->xvals, &lazyGrid->xValsGet,
                                 ntdims, start, count);
 
-		  strcpy(grid->xname, ncvars[xvarid].name);
+		  strcpy(grid->x.name, ncvars[xvarid].name);
 		  strcpy(grid->xlongname, ncvars[xvarid].longname);
 		  strcpy(grid->xunits, ncvars[xvarid].units);
 		}
@@ -5214,7 +5214,7 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
                   cdf_load_vals(size, ndims, yvarid, &ncvars[yvarid], &grid->yvals, &lazyGrid->yValsGet,
                                 ntdims, start, count);
 
-                  strcpy(grid->yname, ncvars[yvarid].name);
+                  strcpy(grid->y.name, ncvars[yvarid].name);
                   strcpy(grid->ylongname, ncvars[yvarid].longname);
                   strcpy(grid->yunits, ncvars[yvarid].units);
 		}
