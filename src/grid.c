@@ -96,8 +96,8 @@ void grid_init(grid_t *gridptr)
   gridptr->proj          = CDI_UNDEFID;
   gridptr->mask          = NULL;
   gridptr->mask_gme      = NULL;
-  gridptr->xvals         = NULL;
-  gridptr->yvals         = NULL;
+  gridptr->x.vals         = NULL;
+  gridptr->y.vals         = NULL;
   gridptr->area          = NULL;
   gridptr->xbounds       = NULL;
   gridptr->ybounds       = NULL;
@@ -174,7 +174,7 @@ static void
 grid_free_components(grid_t *gridptr)
 {
   void *p2free[] = { gridptr->mask, gridptr->mask_gme,
-                   gridptr->xvals, gridptr->yvals,
+                   gridptr->x.vals, gridptr->y.vals,
                    gridptr->xbounds, gridptr->ybounds,
                    gridptr->rowlon, gridptr->area,
                    gridptr->reference, gridptr->name };
@@ -1508,7 +1508,7 @@ gridInqXValsSerial(grid_t *gridptr, double *xvals)
   if ( CDI_Debug && size == 0 )
     Warning("size undefined for gridID = %d", gridptr->self);
 
-  if ( gridptr->xvals )
+  if ( gridptr->x.vals )
     {
       if ( size && xvals )
         {
@@ -1565,11 +1565,11 @@ gridDefXValsSerial(grid_t *gridptr, const double *xvals)
   if ( size == 0 )
     Error("Size undefined for gridID = %d", gridptr->self);
 
-  if (gridptr->xvals && CDI_Debug)
+  if (gridptr->x.vals && CDI_Debug)
     Warning("values already defined!");
-  gridptr->xvals = (double *)Realloc(gridptr->xvals,
+  gridptr->x.vals = (double *)Realloc(gridptr->x.vals,
                                       (size_t)size * sizeof(double));
-  memcpy(gridptr->xvals, xvals, (size_t)size * sizeof (double));
+  memcpy(gridptr->x.vals, xvals, (size_t)size * sizeof (double));
 }
 
 /*
@@ -1604,7 +1604,7 @@ gridInqYValsSerial(grid_t *gridptr, double *yvals)
   if ( CDI_Debug && size == 0 )
     Warning("size undefined for gridID = %d!", gridptr->self);
 
-  if ( gridptr->yvals )
+  if ( gridptr->y.vals )
     {
       if ( size && yvals )
         {
@@ -1655,11 +1655,11 @@ gridDefYValsSerial(grid_t *gridptr, const double *yvals)
   if ( size == 0 )
     Error("Size undefined for gridID = %d!", gridptr->self);
 
-  if (gridptr->yvals && CDI_Debug)
+  if (gridptr->y.vals && CDI_Debug)
     Warning("Values already defined!");
 
-  gridptr->yvals = (double *)Realloc(gridptr->yvals, (size_t)size * sizeof (double));
-  memcpy(gridptr->yvals, yvals, (size_t)size * sizeof (double));
+  gridptr->y.vals = (double *)Realloc(gridptr->y.vals, (size_t)size * sizeof (double));
+  memcpy(gridptr->y.vals, yvals, (size_t)size * sizeof (double));
 }
 
 
@@ -1687,7 +1687,7 @@ void gridDefYvals(int gridID, const double *yvals)
 static double
 gridInqXValSerial(grid_t *gridptr, int index)
 {
-  double xval = gridptr->xvals ? gridptr->xvals[index] : 0;
+  double xval = gridptr->x.vals ? gridptr->x.vals[index] : 0;
   return xval;
 }
 
@@ -1701,7 +1701,7 @@ double gridInqXval(int gridID, int index)
 static double
 gridInqYValSerial(grid_t *gridptr, int index)
 {
-  double yval = gridptr->yvals ? gridptr->yvals[index] : 0;
+  double yval = gridptr->y.vals ? gridptr->y.vals[index] : 0;
   return yval;
 }
 
@@ -2235,8 +2235,8 @@ bool compareXYvals2(grid_t *gridRef, grid_t *gridTest)
 {
   int gridsize = gridTest->size;
   bool differ
-    = ((gridTest->xvals == NULL) ^ (gridRef->xvals == NULL))
-    || ((gridTest->yvals == NULL) ^ (gridRef->yvals == NULL));
+    = ((gridTest->x.vals == NULL) ^ (gridRef->x.vals == NULL))
+    || ((gridTest->y.vals == NULL) ^ (gridRef->y.vals == NULL));
 
   typedef double (*inqVal)(grid_t *grid, int index);
   inqVal inqXValRef = gridRef->vtable->inqXVal,
@@ -2244,11 +2244,11 @@ bool compareXYvals2(grid_t *gridRef, grid_t *gridTest)
     inqXValTest = gridTest->vtable->inqXVal,
     inqYValTest = gridTest->vtable->inqYVal;
 
-  if ( !differ && gridTest->xvals )
+  if ( !differ && gridTest->x.vals )
     differ = fabs(inqXValTest(gridTest, 0) - inqXValRef(gridRef, 0)) > 1.e-9
       || fabs(inqXValTest(gridTest, gridsize-1) - inqXValRef(gridRef, gridsize-1)) > 1.e-9;
 
-  if ( !differ && gridTest->yvals )
+  if ( !differ && gridTest->y.vals )
     differ = fabs(inqYValTest(gridTest, 0) - inqYValRef(gridRef, 0)) > 1.e-9
       || fabs(inqYValTest(gridTest, gridsize-1) - inqYValRef(gridRef, gridsize-1)) > 1.e-9;
 
@@ -2308,7 +2308,7 @@ bool gridCompare(int gridID, const grid_t *grid)
 			    }
 			}
 		    }
-		  else if ( grid->xvals && grid->yvals )
+		  else if ( grid->x.vals && grid->y.vals )
                     differ = gridRef->vtable->compareXYFull(gridRef, (grid_t *)grid);
 		}
 	      else
@@ -2319,7 +2319,7 @@ bool gridCompare(int gridID, const grid_t *grid)
 	      if ( grid->x.size == gridRef->x.size && grid->y.size == gridRef->y.size )
 		{
 		  if ( grid->xdef == 1 && grid->ydef == 1
-                       && grid->xvals && grid->yvals )
+                       && grid->x.vals && grid->y.vals )
                     differ = gridRef->vtable->compareXYFull(gridRef, (grid_t *)grid);
 		}
 	      else if ( (grid->y.size == 0 || grid->y.size == 1) &&
@@ -2344,7 +2344,7 @@ bool gridCompare(int gridID, const grid_t *grid)
 			    differ = true;
 			  }
 		    }
-		  else if ( grid->xvals && grid->yvals )
+		  else if ( grid->x.vals && grid->y.vals )
                     differ = gridRef->vtable->compareXYFull(gridRef, (grid_t *)grid);
 		}
 	      else
@@ -2356,12 +2356,12 @@ bool gridCompare(int gridID, const grid_t *grid)
 	      printf("gridID      %d\n", gridID);
 	      printf("grid.xsize  %d\n", grid->x.size);
 	      printf("grid.ysize  %d\n", grid->y.size);
-	      printf("grid.xfirst %f\n", grid->xvals[0]);
-	      printf("grid.yfirst %f\n", grid->yvals[0]);
+	      printf("grid.xfirst %f\n", grid->x.vals[0]);
+	      printf("grid.yfirst %f\n", grid->y.vals[0]);
 	      printf("grid xfirst %f\n", gridInqXval(gridID, 0));
 	      printf("grid yfirst %f\n", gridInqYval(gridID, 0));
-	      printf("grid.xlast  %f\n", grid->xvals[grid->size-1]);
-	      printf("grid.ylast  %f\n", grid->yvals[grid->size-1]);
+	      printf("grid.xlast  %f\n", grid->x.vals[grid->size-1]);
+	      printf("grid.ylast  %f\n", grid->y.vals[grid->size-1]);
 	      printf("grid xlast  %f\n", gridInqXval(gridID, grid->size-1));
 	      printf("grid ylast  %f\n", gridInqYval(gridID, grid->size-1));
 	      printf("grid.nv     %d\n", grid->nvertex);
@@ -2377,8 +2377,8 @@ bool gridCompare(int gridID, const grid_t *grid)
               differ = differ || ( gridRef->uuid[0] && grid->uuid[0] && memcmp(gridRef->uuid, grid->uuid, CDI_UUID_SIZE) != 0 );
 
               if ( !differ &&
-                   ((grid->xvals == NULL) ^ (gridRef->xvals == NULL)) &&
-                   ((grid->yvals == NULL) ^ (gridRef->yvals == NULL)) )
+                   ((grid->x.vals == NULL) ^ (gridRef->x.vals == NULL)) &&
+                   ((grid->y.vals == NULL) ^ (gridRef->y.vals == NULL)) )
                 {
                   int nvertexA, nvertexB, numberA, numberB;
                   differ = ( (nvertexA = grid->nvertex)
@@ -2632,7 +2632,7 @@ static void gridComplete(grid_t *grid)
 	    double *xvals
               = (double *) Malloc((size_t)grid->x.size * sizeof (double));
 	    gridGenXvals(grid->x.size, grid->xfirst, grid->xlast, grid->xinc, xvals);
-	    grid->xvals = xvals;
+	    grid->x.vals = xvals;
 	    /*
 	    gridDefXinc(gridID, grid->xinc);
 	    */
@@ -2645,7 +2645,7 @@ static void gridComplete(grid_t *grid)
 	    double *yvals
               = (double *) Malloc((size_t)grid->y.size * sizeof (double));
 	    gridGenYvals(gridtype, grid->y.size, grid->yfirst, grid->ylast, grid->yinc, yvals);
-	    grid->yvals = yvals;
+	    grid->y.vals = yvals;
 	    /*
 	    gridDefYinc(gridID, grid->yinc);
 	    */
@@ -2710,7 +2710,7 @@ static void gridComplete(grid_t *grid)
 	    double *yvals
               = (double *) Malloc((size_t)grid->y.size * sizeof (double));
 	    gridGenYvals(gridtype, grid->y.size, grid->yfirst, grid->ylast, grid->yinc, yvals);
-            grid->yvals = yvals;
+            grid->y.vals = yvals;
 	    /*
 	    gridDefYinc(gridID, grid->yinc);
 	    */
@@ -2743,8 +2743,8 @@ static void gridComplete(grid_t *grid)
           {
             gridDefXsize(gridID, grid->x.size);
             gridDefYsize(gridID, grid->y.size);
-            if ( grid->xvals ) gridDefXvals(gridID, grid->xvals);
-            if ( grid->yvals ) gridDefYvals(gridID, grid->yvals);
+            if ( grid->x.vals ) gridDefXvals(gridID, grid->x.vals);
+            if ( grid->y.vals ) gridDefYvals(gridID, grid->y.vals);
           }
         break;
       }
@@ -2796,7 +2796,7 @@ int gridGenerate(const grid_t *grid)
     valdef_group1 |= (gridtype == valdef_group1_tab[i]);
   if ( valdef_group1 && grid->xdef == 1 )
     {
-      gridDefXvals(gridID, grid->xvals);
+      gridDefXvals(gridID, grid->x.vals);
       if ( grid->xbounds )
         gridDefXbounds(gridID, grid->xbounds);
     }
@@ -2806,7 +2806,7 @@ int gridGenerate(const grid_t *grid)
   gridptr->ydef = grid->ydef;
   if ( (valdef_group1 || gridtype == GRID_GAUSSIAN_REDUCED) && grid->ydef == 1)
     {
-      gridDefYvals(gridID, grid->yvals);
+      gridDefYvals(gridID, grid->y.vals);
       if ( grid->ybounds )
         gridDefYbounds(gridID, grid->ybounds);
     }
@@ -2873,20 +2873,20 @@ grid_copy_base_array_fields(grid_t *gridptrOrig, grid_t *gridptrDup)
       memcpy(gridptrDup->rowlon, gridptrOrig->rowlon, nrowlon * sizeof(int));
     }
 
-  if ( gridptrOrig->xvals != NULL )
+  if ( gridptrOrig->x.vals != NULL )
     {
       size_t size  = irregular ? gridsize : (size_t)gridptrOrig->x.size;
 
-      gridptrDup->xvals = (double *)Malloc(size * sizeof (double));
-      memcpy(gridptrDup->xvals, gridptrOrig->xvals, size * sizeof (double));
+      gridptrDup->x.vals = (double *)Malloc(size * sizeof (double));
+      memcpy(gridptrDup->x.vals, gridptrOrig->x.vals, size * sizeof (double));
     }
 
-  if ( gridptrOrig->yvals != NULL )
+  if ( gridptrOrig->y.vals != NULL )
     {
       size_t size  = irregular ? gridsize : (size_t)gridptrOrig->y.size;
 
-      gridptrDup->yvals = (double *)Malloc(size * sizeof (double));
-      memcpy(gridptrDup->yvals, gridptrOrig->yvals, size * sizeof (double));
+      gridptrDup->y.vals = (double *)Malloc(size * sizeof (double));
+      memcpy(gridptrDup->y.vals, gridptrOrig->y.vals, size * sizeof (double));
     }
 
   if ( gridptrOrig->xbounds != NULL )
@@ -3015,7 +3015,7 @@ void gridCompress(int gridID)
 	  gridptr->x.size = (int)gridsize;
 	  gridptr->y.size = (int)gridsize;
 
-          double **resizeP[] = { &gridptr->xvals, &gridptr->yvals,
+          double **resizeP[] = { &gridptr->x.vals, &gridptr->y.vals,
                                  &gridptr->area,
                                  &gridptr->xbounds, &gridptr->ybounds };
           size_t newSize[] = { gridsize, gridsize, gridsize, nv*gridsize,
@@ -3720,7 +3720,7 @@ void gridPrintP ( void * voidptr, FILE * fp )
 
 static const double *gridInqXValsPtrSerial(grid_t *gridptr)
 {
-  return gridptr->xvals;
+  return gridptr->x.vals;
 }
 
 const double *gridInqXvalsPtr(int gridID)
@@ -3732,7 +3732,7 @@ const double *gridInqXvalsPtr(int gridID)
 
 static const double *gridInqYValsPtrSerial(grid_t *gridptr)
 {
-  return gridptr->yvals;
+  return gridptr->y.vals;
 }
 
 const double *gridInqYvalsPtr(int gridID)
@@ -4423,24 +4423,24 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
     {
       size = irregular ? gridP->size : gridP->x.size;
 
-      gridP->xvals = (double *) Malloc((size_t)size * sizeof (double));
+      gridP->x.vals = (double *) Malloc((size_t)size * sizeof (double));
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                      gridP->xvals, size, DATATYPE_FLT64, context);
+                      gridP->x.vals, size, DATATYPE_FLT64, context);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
                       &d, 1, DATATYPE_UINT32, context);
-      xassert(cdiCheckSum(DATATYPE_FLT, size, gridP->xvals) == d );
+      xassert(cdiCheckSum(DATATYPE_FLT, size, gridP->x.vals) == d );
     }
 
   if (memberMask & gridHasYValsFlag)
     {
       size = irregular ? gridP->size : gridP->y.size;
 
-      gridP->yvals = (double *) Malloc((size_t)size * sizeof (double));
+      gridP->y.vals = (double *) Malloc((size_t)size * sizeof (double));
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                      gridP->yvals, size, DATATYPE_FLT64, context);
+                      gridP->y.vals, size, DATATYPE_FLT64, context);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
                       &d, 1, DATATYPE_UINT32, context);
-      xassert(cdiCheckSum(DATATYPE_FLT, size, gridP->yvals) == d);
+      xassert(cdiCheckSum(DATATYPE_FLT, size, gridP->y.vals) == d);
     }
 
   if (memberMask & gridHasAreaFlag)

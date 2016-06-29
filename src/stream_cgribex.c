@@ -344,8 +344,6 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, double *fsec2, int *isec4, 
       grid->angle     = - FSEC2_RotAngle;
     }
 
-  grid->xvals = NULL;
-  grid->yvals = NULL;
   grid->type  = gridtype;
 }
 

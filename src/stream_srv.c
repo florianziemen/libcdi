@@ -214,8 +214,6 @@ void srv_add_record(stream_t *streamptr, int param, int level, int xsize, int ys
   cdiGridTypeInit(grid, GRID_GENERIC, xsize*ysize);
   grid->x.size = xsize;
   grid->y.size = ysize;
-  grid->xvals = NULL;
-  grid->yvals = NULL;
   struct addIffNewRes gridAdded = cdiVlistAddGridIfNew(vlistID, grid, 0);
   int gridID = gridAdded.Id;
   if (!gridAdded.isNew) Free(grid);

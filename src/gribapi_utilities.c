@@ -763,8 +763,6 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
       if ( fabs(grid->angle) > 0 ) grid->angle = -grid->angle;
     }
 
-  grid->xvals = NULL;
-  grid->yvals = NULL;
   grid->type  = gridtype;
 }
 #endif

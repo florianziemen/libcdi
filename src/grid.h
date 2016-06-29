@@ -50,6 +50,7 @@ struct gridaxis_t {
   char    dimname[CDI_MAX_NAME];
   const char *stdname;
   int     size;                  // number of values
+  double *vals;
 };
 
 // Lambert Conformal Conic
@@ -96,8 +97,6 @@ struct grid_t {
   int     proj;                   /* grid projection                */
   mask_t *mask;
   mask_t *mask_gme;
-  double *xvals;
-  double *yvals;
   double *area;
   double *xbounds;
   double *ybounds;

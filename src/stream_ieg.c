@@ -729,8 +729,6 @@ void iegAddRecord(stream_t *streamptr, int param, int *pdb, int *gdb, double *vc
   grid->yinc  = IEG_G_LatIncr(gdb) * resfac;
   grid->ydef  = 2;
   */
-  grid->xvals = NULL;
-  grid->yvals = NULL;
 
   grid->isRotated = FALSE;
   if ( IEG_G_GridType(gdb) == 10 )

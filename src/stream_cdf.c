@@ -4400,10 +4400,10 @@ static void cdfLazyGridDestroy(struct cdfLazyGrid *lazyGrid)
   lazyGrid->base.extraData = NULL;
   if (lazyGrid->base.area == cdfPendingLoad)
     lazyGrid->base.area = NULL;
-  if (lazyGrid->base.xvals == cdfPendingLoad)
-    lazyGrid->base.xvals = NULL;
-  if (lazyGrid->base.yvals == cdfPendingLoad)
-    lazyGrid->base.yvals = NULL;
+  if (lazyGrid->base.x.vals == cdfPendingLoad)
+    lazyGrid->base.x.vals = NULL;
+  if (lazyGrid->base.y.vals == cdfPendingLoad)
+    lazyGrid->base.y.vals = NULL;
   if (lazyGrid->base.xbounds == cdfPendingLoad)
     lazyGrid->base.xbounds = NULL;
   if (lazyGrid->base.ybounds == cdfPendingLoad)
@@ -4486,8 +4486,8 @@ cdfLazyGridInqXValsPtr(grid_t *grid)
 {
   struct cdfLazyGrid *lazyGrid = (struct cdfLazyGrid *)grid;
   lock_lazy_load(lazyGrid);
-  if (grid->xvals == cdfPendingLoad)
-    cdfLazyLoadXYVals(&lazyGrid->xValsGet, &grid->xvals);
+  if (grid->x.vals == cdfPendingLoad)
+    cdfLazyLoadXYVals(&lazyGrid->xValsGet, &grid->x.vals);
   unlock_lazy_load(lazyGrid);
   return lazyGrid->baseVtable->inqXValsPtr(grid);
 }
@@ -4497,8 +4497,8 @@ cdfLazyGridInqYValsPtr(grid_t *grid)
 {
   struct cdfLazyGrid *lazyGrid = (struct cdfLazyGrid *)grid;
   lock_lazy_load(lazyGrid);
-  if (grid->yvals == cdfPendingLoad)
-    cdfLazyLoadXYVals(&lazyGrid->yValsGet, &grid->yvals);
+  if (grid->y.vals == cdfPendingLoad)
+    cdfLazyLoadXYVals(&lazyGrid->yValsGet, &grid->y.vals);
   unlock_lazy_load(lazyGrid);
   return lazyGrid->baseVtable->inqYValsPtr(grid);
 }
@@ -4549,8 +4549,8 @@ cdfLazyGridDefXVals(grid_t *grid, const double *vals)
 {
   struct cdfLazyGrid *cdfGrid = (struct cdfLazyGrid *)grid;
   lock_lazy_load(cdfGrid);
-  if (grid->xvals == cdfPendingLoad)
-    grid->xvals = NULL;
+  if (grid->x.vals == cdfPendingLoad)
+    grid->x.vals = NULL;
   cdfGrid->xValsGet.datasetNCId = -1;
   cdfGrid->xValsGet.varNCId = -1;
   cdfGrid->baseVtable->defXVals(grid, vals);
@@ -4562,8 +4562,8 @@ cdfLazyGridDefYVals(grid_t *grid, const double *vals)
 {
   struct cdfLazyGrid *cdfGrid = (struct cdfLazyGrid *)grid;
   lock_lazy_load(cdfGrid);
-  if (grid->yvals == cdfPendingLoad)
-    grid->yvals = NULL;
+  if (grid->y.vals == cdfPendingLoad)
+    grid->y.vals = NULL;
   cdfGrid->yValsGet.datasetNCId = -1;
   cdfGrid->yValsGet.varNCId = -1;
   cdfGrid->baseVtable->defYVals(grid, vals);
@@ -4576,7 +4576,7 @@ cdfLazyGridInqXVal(grid_t *grid, int index)
   struct cdfLazyGrid *lazyGrid = (struct cdfLazyGrid *)grid;
   lock_lazy_load(lazyGrid);
   double rv = cdfLazyGridInqXYVal(grid, (size_t)index, &lazyGrid->xValsGet,
-                                  grid->xvals, grid->vtable->inqXValsPtr);
+                                  grid->x.vals, grid->vtable->inqXValsPtr);
   unlock_lazy_load(lazyGrid);
   return rv;
 }
@@ -4587,7 +4587,7 @@ cdfLazyGridInqYVal(grid_t *grid, int index)
   struct cdfLazyGrid *lazyGrid = (struct cdfLazyGrid *)grid;
   lock_lazy_load(lazyGrid);
   double rv = cdfLazyGridInqXYVal(grid, (size_t)index, &lazyGrid->yValsGet,
-                                  grid->yvals, grid->vtable->inqYValsPtr);
+                                  grid->y.vals, grid->vtable->inqYValsPtr);
   unlock_lazy_load(lazyGrid);
   return rv;
 }
@@ -4723,20 +4723,20 @@ cdfLazyGridCopyArrayFields(grid_t *gridptrOrig, grid_t *gridptrDup)
       memcpy(gridptrDup->rowlon, gridptrOrig->rowlon, nrowlon * sizeof(int));
     }
 
-  if ( gridptrOrig->xvals != NULL && gridptrOrig->xvals != cdfPendingLoad )
+  if ( gridptrOrig->x.vals != NULL && gridptrOrig->x.vals != cdfPendingLoad )
     {
       size_t size  = irregular ? gridsize : (size_t)gridptrOrig->x.size;
 
-      gridptrDup->xvals = (double *)Malloc(size * sizeof (double));
-      memcpy(gridptrDup->xvals, gridptrOrig->xvals, size * sizeof (double));
+      gridptrDup->x.vals = (double *)Malloc(size * sizeof (double));
+      memcpy(gridptrDup->x.vals, gridptrOrig->x.vals, size * sizeof (double));
     }
 
-  if ( gridptrOrig->yvals != NULL && gridptrOrig->yvals != cdfPendingLoad )
+  if ( gridptrOrig->y.vals != NULL && gridptrOrig->y.vals != cdfPendingLoad )
     {
       size_t size  = irregular ? gridsize : (size_t)gridptrOrig->y.size;
 
-      gridptrDup->yvals = (double *)Malloc(size * sizeof (double));
-      memcpy(gridptrDup->yvals, gridptrOrig->yvals, size * sizeof (double));
+      gridptrDup->y.vals = (double *)Malloc(size * sizeof (double));
+      memcpy(gridptrDup->y.vals, gridptrOrig->y.vals, size * sizeof (double));
     }
 
   if ( gridptrOrig->xbounds != NULL && gridptrOrig->xbounds != cdfPendingLoad )
@@ -5163,7 +5163,7 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 
 		  if ( ncvars[xvarid].xtype == NC_FLOAT ) grid->prec = DATATYPE_FLT32;
 
-                  cdf_load_vals(size, ndims, xvarid, &ncvars[xvarid], &grid->xvals, &lazyGrid->xValsGet,
+                  cdf_load_vals(size, ndims, xvarid, &ncvars[xvarid], &grid->x.vals, &lazyGrid->xValsGet,
                                 ntdims, start, count);
 
 		  strcpy(grid->x.name, ncvars[xvarid].name);
@@ -5211,7 +5211,7 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 
 		  if ( ncvars[yvarid].xtype == NC_FLOAT ) grid->prec = DATATYPE_FLT32;
 
-                  cdf_load_vals(size, ndims, yvarid, &ncvars[yvarid], &grid->yvals, &lazyGrid->yValsGet,
+                  cdf_load_vals(size, ndims, yvarid, &ncvars[yvarid], &grid->y.vals, &lazyGrid->yValsGet,
                                 ntdims, start, count);
 
                   strcpy(grid->y.name, ncvars[yvarid].name);
@@ -5233,15 +5233,15 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
                   double yinc = 0;
                   if ( islon && (int) ysize > 1 )
                     {
-                      yinc = fabs(grid->yvals[0] - grid->yvals[1]);
+                      yinc = fabs(grid->y.vals[0] - grid->y.vals[1]);
                       for ( size_t i = 2; i < ysize; i++ )
-                        if ( (fabs(grid->yvals[i-1] - grid->yvals[i]) - yinc) > (yinc/1000) )
+                        if ( (fabs(grid->y.vals[i-1] - grid->y.vals[i]) - yinc) > (yinc/1000) )
                           {
                             yinc = 0;
                             break;
                           }
                     }
-		  if ( isGaussGrid(ysize, yinc, grid->yvals) )
+		  if ( isGaussGrid(ysize, yinc, grid->y.vals) )
                     {
                       ncvars[ncvarid].gridtype = GRID_GAUSSIAN;
                       grid->np = (int)(ysize/2);
