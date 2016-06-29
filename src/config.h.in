@@ -85,9 +85,6 @@
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
-/* Define to 1 if you have the <jasper.h> header file. */
-#undef HAVE_JASPER_H
-
 /* Define to 1 for GRIB1 decoding/encoding with cgribex */
 #undef HAVE_LIBCGRIBEX
 
@@ -103,12 +100,6 @@
 /* Define to 1 for IEG interface */
 #undef HAVE_LIBIEG
 
-/* Define to 1 for JPEG compression for GRIB2 */
-#undef HAVE_LIBJASPER
-
-/* Define to 1 for PNG compression for GRIB2 */
-#undef HAVE_LIBLIBPNG
-
 /* Define to 1 if you have the `m' library (-lm). */
 #undef HAVE_LIBM
 
@@ -120,9 +111,6 @@
 
 /* Define to 1 for NetCDF support */
 #undef HAVE_LIBNETCDF
-
-/* Define to 1 for JPEG compression for GRIB2 */
-#undef HAVE_LIBOPENJPEG
 
 /* Define to 1 if you have the `pthread' library (-lpthread). */
 #undef HAVE_LIBPTHREAD
@@ -163,14 +151,8 @@
 /* Define to 1 if you have the <netcdf_par.h> header file. */
 #undef HAVE_NETCDF_PAR_H
 
-/* Define to 1 if you have the <openjpeg.h> header file. */
-#undef HAVE_OPENJPEG_H
-
 /* netCDF library does support MPI parallel invocations */
 #undef HAVE_PARALLEL_NC4
-
-/* Define to 1 if you have the <png.h> header file. */
-#undef HAVE_PNG_H
 
 /* ScalES PPM C core library is available */
 #undef HAVE_PPM_CORE
