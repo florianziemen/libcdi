@@ -46,7 +46,7 @@ static int iegInqDatatype(int prec)
   if ( prec == DOUBLE_PRECISION ) datatype = DATATYPE_FLT64;
   else                            datatype = DATATYPE_FLT32;
 
-  return (datatype);
+  return datatype;
 }
 
 
@@ -63,7 +63,7 @@ static int iegDefDatatype(int datatype)
   if ( datatype == DATATYPE_FLT64 ) prec = DOUBLE_PRECISION;
   else                              prec = SINGLE_PRECISION;
 
-  return (prec);
+  return prec;
 }
 
 /* not used
@@ -83,7 +83,7 @@ int iegInqRecord(stream_t *streamptr, int *varID, int *levelID)
   *levelID = -1;
 
   status = iegRead(fileID, iegp);
-  if ( status != 0 ) return (0);
+  if ( status != 0 ) return 0;
 
   icode  = IEG_P_Parameter(iegp->ipdb);
   if ( IEG_P_LevelType(iegp->ipdb) == IEG_LTYPE_HYBRID_LAYER )
@@ -99,45 +99,38 @@ int iegInqRecord(stream_t *streamptr, int *varID, int *levelID)
 
   *levelID = zaxisInqLevelID(zaxisID, (double) ilevel);
 
-  return (1);
+  return 1;
 }
 */
 
 void iegReadRecord(stream_t *streamptr, double *data, int *nmiss)
 {
-  int vlistID, fileID;
-  int status;
-  int recID, vrecID, tsID;
-  off_t recpos;
-  int varID, gridID;
-  int i, size;
-  double missval;
   void *iegp = streamptr->record->exsep;
 
-  vlistID = streamptr->vlistID;
-  fileID  = streamptr->fileID;
-  tsID    = streamptr->curTsID;
-  vrecID  = streamptr->tsteps[tsID].curRecID;
-  recID   = streamptr->tsteps[tsID].recIDs[vrecID];
-  recpos  = streamptr->tsteps[tsID].records[recID].position;
-  varID   = streamptr->tsteps[tsID].records[recID].varID;
+  int vlistID = streamptr->vlistID;
+  int fileID  = streamptr->fileID;
+  int tsID    = streamptr->curTsID;
+  int vrecID  = streamptr->tsteps[tsID].curRecID;
+  int recID   = streamptr->tsteps[tsID].recIDs[vrecID];
+  int varID   = streamptr->tsteps[tsID].records[recID].varID;
+  off_t recpos = streamptr->tsteps[tsID].records[recID].position;
 
   fileSetPos(fileID, recpos, SEEK_SET);
 
-  status = iegRead(fileID, iegp);
+  int status = iegRead(fileID, iegp);
   if ( status != 0 )
     Error("Could not read IEG record!");
 
   iegInqDataDP(iegp, data);
 
-  missval = vlistInqVarMissval(vlistID, varID);
-  gridID  = vlistInqVarGrid(vlistID, varID);
-  size    = gridInqSize(gridID);
+  double missval = vlistInqVarMissval(vlistID, varID);
+  int gridID  = vlistInqVarGrid(vlistID, varID);
+  int size    = gridInqSize(gridID);
 
   streamptr->numvals += size;
 
   *nmiss = 0;
-  for ( i = 0; i < size; i++ )
+  for ( int i = 0; i < size; i++ )
     if ( DBL_IS_EQUAL(data[i], missval) || DBL_IS_EQUAL(data[i], (float)missval) )
       {
 	data[i] = missval;
@@ -197,19 +190,18 @@ int iegGetZaxisType(int iegleveltype)
       }
     }
 
-  return (leveltype);
+  return leveltype;
 }
 
 
 static void iegDefTime(int *pdb, int date, int time, int taxisID)
 {
-  int year, month, day, hour, minute, second;
   int timetype = -1;
-
   if ( taxisID != -1 ) timetype = taxisInqType(taxisID);
 
   if ( timetype == TAXIS_ABSOLUTE || timetype == TAXIS_RELATIVE )
     {
+      int year, month, day, hour, minute, second;
       cdiDecodeDate(date, &year, &month, &day);
       cdiDecodeTime(time, &hour, &minute, &second);
 
@@ -260,7 +252,7 @@ calc_resfac(double xfirst, double xlast, double xinc, double yfirst, double ylas
         }
     }
 
-  return (resfac);
+  return resfac;
 }
 
 static
@@ -270,10 +262,8 @@ void iegDefGrid(int *gdb, int gridID)
 
   if ( gridtype == GRID_GENERIC )
     {
-      int xsize, ysize;
-
-      xsize = gridInqXsize(gridID);
-      ysize = gridInqYsize(gridID);
+      int xsize = gridInqXsize(gridID);
+      int ysize = gridInqYsize(gridID);
 
       if ( (ysize == 32  || ysize == 48 || ysize == 64 ||
 	    ysize == 96  || ysize == 160) &&
@@ -396,10 +386,9 @@ static
 void iegDefLevel(int *pdb, int *gdb, double *vct, int zaxisID, int levelID)
 {
   double level;
-  int ilevel, leveltype;
-  static int vct_warning = 1;
+  int ilevel;
 
-  leveltype = zaxisInqType(zaxisID);
+  int leveltype = zaxisInqType(zaxisID);
 
   if ( leveltype == ZAXIS_GENERIC )
     {
@@ -424,8 +413,6 @@ void iegDefLevel(int *pdb, int *gdb, double *vct, int zaxisID, int levelID)
       }
     case ZAXIS_HYBRID:
       {
-	int vctsize;
-
 	if ( zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL) )
 	  {
 	    IEG_P_LevelType(pdb) = IEG_LTYPE_HYBRID_LAYER;
@@ -439,14 +426,15 @@ void iegDefLevel(int *pdb, int *gdb, double *vct, int zaxisID, int levelID)
 	    IEG_P_Level2(pdb)    = (int)(zaxisInqLevel(zaxisID, levelID));
 	  }
 
-	vctsize = zaxisInqVctSize(zaxisID);
+	int vctsize = zaxisInqVctSize(zaxisID);
 	if ( vctsize > 100 )
 	  {
+            static bool vct_warning = true;
 	    /*	    IEG_G_NumVCP(gdb) = 0; */
 	    if ( vct_warning )
 	      {
 		Warning("VCT size of %d is too large (maximum is 100). Set to 0!", vctsize);
-		vct_warning = 0;
+		vct_warning = false;
 	      }
 	  }
 	else
