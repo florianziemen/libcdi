@@ -315,10 +315,10 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, double *fsec2, int *isec4, 
     case GRID_GME:
       {
 	grid->size  = ISEC4_NumValues;
-	grid->nd    = ISEC2_GME_ND;
-	grid->ni    = ISEC2_GME_NI;
-	grid->ni2   = ISEC2_GME_NI2;
-	grid->ni3   = ISEC2_GME_NI3;
+	grid->gme.nd    = ISEC2_GME_ND;
+	grid->gme.ni    = ISEC2_GME_NI;
+	grid->gme.ni2   = ISEC2_GME_NI2;
+	grid->gme.ni3   = ISEC2_GME_NI3;
 	break;
       }
     case GRID_GENERIC:

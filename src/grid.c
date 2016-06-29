@@ -129,12 +129,12 @@ void grid_init(grid_t *gridptr)
   gridptr->laea.lat_0    = 0.0;
   gridptr->laea.a        = 0.0;
   gridptr->laea.defined  = FALSE;
+  gridptr->gme.nd        = 0;
+  gridptr->gme.ni        = 0;
+  gridptr->gme.ni2       = 0;
+  gridptr->gme.ni3       = 0;
   gridptr->trunc         = 0;
   gridptr->nvertex       = 0;
-  gridptr->nd            = 0;
-  gridptr->ni            = 0;
-  gridptr->ni2           = 0;
-  gridptr->ni3           = 0;
   gridptr->number        = 0;
   gridptr->position      = 0;
   gridptr->reference     = NULL;
@@ -1937,7 +1937,7 @@ int gridInqGMEnd(int gridID)
 {
   grid_t *gridptr = gridID2Ptr(gridID);
 
-  return gridptr->nd;
+  return gridptr->gme.nd;
 }
 
 /*
@@ -1954,9 +1954,9 @@ void gridDefGMEnd(int gridID, int nd)
 {
   grid_t *gridptr = gridID2Ptr(gridID);
 
-  if (gridptr->nd != nd)
+  if (gridptr->gme.nd != nd)
     {
-      gridptr->nd = nd;
+      gridptr->gme.nd = nd;
       gridMark4Update(gridID);
     }
 }
@@ -1975,7 +1975,7 @@ int gridInqGMEni(int gridID)
 {
   grid_t *gridptr = gridID2Ptr(gridID);
 
-  return gridptr->ni;
+  return gridptr->gme.ni;
 }
 
 /*
@@ -1992,9 +1992,9 @@ void gridDefGMEni(int gridID, int ni)
 {
   grid_t *gridptr = gridID2Ptr(gridID);
 
-  if ( gridptr->ni != ni )
+  if ( gridptr->gme.ni != ni )
     {
-      gridptr->ni = ni;
+      gridptr->gme.ni = ni;
       gridMark4Update(gridID);
     }
 }
@@ -2013,7 +2013,7 @@ int gridInqGMEni2(int gridID)
 {
   grid_t *gridptr = gridID2Ptr(gridID);
 
-  return gridptr->ni2;
+  return gridptr->gme.ni2;
 }
 
 /*
@@ -2030,9 +2030,9 @@ void gridDefGMEni2(int gridID, int ni2)
 {
   grid_t *gridptr = gridID2Ptr(gridID);
 
-  if ( gridptr->ni2 != ni2 )
+  if ( gridptr->gme.ni2 != ni2 )
     {
-      gridptr->ni2 = ni2;
+      gridptr->gme.ni2 = ni2;
       gridMark4Update(gridID);
     }
 }
@@ -2051,16 +2051,16 @@ int gridInqGMEni3(int gridID)
 {
   grid_t *gridptr = gridID2Ptr(gridID);
 
-  return gridptr->ni3;
+  return gridptr->gme.ni3;
 }
 
 void gridDefGMEni3(int gridID, int ni3)
 {
   grid_t *gridptr = gridID2Ptr(gridID);
 
-  if ( gridptr->ni3 != ni3 )
+  if ( gridptr->gme.ni3 != ni3 )
     {
-      gridptr->ni3 = ni3;
+      gridptr->gme.ni3 = ni3;
       gridMark4Update(gridID);
     }
 }
@@ -2428,10 +2428,10 @@ int gridCompareP ( void * gridptr1, void * gridptr2 )
   if ( g1->isRotated     != g2->isRotated    ) return differ;
   if ( g1->xdef          != g2->xdef         ) return differ;
   if ( g1->ydef          != g2->ydef         ) return differ;
-  if ( g1->nd            != g2->nd           ) return differ;
-  if ( g1->ni            != g2->ni           ) return differ;
-  if ( g1->ni2           != g2->ni2          ) return differ;
-  if ( g1->ni3           != g2->ni3          ) return differ;
+  if ( g1->gme.nd        != g2->gme.nd       ) return differ;
+  if ( g1->gme.ni        != g2->gme.ni       ) return differ;
+  if ( g1->gme.ni2       != g2->gme.ni2      ) return differ;
+  if ( g1->gme.ni3       != g2->gme.ni3      ) return differ;
   if ( g1->number        != g2->number       ) return differ;
   if ( g1->position      != g2->position     ) return differ;
   if ( g1->trunc         != g2->trunc        ) return differ;
@@ -2730,10 +2730,10 @@ static void gridComplete(grid_t *grid)
       }
     case GRID_GME:
       {
-        gridDefGMEnd(gridID, grid->nd);
-        gridDefGMEni(gridID, grid->ni);
-        gridDefGMEni2(gridID, grid->ni2);
-        gridDefGMEni3(gridID, grid->ni3);
+        gridDefGMEnd(gridID, grid->gme.nd);
+        gridDefGMEni(gridID, grid->gme.ni);
+        gridDefGMEni2(gridID, grid->gme.ni2);
+        gridDefGMEni3(gridID, grid->gme.ni3);
         break;
       }
       /*
@@ -2847,10 +2847,10 @@ int gridGenerate(const grid_t *grid)
     gridDefRowlon(gridID, grid->ysize, grid->rowlon);
   gridptr->trunc = grid->trunc;
   gridptr->lcomplex = grid->lcomplex;
-  gridptr->nd = grid->nd;
-  gridptr->ni = grid->ni;
-  gridptr->ni2 = grid->ni2;
-  gridptr->ni3 = grid->ni3;
+  gridptr->gme.nd = grid->gme.nd;
+  gridptr->gme.ni = grid->gme.ni;
+  gridptr->gme.ni2 = grid->gme.ni2;
+  gridptr->gme.ni3 = grid->gme.ni3;
   const char *grid_str_tab[] = GRID_STR_SERIALIZE(grid);
   char *gridptr_str_tab[] = GRID_STR_SERIALIZE(gridptr);
   for (size_t i = 0; i < sizeof (grid_str_tab) / sizeof (grid_str_tab[0]); ++i)
@@ -3642,7 +3642,7 @@ static void gridPrintKernel(grid_t * gridptr, int index, int opt, FILE *fp)
       }
     case GRID_GME:
       {
-        fprintf(fp, "ni        = %d\n", gridptr->ni );
+        fprintf(fp, "ni        = %d\n", gridptr->gme.ni );
         break;
       }
    default:
@@ -3697,8 +3697,8 @@ void gridPrintP ( void * voidptr, FILE * fp )
           "trunc     = %d\n"
           "lcomplex  = %d\n"
           "nrowlon   = %d\n",
-          gridptr->prec, gridptr->nd, gridptr->ni, gridptr->ni2,
-          gridptr->ni3, gridptr->number, gridptr->position, gridptr->trunc,
+          gridptr->prec, gridptr->gme.nd, gridptr->gme.ni, gridptr->gme.ni2,
+          gridptr->gme.ni3, gridptr->number, gridptr->position, gridptr->trunc,
           gridptr->lcomplex, gridptr->nrowlon );
 
   if ( gridptr->rowlon )
@@ -4354,10 +4354,10 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
     gridP->isRotated     =   (short)intBuffer[9];
     gridP->xdef          =   (short)intBuffer[10];
     gridP->ydef          =   (short)intBuffer[11];
-    gridP->nd            =   intBuffer[12];
-    gridP->ni            =   intBuffer[13];
-    gridP->ni2           =   intBuffer[14];
-    gridP->ni3           =   intBuffer[15];
+    gridP->gme.nd        =   intBuffer[12];
+    gridP->gme.ni        =   intBuffer[13];
+    gridP->gme.ni2       =   intBuffer[14];
+    gridP->gme.ni3       =   intBuffer[15];
     gridP->number        =   intBuffer[16];
     gridP->position      =   intBuffer[17];
     gridP->trunc         =   intBuffer[18];
@@ -4368,8 +4368,8 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
     gridP->ysize         =   intBuffer[23];
     gridP->lcomplex      =   (short)intBuffer[24];
     memberMask           =   intBuffer[25];
-    gridP->x.stdname      =   xystdname_tab[intBuffer[26]][0];
-    gridP->y.stdname      =   xystdname_tab[intBuffer[27]][1];
+    gridP->x.stdname     =   xystdname_tab[intBuffer[26]][0];
+    gridP->y.stdname     =   xystdname_tab[intBuffer[27]][1];
   }
 
   if (memberMask & gridHasRowLonFlag)
@@ -4557,10 +4557,10 @@ gridPack(void * voidP, void * packBuffer, int packBufferSize,
     intBuffer[9]  = gridP->isRotated;
     intBuffer[10] = gridP->xdef;
     intBuffer[11] = gridP->ydef;
-    intBuffer[12] = gridP->nd;
-    intBuffer[13] = gridP->ni;
-    intBuffer[14] = gridP->ni2;
-    intBuffer[15] = gridP->ni3;
+    intBuffer[12] = gridP->gme.nd;
+    intBuffer[13] = gridP->gme.ni;
+    intBuffer[14] = gridP->gme.ni2;
+    intBuffer[15] = gridP->gme.ni3;
     intBuffer[16] = gridP->number;
     intBuffer[17] = gridP->position;
     intBuffer[18] = gridP->trunc;

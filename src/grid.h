@@ -83,6 +83,11 @@ struct grid_laea_t {
   short   defined;
 };
 
+// GME Grid
+struct grid_gme_t {
+  int     nd, ni, ni2, ni3;       /* parameter for GRID_GME         */
+};
+
 struct grid_t {
   int     self;
   int     type;                   /* grid type                      */
@@ -101,12 +106,12 @@ struct grid_t {
   struct grid_lcc_t  lcc;
   struct grid_lcc2_t lcc2;
   struct grid_laea_t laea;
+  struct grid_gme_t  gme;
   double  xpole, ypole, angle;    /* rotated north pole             */
   short   isCyclic;               /* TRUE for global cyclic grids   */
   short   isRotated;              /* TRUE for rotated grids         */
   short   xdef;                   /* 0: undefined 1:xvals 2:x0+xinc */
   short   ydef;                   /* 0: undefined 1:yvals 2:y0+yinc */
-  int     nd, ni, ni2, ni3;       /* parameter for GRID_GME         */
   int     number, position;       /* parameter for GRID_REFERENCE   */
   int     trunc;                  /* parameter for GRID_SPECTEAL    */
   int     nvertex;

@@ -674,13 +674,13 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
         grid->size  = (int)numberOfPoints;
         long lpar;
         /* FIXME: assert(lpar >= INT_MIN && lpar <= INT_MAX) */
-        if ( grib_get_long(gh, "nd", &lpar) == 0 ) grid->nd  = (int)lpar;
+        if ( grib_get_long(gh, "nd", &lpar) == 0 ) grid->gme.nd  = (int)lpar;
         /* FIXME: assert(lpar >= INT_MIN && lpar <= INT_MAX) */
-        if ( grib_get_long(gh, "Ni", &lpar) == 0 ) grid->ni  = (int)lpar;
+        if ( grib_get_long(gh, "Ni", &lpar) == 0 ) grid->gme.ni  = (int)lpar;
         /* FIXME: assert(lpar >= INT_MIN && lpar <= INT_MAX) */
-        if ( grib_get_long(gh, "n2", &lpar) == 0 ) grid->ni2 = (int)lpar;
+        if ( grib_get_long(gh, "n2", &lpar) == 0 ) grid->gme.ni2 = (int)lpar;
         /* FIXME: assert(lpar >= INT_MIN && lpar <= INT_MAX) */
-        if ( grib_get_long(gh, "n3", &lpar) == 0 ) grid->ni3 = (int)lpar;
+        if ( grib_get_long(gh, "n3", &lpar) == 0 ) grid->gme.ni3 = (int)lpar;
 
         break;
       }
