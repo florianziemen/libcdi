@@ -47,6 +47,7 @@ struct gridaxis_t {
   char    name[CDI_MAX_NAME];
   char    longname[CDI_MAX_NAME];
   char    units[CDI_MAX_NAME];
+  char    dimname[CDI_MAX_NAME];
 };
 
 struct grid_t {
@@ -105,8 +106,6 @@ struct grid_t {
   short   hasdims;
   const char *xstdname;
   const char *ystdname;
-  char    xdimname[CDI_MAX_NAME];
-  char    ydimname[CDI_MAX_NAME];
   char    vdimname[CDI_MAX_NAME];
   char   *name;
   struct gridaxis_t x;

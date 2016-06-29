@@ -152,8 +152,8 @@ void grid_init(grid_t *gridptr)
   gridptr->angle         = 0.0;
   gridptr->lcomplex      = 0;
   gridptr->hasdims       = TRUE;
-  gridptr->xdimname[0]   = 0;
-  gridptr->ydimname[0]   = 0;
+  gridptr->x.dimname[0]   = 0;
+  gridptr->y.dimname[0]   = 0;
   gridptr->vdimname[0]   = 0;
   gridptr->x.name[0]      = 0;
   gridptr->y.name[0]      = 0;
@@ -607,8 +607,8 @@ char *grid_key_to_string(grid_t *gridptr, int key)
 
   switch (key)
     {
-    case CDI_GRID_XDIMNAME: gridstring = gridptr->xdimname; break;
-    case CDI_GRID_YDIMNAME: gridstring = gridptr->ydimname; break;
+    case CDI_GRID_XDIMNAME: gridstring = gridptr->x.dimname; break;
+    case CDI_GRID_YDIMNAME: gridstring = gridptr->y.dimname; break;
     case CDI_GRID_VDIMNAME: gridstring = gridptr->vdimname; break;
     }
 
@@ -2770,7 +2770,7 @@ static void gridComplete(grid_t *grid)
   grid->y.units[CDI_MAX_NAME - 1] = 0;
 }
 
-#define GRID_STR_SERIALIZE(gridP) { gridP->xdimname, gridP->ydimname,  \
+#define GRID_STR_SERIALIZE(gridP) { gridP->x.dimname, gridP->y.dimname,  \
     gridP->vdimname, gridP->x.name, gridP->y.name,  \
     gridP->x.longname, gridP->y.longname, \
     gridP->x.units, gridP->y.units }
