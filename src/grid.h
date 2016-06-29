@@ -51,6 +51,7 @@ struct gridaxis_t {
   const char *stdname;
   int     size;                  // number of values
   double *vals;
+  double *bounds;
 };
 
 // Lambert Conformal Conic
@@ -98,8 +99,6 @@ struct grid_t {
   mask_t *mask;
   mask_t *mask_gme;
   double *area;
-  double *xbounds;
-  double *ybounds;
   double  xfirst, yfirst;
   double  xlast, ylast;
   double  xinc, yinc;
