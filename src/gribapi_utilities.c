@@ -487,8 +487,8 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
 
         /* FIXME: assert(numberOfPoints <= INT_MAX && numberOfPoints >= INT_MIN) */
         grid->size  = (int)numberOfPoints;
-        grid->xsize = (int)nlon;
-        grid->ysize = (int)nlat;
+        grid->x.size = (int)nlon;
+        grid->y.size = (int)nlat;
         grid->xinc  = 0;
         grid->yinc  = 0;
         grid->xdef  = 0;
@@ -508,7 +508,7 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
 
         /* if ( IS_NOT_EQUAL(grid->xfirst, 0) || IS_NOT_EQUAL(grid->xlast, 0) ) */
           {
-            if ( grid->xsize > 1 )
+            if ( grid->x.size > 1 )
               {
                 if ( (grid->xfirst >= grid->xlast) && (grid->xfirst >= 180) ) grid->xfirst -= 360;
 
@@ -517,7 +517,7 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
                     /* correct xinc if necessary */
                     if ( IS_EQUAL(grid->xfirst, 0) && grid->xlast > 354 )
                       {
-                        double xinc = 360. / grid->xsize;
+                        double xinc = 360. / grid->x.size;
 
                         if ( fabs(grid->xinc-xinc) > 0.0 )
                           {
@@ -532,7 +532,7 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
         grid->ydef = 0;
         /* if ( IS_NOT_EQUAL(grid->yfirst, 0) || IS_NOT_EQUAL(grid->ylast, 0) ) */
           {
-            if ( grid->ysize > 1 )
+            if ( grid->y.size > 1 )
               {
                 if ( editionNumber <= 1 )
                   {
@@ -565,7 +565,7 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
         for ( int i = 0; i < nlat; ++i ) grid->rowlon[i] = (int)pl[i];
         Free(pl);
 
-        grid->ysize  = nlat;
+        grid->y.size  = nlat;
         grid->xinc   = 0;
         grid->yinc   = 0;
         grid->xdef   = 0;
@@ -579,7 +579,7 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
 
         /* if ( IS_NOT_EQUAL(grid->xfirst, 0) || IS_NOT_EQUAL(grid->xlast, 0) ) */
           {
-            if ( grid->xsize > 1 )
+            if ( grid->x.size > 1 )
               {
                 if ( (grid->xfirst > grid->xlast) && (grid->xfirst >= 180) ) grid->xfirst -= 360;
 
@@ -588,7 +588,7 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
                     /* correct xinc if necessary */
                     if ( IS_EQUAL(grid->xfirst, 0) && grid->xlast > 354 )
                       {
-                        double xinc = 360. / grid->xsize;
+                        double xinc = 360. / grid->x.size;
 
                         if ( fabs(grid->xinc-xinc) > 0.0 )
                           {
@@ -603,7 +603,7 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
         grid->ydef  = 0;
         /* if ( IS_NOT_EQUAL(grid->yfirst, 0) || IS_NOT_EQUAL(grid->ylast, 0) ) */
           {
-            if ( grid->ysize > 1 )
+            if ( grid->y.size > 1 )
               {
                 if ( editionNumber <= 1 )
                   {
@@ -627,8 +627,8 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
           Error("numberOfPoints (%d) and gridSize (%d) differ!", (int)numberOfPoints, nlon*nlat);
 
         grid->size  = (int)numberOfPoints;
-        grid->xsize = nlon;
-        grid->ysize = nlat;
+        grid->x.size = nlon;
+        grid->y.size = nlat;
 
         FAIL_ON_GRIB_ERROR(grib_get_double, gh, "DxInMetres", &grid->lcc.xinc);
         FAIL_ON_GRIB_ERROR(grib_get_double, gh, "DyInMetres", &grid->lcc.yinc);
@@ -732,13 +732,13 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
 
         if ( nlon > 0 && nlat > 0 && nlon*nlat == grid->size )
           {
-            grid->xsize = nlon;
-            grid->ysize = nlat;
+            grid->x.size = nlon;
+            grid->y.size = nlat;
           }
         else
           {
-            grid->xsize = 0;
-            grid->ysize = 0;
+            grid->x.size = 0;
+            grid->y.size = 0;
           }
 
         break;

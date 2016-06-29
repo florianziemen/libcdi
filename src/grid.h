@@ -49,6 +49,7 @@ struct gridaxis_t {
   char    units[CDI_MAX_NAME];
   char    dimname[CDI_MAX_NAME];
   const char *stdname;
+  int     size;                  // number of values
 };
 
 // Lambert Conformal Conic
@@ -120,8 +121,6 @@ struct grid_t {
   int    *rowlon;
   int     nrowlon;
   int     size;
-  int     xsize;                  /* number of values along X */
-  int     ysize;                  /* number of values along Y */
   int     np;                     /* number of parallels between a pole and the equator */
   short   lcomplex;
   short   hasdims;

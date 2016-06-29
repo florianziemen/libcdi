@@ -169,15 +169,15 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, double *fsec2, int *isec4, 
 	if ( ISEC4_NumValues != ISEC2_NumLon*ISEC2_NumLat )
 	  Error("numberOfPoints (%d) and gridSize (%d) differ!", ISEC4_NumValues, ISEC2_NumLon*ISEC2_NumLat);
 	grid->size  = ISEC4_NumValues;
-	grid->xsize = ISEC2_NumLon;
-	grid->ysize = ISEC2_NumLat;
+	grid->x.size = ISEC2_NumLon;
+	grid->y.size = ISEC2_NumLat;
         if ( gridtype == GRID_GAUSSIAN ) grid->np = ISEC2_NumPar;
 	grid->xinc  = 0;
 	grid->yinc  = 0;
 	grid->xdef  = 0;
 	/* if ( ISEC2_FirstLon != 0 || ISEC2_LastLon != 0 ) */
 	  {
-	    if ( grid->xsize > 1 )
+	    if ( grid->x.size > 1 )
 	      {
                 bool recompinc = true;
 
@@ -185,7 +185,7 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, double *fsec2, int *isec4, 
 
 		if ( ISEC2_ResFlag && ISEC2_LonIncr > 0 )
                   {
-                    if ( abs(ISEC2_LastLon - (ISEC2_FirstLon+ISEC2_LonIncr*(grid->xsize-1))) <= 2 )
+                    if ( abs(ISEC2_LastLon - (ISEC2_FirstLon+ISEC2_LonIncr*(grid->x.size-1))) <= 2 )
                       {
                         recompinc = false;
                         grid->xinc = ISEC2_LonIncr * 0.001;
@@ -193,12 +193,12 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, double *fsec2, int *isec4, 
                   }
 
 		/* recompute xinc if necessary */
-                if ( recompinc ) grid->xinc = (ISEC2_LastLon - ISEC2_FirstLon) * 0.001 / (grid->xsize-1);
+                if ( recompinc ) grid->xinc = (ISEC2_LastLon - ISEC2_FirstLon) * 0.001 / (grid->x.size-1);
 
 		/* correct xinc if necessary */
 		if ( ISEC2_FirstLon == 0 && ISEC2_LastLon > 354000 && ISEC2_LastLon < 360000 )
 		  {
-		    double xinc = 360. / grid->xsize;
+		    double xinc = 360. / grid->x.size;
 
 		    if ( fabs(grid->xinc-xinc) > 0.0 )
 		      {
@@ -214,12 +214,12 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, double *fsec2, int *isec4, 
 	grid->ydef  = 0;
 	/* if ( ISEC2_FirstLat != 0 || ISEC2_LastLat != 0 ) */
 	  {
-	    if ( grid->ysize > 1 && compyinc )
+	    if ( grid->y.size > 1 && compyinc )
 	      {
                 bool recompinc = true;
 		if ( ISEC2_ResFlag && ISEC2_LatIncr > 0 )
                   {
-                    if ( abs(ISEC2_LastLat - (ISEC2_FirstLat+ISEC2_LatIncr*(grid->ysize-1))) <= 2 )
+                    if ( abs(ISEC2_LastLat - (ISEC2_FirstLat+ISEC2_LatIncr*(grid->y.size-1))) <= 2 )
                       {
                         recompinc = false;
                         grid->yinc = ISEC2_LatIncr * 0.001;
@@ -227,7 +227,7 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, double *fsec2, int *isec4, 
                   }
 
 		/* recompute yinc if necessary */
-                if ( recompinc ) grid->yinc = (ISEC2_LastLat - ISEC2_FirstLat) * 0.001 / (grid->ysize - 1);
+                if ( recompinc ) grid->yinc = (ISEC2_LastLat - ISEC2_FirstLat) * 0.001 / (grid->y.size - 1);
 	      }
 	    grid->yfirst = ISEC2_FirstLat * 0.001;
 	    grid->ylast  = ISEC2_LastLat  * 0.001;
@@ -241,20 +241,20 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, double *fsec2, int *isec4, 
 	grid->size    = ISEC4_NumValues;
         grid->rowlon  = ISEC2_RowLonPtr;
 	grid->nrowlon = ISEC2_NumLat;
-	grid->ysize   = ISEC2_NumLat;
+	grid->y.size   = ISEC2_NumLat;
 	grid->xinc    = 0;
 	grid->yinc    = 0;
 	grid->xdef    = 0;
 	/* if ( ISEC2_FirstLon != 0 || ISEC2_LastLon != 0 ) */
 	  {
-	    if ( grid->xsize > 1 )
+	    if ( grid->x.size > 1 )
 	      {
                 if ( ISEC2_LastLon < ISEC2_FirstLon && ISEC2_LastLon < 0 ) ISEC2_LastLon += 360000;
 
 		if ( ISEC2_ResFlag && ISEC2_LonIncr > 0 )
 		  grid->xinc = ISEC2_LonIncr * 0.001;
 		else
-		  grid->xinc = (ISEC2_LastLon - ISEC2_FirstLon) * 0.001 / (grid->xsize - 1);
+		  grid->xinc = (ISEC2_LastLon - ISEC2_FirstLon) * 0.001 / (grid->x.size - 1);
 	      }
 	    grid->xfirst = ISEC2_FirstLon * 0.001;
 	    grid->xlast  = ISEC2_LastLon  * 0.001;
@@ -263,12 +263,12 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, double *fsec2, int *isec4, 
 	grid->ydef  = 0;
 	/* if ( ISEC2_FirstLat != 0 || ISEC2_LastLat != 0 ) */
 	  {
-	    if ( grid->ysize > 1 )
+	    if ( grid->y.size > 1 )
 	      {
 		if ( ISEC2_ResFlag && ISEC2_LatIncr > 0 )
 		  grid->yinc = ISEC2_LatIncr * 0.001;
 		else
-		  grid->yinc = (ISEC2_LastLat - ISEC2_FirstLat) * 0.001 / (grid->ysize - 1);
+		  grid->yinc = (ISEC2_LastLat - ISEC2_FirstLat) * 0.001 / (grid->y.size - 1);
 	      }
 	    grid->yfirst = ISEC2_FirstLat * 0.001;
 	    grid->ylast  = ISEC2_LastLat  * 0.001;
@@ -283,8 +283,8 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, double *fsec2, int *isec4, 
 		ISEC4_NumValues, ISEC2_NumLon*ISEC2_NumLat);
 
 	grid->size  = ISEC4_NumValues;
-	grid->xsize = ISEC2_NumLon;
-	grid->ysize = ISEC2_NumLat;
+	grid->x.size = ISEC2_NumLon;
+	grid->y.size = ISEC2_NumLat;
 
 	grid->lcc.xinc      = ISEC2_Lambert_dx;
 	grid->lcc.yinc      = ISEC2_Lambert_dy;
@@ -324,8 +324,8 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, double *fsec2, int *isec4, 
     case GRID_GENERIC:
       {
 	grid->size  = ISEC4_NumValues;
-	grid->xsize = 0;
-	grid->ysize = 0;
+	grid->x.size = 0;
+	grid->y.size = 0;
 	break;
       }
     default:

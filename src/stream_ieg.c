@@ -668,8 +668,10 @@ void iegAddRecord(stream_t *streamptr, int param, int *pdb, int *gdb, double *vc
   grid_t *grid = (grid_t *)Malloc(sizeof (*grid));
   grid_init(grid);
   cdiGridTypeInit(grid, gridtype, IEG_G_NumLon(gdb)*IEG_G_NumLat(gdb));
-  grid->xsize = IEG_G_NumLon(gdb);
-  grid->ysize = IEG_G_NumLat(gdb);
+  int xsize = IEG_G_NumLon(gdb);
+  int ysize = IEG_G_NumLat(gdb);
+  grid->x.size = xsize;
+  grid->y.size = ysize;
   grid->xinc  = 0;
   grid->yinc  = 0;
   grid->xdef  = 0;
@@ -680,17 +682,17 @@ void iegAddRecord(stream_t *streamptr, int param, int *pdb, int *gdb, double *vc
 
   /* if ( IEG_G_FirstLon != 0 || IEG_G_LastLon != 0 ) */
   {
-    if ( grid->xsize > 1 )
+    if ( xsize > 1 )
       {
 	if ( IEG_G_ResFlag(gdb) && IEG_G_LonIncr(gdb) > 0 )
 	  grid->xinc = IEG_G_LonIncr(gdb) * resfac;
 	else
-	  grid->xinc = (IEG_G_LastLon(gdb) - IEG_G_FirstLon(gdb)) * resfac / (grid->xsize - 1);
+	  grid->xinc = (IEG_G_LastLon(gdb) - IEG_G_FirstLon(gdb)) * resfac / (xsize - 1);
 
 	/* correct xinc if necessary */
 	if ( IEG_G_FirstLon(gdb) == 0 && IEG_G_LastLon(gdb) > 354000 )
 	  {
-	    double xinc = 360. / grid->xsize;
+	    double xinc = 360. / xsize;
             /* FIXME: why not use grid->xinc != xinc as condition? */
 	    if ( fabs(grid->xinc-xinc) > 0.0 )
 	      {
@@ -706,12 +708,12 @@ void iegAddRecord(stream_t *streamptr, int param, int *pdb, int *gdb, double *vc
   grid->ydef  = 0;
   /* if ( IEG_G_FirstLat != 0 || IEG_G_LastLat != 0 ) */
   {
-    if ( grid->ysize > 1 )
+    if ( ysize > 1 )
       {
 	if ( IEG_G_ResFlag(gdb) && IEG_G_LatIncr(gdb) > 0 )
 	  grid->yinc = IEG_G_LatIncr(gdb) * resfac;
 	else
-	  grid->yinc = (IEG_G_LastLat(gdb) - IEG_G_FirstLat(gdb)) * resfac / (grid->ysize - 1);
+	  grid->yinc = (IEG_G_LastLat(gdb) - IEG_G_FirstLat(gdb)) * resfac / (ysize - 1);
       }
     grid->yfirst = IEG_G_FirstLat(gdb) * resfac;
     grid->ylast  = IEG_G_LastLat(gdb)  * resfac;

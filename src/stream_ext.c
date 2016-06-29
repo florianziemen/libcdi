@@ -219,8 +219,8 @@ void extAddRecord(stream_t *streamptr, int param, int level, int xysize,
   grid_t *grid = (grid_t *)Malloc(sizeof (*grid));
   grid_init(grid);
   cdiGridTypeInit(grid, GRID_GENERIC, xysize);
-  grid->xsize = xysize;
-  grid->ysize = 0;
+  grid->x.size = xysize;
+  grid->y.size = 0;
   grid->xvals = NULL;
   grid->yvals = NULL;
   struct addIffNewRes gridAdded = cdiVlistAddGridIfNew(vlistID, grid, 0);
@@ -243,8 +243,7 @@ void extAddRecord(stream_t *streamptr, int param, int level, int xysize,
   streamptr->nrecs++;
 
   if ( CDI_Debug )
-    Message("varID = %d gridID = %d levelID = %d",
-	    varID, gridID, levelID);
+    Message("varID = %d gridID = %d levelID = %d", varID, gridID, levelID);
 }
 
 static

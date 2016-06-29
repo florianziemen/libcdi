@@ -4345,11 +4345,11 @@ void grid_set_chunktype(grid_t *grid, ncvar_t *ncvar)
         }
       else
         {
-          if ( grid->xsize > 1 && grid->ysize > 1 && ndims > 1 &&
-               grid->xsize == ncvar->chunks[ndims-1] &&
-               grid->ysize == ncvar->chunks[ndims-2] )
+          if ( grid->x.size > 1 && grid->y.size > 1 && ndims > 1 &&
+               grid->x.size == ncvar->chunks[ndims-1] &&
+               grid->y.size == ncvar->chunks[ndims-2] )
             ncvar->chunktype = CHUNK_GRID;
-          else if ( grid->xsize > 1 && grid->xsize == ncvar->chunks[ndims-1] )
+          else if ( grid->x.size > 1 && grid->x.size == ncvar->chunks[ndims-1] )
             ncvar->chunktype = CHUNK_LINES;
           else
             ncvar->chunktype = CHUNK_AUTO;
@@ -4524,8 +4524,8 @@ cdfLazyGridInqXYVal(grid_t *grid, size_t index,
             }
           else if ( valsGet->ndims == 2)
             {
-              indexND[0] = index / (size_t)grid->xsize;
-              indexND[1] = index % (size_t)grid->xsize;
+              indexND[0] = index / (size_t)grid->x.size;
+              indexND[1] = index % (size_t)grid->x.size;
             }
           else
             indexND[0] = index;
@@ -4725,7 +4725,7 @@ cdfLazyGridCopyArrayFields(grid_t *gridptrOrig, grid_t *gridptrDup)
 
   if ( gridptrOrig->xvals != NULL && gridptrOrig->xvals != cdfPendingLoad )
     {
-      size_t size  = irregular ? gridsize : (size_t)gridptrOrig->xsize;
+      size_t size  = irregular ? gridsize : (size_t)gridptrOrig->x.size;
 
       gridptrDup->xvals = (double *)Malloc(size * sizeof (double));
       memcpy(gridptrDup->xvals, gridptrOrig->xvals, size * sizeof (double));
@@ -4733,7 +4733,7 @@ cdfLazyGridCopyArrayFields(grid_t *gridptrOrig, grid_t *gridptrDup)
 
   if ( gridptrOrig->yvals != NULL && gridptrOrig->yvals != cdfPendingLoad )
     {
-      size_t size  = irregular ? gridsize : (size_t)gridptrOrig->ysize;
+      size_t size  = irregular ? gridsize : (size_t)gridptrOrig->y.size;
 
       gridptrDup->yvals = (double *)Malloc(size * sizeof (double));
       memcpy(gridptrDup->yvals, gridptrOrig->yvals, size * sizeof (double));
@@ -4741,7 +4741,7 @@ cdfLazyGridCopyArrayFields(grid_t *gridptrOrig, grid_t *gridptrDup)
 
   if ( gridptrOrig->xbounds != NULL && gridptrOrig->xbounds != cdfPendingLoad )
     {
-      size_t size  = (irregular ? gridsize : (size_t)gridptrOrig->xsize)
+      size_t size  = (irregular ? gridsize : (size_t)gridptrOrig->x.size)
         * (size_t)gridptrOrig->nvertex;
 
       gridptrDup->xbounds = (double *)Malloc(size * sizeof (double));
@@ -4750,7 +4750,7 @@ cdfLazyGridCopyArrayFields(grid_t *gridptrOrig, grid_t *gridptrDup)
 
   if ( gridptrOrig->ybounds != NULL && gridptrOrig->ybounds != cdfPendingLoad )
     {
-      size_t size = (irregular ? gridsize : (size_t)gridptrOrig->ysize)
+      size_t size = (irregular ? gridsize : (size_t)gridptrOrig->y.size)
         * (size_t)gridptrOrig->nvertex;
 
       gridptrDup->ybounds = (double *)Malloc(size * sizeof (double));
@@ -5266,8 +5266,8 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 	    case GRID_CURVILINEAR:
 	      {
 		grid->size  = (int)size;
-		grid->xsize = (int)xsize;
-		grid->ysize = (int)ysize;
+		grid->x.size = (int)xsize;
+		grid->y.size = (int)ysize;
 		if ( xvarid != UNDEFID )
 		  {
 		    grid->xdef  = 1;
@@ -5340,8 +5340,8 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 		{
 		  grid->type  = GRID_GENERIC;
 		  grid->size  = 1;
-		  grid->xsize = 0;
-		  grid->ysize = 0;
+		  grid->x.size = 0;
+		  grid->y.size = 0;
 		}
 	      else
 		{
@@ -5461,25 +5461,25 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 
               if ( xdimid != UNDEFID && ydimid != UNDEFID && zdimid == UNDEFID )
                 {
-                  if ( grid->xsize > grid->ysize && grid->ysize < 1000 )
+                  if ( grid->x.size > grid->y.size && grid->y.size < 1000 )
                     {
                       ncvars[ncvarid].dimtype[ydimidx] = Z_AXIS;
                       ydimid = UNDEFID;
-                      grid->size  = grid->xsize;
-                      grid->ysize = 0;
+                      grid->size  = grid->x.size;
+                      grid->y.size = 0;
                     }
-                  else if ( grid->ysize > grid->xsize && grid->xsize < 1000 )
+                  else if ( grid->y.size > grid->x.size && grid->x.size < 1000 )
                     {
                       ncvars[ncvarid].dimtype[xdimidx] = Z_AXIS;
                       xdimid = ydimid;
                       ydimid = UNDEFID;
-                      grid->size  = grid->ysize;
-                      grid->xsize = grid->ysize;
-                      grid->ysize = 0;
+                      grid->size  = grid->y.size;
+                      grid->x.size = grid->y.size;
+                      grid->y.size = 0;
                     }
                 }
 
-              if ( grid->size != grid->xsize )
+              if ( grid->size != grid->x.size )
                 {
                   Warning("Unsupported array structure, skipped variable %s!", ncvars[ncvarid].name);
                   ncvars[ncvarid].isvar = -1;
@@ -5501,8 +5501,8 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 	      if ( grid->type == GRID_CURVILINEAR )
 		{
                   proj->size  = grid->size;
-                  proj->xsize = grid->xsize;
-                  proj->ysize = grid->ysize;
+                  proj->x.size = grid->x.size;
+                  proj->y.size = grid->y.size;
 		}
 
 	      //  grid->proj = gridGenerate(proj);
@@ -5512,9 +5512,9 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 	  if ( CDI_Debug )
 	    {
 	      Message("grid: type = %d, size = %d, nx = %d, ny %d",
-		      grid->type, grid->size, grid->xsize, grid->ysize);
+		      grid->type, grid->size, grid->x.size, grid->y.size);
 	      Message("proj: type = %d, size = %d, nx = %d, ny %d",
-		      proj->type, proj->size, proj->xsize, proj->ysize);
+		      proj->type, proj->size, proj->x.size, proj->y.size);
 	    }
 
 #if defined (PROJECTION_TEST)

@@ -212,8 +212,8 @@ void srv_add_record(stream_t *streamptr, int param, int level, int xsize, int ys
   grid_t *grid = (grid_t *)Malloc(sizeof (*grid));
   grid_init(grid);
   cdiGridTypeInit(grid, GRID_GENERIC, xsize*ysize);
-  grid->xsize = xsize;
-  grid->ysize = ysize;
+  grid->x.size = xsize;
+  grid->y.size = ysize;
   grid->xvals = NULL;
   grid->yvals = NULL;
   struct addIffNewRes gridAdded = cdiVlistAddGridIfNew(vlistID, grid, 0);
