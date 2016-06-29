@@ -161,8 +161,8 @@ void grid_init(grid_t *gridptr)
   gridptr->y.longname[0]  = 0;
   gridptr->x.units[0]     = 0;
   gridptr->y.units[0]     = 0;
-  gridptr->xstdname      = NULL;
-  gridptr->ystdname      = NULL;
+  gridptr->x.stdname      = NULL;
+  gridptr->y.stdname      = NULL;
   memset(gridptr->uuid, 0, CDI_UUID_SIZE);
   gridptr->name          = NULL;
   gridptr->vtable        = &cdiGridVtable;
@@ -295,16 +295,16 @@ cdiGridTypeInit(grid_t *gridptr, int gridtype, int size)
         /*
         if ( gridtype == GRID_CURVILINEAR )
           {
-            gridptr->xstdname = xystdname_tab[grid_xystdname_grid_latlon][0];
-            gridptr->ystdname = xystdname_tab[grid_xystdname_grid_latlon][1];
+            gridptr->x.stdname = xystdname_tab[grid_xystdname_grid_latlon][0];
+            gridptr->y.stdname = xystdname_tab[grid_xystdname_grid_latlon][1];
             gridDefXunits(gridID, "degrees");
             gridDefYunits(gridID, "degrees");
           }
         else
         */
           {
-            gridptr->xstdname = xystdname_tab[grid_xystdname_latlon][0];
-            gridptr->ystdname = xystdname_tab[grid_xystdname_latlon][1];
+            gridptr->x.stdname = xystdname_tab[grid_xystdname_latlon][0];
+            gridptr->y.stdname = xystdname_tab[grid_xystdname_latlon][1];
             gridSetName(gridptr->x.units, "degrees_east");
             gridSetName(gridptr->y.units, "degrees_north");
           }
@@ -318,8 +318,8 @@ cdiGridTypeInit(grid_t *gridptr, int gridtype, int size)
       {
         if ( gridptr->x.name[0] == 0 ) gridSetName(gridptr->x.name, "lon");
         if ( gridptr->y.name[0] == 0 ) gridSetName(gridptr->y.name, "lat");
-        gridptr->xstdname = xystdname_tab[grid_xystdname_latlon][0];
-        gridptr->ystdname = xystdname_tab[grid_xystdname_latlon][1];
+        gridptr->x.stdname = xystdname_tab[grid_xystdname_latlon][0];
+        gridptr->y.stdname = xystdname_tab[grid_xystdname_latlon][1];
         gridSetName(gridptr->x.units, "degrees_east");
         gridSetName(gridptr->y.units, "degrees_north");
         break;
@@ -331,10 +331,10 @@ cdiGridTypeInit(grid_t *gridptr, int gridtype, int size)
         if ( gridptr->x.name[0] == 0 ) gridSetName(gridptr->x.name, "x");
         if ( gridptr->y.name[0] == 0 ) gridSetName(gridptr->y.name, "y");
         /*
-        strcpy(gridptr->xstdname, "grid_longitude");
-        strcpy(gridptr->ystdname, "grid_latitude");
-        gridptr->xstdname = xystdname_tab[grid_xystdname_grid_latlon][0];
-        gridptr->ystdname = xystdname_tab[grid_xystdname_grid_latlon][1];
+        strcpy(gridptr->x.stdname, "grid_longitude");
+        strcpy(gridptr->y.stdname, "grid_latitude");
+        gridptr->x.stdname = xystdname_tab[grid_xystdname_grid_latlon][0];
+        gridptr->y.stdname = xystdname_tab[grid_xystdname_grid_latlon][1];
         gridDefXunits(gridID, "degrees");
         gridDefYunits(gridID, "degrees");
         */
@@ -346,8 +346,8 @@ cdiGridTypeInit(grid_t *gridptr, int gridtype, int size)
       {
         if ( gridptr->x.name[0] == 0 ) gridSetName(gridptr->x.name, "x");
         if ( gridptr->y.name[0] == 0 ) gridSetName(gridptr->y.name, "y");
-        gridptr->xstdname = xystdname_tab[grid_xystdname_projection][0];
-        gridptr->ystdname = xystdname_tab[grid_xystdname_projection][1];
+        gridptr->x.stdname = xystdname_tab[grid_xystdname_projection][0];
+        gridptr->y.stdname = xystdname_tab[grid_xystdname_projection][1];
         gridSetName(gridptr->x.units, "m");
         gridSetName(gridptr->y.units, "m");
         break;
@@ -924,8 +924,8 @@ void gridInqXunits(int gridID, char *xunits)
 void gridInqXstdname(int gridID, char *xstdname)
 {
   grid_t *gridptr = gridID2Ptr(gridID);
-  if ( gridptr->xstdname )
-    strcpy(xstdname, gridptr->xstdname);
+  if ( gridptr->x.stdname )
+    strcpy(xstdname, gridptr->x.stdname);
   else
     xstdname[0] = 0;
 }
@@ -1017,8 +1017,8 @@ void gridInqYunits(int gridID, char *yunits)
 void gridInqYstdname(int gridID, char *ystdname)
 {
   grid_t *gridptr = gridID2Ptr(gridID);
-  if ( gridptr->ystdname )
-    strcpy(ystdname, gridptr->ystdname);
+  if ( gridptr->y.stdname )
+    strcpy(ystdname, gridptr->y.stdname);
   else
     ystdname[0] = 0;
 }
@@ -1827,8 +1827,8 @@ void gridDefXpole(int gridID, double xpole)
   // Xpole -> grid_north_pole_longitude
   grid_t *gridptr = gridID2Ptr(gridID);
 
-  if ( gridptr->xstdname && memcmp(gridptr->xstdname, "grid", 4) != 0 )
-    gridptr->xstdname = xystdname_tab[grid_xystdname_grid_latlon][0];
+  if ( gridptr->x.stdname && memcmp(gridptr->x.stdname, "grid", 4) != 0 )
+    gridptr->x.stdname = xystdname_tab[grid_xystdname_grid_latlon][0];
 
   if ( gridptr->isRotated != TRUE || IS_NOT_EQUAL(gridptr->xpole, xpole) )
     {
@@ -1871,8 +1871,8 @@ void gridDefYpole(int gridID, double ypole)
   // Ypole -> grid_north_pole_latitude
   grid_t *gridptr = gridID2Ptr(gridID);
 
-  if ( gridptr->ystdname && memcmp(gridptr->ystdname, "grid", 4) != 0 )
-    gridptr->ystdname = xystdname_tab[grid_xystdname_grid_latlon][1];
+  if ( gridptr->y.stdname && memcmp(gridptr->y.stdname, "grid", 4) != 0 )
+    gridptr->y.stdname = xystdname_tab[grid_xystdname_grid_latlon][1];
 
   if ( gridptr->isRotated != TRUE || IS_NOT_EQUAL(gridptr->ypole, ypole) )
     {
@@ -2561,8 +2561,8 @@ int gridCompareP ( void * gridptr1, void * gridptr2 )
   if (strcmp(g1->y.name, g2->y.name)) return differ;
   if (strcmp(g1->x.longname, g2->x.longname)) return differ;
   if (strcmp(g1->y.longname, g2->y.longname)) return differ;
-  if (g1->xstdname != g2->xstdname) return differ;
-  if (g1->ystdname != g2->ystdname) return differ;
+  if (g1->x.stdname != g2->x.stdname) return differ;
+  if (g1->y.stdname != g2->y.stdname) return differ;
   if (strcmp(g1->x.units, g2->x.units)) return differ;
   if (strcmp(g1->y.units, g2->y.units)) return differ;
 
@@ -2657,8 +2657,8 @@ static void gridComplete(grid_t *grid)
 	    gridDefYname(gridID, "rlat");
 	    gridDefXlongname(gridID, "longitude in rotated pole grid");
 	    gridDefYlongname(gridID, "latitude in rotated pole grid");
-            grid->xstdname = xystdname_tab[grid_xystdname_grid_latlon][0];
-            grid->ystdname = xystdname_tab[grid_xystdname_grid_latlon][1];
+            grid->x.stdname = xystdname_tab[grid_xystdname_grid_latlon][0];
+            grid->y.stdname = xystdname_tab[grid_xystdname_grid_latlon][1];
 	    gridDefXunits(gridID, "degrees");
 	    gridDefYunits(gridID, "degrees");
 
@@ -4368,8 +4368,8 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
     gridP->ysize         =   intBuffer[23];
     gridP->lcomplex      =   (short)intBuffer[24];
     memberMask           =   intBuffer[25];
-    gridP->xstdname      =   xystdname_tab[intBuffer[26]][0];
-    gridP->ystdname      =   xystdname_tab[intBuffer[27]][1];
+    gridP->x.stdname      =   xystdname_tab[intBuffer[26]][0];
+    gridP->y.stdname      =   xystdname_tab[intBuffer[27]][1];
   }
 
   if (memberMask & gridHasRowLonFlag)
@@ -4571,9 +4571,9 @@ gridPack(void * voidP, void * packBuffer, int packBufferSize,
     intBuffer[23] = gridP->ysize;
     intBuffer[24] = gridP->lcomplex;
     intBuffer[25] = memberMask = gridGetComponentFlags(gridP);
-    intBuffer[26] = (int)((const char (*)[2][24])gridP->xstdname
+    intBuffer[26] = (int)((const char (*)[2][24])gridP->x.stdname
                           - xystdname_tab);
-    intBuffer[27] = (int)((const char (*)[2][24])gridP->ystdname
+    intBuffer[27] = (int)((const char (*)[2][24])gridP->y.stdname
                           - (const char (*)[2][24])xystdname_tab[0][1]);
 
     serializePack(intBuffer, gridNint, DATATYPE_INT,

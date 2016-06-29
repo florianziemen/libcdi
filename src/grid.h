@@ -48,6 +48,7 @@ struct gridaxis_t {
   char    longname[CDI_MAX_NAME];
   char    units[CDI_MAX_NAME];
   char    dimname[CDI_MAX_NAME];
+  const char *stdname;
 };
 
 struct grid_t {
@@ -104,8 +105,6 @@ struct grid_t {
   int     np;                     /* number of parallels between a pole and the equator */
   short   lcomplex;
   short   hasdims;
-  const char *xstdname;
-  const char *ystdname;
   char    vdimname[CDI_MAX_NAME];
   char   *name;
   struct gridaxis_t x;
