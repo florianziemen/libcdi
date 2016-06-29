@@ -5168,7 +5168,7 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 
 		  strcpy(grid->x.name, ncvars[xvarid].name);
 		  strcpy(grid->x.longname, ncvars[xvarid].longname);
-		  strcpy(grid->xunits, ncvars[xvarid].units);
+		  strcpy(grid->x.units, ncvars[xvarid].units);
 		}
 
 	      if ( yvarid != UNDEFID )
@@ -5216,7 +5216,7 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 
                   strcpy(grid->y.name, ncvars[yvarid].name);
                   strcpy(grid->y.longname, ncvars[yvarid].longname);
-                  strcpy(grid->yunits, ncvars[yvarid].units);
+                  strcpy(grid->y.units, ncvars[yvarid].units);
 		}
 
 	      if      ( (int) ysize == 0 ) size = xsize;
