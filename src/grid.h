@@ -75,6 +75,14 @@ struct grid_lcc2_t {
   short   defined;
 };
 
+// Lambert Azimuthal Equal Area
+struct grid_laea_t {
+  double  lon_0;
+  double  lat_0;
+  double  a;
+  short   defined;
+};
+
 struct grid_t {
   int     self;
   int     type;                   /* grid type                      */
@@ -92,10 +100,7 @@ struct grid_t {
   double  xinc, yinc;
   struct grid_lcc_t  lcc;
   struct grid_lcc2_t lcc2;
-  int     laea_defined;
-  double  laea_lon_0;             /* Lambert Azimuthal Equal Area   */
-  double  laea_lat_0;
-  double  laea_a;
+  struct grid_laea_t laea;
   double  xpole, ypole, angle;    /* rotated north pole             */
   short   isCyclic;               /* TRUE for global cyclic grids   */
   short   isRotated;              /* TRUE for rotated grids         */

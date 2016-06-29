@@ -125,10 +125,10 @@ void grid_init(grid_t *gridptr)
   gridptr->lcc2.lat_2    = 0.0;
   gridptr->lcc2.a        = 0.0;
   gridptr->lcc2.defined  = FALSE;
-  gridptr->laea_lon_0    = 0.0;
-  gridptr->laea_lat_0    = 0.0;
-  gridptr->laea_a        = 0.0;
-  gridptr->laea_defined  = FALSE;
+  gridptr->laea.lon_0    = 0.0;
+  gridptr->laea.lat_0    = 0.0;
+  gridptr->laea.a        = 0.0;
+  gridptr->laea.defined  = FALSE;
   gridptr->trunc         = 0;
   gridptr->nvertex       = 0;
   gridptr->nd            = 0;
@@ -2423,7 +2423,7 @@ int gridCompareP ( void * gridptr1, void * gridptr2 )
   if ( g1->lcc.scanflag  != g2->lcc.scanflag ) return differ;
   if ( g1->lcc.defined   != g2->lcc.defined  ) return differ;
   if ( g1->lcc2.defined  != g2->lcc2.defined ) return differ;
-  if ( g1->laea_defined  != g2->laea_defined ) return differ;
+  if ( g1->laea.defined  != g2->laea.defined ) return differ;
   if ( g1->isCyclic      != g2->isCyclic     ) return differ;
   if ( g1->isRotated     != g2->isRotated    ) return differ;
   if ( g1->xdef          != g2->xdef         ) return differ;
@@ -2460,9 +2460,9 @@ int gridCompareP ( void * gridptr1, void * gridptr2 )
   if ( IS_NOT_EQUAL(g1->lcc2.lat_1    , g2->lcc2.lat_1)    ) return differ;
   if ( IS_NOT_EQUAL(g1->lcc2.lat_2    , g2->lcc2.lat_2)    ) return differ;
   if ( IS_NOT_EQUAL(g1->lcc2.a        , g2->lcc2.a)        ) return differ;
-  if ( IS_NOT_EQUAL(g1->laea_lon_0    , g2->laea_lon_0)    ) return differ;
-  if ( IS_NOT_EQUAL(g1->laea_lat_0    , g2->laea_lat_0)    ) return differ;
-  if ( IS_NOT_EQUAL(g1->laea_a        , g2->laea_a)        ) return differ;
+  if ( IS_NOT_EQUAL(g1->laea.lon_0    , g2->laea.lon_0)    ) return differ;
+  if ( IS_NOT_EQUAL(g1->laea.lat_0    , g2->laea.lat_0)    ) return differ;
+  if ( IS_NOT_EQUAL(g1->laea.a        , g2->laea.a)        ) return differ;
   if ( IS_NOT_EQUAL(g1->xpole         , g2->xpole)         ) return differ;
   if ( IS_NOT_EQUAL(g1->ypole         , g2->ypole)         ) return differ;
   if ( IS_NOT_EQUAL(g1->angle         , g2->angle)         ) return differ;
@@ -2670,7 +2670,7 @@ static void gridComplete(grid_t *grid)
         switch (gridtype)
           {
           case GRID_LAEA:
-            gridDefLaea(gridID, grid->laea_a, grid->laea_lon_0, grid->laea_lat_0);
+            gridDefLaea(gridID, grid->laea.a, grid->laea.lon_0, grid->laea.lat_0);
             break;
           case GRID_LCC2:
             gridDefLcc2(gridID, grid->lcc2.a, grid->lcc2.lon_0, grid->lcc2.lat_0, grid->lcc2.lat_1, grid->lcc2.lat_2);
@@ -2819,9 +2819,9 @@ int gridGenerate(const grid_t *grid)
   gridptr->angle = grid->angle;
   if ( valdef_group1 && grid->area)
     gridDefArea(gridID, grid->area);
-  gridptr->laea_a = grid->laea_a;
-  gridptr->laea_lon_0 = grid->laea_lon_0;
-  gridptr->laea_lat_0 = grid->laea_lat_0;
+  gridptr->laea.a = grid->laea.a;
+  gridptr->laea.lon_0 = grid->laea.lon_0;
+  gridptr->laea.lat_0 = grid->laea.lat_0;
   gridptr->lcc2.a = grid->lcc2.a;
   gridptr->lcc2.lon_0 = grid->lcc2.lon_0;
   gridptr->lcc2.lat_0 = grid->lcc2.lat_0;
@@ -3889,10 +3889,10 @@ void gridDefLaea(int gridID, double earth_radius, double lon_0, double lat_0)
             gridNamePtr(gridptr->type));
   else
     {
-      gridptr->laea_a       = earth_radius;
-      gridptr->laea_lon_0   = lon_0;
-      gridptr->laea_lat_0   = lat_0;
-      gridptr->laea_defined = TRUE;
+      gridptr->laea.a       = earth_radius;
+      gridptr->laea.lon_0   = lon_0;
+      gridptr->laea.lat_0   = lat_0;
+      gridptr->laea.defined = TRUE;
       gridMark4Update(gridID);
     }
 }
@@ -3907,11 +3907,11 @@ void gridInqLaea(int gridID, double *earth_radius, double *lon_0, double *lat_0)
             gridNamePtr(gridptr->type));
   else
     {
-      if ( gridptr->laea_defined )
+      if ( gridptr->laea.defined )
         {
-          *earth_radius = gridptr->laea_a;
-          *lon_0        = gridptr->laea_lon_0;
-          *lat_0        = gridptr->laea_lat_0;
+          *earth_radius = gridptr->laea.a;
+          *lon_0        = gridptr->laea.lon_0;
+          *lat_0        = gridptr->laea.lat_0;
         }
       else
         Warning("LAEA grid undefined (gridID = %d)", gridID);
@@ -4349,7 +4349,7 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
     gridP->lcc.scanflag  =   intBuffer[4];
     gridP->lcc.defined   =   (short)intBuffer[5];
     gridP->lcc2.defined  =   (short)intBuffer[6];
-    gridP->laea_defined  =   intBuffer[7];
+    gridP->laea.defined  =   intBuffer[7];
     gridP->isCyclic      =   (short)intBuffer[8];
     gridP->isRotated     =   (short)intBuffer[9];
     gridP->xdef          =   (short)intBuffer[10];
@@ -4409,9 +4409,9 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
     gridP->lcc2.lat_1 = doubleBuffer[15];
     gridP->lcc2.lat_2 = doubleBuffer[16];
     gridP->lcc2.a = doubleBuffer[17];
-    gridP->laea_lon_0 = doubleBuffer[18];
-    gridP->laea_lat_0 = doubleBuffer[19];
-    gridP->laea_a = doubleBuffer[20];
+    gridP->laea.lon_0 = doubleBuffer[18];
+    gridP->laea.lat_0 = doubleBuffer[19];
+    gridP->laea.a = doubleBuffer[20];
     gridP->xpole = doubleBuffer[21];
     gridP->ypole = doubleBuffer[22];
     gridP->angle = doubleBuffer[23];
@@ -4552,7 +4552,7 @@ gridPack(void * voidP, void * packBuffer, int packBufferSize,
     intBuffer[4]  = gridP->lcc.scanflag;
     intBuffer[5]  = gridP->lcc.defined;
     intBuffer[6]  = gridP->lcc2.defined;
-    intBuffer[7]  = gridP->laea_defined;
+    intBuffer[7]  = gridP->laea.defined;
     intBuffer[8]  = gridP->isCyclic;
     intBuffer[9]  = gridP->isRotated;
     intBuffer[10] = gridP->xdef;
@@ -4615,9 +4615,9 @@ gridPack(void * voidP, void * packBuffer, int packBufferSize,
     doubleBuffer[15] = gridP->lcc2.lat_1;
     doubleBuffer[16] = gridP->lcc2.lat_2;
     doubleBuffer[17] = gridP->lcc2.a;
-    doubleBuffer[18] = gridP->laea_lon_0;
-    doubleBuffer[19] = gridP->laea_lat_0;
-    doubleBuffer[20] = gridP->laea_a;
+    doubleBuffer[18] = gridP->laea.lon_0;
+    doubleBuffer[19] = gridP->laea.lat_0;
+    doubleBuffer[20] = gridP->laea.a;
     doubleBuffer[21] = gridP->xpole;
     doubleBuffer[22] = gridP->ypole;
     doubleBuffer[23] = gridP->angle;

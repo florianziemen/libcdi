@@ -5397,12 +5397,12 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 		    {
                       double datt;
 		      cdfGetAttDouble(ncvars[ncvarid].ncid, ncvars[ncvarid].gmapid, attname, 1, &datt);
-		      grid->laea_a = datt;
+		      grid->laea.a = datt;
 		      grid->lcc2.a = datt;
 		    }
 		  else if ( strcmp(attname, "longitude_of_projection_origin") == 0 )
 		    {
-		      cdfGetAttDouble(ncvars[ncvarid].ncid, ncvars[ncvarid].gmapid, attname, 1, &grid->laea_lon_0);
+		      cdfGetAttDouble(ncvars[ncvarid].ncid, ncvars[ncvarid].gmapid, attname, 1, &grid->laea.lon_0);
 		    }
 		  else if ( strcmp(attname, "longitude_of_central_meridian") == 0 )
 		    {
@@ -5412,7 +5412,7 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 		    {
                       double datt;
 		      cdfGetAttDouble(ncvars[ncvarid].ncid, ncvars[ncvarid].gmapid, attname, 1, &datt);
-		      grid->laea_lat_0 = datt;
+		      grid->laea.lat_0 = datt;
 		      grid->lcc2.lat_0 = datt;
 		    }
 		  else if ( strcmp(attname, "standard_parallel") == 0 )
