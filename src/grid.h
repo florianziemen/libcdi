@@ -51,6 +51,16 @@ struct gridaxis_t {
   const char *stdname;
 };
 
+// Lambert Conformal Conic 2
+struct grid_lcc2_t {
+  short   defined;
+  double  lon_0;
+  double  lat_0;
+  double  lat_1;
+  double  lat_2;
+  double  a;
+};
+
 struct grid_t {
   int     self;
   int     type;                   /* grid type                      */
@@ -76,13 +86,8 @@ struct grid_t {
   int     lcc_projflag;
   int     lcc_scanflag;
   short   lcc_defined;
-  short   lcc2_defined;
+  struct grid_lcc2_t lcc2;
   int     laea_defined;
-  double  lcc2_lon_0;             /* Lambert Conformal Conic 2      */
-  double  lcc2_lat_0;
-  double  lcc2_lat_1;
-  double  lcc2_lat_2;
-  double  lcc2_a;
   double  laea_lon_0;             /* Lambert Azimuthal Equal Area   */
   double  laea_lat_0;
   double  laea_a;

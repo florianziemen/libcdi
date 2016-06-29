@@ -5398,7 +5398,7 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
                       double datt;
 		      cdfGetAttDouble(ncvars[ncvarid].ncid, ncvars[ncvarid].gmapid, attname, 1, &datt);
 		      grid->laea_a = datt;
-		      grid->lcc2_a = datt;
+		      grid->lcc2.a = datt;
 		    }
 		  else if ( strcmp(attname, "longitude_of_projection_origin") == 0 )
 		    {
@@ -5406,14 +5406,14 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 		    }
 		  else if ( strcmp(attname, "longitude_of_central_meridian") == 0 )
 		    {
-		      cdfGetAttDouble(ncvars[ncvarid].ncid, ncvars[ncvarid].gmapid, attname, 1, &grid->lcc2_lon_0);
+		      cdfGetAttDouble(ncvars[ncvarid].ncid, ncvars[ncvarid].gmapid, attname, 1, &grid->lcc2.lon_0);
 		    }
 		  else if ( strcmp(attname, "latitude_of_projection_origin") == 0 )
 		    {
                       double datt;
 		      cdfGetAttDouble(ncvars[ncvarid].ncid, ncvars[ncvarid].gmapid, attname, 1, &datt);
 		      grid->laea_lat_0 = datt;
-		      grid->lcc2_lat_0 = datt;
+		      grid->lcc2.lat_0 = datt;
 		    }
 		  else if ( strcmp(attname, "standard_parallel") == 0 )
 		    {
@@ -5421,15 +5421,15 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 			{
                           double datt;
 			  cdfGetAttDouble(ncvars[ncvarid].ncid, ncvars[ncvarid].gmapid, attname, 1, &datt);
-			  grid->lcc2_lat_1 = datt;
-			  grid->lcc2_lat_2 = datt;
+			  grid->lcc2.lat_1 = datt;
+			  grid->lcc2.lat_2 = datt;
 			}
 		      else
 			{
 			  double datt2[2];
 			  cdfGetAttDouble(ncvars[ncvarid].ncid, ncvars[ncvarid].gmapid, attname, 2, datt2);
-			  grid->lcc2_lat_1 = datt2[0];
-			  grid->lcc2_lat_2 = datt2[1];
+			  grid->lcc2.lat_1 = datt2[0];
+			  grid->lcc2.lat_2 = datt2[1];
 			}
 		    }
 		  else if ( strcmp(attname, "grid_north_pole_latitude") == 0 )

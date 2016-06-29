@@ -119,12 +119,12 @@ void grid_init(grid_t *gridptr)
   gridptr->lcc_projflag  = 0;
   gridptr->lcc_scanflag  = 0;
   gridptr->lcc_defined   = FALSE;
-  gridptr->lcc2_lon_0    = 0.0;
-  gridptr->lcc2_lat_0    = 0.0;
-  gridptr->lcc2_lat_1    = 0.0;
-  gridptr->lcc2_lat_2    = 0.0;
-  gridptr->lcc2_a        = 0.0;
-  gridptr->lcc2_defined  = FALSE;
+  gridptr->lcc2.lon_0    = 0.0;
+  gridptr->lcc2.lat_0    = 0.0;
+  gridptr->lcc2.lat_1    = 0.0;
+  gridptr->lcc2.lat_2    = 0.0;
+  gridptr->lcc2.a        = 0.0;
+  gridptr->lcc2.defined  = FALSE;
   gridptr->laea_lon_0    = 0.0;
   gridptr->laea_lat_0    = 0.0;
   gridptr->laea_a        = 0.0;
@@ -2422,7 +2422,7 @@ int gridCompareP ( void * gridptr1, void * gridptr2 )
   if ( g1->lcc_projflag  != g2->lcc_projflag ) return differ;
   if ( g1->lcc_scanflag  != g2->lcc_scanflag ) return differ;
   if ( g1->lcc_defined   != g2->lcc_defined  ) return differ;
-  if ( g1->lcc2_defined  != g2->lcc2_defined ) return differ;
+  if ( g1->lcc2.defined  != g2->lcc2.defined ) return differ;
   if ( g1->laea_defined  != g2->laea_defined ) return differ;
   if ( g1->isCyclic      != g2->isCyclic     ) return differ;
   if ( g1->isRotated     != g2->isRotated    ) return differ;
@@ -2455,11 +2455,11 @@ int gridCompareP ( void * gridptr1, void * gridptr2 )
   if ( IS_NOT_EQUAL(g1->lcc_lat2      , g2->lcc_lat2)      ) return differ;
   if ( IS_NOT_EQUAL(g1->lcc_xinc      , g2->lcc_xinc)      ) return differ;
   if ( IS_NOT_EQUAL(g1->lcc_yinc      , g2->lcc_yinc)      ) return differ;
-  if ( IS_NOT_EQUAL(g1->lcc2_lon_0    , g2->lcc2_lon_0)    ) return differ;
-  if ( IS_NOT_EQUAL(g1->lcc2_lat_0    , g2->lcc2_lat_0)    ) return differ;
-  if ( IS_NOT_EQUAL(g1->lcc2_lat_1    , g2->lcc2_lat_1)    ) return differ;
-  if ( IS_NOT_EQUAL(g1->lcc2_lat_2    , g2->lcc2_lat_2)    ) return differ;
-  if ( IS_NOT_EQUAL(g1->lcc2_a        , g2->lcc2_a)        ) return differ;
+  if ( IS_NOT_EQUAL(g1->lcc2.lon_0    , g2->lcc2.lon_0)    ) return differ;
+  if ( IS_NOT_EQUAL(g1->lcc2.lat_0    , g2->lcc2.lat_0)    ) return differ;
+  if ( IS_NOT_EQUAL(g1->lcc2.lat_1    , g2->lcc2.lat_1)    ) return differ;
+  if ( IS_NOT_EQUAL(g1->lcc2.lat_2    , g2->lcc2.lat_2)    ) return differ;
+  if ( IS_NOT_EQUAL(g1->lcc2.a        , g2->lcc2.a)        ) return differ;
   if ( IS_NOT_EQUAL(g1->laea_lon_0    , g2->laea_lon_0)    ) return differ;
   if ( IS_NOT_EQUAL(g1->laea_lat_0    , g2->laea_lat_0)    ) return differ;
   if ( IS_NOT_EQUAL(g1->laea_a        , g2->laea_a)        ) return differ;
@@ -2673,7 +2673,7 @@ static void gridComplete(grid_t *grid)
             gridDefLaea(gridID, grid->laea_a, grid->laea_lon_0, grid->laea_lat_0);
             break;
           case GRID_LCC2:
-            gridDefLcc2(gridID, grid->lcc2_a, grid->lcc2_lon_0, grid->lcc2_lat_0, grid->lcc2_lat_1, grid->lcc2_lat_2);
+            gridDefLcc2(gridID, grid->lcc2.a, grid->lcc2.lon_0, grid->lcc2.lat_0, grid->lcc2.lat_1, grid->lcc2.lat_2);
             break;
           case GRID_LCC:
             gridDefLCC(gridID, grid->lcc_originLon, grid->lcc_originLat, grid->lcc_lonParY,
@@ -2822,11 +2822,11 @@ int gridGenerate(const grid_t *grid)
   gridptr->laea_a = grid->laea_a;
   gridptr->laea_lon_0 = grid->laea_lon_0;
   gridptr->laea_lat_0 = grid->laea_lat_0;
-  gridptr->lcc2_a = grid->lcc2_a;
-  gridptr->lcc2_lon_0 = grid->lcc2_lon_0;
-  gridptr->lcc2_lat_0 = grid->lcc2_lat_0;
-  gridptr->lcc2_lat_1 = grid->lcc2_lat_1;
-  gridptr->lcc2_lat_2 = grid->lcc2_lat_2;
+  gridptr->lcc2.a = grid->lcc2.a;
+  gridptr->lcc2.lon_0 = grid->lcc2.lon_0;
+  gridptr->lcc2.lat_0 = grid->lcc2.lat_0;
+  gridptr->lcc2.lat_1 = grid->lcc2.lat_1;
+  gridptr->lcc2.lat_2 = grid->lcc2.lat_2;
   gridptr->lcc_originLon = grid->lcc_originLon;
   gridptr->lcc_originLat = grid->lcc_originLat;
   gridptr->lcc_lonParY = grid->lcc_lonParY;
@@ -3847,12 +3847,12 @@ void gridDefLcc2(int gridID, double earth_radius, double lon_0, double lat_0, do
 	    gridNamePtr(gridptr->type));
   else
     {
-      gridptr->lcc2_a       = earth_radius;
-      gridptr->lcc2_lon_0   = lon_0;
-      gridptr->lcc2_lat_0   = lat_0;
-      gridptr->lcc2_lat_1   = lat_1;
-      gridptr->lcc2_lat_2   = lat_2;
-      gridptr->lcc2_defined = TRUE;
+      gridptr->lcc2.a       = earth_radius;
+      gridptr->lcc2.lon_0   = lon_0;
+      gridptr->lcc2.lat_0   = lat_0;
+      gridptr->lcc2.lat_1   = lat_1;
+      gridptr->lcc2.lat_2   = lat_2;
+      gridptr->lcc2.defined = TRUE;
       gridMark4Update(gridID);
     }
 }
@@ -3867,13 +3867,13 @@ void gridInqLcc2(int gridID, double *earth_radius, double *lon_0, double *lat_0,
 	    gridNamePtr(gridptr->type));
   else
     {
-      if ( gridptr->lcc2_defined )
+      if ( gridptr->lcc2.defined )
         {
-          *earth_radius = gridptr->lcc2_a;
-          *lon_0        = gridptr->lcc2_lon_0;
-          *lat_0        = gridptr->lcc2_lat_0;
-          *lat_1        = gridptr->lcc2_lat_1;
-          *lat_2        = gridptr->lcc2_lat_2;
+          *earth_radius = gridptr->lcc2.a;
+          *lon_0        = gridptr->lcc2.lon_0;
+          *lat_0        = gridptr->lcc2.lat_0;
+          *lat_1        = gridptr->lcc2.lat_1;
+          *lat_2        = gridptr->lcc2.lat_2;
         }
       else
         Warning("LCC2 grid undefined (gridID = %d)", gridID);
@@ -4348,7 +4348,7 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
     gridP->lcc_projflag  =   intBuffer[3];
     gridP->lcc_scanflag  =   intBuffer[4];
     gridP->lcc_defined   =   (short)intBuffer[5];
-    gridP->lcc2_defined  =   (short)intBuffer[6];
+    gridP->lcc2.defined  =   (short)intBuffer[6];
     gridP->laea_defined  =   intBuffer[7];
     gridP->isCyclic      =   (short)intBuffer[8];
     gridP->isRotated     =   (short)intBuffer[9];
@@ -4404,11 +4404,11 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
     gridP->lcc_lat2 = doubleBuffer[10];
     gridP->lcc_xinc = doubleBuffer[11];
     gridP->lcc_yinc = doubleBuffer[12];
-    gridP->lcc2_lon_0 = doubleBuffer[13];
-    gridP->lcc2_lat_0 = doubleBuffer[14];
-    gridP->lcc2_lat_1 = doubleBuffer[15];
-    gridP->lcc2_lat_2 = doubleBuffer[16];
-    gridP->lcc2_a = doubleBuffer[17];
+    gridP->lcc2.lon_0 = doubleBuffer[13];
+    gridP->lcc2.lat_0 = doubleBuffer[14];
+    gridP->lcc2.lat_1 = doubleBuffer[15];
+    gridP->lcc2.lat_2 = doubleBuffer[16];
+    gridP->lcc2.a = doubleBuffer[17];
     gridP->laea_lon_0 = doubleBuffer[18];
     gridP->laea_lat_0 = doubleBuffer[19];
     gridP->laea_a = doubleBuffer[20];
@@ -4551,7 +4551,7 @@ gridPack(void * voidP, void * packBuffer, int packBufferSize,
     intBuffer[3]  = gridP->lcc_projflag;
     intBuffer[4]  = gridP->lcc_scanflag;
     intBuffer[5]  = gridP->lcc_defined;
-    intBuffer[6]  = gridP->lcc2_defined;
+    intBuffer[6]  = gridP->lcc2.defined;
     intBuffer[7]  = gridP->laea_defined;
     intBuffer[8]  = gridP->isCyclic;
     intBuffer[9]  = gridP->isRotated;
@@ -4610,11 +4610,11 @@ gridPack(void * voidP, void * packBuffer, int packBufferSize,
     doubleBuffer[10] = gridP->lcc_lat2;
     doubleBuffer[11] = gridP->lcc_xinc;
     doubleBuffer[12] = gridP->lcc_yinc;
-    doubleBuffer[13] = gridP->lcc2_lon_0;
-    doubleBuffer[14] = gridP->lcc2_lat_0;
-    doubleBuffer[15] = gridP->lcc2_lat_1;
-    doubleBuffer[16] = gridP->lcc2_lat_2;
-    doubleBuffer[17] = gridP->lcc2_a;
+    doubleBuffer[13] = gridP->lcc2.lon_0;
+    doubleBuffer[14] = gridP->lcc2.lat_0;
+    doubleBuffer[15] = gridP->lcc2.lat_1;
+    doubleBuffer[16] = gridP->lcc2.lat_2;
+    doubleBuffer[17] = gridP->lcc2.a;
     doubleBuffer[18] = gridP->laea_lon_0;
     doubleBuffer[19] = gridP->laea_lat_0;
     doubleBuffer[20] = gridP->laea_a;
