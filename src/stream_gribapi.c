@@ -2614,7 +2614,7 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   long editionNumber = 2;
   char name[256];
   char stdname[256];
-  gribContainer_t *gc = (gribContainer_t *) gribContainer;
+
   // extern unsigned char _grib_template_GRIB2[];
 
   int param    = vlistInqVarParam(vlistID, varID);
@@ -2628,8 +2628,11 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
 #if defined(GRIBAPIENCODETEST)
   grib_handle *gh = (grib_handle *) gribHandleNew(editionNumber);
 #else
+  gribContainer_t *gc = (gribContainer_t *) gribContainer;
+  assert(gc != NULL);
   grib_handle *gh = (struct grib_handle *)gc->gribHandle;
 #endif
+
   GRIB_CHECK(grib_get_long(gh, "editionNumber", &editionNumber), 0);
 
   if ( editionNumber == 2 )
