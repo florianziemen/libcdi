@@ -654,6 +654,7 @@ int streamOpenA(const char *filename, const char *filemode, int filetype)
     case FILETYPE_GRB2:
       {
         fileID = gribOpen(filename, filemode);
+        if ( fileID != CDI_UNDEFID ) gribContainersNew(streamptr);
 	break;
       }
 #endif
