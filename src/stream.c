@@ -604,17 +604,14 @@ int streamOpen(const char *filename, const char *filemode, int filetype)
 static
 int streamOpenA(const char *filename, const char *filemode, int filetype)
 {
-  int fileID = CDI_UNDEFID;
-  int streamID = CDI_ESYSTEM;
-  int status;
-  stream_t *streamptr = stream_new_entry(CDI_UNDEFID);
-  vlist_t *vlistptr;
-
   if ( CDI_Debug )
     Message("Open %s file (mode=%c); filename: %s", strfiletype(filetype), (int) *filemode, filename);
   if ( CDI_Debug ) printf("streamOpenA: %s\n", filename); // seg fault without this line on thunder/squall with "cdo cat x y"
 
   if ( ! filename || ! filemode || filetype < 0 ) return CDI_EINVAL;
+
+  stream_t *streamptr = stream_new_entry(CDI_UNDEFID);
+  int fileID = CDI_UNDEFID;
 
   {
     int (*streamOpenDelegate)(const char *filename, char filemode,
@@ -627,7 +624,7 @@ int streamOpenA(const char *filename, const char *filemode, int filetype)
 
   if ( fileID == CDI_UNDEFID || fileID == CDI_ELIBNAVAIL || fileID == CDI_ESYSTEM ) return fileID;
 
-  streamID = streamptr->self;
+  int streamID = streamptr->self;
 
   streamptr->filemode = tolower(*filemode);
   streamptr->filename = strdupx(filename);
@@ -636,9 +633,9 @@ int streamOpenA(const char *filename, const char *filemode, int filetype)
   streamptr->vlistID = vlistCreate();
   cdiVlistMakeInternal(streamptr->vlistID);
   /* cdiReadByteorder(streamID); */
-  status = cdiInqContents(streamptr);
+  int status = cdiInqContents(streamptr);
   if ( status < 0 ) return status;
-  vlistptr = vlist_to_pointer(streamptr->vlistID);
+  vlist_t *vlistptr = vlist_to_pointer(streamptr->vlistID);
   vlistptr->ntsteps = (int)cdiInqTimeSize(streamID);
   if(!strcmp(filemode, "r")) cdiVlistMakeImmutable(streamptr->vlistID);
 
@@ -898,12 +895,11 @@ void streamDefaultValue ( stream_t * streamptr )
 static
 stream_t *stream_new_entry(int resH)
 {
-  stream_t *streamptr;
-
   cdiInitialize(); /* ***************** make MT version !!! */
 
-  streamptr = (stream_t *) Malloc(sizeof(stream_t));
+  stream_t *streamptr = (stream_t *) Malloc(sizeof(stream_t));
   streamDefaultValue ( streamptr );
+
   if (resH == CDI_UNDEFID)
     streamptr->self = reshPut(streamptr, &streamOps);
   else
