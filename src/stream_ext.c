@@ -13,7 +13,6 @@
 #include "cdi.h"
 #include "cdi_int.h"
 #include "stream_ext.h"
-#include "stream_fcommon.h"
 #include "varscan.h"
 #include "datetime.h"
 #include "extra.h"

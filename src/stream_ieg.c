@@ -19,7 +19,6 @@
 #include "varscan.h"
 #include "datetime.h"
 #include "ieg.h"
-#include "stream_fcommon.h"
 #include "stream_ieg.h"
 #include "vlist.h"
 

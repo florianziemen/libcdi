@@ -16,7 +16,6 @@
 #include "varscan.h"
 #include "datetime.h"
 #include "service.h"
-#include "stream_fcommon.h"
 #include "stream_srv.h"
 #include "vlist.h"
 
