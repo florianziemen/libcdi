@@ -374,6 +374,7 @@ void cdi_create_records(stream_t *streamptr, int tsID)
     }
 }
 
+#include "file.h"
 
 void streamFCopyRecord(stream_t *streamptr2, stream_t *streamptr1, const char *container_name)
 {
