@@ -4,33 +4,10 @@
 
 #ifdef HAVE_LIBNETCDF
 
-//#define TEST_GROUPS 1
-
-#include <limits.h>
-#include <ctype.h>
-#include <math.h>
-#include <float.h>
-#ifdef HAVE_MMAP
-#include <unistd.h>
-#include <sys/mman.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#endif
-#ifdef HAVE_LIBPTHREAD
-#include <pthread.h>
-#endif
-
-#include <netcdf.h>
-
 #include "dmemory.h"
-#include "cdi.h"
-#include "basetime.h"
-#include "gaussgrid.h"
 #include "cdi_int.h"
 #include "cdi_uuid.h"
 #include "stream_cdf.h"
-#include "cdf.h"
 #include "cdf_int.h"
 #include "varscan.h"
 #include "vlist.h"
@@ -40,11 +17,11 @@
 #undef  UNDEFID
 #define UNDEFID  CDI_UNDEFID
 
-static const char bndsName[] = "bnds";
-
-
 #define  POSITIVE_UP    1
 #define  POSITIVE_DOWN  2
+
+
+static const char bndsName[] = "bnds";
 
 
 void cdfCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
@@ -102,33 +79,6 @@ void cdfDefRecord(stream_t *streamptr)
 {
   (void)streamptr;
 }
-
-#if defined(NC_SZIP_NN_OPTION_MASK)
-static
-void cdfDefVarSzip(int ncid, int ncvarid)
-{
-  int retval;
-  /* Set options_mask and bits_per_pixel. */
-  int options_mask = NC_SZIP_NN_OPTION_MASK;
-  int bits_per_pixel = 16;
-
-  if ((retval = nc_def_var_szip(ncid, ncvarid, options_mask, bits_per_pixel)))
-    {
-      if ( retval == NC_EINVAL )
-        {
-          static int lwarn = TRUE;
-
-          if ( lwarn )
-            {
-              lwarn = FALSE;
-              Warning("NetCDF4/Szip compression not compiled in!");
-            }
-        }
-      else
-        Error("nc_def_var_szip failed, status = %d", retval);
-    }
-}
-#endif
 
 static
 void cdfDefTimeValue(stream_t *streamptr, int tsID)
@@ -2016,7 +1966,6 @@ void cdfDefPole(stream_t *streamptr, int gridID)
   cdf_enddef(fileID);
 }
 
-
 static
 void cdfDefMapping(stream_t *streamptr, int gridID)
 {
@@ -2239,6 +2188,7 @@ void cdfDefVars(stream_t *streamptr)
     }
   */
 }
+
 #endif
 /*
  * Local Variables:

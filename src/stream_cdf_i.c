@@ -6,10 +6,8 @@
 
 //#define TEST_GROUPS 1
 
-#include <limits.h>
 #include <ctype.h>
-#include <math.h>
-#include <float.h>
+
 #ifdef HAVE_MMAP
 #include <unistd.h>
 #include <sys/mman.h>
@@ -21,20 +19,16 @@
 #include <pthread.h>
 #endif
 
-#include <netcdf.h>
+//#include <netcdf.h>
 
 #include "dmemory.h"
-#include "cdi.h"
-#include "basetime.h"
 #include "gaussgrid.h"
 #include "cdi_int.h"
 #include "cdi_uuid.h"
 #include "stream_cdf.h"
-#include "cdf.h"
 #include "cdf_int.h"
 #include "varscan.h"
 #include "vlist.h"
-#include "zaxis.h"
 
 //#define PROJECTION_TEST
 
