@@ -83,8 +83,6 @@ libcdi_la_SOURCES = 	 \
 	stream_history.c \
 	stream_ieg.c     \
 	stream_ieg.h	 \
-	stream_fcommon.c \
-	stream_fcommon.h \
 	cdi_int.c        \
 	cdi_int.h	 \
 	stream_record.c  \

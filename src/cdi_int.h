@@ -366,6 +366,8 @@ void    vlist_check_contents(int vlistID);
 
 void    cdi_create_records(stream_t *streamptr, int tsID);
 
+void streamFCopyRecord(stream_t *streamptr2, stream_t *streamptr1, const char *container_name);
+
 int     recordNewEntry(stream_t *streamptr, int tsID);
 
 void    cdiCreateTimesteps(stream_t *streamptr);
