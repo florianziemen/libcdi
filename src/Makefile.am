@@ -94,6 +94,8 @@ libcdi_la_SOURCES = 	 \
         grb_read.c       \
         cdf_write.c      \
         cdf_read.c       \
+        cdf_lazy_grid.c  \
+        cdf_lazy_grid.h  \
         subtype.c        \
         subtype.h        \
 	swap.h	 	 \

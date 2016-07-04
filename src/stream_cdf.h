@@ -1,6 +1,8 @@
 #ifndef _STREAM_CDF_H
 #define _STREAM_CDF_H
 
+#include "cdi_int.h"
+
 void   cdfDefVars(stream_t *streamptr);
 void   cdfDefTimestep(stream_t *streamptr, int tsID);
 int    cdfInqTimestep(stream_t *streamptr, int tsID);
@@ -28,6 +30,8 @@ void   cdf_write_var_chunk(stream_t *streamptr, int varID, int memtype,
 
 void cdfDefVarDeflate(int ncid, int ncvarid, int deflate_level);
 void cdfDefTime(stream_t* streamptr);
+
+void cdf_scale_add(size_t size, double *data, double addoffset, double scalefactor);
 
 #endif
 /*
