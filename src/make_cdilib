@@ -126,7 +126,6 @@ files="basetime.c \
    stream_cdf.c \
    stream_cgribex.c \
    stream_ext.c \
-   stream_fcommon.c \
    stream_grb.c \
    stream_gribapi.c \
    stream_history.c \
