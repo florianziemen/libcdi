@@ -833,9 +833,7 @@ The function @func{gridInqXname} returns the name of a X-axis.
 */
 void gridInqXname(int gridID, char *xname)
 {
-  grid_t *gridptr = gridID2Ptr(gridID);
-
-  strcpy(xname, gridptr->x.name);
+  (void)cdiGridInqKeyStr(gridID, CDI_KEY_XNAME, CDI_MAX_NAME, xname);
 }
 
 const char *gridInqXnamePtr(int gridID)
@@ -865,9 +863,7 @@ The function @func{gridInqXlongname} returns the longname of a X-axis.
 */
 void gridInqXlongname(int gridID, char *xlongname)
 {
-  grid_t *gridptr = gridID2Ptr(gridID);
-
-  strcpy(xlongname, gridptr->x.longname);
+  (void)cdiGridInqKeyStr(gridID, CDI_KEY_XLONGNAME, CDI_MAX_NAME, xlongname);
 }
 
 /*
@@ -891,9 +887,7 @@ The function @func{gridInqXunits} returns the units of a X-axis.
 */
 void gridInqXunits(int gridID, char *xunits)
 {
-  grid_t *gridptr = gridID2Ptr(gridID);
-
-  strcpy(xunits, gridptr->x.units);
+  (void)cdiGridInqKeyStr(gridID, CDI_KEY_XUNITS, CDI_MAX_NAME, xunits);
 }
 
 
