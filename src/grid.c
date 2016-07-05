@@ -96,11 +96,11 @@ void grid_init(grid_t *gridptr)
   gridptr->proj          = CDI_UNDEFID;
   gridptr->mask          = NULL;
   gridptr->mask_gme      = NULL;
-  gridptr->x.vals         = NULL;
-  gridptr->y.vals         = NULL;
+  gridptr->x.vals        = NULL;
+  gridptr->y.vals        = NULL;
   gridptr->area          = NULL;
-  gridptr->x.bounds       = NULL;
-  gridptr->y.bounds       = NULL;
+  gridptr->x.bounds      = NULL;
+  gridptr->y.bounds      = NULL;
   gridptr->rowlon        = NULL;
   gridptr->nrowlon       = 0;
   gridptr->xfirst        = 0.0;
@@ -109,6 +109,7 @@ void grid_init(grid_t *gridptr)
   gridptr->yfirst        = 0.0;
   gridptr->ylast         = 0.0;
   gridptr->yinc          = 0.0;
+
   gridptr->lcc.originLon = 0.0;
   gridptr->lcc.originLat = 0.0;
   gridptr->lcc.lonParY   = 0.0;
@@ -125,14 +126,17 @@ void grid_init(grid_t *gridptr)
   gridptr->lcc2.lat_2    = 0.0;
   gridptr->lcc2.a        = 0.0;
   gridptr->lcc2.defined  = FALSE;
+
   gridptr->laea.lon_0    = 0.0;
   gridptr->laea.lat_0    = 0.0;
   gridptr->laea.a        = 0.0;
   gridptr->laea.defined  = FALSE;
+
   gridptr->gme.nd        = 0;
   gridptr->gme.ni        = 0;
   gridptr->gme.ni2       = 0;
   gridptr->gme.ni3       = 0;
+
   gridptr->trunc         = 0;
   gridptr->nvertex       = 0;
   gridptr->number        = 0;
@@ -140,8 +144,8 @@ void grid_init(grid_t *gridptr)
   gridptr->reference     = NULL;
   gridptr->prec          = 0;
   gridptr->size          = 0;
-  gridptr->x.size         = 0;
-  gridptr->y.size         = 0;
+  gridptr->x.size        = 0;
+  gridptr->y.size        = 0;
   gridptr->np            = 0;
   gridptr->xdef          = 0;
   gridptr->ydef          = 0;
@@ -151,18 +155,18 @@ void grid_init(grid_t *gridptr)
   gridptr->ypole         = 0.0;
   gridptr->angle         = 0.0;
   gridptr->lcomplex      = 0;
-  gridptr->hasdims       = TRUE;
-  gridptr->x.dimname[0]   = 0;
-  gridptr->y.dimname[0]   = 0;
+  gridptr->hasdims       = true;
+  gridptr->x.dimname[0]  = 0;
+  gridptr->y.dimname[0]  = 0;
   gridptr->vdimname[0]   = 0;
-  gridptr->x.name[0]      = 0;
-  gridptr->y.name[0]      = 0;
-  gridptr->x.longname[0]  = 0;
-  gridptr->y.longname[0]  = 0;
-  gridptr->x.units[0]     = 0;
-  gridptr->y.units[0]     = 0;
-  gridptr->x.stdname      = NULL;
-  gridptr->y.stdname      = NULL;
+  gridptr->x.name[0]     = 0;
+  gridptr->y.name[0]     = 0;
+  gridptr->x.longname[0] = 0;
+  gridptr->y.longname[0] = 0;
+  gridptr->x.units[0]    = 0;
+  gridptr->y.units[0]    = 0;
+  gridptr->x.stdname     = NULL;
+  gridptr->y.stdname     = NULL;
   memset(gridptr->uuid, 0, CDI_UUID_SIZE);
   gridptr->name          = NULL;
   gridptr->vtable        = &cdiGridVtable;
@@ -3919,7 +3923,7 @@ int gridInqHasDims(int gridID)
 {
   grid_t* gridptr = gridID2Ptr(gridID);
 
-  return gridptr->hasdims;
+  return (int)gridptr->hasdims;
 }
 
 /*
