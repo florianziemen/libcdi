@@ -2858,11 +2858,11 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
             gridDefHasDims(ncvars[ncvarid].gridID, FALSE);
 
           if ( xdimid != -1 )
-            cdiGridDefString(ncvars[ncvarid].gridID, CDI_GRID_XDIMNAME, (int)(strlen(ncdims[xdimid].name)+1), ncdims[xdimid].name);
+            cdiGridDefKeyStr(ncvars[ncvarid].gridID, CDI_GRID_XDIMNAME, (int)(strlen(ncdims[xdimid].name)+1), ncdims[xdimid].name);
           if ( ydimid != -1 )
-            cdiGridDefString(ncvars[ncvarid].gridID, CDI_GRID_YDIMNAME, (int)(strlen(ncdims[ydimid].name)+1), ncdims[ydimid].name);
+            cdiGridDefKeyStr(ncvars[ncvarid].gridID, CDI_GRID_YDIMNAME, (int)(strlen(ncdims[ydimid].name)+1), ncdims[ydimid].name);
           if ( vdimid != -1 )
-            cdiGridDefString(ncvars[ncvarid].gridID, CDI_GRID_VDIMNAME, (int)(strlen(ncdims[vdimid].name)+1), ncdims[vdimid].name);
+            cdiGridDefKeyStr(ncvars[ncvarid].gridID, CDI_GRID_VDIMNAME, (int)(strlen(ncdims[vdimid].name)+1), ncdims[vdimid].name);
 
 	  if ( CDI_Debug )
 	    Message("gridID %d %d %s", ncvars[ncvarid].gridID, ncvarid, ncvars[ncvarid].name);

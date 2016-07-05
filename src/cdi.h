@@ -767,11 +767,11 @@ int     gridInqYvals(int gridID, double yvals[]);
 #define  CDI_GRID_XUNITS     908  // X-axis units
 #define  CDI_GRID_YUNITS     909  // Y-axis units
 
-//      cdiGridDefString: Define a CDI grid string value from a key
-int     cdiGridDefString(int gridID, int key, int size, const char *mesg);
+//      cdiGridDefKeyStr: Define a CDI grid string value from a key
+int     cdiGridDefKeyStr(int gridID, int key, int size, const char *mesg);
 
-//      cdiGridInqString: Get a CDI grid string value from a key
-int     cdiGridInqString(int gridID, int key, int size, char *mesg);
+//      cdiGridInqKeyStr: Get a CDI grid string value from a key
+int     cdiGridInqKeyStr(int gridID, int key, int size, char *mesg);
 
 /*      gridDefXname: Define the name of a X-axis */
 void    gridDefXname(int gridID, const char *xname);

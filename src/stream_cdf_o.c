@@ -769,7 +769,7 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int ndims,
           dimname[0] = 0;
 
           if ( pvals == NULL )
-            cdiGridInqString(gridID, dimKey, CDI_MAX_NAME, dimname);
+            cdiGridInqKeyStr(gridID, dimKey, CDI_MAX_NAME, dimname);
 
           if ( dimname[0] == 0 ) strcpy(dimname, extendedAxisname);
           dimID = checkDimName(fileID, dimlen, dimname);
@@ -926,7 +926,7 @@ void cdfDefCurvilinear(stream_t *streamptr, int gridID)
       {
         char xdimname[CDI_MAX_NAME+3];
         xdimname[0] = 0;
-        cdiGridInqString(gridID, CDI_GRID_XDIMNAME, CDI_MAX_NAME, xdimname);
+        cdiGridInqKeyStr(gridID, CDI_GRID_XDIMNAME, CDI_MAX_NAME, xdimname);
         if ( xdimname[0] == 0 ) { xdimname[0] = 'x'; xdimname[1] = 0; }
         xdimID = checkDimName(fileID, xdimlen, xdimname);
         if ( xdimID == UNDEFID ) cdf_def_dim(fileID, xdimname, xdimlen, &xdimID);
@@ -934,7 +934,7 @@ void cdfDefCurvilinear(stream_t *streamptr, int gridID)
       {
         char ydimname[CDI_MAX_NAME+3];
         ydimname[0] = 0;
-        cdiGridInqString(gridID, CDI_GRID_YDIMNAME, CDI_MAX_NAME, ydimname);
+        cdiGridInqKeyStr(gridID, CDI_GRID_YDIMNAME, CDI_MAX_NAME, ydimname);
         if ( ydimname[0] == 0 ) { ydimname[0] = 'y'; ydimname[1] = 0; }
         ydimID = checkDimName(fileID, ydimlen, ydimname);
         if ( ydimID == UNDEFID ) cdf_def_dim(fileID, ydimname, ydimlen, &ydimID);
@@ -946,7 +946,7 @@ void cdfDefCurvilinear(stream_t *streamptr, int gridID)
         {
           char vdimname[CDI_MAX_NAME+3];
           vdimname[0] = 0;
-          cdiGridInqString(gridID, CDI_GRID_VDIMNAME, CDI_MAX_NAME, vdimname);
+          cdiGridInqKeyStr(gridID, CDI_GRID_VDIMNAME, CDI_MAX_NAME, vdimname);
           if ( vdimname[0] == 0 ) strcpy(vdimname, "nv4");
           size_t nvertex = 4;
           nvdimID = checkDimName(fileID, nvertex, vdimname);
@@ -1278,7 +1278,7 @@ void cdfDefUnstructured(stream_t *streamptr, int gridID)
       {
         char xdimname[CDI_MAX_NAME+3];
         xdimname[0] = 0;
-        cdiGridInqString(gridID, CDI_GRID_XDIMNAME, CDI_MAX_NAME, xdimname);
+        cdiGridInqKeyStr(gridID, CDI_GRID_XDIMNAME, CDI_MAX_NAME, xdimname);
         if ( xdimname[0] == 0 ) strcpy(xdimname, "ncells");
         dimID = checkDimName(fileID, dimlen, xdimname);
         if ( dimID == UNDEFID ) cdf_def_dim(fileID, xdimname, dimlen, &dimID);
@@ -1289,7 +1289,7 @@ void cdfDefUnstructured(stream_t *streamptr, int gridID)
         {
           char vdimname[CDI_MAX_NAME+3];
           vdimname[0] = 0;
-          cdiGridInqString(gridID, CDI_GRID_VDIMNAME, CDI_MAX_NAME, vdimname);
+          cdiGridInqKeyStr(gridID, CDI_GRID_VDIMNAME, CDI_MAX_NAME, vdimname);
           if ( vdimname[0] == 0 ) strcpy(vdimname, "vertices");
           nvdimID = checkDimName(fileID, nvertex, vdimname);
           if ( nvdimID == UNDEFID ) cdf_def_dim(fileID, vdimname, nvertex, &nvdimID);

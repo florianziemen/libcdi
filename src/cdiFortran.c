@@ -327,8 +327,8 @@ FCALLSCFUN2 (INT, gridInqYvals, GRIDINQYVALS, gridinqyvals, INT, DOUBLEV)
 
 /*  CDI grid string key values  */
 
-FCALLSCFUN4 (INT, cdiGridDefString, CDIGRIDDEFSTRING, cdigriddefstring, INT, INT, INT, STRING)
-FCALLSCFUN4 (INT, cdiGridInqString, CDIGRIDINQSTRING, cdigridinqstring, INT, INT, INT, PSTRING)
+FCALLSCFUN4 (INT, cdiGridDefKeyStr, CDIGRIDDEFSTRING, cdigriddefstring, INT, INT, INT, STRING)
+FCALLSCFUN4 (INT, cdiGridInqKeyStr, CDIGRIDINQSTRING, cdigridinqstring, INT, INT, INT, PSTRING)
 FCALLSCSUB2 (gridDefXname, GRIDDEFXNAME, griddefxname, INT, STRING)
 FCALLSCSUB2 (gridInqXname, GRIDINQXNAME, gridinqxname, INT, PSTRING)
 FCALLSCSUB2 (gridDefXlongname, GRIDDEFXLONGNAME, griddefxlongname, INT, STRING)

@@ -616,10 +616,10 @@ char *grid_key_to_string(grid_t *gridptr, int key)
 }
 
 /*
-@Function  cdiGridDefString
+@Function  cdiGridDefKeyStr
 @Title     Define a CDI grid string value from a key
 
-@Prototype int cdiGridDefString(int gridID, int key, int size, const char *mesg)
+@Prototype int cdiGridDefKeyStr(int gridID, int key, int size, const char *mesg)
 @Parameter
     @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
     @Item  key      The key to be searched
@@ -627,14 +627,14 @@ char *grid_key_to_string(grid_t *gridptr, int key)
     @Item  mesg     The address of a string where the data will be read
 
 @Description
-The function @func{cdiGridDefString} defines a CDI grid string value from a key.
+The function @func{cdiGridDefKeyStr} defines a CDI grid string value from a key.
 
 @Result
-@func{cdiGridDefString} returns 0 if OK and integer value on error.
+@func{cdiGridDefKeyStr} returns 0 if OK and integer value on error.
 
 @EndFunction
 */
-int cdiGridDefString(int gridID, int key, int size, const char *mesg)
+int cdiGridDefKeyStr(int gridID, int key, int size, const char *mesg)
 {
   if ( size < 1 || mesg == NULL || *mesg == 0 ) return -1;
 
@@ -654,10 +654,10 @@ int cdiGridDefString(int gridID, int key, int size, const char *mesg)
 }
 
 /*
-@Function  cdiGridInqString
+@Function  cdiGridInqKeyStr
 @Title     Get a CDI grid string value from a key
 
-@Prototype int cdiGridInqString(int gridID, int key, int size, char *mesg)
+@Prototype int cdiGridInqKeyStr(int gridID, int key, int size, char *mesg)
 @Parameter
     @Item  gridID   Grid ID, from a previous call to @fref{gridCreate}.
     @Item  key      The key to be searched.
@@ -668,14 +668,14 @@ int cdiGridDefString(int gridID, int key, int size, const char *mesg)
                     is given by the predefined constant @func{CDI_MAX_NAME}.
 
 @Description
-The function @func{cdiGridInqString} return a CDI grid string value from a key.
+The function @func{cdiGridInqKeyStr} return a CDI grid string value from a key.
 
 @Result
-@func{cdiGridInqString} returns 0 if OK and integer value on error.
+@func{cdiGridInqKeyStr} returns 0 if OK and integer value on error.
 
 @EndFunction
 */
-int cdiGridInqString(int gridID, int key, int size, char *mesg)
+int cdiGridInqKeyStr(int gridID, int key, int size, char *mesg)
 {
   if ( size < 1 || mesg == NULL ) return -1;
 
