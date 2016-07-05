@@ -99,16 +99,16 @@ void fill_att(cdi_att_t *attp, int indtype, int exdtype, size_t nelems, size_t x
 
 /*
 @Function  vlistInqNatts
-@Title     Get number of variable attributes
+@Title     Get number of attributes
 
 @Prototype int vlistInqNatts(int vlistID, int varID, int *nattsp)
 @Parameter
     @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate} or @fref{streamInqVlist}.
     @Item  varID    Variable identifier, or @func{CDI_GLOBAL} for a global attribute.
-    @Item  nattsp   Pointer to location for returned number of variable attributes.
+    @Item  nattsp   Pointer to location for returned number of attributes.
 
 @Description
-The function @func{vlistInqNatts} gets the number of variable attributes assigned to this variable.
+The function @func{vlistInqNatts} gets the number of attributes assigned to this variable.
 
 @EndFunction
 */
