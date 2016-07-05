@@ -921,9 +921,7 @@ The function @func{gridInqYname} returns the name of a Y-axis.
 */
 void gridInqYname(int gridID, char *yname)
 {
-  grid_t *gridptr = gridID2Ptr(gridID);
-
-  strcpy(yname, gridptr->y.name);
+  (void)cdiGridInqKeyStr(gridID, CDI_KEY_YNAME, CDI_MAX_NAME, yname);
 }
 
 const char *gridInqYnamePtr(int gridID)
@@ -953,9 +951,7 @@ The function @func{gridInqYlongname} returns the longname of a Y-axis.
 */
 void gridInqYlongname(int gridID, char *ylongname)
 {
-  grid_t *gridptr = gridID2Ptr(gridID);
-
-  strcpy(ylongname, gridptr->y.longname);
+  (void)cdiGridInqKeyStr(gridID, CDI_KEY_YLONGNAME, CDI_MAX_NAME, ylongname);
 }
 
 /*
@@ -979,9 +975,7 @@ The function @func{gridInqYunits} returns the units of a Y-axis.
 */
 void gridInqYunits(int gridID, char *yunits)
 {
-  grid_t *gridptr = gridID2Ptr(gridID);
-
-  strcpy(yunits, gridptr->y.units);
+  (void)cdiGridInqKeyStr(gridID, CDI_KEY_YUNITS, CDI_MAX_NAME, yunits);
 }
 
 void gridInqYstdname(int gridID, char *ystdname)
