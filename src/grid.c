@@ -583,6 +583,7 @@ void gridDestroy(int gridID)
   gridptr->vtable->destroy(gridptr);
 }
 
+
 void gridDestroyP ( void * gridptr )
 {
   ((grid_t *)gridptr)->vtable->destroy((grid_t *)gridptr);
@@ -605,24 +606,24 @@ void gridName(int gridtype, char *gridname)
 }
 
 static
-char *grid_key_to_string(grid_t *gridptr, int key)
+void *grid_key_to_ptr(grid_t *gridptr, int key)
 {
-  char *gridstring = NULL;
+  void *keyptr = NULL;
 
   switch (key)
     {
-    case CDI_KEY_XNAME:      gridstring = gridptr->x.name; break;
-    case CDI_KEY_XLONGNAME:  gridstring = gridptr->x.longname; break;
-    case CDI_KEY_XUNITS:     gridstring = gridptr->x.units; break;
-    case CDI_KEY_YNAME:      gridstring = gridptr->y.name; break;
-    case CDI_KEY_YLONGNAME:  gridstring = gridptr->y.longname; break;
-    case CDI_KEY_YUNITS:     gridstring = gridptr->y.units; break;
-    case CDI_KEY_XDIMNAME:   gridstring = gridptr->x.dimname; break;
-    case CDI_KEY_YDIMNAME:   gridstring = gridptr->y.dimname; break;
-    case CDI_KEY_VDIMNAME:   gridstring = gridptr->vdimname; break;
+    case CDI_KEY_XNAME:      keyptr = (void*)gridptr->x.name; break;
+    case CDI_KEY_XLONGNAME:  keyptr = (void*)gridptr->x.longname; break;
+    case CDI_KEY_XUNITS:     keyptr = (void*)gridptr->x.units; break;
+    case CDI_KEY_YNAME:      keyptr = (void*)gridptr->y.name; break;
+    case CDI_KEY_YLONGNAME:  keyptr = (void*)gridptr->y.longname; break;
+    case CDI_KEY_YUNITS:     keyptr = (void*)gridptr->y.units; break;
+    case CDI_KEY_XDIMNAME:   keyptr = (void*)gridptr->x.dimname; break;
+    case CDI_KEY_YDIMNAME:   keyptr = (void*)gridptr->y.dimname; break;
+    case CDI_KEY_VDIMNAME:   keyptr = (void*)gridptr->vdimname; break;
     }
 
-  return gridstring;
+  return keyptr;
 }
 
 /*
@@ -650,7 +651,7 @@ int cdiGridDefKeyStr(int gridID, int key, int size, const char *mesg)
 
   grid_t *gridptr = gridID2Ptr(gridID);
 
-  char *gridstring = grid_key_to_string(gridptr, key);
+  char *gridstring = (char*)grid_key_to_ptr(gridptr, key);
   if ( gridstring == NULL )
     {
       Warning("CDI grid string key %d not supported!", key);
@@ -690,7 +691,7 @@ int cdiGridInqKeyStr(int gridID, int key, int size, char *mesg)
   if ( size < 1 || mesg == NULL ) return -1;
 
   grid_t *gridptr = gridID2Ptr(gridID);
-  const char *gridstring = grid_key_to_string(gridptr, key);
+  const char *gridstring = (const char*)grid_key_to_ptr(gridptr, key);
   if ( gridstring == NULL)
     {
       Warning("CDI grid string key %d not supported!", key);
