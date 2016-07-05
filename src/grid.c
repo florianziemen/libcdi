@@ -607,9 +607,12 @@ char *grid_key_to_string(grid_t *gridptr, int key)
 
   switch (key)
     {
-    case CDI_KEY_XDIMNAME: gridstring = gridptr->x.dimname; break;
-    case CDI_KEY_YDIMNAME: gridstring = gridptr->y.dimname; break;
-    case CDI_KEY_VDIMNAME: gridstring = gridptr->vdimname; break;
+    case CDI_KEY_XNAME:      gridstring = gridptr->x.name; break;
+    case CDI_KEY_XLONGNAME:  gridstring = gridptr->x.longname; break;
+    case CDI_KEY_XUNITS:     gridstring = gridptr->x.units; break;
+    case CDI_KEY_XDIMNAME:   gridstring = gridptr->x.dimname; break;
+    case CDI_KEY_YDIMNAME:   gridstring = gridptr->y.dimname; break;
+    case CDI_KEY_VDIMNAME:   gridstring = gridptr->vdimname; break;
     }
 
   return gridstring;
@@ -708,12 +711,7 @@ The function @func{gridDefXname} defines the name of a X-axis.
 */
 void gridDefXname(int gridID, const char *xname)
 {
-  if ( xname && *xname )
-    {
-      grid_t *gridptr = gridID2Ptr(gridID);
-      gridSetName(gridptr->x.name, xname);
-      gridMark4Update(gridID);
-    }
+  (void)cdiGridDefKeyStr(gridID, CDI_KEY_XNAME, CDI_MAX_NAME, xname);
 }
 
 /*
@@ -732,12 +730,7 @@ The function @func{gridDefXlongname} defines the longname of a X-axis.
 */
 void gridDefXlongname(int gridID, const char *xlongname)
 {
-  if ( xlongname )
-    {
-      grid_t *gridptr = gridID2Ptr(gridID);
-      gridSetName(gridptr->x.longname, xlongname);
-      gridMark4Update(gridID);
-    }
+  (void)cdiGridDefKeyStr(gridID, CDI_KEY_XLONGNAME, CDI_MAX_NAME, xlongname);
 }
 
 /*
@@ -756,12 +749,7 @@ The function @func{gridDefXunits} defines the units of a X-axis.
 */
 void gridDefXunits(int gridID, const char *xunits)
 {
-  if ( xunits )
-    {
-      grid_t *gridptr = gridID2Ptr(gridID);
-      gridSetName(gridptr->x.units, xunits);
-      gridMark4Update(gridID);
-    }
+  (void)cdiGridDefKeyStr(gridID, CDI_KEY_XUNITS, CDI_MAX_NAME, xunits);
 }
 
 /*
