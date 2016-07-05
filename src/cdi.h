@@ -757,15 +757,15 @@ void    gridDefYvals(int gridID, const double yvals[]);
 int     gridInqYvals(int gridID, double yvals[]);
 
 /* CDI grid string key values */
-#define  CDI_GRID_XNAME      901  // X-axis name
-#define  CDI_GRID_YNAME      902  // Y-axis name
-#define  CDI_GRID_XDIMNAME   903  // X-axis dimension name
-#define  CDI_GRID_YDIMNAME   904  // Y-axis dimension name
-#define  CDI_GRID_VDIMNAME   905  // Vertex dimension name
-#define  CDI_GRID_XLONGNAME  906  // X-axis longname
-#define  CDI_GRID_YLONGNAME  907  // Y-axis longname
-#define  CDI_GRID_XUNITS     908  // X-axis units
-#define  CDI_GRID_YUNITS     909  // Y-axis units
+#define  CDI_KEY_XNAME      901  // X-axis name
+#define  CDI_KEY_YNAME      902  // Y-axis name
+#define  CDI_KEY_XDIMNAME   903  // X-axis dimension name
+#define  CDI_KEY_YDIMNAME   904  // Y-axis dimension name
+#define  CDI_KEY_VDIMNAME   905  // Vertex dimension name
+#define  CDI_KEY_XLONGNAME  906  // X-axis longname
+#define  CDI_KEY_YLONGNAME  907  // Y-axis longname
+#define  CDI_KEY_XUNITS     908  // X-axis units
+#define  CDI_KEY_YUNITS     909  // Y-axis units
 
 //      cdiGridDefKeyStr: Define a CDI grid string value from a key
 int     cdiGridDefKeyStr(int gridID, int key, int size, const char *mesg);

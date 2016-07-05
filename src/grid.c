@@ -607,9 +607,9 @@ char *grid_key_to_string(grid_t *gridptr, int key)
 
   switch (key)
     {
-    case CDI_GRID_XDIMNAME: gridstring = gridptr->x.dimname; break;
-    case CDI_GRID_YDIMNAME: gridstring = gridptr->y.dimname; break;
-    case CDI_GRID_VDIMNAME: gridstring = gridptr->vdimname; break;
+    case CDI_KEY_XDIMNAME: gridstring = gridptr->x.dimname; break;
+    case CDI_KEY_YDIMNAME: gridstring = gridptr->y.dimname; break;
+    case CDI_KEY_VDIMNAME: gridstring = gridptr->vdimname; break;
     }
 
   return gridstring;
