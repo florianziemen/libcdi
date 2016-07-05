@@ -610,6 +610,9 @@ char *grid_key_to_string(grid_t *gridptr, int key)
     case CDI_KEY_XNAME:      gridstring = gridptr->x.name; break;
     case CDI_KEY_XLONGNAME:  gridstring = gridptr->x.longname; break;
     case CDI_KEY_XUNITS:     gridstring = gridptr->x.units; break;
+    case CDI_KEY_YNAME:      gridstring = gridptr->y.name; break;
+    case CDI_KEY_YLONGNAME:  gridstring = gridptr->y.longname; break;
+    case CDI_KEY_YUNITS:     gridstring = gridptr->y.units; break;
     case CDI_KEY_XDIMNAME:   gridstring = gridptr->x.dimname; break;
     case CDI_KEY_YDIMNAME:   gridstring = gridptr->y.dimname; break;
     case CDI_KEY_VDIMNAME:   gridstring = gridptr->vdimname; break;
@@ -768,12 +771,7 @@ The function @func{gridDefYname} defines the name of a Y-axis.
 */
 void gridDefYname(int gridID, const char *yname)
 {
-  if ( yname && *yname )
-    {
-      grid_t *gridptr = gridID2Ptr(gridID);
-      gridSetName(gridptr->y.name, yname);
-      gridMark4Update(gridID);
-    }
+  (void)cdiGridDefKeyStr(gridID, CDI_KEY_YNAME, CDI_MAX_NAME, yname);
 }
 
 /*
@@ -792,12 +790,7 @@ The function @func{gridDefYlongname} defines the longname of a Y-axis.
 */
 void gridDefYlongname(int gridID, const char *ylongname)
 {
-  if ( ylongname )
-    {
-      grid_t *gridptr = gridID2Ptr(gridID);
-      gridSetName(gridptr->y.longname, ylongname);
-      gridMark4Update(gridID);
-    }
+  (void)cdiGridDefKeyStr(gridID, CDI_KEY_YLONGNAME, CDI_MAX_NAME, ylongname);
 }
 
 /*
@@ -816,12 +809,7 @@ The function @func{gridDefYunits} defines the units of a Y-axis.
 */
 void gridDefYunits(int gridID, const char *yunits)
 {
-  if ( yunits )
-    {
-      grid_t *gridptr = gridID2Ptr(gridID);
-      gridSetName(gridptr->y.units, yunits);
-      gridMark4Update(gridID);
-    }
+  (void)cdiGridDefKeyStr(gridID, CDI_KEY_YUNITS, CDI_MAX_NAME, yunits);
 }
 
 /*
