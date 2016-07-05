@@ -154,7 +154,7 @@ void grid_init(grid_t *gridptr)
   gridptr->xpole         = 0.0;
   gridptr->ypole         = 0.0;
   gridptr->angle         = 0.0;
-  gridptr->lcomplex      = 0;
+  gridptr->lcomplex      = false;
   gridptr->hasdims       = true;
   gridptr->x.dimname[0]  = 0;
   gridptr->y.dimname[0]  = 0;
@@ -2406,8 +2406,8 @@ int gridCompareP ( void * gridptr1, void * gridptr2 )
   if ( g1->nvertex       != g2->nvertex      ) return differ;
   if ( g1->nrowlon       != g2->nrowlon      ) return differ;
   if ( g1->size          != g2->size         ) return differ;
-  if ( g1->x.size         != g2->x.size        ) return differ;
-  if ( g1->y.size         != g2->y.size        ) return differ;
+  if ( g1->x.size        != g2->x.size       ) return differ;
+  if ( g1->y.size        != g2->y.size       ) return differ;
   if ( g1->lcomplex      != g2->lcomplex     ) return differ;
 
   if ( IS_NOT_EQUAL(g1->xfirst        , g2->xfirst)        ) return differ;
@@ -3893,7 +3893,7 @@ void gridDefComplexPacking(int gridID, int lcomplex)
 
   if (gridptr->lcomplex != lcomplex)
     {
-      gridptr->lcomplex = (short)(lcomplex != 0);
+      gridptr->lcomplex = lcomplex != 0;
       gridMark4Update(gridID);
     }
 }
@@ -3903,7 +3903,7 @@ int gridInqComplexPacking(int gridID)
 {
   grid_t* gridptr = gridID2Ptr(gridID);
 
-  return gridptr->lcomplex;
+  return (int)gridptr->lcomplex;
 }
 
 
@@ -4332,9 +4332,9 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
     gridP->nvertex       =   intBuffer[19];
     gridP->nrowlon       =   intBuffer[20];
     gridP->size          =   intBuffer[21];
-    gridP->x.size         =   intBuffer[22];
-    gridP->y.size         =   intBuffer[23];
-    gridP->lcomplex      =   (short)intBuffer[24];
+    gridP->x.size        =   intBuffer[22];
+    gridP->y.size        =   intBuffer[23];
+    gridP->lcomplex      =   (bool)intBuffer[24];
     memberMask           =   intBuffer[25];
     gridP->x.stdname     =   xystdname_tab[intBuffer[26]][0];
     gridP->y.stdname     =   xystdname_tab[intBuffer[27]][1];
