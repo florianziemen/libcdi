@@ -120,8 +120,8 @@ struct grid_t {
   int     nrowlon;
   int     size;
   int     np;                     /* number of parallels between a pole and the equator */
-  short   lcomplex;
-  short   hasdims;
+  bool    lcomplex;
+  bool    hasdims;
   char    vdimname[CDI_MAX_NAME];
   char   *name;
   struct gridaxis_t x;

@@ -116,7 +116,7 @@ static
 void strtolower(char *str)
 {
   if ( str )
-    for (size_t i = 0; str[i]; ++i)
+    for ( size_t i = 0; str[i]; ++i )
       str[i] = (char)tolower((int)str[i]);
 }
 
@@ -169,7 +169,6 @@ bool isTimeAxisUnits(const char *timeunits)
   int timeunit = get_timeunit(len, ptu);
   if ( timeunit != -1 )
     {
-
       while ( ! isspace(*ptu) && *ptu != 0 ) ptu++;
       if ( *ptu )
         {
@@ -656,7 +655,6 @@ void cdfCreateRecords(stream_t *streamptr, int tsID)
     }
 }
 
-
 static
 int cdfTimeDimID(int fileID, int ndims, int nvars)
 {
@@ -1124,7 +1122,6 @@ bool isHybridSigmaPressureCoordinate(int ncid, int ncvarid, ncvar_t *ncvars, con
 
   return status;
 }
-
 
 static
 int isGaussGrid(size_t ysize, double yinc, const double *yvals)
@@ -4231,7 +4228,6 @@ static
 double get_timevalue(int fileID, int nctimevarid, int tsID, timecache_t *tcache)
 {
   double timevalue = 0;
-  size_t index = (size_t) tsID;
 
   if ( tcache )
     {
@@ -4241,7 +4237,7 @@ double get_timevalue(int fileID, int nctimevarid, int tsID, timecache_t *tcache)
           tcache->startid = (tsID/MAX_TIMECACHE_SIZE)*MAX_TIMECACHE_SIZE;
           if ( (tcache->startid + maxvals) > tcache->maxvals ) maxvals = (tcache->maxvals)%MAX_TIMECACHE_SIZE;
           tcache->size = maxvals;
-          index = (size_t) tcache->startid;
+          size_t index = (size_t) tcache->startid;
           // fprintf(stderr, "fill time cache: %d %d %d %d %d\n", tcache->maxvals, tsID, tcache->startid, tcache->startid+maxvals-1, maxvals);
           for ( int ival = 0; ival < maxvals; ++ival )
             {
@@ -4256,6 +4252,7 @@ double get_timevalue(int fileID, int nctimevarid, int tsID, timecache_t *tcache)
     }
   else
     {
+      size_t index = (size_t) tsID;
       cdf_get_var1_double(fileID, nctimevarid, &index, &timevalue);
       if ( timevalue >= NC_FILL_DOUBLE || timevalue < -NC_FILL_DOUBLE ) timevalue = 0;
     }
@@ -4266,11 +4263,6 @@ double get_timevalue(int fileID, int nctimevarid, int tsID, timecache_t *tcache)
 
 int cdfInqTimestep(stream_t * streamptr, int tsID)
 {
-  long nrecs = 0;
-  double timevalue;
-  int fileID;
-  taxis_t *taxis;
-
   if ( CDI_Debug ) Message("streamID = %d  tsID = %d", streamptr->self, tsID);
 
   if ( tsID < 0 ) Error("unexpected tsID = %d", tsID);
@@ -4279,16 +4271,16 @@ int cdfInqTimestep(stream_t * streamptr, int tsID)
     {
       cdfCreateRecords(streamptr, tsID);
 
-      taxis = &streamptr->tsteps[tsID].taxis;
+      taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
       if ( tsID > 0 )
 	ptaxisCopy(taxis, &streamptr->tsteps[0].taxis);
 
-      timevalue = tsID;
+      double timevalue = tsID;
 
       int nctimevarid = streamptr->basetime.ncvarid;
       if ( nctimevarid != UNDEFID )
 	{
-	  fileID = streamptr->fileID;
+	  int fileID = streamptr->fileID;
 	  size_t index  = (size_t)tsID;
 
 	  if ( streamptr->basetime.lwrf )
@@ -4336,7 +4328,7 @@ int cdfInqTimestep(stream_t * streamptr, int tsID)
     }
 
   streamptr->curTsID = tsID;
-  nrecs = streamptr->tsteps[tsID].nrecs;
+  long nrecs = streamptr->tsteps[tsID].nrecs;
 
   return (int) nrecs;
 }
