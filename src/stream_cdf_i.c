@@ -584,7 +584,7 @@ void cdfCreateRecords(stream_t *streamptr, int tsID)
 }
 
 static
-int cdfTimeDimID(int fileID, int ndims, int nvars)
+int cdf_time_dimid(int fileID, int ndims, int nvars)
 {
   char dimname[80];
   for ( int dimid = 0; dimid < ndims; ++dimid )
@@ -3520,7 +3520,7 @@ int cdfInqContents(stream_t *streamptr)
   if ( unlimdimid >= 0 )
     timedimid = unlimdimid;
   else
-    timedimid = cdfTimeDimID(fileID, ndims, nvars);
+    timedimid = cdf_time_dimid(fileID, ndims, nvars);
 
   streamptr->basetime.ncdimid = timedimid;
 
