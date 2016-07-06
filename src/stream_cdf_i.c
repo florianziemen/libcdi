@@ -1953,6 +1953,14 @@ void cdf_load_cellarea(size_t size, ncvar_t *ncvar, double **gridarea, struct cd
 }
 
 static
+void cdf_copy_axis_attr(ncvar_t *ncvar, struct gridaxis_t *gridaxis)
+{
+  strcpy(gridaxis->name, ncvar->name);
+  strcpy(gridaxis->longname, ncvar->longname);
+  strcpy(gridaxis->units, ncvar->units);
+}
+
+static
 void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars,
                           int timedimid, unsigned char *uuidOfHGrid, char *gridfile, int number_of_grid_used)
 {
@@ -2160,9 +2168,7 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
                   cdf_load_vals(size, ndims, xvarid, &ncvars[xvarid], &grid->x.vals, &lazyGrid->xValsGet,
                                 ntdims, start, count);
 
-		  strcpy(grid->x.name, ncvars[xvarid].name);
-		  strcpy(grid->x.longname, ncvars[xvarid].longname);
-		  strcpy(grid->x.units, ncvars[xvarid].units);
+                  cdf_copy_axis_attr(&ncvars[xvarid], &grid->x);
 		}
 
 	      if ( yvarid != UNDEFID )
@@ -2208,9 +2214,7 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
                   cdf_load_vals(size, ndims, yvarid, &ncvars[yvarid], &grid->y.vals, &lazyGrid->yValsGet,
                                 ntdims, start, count);
 
-                  strcpy(grid->y.name, ncvars[yvarid].name);
-                  strcpy(grid->y.longname, ncvars[yvarid].longname);
-                  strcpy(grid->y.units, ncvars[yvarid].units);
+                  cdf_copy_axis_attr(&ncvars[yvarid], &grid->y);
 		}
 
 	      if      ( (int) ysize == 0 ) size = xsize;
