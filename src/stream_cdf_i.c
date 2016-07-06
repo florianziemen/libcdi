@@ -52,13 +52,13 @@ typedef struct {
   bool     istime;
   bool     warn;
   bool     climatology;
+  bool     lformula;
+  bool     lformulaterms;
   int      tsteptype;
   int      param;
   int      code;
   int      tabnum;
   int      bounds;
-  int      lformula;
-  int      lformulaterms;
   int      gridID;
   int      zaxisID;
   int      gridtype;
@@ -647,14 +647,14 @@ void init_ncvars(long nvars, ncvar_t *ncvars)
       ncvars[ncvarid].istime          = false;
       ncvars[ncvarid].warn            = false;
       ncvars[ncvarid].climatology     = false;
+      ncvars[ncvarid].lformula        = false;
+      ncvars[ncvarid].lformulaterms   = false;
       ncvars[ncvarid].tsteptype       = TSTEP_CONSTANT;
       ncvars[ncvarid].param           = UNDEFID;
       ncvars[ncvarid].code            = UNDEFID;
       ncvars[ncvarid].tabnum          = 0;
       ncvars[ncvarid].calendar        = FALSE;
       ncvars[ncvarid].bounds          = UNDEFID;
-      ncvars[ncvarid].lformula        = FALSE;
-      ncvars[ncvarid].lformulaterms   = FALSE;
       ncvars[ncvarid].gridID          = UNDEFID;
       ncvars[ncvarid].zaxisID         = UNDEFID;
       ncvars[ncvarid].gridtype        = UNDEFID;
@@ -752,7 +752,7 @@ int scan_hybrid_formula(int ncid, int ncfvarid, int *apvarid, int *bvarid, int *
   if ( strcmp(attstring, "p = ap + b*ps") == 0 )
     {
       status = 1;
-      int lstop = FALSE;
+      bool lstop = false;
       int dimvarid;
       cdfGetAttText(ncid, ncfvarid, "formula_terms", attstringlen, attstring);
       char *pstring = attstring;
@@ -763,14 +763,14 @@ int scan_hybrid_formula(int ncid, int ncfvarid, int *apvarid, int *bvarid, int *
           if ( *pstring == 0 ) break;
           char *tagname = pstring;
           while ( !isspace((int) *pstring) && *pstring != 0 ) pstring++;
-          if ( *pstring == 0 ) lstop = TRUE;
+          if ( *pstring == 0 ) lstop = true;
           *pstring++ = 0;
 
           while ( isspace((int) *pstring) ) pstring++;
           if ( *pstring == 0 ) break;
           char *varname = pstring;
           while ( !isspace((int) *pstring) && *pstring != 0 ) pstring++;
-          if ( *pstring == 0 ) lstop = TRUE;
+          if ( *pstring == 0 ) lstop = true;
           *pstring++ = 0;
 
           int status_nc = nc_inq_varid(ncid, varname, &dimvarid);
@@ -791,7 +791,7 @@ int scan_hybrid_formula(int ncid, int ncfvarid, int *apvarid, int *bvarid, int *
   else if ( strcmp(attstring, "xxxp = a*p0 + b*ps") == 0 )
     {
       status = 2;
-      int lstop = FALSE;
+      bool lstop = false;
       int dimvarid;
       cdfGetAttText(ncid, ncfvarid, "formula_terms", attstringlen, attstring);
       char *pstring = attstring;
@@ -802,14 +802,14 @@ int scan_hybrid_formula(int ncid, int ncfvarid, int *apvarid, int *bvarid, int *
           if ( *pstring == 0 ) break;
           char *tagname = pstring;
           while ( !isspace((int) *pstring) && *pstring != 0 ) pstring++;
-          if ( *pstring == 0 ) lstop = TRUE;
+          if ( *pstring == 0 ) lstop = true;
           *pstring++ = 0;
 
           while ( isspace((int) *pstring) ) pstring++;
           if ( *pstring == 0 ) break;
           char *varname = pstring;
           while ( !isspace((int) *pstring) && *pstring != 0 ) pstring++;
-          if ( *pstring == 0 ) lstop = TRUE;
+          if ( *pstring == 0 ) lstop = true;
           *pstring++ = 0;
 
           int status_nc = nc_inq_varid(ncid, varname, &dimvarid);
@@ -869,7 +869,7 @@ bool isHybridSigmaPressureCoordinate(int ncid, int ncvarid, ncvar_t *ncvars, con
           if ( avarid2 != -1 && bvarid2 != -1 )
             {
               ncvars[avarid2].isvar = FALSE;
-              ncvars[bvarid2].isvar  = FALSE;
+              ncvars[bvarid2].isvar = FALSE;
 
               if ( dimid == ncvars[avarid2].dimids[0] && ncdims[ncvars[avarid2].dimids[1]].len == 2 )
                 {
@@ -1241,11 +1241,11 @@ void cdf_scan_var_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimi
             }
           else if ( xtypeIsText(atttype) && strcmp(attname, "formula_terms") == 0 )
             {
-              ncvars[ncvarid].lformulaterms = TRUE;
+              ncvars[ncvarid].lformulaterms = true;
             }
           else if ( xtypeIsText(atttype) && strcmp(attname, "formula") == 0 )
             {
-              ncvars[ncvarid].lformula = TRUE;
+              ncvars[ncvarid].lformula = true;
             }
           else if ( strcmp(attname, "cell_measures") == 0 && xtypeIsText(atttype) )
             {
@@ -1310,7 +1310,7 @@ void cdf_scan_var_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimi
           */
           else if ( (strcmp(attname, "associate")  == 0 || strcmp(attname, "coordinates") == 0) && xtypeIsText(atttype) )
             {
-              int lstop = FALSE;
+              bool lstop = false;
               int dimvarid;
 
               cdfGetAttText(ncid, ncvarid, attname, attstringlen, attstring);
@@ -1322,7 +1322,7 @@ void cdf_scan_var_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimi
                   if ( *pstring == 0 ) break;
                   char *varname = pstring;
                   while ( !isspace((int) *pstring) && *pstring != 0 ) pstring++;
-                  if ( *pstring == 0 ) lstop = TRUE;
+                  if ( *pstring == 0 ) lstop = true;
                   *pstring++ = 0;
 
                   int status = nc_inq_varid(ncid, varname, &dimvarid);
@@ -1355,7 +1355,7 @@ void cdf_scan_var_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimi
             }
           else if ( (strcmp(attname, "auxiliary_variable") == 0) && xtypeIsText(atttype) )
             {
-              int lstop = FALSE;
+              bool lstop = false;
               int dimvarid;
 
               cdfGetAttText(ncid, ncvarid, attname, attstringlen, attstring);
@@ -1367,7 +1367,7 @@ void cdf_scan_var_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimi
                   if ( *pstring == 0 ) break;
                   char *varname = pstring;
                   while ( !isspace((int) *pstring) && *pstring != 0 ) pstring++;
-                  if ( *pstring == 0 ) lstop = TRUE;
+                  if ( *pstring == 0 ) lstop = true;
                   *pstring++ = 0;
 
                   int status = nc_inq_varid(ncid, varname, &dimvarid);
@@ -2649,8 +2649,8 @@ void cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
     {
       if ( ncvars[ncvarid].isvar == TRUE && ncvars[ncvarid].zaxisID == UNDEFID )
 	{
-          int is_scalar = FALSE;
-	  int with_bounds = FALSE;
+          bool is_scalar = false;
+	  bool with_bounds = false;
 	  int zdimid = UNDEFID;
 	  int zvarid = UNDEFID;
 	  int zsize = 1;
@@ -2663,7 +2663,7 @@ void cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
           if ( ncvars[ncvarid].zvarid != -1 && ncvars[ncvars[ncvarid].zvarid].ndims == 0 )
             {
               zvarid = ncvars[ncvarid].zvarid;
-              is_scalar = TRUE;
+              is_scalar = true;
             }
           else
             {
@@ -2723,7 +2723,7 @@ void cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 		      nvertex = (int)ncdims[ncvars[ncvars[zvarid].bounds].dimids[1]].len;
 		      if ( nlevel == zsize && nvertex == 2 )
 			{
-			  with_bounds = TRUE;
+			  with_bounds = true;
 			  lbounds = (double *) Malloc((size_t)nlevel*sizeof(double));
 			  ubounds = (double *) Malloc((size_t)nlevel*sizeof(double));
 			  double zbounds[2*nlevel];
@@ -2764,7 +2764,7 @@ void cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 		}
 	    }
 
-      	  ncvars[ncvarid].zaxisID = varDefZaxis(vlistID, zaxisType, (int) zsize, zvar, with_bounds, lbounds, ubounds,
+      	  ncvars[ncvarid].zaxisID = varDefZaxis(vlistID, zaxisType, (int) zsize, zvar, (int)with_bounds, lbounds, ubounds,
 						(int)vctsize, vct, pname, plongname, punits, zprec, 1, 0);
 
 	  if ( uuidOfVGrid[0] != 0 )
@@ -2836,7 +2836,7 @@ static
 int cmpvarname(const void *s1, const void *s2)
 {
   const struct varinfo *x = (const struct varinfo *)s1,
-    *y = (const struct varinfo *)s2;
+                       *y = (const struct varinfo *)s2;
   return strcmp(x->name, y->name);
 }
 
@@ -2845,7 +2845,7 @@ static
 void cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, int *varids, int nvars, int num_ncvars, ncvar_t *ncvars)
 {
   if ( CDI_Debug )
-    for(int i = 0; i < nvars; i++) Message("varids[%d] = %d", i, varids[i]);
+    for ( int i = 0; i < nvars; i++ ) Message("varids[%d] = %d", i, varids[i]);
 
   if ( streamptr->sortname )
     {
@@ -2865,9 +2865,7 @@ void cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int model
 	}
       Free(varInfo);
       if ( CDI_Debug )
-        {
-          for(int i = 0; i < nvars; i++) Message("sorted varids[%d] = %d", i, varids[i]);
-        }
+        for ( int i = 0; i < nvars; i++ ) Message("sorted varids[%d] = %d", i, varids[i]);
     }
 
   for ( int varID1 = 0; varID1 < nvars; varID1++ )
@@ -2944,27 +2942,19 @@ void cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int model
 
       if ( ncvars[ncvarid].tsteptype != TSTEP_CONSTANT ) iodim++;
 
+      int *dimids = ncvars[ncvarid].dimids;
+
       if ( gridInqType(gridID) == GRID_UNSTRUCTURED && ndims-iodim <= 2 && ydimid == xdimid )
         {
-          if ( xdimid == ncvars[ncvarid].dimids[ndims-1] )
-            {
-              ixyz = 321;
-            }
-          else
-            {
-              ixyz = 213;
-            }
+          ixyz = (xdimid == dimids[ndims-1]) ? 321 : 213;
         }
       else
         {
           for ( int idim = iodim; idim < ndims; idim++ )
             {
-              if      ( xdimid == ncvars[ncvarid].dimids[idim] )
-                ixyz += 1*ipow10[ndims-idim-1];
-              else if ( ydimid == ncvars[ncvarid].dimids[idim] )
-                ixyz += 2*ipow10[ndims-idim-1];
-              else if ( zdimid == ncvars[ncvarid].dimids[idim] )
-                ixyz += 3*ipow10[ndims-idim-1];
+              if      ( xdimid == dimids[idim] ) ixyz += 1*ipow10[ndims-idim-1];
+              else if ( ydimid == dimids[idim] ) ixyz += 2*ipow10[ndims-idim-1];
+              else if ( zdimid == dimids[idim] ) ixyz += 3*ipow10[ndims-idim-1];
             }
         }
 
@@ -2973,7 +2963,7 @@ void cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int model
       printf("ixyz %d\n", ixyz);
       printf("ndims %d\n", ncvars[ncvarid].ndims);
       for ( int i = 0; i < ncvars[ncvarid].ndims; ++i )
-        printf("dimids: %d %d\n", i, ncvars[ncvarid].dimids[i]);
+        printf("dimids: %d %d\n", i, dimids[i]);
       printf("xdimid, ydimid %d %d\n", xdimid, ydimid);
       */
       if ( ncvars[ncvarid].ensdata != NULL )
@@ -3247,13 +3237,10 @@ int find_leadtime(int nvars, ncvar_t *ncvars)
 
   for ( int ncvarid = 0; ncvarid < nvars; ncvarid++ )
     {
-      if ( ncvars[ncvarid].stdname[0] )
+      if ( ncvars[ncvarid].stdname[0] && strcmp(ncvars[ncvarid].stdname, "forecast_period") == 0 )
         {
-          if ( strcmp(ncvars[ncvarid].stdname, "forecast_period") == 0 )
-            {
-              leadtime_id = ncvarid;
-              break;
-            }
+          leadtime_id = ncvarid;
+          break;
         }
     }
 
