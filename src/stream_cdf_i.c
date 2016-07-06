@@ -3409,6 +3409,24 @@ void read_vct_echam(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdims, dou
     }
 }
 
+static
+void cdf_set_ucla_dimtype(int ndims, ncdim_t *ncdims, ncvar_t *ncvars)
+{
+  for ( int ncdimid = 0; ncdimid < ndims; ncdimid++ )
+    {
+      int ncvarid = ncdims[ncdimid].ncvarid;
+      if ( ncvarid != -1 )
+        {
+          if ( ncdims[ncdimid].dimtype == UNDEFID && ncvars[ncvarid].units[0] == 'm' )
+            {
+              if      ( ncvars[ncvarid].name[0] == 'x' ) ncdims[ncdimid].dimtype = X_AXIS;
+              else if ( ncvars[ncvarid].name[0] == 'y' ) ncdims[ncdimid].dimtype = Y_AXIS;
+              else if ( ncvars[ncvarid].name[0] == 'z' ) ncdims[ncdimid].dimtype = Z_AXIS;
+            }
+        }
+    }
+}
+
 
 int cdfInqContents(stream_t *streamptr)
 {
@@ -3652,22 +3670,8 @@ int cdfInqContents(stream_t *streamptr)
 
   if ( CDI_Debug ) cdf_print_vars(ncvars, nvars, "verify_coordinate_vars");
 
-  if ( ucla_les )
-    {
-      for ( ncdimid = 0; ncdimid < ndims; ncdimid++ )
-	{
-	  ncvarid = ncdims[ncdimid].ncvarid;
-	  if ( ncvarid != -1 )
-	    {
-	      if ( ncdims[ncdimid].dimtype == UNDEFID && ncvars[ncvarid].units[0] == 'm' )
-		{
-		  if      ( ncvars[ncvarid].name[0] == 'x' ) ncdims[ncdimid].dimtype = X_AXIS;
-		  else if ( ncvars[ncvarid].name[0] == 'y' ) ncdims[ncdimid].dimtype = Y_AXIS;
-		  else if ( ncvars[ncvarid].name[0] == 'z' ) ncdims[ncdimid].dimtype = Z_AXIS;
-		}
-	    }
-	}
-    }
+  if ( ucla_les ) cdf_set_ucla_dimtype(ndims, ncdims, ncvars);
+
   /*
   for ( ncdimid = 0; ncdimid < ndims; ncdimid++ )
     {
