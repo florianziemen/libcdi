@@ -1595,7 +1595,7 @@ void cdf_scan_var_attributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
 }
 
 static
-void setDimType(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
+void cdf_set_dimtype(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
 {
   for ( int ncvarid = 0; ncvarid < nvars; ncvarid++ )
     {
@@ -3715,7 +3715,7 @@ int cdfInqContents(stream_t *streamptr)
     }
 
   /* set dim type */
-  setDimType(nvars, ncvars, ncdims);
+  cdf_set_dimtype(nvars, ncvars, ncdims);
 
   /* read ECHAM VCT if present */
   size_t vctsize = 0;
