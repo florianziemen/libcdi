@@ -3125,7 +3125,7 @@ void cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int model
 }
 
 static
-void cdf_scan_global_attr(int fileID, int vlistID, stream_t *streamptr, int ngatts, int *instID, int *modelID, int *ucla_les, unsigned char *uuidOfHGrid, unsigned char *uuidOfVGrid, char *gridfile, int *number_of_grid_used)
+void cdf_scan_global_attr(int fileID, int vlistID, stream_t *streamptr, int ngatts, int *instID, int *modelID, bool *ucla_les, unsigned char *uuidOfHGrid, unsigned char *uuidOfVGrid, char *gridfile, int *number_of_grid_used)
 {
   nc_type xtype;
   size_t attlen;
@@ -3166,7 +3166,7 @@ void cdf_scan_global_attr(int fileID, int vlistID, stream_t *streamptr, int ngat
 	      else if ( strcmp(attname, "Source") == 0 )
 		{
 		  if ( strncmp(attstring, "UCLA-LES", 8) == 0 )
-		    *ucla_les = TRUE;
+		    *ucla_les = true;
 		}
 	      /*
 	      else if ( strcmp(attname, "Conventions") == 0 )
@@ -3432,7 +3432,7 @@ int cdfInqContents(stream_t *streamptr)
   ncdim_t *ncdims;
   ncvar_t *ncvars = NULL;
   int format = 0;
-  int ucla_les = FALSE;
+  bool ucla_les = false;
   unsigned char uuidOfHGrid[CDI_UUID_SIZE];
   unsigned char uuidOfVGrid[CDI_UUID_SIZE];
   char gridfile[8912];
@@ -3652,7 +3652,7 @@ int cdfInqContents(stream_t *streamptr)
 
   if ( CDI_Debug ) cdf_print_vars(ncvars, nvars, "verify_coordinate_vars");
 
-  if ( ucla_les == TRUE )
+  if ( ucla_les )
     {
       for ( ncdimid = 0; ncdimid < ndims; ncdimid++ )
 	{
