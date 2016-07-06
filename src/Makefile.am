@@ -24,6 +24,8 @@ libcdi_la_SOURCES = 	 \
 	cdf.h	 	 \
 	cdf_int.c	 \
 	cdf_int.h	 \
+	cdf_util.c	 \
+	cdf_util.h	 \
 	cdi.h	 	 \
 	cdi_error.c      \
 	cdi_limits.h	 \

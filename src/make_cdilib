@@ -94,6 +94,7 @@ files="basetime.c \
    calendar.c \
    cdf.c \
    cdf_int.c \
+   cdf_util.c \
    cdf_lazy_grid.c \
    cdi_cksum.c \
    cdi_error.c \

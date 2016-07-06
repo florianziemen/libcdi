@@ -16,6 +16,7 @@
 #include "cdf_int.h"
 #include "varscan.h"
 #include "vlist.h"
+#include "cdf_util.h"
 #include "cdf_lazy_grid.h"
 
 //#define PROJECTION_TEST
@@ -112,79 +113,6 @@ typedef struct {
 }
 ncvar_t;
 
-static
-void strtolower(char *str)
-{
-  if ( str )
-    for ( size_t i = 0; str[i]; ++i )
-      str[i] = (char)tolower((int)str[i]);
-}
-
-static
-int get_timeunit(size_t len, const char *ptu)
-{
-  int timeunit = -1;
-
-  if ( len > 2 )
-    {
-      if      ( memcmp(ptu, "sec",    3) == 0 )          timeunit = TUNIT_SECOND;
-      else if ( memcmp(ptu, "minute", 6) == 0 )          timeunit = TUNIT_MINUTE;
-      else if ( memcmp(ptu, "hour",   4) == 0 )          timeunit = TUNIT_HOUR;
-      else if ( memcmp(ptu, "day",    3) == 0 )          timeunit = TUNIT_DAY;
-      else if ( memcmp(ptu, "month",  5) == 0 )          timeunit = TUNIT_MONTH;
-      else if ( memcmp(ptu, "calendar_month", 14) == 0 ) timeunit = TUNIT_MONTH;
-      else if ( memcmp(ptu, "year",   4) == 0 )          timeunit = TUNIT_YEAR;
-    }
-  else if ( len == 1 )
-    {
-      if ( ptu[0] == 's' ) timeunit = TUNIT_SECOND;
-    }
-
-  return timeunit;
-}
-
-static
-bool isTimeUnits(const char *timeunits)
-{
-  bool status = strncmp(timeunits, "sec",    3) == 0
-    || strncmp(timeunits, "minute", 6) == 0
-    || strncmp(timeunits, "hour",   4) == 0
-    || strncmp(timeunits, "day",    3) == 0
-    || strncmp(timeunits, "month",  5) == 0;
-  return status;
-}
-
-static
-bool isTimeAxisUnits(const char *timeunits)
-{
-  bool status = false;
-
-  size_t len = strlen(timeunits);
-  char *tu = (char *) Malloc((len+1)*sizeof(char));
-  memcpy(tu, timeunits, (len+1) * sizeof(char));
-  char *ptu = tu;
-
-  for ( size_t i = 0; i < len; i++ ) ptu[i] = (char)tolower((int)ptu[i]);
-
-  int timeunit = get_timeunit(len, ptu);
-  if ( timeunit != -1 )
-    {
-      while ( ! isspace(*ptu) && *ptu != 0 ) ptu++;
-      if ( *ptu )
-        {
-          while ( isspace(*ptu) ) ptu++;
-
-          int timetype = memcmp(ptu, "as", 2) == 0 ? TAXIS_ABSOLUTE :
-            memcmp(ptu, "since", 5) == 0 ? TAXIS_RELATIVE : -1;
-
-          status = timetype != -1;
-        }
-    }
-
-  Free(tu);
-
-  return status;
-}
 
 static
 void scanTimeString(const char *ptu, int *rdate, int *rtime)
@@ -684,7 +612,7 @@ int cdfTimeDimID(int fileID, int ndims, int nvars)
                   cdfGetAttText(fileID, varid, "units", sizeof(sbuf), sbuf);
                   strtolower(sbuf);
 
-                  if ( isTimeUnits(sbuf) ) return dimids[0];
+                  if ( is_time_units(sbuf) ) return dimids[0];
                 }
             }
         }
@@ -808,150 +736,6 @@ void cdfSetDim(ncvar_t *ncvars, int ncvarid, int dimid, int dimtype)
     }
 
   ncvars[ncvarid].dimtype[dimid] = dimtype;
-}
-
-static
-bool isLonAxis(const char *units, const char *stdname)
-{
-  bool status = false;
-  char lc_units[16];
-
-  memcpy(lc_units, units, 15);
-  lc_units[15] = 0;
-  strtolower(lc_units);
-
-  if ( ((memcmp(lc_units, "degree", 6) == 0 || memcmp(lc_units, "radian", 6) == 0) &&
-        (memcmp(stdname, "grid_longitude", 14) == 0 || memcmp(stdname, "longitude", 9) == 0)) )
-    {
-      status = true;
-    }
-
-  if ( status == false &&
-       memcmp(stdname, "grid_latitude", 13) && memcmp(stdname, "latitude", 8) &&
-       memcmp(lc_units, "degree", 6) == 0 )
-    {
-      int ioff = 6;
-      if ( lc_units[ioff] == 's' ) ioff++;
-      if ( lc_units[ioff] == '_' ) ioff++;
-      if ( lc_units[ioff] == 'e' ) status = true;
-    }
-
-  return status;
-}
-
-static
-bool isLatAxis(const char *units, const char *stdname)
-{
-  bool status = false;
-  char lc_units[16];
-
-  memcpy(lc_units, units, 15);
-  lc_units[15] = 0;
-  strtolower(lc_units);
-
-  if ( ((memcmp(lc_units, "degree", 6) == 0 || memcmp(lc_units, "radian", 6) == 0) &&
-        (memcmp(stdname, "grid_latitude", 13) == 0 || memcmp(stdname, "latitude", 8) == 0)) )
-    {
-      status = true;
-    }
-
-  if ( status == false &&
-       memcmp(stdname, "grid_longitude", 14) && memcmp(stdname, "longitude", 9) &&
-       memcmp(lc_units, "degree", 6) == 0 )
-    {
-      int ioff = 6;
-      if ( lc_units[ioff] == 's' ) ioff++;
-      if ( lc_units[ioff] == '_' ) ioff++;
-      if ( lc_units[ioff] == 'n' || lc_units[ioff] == 's' ) status = true;
-    }
-
-  return status;
-}
-
-static
-bool isDBLAxis(/*const char *units,*/ const char *longname)
-{
-  bool status = false;
-
-  if ( strcmp(longname, "depth below land")         == 0 ||
-       strcmp(longname, "depth_below_land")         == 0 ||
-       strcmp(longname, "levels below the surface") == 0 )
-    {
-      /*
-      if ( strcmp(ncvars[ncvarid].units, "cm") == 0 ||
-           strcmp(ncvars[ncvarid].units, "dm") == 0 ||
-           strcmp(ncvars[ncvarid].units, "m")  == 0 )
-      */
-        status = true;
-    }
-
-  return status;
-}
-
-static
-bool unitsIsHeight(const char *units)
-{
-  bool status = false;
-  int u0 = units[0];
-
-  if ( (u0=='m' && (!units[1] || strncmp(units, "meter", 5) == 0)) ||
-       (!units[2] && units[1]=='m' && (u0=='c' || u0=='d' || u0=='k')) )
-    {
-      status = true;
-    }
-
-  return status;
-}
-
-static
-bool isDepthAxis(const char *stdname, const char *longname)
-{
-  bool status = false;
-
-  if ( strcmp(stdname, "depth") == 0 )
-    status = true;
-  else
-    if ( strcmp(longname, "depth_below_sea") == 0 ||
-         strcmp(longname, "depth below sea") == 0 )
-      {
-        status = true;
-      }
-
-  return status;
-}
-
-static
-bool isHeightAxis(const char *stdname, const char *longname)
-{
-  bool status = false;
-
-  if ( strcmp(stdname, "height") == 0 )
-    status = true;
-  else
-    if ( strcmp(longname, "height") == 0 ||
-         strcmp(longname, "height above the surface") == 0 )
-      {
-        status = true;
-      }
-
-  return status;
-}
-
-static
-bool unitsIsPressure(const char *units)
-{
-  bool status = false;
-
-  if ( strncmp(units, "millibar", 8) == 0 ||
-       strncmp(units, "mb", 2)       == 0 ||
-       strncmp(units, "hectopas", 8) == 0 ||
-       strncmp(units, "hPa", 3)      == 0 ||
-       strncmp(units, "Pa", 2)       == 0 )
-    {
-      status = true;
-    }
-
-  return status;
 }
 
 static
@@ -1961,21 +1745,21 @@ void verify_coordinate_vars_1(int ncid, int ndims, ncdim_t *ncdims, ncvar_t *ncv
 
 	  if ( ncvars[ncvarid].units[0] != 0 )
 	    {
-	      if ( isLonAxis(ncvars[ncvarid].units, ncvars[ncvarid].stdname) )
+	      if ( is_lon_axis(ncvars[ncvarid].units, ncvars[ncvarid].stdname) )
 		{
 		  ncvars[ncvarid].islon = true;
 		  cdfSetVar(ncvars, ncvarid, FALSE);
 		  cdfSetDim(ncvars, ncvarid, 0, X_AXIS);
 		  ncdims[ncdimid].dimtype = X_AXIS;
 		}
-	      else if ( isLatAxis(ncvars[ncvarid].units, ncvars[ncvarid].stdname) )
+	      else if ( is_lat_axis(ncvars[ncvarid].units, ncvars[ncvarid].stdname) )
 		{
 		  ncvars[ncvarid].islat = true;
 		  cdfSetVar(ncvars, ncvarid, FALSE);
 		  cdfSetDim(ncvars, ncvarid, 0, Y_AXIS);
 		  ncdims[ncdimid].dimtype = Y_AXIS;
 		}
-	      else if ( unitsIsPressure(ncvars[ncvarid].units) )
+	      else if ( is_pressure_units(ncvars[ncvarid].units) )
 		{
 		  ncvars[ncvarid].zaxistype = ZAXIS_PRESSURE;
 		}
@@ -1992,15 +1776,15 @@ void verify_coordinate_vars_1(int ncid, int ndims, ncdim_t *ncdims, ncvar_t *ncv
 		  else if ( strcmp(ncvars[ncvarid].units, "level") == 0 )
 		    ncvars[ncvarid].zaxistype = ZAXIS_GENERIC;
 		}
-	      else if ( isDBLAxis(ncvars[ncvarid].longname) )
+	      else if ( is_DBL_axis(ncvars[ncvarid].longname) )
                 {
                   ncvars[ncvarid].zaxistype = ZAXIS_DEPTH_BELOW_LAND;
 		}
-	      else if ( unitsIsHeight(ncvars[ncvarid].units) )
+	      else if ( is_height_units(ncvars[ncvarid].units) )
 		{
-		  if ( isDepthAxis(ncvars[ncvarid].stdname, ncvars[ncvarid].longname) )
+		  if ( is_depth_axis(ncvars[ncvarid].stdname, ncvars[ncvarid].longname) )
 		    ncvars[ncvarid].zaxistype = ZAXIS_DEPTH_BELOW_SEA;
-		  else if ( isHeightAxis(ncvars[ncvarid].stdname, ncvars[ncvarid].longname) )
+		  else if ( is_height_axis(ncvars[ncvarid].stdname, ncvars[ncvarid].longname) )
 		    ncvars[ncvarid].zaxistype = ZAXIS_HEIGHT;
 		}
 	    }
@@ -2054,17 +1838,17 @@ void verify_coordinate_vars_2(int nvars, ncvar_t *ncvars)
 	{
 	  if ( ncvars[ncvarid].units[0] != 0 )
 	    {
-	      if ( isLonAxis(ncvars[ncvarid].units, ncvars[ncvarid].stdname) )
+	      if ( is_lon_axis(ncvars[ncvarid].units, ncvars[ncvarid].stdname) )
 		{
 		  ncvars[ncvarid].islon = true;
 		  continue;
 		}
-	      else if ( isLatAxis(ncvars[ncvarid].units, ncvars[ncvarid].stdname) )
+	      else if ( is_lat_axis(ncvars[ncvarid].units, ncvars[ncvarid].stdname) )
 		{
 		  ncvars[ncvarid].islat = true;
 		  continue;
 		}
-	      else if ( unitsIsPressure(ncvars[ncvarid].units) )
+	      else if ( is_pressure_units(ncvars[ncvarid].units) )
 		{
 		  ncvars[ncvarid].zaxistype = ZAXIS_PRESSURE;
 		  continue;
@@ -2083,16 +1867,16 @@ void verify_coordinate_vars_2(int nvars, ncvar_t *ncvars)
 		    ncvars[ncvarid].zaxistype = ZAXIS_GENERIC;
 		  continue;
 		}
-	      else if ( isDBLAxis(ncvars[ncvarid].longname) )
+	      else if ( is_DBL_axis(ncvars[ncvarid].longname) )
 		{
                   ncvars[ncvarid].zaxistype = ZAXIS_DEPTH_BELOW_LAND;
 		  continue;
 		}
-	      else if ( unitsIsHeight(ncvars[ncvarid].units) )
+	      else if ( is_height_units(ncvars[ncvarid].units) )
 		{
-		  if ( isDepthAxis(ncvars[ncvarid].stdname, ncvars[ncvarid].longname) )
+		  if ( is_depth_axis(ncvars[ncvarid].stdname, ncvars[ncvarid].longname) )
 		    ncvars[ncvarid].zaxistype = ZAXIS_DEPTH_BELOW_SEA;
-		  else if ( isHeightAxis(ncvars[ncvarid].stdname, ncvars[ncvarid].longname) )
+		  else if ( is_height_axis(ncvars[ncvarid].stdname, ncvars[ncvarid].longname) )
 		    ncvars[ncvarid].zaxistype = ZAXIS_HEIGHT;
 		  continue;
 		}
@@ -3553,7 +3337,7 @@ void find_time_vars(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimid, 
                   strcpy(timeunits, ncvars[ncvarid].units);
                   strtolower(timeunits);
 
-                  if ( isTimeUnits(timeunits) )
+                  if ( is_time_units(timeunits) )
                     {
                       streamptr->basetime.ncvarid = ncvarid;
                       break;
@@ -3577,7 +3361,7 @@ void find_time_vars(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimid, 
              ncvars[ncvarid].ndims == 1 &&
              timedimid == ncvars[ncvarid].dimids[0] &&
              !xtypeIsText(ncvars[ncvarid].xtype) &&
-             isTimeAxisUnits(ncvars[ncvarid].units) )
+             is_timeaxis_units(ncvars[ncvarid].units) )
           {
             ncvars[ncvarid].isvar = FALSE;
 
