@@ -2839,7 +2839,7 @@ int cmpvarname(const void *s1, const void *s2)
 
 /* define all input data variables */
 static
-void define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, int *varids, int nvars, int num_ncvars, ncvar_t *ncvars)
+void cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, int *varids, int nvars, int num_ncvars, ncvar_t *ncvars)
 {
   if ( CDI_Debug )
     for(int i = 0; i < nvars; i++) Message("varids[%d] = %d", i, varids[i]);
@@ -3759,7 +3759,7 @@ int cdfInqContents(stream_t *streamptr)
   streamptr->ntsteps = (long)ntsteps;
 
   /* define all data variables */
-  define_all_vars(streamptr, vlistID, instID, modelID, varids, nvars_data, nvars, ncvars);
+  cdf_define_all_vars(streamptr, vlistID, instID, modelID, varids, nvars_data, nvars, ncvars);
 
 
   cdiCreateTimesteps(streamptr);
