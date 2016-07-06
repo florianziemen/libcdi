@@ -3126,7 +3126,7 @@ void cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int model
 }
 
 static
-void scan_global_attributes(int fileID, int vlistID, stream_t *streamptr, int ngatts, int *instID, int *modelID, int *ucla_les, unsigned char *uuidOfHGrid, unsigned char *uuidOfVGrid, char *gridfile, int *number_of_grid_used)
+void cdf_scan_global_attr(int fileID, int vlistID, stream_t *streamptr, int ngatts, int *instID, int *modelID, int *ucla_les, unsigned char *uuidOfHGrid, unsigned char *uuidOfVGrid, char *gridfile, int *number_of_grid_used)
 {
   nc_type xtype;
   size_t attlen;
@@ -3513,8 +3513,8 @@ int cdfInqContents(stream_t *streamptr)
     }
 
   /* scan global attributes */
-  scan_global_attributes(fileID, vlistID, streamptr, ngatts, &instID, &modelID, &ucla_les,
-                         uuidOfHGrid, uuidOfVGrid, gridfile, &number_of_grid_used);
+  cdf_scan_global_attr(fileID, vlistID, streamptr, ngatts, &instID, &modelID, &ucla_les,
+                       uuidOfHGrid, uuidOfVGrid, gridfile, &number_of_grid_used);
 
   /* find time dim */
   if ( unlimdimid >= 0 )
