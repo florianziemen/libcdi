@@ -957,13 +957,72 @@ void printNCvars(const ncvar_t *ncvars, int nvars, const char *oname)
 }
 
 static
-void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
-                          int timedimid, int modelID, int format)
+void cdf_scan_attr_axis(ncvar_t *ncvars, ncdim_t *ncdims, int ncvarid, const char *attstring, size_t attlen,
+                        int nvdims, int *dimidsp, const char *name)
 {
-  int ncid;
+  int i;
+  for ( i = 0; i < (int)attlen; ++i )
+    {
+      if ( attstring[i] != '-' && attstring[i] != 't' && attstring[i] != 'z' &&
+           attstring[i] != 'y' && attstring[i] != 'x' )
+        {
+          Warning("Unexpected character in axis attribute for %s, ignored!", name);
+          break;
+        }
+    }
+
+  if ( i == (int) attlen && (int) attlen == nvdims )
+    {
+      while ( attlen-- )
+        {
+          if ( (int) attstring[attlen] == 't' )
+            {
+              if ( attlen != 0 ) Warning("axis attribute 't' not on first position");
+              cdfSetDim(ncvars, ncvarid, (int)attlen, T_AXIS);
+            }
+          else if ( (int) attstring[attlen] == 'z' )
+            {
+              ncvars[ncvarid].zdim = dimidsp[attlen];
+              cdfSetDim(ncvars, ncvarid, (int)attlen, Z_AXIS);
+
+              if ( ncvars[ncvarid].ndims == 1 )
+                {
+                  cdfSetVar(ncvars, ncvarid, FALSE);
+                  ncdims[ncvars[ncvarid].dimids[0]].dimtype = Z_AXIS;
+                }
+            }
+          else if ( (int) attstring[attlen] == 'y' )
+            {
+              ncvars[ncvarid].ydim = dimidsp[attlen];
+              cdfSetDim(ncvars, ncvarid, (int)attlen, Y_AXIS);
+
+              if ( ncvars[ncvarid].ndims == 1 )
+                {
+                  cdfSetVar(ncvars, ncvarid, FALSE);
+                  ncdims[ncvars[ncvarid].dimids[0]].dimtype = Y_AXIS;
+                }
+            }
+          else if ( (int) attstring[attlen] == 'x' )
+            {
+              ncvars[ncvarid].xdim = dimidsp[attlen];
+              cdfSetDim(ncvars, ncvarid, (int)attlen, X_AXIS);
+
+              if ( ncvars[ncvarid].ndims == 1 )
+                {
+                  cdfSetVar(ncvars, ncvarid, FALSE);
+                  ncdims[ncvars[ncvarid].dimids[0]].dimtype = X_AXIS;
+                }
+            }
+        }
+    }
+}
+
+static
+void cdf_scan_var_attributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
+                             int timedimid, int modelID, int format)
+{
   int ncdimid;
   int nvdims, nvatts;
-  int *dimidsp;
   int iatt;
   nc_type xtype, atttype;
   size_t attlen;
@@ -978,8 +1037,8 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
 
   for ( int ncvarid = 0; ncvarid < nvars; ncvarid++ )
     {
-      ncid    = ncvars[ncvarid].ncid;
-      dimidsp = ncvars[ncvarid].dimids;
+      int ncid    = ncvars[ncvarid].ncid;
+      int *dimidsp = ncvars[ncvarid].dimids;
 
       cdf_inq_var(ncid, ncvarid, name, &xtype, &nvdims, dimidsp, &nvatts);
       strcpy(ncvars[ncvarid].name, name);
@@ -1109,41 +1168,7 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
               cdfGetAttText(ncid, ncvarid, attname, attstringlen, attstring);
               strtolower(attstring);
 
-              if      ( strcmp(attstring, "gaussian reduced") == 0 )
-                ncvars[ncvarid].gridtype = GRID_GAUSSIAN_REDUCED;
-              else if ( strcmp(attstring, "gaussian") == 0 )
-                ncvars[ncvarid].gridtype = GRID_GAUSSIAN;
-              else if ( strncmp(attstring, "spectral", 8) == 0 )
-                ncvars[ncvarid].gridtype = GRID_SPECTRAL;
-              else if ( strncmp(attstring, "fourier", 7) == 0 )
-                ncvars[ncvarid].gridtype = GRID_FOURIER;
-              else if ( strcmp(attstring, "trajectory") == 0 )
-                ncvars[ncvarid].gridtype = GRID_TRAJECTORY;
-              else if ( strcmp(attstring, "generic") == 0 )
-                ncvars[ncvarid].gridtype = GRID_GENERIC;
-              else if ( strcmp(attstring, "cell") == 0 )
-                ncvars[ncvarid].gridtype = GRID_UNSTRUCTURED;
-              else if ( strcmp(attstring, "unstructured") == 0 )
-                ncvars[ncvarid].gridtype = GRID_UNSTRUCTURED;
-              else if ( strcmp(attstring, "curvilinear") == 0 )
-                ncvars[ncvarid].gridtype = GRID_CURVILINEAR;
-              else if ( strcmp(attstring, "sinusoidal") == 0 )
-                ;
-              else if ( strcmp(attstring, "laea") == 0 )
-                ;
-              else if ( strcmp(attstring, "lcc2") == 0 )
-                ;
-              else if ( strcmp(attstring, "linear") == 0 ) // ignore grid type linear
-                ;
-              else
-                {
-                  static int warn = TRUE;
-                  if ( warn )
-                    {
-                      warn = FALSE;
-                      Warning("NetCDF attribute grid_type='%s' unsupported!", attstring);
-                    }
-                }
+              set_gridtype(attstring, &ncvars[ncvarid].gridtype);
 
               cdfSetVar(ncvars, ncvarid, TRUE);
             }
@@ -1152,37 +1177,7 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
               cdfGetAttText(ncid, ncvarid, attname, attstringlen, attstring);
               strtolower(attstring);
 
-              if      ( strcmp(attstring, "toa") == 0 )
-                ncvars[ncvarid].zaxistype = ZAXIS_TOA;
-              else if ( strcmp(attstring, "cloudbase") == 0 )
-                ncvars[ncvarid].zaxistype = ZAXIS_CLOUD_BASE;
-              else if ( strcmp(attstring, "cloudtop") == 0 )
-                ncvars[ncvarid].zaxistype = ZAXIS_CLOUD_TOP;
-              else if ( strcmp(attstring, "isotherm0") == 0 )
-                ncvars[ncvarid].zaxistype = ZAXIS_ISOTHERM_ZERO;
-              else if ( strcmp(attstring, "seabottom") == 0 )
-                ncvars[ncvarid].zaxistype = ZAXIS_SEA_BOTTOM;
-              else if ( strcmp(attstring, "lakebottom") == 0 )
-                ncvars[ncvarid].zaxistype = ZAXIS_LAKE_BOTTOM;
-              else if ( strcmp(attstring, "sedimentbottom") == 0 )
-                ncvars[ncvarid].zaxistype = ZAXIS_SEDIMENT_BOTTOM;
-              else if ( strcmp(attstring, "sedimentbottomta") == 0 )
-                ncvars[ncvarid].zaxistype = ZAXIS_SEDIMENT_BOTTOM_TA;
-              else if ( strcmp(attstring, "sedimentbottomtw") == 0 )
-                ncvars[ncvarid].zaxistype = ZAXIS_SEDIMENT_BOTTOM_TW;
-              else if ( strcmp(attstring, "mixlayer") == 0 )
-                ncvars[ncvarid].zaxistype = ZAXIS_MIX_LAYER;
-              else if ( strcmp(attstring, "atmosphere") == 0 )
-                ncvars[ncvarid].zaxistype = ZAXIS_ATMOSPHERE;
-              else
-                {
-                  static int warn = TRUE;
-                  if ( warn )
-                    {
-                      warn = FALSE;
-                      Warning("NetCDF attribute level_type='%s' unsupported!", attstring);
-                    }
-                }
+              set_zaxistype(attstring, &ncvars[ncvarid].zaxistype);
 
               cdfSetVar(ncvars, ncvarid, TRUE);
             }
@@ -1539,61 +1534,7 @@ void cdfScanVarAttributes(int nvars, ncvar_t *ncvars, ncdim_t *ncdims,
 	      else
 		{
 		  strtolower(attstring);
-                  int i;
-		  for ( i = 0; i < (int)attlen; ++i )
-		    {
-		      if ( attstring[i] != '-' && attstring[i] != 't' && attstring[i] != 'z' &&
-			   attstring[i] != 'y' && attstring[i] != 'x' )
-			{
-			  Warning("Unexpected character in axis attribute for %s, ignored!", name);
-			  break;
-			}
-		    }
-
-		  if ( i == (int) attlen && (int) attlen == nvdims )
-		    {
-		      while ( attlen-- )
-			{
-			  if ( (int) attstring[attlen] == 't' )
-			    {
-			      if ( attlen != 0 ) Warning("axis attribute 't' not on first position");
-			      cdfSetDim(ncvars, ncvarid, (int)attlen, T_AXIS);
-			    }
-			  else if ( (int) attstring[attlen] == 'z' )
-			    {
-                              ncvars[ncvarid].zdim = dimidsp[attlen];
-                              cdfSetDim(ncvars, ncvarid, (int)attlen, Z_AXIS);
-
-                              if ( ncvars[ncvarid].ndims == 1 )
-                                {
-                                  cdfSetVar(ncvars, ncvarid, FALSE);
-                                  ncdims[ncvars[ncvarid].dimids[0]].dimtype = Z_AXIS;
-                                }
-			    }
-			  else if ( (int) attstring[attlen] == 'y' )
-			    {
-			      ncvars[ncvarid].ydim = dimidsp[attlen];
-			      cdfSetDim(ncvars, ncvarid, (int)attlen, Y_AXIS);
-
-			      if ( ncvars[ncvarid].ndims == 1 )
-				{
-				  cdfSetVar(ncvars, ncvarid, FALSE);
-				  ncdims[ncvars[ncvarid].dimids[0]].dimtype = Y_AXIS;
-				}
-			    }
-			  else if ( (int) attstring[attlen] == 'x' )
-			    {
-			      ncvars[ncvarid].xdim = dimidsp[attlen];
-			      cdfSetDim(ncvars, ncvarid, (int)attlen, X_AXIS);
-
-			      if ( ncvars[ncvarid].ndims == 1 )
-				{
-				  cdfSetVar(ncvars, ncvarid, FALSE);
-				  ncdims[ncvars[ncvarid].dimids[0]].dimtype = X_AXIS;
-				}
-			    }
-			}
-		    }
+                  cdf_scan_attr_axis(ncvars, ncdims, ncvarid, attstring, attlen, nvdims, dimidsp, name);
 		}
 	    }
 	  else if ( ( strcmp(attname, "realization") == 0 )         ||
@@ -3602,10 +3543,10 @@ int cdfInqContents(stream_t *streamptr)
 	ncdims[ncdimid].dimtype = T_AXIS;
     }
 
-  if ( CDI_Debug ) printNCvars(ncvars, nvars, "cdfScanVarAttributes");
+  if ( CDI_Debug ) printNCvars(ncvars, nvars, "cdf_scan_var_attributes");
 
   /* scan attributes of all variables */
-  cdfScanVarAttributes(nvars, ncvars, ncdims, timedimid, modelID, format);
+  cdf_scan_var_attributes(nvars, ncvars, ncdims, timedimid, modelID, format);
 
 
   if ( CDI_Debug ) printNCvars(ncvars, nvars, "find coordinate vars");

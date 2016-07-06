@@ -3,6 +3,7 @@
 #include "dmemory.h"
 #include "cdi.h"
 #include "cdf_util.h"
+#include "error.h"
 
 
 void strtolower(char *str)
@@ -221,4 +222,69 @@ bool is_lat_axis(const char *units, const char *stdname)
     }
 
   return status;
+}
+
+
+void set_gridtype(const char *attstring, int *gridtype)
+{
+  if      ( strcmp(attstring, "gaussian reduced") == 0 )
+    *gridtype = GRID_GAUSSIAN_REDUCED;
+  else if ( strcmp(attstring, "gaussian") == 0 )
+    *gridtype = GRID_GAUSSIAN;
+  else if ( strncmp(attstring, "spectral", 8) == 0 )
+    *gridtype = GRID_SPECTRAL;
+  else if ( strncmp(attstring, "fourier", 7) == 0 )
+    *gridtype = GRID_FOURIER;
+  else if ( strcmp(attstring, "trajectory") == 0 )
+    *gridtype = GRID_TRAJECTORY;
+  else if ( strcmp(attstring, "generic") == 0 )
+    *gridtype = GRID_GENERIC;
+  else if ( strcmp(attstring, "cell") == 0 )
+    *gridtype = GRID_UNSTRUCTURED;
+  else if ( strcmp(attstring, "unstructured") == 0 )
+    *gridtype = GRID_UNSTRUCTURED;
+  else if ( strcmp(attstring, "curvilinear") == 0 )
+    *gridtype = GRID_CURVILINEAR;
+  else if ( strcmp(attstring, "sinusoidal") == 0 )
+    ;
+  else if ( strcmp(attstring, "laea") == 0 )
+    ;
+  else if ( strcmp(attstring, "lcc2") == 0 )
+    ;
+  else if ( strcmp(attstring, "linear") == 0 ) // ignore grid type linear
+    ;
+  else
+    {
+      static bool warn = true;
+      if ( warn )
+        {
+          warn = false;
+          Warning("NetCDF attribute grid_type='%s' unsupported!", attstring);
+        }
+    }
+}
+
+
+void set_zaxistype(const char *attstring, int *zaxistype)
+{
+  if      ( strcmp(attstring, "toa") == 0 ) *zaxistype = ZAXIS_TOA;
+  else if ( strcmp(attstring, "cloudbase") == 0 ) *zaxistype = ZAXIS_CLOUD_BASE;
+  else if ( strcmp(attstring, "cloudtop") == 0 ) *zaxistype = ZAXIS_CLOUD_TOP;
+  else if ( strcmp(attstring, "isotherm0") == 0 ) *zaxistype = ZAXIS_ISOTHERM_ZERO;
+  else if ( strcmp(attstring, "seabottom") == 0 ) *zaxistype = ZAXIS_SEA_BOTTOM;
+  else if ( strcmp(attstring, "lakebottom") == 0 ) *zaxistype = ZAXIS_LAKE_BOTTOM;
+  else if ( strcmp(attstring, "sedimentbottom") == 0 ) *zaxistype = ZAXIS_SEDIMENT_BOTTOM;
+  else if ( strcmp(attstring, "sedimentbottomta") == 0 ) *zaxistype = ZAXIS_SEDIMENT_BOTTOM_TA;
+  else if ( strcmp(attstring, "sedimentbottomtw") == 0 ) *zaxistype = ZAXIS_SEDIMENT_BOTTOM_TW;
+  else if ( strcmp(attstring, "mixlayer") == 0 ) *zaxistype = ZAXIS_MIX_LAYER;
+  else if ( strcmp(attstring, "atmosphere") == 0 ) *zaxistype = ZAXIS_ATMOSPHERE;
+  else
+    {
+      static bool warn = true;
+      if ( warn )
+        {
+          warn = false;
+          Warning("NetCDF attribute level_type='%s' unsupported!", attstring);
+        }
+    }  
 }
