@@ -288,3 +288,25 @@ void set_zaxistype(const char *attstring, int *zaxistype)
         }
     }  
 }
+
+
+void set_calendar(const char *attstring, int *calendar)
+{
+  if ( memcmp(attstring, "standard", 8)  == 0 ||
+       memcmp(attstring, "gregorian", 9) == 0 )
+    *calendar = CALENDAR_STANDARD;
+  else if ( memcmp(attstring, "none", 4) == 0 )
+    *calendar = CALENDAR_NONE;
+  else if ( memcmp(attstring, "proleptic", 9) == 0 )
+    *calendar = CALENDAR_PROLEPTIC;
+  else if ( memcmp(attstring, "360", 3) == 0 )
+    *calendar = CALENDAR_360DAYS;
+  else if ( memcmp(attstring, "365", 3) == 0 ||
+            memcmp(attstring, "noleap", 6)  == 0 )
+    *calendar = CALENDAR_365DAYS;
+  else if ( memcmp(attstring, "366", 3)  == 0 ||
+            memcmp(attstring, "all_leap", 8) == 0 )
+    *calendar = CALENDAR_366DAYS;
+  else
+    Warning("calendar >%s< unsupported!", attstring);
+}
