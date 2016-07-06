@@ -1124,44 +1124,6 @@ bool isHybridSigmaPressureCoordinate(int ncid, int ncvarid, ncvar_t *ncvars, con
 }
 
 static
-int isGaussGrid(size_t ysize, double yinc, const double *yvals)
-{
-  int lgauss = FALSE;
-  double *yv, *yw;
-
-  if ( IS_EQUAL(yinc, 0) && ysize > 2 ) /* check if gaussian */
-    {
-      size_t i;
-      yv = (double *) Malloc(ysize*sizeof(double));
-      yw = (double *) Malloc(ysize*sizeof(double));
-      gaussaw(yv, yw, ysize);
-      Free(yw);
-      for ( i = 0; i < ysize; i++ )
-        yv[i] = asin(yv[i])/M_PI*180.0;
-
-      for ( i = 0; i < ysize; i++ )
-        if ( fabs(yv[i] - yvals[i]) >
-             ((yv[0] - yv[1])/500) ) break;
-
-      if ( i == ysize ) lgauss = TRUE;
-
-      /* check S->N */
-      if ( lgauss == FALSE )
-        {
-          for ( i = 0; i < ysize; i++ )
-            if ( fabs(yv[i] - yvals[ysize-i-1]) >
-                 ((yv[0] - yv[1])/500) ) break;
-
-          if ( i == ysize ) lgauss = TRUE;
-        }
-
-      Free(yv);
-    }
-
-  return lgauss;
-}
-
-static
 void printNCvars(const ncvar_t *ncvars, int nvars, const char *oname)
 {
   char axis[7];
