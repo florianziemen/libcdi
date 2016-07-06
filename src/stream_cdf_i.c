@@ -908,23 +908,21 @@ bool isHybridSigmaPressureCoordinate(int ncid, int ncvarid, ncvar_t *ncvars, con
 }
 
 static
-void printNCvars(const ncvar_t *ncvars, int nvars, const char *oname)
+void cdf_print_vars(const ncvar_t *ncvars, int nvars, const char *oname)
 {
   char axis[7];
-  int ncvarid, i;
-  int ndim;
   static const char iaxis[] = {'t', 'z', 'y', 'x'};
 
   fprintf(stderr, "%s:\n", oname);
 
-  for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
+  for ( int ncvarid = 0; ncvarid < nvars; ncvarid++ )
     {
-      ndim = 0;
+      int ndim = 0;
       if ( ncvars[ncvarid].isvar )
         {
           axis[ndim++] = 'v';
           axis[ndim++] = ':';
-          for ( i = 0; i < ncvars[ncvarid].ndims; i++ )
+          for ( int i = 0; i < ncvars[ncvarid].ndims; i++ )
             {/*
               if      ( ncvars[ncvarid].tvarid != -1 ) axis[ndim++] = iaxis[0];
               else if ( ncvars[ncvarid].zvarid != -1 ) axis[ndim++] = iaxis[1];
@@ -3543,13 +3541,13 @@ int cdfInqContents(stream_t *streamptr)
 	ncdims[ncdimid].dimtype = T_AXIS;
     }
 
-  if ( CDI_Debug ) printNCvars(ncvars, nvars, "cdf_scan_var_attributes");
+  if ( CDI_Debug ) cdf_print_vars(ncvars, nvars, "cdf_scan_var_attributes");
 
   /* scan attributes of all variables */
   cdf_scan_var_attributes(nvars, ncvars, ncdims, timedimid, modelID, format);
 
 
-  if ( CDI_Debug ) printNCvars(ncvars, nvars, "find coordinate vars");
+  if ( CDI_Debug ) cdf_print_vars(ncvars, nvars, "find coordinate vars");
 
   /* find coordinate vars */
   for ( ncdimid = 0; ncdimid < ndims; ncdimid++ )
@@ -3653,7 +3651,7 @@ int cdfInqContents(stream_t *streamptr)
   /* verify coordinate vars - second scan (all other variables) */
   verify_coordinate_vars_2(nvars, ncvars);
 
-  if ( CDI_Debug ) printNCvars(ncvars, nvars, "verify_coordinate_vars");
+  if ( CDI_Debug ) cdf_print_vars(ncvars, nvars, "verify_coordinate_vars");
 
   if ( ucla_les == TRUE )
     {
@@ -3725,7 +3723,7 @@ int cdfInqContents(stream_t *streamptr)
   read_vct_echam(fileID, nvars, ncvars, ncdims, &vct, &vctsize);
 
 
-  if ( CDI_Debug ) printNCvars(ncvars, nvars, "define_all_grids");
+  if ( CDI_Debug ) cdf_print_vars(ncvars, nvars, "define_all_grids");
 
   /* define all grids */
   cdf_define_all_grids(streamptr, vlistID, ncdims, nvars, ncvars, timedimid, uuidOfHGrid, gridfile, number_of_grid_used);
