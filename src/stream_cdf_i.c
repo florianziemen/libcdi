@@ -726,7 +726,7 @@ void cdf_set_var(ncvar_t *ncvars, int ncvarid, short isvar)
 }
 
 static
-void cdfSetDim(ncvar_t *ncvars, int ncvarid, int dimid, int dimtype)
+void cdf_set_dim(ncvar_t *ncvars, int ncvarid, int dimid, int dimtype)
 {
   if ( ncvars[ncvarid].dimtype[dimid] != UNDEFID &&
        ncvars[ncvarid].dimtype[dimid] != dimtype )
@@ -976,12 +976,12 @@ void cdf_scan_attr_axis(ncvar_t *ncvars, ncdim_t *ncdims, int ncvarid, const cha
           if ( (int) attstring[attlen] == 't' )
             {
               if ( attlen != 0 ) Warning("axis attribute 't' not on first position");
-              cdfSetDim(ncvars, ncvarid, (int)attlen, T_AXIS);
+              cdf_set_dim(ncvars, ncvarid, (int)attlen, T_AXIS);
             }
           else if ( (int) attstring[attlen] == 'z' )
             {
               ncvars[ncvarid].zdim = dimidsp[attlen];
-              cdfSetDim(ncvars, ncvarid, (int)attlen, Z_AXIS);
+              cdf_set_dim(ncvars, ncvarid, (int)attlen, Z_AXIS);
 
               if ( ncvars[ncvarid].ndims == 1 )
                 {
@@ -992,7 +992,7 @@ void cdf_scan_attr_axis(ncvar_t *ncvars, ncdim_t *ncdims, int ncvarid, const cha
           else if ( (int) attstring[attlen] == 'y' )
             {
               ncvars[ncvarid].ydim = dimidsp[attlen];
-              cdfSetDim(ncvars, ncvarid, (int)attlen, Y_AXIS);
+              cdf_set_dim(ncvars, ncvarid, (int)attlen, Y_AXIS);
 
               if ( ncvars[ncvarid].ndims == 1 )
                 {
@@ -1003,7 +1003,7 @@ void cdf_scan_attr_axis(ncvar_t *ncvars, ncdim_t *ncdims, int ncvarid, const cha
           else if ( (int) attstring[attlen] == 'x' )
             {
               ncvars[ncvarid].xdim = dimidsp[attlen];
-              cdfSetDim(ncvars, ncvarid, (int)attlen, X_AXIS);
+              cdf_set_dim(ncvars, ncvarid, (int)attlen, X_AXIS);
 
               if ( ncvars[ncvarid].ndims == 1 )
                 {
@@ -1090,7 +1090,7 @@ void cdf_scan_var_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimi
           if ( timedimid == dimidsp[0] )
             {
               ncvars[ncvarid].tsteptype = TSTEP_INSTANT;
-              cdfSetDim(ncvars, ncvarid, 0, T_AXIS);
+              cdf_set_dim(ncvars, ncvarid, 0, T_AXIS);
             }
           else
             {
@@ -1414,7 +1414,7 @@ void cdf_scan_var_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimi
               if ( ncvars[ncvarid].ndims == 1 )
                 {
                   cdf_set_var(ncvars, ncvarid, FALSE);
-                  cdfSetDim(ncvars, ncvarid, 0, Z_AXIS);
+                  cdf_set_dim(ncvars, ncvarid, 0, Z_AXIS);
                   ncdims[ncvars[ncvarid].dimids[0]].dimtype = Z_AXIS;
                 }
             }
@@ -1605,10 +1605,10 @@ void cdf_set_dimtype(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
 	  for ( int i = 0; i < ndims; i++ )
 	    {
 	      int ncdimid = ncvars[ncvarid].dimids[i];
-	      if      ( ncdims[ncdimid].dimtype == X_AXIS ) cdfSetDim(ncvars, ncvarid, i, X_AXIS);
-	      else if ( ncdims[ncdimid].dimtype == Y_AXIS ) cdfSetDim(ncvars, ncvarid, i, Y_AXIS);
-	      else if ( ncdims[ncdimid].dimtype == Z_AXIS ) cdfSetDim(ncvars, ncvarid, i, Z_AXIS);
-	      else if ( ncdims[ncdimid].dimtype == T_AXIS ) cdfSetDim(ncvars, ncvarid, i, T_AXIS);
+	      if      ( ncdims[ncdimid].dimtype == X_AXIS ) cdf_set_dim(ncvars, ncvarid, i, X_AXIS);
+	      else if ( ncdims[ncdimid].dimtype == Y_AXIS ) cdf_set_dim(ncvars, ncvarid, i, Y_AXIS);
+	      else if ( ncdims[ncdimid].dimtype == Z_AXIS ) cdf_set_dim(ncvars, ncvarid, i, Z_AXIS);
+	      else if ( ncdims[ncdimid].dimtype == T_AXIS ) cdf_set_dim(ncvars, ncvarid, i, T_AXIS);
 	    }
 
 	  if ( CDI_Debug )
@@ -1644,17 +1644,17 @@ void cdf_set_dimtype(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
                   {
                     if ( !lxdim )
                       {
-                        cdfSetDim(ncvars, ncvarid, i, X_AXIS);
+                        cdf_set_dim(ncvars, ncvarid, i, X_AXIS);
                         lxdim = true;
                       }
                     else if ( !lydim && ncvars[ncvarid].gridtype != GRID_UNSTRUCTURED )
                       {
-                        cdfSetDim(ncvars, ncvarid, i, Y_AXIS);
+                        cdf_set_dim(ncvars, ncvarid, i, Y_AXIS);
                         lydim = true;
                       }
                     else if ( !lzdim )
                       {
-                        cdfSetDim(ncvars, ncvarid, i, Z_AXIS);
+                        cdf_set_dim(ncvars, ncvarid, i, Z_AXIS);
                         lzdim = true;
                       }
                   }
@@ -1687,14 +1687,14 @@ void verify_coordinate_vars_1(int ncid, int ndims, ncdim_t *ncdims, ncvar_t *ncv
 		{
 		  ncvars[ncvarid].islon = true;
 		  cdf_set_var(ncvars, ncvarid, FALSE);
-		  cdfSetDim(ncvars, ncvarid, 0, X_AXIS);
+		  cdf_set_dim(ncvars, ncvarid, 0, X_AXIS);
 		  ncdims[ncdimid].dimtype = X_AXIS;
 		}
 	      else if ( is_lat_axis(ncvars[ncvarid].units, ncvars[ncvarid].stdname) )
 		{
 		  ncvars[ncvarid].islat = true;
 		  cdf_set_var(ncvars, ncvarid, FALSE);
-		  cdfSetDim(ncvars, ncvarid, 0, Y_AXIS);
+		  cdf_set_dim(ncvars, ncvarid, 0, Y_AXIS);
 		  ncdims[ncdimid].dimtype = Y_AXIS;
 		}
 	      else if ( is_pressure_units(ncvars[ncvarid].units) )
@@ -1741,7 +1741,7 @@ void verify_coordinate_vars_1(int ncid, int ndims, ncdim_t *ncdims, ncvar_t *ncv
 		{
 		  ncvars[ncvarid].islon = true;
 		  cdf_set_var(ncvars, ncvarid, FALSE);
-		  cdfSetDim(ncvars, ncvarid, 0, X_AXIS);
+		  cdf_set_dim(ncvars, ncvarid, 0, X_AXIS);
 		  ncdims[ncdimid].dimtype = X_AXIS;
 		  continue;
 		}
@@ -1749,7 +1749,7 @@ void verify_coordinate_vars_1(int ncid, int ndims, ncdim_t *ncdims, ncvar_t *ncv
 		{
 		  ncvars[ncvarid].islat = true;
 		  cdf_set_var(ncvars, ncvarid, FALSE);
-		  cdfSetDim(ncvars, ncvarid, 0, Y_AXIS);
+		  cdf_set_dim(ncvars, ncvarid, 0, Y_AXIS);
 		  ncdims[ncdimid].dimtype = Y_AXIS;
 		  continue;
 		}
@@ -1759,7 +1759,7 @@ void verify_coordinate_vars_1(int ncid, int ndims, ncdim_t *ncdims, ncvar_t *ncv
 	    {
               ncvars[ncvarid].islev = true;
 	      cdf_set_var(ncvars, ncvarid, FALSE);
-	      cdfSetDim(ncvars, ncvarid, 0, Z_AXIS);
+	      cdf_set_dim(ncvars, ncvarid, 0, Z_AXIS);
 	      ncdims[ncdimid].dimtype = Z_AXIS;
 	    }
 	}
