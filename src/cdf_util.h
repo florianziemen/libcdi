@@ -3,7 +3,7 @@
 
 #include <stdbool.h>
 
-void strtolower(char *str);
+void str_tolower(char *str);
 
 int get_timeunit(size_t len, const char *ptu);
 

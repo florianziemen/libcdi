@@ -610,7 +610,7 @@ int cdf_time_dimid(int fileID, int ndims, int nvars)
               if ( strncmp(sbuf, "units", 5) == 0 )
                 {
                   cdfGetAttText(fileID, varid, "units", sizeof(sbuf), sbuf);
-                  strtolower(sbuf);
+                  str_tolower(sbuf);
 
                   if ( is_time_units(sbuf) ) return dimids[0];
                 }
@@ -1163,7 +1163,7 @@ void cdf_scan_var_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimi
           else if ( strcmp(attname, "grid_type") == 0 && xtypeIsText(atttype) )
             {
               cdfGetAttText(ncid, ncvarid, attname, attstringlen, attstring);
-              strtolower(attstring);
+              str_tolower(attstring);
 
               set_gridtype(attstring, &ncvars[ncvarid].gridtype);
 
@@ -1172,7 +1172,7 @@ void cdf_scan_var_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimi
           else if ( strcmp(attname, "level_type") == 0 && xtypeIsText(atttype) )
             {
               cdfGetAttText(ncid, ncvarid, attname, attstringlen, attstring);
-              strtolower(attstring);
+              str_tolower(attstring);
 
               set_zaxistype(attstring, &ncvars[ncvarid].zaxistype);
 
@@ -1406,7 +1406,7 @@ void cdf_scan_var_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimi
           else if ( strcmp(attname, "positive") == 0 && xtypeIsText(atttype) )
             {
               cdfGetAttText(ncid, ncvarid, attname, attstringlen, attstring);
-              strtolower(attstring);
+              str_tolower(attstring);
 
               if    ( memcmp(attstring, "down", 4) == 0 ) ncvars[ncvarid].positive = POSITIVE_DOWN;
               else if ( memcmp(attstring, "up", 2) == 0 ) ncvars[ncvarid].positive = POSITIVE_UP;
@@ -1487,7 +1487,7 @@ void cdf_scan_var_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimi
           else if ( strcmp(attname, "_Unsigned") == 0 && xtypeIsText(atttype) )
             {
               cdfGetAttText(ncid, ncvarid, attname, attstringlen, attstring);
-              strtolower(attstring);
+              str_tolower(attstring);
 
               if ( memcmp(attstring, "true", 4) == 0 )
                 {
@@ -1503,7 +1503,7 @@ void cdf_scan_var_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimi
           else if ( strcmp(attname, "cdi") == 0 && xtypeIsText(atttype) )
             {
 	      cdfGetAttText(ncid, ncvarid, attname, attstringlen, attstring);
-	      strtolower(attstring);
+	      str_tolower(attstring);
 
 	      if ( memcmp(attstring, "ignore", 6) == 0 )
 		{
@@ -1530,7 +1530,7 @@ void cdf_scan_var_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimi
                 }
 	      else
 		{
-		  strtolower(attstring);
+		  str_tolower(attstring);
                   cdf_scan_attr_axis(ncvars, ncdims, ncvarid, attstring, attlen, nvdims, dimidsp, name);
 		}
 	    }
@@ -2371,7 +2371,7 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
                       char attstring[attstringlen];
 
 		      cdfGetAttText(ncvars[ncvarid].ncid, ncvars[ncvarid].gmapid, attname, attstringlen, attstring);
-		      strtolower(attstring);
+		      str_tolower(attstring);
 
 		      if ( strcmp(attstring, "rotated_latitude_longitude") == 0 )
 			grid->isRotated = TRUE;
@@ -3273,7 +3273,7 @@ void find_time_vars(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimid, 
               if ( ncvars[ncvarid].units[0] )
                 {
                   strcpy(timeunits, ncvars[ncvarid].units);
-                  strtolower(timeunits);
+                  str_tolower(timeunits);
 
                   if ( is_time_units(timeunits) )
                     {
@@ -3811,7 +3811,7 @@ int cdfInqContents(stream_t *streamptr)
         char attstring[attstringlen];
 
 	cdfGetAttText(fileID, nctimevarid, "calendar", attstringlen, attstring);
-	strtolower(attstring);
+	str_tolower(attstring);
         set_calendar(attstring, &calendar);
       }
 

@@ -6,7 +6,7 @@
 #include "error.h"
 
 
-void strtolower(char *str)
+void str_tolower(char *str)
 {
   if ( str )
     for ( size_t i = 0; str[i]; ++i )
@@ -174,7 +174,7 @@ bool is_lon_axis(const char *units, const char *stdname)
 
   memcpy(lc_units, units, 15);
   lc_units[15] = 0;
-  strtolower(lc_units);
+  str_tolower(lc_units);
 
   if ( ((memcmp(lc_units, "degree", 6) == 0 || memcmp(lc_units, "radian", 6) == 0) &&
         (memcmp(stdname, "grid_longitude", 14) == 0 || memcmp(stdname, "longitude", 9) == 0)) )
@@ -203,7 +203,7 @@ bool is_lat_axis(const char *units, const char *stdname)
 
   memcpy(lc_units, units, 15);
   lc_units[15] = 0;
-  strtolower(lc_units);
+  str_tolower(lc_units);
 
   if ( ((memcmp(lc_units, "degree", 6) == 0 || memcmp(lc_units, "radian", 6) == 0) &&
         (memcmp(stdname, "grid_latitude", 13) == 0 || memcmp(stdname, "latitude", 8) == 0)) )
