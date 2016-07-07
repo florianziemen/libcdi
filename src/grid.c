@@ -3358,7 +3358,8 @@ printMask(FILE *fp, const char prefix[], size_t nbyte0,
   fputs("\n", fp);
 }
 
-static void gridPrintKernel(grid_t * gridptr, int index, int opt, FILE *fp)
+static
+void gridPrintKernel(grid_t *gridptr, int index, int opt, FILE *fp)
 {
   int xdim, ydim;
   unsigned char uuidOfHGrid[CDI_UUID_SIZE];
@@ -3379,6 +3380,9 @@ static void gridPrintKernel(grid_t * gridptr, int index, int opt, FILE *fp)
 
   int dig = (prec == DATATYPE_FLT64) ? 15 : 7;
 
+  struct gridaxis_t *xaxis = &gridptr->x;
+  struct gridaxis_t *yaxis = &gridptr->y;
+
   fprintf(fp, "#\n"
           "# gridID %d\n"
           "#\n"
@@ -3389,16 +3393,22 @@ static void gridPrintKernel(grid_t * gridptr, int index, int opt, FILE *fp)
     {
       if ( xvals )
         {
-          if ( gridptr->x.name[0]     )     fprintf(fp, "xname     = %s\n", gridptr->x.name);
-          if ( gridptr->x.longname[0] )     fprintf(fp, "xlongname = %s\n", gridptr->x.longname);
-          if ( gridptr->x.units[0]    )     fprintf(fp, "xunits    = %s\n", gridptr->x.units);
+          if ( xaxis->name[0]     )     fprintf(fp, "xname     = %s\n", xaxis->name);
+          if ( xaxis->longname[0] )     fprintf(fp, "xlongname = %s\n", xaxis->longname);
+          if ( xaxis->units[0]    )     fprintf(fp, "xunits    = %s\n", xaxis->units);
+          if ( xaxis->dimname[0] && strcmp(xaxis->name, xaxis->dimname) )
+            fprintf(fp, "xdimname  = %s\n", xaxis->dimname);
         }
       if ( yvals )
         {
-          if ( gridptr->y.name[0]     )     fprintf(fp, "yname     = %s\n", gridptr->y.name);
-          if ( gridptr->y.longname[0] )     fprintf(fp, "ylongname = %s\n", gridptr->y.longname);
-          if ( gridptr->y.units[0]    )     fprintf(fp, "yunits    = %s\n", gridptr->y.units);
+          if ( yaxis->name[0]     )     fprintf(fp, "yname     = %s\n", yaxis->name);
+          if ( yaxis->longname[0] )     fprintf(fp, "ylongname = %s\n", yaxis->longname);
+          if ( yaxis->units[0]    )     fprintf(fp, "yunits    = %s\n", yaxis->units);
+          if ( yaxis->dimname[0] && strcmp(yaxis->name, yaxis->dimname) )
+            fprintf(fp, "ydimname  = %s\n", yaxis->dimname);
         }
+      if ( type == GRID_UNSTRUCTURED || type == GRID_CURVILINEAR )
+        if ( gridptr->vdimname[0] ) fprintf(fp, "vdimname  = %s\n", gridptr->vdimname);
       if ( type == GRID_UNSTRUCTURED && nvertex > 0 ) fprintf(fp, "nvertex   = %d\n", nvertex);
     }
 
