@@ -2032,6 +2032,106 @@ void cdf_check_gridtype(int *gridtype, bool islon, bool islat, size_t xsize, siz
 }
 
 static
+bool cdf_read_xaxis(struct cdfLazyGrid *restrict lazyGrid, ncdim_t *ncdims, ncvar_t *ncvar, int xvarid, ncvar_t *axisvar,
+                    grid_t *grid, size_t *xsize, size_t ysize, int ntdims, size_t *start, size_t *count, bool *islon)
+{
+  bool skipvar = true;
+  *islon = axisvar->islon;
+  int ndims = axisvar->ndims;
+  size_t size = 0;
+  if ( (ndims - ntdims) == 2 )
+    {
+      ncvar->gridtype = GRID_CURVILINEAR;
+      size = (*xsize)*ysize;
+      /* Check size of 2 dimensional coordinate variables */
+      int dimid = axisvar->dimids[ndims-2];
+      size_t dimsize1 = ncdims[dimid].len;
+      dimid = axisvar->dimids[ndims-1];
+      size_t dimsize2 = ncdims[dimid].len;
+      skipvar = dimsize1*dimsize2 != size;
+    }
+  else if ( (ndims - ntdims) == 1 )
+    {
+      size = *xsize;
+      /* Check size of 1 dimensional coordinate variables */
+      int dimid = axisvar->dimids[ndims-1];
+      size_t dimsize = ncdims[dimid].len;
+      skipvar = dimsize != size;
+    }
+  else if ( ndims == 0 && *xsize == 0 )
+    {
+      size = *xsize = 1;
+      skipvar = false;
+    }
+
+  if ( skipvar )
+    {
+      Warning("Unsupported array structure, skipped variable %s!", ncvar->name);
+      ncvar->isvar = -1;
+      return true;
+    }
+
+  if ( axisvar->xtype == NC_FLOAT ) grid->prec = DATATYPE_FLT32;
+
+  cdf_load_vals(size, ndims, xvarid, axisvar, &grid->x.vals, &lazyGrid->xValsGet, ntdims, start, count);
+
+  cdf_copy_axis_attr(axisvar, &grid->x);
+
+  return false;
+}
+
+static
+bool cdf_read_yaxis(struct cdfLazyGrid *restrict lazyGrid, ncdim_t *ncdims, ncvar_t *ncvar, int yvarid, ncvar_t *axisvar,
+                    grid_t *grid, size_t xsize, size_t *ysize, int ntdims, size_t *start, size_t *count, bool *islat)
+{
+  bool skipvar = true;
+  *islat = axisvar->islat;
+  int ndims = axisvar->ndims;
+  size_t size = 0;
+  if ( (ndims - ntdims) == 2 )
+    {
+      ncvar->gridtype = GRID_CURVILINEAR;
+      size = xsize*(*ysize);
+      /* Check size of 2 dimensional coordinate variables */
+      int dimid = axisvar->dimids[ndims-2];
+      size_t dimsize1 = ncdims[dimid].len;
+      dimid = axisvar->dimids[ndims-1];
+      size_t dimsize2 = ncdims[dimid].len;
+      skipvar = dimsize1*dimsize2 != size;
+    }
+  else if ( (ndims - ntdims) == 1 )
+    {
+      if ( (int) *ysize == 0 ) size = xsize;
+      else                    size = *ysize;
+
+      int dimid = axisvar->dimids[ndims-1];
+      size_t dimsize = ncdims[dimid].len;
+      skipvar = dimsize != size;
+    }
+  else if ( ndims == 0 && *ysize == 0 )
+    {
+      size = *ysize = 1;
+      skipvar = false;
+    }
+
+  if ( skipvar )
+    {
+      Warning("Unsupported array structure, skipped variable %s!", ncvar->name);
+      ncvar->isvar = -1;
+      return true;
+    }
+
+  if ( axisvar->xtype == NC_FLOAT ) grid->prec = DATATYPE_FLT32;
+
+  cdf_load_vals(size, ndims, yvarid, axisvar, &grid->y.vals, &lazyGrid->yValsGet,
+                ntdims, start, count);
+
+  cdf_copy_axis_attr(axisvar, &grid->y);
+
+  return false;
+}
+
+static
 bool cdf_set_unstructured_par(ncvar_t *ncvar, grid_t *grid, int xdimid, int ydimid, unsigned char *uuidOfHGrid)
 {
   int ndims = ncvar->ndims;
@@ -2349,95 +2449,14 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
                 }
 
               if ( xvarid != UNDEFID )
-		{
-                  bool skipvar = true;
-		  islon = ncvars[xvarid].islon;
-		  int ndims = ncvars[xvarid].ndims;
-		  if ( (ndims - ntdims) == 2 )
-		    {
-		      ncvar->gridtype = GRID_CURVILINEAR;
-		      size = xsize*ysize;
-		      /* Check size of 2 dimensional coordinate variables */
-                      int dimid = ncvars[xvarid].dimids[ndims-2];
-                      size_t dimsize1 = ncdims[dimid].len;
-                      dimid = ncvars[xvarid].dimids[ndims-1];
-                      size_t dimsize2 = ncdims[dimid].len;
-                      skipvar = dimsize1*dimsize2 != size;
-		    }
-		  else if ( (ndims - ntdims) == 1 )
-		    {
-		      size = xsize;
-		      /* Check size of 1 dimensional coordinate variables */
-                      int dimid = ncvars[xvarid].dimids[ndims-1];
-                      size_t dimsize = ncdims[dimid].len;
-                      skipvar = dimsize != size;
-		    }
-		  else if ( ndims == 0 && xsize == 0 )
-		    {
-                      size = xsize = 1;
-                      skipvar = false;
-		    }
-
-                  if ( skipvar )
-                    {
-                      Warning("Unsupported array structure, skipped variable %s!", ncvar->name);
-                      ncvar->isvar = -1;
-                      continue;
-                    }
-
-		  if ( ncvars[xvarid].xtype == NC_FLOAT ) grid->prec = DATATYPE_FLT32;
-
-                  cdf_load_vals(size, ndims, xvarid, &ncvars[xvarid], &grid->x.vals, &lazyGrid->xValsGet,
-                                ntdims, start, count);
-
-                  cdf_copy_axis_attr(&ncvars[xvarid], &grid->x);
-		}
+                if ( cdf_read_xaxis(lazyGrid, ncdims, ncvar, xvarid, &ncvars[xvarid],
+                                    grid, &xsize, ysize, ntdims, start, count, &islon) )
+                  continue;
 
 	      if ( yvarid != UNDEFID )
-		{
-                  bool skipvar = true;
-		  islat = ncvars[yvarid].islat;
-		  int ndims = ncvars[yvarid].ndims;
-		  if ( (ndims - ntdims) == 2 )
-		    {
-		      ncvar->gridtype = GRID_CURVILINEAR;
-		      size = xsize*ysize;
-		      /* Check size of 2 dimensional coordinate variables */
-                      int dimid = ncvars[yvarid].dimids[ndims-2];
-                      size_t dimsize1 = ncdims[dimid].len;
-                      dimid = ncvars[yvarid].dimids[ndims-1];
-                      size_t dimsize2 = ncdims[dimid].len;
-                      skipvar = dimsize1*dimsize2 != size;
-		    }
-		  else if ( (ndims - ntdims) == 1 )
-		    {
-		      if ( (int) ysize == 0 ) size = xsize;
-		      else                    size = ysize;
-
-                      int dimid = ncvars[yvarid].dimids[ndims-1];
-                      size_t dimsize = ncdims[dimid].len;
-                      skipvar = dimsize != size;
-		    }
-		  else if ( ndims == 0 && ysize == 0 )
-		    {
-                      size = ysize = 1;
-                      skipvar = false;
-		    }
-
-                  if ( skipvar )
-                    {
-                      Warning("Unsupported array structure, skipped variable %s!", ncvar->name);
-                      ncvar->isvar = -1;
-                      continue;
-                    }
-
-		  if ( ncvars[yvarid].xtype == NC_FLOAT ) grid->prec = DATATYPE_FLT32;
-
-                  cdf_load_vals(size, ndims, yvarid, &ncvars[yvarid], &grid->y.vals, &lazyGrid->yValsGet,
-                                ntdims, start, count);
-
-                  cdf_copy_axis_attr(&ncvars[yvarid], &grid->y);
-		}
+                if ( cdf_read_yaxis(lazyGrid, ncdims, ncvar, yvarid, &ncvars[yvarid],
+                                    grid, xsize, &ysize, ntdims, start, count, &islat) )
+                  continue;
 
 	      if      ( (int) ysize == 0 ) size = xsize;
 	      else if ( (int) xsize == 0 ) size = ysize;
