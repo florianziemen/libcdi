@@ -1961,6 +1961,45 @@ void cdf_copy_axis_attr(ncvar_t *ncvar, struct gridaxis_t *gridaxis)
 }
 
 static
+int cdf_get_xydimid(int ndims, int *dimids, int *dimtype, int *xdimid, int *ydimid)
+{
+  int nxdims = 0, nydims = 0;
+  int xdimids[2] = {-1,-1}, ydimids[2] = {-1,-1};
+
+  for ( int i = 0; i < ndims; i++ )
+    {
+      if ( dimtype[i] == X_AXIS && nxdims < 2 )
+        {
+          xdimids[nxdims] = dimids[i];
+          nxdims++;
+        }
+      else if ( dimtype[i] == Y_AXIS && nydims < 2 )
+        {
+          ydimids[nydims] = dimids[i];
+          nydims++;
+        }
+    }
+
+  if ( nxdims == 2 )
+    {
+      *xdimid = xdimids[1];
+      *ydimid = xdimids[0];
+    }
+  else if ( nydims == 2 )
+    {
+      *xdimid = ydimids[1];
+      *ydimid = ydimids[0];
+    }
+  else
+    {
+      *xdimid = xdimids[0];
+      *ydimid = ydimids[0];
+    }
+
+  return nydims;
+}
+
+static
 void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars,
                           int timedimid, unsigned char *uuidOfHGrid, char *gridfile, int number_of_grid_used)
 {
@@ -1973,49 +2012,20 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
   for ( int ncvarid = 0; ncvarid < nvars; ++ncvarid )
     {
       ncvar_t *ncvar = &ncvars[ncvarid];
+      int gmapvarid = ncvar->gmapid;
       if ( ncvar->isvar && ncvar->gridID == UNDEFID )
 	{
 	  bool islon = false, islat = false;
-          int xdimids[2] = {-1,-1}, ydimids[2] = {-1,-1};
-	  int xdimid = -1, ydimid = -1;
           int vdimid = -1;
-	  int nxdims = 0, nydims = 0;
           int *dimtype = ncvar->dimtype;
           size_t size = 0;
           size_t xsize = 0, ysize = 0;
           struct addIffNewRes projAdded = { .Id = CDI_UNDEFID, .isNew = 0 },
                               gridAdded = { .Id = CDI_UNDEFID, .isNew = 0 };
 
-	  int ndims = ncvar->ndims;
-	  for ( int i = 0; i < ndims; i++ )
-	    {
-	      if ( dimtype[i] == X_AXIS && nxdims < 2 )
-		{
-		  xdimids[nxdims] = ncvar->dimids[i];
-		  nxdims++;
-		}
-	      else if ( dimtype[i] == Y_AXIS && nydims < 2 )
-		{
-		  ydimids[nydims] = ncvar->dimids[i];
-		  nydims++;
-		}
-	    }
-
-	  if ( nxdims == 2 )
-	    {
-	      xdimid = xdimids[1];
-	      ydimid = xdimids[0];
-	    }
-	  else if ( nydims == 2 )
-	    {
-	      xdimid = ydimids[1];
-	      ydimid = ydimids[0];
-	    }
-	  else
-	    {
-	      xdimid = xdimids[0];
-	      ydimid = ydimids[0];
-	    }
+          int ndims = ncvar->ndims;
+	  int xdimid = -1, ydimid = -1;
+          int nydims = cdf_get_xydimid(ndims, ncvar->dimids, dimtype, &xdimid, &ydimid);
 
 	  int xvarid = ncvar->xvarid != UNDEFID
 	    ? ncvar->xvarid : (xdimid != UNDEFID ? ncdims[xdimid].ncvarid : -1);
@@ -2130,7 +2140,7 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 		{
                   bool skipvar = true;
 		  islon = ncvars[xvarid].islon;
-		  ndims = ncvars[xvarid].ndims;
+		  int ndims = ncvars[xvarid].ndims;
 		  if ( (ndims - ntdims) == 2 )
 		    {
 		      ncvar->gridtype = GRID_CURVILINEAR;
@@ -2175,7 +2185,7 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 		{
                   bool skipvar = true;
 		  islat = ncvars[yvarid].islat;
-		  ndims = ncvars[yvarid].ndims;
+		  int ndims = ncvars[yvarid].ndims;
 		  if ( (ndims - ntdims) == 2 )
 		    {
 		      ncvar->gridtype = GRID_CURVILINEAR;
@@ -2355,27 +2365,28 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 	  if ( number_of_grid_used != UNDEFID && grid->type == GRID_UNSTRUCTURED )
             grid->number = number_of_grid_used;
 
-	  if ( ncvar->gmapid >= 0 )
+          if ( gmapvarid >= 0 )
             {
-              if ( ncvar->gridtype != GRID_CURVILINEAR )
+              int ncid = ncvars[gmapvarid].ncid;
+              if ( !testproj && ncvar->gridtype != GRID_CURVILINEAR )
                 {
                   int nvatts;
-                  cdf_inq_varnatts(ncvar->ncid, ncvar->gmapid, &nvatts);
+                  cdf_inq_varnatts(ncid, gmapvarid, &nvatts);
 
                   for ( int iatt = 0; iatt < nvatts; iatt++ )
                     {
                       nc_type atttype;
                       size_t attlen;
                       char attname[CDI_MAX_NAME];
-                      cdf_inq_attname(ncvar->ncid, ncvar->gmapid, iatt, attname);
-                      cdf_inq_attlen(ncvar->ncid, ncvar->gmapid, attname, &attlen);
-                      cdf_inq_atttype(ncvar->ncid, ncvar->gmapid, attname, &atttype);
+                      cdf_inq_attname(ncid, gmapvarid, iatt, attname);
+                      cdf_inq_attlen(ncid, gmapvarid, attname, &attlen);
+                      cdf_inq_atttype(ncid, gmapvarid, attname, &atttype);
 
                       if ( strcmp(attname, "grid_mapping_name") == 0 )
                         {
                           enum {attstringlen = 8192};
                           char attstring[attstringlen];
-                          cdfGetAttText(ncvar->ncid, ncvar->gmapid, attname, attstringlen, attstring);
+                          cdfGetAttText(ncid, gmapvarid, attname, attstringlen, attstring);
                           str_tolower(attstring);
 
                           if ( strcmp(attstring, "rotated_latitude_longitude") == 0 )
@@ -2395,22 +2406,22 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
                       else if ( strcmp(attname, "earth_radius") == 0 )
                         {
                           double datt;
-                          cdfGetAttDouble(ncvar->ncid, ncvar->gmapid, attname, 1, &datt);
+                          cdfGetAttDouble(ncid, gmapvarid, attname, 1, &datt);
                           grid->laea.a = datt;
                           grid->lcc2.a = datt;
                         }
                       else if ( strcmp(attname, "longitude_of_projection_origin") == 0 )
                         {
-                          cdfGetAttDouble(ncvar->ncid, ncvar->gmapid, attname, 1, &grid->laea.lon_0);
+                          cdfGetAttDouble(ncid, gmapvarid, attname, 1, &grid->laea.lon_0);
                         }
                       else if ( strcmp(attname, "longitude_of_central_meridian") == 0 )
                         {
-                          cdfGetAttDouble(ncvar->ncid, ncvar->gmapid, attname, 1, &grid->lcc2.lon_0);
+                          cdfGetAttDouble(ncid, gmapvarid, attname, 1, &grid->lcc2.lon_0);
                         }
                       else if ( strcmp(attname, "latitude_of_projection_origin") == 0 )
                         {
                           double datt;
-                          cdfGetAttDouble(ncvar->ncid, ncvar->gmapid, attname, 1, &datt);
+                          cdfGetAttDouble(ncid, gmapvarid, attname, 1, &datt);
                           grid->laea.lat_0 = datt;
                           grid->lcc2.lat_0 = datt;
                         }
@@ -2419,29 +2430,29 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
                           if ( attlen == 1 )
                             {
                               double datt;
-                              cdfGetAttDouble(ncvar->ncid, ncvar->gmapid, attname, 1, &datt);
+                              cdfGetAttDouble(ncid, gmapvarid, attname, 1, &datt);
                               grid->lcc2.lat_1 = datt;
                               grid->lcc2.lat_2 = datt;
                             }
                           else
                             {
                               double datt2[2];
-                              cdfGetAttDouble(ncvar->ncid, ncvar->gmapid, attname, 2, datt2);
+                              cdfGetAttDouble(ncid, gmapvarid, attname, 2, datt2);
                               grid->lcc2.lat_1 = datt2[0];
                               grid->lcc2.lat_2 = datt2[1];
                             }
                         }
                       else if ( strcmp(attname, "grid_north_pole_latitude") == 0 )
                         {
-                          cdfGetAttDouble(ncvar->ncid, ncvar->gmapid, attname, 1, &grid->ypole);
+                          cdfGetAttDouble(ncid, gmapvarid, attname, 1, &grid->ypole);
                         }
                       else if ( strcmp(attname, "grid_north_pole_longitude") == 0 )
                         {
-                          cdfGetAttDouble(ncvar->ncid, ncvar->gmapid, attname, 1, &grid->xpole);
+                          cdfGetAttDouble(ncid, gmapvarid, attname, 1, &grid->xpole);
                         }
                       else if ( strcmp(attname, "north_pole_grid_longitude") == 0 )
                         {
-                          cdfGetAttDouble(ncvar->ncid, ncvar->gmapid, attname, 1, &grid->angle);
+                          cdfGetAttDouble(ncid, gmapvarid, attname, 1, &grid->angle);
                         }
                     }
                 }
@@ -2452,29 +2463,29 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
                   char attname[CDI_MAX_NAME];
                   enum {attstringlen = 8192}; char attstring[attstringlen];
                   int nvatts;
-                  cdf_inq_varnatts(ncvar->ncid, ncvar->gmapid, &nvatts);
+                  cdf_inq_varnatts(ncid, gmapvarid, &nvatts);
 
                   for ( int iatt = 0; iatt < nvatts; iatt++ )
                     {
-                      cdf_inq_attname(ncvar->ncid, ncvar->gmapid, iatt, attname);
-                      cdf_inq_attlen(ncvar->ncid, ncvar->gmapid, attname, &attlen);
-                      cdf_inq_atttype(ncvar->ncid, ncvar->gmapid, attname, &atttype);
+                      cdf_inq_attname(ncid, gmapvarid, iatt, attname);
+                      cdf_inq_attlen(ncid, gmapvarid, attname, &attlen);
+                      cdf_inq_atttype(ncid, gmapvarid, attname, &atttype);
 
                       if ( xtypeIsInt(atttype) )
                         {
                           int attint[attlen];
-                          cdfGetAttInt(ncvar->ncid, ncvar->gmapid, attname, (int)attlen, attint);
+                          cdfGetAttInt(ncid, gmapvarid, attname, (int)attlen, attint);
                           printf("atttype: %d attname: %s attr: %d\n", atttype, attname, attint[0]);
                         }
                       else if ( xtypeIsFloat(atttype) )
                         {
                           double attflt[attlen];
-                          cdfGetAttDouble(ncvar->ncid, ncvar->gmapid, attname, (int)attlen, attflt);
+                          cdfGetAttDouble(ncid, gmapvarid, attname, (int)attlen, attflt);
                           printf("atttype: %d attname: %s attr: %g\n", atttype, attname, attflt[0]);
                         }
                       else if ( xtypeIsText(atttype) )
                         {
-                          cdfGetAttText(ncvar->ncid, ncvar->gmapid, attname, attstringlen, attstring);
+                          cdfGetAttText(ncid, gmapvarid, attname, attstringlen, attstring);
                           printf("atttype: %d attname: %s attr: %s\n", atttype, attname, attstring);
                         }
                     }
@@ -2556,7 +2567,7 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 	    {
               projAdded = cdiVlistAddGridIfNew(vlistID, proj, 1);
               ncvar->gridID = projAdded.Id;
-	      copy_numeric_projatts(ncvar->gridID, ncvar->gmapid, ncvar->ncid);
+	      copy_numeric_projatts(ncvar->gridID, gmapvarid, ncvar->ncid);
 	    }
 	  else
 #endif
