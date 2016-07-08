@@ -126,3 +126,26 @@ yvals = ....
 xbounds = ....
 ybounds = ....
 
+=======================================
+Example 3: Latitude and longitude on a spherical Earth
+=======================================
+
+dimensions:
+  lat = 18 ;
+  lon = 36 ;
+variables:
+  double lat(lat) ;
+  double lon(lon) ;
+  float temp(lat, lon) ;
+    temp:long_name = "temperature" ;
+    temp:units = "K" ;
+    temp:grid_mapping = "crs" ;
+  int crs ;
+    crs:grid_mapping_name = "latitude_longitude"
+    crs:semi_major_axis = 6371000.0 ;
+    crs:inverse_flattening = 0 ;
+
+LONLAT grid with projection parameter
+GENERIC grid        "
+CURVILINEAR grid      "
+UNSTRUCTURED grid        "
