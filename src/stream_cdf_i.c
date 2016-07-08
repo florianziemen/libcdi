@@ -2037,7 +2037,7 @@ void cdf_set_grid_to_similar_vars(ncvar_t *ncvar1, ncvar_t *ncvar2, int gridtype
   if ( ncvar2->isvar == TRUE && ncvar2->gridID == UNDEFID )
     {
       int xdimid2 = UNDEFID, ydimid2 = UNDEFID, zdimid2 = UNDEFID;
-      int xdimidx = -1, ydimidx = -1;
+      int xdimidx = UNDEFID, ydimidx = UNDEFID;
       int ndims2 = ncvar2->ndims;
 
       for ( int i = 0; i < ndims2; i++ )
@@ -2102,25 +2102,25 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
   for ( int ncvarid = 0; ncvarid < nvars; ++ncvarid )
     {
       ncvar_t *ncvar = &ncvars[ncvarid];
-      int gmapvarid = ncvar->gmapid;
       if ( ncvar->isvar && ncvar->gridID == UNDEFID )
 	{
 	  bool islon = false, islat = false;
-          int vdimid = -1;
+          int gmapvarid = ncvar->gmapid;
           int ndims = ncvar->ndims;
           int *dimtype = ncvar->dimtype;
+          int vdimid = UNDEFID;
           size_t size = 0;
           size_t xsize = 0, ysize = 0;
           struct addIffNewRes projAdded = { .Id = CDI_UNDEFID, .isNew = 0 },
                               gridAdded = { .Id = CDI_UNDEFID, .isNew = 0 };
 
-	  int xdimid = -1, ydimid = -1;
+	  int xdimid = UNDEFID, ydimid = UNDEFID;
           int nydims = cdf_get_xydimid(ndims, ncvar->dimids, dimtype, &xdimid, &ydimid);
 
 	  int xvarid = ncvar->xvarid != UNDEFID
-	    ? ncvar->xvarid : (xdimid != UNDEFID ? ncdims[xdimid].ncvarid : -1);
+	    ? ncvar->xvarid : (xdimid != UNDEFID ? ncdims[xdimid].ncvarid : UNDEFID);
           int yvarid = ncvar->yvarid != UNDEFID
-            ? ncvar->yvarid : (ydimid != UNDEFID ? ncdims[ydimid].ncvarid : -1);
+            ? ncvar->yvarid : (ydimid != UNDEFID ? ncdims[ydimid].ncvarid : UNDEFID);
 
 	  if ( xdimid != UNDEFID ) xsize = ncdims[xdimid].len;
 	  if ( ydimid != UNDEFID ) ysize = ncdims[ydimid].len;
@@ -2327,7 +2327,7 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 		grid->y.size = (int)ysize;
 		if ( xvarid != UNDEFID )
 		  {
-		    grid->xdef  = 1;
+		    grid->xdef = 1;
 		    if ( ncvars[xvarid].bounds != UNDEFID )
 		      {
 			int nbdims = ncvars[ncvars[xvarid].bounds].ndims;
@@ -2342,13 +2342,13 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 		  }
 		if ( yvarid != UNDEFID )
 		  {
-		    grid->ydef  = 1;
+		    grid->ydef = 1;
 		    if ( ncvars[yvarid].bounds != UNDEFID )
 		      {
 			int nbdims = ncvars[ncvars[yvarid].bounds].ndims;
 			if ( nbdims == 2 || nbdims == 3 )
 			  {
-                            if ( vdimid == -1 )
+                            if ( vdimid == UNDEFID )
                               {
                                 vdimid = ncvars[ncvars[xvarid].bounds].dimids[nbdims-1];
                                 size_t nvertex = ncdims[vdimid].len;
@@ -2544,7 +2544,7 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
           if ( grid->type == GRID_UNSTRUCTURED )
             {
               int zdimid = UNDEFID;
-              int xdimidx = -1, ydimidx = -1;
+              int xdimidx = UNDEFID, ydimidx = UNDEFID;
 
               for ( int i = 0; i < ndims; i++ )
                 {
@@ -2633,13 +2633,13 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 	  int gridindex = vlistGridIndex(vlistID, ncvar->gridID);
 	  streamptr->xdimID[gridindex] = xdimid;
 	  streamptr->ydimID[gridindex] = ydimid;
-          if ( xdimid == -1 && ydimid == -1 && grid->size == 1 )
+          if ( xdimid == UNDEFID && ydimid == UNDEFID && grid->size == 1 )
             gridDefHasDims(ncvar->gridID, FALSE);
 
           int gridID = ncvar->gridID;
-          if ( xdimid != -1 ) cdiGridDefKeyStr(gridID, CDI_KEY_XDIMNAME, (int)(strlen(ncdims[xdimid].name)+1), ncdims[xdimid].name);
-          if ( ydimid != -1 ) cdiGridDefKeyStr(gridID, CDI_KEY_YDIMNAME, (int)(strlen(ncdims[ydimid].name)+1), ncdims[ydimid].name);
-          if ( vdimid != -1 ) cdiGridDefKeyStr(gridID, CDI_KEY_VDIMNAME, (int)(strlen(ncdims[vdimid].name)+1), ncdims[vdimid].name);
+          if ( xdimid != UNDEFID ) cdiGridDefKeyStr(gridID, CDI_KEY_XDIMNAME, (int)(strlen(ncdims[xdimid].name)+1), ncdims[xdimid].name);
+          if ( ydimid != UNDEFID ) cdiGridDefKeyStr(gridID, CDI_KEY_YDIMNAME, (int)(strlen(ncdims[ydimid].name)+1), ncdims[ydimid].name);
+          if ( vdimid != UNDEFID ) cdiGridDefKeyStr(gridID, CDI_KEY_VDIMNAME, (int)(strlen(ncdims[vdimid].name)+1), ncdims[vdimid].name);
 
 	  if ( CDI_Debug )
 	    Message("gridID %d %d %s", ncvar->gridID, ncvarid, ncvar->name);
