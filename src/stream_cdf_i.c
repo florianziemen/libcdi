@@ -2032,6 +2032,55 @@ void cdf_check_gridtype(int *gridtype, bool islon, bool islat, size_t xsize, siz
 }
 
 static
+bool cdf_set_unstructured_par(ncvar_t *ncvar, grid_t *grid, int xdimid, int ydimid, unsigned char *uuidOfHGrid)
+{
+  int ndims = ncvar->ndims;
+  int *dimtype = ncvar->dimtype;
+
+  int zdimid = UNDEFID;
+  int xdimidx = UNDEFID, ydimidx = UNDEFID;
+
+  for ( int i = 0; i < ndims; i++ )
+    {
+      if      ( dimtype[i] == X_AXIS ) xdimidx = i;
+      else if ( dimtype[i] == Y_AXIS ) ydimidx = i;
+      else if ( dimtype[i] == Z_AXIS ) zdimid = ncvar->dimids[i];
+    }
+
+  if ( xdimid != UNDEFID && ydimid != UNDEFID && zdimid == UNDEFID )
+    {
+      if ( grid->x.size > grid->y.size && grid->y.size < 1000 )
+        {
+          dimtype[ydimidx] = Z_AXIS;
+          ydimid = UNDEFID;
+          grid->size  = grid->x.size;
+          grid->y.size = 0;
+        }
+      else if ( grid->y.size > grid->x.size && grid->x.size < 1000 )
+        {
+          dimtype[xdimidx] = Z_AXIS;
+          xdimid = ydimid;
+          ydimid = UNDEFID;
+          grid->size  = grid->y.size;
+          grid->x.size = grid->y.size;
+          grid->y.size = 0;
+        }
+    }
+
+  if ( grid->size != grid->x.size )
+    {
+      Warning("Unsupported array structure, skipped variable %s!", ncvar->name);
+      ncvar->isvar = -1;
+      return true;
+    }
+
+  if ( ncvar->position > 0 ) grid->position = ncvar->position;
+  if ( uuidOfHGrid[0] != 0 ) memcpy(grid->uuid, uuidOfHGrid, 16);
+
+  return false;
+}
+
+static
 void cdf_set_proj_atts(int ncid, int gmapvarid, grid_t *grid)
 {
   int nvatts;
@@ -2543,55 +2592,13 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 	    }
 
           if ( grid->type == GRID_UNSTRUCTURED )
-            {
-              int zdimid = UNDEFID;
-              int xdimidx = UNDEFID, ydimidx = UNDEFID;
-
-              for ( int i = 0; i < ndims; i++ )
-                {
-                  if      ( dimtype[i] == X_AXIS ) xdimidx = i;
-                  else if ( dimtype[i] == Y_AXIS ) ydimidx = i;
-                  else if ( dimtype[i] == Z_AXIS ) zdimid = ncvar->dimids[i];
-                }
-
-              if ( xdimid != UNDEFID && ydimid != UNDEFID && zdimid == UNDEFID )
-                {
-                  if ( grid->x.size > grid->y.size && grid->y.size < 1000 )
-                    {
-                      dimtype[ydimidx] = Z_AXIS;
-                      ydimid = UNDEFID;
-                      grid->size  = grid->x.size;
-                      grid->y.size = 0;
-                    }
-                  else if ( grid->y.size > grid->x.size && grid->x.size < 1000 )
-                    {
-                      dimtype[xdimidx] = Z_AXIS;
-                      xdimid = ydimid;
-                      ydimid = UNDEFID;
-                      grid->size  = grid->y.size;
-                      grid->x.size = grid->y.size;
-                      grid->y.size = 0;
-                    }
-                }
-
-              if ( grid->size != grid->x.size )
-                {
-                  Warning("Unsupported array structure, skipped variable %s!", ncvar->name);
-                  ncvar->isvar = -1;
-                  continue;
-                }
-
-              if ( ncvar->position > 0 ) grid->position = ncvar->position;
-              if ( uuidOfHGrid[0] != 0 ) memcpy(grid->uuid, uuidOfHGrid, 16);
-            }
+            if ( cdf_set_unstructured_par(ncvar, grid, xdimid, ydimid, uuidOfHGrid) )
+              continue;
 
 #if defined (PROJECTION_TEST)
 	  if ( proj->type == GRID_PROJECTION )
 	    {
-	      if ( grid->type == GRID_GENERIC )
-		{
-		  grid->type = GRID_CURVILINEAR;
-		}
+	      if ( grid->type == GRID_GENERIC ) grid->type = GRID_CURVILINEAR;
 
 	      if ( grid->type == GRID_CURVILINEAR )
 		{
