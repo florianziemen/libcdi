@@ -2000,6 +2000,38 @@ int cdf_get_xydimid(int ndims, int *dimids, int *dimtype, int *xdimid, int *ydim
 }
 
 static
+void cdf_check_gridtype(int *gridtype, bool islon, bool islat, size_t xsize, size_t ysize, grid_t *grid)
+{
+  if ( islat && (islon || xsize == 0) )
+    {
+      double yinc = 0;
+      if ( islon && (int) ysize > 1 )
+        {
+          yinc = fabs(grid->y.vals[0] - grid->y.vals[1]);
+          for ( size_t i = 2; i < ysize; i++ )
+            if ( (fabs(grid->y.vals[i-1] - grid->y.vals[i]) - yinc) > (yinc/1000) )
+              {
+                yinc = 0;
+                break;
+              }
+        }
+      if ( isGaussGrid(ysize, yinc, grid->y.vals) )
+        {
+          *gridtype = GRID_GAUSSIAN;
+          grid->np = (int)(ysize/2);
+        }
+      else
+        *gridtype = GRID_LONLAT;
+    }
+  else if ( islon && !islat && ysize == 0 )
+    {
+      *gridtype = GRID_LONLAT;
+    }
+  else
+    *gridtype = GRID_GENERIC;
+}
+
+static
 void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars,
                           int timedimid, unsigned char *uuidOfHGrid, char *gridfile, int number_of_grid_used)
 {
@@ -2031,18 +2063,6 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 	    ? ncvar->xvarid : (xdimid != UNDEFID ? ncdims[xdimid].ncvarid : -1);
           int yvarid = ncvar->yvarid != UNDEFID
             ? ncvar->yvarid : (ydimid != UNDEFID ? ncdims[ydimid].ncvarid : -1);
-
-	  /*
-	  if ( xdimid != UNDEFID )
-	    xvarid = ncdims[xdimid].ncvarid;
-	  if ( xvarid == UNDEFID && ncvar->xvarid != UNDEFID )
-	    xvarid = ncvar->xvarid;
-
-	  if ( ydimid != UNDEFID )
-	    yvarid = ncdims[ydimid].ncvarid;
-	  if ( yvarid == UNDEFID && ncvar->yvarid != UNDEFID )
-	    yvarid = ncvar->yvarid;
-	  */
 
 	  if ( xdimid != UNDEFID ) xsize = ncdims[xdimid].len;
 	  if ( ydimid != UNDEFID ) ysize = ncdims[ydimid].len;
@@ -2233,37 +2253,8 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 	      else                         size = xsize*ysize;
 	    }
 
-	  if ( ncvar->gridtype == UNDEFID ||
-	       ncvar->gridtype == GRID_GENERIC )
-	    {
-	      if ( islat && (islon || xsize == 0) )
-		{
-                  double yinc = 0;
-                  if ( islon && (int) ysize > 1 )
-                    {
-                      yinc = fabs(grid->y.vals[0] - grid->y.vals[1]);
-                      for ( size_t i = 2; i < ysize; i++ )
-                        if ( (fabs(grid->y.vals[i-1] - grid->y.vals[i]) - yinc) > (yinc/1000) )
-                          {
-                            yinc = 0;
-                            break;
-                          }
-                    }
-		  if ( isGaussGrid(ysize, yinc, grid->y.vals) )
-                    {
-                      ncvar->gridtype = GRID_GAUSSIAN;
-                      grid->np = (int)(ysize/2);
-                    }
-                  else
-		    ncvar->gridtype = GRID_LONLAT;
-		}
-	      else if ( islon && !islat && ysize == 0 )
-		{
-		  ncvar->gridtype = GRID_LONLAT;
-		}
-	      else
-		ncvar->gridtype = GRID_GENERIC;
-	    }
+	  if ( ncvar->gridtype == UNDEFID || ncvar->gridtype == GRID_GENERIC )
+            cdf_check_gridtype(&ncvar->gridtype, islon, islat, xsize, ysize, grid);
 
 	  switch (ncvar->gridtype)
 	    {
