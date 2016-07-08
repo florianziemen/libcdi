@@ -140,7 +140,7 @@ extern "C" {
 #define  GRID_LCC2                 12  /* Lambert Conformal Conic (PROJ)                        */
 #define  GRID_LAEA                 13  /* Lambert Azimuthal Equal Area                          */
 #define  GRID_SINUSOIDAL           14  /* Sinusoidal                                            */
-#define  GRID_PROJECTION           15  /* Projected coordiantes                                 */
+#define  GRID_PROJECTION           15  /* Projected coordinates                                 */
 
 /* ZAXIS types */
 
