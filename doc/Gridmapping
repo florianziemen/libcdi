@@ -32,8 +32,8 @@ Example 1: rotated_latitude_longitude
 		T_2M_AV:coordinates = "lon lat" ;
 
 gridtype = GRIB_CURVILINEAR
-xsize = 334
-ysize = 334
+xsize = 106
+ysize = 111
 xname = lon
 xvals = ...
 yname = lat
@@ -47,6 +47,24 @@ pyvals = ....
 grid_north_pole_latitude = 39.25f
 grid_north_pole_longitude = -162.f
 long_name = "coordinates of the rotated North Pole"
+
+gridID = gridCreate(GRID_CURVILINEAR, size)
+gridDefXsize(gridID, xsize)
+gridDefYsize(gridID, ysize)
+gridDefXvals(gridID, xvals)
+gridDefYvals(gridID, yvals)
+....
+projID = gridCreate(GRIB_PROJECTION, size)
+gridDefKeyStr(projID, CDI_KEY_MAPPINGNAME, len, string)
+gridDefKeyStr(projID, CDI_KEY_PNAME, len, string)
+gridDefXsize(projID, xsize)
+gridDefYsize(projID, ysize)
+gridDefXvals(projID, xvals)
+gridDefYvals(projID, yvals)
+gridDefAttStr(projID, NAME, len, string);
+gridDefAttFlt(projID, NAME, len, array);
+....
+gridDefProjection(gridID, projID);
 
 =======================================
 Example 2: lambert_azimuthal_equal_area
