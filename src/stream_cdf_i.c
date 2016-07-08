@@ -2032,6 +2032,91 @@ void cdf_check_gridtype(int *gridtype, bool islon, bool islat, size_t xsize, siz
 }
 
 static
+void cdf_set_proj_atts(int ncid, int gmapvarid, grid_t *grid)
+{
+  int nvatts;
+  cdf_inq_varnatts(ncid, gmapvarid, &nvatts);
+
+  for ( int iatt = 0; iatt < nvatts; iatt++ )
+    {
+      nc_type atttype;
+      size_t attlen;
+      char attname[CDI_MAX_NAME];
+      cdf_inq_attname(ncid, gmapvarid, iatt, attname);
+      cdf_inq_attlen(ncid, gmapvarid, attname, &attlen);
+      cdf_inq_atttype(ncid, gmapvarid, attname, &atttype);
+
+      if ( strcmp(attname, "grid_mapping_name") == 0 )
+        {
+          enum {attstringlen = 8192};
+          char attstring[attstringlen];
+          cdfGetAttText(ncid, gmapvarid, attname, attstringlen, attstring);
+          str_tolower(attstring);
+
+          if ( strcmp(attstring, "rotated_latitude_longitude") == 0 )
+            grid->isRotated = TRUE;
+          else if ( strcmp(attstring, "sinusoidal") == 0 )
+            grid->type = GRID_SINUSOIDAL;
+          else if ( strcmp(attstring, "lambert_azimuthal_equal_area") == 0 )
+            grid->type = GRID_LAEA;
+          else if ( strcmp(attstring, "lambert_conformal_conic") == 0 )
+            grid->type = GRID_LCC2;
+        }
+      else if ( strcmp(attname, "earth_radius") == 0 )
+        {
+          double datt;
+          cdfGetAttDouble(ncid, gmapvarid, attname, 1, &datt);
+          grid->laea.a = datt;
+          grid->lcc2.a = datt;
+        }
+      else if ( strcmp(attname, "longitude_of_projection_origin") == 0 )
+        {
+          cdfGetAttDouble(ncid, gmapvarid, attname, 1, &grid->laea.lon_0);
+        }
+      else if ( strcmp(attname, "longitude_of_central_meridian") == 0 )
+        {
+          cdfGetAttDouble(ncid, gmapvarid, attname, 1, &grid->lcc2.lon_0);
+        }
+      else if ( strcmp(attname, "latitude_of_projection_origin") == 0 )
+        {
+          double datt;
+          cdfGetAttDouble(ncid, gmapvarid, attname, 1, &datt);
+          grid->laea.lat_0 = datt;
+          grid->lcc2.lat_0 = datt;
+        }
+      else if ( strcmp(attname, "standard_parallel") == 0 )
+        {
+          if ( attlen == 1 )
+            {
+              double datt;
+              cdfGetAttDouble(ncid, gmapvarid, attname, 1, &datt);
+              grid->lcc2.lat_1 = datt;
+              grid->lcc2.lat_2 = datt;
+            }
+          else
+            {
+              double datt2[2];
+              cdfGetAttDouble(ncid, gmapvarid, attname, 2, datt2);
+              grid->lcc2.lat_1 = datt2[0];
+              grid->lcc2.lat_2 = datt2[1];
+            }
+        }
+      else if ( strcmp(attname, "grid_north_pole_latitude") == 0 )
+        {
+          cdfGetAttDouble(ncid, gmapvarid, attname, 1, &grid->ypole);
+        }
+      else if ( strcmp(attname, "grid_north_pole_longitude") == 0 )
+        {
+          cdfGetAttDouble(ncid, gmapvarid, attname, 1, &grid->xpole);
+        }
+      else if ( strcmp(attname, "north_pole_grid_longitude") == 0 )
+        {
+          cdfGetAttDouble(ncid, gmapvarid, attname, 1, &grid->angle);
+        }
+    }
+}
+
+static
 void cdf_set_grid_to_similar_vars(ncvar_t *ncvar1, ncvar_t *ncvar2, int gridtype, int xdimid, int ydimid)
 {
   if ( ncvar2->isvar == TRUE && ncvar2->gridID == UNDEFID )
@@ -2419,91 +2504,7 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
               int ncid = ncvars[gmapvarid].ncid;
               if ( !testproj && ncvar->gridtype != GRID_CURVILINEAR )
                 {
-                  int nvatts;
-                  cdf_inq_varnatts(ncid, gmapvarid, &nvatts);
-
-                  for ( int iatt = 0; iatt < nvatts; iatt++ )
-                    {
-                      nc_type atttype;
-                      size_t attlen;
-                      char attname[CDI_MAX_NAME];
-                      cdf_inq_attname(ncid, gmapvarid, iatt, attname);
-                      cdf_inq_attlen(ncid, gmapvarid, attname, &attlen);
-                      cdf_inq_atttype(ncid, gmapvarid, attname, &atttype);
-
-                      if ( strcmp(attname, "grid_mapping_name") == 0 )
-                        {
-                          enum {attstringlen = 8192};
-                          char attstring[attstringlen];
-                          cdfGetAttText(ncid, gmapvarid, attname, attstringlen, attstring);
-                          str_tolower(attstring);
-
-                          if ( strcmp(attstring, "rotated_latitude_longitude") == 0 )
-                            grid->isRotated = TRUE;
-                          else if ( strcmp(attstring, "sinusoidal") == 0 )
-                            grid->type = GRID_SINUSOIDAL;
-                          else if ( strcmp(attstring, "lambert_azimuthal_equal_area") == 0 )
-                            grid->type = GRID_LAEA;
-                          else if ( strcmp(attstring, "lambert_conformal_conic") == 0 )
-                            grid->type = GRID_LCC2;
-                          else if ( strcmp(attstring, "lambert_cylindrical_equal_area") == 0 )
-                            {
-                              proj->type = GRID_PROJECTION;
-                              proj->name = strdup(attstring);
-                            }
-                        }
-                      else if ( strcmp(attname, "earth_radius") == 0 )
-                        {
-                          double datt;
-                          cdfGetAttDouble(ncid, gmapvarid, attname, 1, &datt);
-                          grid->laea.a = datt;
-                          grid->lcc2.a = datt;
-                        }
-                      else if ( strcmp(attname, "longitude_of_projection_origin") == 0 )
-                        {
-                          cdfGetAttDouble(ncid, gmapvarid, attname, 1, &grid->laea.lon_0);
-                        }
-                      else if ( strcmp(attname, "longitude_of_central_meridian") == 0 )
-                        {
-                          cdfGetAttDouble(ncid, gmapvarid, attname, 1, &grid->lcc2.lon_0);
-                        }
-                      else if ( strcmp(attname, "latitude_of_projection_origin") == 0 )
-                        {
-                          double datt;
-                          cdfGetAttDouble(ncid, gmapvarid, attname, 1, &datt);
-                          grid->laea.lat_0 = datt;
-                          grid->lcc2.lat_0 = datt;
-                        }
-                      else if ( strcmp(attname, "standard_parallel") == 0 )
-                        {
-                          if ( attlen == 1 )
-                            {
-                              double datt;
-                              cdfGetAttDouble(ncid, gmapvarid, attname, 1, &datt);
-                              grid->lcc2.lat_1 = datt;
-                              grid->lcc2.lat_2 = datt;
-                            }
-                          else
-                            {
-                              double datt2[2];
-                              cdfGetAttDouble(ncid, gmapvarid, attname, 2, datt2);
-                              grid->lcc2.lat_1 = datt2[0];
-                              grid->lcc2.lat_2 = datt2[1];
-                            }
-                        }
-                      else if ( strcmp(attname, "grid_north_pole_latitude") == 0 )
-                        {
-                          cdfGetAttDouble(ncid, gmapvarid, attname, 1, &grid->ypole);
-                        }
-                      else if ( strcmp(attname, "grid_north_pole_longitude") == 0 )
-                        {
-                          cdfGetAttDouble(ncid, gmapvarid, attname, 1, &grid->xpole);
-                        }
-                      else if ( strcmp(attname, "north_pole_grid_longitude") == 0 )
-                        {
-                          cdfGetAttDouble(ncid, gmapvarid, attname, 1, &grid->angle);
-                        }
-                    }
+                  cdf_set_proj_atts(ncid, gmapvarid, grid);
                 }
               else if ( testproj )
                 {
