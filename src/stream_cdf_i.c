@@ -2032,6 +2032,64 @@ void cdf_check_gridtype(int *gridtype, bool islon, bool islat, size_t xsize, siz
 }
 
 static
+void cdf_set_grid_to_similar_vars(ncvar_t *ncvar1, ncvar_t *ncvar2, int gridtype, int xdimid, int ydimid)
+{
+  if ( ncvar2->isvar == TRUE && ncvar2->gridID == UNDEFID )
+    {
+      int xdimid2 = UNDEFID, ydimid2 = UNDEFID, zdimid2 = UNDEFID;
+      int xdimidx = -1, ydimidx = -1;
+      int ndims2 = ncvar2->ndims;
+
+      for ( int i = 0; i < ndims2; i++ )
+        {
+          int *dimtype2 = ncvar2->dimtype;
+          int *dimids2 = ncvar2->dimids;
+          if      ( dimtype2[i] == X_AXIS ) { xdimid2 = dimids2[i]; xdimidx = i; }
+          else if ( dimtype2[i] == Y_AXIS ) { ydimid2 = dimids2[i]; ydimidx = i; }
+          else if ( dimtype2[i] == Z_AXIS ) { zdimid2 = dimids2[i]; }
+        }
+
+      if ( ncvar2->gridtype == UNDEFID && gridtype == GRID_UNSTRUCTURED )
+        {
+          if ( xdimid == xdimid2 && ydimid2 != UNDEFID && zdimid2 == UNDEFID )
+            {
+              ncvar2->dimtype[ydimidx] = Z_AXIS;
+              ydimid2 = UNDEFID;
+            }
+
+          if ( xdimid == ydimid2 && xdimid2 != UNDEFID && zdimid2 == UNDEFID )
+            {
+              ncvar2->dimtype[xdimidx] = Z_AXIS;
+              xdimid2 = ydimid2;
+              ydimid2 = UNDEFID;
+            }
+        }
+
+      if ( xdimid == xdimid2 &&
+           (ydimid == ydimid2 || (xdimid == ydimid && ydimid2 == UNDEFID)) )
+        {
+          bool same_grid = ncvar1->xvarid == ncvar2->xvarid
+            && ncvar1->yvarid == ncvar2->yvarid
+            && ncvar1->position == ncvar2->position;
+          /*
+            if ( xvarid != -1 && ncvar2->xvarid != UNDEFID &&
+            xvarid != ncvar2->xvarid ) same_grid = false;
+
+            if ( yvarid != -1 && ncvar2->yvarid != UNDEFID &&
+            yvarid != ncvar2->yvarid ) same_grid = false;
+          */
+
+          if ( same_grid )
+            {
+              if ( CDI_Debug ) Message("Same gridID %d %s", ncvar1->gridID, ncvar2->name);
+              ncvar2->gridID = ncvar1->gridID;
+              ncvar2->chunktype = ncvar1->chunktype;
+            }
+        }
+    }
+}
+
+static
 void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars,
                           int timedimid, unsigned char *uuidOfHGrid, char *gridfile, int number_of_grid_used)
 {
@@ -2049,13 +2107,13 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 	{
 	  bool islon = false, islat = false;
           int vdimid = -1;
+          int ndims = ncvar->ndims;
           int *dimtype = ncvar->dimtype;
           size_t size = 0;
           size_t xsize = 0, ysize = 0;
           struct addIffNewRes projAdded = { .Id = CDI_UNDEFID, .isNew = 0 },
                               gridAdded = { .Id = CDI_UNDEFID, .isNew = 0 };
 
-          int ndims = ncvar->ndims;
 	  int xdimid = -1, ydimid = -1;
           int nydims = cdf_get_xydimid(ndims, ncvar->dimids, dimtype, &xdimid, &ydimid);
 
@@ -2333,9 +2391,9 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 
 	  if ( grid->size == 0 )
 	    {
-	      if ( (ncvar->ndims == 1 && dimtype[0] == T_AXIS) ||
-		   (ncvar->ndims == 1 && dimtype[0] == Z_AXIS) ||
-		   (ncvar->ndims == 2 && dimtype[0] == T_AXIS && dimtype[1] == Z_AXIS) )
+	      if ( (ndims == 1 && dimtype[0] == T_AXIS) ||
+		   (ndims == 1 && dimtype[0] == Z_AXIS) ||
+		   (ndims == 2 && dimtype[0] == T_AXIS && dimtype[1] == Z_AXIS) )
 		{
 		  grid->type  = GRID_GENERIC;
 		  grid->size  = 1;
@@ -2587,60 +2645,7 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 	    Message("gridID %d %d %s", ncvar->gridID, ncvarid, ncvar->name);
 
 	  for ( int ncvarid2 = ncvarid+1; ncvarid2 < nvars; ncvarid2++ )
-	    if ( ncvars[ncvarid2].isvar == TRUE && ncvars[ncvarid2].gridID == UNDEFID )
-	      {
-		int xdimid2 = UNDEFID, ydimid2 = UNDEFID, zdimid2 = UNDEFID;
-                int xdimidx = -1, ydimidx = -1;
-		int ndims2 = ncvars[ncvarid2].ndims;
-
-		for ( int i = 0; i < ndims2; i++ )
-		  {
-                    int *dimtype2 = ncvars[ncvarid2].dimtype;
-                    int *dimids2 = ncvars[ncvarid2].dimids;
-                    if      ( dimtype2[i] == X_AXIS ) { xdimid2 = dimids2[i]; xdimidx = i; }
-		    else if ( dimtype2[i] == Y_AXIS ) { ydimid2 = dimids2[i]; ydimidx = i; }
-		    else if ( dimtype2[i] == Z_AXIS ) { zdimid2 = dimids2[i]; }
-		  }
-
-                if ( ncvars[ncvarid2].gridtype == UNDEFID && grid->type == GRID_UNSTRUCTURED )
-                  {
-                    if ( xdimid == xdimid2 && ydimid2 != UNDEFID && zdimid2 == UNDEFID )
-                      {
-                        ncvars[ncvarid2].dimtype[ydimidx] = Z_AXIS;
-                        ydimid2 = UNDEFID;
-                      }
-
-                    if ( xdimid == ydimid2 && xdimid2 != UNDEFID && zdimid2 == UNDEFID )
-                      {
-                        ncvars[ncvarid2].dimtype[xdimidx] = Z_AXIS;
-                        xdimid2 = ydimid2;
-                        ydimid2 = UNDEFID;
-                      }
-                  }
-
-                if ( xdimid == xdimid2 &&
-		    (ydimid == ydimid2 || (xdimid == ydimid && ydimid2 == UNDEFID)) )
-		  {
-		    bool same_grid = ncvar->xvarid == ncvars[ncvarid2].xvarid
-                      && ncvar->yvarid == ncvars[ncvarid2].yvarid
-                      && ncvar->position == ncvars[ncvarid2].position;
-                    /*
-		    if ( xvarid != -1 && ncvars[ncvarid2].xvarid != UNDEFID &&
-			 xvarid != ncvars[ncvarid2].xvarid ) same_grid = false;
-
-		    if ( yvarid != -1 && ncvars[ncvarid2].yvarid != UNDEFID &&
-			 yvarid != ncvars[ncvarid2].yvarid ) same_grid = false;
-                    */
-
-		    if ( same_grid )
-		      {
-			if ( CDI_Debug )
-			  Message("Same gridID %d %d %s", ncvar->gridID, ncvarid2, ncvars[ncvarid2].name);
-			ncvars[ncvarid2].gridID = ncvar->gridID;
-			ncvars[ncvarid2].chunktype = ncvar->chunktype;
-		      }
-		  }
-	      }
+            cdf_set_grid_to_similar_vars(ncvar, &ncvars[ncvarid2], grid->type, xdimid, ydimid);
 
           if ( gridAdded.isNew ) lazyGrid = NULL;
           if ( projAdded.isNew ) lazyProj = NULL;
