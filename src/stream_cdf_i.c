@@ -2033,8 +2033,9 @@ void cdf_check_gridtype(int *gridtype, bool islon, bool islat, size_t xsize, siz
 
 static
 bool cdf_read_xcoord(struct cdfLazyGrid *restrict lazyGrid, ncdim_t *ncdims, ncvar_t *ncvar, int xvarid, ncvar_t *axisvar,
-                     grid_t *grid, size_t *xsize, size_t ysize, int ntdims, size_t *start, size_t *count, bool *islon)
+                     size_t *xsize, size_t ysize, int ntdims, size_t *start, size_t *count, bool *islon)
 {
+  grid_t *grid = &lazyGrid->base;
   bool skipvar = true;
   *islon = axisvar->islon;
   int ndims = axisvar->ndims;
@@ -2082,8 +2083,9 @@ bool cdf_read_xcoord(struct cdfLazyGrid *restrict lazyGrid, ncdim_t *ncdims, ncv
 
 static
 bool cdf_read_ycoord(struct cdfLazyGrid *restrict lazyGrid, ncdim_t *ncdims, ncvar_t *ncvar, int yvarid, ncvar_t *axisvar,
-                     grid_t *grid, size_t xsize, size_t *ysize, int ntdims, size_t *start, size_t *count, bool *islat)
+                     size_t xsize, size_t *ysize, int ntdims, size_t *start, size_t *count, bool *islat)
 {
+  grid_t *grid = &lazyGrid->base;
   bool skipvar = true;
   *islat = axisvar->islat;
   int ndims = axisvar->ndims;
@@ -2127,6 +2129,89 @@ bool cdf_read_ycoord(struct cdfLazyGrid *restrict lazyGrid, ncdim_t *ncdims, ncv
                 ntdims, start, count);
 
   cdf_copy_axis_attr(axisvar, &grid->y);
+
+  return false;
+}
+
+static
+bool cdf_read_coordinates(struct cdfLazyGrid *restrict lazyGrid, ncvar_t *ncvar, ncvar_t *ncvars, ncdim_t *ncdims,
+                          int timedimid, int *xvarid, int *yvarid, size_t *xsize, size_t *ysize, size_t *size)
+{
+  static bool ltwarn = true;
+  grid_t *grid = &lazyGrid->base;
+  size_t start[3], count[3];
+  int ntdims = 0;
+
+  if ( *xvarid != UNDEFID && *yvarid != UNDEFID )
+    {
+      int ndims = ncvars[*xvarid].ndims;
+      if ( ndims != ncvars[*yvarid].ndims )
+        {
+          Warning("Inconsistent grid structure for variable %s!", ncvar->name);
+          ncvar->xvarid = *xvarid = UNDEFID;
+          ncvar->yvarid = *yvarid = UNDEFID;
+        }
+      if ( ndims > 1 )
+        {
+          if ( ndims <= 3 )
+            {
+              if ( ncvars[*xvarid].dimids[0] == timedimid && ncvars[*yvarid].dimids[0] == timedimid )
+                {
+                  if ( ltwarn ) Warning("Time varying grids unsupported, using grid at time step 1!");
+                  ltwarn = false;
+                  ntdims = 1;
+                  start[0] = start[1] = start[2] = 0;
+                  count[0] = 1; count[1] = *ysize; count[ndims-1] = *xsize;
+                }
+            }
+          else
+            {
+              Warning("Unsupported grid structure for variable %s (grid dims > 2)!", ncvar->name);
+              ncvar->xvarid = *xvarid = UNDEFID;
+              ncvar->yvarid = *yvarid = UNDEFID;
+            }
+        }
+    }
+
+  if ( *xvarid != UNDEFID )
+    {
+      if ( (ncvars[*xvarid].ndims - ntdims) > 2 )
+        {
+          Warning("Coordinate variable %s has to many dimensions (%d), skipped!", ncvars[*xvarid].name, ncvars[*xvarid].ndims);
+          //ncvar->xvarid = UNDEFID;
+          *xvarid = UNDEFID;
+        }
+    }
+
+  if ( *yvarid != UNDEFID )
+    {
+      if ( (ncvars[*yvarid].ndims - ntdims) > 2 )
+        {
+          Warning("Coordinate variable %s has to many dimensions (%d), skipped!", ncvars[*yvarid].name, ncvars[*yvarid].ndims);
+          //ncvar->yvarid = UNDEFID;
+          *yvarid = UNDEFID;
+        }
+    }
+
+  bool islon = false, islat = false;
+
+  if ( *xvarid != UNDEFID )
+    if ( cdf_read_xcoord(lazyGrid, ncdims, ncvar, *xvarid, &ncvars[*xvarid],
+                         xsize, *ysize, ntdims, start, count, &islon) )
+      return true;
+
+  if ( *yvarid != UNDEFID )
+    if ( cdf_read_ycoord(lazyGrid, ncdims, ncvar, *yvarid, &ncvars[*yvarid],
+                         *xsize, ysize, ntdims, start, count, &islat) )
+      return true;
+
+  if      ( (int) *ysize == 0 ) *size = *xsize;
+  else if ( (int) *xsize == 0 ) *size = *ysize;
+  else if ( ncvar->gridtype == GRID_UNSTRUCTURED ) *size = *xsize;
+  else                         *size = (*xsize)*(*ysize);
+
+  if ( ncvar->gridtype == UNDEFID || ncvar->gridtype == GRID_GENERIC )
+    cdf_check_gridtype(&ncvar->gridtype, islon, islat, *xsize, *ysize, grid);
 
   return false;
 }
@@ -2332,7 +2417,6 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 #else
   bool testproj = false;
 #endif
-  bool ltwarn = true;
   struct cdfLazyGrid *restrict lazyGrid = NULL, *restrict lazyProj = NULL;
 #define grid (&lazyGrid->base)
 #define proj (&lazyProj->base)
@@ -2342,7 +2426,6 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
       ncvar_t *ncvar = &ncvars[ncvarid];
       if ( ncvar->isvar && ncvar->gridID == UNDEFID )
 	{
-	  bool islon = false, islat = false;
           int gmapvarid = ncvar->gmapid;
           bool lproj = gmapvarid != UNDEFID;
           int ndims = ncvar->ndims;
@@ -2409,78 +2492,10 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 	    }
 	  else
 	    {
-	      size_t start[3], count[3];
-	      int ntdims = 0;
-
-	      if ( xvarid != UNDEFID && yvarid != UNDEFID )
-		{
-                  int ndims = ncvars[xvarid].ndims;
-		  if ( ndims != ncvars[yvarid].ndims )
-		    {
-		      Warning("Inconsistent grid structure for variable %s!", ncvar->name);
-		      ncvar->xvarid = xvarid = UNDEFID;
-		      ncvar->yvarid = yvarid = UNDEFID;
-		    }
-		  if ( ndims > 1 )
-		    {
-		      if ( ndims <= 3 )
-                        {
-                          if ( ncvars[xvarid].dimids[0] == timedimid && ncvars[yvarid].dimids[0] == timedimid )
-                            {
-                              if ( ltwarn ) Warning("Time varying grids unsupported, using grid at time step 1!");
-                              ltwarn = false;
-                              ntdims = 1;
-                              start[0] = start[1] = start[2] = 0;
-                              count[0] = 1; count[1] = ysize; count[ndims-1] = xsize;
-                            }
-			}
-		      else
-			{
-			  Warning("Unsupported grid structure for variable %s (grid dims > 2)!", ncvar->name);
-                          ncvar->xvarid = xvarid = UNDEFID;
-                          ncvar->yvarid = yvarid = UNDEFID;
-			}
-		    }
-		}
-
-              if ( xvarid != UNDEFID )
-                {
-                  if ( (ncvars[xvarid].ndims - ntdims) > 2 )
-                    {
-                      Warning("Coordinate variable %s has to many dimensions (%d), skipped!", ncvars[xvarid].name, ncvars[xvarid].ndims);
-                      //ncvar->xvarid = UNDEFID;
-                      xvarid = UNDEFID;
-                    }
-                }
-
-              if ( yvarid != UNDEFID )
-                {
-                  if ( (ncvars[yvarid].ndims - ntdims) > 2 )
-                    {
-                      Warning("Coordinate variable %s has to many dimensions (%d), skipped!", ncvars[yvarid].name, ncvars[yvarid].ndims);
-                      //ncvar->yvarid = UNDEFID;
-                      yvarid = UNDEFID;
-                    }
-                }
-
-              if ( xvarid != UNDEFID )
-                if ( cdf_read_xcoord(lazyGrid, ncdims, ncvar, xvarid, &ncvars[xvarid],
-                                     grid, &xsize, ysize, ntdims, start, count, &islon) )
-                  continue;
-
-	      if ( yvarid != UNDEFID )
-                if ( cdf_read_ycoord(lazyGrid, ncdims, ncvar, yvarid, &ncvars[yvarid],
-                                    grid, xsize, &ysize, ntdims, start, count, &islat) )
-                  continue;
-
-	      if      ( (int) ysize == 0 ) size = xsize;
-	      else if ( (int) xsize == 0 ) size = ysize;
-	      else if ( ncvar->gridtype == GRID_UNSTRUCTURED ) size = xsize;
-	      else                         size = xsize*ysize;
-	    }
-
-	  if ( ncvar->gridtype == UNDEFID || ncvar->gridtype == GRID_GENERIC )
-            cdf_check_gridtype(&ncvar->gridtype, islon, islat, xsize, ysize, grid);
+              if ( cdf_read_coordinates(lazyGrid, ncvar, ncvars, ncdims,
+                                        timedimid, &xvarid, &yvarid, &xsize, &ysize, &size) )
+                continue;
+            }
 
 	  switch (ncvar->gridtype)
 	    {
