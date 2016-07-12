@@ -2558,7 +2558,7 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 
           {
 #ifdef TEST_PROJ_RLL
-            int gridtype = ( lproj && lgrid ) ? ncvar->gridtype : GRID_PROJECTION;
+            int gridtype = !lgrid ? GRID_PROJECTION : ncvar->gridtype;
 #else
             int gridtype = ncvar->gridtype;
 #endif

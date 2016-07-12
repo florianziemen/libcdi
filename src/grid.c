@@ -1712,7 +1712,7 @@ double gridInqXinc(int gridID)
       if ( xsize > 1 )
         {
           xinc = fabs(xvals[xsize-1] - xvals[0])/(xsize-1);
-          for (size_t i = 2; i < (size_t)xsize; i++ )
+          for ( int i = 2; i < xsize; i++ )
             if ( fabs(fabs(xvals[i-1] - xvals[i]) - xinc) > 0.01*xinc )
               {
                 xinc = 0;
