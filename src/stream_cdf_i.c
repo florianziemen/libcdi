@@ -2190,7 +2190,9 @@ bool cdf_read_coordinates(struct cdfLazyGrid *restrict lazyGrid, ncvar_t *ncvar,
                 {
                   if ( ncvars[xvarid].dimids[0] == timedimid && ncvars[yvarid].dimids[0] == timedimid )
                     {
-                      if ( ltwarn ) Warning("Time varying grids unsupported, using grid at time step 1!");
+                      size_t ntsteps = 0;
+                      cdf_inq_dimlen(ncvar->ncid, timedimid, &ntsteps);
+                      if ( ltwarn && ntsteps > 1 ) Warning("Time varying grids unsupported, using grid at time step 1!");
                       ltwarn = false;
                       ntdims = 1;
                       start[0] = start[1] = start[2] = 0;
