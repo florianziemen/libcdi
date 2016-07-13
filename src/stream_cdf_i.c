@@ -614,6 +614,7 @@ int cdf_time_dimid(int fileID, int ndims, int nvars)
       cdf_inq_dimname(fileID, dimid, dimname);
       size_t len = strlen(dimname);
       if ( len >= 4 && memcmp(dimname, "time", 4) == 0 ) return dimid;
+      if ( len >= 4 && memcmp(dimname, "Time", 4) == 0 ) return dimid;
     }
 
   for ( int varid = 0; varid < nvars; ++varid )
@@ -3648,7 +3649,6 @@ int cdfInqContents(stream_t *streamptr)
   int ndims, nvars, ngatts, unlimdimid;
   int ncvarid;
   int ncdimid;
-  size_t ntsteps;
   int timedimid = -1;
   int *varids;
   int nvarids;
@@ -3661,16 +3661,14 @@ int cdfInqContents(stream_t *streamptr)
   int modelID = UNDEFID;
   int taxisID;
   int calendar = UNDEFID;
-  ncdim_t *ncdims;
-  ncvar_t *ncvars = NULL;
   int format = 0;
   bool ucla_les = false;
-  unsigned char uuidOfHGrid[CDI_UUID_SIZE];
-  unsigned char uuidOfVGrid[CDI_UUID_SIZE];
   char gridfile[8912];
   char fcreftime[CDI_MAX_NAME];
   int number_of_grid_used = UNDEFID;
 
+  unsigned char uuidOfHGrid[CDI_UUID_SIZE];
+  unsigned char uuidOfVGrid[CDI_UUID_SIZE];
   memset(uuidOfHGrid, 0, CDI_UUID_SIZE);
   memset(uuidOfVGrid, 0, CDI_UUID_SIZE);
   gridfile[0] = 0;
@@ -3697,18 +3695,8 @@ int cdfInqContents(stream_t *streamptr)
     }
 
   /* alloc ncdims */
-  ncdims = (ncdim_t *) Malloc((size_t)ndims * sizeof (ncdim_t));
+  ncdim_t *ncdims = (ncdim_t *) Malloc((size_t)ndims * sizeof (ncdim_t));
   init_ncdims(ndims, ncdims);
-
-  if ( nvars > 0 )
-    {
-      /* alloc ncvars */
-      ncvars = (ncvar_t *) Malloc((size_t)nvars * sizeof (ncvar_t));
-      init_ncvars(nvars, ncvars);
-
-      for ( ncvarid = 0; ncvarid < nvars; ++ncvarid )
-        ncvars[ncvarid].ncid = fileID;
-    }
 
 #if  defined  (TEST_GROUPS)
 #if  defined  (HAVE_NETCDF4)
@@ -3743,6 +3731,13 @@ int cdfInqContents(stream_t *streamptr)
       return CDI_EUFSTRUCT;
     }
 
+  /* alloc ncvars */
+  ncvar_t *ncvars = (ncvar_t *) Malloc((size_t)nvars * sizeof (ncvar_t));
+  init_ncvars(nvars, ncvars);
+
+  for ( ncvarid = 0; ncvarid < nvars; ++ncvarid ) ncvars[ncvarid].ncid = fileID;
+
+
   /* scan global attributes */
   cdf_scan_global_attr(fileID, vlistID, streamptr, ngatts, &instID, &modelID, &ucla_les,
                        uuidOfHGrid, uuidOfVGrid, gridfile, &number_of_grid_used);
@@ -3755,10 +3750,8 @@ int cdfInqContents(stream_t *streamptr)
 
   streamptr->basetime.ncdimid = timedimid;
 
-  if ( timedimid != UNDEFID )
-    cdf_inq_dimlen(fileID, timedimid, &ntsteps);
-  else
-    ntsteps = 0;
+  size_t ntsteps = 0;
+  if ( timedimid != UNDEFID ) cdf_inq_dimlen(fileID, timedimid, &ntsteps);
 
   if ( CDI_Debug ) Message("Number of timesteps = %d", ntsteps);
   if ( CDI_Debug ) Message("Time dimid = %d", streamptr->basetime.ncdimid);
