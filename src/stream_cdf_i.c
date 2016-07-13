@@ -2622,15 +2622,35 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
                 }
               else if ( testproj )
                 {
-                  grid_t *projgrid = grid;
                   if ( lgrid )
                     {
-                      projgrid = proj;
                       int dumid;
                       cdf_read_coordinates(lazyProj, ncvar, ncvars, ncdims,
                                            timedimid, xaxisid, yaxisid, xsize, ysize, &dumid);
                     }
+                }
+	    }
 
+	  if ( CDI_Debug || testproj )
+	    {
+	      Message("grid: type = %d, size = %d, nx = %d, ny %d",
+		      grid->type, grid->size, grid->x.size, grid->y.size);
+	      Message("proj: type = %d, size = %d, nx = %d, ny %d",
+		      proj->type, proj->size, proj->x.size, proj->y.size);
+	    }
+
+
+          gridAdded = cdiVlistAddGridIfNew(vlistID, grid, 1);
+          ncvar->gridID = gridAdded.Id;
+          if ( lgrid && lproj )
+            {
+              if ( testproj )
+                {
+                  projAdded = cdiVlistAddGridIfNew(vlistID, proj, 1);
+                  int projID = projAdded.Id;
+                  printf("proj size = %d type %d\n", gridInqSize(projID), gridInqType(projID));
+
+                  int ncid = ncvars[gmapvarid].ncid;
                   nc_type atttype;
                   size_t attlen;
                   char attname[CDI_MAX_NAME];
@@ -2643,7 +2663,7 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
                     }
                   else
                     {
-                      Warning("Attribute %s:grid_mapping_name missing!", ncvars[gmapvarid].name);
+                      Warning("Text attribute %s:grid_mapping_name missing!", ncvars[gmapvarid].name);
                     }
 
                   int nvatts;
@@ -2672,26 +2692,6 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
                           printf("atttype: %d attname: %s attr: %s\n", atttype, attname, attstring);
                         }
                     }
-                }
-	    }
-
-	  if ( CDI_Debug || testproj )
-	    {
-	      Message("grid: type = %d, size = %d, nx = %d, ny %d",
-		      grid->type, grid->size, grid->x.size, grid->y.size);
-	      Message("proj: type = %d, size = %d, nx = %d, ny %d",
-		      proj->type, proj->size, proj->x.size, proj->y.size);
-	    }
-
-          gridAdded = cdiVlistAddGridIfNew(vlistID, grid, 1);
-          ncvar->gridID = gridAdded.Id;
-          if ( lgrid && lproj )
-            {
-              if ( testproj )
-                {
-                  projAdded = cdiVlistAddGridIfNew(vlistID, proj, 1);
-                  int projID = projAdded.Id;
-                  printf("proj size = %d type %d\n", gridInqSize(projID), gridInqType(projID));
                 }
             }
 
