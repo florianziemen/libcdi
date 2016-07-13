@@ -327,7 +327,28 @@ void cdfGetAttDouble(int fileID, int ncvarid, char *attname, int attlen, double 
 }
 
 static
-void cdfGetAttText(int fileID, int ncvarid,const char *attname, int attlen, char *atttext)
+bool cdfCheckAttText(int fileID, int ncvarid, const char *attname)
+{
+  bool status = false;
+  nc_type atttype;
+
+  int status_nc = nc_inq_atttype(fileID, ncvarid, attname, &atttype);
+
+  if ( status_nc == NC_NOERR
+       && (atttype == NC_CHAR
+#if  defined  (HAVE_NETCDF4)
+           || atttype == NC_STRING
+#endif
+           ) )
+    {
+      status = true;
+    }
+
+  return status;
+}
+
+static
+void cdfGetAttText(int fileID, int ncvarid, const char *attname, int attlen, char *atttext)
 {
   nc_type atttype;
   size_t nc_attlen;
@@ -2626,8 +2647,8 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
                   grid_t *projgrid = grid;
                   if ( lgrid )
                     {
-                      int dumid;
                       projgrid = proj;
+                      int dumid;
                       cdf_read_coordinates(lazyProj, ncvar, ncvars, ncdims,
                                            timedimid, xaxisid, yaxisid, xsize, ysize, &dumid);
                     }
@@ -2636,9 +2657,19 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
                   size_t attlen;
                   char attname[CDI_MAX_NAME];
                   enum {attstringlen = 8192}; char attstring[attstringlen];
+
+                  if ( cdfCheckAttText(ncid, gmapvarid, "grid_mapping_name") )
+                    {
+                      cdfGetAttText(ncid, gmapvarid, "grid_mapping_name", attstringlen, attstring);
+                      printf("grid_mapping_name: %s\n", attstring);
+                    }
+                  else
+                    {
+                      Warning("Attribute %s:grid_mapping_name missing!", ncvars[gmapvarid].name);
+                    }
+
                   int nvatts;
                   cdf_inq_varnatts(ncid, gmapvarid, &nvatts);
-
                   for ( int iatt = 0; iatt < nvatts; iatt++ )
                     {
                       cdf_inq_attname(ncid, gmapvarid, iatt, attname);
@@ -2657,7 +2688,7 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
                           cdfGetAttDouble(ncid, gmapvarid, attname, (int)attlen, attflt);
                           printf("atttype: %d attname: %s attr: %g\n", atttype, attname, attflt[0]);
                         }
-                      else if ( xtypeIsText(atttype) )
+                      else if ( xtypeIsText(atttype) && strcmp(attname, "grid_mapping_name") )
                         {
                           cdfGetAttText(ncid, gmapvarid, attname, attstringlen, attstring);
                           printf("atttype: %d attname: %s attr: %s\n", atttype, attname, attstring);
@@ -2702,26 +2733,33 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
             {
               gridAdded = cdiVlistAddGridIfNew(vlistID, grid, 1);
               ncvar->gridID = gridAdded.Id;
+              if ( lgrid && lproj )
+                {
+                  projAdded = cdiVlistAddGridIfNew(vlistID, proj, 1);
+                  int projID = projAdded.Id;
+                  printf("proj size = %d type %d\n", gridInqSize(projID), gridInqType(projID));
+                }
             }
 
+          int gridID = ncvar->gridID;
+
           if ( grid->type == GRID_UNSTRUCTURED && gridfile[0] != 0 )
-            gridDefReference(ncvar->gridID, gridfile);
+            gridDefReference(gridID, gridfile);
 
           if ( ncvar->chunked ) grid_set_chunktype(grid, ncvar);
 
-	  int gridindex = vlistGridIndex(vlistID, ncvar->gridID);
+	  int gridindex = vlistGridIndex(vlistID, gridID);
 	  streamptr->xdimID[gridindex] = xdimid;
 	  streamptr->ydimID[gridindex] = ydimid;
           if ( xdimid == UNDEFID && ydimid == UNDEFID && grid->size == 1 )
-            gridDefHasDims(ncvar->gridID, FALSE);
+            gridDefHasDims(gridID, FALSE);
 
-          int gridID = ncvar->gridID;
           if ( xdimid != UNDEFID ) cdiGridDefKeyStr(gridID, CDI_KEY_XDIMNAME, (int)(strlen(ncdims[xdimid].name)+1), ncdims[xdimid].name);
           if ( ydimid != UNDEFID ) cdiGridDefKeyStr(gridID, CDI_KEY_YDIMNAME, (int)(strlen(ncdims[ydimid].name)+1), ncdims[ydimid].name);
           if ( vdimid != UNDEFID ) cdiGridDefKeyStr(gridID, CDI_KEY_VDIMNAME, (int)(strlen(ncdims[vdimid].name)+1), ncdims[vdimid].name);
 
 	  if ( CDI_Debug )
-	    Message("gridID %d %d %s", ncvar->gridID, ncvarid, ncvar->name);
+	    Message("gridID %d %d %s", gridID, ncvarid, ncvar->name);
 
 	  for ( int ncvarid2 = ncvarid+1; ncvarid2 < nvars; ncvarid2++ )
             cdf_set_grid_to_similar_vars(ncvar, &ncvars[ncvarid2], grid->type, xdimid, ydimid);

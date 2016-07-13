@@ -4778,20 +4778,18 @@ struct addIffNewRes cdiVlistAddGridIfNew(int vlistID, grid_t *grid, int mode)
         else
           Error("Internal problem: undefined gridID in vlist "
                 "%d, position %u!", vlistID, index);
-
       }
 
   if ( ! griddefined )
     {
       struct gridCompareSearchState query;
       query.queryKey = grid;// = { .queryKey = grid };
-      if ((gridglobdefined
-           = (cdiResHFilterApply(&gridOps, gridCompareSearch, &query)
-              == CDI_APPLY_STOP)))
+      if ( (gridglobdefined = (cdiResHFilterApply(&gridOps, gridCompareSearch, &query)
+              == CDI_APPLY_STOP)) )
         gridID = query.resIDValue;
 
       if ( mode == 1 && gridglobdefined )
-	for (unsigned index = 0; index < ngrids; index++ )
+	for ( unsigned index = 0; index < ngrids; index++ )
 	  if ( vlistptr->gridIDs[index] == gridID )
 	    {
 	      gridglobdefined = false;
@@ -4810,9 +4808,9 @@ struct addIffNewRes cdiVlistAddGridIfNew(int vlistID, grid_t *grid, int mode)
       vlistptr->ngrids++;
     }
 
-  return (struct addIffNewRes){ .Id = gridID,
-      .isNew = !griddefined && !gridglobdefined };
+  return (struct addIffNewRes){ .Id = gridID, .isNew = !griddefined && !gridglobdefined };
 }
+
 
 const struct gridVirtTable cdiGridVtable
   = {
