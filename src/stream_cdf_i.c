@@ -19,8 +19,6 @@
 #include "cdf_util.h"
 #include "cdf_lazy_grid.h"
 
-//#define PROJECTION_TEST
-
 #undef  UNDEFID
 #define UNDEFID  CDI_UNDEFID
 
@@ -1861,29 +1859,6 @@ void verify_coordinate_vars_2(int nvars, ncvar_t *ncvars)
     }
 }
 
-#if defined (PROJECTION_TEST)
-static
-void copy_numeric_projatts(int gridID, int ncvarID, int ncfileID)
-{
-  int nvatts;
-  size_t attlen;
-  char attname[CDI_MAX_NAME];
-  nc_type xtype;
-
-  cdf_inq_varnatts(ncfileID, ncvarID, &nvatts);
-
-  for ( int iatt = 0; iatt < nvatts; iatt++ )
-    {
-      cdf_inq_attname(ncfileID, ncvarID, iatt, attname);
-      cdf_inq_atttype(ncfileID, ncvarID, attname, &xtype);
-      cdf_inq_attlen(ncfileID, ncvarID, attname, &attlen);
-
-      //  printf("%s %d\n", attname, (int)attlen);
-    }
-
-}
-#endif
-
 static
 void grid_set_chunktype(grid_t *grid, ncvar_t *ncvar)
 {
@@ -2700,23 +2675,7 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
                 }
 	    }
 
-#if defined (PROJECTION_TEST)
-	  if ( proj->type == GRID_PROJECTION )
-	    {
-	      if ( grid->type == GRID_GENERIC ) grid->type = GRID_CURVILINEAR;
-
-	      if ( grid->type == GRID_CURVILINEAR )
-		{
-                  proj->size  = grid->size;
-                  proj->x.size = grid->x.size;
-                  proj->y.size = grid->y.size;
-		}
-
-	      //  grid->proj = gridGenerate(proj);
-	    }
-#endif
-
-	  if ( CDI_Debug || testproj)
+	  if ( CDI_Debug || testproj )
 	    {
 	      Message("grid: type = %d, size = %d, nx = %d, ny %d",
 		      grid->type, grid->size, grid->x.size, grid->y.size);
@@ -2724,19 +2683,11 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 		      proj->type, proj->size, proj->x.size, proj->y.size);
 	    }
 
-#if defined (PROJECTION_TEST)
-	  if ( proj->type == GRID_PROJECTION )
-	    {
-              projAdded = cdiVlistAddGridIfNew(vlistID, proj, 1);
-              ncvar->gridID = projAdded.Id;
-	      copy_numeric_projatts(ncvar->gridID, gmapvarid, ncvar->ncid);
-	    }
-	  else
-#endif
+          gridAdded = cdiVlistAddGridIfNew(vlistID, grid, 1);
+          ncvar->gridID = gridAdded.Id;
+          if ( lgrid && lproj )
             {
-              gridAdded = cdiVlistAddGridIfNew(vlistID, grid, 1);
-              ncvar->gridID = gridAdded.Id;
-              if ( lgrid && lproj )
+              if ( testproj )
                 {
                   projAdded = cdiVlistAddGridIfNew(vlistID, proj, 1);
                   int projID = projAdded.Id;
