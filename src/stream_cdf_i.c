@@ -2547,13 +2547,14 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
           int *dimtype = ncvar->dimtype;
           int vdimid = UNDEFID;
           struct addIfNewRes projAdded = { .Id = CDI_UNDEFID, .isNew = 0 },
-                              gridAdded = { .Id = CDI_UNDEFID, .isNew = 0 };
+                             gridAdded = { .Id = CDI_UNDEFID, .isNew = 0 };
 
 	  int xdimid = UNDEFID, ydimid = UNDEFID;
           int nydims = cdf_get_xydimid(ndims, ncvar->dimids, dimtype, &xdimid, &ydimid);
 
-	  if ( ncvar->gridtype == UNDEFID || ncvar->gridtype == GRID_GENERIC )
-	    if ( xdimid != UNDEFID && xdimid == ydimid && nydims == 0 ) ncvar->gridtype = GRID_UNSTRUCTURED;
+	  if ( (ncvar->gridtype == UNDEFID || ncvar->gridtype == GRID_GENERIC) &&
+               xdimid != UNDEFID && xdimid == ydimid && nydims == 0 )
+            ncvar->gridtype = GRID_UNSTRUCTURED;
 
           {
 #ifdef TEST_PROJ_RLL
@@ -2625,8 +2626,8 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
                   if ( lgrid )
                     {
                       int dumid;
-                      cdf_read_coordinates(lazyProj, ncvar, ncvars, ncdims,
-                                           timedimid, xaxisid, yaxisid, xsize, ysize, &dumid);
+                      cdf_read_coordinates(lazyProj, ncvar, ncvars, ncdims, timedimid,
+                                           xaxisid, yaxisid, xsize, ysize, &dumid);
                     }
                 }
 	    }
@@ -2640,60 +2641,58 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 	    }
 
 
-          gridAdded = cdiVlistAddGridIfNew(vlistID, grid, 1);
-          ncvar->gridID = gridAdded.Id;
-          if ( lgrid && lproj )
+          if ( lgrid && lproj && testproj )
             {
-              if ( testproj )
+              projAdded = cdiVlistAddGridIfNew(vlistID, proj, 2);
+              int projID = projAdded.Id;
+              printf("proj size = %d type %d\n", gridInqSize(projID), gridInqType(projID));
+
+              int ncid = ncvars[gmapvarid].ncid;
+              nc_type atttype;
+              size_t attlen;
+              char attname[CDI_MAX_NAME];
+              enum {attstringlen = 8192}; char attstring[attstringlen];
+
+              if ( cdfCheckAttText(ncid, gmapvarid, "grid_mapping_name") )
                 {
-                  projAdded = cdiVlistAddGridIfNew(vlistID, proj, 1);
-                  int projID = projAdded.Id;
-                  printf("proj size = %d type %d\n", gridInqSize(projID), gridInqType(projID));
+                  cdfGetAttText(ncid, gmapvarid, "grid_mapping_name", attstringlen, attstring);
+                  printf("grid_mapping_name: %s\n", attstring);
+                }
+              else
+                {
+                  Warning("Text attribute %s:grid_mapping_name missing!", ncvars[gmapvarid].name);
+                }
 
-                  int ncid = ncvars[gmapvarid].ncid;
-                  nc_type atttype;
-                  size_t attlen;
-                  char attname[CDI_MAX_NAME];
-                  enum {attstringlen = 8192}; char attstring[attstringlen];
+              int nvatts;
+              cdf_inq_varnatts(ncid, gmapvarid, &nvatts);
+              for ( int iatt = 0; iatt < nvatts; iatt++ )
+                {
+                  cdf_inq_attname(ncid, gmapvarid, iatt, attname);
+                  cdf_inq_attlen(ncid, gmapvarid, attname, &attlen);
+                  cdf_inq_atttype(ncid, gmapvarid, attname, &atttype);
 
-                  if ( cdfCheckAttText(ncid, gmapvarid, "grid_mapping_name") )
+                  if ( xtypeIsInt(atttype) )
                     {
-                      cdfGetAttText(ncid, gmapvarid, "grid_mapping_name", attstringlen, attstring);
-                      printf("grid_mapping_name: %s\n", attstring);
+                      int attint[attlen];
+                      cdfGetAttInt(ncid, gmapvarid, attname, (int)attlen, attint);
+                      printf("atttype: %d attname: %s attr: %d\n", atttype, attname, attint[0]);
                     }
-                  else
+                  else if ( xtypeIsFloat(atttype) )
                     {
-                      Warning("Text attribute %s:grid_mapping_name missing!", ncvars[gmapvarid].name);
+                      double attflt[attlen];
+                      cdfGetAttDouble(ncid, gmapvarid, attname, (int)attlen, attflt);
+                      printf("atttype: %d attname: %s attr: %g\n", atttype, attname, attflt[0]);
                     }
-
-                  int nvatts;
-                  cdf_inq_varnatts(ncid, gmapvarid, &nvatts);
-                  for ( int iatt = 0; iatt < nvatts; iatt++ )
+                  else if ( xtypeIsText(atttype) && strcmp(attname, "grid_mapping_name") )
                     {
-                      cdf_inq_attname(ncid, gmapvarid, iatt, attname);
-                      cdf_inq_attlen(ncid, gmapvarid, attname, &attlen);
-                      cdf_inq_atttype(ncid, gmapvarid, attname, &atttype);
-
-                      if ( xtypeIsInt(atttype) )
-                        {
-                          int attint[attlen];
-                          cdfGetAttInt(ncid, gmapvarid, attname, (int)attlen, attint);
-                          printf("atttype: %d attname: %s attr: %d\n", atttype, attname, attint[0]);
-                        }
-                      else if ( xtypeIsFloat(atttype) )
-                        {
-                          double attflt[attlen];
-                          cdfGetAttDouble(ncid, gmapvarid, attname, (int)attlen, attflt);
-                          printf("atttype: %d attname: %s attr: %g\n", atttype, attname, attflt[0]);
-                        }
-                      else if ( xtypeIsText(atttype) && strcmp(attname, "grid_mapping_name") )
-                        {
-                          cdfGetAttText(ncid, gmapvarid, attname, attstringlen, attstring);
-                          printf("atttype: %d attname: %s attr: %s\n", atttype, attname, attstring);
-                        }
+                      cdfGetAttText(ncid, gmapvarid, attname, attstringlen, attstring);
+                      printf("atttype: %d attname: %s attr: %s\n", atttype, attname, attstring);
                     }
                 }
             }
+
+          gridAdded = cdiVlistAddGridIfNew(vlistID, grid, 1);
+          ncvar->gridID = gridAdded.Id;
 
           int gridID = ncvar->gridID;
 

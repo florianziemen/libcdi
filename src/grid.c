@@ -4750,12 +4750,13 @@ gridCompareSearch(int id, void *res, void *data)
     return CDI_APPLY_GO_ON;
 }
 
-/* Add grid (which must be Malloc'ed to vlist if not already found */
+/* Add grid (which must be Malloc'ed to vlist if not already found) */
 struct addIfNewRes cdiVlistAddGridIfNew(int vlistID, grid_t *grid, int mode)
 {
   /*
     mode: 0 search in vlist and grid table
           1 search in grid table only
+          2 search in grid table only and don't store the grid in vlist
    */
   bool gridglobdefined = false;
   bool griddefined = false;
@@ -4804,8 +4805,11 @@ struct addIfNewRes cdiVlistAddGridIfNew(int vlistID, grid_t *grid, int mode)
           grid->self = gridID = reshPut(grid, &gridOps);
           gridComplete(grid);
         }
-      vlistptr->gridIDs[ngrids] = gridID;
-      vlistptr->ngrids++;
+      if ( mode < 2 )
+        {
+          vlistptr->gridIDs[ngrids] = gridID;
+          vlistptr->ngrids++;
+        }
     }
 
   return (struct addIfNewRes){ .Id = gridID, .isNew = !griddefined && !gridglobdefined };
