@@ -378,7 +378,7 @@ void cgribexAddRecord(stream_t * streamptr, int param, int *isec1, int *isec2, d
   grid_t *gridptr = (grid_t*) Malloc(sizeof(*gridptr));
   cgribexGetGrid(streamptr, isec2, fsec2, isec4, gridptr, iret);
 
-  struct addIffNewRes gridAdded = cdiVlistAddGridIfNew(vlistID, gridptr, 0);
+  struct addIfNewRes gridAdded = cdiVlistAddGridIfNew(vlistID, gridptr, 0);
   int gridID = gridAdded.Id;
   if ( gridAdded.isNew )
     {

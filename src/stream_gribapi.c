@@ -462,7 +462,7 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
   grid_t *grid = (grid_t *)Malloc(sizeof (*grid));
   gribapiGetGrid(gh, grid);
 
-  struct addIffNewRes gridAdded = cdiVlistAddGridIfNew(vlistID, grid, 0);
+  struct addIfNewRes gridAdded = cdiVlistAddGridIfNew(vlistID, grid, 0);
   int gridID = gridAdded.Id;
   if (!gridAdded.isNew) Free(grid);
 

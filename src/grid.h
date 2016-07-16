@@ -161,13 +161,13 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
            int * unpackBufferPos, int originNamespace, void *context,
            int force_id);
 
-struct addIffNewRes
+struct addIfNewRes
 {
   int Id;
   int isNew;
 };
 
-struct addIffNewRes cdiVlistAddGridIfNew(int vlistID, grid_t *grid, int mode);
+struct addIfNewRes cdiVlistAddGridIfNew(int vlistID, grid_t *grid, int mode);
 
 #endif
 /*

@@ -715,7 +715,7 @@ void iegAddRecord(stream_t *streamptr, int param, int *pdb, int *gdb, double *vc
       grid->angle     = 0;
     }
 
-  struct addIffNewRes gridAdded = cdiVlistAddGridIfNew(vlistID, grid, 0);
+  struct addIfNewRes gridAdded = cdiVlistAddGridIfNew(vlistID, grid, 0);
   int gridID = gridAdded.Id;
   if (!gridAdded.isNew) Free(grid);
 

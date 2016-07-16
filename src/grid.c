@@ -4751,7 +4751,7 @@ gridCompareSearch(int id, void *res, void *data)
 }
 
 /* Add grid (which must be Malloc'ed to vlist if not already found */
-struct addIffNewRes cdiVlistAddGridIfNew(int vlistID, grid_t *grid, int mode)
+struct addIfNewRes cdiVlistAddGridIfNew(int vlistID, grid_t *grid, int mode)
 {
   /*
     mode: 0 search in vlist and grid table
@@ -4808,7 +4808,7 @@ struct addIffNewRes cdiVlistAddGridIfNew(int vlistID, grid_t *grid, int mode)
       vlistptr->ngrids++;
     }
 
-  return (struct addIffNewRes){ .Id = gridID, .isNew = !griddefined && !gridglobdefined };
+  return (struct addIfNewRes){ .Id = gridID, .isNew = !griddefined && !gridglobdefined };
 }
 
 

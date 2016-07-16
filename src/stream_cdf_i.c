@@ -2546,7 +2546,7 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
           int ndims = ncvar->ndims;
           int *dimtype = ncvar->dimtype;
           int vdimid = UNDEFID;
-          struct addIffNewRes projAdded = { .Id = CDI_UNDEFID, .isNew = 0 },
+          struct addIfNewRes projAdded = { .Id = CDI_UNDEFID, .isNew = 0 },
                               gridAdded = { .Id = CDI_UNDEFID, .isNew = 0 };
 
 	  int xdimid = UNDEFID, ydimid = UNDEFID;
