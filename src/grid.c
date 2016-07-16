@@ -992,6 +992,13 @@ void gridInqYstdname(int gridID, char *ystdname)
     ystdname[0] = 0;
 }
 
+int gridInqProj(int gridID)
+{
+  grid_t *gridptr = gridID2Ptr(gridID);
+
+  return gridptr->proj;
+}
+
 /*
 @Function  gridInqType
 @Title     Get the type of a Grid

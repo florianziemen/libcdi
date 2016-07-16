@@ -720,6 +720,9 @@ void    gridDestroy(int gridID);
 /*      gridDuplicate: Duplicate a Grid */
 int     gridDuplicate(int gridID);
 
+/*      gridInqProj: Get the projection ID of a Grid */
+int     gridInqProj(int gridID);
+
 /*      gridInqType: Get the type of a Grid */
 int     gridInqType(int gridID);
 
