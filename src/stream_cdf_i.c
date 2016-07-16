@@ -2659,6 +2659,7 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
                 {
                   cdfGetAttText(ncid, gmapvarid, "grid_mapping_name", attstringlen, attstring);
                   printf("grid_mapping_name: %s\n", attstring);
+                  cdiGridDefKeyStr(projID, CDI_KEY_MAPPING, (int)(strlen(attstring)+1), attstring);
                 }
               else
                 {

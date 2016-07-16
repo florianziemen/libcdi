@@ -621,6 +621,7 @@ void *grid_key_to_ptr(grid_t *gridptr, int key)
     case CDI_KEY_XDIMNAME:   keyptr = (void*)gridptr->x.dimname; break;
     case CDI_KEY_YDIMNAME:   keyptr = (void*)gridptr->y.dimname; break;
     case CDI_KEY_VDIMNAME:   keyptr = (void*)gridptr->vdimname; break;
+    case CDI_KEY_MAPPING:    keyptr = (void*)gridptr->mapping; break;
     }
 
   return keyptr;
