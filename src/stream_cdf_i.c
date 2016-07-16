@@ -2646,7 +2646,7 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
             {
               projAdded = cdiVlistAddGridIfNew(vlistID, proj, 2);
               int projID = projAdded.Id;
-              //grid->proj = projID;
+              grid->proj = projID;
               printf("proj size = %d type %d\n", gridInqSize(projID), gridInqType(projID));
 
               int ncid = ncvars[gmapvarid].ncid;
