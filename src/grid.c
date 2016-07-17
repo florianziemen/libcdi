@@ -2243,7 +2243,7 @@ bool gridCompare(int gridID, const grid_t *grid)
       if ( grid->size == gridRef->size )
 	{
 	  differ = false;
-	  if ( grid->type == GRID_LONLAT )
+	  if ( grid->type == GRID_LONLAT || grid->type == GRID_PROJECTION )
 	    {
 	      /*
 	      printf("gridID      %d\n", gridID);
@@ -2575,7 +2575,8 @@ int gridCompareP ( void * gridptr1, void * gridptr2 )
   return equal;
 }
 
-static void gridComplete(grid_t *grid)
+static
+void gridComplete(grid_t *grid)
 {
   int gridID = grid->self;
   gridDefPrec(gridID, grid->prec);
@@ -2604,10 +2605,8 @@ static void gridComplete(grid_t *grid)
 
 	if ( grid->xdef == 2 )
 	  {
-            assert(gridtype != GRID_UNSTRUCTURED
-                   && gridtype != GRID_CURVILINEAR);
-	    double *xvals
-              = (double *) Malloc((size_t)grid->x.size * sizeof (double));
+            assert(gridtype != GRID_UNSTRUCTURED && gridtype != GRID_CURVILINEAR);
+	    double *xvals = (double *) Malloc((size_t)grid->x.size * sizeof (double));
 	    gridGenXvals(grid->x.size, grid->xfirst, grid->xlast, grid->xinc, xvals);
 	    grid->x.vals = xvals;
 	    /*
@@ -2617,10 +2616,8 @@ static void gridComplete(grid_t *grid)
 
 	if ( grid->ydef == 2 )
 	  {
-            assert(gridtype != GRID_UNSTRUCTURED
-                   && gridtype != GRID_CURVILINEAR);
-	    double *yvals
-              = (double *) Malloc((size_t)grid->y.size * sizeof (double));
+            assert(gridtype != GRID_UNSTRUCTURED && gridtype != GRID_CURVILINEAR);
+	    double *yvals = (double *) Malloc((size_t)grid->y.size * sizeof (double));
 	    gridGenYvals(gridtype, grid->y.size, grid->yfirst, grid->ylast, grid->yinc, yvals);
 	    grid->y.vals = yvals;
 	    /*
@@ -2630,14 +2627,14 @@ static void gridComplete(grid_t *grid)
 
 	if ( grid->isRotated )
 	  {
-	    gridDefXname(gridID, "rlon");
-	    gridDefYname(gridID, "rlat");
-	    gridDefXlongname(gridID, "longitude in rotated pole grid");
-	    gridDefYlongname(gridID, "latitude in rotated pole grid");
+	    if ( grid->x.name[0] == 0 ) gridDefXname(gridID, "rlon");
+	    if ( grid->y.name[0] == 0 ) gridDefYname(gridID, "rlat");
+	    if ( grid->x.longname[0] == 0 ) gridDefXlongname(gridID, "longitude in rotated pole grid");
+	    if ( grid->y.longname[0] == 0 ) gridDefYlongname(gridID, "latitude in rotated pole grid");
             grid->x.stdname = xystdname_tab[grid_xystdname_grid_latlon][0];
             grid->y.stdname = xystdname_tab[grid_xystdname_grid_latlon][1];
-	    gridDefXunits(gridID, "degrees");
-	    gridDefYunits(gridID, "degrees");
+	    if ( grid->x.units[0] == 0 ) gridDefXunits(gridID, "degrees");
+	    if ( grid->y.units[0] == 0 ) gridDefYunits(gridID, "degrees");
 
 	    gridDefXpole(gridID, grid->xpole);
 	    gridDefYpole(gridID, grid->ypole);
@@ -2834,6 +2831,7 @@ int gridGenerate(const grid_t *grid)
     if ( grid_str_tab[i][0] )
       memcpy(gridptr_str_tab[i], grid_str_tab[i], CDI_MAX_NAME);
   gridComplete(gridptr);
+
   return gridID;
 }
 
