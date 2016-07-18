@@ -73,7 +73,7 @@ Function catalog:
 -------------------------------------------------------------
    vlist_att
 -------------------------------------------------------------
-   vlistInqNatts        Get number of variable attributes
+   vlistInqNatts        Get number of attributes
    vlistInqAtt          Get information about an attribute
    vlistDefAttInt       Define an integer attribute
    vlistInqAttInt       Get the value(s) of an integer attribute
