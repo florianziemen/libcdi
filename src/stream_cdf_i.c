@@ -2653,7 +2653,7 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 
           int gridID = ncvar->gridID;
 
-          if ( lproj )
+          if ( lproj && testproj )
             {
               int projID = lgrid ? grid->proj : gridID;
               int ncid = ncvars[gmapvarid].ncid;
