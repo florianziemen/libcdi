@@ -2380,6 +2380,54 @@ bool cdf_set_unstructured_par(ncvar_t *ncvar, grid_t *grid, int xdimid, int ydim
 }
 
 static
+void cdf_read_mapping_atts(int ncid, int gmapvarid, int projID, const char *varname)
+{
+  nc_type atttype;
+  size_t attlen;
+  char attname[CDI_MAX_NAME];
+  enum {attstringlen = 8192}; char attstring[attstringlen];
+
+  if ( cdfCheckAttText(ncid, gmapvarid, "grid_mapping_name") )
+    {
+      cdfGetAttText(ncid, gmapvarid, "grid_mapping_name", attstringlen, attstring);
+      cdiGridDefKeyStr(projID, CDI_KEY_MAPPING, (int)(strlen(attstring)+1), attstring);
+    }
+  else
+    {
+      Warning("Text attribute %s:grid_mapping_name missing!", varname);
+    }
+
+  int nvatts;
+  cdf_inq_varnatts(ncid, gmapvarid, &nvatts);
+  for ( int iatt = 0; iatt < nvatts; ++iatt )
+    {
+      cdf_inq_attname(ncid, gmapvarid, iatt, attname);
+      cdf_inq_attlen(ncid, gmapvarid, attname, &attlen);
+      cdf_inq_atttype(ncid, gmapvarid, attname, &atttype);
+
+      if ( xtypeIsInt(atttype) )
+        {
+          int attint[attlen];
+          cdfGetAttInt(ncid, gmapvarid, attname, (int)attlen, attint);
+          printf("atttype: %d attname: %s attr: %d\n", atttype, attname, attint[0]);
+        }
+      else if ( xtypeIsFloat(atttype) )
+        {
+          double attflt[attlen];
+          cdfGetAttDouble(ncid, gmapvarid, attname, (int)attlen, attflt);
+          printf("atttype: %d attname: %s attr: %g\n", atttype, attname, attflt[0]);
+          int datatype = (attrtype == NC_FLOAT) ? DATATYPE_FLT32 : DATATYPE_FLT64;
+          // gridDefAttFlt(projID, attname, datatype, (int)attlen, attflt);
+        }
+      else if ( xtypeIsText(atttype) && strcmp(attname, "grid_mapping_name") )
+        {
+          cdfGetAttText(ncid, gmapvarid, attname, attstringlen, attstring);
+          printf("atttype: %d attname: %s attr: %s\n", atttype, attname, attstring);
+        }
+    }
+}
+
+static
 void cdf_set_proj_atts(int ncid, int gmapvarid, grid_t *grid)
 {
   int nvatts;
@@ -2585,14 +2633,6 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 	  if ( xdimid != UNDEFID ) xsize = ncdims[xdimid].len;
 	  if ( ydimid != UNDEFID ) ysize = ncdims[ydimid].len;
 
-#ifdef TEST_PROJ_RLL
-          printf("xdimid, ydimid, gmapvarid: %d %d %d\n", xdimid, ydimid, gmapvarid);
-          printf("xvarid, yvarid %d %d\n", xvarid, yvarid);
-          printf("xaxisid, yaxisid %d %d\n", xaxisid, yaxisid);
-          printf("xsize, ysize %d %d\n", xsize, ysize);
-          printf("lproj, lgrid %d %d\n", lproj, lgrid);
-#endif
-
 	  if ( ydimid == UNDEFID && yvarid != UNDEFID )
 	    {
 	      if ( ncvars[yvarid].ndims == 1 )
@@ -2632,7 +2672,7 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
                 }
 	    }
 
-	  if ( CDI_Debug || testproj )
+	  if ( CDI_Debug )
 	    {
 	      Message("grid: type = %d, size = %d, nx = %d, ny %d",
 		      grid->type, grid->size, grid->x.size, grid->y.size);
@@ -2657,48 +2697,7 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
             {
               int projID = lgrid ? grid->proj : gridID;
               int ncid = ncvars[gmapvarid].ncid;
-              nc_type atttype;
-              size_t attlen;
-              char attname[CDI_MAX_NAME];
-              enum {attstringlen = 8192}; char attstring[attstringlen];
-
-              if ( cdfCheckAttText(ncid, gmapvarid, "grid_mapping_name") )
-                {
-                  cdfGetAttText(ncid, gmapvarid, "grid_mapping_name", attstringlen, attstring);
-                  printf("grid_mapping_name: %s\n", attstring);
-                  cdiGridDefKeyStr(projID, CDI_KEY_MAPPING, (int)(strlen(attstring)+1), attstring);
-                }
-              else
-                {
-                  Warning("Text attribute %s:grid_mapping_name missing!", ncvars[gmapvarid].name);
-                }
-
-              int nvatts;
-              cdf_inq_varnatts(ncid, gmapvarid, &nvatts);
-              for ( int iatt = 0; iatt < nvatts; iatt++ )
-                {
-                  cdf_inq_attname(ncid, gmapvarid, iatt, attname);
-                  cdf_inq_attlen(ncid, gmapvarid, attname, &attlen);
-                  cdf_inq_atttype(ncid, gmapvarid, attname, &atttype);
-
-                  if ( xtypeIsInt(atttype) )
-                    {
-                      int attint[attlen];
-                      cdfGetAttInt(ncid, gmapvarid, attname, (int)attlen, attint);
-                      printf("atttype: %d attname: %s attr: %d\n", atttype, attname, attint[0]);
-                    }
-                  else if ( xtypeIsFloat(atttype) )
-                    {
-                      double attflt[attlen];
-                      cdfGetAttDouble(ncid, gmapvarid, attname, (int)attlen, attflt);
-                      printf("atttype: %d attname: %s attr: %g\n", atttype, attname, attflt[0]);
-                    }
-                  else if ( xtypeIsText(atttype) && strcmp(attname, "grid_mapping_name") )
-                    {
-                      cdfGetAttText(ncid, gmapvarid, attname, attstringlen, attstring);
-                      printf("atttype: %d attname: %s attr: %s\n", atttype, attname, attstring);
-                    }
-                }
+              cdf_read_mapping_atts(ncid, gmapvarid, projID, ncvars[gmapvarid].name);
             }
 
           if ( grid->type == GRID_UNSTRUCTURED && gridfile[0] != 0 )
@@ -3114,12 +3113,12 @@ void cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int model
 		{
 		  int attint[attlen];
 		  cdfGetAttInt(ncid, ncvarid, attname, (int)attlen, attint);
-                  int datatype = (attrtype == NC_SHORT) ? DATATYPE_INT16 :
-                                 (attrtype == NC_BYTE)  ? DATATYPE_INT8 :
+                  int datatype = (attrtype == NC_SHORT)  ? DATATYPE_INT16 :
+                                 (attrtype == NC_BYTE)   ? DATATYPE_INT8 :
 #if  defined  (HAVE_NETCDF4)
                                  (attrtype == NC_UBYTE)  ? DATATYPE_UINT8 :
                                  (attrtype == NC_USHORT) ? DATATYPE_UINT16 :
-                                 (attrtype == NC_UINT) ? DATATYPE_UINT32 :
+                                 (attrtype == NC_UINT)   ? DATATYPE_UINT32 :
 #endif
                                  DATATYPE_INT32;
                   vlistDefAttInt(vlistID, varID, attname, datatype, (int)attlen, attint);
