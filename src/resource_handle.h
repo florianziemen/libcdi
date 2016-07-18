@@ -99,6 +99,7 @@ enum reshListMismatch {
 
 int reshListCompare(int nsp0, int nsp1);
 void reshListPrint(FILE *fp);
+int reshGetTxCode(cdiResH resH);
 
 #endif
 /*

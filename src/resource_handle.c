@@ -379,17 +379,15 @@ static listElem_t *
 reshGetElem(const char *caller, const char* expressionString, cdiResH resH, const resOps *ops)
 {
   listElem_t *listElem;
-  int nsp;
-  namespaceTuple_t nspT;
   xassert ( ops );
 
   LIST_INIT(1);
 
   LIST_LOCK();
 
-  nsp = namespaceGetActive ();
+  int nsp = namespaceGetActive ();
 
-  nspT = namespaceResHDecode ( resH );
+  namespaceTuple_t nspT = namespaceResHDecode ( resH );
   assert(nspT.idx >= 0);
 
   if (nspT.nsp == nsp &&
@@ -583,9 +581,35 @@ void reshPackBufferDestroy ( char ** buffer )
 
 /**************************************************************/
 
+int reshGetTxCode(cdiResH resH)
+{
+  int type = 0;
+
+  LIST_LOCK();
+
+  int nsp = namespaceGetActive ();
+
+  namespaceTuple_t nspT = namespaceResHDecode ( resH );
+  assert(nspT.idx >= 0);
+
+  if (nspT.nsp == nsp &&
+      nspT.idx < resHList[nsp].size)
+    {
+      listElem_t *listElem = resHList[nsp].resources + nspT.idx;
+      xassert ( listElem->res.v.ops );
+      type = listElem->res.v.ops->valTxCode();
+    }
+
+  LIST_UNLOCK();
+
+  return type;
+}
+
+/**************************************************************/
+
 int reshPackBufferCreate(char **packBuffer, int *packBufferSize, void *context)
 {
-  int i, packBufferPos = 0;
+  int packBufferPos = 0;
   int end = END;
 
   xassert ( packBuffer );
@@ -603,7 +627,7 @@ int reshPackBufferCreate(char **packBuffer, int *packBufferSize, void *context)
   }
 
   listElem_t *r = resHList[nsp].resources;
-  for ( i = 0; i < resHList[nsp].size; i++ )
+  for ( int i = 0; i < resHList[nsp].size; i++ )
     if (r[i].status & RESH_SYNC_BIT)
       {
         if (r[i].status == RESH_DESYNC_DELETED)
@@ -630,6 +654,7 @@ int reshPackBufferCreate(char **packBuffer, int *packBufferSize, void *context)
   LIST_UNLOCK();
 
   serializePack(&end, 1,  DATATYPE_INT, pB, pBSize, &packBufferPos, context);
+
   return packBufferPos;
 }
 

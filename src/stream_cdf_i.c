@@ -2382,7 +2382,7 @@ bool cdf_set_unstructured_par(ncvar_t *ncvar, grid_t *grid, int xdimid, int ydim
 static
 void cdf_read_mapping_atts(int ncid, int gmapvarid, int projID, const char *varname)
 {
-  nc_type atttype;
+  nc_type attrtype;
   size_t attlen;
   char attname[CDI_MAX_NAME];
   enum {attstringlen = 8192}; char attstring[attstringlen];
@@ -2403,26 +2403,28 @@ void cdf_read_mapping_atts(int ncid, int gmapvarid, int projID, const char *varn
     {
       cdf_inq_attname(ncid, gmapvarid, iatt, attname);
       cdf_inq_attlen(ncid, gmapvarid, attname, &attlen);
-      cdf_inq_atttype(ncid, gmapvarid, attname, &atttype);
+      cdf_inq_atttype(ncid, gmapvarid, attname, &attrtype);
 
-      if ( xtypeIsInt(atttype) )
+      if ( xtypeIsInt(attrtype) )
         {
           int attint[attlen];
           cdfGetAttInt(ncid, gmapvarid, attname, (int)attlen, attint);
-          printf("atttype: %d attname: %s attr: %d\n", atttype, attname, attint[0]);
+          printf("attrtype: %d attname: %s attr: %d\n", attrtype, attname, attint[0]);
         }
-      else if ( xtypeIsFloat(atttype) )
+      else if ( xtypeIsFloat(attrtype) )
         {
           double attflt[attlen];
           cdfGetAttDouble(ncid, gmapvarid, attname, (int)attlen, attflt);
-          printf("atttype: %d attname: %s attr: %g\n", atttype, attname, attflt[0]);
+          printf("attrtype: %d attname: %s attr: %g\n", attrtype, attname, attflt[0]);
           int datatype = (attrtype == NC_FLOAT) ? DATATYPE_FLT32 : DATATYPE_FLT64;
-          // gridDefAttFlt(projID, attname, datatype, (int)attlen, attflt);
+          int varID = vlistDefVar(projID, CDI_UNDEFID, CDI_UNDEFID, CDI_UNDEFID);
+          printf("varID = %d\n", varID);
+          // vlistDefAttFlt(projID, varID, attname, datatype, (int)attlen, attflt);
         }
-      else if ( xtypeIsText(atttype) && strcmp(attname, "grid_mapping_name") )
+      else if ( xtypeIsText(attrtype) && strcmp(attname, "grid_mapping_name") )
         {
           cdfGetAttText(ncid, gmapvarid, attname, attstringlen, attstring);
-          printf("atttype: %d attname: %s attr: %s\n", atttype, attname, attstring);
+          printf("attrtype: %d attname: %s attr: %s\n", attrtype, attname, attstring);
         }
     }
 }
