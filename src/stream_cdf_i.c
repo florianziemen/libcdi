@@ -2645,9 +2645,17 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
           if ( lgrid && lproj && testproj )
             {
               projAdded = cdiVlistAddGridIfNew(vlistID, proj, 2);
-              int projID = projAdded.Id;
-              grid->proj = projID;
+              grid->proj = projAdded.Id;
+            }
 
+          gridAdded = cdiVlistAddGridIfNew(vlistID, grid, 1);
+          ncvar->gridID = gridAdded.Id;
+
+          int gridID = ncvar->gridID;
+
+          if ( lproj )
+            {
+              int projID = lgrid ? grid->proj : gridID;
               int ncid = ncvars[gmapvarid].ncid;
               nc_type atttype;
               size_t attlen;
@@ -2692,11 +2700,6 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
                     }
                 }
             }
-
-          gridAdded = cdiVlistAddGridIfNew(vlistID, grid, 1);
-          ncvar->gridID = gridAdded.Id;
-
-          int gridID = ncvar->gridID;
 
           if ( grid->type == GRID_UNSTRUCTURED && gridfile[0] != 0 )
             gridDefReference(gridID, gridfile);

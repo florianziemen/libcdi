@@ -283,9 +283,7 @@ void printGridInfoKernel(int gridID, int index, bool lproj)
   // int dig = (prec == DATATYPE_FLT64) ? 15 : 7;
   int dig = 7;
 
-  if ( lproj )
-    fprintf(stdout, "         %24s", gridNamePtr(gridtype));
-  else
+  if ( !lproj )
     fprintf(stdout, "  %4d : %-24s", index+1, gridNamePtr(gridtype));
 
   if ( gridtype == GRID_LONLAT   ||
@@ -408,20 +406,19 @@ void printGridInfoKernel(int gridID, int index, bool lproj)
     }
   else if ( gridtype == GRID_PROJECTION )
     {
-      if ( lproj )
-        {
-          char name[CDI_MAX_NAME]; name[0] = 0;
-          cdiGridInqKeyStr(gridID, CDI_KEY_MAPPING, CDI_MAX_NAME, name);
-          if ( name[0] == 0 ) strcpy(name, "undefined");
-          fprintf(stdout, " : %s\n", name);
-        }
-      else
+      if ( !lproj )
         {
           if ( ysize == 0 )
             fprintf(stdout, " : points=%d\n", gridsize);
           else
             fprintf(stdout, " : points=%d (%dx%d)\n", gridsize, xsize, ysize);
         }
+
+      fprintf(stdout, "         %24s", "mapping");
+      char name[CDI_MAX_NAME]; name[0] = 0;
+      cdiGridInqKeyStr(gridID, CDI_KEY_MAPPING, CDI_MAX_NAME, name);
+      if ( name[0] == 0 ) strcpy(name, "undefined");
+      fprintf(stdout, " : %s\n", name);
 
       print_xvals(gridID, dig);
       print_yvals(gridID, dig);
