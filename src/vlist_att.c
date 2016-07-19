@@ -15,6 +15,9 @@
 #include "vlist_att.h"
 #include "error.h"
 #include "serialize.h"
+#include "grid.h"
+#include "resource_unpack.h"
+
 
 static
 cdi_atts_t *get_attsp(vlist_t *vlistptr, int varID)
@@ -97,13 +100,18 @@ void fill_att(cdi_att_t *attp, int indtype, int exdtype, size_t nelems, size_t x
 static
 cdi_atts_t *cdi_get_attsp(int objID, int varID)
 {
-  //printf("ObjID %d TxCode: %d\n", objID, reshGetTxCode(objID));
+  cdi_atts_t *attsp = NULL;
 
-  int vlistID = objID;
-
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-
-  cdi_atts_t *attsp = get_attsp(vlistptr, varID);
+  if ( varID == CDI_GLOBAL && reshGetTxCode(objID) == GRID )
+    {
+      grid_t *gridptr = gridID2Ptr(objID);
+      attsp = &gridptr->atts;
+    }
+  else
+    {
+      vlist_t *vlistptr = vlist_to_pointer(objID);
+      attsp = get_attsp(vlistptr, varID);
+    }
 
   return attsp;
 }
