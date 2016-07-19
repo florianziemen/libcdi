@@ -129,7 +129,7 @@ static int cdfOpenFile(const char *filename, const char *mode, int *filetype)
 #endif
 	  cdf_create(filename, writemode, &ncid);
 	  if ( CDI_Version_Info ) cdfComment(ncid);
-          cdf_put_att_text(ncid, NC_GLOBAL, "Conventions", 6, "CF-1.4");
+          cdf_put_att_text(ncid, NC_GLOBAL, "Conventions", 6, "CF-1.6");
 	  break;
 	case 'a':
 	  cdf_open(filename, NC_WRITE, &ncid);
