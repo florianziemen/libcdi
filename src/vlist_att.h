@@ -5,17 +5,42 @@
 #include "config.h"
 #endif
 
-int
-vlistAttsGetSize(vlist_t *p, int varID, void *context);
+#ifndef _CDI_LIMITS_H
+#include "cdi_limits.h"
+#endif
 
-void
-vlistAttsPack(vlist_t *p, int varID,
-              void * buf, int size, int *position, void *context);
+/*
+ * CDI attribute
+ */
+typedef struct {
+  size_t    xsz;	  /* amount of space at xvalue                      */
+  size_t    namesz;       /* size of name                                   */
+  char     *name;         /* attribute name                                 */
+  int       indtype;	  /* internal data type of xvalue (INT, FLT or TXT) */
+  int       exdtype;      /* external data type                             */
+                          /* indtype    exdtype                             */
+                          /* TXT        TXT                                 */
+                          /* INT        INT16, INT32                        */
+                          /* FLT        FLT32, FLT64                        */
+  size_t    nelems;    	  /* number of elements                             */
+  void     *xvalue;       /* the actual data                                */
+} cdi_att_t;
 
-void
-vlistAttsUnpack(int vlistID, int varID,
-                void * buf, int size, int *position, void *context);
 
+typedef struct {
+  size_t     nalloc;		/* number allocated >= nelems */
+  size_t     nelems;		/* length of the array */
+  cdi_att_t  value[MAX_ATTRIBUTES];
+} cdi_atts_t;
+
+
+int vlistAttsGetSize(void *p, int varID, void *context);
+
+void vlistAttsPack(void *p, int varID,
+                   void *buf, int size, int *position, void *context);
+
+void vlistAttsUnpack(int vlistID, int varID,
+                     void *buf, int size, int *position, void *context);
 
 #endif
 

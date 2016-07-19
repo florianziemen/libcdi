@@ -134,7 +134,6 @@ void vlistCheckVarID(const char *caller, int vlistID, int varID)
 
 int vlistDefVarTiles(int vlistID, int gridID, int zaxisID, int tsteptype, int tilesetID)
 {
-  // printf("ObjID %d TxCode: %d\n", vlistID, reshGetTxCode(vlistID));
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
   if ( CDI_Debug )
     Message("gridID = %d  zaxisID = %d  tsteptype = %d", gridID, zaxisID, tsteptype);

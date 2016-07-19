@@ -491,9 +491,10 @@ vlistAttGetSize(vlist_t *vlistptr, int varID, int attnum, void *context)
   return txsize;
 }
 
-int
-vlistAttsGetSize(vlist_t *p, int varID, void *context)
+
+int vlistAttsGetSize(void *vp, int varID, void *context)
 {
+  vlist_t *p = (vlist_t*) vp;
   cdi_atts_t *attsp = get_attsp(p, varID);
   int txsize = serializeGetSize(1, DATATYPE_INT, context);
   size_t numAtts = attsp->nelems;
@@ -502,9 +503,9 @@ vlistAttsGetSize(vlist_t *p, int varID, void *context)
   return txsize;
 }
 
-static void
-vlistAttPack(vlist_t *vlistptr, int varID, int attnum,
-             void * buf, int size, int *position, void *context)
+static
+void vlistAttPack(vlist_t *vlistptr, int varID, int attnum,
+                  void *buf, int size, int *position, void *context)
 {
   cdi_atts_t *attsp;
   cdi_att_t *attp;
@@ -523,10 +524,10 @@ vlistAttPack(vlist_t *vlistptr, int varID, int attnum,
                 buf, size, position, context);
 }
 
-void
-vlistAttsPack(vlist_t *p, int varID,
-              void * buf, int size, int *position, void *context)
+void vlistAttsPack(void *vp, int varID,
+                   void *buf, int size, int *position, void *context)
 {
+  vlist_t *p = (vlist_t*) vp;
   cdi_atts_t *attsp = get_attsp(p, varID);
   size_t numAtts = attsp->nelems;
   int numAttsI = (int)numAtts;
@@ -536,9 +537,9 @@ vlistAttsPack(vlist_t *p, int varID,
     vlistAttPack(p, varID, (int)i, buf, size, position, context);
 }
 
-static void
-vlistAttUnpack(int vlistID, int varID,
-               void * buf, int size, int *position, void *context)
+static
+void vlistAttUnpack(int vlistID, int varID,
+                    void *buf, int size, int *position, void *context)
 {
   int tempbuf[vlist_att_nints];
 
@@ -575,9 +576,8 @@ vlistAttUnpack(int vlistID, int varID,
   Free(attData);
 }
 
-void
-vlistAttsUnpack(int vlistID, int varID,
-                void * buf, int size, int *position, void *context)
+void vlistAttsUnpack(int vlistID, int varID,
+                     void *buf, int size, int *position, void *context)
 {
   int numAtts;
   serializeUnpack(buf, size, position, &numAtts, 1, DATATYPE_INT, context);
