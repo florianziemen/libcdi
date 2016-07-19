@@ -1584,20 +1584,20 @@ void cdf_scan_var_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimi
 	      /*
 	      int attrint;
 	      double attrflt;
-	      nc_type attrtype;
+	      nc_type atttype;
 	      cdf_inq_attlen(ncid, ncvarid, attname, &attlen);
-	      cdf_inq_atttype(ncid, ncvarid, attname, &attrtype);
-	      if ( attlen == 1 && (attrtype == NC_INT || attrtype == NC_SHORT) )
+	      cdf_inq_atttype(ncid, ncvarid, attname, &atttype);
+	      if ( attlen == 1 && (atttype == NC_INT || atttype == NC_SHORT) )
 		{
 		  cdfGetAttInt(ncid, ncvarid, attname, 1, &attrint);
 		  printf("int: %s.%s = %d\n", ncvars[ncvarid].name, attname, attrint);
 		}
-	      else if ( attlen == 1 && (attrtype == NC_FLOAT || attrtype == NC_DOUBLE) )
+	      else if ( attlen == 1 && (atttype == NC_FLOAT || atttype == NC_DOUBLE) )
 		{
 		  cdfGetAttDouble(ncid, ncvarid, attname, 1, &attrflt);
 		  printf("flt: %s.%s = %g\n", ncvars[ncvarid].name, attname, attrflt);
 		}
-	      else if ( attrtype == NC_CHAR )
+	      else if ( atttype == NC_CHAR )
 		{
 		  cdfGetAttText(ncid, ncvarid, attname, attstringlen, attstring);
 		  attstring[attlen] = 0;
@@ -2382,7 +2382,7 @@ bool cdf_set_unstructured_par(ncvar_t *ncvar, grid_t *grid, int xdimid, int ydim
 static
 void cdf_read_mapping_atts(int ncid, int gmapvarid, int projID, const char *varname)
 {
-  nc_type attrtype;
+  nc_type atttype;
   size_t attlen;
   char attname[CDI_MAX_NAME];
   enum {attstringlen = 8192}; char attstring[attstringlen];
@@ -2403,28 +2403,28 @@ void cdf_read_mapping_atts(int ncid, int gmapvarid, int projID, const char *varn
     {
       cdf_inq_attname(ncid, gmapvarid, iatt, attname);
       cdf_inq_attlen(ncid, gmapvarid, attname, &attlen);
-      cdf_inq_atttype(ncid, gmapvarid, attname, &attrtype);
+      cdf_inq_atttype(ncid, gmapvarid, attname, &atttype);
 
-      if ( xtypeIsInt(attrtype) )
+      if ( xtypeIsInt(atttype) )
         {
           int attint[attlen];
           cdfGetAttInt(ncid, gmapvarid, attname, (int)attlen, attint);
-          printf("attrtype: %d attname: %s attr: %d\n", attrtype, attname, attint[0]);
+          printf("atttype: %d attname: %s attr: %d\n", atttype, attname, attint[0]);
         }
-      else if ( xtypeIsFloat(attrtype) )
+      else if ( xtypeIsFloat(atttype) )
         {
           double attflt[attlen];
           cdfGetAttDouble(ncid, gmapvarid, attname, (int)attlen, attflt);
-          printf("attrtype: %d attname: %s attr: %g\n", attrtype, attname, attflt[0]);
-          int datatype = (attrtype == NC_FLOAT) ? DATATYPE_FLT32 : DATATYPE_FLT64;
+          printf("atttype: %d attname: %s attr: %g\n", atttype, attname, attflt[0]);
+          int datatype = (atttype == NC_FLOAT) ? DATATYPE_FLT32 : DATATYPE_FLT64;
           //int varID = vlistDefVar(projID, CDI_UNDEFID, CDI_UNDEFID, CDI_UNDEFID);
           //printf("varID = %d\n", varID);
           vlistDefAttFlt(projID, CDI_GLOBAL, attname, datatype, (int)attlen, attflt);
         }
-      else if ( xtypeIsText(attrtype) && strcmp(attname, "grid_mapping_name") )
+      else if ( xtypeIsText(atttype) && strcmp(attname, "grid_mapping_name") )
         {
           cdfGetAttText(ncid, gmapvarid, attname, attstringlen, attstring);
-          printf("attrtype: %d attname: %s attr: %s\n", attrtype, attname, attstring);
+          printf("atttype: %d attname: %s attr: %s\n", atttype, attname, attstring);
         }
     }
 }
@@ -3098,7 +3098,7 @@ void cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int model
 
       if ( ncvars[ncvarid].natts )
 	{
-	  nc_type attrtype;
+	  nc_type atttype;
 	  size_t attlen;
 	  char attname[CDI_MAX_NAME];
 	  enum {attstringlen = 8192}; char attstring[attstringlen];
@@ -3109,30 +3109,30 @@ void cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int model
 	      int attnum = ncvars[ncvarid].atts[iatt];
 	      cdf_inq_attname(ncid, ncvarid, attnum, attname);
 	      cdf_inq_attlen(ncid, ncvarid, attname, &attlen);
-	      cdf_inq_atttype(ncid, ncvarid, attname, &attrtype);
+	      cdf_inq_atttype(ncid, ncvarid, attname, &atttype);
 
-	      if ( xtypeIsInt(attrtype) )
+	      if ( xtypeIsInt(atttype) )
 		{
 		  int attint[attlen];
 		  cdfGetAttInt(ncid, ncvarid, attname, (int)attlen, attint);
-                  int datatype = (attrtype == NC_SHORT)  ? DATATYPE_INT16 :
-                                 (attrtype == NC_BYTE)   ? DATATYPE_INT8 :
+                  int datatype = (atttype == NC_SHORT)  ? DATATYPE_INT16 :
+                                 (atttype == NC_BYTE)   ? DATATYPE_INT8 :
 #if  defined  (HAVE_NETCDF4)
-                                 (attrtype == NC_UBYTE)  ? DATATYPE_UINT8 :
-                                 (attrtype == NC_USHORT) ? DATATYPE_UINT16 :
-                                 (attrtype == NC_UINT)   ? DATATYPE_UINT32 :
+                                 (atttype == NC_UBYTE)  ? DATATYPE_UINT8 :
+                                 (atttype == NC_USHORT) ? DATATYPE_UINT16 :
+                                 (atttype == NC_UINT)   ? DATATYPE_UINT32 :
 #endif
                                  DATATYPE_INT32;
                   vlistDefAttInt(vlistID, varID, attname, datatype, (int)attlen, attint);
 		}
-	      else if ( xtypeIsFloat(attrtype) )
+	      else if ( xtypeIsFloat(atttype) )
 		{
 		  double attflt[attlen];
 		  cdfGetAttDouble(ncid, ncvarid, attname, (int)attlen, attflt);
-                  int datatype = (attrtype == NC_FLOAT) ? DATATYPE_FLT32 : DATATYPE_FLT64;
+                  int datatype = (atttype == NC_FLOAT) ? DATATYPE_FLT32 : DATATYPE_FLT64;
                   vlistDefAttFlt(vlistID, varID, attname, datatype, (int)attlen, attflt);
 		}
-	      else if ( xtypeIsText(attrtype) )
+	      else if ( xtypeIsText(atttype) )
 		{
 		  cdfGetAttText(ncid, ncvarid, attname, attstringlen, attstring);
 		  vlistDefAttTxt(vlistID, varID, attname, (int)attlen, attstring);
