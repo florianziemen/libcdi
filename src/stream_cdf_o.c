@@ -1967,6 +1967,23 @@ void cdfDefPole(stream_t *streamptr, int gridID)
 }
 
 static
+void cdf_def_mapping(stream_t *streamptr, int gridID)
+{
+  int fileID = streamptr->fileID;
+
+  static const char varname[] = "dummy";
+
+  cdf_redef(fileID);
+
+  int ncvarid;
+  int ncerrcode = nc_def_var(fileID, varname, (nc_type) NC_CHAR, 0, NULL, &ncvarid);
+  if ( ncerrcode == NC_NOERR )
+    cdfDefineAttributes(gridID, CDI_GLOBAL, fileID, ncvarid);
+
+  cdf_enddef(fileID);
+}
+
+static
 void cdfDefMapping(stream_t *streamptr, int gridID)
 {
   int ncvarid = UNDEFID;
@@ -2061,8 +2078,9 @@ void cdfDefGrid(stream_t *streamptr, int gridID)
   if ( CDI_Debug )
     Message("gridtype = %d  size = %d", gridtype, size);
 
-  if ( gridtype == GRID_GAUSSIAN ||
-       gridtype == GRID_LONLAT   ||
+  if ( gridtype == GRID_GAUSSIAN    ||
+       gridtype == GRID_LONLAT      ||
+       gridtype == GRID_PROJECTION  ||
        gridtype == GRID_GENERIC )
     {
       if ( gridtype == GRID_GENERIC )
@@ -2097,6 +2115,8 @@ void cdfDefGrid(stream_t *streamptr, int gridID)
 
           if ( gridInqXsize(gridID) > 0 ) cdfDefXaxis(streamptr, gridID, ndims);
           if ( gridInqYsize(gridID) > 0 ) cdfDefYaxis(streamptr, gridID, ndims);
+
+          if ( gridtype == GRID_PROJECTION ) cdf_def_mapping(streamptr, gridID);
         }
 
       if ( gridIsRotated(gridID) ) cdfDefPole(streamptr, gridID);

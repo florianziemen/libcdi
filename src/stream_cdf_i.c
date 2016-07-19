@@ -943,7 +943,7 @@ void cdf_set_cdi_attr(int ncid, int ncvarid, int attnum, int cdiID, int varID)
       int attint[attlen];
       cdfGetAttInt(ncid, ncvarid, attname, (int)attlen, attint);
       int datatype = (atttype == NC_SHORT)  ? DATATYPE_INT16 :
-                                 (atttype == NC_BYTE)   ? DATATYPE_INT8 :
+                     (atttype == NC_BYTE)   ? DATATYPE_INT8 :
 #if  defined  (HAVE_NETCDF4)
                      (atttype == NC_UBYTE)  ? DATATYPE_UINT8 :
                      (atttype == NC_USHORT) ? DATATYPE_UINT16 :

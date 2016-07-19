@@ -170,7 +170,7 @@ void grid_init(grid_t *gridptr)
   memset(gridptr->uuid, 0, CDI_UUID_SIZE);
   gridptr->name          = NULL;
   gridptr->vtable        = &cdiGridVtable;
-  gridptr->atts.nalloc   = 0;
+  gridptr->atts.nalloc   = MAX_ATTRIBUTES;
   gridptr->atts.nelems   = 0;
 }
 

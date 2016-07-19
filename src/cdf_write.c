@@ -164,8 +164,8 @@ void *resizeBuf(void **buf, size_t *bufSize, size_t reqSize)
   return *buf;
 }
 
-static
-void cdfDefineAttributes(int vlistID, int varID, int fileID, int ncvarID)
+
+void cdfDefineAttributes(int cdiID, int varID, int fileID, int ncvarID)
 {
   int atttype, attlen;
   size_t len;
@@ -174,11 +174,11 @@ void cdfDefineAttributes(int vlistID, int varID, int fileID, int ncvarID)
   size_t attBufSize = 0;
 
   int natts;
-  vlistInqNatts(vlistID, varID, &natts);
+  vlistInqNatts(cdiID, varID, &natts);
 
   for ( int iatt = 0; iatt < natts; iatt++ )
     {
-      vlistInqAtt(vlistID, varID, iatt, attname, &atttype, &attlen);
+      vlistInqAtt(cdiID, varID, iatt, attname, &atttype, &attlen);
 
       if ( attlen == 0 ) continue;
 
@@ -186,7 +186,7 @@ void cdfDefineAttributes(int vlistID, int varID, int fileID, int ncvarID)
         {
           size_t attSize = (size_t)attlen*sizeof(char);
           char *atttxt = (char *)resizeBuf(&attBuf, &attBufSize, attSize);
-          vlistInqAttTxt(vlistID, varID, attname, attlen, atttxt);
+          vlistInqAttTxt(cdiID, varID, attname, attlen, atttxt);
           len = (size_t)attlen;
           cdf_put_att_text(fileID, ncvarID, attname, len, atttxt);
         }
@@ -196,7 +196,7 @@ void cdfDefineAttributes(int vlistID, int varID, int fileID, int ncvarID)
         {
           size_t attSize = (size_t)attlen*sizeof(int);
           int *attint = (int *)resizeBuf(&attBuf, &attBufSize, attSize);
-          vlistInqAttInt(vlistID, varID, attname, attlen, &attint[0]);
+          vlistInqAttInt(cdiID, varID, attname, attlen, &attint[0]);
           len = (size_t)attlen;
           nc_type xtype = (atttype == DATATYPE_INT8)  ? NC_BYTE :
                           (atttype == DATATYPE_INT16) ? NC_SHORT :
@@ -212,7 +212,7 @@ void cdfDefineAttributes(int vlistID, int varID, int fileID, int ncvarID)
         {
           size_t attSize = (size_t)attlen * sizeof(double);
           double *attflt = (double *)resizeBuf(&attBuf, &attBufSize, attSize);
-          vlistInqAttFlt(vlistID, varID, attname, attlen, attflt);
+          vlistInqAttFlt(cdiID, varID, attname, attlen, attflt);
           len = (size_t)attlen;
           if ( atttype == DATATYPE_FLT32 )
             {
@@ -581,7 +581,8 @@ int cdfDefVar(stream_t *streamptr, int varID)
         }
     }
 
-  if ( gridtype != GRID_GENERIC && gridtype != GRID_LONLAT  && gridtype != GRID_CURVILINEAR )
+  if ( gridtype != GRID_GENERIC && gridtype != GRID_LONLAT &&
+       gridtype != GRID_PROJECTION && gridtype != GRID_CURVILINEAR )
     {
       size_t len = strlen(gridNamePtr(gridtype));
       if ( len > 0 )
@@ -594,7 +595,12 @@ int cdfDefVar(stream_t *streamptr, int varID)
       cdf_put_att_text(fileID, ncvarid, "grid_mapping", strlen(mapping), mapping);
     }
 
-  if ( gridtype == GRID_SINUSOIDAL )
+  if ( gridtype == GRID_PROJECTION )
+    {
+      char mapping[] = "dummy";
+      cdf_put_att_text(fileID, ncvarid, "grid_mapping", strlen(mapping), mapping);
+    }
+  else if ( gridtype == GRID_SINUSOIDAL )
     {
       char mapping[] = "sinusoidal";
       cdf_put_att_text(fileID, ncvarid, "grid_mapping", strlen(mapping), mapping);
