@@ -94,6 +94,20 @@ void fill_att(cdi_att_t *attp, int indtype, int exdtype, size_t nelems, size_t x
     }
 }
 
+static
+cdi_atts_t *cdi_get_attsp(int objID, int varID)
+{
+  //printf("ObjID %d TxCode: %d\n", objID, reshGetTxCode(objID));
+
+  int vlistID = objID;
+
+  vlist_t *vlistptr = vlist_to_pointer(vlistID);
+
+  cdi_atts_t *attsp = get_attsp(vlistptr, varID);
+
+  return attsp;
+}
+
 /*
 @Function  vlistInqNatts
 @Title     Get number of attributes
@@ -113,8 +127,7 @@ int vlistInqNatts(int vlistID, int varID, int *nattsp)
 {
   int status = CDI_NOERR;
 
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  cdi_atts_t *attsp = get_attsp(vlistptr, varID);
+  cdi_atts_t *attsp = cdi_get_attsp(vlistID, varID);
   xassert(attsp != NULL);
 
   *nattsp = (int)attsp->nelems;
@@ -148,9 +161,7 @@ int vlistInqAtt(int vlistID, int varID, int attnum, char *name, int *typep, int 
 
   xassert(name != NULL);
 
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-
-  cdi_atts_t *attsp = get_attsp(vlistptr, varID);
+  cdi_atts_t *attsp = cdi_get_attsp(vlistID, varID);
   xassert(attsp != NULL);
 
   cdi_att_t *attp = NULL;
@@ -179,8 +190,7 @@ int vlistDelAtts(int vlistID, int varID)
 {
   int status = CDI_NOERR;
 
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  cdi_atts_t *attsp = get_attsp(vlistptr, varID);
+  cdi_atts_t *attsp = cdi_get_attsp(vlistID, varID);
   xassert(attsp != NULL);
 
   for ( int attid = 0; attid < (int)attsp->nelems; attid++ )
@@ -217,9 +227,7 @@ int vlist_def_att(int indtype, int exdtype, int vlistID, int varID, const char *
   if ( len != 0 && xp == NULL ) /* Null arg */
     return CDI_EINVAL;
 
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-
-  cdi_atts_t *attsp = get_attsp(vlistptr, varID);
+  cdi_atts_t *attsp = cdi_get_attsp(vlistID, varID);
   xassert(attsp != NULL);
 
   cdi_att_t *attp = find_att(attsp, name);
@@ -236,13 +244,9 @@ int vlist_inq_att(int indtype, int vlistID, int varID, const char *name, size_t 
   int status = CDI_NOERR;
 
   if ( mxsz != 0 && xp == NULL ) /* Null arg */
-    {
-      return CDI_EINVAL;
-    }
+    return CDI_EINVAL;
 
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-
-  cdi_atts_t *attsp = get_attsp(vlistptr, varID);
+  cdi_atts_t *attsp = cdi_get_attsp(vlistID, varID);
   xassert(attsp != NULL);
 
   cdi_att_t *attp = find_att(attsp, name);
@@ -275,9 +279,7 @@ int vlistCopyVarAtts(int vlistID1, int varID_1, int vlistID2, int varID_2)
 {
   int status = CDI_NOERR;
 
-  vlist_t *vlistptr1 = vlist_to_pointer(vlistID1);
-
-  cdi_atts_t *attsp1 = get_attsp(vlistptr1, varID_1);
+  cdi_atts_t *attsp1 = cdi_get_attsp(vlistID1, varID_1);
   xassert(attsp1 != NULL);
 
   for ( int attid = 0; attid < (int)attsp1->nelems; attid++ )
