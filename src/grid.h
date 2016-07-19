@@ -4,6 +4,8 @@
 #include "cdi.h"
 #include <stdbool.h>
 
+#include "vlist_att.h"
+
 typedef unsigned char mask_t;
 
 typedef struct grid_t grid_t;
@@ -128,7 +130,8 @@ struct grid_t {
   struct gridaxis_t x;
   struct gridaxis_t y;
   const struct gridVirtTable *vtable;
-  void *extraData;
+  void   *extraData;
+  cdi_atts_t atts;
 };
 
 

@@ -171,6 +171,8 @@ void grid_init(grid_t *gridptr)
   gridptr->name          = NULL;
   gridptr->vtable        = &cdiGridVtable;
   gridptr->extraData     = NULL;
+  gridptr->atts.nalloc   = 0;
+  gridptr->atts.nelems   = 0;
 }
 
 
@@ -178,12 +180,13 @@ static void
 grid_free_components(grid_t *gridptr)
 {
   void *p2free[] = { gridptr->mask, gridptr->mask_gme,
-                   gridptr->x.vals, gridptr->y.vals,
-                   gridptr->x.bounds, gridptr->y.bounds,
-                   gridptr->rowlon, gridptr->area,
-                   gridptr->reference, gridptr->name };
-  for (size_t i = 0; i < sizeof (p2free) / sizeof (p2free[0]); ++i)
-    if (p2free[i]) Free(p2free[i]);
+                     gridptr->x.vals, gridptr->y.vals,
+                     gridptr->x.bounds, gridptr->y.bounds,
+                     gridptr->rowlon, gridptr->area,
+                     gridptr->reference, gridptr->name};
+
+  for (size_t i = 0; i < sizeof(p2free)/sizeof(p2free[0]); ++i)
+    if ( p2free[i] ) Free(p2free[i]);
 }
 
 void grid_free(grid_t *gridptr)
@@ -197,6 +200,7 @@ gridNewEntry(cdiResH resH)
 {
   grid_t *gridptr = (grid_t*) Malloc(sizeof(grid_t));
   grid_init(gridptr);
+
   if (resH == CDI_UNDEFID)
     gridptr->self = reshPut(gridptr, &gridOps);
   else
@@ -204,6 +208,7 @@ gridNewEntry(cdiResH resH)
       gridptr->self = resH;
       reshReplace(resH, gridptr, &gridOps);
     }
+
   return gridptr;
 }
 
@@ -555,11 +560,9 @@ int gridCreate(int gridtype, int size)
 static
 void gridDestroyKernel( grid_t * gridptr )
 {
-  int id;
-
   xassert ( gridptr );
 
-  id = gridptr->self;
+  int id = gridptr->self;
 
   grid_free_components(gridptr);
   Free( gridptr );
