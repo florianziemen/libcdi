@@ -125,6 +125,7 @@ struct grid_t {
   bool    lcomplex;
   bool    hasdims;
   char    vdimname[CDI_MAX_NAME];
+  char    mapname[CDI_MAX_NAME];
   char    mapping[CDI_MAX_NAME];
   char   *name;
   struct gridaxis_t x;

@@ -158,7 +158,6 @@ void grid_init(grid_t *gridptr)
   gridptr->hasdims       = true;
   gridptr->x.dimname[0]  = 0;
   gridptr->y.dimname[0]  = 0;
-  gridptr->vdimname[0]   = 0;
   gridptr->x.name[0]     = 0;
   gridptr->y.name[0]     = 0;
   gridptr->x.longname[0] = 0;
@@ -167,6 +166,9 @@ void grid_init(grid_t *gridptr)
   gridptr->y.units[0]    = 0;
   gridptr->x.stdname     = NULL;
   gridptr->y.stdname     = NULL;
+  gridptr->vdimname[0]   = 0;
+  gridptr->mapname[0]    = 0;
+  gridptr->mapping[0]    = 0;
   memset(gridptr->uuid, 0, CDI_UUID_SIZE);
   gridptr->name          = NULL;
   gridptr->vtable        = &cdiGridVtable;
@@ -623,6 +625,7 @@ void *grid_key_to_ptr(grid_t *gridptr, int key)
     case CDI_KEY_XDIMNAME:   keyptr = (void*)gridptr->x.dimname; break;
     case CDI_KEY_YDIMNAME:   keyptr = (void*)gridptr->y.dimname; break;
     case CDI_KEY_VDIMNAME:   keyptr = (void*)gridptr->vdimname; break;
+    case CDI_KEY_MAPNAME:    keyptr = (void*)gridptr->mapname; break;
     case CDI_KEY_MAPPING:    keyptr = (void*)gridptr->mapping; break;
     }
 

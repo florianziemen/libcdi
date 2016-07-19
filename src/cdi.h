@@ -769,7 +769,8 @@ int     gridInqYvals(int gridID, double yvals[]);
 #define  CDI_KEY_YLONGNAME  907  // Y-axis longname
 #define  CDI_KEY_XUNITS     908  // X-axis units
 #define  CDI_KEY_YUNITS     909  // Y-axis units
-#define  CDI_KEY_MAPPING    920  // Grid mapping name
+#define  CDI_KEY_MAPNAME    920  // Grid mapping var name
+#define  CDI_KEY_MAPPING    921  // Grid mapping name
 
 //      cdiGridDefKeyStr: Define a CDI grid string value from a key
 int     cdiGridDefKeyStr(int gridID, int key, int size, const char *mesg);

@@ -2710,6 +2710,7 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
               int projID = lgrid ? grid->proj : gridID;
               int ncid = ncvars[gmapvarid].ncid;
               cdf_read_mapping_atts(ncid, gmapvarid, projID, ncvars[gmapvarid].name);
+              cdiGridDefKeyStr(projID, CDI_KEY_MAPNAME, (int)(strlen(ncvars[gmapvarid].name)+1), ncvars[gmapvarid].name);
             }
 
           if ( grid->type == GRID_UNSTRUCTURED && gridfile[0] != 0 )
