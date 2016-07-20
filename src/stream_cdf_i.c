@@ -2265,9 +2265,17 @@ bool cdf_read_coordinates(struct cdfLazyGrid *restrict lazyGrid, ncvar_t *ncvar,
     }
 
   int gridtype = grid->type;
-  if ( gridtype != GRID_PROJECTION ||
-       (gridtype == GRID_PROJECTION && ncvar->gridtype == GRID_LONLAT) )
-    gridtype = ncvar->gridtype;
+  if ( gridtype != GRID_PROJECTION ) gridtype = ncvar->gridtype;
+  else if ( gridtype == GRID_PROJECTION && ncvar->gridtype == GRID_LONLAT )
+    {
+      int gmapvarid = ncvar->gmapid;
+      if ( gmapvarid != UNDEFID && cdfCheckAttText(ncvar->ncid, gmapvarid, "grid_mapping_name") )
+        {
+          enum {attstringlen = 256}; char attstring[attstringlen];
+          cdfGetAttText(ncvar->ncid, gmapvarid, "grid_mapping_name", attstringlen, attstring);
+          if ( strcmp(attstring, "latitude_longitude") == 0 ) gridtype = ncvar->gridtype;
+        }
+    }
 
   switch (gridtype)
     {
@@ -2427,7 +2435,7 @@ void cdf_read_mapping_atts(int ncid, int gmapvarid, int projID, const char *varn
 {
   if ( cdfCheckAttText(ncid, gmapvarid, "grid_mapping_name") )
     {
-      enum {attstringlen = 8192}; char attstring[attstringlen];
+      enum {attstringlen = 256}; char attstring[attstringlen];
       cdfGetAttText(ncid, gmapvarid, "grid_mapping_name", attstringlen, attstring);
       cdiGridDefKeyStr(projID, CDI_KEY_MAPPING, (int)(strlen(attstring)+1), attstring);
     }
