@@ -2589,7 +2589,7 @@ static
 void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars,
                           int timedimid, unsigned char *uuidOfHGrid, char *gridfile, int number_of_grid_used)
 {
-#ifdef TEST_PROJ_RLL
+#ifdef TEST_PROJECTION
   bool testproj = true;
 #else
   bool testproj = false;
@@ -2619,7 +2619,7 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
           struct cdfLazyGrid *restrict lazyGrid = NULL, *restrict lazyProj = NULL;
 
           {
-#ifdef TEST_PROJ_RLL
+#ifdef TEST_PROJECTION
             int gridtype = !lgrid ? GRID_PROJECTION : ncvar->gridtype;
 #else
             int gridtype = ncvar->gridtype;
