@@ -2265,7 +2265,9 @@ bool cdf_read_coordinates(struct cdfLazyGrid *restrict lazyGrid, ncvar_t *ncvar,
     }
 
   int gridtype = grid->type;
-  if ( gridtype != GRID_PROJECTION ) gridtype = ncvar->gridtype;
+  if ( gridtype != GRID_PROJECTION ||
+       (gridtype == GRID_PROJECTION && ncvar->gridtype == GRID_LONLAT) )
+    gridtype = ncvar->gridtype;
 
   switch (gridtype)
     {
@@ -2338,9 +2340,10 @@ bool cdf_read_coordinates(struct cdfLazyGrid *restrict lazyGrid, ncvar_t *ncvar,
       }
     }
 
-  if ( grid->type != GRID_PROJECTION && grid->type != ncvar->gridtype )
+  // if ( grid->type != GRID_PROJECTION && grid->type != ncvar->gridtype )
+  if ( grid->type != gridtype )
     {
-      int gridtype = ncvar->gridtype;
+      // int gridtype = ncvar->gridtype;
       grid->type = gridtype;
       cdiGridTypeInit(grid, gridtype, grid->size);
     }
@@ -2709,8 +2712,9 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
             {
               int projID = lgrid ? grid->proj : gridID;
               int ncid = ncvars[gmapvarid].ncid;
-              cdf_read_mapping_atts(ncid, gmapvarid, projID, ncvars[gmapvarid].name);
-              cdiGridDefKeyStr(projID, CDI_KEY_MAPNAME, (int)(strlen(ncvars[gmapvarid].name)+1), ncvars[gmapvarid].name);
+              const char *gmapname = ncvars[gmapvarid].name;
+              cdf_read_mapping_atts(ncid, gmapvarid, projID, gmapname);
+              cdiGridDefKeyStr(projID, CDI_KEY_MAPNAME, (int)(strlen(gmapname)+1), gmapname);
             }
 
           if ( grid->type == GRID_UNSTRUCTURED && gridfile[0] != 0 )
