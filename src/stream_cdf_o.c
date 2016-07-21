@@ -1969,18 +1969,24 @@ void cdfDefPole(stream_t *streamptr, int gridID)
 static
 void cdf_def_mapping(stream_t *streamptr, int gridID)
 {
-  int fileID = streamptr->fileID;
+  char mapping[CDI_MAX_NAME]; mapping[0] = 0;
+  cdiGridInqKeyStr(gridID, CDI_KEY_MAPPING, CDI_MAX_NAME, mapping);
+  if ( mapping[0] )
+    {
+      char gmapvarname[CDI_MAX_NAME]; gmapvarname[0] = 0;
+      cdiGridInqKeyStr(gridID, CDI_KEY_MAPNAME, CDI_MAX_NAME, gmapvarname);
+      if ( !gmapvarname[0] ) strcpy(gmapvarname, "dummy");
 
-  static const char varname[] = "dummy";
+      int fileID = streamptr->fileID;
+      cdf_redef(fileID);
 
-  cdf_redef(fileID);
+      int ncvarid;
+      int ncerrcode = nc_def_var(fileID, gmapvarname, (nc_type) NC_CHAR, 0, NULL, &ncvarid);
+      if ( ncerrcode == NC_NOERR )
+        cdfDefineAttributes(gridID, CDI_GLOBAL, fileID, ncvarid);
 
-  int ncvarid;
-  int ncerrcode = nc_def_var(fileID, varname, (nc_type) NC_CHAR, 0, NULL, &ncvarid);
-  if ( ncerrcode == NC_NOERR )
-    cdfDefineAttributes(gridID, CDI_GLOBAL, fileID, ncvarid);
-
-  cdf_enddef(fileID);
+      cdf_enddef(fileID);
+    }
 }
 
 static
@@ -2116,7 +2122,7 @@ void cdfDefGrid(stream_t *streamptr, int gridID)
           if ( gridInqXsize(gridID) > 0 ) cdfDefXaxis(streamptr, gridID, ndims);
           if ( gridInqYsize(gridID) > 0 ) cdfDefYaxis(streamptr, gridID, ndims);
 
-          if ( gridtype == GRID_PROJECTION ) cdf_def_mapping(streamptr, gridID);
+          cdf_def_mapping(streamptr, gridID);
         }
 
       if ( gridIsRotated(gridID) ) cdfDefPole(streamptr, gridID);
@@ -2210,6 +2216,7 @@ void cdfDefVars(stream_t *streamptr)
 }
 
 #endif
+
 /*
  * Local Variables:
  * c-file-style: "Java"

@@ -567,8 +567,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
         cdf_put_att_int(fileID, ncvarid, "table", NC_INT, 1, &tablenum);
     }
 
-  char coordinates[CDI_MAX_NAME];
-  coordinates[0] = 0;
+  char coordinates[CDI_MAX_NAME]; coordinates[0] = 0;
 
   if ( zaxis_is_scalar )
     {
@@ -589,33 +588,26 @@ int cdfDefVar(stream_t *streamptr, int varID)
         cdf_put_att_text(fileID, ncvarid, "grid_type", len, gridNamePtr(gridtype));
     }
 
-  if ( gridIsRotated(gridID) )
+  char gmapvarname[CDI_MAX_NAME]; gmapvarname[0] = 0;
+
+  if      ( gridtype == GRID_SINUSOIDAL ) strcpy(gmapvarname, "sinusoidal");
+  else if ( gridtype == GRID_LAEA )       strcpy(gmapvarname, "laea");
+  else if ( gridtype == GRID_LCC2 )       strcpy(gmapvarname, "Lambert_Conformal");
+  else if ( gridtype == GRID_LONLAT && gridIsRotated(gridID) ) strcpy(gmapvarname, "rotated_pole");
+  else
     {
-      char mapping[] = "rotated_pole";
-      cdf_put_att_text(fileID, ncvarid, "grid_mapping", strlen(mapping), mapping);
+      char mapping[CDI_MAX_NAME]; mapping[0] = 0;
+      cdiGridInqKeyStr(gridID, CDI_KEY_MAPPING, CDI_MAX_NAME, mapping);
+      if ( mapping[0] )
+        {
+          cdiGridInqKeyStr(gridID, CDI_KEY_MAPNAME, CDI_MAX_NAME, gmapvarname);
+          if ( !gmapvarname[0] ) strcpy(gmapvarname, "dummy");
+        }
     }
 
-  if ( gridtype == GRID_PROJECTION )
-    {
-      char mapping[] = "dummy";
-      cdf_put_att_text(fileID, ncvarid, "grid_mapping", strlen(mapping), mapping);
-    }
-  else if ( gridtype == GRID_SINUSOIDAL )
-    {
-      char mapping[] = "sinusoidal";
-      cdf_put_att_text(fileID, ncvarid, "grid_mapping", strlen(mapping), mapping);
-    }
-  else if ( gridtype == GRID_LAEA )
-    {
-      char mapping[] = "laea";
-      cdf_put_att_text(fileID, ncvarid, "grid_mapping", strlen(mapping), mapping);
-    }
-  else if ( gridtype == GRID_LCC2 )
-    {
-      char mapping[] = "Lambert_Conformal";
-      cdf_put_att_text(fileID, ncvarid, "grid_mapping", strlen(mapping), mapping);
-    }
-  else if ( gridtype == GRID_TRAJECTORY )
+  if ( gmapvarname[0] ) cdf_put_att_text(fileID, ncvarid, "grid_mapping", strlen(gmapvarname), gmapvarname);
+
+  if ( gridtype == GRID_TRAJECTORY )
     {
       cdf_put_att_text(fileID, ncvarid, "coordinates", 9, "tlon tlat" );
     }
@@ -1286,3 +1278,13 @@ void cdf_write_record(stream_t *streamptr, int memtype, const void *data, int nm
 }
 
 #endif
+
+/*
+ * Local Variables:
+ * c-file-style: "Java"
+ * c-basic-offset: 2
+ * indent-tabs-mode: nil
+ * show-trailing-whitespace: t
+ * require-trailing-newline: t
+ * End:
+ */
