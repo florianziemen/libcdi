@@ -2070,7 +2070,6 @@ void cdfDefMapping(stream_t *streamptr, int gridID)
     }
 }
 
-
 static
 void cdfDefGrid(stream_t *streamptr, int gridID)
 {
@@ -2188,31 +2187,22 @@ void cdfDefVars(stream_t *streamptr)
     Error("Internal problem! vlist undefined for streamptr %p", streamptr);
 
   int ngrids = vlistNgrids(vlistID);
-  int nzaxis = vlistNzaxis(vlistID);
-  /*
-  if ( vlistHasTime(vlistID) ) cdfDefTime(streamptr);
-  */
   if ( ngrids > 0 )
     for ( int index = 0; index < ngrids; index++ )
       {
         int gridID = vlistGrid(vlistID, index);
         cdfDefGrid(streamptr, gridID);
+        int projID = gridInqProj(gridID);
+        //   if ( projID != CDI_UNDEFID ) cdfDefGrid(streamptr, projID);
       }
 
+  int nzaxis = vlistNzaxis(vlistID);
   if ( nzaxis > 0 )
     for ( int index = 0; index < nzaxis; index++ )
       {
         int zaxisID = vlistZaxis(vlistID, index);
         if ( streamptr->zaxisID[index] == UNDEFID ) cdfDefZaxis(streamptr, zaxisID);
       }
-
-  /* define time first!!!
-    int nvars  = vlistNvars(vlistID);
-  for ( int varID = 0; varID < nvars; varID++ )
-    {
-      int ncvarid = cdfDefVar(streamptr, varID);
-    }
-  */
 }
 
 #endif

@@ -283,6 +283,25 @@ void cdfDefLocalAtts(stream_t *streamptr)
 }
 
 static
+void cdf_get_gmapvarname(int gridID, char *gmapvarname)
+{
+  char mapping[CDI_MAX_NAME]; mapping[0] = 0;
+  cdiGridInqKeyStr(gridID, CDI_KEY_MAPPING, CDI_MAX_NAME, mapping);
+
+  if ( !mapping[0] )
+    {
+      int projID = gridInqProj(gridID);
+      if ( projID != CDI_UNDEFID ) cdiGridInqKeyStr(projID, CDI_KEY_MAPPING, CDI_MAX_NAME, mapping);
+    }
+
+  if ( mapping[0] )
+    {
+      cdiGridInqKeyStr(gridID, CDI_KEY_MAPNAME, CDI_MAX_NAME, gmapvarname);
+      if ( !gmapvarname[0] ) strcpy(gmapvarname, "dummy");
+    }
+}
+
+static
 int cdfDefVar(stream_t *streamptr, int varID)
 {
   int ncvarid = -1;
@@ -594,16 +613,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
   else if ( gridtype == GRID_LAEA )       strcpy(gmapvarname, "laea");
   else if ( gridtype == GRID_LCC2 )       strcpy(gmapvarname, "Lambert_Conformal");
   else if ( gridtype == GRID_LONLAT && gridIsRotated(gridID) ) strcpy(gmapvarname, "rotated_pole");
-  else
-    {
-      char mapping[CDI_MAX_NAME]; mapping[0] = 0;
-      cdiGridInqKeyStr(gridID, CDI_KEY_MAPPING, CDI_MAX_NAME, mapping);
-      if ( mapping[0] )
-        {
-          cdiGridInqKeyStr(gridID, CDI_KEY_MAPNAME, CDI_MAX_NAME, gmapvarname);
-          if ( !gmapvarname[0] ) strcpy(gmapvarname, "dummy");
-        }
-    }
+  else  cdf_get_gmapvarname(gridID, gmapvarname);
 
   if ( gmapvarname[0] ) cdf_put_att_text(fileID, ncvarid, "grid_mapping", strlen(gmapvarname), gmapvarname);
 
