@@ -955,7 +955,7 @@ void cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarid, int dty
         }
     }
 
-  if ( swapxy ) // implemented only for cdf_write_var_slice() 
+  if ( swapxy ) // implemented only for cdf_write_var_slice()
     {
       size_t gridsize = xsize*ysize;
       if ( memtype == MEMTYPE_FLOAT )
