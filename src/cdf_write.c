@@ -753,14 +753,6 @@ int cdfDefVar(stream_t *streamptr, int varID)
 	cdf_put_att_int(fileID, ncvarid, "realization", NC_INT, 1, &ensID);
 	cdf_put_att_int(fileID, ncvarid, "ensemble_members", NC_INT, 1, &ensCount);
 	cdf_put_att_int(fileID, ncvarid, "forecast_init_type", NC_INT, 1, &forecast_type);
-
-#ifdef DBG
-	if( DBG )
-	  {
-	    fprintf( stderr, "cdfDefVar :\n EnsID  %d\n Enscount %d\n Forecast init type %d\n",  ensID,
-		     ensCount,  forecast_type );
-	  }
-#endif
     }
 
   /* Attributes */
