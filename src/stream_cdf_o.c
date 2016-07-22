@@ -607,7 +607,7 @@ int checkDimName(int fileID, size_t dimlen, char *dimname)
 }
 
 static
-void checkGridName(char *axisname, int fileID, int vlistID, int gridID, int ngrids, int mode)
+void checkGridName(char *axisname, int fileID)
 {
   int ncdimid;
   char axisname2[CDI_MAX_NAME];
@@ -622,32 +622,11 @@ void checkGridName(char *axisname, int fileID, int vlistID, int gridID, int ngri
       if ( iz ) sprintf(axisname2 + axisnameLen, "_%u", iz+1);
 
       int status = nc_inq_varid(fileID, axisname2, &ncdimid);
+      if ( status != NC_NOERR ) break;
 
-      if ( status != NC_NOERR )
-        {
-          if ( iz )
-            {
-              /* check that the name does not exist for other grids */
-              for ( int index = 0; index < ngrids; index++ )
-                {
-                  int gridID0 = vlistGrid(vlistID, index);
-                  if ( gridID != gridID0 )
-                    {
-                       /* mode X or Y */
-                      const char *(*query)(int)
-                        = mode == 'X' ? gridInqXnamePtr : gridInqYnamePtr;
-                      const char *axisname0 = query(gridID0);
-                      if ( strcmp(axisname0, axisname2) == 0 ) goto nextSuffix;
-                    }
-                }
-            }
-          break;
-        }
-      nextSuffix:
       ++iz;
     }
   while ( iz <= 99 );
-
 
   if ( iz ) sprintf(axisname + axisnameLen, "_%u", iz+1);
 }
@@ -697,26 +676,23 @@ int checkZaxisName(char *axisname, int fileID, int vlistID, int zaxisID, int nza
 }
 
 static void
-cdfDefAxisCommon(stream_t *streamptr, int gridID, int ndims,
+cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridindex, int ndims,
                  const struct cdfDefGridAxisInqs *gridAxisInq,
                  int *axisDimIDs, int dimKey, char axisLetter,
                  void (*finishCyclicBounds)(double *pbounds, size_t dimlen, const double *pvals),
                  int *ncAxisVarIDs, bool lstore)
 {
   int dimID = UNDEFID;
-  int ngrids = 0;
   int ncvarid = UNDEFID, ncbvarid = UNDEFID;
   int nvdimID = UNDEFID;
-  nc_type xtype = gridInqPrec(gridID) == DATATYPE_FLT32 ? NC_FLOAT : NC_DOUBLE;
+  nc_type xtype = (gridInqPrec(gridID) == DATATYPE_FLT32) ? NC_FLOAT : NC_DOUBLE;
 
   int vlistID = streamptr->vlistID;
   int fileID  = streamptr->fileID;
 
-  if ( ndims ) ngrids = vlistNgrids(vlistID);
+  int ngrids = ndims ? vlistNgrids(vlistID) : 0;
 
   size_t dimlen = (size_t)gridAxisInq->axisSize(gridID);
-  int gridindex = -1;
-  if ( lstore ) gridindex = vlistGridIndex(vlistID, gridID);
 
   const char *axisname = gridAxisInq->axisNamePtr(gridID);
   size_t axisnameLen = strlen(axisname);
@@ -757,7 +733,7 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int ndims,
       /* enough to append _ plus up to 100 decimal and trailing \0 */
       char extendedAxisname[axisnameLen + 4 + 1];
       memcpy(extendedAxisname, axisname, axisnameLen + 1);
-      checkGridName(extendedAxisname, fileID, vlistID, gridID, ngrids, axisLetter);
+      checkGridName(extendedAxisname, fileID);
       size_t extendedAxisnameLen = axisnameLen + strlen(extendedAxisname + axisnameLen);
 
       if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
@@ -776,7 +752,7 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int ndims,
         }
 
       bool gen_bounds = false;
-      int grid_is_cyclic = gridIsCircular(gridID);
+      bool grid_is_cyclic = gridIsCircular(gridID) > 0;
       double *pbounds = NULL;
       if ( pvals )
         {
@@ -840,9 +816,9 @@ finishCyclicXBounds(double *pbounds, size_t dimlen, const double *pvals)
 }
 
 static
-void cdfDefXaxis(stream_t *streamptr, int gridID, int ndims, bool lstore)
+void cdfDefXaxis(stream_t *streamptr, int gridID, int gridindex, int ndims, bool lstore)
 {
-  cdfDefAxisCommon(streamptr, gridID, ndims, &gridInqsX, streamptr->xdimID,
+  cdfDefAxisCommon(streamptr, gridID, gridindex, ndims, &gridInqsX, streamptr->xdimID,
                    CDI_KEY_XDIMNAME, 'X', finishCyclicXBounds,
                    streamptr->ncxvarID, lstore);
 }
@@ -855,9 +831,9 @@ finishCyclicYBounds(double *pbounds, size_t dimlen, const double *pvals)
 }
 
 static
-void cdfDefYaxis(stream_t *streamptr, int gridID, int ndims, bool lstore)
+void cdfDefYaxis(stream_t *streamptr, int gridID, int gridindex, int ndims, bool lstore)
 {
-  cdfDefAxisCommon(streamptr, gridID, ndims, &gridInqsY, streamptr->ydimID,
+  cdfDefAxisCommon(streamptr, gridID, gridindex, ndims, &gridInqsY, streamptr->ydimID,
                    CDI_KEY_YDIMNAME, 'Y', finishCyclicYBounds,
                    streamptr->ncyvarID, lstore);
 }
@@ -881,7 +857,7 @@ void cdfDefCurvilinear(stream_t *streamptr, int gridID)
   int ydimID = UNDEFID;
   int ncxvarid = UNDEFID, ncyvarid = UNDEFID;
   int ncbxvarid = UNDEFID, ncbyvarid = UNDEFID, ncavarid = UNDEFID;
-  nc_type xtype = gridInqPrec(gridID) == DATATYPE_FLT32 ? NC_FLOAT : NC_DOUBLE;
+  nc_type xtype = (gridInqPrec(gridID) == DATATYPE_FLT32) ? NC_FLOAT : NC_DOUBLE;
 
   int vlistID = streamptr->vlistID;
   int fileID  = streamptr->fileID;
@@ -959,7 +935,7 @@ void cdfDefCurvilinear(stream_t *streamptr, int gridID)
         {
           char xaxisname[CDI_MAX_NAME];
           gridInqXname(gridID, xaxisname);
-          checkGridName(xaxisname, fileID, vlistID, gridID, ngrids, 'X');
+          checkGridName(xaxisname, fileID);
 
           cdf_def_var(fileID, xaxisname, xtype, 2, dimIDs, &ncxvarid);
           cdfGridCompress(fileID, ncxvarid, (int)(xdimlen*ydimlen), streamptr->filetype, streamptr->comptype);
@@ -985,7 +961,7 @@ void cdfDefCurvilinear(stream_t *streamptr, int gridID)
         {
           char yaxisname[CDI_MAX_NAME];
           gridInqYname(gridID, yaxisname);
-          checkGridName(yaxisname, fileID, vlistID, gridID, ngrids, 'Y');
+          checkGridName(yaxisname, fileID);
 
           cdf_def_var(fileID, yaxisname, xtype, 2, dimIDs, &ncyvarid);
           cdfGridCompress(fileID, ncyvarid, (int)(xdimlen*ydimlen), streamptr->filetype, streamptr->comptype);
@@ -1232,9 +1208,7 @@ void cdfDefUnstructured(stream_t *streamptr, int gridID)
   int ncxvarid = UNDEFID, ncyvarid = UNDEFID;
   int ncbxvarid = UNDEFID, ncbyvarid = UNDEFID, ncavarid = UNDEFID;
   int nvdimID = UNDEFID;
-  nc_type xtype = NC_DOUBLE;
-
-  if ( gridInqPrec(gridID) == DATATYPE_FLT32 ) xtype = NC_FLOAT;
+  nc_type xtype = (gridInqPrec(gridID) == DATATYPE_FLT32) ? NC_FLOAT : NC_DOUBLE;
 
   int vlistID = streamptr->vlistID;
   int fileID  = streamptr->fileID;
@@ -1301,7 +1275,7 @@ void cdfDefUnstructured(stream_t *streamptr, int gridID)
         {
           char xaxisname[CDI_MAX_NAME];
           gridInqXname(gridID, xaxisname);
-          checkGridName(xaxisname, fileID, vlistID, gridID, ngrids, 'X');
+          checkGridName(xaxisname, fileID);
           cdf_def_var(fileID, xaxisname, xtype, 1, &dimID, &ncxvarid);
           cdfGridCompress(fileID, ncxvarid, (int)dimlen, streamptr->filetype, streamptr->comptype);
 
@@ -1324,7 +1298,7 @@ void cdfDefUnstructured(stream_t *streamptr, int gridID)
         {
           char yaxisname[CDI_MAX_NAME];
           gridInqYname(gridID, yaxisname);
-          checkGridName(yaxisname, fileID, vlistID, gridID, ngrids, 'Y');
+          checkGridName(yaxisname, fileID);
           cdf_def_var(fileID, yaxisname, xtype, 1, &dimID, &ncyvarid);
           cdfGridCompress(fileID, ncyvarid, (int)dimlen, streamptr->filetype, streamptr->comptype);
 
@@ -2069,14 +2043,12 @@ void cdfDefMapping(stream_t *streamptr, int gridID)
 }
 
 static
-void cdfDefGrid(stream_t *streamptr, int gridID, bool lstore)
+void cdfDefGrid(stream_t *streamptr, int gridID, int gridindex, bool lstore)
 {
-  if ( lstore )
-    {
-      int vlistID = streamptr->vlistID;
-      int gridindex = vlistGridIndex(vlistID, gridID);
-      if ( streamptr->xdimID[gridindex] != UNDEFID ) return;
-    }
+  if ( gridindex >= MAX_GRIDS_PS )
+    Error("Internal limit exceeded: more than %d grids.", MAX_GRIDS_PS);
+
+  if ( streamptr->xdimID[gridindex] != UNDEFID ) return;
 
   int gridtype = gridInqType(gridID);
   int size     = gridInqSize(gridID);
@@ -2097,20 +2069,20 @@ void cdfDefGrid(stream_t *streamptr, int gridID, bool lstore)
             }
           else
             {
-              int lx = 0, ly = 0;
+              bool lx = false, ly = false;
               if ( gridInqXsize(gridID) > 0 /*&& gridInqXvals(gridID, NULL) > 0*/ )
                 {
-                  cdfDefXaxis(streamptr, gridID, 1, lstore);
-                  lx = 1;
+                  cdfDefXaxis(streamptr, gridID, gridindex, 1, lstore);
+                  lx = true;
                 }
 
               if ( gridInqYsize(gridID) > 0 /*&& gridInqYvals(gridID, NULL) > 0*/ )
                 {
-                  cdfDefYaxis(streamptr, gridID, 1, lstore);
-                  ly = 1;
+                  cdfDefYaxis(streamptr, gridID, gridindex, 1, lstore);
+                  ly = true;
                 }
 
-              if ( lx == 0 && ly == 0 ) cdfDefGdim(streamptr, gridID);
+              if ( !lx && !ly ) cdfDefGdim(streamptr, gridID);
             }
         }
       else
@@ -2119,8 +2091,8 @@ void cdfDefGrid(stream_t *streamptr, int gridID, bool lstore)
           if ( gridtype == GRID_LONLAT && size == 1 && gridInqHasDims(gridID) == FALSE )
             ndims = 0;
 
-          if ( gridInqXsize(gridID) > 0 ) cdfDefXaxis(streamptr, gridID, ndims, lstore);
-          if ( gridInqYsize(gridID) > 0 ) cdfDefYaxis(streamptr, gridID, ndims, lstore);
+          if ( gridInqXsize(gridID) > 0 ) cdfDefXaxis(streamptr, gridID, gridindex, ndims, lstore);
+          if ( gridInqYsize(gridID) > 0 ) cdfDefYaxis(streamptr, gridID, gridindex, ndims, lstore);
 
           cdf_def_mapping(streamptr, gridID);
         }
@@ -2156,8 +2128,8 @@ void cdfDefGrid(stream_t *streamptr, int gridID, bool lstore)
     }
   else if ( gridtype == GRID_SINUSOIDAL || gridtype == GRID_LAEA || gridtype == GRID_LCC2 )
     {
-      cdfDefXaxis(streamptr, gridID, 1, true);
-      cdfDefYaxis(streamptr, gridID, 1, true);
+      cdfDefXaxis(streamptr, gridID, gridindex, 1, true);
+      cdfDefYaxis(streamptr, gridID, gridindex, 1, true);
 
       cdfDefMapping(streamptr, gridID);
     }
@@ -2188,22 +2160,26 @@ void cdfDefVars(stream_t *streamptr)
     Error("Internal problem! vlist undefined for streamptr %p", streamptr);
 
   int ngrids = vlistNgrids(vlistID);
-  if ( ngrids > 0 )
-    for ( int index = 0; index < ngrids; index++ )
-      {
-        int gridID = vlistGrid(vlistID, index);
-        cdfDefGrid(streamptr, gridID, true);
-        int projID = gridInqProj(gridID);
-        if ( projID != CDI_UNDEFID ) cdfDefGrid(streamptr, projID, false);
-      }
+  int index = 0;
+  for ( index = 0; index < ngrids; ++index )
+    {
+      int gridID = vlistGrid(vlistID, index);
+      cdfDefGrid(streamptr, gridID, index, true);
+    }
+  index = ngrids-1;
+  for ( int i = 0; i < ngrids; ++i )
+    {
+      int gridID = vlistGrid(vlistID, i);
+      int projID = gridInqProj(gridID);
+      if ( projID != CDI_UNDEFID ) cdfDefGrid(streamptr, projID, ++index, false);
+    }
 
   int nzaxis = vlistNzaxis(vlistID);
-  if ( nzaxis > 0 )
-    for ( int index = 0; index < nzaxis; index++ )
-      {
-        int zaxisID = vlistZaxis(vlistID, index);
-        if ( streamptr->zaxisID[index] == UNDEFID ) cdfDefZaxis(streamptr, zaxisID);
-      }
+  for ( int index = 0; index < nzaxis; ++index )
+    {
+      int zaxisID = vlistZaxis(vlistID, index);
+      if ( streamptr->zaxisID[index] == UNDEFID ) cdfDefZaxis(streamptr, zaxisID);
+    }
 }
 
 #endif

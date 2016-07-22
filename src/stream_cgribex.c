@@ -55,9 +55,7 @@ int cgribexGetGridType(int *isec2)
 static
 bool cgribexGetIsRotated(int *isec2)
 {
-  bool isRotated = (ISEC2_GridType == GRIB1_GTYPE_LATLON_ROT) ? true : false;
-
-  return isRotated;
+  return (ISEC2_GridType == GRIB1_GTYPE_LATLON_ROT);
 }
 
 static
