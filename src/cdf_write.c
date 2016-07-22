@@ -358,8 +358,8 @@ int cdfDefVar(stream_t *streamptr, int varID)
 
   int zaxisindex = vlistZaxisIndex(vlistID, zaxisID);
   int zid = streamptr->zaxisID[zaxisindex];
-  int zaxis_is_scalar = FALSE;
-  if ( zid == UNDEFID ) zaxis_is_scalar = zaxisInqScalar(zaxisID);
+  bool zaxis_is_scalar = false;
+  if ( zid == UNDEFID ) zaxis_is_scalar = zaxisInqScalar(zaxisID) > 0;
 
   if ( dimorder[0] != 3 ) lchunk = FALSE; /* ZYX and ZXY */
 
