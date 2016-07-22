@@ -306,6 +306,20 @@ void cdf_get_gmapvarname(int gridID, char *gmapvarname)
 }
 
 static
+int nc_grid_index(stream_t *streamptr, int gridID)
+{
+  int index = 0;
+  int vlistID = streamptr->vlistID;
+  int ngrids = vlistNgrids(vlistID);
+  for ( index = 0; index < ngrids; ++index )
+    if ( streamptr->ncgrid[index].gridID == gridID ) break;
+
+  assert(index < ngrids);
+
+  return index;
+}
+
+static
 int cdfDefVar(stream_t *streamptr, int varID)
 {
   int ncvarid = -1;
@@ -347,11 +361,11 @@ int cdfDefVar(stream_t *streamptr, int varID)
   int gridsize  = gridInqSize(gridID);
   if ( gridsize > 1 ) lchunk = TRUE;
   int gridtype  = gridInqType(gridID);
-  int gridindex = vlistGridIndex(vlistID, gridID);
+  int gridindex = nc_grid_index(streamptr, gridID);
   if ( gridtype != GRID_TRAJECTORY )
     {
-      xid = streamptr->xdimID[gridindex];
-      yid = streamptr->ydimID[gridindex];
+      xid = streamptr->ncgrid[gridindex].xdimID;
+      yid = streamptr->ncgrid[gridindex].ydimID;
       if ( xid != UNDEFID ) cdf_inq_dimlen(fileID, xid, &xsize);
       if ( yid != UNDEFID ) cdf_inq_dimlen(fileID, yid, &ysize);
     }
@@ -627,8 +641,8 @@ int cdfDefVar(stream_t *streamptr, int varID)
     }
   else if ( gridtype == GRID_LONLAT && xid == UNDEFID && yid == UNDEFID && gridsize == 1 )
     {
-      int ncxvarID = streamptr->ncxvarID[gridindex];
-      int ncyvarID = streamptr->ncyvarID[gridindex];
+      int ncxvarID = streamptr->ncgrid[gridindex].xvarID;
+      int ncyvarID = streamptr->ncgrid[gridindex].yvarID;
       if ( ncyvarID != CDI_UNDEFID )
         {
           size_t len = strlen(coordinates);
@@ -645,9 +659,9 @@ int cdfDefVar(stream_t *streamptr, int varID)
   else if ( gridtype == GRID_UNSTRUCTURED || gridtype == GRID_CURVILINEAR )
     {
       char cellarea[CDI_MAX_NAME] = "area: ";
-      int ncxvarID = streamptr->ncxvarID[gridindex];
-      int ncyvarID = streamptr->ncyvarID[gridindex];
-      int ncavarID = streamptr->ncavarID[gridindex];
+      int ncxvarID = streamptr->ncgrid[gridindex].xvarID;
+      int ncyvarID = streamptr->ncgrid[gridindex].yvarID;
+      int ncavarID = streamptr->ncgrid[gridindex].avarID;
       if ( ncyvarID != CDI_UNDEFID )
         {
           size_t len = strlen(coordinates);
@@ -793,18 +807,16 @@ void cdfEndDef(stream_t *streamptr)
 static
 void cdfWriteGridTraj(stream_t *streamptr, int gridID)
 {
-  int vlistID = streamptr->vlistID;
-  int fileID  = streamptr->fileID;
-
-  int gridindex = vlistGridIndex(vlistID, gridID);
-  int lonID = streamptr->xdimID[gridindex];
-  int latID = streamptr->ydimID[gridindex];
+  int gridindex = nc_grid_index(streamptr, gridID);
+  int lonID = streamptr->ncgrid[gridindex].xdimID;
+  int latID = streamptr->ncgrid[gridindex].ydimID;
 
   double xlon = gridInqXval(gridID, 0);
   double xlat = gridInqYval(gridID, 0);
   int tsID = streamptr->curTsID;
   size_t index = (size_t)tsID;
 
+  int fileID = streamptr->fileID;
   cdf_put_var1_double(fileID, lonID, &index, &xlon);
   cdf_put_var1_double(fileID, latID, &index, &xlat);
 }
@@ -1023,9 +1035,9 @@ void cdf_write_var(stream_t *streamptr, int varID, int memtype, const void *data
     }
   else
     {
-      int gridindex = vlistGridIndex(vlistID, gridID);
-      xid = streamptr->xdimID[gridindex];
-      yid = streamptr->ydimID[gridindex];
+      int gridindex = nc_grid_index(streamptr, gridID);
+      xid = streamptr->ncgrid[gridindex].xdimID;
+      yid = streamptr->ncgrid[gridindex].ydimID;
     }
 
   int zaxisindex = vlistZaxisIndex(vlistID, zaxisID);
@@ -1121,9 +1133,9 @@ void cdf_write_var_chunk(stream_t *streamptr, int varID, int memtype,
     }
   else
     {
-      int gridindex = vlistGridIndex(vlistID, gridID);
-      xid = streamptr->xdimID[gridindex];
-      yid = streamptr->ydimID[gridindex];
+      int gridindex = nc_grid_index(streamptr, gridID);
+      xid = streamptr->ncgrid[gridindex].xdimID;
+      yid = streamptr->ncgrid[gridindex].ydimID;
     }
 
   int zaxisindex = vlistZaxisIndex(vlistID, zaxisID);
@@ -1219,9 +1231,9 @@ void cdf_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
     }
   else
     {
-      int gridindex = vlistGridIndex(vlistID, gridID);
-      xid = streamptr->xdimID[gridindex];
-      yid = streamptr->ydimID[gridindex];
+      int gridindex = nc_grid_index(streamptr, gridID);
+      xid = streamptr->ncgrid[gridindex].xdimID;
+      yid = streamptr->ncgrid[gridindex].ydimID;
     }
 
   int zaxisindex = vlistZaxisIndex(vlistID, zaxisID);

@@ -882,14 +882,14 @@ void streamDefaultValue ( stream_t * streamptr )
   basetimeInit(&streamptr->basetime);
 
   int i;
-  for ( i = 0; i < MAX_GRIDS_PS; i++ ) streamptr->gridID[i]   = CDI_UNDEFID;
-  for ( i = 0; i < MAX_GRIDS_PS; i++ ) streamptr->xdimID[i]   = CDI_UNDEFID;
-  for ( i = 0; i < MAX_GRIDS_PS; i++ ) streamptr->ydimID[i]   = CDI_UNDEFID;
+  for ( i = 0; i < MAX_GRIDS_PS; i++ ) streamptr->xdimID[i]  = CDI_UNDEFID;
+  for ( i = 0; i < MAX_GRIDS_PS; i++ ) streamptr->ydimID[i]  = CDI_UNDEFID;
   for ( i = 0; i < MAX_ZAXES_PS; i++ ) streamptr->zaxisID[i]  = CDI_UNDEFID;
   for ( i = 0; i < MAX_ZAXES_PS; i++ ) streamptr->nczvarID[i] = CDI_UNDEFID;
-  for ( i = 0; i < MAX_GRIDS_PS; i++ ) streamptr->ncxvarID[i] = CDI_UNDEFID;
-  for ( i = 0; i < MAX_GRIDS_PS; i++ ) streamptr->ncyvarID[i] = CDI_UNDEFID;
-  for ( i = 0; i < MAX_GRIDS_PS; i++ ) streamptr->ncavarID[i] = CDI_UNDEFID;
+
+#ifdef HAVE_LIBNETCDF
+  streamptr->ncgrid            = NULL;
+#endif
 
   streamptr->gribContainers    = NULL;
 }
@@ -967,6 +967,7 @@ void cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDelet
       case FILETYPE_NC4C:
         {
           cdfClose(fileID);
+          if ( streamptr->ncgrid ) { Free(streamptr->ncgrid); streamptr->ncgrid = NULL; }
           break;
         }
 #endif

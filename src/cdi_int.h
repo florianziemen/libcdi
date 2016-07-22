@@ -208,6 +208,17 @@ typedef struct {
 }
 VCT;
 
+#ifdef HAVE_LIBNETCDF
+typedef struct {
+  int gridID;
+  int xdimID;
+  int ydimID;
+  int xvarID;
+  int yvarID;
+  int avarID;
+}
+ncgrid_t;
+#endif
 
 typedef struct {
   int         self;
@@ -233,14 +244,13 @@ typedef struct {
   basetime_t  basetime;
   int         ncmode;
   int         vlistID;
-  int         gridID[MAX_GRIDS_PS];
+#ifdef HAVE_LIBNETCDF
+  ncgrid_t   *ncgrid;
   int         xdimID[MAX_GRIDS_PS];
   int         ydimID[MAX_GRIDS_PS];
+#endif
   int         zaxisID[MAX_ZAXES_PS];	//Warning: synchronous array to vlist_to_pointer(vlistID)->zaxisIDs
   int         nczvarID[MAX_ZAXES_PS];
-  int         ncxvarID[MAX_GRIDS_PS];
-  int         ncyvarID[MAX_GRIDS_PS];
-  int         ncavarID[MAX_GRIDS_PS];
   int         historyID;
   int         globalatts;
   int         localatts;
