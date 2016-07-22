@@ -233,8 +233,9 @@ typedef struct {
   basetime_t  basetime;
   int         ncmode;
   int         vlistID;
-  int         xdimID[MAX_GRIDS_PS];	//Warning: synchronous array to vlist_to_pointer(vlistID)->gridIDs
-  int         ydimID[MAX_GRIDS_PS];	//Warning: synchronous array to vlist_to_pointer(vlistID)->gridIDs
+  int         gridID[MAX_GRIDS_PS];
+  int         xdimID[MAX_GRIDS_PS];
+  int         ydimID[MAX_GRIDS_PS];
   int         zaxisID[MAX_ZAXES_PS];	//Warning: synchronous array to vlist_to_pointer(vlistID)->zaxisIDs
   int         nczvarID[MAX_ZAXES_PS];
   int         ncxvarID[MAX_GRIDS_PS];
