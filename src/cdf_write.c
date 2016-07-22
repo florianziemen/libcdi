@@ -32,7 +32,6 @@ void cdfDefVarDeflate(int ncid, int ncvarid, int deflate_level)
       Error("nc_def_var_deflate failed, status = %d", retval);
     }
 #else
-  
   static int lwarn = TRUE;
   if ( lwarn )
     {
@@ -224,7 +223,7 @@ void cdfDefineAttributes(int cdiID, int varID, int fileID, int ncvarID)
             cdf_put_att_double(fileID, ncvarID, attname, NC_DOUBLE, len, attflt);
         }
     }
-  
+
   Free(attBuf);
 }
 
@@ -285,18 +284,23 @@ void cdfDefLocalAtts(stream_t *streamptr)
 static
 void cdf_get_gmapvarname(int gridID, char *gmapvarname)
 {
+  int pgridID = gridID;
   char mapping[CDI_MAX_NAME]; mapping[0] = 0;
-  cdiGridInqKeyStr(gridID, CDI_KEY_MAPPING, CDI_MAX_NAME, mapping);
+  cdiGridInqKeyStr(pgridID, CDI_KEY_MAPPING, CDI_MAX_NAME, mapping);
 
   if ( !mapping[0] )
     {
       int projID = gridInqProj(gridID);
-      if ( projID != CDI_UNDEFID ) cdiGridInqKeyStr(projID, CDI_KEY_MAPPING, CDI_MAX_NAME, mapping);
+      if ( projID != CDI_UNDEFID )
+        {
+          pgridID = projID;
+          cdiGridInqKeyStr(pgridID, CDI_KEY_MAPPING, CDI_MAX_NAME, mapping);
+        }
     }
 
   if ( mapping[0] )
     {
-      cdiGridInqKeyStr(gridID, CDI_KEY_MAPNAME, CDI_MAX_NAME, gmapvarname);
+      cdiGridInqKeyStr(pgridID, CDI_KEY_MAPNAME, CDI_MAX_NAME, gmapvarname);
       if ( !gmapvarname[0] ) strcpy(gmapvarname, "dummy");
     }
 }
