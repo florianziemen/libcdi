@@ -869,10 +869,6 @@ void streamDefaultValue ( stream_t * streamptr )
   streamptr->vlistID           = CDI_UNDEFID;
   streamptr->globalatts        = 0;
   streamptr->localatts         = 0;
-  streamptr->vct.ilev          = 0;
-  streamptr->vct.mlev          = 0;
-  streamptr->vct.ilevID        = CDI_UNDEFID;
-  streamptr->vct.mlevID        = CDI_UNDEFID;
   streamptr->unreduced         = cdiDataUnreduced;
   streamptr->sortname          = cdiSortName;
   streamptr->have_missval      = cdiHaveMissval;
@@ -881,14 +877,19 @@ void streamDefaultValue ( stream_t * streamptr )
 
   basetimeInit(&streamptr->basetime);
 
+#ifdef HAVE_LIBNETCDF
   int i;
   for ( i = 0; i < MAX_GRIDS_PS; i++ ) streamptr->xdimID[i]  = CDI_UNDEFID;
   for ( i = 0; i < MAX_GRIDS_PS; i++ ) streamptr->ydimID[i]  = CDI_UNDEFID;
   for ( i = 0; i < MAX_ZAXES_PS; i++ ) streamptr->zaxisID[i]  = CDI_UNDEFID;
   for ( i = 0; i < MAX_ZAXES_PS; i++ ) streamptr->nczvarID[i] = CDI_UNDEFID;
 
-#ifdef HAVE_LIBNETCDF
   streamptr->ncgrid            = NULL;
+
+  streamptr->vct.ilev          = 0;
+  streamptr->vct.mlev          = 0;
+  streamptr->vct.ilevID        = CDI_UNDEFID;
+  streamptr->vct.mlevID        = CDI_UNDEFID;
 #endif
 
   streamptr->gribContainers    = NULL;

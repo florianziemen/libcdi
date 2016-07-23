@@ -248,13 +248,13 @@ typedef struct {
   ncgrid_t   *ncgrid;
   int         xdimID[MAX_GRIDS_PS];
   int         ydimID[MAX_GRIDS_PS];
-#endif
   int         zaxisID[MAX_ZAXES_PS];	//Warning: synchronous array to vlist_to_pointer(vlistID)->zaxisIDs
   int         nczvarID[MAX_ZAXES_PS];
+  VCT         vct;
+#endif
   int         historyID;
   int         globalatts;
   int         localatts;
-  VCT         vct;
   int         unreduced;
   int         sortname;
   int         have_missval;
