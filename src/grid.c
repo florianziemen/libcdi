@@ -1776,6 +1776,41 @@ double gridInqYinc(int gridID)
   return yinc;
 }
 
+
+void gridInqProjParamRLL(int gridID, double *xpole, double *ypole, double *angle)
+{
+  *xpole = 0; *ypole = 0; *angle = 0;
+
+  char mapping[CDI_MAX_NAME]; mapping[0] = 0;
+  cdiGridInqKeyStr(gridID, CDI_KEY_MAPPING, CDI_MAX_NAME, mapping);
+  if ( mapping[0] && strcmp(mapping, "rotated_latitude_longitude") == 0 )
+    {
+      int atttype, attlen;
+      char attname[CDI_MAX_NAME+1];
+
+      int natts;
+      vlistInqNatts(gridID, CDI_GLOBAL, &natts);
+
+      for ( int iatt = 0; iatt < natts; ++iatt )
+        {
+          vlistInqAtt(gridID, CDI_GLOBAL, iatt, attname, &atttype, &attlen);
+
+          if ( attlen != 1 ) continue;
+
+          if ( atttype == DATATYPE_FLT32 || atttype == DATATYPE_FLT64 )
+            {
+              double attflt;
+              vlistInqAttFlt(gridID, CDI_GLOBAL, attname, attlen, &attflt);
+              if      ( strcmp(attname, "grid_north_pole_longitude") == 0 ) *xpole = attflt;
+              else if ( strcmp(attname, "grid_north_pole_latitude")  == 0 ) *ypole = attflt;
+              else if ( strcmp(attname, "north_pole_grid_longitude") == 0 ) *angle = attflt;
+            }
+        }
+    }
+  else
+    Warning("rotated_latitude_longitude mapping parameter missing!");
+}
+
 /*
 @Function
 @Title

@@ -1612,8 +1612,9 @@ void cgribexDefTime(int *isec1, int vdate, int vtime, int tsteptype, int numavg,
 static
 void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridID)
 {
-  bool lcurvi = false;
   static bool lwarning = true;
+  bool lrotatedll = false;
+  bool lcurvi = false;
 
   memset(isec2, 0, 16*sizeof(int));
 
@@ -1660,6 +1661,17 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
       lcurvi = true;
     }
 
+  if ( gridtype == GRID_PROJECTION )
+    {
+      char mapping[CDI_MAX_NAME]; mapping[0] = 0;
+      cdiGridInqKeyStr(gridID, CDI_KEY_MAPPING, CDI_MAX_NAME, mapping);
+      if ( mapping[0] && strcmp(mapping, "rotated_latitude_longitude") == 0 )
+        {
+          gridtype = GRID_LONLAT;
+          lrotatedll = true;
+        }
+    }
+
   ISEC2_Reduced  = FALSE;
   ISEC2_ScanFlag = 0;
 
@@ -1676,7 +1688,7 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
 
 	if ( gridtype == GRID_GAUSSIAN || gridtype == GRID_GAUSSIAN_REDUCED )
           ISEC2_GridType = GRIB1_GTYPE_GAUSSIAN;
-        else if ( gridtype == GRID_LONLAT && isRotated )
+        else if ( gridtype == GRID_LONLAT && (isRotated || lrotatedll) )
 	  ISEC2_GridType = GRIB1_GTYPE_LATLON_ROT;
 	else
 	  ISEC2_GridType = GRIB1_GTYPE_LATLON;
@@ -1752,14 +1764,23 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
 
         ISEC2_ResFlag = ( ISEC2_LatIncr == 0 || ISEC2_LonIncr == 0 ) ? 0 : 128;
 
-	if ( isRotated )
-	  {
-	    ISEC2_LatSP = - (int)lround(gridInqYpole(gridID) * 1000);
-	    ISEC2_LonSP =   (int)lround((gridInqXpole(gridID) + 180) * 1000);
-            double angle = gridInqAngle(gridID);
+	if ( isRotated || lrotatedll )
+          {
+            double xpole = 0, ypole = 0, angle = 0;
+            if ( isRotated )
+              {
+                xpole = gridInqXpole(gridID);
+                ypole = gridInqYpole(gridID);
+                angle = gridInqAngle(gridID);
+              }
+            else
+              gridInqProjParamRLL(gridID, &xpole, &ypole, &angle);
+
+	    ISEC2_LatSP = - (int)lround(ypole * 1000);
+	    ISEC2_LonSP =   (int)lround((xpole + 180) * 1000);
             if ( fabs(angle) > 0 ) angle = -angle;
             FSEC2_RotAngle = angle;
-	  }
+          }
 
 	/* East -> West */
 	if ( ISEC2_LastLon < ISEC2_FirstLon ) ISEC2_ScanFlag += 128;

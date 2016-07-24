@@ -175,7 +175,7 @@ void cdfDefineAttributes(int cdiID, int varID, int fileID, int ncvarID)
   int natts;
   vlistInqNatts(cdiID, varID, &natts);
 
-  for ( int iatt = 0; iatt < natts; iatt++ )
+  for ( int iatt = 0; iatt < natts; ++iatt )
     {
       vlistInqAtt(cdiID, varID, iatt, attname, &atttype, &attlen);
 
