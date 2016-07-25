@@ -2698,11 +2698,8 @@ void gridComplete(grid_t *grid)
             {
               int number = grid->number;
               int position = grid->position >= 0 ? grid->position : 0;
-              if ( number > 0 )
-                {
-                  gridDefNumber(gridID, number);
-                  gridDefPosition(gridID, position);
-                }
+              if ( number > 0 ) gridDefNumber(gridID, number);
+              gridDefPosition(gridID, position);
             }
             break;
 	  }
@@ -2721,8 +2718,7 @@ void gridComplete(grid_t *grid)
 
         if ( grid->ydef == 2 )
 	  {
-	    double *yvals
-              = (double *) Malloc((size_t)grid->y.size * sizeof (double));
+	    double *yvals = (double *) Malloc((size_t)grid->y.size * sizeof (double));
 	    gridGenYvals(gridtype, grid->y.size, grid->yfirst, grid->ylast, grid->yinc, yvals);
             grid->y.vals = yvals;
 	    /*
