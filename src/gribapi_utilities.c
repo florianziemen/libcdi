@@ -489,48 +489,48 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
         grid->size  = (int)numberOfPoints;
         grid->x.size = (int)nlon;
         grid->y.size = (int)nlat;
-        grid->xinc  = 0;
-        grid->yinc  = 0;
-        grid->xdef  = 0;
-        FAIL_ON_GRIB_ERROR(grib_get_double, gh, "longitudeOfFirstGridPointInDegrees", &grid->xfirst);
-        FAIL_ON_GRIB_ERROR(grib_get_double, gh, "longitudeOfLastGridPointInDegrees",  &grid->xlast);
-        FAIL_ON_GRIB_ERROR(grib_get_double, gh, "latitudeOfFirstGridPointInDegrees",  &grid->yfirst);
-        FAIL_ON_GRIB_ERROR(grib_get_double, gh, "latitudeOfLastGridPointInDegrees",   &grid->ylast);
+        grid->x.inc  = 0;
+        grid->y.inc  = 0;
+        grid->x.flag = 0;
+        FAIL_ON_GRIB_ERROR(grib_get_double, gh, "longitudeOfFirstGridPointInDegrees", &grid->x.first);
+        FAIL_ON_GRIB_ERROR(grib_get_double, gh, "longitudeOfLastGridPointInDegrees",  &grid->x.last);
+        FAIL_ON_GRIB_ERROR(grib_get_double, gh, "latitudeOfFirstGridPointInDegrees",  &grid->y.first);
+        FAIL_ON_GRIB_ERROR(grib_get_double, gh, "latitudeOfLastGridPointInDegrees",   &grid->y.last);
         if ( nlon > 1 )
-          FAIL_ON_GRIB_ERROR(grib_get_double, gh, "iDirectionIncrementInDegrees", &grid->xinc);
+          FAIL_ON_GRIB_ERROR(grib_get_double, gh, "iDirectionIncrementInDegrees", &grid->x.inc);
         if ( gridtype == GRID_LONLAT && nlat > 1 )
-          FAIL_ON_GRIB_ERROR(grib_get_double, gh, "jDirectionIncrementInDegrees", &grid->yinc);
+          FAIL_ON_GRIB_ERROR(grib_get_double, gh, "jDirectionIncrementInDegrees", &grid->y.inc);
 
-        if ( grid->xinc < -999 || grid->xinc > 999 ) grid->xinc = 0;
-        if ( grid->yinc < -999 || grid->yinc > 999 ) grid->yinc = 0;
+        if ( grid->x.inc < -999 || grid->x.inc > 999 ) grid->x.inc = 0;
+        if ( grid->y.inc < -999 || grid->y.inc > 999 ) grid->y.inc = 0;
 
-        if ( grid->yinc > 0 && grid->yfirst > grid->ylast ) grid->yinc = -grid->yinc;
+        if ( grid->y.inc > 0 && grid->y.first > grid->y.last ) grid->y.inc = -grid->y.inc;
 
-        /* if ( IS_NOT_EQUAL(grid->xfirst, 0) || IS_NOT_EQUAL(grid->xlast, 0) ) */
+        /* if ( IS_NOT_EQUAL(grid->x.first, 0) || IS_NOT_EQUAL(grid->x.last, 0) ) */
           {
             if ( grid->x.size > 1 )
               {
-                if ( (grid->xfirst >= grid->xlast) && (grid->xfirst >= 180) ) grid->xfirst -= 360;
+                if ( (grid->x.first >= grid->x.last) && (grid->x.first >= 180) ) grid->x.first -= 360;
 
                 if ( editionNumber <= 1 )
                   {
                     /* correct xinc if necessary */
-                    if ( IS_EQUAL(grid->xfirst, 0) && grid->xlast > 354 )
+                    if ( IS_EQUAL(grid->x.first, 0) && grid->x.last > 354 )
                       {
                         double xinc = 360. / grid->x.size;
 
-                        if ( fabs(grid->xinc-xinc) > 0.0 )
+                        if ( fabs(grid->x.inc-xinc) > 0.0 )
                           {
-                            grid->xinc = xinc;
-                            if ( CDI_Debug ) Message("set xinc to %g", grid->xinc);
+                            grid->x.inc = xinc;
+                            if ( CDI_Debug ) Message("set xinc to %g", grid->x.inc);
                           }
                       }
                   }
               }
-            grid->xdef = 2;
+            grid->x.flag = 2;
           }
-        grid->ydef = 0;
-        /* if ( IS_NOT_EQUAL(grid->yfirst, 0) || IS_NOT_EQUAL(grid->ylast, 0) ) */
+        grid->y.flag = 0;
+        /* if ( IS_NOT_EQUAL(grid->y.first, 0) || IS_NOT_EQUAL(grid->y.last, 0) ) */
           {
             if ( grid->y.size > 1 )
               {
@@ -538,7 +538,7 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
                   {
                   }
               }
-            grid->ydef = 2;
+            grid->y.flag = 2;
           }
         break;
       }
@@ -566,42 +566,42 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
         Free(pl);
 
         grid->y.size  = nlat;
-        grid->xinc   = 0;
-        grid->yinc   = 0;
-        grid->xdef   = 0;
-        FAIL_ON_GRIB_ERROR(grib_get_double, gh, "longitudeOfFirstGridPointInDegrees", &grid->xfirst);
-        FAIL_ON_GRIB_ERROR(grib_get_double, gh, "longitudeOfLastGridPointInDegrees",  &grid->xlast);
-        FAIL_ON_GRIB_ERROR(grib_get_double, gh, "latitudeOfFirstGridPointInDegrees",  &grid->yfirst);
-        FAIL_ON_GRIB_ERROR(grib_get_double, gh, "latitudeOfLastGridPointInDegrees",   &grid->ylast);
+        grid->x.inc   = 0;
+        grid->y.inc   = 0;
+        grid->x.flag  = 0;
+        FAIL_ON_GRIB_ERROR(grib_get_double, gh, "longitudeOfFirstGridPointInDegrees", &grid->x.first);
+        FAIL_ON_GRIB_ERROR(grib_get_double, gh, "longitudeOfLastGridPointInDegrees",  &grid->x.last);
+        FAIL_ON_GRIB_ERROR(grib_get_double, gh, "latitudeOfFirstGridPointInDegrees",  &grid->y.first);
+        FAIL_ON_GRIB_ERROR(grib_get_double, gh, "latitudeOfLastGridPointInDegrees",   &grid->y.last);
 
-        // FAIL_ON_GRIB_ERROR(grib_get_double, gh, "iDirectionIncrementInDegrees", &grid->xinc);
-        // if ( IS_EQUAL(grid->xinc, GRIB_MISSING_DOUBLE) ) grid->xinc = 0;
+        // FAIL_ON_GRIB_ERROR(grib_get_double, gh, "iDirectionIncrementInDegrees", &grid->x.inc);
+        // if ( IS_EQUAL(grid->x.inc, GRIB_MISSING_DOUBLE) ) grid->x.inc = 0;
 
-        /* if ( IS_NOT_EQUAL(grid->xfirst, 0) || IS_NOT_EQUAL(grid->xlast, 0) ) */
+        /* if ( IS_NOT_EQUAL(grid->x.first, 0) || IS_NOT_EQUAL(grid->x.last, 0) ) */
           {
             if ( grid->x.size > 1 )
               {
-                if ( (grid->xfirst > grid->xlast) && (grid->xfirst >= 180) ) grid->xfirst -= 360;
+                if ( (grid->x.first > grid->x.last) && (grid->x.first >= 180) ) grid->x.first -= 360;
 
                 if ( editionNumber <= 1 )
                   {
                     /* correct xinc if necessary */
-                    if ( IS_EQUAL(grid->xfirst, 0) && grid->xlast > 354 )
+                    if ( IS_EQUAL(grid->x.first, 0) && grid->x.last > 354 )
                       {
                         double xinc = 360. / grid->x.size;
 
-                        if ( fabs(grid->xinc-xinc) > 0.0 )
+                        if ( fabs(grid->x.inc-xinc) > 0.0 )
                           {
-                            grid->xinc = xinc;
-                            if ( CDI_Debug ) Message("set xinc to %g", grid->xinc);
+                            grid->x.inc = xinc;
+                            if ( CDI_Debug ) Message("set xinc to %g", grid->x.inc);
                           }
                       }
                   }
               }
-            grid->xdef = 2;
+            grid->x.flag = 2;
           }
-        grid->ydef  = 0;
-        /* if ( IS_NOT_EQUAL(grid->yfirst, 0) || IS_NOT_EQUAL(grid->ylast, 0) ) */
+        grid->y.flag = 0;
+        /* if ( IS_NOT_EQUAL(grid->y.first, 0) || IS_NOT_EQUAL(grid->y.last, 0) ) */
           {
             if ( grid->y.size > 1 )
               {
@@ -609,7 +609,7 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
                   {
                   }
               }
-            grid->ydef = 2;
+            grid->y.flag = 2;
           }
         break;
       }
@@ -646,8 +646,8 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
             grid->lcc.scanflag  = (int) lpar;
           }
 
-        grid->xdef   = 0;
-        grid->ydef   = 0;
+        grid->x.flag = 0;
+        grid->y.flag = 0;
 
         break;
       }

@@ -52,6 +52,8 @@ struct gridaxis_t {
   char    dimname[CDI_MAX_NAME];
   const char *stdname;
   int     size;                  // number of values
+  short   flag;                  // 0: undefined 1:vals 2:first+inc
+  double  first, last, inc;
   double *vals;
   double *bounds;
 };
@@ -106,9 +108,6 @@ struct grid_t {
   mask_t *mask;
   mask_t *mask_gme;
   double *area;
-  double  xfirst, yfirst;
-  double  xlast, ylast;
-  double  xinc, yinc;
   struct grid_lcc_t  lcc;
   struct grid_lcc2_t lcc2;
   struct grid_laea_t laea;
@@ -116,8 +115,6 @@ struct grid_t {
   struct grid_rll_t  rll;
   short   isCyclic;               /* TRUE for global cyclic grids   */
   short   isRotated;              /* TRUE for rotated grids         */
-  short   xdef;                   /* 0: undefined 1:xvals 2:x0+xinc */
-  short   ydef;                   /* 0: undefined 1:yvals 2:y0+yinc */
   int     number, position;       /* parameter for GRID_REFERENCE   */
   int     trunc;                  /* parameter for GRID_SPECTEAL    */
   int     nvertex;

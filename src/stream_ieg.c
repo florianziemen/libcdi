@@ -648,9 +648,9 @@ void iegAddRecord(stream_t *streamptr, int param, int *pdb, int *gdb, double *vc
   int ysize = IEG_G_NumLat(gdb);
   grid->x.size = xsize;
   grid->y.size = ysize;
-  grid->xinc  = 0;
-  grid->yinc  = 0;
-  grid->xdef  = 0;
+  grid->x.inc  = 0;
+  grid->y.inc  = 0;
+  grid->x.flag = 0;
 
   int iresfac = IEG_G_ResFac(gdb);
   if ( iresfac == 0 ) iresfac = 1000;
@@ -661,49 +661,49 @@ void iegAddRecord(stream_t *streamptr, int param, int *pdb, int *gdb, double *vc
     if ( xsize > 1 )
       {
 	if ( IEG_G_ResFlag(gdb) && IEG_G_LonIncr(gdb) > 0 )
-	  grid->xinc = IEG_G_LonIncr(gdb) * resfac;
+	  grid->x.inc = IEG_G_LonIncr(gdb) * resfac;
 	else
-	  grid->xinc = (IEG_G_LastLon(gdb) - IEG_G_FirstLon(gdb)) * resfac / (xsize - 1);
+	  grid->x.inc = (IEG_G_LastLon(gdb) - IEG_G_FirstLon(gdb)) * resfac / (xsize - 1);
 
 	/* correct xinc if necessary */
 	if ( IEG_G_FirstLon(gdb) == 0 && IEG_G_LastLon(gdb) > 354000 )
 	  {
 	    double xinc = 360. / xsize;
-            /* FIXME: why not use grid->xinc != xinc as condition? */
-	    if ( fabs(grid->xinc-xinc) > 0.0 )
+            /* FIXME: why not use grid->x.inc != xinc as condition? */
+	    if ( fabs(grid->x.inc-xinc) > 0.0 )
 	      {
-		grid->xinc = xinc;
-		if ( CDI_Debug ) Message("set xinc to %g", grid->xinc);
+		grid->x.inc = xinc;
+		if ( CDI_Debug ) Message("set xinc to %g", grid->x.inc);
 	      }
 	  }
       }
-    grid->xfirst = IEG_G_FirstLon(gdb) * resfac;
-    grid->xlast  = IEG_G_LastLon(gdb)  * resfac;
-    grid->xdef   = 2;
+    grid->x.first = IEG_G_FirstLon(gdb) * resfac;
+    grid->x.last  = IEG_G_LastLon(gdb)  * resfac;
+    grid->x.flag  = 2;
   }
-  grid->ydef  = 0;
+  grid->y.flag = 0;
   /* if ( IEG_G_FirstLat != 0 || IEG_G_LastLat != 0 ) */
   {
     if ( ysize > 1 )
       {
 	if ( IEG_G_ResFlag(gdb) && IEG_G_LatIncr(gdb) > 0 )
-	  grid->yinc = IEG_G_LatIncr(gdb) * resfac;
+	  grid->y.inc = IEG_G_LatIncr(gdb) * resfac;
 	else
-	  grid->yinc = (IEG_G_LastLat(gdb) - IEG_G_FirstLat(gdb)) * resfac / (ysize - 1);
+	  grid->y.inc = (IEG_G_LastLat(gdb) - IEG_G_FirstLat(gdb)) * resfac / (ysize - 1);
       }
-    grid->yfirst = IEG_G_FirstLat(gdb) * resfac;
-    grid->ylast  = IEG_G_LastLat(gdb)  * resfac;
-    grid->ydef   = 2;
+    grid->y.first = IEG_G_FirstLat(gdb) * resfac;
+    grid->y.last  = IEG_G_LastLat(gdb)  * resfac;
+    grid->y.flag  = 2;
   }
   /*
-  grid->xfirst= IEG_G_FirstLon(gdb) * resfac;
-  grid->xlast = IEG_G_LastLon(gdb) * resfac;
-  grid->xinc  = IEG_G_LonIncr(gdb) * resfac;
-  grid->xdef  = 2;
-  grid->yfirst= IEG_G_FirstLat(gdb) * resfac;
-  grid->ylast = IEG_G_LastLat(gdb) * resfac;
-  grid->yinc  = IEG_G_LatIncr(gdb) * resfac;
-  grid->ydef  = 2;
+  grid->x.first = IEG_G_FirstLon(gdb) * resfac;
+  grid->x.last  = IEG_G_LastLon(gdb) * resfac;
+  grid->x.inc   = IEG_G_LonIncr(gdb) * resfac;
+  grid->x.flag  = 2;
+  grid->y.first = IEG_G_FirstLat(gdb) * resfac;
+  grid->y.last  = IEG_G_LastLat(gdb) * resfac;
+  grid->y.inc   = IEG_G_LatIncr(gdb) * resfac;
+  grid->y.flag  = 2;
   */
 
   grid->isRotated = FALSE;

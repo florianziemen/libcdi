@@ -2291,7 +2291,7 @@ bool cdf_read_coordinates(struct cdfLazyGrid *restrict lazyGrid, ncvar_t *ncvar,
         grid->y.size = (int)ysize;
         if ( xvarid != UNDEFID )
           {
-            grid->xdef = 1;
+            grid->x.flag = 1;
             int bvarid = ncvars[xvarid].bounds;
             if ( bvarid != UNDEFID )
               {
@@ -2306,7 +2306,7 @@ bool cdf_read_coordinates(struct cdfLazyGrid *restrict lazyGrid, ncvar_t *ncvar,
           }
         if ( yvarid != UNDEFID )
           {
-            grid->ydef = 1;
+            grid->y.flag = 1;
             int bvarid = ncvars[yvarid].bounds;
             if ( bvarid != UNDEFID )
               {
