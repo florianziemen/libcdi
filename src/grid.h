@@ -152,9 +152,6 @@ const double *gridInqXboundsPtr(int gridID);
 const double *gridInqYboundsPtr(int gridID);
 const double *gridInqAreaPtr(int gridID);
 
-const char *gridInqXnamePtr(int gridID);
-const char *gridInqYnamePtr(int gridID);
-
 const char *gridInqReferencePtr(int gridID);
 
 int gridGenerate(const grid_t *grid);

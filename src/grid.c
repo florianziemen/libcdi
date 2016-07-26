@@ -849,12 +849,6 @@ void gridInqXname(int gridID, char *xname)
   (void)cdiGridInqKeyStr(gridID, CDI_KEY_XNAME, CDI_MAX_NAME, xname);
 }
 
-const char *gridInqXnamePtr(int gridID)
-{
-  grid_t *gridptr = gridID2Ptr(gridID);
-  return gridptr->x.name;
-}
-
 /*
 @Function  gridInqXlongname
 @Title     Get the longname of a X-axis
@@ -935,12 +929,6 @@ The function @func{gridInqYname} returns the name of a Y-axis.
 void gridInqYname(int gridID, char *yname)
 {
   (void)cdiGridInqKeyStr(gridID, CDI_KEY_YNAME, CDI_MAX_NAME, yname);
-}
-
-const char *gridInqYnamePtr(int gridID)
-{
-  grid_t *gridptr = gridID2Ptr(gridID);
-  return gridptr->y.name;
 }
 
 /*

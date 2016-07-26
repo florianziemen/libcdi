@@ -463,7 +463,6 @@ void cdfDefFC(stream_t *streamptr, int gridID, int gridindex)
 static const struct cdfDefGridAxisInqs {
   int (*axisSize)(int gridID);
   void (*axisName)(int gridID, char *dimname);
-  const char *(*axisNamePtr)(int gridID);
   void (*axisStdname)(int gridID, char *dimstdname);
   void (*axisLongname)(int gridID, char *dimlongname);
   void (*axisUnits)(int gridID, char *dimunits);
@@ -473,7 +472,6 @@ static const struct cdfDefGridAxisInqs {
 } gridInqsX = {
   .axisSize = gridInqXsize,
   .axisName = gridInqXname,
-  .axisNamePtr = gridInqXnamePtr,
   .axisStdname = gridInqXstdname,
   .axisLongname = gridInqXlongname,
   .axisUnits = gridInqXunits,
@@ -483,7 +481,6 @@ static const struct cdfDefGridAxisInqs {
 }, gridInqsY = {
   .axisSize = gridInqYsize,
   .axisName = gridInqYname,
-  .axisNamePtr = gridInqYnamePtr,
   .axisStdname = gridInqYstdname,
   .axisLongname = gridInqYlongname,
   .axisUnits = gridInqYunits,
@@ -544,7 +541,8 @@ cdfDefTrajLatLon(stream_t *streamptr, int gridID, int gridindex,
       int fileID  = streamptr->fileID;
       if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
-      const char *axisname = inqs->axisNamePtr(gridID);
+      char axisname[CDI_MAX_NAME];
+      inqs->axisName(gridID, axisname);
       cdf_def_var(fileID, axisname, xtype, 1, &dimNcID, &ncvarid);
       cdfPutGridStdAtts(fileID, ncvarid, gridID, inqs);
       cdf_enddef(fileID);
@@ -688,11 +686,6 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridindex, int ndims,
   nc_type xtype = (gridInqPrec(gridID) == DATATYPE_FLT32) ? NC_FLOAT : NC_DOUBLE;
   ncgrid_t *ncgrid = streamptr->ncgrid;
 
-  const char *axisname = gridAxisInq->axisNamePtr(gridID);
-  size_t axisnameLen = strlen(axisname);
-
-  if ( axisname[0] == 0 ) Error("axis name undefined!");
-
   for ( int index = 0; index < gridindex; ++index )
     {
       int gridID0 = ncgrid[index].gridID;
@@ -724,6 +717,11 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridindex, int ndims,
   if ( dimID == UNDEFID )
     {
       const double *pvals = gridAxisInq->axisValsPtr(gridID);
+
+      char axisname[CDI_MAX_NAME];
+      gridAxisInq->axisName(gridID, axisname);
+      if ( axisname[0] == 0 ) Error("axis name undefined!");
+      size_t axisnameLen = strlen(axisname);
 
       /* enough to append _ plus up to 100 decimal and trailing \0 */
       char extendedAxisname[axisnameLen + 4 + 1];
