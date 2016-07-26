@@ -2522,15 +2522,15 @@ void cdf_set_proj_atts(int ncid, int gmapvarid, grid_t *grid)
         }
       else if ( strcmp(attname, "grid_north_pole_latitude") == 0 )
         {
-          cdfGetAttDouble(ncid, gmapvarid, attname, 1, &grid->ypole);
+          cdfGetAttDouble(ncid, gmapvarid, attname, 1, &grid->rll.ypole);
         }
       else if ( strcmp(attname, "grid_north_pole_longitude") == 0 )
         {
-          cdfGetAttDouble(ncid, gmapvarid, attname, 1, &grid->xpole);
+          cdfGetAttDouble(ncid, gmapvarid, attname, 1, &grid->rll.xpole);
         }
       else if ( strcmp(attname, "north_pole_grid_longitude") == 0 )
         {
-          cdfGetAttDouble(ncid, gmapvarid, attname, 1, &grid->angle);
+          cdfGetAttDouble(ncid, gmapvarid, attname, 1, &grid->rll.angle);
         }
     }
 }

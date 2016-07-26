@@ -93,6 +93,11 @@ struct grid_gme_t {
   int     nd, ni, ni2, ni3;       /* parameter for GRID_GME         */
 };
 
+// Rotated LonLat
+struct grid_rll_t {
+  double  xpole, ypole, angle;    /* rotated north pole             */
+};
+
 struct grid_t {
   int     self;
   int     type;                   /* grid type                      */
@@ -108,7 +113,7 @@ struct grid_t {
   struct grid_lcc2_t lcc2;
   struct grid_laea_t laea;
   struct grid_gme_t  gme;
-  double  xpole, ypole, angle;    /* rotated north pole             */
+  struct grid_rll_t  rll;
   short   isCyclic;               /* TRUE for global cyclic grids   */
   short   isRotated;              /* TRUE for rotated grids         */
   short   xdef;                   /* 0: undefined 1:xvals 2:x0+xinc */
@@ -136,8 +141,7 @@ struct grid_t {
 
 
 void grid_init(grid_t *gridptr);
-void
-cdiGridTypeInit(grid_t *gridptr, int gridtype, int size);
+void cdiGridTypeInit(grid_t *gridptr, int gridtype, int size);
 void grid_free(grid_t *gridptr);
 grid_t *gridID2Ptr(int gridID);
 extern const struct gridVirtTable cdiGridVtable;

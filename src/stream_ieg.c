@@ -710,9 +710,9 @@ void iegAddRecord(stream_t *streamptr, int param, int *pdb, int *gdb, double *vc
   if ( IEG_G_GridType(gdb) == 10 )
     {
       grid->isRotated = TRUE;
-      grid->ypole     = - IEG_G_LatSP(gdb) * resfac;
-      grid->xpole     =   IEG_G_LonSP(gdb) * resfac - 180;
-      grid->angle     = 0;
+      grid->rll.ypole = - IEG_G_LatSP(gdb) * resfac;
+      grid->rll.xpole =   IEG_G_LonSP(gdb) * resfac - 180;
+      grid->rll.angle = 0;
     }
 
   struct addIfNewRes gridAdded = cdiVlistAddGridIfNew(vlistID, grid, 0);

@@ -753,14 +753,18 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
   grid->isRotated = FALSE;
   if ( gribapiGetIsRotated(gh) )
     {
+      double xpole, ypole, angle;
       grid->isRotated = TRUE;
-      FAIL_ON_GRIB_ERROR(grib_get_double, gh, "latitudeOfSouthernPoleInDegrees",  &grid->ypole);
-      FAIL_ON_GRIB_ERROR(grib_get_double, gh, "longitudeOfSouthernPoleInDegrees", &grid->xpole);
-      FAIL_ON_GRIB_ERROR(grib_get_double, gh, "angleOfRotation", &grid->angle);
+      FAIL_ON_GRIB_ERROR(grib_get_double, gh, "latitudeOfSouthernPoleInDegrees",  &ypole);
+      FAIL_ON_GRIB_ERROR(grib_get_double, gh, "longitudeOfSouthernPoleInDegrees", &xpole);
+      FAIL_ON_GRIB_ERROR(grib_get_double, gh, "angleOfRotation", &angle);
       /* change from south to north pole */
-      if ( fabs(grid->ypole) > 0 ) grid->ypole = -grid->ypole;
-      grid->xpole =  grid->xpole - 180;
-      if ( fabs(grid->angle) > 0 ) grid->angle = -grid->angle;
+      if ( fabs(ypole) > 0 ) ypole = -ypole;
+      xpole =  xpole - 180;
+      if ( fabs(angle) > 0 ) angle = -angle;
+      grid->rll.xpole = xpole;
+      grid->rll.ypole = ypole;
+      grid->rll.angle = angle;
     }
 
   grid->type  = gridtype;
