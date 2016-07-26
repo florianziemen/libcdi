@@ -2056,6 +2056,7 @@ void cdfDefGrid(stream_t *streamptr, int gridID, int gridindex)
           if ( size == 1 && gridInqXsize(gridID) == 0 && gridInqYsize(gridID) == 0 )
             {
               /* no grid information */
+              streamptr->ncgrid[gridindex].gridID = gridID;
             }
           else
             {
@@ -2154,6 +2155,7 @@ void cdfDefVars(stream_t *streamptr)
   streamptr->ncgrid = (ncgrid_t*) Malloc(2*ngrids*sizeof(ncgrid_t));
   for ( index = 0; index < 2*ngrids; ++index )
     {
+      streamptr->ncgrid[index].gridID = UNDEFID;
       streamptr->ncgrid[index].xdimID = UNDEFID;
       streamptr->ncgrid[index].ydimID = UNDEFID;
       streamptr->ncgrid[index].xvarID = UNDEFID;
