@@ -2052,7 +2052,7 @@ void cdf_check_gridtype(int *gridtype, bool islon, bool islat, size_t xsize, siz
                 break;
               }
         }
-      if ( isGaussGrid(ysize, yinc, grid->y.vals) )
+      if ( ysize < 10000 && isGaussGrid(ysize, yinc, grid->y.vals) )
         {
           *gridtype = GRID_GAUSSIAN;
           grid->np = (int)(ysize/2);
@@ -2177,7 +2177,7 @@ bool cdf_read_coordinates(struct cdfLazyGrid *restrict lazyGrid, ncvar_t *ncvar,
   grid_t *grid = &lazyGrid->base;
   size_t size = 0;
 
-  grid->prec  = DATATYPE_FLT64;
+  grid->prec = DATATYPE_FLT64;
 
   if ( ncvar->gridtype == GRID_TRAJECTORY )
     {
@@ -2620,6 +2620,24 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 	  int xdimid = UNDEFID, ydimid = UNDEFID;
           int nydims = cdf_get_xydimid(ndims, ncvar->dimids, dimtype, &xdimid, &ydimid);
 
+          int xaxisid = xdimid != UNDEFID ? ncdims[xdimid].ncvarid : UNDEFID;
+          int yaxisid = ydimid != UNDEFID ? ncdims[ydimid].ncvarid : UNDEFID;
+          int xvarid = ncvar->xvarid != UNDEFID ? ncvar->xvarid : xaxisid;
+          int yvarid = ncvar->yvarid != UNDEFID ? ncvar->yvarid : yaxisid;
+
+          size_t xsize = 0, ysize = 0;
+	  if ( xdimid != UNDEFID ) xsize = ncdims[xdimid].len;
+	  if ( ydimid != UNDEFID ) ysize = ncdims[ydimid].len;
+
+	  if ( ydimid == UNDEFID && yvarid != UNDEFID )
+	    {
+	      if ( ncvars[yvarid].ndims == 1 )
+		{
+		  ydimid = ncvars[yvarid].dimids[0];
+		  ysize  = ncdims[ydimid].len;
+		}
+	    }
+
 	  if ( (ncvar->gridtype == UNDEFID || ncvar->gridtype == GRID_GENERIC) &&
                xdimid != UNDEFID && xdimid == ydimid && nydims == 0 )
             ncvar->gridtype = GRID_UNSTRUCTURED;
@@ -2646,24 +2664,8 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
           grid_t *grid = &lazyGrid->base;
           grid_t *proj = ( lgrid && lproj ) ? &lazyProj->base : NULL;
 
-          int xaxisid = xdimid != UNDEFID ? ncdims[xdimid].ncvarid : UNDEFID;
-          int xvarid = ncvar->xvarid != UNDEFID ? ncvar->xvarid : xaxisid;
-
-          int yaxisid = ydimid != UNDEFID ? ncdims[ydimid].ncvarid : UNDEFID;
-          int yvarid = ncvar->yvarid != UNDEFID ? ncvar->yvarid : yaxisid;
-
-          size_t xsize = 0, ysize = 0;
-	  if ( xdimid != UNDEFID ) xsize = ncdims[xdimid].len;
-	  if ( ydimid != UNDEFID ) ysize = ncdims[ydimid].len;
-
-	  if ( ydimid == UNDEFID && yvarid != UNDEFID )
-	    {
-	      if ( ncvars[yvarid].ndims == 1 )
-		{
-		  ydimid = ncvars[yvarid].dimids[0];
-		  ysize  = ncdims[ydimid].len;
-		}
-	    }
+          xaxisid = xdimid != UNDEFID ? ncdims[xdimid].ncvarid : UNDEFID;
+          yaxisid = ydimid != UNDEFID ? ncdims[ydimid].ncvarid : UNDEFID;
 
 
           if ( cdf_read_coordinates(lazyGrid, ncvar, ncvars, ncdims,
