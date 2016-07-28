@@ -17,13 +17,12 @@
 #include "datetime.h"
 #include "extra.h"
 #include "vlist.h"
+#include "exse.h"
 
 
 #undef  UNDEFID
 #define UNDEFID  CDI_UNDEFID
 
-#define SINGLE_PRECISION  4
-#define DOUBLE_PRECISION  8
 
 #if defined (HAVE_LIBEXTRA)
 
@@ -39,9 +38,9 @@ int extInqDatatype(int prec, int number)
   int datatype;
 
   if ( number == 2 )
-    datatype = (prec == DOUBLE_PRECISION) ? DATATYPE_CPX64 : DATATYPE_CPX32;
+    datatype = (prec == EXSE_DOUBLE_PRECISION) ? DATATYPE_CPX64 : DATATYPE_CPX32;
   else
-    datatype = (prec == DOUBLE_PRECISION) ? DATATYPE_FLT64 : DATATYPE_FLT32;
+    datatype = (prec == EXSE_DOUBLE_PRECISION) ? DATATYPE_FLT64 : DATATYPE_FLT32;
 
   return datatype;
 }
@@ -56,7 +55,7 @@ void extDefDatatype(int datatype, int *prec, int *number)
 
   *number = (datatype == DATATYPE_CPX32 || datatype == DATATYPE_CPX64) ? 2 : 1;
 
-  *prec = (datatype == DATATYPE_FLT64 || datatype == DATATYPE_CPX64) ? DOUBLE_PRECISION : SINGLE_PRECISION;
+  *prec = (datatype == DATATYPE_FLT64 || datatype == DATATYPE_CPX64) ? EXSE_DOUBLE_PRECISION : EXSE_SINGLE_PRECISION;
 }
 
 /* not used

@@ -18,13 +18,12 @@
 #include "service.h"
 #include "stream_srv.h"
 #include "vlist.h"
+#include "exse.h"
 
 
 #undef  UNDEFID
 #define UNDEFID  CDI_UNDEFID
 
-#define SINGLE_PRECISION  4
-#define DOUBLE_PRECISION  8
 
 #if defined (HAVE_LIBSERVICE)
 
@@ -38,7 +37,7 @@ typedef struct {
 static
 int srvInqDatatype(int prec)
 {
-  return (prec == DOUBLE_PRECISION) ? DATATYPE_FLT64 : DATATYPE_FLT32;
+  return (prec == EXSE_DOUBLE_PRECISION) ? DATATYPE_FLT64 : DATATYPE_FLT32;
 }
 
 
@@ -51,7 +50,7 @@ int srvDefDatatype(int datatype)
   if ( datatype != DATATYPE_FLT32 && datatype != DATATYPE_FLT64 )
     datatype = DATATYPE_FLT32;
 
-  return (datatype == DATATYPE_FLT64) ? DOUBLE_PRECISION : SINGLE_PRECISION;
+  return (datatype == DATATYPE_FLT64) ? EXSE_DOUBLE_PRECISION : EXSE_SINGLE_PRECISION;
 }
 
 /* not used
