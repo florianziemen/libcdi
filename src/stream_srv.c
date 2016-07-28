@@ -40,7 +40,6 @@ int srvInqDatatype(int prec)
   return (prec == EXSE_DOUBLE_PRECISION) ? DATATYPE_FLT64 : DATATYPE_FLT32;
 }
 
-
 static
 int srvDefDatatype(int datatype)
 {
@@ -723,83 +722,21 @@ void srvReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, 
 }
 
 
-void srvWriteVarDP(stream_t *streamptr, int varID, const double *data)
-{
-  int header[8];
-  srvrec_t *srvp = (srvrec_t*) streamptr->record->exsep;
-
-  if ( CDI_Debug )
-    Message("streamID = %d  varID = %d", streamptr->self, varID);
-
-  int vlistID  = streamptr->vlistID;
-  int fileID   = streamptr->fileID;
-  int tsID     = streamptr->curTsID;
-  int gridID   = vlistInqVarGrid(vlistID, varID);
-  int gridsize = gridInqSize(gridID);
-  int zaxisID  = vlistInqVarZaxis(vlistID, varID);
-  int nlevs    = zaxisInqSize(zaxisID);
-
-  if ( CDI_Debug )
-    Message("nlevs = %d gridID = %d gridsize = %d", nlevs, gridID, gridsize);
-
-  int pdis, pcat, pnum;
-  cdiDecodeParam(vlistInqVarParam(vlistID, varID), &pnum, &pcat, &pdis);
-
-  header[0] = pnum;
-  header[2] = streamptr->tsteps[tsID].taxis.vdate;
-  header[3] = streamptr->tsteps[tsID].taxis.vtime;
-
-  int xsize = gridInqXsize(gridID);
-  int ysize = gridInqYsize(gridID);
-  if ( xsize == 0 || ysize == 0 )
-    {
-      xsize = gridInqSize(gridID);
-      ysize = 1;
-    }
-  if ( gridInqType(gridID) == GRID_UNSTRUCTURED ) ysize = 1;
-  if ( gridInqSize(gridID) != xsize*ysize )
-    Error("Internal problem with gridsize!");
-
-  header[4] = xsize;
-  header[5] = ysize;
-  header[6] = 0;
-  header[7] = 0;
-
-  int datatype = vlistInqVarDatatype(vlistID, varID);
-
-  srvp->dprec = srvDefDatatype(datatype);
-
-  for ( int levID = 0; levID < nlevs; levID++ )
-    {
-      double level = zaxisInqLevel(zaxisID, levID);
-
-      header[1] = (int) level;
-      srvDefHeader(srvp, header);
-      srvDefDataDP(srvp, &data[levID*gridsize]);
-      srvWrite(fileID, srvp);
-    }
-}
-
-
 void srvWriteVarSliceDP(stream_t *streamptr, int varID, int levID, const double *data)
 {
-  int header[8];
-  srvrec_t *srvp = (srvrec_t*) streamptr->record->exsep;
+  if ( CDI_Debug ) Message("streamID = %d  varID = %d  levID = %d", streamptr->self, varID, levID);
 
   int vlistID  = streamptr->vlistID;
   int fileID   = streamptr->fileID;
   int tsID     = streamptr->curTsID;
   int gridID   = vlistInqVarGrid(vlistID, varID);
-  int zaxisID  = vlistInqVarZaxis(vlistID, varID);
-  double level    = zaxisInqLevel(zaxisID, levID);
-
-  if ( CDI_Debug ) Message("gridID = %d zaxisID = %d", gridID, zaxisID);
 
   int pdis, pcat, pnum;
   cdiDecodeParam(vlistInqVarParam(vlistID, varID), &pnum, &pcat, &pdis);
 
+  int header[8];
   header[0] = pnum;
-  header[1] = (int) level;
+  header[1] = (int) zaxisInqLevel(vlistInqVarZaxis(vlistID, varID), levID);
   header[2] = streamptr->tsteps[tsID].taxis.vdate;
   header[3] = streamptr->tsteps[tsID].taxis.vtime;
 
@@ -821,11 +758,25 @@ void srvWriteVarSliceDP(stream_t *streamptr, int varID, int levID, const double 
 
   int datatype = vlistInqVarDatatype(vlistID, varID);
 
+  srvrec_t *srvp = (srvrec_t*) streamptr->record->exsep;
   srvp->dprec = srvDefDatatype(datatype);
 
   srvDefHeader(srvp, header);
   srvDefDataDP(srvp, data);
   srvWrite(fileID, srvp);
+}
+
+
+void srvWriteVarDP(stream_t *streamptr, int varID, const double *data)
+{
+  if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamptr->self, varID);
+
+  int vlistID  = streamptr->vlistID;
+  int gridsize = gridInqSize(vlistInqVarGrid(vlistID, varID));
+  int nlevs    = zaxisInqSize(vlistInqVarZaxis(vlistID, varID));
+
+  for ( int levID = 0; levID < nlevs; levID++ )
+    srvWriteVarSliceDP(streamptr, varID, levID, &data[levID*gridsize]);
 }
 
 #endif /* HAVE_LIBSERVICE */

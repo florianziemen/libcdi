@@ -139,8 +139,8 @@ int correct_bdslen(int bdslen, long recsize, long gribpos);
 
 /* param format:  DDDCCCNNN */
 
-void    cdiDecodeParam(int param, int *dis, int *cat, int *num);
-int     cdiEncodeParam(int dis, int cat, int num);
+void    cdiDecodeParam(int param, int *pnum, int *pcat, int *pdis);
+int     cdiEncodeParam(int pnum, int pcat, int pdis);
 
 /* date format:  YYYYMMDD */
 /* time format:  hhmmss   */
