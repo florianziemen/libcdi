@@ -32,34 +32,26 @@
 typedef struct {
   int param;
   int level;
-} SRVCOMPVAR;
+} srvcompvar_t;
 
 
-static int srvInqDatatype(int prec)
+static
+int srvInqDatatype(int prec)
 {
-  int datatype;
-
-  if ( prec == DOUBLE_PRECISION ) datatype = DATATYPE_FLT64;
-  else                            datatype = DATATYPE_FLT32;
-
-  return datatype;
+  return (prec == DOUBLE_PRECISION) ? DATATYPE_FLT64 : DATATYPE_FLT32;
 }
 
 
-static int srvDefDatatype(int datatype)
+static
+int srvDefDatatype(int datatype)
 {
-  int prec;
-
   if ( datatype == DATATYPE_CPX32 || datatype == DATATYPE_CPX64 )
     Error("CDI/SERVICE library does not support complex numbers!");
 
   if ( datatype != DATATYPE_FLT32 && datatype != DATATYPE_FLT64 )
     datatype = DATATYPE_FLT32;
 
-  if ( datatype == DATATYPE_FLT64 ) prec = DOUBLE_PRECISION;
-  else                              prec = SINGLE_PRECISION;
-
-  return prec;
+  return (datatype == DATATYPE_FLT64) ? DOUBLE_PRECISION : SINGLE_PRECISION;
 }
 
 /* not used
@@ -101,9 +93,6 @@ int srvInqRecord(stream_t *streamptr, int *varID, int *levelID)
 
 void srvReadRecord(stream_t *streamptr, double *data, int *nmiss)
 {
-  int header[8];
-  void *srvp = streamptr->record->exsep;
-
   int vlistID  = streamptr->vlistID;
   int fileID   = streamptr->fileID;
   int tsID     = streamptr->curTsID;
@@ -114,10 +103,12 @@ void srvReadRecord(stream_t *streamptr, double *data, int *nmiss)
 
   fileSetPos(fileID, recpos, SEEK_SET);
 
+  void *srvp = streamptr->record->exsep;
   int status = srvRead(fileID, srvp);
   if ( status != 0 )
     Error("Failed to read record from SRV file");
 
+  int header[8];
   srvInqHeader(srvp, header);
   srvInqDataDP(srvp, data);
 
@@ -145,20 +136,21 @@ void srvCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
 
 void srvDefRecord(stream_t *streamptr)
 {
-  int header[8];
-  Record *restrict record = streamptr->record;
-  srvrec_t *restrict srvp = (srvrec_t*) record->exsep;
-  int gridID = record->gridID;
+  Record *record = streamptr->record;
+  srvrec_t *srvp = (srvrec_t*) record->exsep;
 
   int pdis, pcat, pnum;
   cdiDecodeParam(record->param, &pnum, &pcat, &pdis);
+
+  int header[8];
   header[0] = pnum;
   header[1] = record->level;
   header[2] = record->date;
   header[3] = record->time;
 
+  int gridID = record->gridID;
   int xsize = gridInqXsize(gridID),
-    ysize = gridInqYsize(gridID);
+      ysize = gridInqYsize(gridID);
   if ( xsize == 0 || ysize == 0 )
     {
       xsize = gridInqSize(gridID);
@@ -174,7 +166,6 @@ void srvDefRecord(stream_t *streamptr)
   header[7] = 0;
 
   int datatype = record->prec;
-
   srvp->dprec = srvDefDatatype(datatype);
 
   srvDefHeader(srvp, header);
@@ -204,7 +195,7 @@ void srv_add_record(stream_t *streamptr, int param, int level, int xsize, int ys
   record->param    = param;
   record->ilevel   = level;
 
-  grid_t *grid = (grid_t *)Malloc(sizeof (*grid));
+  grid_t *grid = (grid_t*) Malloc(sizeof(*grid));
   grid_init(grid);
   cdiGridTypeInit(grid, GRID_GENERIC, xsize*ysize);
   grid->x.size = xsize;
@@ -253,7 +244,6 @@ void srvScanTimestep1(stream_t *streamptr)
       Error("Internal problem! tstepsNewEntry returns %d", tsID);
     taxis = &streamptr->tsteps[tsID].taxis;
   }
-
 
   int fileID = streamptr->fileID;
 
@@ -361,7 +351,7 @@ int srvScanTimestep2(stream_t *streamptr)
 {
   int header[8];
   off_t recpos = 0;
-  SRVCOMPVAR compVar, compVar0;
+  srvcompvar_t compVar, compVar0;
   void *srvp = streamptr->record->exsep;
 
   streamptr->curTsID = 1;
@@ -429,7 +419,7 @@ int srvScanTimestep2(stream_t *streamptr)
 	  compVar0.param  = streamptr->tsteps[tsID].records[recID].param;
 	  compVar0.level = streamptr->tsteps[tsID].records[recID].ilevel;
 
-	  if ( memcmp(&compVar0, &compVar, sizeof(SRVCOMPVAR)) == 0 )
+	  if ( memcmp(&compVar0, &compVar, sizeof(srvcompvar_t)) == 0 )
 	    {
 	      if ( streamptr->tsteps[tsID].records[recID].used )
 		{
@@ -459,7 +449,7 @@ int srvScanTimestep2(stream_t *streamptr)
       compVar0.param  = streamptr->tsteps[tsID].records[recID].param;
       compVar0.level = streamptr->tsteps[tsID].records[recID].ilevel;
 
-      if ( memcmp(&compVar0, &compVar, sizeof(SRVCOMPVAR)) != 0 )
+      if ( memcmp(&compVar0, &compVar, sizeof(srvcompvar_t)) != 0 )
 	{
 	  Message("tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d",
 		  tsID, recID,
@@ -504,8 +494,6 @@ int srvScanTimestep2(stream_t *streamptr)
 
 int srvInqContents(stream_t *streamptr)
 {
-  int fileID = streamptr->fileID;
-
   streamptr->curTsID = 0;
 
   srvScanTimestep1(streamptr);
@@ -513,6 +501,7 @@ int srvInqContents(stream_t *streamptr)
   int status = 0;
   if ( streamptr->ntsteps == -1 ) status = srvScanTimestep2(streamptr);
 
+  int fileID = streamptr->fileID;
   fileSetPos(fileID, 0, SEEK_SET);
 
   return status;
@@ -633,8 +622,6 @@ long srvScanTimestep(stream_t *streamptr)
 
 int srvInqTimestep(stream_t *streamptr, int tsID)
 {
-  int nrecs;
-
   if ( tsID == 0 && streamptr->rtsteps == 0 )
     Error("Call to cdiInqContents missing!");
 
@@ -645,11 +632,8 @@ int srvInqTimestep(stream_t *streamptr, int tsID)
   while ( ( tsID + 1 ) > streamptr->rtsteps && ntsteps == UNDEFID )
     ntsteps = srvScanTimestep(streamptr);
 
-  if ( tsID >= streamptr->ntsteps && streamptr->ntsteps != UNDEFID )
-    {
-      nrecs = 0;
-    }
-  else
+  int nrecs = 0;
+  if ( !(tsID >= streamptr->ntsteps && streamptr->ntsteps != UNDEFID) )
     {
       streamptr->curTsID = tsID;
       nrecs = streamptr->tsteps[tsID].nrecs;
@@ -673,8 +657,7 @@ void srvReadVarDP(stream_t *streamptr, int varID, double *data, int *nmiss)
   size_t gridsize = (size_t)gridInqSize(gridID);
   int tsid     = streamptr->curTsID;
 
-  if ( CDI_Debug )
-    Message("nlevs = %d gridID = %d gridsize = %d", nlevs, gridID, gridsize);
+  if ( CDI_Debug ) Message("nlevs = %d gridID = %d gridsize = %d", nlevs, gridID, gridsize);
 
   off_t currentfilepos = fileGetPos(fileID);
 
@@ -716,8 +699,7 @@ void srvReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, 
   int tsid     = streamptr->curTsID;
 
   if ( CDI_Debug )
-    Message("nlevs = %d gridID = %d gridsize = %d",
-	     nlevs, gridID, gridsize);
+    Message("nlevs = %d gridID = %d gridsize = %d", nlevs, gridID, gridsize);
 
   off_t currentfilepos = fileGetPos(fileID);
 
@@ -848,6 +830,7 @@ void srvWriteVarSliceDP(stream_t *streamptr, int varID, int levID, const double 
 }
 
 #endif /* HAVE_LIBSERVICE */
+
 /*
  * Local Variables:
  * c-file-style: "Java"

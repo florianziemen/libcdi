@@ -35,18 +35,13 @@
 typedef struct {
   int param;
   int level;
-} IEGCOMPVAR;
+} iegcompvar_t;
 
 
 static
 int iegInqDatatype(int prec)
 {
-  int datatype;
-
-  if ( prec == DOUBLE_PRECISION ) datatype = DATATYPE_FLT64;
-  else                            datatype = DATATYPE_FLT32;
-
-  return datatype;
+  return (prec == DOUBLE_PRECISION) ? DATATYPE_FLT64 : DATATYPE_FLT32;
 }
 
 static
@@ -58,9 +53,7 @@ int iegDefDatatype(int datatype)
   if ( datatype != DATATYPE_FLT32 && datatype != DATATYPE_FLT64 )
     datatype = DATATYPE_FLT32;
 
-  int prec = (datatype == DATATYPE_FLT64) ? DOUBLE_PRECISION : SINGLE_PRECISION;
-
-  return prec;
+  return (datatype == DATATYPE_FLT64) ? DOUBLE_PRECISION : SINGLE_PRECISION;
 }
 
 /* not used
@@ -102,8 +95,6 @@ int iegInqRecord(stream_t *streamptr, int *varID, int *levelID)
 
 void iegReadRecord(stream_t *streamptr, double *data, int *nmiss)
 {
-  void *iegp = streamptr->record->exsep;
-
   int vlistID = streamptr->vlistID;
   int fileID  = streamptr->fileID;
   int tsID    = streamptr->curTsID;
@@ -114,6 +105,7 @@ void iegReadRecord(stream_t *streamptr, double *data, int *nmiss)
 
   fileSetPos(fileID, recpos, SEEK_SET);
 
+  void *iegp = streamptr->record->exsep;
   int status = iegRead(fileID, iegp);
   if ( status != 0 )
     Error("Could not read IEG record!");
@@ -551,13 +543,14 @@ void iegCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
 
 void iegDefRecord(stream_t *streamptr)
 {
-  iegrec_t *iegp = (iegrec_t*) streamptr->record->exsep;
+  Record *record = streamptr->record;
+  iegrec_t *iegp = (iegrec_t*) record->exsep;
 
   int vlistID = streamptr->vlistID;
   int byteorder = streamptr->byteorder;
 
-  int varID   = streamptr->record->varID;
-  int levelID = streamptr->record->levelID;
+  int varID   = record->varID;
+  int levelID = record->levelID;
   int tsID    = streamptr->curTsID;
 
   int gridID  = vlistInqVarGrid(vlistID, varID);
@@ -580,18 +573,18 @@ void iegDefRecord(stream_t *streamptr)
   iegDefGrid(iegp->igdb, gridID);
   iegDefLevel(iegp->ipdb, iegp->igdb, iegp->vct, zaxisID, levelID);
 
-  int datatype = streamptr->record->prec;
-
+  int datatype = record->prec;
   iegp->dprec = iegDefDatatype(datatype);
 }
 
 
 void iegWriteRecord(stream_t *streamptr, const double *data)
 {
-  iegrec_t *iegp = (iegrec_t*) streamptr->record->exsep;
+  Record *record = streamptr->record;
+  iegrec_t *iegp = (iegrec_t*) record->exsep;
 
   int fileID = streamptr->fileID;
-  int gridID = streamptr->record->gridID;
+  int gridID = record->gridID;
 
   int gridsize = gridInqSize(gridID);
 
@@ -602,7 +595,6 @@ void iegWriteRecord(stream_t *streamptr, const double *data)
   iegp->refval = refval;
 
   iegDefDataDP(iegp, data);
-
   iegWrite(fileID, iegp);
 }
 
@@ -789,7 +781,7 @@ void iegScanTimestep1(stream_t *streamptr)
 {
   DateTime datetime0 = { LONG_MIN, LONG_MIN };
   off_t recpos;
-  IEGCOMPVAR compVar, compVar0;
+  iegcompvar_t compVar, compVar0;
   iegrec_t *iegp = (iegrec_t*) streamptr->record->exsep;
 
   streamptr->curTsID = 0;
@@ -845,7 +837,7 @@ void iegScanTimestep1(stream_t *streamptr)
 	      compVar0.param = streamptr->tsteps[0].records[recID].param;
 	      compVar0.level = streamptr->tsteps[0].records[recID].ilevel;
 
-	      if ( memcmp(&compVar0, &compVar, sizeof(IEGCOMPVAR)) == 0 ) break;
+	      if ( memcmp(&compVar0, &compVar, sizeof(iegcompvar_t)) == 0 ) break;
 	    }
 	  if ( recID < nrecs ) break;
 	  DateTime datetime = { .date = vdate, .time = vtime};
@@ -916,7 +908,7 @@ static
 int iegScanTimestep2(stream_t *streamptr)
 {
   off_t recpos = 0;
-  IEGCOMPVAR compVar, compVar0;
+  iegcompvar_t compVar, compVar0;
   iegrec_t *iegp = (iegrec_t*) streamptr->record->exsep;
 
   streamptr->curTsID = 1;
@@ -990,7 +982,7 @@ int iegScanTimestep2(stream_t *streamptr)
 	  compVar0.param = streamptr->tsteps[tsID].records[recID].param;
 	  compVar0.level = streamptr->tsteps[tsID].records[recID].ilevel;
 
-	  if ( memcmp(&compVar0, &compVar, sizeof(IEGCOMPVAR)) == 0 )
+	  if ( memcmp(&compVar0, &compVar, sizeof(iegcompvar_t)) == 0 )
 	    {
 	      if ( streamptr->tsteps[tsID].records[recID].used )
 		{
@@ -1022,7 +1014,7 @@ int iegScanTimestep2(stream_t *streamptr)
       compVar0.param = streamptr->tsteps[tsID].records[recID].param;
       compVar0.level = streamptr->tsteps[tsID].records[recID].ilevel;
 
-      if ( memcmp(&compVar0, &compVar, sizeof(IEGCOMPVAR)) != 0 )
+      if ( memcmp(&compVar0, &compVar, sizeof(iegcompvar_t)) != 0 )
 	{
 	  Message("tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d",
 		  tsID, recID,
@@ -1085,7 +1077,7 @@ static
 long iegScanTimestep(stream_t *streamptr)
 {
   off_t recpos = 0;
-  IEGCOMPVAR compVar, compVar0;
+  iegcompvar_t compVar, compVar0;
   iegrec_t *iegp = (iegrec_t*) streamptr->record->exsep;
 
   if ( CDI_Debug )
@@ -1161,7 +1153,7 @@ long iegScanTimestep(stream_t *streamptr)
 	  compVar0.param = streamptr->tsteps[tsID].records[recID].param;
 	  compVar0.level = streamptr->tsteps[tsID].records[recID].ilevel;
 
-	  if ( memcmp(&compVar0, &compVar, sizeof(IEGCOMPVAR)) != 0 )
+	  if ( memcmp(&compVar0, &compVar, sizeof(iegcompvar_t)) != 0 )
 	    {
 	      Message("tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d",
 		      tsID, recID,
@@ -1215,12 +1207,8 @@ int iegInqTimestep(stream_t *streamptr, int tsID)
   while ( ( tsID + 1 ) > streamptr->rtsteps && ntsteps == UNDEFID )
     ntsteps = iegScanTimestep(streamptr);
 
-  int nrecs;
-  if ( tsID >= streamptr->ntsteps && streamptr->ntsteps != CDI_UNDEFID )
-    {
-      nrecs = 0;
-    }
-  else
+  int nrecs = 0;
+  if ( !(tsID >= streamptr->ntsteps && streamptr->ntsteps != CDI_UNDEFID) )
     {
       streamptr->curTsID = tsID;
       nrecs = streamptr->tsteps[tsID].nrecs;
@@ -1374,6 +1362,14 @@ void iegWriteVarSliceDP(stream_t *streamptr, int varID, int levID, const double 
   int datatype = vlistInqVarDatatype(vlistID, varID);
 
   iegp->dprec = iegDefDatatype(datatype);
+
+  int gridsize = gridInqSize(gridID);
+
+  double refval = data[0];
+  for ( int i = 1; i < gridsize; i++ )
+    if ( data[i] < refval ) refval = data[i];
+
+  iegp->refval = refval;
 
   iegDefDataDP(iegp, data);
   iegWrite(fileID, iegp);

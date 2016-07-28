@@ -39,15 +39,9 @@ int extInqDatatype(int prec, int number)
   int datatype;
 
   if ( number == 2 )
-    {
-      if ( prec == DOUBLE_PRECISION ) datatype = DATATYPE_CPX64;
-      else                            datatype = DATATYPE_CPX32;
-    }
+    datatype = (prec == DOUBLE_PRECISION) ? DATATYPE_CPX64 : DATATYPE_CPX32;
   else
-    {
-      if ( prec == DOUBLE_PRECISION ) datatype = DATATYPE_FLT64;
-      else                            datatype = DATATYPE_FLT32;
-    }
+    datatype = (prec == DOUBLE_PRECISION) ? DATATYPE_FLT64 : DATATYPE_FLT32;
 
   return datatype;
 }
@@ -60,15 +54,9 @@ void extDefDatatype(int datatype, int *prec, int *number)
        datatype != DATATYPE_CPX32 && datatype != DATATYPE_CPX64 )
     datatype = DATATYPE_FLT32;
 
-  if ( datatype == DATATYPE_CPX32 || datatype == DATATYPE_CPX64 )
-    *number = 2;
-  else
-    *number = 1;
+  *number = (datatype == DATATYPE_CPX32 || datatype == DATATYPE_CPX64) ? 2 : 1;
 
-  if ( datatype == DATATYPE_FLT64 || datatype == DATATYPE_CPX64 )
-    *prec = DOUBLE_PRECISION;
-  else 
-    *prec = SINGLE_PRECISION;
+  *prec = (datatype == DATATYPE_FLT64 || datatype == DATATYPE_CPX64) ? DOUBLE_PRECISION : SINGLE_PRECISION;
 }
 
 /* not used
@@ -110,8 +98,6 @@ int extInqRecord(stream_t *streamptr, int *varID, int *levelID)
 
 void extReadRecord(stream_t *streamptr, double *data, int *nmiss)
 {
-  void *extp = streamptr->record->exsep;
-
   int vlistID = streamptr->vlistID;
   int fileID  = streamptr->fileID;
   int tsID    = streamptr->curTsID;
@@ -122,6 +108,7 @@ void extReadRecord(stream_t *streamptr, double *data, int *nmiss)
 
   fileSetPos(fileID, recpos, SEEK_SET);
 
+  void *extp = streamptr->record->exsep;
   int status = extRead(fileID, extp);
   if ( status != 0 ) Error("Failed to read EXTRA record");
 
@@ -165,9 +152,6 @@ void extCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
 
 void extDefRecord(stream_t *streamptr)
 {
-  extrec_t *extp = (extrec_t*) streamptr->record->exsep;
-  int gridID   = streamptr->record->gridID;
-
   int pdis, pcat, pnum;
   cdiDecodeParam(streamptr->record->param, &pnum, &pcat, &pdis);
 
@@ -175,10 +159,11 @@ void extDefRecord(stream_t *streamptr)
   header[0] = streamptr->record->date;
   header[1] = pnum;
   header[2] = streamptr->record->level;
+  int gridID = streamptr->record->gridID;
   header[3] = gridInqSize(gridID);
 
+  extrec_t *extp = (extrec_t*) streamptr->record->exsep;
   extDefDatatype(streamptr->record->prec, &extp->prec, &extp->number);
-
   extDefHeader(extp, header);
 }
 
@@ -364,7 +349,6 @@ int extScanTimestep2(stream_t *streamptr)
   int header[4];
   int varID;
   off_t recpos = 0;
-  int nrecs, recID, rindex;
   extcompvar_t compVar, compVar0;
   void *extp = streamptr->record->exsep;
 
@@ -386,10 +370,10 @@ int extScanTimestep2(stream_t *streamptr)
   int nrecords = streamptr->tsteps[0].nallrecs;
   streamptr->tsteps[1].recIDs = (int *) Malloc((size_t)nrecords * sizeof (int));
   streamptr->tsteps[1].nrecs = 0;
-  for ( recID = 0; recID < nrecords; recID++ )
+  for ( int recID = 0; recID < nrecords; recID++ )
     streamptr->tsteps[1].recIDs[recID] = -1;
 
-  for ( recID = 0; recID < nrecords; recID++ )
+  for ( int recID = 0; recID < nrecords; recID++ )
     {
       varID = streamptr->tsteps[0].records[recID].varID;
       streamptr->tsteps[tsID].records[recID].position =
@@ -398,7 +382,7 @@ int extScanTimestep2(stream_t *streamptr)
 	streamptr->tsteps[0].records[recID].size;
     }
 
-  for ( rindex = 0; rindex <= nrecords; rindex++ )
+  for ( int rindex = 0; rindex <= nrecords; rindex++ )
     {
       recpos = fileGetPos(fileID);
       int status = extRead(fileID, extp);
@@ -429,6 +413,7 @@ int extScanTimestep2(stream_t *streamptr)
       compVar.param = param;
       compVar.level = rlevel;
       bool nextstep = false;
+      int recID;
       for ( recID = 0; recID < nrecords; recID++ )
 	{
 	  compVar0.param = streamptr->tsteps[tsID].records[recID].param;
@@ -476,8 +461,8 @@ int extScanTimestep2(stream_t *streamptr)
       streamptr->tsteps[1].records[recID].position = recpos;
     }
 
-  nrecs = 0;
-  for ( recID = 0; recID < nrecords; recID++ )
+  int nrecs = 0;
+  for ( int recID = 0; recID < nrecords; recID++ )
     {
       if ( ! streamptr->tsteps[tsID].records[recID].used )
 	{
@@ -509,15 +494,14 @@ int extScanTimestep2(stream_t *streamptr)
 
 int extInqContents(stream_t *streamptr)
 {
-  int status = 0;
-  int fileID = streamptr->fileID;
-
   streamptr->curTsID = 0;
 
   extScanTimestep1(streamptr);
 
+  int status = 0;
   if ( streamptr->ntsteps == -1 ) status = extScanTimestep2(streamptr);
 
+  int fileID = streamptr->fileID;
   fileSetPos(fileID, 0, SEEK_SET);
 
   return status;
@@ -529,7 +513,7 @@ long extScanTimestep(stream_t *streamptr)
   int header[4];
   off_t recpos = 0;
   int recID;
-  int rindex, nrecs = 0;
+  int nrecs = 0;
   extcompvar_t compVar, compVar0;
   void *extp = streamptr->record->exsep;
   /*
@@ -560,7 +544,7 @@ long extScanTimestep(stream_t *streamptr)
 
       fileSetPos(fileID, streamptr->tsteps[tsID].position, SEEK_SET);
 
-      for ( rindex = 0; rindex <= nrecs; rindex++ )
+      for ( int rindex = 0; rindex <= nrecs; rindex++ )
 	{
 	  recpos = fileGetPos(fileID);
 	  int status = extRead(fileID, extp);
@@ -641,8 +625,6 @@ long extScanTimestep(stream_t *streamptr)
 
 int extInqTimestep(stream_t *streamptr, int tsID)
 {
-  int nrecs;
-
   if ( tsID == 0 && streamptr->rtsteps == 0 )
     Error("Call to cdiInqContents missing!");
 
@@ -653,11 +635,8 @@ int extInqTimestep(stream_t *streamptr, int tsID)
   while ( ( tsID + 1 ) > streamptr->rtsteps && ntsteps == UNDEFID )
     ntsteps = extScanTimestep(streamptr);
 
-  if ( tsID >= streamptr->ntsteps && streamptr->ntsteps != CDI_UNDEFID )
-    {
-      nrecs = 0;
-    }
-  else
+  int nrecs = 0;
+  if ( !(tsID >= streamptr->ntsteps && streamptr->ntsteps != CDI_UNDEFID) )
     {
       streamptr->curTsID = tsID;
       nrecs = streamptr->tsteps[tsID].nrecs;
@@ -839,6 +818,7 @@ void extWriteVarSliceDP(stream_t *streamptr, int varID, int levID, const double 
 }
 
 #endif /* HAVE_LIBEXTRA */
+
 /*
  * Local Variables:
  * c-file-style: "Java"
