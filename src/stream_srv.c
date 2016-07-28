@@ -641,63 +641,18 @@ int srvInqTimestep(stream_t *streamptr, int tsID)
 }
 
 
-void srvReadVarDP(stream_t *streamptr, int varID, double *data, int *nmiss)
-{
-  int header[8];
-  void *srvp = streamptr->record->exsep;
-
-  int vlistID  = streamptr->vlistID;
-  int fileID   = streamptr->fileID;
-  /* NOTE: tiles are not supported here! */
-  size_t nlevs    = (size_t)streamptr->vars[varID].recordTable[0].nlevs;
-  double missval  = vlistInqVarMissval(vlistID, varID);
-  int gridID   = vlistInqVarGrid(vlistID, varID);
-  size_t gridsize = (size_t)gridInqSize(gridID);
-  int tsid     = streamptr->curTsID;
-
-  if ( CDI_Debug ) Message("nlevs = %d gridID = %d gridsize = %d", nlevs, gridID, gridsize);
-
-  off_t currentfilepos = fileGetPos(fileID);
-
-  for ( size_t levID = 0; levID < nlevs; levID++)
-    {
-      /* NOTE: tiles are not supported here! */
-      int recID = streamptr->vars[varID].recordTable[0].recordID[levID];
-      off_t recpos = streamptr->tsteps[tsid].records[recID].position;
-      fileSetPos(fileID, recpos, SEEK_SET);
-      if (srvRead(fileID, srvp) < 0)
-        abort();
-      srvInqHeader(srvp, header);
-      srvInqDataDP(srvp, &data[levID*gridsize]);
-    }
-  fileSetPos(fileID, currentfilepos, SEEK_SET);
-
-  *nmiss = 0;
-  for ( size_t i = 0; i < nlevs*gridsize; i++ )
-    if ( DBL_IS_EQUAL(data[i], missval) || DBL_IS_EQUAL(data[i], (float)missval) )
-      {
-	data[i] = missval;
-	(*nmiss)++;
-      }
-}
-
-
 void srvReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, int *nmiss)
 {
-  int header[8];
+  if ( CDI_Debug ) Message("streamID = %d  varID = %d  levID = %d", streamptr->self, varID, levID);
+
   void *srvp = streamptr->record->exsep;
 
   int vlistID  = streamptr->vlistID;
   int fileID   = streamptr->fileID;
   /* NOTE: tiles are not supported here! */
-  int nlevs    = streamptr->vars[varID].recordTable[0].nlevs;
-  double missval  = vlistInqVarMissval(vlistID, varID);
-  int gridID   = vlistInqVarGrid(vlistID, varID);
-  int gridsize = gridInqSize(gridID);
+  double missval = vlistInqVarMissval(vlistID, varID);
+  int gridsize = gridInqSize(vlistInqVarGrid(vlistID, varID));
   int tsid     = streamptr->curTsID;
-
-  if ( CDI_Debug )
-    Message("nlevs = %d gridID = %d gridsize = %d", nlevs, gridID, gridsize);
 
   off_t currentfilepos = fileGetPos(fileID);
 
@@ -705,8 +660,8 @@ void srvReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, 
   int recID = streamptr->vars[varID].recordTable[0].recordID[levID];
   off_t recpos = streamptr->tsteps[tsid].records[recID].position;
   fileSetPos(fileID, recpos, SEEK_SET);
-  if (srvRead(fileID, srvp) < 0)
-    abort();
+  if ( srvRead(fileID, srvp) < 0 ) abort();
+  int header[8];
   srvInqHeader(srvp, header);
   srvInqDataDP(srvp, data);
 
@@ -719,6 +674,19 @@ void srvReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, 
 	data[i] = missval;
 	(*nmiss)++;
       }
+}
+
+
+void srvReadVarDP(stream_t *streamptr, int varID, double *data, int *nmiss)
+{
+  if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamptr->self, varID);
+
+  int vlistID = streamptr->vlistID;
+  size_t gridsize = (size_t) gridInqSize(vlistInqVarGrid(vlistID, varID));
+  size_t nlevs    = (size_t) streamptr->vars[varID].recordTable[0].nlevs;
+
+  for ( size_t levID = 0; levID < nlevs; levID++)
+    srvReadVarSliceDP(streamptr, varID, (int)levID, &data[levID*gridsize], nmiss);
 }
 
 
@@ -771,12 +739,12 @@ void srvWriteVarDP(stream_t *streamptr, int varID, const double *data)
 {
   if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamptr->self, varID);
 
-  int vlistID  = streamptr->vlistID;
-  int gridsize = gridInqSize(vlistInqVarGrid(vlistID, varID));
-  int nlevs    = zaxisInqSize(vlistInqVarZaxis(vlistID, varID));
+  int vlistID = streamptr->vlistID;
+  size_t gridsize = (size_t) gridInqSize(vlistInqVarGrid(vlistID, varID));
+  size_t nlevs    = (size_t) zaxisInqSize(vlistInqVarZaxis(vlistID, varID));
 
-  for ( int levID = 0; levID < nlevs; levID++ )
-    srvWriteVarSliceDP(streamptr, varID, levID, &data[levID*gridsize]);
+  for ( size_t levID = 0; levID < nlevs; levID++ )
+    srvWriteVarSliceDP(streamptr, varID, (int)levID, &data[levID*gridsize]);
 }
 
 #endif /* HAVE_LIBSERVICE */
