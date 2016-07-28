@@ -748,72 +748,40 @@ void extReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, 
 }
 
 
-void extWriteVarDP(stream_t *streamptr, int varID, const double *data)
+void extWriteVarSliceDP(stream_t *streamptr, int varID, int levID, const double *data)
 {
-  int header[4];
-  extrec_t *extp = (extrec_t*) streamptr->record->exsep;
-
-  if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamptr->self, varID);
-
   int vlistID  = streamptr->vlistID;
   int fileID   = streamptr->fileID;
   int tsID     = streamptr->curTsID;
-  int gridID   = vlistInqVarGrid(vlistID, varID);
-  int gridsize = gridInqSize(gridID);
-  int zaxisID  = vlistInqVarZaxis(vlistID, varID);
-  int nlevs    = zaxisInqSize(zaxisID);
-
-  if ( CDI_Debug )
-    Message("nlevs = %d gridID = %d gridsize = %d", nlevs, gridID, gridsize);
 
   int pdis, pcat, pnum;
   cdiDecodeParam(vlistInqVarParam(vlistID, varID), &pnum, &pcat, &pdis);
 
+  int header[4];
   header[0] = streamptr->tsteps[tsID].taxis.vdate;
   header[1] = pnum;
-  header[3] = gridInqSize(gridID);
+  header[2] = (int) zaxisInqLevel(vlistInqVarZaxis(vlistID, varID), levID);
+  header[3] = gridInqSize(vlistInqVarGrid(vlistID, varID));
 
+  extrec_t *extp = (extrec_t*) streamptr->record->exsep;
   extDefDatatype(vlistInqVarDatatype(vlistID, varID), &extp->prec, &extp->number);
+  extDefHeader(extp, header);
 
-  for ( int levID = 0;  levID < nlevs; levID++ )
-    {
-      double level = zaxisInqLevel(zaxisID, levID);
-
-      header[2] = (int) level;
-      extDefHeader(extp, header);
-      extDefDataDP(extp, &data[levID*gridsize]);
-      extWrite(fileID, extp);
-    }
+  extDefDataDP(extp, data);
+  extWrite(fileID, extp);
 }
 
 
-void extWriteVarSliceDP(stream_t *streamptr, int varID, int levID, const double *data)
+void extWriteVarDP(stream_t *streamptr, int varID, const double *data)
 {
-  int header[4];
-  extrec_t *extp = (extrec_t*) streamptr->record->exsep;
+  if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamptr->self, varID);
 
   int vlistID  = streamptr->vlistID;
-  int fileID   = streamptr->fileID;
-  int tsID     = streamptr->curTsID;
-  int gridID   = vlistInqVarGrid(vlistID, varID);
-  int zaxisID  = vlistInqVarZaxis(vlistID, varID);
-  double level = zaxisInqLevel(zaxisID, levID);
+  int gridsize = gridInqSize(vlistInqVarGrid(vlistID, varID));
+  int nlevs    = zaxisInqSize(vlistInqVarZaxis(vlistID, varID));
 
-  if ( CDI_Debug ) Message("gridID = %d zaxisID = %d", gridID, zaxisID);
-
-  int pdis, pcat, pnum;
-  cdiDecodeParam(vlistInqVarParam(vlistID, varID), &pnum, &pcat, &pdis);
-
-  header[0] = streamptr->tsteps[tsID].taxis.vdate;
-  header[1] = pnum;
-  header[2] = (int) level;
-  header[3] = gridInqSize(gridID);
-
-  extDefDatatype(vlistInqVarDatatype(vlistID, varID), &extp->prec, &extp->number);
-
-  extDefHeader(extp, header);
-  extDefDataDP(extp, data);
-  extWrite(fileID, extp);
+  for ( int levID = 0;  levID < nlevs; levID++ )
+    extWriteVarSliceDP(streamptr, varID, levID, &data[levID*gridsize]);
 }
 
 #endif /* HAVE_LIBEXTRA */
