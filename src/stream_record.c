@@ -86,18 +86,19 @@ int recordNewEntry(stream_t *streamptr, int tsID)
 static
 void cdiInitRecord(stream_t *streamptr)
 {
-  streamptr->record = (Record *) Malloc(sizeof(Record));
+  Record *record = (Record *) Malloc(sizeof(Record));
+  streamptr->record = record;
 
-  streamptr->record->param      = 0;
-  streamptr->record->level      = 0;
-  streamptr->record->date       = 0;
-  streamptr->record->time       = 0;
-  streamptr->record->gridID     = 0;
-  streamptr->record->buffer     = NULL;
-  streamptr->record->buffersize = 0;
-  streamptr->record->position   = 0;
-  streamptr->record->varID      = 0;
-  streamptr->record->levelID    = CDI_UNDEFID;
+  record->param      = 0;
+  record->level      = 0;
+  record->date       = 0;
+  record->time       = 0;
+  record->gridID     = 0;
+  record->buffer     = NULL;
+  record->buffersize = 0;
+  record->position   = 0;
+  record->varID      = 0;
+  record->levelID    = CDI_UNDEFID;
 }
 
 
@@ -170,14 +171,15 @@ void streamDefRecord(int streamID, int varID, int levelID)
   int param   = vlistInqVarParam(vlistID, varID);
   int level   = (int)(zaxisInqLevel(zaxisID, levelID));
 
-  streamptr->record->varID    = varID;
-  streamptr->record->levelID  = levelID;
-  streamptr->record->param    = param;
-  streamptr->record->level    = level;
-  streamptr->record->date     = streamptr->tsteps[tsID].taxis.vdate;
-  streamptr->record->time     = streamptr->tsteps[tsID].taxis.vtime;
-  streamptr->record->gridID   = gridID;
-  streamptr->record->prec     = vlistInqVarDatatype(vlistID, varID);
+  Record *record = streamptr->record;
+  record->varID    = varID;
+  record->levelID  = levelID;
+  record->param    = param;
+  record->level    = level;
+  record->date     = streamptr->tsteps[tsID].taxis.vdate;
+  record->time     = streamptr->tsteps[tsID].taxis.vtime;
+  record->gridID   = gridID;
+  record->prec     = vlistInqVarDatatype(vlistID, varID);
 
   switch (streamptr->filetype)
     {
@@ -295,7 +297,6 @@ void streamCopyRecord(int streamID2, int streamID1)
 void cdi_create_records(stream_t *streamptr, int tsID)
 {
   unsigned nrecords, maxrecords;
-  record_t *records;
 
   tsteps_t *sourceTstep = streamptr->tsteps;
   tsteps_t *destTstep = sourceTstep + tsID;
@@ -339,10 +340,8 @@ void cdi_create_records(stream_t *streamptr, int tsID)
     }
   //  printf("tsID, nrecords %d %d\n", tsID, nrecords);
 
-  if ( maxrecords > 0 )
-    records = (record_t *) Malloc(maxrecords*sizeof(record_t));
-  else
-    records = NULL;
+  record_t *records = NULL;
+  if ( maxrecords > 0 ) records = (record_t *) Malloc(maxrecords*sizeof(record_t));
 
   destTstep->records    = records;
   destTstep->recordSize = (int)maxrecords;
