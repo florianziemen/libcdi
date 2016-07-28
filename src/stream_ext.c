@@ -750,6 +750,8 @@ void extReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, 
 
 void extWriteVarSliceDP(stream_t *streamptr, int varID, int levID, const double *data)
 {
+  if ( CDI_Debug ) Message("streamID = %d  varID = %d  levID = %d", streamptr->self, varID, levID);
+
   int vlistID  = streamptr->vlistID;
   int fileID   = streamptr->fileID;
   int tsID     = streamptr->curTsID;

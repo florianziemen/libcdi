@@ -565,15 +565,14 @@ void iegDefRecord(stream_t *streamptr)
   cdiDecodeParam(param, &pnum, &pcat, &pdis);
   IEG_P_Parameter(iegp->ipdb) = pnum;
   if ( pdis == 255 ) IEG_P_CodeTable(iegp->ipdb) = pcat;
+
   int date = streamptr->tsteps[tsID].taxis.vdate;
   int time = streamptr->tsteps[tsID].taxis.vtime;
-
   iegDefTime(iegp->ipdb, date, time, vlistInqTaxis(vlistID));
   iegDefGrid(iegp->igdb, gridID);
   iegDefLevel(iegp->ipdb, iegp->igdb, iegp->vct, zaxisID, levelID);
 
-  int datatype = record->prec;
-  iegp->dprec = iegDefDatatype(datatype);
+  iegp->dprec = iegDefDatatype(record->prec);
 }
 
 
@@ -583,9 +582,7 @@ void iegWriteRecord(stream_t *streamptr, const double *data)
   iegrec_t *iegp = (iegrec_t*) record->exsep;
 
   int fileID = streamptr->fileID;
-  int gridID = record->gridID;
-
-  int gridsize = gridInqSize(gridID);
+  int gridsize = gridInqSize(record->gridID);
 
   double refval = data[0];
   for ( int i = 1; i < gridsize; i++ )
@@ -1293,13 +1290,11 @@ void iegReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, 
 }
 
 
-void iegWriteVarDP(stream_t *streamptr, int varID, const double *data)
+void iegWriteVarSliceDP(stream_t *streamptr, int varID, int levID, const double *data)
 {
+  if ( CDI_Debug ) Message("streamID = %d  varID = %d  levID = %d", streamptr->self, varID, levID);
+
   iegrec_t *iegp = (iegrec_t*) streamptr->record->exsep;
-
-  if ( CDI_Debug )
-    Message("streamID = %d  varID = %d", streamptr->self, varID);
-
   iegInitMem(iegp);
   for ( int i = 0; i < 37; i++ ) iegp->ipdb[i] = -1;
 
@@ -1307,60 +1302,21 @@ void iegWriteVarDP(stream_t *streamptr, int varID, const double *data)
   int fileID   = streamptr->fileID;
   int tsID     = streamptr->curTsID;
   int gridID   = vlistInqVarGrid(vlistID, varID);
-  int gridsize = gridInqSize(gridID);
   int zaxisID  = vlistInqVarZaxis(vlistID, varID);
-  int nlevs    = zaxisInqSize(zaxisID);
-
-  if ( CDI_Debug )
-    Message("nlevs = %d gridID = %d gridsize = %d", nlevs, gridID, gridsize);
 
   int param    = vlistInqVarParam(vlistID, varID);
   int pdis, pcat, pnum;
   cdiDecodeParam(param, &pnum, &pcat, &pdis);
   IEG_P_Parameter(iegp->ipdb) = pnum;
   if ( pdis == 255 ) IEG_P_CodeTable(iegp->ipdb) = pcat;
+
   int date     = streamptr->tsteps[tsID].taxis.vdate;
   int time     = streamptr->tsteps[tsID].taxis.vtime;
-
   iegDefTime(iegp->ipdb, date, time, vlistInqTaxis(vlistID));
   iegDefGrid(iegp->igdb, gridID);
+  iegDefLevel(iegp->ipdb, iegp->igdb, iegp->vct, zaxisID, levID);
 
-  int datatype = vlistInqVarDatatype(vlistID, varID);
-
-  iegp->dprec = iegDefDatatype(datatype);
-
-  for ( int levID = 0;  levID < nlevs; levID++ )
-    {
-      iegDefLevel(iegp->ipdb, iegp->igdb, iegp->vct, zaxisID, levID);
-
-      double refval = data[0];
-      for ( int i = 1; i < gridsize; i++ )
-	if ( data[levID*gridsize+i] < refval ) refval = data[levID*gridsize+i];
-
-      iegp->refval = refval;
-
-      iegDefDataDP(iegp, &data[levID*gridsize]);
-      iegWrite(fileID, iegp);
-    }
-}
-
-
-void iegWriteVarSliceDP(stream_t *streamptr, int varID, int levID, const double *data)
-{
-  iegrec_t *iegp = (iegrec_t*) streamptr->record->exsep;
-
-  int vlistID  = streamptr->vlistID;
-  int fileID   = streamptr->fileID;
-  int gridID   = vlistInqVarGrid(vlistID, varID);
-  int zaxisID  = vlistInqVarZaxis(vlistID, varID);
-  (void)levID;
-
-  if ( CDI_Debug )
-    Message("gridID = %d zaxisID = %d", gridID, zaxisID);
-
-  int datatype = vlistInqVarDatatype(vlistID, varID);
-
-  iegp->dprec = iegDefDatatype(datatype);
+  iegp->dprec = iegDefDatatype(vlistInqVarDatatype(vlistID, varID));
 
   int gridsize = gridInqSize(gridID);
 
@@ -1372,6 +1328,19 @@ void iegWriteVarSliceDP(stream_t *streamptr, int varID, int levID, const double 
 
   iegDefDataDP(iegp, data);
   iegWrite(fileID, iegp);
+}
+
+
+void iegWriteVarDP(stream_t *streamptr, int varID, const double *data)
+{
+  if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamptr->self, varID);
+
+  int vlistID  = streamptr->vlistID;
+  int gridsize = gridInqSize(vlistInqVarGrid(vlistID, varID));
+  int nlevs    = zaxisInqSize(vlistInqVarZaxis(vlistID, varID));
+
+  for ( int levID = 0;  levID < nlevs; levID++ )
+    iegWriteVarSliceDP(streamptr, varID, levID, &data[levID*gridsize]);
 }
 
 #endif /* HAVE_LIBIEG */
