@@ -645,74 +645,18 @@ int extInqTimestep(stream_t *streamptr, int tsID)
 }
 
 
-void extReadVarDP(stream_t *streamptr, int varID, double *data, int *nmiss)
-{
-  int header[4];
-  void *extp = streamptr->record->exsep;
-
-  int vlistID  = streamptr->vlistID;
-  int fileID   = streamptr->fileID;
-  /* NOTE: tiles are not supported here! */
-  size_t nlevs = (size_t)streamptr->vars[varID].recordTable[0].nlevs;
-  double missval  = vlistInqVarMissval(vlistID, varID);
-  int gridID   = vlistInqVarGrid(vlistID, varID);
-  size_t gridsize = (size_t)gridInqSize(gridID);
-  int tsid     = streamptr->curTsID;
-
-  if ( CDI_Debug ) Message("nlevs = %d gridID = %d gridsize = %d", nlevs, gridID, gridsize);
-
-  off_t currentfilepos = fileGetPos(fileID);
-
-  for ( size_t levID = 0; levID < nlevs; levID++ )
-    {
-      /* NOTE: tiles are not supported here! */
-      int recID = streamptr->vars[varID].recordTable[0].recordID[levID];
-      off_t recpos = streamptr->tsteps[tsid].records[recID].position;
-      fileSetPos(fileID, recpos, SEEK_SET);
-      extRead(fileID, extp);
-      extInqHeader(extp, header);
-      extInqDataDP(extp, &data[levID*gridsize]);
-    }
-  fileSetPos(fileID, currentfilepos, SEEK_SET);
-
-  *nmiss = 0;
-  if ( vlistInqVarNumber(vlistID, varID) == CDI_REAL )
-    {
-      for ( size_t i = 0; i < nlevs*gridsize; i++ )
-	if ( DBL_IS_EQUAL(data[i], missval) || DBL_IS_EQUAL(data[i], (float)missval) )
-	  {
-	    data[i] = missval;
-	    (*nmiss)++;
-	  }
-    }
-  else
-    {
-      for ( size_t i = 0; i < 2*nlevs*gridsize; i+=2 )
-	if ( DBL_IS_EQUAL(data[i], missval) || DBL_IS_EQUAL(data[i], (float)missval) )
-	  {
-	    data[i] = missval;
-	    (*nmiss)++;
-	  }
-    }
-}
-
-
 void extReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, int *nmiss)
 {
-  int header[4];
+  if ( CDI_Debug ) Message("streamID = %d  varID = %d  levID = %d", streamptr->self, varID, levID);
+
   void *extp = streamptr->record->exsep;
 
   int vlistID  = streamptr->vlistID;
   int fileID   = streamptr->fileID;
   /* NOTE: tiles are not supported here! */
-  int nlevs    = streamptr->vars[varID].recordTable[0].nlevs;
-  double missval  = vlistInqVarMissval(vlistID, varID);
-  int gridID   = vlistInqVarGrid(vlistID, varID);
-  int gridsize = gridInqSize(gridID);
+  double missval = vlistInqVarMissval(vlistID, varID);
+  int gridsize = gridInqSize(vlistInqVarGrid(vlistID, varID));
   int tsid     = streamptr->curTsID;
-
-  if ( CDI_Debug )
-    Message("nlevs = %d gridID = %d gridsize = %d", nlevs, gridID, gridsize);
 
   off_t currentfilepos = fileGetPos(fileID);
 
@@ -721,6 +665,7 @@ void extReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, 
   off_t recpos = streamptr->tsteps[tsid].records[recID].position;
   fileSetPos(fileID, recpos, SEEK_SET);
   extRead(fileID, extp);
+  int header[4];
   extInqHeader(extp, header);
   extInqDataDP(extp, data);
 
@@ -745,6 +690,19 @@ void extReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, 
 	    (*nmiss)++;
 	  }
     }
+}
+
+
+void extReadVarDP(stream_t *streamptr, int varID, double *data, int *nmiss)
+{
+  if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamptr->self, varID);
+
+  int vlistID = streamptr->vlistID;
+  size_t gridsize = (size_t) gridInqSize(vlistInqVarGrid(vlistID, varID));
+  size_t nlevs    = (size_t) streamptr->vars[varID].recordTable[0].nlevs;
+
+  for ( size_t levID = 0; levID < nlevs; levID++)
+    extReadVarSliceDP(streamptr, varID, (int)levID, &data[levID*gridsize], nmiss);
 }
 
 
@@ -778,11 +736,11 @@ void extWriteVarDP(stream_t *streamptr, int varID, const double *data)
 {
   if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamptr->self, varID);
 
-  int vlistID  = streamptr->vlistID;
-  int gridsize = gridInqSize(vlistInqVarGrid(vlistID, varID));
-  int nlevs    = zaxisInqSize(vlistInqVarZaxis(vlistID, varID));
+  int vlistID = streamptr->vlistID;
+  size_t gridsize = (size_t) gridInqSize(vlistInqVarGrid(vlistID, varID));
+  size_t nlevs    = (size_t) zaxisInqSize(vlistInqVarZaxis(vlistID, varID));
 
-  for ( int levID = 0;  levID < nlevs; levID++ )
+  for ( size_t levID = 0;  levID < nlevs; levID++ )
     extWriteVarSliceDP(streamptr, varID, levID, &data[levID*gridsize]);
 }
 
