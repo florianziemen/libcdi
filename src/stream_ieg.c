@@ -38,7 +38,8 @@ typedef struct {
 } IEGCOMPVAR;
 
 
-static int iegInqDatatype(int prec)
+static
+int iegInqDatatype(int prec)
 {
   int datatype;
 
@@ -48,19 +49,16 @@ static int iegInqDatatype(int prec)
   return datatype;
 }
 
-
-static int iegDefDatatype(int datatype)
+static
+int iegDefDatatype(int datatype)
 {
-  int prec;
-
   if ( datatype == DATATYPE_CPX32 || datatype == DATATYPE_CPX64 )
     Error("CDI/IEG library does not support complex numbers!");
 
   if ( datatype != DATATYPE_FLT32 && datatype != DATATYPE_FLT64 )
     datatype = DATATYPE_FLT32;
 
-  if ( datatype == DATATYPE_FLT64 ) prec = DOUBLE_PRECISION;
-  else                              prec = SINGLE_PRECISION;
+  int prec = (datatype == DATATYPE_FLT64) ? DOUBLE_PRECISION : SINGLE_PRECISION;
 
   return prec;
 }
@@ -570,13 +568,13 @@ void iegDefRecord(stream_t *streamptr)
 
   iegp->byteswap = getByteswap(byteorder);
 
-  int param =  vlistInqVarParam(vlistID, varID);
+  int param = vlistInqVarParam(vlistID, varID);
   int pdis, pcat, pnum;
   cdiDecodeParam(param, &pnum, &pcat, &pdis);
   IEG_P_Parameter(iegp->ipdb) = pnum;
   if ( pdis == 255 ) IEG_P_CodeTable(iegp->ipdb) = pcat;
-  int date     = streamptr->tsteps[tsID].taxis.vdate;
-  int time     = streamptr->tsteps[tsID].taxis.vtime;
+  int date = streamptr->tsteps[tsID].taxis.vdate;
+  int time = streamptr->tsteps[tsID].taxis.vtime;
 
   iegDefTime(iegp->ipdb, date, time, vlistInqTaxis(vlistID));
   iegDefGrid(iegp->igdb, gridID);
@@ -695,16 +693,6 @@ void iegAddRecord(stream_t *streamptr, int param, int *pdb, int *gdb, double *vc
     grid->y.last  = IEG_G_LastLat(gdb)  * resfac;
     grid->y.flag  = 2;
   }
-  /*
-  grid->x.first = IEG_G_FirstLon(gdb) * resfac;
-  grid->x.last  = IEG_G_LastLon(gdb) * resfac;
-  grid->x.inc   = IEG_G_LonIncr(gdb) * resfac;
-  grid->x.flag  = 2;
-  grid->y.first = IEG_G_FirstLat(gdb) * resfac;
-  grid->y.last  = IEG_G_LastLat(gdb) * resfac;
-  grid->y.inc   = IEG_G_LatIncr(gdb) * resfac;
-  grid->y.flag  = 2;
-  */
 
   grid->isRotated = FALSE;
   if ( IEG_G_GridType(gdb) == 10 )
@@ -780,10 +768,10 @@ void iegCmpRecord(stream_t *streamptr, int tsID, int recID, off_t position, int 
 }
 #endif
 
-static void iegDateTime(int *pdb, int *date, int *time)
+static
+void iegDateTime(int *pdb, int *date, int *time)
 {
   int ryear   = IEG_P_Year(pdb);
-
   int rmonth  = IEG_P_Month(pdb);
   int rday    = IEG_P_Day(pdb);
 
@@ -801,13 +789,12 @@ void iegScanTimestep1(stream_t *streamptr)
 {
   DateTime datetime0 = { LONG_MIN, LONG_MIN };
   off_t recpos;
-  int nrecs;
   IEGCOMPVAR compVar, compVar0;
   iegrec_t *iegp = (iegrec_t*) streamptr->record->exsep;
 
   streamptr->curTsID = 0;
 
-  int tsID  = tstepsNewEntry(streamptr);
+  int tsID = tstepsNewEntry(streamptr);
   taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
 
   if ( tsID != 0 )
@@ -815,7 +802,7 @@ void iegScanTimestep1(stream_t *streamptr)
 
   int fileID = streamptr->fileID;
 
-  nrecs = 0;
+  int nrecs = 0;
   while ( TRUE )
     {
       recpos = fileGetPos(fileID);
@@ -1112,7 +1099,7 @@ long iegScanTimestep(stream_t *streamptr)
   if ( streamptr->rtsteps == 0 )
     Error("Internal problem! Missing contents.");
 
-  int tsID  = streamptr->rtsteps;
+  int tsID = streamptr->rtsteps;
   taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
 
   int nrecs = 0;
@@ -1253,15 +1240,15 @@ void iegReadVarDP(stream_t *streamptr, int varID, double *data, int *nmiss)
   size_t nlevs    = (size_t)streamptr->vars[varID].recordTable[0].nlevs;
   double missval  = vlistInqVarMissval(vlistID, varID);
   int gridID   = vlistInqVarGrid(vlistID, varID);
-  int gridsize = (size_t)gridInqSize(gridID);
+  size_t gridsize = (size_t)gridInqSize(gridID);
   size_t tsid     = streamptr->curTsID;
 
   if ( CDI_Debug )
-    Message("nlevs = %d gridID = %d gridsize = %d", nlevs, gridID, gridsize);
+    Message("nlevs = %d gridID = %d gridsize = %d", nlevs, gridID, (int)gridsize);
 
   off_t currentfilepos = fileGetPos(fileID);
 
-  for ( size_t levID = 0; levID < nlevs; levID++) 
+  for ( size_t levID = 0; levID < nlevs; levID++ )
     {
       /* NOTE: tiles are not supported here! */
       int recID = streamptr->vars[varID].recordTable[0].recordID[levID];
@@ -1296,8 +1283,7 @@ void iegReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, 
   int tsid     = streamptr->curTsID;
 
   if ( CDI_Debug )
-    Message("nlevs = %d gridID = %d gridsize = %d",
-	     nlevs, gridID, gridsize);
+    Message("nlevs = %d gridID = %d gridsize = %d", nlevs, gridID, gridsize);
 
   off_t currentfilepos = fileGetPos(fileID);
 
