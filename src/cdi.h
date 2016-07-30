@@ -142,6 +142,10 @@ extern "C" {
 #define  GRID_SINUSOIDAL           14  /* Sinusoidal                                            */
 #define  GRID_PROJECTION           15  /* Projected coordinates                                 */
 
+#define  CDI_PROJ_RLL              11  /* Rotated Latitude Longitude                            */
+#define  CDI_PROJ_LCC              12  /* Lambert Conformal Conic                               */
+#define  CDI_PROJ_LAEA             13  /* Lambert Azimuthal Equal Area                          */
+
 /* ZAXIS types */
 
 #define  ZAXIS_SURFACE              0  /* Surface level                                         */
@@ -722,6 +726,9 @@ int     gridDuplicate(int gridID);
 
 /*      gridInqProj: Get the projection ID of a Grid */
 int     gridInqProj(int gridID);
+
+/*      gridInqProjType: Get the projection type */
+int     gridInqProjType(int gridID);
 
 /*      gridInqType: Get the type of a Grid */
 int     gridInqType(int gridID);

@@ -105,6 +105,7 @@ struct grid_t {
   int     type;                   /* grid type                      */
   int     prec;                   /* grid precision                 */
   int     proj;                   /* grid projection                */
+  int     projtype;               /* grid projection type           */
   mask_t *mask;
   mask_t *mask_gme;
   double *area;

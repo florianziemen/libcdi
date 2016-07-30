@@ -1,3 +1,7 @@
+2016-07-30  Uwe Schulzweida
+
+	* ieg write: added support for projection CDI_PROJ_RLL
+
 2016-07-28  Uwe Schulzweida
 
 	* iegWriteVarSliceDP: does not work (bug fix)

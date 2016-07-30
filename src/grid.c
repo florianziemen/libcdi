@@ -94,15 +94,17 @@ void grid_init(grid_t *gridptr)
   gridptr->self          = CDI_UNDEFID;
   gridptr->type          = CDI_UNDEFID;
   gridptr->proj          = CDI_UNDEFID;
+  gridptr->projtype      = CDI_UNDEFID;
   gridptr->mask          = NULL;
   gridptr->mask_gme      = NULL;
   gridptr->x.vals        = NULL;
   gridptr->y.vals        = NULL;
-  gridptr->area          = NULL;
   gridptr->x.bounds      = NULL;
   gridptr->y.bounds      = NULL;
+  gridptr->area          = NULL;
   gridptr->rowlon        = NULL;
   gridptr->nrowlon       = 0;
+
   gridptr->x.first       = 0.0;
   gridptr->x.last        = 0.0;
   gridptr->x.inc         = 0.0;
@@ -979,6 +981,7 @@ void gridInqYunits(int gridID, char *yunits)
   (void)cdiGridInqKeyStr(gridID, CDI_KEY_YUNITS, CDI_MAX_NAME, yunits);
 }
 
+
 void gridInqYstdname(int gridID, char *ystdname)
 {
   grid_t *gridptr = gridID2Ptr(gridID);
@@ -988,11 +991,33 @@ void gridInqYstdname(int gridID, char *ystdname)
     ystdname[0] = 0;
 }
 
+
 int gridInqProj(int gridID)
 {
   grid_t *gridptr = gridID2Ptr(gridID);
 
   return gridptr->proj;
+}
+
+
+int gridInqProjType(int gridID)
+{
+  grid_t *gridptr = gridID2Ptr(gridID);
+
+  int projtype = gridptr->projtype;
+
+  if ( projtype == -1 )
+    {
+      char mapping[CDI_MAX_NAME]; mapping[0] = 0;
+      cdiGridInqKeyStr(gridID, CDI_KEY_MAPPING, CDI_MAX_NAME, mapping);
+      if ( mapping[0] )
+        {
+          if ( strcmp(mapping, "rotated_latitude_longitude") == 0 ) projtype = CDI_PROJ_RLL;
+          gridptr->projtype = projtype;
+        }
+    }
+
+  return projtype;
 }
 
 /*

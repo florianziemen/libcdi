@@ -1613,7 +1613,7 @@ static
 void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridID)
 {
   static bool lwarning = true;
-  bool lrotatedll = false;
+  bool lrotated = false;
   bool lcurvi = false;
 
   memset(isec2, 0, 16*sizeof(int));
@@ -1661,15 +1661,10 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
       lcurvi = true;
     }
 
-  if ( gridtype == GRID_PROJECTION )
+  if ( gridtype == GRID_PROJECTION && gridInqProjType(gridID) == CDI_PROJ_RLL )
     {
-      char mapping[CDI_MAX_NAME]; mapping[0] = 0;
-      cdiGridInqKeyStr(gridID, CDI_KEY_MAPPING, CDI_MAX_NAME, mapping);
-      if ( mapping[0] && strcmp(mapping, "rotated_latitude_longitude") == 0 )
-        {
-          gridtype = GRID_LONLAT;
-          lrotatedll = true;
-        }
+      gridtype = GRID_LONLAT;
+      lrotated = true;
     }
 
   ISEC2_Reduced  = FALSE;
@@ -1688,7 +1683,7 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
 
 	if ( gridtype == GRID_GAUSSIAN || gridtype == GRID_GAUSSIAN_REDUCED )
           ISEC2_GridType = GRIB1_GTYPE_GAUSSIAN;
-        else if ( gridtype == GRID_LONLAT && (isRotated || lrotatedll) )
+        else if ( gridtype == GRID_LONLAT && (isRotated || lrotated) )
 	  ISEC2_GridType = GRIB1_GTYPE_LATLON_ROT;
 	else
 	  ISEC2_GridType = GRIB1_GTYPE_LATLON;
@@ -1764,7 +1759,7 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
 
         ISEC2_ResFlag = ( ISEC2_LatIncr == 0 || ISEC2_LonIncr == 0 ) ? 0 : 128;
 
-	if ( isRotated || lrotatedll )
+	if ( isRotated || lrotated )
           {
             double xpole = 0, ypole = 0, angle = 0;
             if ( isRotated )

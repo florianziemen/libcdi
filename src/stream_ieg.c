@@ -246,13 +246,19 @@ calc_resfac(double xfirst, double xlast, double xinc, double yfirst, double ylas
 static
 void iegDefGrid(int *gdb, int gridID)
 {
+  int projID = gridInqProj(gridID);
+  if ( projID != CDI_UNDEFID && gridInqProjType(projID) == CDI_PROJ_RLL ) gridID = projID;
+
   int gridtype = gridInqType(gridID);
+
+  int projtype = CDI_UNDEFID;
+  if ( gridtype == GRID_PROJECTION && gridInqProjType(gridID) == CDI_PROJ_RLL ) projtype = CDI_PROJ_RLL;
+
+  int xsize = gridInqXsize(gridID);
+  int ysize = gridInqYsize(gridID);
 
   if ( gridtype == GRID_GENERIC )
     {
-      int xsize = gridInqXsize(gridID);
-      int ysize = gridInqYsize(gridID);
-
       if ( (ysize == 32  || ysize == 48 || ysize == 64 ||
 	    ysize == 96  || ysize == 160) &&
 	   (xsize == 2*ysize || xsize == 1) )
@@ -276,39 +282,32 @@ void iegDefGrid(int *gdb, int gridID)
       gridtype = GRID_LONLAT;
     }
 
-  if ( gridtype == GRID_LONLAT || gridtype == GRID_GAUSSIAN )
+  bool lrotated = ((gridtype == GRID_LONLAT && gridIsRotated(gridID)) || projtype == CDI_PROJ_RLL);
+
+  if ( gridtype == GRID_LONLAT || gridtype == GRID_GAUSSIAN || projtype == CDI_PROJ_RLL )
     {
       double xfirst = 0, xlast = 0, xinc = 0;
       double yfirst = 0, ylast = 0, yinc = 0;
 
-      int nlon = gridInqXsize(gridID),
-        nlat = gridInqYsize(gridID);
-
-      if ( nlon == 0 )
-	{
-	  nlon = 1;
-	}
+      if ( xsize == 0 ) xsize = 1;
       else
 	{
-	  xfirst = gridInqXval(gridID,      0);
-	  xlast  = gridInqXval(gridID, nlon-1);
+	  xfirst = gridInqXval(gridID,       0);
+	  xlast  = gridInqXval(gridID, xsize-1);
 	  xinc   = gridInqXinc(gridID);
 	}
 
-      if ( nlat == 0 )
-	{
-	  nlat = 1;
-	}
+      if ( ysize == 0 ) ysize = 1;
       else
 	{
-	  yfirst = gridInqYval(gridID,      0);
-	  ylast  = gridInqYval(gridID, nlat-1);
+	  yfirst = gridInqYval(gridID,       0);
+	  ylast  = gridInqYval(gridID, ysize-1);
 	  yinc   = gridInqYinc(gridID);
 	}
 
       if ( gridtype == GRID_GAUSSIAN )
 	IEG_G_GridType(gdb) = 4;
-      else if ( gridtype == GRID_LONLAT && gridIsRotated(gridID) )
+      else if ( lrotated )
 	IEG_G_GridType(gdb) = 10;
       else
 	IEG_G_GridType(gdb) = 0;
@@ -319,8 +318,8 @@ void iegDefGrid(int *gdb, int gridID)
 
       IEG_G_ResFac(gdb)   = iresfac;
 
-      IEG_G_NumLon(gdb)   = nlon;
-      IEG_G_NumLat(gdb)   = nlat;
+      IEG_G_NumLon(gdb)   = xsize;
+      IEG_G_NumLat(gdb)   = ysize;
       IEG_G_FirstLat(gdb) = (int)lround(yfirst*resfac);
       IEG_G_LastLat(gdb)  = (int)lround(ylast*resfac);
       IEG_G_FirstLon(gdb) = (int)lround(xfirst*resfac);
@@ -330,7 +329,7 @@ void iegDefGrid(int *gdb, int gridID)
 	IEG_G_LonIncr(gdb) = 0;
 
       if ( gridtype == GRID_GAUSSIAN )
-	IEG_G_LatIncr(gdb) = nlat/2;
+	IEG_G_LatIncr(gdb) = ysize/2;
       else
 	{
 	  IEG_G_LatIncr(gdb) = (int)lround(yinc*resfac);
@@ -346,15 +345,22 @@ void iegDefGrid(int *gdb, int gridID)
       if ( IEG_G_NumLon(gdb) == 1 && IEG_G_NumLat(gdb) > 1 )
 	if ( IEG_G_LonIncr(gdb) == 0 && IEG_G_LatIncr(gdb) != 0 ) IEG_G_LonIncr(gdb) = IEG_G_LatIncr(gdb);
 
-      if ( IEG_G_LatIncr(gdb) == 0 || IEG_G_LonIncr(gdb) == 0 )
-	IEG_G_ResFlag(gdb) = 0;
-      else
-	IEG_G_ResFlag(gdb) = 128;
+      IEG_G_ResFlag(gdb) = (IEG_G_LatIncr(gdb) == 0 || IEG_G_LonIncr(gdb) == 0) ? 0 : 128;
 
-      if ( gridIsRotated(gridID) )
+      if ( lrotated )
 	{
-	  IEG_G_LatSP(gdb) = - (int)lround(gridInqYpole(gridID) * resfac);
-	  IEG_G_LonSP(gdb) =   (int)lround((gridInqXpole(gridID) + 180) * resfac);
+          double xpole = 0, ypole = 0, angle = 0;
+          if ( projtype == CDI_PROJ_RLL )
+            gridInqProjParamRLL(gridID, &xpole, &ypole, &angle);
+          else
+            {
+              xpole = gridInqXpole(gridID);
+              ypole = gridInqYpole(gridID);
+              angle = gridInqAngle(gridID);
+            }
+
+	  IEG_G_LatSP(gdb) = - (int)lround(ypole * resfac);
+	  IEG_G_LonSP(gdb) =   (int)lround((xpole + 180) * resfac);
 	  IEG_G_Size(gdb)  = 42;
 	}
       else
