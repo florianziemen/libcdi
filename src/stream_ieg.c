@@ -377,6 +377,14 @@ void iegDefGrid(int *gdb, int gridID)
 }
 
 static
+void pdbDefLevel(int *pdb, int leveltype, int level1, int level2)
+{
+  IEG_P_LevelType(pdb) = leveltype;
+  IEG_P_Level1(pdb)    = level1;
+  IEG_P_Level2(pdb)    = level2;
+}
+
+static
 void iegDefLevel(int *pdb, int *gdb, double *vct, int zaxisID, int levelID)
 {
   double level;
@@ -387,8 +395,7 @@ void iegDefLevel(int *pdb, int *gdb, double *vct, int zaxisID, int levelID)
   if ( leveltype == ZAXIS_GENERIC )
     {
       Message("Changed zaxis type from %s to %s",
-	      zaxisNamePtr(leveltype),
-	      zaxisNamePtr(ZAXIS_PRESSURE));
+	      zaxisNamePtr(leveltype), zaxisNamePtr(ZAXIS_PRESSURE));
       leveltype = ZAXIS_PRESSURE;
       zaxisChangeType(zaxisID, leveltype);
       zaxisDefUnits(zaxisID, "Pa");
@@ -400,25 +407,16 @@ void iegDefLevel(int *pdb, int *gdb, double *vct, int zaxisID, int levelID)
     {
     case ZAXIS_SURFACE:
       {
-	IEG_P_LevelType(pdb) = IEG_LTYPE_SURFACE;
-	IEG_P_Level1(pdb)    = 0;
-	IEG_P_Level2(pdb)    = (int)(zaxisInqLevel(zaxisID, levelID));
+        pdbDefLevel(pdb, IEG_LTYPE_SURFACE, 0, (int)zaxisInqLevel(zaxisID, levelID));
 	break;
       }
     case ZAXIS_HYBRID:
       {
 	if ( zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL) )
-	  {
-	    IEG_P_LevelType(pdb) = IEG_LTYPE_HYBRID_LAYER;
-	    IEG_P_Level1(pdb)    = (int)(zaxisInqLbound(zaxisID, levelID));
-	    IEG_P_Level2(pdb)    = (int)(zaxisInqUbound(zaxisID, levelID));
-	  }
+          pdbDefLevel(pdb, IEG_LTYPE_HYBRID_LAYER, (int)zaxisInqLbound(zaxisID, levelID),
+                      (int)zaxisInqUbound(zaxisID, levelID));
 	else
-	  {
-	    IEG_P_LevelType(pdb) = IEG_LTYPE_HYBRID;
-	    IEG_P_Level1(pdb)    = 0;
-	    IEG_P_Level2(pdb)    = (int)(zaxisInqLevel(zaxisID, levelID));
-	  }
+          pdbDefLevel(pdb, IEG_LTYPE_HYBRID, 0, (int)zaxisInqLevel(zaxisID, levelID));
 
 	int vctsize = zaxisInqVctSize(zaxisID);
 	if ( vctsize > 100 )
@@ -445,8 +443,7 @@ void iegDefLevel(int *pdb, int *gdb, double *vct, int zaxisID, int levelID)
 	char units[128];
 
 	level = zaxisInqLevel(zaxisID, levelID);
-	if ( level < 0 )
-	  Warning("pressure level of %f Pa is below 0.", level);
+	if ( level < 0 ) Warning("pressure level of %f Pa is below 0.", level);
 
 	zaxisInqUnits(zaxisID, units);
 	if ( memcmp(units, "hPa", 3) == 0 || memcmp(units, "mb",2 ) == 0 )
@@ -454,81 +451,43 @@ void iegDefLevel(int *pdb, int *gdb, double *vct, int zaxisID, int levelID)
 
 	ilevel = (int) level;
 	if ( level < 32768 && (level < 100 || modf(level/100, &dum) > 0) )
-	  {
-	    IEG_P_LevelType(pdb) = IEG_LTYPE_99;
-	    IEG_P_Level1(pdb)    = 0;
-	    IEG_P_Level2(pdb)    = ilevel;
-	  }
+          pdbDefLevel(pdb, IEG_LTYPE_99, 0, ilevel);
 	else
-	  {
-	    IEG_P_LevelType(pdb) = IEG_LTYPE_ISOBARIC;
-	    IEG_P_Level1(pdb)    = 0;
-	    IEG_P_Level2(pdb)    = ilevel/100;
-	  }
-	break;
+          pdbDefLevel(pdb, IEG_LTYPE_ISOBARIC, 0, ilevel/100);
+
+        break;
       }
     case ZAXIS_HEIGHT:
       {
 	level = zaxisInqLevel(zaxisID, levelID);
-
-	ilevel = (int) level;
-	IEG_P_LevelType(pdb) = IEG_LTYPE_HEIGHT;
-	IEG_P_Level1(pdb)    = 0;
-	IEG_P_Level2(pdb)    = ilevel;
-
+        pdbDefLevel(pdb, IEG_LTYPE_HEIGHT, 0, (int)level);
 	break;
       }
     case ZAXIS_ALTITUDE:
       {
 	level = zaxisInqLevel(zaxisID, levelID);
-
-	ilevel = (int) level;
-	IEG_P_LevelType(pdb) = IEG_LTYPE_ALTITUDE;
-	IEG_P_Level1(pdb)    = 0;
-	IEG_P_Level2(pdb)    = ilevel;
-
+        pdbDefLevel(pdb, IEG_LTYPE_ALTITUDE, 0, (int)level);
 	break;
       }
     case ZAXIS_DEPTH_BELOW_LAND:
       {
 	if ( zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL) )
-	  {
-	    IEG_P_LevelType(pdb) = IEG_LTYPE_LANDDEPTH_LAYER;
-	    IEG_P_Level1(pdb)    = (int)(zaxisInqLbound(zaxisID, levelID));
-	    IEG_P_Level2(pdb)    = (int)(zaxisInqUbound(zaxisID, levelID));
-	  }
+          pdbDefLevel(pdb, IEG_LTYPE_LANDDEPTH_LAYER, (int)zaxisInqLbound(zaxisID, levelID), (int)zaxisInqUbound(zaxisID, levelID));
 	else
-	  {
-	    level = zaxisInqLevel(zaxisID, levelID);
-
-	    ilevel = (int) level;
-	    IEG_P_LevelType(pdb) = IEG_LTYPE_LANDDEPTH;
-	    IEG_P_Level1(pdb)    = 0;
-	    IEG_P_Level2(pdb)    = ilevel;
-	  }
+          pdbDefLevel(pdb, IEG_LTYPE_LANDDEPTH, 0, (int)zaxisInqLevel(zaxisID, levelID));
 
 	break;
       }
     case ZAXIS_DEPTH_BELOW_SEA:
       {
 	level = zaxisInqLevel(zaxisID, levelID);
-
-	ilevel = (int) level;
-	IEG_P_LevelType(pdb) = IEG_LTYPE_SEADEPTH;
-	IEG_P_Level1(pdb)    = 0;
-	IEG_P_Level2(pdb)    = ilevel;
-
+        pdbDefLevel(pdb, IEG_LTYPE_SEADEPTH, 0, (int)level);
 	break;
       }
     case ZAXIS_ISENTROPIC:
       {
 	level = zaxisInqLevel(zaxisID, levelID);
-
-	ilevel = (int) level;
-	IEG_P_LevelType(pdb) = 113;
-	IEG_P_Level1(pdb)    = 0;
-	IEG_P_Level2(pdb)    = ilevel;
-
+        pdbDefLevel(pdb, 113, 0, (int)level);
 	break;
       }
     default:
