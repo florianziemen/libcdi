@@ -3014,7 +3014,7 @@ void cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int model
 
 #if  defined  (HAVE_NETCDF4)
       if ( ncvars[ncvarid].deflate )
-	vlistDefVarCompType(vlistID, varID, COMPRESS_ZIP);
+	vlistDefVarCompType(vlistID, varID, CDI_COMPRESS_ZIP);
 
       if ( ncvars[ncvarid].chunked && ncvars[ncvarid].chunktype != UNDEFID )
         vlistDefVarChunkType(vlistID, varID, ncvars[ncvarid].chunktype);

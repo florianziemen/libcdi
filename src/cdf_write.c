@@ -526,7 +526,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
     }
 #endif
 
-  if ( streamptr->comptype == COMPRESS_ZIP )
+  if ( streamptr->comptype == CDI_COMPRESS_ZIP )
     {
       if ( lchunk && (streamptr->filetype == FILETYPE_NC4 || streamptr->filetype == FILETYPE_NC4C) )
         {
@@ -547,7 +547,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
         }
     }
 
-  if ( streamptr->comptype == COMPRESS_SZIP )
+  if ( streamptr->comptype == CDI_COMPRESS_SZIP )
     {
       if ( lchunk && (streamptr->filetype == FILETYPE_NC4 || streamptr->filetype == FILETYPE_NC4C) )
         {

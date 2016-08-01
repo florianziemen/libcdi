@@ -655,10 +655,10 @@ int cgribexScanTimestep1(stream_t * streamptr)
       rstatus = gribRead(fileID, (unsigned char *)gribbuffer, &readsize);
       if ( rstatus ) break;
 
-      comptype = COMPRESS_NONE;
+      comptype = CDI_COMPRESS_NONE;
       if ( gribGetZip(recsize, (unsigned char *)gribbuffer, &unzipsize) > 0 )
 	{
-	  comptype = COMPRESS_SZIP;
+	  comptype = CDI_COMPRESS_SZIP;
 	  unzipsize += 100; /* need 0 to 1 bytes for rounding of bds */
 	  if ( buffersize < (size_t)unzipsize )
 	    {

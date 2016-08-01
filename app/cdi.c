@@ -66,7 +66,7 @@ static int DefaultFileType  = CDI_UNDEFID;
 static int DefaultDataType  = CDI_UNDEFID;
 static int DefaultByteorder = CDI_UNDEFID;
 
-static int comptype  = COMPRESS_NONE;  // Compression type
+static int comptype  = CDI_COMPRESS_NONE;  // Compression type
 static int complevel = 0;              // Compression level
 
 enum datamode {SP_MODE, DP_MODE};
@@ -435,7 +435,7 @@ void printShortinfo(int streamID, int vlistID, int vardis)
 
 	  fprintf(stdout, " %-3s", pstr);
 
-	  if ( vlistInqVarCompType(vlistID, varID) == COMPRESS_NONE )
+	  if ( vlistInqVarCompType(vlistID, varID) == CDI_COMPRESS_NONE )
 	    fprintf(stdout, "  ");
 	  else
 	    fprintf(stdout, "z ");
@@ -712,20 +712,20 @@ void defineCompress(const char *arg)
 
   if      ( strncmp(arg, "szip", len) == 0 )
     {
-      comptype = COMPRESS_SZIP;
+      comptype = CDI_COMPRESS_SZIP;
     }
   else if ( strncmp(arg, "jpeg", len) == 0 )
     {
-      comptype = COMPRESS_JPEG;
+      comptype = CDI_COMPRESS_JPEG;
     }
   else if ( strncmp(arg, "gzip", len) == 0 )
     {
-      comptype = COMPRESS_GZIP;
+      comptype = CDI_COMPRESS_GZIP;
       complevel = 6;
     }
   else if ( strncmp(arg, "zip", 3) == 0 )
     {
-      comptype = COMPRESS_ZIP;
+      comptype = CDI_COMPRESS_ZIP;
       if ( len == 5 && arg[3] == '_' && isdigit(arg[4]) )
 	complevel = atoi(&arg[4]);
       else
@@ -923,7 +923,7 @@ int main(int argc, char *argv[])
 	  if ( DefaultByteorder != CDI_UNDEFID )
 	    streamDefByteorder(streamID2, DefaultByteorder);
 
-	  if ( comptype != COMPRESS_NONE )
+	  if ( comptype != CDI_COMPRESS_NONE )
 	    {
 	      streamDefCompType(streamID2, comptype);
 	      streamDefCompLevel(streamID2, complevel);

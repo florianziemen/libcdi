@@ -121,7 +121,7 @@ void grbCopyRecord(stream_t * streamptr2, stream_t * streamptr1)
       long unzipsize;
       int izip = gribGetZip((long)recsize, gribbuffer, &unzipsize);
 
-      if ( izip == 0 && streamptr2->comptype == COMPRESS_SZIP )
+      if ( izip == 0 && streamptr2->comptype == CDI_COMPRESS_SZIP )
           nbytes = grbSzip(filetype, gribbuffer, nbytes);
     }
 
@@ -178,9 +178,9 @@ void grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
 #endif
     }
 
-  if ( comptype != COMPRESS_JPEG && comptype != COMPRESS_SZIP ) comptype = COMPRESS_NONE;
+  if ( comptype != CDI_COMPRESS_JPEG && comptype != CDI_COMPRESS_SZIP ) comptype = CDI_COMPRESS_NONE;
 
-  if ( filetype == FILETYPE_GRB && comptype == COMPRESS_JPEG )
+  if ( filetype == FILETYPE_GRB && comptype == CDI_COMPRESS_JPEG )
     {
       static int ljpeg_warn = 1;
       if ( ljpeg_warn ) Warning("JPEG compression of GRIB1 records not available!");
@@ -190,7 +190,7 @@ void grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
   size_t nbytes = grbEncode(filetype, memtype, varID, levelID, vlistID, gridID, zaxisID, date, time, tsteptype, numavg,
                             datasize, data, nmiss, &gribbuffer, comptype, gc);
 
-  if ( filetype == FILETYPE_GRB && streamptr->comptype == COMPRESS_SZIP )
+  if ( filetype == FILETYPE_GRB && streamptr->comptype == CDI_COMPRESS_SZIP )
     nbytes = grbSzip(filetype, gribbuffer, nbytes);
 
   size_t (*myFileWrite)(int fileID, const void *restrict buffer,

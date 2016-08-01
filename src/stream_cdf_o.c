@@ -843,7 +843,7 @@ static
 void cdfGridCompress(int fileID, int ncvarid, int gridsize, int filetype, int comptype)
 {
 #if  defined  (HAVE_NETCDF4)
-  if ( gridsize > 1 && comptype == COMPRESS_ZIP && (filetype == FILETYPE_NC4 || filetype == FILETYPE_NC4C) )
+  if ( gridsize > 1 && comptype == CDI_COMPRESS_ZIP && (filetype == FILETYPE_NC4 || filetype == FILETYPE_NC4C) )
     {
       nc_def_var_chunking(fileID, ncvarid, NC_CHUNKED, NULL);
       cdfDefVarDeflate(fileID, ncvarid, 1);

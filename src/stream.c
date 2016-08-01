@@ -872,7 +872,7 @@ void streamDefaultValue ( stream_t * streamptr )
   streamptr->unreduced         = cdiDataUnreduced;
   streamptr->sortname          = cdiSortName;
   streamptr->have_missval      = cdiHaveMissval;
-  streamptr->comptype          = COMPRESS_NONE;
+  streamptr->comptype          = CDI_COMPRESS_NONE;
   streamptr->complevel         = 0;
 
   basetimeInit(&streamptr->basetime);

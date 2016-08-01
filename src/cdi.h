@@ -57,12 +57,12 @@ extern "C" {
 
 /* Compress types */
 
-#define  COMPRESS_NONE            0
-#define  COMPRESS_SZIP            1
-#define  COMPRESS_GZIP            2
-#define  COMPRESS_BZIP2           3
-#define  COMPRESS_ZIP             4
-#define  COMPRESS_JPEG            5
+#define  CDI_COMPRESS_NONE          0
+#define  CDI_COMPRESS_SZIP          1
+#define  CDI_COMPRESS_GZIP          2
+#define  CDI_COMPRESS_BZIP2         3
+#define  CDI_COMPRESS_ZIP           4
+#define  CDI_COMPRESS_JPEG          5
 
 /* external data types */
 
