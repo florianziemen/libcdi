@@ -411,7 +411,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
         }
       else if ( dimorder[id] == 2 && yid != UNDEFID )
         {
-          if ( chunktype == CHUNK_LINES )
+          if ( chunktype == CDI_CHUNK_LINES )
             chunks[ndims] = 1;
           else
             chunks[ndims] = ysize;
@@ -517,7 +517,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
 #if  defined  (HAVE_NETCDF4)
   if ( lchunk && (streamptr->filetype == FILETYPE_NC4 || streamptr->filetype == FILETYPE_NC4C) )
     {
-      if ( chunktype == CHUNK_AUTO )
+      if ( chunktype == CDI_CHUNK_AUTO )
         retval = nc_def_var_chunking(fileID, ncvarid, NC_CHUNKED, NULL);
       else
         retval = nc_def_var_chunking(fileID, ncvarid, NC_CHUNKED, chunks);

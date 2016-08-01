@@ -1909,20 +1909,20 @@ void grid_set_chunktype(grid_t *grid, ncvar_t *ncvar)
       if ( grid->type == GRID_UNSTRUCTURED )
         {
           if ( ncvar->chunks[ndims-1] == grid->size )
-            ncvar->chunktype = CHUNK_GRID;
+            ncvar->chunktype = CDI_CHUNK_GRID;
           else
-            ncvar->chunktype = CHUNK_AUTO;
+            ncvar->chunktype = CDI_CHUNK_AUTO;
         }
       else
         {
           if ( grid->x.size > 1 && grid->y.size > 1 && ndims > 1 &&
                grid->x.size == ncvar->chunks[ndims-1] &&
                grid->y.size == ncvar->chunks[ndims-2] )
-            ncvar->chunktype = CHUNK_GRID;
+            ncvar->chunktype = CDI_CHUNK_GRID;
           else if ( grid->x.size > 1 && grid->x.size == ncvar->chunks[ndims-1] )
-            ncvar->chunktype = CHUNK_LINES;
+            ncvar->chunktype = CDI_CHUNK_LINES;
           else
-            ncvar->chunktype = CHUNK_AUTO;
+            ncvar->chunktype = CDI_CHUNK_AUTO;
         }
     }
 }

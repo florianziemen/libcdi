@@ -28,7 +28,7 @@ int cdiDefaultModelID  = CDI_UNDEFID;
 int cdiDefaultTableID  = CDI_UNDEFID;
 //int cdiNcMissingValue  = CDI_UNDEFID;
 int cdiNcChunksizehint = CDI_UNDEFID;
-int cdiChunkType       = CHUNK_GRID;
+int cdiChunkType       = CDI_CHUNK_GRID;
 int cdiSplitLtype105   = CDI_UNDEFID;
 
 int cdiIgnoreAttCoordinates = FALSE;
@@ -237,9 +237,9 @@ void cdiSetChunk(const char *chunkAlgo)
   //size_t len = strlen(chunkAlgo);
   int algo = -1;
 
-  if      ( strcmp("auto",  chunkAlgo)   == 0 ) algo = CHUNK_AUTO;
-  else if ( strcmp("grid",  chunkAlgo)   == 0 ) algo = CHUNK_GRID;
-  else if ( strcmp("lines", chunkAlgo)   == 0 ) algo = CHUNK_LINES;
+  if      ( strcmp("auto",  chunkAlgo)   == 0 ) algo = CDI_CHUNK_AUTO;
+  else if ( strcmp("grid",  chunkAlgo)   == 0 ) algo = CDI_CHUNK_GRID;
+  else if ( strcmp("lines", chunkAlgo)   == 0 ) algo = CDI_CHUNK_LINES;
   /*
   else if ( (pch = strstr(chunkAlgo,"x")) != 0 )
     {

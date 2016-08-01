@@ -120,9 +120,9 @@ extern "C" {
 
 /* Chunks */
 
-#define  CHUNK_AUTO                 1  /* use default chunk size                                */
-#define  CHUNK_GRID                 2
-#define  CHUNK_LINES                3
+#define  CDI_CHUNK_AUTO             1  /* use default chunk size                                */
+#define  CDI_CHUNK_GRID             2
+#define  CDI_CHUNK_LINES            3
 
 /* GRID types */
 
