@@ -588,9 +588,14 @@ void iegAddRecord(stream_t *streamptr, int param, int *pdb, int *gdb, double *vc
   record->ilevel2  = level2;
   record->ltype    = IEG_P_LevelType(pdb);
 
-  int gridtype =
-   ( IEG_G_GridType(gdb) == 0 || IEG_G_GridType(gdb) == 10 ) ? GRID_LONLAT :
-    ( IEG_G_GridType(gdb) == 4 ) ? GRID_GAUSSIAN : GRID_GENERIC;
+#ifdef TEST_PROJECTION
+  int gridtype = (IEG_G_GridType(gdb) == 0) ? GRID_LONLAT :
+                 (IEG_G_GridType(gdb) == 10) ? GRID_PROJECTION :
+                 (IEG_G_GridType(gdb) == 4) ? GRID_GAUSSIAN : GRID_GENERIC;
+#else
+  int gridtype = (IEG_G_GridType(gdb) == 0 || IEG_G_GridType(gdb) == 10) ? GRID_LONLAT :
+                 (IEG_G_GridType(gdb) == 4) ? GRID_GAUSSIAN : GRID_GENERIC;
+#endif
 
   grid_t *grid = (grid_t *)Malloc(sizeof (*grid));
   grid_init(grid);
@@ -648,27 +653,33 @@ void iegAddRecord(stream_t *streamptr, int param, int *pdb, int *gdb, double *vc
   }
 
   grid->isRotated = FALSE;
+  double xpole = 0, ypole = 0;
   if ( IEG_G_GridType(gdb) == 10 )
     {
-      grid->isRotated = TRUE;
-      grid->rll.ypole = - IEG_G_LatSP(gdb) * resfac;
-      grid->rll.xpole =   IEG_G_LonSP(gdb) * resfac - 180;
-      grid->rll.angle = 0;
+      xpole =   IEG_G_LonSP(gdb) * resfac - 180;
+      ypole = - IEG_G_LatSP(gdb) * resfac;
+      if ( gridtype == GRID_LONLAT )
+        {
+          grid->isRotated = TRUE;
+          grid->rll.xpole = xpole;
+          grid->rll.ypole = ypole;
+          grid->rll.angle = 0;
+        }
     }
 
   struct addIfNewRes gridAdded = cdiVlistAddGridIfNew(vlistID, grid, 0);
   int gridID = gridAdded.Id;
-  if (!gridAdded.isNew) Free(grid);
+  if ( !gridAdded.isNew ) Free(grid);
+  else if ( gridtype == GRID_PROJECTION ) gridDefProjParamRLL(gridID, xpole, ypole, 0);
 
   int leveltype = iegGetZaxisType(IEG_P_LevelType(pdb));
-
   if ( leveltype == ZAXIS_HYBRID )
     {
       double tmpvct[100];
       size_t vctsize = (size_t)IEG_G_NumVCP(gdb);
 
-      for (size_t i = 0; i < vctsize/2; i++ ) tmpvct[i] = vct[i];
-      for (size_t i = 0; i < vctsize/2; i++ ) tmpvct[i+vctsize/2] = vct[i+50];
+      for ( size_t i = 0; i < vctsize/2; i++ ) tmpvct[i] = vct[i];
+      for  (size_t i = 0; i < vctsize/2; i++ ) tmpvct[i+vctsize/2] = vct[i+50];
 
       varDefVCT(vctsize, tmpvct);
     }

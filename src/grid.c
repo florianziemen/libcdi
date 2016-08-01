@@ -1826,6 +1826,15 @@ void gridInqProjParamRLL(int gridID, double *xpole, double *ypole, double *angle
     Warning("rotated_latitude_longitude mapping parameter missing!");
 }
 
+
+void gridDefProjParamRLL(int gridID, double xpole, double ypole, double angle)
+{
+  cdiGridDefKeyStr(gridID, CDI_KEY_MAPPING, CDI_MAX_NAME, "rotated_latitude_longitude");
+  vlistDefAttFlt(gridID, CDI_GLOBAL, "grid_north_pole_longitude", DATATYPE_FLT64, 1, &xpole);
+  vlistDefAttFlt(gridID, CDI_GLOBAL, "grid_north_pole_latitude", DATATYPE_FLT64, 1, &ypole);
+  if ( IS_NOT_EQUAL(angle, 0) ) vlistDefAttFlt(gridID, CDI_GLOBAL, "north_pole_grid_longitude", DATATYPE_FLT64, 1, &angle);
+}
+
 /*
 @Function
 @Title
