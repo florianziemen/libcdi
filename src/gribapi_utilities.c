@@ -429,7 +429,11 @@ int gribapiGetGridType(grib_handle *gh)
         gridtype = ( gribGetLong(gh, "Ni") == (long) GRIB_MISSING_LONG ) ? GRID_GAUSSIAN_REDUCED : GRID_GAUSSIAN;
         break;
 
+#ifdef TEST_PROJECTION
+      case GRIB2_GTYPE_LATLON_ROT:   gridtype = GRID_PROJECTION; break;
+#else
       case GRIB2_GTYPE_LATLON_ROT:   gridtype = GRID_LONLAT; break;
+#endif
       case GRIB2_GTYPE_LCC:          gridtype = GRID_LCC; break;
       case GRIB2_GTYPE_SPECTRAL:     gridtype = GRID_SPECTRAL; break;
       case GRIB2_GTYPE_GME:          gridtype = GRID_GME; break;
@@ -450,6 +454,7 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
 {
   long editionNumber = gribEditionNumber(gh);
   int gridtype = gribapiGetGridType(gh);
+  int projtype = (gridtype == GRID_PROJECTION && gribapiGetIsRotated(gh)) ? CDI_PROJ_RLL : CDI_UNDEFID;
   /*
   if ( streamptr->unreduced && gridtype == GRID_GAUSSIAN_REDUCED )
     {
@@ -466,301 +471,259 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
   long numberOfPoints;
   FAIL_ON_GRIB_ERROR(grib_get_long, gh, "numberOfPoints", &numberOfPoints);
 
-  switch (gridtype)
+  long lpar;
+
+  if ( gridtype == GRID_LONLAT || gridtype == GRID_GAUSSIAN || projtype == CDI_PROJ_RLL )
     {
-    case GRID_LONLAT:
-    case GRID_GAUSSIAN:
+      long nlon, nlat;
+      FAIL_ON_GRIB_ERROR(grib_get_long, gh, "Ni", &nlon);
+      FAIL_ON_GRIB_ERROR(grib_get_long, gh, "Nj", &nlat);
+
+      if ( gridtype == GRID_GAUSSIAN )
+        {
+          FAIL_ON_GRIB_ERROR(grib_get_long, gh, "numberOfParallelsBetweenAPoleAndTheEquator", &lpar);
+          grid->np = (int)lpar;
+        }
+
+      if ( numberOfPoints != nlon*nlat )
+        Error("numberOfPoints (%ld) and gridSize (%ld) differ!", numberOfPoints, nlon*nlat);
+
+      grid->size  = (int)numberOfPoints;
+      grid->x.size = (int)nlon;
+      grid->y.size = (int)nlat;
+      grid->x.inc  = 0;
+      grid->y.inc  = 0;
+      grid->x.flag = 0;
+      FAIL_ON_GRIB_ERROR(grib_get_double, gh, "longitudeOfFirstGridPointInDegrees", &grid->x.first);
+      FAIL_ON_GRIB_ERROR(grib_get_double, gh, "longitudeOfLastGridPointInDegrees",  &grid->x.last);
+      FAIL_ON_GRIB_ERROR(grib_get_double, gh, "latitudeOfFirstGridPointInDegrees",  &grid->y.first);
+      FAIL_ON_GRIB_ERROR(grib_get_double, gh, "latitudeOfLastGridPointInDegrees",   &grid->y.last);
+      if ( nlon > 1 )
+        FAIL_ON_GRIB_ERROR(grib_get_double, gh, "iDirectionIncrementInDegrees", &grid->x.inc);
+      if ( gridtype == GRID_LONLAT && nlat > 1 )
+        FAIL_ON_GRIB_ERROR(grib_get_double, gh, "jDirectionIncrementInDegrees", &grid->y.inc);
+
+      if ( grid->x.inc < -999 || grid->x.inc > 999 ) grid->x.inc = 0;
+      if ( grid->y.inc < -999 || grid->y.inc > 999 ) grid->y.inc = 0;
+
+      if ( grid->y.inc > 0 && grid->y.first > grid->y.last ) grid->y.inc = -grid->y.inc;
+
+      /* if ( IS_NOT_EQUAL(grid->x.first, 0) || IS_NOT_EQUAL(grid->x.last, 0) ) */
       {
-        long nlon, nlat;
-        FAIL_ON_GRIB_ERROR(grib_get_long, gh, "Ni", &nlon);
-        FAIL_ON_GRIB_ERROR(grib_get_long, gh, "Nj", &nlat);
-
-        if ( gridtype == GRID_GAUSSIAN )
+        if ( grid->x.size > 1 )
           {
-            long lpar;
-            FAIL_ON_GRIB_ERROR(grib_get_long, gh, "numberOfParallelsBetweenAPoleAndTheEquator", &lpar);
-            grid->np = (int)lpar;
-          }
+            if ( (grid->x.first >= grid->x.last) && (grid->x.first >= 180) ) grid->x.first -= 360;
 
-        if ( numberOfPoints != nlon*nlat )
-          Error("numberOfPoints (%ld) and gridSize (%ld) differ!", numberOfPoints, nlon*nlat);
-
-        /* FIXME: assert(numberOfPoints <= INT_MAX && numberOfPoints >= INT_MIN) */
-        grid->size  = (int)numberOfPoints;
-        grid->x.size = (int)nlon;
-        grid->y.size = (int)nlat;
-        grid->x.inc  = 0;
-        grid->y.inc  = 0;
-        grid->x.flag = 0;
-        FAIL_ON_GRIB_ERROR(grib_get_double, gh, "longitudeOfFirstGridPointInDegrees", &grid->x.first);
-        FAIL_ON_GRIB_ERROR(grib_get_double, gh, "longitudeOfLastGridPointInDegrees",  &grid->x.last);
-        FAIL_ON_GRIB_ERROR(grib_get_double, gh, "latitudeOfFirstGridPointInDegrees",  &grid->y.first);
-        FAIL_ON_GRIB_ERROR(grib_get_double, gh, "latitudeOfLastGridPointInDegrees",   &grid->y.last);
-        if ( nlon > 1 )
-          FAIL_ON_GRIB_ERROR(grib_get_double, gh, "iDirectionIncrementInDegrees", &grid->x.inc);
-        if ( gridtype == GRID_LONLAT && nlat > 1 )
-          FAIL_ON_GRIB_ERROR(grib_get_double, gh, "jDirectionIncrementInDegrees", &grid->y.inc);
-
-        if ( grid->x.inc < -999 || grid->x.inc > 999 ) grid->x.inc = 0;
-        if ( grid->y.inc < -999 || grid->y.inc > 999 ) grid->y.inc = 0;
-
-        if ( grid->y.inc > 0 && grid->y.first > grid->y.last ) grid->y.inc = -grid->y.inc;
-
-        /* if ( IS_NOT_EQUAL(grid->x.first, 0) || IS_NOT_EQUAL(grid->x.last, 0) ) */
-          {
-            if ( grid->x.size > 1 )
+            if ( editionNumber <= 1 )
               {
-                if ( (grid->x.first >= grid->x.last) && (grid->x.first >= 180) ) grid->x.first -= 360;
-
-                if ( editionNumber <= 1 )
+                /* correct xinc if necessary */
+                if ( IS_EQUAL(grid->x.first, 0) && grid->x.last > 354 )
                   {
-                    /* correct xinc if necessary */
-                    if ( IS_EQUAL(grid->x.first, 0) && grid->x.last > 354 )
+                    double xinc = 360. / grid->x.size;
+                    if ( fabs(grid->x.inc-xinc) > 0.0 )
                       {
-                        double xinc = 360. / grid->x.size;
-
-                        if ( fabs(grid->x.inc-xinc) > 0.0 )
-                          {
-                            grid->x.inc = xinc;
-                            if ( CDI_Debug ) Message("set xinc to %g", grid->x.inc);
-                          }
+                        grid->x.inc = xinc;
+                        if ( CDI_Debug ) Message("set xinc to %g", grid->x.inc);
                       }
                   }
               }
-            grid->x.flag = 2;
           }
-        grid->y.flag = 0;
-        /* if ( IS_NOT_EQUAL(grid->y.first, 0) || IS_NOT_EQUAL(grid->y.last, 0) ) */
-          {
-            if ( grid->y.size > 1 )
-              {
-                if ( editionNumber <= 1 )
-                  {
-                  }
-              }
-            grid->y.flag = 2;
-          }
-        break;
+        grid->x.flag = 2;
       }
-    case GRID_GAUSSIAN_REDUCED:
+      grid->y.flag = 0;
+      /* if ( IS_NOT_EQUAL(grid->y.first, 0) || IS_NOT_EQUAL(grid->y.last, 0) ) */
       {
-        long lpar;
-        FAIL_ON_GRIB_ERROR(grib_get_long, gh, "numberOfParallelsBetweenAPoleAndTheEquator", &lpar);
-        /* FIXME: assert(lpar <= INT_MAX && lpar >= INT_MIN) */
-        grid->np = (int)lpar;
-
-        FAIL_ON_GRIB_ERROR(grib_get_long, gh, "Nj", &lpar);
-        /* FIXME: assert(lpar <= INT_MAX && lpar >= INT_MIN) */
-        int nlat = (int)lpar;
-
-        /* FIXME: assert(numberOfPoints <= INT_MAX && numberOfPoints >= INT_MIN) */
-        grid->size   = (int)numberOfPoints;
-
-        grid->nrowlon = nlat;
-        grid->rowlon = (int *) Malloc((size_t)nlat * sizeof (int));
-        long *pl     = (long *) Malloc((size_t)nlat * sizeof (long));
-        size_t dummy = (size_t)nlat;
-        FAIL_ON_GRIB_ERROR(grib_get_long_array, gh, "pl", pl, &dummy);
-        /* FIXME: assert(pl[i] >= INT_MIN && pl[i] <= INT_MIN) */
-        for ( int i = 0; i < nlat; ++i ) grid->rowlon[i] = (int)pl[i];
-        Free(pl);
-
-        grid->y.size  = nlat;
-        grid->x.inc   = 0;
-        grid->y.inc   = 0;
-        grid->x.flag  = 0;
-        FAIL_ON_GRIB_ERROR(grib_get_double, gh, "longitudeOfFirstGridPointInDegrees", &grid->x.first);
-        FAIL_ON_GRIB_ERROR(grib_get_double, gh, "longitudeOfLastGridPointInDegrees",  &grid->x.last);
-        FAIL_ON_GRIB_ERROR(grib_get_double, gh, "latitudeOfFirstGridPointInDegrees",  &grid->y.first);
-        FAIL_ON_GRIB_ERROR(grib_get_double, gh, "latitudeOfLastGridPointInDegrees",   &grid->y.last);
-
-        // FAIL_ON_GRIB_ERROR(grib_get_double, gh, "iDirectionIncrementInDegrees", &grid->x.inc);
-        // if ( IS_EQUAL(grid->x.inc, GRIB_MISSING_DOUBLE) ) grid->x.inc = 0;
-
-        /* if ( IS_NOT_EQUAL(grid->x.first, 0) || IS_NOT_EQUAL(grid->x.last, 0) ) */
+        if ( grid->y.size > 1 )
           {
-            if ( grid->x.size > 1 )
+            if ( editionNumber <= 1 )
               {
-                if ( (grid->x.first > grid->x.last) && (grid->x.first >= 180) ) grid->x.first -= 360;
+              }
+          }
+        grid->y.flag = 2;
+      }
+    }
+  else if ( gridtype == GRID_GAUSSIAN_REDUCED )
+    {
+      FAIL_ON_GRIB_ERROR(grib_get_long, gh, "numberOfParallelsBetweenAPoleAndTheEquator", &lpar);
+      grid->np = (int)lpar;
 
-                if ( editionNumber <= 1 )
+      FAIL_ON_GRIB_ERROR(grib_get_long, gh, "Nj", &lpar);
+      int nlat = (int)lpar;
+
+      grid->size   = (int)numberOfPoints;
+
+      grid->nrowlon = nlat;
+      grid->rowlon = (int *) Malloc((size_t)nlat * sizeof (int));
+      long *pl     = (long *) Malloc((size_t)nlat * sizeof (long));
+      size_t dummy = (size_t)nlat;
+      FAIL_ON_GRIB_ERROR(grib_get_long_array, gh, "pl", pl, &dummy);
+      for ( int i = 0; i < nlat; ++i ) grid->rowlon[i] = (int)pl[i];
+      Free(pl);
+
+      grid->y.size  = nlat;
+      grid->x.inc   = 0;
+      grid->y.inc   = 0;
+      grid->x.flag  = 0;
+      FAIL_ON_GRIB_ERROR(grib_get_double, gh, "longitudeOfFirstGridPointInDegrees", &grid->x.first);
+      FAIL_ON_GRIB_ERROR(grib_get_double, gh, "longitudeOfLastGridPointInDegrees",  &grid->x.last);
+      FAIL_ON_GRIB_ERROR(grib_get_double, gh, "latitudeOfFirstGridPointInDegrees",  &grid->y.first);
+      FAIL_ON_GRIB_ERROR(grib_get_double, gh, "latitudeOfLastGridPointInDegrees",   &grid->y.last);
+
+      // FAIL_ON_GRIB_ERROR(grib_get_double, gh, "iDirectionIncrementInDegrees", &grid->x.inc);
+      // if ( IS_EQUAL(grid->x.inc, GRIB_MISSING_DOUBLE) ) grid->x.inc = 0;
+
+      /* if ( IS_NOT_EQUAL(grid->x.first, 0) || IS_NOT_EQUAL(grid->x.last, 0) ) */
+      {
+        if ( grid->x.size > 1 )
+          {
+            if ( (grid->x.first > grid->x.last) && (grid->x.first >= 180) ) grid->x.first -= 360;
+
+            if ( editionNumber <= 1 )
+              {
+                /* correct xinc if necessary */
+                if ( IS_EQUAL(grid->x.first, 0) && grid->x.last > 354 )
                   {
-                    /* correct xinc if necessary */
-                    if ( IS_EQUAL(grid->x.first, 0) && grid->x.last > 354 )
+                    double xinc = 360. / grid->x.size;
+                    if ( fabs(grid->x.inc-xinc) > 0.0 )
                       {
-                        double xinc = 360. / grid->x.size;
-
-                        if ( fabs(grid->x.inc-xinc) > 0.0 )
-                          {
-                            grid->x.inc = xinc;
-                            if ( CDI_Debug ) Message("set xinc to %g", grid->x.inc);
-                          }
+                        grid->x.inc = xinc;
+                        if ( CDI_Debug ) Message("set xinc to %g", grid->x.inc);
                       }
                   }
               }
-            grid->x.flag = 2;
           }
-        grid->y.flag = 0;
-        /* if ( IS_NOT_EQUAL(grid->y.first, 0) || IS_NOT_EQUAL(grid->y.last, 0) ) */
+        grid->x.flag = 2;
+      }
+      grid->y.flag = 0;
+      /* if ( IS_NOT_EQUAL(grid->y.first, 0) || IS_NOT_EQUAL(grid->y.last, 0) ) */
+      {
+        if ( grid->y.size > 1 )
           {
-            if ( grid->y.size > 1 )
+            if ( editionNumber <= 1 )
               {
-                if ( editionNumber <= 1 )
-                  {
-                  }
               }
-            grid->y.flag = 2;
           }
-        break;
+        grid->y.flag = 2;
       }
-    case GRID_LCC:
-      {
-        int nlon, nlat;
-        long lpar;
+    }
+  else if ( gridtype == GRID_LCC )
+    {
+      int nlon, nlat;
+      FAIL_ON_GRIB_ERROR(grib_get_long, gh, "Nx", &lpar);
+      nlon = (int)lpar;
+      FAIL_ON_GRIB_ERROR(grib_get_long, gh, "Ny", &lpar);
+      nlat = (int)lpar;
 
-        FAIL_ON_GRIB_ERROR(grib_get_long, gh, "Nx", &lpar);
-        nlon = (int)lpar;
-        FAIL_ON_GRIB_ERROR(grib_get_long, gh, "Ny", &lpar);
-        nlat = (int)lpar;
+      if ( numberOfPoints != nlon*nlat )
+        Error("numberOfPoints (%d) and gridSize (%d) differ!", (int)numberOfPoints, nlon*nlat);
 
-        if ( numberOfPoints != nlon*nlat )
-          Error("numberOfPoints (%d) and gridSize (%d) differ!", (int)numberOfPoints, nlon*nlat);
+      grid->size  = (int)numberOfPoints;
+      grid->x.size = nlon;
+      grid->y.size = nlat;
 
-        grid->size  = (int)numberOfPoints;
-        grid->x.size = nlon;
-        grid->y.size = nlat;
+      FAIL_ON_GRIB_ERROR(grib_get_double, gh, "DxInMetres", &grid->lcc.xinc);
+      FAIL_ON_GRIB_ERROR(grib_get_double, gh, "DyInMetres", &grid->lcc.yinc);
+      FAIL_ON_GRIB_ERROR(grib_get_double, gh, "longitudeOfFirstGridPointInDegrees", &grid->lcc.originLon);
+      FAIL_ON_GRIB_ERROR(grib_get_double, gh, "latitudeOfFirstGridPointInDegrees", &grid->lcc.originLat);
+      FAIL_ON_GRIB_ERROR(grib_get_double, gh, "LoVInDegrees", &grid->lcc.lonParY);
+      FAIL_ON_GRIB_ERROR(grib_get_double, gh, "Latin1InDegrees", &grid->lcc.lat1);
+      FAIL_ON_GRIB_ERROR(grib_get_double, gh, "Latin2InDegrees", &grid->lcc.lat2);
 
-        FAIL_ON_GRIB_ERROR(grib_get_double, gh, "DxInMetres", &grid->lcc.xinc);
-        FAIL_ON_GRIB_ERROR(grib_get_double, gh, "DyInMetres", &grid->lcc.yinc);
-        FAIL_ON_GRIB_ERROR(grib_get_double, gh, "longitudeOfFirstGridPointInDegrees", &grid->lcc.originLon);
-        FAIL_ON_GRIB_ERROR(grib_get_double, gh, "latitudeOfFirstGridPointInDegrees", &grid->lcc.originLat);
-        FAIL_ON_GRIB_ERROR(grib_get_double, gh, "LoVInDegrees", &grid->lcc.lonParY);
-        FAIL_ON_GRIB_ERROR(grib_get_double, gh, "Latin1InDegrees", &grid->lcc.lat1);
-        FAIL_ON_GRIB_ERROR(grib_get_double, gh, "Latin2InDegrees", &grid->lcc.lat2);
+      if ( editionNumber <= 1 )
+        {
+          FAIL_ON_GRIB_ERROR(grib_get_long, gh, "projectionCenterFlag", &lpar);
+          grid->lcc.projflag  = (int) lpar;
+          FAIL_ON_GRIB_ERROR(grib_get_long, gh, "scanningMode", &lpar);
+          grid->lcc.scanflag  = (int) lpar;
+        }
 
-        if ( editionNumber <= 1 )
-          {
-            FAIL_ON_GRIB_ERROR(grib_get_long, gh, "projectionCenterFlag", &lpar);
-            grid->lcc.projflag  = (int) lpar;
-            FAIL_ON_GRIB_ERROR(grib_get_long, gh, "scanningMode", &lpar);
-            grid->lcc.scanflag  = (int) lpar;
-          }
+      grid->x.flag = 0;
+      grid->y.flag = 0;
+    }
+  else if ( gridtype == GRID_SPECTRAL )
+    {
+      size_t len = 256;
+      char typeOfPacking[256];
+      FAIL_ON_GRIB_ERROR(grib_get_string, gh, "packingType", typeOfPacking, &len);
+      grid->lcomplex = 0;
+      if ( strncmp(typeOfPacking, "spectral_complex", len) == 0 ) grid->lcomplex = 1;
 
-        grid->x.flag = 0;
-        grid->y.flag = 0;
+      grid->size  = (int)datasize;
 
-        break;
-      }
-    case GRID_SPECTRAL:
-      {
-        size_t len = 256;
-        char typeOfPacking[256];
-        FAIL_ON_GRIB_ERROR(grib_get_string, gh, "packingType", typeOfPacking, &len);
-        grid->lcomplex = 0;
-        if ( strncmp(typeOfPacking, "spectral_complex", len) == 0 ) grid->lcomplex = 1;
-
-        /* FIXME: assert(datasize >= INT_MIN && datasize <= INT_MAX) */
-        grid->size  = (int)datasize;
-        long lpar;
-        FAIL_ON_GRIB_ERROR(grib_get_long, gh, "J", &lpar);
-        /* FIXME: assert(lpar >= INT_MIN && lpar <= INT_MAX) */
-        grid->trunc = (int)lpar;
-
-        break;
-      }
-    case GRID_GME:
-      {
-        /* FIXME: assert(numberOfPoints <= INT_MAX && numberOfPoints >= INT_MIN) */
-        grid->size  = (int)numberOfPoints;
-        long lpar;
-        /* FIXME: assert(lpar >= INT_MIN && lpar <= INT_MAX) */
-        if ( grib_get_long(gh, "nd", &lpar) == 0 ) grid->gme.nd  = (int)lpar;
-        /* FIXME: assert(lpar >= INT_MIN && lpar <= INT_MAX) */
-        if ( grib_get_long(gh, "Ni", &lpar) == 0 ) grid->gme.ni  = (int)lpar;
-        /* FIXME: assert(lpar >= INT_MIN && lpar <= INT_MAX) */
-        if ( grib_get_long(gh, "n2", &lpar) == 0 ) grid->gme.ni2 = (int)lpar;
-        /* FIXME: assert(lpar >= INT_MIN && lpar <= INT_MAX) */
-        if ( grib_get_long(gh, "n3", &lpar) == 0 ) grid->gme.ni3 = (int)lpar;
-
-        break;
-      }
-    case GRID_UNSTRUCTURED:
-      {
-        unsigned char uuid[CDI_UUID_SIZE];
-        /*
+      FAIL_ON_GRIB_ERROR(grib_get_long, gh, "J", &lpar);
+      grid->trunc = (int)lpar;
+    }
+  else if ( gridtype == GRID_GME )
+    {
+      grid->size  = (int)numberOfPoints;
+      if ( grib_get_long(gh, "nd", &lpar) == 0 ) grid->gme.nd  = (int)lpar;
+      if ( grib_get_long(gh, "Ni", &lpar) == 0 ) grid->gme.ni  = (int)lpar;
+      if ( grib_get_long(gh, "n2", &lpar) == 0 ) grid->gme.ni2 = (int)lpar;
+      if ( grib_get_long(gh, "n3", &lpar) == 0 ) grid->gme.ni3 = (int)lpar;
+    }
+  else if ( gridtype == GRID_UNSTRUCTURED )
+    {
+      unsigned char uuid[CDI_UUID_SIZE];
+      /*
         char reference_link[8192];
         size_t len = sizeof(reference_link);
         reference_link[0] = 0;
-        */
+      */
+      grid->size  = (int)numberOfPoints;
 
-        /* FIXME: assert(numberOfPoints <= INT_MAX && numberOfPoints >= INT_MIN) */
-            grid->size  = (int)numberOfPoints;
-        long lpar;
-        if ( grib_get_long(gh, "numberOfGridUsed", &lpar) == 0 )
-          {
-            /* FIXME: assert(lpar <= INT_MAX && lpar >= INT_MIN) */
-            grid->number   = (int)lpar;
-            /* FIXME: assert(lpar <= INT_MAX && lpar >= INT_MIN) */
-            if ( grib_get_long(gh, "numberOfGridInReference", &lpar) == 0 )
-              grid->position = (int)lpar;
-            /*
+      if ( grib_get_long(gh, "numberOfGridUsed", &lpar) == 0 )
+        {
+          grid->number   = (int)lpar;
+          if ( grib_get_long(gh, "numberOfGridInReference", &lpar) == 0 )
+            grid->position = (int)lpar;
+          /*
             if ( grib_get_string(gh, "gridDescriptionFile", reference_link, &len) == 0 )
-              {
-                if ( strncmp(reference_link, "file://", 7) == 0 )
-                  grid->reference = strdupx(reference_link);
-              }
-            */
-            size_t len = (size_t)CDI_UUID_SIZE;
-            if ( grib_get_bytes(gh, "uuidOfHGrid", uuid, &len) == 0)
-              {
-                memcpy(grid->uuid, uuid, CDI_UUID_SIZE);
-              }
-          }
-        break;
-      }
-    case GRID_GENERIC:
-      {
-        int nlon = 0, nlat = 0;
-        long lpar;
-        /* FIXME: assert(lpar <= INT_MAX && lpar >= INT_MIN) */
-        if ( grib_get_long(gh, "Ni", &lpar) == 0 ) nlon = (int)lpar;
-        /* FIXME: assert(lpar <= INT_MAX && lpar >= INT_MIN) */
-        if ( grib_get_long(gh, "Nj", &lpar) == 0 ) nlat = (int)lpar;
+            {
+            if ( strncmp(reference_link, "file://", 7) == 0 )
+            grid->reference = strdupx(reference_link);
+            }
+          */
+          size_t len = (size_t)CDI_UUID_SIZE;
+          if ( grib_get_bytes(gh, "uuidOfHGrid", uuid, &len) == 0)
+            {
+              memcpy(grid->uuid, uuid, CDI_UUID_SIZE);
+            }
+        }
+    }
+  else if ( gridtype == GRID_GENERIC )
+    {
+      int nlon = 0, nlat = 0;
+      if ( grib_get_long(gh, "Ni", &lpar) == 0 ) nlon = (int)lpar;
+      if ( grib_get_long(gh, "Nj", &lpar) == 0 ) nlat = (int)lpar;
 
-        /* FIXME: assert(numberOfPoints <= INT_MAX && numberOfPoints >= INT_MIN) */
-        grid->size  = (int)numberOfPoints;
+      grid->size  = (int)numberOfPoints;
 
-        if ( nlon > 0 && nlat > 0 && nlon*nlat == grid->size )
-          {
-            grid->x.size = nlon;
-            grid->y.size = nlat;
-          }
-        else
-          {
-            grid->x.size = 0;
-            grid->y.size = 0;
-          }
-
-        break;
-      }
-    default:
-      {
-        Error("Unsupported grid type: %s", gridNamePtr(gridtype));
-        break;
-      }
+      if ( nlon > 0 && nlat > 0 && nlon*nlat == grid->size )
+        {
+          grid->x.size = nlon;
+          grid->y.size = nlat;
+        }
+      else
+        {
+          grid->x.size = 0;
+          grid->y.size = 0;
+        }
+    }
+  else
+    {
+      Error("Unsupported grid type: %s", gridNamePtr(gridtype));
     }
 
   grid->isRotated = FALSE;
   if ( gribapiGetIsRotated(gh) )
     {
-      double xpole, ypole, angle;
+      double xpole = 0, ypole = 0, angle = 0;
       grid->isRotated = TRUE;
       FAIL_ON_GRIB_ERROR(grib_get_double, gh, "latitudeOfSouthernPoleInDegrees",  &ypole);
       FAIL_ON_GRIB_ERROR(grib_get_double, gh, "longitudeOfSouthernPoleInDegrees", &xpole);
       FAIL_ON_GRIB_ERROR(grib_get_double, gh, "angleOfRotation", &angle);
-      /* change from south to north pole */
-      if ( fabs(ypole) > 0 ) ypole = -ypole;
       xpole =  xpole - 180;
+      if ( fabs(ypole) > 0 ) ypole = -ypole; // change from south to north pole
       if ( fabs(angle) > 0 ) angle = -angle;
       grid->rll.xpole = xpole;
       grid->rll.ypole = ypole;
@@ -768,6 +731,7 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
     }
 
   grid->type  = gridtype;
+  grid->projtype  = projtype;
 }
 #endif
 /*

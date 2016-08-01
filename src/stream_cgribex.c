@@ -164,6 +164,7 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, double *fsec2, int *isec4, 
 
   grid_init(grid);
   cdiGridTypeInit(grid, gridtype, 0);
+
   if ( gridtype == GRID_LONLAT || gridtype == GRID_GAUSSIAN || projtype == CDI_PROJ_RLL )
     {
       if ( ISEC4_NumValues != ISEC2_NumLon*ISEC2_NumLat )

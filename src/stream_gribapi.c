@@ -459,12 +459,24 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
   //       I. e. kick the fixed size array and allocate enough space, whatever that may be.
   strncpy(record->varname, varname, sizeof(record->varname));
 
-  grid_t *grid = (grid_t *)Malloc(sizeof (*grid));
+  grid_t *grid = (grid_t *)Malloc(sizeof(*grid));
   gribapiGetGrid(gh, grid);
 
   struct addIfNewRes gridAdded = cdiVlistAddGridIfNew(vlistID, grid, 0);
   int gridID = gridAdded.Id;
-  if (!gridAdded.isNew) Free(grid);
+  if ( !gridAdded.isNew ) Free(grid);
+  else if ( grid->projtype == CDI_PROJ_RLL )
+    {
+      double xpole = 0, ypole = 0, angle = 0;
+      grib_get_double(gh, "latitudeOfSouthernPoleInDegrees",  &ypole);
+      grib_get_double(gh, "longitudeOfSouthernPoleInDegrees", &xpole);
+      grib_get_double(gh, "angleOfRotation", &angle);
+      xpole =  xpole - 180;
+      if ( fabs(ypole) > 0 ) ypole = -ypole; // change from south to north pole
+      if ( fabs(angle) > 0 ) angle = -angle;
+
+      gridDefProjParamRLL(gridID, xpole, ypole, angle);
+    }
 
   int zaxistype = gribapiGetZaxisType(gribEditionNumber(gh), leveltype1);
 
