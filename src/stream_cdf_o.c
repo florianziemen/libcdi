@@ -811,8 +811,8 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridindex, int ndims,
     ncgrid[gridindex].ydimID = dimID;
 }
 
-static void
-finishCyclicXBounds(double *pbounds, size_t dimlen, const double *pvals)
+static
+void finishCyclicXBounds(double *pbounds, size_t dimlen, const double *pvals)
 {
   pbounds[0] = (pvals[0] + pvals[dimlen-1]-360)*0.5;
   pbounds[2*dimlen-1] = (pvals[dimlen-1] + pvals[0]+360)*0.5;
@@ -825,8 +825,8 @@ void cdfDefXaxis(stream_t *streamptr, int gridID, int gridindex, int ndims)
                    CDI_KEY_XDIMNAME, 'X', finishCyclicXBounds);
 }
 
-static void
-finishCyclicYBounds(double *pbounds, size_t dimlen, const double *pvals)
+static
+void finishCyclicYBounds(double *pbounds, size_t dimlen, const double *pvals)
 {
   pbounds[0] = copysign(90.0, pvals[0]);
   pbounds[2*dimlen-1] = copysign(90.0, pvals[dimlen-1]);
@@ -1940,13 +1940,12 @@ void cdf_def_mapping(stream_t *streamptr, int gridID)
     {
       char gmapvarname[CDI_MAX_NAME]; gmapvarname[0] = 0;
       cdiGridInqKeyStr(gridID, CDI_KEY_MAPNAME, CDI_MAX_NAME, gmapvarname);
-      if ( !gmapvarname[0] ) strcpy(gmapvarname, "dummy");
 
       int fileID = streamptr->fileID;
       cdf_redef(fileID);
 
       int ncvarid;
-      int ncerrcode = nc_def_var(fileID, gmapvarname, (nc_type) NC_CHAR, 0, NULL, &ncvarid);
+      int ncerrcode = nc_def_var(fileID, gmapvarname, (nc_type) NC_INT, 0, NULL, &ncvarid);
       if ( ncerrcode == NC_NOERR )
         cdfDefineAttributes(gridID, CDI_GLOBAL, fileID, ncvarid);
 

@@ -142,9 +142,9 @@ extern "C" {
 #define  GRID_SINUSOIDAL           14  /* Sinusoidal                                            */
 #define  GRID_PROJECTION           15  /* Projected coordinates                                 */
 
-#define  CDI_PROJ_RLL              11  /* Rotated Latitude Longitude                            */
-#define  CDI_PROJ_LCC              12  /* Lambert Conformal Conic                               */
-#define  CDI_PROJ_LAEA             13  /* Lambert Azimuthal Equal Area                          */
+#define  CDI_PROJ_RLL              21  /* Rotated Latitude Longitude                            */
+#define  CDI_PROJ_LCC              22  /* Lambert Conformal Conic                               */
+#define  CDI_PROJ_LAEA             23  /* Lambert Azimuthal Equal Area                          */
 
 /* ZAXIS types */
 

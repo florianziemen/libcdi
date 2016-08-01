@@ -299,10 +299,7 @@ void cdf_get_gmapvarname(int gridID, char *gmapvarname)
     }
 
   if ( mapping[0] )
-    {
-      cdiGridInqKeyStr(pgridID, CDI_KEY_MAPNAME, CDI_MAX_NAME, gmapvarname);
-      if ( !gmapvarname[0] ) strcpy(gmapvarname, "dummy");
-    }
+    cdiGridInqKeyStr(pgridID, CDI_KEY_MAPNAME, CDI_MAX_NAME, gmapvarname);
 }
 
 static

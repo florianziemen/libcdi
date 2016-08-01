@@ -665,6 +665,8 @@ void iegAddRecord(stream_t *streamptr, int param, int *pdb, int *gdb, double *vc
           grid->rll.ypole = ypole;
           grid->rll.angle = 0;
         }
+      else
+        grid->projtype = CDI_PROJ_RLL;
     }
 
   struct addIfNewRes gridAdded = cdiVlistAddGridIfNew(vlistID, grid, 0);

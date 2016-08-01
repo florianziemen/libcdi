@@ -339,11 +339,15 @@ cdiGridTypeInit(grid_t *gridptr, int gridtype, int size)
         break;
       }
     case GRID_GENERIC:
+    case GRID_PROJECTION:
       {
-
-        /* gridptr->x.size = size; */
         if ( gridptr->x.name[0] == 0 ) gridSetName(gridptr->x.name, "x");
         if ( gridptr->y.name[0] == 0 ) gridSetName(gridptr->y.name, "y");
+
+        if ( gridtype == GRID_PROJECTION )
+          {
+            gridSetName(gridptr->mapname, "Projection");
+          }
         /*
         strcpy(gridptr->x.stdname, "grid_longitude");
         strcpy(gridptr->y.stdname, "grid_latitude");
@@ -1829,10 +1833,17 @@ void gridInqProjParamRLL(int gridID, double *xpole, double *ypole, double *angle
 
 void gridDefProjParamRLL(int gridID, double xpole, double ypole, double angle)
 {
-  cdiGridDefKeyStr(gridID, CDI_KEY_MAPPING, CDI_MAX_NAME, "rotated_latitude_longitude");
+  cdiGridDefKeyStr(gridID, CDI_KEY_MAPNAME, CDI_MAX_NAME, "rotated_pole");
+
+  const char *mapping = "rotated_latitude_longitude";
+  cdiGridDefKeyStr(gridID, CDI_KEY_MAPPING, CDI_MAX_NAME, mapping);
+  vlistDefAttTxt(gridID, CDI_GLOBAL, "grid_mapping_name", strlen(mapping)+1, mapping);
   vlistDefAttFlt(gridID, CDI_GLOBAL, "grid_north_pole_longitude", DATATYPE_FLT64, 1, &xpole);
   vlistDefAttFlt(gridID, CDI_GLOBAL, "grid_north_pole_latitude", DATATYPE_FLT64, 1, &ypole);
   if ( IS_NOT_EQUAL(angle, 0) ) vlistDefAttFlt(gridID, CDI_GLOBAL, "north_pole_grid_longitude", DATATYPE_FLT64, 1, &angle);
+
+  grid_t *gridptr = gridID2Ptr(gridID);
+  gridptr->projtype = CDI_PROJ_RLL;
 }
 
 /*
@@ -2689,10 +2700,10 @@ void gridComplete(grid_t *grid)
 	    */
 	  }
 
-	if ( grid->isRotated )
+	if ( grid->isRotated  || grid->projtype == CDI_PROJ_RLL )
 	  {
-	    if ( grid->x.name[0] == 0 ) gridDefXname(gridID, "rlon");
-	    if ( grid->y.name[0] == 0 ) gridDefYname(gridID, "rlat");
+	    if ( grid->x.name[0] == 0 || grid->x.name[0] == 'x' ) gridDefXname(gridID, "rlon");
+	    if ( grid->y.name[0] == 0 || grid->y.name[0] == 'y' ) gridDefYname(gridID, "rlat");
 	    if ( grid->x.longname[0] == 0 ) gridDefXlongname(gridID, "longitude in rotated pole grid");
 	    if ( grid->y.longname[0] == 0 ) gridDefYlongname(gridID, "latitude in rotated pole grid");
             grid->x.stdname = xystdname_tab[grid_xystdname_grid_latlon][0];
@@ -2700,9 +2711,12 @@ void gridComplete(grid_t *grid)
 	    if ( grid->x.units[0] == 0 ) gridDefXunits(gridID, "degrees");
 	    if ( grid->y.units[0] == 0 ) gridDefYunits(gridID, "degrees");
 
-	    gridDefXpole(gridID, grid->rll.xpole);
-	    gridDefYpole(gridID, grid->rll.ypole);
-	    gridDefAngle(gridID, grid->rll.angle);
+            if ( grid->isRotated )
+              {
+                gridDefXpole(gridID, grid->rll.xpole);
+                gridDefYpole(gridID, grid->rll.ypole);
+                gridDefAngle(gridID, grid->rll.angle);
+              }
 	  }
 
         switch (gridtype)
