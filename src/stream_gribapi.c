@@ -1881,6 +1881,8 @@ static
 void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype, bool lieee, int datatype, int nmiss, int gcinit)
 {
   UNUSED(nmiss);
+  bool lrotated = false;
+  bool lcurvi = false;
 
   int gridtype = gridInqType(gridID);
   int gridsize = gridInqSize(gridID);
@@ -1916,13 +1918,20 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
     }
   else if ( gridtype == GRID_CURVILINEAR )
     {
-      static bool lwarn = true;
-      if ( lwarn && gridsize > 1 )
+      static bool lwarning = true;
+      if ( lwarning && gridsize > 1 )
 	{
-	  lwarn = false;
+	  lwarning = false;
 	  Warning("Curvilinear grids are unsupported in GRIB format! Created wrong Grid Description Section!");
 	}
       gridtype = GRID_LONLAT;
+      lcurvi = true;
+    }
+
+  if ( gridtype == GRID_PROJECTION && gridInqProjType(gridID) == CDI_PROJ_RLL )
+    {
+      gridtype = GRID_LONLAT;
+      lrotated = true;
     }
 
   if ( gridtype == GRID_LONLAT || gridtype == GRID_GAUSSIAN )
@@ -1952,43 +1961,39 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 	double yfirst = 0, ylast = 0, yinc = 0;
 	double latIncr;
 
-        {
-          const char *mesg;
-          size_t len;
-          if ( gridtype == GRID_GAUSSIAN )
-            {
-              static const char mesg_gaussian[] = "regular_gg";
-              len = sizeof (mesg_gaussian) - 1;
-              mesg = mesg_gaussian;
-            }
-          else if ( gridtype == GRID_GAUSSIAN_REDUCED )
-            {
-              static const char mesg_gaussian_reduced[] = "reduced_gg";
-              len = sizeof (mesg_gaussian_reduced) - 1;
-              mesg = mesg_gaussian_reduced;
-            }
-          else if ( gridtype == GRID_LONLAT && gridIsRotated(gridID) )
-            {
-              static const char mesg_rot_lonlat[] = "rotated_ll";
-              len = sizeof (mesg_rot_lonlat) - 1;
-              mesg = mesg_rot_lonlat;
-            }
-          else
-            {
-              static const char mesg_regular_ll[] = "regular_ll";
-              len = sizeof (mesg_regular_ll) - 1;
-              mesg = mesg_regular_ll;
-	  }
-          GRIB_CHECK(my_grib_set_string(gh, "gridType", mesg, &len), 0);
-        }
+        const char *mesg;
+        size_t len;
+        if ( gridtype == GRID_GAUSSIAN )
+          {
+            static const char mesg_gaussian[] = "regular_gg";
+            len = sizeof(mesg_gaussian) - 1;
+            mesg = mesg_gaussian;
+          }
+        else if ( gridtype == GRID_GAUSSIAN_REDUCED )
+          {
+            static const char mesg_gaussian_reduced[] = "reduced_gg";
+            len = sizeof(mesg_gaussian_reduced) - 1;
+            mesg = mesg_gaussian_reduced;
+          }
+        else if ( gridtype == GRID_LONLAT && (gridIsRotated(gridID) || lrotated) )
+          {
+            static const char mesg_rot_lonlat[] = "rotated_ll";
+            len = sizeof(mesg_rot_lonlat) - 1;
+            mesg = mesg_rot_lonlat;
+          }
+        else
+          {
+            static const char mesg_regular_ll[] = "regular_ll";
+            len = sizeof(mesg_regular_ll) - 1;
+            mesg = mesg_regular_ll;
+          }
+        GRIB_CHECK(my_grib_set_string(gh, "gridType", mesg, &len), 0);
 
 	long nlon = gridInqXsize(gridID);
 	long nlat = gridInqYsize(gridID);
 
 	if ( gridtype == GRID_GAUSSIAN_REDUCED )
 	  {
-            //GRIB_CHECK(my_grib_set_long(gh, "numberOfValues", gridsize), 0);
-
 	    nlon = 0;
 
 	    int *rowlon = (int *) Malloc((size_t)nlat*sizeof(int));
@@ -2007,26 +2012,20 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 	  }
 	else
 	  {
-	    if ( nlon == 0 )
-	      {
-		nlon = 1;
-	      }
+	    if ( nlon == 0 ) nlon = 1;
 	    else
 	      {
-		xfirst = gridInqXval(gridID,      0);
-		xlast  = gridInqXval(gridID, nlon-1);
+		xfirst = gridInqXval(gridID, 0);
+                xlast  = gridInqXval(gridID, (lcurvi ? nlon*nlat : nlon) - 1);
 		xinc   = gridInqXinc(gridID);
 	      }
 	  }
 
-	if ( nlat == 0 )
-	  {
-	    nlat = 1;
-	  }
+	if ( nlat == 0 ) nlat = 1;
 	else
 	  {
-	    yfirst = gridInqYval(gridID,      0);
-	    ylast  = gridInqYval(gridID, nlat-1);
+	    yfirst = gridInqYval(gridID, 0);
+            ylast  = gridInqYval(gridID, (lcurvi ? nlon*nlat : nlat) - 1);
 	    yinc   = gridInqYinc(gridID);
 	  }
 
@@ -2044,10 +2043,7 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
           if ( yfirst < ylast ) jscan = 1;
           GRIB_CHECK(my_grib_set_long(gh, "jScansPositively", jscan), 0);
         }
-	/*
-	if ( fabs(xinc*1000 - ISEC2_LonIncr) > FLT_EPSILON )
-	  ISEC2_LonIncr = 0;
-	*/
+
 	if ( gridtype == GRID_GAUSSIAN || gridtype == GRID_GAUSSIAN_REDUCED )
           {
             int np = gridInqNP(gridID);
@@ -2059,67 +2055,46 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 	    latIncr = yinc;
 	    if ( latIncr < 0 ) latIncr = -latIncr;
 	    GRIB_CHECK(my_grib_set_double(gh, "jDirectionIncrementInDegrees", latIncr), 0);
-	    /*
-	    if ( fabs(yinc*1000 - ISEC2_LatIncr) > FLT_EPSILON )
-	      ISEC2_LatIncr = 0;
-	    */
 	  }
-	/*
-	if ( ISEC2_NumLon > 1 && ISEC2_NumLat == 1 )
-	  if ( ISEC2_LonIncr != 0 && ISEC2_LatIncr == 0 ) ISEC2_LatIncr = ISEC2_LonIncr;
 
-	if ( ISEC2_NumLon == 1 && ISEC2_NumLat > 1 )
-	  if ( ISEC2_LonIncr == 0 && ISEC2_LatIncr != 0 ) ISEC2_LonIncr = ISEC2_LatIncr;
-
-	if ( ISEC2_LatIncr == 0 || ISEC2_LonIncr == 0 )
-	  ISEC2_ResFlag = 0;
-	else
-	  ISEC2_ResFlag = 128;
-	*/
-	if ( gridIsRotated(gridID) )
+	if ( gridIsRotated(gridID) || lrotated )
 	  {
-	    double xpole = gridInqXpole(gridID);
-	    double ypole = gridInqYpole(gridID);
-	    double angle = gridInqAngle(gridID);
-	    /* change from north to south pole */
-	    if ( fabs(ypole) > 0 ) ypole = -ypole;
-	    xpole =  xpole + 180;
+            double xpole = 0, ypole = 0, angle = 0;
+            if ( gridIsRotated(gridID) )
+              {
+                xpole = gridInqXpole(gridID);
+                ypole = gridInqYpole(gridID);
+                angle = gridInqAngle(gridID);
+              }
+            else
+              gridInqProjParamRLL(gridID, &xpole, &ypole, &angle);
+
+            xpole =  xpole + 180;
+            if ( fabs(ypole) > 0 ) ypole = -ypole; // change from north to south pole
             if ( fabs(angle) > 0 ) angle = -angle;
-	    GRIB_CHECK(my_grib_set_double(gh, "latitudeOfSouthernPoleInDegrees",  ypole), 0);
-	    GRIB_CHECK(my_grib_set_double(gh, "longitudeOfSouthernPoleInDegrees", xpole), 0);
-	    GRIB_CHECK(my_grib_set_double(gh, "angleOfRotation", angle), 0);
-	  }
-
-	/* East -> West */
-	//if ( ISEC2_LastLon < ISEC2_FirstLon ) ISEC2_ScanFlag += 128;
-
-	/* South -> North */
-	//if ( ISEC2_LastLat > ISEC2_FirstLat ) ISEC2_ScanFlag += 64;
+            GRIB_CHECK(my_grib_set_double(gh, "latitudeOfSouthernPoleInDegrees",  ypole), 0);
+            GRIB_CHECK(my_grib_set_double(gh, "longitudeOfSouthernPoleInDegrees", xpole), 0);
+            GRIB_CHECK(my_grib_set_double(gh, "angleOfRotation", angle), 0);
+          }
 
         if ( editionNumber != 2 ) { lieee = false; comptype = 0; }
 
-        {
-          const char *mesg;
-          size_t len;
-          if ( lieee )
-            {
-              static const char mesg_grid_ieee[] = "grid_ieee";
-              len = sizeof (mesg_grid_ieee) - 1;
-              mesg = mesg_grid_ieee;
-            }
-          else
-            {
-              struct gribApiMsg gaMsg
-                = getGribApiCompTypeMsg(gh, comptype, gridsize);
-              len = gaMsg.msgLen;
-              mesg = gaMsg.msg;
-            }
-          GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
-          if ( lieee )
-            GRIB_CHECK(my_grib_set_long(gh, "precision",
-                                        datatype == DATATYPE_FLT64 ? 2 : 1), 0);
-
-        }
+        if ( lieee )
+          {
+            static const char mesg_grid_ieee[] = "grid_ieee";
+            len = sizeof (mesg_grid_ieee) - 1;
+            mesg = mesg_grid_ieee;
+          }
+        else
+          {
+            struct gribApiMsg gaMsg = getGribApiCompTypeMsg(gh, comptype, gridsize);
+            len = gaMsg.msgLen;
+            mesg = gaMsg.msg;
+          }
+        GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
+        if ( lieee )
+          GRIB_CHECK(my_grib_set_long(gh, "precision",
+                                      datatype == DATATYPE_FLT64 ? 2 : 1), 0);
 
 	break;
       }

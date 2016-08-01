@@ -1612,7 +1612,6 @@ void cgribexDefTime(int *isec1, int vdate, int vtime, int tsteptype, int numavg,
 static
 void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridID)
 {
-  static bool lwarning = true;
   bool lrotated = false;
   bool lcurvi = false;
 
@@ -1652,6 +1651,7 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
     }
   else if ( gridtype == GRID_CURVILINEAR )
     {
+      static bool lwarning = true;
       if ( lwarning && gridInqSize(gridID) > 1 )
 	{
 	  lwarning = false;
@@ -1699,25 +1699,19 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
 	  }
 	else
 	  {
-	    if ( nlon == 0 )
-	      {
-		nlon = 1;
-	      }
+	    if ( nlon == 0 ) nlon = 1;
 	    else
 	      {
-		xfirst = gridInqXval(gridID,      0);
+		xfirst = gridInqXval(gridID, 0);
                 xlast  = gridInqXval(gridID, (lcurvi ? nlon*nlat : nlon) - 1);
 		xinc   = gridInqXinc(gridID);
 	      }
 	  }
 
-	if ( nlat == 0 )
-	  {
-	    nlat = 1;
-	  }
+	if ( nlat == 0 ) nlat = 1;
 	else
 	  {
-	    yfirst = gridInqYval(gridID,      0);
+	    yfirst = gridInqYval(gridID, 0);
             ylast  = gridInqYval(gridID, (lcurvi ? nlon*nlat : nlat) - 1);
 	    yinc   = fabs(gridInqYinc(gridID));
 	  }
