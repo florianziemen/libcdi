@@ -1,5 +1,6 @@
 2016-08-01  Uwe Schulzweida
 
+	* grb write: added support for projection CDI_PROJ_RLL
 	* ieg read: added support for projection CDI_PROJ_RLL
 
 2016-07-30  Uwe Schulzweida

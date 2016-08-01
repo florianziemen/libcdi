@@ -681,7 +681,7 @@ void iegAddRecord(stream_t *streamptr, int param, int *pdb, int *gdb, double *vc
       size_t vctsize = (size_t)IEG_G_NumVCP(gdb);
 
       for ( size_t i = 0; i < vctsize/2; i++ ) tmpvct[i] = vct[i];
-      for  (size_t i = 0; i < vctsize/2; i++ ) tmpvct[i+vctsize/2] = vct[i+50];
+      for ( size_t i = 0; i < vctsize/2; i++ ) tmpvct[i+vctsize/2] = vct[i+50];
 
       varDefVCT(vctsize, tmpvct);
     }
