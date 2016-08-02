@@ -996,10 +996,16 @@ void gridInqYstdname(int gridID, char *ystdname)
 }
 
 
+void gridDefProj(int gridID, int projID)
+{
+  grid_t *gridptr = gridID2Ptr(gridID);
+  gridptr->proj = projID;
+}
+
+
 int gridInqProj(int gridID)
 {
   grid_t *gridptr = gridID2Ptr(gridID);
-
   return gridptr->proj;
 }
 

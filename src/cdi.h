@@ -724,6 +724,9 @@ void    gridDestroy(int gridID);
 /*      gridDuplicate: Duplicate a Grid */
 int     gridDuplicate(int gridID);
 
+/*      gridDefProj: Define the projection ID of a Grid */
+void    gridDefProj(int gridID, int projID);
+
 /*      gridInqProj: Get the projection ID of a Grid */
 int     gridInqProj(int gridID);
 
