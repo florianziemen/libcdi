@@ -1000,6 +1000,13 @@ void gridDefProj(int gridID, int projID)
 {
   grid_t *gridptr = gridID2Ptr(gridID);
   gridptr->proj = projID;
+
+  if ( gridptr->type == GRID_CURVILINEAR )
+    {
+      grid_t *projptr = gridID2Ptr(projID);
+      if ( projptr->x.name[0] ) strcpy(gridptr->x.dimname, projptr->x.name);
+      if ( projptr->y.name[0] ) strcpy(gridptr->y.dimname, projptr->y.name);
+    }
 }
 
 
