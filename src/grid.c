@@ -1801,9 +1801,10 @@ void gridInqProjParamRLL(int gridID, double *xpole, double *ypole, double *angle
 {
   *xpole = 0; *ypole = 0; *angle = 0;
 
+  const char *projection = "rotated_latitude_longitude";
   char mapping[CDI_MAX_NAME]; mapping[0] = 0;
   cdiGridInqKeyStr(gridID, CDI_KEY_MAPPING, CDI_MAX_NAME, mapping);
-  if ( mapping[0] && strcmp(mapping, "rotated_latitude_longitude") == 0 )
+  if ( mapping[0] && strcmp(mapping, projection) == 0 )
     {
       int atttype, attlen;
       char attname[CDI_MAX_NAME+1];
@@ -1828,7 +1829,7 @@ void gridInqProjParamRLL(int gridID, double *xpole, double *ypole, double *angle
         }
     }
   else
-    Warning("rotated_latitude_longitude mapping parameter missing!");
+    Warning("%s mapping parameter missing!", projection);
 }
 
 
