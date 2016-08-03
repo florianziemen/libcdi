@@ -145,6 +145,7 @@ extern "C" {
 #define  CDI_PROJ_RLL              21  /* Rotated Latitude Longitude                            */
 #define  CDI_PROJ_LCC              22  /* Lambert Conformal Conic                               */
 #define  CDI_PROJ_LAEA             23  /* Lambert Azimuthal Equal Area                          */
+#define  CDI_PROJ_SINU             24  /* Sinusoidal                                            */
 
 /* ZAXIS types */
 
@@ -724,11 +725,11 @@ void    gridDestroy(int gridID);
 /*      gridDuplicate: Duplicate a Grid */
 int     gridDuplicate(int gridID);
 
-/*      gridDefProj: Define the projection ID of a Grid */
-void    gridDefProj(int gridID, int projID);
-
 /*      gridInqProj: Get the projection ID of a Grid */
 int     gridInqProj(int gridID);
+
+/*      gridDefProjType: Define the projection type */
+void    gridDefProjType(int gridID, int projtype);
 
 /*      gridInqProjType: Get the projection type */
 int     gridInqProjType(int gridID);

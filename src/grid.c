@@ -200,8 +200,8 @@ void grid_free(grid_t *gridptr)
   grid_init(gridptr);
 }
 
-static grid_t *
-gridNewEntry(cdiResH resH)
+static
+grid_t *gridNewEntry(cdiResH resH)
 {
   grid_t *gridptr = (grid_t*) Malloc(sizeof(grid_t));
   grid_init(gridptr);
@@ -270,28 +270,31 @@ void gridGetString(char *name, const char *gridstrname, size_t len)
   name[len - 1] = 0;
 }
 
-static inline void
-gridSetName(char *gridstrname, const char *name)
+static inline
+void gridSetName(char *gridstrname, const char *name)
 {
   strncpy(gridstrname, name, CDI_MAX_NAME);
   gridstrname[CDI_MAX_NAME - 1] = 0;
 }
 
-void
-cdiGridTypeInit(grid_t *gridptr, int gridtype, int size)
+
+void cdiGridTypeInit(grid_t *gridptr, int gridtype, int size)
 {
   gridptr->type = gridtype;
   gridptr->size = size;
 
+  if      ( gridtype == GRID_CURVILINEAR  ) gridptr->nvertex = 4;
+  else if ( gridtype == GRID_UNSTRUCTURED ) gridptr->x.size = size;
+
   switch (gridtype)
     {
-    case GRID_CURVILINEAR:
-      gridptr->nvertex = 4;
-      /* Fall through */
     case GRID_LONLAT:
     case GRID_GAUSSIAN:
     case GRID_GAUSSIAN_REDUCED:
     case GRID_TRAJECTORY:
+    case GRID_CURVILINEAR:
+    case GRID_UNSTRUCTURED:
+    case GRID_GME:
       {
         if ( gridtype == GRID_TRAJECTORY )
           {
@@ -303,71 +306,36 @@ cdiGridTypeInit(grid_t *gridptr, int gridtype, int size)
             if ( gridptr->x.name[0] == 0 ) gridSetName(gridptr->x.name, "lon");
             if ( gridptr->y.name[0] == 0 ) gridSetName(gridptr->y.name, "lat");
           }
+
         gridSetName(gridptr->x.longname, "longitude");
         gridSetName(gridptr->y.longname, "latitude");
 
-        /*
-        if ( gridtype == GRID_CURVILINEAR )
-          {
-            gridptr->x.stdname = xystdname_tab[grid_xystdname_grid_latlon][0];
-            gridptr->y.stdname = xystdname_tab[grid_xystdname_grid_latlon][1];
-            gridDefXunits(gridID, "degrees");
-            gridDefYunits(gridID, "degrees");
-          }
-        else
-        */
-          {
-            gridptr->x.stdname = xystdname_tab[grid_xystdname_latlon][0];
-            gridptr->y.stdname = xystdname_tab[grid_xystdname_latlon][1];
-            gridSetName(gridptr->x.units, "degrees_east");
-            gridSetName(gridptr->y.units, "degrees_north");
-          }
-
-        break;
-      }
-    case GRID_UNSTRUCTURED:
-      gridptr->x.size = size;
-      /* Fall through */
-    case GRID_GME:
-      {
-        if ( gridptr->x.name[0] == 0 ) gridSetName(gridptr->x.name, "lon");
-        if ( gridptr->y.name[0] == 0 ) gridSetName(gridptr->y.name, "lat");
         gridptr->x.stdname = xystdname_tab[grid_xystdname_latlon][0];
         gridptr->y.stdname = xystdname_tab[grid_xystdname_latlon][1];
         gridSetName(gridptr->x.units, "degrees_east");
         gridSetName(gridptr->y.units, "degrees_north");
+
         break;
       }
     case GRID_GENERIC:
     case GRID_PROJECTION:
-      {
-        if ( gridptr->x.name[0] == 0 ) gridSetName(gridptr->x.name, "x");
-        if ( gridptr->y.name[0] == 0 ) gridSetName(gridptr->y.name, "y");
-
-        if ( gridtype == GRID_PROJECTION )
-          {
-            gridSetName(gridptr->mapname, "Projection");
-          }
-        /*
-        strcpy(gridptr->x.stdname, "grid_longitude");
-        strcpy(gridptr->y.stdname, "grid_latitude");
-        gridptr->x.stdname = xystdname_tab[grid_xystdname_grid_latlon][0];
-        gridptr->y.stdname = xystdname_tab[grid_xystdname_grid_latlon][1];
-        gridDefXunits(gridID, "degrees");
-        gridDefYunits(gridID, "degrees");
-        */
-        break;
-      }
     case GRID_LCC2:
     case GRID_SINUSOIDAL:
     case GRID_LAEA:
       {
         if ( gridptr->x.name[0] == 0 ) gridSetName(gridptr->x.name, "x");
         if ( gridptr->y.name[0] == 0 ) gridSetName(gridptr->y.name, "y");
-        gridptr->x.stdname = xystdname_tab[grid_xystdname_projection][0];
-        gridptr->y.stdname = xystdname_tab[grid_xystdname_projection][1];
-        gridSetName(gridptr->x.units, "m");
-        gridSetName(gridptr->y.units, "m");
+        if ( gridtype == GRID_PROJECTION )
+          {
+            gridSetName(gridptr->mapname, "Projection");
+          }
+        if ( gridtype != GRID_GENERIC )
+          {
+            gridptr->x.stdname = xystdname_tab[grid_xystdname_projection][0];
+            gridptr->y.stdname = xystdname_tab[grid_xystdname_projection][1];
+            gridSetName(gridptr->x.units, "m");
+            gridSetName(gridptr->y.units, "m");
+          }
         break;
       }
     }
@@ -1035,6 +1003,22 @@ int gridInqProjType(int gridID)
     }
 
   return projtype;
+}
+
+
+void gridVerifyProj(int gridID)
+{
+  grid_t *gridptr = gridID2Ptr(gridID);
+
+  int projtype = gridInqProjType(gridID);
+
+  if ( projtype == CDI_PROJ_RLL )
+    {
+      gridptr->x.stdname = xystdname_tab[grid_xystdname_grid_latlon][0];
+      gridptr->y.stdname = xystdname_tab[grid_xystdname_grid_latlon][1];
+      gridSetName(gridptr->x.units, "degrees");
+      gridSetName(gridptr->y.units, "degrees");
+    }
 }
 
 /*

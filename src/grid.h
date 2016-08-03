@@ -146,6 +146,8 @@ extern const struct gridVirtTable cdiGridVtable;
 
 unsigned cdiGridCount(void);
 
+void gridVerifyProj(int gridID);
+
 const double *gridInqXvalsPtr(int gridID);
 const double *gridInqYvalsPtr(int gridID);
 
