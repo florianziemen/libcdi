@@ -997,7 +997,11 @@ int gridInqProjType(int gridID)
       cdiGridInqKeyStr(gridID, CDI_KEY_MAPPING, CDI_MAX_NAME, mapping);
       if ( mapping[0] )
         {
-          if ( strcmp(mapping, "rotated_latitude_longitude") == 0 ) projtype = CDI_PROJ_RLL;
+          if      ( strcmp(mapping, "rotated_latitude_longitude") == 0 )   projtype = CDI_PROJ_RLL;
+          else if ( strcmp(mapping, "lambert_azimuthal_equal_area") == 0 ) projtype = CDI_PROJ_LAEA;
+          else if ( strcmp(mapping, "lambert_conformal_conic") == 0 )      projtype = CDI_PROJ_LCC;
+          else if ( strcmp(mapping, "sinusoidal") == 0 )                   projtype = CDI_PROJ_SINU;
+
           gridptr->projtype = projtype;
         }
     }
