@@ -2615,6 +2615,8 @@ int gridCompareP ( void * gridptr1, void * gridptr2 )
   if (strcmp(g1->x.units, g2->x.units)) return differ;
   if (strcmp(g1->y.units, g2->y.units)) return differ;
 
+  if (strcmp(g1->mapping, g2->mapping)) return differ;
+
   if ( g1->reference )
     {
       if ( !g2->reference ) return differ;
