@@ -3442,6 +3442,69 @@ printMask(FILE *fp, const char prefix[], size_t nbyte0,
   fputs("\n", fp);
 }
 
+static inline
+void *resizeBuffer(void **buf, size_t *bufSize, size_t reqSize)
+{
+  if (reqSize > *bufSize)
+    {
+      *buf = Realloc(*buf, reqSize);
+      *bufSize = reqSize;
+    }
+  return *buf;
+}
+
+static
+void gridPrintAttributes(FILE *fp, int gridID)
+{
+  int cdiID = gridID;
+  int varID = CDI_GLOBAL;
+  int atttype, attlen;
+  char attname[CDI_MAX_NAME+1];
+  void *attBuf = NULL;
+  size_t attBufSize = 0;
+
+  int natts;
+  vlistInqNatts(cdiID, varID, &natts);
+
+  for ( int iatt = 0; iatt < natts; ++iatt )
+    {
+      vlistInqAtt(cdiID, varID, iatt, attname, &atttype, &attlen);
+
+      if ( attlen == 0 ) continue;
+
+      if ( atttype == DATATYPE_TXT )
+        {
+          size_t attSize = (size_t)attlen*sizeof(char);
+          char *atttxt = (char *)resizeBuffer(&attBuf, &attBufSize, attSize);
+          vlistInqAttTxt(cdiID, varID, attname, attlen, atttxt);
+          fprintf(fp, "ATTR_TXT_%d:%s = \"%s\"\n", attlen, attname, atttxt);
+        }
+      else if ( atttype == DATATYPE_INT8  || atttype == DATATYPE_UINT8  ||
+                atttype == DATATYPE_INT16 || atttype == DATATYPE_UINT16 ||
+                atttype == DATATYPE_INT32 || atttype == DATATYPE_UINT32 )
+        {
+          size_t attSize = (size_t)attlen*sizeof(int);
+          int *attint = (int *)resizeBuffer(&attBuf, &attBufSize, attSize);
+          vlistInqAttInt(cdiID, varID, attname, attlen, &attint[0]);
+          fprintf(fp, "ATTR_INT_%d:%s =", attlen, attname);
+          for ( int i = 0; i < attlen; ++i ) fprintf(fp, " %d", attint[i]);
+          fprintf(fp, "\n");
+        }
+      else if ( atttype == DATATYPE_FLT32 || atttype == DATATYPE_FLT64 )
+        {
+          size_t attSize = (size_t)attlen * sizeof(double);
+          double *attflt = (double *)resizeBuffer(&attBuf, &attBufSize, attSize);
+          int dig = (atttype == DATATYPE_FLT64) ? 15 : 7;
+          vlistInqAttFlt(cdiID, varID, attname, attlen, attflt);
+          fprintf(fp, "ATTR_FLT_%d:%s =", attlen, attname);
+          for ( int i = 0; i < attlen; ++i ) fprintf(fp, " %.*g", dig, attflt[i]);
+          fprintf(fp, "\n");
+        }
+    }
+
+  Free(attBuf);
+}
+
 static
 void gridPrintKernel(grid_t *gridptr, int index, int opt, FILE *fp)
 {
@@ -3475,22 +3538,29 @@ void gridPrintKernel(grid_t *gridptr, int index, int opt, FILE *fp)
 
   if ( type != GRID_GME )
     {
+      if ( type != GRID_UNSTRUCTURED && type != GRID_SPECTRAL && type != GRID_FOURIER )
+        {
+          if ( xsize > 0 ) fprintf(fp, "xsize     = %d\n", xsize);
+          if ( ysize > 0 ) fprintf(fp, "ysize     = %d\n", ysize);
+        }
+
       if ( xvals )
         {
-          if ( xaxis->name[0]     )     fprintf(fp, "xname     = %s\n", xaxis->name);
-          if ( xaxis->longname[0] )     fprintf(fp, "xlongname = %s\n", xaxis->longname);
-          if ( xaxis->units[0]    )     fprintf(fp, "xunits    = %s\n", xaxis->units);
+          if ( xaxis->name[0]     )  fprintf(fp, "xname     = %s\n", xaxis->name);
+          if ( xaxis->longname[0] )  fprintf(fp, "xlongname = %s\n", xaxis->longname);
+          if ( xaxis->units[0]    )  fprintf(fp, "xunits    = %s\n", xaxis->units);
           if ( xaxis->dimname[0] && strcmp(xaxis->name, xaxis->dimname) )
             fprintf(fp, "xdimname  = %s\n", xaxis->dimname);
         }
       if ( yvals )
         {
-          if ( yaxis->name[0]     )     fprintf(fp, "yname     = %s\n", yaxis->name);
-          if ( yaxis->longname[0] )     fprintf(fp, "ylongname = %s\n", yaxis->longname);
-          if ( yaxis->units[0]    )     fprintf(fp, "yunits    = %s\n", yaxis->units);
+          if ( yaxis->name[0]     )  fprintf(fp, "yname     = %s\n", yaxis->name);
+          if ( yaxis->longname[0] )  fprintf(fp, "ylongname = %s\n", yaxis->longname);
+          if ( yaxis->units[0]    )  fprintf(fp, "yunits    = %s\n", yaxis->units);
           if ( yaxis->dimname[0] && strcmp(yaxis->name, yaxis->dimname) )
             fprintf(fp, "ydimname  = %s\n", yaxis->dimname);
         }
+
       if ( type == GRID_UNSTRUCTURED || type == GRID_CURVILINEAR )
         if ( gridptr->vdimname[0] ) fprintf(fp, "vdimname  = %s\n", gridptr->vdimname);
       if ( type == GRID_UNSTRUCTURED && nvertex > 0 ) fprintf(fp, "nvertex   = %d\n", nvertex);
@@ -3505,6 +3575,7 @@ void gridPrintKernel(grid_t *gridptr, int index, int opt, FILE *fp)
     case GRID_LCC2:
     case GRID_SINUSOIDAL:
     case GRID_LAEA:
+    case GRID_PROJECTION:
     case GRID_CURVILINEAR:
     case GRID_UNSTRUCTURED:
       {
@@ -3524,12 +3595,6 @@ void gridPrintKernel(grid_t *gridptr, int index, int opt, FILE *fp)
 	  {
 	    xdim = xsize;
 	    ydim = ysize;
-	  }
-
-	if ( type != GRID_UNSTRUCTURED )
-	  {
-	    if ( xsize > 0 ) fprintf(fp, "xsize     = %d\n", xsize);
-	    if ( ysize > 0 ) fprintf(fp, "ysize     = %d\n", ysize);
 	  }
 
 	if ( type == GRID_UNSTRUCTURED )
@@ -3590,6 +3655,7 @@ void gridPrintKernel(grid_t *gridptr, int index, int opt, FILE *fp)
 	    double xfirst = 0.0, xinc = 0.0;
 
 	    if ( type == GRID_LONLAT     || type == GRID_GAUSSIAN ||
+		 type == GRID_PROJECTION ||
 		 type == GRID_GENERIC    || type == GRID_LCC2     ||
                  type == GRID_SINUSOIDAL || type == GRID_LAEA )
 	      {
@@ -3622,7 +3688,9 @@ void gridPrintKernel(grid_t *gridptr, int index, int opt, FILE *fp)
 	  {
 	    double yfirst = 0.0, yinc = 0.0;
 
-	    if ( type == GRID_LONLAT || type == GRID_GENERIC || type == GRID_LCC2 ||
+	    if ( type == GRID_LONLAT || type == GRID_GENERIC ||
+                 type == GRID_PROJECTION ||
+		 type == GRID_GENERIC    || type == GRID_LCC2 ||
 		 type == GRID_SINUSOIDAL || type == GRID_LAEA )
 	      {
 		yfirst = gridInqYval(gridID, 0);
@@ -3667,6 +3735,8 @@ void gridPrintKernel(grid_t *gridptr, int index, int opt, FILE *fp)
             Free(rowlon);
           }
 
+        if ( type == GRID_PROJECTION ) gridPrintAttributes(fp, gridID);
+
 	break;
       }
     case GRID_LCC:
@@ -3677,8 +3747,6 @@ void gridPrintKernel(grid_t *gridptr, int index, int opt, FILE *fp)
 		   &projflag, &scanflag);
 
 	fprintf(fp,
-                "xsize     = %d\n"
-                "ysize     = %d\n"
                 "originLon = %.*g\n"
                 "originLat = %.*g\n"
                 "lonParY   = %.*g\n"
@@ -3687,7 +3755,7 @@ void gridPrintKernel(grid_t *gridptr, int index, int opt, FILE *fp)
                 "xinc      = %.*g\n"
                 "yinc      = %.*g\n"
                 "projection = %s\n",
-                xsize, ysize, dig, originLon, dig, originLat, dig, lonParY,
+                dig, originLon, dig, originLat, dig, lonParY,
                 dig, lat1, dig, lat2, dig, xincm, dig, yincm,
                 (projflag & 128) == 0 ? "northpole" : "southpole");
 	break;
