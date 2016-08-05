@@ -36,8 +36,7 @@ void cdfCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
   int datatype = vlistInqVarDatatype(vlistID1, ivarID);
   int memtype  = datatype != DATATYPE_FLT32 ? MEMTYPE_DOUBLE : MEMTYPE_FLOAT;
 
-  void *data
-    = Malloc((size_t)datasize
+  void *data = Malloc((size_t)datasize
              * (memtype == MEMTYPE_DOUBLE ? sizeof(double) : sizeof(float)));
 
   int nmiss;
