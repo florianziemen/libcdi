@@ -4259,11 +4259,11 @@ gridGetPackSizeBase(grid_t *gridP, void *context)
 static int
 gridGetPackSizeScalars(grid_t *gridP, void *context)
 {
-  int packBuffSize = 0;
+  int packBuffSize = 0, ui32PackSize = serializeGetSize(1, CDI_DATATYPE_UINT32, context);
 
-  packBuffSize += serializeGetSize(gridNint, CDI_DATATYPE_INT, context) + serializeGetSize(1, CDI_DATATYPE_UINT32, context);
+  packBuffSize += serializeGetSize(gridNint, CDI_DATATYPE_INT, context) + ui32PackSize;
 
-  packBuffSize += serializeGetSize(gridNdouble, CDI_DATATYPE_FLT64, context);
+  packBuffSize += serializeGetSize(gridNdouble, CDI_DATATYPE_FLT64, context) + ui32PackSize;
 
   packBuffSize += serializeKeysGetPackSize(&gridP->keys, context);
   packBuffSize += serializeKeysGetPackSize(&gridP->x.keys, context);
@@ -4275,13 +4275,12 @@ gridGetPackSizeScalars(grid_t *gridP, void *context)
 static int
 gridGetPackSizeArrays(grid_t *gridP, void *context)
 {
-  int packBuffSize = 0, count;
+  int packBuffSize = 0, count, ui32PackSize = serializeGetSize(1, CDI_DATATYPE_UINT32, context);
 
   if (gridP->reducedPoints)
     {
       xassert(gridP->reducedPointsSize);
-      packBuffSize += serializeGetSize(gridP->reducedPointsSize, CDI_DATATYPE_INT, context)
-                      + serializeGetSize(1, CDI_DATATYPE_UINT32, context);
+      packBuffSize += serializeGetSize(gridP->reducedPointsSize, CDI_DATATYPE_INT, context) + ui32PackSize;
     }
 
   if (gridP->vtable->inqXValsPtr(gridP))
@@ -4291,7 +4290,7 @@ gridGetPackSizeArrays(grid_t *gridP, void *context)
       else
         count = gridP->x.size;
       xassert(count);
-      packBuffSize += serializeGetSize(count, CDI_DATATYPE_FLT64, context) + serializeGetSize(1, CDI_DATATYPE_UINT32, context);
+      packBuffSize += serializeGetSize(count, CDI_DATATYPE_FLT64, context) + ui32PackSize;
     }
 
   if (gridP->vtable->inqYValsPtr(gridP))
@@ -4301,14 +4300,13 @@ gridGetPackSizeArrays(grid_t *gridP, void *context)
       else
         count = gridP->y.size;
       xassert(count);
-      packBuffSize += serializeGetSize(count, CDI_DATATYPE_FLT64, context) + serializeGetSize(1, CDI_DATATYPE_UINT32, context);
+      packBuffSize += serializeGetSize(count, CDI_DATATYPE_FLT64, context) + ui32PackSize;
     }
 
   if (gridP->vtable->inqAreaPtr(gridP))
     {
       xassert(gridP->size);
-      packBuffSize
-          += serializeGetSize(gridP->size, CDI_DATATYPE_FLT64, context) + serializeGetSize(1, CDI_DATATYPE_UINT32, context);
+      packBuffSize += serializeGetSize(gridP->size, CDI_DATATYPE_FLT64, context) + ui32PackSize;
     }
 
   if (gridP->x.bounds)
@@ -4319,8 +4317,7 @@ gridGetPackSizeArrays(grid_t *gridP, void *context)
       else
         count = gridP->x.size;
       xassert(count);
-      packBuffSize += (serializeGetSize(gridP->nvertex * count, CDI_DATATYPE_FLT64, context)
-                       + serializeGetSize(1, CDI_DATATYPE_UINT32, context));
+      packBuffSize += (serializeGetSize(gridP->nvertex * count, CDI_DATATYPE_FLT64, context) + ui32PackSize);
     }
 
   if (gridP->y.bounds)
@@ -4331,22 +4328,19 @@ gridGetPackSizeArrays(grid_t *gridP, void *context)
       else
         count = gridP->y.size;
       xassert(count);
-      packBuffSize += (serializeGetSize(gridP->nvertex * count, CDI_DATATYPE_FLT64, context)
-                       + serializeGetSize(1, CDI_DATATYPE_UINT32, context));
+      packBuffSize += (serializeGetSize(gridP->nvertex * count, CDI_DATATYPE_FLT64, context) + ui32PackSize);
     }
 
   if (gridP->mask)
     {
       xassert(gridP->size);
-      packBuffSize
-          += serializeGetSize(gridP->size, CDI_DATATYPE_UCHAR, context) + serializeGetSize(1, CDI_DATATYPE_UINT32, context);
+      packBuffSize += serializeGetSize(gridP->size, CDI_DATATYPE_UCHAR, context) + ui32PackSize;
     }
 
   if (gridP->mask_gme)
     {
       xassert(gridP->size);
-      packBuffSize
-          += serializeGetSize(gridP->size, CDI_DATATYPE_UCHAR, context) + serializeGetSize(1, CDI_DATATYPE_UINT32, context);
+      packBuffSize += serializeGetSize(gridP->size, CDI_DATATYPE_UCHAR, context) + ui32PackSize;
     }
 
   return packBuffSize;
