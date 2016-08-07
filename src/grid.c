@@ -4330,12 +4330,14 @@ gridGetPackSizeBase(grid_t *gridP, void *context)
 static int
 gridGetPackSizeScalars(grid_t *gridP, void *context)
 {
-  int packBuffSize = 0;
+  int packBuffSize = 0,
+    ui32PackSize = serializeGetSize(1, CDI_DATATYPE_UINT32, context);
 
   packBuffSize += serializeGetSize(gridNint, CDI_DATATYPE_INT, context)
-    + serializeGetSize(1, CDI_DATATYPE_UINT32, context);
+    + ui32PackSize;
 
-  packBuffSize += serializeGetSize(gridNdouble, CDI_DATATYPE_FLT64, context);
+  packBuffSize += serializeGetSize(gridNdouble, CDI_DATATYPE_FLT64, context)
+    + ui32PackSize;
 
   {
     const char *strTab[] = GRID_STR_SERIALIZE(gridP);
@@ -4349,7 +4351,7 @@ gridGetPackSizeScalars(grid_t *gridP, void *context)
       size_t len = strlen(gridP->reference);
       packBuffSize += serializeGetSize(1, CDI_DATATYPE_INT, context)
         + serializeGetSize((int)len + 1, CDI_DATATYPE_TXT, context)
-        + serializeGetSize(1, CDI_DATATYPE_UINT32, context);
+        + ui32PackSize;
     }
 
   if (!cdiUUIDIsNull(gridP->uuid))
@@ -4361,7 +4363,8 @@ gridGetPackSizeScalars(grid_t *gridP, void *context)
 static int
 gridGetPackSizeArrays(grid_t *gridP, void *context)
 {
-  int packBuffSize = 0, count;
+  int packBuffSize = 0, count,
+    ui32PackSize = serializeGetSize(1, CDI_DATATYPE_UINT32, context);
 
   if (gridP->rowlon)
     {
@@ -4378,7 +4381,7 @@ gridGetPackSizeArrays(grid_t *gridP, void *context)
 	count = gridP->x.size;
       xassert(count);
       packBuffSize += serializeGetSize(count, CDI_DATATYPE_FLT64, context)
-        + serializeGetSize(1, CDI_DATATYPE_UINT32, context);
+        + ui32PackSize;
     }
 
   if (gridP->vtable->inqYValsPtr(gridP))
@@ -4389,7 +4392,7 @@ gridGetPackSizeArrays(grid_t *gridP, void *context)
 	count = gridP->y.size;
       xassert(count);
       packBuffSize += serializeGetSize(count, CDI_DATATYPE_FLT64, context)
-        + serializeGetSize(1, CDI_DATATYPE_UINT32, context);
+        + ui32PackSize;
     }
 
   if (gridP->vtable->inqAreaPtr(gridP))
@@ -4397,7 +4400,7 @@ gridGetPackSizeArrays(grid_t *gridP, void *context)
       xassert(gridP->size);
       packBuffSize +=
         serializeGetSize(gridP->size, CDI_DATATYPE_FLT64, context)
-        + serializeGetSize(1, CDI_DATATYPE_UINT32, context);
+        + ui32PackSize;
     }
 
   if (gridP->x.bounds)
@@ -4410,7 +4413,7 @@ gridGetPackSizeArrays(grid_t *gridP, void *context)
       xassert(count);
       packBuffSize
         += (serializeGetSize(gridP->nvertex * count, CDI_DATATYPE_FLT64, context)
-            + serializeGetSize(1, CDI_DATATYPE_UINT32, context));
+            + ui32PackSize);
     }
 
   if (gridP->y.bounds)
@@ -4423,7 +4426,7 @@ gridGetPackSizeArrays(grid_t *gridP, void *context)
       xassert(count);
       packBuffSize
         += (serializeGetSize(gridP->nvertex * count, CDI_DATATYPE_FLT64, context)
-            + serializeGetSize(1, CDI_DATATYPE_UINT32, context));
+            + ui32PackSize);
     }
 
   if (gridP->mask)
@@ -4431,14 +4434,14 @@ gridGetPackSizeArrays(grid_t *gridP, void *context)
       xassert(gridP->size);
       packBuffSize
         += serializeGetSize(gridP->size, CDI_DATATYPE_UCHAR, context)
-        + serializeGetSize(1, CDI_DATATYPE_UINT32, context);
+        + ui32PackSize;
     }
 
   if (gridP->mask_gme)
     {
       xassert(gridP->size);
       packBuffSize += serializeGetSize(gridP->size, CDI_DATATYPE_UCHAR, context)
-        + serializeGetSize(1, CDI_DATATYPE_UINT32, context);
+        + ui32PackSize;
     }
 
   return packBuffSize;
