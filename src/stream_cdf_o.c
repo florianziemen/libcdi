@@ -1949,6 +1949,12 @@ void cdf_def_mapping(stream_t *streamptr, int gridID)
         cdfDefineAttributes(gridID, CDI_GLOBAL, fileID, ncvarid);
 
       cdf_enddef(fileID);
+
+      if ( ncerrcode == NC_NOERR )
+        {
+          int dummy = 1;
+          cdf_put_var_int(fileID, ncvarid, &dummy);
+        }
     }
 }
 
