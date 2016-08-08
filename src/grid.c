@@ -3478,7 +3478,7 @@ void gridPrintAttributes(FILE *fp, int gridID)
           char *atttxt = (char *)resizeBuffer(&attBuf, &attBufSize, attSize);
           vlistInqAttTxt(cdiID, varID, attname, attlen, atttxt);
           atttxt[attlen] = 0;
-          fprintf(fp, "ATTR_TXT_%d:%s = \"%s\"\n", attlen, attname, atttxt);
+          fprintf(fp, "ATTR_TXT: %s = \"%s\"\n", attname, atttxt);
         }
       else if ( atttype == DATATYPE_INT8  || atttype == DATATYPE_UINT8  ||
                 atttype == DATATYPE_INT16 || atttype == DATATYPE_UINT16 ||
@@ -3487,7 +3487,10 @@ void gridPrintAttributes(FILE *fp, int gridID)
           size_t attSize = (size_t)attlen*sizeof(int);
           int *attint = (int *)resizeBuffer(&attBuf, &attBufSize, attSize);
           vlistInqAttInt(cdiID, varID, attname, attlen, &attint[0]);
-          fprintf(fp, "ATTR_INT_%d:%s =", attlen, attname);
+          if ( attlen == 1 )
+            fprintf(fp, "ATTR_INT: %s =", attname);
+          else
+            fprintf(fp, "ATTR_INT_%d: %s =", attlen, attname);
           for ( int i = 0; i < attlen; ++i ) fprintf(fp, " %d", attint[i]);
           fprintf(fp, "\n");
         }
@@ -3497,7 +3500,10 @@ void gridPrintAttributes(FILE *fp, int gridID)
           double *attflt = (double *)resizeBuffer(&attBuf, &attBufSize, attSize);
           int dig = (atttype == DATATYPE_FLT64) ? 15 : 7;
           vlistInqAttFlt(cdiID, varID, attname, attlen, attflt);
-          fprintf(fp, "ATTR_FLT_%d:%s =", attlen, attname);
+          if ( attlen == 1 )
+            fprintf(fp, "ATTR_FLT: %s =", attname);
+          else
+            fprintf(fp, "ATTR_FLT_%d: %s =", attlen, attname);
           for ( int i = 0; i < attlen; ++i ) fprintf(fp, " %.*g", dig, attflt[i]);
           fprintf(fp, "\n");
         }
