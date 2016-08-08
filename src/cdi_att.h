@@ -1,5 +1,5 @@
-#ifndef VLIST_ATT_H
-#define VLIST_ATT_H
+#ifndef CDI_ATT_H
+#define CDI_ATT_H
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"

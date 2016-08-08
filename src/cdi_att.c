@@ -12,7 +12,7 @@
 #include "cdi.h"
 #include "cdi_int.h"
 #include "vlist.h"
-#include "vlist_att.h"
+#include "cdi_att.h"
 #include "error.h"
 #include "serialize.h"
 #include "grid.h"

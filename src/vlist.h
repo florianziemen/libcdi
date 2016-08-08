@@ -17,7 +17,7 @@
 
 #define VALIDMISS 1.e+303
 
-#include "vlist_att.h"
+#include "cdi_att.h"
 
 typedef struct
 {

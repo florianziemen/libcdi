@@ -12,7 +12,7 @@
 #include "namespace.h"
 #include "resource_handle.h"
 #include "vlist_var.h"
-#include "vlist_att.h"
+#include "cdi_att.h"
 
 #include "resource_unpack.h"
 #include "serialize.h"

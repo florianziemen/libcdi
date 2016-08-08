@@ -149,7 +149,7 @@ files="basetime.c \
    util.c \
    varscan.c \
    vlist.c \
-   vlist_att.c \
+   cdi_att.c \
    vlist_var.c \
    zaxis.c"
 

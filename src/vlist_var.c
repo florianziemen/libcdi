@@ -10,7 +10,7 @@
 #include "vlist.h"
 #include "vlist_var.h"
 #include "resource_handle.h"
-#include "vlist_att.h"
+#include "cdi_att.h"
 #include "namespace.h"
 #include "serialize.h"
 #include "error.h"

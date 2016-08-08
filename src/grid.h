@@ -4,7 +4,7 @@
 #include "cdi.h"
 #include <stdbool.h>
 
-#include "vlist_att.h"
+#include "cdi_att.h"
 
 typedef unsigned char mask_t;
 
