@@ -3474,9 +3474,10 @@ void gridPrintAttributes(FILE *fp, int gridID)
 
       if ( atttype == DATATYPE_TXT )
         {
-          size_t attSize = (size_t)attlen*sizeof(char);
+          size_t attSize = (size_t)(attlen+1)*sizeof(char);
           char *atttxt = (char *)resizeBuffer(&attBuf, &attBufSize, attSize);
           vlistInqAttTxt(cdiID, varID, attname, attlen, atttxt);
+          atttxt[attlen] = 0;
           fprintf(fp, "ATTR_TXT_%d:%s = \"%s\"\n", attlen, attname, atttxt);
         }
       else if ( atttype == DATATYPE_INT8  || atttype == DATATYPE_UINT8  ||
