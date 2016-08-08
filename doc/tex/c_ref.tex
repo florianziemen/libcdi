@@ -2,6 +2,128 @@
 
 \section*{\tt 
 \ifpdf
+\hyperref[cdiDefAttFlt]{cdiDefAttFlt}
+\else
+cdiDefAttFlt
+\fi
+}
+\begin{verbatim}
+    int cdiDefAttFlt(int cdiID, int varID, const char *name, int type, int len, 
+                     const double *dp);
+\end{verbatim}
+
+Define a floating point attribute
+\ifpdfoutput{}{(\ref{cdiDefAttFlt})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[cdiDefAttInt]{cdiDefAttInt}
+\else
+cdiDefAttInt
+\fi
+}
+\begin{verbatim}
+    int cdiDefAttInt(int cdiID, int varID, const char *name, int type, int len, 
+                     const int *ip);
+\end{verbatim}
+
+Define an integer attribute
+\ifpdfoutput{}{(\ref{cdiDefAttInt})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[cdiDefAttTxt]{cdiDefAttTxt}
+\else
+cdiDefAttTxt
+\fi
+}
+\begin{verbatim}
+    int cdiDefAttTxt(int cdiID, int varID, const char *name, int len, const char *tp);
+\end{verbatim}
+
+Define a text attribute
+\ifpdfoutput{}{(\ref{cdiDefAttTxt})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[cdiInqAtt]{cdiInqAtt}
+\else
+cdiInqAtt
+\fi
+}
+\begin{verbatim}
+    int cdiInqAtt(int cdiID, int varID, int attnum, char *name, int *typep, int *lenp);
+\end{verbatim}
+
+Get information about an attribute
+\ifpdfoutput{}{(\ref{cdiInqAtt})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[cdiInqAttFlt]{cdiInqAttFlt}
+\else
+cdiInqAttFlt
+\fi
+}
+\begin{verbatim}
+    int cdiInqAttFlt(int cdiID, int varID, const char *name, int mlen, double *dp);
+\end{verbatim}
+
+Get the value(s) of a floating point attribute
+\ifpdfoutput{}{(\ref{cdiInqAttFlt})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[cdiInqAttInt]{cdiInqAttInt}
+\else
+cdiInqAttInt
+\fi
+}
+\begin{verbatim}
+    int cdiInqAttInt(int cdiID, int varID, const char *name, int mlen, int *ip);
+\end{verbatim}
+
+Get the value(s) of an integer attribute
+\ifpdfoutput{}{(\ref{cdiInqAttInt})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[cdiInqAttTxt]{cdiInqAttTxt}
+\else
+cdiInqAttTxt
+\fi
+}
+\begin{verbatim}
+    int cdiInqAttTxt(int cdiID, int varID, const char *name, int mlen, char *tp);
+\end{verbatim}
+
+Get the value(s) of a text attribute
+\ifpdfoutput{}{(\ref{cdiInqAttTxt})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[cdiInqNatts]{cdiInqNatts}
+\else
+cdiInqNatts
+\fi
+}
+\begin{verbatim}
+    int cdiInqNatts(int cdiID, int varID, int *nattsp);
+\end{verbatim}
+
+Get number of attributes
+\ifpdfoutput{}{(\ref{cdiInqNatts})}
+
+
+\section*{\tt 
+\ifpdf
 \hyperref[gridCreate]{gridCreate}
 \else
 gridCreate
@@ -1116,53 +1238,6 @@ Create a variable list
 
 \section*{\tt 
 \ifpdf
-\hyperref[vlistDefAttFlt]{vlistDefAttFlt}
-\else
-vlistDefAttFlt
-\fi
-}
-\begin{verbatim}
-    int vlistDefAttFlt(int vlistID, int varID, const char *name, int type, int len, 
-                       const double *dp);
-\end{verbatim}
-
-Define a floating point attribute
-\ifpdfoutput{}{(\ref{vlistDefAttFlt})}
-
-
-\section*{\tt 
-\ifpdf
-\hyperref[vlistDefAttInt]{vlistDefAttInt}
-\else
-vlistDefAttInt
-\fi
-}
-\begin{verbatim}
-    int vlistDefAttInt(int vlistID, int varID, const char *name, int type, int len, 
-                       const int *ip);
-\end{verbatim}
-
-Define an integer attribute
-\ifpdfoutput{}{(\ref{vlistDefAttInt})}
-
-
-\section*{\tt 
-\ifpdf
-\hyperref[vlistDefAttTxt]{vlistDefAttTxt}
-\else
-vlistDefAttTxt
-\fi
-}
-\begin{verbatim}
-    int vlistDefAttTxt(int vlistID, int varID, const char *name, int len, const char *tp);
-\end{verbatim}
-
-Define a text attribute
-\ifpdfoutput{}{(\ref{vlistDefAttTxt})}
-
-
-\section*{\tt 
-\ifpdf
 \hyperref[vlistDefTaxis]{vlistDefTaxis}
 \else
 vlistDefTaxis
@@ -1324,81 +1399,6 @@ vlistDuplicate
 
 Duplicate a variable list
 \ifpdfoutput{}{(\ref{vlistDuplicate})}
-
-
-\section*{\tt 
-\ifpdf
-\hyperref[vlistInqAtt]{vlistInqAtt}
-\else
-vlistInqAtt
-\fi
-}
-\begin{verbatim}
-    int vlistInqAtt(int vlistID, int varID, int attnum, char *name, int *typep, int *lenp);
-\end{verbatim}
-
-Get information about an attribute
-\ifpdfoutput{}{(\ref{vlistInqAtt})}
-
-
-\section*{\tt 
-\ifpdf
-\hyperref[vlistInqAttFlt]{vlistInqAttFlt}
-\else
-vlistInqAttFlt
-\fi
-}
-\begin{verbatim}
-    int vlistInqAttFlt(int vlistID, int varID, const char *name, int mlen, double *dp);
-\end{verbatim}
-
-Get the value(s) of a floating point attribute
-\ifpdfoutput{}{(\ref{vlistInqAttFlt})}
-
-
-\section*{\tt 
-\ifpdf
-\hyperref[vlistInqAttInt]{vlistInqAttInt}
-\else
-vlistInqAttInt
-\fi
-}
-\begin{verbatim}
-    int vlistInqAttInt(int vlistID, int varID, const char *name, int mlen, int *ip);
-\end{verbatim}
-
-Get the value(s) of an integer attribute
-\ifpdfoutput{}{(\ref{vlistInqAttInt})}
-
-
-\section*{\tt 
-\ifpdf
-\hyperref[vlistInqAttTxt]{vlistInqAttTxt}
-\else
-vlistInqAttTxt
-\fi
-}
-\begin{verbatim}
-    int vlistInqAttTxt(int vlistID, int varID, const char *name, int mlen, char *tp);
-\end{verbatim}
-
-Get the value(s) of a text attribute
-\ifpdfoutput{}{(\ref{vlistInqAttTxt})}
-
-
-\section*{\tt 
-\ifpdf
-\hyperref[vlistInqNatts]{vlistInqNatts}
-\else
-vlistInqNatts
-\fi
-}
-\begin{verbatim}
-    int vlistInqNatts(int vlistID, int varID, int *nattsp);
-\end{verbatim}
-
-Get number of attributes
-\ifpdfoutput{}{(\ref{vlistInqNatts})}
 
 
 \section*{\tt 
