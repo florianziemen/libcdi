@@ -1839,7 +1839,7 @@ void gridDefProjParamRLL(int gridID, double xpole, double ypole, double angle)
 
   const char *mapping = "rotated_latitude_longitude";
   cdiGridDefKeyStr(gridID, CDI_KEY_MAPPING, CDI_MAX_NAME, mapping);
-  vlistDefAttTxt(gridID, CDI_GLOBAL, "grid_mapping_name", strlen(mapping)+1, mapping);
+  vlistDefAttTxt(gridID, CDI_GLOBAL, "grid_mapping_name", strlen(mapping), mapping);
   vlistDefAttFlt(gridID, CDI_GLOBAL, "grid_north_pole_longitude", DATATYPE_FLT64, 1, &xpole);
   vlistDefAttFlt(gridID, CDI_GLOBAL, "grid_north_pole_latitude", DATATYPE_FLT64, 1, &ypole);
   if ( IS_NOT_EQUAL(angle, 0) ) vlistDefAttFlt(gridID, CDI_GLOBAL, "north_pole_grid_longitude", DATATYPE_FLT64, 1, &angle);
