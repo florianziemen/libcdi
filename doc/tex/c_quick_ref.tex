@@ -22,6 +22,83 @@ Clear the list of additional GRIB keys..
 Register an additional GRIB key which is read when file is opened..
 
 
+\section*{\tt \htmlref{cdiDefAttFlt}{cdiDefAttFlt}}
+
+\begin{verbatim}
+    int cdiDefAttFlt (int cdiID, int varID, const char *name, int type, int len,
+                      const double dp[]);
+\end{verbatim}
+
+Define a floating point attribute.
+
+
+\section*{\tt \htmlref{cdiDefAttInt}{cdiDefAttInt}}
+
+\begin{verbatim}
+    int cdiDefAttInt (int cdiID, int varID, const char *name, int type, int len,
+                      const int ip[]);
+\end{verbatim}
+
+Define an integer attribute.
+
+
+\section*{\tt \htmlref{cdiDefAttTxt}{cdiDefAttTxt}}
+
+\begin{verbatim}
+    int cdiDefAttTxt (int cdiID, int varID, const char *name, int len,
+                      const char *tp_cbuf);
+\end{verbatim}
+
+Define a text attribute.
+
+
+\section*{\tt \htmlref{cdiInqAtt}{cdiInqAtt}}
+
+\begin{verbatim}
+    int cdiInqAtt (int cdiID, int varID, int attrnum, char *name, int *typep,
+                   int *lenp);
+\end{verbatim}
+
+Get information about an attribute.
+
+
+\section*{\tt \htmlref{cdiInqAttFlt}{cdiInqAttFlt}}
+
+\begin{verbatim}
+    int cdiInqAttFlt (int cdiID, int varID, const char *name, int mlen, double dp[]);
+\end{verbatim}
+
+Get the value(s) of a floating point attribute.
+
+
+\section*{\tt \htmlref{cdiInqAttInt}{cdiInqAttInt}}
+
+\begin{verbatim}
+    int cdiInqAttInt (int cdiID, int varID, const char *name, int mlen, int ip[]);
+\end{verbatim}
+
+Get the value(s) of an integer attribute.
+
+
+\section*{\tt \htmlref{cdiInqAttTxt}{cdiInqAttTxt}}
+
+\begin{verbatim}
+    int cdiInqAttTxt (int cdiID, int varID, const char *name, int mlen,
+                      char *tp_cbuf);
+\end{verbatim}
+
+Get the value(s) of a text attribute.
+
+
+\section*{\tt \htmlref{cdiInqNatts}{cdiInqNatts}}
+
+\begin{verbatim}
+    int cdiInqNatts (int cdiID, int varID, int *nattsp);
+\end{verbatim}
+
+Get number of attributes assigned to this variable.
+
+
 \section*{\tt \htmlref{gridCreate}{gridCreate}}
 
 \begin{verbatim}
@@ -74,6 +151,24 @@ Define the position of grid in the reference file.
 \end{verbatim}
 
 Define the precision of a Grid.
+
+
+\section*{\tt \htmlref{gridDefProj}{gridDefProj}}
+
+\begin{verbatim}
+    void gridDefProj (int gridID, int projID);
+\end{verbatim}
+
+Define the projection ID of a Grid.
+
+
+\section*{\tt \htmlref{gridDefProjType}{gridDefProjType}}
+
+\begin{verbatim}
+    void gridDefProjType (int gridID, int projtype);
+\end{verbatim}
+
+Define the projection type.
 
 
 \section*{\tt \htmlref{gridDefReference}{gridDefReference}}
@@ -263,6 +358,24 @@ Get the position of grid in the reference file.
 \end{verbatim}
 
 Get the precision of a Grid.
+
+
+\section*{\tt \htmlref{gridInqProj}{gridInqProj}}
+
+\begin{verbatim}
+    int gridInqProj (int gridID);
+\end{verbatim}
+
+Get the projection ID of a Grid.
+
+
+\section*{\tt \htmlref{gridInqProjType}{gridInqProjType}}
+
+\begin{verbatim}
+    int gridInqProjType (int gridID);
+\end{verbatim}
+
+Get the projection type.
 
 
 \section*{\tt \htmlref{gridInqReference}{gridInqReference}}
@@ -889,36 +1002,6 @@ Safe and convenient version of vlistInqVarName.
 Create a variable list.
 
 
-\section*{\tt \htmlref{vlistDefAttFlt}{vlistDefAttFlt}}
-
-\begin{verbatim}
-    int vlistDefAttFlt (int vlistID, int varID, const char *name, int type, int len,
-                        const double dp[]);
-\end{verbatim}
-
-Define a floating point attribute.
-
-
-\section*{\tt \htmlref{vlistDefAttInt}{vlistDefAttInt}}
-
-\begin{verbatim}
-    int vlistDefAttInt (int vlistID, int varID, const char *name, int type, int len,
-                        const int ip[]);
-\end{verbatim}
-
-Define an integer attribute.
-
-
-\section*{\tt \htmlref{vlistDefAttTxt}{vlistDefAttTxt}}
-
-\begin{verbatim}
-    int vlistDefAttTxt (int vlistID, int varID, const char *name, int len,
-                        const char *tp_cbuf);
-\end{verbatim}
-
-Define a text attribute.
-
-
 \section*{\tt \htmlref{vlistDefTaxis}{vlistDefTaxis}}
 
 \begin{verbatim}
@@ -1071,54 +1154,6 @@ Duplicate a variable list.
 \end{verbatim}
 
 returns 1 if meta-data key was read, 0 otherwise..
-
-
-\section*{\tt \htmlref{vlistInqAtt}{vlistInqAtt}}
-
-\begin{verbatim}
-    int vlistInqAtt (int vlistID, int varID, int attrnum, char *name, int *typep,
-                     int *lenp);
-\end{verbatim}
-
-Get information about an attribute.
-
-
-\section*{\tt \htmlref{vlistInqAttFlt}{vlistInqAttFlt}}
-
-\begin{verbatim}
-    int vlistInqAttFlt (int vlistID, int varID, const char *name, int mlen,
-                        double dp[]);
-\end{verbatim}
-
-Get the value(s) of a floating point attribute.
-
-
-\section*{\tt \htmlref{vlistInqAttInt}{vlistInqAttInt}}
-
-\begin{verbatim}
-    int vlistInqAttInt (int vlistID, int varID, const char *name, int mlen, int ip[]);
-\end{verbatim}
-
-Get the value(s) of an integer attribute.
-
-
-\section*{\tt \htmlref{vlistInqAttTxt}{vlistInqAttTxt}}
-
-\begin{verbatim}
-    int vlistInqAttTxt (int vlistID, int varID, const char *name, int mlen,
-                        char *tp_cbuf);
-\end{verbatim}
-
-Get the value(s) of a text attribute.
-
-
-\section*{\tt \htmlref{vlistInqNatts}{vlistInqNatts}}
-
-\begin{verbatim}
-    int vlistInqNatts (int vlistID, int varID, int *nattsp);
-\end{verbatim}
-
-Get number of variable attributes assigned to this variable.
 
 
 \section*{\tt \htmlref{vlistInqTaxis}{vlistInqTaxis}}

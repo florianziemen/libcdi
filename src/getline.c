@@ -33,6 +33,7 @@
 #include <stdint.h>
 #include <unistd.h>
 #include <string.h>
+#include <limits.h>
 
 /* read until end of line or end of file */
 ssize_t

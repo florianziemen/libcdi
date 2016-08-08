@@ -2064,7 +2064,7 @@ int vlistVarCompare(vlist_t *a, int varIDA, vlist_t *b, int varIDB)
   if (natts != b->vars[varIDB].atts.nelems)
     return 1;
   for (size_t attID = 0; attID < natts; ++attID)
-    diff |= vlist_att_compare(a, varIDA, b, varIDB, (int)attID);
+    diff |= cdi_att_compare(a, varIDA, b, varIDB, (int)attID);
   if ((diff |= ((pva->ensdata == NULL) ^ (pvb->ensdata == NULL))))
     return 1;
   if (pva->ensdata)
@@ -2096,7 +2096,7 @@ int vlistVarGetPackSize(vlist_t *p, int varID, void *context)
     varsize += serializeGetSize((int)strlen(var->extra), DATATYPE_TXT, context);
   varsize += serializeGetSize(4 * zaxisInqSize(var->zaxisID),
                               DATATYPE_INT, context);
-  varsize += vlistAttsGetSize(p, varID, context);
+  varsize += cdiAttsGetSize(p, varID, context);
   return varsize;
 }
 
@@ -2164,7 +2164,7 @@ void vlistVarPack(vlist_t *p, int varID, char * buf, int size, int *position,
       serializePack(levbuf, nlevs * 4, DATATYPE_INT,
                     buf, size, position, context);
     }
-  vlistAttsPack(p, varID, buf, size, position, context);
+  cdiAttsPack(p, varID, buf, size, position, context);
 }
 
 static inline int
@@ -2273,7 +2273,7 @@ void vlistVarUnpack(int vlistID, char * buf, int size, int *position,
       vlistDefFlag(vlistID, newvar, flagSetLev, levbuf[flagSetLev][0]);
     }
   vlistDefVarIOrank(vlistID, newvar, tempbuf[19]);
-  vlistAttsUnpack(vlistID, newvar, buf, size, position, context);
+  cdiAttsUnpack(vlistID, newvar, buf, size, position, context);
 }
 
 

@@ -34,13 +34,11 @@ typedef struct {
 } cdi_atts_t;
 
 
-int vlistAttsGetSize(void *p, int varID, void *context);
+int cdiAttsGetSize(void *p, int varID, void *context);
 
-void vlistAttsPack(void *p, int varID,
-                   void *buf, int size, int *position, void *context);
+void cdiAttsPack(void *p, int varID, void *buf, int size, int *position, void *context);
 
-void vlistAttsUnpack(int vlistID, int varID,
-                     void *buf, int size, int *position, void *context);
+void cdiAttsUnpack(int cdiID, int varID, void *buf, int size, int *position, void *context);
 
 #endif
 

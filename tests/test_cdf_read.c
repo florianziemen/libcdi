@@ -81,11 +81,11 @@ printAtts(int vlistID)
       int nAtts, attType, attLen;
       char attName[CDI_MAX_NAME + 1];
       int varID = (int)varIdx - 1;
-      vlistInqNatts(vlistID, varID, &nAtts);
+      cdiInqNatts(vlistID, varID, &nAtts);
       for (size_t attIdx = 0; attIdx < (size_t)nAtts; attIdx++ )
         {
-          int rc = vlistInqAtt(vlistID, varID, (int)attIdx,
-                               attName, &attType, &attLen);
+          int rc = cdiInqAtt(vlistID, varID, (int)attIdx,
+                             attName, &attType, &attLen);
           {
             const char *varDesc = varIdx > 0
               ? (sprintf((char *)buf, "%s%d", varDescPrefix,
@@ -126,14 +126,14 @@ printAtts(int vlistID)
           switch (attType)
             {
             case DATATYPE_TXT:
-              rc = vlistInqAttTxt(vlistID, (int)varID, attName,
-                                  attLen, (char *)buf);
+              rc = cdiInqAttTxt(vlistID, (int)varID, attName,
+                                attLen, (char *)buf);
               if (rc == CDI_NOERR)
                 printf("\"%.*s\"", attLen, (char *)buf);
               break;
             case DATATYPE_FLT:
-              rc = vlistInqAttFlt(vlistID, (int)varID, attName,
-                                  attLen + 1, (double *)buf);
+              rc = cdiInqAttFlt(vlistID, (int)varID, attName,
+                                attLen + 1, (double *)buf);
               if (rc == CDI_NOERR && attLen)
                 {
                   const double *restrict dp = (const double*)buf;
@@ -143,8 +143,8 @@ printAtts(int vlistID)
                 }
               break;
             case DATATYPE_INT:
-              rc = vlistInqAttInt(vlistID, (int)varID, attName,
-                                  attLen + 1, (int *)buf);
+              rc = cdiInqAttInt(vlistID, (int)varID, attName,
+                                attLen + 1, (int *)buf);
               if (rc == CDI_NOERR && attLen)
                 {
                   const int *restrict ip = (const int *)buf;

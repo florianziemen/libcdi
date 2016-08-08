@@ -56,7 +56,7 @@ vlist_compare(vlist_t *a, vlist_t *b)
     diff |= vlistVarCompare(a, varID, b, varID);
   size_t natts = a->atts.nelems;
   for (size_t attID = 0; attID < natts; ++attID)
-    diff |= vlist_att_compare(a, CDI_GLOBAL, b, CDI_GLOBAL, (int)attID);
+    diff |= cdi_att_compare(a, CDI_GLOBAL, b, CDI_GLOBAL, (int)attID);
   return diff;
 }
 
@@ -214,7 +214,7 @@ vlist_delete(vlist_t *vlistptr)
   int vlistID = vlistptr->self;
   if ( CDI_Debug ) Message("call to vlist_delete, vlistID = %d", vlistID);
 
-  vlistDelAtts(vlistID, CDI_GLOBAL);
+  cdiDelAtts(vlistID, CDI_GLOBAL);
 
   int nvars = vlistptr->nvars;
   var_t *vars = vlistptr->vars;
@@ -240,7 +240,7 @@ vlist_delete(vlist_t *vlistptr)
       vlistptr->vars[varID].opt_grib_kvpair_size = 0;
       vlistptr->vars[varID].opt_grib_kvpair      = NULL;
 
-      vlistDelAtts(vlistID, varID);
+      cdiDelAtts(vlistID, varID);
     }
 
   if ( vars ) Free(vars);
@@ -343,7 +343,7 @@ void vlistCopy(int vlistID2, int vlistID1)
   var_t *vars2 = vlistptr2->vars;
   vlist_copy(vlistptr2, vlistptr1);
 
-  vlistCopyVarAtts(vlistID1, CDI_GLOBAL, vlistID2, CDI_GLOBAL);
+  cdiCopyVarAtts(vlistID1, CDI_GLOBAL, vlistID2, CDI_GLOBAL);
 
   if ( vars1 )
     {
@@ -360,7 +360,7 @@ void vlistCopy(int vlistID2, int vlistID1)
           var_copy_entries(&vars2[varID], &vars1[varID]);
 
           vlistptr2->vars[varID].atts.nelems = 0;
-	  vlistCopyVarAtts(vlistID1, varID, vlistID2, varID);
+	  cdiCopyVarAtts(vlistID1, varID, vlistID2, varID);
 
           if ( vars1[varID].levinfo )
             {
@@ -526,7 +526,7 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
 
   vlist_copy(vlistptr2, vlistptr1);
 
-  vlistCopyVarAtts(vlistID1, CDI_GLOBAL, vlistID2, CDI_GLOBAL);
+  cdiCopyVarAtts(vlistID1, CDI_GLOBAL, vlistID2, CDI_GLOBAL);
 
   if ( vlistptr1->vars )
     {
@@ -568,7 +568,7 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
             var_copy_entries(&vars2[varID2], &vars1[varID]);
 
 	    vlistptr2->vars[varID2].atts.nelems = 0;
-	    vlistCopyVarAtts(vlistID1, varID, vlistID2, varID2);
+	    cdiCopyVarAtts(vlistID1, varID, vlistID2, varID2);
 
 	    int nlevs  = zaxisInqSize(vars1[varID].zaxisID);
 	    int nlevs2 = 0;
@@ -732,7 +732,7 @@ void vlistCat(int vlistID2, int vlistID1)
         }
 
       vars2[varID2].atts.nelems = 0;
-      vlistCopyVarAtts(vlistID1, varID, vlistID2, varID2);
+      cdiCopyVarAtts(vlistID1, varID, vlistID2, varID2);
 
       vlistAdd2GridIDs(vlistptr2, vars1[varID].gridID);
       vlistAdd2ZaxisIDs(vlistptr2, vars1[varID].zaxisID);
@@ -1469,7 +1469,7 @@ int  vlistGetSizeP ( void * vlistptr, void *context)
   vlist_t *p = (vlist_t*) vlistptr;
   txsize = serializeGetSize(vlist_nints, DATATYPE_INT, context);
   txsize += serializeGetSize(1, DATATYPE_LONG, context);
-  txsize += vlistAttsGetSize(p, CDI_GLOBAL, context);
+  txsize += cdiAttsGetSize(p, CDI_GLOBAL, context);
   for ( varID = 0; varID <  p->nvars; varID++ )
     txsize += vlistVarGetPackSize(p, varID, context);
   return txsize;
@@ -1491,7 +1491,7 @@ void vlistPackP ( void * vlistptr, void * buf, int size, int *position,
   serializePack(tempbuf, vlist_nints, DATATYPE_INT, buf, size, position, context);
   serializePack(&p->ntsteps, 1, DATATYPE_LONG, buf, size, position, context);
 
-  vlistAttsPack(p, CDI_GLOBAL, buf, size, position, context);
+  cdiAttsPack(p, CDI_GLOBAL, buf, size, position, context);
   for ( varID = 0; varID < p->nvars; varID++ )
     {
       vlistVarPack(p, varID, (char *)buf, size, position, context);
@@ -1515,7 +1515,7 @@ void vlistUnpack(char * buf, int size, int *position, int originNamespace,
   p->instID = namespaceAdaptKey(tempbuf[4], originNamespace);
   p->modelID = namespaceAdaptKey(tempbuf[5], originNamespace);
   serializeUnpack(buf, size, position, &p->ntsteps, 1, DATATYPE_LONG, context);
-  vlistAttsUnpack(targetID, CDI_GLOBAL, buf, size, position, context);
+  cdiAttsUnpack(targetID, CDI_GLOBAL, buf, size, position, context);
   for (int varID = 0; varID < nvars; varID++ )
     vlistVarUnpack(targetID, buf, size, position, originNamespace, context);
   reshSetStatus(targetID, &vlistOps,

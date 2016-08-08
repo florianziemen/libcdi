@@ -173,11 +173,11 @@ void cdfDefineAttributes(int cdiID, int varID, int fileID, int ncvarID)
   size_t attBufSize = 0;
 
   int natts;
-  vlistInqNatts(cdiID, varID, &natts);
+  cdiInqNatts(cdiID, varID, &natts);
 
   for ( int iatt = 0; iatt < natts; ++iatt )
     {
-      vlistInqAtt(cdiID, varID, iatt, attname, &atttype, &attlen);
+      cdiInqAtt(cdiID, varID, iatt, attname, &atttype, &attlen);
 
       if ( attlen == 0 ) continue;
 
@@ -185,7 +185,7 @@ void cdfDefineAttributes(int cdiID, int varID, int fileID, int ncvarID)
         {
           size_t attSize = (size_t)attlen*sizeof(char);
           char *atttxt = (char *)resizeBuf(&attBuf, &attBufSize, attSize);
-          vlistInqAttTxt(cdiID, varID, attname, attlen, atttxt);
+          cdiInqAttTxt(cdiID, varID, attname, attlen, atttxt);
           len = (size_t)attlen;
           cdf_put_att_text(fileID, ncvarID, attname, len, atttxt);
         }
@@ -195,7 +195,7 @@ void cdfDefineAttributes(int cdiID, int varID, int fileID, int ncvarID)
         {
           size_t attSize = (size_t)attlen*sizeof(int);
           int *attint = (int *)resizeBuf(&attBuf, &attBufSize, attSize);
-          vlistInqAttInt(cdiID, varID, attname, attlen, &attint[0]);
+          cdiInqAttInt(cdiID, varID, attname, attlen, &attint[0]);
           len = (size_t)attlen;
           nc_type xtype = (atttype == DATATYPE_INT8)  ? NC_BYTE :
                           (atttype == DATATYPE_INT16) ? NC_SHORT :
@@ -211,7 +211,7 @@ void cdfDefineAttributes(int cdiID, int varID, int fileID, int ncvarID)
         {
           size_t attSize = (size_t)attlen * sizeof(double);
           double *attflt = (double *)resizeBuf(&attBuf, &attBufSize, attSize);
-          vlistInqAttFlt(cdiID, varID, attname, attlen, attflt);
+          cdiInqAttFlt(cdiID, varID, attname, attlen, attflt);
           len = (size_t)attlen;
           if ( atttype == DATATYPE_FLT32 )
             {
@@ -239,7 +239,7 @@ void cdfDefGlobalAtts(stream_t *streamptr)
   cdfDefInstitut(streamptr);
 
   int natts;
-  vlistInqNatts(vlistID, CDI_GLOBAL, &natts);
+  cdiInqNatts(vlistID, CDI_GLOBAL, &natts);
 
   if ( natts > 0 && streamptr->ncmode == 2 ) cdf_redef(fileID);
 

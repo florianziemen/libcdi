@@ -950,20 +950,20 @@ void cdf_set_cdi_attr(int ncid, int ncvarid, int attnum, int cdiID, int varID)
                      (atttype == NC_UINT)   ? DATATYPE_UINT32 :
 #endif
                      DATATYPE_INT32;
-      vlistDefAttInt(cdiID, varID, attname, datatype, (int)attlen, attint);
+      cdiDefAttInt(cdiID, varID, attname, datatype, (int)attlen, attint);
     }
   else if ( xtypeIsFloat(atttype) )
     {
       double attflt[attlen];
       cdfGetAttDouble(ncid, ncvarid, attname, (int)attlen, attflt);
       int datatype = (atttype == NC_FLOAT) ? DATATYPE_FLT32 : DATATYPE_FLT64;
-      vlistDefAttFlt(cdiID, varID, attname, datatype, (int)attlen, attflt);
+      cdiDefAttFlt(cdiID, varID, attname, datatype, (int)attlen, attflt);
     }
   else if ( xtypeIsText(atttype) )
     {
       enum {attstringlen = 8192}; char attstring[attstringlen];
       cdfGetAttText(ncid, ncvarid, attname, attstringlen, attstring);
-      vlistDefAttTxt(cdiID, varID, attname, (int)attlen, attstring);
+      cdiDefAttTxt(cdiID, varID, attname, (int)attlen, attstring);
     }
 }
 
@@ -3303,7 +3303,7 @@ void cdf_scan_global_attr(int fileID, int vlistID, stream_t *streamptr, int ngat
                       memcpy(gridfile, attstring, attstrlen+1);
                     }
 
-		  vlistDefAttTxt(vlistID, CDI_GLOBAL, attname, (int)attstrlen, attstring);
+		  cdiDefAttTxt(vlistID, CDI_GLOBAL, attname, (int)attstrlen, attstring);
 		}
 	    }
 	}
@@ -3319,7 +3319,7 @@ void cdf_scan_global_attr(int fileID, int vlistID, stream_t *streamptr, int ngat
               int attint[attlen];
               cdfGetAttInt(fileID, NC_GLOBAL, attname, (int)attlen, attint);
               int datatype = (xtype == NC_SHORT) ? DATATYPE_INT16 : DATATYPE_INT32;
-              vlistDefAttInt(vlistID, CDI_GLOBAL, attname, datatype, (int)attlen, attint);
+              cdiDefAttInt(vlistID, CDI_GLOBAL, attname, datatype, (int)attlen, attint);
             }
         }
       else if ( xtype == NC_FLOAT || xtype == NC_DOUBLE )
@@ -3327,7 +3327,7 @@ void cdf_scan_global_attr(int fileID, int vlistID, stream_t *streamptr, int ngat
 	  double attflt[attlen];
 	  cdfGetAttDouble(fileID, NC_GLOBAL, attname, (int)attlen, attflt);
           int datatype = (xtype == NC_FLOAT) ? DATATYPE_FLT32 : DATATYPE_FLT64;
-          vlistDefAttFlt(vlistID, CDI_GLOBAL, attname, datatype, (int)attlen, attflt);
+          cdiDefAttFlt(vlistID, CDI_GLOBAL, attname, datatype, (int)attlen, attflt);
 	}
     }
 }

@@ -1810,18 +1810,18 @@ void gridInqProjParamRLL(int gridID, double *xpole, double *ypole, double *angle
       char attname[CDI_MAX_NAME+1];
 
       int natts;
-      vlistInqNatts(gridID, CDI_GLOBAL, &natts);
+      cdiInqNatts(gridID, CDI_GLOBAL, &natts);
 
       for ( int iatt = 0; iatt < natts; ++iatt )
         {
-          vlistInqAtt(gridID, CDI_GLOBAL, iatt, attname, &atttype, &attlen);
+          cdiInqAtt(gridID, CDI_GLOBAL, iatt, attname, &atttype, &attlen);
 
           if ( attlen != 1 ) continue;
 
           if ( atttype == DATATYPE_FLT32 || atttype == DATATYPE_FLT64 )
             {
               double attflt;
-              vlistInqAttFlt(gridID, CDI_GLOBAL, attname, attlen, &attflt);
+              cdiInqAttFlt(gridID, CDI_GLOBAL, attname, attlen, &attflt);
               if      ( strcmp(attname, "grid_north_pole_longitude") == 0 ) *xpole = attflt;
               else if ( strcmp(attname, "grid_north_pole_latitude")  == 0 ) *ypole = attflt;
               else if ( strcmp(attname, "north_pole_grid_longitude") == 0 ) *angle = attflt;
@@ -1839,10 +1839,10 @@ void gridDefProjParamRLL(int gridID, double xpole, double ypole, double angle)
 
   const char *mapping = "rotated_latitude_longitude";
   cdiGridDefKeyStr(gridID, CDI_KEY_MAPPING, CDI_MAX_NAME, mapping);
-  vlistDefAttTxt(gridID, CDI_GLOBAL, "grid_mapping_name", strlen(mapping), mapping);
-  vlistDefAttFlt(gridID, CDI_GLOBAL, "grid_north_pole_longitude", DATATYPE_FLT64, 1, &xpole);
-  vlistDefAttFlt(gridID, CDI_GLOBAL, "grid_north_pole_latitude", DATATYPE_FLT64, 1, &ypole);
-  if ( IS_NOT_EQUAL(angle, 0) ) vlistDefAttFlt(gridID, CDI_GLOBAL, "north_pole_grid_longitude", DATATYPE_FLT64, 1, &angle);
+  cdiDefAttTxt(gridID, CDI_GLOBAL, "grid_mapping_name", strlen(mapping), mapping);
+  cdiDefAttFlt(gridID, CDI_GLOBAL, "grid_north_pole_longitude", DATATYPE_FLT64, 1, &xpole);
+  cdiDefAttFlt(gridID, CDI_GLOBAL, "grid_north_pole_latitude", DATATYPE_FLT64, 1, &ypole);
+  if ( IS_NOT_EQUAL(angle, 0) ) cdiDefAttFlt(gridID, CDI_GLOBAL, "north_pole_grid_longitude", DATATYPE_FLT64, 1, &angle);
 
   grid_t *gridptr = gridID2Ptr(gridID);
   gridptr->projtype = CDI_PROJ_RLL;
@@ -3464,11 +3464,11 @@ void gridPrintAttributes(FILE *fp, int gridID)
   size_t attBufSize = 0;
 
   int natts;
-  vlistInqNatts(cdiID, varID, &natts);
+  cdiInqNatts(cdiID, varID, &natts);
 
   for ( int iatt = 0; iatt < natts; ++iatt )
     {
-      vlistInqAtt(cdiID, varID, iatt, attname, &atttype, &attlen);
+      cdiInqAtt(cdiID, varID, iatt, attname, &atttype, &attlen);
 
       if ( attlen == 0 ) continue;
 
@@ -3476,7 +3476,7 @@ void gridPrintAttributes(FILE *fp, int gridID)
         {
           size_t attSize = (size_t)(attlen+1)*sizeof(char);
           char *atttxt = (char *)resizeBuffer(&attBuf, &attBufSize, attSize);
-          vlistInqAttTxt(cdiID, varID, attname, attlen, atttxt);
+          cdiInqAttTxt(cdiID, varID, attname, attlen, atttxt);
           atttxt[attlen] = 0;
           fprintf(fp, "ATTR_TXT: %s = \"%s\"\n", attname, atttxt);
         }
@@ -3486,7 +3486,7 @@ void gridPrintAttributes(FILE *fp, int gridID)
         {
           size_t attSize = (size_t)attlen*sizeof(int);
           int *attint = (int *)resizeBuffer(&attBuf, &attBufSize, attSize);
-          vlistInqAttInt(cdiID, varID, attname, attlen, &attint[0]);
+          cdiInqAttInt(cdiID, varID, attname, attlen, &attint[0]);
           if ( attlen == 1 )
             fprintf(fp, "ATTR_INT: %s =", attname);
           else
@@ -3499,7 +3499,7 @@ void gridPrintAttributes(FILE *fp, int gridID)
           size_t attSize = (size_t)attlen * sizeof(double);
           double *attflt = (double *)resizeBuffer(&attBuf, &attBufSize, attSize);
           int dig = (atttype == DATATYPE_FLT64) ? 15 : 7;
-          vlistInqAttFlt(cdiID, varID, attname, attlen, attflt);
+          cdiInqAttFlt(cdiID, varID, attname, attlen, attflt);
           if ( attlen == 1 )
             fprintf(fp, "ATTR_FLT: %s =", attname);
           else

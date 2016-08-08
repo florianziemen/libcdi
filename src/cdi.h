@@ -678,27 +678,27 @@ const char *vlistInqVarNamePtr(int vlistID, int varID);
 const char *vlistInqVarLongnamePtr(int vlistID, int varID);
 const char *vlistInqVarUnitsPtr(int vlistID, int varID);
 
-/* VLIST attributes */
+/* CDI attributes */
 
-/*      vlistInqNatts: Get number of attributes assigned to this variable */
-int     vlistInqNatts(int vlistID, int varID, int *nattsp);
-/*      vlistInqAtt: Get information about an attribute */
-int     vlistInqAtt(int vlistID, int varID, int attrnum, char *name, int *typep, int *lenp);
-int     vlistDelAtt(int vlistID, int varID, const char *name);
+/*      cdiInqNatts: Get number of attributes assigned to this variable */
+int     cdiInqNatts(int cdiID, int varID, int *nattsp);
+/*      cdiInqAtt: Get information about an attribute */
+int     cdiInqAtt(int cdiID, int varID, int attrnum, char *name, int *typep, int *lenp);
+int     cdiDelAtt(int cdiID, int varID, const char *name);
 
-/*      vlistDefAttInt: Define an integer attribute */
-int     vlistDefAttInt(int vlistID, int varID, const char *name, int type, int len, const int ip[]);
-/*      vlistDefAttFlt: Define a floating point attribute */
-int     vlistDefAttFlt(int vlistID, int varID, const char *name, int type, int len, const double dp[]);
-/*      vlistDefAttTxt: Define a text attribute */
-int     vlistDefAttTxt(int vlistID, int varID, const char *name, int len, const char *tp_cbuf);
+/*      cdiDefAttInt: Define an integer attribute */
+int     cdiDefAttInt(int cdiID, int varID, const char *name, int type, int len, const int ip[]);
+/*      cdiDefAttFlt: Define a floating point attribute */
+int     cdiDefAttFlt(int cdiID, int varID, const char *name, int type, int len, const double dp[]);
+/*      cdiDefAttTxt: Define a text attribute */
+int     cdiDefAttTxt(int cdiID, int varID, const char *name, int len, const char *tp_cbuf);
 
-/*      vlistInqAttInt: Get the value(s) of an integer attribute */
-int     vlistInqAttInt(int vlistID, int varID, const char *name, int mlen, int ip[]);
-/*      vlistInqAttFlt: Get the value(s) of a floating point attribute */
-int     vlistInqAttFlt(int vlistID, int varID, const char *name, int mlen, double dp[]);
-/*      vlistInqAttTxt: Get the value(s) of a text attribute */
-int     vlistInqAttTxt(int vlistID, int varID, const char *name, int mlen, char *tp_cbuf);
+/*      cdiInqAttInt: Get the value(s) of an integer attribute */
+int     cdiInqAttInt(int cdiID, int varID, const char *name, int mlen, int ip[]);
+/*      cdiInqAttFlt: Get the value(s) of a floating point attribute */
+int     cdiInqAttFlt(int cdiID, int varID, const char *name, int mlen, double dp[]);
+/*      cdiInqAttTxt: Get the value(s) of a text attribute */
+int     cdiInqAttTxt(int cdiID, int varID, const char *name, int mlen, char *tp_cbuf);
 
 
 /* GRID routines */

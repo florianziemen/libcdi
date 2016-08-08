@@ -82,8 +82,8 @@ int main(int argc, const char **argv)
   vlistDefVarMissval(vlistID, varID, missValue);
   {
     static const char creatorText[] = "CDI test_cdf_write";
-    vlistDefAttTxt(vlistID, varID, "CDI Text Attribute test, created by",
-                   sizeof (creatorText) - 1, creatorText);
+    cdiDefAttTxt(vlistID, varID, "CDI Text Attribute test, created by",
+                 sizeof (creatorText) - 1, creatorText);
   }
 
   int taxisID = taxisCreate(TAXIS_ABSOLUTE);

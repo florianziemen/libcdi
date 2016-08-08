@@ -131,8 +131,8 @@ void     vlistDefVarTsteptype(int vlistID, int varID, int tsteptype);
 int      vlistInqVarMissvalUsed(int vlistID, int varID);
 int      vlistHasTime(int vlistID);
 
-int      vlistDelAtts(int vlistID, int varID);
-int      vlistCopyVarAtts(int vlistID1, int varID_1, int vlistID2, int varID_2);
+int      cdiDelAtts(int vlistID, int varID);
+int      cdiCopyVarAtts(int vlistID1, int varID_1, int vlistID2, int varID_2);
 
 void     vlistUnpack(char * buffer, int bufferSize, int * pos,
                      int originNamespace, void *context, int force_id);
@@ -145,7 +145,7 @@ int     vlistInqVarValidrange(int vlistID, int varID, double *validrange);
 
 void vlistInqVarDimorder(int vlistID, int varID, int (*outDimorder)[3]);
 
-int vlist_att_compare(vlist_t *a, int varIDA, vlist_t *b, int varIDB, int attnum);
+int cdi_att_compare(vlist_t *a, int varIDA, vlist_t *b, int varIDB, int attnum);
 
 void resize_opt_grib_entries(var_t *var, int nentries);
 
