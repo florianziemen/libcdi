@@ -326,7 +326,7 @@ void cdi_create_records(stream_t *streamptr, int tsID)
     {
       nrecords = 0;
       maxrecords = (unsigned)sourceTstep->recordSize;
-      for ( unsigned recID = 0; recID < maxrecords; recID++ )
+      for ( size_t recID = 0; recID < maxrecords; recID++ )
 	{
 	  int varID = sourceTstep->records[recID].varID;
 	  nrecords += (varID == CDI_UNDEFID /* varID = CDI_UNDEFID for write mode !!! */
@@ -356,7 +356,7 @@ void cdi_create_records(stream_t *streamptr, int tsID)
     {
       memcpy(destTstep->records, sourceTstep->records, (size_t)maxrecords*sizeof(record_t));
 
-      for ( unsigned recID = 0; recID < maxrecords; recID++ )
+      for ( size_t recID = 0; recID < maxrecords; recID++ )
 	{
           record_t *curRecord = &sourceTstep->records[recID];
           destTstep->records[recID].used = curRecord->used;
