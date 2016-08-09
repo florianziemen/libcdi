@@ -93,11 +93,9 @@ cdfGetTimeUnits(taxis_t *taxis)
   return unitstr;
 }
 
-static void
-cdfDefForecastTimeUnits(char *unitstr, int timeunit)
+static const char *
+cdfGetForecastTimeUnits(int timeunit)
 {
-  unitstr[0] = 0;
-
   if (timeunit == -1)
     timeunit = TUNIT_HOUR;
   else if (timeunit == TUNIT_QUARTER)
@@ -107,7 +105,7 @@ cdfDefForecastTimeUnits(char *unitstr, int timeunit)
   else if (timeunit == TUNIT_3HOURS || timeunit == TUNIT_6HOURS || timeunit == TUNIT_12HOURS)
     timeunit = TUNIT_HOUR;
 
-  strcpy(unitstr, tunitNamePtr(timeunit));
+  return tunitNamePtr(timeunit);
 }
 
 static void
@@ -224,7 +222,7 @@ cdfDefTime(stream_t *streamptr)
       static const char lname[] = "Time elapsed since the start of the forecast";
       cdf_put_att_text(fileID, leadtimeid, "long_name", sizeof(lname) - 1, lname);
 
-      cdfDefForecastTimeUnits(unitstr_, taxis->fc_unit);
+      const char *unitstr = cdfGetForecastTimeUnits(taxis->fc_unit);
       size_t len = strlen(unitstr);
       if (len) cdf_put_att_text(fileID, leadtimeid, "units", len, unitstr);
     }
