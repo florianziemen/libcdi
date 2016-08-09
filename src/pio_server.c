@@ -1173,6 +1173,7 @@ readGetBuffers(size_t streamIdx, const struct cdiPioConf *conf)
       case CDI_FILETYPE_NC:
       case CDI_FILETYPE_NC2:
       case CDI_FILETYPE_NC4:
+      case CDI_FILETYPE_NC4C:
         writeNetCDFStream(streamIdx, map, &data, &currentDataBufSize, conf);
         break;
 #endif
@@ -1249,6 +1250,8 @@ cdiPioServerStreamOpen(const char *filename, char filemode,
   switch (filetype)
     {
 #if defined HAVE_LIBNETCDF && ! defined HAVE_PARALLEL_NC4
+    case CDI_FILETYPE_NC:
+    case CDI_FILETYPE_NC2:
     case CDI_FILETYPE_NC4:
     case CDI_FILETYPE_NC4C:
       {
