@@ -15,7 +15,6 @@
 typedef struct
 {
   int self;
-  int used;
   int instID;
   int modelgribID;
   char *name;
@@ -38,7 +37,6 @@ static void
 modelDefaultValue(model_t *modelptr)
 {
   modelptr->self = CDI_UNDEFID;
-  modelptr->used = 0;
   modelptr->instID = CDI_UNDEFID;
   modelptr->modelgribID = CDI_UNDEFID;
   modelptr->name = NULL;
@@ -56,7 +54,6 @@ modelNewEntry(cdiResH resH, int instID, int modelgribID, const char *name)
       modelptr->self = resH;
       reshReplace(resH, modelptr, &modelOps);
     }
-  modelptr->used = 1;
   modelptr->instID = instID;
   modelptr->modelgribID = modelgribID;
   if (name && *name) modelptr->name = strdupx(name);
@@ -127,7 +124,7 @@ findModelByID(int resID, void *res, void *data)
   model_t *modelptr = (model_t *) res;
   struct modelLoc *ret = (struct modelLoc *) data;
   int instID = ret->instID, modelgribID = ret->modelgribID;
-  if (modelptr->used && modelptr->instID == instID && modelptr->modelgribID == modelgribID)
+  if (modelptr->instID == instID && modelptr->modelgribID == modelgribID)
     {
       ret->resID = resID;
       return CDI_APPLY_STOP;
@@ -143,8 +140,7 @@ findModelByName(int resID, void *res, void *data)
   struct modelLoc *ret = (struct modelLoc *) data;
   int instID = ret->instID, modelgribID = ret->modelgribID;
   const char *name = ret->name;
-  if (modelptr->used && (instID == -1 || modelptr->instID == instID) && (modelgribID == 0 || modelptr->modelgribID == modelgribID)
-      && modelptr->name)
+  if ((instID == -1 || modelptr->instID == instID) && (modelgribID == 0 || modelptr->modelgribID == modelgribID) && modelptr->name)
     {
       const char *p = name, *q = modelptr->name;
       while (*p != '\0' && *p == *q) ++p, ++q;
@@ -246,7 +242,6 @@ modelPrintP(void *modelptr, FILE *fp)
   fprintf(fp, "# modelID %d\n", mp->self);
   fprintf(fp, "#\n");
   fprintf(fp, "self          = %d\n", mp->self);
-  fprintf(fp, "used          = %d\n", mp->used);
   fprintf(fp, "instID        = %d\n", mp->instID);
   fprintf(fp, "modelgribID   = %d\n", mp->modelgribID);
   fprintf(fp, "name          = %s\n", mp->name ? mp->name : "NN");
