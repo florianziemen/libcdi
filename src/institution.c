@@ -146,17 +146,15 @@ findInstitute(int id, void *res, void *data)
 
 int institutInq(int center, int subcenter, const char *name, const char *longname)
 {
-  institute_t * ip_ref = (institute_t *) Malloc(sizeof (*ip_ref));
-  ip_ref->self       = CDI_UNDEFID;
-  ip_ref->center     = center;
-  ip_ref->subcenter  = subcenter;
-  ip_ref->name       = name && name[0] ? (char *)name : NULL;
-  ip_ref->longname   = longname && longname[0] ? (char *)longname : NULL;
+  institute_t ip_ref;
+  ip_ref.self       = CDI_UNDEFID;
+  ip_ref.center     = center;
+  ip_ref.subcenter  = subcenter;
+  ip_ref.name       = name && name[0] ? (char *)name : NULL;
+  ip_ref.longname   = longname && longname[0] ? (char *)longname : NULL;
 
-  struct instLoc state = { .ip = ip_ref, .id = CDI_UNDEFID };
+  struct instLoc state = { .ip = &ip_ref, .id = CDI_UNDEFID };
   cdiResHFilterApply(&instituteOps, findInstitute, &state);
-
-  Free(ip_ref);
 
   return state.id;
 }
