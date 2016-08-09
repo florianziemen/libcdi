@@ -64,23 +64,20 @@ bool is_timeaxis_units(const char *timeunits)
 
   size_t len = strlen(timeunits);
   char *tu = (char *) Malloc((len+1)*sizeof(char));
-  memcpy(tu, timeunits, (len+1) * sizeof(char));
-  char *ptu = tu;
 
-  for ( size_t i = 0; i < len; i++ ) ptu[i] = (char)tolower((int)ptu[i]);
+  for ( size_t i = 0; i < len; i++ ) tu[i] = (char)tolower((int)timeunits[i]);
 
-  int timeunit = get_timeunit(len, ptu);
+  int timeunit = get_timeunit(len, tu);
   if ( timeunit != -1 )
     {
-      while ( ! isspace(*ptu) && *ptu != 0 ) ptu++;
-      if ( *ptu )
+      size_t pos = 0;
+      while ( ! isspace(tu[pos]) && tu[pos] != 0 ) pos++;
+      if ( tu[pos] )
         {
-          while ( isspace(*ptu) ) ptu++;
+          while ( isspace(tu[pos]) ) pos++;
 
-          int timetype = str_is_equal(ptu, "as") ? TAXIS_ABSOLUTE :
-                         str_is_equal(ptu, "since") ? TAXIS_RELATIVE : -1;
-
-          status = timetype != -1;
+          status = str_is_equal(tu+pos, "as")
+            || str_is_equal(tu+pos, "since");
         }
     }
 
