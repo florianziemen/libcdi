@@ -310,13 +310,6 @@ modelRun(struct model_config setup, MPI_Comm comm)
 #if USE_MPI
                   xt_redist_s_exchange1(varDesc[varIdx].redist4gather,
                                         varslice, var);
-                  size_t layerSize = (size_t)(chunk[0] * chunk[1]);
-                  size_t nblk = (layerSize + nproma - 1)/nproma - 1;
-                  for (size_t k = 0; k < varLevs; ++k)
-                    {
-                      blk_displ[k] = (int)(k * (nblk + 1) * nproma);
-                      blk_lens[k] = (int)layerSize;
-                    }
 #else
                   size_t layerSize = (size_t)(chunk[0] * chunk[1]);
                   size_t nblk = (layerSize + nproma - 1)/nproma - 1;
@@ -344,7 +337,14 @@ modelRun(struct model_config setup, MPI_Comm comm)
                 }
 
 #ifdef USE_MPI
-	      streamWriteScatteredVarPart(streamID, varDesc[varIdx].id,
+              size_t layerSize = (size_t) (chunk[0] * chunk[1]);
+              size_t nblk = (layerSize + nproma - 1) / nproma - 1;
+              for (size_t k = 0; k < varLevs; ++k)
+                {
+                  blk_displ[k] = (int) (k * (nblk + 1) * nproma);
+                  blk_lens[k] = (int) layerSize;
+                }
+              streamWriteScatteredVarPart(streamID, varDesc[varIdx].id,
                                           varslice,
                                           (int)varLevs, blk_lens, blk_displ,
                                           nmiss, varDesc[varIdx].partDesc);
