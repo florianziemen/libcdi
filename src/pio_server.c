@@ -65,6 +65,10 @@ struct streamMemLayout
 struct cacheRedist {
   Xt_redist redist;
   int sliceSize;
+#if defined HAVE_PARALLEL_NC4
+// additional member for parallel writing variant for NetCDF4
+  struct PPM_extent sliceExtent[3];
+#endif
 };
 
 static struct
@@ -321,34 +325,75 @@ countVarChunkMissingVals(int vlistID, int varID,
   return nmiss;
 }
 
-#ifdef HAVE_LIBNETCDF
-static void
-gatherArray(int headerIdx, size_t streamIdx,
-            double *gatherBuf,
-            /* index list representing the data elements gathered on
-             * this rank */
-            Xt_idxlist dstList,
-            const struct cdiPioConf *conf)
+static inline void
+destructRetained(struct cacheRedist *restrict retained, size_t numRetained)
 {
-  Xt_redist gatherRedist = buildVarRedist(headerIdx, streamIdx,
-                                          dstList, conf);
-  xt_redist_s_exchange1(gatherRedist,
-                        rxWin[streamIdx].clientBuf[0].mem, gatherBuf);
-  xt_redist_delete(gatherRedist);
+  for (size_t i = 0; i < (size_t)numRetained; ++i)
+    xt_redist_delete(retained[i].redist);
 }
-#endif
+
+/* return true if the new mapping for stream streamIdx is unchanged
+ * with respect to the previous mapping such that a previously
+ * constructed set of redists can be re-used.
+ *
+ * vlistID is only passed to prevent repeated calls to
+ * streamInqVlist(streamID)
+ */
+static inline bool
+handleRedistCache(size_t streamIdx,
+                  struct streamMapping *restrict mapping,
+                  size_t numPasses, int vlistID, MPI_Comm collComm)
+{
+  bool reuseRedists = false;
+  if (!rxWin[streamIdx].retained)
+    {
+      rxWin[streamIdx].retained
+        = Malloc(numPasses * sizeof (*rxWin[streamIdx].retained));
+      rxWin[streamIdx].numRetained = numPasses;
+      rxWin[streamIdx].prevLayout = mapping->layout;
+      mapping->layout = NULL;
+    }
+  else
+    {
+      size_t numClients = (size_t)numClients_,
+        numVars = (size_t)vlistNvars(vlistID);
+      reuseRedists
+        = !memcmp(mapping->layout, rxWin[streamIdx].prevLayout,
+                  numClients * numVars
+                  * sizeof (mapping->layout[0]));
+      if (!reuseRedists)
+        {
+          Free(rxWin[streamIdx].prevLayout);
+          rxWin[streamIdx].prevLayout = mapping->layout;
+          mapping->layout = NULL;
+        }
+      {
+        int temp = reuseRedists;
+        xmpi(MPI_Allreduce(MPI_IN_PLACE, &temp, 1, MPI_INT, MPI_LAND,
+                           collComm));
+        reuseRedists = temp;
+      }
+      if (!reuseRedists)
+        {
+          destructRetained(rxWin[streamIdx].retained,
+                           rxWin[streamIdx].numRetained);
+          rxWin[streamIdx].retained
+            = Realloc(rxWin[streamIdx].retained,
+                      numPasses * sizeof (*rxWin[streamIdx].retained));
+          rxWin[streamIdx].numRetained = numPasses;
+        }
+    }
+  return reuseRedists;
+}
 
 #ifdef HAVE_PARALLEL_NC4
 static void
 queryVarBounds(struct PPM_extent varShape[3], int vlistID, int varID)
 {
-  varShape[0].first = 0;
-  varShape[1].first = 0;
-  varShape[2].first = 0;
   int sizes[3];
   cdiPioQueryVarDims(sizes, vlistID, varID);
   for (unsigned i = 0; i < 3; ++i)
-    varShape[i].size = sizes[i];
+    varShape[i].first = 0, varShape[i].size = sizes[i];
 }
 
 /* compute distribution of collectors such that number of collectors
@@ -395,6 +440,8 @@ myVarPart(struct PPM_extent varShape[3], struct xyzDims collGrid,
                            myCollGridCoord, myPart);
 }
 
+#include <core/ppm_combinatorics.h>
+
 /* collective writing variant */
 static void
 writeNetCDFStream(size_t streamIdx,
@@ -402,16 +449,39 @@ writeNetCDFStream(size_t streamIdx,
                   double **data_, int *currentDataBufSize,
                   const struct cdiPioConf *conf)
 {
-  int nvars = mapping->numVars;
-  int *restrict varMap = mapping->varMap;
-  int streamID = openStreams.entries[streamIdx],
+  const int nvars = mapping->numVars;
+  const int *restrict varMap = mapping->varMap;
+  const int streamID = openStreams.entries[streamIdx],
     vlistID = streamInqVlist(streamID);
+  const MPI_Comm collComm = commInqCommColl();
+  // init redistCache if applicable
+  const bool reuseRedists = conf->cacheRedists != 0
+    ? handleRedistCache(streamIdx, mapping, (size_t)nvars, vlistID, collComm)
+    : false;
+  struct cacheRedist *restrict retained = rxWin[streamIdx].retained;
+
   for (int varID = 0; varID < nvars; ++varID)
-    if (mapping->numLvlsW[varID])
-      {
+    if (mapping->numLvlsW[varID]) {
+      size_t VarSize = 0;
+      Xt_redist gatherRedist;
+      struct PPM_extent varChunk[3];
+      int myChunk[3][2];
+      if (reuseRedists) {
+          gatherRedist = retained[varID].redist;
+          VarSize = (size_t)retained[varID].sliceSize;
+          varChunk[0] = retained[varID].sliceExtent[0];
+          varChunk[1] = retained[varID].sliceExtent[1];
+          varChunk[2] = retained[varID].sliceExtent[2];
+          myChunk[0][0] = PPM_extent_start(varChunk[0]);
+          myChunk[0][1] = PPM_extent_end(  varChunk[0]);
+          myChunk[1][0] = PPM_extent_start(varChunk[1]);
+          myChunk[1][1] = PPM_extent_end(  varChunk[1]);
+          myChunk[2][0] = PPM_extent_start(varChunk[2]);
+          myChunk[2][1] = PPM_extent_end(  varChunk[2]);
+      } else {
         struct PPM_extent varShape[3];
         queryVarBounds(varShape, vlistID, varID);
-        struct xyzDims collGrid = varDimsCollGridMatch(varShape);
+        const struct xyzDims collGrid = varDimsCollGridMatch(varShape);
         xdebug("writing varID %d with dimensions: "
                "x=%d, y=%d, z=%d,\n"
                "found distribution with dimensions:"
@@ -419,44 +489,53 @@ writeNetCDFStream(size_t streamIdx,
                varShape[0].size, varShape[1].size, varShape[2].size,
                collGrid.sizes[0], collGrid.sizes[1],
                collGrid.sizes[2]);
-        struct PPM_extent varChunk[3];
         myVarPart(varShape, collGrid, varChunk);
-        int myChunk[3][2];
-        for (int i = 0; i < 3; ++i)
-          {
-            myChunk[i][0] = PPM_extent_start(varChunk[i]);
-            myChunk[i][1] = PPM_extent_end(varChunk[i]);
-          }
-        xdebug("Writing chunk { { %d, %d }, { %d, %d },"
-               " { %d, %d } }", myChunk[0][0], myChunk[0][1],
-               myChunk[1][0], myChunk[1][1], myChunk[2][0],
-               myChunk[2][1]);
-        Xt_int varSize[3];
-        for (int i = 0; i < 3; ++i)
-          varSize[2 - i] = varShape[i].size;
         Xt_idxlist preWriteChunk;
         /* prepare yaxt descriptor for write chunk */
         {
           Xt_int preWriteChunkStart[3];
           int preWriteChunkSize[3];
-          for (int i = 0; i < 3; ++i)
-            {
+          Xt_int varSize[3];
+          for (int i = 0; i < 3; ++i) {
+              myChunk[i][0] = PPM_extent_start(varChunk[i]);
+              myChunk[i][1] = PPM_extent_end(varChunk[i]);
+              varSize[2 - i] = varShape[i].size;
               preWriteChunkStart[2 - i] = (Xt_int)varChunk[i].first;
               preWriteChunkSize[2 - i] = (int)varChunk[i].size;
-            }
+          }
           preWriteChunk = xt_idxsection_new(0, 3, varSize,
                                             preWriteChunkSize,
                                             preWriteChunkStart);
         }
-        resizeVarGatherBuf(xt_idxlist_get_num_indices(preWriteChunk),
-                           data_, currentDataBufSize);
-        double *restrict data = *data_;
+        xdebug("Writing chunk { { %d, %d }, { %d, %d },"
+               " { %d, %d } }", myChunk[0][0], myChunk[0][1],
+               myChunk[1][0], myChunk[1][1], myChunk[2][0],
+               myChunk[2][1]);
+        VarSize = (size_t)xt_idxlist_get_num_indices(preWriteChunk);
         /* transpose data into write deco */
         {
           int headerIdx = varMap[varID];
-          gatherArray(headerIdx, streamIdx, data, preWriteChunk, conf);
+          gatherRedist = buildVarRedist(headerIdx, streamIdx,
+                                        preWriteChunk, conf);
+          if (conf->cacheRedists) {
+            retained[varID].redist = gatherRedist;
+            retained[varID].sliceSize = (int)VarSize;
+            retained[varID].sliceExtent[0] = varChunk[0];
+            retained[varID].sliceExtent[1] = varChunk[1];
+            retained[varID].sliceExtent[2] = varChunk[2];
+          }
           xt_idxlist_delete(preWriteChunk);
         }
+      }
+      resizeVarGatherBuf(VarSize, data_, currentDataBufSize);
+      double *restrict data = *data_;
+      xt_redist_s_exchange1(gatherRedist,
+                            rxWin[streamIdx].clientBuf[0].mem, data);
+
+      if (!conf->cacheRedists)
+        xt_redist_delete(gatherRedist);
+
+      {
         /* count missing values if appropriate */
         int nmiss
           = countVarChunkMissingVals(vlistID, varID, mapping,
@@ -467,6 +546,7 @@ writeNetCDFStream(size_t streamIdx,
                             (const int (*)[2])myChunk, data,
                             nmiss);
       }
+    }
 }
 
 #elif defined (HAVE_LIBNETCDF)
@@ -530,42 +610,64 @@ writeNetCDFStream(size_t streamIdx,
                   double **data_, int *currentDataBufSize,
                   const struct cdiPioConf *conf)
 {
-  int nvars = mapping->numVars;
-  int *restrict varMap = mapping->varMap,
+  const int nvars = mapping->numVars;
+  const int *restrict varMap = mapping->varMap,
     *restrict numLvlsW = mapping->numLvlsW;
   /* determine process which has stream open (writer) and
    * which has data for which variable (var owner)
    * three cases need to be distinguished */
-  int streamID = openStreams.entries[streamIdx],
+  const int streamID = openStreams.entries[streamIdx],
     vlistID = streamInqVlist(streamID);
-  int writerRank = cdiPioSerialOpenFileMap(streamID);
-  int collRank = commInqRankColl();
+  const int writerRank = cdiPioSerialOpenFileMap(streamID);
+  const int collRank = commInqRankColl();
+  const MPI_Comm collComm = commInqCommColl(); //HB: which communicator is to be supplied here?
+  const bool reuseRedists = conf->cacheRedists != 0
+    ? handleRedistCache(streamIdx, mapping, (size_t)nvars, vlistID, collComm)
+    : false;
+  struct cacheRedist *restrict retained = rxWin[streamIdx].retained;
+
   for (int varID = 0; varID < nvars; ++varID)
     if (numLvlsW[varID])
       {
         int varSize;
-        Xt_idxlist dstList;
-        if (writerRank == collRank)
+        Xt_redist gatherRedist;
+        if (reuseRedists) {
+          gatherRedist = retained[varID].redist;
+          varSize = retained[varID].sliceSize;
+          if (writerRank == collRank)
+            resizeVarGatherBuf(varSize, data_, currentDataBufSize);
+        } else {
+          Xt_idxlist dstList;
+          if (writerRank == collRank)
           {
             dstList = buildVarSlicesIdxList(vlistID, varID, -1, -1);
             varSize = xt_idxlist_get_num_indices(dstList);
             resizeVarGatherBuf(varSize, data_, currentDataBufSize);
           }
-        else
+          else
           {
             varSize = 0;
             dstList = xt_idxempty_new();
           }
-        double *restrict data = *data_;
-        int headerIdx = varMap[varID];
-        gatherArray(headerIdx, streamIdx, data, dstList, conf);
-        if (writerRank == collRank)
-          {
-            int nmiss = countVarChunkMissingVals(vlistID, varID,
-                                                 mapping, varSize, data);
-            streamWriteVar(streamID, varID, data, nmiss);
+          int headerIdx = varMap[varID];
+          gatherRedist = buildVarRedist(headerIdx, streamIdx, dstList, conf);
+          xt_idxlist_delete(dstList);
+          if (conf->cacheRedists) {
+            retained[varID].redist = gatherRedist;
+            retained[varID].sliceSize = varSize;
           }
-        xt_idxlist_delete(dstList);
+        }
+        double *restrict data = *data_;
+        xt_redist_s_exchange1(gatherRedist,
+                              rxWin[streamIdx].clientBuf[0].mem, data);
+        if (!conf->cacheRedists)
+          xt_redist_delete(gatherRedist);
+        if (writerRank == collRank)
+        {
+          int nmiss = countVarChunkMissingVals(vlistID, varID,
+                                               mapping, varSize, data);
+          streamWriteVar(streamID, varID, data, nmiss);
+        }
       }
 }
 
@@ -689,60 +791,6 @@ streamMappingDelete(struct streamMapping **mapping)
   Free((*mapping)->layout);
   Free(*mapping);
   *mapping = NULL;
-}
-
-static inline void
-destructRetained(struct cacheRedist *restrict retained, size_t numRetained)
-{
-  for (size_t i = 0; i < (size_t)numRetained; ++i)
-    xt_redist_delete(retained[i].redist);
-}
-
-static inline bool
-handleRedistCache(size_t streamIdx,
-                  struct streamMapping *restrict mapping,
-                  size_t numPasses, int vlistID, MPI_Comm collComm)
-{
-  bool reuseRedists = false;
-  if (!rxWin[streamIdx].retained)
-    {
-      rxWin[streamIdx].retained
-        = Malloc(numPasses * sizeof (*rxWin[streamIdx].retained));
-      rxWin[streamIdx].numRetained = numPasses;
-      rxWin[streamIdx].prevLayout = mapping->layout;
-      mapping->layout = NULL;
-    }
-  else
-    {
-      size_t numClients = (size_t)numClients_,
-        numVars = (size_t)vlistNvars(vlistID);
-      reuseRedists
-        = !memcmp(mapping->layout, rxWin[streamIdx].prevLayout,
-                  numClients * numVars
-                  * sizeof (mapping->layout[0]));
-      if (!reuseRedists)
-        {
-          Free(rxWin[streamIdx].prevLayout);
-          rxWin[streamIdx].prevLayout = mapping->layout;
-          mapping->layout = NULL;
-        }
-      {
-        int temp = reuseRedists;
-        xmpi(MPI_Allreduce(MPI_IN_PLACE, &temp, 1, MPI_INT, MPI_LAND,
-                           collComm));
-        reuseRedists = temp;
-      }
-      if (!reuseRedists)
-        {
-          destructRetained(rxWin[streamIdx].retained,
-                           rxWin[streamIdx].numRetained);
-          rxWin[streamIdx].retained
-            = Realloc(rxWin[streamIdx].retained,
-                       numPasses * sizeof (*rxWin[streamIdx].retained));
-          rxWin[streamIdx].numRetained = numPasses;
-        }
-    }
-  return reuseRedists;
 }
 
 /* denote what will be aggregated at a single process */
