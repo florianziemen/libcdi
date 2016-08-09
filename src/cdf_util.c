@@ -82,22 +82,19 @@ is_timeaxis_units(const char *timeunits)
 
   const size_t len = strlen(timeunits);
   char *tu = (char *) malloc((len + 1) * sizeof(char));
-  memcpy(tu, timeunits, (len + 1) * sizeof(char));
-  char *ptu = tu;
 
-  for (size_t i = 0; i < len; i++) ptu[i] = (char) tolower((int) ptu[i]);
+  for (size_t i = 0; i < len; i++) tu[i] = (char) tolower((int) timeunits[i]);
 
-  int timeunit = get_timeunit(len, ptu);
+  int timeunit = get_timeunit(len, tu);
   if (timeunit != -1)
     {
-      while (!isspace(*ptu) && *ptu != 0) ptu++;
-      if (*ptu)
+      size_t pos = 0;
+      while (!isspace(tu[pos]) && tu[pos] != 0) pos++;
+      if (tu[pos])
         {
-          while (isspace(*ptu)) ptu++;
+          while (isspace(tu[pos])) pos++;
 
-          int timetype = strStartsWith(ptu, "as") ? TAXIS_ABSOLUTE : strStartsWith(ptu, "since") ? TAXIS_RELATIVE : -1;
-
-          status = timetype != -1;
+          status = strStartsWith(tu + pos, "as") || strStartsWith(tu + pos, "since");
         }
     }
 
