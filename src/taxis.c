@@ -16,10 +16,6 @@
 static int DefaultTimeType = TAXIS_ABSOLUTE;
 static int DefaultTimeUnit = TUNIT_HOUR;
 
-static const char Timeunits[][TAXIS_MAX_UNIT_STR_LEN + 1] = {
-  "undefined", "seconds", "minutes", "quarters", "30minutes", "hours", "3hours", "6hours", "12hours", "days", "months", "years",
-};
-
 static int taxisCompareP(void *taxisptr1, void *taxisptr2);
 static void taxisDestroyP(void *taxisptr);
 static void taxisPrintKernel(taxis_t *taxisptr, FILE *fp);
@@ -81,11 +77,17 @@ taxisNamePtr(int taxisID)
 const char *
 tunitNamePtr(int unitID)
 {
+  static const char Timeunits[][TAXIS_MAX_UNIT_STR_LEN + 1] = {
+    "undefined", "seconds", "minutes", "quarters", "30minutes", "hours", "3hours", "6hours", "12hours", "days", "months", "years",
+  };
   enum
   {
-    size = sizeof(Timeunits) / sizeof(*Timeunits)
+    size = sizeof(Timeunits) / sizeof(Timeunits[0])
   };
-  return (unitID > 0 && unitID < size) ? Timeunits[unitID] : Timeunits[0];
+
+  const char *name = unitID > 0 && unitID < size ? Timeunits[unitID] : Timeunits[0];
+
+  return name;
 }
 
 static void
