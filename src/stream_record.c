@@ -295,8 +295,7 @@ cdi_create_records(stream_t *streamptr, int tsID)
     }
   //  printf("tsID, nrecords %d %d\n", tsID, nrecords);
 
-  record_t *records = NULL;
-  if (maxrecords > 0) records = (record_t *) Malloc(maxrecords * sizeof(record_t));
+  record_t *records = maxrecords > 0 ? (record_t *) (Malloc(maxrecords * sizeof(record_t))) : (record_t *) NULL;
 
   destTstep->records = records;
   destTstep->recordSize = (int) maxrecords;
