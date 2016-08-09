@@ -23,7 +23,6 @@ static int ECMWF  = CDI_UNDEFID,
 typedef struct
 {
   int    self;
-  int    used;
   int    center;
   int    subcenter;
   char  *name;
@@ -52,7 +51,6 @@ static
 void instituteDefaultValue ( institute_t * instituteptr )
 {
   instituteptr->self       = CDI_UNDEFID;
-  instituteptr->used       = 0;
   instituteptr->center     = CDI_UNDEFID;
   instituteptr->subcenter  = CDI_UNDEFID;
   instituteptr->name       = NULL;
@@ -136,7 +134,7 @@ findInstitute(int id, void *res, void *data)
 {
   institute_t * ip1 = ((struct instLoc *)data)->ip;
   institute_t * ip2 = (institute_t*) res;
-  if (ip2->used && !instituteCompareKernel(ip1, ip2))
+  if (!instituteCompareKernel(ip1, ip2))
     {
       ((struct instLoc *)data)->id = id;
       return CDI_APPLY_STOP;
@@ -150,7 +148,6 @@ int institutInq(int center, int subcenter, const char *name, const char *longnam
 {
   institute_t * ip_ref = (institute_t *) Malloc(sizeof (*ip_ref));
   ip_ref->self       = CDI_UNDEFID;
-  ip_ref->used       = 0;
   ip_ref->center     = center;
   ip_ref->subcenter  = subcenter;
   ip_ref->name       = name && name[0] ? (char *)name : NULL;
@@ -177,7 +174,6 @@ institute_t *instituteNewEntry(cdiResH resH, int center, int subcenter,
       instituteptr->self = resH;
       reshReplace(resH, instituteptr, &instituteOps);
     }
-  instituteptr->used = 1;
   instituteptr->center = center;
   instituteptr->subcenter = subcenter;
   if ( name && *name )
@@ -266,12 +262,11 @@ static void institutePrintP(institute_t *ip, FILE * fp )
             "# instituteID %d\n"
             "#\n"
             "self          = %d\n"
-            "used          = %d\n"
             "center        = %d\n"
             "subcenter     = %d\n"
             "name          = %s\n"
             "longname      = %s\n",
-            ip->self, ip->self, ip->used, ip->center, ip->subcenter,
+            ip->self, ip->self, ip->center, ip->subcenter,
             ip->name ? ip->name : "NN",
             ip->longname ? ip->longname : "NN");
 }
