@@ -44,6 +44,8 @@ typedef struct {
   int      ncid;
   int      isvar;
   bool     ignore;
+  bool     isx;
+  bool     isy;
   bool     islon;
   bool     islat;
   bool     islev;
@@ -661,6 +663,8 @@ void init_ncvars(long nvars, ncvar_t *ncvars)
       ncvars[ncvarid].ncid            = UNDEFID;
       ncvars[ncvarid].isvar           = UNDEFID;
       ncvars[ncvarid].ignore          = false;
+      ncvars[ncvarid].isx             = false;
+      ncvars[ncvarid].isy             = false;
       ncvars[ncvarid].islon           = false;
       ncvars[ncvarid].islat           = false;
       ncvars[ncvarid].islev           = false;
@@ -1004,7 +1008,9 @@ void cdf_print_vars(const ncvar_t *ncvars, int nvars, const char *oname)
           if      ( ncvars[ncvarid].istime ) axis[ndim++] = iaxis[0];
           else if ( ncvars[ncvarid].islev  ) axis[ndim++] = iaxis[1];
           else if ( ncvars[ncvarid].islat  ) axis[ndim++] = iaxis[2];
+          else if ( ncvars[ncvarid].isy    ) axis[ndim++] = iaxis[2];
           else if ( ncvars[ncvarid].islon  ) axis[ndim++] = iaxis[3];
+          else if ( ncvars[ncvarid].isx    ) axis[ndim++] = iaxis[3];
           else                               axis[ndim++] = '?';
         }
 
@@ -1757,6 +1763,20 @@ void verify_coordinate_vars_1(int ncid, int ndims, ncdim_t *ncdims, ncvar_t *ncv
 		  cdf_set_dim(ncvars, ncvarid, 0, Y_AXIS);
 		  ncdims[ncdimid].dimtype = Y_AXIS;
 		}
+	      else if ( is_x_axis(ncvars[ncvarid].units, ncvars[ncvarid].stdname) )
+		{
+		  ncvars[ncvarid].isx = true;
+		  cdf_set_var(ncvars, ncvarid, FALSE);
+		  cdf_set_dim(ncvars, ncvarid, 0, X_AXIS);
+		  ncdims[ncdimid].dimtype = X_AXIS;
+		}
+	      else if ( is_y_axis(ncvars[ncvarid].units, ncvars[ncvarid].stdname) )
+		{
+		  ncvars[ncvarid].isy = true;
+		  cdf_set_var(ncvars, ncvarid, FALSE);
+		  cdf_set_dim(ncvars, ncvarid, 0, Y_AXIS);
+		  ncdims[ncdimid].dimtype = Y_AXIS;
+		}
 	      else if ( is_pressure_units(ncvars[ncvarid].units) )
 		{
 		  ncvars[ncvarid].zaxistype = ZAXIS_PRESSURE;
@@ -1794,8 +1814,8 @@ void verify_coordinate_vars_1(int ncid, int ndims, ncdim_t *ncdims, ncvar_t *ncv
                   ncvars[ncvarid].zaxistype = ZAXIS_REFERENCE;
             }
 
-	  if ( ncvars[ncvarid].islon == false && ncvars[ncvarid].longname[0] != 0 &&
-               ncvars[ncvarid].islat == false && ncvars[ncvarid].longname[1] != 0 )
+	  if ( !ncvars[ncvarid].islon && ncvars[ncvarid].longname[0] != 0 &&
+               !ncvars[ncvarid].islat && ncvars[ncvarid].longname[1] != 0 )
 	    {
 	      if ( memcmp(ncvars[ncvarid].longname+1, "ongitude", 8) == 0 )
 		{
@@ -1846,6 +1866,16 @@ void verify_coordinate_vars_2(int nvars, ncvar_t *ncvars)
 		  ncvars[ncvarid].islat = true;
 		  continue;
 		}
+	      else if ( is_x_axis(ncvars[ncvarid].units, ncvars[ncvarid].stdname) )
+		{
+		  ncvars[ncvarid].isx = true;
+		  continue;
+		}
+	      else if ( is_y_axis(ncvars[ncvarid].units, ncvars[ncvarid].stdname) )
+		{
+		  ncvars[ncvarid].isy = true;
+		  continue;
+		}
 	      else if ( is_pressure_units(ncvars[ncvarid].units) )
 		{
 		  ncvars[ncvarid].zaxistype = ZAXIS_PRESSURE;
@@ -1881,8 +1911,8 @@ void verify_coordinate_vars_2(int nvars, ncvar_t *ncvars)
             }
 
 	  /* not needed anymore for rotated grids */
-	  if ( ncvars[ncvarid].islon == false && ncvars[ncvarid].longname[0] != 0 &&
-               ncvars[ncvarid].islat == false && ncvars[ncvarid].longname[1] != 0 )
+	  if ( !ncvars[ncvarid].islon && ncvars[ncvarid].longname[0] != 0 &&
+               !ncvars[ncvarid].islat && ncvars[ncvarid].longname[1] != 0 )
 	    {
 	      if ( memcmp(ncvars[ncvarid].longname+1, "ongitude", 8) == 0 )
 		{
@@ -2610,7 +2640,7 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 	{
           int gmapvarid = ncvar->gmapid;
           bool lproj = gmapvarid != UNDEFID;
-          bool lgrid = (lproj && ncvar->xvarid == UNDEFID) ? false : true;
+          bool lgrid = !(lproj && ncvar->xvarid == UNDEFID);
           int ndims = ncvar->ndims;
           int *dimtype = ncvar->dimtype;
           int vdimid = UNDEFID;
@@ -2620,14 +2650,13 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 	  int xdimid = UNDEFID, ydimid = UNDEFID;
           int nydims = cdf_get_xydimid(ndims, ncvar->dimids, dimtype, &xdimid, &ydimid);
 
-          int xaxisid = xdimid != UNDEFID ? ncdims[xdimid].ncvarid : UNDEFID;
-          int yaxisid = ydimid != UNDEFID ? ncdims[ydimid].ncvarid : UNDEFID;
-          int xvarid = ncvar->xvarid != UNDEFID ? ncvar->xvarid : xaxisid;
-          int yvarid = ncvar->yvarid != UNDEFID ? ncvar->yvarid : yaxisid;
+          int xaxisid = (xdimid != UNDEFID) ? ncdims[xdimid].ncvarid : UNDEFID;
+          int yaxisid = (ydimid != UNDEFID) ? ncdims[ydimid].ncvarid : UNDEFID;
+          int xvarid = (ncvar->xvarid != UNDEFID) ? ncvar->xvarid : xaxisid;
+          int yvarid = (ncvar->yvarid != UNDEFID) ? ncvar->yvarid : yaxisid;
 
-          size_t xsize = 0, ysize = 0;
-	  if ( xdimid != UNDEFID ) xsize = ncdims[xdimid].len;
-	  if ( ydimid != UNDEFID ) ysize = ncdims[ydimid].len;
+	  size_t xsize = (xdimid != UNDEFID) ? ncdims[xdimid].len : 0;
+	  size_t ysize = (ydimid != UNDEFID) ? ncdims[ydimid].len : 0;
 
 	  if ( ydimid == UNDEFID && yvarid != UNDEFID )
 	    {
@@ -2638,8 +2667,8 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 		}
 	    }
 
-	  if ( (ncvar->gridtype == UNDEFID || ncvar->gridtype == GRID_GENERIC) &&
-               xdimid != UNDEFID && xdimid == ydimid && nydims == 0 )
+          bool lunstructured = xdimid != UNDEFID && xdimid == ydimid && nydims == 0;
+	  if ( (ncvar->gridtype == UNDEFID || ncvar->gridtype == GRID_GENERIC) && lunstructured )
             ncvar->gridtype = GRID_UNSTRUCTURED;
 
           struct cdfLazyGrid *restrict lazyGrid = NULL, *restrict lazyProj = NULL;
@@ -2664,8 +2693,8 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
           grid_t *grid = &lazyGrid->base;
           grid_t *proj = ( lgrid && lproj ) ? &lazyProj->base : NULL;
 
-          xaxisid = xdimid != UNDEFID ? ncdims[xdimid].ncvarid : UNDEFID;
-          yaxisid = ydimid != UNDEFID ? ncdims[ydimid].ncvarid : UNDEFID;
+          xaxisid = (xdimid != UNDEFID) ? ncdims[xdimid].ncvarid : UNDEFID;
+          yaxisid = (ydimid != UNDEFID) ? ncdims[ydimid].ncvarid : UNDEFID;
 
 
           if ( cdf_read_coordinates(lazyGrid, ncvar, ncvars, ncdims,
@@ -3799,8 +3828,10 @@ int cdfInqContents(stream_t *streamptr)
 	  int ndims = ncvar->ncoordvars;
 	  for ( int i = 0; i < ndims; i++ )
 	    {
-	      if      ( ncvars[ncvar->coordvarids[i]].islon ) ncvar->xvarid = ncvar->coordvarids[i];
-	      else if ( ncvars[ncvar->coordvarids[i]].islat ) ncvar->yvarid = ncvar->coordvarids[i];
+	      if      ( ncvars[ncvar->coordvarids[i]].islon ||
+                        ncvars[ncvar->coordvarids[i]].isx )   ncvar->xvarid = ncvar->coordvarids[i];
+	      else if ( ncvars[ncvar->coordvarids[i]].islat ||
+                        ncvars[ncvar->coordvarids[i]].isy )   ncvar->yvarid = ncvar->coordvarids[i];
 	      else if ( ncvars[ncvar->coordvarids[i]].islev ) ncvar->zvarid = ncvar->coordvarids[i];
 	    }
 	}

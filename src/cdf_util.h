@@ -19,6 +19,9 @@ bool is_height_axis(const char *stdname, const char *longname);
 bool is_lon_axis(const char *units, const char *stdname);
 bool is_lat_axis(const char *units, const char *stdname);
 
+bool is_x_axis(const char *units, const char *stdname);
+bool is_y_axis(const char *units, const char *stdname);
+
 void set_gridtype(const char *attstring, int *gridtype);
 void set_zaxistype(const char *attstring, int *zaxistype);
 void set_calendar(const char *attstring, int *calendar);

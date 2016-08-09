@@ -1166,7 +1166,7 @@ void gridDefXsize(int gridID, int xsize)
       gridptr->x.size = xsize;
     }
 
-  if ( gridType != GRID_UNSTRUCTURED )
+  if ( gridType != GRID_UNSTRUCTURED && gridType != GRID_PROJECTION )
     {
       long axisproduct = gridptr->x.size*gridptr->y.size;
       if ( axisproduct > 0 && axisproduct != gridSize )
@@ -1259,7 +1259,8 @@ void gridDefYsize(int gridID, int ysize)
   if ( ysize > gridSize )
     Error("ysize %d is greater then gridsize %d", ysize, gridSize);
 
-  if ( gridInqType(gridID) == GRID_UNSTRUCTURED && ysize != gridSize )
+  int gridType = gridInqType(gridID);
+  if ( gridType == GRID_UNSTRUCTURED && ysize != gridSize )
     Error("ysize %d must be equal gridsize %d for gridtype: UNSTRUCTURED", ysize, gridSize);
 
   if ( gridptr->y.size != ysize )
@@ -1268,7 +1269,7 @@ void gridDefYsize(int gridID, int ysize)
       gridptr->y.size = ysize;
     }
 
-  if ( gridInqType(gridID) != GRID_UNSTRUCTURED )
+  if ( gridType != GRID_UNSTRUCTURED && gridType != GRID_PROJECTION )
     {
       long axisproduct = gridptr->x.size*gridptr->y.size;
       if ( axisproduct > 0 && axisproduct != gridSize )

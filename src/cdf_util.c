@@ -225,6 +225,26 @@ bool is_lat_axis(const char *units, const char *stdname)
 }
 
 
+bool is_x_axis(const char *units, const char *stdname)
+{
+  bool status = false;
+
+  if ( strcmp(stdname, "projection_x_coordinate") == 0  ) status = true;
+
+  return status;
+}
+
+
+bool is_y_axis(const char *units, const char *stdname)
+{
+  bool status = false;
+
+  if ( strcmp(stdname, "projection_y_coordinate") == 0  ) status = true;
+
+  return status;
+}
+
+
 void set_gridtype(const char *attstring, int *gridtype)
 {
   if      ( strcmp(attstring, "gaussian reduced") == 0 )
