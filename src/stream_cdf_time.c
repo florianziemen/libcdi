@@ -103,11 +103,9 @@ cdfGetTimeUnits(taxis_t *taxis)
   return unitstr;
 }
 
-static
-void cdfDefForecastTimeUnits(char *unitstr, int timeunit)
+static const char *
+cdfGetForecastTimeUnits(int timeunit)
 {
-  unitstr[0] = 0;
-
   if ( timeunit == -1 ) timeunit = TUNIT_HOUR;
   else if ( timeunit == TUNIT_QUARTER   ) timeunit = TUNIT_MINUTE;
   else if ( timeunit == TUNIT_30MINUTES ) timeunit = TUNIT_MINUTE;
@@ -115,7 +113,7 @@ void cdfDefForecastTimeUnits(char *unitstr, int timeunit)
             || timeunit == TUNIT_6HOURS
             || timeunit == TUNIT_12HOURS ) timeunit = TUNIT_HOUR;
 
-  strcpy(unitstr, tunitNamePtr(timeunit));
+  return tunitNamePtr(timeunit);
 }
 
 static
@@ -244,8 +242,7 @@ void cdfDefTime(stream_t* streamptr)
       }
 
       {
-          char unitstr[CDI_MAX_NAME];
-          cdfDefForecastTimeUnits(unitstr, taxis->fc_unit);
+          const char *unitstr = cdfGetForecastTimeUnits(taxis->fc_unit);
           size_t len = strlen(unitstr);
           if ( len )
             cdf_put_att_text(fileID, leadtimeid, "units", len, unitstr);
