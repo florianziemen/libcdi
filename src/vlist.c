@@ -2,6 +2,8 @@
 #  include "config.h"
 #endif
 
+#include <stdbool.h>
+
 #include "dmemory.h"
 #include "cdi.h"
 #include "cdi_int.h"
@@ -1451,13 +1453,15 @@ int vlistSubtypeIndex(int vlistID, int subtypeID)
 
 int vlistHasTime(int vlistID)
 {
-  int hastime = FALSE;
+  bool hastime = false;
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
-  for ( int varID = 0; varID <  vlistptr->nvars; varID++ )
-    if ( vlistptr->vars[varID].tsteptype != TSTEP_CONSTANT )
+  size_t nvars = vlistptr->nvars > 0 ? (size_t)vlistptr->nvars : (size_t)0;
+  var_t *restrict vars = vlistptr->vars;
+  for ( size_t varID = 0; varID < nvars; varID++ )
+    if ( vars[varID].tsteptype != TSTEP_CONSTANT )
       {
-        hastime = TRUE;
+        hastime = true;
         break;
       }
 
