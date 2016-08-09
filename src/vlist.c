@@ -2,6 +2,8 @@
 #include "config.h"
 #endif
 
+#include <stdbool.h>
+
 #include "dmemory.h"
 #include "cdi.h"
 #include "cdi_int.h"
@@ -1500,8 +1502,10 @@ vlistHasTime(int vlistID)
 
   if (!(CDI_Reduce_Dim && vlistptr->ntsteps == 1))
     {
-      for (int varID = 0; varID < vlistptr->nvars; varID++)
-        if (vlistptr->vars[varID].timetype != TIME_CONSTANT)
+      size_t nvars = vlistptr->nvars > 0 ? (size_t) vlistptr->nvars : (size_t) 0;
+      var_t *restrict vars = vlistptr->vars;
+      for (size_t varID = 0; varID < nvars; varID++)
+        if (vars[varID].timetype != TIME_CONSTANT)
           {
             hastime = true;
             break;
