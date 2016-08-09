@@ -1158,6 +1158,9 @@ int cdiStreamDefTimestep_(stream_t *streamptr, int tsID)
   if ( CDI_Debug ) Message("streamID = %d  tsID = %d", streamptr->self, tsID);
 
   int vlistID = streamptr->vlistID;
+  if (vlistID == CDI_UNDEFID)
+    Error("Must not call streamDefTimestep for stream (ID=%d)"
+          " with (not yet) defined vlist", streamptr->self);
 
   int time_is_varying = vlistHasTime(vlistID);
 
