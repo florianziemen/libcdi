@@ -1847,6 +1847,8 @@ void gridDefProjParamRLL(int gridID, double xpole, double ypole, double angle)
 
   grid_t *gridptr = gridID2Ptr(gridID);
   gridptr->projtype = CDI_PROJ_RLL;
+
+  gridVerifyProj(gridID);
 }
 
 /*
