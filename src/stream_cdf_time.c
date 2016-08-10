@@ -302,7 +302,7 @@ void cdfDefTimestep(stream_t *streamptr, int tsID)
   int vlistID = streamptr->vlistID;
 
   int time_varid = streamptr->basetime.ncvarid;
-  if ( vlistHasTime(vlistID) ) cdfDefTime(streamptr);
+  if ( time_varid == CDI_UNDEFID && vlistHasTime(vlistID) ) cdfDefTime(streamptr);
   if ( time_varid != CDI_UNDEFID && tsID == 0 )
     {
       taxis_t *taxis = taxisPtr(vlistInqTaxis(vlistID));
