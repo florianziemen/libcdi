@@ -978,7 +978,8 @@ void cdf_write_var(stream_t *streamptr, int varID, int memtype, const void *data
   long ntsteps = streamptr->ntsteps;
   if ( CDI_Debug ) Message("ntsteps = %ld", ntsteps);
 
-  if ( vlistHasTime(vlistID) ) cdfDefTime(streamptr);
+  int time_varid = streamptr->basetime.ncvarid;
+  if ( time_varid == CDI_UNDEFID && vlistHasTime(vlistID) ) cdfDefTime(streamptr);
 
   int ncvarid = cdfDefVar(streamptr, varID);
 
@@ -1076,7 +1077,8 @@ void cdf_write_var_chunk(stream_t *streamptr, int varID, int memtype,
   if ( CDI_Debug )
     Message("ntsteps = %ld", ntsteps);
 
-  if ( vlistHasTime(vlistID) ) cdfDefTime(streamptr);
+  int time_varid = streamptr->basetime.ncvarid;
+  if ( time_varid == CDI_UNDEFID && vlistHasTime(vlistID) ) cdfDefTime(streamptr);
 
   int ncvarid = cdfDefVar(streamptr, varID);
 
@@ -1173,7 +1175,8 @@ void cdf_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
   long ntsteps = streamptr->ntsteps;
   if ( CDI_Debug ) Message("ntsteps = %ld", ntsteps);
 
-  if ( vlistHasTime(vlistID) ) cdfDefTime(streamptr);
+  int time_varid = streamptr->basetime.ncvarid;
+  if ( time_varid == CDI_UNDEFID && vlistHasTime(vlistID) ) cdfDefTime(streamptr);
 
   int ncvarid = cdfDefVar(streamptr, varID);
 
