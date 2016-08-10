@@ -171,7 +171,8 @@ modelRun(struct model_config setup, MPI_Comm comm)
       vlistDefVarDatatype(vlistID, varDesc[varIdx].id, setup.datatype);
     }
 
-  taxisID = taxisCreate(TAXIS_ABSOLUTE);
+  taxisID = taxisCreate(setup.taxistype);
+  if (setup.taxisunit != -1) taxisDefTunit(taxisID, setup.taxisunit);
   vlistDefTaxis(vlistID, taxisID);
 
   for (tfID = 0; tfID < ntfiles; tfID++)
