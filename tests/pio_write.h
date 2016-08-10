@@ -31,6 +31,7 @@ struct model_config
   int nlon, nlat, nts, max_nlev, nvars;
   int filetype, datatype;
   int flags;
+  int taxistype, taxisunit;
   const char *suffix;
 };
 
