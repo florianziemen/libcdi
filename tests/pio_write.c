@@ -31,7 +31,7 @@
 
 static const struct model_config default_setup
 #ifdef __cplusplus
-    = { 12, 6, 3, 5, 5, CDI_FILETYPE_GRB, CDI_DATATYPE_PACK24, PIO_WRITE_CONFIG_CHECKSUM_FLAG, "grb" };
+    = { 12, 6, 3, 5, 5, CDI_FILETYPE_GRB, CDI_DATATYPE_PACK24, PIO_WRITE_CONFIG_CHECKSUM_FLAG, TAXIS_ABSOLUTE, -1, "grb" };
 #else
     = {
         .nlon = 12,
@@ -42,6 +42,8 @@ static const struct model_config default_setup
         .filetype = CDI_FILETYPE_GRB,
         .datatype = CDI_DATATYPE_PACK24,
         .flags = PIO_WRITE_CONFIG_CHECKSUM_FLAG,
+        .taxistype = TAXIS_ABSOLUTE,
+        .taxisunit = -1,
         .suffix = "grb",
       };
 #endif
@@ -139,10 +141,39 @@ parseBooleanLongOption(size_t optionStrSize, const char *optionStr, const char *
   return result;
 }
 
+struct string2int
+{
+  const char *key;
+  int val;
+};
+
+static bool
+parseLongOptionArgStringToInt(const char *str, size_t optionStrLen, const char *optionStr, size_t mapSize,
+                              const struct string2int *map, int argc, char *argv[], int *out)
+{
+  if (!strncmp(str, optionStr, optionStrLen))
+    {
+      const char *optargArg;
+      if (str[optionStrLen] == '=')
+        optargArg = str + optionStrLen + 1;
+      else if (str[sizeof(optionStr) - 1] == 0 && optind < argc)
+        optargArg = argv[optind++];
+      else
+        invalidOptionDie("missing argument to -q%s", optionStr);
+      for (size_t i = 0; i < mapSize; ++i)
+        if (!strcmp(optargArg, map[i].key))
+          {
+            *out = map[i].val;
+            return true;
+          }
+      invalidOptionDie("unknown argument \"%s\" to -q%s", optargArg, optionStr);
+    }
+  return false;
+}
+
 static void
-parse_long_option(struct model_config *restrict setup,
-                  int pioConfHandle, pioRoleFunc *pioRoleAssign,
-                  const char *str)
+parse_long_option(struct model_config *restrict setup, int pioConfHandle, pioRoleFunc *pioRoleAssign, const char *str, int argc,
+                  char *argv[])
 {
 #ifndef USE_MPI
   (void)pioConfHandle;
@@ -150,7 +181,23 @@ parse_long_option(struct model_config *restrict setup,
 #endif
   static const char cacheRedistStr[] = "no-cache-redists", pioRoleSchemeOptionStr[] = "pio-role-scheme",
                     curvilinearGridOptionStr[] = "no-create-curvilinear-grid", uuidCreateOptionStr[] = "no-create-uuid",
-                    useDistGridOptionStr[] = "no-use-dist-grid";
+                    useDistGridOptionStr[] = "no-use-dist-grid", taxistypeOptionStr[] = "taxis-type",
+                    taxisunitOptionStr[] = "taxis-unit";
+  static const struct string2int taxistypeArgMap[] = {
+    { "absolute", TAXIS_ABSOLUTE },
+    { "relative", TAXIS_RELATIVE },
+    { "forecast", TAXIS_FORECAST },
+  };
+  static const struct string2int taxisunitArgMap[] = {
+    { "second", TUNIT_SECOND }, { "minute", TUNIT_MINUTE }, { "quarter", TUNIT_QUARTER }, { "30minutes", TUNIT_30MINUTES },
+    { "hour", TUNIT_HOUR },     { "3hours", TUNIT_3HOURS }, { "6hours", TUNIT_6HOURS },   { "12hours", TUNIT_12HOURS },
+    { "day", TUNIT_DAY },       { "month", TUNIT_MONTH },   { "year", TUNIT_YEAR },
+  };
+  enum
+  {
+    taxistypeArgMapSize = sizeof(taxistypeArgMap) / sizeof(taxistypeArgMap[0]),
+    taxisunitArgMapSize = sizeof(taxisunitArgMap) / sizeof(taxisunitArgMap[0]),
+  };
   struct boolOptionParse bop;
   if ((bop = parseBooleanLongOption(sizeof(cacheRedistStr), cacheRedistStr, str)).matched)
     {
@@ -160,6 +207,12 @@ parse_long_option(struct model_config *restrict setup,
       invalidOptionDie("CDI-PIO option -q%s unavailable in non-MPI mode\n", cacheRedistStr + (bop.invert ? 0 : 3));
 #endif
     }
+  else if (parseLongOptionArgStringToInt(str, sizeof(taxistypeOptionStr) - 1, taxistypeOptionStr, taxistypeArgMapSize,
+                                         taxistypeArgMap, argc, argv, &setup->taxistype))
+    ;
+  else if (parseLongOptionArgStringToInt(str, sizeof(taxisunitOptionStr) - 1, taxisunitOptionStr, taxisunitArgMapSize,
+                                         taxisunitArgMap, argc, argv, &setup->taxisunit))
+    ;
   else if (!strncmp(str, pioRoleSchemeOptionStr,
                     sizeof (pioRoleSchemeOptionStr) - 1))
     {
@@ -286,9 +339,7 @@ int main(int argc, char *argv[])
         }
         break;
 #endif
-      case 'q':
-        parse_long_option(&setup, pioConfHandle, &pioRoleAssign, optarg);
-        break;
+      case 'q': parse_long_option(&setup, pioConfHandle, &pioRoleAssign, optarg, argc, argv); break;
       case 'f':
         {
           int found = 0;
