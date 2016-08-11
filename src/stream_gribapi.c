@@ -2067,7 +2067,7 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
                 angle = gridInqAngle(gridID);
               }
             else
-              gridInqProjParamRLL(gridID, &xpole, &ypole, &angle);
+              gridInqParamRLL(gridID, &xpole, &ypole, &angle);
 
             xpole =  xpole + 180;
             if ( fabs(ypole) > 0 ) ypole = -ypole; // change from north to south pole

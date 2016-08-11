@@ -1763,7 +1763,7 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
                 angle = gridInqAngle(gridID);
               }
             else
-              gridInqProjParamRLL(gridID, &xpole, &ypole, &angle);
+              gridInqParamRLL(gridID, &xpole, &ypole, &angle);
 
 	    ISEC2_LatSP = - (int)lround(ypole * 1000);
 	    ISEC2_LonSP =   (int)lround((xpole + 180) * 1000);

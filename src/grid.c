@@ -1798,7 +1798,7 @@ double gridInqYinc(int gridID)
 }
 
 
-void gridInqProjParamRLL(int gridID, double *xpole, double *ypole, double *angle)
+void gridInqParamRLL(int gridID, double *xpole, double *ypole, double *angle)
 {
   *xpole = 0; *ypole = 0; *angle = 0;
 

@@ -351,7 +351,7 @@ void iegDefGrid(int *gdb, int gridID)
 	{
           double xpole = 0, ypole = 0, angle = 0;
           if ( projtype == CDI_PROJ_RLL )
-            gridInqProjParamRLL(gridID, &xpole, &ypole, &angle);
+            gridInqParamRLL(gridID, &xpole, &ypole, &angle);
           else
             {
               xpole = gridInqXpole(gridID);
