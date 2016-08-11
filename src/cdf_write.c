@@ -624,8 +624,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
 
   char gmapvarname[CDI_MAX_NAME]; gmapvarname[0] = 0;
 
-  if      ( gridtype == GRID_SINUSOIDAL ) strcpy(gmapvarname, "Sinusoidal");
-  else if ( gridtype == GRID_LAEA )       strcpy(gmapvarname, "Lambert_AEA");
+  if      ( gridtype == GRID_LAEA )       strcpy(gmapvarname, "Lambert_AEA");
   else if ( gridtype == GRID_LCC2 )       strcpy(gmapvarname, "Lambert_CC");
   else  cdf_get_gmapvarname(gridID, gmapvarname);
 

@@ -40,7 +40,6 @@ static const char Grids[][17] = {
   /* 11 */  "lcc",
   /* 12 */  "lcc2",
   /* 13 */  "laea",
-  /* 14 */  "sinusoidal",
   /* 15 */  "projection",
 };
 
@@ -315,7 +314,6 @@ void cdiGridTypeInit(grid_t *gridptr, int gridtype, int size)
     case GRID_GENERIC:
     case GRID_PROJECTION:
     case GRID_LCC2:
-    case GRID_SINUSOIDAL:
     case GRID_LAEA:
       {
         if ( gridptr->x.name[0] == 0 ) gridSetName(gridptr->x.name, "x");
@@ -2545,7 +2543,6 @@ void gridComplete(grid_t *grid)
     case GRID_GENERIC:
     case GRID_LCC:
     case GRID_LCC2:
-    case GRID_SINUSOIDAL:
     case GRID_LAEA:
     case GRID_PROJECTION:
       {
@@ -2709,7 +2706,7 @@ int gridGenerate(const grid_t *grid)
   int valdef_group1 = 0;
   static const int valdef_group1_tab[] = {
     GRID_LONLAT, GRID_GAUSSIAN, GRID_UNSTRUCTURED, GRID_CURVILINEAR,
-    GRID_GENERIC, GRID_LCC, GRID_LCC2, GRID_SINUSOIDAL, GRID_LAEA,
+    GRID_GENERIC, GRID_LCC, GRID_LCC2, GRID_LAEA,
     GRID_PROJECTION
   };
   for ( size_t i = 0; i < sizeof (valdef_group1_tab) / sizeof (valdef_group1_tab[0]); ++i)
@@ -3444,7 +3441,6 @@ void gridPrintKernel(grid_t *gridptr, int index, int opt, FILE *fp)
     case GRID_GAUSSIAN_REDUCED:
     case GRID_GENERIC:
     case GRID_LCC2:
-    case GRID_SINUSOIDAL:
     case GRID_LAEA:
     case GRID_PROJECTION:
     case GRID_CURVILINEAR:
@@ -3521,7 +3517,7 @@ void gridPrintKernel(grid_t *gridptr, int index, int opt, FILE *fp)
 	    if ( type == GRID_LONLAT     || type == GRID_GAUSSIAN ||
 		 type == GRID_PROJECTION ||
 		 type == GRID_GENERIC    || type == GRID_LCC2     ||
-                 type == GRID_SINUSOIDAL || type == GRID_LAEA )
+                 type == GRID_LAEA )
 	      {
 		xfirst = gridInqXval(gridID, 0);
 		xinc   = gridInqXinc(gridID);
@@ -3555,7 +3551,7 @@ void gridPrintKernel(grid_t *gridptr, int index, int opt, FILE *fp)
 	    if ( type == GRID_LONLAT || type == GRID_GENERIC ||
                  type == GRID_PROJECTION ||
 		 type == GRID_GENERIC    || type == GRID_LCC2 ||
-		 type == GRID_SINUSOIDAL || type == GRID_LAEA )
+		 type == GRID_LAEA )
 	      {
 		yfirst = gridInqYval(gridID, 0);
 		yinc   = gridInqYinc(gridID);

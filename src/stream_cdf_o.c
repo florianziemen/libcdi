@@ -1936,26 +1936,7 @@ void cdfDefMapping(stream_t *streamptr, int gridID)
   int ncvarid = UNDEFID;
   int fileID  = streamptr->fileID;
 
-  if ( gridInqType(gridID) == GRID_SINUSOIDAL )
-    {
-      static const char varname[] = "Sinusoidal";
-      static const char mapname[] = "sinusoidal";
-
-      cdf_redef(fileID);
-
-      int ncerrcode = nc_def_var(fileID, varname, (nc_type) NC_CHAR, 0, NULL, &ncvarid);
-      if ( ncerrcode == NC_NOERR )
-        {
-          cdf_put_att_text(fileID, ncvarid, "grid_mapping_name", strlen(mapname), mapname);
-          /*
-          cdf_put_att_double(fileID, ncvarid, "grid_north_pole_latitude", NC_DOUBLE, 1, &ypole);
-          cdf_put_att_double(fileID, ncvarid, "grid_north_pole_longitude", NC_DOUBLE, 1, &xpole);
-          */
-        }
-
-      cdf_enddef(fileID);
-    }
-  else if ( gridInqType(gridID) == GRID_LAEA )
+  if ( gridInqType(gridID) == GRID_LAEA )
     {
       static const char varname[] = "Lambert_AEA";
       static const char mapname[] = "lambert_azimuthal_equal_area";
@@ -2091,7 +2072,7 @@ void cdfDefGrid(stream_t *streamptr, int gridID, int gridindex)
       cdfDefTrajLon(streamptr, gridID, gridindex);
       cdfDefTrajLat(streamptr, gridID, gridindex);
     }
-  else if ( gridtype == GRID_SINUSOIDAL || gridtype == GRID_LAEA || gridtype == GRID_LCC2 )
+  else if ( gridtype == GRID_LAEA || gridtype == GRID_LCC2 )
     {
       cdfDefXaxis(streamptr, gridID, gridindex, 1);
       cdfDefYaxis(streamptr, gridID, gridindex, 1);

@@ -139,8 +139,7 @@ extern "C" {
 #define  GRID_LCC                  11  /* Lambert Conformal Conic (GRIB)                        */
 #define  GRID_LCC2                 12  /* Lambert Conformal Conic (PROJ)                        */
 #define  GRID_LAEA                 13  /* Lambert Azimuthal Equal Area                          */
-#define  GRID_SINUSOIDAL           14  /* Sinusoidal                                            */
-#define  GRID_PROJECTION           15  /* Projected coordinates                                 */
+#define  GRID_PROJECTION           14  /* Projected coordinates                                 */
 
 #define  CDI_PROJ_RLL              21  /* Rotated Latitude Longitude                            */
 #define  CDI_PROJ_LCC              22  /* Lambert Conformal Conic                               */

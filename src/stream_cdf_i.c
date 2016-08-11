@@ -2502,9 +2502,7 @@ void cdf_set_proj_atts(int ncid, int gmapvarid, grid_t *grid)
           cdfGetAttText(ncid, gmapvarid, attname, attstringlen, attstring);
           str_tolower(attstring);
 
-          if ( strcmp(attstring, "sinusoidal") == 0 )
-            grid->type = GRID_SINUSOIDAL;
-          else if ( strcmp(attstring, "lambert_azimuthal_equal_area") == 0 )
+          if ( strcmp(attstring, "lambert_azimuthal_equal_area") == 0 )
             grid->type = GRID_LAEA;
           else if ( strcmp(attstring, "lambert_conformal_conic") == 0 )
             grid->type = GRID_LCC2;
@@ -2613,11 +2611,7 @@ static
 void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars,
                           int timedimid, unsigned char *uuidOfHGrid, char *gridfile, int number_of_grid_used)
 {
-#ifdef TEST_PROJECTION
   bool testproj = true;
-#else
-  bool testproj = false;
-#endif
 
   for ( int ncvarid = 0; ncvarid < nvars; ++ncvarid )
     {
@@ -2632,7 +2626,6 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
           int vdimid = UNDEFID;
           struct addIfNewRes projAdded = { .Id = CDI_UNDEFID, .isNew = 0 },
                              gridAdded = { .Id = CDI_UNDEFID, .isNew = 0 };
-
 	  int xdimid = UNDEFID, ydimid = UNDEFID;
           int nydims = cdf_get_xydimid(ndims, ncvar->dimids, dimtype, &xdimid, &ydimid);
 
@@ -2660,11 +2653,7 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
           struct cdfLazyGrid *restrict lazyGrid = NULL, *restrict lazyProj = NULL;
 
           {
-#ifdef TEST_PROJECTION
             int gridtype = !lgrid ? GRID_PROJECTION : ncvar->gridtype;
-#else
-            int gridtype = ncvar->gridtype;
-#endif
             if ( CDI_netcdf_lazy_grid_load )
               {
                 cdfLazyGridRenew(&lazyGrid, gridtype);
