@@ -656,7 +656,8 @@ void setDefaultFileType(char *filetypestr)
       else if ( memcmp(filetypestr, "nc2",  3)  == 0 ) { ftstr += 3; DefaultFileType = FILETYPE_NC2; }
       else if ( memcmp(filetypestr, "nc4c", 4)  == 0 ) { ftstr += 4; DefaultFileType = FILETYPE_NC4C;}
       else if ( memcmp(filetypestr, "nc4",  3)  == 0 ) { ftstr += 3; DefaultFileType = FILETYPE_NC4; }
-      else if ( memcmp(filetypestr, "nc",   2)  == 0 ) { ftstr += 2; DefaultFileType = FILETYPE_NC;  }
+      else if ( memcmp(filetypestr, "nc1",  3)  == 0 ) { ftstr += 3; DefaultFileType = FILETYPE_NC;  }
+      else if ( memcmp(filetypestr, "nc",   2)  == 0 ) { ftstr += 2; DefaultFileType = FILETYPE_NC2; }
       else if ( memcmp(filetypestr, "srv",  3)  == 0 ) { ftstr += 3; DefaultFileType = FILETYPE_SRV; }
       else if ( memcmp(filetypestr, "ext",  3)  == 0 ) { ftstr += 3; DefaultFileType = FILETYPE_EXT; }
       else if ( memcmp(filetypestr, "ieg",  3)  == 0 ) { ftstr += 3; DefaultFileType = FILETYPE_IEG; }

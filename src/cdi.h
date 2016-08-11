@@ -850,17 +850,10 @@ double  gridInqXinc(int gridID);
 double  gridInqYinc(int gridID);
 
 int     gridIsCircular(int gridID);
-int     gridIsRotated(int gridID);
 
 void    gridInqParamRLL(int gridID, double *xpole, double *ypole, double *angle);
 void    gridDefParamRLL(int gridID, double xpole, double ypole, double angle);
 
-void    gridDefXpole(int gridID, double xpole);
-double  gridInqXpole(int gridID);
-void    gridDefYpole(int gridID, double ypole);
-double  gridInqYpole(int gridID);
-void    gridDefAngle(int gridID, double angle);
-double  gridInqAngle(int gridID);
 int     gridInqTrunc(int gridID);
 void    gridDefTrunc(int gridID, int trunc);
 /* Hexagonal GME grid */

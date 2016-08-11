@@ -2502,9 +2502,7 @@ void cdf_set_proj_atts(int ncid, int gmapvarid, grid_t *grid)
           cdfGetAttText(ncid, gmapvarid, attname, attstringlen, attstring);
           str_tolower(attstring);
 
-          if ( strcmp(attstring, "rotated_latitude_longitude") == 0 )
-            grid->isRotated = TRUE;
-          else if ( strcmp(attstring, "sinusoidal") == 0 )
+          if ( strcmp(attstring, "sinusoidal") == 0 )
             grid->type = GRID_SINUSOIDAL;
           else if ( strcmp(attstring, "lambert_azimuthal_equal_area") == 0 )
             grid->type = GRID_LAEA;
@@ -2549,18 +2547,6 @@ void cdf_set_proj_atts(int ncid, int gmapvarid, grid_t *grid)
               grid->lcc2.lat_1 = datt2[0];
               grid->lcc2.lat_2 = datt2[1];
             }
-        }
-      else if ( strcmp(attname, "grid_north_pole_latitude") == 0 )
-        {
-          cdfGetAttDouble(ncid, gmapvarid, attname, 1, &grid->rll.ypole);
-        }
-      else if ( strcmp(attname, "grid_north_pole_longitude") == 0 )
-        {
-          cdfGetAttDouble(ncid, gmapvarid, attname, 1, &grid->rll.xpole);
-        }
-      else if ( strcmp(attname, "north_pole_grid_longitude") == 0 )
-        {
-          cdfGetAttDouble(ncid, gmapvarid, attname, 1, &grid->rll.angle);
         }
     }
 }

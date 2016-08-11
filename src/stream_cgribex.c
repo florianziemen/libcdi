@@ -37,11 +37,7 @@ int cgribexGetGridType(int *isec2)
   switch (ISEC2_GridType)
     {
     case  GRIB1_GTYPE_LATLON:     { gridtype = GRID_LONLAT;     break; }
-#ifdef TEST_PROJECTION
     case  GRIB1_GTYPE_LATLON_ROT: { gridtype = GRID_PROJECTION; break; }
-#else
-    case  GRIB1_GTYPE_LATLON_ROT: { gridtype = GRID_LONLAT;     break; }
-#endif
     case  GRIB1_GTYPE_LCC:        { gridtype = GRID_LCC;        break; }
     case  GRIB1_GTYPE_GAUSSIAN:   { if ( ISEC2_Reduced )
 	                              gridtype = GRID_GAUSSIAN_REDUCED;
@@ -323,15 +319,6 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, double *fsec2, int *isec4, 
   else
     {
       Error("Unsupported grid type: %s", gridNamePtr(gridtype));
-    }
-
-  grid->isRotated = FALSE;
-  if ( cgribexGetIsRotated(isec2) )
-    {
-      grid->isRotated = TRUE;
-      grid->rll.xpole =   ISEC2_LonSP*0.001 - 180;
-      grid->rll.ypole = - ISEC2_LatSP*0.001;
-      grid->rll.angle = - FSEC2_RotAngle;
     }
 
   grid->type = gridtype;
@@ -1679,11 +1666,10 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
       {
 	double xfirst = 0, xlast = 0, xinc = 0;
 	double yfirst = 0, ylast = 0, yinc = 0;
-        bool isRotated = gridIsRotated(gridID);
 
 	if ( gridtype == GRID_GAUSSIAN || gridtype == GRID_GAUSSIAN_REDUCED )
           ISEC2_GridType = GRIB1_GTYPE_GAUSSIAN;
-        else if ( gridtype == GRID_LONLAT && (isRotated || lrotated) )
+        else if ( gridtype == GRID_LONLAT && lrotated )
 	  ISEC2_GridType = GRIB1_GTYPE_LATLON_ROT;
 	else
 	  ISEC2_GridType = GRIB1_GTYPE_LATLON;
@@ -1753,17 +1739,10 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
 
         ISEC2_ResFlag = ( ISEC2_LatIncr == 0 || ISEC2_LonIncr == 0 ) ? 0 : 128;
 
-	if ( isRotated || lrotated )
+	if ( lrotated )
           {
             double xpole = 0, ypole = 0, angle = 0;
-            if ( isRotated )
-              {
-                xpole = gridInqXpole(gridID);
-                ypole = gridInqYpole(gridID);
-                angle = gridInqAngle(gridID);
-              }
-            else
-              gridInqParamRLL(gridID, &xpole, &ypole, &angle);
+            gridInqParamRLL(gridID, &xpole, &ypole, &angle);
 
 	    ISEC2_LatSP = - (int)lround(ypole * 1000);
 	    ISEC2_LonSP =   (int)lround((xpole + 180) * 1000);

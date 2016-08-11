@@ -1975,7 +1975,7 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
             len = sizeof(mesg_gaussian_reduced) - 1;
             mesg = mesg_gaussian_reduced;
           }
-        else if ( gridtype == GRID_LONLAT && (gridIsRotated(gridID) || lrotated) )
+        else if ( lrotated )
           {
             static const char mesg_rot_lonlat[] = "rotated_ll";
             len = sizeof(mesg_rot_lonlat) - 1;
@@ -2057,17 +2057,10 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 	    GRIB_CHECK(my_grib_set_double(gh, "jDirectionIncrementInDegrees", latIncr), 0);
 	  }
 
-	if ( gridIsRotated(gridID) || lrotated )
+	if ( lrotated )
 	  {
             double xpole = 0, ypole = 0, angle = 0;
-            if ( gridIsRotated(gridID) )
-              {
-                xpole = gridInqXpole(gridID);
-                ypole = gridInqYpole(gridID);
-                angle = gridInqAngle(gridID);
-              }
-            else
-              gridInqParamRLL(gridID, &xpole, &ypole, &angle);
+            gridInqParamRLL(gridID, &xpole, &ypole, &angle);
 
             xpole =  xpole + 180;
             if ( fabs(ypole) > 0 ) ypole = -ypole; // change from north to south pole

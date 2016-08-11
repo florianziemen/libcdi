@@ -62,9 +62,6 @@ static int defineGrid (void)
   gridDefYlongname ( gridID, "myYlongname" );
   gridDefYunits ( gridID, "myYunits" );
   gridDefPrec ( gridID, DOUBLE_PRECISION );
-  gridDefXpole ( gridID, 90.0 );
-  gridDefYpole ( gridID, 180.0 );
-  gridDefAngle ( gridID, 360.0 );
   gridDefTrunc ( gridID, 1 );
   gridDefGMEnd ( gridID, 2 );
   gridDefGMEni ( gridID, 3 );

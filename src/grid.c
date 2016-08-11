@@ -139,11 +139,6 @@ void grid_init(grid_t *gridptr)
   gridptr->gme.ni2       = 0;
   gridptr->gme.ni3       = 0;
 
-  gridptr->isRotated     = FALSE;
-  gridptr->rll.xpole     = 0.0;
-  gridptr->rll.ypole     = 0.0;
-  gridptr->rll.angle     = 0.0;
-
   gridptr->trunc         = 0;
   gridptr->nvertex       = 0;
   gridptr->number        = 0;
@@ -1797,7 +1792,16 @@ double gridInqYinc(int gridID)
   return yinc;
 }
 
+/*
+@Function
+@Title
 
+@Prototype
+@Parameter
+    @Item  Grid identifier
+
+@EndFunction
+*/
 void gridInqParamRLL(int gridID, double *xpole, double *ypole, double *angle)
 {
   *xpole = 0; *ypole = 0; *angle = 0;
@@ -1833,7 +1837,16 @@ void gridInqParamRLL(int gridID, double *xpole, double *ypole, double *angle)
     Warning("%s mapping parameter missing!", projection);
 }
 
+/*
+@Function
+@Title
 
+@Prototype
+@Parameter
+    @Item  Grid identifier
+
+@EndFunction
+*/
 void gridDefParamRLL(int gridID, double xpole, double ypole, double angle)
 {
   cdiGridDefKeyStr(gridID, CDI_KEY_MAPNAME, CDI_MAX_NAME, "rotated_pole");
@@ -1849,135 +1862,6 @@ void gridDefParamRLL(int gridID, double xpole, double ypole, double angle)
   gridptr->projtype = CDI_PROJ_RLL;
 
   gridVerifyProj(gridID);
-}
-
-/*
-@Function
-@Title
-
-@Prototype
-@Parameter
-    @Item  Grid identifier
-
-@EndFunction
-*/
-double gridInqXpole(int gridID)
-{
-  // Xpole -> grid_north_pole_longitude
-  grid_t *gridptr = gridID2Ptr(gridID);
-
-  return gridptr->rll.xpole;
-}
-
-/*
-@Function
-@Title
-
-@Prototype
-@Parameter
-    @Item  Grid identifier
-
-@EndFunction
-*/
-void gridDefXpole(int gridID, double xpole)
-{
-  // Xpole -> grid_north_pole_longitude
-  grid_t *gridptr = gridID2Ptr(gridID);
-
-  if ( gridptr->x.stdname && memcmp(gridptr->x.stdname, "grid", 4) != 0 )
-    gridptr->x.stdname = xystdname_tab[grid_xystdname_grid_latlon][0];
-
-  if ( gridptr->isRotated != TRUE || IS_NOT_EQUAL(gridptr->rll.xpole, xpole) )
-    {
-      gridptr->isRotated = TRUE;
-      gridptr->rll.xpole = xpole;
-      gridMark4Update(gridID);
-    }
-}
-
-/*
-@Function
-@Title
-
-@Prototype
-@Parameter
-    @Item  Grid identifier
-
-@EndFunction
-*/
-double gridInqYpole(int gridID)
-{
-  // Ypole -> grid_north_pole_latitude
-  grid_t *gridptr = gridID2Ptr(gridID);
-
-  return gridptr->rll.ypole;
-}
-
-/*
-@Function
-@Title
-
-@Prototype
-@Parameter
-    @Item  Grid identifier
-
-@EndFunction
-*/
-void gridDefYpole(int gridID, double ypole)
-{
-  // Ypole -> grid_north_pole_latitude
-  grid_t *gridptr = gridID2Ptr(gridID);
-
-  if ( gridptr->y.stdname && memcmp(gridptr->y.stdname, "grid", 4) != 0 )
-    gridptr->y.stdname = xystdname_tab[grid_xystdname_grid_latlon][1];
-
-  if ( gridptr->isRotated != TRUE || IS_NOT_EQUAL(gridptr->rll.ypole, ypole) )
-    {
-      gridptr->isRotated = TRUE;
-      gridptr->rll.ypole = ypole;
-      gridMark4Update(gridID);
-    }
-}
-
-/*
-@Function
-@Title
-
-@Prototype
-@Parameter
-    @Item  Grid identifier
-
-@EndFunction
-*/
-double gridInqAngle(int gridID)
-{
-  // Angle -> north_pole_grid_longitude
-  grid_t *gridptr = gridID2Ptr(gridID);
-
-  return gridptr->rll.angle;
-}
-
-/*
-@Function
-@Title
-
-@Prototype
-@Parameter
-    @Item  Grid identifier
-
-@EndFunction<
-*/
-void gridDefAngle(int gridID, double angle)
-{
-  // Angle -> north_pole_grid_longitude
-  grid_t *gridptr = gridID2Ptr(gridID);
-
-  if ( gridptr->isRotated != TRUE || IS_NOT_EQUAL(gridptr->rll.angle, angle) )
-    {
-      gridptr->isRotated = TRUE;
-      gridptr->rll.angle = angle;
-      gridMark4Update(gridID);
-    }
 }
 
 /*
@@ -2245,14 +2129,6 @@ int gridIsCircular(int gridID)
   return gridptr->isCyclic;
 }
 
-
-int gridIsRotated(int gridID)
-{
-  grid_t *gridptr = gridID2Ptr(gridID);
-
-  return gridptr->isRotated;
-}
-
 static
 bool compareXYvals(grid_t *gridRef, grid_t *gridTest)
 {
@@ -2482,7 +2358,6 @@ int gridCompareP ( void * gridptr1, void * gridptr2 )
   if ( g1->lcc2.defined  != g2->lcc2.defined ) return differ;
   if ( g1->laea.defined  != g2->laea.defined ) return differ;
   if ( g1->isCyclic      != g2->isCyclic     ) return differ;
-  if ( g1->isRotated     != g2->isRotated    ) return differ;
   if ( g1->x.flag        != g2->x.flag       ) return differ;
   if ( g1->y.flag        != g2->y.flag       ) return differ;
   if ( g1->gme.nd        != g2->gme.nd       ) return differ;
@@ -2520,9 +2395,6 @@ int gridCompareP ( void * gridptr1, void * gridptr2 )
   if ( IS_NOT_EQUAL(g1->laea.lon_0    , g2->laea.lon_0)    ) return differ;
   if ( IS_NOT_EQUAL(g1->laea.lat_0    , g2->laea.lat_0)    ) return differ;
   if ( IS_NOT_EQUAL(g1->laea.a        , g2->laea.a)        ) return differ;
-  if ( IS_NOT_EQUAL(g1->rll.xpole     , g2->rll.xpole)     ) return differ;
-  if ( IS_NOT_EQUAL(g1->rll.ypole     , g2->rll.ypole)     ) return differ;
-  if ( IS_NOT_EQUAL(g1->rll.angle     , g2->rll.angle)     ) return differ;
 
   const double *restrict g1_xvals = g1->vtable->inqXValsPtr(g1),
     *restrict g2_xvals = g2->vtable->inqXValsPtr(g2);
@@ -2707,7 +2579,7 @@ void gridComplete(grid_t *grid)
 	    */
 	  }
 
-	if ( grid->isRotated  || grid->projtype == CDI_PROJ_RLL )
+	if ( grid->projtype == CDI_PROJ_RLL )
 	  {
 	    if ( grid->x.name[0] == 0 || grid->x.name[0] == 'x' ) gridDefXname(gridID, "rlon");
 	    if ( grid->y.name[0] == 0 || grid->y.name[0] == 'y' ) gridDefYname(gridID, "rlat");
@@ -2717,13 +2589,6 @@ void gridComplete(grid_t *grid)
             grid->y.stdname = xystdname_tab[grid_xystdname_grid_latlon][1];
 	    if ( grid->x.units[0] == 0 ) gridDefXunits(gridID, "degrees");
 	    if ( grid->y.units[0] == 0 ) gridDefYunits(gridID, "degrees");
-
-            if ( grid->isRotated )
-              {
-                gridDefXpole(gridID, grid->rll.xpole);
-                gridDefYpole(gridID, grid->rll.ypole);
-                gridDefAngle(gridID, grid->rll.angle);
-              }
 	  }
 
         switch (gridtype)
@@ -2868,10 +2733,6 @@ int gridGenerate(const grid_t *grid)
   gridptr->y.first = grid->y.first;
   gridptr->y.last = grid->y.last;
   gridptr->y.inc = grid->y.inc;
-  gridptr->isRotated = grid->isRotated;
-  gridptr->rll.xpole = grid->rll.xpole;
-  gridptr->rll.ypole = grid->rll.ypole;
-  gridptr->rll.angle = grid->rll.angle;
   if ( valdef_group1 && grid->area)
     gridDefArea(gridID, grid->area);
   gridptr->laea.a = grid->laea.a;
@@ -3652,13 +3513,6 @@ void gridPrintKernel(grid_t *gridptr, int index, int opt, FILE *fp)
                     "lat_2     = %.*g\n",
                     dig, a, dig, lon_0, dig, lat_0, dig, lat_1, dig, lat_2);
 	  }
-
-	if ( gridptr->isRotated )
-	  {
-	    if ( xsize > 0 ) fprintf(fp, "xnpole    = %.*g\n", dig, gridptr->rll.xpole);
-	    if ( ysize > 0 ) fprintf(fp, "ynpole    = %.*g\n", dig, gridptr->rll.ypole);
-	    if ( IS_NOT_EQUAL(gridptr->rll.angle, 0) ) fprintf(fp, "angle     = %.*g\n", dig, gridptr->rll.angle);
- 	  }
 
 	if ( xvals )
 	  {
@@ -4492,7 +4346,6 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
     gridP->lcc2.defined  =   (short)intBuffer[6];
     gridP->laea.defined  =   intBuffer[7];
     gridP->isCyclic      =   (short)intBuffer[8];
-    gridP->isRotated     =   (short)intBuffer[9];
     gridP->x.flag        =   (short)intBuffer[10];
     gridP->y.flag        =   (short)intBuffer[11];
     gridP->gme.nd        =   intBuffer[12];
@@ -4553,9 +4406,6 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
     gridP->laea.lon_0 = doubleBuffer[18];
     gridP->laea.lat_0 = doubleBuffer[19];
     gridP->laea.a = doubleBuffer[20];
-    gridP->rll.xpole = doubleBuffer[21];
-    gridP->rll.ypole = doubleBuffer[22];
-    gridP->rll.angle = doubleBuffer[23];
   }
 
   int irregular = gridP->type == GRID_UNSTRUCTURED
@@ -4695,7 +4545,6 @@ gridPack(void * voidP, void * packBuffer, int packBufferSize,
     intBuffer[6]  = gridP->lcc2.defined;
     intBuffer[7]  = gridP->laea.defined;
     intBuffer[8]  = gridP->isCyclic;
-    intBuffer[9]  = gridP->isRotated;
     intBuffer[10] = gridP->x.flag;
     intBuffer[11] = gridP->y.flag;
     intBuffer[12] = gridP->gme.nd;
@@ -4759,9 +4608,6 @@ gridPack(void * voidP, void * packBuffer, int packBufferSize,
     doubleBuffer[18] = gridP->laea.lon_0;
     doubleBuffer[19] = gridP->laea.lat_0;
     doubleBuffer[20] = gridP->laea.a;
-    doubleBuffer[21] = gridP->rll.xpole;
-    doubleBuffer[22] = gridP->rll.ypole;
-    doubleBuffer[23] = gridP->rll.angle;
 
     serializePack(doubleBuffer, gridNdouble, DATATYPE_FLT64,
                   packBuffer, packBufferSize, packBufferPos, context);

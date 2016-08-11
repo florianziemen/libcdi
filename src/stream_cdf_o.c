@@ -1903,34 +1903,6 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
 }
 
 static
-void cdfDefPole(stream_t *streamptr, int gridID)
-{
-  int ncvarid = UNDEFID;
-  static const char varname[] = "rotated_pole";
-  static const char mapname[] = "rotated_latitude_longitude";
-
-  int fileID  = streamptr->fileID;
-
-  double ypole = gridInqYpole(gridID);
-  double xpole = gridInqXpole(gridID);
-  double angle = gridInqAngle(gridID);
-
-  cdf_redef(fileID);
-
-  int ncerrcode = nc_def_var(fileID, varname, (nc_type) NC_CHAR, 0, NULL, &ncvarid);
-  if ( ncerrcode == NC_NOERR )
-    {
-      cdf_put_att_text(fileID, ncvarid, "grid_mapping_name", sizeof (mapname) - 1, mapname);
-      cdf_put_att_double(fileID, ncvarid, "grid_north_pole_latitude", NC_DOUBLE, 1, &ypole);
-      cdf_put_att_double(fileID, ncvarid, "grid_north_pole_longitude", NC_DOUBLE, 1, &xpole);
-      if ( IS_NOT_EQUAL(angle, 0) )
-        cdf_put_att_double(fileID, ncvarid, "north_pole_grid_longitude", NC_DOUBLE, 1, &angle);
-    }
-
-  cdf_enddef(fileID);
-}
-
-static
 void cdf_def_mapping(stream_t *streamptr, int gridID)
 {
   char mapping[CDI_MAX_NAME]; mapping[0] = 0;
@@ -2091,8 +2063,6 @@ void cdfDefGrid(stream_t *streamptr, int gridID, int gridindex)
 
           cdf_def_mapping(streamptr, gridID);
         }
-
-      if ( gridIsRotated(gridID) ) cdfDefPole(streamptr, gridID);
     }
   else if ( gridtype == GRID_CURVILINEAR )
     {
