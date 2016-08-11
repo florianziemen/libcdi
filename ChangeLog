@@ -2,6 +2,10 @@
 
 	* Removed obsolete CDI grid functions gridXXXXpole(), gridXXXYpole(), gridXXXAngle() and gridIsRotated()
 
+2016-08-11  Uwe Schulzweida
+
+	* Version 1.8.0rc1 released
+
 2016-08-01  Uwe Schulzweida
 
 	* grb, grb2 write: added support for projection CDI_PROJ_RLL
