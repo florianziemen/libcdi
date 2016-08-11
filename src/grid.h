@@ -4,6 +4,8 @@
 #include "cdi.h"
 #include <stdbool.h>
 
+#include "cdi_att.h"
+
 typedef unsigned char mask_t;
 
 typedef struct grid_t grid_t;
@@ -43,47 +45,77 @@ struct gridVirtTable
   const double *(*inqYBoundsPtr)(grid_t *gridptr);
 };
 
+struct gridaxis_t {
+  char    name[CDI_MAX_NAME];
+  char    longname[CDI_MAX_NAME];
+  char    units[CDI_MAX_NAME];
+  char    dimname[CDI_MAX_NAME];
+  const char *stdname;
+  int     size;                  // number of values
+  short   flag;                  // 0: undefined 1:vals 2:first+inc
+  double  first, last, inc;
+  double *vals;
+  double *bounds;
+};
+
+// Lambert Conformal Conic
+struct grid_lcc_t {
+  double  originLon;
+  double  originLat;
+  double  lonParY;
+  double  lat1;
+  double  lat2;
+  double  xinc;
+  double  yinc;
+  int     projflag;
+  int     scanflag;
+  short   defined;
+};
+
+// Lambert Conformal Conic 2
+struct grid_lcc2_t {
+  double  lon_0;
+  double  lat_0;
+  double  lat_1;
+  double  lat_2;
+  double  a;
+  short   defined;
+};
+
+// Lambert Azimuthal Equal Area
+struct grid_laea_t {
+  double  lon_0;
+  double  lat_0;
+  double  a;
+  short   defined;
+};
+
+// GME Grid
+struct grid_gme_t {
+  int     nd, ni, ni2, ni3;       /* parameter for GRID_GME         */
+};
+
+// Rotated LonLat
+struct grid_rll_t {
+  double  xpole, ypole, angle;    /* rotated north pole             */
+};
+
 struct grid_t {
   int     self;
   int     type;                   /* grid type                      */
   int     prec;                   /* grid precision                 */
   int     proj;                   /* grid projection                */
+  int     projtype;               /* grid projection type           */
   mask_t *mask;
   mask_t *mask_gme;
-  double *xvals;
-  double *yvals;
   double *area;
-  double *xbounds;
-  double *ybounds;
-  double  xfirst, yfirst;
-  double  xlast, ylast;
-  double  xinc, yinc;
-  double  lcc_originLon;          /* Lambert Conformal Conic        */
-  double  lcc_originLat;
-  double  lcc_lonParY;
-  double  lcc_lat1;
-  double  lcc_lat2;
-  double  lcc_xinc;
-  double  lcc_yinc;
-  int     lcc_projflag;
-  int     lcc_scanflag;
-  short   lcc_defined;
-  short   lcc2_defined;
-  int     laea_defined;
-  double  lcc2_lon_0;             /* Lambert Conformal Conic 2      */
-  double  lcc2_lat_0;
-  double  lcc2_lat_1;
-  double  lcc2_lat_2;
-  double  lcc2_a;
-  double  laea_lon_0;             /* Lambert Azimuthal Equal Area   */
-  double  laea_lat_0;
-  double  laea_a;
-  double  xpole, ypole, angle;    /* rotated north pole             */
+  struct grid_lcc_t  lcc;
+  struct grid_lcc2_t lcc2;
+  struct grid_laea_t laea;
+  struct grid_gme_t  gme;
+  struct grid_rll_t  rll;
   short   isCyclic;               /* TRUE for global cyclic grids   */
   short   isRotated;              /* TRUE for rotated grids         */
-  short   xdef;                   /* 0: undefined 1:xvals 2:x0+xinc */
-  short   ydef;                   /* 0: undefined 1:yvals 2:y0+yinc */
-  int     nd, ni, ni2, ni3;       /* parameter for GRID_GME         */
   int     number, position;       /* parameter for GRID_REFERENCE   */
   int     trunc;                  /* parameter for GRID_SPECTEAL    */
   int     nvertex;
@@ -92,36 +124,29 @@ struct grid_t {
   int    *rowlon;
   int     nrowlon;
   int     size;
-  int     xsize;                  /* number of values along X */
-  int     ysize;                  /* number of values along Y */
   int     np;                     /* number of parallels between a pole and the equator */
-  short   lcomplex;
-  short   hasdims;
-  const char *xstdname;
-  const char *ystdname;
-  char    xdimname[CDI_MAX_NAME];
-  char    ydimname[CDI_MAX_NAME];
+  bool    lcomplex;
+  bool    hasdims;
   char    vdimname[CDI_MAX_NAME];
-  char    xname[CDI_MAX_NAME];
-  char    yname[CDI_MAX_NAME];
-  char    xlongname[CDI_MAX_NAME];
-  char    ylongname[CDI_MAX_NAME];
-  char    xunits[CDI_MAX_NAME];
-  char    yunits[CDI_MAX_NAME];
+  char    mapname[CDI_MAX_NAME];
+  char    mapping[CDI_MAX_NAME];
   char   *name;
+  struct gridaxis_t x;
+  struct gridaxis_t y;
   const struct gridVirtTable *vtable;
-  void *extraData;
+  cdi_atts_t atts;
 };
 
 
 void grid_init(grid_t *gridptr);
-void
-cdiGridTypeInit(grid_t *gridptr, int gridtype, int size);
+void cdiGridTypeInit(grid_t *gridptr, int gridtype, int size);
 void grid_free(grid_t *gridptr);
 grid_t *gridID2Ptr(int gridID);
 extern const struct gridVirtTable cdiGridVtable;
 
 unsigned cdiGridCount(void);
+
+void gridVerifyProj(int gridID);
 
 const double *gridInqXvalsPtr(int gridID);
 const double *gridInqYvalsPtr(int gridID);
@@ -129,9 +154,6 @@ const double *gridInqYvalsPtr(int gridID);
 const double *gridInqXboundsPtr(int gridID);
 const double *gridInqYboundsPtr(int gridID);
 const double *gridInqAreaPtr(int gridID);
-
-const char *gridInqXnamePtr(int gridID);
-const char *gridInqYnamePtr(int gridID);
 
 const char *gridInqReferencePtr(int gridID);
 
@@ -144,13 +166,13 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
            int * unpackBufferPos, int originNamespace, void *context,
            int force_id);
 
-struct addIffNewRes
+struct addIfNewRes
 {
   int Id;
   int isNew;
 };
 
-struct addIffNewRes cdiVlistAddGridIfNew(int vlistID, grid_t *grid, int mode);
+struct addIfNewRes cdiVlistAddGridIfNew(int vlistID, grid_t *grid, int mode);
 
 #endif
 /*

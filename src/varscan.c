@@ -122,7 +122,7 @@ paramInitEntry(unsigned varID, int param)
   vartable[varID].tableID        = UNDEFID;
   vartable[varID].typeOfGeneratingProcess   = UNDEFID;
   vartable[varID].productDefinitionTemplate = UNDEFID;
-  vartable[varID].comptype       = COMPRESS_NONE;
+  vartable[varID].comptype       = CDI_COMPRESS_NONE;
   vartable[varID].complevel      = 1;
   vartable[varID].lmissval       = 0;
   vartable[varID].missval        = 0;
@@ -1054,7 +1054,7 @@ void varDefMissval(int varID, double missval)
 
 void varDefCompType(int varID, int comptype)
 {
-  if ( vartable[varID].comptype == COMPRESS_NONE )
+  if ( vartable[varID].comptype == CDI_COMPRESS_NONE )
     vartable[varID].comptype = comptype;
 }
 

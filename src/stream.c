@@ -330,7 +330,7 @@ long cdiInqTimeSize(int streamID)
 }
 
 static
-int cdiInqContents(stream_t * streamptr)
+int cdiInqContents(stream_t *streamptr)
 {
   int status = 0;
 
@@ -593,26 +593,25 @@ int streamOpenID(const char *filename, char filemode, int filetype, int resH)
   return streamID;
 }
 
-static int streamOpen(const char *filename, const char *filemode, int filetype)
+static
+int streamOpen(const char *filename, const char *filemode, int filetype)
 {
   if (!filemode || strlen(filemode) != 1) return CDI_EINVAL;
   return streamOpenID(filename, (char)tolower(filemode[0]),
                       filetype, CDI_UNDEFID);
 }
 
-static int streamOpenA(const char *filename, const char *filemode, int filetype)
+static
+int streamOpenA(const char *filename, const char *filemode, int filetype)
 {
-  int fileID = CDI_UNDEFID;
-  int streamID = CDI_ESYSTEM;
-  int status;
-  stream_t *streamptr = stream_new_entry(CDI_UNDEFID);
-  vlist_t *vlistptr;
-
   if ( CDI_Debug )
     Message("Open %s file (mode=%c); filename: %s", strfiletype(filetype), (int) *filemode, filename);
   if ( CDI_Debug ) printf("streamOpenA: %s\n", filename); // seg fault without this line on thunder/squall with "cdo cat x y"
 
   if ( ! filename || ! filemode || filetype < 0 ) return CDI_EINVAL;
+
+  stream_t *streamptr = stream_new_entry(CDI_UNDEFID);
+  int fileID = CDI_UNDEFID;
 
   {
     int (*streamOpenDelegate)(const char *filename, char filemode,
@@ -625,7 +624,7 @@ static int streamOpenA(const char *filename, const char *filemode, int filetype)
 
   if ( fileID == CDI_UNDEFID || fileID == CDI_ELIBNAVAIL || fileID == CDI_ESYSTEM ) return fileID;
 
-  streamID = streamptr->self;
+  int streamID = streamptr->self;
 
   streamptr->filemode = tolower(*filemode);
   streamptr->filename = strdupx(filename);
@@ -634,9 +633,9 @@ static int streamOpenA(const char *filename, const char *filemode, int filetype)
   streamptr->vlistID = vlistCreate();
   cdiVlistMakeInternal(streamptr->vlistID);
   /* cdiReadByteorder(streamID); */
-  status = cdiInqContents(streamptr);
+  int status = cdiInqContents(streamptr);
   if ( status < 0 ) return status;
-  vlistptr = vlist_to_pointer(streamptr->vlistID);
+  vlist_t *vlistptr = vlist_to_pointer(streamptr->vlistID);
   vlistptr->ntsteps = (int)cdiInqTimeSize(streamID);
   if(!strcmp(filemode, "r")) cdiVlistMakeImmutable(streamptr->vlistID);
 
@@ -655,6 +654,7 @@ static int streamOpenA(const char *filename, const char *filemode, int filetype)
     case FILETYPE_GRB2:
       {
         fileID = gribOpen(filename, filemode);
+        if ( fileID != CDI_UNDEFID ) gribContainersNew(streamptr);
 	break;
       }
 #endif
@@ -869,39 +869,40 @@ void streamDefaultValue ( stream_t * streamptr )
   streamptr->vlistID           = CDI_UNDEFID;
   streamptr->globalatts        = 0;
   streamptr->localatts         = 0;
-  streamptr->vct.ilev          = 0;
-  streamptr->vct.mlev          = 0;
-  streamptr->vct.ilevID        = CDI_UNDEFID;
-  streamptr->vct.mlevID        = CDI_UNDEFID;
   streamptr->unreduced         = cdiDataUnreduced;
   streamptr->sortname          = cdiSortName;
   streamptr->have_missval      = cdiHaveMissval;
-  streamptr->comptype          = COMPRESS_NONE;
+  streamptr->comptype          = CDI_COMPRESS_NONE;
   streamptr->complevel         = 0;
 
   basetimeInit(&streamptr->basetime);
 
+#ifdef HAVE_LIBNETCDF
   int i;
-  for ( i = 0; i < MAX_GRIDS_PS; i++ ) streamptr->xdimID[i]   = CDI_UNDEFID;
-  for ( i = 0; i < MAX_GRIDS_PS; i++ ) streamptr->ydimID[i]   = CDI_UNDEFID;
+  for ( i = 0; i < MAX_GRIDS_PS; i++ ) streamptr->xdimID[i]  = CDI_UNDEFID;
+  for ( i = 0; i < MAX_GRIDS_PS; i++ ) streamptr->ydimID[i]  = CDI_UNDEFID;
   for ( i = 0; i < MAX_ZAXES_PS; i++ ) streamptr->zaxisID[i]  = CDI_UNDEFID;
   for ( i = 0; i < MAX_ZAXES_PS; i++ ) streamptr->nczvarID[i] = CDI_UNDEFID;
-  for ( i = 0; i < MAX_GRIDS_PS; i++ ) streamptr->ncxvarID[i] = CDI_UNDEFID;
-  for ( i = 0; i < MAX_GRIDS_PS; i++ ) streamptr->ncyvarID[i] = CDI_UNDEFID;
-  for ( i = 0; i < MAX_GRIDS_PS; i++ ) streamptr->ncavarID[i] = CDI_UNDEFID;
+
+  streamptr->ncgrid            = NULL;
+
+  streamptr->vct.ilev          = 0;
+  streamptr->vct.mlev          = 0;
+  streamptr->vct.ilevID        = CDI_UNDEFID;
+  streamptr->vct.mlevID        = CDI_UNDEFID;
+#endif
 
   streamptr->gribContainers    = NULL;
 }
 
-
-static stream_t *stream_new_entry(int resH)
+static
+stream_t *stream_new_entry(int resH)
 {
-  stream_t *streamptr;
-
   cdiInitialize(); /* ***************** make MT version !!! */
 
-  streamptr = (stream_t *) Malloc(sizeof(stream_t));
+  stream_t *streamptr = (stream_t *) Malloc(sizeof(stream_t));
   streamDefaultValue ( streamptr );
+
   if (resH == CDI_UNDEFID)
     streamptr->self = reshPut(streamptr, &streamOps);
   else
@@ -914,8 +915,7 @@ static stream_t *stream_new_entry(int resH)
 }
 
 
-void
-cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDeleted)
+void cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDeleted)
 {
   int fileID   = streamptr->fileID;
   int filetype = streamptr->filetype;
@@ -968,6 +968,7 @@ cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDeleted)
       case FILETYPE_NC4C:
         {
           cdfClose(fileID);
+          if ( streamptr->ncgrid ) { Free(streamptr->ncgrid); streamptr->ncgrid = NULL; }
           break;
         }
 #endif
@@ -980,7 +981,8 @@ cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDeleted)
 }
 
 
-static void deallocate_sleveltable_t(sleveltable_t *entry)
+static
+void deallocate_sleveltable_t(sleveltable_t *entry)
 {
   if (entry->recordID) Free(entry->recordID);
   if (entry->lindex)   Free(entry->lindex);
@@ -1004,7 +1006,6 @@ The function @func{streamClose} closes an open dataset.
 */
 void streamClose(int streamID)
 {
-  int index;
   stream_t *streamptr = stream_to_pointer(streamID);
 
   if ( CDI_Debug )
@@ -1029,7 +1030,7 @@ void streamClose(int streamID)
   streamptr->filetype = 0;
   if ( streamptr->filename ) Free(streamptr->filename);
 
-  for ( index = 0; index < streamptr->nvars; index++ )
+  for ( int index = 0; index < streamptr->nvars; index++ )
     {
       sleveltable_t *pslev = streamptr->vars[index].recordTable;
       unsigned nsub = streamptr->vars[index].subtypeSize >= 0
@@ -1043,7 +1044,7 @@ void streamClose(int streamID)
   Free(streamptr->vars);
   streamptr->vars = NULL;
 
-  for ( index = 0; index < streamptr->ntsteps; ++index )
+  for ( int index = 0; index < streamptr->ntsteps; ++index )
     {
       if ( streamptr->tsteps[index].records )
         Free(streamptr->tsteps[index].records);
@@ -1070,13 +1071,12 @@ void streamClose(int streamID)
   stream_delete_entry(streamptr);
 }
 
-static void stream_delete_entry(stream_t *streamptr)
+static
+void stream_delete_entry(stream_t *streamptr)
 {
-  int idx;
-
   xassert ( streamptr );
 
-  idx = streamptr->self;
+  int idx = streamptr->self;
   Free( streamptr );
   reshRemove ( idx, &streamOps );
 
@@ -1232,6 +1232,7 @@ int streamDefTimestep(int streamID, int tsID)
     namespaceSwitchGet(NSSWITCH_STREAM_DEF_TIMESTEP_).func;
   return myStreamDefTimestep_(streamptr, tsID);
 }
+
 
 int streamInqCurTimestepID(int streamID)
 {
@@ -1474,8 +1475,7 @@ void streamDefVlist(int streamID, int vlistID)
 }
 
 /* the single image implementation of streamDefVlist */
-void
-cdiStreamDefVlist_(int streamID, int vlistID)
+void cdiStreamDefVlist_(int streamID, int vlistID)
 {
   stream_t *streamptr = stream_to_pointer(streamID);
 
@@ -1581,29 +1581,26 @@ int streamTxCode(void)
   return STREAM;
 }
 
-void
-cdiStreamSetupVlist(stream_t *streamptr, int vlistID)
+void cdiStreamSetupVlist(stream_t *streamptr, int vlistID)
 {
   void (*myStreamSetupVlist)(stream_t *streamptr, int vlistID)
-    = (void (*)(stream_t *, int))
-    namespaceSwitchGet(NSSWITCH_STREAM_SETUP_VLIST).func;
+    = (void (*)(stream_t *, int)) namespaceSwitchGet(NSSWITCH_STREAM_SETUP_VLIST).func;
   myStreamSetupVlist(streamptr, vlistID);
 }
 
-void
-cdiStreamSetupVlist_(stream_t *streamptr, int vlistID)
+
+void cdiStreamSetupVlist_(stream_t *streamptr, int vlistID)
 {
-  int nvars = vlistNvars(vlistID);
   streamptr->vlistID = vlistID;
-  for (int varID = 0; varID < nvars; varID++ )
+  int nvars = vlistNvars(vlistID);
+  for ( int varID = 0; varID < nvars; varID++ )
     {
       int gridID    = vlistInqVarGrid(vlistID, varID);
       int zaxisID   = vlistInqVarZaxis(vlistID, varID);
       int tilesetID = vlistInqVarSubtype(vlistID, varID);
       stream_new_var(streamptr, gridID, zaxisID, tilesetID);
       if ( streamptr->have_missval )
-        vlistDefVarMissval(vlistID, varID,
-                           vlistInqVarMissval(vlistID, varID));
+        vlistDefVarMissval(vlistID, varID, vlistInqVarMissval(vlistID, varID));
     }
 
   if (streamptr->filemode == 'w')
@@ -1616,8 +1613,7 @@ cdiStreamSetupVlist_(stream_t *streamptr, int vlistID)
       case FILETYPE_NC4C:
         {
           void (*myCdfDefVars)(stream_t *streamptr)
-            = (void (*)(stream_t *))
-            namespaceSwitchGet(NSSWITCH_CDF_STREAM_SETUP).func;
+            = (void (*)(stream_t *)) namespaceSwitchGet(NSSWITCH_CDF_STREAM_SETUP).func;
           myCdfDefVars(streamptr);
         }
         break;

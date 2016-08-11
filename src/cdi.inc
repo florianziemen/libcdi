@@ -1,10 +1,10 @@
 ! This file was automatically generated, don't edit!
 !
-! Fortran interface for CDI library version 1.7.2
+! Fortran interface for CDI library version 1.8.0
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   April 2016
+! Uwe Schulzweida, MPI-MET, Hamburg,   August 2016
 !
 
       INTEGER    CDI_MAX_NAME          
@@ -75,18 +75,18 @@
 !
 !  Compress types
 !
-      INTEGER    COMPRESS_NONE         
-      PARAMETER (COMPRESS_NONE          =  0)
-      INTEGER    COMPRESS_SZIP         
-      PARAMETER (COMPRESS_SZIP          =  1)
-      INTEGER    COMPRESS_GZIP         
-      PARAMETER (COMPRESS_GZIP          =  2)
-      INTEGER    COMPRESS_BZIP2        
-      PARAMETER (COMPRESS_BZIP2         =  3)
-      INTEGER    COMPRESS_ZIP          
-      PARAMETER (COMPRESS_ZIP           =  4)
-      INTEGER    COMPRESS_JPEG         
-      PARAMETER (COMPRESS_JPEG          =  5)
+      INTEGER    CDI_COMPRESS_NONE     
+      PARAMETER (CDI_COMPRESS_NONE      =  0)
+      INTEGER    CDI_COMPRESS_SZIP     
+      PARAMETER (CDI_COMPRESS_SZIP      =  1)
+      INTEGER    CDI_COMPRESS_GZIP     
+      PARAMETER (CDI_COMPRESS_GZIP      =  2)
+      INTEGER    CDI_COMPRESS_BZIP2    
+      PARAMETER (CDI_COMPRESS_BZIP2     =  3)
+      INTEGER    CDI_COMPRESS_ZIP      
+      PARAMETER (CDI_COMPRESS_ZIP       =  4)
+      INTEGER    CDI_COMPRESS_JPEG     
+      PARAMETER (CDI_COMPRESS_JPEG      =  5)
 !
 !  external data types
 !
@@ -194,12 +194,12 @@
 !
 !  Chunks
 !
-      INTEGER    CHUNK_AUTO            
-      PARAMETER (CHUNK_AUTO             =  1)
-      INTEGER    CHUNK_GRID            
-      PARAMETER (CHUNK_GRID             =  2)
-      INTEGER    CHUNK_LINES           
-      PARAMETER (CHUNK_LINES            =  3)
+      INTEGER    CDI_CHUNK_AUTO        
+      PARAMETER (CDI_CHUNK_AUTO         =  1)
+      INTEGER    CDI_CHUNK_GRID        
+      PARAMETER (CDI_CHUNK_GRID         =  2)
+      INTEGER    CDI_CHUNK_LINES       
+      PARAMETER (CDI_CHUNK_LINES        =  3)
 !
 !  GRID types
 !
@@ -233,6 +233,14 @@
       PARAMETER (GRID_SINUSOIDAL        = 14)
       INTEGER    GRID_PROJECTION       
       PARAMETER (GRID_PROJECTION        = 15)
+      INTEGER    CDI_PROJ_RLL          
+      PARAMETER (CDI_PROJ_RLL           = 21)
+      INTEGER    CDI_PROJ_LCC          
+      PARAMETER (CDI_PROJ_LCC           = 22)
+      INTEGER    CDI_PROJ_LAEA         
+      PARAMETER (CDI_PROJ_LAEA          = 23)
+      INTEGER    CDI_PROJ_SINU         
+      PARAMETER (CDI_PROJ_SINU          = 24)
 !
 !  ZAXIS types
 !
@@ -1340,78 +1348,78 @@
       EXTERNAL        vlistInqVarUnitsPtr
 
 !
-!  VLIST attributes
+!  CDI attributes
 !
-      INTEGER         vlistInqNatts
-!                                    (INTEGER         vlistID,
+      INTEGER         cdiInqNatts
+!                                    (INTEGER         cdiID,
 !                                     INTEGER         varID,
 !                                     INTEGER         nattsp)
-      EXTERNAL        vlistInqNatts
+      EXTERNAL        cdiInqNatts
 
-      INTEGER         vlistInqAtt
-!                                    (INTEGER         vlistID,
+      INTEGER         cdiInqAtt
+!                                    (INTEGER         cdiID,
 !                                     INTEGER         varID,
 !                                     INTEGER         attrnum,
 !                                     CHARACTER*(*)   name,
 !                                     INTEGER         typep,
 !                                     INTEGER         lenp)
-      EXTERNAL        vlistInqAtt
+      EXTERNAL        cdiInqAtt
 
-      INTEGER         vlistDelAtt
-!                                    (INTEGER         vlistID,
+      INTEGER         cdiDelAtt
+!                                    (INTEGER         cdiID,
 !                                     INTEGER         varID,
 !                                     CHARACTER*(*)   name)
-      EXTERNAL        vlistDelAtt
+      EXTERNAL        cdiDelAtt
 
-      INTEGER         vlistDefAttInt
-!                                    (INTEGER         vlistID,
+      INTEGER         cdiDefAttInt
+!                                    (INTEGER         cdiID,
 !                                     INTEGER         varID,
 !                                     CHARACTER*(*)   name,
 !                                     INTEGER         type,
 !                                     INTEGER         len,
 !                                     INTEGER         ip(*))
-      EXTERNAL        vlistDefAttInt
+      EXTERNAL        cdiDefAttInt
 
-      INTEGER         vlistDefAttFlt
-!                                    (INTEGER         vlistID,
+      INTEGER         cdiDefAttFlt
+!                                    (INTEGER         cdiID,
 !                                     INTEGER         varID,
 !                                     CHARACTER*(*)   name,
 !                                     INTEGER         type,
 !                                     INTEGER         len,
 !                                     DOUBLEPRECISION dp(*))
-      EXTERNAL        vlistDefAttFlt
+      EXTERNAL        cdiDefAttFlt
 
-      INTEGER         vlistDefAttTxt
-!                                    (INTEGER         vlistID,
+      INTEGER         cdiDefAttTxt
+!                                    (INTEGER         cdiID,
 !                                     INTEGER         varID,
 !                                     CHARACTER*(*)   name,
 !                                     INTEGER         len,
 !                                     CHARACTER*(*)   tp_cbuf)
-      EXTERNAL        vlistDefAttTxt
+      EXTERNAL        cdiDefAttTxt
 
-      INTEGER         vlistInqAttInt
-!                                    (INTEGER         vlistID,
+      INTEGER         cdiInqAttInt
+!                                    (INTEGER         cdiID,
 !                                     INTEGER         varID,
 !                                     CHARACTER*(*)   name,
 !                                     INTEGER         mlen,
 !                                     INTEGER         ip(*))
-      EXTERNAL        vlistInqAttInt
+      EXTERNAL        cdiInqAttInt
 
-      INTEGER         vlistInqAttFlt
-!                                    (INTEGER         vlistID,
+      INTEGER         cdiInqAttFlt
+!                                    (INTEGER         cdiID,
 !                                     INTEGER         varID,
 !                                     CHARACTER*(*)   name,
 !                                     INTEGER         mlen,
 !                                     DOUBLEPRECISION dp(*))
-      EXTERNAL        vlistInqAttFlt
+      EXTERNAL        cdiInqAttFlt
 
-      INTEGER         vlistInqAttTxt
-!                                    (INTEGER         vlistID,
+      INTEGER         cdiInqAttTxt
+!                                    (INTEGER         cdiID,
 !                                     INTEGER         varID,
 !                                     CHARACTER*(*)   name,
 !                                     INTEGER         mlen,
 !                                     CHARACTER*(*)   tp_cbuf)
-      EXTERNAL        vlistInqAttTxt
+      EXTERNAL        cdiInqAttTxt
 
 !
 !  GRID routines
@@ -1467,6 +1475,24 @@
       INTEGER         gridDuplicate
 !                                    (INTEGER         gridID)
       EXTERNAL        gridDuplicate
+
+!                     gridDefProj
+!                                    (INTEGER         gridID,
+!                                     INTEGER         projID)
+      EXTERNAL        gridDefProj
+
+      INTEGER         gridInqProj
+!                                    (INTEGER         gridID)
+      EXTERNAL        gridInqProj
+
+!                     gridDefProjType
+!                                    (INTEGER         gridID,
+!                                     INTEGER         projtype)
+      EXTERNAL        gridDefProjType
+
+      INTEGER         gridInqProjType
+!                                    (INTEGER         gridID)
+      EXTERNAL        gridInqProjType
 
       INTEGER         gridInqType
 !                                    (INTEGER         gridID)
@@ -1526,37 +1552,41 @@
 !
 !  CDI grid string key values
 !
-      INTEGER    CDI_GRID_XNAME        
-      PARAMETER (CDI_GRID_XNAME         = 901)
-      INTEGER    CDI_GRID_YNAME        
-      PARAMETER (CDI_GRID_YNAME         = 902)
-      INTEGER    CDI_GRID_XDIMNAME     
-      PARAMETER (CDI_GRID_XDIMNAME      = 903)
-      INTEGER    CDI_GRID_YDIMNAME     
-      PARAMETER (CDI_GRID_YDIMNAME      = 904)
-      INTEGER    CDI_GRID_VDIMNAME     
-      PARAMETER (CDI_GRID_VDIMNAME      = 905)
-      INTEGER    CDI_GRID_XLONGNAME    
-      PARAMETER (CDI_GRID_XLONGNAME     = 906)
-      INTEGER    CDI_GRID_YLONGNAME    
-      PARAMETER (CDI_GRID_YLONGNAME     = 907)
-      INTEGER    CDI_GRID_XUNITS       
-      PARAMETER (CDI_GRID_XUNITS        = 908)
-      INTEGER    CDI_GRID_YUNITS       
-      PARAMETER (CDI_GRID_YUNITS        = 909)
-      INTEGER         cdiGridDefString
+      INTEGER    CDI_KEY_XNAME         
+      PARAMETER (CDI_KEY_XNAME          = 901)
+      INTEGER    CDI_KEY_YNAME         
+      PARAMETER (CDI_KEY_YNAME          = 902)
+      INTEGER    CDI_KEY_XDIMNAME      
+      PARAMETER (CDI_KEY_XDIMNAME       = 903)
+      INTEGER    CDI_KEY_YDIMNAME      
+      PARAMETER (CDI_KEY_YDIMNAME       = 904)
+      INTEGER    CDI_KEY_VDIMNAME      
+      PARAMETER (CDI_KEY_VDIMNAME       = 905)
+      INTEGER    CDI_KEY_XLONGNAME     
+      PARAMETER (CDI_KEY_XLONGNAME      = 906)
+      INTEGER    CDI_KEY_YLONGNAME     
+      PARAMETER (CDI_KEY_YLONGNAME      = 907)
+      INTEGER    CDI_KEY_XUNITS        
+      PARAMETER (CDI_KEY_XUNITS         = 908)
+      INTEGER    CDI_KEY_YUNITS        
+      PARAMETER (CDI_KEY_YUNITS         = 909)
+      INTEGER    CDI_KEY_MAPNAME       
+      PARAMETER (CDI_KEY_MAPNAME        = 920)
+      INTEGER    CDI_KEY_MAPPING       
+      PARAMETER (CDI_KEY_MAPPING        = 921)
+      INTEGER         cdiGridDefKeyStr
 !                                    (INTEGER         gridID,
 !                                     INTEGER         key,
 !                                     INTEGER         size,
 !                                     CHARACTER*(*)   mesg)
-      EXTERNAL        cdiGridDefString
+      EXTERNAL        cdiGridDefKeyStr
 
-      INTEGER         cdiGridInqString
+      INTEGER         cdiGridInqKeyStr
 !                                    (INTEGER         gridID,
 !                                     INTEGER         key,
 !                                     INTEGER         size,
 !                                     CHARACTER*(*)   mesg)
-      EXTERNAL        cdiGridInqString
+      EXTERNAL        cdiGridInqKeyStr
 
 !                     gridDefXname
 !                                    (INTEGER         gridID,
@@ -1662,6 +1692,20 @@
       INTEGER         gridIsRotated
 !                                    (INTEGER         gridID)
       EXTERNAL        gridIsRotated
+
+!                     gridInqProjParamRLL
+!                                    (INTEGER         gridID,
+!                                     DOUBLEPRECISION xpole,
+!                                     DOUBLEPRECISION ypole,
+!                                     DOUBLEPRECISION angle)
+      EXTERNAL        gridInqProjParamRLL
+
+!                     gridDefProjParamRLL
+!                                    (INTEGER         gridID,
+!                                     DOUBLEPRECISION xpole,
+!                                     DOUBLEPRECISION ypole,
+!                                     DOUBLEPRECISION angle)
+      EXTERNAL        gridDefProjParamRLL
 
 !                     gridDefXpole
 !                                    (INTEGER         gridID,

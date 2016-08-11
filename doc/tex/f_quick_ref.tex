@@ -22,6 +22,85 @@ Clear the list of additional GRIB keys..
 Register an additional GRIB key which is read when file is opened..
 
 
+\section*{\tt \htmlref{cdiDefAttFlt}{cdiDefAttFlt}}
+
+\begin{verbatim}
+    INTEGER FUNCTION cdiDefAttFlt (INTEGER cdiID, INTEGER varID, CHARACTER*(*) name,
+                                   INTEGER type, INTEGER len, DOUBLEPRECISION dp(*))
+\end{verbatim}
+
+Define a floating point attribute.
+
+
+\section*{\tt \htmlref{cdiDefAttInt}{cdiDefAttInt}}
+
+\begin{verbatim}
+    INTEGER FUNCTION cdiDefAttInt (INTEGER cdiID, INTEGER varID, CHARACTER*(*) name,
+                                   INTEGER type, INTEGER len, INTEGER ip(*))
+\end{verbatim}
+
+Define an integer attribute.
+
+
+\section*{\tt \htmlref{cdiDefAttTxt}{cdiDefAttTxt}}
+
+\begin{verbatim}
+    INTEGER FUNCTION cdiDefAttTxt (INTEGER cdiID, INTEGER varID, CHARACTER*(*) name,
+                                   INTEGER len, CHARACTER*(*) tp_cbuf)
+\end{verbatim}
+
+Define a text attribute.
+
+
+\section*{\tt \htmlref{cdiInqAtt}{cdiInqAtt}}
+
+\begin{verbatim}
+    INTEGER FUNCTION cdiInqAtt (INTEGER cdiID, INTEGER varID, INTEGER attrnum,
+                                CHARACTER*(*) name, INTEGER typep, INTEGER lenp)
+\end{verbatim}
+
+Get information about an attribute.
+
+
+\section*{\tt \htmlref{cdiInqAttFlt}{cdiInqAttFlt}}
+
+\begin{verbatim}
+    INTEGER FUNCTION cdiInqAttFlt (INTEGER cdiID, INTEGER varID, CHARACTER*(*) name,
+                                   INTEGER mlen, DOUBLEPRECISION dp(*))
+\end{verbatim}
+
+Get the value(s) of a floating point attribute.
+
+
+\section*{\tt \htmlref{cdiInqAttInt}{cdiInqAttInt}}
+
+\begin{verbatim}
+    INTEGER FUNCTION cdiInqAttInt (INTEGER cdiID, INTEGER varID, CHARACTER*(*) name,
+                                   INTEGER mlen, INTEGER ip(*))
+\end{verbatim}
+
+Get the value(s) of an integer attribute.
+
+
+\section*{\tt \htmlref{cdiInqAttTxt}{cdiInqAttTxt}}
+
+\begin{verbatim}
+    INTEGER FUNCTION cdiInqAttTxt (INTEGER cdiID, INTEGER varID, CHARACTER*(*) name,
+                                   INTEGER mlen, CHARACTER*(*) tp_cbuf)
+\end{verbatim}
+
+Get the value(s) of a text attribute.
+
+
+\section*{\tt \htmlref{cdiInqNatts}{cdiInqNatts}}
+
+\begin{verbatim}
+    INTEGER FUNCTION cdiInqNatts (INTEGER cdiID, INTEGER varID, INTEGER nattsp)
+\end{verbatim}
+
+Get number of attributes assigned to this variable.
+
+
 \section*{\tt \htmlref{gridCreate}{gridCreate}}
 
 \begin{verbatim}
@@ -74,6 +153,24 @@ Define the position of grid in the reference file.
 \end{verbatim}
 
 Define the precision of a Grid.
+
+
+\section*{\tt \htmlref{gridDefProj}{gridDefProj}}
+
+\begin{verbatim}
+    SUBROUTINE gridDefProj (INTEGER gridID, INTEGER projID)
+\end{verbatim}
+
+Define the projection ID of a Grid.
+
+
+\section*{\tt \htmlref{gridDefProjType}{gridDefProjType}}
+
+\begin{verbatim}
+    SUBROUTINE gridDefProjType (INTEGER gridID, INTEGER projtype)
+\end{verbatim}
+
+Define the projection type.
 
 
 \section*{\tt \htmlref{gridDefReference}{gridDefReference}}
@@ -263,6 +360,24 @@ Get the position of grid in the reference file.
 \end{verbatim}
 
 Get the precision of a Grid.
+
+
+\section*{\tt \htmlref{gridInqProj}{gridInqProj}}
+
+\begin{verbatim}
+    INTEGER FUNCTION gridInqProj (INTEGER gridID)
+\end{verbatim}
+
+Get the projection ID of a Grid.
+
+
+\section*{\tt \htmlref{gridInqProjType}{gridInqProjType}}
+
+\begin{verbatim}
+    INTEGER FUNCTION gridInqProjType (INTEGER gridID)
+\end{verbatim}
+
+Get the projection type.
 
 
 \section*{\tt \htmlref{gridInqReference}{gridInqReference}}
@@ -892,39 +1007,6 @@ Safe and convenient version of vlistInqVarName.
 Create a variable list.
 
 
-\section*{\tt \htmlref{vlistDefAttFlt}{vlistDefAttFlt}}
-
-\begin{verbatim}
-    INTEGER FUNCTION vlistDefAttFlt (INTEGER vlistID, INTEGER varID,
-                                     CHARACTER*(*) name, INTEGER type, INTEGER len,
-                                     DOUBLEPRECISION dp(*))
-\end{verbatim}
-
-Define a floating point attribute.
-
-
-\section*{\tt \htmlref{vlistDefAttInt}{vlistDefAttInt}}
-
-\begin{verbatim}
-    INTEGER FUNCTION vlistDefAttInt (INTEGER vlistID, INTEGER varID,
-                                     CHARACTER*(*) name, INTEGER type, INTEGER len,
-                                     INTEGER ip(*))
-\end{verbatim}
-
-Define an integer attribute.
-
-
-\section*{\tt \htmlref{vlistDefAttTxt}{vlistDefAttTxt}}
-
-\begin{verbatim}
-    INTEGER FUNCTION vlistDefAttTxt (INTEGER vlistID, INTEGER varID,
-                                     CHARACTER*(*) name, INTEGER len,
-                                     CHARACTER*(*) tp_cbuf)
-\end{verbatim}
-
-Define a text attribute.
-
-
 \section*{\tt \htmlref{vlistDefTaxis}{vlistDefTaxis}}
 
 \begin{verbatim}
@@ -1085,57 +1167,6 @@ Duplicate a variable list.
 \end{verbatim}
 
 returns 1 if meta-data key was read, 0 otherwise..
-
-
-\section*{\tt \htmlref{vlistInqAtt}{vlistInqAtt}}
-
-\begin{verbatim}
-    INTEGER FUNCTION vlistInqAtt (INTEGER vlistID, INTEGER varID, INTEGER attrnum,
-                                  CHARACTER*(*) name, INTEGER typep, INTEGER lenp)
-\end{verbatim}
-
-Get information about an attribute.
-
-
-\section*{\tt \htmlref{vlistInqAttFlt}{vlistInqAttFlt}}
-
-\begin{verbatim}
-    INTEGER FUNCTION vlistInqAttFlt (INTEGER vlistID, INTEGER varID,
-                                     CHARACTER*(*) name, INTEGER mlen,
-                                     DOUBLEPRECISION dp(*))
-\end{verbatim}
-
-Get the value(s) of a floating point attribute.
-
-
-\section*{\tt \htmlref{vlistInqAttInt}{vlistInqAttInt}}
-
-\begin{verbatim}
-    INTEGER FUNCTION vlistInqAttInt (INTEGER vlistID, INTEGER varID,
-                                     CHARACTER*(*) name, INTEGER mlen, INTEGER ip(*))
-\end{verbatim}
-
-Get the value(s) of an integer attribute.
-
-
-\section*{\tt \htmlref{vlistInqAttTxt}{vlistInqAttTxt}}
-
-\begin{verbatim}
-    INTEGER FUNCTION vlistInqAttTxt (INTEGER vlistID, INTEGER varID,
-                                     CHARACTER*(*) name, INTEGER mlen,
-                                     CHARACTER*(*) tp_cbuf)
-\end{verbatim}
-
-Get the value(s) of a text attribute.
-
-
-\section*{\tt \htmlref{vlistInqNatts}{vlistInqNatts}}
-
-\begin{verbatim}
-    INTEGER FUNCTION vlistInqNatts (INTEGER vlistID, INTEGER varID, INTEGER nattsp)
-\end{verbatim}
-
-Get number of variable attributes assigned to this variable.
 
 
 \section*{\tt \htmlref{vlistInqTaxis}{vlistInqTaxis}}

@@ -1,5 +1,5 @@
 #ifdef HAVE_CONFIG_H
-#  include "config.h"
+#include "config.h"
 #endif
 
 #include <assert.h>
@@ -12,9 +12,12 @@
 #include "cdi.h"
 #include "cdi_int.h"
 #include "vlist.h"
-#include "vlist_att.h"
+#include "cdi_att.h"
 #include "error.h"
 #include "serialize.h"
+#include "grid.h"
+#include "resource_unpack.h"
+
 
 static
 cdi_atts_t *get_attsp(vlist_t *vlistptr, int varID)
@@ -31,7 +34,7 @@ cdi_atts_t *get_attsp(vlist_t *vlistptr, int varID)
 	attsp = &(vlistptr->vars[varID].atts);
     }
 
-  return (attsp);
+  return attsp;
 }
 
 static
@@ -49,27 +52,24 @@ cdi_att_t *find_att(cdi_atts_t *attsp, const char *name)
     {
       cdi_att_t *attp = atts + attid;
       if ( attp->namesz == slen && memcmp(attp->name, name, slen) == 0 )
-        return (attp); /* Normal return */
+        return attp; /* Normal return */
     }
 
-  return (NULL);
+  return NULL;
 }
 
 static
 cdi_att_t *new_att(cdi_atts_t *attsp, const char *name)
 {
-  cdi_att_t *attp;
-  size_t slen;
-
   xassert(attsp != NULL);
   xassert(name  != NULL);
 
-  if ( attsp->nelems == attsp->nalloc ) return (NULL);
+  if ( attsp->nelems == attsp->nalloc ) return NULL;
 
-  attp = &(attsp->value[attsp->nelems]);
+  cdi_att_t *attp = &(attsp->value[attsp->nelems]);
   attsp->nelems++;
 
-  slen = strlen(name);
+  size_t slen = strlen(name);
   if ( slen > CDI_MAX_NAME ) slen = CDI_MAX_NAME;
 
   attp->name = (char *) Malloc(slen+1);
@@ -77,7 +77,7 @@ cdi_att_t *new_att(cdi_atts_t *attsp, const char *name)
   attp->namesz = slen;
   attp->xvalue = NULL;
 
-  return (attp);
+  return attp;
 }
 
 static
@@ -97,44 +97,59 @@ void fill_att(cdi_att_t *attp, int indtype, int exdtype, size_t nelems, size_t x
     }
 }
 
-/*
-@Function  vlistInqNatts
-@Title     Get number of variable attributes
+static
+cdi_atts_t *cdi_get_attsp(int objID, int varID)
+{
+  cdi_atts_t *attsp = NULL;
 
-@Prototype int vlistInqNatts(int vlistID, int varID, int *nattsp)
+  if ( varID == CDI_GLOBAL && reshGetTxCode(objID) == GRID )
+    {
+      grid_t *gridptr = gridID2Ptr(objID);
+      attsp = &gridptr->atts;
+    }
+  else
+    {
+      vlist_t *vlistptr = vlist_to_pointer(objID);
+      attsp = get_attsp(vlistptr, varID);
+    }
+
+  return attsp;
+}
+
+/*
+@Function  cdiInqNatts
+@Title     Get number of attributes
+
+@Prototype int cdiInqNatts(int cdiID, int varID, int *nattsp)
 @Parameter
-    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate} or @fref{streamInqVlist}.
+    @Item  cdiID    CDI ID, from a previous call to @fref{vlistCreate}, @fref{gridCreate} or @fref{streamInqVlist}.
     @Item  varID    Variable identifier, or @func{CDI_GLOBAL} for a global attribute.
-    @Item  nattsp   Pointer to location for returned number of variable attributes.
+    @Item  nattsp   Pointer to location for returned number of attributes.
 
 @Description
-The function @func{vlistInqNatts} gets the number of variable attributes assigned to this variable.
+The function @func{cdiInqNatts} gets the number of attributes assigned to this variable.
 
 @EndFunction
 */
-int vlistInqNatts(int vlistID, int varID, int *nattsp)
+int cdiInqNatts(int cdiID, int varID, int *nattsp)
 {
   int status = CDI_NOERR;
-  vlist_t *vlistptr;
-  cdi_atts_t *attsp;
 
-  vlistptr = vlist_to_pointer(vlistID);
-
-  attsp = get_attsp(vlistptr, varID);
+  cdi_atts_t *attsp = cdi_get_attsp(cdiID, varID);
   xassert(attsp != NULL);
 
   *nattsp = (int)attsp->nelems;
 
-  return (status);
+  return status;
 }
 
 /*
-@Function  vlistInqAtt
+@Function  cdiInqAtt
 @Title     Get information about an attribute
 
-@Prototype int vlistInqAtt(int vlistID, int varID, int attnum, char *name, int *typep, int *lenp)
+@Prototype int cdiInqAtt(int cdiID, int varID, int attnum, char *name, int *typep, int *lenp)
 @Parameter
-    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate} or @fref{streamInqVlist}.
+    @Item  cdiID    CDI ID, from a previous call to @fref{vlistCreate}, @fref{gridCreate} or @fref{streamInqVlist}.
     @Item  varID    Variable identifier, or @func{CDI_GLOBAL} for a global attribute.
     @Item  attnum   Attribute number (from 0 to natts-1).
     @Item  name     Pointer to the location for the returned attribute name. The caller must allocate space for the
@@ -144,22 +159,20 @@ int vlistInqNatts(int vlistID, int varID, int *nattsp)
     @Item  lenp     Pointer to location for returned attribute number.
 
 @Description
-The function @func{vlistInqAtt} gets information about an attribute.
+The function @func{cdiInqAtt} gets information about an attribute.
 
 @EndFunction
 */
-int vlistInqAtt(int vlistID, int varID, int attnum, char *name, int *typep, int *lenp)
+int cdiInqAtt(int cdiID, int varID, int attnum, char *name, int *typep, int *lenp)
 {
   int status = CDI_NOERR;
-  cdi_att_t *attp = NULL;
 
   xassert(name != NULL);
 
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-
-  cdi_atts_t *attsp = get_attsp(vlistptr, varID);
+  cdi_atts_t *attsp = cdi_get_attsp(cdiID, varID);
   xassert(attsp != NULL);
 
+  cdi_att_t *attp = NULL;
   if ( attnum >= 0 && attnum < (int)attsp->nelems )
     attp = &(attsp->value[attnum]);
 
@@ -177,102 +190,79 @@ int vlistInqAtt(int vlistID, int varID, int attnum, char *name, int *typep, int 
       status  = -1;
     }
 
-  return (status);
+  return status;
 }
 
 
-int vlistDelAtts(int vlistID, int varID)
+int cdiDelAtts(int cdiID, int varID)
 {
   int status = CDI_NOERR;
-  vlist_t *vlistptr;
-  cdi_att_t *attp = NULL;
-  cdi_atts_t *attsp;
-  int attid;
 
-  vlistptr = vlist_to_pointer(vlistID);
-
-  attsp = get_attsp(vlistptr, varID);
+  cdi_atts_t *attsp = cdi_get_attsp(cdiID, varID);
   xassert(attsp != NULL);
 
-  for ( attid = 0; attid < (int)attsp->nelems; attid++ )
+  for ( int attid = 0; attid < (int)attsp->nelems; attid++ )
     {
-      attp = &(attsp->value[attid]);
+      cdi_att_t *attp = &(attsp->value[attid]);
       if ( attp->name   ) Free(attp->name);
       if ( attp->xvalue ) Free(attp->xvalue);
     }
 
   attsp->nelems = 0;
 
-  return (status);
+  return status;
 }
 
 
-int vlistDelAtt(int vlistID, int varID, const char *name)
+int cdiDelAtt(int cdiID, int varID, const char *name)
 {
   int status = CDI_NOERR;
 
-  UNUSED(vlistID);
+  UNUSED(cdiID);
   UNUSED(varID);
   UNUSED(name);
 
-  fprintf(stderr, "vlistDelAtt not implemented!\n");
+  fprintf(stderr, "cdiDelAtt not implemented!\n");
 
-  return (status);
+  return status;
 }
 
 static
-int vlist_def_att(int indtype, int exdtype, int vlistID, int varID, const char *name, size_t len, size_t xsz, const void *xp)
+int cdi_def_att(int indtype, int exdtype, int cdiID, int varID, const char *name, size_t len, size_t xsz, const void *xp)
 {
   int status = CDI_NOERR;
-  vlist_t *vlistptr;
-  cdi_att_t *attp;
-  cdi_atts_t *attsp;
 
   if ( len != 0 && xp == NULL ) /* Null arg */
-    {
-      return (CDI_EINVAL);
-    }
+    return CDI_EINVAL;
 
-  vlistptr = vlist_to_pointer(vlistID);
-
-  attsp = get_attsp(vlistptr, varID);
+  cdi_atts_t *attsp = cdi_get_attsp(cdiID, varID);
   xassert(attsp != NULL);
 
-  attp = find_att(attsp, name);
-  if ( attp == NULL )
-    attp = new_att(attsp, name);
+  cdi_att_t *attp = find_att(attsp, name);
+  if ( attp == NULL ) attp = new_att(attsp, name);
 
-  if ( attp != NULL )
-    fill_att(attp, indtype, exdtype, len, xsz, xp);
+  if ( attp != NULL ) fill_att(attp, indtype, exdtype, len, xsz, xp);
 
-  return (status);
+  return status;
 }
 
 static
-int vlist_inq_att(int indtype, int vlistID, int varID, const char *name, size_t mxsz, void *xp)
+int cdi_inq_att(int indtype, int cdiID, int varID, const char *name, size_t mxsz, void *xp)
 {
   int status = CDI_NOERR;
-  vlist_t *vlistptr;
-  cdi_att_t *attp;
-  cdi_atts_t *attsp;
-  size_t xsz;
 
   if ( mxsz != 0 && xp == NULL ) /* Null arg */
-    {
-      return (CDI_EINVAL);
-    }
+    return CDI_EINVAL;
 
-  vlistptr = vlist_to_pointer(vlistID);
-
-  attsp = get_attsp(vlistptr, varID);
+  cdi_atts_t *attsp = cdi_get_attsp(cdiID, varID);
   xassert(attsp != NULL);
 
-  attp = find_att(attsp, name);
+  cdi_att_t *attp = find_att(attsp, name);
   if ( attp != NULL ) /* name in use */
     {
       if ( attp->indtype == indtype )
 	{
-	  xsz = attp->xsz;
+	  size_t xsz = attp->xsz;
 	  if ( mxsz < xsz ) xsz = mxsz;
 	  if ( xsz > 0 )
 	    memcpy(xp, attp->xvalue, xsz);
@@ -289,40 +279,34 @@ int vlist_inq_att(int indtype, int vlistID, int varID, const char *name, size_t 
       status = -1;
     }
 
-  return (status);
+  return status;
 }
 
 
-int vlistCopyVarAtts(int vlistID1, int varID_1, int vlistID2, int varID_2)
+int cdiCopyVarAtts(int cdiID1, int varID_1, int cdiID2, int varID_2)
 {
   int status = CDI_NOERR;
-  vlist_t *vlistptr1;
-  cdi_att_t *attp = NULL;
-  cdi_atts_t *attsp1;
-  int attid;
 
-  vlistptr1 = vlist_to_pointer(vlistID1);
-
-  attsp1 = get_attsp(vlistptr1, varID_1);
+  cdi_atts_t *attsp1 = cdi_get_attsp(cdiID1, varID_1);
   xassert(attsp1 != NULL);
 
-  for ( attid = 0; attid < (int)attsp1->nelems; attid++ )
+  for ( int attid = 0; attid < (int)attsp1->nelems; attid++ )
     {
-      attp = &(attsp1->value[attid]);
-      vlist_def_att(attp->indtype, attp->exdtype, vlistID2, varID_2, attp->name, attp->nelems, attp->xsz, attp->xvalue);
+      cdi_att_t *attp = &(attsp1->value[attid]);
+      cdi_def_att(attp->indtype, attp->exdtype, cdiID2, varID_2, attp->name, attp->nelems, attp->xsz, attp->xvalue);
     }
 
-  return (status);
+  return status;
 }
 
 /*
-@Function  vlistDefAttInt
+@Function  cdiDefAttInt
 @Title     Define an integer attribute
 
-@Prototype int vlistDefAttInt(int vlistID, int varID, const char *name, int type, int len, const int *ip)
+@Prototype int cdiDefAttInt(int cdiID, int varID, const char *name, int type, int len, const int *ip)
 
 @Parameter
-    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}.
+    @Item  cdiID    CDI ID, from a previous call to @fref{vlistCreate} or @fref{gridCreate}.
     @Item  varID    Variable identifier, or @func{CDI_GLOBAL} for a global attribute.
     @Item  name     Attribute name.
     @Item  type     External data type (@func{DATATYPE_INT16} or @func{DATATYPE_INT32}).
@@ -330,23 +314,23 @@ int vlistCopyVarAtts(int vlistID1, int varID_1, int vlistID2, int varID_2)
     @Item  ip       Pointer to one or more integer values.
 
 @Description
-The function @func{vlistDefAttInt} defines an integer attribute.
+The function @func{cdiDefAttInt} defines an integer attribute.
 
 @EndFunction
 */
-int vlistDefAttInt(int vlistID, int varID, const char *name, int type, int len, const int *ip)
+int cdiDefAttInt(int cdiID, int varID, const char *name, int type, int len, const int *ip)
 {
-  return vlist_def_att(DATATYPE_INT, type, vlistID, varID, name, (size_t)len, (size_t)len * sizeof (int), ip);
+  return cdi_def_att(DATATYPE_INT, type, cdiID, varID, name, (size_t)len, (size_t)len * sizeof(int), ip);
 }
 
 /*
-@Function  vlistDefAttFlt
+@Function  cdiDefAttFlt
 @Title     Define a floating point attribute
 
-@Prototype int vlistDefAttFlt(int vlistID, int varID, const char *name, int type, int len, const double *dp)
+@Prototype int cdiDefAttFlt(int cdiID, int varID, const char *name, int type, int len, const double *dp)
 
 @Parameter
-    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}.
+    @Item  cdiID    CDI ID, from a previous call to @fref{vlistCreate} or @fref{gridCreate}.
     @Item  varID    Variable identifier, or @func{CDI_GLOBAL} for a global attribute.
     @Item  name     Attribute name.
     @Item  type     External data type (@func{DATATYPE_FLT32} or @func{DATATYPE_FLT64}).
@@ -354,110 +338,110 @@ int vlistDefAttInt(int vlistID, int varID, const char *name, int type, int len, 
     @Item  dp       Pointer to one or more floating point values.
 
 @Description
-The function @func{vlistDefAttFlt} defines a floating point attribute.
+The function @func{cdiDefAttFlt} defines a floating point attribute.
 
 @EndFunction
 */
-int vlistDefAttFlt(int vlistID, int varID, const char *name, int type, int len, const double *dp)
+int cdiDefAttFlt(int cdiID, int varID, const char *name, int type, int len, const double *dp)
 {
-  return vlist_def_att(DATATYPE_FLT, type, vlistID, varID, name, (size_t)len, (size_t)len * sizeof (double), dp);
+  return cdi_def_att(DATATYPE_FLT, type, cdiID, varID, name, (size_t)len, (size_t)len * sizeof(double), dp);
 }
 
 /*
-@Function  vlistDefAttTxt
+@Function  cdiDefAttTxt
 @Title     Define a text attribute
 
-@Prototype int vlistDefAttTxt(int vlistID, int varID, const char *name, int len, const char *tp)
+@Prototype int cdiDefAttTxt(int cdiID, int varID, const char *name, int len, const char *tp)
 
 @Parameter
-    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}.
+    @Item  cdiID    CDI ID, from a previous call to @fref{vlistCreate} or @fref{gridCreate}.
     @Item  varID    Variable identifier, or @func{CDI_GLOBAL} for a global attribute.
     @Item  name     Attribute name.
     @Item  len      Number of values provided for the attribute.
     @Item  tp       Pointer to one or more character values.
 
 @Description
-The function @func{vlistDefAttTxt} defines a text attribute.
+The function @func{cdiDefAttTxt} defines a text attribute.
 
 @EndFunction
 */
-int vlistDefAttTxt(int vlistID, int varID, const char *name, int len, const char *tp)
+int cdiDefAttTxt(int cdiID, int varID, const char *name, int len, const char *tp)
 {
-  return vlist_def_att(DATATYPE_TXT, DATATYPE_TXT, vlistID, varID, name, (size_t)len, (size_t)len, tp);
+  return cdi_def_att(DATATYPE_TXT, DATATYPE_TXT, cdiID, varID, name, (size_t)len, (size_t)len, tp);
 }
 
 /*
-@Function  vlistInqAttInt
+@Function  cdiInqAttInt
 @Title     Get the value(s) of an integer attribute
 
-@Prototype int vlistInqAttInt(int vlistID, int varID, const char *name, int mlen, int *ip)
+@Prototype int cdiInqAttInt(int cdiID, int varID, const char *name, int mlen, int *ip)
 @Parameter
-    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate} or @fref{streamInqVlist}.
+    @Item  cdiID    CDI ID, from a previous call to @fref{vlistCreate}, @fref{gridCreate} or @fref{streamInqVlist}.
     @Item  varID    Variable identifier, or @func{CDI_GLOBAL} for a global attribute.
     @Item  name     Attribute name.
     @Item  mlen     Number of allocated values provided for the attribute.
     @Item  ip       Pointer location for returned integer attribute value(s).
 
 @Description
-The function @func{vlistInqAttInt} gets the values(s) of an integer attribute.
+The function @func{cdiInqAttInt} gets the values(s) of an integer attribute.
 
 @EndFunction
 */
-int vlistInqAttInt(int vlistID, int varID, const char *name, int mlen, int *ip)
+int cdiInqAttInt(int cdiID, int varID, const char *name, int mlen, int *ip)
 {
-  return vlist_inq_att(DATATYPE_INT, vlistID, varID, name, (size_t)mlen * sizeof (int), ip);
+  return cdi_inq_att(DATATYPE_INT, cdiID, varID, name, (size_t)mlen * sizeof(int), ip);
 }
 
 /*
-@Function  vlistInqAttFlt
+@Function  cdiInqAttFlt
 @Title     Get the value(s) of a floating point attribute
 
-@Prototype int vlistInqAttFlt(int vlistID, int varID, const char *name, int mlen, double *dp)
+@Prototype int cdiInqAttFlt(int cdiID, int varID, const char *name, int mlen, double *dp)
 @Parameter
-    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate} or @fref{streamInqVlist}.
+    @Item  cdiID    CDI ID, from a previous call to @fref{vlistCreate}, @fref{gridCreate} or @fref{streamInqVlist}.
     @Item  varID    Variable identifier, or @func{CDI_GLOBAL} for a global attribute.
     @Item  name     Attribute name.
     @Item  mlen     Number of allocated values provided for the attribute.
     @Item  dp       Pointer location for returned floating point attribute value(s).
 
 @Description
-The function @func{vlistInqAttFlt} gets the values(s) of a floating point attribute.
+The function @func{cdiInqAttFlt} gets the values(s) of a floating point attribute.
 
 @EndFunction
 */
-int vlistInqAttFlt(int vlistID, int varID, const char *name, int mlen, double *dp)
+int cdiInqAttFlt(int cdiID, int varID, const char *name, int mlen, double *dp)
 {
-  return vlist_inq_att(DATATYPE_FLT, vlistID, varID, name, (size_t)mlen * sizeof (double), dp);
+  return cdi_inq_att(DATATYPE_FLT, cdiID, varID, name, (size_t)mlen * sizeof(double), dp);
 }
 
 /*
-@Function  vlistInqAttTxt
+@Function  cdiInqAttTxt
 @Title     Get the value(s) of a text attribute
 
-@Prototype int vlistInqAttTxt(int vlistID, int varID, const char *name, int mlen, char *tp)
+@Prototype int cdiInqAttTxt(int cdiID, int varID, const char *name, int mlen, char *tp)
 @Parameter
-    @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate} or @fref{streamInqVlist}.
+    @Item  cdiID    CDI ID, from a previous call to @fref{vlistCreate}, @fref{gridCreate} or @fref{streamInqVlist}.
     @Item  varID    Variable identifier, or @func{CDI_GLOBAL} for a global attribute.
     @Item  name     Attribute name.
     @Item  mlen     Number of allocated values provided for the attribute.
     @Item  tp       Pointer location for returned text attribute value(s).
 
 @Description
-The function @func{vlistInqAttTxt} gets the values(s) of a text attribute.
+The function @func{cdiInqAttTxt} gets the values(s) of a text attribute.
 
 @EndFunction
 */
-int vlistInqAttTxt(int vlistID, int varID, const char *name, int mlen, char *tp)
+int cdiInqAttTxt(int cdiID, int varID, const char *name, int mlen, char *tp)
 {
-  return vlist_inq_att(DATATYPE_TXT, vlistID, varID, name, (size_t)mlen * sizeof (char), tp);
+  return cdi_inq_att(DATATYPE_TXT, cdiID, varID, name, (size_t)mlen * sizeof(char), tp);
 }
 
 enum {
-  vlist_att_nints = 4,          /* namesz, exdtype, indtype, nelems */
+  cdi_att_nints = 4,          /* namesz, exdtype, indtype, nelems */
 };
 
-static inline int
-vlistAttTypeLookup(cdi_att_t *attp)
+static inline
+int cdiAttTypeLookup(cdi_att_t *attp)
 {
   int type;
   switch (attp->indtype)
@@ -477,8 +461,7 @@ vlistAttTypeLookup(cdi_att_t *attp)
 }
 
 
-int vlist_att_compare(vlist_t *a, int varIDA, vlist_t *b, int varIDB,
-                      int attnum)
+int cdi_att_compare(vlist_t *a, int varIDA, vlist_t *b, int varIDB, int attnum)
 {
   cdi_atts_t *attspa = get_attsp(a, varIDA),
     *attspb = get_attsp(b, varIDB);
@@ -502,8 +485,8 @@ int vlist_att_compare(vlist_t *a, int varIDA, vlist_t *b, int varIDB,
 }
 
 
-static int
-vlistAttGetSize(vlist_t *vlistptr, int varID, int attnum, void *context)
+static
+int cdiAttGetSize(vlist_t *vlistptr, int varID, int attnum, void *context)
 {
   cdi_atts_t *attsp;
   cdi_att_t *attp;
@@ -511,30 +494,31 @@ vlistAttGetSize(vlist_t *vlistptr, int varID, int attnum, void *context)
   xassert(attsp = get_attsp(vlistptr, varID));
   xassert(attnum >= 0 && attnum < (int)attsp->nelems);
   attp = &(attsp->value[attnum]);
-  int txsize = serializeGetSize(vlist_att_nints, DATATYPE_INT, context)
+  int txsize = serializeGetSize(cdi_att_nints, DATATYPE_INT, context)
     + serializeGetSize((int)attp->namesz, DATATYPE_TXT, context);
-  txsize += serializeGetSize((int)attp->nelems, vlistAttTypeLookup(attp), context);
+  txsize += serializeGetSize((int)attp->nelems, cdiAttTypeLookup(attp), context);
   return txsize;
 }
 
-int
-vlistAttsGetSize(vlist_t *p, int varID, void *context)
+
+int cdiAttsGetSize(void *vp, int varID, void *context)
 {
+  vlist_t *p = (vlist_t*) vp;
   cdi_atts_t *attsp = get_attsp(p, varID);
   int txsize = serializeGetSize(1, DATATYPE_INT, context);
   size_t numAtts = attsp->nelems;
   for (size_t i = 0; i < numAtts; ++i)
-    txsize += vlistAttGetSize(p, varID, (int)i, context);
+    txsize += cdiAttGetSize(p, varID, (int)i, context);
   return txsize;
 }
 
-static void
-vlistAttPack(vlist_t *vlistptr, int varID, int attnum,
-             void * buf, int size, int *position, void *context)
+static
+void cdiAttPack(vlist_t *vlistptr, int varID, int attnum,
+                void *buf, int size, int *position, void *context)
 {
   cdi_atts_t *attsp;
   cdi_att_t *attp;
-  int tempbuf[vlist_att_nints];
+  int tempbuf[cdi_att_nints];
 
   xassert(attsp = get_attsp(vlistptr, varID));
   xassert(attnum >= 0 && attnum < (int)attsp->nelems);
@@ -543,33 +527,32 @@ vlistAttPack(vlist_t *vlistptr, int varID, int attnum,
   tempbuf[1] = attp->exdtype;
   tempbuf[2] = attp->indtype;
   tempbuf[3] = (int)attp->nelems;
-  serializePack(tempbuf, vlist_att_nints, DATATYPE_INT, buf, size, position, context);
+  serializePack(tempbuf, cdi_att_nints, DATATYPE_INT, buf, size, position, context);
   serializePack(attp->name, (int)attp->namesz, DATATYPE_TXT, buf, size, position, context);
-  serializePack(attp->xvalue, (int)attp->nelems, vlistAttTypeLookup(attp),
+  serializePack(attp->xvalue, (int)attp->nelems, cdiAttTypeLookup(attp),
                 buf, size, position, context);
 }
 
-void
-vlistAttsPack(vlist_t *p, int varID,
-              void * buf, int size, int *position, void *context)
+
+void cdiAttsPack(void *vp, int varID, void *buf, int size, int *position, void *context)
 {
+  vlist_t *p = (vlist_t*) vp;
   cdi_atts_t *attsp = get_attsp(p, varID);
   size_t numAtts = attsp->nelems;
   int numAttsI = (int)numAtts;
   xassert(numAtts <= INT_MAX);
   serializePack(&numAttsI, 1, DATATYPE_INT, buf, size, position, context);
   for (size_t i = 0; i < numAtts; ++i)
-    vlistAttPack(p, varID, (int)i, buf, size, position, context);
+    cdiAttPack(p, varID, (int)i, buf, size, position, context);
 }
 
-static void
-vlistAttUnpack(int vlistID, int varID,
-               void * buf, int size, int *position, void *context)
+static
+void cdiAttUnpack(int cdiID, int varID, void *buf, int size, int *position, void *context)
 {
-  int tempbuf[vlist_att_nints];
+  int tempbuf[cdi_att_nints];
 
   serializeUnpack(buf, size, position,
-                  tempbuf, vlist_att_nints, DATATYPE_INT, context);
+                  tempbuf, cdi_att_nints, DATATYPE_INT, context);
   char *attName = (char *) Malloc((size_t)tempbuf[0] + 1);
   serializeUnpack(buf, size, position, attName, tempbuf[0], DATATYPE_TXT, context);
   attName[tempbuf[0]] = '\0';
@@ -595,22 +578,19 @@ vlistAttUnpack(int vlistID, int varID,
   }
   void *attData = (void *) Malloc(elemSize * (size_t)tempbuf[3]);
   serializeUnpack(buf, size, position, attData, tempbuf[3], attVDt, context);
-  vlist_def_att(tempbuf[2], tempbuf[1], vlistID, varID, attName,
-                (size_t)tempbuf[3], (size_t)tempbuf[3] * elemSize, attData);
+  cdi_def_att(tempbuf[2], tempbuf[1], cdiID, varID, attName,
+              (size_t)tempbuf[3], (size_t)tempbuf[3] * elemSize, attData);
   Free(attName);
   Free(attData);
 }
 
-void
-vlistAttsUnpack(int vlistID, int varID,
-                void * buf, int size, int *position, void *context)
+
+void cdiAttsUnpack(int cdiID, int varID, void *buf, int size, int *position, void *context)
 {
-  int numAtts, i;
+  int numAtts;
   serializeUnpack(buf, size, position, &numAtts, 1, DATATYPE_INT, context);
-  for (i = 0; i < numAtts; ++i)
-  {
-    vlistAttUnpack(vlistID, varID, buf, size, position, context);
-  }
+  for ( int i = 0; i < numAtts; ++i )
+    cdiAttUnpack(cdiID, varID, buf, size, position, context);
 }
 
 /*

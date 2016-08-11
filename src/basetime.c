@@ -3,6 +3,7 @@
 #endif
 
 #include <stdio.h>
+#include <stdbool.h>
 
 #include "error.h"
 #include "cdi.h"
@@ -20,7 +21,7 @@ void basetimeInit(basetime_t *basetime)
   basetime->ncdimid       = UNDEFID;
   basetime->ncvarboundsid = UNDEFID;
   basetime->leadtimeid    = UNDEFID;
-  basetime->lwrf          = 0;
+  basetime->lwrf          = false;
   basetime->timevar_cache = NULL;
 }
 /*

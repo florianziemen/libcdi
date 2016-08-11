@@ -36,17 +36,21 @@ int cgribexGetGridType(int *isec2)
 
   switch (ISEC2_GridType)
     {
-    case  GRIB1_GTYPE_LATLON:     { if ( ISEC2_Reduced )      break; }
-    case  GRIB1_GTYPE_LATLON_ROT: { gridtype = GRID_LONLAT;   break; }
-    case  GRIB1_GTYPE_LCC:        { gridtype = GRID_LCC;      break; }
+    case  GRIB1_GTYPE_LATLON:     { gridtype = GRID_LONLAT;     break; }
+#ifdef TEST_PROJECTION
+    case  GRIB1_GTYPE_LATLON_ROT: { gridtype = GRID_PROJECTION; break; }
+#else
+    case  GRIB1_GTYPE_LATLON_ROT: { gridtype = GRID_LONLAT;     break; }
+#endif
+    case  GRIB1_GTYPE_LCC:        { gridtype = GRID_LCC;        break; }
     case  GRIB1_GTYPE_GAUSSIAN:   { if ( ISEC2_Reduced )
 	                              gridtype = GRID_GAUSSIAN_REDUCED;
                          	    else
 				      gridtype = GRID_GAUSSIAN;
           	                    break;
                                   }
-    case  GRIB1_GTYPE_SPECTRAL:   { gridtype = GRID_SPECTRAL; break; }
-    case  GRIB1_GTYPE_GME:        { gridtype = GRID_GME;      break; }
+    case  GRIB1_GTYPE_SPECTRAL:   { gridtype = GRID_SPECTRAL;   break; }
+    case  GRIB1_GTYPE_GME:        { gridtype = GRID_GME;        break; }
     }
 
   return gridtype;
@@ -55,9 +59,7 @@ int cgribexGetGridType(int *isec2)
 static
 bool cgribexGetIsRotated(int *isec2)
 {
-  bool isRotated = (ISEC2_GridType == GRIB1_GTYPE_LATLON_ROT) ? true : false;
-
-  return isRotated;
+  return (ISEC2_GridType == GRIB1_GTYPE_LATLON_ROT);
 }
 
 static
@@ -147,6 +149,7 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, double *fsec2, int *isec4, 
 {
   bool compyinc = true;
   int gridtype = cgribexGetGridType(isec2);
+  int projtype = (gridtype == GRID_PROJECTION && cgribexGetIsRotated(isec2)) ? CDI_PROJ_RLL : CDI_UNDEFID;
 
   if ( streamptr->unreduced && gridtype == GRID_GAUSSIAN_REDUCED && iret != -801 )
     {
@@ -161,192 +164,178 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, double *fsec2, int *isec4, 
 
   grid_init(grid);
   cdiGridTypeInit(grid, gridtype, 0);
-  switch (gridtype)
+
+  if ( gridtype == GRID_LONLAT || gridtype == GRID_GAUSSIAN || projtype == CDI_PROJ_RLL )
     {
-    case GRID_LONLAT:
-    case GRID_GAUSSIAN:
+      if ( ISEC4_NumValues != ISEC2_NumLon*ISEC2_NumLat )
+        Error("numberOfPoints (%d) and gridSize (%d) differ!", ISEC4_NumValues, ISEC2_NumLon*ISEC2_NumLat);
+      grid->size  = ISEC4_NumValues;
+      grid->x.size = ISEC2_NumLon;
+      grid->y.size = ISEC2_NumLat;
+      if ( gridtype == GRID_GAUSSIAN ) grid->np = ISEC2_NumPar;
+      grid->x.inc  = 0;
+      grid->y.inc  = 0;
+      grid->x.flag = 0;
+      /* if ( ISEC2_FirstLon != 0 || ISEC2_LastLon != 0 ) */
       {
-	if ( ISEC4_NumValues != ISEC2_NumLon*ISEC2_NumLat )
-	  Error("numberOfPoints (%d) and gridSize (%d) differ!", ISEC4_NumValues, ISEC2_NumLon*ISEC2_NumLat);
-	grid->size  = ISEC4_NumValues;
-	grid->xsize = ISEC2_NumLon;
-	grid->ysize = ISEC2_NumLat;
-        if ( gridtype == GRID_GAUSSIAN ) grid->np = ISEC2_NumPar;
-	grid->xinc  = 0;
-	grid->yinc  = 0;
-	grid->xdef  = 0;
-	/* if ( ISEC2_FirstLon != 0 || ISEC2_LastLon != 0 ) */
-	  {
-	    if ( grid->xsize > 1 )
-	      {
-                bool recompinc = true;
+        if ( grid->x.size > 1 )
+          {
+            bool recompinc = true;
 
-                if ( ISEC2_LastLon < ISEC2_FirstLon && ISEC2_LastLon < 0 ) ISEC2_LastLon += 360000;
+            if ( ISEC2_LastLon < ISEC2_FirstLon && ISEC2_LastLon < 0 ) ISEC2_LastLon += 360000;
 
-		if ( ISEC2_ResFlag && ISEC2_LonIncr > 0 )
+            if ( ISEC2_ResFlag && ISEC2_LonIncr > 0 )
+              {
+                if ( abs(ISEC2_LastLon - (ISEC2_FirstLon+ISEC2_LonIncr*(grid->x.size-1))) <= 2 )
                   {
-                    if ( abs(ISEC2_LastLon - (ISEC2_FirstLon+ISEC2_LonIncr*(grid->xsize-1))) <= 2 )
-                      {
-                        recompinc = false;
-                        grid->xinc = ISEC2_LonIncr * 0.001;
-                      }
+                    recompinc = false;
+                    grid->x.inc = ISEC2_LonIncr * 0.001;
                   }
+              }
 
-		/* recompute xinc if necessary */
-                if ( recompinc ) grid->xinc = (ISEC2_LastLon - ISEC2_FirstLon) * 0.001 / (grid->xsize-1);
+            /* recompute xinc if necessary */
+            if ( recompinc ) grid->x.inc = (ISEC2_LastLon - ISEC2_FirstLon) * 0.001 / (grid->x.size-1);
 
-		/* correct xinc if necessary */
-		if ( ISEC2_FirstLon == 0 && ISEC2_LastLon > 354000 && ISEC2_LastLon < 360000 )
-		  {
-		    double xinc = 360. / grid->xsize;
-
-		    if ( fabs(grid->xinc-xinc) > 0.0 )
-		      {
-			grid->xinc = xinc;
-			if ( CDI_Debug ) Message("set xinc to %g", grid->xinc);
-		      }
-		  }
-	      }
-	    grid->xfirst = ISEC2_FirstLon * 0.001;
-	    grid->xlast  = ISEC2_LastLon  * 0.001;
-	    grid->xdef   = 2;
-	  }
-	grid->ydef  = 0;
-	/* if ( ISEC2_FirstLat != 0 || ISEC2_LastLat != 0 ) */
-	  {
-	    if ( grid->ysize > 1 && compyinc )
-	      {
-                bool recompinc = true;
-		if ( ISEC2_ResFlag && ISEC2_LatIncr > 0 )
+            /* correct xinc if necessary */
+            if ( ISEC2_FirstLon == 0 && ISEC2_LastLon > 354000 && ISEC2_LastLon < 360000 )
+              {
+                double xinc = 360. / grid->x.size;
+                if ( fabs(grid->x.inc-xinc) > 0.0 )
                   {
-                    if ( abs(ISEC2_LastLat - (ISEC2_FirstLat+ISEC2_LatIncr*(grid->ysize-1))) <= 2 )
-                      {
-                        recompinc = false;
-                        grid->yinc = ISEC2_LatIncr * 0.001;
-                      }
+                    grid->x.inc = xinc;
+                    if ( CDI_Debug ) Message("set xinc to %g", grid->x.inc);
                   }
-
-		/* recompute yinc if necessary */
-                if ( recompinc ) grid->yinc = (ISEC2_LastLat - ISEC2_FirstLat) * 0.001 / (grid->ysize - 1);
-	      }
-	    grid->yfirst = ISEC2_FirstLat * 0.001;
-	    grid->ylast  = ISEC2_LastLat  * 0.001;
-	    grid->ydef   = 2;
-	  }
-	break;
+              }
+          }
+        grid->x.first = ISEC2_FirstLon * 0.001;
+        grid->x.last  = ISEC2_LastLon  * 0.001;
+        grid->x.flag  = 2;
       }
-    case GRID_GAUSSIAN_REDUCED:
+      grid->y.flag = 0;
+      /* if ( ISEC2_FirstLat != 0 || ISEC2_LastLat != 0 ) */
       {
-        grid->np      = ISEC2_NumPar;
-	grid->size    = ISEC4_NumValues;
-        grid->rowlon  = ISEC2_RowLonPtr;
-	grid->nrowlon = ISEC2_NumLat;
-	grid->ysize   = ISEC2_NumLat;
-	grid->xinc    = 0;
-	grid->yinc    = 0;
-	grid->xdef    = 0;
-	/* if ( ISEC2_FirstLon != 0 || ISEC2_LastLon != 0 ) */
-	  {
-	    if ( grid->xsize > 1 )
-	      {
-                if ( ISEC2_LastLon < ISEC2_FirstLon && ISEC2_LastLon < 0 ) ISEC2_LastLon += 360000;
+        if ( grid->y.size > 1 && compyinc )
+          {
+            bool recompinc = true;
+            if ( ISEC2_ResFlag && ISEC2_LatIncr > 0 )
+              {
+                if ( abs(ISEC2_LastLat - (ISEC2_FirstLat+ISEC2_LatIncr*(grid->y.size-1))) <= 2 )
+                  {
+                    recompinc = false;
+                    grid->y.inc = ISEC2_LatIncr * 0.001;
+                  }
+              }
 
-		if ( ISEC2_ResFlag && ISEC2_LonIncr > 0 )
-		  grid->xinc = ISEC2_LonIncr * 0.001;
-		else
-		  grid->xinc = (ISEC2_LastLon - ISEC2_FirstLon) * 0.001 / (grid->xsize - 1);
-	      }
-	    grid->xfirst = ISEC2_FirstLon * 0.001;
-	    grid->xlast  = ISEC2_LastLon  * 0.001;
-	    grid->xdef   = 2;
-	  }
-	grid->ydef  = 0;
-	/* if ( ISEC2_FirstLat != 0 || ISEC2_LastLat != 0 ) */
-	  {
-	    if ( grid->ysize > 1 )
-	      {
-		if ( ISEC2_ResFlag && ISEC2_LatIncr > 0 )
-		  grid->yinc = ISEC2_LatIncr * 0.001;
-		else
-		  grid->yinc = (ISEC2_LastLat - ISEC2_FirstLat) * 0.001 / (grid->ysize - 1);
-	      }
-	    grid->yfirst = ISEC2_FirstLat * 0.001;
-	    grid->ylast  = ISEC2_LastLat  * 0.001;
-	    grid->ydef   = 2;
-	  }
-	break;
+            /* recompute yinc if necessary */
+            if ( recompinc ) grid->y.inc = (ISEC2_LastLat - ISEC2_FirstLat) * 0.001 / (grid->y.size - 1);
+          }
+        grid->y.first = ISEC2_FirstLat * 0.001;
+        grid->y.last  = ISEC2_LastLat  * 0.001;
+        grid->y.flag  = 2;
       }
-    case GRID_LCC:
+    }
+  else if ( gridtype == GRID_GAUSSIAN_REDUCED )
+    {
+      grid->np      = ISEC2_NumPar;
+      grid->size    = ISEC4_NumValues;
+      grid->rowlon  = ISEC2_RowLonPtr;
+      grid->nrowlon = ISEC2_NumLat;
+      grid->y.size  = ISEC2_NumLat;
+      grid->x.inc   = 0;
+      grid->y.inc   = 0;
+      grid->x.flag  = 0;
+      /* if ( ISEC2_FirstLon != 0 || ISEC2_LastLon != 0 ) */
       {
-	if ( ISEC4_NumValues != ISEC2_NumLon*ISEC2_NumLat )
-	  Error("numberOfPoints (%d) and gridSize (%d) differ!",
-		ISEC4_NumValues, ISEC2_NumLon*ISEC2_NumLat);
+        if ( grid->x.size > 1 )
+          {
+            if ( ISEC2_LastLon < ISEC2_FirstLon && ISEC2_LastLon < 0 ) ISEC2_LastLon += 360000;
 
-	grid->size  = ISEC4_NumValues;
-	grid->xsize = ISEC2_NumLon;
-	grid->ysize = ISEC2_NumLat;
-
-	grid->lcc_xinc      = ISEC2_Lambert_dx;
-	grid->lcc_yinc      = ISEC2_Lambert_dy;
-	grid->lcc_originLon = ISEC2_FirstLon * 0.001;
-	grid->lcc_originLat = ISEC2_FirstLat * 0.001;
-	grid->lcc_lonParY   = ISEC2_Lambert_Lov * 0.001;
-	grid->lcc_lat1      = ISEC2_Lambert_LatS1 * 0.001;
-	grid->lcc_lat2      = ISEC2_Lambert_LatS2 * 0.001;
-	grid->lcc_projflag  = ISEC2_Lambert_ProjFlag;
-	grid->lcc_scanflag  = ISEC2_ScanFlag;
-
-	grid->xdef   = 0;
-	grid->ydef   = 0;
-
-	break;
+            if ( ISEC2_ResFlag && ISEC2_LonIncr > 0 )
+              grid->x.inc = ISEC2_LonIncr * 0.001;
+            else
+              grid->x.inc = (ISEC2_LastLon - ISEC2_FirstLon) * 0.001 / (grid->x.size - 1);
+          }
+        grid->x.first = ISEC2_FirstLon * 0.001;
+        grid->x.last  = ISEC2_LastLon  * 0.001;
+        grid->x.flag  = 2;
       }
-    case GRID_SPECTRAL:
+      grid->y.flag = 0;
+      /* if ( ISEC2_FirstLat != 0 || ISEC2_LastLat != 0 ) */
       {
-	grid->size  = ISEC4_NumValues;
-	grid->trunc = ISEC2_PentaJ;
-	if ( ISEC2_RepMode == 2 )
-	  grid->lcomplex = 1;
-	else
-	  grid->lcomplex = 0;
+        if ( grid->y.size > 1 )
+          {
+            if ( ISEC2_ResFlag && ISEC2_LatIncr > 0 )
+              grid->y.inc = ISEC2_LatIncr * 0.001;
+            else
+              grid->y.inc = (ISEC2_LastLat - ISEC2_FirstLat) * 0.001 / (grid->y.size - 1);
+          }
+        grid->y.first = ISEC2_FirstLat * 0.001;
+        grid->y.last  = ISEC2_LastLat  * 0.001;
+        grid->y.flag  = 2;
+      }
+    }
+  else if ( gridtype == GRID_LCC )
+    {
+      if ( ISEC4_NumValues != ISEC2_NumLon*ISEC2_NumLat )
+        Error("numberOfPoints (%d) and gridSize (%d) differ!",
+              ISEC4_NumValues, ISEC2_NumLon*ISEC2_NumLat);
 
-	break;
-      }
-    case GRID_GME:
-      {
-	grid->size  = ISEC4_NumValues;
-	grid->nd    = ISEC2_GME_ND;
-	grid->ni    = ISEC2_GME_NI;
-	grid->ni2   = ISEC2_GME_NI2;
-	grid->ni3   = ISEC2_GME_NI3;
-	break;
-      }
-    case GRID_GENERIC:
-      {
-	grid->size  = ISEC4_NumValues;
-	grid->xsize = 0;
-	grid->ysize = 0;
-	break;
-      }
-    default:
-      {
-	Error("Unsupported grid type: %s", gridNamePtr(gridtype));
-	break;
-      }
+      grid->size  = ISEC4_NumValues;
+      grid->x.size = ISEC2_NumLon;
+      grid->y.size = ISEC2_NumLat;
+
+      grid->lcc.xinc      = ISEC2_Lambert_dx;
+      grid->lcc.yinc      = ISEC2_Lambert_dy;
+      grid->lcc.originLon = ISEC2_FirstLon * 0.001;
+      grid->lcc.originLat = ISEC2_FirstLat * 0.001;
+      grid->lcc.lonParY   = ISEC2_Lambert_Lov * 0.001;
+      grid->lcc.lat1      = ISEC2_Lambert_LatS1 * 0.001;
+      grid->lcc.lat2      = ISEC2_Lambert_LatS2 * 0.001;
+      grid->lcc.projflag  = ISEC2_Lambert_ProjFlag;
+      grid->lcc.scanflag  = ISEC2_ScanFlag;
+
+      grid->x.flag = 0;
+      grid->y.flag = 0;
+    }
+  else if ( gridtype == GRID_SPECTRAL )
+    {
+      grid->size  = ISEC4_NumValues;
+      grid->trunc = ISEC2_PentaJ;
+      if ( ISEC2_RepMode == 2 )
+        grid->lcomplex = 1;
+      else
+        grid->lcomplex = 0;
+    }
+  else if ( gridtype == GRID_GME )
+    {
+      grid->size  = ISEC4_NumValues;
+      grid->gme.nd    = ISEC2_GME_ND;
+      grid->gme.ni    = ISEC2_GME_NI;
+      grid->gme.ni2   = ISEC2_GME_NI2;
+      grid->gme.ni3   = ISEC2_GME_NI3;
+    }
+  else if ( gridtype == GRID_GENERIC )
+    {
+      grid->size  = ISEC4_NumValues;
+      grid->x.size = 0;
+      grid->y.size = 0;
+    }
+  else
+    {
+      Error("Unsupported grid type: %s", gridNamePtr(gridtype));
     }
 
   grid->isRotated = FALSE;
   if ( cgribexGetIsRotated(isec2) )
     {
       grid->isRotated = TRUE;
-      grid->ypole     = - ISEC2_LatSP*0.001;
-      grid->xpole     =   ISEC2_LonSP*0.001 - 180;
-      grid->angle     = - FSEC2_RotAngle;
+      grid->rll.xpole =   ISEC2_LonSP*0.001 - 180;
+      grid->rll.ypole = - ISEC2_LatSP*0.001;
+      grid->rll.angle = - FSEC2_RotAngle;
     }
 
-  grid->xvals = NULL;
-  grid->yvals = NULL;
-  grid->type  = gridtype;
+  grid->type = gridtype;
+  grid->projtype = projtype;
 }
 
 static
@@ -380,7 +369,7 @@ void cgribexAddRecord(stream_t * streamptr, int param, int *isec1, int *isec2, d
   grid_t *gridptr = (grid_t*) Malloc(sizeof(*gridptr));
   cgribexGetGrid(streamptr, isec2, fsec2, isec4, gridptr, iret);
 
-  struct addIffNewRes gridAdded = cdiVlistAddGridIfNew(vlistID, gridptr, 0);
+  struct addIfNewRes gridAdded = cdiVlistAddGridIfNew(vlistID, gridptr, 0);
   int gridID = gridAdded.Id;
   if ( gridAdded.isNew )
     {
@@ -390,6 +379,13 @@ void cgribexAddRecord(stream_t * streamptr, int param, int *isec1, int *isec2, d
           int *rowlon = gridptr->rowlon;
           gridptr->rowlon = (int*) Malloc(nrowlon * sizeof(int));
           memcpy(gridptr->rowlon, rowlon, nrowlon * sizeof(int));
+        }
+      else if ( gridptr->projtype == CDI_PROJ_RLL )
+        {
+          double xpole =   ISEC2_LonSP*0.001 - 180;
+          double ypole = - ISEC2_LatSP*0.001;
+          double angle = - FSEC2_RotAngle;
+          gridDefProjParamRLL(gridID, xpole, ypole, angle);
         }
     }
   else
@@ -659,10 +655,10 @@ int cgribexScanTimestep1(stream_t * streamptr)
       rstatus = gribRead(fileID, (unsigned char *)gribbuffer, &readsize);
       if ( rstatus ) break;
 
-      comptype = COMPRESS_NONE;
+      comptype = CDI_COMPRESS_NONE;
       if ( gribGetZip(recsize, (unsigned char *)gribbuffer, &unzipsize) > 0 )
 	{
-	  comptype = COMPRESS_SZIP;
+	  comptype = CDI_COMPRESS_SZIP;
 	  unzipsize += 100; /* need 0 to 1 bytes for rounding of bds */
 	  if ( buffersize < (size_t)unzipsize )
 	    {
@@ -1616,8 +1612,8 @@ void cgribexDefTime(int *isec1, int vdate, int vtime, int tsteptype, int numavg,
 static
 void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridID)
 {
+  bool lrotated = false;
   bool lcurvi = false;
-  static bool lwarning = true;
 
   memset(isec2, 0, 16*sizeof(int));
 
@@ -1655,6 +1651,7 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
     }
   else if ( gridtype == GRID_CURVILINEAR )
     {
+      static bool lwarning = true;
       if ( lwarning && gridInqSize(gridID) > 1 )
 	{
 	  lwarning = false;
@@ -1662,6 +1659,12 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
 	}
       gridtype = GRID_LONLAT;
       lcurvi = true;
+    }
+
+  if ( gridtype == GRID_PROJECTION && gridInqProjType(gridID) == CDI_PROJ_RLL )
+    {
+      gridtype = GRID_LONLAT;
+      lrotated = true;
     }
 
   ISEC2_Reduced  = FALSE;
@@ -1680,7 +1683,7 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
 
 	if ( gridtype == GRID_GAUSSIAN || gridtype == GRID_GAUSSIAN_REDUCED )
           ISEC2_GridType = GRIB1_GTYPE_GAUSSIAN;
-        else if ( gridtype == GRID_LONLAT && isRotated )
+        else if ( gridtype == GRID_LONLAT && (isRotated || lrotated) )
 	  ISEC2_GridType = GRIB1_GTYPE_LATLON_ROT;
 	else
 	  ISEC2_GridType = GRIB1_GTYPE_LATLON;
@@ -1696,25 +1699,19 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
 	  }
 	else
 	  {
-	    if ( nlon == 0 )
-	      {
-		nlon = 1;
-	      }
+	    if ( nlon == 0 ) nlon = 1;
 	    else
 	      {
-		xfirst = gridInqXval(gridID,      0);
+		xfirst = gridInqXval(gridID, 0);
                 xlast  = gridInqXval(gridID, (lcurvi ? nlon*nlat : nlon) - 1);
 		xinc   = gridInqXinc(gridID);
 	      }
 	  }
 
-	if ( nlat == 0 )
-	  {
-	    nlat = 1;
-	  }
+	if ( nlat == 0 ) nlat = 1;
 	else
 	  {
-	    yfirst = gridInqYval(gridID,      0);
+	    yfirst = gridInqYval(gridID, 0);
             ylast  = gridInqYval(gridID, (lcurvi ? nlon*nlat : nlat) - 1);
 	    yinc   = fabs(gridInqYinc(gridID));
 	  }
@@ -1756,14 +1753,23 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
 
         ISEC2_ResFlag = ( ISEC2_LatIncr == 0 || ISEC2_LonIncr == 0 ) ? 0 : 128;
 
-	if ( isRotated )
-	  {
-	    ISEC2_LatSP = - (int)lround(gridInqYpole(gridID) * 1000);
-	    ISEC2_LonSP =   (int)lround((gridInqXpole(gridID) + 180) * 1000);
-            double angle = gridInqAngle(gridID);
+	if ( isRotated || lrotated )
+          {
+            double xpole = 0, ypole = 0, angle = 0;
+            if ( isRotated )
+              {
+                xpole = gridInqXpole(gridID);
+                ypole = gridInqYpole(gridID);
+                angle = gridInqAngle(gridID);
+              }
+            else
+              gridInqProjParamRLL(gridID, &xpole, &ypole, &angle);
+
+	    ISEC2_LatSP = - (int)lround(ypole * 1000);
+	    ISEC2_LonSP =   (int)lround((xpole + 180) * 1000);
             if ( fabs(angle) > 0 ) angle = -angle;
             FSEC2_RotAngle = angle;
-	  }
+          }
 
 	/* East -> West */
 	if ( ISEC2_LastLon < ISEC2_FirstLon ) ISEC2_ScanFlag += 128;
@@ -1850,6 +1856,14 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
 }
 
 static
+void isec1DefLevel(int *isec1, int leveltype, int level1, int level2)
+{
+  ISEC1_LevelType = leveltype;
+  ISEC1_Level1    = level1;
+  ISEC1_Level2    = level2;
+}
+
+static
 void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int levelID)
 {
   static bool lwarning_vct = true;
@@ -1861,8 +1875,7 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
   if ( zaxistype == ZAXIS_GENERIC && ltype == 0 )
     {
       Message("Changed zaxis type from %s to %s",
-	      zaxisNamePtr(zaxistype),
-	      zaxisNamePtr(ZAXIS_PRESSURE));
+	      zaxisNamePtr(zaxistype), zaxisNamePtr(ZAXIS_PRESSURE));
       zaxistype = ZAXIS_PRESSURE;
       zaxisChangeType(zaxisID, zaxistype);
       zaxisDefUnits(zaxisID, "Pa");
@@ -1880,9 +1893,7 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
     case ZAXIS_DEPTH_BELOW_SEA:
     case ZAXIS_ISENTROPIC:
       {
-        ISEC1_LevelType = grib_ltype;
-	ISEC1_Level1    = (int) (zaxisInqLevel(zaxisID, levelID));
-	ISEC1_Level2    = 0;
+        isec1DefLevel(isec1, grib_ltype, (int) zaxisInqLevel(zaxisID, levelID), 0);
 	break;
       }
     case ZAXIS_CLOUD_BASE:
@@ -1892,26 +1903,17 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
     case ZAXIS_SEA_BOTTOM:
     case ZAXIS_ATMOSPHERE:
       {
-        ISEC1_LevelType = grib_ltype;
-	ISEC1_Level1    = 0;
-	ISEC1_Level2    = 0;
+        isec1DefLevel(isec1, grib_ltype, 0, 0);
 	break;
       }
     case ZAXIS_HYBRID:
     case ZAXIS_HYBRID_HALF:
       {
 	if ( zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL) )
-	  {
-	    ISEC1_LevelType = GRIB1_LTYPE_HYBRID_LAYER;
-	    ISEC1_Level1    = (int) (zaxisInqLbound(zaxisID, levelID));
-	    ISEC1_Level2    = (int) (zaxisInqUbound(zaxisID, levelID));
-	  }
+          isec1DefLevel(isec1, GRIB1_LTYPE_HYBRID_LAYER, (int)zaxisInqLbound(zaxisID, levelID),
+                        (int)zaxisInqUbound(zaxisID, levelID));
 	else
-	  {
-	    ISEC1_LevelType = GRIB1_LTYPE_HYBRID;
-	    ISEC1_Level1    = (int) (zaxisInqLevel(zaxisID, levelID));
-	    ISEC1_Level2    = 0;
-	  }
+          isec1DefLevel(isec1, GRIB1_LTYPE_HYBRID, (int) zaxisInqLevel(zaxisID, levelID), 0);
 
 	int vctsize = zaxisInqVctSize(zaxisID);
 	if ( vctsize > 255 )
@@ -1933,8 +1935,7 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
     case ZAXIS_PRESSURE:
       {
 	level = zaxisInqLevel(zaxisID, levelID);
-	if ( level < 0 )
-	  Warning("Pressure level of %f Pa is below zero!", level);
+	if ( level < 0 ) Warning("Pressure level of %f Pa is below zero!", level);
 
 	char units[128];
 	zaxisInqUnits(zaxisID, units);
@@ -1942,16 +1943,11 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
 
 	double dum;
 	if ( level < 32768 && (level < 100 || modf(level/100, &dum) > 0) )
-	  {
-	    grib_ltype = GRIB1_LTYPE_99;
-	  }
+          grib_ltype = GRIB1_LTYPE_99;
 	else
-	  {
-	    level = level/100;
-	  }
-        ISEC1_LevelType = grib_ltype;
-        ISEC1_Level1    = (int) level;
-        ISEC1_Level2    = 0;
+          level = level/100;
+
+        isec1DefLevel(isec1, grib_ltype, (int) level, 0);
 	break;
       }
     case ZAXIS_HEIGHT:
@@ -1967,26 +1963,16 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
             else if ( units[0] == 'k' ) level *= 1000;
           }
 
-	ISEC1_LevelType = grib_ltype;
-	ISEC1_Level1    = (int) level;
-	ISEC1_Level2    = 0;
-
+        isec1DefLevel(isec1, grib_ltype, (int) level, 0);
 	break;
       }
     case ZAXIS_SIGMA:
       {
 	if ( zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL) )
-	  {
-	    ISEC1_LevelType = GRIB1_LTYPE_SIGMA_LAYER;
-	    ISEC1_Level1    = (int) zaxisInqLbound(zaxisID, levelID);
-	    ISEC1_Level2    = (int) zaxisInqUbound(zaxisID, levelID);
-	  }
+          isec1DefLevel(isec1, GRIB1_LTYPE_SIGMA_LAYER, (int) zaxisInqLbound(zaxisID, levelID),
+                        (int) zaxisInqUbound(zaxisID, levelID));
 	else
-	  {
-            ISEC1_LevelType = GRIB1_LTYPE_SIGMA;
-            ISEC1_Level1    = (int) zaxisInqLevel(zaxisID, levelID);
-            ISEC1_Level2    = 0;
-          }
+          isec1DefLevel(isec1, GRIB1_LTYPE_SIGMA, (int) zaxisInqLevel(zaxisID, levelID), 0);
 
 	break;
       }
@@ -2002,26 +1988,16 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
         else                                           factor = 100; // meter
 
 	if ( zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL) )
-	  {
-	    ISEC1_LevelType = GRIB1_LTYPE_LANDDEPTH_LAYER;
-	    ISEC1_Level1    = (int) (factor*zaxisInqLbound(zaxisID, levelID));
-	    ISEC1_Level2    = (int) (factor*zaxisInqUbound(zaxisID, levelID));
-	  }
+          isec1DefLevel(isec1, GRIB1_LTYPE_LANDDEPTH_LAYER, (int) (factor*zaxisInqLbound(zaxisID, levelID)),
+                        (int) (factor*zaxisInqUbound(zaxisID, levelID)));
 	else
-	  {
-	    ISEC1_LevelType = GRIB1_LTYPE_LANDDEPTH;
-	    ISEC1_Level1    = (int) (factor*zaxisInqLevel(zaxisID, levelID));
-	    ISEC1_Level2    = 0;
-	  }
+          isec1DefLevel(isec1, GRIB1_LTYPE_LANDDEPTH, (int) (factor*zaxisInqLevel(zaxisID, levelID)), 0);
 
 	break;
       }
     case ZAXIS_GENERIC:
       {
-	ISEC1_LevelType = ltype;
-	ISEC1_Level1    = (int) zaxisInqLevel(zaxisID, levelID);
-	ISEC1_Level2    = 0;
-
+        isec1DefLevel(isec1, ltype, (int) zaxisInqLevel(zaxisID, levelID), 0);
 	break;
       }
     default:

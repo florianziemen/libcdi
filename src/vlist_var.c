@@ -10,7 +10,7 @@
 #include "vlist.h"
 #include "vlist_var.h"
 #include "resource_handle.h"
-#include "vlist_att.h"
+#include "cdi_att.h"
 #include "namespace.h"
 #include "serialize.h"
 #include "error.h"
@@ -54,7 +54,7 @@ void vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].units         = NULL;
   vlistptr->vars[varID].extra         = NULL;
   vlistptr->vars[varID].levinfo       = NULL;
-  vlistptr->vars[varID].comptype      = COMPRESS_NONE;
+  vlistptr->vars[varID].comptype      = CDI_COMPRESS_NONE;
   vlistptr->vars[varID].complevel     = 1;
   vlistptr->vars[varID].atts.nalloc   = MAX_ATTRIBUTES;
   vlistptr->vars[varID].atts.nelems   = 0;
@@ -114,7 +114,7 @@ int vlistvarNewEntry(int vlistID)
 
   vlistptr->vars[varID].isUsed = TRUE;
 
-  return (varID);
+  return varID;
 }
 
 void vlistCheckVarID(const char *caller, int vlistID, int varID)
@@ -134,12 +134,12 @@ void vlistCheckVarID(const char *caller, int vlistID, int varID)
 
 int vlistDefVarTiles(int vlistID, int gridID, int zaxisID, int tsteptype, int tilesetID)
 {
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
   if ( CDI_Debug )
     Message("gridID = %d  zaxisID = %d  tsteptype = %d", gridID, zaxisID, tsteptype);
 
   int varID = vlistvarNewEntry(vlistID);
 
+  vlist_t *vlistptr = vlist_to_pointer(vlistID);
   vlistptr->nvars++;
   vlistptr->vars[varID].gridID    = gridID;
   vlistptr->vars[varID].zaxisID   = zaxisID;
@@ -158,7 +158,8 @@ int vlistDefVarTiles(int vlistID, int gridID, int zaxisID, int tsteptype, int ti
 
   vlistptr->vars[varID].param = cdiEncodeParam(-(varID + 1), 255, 255);
   reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
-  return (varID);
+
+  return varID;
 }
 
 /*
@@ -317,7 +318,7 @@ int vlistInqVarGrid(int vlistID, int varID)
 
   vlistCheckVarID(__func__, vlistID, varID);
 
-  return (vlistptr->vars[varID].gridID);
+  return vlistptr->vars[varID].gridID;
 }
 
 /*
@@ -343,7 +344,7 @@ int vlistInqVarZaxis(int vlistID, int varID)
 
   vlistCheckVarID(__func__, vlistID, varID);
 
-  return (vlistptr->vars[varID].zaxisID);
+  return vlistptr->vars[varID].zaxisID;
 }
 
 
@@ -364,7 +365,8 @@ int vlistInqVarSubtype(int vlistID, int varID)
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
   vlistCheckVarID(__func__, vlistID, varID);
-  return (vlistptr->vars[varID].subtypeID);
+
+  return vlistptr->vars[varID].subtypeID;
 }
 
 
@@ -391,7 +393,7 @@ int vlistInqVarParam(int vlistID, int varID)
 
   vlistCheckVarID(__func__, vlistID, varID);
 
-  return (vlistptr->vars[varID].param);
+  return vlistptr->vars[varID].param;
 }
 
 /*
@@ -428,7 +430,7 @@ int vlistInqVarCode(int vlistID, int varID)
       tableInqParCode(vlistptr->vars[varID].tableID, vlistptr->vars[varID].name, &code);
     }
 
-  return (code);
+  return code;
 }
 
 
@@ -438,7 +440,7 @@ const char *vlistInqVarNamePtr(int vlistID, int varID)
 
   vlistCheckVarID(__func__, vlistID, varID);
 
-  return (vlistptr->vars[varID].name);
+  return vlistptr->vars[varID].name;
 }
 
 
@@ -448,7 +450,7 @@ const char *vlistInqVarLongnamePtr(int vlistID, int varID)
 
   vlistCheckVarID(__func__, vlistID, varID);
 
-  return (vlistptr->vars[varID].longname);
+  return vlistptr->vars[varID].longname;
 }
 
 
@@ -458,7 +460,7 @@ const char *vlistInqVarStdnamePtr(int vlistID, int varID)
 
   vlistCheckVarID(__func__, vlistID, varID);
 
-  return (vlistptr->vars[varID].stdname);
+  return vlistptr->vars[varID].stdname;
 }
 
 
@@ -468,7 +470,7 @@ const char *vlistInqVarUnitsPtr(int vlistID, int varID)
 
   vlistCheckVarID(__func__, vlistID, varID);
 
-  return (vlistptr->vars[varID].units);
+  return vlistptr->vars[varID].units;
 }
 
 /*
@@ -715,10 +717,10 @@ int vlistInqVarID(int vlistID, int code)
       int param = vlistptr->vars[varID].param;
       int pdis, pcat, pnum;
       cdiDecodeParam(param, &pnum, &pcat, &pdis);
-      if ( pnum == code ) return (varID);
+      if ( pnum == code ) return varID;
     }
 
-  return (CDI_UNDEFID);
+  return CDI_UNDEFID;
 }
 
 
@@ -726,8 +728,7 @@ int vlistInqVarSize(int vlistID, int varID)
 {
   vlistCheckVarID(__func__, vlistID, varID);
 
-  int zaxisID, gridID;
-  int tsteptype;
+  int zaxisID, gridID, tsteptype;
   vlistInqVar(vlistID, varID, &gridID, &zaxisID, &tsteptype);
 
   int nlevs = zaxisInqSize(zaxisID);
@@ -736,7 +737,7 @@ int vlistInqVarSize(int vlistID, int varID)
 
   int size = gridsize*nlevs;
 
-  return (size);
+  return size;
 }
 
 /*
@@ -765,7 +766,7 @@ int vlistInqVarDatatype(int vlistID, int varID)
 
   vlistCheckVarID(__func__, vlistID, varID);
 
-  return (vlistptr->vars[varID].datatype);
+  return vlistptr->vars[varID].datatype;
 }
 
 
@@ -780,7 +781,7 @@ int vlistInqVarNumber(int vlistID, int varID)
        vlistptr->vars[varID].datatype == DATATYPE_CPX64 )
     number = CDI_COMP;
 
-  return (number);
+  return number;
 }
 
 /*
@@ -840,7 +841,7 @@ void vlistDefVarInstitut(int vlistID, int varID, int instID)
 int vlistInqVarInstitut(int vlistID, int varID)
 {
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  return (vlistptr->vars[varID].instID);
+  return vlistptr->vars[varID].instID;
 }
 
 
@@ -858,7 +859,7 @@ void vlistDefVarModel(int vlistID, int varID, int modelID)
 int vlistInqVarModel(int vlistID, int varID)
 {
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  return (vlistptr->vars[varID].modelID);
+  return vlistptr->vars[varID].modelID;
 }
 
 
@@ -884,7 +885,7 @@ void vlistDefVarTable(int vlistID, int varID, int tableID)
 int vlistInqVarTable(int vlistID, int varID)
 {
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  return (vlistptr->vars[varID].tableID);
+  return vlistptr->vars[varID].tableID;
 }
 
 /*
@@ -1046,7 +1047,7 @@ double vlistInqVarMissval(int vlistID, int varID)
 
   vlistCheckVarID(__func__, vlistID, varID);
 
-  return (vlistptr->vars[varID].missval);
+  return vlistptr->vars[varID].missval;
 }
 
 /*
@@ -1156,7 +1157,7 @@ int vlistInqVarValidrange(int vlistID, int varID, double *validrange)
       validrange[1] = vlistptr->vars[varID].validrange[1];
     }
 
-  return (vlistptr->vars[varID].lvalidrange);
+  return vlistptr->vars[varID].lvalidrange;
 }
 
 
@@ -1179,7 +1180,7 @@ double vlistInqVarScalefactor(int vlistID, int varID)
 
   vlistCheckVarID(__func__, vlistID, varID);
 
-  return (vlistptr->vars[varID].scalefactor);
+  return vlistptr->vars[varID].scalefactor;
 }
 
 
@@ -1189,7 +1190,7 @@ double vlistInqVarAddoffset(int vlistID, int varID)
 
   vlistCheckVarID(__func__, vlistID, varID);
 
-  return (vlistptr->vars[varID].addoffset);
+  return vlistptr->vars[varID].addoffset;
 }
 
 
@@ -1254,7 +1255,7 @@ The valid CDI timestep types are @func{TSTEP_CONSTANT}, @func{TSTEP_INSTANT},
 int vlistInqVarTsteptype(int vlistID, int varID)
 {
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  return (vlistptr->vars[varID].tsteptype);
+  return vlistptr->vars[varID].tsteptype;
 }
 
 
@@ -1272,7 +1273,7 @@ void vlistDefVarTimave(int vlistID, int varID, int timave)
 int vlistInqVarTimave(int vlistID, int varID)
 {
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  return (vlistptr->vars[varID].timave);
+  return vlistptr->vars[varID].timave;
 }
 
 
@@ -1290,7 +1291,7 @@ void vlistDefVarTimaccu(int vlistID, int varID, int timaccu)
 int vlistInqVarTimaccu(int vlistID, int varID)
 {
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  return (vlistptr->vars[varID].timaccu);
+  return vlistptr->vars[varID].timaccu;
 }
 
 
@@ -1308,7 +1309,7 @@ void vlistDefVarTypeOfGeneratingProcess(int vlistID, int varID, int typeOfGenera
 int vlistInqVarTypeOfGeneratingProcess(int vlistID, int varID)
 {
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  return (vlistptr->vars[varID].typeOfGeneratingProcess);
+  return vlistptr->vars[varID].typeOfGeneratingProcess;
 }
 
 
@@ -1327,8 +1328,7 @@ void vlistDefVarProductDefinitionTemplate(int vlistID, int varID, int productDef
 int vlistInqVarProductDefinitionTemplate(int vlistID, int varID)
 {
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
-
-  return (vlistptr->vars[varID].productDefinitionTemplate);
+  return vlistptr->vars[varID].productDefinitionTemplate;
 }
 
 
@@ -1386,7 +1386,7 @@ void vlistDestroyVarUnits(int vlistID, int varID)
 int vlistInqVarMissvalUsed(int vlistID, int varID)
 {
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  return (vlistptr->vars[varID].missvalused);
+  return vlistptr->vars[varID].missvalused;
 }
 
 
@@ -1425,7 +1425,7 @@ int vlistInqFlag(int vlistID, int varID, int levID)
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
   if (vlistptr->vars[varID].levinfo)
-    return (vlistptr->vars[varID].levinfo[levID].flag);
+    return vlistptr->vars[varID].levinfo[levID].flag;
   else
     {
       levinfo_t li = DEFAULT_LEVINFO(levID);
@@ -1450,7 +1450,7 @@ int vlistFindVar(int vlistID, int fvarID)
       Message("varID not found for fvarID %d in vlistID %d!", fvarID, vlistID);
     }
 
-  return (varID);
+  return varID;
 }
 
 
@@ -1477,14 +1477,14 @@ int vlistFindLevel(int vlistID, int fvarID, int flevelID)
 	}
     }
 
-  return (levelID);
+  return levelID;
 }
 
 
 int vlistMergedVar(int vlistID, int varID)
 {
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  return (vlistptr->vars[varID].mvarID);
+  return vlistptr->vars[varID].mvarID;
 }
 
 
@@ -1523,7 +1523,7 @@ int vlistInqIndex(int vlistID, int varID, int levelID)
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
   if (vlistptr->vars[varID].levinfo)
-    return (vlistptr->vars[varID].levinfo[levelID].index);
+    return vlistptr->vars[varID].levinfo[levelID].index;
   else
     {
       levinfo_t li = DEFAULT_LEVINFO(levelID);
@@ -1612,7 +1612,7 @@ int vlistInqVarCompType(int vlistID, int varID)
 
   vlistCheckVarID(__func__, vlistID, varID);
 
-  return (vlistptr->vars[varID].comptype);
+  return vlistptr->vars[varID].comptype;
 }
 
 
@@ -1636,7 +1636,7 @@ int vlistInqVarCompLevel(int vlistID, int varID)
 
   vlistCheckVarID(__func__, vlistID, varID);
 
-  return (vlistptr->vars[varID].complevel);
+  return vlistptr->vars[varID].complevel;
 }
 
 
@@ -1660,7 +1660,7 @@ int vlistInqVarChunkType(int vlistID, int varID)
 
   vlistCheckVarID(__func__, vlistID, varID);
 
-  return (vlistptr->vars[varID].chunktype);
+  return vlistptr->vars[varID].chunktype;
 }
 
 static
@@ -1737,7 +1737,7 @@ int vlistInqVarXYZ(int vlistID, int varID)
 
   vlistCheckVarID(__func__, vlistID, varID);
 
-  return (vlistptr->vars[varID].xyz);
+  return vlistptr->vars[varID].xyz;
 }
 
 /* Ensemble Info Routines */
@@ -1774,7 +1774,7 @@ int vlistInqVarEnsemble( int vlistID, int varID, int *ensID, int *ensCount, int 
       status = 1;
     }
 
-  return (status);
+  return status;
 }
 
 
@@ -2064,7 +2064,7 @@ int vlistVarCompare(vlist_t *a, int varIDA, vlist_t *b, int varIDB)
   if (natts != b->vars[varIDB].atts.nelems)
     return 1;
   for (size_t attID = 0; attID < natts; ++attID)
-    diff |= vlist_att_compare(a, varIDA, b, varIDB, (int)attID);
+    diff |= cdi_att_compare(a, varIDA, b, varIDB, (int)attID);
   if ((diff |= ((pva->ensdata == NULL) ^ (pvb->ensdata == NULL))))
     return 1;
   if (pva->ensdata)
@@ -2096,7 +2096,7 @@ int vlistVarGetPackSize(vlist_t *p, int varID, void *context)
     varsize += serializeGetSize((int)strlen(var->extra), DATATYPE_TXT, context);
   varsize += serializeGetSize(4 * zaxisInqSize(var->zaxisID),
                               DATATYPE_INT, context);
-  varsize += vlistAttsGetSize(p, varID, context);
+  varsize += cdiAttsGetSize(p, varID, context);
   return varsize;
 }
 
@@ -2164,7 +2164,7 @@ void vlistVarPack(vlist_t *p, int varID, char * buf, int size, int *position,
       serializePack(levbuf, nlevs * 4, DATATYPE_INT,
                     buf, size, position, context);
     }
-  vlistAttsPack(p, varID, buf, size, position, context);
+  cdiAttsPack(p, varID, buf, size, position, context);
 }
 
 static inline int
@@ -2273,7 +2273,7 @@ void vlistVarUnpack(int vlistID, char * buf, int size, int *position,
       vlistDefFlag(vlistID, newvar, flagSetLev, levbuf[flagSetLev][0]);
     }
   vlistDefVarIOrank(vlistID, newvar, tempbuf[19]);
-  vlistAttsUnpack(vlistID, newvar, buf, size, position, context);
+  cdiAttsUnpack(vlistID, newvar, buf, size, position, context);
 }
 
 

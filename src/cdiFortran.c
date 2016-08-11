@@ -287,17 +287,17 @@ FCALLSCFUN2 (STRING, vlistInqVarNamePtr, VLISTINQVARNAMEPTR, vlistinqvarnameptr,
 FCALLSCFUN2 (STRING, vlistInqVarLongnamePtr, VLISTINQVARLONGNAMEPTR, vlistinqvarlongnameptr, INT, INT)
 FCALLSCFUN2 (STRING, vlistInqVarUnitsPtr, VLISTINQVARUNITSPTR, vlistinqvarunitsptr, INT, INT)
 
-/*  VLIST attributes  */
+/*  CDI attributes  */
 
-FCALLSCFUN3 (INT, vlistInqNatts, VLISTINQNATTS, vlistinqnatts, INT, INT, PINT)
-FCALLSCFUN6 (INT, vlistInqAtt, VLISTINQATT, vlistinqatt, INT, INT, INT, PSTRING, PINT, PINT)
-FCALLSCFUN3 (INT, vlistDelAtt, VLISTDELATT, vlistdelatt, INT, INT, STRING)
-FCALLSCFUN6 (INT, vlistDefAttInt, VLISTDEFATTINT, vlistdefattint, INT, INT, STRING, INT, INT, INTV)
-FCALLSCFUN6 (INT, vlistDefAttFlt, VLISTDEFATTFLT, vlistdefattflt, INT, INT, STRING, INT, INT, DOUBLEV)
-FCALLSCFUN5 (INT, vlistDefAttTxt, VLISTDEFATTTXT, vlistdefatttxt, INT, INT, STRING, INT, PPSTRING)
-FCALLSCFUN5 (INT, vlistInqAttInt, VLISTINQATTINT, vlistinqattint, INT, INT, STRING, INT, INTV)
-FCALLSCFUN5 (INT, vlistInqAttFlt, VLISTINQATTFLT, vlistinqattflt, INT, INT, STRING, INT, DOUBLEV)
-FCALLSCFUN5 (INT, vlistInqAttTxt, VLISTINQATTTXT, vlistinqatttxt, INT, INT, STRING, INT, PPSTRING)
+FCALLSCFUN3 (INT, cdiInqNatts, CDIINQNATTS, cdiinqnatts, INT, INT, PINT)
+FCALLSCFUN6 (INT, cdiInqAtt, CDIINQATT, cdiinqatt, INT, INT, INT, PSTRING, PINT, PINT)
+FCALLSCFUN3 (INT, cdiDelAtt, CDIDELATT, cdidelatt, INT, INT, STRING)
+FCALLSCFUN6 (INT, cdiDefAttInt, CDIDEFATTINT, cdidefattint, INT, INT, STRING, INT, INT, INTV)
+FCALLSCFUN6 (INT, cdiDefAttFlt, CDIDEFATTFLT, cdidefattflt, INT, INT, STRING, INT, INT, DOUBLEV)
+FCALLSCFUN5 (INT, cdiDefAttTxt, CDIDEFATTTXT, cdidefatttxt, INT, INT, STRING, INT, PPSTRING)
+FCALLSCFUN5 (INT, cdiInqAttInt, CDIINQATTINT, cdiinqattint, INT, INT, STRING, INT, INTV)
+FCALLSCFUN5 (INT, cdiInqAttFlt, CDIINQATTFLT, cdiinqattflt, INT, INT, STRING, INT, DOUBLEV)
+FCALLSCFUN5 (INT, cdiInqAttTxt, CDIINQATTTXT, cdiinqatttxt, INT, INT, STRING, INT, PPSTRING)
 
 /*  GRID routines  */
 
@@ -312,6 +312,10 @@ FCALLSCSUB3 (gridPrint, GRIDPRINT, gridprint, INT, INT, INT)
 FCALLSCFUN2 (INT, gridCreate, GRIDCREATE, gridcreate, INT, INT)
 FCALLSCSUB1 (gridDestroy, GRIDDESTROY, griddestroy, INT)
 FCALLSCFUN1 (INT, gridDuplicate, GRIDDUPLICATE, gridduplicate, INT)
+FCALLSCSUB2 (gridDefProj, GRIDDEFPROJ, griddefproj, INT, INT)
+FCALLSCFUN1 (INT, gridInqProj, GRIDINQPROJ, gridinqproj, INT)
+FCALLSCSUB2 (gridDefProjType, GRIDDEFPROJTYPE, griddefprojtype, INT, INT)
+FCALLSCFUN1 (INT, gridInqProjType, GRIDINQPROJTYPE, gridinqprojtype, INT)
 FCALLSCFUN1 (INT, gridInqType, GRIDINQTYPE, gridinqtype, INT)
 FCALLSCFUN1 (INT, gridInqSize, GRIDINQSIZE, gridinqsize, INT)
 FCALLSCSUB2 (gridDefXsize, GRIDDEFXSIZE, griddefxsize, INT, INT)
@@ -327,8 +331,8 @@ FCALLSCFUN2 (INT, gridInqYvals, GRIDINQYVALS, gridinqyvals, INT, DOUBLEV)
 
 /*  CDI grid string key values  */
 
-FCALLSCFUN4 (INT, cdiGridDefString, CDIGRIDDEFSTRING, cdigriddefstring, INT, INT, INT, STRING)
-FCALLSCFUN4 (INT, cdiGridInqString, CDIGRIDINQSTRING, cdigridinqstring, INT, INT, INT, PSTRING)
+FCALLSCFUN4 (INT, cdiGridDefKeyStr, CDIGRIDDEFKEYSTR, cdigriddefkeystr, INT, INT, INT, STRING)
+FCALLSCFUN4 (INT, cdiGridInqKeyStr, CDIGRIDINQKEYSTR, cdigridinqkeystr, INT, INT, INT, PSTRING)
 FCALLSCSUB2 (gridDefXname, GRIDDEFXNAME, griddefxname, INT, STRING)
 FCALLSCSUB2 (gridInqXname, GRIDINQXNAME, gridinqxname, INT, PSTRING)
 FCALLSCSUB2 (gridDefXlongname, GRIDDEFXLONGNAME, griddefxlongname, INT, STRING)
@@ -351,6 +355,8 @@ FCALLSCFUN1 (DOUBLE, gridInqXinc, GRIDINQXINC, gridinqxinc, INT)
 FCALLSCFUN1 (DOUBLE, gridInqYinc, GRIDINQYINC, gridinqyinc, INT)
 FCALLSCFUN1 (INT, gridIsCircular, GRIDISCIRCULAR, gridiscircular, INT)
 FCALLSCFUN1 (INT, gridIsRotated, GRIDISROTATED, gridisrotated, INT)
+FCALLSCSUB4 (gridInqProjParamRLL, GRIDINQPROJPARAMRLL, gridinqprojparamrll, INT, PDOUBLE, PDOUBLE, PDOUBLE)
+FCALLSCSUB4 (gridDefProjParamRLL, GRIDDEFPROJPARAMRLL, griddefprojparamrll, INT, DOUBLE, DOUBLE, DOUBLE)
 FCALLSCSUB2 (gridDefXpole, GRIDDEFXPOLE, griddefxpole, INT, DOUBLE)
 FCALLSCFUN1 (DOUBLE, gridInqXpole, GRIDINQXPOLE, gridinqxpole, INT)
 FCALLSCSUB2 (gridDefYpole, GRIDDEFYPOLE, griddefypole, INT, DOUBLE)

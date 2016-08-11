@@ -2,7 +2,7 @@
 #  include "config.h"
 #endif
 
-#include <limits.h>
+#include <stdint.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -340,7 +340,7 @@ scatterGatherPackFunc(void *dataDesc, void *buf, int size, int *pos,
   unsigned char *dstBuf = (unsigned char *)buf + pos_,
     *bufEnd = (unsigned char *)buf + size;
   size_t elemSize = p->elemSize;
-  xassert(elemSize <= SSIZE_MAX);
+  xassert(elemSize <= SIZE_MAX);
   const unsigned char *data = p->data;
   unsigned copyCount = 0, numElems = p->numElems;
   for (unsigned j = 0; j < numBlocks && copyCount < numElems; ++j)
@@ -356,7 +356,7 @@ scatterGatherPackFunc(void *dataDesc, void *buf, int size, int *pos,
             }
           size_t bsize = (size_t)bl * elemSize;
           xassert(dstBuf + bsize <= bufEnd);
-          memcpy(dstBuf, data + (ssize_t)elemSize * (ssize_t)disps[j], bsize);
+          memcpy(dstBuf, data + (size_t)elemSize * (size_t)disps[j], bsize);
           dstBuf += bsize;
         }
     }

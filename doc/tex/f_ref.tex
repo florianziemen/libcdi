@@ -2,6 +2,133 @@
 
 \section*{\tt 
 \ifpdf
+\hyperref[cdiDefAttFlt]{cdiDefAttFlt}
+\else
+cdiDefAttFlt
+\fi
+}
+\begin{verbatim}
+    INTEGER FUNCTION cdiDefAttFlt(INTEGER cdiID, INTEGER varID, CHARACTER*(*) name, 
+                                  INTEGER type, INTEGER len, REAL*8 dp)
+\end{verbatim}
+
+Define a floating point attribute
+\ifpdfoutput{}{(\ref{cdiDefAttFlt})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[cdiDefAttInt]{cdiDefAttInt}
+\else
+cdiDefAttInt
+\fi
+}
+\begin{verbatim}
+    INTEGER FUNCTION cdiDefAttInt(INTEGER cdiID, INTEGER varID, CHARACTER*(*) name, 
+                                  INTEGER type, INTEGER len, INTEGER ip)
+\end{verbatim}
+
+Define an integer attribute
+\ifpdfoutput{}{(\ref{cdiDefAttInt})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[cdiDefAttTxt]{cdiDefAttTxt}
+\else
+cdiDefAttTxt
+\fi
+}
+\begin{verbatim}
+    INTEGER FUNCTION cdiDefAttTxt(INTEGER cdiID, INTEGER varID, CHARACTER*(*) name, 
+                                  INTEGER len, CHARACTER*(*) tp)
+\end{verbatim}
+
+Define a text attribute
+\ifpdfoutput{}{(\ref{cdiDefAttTxt})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[cdiInqAtt]{cdiInqAtt}
+\else
+cdiInqAtt
+\fi
+}
+\begin{verbatim}
+    INTEGER FUNCTION cdiInqAtt(INTEGER cdiID, INTEGER varID, INTEGER attnum, 
+                               CHARACTER*(*) name, INTEGER typep, INTEGER lenp)
+\end{verbatim}
+
+Get information about an attribute
+\ifpdfoutput{}{(\ref{cdiInqAtt})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[cdiInqAttFlt]{cdiInqAttFlt}
+\else
+cdiInqAttFlt
+\fi
+}
+\begin{verbatim}
+    INTEGER FUNCTION cdiInqAttFlt(INTEGER cdiID, INTEGER varID, CHARACTER*(*) name, 
+                                  INTEGER mlen, REAL*8 dp)
+\end{verbatim}
+
+Get the value(s) of a floating point attribute
+\ifpdfoutput{}{(\ref{cdiInqAttFlt})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[cdiInqAttInt]{cdiInqAttInt}
+\else
+cdiInqAttInt
+\fi
+}
+\begin{verbatim}
+    INTEGER FUNCTION cdiInqAttInt(INTEGER cdiID, INTEGER varID, CHARACTER*(*) name, 
+                                  INTEGER mlen, INTEGER ip)
+\end{verbatim}
+
+Get the value(s) of an integer attribute
+\ifpdfoutput{}{(\ref{cdiInqAttInt})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[cdiInqAttTxt]{cdiInqAttTxt}
+\else
+cdiInqAttTxt
+\fi
+}
+\begin{verbatim}
+    INTEGER FUNCTION cdiInqAttTxt(INTEGER cdiID, INTEGER varID, CHARACTER*(*) name, 
+                                  INTEGER mlen, CHARACTER*(*) tp)
+\end{verbatim}
+
+Get the value(s) of a text attribute
+\ifpdfoutput{}{(\ref{cdiInqAttTxt})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[cdiInqNatts]{cdiInqNatts}
+\else
+cdiInqNatts
+\fi
+}
+\begin{verbatim}
+    INTEGER FUNCTION cdiInqNatts(INTEGER cdiID, INTEGER varID, INTEGER nattsp)
+\end{verbatim}
+
+Get number of attributes
+\ifpdfoutput{}{(\ref{cdiInqNatts})}
+
+
+\section*{\tt 
+\ifpdf
 \hyperref[gridCreate]{gridCreate}
 \else
 gridCreate
@@ -1120,57 +1247,6 @@ Create a variable list
 
 \section*{\tt 
 \ifpdf
-\hyperref[vlistDefAttFlt]{vlistDefAttFlt}
-\else
-vlistDefAttFlt
-\fi
-}
-\begin{verbatim}
-    INTEGER FUNCTION vlistDefAttFlt(INTEGER vlistID, INTEGER varID, 
-                                    CHARACTER*(*) name, INTEGER type, INTEGER len, 
-                                    REAL*8 dp)
-\end{verbatim}
-
-Define a floating point attribute
-\ifpdfoutput{}{(\ref{vlistDefAttFlt})}
-
-
-\section*{\tt 
-\ifpdf
-\hyperref[vlistDefAttInt]{vlistDefAttInt}
-\else
-vlistDefAttInt
-\fi
-}
-\begin{verbatim}
-    INTEGER FUNCTION vlistDefAttInt(INTEGER vlistID, INTEGER varID, 
-                                    CHARACTER*(*) name, INTEGER type, INTEGER len, 
-                                    INTEGER ip)
-\end{verbatim}
-
-Define an integer attribute
-\ifpdfoutput{}{(\ref{vlistDefAttInt})}
-
-
-\section*{\tt 
-\ifpdf
-\hyperref[vlistDefAttTxt]{vlistDefAttTxt}
-\else
-vlistDefAttTxt
-\fi
-}
-\begin{verbatim}
-    INTEGER FUNCTION vlistDefAttTxt(INTEGER vlistID, INTEGER varID, 
-                                    CHARACTER*(*) name, INTEGER len, 
-                                    CHARACTER*(*) tp)
-\end{verbatim}
-
-Define a text attribute
-\ifpdfoutput{}{(\ref{vlistDefAttTxt})}
-
-
-\section*{\tt 
-\ifpdf
 \hyperref[vlistDefTaxis]{vlistDefTaxis}
 \else
 vlistDefTaxis
@@ -1335,86 +1411,6 @@ vlistDuplicate
 
 Duplicate a variable list
 \ifpdfoutput{}{(\ref{vlistDuplicate})}
-
-
-\section*{\tt 
-\ifpdf
-\hyperref[vlistInqAtt]{vlistInqAtt}
-\else
-vlistInqAtt
-\fi
-}
-\begin{verbatim}
-    INTEGER FUNCTION vlistInqAtt(INTEGER vlistID, INTEGER varID, INTEGER attnum, 
-                                 CHARACTER*(*) name, INTEGER typep, INTEGER lenp)
-\end{verbatim}
-
-Get information about an attribute
-\ifpdfoutput{}{(\ref{vlistInqAtt})}
-
-
-\section*{\tt 
-\ifpdf
-\hyperref[vlistInqAttFlt]{vlistInqAttFlt}
-\else
-vlistInqAttFlt
-\fi
-}
-\begin{verbatim}
-    INTEGER FUNCTION vlistInqAttFlt(INTEGER vlistID, INTEGER varID, 
-                                    CHARACTER*(*) name, INTEGER mlen, REAL*8 dp)
-\end{verbatim}
-
-Get the value(s) of a floating point attribute
-\ifpdfoutput{}{(\ref{vlistInqAttFlt})}
-
-
-\section*{\tt 
-\ifpdf
-\hyperref[vlistInqAttInt]{vlistInqAttInt}
-\else
-vlistInqAttInt
-\fi
-}
-\begin{verbatim}
-    INTEGER FUNCTION vlistInqAttInt(INTEGER vlistID, INTEGER varID, 
-                                    CHARACTER*(*) name, INTEGER mlen, INTEGER ip)
-\end{verbatim}
-
-Get the value(s) of an integer attribute
-\ifpdfoutput{}{(\ref{vlistInqAttInt})}
-
-
-\section*{\tt 
-\ifpdf
-\hyperref[vlistInqAttTxt]{vlistInqAttTxt}
-\else
-vlistInqAttTxt
-\fi
-}
-\begin{verbatim}
-    INTEGER FUNCTION vlistInqAttTxt(INTEGER vlistID, INTEGER varID, 
-                                    CHARACTER*(*) name, INTEGER mlen, 
-                                    CHARACTER*(*) tp)
-\end{verbatim}
-
-Get the value(s) of a text attribute
-\ifpdfoutput{}{(\ref{vlistInqAttTxt})}
-
-
-\section*{\tt 
-\ifpdf
-\hyperref[vlistInqNatts]{vlistInqNatts}
-\else
-vlistInqNatts
-\fi
-}
-\begin{verbatim}
-    INTEGER FUNCTION vlistInqNatts(INTEGER vlistID, INTEGER varID, INTEGER nattsp)
-\end{verbatim}
-
-Get number of variable attributes
-\ifpdfoutput{}{(\ref{vlistInqNatts})}
 
 
 \section*{\tt 

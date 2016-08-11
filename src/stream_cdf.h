@@ -1,6 +1,8 @@
 #ifndef _STREAM_CDF_H
 #define _STREAM_CDF_H
 
+#include "cdi_int.h"
+
 void   cdfDefVars(stream_t *streamptr);
 void   cdfDefTimestep(stream_t *streamptr, int tsID);
 int    cdfInqTimestep(stream_t *streamptr, int tsID);
@@ -13,6 +15,8 @@ void   cdfEndDef(stream_t * streamptr);
 void   cdfDefRecord(stream_t * streamptr);
 
 void   cdfCopyRecord(stream_t *streamptr2, stream_t *streamptr1);
+
+void   cdfDefineAttributes(int vlistID, int varID, int fileID, int ncvarID);
 
 void   cdf_read_record(stream_t *streamptr, int memtype, void *data, int *nmiss);
 void   cdf_write_record(stream_t *streamptr, int memtype, const void *data, int nmiss);
@@ -28,6 +32,8 @@ void   cdf_write_var_chunk(stream_t *streamptr, int varID, int memtype,
 
 void cdfDefVarDeflate(int ncid, int ncvarid, int deflate_level);
 void cdfDefTime(stream_t* streamptr);
+
+void cdf_scale_add(size_t size, double *data, double addoffset, double scalefactor);
 
 #endif
 /*

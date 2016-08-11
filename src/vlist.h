@@ -17,30 +17,7 @@
 
 #define VALIDMISS 1.e+303
 
-/*
- * CDI attribute
- */
-typedef struct {
-  size_t    xsz;	  /* amount of space at xvalue                      */
-  size_t    namesz;       /* size of name                                   */
-  char     *name;         /* attribute name                                 */
-  int       indtype;	  /* internal data type of xvalue (INT, FLT or TXT) */
-  int       exdtype;      /* external data type                             */
-                          /* indtype    exdtype                             */
-                          /* TXT        TXT                                 */
-                          /* INT        INT16, INT32                        */
-                          /* FLT        FLT32, FLT64                        */
-  size_t    nelems;    	  /* number of elements                             */
-  void     *xvalue;       /* the actual data                                */
-} cdi_att_t;
-
-
-typedef struct {
-  size_t     nalloc;		/* number allocated >= nelems */
-  size_t     nelems;		/* length of the array */
-  cdi_att_t  value[MAX_ATTRIBUTES];
-} cdi_atts_t;
-
+#include "cdi_att.h"
 
 typedef struct
 {
@@ -117,9 +94,9 @@ var_t;
 typedef struct
 {
   //set when a vlist is passed to streamDefVlist() to safeguard against modifications of the wrong vlist object
-  bool    immutable;
+  bool        immutable;
   //set if this vlist has been created by CDI itself, and must not be destroyed by the user, consequently
-  bool    internal;
+  bool        internal;
   int         self;
   int         nvars;        /* number of variables                */
   int         ngrids;
@@ -154,8 +131,8 @@ void     vlistDefVarTsteptype(int vlistID, int varID, int tsteptype);
 int      vlistInqVarMissvalUsed(int vlistID, int varID);
 int      vlistHasTime(int vlistID);
 
-int      vlistDelAtts(int vlistID, int varID);
-int      vlistCopyVarAtts(int vlistID1, int varID_1, int vlistID2, int varID_2);
+int      cdiDelAtts(int vlistID, int varID);
+int      cdiCopyVarAtts(int vlistID1, int varID_1, int vlistID2, int varID_2);
 
 void     vlistUnpack(char * buffer, int bufferSize, int * pos,
                      int originNamespace, void *context, int force_id);
@@ -168,7 +145,7 @@ int     vlistInqVarValidrange(int vlistID, int varID, double *validrange);
 
 void vlistInqVarDimorder(int vlistID, int varID, int (*outDimorder)[3]);
 
-int vlist_att_compare(vlist_t *a, int varIDA, vlist_t *b, int varIDB, int attnum);
+int cdi_att_compare(vlist_t *a, int varIDA, vlist_t *b, int varIDB, int attnum);
 
 void resize_opt_grib_entries(var_t *var, int nentries);
 

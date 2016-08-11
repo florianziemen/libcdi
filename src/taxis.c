@@ -112,7 +112,7 @@ const char *tunitNamePtr(int unitID)
   else
     name = Timeunits[0];
 
-  return (name);
+  return name;
 }
 
 #if 0
@@ -150,7 +150,7 @@ static
 void taxisDefaultValue(taxis_t* taxisptr)
 {
   taxisptr->self        = CDI_UNDEFID;
-  taxisptr->used        = FALSE;
+  taxisptr->used        = false;
   taxisptr->type        = DefaultTimeType;
   taxisptr->vdate       = 0;
   taxisptr->vtime       = 0;
@@ -161,8 +161,8 @@ void taxisDefaultValue(taxis_t* taxisptr)
   taxisptr->calendar    = cdiDefaultCalendar;
   taxisptr->unit        = DefaultTimeUnit;
   taxisptr->numavg      = 0;
-  taxisptr->climatology = FALSE;
-  taxisptr->has_bounds  = FALSE;
+  taxisptr->climatology = false;
+  taxisptr->has_bounds  = false;
   taxisptr->vdate_lb    = 0;
   taxisptr->vtime_lb    = 0;
   taxisptr->vdate_ub    = 0;
@@ -187,20 +187,19 @@ taxisNewEntry(cdiResH resH)
       reshReplace(resH, taxisptr, &taxisOps);
     }
 
-  return (taxisptr);
+  return taxisptr;
 }
 
 static
 void taxisInit (void)
 {
-  static int taxisInitialized = 0;
-  char *env;
+  static bool taxisInitialized = false;
 
   if ( taxisInitialized ) return;
 
-  taxisInitialized = 1;
+  taxisInitialized = true;
 
-  env = getenv("TAXIS_DEBUG");
+  char *env = getenv("TAXIS_DEBUG");
   if ( env ) TAXIS_Debug = atoi(env);
 }
 
@@ -248,8 +247,7 @@ taxisDefRtime(taxisID, 120000);
 */
 int taxisCreate(int taxistype)
 {
-  if ( CDI_Debug )
-    Message("taxistype: %d", taxistype);
+  if ( CDI_Debug ) Message("taxistype: %d", taxistype);
 
   taxisInit ();
 
@@ -258,10 +256,9 @@ int taxisCreate(int taxistype)
 
   int taxisID = taxisptr->self;
 
-  if ( CDI_Debug )
-    Message("taxisID: %d", taxisID);
+  if ( CDI_Debug ) Message("taxisID: %d", taxisID);
 
-  return (taxisID);
+  return taxisID;
 }
 
 void taxisDestroyKernel(taxis_t *taxisptr)
@@ -303,11 +300,11 @@ int taxisDuplicate(int taxisID1)
 
   int taxisID2 = taxisptr2->self;
 
-  if ( CDI_Debug )
-    Message("taxisID2: %d", taxisID2);
+  if ( CDI_Debug ) Message("taxisID2: %d", taxisID2);
 
   ptaxisCopy(taxisptr2, taxisptr1);
-  return (taxisID2);
+
+  return taxisID2;
 }
 
 
@@ -555,7 +552,7 @@ int taxisInqType(int taxisID)
 {
   taxis_t *taxisptr = (taxis_t *)reshGetVal(taxisID, &taxisOps);
 
-  return (taxisptr->type);
+  return taxisptr->type;
 }
 
 
@@ -563,7 +560,7 @@ int taxisHasBounds(int taxisID)
 {
   taxis_t *taxisptr = (taxis_t *)reshGetVal(taxisID, &taxisOps);
 
-  return (taxisptr->has_bounds);
+  return taxisptr->has_bounds;
 }
 
 
@@ -571,9 +568,9 @@ void taxisDeleteBounds(int taxisID)
 {
   taxis_t *taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
-  if (taxisptr->has_bounds != FALSE)
+  if ( taxisptr->has_bounds )
     {
-      taxisptr->has_bounds = FALSE;
+      taxisptr->has_bounds = false;
       reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
     }
 }
@@ -630,7 +627,7 @@ int taxisInqVdate(int taxisID)
 {
   taxis_t *taxisptr = (taxis_t *)reshGetVal(taxisID, &taxisOps);
 
-  return (taxisptr->vdate);
+  return taxisptr->vdate;
 }
 
 
@@ -647,13 +644,13 @@ void taxisDefVdateBounds(int taxisID, int vdate_lb, int vdate_ub)
 {
   taxis_t *taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
-  if (taxisptr->vdate_lb != vdate_lb
-      || taxisptr->vdate_ub != vdate_ub
-      || taxisptr->has_bounds != TRUE)
+  if ( taxisptr->vdate_lb != vdate_lb
+       || taxisptr->vdate_ub != vdate_ub
+       || taxisptr->has_bounds == false )
     {
       taxisptr->vdate_lb = vdate_lb;
       taxisptr->vdate_ub = vdate_ub;
-      taxisptr->has_bounds = TRUE;
+      taxisptr->has_bounds = true;
       reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
     }
 }
@@ -678,7 +675,7 @@ int taxisInqVtime(int taxisID)
 {
   taxis_t *taxisptr = (taxis_t *)reshGetVal(taxisID, &taxisOps);
 
-  return (taxisptr->vtime);
+  return taxisptr->vtime;
 }
 
 
@@ -695,13 +692,13 @@ void taxisDefVtimeBounds(int taxisID, int vtime_lb, int vtime_ub)
 {
   taxis_t *taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
-  if (taxisptr->vtime_lb != vtime_lb
-      || taxisptr->vtime_ub != vtime_ub
-      || taxisptr->has_bounds != TRUE)
+  if ( taxisptr->vtime_lb != vtime_lb
+       || taxisptr->vtime_ub != vtime_ub
+       || taxisptr->has_bounds == false )
     {
       taxisptr->vtime_lb = vtime_lb;
       taxisptr->vtime_ub = vtime_ub;
-      taxisptr->has_bounds = TRUE;
+      taxisptr->has_bounds = true;
       reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
     }
 }
@@ -733,7 +730,7 @@ int taxisInqRdate(int taxisID)
       reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
     }
 
-  return (taxisptr->rdate);
+  return taxisptr->rdate;
 }
 
 /*
@@ -763,7 +760,7 @@ int taxisInqRtime(int taxisID)
       reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
     }
 
-  return (taxisptr->rtime);
+  return taxisptr->rtime;
 }
 
 /*
@@ -792,7 +789,7 @@ int taxisInqFdate(int taxisID)
       taxisptr->ftime = taxisptr->vtime;
     }
 
-  return (taxisptr->fdate);
+  return taxisptr->fdate;
 }
 
 /*
@@ -821,7 +818,7 @@ int taxisInqFtime(int taxisID)
       taxisptr->ftime = taxisptr->vtime;
     }
 
-  return (taxisptr->ftime);
+  return taxisptr->ftime;
 }
 
 /*
@@ -847,7 +844,7 @@ int taxisInqCalendar(int taxisID)
 {
   taxis_t *taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
-  return (taxisptr->calendar);
+  return taxisptr->calendar;
 }
 
 
@@ -855,7 +852,7 @@ int taxisInqTunit(int taxisID)
 {
   taxis_t *taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
-  return (taxisptr->unit);
+  return taxisptr->unit;
 }
 
 
@@ -879,7 +876,7 @@ int taxisInqNumavg(int taxisID)
 {
   taxis_t *taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
 
-  return (taxisptr->numavg);
+  return taxisptr->numavg;
 }
 
 
@@ -887,7 +884,7 @@ taxis_t *taxisPtr(int taxisID)
 {
   taxis_t *taxisptr = (taxis_t *)reshGetVal(taxisID, &taxisOps);
 
-  return (taxisptr);
+  return taxisptr;
 }
 
 void
@@ -918,8 +915,6 @@ ptaxisDefLongname(taxis_t *taxisptr, const char *longname)
 static void
 cdiDecodeTimevalue(int timeunit, double timevalue, int *days, int *secs)
 {
-  static int lwarn = TRUE;
-
   *days = 0;
   *secs = 0;
 
@@ -964,10 +959,11 @@ cdiDecodeTimevalue(int timeunit, double timevalue, int *days, int *secs)
     }
   else
     {
+      static bool lwarn = true;
       if ( lwarn )
 	{
 	  Warning("timeunit %s unsupported!", tunitNamePtr(timeunit));
-	  lwarn = FALSE;
+	  lwarn = false;
 	}
     }
 }
@@ -975,8 +971,6 @@ cdiDecodeTimevalue(int timeunit, double timevalue, int *days, int *secs)
 static
 void cdiEncodeTimevalue(int days, int secs, int timeunit, double *timevalue)
 {
-  static int lwarn = TRUE;
-
   if ( timeunit == TUNIT_SECOND )
     {
       *timevalue = days*86400. + secs;
@@ -1000,10 +994,11 @@ void cdiEncodeTimevalue(int days, int secs, int timeunit, double *timevalue)
     }
   else
     {
+      static bool lwarn = true;
       if ( lwarn )
 	{
 	  Warning("timeunit %s unsupported!", tunitNamePtr(timeunit));
-	  lwarn = FALSE;
+	  lwarn = false;
 	}
     }
 }
@@ -1087,7 +1082,7 @@ double vtime2timeval(int vdate, int vtime, taxis_t *taxis)
       rtime  = (*taxis).vtime;
     }
 
-  if ( rdate == 0 && rtime == 0 && vdate == 0 && vtime == 0 ) return(value);
+  if ( rdate == 0 && rtime == 0 && vdate == 0 && vtime == 0 ) return value;
 
   cdiDecodeDate(rdate, &ryear, &rmonth, &day);
   cdiDecodeTime(rtime, &hour, &minute, &second);
@@ -1140,7 +1135,7 @@ double vtime2timeval(int vdate, int vtime, taxis_t *taxis)
       value /= 30;
     }
 
-  return (value);
+  return value;
 }
 
 
@@ -1172,7 +1167,6 @@ splitTimevalue(double timevalue, int timeunit, int *date, int *time)
   int vdate = 0, vtime = 0;
   int hour, minute, second;
   int year, month, day;
-  static int lwarn = TRUE;
 
   if ( timeunit == TUNIT_SECOND )
     {
@@ -1212,10 +1206,11 @@ splitTimevalue(double timevalue, int timeunit, int *date, int *time)
     }
   else
     {
+      static bool lwarn = true;
       if ( lwarn )
 	{
 	  Warning("timeunit %s unsupported!", tunitNamePtr(timeunit));
-	  lwarn = FALSE;
+	  lwarn = false;
 	}
     }
 
@@ -1236,9 +1231,10 @@ splitTimevalue(double timevalue, int timeunit, int *date, int *time)
       vdate = cdiEncodeDate(year, month, day);
       vtime = cdiEncodeTime(hour, minute, second);
 
+      static bool lwarn = true;
       if ( lwarn )
         {
-          lwarn = FALSE;
+          lwarn = false;
           Warning("Reset wrong date/time to %4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d!",
                   year, month, day, hour, minute, second);
         }
@@ -1355,7 +1351,7 @@ double cdiEncodeTimeval(int date, int time, taxis_t *taxis)
   else
     timevalue = vtime2timeval(date, time, taxis);
 
-  return (timevalue);
+  return timevalue;
 }
 
 
@@ -1435,13 +1431,13 @@ taxisPrintKernel(taxis_t * taxisptr, FILE * fp)
           "fc_unit     = %d\n"
           "fc_period   = %g\n"
           "\n", taxisptr->self, taxisptr->self,
-          taxisptr->used, taxisptr->type,
+          (int)taxisptr->used, taxisptr->type,
           taxisptr->vdate, taxisptr->vtime,
           taxisptr->rdate, taxisptr->rtime,
           taxisptr->fdate, taxisptr->ftime,
           taxisptr->calendar, taxisptr->unit,
-          taxisptr->numavg, taxisptr->climatology,
-          taxisptr->has_bounds,
+          taxisptr->numavg, (int)taxisptr->climatology,
+          (int) taxisptr->has_bounds,
           vdate_lb, vtime_lb, vdate_ub, vtime_ub,
           taxisptr->fc_unit, taxisptr->fc_period );
 }

@@ -164,11 +164,10 @@ static struct idPair defineVlist ( int gridID, int zaxisID, int taxisID )
   vlistDefVarName(vlistID, varID1, "varname1");
   {
     int globfac[] = { 23, 42 };
-    vlistDefAttInt(vlistID, varID1, "seer's globule factors", DATATYPE_INT16,
-                   2, globfac);
+    cdiDefAttInt(vlistID, varID1, "seer's globule factors", DATATYPE_INT16, 2, globfac);
   }
   vlistDefVarName(vlistID, varID2, "varname2");
-  vlistDefAttTxt(vlistID, varID2, "txt demo", 6, "banana");
+  cdiDefAttTxt(vlistID, varID2, "txt demo", 6, "banana");
   vlistDefTaxis(vlistID, taxisID);
   int vlistID2 = vlistCreate();
   vlistDefVar(vlistID2, gridID, zaxisID, TIME_VARIABLE);

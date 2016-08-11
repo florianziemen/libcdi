@@ -1,4 +1,25 @@
-2016-06-??  Uwe Schulzweida
+2016-08-01  Uwe Schulzweida
+
+	* grb, grb2 write: added support for projection CDI_PROJ_RLL
+	* grb, grb2, ieg read: added support for projection CDI_PROJ_RLL
+
+2016-07-30  Uwe Schulzweida
+
+	* ieg write: added support for projection CDI_PROJ_RLL
+
+2016-07-28  Uwe Schulzweida
+
+	* iegWriteVarSliceDP: does not work (bug fix)
+
+2016-07-02  Uwe Schulzweida
+
+	* streamOpenAppend: call to gribContainersNew() missing (bug fix) [Bug #6944]
+
+2016-06-17  Uwe Schulzweida
+
+	* netCDF4: added support for attribute type NC_BYTE, NC_UBYTE, NC_USHORT and NC_UINT
+
+2016-06-10  Uwe Schulzweida
 
 	* Version 1.7.2 released
 

@@ -208,6 +208,17 @@ typedef struct {
 }
 VCT;
 
+#ifdef HAVE_LIBNETCDF
+typedef struct {
+  int gridID;
+  int xdimID;
+  int ydimID;
+  int xvarID;
+  int yvarID;
+  int avarID;
+}
+ncgrid_t;
+#endif
 
 typedef struct {
   int         self;
@@ -233,17 +244,17 @@ typedef struct {
   basetime_t  basetime;
   int         ncmode;
   int         vlistID;
-  int         xdimID[MAX_GRIDS_PS];	//Warning: synchronous array to vlist_to_pointer(vlistID)->gridIDs
-  int         ydimID[MAX_GRIDS_PS];	//Warning: synchronous array to vlist_to_pointer(vlistID)->gridIDs
+#ifdef HAVE_LIBNETCDF
+  ncgrid_t   *ncgrid;
+  int         xdimID[MAX_GRIDS_PS];
+  int         ydimID[MAX_GRIDS_PS];
   int         zaxisID[MAX_ZAXES_PS];	//Warning: synchronous array to vlist_to_pointer(vlistID)->zaxisIDs
   int         nczvarID[MAX_ZAXES_PS];
-  int         ncxvarID[MAX_GRIDS_PS];
-  int         ncyvarID[MAX_GRIDS_PS];
-  int         ncavarID[MAX_GRIDS_PS];
+  VCT         vct;
+#endif
   int         historyID;
   int         globalatts;
   int         localatts;
-  VCT         vct;
   int         unreduced;
   int         sortname;
   int         have_missval;
@@ -365,6 +376,8 @@ void    cdi_generate_vars(stream_t *streamptr);
 void    vlist_check_contents(int vlistID);
 
 void    cdi_create_records(stream_t *streamptr, int tsID);
+
+void streamFCopyRecord(stream_t *streamptr2, stream_t *streamptr1, const char *container_name);
 
 int     recordNewEntry(stream_t *streamptr, int tsID);
 

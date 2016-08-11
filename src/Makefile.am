@@ -24,6 +24,8 @@ libcdi_la_SOURCES = 	 \
 	cdf.h	 	 \
 	cdf_int.c	 \
 	cdf_int.h	 \
+	cdf_util.c	 \
+	cdf_util.h	 \
 	cdi.h	 	 \
 	cdi_error.c      \
 	cdi_limits.h	 \
@@ -71,7 +73,8 @@ libcdi_la_SOURCES = 	 \
 	resource_handle.h\
 	service.h	 \
 	servicelib.c     \
-	stream_cdf.c     \
+	stream_cdf_i.c   \
+	stream_cdf_o.c   \
 	stream_cdf.h	 \
 	stream_cgribex.c \
 	stream_cgribex.h \
@@ -83,8 +86,6 @@ libcdi_la_SOURCES = 	 \
 	stream_history.c \
 	stream_ieg.c     \
 	stream_ieg.h	 \
-	stream_fcommon.c \
-	stream_fcommon.h \
 	cdi_int.c        \
 	cdi_int.h	 \
 	stream_record.c  \
@@ -95,6 +96,8 @@ libcdi_la_SOURCES = 	 \
         grb_read.c       \
         cdf_write.c      \
         cdf_read.c       \
+        cdf_lazy_grid.c  \
+        cdf_lazy_grid.h  \
         subtype.c        \
         subtype.h        \
 	swap.h	 	 \
@@ -112,8 +115,8 @@ libcdi_la_SOURCES = 	 \
 	version.c      	 \
 	vlist.c 	 \
 	vlist.h	         \
-	vlist_att.c 	 \
-	vlist_att.h 	 \
+	cdi_att.c 	 \
+	cdi_att.h 	 \
 	vlist_var.c 	 \
 	vlist_var.h	 \
 	zaxis.c		 \

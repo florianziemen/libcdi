@@ -57,12 +57,12 @@ extern "C" {
 
 /* Compress types */
 
-#define  COMPRESS_NONE            0
-#define  COMPRESS_SZIP            1
-#define  COMPRESS_GZIP            2
-#define  COMPRESS_BZIP2           3
-#define  COMPRESS_ZIP             4
-#define  COMPRESS_JPEG            5
+#define  CDI_COMPRESS_NONE          0
+#define  CDI_COMPRESS_SZIP          1
+#define  CDI_COMPRESS_GZIP          2
+#define  CDI_COMPRESS_BZIP2         3
+#define  CDI_COMPRESS_ZIP           4
+#define  CDI_COMPRESS_JPEG          5
 
 /* external data types */
 
@@ -120,9 +120,9 @@ extern "C" {
 
 /* Chunks */
 
-#define  CHUNK_AUTO                 1  /* use default chunk size                                */
-#define  CHUNK_GRID                 2
-#define  CHUNK_LINES                3
+#define  CDI_CHUNK_AUTO             1  /* use default chunk size                                */
+#define  CDI_CHUNK_GRID             2
+#define  CDI_CHUNK_LINES            3
 
 /* GRID types */
 
@@ -140,7 +140,12 @@ extern "C" {
 #define  GRID_LCC2                 12  /* Lambert Conformal Conic (PROJ)                        */
 #define  GRID_LAEA                 13  /* Lambert Azimuthal Equal Area                          */
 #define  GRID_SINUSOIDAL           14  /* Sinusoidal                                            */
-#define  GRID_PROJECTION           15  /* Projected coordiantes                                 */
+#define  GRID_PROJECTION           15  /* Projected coordinates                                 */
+
+#define  CDI_PROJ_RLL              21  /* Rotated Latitude Longitude                            */
+#define  CDI_PROJ_LCC              22  /* Lambert Conformal Conic                               */
+#define  CDI_PROJ_LAEA             23  /* Lambert Azimuthal Equal Area                          */
+#define  CDI_PROJ_SINU             24  /* Sinusoidal                                            */
 
 /* ZAXIS types */
 
@@ -673,27 +678,27 @@ const char *vlistInqVarNamePtr(int vlistID, int varID);
 const char *vlistInqVarLongnamePtr(int vlistID, int varID);
 const char *vlistInqVarUnitsPtr(int vlistID, int varID);
 
-/* VLIST attributes */
+/* CDI attributes */
 
-/*      vlistInqNatts: Get number of variable attributes assigned to this variable */
-int     vlistInqNatts(int vlistID, int varID, int *nattsp);
-/*      vlistInqAtt: Get information about an attribute */
-int     vlistInqAtt(int vlistID, int varID, int attrnum, char *name, int *typep, int *lenp);
-int     vlistDelAtt(int vlistID, int varID, const char *name);
+/*      cdiInqNatts: Get number of attributes assigned to this variable */
+int     cdiInqNatts(int cdiID, int varID, int *nattsp);
+/*      cdiInqAtt: Get information about an attribute */
+int     cdiInqAtt(int cdiID, int varID, int attrnum, char *name, int *typep, int *lenp);
+int     cdiDelAtt(int cdiID, int varID, const char *name);
 
-/*      vlistDefAttInt: Define an integer attribute */
-int     vlistDefAttInt(int vlistID, int varID, const char *name, int type, int len, const int ip[]);
-/*      vlistDefAttFlt: Define a floating point attribute */
-int     vlistDefAttFlt(int vlistID, int varID, const char *name, int type, int len, const double dp[]);
-/*      vlistDefAttTxt: Define a text attribute */
-int     vlistDefAttTxt(int vlistID, int varID, const char *name, int len, const char *tp_cbuf);
+/*      cdiDefAttInt: Define an integer attribute */
+int     cdiDefAttInt(int cdiID, int varID, const char *name, int type, int len, const int ip[]);
+/*      cdiDefAttFlt: Define a floating point attribute */
+int     cdiDefAttFlt(int cdiID, int varID, const char *name, int type, int len, const double dp[]);
+/*      cdiDefAttTxt: Define a text attribute */
+int     cdiDefAttTxt(int cdiID, int varID, const char *name, int len, const char *tp_cbuf);
 
-/*      vlistInqAttInt: Get the value(s) of an integer attribute */
-int     vlistInqAttInt(int vlistID, int varID, const char *name, int mlen, int ip[]);
-/*      vlistInqAttFlt: Get the value(s) of a floating point attribute */
-int     vlistInqAttFlt(int vlistID, int varID, const char *name, int mlen, double dp[]);
-/*      vlistInqAttTxt: Get the value(s) of a text attribute */
-int     vlistInqAttTxt(int vlistID, int varID, const char *name, int mlen, char *tp_cbuf);
+/*      cdiInqAttInt: Get the value(s) of an integer attribute */
+int     cdiInqAttInt(int cdiID, int varID, const char *name, int mlen, int ip[]);
+/*      cdiInqAttFlt: Get the value(s) of a floating point attribute */
+int     cdiInqAttFlt(int cdiID, int varID, const char *name, int mlen, double dp[]);
+/*      cdiInqAttTxt: Get the value(s) of a text attribute */
+int     cdiInqAttTxt(int cdiID, int varID, const char *name, int mlen, char *tp_cbuf);
 
 
 /* GRID routines */
@@ -719,6 +724,18 @@ void    gridDestroy(int gridID);
 
 /*      gridDuplicate: Duplicate a Grid */
 int     gridDuplicate(int gridID);
+
+/*      gridDefProj: Define the projection ID of a Grid */
+void    gridDefProj(int gridID, int projID);
+
+/*      gridInqProj: Get the projection ID of a Grid */
+int     gridInqProj(int gridID);
+
+/*      gridDefProjType: Define the projection type */
+void    gridDefProjType(int gridID, int projtype);
+
+/*      gridInqProjType: Get the projection type */
+int     gridInqProjType(int gridID);
 
 /*      gridInqType: Get the type of a Grid */
 int     gridInqType(int gridID);
@@ -757,21 +774,23 @@ void    gridDefYvals(int gridID, const double yvals[]);
 int     gridInqYvals(int gridID, double yvals[]);
 
 /* CDI grid string key values */
-#define  CDI_GRID_XNAME      901  // X-axis name
-#define  CDI_GRID_YNAME      902  // Y-axis name
-#define  CDI_GRID_XDIMNAME   903  // X-axis dimension name
-#define  CDI_GRID_YDIMNAME   904  // Y-axis dimension name
-#define  CDI_GRID_VDIMNAME   905  // Vertex dimension name
-#define  CDI_GRID_XLONGNAME  906  // X-axis longname
-#define  CDI_GRID_YLONGNAME  907  // Y-axis longname
-#define  CDI_GRID_XUNITS     908  // X-axis units
-#define  CDI_GRID_YUNITS     909  // Y-axis units
+#define  CDI_KEY_XNAME      901  // X-axis name
+#define  CDI_KEY_YNAME      902  // Y-axis name
+#define  CDI_KEY_XDIMNAME   903  // X-axis dimension name
+#define  CDI_KEY_YDIMNAME   904  // Y-axis dimension name
+#define  CDI_KEY_VDIMNAME   905  // Vertex dimension name
+#define  CDI_KEY_XLONGNAME  906  // X-axis longname
+#define  CDI_KEY_YLONGNAME  907  // Y-axis longname
+#define  CDI_KEY_XUNITS     908  // X-axis units
+#define  CDI_KEY_YUNITS     909  // Y-axis units
+#define  CDI_KEY_MAPNAME    920  // Grid mapping var name
+#define  CDI_KEY_MAPPING    921  // Grid mapping name
 
-//      cdiGridDefString: Define a CDI grid string value from a key
-int     cdiGridDefString(int gridID, int key, int size, const char *mesg);
+//      cdiGridDefKeyStr: Define a CDI grid string value from a key
+int     cdiGridDefKeyStr(int gridID, int key, int size, const char *mesg);
 
-//      cdiGridInqString: Get a CDI grid string value from a key
-int     cdiGridInqString(int gridID, int key, int size, char *mesg);
+//      cdiGridInqKeyStr: Get a CDI grid string value from a key
+int     cdiGridInqKeyStr(int gridID, int key, int size, char *mesg);
 
 /*      gridDefXname: Define the name of a X-axis */
 void    gridDefXname(int gridID, const char *xname);
@@ -832,6 +851,10 @@ double  gridInqYinc(int gridID);
 
 int     gridIsCircular(int gridID);
 int     gridIsRotated(int gridID);
+
+void    gridInqProjParamRLL(int gridID, double *xpole, double *ypole, double *angle);
+void    gridDefProjParamRLL(int gridID, double xpole, double ypole, double angle);
+
 void    gridDefXpole(int gridID, double xpole);
 double  gridInqXpole(int gridID);
 void    gridDefYpole(int gridID, double ypole);
