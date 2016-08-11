@@ -1834,7 +1834,7 @@ void gridInqParamRLL(int gridID, double *xpole, double *ypole, double *angle)
 }
 
 
-void gridDefProjParamRLL(int gridID, double xpole, double ypole, double angle)
+void gridDefParamRLL(int gridID, double xpole, double ypole, double angle)
 {
   cdiGridDefKeyStr(gridID, CDI_KEY_MAPNAME, CDI_MAX_NAME, "rotated_pole");
 

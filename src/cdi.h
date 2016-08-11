@@ -853,7 +853,7 @@ int     gridIsCircular(int gridID);
 int     gridIsRotated(int gridID);
 
 void    gridInqParamRLL(int gridID, double *xpole, double *ypole, double *angle);
-void    gridDefProjParamRLL(int gridID, double xpole, double ypole, double angle);
+void    gridDefParamRLL(int gridID, double xpole, double ypole, double angle);
 
 void    gridDefXpole(int gridID, double xpole);
 double  gridInqXpole(int gridID);

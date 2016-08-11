@@ -672,7 +672,7 @@ void iegAddRecord(stream_t *streamptr, int param, int *pdb, int *gdb, double *vc
   struct addIfNewRes gridAdded = cdiVlistAddGridIfNew(vlistID, grid, 0);
   int gridID = gridAdded.Id;
   if ( !gridAdded.isNew ) Free(grid);
-  else if ( gridtype == GRID_PROJECTION ) gridDefProjParamRLL(gridID, xpole, ypole, 0);
+  else if ( gridtype == GRID_PROJECTION ) gridDefParamRLL(gridID, xpole, ypole, 0);
 
   int leveltype = iegGetZaxisType(IEG_P_LevelType(pdb));
   if ( leveltype == ZAXIS_HYBRID )

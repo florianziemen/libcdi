@@ -385,7 +385,7 @@ void cgribexAddRecord(stream_t * streamptr, int param, int *isec1, int *isec2, d
           double xpole =   ISEC2_LonSP*0.001 - 180;
           double ypole = - ISEC2_LatSP*0.001;
           double angle = - FSEC2_RotAngle;
-          gridDefProjParamRLL(gridID, xpole, ypole, angle);
+          gridDefParamRLL(gridID, xpole, ypole, angle);
         }
     }
   else

@@ -475,7 +475,7 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
       if ( fabs(ypole) > 0 ) ypole = -ypole; // change from south to north pole
       if ( fabs(angle) > 0 ) angle = -angle;
 
-      gridDefProjParamRLL(gridID, xpole, ypole, angle);
+      gridDefParamRLL(gridID, xpole, ypole, angle);
     }
 
   int zaxistype = gribapiGetZaxisType(gribEditionNumber(gh), leveltype1);
