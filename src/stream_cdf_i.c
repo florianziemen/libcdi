@@ -2502,21 +2502,14 @@ void cdf_set_proj_atts(int ncid, int gmapvarid, grid_t *grid)
           cdfGetAttText(ncid, gmapvarid, attname, attstringlen, attstring);
           str_tolower(attstring);
 
-          if ( strcmp(attstring, "lambert_azimuthal_equal_area") == 0 )
-            grid->type = GRID_LAEA;
-          else if ( strcmp(attstring, "lambert_conformal_conic") == 0 )
+          if ( strcmp(attstring, "lambert_conformal_conic") == 0 )
             grid->type = GRID_LCC2;
         }
       else if ( strcmp(attname, "earth_radius") == 0 )
         {
           double datt;
           cdfGetAttDouble(ncid, gmapvarid, attname, 1, &datt);
-          grid->laea.a = datt;
           grid->lcc2.a = datt;
-        }
-      else if ( strcmp(attname, "longitude_of_projection_origin") == 0 )
-        {
-          cdfGetAttDouble(ncid, gmapvarid, attname, 1, &grid->laea.lon_0);
         }
       else if ( strcmp(attname, "longitude_of_central_meridian") == 0 )
         {
@@ -2526,7 +2519,6 @@ void cdf_set_proj_atts(int ncid, int gmapvarid, grid_t *grid)
         {
           double datt;
           cdfGetAttDouble(ncid, gmapvarid, attname, 1, &datt);
-          grid->laea.lat_0 = datt;
           grid->lcc2.lat_0 = datt;
         }
       else if ( strcmp(attname, "standard_parallel") == 0 )

@@ -39,8 +39,7 @@ static const char Grids[][17] = {
   /* 10 */  "curvilinear",
   /* 11 */  "lcc",
   /* 12 */  "lcc2",
-  /* 13 */  "laea",
-  /* 15 */  "projection",
+  /* 13 */  "projection",
 };
 
 /* must match table below */
@@ -127,11 +126,6 @@ void grid_init(grid_t *gridptr)
   gridptr->lcc2.lat_2    = 0.0;
   gridptr->lcc2.a        = 0.0;
   gridptr->lcc2.defined  = FALSE;
-
-  gridptr->laea.lon_0    = 0.0;
-  gridptr->laea.lat_0    = 0.0;
-  gridptr->laea.a        = 0.0;
-  gridptr->laea.defined  = FALSE;
 
   gridptr->gme.nd        = 0;
   gridptr->gme.ni        = 0;
@@ -314,7 +308,6 @@ void cdiGridTypeInit(grid_t *gridptr, int gridtype, int size)
     case GRID_GENERIC:
     case GRID_PROJECTION:
     case GRID_LCC2:
-    case GRID_LAEA:
       {
         if ( gridptr->x.name[0] == 0 ) gridSetName(gridptr->x.name, "x");
         if ( gridptr->y.name[0] == 0 ) gridSetName(gridptr->y.name, "y");
@@ -2354,7 +2347,6 @@ int gridCompareP ( void * gridptr1, void * gridptr2 )
   if ( g1->lcc.scanflag  != g2->lcc.scanflag ) return differ;
   if ( g1->lcc.defined   != g2->lcc.defined  ) return differ;
   if ( g1->lcc2.defined  != g2->lcc2.defined ) return differ;
-  if ( g1->laea.defined  != g2->laea.defined ) return differ;
   if ( g1->isCyclic      != g2->isCyclic     ) return differ;
   if ( g1->x.flag        != g2->x.flag       ) return differ;
   if ( g1->y.flag        != g2->y.flag       ) return differ;
@@ -2390,9 +2382,6 @@ int gridCompareP ( void * gridptr1, void * gridptr2 )
   if ( IS_NOT_EQUAL(g1->lcc2.lat_1    , g2->lcc2.lat_1)    ) return differ;
   if ( IS_NOT_EQUAL(g1->lcc2.lat_2    , g2->lcc2.lat_2)    ) return differ;
   if ( IS_NOT_EQUAL(g1->lcc2.a        , g2->lcc2.a)        ) return differ;
-  if ( IS_NOT_EQUAL(g1->laea.lon_0    , g2->laea.lon_0)    ) return differ;
-  if ( IS_NOT_EQUAL(g1->laea.lat_0    , g2->laea.lat_0)    ) return differ;
-  if ( IS_NOT_EQUAL(g1->laea.a        , g2->laea.a)        ) return differ;
 
   const double *restrict g1_xvals = g1->vtable->inqXValsPtr(g1),
     *restrict g2_xvals = g2->vtable->inqXValsPtr(g2);
@@ -2543,7 +2532,6 @@ void gridComplete(grid_t *grid)
     case GRID_GENERIC:
     case GRID_LCC:
     case GRID_LCC2:
-    case GRID_LAEA:
     case GRID_PROJECTION:
       {
 	if ( grid->x.size > 0 ) gridDefXsize(gridID, grid->x.size);
@@ -2590,9 +2578,6 @@ void gridComplete(grid_t *grid)
 
         switch (gridtype)
           {
-          case GRID_LAEA:
-            gridDefLaea(gridID, grid->laea.a, grid->laea.lon_0, grid->laea.lat_0);
-            break;
           case GRID_LCC2:
             gridDefLcc2(gridID, grid->lcc2.a, grid->lcc2.lon_0, grid->lcc2.lat_0, grid->lcc2.lat_1, grid->lcc2.lat_2);
             break;
@@ -2706,7 +2691,7 @@ int gridGenerate(const grid_t *grid)
   int valdef_group1 = 0;
   static const int valdef_group1_tab[] = {
     GRID_LONLAT, GRID_GAUSSIAN, GRID_UNSTRUCTURED, GRID_CURVILINEAR,
-    GRID_GENERIC, GRID_LCC, GRID_LCC2, GRID_LAEA,
+    GRID_GENERIC, GRID_LCC, GRID_LCC2,
     GRID_PROJECTION
   };
   for ( size_t i = 0; i < sizeof (valdef_group1_tab) / sizeof (valdef_group1_tab[0]); ++i)
@@ -2732,9 +2717,6 @@ int gridGenerate(const grid_t *grid)
   gridptr->y.inc = grid->y.inc;
   if ( valdef_group1 && grid->area)
     gridDefArea(gridID, grid->area);
-  gridptr->laea.a = grid->laea.a;
-  gridptr->laea.lon_0 = grid->laea.lon_0;
-  gridptr->laea.lat_0 = grid->laea.lat_0;
   gridptr->lcc2.a = grid->lcc2.a;
   gridptr->lcc2.lon_0 = grid->lcc2.lon_0;
   gridptr->lcc2.lat_0 = grid->lcc2.lat_0;
@@ -3441,7 +3423,6 @@ void gridPrintKernel(grid_t *gridptr, int index, int opt, FILE *fp)
     case GRID_GAUSSIAN_REDUCED:
     case GRID_GENERIC:
     case GRID_LCC2:
-    case GRID_LAEA:
     case GRID_PROJECTION:
     case GRID_CURVILINEAR:
     case GRID_UNSTRUCTURED:
@@ -3489,15 +3470,6 @@ void gridPrintKernel(grid_t *gridptr, int index, int opt, FILE *fp)
               }
           }
 
-	if ( type == GRID_LAEA )
-	  {
-	    double a = 0, lon_0 = 0, lat_0 = 0;
-	    gridInqLaea(gridID, &a, &lon_0, &lat_0);
-	    fprintf(fp, "a         = %.*g\n"
-                    "lon_0     = %.*g\n"
-                    "lat_0     = %.*g\n", dig, a, dig, lon_0, dig, lat_0);
-	  }
-
 	if ( type == GRID_LCC2 )
 	  {
 	    double a = 0, lon_0 = 0, lat_0 = 0, lat_1 = 0, lat_2 = 0;
@@ -3516,8 +3488,7 @@ void gridPrintKernel(grid_t *gridptr, int index, int opt, FILE *fp)
 
 	    if ( type == GRID_LONLAT     || type == GRID_GAUSSIAN ||
 		 type == GRID_PROJECTION ||
-		 type == GRID_GENERIC    || type == GRID_LCC2     ||
-                 type == GRID_LAEA )
+		 type == GRID_GENERIC    || type == GRID_LCC2  )
 	      {
 		xfirst = gridInqXval(gridID, 0);
 		xinc   = gridInqXinc(gridID);
@@ -3550,8 +3521,7 @@ void gridPrintKernel(grid_t *gridptr, int index, int opt, FILE *fp)
 
 	    if ( type == GRID_LONLAT || type == GRID_GENERIC ||
                  type == GRID_PROJECTION ||
-		 type == GRID_GENERIC    || type == GRID_LCC2 ||
-		 type == GRID_LAEA )
+		 type == GRID_GENERIC    || type == GRID_LCC2  )
 	      {
 		yfirst = gridInqYval(gridID, 0);
 		yinc   = gridInqYinc(gridID);
@@ -3868,44 +3838,6 @@ void gridInqLcc2(int gridID, double *earth_radius, double *lon_0, double *lat_0,
         }
       else
         Warning("LCC2 grid undefined (gridID = %d)", gridID);
-    }
-}
-
-void gridDefLaea(int gridID, double earth_radius, double lon_0, double lat_0)
-{
-  grid_t *gridptr = gridID2Ptr(gridID);
-
-  if ( gridptr->type != GRID_LAEA )
-    Warning("Definition of LAEA grid for %s grid not allowed!",
-            gridNamePtr(gridptr->type));
-  else
-    {
-      gridptr->laea.a       = earth_radius;
-      gridptr->laea.lon_0   = lon_0;
-      gridptr->laea.lat_0   = lat_0;
-      gridptr->laea.defined = TRUE;
-      gridMark4Update(gridID);
-    }
-}
-
-
-void gridInqLaea(int gridID, double *earth_radius, double *lon_0, double *lat_0)
-{
-  grid_t* gridptr = gridID2Ptr(gridID);
-
-  if ( gridptr->type != GRID_LAEA )
-    Warning("Inquire of LAEA grid definition for %s grid not allowed!",
-            gridNamePtr(gridptr->type));
-  else
-    {
-      if ( gridptr->laea.defined )
-        {
-          *earth_radius = gridptr->laea.a;
-          *lon_0        = gridptr->laea.lon_0;
-          *lat_0        = gridptr->laea.lat_0;
-        }
-      else
-        Warning("LAEA grid undefined (gridID = %d)", gridID);
     }
 }
 
@@ -4340,7 +4272,6 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
     gridP->lcc.scanflag  =   intBuffer[4];
     gridP->lcc.defined   =   (short)intBuffer[5];
     gridP->lcc2.defined  =   (short)intBuffer[6];
-    gridP->laea.defined  =   intBuffer[7];
     gridP->isCyclic      =   (short)intBuffer[8];
     gridP->x.flag        =   (short)intBuffer[10];
     gridP->y.flag        =   (short)intBuffer[11];
@@ -4399,9 +4330,6 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
     gridP->lcc2.lat_1 = doubleBuffer[15];
     gridP->lcc2.lat_2 = doubleBuffer[16];
     gridP->lcc2.a = doubleBuffer[17];
-    gridP->laea.lon_0 = doubleBuffer[18];
-    gridP->laea.lat_0 = doubleBuffer[19];
-    gridP->laea.a = doubleBuffer[20];
   }
 
   int irregular = gridP->type == GRID_UNSTRUCTURED
@@ -4539,7 +4467,6 @@ gridPack(void * voidP, void * packBuffer, int packBufferSize,
     intBuffer[4]  = gridP->lcc.scanflag;
     intBuffer[5]  = gridP->lcc.defined;
     intBuffer[6]  = gridP->lcc2.defined;
-    intBuffer[7]  = gridP->laea.defined;
     intBuffer[8]  = gridP->isCyclic;
     intBuffer[10] = gridP->x.flag;
     intBuffer[11] = gridP->y.flag;
@@ -4601,9 +4528,6 @@ gridPack(void * voidP, void * packBuffer, int packBufferSize,
     doubleBuffer[15] = gridP->lcc2.lat_1;
     doubleBuffer[16] = gridP->lcc2.lat_2;
     doubleBuffer[17] = gridP->lcc2.a;
-    doubleBuffer[18] = gridP->laea.lon_0;
-    doubleBuffer[19] = gridP->laea.lat_0;
-    doubleBuffer[20] = gridP->laea.a;
 
     serializePack(doubleBuffer, gridNdouble, DATATYPE_FLT64,
                   packBuffer, packBufferSize, packBufferPos, context);

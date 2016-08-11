@@ -1,5 +1,6 @@
 2016-08-11  Uwe Schulzweida
 
+	* Removed obsolete grid type GRID_LAEA
 	* Removed obsolete grid type GRID_SINUSOIDAL
 	* Removed obsolete CDI grid functions gridXXXXpole(), gridXXXYpole(), gridXXXAngle() and gridIsRotated()
 
