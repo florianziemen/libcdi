@@ -1767,7 +1767,7 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
 	int xsize = gridInqXsize(gridID),
           ysize = gridInqYsize(gridID);
 
-	gridInqLCC(gridID, &originLon, &originLat, &lonParY, &lat1, &lat2, &xincm, &yincm,
+	gridInqParamLCC(gridID, &originLon, &originLat, &lonParY, &lat1, &lat2, &xincm, &yincm,
 		   &projflag, &scanflag);
 
 	ISEC2_GridType = GRIB1_GTYPE_LCC;

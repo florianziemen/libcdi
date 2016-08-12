@@ -2562,7 +2562,7 @@ void gridComplete(grid_t *grid)
         switch (gridtype)
           {
           case GRID_LCC:
-            gridDefLCC(gridID, grid->lcc.originLon, grid->lcc.originLat, grid->lcc.lonParY,
+            gridDefParamLCC(gridID, grid->lcc.originLon, grid->lcc.originLat, grid->lcc.lonParY,
                        grid->lcc.lat1, grid->lcc.lat2, grid->lcc.xinc, grid->lcc.yinc,
                        grid->lcc.projflag, grid->lcc.scanflag);
             break;
@@ -3532,7 +3532,7 @@ void gridPrintKernel(grid_t *gridptr, int index, int opt, FILE *fp)
       {
 	double originLon = 0, originLat = 0, lonParY = 0, lat1 = 0, lat2 = 0, xincm = 0, yincm = 0;
 	int projflag = 0, scanflag = 0;
-	gridInqLCC(gridID, &originLon, &originLat, &lonParY, &lat1, &lat2, &xincm, &yincm,
+	gridInqParamLCC(gridID, &originLon, &originLat, &lonParY, &lat1, &lat2, &xincm, &yincm,
 		   &projflag, &scanflag);
 
 	fprintf(fp,
@@ -3662,10 +3662,10 @@ const double *gridInqYvalsPtr(int gridID)
 }
 
 /*
-@Function  gridDefLCC
+@Function  gridDefParamLCC
 @Title     Define the parameter of a Lambert Conformal Conic grid
 
-@Prototype void gridDefLCC(int gridID, double originLon, double originLat, double lonParY, double lat1, double lat2, double xinc, double yinc, int projflag, int scanflag)
+@Prototype void gridDefParamLCC(int gridID, double originLon, double originLat, double lonParY, double lat1, double lat2, double xinc, double yinc, int projflag, int scanflag)
 @Parameter
     @Item  gridID    Grid ID, from a previous call to @fref{gridCreate}.
     @Item  originLon Longitude of the first grid point.
@@ -3679,11 +3679,11 @@ const double *gridInqYvalsPtr(int gridID)
     @Item  scanflag  Scanning mode flag.
 
 @Description
-The function @func{gridDefLCC} defines the parameter of a Lambert Conformal Conic grid.
+The function @func{gridDefParamLCC} defines the parameter of a Lambert Conformal Conic grid.
 
 @EndFunction
 */
-void gridDefLCC(int gridID, double originLon, double originLat, double lonParY,
+void gridDefParamLCC(int gridID, double originLon, double originLat, double lonParY,
                 double lat1, double lat2, double xinc, double yinc,
                 int projflag, int scanflag)
 {
@@ -3709,10 +3709,10 @@ void gridDefLCC(int gridID, double originLon, double originLat, double lonParY,
 }
 
 /*
-@Function  gridInqLCC
+@Function  gridInqParamLCC
 @Title     Get the parameter of a Lambert Conformal Conic grid
 
-@Prototype void gridInqLCC(int gridID, double *originLon, double *originLat, double *lonParY, double *lat1, double *lat2, double *xinc, double *yinc, int *projflag, int *scanflag)
+@Prototype void gridInqParamLCC(int gridID, double *originLon, double *originLat, double *lonParY, double *lat1, double *lat2, double *xinc, double *yinc, int *projflag, int *scanflag)
 @Parameter
     @Item  gridID    Grid ID, from a previous call to @fref{gridCreate} or @fref{vlistInqVarGrid}.
     @Item  originLon Longitude of the first grid point.
@@ -3726,11 +3726,11 @@ void gridDefLCC(int gridID, double originLon, double originLat, double lonParY,
     @Item  scanflag  Scanning mode flag.
  
 @Description
-The function @func{gridInqLCC} returns the parameter of a Lambert Conformal Conic grid.
+The function @func{gridInqParamLCC} returns the parameter of a Lambert Conformal Conic grid.
 
 @EndFunction
 */
-void gridInqLCC(int gridID, double *originLon, double *originLat, double *lonParY,
+void gridInqParamLCC(int gridID, double *originLon, double *originLat, double *lonParY,
                 double *lat1, double *lat2, double *xinc, double *yinc,
                 int *projflag, int *scanflag)
 {
