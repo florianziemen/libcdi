@@ -1,3 +1,7 @@
+2016-08-12  Uwe Schulzweida
+
+	* Removed obsolete grid type GRID_LCC2
+
 2016-08-11  Uwe Schulzweida
 
 	* Removed obsolete grid type GRID_LAEA

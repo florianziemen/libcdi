@@ -624,8 +624,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
 
   char gmapvarname[CDI_MAX_NAME]; gmapvarname[0] = 0;
 
-  if ( gridtype == GRID_LCC2 )       strcpy(gmapvarname, "Lambert_CC");
-  else  cdf_get_gmapvarname(gridID, gmapvarname);
+  cdf_get_gmapvarname(gridID, gmapvarname);
 
   if ( gmapvarname[0] ) cdf_put_att_text(fileID, ncvarid, "grid_mapping", strlen(gmapvarname), gmapvarname);
 

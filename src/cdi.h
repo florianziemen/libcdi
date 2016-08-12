@@ -137,8 +137,7 @@ extern "C" {
 #define  GRID_UNSTRUCTURED          9  /* General unstructured grid                             */
 #define  GRID_CURVILINEAR          10  /* Curvilinear grid                                      */
 #define  GRID_LCC                  11  /* Lambert Conformal Conic (GRIB)                        */
-#define  GRID_LCC2                 12  /* Lambert Conformal Conic (PROJ)                        */
-#define  GRID_PROJECTION           13  /* Projected coordinates                                 */
+#define  GRID_PROJECTION           12  /* Projected coordinates                                 */
 
 #define  CDI_PROJ_RLL              21  /* Rotated Latitude Longitude                            */
 #define  CDI_PROJ_LCC              22  /* Lambert Conformal Conic                               */
@@ -901,15 +900,6 @@ void    gridInqUUID(int gridID, unsigned char uuid[CDI_UUID_SIZE]);
 /* Lambert Conformal Conic grid (GRIB version) */
 void gridDefLCC(int gridID, double originLon, double originLat, double lonParY, double lat1, double lat2, double xinc, double yinc, int projflag, int scanflag);
 void gridInqLCC(int gridID, double *originLon, double *originLat, double *lonParY, double *lat1, double *lat2, double *xinc, double *yinc, int *projflag, int *scanflag);
-
-/* Lambert Conformal Conic 2 grid (PROJ version) */
-void gridDefLcc2(int gridID, double earth_radius, double lon_0, double lat_0, double lat_1, double lat_2);
-void gridInqLcc2(int gridID, double *earth_radius, double *lon_0, double *lat_0, double *lat_1, double *lat_2);
-
-/* Lambert Azimuthal Equal Area grid */
-void gridDefLaea(int gridID, double earth_radius, double lon_0, double lat_0);
-void gridInqLaea(int gridID, double *earth_radius, double *lon_0, double *lat_0);
-
 
 void    gridDefArea(int gridID, const double area[]);
 void    gridInqArea(int gridID, double area[]);

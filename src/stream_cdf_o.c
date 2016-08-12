@@ -1931,46 +1931,6 @@ void cdf_def_mapping(stream_t *streamptr, int gridID)
 }
 
 static
-void cdfDefMapping(stream_t *streamptr, int gridID)
-{
-  int ncvarid = UNDEFID;
-  int fileID  = streamptr->fileID;
-
-  if ( gridInqType(gridID) == GRID_LCC2 )
-    {
-      static const char varname[] = "Lambert_CC";
-      static const char mapname[] = "lambert_conformal_conic";
-
-      cdf_redef(fileID);
-
-      int ncerrcode = nc_def_var(fileID, varname, (nc_type) NC_CHAR, 0, NULL, &ncvarid);
-      if ( ncerrcode == NC_NOERR )
-        {
-          double radius, lon_0, lat_0, lat_1, lat_2;
-
-          gridInqLcc2(gridID, &radius, &lon_0, &lat_0, &lat_1, &lat_2);
-
-          cdf_put_att_text(fileID, ncvarid, "grid_mapping_name", strlen(mapname), mapname);
-          if ( radius > 0 )
-            cdf_put_att_double(fileID, ncvarid, "earth_radius", NC_DOUBLE, 1, &radius);
-          cdf_put_att_double(fileID, ncvarid, "longitude_of_central_meridian", NC_DOUBLE, 1, &lon_0);
-          cdf_put_att_double(fileID, ncvarid, "latitude_of_projection_origin", NC_DOUBLE, 1, &lat_0);
-          if ( IS_EQUAL(lat_1, lat_2) )
-            cdf_put_att_double(fileID, ncvarid, "standard_parallel", NC_DOUBLE, 1, &lat_1);
-          else
-            {
-              double lat_1_2[2];
-              lat_1_2[0] = lat_1;
-              lat_1_2[1] = lat_2;
-              cdf_put_att_double(fileID, ncvarid, "standard_parallel", NC_DOUBLE, 2, lat_1_2);
-            }
-        }
-
-      cdf_enddef(fileID);
-    }
-}
-
-static
 void cdfDefGrid(stream_t *streamptr, int gridID, int gridindex)
 {
   if ( streamptr->ncgrid[gridindex].xdimID != UNDEFID ) return;
@@ -2049,13 +2009,6 @@ void cdfDefGrid(stream_t *streamptr, int gridID, int gridindex)
     {
       cdfDefTrajLon(streamptr, gridID, gridindex);
       cdfDefTrajLat(streamptr, gridID, gridindex);
-    }
-  else if ( gridtype == GRID_LCC2 )
-    {
-      cdfDefXaxis(streamptr, gridID, gridindex, 1);
-      cdfDefYaxis(streamptr, gridID, gridindex, 1);
-
-      cdfDefMapping(streamptr, gridID);
     }
   /*
   else if ( gridtype == GRID_LCC )

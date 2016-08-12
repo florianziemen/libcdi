@@ -72,16 +72,6 @@ struct grid_lcc_t {
   short   defined;
 };
 
-// Lambert Conformal Conic 2
-struct grid_lcc2_t {
-  double  lon_0;
-  double  lat_0;
-  double  lat_1;
-  double  lat_2;
-  double  a;
-  short   defined;
-};
-
 // GME Grid
 struct grid_gme_t {
   int     nd, ni, ni2, ni3;       /* parameter for GRID_GME         */
@@ -97,7 +87,6 @@ struct grid_t {
   mask_t *mask_gme;
   double *area;
   struct grid_lcc_t  lcc;
-  struct grid_lcc2_t lcc2;
   struct grid_gme_t  gme;
   short   isCyclic;               /* TRUE for global cyclic grids   */
   int     number, position;       /* parameter for GRID_REFERENCE   */

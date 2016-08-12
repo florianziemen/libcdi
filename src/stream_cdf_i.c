@@ -2481,67 +2481,6 @@ void cdf_read_mapping_atts(int ncid, int gmapvarid, int projID, const char *varn
 }
 
 static
-void cdf_set_proj_atts(int ncid, int gmapvarid, grid_t *grid)
-{
-  int nvatts;
-  cdf_inq_varnatts(ncid, gmapvarid, &nvatts);
-
-  for ( int iatt = 0; iatt < nvatts; iatt++ )
-    {
-      nc_type atttype;
-      size_t attlen;
-      char attname[CDI_MAX_NAME];
-      cdf_inq_attname(ncid, gmapvarid, iatt, attname);
-      cdf_inq_attlen(ncid, gmapvarid, attname, &attlen);
-      cdf_inq_atttype(ncid, gmapvarid, attname, &atttype);
-
-      if ( strcmp(attname, "grid_mapping_name") == 0 )
-        {
-          enum {attstringlen = 8192};
-          char attstring[attstringlen];
-          cdfGetAttText(ncid, gmapvarid, attname, attstringlen, attstring);
-          str_tolower(attstring);
-
-          if ( strcmp(attstring, "lambert_conformal_conic") == 0 )
-            grid->type = GRID_LCC2;
-        }
-      else if ( strcmp(attname, "earth_radius") == 0 )
-        {
-          double datt;
-          cdfGetAttDouble(ncid, gmapvarid, attname, 1, &datt);
-          grid->lcc2.a = datt;
-        }
-      else if ( strcmp(attname, "longitude_of_central_meridian") == 0 )
-        {
-          cdfGetAttDouble(ncid, gmapvarid, attname, 1, &grid->lcc2.lon_0);
-        }
-      else if ( strcmp(attname, "latitude_of_projection_origin") == 0 )
-        {
-          double datt;
-          cdfGetAttDouble(ncid, gmapvarid, attname, 1, &datt);
-          grid->lcc2.lat_0 = datt;
-        }
-      else if ( strcmp(attname, "standard_parallel") == 0 )
-        {
-          if ( attlen == 1 )
-            {
-              double datt;
-              cdfGetAttDouble(ncid, gmapvarid, attname, 1, &datt);
-              grid->lcc2.lat_1 = datt;
-              grid->lcc2.lat_2 = datt;
-            }
-          else
-            {
-              double datt2[2];
-              cdfGetAttDouble(ncid, gmapvarid, attname, 2, datt2);
-              grid->lcc2.lat_1 = datt2[0];
-              grid->lcc2.lat_2 = datt2[1];
-            }
-        }
-    }
-}
-
-static
 void cdf_set_grid_to_similar_vars(ncvar_t *ncvar1, ncvar_t *ncvar2, int gridtype, int xdimid, int ydimid)
 {
   if ( ncvar2->isvar == TRUE && ncvar2->gridID == UNDEFID )
@@ -2675,22 +2614,11 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
             if ( cdf_set_unstructured_par(ncvar, grid, xdimid, ydimid, number_of_grid_used, uuidOfHGrid) )
               continue;
 
-          if ( lproj )
+          if ( lproj && lgrid )
             {
-              int ncid = ncvars[gmapvarid].ncid;
-              if ( !testproj && ncvar->gridtype != GRID_CURVILINEAR )
-                {
-                  cdf_set_proj_atts(ncid, gmapvarid, grid);
-                }
-              else if ( testproj )
-                {
-                  if ( lgrid )
-                    {
-                      int dumid;
-                      cdf_read_coordinates(lazyProj, ncvar, ncvars, ncdims, timedimid,
-                                           xaxisid, yaxisid, xsize, ysize, &dumid);
-                    }
-                }
+              int dumid;
+              cdf_read_coordinates(lazyProj, ncvar, ncvars, ncdims, timedimid,
+                                   xaxisid, yaxisid, xsize, ysize, &dumid);
 	    }
 
 	  if ( CDI_Debug )
