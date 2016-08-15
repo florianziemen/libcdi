@@ -1814,10 +1814,12 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
     case GRID_GME:
       {
 	ISEC2_GridType   = GRIB1_GTYPE_GME;
-	ISEC2_GME_ND     = gridInqGMEnd(gridID);
-	ISEC2_GME_NI     = gridInqGMEni(gridID);
-	ISEC2_GME_NI2    = gridInqGMEni2(gridID);
-	ISEC2_GME_NI3    = gridInqGMEni3(gridID);
+        int nd = 0, ni = 0, ni2 = 0, ni3 = 0;
+        gridInqParamGME(gridID, &nd, &ni, &ni2, &ni3);
+	ISEC2_GME_ND     = nd;
+	ISEC2_GME_NI     = ni;
+	ISEC2_GME_NI2    = ni2;
+	ISEC2_GME_NI3    = ni3;
 	ISEC2_GME_AFlag  = 0;
 	ISEC2_GME_LatPP  = 90000;
 	ISEC2_GME_LonPP  = 0;

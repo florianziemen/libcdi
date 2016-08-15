@@ -1855,11 +1855,14 @@ void gridDefParamRLL(int gridID, double xpole, double ypole, double angle)
 
 @EndFunction
 */
-int gridInqGMEnd(int gridID)
+void gridInqParamGME(int gridID, int *nd, int *ni, int *ni2, int *ni3)
 {
   grid_t *gridptr = gridID2Ptr(gridID);
 
-  return gridptr->gme.nd;
+  *nd  = gridptr->gme.nd;
+  *ni  = gridptr->gme.ni;
+  *ni2 = gridptr->gme.ni2;
+  *ni3 = gridptr->gme.ni3;
 }
 
 /*
@@ -1872,116 +1875,15 @@ int gridInqGMEnd(int gridID)
 
 @EndFunction
 */
-void gridDefGMEnd(int gridID, int nd)
+void gridDefParamGME(int gridID, int nd, int ni, int ni2, int ni3)
 {
   grid_t *gridptr = gridID2Ptr(gridID);
 
-  if (gridptr->gme.nd != nd)
+  if ( gridptr->gme.nd != nd )
     {
-      gridptr->gme.nd = nd;
-      gridMark4Update(gridID);
-    }
-}
-
-/*
-@Function
-@Title
-
-@Prototype
-@Parameter
-    @Item  Grid identifier
-
-@EndFunction
-*/
-int gridInqGMEni(int gridID)
-{
-  grid_t *gridptr = gridID2Ptr(gridID);
-
-  return gridptr->gme.ni;
-}
-
-/*
-@Function
-@Title
-
-@Prototype
-@Parameter
-    @Item  Grid identifier
-
-@EndFunction
-*/
-void gridDefGMEni(int gridID, int ni)
-{
-  grid_t *gridptr = gridID2Ptr(gridID);
-
-  if ( gridptr->gme.ni != ni )
-    {
-      gridptr->gme.ni = ni;
-      gridMark4Update(gridID);
-    }
-}
-
-/*
-@Function
-@Title
-
-@Prototype
-@Parameter
-    @Item  Grid identifier
-
-@EndFunction
-*/
-int gridInqGMEni2(int gridID)
-{
-  grid_t *gridptr = gridID2Ptr(gridID);
-
-  return gridptr->gme.ni2;
-}
-
-/*
-@Function
-@Title
-
-@Prototype
-@Parameter
-    @Item  Grid identifier
-
-@EndFunction
-*/
-void gridDefGMEni2(int gridID, int ni2)
-{
-  grid_t *gridptr = gridID2Ptr(gridID);
-
-  if ( gridptr->gme.ni2 != ni2 )
-    {
+      gridptr->gme.nd  = nd;
+      gridptr->gme.ni  = ni;
       gridptr->gme.ni2 = ni2;
-      gridMark4Update(gridID);
-    }
-}
-
-/*
-@Function
-@Title
-
-@Prototype
-@Parameter
-    @Item  Grid identifier
-
-@EndFunction
-*/
-int gridInqGMEni3(int gridID)
-{
-  grid_t *gridptr = gridID2Ptr(gridID);
-
-  return gridptr->gme.ni3;
-}
-
-void gridDefGMEni3(int gridID, int ni3)
-{
-  grid_t *gridptr = gridID2Ptr(gridID);
-
-  if ( gridptr->gme.ni3 != ni3 )
-    {
       gridptr->gme.ni3 = ni3;
       gridMark4Update(gridID);
     }
@@ -2612,10 +2514,7 @@ void gridComplete(grid_t *grid)
       }
     case GRID_GME:
       {
-        gridDefGMEnd(gridID, grid->gme.nd);
-        gridDefGMEni(gridID, grid->gme.ni);
-        gridDefGMEni2(gridID, grid->gme.ni2);
-        gridDefGMEni3(gridID, grid->gme.ni3);
+        gridDefParamGME(gridID, grid->gme.nd, grid->gme.ni, grid->gme.ni2, grid->gme.ni3);
         break;
       }
       /*

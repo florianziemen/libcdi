@@ -1,3 +1,7 @@
+2016-08-15  Uwe Schulzweida
+
+	* Changed interface for GME grid parameter
+
 2016-08-12  Uwe Schulzweida
 
 	* Removed obsolete grid type GRID_LCC2

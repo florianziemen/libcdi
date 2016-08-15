@@ -850,15 +850,6 @@ int     gridIsCircular(int gridID);
 
 int     gridInqTrunc(int gridID);
 void    gridDefTrunc(int gridID, int trunc);
-/* Hexagonal GME grid */
-void    gridDefGMEnd(int gridID, int nd);
-int     gridInqGMEnd(int gridID);
-void    gridDefGMEni(int gridID, int ni);
-int     gridInqGMEni(int gridID);
-void    gridDefGMEni2(int gridID, int ni2);
-int     gridInqGMEni2(int gridID);
-void    gridDefGMEni3(int gridID, int ni3);
-int     gridInqGMEni3(int gridID);
 
 /* Reference of an unstructured grid */
 
@@ -895,10 +886,14 @@ void    gridInqUUID(int gridID, unsigned char uuid[CDI_UUID_SIZE]);
 #endif
 
 /* Rotated Lon/Lat grid */
-void    gridInqParamRLL(int gridID, double *xpole, double *ypole, double *angle);
 void    gridDefParamRLL(int gridID, double xpole, double ypole, double angle);
+void    gridInqParamRLL(int gridID, double *xpole, double *ypole, double *angle);
 
-/* Lambert Conformal Conic grid (GRIB version) */
+/* Hexagonal GME grid */
+void    gridDefParamGME(int gridID, int nd, int ni, int ni2, int ni3);
+void    gridInqParamGME(int gridID, int *nd, int *ni, int *ni2, int *ni3);
+
+  /* Lambert Conformal Conic grid (GRIB version) */
 void    gridDefParamLCC(int gridID, double originLon, double originLat, double lonParY, double lat1, double lat2, double xinc, double yinc, int projflag, int scanflag);
 void    gridInqParamLCC(int gridID, double *originLon, double *originLat, double *lonParY, double *lat1, double *lat2, double *xinc, double *yinc, int *projflag, int *scanflag);
 

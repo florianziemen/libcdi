@@ -63,18 +63,10 @@ static int defineGrid (void)
   gridDefYunits ( gridID, "myYunits" );
   gridDefPrec ( gridID, DOUBLE_PRECISION );
   gridDefTrunc ( gridID, 1 );
-  gridDefGMEnd ( gridID, 2 );
-  gridDefGMEni ( gridID, 3 );
-  gridDefGMEni2 ( gridID, 4 );
-  gridDefGMEni3 ( gridID, 5 );
+  gridDefParamGME ( gridID, 2, 3, 4, 5 );
   gridDefNumber ( gridID, 6 );
   gridDefPosition ( gridID, 7 );
   gridDefReference ( gridID, "myReference" );
-/* gridDefLCC ( gridID, double originLon, double originLat,  */
-/*         double lonParY, double lat1, double lat2, double xinc, double yinc, int projflag, int scanflag); */
-/* gridDefLcc2 ( gridID, double earth_radius, double lon_0,  */
-/*          double lat_0, double lat_1,double lat_2);*/
-/* gridDefLaea ( gridID, double earth_radius, double lon_0, double lat_0); */
   for ( i = 0; i < nlon*nlat; i++ )
     area_vec[i] = 0.1 * i;
   gridDefArea ( gridID, ap );

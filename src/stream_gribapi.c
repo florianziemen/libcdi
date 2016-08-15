@@ -2172,10 +2172,12 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
       {
 	GRIB_CHECK(my_grib_set_long(gh, "gridDefinitionTemplateNumber", GRIB2_GTYPE_GME), 0);
 
-	GRIB_CHECK(my_grib_set_long(gh, "nd", gridInqGMEnd(gridID)), 0);
-	GRIB_CHECK(my_grib_set_long(gh, "Ni", gridInqGMEni(gridID)), 0);
-	GRIB_CHECK(my_grib_set_long(gh, "n2", gridInqGMEni2(gridID)), 0);
-	GRIB_CHECK(my_grib_set_long(gh, "n3", gridInqGMEni3(gridID)), 0);
+        int nd = 0, ni = 0, ni2 = 0, ni3 = 0;
+        gridInqParamGME(gridID, &nd, &ni, &ni2, &ni3);
+	GRIB_CHECK(my_grib_set_long(gh, "nd", nd), 0);
+	GRIB_CHECK(my_grib_set_long(gh, "Ni", ni), 0);
+	GRIB_CHECK(my_grib_set_long(gh, "n2", ni2), 0);
+	GRIB_CHECK(my_grib_set_long(gh, "n3", ni3), 0);
 	GRIB_CHECK(my_grib_set_long(gh, "latitudeOfThePolePoint", 90000000), 0);
 	GRIB_CHECK(my_grib_set_long(gh, "longitudeOfThePolePoint", 0), 0);
 
