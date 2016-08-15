@@ -227,21 +227,13 @@ bool is_lat_axis(const char *units, const char *stdname)
 
 bool is_x_axis(const char *units, const char *stdname)
 {
-  bool status = false;
-
-  if ( strcmp(stdname, "projection_x_coordinate") == 0  ) status = true;
-
-  return status;
+  return (strcmp(stdname, "projection_x_coordinate") == 0);
 }
 
 
 bool is_y_axis(const char *units, const char *stdname)
 {
-  bool status = false;
-
-  if ( strcmp(stdname, "projection_y_coordinate") == 0  ) status = true;
-
-  return status;
+  return (strcmp(stdname, "projection_y_coordinate") == 0);
 }
 
 

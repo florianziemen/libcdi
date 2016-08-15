@@ -614,7 +614,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
         }
     }
 
-  if ( gridtype != GRID_GENERIC && gridtype != GRID_LONLAT &&
+  if ( gridtype != GRID_GENERIC && gridtype != GRID_LONLAT && gridtype != GRID_GAUSSIAN &&
        gridtype != GRID_PROJECTION && gridtype != GRID_CURVILINEAR )
     {
       size_t len = strlen(gridNamePtr(gridtype));
