@@ -2542,8 +2542,6 @@ static
 void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars,
                           int timedimid, unsigned char *uuidOfHGrid, char *gridfile, int number_of_grid_used)
 {
-  bool testproj = true;
-
   for ( int ncvarid = 0; ncvarid < nvars; ++ncvarid )
     {
       ncvar_t *ncvar = &ncvars[ncvarid];
@@ -2631,7 +2629,7 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 	    }
 
 
-          if ( lgrid && lproj && testproj )
+          if ( lgrid && lproj )
             {
               projAdded = cdiVlistAddGridIfNew(vlistID, proj, 2);
               grid->proj = projAdded.Id;
@@ -2642,7 +2640,7 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 
           int gridID = ncvar->gridID;
 
-          if ( lproj && testproj )
+          if ( lproj )
             {
               int projID = lgrid ? grid->proj : gridID;
               int ncid = ncvars[gmapvarid].ncid;
