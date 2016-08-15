@@ -1,5 +1,6 @@
 2016-08-15  Uwe Schulzweida
 
+	* Skip netCDF attribute cell_measures if grid area variable not found
 	* Changed interface for GME grid parameter
 
 2016-08-12  Uwe Schulzweida
