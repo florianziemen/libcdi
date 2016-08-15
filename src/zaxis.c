@@ -668,9 +668,9 @@ void zaxisDefPositive(int zaxisID, int positive)
 {
   zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
 
-  if (zaxisptr->positive != (unsigned)(positive != 0))
+  if ( zaxisptr->positive != (unsigned)positive )
     {
-      zaxisptr->positive = (unsigned)(positive != 0);
+      zaxisptr->positive = (unsigned)positive;
       reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
     }
 }
