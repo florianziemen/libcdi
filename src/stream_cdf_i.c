@@ -1226,7 +1226,7 @@ void cdf_scan_var_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimi
               if ( memcmp(attstring, "Triangular", attlen) == 0 )
                 ncvars[ncvarid].gridtype = GRID_SPECTRAL;
             }
-          else if ( strcmp(attname, "grid_type") == 0 && xtypeIsText(atttype) )
+          else if ( (strcmp(attname, "grid_type") == 0 || strcmp(attname, "CDI_grid_type") == 0) && xtypeIsText(atttype) )
             {
               cdfGetAttText(ncid, ncvarid, attname, attstringlen, attstring);
               str_tolower(attstring);

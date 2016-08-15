@@ -619,7 +619,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
     {
       size_t len = strlen(gridNamePtr(gridtype));
       if ( len > 0 )
-        cdf_put_att_text(fileID, ncvarid, "grid_type", len, gridNamePtr(gridtype));
+        cdf_put_att_text(fileID, ncvarid, "CDI_grid_type", len, gridNamePtr(gridtype));
     }
 
   char gmapvarname[CDI_MAX_NAME]; gmapvarname[0] = 0;
