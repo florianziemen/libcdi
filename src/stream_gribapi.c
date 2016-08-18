@@ -475,7 +475,7 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
       if ( fabs(ypole) > 0 ) ypole = -ypole; // change from south to north pole
       if ( fabs(angle) > 0 ) angle = -angle;
 
-      gridDefProjParamRLL(gridID, xpole, ypole, angle);
+      gridDefParamRLL(gridID, xpole, ypole, angle);
     }
 
   int zaxistype = gribapiGetZaxisType(gribEditionNumber(gh), leveltype1);
@@ -1975,7 +1975,7 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
             len = sizeof(mesg_gaussian_reduced) - 1;
             mesg = mesg_gaussian_reduced;
           }
-        else if ( gridtype == GRID_LONLAT && (gridIsRotated(gridID) || lrotated) )
+        else if ( lrotated )
           {
             static const char mesg_rot_lonlat[] = "rotated_ll";
             len = sizeof(mesg_rot_lonlat) - 1;
@@ -2057,17 +2057,10 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 	    GRIB_CHECK(my_grib_set_double(gh, "jDirectionIncrementInDegrees", latIncr), 0);
 	  }
 
-	if ( gridIsRotated(gridID) || lrotated )
+	if ( lrotated )
 	  {
             double xpole = 0, ypole = 0, angle = 0;
-            if ( gridIsRotated(gridID) )
-              {
-                xpole = gridInqXpole(gridID);
-                ypole = gridInqYpole(gridID);
-                angle = gridInqAngle(gridID);
-              }
-            else
-              gridInqProjParamRLL(gridID, &xpole, &ypole, &angle);
+            gridInqParamRLL(gridID, &xpole, &ypole, &angle);
 
             xpole =  xpole + 180;
             if ( fabs(ypole) > 0 ) ypole = -ypole; // change from north to south pole
@@ -2106,7 +2099,7 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 	int xsize = gridInqXsize(gridID);
 	int ysize = gridInqYsize(gridID);
 
-	gridInqLCC(gridID, &originLon, &originLat, &lonParY, &lat1, &lat2, &xincm, &yincm,
+	gridInqParamLCC(gridID, &originLon, &originLat, &lonParY, &lat1, &lat2, &xincm, &yincm,
 		   &projflag, &scanflag);
 
         static const char mesg[] = "lambert";
@@ -2179,10 +2172,12 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
       {
 	GRIB_CHECK(my_grib_set_long(gh, "gridDefinitionTemplateNumber", GRIB2_GTYPE_GME), 0);
 
-	GRIB_CHECK(my_grib_set_long(gh, "nd", gridInqGMEnd(gridID)), 0);
-	GRIB_CHECK(my_grib_set_long(gh, "Ni", gridInqGMEni(gridID)), 0);
-	GRIB_CHECK(my_grib_set_long(gh, "n2", gridInqGMEni2(gridID)), 0);
-	GRIB_CHECK(my_grib_set_long(gh, "n3", gridInqGMEni3(gridID)), 0);
+        int nd = 0, ni = 0, ni2 = 0, ni3 = 0;
+        gridInqParamGME(gridID, &nd, &ni, &ni2, &ni3);
+	GRIB_CHECK(my_grib_set_long(gh, "nd", nd), 0);
+	GRIB_CHECK(my_grib_set_long(gh, "Ni", ni), 0);
+	GRIB_CHECK(my_grib_set_long(gh, "n2", ni2), 0);
+	GRIB_CHECK(my_grib_set_long(gh, "n3", ni3), 0);
 	GRIB_CHECK(my_grib_set_long(gh, "latitudeOfThePolePoint", 90000000), 0);
 	GRIB_CHECK(my_grib_set_long(gh, "longitudeOfThePolePoint", 0), 0);
 

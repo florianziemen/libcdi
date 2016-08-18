@@ -1,3 +1,23 @@
+2016-08-15  Uwe Schulzweida
+
+	* zaxisDefPositive: bug fix
+	* Skip netCDF attribute cell_measures if grid area variable not found
+	* Changed interface for GME grid parameter
+
+2016-08-12  Uwe Schulzweida
+
+	* Removed obsolete grid type GRID_LCC2
+
+2016-08-11  Uwe Schulzweida
+
+	* Removed obsolete grid type GRID_LAEA
+	* Removed obsolete grid type GRID_SINUSOIDAL
+	* Removed obsolete CDI grid functions gridXXXXpole(), gridXXXYpole(), gridXXXAngle() and gridIsRotated()
+
+2016-08-11  Uwe Schulzweida
+
+	* Version 1.8.0rc1 released
+
 2016-08-01  Uwe Schulzweida
 
 	* grb, grb2 write: added support for projection CDI_PROJ_RLL

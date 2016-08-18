@@ -614,21 +614,17 @@ int cdfDefVar(stream_t *streamptr, int varID)
         }
     }
 
-  if ( gridtype != GRID_GENERIC && gridtype != GRID_LONLAT &&
+  if ( gridtype != GRID_GENERIC && gridtype != GRID_LONLAT && gridtype != GRID_GAUSSIAN &&
        gridtype != GRID_PROJECTION && gridtype != GRID_CURVILINEAR )
     {
       size_t len = strlen(gridNamePtr(gridtype));
       if ( len > 0 )
-        cdf_put_att_text(fileID, ncvarid, "grid_type", len, gridNamePtr(gridtype));
+        cdf_put_att_text(fileID, ncvarid, "CDI_grid_type", len, gridNamePtr(gridtype));
     }
 
   char gmapvarname[CDI_MAX_NAME]; gmapvarname[0] = 0;
 
-  if      ( gridtype == GRID_SINUSOIDAL ) strcpy(gmapvarname, "Sinusoidal");
-  else if ( gridtype == GRID_LAEA )       strcpy(gmapvarname, "Lambert_AEA");
-  else if ( gridtype == GRID_LCC2 )       strcpy(gmapvarname, "Lambert_CC");
-  else if ( gridtype == GRID_LONLAT && gridIsRotated(gridID) ) strcpy(gmapvarname, "rotated_pole");
-  else  cdf_get_gmapvarname(gridID, gmapvarname);
+  cdf_get_gmapvarname(gridID, gmapvarname);
 
   if ( gmapvarname[0] ) cdf_put_att_text(fileID, ncvarid, "grid_mapping", strlen(gmapvarname), gmapvarname);
 

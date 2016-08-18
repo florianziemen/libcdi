@@ -225,14 +225,8 @@
       PARAMETER (GRID_CURVILINEAR       = 10)
       INTEGER    GRID_LCC              
       PARAMETER (GRID_LCC               = 11)
-      INTEGER    GRID_LCC2             
-      PARAMETER (GRID_LCC2              = 12)
-      INTEGER    GRID_LAEA             
-      PARAMETER (GRID_LAEA              = 13)
-      INTEGER    GRID_SINUSOIDAL       
-      PARAMETER (GRID_SINUSOIDAL        = 14)
       INTEGER    GRID_PROJECTION       
-      PARAMETER (GRID_PROJECTION        = 15)
+      PARAMETER (GRID_PROJECTION        = 12)
       INTEGER    CDI_PROJ_RLL          
       PARAMETER (CDI_PROJ_RLL           = 21)
       INTEGER    CDI_PROJ_LCC          
@@ -1689,51 +1683,6 @@
 !                                    (INTEGER         gridID)
       EXTERNAL        gridIsCircular
 
-      INTEGER         gridIsRotated
-!                                    (INTEGER         gridID)
-      EXTERNAL        gridIsRotated
-
-!                     gridInqProjParamRLL
-!                                    (INTEGER         gridID,
-!                                     DOUBLEPRECISION xpole,
-!                                     DOUBLEPRECISION ypole,
-!                                     DOUBLEPRECISION angle)
-      EXTERNAL        gridInqProjParamRLL
-
-!                     gridDefProjParamRLL
-!                                    (INTEGER         gridID,
-!                                     DOUBLEPRECISION xpole,
-!                                     DOUBLEPRECISION ypole,
-!                                     DOUBLEPRECISION angle)
-      EXTERNAL        gridDefProjParamRLL
-
-!                     gridDefXpole
-!                                    (INTEGER         gridID,
-!                                     DOUBLEPRECISION xpole)
-      EXTERNAL        gridDefXpole
-
-      DOUBLEPRECISION gridInqXpole
-!                                    (INTEGER         gridID)
-      EXTERNAL        gridInqXpole
-
-!                     gridDefYpole
-!                                    (INTEGER         gridID,
-!                                     DOUBLEPRECISION ypole)
-      EXTERNAL        gridDefYpole
-
-      DOUBLEPRECISION gridInqYpole
-!                                    (INTEGER         gridID)
-      EXTERNAL        gridInqYpole
-
-!                     gridDefAngle
-!                                    (INTEGER         gridID,
-!                                     DOUBLEPRECISION angle)
-      EXTERNAL        gridDefAngle
-
-      DOUBLEPRECISION gridInqAngle
-!                                    (INTEGER         gridID)
-      EXTERNAL        gridInqAngle
-
       INTEGER         gridInqTrunc
 !                                    (INTEGER         gridID)
       EXTERNAL        gridInqTrunc
@@ -1742,45 +1691,6 @@
 !                                    (INTEGER         gridID,
 !                                     INTEGER         trunc)
       EXTERNAL        gridDefTrunc
-
-!
-!  Hexagonal GME grid
-!
-!                     gridDefGMEnd
-!                                    (INTEGER         gridID,
-!                                     INTEGER         nd)
-      EXTERNAL        gridDefGMEnd
-
-      INTEGER         gridInqGMEnd
-!                                    (INTEGER         gridID)
-      EXTERNAL        gridInqGMEnd
-
-!                     gridDefGMEni
-!                                    (INTEGER         gridID,
-!                                     INTEGER         ni)
-      EXTERNAL        gridDefGMEni
-
-      INTEGER         gridInqGMEni
-!                                    (INTEGER         gridID)
-      EXTERNAL        gridInqGMEni
-
-!                     gridDefGMEni2
-!                                    (INTEGER         gridID,
-!                                     INTEGER         ni2)
-      EXTERNAL        gridDefGMEni2
-
-      INTEGER         gridInqGMEni2
-!                                    (INTEGER         gridID)
-      EXTERNAL        gridInqGMEni2
-
-!                     gridDefGMEni3
-!                                    (INTEGER         gridID,
-!                                     INTEGER         ni3)
-      EXTERNAL        gridDefGMEni3
-
-      INTEGER         gridInqGMEni3
-!                                    (INTEGER         gridID)
-      EXTERNAL        gridInqGMEni3
 
 !
 !  Reference of an unstructured grid
@@ -1824,9 +1734,45 @@
       EXTERNAL        gridInqUUID
 
 !
+!  Rotated Lon/Lat grid
+!
+!                     gridDefParamRLL
+!                                    (INTEGER         gridID,
+!                                     DOUBLEPRECISION xpole,
+!                                     DOUBLEPRECISION ypole,
+!                                     DOUBLEPRECISION angle)
+      EXTERNAL        gridDefParamRLL
+
+!                     gridInqParamRLL
+!                                    (INTEGER         gridID,
+!                                     DOUBLEPRECISION xpole,
+!                                     DOUBLEPRECISION ypole,
+!                                     DOUBLEPRECISION angle)
+      EXTERNAL        gridInqParamRLL
+
+!
+!  Hexagonal GME grid
+!
+!                     gridDefParamGME
+!                                    (INTEGER         gridID,
+!                                     INTEGER         nd,
+!                                     INTEGER         ni,
+!                                     INTEGER         ni2,
+!                                     INTEGER         ni3)
+      EXTERNAL        gridDefParamGME
+
+!                     gridInqParamGME
+!                                    (INTEGER         gridID,
+!                                     INTEGER         nd,
+!                                     INTEGER         ni,
+!                                     INTEGER         ni2,
+!                                     INTEGER         ni3)
+      EXTERNAL        gridInqParamGME
+
+!
 !  Lambert Conformal Conic grid (GRIB version)
 !
-!                     gridDefLCC
+!                     gridDefParamLCC
 !                                    (INTEGER         gridID,
 !                                     DOUBLEPRECISION originLon,
 !                                     DOUBLEPRECISION originLat,
@@ -1837,9 +1783,9 @@
 !                                     DOUBLEPRECISION yinc,
 !                                     INTEGER         projflag,
 !                                     INTEGER         scanflag)
-      EXTERNAL        gridDefLCC
+      EXTERNAL        gridDefParamLCC
 
-!                     gridInqLCC
+!                     gridInqParamLCC
 !                                    (INTEGER         gridID,
 !                                     DOUBLEPRECISION originLon,
 !                                     DOUBLEPRECISION originLat,
@@ -1850,45 +1796,7 @@
 !                                     DOUBLEPRECISION yinc,
 !                                     INTEGER         projflag,
 !                                     INTEGER         scanflag)
-      EXTERNAL        gridInqLCC
-
-!
-!  Lambert Conformal Conic 2 grid (PROJ version)
-!
-!                     gridDefLcc2
-!                                    (INTEGER         gridID,
-!                                     DOUBLEPRECISION earth_radius,
-!                                     DOUBLEPRECISION lon_0,
-!                                     DOUBLEPRECISION lat_0,
-!                                     DOUBLEPRECISION lat_1,
-!                                     DOUBLEPRECISION lat_2)
-      EXTERNAL        gridDefLcc2
-
-!                     gridInqLcc2
-!                                    (INTEGER         gridID,
-!                                     DOUBLEPRECISION earth_radius,
-!                                     DOUBLEPRECISION lon_0,
-!                                     DOUBLEPRECISION lat_0,
-!                                     DOUBLEPRECISION lat_1,
-!                                     DOUBLEPRECISION lat_2)
-      EXTERNAL        gridInqLcc2
-
-!
-!  Lambert Azimuthal Equal Area grid
-!
-!                     gridDefLaea
-!                                    (INTEGER         gridID,
-!                                     DOUBLEPRECISION earth_radius,
-!                                     DOUBLEPRECISION lon_0,
-!                                     DOUBLEPRECISION lat_0)
-      EXTERNAL        gridDefLaea
-
-!                     gridInqLaea
-!                                    (INTEGER         gridID,
-!                                     DOUBLEPRECISION earth_radius,
-!                                     DOUBLEPRECISION lon_0,
-!                                     DOUBLEPRECISION lat_0)
-      EXTERNAL        gridInqLaea
+      EXTERNAL        gridInqParamLCC
 
 !                     gridDefArea
 !                                    (INTEGER         gridID,

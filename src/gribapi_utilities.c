@@ -289,6 +289,7 @@ static int getAvailabilityOfRelativeTimes(grib_handle* gh, bool* outHaveForecast
     }
 }
 
+
 char* gribMakeTimeString(grib_handle* gh, CdiTimeType timeType)
 {
   //Get the parts of the reference date.
@@ -336,9 +337,10 @@ char* gribMakeTimeString(grib_handle* gh, CdiTimeType timeType)
   return makeDateString(&date);
 }
 
+
 int gribapiTimeIsFC(grib_handle *gh)
 {
-  if(gribEditionNumber(gh) <= 1) return true;
+  if (gribEditionNumber(gh) <= 1) return true;
 
   long sigofrtime;
   FAIL_ON_GRIB_ERROR(grib_get_long, gh, "significanceOfReferenceTime", &sigofrtime);
@@ -380,8 +382,9 @@ int gribapiGetTsteptype(grib_handle *gh)
         }
     }
 
-  return (tsteptype);
+  return tsteptype;
 }
+
 
 int gribGetDatatype(grib_handle* gribHandle)
 {
@@ -397,6 +400,7 @@ int gribGetDatatype(grib_handle* gribHandle)
     }
   return datatype;
 }
+
 
 int gribapiGetParam(grib_handle *gh)
 {
@@ -416,6 +420,7 @@ int gribapiGetParam(grib_handle *gh)
   return cdiEncodeParam((int)pnum, (int)pcat, (int)pdis);
 }
 
+
 int gribapiGetGridType(grib_handle *gh)
 {
   int gridtype = GRID_GENERIC;
@@ -424,16 +429,10 @@ int gribapiGetGridType(grib_handle *gh)
       case  GRIB2_GTYPE_LATLON:
         gridtype = ( gribGetLong(gh, "Ni") == (long) GRIB_MISSING_LONG ) ? GRID_GENERIC : GRID_LONLAT;
         break;
-
       case  GRIB2_GTYPE_GAUSSIAN:
         gridtype = ( gribGetLong(gh, "Ni") == (long) GRIB_MISSING_LONG ) ? GRID_GAUSSIAN_REDUCED : GRID_GAUSSIAN;
         break;
-
-#ifdef TEST_PROJECTION
       case GRIB2_GTYPE_LATLON_ROT:   gridtype = GRID_PROJECTION; break;
-#else
-      case GRIB2_GTYPE_LATLON_ROT:   gridtype = GRID_LONLAT; break;
-#endif
       case GRIB2_GTYPE_LCC:          gridtype = GRID_LCC; break;
       case GRIB2_GTYPE_SPECTRAL:     gridtype = GRID_SPECTRAL; break;
       case GRIB2_GTYPE_GME:          gridtype = GRID_GME; break;
@@ -712,22 +711,6 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
   else
     {
       Error("Unsupported grid type: %s", gridNamePtr(gridtype));
-    }
-
-  grid->isRotated = FALSE;
-  if ( gribapiGetIsRotated(gh) )
-    {
-      double xpole = 0, ypole = 0, angle = 0;
-      grid->isRotated = TRUE;
-      FAIL_ON_GRIB_ERROR(grib_get_double, gh, "latitudeOfSouthernPoleInDegrees",  &ypole);
-      FAIL_ON_GRIB_ERROR(grib_get_double, gh, "longitudeOfSouthernPoleInDegrees", &xpole);
-      FAIL_ON_GRIB_ERROR(grib_get_double, gh, "angleOfRotation", &angle);
-      xpole =  xpole - 180;
-      if ( fabs(ypole) > 0 ) ypole = -ypole; // change from south to north pole
-      if ( fabs(angle) > 0 ) angle = -angle;
-      grid->rll.xpole = xpole;
-      grid->rll.ypole = ypole;
-      grid->rll.angle = angle;
     }
 
   grid->type  = gridtype;

@@ -1903,34 +1903,6 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
 }
 
 static
-void cdfDefPole(stream_t *streamptr, int gridID)
-{
-  int ncvarid = UNDEFID;
-  static const char varname[] = "rotated_pole";
-  static const char mapname[] = "rotated_latitude_longitude";
-
-  int fileID  = streamptr->fileID;
-
-  double ypole = gridInqYpole(gridID);
-  double xpole = gridInqXpole(gridID);
-  double angle = gridInqAngle(gridID);
-
-  cdf_redef(fileID);
-
-  int ncerrcode = nc_def_var(fileID, varname, (nc_type) NC_CHAR, 0, NULL, &ncvarid);
-  if ( ncerrcode == NC_NOERR )
-    {
-      cdf_put_att_text(fileID, ncvarid, "grid_mapping_name", sizeof (mapname) - 1, mapname);
-      cdf_put_att_double(fileID, ncvarid, "grid_north_pole_latitude", NC_DOUBLE, 1, &ypole);
-      cdf_put_att_double(fileID, ncvarid, "grid_north_pole_longitude", NC_DOUBLE, 1, &xpole);
-      if ( IS_NOT_EQUAL(angle, 0) )
-        cdf_put_att_double(fileID, ncvarid, "north_pole_grid_longitude", NC_DOUBLE, 1, &angle);
-    }
-
-  cdf_enddef(fileID);
-}
-
-static
 void cdf_def_mapping(stream_t *streamptr, int gridID)
 {
   char mapping[CDI_MAX_NAME]; mapping[0] = 0;
@@ -1955,87 +1927,6 @@ void cdf_def_mapping(stream_t *streamptr, int gridID)
           int dummy = 1;
           cdf_put_var_int(fileID, ncvarid, &dummy);
         }
-    }
-}
-
-static
-void cdfDefMapping(stream_t *streamptr, int gridID)
-{
-  int ncvarid = UNDEFID;
-  int fileID  = streamptr->fileID;
-
-  if ( gridInqType(gridID) == GRID_SINUSOIDAL )
-    {
-      static const char varname[] = "Sinusoidal";
-      static const char mapname[] = "sinusoidal";
-
-      cdf_redef(fileID);
-
-      int ncerrcode = nc_def_var(fileID, varname, (nc_type) NC_CHAR, 0, NULL, &ncvarid);
-      if ( ncerrcode == NC_NOERR )
-        {
-          cdf_put_att_text(fileID, ncvarid, "grid_mapping_name", strlen(mapname), mapname);
-          /*
-          cdf_put_att_double(fileID, ncvarid, "grid_north_pole_latitude", NC_DOUBLE, 1, &ypole);
-          cdf_put_att_double(fileID, ncvarid, "grid_north_pole_longitude", NC_DOUBLE, 1, &xpole);
-          */
-        }
-
-      cdf_enddef(fileID);
-    }
-  else if ( gridInqType(gridID) == GRID_LAEA )
-    {
-      static const char varname[] = "Lambert_AEA";
-      static const char mapname[] = "lambert_azimuthal_equal_area";
-
-      cdf_redef(fileID);
-
-      int ncerrcode = nc_def_var(fileID, varname, (nc_type) NC_CHAR, 0, NULL, &ncvarid);
-      if ( ncerrcode == NC_NOERR )
-        {
-          double a, lon_0, lat_0;
-
-          gridInqLaea(gridID, &a, &lon_0, &lat_0);
-
-          cdf_put_att_text(fileID, ncvarid, "grid_mapping_name", strlen(mapname), mapname);
-          cdf_put_att_double(fileID, ncvarid, "earth_radius", NC_DOUBLE, 1, &a);
-          cdf_put_att_double(fileID, ncvarid, "longitude_of_projection_origin", NC_DOUBLE, 1, &lon_0);
-          cdf_put_att_double(fileID, ncvarid, "latitude_of_projection_origin", NC_DOUBLE, 1, &lat_0);
-        }
-
-      cdf_enddef(fileID);
-    }
-  else if ( gridInqType(gridID) == GRID_LCC2 )
-    {
-      static const char varname[] = "Lambert_CC";
-      static const char mapname[] = "lambert_conformal_conic";
-
-      cdf_redef(fileID);
-
-      int ncerrcode = nc_def_var(fileID, varname, (nc_type) NC_CHAR, 0, NULL, &ncvarid);
-      if ( ncerrcode == NC_NOERR )
-        {
-          double radius, lon_0, lat_0, lat_1, lat_2;
-
-          gridInqLcc2(gridID, &radius, &lon_0, &lat_0, &lat_1, &lat_2);
-
-          cdf_put_att_text(fileID, ncvarid, "grid_mapping_name", strlen(mapname), mapname);
-          if ( radius > 0 )
-            cdf_put_att_double(fileID, ncvarid, "earth_radius", NC_DOUBLE, 1, &radius);
-          cdf_put_att_double(fileID, ncvarid, "longitude_of_central_meridian", NC_DOUBLE, 1, &lon_0);
-          cdf_put_att_double(fileID, ncvarid, "latitude_of_projection_origin", NC_DOUBLE, 1, &lat_0);
-          if ( IS_EQUAL(lat_1, lat_2) )
-            cdf_put_att_double(fileID, ncvarid, "standard_parallel", NC_DOUBLE, 1, &lat_1);
-          else
-            {
-              double lat_1_2[2];
-              lat_1_2[0] = lat_1;
-              lat_1_2[1] = lat_2;
-              cdf_put_att_double(fileID, ncvarid, "standard_parallel", NC_DOUBLE, 2, lat_1_2);
-            }
-        }
-
-      cdf_enddef(fileID);
     }
 }
 
@@ -2091,8 +1982,6 @@ void cdfDefGrid(stream_t *streamptr, int gridID, int gridindex)
 
           cdf_def_mapping(streamptr, gridID);
         }
-
-      if ( gridIsRotated(gridID) ) cdfDefPole(streamptr, gridID);
     }
   else if ( gridtype == GRID_CURVILINEAR )
     {
@@ -2120,13 +2009,6 @@ void cdfDefGrid(stream_t *streamptr, int gridID, int gridindex)
     {
       cdfDefTrajLon(streamptr, gridID, gridindex);
       cdfDefTrajLat(streamptr, gridID, gridindex);
-    }
-  else if ( gridtype == GRID_SINUSOIDAL || gridtype == GRID_LAEA || gridtype == GRID_LCC2 )
-    {
-      cdfDefXaxis(streamptr, gridID, gridindex, 1);
-      cdfDefYaxis(streamptr, gridID, gridindex, 1);
-
-      cdfDefMapping(streamptr, gridID);
     }
   /*
   else if ( gridtype == GRID_LCC )

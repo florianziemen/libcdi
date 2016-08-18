@@ -182,7 +182,7 @@ zaxis_t *zaxisNewEntry(int id)
       reshReplace(id, zaxisptr, &zaxisOps);
     }
 
-  return (zaxisptr);
+  return zaxisptr;
 }
 
 static inline zaxis_t *
@@ -195,14 +195,11 @@ zaxisID2Ptr(int id)
 static
 void zaxisInit(void)
 {
-  static int zaxisInitialized = 0;
-  char *env;
-
+  static bool zaxisInitialized = false;
   if ( zaxisInitialized ) return;
+  zaxisInitialized = true;
 
-  zaxisInitialized = 1;
-
-  env = getenv("ZAXIS_DEBUG");
+  char *env = getenv("ZAXIS_DEBUG");
   if ( env ) ZAXIS_Debug = atoi(env);
 }
 
@@ -349,7 +346,7 @@ const char *zaxisNamePtr(int zaxistype)
   const char *name = (zaxistype >= 0 && zaxistype < CDI_NumZaxistype)
     ? ZaxistypeEntry[zaxistype].longname
     : ZaxistypeEntry[ZAXIS_GENERIC].longname;
-  return (name);
+  return name;
 }
 
 
@@ -481,10 +478,9 @@ The function @func{zaxisDefName} defines the name of a Z-axis.
 */
 void zaxisDefName(int zaxisID, const char *name)
 {
-  zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
-
   if ( name )
     {
+      zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
       strncpy(zaxisptr->name, name, CDI_MAX_NAME - 1);
       zaxisptr->name[CDI_MAX_NAME - 1] = '\0';
       reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
@@ -507,10 +503,9 @@ The function @func{zaxisDefLongname} defines the longname of a Z-axis.
 */
 void zaxisDefLongname(int zaxisID, const char *longname)
 {
-  zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
-
   if ( longname )
     {
+      zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
       strncpy(zaxisptr->longname, longname, CDI_MAX_NAME - 1);
       zaxisptr->longname[CDI_MAX_NAME - 1] = '\0';
       reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
@@ -533,10 +528,9 @@ The function @func{zaxisDefUnits} defines the units of a Z-axis.
 */
 void zaxisDefUnits(int zaxisID, const char *units)
 {
-  zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
-
   if ( units )
     {
+      zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
       strncpy(zaxisptr->units, units, CDI_MAX_NAME - 1);
       zaxisptr->units[CDI_MAX_NAME - 1] = '\0';
       reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
@@ -546,10 +540,9 @@ void zaxisDefUnits(int zaxisID, const char *units)
 
 void zaxisDefPsName(int zaxisID, const char *psname)
 {
-  zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
-
   if ( psname )
     {
+      zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
       strncpy(zaxisptr->psname, psname, CDI_MAX_NAME - 1);
       zaxisptr->name[CDI_MAX_NAME - 1] = '\0';
       reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
@@ -667,7 +660,7 @@ void zaxisDefPrec(int zaxisID, int prec)
 int zaxisInqPrec(int zaxisID)
 {
   zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
-  return (zaxisptr->prec);
+  return zaxisptr->prec;
 }
 
 
@@ -675,9 +668,9 @@ void zaxisDefPositive(int zaxisID, int positive)
 {
   zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
 
-  if (zaxisptr->positive != (unsigned)(positive != 0))
+  if ( zaxisptr->positive != (unsigned)positive )
     {
-      zaxisptr->positive = (unsigned)(positive != 0);
+      zaxisptr->positive = (unsigned)positive;
       reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
     }
 }
@@ -761,11 +754,11 @@ void zaxisDefLevels(int zaxisID, const double *levels)
   zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
 
   int size = zaxisptr->size;
-
   double *vals = zaxisptr->vals;
 
   for (int ilev = 0; ilev < size; ilev++ )
     vals[ilev] = levels[ilev];
+
   reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
 }
 
@@ -994,7 +987,7 @@ int zaxisInqLbounds(int zaxisID, double *lbounds)
           lbounds[i] =  zaxisptr->lbounds[i];
     }
 
-  return (size);
+  return size;
 }
 
 
@@ -1012,7 +1005,7 @@ int zaxisInqUbounds(int zaxisID, double *ubounds)
           ubounds[i] =  zaxisptr->ubounds[i];
     }
 
-  return (size);
+  return size;
 }
 
 
@@ -1030,7 +1023,7 @@ int zaxisInqWeights(int zaxisID, double *weights)
           weights[i] =  zaxisptr->weights[i];
     }
 
-  return (size);
+  return size;
 }
 
 
@@ -1078,7 +1071,7 @@ The valid CDI Z-axis types are @func{ZAXIS_GENERIC}, @func{ZAXIS_SURFACE},
 int zaxisInqType(int zaxisID)
 {
   zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
-  return (zaxisptr->type);
+  return zaxisptr->type;
 }
 
 /*
@@ -1100,7 +1093,7 @@ The function @func{zaxisInqSize} returns the size of a Z-axis.
 int zaxisInqSize(int zaxisID)
 {
   zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
-  return (zaxisptr->size);
+  return zaxisptr->size;
 }
 
 
@@ -1165,14 +1158,14 @@ void zaxisInqVct(int zaxisID, double *vct)
 int zaxisInqVctSize(int zaxisID)
 {
   zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
-  return (zaxisptr->vctsize);
+  return zaxisptr->vctsize;
 }
 
 
 const double *zaxisInqVctPtr(int zaxisID)
 {
   zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
-  return (zaxisptr->vct);
+  return zaxisptr->vct;
 }
 
 
@@ -1303,7 +1296,7 @@ int zaxisDuplicate(int zaxisID)
         }
     }
 
-  return (zaxisIDnew);
+  return zaxisIDnew;
 }
 
 
@@ -1447,12 +1440,10 @@ void zaxisPrintP ( void * voidptr, FILE * fp )
 }
 
 
-static int
-zaxisCompareP(zaxis_t *z1, zaxis_t *z2)
+static
+int zaxisCompareP(zaxis_t *z1, zaxis_t *z2)
 {
-  enum {
-    differ = 1,
-  };
+  enum { differ = 1 };
   int diff = 0;
   xassert(z1 && z2);
 
@@ -1464,8 +1455,8 @@ zaxisCompareP(zaxis_t *z1, zaxis_t *z2)
     | (z1->vctsize != z2->vctsize)
     | (z1->positive != z2->positive);
 
-  if (diff)
-    return differ;
+  if ( diff ) return differ;
+
   int size = z1->size;
   int anyPresent = 0;
   int present = (z1->vals != NULL);

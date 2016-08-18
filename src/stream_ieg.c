@@ -282,7 +282,7 @@ void iegDefGrid(int *gdb, int gridID)
       gridtype = GRID_LONLAT;
     }
 
-  bool lrotated = ((gridtype == GRID_LONLAT && gridIsRotated(gridID)) || projtype == CDI_PROJ_RLL);
+  bool lrotated = (projtype == CDI_PROJ_RLL);
 
   if ( gridtype == GRID_LONLAT || gridtype == GRID_GAUSSIAN || projtype == CDI_PROJ_RLL )
     {
@@ -350,14 +350,7 @@ void iegDefGrid(int *gdb, int gridID)
       if ( lrotated )
 	{
           double xpole = 0, ypole = 0, angle = 0;
-          if ( projtype == CDI_PROJ_RLL )
-            gridInqProjParamRLL(gridID, &xpole, &ypole, &angle);
-          else
-            {
-              xpole = gridInqXpole(gridID);
-              ypole = gridInqYpole(gridID);
-              angle = gridInqAngle(gridID);
-            }
+          gridInqParamRLL(gridID, &xpole, &ypole, &angle);
 
 	  IEG_G_LatSP(gdb) = - (int)lround(ypole * resfac);
 	  IEG_G_LonSP(gdb) =   (int)lround((xpole + 180) * resfac);
@@ -588,14 +581,9 @@ void iegAddRecord(stream_t *streamptr, int param, int *pdb, int *gdb, double *vc
   record->ilevel2  = level2;
   record->ltype    = IEG_P_LevelType(pdb);
 
-#ifdef TEST_PROJECTION
   int gridtype = (IEG_G_GridType(gdb) == 0) ? GRID_LONLAT :
                  (IEG_G_GridType(gdb) == 10) ? GRID_PROJECTION :
                  (IEG_G_GridType(gdb) == 4) ? GRID_GAUSSIAN : GRID_GENERIC;
-#else
-  int gridtype = (IEG_G_GridType(gdb) == 0 || IEG_G_GridType(gdb) == 10) ? GRID_LONLAT :
-                 (IEG_G_GridType(gdb) == 4) ? GRID_GAUSSIAN : GRID_GENERIC;
-#endif
 
   grid_t *grid = (grid_t *)Malloc(sizeof (*grid));
   grid_init(grid);
@@ -652,27 +640,18 @@ void iegAddRecord(stream_t *streamptr, int param, int *pdb, int *gdb, double *vc
     grid->y.flag  = 2;
   }
 
-  grid->isRotated = FALSE;
   double xpole = 0, ypole = 0;
   if ( IEG_G_GridType(gdb) == 10 )
     {
       xpole =   IEG_G_LonSP(gdb) * resfac - 180;
       ypole = - IEG_G_LatSP(gdb) * resfac;
-      if ( gridtype == GRID_LONLAT )
-        {
-          grid->isRotated = TRUE;
-          grid->rll.xpole = xpole;
-          grid->rll.ypole = ypole;
-          grid->rll.angle = 0;
-        }
-      else
-        grid->projtype = CDI_PROJ_RLL;
+      grid->projtype = CDI_PROJ_RLL;
     }
 
   struct addIfNewRes gridAdded = cdiVlistAddGridIfNew(vlistID, grid, 0);
   int gridID = gridAdded.Id;
   if ( !gridAdded.isNew ) Free(grid);
-  else if ( gridtype == GRID_PROJECTION ) gridDefProjParamRLL(gridID, xpole, ypole, 0);
+  else if ( gridtype == GRID_PROJECTION ) gridDefParamRLL(gridID, xpole, ypole, 0);
 
   int leveltype = iegGetZaxisType(IEG_P_LevelType(pdb));
   if ( leveltype == ZAXIS_HYBRID )

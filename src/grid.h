@@ -72,32 +72,9 @@ struct grid_lcc_t {
   short   defined;
 };
 
-// Lambert Conformal Conic 2
-struct grid_lcc2_t {
-  double  lon_0;
-  double  lat_0;
-  double  lat_1;
-  double  lat_2;
-  double  a;
-  short   defined;
-};
-
-// Lambert Azimuthal Equal Area
-struct grid_laea_t {
-  double  lon_0;
-  double  lat_0;
-  double  a;
-  short   defined;
-};
-
 // GME Grid
 struct grid_gme_t {
   int     nd, ni, ni2, ni3;       /* parameter for GRID_GME         */
-};
-
-// Rotated LonLat
-struct grid_rll_t {
-  double  xpole, ypole, angle;    /* rotated north pole             */
 };
 
 struct grid_t {
@@ -110,12 +87,8 @@ struct grid_t {
   mask_t *mask_gme;
   double *area;
   struct grid_lcc_t  lcc;
-  struct grid_lcc2_t lcc2;
-  struct grid_laea_t laea;
   struct grid_gme_t  gme;
-  struct grid_rll_t  rll;
   short   isCyclic;               /* TRUE for global cyclic grids   */
-  short   isRotated;              /* TRUE for rotated grids         */
   int     number, position;       /* parameter for GRID_REFERENCE   */
   int     trunc;                  /* parameter for GRID_SPECTEAL    */
   int     nvertex;

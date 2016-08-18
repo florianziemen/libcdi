@@ -354,28 +354,8 @@ FCALLSCFUN2 (DOUBLE, gridInqYval, GRIDINQYVAL, gridinqyval, INT, INT)
 FCALLSCFUN1 (DOUBLE, gridInqXinc, GRIDINQXINC, gridinqxinc, INT)
 FCALLSCFUN1 (DOUBLE, gridInqYinc, GRIDINQYINC, gridinqyinc, INT)
 FCALLSCFUN1 (INT, gridIsCircular, GRIDISCIRCULAR, gridiscircular, INT)
-FCALLSCFUN1 (INT, gridIsRotated, GRIDISROTATED, gridisrotated, INT)
-FCALLSCSUB4 (gridInqProjParamRLL, GRIDINQPROJPARAMRLL, gridinqprojparamrll, INT, PDOUBLE, PDOUBLE, PDOUBLE)
-FCALLSCSUB4 (gridDefProjParamRLL, GRIDDEFPROJPARAMRLL, griddefprojparamrll, INT, DOUBLE, DOUBLE, DOUBLE)
-FCALLSCSUB2 (gridDefXpole, GRIDDEFXPOLE, griddefxpole, INT, DOUBLE)
-FCALLSCFUN1 (DOUBLE, gridInqXpole, GRIDINQXPOLE, gridinqxpole, INT)
-FCALLSCSUB2 (gridDefYpole, GRIDDEFYPOLE, griddefypole, INT, DOUBLE)
-FCALLSCFUN1 (DOUBLE, gridInqYpole, GRIDINQYPOLE, gridinqypole, INT)
-FCALLSCSUB2 (gridDefAngle, GRIDDEFANGLE, griddefangle, INT, DOUBLE)
-FCALLSCFUN1 (DOUBLE, gridInqAngle, GRIDINQANGLE, gridinqangle, INT)
 FCALLSCFUN1 (INT, gridInqTrunc, GRIDINQTRUNC, gridinqtrunc, INT)
 FCALLSCSUB2 (gridDefTrunc, GRIDDEFTRUNC, griddeftrunc, INT, INT)
-
-/*  Hexagonal GME grid  */
-
-FCALLSCSUB2 (gridDefGMEnd, GRIDDEFGMEND, griddefgmend, INT, INT)
-FCALLSCFUN1 (INT, gridInqGMEnd, GRIDINQGMEND, gridinqgmend, INT)
-FCALLSCSUB2 (gridDefGMEni, GRIDDEFGMENI, griddefgmeni, INT, INT)
-FCALLSCFUN1 (INT, gridInqGMEni, GRIDINQGMENI, gridinqgmeni, INT)
-FCALLSCSUB2 (gridDefGMEni2, GRIDDEFGMENI2, griddefgmeni2, INT, INT)
-FCALLSCFUN1 (INT, gridInqGMEni2, GRIDINQGMENI2, gridinqgmeni2, INT)
-FCALLSCSUB2 (gridDefGMEni3, GRIDDEFGMENI3, griddefgmeni3, INT, INT)
-FCALLSCFUN1 (INT, gridInqGMEni3, GRIDINQGMENI3, gridinqgmeni3, INT)
 
 /*  Reference of an unstructured grid  */
 
@@ -388,20 +368,20 @@ FCALLSCFUN2 (INT, gridInqReference, GRIDINQREFERENCE, gridinqreference, INT, PST
 FCALLSCSUB2 (gridDefUUID, GRIDDEFUUID, griddefuuid, INT, PVOID)
 FCALLSCSUB2 (gridInqUUID, GRIDINQUUID, gridinquuid, INT, PVOID)
 
+/*  Rotated Lon/Lat grid  */
+
+FCALLSCSUB4 (gridDefParamRLL, GRIDDEFPARAMRLL, griddefparamrll, INT, DOUBLE, DOUBLE, DOUBLE)
+FCALLSCSUB4 (gridInqParamRLL, GRIDINQPARAMRLL, gridinqparamrll, INT, PDOUBLE, PDOUBLE, PDOUBLE)
+
+/*  Hexagonal GME grid  */
+
+FCALLSCSUB5 (gridDefParamGME, GRIDDEFPARAMGME, griddefparamgme, INT, INT, INT, INT, INT)
+FCALLSCSUB5 (gridInqParamGME, GRIDINQPARAMGME, gridinqparamgme, INT, PINT, PINT, PINT, PINT)
+
 /*  Lambert Conformal Conic grid (GRIB version)  */
 
-FCALLSCSUB10 (gridDefLCC, GRIDDEFLCC, griddeflcc, INT, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE, INT, INT)
-FCALLSCSUB10 (gridInqLCC, GRIDINQLCC, gridinqlcc, INT, PDOUBLE, PDOUBLE, PDOUBLE, PDOUBLE, PDOUBLE, PDOUBLE, PDOUBLE, PINT, PINT)
-
-/*  Lambert Conformal Conic 2 grid (PROJ version)  */
-
-FCALLSCSUB6 (gridDefLcc2, GRIDDEFLCC2, griddeflcc2, INT, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE)
-FCALLSCSUB6 (gridInqLcc2, GRIDINQLCC2, gridinqlcc2, INT, PDOUBLE, PDOUBLE, PDOUBLE, PDOUBLE, PDOUBLE)
-
-/*  Lambert Azimuthal Equal Area grid  */
-
-FCALLSCSUB4 (gridDefLaea, GRIDDEFLAEA, griddeflaea, INT, DOUBLE, DOUBLE, DOUBLE)
-FCALLSCSUB4 (gridInqLaea, GRIDINQLAEA, gridinqlaea, INT, PDOUBLE, PDOUBLE, PDOUBLE)
+FCALLSCSUB10 (gridDefParamLCC, GRIDDEFPARAMLCC, griddefparamlcc, INT, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE, INT, INT)
+FCALLSCSUB10 (gridInqParamLCC, GRIDINQPARAMLCC, gridinqparamlcc, INT, PDOUBLE, PDOUBLE, PDOUBLE, PDOUBLE, PDOUBLE, PDOUBLE, PDOUBLE, PINT, PINT)
 FCALLSCSUB2 (gridDefArea, GRIDDEFAREA, griddefarea, INT, DOUBLEV)
 FCALLSCSUB2 (gridInqArea, GRIDINQAREA, gridinqarea, INT, DOUBLEV)
 FCALLSCFUN1 (INT, gridHasArea, GRIDHASAREA, gridhasarea, INT)

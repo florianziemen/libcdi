@@ -301,9 +301,6 @@ void printGridInfoKernel(int gridID, int index, bool lproj)
     }
 
   if ( gridtype == GRID_LONLAT     ||
-       gridtype == GRID_LCC2       ||
-       gridtype == GRID_LAEA       ||
-       gridtype == GRID_SINUSOIDAL ||
        gridtype == GRID_PROJECTION ||
        gridtype == GRID_GENERIC    ||
        gridtype == GRID_GAUSSIAN   ||
@@ -348,16 +345,6 @@ void printGridInfoKernel(int gridID, int index, bool lproj)
       print_xvals(gridID, dig);
       print_yvals(gridID, dig);
 
-      if ( gridtype == GRID_LONLAT && gridIsRotated(gridID) )
-        {
-          double lonpole = gridInqXpole(gridID);
-          double latpole = gridInqYpole(gridID);
-          double angle   = gridInqAngle(gridID);
-          fprintf(stdout, "%33s : lon=%.*g  lat=%.*g", "northpole", dig, lonpole, dig, latpole);
-          if ( IS_NOT_EQUAL(angle, 0) ) fprintf(stdout, "  angle=%.*g", dig, angle);
-          fprintf(stdout, "\n");
-        }
-
       if ( gridInqXbounds(gridID, NULL) || gridInqYbounds(gridID, NULL) )
         {
           fprintf(stdout, "%33s :", "available");
@@ -365,21 +352,6 @@ void printGridInfoKernel(int gridID, int index, bool lproj)
           if ( gridHasArea(gridID) )          fprintf(stdout, " area");
           if ( gridInqMask(gridID, NULL) )    fprintf(stdout, " mask");
           fprintf(stdout, "\n");
-        }
-
-      if ( gridtype == GRID_LAEA )
-        {
-          double a, lon_0, lat_0;
-          gridInqLaea(gridID, &a, &lon_0, &lat_0);
-          fprintf(stdout, "%33s : a=%g  lon_0=%g  lat_0=%g\n", "projpar", a, lon_0, lat_0);
-        }
-
-      if ( gridtype == GRID_LCC2 )
-        {
-          double a, lon_0, lat_0, lat_1, lat_2;
-          gridInqLcc2(gridID, &a, &lon_0, &lat_0, &lat_1, &lat_2);
-          fprintf(stdout, "%33s : a=%7.0f  lon_0=%g  lat_0=%g  lat_1=%g  lat_2=%g\n",
-                  "projpar", a, lon_0, lat_0, lat_1, lat_2);
         }
     }
   else if ( gridtype == GRID_SPECTRAL )
@@ -402,8 +374,8 @@ void printGridInfoKernel(int gridID, int index, bool lproj)
     }
   else if ( gridtype == GRID_GME )
     {
-      int ni = gridInqGMEni(gridID);
-      int nd = gridInqGMEnd(gridID);
+      int nd, ni, ni2, ni3;
+      gridInqParamGME(gridID, &nd, &ni, &ni2, &ni3);
 #ifdef CDO
       set_text_color(stdout, RESET, GREEN);
 #endif
@@ -448,7 +420,7 @@ void printGridInfoKernel(int gridID, int index, bool lproj)
       double originLon, originLat, lonParY, lat1, lat2, xincm, yincm;
       int projflag, scanflag;
 
-      gridInqLCC(gridID, &originLon, &originLat, &lonParY, &lat1, &lat2, &xincm, &yincm,
+      gridInqParamLCC(gridID, &originLon, &originLat, &lonParY, &lat1, &lat2, &xincm, &yincm,
                  &projflag, &scanflag);
 
 #ifdef CDO
@@ -529,9 +501,9 @@ void printZaxisInfo(int vlistID)
       int zaxistype = zaxisInqType(zaxisID);
       int ltype     = zaxisInqLtype(zaxisID);
       int levelsize = zaxisInqSize(zaxisID);
-      int prec      = zaxisInqPrec(zaxisID);
-
-      int dig = (prec == DATATYPE_FLT64) ? 15 : 7;
+      // int prec      = zaxisInqPrec(zaxisID);
+      // int dig = (prec == DATATYPE_FLT64) ? 15 : 7;
+      int dig = 7;
 
       zaxisName(zaxistype, zaxisname);
       zaxisInqName(zaxisID, zname);
@@ -679,7 +651,7 @@ int printDateTime(int ntimeout, int vdate, int vtime)
 
   fprintf(stdout, " %s %s", vdatestr, vtimestr);
 
-  return (++ntimeout);
+  return ++ntimeout;
 }
 
 #define NUM_TIMESTEP 60
