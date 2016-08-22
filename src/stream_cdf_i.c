@@ -1347,8 +1347,7 @@ void cdf_scan_var_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimi
           else if ( isText && strcmp(attname, "cell_measures") == 0 && (nc_cell_id=cdf_get_cell_varid(attstring, ncid)) != UNDEFID )
             {
               ncvars[ncvarid].cellarea = nc_cell_id;
-              /* ncvars[nc_cell_id].isvar = UNDEFID; */
-              cdf_set_var(ncvars, nc_cell_id, FALSE);
+              ncvars[nc_cell_id].isvar = FALSE;
               cdf_set_var(ncvars, ncvarid, TRUE);
             }
           /*
