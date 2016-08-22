@@ -314,18 +314,12 @@ void transpose2dArrayDP(size_t inWidth, size_t inHeight, double *data)
   */
 
   for ( size_t yBlock = 0; yBlock < inHeight; yBlock += cacheBlockSize )
-    {
-      for ( size_t xBlock = 0; xBlock < inWidth; xBlock += cacheBlockSize )
-        {
-          for ( size_t y = yBlock, yEnd = min_size(yBlock + cacheBlockSize, inHeight); y < yEnd; y++ )
-            {
-              for ( size_t x = xBlock, xEnd = min_size(xBlock + cacheBlockSize, inWidth); x < xEnd; x++ )
-                {
-                  out[x][y] = temp[y][x];
-                }
-            }
-        }
-    }
+    for ( size_t xBlock = 0; xBlock < inWidth; xBlock += cacheBlockSize )
+      for ( size_t y = yBlock, yEnd = min_size(yBlock + cacheBlockSize, inHeight); y < yEnd; y++ )
+        for ( size_t x = xBlock, xEnd = min_size(xBlock + cacheBlockSize, inWidth); x < xEnd; x++ )
+          {
+            out[x][y] = temp[y][x];
+          }
 
   Free(temp[0]);
 }
@@ -355,18 +349,12 @@ void transpose2dArraySP(size_t inWidth, size_t inHeight, float *data)
   */
 
   for ( size_t yBlock = 0; yBlock < inHeight; yBlock += cacheBlockSize )
-    {
-      for ( size_t xBlock = 0; xBlock < inWidth; xBlock += cacheBlockSize )
-        {
-          for ( size_t y = yBlock, yEnd = min_size(yBlock + cacheBlockSize, inHeight); y < yEnd; y++ )
-            {
-              for ( size_t x = xBlock, xEnd = min_size(xBlock + cacheBlockSize, inWidth); x < xEnd; x++ )
-                {
-                  out[x][y] = temp[y][x];
-                }
-            }
-        }
-    }
+    for ( size_t xBlock = 0; xBlock < inWidth; xBlock += cacheBlockSize )
+      for ( size_t y = yBlock, yEnd = min_size(yBlock + cacheBlockSize, inHeight); y < yEnd; y++ )
+        for ( size_t x = xBlock, xEnd = min_size(xBlock + cacheBlockSize, inWidth); x < xEnd; x++ )
+          {
+            out[x][y] = temp[y][x];
+          }
 
   Free(temp);
 }

@@ -193,8 +193,7 @@ void grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
   if ( filetype == FILETYPE_GRB && streamptr->comptype == CDI_COMPRESS_SZIP )
     nbytes = grbSzip(filetype, gribbuffer, nbytes);
 
-  size_t (*myFileWrite)(int fileID, const void *restrict buffer,
-                        size_t len, int tsID)
+  size_t (*myFileWrite)(int fileID, const void *restrict buffer, size_t len, int tsID)
     = (size_t (*)(int, const void *restrict, size_t, int))
     namespaceSwitchGet(NSSWITCH_FILE_WRITE).func;
   size_t nwrite = myFileWrite(fileID, gribbuffer, nbytes, tsID);

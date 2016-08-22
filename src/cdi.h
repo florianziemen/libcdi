@@ -357,9 +357,9 @@ const char *streamFilesuffix(int filetype);
 
 off_t   streamNvals(int streamID);
 
-int     streamInqNvars ( int streamID );
+int     streamInqNvars(int streamID);
 
-/* STREAM var I/O routines */
+/* STREAM var I/O routines (random access) */
 
 /*      streamWriteVar: Write a variable */
 void    streamWriteVar(int streamID, int varID, const double data[], int nmiss);
@@ -380,7 +380,7 @@ void    streamReadVarSliceF(int streamID, int varID, int levelID, float data[], 
 void    streamWriteVarChunk(int streamID, int varID, const int rect[3][2], const double data[], int nmiss);
 
 
-/* STREAM record I/O routines */
+/* STREAM record I/O routines (sequential access) */
 
 void    streamDefRecord(int streamID, int  varID, int  levelID);
 void    streamInqRecord(int streamID, int *varID, int *levelID);

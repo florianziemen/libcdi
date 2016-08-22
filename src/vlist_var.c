@@ -68,18 +68,13 @@ void vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].opt_grib_nentries    = 0;
 }
 
-
-
 static
 int vlistvarNewEntry(int vlistID)
 {
   int varID = 0;
-  int vlistvarSize;
-  var_t *vlistvar;
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
-
-  vlistvarSize = vlistptr->varsAllocated;
-  vlistvar     = vlistptr->vars;
+  int vlistvarSize = vlistptr->varsAllocated;
+  var_t *vlistvar = vlistptr->vars;
   /*
     Look for a free slot in vlistvar.
     (Create the table the first time through).
@@ -88,8 +83,8 @@ int vlistvarNewEntry(int vlistID)
     {
       vlistvarSize = 2;
       vlistvar = (var_t *) Malloc((size_t)vlistvarSize * sizeof (var_t));
-      for (int i = 0; i < vlistvarSize; i++ )
-	vlistvar[i].isUsed = FALSE;
+      for ( int i = 0; i < vlistvarSize; i++ )
+	vlistvar[i].isUsed = false;
     }
   else
     {
@@ -104,7 +99,7 @@ int vlistvarNewEntry(int vlistID)
       vlistvar = (var_t *) Realloc(vlistvar,
                                    (size_t)(vlistvarSize *= 2) * sizeof(var_t));
       for ( int i = varID; i < vlistvarSize; i++ )
-	vlistvar[i].isUsed = FALSE;
+	vlistvar[i].isUsed = false;
     }
 
   vlistptr->varsAllocated = vlistvarSize;
@@ -112,7 +107,7 @@ int vlistvarNewEntry(int vlistID)
 
   vlistvarInitEntry(vlistID, varID);
 
-  vlistptr->vars[varID].isUsed = TRUE;
+  vlistptr->vars[varID].isUsed = true;
 
   return varID;
 }
@@ -1721,9 +1716,7 @@ void  vlistDefVarXYZ(int vlistID, int varID, int xyz)
 
 void vlistInqVarDimorder(int vlistID, int varID, int (*outDimorder)[3])
 {
-  vlist_t *vlistptr;
-
-  vlistptr = vlist_to_pointer(vlistID);
+  vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
   vlistCheckVarID(__func__, vlistID, varID);
 

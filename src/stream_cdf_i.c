@@ -2933,7 +2933,7 @@ void cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int model
         vlistDefVarChunkType(vlistID, varID, ncvars[ncvarid].chunktype);
 #endif
 
-      streamptr->vars[varID1].defmiss = 0;
+      streamptr->vars[varID1].defmiss = false;
       streamptr->vars[varID1].ncvarid = ncvarid;
 
       vlistDefVarName(vlistID, varID, ncvars[ncvarid].name);

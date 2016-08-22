@@ -46,8 +46,8 @@ ensinfo_t;
 
 typedef struct
 {
+  bool        isUsed;
   int         flag;
-  int         isUsed;
   int         mvarID;
   int         fvarID;
   int         param;

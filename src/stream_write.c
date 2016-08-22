@@ -105,8 +105,7 @@ The values are converted to the external data type of the variable, if necessary
 */
 void streamWriteVar(int streamID, int varID, const double *data, int nmiss)
 {
-  void (*myCdiStreamWriteVar_)(int streamID, int varID, int memtype,
-                               const void *data, int nmiss)
+  void (*myCdiStreamWriteVar_)(int streamID, int varID, int memtype, const void *data, int nmiss)
     = (void (*)(int, int, int, const void *, int))
     namespaceSwitchGet(NSSWITCH_STREAM_WRITE_VAR_).func;
 
@@ -131,8 +130,7 @@ The values are converted to the external data type of the variable, if necessary
 */
 void streamWriteVarF(int streamID, int varID, const float *data, int nmiss)
 {
-  int (*myCdiStreamWriteVar_)(int streamID, int varID, int memtype,
-                              const void *data, int nmiss)
+  int (*myCdiStreamWriteVar_)(int streamID, int varID, int memtype, const void *data, int nmiss)
     = (int (*)(int, int, int, const void *, int))
     namespaceSwitchGet(NSSWITCH_STREAM_WRITE_VAR_).func;
   
@@ -275,22 +273,19 @@ void streamWriteVarSliceF(int streamID, int varID, int levelID, const float *dat
 }
 
 
-void
-streamWriteVarChunk(int streamID, int varID,
-                    const int rect[][2], const double *data, int nmiss)
+void streamWriteVarChunk(int streamID, int varID,
+                         const int rect[][2], const double *data, int nmiss)
 {
   void (*myCdiStreamWriteVarChunk_)(int streamID, int varID, int memtype,
-                                    const int rect[][2], const void *data,
-                                    int nmiss)
+                                    const int rect[][2], const void *data, int nmiss)
     = (void (*)(int, int, int, const int [][2], const void *, int))
     namespaceSwitchGet(NSSWITCH_STREAM_WRITE_VAR_CHUNK_).func;
   myCdiStreamWriteVarChunk_(streamID, varID, MEMTYPE_DOUBLE, rect, data, nmiss);
 }
 
 /* single image implementation */
-void
-cdiStreamWriteVarChunk_(int streamID, int varID, int memtype,
-                        const int rect[][2], const void *data, int nmiss)
+void cdiStreamWriteVarChunk_(int streamID, int varID, int memtype,
+                             const int rect[][2], const void *data, int nmiss)
 {
   if ( CDI_Debug ) Message("streamID = %d varID = %d", streamID, varID);
 
@@ -420,7 +415,7 @@ void streamWriteRecordF(int streamID, const float *data, int nmiss)
       // In case the file format does not support single precision writing,
       // we fall back to double precision writing, converting the data on the fly.
       stream_t *streamptr = stream_to_pointer(streamID);
-      int varID  = streamptr->record->varID;
+      int varID = streamptr->record->varID;
       size_t elementCount = (size_t) gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
       double *conversionBuffer = (double *) Malloc(elementCount*sizeof(*conversionBuffer));
       for ( size_t i = elementCount; i--; ) conversionBuffer[i] = (double) data[i];

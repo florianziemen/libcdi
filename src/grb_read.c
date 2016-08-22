@@ -81,7 +81,7 @@ int grbUnzipRecord(void *gribbuffer, size_t *gribsize)
 	  if ( unzipsize < (long) igribsize )
 	    {
 	      fprintf(stderr, "Decompressed size smaller than compressed size (in %ld; out %ld)!\n", (long)igribsize, unzipsize);
-	      return (0);
+	      return 0;
 	    }
 
 	  if ( itmpbuffersize < igribsize )

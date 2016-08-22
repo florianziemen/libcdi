@@ -2,10 +2,7 @@
 #  include "config.h"
 #endif
 
-#include <string.h>
-
 #include "dmemory.h"
-#include "error.h"
 
 #include "cdi.h"
 #include "cdi_int.h"
@@ -23,7 +20,7 @@ static
 void streamvar_init_entry(stream_t *streamptr, int varID)
 {
   streamptr->vars[varID].ncvarid      = CDI_UNDEFID;
-  streamptr->vars[varID].defmiss      = 0;
+  streamptr->vars[varID].defmiss      = false;
 
   streamptr->vars[varID].subtypeSize  = 0;
   streamptr->vars[varID].recordTable  = NULL;
@@ -38,30 +35,24 @@ static
 int streamvar_new_entry(stream_t *streamptr)
 {
   int varID = 0;
-  int streamvarSize;
-  svarinfo_t *streamvar;
-
-  streamvarSize = streamptr->varsAllocated;
-  streamvar     = streamptr->vars;
+  int streamvarSize = streamptr->varsAllocated;
+  svarinfo_t *streamvar = streamptr->vars;
   /*
     Look for a free slot in streamvar.
     (Create the table the first time through).
   */
   if ( ! streamvarSize )
     {
-      int i;
-
       streamvarSize = 2;
-      streamvar
-        = (svarinfo_t *) Malloc((size_t)streamvarSize * sizeof(svarinfo_t));
+      streamvar = (svarinfo_t *) Malloc((size_t)streamvarSize * sizeof(svarinfo_t));
       if ( streamvar == NULL )
 	{
           Message("streamvarSize = %d", streamvarSize);
 	  SysError("Allocation of svarinfo_t failed");
 	}
 
-      for ( i = 0; i < streamvarSize; i++ )
-	streamvar[i].isUsed = FALSE;
+      for ( int i = 0; i < streamvarSize; i++ )
+	streamvar[i].isUsed = false;
     }
   else
     {
@@ -76,11 +67,8 @@ int streamvar_new_entry(stream_t *streamptr)
   */
   if ( varID == streamvarSize )
     {
-      int i;
-
       streamvarSize = 2*streamvarSize;
-      streamvar
-        = (svarinfo_t *) Realloc(streamvar,
+      streamvar = (svarinfo_t *) Realloc(streamvar,
                                  (size_t)streamvarSize * sizeof (svarinfo_t));
       if ( streamvar == NULL )
 	{
@@ -89,8 +77,8 @@ int streamvar_new_entry(stream_t *streamptr)
 	}
       varID = streamvarSize/2;
 
-      for ( i = varID; i < streamvarSize; i++ )
-	streamvar[i].isUsed = FALSE;
+      for ( int i = varID; i < streamvarSize; i++ )
+	streamvar[i].isUsed = false;
     }
 
   streamptr->varsAllocated = streamvarSize;
@@ -98,8 +86,9 @@ int streamvar_new_entry(stream_t *streamptr)
 
   streamvar_init_entry(streamptr, varID);
 
-  streamptr->vars[varID].isUsed = TRUE;
-  return (varID);
+  streamptr->vars[varID].isUsed = true;
+
+  return varID;
 }
 
 
@@ -109,7 +98,7 @@ allocate_record_table_entry(stream_t *streamptr, int varID, int subID, int nlevs
   int *level    = (int *) Malloc((size_t)nlevs * sizeof (int));
   int *lindex   = (int *) Malloc((size_t)nlevs * sizeof (int));
 
-  for (int levID = 0; levID < nlevs; levID++ )
+  for ( int levID = 0; levID < nlevs; levID++ )
     {
       level[levID]    = CDI_UNDEFID;
       lindex[levID]   = levID;
@@ -154,7 +143,7 @@ int stream_new_var(stream_t *streamptr, int gridID, int zaxisID, int tilesetID)
 
   streamptr->vars[varID].subtypeID = tilesetID;
 
-  return (varID);
+  return varID;
 }
 /*
  * Local Variables:

@@ -188,14 +188,14 @@ typedef struct {
 typedef struct {
   int            ncvarid;
   int            subtypeSize;
-  sleveltable_t *recordTable; /* record IDs for each subtype */
-  int            defmiss;     /* TRUE if missval is defined in file */
+  sleveltable_t *recordTable; // record IDs for each subtype
+  bool           defmiss;     // true: if missval is defined in file
+  bool           isUsed;
 
-  int            isUsed;
   int            gridID;
   int            zaxisID;
-  int            tsteptype;   /* TSTEP_* */
-  int            subtypeID;   /* subtype ID, e.g. for tile-related meta-data (currently for GRIB-API only). */
+  int            tsteptype;   // TSTEP_*
+  int            subtypeID;   // subtype ID, e.g. for tile-related meta-data (currently for GRIB-API only).
 }
 svarinfo_t;
 
