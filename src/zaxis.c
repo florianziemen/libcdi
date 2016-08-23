@@ -1322,6 +1322,11 @@ static void zaxisPrintKernel ( zaxis_t * zaxisptr, int index, FILE * fp )
   fprintf(fp, "#\n");
   fprintf(fp, "zaxistype = %s\n", zaxisNamePtr(type));
   fprintf(fp, "size      = %d\n", nlevels);
+  if ( nlevels == 1 )
+    {
+      bool zscalar = (bool)zaxisptr->scalar;
+      if ( zscalar ) fprintf(fp, "scalar    = true\n");
+    }
   if ( zaxisptr->name[0]     ) fprintf(fp, "name      = %s\n", zaxisptr->name);
   if ( zaxisptr->longname[0] ) fprintf(fp, "longname  = %s\n", zaxisptr->longname);
   if ( zaxisptr->units[0]    ) fprintf(fp, "units     = %s\n", zaxisptr->units);
