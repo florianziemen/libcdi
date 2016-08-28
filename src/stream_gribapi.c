@@ -1849,7 +1849,7 @@ struct gribApiMsg {
 };
 
 static struct gribApiMsg
-getGribApiCompTypeMsg(grib_handle *gh, int comptype, int gridsize)
+getGribApiCompTypeMsg(int comptype, int gridsize)
 {
   const char *mesg;
   size_t len;
@@ -1940,8 +1940,7 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 
       if ( comptype )
         {
-          struct gribApiMsg gaMsg
-            = getGribApiCompTypeMsg(gh, comptype, gridsize);
+          struct gribApiMsg gaMsg = getGribApiCompTypeMsg(comptype, gridsize);
           size_t len = gaMsg.msgLen;
           const char *mesg = gaMsg.msg;
           GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
@@ -2080,14 +2079,13 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
           }
         else
           {
-            struct gribApiMsg gaMsg = getGribApiCompTypeMsg(gh, comptype, gridsize);
+            struct gribApiMsg gaMsg = getGribApiCompTypeMsg(comptype, gridsize);
             len = gaMsg.msgLen;
             mesg = gaMsg.msg;
           }
         GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
         if ( lieee )
-          GRIB_CHECK(my_grib_set_long(gh, "precision",
-                                      datatype == DATATYPE_FLT64 ? 2 : 1), 0);
+          GRIB_CHECK(my_grib_set_long(gh, "precision", datatype == DATATYPE_FLT64 ? 2 : 1), 0);
 
 	break;
       }
@@ -2100,7 +2098,7 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 	int ysize = gridInqYsize(gridID);
 
 	gridInqParamLCC(gridID, &originLon, &originLat, &lonParY, &lat1, &lat2, &xincm, &yincm,
-		   &projflag, &scanflag);
+                        &projflag, &scanflag);
 
         static const char mesg[] = "lambert";
         size_t len = sizeof (mesg) -1;
@@ -2325,7 +2323,7 @@ void grib_verfiy_zaxis(int zaxisID, double sf)
 */
 
 static
-void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID, int levelID, int gcinit, int proddef_template_num)
+void gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelID, int gcinit, int proddef_template_num)
 {
   bool lbounds = false;
   double dlevel1 = 0, dlevel2 = 0;
@@ -2650,7 +2648,7 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
 
   gribapiDefGrid((int)editionNumber, gh, gridID, comptype, lieee, datatype, nmiss, gc->init);
 
-  gribapiDefLevel((int)editionNumber, gh, param, zaxisID, levelID, gc->init, productDefinitionTemplate);
+  gribapiDefLevel((int)editionNumber, gh, zaxisID, levelID, gc->init, productDefinitionTemplate);
 
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
   //if (!gc->init)

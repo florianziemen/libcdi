@@ -141,7 +141,7 @@ int cgribexGetTsteptype(int timerange)
 }
 
 static
-void cgribexGetGrid(stream_t *streamptr, int *isec2, double *fsec2, int *isec4, grid_t *grid, int iret)
+void cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid, int iret)
 {
   bool compyinc = true;
   int gridtype = cgribexGetGridType(isec2);
@@ -354,7 +354,7 @@ void cgribexAddRecord(stream_t * streamptr, int param, int *isec1, int *isec2, d
   record->tsteptype = (short)tsteptype;
 
   grid_t *gridptr = (grid_t*) Malloc(sizeof(*gridptr));
-  cgribexGetGrid(streamptr, isec2, fsec2, isec4, gridptr, iret);
+  cgribexGetGrid(streamptr, isec2, isec4, gridptr, iret);
 
   struct addIfNewRes gridAdded = cdiVlistAddGridIfNew(vlistID, gridptr, 0);
   int gridID = gridAdded.Id;
