@@ -2682,10 +2682,6 @@ static
 void cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars,
                           size_t vctsize_echam, double *vct_echam, unsigned char *uuidOfVGrid)
 {
-  int ncvarid2;
-  int i, ilev;
-  int zaxisindex;
-  int nbdims, nvertex, nlevel;
   int psvarid = -1;
   char *pname, *plongname, *punits;
   size_t vctsize = vctsize_echam;
@@ -2714,7 +2710,7 @@ void cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
             }
           else
             {
-              for ( i = 0; i < ndims; i++ )
+              for ( int i = 0; i < ndims; i++ )
                 {
                   if ( ncvar->dimtype[i] == Z_AXIS )
                     zdimid = ncvar->dimids[i];
@@ -2763,11 +2759,11 @@ void cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 
 	      if ( ncvars[zvarid].bounds != UNDEFID )
 		{
-		  nbdims = ncvars[ncvars[zvarid].bounds].ndims;
+		  int nbdims = ncvars[ncvars[zvarid].bounds].ndims;
 		  if ( nbdims == 2 )
 		    {
-		      nlevel  = (int)ncdims[ncvars[ncvars[zvarid].bounds].dimids[0]].len;
-		      nvertex = (int)ncdims[ncvars[ncvars[zvarid].bounds].dimids[1]].len;
+		      int nlevel  = (int)ncdims[ncvars[ncvars[zvarid].bounds].dimids[0]].len;
+		      int nvertex = (int)ncdims[ncvars[ncvars[zvarid].bounds].dimids[1]].len;
 		      if ( nlevel == zsize && nvertex == 2 )
 			{
 			  with_bounds = true;
@@ -2775,7 +2771,7 @@ void cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 			  ubounds = (double *) Malloc((size_t)nlevel*sizeof(double));
 			  double zbounds[2*nlevel];
 			  cdf_get_var_double(ncvars[zvarid].ncid, ncvars[zvarid].bounds, zbounds);
-			  for ( i = 0; i < nlevel; ++i )
+			  for ( int i = 0; i < nlevel; ++i )
 			    {
 			      lbounds[i] = zbounds[i*2];
 			      ubounds[i] = zbounds[i*2+1];
@@ -2807,14 +2803,16 @@ void cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 		}
 	      else
 		{
-		  for ( ilev = 0; ilev < zsize; ilev++ ) zvar[ilev] = ilev + 1;
+		  for ( int ilev = 0; ilev < zsize; ilev++ ) zvar[ilev] = ilev + 1;
 		}
 	    }
 
       	  ncvar->zaxisID = varDefZaxis(vlistID, zaxisType, (int) zsize, zvar, (int)with_bounds, lbounds, ubounds,
                                        (int)vctsize, vct, pname, plongname, punits, zprec, 1, 0);
 
-	  if ( uuidOfVGrid[0] != 0 )
+          if ( CDI_cmor_mode && zsize == 1 && zaxisType != ZAXIS_HYBRID ) zaxisDefScalar(ncvar->zaxisID);
+
+          if ( uuidOfVGrid[0] != 0 )
             {
               // printf("uuidOfVGrid: defined\n");
               zaxisDefUUID(ncvar->zaxisID, uuidOfVGrid);
@@ -2835,13 +2833,13 @@ void cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 	  Free(lbounds);
 	  Free(ubounds);
 
-	  zaxisindex = vlistZaxisIndex(vlistID, ncvar->zaxisID);
-	  streamptr->zaxisID[zaxisindex]  = zdimid;
+	  int zaxisindex = vlistZaxisIndex(vlistID, ncvar->zaxisID);
+	  streamptr->zaxisID[zaxisindex] = zdimid;
 
 	  if ( CDI_Debug )
 	    Message("zaxisID %d %d %s", ncvar->zaxisID, ncvarid, ncvar->name);
 
-	  for ( ncvarid2 = ncvarid+1; ncvarid2 < nvars; ncvarid2++ )
+	  for ( int ncvarid2 = ncvarid+1; ncvarid2 < nvars; ncvarid2++ )
 	    if ( ncvars[ncvarid2].isvar == TRUE && ncvars[ncvarid2].zaxisID == UNDEFID /*&& ncvars[ncvarid2].zaxistype == UNDEFID*/ )
 	      {
                 int zvarid2 = UNDEFID;
@@ -2850,7 +2848,7 @@ void cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 
 		int zdimid2 = UNDEFID;
 		ndims = ncvars[ncvarid2].ndims;
-		for ( i = 0; i < ndims; i++ )
+		for ( int i = 0; i < ndims; i++ )
 		  {
 		    if ( ncvars[ncvarid2].dimtype[i] == Z_AXIS )
 		      zdimid2 = ncvars[ncvarid2].dimids[i];

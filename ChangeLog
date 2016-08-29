@@ -1,3 +1,7 @@
+2016-08-29  Uwe Schulzweida
+
+	* CDI_cmor_mode: Convert Zaxis with one level to Scalar Z-Coordinate on all input streams
+
 2016-08-18  Uwe Schulzweida
 
 	* Version 1.8.0rc2 released
