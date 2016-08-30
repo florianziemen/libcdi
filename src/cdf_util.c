@@ -13,6 +13,15 @@ void str_tolower(char *str)
       str[i] = (char)tolower((int)str[i]);
 }
 
+bool str_is_equal(const char *vstr, const char *cstr)
+{
+  bool is_equal = false;
+  size_t clen = (cstr != NULL) ? strlen(cstr) : 0;
+
+  if ( vstr && *vstr ) is_equal = (memcmp(vstr, cstr, clen) == 0);
+
+  return is_equal;
+}
 
 int get_timeunit(size_t len, const char *ptu)
 {
@@ -20,13 +29,13 @@ int get_timeunit(size_t len, const char *ptu)
 
   if ( len > 2 )
     {
-      if      ( memcmp(ptu, "sec",    3) == 0 )          timeunit = TUNIT_SECOND;
-      else if ( memcmp(ptu, "minute", 6) == 0 )          timeunit = TUNIT_MINUTE;
-      else if ( memcmp(ptu, "hour",   4) == 0 )          timeunit = TUNIT_HOUR;
-      else if ( memcmp(ptu, "day",    3) == 0 )          timeunit = TUNIT_DAY;
-      else if ( memcmp(ptu, "month",  5) == 0 )          timeunit = TUNIT_MONTH;
-      else if ( memcmp(ptu, "calendar_month", 14) == 0 ) timeunit = TUNIT_MONTH;
-      else if ( memcmp(ptu, "year",   4) == 0 )          timeunit = TUNIT_YEAR;
+      if      ( str_is_equal(ptu, "sec") )            timeunit = TUNIT_SECOND;
+      else if ( str_is_equal(ptu, "minute") )         timeunit = TUNIT_MINUTE;
+      else if ( str_is_equal(ptu, "hour") )           timeunit = TUNIT_HOUR;
+      else if ( str_is_equal(ptu, "day") )            timeunit = TUNIT_DAY;
+      else if ( str_is_equal(ptu, "month") )          timeunit = TUNIT_MONTH;
+      else if ( str_is_equal(ptu, "calendar_month") ) timeunit = TUNIT_MONTH;
+      else if ( str_is_equal(ptu, "year") )           timeunit = TUNIT_YEAR;
     }
   else if ( len == 1 )
     {
@@ -39,11 +48,13 @@ int get_timeunit(size_t len, const char *ptu)
 
 bool is_time_units(const char *timeunits)
 {
-  bool status = strncmp(timeunits, "sec",    3) == 0
-             || strncmp(timeunits, "minute", 6) == 0
-             || strncmp(timeunits, "hour",   4) == 0
-             || strncmp(timeunits, "day",    3) == 0
-             || strncmp(timeunits, "month",  5) == 0;
+  bool status = str_is_equal(timeunits, "sec")
+             || str_is_equal(timeunits, "minute")
+             || str_is_equal(timeunits, "hour")
+             || str_is_equal(timeunits, "day")
+             || str_is_equal(timeunits, "month")
+             || str_is_equal(timeunits, "calendar_month")
+             || str_is_equal(timeunits, "year");
 
   return status;
 }
@@ -68,8 +79,8 @@ bool is_timeaxis_units(const char *timeunits)
         {
           while ( isspace(*ptu) ) ptu++;
 
-          int timetype = memcmp(ptu, "as", 2) == 0 ? TAXIS_ABSOLUTE :
-            memcmp(ptu, "since", 5) == 0 ? TAXIS_RELATIVE : -1;
+          int timetype = str_is_equal(ptu, "as") ? TAXIS_ABSOLUTE :
+                         str_is_equal(ptu, "since") ? TAXIS_RELATIVE : -1;
 
           status = timetype != -1;
         }
@@ -176,15 +187,14 @@ bool is_lon_axis(const char *units, const char *stdname)
   lc_units[15] = 0;
   str_tolower(lc_units);
 
-  if ( ((memcmp(lc_units, "degree", 6) == 0 || memcmp(lc_units, "radian", 6) == 0) &&
-        (memcmp(stdname, "grid_longitude", 14) == 0 || memcmp(stdname, "longitude", 9) == 0)) )
+  if ( (str_is_equal(lc_units, "degree") || str_is_equal(lc_units, "radian")) &&
+       (str_is_equal(stdname, "grid_longitude") || str_is_equal(stdname, "longitude")) )
     {
       status = true;
     }
 
-  if ( status == false &&
-       memcmp(stdname, "grid_latitude", 13) && memcmp(stdname, "latitude", 8) &&
-       memcmp(lc_units, "degree", 6) == 0 )
+  if ( status == false && str_is_equal(lc_units, "degree") &&
+       !str_is_equal(stdname, "grid_latitude") && !str_is_equal(stdname, "latitude") )
     {
       int ioff = 6;
       if ( lc_units[ioff] == 's' ) ioff++;
@@ -205,15 +215,14 @@ bool is_lat_axis(const char *units, const char *stdname)
   lc_units[15] = 0;
   str_tolower(lc_units);
 
-  if ( ((memcmp(lc_units, "degree", 6) == 0 || memcmp(lc_units, "radian", 6) == 0) &&
-        (memcmp(stdname, "grid_latitude", 13) == 0 || memcmp(stdname, "latitude", 8) == 0)) )
+  if ( (str_is_equal(lc_units, "degree") || str_is_equal(lc_units, "radian")) &&
+        (str_is_equal(stdname, "grid_latitude") || str_is_equal(stdname, "latitude")) )
     {
       status = true;
     }
 
-  if ( status == false &&
-       memcmp(stdname, "grid_longitude", 14) && memcmp(stdname, "longitude", 9) &&
-       memcmp(lc_units, "degree", 6) == 0 )
+  if ( status == false && str_is_equal(lc_units, "degree") &&
+       !str_is_equal(stdname, "grid_longitude") && !str_is_equal(stdname, "longitude") )
     {
       int ioff = 6;
       if ( lc_units[ioff] == 's' ) ioff++;
@@ -306,20 +315,20 @@ void set_zaxistype(const char *attstring, int *zaxistype)
 
 void set_calendar(const char *attstring, int *calendar)
 {
-  if ( memcmp(attstring, "standard", 8)  == 0 ||
-       memcmp(attstring, "gregorian", 9) == 0 )
+  if ( str_is_equal(attstring, "standard") ||
+       str_is_equal(attstring, "gregorian") )
     *calendar = CALENDAR_STANDARD;
-  else if ( memcmp(attstring, "none", 4) == 0 )
+  else if ( str_is_equal(attstring, "none") )
     *calendar = CALENDAR_NONE;
-  else if ( memcmp(attstring, "proleptic", 9) == 0 )
+  else if ( str_is_equal(attstring, "proleptic") )
     *calendar = CALENDAR_PROLEPTIC;
-  else if ( memcmp(attstring, "360", 3) == 0 )
+  else if ( str_is_equal(attstring, "360") )
     *calendar = CALENDAR_360DAYS;
-  else if ( memcmp(attstring, "365", 3) == 0 ||
-            memcmp(attstring, "noleap", 6)  == 0 )
+  else if ( str_is_equal(attstring, "365") ||
+            str_is_equal(attstring, "noleap") )
     *calendar = CALENDAR_365DAYS;
-  else if ( memcmp(attstring, "366", 3)  == 0 ||
-            memcmp(attstring, "all_leap", 8) == 0 )
+  else if ( str_is_equal(attstring, "366") ||
+            str_is_equal(attstring, "all_leap") )
     *calendar = CALENDAR_366DAYS;
   else
     Warning("calendar >%s< unsupported!", attstring);

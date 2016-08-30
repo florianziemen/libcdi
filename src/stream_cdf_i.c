@@ -223,9 +223,9 @@ int setBaseTime(const char *timeunits, taxis_t *taxis)
     {
       while ( isspace(*ptu) ) ptu++;
 
-      if ( memcmp(ptu, "as", 2) == 0 )
+      if ( str_is_equal(ptu, "as") )
         timetype = TAXIS_ABSOLUTE;
-      else if ( memcmp(ptu, "since", 5) == 0 )
+      else if ( str_is_equal(ptu, "since") )
         timetype = TAXIS_RELATIVE;
 
       while ( ! isspace(*ptu) && *ptu != 0 ) ptu++;
@@ -235,12 +235,12 @@ int setBaseTime(const char *timeunits, taxis_t *taxis)
 
           if ( timetype == TAXIS_ABSOLUTE )
             {
-              if ( memcmp(ptu, "%y%m%d.%f", 9) != 0 && timeunit == TUNIT_DAY )
+              if ( !str_is_equal(ptu, "%y%m%d.%f") && timeunit == TUNIT_DAY )
                 {
                   Message("Unsupported format %s for TIMEUNIT day!", ptu);
                   timeunit = -1;
                 }
-              else if ( memcmp(ptu, "%y%m.%f", 7) != 0 && timeunit == TUNIT_MONTH )
+              else if ( !str_is_equal(ptu, "%y%m.%f") && timeunit == TUNIT_MONTH )
                 {
                   Message("Unsupported format %s for TIMEUNIT month!", ptu);
                   timeunit = -1;
@@ -348,7 +348,7 @@ bool cdfCheckAttText(int fileID, int ncvarid, const char *attname)
 }
 
 static
-void cdfGetAttText(int fileID, int ncvarid, const char *attname, int attlen, char *atttext)
+void cdfGetAttText(int fileID, int ncvarid, const char *attname, size_t attlen, char *atttext)
 {
   nc_type atttype;
   size_t nc_attlen;
@@ -363,7 +363,7 @@ void cdfGetAttText(int fileID, int ncvarid, const char *attname, int attlen, cha
         {
           cdf_get_att_text(fileID, ncvarid, attname, attbuf);
 
-          if ( (int) nc_attlen > (attlen-1) ) nc_attlen = (size_t)(attlen-1);
+          if ( nc_attlen > (attlen-1) ) nc_attlen = (attlen-1);
 
           attbuf[nc_attlen++] = 0;
           memcpy(atttext, attbuf, nc_attlen);
@@ -383,7 +383,7 @@ void cdfGetAttText(int fileID, int ncvarid, const char *attname, int attlen, cha
 
           size_t ssize = strlen(attbuf) + 1;
 
-          if ( ssize > (size_t)attlen ) ssize = (size_t)attlen;
+          if ( ssize > attlen ) ssize = attlen;
           memcpy(atttext, attbuf, ssize);
           atttext[ssize - 1] = 0;
           Free(attbuf);
@@ -612,9 +612,7 @@ int cdf_time_dimid(int fileID, int ndims, int nvars)
     {
       dimname[0] = 0;
       cdf_inq_dimname(fileID, dimid, dimname);
-      size_t len = strlen(dimname);
-      if ( len >= 4 && memcmp(dimname, "time", 4) == 0 ) return dimid;
-      if ( len >= 4 && memcmp(dimname, "Time", 4) == 0 ) return dimid;
+      if ( str_is_equal(dimname, "time") || str_is_equal(dimname, "Time") ) return dimid;
     }
 
   for ( int varid = 0; varid < nvars; ++varid )
@@ -771,14 +769,14 @@ int scan_hybrid_formula(int ncid, int ncfvarid, int *apvarid, int *bvarid, int *
   *psvarid = -1;
   *avarid  = -1;
   *p0varid = -1;
-  enum { attstringlen = 8192 }; char attstring[attstringlen];
-  cdfGetAttText(ncid, ncfvarid, "formula", attstringlen, attstring);
+  char attstring[1024];
+  cdfGetAttText(ncid, ncfvarid, "formula", sizeof(attstring), attstring);
   if ( strcmp(attstring, "p = ap + b*ps") == 0 )
     {
       status = 1;
       bool lstop = false;
       int dimvarid;
-      cdfGetAttText(ncid, ncfvarid, "formula_terms", attstringlen, attstring);
+      cdfGetAttText(ncid, ncfvarid, "formula_terms", sizeof(attstring), attstring);
       char *pstring = attstring;
 
       for ( int i = 0; i < 3; i++ )
@@ -817,7 +815,7 @@ int scan_hybrid_formula(int ncid, int ncfvarid, int *apvarid, int *bvarid, int *
       status = 2;
       bool lstop = false;
       int dimvarid;
-      cdfGetAttText(ncid, ncfvarid, "formula_terms", attstringlen, attstring);
+      cdfGetAttText(ncid, ncfvarid, "formula_terms", sizeof(attstring), attstring);
       char *pstring = attstring;
 
       for ( int i = 0; i < 4; i++ )
@@ -965,8 +963,8 @@ void cdf_set_cdi_attr(int ncid, int ncvarid, int attnum, int cdiID, int varID)
     }
   else if ( xtypeIsText(atttype) )
     {
-      enum {attstringlen = 8192}; char attstring[attstringlen];
-      cdfGetAttText(ncid, ncvarid, attname, attstringlen, attstring);
+      char attstring[8192];
+      cdfGetAttText(ncid, ncvarid, attname, sizeof(attstring), attstring);
       cdiDefAttTxt(cdiID, varID, attname, (int)attlen, attstring);
     }
 }
@@ -1099,7 +1097,7 @@ int cdf_get_cell_varid(char *attstring, int ncid)
     printf("cell_measures >%s<\n", cell_measures);
     printf("cell_var >%s<\n", cell_var);
   */
-  if ( memcmp(cell_measures, "area", 4) == 0 )
+  if ( str_is_equal(cell_measures, "area") )
     {
       int nc_var_id;
       int status = nc_inq_varid(ncid, cell_var, &nc_var_id);
@@ -1124,7 +1122,7 @@ void cdf_scan_var_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimi
   size_t attlen;
   char name[CDI_MAX_NAME];
   char attname[CDI_MAX_NAME];
-  const int attstringlen = 8192; char attstring[8192];
+  char attstring[8192];
 
   int nchecked_vars = 0;
   enum { max_check_vars = 9 };
@@ -1212,20 +1210,26 @@ void cdf_scan_var_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimi
           cdf_inq_atttype(ncid, ncvarid, attname, &atttype);
           cdf_inq_attlen(ncid, ncvarid, attname, &attlen);
 
+          size_t attstringsize = sizeof(attstring);
           bool isText = xtypeIsText(atttype);
-          if ( isText ) cdfGetAttText(ncid, ncvarid, attname, attstringlen, attstring);
+          if ( isText )
+            {
+              cdfGetAttText(ncid, ncvarid, attname, sizeof(attstring), attstring);
+              attstringsize = strlen(attstring) + 1;
+              if ( attstringsize > CDI_MAX_NAME ) attstringsize = CDI_MAX_NAME;
+            }
 
           if ( isText && strcmp(attname, "long_name") == 0 )
             {
-              memcpy(ncvars[ncvarid].longname, attstring, CDI_MAX_NAME);
+              memcpy(ncvars[ncvarid].longname, attstring, attstringsize);
             }
           else if ( isText && strcmp(attname, "standard_name") == 0 )
             {
-              memcpy(ncvars[ncvarid].stdname, attstring, CDI_MAX_NAME);
+              memcpy(ncvars[ncvarid].stdname, attstring, attstringsize);
             }
           else if ( isText && strcmp(attname, "units") == 0 )
             {
-              memcpy(ncvars[ncvarid].units, attstring, CDI_MAX_NAME);
+              memcpy(ncvars[ncvarid].units, attstring, attstringsize);
             }
           else if ( strcmp(attname, "calendar") == 0 )
             {
@@ -1258,23 +1262,19 @@ void cdf_scan_var_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimi
             }
           else if ( isText && strcmp(attname, "trunc_type") == 0 )
             {
-              if ( memcmp(attstring, "Triangular", attlen) == 0 )
+              if ( str_is_equal(attstring, "Triangular") )
                 ncvars[ncvarid].gridtype = GRID_SPECTRAL;
             }
           else if ( isText && (strcmp(attname, "grid_type") == 0 || strcmp(attname, "CDI_grid_type") == 0) )
             {
               str_tolower(attstring);
-
               set_gridtype(attstring, &ncvars[ncvarid].gridtype);
-
               cdf_set_var(ncvars, ncvarid, TRUE);
             }
           else if ( isText && strcmp(attname, "level_type") == 0 )
             {
               str_tolower(attstring);
-
               set_zaxistype(attstring, &ncvars[ncvarid].zaxistype);
-
               cdf_set_var(ncvars, ncvarid, TRUE);
             }
           else if ( !isText && strcmp(attname, "trunc_count") == 0 )
@@ -1467,8 +1467,8 @@ void cdf_scan_var_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimi
             {
               str_tolower(attstring);
 
-              if      ( memcmp(attstring, "down", 4) == 0 ) ncvars[ncvarid].positive = POSITIVE_DOWN;
-              else if ( memcmp(attstring, "up", 2)   == 0 ) ncvars[ncvarid].positive = POSITIVE_UP;
+              if      ( str_is_equal(attstring, "down") ) ncvars[ncvarid].positive = POSITIVE_DOWN;
+              else if ( str_is_equal(attstring, "up")   ) ncvars[ncvarid].positive = POSITIVE_UP;
 
               if ( ncvars[ncvarid].ndims == 1 )
                 {
@@ -1547,7 +1547,7 @@ void cdf_scan_var_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimi
             {
               str_tolower(attstring);
 
-              if ( memcmp(attstring, "true", 4) == 0 )
+              if ( str_is_equal(attstring, "true") )
                 {
                   ncvars[ncvarid].lunsigned = true;
                   /*
@@ -1562,7 +1562,7 @@ void cdf_scan_var_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimi
             {
 	      str_tolower(attstring);
 
-	      if ( memcmp(attstring, "ignore", 6) == 0 )
+	      if ( str_is_equal(attstring, "ignore") )
 		{
 		  ncvars[ncvarid].ignore = true;
 		  cdf_set_var(ncvars, ncvarid, FALSE);
@@ -1806,7 +1806,7 @@ void verify_coordinate_vars_1(int ncid, int ndims, ncdim_t *ncdims, ncvar_t *ncv
 	  if ( !ncvars[ncvarid].islon && ncvars[ncvarid].longname[0] != 0 &&
                !ncvars[ncvarid].islat && ncvars[ncvarid].longname[1] != 0 )
 	    {
-	      if ( memcmp(ncvars[ncvarid].longname+1, "ongitude", 8) == 0 )
+	      if ( str_is_equal(ncvars[ncvarid].longname+1, "ongitude") )
 		{
 		  ncvars[ncvarid].islon = true;
 		  cdf_set_var(ncvars, ncvarid, FALSE);
@@ -1814,7 +1814,7 @@ void verify_coordinate_vars_1(int ncid, int ndims, ncdim_t *ncdims, ncvar_t *ncv
 		  ncdims[ncdimid].dimtype = X_AXIS;
 		  continue;
 		}
-	      else if ( memcmp(ncvars[ncvarid].longname+1, "atitude", 7) == 0 )
+	      else if ( str_is_equal(ncvars[ncvarid].longname+1, "atitude") )
 		{
 		  ncvars[ncvarid].islat = true;
 		  cdf_set_var(ncvars, ncvarid, FALSE);
@@ -1903,12 +1903,12 @@ void verify_coordinate_vars_2(int nvars, ncvar_t *ncvars)
 	  if ( !ncvars[ncvarid].islon && ncvars[ncvarid].longname[0] != 0 &&
                !ncvars[ncvarid].islat && ncvars[ncvarid].longname[1] != 0 )
 	    {
-	      if ( memcmp(ncvars[ncvarid].longname+1, "ongitude", 8) == 0 )
+	      if ( str_is_equal(ncvars[ncvarid].longname+1, "ongitude") )
 		{
 		  ncvars[ncvarid].islon = true;
 		  continue;
 		}
-	      else if ( memcmp(ncvars[ncvarid].longname+1, "atitude", 7) == 0 )
+	      else if ( str_is_equal(ncvars[ncvarid].longname+1, "atitude") )
 		{
 		  ncvars[ncvarid].islat = true;
 		  continue;
@@ -3065,7 +3065,7 @@ void cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int model
 	  size_t len = strlen(pname);
 	  if ( len > 3 && isdigit((int) pname[3]) )
 	    {
-	      if ( memcmp("var", pname, 3) == 0 )
+	      if ( str_is_equal(pname, "var") )
 		{
 		  vlistDefVarCode(vlistID, varID, atoi(pname+3));
                   // vlistDestroyVarName(vlistID, varID);
@@ -3073,7 +3073,7 @@ void cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int model
 	    }
 	  else if ( len > 4 && isdigit((int) pname[4]) )
 	    {
-	      if ( memcmp("code", pname, 4) == 0 )
+	      if ( str_is_equal(pname, "code") )
 		{
 		  vlistDefVarCode(vlistID, varID, atoi(pname+4));
 		  // vlistDestroyVarName(vlistID, varID);
@@ -3081,7 +3081,7 @@ void cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int model
 	    }
 	  else if ( len > 5 && isdigit((int) pname[5]) )
 	    {
-	      if ( memcmp("param", pname, 5) == 0 )
+	      if ( str_is_equal(pname, "param") )
 		{
 		  int pnum = -1, pcat = 255, pdis = 255;
 		  sscanf(pname+5, "%d.%d.%d", &pnum, &pcat, &pdis);
@@ -3135,8 +3135,7 @@ void cdf_scan_global_attr(int fileID, int vlistID, stream_t *streamptr, int ngat
   nc_type xtype;
   size_t attlen;
   char attname[CDI_MAX_NAME];
-  enum { attstringlen = 65636 };
-  char attstring[attstringlen];
+  char attstring[65636];
 
   for ( int iatt = 0; iatt < ngatts; iatt++ )
     {
@@ -3146,7 +3145,7 @@ void cdf_scan_global_attr(int fileID, int vlistID, stream_t *streamptr, int ngat
 
       if ( xtypeIsText(xtype) )
 	{
-	  cdfGetAttText(fileID, NC_GLOBAL, attname, attstringlen, attstring);
+	  cdfGetAttText(fileID, NC_GLOBAL, attname, sizeof(attstring), attstring);
 
           size_t attstrlen = strlen(attstring);
 
@@ -3811,10 +3810,8 @@ int cdfInqContents(stream_t *streamptr)
   if ( nctimevarid != UNDEFID )
     if ( ncvars[nctimevarid].calendar == TRUE )
       {
-        enum {attstringlen = 8192};
-        char attstring[attstringlen];
-
-	cdfGetAttText(fileID, nctimevarid, "calendar", attstringlen, attstring);
+        char attstring[1024];
+	cdfGetAttText(fileID, nctimevarid, "calendar", sizeof(attstring), attstring);
 	str_tolower(attstring);
         set_calendar(attstring, &calendar);
       }
