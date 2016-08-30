@@ -716,11 +716,6 @@ void init_ncvars(long nvars, ncvar_t *ncvars)
       ncvars[ncvarid].fillval         = 0;
       ncvars[ncvarid].addoffset       = 0;
       ncvars[ncvarid].scalefactor     = 1;
-      ncvars[ncvarid].name[0]         = 0;
-      ncvars[ncvarid].longname[0]     = 0;
-      ncvars[ncvarid].stdname[0]      = 0;
-      ncvars[ncvarid].units[0]        = 0;
-      ncvars[ncvarid].extra[0]        = 0;
       ncvars[ncvarid].natts           = 0;
       ncvars[ncvarid].atts            = NULL;
       ncvars[ncvarid].deflate         = 0;
@@ -729,6 +724,11 @@ void init_ncvars(long nvars, ncvar_t *ncvars)
       ncvars[ncvarid].validrange[0]   = VALIDMISS;
       ncvars[ncvarid].validrange[1]   = VALIDMISS;
       ncvars[ncvarid].ensdata         = NULL;
+      memset(ncvars[ncvarid].name, 0, CDI_MAX_NAME);
+      memset(ncvars[ncvarid].longname, 0, CDI_MAX_NAME);
+      memset(ncvars[ncvarid].stdname, 0, CDI_MAX_NAME);
+      memset(ncvars[ncvarid].units, 0, CDI_MAX_NAME);
+      memset(ncvars[ncvarid].extra, 0, CDI_MAX_NAME);
     }
 }
 
