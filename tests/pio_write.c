@@ -22,6 +22,7 @@
 #endif
 
 #include "cdi.h"
+#include "error.h"
 #include "dmemory.h"
 #include "pio_write.h"
 #ifdef USE_MPI
@@ -71,6 +72,8 @@ static const struct {
   },
   { "ieg", CDI_FILETYPE_IEG, CDI_DATATYPE_FLT64, GRID_LONLAT },
 };
+
+static void invalidOptionDie(const char *format, ...) __attribute__((noreturn));
 
 static void
 invalidOptionDie(const char *format, ...)
