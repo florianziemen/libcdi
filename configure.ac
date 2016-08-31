@@ -290,7 +290,8 @@ main(int argc, char **argv)
   [MPI_LAUNCH="`pwd`/util/serialrun"
    AC_SUBST([MPI_LAUNCH])])
 AS_IF([test $HAVE_PARALLEL_NC4 -gt 0],
-  [AC_DEFINE([HAVE_PARALLEL_NC4],[1],
+  [ACX_TLS_XLC_RETRY
+   AC_DEFINE([HAVE_PARALLEL_NC4],[1],
              [netCDF library does support MPI parallel invocations])])
 AC_SUBST([HAVE_PARALLEL_NC4])
 AM_CONDITIONAL([USE_MPI],[test x"$USE_MPI" = xyes])
