@@ -8,6 +8,9 @@
 
 
 #include <limits.h>
+#ifdef HAVE_PARALLEL_NC4
+#include <setjmp.h>
+#endif
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -75,7 +78,7 @@ static struct
 {
   MPI_Win getWin;
   struct clientBuf *clientBuf;
-#if defined HAVE_LIBNETCDF && ! defined HAVE_PARALLEL_NC4
+#ifdef HAVE_LIBNETCDF
   int ownerRank;
 #endif
   /* put data for description of last layout from RMA GET here */
@@ -444,10 +447,10 @@ myVarPart(struct PPM_extent varShape[3], struct xyzDims collGrid,
 
 /* collective writing variant */
 static void
-writeNetCDFStream(size_t streamIdx,
-                  struct streamMapping *mapping,
-                  double **data_, int *currentDataBufSize,
-                  const struct cdiPioConf *conf)
+writeNetCDFStreamParallel(size_t streamIdx,
+                          struct streamMapping *mapping,
+                          double **data_, int *currentDataBufSize,
+                          const struct cdiPioConf *conf)
 {
   const int nvars = mapping->numVars;
   const int *restrict varMap = mapping->varMap;
@@ -549,7 +552,8 @@ writeNetCDFStream(size_t streamIdx,
     }
 }
 
-#elif defined (HAVE_LIBNETCDF)
+#endif
+#if defined (HAVE_LIBNETCDF)
 /* needed for writing when some files are only written to by a single process */
 /* cdiOpenFileMap(fileID) gives the writer process */
 static int cdiPioSerialOpenFileMap(int streamID)
@@ -558,12 +562,14 @@ static int cdiPioSerialOpenFileMap(int streamID)
   xassert(streamIdx < SIZE_MAX);
   return rxWin[streamIdx].ownerRank;
 }
+
+
 /* for load-balancing purposes, count number of files per process */
 /* cdiOpenFileCounts[rank] gives number of open files rank has to himself */
 static int *cdiSerialOpenFileCount;
 
 static int
-cdiPioNextOpenRank()
+cdiPioNextOpenRank(void)
 {
   xassert(cdiSerialOpenFileCount != NULL);
   int commCollSize = commInqSizeColl();
@@ -597,18 +603,21 @@ cdiPioCloseFileOnRank(int rank)
 static void
 cdiPioServerCdfDefVars(stream_t *streamptr)
 {
-  int rank, rankOpen;
+  int rank,
+    rankOpen = cdiPioSerialOpenFileMap(streamptr->self);
   if (commInqIOMode() == PIO_NONE
-      || ((rank = commInqRankColl())
-          == (rankOpen = cdiPioSerialOpenFileMap(streamptr->self))))
+#ifdef HAVE_PARALLEL_NC4
+      || rankOpen == CDI_PIO_COLLECTIVE_OPEN
+#endif
+      || (rank = commInqRankColl()) == rankOpen)
     cdfDefVars(streamptr);
 }
 
 static void
-writeNetCDFStream(size_t streamIdx,
-                  struct streamMapping *mapping,
-                  double **data_, int *currentDataBufSize,
-                  const struct cdiPioConf *conf)
+writeNetCDFStreamSerial(size_t streamIdx,
+                        struct streamMapping *mapping,
+                        double **data_, int *currentDataBufSize,
+                        const struct cdiPioConf *conf)
 {
   const int nvars = mapping->numVars;
   const int *restrict varMap = mapping->varMap,
@@ -671,6 +680,26 @@ writeNetCDFStream(size_t streamIdx,
       }
 }
 
+
+static void
+writeNetCDFStream(size_t streamIdx,
+                  struct streamMapping *mapping,
+                  double **data_, int *currentDataBufSize,
+                  const struct cdiPioConf *conf)
+{
+  void (*writeNetCDFStream_)(size_t streamIdx,
+                             struct streamMapping *mapping,
+                             double **data_, int *currentDataBufSize,
+                             const struct cdiPioConf *conf)
+    = writeNetCDFStreamSerial;
+#ifdef HAVE_PARALLEL_NC4
+  int streamID = openStreams.entries[streamIdx];
+  int rankOpen = cdiPioSerialOpenFileMap(streamID);
+  if (rankOpen == CDI_PIO_COLLECTIVE_OPEN)
+    writeNetCDFStream_ = writeNetCDFStreamParallel;
+#endif
+  writeNetCDFStream_(streamIdx, mapping, data_, currentDataBufSize, conf);
+}
 #endif
 
 static inline struct winHeaderEntry *
@@ -1169,7 +1198,7 @@ readGetBuffers(size_t streamIdx, const struct cdiPioConf *conf)
       case CDI_FILETYPE_GRB2:
         writeGribStream(streamIdx, map, &data, &currentDataBufSize, conf);
         break;
-#ifdef HAVE_NETCDF4
+#ifdef HAVE_LIBNETCDF
       case CDI_FILETYPE_NC:
       case CDI_FILETYPE_NC2:
       case CDI_FILETYPE_NC4:
@@ -1243,17 +1272,43 @@ cdiPioServerStreamOpen(const char *filename, char filemode,
                        int recordBufIsToBeCreated)
 {
   int fileID = -1;
-#if defined HAVE_LIBNETCDF && ! defined HAVE_PARALLEL_NC4
+#ifdef HAVE_LIBNETCDF
   /* Only needs initialization to shut up gcc */
   int rank = -1;
 #endif
   switch (filetype)
     {
-#if defined HAVE_LIBNETCDF && ! defined HAVE_PARALLEL_NC4
+#ifdef HAVE_LIBNETCDF
     case CDI_FILETYPE_NC:
     case CDI_FILETYPE_NC2:
     case CDI_FILETYPE_NC4:
     case CDI_FILETYPE_NC4C:
+#ifdef HAVE_PARALLEL_NC4
+      {
+        struct cdiPioNcCreateLongJmpRetBuf retJmpBuf;
+        retJmpBuf.openRank = cdiPioNextOpenRank();
+#if ! defined TLS && defined HAVE_PTHREAD
+        pthread_setspecific(cdiPioCdfJmpKey, &jmpBuf);
+#else
+        cdiPioCdfJmpBuf = &retJmpBuf;
+#endif
+        if (!setjmp(retJmpBuf.jmpBuf))
+          /* attempt parallel open first */
+          /* in case it fails, ranks other than retJmpBuf.openRank
+           * will call longjmp and return 1 from the above setjmp */
+          fileID = cdiStreamOpenDefaultDelegate(filename, filemode,
+                                                filetype, streamptr,
+                                                recordBufIsToBeCreated);
+        rank = retJmpBuf.openRank;
+        if (rank != CDI_PIO_COLLECTIVE_OPEN)
+          {
+            streamptr->filetype = filetype;
+            if (commInqIOMode() != PIO_NONE)
+              xmpi(MPI_Bcast(&fileID, 1, MPI_INT, rank, commInqCommColl()));
+            cdiPioOpenFileOnRank(rank);
+          }
+      }
+#else
       {
         int ioMode = commInqIOMode();
         if (ioMode == PIO_NONE
@@ -1267,6 +1322,7 @@ cdiPioServerStreamOpen(const char *filename, char filemode,
           xmpi(MPI_Bcast(&fileID, 1, MPI_INT, rank, commInqCommColl()));
         cdiPioOpenFileOnRank(rank);
       }
+#endif
       break;
 #endif
     default:
@@ -1298,7 +1354,7 @@ cdiPioServerStreamOpen(const char *filename, char filemode,
       rxWin[streamIdx].aggBufSize = 0;
       rxWin[streamIdx].aggBufUsed = 0;
       rxWin[streamIdx].aggBuf = NULL;
-#if defined HAVE_LIBNETCDF && ! defined HAVE_PARALLEL_NC4
+#ifdef HAVE_LIBNETCDF
       rxWin[streamIdx].ownerRank = rank;
 #endif
     }
@@ -1316,7 +1372,7 @@ cdiPioServerStreamClose(stream_t *streamptr, int recordBufIsToBeDeleted)
     {
       switch (filetype)
         {
-#if defined (HAVE_LIBNETCDF) && ! defined (HAVE_PARALLEL_NC4)
+#ifdef HAVE_LIBNETCDF
         case CDI_FILETYPE_NC:
         case CDI_FILETYPE_NC2:
         case CDI_FILETYPE_NC4:
@@ -1324,9 +1380,15 @@ cdiPioServerStreamClose(stream_t *streamptr, int recordBufIsToBeDeleted)
           {
             int rank, rankOpen = cdiPioSerialOpenFileMap(streamptr->self);
             if (commInqIOMode() == PIO_NONE
+#ifdef HAVE_PARALLEL_NC4
+                || rankOpen == CDI_PIO_COLLECTIVE_OPEN
+#endif
                 || ((rank = commInqRankColl()) == rankOpen))
               cdiStreamCloseDefaultDelegate(streamptr, recordBufIsToBeDeleted);
-            cdiPioCloseFileOnRank(rankOpen);
+#ifdef HAVE_PARALLEL_NC4
+            if (rankOpen != CDI_PIO_COLLECTIVE_OPEN)
+#endif
+              cdiPioCloseFileOnRank(rankOpen);
           }
           break;
 #endif
@@ -1346,14 +1408,17 @@ cdiPioServerStreamClose(stream_t *streamptr, int recordBufIsToBeDeleted)
     }
 }
 
-#if defined (HAVE_LIBNETCDF) && ! defined (HAVE_PARALLEL_NC4)
+#ifdef HAVE_LIBNETCDF
 static void
 cdiPioCdfDefTimestep(stream_t *streamptr, int tsID)
 {
-  int rank, rankOpen, streamID = streamptr->self;
+  int rank, streamID = streamptr->self,
+    rankOpen = cdiPioSerialOpenFileMap(streamID);
   if (commInqIOMode() == PIO_NONE
-      || ((rank = commInqRankColl())
-          == (rankOpen = cdiPioSerialOpenFileMap(streamID))))
+#ifdef HAVE_PARALLEL_NC4
+      || rankOpen == CDI_PIO_COLLECTIVE_OPEN
+#endif
+      || (rank = commInqRankColl()) == rankOpen)
     cdfDefTimestep(streamptr, tsID);
 }
 #endif
@@ -1458,9 +1523,10 @@ void cdiPioCollectorMessageLoop(const struct cdiPioConf *conf)
   cdiPioEnableNetCDFParAccess();
   numPioPrimes = PPM_prime_factorization_32((uint32_t)commInqSizeColl(),
                                             &pioPrimes);
-#elif defined (HAVE_LIBNETCDF)
+#endif
+#ifdef HAVE_LIBNETCDF
   cdiSerialOpenFileCount = Calloc(sizeof (cdiSerialOpenFileCount[0]),
-                                   (size_t)commInqSizeColl());
+                                  (size_t)commInqSizeColl());
   namespaceSwitchSet(NSSWITCH_CDF_DEF_TIMESTEP,
                      NSSW_FUNC(cdiPioCdfDefTimestep));
   namespaceSwitchSet(NSSWITCH_CDF_STREAM_SETUP,

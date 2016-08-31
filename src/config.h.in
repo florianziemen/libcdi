@@ -249,6 +249,9 @@
 /* System type */
 #undef SYSTEM_TYPE
 
+/* If the compiler supports a TLS storage class define it to that here */
+#undef TLS
+
 /* User name */
 #undef USER_NAME
 

@@ -165,7 +165,7 @@ cdiPioDistGridCreate(int gridtype, int size, int xsize, int ysize, int nvertex,
 
 #ifdef HAVE_PPM_DIST_ARRAY_H
 
-#if defined (HAVE_NETCDF4) && defined (HAVE_PARALLEL_NC4)
+#ifdef HAVE_PARALLEL_NC4
 /* maximal spatial rank of variable */
 enum { maxCdfVarRank = 3 };
 struct cdfPostDefPutVarADouble
