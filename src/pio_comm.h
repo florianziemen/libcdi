@@ -35,7 +35,6 @@ int cdiPioCommInqSizeClients(void);
 
 int commInqSpecialRank(void);
 
-void     commDefCommColl        ( int );
 MPI_Comm commInqCommColl        ( void );
 int commRankGlob2CollID(int rankGlob);
 int      commInqSizeColl        ( void );
