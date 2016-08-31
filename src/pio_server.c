@@ -66,7 +66,7 @@ struct streamMemLayout
 struct cacheRedist
 {
   Xt_redist redist;
-  int sliceSize;
+  size_t sliceSize;
 #if defined HAVE_PARALLEL_NC4
   // additional member for parallel writing variant for NetCDF4
   struct PPM_extent sliceExtent[3];
@@ -198,12 +198,12 @@ readFuncCall(struct winHeaderEntry *header, size_t streamIdx)
 /************************************************************************/
 
 static void
-resizeVarGatherBuf(int size, double **buf, int *bufSize)
+resizeVarGatherBuf(size_t size, double **buf, size_t *bufSize)
 {
   if (size <= *bufSize)
     ;
   else
-    *buf = Realloc(*buf, (size_t) (*bufSize = size) * sizeof(buf[0][0]));
+    *buf = Realloc(*buf, (*bufSize = size) * sizeof(buf[0][0]));
 }
 
 #define wHECast struct winHeaderEntry *)(void *
@@ -278,13 +278,13 @@ buildVarSlicesIdxList(int vlistID, int varID, int startLvl, int numLvl)
 }
 
 static int
-countVarChunkMissingVals(int vlistID, int varID, struct streamMapping *mapping, int chunkLen, const double *restrict data)
+countVarChunkMissingVals(int vlistID, int varID, struct streamMapping *mapping, size_t chunkLen, const double *restrict data)
 {
   size_t nmiss = 0;
   if (mapping->hasMissing[varID])
     {
       double missval = vlistInqVarMissval(vlistID, varID);
-      for (size_t i = 0; i < (size_t) chunkLen; ++i) nmiss += (data[i] == missval);
+      for (size_t i = 0; i < chunkLen; ++i) nmiss += (data[i] == missval);
     }
   return nmiss;
 }
@@ -391,7 +391,7 @@ myVarPart(struct PPM_extent varShape[3], struct xyzDims collGrid, struct PPM_ext
 
 /* collective writing variant */
 static void
-writeNetCDFStreamParallel(size_t streamIdx, struct streamMapping *mapping, double **data_, int *currentDataBufSize,
+writeNetCDFStreamParallel(size_t streamIdx, struct streamMapping *mapping, double **data_, size_t *currentDataBufSize,
                           const struct cdiPioConf *conf)
 {
   const int nvars = mapping->numVars;
@@ -406,14 +406,14 @@ writeNetCDFStreamParallel(size_t streamIdx, struct streamMapping *mapping, doubl
   for (int varID = 0; varID < nvars; ++varID)
     if (mapping->numLvlsW[varID])
       {
-        size_t VarSize = 0;
+        size_t varSize = 0;
         Xt_redist gatherRedist;
         struct PPM_extent varChunk[3];
         int myChunk[3][2];
         if (reuseRedists)
           {
             gatherRedist = retained[varID].redist;
-            VarSize = (size_t) retained[varID].sliceSize;
+            varSize = retained[varID].sliceSize;
             varChunk[0] = retained[varID].sliceExtent[0];
             varChunk[1] = retained[varID].sliceExtent[1];
             varChunk[2] = retained[varID].sliceExtent[2];
@@ -441,21 +441,21 @@ writeNetCDFStreamParallel(size_t streamIdx, struct streamMapping *mapping, doubl
             {
               Xt_int preWriteChunkStart[3];
               int preWriteChunkSize[3];
-              Xt_int varSize[3];
+              Xt_int varDims[3];
               for (int i = 0; i < 3; ++i)
                 {
                   myChunk[i][0] = PPM_extent_start(varChunk[i]);
                   myChunk[i][1] = PPM_extent_end(varChunk[i]);
-                  varSize[2 - i] = varShape[i].size;
+                  varDims[2 - i] = varShape[i].size;
                   preWriteChunkStart[2 - i] = (Xt_int) varChunk[i].first;
                   preWriteChunkSize[2 - i] = (int) varChunk[i].size;
                 }
-              preWriteChunk = xt_idxsection_new(0, 3, varSize, preWriteChunkSize, preWriteChunkStart);
+              preWriteChunk = xt_idxsection_new(0, 3, varDims, preWriteChunkSize, preWriteChunkStart);
             }
             xdebug("Writing chunk { { %d, %d }, { %d, %d },"
                    " { %d, %d } }",
                    myChunk[0][0], myChunk[0][1], myChunk[1][0], myChunk[1][1], myChunk[2][0], myChunk[2][1]);
-            VarSize = (size_t) xt_idxlist_get_num_indices(preWriteChunk);
+            varSize = (size_t) xt_idxlist_get_num_indices(preWriteChunk);
             /* transpose data into write deco */
             {
               int headerIdx = varMap[varID];
@@ -463,7 +463,7 @@ writeNetCDFStreamParallel(size_t streamIdx, struct streamMapping *mapping, doubl
               if (conf->cacheRedists)
                 {
                   retained[varID].redist = gatherRedist;
-                  retained[varID].sliceSize = (int) VarSize;
+                  retained[varID].sliceSize = varSize;
                   retained[varID].sliceExtent[0] = varChunk[0];
                   retained[varID].sliceExtent[1] = varChunk[1];
                   retained[varID].sliceExtent[2] = varChunk[2];
@@ -471,7 +471,7 @@ writeNetCDFStreamParallel(size_t streamIdx, struct streamMapping *mapping, doubl
               xt_idxlist_delete(preWriteChunk);
             }
           }
-        resizeVarGatherBuf(VarSize, data_, currentDataBufSize);
+        resizeVarGatherBuf(varSize, data_, currentDataBufSize);
         double *restrict data = *data_;
         xt_redist_s_exchange1(gatherRedist, rxWin[streamIdx].clientBuf[0].mem, data);
 
@@ -545,7 +545,7 @@ cdiPioServerCdfDefVars(stream_t *streamptr)
 }
 
 static void
-writeNetCDFStreamSerial(size_t streamIdx, struct streamMapping *mapping, double **data_, int *currentDataBufSize,
+writeNetCDFStreamSerial(size_t streamIdx, struct streamMapping *mapping, double **data_, size_t *currentDataBufSize,
                         const struct cdiPioConf *conf)
 {
   const int nvars = mapping->numVars;
@@ -564,7 +564,7 @@ writeNetCDFStreamSerial(size_t streamIdx, struct streamMapping *mapping, double 
   for (int varID = 0; varID < nvars; ++varID)
     if (numLvlsW[varID])
       {
-        int varSize;
+        size_t varSize;
         Xt_redist gatherRedist;
         if (reuseRedists)
           {
@@ -578,7 +578,7 @@ writeNetCDFStreamSerial(size_t streamIdx, struct streamMapping *mapping, double 
             if (writerRank == collRank)
               {
                 dstList = buildVarSlicesIdxList(vlistID, varID, -1, -1);
-                varSize = xt_idxlist_get_num_indices(dstList);
+                varSize = (size_t) xt_idxlist_get_num_indices(dstList);
                 resizeVarGatherBuf(varSize, data_, currentDataBufSize);
               }
             else
@@ -607,10 +607,10 @@ writeNetCDFStreamSerial(size_t streamIdx, struct streamMapping *mapping, double 
 }
 
 static void
-writeNetCDFStream(size_t streamIdx, struct streamMapping *mapping, double **data_, int *currentDataBufSize,
+writeNetCDFStream(size_t streamIdx, struct streamMapping *mapping, double **data_, size_t *currentDataBufSize,
                   const struct cdiPioConf *conf)
 {
-  void (*writeNetCDFStream_)(size_t streamIdx, struct streamMapping * mapping, double **data_, int *currentDataBufSize,
+  void (*writeNetCDFStream_)(size_t streamIdx, struct streamMapping * mapping, double **data_, size_t *currentDataBufSize,
                              const struct cdiPioConf *conf)
       = writeNetCDFStreamSerial;
 #ifdef HAVE_PARALLEL_NC4
@@ -849,7 +849,7 @@ aggBufFlush(size_t streamIdx, size_t (*cdiPioFileWrite)(int, const void *restric
 }
 
 static void
-writeGribStream(size_t streamIdx, struct streamMapping *mapping, double **data_, int *currentDataBufSize,
+writeGribStream(size_t streamIdx, struct streamMapping *mapping, double **data_, size_t *currentDataBufSize,
                 const struct cdiPioConf *conf)
 {
   const struct clientBuf *restrict clientBuf = rxWin[streamIdx].clientBuf;
@@ -947,11 +947,11 @@ writeGribStream(size_t streamIdx, struct streamMapping *mapping, double **data_,
           if (conf->cacheRedists)
             {
               retained[pass].redist = compositePassRedist;
-              retained[pass].sliceSize = (int) myAggSize;
+              retained[pass].sliceSize = myAggSize;
             }
         }
       /* resize gather buffer if needed */
-      resizeVarGatherBuf((int) myAggSize, data_, currentDataBufSize);
+      resizeVarGatherBuf(myAggSize, data_, currentDataBufSize);
       /* execute composite redist */
       xt_redist_s_exchange1(compositePassRedist, clientBuf[0].mem, *data_);
       /* delete composite redist */
@@ -984,7 +984,7 @@ writeGribStream(size_t streamIdx, struct streamMapping *mapping, double **data_,
               varIdx += varID != prevVarID;
               size_t recordSize = writtenRecords[recordIdx].dataSize;
               size_t nvals = recordSize / sizeof(double);
-              size_t nmiss = countVarChunkMissingVals(vlistID, varID, mapping, (int) nvals, data + recordDataOfs);
+              size_t nmiss = countVarChunkMissingVals(vlistID, varID, mapping, nvals, data + recordDataOfs);
               streamWriteVarSlice(streamID, varID, level, data + recordDataOfs, nmiss);
               recordDataOfs += nvals;
             }
@@ -1026,7 +1026,7 @@ readGetBuffers(size_t streamIdx, const struct cdiPioConf *conf)
     /* TODO: build list of rma buffer layout here to check if caching
      * can be done */
     double *data = NULL;
-    int currentDataBufSize = 0;
+    size_t currentDataBufSize = 0;
     int filetype = streamInqFiletype(streamID);
 
     switch (cdiBaseFiletype(filetype))
