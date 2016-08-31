@@ -113,10 +113,14 @@ Makefile
 /tests/example_0.cksum
 /tests/example_0.grb
 /tests/example_0.grb2
+/tests/example_0.nc
+/tests/example_0.nc2
 /tests/example_0.nc4
 /tests/example_1.cksum
 /tests/example_1.grb
 /tests/example_1.grb2
+/tests/example_1.nc
+/tests/example_1.nc2
 /tests/example_1.nc4
 /tests/pio_write
 /tests/pio_write_deco2d
