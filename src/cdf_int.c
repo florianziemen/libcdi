@@ -26,9 +26,11 @@ cdf_create(const char *path, int cmode, int *ncidp)
   cdi_nc__create_funcp my_nc__create = (cdi_nc__create_funcp) namespaceSwitchGet(NSSWITCH_NC__CREATE).func;
   int status = my_nc__create(path, cmode, initialsz, &chunksizehint, ncidp);
 
-  if (CDF_Debug || status != NC_NOERR) Message("ncid=%d  mode=%d  chunksizehint=%zu  file=%s", *ncidp, cmode, chunksizehint, path);
-
-  if (status != NC_NOERR) Error("%s: %s", path, nc_strerror(status));
+  if (status != NC_NOERR)
+    {
+      if (CDF_Debug) Message("ncid=%d  mode=%d  chunksizehint=%zu  file=%s", *ncidp, cmode, chunksizehint, path);
+      Error("%s: %s", path, nc_strerror(status));
+    }
 
   int oldfill;
   status = nc_set_fill(*ncidp, NC_NOFILL, &oldfill);
