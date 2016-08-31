@@ -35,6 +35,7 @@ int cdiPioCommInqSizeClients(void);
 
 int commInqSpecialRank(void);
 
+/* query communicator of processes active in collection of data */
 MPI_Comm commInqCommColl        ( void );
 int commRankGlob2CollID(int rankGlob);
 int      commInqSizeColl        ( void );
