@@ -185,7 +185,7 @@ fwMPINONB(int fileID, const void *buffer, size_t len, int tsID)
       xmpi(MPI_Barrier(commInqCommPio()));
     }
 
-  filled = dbuffer_push(of->db, (unsigned char *) buffer, len);
+  filled = dbuffer_push(of->db, buffer, len);
 
   xdebug3("IOPE%d: fileID = %d, tsID = %d,"
           " pushed data on buffer, filled = %d",
@@ -199,7 +199,7 @@ fwMPINONB(int fileID, const void *buffer, size_t len, int tsID)
         {
           writeMPINONB(of);
 
-          error = dbuffer_push(of->db, (unsigned char *) buffer, len);
+          error = dbuffer_push(of->db, buffer, len);
         }
     }
 
