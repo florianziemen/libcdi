@@ -861,17 +861,17 @@ void varDefZAxisReference(int nhlev, int nvgrid, unsigned char uuid[CDI_UUID_SIZ
 }
 
 
-int zaxisCompare(int zaxisID, int zaxistype, int nlevels, int lbounds, const double *levels, const char *longname, const char *units, int ltype1)
+bool zaxisCompare(int zaxisID, int zaxistype, int nlevels, bool lbounds, const double *levels, const char *longname, const char *units, int ltype1)
 {
-  int differ = 1;
-  int zlbounds = 0;
+  bool differ = true;
+  bool zlbounds = false;
   bool ltype_is_equal = false;
 
   if ( ltype1 == zaxisInqLtype(zaxisID) ) ltype_is_equal = true;
 
   if ( ltype_is_equal && (zaxistype == zaxisInqType(zaxisID) || zaxistype == ZAXIS_GENERIC) )
     {
-      if ( zaxisInqLbounds(zaxisID, NULL) > 0 ) zlbounds = 1;
+      if ( zaxisInqLbounds(zaxisID, NULL) > 0 ) zlbounds = true;
       if ( nlevels == zaxisInqSize(zaxisID) && zlbounds == lbounds )
 	{
 	  char zlongname[CDI_MAX_NAME];
@@ -887,7 +887,7 @@ int zaxisCompare(int zaxisID, int zaxistype, int nlevels, int lbounds, const dou
                     break;
                 }
 
-              if ( levelID == nlevels ) differ = 0;
+              if ( levelID == nlevels ) differ = false;
             }
 
 	  if ( ! differ )
@@ -896,11 +896,11 @@ int zaxisCompare(int zaxisID, int zaxistype, int nlevels, int lbounds, const dou
 	      zaxisInqUnits(zaxisID, zunits);
 	      if ( longname && zlongname[0] )
 		{
-		  if ( strcmp(longname, zlongname) != 0 ) differ = 1;
+		  if ( strcmp(longname, zlongname) != 0 ) differ = true;
 		}
 	      if ( units && zunits[0] )
 		{
-		  if ( strcmp(units, zunits) != 0 ) differ = 1;
+		  if ( strcmp(units, zunits) != 0 ) differ = true;
 		}
 	    }
 	}
@@ -914,7 +914,7 @@ struct varDefZAxisSearchState
   int resIDValue;
   int zaxistype;
   int nlevels;
-  int lbounds;
+  bool lbounds;
   const double *levels;
   const char *longname;
   const char *units;
@@ -926,9 +926,9 @@ varDefZAxisSearch(int id, void *res, void *data)
 {
   struct varDefZAxisSearchState *state = (struct varDefZAxisSearchState *)data;
   (void)res;
-  if (zaxisCompare(id, state->zaxistype, state->nlevels, state->lbounds,
-                   state->levels, state->longname, state->units, state->ltype)
-      == 0)
+  if ( zaxisCompare(id, state->zaxistype, state->nlevels, state->lbounds,
+                    state->levels, state->longname, state->units, state->ltype)
+      == false)
     {
       state->resIDValue = id;
       return CDI_APPLY_STOP;
@@ -938,7 +938,7 @@ varDefZAxisSearch(int id, void *res, void *data)
 }
 
 
-int varDefZaxis(int vlistID, int zaxistype, int nlevels, const double *levels, int lbounds,
+int varDefZaxis(int vlistID, int zaxistype, int nlevels, const double *levels, bool lbounds,
 		const double *levels1, const double *levels2, int vctsize, const double *vct, char *name,
 		const char *longname, const char *units, int prec, int mode, int ltype1)
 {
@@ -946,9 +946,9 @@ int varDefZaxis(int vlistID, int zaxistype, int nlevels, const double *levels, i
     mode: 0 search in vlist and zaxis table
           1 search in zaxis table
    */
-  int zaxisdefined = 0;
   int zaxisID = UNDEFID;
-  int zaxisglobdefined = 0;
+  bool zaxisdefined = false;
+  bool zaxisglobdefined = false;
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
   int nzaxis = vlistptr->nzaxis;
 
@@ -957,9 +957,9 @@ int varDefZaxis(int vlistID, int zaxistype, int nlevels, const double *levels, i
       {
 	zaxisID = vlistptr->zaxisIDs[index];
 
-	if ( zaxisCompare(zaxisID, zaxistype, nlevels, lbounds, levels, longname, units, ltype1) == 0 )
+	if ( zaxisCompare(zaxisID, zaxistype, nlevels, lbounds, levels, longname, units, ltype1) == false )
 	  {
-	    zaxisdefined = 1;
+	    zaxisdefined = true;
 	    break;
 	  }
       }
@@ -984,7 +984,7 @@ int varDefZaxis(int vlistID, int zaxistype, int nlevels, const double *levels, i
 	for (int index = 0; index < nzaxis; index++ )
 	  if ( vlistptr->zaxisIDs[index] == zaxisID )
 	    {
-	      zaxisglobdefined = FALSE;
+	      zaxisglobdefined = false;
 	      break;
 	    }
     }

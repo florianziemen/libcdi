@@ -420,7 +420,7 @@ struct vgzSearchState
   int resIDValue;
   int zaxistype;
   int nlevels;
-  int lbounds;
+  bool lbounds;
   const double *levels;
 };
 
@@ -431,7 +431,7 @@ vgzZAxisSearch(int id, void *res, void *data)
   (void)res;
   if (zaxisCompare(id, state->zaxistype, state->nlevels, state->lbounds,
                    state->levels, NULL, NULL, 0)
-      == 0)
+      == false)
     {
       state->resIDValue = id;
       return CDI_APPLY_STOP;
@@ -440,27 +440,26 @@ vgzZAxisSearch(int id, void *res, void *data)
     return CDI_APPLY_GO_ON;
 }
 
-
 static
 int vlist_generate_zaxis(int vlistID, int zaxistype, int nlevels, const double *levels,
                          const double *lbounds, const double *ubounds, int vctsize, const double *vct)
 {
   int zaxisID = CDI_UNDEFID;
-  int zaxisglobdefined = 0;
-  int has_bounds = FALSE;
+  bool zaxisdefined = false;
+  bool zaxisglobdefined = false;
+  bool has_bounds = false;
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  int zaxisdefined = 0;
   int nzaxis = vlistptr->nzaxis;
 
-  if ( lbounds && ubounds ) has_bounds = TRUE;
+  if ( lbounds && ubounds ) has_bounds = true;
 
   for ( int index = 0; index < nzaxis; ++index )
     {
       zaxisID = vlistptr->zaxisIDs[index];
 
-      if ( zaxisCompare(zaxisID, zaxistype, nlevels, has_bounds, levels, NULL, NULL, 0) == 0 )
+      if ( zaxisCompare(zaxisID, zaxistype, nlevels, has_bounds, levels, NULL, NULL, 0) == false )
         {
-          zaxisdefined = 1;
+          zaxisdefined = true;
           break;
         }
     }
@@ -1540,7 +1539,7 @@ void vlist_check_contents(int vlistID)
 /* Resizes and initializes opt_grib_kvpair data structure. */
 void resize_opt_grib_entries(var_t *var, int nentries)
 {
-  if (var->opt_grib_kvpair_size >= nentries) 
+  if (var->opt_grib_kvpair_size >= nentries)
     {
       if ( CDI_Debug )
         Message("data structure has size %d, no resize to %d needed.", var->opt_grib_kvpair_size, nentries);
