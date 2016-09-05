@@ -18,6 +18,8 @@ const resOps *getZaxisOps(void);
 
 const char *zaxisInqNamePtr(int zaxisID);
 
+const double *zaxisInqLevelsPtr(int zaxisID);
+
 #endif
 
 /*

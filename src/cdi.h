@@ -1031,7 +1031,6 @@ int     zaxisInqScalar(int zaxisID);
 void    zaxisDefLtype(int zaxisID, int ltype);
 int     zaxisInqLtype(int zaxisID);
 
-const double *zaxisInqLevelsPtr(int zaxisID);
 void    zaxisDefVct(int zaxisID, int size, const double vct[]);
 void    zaxisInqVct(int zaxisID, double vct[]);
 int     zaxisInqVctSize(int zaxisID);

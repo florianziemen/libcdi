@@ -1473,8 +1473,8 @@ void gridDefMaskGME(int gridID, const int *mask)
 }
 
 
-static int
-gridInqXValsSerial(grid_t *gridptr, double *xvals)
+static
+int gridInqXValsSerial(grid_t *gridptr, double *xvals)
 {
   long size;
   if ( gridptr->type == GRID_CURVILINEAR || gridptr->type == GRID_UNSTRUCTURED )
@@ -1528,8 +1528,8 @@ int gridInqXvals(int gridID, double *xvals)
 }
 
 
-static void
-gridDefXValsSerial(grid_t *gridptr, const double *xvals)
+static
+void gridDefXValsSerial(grid_t *gridptr, const double *xvals)
 {
   int gridtype = gridptr->type;
 
@@ -1572,13 +1572,12 @@ void gridDefXvals(int gridID, const double *xvals)
   gridMark4Update(gridID);
 }
 
-static int
-gridInqYValsSerial(grid_t *gridptr, double *yvals)
+static
+int gridInqYValsSerial(grid_t *gridptr, double *yvals)
 {
   int gridtype = gridptr->type;
-  long size
-    = (gridtype == GRID_CURVILINEAR || gridtype == GRID_UNSTRUCTURED)
-    ? gridptr->size : gridptr->y.size;
+  long size = (gridtype == GRID_CURVILINEAR || gridtype == GRID_UNSTRUCTURED)
+            ? gridptr->size : gridptr->y.size;
 
   if ( CDI_Debug && size == 0 )
     Warning("size undefined for gridID = %d!", gridptr->self);
@@ -1623,18 +1622,17 @@ int gridInqYvals(int gridID, double *yvals)
   return gridptr->vtable->inqYVals(gridptr, yvals);
 }
 
-static void
-gridDefYValsSerial(grid_t *gridptr, const double *yvals)
+static
+void gridDefYValsSerial(grid_t *gridptr, const double *yvals)
 {
   int gridtype = gridptr->type;
-  long size
-    = (gridtype == GRID_CURVILINEAR || gridtype == GRID_UNSTRUCTURED)
-    ? gridptr->size : gridptr->y.size;
+  long size = (gridtype == GRID_CURVILINEAR || gridtype == GRID_UNSTRUCTURED)
+            ? gridptr->size : gridptr->y.size;
 
   if ( size == 0 )
     Error("Size undefined for gridID = %d!", gridptr->self);
 
-  if (gridptr->y.vals && CDI_Debug)
+  if ( gridptr->y.vals && CDI_Debug )
     Warning("Values already defined!");
 
   gridptr->y.vals = (double *)Realloc(gridptr->y.vals, (size_t)size * sizeof (double));

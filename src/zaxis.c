@@ -1300,13 +1300,12 @@ int zaxisDuplicate(int zaxisID)
 }
 
 
-static void zaxisPrintKernel ( zaxis_t * zaxisptr, int index, FILE * fp )
+static
+void zaxisPrintKernel(zaxis_t *zaxisptr, int index, FILE *fp)
 {
   unsigned char uuid[CDI_UUID_SIZE];
-  int levelID;
-  int nbyte;
 
-  xassert ( zaxisptr );
+  xassert(zaxisptr);
 
   int zaxisID = zaxisptr->self;
 
@@ -1332,8 +1331,8 @@ static void zaxisPrintKernel ( zaxis_t * zaxisptr, int index, FILE * fp )
   if ( zaxisptr->units[0]    ) fprintf(fp, "units     = %s\n", zaxisptr->units);
 
   nbyte0 = fprintf(fp, "levels    = ");
-  nbyte = nbyte0;
-  for ( levelID = 0; levelID < nlevels; levelID++ )
+  int nbyte = nbyte0;
+  for ( int levelID = 0; levelID < nlevels; levelID++ )
     {
       if ( nbyte > 80 )
 	{
@@ -1349,7 +1348,7 @@ static void zaxisPrintKernel ( zaxis_t * zaxisptr, int index, FILE * fp )
     {
       nbyte0 = fprintf(fp, "lbounds   = ");
       nbyte = nbyte0;
-      for ( levelID = 0; levelID < nlevels; levelID++ )
+      for ( int levelID = 0; levelID < nlevels; levelID++ )
 	{
 	  if ( nbyte > 80 )
 	    {
@@ -1363,7 +1362,7 @@ static void zaxisPrintKernel ( zaxis_t * zaxisptr, int index, FILE * fp )
 
       nbyte0 = fprintf(fp, "ubounds   = ");
       nbyte = nbyte0;
-      for ( levelID = 0; levelID < nlevels; levelID++ )
+      for ( int levelID = 0; levelID < nlevels; levelID++ )
 	{
 	  if ( nbyte > 80 )
 	    {

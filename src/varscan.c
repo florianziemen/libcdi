@@ -864,29 +864,31 @@ void varDefZAxisReference(int nhlev, int nvgrid, unsigned char uuid[CDI_UUID_SIZ
 int zaxisCompare(int zaxisID, int zaxistype, int nlevels, int lbounds, const double *levels, const char *longname, const char *units, int ltype1)
 {
   int differ = 1;
-  int levelID;
   int zlbounds = 0;
-  int ltype_is_equal = FALSE;
+  bool ltype_is_equal = false;
 
-  if ( ltype1 == zaxisInqLtype(zaxisID) ) ltype_is_equal = TRUE;
+  if ( ltype1 == zaxisInqLtype(zaxisID) ) ltype_is_equal = true;
 
   if ( ltype_is_equal && (zaxistype == zaxisInqType(zaxisID) || zaxistype == ZAXIS_GENERIC) )
     {
       if ( zaxisInqLbounds(zaxisID, NULL) > 0 ) zlbounds = 1;
       if ( nlevels == zaxisInqSize(zaxisID) && zlbounds == lbounds )
 	{
-	  const double *dlevels;
 	  char zlongname[CDI_MAX_NAME];
 	  char zunits[CDI_MAX_NAME];
 
-	  dlevels = zaxisInqLevelsPtr(zaxisID);
-	  for ( levelID = 0; levelID < nlevels; levelID++ )
-	    {
-	      if ( fabs(dlevels[levelID] - levels[levelID]) > 1.e-9 )
-		break;
-	    }
+	  const double *dlevels = zaxisInqLevelsPtr(zaxisID);
+          if ( dlevels )
+            {
+              int levelID;
+              for ( levelID = 0; levelID < nlevels; levelID++ )
+                {
+                  if ( fabs(dlevels[levelID] - levels[levelID]) > 1.e-9 )
+                    break;
+                }
 
-	  if ( levelID == nlevels ) differ = 0;
+              if ( levelID == nlevels ) differ = 0;
+            }
 
 	  if ( ! differ )
 	    {
