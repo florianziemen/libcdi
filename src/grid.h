@@ -132,6 +132,8 @@ const char *gridInqReferencePtr(int gridID);
 
 int gridGenerate(const grid_t *grid);
 
+//int gridIsEqual(int gridID1, int gridID2);
+
 void cdiGridGetIndexList(unsigned, int * );
 
 void

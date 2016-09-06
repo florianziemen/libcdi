@@ -2070,10 +2070,10 @@ bool compareXYvals2(grid_t *gridRef, grid_t *gridTest)
 }
 
 static
-bool gridCompare(int gridID, const grid_t *grid)
+bool gridCompare(int gridID, const grid_t *grid, bool coord_compare)
 {
   bool differ = true;
-  grid_t *gridRef = gridID2Ptr(gridID);
+  const grid_t *gridRef = gridID2Ptr(gridID);
 
   if ( grid->type == gridRef->type || grid->type == GRID_GENERIC )
     {
@@ -2123,7 +2123,7 @@ bool gridCompare(int gridID, const grid_t *grid)
 			}
 		    }
 		  else if ( grid->x.vals && grid->y.vals )
-                    differ = gridRef->vtable->compareXYFull(gridRef, (grid_t *)grid);
+                    differ = gridRef->vtable->compareXYFull((grid_t *)gridRef, (grid_t *)grid);
 		}
 	      else
 		differ = true;
@@ -2134,7 +2134,7 @@ bool gridCompare(int gridID, const grid_t *grid)
 		{
 		  if ( grid->x.flag == 1 && grid->y.flag == 1
                        && grid->x.vals && grid->y.vals )
-                    differ = gridRef->vtable->compareXYFull(gridRef, (grid_t *)grid);
+                    differ = gridRef->vtable->compareXYFull((grid_t *)gridRef, (grid_t *)grid);
 		}
 	      else if ( (grid->y.size == 0 || grid->y.size == 1) &&
 			grid->x.size == gridRef->x.size*gridRef->y.size )
@@ -2159,7 +2159,7 @@ bool gridCompare(int gridID, const grid_t *grid)
 			  }
 		    }
 		  else if ( grid->x.vals && grid->y.vals )
-                    differ = gridRef->vtable->compareXYFull(gridRef, (grid_t *)grid);
+                    differ = gridRef->vtable->compareXYFull((grid_t *)gridRef, (grid_t *)grid);
 		}
 	      else
 		differ = true;
@@ -2182,48 +2182,65 @@ bool gridCompare(int gridID, const grid_t *grid)
 	      printf("grid nv     %d\n", gridInqNvertex(gridID));
 	      */
 	      if ( grid->x.size == gridRef->x.size && grid->y.size == gridRef->y.size )
-                differ = gridRef->vtable->compareXYAO(gridRef, (grid_t *)grid);
+                differ = gridRef->vtable->compareXYAO((grid_t *)gridRef, (grid_t *)grid);
 	    }
 	  else if ( grid->type == GRID_UNSTRUCTURED )
 	    {
-              /* FIXME: not octet 0 but octet 7 is guaranteed  non-zero
-               * for any non-NULL UUID */
-              differ = differ || ( gridRef->uuid[0] && grid->uuid[0] && memcmp(gridRef->uuid, grid->uuid, CDI_UUID_SIZE) != 0 );
-
-              if ( !differ &&
-                   ((grid->x.vals == NULL) ^ (gridRef->x.vals == NULL)) &&
-                   ((grid->y.vals == NULL) ^ (gridRef->y.vals == NULL)) )
-                {
-                  int nvertexA, nvertexB, numberA, numberB;
-                  differ = ( (nvertexA = grid->nvertex)
-                             && (nvertexB = gridRef->nvertex)
-                             && (nvertexA != nvertexB) )
-                    || (numberA = grid->number, numberB = gridRef->number,
-                        ( (numberA)
-                          && numberB
-                          && (numberA != numberB) )
-                        || ( (numberA && numberB)
-                             && (grid->position) != (gridRef->position) ) );
-                }
-              else if ( !differ )
+              if ( coord_compare )
                 {
                   differ = grid->nvertex != gridRef->nvertex
-                    || grid->number != gridRef->number
-                    || (grid->number > 0 && grid->position != gridRef->position)
-                    || gridRef->vtable->compareXYAO(gridRef, (grid_t *)grid);
+                    || gridRef->vtable->compareXYAO((grid_t *)gridRef, (grid_t *)grid);
                 }
-              }
+              else
+                {
+                  /* FIXME: not octet 0 but octet 7 is guaranteed  non-zero for any non-NULL UUID */
+                  differ = differ || ( gridRef->uuid[0] && grid->uuid[0] && memcmp(gridRef->uuid, grid->uuid, CDI_UUID_SIZE) != 0 );
+
+                  if ( !differ &&
+                       ((grid->x.vals == NULL) ^ (gridRef->x.vals == NULL)) &&
+                       ((grid->y.vals == NULL) ^ (gridRef->y.vals == NULL)) )
+                    {
+                      int nvertexA, nvertexB, numberA, numberB;
+                      differ = ( (nvertexA = grid->nvertex)
+                                 && (nvertexB = gridRef->nvertex)
+                                 && (nvertexA != nvertexB) )
+                        || (numberA = grid->number, numberB = gridRef->number,
+                            ( (numberA)
+                              && numberB
+                              && (numberA != numberB) )
+                            || ( (numberA && numberB)
+                                 && (grid->position) != (gridRef->position) ) );
+                    }
+                  else if ( !differ )
+                    {
+                      differ = grid->nvertex != gridRef->nvertex
+                        || grid->number != gridRef->number
+                        || (grid->number > 0 && grid->position != gridRef->position)
+                        || gridRef->vtable->compareXYAO((grid_t *)gridRef, (grid_t *)grid);
+                    }
+                }
+            }
 	}
     }
 
   return differ;
 }
 
-
-int gridCompareP ( void * gridptr1, void * gridptr2 )
+/*
+int gridIsEqual(int gridID1, int gridID2)
 {
-  grid_t * g1 = ( grid_t * ) gridptr1;
-  grid_t * g2 = ( grid_t * ) gridptr2;
+  const grid_t *grid2 = gridID2Ptr(gridID2);
+
+  int grid_is_equal = gridCompare(gridID1, grid2, true) == false;
+
+  return grid_is_equal;
+}
+*/
+
+int gridCompareP(void *gridptr1, void *gridptr2)
+{
+  grid_t *g1 = ( grid_t * ) gridptr1;
+  grid_t *g2 = ( grid_t * ) gridptr2;
   enum { equal = 0,
          differ = -1 };
   int i, size;
@@ -2268,7 +2285,7 @@ int gridCompareP ( void * gridptr1, void * gridptr2 )
   if ( IS_NOT_EQUAL(g1->lcc.yinc      , g2->lcc.yinc)      ) return differ;
 
   const double *restrict g1_xvals = g1->vtable->inqXValsPtr(g1),
-    *restrict g2_xvals = g2->vtable->inqXValsPtr(g2);
+               *restrict g2_xvals = g2->vtable->inqXValsPtr(g2);
   if ( g1_xvals )
     {
       if ( g1->type == GRID_UNSTRUCTURED || g1->type == GRID_CURVILINEAR )
@@ -2286,7 +2303,7 @@ int gridCompareP ( void * gridptr1, void * gridptr2 )
     return differ;
 
   const double *restrict g1_yvals = g1->vtable->inqYValsPtr(g1),
-    *restrict g2_yvals = g2->vtable->inqYValsPtr(g2);
+               *restrict g2_yvals = g2->vtable->inqYValsPtr(g2);
   if ( g1_yvals )
     {
       if ( g1->type == GRID_UNSTRUCTURED || g1->type == GRID_CURVILINEAR )
@@ -2304,7 +2321,7 @@ int gridCompareP ( void * gridptr1, void * gridptr2 )
     return differ;
 
   const double *restrict g1_area = g1->vtable->inqAreaPtr(g1),
-    *restrict g2_area = g2->vtable->inqAreaPtr(g2);
+               *restrict g2_area = g2->vtable->inqAreaPtr(g2);
   if ( g1_area )
     {
       xassert ( g1->size );
@@ -2394,7 +2411,7 @@ int gridCompareP ( void * gridptr1, void * gridptr2 )
   else if ( g2->mask_gme )
     return differ;
 
-  if (memcmp(g1->uuid, g2->uuid, CDI_UUID_SIZE))
+  if ( memcmp(g1->uuid, g2->uuid, CDI_UUID_SIZE) )
     return differ;
 
   return equal;
@@ -4471,7 +4488,7 @@ gridCompareSearch(int id, void *res, void *data)
 {
   struct gridCompareSearchState *state = (struct gridCompareSearchState*)data;
   (void)res;
-  if ( gridCompare(id, state->queryKey) == false )
+  if ( gridCompare(id, state->queryKey, false) == false )
     {
       state->resIDValue = id;
       return CDI_APPLY_STOP;
@@ -4500,7 +4517,7 @@ struct addIfNewRes cdiVlistAddGridIfNew(int vlistID, grid_t *grid, int mode)
       {
 	if ( (gridID = vlistptr->gridIDs[index]) != UNDEFID )
           {
-            if ( gridCompare(gridID, grid) == false )
+            if ( gridCompare(gridID, grid, false) == false )
               {
                 griddefined = true;
                 break;

@@ -230,10 +230,11 @@ vlist_delete(vlist_t *vlistptr)
 
       if ( vlistptr->vars[varID].opt_grib_kvpair )
         {
-          for (int i=0; i<vlistptr->vars[varID].opt_grib_nentries; i++) {
-            if ( vlistptr->vars[varID].opt_grib_kvpair[i].keyword )
-              Free(vlistptr->vars[varID].opt_grib_kvpair[i].keyword);
-          }
+          for ( int i = 0; i<vlistptr->vars[varID].opt_grib_nentries; i++ )
+            {
+              if ( vlistptr->vars[varID].opt_grib_kvpair[i].keyword )
+                Free(vlistptr->vars[varID].opt_grib_kvpair[i].keyword);
+            }
           Free(vlistptr->vars[varID].opt_grib_kvpair);
         }
       vlistptr->vars[varID].opt_grib_nentries    = 0;
@@ -531,7 +532,6 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
     {
       int nvars = vlistptr1->nvars;
       int nvars2 = 0;
-      int varID2;
 
       vlistptr2->ngrids = 0;
       vlistptr2->nzaxis = 0;
@@ -548,7 +548,7 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
 
       vlistptr2->vars = vars2;
 
-      varID2 = 0;
+      int varID2 = 0;
       for ( int varID = 0; varID < nvars; varID++ )
 	if ( vars1[varID].flag )
 	  {

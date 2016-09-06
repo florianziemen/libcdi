@@ -18,6 +18,7 @@
 #define VALIDMISS 1.e+303
 
 #include "cdi_att.h"
+#include "grid.h"
 
 typedef struct
 {
@@ -151,23 +152,27 @@ void resize_opt_grib_entries(var_t *var, int nentries);
 
 
 
-static inline void
-vlistAdd2GridIDs(vlist_t *vlistptr, int gridID)
+static inline
+void vlistAdd2GridIDs(vlist_t *vlistptr, int gridID)
 {
   int index, ngrids = vlistptr->ngrids;
   for ( index = 0; index < ngrids; index++ )
-    if (vlistptr->gridIDs[index] == gridID ) break;
+    {
+      if ( vlistptr->gridIDs[index] == gridID ) break;
+      //      if ( gridIsEqual(vlistptr->gridIDs[index], gridID) ) break;
+    }
+
   if ( index == ngrids )
     {
-      if (ngrids >= MAX_GRIDS_PS)
+      if ( ngrids >= MAX_GRIDS_PS )
         Error("Internal limit exceeded: more than %d grids.", MAX_GRIDS_PS);
-      ++(vlistptr->ngrids);
       vlistptr->gridIDs[ngrids] = gridID;
+      ++(vlistptr->ngrids);
     }
 }
 
-static inline void
-vlistAdd2ZaxisIDs(vlist_t *vlistptr, int zaxisID)
+static inline
+void vlistAdd2ZaxisIDs(vlist_t *vlistptr, int zaxisID)
 {
   int index, nzaxis = vlistptr->nzaxis;
   for ( index = 0; index < nzaxis; index++ )
@@ -178,24 +183,25 @@ vlistAdd2ZaxisIDs(vlist_t *vlistptr, int zaxisID)
       if ( nzaxis >= MAX_ZAXES_PS )
 	Error("Internal limit exceeded: more than %d zaxis.", MAX_ZAXES_PS);
       vlistptr->zaxisIDs[nzaxis] = zaxisID;
-      vlistptr->nzaxis++;
+      ++(vlistptr->nzaxis);
     }
 }
 
-static inline void
-vlistAdd2SubtypeIDs(vlist_t *vlistptr, int subtypeID)
+static inline
+void vlistAdd2SubtypeIDs(vlist_t *vlistptr, int subtypeID)
 {
   if ( subtypeID == CDI_UNDEFID ) return;
 
   int index, nsubs = vlistptr->nsubtypes;
   for ( index = 0; index < nsubs; index++ )
-    if (vlistptr->subtypeIDs[index] == subtypeID ) break;
+    if ( vlistptr->subtypeIDs[index] == subtypeID ) break;
+
   if ( index == nsubs )
     {
-      if (nsubs >= MAX_SUBTYPES_PS)
+      if ( nsubs >= MAX_SUBTYPES_PS )
         Error("Internal limit exceeded: more than %d subs.", MAX_SUBTYPES_PS);
-      ++(vlistptr->nsubtypes);
       vlistptr->subtypeIDs[nsubs] = subtypeID;
+      ++(vlistptr->nsubtypes);
     }
 }
 
