@@ -53,7 +53,7 @@ size_t grbEncode(int filetype, int memtype, int varID, int levelID, int vlistID,
 			     (long) datasize, datap, nmiss, gribbuffer, &gribbuffersize,
 			     comptype, gribContainer);
       
-      if ( memtype == MEMTYPE_FLOAT ) free((void*)datap);
+      if ( memtype == MEMTYPE_FLOAT ) Free((void*)datap);
     }
 #else
     {

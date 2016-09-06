@@ -47,7 +47,7 @@ int grbDecode(int filetype, int memtype, void *gribbuffer, int gribsize, void *d
           float *dataf = (float*) data;
           double *datad = (double*) datap;
           for ( size_t i = 0; i < datasize; ++i ) dataf[i] = (float) datad[i];
-          free((void*)datap);
+          Free((void*)datap);
         }
     }
 #else

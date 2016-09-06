@@ -614,7 +614,7 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
                     ubounds = lbounds + nlevs2;
 
                     double *lbounds1 = (double *) Malloc(2 * (size_t)nlevs * sizeof (double)),
-                      *ubounds1 = lbounds1 + nlevs;
+                           *ubounds1 = lbounds1 + nlevs;
 
                     zaxisInqLbounds(zaxisID, lbounds1);
                     zaxisInqUbounds(zaxisID, ubounds1);
@@ -632,7 +632,7 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
                   }
 
 		int zaxisID2 = vlist_generate_zaxis(vlistID2, zaxisType, nlevs2, levels, lbounds, ubounds, nvct, vct);
-		free(levels);
+		Free(levels);
                 Free(lbounds);
 
                 zaxisInqName(zaxisID, ctemp);
