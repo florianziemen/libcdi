@@ -461,7 +461,7 @@ void cdfDefFC(stream_t *streamptr, int gridID, int gridindex)
 
 static const struct cdfDefGridAxisInqs {
   int (*axisSize)(int gridID);
-  void (*axisName)(int gridID, char *dimname);
+  int (*axisName)(int gridID, int key, int size, char *mesg);
   void (*axisStdname)(int gridID, char *dimstdname);
   void (*axisLongname)(int gridID, char *dimlongname);
   void (*axisUnits)(int gridID, char *dimunits);
@@ -470,7 +470,7 @@ static const struct cdfDefGridAxisInqs {
   const double *(*axisBoundsPtr)(int gridID);
 } gridInqsX = {
   .axisSize = gridInqXsize,
-  .axisName = gridInqXname,
+  .axisName = cdiGridInqKeyStr,
   .axisStdname = gridInqXstdname,
   .axisLongname = gridInqXlongname,
   .axisUnits = gridInqXunits,
@@ -479,7 +479,7 @@ static const struct cdfDefGridAxisInqs {
   .axisBoundsPtr = gridInqXboundsPtr,
 }, gridInqsY = {
   .axisSize = gridInqYsize,
-  .axisName = gridInqYname,
+  .axisName = cdiGridInqKeyStr,
   .axisStdname = gridInqYstdname,
   .axisLongname = gridInqYlongname,
   .axisUnits = gridInqYunits,
@@ -540,8 +540,9 @@ cdfDefTrajLatLon(stream_t *streamptr, int gridID, int gridindex,
       int fileID  = streamptr->fileID;
       if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
-      char axisname[CDI_MAX_NAME];
-      inqs->axisName(gridID, axisname);
+      char axisname[CDI_MAX_NAME]; axisname[0] = 0;
+      int keyname = (dimtype == 'X') ? CDI_KEY_XNAME : CDI_KEY_YNAME;
+      inqs->axisName(gridID, keyname, CDI_MAX_NAME, axisname);
       cdf_def_var(fileID, axisname, xtype, 1, &dimNcID, &ncvarid);
       cdfPutGridStdAtts(fileID, ncvarid, gridID, inqs);
       cdf_enddef(fileID);
@@ -717,8 +718,9 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridindex, int ndims,
     {
       const double *pvals = gridAxisInq->axisValsPtr(gridID);
 
-      char axisname[CDI_MAX_NAME];
-      gridAxisInq->axisName(gridID, axisname);
+      char axisname[CDI_MAX_NAME]; axisname[0] = 0;
+      int keyname = (axisLetter == 'X') ? CDI_KEY_XNAME : CDI_KEY_YNAME;
+      gridAxisInq->axisName(gridID, keyname, CDI_MAX_NAME, axisname);
       if ( axisname[0] == 0 ) Error("axis name undefined!");
       size_t axisnameLen = strlen(axisname);
 
@@ -915,8 +917,7 @@ void cdfDefCurvilinear(stream_t *streamptr, int gridID, int gridindex)
       int dimIDs[3];
       if ( gridInqXboundsPtr(gridID) || gridInqYboundsPtr(gridID) )
         {
-          char vdimname[CDI_MAX_NAME+3];
-          vdimname[0] = 0;
+          char vdimname[CDI_MAX_NAME+3]; vdimname[0] = 0;
           cdiGridInqKeyStr(gridID, CDI_KEY_VDIMNAME, CDI_MAX_NAME, vdimname);
           if ( vdimname[0] == 0 ) strcpy(vdimname, "nv4");
           size_t nvertex = 4;
@@ -930,8 +931,8 @@ void cdfDefCurvilinear(stream_t *streamptr, int gridID, int gridindex)
 
       if ( gridInqXvalsPtr(gridID) )
         {
-          char xaxisname[CDI_MAX_NAME];
-          gridInqXname(gridID, xaxisname);
+          char xaxisname[CDI_MAX_NAME]; xaxisname[0] = 0;
+          cdiGridInqKeyStr(gridID, CDI_KEY_XNAME, CDI_MAX_NAME, xaxisname);
           checkGridName(xaxisname, fileID);
 
           cdf_def_var(fileID, xaxisname, xtype, 2, dimIDs, &ncxvarid);
@@ -1264,8 +1265,8 @@ void cdfDefUnstructured(stream_t *streamptr, int gridID, int gridindex)
 
       if ( gridInqXvalsPtr(gridID) )
         {
-          char xaxisname[CDI_MAX_NAME];
-          gridInqXname(gridID, xaxisname);
+          char xaxisname[CDI_MAX_NAME]; xaxisname[0] = 0;
+          cdiGridInqKeyStr(gridID, CDI_KEY_XNAME, CDI_MAX_NAME, xaxisname);
           checkGridName(xaxisname, fileID);
           cdf_def_var(fileID, xaxisname, xtype, 1, &dimID, &ncxvarid);
           cdfGridCompress(fileID, ncxvarid, (int)dimlen, streamptr->filetype, streamptr->comptype);
