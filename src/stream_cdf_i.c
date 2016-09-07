@@ -2890,10 +2890,10 @@ void cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
           if ( is_scalar ) zaxisDefScalar(ncvar->zaxisID);
 
           if ( zdimid != -1 )
-            cdiZaxisDefKeyStr(ncvar->zaxisID, CDI_ZAXIS_DIMNAME, (int)(strlen(ncdims[zdimid].name)+1), ncdims[zdimid].name);
+            cdiZaxisDefKeyStr(ncvar->zaxisID, CDI_KEY_DIMNAME, (int)(strlen(ncdims[zdimid].name)+1), ncdims[zdimid].name);
           /*
           if ( vdimid != -1 )
-            cdiZaxisDefKeyStr(ncvar->zaxisID, CDI_ZAXIS_VDIMNAME, strlen(ncdims[vdimid].name)+1, ncdims[vdimid].name);
+            cdiZaxisDefKeyStr(ncvar->zaxisID, CDI_KEY_VDIMNAME, strlen(ncdims[vdimid].name)+1, ncdims[vdimid].name);
           */
 	  Free(zvar);
 	  Free(lbounds);

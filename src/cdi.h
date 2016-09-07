@@ -771,17 +771,23 @@ void    gridDefYvals(int gridID, const double yvals[]);
 int     gridInqYvals(int gridID, double yvals[]);
 
 /* CDI grid string key values */
-#define  CDI_KEY_XNAME      901  // X-axis name
-#define  CDI_KEY_YNAME      902  // Y-axis name
-#define  CDI_KEY_XDIMNAME   903  // X-axis dimension name
-#define  CDI_KEY_YDIMNAME   904  // Y-axis dimension name
-#define  CDI_KEY_VDIMNAME   905  // Vertex dimension name
-#define  CDI_KEY_XLONGNAME  906  // X-axis longname
-#define  CDI_KEY_YLONGNAME  907  // Y-axis longname
-#define  CDI_KEY_XUNITS     908  // X-axis units
-#define  CDI_KEY_YUNITS     909  // Y-axis units
-#define  CDI_KEY_MAPNAME    920  // Grid mapping var name
-#define  CDI_KEY_MAPPING    921  // Grid mapping name
+#define  CDI_KEY_XNAME       901  // X-axis name
+#define  CDI_KEY_XDIMNAME    902  // X-axis dimension name
+#define  CDI_KEY_XLONGNAME   903  // X-axis longname
+#define  CDI_KEY_XUNITS      904  // X-axis units
+#define  CDI_KEY_YNAME       911  // Y-axis name
+#define  CDI_KEY_YDIMNAME    912  // Y-axis dimension name
+#define  CDI_KEY_YLONGNAME   913  // Y-axis longname
+#define  CDI_KEY_YUNITS      914  // Y-axis units
+#define  CDI_KEY_VDIMNAME    920  // Vertex dimension name
+#define  CDI_KEY_MAPNAME     921  // Grid mapping var name
+#define  CDI_KEY_MAPPING     922  // Grid mapping name
+
+/* CDI zaxis string key values */
+#define  CDI_KEY_NAME        941  // Z-axis name
+#define  CDI_KEY_DIMNAME     942  // Z-axis dimension name
+#define  CDI_KEY_LONGNAME    943  // Z-axis longname
+#define  CDI_KEY_UNITS       944  // Z-axis units
 
 //      cdiGridDefKeyStr: Define a CDI grid string value from a key
 int     cdiGridDefKeyStr(int gridID, int key, int size, const char *mesg);
@@ -978,13 +984,6 @@ void    zaxisDefUUID(int zaxisID, const unsigned char uuid[CDI_UUID_SIZE]);
 
 /*      zaxisInqUUID: Get the UUID of a generalized Z-axis */
 void    zaxisInqUUID(int zaxisID, unsigned char uuid[CDI_UUID_SIZE]);
-
-/* CDI zaxis string key values */
-#define  CDI_ZAXIS_NAME      801  // Z-axis name
-#define  CDI_ZAXIS_DIMNAME   802  // Z-axis dimension name
-#define  CDI_ZAXIS_VDIMNAME  803  // Vertex dimension name
-#define  CDI_ZAXIS_LONGNAME  804  // Z-axis longname
-#define  CDI_ZAXIS_UNITS     805  // Z-axis units
 
 //      cdiZaxisDefKeyStr: Define a CDI Z-axis string value from a key
 int     cdiZaxisDefKeyStr(int zaxisID, int key, int size, const char *mesg);

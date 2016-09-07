@@ -369,14 +369,17 @@ void zaxisGetString(char *name, const char *zaxisstrname, size_t len)
 }
 
 static
-char *zaxis_key_to_string(zaxis_t *zaxisptr, int key)
+void *zaxis_key_to_ptr(zaxis_t *zaxisptr, int key)
 {
-  char *keyptr = NULL;
+  void *keyptr = NULL;
 
   switch (key)
     {
-    case CDI_ZAXIS_DIMNAME:  keyptr = zaxisptr->dimname; break;
-    case CDI_ZAXIS_VDIMNAME: keyptr = zaxisptr->vdimname; break;
+    case CDI_KEY_NAME:      keyptr = (void*)zaxisptr->name; break;
+    case CDI_KEY_LONGNAME:  keyptr = (void*)zaxisptr->longname; break;
+    case CDI_KEY_UNITS:     keyptr = (void*)zaxisptr->units; break;
+    case CDI_KEY_DIMNAME:   keyptr = (void*)zaxisptr->dimname; break;
+    case CDI_KEY_VDIMNAME:  keyptr = (void*)zaxisptr->vdimname; break;
     }
 
   return keyptr;
@@ -407,7 +410,7 @@ int cdiZaxisDefKeyStr(int zaxisID, int key, int size, const char *mesg)
 
   zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
 
-  char *keyptr = zaxis_key_to_string(zaxisptr, key);
+  char *keyptr = (char*)zaxis_key_to_ptr(zaxisptr, key);
   if ( keyptr == NULL)
     {
       Warning("CDI zaxis string key %d not supported!", key);
@@ -447,7 +450,7 @@ int cdiZaxisInqKeyStr(int zaxisID, int key, int size, char *mesg)
   if ( size < 1 || mesg == NULL ) return -1;
 
   zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
-  const char *keyptr = zaxis_key_to_string(zaxisptr, key);
+  const char *keyptr = (const char*)zaxis_key_to_ptr(zaxisptr, key);
   if ( keyptr == NULL)
     {
       Warning("CDI zaxis string key %d not supported!", key);
@@ -475,13 +478,7 @@ The function @func{zaxisDefName} defines the name of a Z-axis.
 */
 void zaxisDefName(int zaxisID, const char *name)
 {
-  if ( name )
-    {
-      zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
-      strncpy(zaxisptr->name, name, CDI_MAX_NAME - 1);
-      zaxisptr->name[CDI_MAX_NAME - 1] = '\0';
-      reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
-    }
+  (void)cdiZaxisDefKeyStr(zaxisID, CDI_KEY_NAME, CDI_MAX_NAME, name);
 }
 
 /*
@@ -500,13 +497,7 @@ The function @func{zaxisDefLongname} defines the longname of a Z-axis.
 */
 void zaxisDefLongname(int zaxisID, const char *longname)
 {
-  if ( longname )
-    {
-      zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
-      strncpy(zaxisptr->longname, longname, CDI_MAX_NAME - 1);
-      zaxisptr->longname[CDI_MAX_NAME - 1] = '\0';
-      reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
-    }
+  (void)cdiZaxisDefKeyStr(zaxisID, CDI_KEY_LONGNAME, CDI_MAX_NAME, longname);
 }
 
 /*
@@ -525,13 +516,7 @@ The function @func{zaxisDefUnits} defines the units of a Z-axis.
 */
 void zaxisDefUnits(int zaxisID, const char *units)
 {
-  if ( units )
-    {
-      zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
-      strncpy(zaxisptr->units, units, CDI_MAX_NAME - 1);
-      zaxisptr->units[CDI_MAX_NAME - 1] = '\0';
-      reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
-    }
+  (void)cdiZaxisDefKeyStr(zaxisID, CDI_KEY_UNITS, CDI_MAX_NAME, units);
 }
 
 
@@ -567,8 +552,7 @@ The function @func{zaxisInqName} returns the name of a Z-axis.
 */
 void zaxisInqName(int zaxisID, char *name)
 {
-  zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
-  strcpy(name, zaxisptr->name);
+  (void)cdiZaxisInqKeyStr(zaxisID, CDI_KEY_NAME, CDI_MAX_NAME, name);
 }
 
 const char *zaxisInqNamePtr(int zaxisID)
@@ -598,8 +582,7 @@ The function @func{zaxisInqLongname} returns the longname of a Z-axis.
 */
 void zaxisInqLongname(int zaxisID, char *longname)
 {
-  zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
-  strcpy(longname, zaxisptr->longname);
+  (void)cdiZaxisInqKeyStr(zaxisID, CDI_KEY_LONGNAME, CDI_MAX_NAME, longname);
 }
 
 /*
@@ -623,8 +606,7 @@ The function @func{zaxisInqUnits} returns the units of a Z-axis.
 */
 void zaxisInqUnits(int zaxisID, char *units)
 {
-  zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
-  strcpy(units, zaxisptr->units);
+  (void)cdiZaxisInqKeyStr(zaxisID, CDI_KEY_UNITS, CDI_MAX_NAME, units);
 }
 
 

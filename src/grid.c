@@ -883,7 +883,7 @@ void gridInqYname(int gridID, char *yname)
 @Function  gridInqYlongname
 @Title     Get the longname of a Y-axis
 
-@Prototype void gridInqXlongname(int gridID, char *longname)
+@Prototype void gridInqYlongname(int gridID, char *longname)
 @Parameter
     @Item  gridID   Grid ID, from a previous call to @fref{gridCreate} or @fref{vlistInqVarGrid}.
     @Item  longname Longname of the Y-axis. The caller must allocate space for the
