@@ -1847,6 +1847,7 @@ void isec1DefLevel(int *isec1, int leveltype, int level1, int level2)
 static
 void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int levelID)
 {
+  char units[CDI_MAX_NAME];
   static bool lwarning_vct = true;
   double level;
 
@@ -1918,7 +1919,6 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
 	level = zaxisInqLevel(zaxisID, levelID);
 	if ( level < 0 ) Warning("Pressure level of %f Pa is below zero!", level);
 
-	char units[128];
 	zaxisInqUnits(zaxisID, units);
 	if ( (units[0] != 'P') | (units[1] != 'a') ) level *= 100;
 
@@ -1935,7 +1935,6 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
       {
 	level = zaxisInqLevel(zaxisID, levelID);
 
-	char units[128];
 	zaxisInqUnits(zaxisID, units);
         if ( units[1] == 'm' && !units[2] )
           {
@@ -1959,7 +1958,6 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
       }
     case ZAXIS_DEPTH_BELOW_LAND:
       {
-	char units[128];
 	zaxisInqUnits(zaxisID, units);
 
 	double factor;

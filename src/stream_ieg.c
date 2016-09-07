@@ -433,7 +433,7 @@ void iegDefLevel(int *pdb, int *gdb, double *vct, int zaxisID, int levelID)
     case ZAXIS_PRESSURE:
       {
 	double dum;
-	char units[128];
+	char units[CDI_MAX_NAME];
 
 	level = zaxisInqLevel(zaxisID, levelID);
 	if ( level < 0 ) Warning("pressure level of %f Pa is below 0.", level);

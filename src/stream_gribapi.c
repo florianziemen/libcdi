@@ -2325,6 +2325,7 @@ void grib_verfiy_zaxis(int zaxisID, double sf)
 static
 void gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelID, int gcinit, int proddef_template_num)
 {
+  char units[CDI_MAX_NAME];
   bool lbounds = false;
   double dlevel1 = 0, dlevel2 = 0;
 
@@ -2372,7 +2373,6 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelI
         if ( zaxistype == ZAXIS_HEIGHT )
           {
             double sf = 1;
-            char units[128];
             zaxisInqUnits(zaxisID, units);
             if ( units[1] == 'm' && !units[2] )
               {
@@ -2420,13 +2420,9 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelI
     case ZAXIS_ATMOSPHERE:
       {
         if ( editionNumber <= 1 )
-          {
-            grib1DefLevel(gh, gcinit, grib_ltype, lbounds, level, dlevel1, dlevel2);
-          }
+          grib1DefLevel(gh, gcinit, grib_ltype, lbounds, level, dlevel1, dlevel2);
         else
-          {
-            grib2DefLevel(gh, gcinit, grib_ltype, grib_ltype, lbounds, level, dlevel1, dlevel2);
-          }
+          grib2DefLevel(gh, gcinit, grib_ltype, grib_ltype, lbounds, level, dlevel1, dlevel2);
 
         break;
       }
@@ -2459,7 +2455,6 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelI
       {
 	if ( level < 0 ) Warning("Pressure level of %f Pa is below zero!", level);
 
-	char units[128];
 	zaxisInqUnits(zaxisID, units);
 	if ( memcmp(units, "Pa", 2) != 0 )
           {
@@ -2499,7 +2494,6 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelI
       }
     case ZAXIS_DEPTH_BELOW_LAND:
       {
-	char units[128];
 	zaxisInqUnits(zaxisID, units);
         double sf; //scalefactor
 
