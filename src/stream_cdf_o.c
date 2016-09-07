@@ -1819,7 +1819,7 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
 
       char dimname[CDI_MAX_NAME+3];
       dimname[0] = 0;
-      //cdiZaxisInqString(zaxisID, CDI_ZAXIS_DIMNAME, CDI_MAX_NAME, dimname);
+      //cdiZaxisInqKeyStr(zaxisID, CDI_ZAXIS_DIMNAME, CDI_MAX_NAME, dimname);
       if ( dimname[0] == 0 ) strcpy(dimname, axisname);
 
       if ( type == ZAXIS_REFERENCE ) cdfDefZaxisUUID(streamptr, zaxisID);

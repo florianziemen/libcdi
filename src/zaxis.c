@@ -421,10 +421,10 @@ int cdiZaxisDefKeyStr(int zaxisID, int key, int size, const char *mesg)
 }
 
 /*
-@Function  cdiZaxisInqString
+@Function  cdiZaxisInqKeyStr
 @Title     Get a CDI Z-axis string value from a key
 
-@Prototype int cdiZaxisInqString(int zaxisID, int key, int size, char *mesg)
+@Prototype int cdiZaxisInqKeyStr(int zaxisID, int key, int size, char *mesg)
 @Parameter
     @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}.
     @Item  key      The key to be searched.
@@ -435,14 +435,14 @@ int cdiZaxisDefKeyStr(int zaxisID, int key, int size, const char *mesg)
                     is given by the predefined constant @func{CDI_MAX_NAME}.
 
 @Description
-The function @func{cdiZaxisInqString} return a CDI Z-axis string value from a key.
+The function @func{cdiZaxisInqKeyStr} return a CDI Z-axis string value from a key.
 
 @Result
-@func{cdiZaxisInqString} returns 0 if OK and integer value on error.
+@func{cdiZaxisInqKeyStr} returns 0 if OK and integer value on error.
 
 @EndFunction
 */
-int cdiZaxisInqString(int zaxisID, int key, int size, char *mesg)
+int cdiZaxisInqKeyStr(int zaxisID, int key, int size, char *mesg)
 {
   if ( size < 1 || mesg == NULL ) return -1;
 
