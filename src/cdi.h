@@ -986,8 +986,8 @@ void    zaxisInqUUID(int zaxisID, unsigned char uuid[CDI_UUID_SIZE]);
 #define  CDI_ZAXIS_LONGNAME  804  // Z-axis longname
 #define  CDI_ZAXIS_UNITS     805  // Z-axis units
 
-//      cdiZaxisDefString: Define a CDI Z-axis string value from a key
-int     cdiZaxisDefString(int zaxisID, int key, int size, const char *mesg);
+//      cdiZaxisDefKeyStr: Define a CDI Z-axis string value from a key
+int     cdiZaxisDefKeyStr(int zaxisID, int key, int size, const char *mesg);
 
 //      cdiZaxisInqString: Get a CDI Z-axis string value from a key
 int     cdiZaxisInqString(int zaxisID, int key, int size, char *mesg);

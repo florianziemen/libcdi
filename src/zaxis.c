@@ -174,7 +174,7 @@ zaxis_t *zaxisNewEntry(int id)
 
   zaxisDefaultValue ( zaxisptr );
 
-  if (id == CDI_UNDEFID)
+  if ( id == CDI_UNDEFID )
     zaxisptr->self = reshPut(zaxisptr, &zaxisOps);
   else
     {
@@ -185,8 +185,8 @@ zaxis_t *zaxisNewEntry(int id)
   return zaxisptr;
 }
 
-static inline zaxis_t *
-zaxisID2Ptr(int id)
+static inline
+zaxis_t *zaxisID2Ptr(int id)
 {
   return (zaxis_t *)reshGetVal(id, &zaxisOps);
 }
@@ -199,7 +199,7 @@ void zaxisInit(void)
   if ( zaxisInitialized ) return;
   zaxisInitialized = true;
 
-  char *env = getenv("ZAXIS_DEBUG");
+  const char *env = getenv("ZAXIS_DEBUG");
   if ( env ) ZAXIS_Debug = atoi(env);
 }
 
@@ -248,7 +248,6 @@ zaxisCreate_(int zaxistype, int size, int id)
   return zaxisID;
 }
 
-
 /*
 @Function  zaxisCreate
 @Title     Create a vertical Z-axis
@@ -291,8 +290,7 @@ zaxisDefLevels(zaxisID, levs);
 */
 int zaxisCreate(int zaxistype, int size)
 {
-  if ( CDI_Debug )
-    Message("zaxistype: %d size: %d ", zaxistype, size);
+  if ( CDI_Debug ) Message("zaxistype: %d size: %d ", zaxistype, size);
 
   zaxisInit ();
   return zaxisCreate_(zaxistype, size, CDI_UNDEFID);
@@ -329,15 +327,14 @@ static void zaxisDestroyKernel( zaxis_t * zaxisptr )
 void zaxisDestroy(int zaxisID)
 {
   zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
-
-  zaxisDestroyKernel ( zaxisptr );
+  zaxisDestroyKernel(zaxisptr);
 }
 
 
 static
-void zaxisDestroyP ( void * zaxisptr )
+void zaxisDestroyP(void *zaxisptr)
 {
-  zaxisDestroyKernel (( zaxis_t * ) zaxisptr );
+  zaxisDestroyKernel((zaxis_t *) zaxisptr);
 }
 
 
@@ -374,22 +371,22 @@ void zaxisGetString(char *name, const char *zaxisstrname, size_t len)
 static
 char *zaxis_key_to_string(zaxis_t *zaxisptr, int key)
 {
-  char *zaxisstring = NULL;
+  char *keyptr = NULL;
 
   switch (key)
     {
-    case CDI_ZAXIS_DIMNAME:  zaxisstring = zaxisptr->dimname; break;
-    case CDI_ZAXIS_VDIMNAME: zaxisstring = zaxisptr->vdimname; break;
+    case CDI_ZAXIS_DIMNAME:  keyptr = zaxisptr->dimname; break;
+    case CDI_ZAXIS_VDIMNAME: keyptr = zaxisptr->vdimname; break;
     }
 
-  return zaxisstring;
+  return keyptr;
 }
 
 /*
-@Function  cdiZaxisDefString
+@Function  cdiZaxisDefKeyStr
 @Title     Define a CDI Z-axis string value from a key
 
-@Prototype int cdiZaxisDefString(int zaxisID, int key, int size, const char *mesg)
+@Prototype int cdiZaxisDefKeyStr(int zaxisID, int key, int size, const char *mesg)
 @Parameter
     @Item  zaxisID  Z-axis ID, from a previous call to @fref{zaxisCreate}.
     @Item  key      The key to be searched
@@ -397,27 +394,27 @@ char *zaxis_key_to_string(zaxis_t *zaxisptr, int key)
     @Item  mesg     The address of a string where the data will be read
 
 @Description
-The function @func{cdiZaxisDefString} defines a CDI Z-axis string value from a key.
+The function @func{cdiZaxisDefKeyStr} defines a CDI Z-axis string value from a key.
 
 @Result
-@func{cdiZaxisDefString} returns 0 if OK and integer value on error.
+@func{cdiZaxisDefKeyStr} returns 0 if OK and integer value on error.
 
 @EndFunction
 */
-int cdiZaxisDefString(int zaxisID, int key, int size, const char *mesg)
+int cdiZaxisDefKeyStr(int zaxisID, int key, int size, const char *mesg)
 {
-  if ( size <= 0 || mesg == NULL || *mesg == 0 ) return -1;
+  if ( size < 1 || mesg == NULL || *mesg == 0 ) return -1;
 
   zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
 
-  char *zaxisstring = zaxis_key_to_string(zaxisptr, key);
-  if ( zaxisstring == NULL)
+  char *keyptr = zaxis_key_to_string(zaxisptr, key);
+  if ( keyptr == NULL)
     {
       Warning("CDI zaxis string key %d not supported!", key);
       return -1;
     }
 
-  zaxisSetString(zaxisstring, mesg, (size_t)size);
+  zaxisSetString(keyptr, mesg, (size_t)size);
   reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
 
   return 0;
@@ -447,17 +444,17 @@ The function @func{cdiZaxisInqString} return a CDI Z-axis string value from a ke
 */
 int cdiZaxisInqString(int zaxisID, int key, int size, char *mesg)
 {
-  if ( size <= 0 || mesg == NULL ) return -1;
+  if ( size < 1 || mesg == NULL ) return -1;
 
   zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
-  const char *zaxisstring = zaxis_key_to_string(zaxisptr, key);
-  if ( zaxisstring == NULL)
+  const char *keyptr = zaxis_key_to_string(zaxisptr, key);
+  if ( keyptr == NULL)
     {
       Warning("CDI zaxis string key %d not supported!", key);
       return -1;
     }
 
-  zaxisGetString(mesg, zaxisstring, (size_t)size);
+  zaxisGetString(mesg, keyptr, (size_t)size);
 
   return 0;
 }

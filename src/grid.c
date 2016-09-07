@@ -162,8 +162,8 @@ void grid_init(grid_t *gridptr)
 }
 
 
-static void
-grid_free_components(grid_t *gridptr)
+static
+void grid_free_components(grid_t *gridptr)
 {
   void *p2free[] = { gridptr->mask, gridptr->mask_gme,
                      gridptr->x.vals, gridptr->y.vals,
@@ -171,7 +171,7 @@ grid_free_components(grid_t *gridptr)
                      gridptr->rowlon, gridptr->area,
                      gridptr->reference, gridptr->name};
 
-  for (size_t i = 0; i < sizeof(p2free)/sizeof(p2free[0]); ++i)
+  for ( size_t i = 0; i < sizeof(p2free)/sizeof(p2free[0]); ++i )
     if ( p2free[i] ) Free(p2free[i]);
 }
 
@@ -187,7 +187,7 @@ grid_t *gridNewEntry(cdiResH resH)
   grid_t *gridptr = (grid_t*) Malloc(sizeof(grid_t));
   grid_init(gridptr);
 
-  if (resH == CDI_UNDEFID)
+  if ( resH == CDI_UNDEFID )
     gridptr->self = reshPut(gridptr, &gridOps);
   else
     {
@@ -201,28 +201,26 @@ grid_t *gridNewEntry(cdiResH resH)
 static
 void gridInit(void)
 {
-  static int gridInitialized = 0;
-
+  static bool gridInitialized = false;
   if ( gridInitialized ) return;
-
-  gridInitialized = 1;
+  gridInitialized = true;
 
   const char *env = getenv("GRID_DEBUG");
   if ( env ) GRID_Debug = atoi(env);
 }
 
-static void
-grid_copy_base_scalar_fields(grid_t *gridptrOrig, grid_t *gridptrDup)
+static
+void grid_copy_base_scalar_fields(grid_t *gridptrOrig, grid_t *gridptrDup)
 {
   memcpy(gridptrDup, gridptrOrig, sizeof(grid_t));
   gridptrDup->self = CDI_UNDEFID;
-  if (gridptrOrig->reference)
+  if ( gridptrOrig->reference )
     gridptrDup->reference = strdupx(gridptrOrig->reference);
 }
 
 
-static grid_t *
-grid_copy_base(grid_t *gridptrOrig)
+static
+grid_t *grid_copy_base(grid_t *gridptrOrig)
 {
   grid_t *gridptrDup = (grid_t *)Malloc(sizeof (*gridptrDup));
   gridptrOrig->vtable->copyScalarFields(gridptrOrig, gridptrDup);
@@ -609,14 +607,14 @@ int cdiGridDefKeyStr(int gridID, int key, int size, const char *mesg)
 
   grid_t *gridptr = gridID2Ptr(gridID);
 
-  char *gridstring = (char*)grid_key_to_ptr(gridptr, key);
-  if ( gridstring == NULL )
+  char *keyptr = (char*)grid_key_to_ptr(gridptr, key);
+  if ( keyptr == NULL )
     {
       Warning("CDI grid string key %d not supported!", key);
       return -1;
     }
 
-  gridSetString(gridstring, mesg, (size_t)size);
+  gridSetString(keyptr, mesg, (size_t)size);
   gridMark4Update(gridID);
 
   return 0;
@@ -649,14 +647,14 @@ int cdiGridInqKeyStr(int gridID, int key, int size, char *mesg)
   if ( size < 1 || mesg == NULL ) return -1;
 
   grid_t *gridptr = gridID2Ptr(gridID);
-  const char *gridstring = (const char*)grid_key_to_ptr(gridptr, key);
-  if ( gridstring == NULL)
+  const char *keyptr = (const char*)grid_key_to_ptr(gridptr, key);
+  if ( keyptr == NULL)
     {
       Warning("CDI grid string key %d not supported!", key);
       return -1;
     }
 
-  gridGetString(mesg, gridstring, (size_t)size);
+  gridGetString(mesg, keyptr, (size_t)size);
 
   return 0;
 }

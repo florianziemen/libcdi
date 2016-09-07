@@ -420,7 +420,7 @@ FCALLSCSUB2 (zaxisInqUUID, ZAXISINQUUID, zaxisinquuid, INT, PVOID)
 
 /*  CDI zaxis string key values  */
 
-FCALLSCFUN4 (INT, cdiZaxisDefString, CDIZAXISDEFSTRING, cdizaxisdefstring, INT, INT, INT, STRING)
+FCALLSCFUN4 (INT, cdiZaxisDefKeyStr, CDIZAXISDEFSTRING, cdizaxisdefstring, INT, INT, INT, STRING)
 FCALLSCFUN4 (INT, cdiZaxisInqString, CDIZAXISINQSTRING, cdizaxisinqstring, INT, INT, INT, PSTRING)
 FCALLSCSUB2 (zaxisDefName, ZAXISDEFNAME, zaxisdefname, INT, STRING)
 FCALLSCSUB2 (zaxisInqName, ZAXISINQNAME, zaxisinqname, INT, PSTRING)
