@@ -2464,14 +2464,14 @@ void gridComplete(grid_t *grid)
 
 	if ( grid->projtype == CDI_PROJ_RLL )
 	  {
-	    if ( grid->x.name[0] == 0 || grid->x.name[0] == 'x' ) gridDefXname(gridID, "rlon");
-	    if ( grid->y.name[0] == 0 || grid->y.name[0] == 'y' ) gridDefYname(gridID, "rlat");
-	    if ( grid->x.longname[0] == 0 ) gridDefXlongname(gridID, "longitude in rotated pole grid");
-	    if ( grid->y.longname[0] == 0 ) gridDefYlongname(gridID, "latitude in rotated pole grid");
+	    if ( grid->x.name[0] == 0 || grid->x.name[0] == 'x' ) strcpy(grid->x.name, "rlon");
+	    if ( grid->y.name[0] == 0 || grid->y.name[0] == 'y' ) strcpy(grid->y.name, "rlat");
+	    if ( grid->x.longname[0] == 0 ) strcpy(grid->x.longname, "longitude in rotated pole grid");
+	    if ( grid->y.longname[0] == 0 ) strcpy(grid->y.longname, "latitude in rotated pole grid");
             grid->x.stdname = xystdname_tab[grid_xystdname_grid_latlon][0];
             grid->y.stdname = xystdname_tab[grid_xystdname_grid_latlon][1];
-	    if ( grid->x.units[0] == 0 ) gridDefXunits(gridID, "degrees");
-	    if ( grid->y.units[0] == 0 ) gridDefYunits(gridID, "degrees");
+	    if ( grid->x.units[0] == 0 ) strcpy(grid->x.units, "degrees");
+	    if ( grid->y.units[0] == 0 ) strcpy(grid->y.units, "degrees");
 	  }
 
         switch (gridtype)
