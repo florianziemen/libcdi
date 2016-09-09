@@ -858,7 +858,6 @@ static
 bool isHybridSigmaPressureCoordinate(int ncid, int ncvarid, ncvar_t *ncvars, const ncdim_t *ncdims)
 {
   bool status = false;
-  int ncfvarid = ncvarid;
   ncvar_t *ncvar = &ncvars[ncvarid];
 
   if ( strcmp(ncvar->stdname, "atmosphere_hybrid_sigma_pressure_coordinate") == 0 )
@@ -872,6 +871,7 @@ bool isHybridSigmaPressureCoordinate(int ncid, int ncvarid, ncvar_t *ncvars, con
 
       int ret;
       int apvarid1 = -1, bvarid1 = -1, psvarid1 = -1, avarid1 = -1, p0varid1 = -1;
+      int ncfvarid = ncvarid;
       if ( ncvars[ncfvarid].lformula && ncvars[ncfvarid].lformulaterms )
         ret = scan_hybrid_formula(ncid, ncfvarid, &apvarid1, &bvarid1, &psvarid1, &avarid1, &p0varid1);
       if ( apvarid1 != -1 ) ncvars[apvarid1].isvar = FALSE;
@@ -1931,11 +1931,6 @@ void verify_coordinate_vars_2(int nvars, ncvar_t *ncvars)
 		  ncvars[ncvarid].isy = true;
 		  continue;
 		}
-	      else if ( is_pressure_units(ncvars[ncvarid].units) )
-		{
-		  ncvars[ncvarid].zaxistype = ZAXIS_PRESSURE;
-		  continue;
-		}
 	      else if ( strcmp(ncvars[ncvarid].units, "level") == 0 || strcmp(ncvars[ncvarid].units, "1") == 0 )
 		{
 		  if      ( strcmp(ncvars[ncvarid].longname, "hybrid level at layer midpoints") == 0 )
@@ -1948,6 +1943,11 @@ void verify_coordinate_vars_2(int nvars, ncvar_t *ncvars)
 		    ncvars[ncvarid].zaxistype = ZAXIS_HYBRID_HALF;
 		  else if ( strcmp(ncvars[ncvarid].units, "level") == 0 )
 		    ncvars[ncvarid].zaxistype = ZAXIS_GENERIC;
+		  continue;
+		}
+	      else if ( ncvars[ncvarid].zaxistype == UNDEFID && is_pressure_units(ncvars[ncvarid].units) )
+		{
+		  ncvars[ncvarid].zaxistype = ZAXIS_PRESSURE;
 		  continue;
 		}
 	      else if ( is_DBL_axis(ncvars[ncvarid].longname) )
