@@ -52,7 +52,6 @@ typedef struct {
   bool     istime;
   bool     warn;
   bool     climatology;
-  bool     lformula;
   bool     lformulaterms;
   int      tsteptype;
   int      param;
@@ -669,7 +668,6 @@ void init_ncvars(long nvars, ncvar_t *ncvars)
       ncvars[ncvarid].istime          = false;
       ncvars[ncvarid].warn            = false;
       ncvars[ncvarid].climatology     = false;
-      ncvars[ncvarid].lformula        = false;
       ncvars[ncvarid].lformulaterms   = false;
       ncvars[ncvarid].tsteptype       = TSTEP_CONSTANT;
       ncvars[ncvarid].param           = UNDEFID;
@@ -761,94 +759,51 @@ void cdf_set_dim(ncvar_t *ncvars, int ncvarid, int dimid, int dimtype)
 }
 
 static
-int scan_hybrid_formula(int ncid, int ncfvarid, int *apvarid, int *bvarid, int *psvarid, int *avarid, int *p0varid)
+int scan_hybrid_formulaterms(int ncid, int ncfvarid, int *apvarid, int *bvarid, int *psvarid, int *avarid, int *p0varid)
 {
-  int status = 0;
+  int status = 1;
   *apvarid = -1;
   *bvarid  = -1;
   *psvarid = -1;
   *avarid  = -1;
   *p0varid = -1;
   char attstring[1024];
-  cdfGetAttText(ncid, ncfvarid, "formula", sizeof(attstring), attstring);
-  if ( strcmp(attstring, "p = ap + b*ps") == 0 )
+
+  bool lstop = false;
+  int dimvarid;
+  cdfGetAttText(ncid, ncfvarid, "formula_terms", sizeof(attstring), attstring);
+  char *pstring = attstring;
+
+  for ( int i = 0; i < 4; i++ )
     {
-      status = 1;
-      bool lstop = false;
-      int dimvarid;
-      cdfGetAttText(ncid, ncfvarid, "formula_terms", sizeof(attstring), attstring);
-      char *pstring = attstring;
+      while ( isspace((int) *pstring) ) pstring++;
+      if ( *pstring == 0 ) break;
+      char *tagname = pstring;
+      while ( !isspace((int) *pstring) && *pstring != 0 ) pstring++;
+      if ( *pstring == 0 ) lstop = true;
+      *pstring++ = 0;
 
-      for ( int i = 0; i < 3; i++ )
+      while ( isspace((int) *pstring) ) pstring++;
+      if ( *pstring == 0 ) break;
+      char *varname = pstring;
+      while ( !isspace((int) *pstring) && *pstring != 0 ) pstring++;
+      if ( *pstring == 0 ) lstop = true;
+      *pstring++ = 0;
+
+      int status_nc = nc_inq_varid(ncid, varname, &dimvarid);
+      if ( status_nc == NC_NOERR )
         {
-          while ( isspace((int) *pstring) ) pstring++;
-          if ( *pstring == 0 ) break;
-          char *tagname = pstring;
-          while ( !isspace((int) *pstring) && *pstring != 0 ) pstring++;
-          if ( *pstring == 0 ) lstop = true;
-          *pstring++ = 0;
-
-          while ( isspace((int) *pstring) ) pstring++;
-          if ( *pstring == 0 ) break;
-          char *varname = pstring;
-          while ( !isspace((int) *pstring) && *pstring != 0 ) pstring++;
-          if ( *pstring == 0 ) lstop = true;
-          *pstring++ = 0;
-
-          int status_nc = nc_inq_varid(ncid, varname, &dimvarid);
-          if ( status_nc == NC_NOERR )
-            {
-              if      ( strcmp(tagname, "ap:") == 0 ) *apvarid = dimvarid;
-              else if ( strcmp(tagname, "b:")  == 0 ) *bvarid  = dimvarid;
-              else if ( strcmp(tagname, "ps:") == 0 ) *psvarid = dimvarid;
-            }
-          else if ( strcmp(tagname, "ps:") != 0 )
-            {
-              Warning("%s - %s", nc_strerror(status_nc), varname);
-            }
-
-          if ( lstop ) break;
+          if      ( strcmp(tagname, "ap:") == 0 ) *apvarid = dimvarid;
+          else if ( strcmp(tagname, "b:")  == 0 ) *bvarid  = dimvarid;
+          else if ( strcmp(tagname, "ps:") == 0 ) *psvarid = dimvarid;
+          else if ( strcmp(tagname, "p0:") == 0 ) *p0varid = dimvarid;
         }
-    }
-  else if ( strcmp(attstring, "xxxp = a*p0 + b*ps") == 0 )
-    {
-      status = 2;
-      bool lstop = false;
-      int dimvarid;
-      cdfGetAttText(ncid, ncfvarid, "formula_terms", sizeof(attstring), attstring);
-      char *pstring = attstring;
-
-      for ( int i = 0; i < 4; i++ )
+      else if ( strcmp(tagname, "ps:") != 0 )
         {
-          while ( isspace((int) *pstring) ) pstring++;
-          if ( *pstring == 0 ) break;
-          char *tagname = pstring;
-          while ( !isspace((int) *pstring) && *pstring != 0 ) pstring++;
-          if ( *pstring == 0 ) lstop = true;
-          *pstring++ = 0;
-
-          while ( isspace((int) *pstring) ) pstring++;
-          if ( *pstring == 0 ) break;
-          char *varname = pstring;
-          while ( !isspace((int) *pstring) && *pstring != 0 ) pstring++;
-          if ( *pstring == 0 ) lstop = true;
-          *pstring++ = 0;
-
-          int status_nc = nc_inq_varid(ncid, varname, &dimvarid);
-          if ( status_nc == NC_NOERR )
-            {
-              if      ( strcmp(tagname, "a:")  == 0 ) *avarid  = dimvarid;
-              else if ( strcmp(tagname, "b:")  == 0 ) *bvarid  = dimvarid;
-              else if ( strcmp(tagname, "ps:") == 0 ) *psvarid = dimvarid;
-              else if ( strcmp(tagname, "p0:") == 0 ) *p0varid = dimvarid;
-            }
-          else if ( strcmp(tagname, "ps:") != 0 )
-            {
-              Warning("%s - %s", nc_strerror(status_nc), varname);
-            }
-
-          if ( lstop ) break;
+          Warning("%s - %s", nc_strerror(status_nc), varname);
         }
+
+      if ( lstop ) break;
     }
 
   return status;
@@ -869,24 +824,26 @@ bool isHybridSigmaPressureCoordinate(int ncid, int ncvarid, ncvar_t *ncvars, con
       int dimid = ncvar->dimids[0];
       size_t dimlen = ncdims[dimid].len;
 
-      int ret;
+      int ret = 0;
       int apvarid1 = -1, bvarid1 = -1, psvarid1 = -1, avarid1 = -1, p0varid1 = -1;
       int ncfvarid = ncvarid;
-      if ( ncvars[ncfvarid].lformula && ncvars[ncfvarid].lformulaterms )
-        ret = scan_hybrid_formula(ncid, ncfvarid, &apvarid1, &bvarid1, &psvarid1, &avarid1, &p0varid1);
+      if ( ncvars[ncfvarid].lformulaterms )
+        ret = scan_hybrid_formulaterms(ncid, ncfvarid, &apvarid1, &bvarid1, &psvarid1, &avarid1, &p0varid1);
+      // printf("ret %d apvarid1, bvarid1, psvarid1, avarid1, p0varid1 %d %d %d %d %d\n", ret, apvarid1, bvarid1, psvarid1, avarid1, p0varid1);
       if ( apvarid1 != -1 ) ncvars[apvarid1].isvar = FALSE;
       if ( bvarid1  != -1 ) ncvars[bvarid1].isvar  = FALSE;
       if ( psvarid1 != -1 ) ncvar->psvarid = psvarid1;
       if ( avarid1  != -1 ) ncvars[avarid1].isvar = FALSE;
       if ( p0varid1 != -1 ) ncvar->p0varid = p0varid1;
 
-      if ( ncvar->bounds != UNDEFID && ncvars[ncvar->bounds].lformula && ncvars[ncvar->bounds].lformulaterms )
+      if ( ncvar->bounds != UNDEFID && ncvars[ncvar->bounds].lformulaterms )
         {
           ncfvarid = ncvar->bounds;
           int apvarid2 = -1, bvarid2 = -1, psvarid2 = -1, avarid2 = -1, p0varid2 = -1;
           ret = 0;
-          if ( ncvars[ncfvarid].lformula && ncvars[ncfvarid].lformulaterms )
-            ret = scan_hybrid_formula(ncid, ncfvarid, &apvarid2, &bvarid2, &psvarid2, &avarid2, &p0varid2);
+          if ( ncvars[ncfvarid].lformulaterms )
+            ret = scan_hybrid_formulaterms(ncid, ncfvarid, &apvarid2, &bvarid2, &psvarid2, &avarid2, &p0varid2);
+          // printf("ret %d apvarid2, bvarid2, psvarid2, avarid2, p0varid2 %d %d %d %d %d\n", ret, apvarid2, bvarid2, psvarid2, avarid2, p0varid2);
           if ( ret == 1 ) avarid2 = apvarid2;
           if ( avarid2 != -1 && bvarid2 != -1 )
             {
@@ -1339,10 +1296,6 @@ void cdf_scan_var_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimi
           else if ( isText &&  strcmp(attname, "formula_terms") == 0 )
             {
               ncvars[ncvarid].lformulaterms = true;
-            }
-          else if ( isText && strcmp(attname, "formula") == 0 )
-            {
-              ncvars[ncvarid].lformula = true;
             }
           else if ( isText && strcmp(attname, "cell_measures") == 0 && (nc_cell_id=cdf_get_cell_varid(attstring, ncid)) != UNDEFID )
             {
