@@ -1786,7 +1786,7 @@ void cdf_set_dimtype(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
 
 /* verify coordinate vars - first scan (dimname == varname) */
 static
-void verify_coordinate_vars_1(int ncid, int ndims, ncdim_t *ncdims, ncvar_t *ncvars, int timedimid)
+void verify_coordinate_vars_1(int ncid, int ndims, ncdim_t *ncdims, ncvar_t *ncvars, int timedimid, bool *lhybrid_cf)
 {
   for ( int ncdimid = 0; ncdimid < ndims; ncdimid++ )
     {
@@ -1800,7 +1800,11 @@ void verify_coordinate_vars_1(int ncid, int ndims, ncdim_t *ncdims, ncvar_t *ncv
 	      continue;
 	    }
 
-          if ( isHybridSigmaPressureCoordinate(ncid, ncvarid, ncvars, ncdims) ) continue;
+          if ( isHybridSigmaPressureCoordinate(ncid, ncvarid, ncvars, ncdims) )
+            {
+              *lhybrid_cf = true;
+              continue;
+            }
 
 	  if ( ncvars[ncvarid].units[0] != 0 )
 	    {
@@ -3729,7 +3733,8 @@ int cdfInqContents(stream_t *streamptr)
   timedimid = cdf_check_vars(nvars, ncvars, ntsteps, timedimid);
 
   /* verify coordinate vars - first scan (dimname == varname) */
-  verify_coordinate_vars_1(fileID, ndims, ncdims, ncvars, timedimid);
+  bool lhybrid_cf = false;
+  verify_coordinate_vars_1(fileID, ndims, ncdims, ncvars, timedimid, &lhybrid_cf);
 
   /* verify coordinate vars - second scan (all other variables) */
   verify_coordinate_vars_2(nvars, ncvars);
@@ -3788,7 +3793,7 @@ int cdfInqContents(stream_t *streamptr)
   /* read ECHAM VCT if present */
   size_t vctsize = 0;
   double *vct = NULL;
-  read_vct_echam(fileID, nvars, ncvars, ncdims, &vct, &vctsize);
+  if ( !lhybrid_cf ) read_vct_echam(fileID, nvars, ncvars, ncdims, &vct, &vctsize);
 
 
   if ( CDI_Debug ) cdf_print_vars(ncvars, nvars, "cdf_define_all_grids");
