@@ -355,17 +355,17 @@ void zaxisName(int zaxistype, char *zaxisname)
 static inline
 void zaxisSetString(char *zaxisstrname, const char *name, size_t len)
 {
-  if ( len > CDI_MAX_NAME ) len = CDI_MAX_NAME;
+  if ( len >= CDI_MAX_NAME ) len = CDI_MAX_NAME-1;
   strncpy(zaxisstrname, name, len);
-  zaxisstrname[len - 1] = 0;
+  zaxisstrname[len] = 0;
 }
 
 static inline
 void zaxisGetString(char *name, const char *zaxisstrname, size_t len)
 {
-  if ( len > CDI_MAX_NAME ) len = CDI_MAX_NAME;
+  if ( len >= CDI_MAX_NAME ) len = CDI_MAX_NAME-1;
   strncpy(name, zaxisstrname, len);
-  name[len - 1] = 0;
+  name[len] = 0;
 }
 
 static
@@ -380,6 +380,7 @@ void *zaxis_key_to_ptr(zaxis_t *zaxisptr, int key)
     case CDI_KEY_UNITS:     keyptr = (void*)zaxisptr->units; break;
     case CDI_KEY_DIMNAME:   keyptr = (void*)zaxisptr->dimname; break;
     case CDI_KEY_VDIMNAME:  keyptr = (void*)zaxisptr->vdimname; break;
+    case CDI_KEY_PSNAME:    keyptr = (void*)zaxisptr->psname; break;
     }
 
   return keyptr;
@@ -517,18 +518,6 @@ The function @func{zaxisDefUnits} defines the units of a Z-axis.
 void zaxisDefUnits(int zaxisID, const char *units)
 {
   (void)cdiZaxisDefKeyStr(zaxisID, CDI_KEY_UNITS, CDI_MAX_NAME, units);
-}
-
-
-void zaxisDefPsName(int zaxisID, const char *psname)
-{
-  if ( psname )
-    {
-      zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
-      strncpy(zaxisptr->psname, psname, CDI_MAX_NAME - 1);
-      zaxisptr->name[CDI_MAX_NAME - 1] = '\0';
-      reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
-    }
 }
 
 /*

@@ -788,6 +788,7 @@ int     gridInqYvals(int gridID, double yvals[]);
 #define  CDI_KEY_DIMNAME     942  // Z-axis dimension name
 #define  CDI_KEY_LONGNAME    943  // Z-axis longname
 #define  CDI_KEY_UNITS       944  // Z-axis units
+#define  CDI_KEY_PSNAME      950  // Z-axis surface pressure name
 
 //      cdiGridDefKeyStr: Define a CDI grid string value from a key
 int     cdiGridDefKeyStr(int gridID, int key, int size, const char *mesg);
@@ -1011,9 +1012,6 @@ void    zaxisInqUnits(int zaxisID, char *units);
 
 /*      zaxisInqStdname: Get the standard name of a Z-axis */
 void    zaxisInqStdname(int zaxisID, char *stdname);
-
-/*      zaxisDefPsName: Define the name of the surface pressure variable of a hybrid sigma pressure Z-axis */
-void    zaxisDefPsName(int zaxisID, const char *psname_optional);
 
 /*      zaxisInqPsName: Get the name of the surface pressure variable of a hybrid sigma pressure Z-axis */
 void    zaxisInqPsName(int zaxisID, char *psname);
