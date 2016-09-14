@@ -333,7 +333,6 @@ static
 int cdiInqContents(stream_t *streamptr)
 {
   int status = 0;
-
   int filetype = streamptr->filetype;
 
   switch (filetype)
@@ -411,7 +410,9 @@ int cdiStreamOpenDefaultDelegate(const char *filename, char filemode,
     {
 #if  defined  (HAVE_LIBGRIB)
     case FILETYPE_GRB:
+#if  defined  (HAVE_LIBGRIB_API)
     case FILETYPE_GRB2:
+#endif
       {
 #ifndef __cplusplus
         fileID = gribOpen(filename, (char [2]){filemode, 0});
@@ -481,7 +482,7 @@ int cdiStreamOpenDefaultDelegate(const char *filename, char filemode,
           {
             streamptr->record = (Record *) Malloc(sizeof(Record));
             streamptr->record->buffer = NULL;
-            streamptr->record->exsep   = iegNew();
+            streamptr->record->exsep  = iegNew();
           }
         break;
       }
@@ -596,9 +597,8 @@ int streamOpenID(const char *filename, char filemode, int filetype, int resH)
 static
 int streamOpen(const char *filename, const char *filemode, int filetype)
 {
-  if (!filemode || strlen(filemode) != 1) return CDI_EINVAL;
-  return streamOpenID(filename, (char)tolower(filemode[0]),
-                      filetype, CDI_UNDEFID);
+  if ( !filemode || strlen(filemode) != 1 ) return CDI_EINVAL;
+  return streamOpenID(filename, (char)tolower(filemode[0]), filetype, CDI_UNDEFID);
 }
 
 static
@@ -651,7 +651,9 @@ int streamOpenA(const char *filename, const char *filemode, int filetype)
     {
 #if  defined  (HAVE_LIBGRIB)
     case FILETYPE_GRB:
+#if  defined  (HAVE_LIBGRIB_API)
     case FILETYPE_GRB2:
+#endif
       {
         fileID = gribOpen(filename, filemode);
         if ( fileID != CDI_UNDEFID ) gribContainersNew(streamptr);
@@ -929,8 +931,7 @@ void cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDelet
       case FILETYPE_GRB2:
         {
           gribClose(fileID);
-          if (recordBufIsToBeDeleted)
-            gribContainersDelete(streamptr);
+          if ( recordBufIsToBeDeleted ) gribContainersDelete(streamptr);
           break;
         }
 #endif
@@ -938,8 +939,7 @@ void cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDelet
       case FILETYPE_SRV:
         {
           fileClose(fileID);
-          if (recordBufIsToBeDeleted)
-            srvDelete(streamptr->record->exsep);
+          if ( recordBufIsToBeDeleted ) srvDelete(streamptr->record->exsep);
           break;
         }
 #endif
@@ -947,8 +947,7 @@ void cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDelet
       case FILETYPE_EXT:
         {
           fileClose(fileID);
-          if (recordBufIsToBeDeleted)
-            extDelete(streamptr->record->exsep);
+          if ( recordBufIsToBeDeleted ) extDelete(streamptr->record->exsep);
           break;
         }
 #endif
@@ -956,8 +955,7 @@ void cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDelet
       case FILETYPE_IEG:
         {
           fileClose(fileID);
-          if (recordBufIsToBeDeleted)
-            iegDelete(streamptr->record->exsep);
+          if ( recordBufIsToBeDeleted ) iegDelete(streamptr->record->exsep);
           break;
         }
 #endif
@@ -1046,10 +1044,8 @@ void streamClose(int streamID)
 
   for ( int index = 0; index < streamptr->ntsteps; ++index )
     {
-      if ( streamptr->tsteps[index].records )
-        Free(streamptr->tsteps[index].records);
-      if ( streamptr->tsteps[index].recIDs )
-        Free(streamptr->tsteps[index].recIDs);
+      if ( streamptr->tsteps[index].records ) Free(streamptr->tsteps[index].records);
+      if ( streamptr->tsteps[index].recIDs  ) Free(streamptr->tsteps[index].recIDs);
       taxisDestroyKernel(&streamptr->tsteps[index].taxis);
     }
 
@@ -1059,11 +1055,8 @@ void streamClose(int streamID)
 
   if ( vlistID != -1 )
     {
-      if ( streamptr->filemode != 'w' )
-	if ( vlistInqTaxis(vlistID) != -1 )
-	  {
-	    taxisDestroy(vlistInqTaxis(vlistID));
-	  }
+      if ( streamptr->filemode != 'w' && vlistInqTaxis(vlistID) != -1 )
+        taxisDestroy(vlistInqTaxis(vlistID));
 
       cdiVlistDestroy_(vlistID);
     }
@@ -1077,7 +1070,7 @@ void stream_delete_entry(stream_t *streamptr)
   xassert ( streamptr );
 
   int idx = streamptr->self;
-  Free( streamptr );
+  Free(streamptr);
   reshRemove ( idx, &streamOps );
 
   if ( CDI_Debug )
@@ -1092,12 +1085,9 @@ void cdiStreamSync_(stream_t *streamptr)
   int vlistID  = streamptr->vlistID;
   int nvars    = vlistNvars(vlistID);
 
-  if ( fileID == CDI_UNDEFID )
-    Warning("File %s not open!", streamptr->filename);
-  else if ( vlistID == CDI_UNDEFID )
-    Warning("Vlist undefined for file %s!", streamptr->filename);
-  else if ( nvars == 0 )
-    Warning("No variables defined!");
+  if      ( fileID == CDI_UNDEFID )  Warning("File %s not open!", streamptr->filename);
+  else if ( vlistID == CDI_UNDEFID ) Warning("Vlist undefined for file %s!", streamptr->filename);
+  else if ( nvars == 0 )             Warning("No variables defined!");
   else
     {
       if ( streamptr->filemode == 'w' || streamptr->filemode == 'a' )
@@ -1154,8 +1144,7 @@ int cdiStreamDefTimestep_(stream_t *streamptr, int tsID)
 
   stream_check_ptr(__func__, streamptr);
 
-  if ( CDI_Debug )
-    Message("streamID = %d  tsID = %d", streamptr->self, tsID);
+  if ( CDI_Debug ) Message("streamID = %d  tsID = %d", streamptr->self, tsID);
 
   int vlistID = streamptr->vlistID;
 
@@ -1239,7 +1228,6 @@ int streamInqCurTimestepID(int streamID)
   stream_t *streamptr = stream_to_pointer(streamID);
   return streamptr->curTsID;
 }
-
 
 /*
 @Function  streamInqTimestep
@@ -1445,7 +1433,6 @@ void streamWriteContents(int streamID, char *cname)
 off_t streamNvals(int streamID)
 {
   stream_t *streamptr = stream_to_pointer(streamID);
-
   return streamptr->numvals;
 }
 
@@ -1673,7 +1660,7 @@ static int streamCompareP(void * streamptr1, void * streamptr2)
 
 void streamDestroyP ( void * streamptr )
 {
-  stream_t * sp = ( stream_t * ) streamptr;
+  stream_t *sp = ( stream_t * ) streamptr;
 
   xassert ( sp );
 
