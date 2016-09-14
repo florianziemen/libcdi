@@ -1604,8 +1604,6 @@ void cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int ncvarid, int zax
       sname_v[] = "atmosphere_hybrid_sigma_pressure_coordinate",
       lname[] = "long_name",
       lname_v[] = "hybrid sigma pressure coordinate",
-      fterms[] = "formula_terms",
-      fterms_v[] = "ap: ap b: b ps: ",
       units[] = "units",
       units_v[] = "1",
       axis[] = "axis",
@@ -1615,7 +1613,6 @@ void cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int ncvarid, int zax
     struct attTxtTab2 tab[] = {
       { sname, sname_v, sizeof (sname_v) - 1 },
       { lname, lname_v, sizeof (lname_v) - 1 },
-      { fterms, fterms_v, sizeof (fterms_v) - 1 },
       { units, units_v, sizeof (units_v) - 1 },
       { axis, axis_v, sizeof (axis_v) - 1 },
       { direction, direction_v, sizeof (direction_v) - 1 },
@@ -1623,6 +1620,11 @@ void cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int ncvarid, int zax
     enum { nAtt = sizeof (tab) / sizeof (tab[0]) };
     for ( size_t i = 0; i < nAtt; ++i )
       cdf_put_att_text(fileID, ncvarid, tab[i].attName, tab[i].valLen, tab[i].attVal);
+  }
+  {
+    char txt[CDI_MAX_NAME];
+    size_t len = (size_t)(sprintf(txt, "%s%s", "ap: ap b: b ps: ", psname));
+    cdf_put_att_text(fileID, ncvarid, "formula_terms", len, txt);
   }
 
   int ncbvarid = UNDEFID;
@@ -1661,9 +1663,12 @@ void cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int ncvarid, int zax
           cdf_put_att_text(fileID, ncvarid, "bounds", axisnameLen, axisname);
           {
             static const char sname[] = "standard_name",
-              sname_v[] = "atmosphere_hybrid_sigma_pressure_coordinate";
+              sname_v[] = "atmosphere_hybrid_sigma_pressure_coordinate",
+              units[] = "units",
+              units_v[] = "1";
             struct attTxtTab2 tab[] = {
               { sname, sname_v, sizeof (sname_v) - 1 },
+              { units, units_v, sizeof (units_v) - 1 },
             };
             enum { nAtt = sizeof (tab) / sizeof (tab[0]) };
             for ( size_t i = 0; i < nAtt; ++i )
@@ -1673,10 +1678,6 @@ void cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int ncvarid, int zax
             char txt[CDI_MAX_NAME];
             size_t len = (size_t)(sprintf(txt, "%s%s", "ap: ap_bnds b: b_bnds ps: ", psname));
             cdf_put_att_text(fileID, ncbvarid, "formula_terms", len, txt);
-          }
-          {
-            static const char units[] = "1";
-            cdf_put_att_text(fileID, ncbvarid, "units", sizeof (units) - 1, units);
           }
         }
     }
