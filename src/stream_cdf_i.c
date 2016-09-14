@@ -2705,7 +2705,6 @@ static
 void cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars,
                           size_t vctsize_echam, double *vct_echam, unsigned char *uuidOfVGrid)
 {
-  int psvarid = -1;
   char *pname, *plongname, *punits;
   size_t vctsize = vctsize_echam;
   double *vct = vct_echam;
@@ -2720,6 +2719,7 @@ void cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 	  int zdimid = UNDEFID;
 	  int zvarid = UNDEFID;
 	  int zsize = 1;
+          int psvarid = -1;
 	  double *lbounds = NULL;
 	  double *ubounds = NULL;
 
@@ -2769,7 +2769,6 @@ void cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 		if ( pname[len-2] == '_' && isdigit((int) pname[len-1]) )
 		  pname[len-2] = 0;
 	      */
-              psvarid = -1;
               if ( zaxisType == ZAXIS_HYBRID && ncvars[zvarid].vct )
                 {
                   vct = ncvars[zvarid].vct;
