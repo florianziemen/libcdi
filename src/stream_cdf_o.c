@@ -1586,9 +1586,8 @@ void cdf_def_zaxis_hybrid_echam(stream_t *streamptr, int type, int ncvarid, int 
 static
 void cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int ncvarid, int zaxisID, int zaxisindex, int xtype, size_t dimlen, int *dimID, char *axisname)
 {
-  char psname[CDI_MAX_NAME];
-  psname[0] = 0;
-  zaxisInqPsName(zaxisID, psname);
+  char psname[CDI_MAX_NAME]; psname[0] = 0;
+  cdiZaxisInqKeyStr(zaxisID, CDI_KEY_PSNAME, CDI_MAX_NAME, psname);
   if ( psname[0] == 0 ) strcpy(psname, "ps");
 
   int fileID = streamptr->fileID;

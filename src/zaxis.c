@@ -355,17 +355,19 @@ void zaxisName(int zaxistype, char *zaxisname)
 static inline
 void zaxisSetString(char *zaxisstrname, const char *name, size_t len)
 {
-  if ( len >= CDI_MAX_NAME ) len = CDI_MAX_NAME-1;
+  if ( len > CDI_MAX_NAME ) len = CDI_MAX_NAME;
   strncpy(zaxisstrname, name, len);
-  zaxisstrname[len] = 0;
+  zaxisstrname[len-1] = 0;
 }
 
 static inline
 void zaxisGetString(char *name, const char *zaxisstrname, size_t len)
 {
-  if ( len >= CDI_MAX_NAME ) len = CDI_MAX_NAME-1;
-  strncpy(name, zaxisstrname, len);
-  name[len] = 0;
+  size_t slen = strlen(zaxisstrname)+1;
+  if ( slen > len ) slen = len;
+  if ( slen > CDI_MAX_NAME ) slen = CDI_MAX_NAME;
+  strncpy(name, zaxisstrname, slen);
+  name[slen-1] = 0;
 }
 
 static
@@ -603,13 +605,6 @@ void zaxisInqStdname(int zaxisID, char *stdname)
 {
   zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
   strcpy(stdname, zaxisptr->stdname);
-}
-
-
-void zaxisInqPsName(int zaxisID, char *psname)
-{
-  zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
-  strcpy(psname, zaxisptr->psname);
 }
 
 

@@ -2841,7 +2841,7 @@ void cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
             }
 
           if ( zaxisType == ZAXIS_HYBRID && psvarid != -1 )
-            cdiZaxisDefKeyStr(ncvar->zaxisID, CDI_KEY_PSNAME, strlen(ncvars[psvarid].name), ncvars[psvarid].name);
+            cdiZaxisDefKeyStr(ncvar->zaxisID, CDI_KEY_PSNAME, strlen(ncvars[psvarid].name)+1, ncvars[psvarid].name);
 
           if ( positive > 0 ) zaxisDefPositive(ncvar->zaxisID, positive);
           if ( is_scalar ) zaxisDefScalar(ncvar->zaxisID);

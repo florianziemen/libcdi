@@ -1013,9 +1013,6 @@ void    zaxisInqUnits(int zaxisID, char *units);
 /*      zaxisInqStdname: Get the standard name of a Z-axis */
 void    zaxisInqStdname(int zaxisID, char *stdname);
 
-/*      zaxisInqPsName: Get the name of the surface pressure variable of a hybrid sigma pressure Z-axis */
-void    zaxisInqPsName(int zaxisID, char *psname);
-
 void    zaxisDefPrec(int zaxisID, int prec);
 int     zaxisInqPrec(int zaxisID);
 
