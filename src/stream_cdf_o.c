@@ -46,33 +46,6 @@ void cdfCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
   Free(data);
 }
 
-/* not used
-int cdfInqRecord(stream_t *streamptr, int *varID, int *levelID)
-{
-  int tsID, recID;
-
-  recID = streamptr->tsteps[0].curRecID++;
-  printf("cdfInqRecord recID %d %d\n", recID, streamptr->tsteps[0].curRecID);
-  printf("cdfInqRecord tsID %d\n", streamptr->curTsID);
-
-  if ( streamptr->tsteps[0].curRecID >= streamptr->tsteps[0].nrecs )
-    {
-      streamptr->tsteps[0].curRecID = 0;
-    }
-
-  *varID   = streamptr->tsteps[0].records[recID].varID;
-  *levelID = streamptr->tsteps[0].records[recID].levelID;
-
-  streamptr->record->varID   = *varID;
-  streamptr->record->levelID = *levelID;
-
-  if ( CDI_Debug )
-    Message("recID = %d  varID = %d  levelID = %d", recID, *varID, *levelID);
-
-  return (recID+1);
-}
-*/
-
 
 void cdfDefRecord(stream_t *streamptr)
 {
@@ -241,8 +214,8 @@ void cdfDefCalendar(int fileID, int ncvarid, int calendar)
   };
   enum { calTabSize = sizeof calTab / sizeof calTab[0] };
 
-  for (size_t i = 0; i < calTabSize; ++i)
-    if (calTab[i].calCode == calendar)
+  for ( size_t i = 0; i < calTabSize; ++i )
+    if ( calTab[i].calCode == calendar )
       {
         const char *calstr = calTab[i].calStr;
         size_t len = strlen(calstr);
@@ -397,13 +370,13 @@ static void
 cdfDefSPorFC(stream_t *streamptr, int gridID, int gridindex,
              char *restrict axisname, int gridRefType)
 {
-  int index, iz = 0;
+  int iz = 0;
   int dimID = UNDEFID;
   ncgrid_t *ncgrid = streamptr->ncgrid;
 
   size_t dimlen = (size_t)gridInqSize(gridID)/2;
 
-  for ( index = 0; index < gridindex; index++ )
+  for ( int index = 0; index < gridindex; index++ )
     {
       if ( ncgrid[index].ydimID != UNDEFID )
         {
@@ -1142,11 +1115,8 @@ void cdfDefGridReference(stream_t *streamptr, int gridID)
 {
   int fileID  = streamptr->fileID;
   int number = gridInqNumber(gridID);
-
   if ( number > 0 )
-    {
-      cdf_put_att_int(fileID, NC_GLOBAL, "number_of_grid_used", NC_INT, 1, &number);
-    }
+    cdf_put_att_int(fileID, NC_GLOBAL, "number_of_grid_used", NC_INT, 1, &number);
 
   const char *gridfile = gridInqReferencePtr(gridID);
   if ( gridfile && gridfile[0] != 0 )
@@ -1354,16 +1324,11 @@ void cdf_def_vct_echam(stream_t *streamptr, int zaxisID)
       if ( ilev == 0 ) return;
 
       int mlev = ilev - 1;
-      size_t start;
-      size_t count = 1;
-      int ncdimid, ncdimid2;
-      int hyaiid, hybiid, hyamid, hybmid;
-      double mval;
 
       if ( streamptr->vct.ilev > 0 )
         {
           if ( streamptr->vct.ilev != ilev )
-            Error("more than one VCT for each file unsupported!");
+            Error("More than one VCT for each file unsupported!");
           return;
         }
 
@@ -1371,6 +1336,7 @@ void cdf_def_vct_echam(stream_t *streamptr, int zaxisID)
 
       if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
+      int ncdimid, ncdimid2;
       cdf_def_dim(fileID, "nhym", (size_t)mlev, &ncdimid);
       cdf_def_dim(fileID, "nhyi", (size_t)ilev, &ncdimid2);
 
@@ -1379,6 +1345,7 @@ void cdf_def_vct_echam(stream_t *streamptr, int zaxisID)
       streamptr->vct.mlevID = ncdimid;
       streamptr->vct.ilevID = ncdimid2;
 
+      int hyaiid, hybiid, hyamid, hybmid;
       cdf_def_var(fileID, "hyai", NC_DOUBLE, 1, &ncdimid2, &hyaiid);
       cdf_def_var(fileID, "hybi", NC_DOUBLE, 1, &ncdimid2, &hybiid);
       cdf_def_var(fileID, "hyam", NC_DOUBLE, 1, &ncdimid,  &hyamid);
@@ -1421,6 +1388,9 @@ void cdf_def_vct_echam(stream_t *streamptr, int zaxisID)
       cdf_put_var_double(fileID, hyaiid, vctptr);
       cdf_put_var_double(fileID, hybiid, vctptr+ilev);
 
+      size_t start;
+      size_t count = 1;
+      double mval;
       for ( int i = 0; i < mlev; i++ )
         {
           start = (size_t)i;
@@ -1545,7 +1515,7 @@ struct attTxtTab { const char *txt; size_t txtLen; };
 static
 void cdf_def_zaxis_hybrid_echam(stream_t *streamptr, int type, int ncvarid, int zaxisID, int zaxisindex, int xtype, size_t dimlen, int *dimID, char *axisname)
 {
-  int fileID  = streamptr->fileID;
+  int fileID = streamptr->fileID;
 
   if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
@@ -1634,8 +1604,6 @@ void cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int ncvarid, int zax
       sname_v[] = "atmosphere_hybrid_sigma_pressure_coordinate",
       lname[] = "long_name",
       lname_v[] = "hybrid sigma pressure coordinate",
-      formula[] = "formula",
-      formula_v[] = "p = ap + b*ps",
       fterms[] = "formula_terms",
       fterms_v[] = "ap: ap b: b ps: ",
       units[] = "units",
@@ -1647,14 +1615,13 @@ void cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int ncvarid, int zax
     struct attTxtTab2 tab[] = {
       { sname, sname_v, sizeof (sname_v) - 1 },
       { lname, lname_v, sizeof (lname_v) - 1 },
-      { formula, formula_v, sizeof (formula_v) - 1 },
       { fterms, fterms_v, sizeof (fterms_v) - 1 },
       { units, units_v, sizeof (units_v) - 1 },
       { axis, axis_v, sizeof (axis_v) - 1 },
       { direction, direction_v, sizeof (direction_v) - 1 },
     };
     enum { nAtt = sizeof (tab) / sizeof (tab[0]) };
-    for (size_t i = 0; i < nAtt; ++i)
+    for ( size_t i = 0; i < nAtt; ++i )
       cdf_put_att_text(fileID, ncvarid, tab[i].attName, tab[i].valLen, tab[i].attVal);
   }
 
@@ -1694,15 +1661,12 @@ void cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int ncvarid, int zax
           cdf_put_att_text(fileID, ncvarid, "bounds", axisnameLen, axisname);
           {
             static const char sname[] = "standard_name",
-              sname_v[] = "atmosphere_hybrid_sigma_pressure_coordinate",
-              formula[] = "formula",
-              formula_v[] = "p = ap + b*ps";
+              sname_v[] = "atmosphere_hybrid_sigma_pressure_coordinate";
             struct attTxtTab2 tab[] = {
               { sname, sname_v, sizeof (sname_v) - 1 },
-              { formula, formula_v, sizeof (formula_v) - 1 },
             };
             enum { nAtt = sizeof (tab) / sizeof (tab[0]) };
-            for (size_t i = 0; i < nAtt; ++i)
+            for ( size_t i = 0; i < nAtt; ++i )
               cdf_put_att_text(fileID, ncbvarid, tab[i].attName, tab[i].valLen, tab[i].attVal);
           }
           {
