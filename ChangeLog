@@ -1,3 +1,7 @@
+2016-09-15  Uwe Schulzweida
+
+	* zaxis: added support for user defined attributes
+
 2016-08-29  Uwe Schulzweida
 
 	* CDI_cmor_mode: Convert Zaxis with one level to Scalar Z-Coordinate on all input streams

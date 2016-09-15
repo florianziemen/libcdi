@@ -1513,14 +1513,16 @@ void cdf_def_vct_cf(stream_t *streamptr, int zaxisID, int nclevID, int ncbndsID)
 struct attTxtTab { const char *txt; size_t txtLen; };
 
 static
-void cdf_def_zaxis_hybrid_echam(stream_t *streamptr, int type, int ncvarid, int zaxisID, int zaxisindex, int xtype, size_t dimlen, int *dimID, char *axisname)
+void cdf_def_zaxis_hybrid_echam(stream_t *streamptr, int type, int *ncvaridp, int zaxisID, int zaxisindex, int xtype, size_t dimlen, int *dimID, char *axisname)
 {
   int fileID = streamptr->fileID;
 
   if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
+  int ncvarid;
   cdf_def_dim(fileID, axisname, dimlen, dimID);
   cdf_def_var(fileID, axisname, (nc_type) xtype, 1, dimID,  &ncvarid);
+  *ncvaridp = ncvarid;
 
   {
     static const char sname[] = "hybrid_sigma_pressure";
@@ -1584,7 +1586,7 @@ void cdf_def_zaxis_hybrid_echam(stream_t *streamptr, int type, int ncvarid, int 
 }
 
 static
-void cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int ncvarid, int zaxisID, int zaxisindex, int xtype, size_t dimlen, int *dimID, char *axisname)
+void cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int *ncvaridp, int zaxisID, int zaxisindex, int xtype, size_t dimlen, int *dimID, char *axisname)
 {
   char psname[CDI_MAX_NAME]; psname[0] = 0;
   cdiZaxisInqKeyStr(zaxisID, CDI_KEY_PSNAME, CDI_MAX_NAME, psname);
@@ -1595,8 +1597,10 @@ void cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int ncvarid, int zax
 
   strcpy(axisname, "lev");
 
+  int ncvarid;
   cdf_def_dim(fileID, axisname, dimlen, dimID);
   cdf_def_var(fileID, axisname, (nc_type) xtype, 1, dimID,  &ncvarid);
+  *ncvaridp = ncvarid;
 
   {
     static const char sname[] = "standard_name",
@@ -1709,7 +1713,7 @@ void cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int ncvarid, int zax
 }
 
 static
-void cdf_def_zaxis_hybrid(stream_t *streamptr, int type, int ncvarid, int zaxisID, int zaxisindex, int xtype, size_t dimlen, int *dimID, char *axisname)
+void cdf_def_zaxis_hybrid(stream_t *streamptr, int type, int *ncvarid, int zaxisID, int zaxisindex, int xtype, size_t dimlen, int *dimID, char *axisname)
 {
   if ( (!CDI_cmor_mode && cdiConvention == CDI_CONVENTION_ECHAM) || type == ZAXIS_HYBRID_HALF )
     cdf_def_zaxis_hybrid_echam(streamptr, type, ncvarid, zaxisID, zaxisindex, xtype, dimlen, dimID, axisname);
@@ -1788,7 +1792,7 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
 
       if ( type == ZAXIS_HYBRID || type == ZAXIS_HYBRID_HALF )
         {
-          cdf_def_zaxis_hybrid(streamptr, type, ncvarid, zaxisID, zaxisindex, xtype, dimlen, &dimID, axisname);
+          cdf_def_zaxis_hybrid(streamptr, type, &ncvarid, zaxisID, zaxisindex, xtype, dimlen, &dimID, axisname);
         }
       else
         {
@@ -1805,7 +1809,7 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
           {
             int positive = zaxisInqPositive(zaxisID);
             static const char positive_up[] = "up",
-              positive_down[] = "down";
+                              positive_down[] = "down";
             static const struct attTxtTab tab[2] = {
               { positive_up, sizeof (positive_up) - 1 },
               { positive_down, sizeof (positive_down) - 1 },
@@ -1813,8 +1817,7 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
             if ( positive == POSITIVE_UP || positive == POSITIVE_DOWN )
               {
                 size_t select = positive == POSITIVE_DOWN;
-                cdf_put_att_text(fileID, ncvarid, "positive",
-                                 tab[select].txtLen, tab[select].txt);
+                cdf_put_att_text(fileID, ncvarid, "positive", tab[select].txtLen, tab[select].txt);
               }
           }
           cdf_put_att_text(fileID, ncvarid, "axis", 1, "Z");
@@ -1858,6 +1861,17 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
 
           if ( ndims == 0 ) streamptr->nczvarID[zaxisindex] = ncvarid;
         }
+
+      {
+        int natts;
+        cdiInqNatts(zaxisID, CDI_GLOBAL, &natts);
+
+        if ( natts > 0 && streamptr->ncmode == 2 ) cdf_redef(fileID);
+
+        cdfDefineAttributes(zaxisID, CDI_GLOBAL, fileID, ncvarid);
+
+        if ( natts > 0 && streamptr->ncmode == 2 ) cdf_enddef(fileID);
+      }
     }
 
   if ( dimID != UNDEFID )

@@ -64,35 +64,6 @@ enum {
 };
 
 
-typedef struct {
-  char     dimname[CDI_MAX_NAME];
-  char     vdimname[CDI_MAX_NAME];
-  char     name[CDI_MAX_NAME];
-  char     longname[CDI_MAX_NAME];
-  char     stdname[CDI_MAX_NAME];
-  char     units[CDI_MAX_NAME];
-  char     psname[CDI_MAX_NAME];
-  double  *vals;
-  double  *lbounds;
-  double  *ubounds;
-  double  *weights;
-  int      self;
-  int      prec;
-  int      scalar;
-  int      type;
-  int      ltype;    /* GRIB level type */
-  int      ltype2;
-  int      size;
-  int      direction;
-  int      vctsize;
-  unsigned positive;
-  double  *vct;
-  int      number;   /* Reference number to a generalized Z-axis */
-  int      nhlev;
-  unsigned char uuid[CDI_UUID_SIZE];
-}
-zaxis_t;
-
 static int    zaxisCompareP    (zaxis_t *z1, zaxis_t *z2);
 static void   zaxisDestroyP    ( void * zaxisptr );
 static void   zaxisPrintP      ( void * zaxisptr, FILE * fp );
@@ -139,31 +110,33 @@ void zaxisGetTypeDescription(int zaxisType, int* outPositive, const char** outNa
 static
 void zaxisDefaultValue(zaxis_t *zaxisptr)
 {
-  zaxisptr->self        = CDI_UNDEFID;
-  zaxisptr->name[0]     = 0;
-  zaxisptr->longname[0] = 0;
-  zaxisptr->stdname[0]  = 0;
-  zaxisptr->dimname[0]  = 0;
-  zaxisptr->vdimname[0] = 0;
-  zaxisptr->units[0]    = 0;
-  zaxisptr->psname[0]   = 0;
-  zaxisptr->vals        = NULL;
-  zaxisptr->ubounds     = NULL;
-  zaxisptr->lbounds     = NULL;
-  zaxisptr->weights     = NULL;
-  zaxisptr->type        = CDI_UNDEFID;
-  zaxisptr->ltype       = 0;
-  zaxisptr->ltype2      = -1;
-  zaxisptr->positive    = 0;
-  zaxisptr->scalar      = 0;
-  zaxisptr->direction   = 0;
-  zaxisptr->prec        = 0;
-  zaxisptr->size        = 0;
-  zaxisptr->vctsize     = 0;
-  zaxisptr->vct         = NULL;
-  zaxisptr->number      = 0;
-  zaxisptr->nhlev       = 0;
+  zaxisptr->self          = CDI_UNDEFID;
+  zaxisptr->name[0]       = 0;
+  zaxisptr->longname[0]   = 0;
+  zaxisptr->stdname[0]    = 0;
+  zaxisptr->dimname[0]    = 0;
+  zaxisptr->vdimname[0]   = 0;
+  zaxisptr->units[0]      = 0;
+  zaxisptr->psname[0]     = 0;
+  zaxisptr->vals          = NULL;
+  zaxisptr->ubounds       = NULL;
+  zaxisptr->lbounds       = NULL;
+  zaxisptr->weights       = NULL;
+  zaxisptr->type          = CDI_UNDEFID;
+  zaxisptr->ltype         = 0;
+  zaxisptr->ltype2        = -1;
+  zaxisptr->positive      = 0;
+  zaxisptr->scalar        = 0;
+  zaxisptr->direction     = 0;
+  zaxisptr->prec          = 0;
+  zaxisptr->size          = 0;
+  zaxisptr->vctsize       = 0;
+  zaxisptr->vct           = NULL;
+  zaxisptr->number        = 0;
+  zaxisptr->nhlev         = 0;
   memset(zaxisptr->uuid, 0, CDI_UUID_SIZE);
+  zaxisptr->atts.nalloc   = MAX_ATTRIBUTES;
+  zaxisptr->atts.nelems   = 0;
 }
 
 
@@ -185,7 +158,7 @@ zaxis_t *zaxisNewEntry(int id)
   return zaxisptr;
 }
 
-static inline
+
 zaxis_t *zaxisID2Ptr(int id)
 {
   return (zaxis_t *)reshGetVal(id, &zaxisOps);

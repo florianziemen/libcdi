@@ -1566,8 +1566,7 @@ void cdf_scan_var_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimi
 	  else
 	    {
 	      if ( ncvars[ncvarid].natts == 0 )
-		ncvars[ncvarid].atts
-                  = (int *) Malloc((size_t)nvatts * sizeof (int));
+		ncvars[ncvarid].atts = (int*) Malloc((size_t)nvatts*sizeof(int));
 
 	      ncvars[ncvarid].atts[ncvars[ncvarid].natts++] = iatt;
 	      /*
@@ -1593,7 +1592,7 @@ void cdf_scan_var_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimi
 		}
 	      else
 		printf("att: %s.%s = unknown\n", ncvars[ncvarid].name, attname);
-	      */
+              */
 	    }
 	}
     }
@@ -2752,7 +2751,7 @@ void cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 
 	  int zaxisType = UNDEFID;
 	  if ( zvarid != UNDEFID ) zaxisType = ncvars[zvarid].zaxistype;
-	  if ( zaxisType == UNDEFID )  zaxisType = ZAXIS_GENERIC;
+	  if ( zaxisType == UNDEFID ) zaxisType = ZAXIS_GENERIC;
 
 	  int zprec = DATATYPE_FLT64;
 
@@ -2832,35 +2831,50 @@ void cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
       	  ncvar->zaxisID = varDefZaxis(vlistID, zaxisType, (int) zsize, zvar, with_bounds, lbounds, ubounds,
                                        (int)vctsize, vct, pname, plongname, punits, zprec, 1, 0);
 
-          if ( CDI_cmor_mode && zsize == 1 && zaxisType != ZAXIS_HYBRID ) zaxisDefScalar(ncvar->zaxisID);
+          int zaxisID = ncvar->zaxisID;
+
+          if ( CDI_cmor_mode && zsize == 1 && zaxisType != ZAXIS_HYBRID ) zaxisDefScalar(zaxisID);
 
           if ( uuidOfVGrid[0] != 0 )
             {
               // printf("uuidOfVGrid: defined\n");
-              zaxisDefUUID(ncvar->zaxisID, uuidOfVGrid);
+              zaxisDefUUID(zaxisID, uuidOfVGrid);
             }
 
           if ( zaxisType == ZAXIS_HYBRID && psvarid != -1 )
-            cdiZaxisDefKeyStr(ncvar->zaxisID, CDI_KEY_PSNAME, strlen(ncvars[psvarid].name)+1, ncvars[psvarid].name);
+            cdiZaxisDefKeyStr(zaxisID, CDI_KEY_PSNAME, strlen(ncvars[psvarid].name)+1, ncvars[psvarid].name);
 
-          if ( positive > 0 ) zaxisDefPositive(ncvar->zaxisID, positive);
-          if ( is_scalar ) zaxisDefScalar(ncvar->zaxisID);
+          if ( positive > 0 ) zaxisDefPositive(zaxisID, positive);
+          if ( is_scalar ) zaxisDefScalar(zaxisID);
 
           if ( zdimid != -1 )
-            cdiZaxisDefKeyStr(ncvar->zaxisID, CDI_KEY_DIMNAME, (int)(strlen(ncdims[zdimid].name)+1), ncdims[zdimid].name);
+            cdiZaxisDefKeyStr(zaxisID, CDI_KEY_DIMNAME, (int)(strlen(ncdims[zdimid].name)+1), ncdims[zdimid].name);
           /*
           if ( vdimid != -1 )
-            cdiZaxisDefKeyStr(ncvar->zaxisID, CDI_KEY_VDIMNAME, strlen(ncdims[vdimid].name)+1, ncdims[vdimid].name);
+            cdiZaxisDefKeyStr(zaxisID, CDI_KEY_VDIMNAME, strlen(ncdims[vdimid].name)+1, ncdims[vdimid].name);
           */
 	  Free(zvar);
 	  Free(lbounds);
 	  Free(ubounds);
 
-	  int zaxisindex = vlistZaxisIndex(vlistID, ncvar->zaxisID);
+          if ( zvarid != UNDEFID )
+            {
+              int ncid = ncvars[zvarid].ncid;
+              int nvatts = ncvars[zvarid].natts;
+              printf("nvarid %d name %s nvatts %d\n", zvarid, ncvars[zvarid].name, nvatts);
+              for ( int iatt = 0; iatt < nvatts; ++iatt )
+                {
+                  int attnum = ncvars[zvarid].atts[iatt];
+                  printf("attnum %d\n", attnum);
+                  cdf_set_cdi_attr(ncid, zvarid, attnum, zaxisID, CDI_GLOBAL);
+                }
+            }
+
+          int zaxisindex = vlistZaxisIndex(vlistID, zaxisID);
 	  streamptr->zaxisID[zaxisindex] = zdimid;
 
 	  if ( CDI_Debug )
-	    Message("zaxisID %d %d %s", ncvar->zaxisID, ncvarid, ncvar->name);
+	    Message("zaxisID %d %d %s", zaxisID, ncvarid, ncvar->name);
 
 	  for ( int ncvarid2 = ncvarid+1; ncvarid2 < nvars; ncvarid2++ )
 	    if ( ncvars[ncvarid2].isvar == TRUE && ncvars[ncvarid2].zaxisID == UNDEFID /*&& ncvars[ncvarid2].zaxistype == UNDEFID*/ )
@@ -2885,8 +2899,8 @@ void cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
                          (zdimid == UNDEFID && zvarid2 == UNDEFID && ncvars[ncvarid2].zaxistype == UNDEFID) )
                       {
                         if ( CDI_Debug )
-                          Message("zaxisID %d %d %s", ncvar->zaxisID, ncvarid2, ncvars[ncvarid2].name);
-                        ncvars[ncvarid2].zaxisID = ncvar->zaxisID;
+                          Message("zaxisID %d %d %s", zaxisID, ncvarid2, ncvars[ncvarid2].name);
+                        ncvars[ncvarid2].zaxisID = zaxisID;
                       }
                   }
 	      }
@@ -3230,9 +3244,7 @@ void cdf_scan_global_attr(int fileID, int vlistID, stream_t *streamptr, int ngat
 	      else
 		{
                   if ( strcmp(attname, "ICON_grid_file_uri") == 0 && gridfile[0] == 0 )
-                    {
-                      memcpy(gridfile, attstring, attstrlen+1);
-                    }
+                    memcpy(gridfile, attstring, attstrlen+1);
 
 		  cdiDefAttTxt(vlistID, CDI_GLOBAL, attname, (int)attstrlen, attstring);
 		}

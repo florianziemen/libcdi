@@ -16,6 +16,7 @@
 #include "error.h"
 #include "serialize.h"
 #include "grid.h"
+#include "zaxis.h"
 #include "resource_unpack.h"
 
 
@@ -106,6 +107,11 @@ cdi_atts_t *cdi_get_attsp(int objID, int varID)
     {
       grid_t *gridptr = gridID2Ptr(objID);
       attsp = &gridptr->atts;
+    }
+  else if ( varID == CDI_GLOBAL && reshGetTxCode(objID) == ZAXIS )
+    {
+      zaxis_t *zaxisptr = zaxisID2Ptr(objID);
+      attsp = &zaxisptr->atts;
     }
   else
     {
