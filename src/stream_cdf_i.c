@@ -2861,11 +2861,9 @@ void cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
             {
               int ncid = ncvars[zvarid].ncid;
               int nvatts = ncvars[zvarid].natts;
-              printf("nvarid %d name %s nvatts %d\n", zvarid, ncvars[zvarid].name, nvatts);
               for ( int iatt = 0; iatt < nvatts; ++iatt )
                 {
                   int attnum = ncvars[zvarid].atts[iatt];
-                  printf("attnum %d\n", attnum);
                   cdf_set_cdi_attr(ncid, zvarid, attnum, zaxisID, CDI_GLOBAL);
                 }
             }
