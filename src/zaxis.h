@@ -1,6 +1,8 @@
 #ifndef _ZAXIS_H
 #define _ZAXIS_H
 
+#include "cdi_att.h"
+
 typedef struct {
   char     dimname[CDI_MAX_NAME];
   char     vdimname[CDI_MAX_NAME];
