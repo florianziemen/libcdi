@@ -51,6 +51,7 @@ typedef struct {
   bool     islev;
   bool     istime;
   bool     warn;
+  bool     calendar;
   bool     climatology;
   bool     lformulaterms;
   int      tsteptype;
@@ -76,7 +77,6 @@ typedef struct {
   int      nauxvars;
   int      auxvarids[MAX_AUXVARS];
   int      cellarea;
-  int      calendar;
   int      tableID;
   int      truncation;
   int      position;
@@ -640,13 +640,13 @@ void init_ncvars(long nvars, ncvar_t *ncvars)
       ncvars[ncvarid].islev           = false;
       ncvars[ncvarid].istime          = false;
       ncvars[ncvarid].warn            = false;
+      ncvars[ncvarid].calendar        = false;
       ncvars[ncvarid].climatology     = false;
       ncvars[ncvarid].lformulaterms   = false;
       ncvars[ncvarid].tsteptype       = TSTEP_CONSTANT;
       ncvars[ncvarid].param           = UNDEFID;
       ncvars[ncvarid].code            = UNDEFID;
       ncvars[ncvarid].tabnum          = 0;
-      ncvars[ncvarid].calendar        = FALSE;
       ncvars[ncvarid].bounds          = UNDEFID;
       ncvars[ncvarid].gridID          = UNDEFID;
       ncvars[ncvarid].zaxisID         = UNDEFID;
@@ -1163,7 +1163,7 @@ void cdf_scan_var_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimi
             }
           else if ( strcmp(attname, "calendar") == 0 )
             {
-              ncvars[ncvarid].calendar = TRUE;
+              ncvars[ncvarid].calendar = true;
             }
           else if ( isText && strcmp(attname, "param") == 0 )
             {
@@ -3518,7 +3518,6 @@ int cdfInqContents(stream_t *streamptr)
   int nvars_data;
   int instID  = UNDEFID;
   int modelID = UNDEFID;
-  int taxisID;
   int calendar = UNDEFID;
   int format = 0;
   bool ucla_les = false;
@@ -3815,7 +3814,7 @@ int cdfInqContents(stream_t *streamptr)
     }
 
   if ( nctimevarid != UNDEFID )
-    if ( ncvars[nctimevarid].calendar == TRUE )
+    if ( ncvars[nctimevarid].calendar == true )
       {
         char attstring[1024];
 	cdfGetAttText(fileID, nctimevarid, "calendar", sizeof(attstring), attstring);
@@ -3823,6 +3822,7 @@ int cdfInqContents(stream_t *streamptr)
         set_calendar(attstring, &calendar);
       }
 
+  int taxisID;
   if ( streamptr->tsteps[0].taxis.type == TAXIS_FORECAST )
     {
       taxisID = taxisCreate(TAXIS_FORECAST);
