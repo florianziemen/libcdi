@@ -2780,20 +2780,10 @@ void cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 	      plongname = NULL;
 	      punits    = NULL;
 
-	      if ( zsize == 1 )
+	      if ( zsize == 1 && zdimid == UNDEFID )
 		{
-                  if ( ncvar->zaxistype != UNDEFID )
-                    zaxisType = ncvar->zaxistype;
-                  else
-                    zaxisType = ZAXIS_SURFACE;
-
+                  zaxisType = (ncvar->zaxistype != UNDEFID) ? ncvar->zaxistype : ZAXIS_SURFACE;
 		  zvar[0] = 0;
-		  /*
-		  if ( zdimid == UNDEFID )
-		    zvar[0] = 9999;
-		  else
-		    zvar[0] = 0;
-		  */
 		}
 	      else
 		{

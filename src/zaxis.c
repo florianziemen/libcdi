@@ -692,7 +692,7 @@ void zaxisDefLevels(int zaxisID, const double *levels)
   int size = zaxisptr->size;
   double *vals = zaxisptr->vals;
 
-  for (int ilev = 0; ilev < size; ilev++ )
+  for ( int ilev = 0; ilev < size; ilev++ )
     vals[ilev] = levels[ilev];
 
   reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
@@ -845,34 +845,35 @@ The function @func{zaxisInqLevel} returns one level of a Z-axis.
 */
 double zaxisInqLevel(int zaxisID, int levelID)
 {
-  double level = 0;
+  double level = levelID;
   zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
 
-  if ( levelID >= 0 && levelID < zaxisptr->size )
+  if ( zaxisptr->vals && levelID >= 0 && levelID < zaxisptr->size )
     level = zaxisptr->vals[levelID];
 
   return level;
 }
 
-double zaxisInqLbound(int zaxisID, int index)
+double zaxisInqLbound(int zaxisID, int levelID)
 {
-  double level = 0;
+  double level = levelID;
   zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
 
-  if ( zaxisptr->lbounds && ( index >= 0 && index < zaxisptr->size ) )
-      level = zaxisptr->lbounds[index];
+  if ( zaxisptr->lbounds && levelID >= 0 && levelID < zaxisptr->size )
+    level = zaxisptr->lbounds[levelID];
 
   return level;
 }
 
 
-double zaxisInqUbound(int zaxisID, int index)
+double zaxisInqUbound(int zaxisID, int levelID)
 {
-  double level = 0;
+  double level = levelID;
   zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
 
-  if ( zaxisptr->ubounds && ( index >= 0 && index < zaxisptr->size ) )
-    level = zaxisptr->ubounds[index];
+  if ( zaxisptr->ubounds && levelID >= 0 && levelID < zaxisptr->size )
+    level = zaxisptr->ubounds[levelID];
+
   return level;
 }
 
@@ -904,8 +905,8 @@ void zaxisInqLevels(int zaxisID, double *levels)
 {
   zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
   int size = zaxisptr->size;
-  for (int i = 0; i < size; i++ )
-    levels[i] =  zaxisptr->vals[i];
+  for ( int i = 0; i < size; i++ )
+    levels[i] = zaxisptr->vals[i];
 }
 
 
@@ -919,8 +920,8 @@ int zaxisInqLbounds(int zaxisID, double *lbounds)
       size = zaxisptr->size;
 
       if ( lbounds )
-        for (int i = 0; i < size; i++ )
-          lbounds[i] =  zaxisptr->lbounds[i];
+        for ( int i = 0; i < size; i++ )
+          lbounds[i] = zaxisptr->lbounds[i];
     }
 
   return size;
@@ -937,8 +938,8 @@ int zaxisInqUbounds(int zaxisID, double *ubounds)
       size = zaxisptr->size;
 
       if ( ubounds )
-        for (int i = 0; i < size; i++ )
-          ubounds[i] =  zaxisptr->ubounds[i];
+        for ( int i = 0; i < size; i++ )
+          ubounds[i] = zaxisptr->ubounds[i];
     }
 
   return size;
@@ -956,7 +957,7 @@ int zaxisInqWeights(int zaxisID, double *weights)
 
       if ( weights )
         for ( int i = 0; i < size; i++ )
-          weights[i] =  zaxisptr->weights[i];
+          weights[i] = zaxisptr->weights[i];
     }
 
   return size;
@@ -968,13 +969,16 @@ int zaxisInqLevelID(int zaxisID, double level)
   int levelID = CDI_UNDEFID;
   zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
 
-  int size = zaxisptr->size;
-  for ( int i = 0; i < size; i++ )
-    if ( fabs(level-zaxisptr->vals[i]) < DBL_EPSILON )
-      {
-        levelID = i;
-        break;
-      }
+  if ( zaxisptr->vals )
+    {
+      int size = zaxisptr->size;
+      for ( int i = 0; i < size; i++ )
+        if ( fabs(level-zaxisptr->vals[i]) < DBL_EPSILON )
+          {
+            levelID = i;
+            break;
+          }
+    }
 
   return levelID;
 }
@@ -1196,7 +1200,7 @@ int zaxisDuplicate(int zaxisID)
   strcpy(zaxisptrnew->longname, zaxisptr->longname);
   strcpy(zaxisptrnew->units, zaxisptr->units);
 
-  if ( zaxisptr->vals != NULL )
+  if ( zaxisptr->vals )
     {
       size_t size = (size_t)zaxissize;
 
@@ -1220,7 +1224,7 @@ int zaxisDuplicate(int zaxisID)
       memcpy(zaxisptrnew->ubounds, zaxisptr->ubounds, size * sizeof (double));
     }
 
-  if ( zaxisptr->vct != NULL )
+  if ( zaxisptr->vct )
     {
       size_t size = (size_t)zaxisptr->vctsize;
 
@@ -1405,7 +1409,7 @@ int zaxisCompareP(zaxis_t *z1, zaxis_t *z2)
   if (!diff && present)
     {
       const double *p = z1->vals, *q = z2->vals;
-      for (int i = 0; i < size; i++)
+      for ( int i = 0; i < size; i++ )
         diff |= IS_NOT_EQUAL(p[i], q[i]);
     }
 
@@ -1415,7 +1419,7 @@ int zaxisCompareP(zaxis_t *z1, zaxis_t *z2)
   if (!diff && present)
     {
       const double *p = z1->lbounds, *q = z2->lbounds;
-      for (int i = 0; i < size; i++)
+      for ( int i = 0; i < size; i++ )
         diff |= IS_NOT_EQUAL(p[i], q[i]);
     }
 
@@ -1425,7 +1429,7 @@ int zaxisCompareP(zaxis_t *z1, zaxis_t *z2)
   if (!diff && present)
     {
       const double *p = z1->ubounds, *q = z2->ubounds;
-      for (int i = 0; i < size; ++i)
+      for ( int i = 0; i < size; ++i )
         diff |= IS_NOT_EQUAL(p[i], q[i]);
     }
 
@@ -1435,7 +1439,7 @@ int zaxisCompareP(zaxis_t *z1, zaxis_t *z2)
   if (!diff && present)
     {
       const double *p = z1->weights, *q = z2->weights;
-      for (int i = 0; i < size; ++i)
+      for ( int i = 0; i < size; ++i )
         diff |= IS_NOT_EQUAL(p[i], q[i]);
     }
 
@@ -1446,7 +1450,7 @@ int zaxisCompareP(zaxis_t *z1, zaxis_t *z2)
       int vctsize = z1->vctsize;
       xassert(vctsize);
       const double *p = z1->vct, *q = z2->vct;
-      for (int i = 0; i < vctsize; ++i)
+      for ( int i = 0; i < vctsize; ++i )
         diff |= IS_NOT_EQUAL(p[i], q[i]);
     }
 
