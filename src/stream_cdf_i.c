@@ -204,8 +204,8 @@ int setBaseTime(const char *timeunits, taxis_t *taxis)
   int rdate = -1, rtime = -1;
 
   size_t len = strlen(timeunits);
-  char *tu = (char *) Malloc((len+1) * sizeof (char));
-  memcpy(tu, timeunits, (len+1) * sizeof (char));
+  char *tu = (char*) Malloc((len+1) * sizeof(char));
+  memcpy(tu, timeunits, (len+1) * sizeof(char));
   char *ptu = tu;
 
   for ( size_t i = 0; i < len; i++ ) ptu[i] = (char)tolower((int) ptu[i]);
@@ -458,37 +458,10 @@ int cdfInqDatatype(int xtype, bool lunsigned)
 }
 
 
-/* not used
-int cdfInqRecord(stream_t *streamptr, int *varID, int *levelID)
-{
-  int tsID, recID;
-
-  recID = streamptr->tsteps[0].curRecID++;
-  printf("cdfInqRecord recID %d %d\n", recID, streamptr->tsteps[0].curRecID);
-  printf("cdfInqRecord tsID %d\n", streamptr->curTsID);
-
-  if ( streamptr->tsteps[0].curRecID >= streamptr->tsteps[0].nrecs )
-    {
-      streamptr->tsteps[0].curRecID = 0;
-    }
-
-  *varID   = streamptr->tsteps[0].records[recID].varID;
-  *levelID = streamptr->tsteps[0].records[recID].levelID;
-
-  streamptr->record->varID   = *varID;
-  streamptr->record->levelID = *levelID;
-
-  if ( CDI_Debug )
-    Message("recID = %d  varID = %d  levelID = %d", recID, *varID, *levelID);
-
-  return (recID+1);
-}
-*/
-
 void cdf_scale_add(size_t size, double *data, double addoffset, double scalefactor)
 {
-  int laddoffset   = IS_NOT_EQUAL(addoffset, 0);
-  int lscalefactor = IS_NOT_EQUAL(scalefactor, 1);
+  bool laddoffset   = IS_NOT_EQUAL(addoffset, 0);
+  bool lscalefactor = IS_NOT_EQUAL(scalefactor, 1);
 
   if ( laddoffset || lscalefactor )
     {
