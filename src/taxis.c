@@ -551,7 +551,6 @@ The valid CDI time types are TAXIS_ABSOLUTE and TAXIS_RELATIVE.
 int taxisInqType(int taxisID)
 {
   taxis_t *taxisptr = (taxis_t *)reshGetVal(taxisID, &taxisOps);
-
   return taxisptr->type;
 }
 
@@ -559,7 +558,6 @@ int taxisInqType(int taxisID)
 int taxisHasBounds(int taxisID)
 {
   taxis_t *taxisptr = (taxis_t *)reshGetVal(taxisID, &taxisOps);
-
   return taxisptr->has_bounds;
 }
 
@@ -579,7 +577,7 @@ void taxisDeleteBounds(int taxisID)
 void taxisCopyTimestep(int taxisID2, int taxisID1)
 {
   taxis_t *taxisptr1 = (taxis_t *)reshGetVal(taxisID1, &taxisOps),
-    *taxisptr2 = (taxis_t *)reshGetVal(taxisID2, &taxisOps);
+          *taxisptr2 = (taxis_t *)reshGetVal(taxisID2, &taxisOps);
 
   reshLock();
 
@@ -626,7 +624,6 @@ The function @func{taxisInqVdate} returns the verification date of a Time axis.
 int taxisInqVdate(int taxisID)
 {
   taxis_t *taxisptr = (taxis_t *)reshGetVal(taxisID, &taxisOps);
-
   return taxisptr->vdate;
 }
 
@@ -674,7 +671,6 @@ The function @func{taxisInqVtime} returns the verification time of a Time axis.
 int taxisInqVtime(int taxisID)
 {
   taxis_t *taxisptr = (taxis_t *)reshGetVal(taxisID, &taxisOps);
-
   return taxisptr->vtime;
 }
 
@@ -842,40 +838,35 @@ The valid CDI calendar types are @func{CALENDAR_STANDARD}, @func{CALENDAR_PROLEP
 */
 int taxisInqCalendar(int taxisID)
 {
-  taxis_t *taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
-
+  taxis_t *taxisptr = (taxis_t *) reshGetVal ( taxisID, &taxisOps );
   return taxisptr->calendar;
 }
 
 
 int taxisInqTunit(int taxisID)
 {
-  taxis_t *taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
-
+  taxis_t *taxisptr = (taxis_t *) reshGetVal ( taxisID, &taxisOps );
   return taxisptr->unit;
 }
 
 
 int taxisInqForecastTunit(int taxisID)
 {
-  taxis_t *taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
-
-  return (taxisptr->fc_unit);
+  taxis_t *taxisptr = (taxis_t *) reshGetVal ( taxisID, &taxisOps );
+  return taxisptr->fc_unit;
 }
 
 
 double taxisInqForecastPeriod(int taxisID)
 {
   taxis_t *taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
-
-  return (taxisptr->fc_period);
+  return taxisptr->fc_period;
 }
 
 
 int taxisInqNumavg(int taxisID)
 {
   taxis_t *taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
-
   return taxisptr->numavg;
 }
 
@@ -883,14 +874,13 @@ int taxisInqNumavg(int taxisID)
 taxis_t *taxisPtr(int taxisID)
 {
   taxis_t *taxisptr = (taxis_t *)reshGetVal(taxisID, &taxisOps);
-
   return taxisptr;
 }
 
-void
-ptaxisDefName(taxis_t *taxisptr, const char *name)
+
+void ptaxisDefName(taxis_t *taxisptr, const char *name)
 {
-  if (name)
+  if ( name )
     {
       size_t len = strlen(name);
       delete_refcount_string(taxisptr->name);
@@ -899,10 +889,10 @@ ptaxisDefName(taxis_t *taxisptr, const char *name)
     }
 }
 
-void
-ptaxisDefLongname(taxis_t *taxisptr, const char *longname)
+
+void ptaxisDefLongname(taxis_t *taxisptr, const char *longname)
 {
-  if (longname)
+  if ( longname )
     {
       size_t len = strlen(longname);
       delete_refcount_string(taxisptr->longname);
@@ -1062,20 +1052,14 @@ void timeval2vtime(double timevalue, taxis_t *taxis, int *vdate, int *vtime)
 
 double vtime2timeval(int vdate, int vtime, taxis_t *taxis)
 {
-  int ryear, rmonth;
-  int year, month, day, hour, minute, second;
-  int rdate, rtime;
   double value = 0;
-  int timeunit;
-  int timeunit0;
-  int calendar;
   int julday1, secofday1, julday2, secofday2, days, secs;
 
-  timeunit = (*taxis).unit;
-  calendar = (*taxis).calendar;
+  int timeunit = (*taxis).unit;
+  int calendar = (*taxis).calendar;
 
-  rdate = (*taxis).rdate;
-  rtime = (*taxis).rtime;
+  int rdate = (*taxis).rdate;
+  int rtime = (*taxis).rtime;
   if ( rdate == -1 )
     {
       rdate  = (*taxis).vdate;
@@ -1084,6 +1068,8 @@ double vtime2timeval(int vdate, int vtime, taxis_t *taxis)
 
   if ( rdate == 0 && rtime == 0 && vdate == 0 && vtime == 0 ) return value;
 
+  int ryear, rmonth;
+  int year, month, day, hour, minute, second;
   cdiDecodeDate(rdate, &ryear, &rmonth, &day);
   cdiDecodeTime(rtime, &hour, &minute, &second);
 
@@ -1092,7 +1078,7 @@ double vtime2timeval(int vdate, int vtime, taxis_t *taxis)
   cdiDecodeDate(vdate, &year, &month, &day);
   cdiDecodeTime(vtime, &hour, &minute, &second);
 
-  timeunit0 = timeunit;
+  int timeunit0 = timeunit;
 
   if ( timeunit == TUNIT_MONTH && calendar == CALENDAR_360DAYS )
     {
@@ -1101,17 +1087,15 @@ double vtime2timeval(int vdate, int vtime, taxis_t *taxis)
 
   if ( timeunit == TUNIT_MONTH || timeunit == TUNIT_YEAR )
     {
-      int nmonth, dpm;
-
       value = (year-ryear)*12 - rmonth + month;
 
-      nmonth = (int) value;
+      int nmonth = (int) value;
       month -= nmonth;
 
       while ( month > 12 ) { month -= 12; year++; }
       while ( month <  1 ) { month += 12; year--; }
 
-      dpm = days_per_month(calendar, year, month);
+      int dpm = days_per_month(calendar, year, month);
 
       encode_caldaysec(calendar, year, month, day, hour, minute, second, &julday2, &secofday2);
 
@@ -1139,34 +1123,31 @@ double vtime2timeval(int vdate, int vtime, taxis_t *taxis)
 }
 
 
-static void conv_timeval(double timevalue, int *rvdate, int *rvtime)
+static
+void conv_timeval(double timevalue, int *rvdate, int *rvtime)
 {
-  int vdate = 0, vtime = 0;
-  int hour, minute, second;
   int daysec;
 
-  vdate = (int) timevalue;
+  int vdate = (int) timevalue;
   if ( vdate < 0 )
     daysec = (int) (-(timevalue - vdate)*86400 + 0.01);
   else
     daysec = (int) ( (timevalue - vdate)*86400 + 0.01);
 
-  hour   =  daysec / 3600;
-  minute = (daysec - hour*3600)/60;
-  second =  daysec - hour*3600 - minute*60;
-  vtime  = cdiEncodeTime(hour, minute, second);
+  int hour   =  daysec / 3600;
+  int minute = (daysec - hour*3600)/60;
+  int second =  daysec - hour*3600 - minute*60;
+  int vtime  = cdiEncodeTime(hour, minute, second);
 
   *rvdate = vdate;
   *rvtime = vtime;
 }
 
 
-static void
-splitTimevalue(double timevalue, int timeunit, int *date, int *time)
+static
+void splitTimevalue(double timevalue, int timeunit, int *date, int *time)
 {
   int vdate = 0, vtime = 0;
-  int hour, minute, second;
-  int year, month, day;
 
   if ( timeunit == TUNIT_SECOND )
     {
@@ -1216,7 +1197,9 @@ splitTimevalue(double timevalue, int timeunit, int *date, int *time)
 
   /* verify date and time */
 
+  int year, month, day;
   cdiDecodeDate(vdate, &year, &month, &day);
+  int hour, minute, second;
   cdiDecodeTime(vtime, &hour, &minute, &second);
 
   if ( month > 17 || day > 31 || hour > 23 || minute > 59 || second > 59 )
@@ -1247,22 +1230,19 @@ splitTimevalue(double timevalue, int timeunit, int *date, int *time)
 
 void cdiSetForecastPeriod(double timevalue, taxis_t *taxis)
 {
-  int year, month, day, hour, minute, second;
-  int vdate, vtime;
-  int timeunit;
-  int calendar;
   int julday, secofday, days, secs;
 
   (*taxis).fc_period = timevalue;
 
-  timeunit = (*taxis).fc_unit;
-  calendar = (*taxis).calendar;
+  int timeunit = (*taxis).fc_unit;
+  int calendar = (*taxis).calendar;
 
-  vdate  = (*taxis).vdate;
-  vtime  = (*taxis).vtime;
+  int vdate = (*taxis).vdate;
+  int vtime = (*taxis).vtime;
 
   if ( vdate == 0 && vtime == 0 && DBL_IS_EQUAL(timevalue, 0.) ) return;
 
+  int year, month, day, hour, minute, second;
   cdiDecodeDate(vdate, &year, &month, &day);
   cdiDecodeTime(vtime, &hour, &minute, &second);
 
