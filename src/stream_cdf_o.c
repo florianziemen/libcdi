@@ -246,7 +246,9 @@ void cdfDefTime(stream_t* streamptr)
   cdf_def_dim(fileID, taxis_name, NC_UNLIMITED, &time_dimid);
   streamptr->basetime.ncdimid = time_dimid;
 
-  cdf_def_var(fileID, taxis_name, NC_DOUBLE, 1, &time_dimid, &time_varid);
+  nc_type xtype = (taxis->datatype == DATATYPE_FLT32) ? NC_FLOAT : NC_DOUBLE;
+
+  cdf_def_var(fileID, taxis_name, xtype, 1, &time_dimid, &time_varid);
 
   streamptr->basetime.ncvarid = time_varid;
 
@@ -291,7 +293,7 @@ void cdfDefTime(stream_t* streamptr)
     {
       int leadtimeid;
 
-      cdf_def_var(fileID, "leadtime", NC_DOUBLE, 1, &time_dimid, &leadtimeid);
+      cdf_def_var(fileID, "leadtime", xtype, 1, &time_dimid, &leadtimeid);
 
       streamptr->basetime.leadtimeid = leadtimeid;
 

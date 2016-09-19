@@ -1,3 +1,7 @@
+2016-09-19  Uwe Schulzweida
+
+	* time axis: added support for NC_FLOAT
+
 2016-09-15  Uwe Schulzweida
 
 	* zaxis: added support for user defined attributes

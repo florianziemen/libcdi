@@ -151,6 +151,7 @@ void taxisDefaultValue(taxis_t* taxisptr)
 {
   taxisptr->self        = CDI_UNDEFID;
   taxisptr->used        = false;
+  taxisptr->datatype    = DATATYPE_FLT64;
   taxisptr->type        = DefaultTimeType;
   taxisptr->vdate       = 0;
   taxisptr->vtime       = 0;
@@ -878,6 +879,12 @@ taxis_t *taxisPtr(int taxisID)
 }
 
 
+void ptaxisDefDatatype(taxis_t *taxisptr, int datatype)
+{
+  taxisptr->datatype = datatype;
+}
+
+
 void ptaxisDefName(taxis_t *taxisptr, const char *name)
 {
   if ( name )
@@ -1347,6 +1354,7 @@ void ptaxisCopy(taxis_t *dest, taxis_t *source)
 
   /* memcpy(dest, source, sizeof(taxis_t)); */
   dest->used        = source->used;
+  dest->datatype    = source->datatype;
   dest->type        = source->type;
   dest->vdate       = source->vdate;
   dest->vtime       = source->vtime;

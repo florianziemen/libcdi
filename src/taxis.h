@@ -13,6 +13,7 @@ typedef struct {
   int     self;
   bool    used;
   short   has_bounds;
+  int     datatype;       // datatype
   int     type;           // time type
   int     vdate;          // verification date
   int     vtime;          // verification time
@@ -30,8 +31,8 @@ typedef struct {
   int     vtime_ub;       // upper bounds of vtime
   int     fc_unit;        // forecast time unit
   double  fc_period;      // forecast time period
-  char*   name;
-  char*   longname;
+  char   *name;
+  char   *longname;
 }
 taxis_t;
 
@@ -44,6 +45,7 @@ double   cdiEncodeTimeval(int date, int time, taxis_t* taxis);
 void     timeval2vtime(double timevalue, taxis_t* taxis, int* vdate, int* vtime);
 double   vtime2timeval(int vdate, int vtime, taxis_t *taxis);
 
+void    ptaxisDefDatatype(taxis_t *taxisptr, int datatype);
 void    ptaxisDefName(taxis_t *taxisptr, const char *name);
 void    ptaxisDefLongname(taxis_t *taxisptr, const char *name);
 void    taxisDestroyKernel(taxis_t *taxisptr);
