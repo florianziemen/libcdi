@@ -134,7 +134,7 @@ FCALLSCFUN1 (STRING, streamFilename, STREAMFILENAME, streamfilename, INT)
 FCALLSCFUN1 (STRING, streamFilesuffix, STREAMFILESUFFIX, streamfilesuffix, INT)
 FCALLSCFUN1 (INT, streamInqNvars, STREAMINQNVARS, streaminqnvars, INT)
 
-/*  STREAM var I/O routines  */
+/*  STREAM var I/O routines (random access)  */
 
 FCALLSCSUB4 (streamWriteVar, STREAMWRITEVAR, streamwritevar, INT, INT, DOUBLEV, INT)
 FCALLSCSUB4 (streamWriteVarF, STREAMWRITEVARF, streamwritevarf, INT, INT, FLOATV, INT)
@@ -146,7 +146,7 @@ FCALLSCSUB5 (streamReadVarSlice, STREAMREADVARSLICE, streamreadvarslice, INT, IN
 FCALLSCSUB5 (streamReadVarSliceF, STREAMREADVARSLICEF, streamreadvarslicef, INT, INT, INT, FLOATV, PINT)
 FCALLSCSUB5 (streamWriteVarChunk, STREAMWRITEVARCHUNK, streamwritevarchunk, INT, INT, INTVV, DOUBLEV, INT)
 
-/*  STREAM record I/O routines  */
+/*  STREAM record I/O routines (sequential access)  */
 
 FCALLSCSUB3 (streamDefRecord, STREAMDEFRECORD, streamdefrecord, INT, INT, INT)
 FCALLSCSUB3 (streamInqRecord, STREAMINQRECORD, streaminqrecord, INT, PINT, PINT)
@@ -331,6 +331,9 @@ FCALLSCFUN2 (INT, gridInqYvals, GRIDINQYVALS, gridinqyvals, INT, DOUBLEV)
 
 /*  CDI grid string key values  */
 
+
+/*  CDI zaxis string key values  */
+
 FCALLSCFUN4 (INT, cdiGridDefKeyStr, CDIGRIDDEFKEYSTR, cdigriddefkeystr, INT, INT, INT, STRING)
 FCALLSCFUN4 (INT, cdiGridInqKeyStr, CDIGRIDINQKEYSTR, cdigridinqkeystr, INT, INT, INT, PSTRING)
 FCALLSCSUB2 (gridDefXname, GRIDDEFXNAME, griddefxname, INT, STRING)
@@ -405,10 +408,9 @@ FCALLSCSUB1 (zaxisDestroy, ZAXISDESTROY, zaxisdestroy, INT)
 FCALLSCFUN1 (INT, zaxisInqType, ZAXISINQTYPE, zaxisinqtype, INT)
 FCALLSCFUN1 (INT, zaxisInqSize, ZAXISINQSIZE, zaxisinqsize, INT)
 FCALLSCFUN1 (INT, zaxisDuplicate, ZAXISDUPLICATE, zaxisduplicate, INT)
-FCALLSCSUB2 (zaxisResize, ZAXISRESIZE, zaxisresize, INT, INT)
 FCALLSCSUB2 (zaxisPrint, ZAXISPRINT, zaxisprint, INT, INT)
 FCALLSCSUB2 (zaxisDefLevels, ZAXISDEFLEVELS, zaxisdeflevels, INT, DOUBLEV)
-FCALLSCSUB2 (zaxisInqLevels, ZAXISINQLEVELS, zaxisinqlevels, INT, DOUBLEV)
+FCALLSCFUN2 (INT, zaxisInqLevels, ZAXISINQLEVELS, zaxisinqlevels, INT, DOUBLEV)
 FCALLSCSUB3 (zaxisDefLevel, ZAXISDEFLEVEL, zaxisdeflevel, INT, INT, DOUBLE)
 FCALLSCFUN2 (DOUBLE, zaxisInqLevel, ZAXISINQLEVEL, zaxisinqlevel, INT, INT)
 FCALLSCSUB2 (zaxisDefNlevRef, ZAXISDEFNLEVREF, zaxisdefnlevref, INT, INT)
@@ -417,11 +419,8 @@ FCALLSCSUB2 (zaxisDefNumber, ZAXISDEFNUMBER, zaxisdefnumber, INT, INT)
 FCALLSCFUN1 (INT, zaxisInqNumber, ZAXISINQNUMBER, zaxisinqnumber, INT)
 FCALLSCSUB2 (zaxisDefUUID, ZAXISDEFUUID, zaxisdefuuid, INT, PVOID)
 FCALLSCSUB2 (zaxisInqUUID, ZAXISINQUUID, zaxisinquuid, INT, PVOID)
-
-/*  CDI zaxis string key values  */
-
-FCALLSCFUN4 (INT, cdiZaxisDefKeyStr, CDIZAXISDEFSTRING, cdizaxisdefstring, INT, INT, INT, STRING)
-FCALLSCFUN4 (INT, cdiZaxisInqKeyStr, CDIZAXISINQSTRING, cdizaxisinqstring, INT, INT, INT, PSTRING)
+FCALLSCFUN4 (INT, cdiZaxisDefKeyStr, CDIZAXISDEFKEYSTR, cdizaxisdefkeystr, INT, INT, INT, STRING)
+FCALLSCFUN4 (INT, cdiZaxisInqKeyStr, CDIZAXISINQKEYSTR, cdizaxisinqkeystr, INT, INT, INT, PSTRING)
 FCALLSCSUB2 (zaxisDefName, ZAXISDEFNAME, zaxisdefname, INT, STRING)
 FCALLSCSUB2 (zaxisInqName, ZAXISINQNAME, zaxisinqname, INT, PSTRING)
 FCALLSCSUB2 (zaxisDefLongname, ZAXISDEFLONGNAME, zaxisdeflongname, INT, STRING)
@@ -429,8 +428,6 @@ FCALLSCSUB2 (zaxisInqLongname, ZAXISINQLONGNAME, zaxisinqlongname, INT, PSTRING)
 FCALLSCSUB2 (zaxisDefUnits, ZAXISDEFUNITS, zaxisdefunits, INT, STRING)
 FCALLSCSUB2 (zaxisInqUnits, ZAXISINQUNITS, zaxisinqunits, INT, PSTRING)
 FCALLSCSUB2 (zaxisInqStdname, ZAXISINQSTDNAME, zaxisinqstdname, INT, PSTRING)
-FCALLSCSUB2 (zaxisDefPsName, ZAXISDEFPSNAME, zaxisdefpsname, INT, STRING)
-FCALLSCSUB2 (zaxisInqPsName, ZAXISINQPSNAME, zaxisinqpsname, INT, PSTRING)
 FCALLSCSUB2 (zaxisDefPrec, ZAXISDEFPREC, zaxisdefprec, INT, INT)
 FCALLSCFUN1 (INT, zaxisInqPrec, ZAXISINQPREC, zaxisinqprec, INT)
 FCALLSCSUB2 (zaxisDefPositive, ZAXISDEFPOSITIVE, zaxisdefpositive, INT, INT)

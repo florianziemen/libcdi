@@ -4,7 +4,7 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   August 2016
+! Uwe Schulzweida, MPI-MET, Hamburg,   September 2016
 !
 
       INTEGER    CDI_MAX_NAME          
@@ -602,7 +602,7 @@
       EXTERNAL        streamInqNvars
 
 !
-!  STREAM var I/O routines
+!  STREAM var I/O routines (random access)
 !
 !                     streamWriteVar
 !                                    (INTEGER         streamID,
@@ -673,7 +673,7 @@
       EXTERNAL        streamWriteVarChunk
 
 !
-!  STREAM record I/O routines
+!  STREAM record I/O routines (sequential access)
 !
 !                     streamDefRecord
 !                                    (INTEGER         streamID,
@@ -1548,26 +1548,39 @@
 !
       INTEGER    CDI_KEY_XNAME         
       PARAMETER (CDI_KEY_XNAME          = 901)
-      INTEGER    CDI_KEY_YNAME         
-      PARAMETER (CDI_KEY_YNAME          = 902)
       INTEGER    CDI_KEY_XDIMNAME      
-      PARAMETER (CDI_KEY_XDIMNAME       = 903)
-      INTEGER    CDI_KEY_YDIMNAME      
-      PARAMETER (CDI_KEY_YDIMNAME       = 904)
-      INTEGER    CDI_KEY_VDIMNAME      
-      PARAMETER (CDI_KEY_VDIMNAME       = 905)
+      PARAMETER (CDI_KEY_XDIMNAME       = 902)
       INTEGER    CDI_KEY_XLONGNAME     
-      PARAMETER (CDI_KEY_XLONGNAME      = 906)
-      INTEGER    CDI_KEY_YLONGNAME     
-      PARAMETER (CDI_KEY_YLONGNAME      = 907)
+      PARAMETER (CDI_KEY_XLONGNAME      = 903)
       INTEGER    CDI_KEY_XUNITS        
-      PARAMETER (CDI_KEY_XUNITS         = 908)
+      PARAMETER (CDI_KEY_XUNITS         = 904)
+      INTEGER    CDI_KEY_YNAME         
+      PARAMETER (CDI_KEY_YNAME          = 911)
+      INTEGER    CDI_KEY_YDIMNAME      
+      PARAMETER (CDI_KEY_YDIMNAME       = 912)
+      INTEGER    CDI_KEY_YLONGNAME     
+      PARAMETER (CDI_KEY_YLONGNAME      = 913)
       INTEGER    CDI_KEY_YUNITS        
-      PARAMETER (CDI_KEY_YUNITS         = 909)
+      PARAMETER (CDI_KEY_YUNITS         = 914)
+      INTEGER    CDI_KEY_VDIMNAME      
+      PARAMETER (CDI_KEY_VDIMNAME       = 920)
       INTEGER    CDI_KEY_MAPNAME       
-      PARAMETER (CDI_KEY_MAPNAME        = 920)
+      PARAMETER (CDI_KEY_MAPNAME        = 921)
       INTEGER    CDI_KEY_MAPPING       
-      PARAMETER (CDI_KEY_MAPPING        = 921)
+      PARAMETER (CDI_KEY_MAPPING        = 922)
+!
+!  CDI zaxis string key values
+!
+      INTEGER    CDI_KEY_NAME          
+      PARAMETER (CDI_KEY_NAME           = 941)
+      INTEGER    CDI_KEY_DIMNAME       
+      PARAMETER (CDI_KEY_DIMNAME        = 942)
+      INTEGER    CDI_KEY_LONGNAME      
+      PARAMETER (CDI_KEY_LONGNAME       = 943)
+      INTEGER    CDI_KEY_UNITS         
+      PARAMETER (CDI_KEY_UNITS          = 944)
+      INTEGER    CDI_KEY_PSNAME        
+      PARAMETER (CDI_KEY_PSNAME         = 950)
       INTEGER         cdiGridDefKeyStr
 !                                    (INTEGER         gridID,
 !                                     INTEGER         key,
@@ -1895,11 +1908,6 @@
 !                                    (INTEGER         zaxisID)
       EXTERNAL        zaxisDuplicate
 
-!                     zaxisResize
-!                                    (INTEGER         zaxisID,
-!                                     INTEGER         size)
-      EXTERNAL        zaxisResize
-
 !                     zaxisPrint
 !                                    (INTEGER         zaxisID,
 !                                     INTEGER         index)
@@ -1910,7 +1918,7 @@
 !                                     DOUBLEPRECISION levels(*))
       EXTERNAL        zaxisDefLevels
 
-!                     zaxisInqLevels
+      INTEGER         zaxisInqLevels
 !                                    (INTEGER         zaxisID,
 !                                     DOUBLEPRECISION levels(*))
       EXTERNAL        zaxisInqLevels
@@ -1954,32 +1962,19 @@
 !                                     INTEGER*1(16)   uuid)
       EXTERNAL        zaxisInqUUID
 
-!
-!  CDI zaxis string key values
-!
-      INTEGER    CDI_ZAXIS_NAME        
-      PARAMETER (CDI_ZAXIS_NAME         = 801)
-      INTEGER    CDI_ZAXIS_DIMNAME     
-      PARAMETER (CDI_ZAXIS_DIMNAME      = 802)
-      INTEGER    CDI_ZAXIS_VDIMNAME    
-      PARAMETER (CDI_ZAXIS_VDIMNAME     = 803)
-      INTEGER    CDI_ZAXIS_LONGNAME    
-      PARAMETER (CDI_ZAXIS_LONGNAME     = 804)
-      INTEGER    CDI_ZAXIS_UNITS       
-      PARAMETER (CDI_ZAXIS_UNITS        = 805)
-      INTEGER         cdiZaxisDefString
+      INTEGER         cdiZaxisDefKeyStr
 !                                    (INTEGER         zaxisID,
 !                                     INTEGER         key,
 !                                     INTEGER         size,
 !                                     CHARACTER*(*)   mesg)
-      EXTERNAL        cdiZaxisDefString
+      EXTERNAL        cdiZaxisDefKeyStr
 
-      INTEGER         cdiZaxisInqString
+      INTEGER         cdiZaxisInqKeyStr
 !                                    (INTEGER         zaxisID,
 !                                     INTEGER         key,
 !                                     INTEGER         size,
 !                                     CHARACTER*(*)   mesg)
-      EXTERNAL        cdiZaxisInqString
+      EXTERNAL        cdiZaxisInqKeyStr
 
 !                     zaxisDefName
 !                                    (INTEGER         zaxisID,
@@ -2015,16 +2010,6 @@
 !                                    (INTEGER         zaxisID,
 !                                     CHARACTER*(*)   stdname)
       EXTERNAL        zaxisInqStdname
-
-!                     zaxisDefPsName
-!                                    (INTEGER         zaxisID,
-!                                     CHARACTER*(*)   psname_optional)
-      EXTERNAL        zaxisDefPsName
-
-!                     zaxisInqPsName
-!                                    (INTEGER         zaxisID,
-!                                     CHARACTER*(*)   psname)
-      EXTERNAL        zaxisInqPsName
 
 !                     zaxisDefPrec
 !                                    (INTEGER         zaxisID,
