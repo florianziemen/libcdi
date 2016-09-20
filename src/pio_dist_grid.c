@@ -502,6 +502,24 @@ cdiPioDistGridInit(grid_t *gridptr,
       }
     else
       {
+        /* check if hints are in range */
+        static const char dimName[2] = { 'X', 'Y' },
+          caller[] = "cdiPioDistGridCreate";
+        for (size_t aRank = 0; aRank < saMaxRank; ++aRank)
+          {
+            int32_t dimUB = sub_arrays[cdiPioGDsaArea].rect[aRank].first
+              + sub_arrays[cdiPioGDsaArea].rect[aRank].size;
+            if (xy_decomposition[aRank][0] < 0
+                || xy_decomposition[aRank][0] > dimUB)
+              Errorc("decomposition hint for %c start out "
+                     "of range [0,%d]\n", dimName[aRank], (int)dimUB-1);
+            if (xy_decomposition[aRank][1] < 0
+                || (xy_decomposition[aRank][0]
+                    + xy_decomposition[aRank][1] > dimUB))
+              Errorc("decomposition hint value %d for %c size out "
+                     "of range [0,%d]\n", (int)xy_decomposition[aRank][1],
+                     dimName[aRank], (int)dimUB-xy_decomposition[aRank][0]);
+          }
         if (irregular)
           /* for irregular grids, all arrays are decomposed identically */
           for (size_t j = 0; j < cdiPioGDsaNum; ++j)
