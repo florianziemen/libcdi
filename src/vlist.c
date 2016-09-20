@@ -580,33 +580,41 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
 	    if ( nlevs != nlevs2 )
 	      {
 		int nvct = 0;
+                double *levels = NULL;
 		double *lbounds = NULL, *ubounds = NULL;
 		const double *vct = NULL;
                 char ctemp[CDI_MAX_NAME];
 
+                if ( !vars1[varID].levinfo ) cdiVlistCreateVarLevInfo(vlistptr1, varID);
+
 		zaxisID = vars1[varID].zaxisID;
-		double *levels = (double *) Malloc((size_t)nlevs2 * sizeof (double));
-                if ( !vars1[varID].levinfo )
-                  cdiVlistCreateVarLevInfo(vlistptr1, varID);
+                int zaxisType = zaxisInqType(zaxisID);
 
-                {
-                  int levID2 = 0;
-                  for ( int levID = 0; levID < nlevs; ++levID )
-                    if ( vars1[varID].levinfo[levID].flag )
-                      {
-                        vars1[varID].levinfo[levID].flevelID = levID2;
-                        vars1[varID].levinfo[levID].mlevelID = levID2;
-                        levels[levID2++] = zaxisInqLevel(zaxisID, levID);
-                      }
-                }
+                int levID2 = 0;
+                for ( int levID = 0; levID < nlevs; ++levID )
+                  if ( vars1[varID].levinfo[levID].flag )
+                    {
+                      vars1[varID].levinfo[levID].flevelID = levID2;
+                      vars1[varID].levinfo[levID].mlevelID = levID2;
+                    }
 
-		int zaxisType = zaxisInqType(zaxisID);
+                if ( zaxisInqLevels(zaxisID, NULL) )
+                  {
+                    levels = (double *) Malloc((size_t)nlevs2 * sizeof (double));
 
-		if ( zaxisType == ZAXIS_HYBRID )
-		  {
-		    nvct = zaxisInqVctSize(zaxisID);
-		    vct  = zaxisInqVctPtr(zaxisID);
-		  }
+                    levID2 = 0;
+                    for ( int levID = 0; levID < nlevs; ++levID )
+                      if ( vars1[varID].levinfo[levID].flag )
+                        {
+                          levels[levID2++] = zaxisInqLevel(zaxisID, levID);
+                        }
+                  }
+
+                if ( zaxisType == ZAXIS_HYBRID )
+                  {
+                    nvct = zaxisInqVctSize(zaxisID);
+                    vct  = zaxisInqVctPtr(zaxisID);
+                  }
 
                 if ( zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL) )
                   {
@@ -619,7 +627,7 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
                     zaxisInqLbounds(zaxisID, lbounds1);
                     zaxisInqUbounds(zaxisID, ubounds1);
 
-                    int levID2 = 0;
+                    levID2 = 0;
                     for ( int levID = 0; levID < nlevs; ++levID )
                       if ( vars1[varID].levinfo[levID].flag )
                         {
@@ -632,8 +640,8 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
                   }
 
 		int zaxisID2 = vlist_generate_zaxis(vlistID2, zaxisType, nlevs2, levels, lbounds, ubounds, nvct, vct);
-		Free(levels);
-                Free(lbounds);
+		if ( levels )  Free(levels);
+                if ( lbounds ) Free(lbounds);
 
                 zaxisInqName(zaxisID, ctemp);
                 zaxisDefName(zaxisID2, ctemp);
@@ -836,19 +844,22 @@ void vlistMerge(int vlistID2, int vlistID1)
 
           int zaxisID = zaxisDuplicate(zaxisID2);
 
-          zaxisResize(zaxisID, nlevs);
+          if ( zaxisInqLevels(zaxisID1, NULL) )
+            {
+              zaxisResize(zaxisID, nlevs);
 
-          double *levels = (double *) Malloc((size_t)nlevs1 * sizeof(double));
+              double *levels = (double *) Malloc((size_t)nlevs1 * sizeof(double));
 
-          zaxisInqLevels(zaxisID1, levels);
-          /*
-          for ( levID = 0; levID < nlevs1; levID++ )
-            fprintf(stderr, "%d %d %d %d %d %g\n", varID, levID, nlevs1, nlevs2, vars2[varID].nlevs, levels[levID]);
-          */
-          for ( int levID = 0; levID < nlevs1; levID++ )
-            zaxisDefLevel(zaxisID, nlevs2+levID, levels[levID]);
+              zaxisInqLevels(zaxisID1, levels);
+              /*
+                for ( levID = 0; levID < nlevs1; levID++ )
+                fprintf(stderr, "%d %d %d %d %d %g\n", varID, levID, nlevs1, nlevs2, vars2[varID].nlevs, levels[levID]);
+              */
+              for ( int levID = 0; levID < nlevs1; levID++ )
+                zaxisDefLevel(zaxisID, nlevs2+levID, levels[levID]);
 
-          Free(levels);
+              Free(levels);
+            }
 
           for ( int index = 0; index < vlistptr2->nzaxis; index++ )
             if ( vlistptr2->zaxisIDs[index] == zaxisID2 )
@@ -1071,7 +1082,8 @@ void vlistPrintKernel(vlist_t *vlistptr, FILE *fp)
               int mlevID = li.mlevelID;
               int index  = li.index;
               int flag   = li.flag;
-              double level  = zaxisInqLevel(zaxisID, levID);
+
+              double level = zaxisInqLevels(zaxisID, NULL) ? zaxisInqLevel(zaxisID, levID) : levID+1;
 
               fprintf(fp, "%6d %6d %6d %6d %6d %6d %6d %6d %5d  %.9g\n",
                       varID, levID, fvarID, flevID, mvarID, mlevID, index,

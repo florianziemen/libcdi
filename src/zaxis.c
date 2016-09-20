@@ -212,12 +212,6 @@ zaxisCreate_(int zaxistype, int size, int id)
 
   zaxisptr->positive = ZaxistypeEntry[zaxistype].positive;
 
-  double *vals = zaxisptr->vals
-    = (double *) Malloc((size_t)size * sizeof(double));
-
-  for ( int ilev = 0; ilev < size; ilev++ )
-    vals[ilev] = 0.0;
-
   return zaxisID;
 }
 
@@ -688,11 +682,14 @@ The function @func{zaxisDefLevels} defines the levels of a Z-axis.
 void zaxisDefLevels(int zaxisID, const double *levels)
 {
   zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
+  size_t size = (size_t)zaxisptr->size;
 
-  int size = zaxisptr->size;
+  if ( zaxisptr->vals == NULL )
+    zaxisptr->vals = (double*) Malloc(size*sizeof(double));
+
   double *vals = zaxisptr->vals;
 
-  for ( int ilev = 0; ilev < size; ilev++ )
+  for ( size_t ilev = 0; ilev < size; ++ilev )
     vals[ilev] = levels[ilev];
 
   reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
@@ -716,8 +713,14 @@ The function @func{zaxisDefLevel} defines one level of a Z-axis.
 void zaxisDefLevel(int zaxisID, int levelID, double level)
 {
   zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
-  if ( levelID >= 0 && levelID < zaxisptr->size )
+  int size = zaxisptr->size;
+
+  if ( zaxisptr->vals == NULL )
+    zaxisptr->vals = (double*) Malloc((size_t)size*sizeof(double));
+
+  if ( levelID >= 0 && levelID < size )
     zaxisptr->vals[levelID] = level;
+
   reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
 }
 
@@ -845,7 +848,7 @@ The function @func{zaxisInqLevel} returns one level of a Z-axis.
 */
 double zaxisInqLevel(int zaxisID, int levelID)
 {
-  double level = levelID;
+  double level = 0;
   zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
 
   if ( zaxisptr->vals && levelID >= 0 && levelID < zaxisptr->size )
@@ -854,9 +857,10 @@ double zaxisInqLevel(int zaxisID, int levelID)
   return level;
 }
 
+
 double zaxisInqLbound(int zaxisID, int levelID)
 {
-  double level = levelID;
+  double level = 0;
   zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
 
   if ( zaxisptr->lbounds && levelID >= 0 && levelID < zaxisptr->size )
@@ -868,7 +872,7 @@ double zaxisInqLbound(int zaxisID, int levelID)
 
 double zaxisInqUbound(int zaxisID, int levelID)
 {
-  double level = levelID;
+  double level = 0;
   zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
 
   if ( zaxisptr->ubounds && levelID >= 0 && levelID < zaxisptr->size )
@@ -901,12 +905,21 @@ The function @func{zaxisInqLevels} returns all levels of a Z-axis.
 @func{zaxisInqLevels} saves all levels to the parameter @func{levels}.
 @EndFunction
 */
-void zaxisInqLevels(int zaxisID, double *levels)
+int zaxisInqLevels(int zaxisID, double *levels)
 {
+  int size = 0;
   zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
-  int size = zaxisptr->size;
-  for ( int i = 0; i < size; i++ )
-    levels[i] = zaxisptr->vals[i];
+
+  if ( zaxisptr->vals )
+    {
+      size = zaxisptr->size;
+
+      if ( levels )
+        for ( int i = 0; i < size; i++ )
+          levels[i] = zaxisptr->vals[i];
+    }
+
+  return size;
 }
 
 
@@ -972,6 +985,7 @@ int zaxisInqLevelID(int zaxisID, double level)
   if ( zaxisptr->vals )
     {
       int size = zaxisptr->size;
+
       for ( int i = 0; i < size; i++ )
         if ( fabs(level-zaxisptr->vals[i]) < DBL_EPSILON )
           {
@@ -1041,7 +1055,7 @@ void cdiCheckZaxis(int zaxisID)
 {
   zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
 
-  if ( zaxisInqType(zaxisID) == ZAXIS_GENERIC )
+  if ( zaxisInqType(zaxisID) == ZAXIS_GENERIC && zaxisptr->vals )
     {
       int size = zaxisptr->size;
       if ( size > 1 )
@@ -1179,7 +1193,7 @@ void zaxisResize(int zaxisID, int size)
   zaxisptr->size = size;
 
   if ( zaxisptr->vals )
-    zaxisptr->vals = (double *) Realloc(zaxisptr->vals, (size_t)size * sizeof(double));
+    zaxisptr->vals = (double *) Realloc(zaxisptr->vals, (size_t)size*sizeof(double));
 }
 
 
@@ -1203,7 +1217,6 @@ int zaxisDuplicate(int zaxisID)
   if ( zaxisptr->vals )
     {
       size_t size = (size_t)zaxissize;
-
       zaxisptrnew->vals = (double *) Malloc(size * sizeof (double));
       memcpy(zaxisptrnew->vals, zaxisptr->vals, size * sizeof (double));
     }
@@ -1211,7 +1224,6 @@ int zaxisDuplicate(int zaxisID)
   if ( zaxisptr->lbounds )
     {
       size_t size = (size_t)zaxissize;
-
       zaxisptrnew->lbounds = (double *) Malloc(size * sizeof (double));
       memcpy(zaxisptrnew->lbounds, zaxisptr->lbounds, size * sizeof(double));
     }
@@ -1219,7 +1231,6 @@ int zaxisDuplicate(int zaxisID)
   if ( zaxisptr->ubounds )
     {
       size_t size = (size_t)zaxissize;
-
       zaxisptrnew->ubounds = (double *) Malloc(size * sizeof (double));
       memcpy(zaxisptrnew->ubounds, zaxisptr->ubounds, size * sizeof (double));
     }
@@ -1227,7 +1238,6 @@ int zaxisDuplicate(int zaxisID)
   if ( zaxisptr->vct )
     {
       size_t size = (size_t)zaxisptr->vctsize;
-
       if ( size )
         {
           zaxisptrnew->vctsize = (int)size;
@@ -1255,6 +1265,7 @@ void zaxisPrintKernel(zaxis_t *zaxisptr, int index, FILE *fp)
 
   int dig = (prec == DATATYPE_FLT64) ? 15 : 7;
 
+  int nbyte;
   int nbyte0 = 0;
   fprintf(fp, "#\n");
   fprintf(fp, "# zaxisID %d\n", index);
@@ -1270,19 +1281,22 @@ void zaxisPrintKernel(zaxis_t *zaxisptr, int index, FILE *fp)
   if ( zaxisptr->longname[0] ) fprintf(fp, "longname  = %s\n", zaxisptr->longname);
   if ( zaxisptr->units[0]    ) fprintf(fp, "units     = %s\n", zaxisptr->units);
 
-  nbyte0 = fprintf(fp, "levels    = ");
-  int nbyte = nbyte0;
-  for ( int levelID = 0; levelID < nlevels; levelID++ )
+  if ( zaxisptr->vals )
     {
-      if ( nbyte > 80 )
-	{
-	  fprintf(fp, "\n");
-	  fprintf(fp, "%*s", nbyte0, "");
-	  nbyte = nbyte0;
-	}
-      nbyte += fprintf(fp, "%.*g ", dig, zaxisptr->vals[levelID]);
+      nbyte0 = fprintf(fp, "levels    = ");
+      nbyte = nbyte0;
+      for ( int levelID = 0; levelID < nlevels; levelID++ )
+        {
+          if ( nbyte > 80 )
+            {
+              fprintf(fp, "\n");
+              fprintf(fp, "%*s", nbyte0, "");
+              nbyte = nbyte0;
+            }
+          nbyte += fprintf(fp, "%.*g ", dig, zaxisptr->vals[levelID]);
+        }
+      fprintf(fp, "\n");
     }
-  fprintf(fp, "\n");
 
   if ( zaxisptr->lbounds && zaxisptr->ubounds )
     {

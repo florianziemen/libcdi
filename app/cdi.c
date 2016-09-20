@@ -987,7 +987,7 @@ int main(int argc, char *argv[])
 			 varID, param, gridID, zaxisID, levelID);
 		  */
 		  gridsize = gridInqSize(gridID);
-		  level    = zaxisInqLevel(zaxisID, levelID);
+		  level    = zaxisInqLevels(zaxisID, NULL) ? zaxisInqLevel(zaxisID, levelID) : levelID+1;
 		  missval  = vlistInqVarMissval(vlistID1, varID);
 
 		  if ( Info )
@@ -1029,7 +1029,7 @@ int main(int argc, char *argv[])
 		  levelsize = zaxisInqSize(zaxisID);
 		  for ( levelID = 0; levelID < levelsize; levelID++ )
 		    {
-		      level = zaxisInqLevel(zaxisID, levelID);
+                      level = zaxisInqLevels(zaxisID, NULL) ? zaxisInqLevel(zaxisID, levelID) : levelID+1;
 		      streamReadVarSlice(streamID1, varID, levelID, data, &nmiss);
 
 		      if ( Info )

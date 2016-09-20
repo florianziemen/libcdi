@@ -2304,24 +2304,6 @@ void grib2DefLevel(grib_handle *gh, int gcinit, long leveltype1, long leveltype2
     }
 }
 
-
-/*
-void grib_verfiy_zaxis(int zaxisID, double sf)
-{
-  printf("grb_verfiy_vlist called\n");
-  int zaxisID = vlistZaxis(vlistID, index);
-  int nlevels = zaxisInqSize(zaxisID);
-  int zaxistype = zaxisInqType(zaxisID);
-  double *levels = (double *) Malloc(nlevels*sizeof(double));
-  int *ilevels = (int *) Malloc(nlevels*sizeof(int));
-  zaxisInqLevels(zaxisID, levels);
-  for ( int i = 0; i < nlevels; ++i )
-    printf("level %d %g\n", i+1, levels[i]);
-  Free(ilevels);
-  Free(levels);
-}
-*/
-
 static
 void gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelID, int gcinit, int proddef_template_num)
 {
@@ -2332,7 +2314,7 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelI
   int zaxistype = zaxisInqType(zaxisID);
   long ltype = zaxisInqLtype(zaxisID);
   long ltype2 = zaxisInqLtype2(zaxisID);
-  double level = zaxisInqLevel(zaxisID, levelID);
+  double level = zaxisInqLevels(zaxisID, NULL) ? zaxisInqLevel(zaxisID, levelID) : levelID+1;
 
   if ( zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL) )
     {

@@ -960,7 +960,7 @@ void    zaxisPrint(int zaxisID, int index);
 void    zaxisDefLevels(int zaxisID, const double levels[]);
 
 /*      zaxisInqLevels: Get all levels of a Z-axis */
-void    zaxisInqLevels(int zaxisID, double levels[]);
+int     zaxisInqLevels(int zaxisID, double levels[]);
 
 /*      zaxisDefLevel: Define one level of a Z-axis */
 void    zaxisDefLevel(int zaxisID, int levelID, double levels);

@@ -1637,7 +1637,10 @@ void cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int *ncvaridp, int z
 
   double lbounds[dimlen], ubounds[dimlen], levels[dimlen];
 
-  zaxisInqLevels(zaxisID, levels);
+  if ( zaxisInqLevels(zaxisID, NULL) )
+    zaxisInqLevels(zaxisID, levels);
+  else
+    for ( size_t i = 0; i < dimlen; ++i ) levels[i] = i+1;
 
   if ( zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL) )
     {
@@ -1804,76 +1807,82 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
 
           if ( ndims && dimID == UNDEFID ) cdf_def_dim(fileID, dimname, dimlen, &dimID);
 
-          cdf_def_var(fileID, axisname, (nc_type) xtype, ndims, &dimID, &ncvarid);
-
-          cdfPutGridStdAtts(fileID, ncvarid, zaxisID, 'Z', &gridInqsZ);
-
-          {
-            int positive = zaxisInqPositive(zaxisID);
-            static const char positive_up[] = "up",
-                              positive_down[] = "down";
-            static const struct attTxtTab tab[2] = {
-              { positive_up, sizeof (positive_up) - 1 },
-              { positive_down, sizeof (positive_down) - 1 },
-            };
-            if ( positive == POSITIVE_UP || positive == POSITIVE_DOWN )
-              {
-                size_t select = positive == POSITIVE_DOWN;
-                cdf_put_att_text(fileID, ncvarid, "positive", tab[select].txtLen, tab[select].txt);
-              }
-          }
-          cdf_put_att_text(fileID, ncvarid, "axis", 1, "Z");
-
-	  if ( zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL) )
+          if ( zaxisInqLevels(zaxisID, NULL) )
             {
-              size_t nvertex = 2;
-	      if ( nc_inq_dimid(fileID, bndsName, &nvdimID) != NC_NOERR )
-		cdf_def_dim(fileID, bndsName, nvertex, &nvdimID);
+              cdf_def_var(fileID, axisname, (nc_type) xtype, ndims, &dimID, &ncvarid);
 
-	      if ( nvdimID != UNDEFID )
-		{
-                  size_t axisnameLen = strlen(axisname);
-                  axisname[axisnameLen] = '_';
-                  memcpy(axisname + axisnameLen + 1, bndsName, sizeof (bndsName));
-		  dimIDs[0] = dimID;
-		  dimIDs[ndims] = nvdimID;
-		  cdf_def_var(fileID, axisname, (nc_type) xtype, ndims+1, dimIDs, &ncbvarid);
-		  cdf_put_att_text(fileID, ncvarid, "bounds", strlen(axisname), axisname);
-		}
-	    }
+              cdfPutGridStdAtts(fileID, ncvarid, zaxisID, 'Z', &gridInqsZ);
+
+              {
+                int positive = zaxisInqPositive(zaxisID);
+                static const char positive_up[] = "up",
+                                  positive_down[] = "down";
+                static const struct attTxtTab tab[2] = {
+                  { positive_up, sizeof (positive_up) - 1 },
+                  { positive_down, sizeof (positive_down) - 1 },
+                };
+                if ( positive == POSITIVE_UP || positive == POSITIVE_DOWN )
+                  {
+                    size_t select = positive == POSITIVE_DOWN;
+                    cdf_put_att_text(fileID, ncvarid, "positive", tab[select].txtLen, tab[select].txt);
+                  }
+              }
+              cdf_put_att_text(fileID, ncvarid, "axis", 1, "Z");
+
+              if ( zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL) )
+                {
+                  size_t nvertex = 2;
+                  if ( nc_inq_dimid(fileID, bndsName, &nvdimID) != NC_NOERR )
+                    cdf_def_dim(fileID, bndsName, nvertex, &nvdimID);
+
+                  if ( nvdimID != UNDEFID )
+                    {
+                      size_t axisnameLen = strlen(axisname);
+                      axisname[axisnameLen] = '_';
+                      memcpy(axisname + axisnameLen + 1, bndsName, sizeof (bndsName));
+                      dimIDs[0] = dimID;
+                      dimIDs[ndims] = nvdimID;
+                      cdf_def_var(fileID, axisname, (nc_type) xtype, ndims+1, dimIDs, &ncbvarid);
+                      cdf_put_att_text(fileID, ncvarid, "bounds", strlen(axisname), axisname);
+                    }
+                }
+            }
 
           cdf_enddef(fileID);
           streamptr->ncmode = 2;
 
-          cdf_put_var_double(fileID, ncvarid, zaxisInqLevelsPtr(zaxisID));
+          if ( zaxisInqLevels(zaxisID, NULL) )
+            {
+              cdf_put_var_double(fileID, ncvarid, zaxisInqLevelsPtr(zaxisID));
 
-          if ( ncbvarid != UNDEFID )
-	    {
-              double lbounds[dimlen], ubounds[dimlen], zbounds[2*dimlen];
-	      zaxisInqLbounds(zaxisID, lbounds);
-	      zaxisInqUbounds(zaxisID, ubounds);
-	      for ( size_t i = 0; i < dimlen; ++i )
-		{
-		  zbounds[2*i  ] = lbounds[i];
-		  zbounds[2*i+1] = ubounds[i];
-		}
+              if ( ncbvarid != UNDEFID )
+                {
+                  double lbounds[dimlen], ubounds[dimlen], zbounds[2*dimlen];
+                  zaxisInqLbounds(zaxisID, lbounds);
+                  zaxisInqUbounds(zaxisID, ubounds);
+                  for ( size_t i = 0; i < dimlen; ++i )
+                    {
+                      zbounds[2*i  ] = lbounds[i];
+                      zbounds[2*i+1] = ubounds[i];
+                    }
 
-	      cdf_put_var_double(fileID, ncbvarid, zbounds);
-	    }
+                  cdf_put_var_double(fileID, ncbvarid, zbounds);
+                }
 
-          if ( ndims == 0 ) streamptr->nczvarID[zaxisindex] = ncvarid;
+              if ( ndims == 0 ) streamptr->nczvarID[zaxisindex] = ncvarid;
+
+              {
+                int natts;
+                cdiInqNatts(zaxisID, CDI_GLOBAL, &natts);
+
+                if ( natts > 0 && streamptr->ncmode == 2 ) cdf_redef(fileID);
+
+                cdfDefineAttributes(zaxisID, CDI_GLOBAL, fileID, ncvarid);
+
+                if ( natts > 0 && streamptr->ncmode == 2 ) cdf_enddef(fileID);
+              }
+            }
         }
-
-      {
-        int natts;
-        cdiInqNatts(zaxisID, CDI_GLOBAL, &natts);
-
-        if ( natts > 0 && streamptr->ncmode == 2 ) cdf_redef(fileID);
-
-        cdfDefineAttributes(zaxisID, CDI_GLOBAL, fileID, ncvarid);
-
-        if ( natts > 0 && streamptr->ncmode == 2 ) cdf_enddef(fileID);
-      }
     }
 
   if ( dimID != UNDEFID )
