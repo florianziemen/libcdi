@@ -952,8 +952,6 @@ int     zaxisInqSize(int zaxisID);
 /*      zaxisDuplicate: Duplicate a Z-axis */
 int     zaxisDuplicate(int zaxisID);
 
-void    zaxisResize(int zaxisID, int size);
-
 void    zaxisPrint(int zaxisID, int index);
 
 /*      zaxisDefLevels: Define the levels of a Z-axis */

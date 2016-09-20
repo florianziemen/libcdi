@@ -55,6 +55,8 @@ const char *zaxisInqNamePtr(int zaxisID);
 
 const double *zaxisInqLevelsPtr(int zaxisID);
 
+void zaxisResize(int zaxisID, int size);
+
 #endif
 
 /*

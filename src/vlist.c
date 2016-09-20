@@ -823,11 +823,11 @@ void vlistMerge(int vlistID2, int vlistID1)
             vars1[varID].levinfo[levID].mlevelID = nlevs2 + levID;
 	}
 
-      int *lvar = (int *) Calloc((size_t)nvars2, sizeof(int));
+      bool *lvar = (bool *) Calloc((size_t)nvars2, sizeof(bool));
 
       for ( varID = 0; varID < nvars2; varID++ )
         {
-          if ( lvar[varID] == TRUE ) continue;
+          if ( lvar[varID] == true ) continue;
 
           int zaxisID1 = vars1[varID].zaxisID;
           int zaxisID2 = vars2[varID].zaxisID;
@@ -843,11 +843,10 @@ void vlistMerge(int vlistID2, int vlistID1)
           int nlevs = nlevs1 + nlevs2;
 
           int zaxisID = zaxisDuplicate(zaxisID2);
+          zaxisResize(zaxisID, nlevs);
 
           if ( zaxisInqLevels(zaxisID1, NULL) )
             {
-              zaxisResize(zaxisID, nlevs);
-
               double *levels = (double *) Malloc((size_t)nlevs1 * sizeof(double));
 
               zaxisInqLevels(zaxisID1, levels);
@@ -866,10 +865,10 @@ void vlistMerge(int vlistID2, int vlistID1)
               vlistptr2->zaxisIDs[index] = zaxisID;
 
           for ( int varID2 = 0; varID2 < nvars2; varID2++ )
-            if ( lvar[varID2] == FALSE && vars2[varID2].zaxisID == zaxisID2 )
+            if ( lvar[varID2] == false && vars2[varID2].zaxisID == zaxisID2 )
               {
                 vars2[varID2].zaxisID = zaxisID;
-                lvar[varID2] = TRUE;
+                lvar[varID2] = true;
               }
         }
 
