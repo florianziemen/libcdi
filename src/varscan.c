@@ -994,7 +994,7 @@ int varDefZaxis(int vlistID, int zaxistype, int nlevels, const double *levels, b
       if ( ! zaxisglobdefined )
 	{
 	  zaxisID = zaxisCreate(zaxistype, nlevels);
-	  zaxisDefLevels(zaxisID, levels);
+	  if ( levels ) zaxisDefLevels(zaxisID, levels);
 	  if ( lbounds )
 	    {
 	      zaxisDefLbounds(zaxisID, levels1);
@@ -1004,9 +1004,9 @@ int varDefZaxis(int vlistID, int zaxistype, int nlevels, const double *levels, b
 	  if ( (zaxistype == ZAXIS_HYBRID || zaxistype == ZAXIS_HYBRID_HALF) && vctsize > 0 )
             zaxisDefVct(zaxisID, vctsize, vct);
 
-	  zaxisDefName(zaxisID, name);
-	  zaxisDefLongname(zaxisID, longname);
-	  zaxisDefUnits(zaxisID, units);
+	  if ( name && name[0] ) zaxisDefName(zaxisID, name);
+	  if ( longname && longname[0] ) zaxisDefLongname(zaxisID, longname);
+	  if ( units && units[0] ) zaxisDefUnits(zaxisID, units);
 	  zaxisDefPrec(zaxisID, prec);
 	  zaxisDefLtype(zaxisID, ltype1);
 	}

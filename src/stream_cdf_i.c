@@ -2720,7 +2720,7 @@ void cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 
 	  if ( CDI_Debug ) Message("nlevs = %d", zsize);
 
-	  double *zvar = (double *) Malloc((size_t)zsize * sizeof (double));
+	  double *zvar = NULL;
 
 	  int zaxisType = UNDEFID;
 	  if ( zvarid != UNDEFID ) zaxisType = ncvars[zvarid].zaxistype;
@@ -2749,6 +2749,7 @@ void cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
                   if ( ncvars[zvarid].psvarid != -1 ) psvarid = ncvars[zvarid].psvarid;
                 }
 
+              zvar = (double*) Malloc((size_t)zsize*sizeof(double));
 	      cdf_get_var_double(ncvars[zvarid].ncid, zvarid, zvar);
 
 	      if ( ncvars[zvarid].bounds != UNDEFID )
@@ -2776,18 +2777,15 @@ void cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 	    }
 	  else
 	    {
-	      pname     = NULL;
+              pname     = (zdimid != UNDEFID) ? ncdims[zdimid].name : NULL;
 	      plongname = NULL;
 	      punits    = NULL;
 
 	      if ( zsize == 1 && zdimid == UNDEFID )
 		{
                   zaxisType = (ncvar->zaxistype != UNDEFID) ? ncvar->zaxistype : ZAXIS_SURFACE;
+                  zvar = (double*) Malloc(sizeof(double));
 		  zvar[0] = 0;
-		}
-	      else
-		{
-		  for ( int ilev = 0; ilev < zsize; ilev++ ) zvar[ilev] = ilev + 1;
 		}
 	    }
 
@@ -2799,10 +2797,7 @@ void cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
           if ( CDI_cmor_mode && zsize == 1 && zaxisType != ZAXIS_HYBRID ) zaxisDefScalar(zaxisID);
 
           if ( uuidOfVGrid[0] != 0 )
-            {
-              // printf("uuidOfVGrid: defined\n");
-              zaxisDefUUID(zaxisID, uuidOfVGrid);
-            }
+            zaxisDefUUID(zaxisID, uuidOfVGrid);
 
           if ( zaxisType == ZAXIS_HYBRID && psvarid != -1 )
             cdiZaxisDefKeyStr(zaxisID, CDI_KEY_PSNAME, strlen(ncvars[psvarid].name)+1, ncvars[psvarid].name);
@@ -2810,15 +2805,15 @@ void cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
           if ( positive > 0 ) zaxisDefPositive(zaxisID, positive);
           if ( is_scalar ) zaxisDefScalar(zaxisID);
 
-          if ( zdimid != -1 )
+          if ( zdimid != UNDEFID )
             cdiZaxisDefKeyStr(zaxisID, CDI_KEY_DIMNAME, (int)(strlen(ncdims[zdimid].name)+1), ncdims[zdimid].name);
           /*
           if ( vdimid != -1 )
             cdiZaxisDefKeyStr(zaxisID, CDI_KEY_VDIMNAME, strlen(ncdims[vdimid].name)+1, ncdims[vdimid].name);
           */
-	  Free(zvar);
-	  Free(lbounds);
-	  Free(ubounds);
+	  if ( zvar    ) Free(zvar);
+	  if ( lbounds ) Free(lbounds);
+	  if ( ubounds ) Free(ubounds);
 
           if ( zvarid != UNDEFID )
             {

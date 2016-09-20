@@ -32,7 +32,7 @@ static const struct {
 }
 ZaxistypeEntry[] = {
   { /*  0 */ 0, "sfc",               "surface",                "",               ""},
-  { /*  1 */ 0, "lev",               "generic",                "",               "level"},
+  { /*  1 */ 0, "lev",               "generic",                "",               ""},
   { /*  2 */ 2, "lev",               "hybrid",                 "",               "level"},
   { /*  3 */ 2, "lev",               "hybrid_half",            "",               "level"},
   { /*  4 */ 2, "lev",               "pressure",               "air_pressure",   "Pa"},
@@ -684,15 +684,18 @@ void zaxisDefLevels(int zaxisID, const double *levels)
   zaxis_t *zaxisptr = zaxisID2Ptr(zaxisID);
   size_t size = (size_t)zaxisptr->size;
 
-  if ( zaxisptr->vals == NULL )
-    zaxisptr->vals = (double*) Malloc(size*sizeof(double));
+  if ( levels )
+    {
+      if ( zaxisptr->vals == NULL )
+        zaxisptr->vals = (double*) Malloc(size*sizeof(double));
 
-  double *vals = zaxisptr->vals;
+      double *vals = zaxisptr->vals;
 
-  for ( size_t ilev = 0; ilev < size; ++ilev )
-    vals[ilev] = levels[ilev];
+      for ( size_t ilev = 0; ilev < size; ++ilev )
+        vals[ilev] = levels[ilev];
 
-  reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
+      reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
+    }
 }
 
 /*
