@@ -1,3 +1,7 @@
+2016-09-22  Uwe Schulzweida
+
+	* GRIB: sort only unsorted pressure levels
+
 2016-09-19  Uwe Schulzweida
 
 	* time axis: added support for NC_FLOAT

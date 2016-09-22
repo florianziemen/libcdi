@@ -670,7 +670,7 @@ void cdi_generate_vars(stream_t *streamptr)
            * levelTable[levelID1].level1 < levelTable[levelID2].level1 <=> levelID1 > levelID2
            * unless already sorted in decreasing order
            */
-          if ( !ldec && zaxistype == ZAXIS_PRESSURE )
+          if ( (!linc && !ldec) && zaxistype == ZAXIS_PRESSURE )
             {
               qsort(levelTable, nlevels, sizeof(leveltable_t), cmpLevelTableInv);
               lsort = true;
