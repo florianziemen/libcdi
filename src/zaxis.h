@@ -38,7 +38,7 @@ void zaxisGetTypeDescription(int zaxisType, int* outPositive, const char** outNa
 
 unsigned cdiZaxisCount(void);
 
-zaxis_t *zaxisID2Ptr(int zaxisID);
+zaxis_t *zaxis_to_pointer(int zaxisID);
 
 void cdiZaxisGetIndexList(unsigned numIDs, int *IDs);
 

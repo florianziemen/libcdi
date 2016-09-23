@@ -110,7 +110,7 @@ cdi_atts_t *cdi_get_attsp(int objID, int varID)
     }
   else if ( varID == CDI_GLOBAL && reshGetTxCode(objID) == ZAXIS )
     {
-      zaxis_t *zaxisptr = zaxisID2Ptr(objID);
+      zaxis_t *zaxisptr = zaxis_to_pointer(objID);
       attsp = &zaxisptr->atts;
     }
   else
