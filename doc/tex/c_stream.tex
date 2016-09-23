@@ -17,9 +17,9 @@ The function {\tt streamOpenWrite} creates a new datset.
 The name of the new dataset.
 \item[{\tt filetype}]
 The type of the file format, one of the set of predefined {\CDI} file format types.
-                     The valid {\CDI} file format types are {\tt FILETYPE\_GRB}, {\tt FILETYPE\_GRB2}, {\tt FILETYPE\_NC},
-                     {\tt FILETYPE\_NC2}, {\tt FILETYPE\_NC4}, {\tt FILETYPE\_NC4C}, {\tt FILETYPE\_SRV},
-                     {\tt FILETYPE\_EXT} and {\tt FILETYPE\_IEG}.
+                     The valid {\CDI} file format types are {\tt CDI\_FILETYPE\_GRB}, {\tt CDI\_FILETYPE\_GRB2}, {\tt CDI\_FILETYPE\_NC},
+                     {\tt CDI\_FILETYPE\_NC2}, {\tt CDI\_FILETYPE\_NC4}, {\tt CDI\_FILETYPE\_NC4C}, {\tt CDI\_FILETYPE\_SRV},
+                     {\tt CDI\_FILETYPE\_EXT} and {\tt CDI\_FILETYPE\_IEG}.
 
 \end{deflist}
 \end{minipage}
@@ -57,7 +57,7 @@ Here is an example using {\tt streamOpenWrite} to create a new NetCDF file named
        ...
     int streamID;
        ...
-    streamID = streamOpenWrite("foo.nc", FILETYPE_NC);
+    streamID = streamOpenWrite("foo.nc", CDI_FILETYPE_NC);
     if ( streamID < 0 ) handle_error(streamID);
        ...
 \end{lstlisting}
@@ -168,8 +168,8 @@ Stream ID, from a previous call to {\htmlref{\tt streamOpenRead}{streamOpenRead}
 
 {\tt streamInqFiletype} returns the type of the file format,
 one of the set of predefined {\CDI} file format types.
-The valid {\CDI} file format types are {\tt FILETYPE\_GRB}, {\tt FILETYPE\_GRB2}, {\tt FILETYPE\_NC}, {\tt FILETYPE\_NC2},
-{\tt FILETYPE\_NC4}, {\tt FILETYPE\_NC4C}, {\tt FILETYPE\_SRV}, {\tt FILETYPE\_EXT} and {\tt FILETYPE\_IEG}.
+The valid {\CDI} file format types are {\tt CDI\_FILETYPE\_GRB}, {\tt CDI\_FILETYPE\_GRB2}, {\tt CDI\_FILETYPE\_NC}, {\tt CDI\_FILETYPE\_NC2},
+{\tt CDI\_FILETYPE\_NC4}, {\tt CDI\_FILETYPE\_NC4C}, {\tt CDI\_FILETYPE\_SRV}, {\tt CDI\_FILETYPE\_EXT} and {\tt CDI\_FILETYPE\_IEG}.
 
 
 
@@ -178,7 +178,7 @@ The valid {\CDI} file format types are {\tt FILETYPE\_GRB}, {\tt FILETYPE\_GRB2}
 \label{streamDefByteorder}
 
 The function {\tt streamDefByteorder} defines the byte order of a binary dataset
-with the file format type {\tt FILETYPE\_SRV}, {\tt FILETYPE\_EXT} or {\tt FILETYPE\_IEG}.
+with the file format type {\tt CDI\_FILETYPE\_SRV}, {\tt CDI\_FILETYPE\_EXT} or {\tt CDI\_FILETYPE\_IEG}.
 
 \subsubsection*{Usage}
 
@@ -203,7 +203,7 @@ The byte order of a dataset, one of the {\CDI} constants {\tt CDI\_BIGENDIAN} an
 \label{streamInqByteorder}
 
 The function {\tt streamInqByteorder} returns the byte order of a binary dataset
-with the file format type {\tt FILETYPE\_SRV}, {\tt FILETYPE\_EXT} or {\tt FILETYPE\_IEG}.
+with the file format type {\tt CDI\_FILETYPE\_SRV}, {\tt CDI\_FILETYPE\_EXT} or {\tt CDI\_FILETYPE\_IEG}.
 
 \subsubsection*{Usage}
 
