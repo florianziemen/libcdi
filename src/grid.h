@@ -114,7 +114,7 @@ struct grid_t {
 void grid_init(grid_t *gridptr);
 void cdiGridTypeInit(grid_t *gridptr, int gridtype, int size);
 void grid_free(grid_t *gridptr);
-grid_t *gridID2Ptr(int gridID);
+grid_t *grid_to_pointer(int gridID);
 extern const struct gridVirtTable cdiGridVtable;
 
 unsigned cdiGridCount(void);

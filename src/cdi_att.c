@@ -105,7 +105,7 @@ cdi_atts_t *cdi_get_attsp(int objID, int varID)
 
   if ( varID == CDI_GLOBAL && reshGetTxCode(objID) == GRID )
     {
-      grid_t *gridptr = gridID2Ptr(objID);
+      grid_t *gridptr = grid_to_pointer(objID);
       attsp = &gridptr->atts;
     }
   else if ( varID == CDI_GLOBAL && reshGetTxCode(objID) == ZAXIS )
