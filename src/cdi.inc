@@ -52,8 +52,6 @@
 !
 !  File types
 !
-      INTEGER    FILETYPE_UNDEF        
-      PARAMETER (FILETYPE_UNDEF         = -1)
       INTEGER    FILETYPE_GRB          
       PARAMETER (FILETYPE_GRB           =  1)
       INTEGER    FILETYPE_GRB2         

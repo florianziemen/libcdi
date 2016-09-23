@@ -301,6 +301,7 @@ typedef enum {
 } CdiTimeType;
 
 
+#define  FILETYPE_UNDEF          -1   /* Unknown/not yet defined file type */
 
 
 extern int CDI_Debug;      /* If set to 1, debuggig (default 0)            */
