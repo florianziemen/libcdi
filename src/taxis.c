@@ -151,7 +151,7 @@ void taxisDefaultValue(taxis_t* taxisptr)
 {
   taxisptr->self        = CDI_UNDEFID;
   taxisptr->used        = false;
-  taxisptr->datatype    = DATATYPE_FLT64;
+  taxisptr->datatype    = CDI_DATATYPE_FLT64;
   taxisptr->type        = DefaultTimeType;
   taxisptr->vdate       = 0;
   taxisptr->vtime       = 0;
@@ -1472,12 +1472,12 @@ taxisGetPackSize(void *p, void *context)
 {
   taxis_t *taxisptr = (taxis_t*) p;
   int packBufferSize
-    = serializeGetSize(taxisNint, DATATYPE_INT, context)
-    + serializeGetSize(1, DATATYPE_UINT32, context)
+    = serializeGetSize(taxisNint, CDI_DATATYPE_INT, context)
+    + serializeGetSize(1, CDI_DATATYPE_UINT32, context)
     + (taxisptr->name ?
-       serializeGetSize((int)strlen(taxisptr->name), DATATYPE_TXT, context) : 0)
+       serializeGetSize((int)strlen(taxisptr->name), CDI_DATATYPE_TXT, context) : 0)
     + (taxisptr->longname ?
-       serializeGetSize((int)strlen(taxisptr->longname), DATATYPE_TXT,
+       serializeGetSize((int)strlen(taxisptr->longname), CDI_DATATYPE_TXT,
                         context) : 0);
   return packBufferSize;
 }
@@ -1492,11 +1492,11 @@ taxisUnpack(char * unpackBuffer, int unpackBufferSize, int * unpackBufferPos,
   int idx = 0;
 
   serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                  intBuffer, taxisNint, DATATYPE_INT, context);
+                  intBuffer, taxisNint, CDI_DATATYPE_INT, context);
   serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                  &d, 1, DATATYPE_UINT32, context);
+                  &d, 1, CDI_DATATYPE_UINT32, context);
 
-  xassert(cdiCheckSum(DATATYPE_INT, taxisNint, intBuffer) == d);
+  xassert(cdiCheckSum(CDI_DATATYPE_INT, taxisNint, intBuffer) == d);
 
   taxisInit();
 
@@ -1529,7 +1529,7 @@ taxisUnpack(char * unpackBuffer, int unpackBufferSize, int * unpackBufferPos,
       int len = intBuffer[idx];
       char *name = new_refcount_string((size_t)len);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                      name, len, DATATYPE_TXT, context);
+                      name, len, CDI_DATATYPE_TXT, context);
       name[len] = '\0';
       taxisP->name = name;
     }
@@ -1539,7 +1539,7 @@ taxisUnpack(char * unpackBuffer, int unpackBufferSize, int * unpackBufferPos,
       int len = intBuffer[idx];
       char *longname = new_refcount_string((size_t)len);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                      longname, len, DATATYPE_TXT, context);
+                      longname, len, CDI_DATATYPE_TXT, context);
       longname[len] = '\0';
       taxisP->longname = longname;
     }
@@ -1582,16 +1582,16 @@ taxisPack(void * voidP, void * packBuffer, int packBufferSize, int * packBufferP
   intBuffer[idx++] = taxisP->name ? (int)strlen(taxisP->name) : 0;
   intBuffer[idx++] = taxisP->longname ? (int)strlen(taxisP->longname) : 0;
 
-  serializePack(intBuffer, taxisNint, DATATYPE_INT,
+  serializePack(intBuffer, taxisNint, CDI_DATATYPE_INT,
                 packBuffer, packBufferSize, packBufferPos, context);
-  d = cdiCheckSum(DATATYPE_INT, taxisNint, intBuffer);
-  serializePack(&d, 1, DATATYPE_UINT32,
+  d = cdiCheckSum(CDI_DATATYPE_INT, taxisNint, intBuffer);
+  serializePack(&d, 1, CDI_DATATYPE_UINT32,
                 packBuffer, packBufferSize, packBufferPos, context);
   if (taxisP->name)
-    serializePack(taxisP->name, intBuffer[15], DATATYPE_TXT,
+    serializePack(taxisP->name, intBuffer[15], CDI_DATATYPE_TXT,
                   packBuffer, packBufferSize, packBufferPos, context);
   if (taxisP->longname)
-    serializePack(taxisP->longname, intBuffer[16], DATATYPE_TXT,
+    serializePack(taxisP->longname, intBuffer[16], CDI_DATATYPE_TXT,
                   packBuffer, packBufferSize, packBufferPos, context);
 
 }

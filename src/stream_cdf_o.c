@@ -34,7 +34,7 @@ void cdfCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
   int gridID   = vlistInqVarGrid(vlistID1, ivarID);
   int datasize = gridInqSize(gridID);
   int datatype = vlistInqVarDatatype(vlistID1, ivarID);
-  int memtype  = datatype != DATATYPE_FLT32 ? MEMTYPE_DOUBLE : MEMTYPE_FLOAT;
+  int memtype  = datatype != CDI_DATATYPE_FLT32 ? MEMTYPE_DOUBLE : MEMTYPE_FLOAT;
 
   void *data = Malloc((size_t)datasize
              * (memtype == MEMTYPE_DOUBLE ? sizeof(double) : sizeof(float)));
@@ -246,7 +246,7 @@ void cdfDefTime(stream_t* streamptr)
   cdf_def_dim(fileID, taxis_name, NC_UNLIMITED, &time_dimid);
   streamptr->basetime.ncdimid = time_dimid;
 
-  nc_type xtype = (taxis->datatype == DATATYPE_FLT32) ? NC_FLOAT : NC_DOUBLE;
+  nc_type xtype = (taxis->datatype == CDI_DATATYPE_FLT32) ? NC_FLOAT : NC_DOUBLE;
 
   cdf_def_var(fileID, taxis_name, xtype, 1, &time_dimid, &time_varid);
 
@@ -493,7 +493,7 @@ static void
 cdfDefTrajLatLon(stream_t *streamptr, int gridID, int gridindex,
                  const struct cdfDefGridAxisInqs *inqs, int dimtype)
 {
-  nc_type xtype = (gridInqPrec(gridID) == DATATYPE_FLT32) ? NC_FLOAT : NC_DOUBLE;
+  nc_type xtype = (gridInqPrec(gridID) == CDI_DATATYPE_FLT32) ? NC_FLOAT : NC_DOUBLE;
   ncgrid_t *ncgrid = streamptr->ncgrid;
 
   int dimlen = inqs->axisSize(gridID);
@@ -655,7 +655,7 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridindex, int ndims,
   int nvdimID = UNDEFID;
   int fileID  = streamptr->fileID;
   size_t dimlen = (size_t)gridAxisInq->axisSize(gridID);
-  nc_type xtype = (gridInqPrec(gridID) == DATATYPE_FLT32) ? NC_FLOAT : NC_DOUBLE;
+  nc_type xtype = (gridInqPrec(gridID) == CDI_DATATYPE_FLT32) ? NC_FLOAT : NC_DOUBLE;
   ncgrid_t *ncgrid = streamptr->ncgrid;
 
   for ( int index = 0; index < gridindex; ++index )
@@ -831,7 +831,7 @@ void cdfDefCurvilinear(stream_t *streamptr, int gridID, int gridindex)
   int ydimID = UNDEFID;
   int ncxvarid = UNDEFID, ncyvarid = UNDEFID;
   int ncbxvarid = UNDEFID, ncbyvarid = UNDEFID, ncavarid = UNDEFID;
-  nc_type xtype = (gridInqPrec(gridID) == DATATYPE_FLT32) ? NC_FLOAT : NC_DOUBLE;
+  nc_type xtype = (gridInqPrec(gridID) == CDI_DATATYPE_FLT32) ? NC_FLOAT : NC_DOUBLE;
   ncgrid_t *ncgrid = streamptr->ncgrid;
 
   int fileID  = streamptr->fileID;
@@ -1172,7 +1172,7 @@ void cdfDefUnstructured(stream_t *streamptr, int gridID, int gridindex)
   int ncxvarid = UNDEFID, ncyvarid = UNDEFID;
   int ncbxvarid = UNDEFID, ncbyvarid = UNDEFID, ncavarid = UNDEFID;
   int nvdimID = UNDEFID;
-  nc_type xtype = (gridInqPrec(gridID) == DATATYPE_FLT32) ? NC_FLOAT : NC_DOUBLE;
+  nc_type xtype = (gridInqPrec(gridID) == CDI_DATATYPE_FLT32) ? NC_FLOAT : NC_DOUBLE;
   ncgrid_t *ncgrid = streamptr->ncgrid;
 
   int fileID  = streamptr->fileID;
@@ -1737,7 +1737,7 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
   int nvdimID = UNDEFID;
   int xtype = NC_DOUBLE;
 
-  if ( zaxisInqPrec(zaxisID) == DATATYPE_FLT32 ) xtype = NC_FLOAT;
+  if ( zaxisInqPrec(zaxisID) == CDI_DATATYPE_FLT32 ) xtype = NC_FLOAT;
 
   int vlistID = streamptr->vlistID;
   int fileID  = streamptr->fileID;

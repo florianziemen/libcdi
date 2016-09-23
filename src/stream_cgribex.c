@@ -390,8 +390,8 @@ void cgribexAddRecord(stream_t * streamptr, int param, int *isec1, int *isec2, d
 
   int lbounds = cgribexGetZaxisHasBounds(ISEC1_LevelType);
 
-  if ( datatype > 32 ) datatype = DATATYPE_PACK32;
-  if ( datatype <  0 ) datatype = DATATYPE_PACK;
+  if ( datatype > 32 ) datatype = CDI_DATATYPE_PACK32;
+  if ( datatype <  0 ) datatype = CDI_DATATYPE_PACK;
 
   varAddRecord(recID, param, gridID, zaxistype, lbounds, level1, level2, 0, 0,
 	       datatype, &varID, &levelID, tsteptype, numavg, ISEC1_LevelType, -1,
@@ -671,7 +671,7 @@ int cgribexScanTimestep1(stream_t * streamptr)
       if ( ISEC4_NumBits > 0 && ISEC4_NumBits <= 32 )
 	datatype = ISEC4_NumBits;
       else
-        datatype = DATATYPE_PACK;
+        datatype = CDI_DATATYPE_PACK;
 
       if ( nrecs == 0 )
 	{

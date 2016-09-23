@@ -48,7 +48,7 @@
 
         status = vlistInqAtt(vlistID, -1, ia-1, attname, atttype,
      &  attlen)
-        IF ( atttype == DATATYPE_TXT ) THEN
+        IF ( atttype == CDI_DATATYPE_TXT ) THEN
 	  status = vlistInqAttTxt(vlistID, -1, attname, 80,
      &         atttxt)
           WRITE(0,*) attname(1:10), attlen, atttxt(1:attlen)

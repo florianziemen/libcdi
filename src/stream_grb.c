@@ -166,14 +166,14 @@ int grbBitsPerValue(int datatype)
 {
   int bitsPerValue = 16;
 
-  if ( datatype == DATATYPE_CPX32 || datatype == DATATYPE_CPX64 )
+  if ( datatype == CDI_DATATYPE_CPX32 || datatype == CDI_DATATYPE_CPX64 )
     Error("CDI/GRIB library does not support complex numbers!");
 
   if ( datatype != CDI_UNDEFID )
     {
       if ( datatype > 0 && datatype <= 32 )
 	bitsPerValue = datatype;
-      else if ( datatype == DATATYPE_FLT64 )
+      else if ( datatype == CDI_DATATYPE_FLT64 )
 	bitsPerValue = 24;
       else
 	bitsPerValue = 16;

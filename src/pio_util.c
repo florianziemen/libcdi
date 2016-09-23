@@ -147,13 +147,13 @@ void printArray ( const char *cdiPioDebugString, const char *ps, const void *arr
 
   switch ( datatype )
     {
-    case DATATYPE_INT:
+    case CDI_DATATYPE_INT:
       iArray = ( int * ) array;
       for ( i = 0; i < n-1; i++ )
 	fprintf ( stdout, "%d ", * ( iArray + i ));
       fprintf ( stdout, "%d\n", * ( iArray + n - 1 ));
       break;
-    case DATATYPE_FLT:
+    case CDI_DATATYPE_FLT:
       dArray = ( double * ) array;
       for ( i = 0; i < n-1; i++ )
 	fprintf ( stdout, "%.2f ", * ( dArray + i ));

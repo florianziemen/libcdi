@@ -99,13 +99,13 @@ static const struct {
   char suffix[4];
   int type, defaultDT, defaultGrid;
 } suffix2type[] = {
-  { "nc", CDI_FILETYPE_NC, DATATYPE_FLT64, GRID_LONLAT },
-  { "grb",  CDI_FILETYPE_GRB, DATATYPE_PACK24, GRID_LONLAT },
-  { "nc2", CDI_FILETYPE_NC2, DATATYPE_FLT64, GRID_LONLAT },
-  { "nc4", CDI_FILETYPE_NC4, DATATYPE_FLT64, GRID_LONLAT },
-  { "ext", CDI_FILETYPE_EXT, DATATYPE_FLT64, GRID_GENERIC, },
-  { "svc", CDI_FILETYPE_SRV, DATATYPE_FLT64, GRID_GENERIC, },
-  { "ieg", CDI_FILETYPE_IEG, DATATYPE_FLT64, GRID_LONLAT },
+  { "nc", CDI_FILETYPE_NC, CDI_DATATYPE_FLT64, GRID_LONLAT },
+  { "grb",  CDI_FILETYPE_GRB, CDI_DATATYPE_PACK24, GRID_LONLAT },
+  { "nc2", CDI_FILETYPE_NC2, CDI_DATATYPE_FLT64, GRID_LONLAT },
+  { "nc4", CDI_FILETYPE_NC4, CDI_DATATYPE_FLT64, GRID_LONLAT },
+  { "ext", CDI_FILETYPE_EXT, CDI_DATATYPE_FLT64, GRID_GENERIC, },
+  { "svc", CDI_FILETYPE_SRV, CDI_DATATYPE_FLT64, GRID_GENERIC, },
+  { "ieg", CDI_FILETYPE_IEG, CDI_DATATYPE_FLT64, GRID_LONLAT },
 };
 #endif
 enum {
@@ -130,11 +130,11 @@ main(int argc, char *argv[])
 #ifndef TEST_CHUNK_WRITE
   const char *suffix = "grb", *prefix = "example";
   int grid = GRID_LONLAT;
-  int filetype = CDI_FILETYPE_GRB, datatype = DATATYPE_PACK24;
+  int filetype = CDI_FILETYPE_GRB, datatype = CDI_DATATYPE_PACK24;
 #else
   const char *suffix = "nc", *prefix = "example";
   int grid = GRID_LONLAT;
-  int filetype = CDI_FILETYPE_NC, datatype = DATATYPE_FLT64;
+  int filetype = CDI_FILETYPE_NC, datatype = CDI_DATATYPE_FLT64;
 #endif
   {
     int opt;

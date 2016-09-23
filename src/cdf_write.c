@@ -46,35 +46,35 @@ int cdfDefDatatype(int datatype, int filetype)
 {
   int xtype = NC_FLOAT;
 
-  if ( datatype == DATATYPE_CPX32 || datatype == DATATYPE_CPX64 )
+  if ( datatype == CDI_DATATYPE_CPX32 || datatype == CDI_DATATYPE_CPX64 )
     Error("CDI/NetCDF library does not support complex numbers!");
 
   if ( filetype == CDI_FILETYPE_NC4 )
     {
-      if      ( datatype == DATATYPE_INT8   ) xtype = NC_BYTE;
-      else if ( datatype == DATATYPE_INT16  ) xtype = NC_SHORT;
-      else if ( datatype == DATATYPE_INT32  ) xtype = NC_INT;
+      if      ( datatype == CDI_DATATYPE_INT8   ) xtype = NC_BYTE;
+      else if ( datatype == CDI_DATATYPE_INT16  ) xtype = NC_SHORT;
+      else if ( datatype == CDI_DATATYPE_INT32  ) xtype = NC_INT;
 #if  defined  (HAVE_NETCDF4)
-      else if ( datatype == DATATYPE_UINT8  ) xtype = NC_UBYTE;
-      else if ( datatype == DATATYPE_UINT16 ) xtype = NC_USHORT;
-      else if ( datatype == DATATYPE_UINT32 ) xtype = NC_UINT;
+      else if ( datatype == CDI_DATATYPE_UINT8  ) xtype = NC_UBYTE;
+      else if ( datatype == CDI_DATATYPE_UINT16 ) xtype = NC_USHORT;
+      else if ( datatype == CDI_DATATYPE_UINT32 ) xtype = NC_UINT;
 #else
-      else if ( datatype == DATATYPE_UINT8  ) xtype = NC_SHORT;
-      else if ( datatype == DATATYPE_UINT16 ) xtype = NC_INT;
-      else if ( datatype == DATATYPE_UINT32 ) xtype = NC_INT;
+      else if ( datatype == CDI_DATATYPE_UINT8  ) xtype = NC_SHORT;
+      else if ( datatype == CDI_DATATYPE_UINT16 ) xtype = NC_INT;
+      else if ( datatype == CDI_DATATYPE_UINT32 ) xtype = NC_INT;
 #endif
-      else if ( datatype == DATATYPE_FLT64  ) xtype = NC_DOUBLE;
+      else if ( datatype == CDI_DATATYPE_FLT64  ) xtype = NC_DOUBLE;
       else                                    xtype = NC_FLOAT;
     }
   else
     {
-      if      ( datatype == DATATYPE_INT8   ) xtype = NC_BYTE;
-      else if ( datatype == DATATYPE_INT16  ) xtype = NC_SHORT;
-      else if ( datatype == DATATYPE_INT32  ) xtype = NC_INT;
-      else if ( datatype == DATATYPE_UINT8  ) xtype = NC_SHORT;
-      else if ( datatype == DATATYPE_UINT16 ) xtype = NC_INT;
-      else if ( datatype == DATATYPE_UINT32 ) xtype = NC_INT;
-      else if ( datatype == DATATYPE_FLT64  ) xtype = NC_DOUBLE;
+      if      ( datatype == CDI_DATATYPE_INT8   ) xtype = NC_BYTE;
+      else if ( datatype == CDI_DATATYPE_INT16  ) xtype = NC_SHORT;
+      else if ( datatype == CDI_DATATYPE_INT32  ) xtype = NC_INT;
+      else if ( datatype == CDI_DATATYPE_UINT8  ) xtype = NC_SHORT;
+      else if ( datatype == CDI_DATATYPE_UINT16 ) xtype = NC_INT;
+      else if ( datatype == CDI_DATATYPE_UINT32 ) xtype = NC_INT;
+      else if ( datatype == CDI_DATATYPE_FLT64  ) xtype = NC_DOUBLE;
       else                                    xtype = NC_FLOAT;
     }
 
@@ -181,7 +181,7 @@ void cdfDefineAttributes(int cdiID, int varID, int fileID, int ncvarID)
 
       if ( attlen == 0 ) continue;
 
-      if ( atttype == DATATYPE_TXT )
+      if ( atttype == CDI_DATATYPE_TXT )
         {
           size_t attSize = (size_t)attlen*sizeof(char);
           char *atttxt = (char *)resizeBuf(&attBuf, &attBufSize, attSize);
@@ -189,31 +189,31 @@ void cdfDefineAttributes(int cdiID, int varID, int fileID, int ncvarID)
           len = (size_t)attlen;
           cdf_put_att_text(fileID, ncvarID, attname, len, atttxt);
         }
-      else if ( atttype == DATATYPE_INT8  || atttype == DATATYPE_UINT8  ||
-                atttype == DATATYPE_INT16 || atttype == DATATYPE_UINT16 ||
-                atttype == DATATYPE_INT32 || atttype == DATATYPE_UINT32 )
+      else if ( atttype == CDI_DATATYPE_INT8  || atttype == CDI_DATATYPE_UINT8  ||
+                atttype == CDI_DATATYPE_INT16 || atttype == CDI_DATATYPE_UINT16 ||
+                atttype == CDI_DATATYPE_INT32 || atttype == CDI_DATATYPE_UINT32 )
         {
           size_t attSize = (size_t)attlen*sizeof(int);
           int *attint = (int *)resizeBuf(&attBuf, &attBufSize, attSize);
           cdiInqAttInt(cdiID, varID, attname, attlen, &attint[0]);
           len = (size_t)attlen;
-          nc_type xtype = (atttype == DATATYPE_INT8)  ? NC_BYTE :
-                          (atttype == DATATYPE_INT16) ? NC_SHORT :
+          nc_type xtype = (atttype == CDI_DATATYPE_INT8)  ? NC_BYTE :
+                          (atttype == CDI_DATATYPE_INT16) ? NC_SHORT :
 #if  defined  (HAVE_NETCDF4)
-                          (atttype == DATATYPE_UINT8)  ? NC_UBYTE :
-                          (atttype == DATATYPE_UINT16) ? NC_USHORT :
-                          (atttype == DATATYPE_UINT32) ? NC_UINT :
+                          (atttype == CDI_DATATYPE_UINT8)  ? NC_UBYTE :
+                          (atttype == CDI_DATATYPE_UINT16) ? NC_USHORT :
+                          (atttype == CDI_DATATYPE_UINT32) ? NC_UINT :
 #endif
                           NC_INT;
           cdf_put_att_int(fileID, ncvarID, attname, xtype, len, attint);
         }
-      else if ( atttype == DATATYPE_FLT32 || atttype == DATATYPE_FLT64 )
+      else if ( atttype == CDI_DATATYPE_FLT32 || atttype == CDI_DATATYPE_FLT64 )
         {
           size_t attSize = (size_t)attlen * sizeof(double);
           double *attflt = (double *)resizeBuf(&attBuf, &attBufSize, attSize);
           cdiInqAttFlt(cdiID, varID, attname, attlen, attflt);
           len = (size_t)attlen;
-          if ( atttype == DATATYPE_FLT32 )
+          if ( atttype == CDI_DATATYPE_FLT32 )
             {
               float attflt_sp[len];
               for ( size_t i = 0; i < len; ++i ) attflt_sp[i] = (float)attflt[i];
@@ -710,7 +710,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
         }
     }
 
-  if ( dtype == DATATYPE_UINT8 && xtype == NC_BYTE )
+  if ( dtype == CDI_DATATYPE_UINT8 && xtype == NC_BYTE )
     {
       int validrange[2] = {0, 255};
       cdf_put_att_int(fileID, ncvarid, "valid_range", NC_SHORT, 2, validrange);
@@ -814,7 +814,7 @@ void cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarid, int dty
   float *mdata_sp = NULL;
   float *sdata_sp = NULL;
 
-  /*  if ( dtype == DATATYPE_INT8 || dtype == DATATYPE_INT16 || dtype == DATATYPE_INT32 ) */
+  /*  if ( dtype == CDI_DATATYPE_INT8 || dtype == CDI_DATATYPE_INT16 || dtype == CDI_DATATYPE_INT32 ) */
     {
       double missval      = vlistInqVarMissval(vlistID, varID);
       double addoffset    = vlistInqVarAddoffset(vlistID, varID);
@@ -882,8 +882,8 @@ void cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarid, int dty
             }
         }
 
-      if ( dtype == DATATYPE_UINT8 || dtype == DATATYPE_INT8 ||
-           dtype == DATATYPE_INT16 || dtype == DATATYPE_INT32 )
+      if ( dtype == CDI_DATATYPE_UINT8 || dtype == CDI_DATATYPE_INT8 ||
+           dtype == CDI_DATATYPE_INT16 || dtype == CDI_DATATYPE_INT32 )
         {
           if ( memtype == MEMTYPE_FLOAT )
             {
@@ -896,7 +896,7 @@ void cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarid, int dty
 
               for ( size_t i = 0; i < nvals; i++ ) mdata_sp[i] = roundf(mdata_sp[i]);
 
-              if ( dtype == DATATYPE_UINT8 )
+              if ( dtype == CDI_DATATYPE_UINT8 )
                 {
                   nc_type xtype;
                   cdf_inq_vartype(fileID, ncvarid, &xtype);
@@ -918,7 +918,7 @@ void cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarid, int dty
 
               for ( size_t i = 0; i < nvals; i++ ) mdata_dp[i] = round(mdata_dp[i]);
 
-              if ( dtype == DATATYPE_UINT8 )
+              if ( dtype == CDI_DATATYPE_UINT8 )
                 {
                   nc_type xtype;
                   cdf_inq_vartype(fileID, ncvarid, &xtype);

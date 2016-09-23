@@ -31,7 +31,7 @@ int reshUnpackResources(char * unpackBuffer, int unpackBufferSize,
   {
     int msgHdr[2];
     serializeUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos,
-                    &msgHdr, 2, DATATYPE_INT, context);
+                    &msgHdr, 2, CDI_DATATYPE_INT, context);
     if (msgHdr[0] != START)
       xabort("error parsing resource serialization buffer");
     originNamespace = msgHdr[1];
@@ -39,7 +39,7 @@ int reshUnpackResources(char * unpackBuffer, int unpackBufferSize,
   while ( unpackBufferPos < unpackBufferSize )
     {
       serializeUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos,
-                      &updateType, 1, DATATYPE_INT, context);
+                      &updateType, 1, CDI_DATATYPE_INT, context);
       if (updateType == END)
         break;
       switch (updateType)
@@ -80,7 +80,7 @@ int reshUnpackResources(char * unpackBuffer, int unpackBufferSize,
 	  break;
         case RESH_DELETE:
           serializeUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos,
-                          &resH, 1, DATATYPE_INT, context);
+                          &resH, 1, CDI_DATATYPE_INT, context);
           resH = namespaceAdaptKey(resH, originNamespace);
           reshDestroy(resH);
           reshSetStatus(resH, NULL, RESH_UNUSED);

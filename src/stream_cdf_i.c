@@ -439,19 +439,19 @@ int cdfInqDatatype(int xtype, bool lunsigned)
   if ( xtype == NC_BYTE && lunsigned ) xtype = NC_UBYTE;
 #endif
 
-  if      ( xtype == NC_BYTE   )  datatype = DATATYPE_INT8;
-  /* else if ( xtype == NC_CHAR   )  datatype = DATATYPE_UINT8; */
-  else if ( xtype == NC_SHORT  )  datatype = DATATYPE_INT16;
-  else if ( xtype == NC_INT    )  datatype = DATATYPE_INT32;
-  else if ( xtype == NC_FLOAT  )  datatype = DATATYPE_FLT32;
-  else if ( xtype == NC_DOUBLE )  datatype = DATATYPE_FLT64;
+  if      ( xtype == NC_BYTE   )  datatype = CDI_DATATYPE_INT8;
+  /* else if ( xtype == NC_CHAR   )  datatype = CDI_DATATYPE_UINT8; */
+  else if ( xtype == NC_SHORT  )  datatype = CDI_DATATYPE_INT16;
+  else if ( xtype == NC_INT    )  datatype = CDI_DATATYPE_INT32;
+  else if ( xtype == NC_FLOAT  )  datatype = CDI_DATATYPE_FLT32;
+  else if ( xtype == NC_DOUBLE )  datatype = CDI_DATATYPE_FLT64;
 #if  defined  (HAVE_NETCDF4)
-  else if ( xtype == NC_UBYTE  )  datatype = DATATYPE_UINT8;
-  else if ( xtype == NC_LONG   )  datatype = DATATYPE_INT32;
-  else if ( xtype == NC_USHORT )  datatype = DATATYPE_UINT16;
-  else if ( xtype == NC_UINT   )  datatype = DATATYPE_UINT32;
-  else if ( xtype == NC_INT64  )  datatype = DATATYPE_FLT64;
-  else if ( xtype == NC_UINT64 )  datatype = DATATYPE_FLT64;
+  else if ( xtype == NC_UBYTE  )  datatype = CDI_DATATYPE_UINT8;
+  else if ( xtype == NC_LONG   )  datatype = CDI_DATATYPE_INT32;
+  else if ( xtype == NC_USHORT )  datatype = CDI_DATATYPE_UINT16;
+  else if ( xtype == NC_UINT   )  datatype = CDI_DATATYPE_UINT32;
+  else if ( xtype == NC_INT64  )  datatype = CDI_DATATYPE_FLT64;
+  else if ( xtype == NC_UINT64 )  datatype = CDI_DATATYPE_FLT64;
 #endif
 
   return datatype;
@@ -874,21 +874,21 @@ void cdf_set_cdi_attr(int ncid, int ncvarid, int attnum, int cdiID, int varID)
     {
       int attint[attlen];
       cdfGetAttInt(ncid, ncvarid, attname, (int)attlen, attint);
-      int datatype = (atttype == NC_SHORT)  ? DATATYPE_INT16 :
-                     (atttype == NC_BYTE)   ? DATATYPE_INT8 :
+      int datatype = (atttype == NC_SHORT)  ? CDI_DATATYPE_INT16 :
+                     (atttype == NC_BYTE)   ? CDI_DATATYPE_INT8 :
 #if  defined  (HAVE_NETCDF4)
-                     (atttype == NC_UBYTE)  ? DATATYPE_UINT8 :
-                     (atttype == NC_USHORT) ? DATATYPE_UINT16 :
-                     (atttype == NC_UINT)   ? DATATYPE_UINT32 :
+                     (atttype == NC_UBYTE)  ? CDI_DATATYPE_UINT8 :
+                     (atttype == NC_USHORT) ? CDI_DATATYPE_UINT16 :
+                     (atttype == NC_UINT)   ? CDI_DATATYPE_UINT32 :
 #endif
-                     DATATYPE_INT32;
+                     CDI_DATATYPE_INT32;
       cdiDefAttInt(cdiID, varID, attname, datatype, (int)attlen, attint);
     }
   else if ( xtypeIsFloat(atttype) )
     {
       double attflt[attlen];
       cdfGetAttDouble(ncid, ncvarid, attname, (int)attlen, attflt);
-      int datatype = (atttype == NC_FLOAT) ? DATATYPE_FLT32 : DATATYPE_FLT64;
+      int datatype = (atttype == NC_FLOAT) ? CDI_DATATYPE_FLT32 : CDI_DATATYPE_FLT64;
       cdiDefAttFlt(cdiID, varID, attname, datatype, (int)attlen, attflt);
     }
   else if ( xtypeIsText(atttype) )
@@ -2123,7 +2123,7 @@ bool cdf_read_xcoord(struct cdfLazyGrid *restrict lazyGrid, ncdim_t *ncdims, ncv
       return true;
     }
 
-  if ( axisvar->xtype == NC_FLOAT ) grid->prec = DATATYPE_FLT32;
+  if ( axisvar->xtype == NC_FLOAT ) grid->prec = CDI_DATATYPE_FLT32;
 
   cdf_load_vals(size, ndims, xvarid, axisvar, &grid->x.vals, &lazyGrid->xValsGet, ntdims, start, count);
 
@@ -2174,7 +2174,7 @@ bool cdf_read_ycoord(struct cdfLazyGrid *restrict lazyGrid, ncdim_t *ncdims, ncv
       return true;
     }
 
-  if ( axisvar->xtype == NC_FLOAT ) grid->prec = DATATYPE_FLT32;
+  if ( axisvar->xtype == NC_FLOAT ) grid->prec = CDI_DATATYPE_FLT32;
 
   cdf_load_vals(size, ndims, yvarid, axisvar, &grid->y.vals, &lazyGrid->yValsGet,
                 ntdims, start, count);
@@ -2191,7 +2191,7 @@ bool cdf_read_coordinates(struct cdfLazyGrid *restrict lazyGrid, ncvar_t *ncvar,
   grid_t *grid = &lazyGrid->base;
   size_t size = 0;
 
-  grid->prec = DATATYPE_FLT64;
+  grid->prec = CDI_DATATYPE_FLT64;
 
   if ( ncvar->gridtype == GRID_TRAJECTORY )
     {
@@ -2726,7 +2726,7 @@ void cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 	  if ( zvarid != UNDEFID ) zaxisType = ncvars[zvarid].zaxistype;
 	  if ( zaxisType == UNDEFID ) zaxisType = ZAXIS_GENERIC;
 
-	  int zprec = DATATYPE_FLT64;
+	  int zprec = CDI_DATATYPE_FLT64;
 
 	  if ( zvarid != UNDEFID )
 	    {
@@ -2734,7 +2734,7 @@ void cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 	      pname     = ncvars[zvarid].name;
 	      plongname = ncvars[zvarid].longname;
 	      punits    = ncvars[zvarid].units;
-	      if ( ncvars[zvarid].xtype == NC_FLOAT ) zprec = DATATYPE_FLT32;
+	      if ( ncvars[zvarid].xtype == NC_FLOAT ) zprec = CDI_DATATYPE_FLT32;
 	      /* don't change the name !!! */
 	      /*
 	      if ( (len = strlen(pname)) > 2 )
@@ -3217,7 +3217,7 @@ void cdf_scan_global_attr(int fileID, int vlistID, stream_t *streamptr, int ngat
             {
               int attint[attlen];
               cdfGetAttInt(fileID, NC_GLOBAL, attname, (int)attlen, attint);
-              int datatype = (xtype == NC_SHORT) ? DATATYPE_INT16 : DATATYPE_INT32;
+              int datatype = (xtype == NC_SHORT) ? CDI_DATATYPE_INT16 : CDI_DATATYPE_INT32;
               cdiDefAttInt(vlistID, CDI_GLOBAL, attname, datatype, (int)attlen, attint);
             }
         }
@@ -3225,7 +3225,7 @@ void cdf_scan_global_attr(int fileID, int vlistID, stream_t *streamptr, int ngat
 	{
 	  double attflt[attlen];
 	  cdfGetAttDouble(fileID, NC_GLOBAL, attname, (int)attlen, attflt);
-          int datatype = (xtype == NC_FLOAT) ? DATATYPE_FLT32 : DATATYPE_FLT64;
+          int datatype = (xtype == NC_FLOAT) ? CDI_DATATYPE_FLT32 : CDI_DATATYPE_FLT64;
           cdiDefAttFlt(vlistID, CDI_GLOBAL, attname, datatype, (int)attlen, attflt);
 	}
     }
@@ -3798,7 +3798,7 @@ int cdfInqContents(stream_t *streamptr)
       if ( ncvars[nctimevarid].longname[0] )
         ptaxisDefLongname(taxis, ncvars[nctimevarid].longname);
 
-      int datatype = (ncvars[nctimevarid].xtype == NC_FLOAT) ? DATATYPE_FLT32 : DATATYPE_FLT64;
+      int datatype = (ncvars[nctimevarid].xtype == NC_FLOAT) ? CDI_DATATYPE_FLT32 : CDI_DATATYPE_FLT64;
       ptaxisDefDatatype(taxis, datatype);
     }
 

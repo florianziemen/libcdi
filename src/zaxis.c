@@ -1264,7 +1264,7 @@ void zaxisPrintKernel(zaxis_t *zaxisptr, int index, FILE *fp)
   int nlevels = zaxisptr->size;
   int prec    = zaxisptr->prec;
 
-  int dig = (prec == DATATYPE_FLT64) ? 15 : 7;
+  int dig = (prec == CDI_DATATYPE_FLT64) ? 15 : 7;
 
   int nbyte;
   int nbyte0 = 0;
@@ -1517,33 +1517,33 @@ static int
 zaxisGetPackSize(void * voidP, void *context)
 {
   zaxis_t * zaxisP = ( zaxis_t * ) voidP;
-  int packBufferSize = serializeGetSize(zaxisNint, DATATYPE_INT, context)
-    + serializeGetSize(1, DATATYPE_UINT32, context);
+  int packBufferSize = serializeGetSize(zaxisNint, CDI_DATATYPE_INT, context)
+    + serializeGetSize(1, CDI_DATATYPE_UINT32, context);
 
   if (zaxisP->vals || zaxisP->lbounds || zaxisP->ubounds || zaxisP->weights)
     xassert(zaxisP->size);
 
   if ( zaxisP->vals )
-    packBufferSize += serializeGetSize(zaxisP->size, DATATYPE_FLT64, context)
-      + serializeGetSize(1, DATATYPE_UINT32, context);
+    packBufferSize += serializeGetSize(zaxisP->size, CDI_DATATYPE_FLT64, context)
+      + serializeGetSize(1, CDI_DATATYPE_UINT32, context);
 
   if ( zaxisP->lbounds )
-    packBufferSize += serializeGetSize(zaxisP->size, DATATYPE_FLT64, context)
-      + serializeGetSize(1, DATATYPE_UINT32, context);
+    packBufferSize += serializeGetSize(zaxisP->size, CDI_DATATYPE_FLT64, context)
+      + serializeGetSize(1, CDI_DATATYPE_UINT32, context);
 
   if ( zaxisP->ubounds )
-    packBufferSize += serializeGetSize(zaxisP->size, DATATYPE_FLT64, context)
-      + serializeGetSize(1, DATATYPE_UINT32, context);
+    packBufferSize += serializeGetSize(zaxisP->size, CDI_DATATYPE_FLT64, context)
+      + serializeGetSize(1, CDI_DATATYPE_UINT32, context);
 
   if ( zaxisP->weights )
-    packBufferSize += serializeGetSize(zaxisP->size, DATATYPE_FLT64, context)
-      + serializeGetSize(1, DATATYPE_UINT32, context);
+    packBufferSize += serializeGetSize(zaxisP->size, CDI_DATATYPE_FLT64, context)
+      + serializeGetSize(1, CDI_DATATYPE_UINT32, context);
 
   if ( zaxisP->vct )
     {
       xassert ( zaxisP->vctsize );
-      packBufferSize += serializeGetSize(zaxisP->vctsize, DATATYPE_FLT64, context)
-        + serializeGetSize(1, DATATYPE_UINT32, context);
+      packBufferSize += serializeGetSize(zaxisP->vctsize, CDI_DATATYPE_FLT64, context)
+        + serializeGetSize(1, CDI_DATATYPE_UINT32, context);
     }
 
   {
@@ -1553,10 +1553,10 @@ zaxisGetPackSize(void * voidP, void *context)
       += serializeStrTabGetPackSize(strTab, (int)numStr, context);
   }
 
-  packBufferSize += serializeGetSize(1, DATATYPE_UCHAR, context);
+  packBufferSize += serializeGetSize(1, CDI_DATATYPE_UCHAR, context);
 
   if (!cdiUUIDIsNull(zaxisP->uuid))
-    packBufferSize += serializeGetSize(CDI_UUID_SIZE, DATATYPE_UCHAR, context);
+    packBufferSize += serializeGetSize(CDI_UUID_SIZE, CDI_DATATYPE_UCHAR, context);
 
   return packBufferSize;
 }
@@ -1571,11 +1571,11 @@ zaxisUnpack(char * unpackBuffer, int unpackBufferSize,
   uint32_t d;
 
   serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                  intBuffer, zaxisNint, DATATYPE_INT, context);
+                  intBuffer, zaxisNint, CDI_DATATYPE_INT, context);
   serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                  &d, 1, DATATYPE_UINT32, context);
+                  &d, 1, CDI_DATATYPE_UINT32, context);
 
-  xassert(cdiCheckSum(DATATYPE_INT, zaxisNint, intBuffer) == d);
+  xassert(cdiCheckSum(CDI_DATATYPE_INT, zaxisNint, intBuffer) == d);
 
   zaxisInit();
 
@@ -1598,10 +1598,10 @@ zaxisUnpack(char * unpackBuffer, int unpackBufferSize,
 
       zaxisP->vals = (double *) Malloc((size_t)size * sizeof (double));
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                      zaxisP->vals, size, DATATYPE_FLT64, context);
+                      zaxisP->vals, size, CDI_DATATYPE_FLT64, context);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                      &d, 1, DATATYPE_UINT32, context);
-      xassert(cdiCheckSum(DATATYPE_FLT, size, zaxisP->vals) == d);
+                      &d, 1, CDI_DATATYPE_UINT32, context);
+      xassert(cdiCheckSum(CDI_DATATYPE_FLT, size, zaxisP->vals) == d);
     }
 
   if (memberMask & lbounds)
@@ -1611,10 +1611,10 @@ zaxisUnpack(char * unpackBuffer, int unpackBufferSize,
 
       zaxisP->lbounds = (double *) Malloc((size_t)size * sizeof (double));
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                      zaxisP->lbounds, size, DATATYPE_FLT64, context);
+                      zaxisP->lbounds, size, CDI_DATATYPE_FLT64, context);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                      &d, 1, DATATYPE_UINT32, context);
-      xassert(cdiCheckSum(DATATYPE_FLT, size, zaxisP->lbounds) == d);
+                      &d, 1, CDI_DATATYPE_UINT32, context);
+      xassert(cdiCheckSum(CDI_DATATYPE_FLT, size, zaxisP->lbounds) == d);
     }
 
   if (memberMask & ubounds)
@@ -1624,10 +1624,10 @@ zaxisUnpack(char * unpackBuffer, int unpackBufferSize,
 
       zaxisP->ubounds = (double *) Malloc((size_t)size * sizeof (double));
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                      zaxisP->ubounds, size, DATATYPE_FLT64, context);
+                      zaxisP->ubounds, size, CDI_DATATYPE_FLT64, context);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                      &d, 1, DATATYPE_UINT32, context);
-      xassert(cdiCheckSum(DATATYPE_FLT, size, zaxisP->ubounds) == d);
+                      &d, 1, CDI_DATATYPE_UINT32, context);
+      xassert(cdiCheckSum(CDI_DATATYPE_FLT, size, zaxisP->ubounds) == d);
     }
 
   if (memberMask & weights)
@@ -1637,10 +1637,10 @@ zaxisUnpack(char * unpackBuffer, int unpackBufferSize,
 
       zaxisP->weights = (double *) Malloc((size_t)size * sizeof (double));
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                      zaxisP->weights, size, DATATYPE_FLT64, context);
+                      zaxisP->weights, size, CDI_DATATYPE_FLT64, context);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                      &d, 1, DATATYPE_UINT32, context);
-      xassert(cdiCheckSum(DATATYPE_FLT, size, zaxisP->weights) == d);
+                      &d, 1, CDI_DATATYPE_UINT32, context);
+      xassert(cdiCheckSum(CDI_DATATYPE_FLT, size, zaxisP->weights) == d);
     }
 
   if ( memberMask & vct )
@@ -1650,10 +1650,10 @@ zaxisUnpack(char * unpackBuffer, int unpackBufferSize,
 
       zaxisP->vct = (double *) Malloc((size_t)size * sizeof (double));
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                      zaxisP->vct, size, DATATYPE_FLT64, context);
+                      zaxisP->vct, size, CDI_DATATYPE_FLT64, context);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                      &d, 1, DATATYPE_UINT32, context);
-      xassert(cdiCheckSum(DATATYPE_FLT64, size, zaxisP->vct) == d);
+                      &d, 1, CDI_DATATYPE_UINT32, context);
+      xassert(cdiCheckSum(CDI_DATATYPE_FLT64, size, zaxisP->vct) == d);
     }
 
   {
@@ -1664,11 +1664,11 @@ zaxisUnpack(char * unpackBuffer, int unpackBufferSize,
   }
 
   serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                  &zaxisP->positive, 1, DATATYPE_UCHAR, context);
+                  &zaxisP->positive, 1, CDI_DATATYPE_UCHAR, context);
 
   if (memberMask & zaxisHasUUIDFlag)
     serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                    zaxisP->uuid, CDI_UUID_SIZE, DATATYPE_UCHAR, context);
+                    zaxisP->uuid, CDI_UUID_SIZE, CDI_DATATYPE_UCHAR, context);
 
   reshSetStatus(zaxisP->self, &zaxisOps,
                 reshGetStatus(zaxisP->self, &zaxisOps) & ~RESH_SYNC_BIT);
@@ -1692,30 +1692,30 @@ zaxisPack(void * voidP, void * packBuffer, int packBufferSize,
   intBuffer[6]  = zaxisP->vctsize;
   intBuffer[7]  = memberMask = zaxisGetMemberMask ( zaxisP );
 
-  serializePack(intBuffer, zaxisNint, DATATYPE_INT,
+  serializePack(intBuffer, zaxisNint, CDI_DATATYPE_INT,
                 packBuffer, packBufferSize, packBufferPos, context);
-  d = cdiCheckSum(DATATYPE_INT, zaxisNint, intBuffer);
-  serializePack(&d, 1, DATATYPE_UINT32,
+  d = cdiCheckSum(CDI_DATATYPE_INT, zaxisNint, intBuffer);
+  serializePack(&d, 1, CDI_DATATYPE_UINT32,
                 packBuffer, packBufferSize, packBufferPos, context);
 
 
   if ( memberMask & vals )
     {
       xassert(zaxisP->size);
-      serializePack(zaxisP->vals, zaxisP->size, DATATYPE_FLT64,
+      serializePack(zaxisP->vals, zaxisP->size, CDI_DATATYPE_FLT64,
                     packBuffer, packBufferSize, packBufferPos, context);
-      d = cdiCheckSum(DATATYPE_FLT, zaxisP->size, zaxisP->vals );
-      serializePack(&d, 1, DATATYPE_UINT32,
+      d = cdiCheckSum(CDI_DATATYPE_FLT, zaxisP->size, zaxisP->vals );
+      serializePack(&d, 1, CDI_DATATYPE_UINT32,
                     packBuffer, packBufferSize, packBufferPos, context);
     }
 
   if (memberMask & lbounds)
     {
       xassert(zaxisP->size);
-      serializePack(zaxisP->lbounds, zaxisP->size, DATATYPE_FLT64,
+      serializePack(zaxisP->lbounds, zaxisP->size, CDI_DATATYPE_FLT64,
                     packBuffer, packBufferSize, packBufferPos, context);
-      d = cdiCheckSum(DATATYPE_FLT, zaxisP->size, zaxisP->lbounds);
-      serializePack(&d, 1, DATATYPE_UINT32,
+      d = cdiCheckSum(CDI_DATATYPE_FLT, zaxisP->size, zaxisP->lbounds);
+      serializePack(&d, 1, CDI_DATATYPE_UINT32,
                     packBuffer, packBufferSize, packBufferPos, context);
     }
 
@@ -1723,10 +1723,10 @@ zaxisPack(void * voidP, void * packBuffer, int packBufferSize,
     {
       xassert(zaxisP->size);
 
-      serializePack(zaxisP->ubounds, zaxisP->size, DATATYPE_FLT64,
+      serializePack(zaxisP->ubounds, zaxisP->size, CDI_DATATYPE_FLT64,
                     packBuffer, packBufferSize, packBufferPos, context);
-      d = cdiCheckSum(DATATYPE_FLT, zaxisP->size, zaxisP->ubounds);
-      serializePack(&d, 1, DATATYPE_UINT32,
+      d = cdiCheckSum(CDI_DATATYPE_FLT, zaxisP->size, zaxisP->ubounds);
+      serializePack(&d, 1, CDI_DATATYPE_UINT32,
                     packBuffer, packBufferSize, packBufferPos, context);
     }
 
@@ -1734,10 +1734,10 @@ zaxisPack(void * voidP, void * packBuffer, int packBufferSize,
     {
       xassert(zaxisP->size);
 
-      serializePack(zaxisP->weights, zaxisP->size, DATATYPE_FLT64,
+      serializePack(zaxisP->weights, zaxisP->size, CDI_DATATYPE_FLT64,
                     packBuffer, packBufferSize, packBufferPos, context);
-      d = cdiCheckSum(DATATYPE_FLT, zaxisP->size, zaxisP->weights);
-      serializePack(&d, 1, DATATYPE_UINT32,
+      d = cdiCheckSum(CDI_DATATYPE_FLT, zaxisP->size, zaxisP->weights);
+      serializePack(&d, 1, CDI_DATATYPE_UINT32,
                     packBuffer, packBufferSize, packBufferPos, context);
     }
 
@@ -1745,10 +1745,10 @@ zaxisPack(void * voidP, void * packBuffer, int packBufferSize,
     {
       xassert(zaxisP->vctsize);
 
-      serializePack(zaxisP->vct, zaxisP->vctsize, DATATYPE_FLT64,
+      serializePack(zaxisP->vct, zaxisP->vctsize, CDI_DATATYPE_FLT64,
                     packBuffer, packBufferSize, packBufferPos, context);
-      d = cdiCheckSum(DATATYPE_FLT64, zaxisP->vctsize, zaxisP->vct);
-      serializePack(&d, 1, DATATYPE_UINT32,
+      d = cdiCheckSum(CDI_DATATYPE_FLT64, zaxisP->vctsize, zaxisP->vct);
+      serializePack(&d, 1, CDI_DATATYPE_UINT32,
                     packBuffer, packBufferSize, packBufferPos, context);
     }
 
@@ -1759,11 +1759,11 @@ zaxisPack(void * voidP, void * packBuffer, int packBufferSize,
                         packBuffer, packBufferSize, packBufferPos, context);
   }
 
-  serializePack(&zaxisP->positive, 1, DATATYPE_UCHAR,
+  serializePack(&zaxisP->positive, 1, CDI_DATATYPE_UCHAR,
                 packBuffer, packBufferSize, packBufferPos, context);
 
   if (memberMask & zaxisHasUUIDFlag)
-    serializePack(zaxisP->uuid, CDI_UUID_SIZE, DATATYPE_UCHAR,
+    serializePack(zaxisP->uuid, CDI_UUID_SIZE, CDI_DATATYPE_UCHAR,
                   packBuffer, packBufferSize, packBufferPos, context);
 
 }

@@ -1803,7 +1803,7 @@ void gridInqParamRLL(int gridID, double *xpole, double *ypole, double *angle)
 
           if ( attlen != 1 ) continue;
 
-          if ( atttype == DATATYPE_FLT32 || atttype == DATATYPE_FLT64 )
+          if ( atttype == CDI_DATATYPE_FLT32 || atttype == CDI_DATATYPE_FLT64 )
             {
               double attflt;
               cdiInqAttFlt(gridID, CDI_GLOBAL, attname, attlen, &attflt);
@@ -1834,9 +1834,9 @@ void gridDefParamRLL(int gridID, double xpole, double ypole, double angle)
   const char *mapping = "rotated_latitude_longitude";
   cdiGridDefKeyStr(gridID, CDI_KEY_MAPPING, CDI_MAX_NAME, mapping);
   cdiDefAttTxt(gridID, CDI_GLOBAL, "grid_mapping_name", strlen(mapping), mapping);
-  cdiDefAttFlt(gridID, CDI_GLOBAL, "grid_north_pole_longitude", DATATYPE_FLT64, 1, &xpole);
-  cdiDefAttFlt(gridID, CDI_GLOBAL, "grid_north_pole_latitude", DATATYPE_FLT64, 1, &ypole);
-  if ( IS_NOT_EQUAL(angle, 0) ) cdiDefAttFlt(gridID, CDI_GLOBAL, "north_pole_grid_longitude", DATATYPE_FLT64, 1, &angle);
+  cdiDefAttFlt(gridID, CDI_GLOBAL, "grid_north_pole_longitude", CDI_DATATYPE_FLT64, 1, &xpole);
+  cdiDefAttFlt(gridID, CDI_GLOBAL, "grid_north_pole_latitude", CDI_DATATYPE_FLT64, 1, &ypole);
+  if ( IS_NOT_EQUAL(angle, 0) ) cdiDefAttFlt(gridID, CDI_GLOBAL, "north_pole_grid_longitude", CDI_DATATYPE_FLT64, 1, &angle);
 
   grid_t *gridptr = grid_to_pointer(gridID);
   gridptr->projtype = CDI_PROJ_RLL;
@@ -3204,7 +3204,7 @@ void gridPrintAttributes(FILE *fp, int gridID)
 
       if ( attlen == 0 ) continue;
 
-      if ( atttype == DATATYPE_TXT )
+      if ( atttype == CDI_DATATYPE_TXT )
         {
           size_t attSize = (size_t)(attlen+1)*sizeof(char);
           char *atttxt = (char *)resizeBuffer(&attBuf, &attBufSize, attSize);
@@ -3212,9 +3212,9 @@ void gridPrintAttributes(FILE *fp, int gridID)
           atttxt[attlen] = 0;
           fprintf(fp, "ATTR_TXT: %s = \"%s\"\n", attname, atttxt);
         }
-      else if ( atttype == DATATYPE_INT8  || atttype == DATATYPE_UINT8  ||
-                atttype == DATATYPE_INT16 || atttype == DATATYPE_UINT16 ||
-                atttype == DATATYPE_INT32 || atttype == DATATYPE_UINT32 )
+      else if ( atttype == CDI_DATATYPE_INT8  || atttype == CDI_DATATYPE_UINT8  ||
+                atttype == CDI_DATATYPE_INT16 || atttype == CDI_DATATYPE_UINT16 ||
+                atttype == CDI_DATATYPE_INT32 || atttype == CDI_DATATYPE_UINT32 )
         {
           size_t attSize = (size_t)attlen*sizeof(int);
           int *attint = (int *)resizeBuffer(&attBuf, &attBufSize, attSize);
@@ -3226,11 +3226,11 @@ void gridPrintAttributes(FILE *fp, int gridID)
           for ( int i = 0; i < attlen; ++i ) fprintf(fp, " %d", attint[i]);
           fprintf(fp, "\n");
         }
-      else if ( atttype == DATATYPE_FLT32 || atttype == DATATYPE_FLT64 )
+      else if ( atttype == CDI_DATATYPE_FLT32 || atttype == CDI_DATATYPE_FLT64 )
         {
           size_t attSize = (size_t)attlen * sizeof(double);
           double *attflt = (double *)resizeBuffer(&attBuf, &attBufSize, attSize);
-          int dig = (atttype == DATATYPE_FLT64) ? 15 : 7;
+          int dig = (atttype == CDI_DATATYPE_FLT64) ? 15 : 7;
           cdiInqAttFlt(cdiID, varID, attname, attlen, attflt);
           if ( attlen == 1 )
             fprintf(fp, "ATTR_FLT: %s =", attname);
@@ -3264,7 +3264,7 @@ void gridPrintKernel(grid_t *gridptr, int index, int opt, FILE *fp)
   int nvertex  = gridInqNvertex(gridID);
   int prec     = gridInqPrec(gridID);
 
-  int dig = (prec == DATATYPE_FLT64) ? 15 : 7;
+  int dig = (prec == CDI_DATATYPE_FLT64) ? 15 : 7;
 
   struct gridaxis_t *xaxis = &gridptr->x;
   struct gridaxis_t *yaxis = &gridptr->y;
@@ -3969,17 +3969,17 @@ gridGetPackSize(void * voidP, void *context)
   grid_t * gridP = ( grid_t * ) voidP;
   int packBuffSize = 0, count;
 
-  packBuffSize += serializeGetSize(gridNint, DATATYPE_INT, context)
-    + serializeGetSize(1, DATATYPE_UINT32, context);
+  packBuffSize += serializeGetSize(gridNint, CDI_DATATYPE_INT, context)
+    + serializeGetSize(1, CDI_DATATYPE_UINT32, context);
 
   if (gridP->rowlon)
     {
       xassert(gridP->nrowlon);
-      packBuffSize += serializeGetSize(gridP->nrowlon, DATATYPE_INT, context)
-        + serializeGetSize( 1, DATATYPE_UINT32, context);
+      packBuffSize += serializeGetSize(gridP->nrowlon, CDI_DATATYPE_INT, context)
+        + serializeGetSize( 1, CDI_DATATYPE_UINT32, context);
     }
 
-  packBuffSize += serializeGetSize(gridNdouble, DATATYPE_FLT64, context);
+  packBuffSize += serializeGetSize(gridNdouble, CDI_DATATYPE_FLT64, context);
 
   if (gridP->vtable->inqXValsPtr(gridP))
     {
@@ -3988,8 +3988,8 @@ gridGetPackSize(void * voidP, void *context)
       else
 	count = gridP->x.size;
       xassert(count);
-      packBuffSize += serializeGetSize(count, DATATYPE_FLT64, context)
-        + serializeGetSize(1, DATATYPE_UINT32, context);
+      packBuffSize += serializeGetSize(count, CDI_DATATYPE_FLT64, context)
+        + serializeGetSize(1, CDI_DATATYPE_UINT32, context);
     }
 
   if (gridP->vtable->inqYValsPtr(gridP))
@@ -3999,16 +3999,16 @@ gridGetPackSize(void * voidP, void *context)
       else
 	count = gridP->y.size;
       xassert(count);
-      packBuffSize += serializeGetSize(count, DATATYPE_FLT64, context)
-        + serializeGetSize(1, DATATYPE_UINT32, context);
+      packBuffSize += serializeGetSize(count, CDI_DATATYPE_FLT64, context)
+        + serializeGetSize(1, CDI_DATATYPE_UINT32, context);
     }
 
   if (gridP->vtable->inqAreaPtr(gridP))
     {
       xassert(gridP->size);
       packBuffSize +=
-        serializeGetSize(gridP->size, DATATYPE_FLT64, context)
-        + serializeGetSize(1, DATATYPE_UINT32, context);
+        serializeGetSize(gridP->size, CDI_DATATYPE_FLT64, context)
+        + serializeGetSize(1, CDI_DATATYPE_UINT32, context);
     }
 
   if (gridP->x.bounds)
@@ -4020,8 +4020,8 @@ gridGetPackSize(void * voidP, void *context)
 	count = gridP->x.size;
       xassert(count);
       packBuffSize
-        += (serializeGetSize(gridP->nvertex * count, DATATYPE_FLT64, context)
-            + serializeGetSize(1, DATATYPE_UINT32, context));
+        += (serializeGetSize(gridP->nvertex * count, CDI_DATATYPE_FLT64, context)
+            + serializeGetSize(1, CDI_DATATYPE_UINT32, context));
     }
 
   if (gridP->y.bounds)
@@ -4033,8 +4033,8 @@ gridGetPackSize(void * voidP, void *context)
 	count = gridP->y.size;
       xassert(count);
       packBuffSize
-        += (serializeGetSize(gridP->nvertex * count, DATATYPE_FLT64, context)
-            + serializeGetSize(1, DATATYPE_UINT32, context));
+        += (serializeGetSize(gridP->nvertex * count, CDI_DATATYPE_FLT64, context)
+            + serializeGetSize(1, CDI_DATATYPE_UINT32, context));
     }
 
   {
@@ -4047,28 +4047,28 @@ gridGetPackSize(void * voidP, void *context)
   if (gridP->reference)
     {
       size_t len = strlen(gridP->reference);
-      packBuffSize += serializeGetSize(1, DATATYPE_INT, context)
-        + serializeGetSize((int)len + 1, DATATYPE_TXT, context)
-        + serializeGetSize(1, DATATYPE_UINT32, context);
+      packBuffSize += serializeGetSize(1, CDI_DATATYPE_INT, context)
+        + serializeGetSize((int)len + 1, CDI_DATATYPE_TXT, context)
+        + serializeGetSize(1, CDI_DATATYPE_UINT32, context);
     }
 
   if (gridP->mask)
     {
       xassert(gridP->size);
       packBuffSize
-        += serializeGetSize(gridP->size, DATATYPE_UCHAR, context)
-        + serializeGetSize(1, DATATYPE_UINT32, context);
+        += serializeGetSize(gridP->size, CDI_DATATYPE_UCHAR, context)
+        + serializeGetSize(1, CDI_DATATYPE_UINT32, context);
     }
 
   if (gridP->mask_gme)
     {
       xassert(gridP->size);
-      packBuffSize += serializeGetSize(gridP->size, DATATYPE_UCHAR, context)
-        + serializeGetSize(1, DATATYPE_UINT32, context);
+      packBuffSize += serializeGetSize(gridP->size, CDI_DATATYPE_UCHAR, context)
+        + serializeGetSize(1, CDI_DATATYPE_UINT32, context);
     }
 
   if (!cdiUUIDIsNull(gridP->uuid))
-    packBuffSize += serializeGetSize(CDI_UUID_SIZE, DATATYPE_UCHAR, context);
+    packBuffSize += serializeGetSize(CDI_UUID_SIZE, CDI_DATATYPE_UCHAR, context);
 
   return packBuffSize;
 }
@@ -4087,11 +4087,11 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
   {
     int intBuffer[gridNint];
     serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                    intBuffer, gridNint, DATATYPE_INT, context);
+                    intBuffer, gridNint, CDI_DATATYPE_INT, context);
     serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                    &d, 1, DATATYPE_UINT32, context);
+                    &d, 1, CDI_DATATYPE_UINT32, context);
 
-    xassert(cdiCheckSum(DATATYPE_INT, gridNint, intBuffer) == d);
+    xassert(cdiCheckSum(CDI_DATATYPE_INT, gridNint, intBuffer) == d);
     int targetID = namespaceAdaptKey(intBuffer[0], originNamespace);
     gridP = gridNewEntry(force_id?targetID:CDI_UNDEFID);
 
@@ -4128,19 +4128,19 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
       xassert(gridP->nrowlon);
       gridP->rowlon = (int *) Malloc((size_t)gridP->nrowlon * sizeof (int));
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                      gridP->rowlon, gridP->nrowlon , DATATYPE_INT, context);
+                      gridP->rowlon, gridP->nrowlon , CDI_DATATYPE_INT, context);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                      &d, 1, DATATYPE_UINT32, context);
-      xassert(cdiCheckSum(DATATYPE_INT, gridP->nrowlon, gridP->rowlon) == d);
+                      &d, 1, CDI_DATATYPE_UINT32, context);
+      xassert(cdiCheckSum(CDI_DATATYPE_INT, gridP->nrowlon, gridP->rowlon) == d);
     }
 
   {
     double doubleBuffer[gridNdouble];
     serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                    doubleBuffer, gridNdouble, DATATYPE_FLT64, context);
+                    doubleBuffer, gridNdouble, CDI_DATATYPE_FLT64, context);
     serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                    &d, 1, DATATYPE_UINT32, context);
-    xassert(d == cdiCheckSum(DATATYPE_FLT, gridNdouble, doubleBuffer));
+                    &d, 1, CDI_DATATYPE_UINT32, context);
+    xassert(d == cdiCheckSum(CDI_DATATYPE_FLT, gridNdouble, doubleBuffer));
 
     gridP->x.first = doubleBuffer[0];
     gridP->y.first = doubleBuffer[1];
@@ -4165,10 +4165,10 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
 
       gridP->x.vals = (double *) Malloc((size_t)size * sizeof (double));
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                      gridP->x.vals, size, DATATYPE_FLT64, context);
+                      gridP->x.vals, size, CDI_DATATYPE_FLT64, context);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                      &d, 1, DATATYPE_UINT32, context);
-      xassert(cdiCheckSum(DATATYPE_FLT, size, gridP->x.vals) == d );
+                      &d, 1, CDI_DATATYPE_UINT32, context);
+      xassert(cdiCheckSum(CDI_DATATYPE_FLT, size, gridP->x.vals) == d );
     }
 
   if (memberMask & gridHasYValsFlag)
@@ -4177,10 +4177,10 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
 
       gridP->y.vals = (double *) Malloc((size_t)size * sizeof (double));
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                      gridP->y.vals, size, DATATYPE_FLT64, context);
+                      gridP->y.vals, size, CDI_DATATYPE_FLT64, context);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                      &d, 1, DATATYPE_UINT32, context);
-      xassert(cdiCheckSum(DATATYPE_FLT, size, gridP->y.vals) == d);
+                      &d, 1, CDI_DATATYPE_UINT32, context);
+      xassert(cdiCheckSum(CDI_DATATYPE_FLT, size, gridP->y.vals) == d);
     }
 
   if (memberMask & gridHasAreaFlag)
@@ -4189,10 +4189,10 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
       xassert(size);
       gridP->area = (double *) Malloc((size_t)size * sizeof (double));
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                      gridP->area, size, DATATYPE_FLT64, context);
+                      gridP->area, size, CDI_DATATYPE_FLT64, context);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                      &d, 1, DATATYPE_UINT32, context);
-      xassert(cdiCheckSum(DATATYPE_FLT, size, gridP->area) == d);
+                      &d, 1, CDI_DATATYPE_UINT32, context);
+      xassert(cdiCheckSum(CDI_DATATYPE_FLT, size, gridP->area) == d);
     }
 
   if (memberMask & gridHasXBoundsFlag)
@@ -4202,10 +4202,10 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
 
       gridP->x.bounds = (double *) Malloc((size_t)size * sizeof (double));
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                      gridP->x.bounds, size, DATATYPE_FLT64, context);
+                      gridP->x.bounds, size, CDI_DATATYPE_FLT64, context);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                      &d, 1, DATATYPE_UINT32, context);
-      xassert(cdiCheckSum(DATATYPE_FLT, size, gridP->x.bounds) == d);
+                      &d, 1, CDI_DATATYPE_UINT32, context);
+      xassert(cdiCheckSum(CDI_DATATYPE_FLT, size, gridP->x.bounds) == d);
     }
 
   if (memberMask & gridHasYBoundsFlag)
@@ -4215,10 +4215,10 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
 
       gridP->y.bounds = (double *) Malloc((size_t)size * sizeof (double));
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-			  gridP->y.bounds, size, DATATYPE_FLT64, context);
+			  gridP->y.bounds, size, CDI_DATATYPE_FLT64, context);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                      &d, 1, DATATYPE_UINT32, context);
-      xassert(cdiCheckSum(DATATYPE_FLT, size, gridP->y.bounds) == d);
+                      &d, 1, CDI_DATATYPE_UINT32, context);
+      xassert(cdiCheckSum(CDI_DATATYPE_FLT, size, gridP->y.bounds) == d);
     }
 
   {
@@ -4232,13 +4232,13 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
     {
       int referenceSize;
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                      &referenceSize, 1, DATATYPE_INT, context);
+                      &referenceSize, 1, CDI_DATATYPE_INT, context);
       gridP->reference = (char *) Malloc((size_t)referenceSize);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                      gridP->reference, referenceSize, DATATYPE_TXT, context);
+                      gridP->reference, referenceSize, CDI_DATATYPE_TXT, context);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                      &d, 1, DATATYPE_UINT32, context);
-      xassert(cdiCheckSum(DATATYPE_TXT, referenceSize, gridP->reference) == d);
+                      &d, 1, CDI_DATATYPE_UINT32, context);
+      xassert(cdiCheckSum(CDI_DATATYPE_TXT, referenceSize, gridP->reference) == d);
     }
 
   if (memberMask & gridHasMaskFlag)
@@ -4246,10 +4246,10 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
       xassert((size = gridP->size));
       gridP->mask = (mask_t *) Malloc((size_t)size * sizeof (mask_t));
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                      gridP->mask, gridP->size, DATATYPE_UCHAR, context);
+                      gridP->mask, gridP->size, CDI_DATATYPE_UCHAR, context);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                      &d, 1, DATATYPE_UINT32, context);
-      xassert(cdiCheckSum(DATATYPE_UCHAR, gridP->size, gridP->mask) == d);
+                      &d, 1, CDI_DATATYPE_UINT32, context);
+      xassert(cdiCheckSum(CDI_DATATYPE_UCHAR, gridP->size, gridP->mask) == d);
     }
 
   if (memberMask & gridHasGMEMaskFlag)
@@ -4257,15 +4257,15 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
       xassert((size = gridP->size));
       gridP->mask_gme = (mask_t *) Malloc((size_t)size * sizeof (mask_t));
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                      gridP->mask_gme, gridP->size, DATATYPE_UCHAR, context);
+                      gridP->mask_gme, gridP->size, CDI_DATATYPE_UCHAR, context);
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                      &d, 1, DATATYPE_UINT32, context);
-      xassert(cdiCheckSum(DATATYPE_UCHAR, gridP->size, gridP->mask_gme) == d);
+                      &d, 1, CDI_DATATYPE_UINT32, context);
+      xassert(cdiCheckSum(CDI_DATATYPE_UCHAR, gridP->size, gridP->mask_gme) == d);
     }
   if (memberMask & gridHasUUIDFlag)
     {
       serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                      gridP->uuid, CDI_UUID_SIZE, DATATYPE_UCHAR, context);
+                      gridP->uuid, CDI_UUID_SIZE, CDI_DATATYPE_UCHAR, context);
     }
 
   reshSetStatus(gridP->self, &gridOps,
@@ -4313,10 +4313,10 @@ gridPack(void * voidP, void * packBuffer, int packBufferSize,
     intBuffer[27] = (int)((const char (*)[2][24])gridP->y.stdname
                           - (const char (*)[2][24])xystdname_tab[0][1]);
 
-    serializePack(intBuffer, gridNint, DATATYPE_INT,
+    serializePack(intBuffer, gridNint, CDI_DATATYPE_INT,
                   packBuffer, packBufferSize, packBufferPos, context);
-    d = cdiCheckSum(DATATYPE_INT, gridNint, intBuffer);
-    serializePack(&d, 1, DATATYPE_UINT32,
+    d = cdiCheckSum(CDI_DATATYPE_INT, gridNint, intBuffer);
+    serializePack(&d, 1, CDI_DATATYPE_UINT32,
                   packBuffer, packBufferSize, packBufferPos, context);
   }
 
@@ -4324,10 +4324,10 @@ gridPack(void * voidP, void * packBuffer, int packBufferSize,
     {
       size = gridP->nrowlon;
       xassert(size > 0);
-      serializePack(gridP->rowlon, size, DATATYPE_INT,
+      serializePack(gridP->rowlon, size, CDI_DATATYPE_INT,
                     packBuffer, packBufferSize, packBufferPos, context);
-      d = cdiCheckSum(DATATYPE_INT , size, gridP->rowlon);
-      serializePack(&d, 1, DATATYPE_UINT32,
+      d = cdiCheckSum(CDI_DATATYPE_INT , size, gridP->rowlon);
+      serializePack(&d, 1, CDI_DATATYPE_UINT32,
                     packBuffer, packBufferSize, packBufferPos, context);
     }
 
@@ -4348,10 +4348,10 @@ gridPack(void * voidP, void * packBuffer, int packBufferSize,
     doubleBuffer[11] = gridP->lcc.xinc;
     doubleBuffer[12] = gridP->lcc.yinc;
 
-    serializePack(doubleBuffer, gridNdouble, DATATYPE_FLT64,
+    serializePack(doubleBuffer, gridNdouble, CDI_DATATYPE_FLT64,
                   packBuffer, packBufferSize, packBufferPos, context);
-    d = cdiCheckSum(DATATYPE_FLT, gridNdouble, doubleBuffer);
-    serializePack(&d, 1, DATATYPE_UINT32,
+    d = cdiCheckSum(CDI_DATATYPE_FLT, gridNdouble, doubleBuffer);
+    serializePack(&d, 1, CDI_DATATYPE_UINT32,
                   packBuffer, packBufferSize, packBufferPos, context);
   }
 
@@ -4364,10 +4364,10 @@ gridPack(void * voidP, void * packBuffer, int packBufferSize,
       xassert(size);
 
       const double *gridP_xvals = gridP->vtable->inqXValsPtr(gridP);
-      serializePack(gridP_xvals, size, DATATYPE_FLT64,
+      serializePack(gridP_xvals, size, CDI_DATATYPE_FLT64,
                     packBuffer, packBufferSize, packBufferPos, context);
-      d = cdiCheckSum(DATATYPE_FLT, size, gridP_xvals);
-      serializePack(&d, 1, DATATYPE_UINT32,
+      d = cdiCheckSum(CDI_DATATYPE_FLT, size, gridP_xvals);
+      serializePack(&d, 1, CDI_DATATYPE_UINT32,
                     packBuffer, packBufferSize, packBufferPos, context);
     }
 
@@ -4379,10 +4379,10 @@ gridPack(void * voidP, void * packBuffer, int packBufferSize,
 	size = gridP->y.size;
       xassert(size);
       const double *gridP_yvals = gridP->vtable->inqYValsPtr(gridP);
-      serializePack(gridP_yvals, size, DATATYPE_FLT64,
+      serializePack(gridP_yvals, size, CDI_DATATYPE_FLT64,
                     packBuffer, packBufferSize, packBufferPos, context);
-      d = cdiCheckSum(DATATYPE_FLT, size, gridP_yvals);
-      serializePack(&d, 1, DATATYPE_UINT32,
+      d = cdiCheckSum(CDI_DATATYPE_FLT, size, gridP_yvals);
+      serializePack(&d, 1, CDI_DATATYPE_UINT32,
                     packBuffer, packBufferSize, packBufferPos, context);
     }
 
@@ -4390,10 +4390,10 @@ gridPack(void * voidP, void * packBuffer, int packBufferSize,
     {
       xassert(gridP->size);
 
-      serializePack(gridP->area, gridP->size, DATATYPE_FLT64,
+      serializePack(gridP->area, gridP->size, CDI_DATATYPE_FLT64,
                     packBuffer, packBufferSize, packBufferPos, context);
-      d = cdiCheckSum(DATATYPE_FLT, gridP->size, gridP->area);
-      serializePack(&d, 1, DATATYPE_UINT32,
+      d = cdiCheckSum(CDI_DATATYPE_FLT, gridP->size, gridP->area);
+      serializePack(&d, 1, CDI_DATATYPE_UINT32,
                     packBuffer, packBufferSize, packBufferPos, context);
     }
 
@@ -4406,10 +4406,10 @@ gridPack(void * voidP, void * packBuffer, int packBufferSize,
 	size = gridP->nvertex * gridP->x.size;
       xassert ( size );
 
-      serializePack(gridP->x.bounds, size, DATATYPE_FLT64,
+      serializePack(gridP->x.bounds, size, CDI_DATATYPE_FLT64,
                     packBuffer, packBufferSize, packBufferPos, context);
-      d = cdiCheckSum(DATATYPE_FLT, size, gridP->x.bounds);
-      serializePack(&d, 1, DATATYPE_UINT32,
+      d = cdiCheckSum(CDI_DATATYPE_FLT, size, gridP->x.bounds);
+      serializePack(&d, 1, CDI_DATATYPE_UINT32,
                     packBuffer, packBufferSize, packBufferPos, context);
     }
 
@@ -4422,10 +4422,10 @@ gridPack(void * voidP, void * packBuffer, int packBufferSize,
 	size = gridP->nvertex * gridP->y.size;
       xassert ( size );
 
-      serializePack(gridP->y.bounds, size, DATATYPE_FLT64,
+      serializePack(gridP->y.bounds, size, CDI_DATATYPE_FLT64,
                     packBuffer, packBufferSize, packBufferPos, context);
-      d = cdiCheckSum(DATATYPE_FLT, size, gridP->y.bounds);
-      serializePack(&d, 1, DATATYPE_UINT32,
+      d = cdiCheckSum(CDI_DATATYPE_FLT, size, gridP->y.bounds);
+      serializePack(&d, 1, CDI_DATATYPE_UINT32,
                     packBuffer, packBufferSize, packBufferPos, context);
     }
 
@@ -4439,22 +4439,22 @@ gridPack(void * voidP, void * packBuffer, int packBufferSize,
   if (memberMask & gridHasReferenceFlag)
     {
       size = (int)strlen(gridP->reference) + 1;
-      serializePack(&size, 1, DATATYPE_INT,
+      serializePack(&size, 1, CDI_DATATYPE_INT,
                     packBuffer, packBufferSize, packBufferPos, context);
-      serializePack(gridP->reference, size, DATATYPE_TXT,
+      serializePack(gridP->reference, size, CDI_DATATYPE_TXT,
                     packBuffer, packBufferSize, packBufferPos, context);
-      d = cdiCheckSum(DATATYPE_TXT, size, gridP->reference);
-      serializePack(&d, 1, DATATYPE_UINT32,
+      d = cdiCheckSum(CDI_DATATYPE_TXT, size, gridP->reference);
+      serializePack(&d, 1, CDI_DATATYPE_UINT32,
                     packBuffer, packBufferSize, packBufferPos, context);
     }
 
   if (memberMask & gridHasMaskFlag)
     {
       xassert((size = gridP->size));
-      serializePack(gridP->mask, size, DATATYPE_UCHAR,
+      serializePack(gridP->mask, size, CDI_DATATYPE_UCHAR,
                     packBuffer, packBufferSize, packBufferPos, context);
-      d = cdiCheckSum(DATATYPE_UCHAR, size, gridP->mask);
-      serializePack(&d, 1, DATATYPE_UINT32,
+      d = cdiCheckSum(CDI_DATATYPE_UCHAR, size, gridP->mask);
+      serializePack(&d, 1, CDI_DATATYPE_UINT32,
                     packBuffer, packBufferSize, packBufferPos, context);
     }
 
@@ -4462,15 +4462,15 @@ gridPack(void * voidP, void * packBuffer, int packBufferSize,
     {
       xassert((size = gridP->size));
 
-      serializePack(gridP->mask_gme, size, DATATYPE_UCHAR,
+      serializePack(gridP->mask_gme, size, CDI_DATATYPE_UCHAR,
                     packBuffer, packBufferSize, packBufferPos, context);
-      d = cdiCheckSum(DATATYPE_UCHAR, size, gridP->mask_gme);
-      serializePack(&d, 1, DATATYPE_UINT32,
+      d = cdiCheckSum(CDI_DATATYPE_UCHAR, size, gridP->mask_gme);
+      serializePack(&d, 1, CDI_DATATYPE_UINT32,
                     packBuffer, packBufferSize, packBufferPos, context);
     }
 
   if (memberMask & gridHasUUIDFlag)
-    serializePack(gridP->uuid, CDI_UUID_SIZE, DATATYPE_UCHAR,
+    serializePack(gridP->uuid, CDI_UUID_SIZE, CDI_DATATYPE_UCHAR,
                   packBuffer, packBufferSize, packBufferPos, context);
 }
 

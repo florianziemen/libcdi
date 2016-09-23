@@ -921,7 +921,7 @@ int vlistNumber(int vlistID)
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
   int datatype = vlistptr->vars[0].datatype;
-  if (  datatype== DATATYPE_CPX32 || datatype == DATATYPE_CPX64 )
+  if (  datatype== CDI_DATATYPE_CPX32 || datatype == CDI_DATATYPE_CPX64 )
     number = CDI_COMP;
   else
     number = CDI_REAL;
@@ -929,7 +929,7 @@ int vlistNumber(int vlistID)
   for ( int varID = 1; varID < vlistptr->nvars; varID++ )
     {
       datatype = vlistptr->vars[varID].datatype;
-      if ( datatype == DATATYPE_CPX32 || datatype == DATATYPE_CPX64 )
+      if ( datatype == CDI_DATATYPE_CPX32 || datatype == CDI_DATATYPE_CPX64 )
         number2 = CDI_COMP;
       else
         number2 = CDI_REAL;
@@ -1477,8 +1477,8 @@ int  vlistGetSizeP ( void * vlistptr, void *context)
 {
   int txsize, varID;
   vlist_t *p = (vlist_t*) vlistptr;
-  txsize = serializeGetSize(vlist_nints, DATATYPE_INT, context);
-  txsize += serializeGetSize(1, DATATYPE_LONG, context);
+  txsize = serializeGetSize(vlist_nints, CDI_DATATYPE_INT, context);
+  txsize += serializeGetSize(1, CDI_DATATYPE_LONG, context);
   txsize += cdiAttsGetSize(p, CDI_GLOBAL, context);
   for ( varID = 0; varID <  p->nvars; varID++ )
     txsize += vlistVarGetPackSize(p, varID, context);
@@ -1498,8 +1498,8 @@ void vlistPackP ( void * vlistptr, void * buf, int size, int *position,
   tempbuf[3] = p->tableID;
   tempbuf[4] = p->instID;
   tempbuf[5] = p->modelID;
-  serializePack(tempbuf, vlist_nints, DATATYPE_INT, buf, size, position, context);
-  serializePack(&p->ntsteps, 1, DATATYPE_LONG, buf, size, position, context);
+  serializePack(tempbuf, vlist_nints, CDI_DATATYPE_INT, buf, size, position, context);
+  serializePack(&p->ntsteps, 1, CDI_DATATYPE_LONG, buf, size, position, context);
 
   cdiAttsPack(p, CDI_GLOBAL, buf, size, position, context);
   for ( varID = 0; varID < p->nvars; varID++ )
@@ -1512,7 +1512,7 @@ void vlistUnpack(char * buf, int size, int *position, int originNamespace,
                  void *context, int force_id)
 {
   int tempbuf[vlist_nints];
-  serializeUnpack(buf, size, position, tempbuf, vlist_nints, DATATYPE_INT, context);
+  serializeUnpack(buf, size, position, tempbuf, vlist_nints, CDI_DATATYPE_INT, context);
   int nvars = tempbuf[1];
   int targetID = namespaceAdaptKey(tempbuf[0], originNamespace);
   vlist_t *p = vlist_new_entry(force_id?targetID:CDI_UNDEFID);
@@ -1524,7 +1524,7 @@ void vlistUnpack(char * buf, int size, int *position, int originNamespace,
   p->tableID = tempbuf[3];
   p->instID = namespaceAdaptKey(tempbuf[4], originNamespace);
   p->modelID = namespaceAdaptKey(tempbuf[5], originNamespace);
-  serializeUnpack(buf, size, position, &p->ntsteps, 1, DATATYPE_LONG, context);
+  serializeUnpack(buf, size, position, &p->ntsteps, 1, CDI_DATATYPE_LONG, context);
   cdiAttsUnpack(targetID, CDI_GLOBAL, buf, size, position, context);
   for (int varID = 0; varID < nvars; varID++ )
     vlistVarUnpack(targetID, buf, size, position, originNamespace, context);

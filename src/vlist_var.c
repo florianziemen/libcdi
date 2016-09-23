@@ -749,9 +749,9 @@ The function @func{vlistInqVarDatatype} returns the data type of a variable.
 
 @Result
 @func{vlistInqVarDatatype} returns an identifier to the data type of the variable.
-The valid CDI data types are @func{DATATYPE_PACK8}, @func{DATATYPE_PACK16}, @func{DATATYPE_PACK24},
-@func{DATATYPE_FLT32}, @func{DATATYPE_FLT64}, @func{DATATYPE_INT8}, @func{DATATYPE_INT16} and 
-@func{DATATYPE_INT32}.
+The valid CDI data types are @func{CDI_DATATYPE_PACK8}, @func{CDI_DATATYPE_PACK16}, @func{CDI_DATATYPE_PACK24},
+@func{CDI_DATATYPE_FLT32}, @func{CDI_DATATYPE_FLT64}, @func{CDI_DATATYPE_INT8}, @func{CDI_DATATYPE_INT16} and 
+@func{CDI_DATATYPE_INT32}.
 
 @EndFunction
 */
@@ -772,8 +772,8 @@ int vlistInqVarNumber(int vlistID, int varID)
   vlistCheckVarID(__func__, vlistID, varID);
 
   int number = CDI_REAL;
-  if ( vlistptr->vars[varID].datatype == DATATYPE_CPX32 ||
-       vlistptr->vars[varID].datatype == DATATYPE_CPX64 )
+  if ( vlistptr->vars[varID].datatype == CDI_DATATYPE_CPX32 ||
+       vlistptr->vars[varID].datatype == CDI_DATATYPE_CPX64 )
     number = CDI_COMP;
 
   return number;
@@ -788,9 +788,9 @@ int vlistInqVarNumber(int vlistID, int varID)
     @Item  vlistID  Variable list ID, from a previous call to @fref{vlistCreate}.
     @Item  varID    Variable identifier.
     @Item  datatype The data type identifier.
-                    The valid CDI data types are @func{DATATYPE_PACK8}, @func{DATATYPE_PACK16},
-                    @func{DATATYPE_PACK24}, @func{DATATYPE_FLT32}, @func{DATATYPE_FLT64},
-                    @func{DATATYPE_INT8}, @func{DATATYPE_INT16} and @func{DATATYPE_INT32}.
+                    The valid CDI data types are @func{CDI_DATATYPE_PACK8}, @func{CDI_DATATYPE_PACK16},
+                    @func{CDI_DATATYPE_PACK24}, @func{CDI_DATATYPE_FLT32}, @func{CDI_DATATYPE_FLT64},
+                    @func{CDI_DATATYPE_INT8}, @func{CDI_DATATYPE_INT16} and @func{CDI_DATATYPE_INT32}.
 
 @Description
 The function @func{vlistDefVarDatatype} defines the data type of a variable.
@@ -810,12 +810,12 @@ void vlistDefVarDatatype(int vlistID, int varID, int datatype)
       if ( vlistptr->vars[varID].missvalused == FALSE )
         switch (datatype)
           {
-          case DATATYPE_INT8:   vlistptr->vars[varID].missval = -SCHAR_MAX; break;
-          case DATATYPE_UINT8:  vlistptr->vars[varID].missval =  UCHAR_MAX; break;
-          case DATATYPE_INT16:  vlistptr->vars[varID].missval = -SHRT_MAX;  break;
-          case DATATYPE_UINT16: vlistptr->vars[varID].missval =  USHRT_MAX; break;
-          case DATATYPE_INT32:  vlistptr->vars[varID].missval = -INT_MAX;   break;
-          case DATATYPE_UINT32: vlistptr->vars[varID].missval =  UINT_MAX;  break;
+          case CDI_DATATYPE_INT8:   vlistptr->vars[varID].missval = -SCHAR_MAX; break;
+          case CDI_DATATYPE_UINT8:  vlistptr->vars[varID].missval =  UCHAR_MAX; break;
+          case CDI_DATATYPE_INT16:  vlistptr->vars[varID].missval = -SHRT_MAX;  break;
+          case CDI_DATATYPE_UINT16: vlistptr->vars[varID].missval =  USHRT_MAX; break;
+          case CDI_DATATYPE_INT32:  vlistptr->vars[varID].missval = -INT_MAX;   break;
+          case CDI_DATATYPE_UINT32: vlistptr->vars[varID].missval =  UINT_MAX;  break;
           }
       reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
     }
@@ -2075,20 +2075,20 @@ enum {
 int vlistVarGetPackSize(vlist_t *p, int varID, void *context)
 {
   var_t *var = p->vars + varID;
-  int varsize = serializeGetSize(vlistvar_nints, DATATYPE_INT, context)
-    + serializeGetSize(vlistvar_ndbls, DATATYPE_FLT64, context);
+  int varsize = serializeGetSize(vlistvar_nints, CDI_DATATYPE_INT, context)
+    + serializeGetSize(vlistvar_ndbls, CDI_DATATYPE_FLT64, context);
   if (var->name)
-    varsize += serializeGetSize((int)strlen(var->name), DATATYPE_TXT, context);
+    varsize += serializeGetSize((int)strlen(var->name), CDI_DATATYPE_TXT, context);
   if (var->longname)
-    varsize += serializeGetSize((int)strlen(var->longname), DATATYPE_TXT, context);
+    varsize += serializeGetSize((int)strlen(var->longname), CDI_DATATYPE_TXT, context);
   if (var->stdname)
-    varsize += serializeGetSize((int)strlen(var->stdname), DATATYPE_TXT, context);
+    varsize += serializeGetSize((int)strlen(var->stdname), CDI_DATATYPE_TXT, context);
   if (var->units)
-    varsize += serializeGetSize((int)strlen(var->units), DATATYPE_TXT, context);
+    varsize += serializeGetSize((int)strlen(var->units), CDI_DATATYPE_TXT, context);
   if (var->extra)
-    varsize += serializeGetSize((int)strlen(var->extra), DATATYPE_TXT, context);
+    varsize += serializeGetSize((int)strlen(var->extra), CDI_DATATYPE_TXT, context);
   varsize += serializeGetSize(4 * zaxisInqSize(var->zaxisID),
-                              DATATYPE_INT, context);
+                              CDI_DATATYPE_INT, context);
   varsize += cdiAttsGetSize(p, varID, context);
   return varsize;
 }
@@ -2126,23 +2126,23 @@ void vlistVarPack(vlist_t *p, int varID, char * buf, int size, int *position,
   dtempbuf[0] = var->missval;
   dtempbuf[1] = var->scalefactor;
   dtempbuf[2] = var->addoffset;
-  serializePack(tempbuf, vlistvar_nints, DATATYPE_INT,
+  serializePack(tempbuf, vlistvar_nints, CDI_DATATYPE_INT,
                 buf, size, position, context);
-  serializePack(dtempbuf, vlistvar_ndbls, DATATYPE_FLT64,
+  serializePack(dtempbuf, vlistvar_ndbls, CDI_DATATYPE_FLT64,
                 buf, size, position, context);
   if (namesz)
-    serializePack(var->name, namesz, DATATYPE_TXT, buf, size, position, context);
+    serializePack(var->name, namesz, CDI_DATATYPE_TXT, buf, size, position, context);
   if (longnamesz)
-    serializePack(var->longname, longnamesz, DATATYPE_TXT,
+    serializePack(var->longname, longnamesz, CDI_DATATYPE_TXT,
                   buf, size, position, context);
   if (stdnamesz)
-    serializePack(var->stdname, stdnamesz, DATATYPE_TXT,
+    serializePack(var->stdname, stdnamesz, CDI_DATATYPE_TXT,
                   buf, size, position, context);
   if (unitssz)
-    serializePack(var->units, unitssz, DATATYPE_TXT,
+    serializePack(var->units, unitssz, CDI_DATATYPE_TXT,
                   buf, size, position, context);
   if (extralen)
-    serializePack(var->extra, extralen, DATATYPE_TXT,
+    serializePack(var->extra, extralen, CDI_DATATYPE_TXT,
                   buf, size, position, context);
   if (nlevs)
     {
@@ -2154,7 +2154,7 @@ void vlistVarPack(vlist_t *p, int varID, char * buf, int size, int *position,
           levbuf[levID][2] = var->levinfo[levID].mlevelID;
           levbuf[levID][3] = var->levinfo[levID].flevelID;
         }
-      serializePack(levbuf, nlevs * 4, DATATYPE_INT,
+      serializePack(levbuf, nlevs * 4, CDI_DATATYPE_INT,
                     buf, size, position, context);
     }
   cdiAttsPack(p, varID, buf, size, position, context);
@@ -2175,9 +2175,9 @@ void vlistVarUnpack(int vlistID, char * buf, int size, int *position,
   char *varname = NULL;
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
   serializeUnpack(buf, size, position,
-                  tempbuf, vlistvar_nints, DATATYPE_INT, context);
+                  tempbuf, vlistvar_nints, CDI_DATATYPE_INT, context);
   serializeUnpack(buf, size, position,
-                  dtempbuf, vlistvar_ndbls, DATATYPE_FLT64, context);
+                  dtempbuf, vlistvar_ndbls, CDI_DATATYPE_FLT64, context);
 
   /* ------------------------------------------- */
   /* NOTE: Tile sets  currently not supported!!! */
@@ -2195,35 +2195,35 @@ void vlistVarUnpack(int vlistID, char * buf, int size, int *position,
   if (tempbuf[4])
   {
     serializeUnpack(buf, size, position,
-                    varname, tempbuf[4], DATATYPE_TXT, context);
+                    varname, tempbuf[4], CDI_DATATYPE_TXT, context);
     varname[tempbuf[4]] = '\0';
     vlistDefVarName(vlistID, newvar, varname);
   }
   if (tempbuf[5])
   {
     serializeUnpack(buf, size, position,
-                    varname, tempbuf[5], DATATYPE_TXT, context);
+                    varname, tempbuf[5], CDI_DATATYPE_TXT, context);
     varname[tempbuf[5]] = '\0';
     vlistDefVarLongname(vlistID, newvar, varname);
   }
   if (tempbuf[6])
   {
     serializeUnpack(buf, size, position,
-                    varname, tempbuf[6], DATATYPE_TXT, context);
+                    varname, tempbuf[6], CDI_DATATYPE_TXT, context);
     varname[tempbuf[6]] = '\0';
     vlistDefVarStdname(vlistID, newvar, varname);
   }
   if (tempbuf[7])
   {
     serializeUnpack(buf, size, position,
-                    varname, tempbuf[7], DATATYPE_TXT, context);
+                    varname, tempbuf[7], CDI_DATATYPE_TXT, context);
     varname[tempbuf[7]] = '\0';
     vlistDefVarUnits(vlistID, newvar, varname);
   }
   if (tempbuf[20])
     {
       serializeUnpack(buf, size, position,
-                      varname, tempbuf[20], DATATYPE_TXT, context);
+                      varname, tempbuf[20], CDI_DATATYPE_TXT, context);
       varname[tempbuf[20]] = '\0';
       vlistDefVarExtra(vlistID, newvar, varname);
     }
@@ -2252,7 +2252,7 @@ void vlistVarUnpack(int vlistID, char * buf, int size, int *position,
       int i, flagSetLev = 0;
       cdiVlistCreateVarLevInfo(vlistptr, newvar);
       serializeUnpack(buf, size, position,
-                      levbuf, nlevs * 4, DATATYPE_INT, context);
+                      levbuf, nlevs * 4, CDI_DATATYPE_INT, context);
       for (i = 0; i < nlevs; ++i)
         {
           vlistDefFlag(vlistID, newvar, i, levbuf[i][0]);

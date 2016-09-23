@@ -55,7 +55,7 @@ typedef struct
   int         gridID;
   int         zaxisID;
   int         tsteptype; /* TSTEP_* */
-  int         datatype;  /* DATATYPE_PACKX for GRIB data, else DATATYPE_FLT32 or DATATYPE_FLT64 */
+  int         datatype;  /* CDI_DATATYPE_PACKX for GRIB data, else CDI_DATATYPE_FLT32 or CDI_DATATYPE_FLT64 */
   int         instID;
   int         modelID;
   int         tableID;

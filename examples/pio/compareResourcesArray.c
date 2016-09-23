@@ -146,7 +146,7 @@ static int defineVlist ( int gridID, int zaxisID, int taxisID )
   vlistDefVarName(vlistID, varID1, "varname1");
   {
     int globfac[] = { 23, 42 };
-    vlistDefAttInt(vlistID, varID1, "seer's globule factors", DATATYPE_INT16,
+    vlistDefAttInt(vlistID, varID1, "seer's globule factors", CDI_DATATYPE_INT16,
                    2, globfac);
   }
   vlistDefVarName(vlistID, varID2, "varname2");

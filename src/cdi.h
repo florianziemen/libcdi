@@ -54,15 +54,15 @@ extern "C" {
 #define  CDI_FILETYPE_EXT           8   // File type EXTRA
 #define  CDI_FILETYPE_IEG           9   // File type IEG
 
-#define  FILETYPE_GRB     CDI_FILETYPE_GRB
-#define  FILETYPE_GRB2    CDI_FILETYPE_GRB2
-#define  FILETYPE_NC      CDI_FILETYPE_NC
-#define  FILETYPE_NC2     CDI_FILETYPE_NC2
-#define  FILETYPE_NC4     CDI_FILETYPE_NC4
-#define  FILETYPE_NC4C    CDI_FILETYPE_NC4C
-#define  FILETYPE_SRV     CDI_FILETYPE_SRV
-#define  FILETYPE_EXT     CDI_FILETYPE_EXT
-#define  FILETYPE_IEG     CDI_FILETYPE_IEG
+#define  FILETYPE_GRB           1
+#define  FILETYPE_GRB2          2
+#define  FILETYPE_NC            3
+#define  FILETYPE_NC2           4
+#define  FILETYPE_NC4           5
+#define  FILETYPE_NC4C          6
+#define  FILETYPE_SRV           7
+#define  FILETYPE_EXT           8
+#define  FILETYPE_IEG           9
 
 /* Compress types */
 
@@ -75,57 +75,57 @@ extern "C" {
 
 /* external data types */
 
-#define  DATATYPE_PACK            0
-#define  DATATYPE_PACK1           1
-#define  DATATYPE_PACK2           2
-#define  DATATYPE_PACK3           3
-#define  DATATYPE_PACK4           4
-#define  DATATYPE_PACK5           5
-#define  DATATYPE_PACK6           6
-#define  DATATYPE_PACK7           7
-#define  DATATYPE_PACK8           8
-#define  DATATYPE_PACK9           9
-#define  DATATYPE_PACK10         10
-#define  DATATYPE_PACK11         11
-#define  DATATYPE_PACK12         12
-#define  DATATYPE_PACK13         13
-#define  DATATYPE_PACK14         14
-#define  DATATYPE_PACK15         15
-#define  DATATYPE_PACK16         16
-#define  DATATYPE_PACK17         17
-#define  DATATYPE_PACK18         18
-#define  DATATYPE_PACK19         19
-#define  DATATYPE_PACK20         20
-#define  DATATYPE_PACK21         21
-#define  DATATYPE_PACK22         22
-#define  DATATYPE_PACK23         23
-#define  DATATYPE_PACK24         24
-#define  DATATYPE_PACK25         25
-#define  DATATYPE_PACK26         26
-#define  DATATYPE_PACK27         27
-#define  DATATYPE_PACK28         28
-#define  DATATYPE_PACK29         29
-#define  DATATYPE_PACK30         30
-#define  DATATYPE_PACK31         31
-#define  DATATYPE_PACK32         32
-#define  DATATYPE_CPX32          64
-#define  DATATYPE_CPX64         128
-#define  DATATYPE_FLT32         132
-#define  DATATYPE_FLT64         164
-#define  DATATYPE_INT8          208
-#define  DATATYPE_INT16         216
-#define  DATATYPE_INT32         232
-#define  DATATYPE_UINT8         308
-#define  DATATYPE_UINT16        316
-#define  DATATYPE_UINT32        332
+#define  CDI_DATATYPE_PACK            0
+#define  CDI_DATATYPE_PACK1           1
+#define  CDI_DATATYPE_PACK2           2
+#define  CDI_DATATYPE_PACK3           3
+#define  CDI_DATATYPE_PACK4           4
+#define  CDI_DATATYPE_PACK5           5
+#define  CDI_DATATYPE_PACK6           6
+#define  CDI_DATATYPE_PACK7           7
+#define  CDI_DATATYPE_PACK8           8
+#define  CDI_DATATYPE_PACK9           9
+#define  CDI_DATATYPE_PACK10         10
+#define  CDI_DATATYPE_PACK11         11
+#define  CDI_DATATYPE_PACK12         12
+#define  CDI_DATATYPE_PACK13         13
+#define  CDI_DATATYPE_PACK14         14
+#define  CDI_DATATYPE_PACK15         15
+#define  CDI_DATATYPE_PACK16         16
+#define  CDI_DATATYPE_PACK17         17
+#define  CDI_DATATYPE_PACK18         18
+#define  CDI_DATATYPE_PACK19         19
+#define  CDI_DATATYPE_PACK20         20
+#define  CDI_DATATYPE_PACK21         21
+#define  CDI_DATATYPE_PACK22         22
+#define  CDI_DATATYPE_PACK23         23
+#define  CDI_DATATYPE_PACK24         24
+#define  CDI_DATATYPE_PACK25         25
+#define  CDI_DATATYPE_PACK26         26
+#define  CDI_DATATYPE_PACK27         27
+#define  CDI_DATATYPE_PACK28         28
+#define  CDI_DATATYPE_PACK29         29
+#define  CDI_DATATYPE_PACK30         30
+#define  CDI_DATATYPE_PACK31         31
+#define  CDI_DATATYPE_PACK32         32
+#define  CDI_DATATYPE_CPX32          64
+#define  CDI_DATATYPE_CPX64         128
+#define  CDI_DATATYPE_FLT32         132
+#define  CDI_DATATYPE_FLT64         164
+#define  CDI_DATATYPE_INT8          208
+#define  CDI_DATATYPE_INT16         216
+#define  CDI_DATATYPE_INT32         232
+#define  CDI_DATATYPE_UINT8         308
+#define  CDI_DATATYPE_UINT16        316
+#define  CDI_DATATYPE_UINT32        332
 
 /* internal data types */
-#define  DATATYPE_INT           251
-#define  DATATYPE_FLT           252
-#define  DATATYPE_TXT           253
-#define  DATATYPE_CPX           254
-#define  DATATYPE_UCHAR         255
-#define  DATATYPE_LONG          256
+#define  CDI_DATATYPE_INT           251
+#define  CDI_DATATYPE_FLT           252
+#define  CDI_DATATYPE_TXT           253
+#define  CDI_DATATYPE_CPX           254
+#define  CDI_DATATYPE_UCHAR         255
+#define  CDI_DATATYPE_LONG          256
 
 /* Chunks */
 

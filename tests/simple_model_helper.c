@@ -17,24 +17,24 @@ var_scale(int datatype, double *mscale, double *mrscale)
   int mant_bits;
   switch (datatype)
     {
-    case DATATYPE_PACK8:
+    case CDI_DATATYPE_PACK8:
       mant_bits = 7;
       break;
-    case DATATYPE_PACK16:
+    case CDI_DATATYPE_PACK16:
       mant_bits = 15;
       break;
-    case DATATYPE_PACK24:
+    case CDI_DATATYPE_PACK24:
       mant_bits = 23;
       break;
-    case DATATYPE_FLT32:
+    case CDI_DATATYPE_FLT32:
       mant_bits = 24;
       break;
-    case DATATYPE_FLT64:
+    case CDI_DATATYPE_FLT64:
       mant_bits = 53;
       break;
-    case DATATYPE_INT8:
-    case DATATYPE_INT16:
-    case DATATYPE_INT32:
+    case CDI_DATATYPE_INT8:
+    case CDI_DATATYPE_INT16:
+    case CDI_DATATYPE_INT32:
     default:
       fprintf(stderr, "Unexpected or unusable content format: %d\n",
               datatype);

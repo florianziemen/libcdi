@@ -520,8 +520,8 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
       }
     }
 
-  // if ( datatype > 32 ) datatype = DATATYPE_PACK32;
-  if ( datatype <  0 ) datatype = DATATYPE_PACK;
+  // if ( datatype > 32 ) datatype = CDI_DATATYPE_PACK32;
+  if ( datatype <  0 ) datatype = CDI_DATATYPE_PACK;
 
   stdname[0] = 0;
   longname[0] = 0;
@@ -725,14 +725,14 @@ grib_handle *gribapiGetDiskRepresentation(size_t recsize, size_t *buffersize, vo
 
   if ( lieee )
     {
-      *outDatatype = DATATYPE_FLT64;
+      *outDatatype = CDI_DATATYPE_FLT64;
       long precision;
       int status = grib_get_long(gh, "precision", &precision);
-      if ( status == 0 && precision == 1 ) *outDatatype = DATATYPE_FLT32;
+      if ( status == 0 && precision == 1 ) *outDatatype = CDI_DATATYPE_FLT32;
     }
   else
     {
-      *outDatatype = DATATYPE_PACK;
+      *outDatatype = CDI_DATATYPE_PACK;
       long bitsPerValue;
       if ( grib_get_long(gh, "bitsPerValue", &bitsPerValue) == 0 )
         {
@@ -2085,7 +2085,7 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
           }
         GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
         if ( lieee )
-          GRIB_CHECK(my_grib_set_long(gh, "precision", datatype == DATATYPE_FLT64 ? 2 : 1), 0);
+          GRIB_CHECK(my_grib_set_long(gh, "precision", datatype == CDI_DATATYPE_FLT64 ? 2 : 1), 0);
 
 	break;
       }
@@ -2613,7 +2613,7 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
 
   if ( ! gc->init ) gribapiDefParam((int)editionNumber, gh, param, name, stdname);
 
-  if ( editionNumber == 2 && (datatype == DATATYPE_FLT32 || datatype == DATATYPE_FLT64) ) lieee = true;
+  if ( editionNumber == 2 && (datatype == CDI_DATATYPE_FLT32 || datatype == CDI_DATATYPE_FLT64) ) lieee = true;
 
   /* bitsPerValue have to be defined before call to DefGrid (complex packing) */
   //  if ( lieee == false )
