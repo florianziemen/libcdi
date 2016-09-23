@@ -63,8 +63,7 @@ static int    gridCompareP    ( void * gridptr1, void * gridptr2 );
 static void   gridDestroyP    ( void * gridptr );
 static void   gridPrintP      ( void * gridptr, FILE * fp );
 static int    gridGetPackSize ( void * gridptr, void *context);
-static void   gridPack        ( void * gridptr, void * buff, int size,
-				int *position, void *context);
+static void   gridPack        ( void * gridptr, void * buff, int size, int *position, void *context);
 static int    gridTxCode      ( void );
 
 static const resOps gridOps = {
@@ -78,11 +77,12 @@ static const resOps gridOps = {
 
 static int  GRID_Debug = 0;   /* If set to 1, debugging */
 
+
 grid_t *grid_to_pointer(int gridID)
 {
   return (grid_t *)reshGetVal(gridID, &gridOps);
 }
-#define grid_to_pointer(gridID) (grid_t *)reshGetVal(gridID, &gridOps)
+
 #define gridMark4Update(gridID) reshSetStatus(gridID, &gridOps, RESH_DESYNC_IN_USE)
 
 
@@ -227,6 +227,7 @@ grid_t *grid_copy_base(grid_t *gridptrOrig)
   gridptrOrig->vtable->copyArrayFields(gridptrOrig, gridptrDup);
   return gridptrDup;
 }
+
 
 unsigned cdiGridCount(void)
 {
@@ -537,8 +538,8 @@ void gridDestroy(int gridID)
   gridptr->vtable->destroy(gridptr);
 }
 
-
-void gridDestroyP ( void * gridptr )
+static
+void gridDestroyP(void * gridptr)
 {
   ((grid_t *)gridptr)->vtable->destroy((grid_t *)gridptr);
 }
@@ -548,7 +549,7 @@ const char *gridNamePtr(int gridtype)
 {
   int size = (int) (sizeof(Grids)/sizeof(Grids[0]));
 
-  const char *name = gridtype >= 0 && gridtype < size ? Grids[gridtype] : Grids[GRID_GENERIC];
+  const char *name = (gridtype >= 0 && gridtype < size) ? Grids[gridtype] : Grids[GRID_GENERIC];
 
   return name;
 }
@@ -848,11 +849,12 @@ void gridInqXunits(int gridID, char *xunits)
 
 void gridInqXstdname(int gridID, char *xstdname)
 {
-  grid_t *gridptr = grid_to_pointer(gridID);
-  if ( gridptr->x.stdname )
-    strcpy(xstdname, gridptr->x.stdname);
-  else
-    xstdname[0] = 0;
+  if ( xstdname )
+    {
+      xstdname[0] = 0;
+      grid_t *gridptr = grid_to_pointer(gridID);
+      if ( gridptr->x.stdname ) strcpy(xstdname, gridptr->x.stdname);
+    }
 }
 
 /*
@@ -930,11 +932,12 @@ void gridInqYunits(int gridID, char *yunits)
 
 void gridInqYstdname(int gridID, char *ystdname)
 {
-  grid_t *gridptr = grid_to_pointer(gridID);
-  if ( gridptr->y.stdname )
-    strcpy(ystdname, gridptr->y.stdname);
-  else
-    ystdname[0] = 0;
+  if ( ystdname )
+    {
+      ystdname[0] = 0;
+      grid_t *gridptr = grid_to_pointer(gridID);
+      if ( gridptr->y.stdname ) strcpy(ystdname, gridptr->y.stdname);
+    }
 }
 
 
@@ -3799,7 +3802,6 @@ The function @func{gridInqPosition} returns the position of grid in the referenc
 int gridInqPosition(int gridID)
 {
   grid_t *gridptr = grid_to_pointer(gridID);
-
   return gridptr->position;
 }
 

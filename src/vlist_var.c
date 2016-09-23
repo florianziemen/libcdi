@@ -1997,7 +1997,7 @@ int vlistInqVarIntKey(int vlistID, int varID, const char* name)
 
 void vlistDefVarIOrank(int vlistID, int varID, int iorank)
 {
-  vlist_t *vlistptr = vlist_to_pointer(vlistID );
+  vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
   vlistCheckVarID ( __func__, vlistID, varID );
 

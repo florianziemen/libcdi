@@ -107,8 +107,14 @@ void zaxisGetTypeDescription(int zaxisType, int *outPositive, const char **outNa
     }
 }
 
+
+zaxis_t *zaxis_to_pointer(int id)
+{
+  return (zaxis_t *)reshGetVal(id, &zaxisOps);
+}
+
 static
-void zaxisDefaultValue(zaxis_t *zaxisptr)
+void zaxis_init(zaxis_t *zaxisptr)
 {
   zaxisptr->self          = CDI_UNDEFID;
   zaxisptr->name[0]       = 0;
@@ -143,8 +149,7 @@ static
 zaxis_t *zaxisNewEntry(int id)
 {
   zaxis_t *zaxisptr = (zaxis_t *) Malloc(sizeof(zaxis_t));
-
-  zaxisDefaultValue ( zaxisptr );
+  zaxis_init(zaxisptr);
 
   if ( id == CDI_UNDEFID )
     zaxisptr->self = reshPut(zaxisptr, &zaxisOps);
@@ -155,12 +160,6 @@ zaxis_t *zaxisNewEntry(int id)
     }
 
   return zaxisptr;
-}
-
-
-zaxis_t *zaxis_to_pointer(int id)
-{
-  return (zaxis_t *)reshGetVal(id, &zaxisOps);
 }
 
 static
@@ -182,14 +181,14 @@ void zaxis_copy(zaxis_t *zaxisptr2, zaxis_t *zaxisptr1)
   zaxisptr2->self = zaxisID2;
 }
 
+
 unsigned cdiZaxisCount(void)
 {
   return reshCountType(&zaxisOps);
 }
 
-
-static int
-zaxisCreate_(int zaxistype, int size, int id)
+static
+int zaxisCreate_(int zaxistype, int size, int id)
 {
   zaxis_t *zaxisptr = zaxisNewEntry(id);
 
@@ -257,7 +256,8 @@ int zaxisCreate(int zaxistype, int size)
 {
   if ( CDI_Debug ) Message("zaxistype: %d size: %d ", zaxistype, size);
 
-  zaxisInit ();
+  zaxisInit();
+
   return zaxisCreate_(zaxistype, size, CDI_UNDEFID);
 }
 
@@ -568,8 +568,12 @@ void zaxisInqUnits(int zaxisID, char *units)
 
 void zaxisInqStdname(int zaxisID, char *stdname)
 {
-  zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
-  strcpy(stdname, zaxisptr->stdname);
+  if ( stdname )
+    {
+      stdname[0] = 0;
+      zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
+      if ( zaxisptr->stdname ) strcpy(stdname, zaxisptr->stdname);
+    }
 }
 
 
@@ -577,7 +581,7 @@ void zaxisDefPrec(int zaxisID, int prec)
 {
   zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
 
-  if (zaxisptr->prec != prec)
+  if ( zaxisptr->prec != prec )
     {
       zaxisptr->prec = prec;
       reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
@@ -649,7 +653,7 @@ void zaxisDefLtype2(int zaxisID, int ltype2)
 {
   zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
 
-  if (zaxisptr->ltype2 != ltype2)
+  if ( zaxisptr->ltype2 != ltype2 )
     {
       zaxisptr->ltype2 = ltype2;
       reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
@@ -1250,16 +1254,12 @@ int zaxisDuplicate(int zaxisID)
   return zaxisIDnew;
 }
 
-
 static
 void zaxisPrintKernel(zaxis_t *zaxisptr, int index, FILE *fp)
 {
-  unsigned char uuid[CDI_UUID_SIZE];
-
   xassert(zaxisptr);
 
   int zaxisID = zaxisptr->self;
-
   int type    = zaxisptr->type;
   int nlevels = zaxisptr->size;
   int prec    = zaxisptr->prec;
@@ -1368,6 +1368,7 @@ void zaxisPrintKernel(zaxis_t *zaxisptr, int index, FILE *fp)
 
   if ( type == ZAXIS_REFERENCE )
     {
+      unsigned char uuid[CDI_UUID_SIZE];
       zaxisInqUUID(zaxisID, uuid);
       if ( *uuid )
         {
@@ -1380,11 +1381,10 @@ void zaxisPrintKernel(zaxis_t *zaxisptr, int index, FILE *fp)
 }
 
 
-void zaxisPrint ( int zaxisID, int index )
+void zaxisPrint(int zaxisID, int index)
 {
   zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
-
-  zaxisPrintKernel ( zaxisptr, index, stdout );
+  zaxisPrintKernel(zaxisptr, index, stdout);
 }
 
 
