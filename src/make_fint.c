@@ -777,7 +777,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
           else
             {
               if ( strncmp(parname, "CDI_H_", 6) == 0 ) continue;
-              fprintf(fpinc, "%s\n", line);
+              fprintf(fpinc, "%s", line);
             }
 	}
       else if (!regexec(&cppCondRE, line, maxMatch, reMatch, 0)

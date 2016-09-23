@@ -15,44 +15,54 @@ extern "C" {
 #endif
 
 
-#define  CDI_MAX_NAME           256   /* max length of a name                 */
+#define  CDI_MAX_NAME             256   // max length of a name
 
-#define  CDI_UNDEFID             -1
-#define  CDI_GLOBAL              -1   /* Global var ID for vlist              */
+#define  CDI_UNDEFID               -1
+#define  CDI_GLOBAL                -1   // Global var ID for vlist
 
 /* Byte order */
 
-#define  CDI_BIGENDIAN            0   /* Byte order BIGENDIAN                 */
-#define  CDI_LITTLEENDIAN         1   /* Byte order LITTLEENDIAN              */
-#define  CDI_PDPENDIAN            2
+#define  CDI_BIGENDIAN              0   // Byte order BIGENDIAN
+#define  CDI_LITTLEENDIAN           1   // Byte order LITTLEENDIAN
+#define  CDI_PDPENDIAN              2
 
-#define  CDI_REAL                 1   /* Real numbers                         */
-#define  CDI_COMP                 2   /* Complex numbers                      */
-#define  CDI_BOTH                 3   /* Both numbers                         */
+#define  CDI_REAL                   1   // Real numbers
+#define  CDI_COMP                   2   // Complex numbers
+#define  CDI_BOTH                   3   // Both numbers
 
 /* Error identifier */
 
-#define	 CDI_NOERR        	  0   /* No Error                             */
-#define  CDI_EEOF                -1   /* The end of file was encountered      */
-#define  CDI_ESYSTEM            -10   /* Operating system error               */
-#define  CDI_EINVAL             -20   /* Invalid argument                     */
-#define  CDI_EUFTYPE            -21   /* Unsupported file type                */
-#define  CDI_ELIBNAVAIL         -22   /* xxx library not available            */
-#define  CDI_EUFSTRUCT          -23   /* Unsupported file structure           */
-#define  CDI_EUNC4              -24   /* Unsupported NetCDF4 structure        */
-#define  CDI_ELIMIT             -99   /* Internal limits exceeded             */
+#define	 CDI_NOERR        	    0   // No Error
+#define  CDI_EEOF                  -1   // The end of file was encountered
+#define  CDI_ESYSTEM              -10   // Operating system error
+#define  CDI_EINVAL               -20   // Invalid argument
+#define  CDI_EUFTYPE              -21   // Unsupported file type
+#define  CDI_ELIBNAVAIL           -22   // xxx library not available
+#define  CDI_EUFSTRUCT            -23   // Unsupported file structure
+#define  CDI_EUNC4                -24   // Unsupported NetCDF4 structure
+#define  CDI_ELIMIT               -99   // Internal limits exceeded
 
 /* File types */
 
-#define  CDI_FILETYPE_GRB             1   /* File type GRIB                       */
-#define  CDI_FILETYPE_GRB2            2   /* File type GRIB version 2             */
-#define  CDI_FILETYPE_NC              3   /* File type NetCDF                     */
-#define  CDI_FILETYPE_NC2             4   /* File type NetCDF version 2 (64-bit)  */
-#define  CDI_FILETYPE_NC4             5   /* File type NetCDF version 4           */
-#define  CDI_FILETYPE_NC4C            6   /* File type NetCDF version 4 (classic) */
-#define  CDI_FILETYPE_SRV             7   /* File type SERVICE                    */
-#define  CDI_FILETYPE_EXT             8   /* File type EXTRA                      */
-#define  CDI_FILETYPE_IEG             9   /* File type IEG                        */
+#define  CDI_FILETYPE_GRB           1   // File type GRIB
+#define  CDI_FILETYPE_GRB2          2   // File type GRIB version 2
+#define  CDI_FILETYPE_NC            3   // File type NetCDF
+#define  CDI_FILETYPE_NC2           4   // File type NetCDF version 2 (64-bit)
+#define  CDI_FILETYPE_NC4           5   // File type NetCDF version 4
+#define  CDI_FILETYPE_NC4C          6   // File type NetCDF version 4 (classic)
+#define  CDI_FILETYPE_SRV           7   // File type SERVICE
+#define  CDI_FILETYPE_EXT           8   // File type EXTRA
+#define  CDI_FILETYPE_IEG           9   // File type IEG
+
+#define  FILETYPE_GRB     CDI_FILETYPE_GRB
+#define  FILETYPE_GRB2    CDI_FILETYPE_GRB2
+#define  FILETYPE_NC      CDI_FILETYPE_NC
+#define  FILETYPE_NC2     CDI_FILETYPE_NC2
+#define  FILETYPE_NC4     CDI_FILETYPE_NC4
+#define  FILETYPE_NC4C    CDI_FILETYPE_NC4C
+#define  FILETYPE_SRV     CDI_FILETYPE_SRV
+#define  FILETYPE_EXT     CDI_FILETYPE_EXT
+#define  FILETYPE_IEG     CDI_FILETYPE_IEG
 
 /* Compress types */
 

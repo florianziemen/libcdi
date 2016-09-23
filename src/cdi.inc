@@ -52,24 +52,33 @@
 !
 !  File types
 !
-      INTEGER    FILETYPE_GRB          
-      PARAMETER (FILETYPE_GRB           =  1)
-      INTEGER    FILETYPE_GRB2         
-      PARAMETER (FILETYPE_GRB2          =  2)
-      INTEGER    FILETYPE_NC           
-      PARAMETER (FILETYPE_NC            =  3)
-      INTEGER    FILETYPE_NC2          
-      PARAMETER (FILETYPE_NC2           =  4)
-      INTEGER    FILETYPE_NC4          
-      PARAMETER (FILETYPE_NC4           =  5)
-      INTEGER    FILETYPE_NC4C         
-      PARAMETER (FILETYPE_NC4C          =  6)
-      INTEGER    FILETYPE_SRV          
-      PARAMETER (FILETYPE_SRV           =  7)
-      INTEGER    FILETYPE_EXT          
-      PARAMETER (FILETYPE_EXT           =  8)
-      INTEGER    FILETYPE_IEG          
-      PARAMETER (FILETYPE_IEG           =  9)
+      INTEGER    CDI_FILETYPE_GRB      
+      PARAMETER (CDI_FILETYPE_GRB       =  1)
+      INTEGER    CDI_FILETYPE_GRB2     
+      PARAMETER (CDI_FILETYPE_GRB2      =  2)
+      INTEGER    CDI_FILETYPE_NC       
+      PARAMETER (CDI_FILETYPE_NC        =  3)
+      INTEGER    CDI_FILETYPE_NC2      
+      PARAMETER (CDI_FILETYPE_NC2       =  4)
+      INTEGER    CDI_FILETYPE_NC4      
+      PARAMETER (CDI_FILETYPE_NC4       =  5)
+      INTEGER    CDI_FILETYPE_NC4C     
+      PARAMETER (CDI_FILETYPE_NC4C      =  6)
+      INTEGER    CDI_FILETYPE_SRV      
+      PARAMETER (CDI_FILETYPE_SRV       =  7)
+      INTEGER    CDI_FILETYPE_EXT      
+      PARAMETER (CDI_FILETYPE_EXT       =  8)
+      INTEGER    CDI_FILETYPE_IEG      
+      PARAMETER (CDI_FILETYPE_IEG       =  9)
+#define  FILETYPE_GRB     CDI_FILETYPE_GRB
+#define  FILETYPE_GRB2    CDI_FILETYPE_GRB2
+#define  FILETYPE_NC      CDI_FILETYPE_NC
+#define  FILETYPE_NC2     CDI_FILETYPE_NC2
+#define  FILETYPE_NC4     CDI_FILETYPE_NC4
+#define  FILETYPE_NC4C    CDI_FILETYPE_NC4C
+#define  FILETYPE_SRV     CDI_FILETYPE_SRV
+#define  FILETYPE_EXT     CDI_FILETYPE_EXT
+#define  FILETYPE_IEG     CDI_FILETYPE_IEG
 !
 !  Compress types
 !
