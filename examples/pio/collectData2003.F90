@@ -72,7 +72,7 @@ CONTAINS
     INTEGER, PARAMETER :: nts      =  3   ! Number of time steps
     INTEGER, PARAMETER :: vdate    = 19850101
     INTEGER, PARAMETER :: vtime    = 120000
-    INTEGER, PARAMETER :: filetype = FILETYPE_GRB
+    INTEGER, PARAMETER :: filetype = CDI_FILETYPE_GRB
 
     INTEGER :: gridID, zaxisID1, zaxisID2, taxisID
     INTEGER :: vlistID, varID1, varID2, streamID, tsID
