@@ -23,7 +23,7 @@ int grbDecode(int filetype, int memtype, void *gribbuffer, int gribsize, void *d
   int status = 0;
 
 #if  defined  (HAVE_LIBCGRIBEX)
-  if ( filetype == FILETYPE_GRB )
+  if ( filetype == CDI_FILETYPE_GRB )
     {
 #if  defined  (HAVE_LIBGRIB_API)
       extern int cdiNAdditionalGRIBKeys;

@@ -49,7 +49,7 @@ int cdfDefDatatype(int datatype, int filetype)
   if ( datatype == DATATYPE_CPX32 || datatype == DATATYPE_CPX64 )
     Error("CDI/NetCDF library does not support complex numbers!");
 
-  if ( filetype == FILETYPE_NC4 )
+  if ( filetype == CDI_FILETYPE_NC4 )
     {
       if      ( datatype == DATATYPE_INT8   ) xtype = NC_BYTE;
       else if ( datatype == DATATYPE_INT16  ) xtype = NC_SHORT;
@@ -507,7 +507,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
   cdf_def_var(fileID, name, (nc_type) xtype, ndims, dims, &ncvarid);
 
 #if  defined  (HAVE_NETCDF4)
-  if ( lchunk && (streamptr->filetype == FILETYPE_NC4 || streamptr->filetype == FILETYPE_NC4C) )
+  if ( lchunk && (streamptr->filetype == CDI_FILETYPE_NC4 || streamptr->filetype == CDI_FILETYPE_NC4C) )
     {
       if ( chunktype == CDI_CHUNK_AUTO )
         retval = nc_def_var_chunking(fileID, ncvarid, NC_CHUNKED, NULL);
@@ -520,7 +520,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
 
   if ( streamptr->comptype == CDI_COMPRESS_ZIP )
     {
-      if ( lchunk && (streamptr->filetype == FILETYPE_NC4 || streamptr->filetype == FILETYPE_NC4C) )
+      if ( lchunk && (streamptr->filetype == CDI_FILETYPE_NC4 || streamptr->filetype == CDI_FILETYPE_NC4C) )
         {
           cdfDefVarDeflate(fileID, ncvarid, streamptr->complevel);
         }
@@ -540,7 +540,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
 
   if ( streamptr->comptype == CDI_COMPRESS_SZIP )
     {
-      if ( lchunk && (streamptr->filetype == FILETYPE_NC4 || streamptr->filetype == FILETYPE_NC4C) )
+      if ( lchunk && (streamptr->filetype == CDI_FILETYPE_NC4 || streamptr->filetype == CDI_FILETYPE_NC4C) )
         {
 #if defined (NC_SZIP_NN_OPTION_MASK)
           cdfDefVarSzip(fileID, ncvarid);

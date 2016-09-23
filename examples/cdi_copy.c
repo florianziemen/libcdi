@@ -28,7 +28,7 @@ int main(void)
   int varID2 = 1;
 
   // Open the output dataset (GRIB format)
-  int streamID2  = streamOpenWrite("example.grb", FILETYPE_GRB);
+  int streamID2  = streamOpenWrite("example.grb", CDI_FILETYPE_GRB);
   if ( streamID2 < 0 )
     {
       fprintf(stderr, "%s\n", cdiStringError(streamID2));

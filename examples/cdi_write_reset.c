@@ -51,7 +51,7 @@ int run(int irun)
   vlistDefTaxis(vlistID, taxisID);
 
   // Create a dataset in netCDF format
-  streamID = streamOpenWrite("example.nc", FILETYPE_NC);
+  streamID = streamOpenWrite("example.nc", CDI_FILETYPE_NC);
   if ( streamID < 0 )
     {
       fprintf(stderr, "%s\n", cdiStringError(streamID));

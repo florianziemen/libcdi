@@ -198,7 +198,7 @@ static void modelRun ( MPI_Comm comm )
   instID  = defineInstitute ();
   defineModel(instID);
   vlistID = defineVlist     ( gridID, zaxisID, taxisID);
-  streamID = streamOpenWrite("example.grb", FILETYPE_GRB);
+  streamID = streamOpenWrite("example.grb", CDI_FILETYPE_GRB);
   if ( streamID < 0 ) xabort ( "Could not open file" );
   defineStream ( streamID, vlistID );
 

@@ -324,7 +324,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
 	  taxisDefVdate(taxisID, vdatetime[1]);
 	  taxisDefVtime(taxisID, vdatetime[0]);
 	  streamDefTimestep ( streamID, tsID );
-          if (setup.filetype == FILETYPE_EXT)
+          if (setup.filetype == CDI_FILETYPE_EXT)
             {
               /* EXTRA doesn't store time, only date
                * set the value to 0 before checksumming, because a

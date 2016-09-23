@@ -7,7 +7,7 @@
 int main(void)
 {
   char fname[] = "test_ens.grb2";
-  int filetype = FILETYPE_GRB2;
+  int filetype = CDI_FILETYPE_GRB2;
   int nlat = 18, nlon = 2*nlat;
   double *data = NULL;
   int nlevel;

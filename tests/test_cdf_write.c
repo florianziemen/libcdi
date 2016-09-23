@@ -29,7 +29,7 @@ int main(int argc, const char **argv)
   const char *fname = "test.nc";
   if (argc > 1)
     fname = argv[1];
-  int streamID = streamOpenWrite(fname, FILETYPE_NC);
+  int streamID = streamOpenWrite(fname, CDI_FILETYPE_NC);
 
   if ( streamID < 0 )
     {

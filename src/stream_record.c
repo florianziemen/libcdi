@@ -184,31 +184,31 @@ void streamDefRecord(int streamID, int varID, int levelID)
   switch (streamptr->filetype)
     {
 #if  defined  (HAVE_LIBGRIB)
-    case FILETYPE_GRB:
-    case FILETYPE_GRB2:
+    case CDI_FILETYPE_GRB:
+    case CDI_FILETYPE_GRB2:
       grbDefRecord(streamptr);
       break;
 #endif
 #if  defined  (HAVE_LIBSERVICE)
-    case FILETYPE_SRV:
+    case CDI_FILETYPE_SRV:
       srvDefRecord(streamptr);
       break;
 #endif
 #if  defined  (HAVE_LIBEXTRA)
-    case FILETYPE_EXT:
+    case CDI_FILETYPE_EXT:
       extDefRecord(streamptr);
       break;
 #endif
 #if  defined  (HAVE_LIBIEG)
-    case FILETYPE_IEG:
+    case CDI_FILETYPE_IEG:
       iegDefRecord(streamptr);
       break;
 #endif
 #if  defined  (HAVE_LIBNETCDF)
-    case FILETYPE_NC:
-    case FILETYPE_NC2:
-    case FILETYPE_NC4:
-    case FILETYPE_NC4C:
+    case CDI_FILETYPE_NC:
+    case CDI_FILETYPE_NC2:
+    case CDI_FILETYPE_NC4:
+    case CDI_FILETYPE_NC4C:
       if ( streamptr->accessmode == 0 ) cdfEndDef(streamptr);
       cdfDefRecord(streamptr);
       break;
@@ -226,23 +226,23 @@ void streamCopyRecord(int streamID2, int streamID1)
     *streamptr2 = stream_to_pointer(streamID2);
   int filetype1 = streamptr1->filetype,
     filetype2 = streamptr2->filetype,
-    filetype  = FILETYPE_UNDEF;
+    filetype  = CDI_FILETYPE_UNDEF;
 
   if ( filetype1 == filetype2 ) filetype = filetype2;
   else
     {
       switch (filetype1)
         {
-        case FILETYPE_NC:
-        case FILETYPE_NC2:
-        case FILETYPE_NC4:
-        case FILETYPE_NC4C:
+        case CDI_FILETYPE_NC:
+        case CDI_FILETYPE_NC2:
+        case CDI_FILETYPE_NC4:
+        case CDI_FILETYPE_NC4C:
           switch (filetype2)
             {
-            case FILETYPE_NC:
-            case FILETYPE_NC2:
-            case FILETYPE_NC4:
-            case FILETYPE_NC4C:
+            case CDI_FILETYPE_NC:
+            case CDI_FILETYPE_NC2:
+            case CDI_FILETYPE_NC4:
+            case CDI_FILETYPE_NC4C:
               Warning("Streams have different file types (%s -> %s)!", strfiletype(filetype1), strfiletype(filetype2));
               filetype = filetype2;
               break;
@@ -251,37 +251,37 @@ void streamCopyRecord(int streamID2, int streamID1)
         }
     }
 
-  if ( filetype == FILETYPE_UNDEF )
+  if ( filetype == CDI_FILETYPE_UNDEF )
     Error("Streams have different file types (%s -> %s)!", strfiletype(filetype1), strfiletype(filetype2));
 
   switch (filetype)
     {
 #if  defined  (HAVE_LIBGRIB)
-    case FILETYPE_GRB:
-    case FILETYPE_GRB2:
+    case CDI_FILETYPE_GRB:
+    case CDI_FILETYPE_GRB2:
       grbCopyRecord(streamptr2, streamptr1);
       break;
 #endif
 #if  defined  (HAVE_LIBSERVICE)
-    case FILETYPE_SRV:
+    case CDI_FILETYPE_SRV:
       srvCopyRecord(streamptr2, streamptr1);
       break;
 #endif
 #if  defined  (HAVE_LIBEXTRA)
-    case FILETYPE_EXT:
+    case CDI_FILETYPE_EXT:
       extCopyRecord(streamptr2, streamptr1);
       break;
 #endif
 #if  defined  (HAVE_LIBIEG)
-    case FILETYPE_IEG:
+    case CDI_FILETYPE_IEG:
       iegCopyRecord(streamptr2, streamptr1);
       break;
 #endif
 #if  defined  (HAVE_LIBNETCDF)
-    case FILETYPE_NC:
-    case FILETYPE_NC2:
-    case FILETYPE_NC4:
-    case FILETYPE_NC4C:
+    case CDI_FILETYPE_NC:
+    case CDI_FILETYPE_NC2:
+    case CDI_FILETYPE_NC4:
+    case CDI_FILETYPE_NC4C:
       cdfCopyRecord(streamptr2, streamptr1);
       break;
 #endif

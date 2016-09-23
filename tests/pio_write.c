@@ -30,10 +30,10 @@ typedef int MPI_Comm;
 
 static const struct model_config default_setup
 #ifdef __cplusplus
-= { 12, 6, 3, 5, 5, FILETYPE_GRB, DATATYPE_PACK24,1,"grb"};
+= { 12, 6, 3, 5, 5, CDI_FILETYPE_GRB, DATATYPE_PACK24,1,"grb"};
 #else
   = { .nlon = 12, .nts = 3, .nlat = 6, .nvars = 5,
-      .filetype = FILETYPE_GRB, .datatype = DATATYPE_PACK24,
+      .filetype = CDI_FILETYPE_GRB, .datatype = DATATYPE_PACK24,
       .compute_checksum = 1, .create_uuid = 0,
       .suffix = "grb",
       .max_nlev = 5,
@@ -44,13 +44,13 @@ static const struct {
   char suffix[4];
   int type, defaultDT, defaultGrid;
 } suffix2type[] = {
-  { "nc", FILETYPE_NC, DATATYPE_FLT64, GRID_LONLAT },
-  { "grb",  FILETYPE_GRB, DATATYPE_PACK24, GRID_LONLAT },
-  { "nc2", FILETYPE_NC2, DATATYPE_FLT64, GRID_LONLAT },
-  { "nc4", FILETYPE_NC4, DATATYPE_FLT64, GRID_LONLAT },
-  { "ext", FILETYPE_EXT, DATATYPE_FLT64, GRID_GENERIC, },
-  { "svc", FILETYPE_SRV, DATATYPE_FLT64, GRID_GENERIC, },
-  { "ieg", FILETYPE_IEG, DATATYPE_FLT64, GRID_LONLAT },
+  { "nc", CDI_FILETYPE_NC, DATATYPE_FLT64, GRID_LONLAT },
+  { "grb",  CDI_FILETYPE_GRB, DATATYPE_PACK24, GRID_LONLAT },
+  { "nc2", CDI_FILETYPE_NC2, DATATYPE_FLT64, GRID_LONLAT },
+  { "nc4", CDI_FILETYPE_NC4, DATATYPE_FLT64, GRID_LONLAT },
+  { "ext", CDI_FILETYPE_EXT, DATATYPE_FLT64, GRID_GENERIC, },
+  { "svc", CDI_FILETYPE_SRV, DATATYPE_FLT64, GRID_GENERIC, },
+  { "ieg", CDI_FILETYPE_IEG, DATATYPE_FLT64, GRID_LONLAT },
 };
 
 static void

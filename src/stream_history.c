@@ -13,10 +13,10 @@ void streamDefHistory(int streamID, int length, const char *history)
 #ifdef HAVE_LIBNETCDF
   stream_t *streamptr = stream_to_pointer(streamID);
 
-  if ( streamptr->filetype == FILETYPE_NC  ||
-       streamptr->filetype == FILETYPE_NC2 ||
-       streamptr->filetype == FILETYPE_NC4 ||
-       streamptr->filetype == FILETYPE_NC4C )
+  if ( streamptr->filetype == CDI_FILETYPE_NC  ||
+       streamptr->filetype == CDI_FILETYPE_NC2 ||
+       streamptr->filetype == CDI_FILETYPE_NC4 ||
+       streamptr->filetype == CDI_FILETYPE_NC4C )
     {
       char *histstring;
       size_t len;
@@ -45,10 +45,10 @@ int streamInqHistorySize(int streamID)
 #ifdef HAVE_LIBNETCDF
   stream_t *streamptr = stream_to_pointer(streamID);
 
-  if ( streamptr->filetype == FILETYPE_NC  ||
-       streamptr->filetype == FILETYPE_NC2 ||
-       streamptr->filetype == FILETYPE_NC4 ||
-       streamptr->filetype == FILETYPE_NC4C )
+  if ( streamptr->filetype == CDI_FILETYPE_NC  ||
+       streamptr->filetype == CDI_FILETYPE_NC2 ||
+       streamptr->filetype == CDI_FILETYPE_NC4 ||
+       streamptr->filetype == CDI_FILETYPE_NC4C )
     {
       size = cdfInqHistorySize(streamptr);
     }
@@ -64,10 +64,10 @@ void streamInqHistoryString(int streamID, char *history)
 #ifdef HAVE_LIBNETCDF
   stream_t *streamptr = stream_to_pointer(streamID);
 
-  if ( streamptr->filetype == FILETYPE_NC  ||
-       streamptr->filetype == FILETYPE_NC2 ||
-       streamptr->filetype == FILETYPE_NC4 ||
-       streamptr->filetype == FILETYPE_NC4C )
+  if ( streamptr->filetype == CDI_FILETYPE_NC  ||
+       streamptr->filetype == CDI_FILETYPE_NC2 ||
+       streamptr->filetype == CDI_FILETYPE_NC4 ||
+       streamptr->filetype == CDI_FILETYPE_NC4C )
     {
       cdfInqHistoryString(streamptr, history);
     }

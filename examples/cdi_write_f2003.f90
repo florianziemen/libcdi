@@ -58,7 +58,7 @@
       CALL vlistDefTaxis(vlistID, taxisID)
 
 !     Create a dataset in netCDF format
-      streamID = streamOpenWrite(C_CHAR_"example.nc"//C_NULL_CHAR, FILETYPE_NC)
+      streamID = streamOpenWrite(C_CHAR_"example.nc"//C_NULL_CHAR, CDI_FILETYPE_NC)
       IF ( streamID < 0 ) THEN
          msg => cdiStringError(streamID)
          WRITE(0,'(132a)') msg

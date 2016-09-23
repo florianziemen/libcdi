@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
   vardata = (double *) malloc(gridsize*MAX_LEVEL*sizeof(double));
 
   /* Open the output dataset (GRIB format) */
-  streamID2  = streamOpenWrite(ofile, FILETYPE_GRB);
+  streamID2  = streamOpenWrite(ofile, CDI_FILETYPE_GRB);
   if ( streamID2 < 0 )
     {
       fprintf(stderr, "%s\n", cdiStringError(streamID2));

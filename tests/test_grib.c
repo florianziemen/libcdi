@@ -12,7 +12,7 @@
 int main()
 {
   char fname[] = "test.grb";
-  int filetype = FILETYPE_GRB;
+  int filetype = CDI_FILETYPE_GRB;
   enum {
     nlat = 18,
     nlon = 2*nlat,

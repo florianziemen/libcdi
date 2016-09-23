@@ -114,18 +114,18 @@ static int cdfOpenFile(const char *filename, const char *mode, int *filetype)
 	      (void) nc_inq_format(ncid, &format);
 	      if ( format == NC_FORMAT_NETCDF4_CLASSIC )
 		{
-		  *filetype = FILETYPE_NC4C;
+		  *filetype = CDI_FILETYPE_NC4C;
 		}
 	    }
 #endif
 	  break;
 	case 'w':
 #if  defined  (NC_64BIT_OFFSET)
-	  if      ( *filetype == FILETYPE_NC2  ) writemode |= NC_64BIT_OFFSET;
+	  if      ( *filetype == CDI_FILETYPE_NC2  ) writemode |= NC_64BIT_OFFSET;
 #endif
 #if  defined  (HAVE_NETCDF4)
-	  if      ( *filetype == FILETYPE_NC4  ) writemode |= NC_NETCDF4;
-	  else if ( *filetype == FILETYPE_NC4C ) writemode |= NC_NETCDF4 | NC_CLASSIC_MODEL;
+	  if      ( *filetype == CDI_FILETYPE_NC4  ) writemode |= NC_NETCDF4;
+	  else if ( *filetype == CDI_FILETYPE_NC4C ) writemode |= NC_NETCDF4 | NC_CLASSIC_MODEL;
 #endif
 	  cdf_create(filename, writemode, &ncid);
 	  if ( CDI_Version_Info ) cdfComment(ncid);
@@ -146,7 +146,7 @@ static int cdfOpenFile(const char *filename, const char *mode, int *filetype)
 
 int cdfOpen(const char *filename, const char *mode)
 {
-  int filetype = FILETYPE_NC;
+  int filetype = CDI_FILETYPE_NC;
 
   if ( CDF_Debug )
     Message("Open %s with mode %c", filename, *mode);
@@ -164,7 +164,7 @@ int cdfOpen64(const char *filename, const char *mode)
 {
   int fileID = -1;
   int open_file = TRUE;
-  int filetype = FILETYPE_NC2;
+  int filetype = CDI_FILETYPE_NC2;
 
   if ( CDF_Debug )
     Message("Open %s with mode %c", filename, *mode);
