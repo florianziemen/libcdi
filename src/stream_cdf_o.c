@@ -1597,7 +1597,15 @@ void cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int *ncvaridp, int z
   int fileID = streamptr->fileID;
   if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
-  strcpy(axisname, "lev");
+  char zname[CDI_MAX_NAME]; zname[0] = 0;
+  char zlongname[CDI_MAX_NAME]; zlongname[0] = 0;
+  char zunits[CDI_MAX_NAME]; zunits[0] = 0;
+  cdiZaxisInqKeyStr(zaxisID, CDI_KEY_NAME, CDI_MAX_NAME, zname);
+  //cdiZaxisInqKeyStr(zaxisID, CDI_KEY_LONGNAME, CDI_MAX_NAME, zlongname);
+  cdiZaxisInqKeyStr(zaxisID, CDI_KEY_UNITS, CDI_MAX_NAME, zunits);
+  if ( zname[0] ) strcpy(axisname, zname);
+  if ( zlongname[0] == 0 ) strcpy(zlongname, "hybrid sigma pressure coordinate");
+  if ( zunits[0] == 0 ) strcpy(zunits, "1");
 
   int ncvarid;
   cdf_def_dim(fileID, axisname, dimlen, dimID);
@@ -1607,24 +1615,21 @@ void cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int *ncvaridp, int z
   {
     static const char sname[] = "standard_name",
       sname_v[] = "atmosphere_hybrid_sigma_pressure_coordinate",
-      lname[] = "long_name",
-      lname_v[] = "hybrid sigma pressure coordinate",
-      units[] = "units",
-      units_v[] = "1",
       axis[] = "axis",
       axis_v[] = "Z",
       direction[] = "positive",
       direction_v[] = "down";
     struct attTxtTab2 tab[] = {
       { sname, sname_v, sizeof (sname_v) - 1 },
-      { lname, lname_v, sizeof (lname_v) - 1 },
-      { units, units_v, sizeof (units_v) - 1 },
       { axis, axis_v, sizeof (axis_v) - 1 },
       { direction, direction_v, sizeof (direction_v) - 1 },
     };
     enum { nAtt = sizeof (tab) / sizeof (tab[0]) };
     for ( size_t i = 0; i < nAtt; ++i )
       cdf_put_att_text(fileID, ncvarid, tab[i].attName, tab[i].valLen, tab[i].attVal);
+
+    cdf_put_att_text(fileID, ncvarid, "long_name", strlen(zlongname), zlongname);
+    cdf_put_att_text(fileID, ncvarid, "units", strlen(zunits), zunits);
   }
   {
     char txt[CDI_MAX_NAME];
@@ -1671,16 +1676,14 @@ void cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int *ncvaridp, int z
           cdf_put_att_text(fileID, ncvarid, "bounds", axisnameLen, axisname);
           {
             static const char sname[] = "standard_name",
-              sname_v[] = "atmosphere_hybrid_sigma_pressure_coordinate",
-              units[] = "units",
-              units_v[] = "1";
+              sname_v[] = "atmosphere_hybrid_sigma_pressure_coordinate";
             struct attTxtTab2 tab[] = {
               { sname, sname_v, sizeof (sname_v) - 1 },
-              { units, units_v, sizeof (units_v) - 1 },
             };
             enum { nAtt = sizeof (tab) / sizeof (tab[0]) };
             for ( size_t i = 0; i < nAtt; ++i )
               cdf_put_att_text(fileID, ncbvarid, tab[i].attName, tab[i].valLen, tab[i].attVal);
+            cdf_put_att_text(fileID, ncbvarid, "units", strlen(zunits), zunits);
           }
           {
             char txt[CDI_MAX_NAME];

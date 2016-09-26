@@ -1,3 +1,7 @@
+2016-09-26  Uwe Schulzweida
+
+	* Added read support for hybrid sigma pressure coordinate with formula term P0
+
 2016-09-22  Uwe Schulzweida
 
 	* GRIB: sort only unsorted pressure levels

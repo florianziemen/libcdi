@@ -83,9 +83,9 @@ typedef struct {
   bool     defmissval;
   bool     deffillval;
   int      xtype;
-  int      ndims;
   int      gmapid;
   int      positive;
+  int      ndims;
   int      dimids[8];
   int      dimtype[8];
   int      chunks[8];
@@ -732,13 +732,11 @@ void cdf_set_dim(ncvar_t *ncvars, int ncvarid, int dimid, int dimtype)
 }
 
 static
-int scan_hybrid_formulaterms(int ncid, int ncfvarid, int *apvarid, int *bvarid, int *psvarid, int *avarid, int *p0varid)
+void scan_hybrid_formulaterms(int ncid, int ncfvarid, int *avarid, int *bvarid, int *psvarid, int *p0varid)
 {
-  int status = 1;
-  *apvarid = -1;
+  *avarid  = -1;
   *bvarid  = -1;
   *psvarid = -1;
-  *avarid  = -1;
   *p0varid = -1;
   char attstring[1024];
 
@@ -766,7 +764,8 @@ int scan_hybrid_formulaterms(int ncid, int ncfvarid, int *apvarid, int *bvarid, 
       int status_nc = nc_inq_varid(ncid, varname, &dimvarid);
       if ( status_nc == NC_NOERR )
         {
-          if      ( strcmp(tagname, "ap:") == 0 ) *apvarid = dimvarid;
+          if      ( strcmp(tagname, "ap:") == 0 ) *avarid  = dimvarid;
+          else if ( strcmp(tagname, "a:")  == 0 ) *avarid  = dimvarid;
           else if ( strcmp(tagname, "b:")  == 0 ) *bvarid  = dimvarid;
           else if ( strcmp(tagname, "ps:") == 0 ) *psvarid = dimvarid;
           else if ( strcmp(tagname, "p0:") == 0 ) *p0varid = dimvarid;
@@ -778,8 +777,6 @@ int scan_hybrid_formulaterms(int ncid, int ncfvarid, int *apvarid, int *bvarid, 
 
       if ( lstop ) break;
     }
-
-  return status;
 }
 
 static
@@ -794,59 +791,68 @@ bool isHybridSigmaPressureCoordinate(int ncid, int ncvarid, ncvar_t *ncvars, con
 
       status = true;
       ncvar->zaxistype = ZAXIS_HYBRID;
+      //int ndims = ncvar->ndims;
       int dimid = ncvar->dimids[0];
       size_t dimlen = ncdims[dimid].len;
-
-      int ret = 0;
-      int apvarid1 = -1, bvarid1 = -1, psvarid1 = -1, avarid1 = -1, p0varid1 = -1;
+      int avarid1 = -1, bvarid1 = -1, psvarid1 = -1, p0varid1 = -1;
       int ncfvarid = ncvarid;
       if ( ncvars[ncfvarid].lformulaterms )
-        ret = scan_hybrid_formulaterms(ncid, ncfvarid, &apvarid1, &bvarid1, &psvarid1, &avarid1, &p0varid1);
-      // printf("ret %d apvarid1, bvarid1, psvarid1, avarid1, p0varid1 %d %d %d %d %d\n", ret, apvarid1, bvarid1, psvarid1, avarid1, p0varid1);
-      if ( apvarid1 != -1 ) ncvars[apvarid1].isvar = FALSE;
-      if ( bvarid1  != -1 ) ncvars[bvarid1].isvar  = FALSE;
-      if ( psvarid1 != -1 ) ncvar->psvarid = psvarid1;
+        scan_hybrid_formulaterms(ncid, ncfvarid, &avarid1, &bvarid1, &psvarid1, &p0varid1);
+      // printf("avarid1, bvarid1, psvarid1, p0varid1 %d %d %d %d\n", avarid1, bvarid1, psvarid1, p0varid1);
       if ( avarid1  != -1 ) ncvars[avarid1].isvar = FALSE;
+      if ( bvarid1  != -1 ) ncvars[bvarid1].isvar = FALSE;
+      if ( psvarid1 != -1 ) ncvar->psvarid = psvarid1;
       if ( p0varid1 != -1 ) ncvar->p0varid = p0varid1;
 
       if ( ncvar->bounds != UNDEFID && ncvars[ncvar->bounds].lformulaterms )
         {
           ncfvarid = ncvar->bounds;
-          int apvarid2 = -1, bvarid2 = -1, psvarid2 = -1, avarid2 = -1, p0varid2 = -1;
-          ret = 0;
+          int avarid2 = -1, bvarid2 = -1, psvarid2 = -1, p0varid2 = -1;
           if ( ncvars[ncfvarid].lformulaterms )
-            ret = scan_hybrid_formulaterms(ncid, ncfvarid, &apvarid2, &bvarid2, &psvarid2, &avarid2, &p0varid2);
-          // printf("ret %d apvarid2, bvarid2, psvarid2, avarid2, p0varid2 %d %d %d %d %d\n", ret, apvarid2, bvarid2, psvarid2, avarid2, p0varid2);
-          if ( ret == 1 ) avarid2 = apvarid2;
+            scan_hybrid_formulaterms(ncid, ncfvarid, &avarid2, &bvarid2, &psvarid2, &p0varid2);
+          // printf("avarid2, bvarid2, psvarid2, p0varid2 %d %d %d %d\n", avarid2, bvarid2, psvarid2, p0varid2);
           if ( avarid2 != -1 && bvarid2 != -1 )
             {
               ncvars[avarid2].isvar = FALSE;
               ncvars[bvarid2].isvar = FALSE;
 
-              if ( dimid == ncvars[avarid2].dimids[0] && ncdims[ncvars[avarid2].dimids[1]].len == 2 )
+              int ndims2 = ncvars[avarid2].ndims;
+              int dimid2 = ncvars[avarid2].dimids[0];
+              size_t dimlen2 = ncdims[dimid2].len;
+
+              if ( (ndims2 == 2 && dimid == ncvars[avarid2].dimids[0] ) ||
+                   (ndims2 == 1 && dimlen == dimlen2-1 ) )
                 {
                   double px = 1;
-                  if ( ret == 2 && p0varid1 == p0varid2 )
+                  if ( p0varid1 != -1 && p0varid1 == p0varid2 )
                     cdf_get_var_double(ncid, p0varid2, &px);
 
                   double abuf[dimlen*2], bbuf[dimlen*2];
                   cdf_get_var_double(ncid, avarid2, abuf);
                   cdf_get_var_double(ncid, bvarid2, bbuf);
-                  /*
-                  for ( int i = 0; i < dimlen; ++i )
-                    printf("%d  %g %g    %g %g\n", i, abuf[i*2], abuf[i*2+1], bbuf[i*2], bbuf[i*2+1]);
-                  */
-                  size_t vctsize = (dimlen+1)*2;
-                  double *vct = (double *) Malloc(vctsize * sizeof(double));
-                  for ( size_t i = 0; i < dimlen; ++i )
-                    {
-                      vct[i] = abuf[i*2];
-                      vct[i+dimlen+1] = bbuf[i*2];
-                    }
-                  vct[dimlen]     = abuf[dimlen*2-1];
-                  vct[dimlen*2+1] = bbuf[dimlen*2-1];
 
-                  if ( ret == 2 && IS_NOT_EQUAL(px, 1) )
+                  size_t vctsize = (dimlen+1)*2;
+                  double *vct = (double *) Malloc(vctsize*sizeof(double));
+                  if ( ndims2 == 2 )
+                    {
+                      for ( size_t i = 0; i < dimlen; ++i )
+                        {
+                          vct[i] = abuf[i*2];
+                          vct[i+dimlen+1] = bbuf[i*2];
+                        }
+                      vct[dimlen]     = abuf[dimlen*2-1];
+                      vct[dimlen*2+1] = bbuf[dimlen*2-1];
+                    }
+                  else
+                    {
+                       for ( size_t i = 0; i < dimlen2; ++i )
+                        {
+                          vct[i] = abuf[i];
+                          vct[i+dimlen+1] = bbuf[i];
+                        }
+                    }
+
+                  if ( p0varid1 != -1 && IS_NOT_EQUAL(px, 1) )
                     for ( size_t i = 0; i < dimlen+1; ++i ) vct[i] *= px;
 
                   ncvar->vct = vct;

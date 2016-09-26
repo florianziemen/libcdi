@@ -1204,13 +1204,12 @@ void zaxisResize(int zaxisID, int size)
 
 int zaxisDuplicate(int zaxisID)
 {
-  int zaxisIDnew;
   zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
 
   int zaxistype = zaxisInqType(zaxisID);
   int zaxissize = zaxisInqSize(zaxisID);
 
-  zaxisIDnew = zaxisCreate(zaxistype, zaxissize);
+  int zaxisIDnew = zaxisCreate(zaxistype, zaxissize);
   zaxis_t *zaxisptrnew = zaxis_to_pointer(zaxisIDnew);
 
   zaxis_copy(zaxisptrnew, zaxisptr);
