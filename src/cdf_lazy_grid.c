@@ -57,8 +57,7 @@ cdfLazyGridDefArea(grid_t *grid, const double *area)
 {
   struct cdfLazyGrid *cdfGrid = (struct cdfLazyGrid *)grid;
   lock_lazy_load(cdfGrid);
-  if (grid->area == cdfPendingLoad)
-    grid->area = NULL;
+  if (grid->area == cdfPendingLoad) grid->area = NULL;
   cdfGrid->cellAreaGet.datasetNCId = -1;
   cdfGrid->cellAreaGet.varNCId = -1;
   cdfGrid->baseVtable->defArea(grid, area);
@@ -93,8 +92,7 @@ cdfLazyGridInqArea(grid_t *grid, double *area)
 static void
 cdfLazyLoadXYVals(struct xyValGet *valsGet, double **valsp)
 {
-  double *grid_vals
-    = (double *)Malloc(valsGet->size * sizeof (double));
+  double *grid_vals = (double *)Malloc(valsGet->size * sizeof (double));
   *valsp = grid_vals;
   if ( valsGet->ndims == 3 )
     cdf_get_vara_double(valsGet->datasetNCId, valsGet->varNCId,

@@ -738,13 +738,12 @@ void scan_hybrid_formulaterms(int ncid, int ncfvarid, int *avarid, int *bvarid, 
   *bvarid  = -1;
   *psvarid = -1;
   *p0varid = -1;
-  char attstring[1024];
 
-  bool lstop = false;
-  int dimvarid;
+  char attstring[1024];
   cdfGetAttText(ncid, ncfvarid, "formula_terms", sizeof(attstring), attstring);
   char *pstring = attstring;
 
+  bool lstop = false;
   for ( int i = 0; i < 4; i++ )
     {
       while ( isspace((int) *pstring) ) pstring++;
@@ -761,6 +760,7 @@ void scan_hybrid_formulaterms(int ncid, int ncfvarid, int *avarid, int *bvarid, 
       if ( *pstring == 0 ) lstop = true;
       *pstring++ = 0;
 
+      int dimvarid;
       int status_nc = nc_inq_varid(ncid, varname, &dimvarid);
       if ( status_nc == NC_NOERR )
         {
@@ -2698,6 +2698,7 @@ void cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 	  int zvarid = UNDEFID;
 	  int zsize = 1;
           int psvarid = -1;
+          int p0varid = -1;
 	  double *lbounds = NULL;
 	  double *ubounds = NULL;
 
@@ -2753,6 +2754,7 @@ void cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
                   vctsize = ncvars[zvarid].vctsize;
 
                   if ( ncvars[zvarid].psvarid != -1 ) psvarid = ncvars[zvarid].psvarid;
+                  if ( ncvars[zvarid].p0varid != -1 ) p0varid = ncvars[zvarid].p0varid;
                 }
 
               zvar = (double*) Malloc((size_t)zsize*sizeof(double));
@@ -2805,8 +2807,18 @@ void cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
           if ( uuidOfVGrid[0] != 0 )
             zaxisDefUUID(zaxisID, uuidOfVGrid);
 
-          if ( zaxisType == ZAXIS_HYBRID && psvarid != -1 )
-            cdiZaxisDefKeyStr(zaxisID, CDI_KEY_PSNAME, strlen(ncvars[psvarid].name)+1, ncvars[psvarid].name);
+          if ( zaxisType == ZAXIS_HYBRID )
+            {
+              if ( psvarid != -1 )
+                cdiZaxisDefKeyStr(zaxisID, CDI_KEY_PSNAME, strlen(ncvars[psvarid].name)+1, ncvars[psvarid].name);
+              if ( p0varid != -1 )
+                {
+                  double px = 1;
+                  cdf_get_var_double(ncvars[p0varid].ncid, p0varid, &px);
+                  cdiZaxisDefKeyFlt(zaxisID, CDI_KEY_P0VALUE, px);
+                  cdiZaxisDefKeyStr(zaxisID, CDI_KEY_P0NAME, strlen(ncvars[p0varid].name)+1, ncvars[p0varid].name);
+                }
+            }
 
           if ( positive > 0 ) zaxisDefPositive(zaxisID, positive);
           if ( is_scalar ) zaxisDefScalar(zaxisID);

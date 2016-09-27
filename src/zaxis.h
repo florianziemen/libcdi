@@ -4,6 +4,12 @@
 #include "cdi_att.h"
 
 typedef struct {
+  double value;
+  bool defined;
+}
+zkey_double_t;
+
+typedef struct {
   char     dimname[CDI_MAX_NAME];
   char     vdimname[CDI_MAX_NAME];
   char     name[CDI_MAX_NAME];
@@ -11,6 +17,8 @@ typedef struct {
   char     stdname[CDI_MAX_NAME];
   char     units[CDI_MAX_NAME];
   char     psname[CDI_MAX_NAME];
+  char     p0name[CDI_MAX_NAME];
+  zkey_double_t p0value;
   double  *vals;
   double  *lbounds;
   double  *ubounds;

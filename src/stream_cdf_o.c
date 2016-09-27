@@ -1405,7 +1405,7 @@ void cdf_def_vct_echam(stream_t *streamptr, int zaxisID)
 }
 
 static
-void cdf_def_vct_cf(stream_t *streamptr, int zaxisID, int nclevID, int ncbndsID)
+void cdf_def_vct_cf(stream_t *streamptr, int zaxisID, int nclevID, int ncbndsID, int p0status, double p0value)
 {
   int type = zaxisInqType(zaxisID);
 
@@ -1437,7 +1437,10 @@ void cdf_def_vct_cf(stream_t *streamptr, int zaxisID, int nclevID, int ncbndsID)
       streamptr->vct.mlevID = nclevID;
       streamptr->vct.ilevID = nclevID;
 
-      cdf_def_var(fileID, "ap", NC_DOUBLE, 1, dimIDs,  &hyamid);
+      if ( p0status == 0 )
+        cdf_def_var(fileID, "a", NC_DOUBLE, 1, dimIDs,  &hyamid);
+      else
+        cdf_def_var(fileID, "ap", NC_DOUBLE, 1, dimIDs,  &hyamid);
       cdf_def_var(fileID, "b",  NC_DOUBLE, 1, dimIDs,  &hybmid);
 
       {
@@ -1459,7 +1462,10 @@ void cdf_def_vct_cf(stream_t *streamptr, int zaxisID, int nclevID, int ncbndsID)
 
       if ( ncbndsID != -1 )
         {
-          cdf_def_var(fileID, "ap_bnds", NC_DOUBLE, 2, dimIDs, &hyaiid);
+          if ( p0status == 0 )
+            cdf_def_var(fileID, "a_bnds", NC_DOUBLE, 2, dimIDs, &hyaiid);
+          else
+            cdf_def_var(fileID, "ap_bnds", NC_DOUBLE, 2, dimIDs, &hyaiid);
           cdf_def_var(fileID, "b_bnds",  NC_DOUBLE, 2, dimIDs, &hybiid);
           {
             static const char lname[] = "vertical coordinate formula term: ap(k+1/2)";
@@ -1482,32 +1488,38 @@ void cdf_def_vct_cf(stream_t *streamptr, int zaxisID, int nclevID, int ncbndsID)
       cdf_enddef(fileID);
       streamptr->ncmode = 2;
 
-      const double *vctptr = zaxisInqVctPtr(zaxisID);
+      int vctsize = zaxisInqVctSize(zaxisID);
+      double vct[vctsize];
+      zaxisInqVct(zaxisID, vct);
+
+      if ( p0status == 0 && IS_NOT_EQUAL(p0value,0) )
+        for ( int i = 0; i < vctsize/2; ++i ) vct[i] /= p0value;
+
       double tarray[ilev*2];
 
       if ( ncbndsID != -1 )
         {
           for ( int i = 0; i < mlev; ++i )
             {
-              tarray[2*i  ] = vctptr[i];
-              tarray[2*i+1] = vctptr[i+1];
+              tarray[2*i  ] = vct[i];
+              tarray[2*i+1] = vct[i+1];
             }
           cdf_put_var_double(fileID, hyaiid, tarray);
 
           for ( int i = 0; i < mlev; ++i )
             {
-              tarray[2*i  ] = vctptr[ilev+i];
-              tarray[2*i+1] = vctptr[ilev+i+1];
+              tarray[2*i  ] = vct[ilev+i];
+              tarray[2*i+1] = vct[ilev+i+1];
             }
           cdf_put_var_double(fileID, hybiid, tarray);
         }
 
       for ( int i = 0; i < mlev; ++i )
-        tarray[i] = (vctptr[i] + vctptr[i+1]) * 0.5;
+        tarray[i] = (vct[i] + vct[i+1]) * 0.5;
       cdf_put_var_double(fileID, hyamid, tarray);
 
       for ( int i = 0; i < mlev; ++i )
-        tarray[i] = (vctptr[ilev+i] + vctptr[ilev+i+1]) * 0.5;
+        tarray[i] = (vct[ilev+i] + vct[ilev+i+1]) * 0.5;
       cdf_put_var_double(fileID, hybmid, tarray);
     }
 }
@@ -1590,12 +1602,27 @@ void cdf_def_zaxis_hybrid_echam(stream_t *streamptr, int type, int *ncvaridp, in
 static
 void cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int *ncvaridp, int zaxisID, int zaxisindex, int xtype, size_t dimlen, int *dimID, char *axisname)
 {
+  int fileID = streamptr->fileID;
+  if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
+
   char psname[CDI_MAX_NAME]; psname[0] = 0;
   cdiZaxisInqKeyStr(zaxisID, CDI_KEY_PSNAME, CDI_MAX_NAME, psname);
   if ( psname[0] == 0 ) strcpy(psname, "ps");
 
-  int fileID = streamptr->fileID;
-  if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
+  char p0name[CDI_MAX_NAME]; p0name[0] = 0;
+  double p0value = 1;
+  int p0varid = UNDEFID;
+  int p0status = cdiZaxisInqKeyFlt(zaxisID, CDI_KEY_P0VALUE, &p0value);
+  if ( p0status == 0 )
+    {
+      cdiZaxisInqKeyStr(zaxisID, CDI_KEY_P0NAME, CDI_MAX_NAME, p0name);
+      if ( p0name[0] == 0 ) strcpy(p0name, "p0");
+      cdf_def_var(fileID, p0name, NC_DOUBLE, 0, 0,  &p0varid);
+      static const char longname[] = "reference pressure";
+      cdf_put_att_text(fileID, p0varid, "long_name", strlen(longname), longname);
+      static const char units[] = "Pa";
+      cdf_put_att_text(fileID, p0varid, "units", strlen(units), units);
+    }
 
   char zname[CDI_MAX_NAME]; zname[0] = 0;
   char zlongname[CDI_MAX_NAME]; zlongname[0] = 0;
@@ -1631,11 +1658,14 @@ void cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int *ncvaridp, int z
     cdf_put_att_text(fileID, ncvarid, "long_name", strlen(zlongname), zlongname);
     cdf_put_att_text(fileID, ncvarid, "units", strlen(zunits), zunits);
   }
-  {
-    char txt[CDI_MAX_NAME];
-    size_t len = (size_t)(sprintf(txt, "%s%s", "ap: ap b: b ps: ", psname));
-    cdf_put_att_text(fileID, ncvarid, "formula_terms", len, txt);
-  }
+
+  size_t len = 0;
+  char txt[CDI_MAX_NAME];
+  if ( p0status == 0 )
+    len = (size_t)(sprintf(txt, "%s%s %s%s", "a: a b: b p0: ", p0name, "ps: ", psname));
+  else
+    len = (size_t)(sprintf(txt, "%s%s", "ap: ap b: b ps: ", psname));
+  cdf_put_att_text(fileID, ncvarid, "formula_terms", len, txt);
 
   int ncbvarid = UNDEFID;
   int nvdimID = UNDEFID;
@@ -1685,11 +1715,12 @@ void cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int *ncvaridp, int z
               cdf_put_att_text(fileID, ncbvarid, tab[i].attName, tab[i].valLen, tab[i].attVal);
             cdf_put_att_text(fileID, ncbvarid, "units", strlen(zunits), zunits);
           }
-          {
-            char txt[CDI_MAX_NAME];
-            size_t len = (size_t)(sprintf(txt, "%s%s", "ap: ap_bnds b: b_bnds ps: ", psname));
-            cdf_put_att_text(fileID, ncbvarid, "formula_terms", len, txt);
-          }
+
+          if ( p0status == 0 )
+            len = (size_t)(sprintf(txt, "%s%s %s%s", "a: a_bnds b: b_bnds p0: ", p0name, "ps: ", psname));
+          else
+            len = (size_t)(sprintf(txt, "%s%s", "ap: ap_bnds b: b_bnds ps: ", psname));
+          cdf_put_att_text(fileID, ncbvarid, "formula_terms", len, txt);
         }
     }
 
@@ -1697,6 +1728,8 @@ void cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int *ncvaridp, int z
   streamptr->ncmode = 2;
 
   cdf_put_var_double(fileID, ncvarid, levels);
+
+  if ( p0varid != UNDEFID ) cdf_put_var_double(fileID, p0varid, &p0value);
 
   if ( ncbvarid != UNDEFID )
     {
@@ -1709,7 +1742,7 @@ void cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int *ncvaridp, int z
       cdf_put_var_double(fileID, ncbvarid, zbounds);
     }
 
-  cdf_def_vct_cf(streamptr, zaxisID, *dimID, nvdimID);
+  cdf_def_vct_cf(streamptr, zaxisID, *dimID, nvdimID, p0status, p0value);
 
   if ( *dimID == UNDEFID )
     {
@@ -1752,13 +1785,13 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
   size_t dimlen = (size_t)zaxisInqSize(zaxisID);
   int type   = zaxisInqType(zaxisID);
 
-  int is_scalar = FALSE;
+  bool is_scalar = false;
   if ( dimlen == 1 )
     {
-      is_scalar = zaxisInqScalar(zaxisID);
+      is_scalar = zaxisInqScalar(zaxisID) > 0;
       if ( !is_scalar && CDI_cmor_mode )
         {
-          is_scalar = TRUE;
+          is_scalar = true;
           zaxisDefScalar(zaxisID);
         }
     }
@@ -1791,8 +1824,7 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
     {
       checkZaxisName(axisname, fileID, vlistID, zaxisID, nzaxis);
 
-      char dimname[CDI_MAX_NAME+3];
-      dimname[0] = 0;
+      char dimname[CDI_MAX_NAME+3]; dimname[0] = 0;
       //cdiZaxisInqKeyStr(zaxisID, CDI_KEY_DIMNAME, CDI_MAX_NAME, dimname);
       if ( dimname[0] == 0 ) strcpy(dimname, axisname);
 
@@ -1801,6 +1833,12 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
       if ( type == ZAXIS_HYBRID || type == ZAXIS_HYBRID_HALF )
         {
           cdf_def_zaxis_hybrid(streamptr, type, &ncvarid, zaxisID, zaxisindex, xtype, dimlen, &dimID, axisname);
+
+          int natts;
+          cdiInqNatts(zaxisID, CDI_GLOBAL, &natts);
+          if ( natts > 0 && streamptr->ncmode == 2 ) cdf_redef(fileID);
+          cdfDefineAttributes(zaxisID, CDI_GLOBAL, fileID, ncvarid);
+          if ( natts > 0 && streamptr->ncmode == 2 ) cdf_enddef(fileID);
         }
       else
         {
@@ -1849,6 +1887,8 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
                       cdf_put_att_text(fileID, ncvarid, "bounds", strlen(axisname), axisname);
                     }
                 }
+
+              cdfDefineAttributes(zaxisID, CDI_GLOBAL, fileID, ncvarid);
             }
 
           cdf_enddef(fileID);
@@ -1873,17 +1913,6 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
                 }
 
               if ( ndims == 0 ) streamptr->nczvarID[zaxisindex] = ncvarid;
-
-              {
-                int natts;
-                cdiInqNatts(zaxisID, CDI_GLOBAL, &natts);
-
-                if ( natts > 0 && streamptr->ncmode == 2 ) cdf_redef(fileID);
-
-                cdfDefineAttributes(zaxisID, CDI_GLOBAL, fileID, ncvarid);
-
-                if ( natts > 0 && streamptr->ncmode == 2 ) cdf_enddef(fileID);
-              }
             }
         }
     }

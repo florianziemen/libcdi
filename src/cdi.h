@@ -813,12 +813,20 @@ int     gridInqYvals(int gridID, double yvals[]);
 #define  CDI_KEY_LONGNAME    943  // Z-axis longname
 #define  CDI_KEY_UNITS       944  // Z-axis units
 #define  CDI_KEY_PSNAME      950  // Z-axis surface pressure name
+#define  CDI_KEY_P0NAME      951  // Z-axis reference pressure name
+#define  CDI_KEY_P0VALUE     952  // Z-axis reference pressure in Pa
 
 //      cdiGridDefKeyStr: Define a CDI grid string value from a key
 int     cdiGridDefKeyStr(int gridID, int key, int size, const char *mesg);
 
 //      cdiGridInqKeyStr: Get a CDI grid string value from a key
 int     cdiGridInqKeyStr(int gridID, int key, int size, char *mesg);
+
+//      cdiZaxisDefKeyFlt: Define a CDI Z-axis floating point value from a key
+int     cdiZaxisDefKeyFlt(int zaxisID, int key, double value);
+
+//      cdiZaxisInqKeyFlt: Get a CDI Z-axis floating point value from a key
+int     cdiZaxisInqKeyFlt(int zaxisID, int key, double *value);
 
 /*      gridDefXname: Define the name of a X-axis */
 void    gridDefXname(int gridID, const char *xname);
