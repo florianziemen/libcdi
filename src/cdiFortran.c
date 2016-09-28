@@ -336,6 +336,8 @@ FCALLSCFUN2 (INT, gridInqYvals, GRIDINQYVALS, gridinqyvals, INT, DOUBLEV)
 
 FCALLSCFUN4 (INT, cdiGridDefKeyStr, CDIGRIDDEFKEYSTR, cdigriddefkeystr, INT, INT, INT, STRING)
 FCALLSCFUN4 (INT, cdiGridInqKeyStr, CDIGRIDINQKEYSTR, cdigridinqkeystr, INT, INT, INT, PSTRING)
+FCALLSCFUN3 (INT, cdiZaxisDefKeyFlt, CDIZAXISDEFKEYFLT, cdizaxisdefkeyflt, INT, INT, DOUBLE)
+FCALLSCFUN3 (INT, cdiZaxisInqKeyFlt, CDIZAXISINQKEYFLT, cdizaxisinqkeyflt, INT, INT, PDOUBLE)
 FCALLSCSUB2 (gridDefXname, GRIDDEFXNAME, griddefxname, INT, STRING)
 FCALLSCSUB2 (gridInqXname, GRIDINQXNAME, gridinqxname, INT, PSTRING)
 FCALLSCSUB2 (gridDefXlongname, GRIDDEFXLONGNAME, griddefxlongname, INT, STRING)
