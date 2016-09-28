@@ -763,16 +763,22 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
 	      if ( isspace((int) pline[i]) ) break;
 	    }
 	  if ( i == len ) continue;
-	  parname[i] = 0;
 	  pline += i+1;
 	  while ( isspace((int) *pline) ) pline++;
-	  if ( ! (isdigit((int) *pline) || *pline == '-') ) continue;
-	  parvalue = atoi(pline);
+	  if ( isdigit((int) *pline) || *pline == '-' )
+            {
+              parname[i] = 0;
+              parvalue = atoi(pline);
 
-	  /* fortran include */
-	  fprintf(fpinc, "      INTEGER    %-22s\n"
-                  "      PARAMETER (%-22s = %2d)\n", parname, parname,
-                  parvalue);
+              /* fortran include */
+              fprintf(fpinc, "      INTEGER    %-22s\n"
+                      "      PARAMETER (%-22s = %2d)\n", parname, parname, parvalue);
+            }
+          else
+            {
+              if ( strncmp(parname, "CDI_H_", 6) == 0 ) continue;
+              fprintf(fpinc, "%s", line);
+            }
 	}
       else if (!regexec(&cppCondRE, line, maxMatch, reMatch, 0)
                && ((cppSwitchLen = reMatch[2].rm_eo - reMatch[2].rm_so) == 5)

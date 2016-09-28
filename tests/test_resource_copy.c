@@ -153,7 +153,7 @@ static struct idPair defineVlist ( int gridID, int zaxisID, int taxisID )
   vlistDefVarName(vlistID, varID1, "varname1");
   {
     int globfac[] = { 23, 42 };
-    cdiDefAttInt(vlistID, varID1, "seer's globule factors", DATATYPE_INT16, 2, globfac);
+    cdiDefAttInt(vlistID, varID1, "seer's globule factors", CDI_DATATYPE_INT16, 2, globfac);
   }
   vlistDefVarName(vlistID, varID2, "varname2");
   cdiDefAttTxt(vlistID, varID2, "txt demo", 6, "banana");
@@ -203,7 +203,7 @@ static int modelRun(MPI_Comm comm)
   {
     struct idPair temp = defineVlist(gridID, zaxisID, taxisID);
     vlistID = temp.id1;
-    streamID = streamOpenWrite("example.grb", FILETYPE_GRB);
+    streamID = streamOpenWrite("example.grb", CDI_FILETYPE_GRB);
     if ( streamID < 0 ) xabort ( "Could not open file" );
     defineStream ( streamID, vlistID );
     vlistDestroy(temp.id1);

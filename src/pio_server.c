@@ -1109,14 +1109,14 @@ readGetBuffers(size_t streamIdx, const struct cdiPioConf *conf)
 
     switch (filetype)
       {
-      case FILETYPE_GRB:
-      case FILETYPE_GRB2:
+      case CDI_FILETYPE_GRB:
+      case CDI_FILETYPE_GRB2:
         writeGribStream(streamIdx, map, &data, &currentDataBufSize, conf);
         break;
 #ifdef HAVE_NETCDF4
-      case FILETYPE_NC:
-      case FILETYPE_NC2:
-      case FILETYPE_NC4:
+      case CDI_FILETYPE_NC:
+      case CDI_FILETYPE_NC2:
+      case CDI_FILETYPE_NC4:
         writeNetCDFStream(streamIdx, map, &data, &currentDataBufSize, conf);
         break;
 #endif
@@ -1193,8 +1193,8 @@ cdiPioServerStreamOpen(const char *filename, char filemode,
   switch (filetype)
     {
 #if defined HAVE_LIBNETCDF && ! defined HAVE_PARALLEL_NC4
-    case FILETYPE_NC4:
-    case FILETYPE_NC4C:
+    case CDI_FILETYPE_NC4:
+    case CDI_FILETYPE_NC4C:
       {
         int ioMode = commInqIOMode();
         if (ioMode == PIO_NONE
@@ -1258,10 +1258,10 @@ cdiPioServerStreamClose(stream_t *streamptr, int recordBufIsToBeDeleted)
       switch (filetype)
         {
 #if defined (HAVE_LIBNETCDF) && ! defined (HAVE_PARALLEL_NC4)
-        case FILETYPE_NC:
-        case FILETYPE_NC2:
-        case FILETYPE_NC4:
-        case FILETYPE_NC4C:
+        case CDI_FILETYPE_NC:
+        case CDI_FILETYPE_NC2:
+        case CDI_FILETYPE_NC4:
+        case CDI_FILETYPE_NC4C:
           {
             int rank, rankOpen = cdiPioSerialOpenFileMap(streamptr->self);
             if (commInqIOMode() == PIO_NONE

@@ -166,14 +166,14 @@ int grbBitsPerValue(int datatype)
 {
   int bitsPerValue = 16;
 
-  if ( datatype == DATATYPE_CPX32 || datatype == DATATYPE_CPX64 )
+  if ( datatype == CDI_DATATYPE_CPX32 || datatype == CDI_DATATYPE_CPX64 )
     Error("CDI/GRIB library does not support complex numbers!");
 
   if ( datatype != CDI_UNDEFID )
     {
       if ( datatype > 0 && datatype <= 32 )
 	bitsPerValue = datatype;
-      else if ( datatype == DATATYPE_FLT64 )
+      else if ( datatype == CDI_DATATYPE_FLT64 )
 	bitsPerValue = 24;
       else
 	bitsPerValue = 16;
@@ -207,7 +207,7 @@ int grbScanTimestep1(stream_t * streamptr)
 #if  defined  (HAVE_LIBCGRIBEX)
   int filetype  = streamptr->filetype;
 
-  if ( filetype == FILETYPE_GRB )
+  if ( filetype == CDI_FILETYPE_GRB )
     status = cgribexScanTimestep1(streamptr);
 #endif
 #if defined(HAVE_LIBCGRIBEX) && defined (HAVE_LIBGRIB_API)
@@ -228,7 +228,7 @@ int grbScanTimestep2(stream_t * streamptr)
 #if  defined  (HAVE_LIBCGRIBEX)
   int filetype = streamptr->filetype;
 
-  if ( filetype == FILETYPE_GRB )
+  if ( filetype == CDI_FILETYPE_GRB )
     {
       status = cgribexScanTimestep2(streamptr);
     }
@@ -252,7 +252,7 @@ int grbScanTimestep(stream_t * streamptr)
   filetype  = streamptr->filetype;
 
 #if  defined  (HAVE_LIBCGRIBEX)
-  if ( filetype == FILETYPE_GRB )
+  if ( filetype == CDI_FILETYPE_GRB )
     {
       status = cgribexScanTimestep(streamptr);
     }
@@ -329,7 +329,7 @@ void streamInqGRIBinfo(int streamID, int *intnum, float *fltnum, off_t *bignum)
 
   int filetype = streamptr->filetype;
 
-  if ( filetype == FILETYPE_GRB )
+  if ( filetype == CDI_FILETYPE_GRB )
     {
       int tsID     = streamptr->curTsID;
       int vrecID   = streamptr->tsteps[tsID].curRecID;

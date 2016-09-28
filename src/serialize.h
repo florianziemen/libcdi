@@ -37,11 +37,11 @@ serializeStrTabGetPackSize(const char **strTab, int numStr,
   {
     size_t len = strlen(strTab[i]);
     packBuffSize +=
-      serializeGetSize(1, DATATYPE_INT, context)
-      + serializeGetSize((int)len, DATATYPE_TXT, context);
+      serializeGetSize(1, CDI_DATATYPE_INT, context)
+      + serializeGetSize((int)len, CDI_DATATYPE_TXT, context);
   }
   packBuffSize +=
-    serializeGetSize(1, DATATYPE_UINT32, context);
+    serializeGetSize(1, CDI_DATATYPE_UINT32, context);
   return packBuffSize;
 }
 
@@ -54,13 +54,13 @@ serializeStrTabPack(const char **strTab, int numStr,
   for (size_t i = 0; i < (size_t)numStr; ++i)
   {
     int len = (int)strlen(strTab[i]);
-    serializePack(&len, 1, DATATYPE_INT,
+    serializePack(&len, 1, CDI_DATATYPE_INT,
                   buf, buf_size, position, context);
-    serializePack(strTab[i], len, DATATYPE_TXT,
+    serializePack(strTab[i], len, CDI_DATATYPE_TXT,
                   buf, buf_size, position, context);
-    d ^= cdiCheckSum(DATATYPE_TXT, len, strTab[i]);
+    d ^= cdiCheckSum(CDI_DATATYPE_TXT, len, strTab[i]);
   }
-  serializePack(&d, 1, DATATYPE_UINT32,
+  serializePack(&d, 1, CDI_DATATYPE_UINT32,
                 buf, buf_size, position, context);
 }
 
@@ -74,14 +74,14 @@ serializeStrTabUnpack(const void *buf, int buf_size, int *position,
     {
       int len;
       serializeUnpack(buf, buf_size, position,
-                      &len, 1, DATATYPE_INT, context);
+                      &len, 1, CDI_DATATYPE_INT, context);
       serializeUnpack(buf, buf_size, position,
-                      strTab[i], len, DATATYPE_TXT, context);
+                      strTab[i], len, CDI_DATATYPE_TXT, context);
       strTab[i][len] = '\0';
-      d2 ^= cdiCheckSum(DATATYPE_TXT, len, strTab[i]);
+      d2 ^= cdiCheckSum(CDI_DATATYPE_TXT, len, strTab[i]);
     }
   serializeUnpack(buf, buf_size, position,
-                  &d, 1, DATATYPE_UINT32, context);
+                  &d, 1, CDI_DATATYPE_UINT32, context);
   xassert(d == d2);
 }
 

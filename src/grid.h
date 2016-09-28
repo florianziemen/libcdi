@@ -78,6 +78,10 @@ struct grid_gme_t {
 };
 
 struct grid_t {
+  char    vdimname[CDI_MAX_NAME];
+  char    mapname[CDI_MAX_NAME];
+  char    mapping[CDI_MAX_NAME];
+  char   *name;
   int     self;
   int     type;                   /* grid type                      */
   int     prec;                   /* grid precision                 */
@@ -100,10 +104,6 @@ struct grid_t {
   int     np;                     /* number of parallels between a pole and the equator */
   bool    lcomplex;
   bool    hasdims;
-  char    vdimname[CDI_MAX_NAME];
-  char    mapname[CDI_MAX_NAME];
-  char    mapping[CDI_MAX_NAME];
-  char   *name;
   struct gridaxis_t x;
   struct gridaxis_t y;
   const struct gridVirtTable *vtable;
@@ -114,7 +114,7 @@ struct grid_t {
 void grid_init(grid_t *gridptr);
 void cdiGridTypeInit(grid_t *gridptr, int gridtype, int size);
 void grid_free(grid_t *gridptr);
-grid_t *gridID2Ptr(int gridID);
+grid_t *grid_to_pointer(int gridID);
 extern const struct gridVirtTable cdiGridVtable;
 
 unsigned cdiGridCount(void);
@@ -131,6 +131,8 @@ const double *gridInqAreaPtr(int gridID);
 const char *gridInqReferencePtr(int gridID);
 
 int gridGenerate(const grid_t *grid);
+
+//int gridIsEqual(int gridID1, int gridID2);
 
 void cdiGridGetIndexList(unsigned, int * );
 

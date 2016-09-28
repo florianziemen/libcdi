@@ -34,15 +34,15 @@ int cdiStreamReadVar(int streamID, int varID, int memtype, void *data, int *nmis
   switch (filetype)
     {
 #if  defined  (HAVE_LIBGRIB)
-    case FILETYPE_GRB:
-    case FILETYPE_GRB2:
+    case CDI_FILETYPE_GRB:
+    case CDI_FILETYPE_GRB2:
       {
         grb_read_var(streamptr, varID, memtype, data, nmiss);
 	break;
       }
 #endif
 #if  defined  (HAVE_LIBSERVICE)
-    case FILETYPE_SRV:
+    case CDI_FILETYPE_SRV:
       {
         if ( memtype == MEMTYPE_FLOAT ) return 1;
         srvReadVarDP(streamptr, varID, (double *)data, nmiss);
@@ -50,7 +50,7 @@ int cdiStreamReadVar(int streamID, int varID, int memtype, void *data, int *nmis
       }
 #endif
 #if  defined  (HAVE_LIBEXTRA)
-    case FILETYPE_EXT:
+    case CDI_FILETYPE_EXT:
       {
         if ( memtype == MEMTYPE_FLOAT ) return 1;
         extReadVarDP(streamptr, varID, (double *)data, nmiss);
@@ -58,7 +58,7 @@ int cdiStreamReadVar(int streamID, int varID, int memtype, void *data, int *nmis
       }
 #endif
 #if  defined  (HAVE_LIBIEG)
-    case FILETYPE_IEG:
+    case CDI_FILETYPE_IEG:
       {
         if ( memtype == MEMTYPE_FLOAT ) return 1;
         iegReadVarDP(streamptr, varID, (double *)data, nmiss);
@@ -66,10 +66,10 @@ int cdiStreamReadVar(int streamID, int varID, int memtype, void *data, int *nmis
       }
 #endif
 #if  defined  (HAVE_LIBNETCDF)
-    case FILETYPE_NC:
-    case FILETYPE_NC2:
-    case FILETYPE_NC4:
-    case FILETYPE_NC4C:
+    case CDI_FILETYPE_NC:
+    case CDI_FILETYPE_NC2:
+    case CDI_FILETYPE_NC4:
+    case CDI_FILETYPE_NC4C:
       {
         cdf_read_var(streamptr, varID, memtype, data, nmiss);
 	break;
@@ -160,15 +160,15 @@ int cdiStreamReadVarSlice(int streamID, int varID, int levelID, int memtype, voi
   switch (filetype)
     {
 #if  defined  (HAVE_LIBGRIB)
-    case FILETYPE_GRB:
-    case FILETYPE_GRB2:
+    case CDI_FILETYPE_GRB:
+    case CDI_FILETYPE_GRB2:
       {
         grb_read_var_slice(streamptr, varID, levelID, memtype, data, nmiss);
 	break;
       }
 #endif
 #if  defined  (HAVE_LIBSERVICE)
-    case FILETYPE_SRV:
+    case CDI_FILETYPE_SRV:
       {
         if ( memtype == MEMTYPE_FLOAT ) return 1;
         srvReadVarSliceDP(streamptr, varID, levelID, (double *)data, nmiss);
@@ -176,7 +176,7 @@ int cdiStreamReadVarSlice(int streamID, int varID, int levelID, int memtype, voi
       }
 #endif
 #if  defined  (HAVE_LIBEXTRA)
-    case FILETYPE_EXT:
+    case CDI_FILETYPE_EXT:
       {
         if ( memtype == MEMTYPE_FLOAT ) return 1;
         extReadVarSliceDP(streamptr, varID, levelID, (double *)data, nmiss);
@@ -184,7 +184,7 @@ int cdiStreamReadVarSlice(int streamID, int varID, int levelID, int memtype, voi
       }
 #endif
 #if  defined  (HAVE_LIBIEG)
-    case FILETYPE_IEG:
+    case CDI_FILETYPE_IEG:
       {
         if ( memtype == MEMTYPE_FLOAT ) return 1;
         iegReadVarSliceDP(streamptr, varID, levelID, (double *)data, nmiss);
@@ -192,10 +192,10 @@ int cdiStreamReadVarSlice(int streamID, int varID, int levelID, int memtype, voi
       }
 #endif
 #if  defined  (HAVE_LIBNETCDF)
-    case FILETYPE_NC:
-    case FILETYPE_NC2:
-    case FILETYPE_NC4:
-    case FILETYPE_NC4C:
+    case CDI_FILETYPE_NC:
+    case CDI_FILETYPE_NC2:
+    case CDI_FILETYPE_NC4:
+    case CDI_FILETYPE_NC4C:
       {
         cdf_read_var_slice(streamptr, varID, levelID, memtype, data, nmiss);
         break;
@@ -289,34 +289,34 @@ int stream_read_record(int streamID, int memtype, void *data, int *nmiss)
   switch (streamptr->filetype)
     {
 #if  defined  (HAVE_LIBGRIB)
-    case FILETYPE_GRB:
-    case FILETYPE_GRB2:
+    case CDI_FILETYPE_GRB:
+    case CDI_FILETYPE_GRB2:
       grb_read_record(streamptr, memtype, data, nmiss);
       break;
 #endif
 #if  defined  (HAVE_LIBSERVICE)
-    case FILETYPE_SRV:
+    case CDI_FILETYPE_SRV:
       if ( memtype == MEMTYPE_FLOAT ) return 1;
       srvReadRecord(streamptr, (double *)data, nmiss);
       break;
 #endif
 #if  defined  (HAVE_LIBEXTRA)
-    case FILETYPE_EXT:
+    case CDI_FILETYPE_EXT:
       if ( memtype == MEMTYPE_FLOAT ) return 1;
       extReadRecord(streamptr, (double *)data, nmiss);
       break;
 #endif
 #if  defined  (HAVE_LIBIEG)
-    case FILETYPE_IEG:
+    case CDI_FILETYPE_IEG:
       if ( memtype == MEMTYPE_FLOAT ) return 1;
       iegReadRecord(streamptr, (double *)data, nmiss);
       break;
 #endif
 #if  defined  (HAVE_LIBNETCDF)
-    case FILETYPE_NC:
-    case FILETYPE_NC2:
-    case FILETYPE_NC4:
-    case FILETYPE_NC4C:
+    case CDI_FILETYPE_NC:
+    case CDI_FILETYPE_NC2:
+    case CDI_FILETYPE_NC4:
+    case CDI_FILETYPE_NC4C:
       cdf_read_record(streamptr, memtype, data, nmiss);
       break;
 #endif

@@ -1,3 +1,23 @@
+2016-09-26  Uwe Schulzweida
+
+	* Added read support for hybrid sigma pressure coordinate with formula term P0
+
+2016-09-22  Uwe Schulzweida
+
+	* GRIB: sort only unsorted pressure levels
+
+2016-09-19  Uwe Schulzweida
+
+	* time axis: added support for NC_FLOAT
+
+2016-09-15  Uwe Schulzweida
+
+	* zaxis: added support for user defined attributes
+
+2016-08-29  Uwe Schulzweida
+
+	* CDI_cmor_mode: Convert Zaxis with one level to Scalar Z-Coordinate on all input streams
+
 2016-08-18  Uwe Schulzweida
 
 	* Version 1.8.0rc2 released

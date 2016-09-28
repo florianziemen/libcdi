@@ -15,45 +15,54 @@ extern "C" {
 #endif
 
 
-#define  CDI_MAX_NAME           256   /* max length of a name                 */
+#define  CDI_MAX_NAME             256   // max length of a name
 
-#define  CDI_UNDEFID             -1
-#define  CDI_GLOBAL              -1   /* Global var ID for vlist              */
+#define  CDI_UNDEFID               -1
+#define  CDI_GLOBAL                -1   // Global var ID for vlist
 
 /* Byte order */
 
-#define  CDI_BIGENDIAN            0   /* Byte order BIGENDIAN                 */
-#define  CDI_LITTLEENDIAN         1   /* Byte order LITTLEENDIAN              */
-#define  CDI_PDPENDIAN            2
+#define  CDI_BIGENDIAN              0   // Byte order BIGENDIAN
+#define  CDI_LITTLEENDIAN           1   // Byte order LITTLEENDIAN
+#define  CDI_PDPENDIAN              2
 
-#define  CDI_REAL                 1   /* Real numbers                         */
-#define  CDI_COMP                 2   /* Complex numbers                      */
-#define  CDI_BOTH                 3   /* Both numbers                         */
+#define  CDI_REAL                   1   // Real numbers
+#define  CDI_COMP                   2   // Complex numbers
+#define  CDI_BOTH                   3   // Both numbers
 
 /* Error identifier */
 
-#define	 CDI_NOERR        	  0   /* No Error                             */
-#define  CDI_EEOF                -1   /* The end of file was encountered      */
-#define  CDI_ESYSTEM            -10   /* Operating system error               */
-#define  CDI_EINVAL             -20   /* Invalid argument                     */
-#define  CDI_EUFTYPE            -21   /* Unsupported file type                */
-#define  CDI_ELIBNAVAIL         -22   /* xxx library not available            */
-#define  CDI_EUFSTRUCT          -23   /* Unsupported file structure           */
-#define  CDI_EUNC4              -24   /* Unsupported NetCDF4 structure        */
-#define  CDI_ELIMIT             -99   /* Internal limits exceeded             */
+#define	 CDI_NOERR        	    0   // No Error
+#define  CDI_EEOF                  -1   // The end of file was encountered
+#define  CDI_ESYSTEM              -10   // Operating system error
+#define  CDI_EINVAL               -20   // Invalid argument
+#define  CDI_EUFTYPE              -21   // Unsupported file type
+#define  CDI_ELIBNAVAIL           -22   // xxx library not available
+#define  CDI_EUFSTRUCT            -23   // Unsupported file structure
+#define  CDI_EUNC4                -24   // Unsupported NetCDF4 structure
+#define  CDI_ELIMIT               -99   // Internal limits exceeded
 
 /* File types */
 
-#define  FILETYPE_UNDEF          -1   /* Unknown/not yet defined file type */
-#define  FILETYPE_GRB             1   /* File type GRIB                       */
-#define  FILETYPE_GRB2            2   /* File type GRIB version 2             */
-#define  FILETYPE_NC              3   /* File type NetCDF                     */
-#define  FILETYPE_NC2             4   /* File type NetCDF version 2 (64-bit)  */
-#define  FILETYPE_NC4             5   /* File type NetCDF version 4           */
-#define  FILETYPE_NC4C            6   /* File type NetCDF version 4 (classic) */
-#define  FILETYPE_SRV             7   /* File type SERVICE                    */
-#define  FILETYPE_EXT             8   /* File type EXTRA                      */
-#define  FILETYPE_IEG             9   /* File type IEG                        */
+#define  CDI_FILETYPE_GRB           1   // File type GRIB
+#define  CDI_FILETYPE_GRB2          2   // File type GRIB version 2
+#define  CDI_FILETYPE_NC            3   // File type NetCDF
+#define  CDI_FILETYPE_NC2           4   // File type NetCDF version 2 (64-bit)
+#define  CDI_FILETYPE_NC4           5   // File type NetCDF version 4
+#define  CDI_FILETYPE_NC4C          6   // File type NetCDF version 4 (classic)
+#define  CDI_FILETYPE_SRV           7   // File type SERVICE
+#define  CDI_FILETYPE_EXT           8   // File type EXTRA
+#define  CDI_FILETYPE_IEG           9   // File type IEG
+
+#define  FILETYPE_GRB           1
+#define  FILETYPE_GRB2          2
+#define  FILETYPE_NC            3
+#define  FILETYPE_NC2           4
+#define  FILETYPE_NC4           5
+#define  FILETYPE_NC4C          6
+#define  FILETYPE_SRV           7
+#define  FILETYPE_EXT           8
+#define  FILETYPE_IEG           9
 
 /* Compress types */
 
@@ -66,51 +75,66 @@ extern "C" {
 
 /* external data types */
 
+#define  CDI_DATATYPE_PACK          0
+#define  CDI_DATATYPE_PACK1         1
+#define  CDI_DATATYPE_PACK2         2
+#define  CDI_DATATYPE_PACK3         3
+#define  CDI_DATATYPE_PACK4         4
+#define  CDI_DATATYPE_PACK5         5
+#define  CDI_DATATYPE_PACK6         6
+#define  CDI_DATATYPE_PACK7         7
+#define  CDI_DATATYPE_PACK8         8
+#define  CDI_DATATYPE_PACK9         9
+#define  CDI_DATATYPE_PACK10       10
+#define  CDI_DATATYPE_PACK11       11
+#define  CDI_DATATYPE_PACK12       12
+#define  CDI_DATATYPE_PACK13       13
+#define  CDI_DATATYPE_PACK14       14
+#define  CDI_DATATYPE_PACK15       15
+#define  CDI_DATATYPE_PACK16       16
+#define  CDI_DATATYPE_PACK17       17
+#define  CDI_DATATYPE_PACK18       18
+#define  CDI_DATATYPE_PACK19       19
+#define  CDI_DATATYPE_PACK20       20
+#define  CDI_DATATYPE_PACK21       21
+#define  CDI_DATATYPE_PACK22       22
+#define  CDI_DATATYPE_PACK23       23
+#define  CDI_DATATYPE_PACK24       24
+#define  CDI_DATATYPE_PACK25       25
+#define  CDI_DATATYPE_PACK26       26
+#define  CDI_DATATYPE_PACK27       27
+#define  CDI_DATATYPE_PACK28       28
+#define  CDI_DATATYPE_PACK29       29
+#define  CDI_DATATYPE_PACK30       30
+#define  CDI_DATATYPE_PACK31       31
+#define  CDI_DATATYPE_PACK32       32
+#define  CDI_DATATYPE_CPX32        64
+#define  CDI_DATATYPE_CPX64       128
+#define  CDI_DATATYPE_FLT32       132
+#define  CDI_DATATYPE_FLT64       164
+#define  CDI_DATATYPE_INT8        208
+#define  CDI_DATATYPE_INT16       216
+#define  CDI_DATATYPE_INT32       232
+#define  CDI_DATATYPE_UINT8       308
+#define  CDI_DATATYPE_UINT16      316
+#define  CDI_DATATYPE_UINT32      332
+
 #define  DATATYPE_PACK            0
-#define  DATATYPE_PACK1           1
-#define  DATATYPE_PACK2           2
-#define  DATATYPE_PACK3           3
-#define  DATATYPE_PACK4           4
-#define  DATATYPE_PACK5           5
-#define  DATATYPE_PACK6           6
-#define  DATATYPE_PACK7           7
 #define  DATATYPE_PACK8           8
-#define  DATATYPE_PACK9           9
-#define  DATATYPE_PACK10         10
-#define  DATATYPE_PACK11         11
-#define  DATATYPE_PACK12         12
-#define  DATATYPE_PACK13         13
-#define  DATATYPE_PACK14         14
-#define  DATATYPE_PACK15         15
 #define  DATATYPE_PACK16         16
-#define  DATATYPE_PACK17         17
-#define  DATATYPE_PACK18         18
-#define  DATATYPE_PACK19         19
-#define  DATATYPE_PACK20         20
-#define  DATATYPE_PACK21         21
-#define  DATATYPE_PACK22         22
-#define  DATATYPE_PACK23         23
 #define  DATATYPE_PACK24         24
-#define  DATATYPE_PACK25         25
-#define  DATATYPE_PACK26         26
-#define  DATATYPE_PACK27         27
-#define  DATATYPE_PACK28         28
-#define  DATATYPE_PACK29         29
-#define  DATATYPE_PACK30         30
-#define  DATATYPE_PACK31         31
-#define  DATATYPE_PACK32         32
-#define  DATATYPE_CPX32          64
-#define  DATATYPE_CPX64         128
 #define  DATATYPE_FLT32         132
 #define  DATATYPE_FLT64         164
-#define  DATATYPE_INT8          208
-#define  DATATYPE_INT16         216
 #define  DATATYPE_INT32         232
-#define  DATATYPE_UINT8         308
-#define  DATATYPE_UINT16        316
-#define  DATATYPE_UINT32        332
 
 /* internal data types */
+#define  CDI_DATATYPE_INT         251
+#define  CDI_DATATYPE_FLT         252
+#define  CDI_DATATYPE_TXT         253
+#define  CDI_DATATYPE_CPX         254
+#define  CDI_DATATYPE_UCHAR       255
+#define  CDI_DATATYPE_LONG        256
+
 #define  DATATYPE_INT           251
 #define  DATATYPE_FLT           252
 #define  DATATYPE_TXT           253
@@ -357,9 +381,9 @@ const char *streamFilesuffix(int filetype);
 
 off_t   streamNvals(int streamID);
 
-int     streamInqNvars ( int streamID );
+int     streamInqNvars(int streamID);
 
-/* STREAM var I/O routines */
+/* STREAM var I/O routines (random access) */
 
 /*      streamWriteVar: Write a variable */
 void    streamWriteVar(int streamID, int varID, const double data[], int nmiss);
@@ -380,7 +404,7 @@ void    streamReadVarSliceF(int streamID, int varID, int levelID, float data[], 
 void    streamWriteVarChunk(int streamID, int varID, const int rect[3][2], const double data[], int nmiss);
 
 
-/* STREAM record I/O routines */
+/* STREAM record I/O routines (sequential access) */
 
 void    streamDefRecord(int streamID, int  varID, int  levelID);
 void    streamInqRecord(int streamID, int *varID, int *levelID);
@@ -771,23 +795,38 @@ void    gridDefYvals(int gridID, const double yvals[]);
 int     gridInqYvals(int gridID, double yvals[]);
 
 /* CDI grid string key values */
-#define  CDI_KEY_XNAME      901  // X-axis name
-#define  CDI_KEY_YNAME      902  // Y-axis name
-#define  CDI_KEY_XDIMNAME   903  // X-axis dimension name
-#define  CDI_KEY_YDIMNAME   904  // Y-axis dimension name
-#define  CDI_KEY_VDIMNAME   905  // Vertex dimension name
-#define  CDI_KEY_XLONGNAME  906  // X-axis longname
-#define  CDI_KEY_YLONGNAME  907  // Y-axis longname
-#define  CDI_KEY_XUNITS     908  // X-axis units
-#define  CDI_KEY_YUNITS     909  // Y-axis units
-#define  CDI_KEY_MAPNAME    920  // Grid mapping var name
-#define  CDI_KEY_MAPPING    921  // Grid mapping name
+#define  CDI_KEY_XNAME       901  // X-axis name
+#define  CDI_KEY_XDIMNAME    902  // X-axis dimension name
+#define  CDI_KEY_XLONGNAME   903  // X-axis longname
+#define  CDI_KEY_XUNITS      904  // X-axis units
+#define  CDI_KEY_YNAME       911  // Y-axis name
+#define  CDI_KEY_YDIMNAME    912  // Y-axis dimension name
+#define  CDI_KEY_YLONGNAME   913  // Y-axis longname
+#define  CDI_KEY_YUNITS      914  // Y-axis units
+#define  CDI_KEY_VDIMNAME    920  // Vertex dimension name
+#define  CDI_KEY_MAPNAME     921  // Grid mapping var name
+#define  CDI_KEY_MAPPING     922  // Grid mapping name
+
+/* CDI zaxis string key values */
+#define  CDI_KEY_NAME        941  // Z-axis name
+#define  CDI_KEY_DIMNAME     942  // Z-axis dimension name
+#define  CDI_KEY_LONGNAME    943  // Z-axis longname
+#define  CDI_KEY_UNITS       944  // Z-axis units
+#define  CDI_KEY_PSNAME      950  // Z-axis surface pressure name
+#define  CDI_KEY_P0NAME      951  // Z-axis reference pressure name
+#define  CDI_KEY_P0VALUE     952  // Z-axis reference pressure in Pa
 
 //      cdiGridDefKeyStr: Define a CDI grid string value from a key
 int     cdiGridDefKeyStr(int gridID, int key, int size, const char *mesg);
 
 //      cdiGridInqKeyStr: Get a CDI grid string value from a key
 int     cdiGridInqKeyStr(int gridID, int key, int size, char *mesg);
+
+//      cdiZaxisDefKeyFlt: Define a CDI Z-axis floating point value from a key
+int     cdiZaxisDefKeyFlt(int zaxisID, int key, double value);
+
+//      cdiZaxisInqKeyFlt: Get a CDI Z-axis floating point value from a key
+int     cdiZaxisInqKeyFlt(int zaxisID, int key, double *value);
 
 /*      gridDefXname: Define the name of a X-axis */
 void    gridDefXname(int gridID, const char *xname);
@@ -945,15 +984,13 @@ int     zaxisInqSize(int zaxisID);
 /*      zaxisDuplicate: Duplicate a Z-axis */
 int     zaxisDuplicate(int zaxisID);
 
-void    zaxisResize(int zaxisID, int size);
-
 void    zaxisPrint(int zaxisID, int index);
 
 /*      zaxisDefLevels: Define the levels of a Z-axis */
 void    zaxisDefLevels(int zaxisID, const double levels[]);
 
 /*      zaxisInqLevels: Get all levels of a Z-axis */
-void    zaxisInqLevels(int zaxisID, double levels[]);
+int     zaxisInqLevels(int zaxisID, double levels[]);
 
 /*      zaxisDefLevel: Define one level of a Z-axis */
 void    zaxisDefLevel(int zaxisID, int levelID, double levels);
@@ -979,18 +1016,11 @@ void    zaxisDefUUID(int zaxisID, const unsigned char uuid[CDI_UUID_SIZE]);
 /*      zaxisInqUUID: Get the UUID of a generalized Z-axis */
 void    zaxisInqUUID(int zaxisID, unsigned char uuid[CDI_UUID_SIZE]);
 
-/* CDI zaxis string key values */
-#define  CDI_ZAXIS_NAME      801  // Z-axis name
-#define  CDI_ZAXIS_DIMNAME   802  // Z-axis dimension name
-#define  CDI_ZAXIS_VDIMNAME  803  // Vertex dimension name
-#define  CDI_ZAXIS_LONGNAME  804  // Z-axis longname
-#define  CDI_ZAXIS_UNITS     805  // Z-axis units
+//      cdiZaxisDefKeyStr: Define a CDI Z-axis string value from a key
+int     cdiZaxisDefKeyStr(int zaxisID, int key, int size, const char *mesg);
 
-//      cdiZaxisDefString: Define a CDI Z-axis string value from a key
-int     cdiZaxisDefString(int zaxisID, int key, int size, const char *mesg);
-
-//      cdiZaxisInqString: Get a CDI Z-axis string value from a key
-int     cdiZaxisInqString(int zaxisID, int key, int size, char *mesg);
+//      cdiZaxisInqKeyStr: Get a CDI Z-axis string value from a key
+int     cdiZaxisInqKeyStr(int zaxisID, int key, int size, char *mesg);
 
 /*      zaxisDefName: Define the name of a Z-axis */
 void    zaxisDefName(int zaxisID, const char *name_optional);
@@ -1013,12 +1043,6 @@ void    zaxisInqUnits(int zaxisID, char *units);
 /*      zaxisInqStdname: Get the standard name of a Z-axis */
 void    zaxisInqStdname(int zaxisID, char *stdname);
 
-/*      zaxisDefPsName: Define the name of the surface pressure variable of a hybrid sigma pressure Z-axis */
-void    zaxisDefPsName(int zaxisID, const char *psname_optional);
-
-/*      zaxisInqPsName: Get the name of the surface pressure variable of a hybrid sigma pressure Z-axis */
-void    zaxisInqPsName(int zaxisID, char *psname);
-
 void    zaxisDefPrec(int zaxisID, int prec);
 int     zaxisInqPrec(int zaxisID);
 
@@ -1031,7 +1055,6 @@ int     zaxisInqScalar(int zaxisID);
 void    zaxisDefLtype(int zaxisID, int ltype);
 int     zaxisInqLtype(int zaxisID);
 
-const double *zaxisInqLevelsPtr(int zaxisID);
 void    zaxisDefVct(int zaxisID, int size, const double vct[]);
 void    zaxisInqVct(int zaxisID, double vct[]);
 int     zaxisInqVctSize(int zaxisID);

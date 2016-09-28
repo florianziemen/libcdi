@@ -30,7 +30,7 @@
       varID2 = 1
 
 !     Open the output dataset (GRIB format)
-      streamID2 = streamOpenWrite("example.grb", FILETYPE_GRB)
+      streamID2 = streamOpenWrite("example.grb", CDI_FILETYPE_GRB)
       IF ( streamID2 < 0 ) THEN
          WRITE(0,*) cdiStringError(streamID2)
          STOP

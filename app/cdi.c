@@ -75,7 +75,7 @@ static int datamode = DP_MODE;
 static
 void version(void)
 {
-  int   filetypes[] = {FILETYPE_SRV, FILETYPE_EXT, FILETYPE_IEG, FILETYPE_GRB, FILETYPE_GRB2, FILETYPE_NC, FILETYPE_NC2, FILETYPE_NC4, FILETYPE_NC4C};
+  int   filetypes[] = {CDI_FILETYPE_SRV, CDI_FILETYPE_EXT, CDI_FILETYPE_IEG, CDI_FILETYPE_GRB, CDI_FILETYPE_GRB2, CDI_FILETYPE_NC, CDI_FILETYPE_NC2, CDI_FILETYPE_NC4, CDI_FILETYPE_NC4C};
    const char *typenames[] = {        "srv",        "ext",        "ieg",        "grb",        "grb2",        "nc",        "nc2",        "nc4",        "nc4c"};
 
   fprintf(stderr, "CDI version 1.8\n");
@@ -419,18 +419,18 @@ void printShortinfo(int streamID, int vlistID, int vardis)
 
 	  /* datatype */
 	  datatype = vlistInqVarDatatype(vlistID, varID);
-	  if      ( datatype == DATATYPE_PACK   ) strcpy(pstr, "P0");
+	  if      ( datatype == CDI_DATATYPE_PACK   ) strcpy(pstr, "P0");
 	  else if ( datatype > 0 && datatype <= 32  ) sprintf(pstr, "P%d", datatype);
-	  else if ( datatype == DATATYPE_CPX32  ) strcpy(pstr, "C32");
-	  else if ( datatype == DATATYPE_CPX64  ) strcpy(pstr, "C64");
-	  else if ( datatype == DATATYPE_FLT32  ) strcpy(pstr, "F32");
-	  else if ( datatype == DATATYPE_FLT64  ) strcpy(pstr, "F64");
-	  else if ( datatype == DATATYPE_INT8   ) strcpy(pstr, "I8");
-	  else if ( datatype == DATATYPE_INT16  ) strcpy(pstr, "I16");
-	  else if ( datatype == DATATYPE_INT32  ) strcpy(pstr, "I32");
-	  else if ( datatype == DATATYPE_UINT8  ) strcpy(pstr, "U8");
-	  else if ( datatype == DATATYPE_UINT16 ) strcpy(pstr, "U16");
-	  else if ( datatype == DATATYPE_UINT32 ) strcpy(pstr, "U32");
+	  else if ( datatype == CDI_DATATYPE_CPX32  ) strcpy(pstr, "C32");
+	  else if ( datatype == CDI_DATATYPE_CPX64  ) strcpy(pstr, "C64");
+	  else if ( datatype == CDI_DATATYPE_FLT32  ) strcpy(pstr, "F32");
+	  else if ( datatype == CDI_DATATYPE_FLT64  ) strcpy(pstr, "F64");
+	  else if ( datatype == CDI_DATATYPE_INT8   ) strcpy(pstr, "I8");
+	  else if ( datatype == CDI_DATATYPE_INT16  ) strcpy(pstr, "I16");
+	  else if ( datatype == CDI_DATATYPE_INT32  ) strcpy(pstr, "I32");
+	  else if ( datatype == CDI_DATATYPE_UINT8  ) strcpy(pstr, "U8");
+	  else if ( datatype == CDI_DATATYPE_UINT16 ) strcpy(pstr, "U16");
+	  else if ( datatype == CDI_DATATYPE_UINT32 ) strcpy(pstr, "U32");
 	  else                                    strcpy(pstr, "-1");
 
 	  fprintf(stdout, " %-3s", pstr);
@@ -563,12 +563,12 @@ void setDefaultDataType(char *datatypestr)
 	  if      ( nbits > 0 && nbits < 32 ) DefaultDataType = nbits;
 	  else if ( nbits == 32 )
 	    {
-	      if ( DefaultFileType == FILETYPE_GRB )
-		DefaultDataType = DATATYPE_PACK32;
+	      if ( DefaultFileType == CDI_FILETYPE_GRB )
+		DefaultDataType = CDI_DATATYPE_PACK32;
 	      else
-		DefaultDataType = DATATYPE_FLT32;
+		DefaultDataType = CDI_DATATYPE_FLT32;
 	    }
-	  else if ( nbits == 64 ) DefaultDataType = DATATYPE_FLT64;
+	  else if ( nbits == 64 ) DefaultDataType = CDI_DATATYPE_FLT64;
 	  else
 	    {
 	      fprintf(stderr, "Unsupported number of bits %d!\n", nbits);
@@ -580,9 +580,9 @@ void setDefaultDataType(char *datatypestr)
 	{
 	  if ( dtype == D_INT )
 	    {
-	      if      ( nbits ==  8 ) DefaultDataType = DATATYPE_INT8;
-	      else if ( nbits == 16 ) DefaultDataType = DATATYPE_INT16;
-	      else if ( nbits == 32 ) DefaultDataType = DATATYPE_INT32;
+	      if      ( nbits ==  8 ) DefaultDataType = CDI_DATATYPE_INT8;
+	      else if ( nbits == 16 ) DefaultDataType = CDI_DATATYPE_INT16;
+	      else if ( nbits == 32 ) DefaultDataType = CDI_DATATYPE_INT32;
 	      else
 		{
 		  fprintf(stderr, "Unsupported number of bits = %d for datatype INT!\n", nbits);
@@ -592,7 +592,7 @@ void setDefaultDataType(char *datatypestr)
 	  /*
 	  else if ( dtype == D_UINT )
 	    {
-	      if      ( nbits ==  8 ) DefaultDataType = DATATYPE_UINT8;
+	      if      ( nbits ==  8 ) DefaultDataType = CDI_DATATYPE_UINT8;
 	      else
 		{
 		  fprintf(stderr, "Unsupported number of bits = %d for datatype UINT!\n", nbits);
@@ -602,8 +602,8 @@ void setDefaultDataType(char *datatypestr)
 	  */
 	  else if ( dtype == D_FLT )
 	    {
-	      if      ( nbits == 32 ) DefaultDataType = DATATYPE_FLT32;
-	      else if ( nbits == 64 ) DefaultDataType = DATATYPE_FLT64;
+	      if      ( nbits == 32 ) DefaultDataType = CDI_DATATYPE_FLT32;
+	      else if ( nbits == 64 ) DefaultDataType = CDI_DATATYPE_FLT64;
 	      else
 		{
 		  fprintf(stderr, "Unsupported number of bits = %d for datatype FLT!\n", nbits);
@@ -612,8 +612,8 @@ void setDefaultDataType(char *datatypestr)
 	    }
 	  else if ( dtype == D_CPX )
 	    {
-	      if      ( nbits == 32 ) DefaultDataType = DATATYPE_CPX32;
-	      else if ( nbits == 64 ) DefaultDataType = DATATYPE_CPX64;
+	      if      ( nbits == 32 ) DefaultDataType = CDI_DATATYPE_CPX32;
+	      else if ( nbits == 64 ) DefaultDataType = CDI_DATATYPE_CPX64;
 	      else
 		{
 		  fprintf(stderr, "Unsupported number of bits = %d for datatype CPX!\n", nbits);
@@ -650,17 +650,17 @@ void setDefaultFileType(char *filetypestr)
     {
       char *ftstr = filetypestr;
 
-      if      ( memcmp(filetypestr, "grb2", 4)  == 0 ) { ftstr += 4; DefaultFileType = FILETYPE_GRB2;}
-      else if ( memcmp(filetypestr, "grb1", 4)  == 0 ) { ftstr += 4; DefaultFileType = FILETYPE_GRB; }
-      else if ( memcmp(filetypestr, "grb",  3)  == 0 ) { ftstr += 3; DefaultFileType = FILETYPE_GRB; }
-      else if ( memcmp(filetypestr, "nc2",  3)  == 0 ) { ftstr += 3; DefaultFileType = FILETYPE_NC2; }
-      else if ( memcmp(filetypestr, "nc4c", 4)  == 0 ) { ftstr += 4; DefaultFileType = FILETYPE_NC4C;}
-      else if ( memcmp(filetypestr, "nc4",  3)  == 0 ) { ftstr += 3; DefaultFileType = FILETYPE_NC4; }
-      else if ( memcmp(filetypestr, "nc1",  3)  == 0 ) { ftstr += 3; DefaultFileType = FILETYPE_NC;  }
-      else if ( memcmp(filetypestr, "nc",   2)  == 0 ) { ftstr += 2; DefaultFileType = FILETYPE_NC2; }
-      else if ( memcmp(filetypestr, "srv",  3)  == 0 ) { ftstr += 3; DefaultFileType = FILETYPE_SRV; }
-      else if ( memcmp(filetypestr, "ext",  3)  == 0 ) { ftstr += 3; DefaultFileType = FILETYPE_EXT; }
-      else if ( memcmp(filetypestr, "ieg",  3)  == 0 ) { ftstr += 3; DefaultFileType = FILETYPE_IEG; }
+      if      ( memcmp(filetypestr, "grb2", 4)  == 0 ) { ftstr += 4; DefaultFileType = CDI_FILETYPE_GRB2;}
+      else if ( memcmp(filetypestr, "grb1", 4)  == 0 ) { ftstr += 4; DefaultFileType = CDI_FILETYPE_GRB; }
+      else if ( memcmp(filetypestr, "grb",  3)  == 0 ) { ftstr += 3; DefaultFileType = CDI_FILETYPE_GRB; }
+      else if ( memcmp(filetypestr, "nc2",  3)  == 0 ) { ftstr += 3; DefaultFileType = CDI_FILETYPE_NC2; }
+      else if ( memcmp(filetypestr, "nc4c", 4)  == 0 ) { ftstr += 4; DefaultFileType = CDI_FILETYPE_NC4C;}
+      else if ( memcmp(filetypestr, "nc4",  3)  == 0 ) { ftstr += 3; DefaultFileType = CDI_FILETYPE_NC4; }
+      else if ( memcmp(filetypestr, "nc1",  3)  == 0 ) { ftstr += 3; DefaultFileType = CDI_FILETYPE_NC;  }
+      else if ( memcmp(filetypestr, "nc",   2)  == 0 ) { ftstr += 2; DefaultFileType = CDI_FILETYPE_NC2; }
+      else if ( memcmp(filetypestr, "srv",  3)  == 0 ) { ftstr += 3; DefaultFileType = CDI_FILETYPE_SRV; }
+      else if ( memcmp(filetypestr, "ext",  3)  == 0 ) { ftstr += 3; DefaultFileType = CDI_FILETYPE_EXT; }
+      else if ( memcmp(filetypestr, "ieg",  3)  == 0 ) { ftstr += 3; DefaultFileType = CDI_FILETYPE_IEG; }
       else
 	{
 	  fprintf(stderr, "Unsupported filetype %s!\n", filetypestr);
@@ -987,7 +987,7 @@ int main(int argc, char *argv[])
 			 varID, param, gridID, zaxisID, levelID);
 		  */
 		  gridsize = gridInqSize(gridID);
-		  level    = zaxisInqLevel(zaxisID, levelID);
+		  level    = zaxisInqLevels(zaxisID, NULL) ? zaxisInqLevel(zaxisID, levelID) : levelID+1;
 		  missval  = vlistInqVarMissval(vlistID1, varID);
 
 		  if ( Info )
@@ -1029,7 +1029,7 @@ int main(int argc, char *argv[])
 		  levelsize = zaxisInqSize(zaxisID);
 		  for ( levelID = 0; levelID < levelsize; levelID++ )
 		    {
-		      level = zaxisInqLevel(zaxisID, levelID);
+                      level = zaxisInqLevels(zaxisID, NULL) ? zaxisInqLevel(zaxisID, levelID) : levelID+1;
 		      streamReadVarSlice(streamID1, varID, levelID, data, &nmiss);
 
 		      if ( Info )

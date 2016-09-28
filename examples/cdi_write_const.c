@@ -43,7 +43,7 @@ int main(void)
   vlistDefVarName(vlistID, varID2, "varname2");
 
   // Create a dataset in netCDF format
-  streamID = streamOpenWrite("example_const.nc", FILETYPE_NC);
+  streamID = streamOpenWrite("example_const.nc", CDI_FILETYPE_NC);
   if ( streamID < 0 )
     {
       fprintf(stderr, "%s\n", cdiStringError(streamID));

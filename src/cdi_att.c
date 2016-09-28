@@ -16,6 +16,7 @@
 #include "error.h"
 #include "serialize.h"
 #include "grid.h"
+#include "zaxis.h"
 #include "resource_unpack.h"
 
 
@@ -104,8 +105,13 @@ cdi_atts_t *cdi_get_attsp(int objID, int varID)
 
   if ( varID == CDI_GLOBAL && reshGetTxCode(objID) == GRID )
     {
-      grid_t *gridptr = gridID2Ptr(objID);
+      grid_t *gridptr = grid_to_pointer(objID);
       attsp = &gridptr->atts;
+    }
+  else if ( varID == CDI_GLOBAL && reshGetTxCode(objID) == ZAXIS )
+    {
+      zaxis_t *zaxisptr = zaxis_to_pointer(objID);
+      attsp = &zaxisptr->atts;
     }
   else
     {
@@ -309,7 +315,7 @@ int cdiCopyVarAtts(int cdiID1, int varID_1, int cdiID2, int varID_2)
     @Item  cdiID    CDI ID, from a previous call to @fref{vlistCreate} or @fref{gridCreate}.
     @Item  varID    Variable identifier, or @func{CDI_GLOBAL} for a global attribute.
     @Item  name     Attribute name.
-    @Item  type     External data type (@func{DATATYPE_INT16} or @func{DATATYPE_INT32}).
+    @Item  type     External data type (@func{CDI_DATATYPE_INT16} or @func{CDI_DATATYPE_INT32}).
     @Item  len      Number of values provided for the attribute.
     @Item  ip       Pointer to one or more integer values.
 
@@ -320,7 +326,7 @@ The function @func{cdiDefAttInt} defines an integer attribute.
 */
 int cdiDefAttInt(int cdiID, int varID, const char *name, int type, int len, const int *ip)
 {
-  return cdi_def_att(DATATYPE_INT, type, cdiID, varID, name, (size_t)len, (size_t)len * sizeof(int), ip);
+  return cdi_def_att(CDI_DATATYPE_INT, type, cdiID, varID, name, (size_t)len, (size_t)len * sizeof(int), ip);
 }
 
 /*
@@ -333,7 +339,7 @@ int cdiDefAttInt(int cdiID, int varID, const char *name, int type, int len, cons
     @Item  cdiID    CDI ID, from a previous call to @fref{vlistCreate} or @fref{gridCreate}.
     @Item  varID    Variable identifier, or @func{CDI_GLOBAL} for a global attribute.
     @Item  name     Attribute name.
-    @Item  type     External data type (@func{DATATYPE_FLT32} or @func{DATATYPE_FLT64}).
+    @Item  type     External data type (@func{CDI_DATATYPE_FLT32} or @func{CDI_DATATYPE_FLT64}).
     @Item  len      Number of values provided for the attribute.
     @Item  dp       Pointer to one or more floating point values.
 
@@ -344,7 +350,7 @@ The function @func{cdiDefAttFlt} defines a floating point attribute.
 */
 int cdiDefAttFlt(int cdiID, int varID, const char *name, int type, int len, const double *dp)
 {
-  return cdi_def_att(DATATYPE_FLT, type, cdiID, varID, name, (size_t)len, (size_t)len * sizeof(double), dp);
+  return cdi_def_att(CDI_DATATYPE_FLT, type, cdiID, varID, name, (size_t)len, (size_t)len * sizeof(double), dp);
 }
 
 /*
@@ -367,7 +373,7 @@ The function @func{cdiDefAttTxt} defines a text attribute.
 */
 int cdiDefAttTxt(int cdiID, int varID, const char *name, int len, const char *tp)
 {
-  return cdi_def_att(DATATYPE_TXT, DATATYPE_TXT, cdiID, varID, name, (size_t)len, (size_t)len, tp);
+  return cdi_def_att(CDI_DATATYPE_TXT, CDI_DATATYPE_TXT, cdiID, varID, name, (size_t)len, (size_t)len, tp);
 }
 
 /*
@@ -389,7 +395,7 @@ The function @func{cdiInqAttInt} gets the values(s) of an integer attribute.
 */
 int cdiInqAttInt(int cdiID, int varID, const char *name, int mlen, int *ip)
 {
-  return cdi_inq_att(DATATYPE_INT, cdiID, varID, name, (size_t)mlen * sizeof(int), ip);
+  return cdi_inq_att(CDI_DATATYPE_INT, cdiID, varID, name, (size_t)mlen * sizeof(int), ip);
 }
 
 /*
@@ -411,7 +417,7 @@ The function @func{cdiInqAttFlt} gets the values(s) of a floating point attribut
 */
 int cdiInqAttFlt(int cdiID, int varID, const char *name, int mlen, double *dp)
 {
-  return cdi_inq_att(DATATYPE_FLT, cdiID, varID, name, (size_t)mlen * sizeof(double), dp);
+  return cdi_inq_att(CDI_DATATYPE_FLT, cdiID, varID, name, (size_t)mlen * sizeof(double), dp);
 }
 
 /*
@@ -433,7 +439,7 @@ The function @func{cdiInqAttTxt} gets the values(s) of a text attribute.
 */
 int cdiInqAttTxt(int cdiID, int varID, const char *name, int mlen, char *tp)
 {
-  return cdi_inq_att(DATATYPE_TXT, cdiID, varID, name, (size_t)mlen * sizeof(char), tp);
+  return cdi_inq_att(CDI_DATATYPE_TXT, cdiID, varID, name, (size_t)mlen * sizeof(char), tp);
 }
 
 enum {
@@ -446,11 +452,11 @@ int cdiAttTypeLookup(cdi_att_t *attp)
   int type;
   switch (attp->indtype)
   {
-  case DATATYPE_FLT:
-    type = DATATYPE_FLT64;
+  case CDI_DATATYPE_FLT:
+    type = CDI_DATATYPE_FLT64;
     break;
-  case DATATYPE_INT:
-  case DATATYPE_TXT:
+  case CDI_DATATYPE_INT:
+  case CDI_DATATYPE_TXT:
     type = attp->indtype;
     break;
   default:
@@ -494,8 +500,8 @@ int cdiAttGetSize(vlist_t *vlistptr, int varID, int attnum, void *context)
   xassert(attsp = get_attsp(vlistptr, varID));
   xassert(attnum >= 0 && attnum < (int)attsp->nelems);
   attp = &(attsp->value[attnum]);
-  int txsize = serializeGetSize(cdi_att_nints, DATATYPE_INT, context)
-    + serializeGetSize((int)attp->namesz, DATATYPE_TXT, context);
+  int txsize = serializeGetSize(cdi_att_nints, CDI_DATATYPE_INT, context)
+    + serializeGetSize((int)attp->namesz, CDI_DATATYPE_TXT, context);
   txsize += serializeGetSize((int)attp->nelems, cdiAttTypeLookup(attp), context);
   return txsize;
 }
@@ -505,7 +511,7 @@ int cdiAttsGetSize(void *vp, int varID, void *context)
 {
   vlist_t *p = (vlist_t*) vp;
   cdi_atts_t *attsp = get_attsp(p, varID);
-  int txsize = serializeGetSize(1, DATATYPE_INT, context);
+  int txsize = serializeGetSize(1, CDI_DATATYPE_INT, context);
   size_t numAtts = attsp->nelems;
   for (size_t i = 0; i < numAtts; ++i)
     txsize += cdiAttGetSize(p, varID, (int)i, context);
@@ -527,8 +533,8 @@ void cdiAttPack(vlist_t *vlistptr, int varID, int attnum,
   tempbuf[1] = attp->exdtype;
   tempbuf[2] = attp->indtype;
   tempbuf[3] = (int)attp->nelems;
-  serializePack(tempbuf, cdi_att_nints, DATATYPE_INT, buf, size, position, context);
-  serializePack(attp->name, (int)attp->namesz, DATATYPE_TXT, buf, size, position, context);
+  serializePack(tempbuf, cdi_att_nints, CDI_DATATYPE_INT, buf, size, position, context);
+  serializePack(attp->name, (int)attp->namesz, CDI_DATATYPE_TXT, buf, size, position, context);
   serializePack(attp->xvalue, (int)attp->nelems, cdiAttTypeLookup(attp),
                 buf, size, position, context);
 }
@@ -541,7 +547,7 @@ void cdiAttsPack(void *vp, int varID, void *buf, int size, int *position, void *
   size_t numAtts = attsp->nelems;
   int numAttsI = (int)numAtts;
   xassert(numAtts <= INT_MAX);
-  serializePack(&numAttsI, 1, DATATYPE_INT, buf, size, position, context);
+  serializePack(&numAttsI, 1, CDI_DATATYPE_INT, buf, size, position, context);
   for (size_t i = 0; i < numAtts; ++i)
     cdiAttPack(p, varID, (int)i, buf, size, position, context);
 }
@@ -552,24 +558,24 @@ void cdiAttUnpack(int cdiID, int varID, void *buf, int size, int *position, void
   int tempbuf[cdi_att_nints];
 
   serializeUnpack(buf, size, position,
-                  tempbuf, cdi_att_nints, DATATYPE_INT, context);
+                  tempbuf, cdi_att_nints, CDI_DATATYPE_INT, context);
   char *attName = (char *) Malloc((size_t)tempbuf[0] + 1);
-  serializeUnpack(buf, size, position, attName, tempbuf[0], DATATYPE_TXT, context);
+  serializeUnpack(buf, size, position, attName, tempbuf[0], CDI_DATATYPE_TXT, context);
   attName[tempbuf[0]] = '\0';
   int attVDt;
   size_t elemSize;
   switch (tempbuf[2])
   {
-  case DATATYPE_FLT:
-    attVDt = DATATYPE_FLT64;
+  case CDI_DATATYPE_FLT:
+    attVDt = CDI_DATATYPE_FLT64;
     elemSize = sizeof(double);
     break;
-  case DATATYPE_INT:
-    attVDt = DATATYPE_INT;
+  case CDI_DATATYPE_INT:
+    attVDt = CDI_DATATYPE_INT;
     elemSize = sizeof(int);
     break;
-  case DATATYPE_TXT:
-    attVDt = DATATYPE_TXT;
+  case CDI_DATATYPE_TXT:
+    attVDt = CDI_DATATYPE_TXT;
     elemSize = 1;
     break;
   default:
@@ -588,7 +594,7 @@ void cdiAttUnpack(int cdiID, int varID, void *buf, int size, int *position, void
 void cdiAttsUnpack(int cdiID, int varID, void *buf, int size, int *position, void *context)
 {
   int numAtts;
-  serializeUnpack(buf, size, position, &numAtts, 1, DATATYPE_INT, context);
+  serializeUnpack(buf, size, position, &numAtts, 1, CDI_DATATYPE_INT, context);
   for ( int i = 0; i < numAtts; ++i )
     cdiAttUnpack(cdiID, varID, buf, size, position, context);
 }

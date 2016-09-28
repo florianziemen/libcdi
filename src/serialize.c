@@ -45,27 +45,27 @@ serializeGetSizeInCore(int count, int datatype, void *context)
   (void)context;
   switch (datatype)
   {
-  case DATATYPE_INT8:
+  case CDI_DATATYPE_INT8:
     elemSize = sizeof (int8_t);
     break;
-  case DATATYPE_INT16:
+  case CDI_DATATYPE_INT16:
     elemSize = sizeof (int16_t);
     break;
-  case DATATYPE_UINT32:
+  case CDI_DATATYPE_UINT32:
     elemSize = sizeof (uint32_t);
     break;
-  case DATATYPE_INT:
+  case CDI_DATATYPE_INT:
     elemSize = sizeof (int);
     break;
-  case DATATYPE_FLT:
-  case DATATYPE_FLT64:
+  case CDI_DATATYPE_FLT:
+  case CDI_DATATYPE_FLT64:
     elemSize = sizeof (double);
     break;
-  case DATATYPE_TXT:
-  case DATATYPE_UCHAR:
+  case CDI_DATATYPE_TXT:
+  case CDI_DATATYPE_UCHAR:
     elemSize = 1;
     break;
-  case DATATYPE_LONG:
+  case CDI_DATATYPE_LONG:
     elemSize = sizeof (long);
     break;
   default:

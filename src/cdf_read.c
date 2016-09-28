@@ -314,18 +314,12 @@ void transpose2dArrayDP(size_t inWidth, size_t inHeight, double *data)
   */
 
   for ( size_t yBlock = 0; yBlock < inHeight; yBlock += cacheBlockSize )
-    {
-      for ( size_t xBlock = 0; xBlock < inWidth; xBlock += cacheBlockSize )
-        {
-          for ( size_t y = yBlock, yEnd = min_size(yBlock + cacheBlockSize, inHeight); y < yEnd; y++ )
-            {
-              for ( size_t x = xBlock, xEnd = min_size(xBlock + cacheBlockSize, inWidth); x < xEnd; x++ )
-                {
-                  out[x][y] = temp[y][x];
-                }
-            }
-        }
-    }
+    for ( size_t xBlock = 0; xBlock < inWidth; xBlock += cacheBlockSize )
+      for ( size_t y = yBlock, yEnd = min_size(yBlock + cacheBlockSize, inHeight); y < yEnd; y++ )
+        for ( size_t x = xBlock, xEnd = min_size(xBlock + cacheBlockSize, inWidth); x < xEnd; x++ )
+          {
+            out[x][y] = temp[y][x];
+          }
 
   Free(temp[0]);
 }
@@ -355,18 +349,12 @@ void transpose2dArraySP(size_t inWidth, size_t inHeight, float *data)
   */
 
   for ( size_t yBlock = 0; yBlock < inHeight; yBlock += cacheBlockSize )
-    {
-      for ( size_t xBlock = 0; xBlock < inWidth; xBlock += cacheBlockSize )
-        {
-          for ( size_t y = yBlock, yEnd = min_size(yBlock + cacheBlockSize, inHeight); y < yEnd; y++ )
-            {
-              for ( size_t x = xBlock, xEnd = min_size(xBlock + cacheBlockSize, inWidth); x < xEnd; x++ )
-                {
-                  out[x][y] = temp[y][x];
-                }
-            }
-        }
-    }
+    for ( size_t xBlock = 0; xBlock < inWidth; xBlock += cacheBlockSize )
+      for ( size_t y = yBlock, yEnd = min_size(yBlock + cacheBlockSize, inHeight); y < yEnd; y++ )
+        for ( size_t x = xBlock, xEnd = min_size(xBlock + cacheBlockSize, inWidth); x < xEnd; x++ )
+          {
+            out[x][y] = temp[y][x];
+          }
 
   Free(temp);
 }
@@ -594,7 +582,7 @@ void cdfReadVarSliceDP(stream_t *streamptr, int varID, int levelID, double *data
   size_t xsize = (size_t)gridInqXsize(gridId);
   size_t ysize = (size_t)gridInqYsize(gridId);
 
-  if ( vlistInqVarDatatype(vlistID, varID) == DATATYPE_FLT32 )
+  if ( vlistInqVarDatatype(vlistID, varID) == CDI_DATATYPE_FLT32 )
     {
       float *data_fp = (float *) Malloc(gridsize*sizeof(*data_fp));
       cdf_get_vara_float(fileID, ncvarid, start, count, data_fp);
@@ -606,7 +594,7 @@ void cdfReadVarSliceDP(stream_t *streamptr, int varID, int levelID, double *data
     {
       cdf_get_vara_double(fileID, ncvarid, start, count, data);
       
-      if ( vlistInqVarDatatype(vlistID, varID) == DATATYPE_UINT8 )
+      if ( vlistInqVarDatatype(vlistID, varID) == CDI_DATATYPE_UINT8 )
         {
           nc_type xtype;
           cdf_inq_vartype(fileID, ncvarid, &xtype);
@@ -651,7 +639,7 @@ void cdfReadVarSliceSP(stream_t *streamptr, int varID, int levelID, float *data,
   size_t xsize = (size_t)gridInqXsize(gridId);
   size_t ysize = (size_t)gridInqYsize(gridId);
 
-  if ( vlistInqVarDatatype(vlistID, varID) == DATATYPE_FLT64 )
+  if ( vlistInqVarDatatype(vlistID, varID) == CDI_DATATYPE_FLT64 )
     {
       double *data_dp = (double *) Malloc(gridsize*sizeof(*data_dp));
       cdf_get_vara_double(fileID, ncvarid, start, count, data_dp);
@@ -663,7 +651,7 @@ void cdfReadVarSliceSP(stream_t *streamptr, int varID, int levelID, float *data,
     {
       cdf_get_vara_float(fileID, ncvarid, start, count, data);
 
-      if ( vlistInqVarDatatype(vlistID, varID) == DATATYPE_UINT8 )
+      if ( vlistInqVarDatatype(vlistID, varID) == CDI_DATATYPE_UINT8 )
         {
           nc_type xtype;
           cdf_inq_vartype(fileID, ncvarid, &xtype);

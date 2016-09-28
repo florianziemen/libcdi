@@ -4,7 +4,7 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   August 2016
+! Uwe Schulzweida, MPI-MET, Hamburg,   September 2016
 !
 
       INTEGER    CDI_MAX_NAME          
@@ -52,8 +52,24 @@
 !
 !  File types
 !
-      INTEGER    FILETYPE_UNDEF        
-      PARAMETER (FILETYPE_UNDEF         = -1)
+      INTEGER    CDI_FILETYPE_GRB      
+      PARAMETER (CDI_FILETYPE_GRB       =  1)
+      INTEGER    CDI_FILETYPE_GRB2     
+      PARAMETER (CDI_FILETYPE_GRB2      =  2)
+      INTEGER    CDI_FILETYPE_NC       
+      PARAMETER (CDI_FILETYPE_NC        =  3)
+      INTEGER    CDI_FILETYPE_NC2      
+      PARAMETER (CDI_FILETYPE_NC2       =  4)
+      INTEGER    CDI_FILETYPE_NC4      
+      PARAMETER (CDI_FILETYPE_NC4       =  5)
+      INTEGER    CDI_FILETYPE_NC4C     
+      PARAMETER (CDI_FILETYPE_NC4C      =  6)
+      INTEGER    CDI_FILETYPE_SRV      
+      PARAMETER (CDI_FILETYPE_SRV       =  7)
+      INTEGER    CDI_FILETYPE_EXT      
+      PARAMETER (CDI_FILETYPE_EXT       =  8)
+      INTEGER    CDI_FILETYPE_IEG      
+      PARAMETER (CDI_FILETYPE_IEG       =  9)
       INTEGER    FILETYPE_GRB          
       PARAMETER (FILETYPE_GRB           =  1)
       INTEGER    FILETYPE_GRB2         
@@ -90,95 +106,121 @@
 !
 !  external data types
 !
+      INTEGER    CDI_DATATYPE_PACK     
+      PARAMETER (CDI_DATATYPE_PACK      =  0)
+      INTEGER    CDI_DATATYPE_PACK1    
+      PARAMETER (CDI_DATATYPE_PACK1     =  1)
+      INTEGER    CDI_DATATYPE_PACK2    
+      PARAMETER (CDI_DATATYPE_PACK2     =  2)
+      INTEGER    CDI_DATATYPE_PACK3    
+      PARAMETER (CDI_DATATYPE_PACK3     =  3)
+      INTEGER    CDI_DATATYPE_PACK4    
+      PARAMETER (CDI_DATATYPE_PACK4     =  4)
+      INTEGER    CDI_DATATYPE_PACK5    
+      PARAMETER (CDI_DATATYPE_PACK5     =  5)
+      INTEGER    CDI_DATATYPE_PACK6    
+      PARAMETER (CDI_DATATYPE_PACK6     =  6)
+      INTEGER    CDI_DATATYPE_PACK7    
+      PARAMETER (CDI_DATATYPE_PACK7     =  7)
+      INTEGER    CDI_DATATYPE_PACK8    
+      PARAMETER (CDI_DATATYPE_PACK8     =  8)
+      INTEGER    CDI_DATATYPE_PACK9    
+      PARAMETER (CDI_DATATYPE_PACK9     =  9)
+      INTEGER    CDI_DATATYPE_PACK10   
+      PARAMETER (CDI_DATATYPE_PACK10    = 10)
+      INTEGER    CDI_DATATYPE_PACK11   
+      PARAMETER (CDI_DATATYPE_PACK11    = 11)
+      INTEGER    CDI_DATATYPE_PACK12   
+      PARAMETER (CDI_DATATYPE_PACK12    = 12)
+      INTEGER    CDI_DATATYPE_PACK13   
+      PARAMETER (CDI_DATATYPE_PACK13    = 13)
+      INTEGER    CDI_DATATYPE_PACK14   
+      PARAMETER (CDI_DATATYPE_PACK14    = 14)
+      INTEGER    CDI_DATATYPE_PACK15   
+      PARAMETER (CDI_DATATYPE_PACK15    = 15)
+      INTEGER    CDI_DATATYPE_PACK16   
+      PARAMETER (CDI_DATATYPE_PACK16    = 16)
+      INTEGER    CDI_DATATYPE_PACK17   
+      PARAMETER (CDI_DATATYPE_PACK17    = 17)
+      INTEGER    CDI_DATATYPE_PACK18   
+      PARAMETER (CDI_DATATYPE_PACK18    = 18)
+      INTEGER    CDI_DATATYPE_PACK19   
+      PARAMETER (CDI_DATATYPE_PACK19    = 19)
+      INTEGER    CDI_DATATYPE_PACK20   
+      PARAMETER (CDI_DATATYPE_PACK20    = 20)
+      INTEGER    CDI_DATATYPE_PACK21   
+      PARAMETER (CDI_DATATYPE_PACK21    = 21)
+      INTEGER    CDI_DATATYPE_PACK22   
+      PARAMETER (CDI_DATATYPE_PACK22    = 22)
+      INTEGER    CDI_DATATYPE_PACK23   
+      PARAMETER (CDI_DATATYPE_PACK23    = 23)
+      INTEGER    CDI_DATATYPE_PACK24   
+      PARAMETER (CDI_DATATYPE_PACK24    = 24)
+      INTEGER    CDI_DATATYPE_PACK25   
+      PARAMETER (CDI_DATATYPE_PACK25    = 25)
+      INTEGER    CDI_DATATYPE_PACK26   
+      PARAMETER (CDI_DATATYPE_PACK26    = 26)
+      INTEGER    CDI_DATATYPE_PACK27   
+      PARAMETER (CDI_DATATYPE_PACK27    = 27)
+      INTEGER    CDI_DATATYPE_PACK28   
+      PARAMETER (CDI_DATATYPE_PACK28    = 28)
+      INTEGER    CDI_DATATYPE_PACK29   
+      PARAMETER (CDI_DATATYPE_PACK29    = 29)
+      INTEGER    CDI_DATATYPE_PACK30   
+      PARAMETER (CDI_DATATYPE_PACK30    = 30)
+      INTEGER    CDI_DATATYPE_PACK31   
+      PARAMETER (CDI_DATATYPE_PACK31    = 31)
+      INTEGER    CDI_DATATYPE_PACK32   
+      PARAMETER (CDI_DATATYPE_PACK32    = 32)
+      INTEGER    CDI_DATATYPE_CPX32    
+      PARAMETER (CDI_DATATYPE_CPX32     = 64)
+      INTEGER    CDI_DATATYPE_CPX64    
+      PARAMETER (CDI_DATATYPE_CPX64     = 128)
+      INTEGER    CDI_DATATYPE_FLT32    
+      PARAMETER (CDI_DATATYPE_FLT32     = 132)
+      INTEGER    CDI_DATATYPE_FLT64    
+      PARAMETER (CDI_DATATYPE_FLT64     = 164)
+      INTEGER    CDI_DATATYPE_INT8     
+      PARAMETER (CDI_DATATYPE_INT8      = 208)
+      INTEGER    CDI_DATATYPE_INT16    
+      PARAMETER (CDI_DATATYPE_INT16     = 216)
+      INTEGER    CDI_DATATYPE_INT32    
+      PARAMETER (CDI_DATATYPE_INT32     = 232)
+      INTEGER    CDI_DATATYPE_UINT8    
+      PARAMETER (CDI_DATATYPE_UINT8     = 308)
+      INTEGER    CDI_DATATYPE_UINT16   
+      PARAMETER (CDI_DATATYPE_UINT16    = 316)
+      INTEGER    CDI_DATATYPE_UINT32   
+      PARAMETER (CDI_DATATYPE_UINT32    = 332)
       INTEGER    DATATYPE_PACK         
       PARAMETER (DATATYPE_PACK          =  0)
-      INTEGER    DATATYPE_PACK1        
-      PARAMETER (DATATYPE_PACK1         =  1)
-      INTEGER    DATATYPE_PACK2        
-      PARAMETER (DATATYPE_PACK2         =  2)
-      INTEGER    DATATYPE_PACK3        
-      PARAMETER (DATATYPE_PACK3         =  3)
-      INTEGER    DATATYPE_PACK4        
-      PARAMETER (DATATYPE_PACK4         =  4)
-      INTEGER    DATATYPE_PACK5        
-      PARAMETER (DATATYPE_PACK5         =  5)
-      INTEGER    DATATYPE_PACK6        
-      PARAMETER (DATATYPE_PACK6         =  6)
-      INTEGER    DATATYPE_PACK7        
-      PARAMETER (DATATYPE_PACK7         =  7)
       INTEGER    DATATYPE_PACK8        
       PARAMETER (DATATYPE_PACK8         =  8)
-      INTEGER    DATATYPE_PACK9        
-      PARAMETER (DATATYPE_PACK9         =  9)
-      INTEGER    DATATYPE_PACK10       
-      PARAMETER (DATATYPE_PACK10        = 10)
-      INTEGER    DATATYPE_PACK11       
-      PARAMETER (DATATYPE_PACK11        = 11)
-      INTEGER    DATATYPE_PACK12       
-      PARAMETER (DATATYPE_PACK12        = 12)
-      INTEGER    DATATYPE_PACK13       
-      PARAMETER (DATATYPE_PACK13        = 13)
-      INTEGER    DATATYPE_PACK14       
-      PARAMETER (DATATYPE_PACK14        = 14)
-      INTEGER    DATATYPE_PACK15       
-      PARAMETER (DATATYPE_PACK15        = 15)
       INTEGER    DATATYPE_PACK16       
       PARAMETER (DATATYPE_PACK16        = 16)
-      INTEGER    DATATYPE_PACK17       
-      PARAMETER (DATATYPE_PACK17        = 17)
-      INTEGER    DATATYPE_PACK18       
-      PARAMETER (DATATYPE_PACK18        = 18)
-      INTEGER    DATATYPE_PACK19       
-      PARAMETER (DATATYPE_PACK19        = 19)
-      INTEGER    DATATYPE_PACK20       
-      PARAMETER (DATATYPE_PACK20        = 20)
-      INTEGER    DATATYPE_PACK21       
-      PARAMETER (DATATYPE_PACK21        = 21)
-      INTEGER    DATATYPE_PACK22       
-      PARAMETER (DATATYPE_PACK22        = 22)
-      INTEGER    DATATYPE_PACK23       
-      PARAMETER (DATATYPE_PACK23        = 23)
       INTEGER    DATATYPE_PACK24       
       PARAMETER (DATATYPE_PACK24        = 24)
-      INTEGER    DATATYPE_PACK25       
-      PARAMETER (DATATYPE_PACK25        = 25)
-      INTEGER    DATATYPE_PACK26       
-      PARAMETER (DATATYPE_PACK26        = 26)
-      INTEGER    DATATYPE_PACK27       
-      PARAMETER (DATATYPE_PACK27        = 27)
-      INTEGER    DATATYPE_PACK28       
-      PARAMETER (DATATYPE_PACK28        = 28)
-      INTEGER    DATATYPE_PACK29       
-      PARAMETER (DATATYPE_PACK29        = 29)
-      INTEGER    DATATYPE_PACK30       
-      PARAMETER (DATATYPE_PACK30        = 30)
-      INTEGER    DATATYPE_PACK31       
-      PARAMETER (DATATYPE_PACK31        = 31)
-      INTEGER    DATATYPE_PACK32       
-      PARAMETER (DATATYPE_PACK32        = 32)
-      INTEGER    DATATYPE_CPX32        
-      PARAMETER (DATATYPE_CPX32         = 64)
-      INTEGER    DATATYPE_CPX64        
-      PARAMETER (DATATYPE_CPX64         = 128)
       INTEGER    DATATYPE_FLT32        
       PARAMETER (DATATYPE_FLT32         = 132)
       INTEGER    DATATYPE_FLT64        
       PARAMETER (DATATYPE_FLT64         = 164)
-      INTEGER    DATATYPE_INT8         
-      PARAMETER (DATATYPE_INT8          = 208)
-      INTEGER    DATATYPE_INT16        
-      PARAMETER (DATATYPE_INT16         = 216)
       INTEGER    DATATYPE_INT32        
       PARAMETER (DATATYPE_INT32         = 232)
-      INTEGER    DATATYPE_UINT8        
-      PARAMETER (DATATYPE_UINT8         = 308)
-      INTEGER    DATATYPE_UINT16       
-      PARAMETER (DATATYPE_UINT16        = 316)
-      INTEGER    DATATYPE_UINT32       
-      PARAMETER (DATATYPE_UINT32        = 332)
 !
 !  internal data types
 !
+      INTEGER    CDI_DATATYPE_INT      
+      PARAMETER (CDI_DATATYPE_INT       = 251)
+      INTEGER    CDI_DATATYPE_FLT      
+      PARAMETER (CDI_DATATYPE_FLT       = 252)
+      INTEGER    CDI_DATATYPE_TXT      
+      PARAMETER (CDI_DATATYPE_TXT       = 253)
+      INTEGER    CDI_DATATYPE_CPX      
+      PARAMETER (CDI_DATATYPE_CPX       = 254)
+      INTEGER    CDI_DATATYPE_UCHAR    
+      PARAMETER (CDI_DATATYPE_UCHAR     = 255)
+      INTEGER    CDI_DATATYPE_LONG     
+      PARAMETER (CDI_DATATYPE_LONG      = 256)
       INTEGER    DATATYPE_INT          
       PARAMETER (DATATYPE_INT           = 251)
       INTEGER    DATATYPE_FLT          
@@ -602,7 +644,7 @@
       EXTERNAL        streamInqNvars
 
 !
-!  STREAM var I/O routines
+!  STREAM var I/O routines (random access)
 !
 !                     streamWriteVar
 !                                    (INTEGER         streamID,
@@ -673,7 +715,7 @@
       EXTERNAL        streamWriteVarChunk
 
 !
-!  STREAM record I/O routines
+!  STREAM record I/O routines (sequential access)
 !
 !                     streamDefRecord
 !                                    (INTEGER         streamID,
@@ -1548,26 +1590,39 @@
 !
       INTEGER    CDI_KEY_XNAME         
       PARAMETER (CDI_KEY_XNAME          = 901)
-      INTEGER    CDI_KEY_YNAME         
-      PARAMETER (CDI_KEY_YNAME          = 902)
       INTEGER    CDI_KEY_XDIMNAME      
-      PARAMETER (CDI_KEY_XDIMNAME       = 903)
-      INTEGER    CDI_KEY_YDIMNAME      
-      PARAMETER (CDI_KEY_YDIMNAME       = 904)
-      INTEGER    CDI_KEY_VDIMNAME      
-      PARAMETER (CDI_KEY_VDIMNAME       = 905)
+      PARAMETER (CDI_KEY_XDIMNAME       = 902)
       INTEGER    CDI_KEY_XLONGNAME     
-      PARAMETER (CDI_KEY_XLONGNAME      = 906)
-      INTEGER    CDI_KEY_YLONGNAME     
-      PARAMETER (CDI_KEY_YLONGNAME      = 907)
+      PARAMETER (CDI_KEY_XLONGNAME      = 903)
       INTEGER    CDI_KEY_XUNITS        
-      PARAMETER (CDI_KEY_XUNITS         = 908)
+      PARAMETER (CDI_KEY_XUNITS         = 904)
+      INTEGER    CDI_KEY_YNAME         
+      PARAMETER (CDI_KEY_YNAME          = 911)
+      INTEGER    CDI_KEY_YDIMNAME      
+      PARAMETER (CDI_KEY_YDIMNAME       = 912)
+      INTEGER    CDI_KEY_YLONGNAME     
+      PARAMETER (CDI_KEY_YLONGNAME      = 913)
       INTEGER    CDI_KEY_YUNITS        
-      PARAMETER (CDI_KEY_YUNITS         = 909)
+      PARAMETER (CDI_KEY_YUNITS         = 914)
+      INTEGER    CDI_KEY_VDIMNAME      
+      PARAMETER (CDI_KEY_VDIMNAME       = 920)
       INTEGER    CDI_KEY_MAPNAME       
-      PARAMETER (CDI_KEY_MAPNAME        = 920)
+      PARAMETER (CDI_KEY_MAPNAME        = 921)
       INTEGER    CDI_KEY_MAPPING       
-      PARAMETER (CDI_KEY_MAPPING        = 921)
+      PARAMETER (CDI_KEY_MAPPING        = 922)
+!
+!  CDI zaxis string key values
+!
+      INTEGER    CDI_KEY_NAME          
+      PARAMETER (CDI_KEY_NAME           = 941)
+      INTEGER    CDI_KEY_DIMNAME       
+      PARAMETER (CDI_KEY_DIMNAME        = 942)
+      INTEGER    CDI_KEY_LONGNAME      
+      PARAMETER (CDI_KEY_LONGNAME       = 943)
+      INTEGER    CDI_KEY_UNITS         
+      PARAMETER (CDI_KEY_UNITS          = 944)
+      INTEGER    CDI_KEY_PSNAME        
+      PARAMETER (CDI_KEY_PSNAME         = 950)
       INTEGER         cdiGridDefKeyStr
 !                                    (INTEGER         gridID,
 !                                     INTEGER         key,
@@ -1895,11 +1950,6 @@
 !                                    (INTEGER         zaxisID)
       EXTERNAL        zaxisDuplicate
 
-!                     zaxisResize
-!                                    (INTEGER         zaxisID,
-!                                     INTEGER         size)
-      EXTERNAL        zaxisResize
-
 !                     zaxisPrint
 !                                    (INTEGER         zaxisID,
 !                                     INTEGER         index)
@@ -1910,7 +1960,7 @@
 !                                     DOUBLEPRECISION levels(*))
       EXTERNAL        zaxisDefLevels
 
-!                     zaxisInqLevels
+      INTEGER         zaxisInqLevels
 !                                    (INTEGER         zaxisID,
 !                                     DOUBLEPRECISION levels(*))
       EXTERNAL        zaxisInqLevels
@@ -1954,32 +2004,19 @@
 !                                     INTEGER*1(16)   uuid)
       EXTERNAL        zaxisInqUUID
 
-!
-!  CDI zaxis string key values
-!
-      INTEGER    CDI_ZAXIS_NAME        
-      PARAMETER (CDI_ZAXIS_NAME         = 801)
-      INTEGER    CDI_ZAXIS_DIMNAME     
-      PARAMETER (CDI_ZAXIS_DIMNAME      = 802)
-      INTEGER    CDI_ZAXIS_VDIMNAME    
-      PARAMETER (CDI_ZAXIS_VDIMNAME     = 803)
-      INTEGER    CDI_ZAXIS_LONGNAME    
-      PARAMETER (CDI_ZAXIS_LONGNAME     = 804)
-      INTEGER    CDI_ZAXIS_UNITS       
-      PARAMETER (CDI_ZAXIS_UNITS        = 805)
-      INTEGER         cdiZaxisDefString
+      INTEGER         cdiZaxisDefKeyStr
 !                                    (INTEGER         zaxisID,
 !                                     INTEGER         key,
 !                                     INTEGER         size,
 !                                     CHARACTER*(*)   mesg)
-      EXTERNAL        cdiZaxisDefString
+      EXTERNAL        cdiZaxisDefKeyStr
 
-      INTEGER         cdiZaxisInqString
+      INTEGER         cdiZaxisInqKeyStr
 !                                    (INTEGER         zaxisID,
 !                                     INTEGER         key,
 !                                     INTEGER         size,
 !                                     CHARACTER*(*)   mesg)
-      EXTERNAL        cdiZaxisInqString
+      EXTERNAL        cdiZaxisInqKeyStr
 
 !                     zaxisDefName
 !                                    (INTEGER         zaxisID,
@@ -2015,16 +2052,6 @@
 !                                    (INTEGER         zaxisID,
 !                                     CHARACTER*(*)   stdname)
       EXTERNAL        zaxisInqStdname
-
-!                     zaxisDefPsName
-!                                    (INTEGER         zaxisID,
-!                                     CHARACTER*(*)   psname_optional)
-      EXTERNAL        zaxisDefPsName
-
-!                     zaxisInqPsName
-!                                    (INTEGER         zaxisID,
-!                                     CHARACTER*(*)   psname)
-      EXTERNAL        zaxisInqPsName
 
 !                     zaxisDefPrec
 !                                    (INTEGER         zaxisID,

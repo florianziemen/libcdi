@@ -58,31 +58,31 @@ void printFiletype(int streamID, int vlistID)
 
   switch ( filetype )
     {
-    case FILETYPE_GRB:
+    case CDI_FILETYPE_GRB:
       printf("GRIB");
       break;
-    case FILETYPE_GRB2:
+    case CDI_FILETYPE_GRB2:
       printf("GRIB2");
       break;
-    case FILETYPE_NC:
+    case CDI_FILETYPE_NC:
       printf("NetCDF");
       break;
-    case FILETYPE_NC2:
+    case CDI_FILETYPE_NC2:
       printf("NetCDF2");
       break;
-    case FILETYPE_NC4:
+    case CDI_FILETYPE_NC4:
       printf("NetCDF4");
       break;
-    case FILETYPE_NC4C:
+    case CDI_FILETYPE_NC4C:
       printf("NetCDF4 classic");
       break;
-    case FILETYPE_SRV:
+    case CDI_FILETYPE_SRV:
       printf("SERVICE");
       break;
-    case FILETYPE_EXT:
+    case CDI_FILETYPE_EXT:
       printf("EXTRA");
       break;
-    case FILETYPE_IEG:
+    case CDI_FILETYPE_IEG:
       printf("IEG");
       break;
     default:
@@ -90,7 +90,7 @@ void printFiletype(int streamID, int vlistID)
       break;
     }
 
-  if ( filetype == FILETYPE_SRV || filetype == FILETYPE_EXT || filetype == FILETYPE_IEG )
+  if ( filetype == CDI_FILETYPE_SRV || filetype == CDI_FILETYPE_EXT || filetype == CDI_FILETYPE_IEG )
     {
       switch ( streamInqByteorder(streamID) )
 	{
@@ -103,40 +103,31 @@ void printFiletype(int streamID, int vlistID)
 	}
     }
 
-  if ( filetype == FILETYPE_GRB || filetype == FILETYPE_NC4 || filetype == FILETYPE_NC4C )
+  if ( filetype == CDI_FILETYPE_GRB || filetype == CDI_FILETYPE_NC4 || filetype == CDI_FILETYPE_NC4C )
     {
-      int nvars, varID;
-      int comptype;
-
-      nvars = vlistNvars(vlistID);
-
-      for ( varID = 0; varID < nvars; varID++ )
+      int nvars = vlistNvars(vlistID);
+      for ( int varID = 0; varID < nvars; varID++ )
 	{
-	  comptype = vlistInqVarCompType(vlistID, varID);
+	  int comptype = vlistInqVarCompType(vlistID, varID);
 	  if ( comptype )
 	    {
-	      if ( comptype == CDI_COMPRESS_SZIP )
-		printf(" SZIP");
-	      else if ( comptype == CDI_COMPRESS_ZIP )
-		printf(" ZIP");
+	      if      ( comptype == CDI_COMPRESS_SZIP ) printf(" SZIP");
+	      else if ( comptype == CDI_COMPRESS_ZIP  ) printf(" ZIP");
 
 	      break;
 	    }
 	}
     }
 
-  if ( filetype == FILETYPE_GRB2 )
+  if ( filetype == CDI_FILETYPE_GRB2 )
     {
-      int comptype;
       int nvars = vlistNvars(vlistID);
       for ( int varID = 0; varID < nvars; varID++ )
 	{
-	  comptype = vlistInqVarCompType(vlistID, varID);
+	  int comptype = vlistInqVarCompType(vlistID, varID);
 	  if ( comptype )
 	    {
-	      if ( comptype == CDI_COMPRESS_JPEG )
-		printf(" JPEG");
-
+	      if ( comptype == CDI_COMPRESS_JPEG ) printf(" JPEG");
 	      break;
 	    }
 	}
@@ -286,7 +277,7 @@ void printGridInfoKernel(int gridID, int index, bool lproj)
   int xysize   = xsize*ysize;
 
   // int prec     = gridInqPrec(gridID);
-  // int dig = (prec == DATATYPE_FLT64) ? 15 : 7;
+  // int dig = (prec == CDI_DATATYPE_FLT64) ? 15 : 7;
   int dig = 7;
 
   if ( !lproj )
@@ -502,7 +493,7 @@ void printZaxisInfo(int vlistID)
       int ltype     = zaxisInqLtype(zaxisID);
       int levelsize = zaxisInqSize(zaxisID);
       // int prec      = zaxisInqPrec(zaxisID);
-      // int dig = (prec == DATATYPE_FLT64) ? 15 : 7;
+      // int dig = (prec == CDI_DATATYPE_FLT64) ? 15 : 7;
       int dig = 7;
 
       zaxisName(zaxistype, zaxisname);
@@ -526,38 +517,44 @@ void printZaxisInfo(int vlistID)
       set_text_color(stdout, RESET, GREEN);
 #endif
       fprintf(stdout, " levels=%d", levelsize);
+      bool zscalar = (levelsize == 1) ? zaxisInqScalar(zaxisID) : false;
+      if ( zscalar ) fprintf(stdout, "  scalar");
       my_reset_text_color(stdout);
       fprintf(stdout, "\n");
 
-      double *levels = (double*) malloc((size_t)levelsize*sizeof(double));
-      zaxisInqLevels(zaxisID, levels);
-
-      if ( !(zaxistype == ZAXIS_SURFACE && levelsize == 1 && !(fabs(levels[0]) > 0)) )
+      if ( zaxisInqLevels(zaxisID, NULL) )
         {
-          double zfirst = levels[0];
-          double zlast  = levels[levelsize-1];
-          if ( levelsize > 2 )
-            {
-              int levelID;
-              zinc = (levels[levelsize-1] - levels[0]) / (levelsize-1);
-              for ( levelID = 2; levelID < levelsize; ++levelID )
-                if ( fabs(fabs(levels[levelID] - levels[levelID-1]) - zinc) > 0.001*zinc ) break;
+          double *levels = (double*) malloc((size_t)levelsize*sizeof(double));
+          zaxisInqLevels(zaxisID, levels);
 
-              if ( levelID < levelsize ) zinc = 0;
+          if ( !(zaxistype == ZAXIS_SURFACE && levelsize == 1 && !(fabs(levels[0]) > 0)) )
+            {
+              double zfirst = levels[0];
+              double zlast  = levels[levelsize-1];
+              if ( levelsize > 2 )
+                {
+                  zinc = (levels[levelsize-1] - levels[0]) / (levelsize-1);
+                  for ( int levelID = 2; levelID < levelsize; ++levelID )
+                    if ( fabs(fabs(levels[levelID] - levels[levelID-1]) - zinc) > 0.001*zinc )
+                      {
+                        zinc = 0;
+                        break;
+                      }
+                }
+
+              fprintf(stdout, "%33s : %.*g", zname, dig, zfirst);
+              if ( levelsize > 1 )
+                {
+                  fprintf(stdout, " to %.*g", dig, zlast);
+                  if ( IS_NOT_EQUAL(zinc, 0) )
+                    fprintf(stdout, " by %.*g", dig, zinc);
+                }
+              fprintf(stdout, " %s", zunits);
+              fprintf(stdout, "\n");
             }
 
-          fprintf(stdout, "%33s : %.*g", zname, dig, zfirst);
-          if ( levelsize > 1 )
-            {
-              fprintf(stdout, " to %.*g", dig, zlast);
-              if ( IS_NOT_EQUAL(zinc, 0) )
-                fprintf(stdout, " by %.*g", dig, zinc);
-            }
-          fprintf(stdout, " %s", zunits);
-          fprintf(stdout, "\n");
+          free(levels);
         }
-
-      free(levels);
 
       if ( zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL) )
         {
@@ -581,9 +578,8 @@ void printZaxisInfo(int vlistID)
 
       if ( zaxistype == ZAXIS_HYBRID )
         {
-          char psname[CDI_MAX_NAME];
-          psname[0] = 0;
-          zaxisInqPsName(zaxisID, psname);
+          char psname[CDI_MAX_NAME]; psname[0] = 0;
+          cdiZaxisInqKeyStr(zaxisID, CDI_KEY_PSNAME, CDI_MAX_NAME, psname);
           int vctsize = zaxisInqVctSize(zaxisID);
           if ( vctsize || psname[0] )
             {

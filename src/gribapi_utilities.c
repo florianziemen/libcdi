@@ -391,12 +391,12 @@ int gribGetDatatype(grib_handle* gribHandle)
   int datatype;
   if(gribEditionNumber(gribHandle) > 1 && gribCheckString(gribHandle, "packingType", "grid_ieee"))
     {
-      datatype = gribCheckLong(gribHandle, "precision", 1) ? DATATYPE_FLT32 : DATATYPE_FLT64;
+      datatype = gribCheckLong(gribHandle, "precision", 1) ? CDI_DATATYPE_FLT32 : CDI_DATATYPE_FLT64;
     }
   else
     {
       long bitsPerValue;
-      datatype = (!grib_get_long(gribHandle, "bitsPerValue", &bitsPerValue) && bitsPerValue > 0 && bitsPerValue <= 32) ? (int)bitsPerValue : DATATYPE_PACK;
+      datatype = (!grib_get_long(gribHandle, "bitsPerValue", &bitsPerValue) && bitsPerValue > 0 && bitsPerValue <= 32) ? (int)bitsPerValue : CDI_DATATYPE_PACK;
     }
   return datatype;
 }

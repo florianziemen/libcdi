@@ -40,19 +40,19 @@ typedef struct {
 static
 int iegInqDatatype(int prec)
 {
-  return (prec == EXSE_DOUBLE_PRECISION) ? DATATYPE_FLT64 : DATATYPE_FLT32;
+  return (prec == EXSE_DOUBLE_PRECISION) ? CDI_DATATYPE_FLT64 : CDI_DATATYPE_FLT32;
 }
 
 static
 int iegDefDatatype(int datatype)
 {
-  if ( datatype == DATATYPE_CPX32 || datatype == DATATYPE_CPX64 )
+  if ( datatype == CDI_DATATYPE_CPX32 || datatype == CDI_DATATYPE_CPX64 )
     Error("CDI/IEG library does not support complex numbers!");
 
-  if ( datatype != DATATYPE_FLT32 && datatype != DATATYPE_FLT64 )
-    datatype = DATATYPE_FLT32;
+  if ( datatype != CDI_DATATYPE_FLT32 && datatype != CDI_DATATYPE_FLT64 )
+    datatype = CDI_DATATYPE_FLT32;
 
-  return (datatype == DATATYPE_FLT64) ? EXSE_DOUBLE_PRECISION : EXSE_SINGLE_PRECISION;
+  return (datatype == CDI_DATATYPE_FLT64) ? EXSE_DOUBLE_PRECISION : EXSE_SINGLE_PRECISION;
 }
 
 /* not used
@@ -433,7 +433,7 @@ void iegDefLevel(int *pdb, int *gdb, double *vct, int zaxisID, int levelID)
     case ZAXIS_PRESSURE:
       {
 	double dum;
-	char units[128];
+	char units[CDI_MAX_NAME];
 
 	level = zaxisInqLevel(zaxisID, levelID);
 	if ( level < 0 ) Warning("pressure level of %f Pa is below 0.", level);

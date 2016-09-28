@@ -141,7 +141,7 @@ int cgribexGetTsteptype(int timerange)
 }
 
 static
-void cgribexGetGrid(stream_t *streamptr, int *isec2, double *fsec2, int *isec4, grid_t *grid, int iret)
+void cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid, int iret)
 {
   bool compyinc = true;
   int gridtype = cgribexGetGridType(isec2);
@@ -354,7 +354,7 @@ void cgribexAddRecord(stream_t * streamptr, int param, int *isec1, int *isec2, d
   record->tsteptype = (short)tsteptype;
 
   grid_t *gridptr = (grid_t*) Malloc(sizeof(*gridptr));
-  cgribexGetGrid(streamptr, isec2, fsec2, isec4, gridptr, iret);
+  cgribexGetGrid(streamptr, isec2, isec4, gridptr, iret);
 
   struct addIfNewRes gridAdded = cdiVlistAddGridIfNew(vlistID, gridptr, 0);
   int gridID = gridAdded.Id;
@@ -390,8 +390,8 @@ void cgribexAddRecord(stream_t * streamptr, int param, int *isec1, int *isec2, d
 
   int lbounds = cgribexGetZaxisHasBounds(ISEC1_LevelType);
 
-  if ( datatype > 32 ) datatype = DATATYPE_PACK32;
-  if ( datatype <  0 ) datatype = DATATYPE_PACK;
+  if ( datatype > 32 ) datatype = CDI_DATATYPE_PACK32;
+  if ( datatype <  0 ) datatype = CDI_DATATYPE_PACK;
 
   varAddRecord(recID, param, gridID, zaxistype, lbounds, level1, level2, 0, 0,
 	       datatype, &varID, &levelID, tsteptype, numavg, ISEC1_LevelType, -1,
@@ -671,7 +671,7 @@ int cgribexScanTimestep1(stream_t * streamptr)
       if ( ISEC4_NumBits > 0 && ISEC4_NumBits <= 32 )
 	datatype = ISEC4_NumBits;
       else
-        datatype = DATATYPE_PACK;
+        datatype = CDI_DATATYPE_PACK;
 
       if ( nrecs == 0 )
 	{
@@ -1847,6 +1847,7 @@ void isec1DefLevel(int *isec1, int leveltype, int level1, int level2)
 static
 void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int levelID)
 {
+  char units[CDI_MAX_NAME];
   static bool lwarning_vct = true;
   double level;
 
@@ -1918,7 +1919,6 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
 	level = zaxisInqLevel(zaxisID, levelID);
 	if ( level < 0 ) Warning("Pressure level of %f Pa is below zero!", level);
 
-	char units[128];
 	zaxisInqUnits(zaxisID, units);
 	if ( (units[0] != 'P') | (units[1] != 'a') ) level *= 100;
 
@@ -1935,7 +1935,6 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
       {
 	level = zaxisInqLevel(zaxisID, levelID);
 
-	char units[128];
 	zaxisInqUnits(zaxisID, units);
         if ( units[1] == 'm' && !units[2] )
           {
@@ -1959,7 +1958,6 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
       }
     case ZAXIS_DEPTH_BELOW_LAND:
       {
-	char units[128];
 	zaxisInqUnits(zaxisID, units);
 
 	double factor;

@@ -102,13 +102,13 @@ printAtts(int vlistID)
           size_t elemSize = 0;
           switch (attType)
             {
-            case DATATYPE_TXT:
+            case CDI_DATATYPE_TXT:
               elemSize = 1;
               break;
-            case DATATYPE_FLT:
+            case CDI_DATATYPE_FLT:
               elemSize = sizeof (double);
               break;
-            case DATATYPE_INT:
+            case CDI_DATATYPE_INT:
               elemSize = sizeof (int);
               break;
             }
@@ -125,13 +125,13 @@ printAtts(int vlistID)
 
           switch (attType)
             {
-            case DATATYPE_TXT:
+            case CDI_DATATYPE_TXT:
               rc = cdiInqAttTxt(vlistID, (int)varID, attName,
                                 attLen, (char *)buf);
               if (rc == CDI_NOERR)
                 printf("\"%.*s\"", attLen, (char *)buf);
               break;
-            case DATATYPE_FLT:
+            case CDI_DATATYPE_FLT:
               rc = cdiInqAttFlt(vlistID, (int)varID, attName,
                                 attLen + 1, (double *)buf);
               if (rc == CDI_NOERR && attLen)
@@ -142,7 +142,7 @@ printAtts(int vlistID)
                     printf(", %10g", dp[i]);
                 }
               break;
-            case DATATYPE_INT:
+            case CDI_DATATYPE_INT:
               rc = cdiInqAttInt(vlistID, (int)varID, attName,
                                 attLen + 1, (int *)buf);
               if (rc == CDI_NOERR && attLen)

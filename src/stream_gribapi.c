@@ -520,8 +520,8 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
       }
     }
 
-  // if ( datatype > 32 ) datatype = DATATYPE_PACK32;
-  if ( datatype <  0 ) datatype = DATATYPE_PACK;
+  // if ( datatype > 32 ) datatype = CDI_DATATYPE_PACK32;
+  if ( datatype <  0 ) datatype = CDI_DATATYPE_PACK;
 
   stdname[0] = 0;
   longname[0] = 0;
@@ -725,14 +725,14 @@ grib_handle *gribapiGetDiskRepresentation(size_t recsize, size_t *buffersize, vo
 
   if ( lieee )
     {
-      *outDatatype = DATATYPE_FLT64;
+      *outDatatype = CDI_DATATYPE_FLT64;
       long precision;
       int status = grib_get_long(gh, "precision", &precision);
-      if ( status == 0 && precision == 1 ) *outDatatype = DATATYPE_FLT32;
+      if ( status == 0 && precision == 1 ) *outDatatype = CDI_DATATYPE_FLT32;
     }
   else
     {
-      *outDatatype = DATATYPE_PACK;
+      *outDatatype = CDI_DATATYPE_PACK;
       long bitsPerValue;
       if ( grib_get_long(gh, "bitsPerValue", &bitsPerValue) == 0 )
         {
@@ -1849,7 +1849,7 @@ struct gribApiMsg {
 };
 
 static struct gribApiMsg
-getGribApiCompTypeMsg(grib_handle *gh, int comptype, int gridsize)
+getGribApiCompTypeMsg(int comptype, int gridsize)
 {
   const char *mesg;
   size_t len;
@@ -1940,8 +1940,7 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 
       if ( comptype )
         {
-          struct gribApiMsg gaMsg
-            = getGribApiCompTypeMsg(gh, comptype, gridsize);
+          struct gribApiMsg gaMsg = getGribApiCompTypeMsg(comptype, gridsize);
           size_t len = gaMsg.msgLen;
           const char *mesg = gaMsg.msg;
           GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
@@ -2080,14 +2079,13 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
           }
         else
           {
-            struct gribApiMsg gaMsg = getGribApiCompTypeMsg(gh, comptype, gridsize);
+            struct gribApiMsg gaMsg = getGribApiCompTypeMsg(comptype, gridsize);
             len = gaMsg.msgLen;
             mesg = gaMsg.msg;
           }
         GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
         if ( lieee )
-          GRIB_CHECK(my_grib_set_long(gh, "precision",
-                                      datatype == DATATYPE_FLT64 ? 2 : 1), 0);
+          GRIB_CHECK(my_grib_set_long(gh, "precision", datatype == CDI_DATATYPE_FLT64 ? 2 : 1), 0);
 
 	break;
       }
@@ -2100,7 +2098,7 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 	int ysize = gridInqYsize(gridID);
 
 	gridInqParamLCC(gridID, &originLon, &originLat, &lonParY, &lat1, &lat2, &xincm, &yincm,
-		   &projflag, &scanflag);
+                        &projflag, &scanflag);
 
         static const char mesg[] = "lambert";
         size_t len = sizeof (mesg) -1;
@@ -2306,34 +2304,17 @@ void grib2DefLevel(grib_handle *gh, int gcinit, long leveltype1, long leveltype2
     }
 }
 
-
-/*
-void grib_verfiy_zaxis(int zaxisID, double sf)
-{
-  printf("grb_verfiy_vlist called\n");
-  int zaxisID = vlistZaxis(vlistID, index);
-  int nlevels = zaxisInqSize(zaxisID);
-  int zaxistype = zaxisInqType(zaxisID);
-  double *levels = (double *) Malloc(nlevels*sizeof(double));
-  int *ilevels = (int *) Malloc(nlevels*sizeof(int));
-  zaxisInqLevels(zaxisID, levels);
-  for ( int i = 0; i < nlevels; ++i )
-    printf("level %d %g\n", i+1, levels[i]);
-  Free(ilevels);
-  Free(levels);
-}
-*/
-
 static
-void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID, int levelID, int gcinit, int proddef_template_num)
+void gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelID, int gcinit, int proddef_template_num)
 {
+  char units[CDI_MAX_NAME];
   bool lbounds = false;
   double dlevel1 = 0, dlevel2 = 0;
 
   int zaxistype = zaxisInqType(zaxisID);
   long ltype = zaxisInqLtype(zaxisID);
   long ltype2 = zaxisInqLtype2(zaxisID);
-  double level = zaxisInqLevel(zaxisID, levelID);
+  double level = zaxisInqLevels(zaxisID, NULL) ? zaxisInqLevel(zaxisID, levelID) : levelID+1;
 
   if ( zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL) )
     {
@@ -2374,7 +2355,6 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
         if ( zaxistype == ZAXIS_HEIGHT )
           {
             double sf = 1;
-            char units[128];
             zaxisInqUnits(zaxisID, units);
             if ( units[1] == 'm' && !units[2] )
               {
@@ -2422,13 +2402,9 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
     case ZAXIS_ATMOSPHERE:
       {
         if ( editionNumber <= 1 )
-          {
-            grib1DefLevel(gh, gcinit, grib_ltype, lbounds, level, dlevel1, dlevel2);
-          }
+          grib1DefLevel(gh, gcinit, grib_ltype, lbounds, level, dlevel1, dlevel2);
         else
-          {
-            grib2DefLevel(gh, gcinit, grib_ltype, grib_ltype, lbounds, level, dlevel1, dlevel2);
-          }
+          grib2DefLevel(gh, gcinit, grib_ltype, grib_ltype, lbounds, level, dlevel1, dlevel2);
 
         break;
       }
@@ -2461,7 +2437,6 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
       {
 	if ( level < 0 ) Warning("Pressure level of %f Pa is below zero!", level);
 
-	char units[128];
 	zaxisInqUnits(zaxisID, units);
 	if ( memcmp(units, "Pa", 2) != 0 )
           {
@@ -2501,7 +2476,6 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int param, int zaxisID,
       }
     case ZAXIS_DEPTH_BELOW_LAND:
       {
-	char units[128];
 	zaxisInqUnits(zaxisID, units);
         double sf; //scalefactor
 
@@ -2639,7 +2613,7 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
 
   if ( ! gc->init ) gribapiDefParam((int)editionNumber, gh, param, name, stdname);
 
-  if ( editionNumber == 2 && (datatype == DATATYPE_FLT32 || datatype == DATATYPE_FLT64) ) lieee = true;
+  if ( editionNumber == 2 && (datatype == CDI_DATATYPE_FLT32 || datatype == CDI_DATATYPE_FLT64) ) lieee = true;
 
   /* bitsPerValue have to be defined before call to DefGrid (complex packing) */
   //  if ( lieee == false )
@@ -2650,7 +2624,7 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
 
   gribapiDefGrid((int)editionNumber, gh, gridID, comptype, lieee, datatype, nmiss, gc->init);
 
-  gribapiDefLevel((int)editionNumber, gh, param, zaxisID, levelID, gc->init, productDefinitionTemplate);
+  gribapiDefLevel((int)editionNumber, gh, zaxisID, levelID, gc->init, productDefinitionTemplate);
 
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
   //if (!gc->init)

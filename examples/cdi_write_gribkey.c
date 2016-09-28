@@ -52,7 +52,7 @@ int main(void)
   vlistDefTaxis(vlistID, taxisID);
 
   // Create a dataset in netCDF format
-  streamID = streamOpenWrite("example_ens.grb", FILETYPE_GRB2);
+  streamID = streamOpenWrite("example_ens.grb", CDI_FILETYPE_GRB2);
   if ( streamID < 0 )
     {
       fprintf(stderr, "%s\n", cdiStringError(streamID));

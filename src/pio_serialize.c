@@ -19,19 +19,19 @@ static struct
   = {
 #if MPI_VERSION == 1 || (MPI_VERSION == 2 && MPI_SUBVERSION < 2)
 #define CDI_DT_MATCH_NEEDED 1
-  { DATATYPE_INT8, MPI_SIGNED_CHAR },
-  { DATATYPE_INT16, MPI_SHORT },
-  { DATATYPE_UINT32, MPI_INT },
+  { CDI_DATATYPE_INT8, MPI_SIGNED_CHAR },
+  { CDI_DATATYPE_INT16, MPI_SHORT },
+  { CDI_DATATYPE_UINT32, MPI_INT },
 #else
-  { DATATYPE_INT8, MPI_INT8_T },
-  { DATATYPE_INT16, MPI_INT16_T },
-  { DATATYPE_UINT32, MPI_UINT32_T },
+  { CDI_DATATYPE_INT8, MPI_INT8_T },
+  { CDI_DATATYPE_INT16, MPI_INT16_T },
+  { CDI_DATATYPE_UINT32, MPI_UINT32_T },
 #endif
-  { DATATYPE_INT, MPI_INT },
-  { DATATYPE_FLT64, MPI_DOUBLE },
-  { DATATYPE_TXT, MPI_CHAR },
-  { DATATYPE_UCHAR, MPI_UNSIGNED_CHAR },
-  { DATATYPE_LONG, MPI_LONG },
+  { CDI_DATATYPE_INT, MPI_INT },
+  { CDI_DATATYPE_FLT64, MPI_DOUBLE },
+  { CDI_DATATYPE_TXT, MPI_CHAR },
+  { CDI_DATATYPE_UCHAR, MPI_UNSIGNED_CHAR },
+  { CDI_DATATYPE_LONG, MPI_LONG },
 };
 
 static inline size_t
@@ -61,11 +61,11 @@ dtDictFixMPIType(size_t i, int typeclass, int size)
 static void
 setupDtDict()
 {
-  dtDictFixMPIType(lookupDt(DATATYPE_INT8), MPI_TYPECLASS_INTEGER,
+  dtDictFixMPIType(lookupDt(CDI_DATATYPE_INT8), MPI_TYPECLASS_INTEGER,
                    (int)sizeof (int8_t));
-  dtDictFixMPIType(lookupDt(DATATYPE_INT16), MPI_TYPECLASS_INTEGER,
+  dtDictFixMPIType(lookupDt(CDI_DATATYPE_INT16), MPI_TYPECLASS_INTEGER,
                    (int)sizeof (int16_t));
-  dtDictFixMPIType(lookupDt(DATATYPE_UINT32), MPI_TYPECLASS_INTEGER,
+  dtDictFixMPIType(lookupDt(CDI_DATATYPE_UINT32), MPI_TYPECLASS_INTEGER,
                    (int)sizeof (uint32_t));
   dtDictMatchComplete = 1;
 }

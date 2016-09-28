@@ -191,30 +191,30 @@ int cdiHaveFiletype(int filetype)
   switch (filetype)
     {
 #if  defined  (HAVE_LIBSERVICE)
-    case FILETYPE_SRV:  { status = 1; break; }
+    case CDI_FILETYPE_SRV:  { status = 1; break; }
 #endif
 #if  defined  (HAVE_LIBEXTRA)
-    case FILETYPE_EXT:  { status = 1; break; }
+    case CDI_FILETYPE_EXT:  { status = 1; break; }
 #endif
 #if  defined  (HAVE_LIBIEG)
-    case FILETYPE_IEG:  { status = 1; break; }
+    case CDI_FILETYPE_IEG:  { status = 1; break; }
 #endif
 #if  defined  (HAVE_LIBGRIB)
 #if  defined  (HAVE_LIBGRIB_API) || defined  (HAVE_LIBCGRIBEX)
-    case FILETYPE_GRB:  { status = 1; break; }
+    case CDI_FILETYPE_GRB:  { status = 1; break; }
 #endif
 #if  defined  (HAVE_LIBGRIB_API)
-    case FILETYPE_GRB2: { status = 1; break; }
+    case CDI_FILETYPE_GRB2: { status = 1; break; }
 #endif
 #endif
 #if  defined  (HAVE_LIBNETCDF)
-    case FILETYPE_NC:   { status = 1; break; }
+    case CDI_FILETYPE_NC:   { status = 1; break; }
 #if  defined  (HAVE_NETCDF2)
-    case FILETYPE_NC2:  { status = 1; break; }
+    case CDI_FILETYPE_NC2:  { status = 1; break; }
 #endif
 #if  defined  (HAVE_NETCDF4)
-    case FILETYPE_NC4:  { status = 1; break; }
-    case FILETYPE_NC4C: { status = 1; break; }
+    case CDI_FILETYPE_NC4:  { status = 1; break; }
+    case CDI_FILETYPE_NC4C: { status = 1; break; }
 #endif
 #endif
     default: { status = 0; break; }

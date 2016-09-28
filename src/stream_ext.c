@@ -38,9 +38,9 @@ int extInqDatatype(int prec, int number)
   int datatype;
 
   if ( number == 2 )
-    datatype = (prec == EXSE_DOUBLE_PRECISION) ? DATATYPE_CPX64 : DATATYPE_CPX32;
+    datatype = (prec == EXSE_DOUBLE_PRECISION) ? CDI_DATATYPE_CPX64 : CDI_DATATYPE_CPX32;
   else
-    datatype = (prec == EXSE_DOUBLE_PRECISION) ? DATATYPE_FLT64 : DATATYPE_FLT32;
+    datatype = (prec == EXSE_DOUBLE_PRECISION) ? CDI_DATATYPE_FLT64 : CDI_DATATYPE_FLT32;
 
   return datatype;
 }
@@ -49,13 +49,13 @@ static
 void extDefDatatype(int datatype, int *prec, int *number)
 {
 
-  if ( datatype != DATATYPE_FLT32 && datatype != DATATYPE_FLT64 &&
-       datatype != DATATYPE_CPX32 && datatype != DATATYPE_CPX64 )
-    datatype = DATATYPE_FLT32;
+  if ( datatype != CDI_DATATYPE_FLT32 && datatype != CDI_DATATYPE_FLT64 &&
+       datatype != CDI_DATATYPE_CPX32 && datatype != CDI_DATATYPE_CPX64 )
+    datatype = CDI_DATATYPE_FLT32;
 
-  *number = (datatype == DATATYPE_CPX32 || datatype == DATATYPE_CPX64) ? 2 : 1;
+  *number = (datatype == CDI_DATATYPE_CPX32 || datatype == CDI_DATATYPE_CPX64) ? 2 : 1;
 
-  *prec = (datatype == DATATYPE_FLT64 || datatype == DATATYPE_CPX64) ? EXSE_DOUBLE_PRECISION : EXSE_SINGLE_PRECISION;
+  *prec = (datatype == CDI_DATATYPE_FLT64 || datatype == CDI_DATATYPE_CPX64) ? EXSE_DOUBLE_PRECISION : EXSE_SINGLE_PRECISION;
 }
 
 /* not used

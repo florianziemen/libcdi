@@ -546,7 +546,7 @@ static int getPackBufferSize(void *context)
   int nsp = namespaceGetActive ();
 
   /* pack start marker, namespace and sererator marker */
-  packBufferSize += resHPackHeaderNInt * (intpacksize = serializeGetSize(1, DATATYPE_INT, context));
+  packBufferSize += resHPackHeaderNInt * (intpacksize = serializeGetSize(1, CDI_DATATYPE_INT, context));
 
   /* pack resources, type marker and seperator marker */
   listElem_t *r = resHList[nsp].resources;
@@ -623,7 +623,7 @@ int reshPackBufferCreate(char **packBuffer, int *packBufferSize, void *context)
 
   {
     int header[resHPackHeaderNInt] = { START, nsp };
-    serializePack(header, resHPackHeaderNInt,  DATATYPE_INT, pB, pBSize, &packBufferPos, context);
+    serializePack(header, resHPackHeaderNInt,  CDI_DATATYPE_INT, pB, pBSize, &packBufferPos, context);
   }
 
   listElem_t *r = resHList[nsp].resources;
@@ -634,7 +634,7 @@ int reshPackBufferCreate(char **packBuffer, int *packBufferSize, void *context)
           {
             int temp[resHDeleteNInt]
               = { RESH_DELETE, namespaceIdxEncode2(nsp, i) };
-            serializePack(temp, resHDeleteNInt, DATATYPE_INT,
+            serializePack(temp, resHDeleteNInt, CDI_DATATYPE_INT,
                           pB, pBSize, &packBufferPos, context);
           }
         else
@@ -643,7 +643,7 @@ int reshPackBufferCreate(char **packBuffer, int *packBufferSize, void *context)
             xassert ( curr->res.v.ops );
             int type = curr->res.v.ops->valTxCode();
             if ( ! type ) continue;
-            serializePack(&type, 1, DATATYPE_INT, pB,
+            serializePack(&type, 1, CDI_DATATYPE_INT, pB,
                           pBSize, &packBufferPos, context);
             curr->res.v.ops->valPack(curr->res.v.val,
                                      pB, pBSize, &packBufferPos, context);
@@ -653,7 +653,7 @@ int reshPackBufferCreate(char **packBuffer, int *packBufferSize, void *context)
 
   LIST_UNLOCK();
 
-  serializePack(&end, 1,  DATATYPE_INT, pB, pBSize, &packBufferPos, context);
+  serializePack(&end, 1,  CDI_DATATYPE_INT, pB, pBSize, &packBufferPos, context);
 
   return packBufferPos;
 }

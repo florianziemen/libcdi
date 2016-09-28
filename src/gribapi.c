@@ -53,7 +53,7 @@ const char *gribapiLibraryVersionString(void)
 
 void gribContainersNew(stream_t * streamptr)
 {
-  int editionNumber = (streamptr->filetype == FILETYPE_GRB) ? 1 : 2;
+  int editionNumber = (streamptr->filetype == CDI_FILETYPE_GRB) ? 1 : 2;
 
 #if  defined  (HAVE_LIBCGRIBEX)
   if ( editionNumber == 1 )

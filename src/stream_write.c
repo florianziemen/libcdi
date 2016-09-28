@@ -36,15 +36,15 @@ int cdiStreamWriteVar_(int streamID, int varID, int memtype, const void *data, i
   switch (filetype)
     {
 #if  defined  (HAVE_LIBGRIB)
-    case FILETYPE_GRB:
-    case FILETYPE_GRB2:
+    case CDI_FILETYPE_GRB:
+    case CDI_FILETYPE_GRB2:
       {
         grb_write_var(streamptr, varID, memtype, data, nmiss);
 	break;
       }
 #endif
 #if  defined  (HAVE_LIBSERVICE)
-    case FILETYPE_SRV:
+    case CDI_FILETYPE_SRV:
       {
         if ( memtype == MEMTYPE_FLOAT ) return 1;
         srvWriteVarDP(streamptr, varID, (double *)data);
@@ -52,7 +52,7 @@ int cdiStreamWriteVar_(int streamID, int varID, int memtype, const void *data, i
       }
 #endif
 #if  defined  (HAVE_LIBEXTRA)
-    case FILETYPE_EXT:
+    case CDI_FILETYPE_EXT:
       {
         if ( memtype == MEMTYPE_FLOAT ) return 1;
         extWriteVarDP(streamptr, varID, (double *)data);
@@ -60,7 +60,7 @@ int cdiStreamWriteVar_(int streamID, int varID, int memtype, const void *data, i
       }
 #endif
 #if  defined  (HAVE_LIBIEG)
-    case FILETYPE_IEG:
+    case CDI_FILETYPE_IEG:
       {
         if ( memtype == MEMTYPE_FLOAT ) return 1;
         iegWriteVarDP(streamptr, varID, (double *)data);
@@ -68,10 +68,10 @@ int cdiStreamWriteVar_(int streamID, int varID, int memtype, const void *data, i
       }
 #endif
 #if  defined  (HAVE_LIBNETCDF)
-    case FILETYPE_NC:
-    case FILETYPE_NC2:
-    case FILETYPE_NC4:
-    case FILETYPE_NC4C:
+    case CDI_FILETYPE_NC:
+    case CDI_FILETYPE_NC2:
+    case CDI_FILETYPE_NC4:
+    case CDI_FILETYPE_NC4C:
       {
         cdf_write_var(streamptr, varID, memtype, data, nmiss);
 	break;
@@ -105,8 +105,7 @@ The values are converted to the external data type of the variable, if necessary
 */
 void streamWriteVar(int streamID, int varID, const double *data, int nmiss)
 {
-  void (*myCdiStreamWriteVar_)(int streamID, int varID, int memtype,
-                               const void *data, int nmiss)
+  void (*myCdiStreamWriteVar_)(int streamID, int varID, int memtype, const void *data, int nmiss)
     = (void (*)(int, int, int, const void *, int))
     namespaceSwitchGet(NSSWITCH_STREAM_WRITE_VAR_).func;
 
@@ -131,8 +130,7 @@ The values are converted to the external data type of the variable, if necessary
 */
 void streamWriteVarF(int streamID, int varID, const float *data, int nmiss)
 {
-  int (*myCdiStreamWriteVar_)(int streamID, int varID, int memtype,
-                              const void *data, int nmiss)
+  int (*myCdiStreamWriteVar_)(int streamID, int varID, int memtype, const void *data, int nmiss)
     = (int (*)(int, int, int, const void *, int))
     namespaceSwitchGet(NSSWITCH_STREAM_WRITE_VAR_).func;
   
@@ -172,15 +170,15 @@ int cdiStreamWriteVarSlice(int streamID, int varID, int levelID, int memtype, co
   switch (filetype)
     {
 #if  defined  (HAVE_LIBGRIB)
-    case FILETYPE_GRB:
-    case FILETYPE_GRB2:
+    case CDI_FILETYPE_GRB:
+    case CDI_FILETYPE_GRB2:
       {
         grb_write_var_slice(streamptr, varID, levelID, memtype, data, nmiss);
 	break;
       }
 #endif
 #if  defined  (HAVE_LIBSERVICE)
-    case FILETYPE_SRV:
+    case CDI_FILETYPE_SRV:
       {
         if ( memtype == MEMTYPE_FLOAT ) return 1;
         srvWriteVarSliceDP(streamptr, varID, levelID, (double *)data);
@@ -188,7 +186,7 @@ int cdiStreamWriteVarSlice(int streamID, int varID, int levelID, int memtype, co
       }
 #endif
 #if  defined  (HAVE_LIBEXTRA)
-    case FILETYPE_EXT:
+    case CDI_FILETYPE_EXT:
       {
         if ( memtype == MEMTYPE_FLOAT ) return 1;
         extWriteVarSliceDP(streamptr, varID, levelID, (double *)data);
@@ -196,7 +194,7 @@ int cdiStreamWriteVarSlice(int streamID, int varID, int levelID, int memtype, co
       }
 #endif
 #if  defined  (HAVE_LIBIEG)
-    case FILETYPE_IEG:
+    case CDI_FILETYPE_IEG:
       {
         if ( memtype == MEMTYPE_FLOAT ) return 1;
         iegWriteVarSliceDP(streamptr, varID, levelID, (double *)data);
@@ -204,10 +202,10 @@ int cdiStreamWriteVarSlice(int streamID, int varID, int levelID, int memtype, co
       }
 #endif
 #if  defined  (HAVE_LIBNETCDF)
-    case FILETYPE_NC:
-    case FILETYPE_NC2:
-    case FILETYPE_NC4:
-    case FILETYPE_NC4C:
+    case CDI_FILETYPE_NC:
+    case CDI_FILETYPE_NC2:
+    case CDI_FILETYPE_NC4:
+    case CDI_FILETYPE_NC4C:
       cdf_write_var_slice(streamptr, varID, levelID, memtype, data, nmiss);
       break;
 #endif
@@ -275,22 +273,19 @@ void streamWriteVarSliceF(int streamID, int varID, int levelID, const float *dat
 }
 
 
-void
-streamWriteVarChunk(int streamID, int varID,
-                    const int rect[][2], const double *data, int nmiss)
+void streamWriteVarChunk(int streamID, int varID,
+                         const int rect[][2], const double *data, int nmiss)
 {
   void (*myCdiStreamWriteVarChunk_)(int streamID, int varID, int memtype,
-                                    const int rect[][2], const void *data,
-                                    int nmiss)
+                                    const int rect[][2], const void *data, int nmiss)
     = (void (*)(int, int, int, const int [][2], const void *, int))
     namespaceSwitchGet(NSSWITCH_STREAM_WRITE_VAR_CHUNK_).func;
   myCdiStreamWriteVarChunk_(streamID, varID, MEMTYPE_DOUBLE, rect, data, nmiss);
 }
 
 /* single image implementation */
-void
-cdiStreamWriteVarChunk_(int streamID, int varID, int memtype,
-                        const int rect[][2], const void *data, int nmiss)
+void cdiStreamWriteVarChunk_(int streamID, int varID, int memtype,
+                             const int rect[][2], const void *data, int nmiss)
 {
   if ( CDI_Debug ) Message("streamID = %d varID = %d", streamID, varID);
 
@@ -303,17 +298,17 @@ cdiStreamWriteVarChunk_(int streamID, int varID, int memtype,
   switch (filetype)
     {
 #if defined (HAVE_LIBGRIB)
-    case FILETYPE_GRB:
-    case FILETYPE_GRB2:
+    case CDI_FILETYPE_GRB:
+    case CDI_FILETYPE_GRB2:
 #endif
 #if defined (HAVE_LIBSERVICE)
-    case FILETYPE_SRV:
+    case CDI_FILETYPE_SRV:
 #endif
 #if defined (HAVE_LIBEXTRA)
-    case FILETYPE_EXT:
+    case CDI_FILETYPE_EXT:
 #endif
 #if defined (HAVE_LIBIEG)
-    case FILETYPE_IEG:
+    case CDI_FILETYPE_IEG:
 #endif
 #if  defined (HAVE_LIBGRIB) || defined (HAVE_LIBSERVICE)      \
   || defined (HAVE_LIBEXTRA) || defined (HAVE_LIBIEG)
@@ -322,10 +317,10 @@ cdiStreamWriteVarChunk_(int streamID, int varID, int memtype,
       break;
 #endif
 #if  defined  (HAVE_LIBNETCDF)
-    case FILETYPE_NC:
-    case FILETYPE_NC2:
-    case FILETYPE_NC4:
-    case FILETYPE_NC4C:
+    case CDI_FILETYPE_NC:
+    case CDI_FILETYPE_NC2:
+    case CDI_FILETYPE_NC4:
+    case CDI_FILETYPE_NC4C:
       cdf_write_var_chunk(streamptr, varID, memtype, rect, data, nmiss);
       break;
 #endif
@@ -349,34 +344,34 @@ int stream_write_record(int streamID, int memtype, const void *data, int nmiss)
   switch (streamptr->filetype)
     {
 #if  defined  (HAVE_LIBGRIB)
-    case FILETYPE_GRB:
-    case FILETYPE_GRB2:
+    case CDI_FILETYPE_GRB:
+    case CDI_FILETYPE_GRB2:
       grb_write_record(streamptr, memtype, data, nmiss);
       break;
 #endif
 #if  defined  (HAVE_LIBSERVICE)
-    case FILETYPE_SRV:
+    case CDI_FILETYPE_SRV:
       if ( memtype == MEMTYPE_FLOAT ) return 1;
       srvWriteRecord(streamptr, (const double *)data);
       break;
 #endif
 #if  defined  (HAVE_LIBEXTRA)
-    case FILETYPE_EXT:
+    case CDI_FILETYPE_EXT:
       if ( memtype == MEMTYPE_FLOAT ) return 1;
       extWriteRecord(streamptr, (const double *)data);
       break;
 #endif
 #if  defined  (HAVE_LIBIEG)
-    case FILETYPE_IEG:
+    case CDI_FILETYPE_IEG:
       if ( memtype == MEMTYPE_FLOAT ) return 1;
       iegWriteRecord(streamptr, (const double *)data);
       break;
 #endif
 #if  defined  (HAVE_LIBNETCDF)
-    case FILETYPE_NC:
-    case FILETYPE_NC2:
-    case FILETYPE_NC4:
-    case FILETYPE_NC4C:
+    case CDI_FILETYPE_NC:
+    case CDI_FILETYPE_NC2:
+    case CDI_FILETYPE_NC4:
+    case CDI_FILETYPE_NC4C:
       {
 	cdf_write_record(streamptr, memtype, data, nmiss);
 	break;
@@ -420,7 +415,7 @@ void streamWriteRecordF(int streamID, const float *data, int nmiss)
       // In case the file format does not support single precision writing,
       // we fall back to double precision writing, converting the data on the fly.
       stream_t *streamptr = stream_to_pointer(streamID);
-      int varID  = streamptr->record->varID;
+      int varID = streamptr->record->varID;
       size_t elementCount = (size_t) gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
       double *conversionBuffer = (double *) Malloc(elementCount*sizeof(*conversionBuffer));
       for ( size_t i = elementCount; i--; ) conversionBuffer[i] = (double) data[i];

@@ -42,7 +42,7 @@ uniform_partition_start(int set_interval[2], int nparts, int part_idx);
 static void modelRun(MPI_Comm commModel)
 {
   enum {
-    filetype    = FILETYPE_GRB,
+    filetype    = CDI_FILETYPE_GRB,
     nStreams    = 5,
     MAXNSTREAMS = 25,
     ntfiles     = 2,

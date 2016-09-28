@@ -23,7 +23,7 @@ int grbDecode(int filetype, int memtype, void *gribbuffer, int gribsize, void *d
   int status = 0;
 
 #if  defined  (HAVE_LIBCGRIBEX)
-  if ( filetype == FILETYPE_GRB )
+  if ( filetype == CDI_FILETYPE_GRB )
     {
 #if  defined  (HAVE_LIBGRIB_API)
       extern int cdiNAdditionalGRIBKeys;
@@ -47,7 +47,7 @@ int grbDecode(int filetype, int memtype, void *gribbuffer, int gribsize, void *d
           float *dataf = (float*) data;
           double *datad = (double*) datap;
           for ( size_t i = 0; i < datasize; ++i ) dataf[i] = (float) datad[i];
-          free((void*)datap);
+          Free((void*)datap);
         }
     }
 #else
@@ -81,7 +81,7 @@ int grbUnzipRecord(void *gribbuffer, size_t *gribsize)
 	  if ( unzipsize < (long) igribsize )
 	    {
 	      fprintf(stderr, "Decompressed size smaller than compressed size (in %ld; out %ld)!\n", (long)igribsize, unzipsize);
-	      return (0);
+	      return 0;
 	    }
 
 	  if ( itmpbuffersize < igribsize )
