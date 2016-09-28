@@ -1623,6 +1623,10 @@
       PARAMETER (CDI_KEY_UNITS          = 944)
       INTEGER    CDI_KEY_PSNAME        
       PARAMETER (CDI_KEY_PSNAME         = 950)
+      INTEGER    CDI_KEY_P0NAME        
+      PARAMETER (CDI_KEY_P0NAME         = 951)
+      INTEGER    CDI_KEY_P0VALUE       
+      PARAMETER (CDI_KEY_P0VALUE        = 952)
       INTEGER         cdiGridDefKeyStr
 !                                    (INTEGER         gridID,
 !                                     INTEGER         key,
@@ -1636,6 +1640,18 @@
 !                                     INTEGER         size,
 !                                     CHARACTER*(*)   mesg)
       EXTERNAL        cdiGridInqKeyStr
+
+      INTEGER         cdiZaxisDefKeyFlt
+!                                    (INTEGER         zaxisID,
+!                                     INTEGER         key,
+!                                     DOUBLEPRECISION value)
+      EXTERNAL        cdiZaxisDefKeyFlt
+
+      INTEGER         cdiZaxisInqKeyFlt
+!                                    (INTEGER         zaxisID,
+!                                     INTEGER         key,
+!                                     DOUBLEPRECISION value)
+      EXTERNAL        cdiZaxisInqKeyFlt
 
 !                     gridDefXname
 !                                    (INTEGER         gridID,
