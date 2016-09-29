@@ -2792,9 +2792,12 @@ void cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 	      if ( zsize == 1 && zdimid == UNDEFID )
 		{
                   zaxisType = (ncvar->zaxistype != UNDEFID) ? ncvar->zaxistype : ZAXIS_SURFACE;
-                  zvar = (double*) Malloc(sizeof(double));
-		  zvar[0] = 0;
-		}
+                  // if ( pname )
+                    {
+                      zvar = (double*) Malloc(sizeof(double));
+                      zvar[0] = 0;
+                    }
+                }
 	    }
 
       	  ncvar->zaxisID = varDefZaxis(vlistID, zaxisType, (int) zsize, zvar, with_bounds, lbounds, ubounds,
