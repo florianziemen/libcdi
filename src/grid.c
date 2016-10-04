@@ -2049,23 +2049,22 @@ static
 bool compareXYvals2(grid_t *gridRef, grid_t *gridTest)
 {
   int gridsize = gridTest->size;
-  bool differ
-    = ((gridTest->x.vals == NULL) ^ (gridRef->x.vals == NULL))
-    || ((gridTest->y.vals == NULL) ^ (gridRef->y.vals == NULL));
+  bool differ = ((gridTest->x.vals == NULL) ^ (gridRef->x.vals == NULL))
+             || ((gridTest->y.vals == NULL) ^ (gridRef->y.vals == NULL));
 
   typedef double (*inqVal)(grid_t *grid, int index);
   inqVal inqXValRef = gridRef->vtable->inqXVal,
-    inqYValRef = gridRef->vtable->inqXVal,
-    inqXValTest = gridTest->vtable->inqXVal,
-    inqYValTest = gridTest->vtable->inqYVal;
+         inqYValRef = gridRef->vtable->inqYVal,
+         inqXValTest = gridTest->vtable->inqXVal,
+         inqYValTest = gridTest->vtable->inqYVal;
 
   if ( !differ && gridTest->x.vals )
     differ = fabs(inqXValTest(gridTest, 0) - inqXValRef(gridRef, 0)) > 1.e-9
-      || fabs(inqXValTest(gridTest, gridsize-1) - inqXValRef(gridRef, gridsize-1)) > 1.e-9;
+          || fabs(inqXValTest(gridTest, gridsize-1) - inqXValRef(gridRef, gridsize-1)) > 1.e-9;
 
   if ( !differ && gridTest->y.vals )
     differ = fabs(inqYValTest(gridTest, 0) - inqYValRef(gridRef, 0)) > 1.e-9
-      || fabs(inqYValTest(gridTest, gridsize-1) - inqYValRef(gridRef, gridsize-1)) > 1.e-9;
+          || fabs(inqYValTest(gridTest, gridsize-1) - inqYValRef(gridRef, gridsize-1)) > 1.e-9;
 
   return differ;
 }
@@ -2195,7 +2194,7 @@ bool gridCompare(int gridID, const grid_t *grid, bool coord_compare)
               else
                 {
                   /* FIXME: not octet 0 but octet 7 is guaranteed  non-zero for any non-NULL UUID */
-                  differ = differ || ( gridRef->uuid[0] && grid->uuid[0] && memcmp(gridRef->uuid, grid->uuid, CDI_UUID_SIZE) != 0 );
+                  differ = differ || (gridRef->uuid[0] && grid->uuid[0] && memcmp(gridRef->uuid, grid->uuid, CDI_UUID_SIZE) != 0);
 
                   if ( !differ &&
                        ((grid->x.vals == NULL) ^ (gridRef->x.vals == NULL)) &&
