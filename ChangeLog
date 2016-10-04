@@ -1,3 +1,11 @@
+2016-10-04  Uwe Schulzweida
+
+	* Changed default name of pressure levels to plev
+
+2016-10-04  Uwe Schulzweida
+
+	* Version 1.8.0rc3 released
+
 2016-09-26  Uwe Schulzweida
 
 	* Added read support for hybrid sigma pressure coordinate with formula term P0
