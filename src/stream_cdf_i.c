@@ -2401,7 +2401,7 @@ bool cdf_read_coordinates(struct cdfLazyGrid *restrict lazyGrid, ncvar_t *ncvar,
 }
 
 static
-bool cdf_set_unstructured_par(ncvar_t *ncvar, grid_t *grid, int xdimid, int ydimid, int number_of_grid_used, unsigned char *uuidOfHGrid)
+bool cdf_set_unstructured_par(ncvar_t *ncvar, grid_t *grid, int *xdimid, int *ydimid, int number_of_grid_used, unsigned char *uuidOfHGrid)
 {
   int ndims = ncvar->ndims;
   int *dimtype = ncvar->dimtype;
@@ -2416,20 +2416,20 @@ bool cdf_set_unstructured_par(ncvar_t *ncvar, grid_t *grid, int xdimid, int ydim
       else if ( dimtype[i] == Z_AXIS ) zdimid = ncvar->dimids[i];
     }
 
-  if ( xdimid != UNDEFID && ydimid != UNDEFID && zdimid == UNDEFID )
+  if ( *xdimid != UNDEFID && *ydimid != UNDEFID && zdimid == UNDEFID )
     {
       if ( grid->x.size > grid->y.size && grid->y.size < 1000 )
         {
           dimtype[ydimidx] = Z_AXIS;
-          ydimid = UNDEFID;
+          *ydimid = UNDEFID;
           grid->size  = grid->x.size;
           grid->y.size = 0;
         }
       else if ( grid->y.size > grid->x.size && grid->x.size < 1000 )
         {
           dimtype[xdimidx] = Z_AXIS;
-          xdimid = ydimid;
-          ydimid = UNDEFID;
+          *xdimid = *ydimid;
+          *ydimid = UNDEFID;
           grid->size  = grid->y.size;
           grid->x.size = grid->y.size;
           grid->y.size = 0;
@@ -2479,10 +2479,10 @@ void cdf_set_grid_to_similar_vars(ncvar_t *ncvar1, ncvar_t *ncvar2, int gridtype
       int xdimidx = UNDEFID, ydimidx = UNDEFID;
       int ndims2 = ncvar2->ndims;
 
+      int *dimtype2 = ncvar2->dimtype;
+      int *dimids2 = ncvar2->dimids;
       for ( int i = 0; i < ndims2; i++ )
         {
-          int *dimtype2 = ncvar2->dimtype;
-          int *dimids2 = ncvar2->dimids;
           if      ( dimtype2[i] == X_AXIS ) { xdimid2 = dimids2[i]; xdimidx = i; }
           else if ( dimtype2[i] == Y_AXIS ) { ydimid2 = dimids2[i]; ydimidx = i; }
           else if ( dimtype2[i] == Z_AXIS ) { zdimid2 = dimids2[i]; }
@@ -2504,12 +2504,11 @@ void cdf_set_grid_to_similar_vars(ncvar_t *ncvar1, ncvar_t *ncvar2, int gridtype
             }
         }
 
-      if ( xdimid == xdimid2 &&
-           (ydimid == ydimid2 || (xdimid == ydimid && ydimid2 == UNDEFID)) )
+      if ( xdimid == xdimid2 && (ydimid == ydimid2 || (xdimid == ydimid && ydimid2 == UNDEFID)) )
         {
           bool same_grid = ncvar1->xvarid == ncvar2->xvarid
-            && ncvar1->yvarid == ncvar2->yvarid
-            && ncvar1->position == ncvar2->position;
+                        && ncvar1->yvarid == ncvar2->yvarid
+                        && ncvar1->position == ncvar2->position;
           /*
             if ( xvarid != -1 && ncvar2->xvarid != UNDEFID &&
             xvarid != ncvar2->xvarid ) same_grid = false;
@@ -2599,7 +2598,7 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
             grid->type = GRID_UNSTRUCTURED;
 
           if ( grid->type == GRID_UNSTRUCTURED )
-            if ( cdf_set_unstructured_par(ncvar, grid, xdimid, ydimid, number_of_grid_used, uuidOfHGrid) )
+            if ( cdf_set_unstructured_par(ncvar, grid, &xdimid, &ydimid, number_of_grid_used, uuidOfHGrid) )
               continue;
 
           if ( lproj && lgrid )
