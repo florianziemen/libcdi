@@ -2594,7 +2594,9 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
                                     timedimid, xvarid, yvarid, xsize, ysize, &vdimid) )
             continue;
 
-	  if ( number_of_grid_used != UNDEFID && (grid->type == UNDEFID || grid->type == GRID_GENERIC) )
+	  if ( number_of_grid_used != UNDEFID &&
+               (grid->type == UNDEFID || grid->type == GRID_GENERIC) &&
+               xdimid != UNDEFID && xsize > 9999 )
             grid->type = GRID_UNSTRUCTURED;
 
           if ( grid->type == GRID_UNSTRUCTURED )
