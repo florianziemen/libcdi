@@ -1,7 +1,15 @@
 CDI NEWS
 --------
 
+Version 1.8.0 (26 October 2016):
 
+   New features:
+     * Refactor horizontal and vertical grid module
+     * netCDF4: added support for attribute type NC_BYTE, NC_UBYTE, NC_USHORT and NC_UINT
+   Fixed bugs:
+     * iegWriteVarSliceDP: does not work (bug fix)
+     * streamOpenAppend: call to gribContainersNew() missing (bug fix) [Bug #6944]
+        
 Version 1.7.0 (27 October 2015):
 
    New features:
