@@ -1186,7 +1186,6 @@ void gridDefPrec(int gridID, int prec)
 int gridInqPrec(int gridID)
 {
   grid_t *gridptr = grid_to_pointer(gridID);
-
   return gridptr->prec;
 }
 
@@ -1209,7 +1208,6 @@ The function @func{gridInqXsize} returns the number of values of a X-axis.
 int gridInqXsize(int gridID)
 {
   grid_t *gridptr = grid_to_pointer(gridID);
-
   return gridptr->x.size;
 }
 
@@ -1274,7 +1272,6 @@ The function @func{gridInqYsize} returns the number of values of a Y-axis.
 int gridInqYsize(int gridID)
 {
   grid_t *gridptr = grid_to_pointer(gridID);
-
   return gridptr->y.size;
 }
 
@@ -1324,7 +1321,6 @@ of a Gaussian grid.
 int gridInqNP(int gridID)
 {
   grid_t *gridptr = grid_to_pointer(gridID);
-
   return gridptr->np;
 }
 
@@ -2895,7 +2891,6 @@ void gridDefNvertex(int gridID, int nvertex)
 int gridInqNvertex(int gridID)
 {
   grid_t *gridptr = grid_to_pointer(gridID);
-
   return gridptr->nvertex;
 }
 

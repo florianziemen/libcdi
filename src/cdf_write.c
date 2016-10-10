@@ -41,7 +41,7 @@ void cdfDefVarDeflate(int ncid, int ncvarid, int deflate_level)
 #endif
 }
 
-static
+
 int cdfDefDatatype(int datatype, int filetype)
 {
   int xtype = NC_FLOAT;
@@ -64,7 +64,7 @@ int cdfDefDatatype(int datatype, int filetype)
       else if ( datatype == CDI_DATATYPE_UINT32 ) xtype = NC_INT;
 #endif
       else if ( datatype == CDI_DATATYPE_FLT64  ) xtype = NC_DOUBLE;
-      else                                    xtype = NC_FLOAT;
+      else                                        xtype = NC_FLOAT;
     }
   else
     {
@@ -75,7 +75,7 @@ int cdfDefDatatype(int datatype, int filetype)
       else if ( datatype == CDI_DATATYPE_UINT16 ) xtype = NC_INT;
       else if ( datatype == CDI_DATATYPE_UINT32 ) xtype = NC_INT;
       else if ( datatype == CDI_DATATYPE_FLT64  ) xtype = NC_DOUBLE;
-      else                                    xtype = NC_FLOAT;
+      else                                        xtype = NC_FLOAT;
     }
 
   return xtype;

@@ -655,7 +655,8 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridindex, int ndims,
   int nvdimID = UNDEFID;
   int fileID  = streamptr->fileID;
   size_t dimlen = (size_t)gridAxisInq->axisSize(gridID);
-  nc_type xtype = (gridInqPrec(gridID) == CDI_DATATYPE_FLT32) ? NC_FLOAT : NC_DOUBLE;
+  nc_type xtype = (nc_type)cdfDefDatatype(gridInqPrec(gridID), streamptr->filetype);
+
   ncgrid_t *ncgrid = streamptr->ncgrid;
 
   for ( int index = 0; index < gridindex; ++index )
@@ -831,7 +832,7 @@ void cdfDefCurvilinear(stream_t *streamptr, int gridID, int gridindex)
   int ydimID = UNDEFID;
   int ncxvarid = UNDEFID, ncyvarid = UNDEFID;
   int ncbxvarid = UNDEFID, ncbyvarid = UNDEFID, ncavarid = UNDEFID;
-  nc_type xtype = (gridInqPrec(gridID) == CDI_DATATYPE_FLT32) ? NC_FLOAT : NC_DOUBLE;
+  nc_type xtype = (nc_type)cdfDefDatatype(gridInqPrec(gridID), streamptr->filetype);
   ncgrid_t *ncgrid = streamptr->ncgrid;
 
   int fileID  = streamptr->fileID;
@@ -1172,7 +1173,7 @@ void cdfDefUnstructured(stream_t *streamptr, int gridID, int gridindex)
   int ncxvarid = UNDEFID, ncyvarid = UNDEFID;
   int ncbxvarid = UNDEFID, ncbyvarid = UNDEFID, ncavarid = UNDEFID;
   int nvdimID = UNDEFID;
-  nc_type xtype = (gridInqPrec(gridID) == CDI_DATATYPE_FLT32) ? NC_FLOAT : NC_DOUBLE;
+  nc_type xtype = (nc_type)cdfDefDatatype(gridInqPrec(gridID), streamptr->filetype);
   ncgrid_t *ncgrid = streamptr->ncgrid;
 
   int fileID  = streamptr->fileID;

@@ -1,5 +1,6 @@
 2016-10-10  Uwe Schulzweida
 
+	* NetCDF: added support for grid datatype integer
 	* NetCDF: added support for proj coordinate without mapping attribute
 
 2016-10-04  Uwe Schulzweida

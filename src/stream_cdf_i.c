@@ -2129,7 +2129,8 @@ bool cdf_read_xcoord(struct cdfLazyGrid *restrict lazyGrid, ncdim_t *ncdims, ncv
       return true;
     }
 
-  if ( axisvar->xtype == NC_FLOAT ) grid->prec = CDI_DATATYPE_FLT32;
+  int prec = cdfInqDatatype(axisvar->xtype, axisvar->lunsigned);
+  if ( prec != -1 )  grid->prec = prec;
 
   cdf_load_vals(size, ndims, xvarid, axisvar, &grid->x.vals, &lazyGrid->xValsGet, ntdims, start, count);
 
@@ -2180,10 +2181,10 @@ bool cdf_read_ycoord(struct cdfLazyGrid *restrict lazyGrid, ncdim_t *ncdims, ncv
       return true;
     }
 
-  if ( axisvar->xtype == NC_FLOAT ) grid->prec = CDI_DATATYPE_FLT32;
+  int prec = cdfInqDatatype(axisvar->xtype, axisvar->lunsigned);
+  if ( prec != -1 )  grid->prec = prec;
 
-  cdf_load_vals(size, ndims, yvarid, axisvar, &grid->y.vals, &lazyGrid->yValsGet,
-                ntdims, start, count);
+  cdf_load_vals(size, ndims, yvarid, axisvar, &grid->y.vals, &lazyGrid->yValsGet, ntdims, start, count);
 
   cdf_copy_axis_attr(axisvar, &grid->y);
 
