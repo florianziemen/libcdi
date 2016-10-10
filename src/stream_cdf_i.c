@@ -2536,9 +2536,6 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
       ncvar_t *ncvar = &ncvars[ncvarid];
       if ( ncvar->isvar && ncvar->gridID == UNDEFID )
 	{
-          int gmapvarid = ncvar->gmapid;
-          bool lproj = gmapvarid != UNDEFID;
-          bool lgrid = !(lproj && ncvar->xvarid == UNDEFID);
           int ndims = ncvar->ndims;
           int *dimtype = ncvar->dimtype;
           int vdimid = UNDEFID;
@@ -2563,6 +2560,16 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 		  ysize  = ncdims[ydimid].len;
 		}
 	    }
+
+          int gmapvarid = ncvar->gmapid;
+          bool lproj = gmapvarid != UNDEFID;
+
+          if ( !lproj && xaxisid != UNDEFID && xaxisid != xvarid && yaxisid != UNDEFID && yaxisid != yvarid )
+            {
+              lproj = true;
+            }
+
+          bool lgrid = !(lproj && ncvar->xvarid == UNDEFID);
 
           bool lunstructured = xdimid != UNDEFID && xdimid == ydimid && nydims == 0;
 	  if ( (ncvar->gridtype == UNDEFID || ncvar->gridtype == GRID_GENERIC) && lunstructured )
@@ -2631,7 +2638,7 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 
           int gridID = ncvar->gridID;
 
-          if ( lproj )
+          if ( lproj && gmapvarid != UNDEFID )
             {
               int projID = lgrid ? grid->proj : gridID;
               int ncid = ncvars[gmapvarid].ncid;

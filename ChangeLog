@@ -1,3 +1,11 @@
+2016-10-10  Uwe Schulzweida
+
+	* NetCDF: added support for proj coordinate without mapping attribute
+
+2016-10-04  Uwe Schulzweida
+
+	* Version 1.8.0rc3 released
+
 2016-10-04  Uwe Schulzweida
 
 	* Changed default name of pressure levels to plev
