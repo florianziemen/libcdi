@@ -1,3 +1,7 @@
+#if defined (HAVE_CONFIG_H)
+#include "config.h"
+#endif
+
 #include "stream_cdf.h"
 #include "cdf_lazy_grid.h"
 
@@ -23,6 +27,8 @@ static bool cdfLazyInitialized;
 #define init_lazy_load_lock(plGrid)
 #endif
 
+
+#ifdef HAVE_LIBNETCDF
 
 void cdfLazyGridDestroy(struct cdfLazyGrid *lazyGrid)
 {
@@ -515,6 +521,9 @@ void cdfBaseGridRenew(struct cdfLazyGrid *restrict *restrict gridpptr, int gridt
     *gridpptr = grid = (struct cdfLazyGrid *)Malloc(sizeof (grid_t));
   cdfBaseGridInit((grid_t*)grid, gridtype);
 }
+
+#endif
+
 /*
  * Local Variables:
  * c-file-style: "Java"
