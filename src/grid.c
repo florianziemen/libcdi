@@ -20,8 +20,6 @@
 #include "serialize.h"
 #include "vlist.h"
 
-#undef  UNDEFID
-#define UNDEFID -1
 
 /* the value in the second pair of brackets must match the length of
  * the longest string (including terminating NUL) */
@@ -4509,7 +4507,7 @@ struct addIfNewRes cdiVlistAddGridIfNew(int vlistID, grid_t *grid, int mode)
   if ( mode == 0 )
     for ( unsigned index = 0; index < ngrids; index++ )
       {
-	if ( (gridID = vlistptr->gridIDs[index]) != UNDEFID )
+	if ( (gridID = vlistptr->gridIDs[index]) != CDI_UNDEFID )
           {
             if ( gridCompare(gridID, grid, false) == false )
               {

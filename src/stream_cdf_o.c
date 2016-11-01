@@ -14,9 +14,6 @@
 #include "zaxis.h"
 
 
-#undef  UNDEFID
-#define UNDEFID  CDI_UNDEFID
-
 #define  POSITIVE_UP    1
 #define  POSITIVE_DOWN  2
 

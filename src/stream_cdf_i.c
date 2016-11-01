@@ -19,8 +19,6 @@
 #include "cdf_util.h"
 #include "cdf_lazy_grid.h"
 
-#undef  UNDEFID
-#define UNDEFID  CDI_UNDEFID
 
 #define  X_AXIS  1
 #define  Y_AXIS  2
@@ -500,7 +498,7 @@ void cdfCreateRecords(stream_t *streamptr, int tsID)
       destTstep->nrecs      = nrecs;
       destTstep->nallrecs   = nrecs;
       destTstep->recordSize = nrecs;
-      destTstep->curRecID   = UNDEFID;
+      destTstep->curRecID   = CDI_UNDEFID;
       destTstep->recIDs     = (int *) Malloc((size_t)nvrecs*sizeof (int));;
       for ( int recID = 0; recID < nvrecs; recID++ ) destTstep->recIDs[recID] = recID;
 
@@ -537,7 +535,7 @@ void cdfCreateRecords(stream_t *streamptr, int tsID)
       destTstep->nrecs      = nvrecs;
       destTstep->nallrecs   = nrecs;
       destTstep->recordSize = nrecs;
-      destTstep->curRecID   = UNDEFID;
+      destTstep->curRecID   = CDI_UNDEFID;
 
       memcpy(destTstep->records, sourceTstep->records, (size_t)nrecs*sizeof(record_t));
 
@@ -566,7 +564,7 @@ void cdfCreateRecords(stream_t *streamptr, int tsID)
       destTstep->nrecs      = nvrecs;
       destTstep->nallrecs   = nrecs;
       destTstep->recordSize = nrecs;
-      destTstep->curRecID   = UNDEFID;
+      destTstep->curRecID   = CDI_UNDEFID;
 
       memcpy(destTstep->records, sourceTstep->records, (size_t)nrecs*sizeof(record_t));
 
@@ -610,7 +608,7 @@ int cdf_time_dimid(int fileID, int ndims, int nvars)
         }
     }
 
-  return UNDEFID;
+  return CDI_UNDEFID;
 }
 
 static
@@ -618,8 +616,8 @@ void init_ncdims(long ndims, ncdim_t *ncdims)
 {
   for ( long ncdimid = 0; ncdimid < ndims; ncdimid++ )
     {
-      ncdims[ncdimid].ncvarid      = UNDEFID;
-      ncdims[ncdimid].dimtype      = UNDEFID;
+      ncdims[ncdimid].ncvarid      = CDI_UNDEFID;
+      ncdims[ncdimid].dimtype      = CDI_UNDEFID;
       ncdims[ncdimid].len          = 0;
       ncdims[ncdimid].name[0]      = 0;
     }
@@ -630,8 +628,8 @@ void init_ncvars(long nvars, ncvar_t *ncvars)
 {
   for ( long ncvarid = 0; ncvarid < nvars; ++ncvarid )
     {
-      ncvars[ncvarid].ncid            = UNDEFID;
-      ncvars[ncvarid].isvar           = UNDEFID;
+      ncvars[ncvarid].ncid            = CDI_UNDEFID;
+      ncvars[ncvarid].isvar           = CDI_UNDEFID;
       ncvars[ncvarid].ignore          = false;
       ncvars[ncvarid].isx             = false;
       ncvars[ncvarid].isy             = false;
@@ -644,41 +642,41 @@ void init_ncvars(long nvars, ncvar_t *ncvars)
       ncvars[ncvarid].climatology     = false;
       ncvars[ncvarid].lformulaterms   = false;
       ncvars[ncvarid].tsteptype       = TSTEP_CONSTANT;
-      ncvars[ncvarid].param           = UNDEFID;
-      ncvars[ncvarid].code            = UNDEFID;
+      ncvars[ncvarid].param           = CDI_UNDEFID;
+      ncvars[ncvarid].code            = CDI_UNDEFID;
       ncvars[ncvarid].tabnum          = 0;
-      ncvars[ncvarid].bounds          = UNDEFID;
-      ncvars[ncvarid].gridID          = UNDEFID;
-      ncvars[ncvarid].zaxisID         = UNDEFID;
-      ncvars[ncvarid].gridtype        = UNDEFID;
-      ncvars[ncvarid].zaxistype       = UNDEFID;
-      ncvars[ncvarid].xdim            = UNDEFID;
-      ncvars[ncvarid].ydim            = UNDEFID;
-      ncvars[ncvarid].zdim            = UNDEFID;
-      ncvars[ncvarid].xvarid          = UNDEFID;
-      ncvars[ncvarid].yvarid          = UNDEFID;
-      ncvars[ncvarid].zvarid          = UNDEFID;
-      ncvars[ncvarid].tvarid          = UNDEFID;
-      ncvars[ncvarid].psvarid         = UNDEFID;
-      ncvars[ncvarid].p0varid         = UNDEFID;
+      ncvars[ncvarid].bounds          = CDI_UNDEFID;
+      ncvars[ncvarid].gridID          = CDI_UNDEFID;
+      ncvars[ncvarid].zaxisID         = CDI_UNDEFID;
+      ncvars[ncvarid].gridtype        = CDI_UNDEFID;
+      ncvars[ncvarid].zaxistype       = CDI_UNDEFID;
+      ncvars[ncvarid].xdim            = CDI_UNDEFID;
+      ncvars[ncvarid].ydim            = CDI_UNDEFID;
+      ncvars[ncvarid].zdim            = CDI_UNDEFID;
+      ncvars[ncvarid].xvarid          = CDI_UNDEFID;
+      ncvars[ncvarid].yvarid          = CDI_UNDEFID;
+      ncvars[ncvarid].zvarid          = CDI_UNDEFID;
+      ncvars[ncvarid].tvarid          = CDI_UNDEFID;
+      ncvars[ncvarid].psvarid         = CDI_UNDEFID;
+      ncvars[ncvarid].p0varid         = CDI_UNDEFID;
       ncvars[ncvarid].ncoordvars      = 0;
       for ( int i = 0; i < MAX_COORDVARS; ++i )
-        ncvars[ncvarid].coordvarids[i]  = UNDEFID;
+        ncvars[ncvarid].coordvarids[i]  = CDI_UNDEFID;
       ncvars[ncvarid].nauxvars      = 0;
       for ( int i = 0; i < MAX_AUXVARS; ++i )
-        ncvars[ncvarid].auxvarids[i]  = UNDEFID;
-      ncvars[ncvarid].cellarea        = UNDEFID;
-      ncvars[ncvarid].tableID         = UNDEFID;
+        ncvars[ncvarid].auxvarids[i]  = CDI_UNDEFID;
+      ncvars[ncvarid].cellarea        = CDI_UNDEFID;
+      ncvars[ncvarid].tableID         = CDI_UNDEFID;
       ncvars[ncvarid].xtype           = 0;
       ncvars[ncvarid].ndims           = 0;
-      ncvars[ncvarid].gmapid          = UNDEFID;
+      ncvars[ncvarid].gmapid          = CDI_UNDEFID;
       ncvars[ncvarid].vctsize         = 0;
       ncvars[ncvarid].vct             = NULL;
       ncvars[ncvarid].truncation      = 0;
       ncvars[ncvarid].position        = 0;
       ncvars[ncvarid].positive        = 0;
       ncvars[ncvarid].chunked         = 0;
-      ncvars[ncvarid].chunktype       = UNDEFID;
+      ncvars[ncvarid].chunktype       = CDI_UNDEFID;
       ncvars[ncvarid].defmissval      = false;
       ncvars[ncvarid].deffillval      = false;
       ncvars[ncvarid].missval         = 0;
@@ -704,7 +702,7 @@ void init_ncvars(long nvars, ncvar_t *ncvars)
 static
 void cdf_set_var(ncvar_t *ncvars, int ncvarid, short isvar)
 {
-  if ( ncvars[ncvarid].isvar != UNDEFID &&
+  if ( ncvars[ncvarid].isvar != CDI_UNDEFID &&
        ncvars[ncvarid].isvar != isvar   &&
        ncvars[ncvarid].warn  == false )
     {
@@ -721,7 +719,7 @@ void cdf_set_var(ncvar_t *ncvars, int ncvarid, short isvar)
 static
 void cdf_set_dim(ncvar_t *ncvars, int ncvarid, int dimid, int dimtype)
 {
-  if ( ncvars[ncvarid].dimtype[dimid] != UNDEFID &&
+  if ( ncvars[ncvarid].dimtype[dimid] != CDI_UNDEFID &&
        ncvars[ncvarid].dimtype[dimid] != dimtype )
     {
       Warning("Inconsistent dimension definition for %s! dimid = %d;  type = %d;  newtype = %d",
@@ -804,7 +802,7 @@ bool isHybridSigmaPressureCoordinate(int ncid, int ncvarid, ncvar_t *ncvars, con
       if ( psvarid1 != -1 ) ncvar->psvarid = psvarid1;
       if ( p0varid1 != -1 ) ncvar->p0varid = p0varid1;
 
-      if ( ncvar->bounds != UNDEFID && ncvars[ncvar->bounds].lformulaterms )
+      if ( ncvar->bounds != CDI_UNDEFID && ncvars[ncvar->bounds].lformulaterms )
         {
           ncfvarid = ncvar->bounds;
           int avarid2 = -1, bvarid2 = -1, psvarid2 = -1, p0varid2 = -1;
@@ -1018,7 +1016,7 @@ void cdf_scan_attr_axis(ncvar_t *ncvars, ncdim_t *ncdims, int ncvarid, const cha
 static
 int cdf_get_cell_varid(char *attstring, int ncid)
 {
-  int nc_cell_id = UNDEFID;
+  int nc_cell_id = CDI_UNDEFID;
 
   char *pstring = attstring;
   while ( isspace((int) *pstring) ) pstring++;
@@ -1140,7 +1138,7 @@ void cdf_scan_var_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimi
 
       for ( iatt = 0; iatt < nvatts; iatt++ )
         {
-          int nc_cell_id = UNDEFID;
+          int nc_cell_id = CDI_UNDEFID;
 
           cdf_inq_attname(ncid, ncvarid, iatt, attname);
           cdf_inq_atttype(ncid, ncvarid, attname, &atttype);
@@ -1276,7 +1274,7 @@ void cdf_scan_var_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimi
             {
               ncvars[ncvarid].lformulaterms = true;
             }
-          else if ( isText && strcmp(attname, "cell_measures") == 0 && (nc_cell_id=cdf_get_cell_varid(attstring, ncid)) != UNDEFID )
+          else if ( isText && strcmp(attname, "cell_measures") == 0 && (nc_cell_id=cdf_get_cell_varid(attstring, ncid)) != CDI_UNDEFID )
             {
               ncvars[ncvarid].cellarea = nc_cell_id;
               ncvars[nc_cell_id].isvar = FALSE;
@@ -1620,12 +1618,12 @@ void cdf_set_dimtype(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
 	      /* else if ( ncvars[ncvarid].dimtype[i] == T_AXIS ) ltdim = true; */
 	    }
 
-          if ( !lxdim && ncvars[ncvarid].xvarid != UNDEFID )
+          if ( !lxdim && ncvars[ncvarid].xvarid != CDI_UNDEFID )
             {
               if ( ncvars[ncvars[ncvarid].xvarid].ndims == 0 ) lxdim = true;
             }
 
-          if ( !lydim && ncvars[ncvarid].yvarid != UNDEFID )
+          if ( !lydim && ncvars[ncvarid].yvarid != CDI_UNDEFID )
             {
               if ( ncvars[ncvars[ncvarid].yvarid].ndims == 0 ) lydim = true;
             }
@@ -1640,7 +1638,7 @@ void cdf_set_dimtype(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
                         cdf_set_dim(ncvars, ncvarid, i, Z_AXIS);
                         lzdim = true;
                         int ncdimid = ncvars[ncvarid].dimids[i];
-                        if ( ncdims[ncdimid].dimtype == UNDEFID )
+                        if ( ncdims[ncdimid].dimtype == CDI_UNDEFID )
                           ncdims[ncdimid].dimtype = Z_AXIS;
                       }
                   }
@@ -1653,7 +1651,7 @@ void cdf_set_dimtype(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
       int ndims = ncvars[ncvarid].ndims;
       for ( int i = 0; i < ndims; i++ )
         {
-          if ( ncvars[ncvarid].dimtype[i] == UNDEFID )
+          if ( ncvars[ncvarid].dimtype[i] == CDI_UNDEFID )
             {
               int ncdimid = ncvars[ncvarid].dimids[i];
               if ( ncdims[ncdimid].dimtype == Z_AXIS )
@@ -1679,12 +1677,12 @@ void cdf_set_dimtype(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
 	      /* else if ( ncvars[ncvarid].dimtype[i] == T_AXIS ) ltdim = true; */
 	    }
 
-          if ( !lxdim && ncvars[ncvarid].xvarid != UNDEFID )
+          if ( !lxdim && ncvars[ncvarid].xvarid != CDI_UNDEFID )
             {
               if ( ncvars[ncvars[ncvarid].xvarid].ndims == 0 ) lxdim = true;
             }
 
-          if ( !lydim && ncvars[ncvarid].yvarid != UNDEFID )
+          if ( !lydim && ncvars[ncvarid].yvarid != CDI_UNDEFID )
             {
               if ( ncvars[ncvars[ncvarid].yvarid].ndims == 0 ) lydim = true;
             }
@@ -1825,7 +1823,7 @@ void verify_coordinate_vars_1(int ncid, int ndims, ncdim_t *ncdims, ncvar_t *ncv
 		}
 	    }
 
-	  if ( ncvars[ncvarid].zaxistype != UNDEFID )
+	  if ( ncvars[ncvarid].zaxistype != CDI_UNDEFID )
 	    {
               ncvars[ncvarid].islev = true;
 	      cdf_set_var(ncvars, ncvarid, FALSE);
@@ -1880,7 +1878,7 @@ void verify_coordinate_vars_2(int nvars, ncvar_t *ncvars)
 		    ncvars[ncvarid].zaxistype = ZAXIS_GENERIC;
 		  continue;
 		}
-	      else if ( ncvars[ncvarid].zaxistype == UNDEFID && is_pressure_units(ncvars[ncvarid].units) )
+	      else if ( ncvars[ncvarid].zaxistype == CDI_UNDEFID && is_pressure_units(ncvars[ncvarid].units) )
 		{
 		  ncvars[ncvarid].zaxistype = ZAXIS_PRESSURE;
 		  continue;
@@ -2202,8 +2200,8 @@ bool cdf_read_coordinates(struct cdfLazyGrid *restrict lazyGrid, ncvar_t *ncvar,
 
   if ( ncvar->gridtype == GRID_TRAJECTORY )
     {
-      if ( ncvar->xvarid == UNDEFID ) Error("Longitude coordinate undefined for %s!", ncvar->name);
-      if ( ncvar->yvarid == UNDEFID ) Error("Latitude coordinate undefined for %s!", ncvar->name);
+      if ( ncvar->xvarid == CDI_UNDEFID ) Error("Longitude coordinate undefined for %s!", ncvar->name);
+      if ( ncvar->yvarid == CDI_UNDEFID ) Error("Latitude coordinate undefined for %s!", ncvar->name);
     }
   else
     {
@@ -2211,14 +2209,14 @@ bool cdf_read_coordinates(struct cdfLazyGrid *restrict lazyGrid, ncvar_t *ncvar,
       size_t start[3], count[3];
       int ntdims = 0;
 
-      if ( xvarid != UNDEFID && yvarid != UNDEFID )
+      if ( xvarid != CDI_UNDEFID && yvarid != CDI_UNDEFID )
         {
           int ndims = ncvars[xvarid].ndims;
           if ( ndims != ncvars[yvarid].ndims )
             {
               Warning("Inconsistent grid structure for variable %s!", ncvar->name);
-              ncvar->xvarid = xvarid = UNDEFID;
-              ncvar->yvarid = yvarid = UNDEFID;
+              ncvar->xvarid = xvarid = CDI_UNDEFID;
+              ncvar->yvarid = yvarid = CDI_UNDEFID;
             }
           if ( ndims > 1 )
             {
@@ -2238,40 +2236,40 @@ bool cdf_read_coordinates(struct cdfLazyGrid *restrict lazyGrid, ncvar_t *ncvar,
               else
                 {
                   Warning("Unsupported grid structure for variable %s (grid dims > 2)!", ncvar->name);
-                  ncvar->xvarid = xvarid = UNDEFID;
-                  ncvar->yvarid = yvarid = UNDEFID;
+                  ncvar->xvarid = xvarid = CDI_UNDEFID;
+                  ncvar->yvarid = yvarid = CDI_UNDEFID;
                 }
             }
         }
 
-      if ( xvarid != UNDEFID )
+      if ( xvarid != CDI_UNDEFID )
         {
           if ( (ncvars[xvarid].ndims - ntdims) > 2 )
             {
               Warning("Coordinate variable %s has to many dimensions (%d), skipped!", ncvars[xvarid].name, ncvars[xvarid].ndims);
-              //ncvar->xvarid = UNDEFID;
-              xvarid = UNDEFID;
+              //ncvar->xvarid = CDI_UNDEFID;
+              xvarid = CDI_UNDEFID;
             }
         }
 
-      if ( yvarid != UNDEFID )
+      if ( yvarid != CDI_UNDEFID )
         {
           if ( (ncvars[yvarid].ndims - ntdims) > 2 )
             {
               Warning("Coordinate variable %s has to many dimensions (%d), skipped!", ncvars[yvarid].name, ncvars[yvarid].ndims);
-              //ncvar->yvarid = UNDEFID;
-              yvarid = UNDEFID;
+              //ncvar->yvarid = CDI_UNDEFID;
+              yvarid = CDI_UNDEFID;
             }
         }
 
       bool islon = false, islat = false;
 
-      if ( xvarid != UNDEFID )
+      if ( xvarid != CDI_UNDEFID )
         if ( cdf_read_xcoord(lazyGrid, ncdims, ncvar, xvarid, &ncvars[xvarid],
                              &xsize, ysize, ntdims, start, count, &islon) )
           return true;
 
-      if ( yvarid != UNDEFID )
+      if ( yvarid != CDI_UNDEFID )
         if ( cdf_read_ycoord(lazyGrid, ncdims, ncvar, yvarid, &ncvars[yvarid],
                              xsize, &ysize, ntdims, start, count, &islat) )
           return true;
@@ -2281,7 +2279,7 @@ bool cdf_read_coordinates(struct cdfLazyGrid *restrict lazyGrid, ncvar_t *ncvar,
       else if ( ncvar->gridtype == GRID_UNSTRUCTURED ) size = xsize;
       else                         size = xsize*ysize;
 
-      if ( ncvar->gridtype == UNDEFID || ncvar->gridtype == GRID_GENERIC )
+      if ( ncvar->gridtype == CDI_UNDEFID || ncvar->gridtype == GRID_GENERIC )
         cdf_check_gridtype(&ncvar->gridtype, islon, islat, xsize, ysize, grid);
     }
 
@@ -2290,7 +2288,7 @@ bool cdf_read_coordinates(struct cdfLazyGrid *restrict lazyGrid, ncvar_t *ncvar,
   else if ( gridtype == GRID_PROJECTION && ncvar->gridtype == GRID_LONLAT )
     {
       int gmapvarid = ncvar->gmapid;
-      if ( gmapvarid != UNDEFID && cdfCheckAttText(ncvar->ncid, gmapvarid, "grid_mapping_name") )
+      if ( gmapvarid != CDI_UNDEFID && cdfCheckAttText(ncvar->ncid, gmapvarid, "grid_mapping_name") )
         {
           char attstring[CDI_MAX_NAME];
           cdfGetAttText(ncvar->ncid, gmapvarid, "grid_mapping_name", CDI_MAX_NAME, attstring);
@@ -2310,11 +2308,11 @@ bool cdf_read_coordinates(struct cdfLazyGrid *restrict lazyGrid, ncvar_t *ncvar,
         grid->size  = (int)size;
         grid->x.size = (int)xsize;
         grid->y.size = (int)ysize;
-        if ( xvarid != UNDEFID )
+        if ( xvarid != CDI_UNDEFID )
           {
             grid->x.flag = 1;
             int bvarid = ncvars[xvarid].bounds;
-            if ( bvarid != UNDEFID )
+            if ( bvarid != CDI_UNDEFID )
               {
                 int nbdims = ncvars[bvarid].ndims;
                 if ( nbdims == 2 || nbdims == 3 )
@@ -2325,16 +2323,16 @@ bool cdf_read_coordinates(struct cdfLazyGrid *restrict lazyGrid, ncvar_t *ncvar,
                   }
               }
           }
-        if ( yvarid != UNDEFID )
+        if ( yvarid != CDI_UNDEFID )
           {
             grid->y.flag = 1;
             int bvarid = ncvars[yvarid].bounds;
-            if ( bvarid != UNDEFID )
+            if ( bvarid != CDI_UNDEFID )
               {
                 int nbdims = ncvars[bvarid].ndims;
                 if ( nbdims == 2 || nbdims == 3 )
                   {
-                    if ( *vdimid == UNDEFID )
+                    if ( *vdimid == CDI_UNDEFID )
                       {
                         *vdimid = ncvars[bvarid].dimids[nbdims-1];
                         grid->nvertex = (int)ncdims[*vdimid].len;
@@ -2344,7 +2342,7 @@ bool cdf_read_coordinates(struct cdfLazyGrid *restrict lazyGrid, ncvar_t *ncvar,
               }
           }
 
-        if ( ncvar->cellarea != UNDEFID )
+        if ( ncvar->cellarea != CDI_UNDEFID )
           cdf_load_cellarea(size, ncvar, &grid->area, &lazyGrid->cellAreaGet);
 
         break;
@@ -2407,8 +2405,8 @@ bool cdf_set_unstructured_par(ncvar_t *ncvar, grid_t *grid, int *xdimid, int *yd
   int ndims = ncvar->ndims;
   int *dimtype = ncvar->dimtype;
 
-  int zdimid = UNDEFID;
-  int xdimidx = UNDEFID, ydimidx = UNDEFID;
+  int zdimid = CDI_UNDEFID;
+  int xdimidx = CDI_UNDEFID, ydimidx = CDI_UNDEFID;
 
   for ( int i = 0; i < ndims; i++ )
     {
@@ -2417,12 +2415,12 @@ bool cdf_set_unstructured_par(ncvar_t *ncvar, grid_t *grid, int *xdimid, int *yd
       else if ( dimtype[i] == Z_AXIS ) zdimid = ncvar->dimids[i];
     }
 
-  if ( *xdimid != UNDEFID && *ydimid != UNDEFID && zdimid == UNDEFID )
+  if ( *xdimid != CDI_UNDEFID && *ydimid != CDI_UNDEFID && zdimid == CDI_UNDEFID )
     {
       if ( grid->x.size > grid->y.size && grid->y.size < 1000 )
         {
           dimtype[ydimidx] = Z_AXIS;
-          *ydimid = UNDEFID;
+          *ydimid = CDI_UNDEFID;
           grid->size  = grid->x.size;
           grid->y.size = 0;
         }
@@ -2430,7 +2428,7 @@ bool cdf_set_unstructured_par(ncvar_t *ncvar, grid_t *grid, int *xdimid, int *yd
         {
           dimtype[xdimidx] = Z_AXIS;
           *xdimid = *ydimid;
-          *ydimid = UNDEFID;
+          *ydimid = CDI_UNDEFID;
           grid->size  = grid->y.size;
           grid->x.size = grid->y.size;
           grid->y.size = 0;
@@ -2444,7 +2442,7 @@ bool cdf_set_unstructured_par(ncvar_t *ncvar, grid_t *grid, int *xdimid, int *yd
       return true;
     }
 
-  if ( number_of_grid_used != UNDEFID ) grid->number = number_of_grid_used;
+  if ( number_of_grid_used != CDI_UNDEFID ) grid->number = number_of_grid_used;
   if ( ncvar->position > 0 ) grid->position = ncvar->position;
   if ( uuidOfHGrid[0] != 0 ) memcpy(grid->uuid, uuidOfHGrid, 16);
 
@@ -2474,10 +2472,10 @@ void cdf_read_mapping_atts(int ncid, int gmapvarid, int projID, const char *varn
 static
 void cdf_set_grid_to_similar_vars(ncvar_t *ncvar1, ncvar_t *ncvar2, int gridtype, int xdimid, int ydimid)
 {
-  if ( ncvar2->isvar == TRUE && ncvar2->gridID == UNDEFID )
+  if ( ncvar2->isvar == TRUE && ncvar2->gridID == CDI_UNDEFID )
     {
-      int xdimid2 = UNDEFID, ydimid2 = UNDEFID, zdimid2 = UNDEFID;
-      int xdimidx = UNDEFID, ydimidx = UNDEFID;
+      int xdimid2 = CDI_UNDEFID, ydimid2 = CDI_UNDEFID, zdimid2 = CDI_UNDEFID;
+      int xdimidx = CDI_UNDEFID, ydimidx = CDI_UNDEFID;
       int ndims2 = ncvar2->ndims;
 
       int *dimtype2 = ncvar2->dimtype;
@@ -2489,32 +2487,32 @@ void cdf_set_grid_to_similar_vars(ncvar_t *ncvar1, ncvar_t *ncvar2, int gridtype
           else if ( dimtype2[i] == Z_AXIS ) { zdimid2 = dimids2[i]; }
         }
 
-      if ( ncvar2->gridtype == UNDEFID && gridtype == GRID_UNSTRUCTURED )
+      if ( ncvar2->gridtype == CDI_UNDEFID && gridtype == GRID_UNSTRUCTURED )
         {
-          if ( xdimid == xdimid2 && ydimid2 != UNDEFID && zdimid2 == UNDEFID )
+          if ( xdimid == xdimid2 && ydimid2 != CDI_UNDEFID && zdimid2 == CDI_UNDEFID )
             {
               ncvar2->dimtype[ydimidx] = Z_AXIS;
-              ydimid2 = UNDEFID;
+              ydimid2 = CDI_UNDEFID;
             }
 
-          if ( xdimid == ydimid2 && xdimid2 != UNDEFID && zdimid2 == UNDEFID )
+          if ( xdimid == ydimid2 && xdimid2 != CDI_UNDEFID && zdimid2 == CDI_UNDEFID )
             {
               ncvar2->dimtype[xdimidx] = Z_AXIS;
               xdimid2 = ydimid2;
-              ydimid2 = UNDEFID;
+              ydimid2 = CDI_UNDEFID;
             }
         }
 
-      if ( xdimid == xdimid2 && (ydimid == ydimid2 || (xdimid == ydimid && ydimid2 == UNDEFID)) )
+      if ( xdimid == xdimid2 && (ydimid == ydimid2 || (xdimid == ydimid && ydimid2 == CDI_UNDEFID)) )
         {
           bool same_grid = ncvar1->xvarid == ncvar2->xvarid
                         && ncvar1->yvarid == ncvar2->yvarid
                         && ncvar1->position == ncvar2->position;
           /*
-            if ( xvarid != -1 && ncvar2->xvarid != UNDEFID &&
+            if ( xvarid != -1 && ncvar2->xvarid != CDI_UNDEFID &&
             xvarid != ncvar2->xvarid ) same_grid = false;
 
-            if ( yvarid != -1 && ncvar2->yvarid != UNDEFID &&
+            if ( yvarid != -1 && ncvar2->yvarid != CDI_UNDEFID &&
             yvarid != ncvar2->yvarid ) same_grid = false;
           */
 
@@ -2535,25 +2533,25 @@ void cdf_define_all_grids(ncgrid_t *ncgrid, int vlistID, ncdim_t *ncdims, int nv
   for ( int ncvarid = 0; ncvarid < nvars; ++ncvarid )
     {
       ncvar_t *ncvar = &ncvars[ncvarid];
-      if ( ncvar->isvar && ncvar->gridID == UNDEFID )
+      if ( ncvar->isvar && ncvar->gridID == CDI_UNDEFID )
 	{
           int ndims = ncvar->ndims;
           int *dimtype = ncvar->dimtype;
-          int vdimid = UNDEFID;
+          int vdimid = CDI_UNDEFID;
           struct addIfNewRes projAdded = { .Id = CDI_UNDEFID, .isNew = 0 },
                              gridAdded = { .Id = CDI_UNDEFID, .isNew = 0 };
-	  int xdimid = UNDEFID, ydimid = UNDEFID;
+	  int xdimid = CDI_UNDEFID, ydimid = CDI_UNDEFID;
           int nydims = cdf_get_xydimid(ndims, ncvar->dimids, dimtype, &xdimid, &ydimid);
 
-          int xaxisid = (xdimid != UNDEFID) ? ncdims[xdimid].ncvarid : UNDEFID;
-          int yaxisid = (ydimid != UNDEFID) ? ncdims[ydimid].ncvarid : UNDEFID;
-          int xvarid = (ncvar->xvarid != UNDEFID) ? ncvar->xvarid : xaxisid;
-          int yvarid = (ncvar->yvarid != UNDEFID) ? ncvar->yvarid : yaxisid;
+          int xaxisid = (xdimid != CDI_UNDEFID) ? ncdims[xdimid].ncvarid : CDI_UNDEFID;
+          int yaxisid = (ydimid != CDI_UNDEFID) ? ncdims[ydimid].ncvarid : CDI_UNDEFID;
+          int xvarid = (ncvar->xvarid != CDI_UNDEFID) ? ncvar->xvarid : xaxisid;
+          int yvarid = (ncvar->yvarid != CDI_UNDEFID) ? ncvar->yvarid : yaxisid;
 
-	  size_t xsize = (xdimid != UNDEFID) ? ncdims[xdimid].len : 0;
-	  size_t ysize = (ydimid != UNDEFID) ? ncdims[ydimid].len : 0;
+	  size_t xsize = (xdimid != CDI_UNDEFID) ? ncdims[xdimid].len : 0;
+	  size_t ysize = (ydimid != CDI_UNDEFID) ? ncdims[ydimid].len : 0;
 
-	  if ( ydimid == UNDEFID && yvarid != UNDEFID )
+	  if ( ydimid == CDI_UNDEFID && yvarid != CDI_UNDEFID )
 	    {
 	      if ( ncvars[yvarid].ndims == 1 )
 		{
@@ -2563,17 +2561,17 @@ void cdf_define_all_grids(ncgrid_t *ncgrid, int vlistID, ncdim_t *ncdims, int nv
 	    }
 
           int gmapvarid = ncvar->gmapid;
-          bool lproj = gmapvarid != UNDEFID;
+          bool lproj = gmapvarid != CDI_UNDEFID;
 
-          if ( !lproj && xaxisid != UNDEFID && xaxisid != xvarid && yaxisid != UNDEFID && yaxisid != yvarid )
+          if ( !lproj && xaxisid != CDI_UNDEFID && xaxisid != xvarid && yaxisid != CDI_UNDEFID && yaxisid != yvarid )
             {
               lproj = true;
             }
 
-          bool lgrid = !(lproj && ncvar->xvarid == UNDEFID);
+          bool lgrid = !(lproj && ncvar->xvarid == CDI_UNDEFID);
 
-          bool lunstructured = xdimid != UNDEFID && xdimid == ydimid && nydims == 0;
-	  if ( (ncvar->gridtype == UNDEFID || ncvar->gridtype == GRID_GENERIC) && lunstructured )
+          bool lunstructured = xdimid != CDI_UNDEFID && xdimid == ydimid && nydims == 0;
+	  if ( (ncvar->gridtype == CDI_UNDEFID || ncvar->gridtype == GRID_GENERIC) && lunstructured )
             ncvar->gridtype = GRID_UNSTRUCTURED;
 
           struct cdfLazyGrid *restrict lazyGrid = NULL, *restrict lazyProj = NULL;
@@ -2594,17 +2592,17 @@ void cdf_define_all_grids(ncgrid_t *ncgrid, int vlistID, ncdim_t *ncdims, int nv
           grid_t *grid = &lazyGrid->base;
           grid_t *proj = ( lgrid && lproj ) ? &lazyProj->base : NULL;
 
-          xaxisid = (xdimid != UNDEFID) ? ncdims[xdimid].ncvarid : UNDEFID;
-          yaxisid = (ydimid != UNDEFID) ? ncdims[ydimid].ncvarid : UNDEFID;
+          xaxisid = (xdimid != CDI_UNDEFID) ? ncdims[xdimid].ncvarid : CDI_UNDEFID;
+          yaxisid = (ydimid != CDI_UNDEFID) ? ncdims[ydimid].ncvarid : CDI_UNDEFID;
 
 
           if ( cdf_read_coordinates(lazyGrid, ncvar, ncvars, ncdims,
                                     timedimid, xvarid, yvarid, xsize, ysize, &vdimid) )
             continue;
 
-	  if ( number_of_grid_used != UNDEFID &&
-               (grid->type == UNDEFID || grid->type == GRID_GENERIC) &&
-               xdimid != UNDEFID && xsize > 9999 )
+	  if ( number_of_grid_used != CDI_UNDEFID &&
+               (grid->type == CDI_UNDEFID || grid->type == GRID_GENERIC) &&
+               xdimid != CDI_UNDEFID && xsize > 9999 )
             grid->type = GRID_UNSTRUCTURED;
 
           if ( grid->type == GRID_UNSTRUCTURED )
@@ -2639,7 +2637,7 @@ void cdf_define_all_grids(ncgrid_t *ncgrid, int vlistID, ncdim_t *ncdims, int nv
 
           int gridID = ncvar->gridID;
 
-          if ( lproj && gmapvarid != UNDEFID )
+          if ( lproj && gmapvarid != CDI_UNDEFID )
             {
               int projID = lgrid ? grid->proj : gridID;
               int ncid = ncvars[gmapvarid].ncid;
@@ -2659,12 +2657,12 @@ void cdf_define_all_grids(ncgrid_t *ncgrid, int vlistID, ncdim_t *ncdims, int nv
           ncgrid[gridindex].xdimID = xdimid;
           ncgrid[gridindex].ydimID = ydimid;
 
-          if ( xdimid == UNDEFID && ydimid == UNDEFID && grid->size == 1 )
+          if ( xdimid == CDI_UNDEFID && ydimid == CDI_UNDEFID && grid->size == 1 )
             gridDefHasDims(gridID, FALSE);
 
-          if ( xdimid != UNDEFID ) cdiGridDefKeyStr(gridID, CDI_KEY_XDIMNAME, (int)(strlen(ncdims[xdimid].name)+1), ncdims[xdimid].name);
-          if ( ydimid != UNDEFID ) cdiGridDefKeyStr(gridID, CDI_KEY_YDIMNAME, (int)(strlen(ncdims[ydimid].name)+1), ncdims[ydimid].name);
-          if ( vdimid != UNDEFID ) cdiGridDefKeyStr(gridID, CDI_KEY_VDIMNAME, (int)(strlen(ncdims[vdimid].name)+1), ncdims[vdimid].name);
+          if ( xdimid != CDI_UNDEFID ) cdiGridDefKeyStr(gridID, CDI_KEY_XDIMNAME, (int)(strlen(ncdims[xdimid].name)+1), ncdims[xdimid].name);
+          if ( ydimid != CDI_UNDEFID ) cdiGridDefKeyStr(gridID, CDI_KEY_YDIMNAME, (int)(strlen(ncdims[ydimid].name)+1), ncdims[ydimid].name);
+          if ( vdimid != CDI_UNDEFID ) cdiGridDefKeyStr(gridID, CDI_KEY_VDIMNAME, (int)(strlen(ncdims[vdimid].name)+1), ncdims[vdimid].name);
 
 	  if ( CDI_Debug ) Message("gridID %d %d %s", gridID, ncvarid, ncvar->name);
 
@@ -2701,12 +2699,12 @@ void cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
   for ( int ncvarid = 0; ncvarid < nvars; ncvarid++ )
     {
       ncvar_t *ncvar = &ncvars[ncvarid];
-      if ( ncvar->isvar == TRUE && ncvar->zaxisID == UNDEFID )
+      if ( ncvar->isvar == TRUE && ncvar->zaxisID == CDI_UNDEFID )
 	{
           bool is_scalar = false;
 	  bool with_bounds = false;
-	  int zdimid = UNDEFID;
-	  int zvarid = UNDEFID;
+	  int zdimid = CDI_UNDEFID;
+	  int zvarid = CDI_UNDEFID;
 	  int zsize = 1;
           int psvarid = -1;
           int p0varid = -1;
@@ -2729,7 +2727,7 @@ void cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
                     zdimid = ncvar->dimids[i];
                 }
 
-              if ( zdimid != UNDEFID )
+              if ( zdimid != CDI_UNDEFID )
                 {
                   zvarid = ncdims[zdimid].ncvarid;
                   zsize  = (int)ncdims[zdimid].len;
@@ -2740,13 +2738,13 @@ void cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 
 	  double *zvar = NULL;
 
-	  int zaxisType = UNDEFID;
-	  if ( zvarid != UNDEFID ) zaxisType = ncvars[zvarid].zaxistype;
-	  if ( zaxisType == UNDEFID ) zaxisType = ZAXIS_GENERIC;
+	  int zaxisType = CDI_UNDEFID;
+	  if ( zvarid != CDI_UNDEFID ) zaxisType = ncvars[zvarid].zaxistype;
+	  if ( zaxisType == CDI_UNDEFID ) zaxisType = ZAXIS_GENERIC;
 
 	  int zprec = CDI_DATATYPE_FLT64;
 
-	  if ( zvarid != UNDEFID )
+	  if ( zvarid != CDI_UNDEFID )
 	    {
 	      positive  = ncvars[zvarid].positive;
 	      pname     = ncvars[zvarid].name;
@@ -2771,7 +2769,7 @@ void cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
               zvar = (double*) Malloc((size_t)zsize*sizeof(double));
 	      cdf_get_var_double(ncvars[zvarid].ncid, zvarid, zvar);
 
-	      if ( ncvars[zvarid].bounds != UNDEFID )
+	      if ( ncvars[zvarid].bounds != CDI_UNDEFID )
 		{
 		  int nbdims = ncvars[ncvars[zvarid].bounds].ndims;
 		  if ( nbdims == 2 )
@@ -2796,13 +2794,13 @@ void cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 	    }
 	  else
 	    {
-              pname     = (zdimid != UNDEFID) ? ncdims[zdimid].name : NULL;
+              pname     = (zdimid != CDI_UNDEFID) ? ncdims[zdimid].name : NULL;
 	      plongname = NULL;
 	      punits    = NULL;
 
-	      if ( zsize == 1 && zdimid == UNDEFID )
+	      if ( zsize == 1 && zdimid == CDI_UNDEFID )
 		{
-                  zaxisType = (ncvar->zaxistype != UNDEFID) ? ncvar->zaxistype : ZAXIS_SURFACE;
+                  zaxisType = (ncvar->zaxistype != CDI_UNDEFID) ? ncvar->zaxistype : ZAXIS_SURFACE;
                   // if ( pname )
                     {
                       zvar = (double*) Malloc(sizeof(double));
@@ -2837,7 +2835,7 @@ void cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
           if ( positive > 0 ) zaxisDefPositive(zaxisID, positive);
           if ( is_scalar ) zaxisDefScalar(zaxisID);
 
-          if ( zdimid != UNDEFID )
+          if ( zdimid != CDI_UNDEFID )
             cdiZaxisDefKeyStr(zaxisID, CDI_KEY_DIMNAME, (int)(strlen(ncdims[zdimid].name)+1), ncdims[zdimid].name);
           /*
           if ( vdimid != -1 )
@@ -2847,7 +2845,7 @@ void cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 	  if ( lbounds ) Free(lbounds);
 	  if ( ubounds ) Free(ubounds);
 
-          if ( zvarid != UNDEFID )
+          if ( zvarid != CDI_UNDEFID )
             {
               int ncid = ncvars[zvarid].ncid;
               int nvatts = ncvars[zvarid].natts;
@@ -2865,13 +2863,13 @@ void cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 	    Message("zaxisID %d %d %s", zaxisID, ncvarid, ncvar->name);
 
 	  for ( int ncvarid2 = ncvarid+1; ncvarid2 < nvars; ncvarid2++ )
-	    if ( ncvars[ncvarid2].isvar == TRUE && ncvars[ncvarid2].zaxisID == UNDEFID /*&& ncvars[ncvarid2].zaxistype == UNDEFID*/ )
+	    if ( ncvars[ncvarid2].isvar == TRUE && ncvars[ncvarid2].zaxisID == CDI_UNDEFID /*&& ncvars[ncvarid2].zaxistype == CDI_UNDEFID*/ )
 	      {
-                int zvarid2 = UNDEFID;
-                if ( ncvars[ncvarid2].zvarid != UNDEFID && ncvars[ncvars[ncvarid2].zvarid].ndims == 0 )
+                int zvarid2 = CDI_UNDEFID;
+                if ( ncvars[ncvarid2].zvarid != CDI_UNDEFID && ncvars[ncvars[ncvarid2].zvarid].ndims == 0 )
                   zvarid2 = ncvars[ncvarid2].zvarid;
 
-		int zdimid2 = UNDEFID;
+		int zdimid2 = CDI_UNDEFID;
 		ndims = ncvars[ncvarid2].ndims;
 		for ( int i = 0; i < ndims; i++ )
 		  {
@@ -2881,10 +2879,10 @@ void cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 
 		if ( zdimid == zdimid2 /* && zvarid == zvarid2 */)
 		  {
-                    if ( (zdimid != UNDEFID && ncvars[ncvarid2].zaxistype == UNDEFID) ||
-                         (zdimid == UNDEFID && zvarid != UNDEFID && zvarid == zvarid2) ||
-                         (zdimid == UNDEFID && zaxisType == ncvars[ncvarid2].zaxistype) ||
-                         (zdimid == UNDEFID && zvarid2 == UNDEFID && ncvars[ncvarid2].zaxistype == UNDEFID) )
+                    if ( (zdimid != CDI_UNDEFID && ncvars[ncvarid2].zaxistype == CDI_UNDEFID) ||
+                         (zdimid == CDI_UNDEFID && zvarid != CDI_UNDEFID && zvarid == zvarid2) ||
+                         (zdimid == CDI_UNDEFID && zaxisType == ncvars[ncvarid2].zaxistype) ||
+                         (zdimid == CDI_UNDEFID && zvarid2 == CDI_UNDEFID && ncvars[ncvarid2].zaxistype == CDI_UNDEFID) )
                       {
                         if ( CDI_Debug )
                           Message("zaxisID %d %d %s", zaxisID, ncvarid2, ncvars[ncvarid2].name);
@@ -2951,7 +2949,7 @@ void cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int model
       if ( ncvars[ncvarid].deflate )
 	vlistDefVarCompType(vlistID, varID, CDI_COMPRESS_ZIP);
 
-      if ( ncvars[ncvarid].chunked && ncvars[ncvarid].chunktype != UNDEFID )
+      if ( ncvars[ncvarid].chunked && ncvars[ncvarid].chunktype != CDI_UNDEFID )
         vlistDefVarChunkType(vlistID, varID, ncvars[ncvarid].chunktype);
 #endif
 
@@ -2959,9 +2957,9 @@ void cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int model
       streamptr->vars[varID1].ncvarid = ncvarid;
 
       vlistDefVarName(vlistID, varID, ncvars[ncvarid].name);
-      if ( ncvars[ncvarid].param != UNDEFID ) vlistDefVarParam(vlistID, varID, ncvars[ncvarid].param);
-      if ( ncvars[ncvarid].code != UNDEFID )  vlistDefVarCode(vlistID, varID, ncvars[ncvarid].code);
-      if ( ncvars[ncvarid].code != UNDEFID )
+      if ( ncvars[ncvarid].param != CDI_UNDEFID ) vlistDefVarParam(vlistID, varID, ncvars[ncvarid].param);
+      if ( ncvars[ncvarid].code != CDI_UNDEFID )  vlistDefVarCode(vlistID, varID, ncvars[ncvarid].code);
+      if ( ncvars[ncvarid].code != CDI_UNDEFID )
 	{
 	  int param = cdiEncodeParam(ncvars[ncvarid].code, ncvars[ncvarid].tabnum, 255);
 	  vlistDefVarParam(vlistID, varID, param);
@@ -2982,7 +2980,7 @@ void cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int model
 
       vlistDefVarInstitut(vlistID, varID, instID);
       vlistDefVarModel(vlistID, varID, modelID);
-      if ( ncvars[ncvarid].tableID != UNDEFID )
+      if ( ncvars[ncvarid].tableID != CDI_UNDEFID )
 	vlistDefVarTable(vlistID, varID, ncvars[ncvarid].tableID);
 
       if ( ncvars[ncvarid].deffillval == false && ncvars[ncvarid].defmissval )
@@ -3123,7 +3121,7 @@ void cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int model
       int varModelID = vlistInqVarModel(vlistID, varID);
       int varTableID = vlistInqVarTable(vlistID, varID);
       int code = vlistInqVarCode(vlistID, varID);
-      if ( cdiDefaultTableID != UNDEFID )
+      if ( cdiDefaultTableID != CDI_UNDEFID )
 	{
 	  if ( tableInqParNamePtr(cdiDefaultTableID, code) )
 	    {
@@ -3131,7 +3129,7 @@ void cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int model
 	      vlistDestroyVarLongname(vlistID, varID);
 	      vlistDestroyVarUnits(vlistID, varID);
 
-	      if ( varTableID != UNDEFID )
+	      if ( varTableID != CDI_UNDEFID )
 		{
 		  vlistDefVarName(vlistID, varID, tableInqParNamePtr(cdiDefaultTableID, code));
 		  if ( tableInqParLongnamePtr(cdiDefaultTableID, code) )
@@ -3145,12 +3143,12 @@ void cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int model
 		}
 	    }
 
-	  if ( cdiDefaultModelID != UNDEFID ) varModelID = cdiDefaultModelID;
-	  if ( cdiDefaultInstID  != UNDEFID ) varInstID  = cdiDefaultInstID;
+	  if ( cdiDefaultModelID != CDI_UNDEFID ) varModelID = cdiDefaultModelID;
+	  if ( cdiDefaultInstID  != CDI_UNDEFID ) varInstID  = cdiDefaultInstID;
 	}
-      if ( varInstID  != UNDEFID ) vlistDefVarInstitut(vlistID, varID, varInstID);
-      if ( varModelID != UNDEFID ) vlistDefVarModel(vlistID, varID, varModelID);
-      if ( varTableID != UNDEFID ) vlistDefVarTable(vlistID, varID, varTableID);
+      if ( varInstID  != CDI_UNDEFID ) vlistDefVarInstitut(vlistID, varID, varInstID);
+      if ( varModelID != CDI_UNDEFID ) vlistDefVarModel(vlistID, varID, varModelID);
+      if ( varTableID != CDI_UNDEFID ) vlistDefVarTable(vlistID, varID, varTableID);
     }
 }
 
@@ -3183,13 +3181,13 @@ void cdf_scan_global_attr(int fileID, int vlistID, stream_t *streamptr, int ngat
 	      else if ( strcmp(attname, "institution") == 0 )
 		{
 		  *instID = institutInq(0, 0, NULL, attstring);
-		  if ( *instID == UNDEFID )
+		  if ( *instID == CDI_UNDEFID )
 		    *instID = institutDef(0, 0, NULL, attstring);
 		}
 	      else if ( strcmp(attname, "source") == 0 )
 		{
 		  *modelID = modelInq(-1, 0, attstring);
-		  if ( *modelID == UNDEFID )
+		  if ( *modelID == CDI_UNDEFID )
 		    *modelID = modelDef(-1, 0, attstring);
 		}
 	      else if ( strcmp(attname, "Source") == 0 )
@@ -3242,7 +3240,7 @@ void cdf_scan_global_attr(int fileID, int vlistID, stream_t *streamptr, int ngat
 	{
 	  if ( strcmp(attname, "number_of_grid_used") == 0 )
 	    {
-	      (*number_of_grid_used) = UNDEFID;
+	      (*number_of_grid_used) = CDI_UNDEFID;
 	      cdfGetAttInt(fileID, NC_GLOBAL, attname, 1, number_of_grid_used);
 	    }
  	  else
@@ -3266,7 +3264,7 @@ void cdf_scan_global_attr(int fileID, int vlistID, stream_t *streamptr, int ngat
 static
 int find_leadtime(int nvars, ncvar_t *ncvars)
 {
-  int leadtime_id = UNDEFID;
+  int leadtime_id = CDI_UNDEFID;
 
   for ( int ncvarid = 0; ncvarid < nvars; ncvarid++ )
     {
@@ -3286,7 +3284,7 @@ void find_time_vars(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimid, 
 {
   int ncvarid;
 
-  if ( timedimid == UNDEFID )
+  if ( timedimid == CDI_UNDEFID )
     {
       char timeunits[CDI_MAX_NAME];
 
@@ -3312,7 +3310,7 @@ void find_time_vars(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimid, 
     {
       bool ltimevar = false;
 
-      if ( ncdims[timedimid].ncvarid != UNDEFID )
+      if ( ncdims[timedimid].ncvarid != CDI_UNDEFID )
         {
           streamptr->basetime.ncvarid = ncdims[timedimid].ncvarid;
           ltimevar = true;
@@ -3358,7 +3356,7 @@ void find_time_vars(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimid, 
       /* time varID */
       ncvarid = streamptr->basetime.ncvarid;
 
-      if ( ncvarid == UNDEFID )
+      if ( ncvarid == CDI_UNDEFID )
         {
           Warning("Time variable >%s< not found!", ncdims[timedimid].name);
         }
@@ -3367,11 +3365,11 @@ void find_time_vars(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimid, 
   /* time varID */
   ncvarid = streamptr->basetime.ncvarid;
 
-  if ( ncvarid != UNDEFID && streamptr->basetime.lwrf == false )
+  if ( ncvarid != CDI_UNDEFID && streamptr->basetime.lwrf == false )
     {
       if ( ncvars[ncvarid].units[0] != 0 ) *time_has_units = true;
 
-      if ( ncvars[ncvarid].bounds != UNDEFID )
+      if ( ncvars[ncvarid].bounds != CDI_UNDEFID )
         {
           int nbdims = ncvars[ncvars[ncvarid].bounds].ndims;
           if ( nbdims == 2 )
@@ -3392,7 +3390,7 @@ static
 void read_vct_echam(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdims, double **vct, size_t *pvctsize)
 {
   /* find ECHAM VCT */
-  int nvcth_id = UNDEFID, vcta_id = UNDEFID, vctb_id = UNDEFID;
+  int nvcth_id = CDI_UNDEFID, vcta_id = CDI_UNDEFID, vctb_id = CDI_UNDEFID;
 
   for ( int ncvarid = 0; ncvarid < nvars; ncvarid++ )
     {
@@ -3422,7 +3420,7 @@ void read_vct_echam(int fileID, int nvars, ncvar_t *ncvars, ncdim_t *ncdims, dou
     }
 
   /* read VCT */
-  if ( nvcth_id != UNDEFID && vcta_id != UNDEFID && vctb_id != UNDEFID )
+  if ( nvcth_id != CDI_UNDEFID && vcta_id != CDI_UNDEFID && vctb_id != CDI_UNDEFID )
     {
       size_t vctsize = ncdims[nvcth_id].len;
       vctsize *= 2;
@@ -3441,7 +3439,7 @@ void cdf_set_ucla_dimtype(int ndims, ncdim_t *ncdims, ncvar_t *ncvars)
       int ncvarid = ncdims[ncdimid].ncvarid;
       if ( ncvarid != -1 )
         {
-          if ( ncdims[ncdimid].dimtype == UNDEFID && ncvars[ncvarid].units[0] == 'm' )
+          if ( ncdims[ncdimid].dimtype == CDI_UNDEFID && ncvars[ncvarid].units[0] == 'm' )
             {
               if      ( ncvars[ncvarid].name[0] == 'x' ) ncdims[ncdimid].dimtype = X_AXIS;
               else if ( ncvars[ncvarid].name[0] == 'y' ) ncdims[ncdimid].dimtype = Y_AXIS;
@@ -3456,7 +3454,7 @@ int cdf_check_vars(int nvars, ncvar_t *ncvars, int ntsteps, int timedimid)
 {
   for ( int ncvarid = 0; ncvarid < nvars; ncvarid++ )
     {
-      if ( timedimid != UNDEFID )
+      if ( timedimid != CDI_UNDEFID )
 	if ( ncvars[ncvarid].isvar == -1 &&
 	     ncvars[ncvarid].ndims > 1   &&
 	     timedimid == ncvars[ncvarid].dimids[0] )
@@ -3484,7 +3482,7 @@ int cdf_check_vars(int nvars, ncvar_t *ncvars, int ntsteps, int timedimid)
 	  continue;
 	}
 
-      if ( ncvars[ncvarid].ndims == 4 && timedimid == UNDEFID )
+      if ( ncvars[ncvarid].ndims == 4 && timedimid == CDI_UNDEFID )
 	{
 	  ncvars[ncvarid].isvar = 0;
 	  Warning("%d dimensional variables without time dimension are not supported, skipped variable %s!",
@@ -3505,7 +3503,7 @@ int cdf_check_vars(int nvars, ncvar_t *ncvars, int ntsteps, int timedimid)
 	  continue;
 	}
 
-      if ( timedimid != UNDEFID && ntsteps == 0 && ncvars[ncvarid].ndims > 0 )
+      if ( timedimid != CDI_UNDEFID && ntsteps == 0 && ncvars[ncvarid].ndims > 0 )
 	{
 	  if ( timedimid == ncvars[ncvarid].dimids[0] )
 	    {
@@ -3531,16 +3529,16 @@ int cdfInqContents(stream_t *streamptr)
   bool time_has_units = false;
   bool time_has_bounds = false;
   bool time_climatology = false;
-  int leadtime_id = UNDEFID;
+  int leadtime_id = CDI_UNDEFID;
   int nvars_data;
-  int instID  = UNDEFID;
-  int modelID = UNDEFID;
-  int calendar = UNDEFID;
+  int instID  = CDI_UNDEFID;
+  int modelID = CDI_UNDEFID;
+  int calendar = CDI_UNDEFID;
   int format = 0;
   bool ucla_les = false;
   char gridfile[8912];
   char fcreftime[CDI_MAX_NAME];
-  int number_of_grid_used = UNDEFID;
+  int number_of_grid_used = CDI_UNDEFID;
 
   unsigned char uuidOfHGrid[CDI_UUID_SIZE];
   unsigned char uuidOfVGrid[CDI_UUID_SIZE];
@@ -3626,7 +3624,7 @@ int cdfInqContents(stream_t *streamptr)
   streamptr->basetime.ncdimid = timedimid;
 
   size_t ntsteps = 0;
-  if ( timedimid != UNDEFID ) cdf_inq_dimlen(fileID, timedimid, &ntsteps);
+  if ( timedimid != CDI_UNDEFID ) cdf_inq_dimlen(fileID, timedimid, &ntsteps);
 
   if ( CDI_Debug ) Message("Number of timesteps = %d", ntsteps);
   if ( CDI_Debug ) Message("Time dimid = %d", streamptr->basetime.ncdimid);
@@ -3655,7 +3653,7 @@ int cdfInqContents(stream_t *streamptr)
 	{
 	  if ( ncvars[ncvarid].ndims == 1 )
 	    {
-	      if ( timedimid != UNDEFID && timedimid == ncvars[ncvarid].dimids[0] )
+	      if ( timedimid != CDI_UNDEFID && timedimid == ncvars[ncvarid].dimids[0] )
 		{
 		  if ( ncvars[ncvarid].isvar != FALSE ) cdf_set_var(ncvars, ncvarid, TRUE);
 		}
@@ -3665,7 +3663,7 @@ int cdfInqContents(stream_t *streamptr)
 		}
 	      // if ( ncvars[ncvarid].isvar != TRUE ) cdf_set_var(ncvars, ncvarid, FALSE);
 
-	      if ( ncdimid == ncvars[ncvarid].dimids[0] && ncdims[ncdimid].ncvarid == UNDEFID )
+	      if ( ncdimid == ncvars[ncvarid].dimids[0] && ncdims[ncdimid].ncvarid == CDI_UNDEFID )
 		if ( strcmp(ncvars[ncvarid].name, ncdims[ncdimid].name) == 0 )
 		  {
 		    ncdims[ncdimid].ncvarid = ncvarid;
@@ -3679,7 +3677,7 @@ int cdfInqContents(stream_t *streamptr)
   find_time_vars(nvars, ncvars, ncdims, timedimid, streamptr, &time_has_units, &time_has_bounds, &time_climatology);
 
   leadtime_id = find_leadtime(nvars, ncvars);
-  if ( leadtime_id != UNDEFID ) ncvars[leadtime_id].isvar = FALSE;
+  if ( leadtime_id != CDI_UNDEFID ) ncvars[leadtime_id].isvar = FALSE;
 
   /* check ncvars */
   timedimid = cdf_check_vars(nvars, ncvars, ntsteps, timedimid);
@@ -3778,7 +3776,7 @@ int cdfInqContents(stream_t *streamptr)
       return CDI_EUFSTRUCT;
     }
 
-  if ( ntsteps == 0 && streamptr->basetime.ncdimid == UNDEFID && streamptr->basetime.ncvarid != UNDEFID )
+  if ( ntsteps == 0 && streamptr->basetime.ncdimid == CDI_UNDEFID && streamptr->basetime.ncvarid != CDI_UNDEFID )
     ntsteps = 1;
 
   streamptr->ntsteps = (long)ntsteps;
@@ -3798,11 +3796,11 @@ int cdfInqContents(stream_t *streamptr)
 
       if ( setBaseTime(ncvars[nctimevarid].units, taxis) == 1 )
         {
-          nctimevarid = UNDEFID;
-          streamptr->basetime.ncvarid = UNDEFID;
+          nctimevarid = CDI_UNDEFID;
+          streamptr->basetime.ncvarid = CDI_UNDEFID;
         }
 
-      if ( leadtime_id != UNDEFID && taxis->type == TAXIS_RELATIVE )
+      if ( leadtime_id != CDI_UNDEFID && taxis->type == TAXIS_RELATIVE )
         {
           streamptr->basetime.leadtimeid = leadtime_id;
           taxis->type = TAXIS_FORECAST;
@@ -3822,7 +3820,7 @@ int cdfInqContents(stream_t *streamptr)
       if ( time_climatology ) streamptr->tsteps[0].taxis.climatology = true;
     }
 
-  if ( nctimevarid != UNDEFID )
+  if ( nctimevarid != CDI_UNDEFID )
     {
       taxis_t *taxis = &streamptr->tsteps[0].taxis;
       ptaxisDefName(taxis, ncvars[nctimevarid].name);
@@ -3834,7 +3832,7 @@ int cdfInqContents(stream_t *streamptr)
       ptaxisDefDatatype(taxis, datatype);
     }
 
-  if ( nctimevarid != UNDEFID )
+  if ( nctimevarid != CDI_UNDEFID )
     if ( ncvars[nctimevarid].calendar == true )
       {
         char attstring[1024];
@@ -3863,7 +3861,7 @@ int cdfInqContents(stream_t *streamptr)
     }
 
 
-  if ( calendar == UNDEFID && streamptr->tsteps[0].taxis.type != TAXIS_ABSOLUTE )
+  if ( calendar == CDI_UNDEFID && streamptr->tsteps[0].taxis.type != TAXIS_ABSOLUTE )
     {
       calendar = CALENDAR_STANDARD;
     }
@@ -3872,7 +3870,7 @@ int cdfInqContents(stream_t *streamptr)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic warning "-Wstrict-overflow"
 #endif
-  if ( calendar != UNDEFID )
+  if ( calendar != CDI_UNDEFID )
     {
       taxis_t *taxis = &streamptr->tsteps[0].taxis;
       taxis->calendar = calendar;
@@ -3974,7 +3972,7 @@ int cdfInqTimestep(stream_t * streamptr, int tsID)
       double timevalue = tsID;
 
       int nctimevarid = streamptr->basetime.ncvarid;
-      if ( nctimevarid != UNDEFID )
+      if ( nctimevarid != CDI_UNDEFID )
 	{
 	  int fileID = streamptr->fileID;
 	  size_t index  = (size_t)tsID;
@@ -3998,7 +3996,7 @@ int cdfInqTimestep(stream_t * streamptr, int tsID)
 	    }
 
 	  int nctimeboundsid = streamptr->basetime.ncvarboundsid;
-	  if ( nctimeboundsid != UNDEFID )
+	  if ( nctimeboundsid != CDI_UNDEFID )
 	    {
 	      size_t start[2], count[2];
               start[0] = index; count[0] = 1; start[1] = 0; count[1] = 1;
@@ -4015,7 +4013,7 @@ int cdfInqTimestep(stream_t * streamptr, int tsID)
 	    }
 
           int leadtimeid = streamptr->basetime.leadtimeid;
-          if ( leadtimeid != UNDEFID )
+          if ( leadtimeid != CDI_UNDEFID )
             {
               timevalue = get_timevalue(fileID, leadtimeid, tsID, NULL);
               cdiSetForecastPeriod(timevalue, taxis);
@@ -4034,7 +4032,7 @@ int cdfInqHistorySize(stream_t *streamptr)
 {
   size_t size = 0;
   int ncid = streamptr->fileID;
-  if ( streamptr->historyID != UNDEFID )
+  if ( streamptr->historyID != CDI_UNDEFID )
     cdf_inq_attlen(ncid, NC_GLOBAL, "history", &size);
 
   return (int) size;
@@ -4044,7 +4042,7 @@ int cdfInqHistorySize(stream_t *streamptr)
 void cdfInqHistoryString(stream_t *streamptr, char *history)
 {
   int ncid = streamptr->fileID;
-  if ( streamptr->historyID != UNDEFID )
+  if ( streamptr->historyID != CDI_UNDEFID )
     {
       nc_type atttype;
       cdf_inq_atttype(ncid, NC_GLOBAL, "history", &atttype);

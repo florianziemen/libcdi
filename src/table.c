@@ -10,8 +10,6 @@
 #include "cdi.h"
 #include "cdi_int.h"
 
-#undef  UNDEFID
-#define UNDEFID -1
 
 /*int TableDefine = 0; */ /* Define new table also if the entry already exist */
                           /* This is needed for createtable */
@@ -96,8 +94,8 @@ static void parTableInitEntry(int tableID)
   parTable[tableID].used    = 0;
   parTable[tableID].pars    = NULL;
   parTable[tableID].npars   = 0;
-  parTable[tableID].modelID = UNDEFID;
-  parTable[tableID].number  = UNDEFID;
+  parTable[tableID].modelID = CDI_UNDEFID;
+  parTable[tableID].number  = CDI_UNDEFID;
   parTable[tableID].name    = NULL;
 }
 
@@ -325,7 +323,7 @@ int tableRead(const char *tablefile)
   int lnr = 0;
   int id;
   char name[256], longname[256], units[256];
-  int tableID = UNDEFID;
+  int tableID = CDI_UNDEFID;
   int err;
   char *tablename;
   FILE *tablefp;
@@ -379,7 +377,7 @@ int tableRead(const char *tablefile)
 
 static int tableFromEnv(int modelID, int tablenum)
 {
-  int tableID = UNDEFID;
+  int tableID = CDI_UNDEFID;
   char tablename[256] = {'\0'};
   int tablenamefound = 0;
 
@@ -397,7 +395,7 @@ static int tableFromEnv(int modelID, int tablenum)
   else
     {
       int instID = modelInqInstitut(modelID);
-      if ( instID != UNDEFID )
+      if ( instID != CDI_UNDEFID )
 	{
           const char *instName;
 	  if ( (instName = institutInqNamePtr(instID)) )
@@ -434,7 +432,7 @@ static int tableFromEnv(int modelID, int tablenum)
       /* if (tablefile) printf("tableFile = %s\n", tablefile); */
 
       tableID = tableRead(tablefile);
-      if ( tableID != UNDEFID )
+      if ( tableID != CDI_UNDEFID )
 	{
 	  tableDefModelID(tableID, modelID);
 	  tableDefNum(tableID, tablenum);
@@ -449,8 +447,8 @@ static int tableFromEnv(int modelID, int tablenum)
 
 int tableInq(int modelID, int tablenum, const char *tablename)
 {
-  int tableID = UNDEFID;
-  int modelID2 = UNDEFID;
+  int tableID = CDI_UNDEFID;
+  int modelID2 = CDI_UNDEFID;
   char tablefile[256] = {'\0'};
 
   if ( ! ParTableInit ) parTableInit();
@@ -472,7 +470,7 @@ int tableInq(int modelID, int tablenum, const char *tablename)
 	      if ( memcmp(parTable[tableID].name, tablename, len) == 0 ) break;
 	    }
 	}
-      if ( tableID == MAX_TABLE ) tableID = UNDEFID;
+      if ( tableID == MAX_TABLE ) tableID = CDI_UNDEFID;
       if ( CDI_Debug )
 	Message("tableID = %d tablename = %s", tableID, tablename);
     }
@@ -487,11 +485,11 @@ int tableInq(int modelID, int tablenum, const char *tablename)
 	    }
 	}
 
-      if ( tableID == MAX_TABLE ) tableID = UNDEFID;
+      if ( tableID == MAX_TABLE ) tableID = CDI_UNDEFID;
 
-      if ( tableID == UNDEFID )
+      if ( tableID == CDI_UNDEFID )
 	{
-	  if ( modelID != UNDEFID )
+	  if ( modelID != CDI_UNDEFID )
 	    {
               const char *modelName;
 	      if ( (modelName = modelInqNamePtr(modelID)) )
@@ -503,7 +501,7 @@ int tableInq(int modelID, int tablenum, const char *tablename)
 		  modelID2 = modelInq(-1, 0, tablefile);
 		}
 	    }
-	  if ( modelID2 != UNDEFID )
+	  if ( modelID2 != CDI_UNDEFID )
 	    for ( tableID = 0; tableID < MAX_TABLE; tableID++ )
 	      {
 		if ( parTable[tableID].used )
@@ -514,9 +512,9 @@ int tableInq(int modelID, int tablenum, const char *tablename)
 	      }
 	}
 
-      if ( tableID == MAX_TABLE ) tableID = UNDEFID;
+      if ( tableID == MAX_TABLE ) tableID = CDI_UNDEFID;
 
-      if ( tableID == UNDEFID && modelID != UNDEFID )
+      if ( tableID == CDI_UNDEFID && modelID != CDI_UNDEFID )
 	tableID = tableFromEnv(modelID, tablenum);
 
       if ( CDI_Debug )
@@ -529,14 +527,14 @@ int tableInq(int modelID, int tablenum, const char *tablename)
 
 int tableDef(int modelID, int tablenum, const char *tablename)
 {
-  int tableID = UNDEFID;
+  int tableID = CDI_UNDEFID;
 
   if ( ! ParTableInit ) parTableInit();
   /*
-  if ( ! (modelID == UNDEFID && tablenum == 0) )
+  if ( ! (modelID == CDI_UNDEFID && tablenum == 0) )
     tableID = tableInq(modelID, tablenum, tablename);
     */
-  if ( tableID == UNDEFID )
+  if ( tableID == CDI_UNDEFID )
     {
       tableID = tableNewEntry();
 
@@ -618,7 +616,7 @@ void tableWrite(const char *ptfile, int tableID)
   if ( CDI_Debug )
     Message("write parameter table %d to %s", tableID, ptfile);
 
-  if ( tableID == UNDEFID )
+  if ( tableID == CDI_UNDEFID )
     {
       Warning("parameter table ID undefined");
       return;
@@ -730,7 +728,7 @@ void tableFWriteC(FILE *ptfp, int tableID)
   char tablename[256];
 
 
-  if ( tableID == UNDEFID )
+  if ( tableID == CDI_UNDEFID )
     {
       Warning("parameter table ID undefined");
       return;
@@ -798,7 +796,7 @@ int tableInqParCode(int tableID, char *varname, int *code)
 {
   int err = 1;
 
-  if ( tableID != UNDEFID && varname != NULL )
+  if ( tableID != CDI_UNDEFID && varname != NULL )
     {
       int npars = parTable[tableID].npars;
       for ( int item = 0; item < npars; item++ )
@@ -835,7 +833,7 @@ int tableInqParName(int tableID, int code, char *varname)
 	    }
 	}
     }
-  else if ( tableID == UNDEFID )
+  else if ( tableID == CDI_UNDEFID )
     { }
   else
     Error("Invalid table ID %d", tableID);
@@ -848,7 +846,7 @@ const char *tableInqParNamePtr(int tableID, int code)
 {
   const char *name = NULL;
 
-  if ( tableID != UNDEFID )
+  if ( tableID != CDI_UNDEFID )
     {
       int npars = parTable[tableID].npars;
       for ( int item = 0; item < npars; item++ )
@@ -869,7 +867,7 @@ const char *tableInqParLongnamePtr(int tableID, int code)
 {
   const char *longname = NULL;
 
-  if ( tableID != UNDEFID )
+  if ( tableID != CDI_UNDEFID )
     {
       int npars = parTable[tableID].npars;
       for ( int item = 0; item < npars; item++ )
@@ -890,7 +888,7 @@ const char *tableInqParUnitsPtr(int tableID, int code)
 {
   const char *units = NULL;
 
-  if ( tableID != UNDEFID )
+  if ( tableID != CDI_UNDEFID )
     {
       int npars = parTable[tableID].npars;
       for ( int item = 0; item < npars; item++ )
@@ -909,12 +907,12 @@ const char *tableInqParUnitsPtr(int tableID, int code)
 
 int tableInqParLongname(int tableID, int code, char *longname)
 {
-  if ( ((tableID >= 0) & (tableID < MAX_TABLE)) | (tableID == UNDEFID) ) { } else
+  if ( ((tableID >= 0) & (tableID < MAX_TABLE)) | (tableID == CDI_UNDEFID) ) { } else
     Error("Invalid table ID %d", tableID);
 
   int err = 1;
 
-  if ( tableID != UNDEFID )
+  if ( tableID != CDI_UNDEFID )
     {
       int npars = parTable[tableID].npars;
       for ( int item = 0; item < npars; item++ )
@@ -936,12 +934,12 @@ int tableInqParLongname(int tableID, int code, char *longname)
 int tableInqParUnits(int tableID, int code, char *units)
 {
 
-  if ( ((tableID >= 0) & (tableID < MAX_TABLE)) | (tableID == UNDEFID) ) { } else
+  if ( ((tableID >= 0) & (tableID < MAX_TABLE)) | (tableID == CDI_UNDEFID) ) { } else
     Error("Invalid table ID %d", tableID);
 
   int err = 1;
 
-  if ( tableID != UNDEFID )
+  if ( tableID != CDI_UNDEFID )
     {
       int npars = parTable[tableID].npars;
       for ( int item = 0; item < npars; item++ )
@@ -963,7 +961,7 @@ int tableInqParUnits(int tableID, int code, char *units)
 void tableInqPar(int tableID, int code, char *name, char *longname, char *units)
 {
 
-  if ( ((tableID >= 0) & (tableID < MAX_TABLE)) | (tableID == UNDEFID) ) { } else
+  if ( ((tableID >= 0) & (tableID < MAX_TABLE)) | (tableID == CDI_UNDEFID) ) { } else
     Error("Invalid table ID %d", tableID);
 
   int npars = parTable[tableID].npars;

@@ -20,12 +20,7 @@
 #include "exse.h"
 
 
-#undef  UNDEFID
-#define UNDEFID  CDI_UNDEFID
-
-
 #if defined (HAVE_LIBEXTRA)
-
 
 typedef struct {
   int param;
@@ -85,7 +80,7 @@ int extInqRecord(stream_t *streamptr, int *varID, int *levelID)
 
   *varID = vlistInqVarID(vlistID, icode);
 
-  if ( *varID == UNDEFID ) Error("Code %d undefined", icode);
+  if ( *varID == CDI_UNDEFID ) Error("Code %d undefined", icode);
 
   zaxisID = vlistInqVarZaxis(vlistID, *varID);
 
@@ -630,8 +625,8 @@ int extInqTimestep(stream_t *streamptr, int tsID)
   if ( CDI_Debug )
     Message("tsID = %d rtsteps = %d", tsID, streamptr->rtsteps);
 
-  long ntsteps = UNDEFID;
-  while ( ( tsID + 1 ) > streamptr->rtsteps && ntsteps == UNDEFID )
+  long ntsteps = CDI_UNDEFID;
+  while ( ( tsID + 1 ) > streamptr->rtsteps && ntsteps == CDI_UNDEFID )
     ntsteps = extScanTimestep(streamptr);
 
   int nrecs = 0;

@@ -9,18 +9,16 @@
 #include "cdi.h"
 #include "basetime.h"
 
-#undef  UNDEFID
-#define UNDEFID  CDI_UNDEFID
 
 void basetimeInit(basetime_t *basetime)
 {
   if ( basetime == NULL )
     Error("Internal problem! Basetime not allocated.");
 
-  basetime->ncvarid       = UNDEFID;
-  basetime->ncdimid       = UNDEFID;
-  basetime->ncvarboundsid = UNDEFID;
-  basetime->leadtimeid    = UNDEFID;
+  basetime->ncvarid       = CDI_UNDEFID;
+  basetime->ncdimid       = CDI_UNDEFID;
+  basetime->ncvarboundsid = CDI_UNDEFID;
+  basetime->leadtimeid    = CDI_UNDEFID;
   basetime->lwrf          = false;
   basetime->timevar_cache = NULL;
 }

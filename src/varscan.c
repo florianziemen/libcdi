@@ -15,9 +15,6 @@
 #include "subtype.h"
 
 
-#undef  UNDEFID
-#define UNDEFID -1
-
 static size_t Vctsize = 0;
 static double *Vct = NULL;
 
@@ -103,7 +100,7 @@ void paramInitEntry(unsigned varID, int param)
   vartable[varID].tsteptype      = TSTEP_INSTANT;
   vartable[varID].timave         = 0;
   vartable[varID].timaccu        = 0;
-  vartable[varID].gridID         = UNDEFID;
+  vartable[varID].gridID         = CDI_UNDEFID;
   vartable[varID].zaxistype      = 0;
   vartable[varID].ltype1         = 0;
   vartable[varID].ltype2         = -1;
@@ -113,11 +110,11 @@ void paramInitEntry(unsigned varID, int param)
   vartable[varID].recordTable    = NULL;
   vartable[varID].nsubtypes_alloc= 0;
   vartable[varID].nsubtypes      = 0;
-  vartable[varID].instID         = UNDEFID;
-  vartable[varID].modelID        = UNDEFID;
-  vartable[varID].tableID        = UNDEFID;
-  vartable[varID].typeOfGeneratingProcess   = UNDEFID;
-  vartable[varID].productDefinitionTemplate = UNDEFID;
+  vartable[varID].instID         = CDI_UNDEFID;
+  vartable[varID].modelID        = CDI_UNDEFID;
+  vartable[varID].tableID        = CDI_UNDEFID;
+  vartable[varID].typeOfGeneratingProcess   = CDI_UNDEFID;
+  vartable[varID].productDefinitionTemplate = CDI_UNDEFID;
   vartable[varID].comptype       = CDI_COMPRESS_NONE;
   vartable[varID].complevel      = 1;
   vartable[varID].lmissval       = false;
@@ -294,12 +291,12 @@ static int levelNewEntry(unsigned varID, int level1, int level2, int tileID)
       levelTable = (leveltable_t *) Malloc((size_t)levelTableSize
                                            * sizeof (leveltable_t));
       for ( int i = 0; i < levelTableSize; i++ )
-        levelTable[i].recID = UNDEFID;
+        levelTable[i].recID = CDI_UNDEFID;
     }
   else
     {
       while( levelID < levelTableSize
-             && levelTable[levelID].recID != UNDEFID )
+             && levelTable[levelID].recID != CDI_UNDEFID )
         ++levelID;
     }
   /*
@@ -311,7 +308,7 @@ static int levelNewEntry(unsigned varID, int level1, int level2, int tileID)
                                             (size_t)(levelTableSize *= 2)
                                             * sizeof (leveltable_t));
       for( int i = levelID; i < levelTableSize; i++ )
-        levelTable[i].recID = UNDEFID;
+        levelTable[i].recID = CDI_UNDEFID;
     }
 
   levelTable[levelID].level1   = level1;
@@ -430,9 +427,9 @@ void varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds,
                   const var_tile_t *tiles, int *tile_index)
 {
   unsigned varID = (cdiSplitLtype105 != 1 || zaxistype != ZAXIS_HEIGHT) ?
-    varGetEntry(param, zaxistype, ltype1, tsteptype, name, tiles) : (unsigned)UNDEFID;
+    varGetEntry(param, zaxistype, ltype1, tsteptype, name, tiles) : (unsigned) CDI_UNDEFID;
 
-  if ( varID == (unsigned)UNDEFID )
+  if ( varID == (unsigned) CDI_UNDEFID )
     {
       nvars++;
       varID = paramNewEntry(param);
@@ -743,10 +740,10 @@ void cdi_generate_vars(stream_t *streamptr)
       vlistDefVarTimaccu(vlistID, varID, timaccu);
       vlistDefVarCompType(vlistID, varID, comptype);
 
-      if ( vartable[varid].typeOfGeneratingProcess != UNDEFID )
+      if ( vartable[varid].typeOfGeneratingProcess != CDI_UNDEFID )
         vlistDefVarTypeOfGeneratingProcess(vlistID, varID, vartable[varid].typeOfGeneratingProcess);
 
-      if ( vartable[varid].productDefinitionTemplate != UNDEFID )
+      if ( vartable[varid].productDefinitionTemplate != CDI_UNDEFID )
         vlistDefVarProductDefinitionTemplate(vlistID, varID, vartable[varid].productDefinitionTemplate);
 
       if ( vartable[varid].lmissval ) vlistDefVarMissval(vlistID, varID, vartable[varid].missval);
@@ -775,13 +772,13 @@ void cdi_generate_vars(stream_t *streamptr)
         }
       /* note: if the key is not defined, we do not throw an error! */
 
-      if ( cdiDefaultTableID != UNDEFID )
+      if ( cdiDefaultTableID != CDI_UNDEFID )
 	{
 	  int pdis, pcat, pnum;
 	  cdiDecodeParam(param, &pnum, &pcat, &pdis);
 	  if ( tableInqParNamePtr(cdiDefaultTableID, pnum) )
 	    {
-	      if ( tableID != UNDEFID )
+	      if ( tableID != CDI_UNDEFID )
 		{
 		  strcpy(name, tableInqParNamePtr(cdiDefaultTableID, pnum));
 		  vlistDefVarName(vlistID, varID, name);
@@ -799,13 +796,13 @@ void cdi_generate_vars(stream_t *streamptr)
 	      else
 		tableID = cdiDefaultTableID;
 	    }
-	  if ( cdiDefaultModelID != UNDEFID ) modelID = cdiDefaultModelID;
-	  if ( cdiDefaultInstID  != UNDEFID )  instID = cdiDefaultInstID;
+	  if ( cdiDefaultModelID != CDI_UNDEFID ) modelID = cdiDefaultModelID;
+	  if ( cdiDefaultInstID  != CDI_UNDEFID )  instID = cdiDefaultInstID;
 	}
 
-      if ( instID  != UNDEFID ) vlistDefVarInstitut(vlistID, varID, instID);
-      if ( modelID != UNDEFID ) vlistDefVarModel(vlistID, varID, modelID);
-      if ( tableID != UNDEFID ) vlistDefVarTable(vlistID, varID, tableID);
+      if ( instID  != CDI_UNDEFID ) vlistDefVarInstitut(vlistID, varID, instID);
+      if ( modelID != CDI_UNDEFID ) vlistDefVarModel(vlistID, varID, modelID);
+      if ( tableID != CDI_UNDEFID ) vlistDefVarTable(vlistID, varID, tableID);
     }
 
   for ( unsigned index = 0; index < nvars; index++ )
@@ -940,7 +937,7 @@ int varDefZaxis(int vlistID, int zaxistype, int nlevels, const double *levels, b
     mode: 0 search in vlist and zaxis table
           1 search in zaxis table
    */
-  int zaxisID = UNDEFID;
+  int zaxisID = CDI_UNDEFID;
   bool zaxisdefined = false;
   bool zaxisglobdefined = false;
   vlist_t *vlistptr = vlist_to_pointer(vlistID);

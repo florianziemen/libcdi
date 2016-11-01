@@ -15,12 +15,10 @@
 #include "serialize.h"
 #include "institution.h"
 
-#undef  UNDEFID
-#define UNDEFID  -1
 
-static int ECMWF  = UNDEFID,
-  MPIMET = UNDEFID,
-  MCH    = UNDEFID;
+static int ECMWF  = CDI_UNDEFID,
+  MPIMET = CDI_UNDEFID,
+  MCH    = CDI_UNDEFID;
 
 typedef struct
 {
@@ -53,10 +51,10 @@ static const resOps instituteOps = {
 static
 void instituteDefaultValue ( institute_t * instituteptr )
 {
-  instituteptr->self       = UNDEFID;
+  instituteptr->self       = CDI_UNDEFID;
   instituteptr->used       = 0;
-  instituteptr->center     = UNDEFID;
-  instituteptr->subcenter  = UNDEFID;
+  instituteptr->center     = CDI_UNDEFID;
+  instituteptr->subcenter  = CDI_UNDEFID;
   instituteptr->name       = NULL;
   instituteptr->longname   = NULL;
 }
@@ -151,14 +149,14 @@ findInstitute(int id, void *res, void *data)
 int institutInq(int center, int subcenter, const char *name, const char *longname)
 {
   institute_t * ip_ref = (institute_t *) Malloc(sizeof (*ip_ref));
-  ip_ref->self       = UNDEFID;
+  ip_ref->self       = CDI_UNDEFID;
   ip_ref->used       = 0;
   ip_ref->center     = center;
   ip_ref->subcenter  = subcenter;
   ip_ref->name       = name && name[0] ? (char *)name : NULL;
   ip_ref->longname   = longname && longname[0] ? (char *)longname : NULL;
 
-  struct instLoc state = { .ip = ip_ref, .id = UNDEFID };
+  struct instLoc state = { .ip = ip_ref, .id = CDI_UNDEFID };
   cdiResHFilterApply(&instituteOps, findInstitute, &state);
 
   Free(ip_ref);
@@ -202,10 +200,10 @@ int institutInqCenter(int instID)
 {
   institute_t * instituteptr = NULL;
 
-  if ( instID != UNDEFID )
+  if ( instID != CDI_UNDEFID )
     instituteptr = ( institute_t * ) reshGetVal ( instID, &instituteOps );
 
-  return  instituteptr ? instituteptr->center : UNDEFID;
+  return  instituteptr ? instituteptr->center : CDI_UNDEFID;
 }
 
 
@@ -213,10 +211,10 @@ int institutInqSubcenter(int instID)
 {
   institute_t * instituteptr = NULL;
 
-  if ( instID != UNDEFID )
+  if ( instID != CDI_UNDEFID )
     instituteptr = ( institute_t * ) reshGetVal ( instID, &instituteOps );
 
-  return instituteptr ? instituteptr->subcenter: UNDEFID;
+  return instituteptr ? instituteptr->subcenter: CDI_UNDEFID;
 }
 
 
@@ -224,7 +222,7 @@ const char *institutInqNamePtr(int instID)
 {
   institute_t * instituteptr = NULL;
 
-  if ( instID != UNDEFID )
+  if ( instID != CDI_UNDEFID )
     instituteptr = ( institute_t * ) reshGetVal ( instID, &instituteOps );
 
   return instituteptr ? instituteptr->name : NULL;
@@ -235,7 +233,7 @@ const char *institutInqLongnamePtr(int instID)
 {
   institute_t * instituteptr = NULL;
 
-  if ( instID != UNDEFID )
+  if ( instID != CDI_UNDEFID )
     instituteptr = ( institute_t * ) reshGetVal ( instID, &instituteOps );
 
   return instituteptr ? instituteptr->longname : NULL;
