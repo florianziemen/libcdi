@@ -2058,7 +2058,7 @@ void cdfDefVars(stream_t *streamptr)
     Error("Internal problem! vlist undefined for streamptr %p", streamptr);
 
   int ngrids = vlistNgrids(vlistID);
-  streamptr->ncgrid = (ncgrid_t*) Malloc(2*ngrids*sizeof(ncgrid_t));
+  if ( 2*ngrids > MAX_GRIDS_PS ) Error("Internaal problem! Too many grids per stream (max=%d)\n", MAX_GRIDS_PS);
   for ( index = 0; index < 2*ngrids; ++index )
     {
       streamptr->ncgrid[index].gridID = CDI_UNDEFID;

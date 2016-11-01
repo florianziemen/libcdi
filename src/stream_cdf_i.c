@@ -2529,7 +2529,7 @@ void cdf_set_grid_to_similar_vars(ncvar_t *ncvar1, ncvar_t *ncvar2, int gridtype
 }
 
 static
-void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars,
+void cdf_define_all_grids(ncgrid_t *ncgrid, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars,
                           int timedimid, unsigned char *uuidOfHGrid, char *gridfile, int number_of_grid_used)
 {
   for ( int ncvarid = 0; ncvarid < nvars; ++ncvarid )
@@ -2655,8 +2655,10 @@ void cdf_define_all_grids(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
           if ( ncvar->chunked ) grid_set_chunktype(grid, ncvar);
 
 	  int gridindex = vlistGridIndex(vlistID, gridID);
-	  streamptr->xdimID[gridindex] = xdimid;
-	  streamptr->ydimID[gridindex] = ydimid;
+          ncgrid[gridindex].gridID = gridID;
+          ncgrid[gridindex].xdimID = xdimid;
+          ncgrid[gridindex].ydimID = ydimid;
+
           if ( xdimid == UNDEFID && ydimid == UNDEFID && grid->size == 1 )
             gridDefHasDims(gridID, FALSE);
 
@@ -2997,8 +2999,8 @@ void cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int model
 		vlistInqVarGrid(vlistID, varID), vlistInqVarZaxis(vlistID, varID));
 
       int gridindex = vlistGridIndex(vlistID, gridID);
-      int xdimid = streamptr->xdimID[gridindex];
-      int ydimid = streamptr->ydimID[gridindex];
+      int xdimid = streamptr->ncgrid[gridindex].xdimID;
+      int ydimid = streamptr->ncgrid[gridindex].ydimID;
 
       int zaxisindex = vlistZaxisIndex(vlistID, zaxisID);
       int zdimid = streamptr->zaxisID[zaxisindex];
@@ -3749,7 +3751,7 @@ int cdfInqContents(stream_t *streamptr)
   if ( CDI_Debug ) cdf_print_vars(ncvars, nvars, "cdf_define_all_grids");
 
   /* define all grids */
-  cdf_define_all_grids(streamptr, vlistID, ncdims, nvars, ncvars, timedimid, uuidOfHGrid, gridfile, number_of_grid_used);
+  cdf_define_all_grids(streamptr->ncgrid, vlistID, ncdims, nvars, ncvars, timedimid, uuidOfHGrid, gridfile, number_of_grid_used);
 
 
   /* define all zaxes */
