@@ -238,10 +238,10 @@ void  gribClose(int fileID);
 int   gribRead(int fileID, unsigned char *buffer, size_t *buffersize);
 int   gribWrite(int fileID, unsigned char *buffer, size_t buffersize);
 off_t gribGetPos(int fileID);
-int   gribGetSize(int fileID);
+size_t gribGetSize(int fileID);
 int   gribCheckSeek(int fileID, long *offset, int *version);
 int   gribFileSeek(int fileID, long *offset);
-int   gribReadSize(int fileID);
+size_t gribReadSize(int fileID);
 int   gribVersion(unsigned char *buffer, size_t buffersize);
 
 int   grib_info_for_grads(off_t recpos, long recsize, unsigned char *gribbuffer, int *intnum, float *fltnum, off_t *bignum);
