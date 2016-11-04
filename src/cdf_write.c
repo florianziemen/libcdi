@@ -13,10 +13,6 @@
 #include "vlist.h"
 
 
-#undef  UNDEFID
-#define UNDEFID  CDI_UNDEFID
-
-
 void cdfDefVarDeflate(int ncid, int ncvarid, int deflate_level)
 {
 #if  defined(HAVE_NETCDF4)
@@ -41,7 +37,7 @@ void cdfDefVarDeflate(int ncid, int ncvarid, int deflate_level)
 #endif
 }
 
-static
+
 int cdfDefDatatype(int datatype, int filetype)
 {
   int xtype = NC_FLOAT;
@@ -64,7 +60,7 @@ int cdfDefDatatype(int datatype, int filetype)
       else if ( datatype == CDI_DATATYPE_UINT32 ) xtype = NC_INT;
 #endif
       else if ( datatype == CDI_DATATYPE_FLT64  ) xtype = NC_DOUBLE;
-      else                                    xtype = NC_FLOAT;
+      else                                        xtype = NC_FLOAT;
     }
   else
     {
@@ -75,7 +71,7 @@ int cdfDefDatatype(int datatype, int filetype)
       else if ( datatype == CDI_DATATYPE_UINT16 ) xtype = NC_INT;
       else if ( datatype == CDI_DATATYPE_UINT32 ) xtype = NC_INT;
       else if ( datatype == CDI_DATATYPE_FLT64  ) xtype = NC_DOUBLE;
-      else                                    xtype = NC_FLOAT;
+      else                                        xtype = NC_FLOAT;
     }
 
   return xtype;
@@ -113,7 +109,7 @@ void cdfDefInstitut(stream_t *streamptr)
   int fileID  = streamptr->fileID;
   int instID  = vlistInqInstitut(vlistID);
 
-  if ( instID != UNDEFID )
+  if ( instID != CDI_UNDEFID )
     {
       const char *longname = institutInqLongnamePtr(instID);
       if ( longname )
@@ -136,7 +132,7 @@ void cdfDefSource(stream_t *streamptr)
   int fileID  = streamptr->fileID;
   int modelID = vlistInqModel(vlistID);
 
-  if ( modelID != UNDEFID )
+  if ( modelID != CDI_UNDEFID )
     {
       const char *longname = modelInqNamePtr(modelID);
       if ( longname )
@@ -257,7 +253,7 @@ void cdfDefLocalAtts(stream_t *streamptr)
   int fileID  = streamptr->fileID;
 
   if ( streamptr->localatts ) return;
-  if ( vlistInqInstitut(vlistID) != UNDEFID ) return;
+  if ( vlistInqInstitut(vlistID) != CDI_UNDEFID ) return;
 
   streamptr->localatts = 1;
 
@@ -266,7 +262,7 @@ void cdfDefLocalAtts(stream_t *streamptr)
   for ( int varID = 0; varID < streamptr->nvars; varID++ )
     {
       int instID = vlistInqVarInstitut(vlistID, varID);
-      if ( instID != UNDEFID )
+      if ( instID != CDI_UNDEFID )
 	{
           int ncvarid = streamptr->vars[varID].ncvarid;
   	  const char *name = institutInqNamePtr(instID);
@@ -320,7 +316,7 @@ static
 int cdfDefVar(stream_t *streamptr, int varID)
 {
   int ncvarid = -1;
-  int xid = UNDEFID, yid = UNDEFID;
+  int xid = CDI_UNDEFID, yid = CDI_UNDEFID;
   size_t xsize = 0, ysize = 0;
   char varname[CDI_MAX_NAME];
   int dims[4];
@@ -338,7 +334,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
   if ( CDI_Debug )
     Message("streamID = %d, fileID = %d, varID = %d", streamptr->self, fileID, varID);
 
-  if ( streamptr->vars[varID].ncvarid != UNDEFID )
+  if ( streamptr->vars[varID].ncvarid != CDI_UNDEFID )
     return streamptr->vars[varID].ncvarid;
 
   int vlistID   = streamptr->vlistID;
@@ -362,18 +358,18 @@ int cdfDefVar(stream_t *streamptr, int varID)
     {
       xid = streamptr->ncgrid[gridindex].xdimID;
       yid = streamptr->ncgrid[gridindex].ydimID;
-      if ( xid != UNDEFID ) cdf_inq_dimlen(fileID, xid, &xsize);
-      if ( yid != UNDEFID ) cdf_inq_dimlen(fileID, yid, &ysize);
+      if ( xid != CDI_UNDEFID ) cdf_inq_dimlen(fileID, xid, &xsize);
+      if ( yid != CDI_UNDEFID ) cdf_inq_dimlen(fileID, yid, &ysize);
     }
 
   int zaxisindex = vlistZaxisIndex(vlistID, zaxisID);
   int zid = streamptr->zaxisID[zaxisindex];
   bool zaxis_is_scalar = false;
-  if ( zid == UNDEFID ) zaxis_is_scalar = zaxisInqScalar(zaxisID) > 0;
+  if ( zid == CDI_UNDEFID ) zaxis_is_scalar = zaxisInqScalar(zaxisID) > 0;
 
   if ( dimorder[0] != 3 ) lchunk = false; /* ZYX and ZXY */
 
-  if ( ((dimorder[0]>0)+(dimorder[1]>0)+(dimorder[2]>0)) < ((xid!=UNDEFID)+(yid!=UNDEFID)+(zid!=UNDEFID)) )
+  if ( ((dimorder[0]>0)+(dimorder[1]>0)+(dimorder[2]>0)) < ((xid!=CDI_UNDEFID)+(yid!=CDI_UNDEFID)+(zid!=CDI_UNDEFID)) )
     {
       printf("zid=%d  yid=%d  xid=%d\n", zid, yid, xid);
       Error("Internal problem, dimension order missing!");
@@ -383,32 +379,32 @@ int cdfDefVar(stream_t *streamptr, int varID)
 
   if ( tsteptype != TSTEP_CONSTANT )
     {
-      if ( tid == UNDEFID ) Error("Internal problem, time undefined!");
+      if ( tid == CDI_UNDEFID ) Error("Internal problem, time undefined!");
       chunks[ndims] = 1;
       dims[ndims++] = tid;
       axis[iax++] = 'T';
     }
   /*
-  if ( zid != UNDEFID ) axis[iax++] = 'Z';
-  if ( zid != UNDEFID ) chunks[ndims] = 1;
-  if ( zid != UNDEFID ) dims[ndims++] = zid;
+  if ( zid != CDI_UNDEFID ) axis[iax++] = 'Z';
+  if ( zid != CDI_UNDEFID ) chunks[ndims] = 1;
+  if ( zid != CDI_UNDEFID ) dims[ndims++] = zid;
 
-  if ( yid != UNDEFID ) chunks[ndims] = ysize;
-  if ( yid != UNDEFID ) dims[ndims++] = yid;
+  if ( yid != CDI_UNDEFID ) chunks[ndims] = ysize;
+  if ( yid != CDI_UNDEFID ) dims[ndims++] = yid;
 
-  if ( xid != UNDEFID ) chunks[ndims] = xsize;
-  if ( xid != UNDEFID ) dims[ndims++] = xid;
+  if ( xid != CDI_UNDEFID ) chunks[ndims] = xsize;
+  if ( xid != CDI_UNDEFID ) dims[ndims++] = xid;
   */
   for ( int id = 0; id < 3; ++id )
     {
-      if ( dimorder[id] == 3 && zid != UNDEFID )
+      if ( dimorder[id] == 3 && zid != CDI_UNDEFID )
         {
           axis[iax++] = 'Z';
           chunks[ndims] = 1;
           dims[ndims] = zid;
           ndims++;
         }
-      else if ( dimorder[id] == 2 && yid != UNDEFID )
+      else if ( dimorder[id] == 2 && yid != CDI_UNDEFID )
         {
           if ( chunktype == CDI_CHUNK_LINES )
             chunks[ndims] = 1;
@@ -417,7 +413,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
           dims[ndims] = yid;
           ndims++;
         }
-      else if ( dimorder[id] == 1 && xid != UNDEFID )
+      else if ( dimorder[id] == 1 && xid != CDI_UNDEFID )
         {
           chunks[ndims] = xsize;
           dims[ndims] = xid;
@@ -583,7 +579,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
       cdf_put_att_text(fileID, ncvarid, "param", strlen(paramstr), paramstr);
     }
 
-  if ( tableID != UNDEFID )
+  if ( tableID != CDI_UNDEFID )
     {
       tablenum = tableInqNum(tableID);
       if ( tablenum > 0 )
@@ -621,7 +617,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
     {
       cdf_put_att_text(fileID, ncvarid, "coordinates", 9, "tlon tlat" );
     }
-  else if ( gridtype == GRID_LONLAT && xid == UNDEFID && yid == UNDEFID && gridsize == 1 )
+  else if ( gridtype == GRID_LONLAT && xid == CDI_UNDEFID && yid == CDI_UNDEFID && gridsize == 1 )
     {
       int ncxvarID = streamptr->ncgrid[gridindex].xvarID;
       int ncyvarID = streamptr->ncgrid[gridindex].yvarID;
@@ -1009,7 +1005,7 @@ void cdf_write_var(stream_t *streamptr, int varID, int memtype, const void *data
   int zaxisID   = vlistInqVarZaxis(vlistID, varID);
   int tsteptype = vlistInqVarTsteptype(vlistID, varID);
 
-  int xid = UNDEFID, yid = UNDEFID;
+  int xid = CDI_UNDEFID, yid = CDI_UNDEFID;
   if ( gridInqType(gridID) == GRID_TRAJECTORY )
     {
       cdfWriteGridTraj(streamptr, gridID);
@@ -1031,14 +1027,14 @@ void cdf_write_var(stream_t *streamptr, int varID, int memtype, const void *data
       ndims++;
     }
 
-  if ( zid != UNDEFID )
+  if ( zid != CDI_UNDEFID )
     {
       start[ndims] = 0;
       count[ndims] = (size_t)zaxisInqSize(zaxisID);
       ndims++;
     }
 
-  if ( yid != UNDEFID )
+  if ( yid != CDI_UNDEFID )
     {
       start[ndims] = 0;
       cdf_inq_dimlen(fileID, yid, &size);
@@ -1047,7 +1043,7 @@ void cdf_write_var(stream_t *streamptr, int varID, int memtype, const void *data
       ndims++;
     }
 
-  if ( xid != UNDEFID )
+  if ( xid != CDI_UNDEFID )
     {
       start[ndims] = 0;
       cdf_inq_dimlen(fileID, xid, &size);
@@ -1081,7 +1077,7 @@ void cdf_write_var_chunk(stream_t *streamptr, int varID, int memtype,
 {
   if ( streamptr->accessmode == 0 ) cdfEndDef(streamptr);
 
-  int xid = UNDEFID, yid = UNDEFID;
+  int xid = CDI_UNDEFID, yid = CDI_UNDEFID;
   size_t xsize = 0, ysize = 0;
   size_t start[5];
   size_t count[5];
@@ -1128,7 +1124,7 @@ void cdf_write_var_chunk(stream_t *streamptr, int varID, int memtype,
       count[ndims] = 1;
       ndims++;
     }
-  if ( zid != UNDEFID )
+  if ( zid != CDI_UNDEFID )
     {
       int size = zaxisInqSize(zaxisID);
       xassert(rect[2][0] >= 0 && rect[2][0] <= rect[2][1]
@@ -1137,7 +1133,7 @@ void cdf_write_var_chunk(stream_t *streamptr, int varID, int memtype,
       count[ndims] = (size_t)rect[2][1] - (size_t)rect[2][0] + 1;
       ndims++;
     }
-  if ( yid != UNDEFID )
+  if ( yid != CDI_UNDEFID )
     {
       size_t size;
       cdf_inq_dimlen(fileID, yid, &size);
@@ -1147,7 +1143,7 @@ void cdf_write_var_chunk(stream_t *streamptr, int varID, int memtype,
       count[ndims] = (size_t)rect[1][1] - (size_t)rect[1][0] + 1;
       ndims++;
     }
-  if ( xid != UNDEFID )
+  if ( xid != CDI_UNDEFID )
     {
       size_t size;
       cdf_inq_dimlen(fileID, xid, &size);
@@ -1187,7 +1183,7 @@ void cdf_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
   size_t start[5];
   size_t count[5];
   int dimorder[3];
-  int xid = UNDEFID, yid = UNDEFID;
+  int xid = CDI_UNDEFID, yid = CDI_UNDEFID;
 
   if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamptr->self, varID);
 
@@ -1220,7 +1216,7 @@ void cdf_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
   int zaxisindex = vlistZaxisIndex(vlistID, zaxisID);
   int zid = streamptr->zaxisID[zaxisindex];
 
-  bool swapxy = (dimorder[2] == 2 || dimorder[0] == 1) && xid != UNDEFID && yid != UNDEFID;
+  bool swapxy = (dimorder[2] == 2 || dimorder[0] == 1) && xid != CDI_UNDEFID && yid != CDI_UNDEFID;
 
   size_t ndims = 0;
   if ( tsteptype != TSTEP_CONSTANT )
@@ -1232,20 +1228,20 @@ void cdf_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
 
   for ( int id = 0; id < 3; ++id )
     {
-      if ( dimorder[id] == 3 && zid != UNDEFID )
+      if ( dimorder[id] == 3 && zid != CDI_UNDEFID )
         {
           start[ndims] = (size_t)levelID;
           count[ndims] = 1;
           ndims++;
         }
-      else if ( dimorder[id] == 2 && yid != UNDEFID )
+      else if ( dimorder[id] == 2 && yid != CDI_UNDEFID )
         {
           start[ndims] = 0;
           cdf_inq_dimlen(fileID, yid, &ysize);
           count[ndims] = ysize;
           ndims++;
         }
-      else if ( dimorder[id] == 1 && xid != UNDEFID )
+      else if ( dimorder[id] == 1 && xid != CDI_UNDEFID )
         {
           start[ndims] = 0;
           cdf_inq_dimlen(fileID, xid, &xsize);

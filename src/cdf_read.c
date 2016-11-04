@@ -16,10 +16,6 @@
 #include "vlist.h"
 
 
-#undef  UNDEFID
-#define UNDEFID  CDI_UNDEFID
-
-
 static
 void cdfReadGridTraj(stream_t *streamptr, int gridID)
 {
@@ -27,8 +23,8 @@ void cdfReadGridTraj(stream_t *streamptr, int gridID)
   int fileID  = streamptr->fileID;
 
   int gridindex = vlistGridIndex(vlistID, gridID);
-  int lonID = streamptr->xdimID[gridindex];
-  int latID = streamptr->ydimID[gridindex];
+  int lonID = streamptr->ncgrid[gridindex].xdimID;
+  int latID = streamptr->ncgrid[gridindex].ydimID;
 
   int tsID = streamptr->curTsID;
   size_t index = (size_t)tsID;
@@ -53,15 +49,15 @@ void cdfGetSlapDescription(stream_t *streamptr, int varID, size_t (*start)[4], s
 
   if ( CDI_Debug ) Message("tsID = %d", tsID);
 
-  int xid = UNDEFID, yid = UNDEFID;
+  int xid = CDI_UNDEFID, yid = CDI_UNDEFID;
   if ( gridInqType(gridID) == GRID_TRAJECTORY )
     {
       cdfReadGridTraj(streamptr, gridID);
     }
   else
     {
-      xid = streamptr->xdimID[gridindex];
-      yid = streamptr->ydimID[gridindex];
+      xid = streamptr->ncgrid[gridindex].xdimID;
+      yid = streamptr->ncgrid[gridindex].ydimID;
     }
   int zaxisindex = vlistZaxisIndex(vlistID, zaxisID);
   int zid = streamptr->zaxisID[zaxisindex];
@@ -74,9 +70,9 @@ void cdfGetSlapDescription(stream_t *streamptr, int varID, size_t (*start)[4], s
       ndims++; \
     } while(0)
   if ( tsteptype != TSTEP_CONSTANT ) addDimension((size_t)tsID, 1);
-  if ( zid != UNDEFID ) addDimension(0, (size_t)zaxisInqSize(zaxisID));
-  if ( yid != UNDEFID ) addDimension(0, (size_t)gridInqYsize(gridID));
-  if ( xid != UNDEFID ) addDimension(0, (size_t)gridInqXsize(gridID));
+  if ( zid != CDI_UNDEFID ) addDimension(0, (size_t)zaxisInqSize(zaxisID));
+  if ( yid != CDI_UNDEFID ) addDimension(0, (size_t)gridInqYsize(gridID));
+  if ( xid != CDI_UNDEFID ) addDimension(0, (size_t)gridInqXsize(gridID));
 #undef addDimension
 
   assert(ndims <= (int)(sizeof(*start)/sizeof(**start)));
@@ -365,7 +361,7 @@ void cdfInqDimIds(stream_t *streamptr, int varId, int (*outDimIds)[3])
   int gridId = vlistInqVarGrid(streamptr->vlistID, varId);
   int gridindex = vlistGridIndex(streamptr->vlistID, gridId);
 
-  (*outDimIds)[0] = (*outDimIds)[1] = (*outDimIds)[2] = UNDEFID;
+  (*outDimIds)[0] = (*outDimIds)[1] = (*outDimIds)[2] = CDI_UNDEFID;
   switch ( gridInqType(gridId) )
     {
       case GRID_TRAJECTORY:
@@ -373,12 +369,12 @@ void cdfInqDimIds(stream_t *streamptr, int varId, int (*outDimIds)[3])
         break;
 
       case GRID_UNSTRUCTURED:
-        (*outDimIds)[0] = streamptr->xdimID[gridindex];
+        (*outDimIds)[0] = streamptr->ncgrid[gridindex].xdimID;
         break;
 
       default:
-        (*outDimIds)[0] = streamptr->xdimID[gridindex];
-        (*outDimIds)[1] = streamptr->ydimID[gridindex];
+        (*outDimIds)[0] = streamptr->ncgrid[gridindex].xdimID;
+        (*outDimIds)[1] = streamptr->ncgrid[gridindex].ydimID;
         break;
     }
 
@@ -390,8 +386,8 @@ void cdfInqDimIds(stream_t *streamptr, int varId, int (*outDimIds)[3])
 static
 int cdfGetSkipDim(int fileId, int ncvarid, int (*dimIds)[3])
 {
-  if((*dimIds)[0] != UNDEFID) return 0;
-  if((*dimIds)[1] != UNDEFID) return 0;
+  if((*dimIds)[0] != CDI_UNDEFID) return 0;
+  if((*dimIds)[1] != CDI_UNDEFID) return 0;
   int nvdims;
   cdf_inq_varndims(fileId, ncvarid, &nvdims);
   if(nvdims != 3) return 0;
@@ -436,7 +432,7 @@ void cdfGetSliceSlapDescription(stream_t *streamptr, int varId, int levelId, boo
   int dimorder[3];
   vlistInqVarDimorder(vlistId, varId, &dimorder);
 
-  *outSwapXY = (dimorder[2] == 2 || dimorder[0] == 1) && dimIds[0] != UNDEFID && dimIds[1] != UNDEFID ;
+  *outSwapXY = (dimorder[2] == 2 || dimorder[0] == 1) && dimIds[0] != CDI_UNDEFID && dimIds[1] != CDI_UNDEFID ;
 
   int ndims = 0;
 
@@ -453,7 +449,7 @@ void cdfGetSliceSlapDescription(stream_t *streamptr, int varId, int levelId, boo
     {
       size_t size;
       int curDimId = dimIds[dimorder[id]-1];
-      if ( curDimId == UNDEFID ) continue;
+      if ( curDimId == CDI_UNDEFID ) continue;
       switch ( dimorder[id] )
         {
           Error("Internal errror: Malformed dimension order encountered. Please report this bug.\n");

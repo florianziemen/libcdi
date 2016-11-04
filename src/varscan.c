@@ -2,9 +2,6 @@
 #  include "config.h"
 #endif
 
-#include <stdbool.h>
-#include <string.h>
-#include <math.h>
 
 #include "cdi.h"
 #include "cdi_int.h"
@@ -17,9 +14,6 @@
 #include "zaxis.h"
 #include "subtype.h"
 
-
-#undef  UNDEFID
-#define UNDEFID -1
 
 static size_t Vctsize = 0;
 static double *Vct = NULL;
@@ -74,7 +68,7 @@ typedef struct
   int            comptype;       // compression type
   int            complevel;      // compression level
   short          timave;
-  short          lmissval;
+  bool           lmissval;
   double         missval;
   char          *name;
   char          *stdname;
@@ -98,16 +92,15 @@ static vartable_t *vartable;
 static unsigned varTablesize = 0;
 static unsigned nvars = 0;
 
-
-static void
-paramInitEntry(unsigned varID, int param)
+static
+void paramInitEntry(unsigned varID, int param)
 {
   vartable[varID].param          = param;
   vartable[varID].prec           = 0;
   vartable[varID].tsteptype      = TSTEP_INSTANT;
   vartable[varID].timave         = 0;
   vartable[varID].timaccu        = 0;
-  vartable[varID].gridID         = UNDEFID;
+  vartable[varID].gridID         = CDI_UNDEFID;
   vartable[varID].zaxistype      = 0;
   vartable[varID].ltype1         = 0;
   vartable[varID].ltype2         = -1;
@@ -117,14 +110,14 @@ paramInitEntry(unsigned varID, int param)
   vartable[varID].recordTable    = NULL;
   vartable[varID].nsubtypes_alloc= 0;
   vartable[varID].nsubtypes      = 0;
-  vartable[varID].instID         = UNDEFID;
-  vartable[varID].modelID        = UNDEFID;
-  vartable[varID].tableID        = UNDEFID;
-  vartable[varID].typeOfGeneratingProcess   = UNDEFID;
-  vartable[varID].productDefinitionTemplate = UNDEFID;
+  vartable[varID].instID         = CDI_UNDEFID;
+  vartable[varID].modelID        = CDI_UNDEFID;
+  vartable[varID].tableID        = CDI_UNDEFID;
+  vartable[varID].typeOfGeneratingProcess   = CDI_UNDEFID;
+  vartable[varID].productDefinitionTemplate = CDI_UNDEFID;
   vartable[varID].comptype       = CDI_COMPRESS_NONE;
   vartable[varID].complevel      = 1;
-  vartable[varID].lmissval       = 0;
+  vartable[varID].lmissval       = false;
   vartable[varID].missval        = 0;
   vartable[varID].name           = NULL;
   vartable[varID].stdname        = NULL;
@@ -143,7 +136,7 @@ varGetEntry(int param, int zaxistype, int ltype1, int tsteptype, const char *nam
     {
       /* testing for "param" implicitly checks if we are beyond the
        * current vartable size: */
-      if (vartable[varID].param == param)
+      if ( vartable[varID].param == param )
         {
           int no_of_tiles = -1;
           if ( tiles ) no_of_tiles = tiles->numberOfTiles;
@@ -298,24 +291,24 @@ static int levelNewEntry(unsigned varID, int level1, int level2, int tileID)
       levelTable = (leveltable_t *) Malloc((size_t)levelTableSize
                                            * sizeof (leveltable_t));
       for ( int i = 0; i < levelTableSize; i++ )
-        levelTable[i].recID = UNDEFID;
+        levelTable[i].recID = CDI_UNDEFID;
     }
   else
     {
       while( levelID < levelTableSize
-             && levelTable[levelID].recID != UNDEFID )
+             && levelTable[levelID].recID != CDI_UNDEFID )
         ++levelID;
     }
   /*
     If the table overflows, double its size.
   */
-  if( levelID == levelTableSize )
+  if ( levelID == levelTableSize )
     {
       levelTable = (leveltable_t *) Realloc(levelTable,
                                             (size_t)(levelTableSize *= 2)
                                             * sizeof (leveltable_t));
       for( int i = levelID; i < levelTableSize; i++ )
-        levelTable[i].recID = UNDEFID;
+        levelTable[i].recID = CDI_UNDEFID;
     }
 
   levelTable[levelID].level1   = level1;
@@ -374,7 +367,7 @@ paramNewEntry(int param)
     {
       vartable = (vartable_t *) Realloc(vartable, (size_t)(varTablesize *= 2)
                                         * sizeof (vartable_t));
-      for( unsigned i = varID; i < varTablesize; i++ )
+      for ( unsigned i = varID; i < varTablesize; i++ )
         {
           vartable[i].param = UNDEF_PARAM;
           vartable[i].opt_grib_kvpair      = NULL;
@@ -422,6 +415,7 @@ int varInsertTileSubtype(vartable_t *vptr, const var_tile_t *tiles)
     subtypeDestroyPtr(subtype_ptr);
     return vptr->tiles->nentries - 1;
   }
+
   return CDI_UNDEFID;
 }
 
@@ -433,9 +427,9 @@ void varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds,
                   const var_tile_t *tiles, int *tile_index)
 {
   unsigned varID = (cdiSplitLtype105 != 1 || zaxistype != ZAXIS_HEIGHT) ?
-    varGetEntry(param, zaxistype, ltype1, tsteptype, name, tiles) : (unsigned)UNDEFID;
+    varGetEntry(param, zaxistype, ltype1, tsteptype, name, tiles) : (unsigned) CDI_UNDEFID;
 
-  if ( varID == (unsigned)UNDEFID )
+  if ( varID == (unsigned) CDI_UNDEFID )
     {
       nvars++;
       varID = paramNewEntry(param);
@@ -478,11 +472,12 @@ void varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds,
   int this_tile = varInsertTileSubtype(&vartable[varID], tiles);
   int tileID = tileGetEntry(varID, this_tile);
   if ( tile_index ) (*tile_index) = this_tile;
-  if (tileID == CDI_UNDEFID) {
-    tileID = tileNewEntry((int)varID);
-    vartable[varID].recordTable[tileID].subtypeIndex = this_tile;
-    vartable[varID].nsubtypes++;
-  }
+  if ( tileID == CDI_UNDEFID )
+    {
+      tileID = tileNewEntry((int)varID);
+      vartable[varID].recordTable[tileID].subtypeIndex = this_tile;
+      vartable[varID].nsubtypes++;
+    }
 
   /* append current level to level table info */
   int levelID = levelNewEntry(varID, level1, level2, tileID);
@@ -745,10 +740,10 @@ void cdi_generate_vars(stream_t *streamptr)
       vlistDefVarTimaccu(vlistID, varID, timaccu);
       vlistDefVarCompType(vlistID, varID, comptype);
 
-      if ( vartable[varid].typeOfGeneratingProcess != UNDEFID )
+      if ( vartable[varid].typeOfGeneratingProcess != CDI_UNDEFID )
         vlistDefVarTypeOfGeneratingProcess(vlistID, varID, vartable[varid].typeOfGeneratingProcess);
 
-      if ( vartable[varid].productDefinitionTemplate != UNDEFID )
+      if ( vartable[varid].productDefinitionTemplate != CDI_UNDEFID )
         vlistDefVarProductDefinitionTemplate(vlistID, varID, vartable[varid].productDefinitionTemplate);
 
       if ( vartable[varid].lmissval ) vlistDefVarMissval(vlistID, varID, vartable[varid].missval);
@@ -777,13 +772,13 @@ void cdi_generate_vars(stream_t *streamptr)
         }
       /* note: if the key is not defined, we do not throw an error! */
 
-      if ( cdiDefaultTableID != UNDEFID )
+      if ( cdiDefaultTableID != CDI_UNDEFID )
 	{
 	  int pdis, pcat, pnum;
 	  cdiDecodeParam(param, &pnum, &pcat, &pdis);
 	  if ( tableInqParNamePtr(cdiDefaultTableID, pnum) )
 	    {
-	      if ( tableID != UNDEFID )
+	      if ( tableID != CDI_UNDEFID )
 		{
 		  strcpy(name, tableInqParNamePtr(cdiDefaultTableID, pnum));
 		  vlistDefVarName(vlistID, varID, name);
@@ -801,13 +796,13 @@ void cdi_generate_vars(stream_t *streamptr)
 	      else
 		tableID = cdiDefaultTableID;
 	    }
-	  if ( cdiDefaultModelID != UNDEFID ) modelID = cdiDefaultModelID;
-	  if ( cdiDefaultInstID  != UNDEFID )  instID = cdiDefaultInstID;
+	  if ( cdiDefaultModelID != CDI_UNDEFID ) modelID = cdiDefaultModelID;
+	  if ( cdiDefaultInstID  != CDI_UNDEFID )  instID = cdiDefaultInstID;
 	}
 
-      if ( instID  != UNDEFID ) vlistDefVarInstitut(vlistID, varID, instID);
-      if ( modelID != UNDEFID ) vlistDefVarModel(vlistID, varID, modelID);
-      if ( tableID != UNDEFID ) vlistDefVarTable(vlistID, varID, tableID);
+      if ( instID  != CDI_UNDEFID ) vlistDefVarInstitut(vlistID, varID, instID);
+      if ( modelID != CDI_UNDEFID ) vlistDefVarModel(vlistID, varID, modelID);
+      if ( tableID != CDI_UNDEFID ) vlistDefVarTable(vlistID, varID, tableID);
     }
 
   for ( unsigned index = 0; index < nvars; index++ )
@@ -864,21 +859,16 @@ void varDefZAxisReference(int nhlev, int nvgrid, unsigned char uuid[CDI_UUID_SIZ
 bool zaxisCompare(int zaxisID, int zaxistype, int nlevels, bool lbounds, const double *levels, const char *longname, const char *units, int ltype1)
 {
   bool differ = true;
-  bool zlbounds = false;
-  bool ltype_is_equal = false;
 
-  if ( ltype1 == zaxisInqLtype(zaxisID) ) ltype_is_equal = true;
+  bool ltype_is_equal = (ltype1 == zaxisInqLtype(zaxisID));
 
   if ( ltype_is_equal && (zaxistype == zaxisInqType(zaxisID) || zaxistype == ZAXIS_GENERIC) )
     {
-      if ( zaxisInqLbounds(zaxisID, NULL) > 0 ) zlbounds = true;
+      bool zlbounds = (zaxisInqLbounds(zaxisID, NULL) > 0);
       if ( nlevels == zaxisInqSize(zaxisID) && zlbounds == lbounds )
 	{
-	  char zlongname[CDI_MAX_NAME];
-	  char zunits[CDI_MAX_NAME];
-
 	  const double *dlevels = zaxisInqLevelsPtr(zaxisID);
-          if ( dlevels )
+          if ( dlevels && levels )
             {
               int levelID;
               for ( levelID = 0; levelID < nlevels; levelID++ )
@@ -886,23 +876,24 @@ bool zaxisCompare(int zaxisID, int zaxistype, int nlevels, bool lbounds, const d
                   if ( fabs(dlevels[levelID] - levels[levelID]) > 1.e-9 )
                     break;
                 }
-
               if ( levelID == nlevels ) differ = false;
             }
 
 	  if ( ! differ )
 	    {
-	      zaxisInqLongname(zaxisID, zlongname);
-	      zaxisInqUnits(zaxisID, zunits);
-	      if ( longname && zlongname[0] )
-		{
-		  if ( strcmp(longname, zlongname) != 0 ) differ = true;
-		}
-	      if ( units && zunits[0] )
-		{
-		  if ( strcmp(units, zunits) != 0 ) differ = true;
-		}
-	    }
+              if ( longname )
+                {
+                  char zlongname[CDI_MAX_NAME];
+                  zaxisInqLongname(zaxisID, zlongname);
+                  if ( zlongname[0] && strcmp(longname, zlongname) != 0 ) differ = true;
+                }
+              if ( units )
+                {
+                  char zunits[CDI_MAX_NAME];
+                  zaxisInqUnits(zaxisID, zunits);
+                  if ( zunits[0] && strcmp(units, zunits) != 0 ) differ = true;
+                }
+            }
 	}
     }
 
@@ -946,7 +937,7 @@ int varDefZaxis(int vlistID, int zaxistype, int nlevels, const double *levels, b
     mode: 0 search in vlist and zaxis table
           1 search in zaxis table
    */
-  int zaxisID = UNDEFID;
+  int zaxisID = CDI_UNDEFID;
   bool zaxisdefined = false;
   bool zaxisglobdefined = false;
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
@@ -957,7 +948,7 @@ int varDefZaxis(int vlistID, int zaxistype, int nlevels, const double *levels, b
       {
 	zaxisID = vlistptr->zaxisIDs[index];
 
-	if ( zaxisCompare(zaxisID, zaxistype, nlevels, lbounds, levels, longname, units, ltype1) == false )
+	if ( !zaxisCompare(zaxisID, zaxistype, nlevels, lbounds, levels, longname, units, ltype1) )
 	  {
 	    zaxisdefined = true;
 	    break;
@@ -1021,7 +1012,7 @@ int varDefZaxis(int vlistID, int zaxistype, int nlevels, const double *levels, b
 
 void varDefMissval(int varID, double missval)
 {
-  vartable[varID].lmissval = 1;
+  vartable[varID].lmissval = true;
   vartable[varID].missval = missval;
 }
 

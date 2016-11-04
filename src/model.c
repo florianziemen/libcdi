@@ -13,12 +13,12 @@
 #include "resource_unpack.h"
 #include "serialize.h"
 
-#undef  UNDEFID
-#define UNDEFID -1
+#undef  CDI_UNDEFID
+#define CDI_UNDEFID -1
 
-static int ECHAM4 = UNDEFID,
-  ECHAM5 = UNDEFID,
-  COSMO  = UNDEFID;
+static int ECHAM4 = CDI_UNDEFID,
+  ECHAM5 = CDI_UNDEFID,
+  COSMO  = CDI_UNDEFID;
 
 typedef struct
 {
@@ -56,10 +56,10 @@ static const resOps modelOps = {
 static
 void modelDefaultValue ( model_t *modelptr )
 {
-  modelptr->self        = UNDEFID;
+  modelptr->self        = CDI_UNDEFID;
   modelptr->used        = 0;
-  modelptr->instID      = UNDEFID;
-  modelptr->modelgribID = UNDEFID;
+  modelptr->instID      = CDI_UNDEFID;
+  modelptr->modelgribID = CDI_UNDEFID;
   modelptr->name        = NULL;
 }
 
@@ -186,7 +186,7 @@ int modelInq(int instID, int modelgribID, const char *name)
 
   struct modelLoc searchState = { .name = name, .instID = instID,
                                   .modelgribID = modelgribID,
-                                  .resID = UNDEFID };
+                                  .resID = CDI_UNDEFID };
   if (name && *name)
     cdiResHFilterApply(&modelOps, findModelByName, &searchState);
   else
@@ -213,10 +213,10 @@ int modelInqInstitut(int modelID)
 
   modelInit ();
 
-  if ( modelID != UNDEFID )
+  if ( modelID != CDI_UNDEFID )
     modelptr = ( model_t * ) reshGetVal ( modelID, &modelOps );
 
-  return modelptr ? modelptr->instID : UNDEFID;
+  return modelptr ? modelptr->instID : CDI_UNDEFID;
 }
 
 
@@ -226,10 +226,10 @@ int modelInqGribID(int modelID)
 
   modelInit ();
 
-  if ( modelID != UNDEFID )
+  if ( modelID != CDI_UNDEFID )
     modelptr = ( model_t * ) reshGetVal ( modelID, &modelOps );
 
-  return modelptr ? modelptr->modelgribID : UNDEFID;
+  return modelptr ? modelptr->modelgribID : CDI_UNDEFID;
 }
 
 
@@ -239,7 +239,7 @@ const char *modelInqNamePtr(int modelID)
 
   modelInit ();
 
-  if ( modelID != UNDEFID )
+  if ( modelID != CDI_UNDEFID )
     modelptr = ( model_t * ) reshGetVal ( modelID, &modelOps );
 
   return modelptr ? modelptr->name : NULL;

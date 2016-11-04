@@ -637,7 +637,7 @@ int streamOpenA(const char *filename, const char *filemode, int filetype)
   if ( status < 0 ) return status;
   vlist_t *vlistptr = vlist_to_pointer(streamptr->vlistID);
   vlistptr->ntsteps = (int)cdiInqTimeSize(streamID);
-  if(!strcmp(filemode, "r")) cdiVlistMakeImmutable(streamptr->vlistID);
+  if ( !strcmp(filemode, "r") ) cdiVlistMakeImmutable(streamptr->vlistID);
 
   {
     void (*streamCloseDelegate)(stream_t *streamptr, int recordBufIsToBeDeleted)
@@ -880,13 +880,18 @@ void streamDefaultValue ( stream_t * streamptr )
   basetimeInit(&streamptr->basetime);
 
 #ifdef HAVE_LIBNETCDF
-  int i;
-  for ( i = 0; i < MAX_GRIDS_PS; i++ ) streamptr->xdimID[i]  = CDI_UNDEFID;
-  for ( i = 0; i < MAX_GRIDS_PS; i++ ) streamptr->ydimID[i]  = CDI_UNDEFID;
-  for ( i = 0; i < MAX_ZAXES_PS; i++ ) streamptr->zaxisID[i]  = CDI_UNDEFID;
-  for ( i = 0; i < MAX_ZAXES_PS; i++ ) streamptr->nczvarID[i] = CDI_UNDEFID;
+  for ( int i = 0; i < MAX_ZAXES_PS; i++ ) streamptr->zaxisID[i]  = CDI_UNDEFID;
+  for ( int i = 0; i < MAX_ZAXES_PS; i++ ) streamptr->nczvarID[i] = CDI_UNDEFID;
 
-  streamptr->ncgrid            = NULL;
+  for ( int i = 0; i < MAX_GRIDS_PS; i++ )
+    {
+      streamptr->ncgrid[i].gridID = CDI_UNDEFID;
+      streamptr->ncgrid[i].xdimID = CDI_UNDEFID;
+      streamptr->ncgrid[i].ydimID = CDI_UNDEFID;
+      streamptr->ncgrid[i].xvarID = CDI_UNDEFID;
+      streamptr->ncgrid[i].yvarID = CDI_UNDEFID;
+      streamptr->ncgrid[i].avarID = CDI_UNDEFID;
+    }
 
   streamptr->vct.ilev          = 0;
   streamptr->vct.mlev          = 0;
@@ -966,7 +971,6 @@ void cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDelet
       case CDI_FILETYPE_NC4C:
         {
           cdfClose(fileID);
-          if ( streamptr->ncgrid ) { Free(streamptr->ncgrid); streamptr->ncgrid = NULL; }
           break;
         }
 #endif

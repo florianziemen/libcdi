@@ -245,9 +245,7 @@ typedef struct {
   int         ncmode;
   int         vlistID;
 #ifdef HAVE_LIBNETCDF
-  ncgrid_t   *ncgrid;
-  int         xdimID[MAX_GRIDS_PS];
-  int         ydimID[MAX_GRIDS_PS];
+  ncgrid_t    ncgrid[MAX_GRIDS_PS];
   int         zaxisID[MAX_ZAXES_PS];	//Warning: synchronous array to vlist_to_pointer(vlistID)->zaxisIDs
   int         nczvarID[MAX_ZAXES_PS];
   VCT         vct;

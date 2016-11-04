@@ -35,6 +35,8 @@ void cdfDefTime(stream_t* streamptr);
 
 void cdf_scale_add(size_t size, double *data, double addoffset, double scalefactor);
 
+int cdfDefDatatype(int datatype, int filetype);
+
 #endif
 /*
  * Local Variables:

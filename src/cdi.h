@@ -752,9 +752,6 @@ void    gridDefProj(int gridID, int projID);
 /*      gridInqProj: Get the projection ID of a Grid */
 int     gridInqProj(int gridID);
 
-/*      gridDefProjType: Define the projection type */
-void    gridDefProjType(int gridID, int projtype);
-
 /*      gridInqProjType: Get the projection type */
 int     gridInqProjType(int gridID);
 
