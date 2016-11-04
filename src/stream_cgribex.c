@@ -327,7 +327,7 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid, i
 
 static
 void cgribexAddRecord(stream_t * streamptr, int param, int *isec1, int *isec2, double *fsec2, double *fsec3,
-		      int *isec4, long recsize, off_t position, int datatype, int comptype, int lmv, int iret)
+		      int *isec4, size_t recsize, off_t position, int datatype, int comptype, int lmv, int iret)
 {
   int varID;
   int levelID = 0;
@@ -345,7 +345,7 @@ void cgribexAddRecord(stream_t * streamptr, int param, int *isec1, int *isec2, d
 
   /* fprintf(stderr, "param %d %d %d %d\n", param, level1, level2, ISEC1_LevelType); */
 
-  record->size      = (size_t)recsize;
+  record->size      = recsize;
   record->position  = position;
   record->param     = param;
   record->ilevel    = level1;
@@ -579,7 +579,7 @@ int cgribexScanTimestep1(stream_t * streamptr)
   unsigned nrecords, recID;
   int nrecs_scanned = 0;
   int datatype;
-  long recsize = 0;
+  size_t recsize = 0;
   bool warn_time = true;
   bool warn_numavg = true;
   int taxisID = -1;
@@ -631,13 +631,13 @@ int cgribexScanTimestep1(stream_t * streamptr)
 	  streamptr->ntsteps = 1;
 	  break;
 	}
-      if ( (size_t)recsize > buffersize )
+      if ( recsize > buffersize )
 	{
-	  buffersize = (size_t)recsize;
+	  buffersize = recsize;
 	  gribbuffer = Realloc(gribbuffer, buffersize);
 	}
 
-      readsize = (size_t)recsize;
+      readsize = recsize;
       rstatus = gribRead(fileID, (unsigned char *)gribbuffer, &readsize);
       if ( rstatus ) break;
 
@@ -797,7 +797,7 @@ int cgribexScanTimestep2(stream_t * streamptr)
   int varID, gridID;
   size_t readsize;
   int nrecs, recID;
-  long recsize = 0;
+  size_t recsize = 0;
   bool warn_numavg = true;
   int tsteptype;
   long unzipsize;
@@ -854,13 +854,13 @@ int cgribexScanTimestep2(stream_t * streamptr)
 	  streamptr->ntsteps = 2;
 	  break;
 	}
-      if ( (size_t)recsize > buffersize )
+      if ( recsize > buffersize )
 	{
-	  buffersize = (size_t)recsize;
+	  buffersize = recsize;
 	  gribbuffer = Realloc(gribbuffer, buffersize);
 	}
 
-      readsize = (size_t)recsize;
+      readsize = recsize;
       rstatus = gribRead(fileID, (unsigned char *)gribbuffer, &readsize);
       if ( rstatus ) break;
 
@@ -974,7 +974,7 @@ int cgribexScanTimestep2(stream_t * streamptr)
       if ( CDI_Debug )
 	Message("Read record %2d (id=%s lev1=%d lev2=%d) %8d %6d", nrecs_scanned, paramstr, level1, level2, vdate, vtime);
 
-      streamptr->tsteps[tsID].records[recID].size = (size_t)recsize;
+      streamptr->tsteps[tsID].records[recID].size = recsize;
 
       if ( cgribexVarCompare(compVar, streamptr->tsteps[tsID].records[recID], 0) != 0 )
 	{
@@ -1034,7 +1034,7 @@ int cgribexScanTimestep(stream_t * streamptr)
   int rstatus = 0;
   double fsec2[512], fsec3[2], *fsec4 = NULL;
   int lmv = 0, iret = 0;
-  long recsize = 0;
+  size_t recsize = 0;
   off_t recpos = 0;
   void *gribbuffer;
   size_t buffersize = 0;
@@ -1100,15 +1100,15 @@ int cgribexScanTimestep(stream_t * streamptr)
 	      streamptr->ntsteps = streamptr->rtsteps + 1;
 	      break;
 	    }
-	  if ( recsize > 0 && (size_t)recsize > buffersize )
+	  if ( recsize > 0 && recsize > buffersize )
 	    {
-	      buffersize = (size_t)recsize;
+	      buffersize = recsize;
 	      gribbuffer = Realloc(gribbuffer, buffersize);
 	    }
 
 	  if ( rindex >= nrecs ) break;
 
-	  readsize = (size_t)recsize;
+	  readsize = recsize;
 	  rstatus = gribRead(fileID, (unsigned char *)gribbuffer, &readsize);
 	  if ( rstatus )
 	    {
@@ -1242,7 +1242,7 @@ int cgribexScanTimestep(stream_t * streamptr)
 	    }
 
 	  streamptr->tsteps[tsID].records[recID].position = recpos;
-	  streamptr->tsteps[tsID].records[recID].size = (size_t)recsize;
+	  streamptr->tsteps[tsID].records[recID].size = recsize;
 
 	  rindex++;
 	}

@@ -804,8 +804,8 @@ int gribapiScanTimestep1(stream_t * streamptr)
   while ( TRUE )
     {
       int level1 = 0, level2 = 0;
-      size_t recsize = (size_t)gribGetSize(fileID);
-      recpos  = fileGetPos(fileID);
+      size_t recsize = gribGetSize(fileID);
+      recpos = fileGetPos(fileID);
 
       if ( recsize == 0 )
         {
@@ -1027,8 +1027,8 @@ int gribapiScanTimestep2(stream_t * streamptr)
     {
       if ( rindex > nrecords ) break;
 
-      size_t recsize = (size_t)gribGetSize(fileID);
-      recpos  = fileGetPos(fileID);
+      size_t recsize = gribGetSize(fileID);
+      recpos = fileGetPos(fileID);
       if ( recsize == 0 )
 	{
 	  streamptr->ntsteps = 2;
@@ -1248,8 +1248,8 @@ int gribapiScanTimestep(stream_t * streamptr)
 	{
 	  if ( rindex > nrecs ) break;
 
-	  size_t recsize = (size_t)gribGetSize(fileID);
-	  recpos  = fileGetPos(fileID);
+	  size_t recsize = gribGetSize(fileID);
+	  recpos = fileGetPos(fileID);
 	  if ( recsize == 0 )
 	    {
 	      streamptr->ntsteps = streamptr->rtsteps + 1;
