@@ -4,7 +4,7 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   September 2016
+! Uwe Schulzweida, MPI-MET, Hamburg,   November 2016
 !
 
       INTEGER    CDI_MAX_NAME          
@@ -1520,11 +1520,6 @@
       INTEGER         gridInqProj
 !                                    (INTEGER         gridID)
       EXTERNAL        gridInqProj
-
-!                     gridDefProjType
-!                                    (INTEGER         gridID,
-!                                     INTEGER         projtype)
-      EXTERNAL        gridDefProjType
 
       INTEGER         gridInqProjType
 !                                    (INTEGER         gridID)
