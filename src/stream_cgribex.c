@@ -514,11 +514,10 @@ compvar_t cgribexVarSet(int param, int level1, int level2, int leveltype, int tr
 static inline int
 cgribexVarCompare(compvar_t compVar, record_t record, int flag)
 {
-  int tstepDiff = (!((flag == 0) & (((compVar.tsteptype == TSTEP_INSTANT)
-                                     & (record.tsteptype == TSTEP_INSTANT3))
-                                    |((compVar.tsteptype == TSTEP_INSTANT3)
-                                      & (record.tsteptype == TSTEP_INSTANT)))))
-    & (compVar.tsteptype != record.tsteptype);
+  bool vinst = compVar.tsteptype == TSTEP_INSTANT || compVar.tsteptype == TSTEP_INSTANT2 || compVar.tsteptype == TSTEP_INSTANT3;
+  bool rinst = record.tsteptype == TSTEP_INSTANT || record.tsteptype == TSTEP_INSTANT2 || record.tsteptype == TSTEP_INSTANT3;
+  int tstepDiff = (!((flag == 0) & (vinst && rinst)))
+                & (compVar.tsteptype != record.tsteptype);
   int rstatus = (compVar.param != record.param)
     |           (compVar.level1 != record.ilevel)
     |           (compVar.level2 != record.ilevel2)
@@ -663,8 +662,8 @@ int cgribexScanTimestep1(stream_t * streamptr)
 
       if ( ISEC1_LevelType == 100 ) ISEC1_Level1 *= 100;
       if ( ISEC1_LevelType ==  99 ) ISEC1_LevelType = 100;
-      level1   = ISEC1_Level1;
-      level2   = ISEC1_Level2;
+      level1 = ISEC1_Level1;
+      level2 = ISEC1_Level2;
 
       gribDateTime(isec1, &vdate, &vtime);
 
@@ -684,8 +683,8 @@ int cgribexScanTimestep1(stream_t * streamptr)
 	}
       else
 	{
-	  datetime.date  = vdate;
-	  datetime.time  = vtime;
+	  datetime.date = vdate;
+	  datetime.time = vtime;
 	  compvar_t compVar = cgribexVarSet(param, level1, level2, ISEC1_LevelType, ISEC1_TimeRange);
 	  for ( recID = 0; recID < nrecs; recID++ )
 	    {
