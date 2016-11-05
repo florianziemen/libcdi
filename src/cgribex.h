@@ -226,7 +226,7 @@ void  gribPrintBDS(int nrec, long recpos, long recsize, unsigned char *gribbuffe
 void  gribCheck1(int nrec, long recpos, long recsize, unsigned char *gribbuffer);
 void  gribRepair1(int nrec, long recsize, unsigned char *gribbuffer);
 
-int   gribGetZip(long recsize, unsigned char *gribbuffer, long *urecsize);
+int   gribGetZip(size_t recsize, unsigned char *gribbuffer, size_t *urecsize);
 
 int   gribBzip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbufsize);
 int   gribZip(unsigned char *dbuf, long dbufsize, unsigned char *sbuf, long sbufsize);

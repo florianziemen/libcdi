@@ -118,8 +118,8 @@ void grbCopyRecord(stream_t * streamptr2, stream_t * streamptr1)
 
   if ( filetype == CDI_FILETYPE_GRB )
     {
-      long unzipsize;
-      int izip = gribGetZip((long)recsize, gribbuffer, &unzipsize);
+      size_t unzipsize;
+      int izip = gribGetZip(recsize, gribbuffer, &unzipsize);
 
       if ( izip == 0 && streamptr2->comptype == CDI_COMPRESS_SZIP )
           nbytes = grbSzip(filetype, gribbuffer, nbytes);

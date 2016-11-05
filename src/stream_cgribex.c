@@ -587,7 +587,7 @@ int cgribexScanTimestep1(stream_t * streamptr)
   bool fcast = false;
   int vlistID;
   int comptype;
-  long unzipsize;
+  size_t unzipsize;
   char paramstr[32];
   int nskip = cdiSkipRecords;
 
@@ -646,9 +646,9 @@ int cgribexScanTimestep1(stream_t * streamptr)
 	{
 	  comptype = CDI_COMPRESS_SZIP;
 	  unzipsize += 100; /* need 0 to 1 bytes for rounding of bds */
-	  if ( buffersize < (size_t)unzipsize )
+	  if ( buffersize < unzipsize )
 	    {
-	      buffersize = (size_t)unzipsize;
+	      buffersize = unzipsize;
 	      gribbuffer = Realloc(gribbuffer, buffersize);
 	    }
 	}
@@ -800,7 +800,7 @@ int cgribexScanTimestep2(stream_t * streamptr)
   size_t recsize = 0;
   bool warn_numavg = true;
   int tsteptype;
-  long unzipsize;
+  size_t unzipsize;
   char paramstr[32];
 
   streamptr->curTsID = 1;
@@ -867,9 +867,9 @@ int cgribexScanTimestep2(stream_t * streamptr)
       if ( gribGetZip(recsize, (unsigned char *)gribbuffer, &unzipsize) > 0 )
 	{
 	  unzipsize += 100; /* need 0 to 1 bytes for rounding of bds */
-	  if ( buffersize < (size_t)unzipsize )
+	  if ( buffersize < unzipsize )
 	    {
-	      buffersize = (size_t)unzipsize;
+	      buffersize = unzipsize;
 	      gribbuffer = Realloc(gribbuffer, buffersize);
 	    }
 	}
@@ -1048,7 +1048,7 @@ int cgribexScanTimestep(stream_t * streamptr)
   int taxisID = -1;
   int rindex, nrecs = 0;
   int nrecs_scanned;
-  long unzipsize;
+  size_t unzipsize;
   char paramstr[32];
 
   /*
@@ -1120,9 +1120,9 @@ int cgribexScanTimestep(stream_t * streamptr)
 	  if ( gribGetZip(recsize, (unsigned char *)gribbuffer, &unzipsize) > 0 )
 	    {
 	      unzipsize += 100; /* need 0 to 1 bytes for rounding of bds */
-	      if ( buffersize < (size_t)unzipsize )
+	      if ( buffersize < unzipsize )
 		{
-		  buffersize = (size_t)unzipsize;
+		  buffersize = unzipsize;
 		  gribbuffer = Realloc(gribbuffer, buffersize);
 		}
 	    }
