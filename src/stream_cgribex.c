@@ -776,7 +776,7 @@ int cgribexScanTimestep1(stream_t * streamptr)
     streamptr->tsteps[0].recIDs[recID] = (int)recID;
 
   streamptr->record->buffer     = gribbuffer;
-  streamptr->record->buffersize = (size_t)buffersize;
+  streamptr->record->buffersize = buffersize;
 
   cgribexScanTsFixNtsteps(streamptr, recpos);
   cgribexScanTsConstAdjust(streamptr, taxis);
