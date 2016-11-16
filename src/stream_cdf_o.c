@@ -434,34 +434,34 @@ void cdfDefFC(stream_t *streamptr, int gridID, int gridindex)
 static const struct cdfDefGridAxisInqs {
   int (*axisSize)(int gridID);
   int (*axisName)(int cdiID, int key, int size, char *mesg);
-  void (*axisStdname)(int cdiID, char *dimstdname);
   int (*axisLongname)(int cdiID, int key, int size, char *mesg);
-  void (*axisUnits)(int cdiID, char *dimunits);
+  int (*axisUnits)(int cdiID, int key, int size, char *mesg);
+  void (*axisStdname)(int cdiID, char *dimstdname);
   double (*axisVal)(int gridID, int index);
   const double *(*axisValsPtr)(int gridID);
   const double *(*axisBoundsPtr)(int gridID);
 } gridInqsX = {
   .axisSize = gridInqXsize,
   .axisName = cdiGridInqKeyStr,
-  .axisStdname = gridInqXstdname,
   .axisLongname = cdiGridInqKeyStr,
-  .axisUnits = gridInqXunits,
+  .axisUnits = cdiGridInqKeyStr,
+  .axisStdname = gridInqXstdname,
   .axisVal = gridInqXval,
   .axisValsPtr = gridInqXvalsPtr,
   .axisBoundsPtr = gridInqXboundsPtr,
 }, gridInqsY = {
   .axisSize = gridInqYsize,
   .axisName = cdiGridInqKeyStr,
-  .axisStdname = gridInqYstdname,
   .axisLongname = cdiGridInqKeyStr,
-  .axisUnits = gridInqYunits,
+  .axisUnits = cdiGridInqKeyStr,
+  .axisStdname = gridInqYstdname,
   .axisVal = gridInqYval,
   .axisValsPtr = gridInqYvalsPtr,
   .axisBoundsPtr = gridInqYboundsPtr,
 }, gridInqsZ = {
-  .axisStdname = zaxisInqStdname,
   .axisLongname = cdiZaxisInqKeyStr,
-  .axisUnits = zaxisInqUnits,
+  .axisUnits = cdiZaxisInqKeyStr,
+  .axisStdname = zaxisInqStdname,
 };
 
 static
@@ -477,12 +477,13 @@ void cdfPutGridStdAtts(int fileID, int ncvarid, int gridID, int dimtype, const s
   char longname[CDI_MAX_NAME]; longname[0] = 0;
   int keyname = (dimtype == 'Z') ? CDI_KEY_LONGNAME : (dimtype == 'X') ? CDI_KEY_XLONGNAME : CDI_KEY_YLONGNAME;
   inqs->axisLongname(gridID, keyname, CDI_MAX_NAME, longname);
-  if ( (len = strlen(longname)) )
+  if ( longname[0] && (len = strlen(longname)) )
     cdf_put_att_text(fileID, ncvarid, "long_name", len, longname);
 
-  char units[CDI_MAX_NAME];
-  inqs->axisUnits(gridID, units);
-  if ( (len = strlen(units)) )
+  char units[CDI_MAX_NAME]; units[0] = 0;
+  keyname = (dimtype == 'Z') ? CDI_KEY_UNITS : (dimtype == 'X') ? CDI_KEY_XUNITS : CDI_KEY_YUNITS;
+  inqs->axisUnits(gridID, keyname, CDI_MAX_NAME, units);
+  if ( units[0] && (len = strlen(units)) )
     cdf_put_att_text(fileID, ncvarid, "units", len, units);
 }
 
@@ -674,10 +675,7 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridindex, int ndims,
               if ( IS_EQUAL(inqVal(gridID0, 0), inqVal(gridID, 0)) &&
                    IS_EQUAL(inqVal(gridID0, (int)dimlen-1), inqVal(gridID, (int)dimlen-1)) )
                 {
-                  if ( dimKey == CDI_KEY_XDIMNAME )
-                    dimID = ncgrid[index].xdimID;
-                  else
-                    dimID = ncgrid[index].ydimID;
+                  dimID = (dimKey == CDI_KEY_XDIMNAME) ? ncgrid[index].xdimID : ncgrid[index].ydimID;
                   break;
                 }
             }
