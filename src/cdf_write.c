@@ -1145,30 +1145,33 @@ void cdf_write_var_chunk(stream_t *streamptr, int varID, int memtype,
   if ( zid != CDI_UNDEFID )
     {
       int size = zaxisInqSize(zaxisID);
-      xassert(rect[2][0] >= 0 && rect[2][0] <= rect[2][1]
+      xassert(rect[2][0] >= 0 && rect[2][0] <= rect[2][1] + 1
               && rect[2][1] <= size);
       start[ndims] = (size_t)rect[2][0];
-      count[ndims] = (size_t)rect[2][1] - (size_t)rect[2][0] + 1;
+      count[ndims] = rect[2][1] < 0 ? (size_t)0
+        : (size_t)rect[2][1] - (size_t)rect[2][0] + 1;
       ndims++;
     }
   if ( yid != CDI_UNDEFID )
     {
       size_t size;
       cdf_inq_dimlen(fileID, yid, &size);
-      xassert(rect[1][0] >= 0 && rect[1][0] <= rect[1][1]
-              && (size_t)rect[1][1] <= size);
+      xassert(rect[1][0] >= 0 && rect[1][0] <= rect[1][1] + 1
+              && (rect[1][1] < 0 || (size_t)rect[1][1] <= size));
       start[ndims] = (size_t)rect[1][0];
-      count[ndims] = (size_t)rect[1][1] - (size_t)rect[1][0] + 1;
+      count[ndims] = rect[1][1] < 0 ? (size_t)0
+        : ((size_t)rect[1][1] - (size_t)rect[1][0] + 1);
       ndims++;
     }
   if ( xid != CDI_UNDEFID )
     {
       size_t size;
       cdf_inq_dimlen(fileID, xid, &size);
-      xassert(rect[0][0] >= 0 && rect[0][0] <= rect[0][1]
-              && (size_t)rect[0][1] <= size);
+      xassert(rect[0][0] >= 0 && rect[0][0] <= rect[0][1] + 1
+              && (rect[0][1] < 0 || (size_t)rect[0][1] <= size));
       start[ndims] = (size_t)rect[0][0];
-      count[ndims] = (size_t)rect[0][1] - (size_t)rect[0][0] + 1;
+      count[ndims] = rect[0][1] < 0 ? (size_t)0
+        : (size_t)rect[0][1] - (size_t)rect[0][0] + 1;
       ndims++;
     }
 
