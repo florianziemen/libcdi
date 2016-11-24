@@ -65,12 +65,12 @@ int grbUnzipRecord(void *gribbuffer, size_t *gribsize)
 {
   int zip = 0;
   int izip;
-  long unzipsize;
+  size_t unzipsize;
 
   size_t igribsize = *gribsize;
   size_t ogribsize = *gribsize;
 
-  if ( (izip = gribGetZip((long)igribsize, (unsigned char *)gribbuffer, &unzipsize)) > 0 )
+  if ( (izip = gribGetZip(igribsize, (unsigned char *)gribbuffer, &unzipsize)) > 0 )
     {
       zip = izip;
       if ( izip == 128 ) /* szip */
@@ -78,9 +78,9 @@ int grbUnzipRecord(void *gribbuffer, size_t *gribsize)
 	  unsigned char *itmpbuffer = NULL;
 	  size_t itmpbuffersize = 0;
 
-	  if ( unzipsize < (long) igribsize )
+	  if ( unzipsize < igribsize )
 	    {
-	      fprintf(stderr, "Decompressed size smaller than compressed size (in %ld; out %ld)!\n", (long)igribsize, unzipsize);
+	      fprintf(stderr, "Decompressed size smaller than compressed size (in %zu; out %zu)!\n", igribsize, unzipsize);
 	      return 0;
 	    }
 
@@ -94,7 +94,7 @@ int grbUnzipRecord(void *gribbuffer, size_t *gribsize)
 
 	  unzipsize += 100; /* need 0 to 1 bytes for rounding of bds */
 
-	  ogribsize = (size_t)gribUnzip((unsigned char *)gribbuffer, unzipsize, itmpbuffer, (long)igribsize);
+	  ogribsize = (size_t)gribUnzip((unsigned char *)gribbuffer, (long)unzipsize, itmpbuffer, (long)igribsize);
 
 	  Free(itmpbuffer);
 

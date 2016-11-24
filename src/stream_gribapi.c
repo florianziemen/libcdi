@@ -692,7 +692,7 @@ void ensureBufferSize(size_t requiredSize, size_t *curSize, void **buffer)
 }
 
 static
-grib_handle *gribapiGetDiskRepresentation(size_t recsize, size_t *buffersize, void **gribbuffer, int *outDatatype, int *outCompressionType, long *outUnzipsize)
+grib_handle *gribapiGetDiskRepresentation(size_t recsize, size_t *buffersize, void **gribbuffer, int *outDatatype, int *outCompressionType, size_t *outUnzipsize)
 {
   bool lieee = false;
 
@@ -712,10 +712,10 @@ grib_handle *gribapiGetDiskRepresentation(size_t recsize, size_t *buffersize, vo
     }
   else
     {
-      if( gribGetZip((long)recsize, *gribbuffer, outUnzipsize) > 0 )
+      if( gribGetZip(recsize, *gribbuffer, outUnzipsize) > 0 )
         {
           *outCompressionType = CDI_COMPRESS_SZIP;
-          ensureBufferSize((size_t)*outUnzipsize + 100, buffersize, gribbuffer);
+          ensureBufferSize(*outUnzipsize + 100, buffersize, gribbuffer);
         }
       else
         {
@@ -804,8 +804,8 @@ int gribapiScanTimestep1(stream_t * streamptr)
   while ( TRUE )
     {
       int level1 = 0, level2 = 0;
-      size_t recsize = (size_t)gribGetSize(fileID);
-      recpos  = fileGetPos(fileID);
+      size_t recsize = gribGetSize(fileID);
+      recpos = fileGetPos(fileID);
 
       if ( recsize == 0 )
         {
@@ -819,7 +819,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
       if ( rstatus ) break;
 
       int datatype, comptype = 0;
-      long unzipsize;
+      size_t unzipsize;
       gh = gribapiGetDiskRepresentation(recsize, &buffersize, &gribbuffer, &datatype, &comptype, &unzipsize);
 
       nrecs_scanned++;
@@ -1027,8 +1027,8 @@ int gribapiScanTimestep2(stream_t * streamptr)
     {
       if ( rindex > nrecords ) break;
 
-      size_t recsize = (size_t)gribGetSize(fileID);
-      recpos  = fileGetPos(fileID);
+      size_t recsize = gribGetSize(fileID);
+      recpos = fileGetPos(fileID);
       if ( recsize == 0 )
 	{
 	  streamptr->ntsteps = 2;
@@ -1040,9 +1040,9 @@ int gribapiScanTimestep2(stream_t * streamptr)
       rstatus = gribRead(fileID, gribbuffer, &readsize);
       if ( rstatus ) break;
 
-      long unzipsize;
-      if ( gribGetZip((long)recsize, gribbuffer, &unzipsize) > 0 )
-        ensureBufferSize((size_t)unzipsize + 100, &buffersize, &gribbuffer);
+      size_t unzipsize;
+      if ( gribGetZip(recsize, gribbuffer, &unzipsize) > 0 )
+        ensureBufferSize(unzipsize + 100, &buffersize, &gribbuffer);
 
       nrecs_scanned++;
       gh = grib_handle_new_from_message(NULL, gribbuffer, recsize);
@@ -1248,8 +1248,8 @@ int gribapiScanTimestep(stream_t * streamptr)
 	{
 	  if ( rindex > nrecs ) break;
 
-	  size_t recsize = (size_t)gribGetSize(fileID);
-	  recpos  = fileGetPos(fileID);
+	  size_t recsize = gribGetSize(fileID);
+	  recpos = fileGetPos(fileID);
 	  if ( recsize == 0 )
 	    {
 	      streamptr->ntsteps = streamptr->rtsteps + 1;
@@ -1268,9 +1268,9 @@ int gribapiScanTimestep(stream_t * streamptr)
 	      break;
 	    }
 
-          long unzipsize;
-	  if ( gribGetZip((long)recsize, gribbuffer, &unzipsize) > 0 )
-            ensureBufferSize((size_t)unzipsize + 100, &buffersize, &gribbuffer);
+          size_t unzipsize;
+	  if ( gribGetZip(recsize, gribbuffer, &unzipsize) > 0 )
+            ensureBufferSize(unzipsize + 100, &buffersize, &gribbuffer);
 
           nrecs_scanned++;
 	  gh = grib_handle_new_from_message(NULL, gribbuffer, recsize);
