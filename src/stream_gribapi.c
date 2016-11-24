@@ -2288,7 +2288,7 @@ void getLevelFactor(double level, long *factor, long *out_scaled_value)
   long   i;
 
   const double eps = 1.e-8;
-  for ( i=0; (fabs(scaled_value - (double) iscaled_value) >= eps) && i < 7; i++ )
+  for ( i=0; iscaled_value <= INT32_MAX/10 && (fabs(scaled_value - (double) iscaled_value) >= eps) && i < 7; i++ )
     {
       scaled_value *= 10.;
       iscaled_value = lround(scaled_value);
