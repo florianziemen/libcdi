@@ -166,7 +166,9 @@ CdiGribIterator *cdiGribIterator_deserialize(const char *description)
 
   {
     const char *savedStart = description;
-    long long decodedOffset = strtoll(description, (char**)&description, 0);    //The cast is a workaround for the wrong signature of strtoll() (it should have been `long long strtoll(const char*, const char**, int)`, not `long long strtoll(const char*, char**, int)`.
+    char *description_ = (char *)description;
+    long long decodedOffset = strtoll(description, &description_, 0);
+    description = description_;
     me->fileOffset = (off_t)decodedOffset;
     if(savedStart == description) goto closeFile;
     if((unsigned long long)decodedOffset > (unsigned long long)me->fileOffset) goto closeFile;
