@@ -33,7 +33,7 @@ char* gribCopyString(grib_handle* gribHandle, const char* key)
 #ifdef HAVE_GRIB_GET_LENGTH
   if(!grib_get_length(gribHandle, key, &length))
     {
-    char* result = (char *) Malloc(length);
+      result = (char *) Malloc(length);
     if(!grib_get_string(gribHandle, key, result, &length))
     result = (char *) Realloc(result, length);
 
