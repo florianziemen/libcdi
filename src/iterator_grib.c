@@ -488,15 +488,15 @@ int cdiGribIterator_level(CdiIterator *super, int levelSelector, double *outValu
         {}
       else if(isGrib1DualLevel((int)levelType))
         {
-          *outValue1 = (double)gribGetLongDefault(me->gribHandle, (levelSelector ? "bottomLevel" : "topLevel"), 0);
+          *outValue1 = (double)(gribGetLongDefault(me->gribHandle, (levelSelector ? "bottomLevel" : "topLevel"), 0));
         }
       else if(levelType == 100)
         {
-          *outValue1 = 100 * (double)gribGetLongDefault(me->gribHandle, "level", 0);        //2 bytes
+          *outValue1 = 100 * (double)(gribGetLongDefault(me->gribHandle, "level", 0));        //2 bytes
         }
       else
         {
-          *outValue1 = (double)gribGetLongDefault(me->gribHandle, "level", 0);        //2 bytes
+          *outValue1 = (double)(gribGetLongDefault(me->gribHandle, "level", 0));        //2 bytes
         }
     }
   return CDI_NOERR;
