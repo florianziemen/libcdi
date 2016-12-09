@@ -12,6 +12,7 @@
 #include "file.h"
 #include "gribapi_utilities.h"
 #include "stream_grb.h"
+#include "stream_gribapi.h"
 #include "varscan.h"
 #include "datetime.h"
 #include "vlist.h"
