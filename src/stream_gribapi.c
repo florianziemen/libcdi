@@ -1761,7 +1761,7 @@ int gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, int rdate, int rti
 
   int factor = getTimeunitFactor(timeunit);
 
-  if ( !(int) fmod(days*86400.0 + secs, factor) )
+  if ( !(int)(fmod(days*86400.0 + secs, factor)))
     {
       int proDefTempNum = gribapiDefSteptype(editionNumber, gh, productDefinitionTemplate, typeOfGeneratingProcess, tsteptype, gcinit);
 
