@@ -85,7 +85,7 @@ CdiIterator *cdiGribIterator_new(const char *path, int filetype)
 
 CdiGribIterator *cdiGribIterator_makeClone(CdiIterator *super)
 {
-  CdiGribIterator *me = (CdiGribIterator*)super;
+  CdiGribIterator *me = (CdiGribIterator*)(void *)super;
 
   //Allocate memory and copy data. (operations that may fail)
   CdiGribIterator *result = (struct CdiGribIterator *) Malloc(sizeof(*result));
@@ -137,7 +137,7 @@ fail:
 
 char *cdiGribIterator_serialize(CdiIterator *super)
 {
-  CdiGribIterator *me = (CdiGribIterator*)super;
+  CdiGribIterator *me = (CdiGribIterator*)(void *)super;
 
   const char *path = cdiInputFile_getPath(me->file);
   char *escapedPath = cdiEscapeSpaces(path);
@@ -350,7 +350,7 @@ fail:
 
 int cdiGribIterator_nextField(CdiIterator *super)
 {
-  CdiGribIterator *me = (CdiGribIterator*)super;
+  CdiGribIterator *me = (CdiGribIterator*)(void *)super;
 
   if(super->gridId != CDI_UNDEFID) gridDestroy(super->gridId), super->gridId = CDI_UNDEFID;
 
@@ -371,13 +371,13 @@ int cdiGribIterator_nextField(CdiIterator *super)
 
 char *cdiGribIterator_inqTime(CdiIterator *super, CdiTimeType timeType)
 {
-  CdiGribIterator *me = (CdiGribIterator*)super;
+  CdiGribIterator *me = (CdiGribIterator*)(void *)super;
   return gribMakeTimeString(me->gribHandle, timeType);
 }
 
 int cdiGribIterator_levelType(CdiIterator *super, int levelSelector, char **outName, char **outLongName, char **outStdName, char **outUnit)
 {
-  CdiGribIterator *me = (CdiGribIterator*)super;
+  CdiGribIterator *me = (CdiGribIterator*)(void *)super;
 
   //First determine the zaxis type corresponding to the given level.
   int zaxisType = ZAXIS_GENERIC;
@@ -464,7 +464,7 @@ static int readLevel2(grib_handle *gribHandle, const char *levelTypeKey, const c
 
 int cdiGribIterator_level(CdiIterator *super, int levelSelector, double *outValue1, double *outValue2)
 {
-  CdiGribIterator *me = (CdiGribIterator*)super;
+  CdiGribIterator *me = (CdiGribIterator*)(void *)super;
   double trash;
   if(!outValue1) outValue1 = &trash;
   if(!outValue2) outValue2 = &trash;
@@ -504,7 +504,7 @@ int cdiGribIterator_level(CdiIterator *super, int levelSelector, double *outValu
 
 int cdiGribIterator_zaxisUuid(CdiIterator *super, int *outVgridNumber, int *outLevelCount, unsigned char outUuid[CDI_UUID_SIZE])
 {
-  CdiGribIterator *me = (CdiGribIterator*)super;
+  CdiGribIterator *me = (CdiGribIterator*)(void *)super;
 
   if(outVgridNumber)
     {
@@ -530,7 +530,7 @@ int cdiGribIterator_zaxisUuid(CdiIterator *super, int *outVgridNumber, int *outL
 
 int cdiGribIterator_inqTile(CdiIterator *super, int *outTileIndex, int *outTileAttribute)
 {
-  CdiGribIterator *me = (CdiGribIterator*)super;
+  CdiGribIterator *me = (CdiGribIterator*)(void *)super;
   int trash;
   if(!outTileIndex) outTileIndex = &trash;
   if(!outTileAttribute) outTileAttribute = &trash;
@@ -550,7 +550,7 @@ int cdiGribIterator_inqTile(CdiIterator *super, int *outTileIndex, int *outTileA
 
 int cdiGribIterator_inqTileCount(CdiIterator *super, int *outTileCount, int *outTileAttributeCount)
 {
-  CdiGribIterator *me = (CdiGribIterator*)super;
+  CdiGribIterator *me = (CdiGribIterator*)(void *)super;
   int trash;
   if(!outTileCount) outTileCount = &trash;
   if(!outTileAttributeCount) outTileAttributeCount = &trash;
@@ -570,13 +570,13 @@ int cdiGribIterator_inqTileCount(CdiIterator *super, int *outTileCount, int *out
 
 char *cdiGribIterator_copyVariableName(CdiIterator *super)
 {
-  CdiGribIterator *me = (CdiGribIterator*)super;
+  CdiGribIterator *me = (CdiGribIterator*)(void *)super;
   return gribCopyString(me->gribHandle, "shortName");
 }
 
 void cdiGribIterator_readField(CdiIterator *super, double *buffer, size_t *nmiss)
 {
-  CdiGribIterator *me = (CdiGribIterator*)super;
+  CdiGribIterator *me = (CdiGribIterator*)(void *)super;
 
   GRIB_CHECK(my_grib_set_double(me->gribHandle, "missingValue", cdiDefaultMissval), 0);
   gribGetDoubleArray(me->gribHandle, "values", buffer);
@@ -589,7 +589,7 @@ void cdiGribIterator_readField(CdiIterator *super, double *buffer, size_t *nmiss
 
 void cdiGribIterator_readFieldF(CdiIterator *super, float *buffer, size_t *nmiss)
 {
-  CdiGribIterator *me = (CdiGribIterator*)super;
+  CdiGribIterator *me = (CdiGribIterator*)(void *)super;
 
   size_t valueCount = gribGetArraySize(me->gribHandle, "values");
   double *temp = (double *) Malloc(valueCount*sizeof(*temp));
