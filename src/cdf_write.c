@@ -958,8 +958,7 @@ void cdf_write_var(stream_t *streamptr, int varID, int memtype, const void *data
   size_t start[5];
   size_t count[5];
   bool swapxy = false;
-  int ndims = 0;
-  int idim;
+  size_t ndims = 0;
 
   if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamptr->self, varID);
 
@@ -1025,7 +1024,7 @@ void cdf_write_var(stream_t *streamptr, int varID, int memtype, const void *data
     }
 
   if ( CDI_Debug )
-    for (idim = 0; idim < ndims; idim++)
+    for (size_t idim = 0; idim < ndims; idim++)
       Message("dim = %d  start = %d  count = %d", idim, start[idim], count[idim]);
 
   if ( streamptr->ncmode == 1 )
@@ -1054,8 +1053,7 @@ void cdf_write_var_chunk(stream_t *streamptr, int varID, int memtype,
   size_t start[5];
   size_t count[5];
   bool swapxy = false;
-  int ndims = 0;
-  int idim;
+  size_t ndims = 0;
   int streamID = streamptr->self;
 
   if ( CDI_Debug )
@@ -1127,7 +1125,7 @@ void cdf_write_var_chunk(stream_t *streamptr, int varID, int memtype,
     }
 
   if ( CDI_Debug )
-    for (idim = 0; idim < ndims; idim++)
+    for (size_t idim = 0; idim < ndims; idim++)
       Message("dim = %d  start = %d  count = %d", idim, start[idim], count[idim]);
 
   if ( streamptr->ncmode == 1 )
