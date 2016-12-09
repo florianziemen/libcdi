@@ -2130,10 +2130,11 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
       }
     case GRID_SPECTRAL:
       {
-        static const char mesg[] = "sh";
-        size_t len = sizeof(mesg) -1;
-	GRIB_CHECK(my_grib_set_string(gh, "gridType", mesg, &len), 0);
-
+        {
+          static const char mesg[] = "sh";
+          size_t len = sizeof (mesg) -1;
+          GRIB_CHECK(my_grib_set_string(gh, "gridType", mesg, &len), 0);
+        }
 	int trunc = gridInqTrunc(gridID);
 	GRIB_CHECK(my_grib_set_long(gh, "J", trunc), 0);
 	GRIB_CHECK(my_grib_set_long(gh, "K", trunc), 0);
