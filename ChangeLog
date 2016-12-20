@@ -3,6 +3,10 @@
         * using CGRIBEX library version 1.7.6
 	* Version 1.8.0 released
 
+2016-12-20  Uwe Schulzweida
+
+	* Added support for GRIB level type 210
+
 2016-11-24  Uwe Schulzweida
 
 	* Version 1.8.0rc5 released

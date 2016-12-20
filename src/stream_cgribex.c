@@ -1923,7 +1923,7 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
 
 	double dum;
 	if ( level < 32768 && (level < 100 || modf(level/100, &dum) > 0) )
-          grib_ltype = GRIB1_LTYPE_99;
+          grib_ltype = GRIB1_LTYPE_ISOBARIC_PA;
 	else
           level = level/100;
 
