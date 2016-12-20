@@ -660,8 +660,8 @@ int cgribexScanTimestep1(stream_t * streamptr)
       param = cdiEncodeParam(ISEC1_Parameter, ISEC1_CodeTable, 255);
       cdiParamToString(param, paramstr, sizeof(paramstr));
 
-      if ( ISEC1_LevelType == 100 ) ISEC1_Level1 *= 100;
-      if ( ISEC1_LevelType ==  99 ) ISEC1_LevelType = 100;
+      if ( ISEC1_LevelType == GRIB1_LTYPE_ISOBARIC ) ISEC1_Level1 *= 100;
+      if ( ISEC1_LevelType == GRIB1_LTYPE_99 || ISEC1_LevelType == GRIB1_LTYPE_ISOBARIC_PA ) ISEC1_LevelType = GRIB1_LTYPE_ISOBARIC;
       level1 = ISEC1_Level1;
       level2 = ISEC1_Level2;
 
@@ -882,8 +882,8 @@ int cgribexScanTimestep2(stream_t * streamptr)
       param = cdiEncodeParam(ISEC1_Parameter, ISEC1_CodeTable, 255);
       cdiParamToString(param, paramstr, sizeof(paramstr));
 
-      if ( ISEC1_LevelType == 100 ) ISEC1_Level1 *= 100;
-      if ( ISEC1_LevelType ==  99 ) ISEC1_LevelType = 100;
+      if ( ISEC1_LevelType == GRIB1_LTYPE_ISOBARIC ) ISEC1_Level1 *= 100;
+      if ( ISEC1_LevelType == GRIB1_LTYPE_99 || ISEC1_LevelType == GRIB1_LTYPE_ISOBARIC_PA ) ISEC1_LevelType = GRIB1_LTYPE_ISOBARIC;
       level1    = ISEC1_Level1;
       level2    = ISEC1_Level2;
 
@@ -1135,10 +1135,10 @@ int cgribexScanTimestep(stream_t * streamptr)
 	  param = cdiEncodeParam(ISEC1_Parameter, ISEC1_CodeTable, 255);
           cdiParamToString(param, paramstr, sizeof(paramstr));
 
-	  if ( ISEC1_LevelType == 100 ) ISEC1_Level1 *= 100;
-	  if ( ISEC1_LevelType ==  99 ) ISEC1_LevelType = 100;
-	  level1   = ISEC1_Level1;
-	  level2   = ISEC1_Level2;
+          if ( ISEC1_LevelType == GRIB1_LTYPE_ISOBARIC ) ISEC1_Level1 *= 100;
+          if ( ISEC1_LevelType == GRIB1_LTYPE_99 || ISEC1_LevelType == GRIB1_LTYPE_ISOBARIC_PA ) ISEC1_LevelType = GRIB1_LTYPE_ISOBARIC;
+	  level1 = ISEC1_Level1;
+	  level2 = ISEC1_Level2;
 
 	  gribDateTime(isec1, &vdate, &vtime);
 

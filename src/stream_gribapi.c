@@ -276,9 +276,9 @@ void grib1GetLevel(grib_handle *gh, int *leveltype, int *lbounds, int *level1, i
 	{
           double dlevel;
 	  GRIB_CHECK(grib_get_double(gh, "level", &dlevel), 0); //2 byte
-	  if ( *leveltype == 100 ) dlevel *= 100;
+	  if ( *leveltype == GRIB1_LTYPE_ISOBARIC ) dlevel *= 100;
 	  if ( dlevel < -2.e9 || dlevel > 2.e9 ) dlevel = 0;
-	  if ( *leveltype == GRIB1_LTYPE_99 || *leveltype == GRIB1_LTYPE_ISOBARIC_PA ) *leveltype = 100;
+	  if ( *leveltype == GRIB1_LTYPE_99 || *leveltype == GRIB1_LTYPE_ISOBARIC_PA ) *leveltype = GRIB1_LTYPE_ISOBARIC;
 
 	  *level1 = (int) dlevel;
 	  *level2 = 0;
