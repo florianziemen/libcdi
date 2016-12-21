@@ -305,10 +305,10 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid, i
   else if ( gridtype == GRID_GME )
     {
       grid->size  = ISEC4_NumValues;
-      grid->gme.nd    = ISEC2_GME_ND;
-      grid->gme.ni    = ISEC2_GME_NI;
-      grid->gme.ni2   = ISEC2_GME_NI2;
-      grid->gme.ni3   = ISEC2_GME_NI3;
+      grid->gme.nd  = ISEC2_GME_ND;
+      grid->gme.ni  = ISEC2_GME_NI;
+      grid->gme.ni2 = ISEC2_GME_NI2;
+      grid->gme.ni3 = ISEC2_GME_NI3;
     }
   else if ( gridtype == GRID_GENERIC )
     {
@@ -326,6 +326,16 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid, i
 }
 
 static
+void cgribexGetLevel(int *isec1, int *leveltype, int *level1, int *level2)
+{
+  *leveltype = ISEC1_LevelType;
+  *level1 = ISEC1_Level1;
+  *level2 = ISEC1_Level2;
+  if ( *leveltype == GRIB1_LTYPE_ISOBARIC ) *level1 *= 100;
+  else if ( *leveltype == GRIB1_LTYPE_99 || *leveltype == GRIB1_LTYPE_ISOBARIC_PA ) *leveltype = GRIB1_LTYPE_ISOBARIC;
+}
+
+static
 void cgribexAddRecord(stream_t * streamptr, int param, int *isec1, int *isec2, double *fsec2, double *fsec3,
 		      int *isec4, size_t recsize, off_t position, int datatype, int comptype, int lmv, int iret)
 {
@@ -340,17 +350,17 @@ void cgribexAddRecord(stream_t * streamptr, int param, int *isec1, int *isec2, d
   int tsteptype = cgribexGetTsteptype(ISEC1_TimeRange);
   int numavg    = ISEC1_AvgNum;
 
-  int level1  = ISEC1_Level1;
-  int level2  = ISEC1_Level2;
+  int leveltype, level1, level2;
+  cgribexGetLevel(isec1, &leveltype, &level1, &level2);
 
-  /* fprintf(stderr, "param %d %d %d %d\n", param, level1, level2, ISEC1_LevelType); */
+  /* fprintf(stderr, "param %d %d %d %d\n", param, level1, level2, leveltype); */
 
   record->size      = recsize;
   record->position  = position;
   record->param     = param;
   record->ilevel    = level1;
   record->ilevel2   = level2;
-  record->ltype     = ISEC1_LevelType;
+  record->ltype     = leveltype;
   record->tsteptype = (short)tsteptype;
 
   grid_t *gridptr = (grid_t*) Malloc(sizeof(*gridptr));
@@ -378,7 +388,7 @@ void cgribexAddRecord(stream_t * streamptr, int param, int *isec1, int *isec2, d
   else
     Free(gridptr);
 
-  int zaxistype = grib1ltypeToZaxisType(ISEC1_LevelType);
+  int zaxistype = grib1ltypeToZaxisType(leveltype);
 
   if ( zaxistype == ZAXIS_HYBRID || zaxistype == ZAXIS_HYBRID_HALF )
     {
@@ -388,13 +398,13 @@ void cgribexAddRecord(stream_t * streamptr, int param, int *isec1, int *isec2, d
       varDefVCT(vctsize, vctptr);
     }
 
-  int lbounds = cgribexGetZaxisHasBounds(ISEC1_LevelType);
+  int lbounds = cgribexGetZaxisHasBounds(leveltype);
 
   if ( datatype > 32 ) datatype = CDI_DATATYPE_PACK32;
   if ( datatype <  0 ) datatype = CDI_DATATYPE_PACK;
 
   varAddRecord(recID, param, gridID, zaxistype, lbounds, level1, level2, 0, 0,
-	       datatype, &varID, &levelID, tsteptype, numavg, ISEC1_LevelType, -1,
+	       datatype, &varID, &levelID, tsteptype, numavg, leveltype, -1,
                NULL, NULL, NULL, NULL, NULL, NULL);
 
   record->varID   = (short)varID;
@@ -555,16 +565,14 @@ cgribexScanTsConstAdjust(stream_t *streamptr, taxis_t *taxis)
       if ( taxis->vdate == 0 && taxis->vtime == 0 )
 	{
 	  streamptr->ntsteps = 0;
-	  for (int varID = 0; varID < streamptr->nvars; varID++ )
-	    {
-	      vlistDefVarTsteptype(vlistID, varID, TSTEP_CONSTANT);
-	    }
+	  for ( int varID = 0; varID < streamptr->nvars; varID++ )
+            vlistDefVarTsteptype(vlistID, varID, TSTEP_CONSTANT);
 	}
     }
 }
 
 
-int cgribexScanTimestep1(stream_t * streamptr)
+int cgribexScanTimestep1(stream_t *streamptr)
 {
   double fsec2[512], fsec3[2], *fsec4 = NULL;
   int lmv = 0, iret = 0;
@@ -573,7 +581,7 @@ int cgribexScanTimestep1(stream_t * streamptr)
   size_t buffersize = 0;
   int rstatus;
   int param = 0;
-  int level1 = 0, level2 = 0, vdate = 0, vtime = 0;
+  int leveltype = 0, level1 = 0, level2 = 0, vdate = 0, vtime = 0;
   DateTime datetime, datetime0 = { LONG_MIN, LONG_MIN };
   size_t readsize;
   unsigned nrecords, recID;
@@ -660,10 +668,7 @@ int cgribexScanTimestep1(stream_t * streamptr)
       param = cdiEncodeParam(ISEC1_Parameter, ISEC1_CodeTable, 255);
       cdiParamToString(param, paramstr, sizeof(paramstr));
 
-      if ( ISEC1_LevelType == GRIB1_LTYPE_ISOBARIC ) ISEC1_Level1 *= 100;
-      if ( ISEC1_LevelType == GRIB1_LTYPE_99 || ISEC1_LevelType == GRIB1_LTYPE_ISOBARIC_PA ) ISEC1_LevelType = GRIB1_LTYPE_ISOBARIC;
-      level1 = ISEC1_Level1;
-      level2 = ISEC1_Level2;
+      cgribexGetLevel(isec1, &leveltype, &level1, &level2);
 
       gribDateTime(isec1, &vdate, &vtime);
 
@@ -685,7 +690,7 @@ int cgribexScanTimestep1(stream_t * streamptr)
 	{
 	  datetime.date = vdate;
 	  datetime.time = vtime;
-	  compvar_t compVar = cgribexVarSet(param, level1, level2, ISEC1_LevelType, ISEC1_TimeRange);
+	  compvar_t compVar = cgribexVarSet(param, level1, level2, leveltype, ISEC1_TimeRange);
 	  for ( recID = 0; recID < nrecs; recID++ )
 	    {
 	      if ( cgribexVarCompare(compVar, streamptr->tsteps[0].records[recID], 0) == 0 ) break;
@@ -792,7 +797,7 @@ int cgribexScanTimestep2(stream_t * streamptr)
   int lmv = 0, iret = 0;
   off_t recpos = 0;
   int param = 0;
-  int level1 = 0, level2 = 0, vdate = 0, vtime = 0;
+  int leveltype = 0, level1 = 0, level2 = 0, vdate = 0, vtime = 0;
   DateTime datetime, datetime0 = { LONG_MIN, LONG_MIN };
   int varID, gridID;
   size_t readsize;
@@ -882,10 +887,7 @@ int cgribexScanTimestep2(stream_t * streamptr)
       param = cdiEncodeParam(ISEC1_Parameter, ISEC1_CodeTable, 255);
       cdiParamToString(param, paramstr, sizeof(paramstr));
 
-      if ( ISEC1_LevelType == GRIB1_LTYPE_ISOBARIC ) ISEC1_Level1 *= 100;
-      if ( ISEC1_LevelType == GRIB1_LTYPE_99 || ISEC1_LevelType == GRIB1_LTYPE_ISOBARIC_PA ) ISEC1_LevelType = GRIB1_LTYPE_ISOBARIC;
-      level1    = ISEC1_Level1;
-      level2    = ISEC1_Level2;
+      cgribexGetLevel(isec1, &leveltype, &level1, &level2);
 
       gribDateTime(isec1, &vdate, &vtime);
 
@@ -930,7 +932,7 @@ int cgribexScanTimestep2(stream_t * streamptr)
       datetime.date  = vdate;
       datetime.time  = vtime;
 
-      compvar_t compVar = cgribexVarSet(param, level1, level2, ISEC1_LevelType, ISEC1_TimeRange);
+      compvar_t compVar = cgribexVarSet(param, level1, level2, leveltype, ISEC1_TimeRange);
 
       for ( recID = 0; recID < nrecords; recID++ )
 	{
@@ -1040,7 +1042,7 @@ int cgribexScanTimestep(stream_t * streamptr)
   size_t buffersize = 0;
   int fileID;
   int param = 0;
-  int level1 = 0, level2 = 0, vdate = 0, vtime = 0;
+  int leveltype = 0, level1 = 0, level2 = 0, vdate = 0, vtime = 0;
   DateTime datetime, datetime0 = { LONG_MIN, LONG_MIN };
   int vrecID, recID;
   bool warn_numavg = true;
@@ -1135,10 +1137,7 @@ int cgribexScanTimestep(stream_t * streamptr)
 	  param = cdiEncodeParam(ISEC1_Parameter, ISEC1_CodeTable, 255);
           cdiParamToString(param, paramstr, sizeof(paramstr));
 
-          if ( ISEC1_LevelType == GRIB1_LTYPE_ISOBARIC ) ISEC1_Level1 *= 100;
-          if ( ISEC1_LevelType == GRIB1_LTYPE_99 || ISEC1_LevelType == GRIB1_LTYPE_ISOBARIC_PA ) ISEC1_LevelType = GRIB1_LTYPE_ISOBARIC;
-	  level1 = ISEC1_Level1;
-	  level2 = ISEC1_Level2;
+          cgribexGetLevel(isec1, &leveltype, &level1, &level2);
 
 	  gribDateTime(isec1, &vdate, &vtime);
 
@@ -1185,7 +1184,7 @@ int cgribexScanTimestep(stream_t * streamptr)
 	  datetime.date  = vdate;
 	  datetime.time  = vtime;
 
-	  compvar_t compVar = cgribexVarSet(param, level1, level2, ISEC1_LevelType, ISEC1_TimeRange);
+	  compvar_t compVar = cgribexVarSet(param, level1, level2, leveltype, ISEC1_TimeRange);
 
 	  for ( vrecID = 0; vrecID < nrecs; vrecID++ )
 	    {
