@@ -2005,6 +2005,20 @@ void cdf_load_vals(size_t size, int ndims, int varid, ncvar_t *ncvar, double **g
 }
 
 static
+void cdf_load_cvals(size_t size, int varid, ncvar_t *ncvar, char ***gridvals, size_t dimlength)
+{
+  size_t startc[] = {0, 0};
+  size_t countc[] = {1, size/dimlength};
+  *gridvals = (char **) Malloc(dimlength * sizeof(char *));
+  for ( int i = 0; i < dimlength; i++ )
+    {      
+      (*gridvals)[i] = (char*) Malloc((size/dimlength) * sizeof(char));
+      cdf_get_vara_text(ncvar->ncid, varid, startc, countc, (*gridvals)[i]);
+      startc[0] = i+1;
+    }
+}
+
+static
 void cdf_load_bounds(size_t size, ncvar_t *ncvar, double **gridbounds, struct cdfLazyGridIds *cellBoundsGet)
 {
   if ( CDI_netcdf_lazy_grid_load )
