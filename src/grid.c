@@ -37,6 +37,7 @@ static const char Grids[][17] = {
   /* 10 */  "curvilinear",
   /* 11 */  "lcc",
   /* 12 */  "projection",
+  /* 13 */  "characterXY",
 };
 
 /* must match table below */
@@ -93,7 +94,9 @@ void grid_init(grid_t *gridptr)
   gridptr->mask          = NULL;
   gridptr->mask_gme      = NULL;
   gridptr->x.vals        = NULL;
+  gridptr->x.cvals       = NULL;
   gridptr->y.vals        = NULL;
+  gridptr->y.cvals       = NULL;
   gridptr->x.bounds      = NULL;
   gridptr->y.bounds      = NULL;
   gridptr->area          = NULL;
@@ -165,6 +168,7 @@ void grid_free_components(grid_t *gridptr)
 {
   void *p2free[] = { gridptr->mask, gridptr->mask_gme,
                      gridptr->x.vals, gridptr->y.vals,
+                     gridptr->x.cvals, gridptr->y.cvals,
                      gridptr->x.bounds, gridptr->y.bounds,
                      gridptr->rowlon, gridptr->area,
                      gridptr->reference, gridptr->name};
@@ -1496,6 +1500,30 @@ int gridInqXValsSerial(grid_t *gridptr, double *xvals)
   return (int)size;
 }
 
+static
+int gridInqXCvalsSerial(grid_t *gridptr, char **xcvals)
+{
+  if ( gridptr->type != GRID_CHARXY )
+    Error("Function only valid for grid type 'GRID_CHARXY'.");
+
+  int size = gridptr->x.size;
+  int stringlen = 0;
+
+  if ( gridptr->x.cvals )
+    {
+      if ( size && xcvals )
+        {
+          const char **gridptr_xcvals = gridptr->vtable->inqXCvalsPtr(gridptr);
+          stringlen = strlen(gridptr_xcvals[1]);
+          memcpy(xcvals, gridptr_xcvals, (size_t)size * sizeof ( (size_t)stringlen * sizeof(char)));
+        }
+    }
+  else
+    size = 0;
+
+  return (int)stringlen;
+}
+
 /*
 @Function  gridInqXvals
 @Title     Get all values of a X-axis
@@ -1522,6 +1550,11 @@ int gridInqXvals(int gridID, double *xvals)
   return gridptr->vtable->inqXVals(gridptr, xvals);
 }
 
+int gridInqXCvals(int gridID, char **xcvals)
+{
+  grid_t *gridptr = grid_to_pointer(gridID);
+  return gridptr->vtable->inqXCvals(gridptr, xcvals);
+}
 
 static
 void gridDefXValsSerial(grid_t *gridptr, const double *xvals)
@@ -1544,6 +1577,30 @@ void gridDefXValsSerial(grid_t *gridptr, const double *xvals)
   gridptr->x.vals = (double *)Realloc(gridptr->x.vals,
                                       (size_t)size * sizeof(double));
   memcpy(gridptr->x.vals, xvals, (size_t)size * sizeof (double));
+}
+
+static
+int gridInqYCvalsSerial(grid_t *gridptr, char **ycvals)
+{
+  if ( gridptr->type != GRID_CHARXY )
+    Error("Function only valid for grid type 'GRID_CHARXY'.");
+
+  int size = gridptr->y.size;
+  int stringlen = 0;
+
+  if ( gridptr->y.cvals )
+    {
+      if ( size && ycvals )
+        {
+          const char **gridptr_ycvals = gridptr->vtable->inqYCvalsPtr(gridptr);
+          stringlen = strlen(gridptr_ycvals[0]);
+          memcpy(ycvals, gridptr_ycvals, (size_t)size * sizeof ( (size_t)stringlen * sizeof(char)));
+        }
+    }
+  else
+    size = 0;
+
+  return (int)stringlen;
 }
 
 /*
@@ -1615,6 +1672,12 @@ int gridInqYvals(int gridID, double *yvals)
 {
   grid_t *gridptr = grid_to_pointer(gridID);
   return gridptr->vtable->inqYVals(gridptr, yvals);
+}
+
+int gridInqYCvals(int gridID, char **ycvals)
+{
+  grid_t *gridptr = grid_to_pointer(gridID);
+  return gridptr->vtable->inqYCvals(gridptr, ycvals);
 }
 
 static
@@ -2418,6 +2481,7 @@ void gridComplete(grid_t *grid)
   gridDefPrec(gridID, grid->prec);
 
   int gridtype = grid->type;
+
   switch (gridtype)
     {
     case GRID_LONLAT:
@@ -2427,6 +2491,7 @@ void gridComplete(grid_t *grid)
     case GRID_GENERIC:
     case GRID_LCC:
     case GRID_PROJECTION:
+    case GRID_CHARXY:
       {
 	if ( grid->x.size > 0 ) gridDefXsize(gridID, grid->x.size);
 	if ( grid->y.size > 0 ) gridDefYsize(gridID, grid->y.size);
@@ -3111,6 +3176,7 @@ printDblsPrefixAutoBrk(FILE *fp, int dig, const char prefix[], size_t nbyte0,
   fputs("\n", fp);
 }
 
+
 static void
 printIntsPrefixAutoBrk(FILE *fp, const char prefix[], size_t nbyte0,
                        size_t n, const int vals[])
@@ -3244,7 +3310,9 @@ void gridPrintKernel(grid_t *gridptr, int index, int opt, FILE *fp)
   int gridID = gridptr->self;
   const double *area    = gridInqAreaPtr(gridID);
   const double *xvals   = gridInqXvalsPtr(gridID);
+  const char  **xcvals  = gridInqXCvalsPtr(gridID);
   const double *yvals   = gridInqYvalsPtr(gridID);
+  const char  **ycvals  = gridInqYCvalsPtr(gridID);
   const double *xbounds = gridInqXboundsPtr(gridID);
   const double *ybounds = gridInqYboundsPtr(gridID);
 
@@ -3275,7 +3343,7 @@ void gridPrintKernel(grid_t *gridptr, int index, int opt, FILE *fp)
           if ( ysize > 0 ) fprintf(fp, "ysize     = %d\n", ysize);
         }
 
-      if ( xvals )
+      if ( xvals || xcvals )
         {
           if ( xaxis->name[0]     )  fprintf(fp, "xname     = %s\n", xaxis->name);
           if ( xaxis->longname[0] )  fprintf(fp, "xlongname = %s\n", xaxis->longname);
@@ -3283,7 +3351,7 @@ void gridPrintKernel(grid_t *gridptr, int index, int opt, FILE *fp)
           if ( xaxis->dimname[0] && strcmp(xaxis->name, xaxis->dimname) )
             fprintf(fp, "xdimname  = %s\n", xaxis->dimname);
         }
-      if ( yvals )
+      if ( yvals || ycvals )
         {
           if ( yaxis->name[0]     )  fprintf(fp, "yname     = %s\n", yaxis->name);
           if ( yaxis->longname[0] )  fprintf(fp, "ylongname = %s\n", yaxis->longname);
@@ -3306,6 +3374,7 @@ void gridPrintKernel(grid_t *gridptr, int index, int opt, FILE *fp)
     case GRID_PROJECTION:
     case GRID_CURVILINEAR:
     case GRID_UNSTRUCTURED:
+    case GRID_CHARXY:
       {
         if ( type == GRID_GAUSSIAN || type == GRID_GAUSSIAN_REDUCED ) fprintf(fp, "np        = %d\n", gridptr->np);
 
@@ -3374,6 +3443,13 @@ void gridPrintKernel(grid_t *gridptr, int index, int opt, FILE *fp)
 	      }
 	  }
 
+        if ( xcvals )
+          {
+            fprintf(fp, "xregions  = %s\n", xcvals[0]);
+            for ( int i = 1; i < xsize; i++ )
+              fprintf(fp, "          = %s\n", xcvals[i]);
+          }
+
 	if ( xbounds )
 	  {
             static const char prefix[] = "xbounds   = ";
@@ -3405,6 +3481,13 @@ void gridPrintKernel(grid_t *gridptr, int index, int opt, FILE *fp)
                                        (size_t)(ydim > 0 ? ydim : 0), yvals);
 	      }
 	  }
+
+        if ( ycvals )
+          {
+            fprintf(fp, "yregions  = %s\n", ycvals[0]);
+            for ( int i = 1; i < ysize; i++ )
+              fprintf(fp, "          = %s\n", ycvals[i]);
+          }
 
 	if ( ybounds )
 	  {
@@ -3550,10 +3633,21 @@ static const double *gridInqXValsPtrSerial(grid_t *gridptr)
   return gridptr->x.vals;
 }
 
+static const char **gridInqXCvalsPtrSerial(grid_t *gridptr)
+{
+  return (const char **) gridptr-> x.cvals;
+}
+
 const double *gridInqXvalsPtr(int gridID)
 {
   grid_t *gridptr = grid_to_pointer(gridID);
   return gridptr->vtable->inqXValsPtr(gridptr);
+}
+
+const char **gridInqXCvalsPtr(int gridID)
+{
+  grid_t *gridptr = grid_to_pointer(gridID);
+  return gridptr->vtable->inqXCvalsPtr(gridptr);
 }
 
 
@@ -3562,10 +3656,22 @@ static const double *gridInqYValsPtrSerial(grid_t *gridptr)
   return gridptr->y.vals;
 }
 
+static const char **gridInqYCvalsPtrSerial(grid_t *gridptr)
+{
+  return (const char **) gridptr->y.cvals;
+}
+
+
 const double *gridInqYvalsPtr(int gridID)
 {
   grid_t *gridptr = grid_to_pointer(gridID);
   return gridptr->vtable->inqYValsPtr(gridptr);
+}
+
+const char **gridInqYCvalsPtr(int gridID)
+{
+  grid_t *gridptr = grid_to_pointer(gridID);
+  return gridptr->vtable->inqYCvalsPtr(gridptr);
 }
 
 /*
@@ -4571,9 +4677,13 @@ const struct gridVirtTable cdiGridVtable
   .inqXVal = gridInqXValSerial,
   .inqYVal = gridInqYValSerial,
   .inqXVals = gridInqXValsSerial,
+  .inqXCvals = gridInqXCvalsSerial,
   .inqYVals = gridInqYValsSerial,
+  .inqYCvals = gridInqYCvalsSerial,
   .inqXValsPtr = gridInqXValsPtrSerial,
+  .inqXCvalsPtr = gridInqXCvalsPtrSerial,
   .inqYValsPtr = gridInqYValsPtrSerial,
+  .inqYCvalsPtr = gridInqYCvalsPtrSerial,
   .compareXYFull = compareXYvals,
   .compareXYAO = compareXYvals2,
   .inqArea = gridInqAreaSerial,
