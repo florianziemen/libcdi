@@ -44,6 +44,7 @@ typedef struct {
   bool     ignore;
   bool     isx;
   bool     isy;
+  bool     isc;
   bool     islon;
   bool     islat;
   bool     islev;
@@ -67,6 +68,7 @@ typedef struct {
   int      xvarid;
   int      yvarid;
   int      zvarid;
+  int      cvarid;
   int      tvarid;
   int      psvarid;
   int      p0varid;
@@ -438,7 +440,7 @@ int cdfInqDatatype(int xtype, bool lunsigned)
 #endif
 
   if      ( xtype == NC_BYTE   )  datatype = CDI_DATATYPE_INT8;
-  /* else if ( xtype == NC_CHAR   )  datatype = CDI_DATATYPE_UINT8; */
+  else if ( xtype == NC_CHAR   )  datatype = CDI_DATATYPE_UINT8;
   else if ( xtype == NC_SHORT  )  datatype = CDI_DATATYPE_INT16;
   else if ( xtype == NC_INT    )  datatype = CDI_DATATYPE_INT32;
   else if ( xtype == NC_FLOAT  )  datatype = CDI_DATATYPE_FLT32;
@@ -633,6 +635,7 @@ void init_ncvars(long nvars, ncvar_t *ncvars)
       ncvars[ncvarid].ignore          = false;
       ncvars[ncvarid].isx             = false;
       ncvars[ncvarid].isy             = false;
+      ncvars[ncvarid].isc             = false;
       ncvars[ncvarid].islon           = false;
       ncvars[ncvarid].islat           = false;
       ncvars[ncvarid].islev           = false;
@@ -656,6 +659,7 @@ void init_ncvars(long nvars, ncvar_t *ncvars)
       ncvars[ncvarid].xvarid          = CDI_UNDEFID;
       ncvars[ncvarid].yvarid          = CDI_UNDEFID;
       ncvars[ncvarid].zvarid          = CDI_UNDEFID;
+      ncvars[ncvarid].cvarid          = CDI_UNDEFID;
       ncvars[ncvarid].tvarid          = CDI_UNDEFID;
       ncvars[ncvarid].psvarid         = CDI_UNDEFID;
       ncvars[ncvarid].p0varid         = CDI_UNDEFID;
