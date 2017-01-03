@@ -1671,8 +1671,12 @@ void cdf_set_dimtype(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
     {
       if ( ncvars[ncvarid].isvar == TRUE )
 	{
-	  bool lxdim = false, lydim = false, lzdim = false/* , ltdim = false */;
+	  bool lxdim = false, lydim = false, lzdim = false, lcdim = false /*, ltdim = false */;
 	  int ndims = ncvars[ncvarid].ndims;
+          if ( ncvars[ncvarid].cvarid != CDI_UNDEFID )
+            {
+              lcdim = true;
+            }
 	  for ( int i = 0; i < ndims; i++ )
 	    {
 	      if      ( ncvars[ncvarid].dimtype[i] == X_AXIS ) lxdim = true;
@@ -1690,7 +1694,6 @@ void cdf_set_dimtype(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
             {
               if ( ncvars[ncvars[ncvarid].yvarid].ndims == 0 ) lydim = true;
             }
-
           //   if ( ndims > 1 )
             for ( int i = ndims-1; i >= 0; i-- )
               {
@@ -1698,16 +1701,34 @@ void cdf_set_dimtype(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
                   {
                     if ( !lxdim )
                       {
+                        if ( lcdim && ncvars[ncvarid].xvarid == CDI_UNDEFID )
+                          {
+                            int cdimvar = ncvars[ncvarid].cvarid;
+                            ncvars[ncvarid].xvarid = cdimvar;
+                            lcdim = false;
+                          }
                         cdf_set_dim(ncvars, ncvarid, i, X_AXIS);
                         lxdim = true;
                       }
                     else if ( !lydim && ncvars[ncvarid].gridtype != GRID_UNSTRUCTURED )
                       {
+                        if ( lcdim && ncvars[ncvarid].yvarid == CDI_UNDEFID )
+                          {
+                            int cdimvar = ncvars[ncvarid].cvarid;
+                            ncvars[ncvarid].yvarid = cdimvar;
+                            lcdim = false;
+                          }
                         cdf_set_dim(ncvars, ncvarid, i, Y_AXIS);
                         lydim = true;
                       }
-                    else if ( !lzdim )
+                    else if ( !lzdim && ncvars[ncvarid].zvarid == CDI_UNDEFID )
                       {
+                        if ( lcdim )
+                          {
+                            int cdimvar = ncvars[ncvarid].cvarid;
+                            ncvars[ncvarid].zvarid = cdimvar;
+                            lcdim = false;
+                          }
                         cdf_set_dim(ncvars, ncvarid, i, Z_AXIS);
                         lzdim = true;
                       }
