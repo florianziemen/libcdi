@@ -1922,6 +1922,10 @@ void verify_coordinate_vars_2(int nvars, ncvar_t *ncvars)
 		  continue;
 		}
             }
+          else if ( strcmp(ncvars[ncvarid].stdname, "region") == 0 )
+            {
+              ncvars[ncvarid].isc = true;
+            }
 
 	  /* not needed anymore for rotated grids */
 	  if ( !ncvars[ncvarid].islon && ncvars[ncvarid].longname[0] != 0 &&
