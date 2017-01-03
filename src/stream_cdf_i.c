@@ -2138,16 +2138,29 @@ bool cdf_read_xcoord(struct cdfLazyGrid *restrict lazyGrid, ncdim_t *ncdims, ncv
   *islon = axisvar->islon;
   int ndims = axisvar->ndims;
   size_t size = 0;
+  int prec = cdfInqDatatype(axisvar->xtype, axisvar->lunsigned);
+
   if ( (ndims - ntdims) == 2 )
     {
-      ncvar->gridtype = GRID_CURVILINEAR;
-      size = (*xsize)*ysize;
       /* Check size of 2 dimensional coordinate variables */
       int dimid = axisvar->dimids[ndims-2];
       size_t dimsize1 = ncdims[dimid].len;
       dimid = axisvar->dimids[ndims-1];
       size_t dimsize2 = ncdims[dimid].len;
-      skipvar = dimsize1*dimsize2 != size;
+
+      if ( prec == CDI_DATATYPE_UINT8 )
+        {
+          ncvar->gridtype = GRID_CHARXY;
+          size = dimsize1*dimsize2;
+          skipvar = dimsize1 != *xsize;
+        }
+
+      else
+        {
+          ncvar->gridtype = GRID_CURVILINEAR;
+          size = (*xsize)*ysize;
+          skipvar = dimsize1*dimsize2 != size;
+        }
     }
   else if ( (ndims - ntdims) == 1 )
     {
@@ -2170,10 +2183,12 @@ bool cdf_read_xcoord(struct cdfLazyGrid *restrict lazyGrid, ncdim_t *ncdims, ncv
       return true;
     }
 
-  int prec = cdfInqDatatype(axisvar->xtype, axisvar->lunsigned);
   if ( prec != -1 )  grid->prec = prec;
 
-  cdf_load_vals(size, ndims, xvarid, axisvar, &grid->x.vals, &lazyGrid->xValsGet, ntdims, start, count);
+  if ( prec == CDI_DATATYPE_UINT8 && !CDI_netcdf_lazy_grid_load )
+    cdf_load_cvals(size, xvarid, axisvar, &grid->x.cvals, *xsize);
+  else
+    cdf_load_vals(size, ndims, xvarid, axisvar, &grid->x.vals, &lazyGrid->xValsGet, ntdims, start, count);
 
   cdf_copy_axis_attr(axisvar, &grid->x);
 
@@ -2189,16 +2204,30 @@ bool cdf_read_ycoord(struct cdfLazyGrid *restrict lazyGrid, ncdim_t *ncdims, ncv
   *islat = axisvar->islat;
   int ndims = axisvar->ndims;
   size_t size = 0;
+  size_t startc[] = {0, 0};
+  size_t countc[] = {1, 0};
+  int prec = cdfInqDatatype(axisvar->xtype, axisvar->lunsigned);
+
   if ( (ndims - ntdims) == 2 )
     {
-      ncvar->gridtype = GRID_CURVILINEAR;
-      size = xsize*(*ysize);
       /* Check size of 2 dimensional coordinate variables */
       int dimid = axisvar->dimids[ndims-2];
       size_t dimsize1 = ncdims[dimid].len;
       dimid = axisvar->dimids[ndims-1];
       size_t dimsize2 = ncdims[dimid].len;
-      skipvar = dimsize1*dimsize2 != size;
+      if ( prec == CDI_DATATYPE_UINT8 )
+        {
+          ncvar->gridtype = GRID_CHARXY;
+          size = dimsize1*dimsize2;
+          countc[1] = dimsize2;
+          skipvar = dimsize1 != *ysize;
+        }
+      else
+        {
+          ncvar->gridtype = GRID_CURVILINEAR;
+          size = xsize*(*ysize);
+          skipvar = dimsize1*dimsize2 != size;
+        }
     }
   else if ( (ndims - ntdims) == 1 )
     {
@@ -2222,10 +2251,12 @@ bool cdf_read_ycoord(struct cdfLazyGrid *restrict lazyGrid, ncdim_t *ncdims, ncv
       return true;
     }
 
-  int prec = cdfInqDatatype(axisvar->xtype, axisvar->lunsigned);
   if ( prec != -1 )  grid->prec = prec;
 
-  cdf_load_vals(size, ndims, yvarid, axisvar, &grid->y.vals, &lazyGrid->yValsGet, ntdims, start, count);
+  if ( prec == CDI_DATATYPE_UINT8 && !CDI_netcdf_lazy_grid_load )
+    cdf_load_cvals(size, yvarid, axisvar, &grid->y.cvals, *ysize);
+  else
+    cdf_load_vals(size, ndims, yvarid, axisvar, &grid->y.vals, &lazyGrid->yValsGet, ntdims, start, count);
 
   cdf_copy_axis_attr(axisvar, &grid->y);
 
@@ -2255,7 +2286,7 @@ bool cdf_read_coordinates(struct cdfLazyGrid *restrict lazyGrid, ncvar_t *ncvar,
       if ( xvarid != CDI_UNDEFID && yvarid != CDI_UNDEFID )
         {
           int ndims = ncvars[xvarid].ndims;
-          if ( ndims != ncvars[yvarid].ndims )
+          if ( ndims != ncvars[yvarid].ndims && !ncvars[xvarid].isc && !ncvars[yvarid].isc)
             {
               Warning("Inconsistent grid structure for variable %s!", ncvar->name);
               ncvar->xvarid = xvarid = CDI_UNDEFID;
@@ -2406,6 +2437,13 @@ bool cdf_read_coordinates(struct cdfLazyGrid *restrict lazyGrid, ncvar_t *ncvar,
     case GRID_TRAJECTORY:
       {
         grid->size = 1;
+        break;
+      }
+    case GRID_CHARXY:
+      {
+        grid->size = (int)size;
+        grid->x.size = (int)xsize;
+        grid->y.size = (int)ysize;
         break;
       }
     }
@@ -2642,7 +2680,7 @@ void cdf_define_all_grids(ncgrid_t *ncgrid, int vlistID, ncdim_t *ncdims, int nv
           if ( cdf_read_coordinates(lazyGrid, ncvar, ncvars, ncdims,
                                     timedimid, xvarid, yvarid, xsize, ysize, &vdimid) )
             continue;
-
+          
 	  if ( number_of_grid_used != CDI_UNDEFID &&
                (grid->type == CDI_UNDEFID || grid->type == GRID_GENERIC) &&
                xdimid != CDI_UNDEFID && xsize > 9999 )
@@ -2667,7 +2705,6 @@ void cdf_define_all_grids(ncgrid_t *ncgrid, int vlistID, ncdim_t *ncdims, int nv
                 Message("proj: type = %d, size = %d, nx = %d, ny %d",
                         proj->type, proj->size, proj->x.size, proj->y.size);
 	    }
-
 
           if ( lgrid && lproj )
             {
@@ -3776,6 +3813,7 @@ int cdfInqContents(stream_t *streamptr)
 	      else if ( ncvars[ncvar->coordvarids[i]].islat ||
                         ncvars[ncvar->coordvarids[i]].isy )   ncvar->yvarid = ncvar->coordvarids[i];
 	      else if ( ncvars[ncvar->coordvarids[i]].islev ) ncvar->zvarid = ncvar->coordvarids[i];
+	      else if ( ncvars[ncvar->coordvarids[i]].isc )   ncvar->cvarid = ncvar->coordvarids[i];
 	    }
 	}
     }
