@@ -28259,7 +28259,7 @@ else
       call mpi_waitall
       end
 _ACEOF
-   for ac_lib in '' mpi mpifort mpi_f90 mpi_f77 mpich; do
+   for ac_lib in '' mpi mpi_f90 mpi_f77 mpich; do
      if test -z "$ac_lib"; then :
   ac_res="none required"
         LIBS="$MPI_FC_LIB $acx_option_func_search_save_LIBS"
@@ -28291,7 +28291,7 @@ fi
       call mpi_waitall
       end
 _ACEOF
-   for ac_lib in '' mpi mpifort mpi_f90 mpi_f77 mpich; do
+   for ac_lib in '' mpi mpi_f90 mpi_f77 mpich; do
      if test -z "$ac_lib"; then :
   ac_res="none required"
         LIBS="$MPI_FC_LIB -lmpi_f77 -lmpi $acx_option_func_search_save_LIBS"
@@ -28323,7 +28323,7 @@ fi
       call mpi_waitall
       end
 _ACEOF
-   for ac_lib in '' mpi mpifort mpi_f90 mpi_f77 mpich; do
+   for ac_lib in '' mpi mpi_f90 mpi_f77 mpich; do
      if test -z "$ac_lib"; then :
   ac_res="none required"
         LIBS="$MPI_FC_LIB -lmpi $acx_option_func_search_save_LIBS"
