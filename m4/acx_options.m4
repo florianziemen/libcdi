@@ -80,6 +80,10 @@ AC_ARG_WITH([netcdf],
                             NETCDF_LIBS=" -lnetcdf"
                             AC_CHECK_PROG(NC_CONFIG,nc-config,nc-config)
                             AS_IF([test "x$NC_CONFIG" != "x"],
+                                  [AC_MSG_CHECKING([netcdf's OpenDAP support])
+                                   AS_IF([test "x$($NC_CONFIG --has-dap)" = "xyes"],
+                                         [AC_DEFINE([HAVE_LIBNC_DAP],[1],[Define to 1 for NetCDF OpenDAP])
+                                          AC_MSG_RESULT([yes])],[AC_MSG_RESULT([no])])]
                                   [AC_MSG_CHECKING([netcdf's nc2 support])
                                    AS_IF([test "x$($NC_CONFIG --has-nc2)" = "xyes"],
                                          [AC_DEFINE([HAVE_NETCDF2],[1],[Define to 1 for NetCDF2 support])
