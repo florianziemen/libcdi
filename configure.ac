@@ -160,7 +160,7 @@ AC_ARG_ENABLE([mpi],
        [ACX_FORTRAN_PACKAGE([MPI], [mpif.h],,,
           [AC_MSG_FAILURE([Required include mpif.h not found or not compilable.])
            enable_MPI=no],[mpi_waitall],
-          [mpi mpi_f90 mpi_f77 mpich],[[-lmpi_f77 -lmpi],[-lmpi]],,
+          [mpi mpifort mpi_f90 mpi_f77 mpich],[[-lmpi_f77 -lmpi],[-lmpi]],,
           [AC_MSG_FAILURE([Cannot link Fortran MPI programs.])
            enable_MPI=no],[])])],
     [enable_mpi=no])
