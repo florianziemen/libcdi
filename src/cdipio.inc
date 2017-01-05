@@ -1,12 +1,13 @@
 ! This file was automatically generated, don't edit!
 !
-! Fortran interface for CDI library version 1.7.2
+! Fortran interface for CDI library version 1.8.0
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   April 2016
+! Uwe Schulzweida, MPI-MET, Hamburg,   March 2017
 !
 
+#define  CDIPIO_H_
 !
 !  parallel IO IOMode
 !
@@ -26,6 +27,8 @@
       PARAMETER (PIO_MPI_FW_AT_ALL      =  6)
       INTEGER    PIO_MPI_FW_AT_REBLOCK 
       PARAMETER (PIO_MPI_FW_AT_REBLOCK  =  7)
+#define PIO_MINIOMODE PIO_NONE
+#define PIO_MAXIOMODE PIO_MPI_FW_AT_REBLOCK
       INTEGER    PIO_ROLE_CLIENT       
       PARAMETER (PIO_ROLE_CLIENT        =  0)
       INTEGER    PIO_ROLE_COLLECTOR    

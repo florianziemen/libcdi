@@ -437,6 +437,7 @@ module mo_cdi
   public :: cdiInqNatts
   public :: cdiInqAtt
   public :: cdiDelAtt
+  public :: cdiCopyAtts
   public :: cdiDefAttInt
   public :: cdiDefAttFlt
   public :: cdiDefAttTxt
@@ -456,7 +457,6 @@ module mo_cdi
   public :: gridDuplicate
   public :: gridDefProj
   public :: gridInqProj
-  public :: gridDefProjType
   public :: gridInqProjType
   public :: gridInqType
   public :: gridInqSize
@@ -479,8 +479,8 @@ module mo_cdi
   integer(c_int), public, parameter :: CDI_KEY_YLONGNAME = 913
   integer(c_int), public, parameter :: CDI_KEY_YUNITS = 914
   integer(c_int), public, parameter :: CDI_KEY_VDIMNAME = 920
-  integer(c_int), public, parameter :: CDI_KEY_MAPNAME = 921
-  integer(c_int), public, parameter :: CDI_KEY_MAPPING = 922
+  integer(c_int), public, parameter :: CDI_KEY_MAPPING = 921
+  integer(c_int), public, parameter :: CDI_KEY_MAPNAME = 922
   integer(c_int), public, parameter :: CDI_KEY_NAME = 941
   integer(c_int), public, parameter :: CDI_KEY_DIMNAME = 942
   integer(c_int), public, parameter :: CDI_KEY_LONGNAME = 943
@@ -543,7 +543,10 @@ module mo_cdi
   public :: gridChangeType
   public :: gridDefComplexPacking
   public :: gridInqComplexPacking
+  public :: gridDefUvRelativeToGrid
+  public :: gridInqUvRelativeToGrid
   public :: zaxisName
+  public :: zaxisNamePtr
   public :: zaxisCreate
   public :: zaxisDestroy
   public :: zaxisInqType
@@ -1757,6 +1760,16 @@ module mo_cdi
       integer(c_int) :: f_result
     end function cdiInqNatts
 
+    function cdiCopyAtts(cdiID1_dummy, varID1_dummy, cdiID2_dummy,&
+    & varID2_dummy) bind(c, name = 'cdiCopyAtts') result(f_result)
+      import c_int
+      integer(c_int), value :: cdiID1_dummy
+      integer(c_int), value :: varID1_dummy
+      integer(c_int), value :: cdiID2_dummy
+      integer(c_int), value :: varID2_dummy
+      integer(c_int) :: f_result
+    end function cdiCopyAtts
+
     subroutine gridCompress(gridID_dummy) bind(c, name = 'gridCompress')
       import c_int
       integer(c_int), value :: gridID_dummy
@@ -1792,11 +1805,9 @@ module mo_cdi
       integer(c_int) :: f_result
     end function gridInqMask
 
-    subroutine gridPrint(gridID_dummy, index_dummy, opt_dummy) bind(c, name =&
-    & 'gridPrint')
+    subroutine gridPrint(gridID_dummy, opt_dummy) bind(c, name = 'gridPrint')
       import c_int
       integer(c_int), value :: gridID_dummy
-      integer(c_int), value :: index_dummy
       integer(c_int), value :: opt_dummy
     end subroutine gridPrint
 
@@ -1833,13 +1844,6 @@ module mo_cdi
       integer(c_int), value :: gridID_dummy
       integer(c_int) :: f_result
     end function gridInqProj
-
-    subroutine gridDefProjType(gridID_dummy, projtype_dummy) bind(c, name =&
-    & 'gridDefProjType')
-      import c_int
-      integer(c_int), value :: gridID_dummy
-      integer(c_int), value :: projtype_dummy
-    end subroutine gridDefProjType
 
     function gridInqProjType(gridID_dummy) bind(c, name = 'gridInqProjType')&
     & result(f_result)
@@ -2229,6 +2233,20 @@ module mo_cdi
       integer(c_int) :: f_result
     end function gridInqComplexPacking
 
+    subroutine gridDefUvRelativeToGrid(gridID_dummy, uvRelativeToGrid_dummy)&
+    & bind(c, name = 'gridDefUvRelativeToGrid')
+      import c_int
+      integer(c_int), value :: gridID_dummy
+      integer(c_int), value :: uvRelativeToGrid_dummy
+    end subroutine gridDefUvRelativeToGrid
+
+    function gridInqUvRelativeToGrid(gridID_dummy) bind(c, name =&
+    & 'gridInqUvRelativeToGrid') result(f_result)
+      import c_int
+      integer(c_int), value :: gridID_dummy
+      integer(c_int) :: f_result
+    end function gridInqUvRelativeToGrid
+
     function zaxisCreate(zaxistype_dummy, size_dummy) bind(c, name =&
     & 'zaxisCreate') result(f_result)
       import c_int
@@ -2263,11 +2281,9 @@ module mo_cdi
       integer(c_int) :: f_result
     end function zaxisDuplicate
 
-    subroutine zaxisPrint(zaxisID_dummy, index_dummy) bind(c, name =&
-    & 'zaxisPrint')
+    subroutine zaxisPrint(zaxisID_dummy) bind(c, name = 'zaxisPrint')
       import c_int
       integer(c_int), value :: zaxisID_dummy
-      integer(c_int), value :: index_dummy
     end subroutine zaxisPrint
 
     subroutine zaxisDefLevels(zaxisID_dummy, levels_dummy) bind(c, name =&
@@ -5376,6 +5392,27 @@ contains
       zaxisname_dummy(zaxisname_i:zaxisname_i) = ' '
     end do
   end subroutine zaxisName
+
+  function zaxisNamePtr(leveltype_dummy) result(f_result)
+    character(kind = c_char), dimension(:), pointer :: f_result
+    integer(c_int), value :: leveltype_dummy
+    type(c_ptr) :: ptr
+    integer :: rv_shape(1)
+    interface
+      function lib_zaxisNamePtr(leveltype_dummy) bind(c, name = 'zaxisNamePtr')&
+      & result(c_result)
+        import c_int, c_ptr
+        type(c_ptr) :: c_result
+        integer(c_int), value :: leveltype_dummy
+      end function lib_zaxisNamePtr
+    end interface
+    f_result => null()
+    ptr = lib_zaxisNamePtr(leveltype_dummy)
+    if(c_associated(ptr)) then
+      rv_shape(1) = int(lib_strlen(ptr))
+      call c_f_pointer(ptr, f_result, rv_shape)
+    end if
+  end function zaxisNamePtr
 
   function cdiZaxisDefKeyStr(zaxisID_dummy, key_dummy, size_dummy, mesg_dummy)&
   & result(f_result)

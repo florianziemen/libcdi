@@ -4,7 +4,7 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   February 2017
+! Uwe Schulzweida, MPI-MET, Hamburg,   March 2017
 !
 
       INTEGER    CDI_MAX_NAME          
@@ -1937,6 +1937,15 @@
       INTEGER         gridInqComplexPacking
 !                                    (INTEGER         gridID)
       EXTERNAL        gridInqComplexPacking
+
+!                     gridDefUvRelativeToGrid
+!                                    (INTEGER         gridID,
+!                                     INTEGER         uvRelativeToGrid)
+      EXTERNAL        gridDefUvRelativeToGrid
+
+      INTEGER         gridInqUvRelativeToGrid
+!                                    (INTEGER         gridID)
+      EXTERNAL        gridInqUvRelativeToGrid
 
 !
 !  ZAXIS routines

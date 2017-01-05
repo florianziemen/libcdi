@@ -401,6 +401,8 @@ FCALLSCSUB2 (gridInqRowlon, GRIDINQROWLON, gridinqrowlon, INT, INTV)
 FCALLSCSUB2 (gridChangeType, GRIDCHANGETYPE, gridchangetype, INT, INT)
 FCALLSCSUB2 (gridDefComplexPacking, GRIDDEFCOMPLEXPACKING, griddefcomplexpacking, INT, INT)
 FCALLSCFUN1 (INT, gridInqComplexPacking, GRIDINQCOMPLEXPACKING, gridinqcomplexpacking, INT)
+FCALLSCSUB2 (gridDefUvRelativeToGrid, GRIDDEFUVRELATIVETOGRID, griddefuvrelativetogrid, INT, INT)
+FCALLSCFUN1 (INT, gridInqUvRelativeToGrid, GRIDINQUVRELATIVETOGRID, gridinquvrelativetogrid, INT)
 
 /*  ZAXIS routines  */
 
