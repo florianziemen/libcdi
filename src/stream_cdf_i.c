@@ -2326,7 +2326,7 @@ bool cdf_read_coordinates(struct cdfLazyGrid *restrict lazyGrid, ncvar_t *ncvar,
                   {
                     *vdimid = ncvars[bvarid].dimids[nbdims-1];
                     grid->nvertex = (int)ncdims[*vdimid].len;
-                    cdf_load_bounds(grid->size*grid->nvertex, &ncvars[xvarid], &grid->x.bounds, &lazyGrid->xBoundsGet);
+                    cdf_load_bounds(size*(size_t)grid->nvertex, &ncvars[xvarid], &grid->x.bounds, &lazyGrid->xBoundsGet);
                   }
               }
           }
@@ -2344,7 +2344,7 @@ bool cdf_read_coordinates(struct cdfLazyGrid *restrict lazyGrid, ncvar_t *ncvar,
                         *vdimid = ncvars[bvarid].dimids[nbdims-1];
                         grid->nvertex = (int)ncdims[*vdimid].len;
                       }
-                    cdf_load_bounds(grid->size*grid->nvertex, &ncvars[yvarid], &grid->y.bounds, &lazyGrid->yBoundsGet);
+                    cdf_load_bounds(size*(size_t)grid->nvertex, &ncvars[yvarid], &grid->y.bounds, &lazyGrid->yBoundsGet);
                   }
               }
           }
