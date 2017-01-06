@@ -117,7 +117,7 @@ fwFileWriteAtAll(int fileID, const void *buffer, size_t len)
     rankPio = commInqRankPio();
   /* find position to write to */
   of->collWriteSize[rankPio] = (int)len;
-  xmpi(MPI_Allgather(MPI_IN_PLACE, 0, MPI_CDI_DATATYPE_NULL,
+  xmpi(MPI_Allgather(MPI_IN_PLACE, 0, MPI_DATATYPE_NULL,
                      of->collWriteSize, 1, MPI_INT, commPio));
   MPI_Offset myPos = of->pos, nextWritePos;
   for (size_t i = 0; i < (size_t)rankPio; ++i)
