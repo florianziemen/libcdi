@@ -125,6 +125,16 @@ struct symbol {
 
 /* C symbol names */
 #define SYMRE "([A-Za-z_][A-Za-z_0-9]*)"
+static inline int isSymStart(int c)
+{
+  return (isalpha(c) || c == '_');
+}
+
+static inline int isSym(int c)
+{
+  return (isalnum(c) || c == '_');
+}
+
 /* white-space */
 #define WS "[[:blank:]\n]"
 #define NWS "[^[:blank:]\n]"
@@ -269,7 +279,6 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
   char *xdes = calloc(128, 1);
   xname[0] = 0;
   size_t xnameLen = 0;
-  int parvalue;
   enum cftype functype;
   int lineno = 0;
 
@@ -283,6 +292,8 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
   struct tm *date_and_time;
   regmatch_t *reMatch = NULL;
   size_t maxMatch = 0;
+  char **definedParnames = NULL;
+  size_t numDefinedParnames = 0;
 
   date_and_time_in_sec = time(NULL);
   timestr[0] = 0;
@@ -838,33 +849,59 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
 	}
       else if ( memcmp(line, "#define", 7) == 0 )
 	{
-	  pline = line;
-	  pline += 7;
+	  pline = line + 7;
 	  while ( isspace((int) *pline) ) pline++;
 	  parname = pline;
 	  size_t len = strlen(pline);
-          size_t i = 0;
-	  for (; i < len; i++ )
-	    {
-	      if ( isspace((int) pline[i]) ) break;
-	    }
-	  if ( i == len ) continue;
-	  pline += i+1;
+          size_t parnameLen = 0;
+	  while (parnameLen < len && !isspace((int)pline[parnameLen]))
+            ++parnameLen;
+	  if ( parnameLen == len ) continue;
+	  pline += parnameLen+1;
 	  while ( isspace((int) *pline) ) pline++;
-	  if ( isdigit((int) *pline) || *pline == '-' )
+	  if ( isdigit((int)*(pline + (*pline == '-'))) )
             {
-              parname[i] = 0;
-              parvalue = atoi(pline);
-
+              parname[parnameLen] = 0;
+              int parvalue = atoi(pline);
               /* fortran include */
-              fprintf(fpinc, "      INTEGER    %-22s\n"
+              fprintf(fpinc, "      INTEGER    %s\n"
                       "      PARAMETER (%-22s = %2d)\n", parname, parname, parvalue);
+            }
+          else if (isSymStart((int)*pline)
+                   || (*pline == '-' && isSymStart(pline[1])))
+            {
+              parname[parnameLen] = 0;
+              size_t parValueLen = 1 + (*pline == '-');
+              while (isSym((int)pline[parValueLen]))
+                ++parValueLen;
+              char *parValue = pline;
+              for (size_t i = 0; i < numDefinedParnames; ++i)
+                if (!strcmp(definedParnames[i], parValue + (*pline == '-')))
+                  goto foundParname;
+              fprintf(stderr, "Found definition for %s to unknown value: %*s\n",
+                      parname, (int)parValueLen, parValue);
+              foundParname:
+              fprintf(fpinc, "      INTEGER    %s\n"
+                      "      PARAMETER (%-22s = %1.*s)\n",
+                      parname, parname, (int)parValueLen, parValue);
             }
           else
             {
               if ( strncmp(parname, "CDI_H_", 6) == 0 ) continue;
               fprintf(fpinc, "%s", line);
+              continue;
             }
+          definedParnames = realloc(definedParnames,
+                                    sizeof (definedParnames[0])
+                                    * (numDefinedParnames+1));
+          if (!definedParnames)
+            abort();
+          char *remembered = definedParnames[numDefinedParnames]
+            = malloc(parnameLen+1);
+          if (!remembered)
+            abort();
+          memcpy(remembered, parname, parnameLen+1);
+          ++numDefinedParnames;
 	}
       else if (!regexec(&cppCondRE, line, maxMatch, reMatch, 0)
                && ((cppSwitchLen = reMatch[2].rm_eo - reMatch[2].rm_so) == 5)
