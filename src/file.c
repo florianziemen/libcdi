@@ -6,7 +6,7 @@
 #include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <stdint.h>
+#include <limits.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
@@ -915,7 +915,7 @@ int file_fill_buffer(bfile_t *fileptr)
 	}
       else
 	{
-          xassert(fileptr->bufferSize <= SIZE_MAX);
+          xassert(fileptr->bufferSize <= SSIZE_MAX);
 	  nread = (ssize_t)fileptr->bufferSize;
 	  if ( (nread + fileptr->bufferPos) > fileptr->size )
 	    nread = fileptr->size - fileptr->bufferPos;
