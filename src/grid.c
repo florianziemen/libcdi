@@ -3965,8 +3965,53 @@ gridTxCode ()
   return GRID;
 }
 
-enum { gridNint    = 28,
-       gridNdouble = 24,
+enum {
+  GRID_PACK_INT_IDX_SELF,
+  GRID_PACK_INT_IDX_TYPE,
+  GRID_PACK_INT_IDX_PREC,
+  GRID_PACK_INT_IDX_LCC_PROJFLAG,
+  GRID_PACK_INT_IDX_LCC_SCANFLAG,
+  GRID_PACK_INT_IDX_LCC_DEFINED,
+  GRID_PACK_INT_IDX_IS_CYCLIC,
+  GRID_PACK_INT_IDX_X_FLAG,
+  GRID_PACK_INT_IDX_Y_FLAG,
+  GRID_PACK_INT_IDX_GME_ND,
+  GRID_PACK_INT_IDX_GME_NI,
+  GRID_PACK_INT_IDX_GME_NI2,
+  GRID_PACK_INT_IDX_GME_NI3,
+  GRID_PACK_INT_IDX_NUMBER,
+  GRID_PACK_INT_IDX_POSITION,
+  GRID_PACK_INT_IDX_TRUNC,
+  GRID_PACK_INT_IDX_NVERTEX,
+  GRID_PACK_INT_IDX_NROWLON,
+  GRID_PACK_INT_IDX_SIZE,
+  GRID_PACK_INT_IDX_X_SIZE,
+  GRID_PACK_INT_IDX_Y_SIZE,
+  GRID_PACK_INT_IDX_LCOMPLEX,
+  GRID_PACK_INT_IDX_MEMBERMASK,
+  GRID_PACK_INT_IDX_XTSTDNNAME,
+  GRID_PACK_INT_IDX_YTSTDNNAME,
+  gridNint
+};
+
+enum {
+  GRID_PACK_DBL_IDX_X_FIRST,
+  GRID_PACK_DBL_IDX_Y_FIRST,
+  GRID_PACK_DBL_IDX_X_LAST,
+  GRID_PACK_DBL_IDX_Y_LAST,
+  GRID_PACK_DBL_IDX_X_INC,
+  GRID_PACK_DBL_IDX_Y_INC,
+  GRID_PACK_DBL_IDX_LCC_ORIGIN_LON,
+  GRID_PACK_DBL_IDX_LCC_ORIGIN_LAT,
+  GRID_PACK_DBL_IDX_LCC_LON_PAR_Y,
+  GRID_PACK_DBL_IDX_LCC_LAT1,
+  GRID_PACK_DBL_IDX_LCC_LAT2,
+  GRID_PACK_DBL_IDX_LCC_XINC,
+  GRID_PACK_DBL_IDX_LCC_YINC,
+  gridNdouble
+};
+
+enum {
        gridHasMaskFlag = 1 << 0,
        gridHasGMEMaskFlag = 1 << 1,
        gridHasXValsFlag = 1 << 2,
@@ -4133,30 +4178,32 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
 
     xassert(!force_id || targetID == gridP->self);
 
-    gridP->type          =   intBuffer[1];
-    gridP->prec          =   intBuffer[2];
-    gridP->lcc.projflag  =   intBuffer[3];
-    gridP->lcc.scanflag  =   intBuffer[4];
-    gridP->lcc.defined   =   (short)intBuffer[5];
-    gridP->isCyclic      =   (short)intBuffer[8];
-    gridP->x.flag        =   (short)intBuffer[10];
-    gridP->y.flag        =   (short)intBuffer[11];
-    gridP->gme.nd        =   intBuffer[12];
-    gridP->gme.ni        =   intBuffer[13];
-    gridP->gme.ni2       =   intBuffer[14];
-    gridP->gme.ni3       =   intBuffer[15];
-    gridP->number        =   intBuffer[16];
-    gridP->position      =   intBuffer[17];
-    gridP->trunc         =   intBuffer[18];
-    gridP->nvertex       =   intBuffer[19];
-    gridP->nrowlon       =   intBuffer[20];
-    gridP->size          =   intBuffer[21];
-    gridP->x.size        =   intBuffer[22];
-    gridP->y.size        =   intBuffer[23];
-    gridP->lcomplex      =   (bool)intBuffer[24];
-    memberMask           =   intBuffer[25];
-    gridP->x.stdname     =   xystdname_tab[intBuffer[26]][0];
-    gridP->y.stdname     =   xystdname_tab[intBuffer[27]][1];
+    gridP->type          =   intBuffer[GRID_PACK_INT_IDX_TYPE];
+    gridP->prec          =   intBuffer[GRID_PACK_INT_IDX_PREC];
+    gridP->lcc.projflag  =   intBuffer[GRID_PACK_INT_IDX_LCC_PROJFLAG];
+    gridP->lcc.scanflag  =   intBuffer[GRID_PACK_INT_IDX_LCC_SCANFLAG];
+    gridP->lcc.defined   =   (short)intBuffer[GRID_PACK_INT_IDX_LCC_DEFINED];
+    gridP->isCyclic      =   (short)intBuffer[GRID_PACK_INT_IDX_IS_CYCLIC];
+    gridP->x.flag        =   (short)intBuffer[GRID_PACK_INT_IDX_X_FLAG];
+    gridP->y.flag        =   (short)intBuffer[GRID_PACK_INT_IDX_Y_FLAG];
+    gridP->gme.nd        =   intBuffer[GRID_PACK_INT_IDX_GME_ND];
+    gridP->gme.ni        =   intBuffer[GRID_PACK_INT_IDX_GME_NI];
+    gridP->gme.ni2       =   intBuffer[GRID_PACK_INT_IDX_GME_NI2];
+    gridP->gme.ni3       =   intBuffer[GRID_PACK_INT_IDX_GME_NI3];
+    gridP->number        =   intBuffer[GRID_PACK_INT_IDX_NUMBER];
+    gridP->position      =   intBuffer[GRID_PACK_INT_IDX_POSITION];
+    gridP->trunc         =   intBuffer[GRID_PACK_INT_IDX_TRUNC];
+    gridP->nvertex       =   intBuffer[GRID_PACK_INT_IDX_NVERTEX];
+    gridP->nrowlon       =   intBuffer[GRID_PACK_INT_IDX_NROWLON];
+    gridP->size          =   intBuffer[GRID_PACK_INT_IDX_SIZE];
+    gridP->x.size        =   intBuffer[GRID_PACK_INT_IDX_X_SIZE];
+    gridP->y.size        =   intBuffer[GRID_PACK_INT_IDX_Y_SIZE];
+    gridP->lcomplex      =   (bool)intBuffer[GRID_PACK_INT_IDX_LCOMPLEX];
+    memberMask           =   intBuffer[GRID_PACK_INT_IDX_MEMBERMASK];
+    gridP->x.stdname     =
+      xystdname_tab[intBuffer[GRID_PACK_INT_IDX_XTSTDNNAME]][0];
+    gridP->y.stdname     =
+      xystdname_tab[intBuffer[GRID_PACK_INT_IDX_YTSTDNNAME]][1];
   }
 
   if (memberMask & gridHasRowLonFlag)
@@ -4178,19 +4225,19 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
                     &d, 1, CDI_DATATYPE_UINT32, context);
     xassert(d == cdiCheckSum(CDI_DATATYPE_FLT, gridNdouble, doubleBuffer));
 
-    gridP->x.first = doubleBuffer[0];
-    gridP->y.first = doubleBuffer[1];
-    gridP->x.last = doubleBuffer[2];
-    gridP->y.last = doubleBuffer[3];
-    gridP->x.inc = doubleBuffer[4];
-    gridP->y.inc = doubleBuffer[5];
-    gridP->lcc.originLon = doubleBuffer[6];
-    gridP->lcc.originLat = doubleBuffer[7];
-    gridP->lcc.lonParY = doubleBuffer[8];
-    gridP->lcc.lat1 = doubleBuffer[9];
-    gridP->lcc.lat2 = doubleBuffer[10];
-    gridP->lcc.xinc = doubleBuffer[11];
-    gridP->lcc.yinc = doubleBuffer[12];
+    gridP->x.first = doubleBuffer[GRID_PACK_DBL_IDX_X_FIRST];
+    gridP->y.first = doubleBuffer[GRID_PACK_DBL_IDX_Y_FIRST];
+    gridP->x.last = doubleBuffer[GRID_PACK_DBL_IDX_X_LAST];
+    gridP->y.last = doubleBuffer[GRID_PACK_DBL_IDX_Y_LAST];
+    gridP->x.inc = doubleBuffer[GRID_PACK_DBL_IDX_X_INC];
+    gridP->y.inc = doubleBuffer[GRID_PACK_DBL_IDX_Y_INC];
+    gridP->lcc.originLon = doubleBuffer[GRID_PACK_DBL_IDX_LCC_ORIGIN_LON];
+    gridP->lcc.originLat = doubleBuffer[GRID_PACK_DBL_IDX_LCC_ORIGIN_LAT];
+    gridP->lcc.lonParY = doubleBuffer[GRID_PACK_DBL_IDX_LCC_LON_PAR_Y];
+    gridP->lcc.lat1 = doubleBuffer[GRID_PACK_DBL_IDX_LCC_LAT1];
+    gridP->lcc.lat2 = doubleBuffer[GRID_PACK_DBL_IDX_LCC_LAT2];
+    gridP->lcc.xinc = doubleBuffer[GRID_PACK_DBL_IDX_LCC_XINC];
+    gridP->lcc.yinc = doubleBuffer[GRID_PACK_DBL_IDX_LCC_YINC];
   }
 
   int irregular = gridP->type == GRID_UNSTRUCTURED
@@ -4321,33 +4368,35 @@ gridPack(void * voidP, void * packBuffer, int packBufferSize,
   {
     int intBuffer[gridNint];
 
-    intBuffer[0]  = gridP->self;
-    intBuffer[1]  = gridP->type;
-    intBuffer[2]  = gridP->prec;
-    intBuffer[3]  = gridP->lcc.projflag;
-    intBuffer[4]  = gridP->lcc.scanflag;
-    intBuffer[5]  = gridP->lcc.defined;
-    intBuffer[8]  = gridP->isCyclic;
-    intBuffer[10] = gridP->x.flag;
-    intBuffer[11] = gridP->y.flag;
-    intBuffer[12] = gridP->gme.nd;
-    intBuffer[13] = gridP->gme.ni;
-    intBuffer[14] = gridP->gme.ni2;
-    intBuffer[15] = gridP->gme.ni3;
-    intBuffer[16] = gridP->number;
-    intBuffer[17] = gridP->position;
-    intBuffer[18] = gridP->trunc;
-    intBuffer[19] = gridP->nvertex;
-    intBuffer[20] = gridP->nrowlon;
-    intBuffer[21] = gridP->size;
-    intBuffer[22] = gridP->x.size;
-    intBuffer[23] = gridP->y.size;
-    intBuffer[24] = gridP->lcomplex;
-    intBuffer[25] = memberMask = gridGetComponentFlags(gridP);
-    intBuffer[26] = (int)((const char (*)[2][24])gridP->x.stdname
-                          - xystdname_tab);
-    intBuffer[27] = (int)((const char (*)[2][24])gridP->y.stdname
-                          - (const char (*)[2][24])xystdname_tab[0][1]);
+    intBuffer[GRID_PACK_INT_IDX_SELF]         = gridP->self;
+    intBuffer[GRID_PACK_INT_IDX_TYPE]         = gridP->type;
+    intBuffer[GRID_PACK_INT_IDX_PREC]         = gridP->prec;
+    intBuffer[GRID_PACK_INT_IDX_LCC_PROJFLAG] = gridP->lcc.projflag;
+    intBuffer[GRID_PACK_INT_IDX_LCC_SCANFLAG] = gridP->lcc.scanflag;
+    intBuffer[GRID_PACK_INT_IDX_LCC_DEFINED]  = gridP->lcc.defined;
+    intBuffer[GRID_PACK_INT_IDX_IS_CYCLIC]    = gridP->isCyclic;
+    intBuffer[GRID_PACK_INT_IDX_X_FLAG]       = gridP->x.flag;
+    intBuffer[GRID_PACK_INT_IDX_Y_FLAG]       = gridP->y.flag;
+    intBuffer[GRID_PACK_INT_IDX_GME_ND]       = gridP->gme.nd;
+    intBuffer[GRID_PACK_INT_IDX_GME_NI]       = gridP->gme.ni;
+    intBuffer[GRID_PACK_INT_IDX_GME_NI2]      = gridP->gme.ni2;
+    intBuffer[GRID_PACK_INT_IDX_GME_NI3]      = gridP->gme.ni3;
+    intBuffer[GRID_PACK_INT_IDX_NUMBER]       = gridP->number;
+    intBuffer[GRID_PACK_INT_IDX_POSITION]     = gridP->position;
+    intBuffer[GRID_PACK_INT_IDX_TRUNC]        = gridP->trunc;
+    intBuffer[GRID_PACK_INT_IDX_NVERTEX]      = gridP->nvertex;
+    intBuffer[GRID_PACK_INT_IDX_NROWLON]      = gridP->nrowlon;
+    intBuffer[GRID_PACK_INT_IDX_SIZE]         = gridP->size;
+    intBuffer[GRID_PACK_INT_IDX_X_SIZE]       = gridP->x.size;
+    intBuffer[GRID_PACK_INT_IDX_Y_SIZE]       = gridP->y.size;
+    intBuffer[GRID_PACK_INT_IDX_LCOMPLEX]     = gridP->lcomplex;
+    intBuffer[GRID_PACK_INT_IDX_MEMBERMASK]   = memberMask
+                                              = gridGetComponentFlags(gridP);
+    intBuffer[GRID_PACK_INT_IDX_XTSTDNNAME]   =
+      (int)((const char (*)[2][24])gridP->x.stdname - xystdname_tab);
+    intBuffer[GRID_PACK_INT_IDX_YTSTDNNAME]   =
+      (int)((const char (*)[2][24])gridP->y.stdname
+            - (const char (*)[2][24])xystdname_tab[0][1]);
 
     serializePack(intBuffer, gridNint, CDI_DATATYPE_INT,
                   packBuffer, packBufferSize, packBufferPos, context);
@@ -4370,19 +4419,19 @@ gridPack(void * voidP, void * packBuffer, int packBufferSize,
   {
     double doubleBuffer[gridNdouble];
 
-    doubleBuffer[0]  = gridP->x.first;
-    doubleBuffer[1]  = gridP->y.first;
-    doubleBuffer[2]  = gridP->x.last;
-    doubleBuffer[3]  = gridP->y.last;
-    doubleBuffer[4]  = gridP->x.inc;
-    doubleBuffer[5]  = gridP->y.inc;
-    doubleBuffer[6]  = gridP->lcc.originLon;
-    doubleBuffer[7]  = gridP->lcc.originLat;
-    doubleBuffer[8]  = gridP->lcc.lonParY;
-    doubleBuffer[9]  = gridP->lcc.lat1;
-    doubleBuffer[10] = gridP->lcc.lat2;
-    doubleBuffer[11] = gridP->lcc.xinc;
-    doubleBuffer[12] = gridP->lcc.yinc;
+    doubleBuffer[GRID_PACK_DBL_IDX_X_FIRST]        = gridP->x.first;
+    doubleBuffer[GRID_PACK_DBL_IDX_Y_FIRST]        = gridP->y.first;
+    doubleBuffer[GRID_PACK_DBL_IDX_X_LAST]         = gridP->x.last;
+    doubleBuffer[GRID_PACK_DBL_IDX_Y_LAST]         = gridP->y.last;
+    doubleBuffer[GRID_PACK_DBL_IDX_X_INC]          = gridP->x.inc;
+    doubleBuffer[GRID_PACK_DBL_IDX_Y_INC]          = gridP->y.inc;
+    doubleBuffer[GRID_PACK_DBL_IDX_LCC_ORIGIN_LON] = gridP->lcc.originLon;
+    doubleBuffer[GRID_PACK_DBL_IDX_LCC_ORIGIN_LAT] = gridP->lcc.originLat;
+    doubleBuffer[GRID_PACK_DBL_IDX_LCC_LON_PAR_Y]  = gridP->lcc.lonParY;
+    doubleBuffer[GRID_PACK_DBL_IDX_LCC_LAT1]       = gridP->lcc.lat1;
+    doubleBuffer[GRID_PACK_DBL_IDX_LCC_LAT2]       = gridP->lcc.lat2;
+    doubleBuffer[GRID_PACK_DBL_IDX_LCC_XINC]       = gridP->lcc.xinc;
+    doubleBuffer[GRID_PACK_DBL_IDX_LCC_YINC]       = gridP->lcc.yinc;
 
     serializePack(doubleBuffer, gridNdouble, CDI_DATATYPE_FLT64,
                   packBuffer, packBufferSize, packBufferPos, context);
