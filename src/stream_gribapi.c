@@ -1988,8 +1988,8 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
           }
         GRIB_CHECK(my_grib_set_string(gh, "gridType", mesg, &len), 0);
 
-	long nlon = gridInqXsize(gridID);
-	long nlat = gridInqYsize(gridID);
+	int nlon = gridInqXsize(gridID);
+	int nlat = gridInqYsize(gridID);
 
 	if ( gridtype == GRID_GAUSSIAN_REDUCED )
 	  {
@@ -2000,14 +2000,14 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 	    gridInqRowlon(gridID, rowlon);
 	    for ( int i = 0; i < nlat; ++i ) pl[i] = rowlon[i];
 
-            GRIB_CHECK(grib_set_long_array(gh, "pl", pl, nlat), 0);
+            GRIB_CHECK(grib_set_long_array(gh, "pl", pl, (size_t)nlat), 0);
 
 	    Free(pl);
 	    Free(rowlon);
 
 	    xfirst = 0;
-	    xlast  = 360.-360./(nlat*2);
-	    xinc   = 360./(nlat*2);
+	    xinc   =        360. * 0.5 / (double)nlat;
+	    xlast  = 360. - 360. * 0.5 / (double)nlat;
 	  }
 	else
 	  {
