@@ -833,7 +833,6 @@ void cdfDefCurvilinear(stream_t *streamptr, int gridID, int gridindex)
   int xdimID = CDI_UNDEFID;
   int ydimID = CDI_UNDEFID;
   int ncxvarid = CDI_UNDEFID, ncyvarid = CDI_UNDEFID;
-  int ncbxvarid = CDI_UNDEFID, ncbyvarid = CDI_UNDEFID, ncavarid = CDI_UNDEFID;
   nc_type xtype = (nc_type)cdfDefDatatype(gridInqPrec(gridID), streamptr->filetype);
   ncgrid_t *ncgrid = streamptr->ncgrid;
 
@@ -868,6 +867,7 @@ void cdfDefCurvilinear(stream_t *streamptr, int gridID, int gridindex)
         }
     }
 
+  int ncbxvarid = CDI_UNDEFID, ncbyvarid = CDI_UNDEFID, ncavarid = CDI_UNDEFID;
   if ( xdimID == CDI_UNDEFID || ydimID == CDI_UNDEFID )
     {
       if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
