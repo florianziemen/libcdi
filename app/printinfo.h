@@ -226,7 +226,7 @@ void print_xyvals2D(int gridID, int dig)
           int xsize = gridInqXsize(gridID);
           if ( xsize > 1 )
             {
-              double *xvals = (double*) malloc(xsize*sizeof(double));
+              double *xvals = (double*) malloc((size_t)xsize*sizeof(double));
               for ( int i = 0; i < xsize; ++i ) xvals[i] = xvals2D[i];
               xinc = fabs(xvals[xsize-1] - xvals[0])/(xsize-1);
               for ( int i = 2; i < xsize; i++ )
@@ -236,7 +236,7 @@ void print_xyvals2D(int gridID, int dig)
           int ysize = gridInqYsize(gridID);
           if ( ysize > 1 )
             {
-              double *yvals = (double*) malloc(ysize*sizeof(double));
+              double *yvals = (double*) malloc((size_t)ysize*sizeof(double));
               for ( int i = 0; i < ysize; ++i ) yvals[i] = yvals2D[i*xsize];
               yinc = fabs(yvals[ysize-1] - yvals[0])/(ysize-1);
               for ( int i = 2; i < ysize; i++ )
