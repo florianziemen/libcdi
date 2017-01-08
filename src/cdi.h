@@ -735,7 +735,7 @@ int     gridInqMaskGME(int gridID, int mask[]);
 void    gridDefMask(int gridID, const int mask[]);
 int     gridInqMask(int gridID, int mask[]);
 
-void    gridPrint(int gridID, int index, int opt);
+void    gridPrint(int gridID, int opt);
 
 /*      gridCreate: Create a horizontal Grid */
 int     gridCreate(int gridtype, int size);
@@ -981,7 +981,7 @@ int     zaxisInqSize(int zaxisID);
 /*      zaxisDuplicate: Duplicate a Z-axis */
 int     zaxisDuplicate(int zaxisID);
 
-void    zaxisPrint(int zaxisID, int index);
+void    zaxisPrint(int zaxisID);
 
 /*      zaxisDefLevels: Define the levels of a Z-axis */
 void    zaxisDefLevels(int zaxisID, const double levels[]);

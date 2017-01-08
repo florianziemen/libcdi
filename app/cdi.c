@@ -852,15 +852,7 @@ int main(int argc, char *argv[])
 
       int vlistID1 = streamInqVlist(streamID1);
 
-      if ( Longinfo )
-	{
-	  int ngrids, nzaxis;
-	  vlistPrint(vlistID1);
-	  ngrids = vlistNgrids(vlistID1);
-	  nzaxis = vlistNzaxis(vlistID1);
-          for ( int index = 0; index < ngrids; index++ ) gridPrint(vlistGrid(vlistID1, index), index, 1);
-          for ( int index = 0; index < nzaxis; index++ ) zaxisPrint(vlistZaxis(vlistID1, index), index);
-	}
+      if ( Longinfo ) vlistPrint(vlistID1);
 
       int nvars = vlistNvars(vlistID1);
       int taxisID1 = vlistInqTaxis(vlistID1);

@@ -4,7 +4,7 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   November 2016
+! Uwe Schulzweida, MPI-MET, Hamburg,   January 2017
 !
 
       INTEGER    CDI_MAX_NAME          
@@ -1495,7 +1495,6 @@
 
 !                     gridPrint
 !                                    (INTEGER         gridID,
-!                                     INTEGER         index,
 !                                     INTEGER         opt)
       EXTERNAL        gridPrint
 
@@ -1962,8 +1961,7 @@
       EXTERNAL        zaxisDuplicate
 
 !                     zaxisPrint
-!                                    (INTEGER         zaxisID,
-!                                     INTEGER         index)
+!                                    (INTEGER         zaxisID)
       EXTERNAL        zaxisPrint
 
 !                     zaxisDefLevels

@@ -3493,7 +3493,7 @@ void gridPrintKernel(grid_t *gridptr, int opt, FILE *fp)
 }
 
 
-void gridPrint(int gridID, int index, int opt)
+void gridPrint(int gridID, int opt)
 {
   grid_t *gridptr = grid_to_pointer(gridID);
 
