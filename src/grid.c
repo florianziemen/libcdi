@@ -3237,7 +3237,7 @@ void gridPrintAttributes(FILE *fp, int gridID)
 }
 
 static
-void gridPrintKernel(grid_t *gridptr, int index, int opt, FILE *fp)
+void gridPrintKernel(grid_t *gridptr, int opt, FILE *fp)
 {
   int xdim, ydim;
   unsigned char uuidOfHGrid[CDI_UUID_SIZE];
@@ -3261,11 +3261,7 @@ void gridPrintKernel(grid_t *gridptr, int index, int opt, FILE *fp)
   struct gridaxis_t *xaxis = &gridptr->x;
   struct gridaxis_t *yaxis = &gridptr->y;
 
-  fprintf(fp, "#\n"
-          "# gridID %d\n"
-          "#\n"
-          "gridtype  = %s\n"
-          "gridsize  = %d\n", index, gridNamePtr(type), gridsize);
+  fprintf(fp, "gridtype  = %s\n" "gridsize  = %d\n", gridNamePtr(type), gridsize);
 
   if ( type != GRID_GME )
     {
@@ -3496,22 +3492,23 @@ void gridPrintKernel(grid_t *gridptr, int index, int opt, FILE *fp)
     }
 }
 
-void gridPrint ( int gridID, int index, int opt )
+
+void gridPrint(int gridID, int index, int opt)
 {
   grid_t *gridptr = grid_to_pointer(gridID);
 
-  gridPrintKernel ( gridptr, index, opt, stdout );
+  gridPrintKernel(gridptr, opt, stdout);
 }
 
 
 
-void gridPrintP ( void * voidptr, FILE * fp )
+void gridPrintP(void *voidptr, FILE *fp)
 {
-  grid_t * gridptr = ( grid_t * ) voidptr;
+  grid_t *gridptr = (grid_t *) voidptr;
 
-  xassert ( gridptr );
+  xassert( gridptr );
 
-  gridPrintKernel ( gridptr , gridptr->self, 0, fp );
+  gridPrintKernel(gridptr, 0, fp);
 
   fprintf(fp,
           "precision = %d\n"
