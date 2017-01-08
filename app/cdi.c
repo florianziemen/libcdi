@@ -252,9 +252,7 @@ void printInfo(int vdate, int vtime, char *varname, double level,
   else
     {
       int nvals_r = 0, nvals_i = 0;
-      double arrsum_r, arrsum_i, arrmean_r = 0, arrmean_i = 0;
-      arrsum_r = 0;
-      arrsum_i = 0;
+      double arrsum_r = 0, arrsum_i = 0, arrmean_r = 0, arrmean_i = 0;
 
       for ( i = 0; i < datasize; i++ )
 	{
@@ -331,16 +329,8 @@ static
 void printShortinfo(int streamID, int vlistID, int vardis)
 {
   int varID;
-  int gridsize = 0;
-  int gridID, zaxisID, param;
-  int vdate, vtime;
-  int ntsteps;
-  int levelsize;
-  int tsteptype, taxisID;
   char tmpname[CDI_MAX_NAME];
   char varname[CDI_MAX_NAME];
-  const char *modelptr, *instptr;
-  int datatype;
   int year, month, day, hour, minute, second;
   char pstr[4];
   char paramstr[32];
@@ -365,28 +355,28 @@ void printShortinfo(int streamID, int vlistID, int vardis)
 
       for ( varID = 0; varID < nvars; varID++ )
 	{
-	  param   = vlistInqVarParam(vlistID, varID);
-	  gridID  = vlistInqVarGrid(vlistID, varID);
-	  zaxisID = vlistInqVarZaxis(vlistID, varID);
+	  int param   = vlistInqVarParam(vlistID, varID);
+	  int gridID  = vlistInqVarGrid(vlistID, varID);
+	  int zaxisID = vlistInqVarZaxis(vlistID, varID);
 
 	  fprintf(stdout, "%6d : ", varID + 1);
 
 	  /* institute info */
-	  instptr = institutInqNamePtr(vlistInqVarInstitut(vlistID, varID));
+	  const char *instptr = institutInqNamePtr(vlistInqVarInstitut(vlistID, varID));
 	  strcpy(tmpname, "unknown");
 	  if ( instptr ) strncpy(tmpname, instptr, CDI_MAX_NAME);
 	  limit_string_length(tmpname, CDI_MAX_NAME);
 	  fprintf(stdout, "%-8s ", tmpname);
 
 	  /* source info */
-	  modelptr = modelInqNamePtr(vlistInqVarModel(vlistID, varID));
+	  const char *modelptr = modelInqNamePtr(vlistInqVarModel(vlistID, varID));
 	  strcpy(tmpname, "unknown");
 	  if ( modelptr ) strncpy(tmpname, modelptr, CDI_MAX_NAME);
 	  limit_string_length(tmpname, CDI_MAX_NAME);
 	  fprintf(stdout, "%-8s ", tmpname);
 
 	  /* tsteptype */
-	  tsteptype = vlistInqVarTsteptype(vlistID, varID);
+	  int tsteptype = vlistInqVarTsteptype(vlistID, varID);
 	  if      ( tsteptype == TSTEP_CONSTANT ) fprintf(stdout, "%-8s ", "constant");
 	  else if ( tsteptype == TSTEP_INSTANT  ) fprintf(stdout, "%-8s ", "instant");
 	  else if ( tsteptype == TSTEP_INSTANT2 ) fprintf(stdout, "%-8s ", "instant");
@@ -408,17 +398,17 @@ void printShortinfo(int streamID, int vlistID, int vardis)
             }
 
 	  /* layer info */
-	  levelsize = zaxisInqSize(zaxisID);
+          int levelsize = zaxisInqSize(zaxisID);
 	  fprintf(stdout, "%6d ", levelsize);
 	  fprintf(stdout, "%3d ", vlistZaxisIndex(vlistID, zaxisID) + 1);
 
 	  /* grid info */
-	  gridsize = gridInqSize(gridID);
+	  int gridsize = gridInqSize(gridID);
 	  fprintf(stdout, "%9d ", gridsize);
 	  fprintf(stdout, "%3d ", vlistGridIndex(vlistID, gridID) + 1);
 
 	  /* datatype */
-	  datatype = vlistInqVarDatatype(vlistID, varID);
+          int datatype = vlistInqVarDatatype(vlistID, varID);
 	  if      ( datatype == CDI_DATATYPE_PACK   ) strcpy(pstr, "P0");
 	  else if ( datatype > 0 && datatype <= 32  ) sprintf(pstr, "P%d", datatype);
 	  else if ( datatype == CDI_DATATYPE_CPX32  ) strcpy(pstr, "C32");
@@ -445,7 +435,7 @@ void printShortinfo(int streamID, int vlistID, int vardis)
 
 	  cdiParamToString(param, paramstr, sizeof(paramstr));
 
-	  if (vardis)
+	  if ( vardis )
             {
               vlistInqVarName(vlistID, varID, varname);
               fprintf(stdout, "%-14s", varname);
@@ -474,8 +464,8 @@ void printShortinfo(int streamID, int vlistID, int vardis)
           printSubtypeInfo(vlistID);
         }
 
-      taxisID = vlistInqTaxis(vlistID);
-      ntsteps = vlistNtsteps(vlistID);
+      int taxisID = vlistInqTaxis(vlistID);
+      int ntsteps = vlistNtsteps(vlistID);
 
       if ( ntsteps != 0 )
 	{
@@ -488,10 +478,8 @@ void printShortinfo(int streamID, int vlistID, int vardis)
 	    {
 	      if ( taxisInqType(taxisID) == TAXIS_RELATIVE )
 		{
-                  int calendar, tunits;
-
-		  vdate = taxisInqRdate(taxisID);
-		  vtime = taxisInqRtime(taxisID);
+		  int vdate = taxisInqRdate(taxisID);
+		  int vtime = taxisInqRtime(taxisID);
 
 		  cdiDecodeDate(vdate, &year, &month, &day);
 		  cdiDecodeTime(vtime, &hour, &minute, &second);
@@ -499,10 +487,10 @@ void printShortinfo(int streamID, int vlistID, int vardis)
 		  fprintf(stdout, "     RefTime = %4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d",
 			  year, month, day, hour, minute, second);
 
-		  tunits = taxisInqTunit(taxisID);
+		  int tunits = taxisInqTunit(taxisID);
 		  if ( tunits != CDI_UNDEFID )  fprintf(stdout, "  Units = %s", tunit2str(tunits));
 
-		  calendar = taxisInqCalendar(taxisID);
+		  int calendar = taxisInqCalendar(taxisID);
 		  if ( calendar != CDI_UNDEFID )  fprintf(stdout, "  Calendar = %s", calendar2str(calendar));
 
 		  if ( taxisHasBounds(taxisID) )
@@ -703,7 +691,7 @@ int handle_error(int cdiErrno, const char *fmt, ...)
 
   fprintf(stderr, "%s\n", cdiStringError(cdiErrno));
 
-  return (cdiErrno);
+  return cdiErrno;
 }
 
 static
@@ -844,33 +832,25 @@ int main(int argc, char *argv[])
 
   if ( fname1 )
     {
-      double *data = NULL;
-      double missval;
-      double level;
       int nmiss;
       int number;
       int datasize = 0;
-      int streamID1 = CDI_UNDEFID;
       int streamID2 = CDI_UNDEFID;
       int filetype;
       int gridID, zaxisID;
       int param;
-      int vdate, vtime;
-      int nrecs, nvars;
+      int nrecs;
       int levelID, levelsize;
       int nts = 0;
       int gridsize = 0;
       int recID;
-      int tsID;
-      int ntsteps = 0;
-      int taxisID1, taxisID2 = CDI_UNDEFID;
-      int vlistID1, vlistID2 = CDI_UNDEFID;
+      int taxisID2 = CDI_UNDEFID;
+      int vlistID2 = CDI_UNDEFID;
 
-      streamID1 = streamOpenRead(fname1);
-      if ( streamID1 < 0 )
-	return (handle_error(streamID1, "Open failed on %s", fname1));
+      int streamID1 = streamOpenRead(fname1);
+      if ( streamID1 < 0 ) return handle_error(streamID1, "Open failed on %s", fname1);
 
-      vlistID1 = streamInqVlist(streamID1);
+      int vlistID1 = streamInqVlist(streamID1);
 
       if ( Longinfo )
 	{
@@ -878,17 +858,16 @@ int main(int argc, char *argv[])
 	  vlistPrint(vlistID1);
 	  ngrids = vlistNgrids(vlistID1);
 	  nzaxis = vlistNzaxis(vlistID1);
-	  for ( gridID = 0; gridID < ngrids; gridID++ ) gridPrint(gridID, gridID, 1);
-	  for ( zaxisID = 0; zaxisID < nzaxis; zaxisID++ ) zaxisPrint(zaxisID, zaxisID);
+          for ( int index = 0; index < ngrids; index++ ) gridPrint(vlistGrid(vlistID1, index), index, 1);
+          for ( int index = 0; index < nzaxis; index++ ) zaxisPrint(vlistZaxis(vlistID1, index), index);
 	}
 
-      nvars   = vlistNvars(vlistID1);
-      taxisID1 = vlistInqTaxis(vlistID1);
-      ntsteps = vlistNtsteps(vlistID1);
+      int nvars = vlistNvars(vlistID1);
+      int taxisID1 = vlistInqTaxis(vlistID1);
+      int ntsteps = vlistNtsteps(vlistID1);
 
-      if (Debug)
-        fprintf(stderr, "nvars   = %d\n"
-                "ntsteps = %d\n", nvars, ntsteps);
+      if ( Debug )
+        fprintf(stderr, "nvars   = %d\nntsteps = %d\n", nvars, ntsteps);
 
       if ( fname2 )
         {
@@ -919,7 +898,7 @@ int main(int argc, char *argv[])
 
 	  streamID2 = streamOpenWrite(fname2, filetype);
 	  if ( streamID2 < 0 )
-	    return (handle_error(streamID2, "Open failed on %s", fname2));
+	    return handle_error(streamID2, "Open failed on %s", fname2);
 
 	  if ( DefaultByteorder != CDI_UNDEFID )
 	    streamDefByteorder(streamID2, DefaultByteorder);
@@ -936,14 +915,13 @@ int main(int argc, char *argv[])
 	}
 
       if ( vlistNumber(vlistID1) != CDI_REAL ) datasize *= 2;
-      data = (double *) malloc((size_t)datasize * sizeof (double));
+      double *data = (double *) malloc((size_t)datasize * sizeof (double));
 
       /*
 	nts = cdiInqTimeSize(streamID1);
       */
-      if (Debug)
-	printf("nts = %d streamID1 = %d, streamID2 = %d\n",
-               nts, streamID1, streamID2);
+      if ( Debug )
+	printf("nts = %d streamID1 = %d, streamID2 = %d\n", nts, streamID1, streamID2);
 
       if ( Shortinfo )
 	{
@@ -951,7 +929,7 @@ int main(int argc, char *argv[])
 	  printShortinfo(streamID1, vlistID1, Vardis);
 	}
 
-      tsID = 0;
+      int tsID = 0;
       if ( Info || fname2 )
       while ( (nrecs = streamInqTimestep(streamID1, tsID)) > 0 )
 	{
@@ -960,8 +938,8 @@ int main(int argc, char *argv[])
               taxisCopyTimestep(taxisID2, taxisID1);
               streamDefTimestep(streamID2, tsID);
             }
-	  vdate = taxisInqVdate(taxisID1);
-	  vtime = taxisInqVtime(taxisID1);
+	  int vdate = taxisInqVdate(taxisID1);
+	  int vtime = taxisInqVtime(taxisID1);
 
 	  if ( Debug )
 	    fprintf(stdout, "tsID = %d nrecs = %d date = %d time = %d\n", tsID, nrecs, vdate, vtime);
@@ -987,8 +965,8 @@ int main(int argc, char *argv[])
 			 varID, param, gridID, zaxisID, levelID);
 		  */
 		  gridsize = gridInqSize(gridID);
-		  level    = zaxisInqLevels(zaxisID, NULL) ? zaxisInqLevel(zaxisID, levelID) : levelID+1;
-		  missval  = vlistInqVarMissval(vlistID1, varID);
+		  double level   = zaxisInqLevels(zaxisID, NULL) ? zaxisInqLevel(zaxisID, levelID) : levelID+1;
+                  double missval = vlistInqVarMissval(vlistID1, varID);
 
 		  if ( Info )
 		    printInfo(vdate, vtime, varname, level, gridsize, number, nmiss, missval, data, Vardis);
@@ -1024,12 +1002,12 @@ int main(int argc, char *argv[])
 			    varID, param, gridID, zaxisID);
 
 		  gridsize = gridInqSize(gridID);
-		  missval  = vlistInqVarMissval(vlistID1, varID);
+		  double missval = vlistInqVarMissval(vlistID1, varID);
 
 		  levelsize = zaxisInqSize(zaxisID);
 		  for ( levelID = 0; levelID < levelsize; levelID++ )
 		    {
-                      level = zaxisInqLevels(zaxisID, NULL) ? zaxisInqLevel(zaxisID, levelID) : levelID+1;
+                      double level = zaxisInqLevels(zaxisID, NULL) ? zaxisInqLevel(zaxisID, levelID) : levelID+1;
 		      streamReadVarSlice(streamID1, varID, levelID, data, &nmiss);
 
 		      if ( Info )
@@ -1040,6 +1018,7 @@ int main(int argc, char *argv[])
 		    }
 		}
 	    }
+
 	  tsID++;
         }
 
@@ -1059,7 +1038,7 @@ int main(int argc, char *argv[])
   if ( wTable )
     tableWrite(wTable, itableID);
 
-  return (0);
+  return 0;
 }
 /*
  * Local Variables:
