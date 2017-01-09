@@ -245,7 +245,7 @@ symRegexCompile(size_t numSyms, struct symbol symList[],
                 char **line, size_t *lineBufSize);
 
 static void
-build_header_name(const char *fname, char *cppMacro);
+build_header_name(size_t len, const char *fname, char *cppMacro);
 
 static int detectComment(char **line_, ssize_t *lineLen, size_t *lineBufSize,
                          size_t maxMatch, regmatch_t reMatch[],
@@ -388,13 +388,19 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
   fprintf(fpint, "#  include \"config.h\"\n");
   fprintf(fpint, "#endif\n");
   fprintf(fpint, "\n");
+  char *cppHeaderSentinelMacro;
+  size_t cppHeaderSentinelMacroLen;
   {
-    char *cppMacro = (char*) malloc(strlen(fname) + 2);
-    build_header_name(fname, cppMacro);
+    char *lastSlash = strrchr(fname, '/');
+    char *fbasename = lastSlash ? (lastSlash+1) : fname;
+    size_t fbasenameLen = strlen(fbasename);
+    cppHeaderSentinelMacroLen = fbasenameLen + 1;
+    cppHeaderSentinelMacro = (char *)malloc(fbasenameLen + 2);
+    build_header_name(fbasenameLen, fbasename, cppHeaderSentinelMacro);
     fprintf(fpint, "#if ! defined (%s)\n"
             "#  include \"%s\"\n"
             "#endif\n"
-            "\n", cppMacro, fname);
+            "\n", cppHeaderSentinelMacro, fbasename);
   }
   fputs("#if defined (HAVE_CF_INTERFACE)\n"
         "\n"
@@ -887,7 +893,8 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
             }
           else
             {
-              if ( strncmp(parname, "CDI_H_", 6) == 0 ) continue;
+              if ( strncmp(parname, cppHeaderSentinelMacro,
+                           cppHeaderSentinelMacroLen) == 0 ) continue;
               fprintf(fpinc, "%s", line);
               continue;
             }
@@ -1052,9 +1059,8 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
 }
 
 static void
-build_header_name(const char *fname, char *cppMacro)
+build_header_name(size_t len, const char *fname, char *cppMacro)
 {
-  size_t len = strlen(fname);
   for (size_t i = 0; i < len; ++i)
     switch (fname[i])
       {

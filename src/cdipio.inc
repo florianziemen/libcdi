@@ -7,7 +7,6 @@
 ! Uwe Schulzweida, MPI-MET, Hamburg,   March 2017
 !
 
-#define  CDIPIO_H_
 !
 !  parallel IO IOMode
 !
