@@ -1828,7 +1828,7 @@ void gridDefParamRLL(int gridID, double xpole, double ypole, double angle)
 
   const char *mapping = "rotated_latitude_longitude";
   cdiGridDefKeyStr(gridID, CDI_KEY_MAPNAME, CDI_MAX_NAME, mapping);
-  cdiDefAttTxt(gridID, CDI_GLOBAL, "grid_mapping_name", strlen(mapping), mapping);
+  cdiDefAttTxt(gridID, CDI_GLOBAL, "grid_mapping_name", (int)(strlen(mapping)), mapping);
   cdiDefAttFlt(gridID, CDI_GLOBAL, "grid_north_pole_longitude", CDI_DATATYPE_FLT64, 1, &xpole);
   cdiDefAttFlt(gridID, CDI_GLOBAL, "grid_north_pole_latitude", CDI_DATATYPE_FLT64, 1, &ypole);
   if ( IS_NOT_EQUAL(angle, 0) ) cdiDefAttFlt(gridID, CDI_GLOBAL, "north_pole_grid_longitude", CDI_DATATYPE_FLT64, 1, &angle);
@@ -3247,7 +3247,7 @@ void gridPrintAttributes(FILE *fp, int gridID)
 static
 void gridPrintKernel(int gridID, int opt, FILE *fp)
 {
-  int xdim, ydim;
+  size_t xdimLen, ydimLen;
   char attstr[CDI_MAX_NAME];
   char attstr2[CDI_MAX_NAME];
   unsigned char uuidOfHGrid[CDI_UUID_SIZE];
@@ -3321,18 +3321,18 @@ void gridPrintKernel(int gridID, int opt, FILE *fp)
 
 	if ( type == GRID_CURVILINEAR || type == GRID_UNSTRUCTURED )
 	  {
-	    xdim = gridsize;
-	    ydim = gridsize;
+	    xdimLen = (size_t)gridsize;
+	    ydimLen = (size_t)gridsize;
 	  }
         else if ( type == GRID_GAUSSIAN_REDUCED )
           {
-	    xdim = 2;
-	    ydim = ysize;
+	    xdimLen = 2;
+	    ydimLen = (size_t)ysize;
           }
 	else
 	  {
-	    xdim = xsize;
-	    ydim = ysize;
+	    xdimLen = (size_t)xsize;
+	    ydimLen = (size_t)ysize;
 	  }
 
 	if ( type == GRID_UNSTRUCTURED )
@@ -3391,7 +3391,7 @@ void gridPrintKernel(int gridID, int opt, FILE *fp)
             double *xbounds = (double*) Malloc(nxbounds*sizeof(double));
             gridInqXbounds(gridID, xbounds);
             static const char prefix[] = "xbounds   = ";
-            printBounds(fp, dig, prefix, sizeof(prefix)-1, xdim, nvertex, xbounds);
+            printBounds(fp, dig, prefix, sizeof(prefix)-1, xdimLen, (size_t)nvertex, xbounds);
             Free(xbounds);
 	  }
 
@@ -3426,16 +3426,16 @@ void gridPrintKernel(int gridID, int opt, FILE *fp)
             double *ybounds = (double*) Malloc(nybounds*sizeof(double));
             gridInqYbounds(gridID, ybounds);
             static const char prefix[] = "ybounds   = ";
-            printBounds(fp, dig, prefix, sizeof(prefix)-1, ydim, nvertex, ybounds);
+            printBounds(fp, dig, prefix, sizeof(prefix)-1, ydimLen, (size_t)nvertex, ybounds);
             Free(ybounds);
 	  }
 
 	if ( gridHasArea(gridID) )
 	  {
-            double *area = (double*) Malloc(gridsize*sizeof(double));
+            double *area = (double*) Malloc((size_t)gridsize*sizeof(double));
             gridInqArea(gridID, area);
             static const char prefix[] = "area      = ";
-            printDblsPrefixAutoBrk(fp, dig, prefix, sizeof(prefix)-1, gridsize, area);
+            printDblsPrefixAutoBrk(fp, dig, prefix, sizeof(prefix)-1, (size_t)gridsize, area);
             Free(area);
 	  }
 

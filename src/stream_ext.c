@@ -736,7 +736,7 @@ void extWriteVarDP(stream_t *streamptr, int varID, const double *data)
   size_t nlevs    = (size_t) zaxisInqSize(vlistInqVarZaxis(vlistID, varID));
 
   for ( size_t levID = 0;  levID < nlevs; levID++ )
-    extWriteVarSliceDP(streamptr, varID, levID, &data[levID*gridsize]);
+    extWriteVarSliceDP(streamptr, varID, (int)levID, &data[levID*gridsize]);
 }
 
 #endif /* HAVE_LIBEXTRA */
