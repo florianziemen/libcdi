@@ -355,7 +355,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
   int gridindex = nc_grid_index(streamptr, gridID);
   if ( gridtype != GRID_TRAJECTORY )
     {
-      xid = streamptr->ncgrid[gridindex].xdimID;
+      xid = streamptr->ncgrid[gridindex].ncIDs[CDF_DIMID_X];
       yid = streamptr->ncgrid[gridindex].ydimID;
       if ( xid != CDI_UNDEFID ) cdf_inq_dimlen(fileID, xid, &xsize);
       if ( yid != CDI_UNDEFID ) cdf_inq_dimlen(fileID, yid, &ysize);
@@ -754,7 +754,7 @@ static
 void cdfWriteGridTraj(stream_t *streamptr, int gridID)
 {
   int gridindex = nc_grid_index(streamptr, gridID);
-  int lonID = streamptr->ncgrid[gridindex].xdimID;
+  int lonID = streamptr->ncgrid[gridindex].ncIDs[CDF_DIMID_X];
   int latID = streamptr->ncgrid[gridindex].ydimID;
 
   double xlon = gridInqXval(gridID, 0);
@@ -980,7 +980,7 @@ void cdf_write_var(stream_t *streamptr, int varID, int memtype, const void *data
   else
     {
       int gridindex = nc_grid_index(streamptr, gridID);
-      xid = streamptr->ncgrid[gridindex].xdimID;
+      xid = streamptr->ncgrid[gridindex].ncIDs[CDF_DIMID_X];
       yid = streamptr->ncgrid[gridindex].ydimID;
     }
 
@@ -1077,7 +1077,7 @@ void cdf_write_var_chunk(stream_t *streamptr, int varID, int memtype,
   else
     {
       int gridindex = nc_grid_index(streamptr, gridID);
-      xid = streamptr->ncgrid[gridindex].xdimID;
+      xid = streamptr->ncgrid[gridindex].ncIDs[CDF_DIMID_X];
       yid = streamptr->ncgrid[gridindex].ydimID;
     }
 
@@ -1175,7 +1175,7 @@ void cdf_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
   else
     {
       int gridindex = nc_grid_index(streamptr, gridID);
-      xid = streamptr->ncgrid[gridindex].xdimID;
+      xid = streamptr->ncgrid[gridindex].ncIDs[CDF_DIMID_X];
       yid = streamptr->ncgrid[gridindex].ydimID;
     }
 

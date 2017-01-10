@@ -2654,7 +2654,7 @@ void cdf_define_all_grids(ncgrid_t *ncgrid, int vlistID, ncdim_t *ncdims, int nv
 
 	  int gridindex = vlistGridIndex(vlistID, gridID);
           ncgrid[gridindex].gridID = gridID;
-          ncgrid[gridindex].xdimID = xdimid;
+          ncgrid[gridindex].ncIDs[CDF_DIMID_X] = xdimid;
           ncgrid[gridindex].ydimID = ydimid;
 
           if ( xdimid == CDI_UNDEFID && ydimid == CDI_UNDEFID && grid->size == 1 )
@@ -2998,7 +2998,7 @@ void cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int model
 		vlistInqVarGrid(vlistID, varID), vlistInqVarZaxis(vlistID, varID));
 
       int gridindex = vlistGridIndex(vlistID, gridID);
-      int xdimid = streamptr->ncgrid[gridindex].xdimID;
+      int xdimid = streamptr->ncgrid[gridindex].ncIDs[CDF_DIMID_X];
       int ydimid = streamptr->ncgrid[gridindex].ydimID;
 
       int zaxisindex = vlistZaxisIndex(vlistID, zaxisID);

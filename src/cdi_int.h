@@ -217,9 +217,13 @@ typedef struct {
 VCT;
 
 #ifdef HAVE_LIBNETCDF
+enum {
+  CDF_DIMID_X,
+  CDF_SIZE_ncIDs,
+};
 typedef struct {
   int gridID;
-  int xdimID;
+  int ncIDs[CDF_SIZE_ncIDs];
   int ydimID;
   int xvarID;
   int yvarID;

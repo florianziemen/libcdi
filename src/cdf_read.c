@@ -23,7 +23,7 @@ void cdfReadGridTraj(stream_t *streamptr, int gridID)
   int fileID  = streamptr->fileID;
 
   int gridindex = vlistGridIndex(vlistID, gridID);
-  int lonID = streamptr->ncgrid[gridindex].xdimID;
+  int lonID = streamptr->ncgrid[gridindex].ncIDs[CDF_DIMID_X];
   int latID = streamptr->ncgrid[gridindex].ydimID;
 
   int tsID = streamptr->curTsID;
@@ -56,7 +56,7 @@ void cdfGetSlapDescription(stream_t *streamptr, int varID, size_t (*start)[4], s
     }
   else
     {
-      xid = streamptr->ncgrid[gridindex].xdimID;
+      xid = streamptr->ncgrid[gridindex].ncIDs[CDF_DIMID_X];
       yid = streamptr->ncgrid[gridindex].ydimID;
     }
   int zaxisindex = vlistZaxisIndex(vlistID, zaxisID);
@@ -369,11 +369,11 @@ void cdfInqDimIds(stream_t *streamptr, int varId, int (*outDimIds)[3])
         break;
 
       case GRID_UNSTRUCTURED:
-        (*outDimIds)[0] = streamptr->ncgrid[gridindex].xdimID;
+        (*outDimIds)[0] = streamptr->ncgrid[gridindex].ncIDs[CDF_DIMID_X];
         break;
 
       default:
-        (*outDimIds)[0] = streamptr->ncgrid[gridindex].xdimID;
+        (*outDimIds)[0] = streamptr->ncgrid[gridindex].ncIDs[CDF_DIMID_X];
         (*outDimIds)[1] = streamptr->ncgrid[gridindex].ydimID;
         break;
     }
