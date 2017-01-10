@@ -3370,7 +3370,7 @@ void gridPrintKernel(int gridID, int opt, FILE *fp)
 	      }
 	    else
 	      {
-                double *xvals = (double*) Malloc(nyvals*sizeof(double));
+                double *xvals = (double*) Malloc(nxvals*sizeof(double));
                 gridInqXvals(gridID, xvals);
                 static const char prefix[] = "xvals     = ";
                 printDblsPrefixAutoBrk(fp, dig, prefix, sizeof(prefix)-1, nxvals, xvals);
