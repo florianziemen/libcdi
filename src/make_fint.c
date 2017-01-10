@@ -276,7 +276,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
   size_t lineBufSize = 0;
   char sname[128], *parname;
   char xname[128];
-  char *xdes = calloc(128, 1);
+  char *xdes = malloc(128);
   xname[0] = 0;
   size_t xnameLen = 0;
   enum cftype functype;
