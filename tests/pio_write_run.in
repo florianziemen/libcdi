@@ -14,14 +14,17 @@ else
 fi
 for variation in "" $variations ; do
   exec 5>&1 6>&2 >"$LOG" 2>&1
+  echo "creating data" >&2
   ../libtool --mode=execute \
     @MPI_LAUNCH@ \
     -n ${mpi_task_num} ${tool_wrap} ./pio_write ${pio_write_args} ${variation}
-  exec 2>&6 1>&5 5>&- 6>&-
+  echo "checking example_0.$suffix" >&2
   ../libtool --mode=execute \
     ${tool_wrap} ./cksum_read example_0.${suffix} example_0.cksum
+  echo "checking example_1.$suffix" >&2
   ../libtool --mode=execute \
     ${tool_wrap} ./cksum_read example_1.${suffix} example_1.cksum
+  exec 2>&6 1>&5 5>&- 6>&-
   \rm "$LOG"
 done
 #
