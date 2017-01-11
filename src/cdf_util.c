@@ -268,6 +268,8 @@ void set_gridtype(const char *attstring, int *gridtype)
     *gridtype = GRID_UNSTRUCTURED;
   else if ( strcmp(attstring, "curvilinear") == 0 )
     *gridtype = GRID_CURVILINEAR;
+  else if ( strcmp(attstring, "characterxy") == 0 )
+    *gridtype = GRID_CHARXY;
   else if ( strcmp(attstring, "sinusoidal") == 0 )
     ;
   else if ( strcmp(attstring, "laea") == 0 )
