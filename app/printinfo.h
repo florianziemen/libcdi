@@ -12,21 +12,15 @@
 #include "datetime.h"
 #include "pstream.h"
 #include "text.h"
+#else
+#define set_text_color(fp, flag, color) do { (void)fp; } while (0)
+#define reset_text_color(fp) do { (void)fp; } while (0)
 #endif
 
 void datetime2str(int date, int time, char *datetimestr, int maxlen);
 void date2str(int date, char *datestr, int maxlen);
 void time2str(int time, char *timestr, int maxlen);
 void printFiletype(int streamID, int vlistID);
-
-static void my_reset_text_color(FILE *fp)
-{
-  (void)fp;
-#ifdef CDO
-  reset_text_color(fp);
-#endif
-}
-
 
 
 static
@@ -180,11 +174,9 @@ void printGridInfoKernel(int gridID, int index, bool lproj)
   if ( !lproj )
     {
       fprintf(stdout, "  %4d : ", index+1);
-#ifdef CDO
       set_text_color(stdout, RESET, BLUE);
-#endif
       fprintf(stdout, "%-24s", gridNamePtr(gridtype));
-      my_reset_text_color(stdout);
+      reset_text_color(stdout);
       fprintf(stdout, " : ");
     }
 
@@ -196,9 +188,7 @@ void printGridInfoKernel(int gridID, int index, bool lproj)
     {
       if ( !lproj )
         {
-#ifdef CDO
           set_text_color(stdout, RESET, GREEN);
-#endif
           fprintf(stdout, "points=%d", gridsize);
           if ( gridtype == GRID_GAUSSIAN_REDUCED )
             fprintf(stdout, "  nlat=%d", ysize);
@@ -207,7 +197,7 @@ void printGridInfoKernel(int gridID, int index, bool lproj)
 
           if ( gridtype == GRID_GAUSSIAN || gridtype == GRID_GAUSSIAN_REDUCED )
             fprintf(stdout, "  np=%d", gridInqNP(gridID));
-          my_reset_text_color(stdout);
+          reset_text_color(stdout);
 
           fprintf(stdout, "\n");
         }
@@ -217,17 +207,13 @@ void printGridInfoKernel(int gridID, int index, bool lproj)
       if ( gridtype == GRID_PROJECTION || name[0] )
         {
           if ( name[0] == 0 ) strcpy(name, "undefined");
-#ifdef CDO
           set_text_color(stdout, RESET, BLUE);
-#endif
           fprintf(stdout, "         %24s", "mapping");
-          my_reset_text_color(stdout);
+          reset_text_color(stdout);
           fprintf(stdout, " : ");
-#ifdef CDO
           set_text_color(stdout, RESET, GREEN);
-#endif
           fprintf(stdout, "%s\n", name);
-          my_reset_text_color(stdout);
+          reset_text_color(stdout);
         }
 
       print_xvals(gridID, dig);
@@ -244,37 +230,29 @@ void printGridInfoKernel(int gridID, int index, bool lproj)
     }
   else if ( gridtype == GRID_SPECTRAL )
     {
-#ifdef CDO
       set_text_color(stdout, RESET, GREEN);
-#endif
       fprintf(stdout, "points=%d  nsp=%d  truncation=%d", gridsize, gridsize/2, trunc);
       if ( gridInqComplexPacking(gridID) ) fprintf(stdout, "  complexPacking");
-      my_reset_text_color(stdout);
+      reset_text_color(stdout);
       fprintf(stdout, "\n");
     }
   else if ( gridtype == GRID_FOURIER )
     {
-#ifdef CDO
       set_text_color(stdout, RESET, GREEN);
-#endif
       fprintf(stdout, "points=%d  nfc=%d  truncation=%d\n", gridsize, gridsize/2, trunc);
-      my_reset_text_color(stdout);
+      reset_text_color(stdout);
     }
   else if ( gridtype == GRID_GME )
     {
       int nd, ni, ni2, ni3;
       gridInqParamGME(gridID, &nd, &ni, &ni2, &ni3);
-#ifdef CDO
       set_text_color(stdout, RESET, GREEN);
-#endif
       fprintf(stdout, "points=%d  nd=%d  ni=%d\n", gridsize, nd, ni);
-      my_reset_text_color(stdout);
+      reset_text_color(stdout);
     }
   else if ( gridtype == GRID_CURVILINEAR || gridtype == GRID_UNSTRUCTURED )
     {
-#ifdef CDO
       set_text_color(stdout, RESET, GREEN);
-#endif
       if ( gridtype == GRID_CURVILINEAR )
         fprintf(stdout, "points=%d (%dx%d)", gridsize, xsize, ysize);
       else
@@ -282,7 +260,7 @@ void printGridInfoKernel(int gridID, int index, bool lproj)
 
       if ( gridtype == GRID_UNSTRUCTURED && gridInqNvertex(gridID) > 0 )
         fprintf(stdout, "  nvertex=%d", gridInqNvertex(gridID));
-      my_reset_text_color(stdout);
+      reset_text_color(stdout);
 
       fprintf(stdout, "\n");
 
@@ -305,14 +283,12 @@ void printGridInfoKernel(int gridID, int index, bool lproj)
     }
   else /* if ( gridtype == GRID_GENERIC ) */
     {
-#ifdef CDO
       set_text_color(stdout, RESET, GREEN);
-#endif
       if ( ysize == 0 )
         fprintf(stdout, "points=%d\n", gridsize);
       else
         fprintf(stdout, "points=%d (%dx%d)\n", gridsize, xsize, ysize);
-      my_reset_text_color(stdout);
+      reset_text_color(stdout);
     }
 
   if ( gridtype == GRID_CURVILINEAR || gridtype == GRID_UNSTRUCTURED )
@@ -382,24 +358,20 @@ void printZaxisInfo(int vlistID)
       zunits[12] = 0;
 
       fprintf(stdout, "  %4d : ", vlistZaxisIndex(vlistID, zaxisID)+1);
-#ifdef CDO
       set_text_color(stdout, RESET, BLUE);
-#endif
       if ( zaxistype == ZAXIS_GENERIC && ltype != 0 )
         fprintf(stdout, "%-12s (ltype=%3d)", zaxisname, ltype);
       else
         fprintf(stdout, "%-24s", zaxisname);
-      my_reset_text_color(stdout);
+      reset_text_color(stdout);
 
       fprintf(stdout, " :");
 
-#ifdef CDO
       set_text_color(stdout, RESET, GREEN);
-#endif
       fprintf(stdout, " levels=%d", levelsize);
       bool zscalar = (levelsize == 1) ? zaxisInqScalar(zaxisID) : false;
       if ( zscalar ) fprintf(stdout, "  scalar");
-      my_reset_text_color(stdout);
+      reset_text_color(stdout);
       fprintf(stdout, "\n");
 
       if ( zaxisInqLevels(zaxisID, NULL) )
