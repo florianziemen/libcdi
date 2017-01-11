@@ -1936,7 +1936,9 @@ void verify_coordinate_vars_2(int nvars, ncvar_t *ncvars)
 		  continue;
 		}
             }
-          else if ( strcmp(ncvars[ncvarid].stdname, "region") == 0 )
+          else if ( strcmp(ncvars[ncvarid].stdname, "region") == 0  ||
+                    strcmp(ncvars[ncvarid].stdname, "area_type") == 0 ||       
+                    cdfInqDatatype(ncvars[ncvarid].xtype, ncvars[ncvarid].lunsigned) == CDI_DATATYPE_UINT8 )
             {
               ncvars[ncvarid].isc = true;
             }
