@@ -609,7 +609,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
       char cellarea[CDI_MAX_NAME] = "area: ";
       int ncxvarID = streamptr->ncgrid[gridindex].ncIDs[CDF_VARID_X];
       int ncyvarID = streamptr->ncgrid[gridindex].ncIDs[CDF_VARID_Y];
-      int ncavarID = streamptr->ncgrid[gridindex].avarID;
+      int ncavarID = streamptr->ncgrid[gridindex].ncIDs[CDF_VARID_A];
       if ( ncyvarID != CDI_UNDEFID )
         {
           size_t len = strlen(coordinates);

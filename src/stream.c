@@ -894,7 +894,6 @@ void streamDefaultValue ( stream_t * streamptr )
       streamptr->ncgrid[i].gridID = CDI_UNDEFID;
       for (size_t j = 0; j < CDF_SIZE_ncIDs; ++j)
         streamptr->ncgrid[i].ncIDs[j] = CDI_UNDEFID;
-      streamptr->ncgrid[i].avarID = CDI_UNDEFID;
     }
 
   streamptr->vct.ilev          = 0;

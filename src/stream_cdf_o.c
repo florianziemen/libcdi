@@ -976,7 +976,7 @@ void cdfDefCurvilinear(stream_t *streamptr, int gridID, int gridindex)
   ncgrid[gridindex].ncIDs[CDF_DIMID_Y] = ydimID;
   ncgrid[gridindex].ncIDs[CDF_VARID_X] = ncxvarid;
   ncgrid[gridindex].ncIDs[CDF_VARID_Y] = ncyvarid;
-  ncgrid[gridindex].avarID = ncavarid;
+  ncgrid[gridindex].ncIDs[CDF_VARID_A] = ncavarid;
 }
 
 static
@@ -1190,7 +1190,7 @@ void cdfDefUnstructured(stream_t *streamptr, int gridID, int gridindex)
 		    dimID = ncgrid[index].ncIDs[CDF_DIMID_X];
                     ncxvarid = ncgrid[index].ncIDs[CDF_VARID_X];
                     ncyvarid = ncgrid[index].ncIDs[CDF_VARID_Y];
-                    ncavarid = ncgrid[index].avarID;
+                    ncavarid = ncgrid[index].ncIDs[CDF_VARID_A];
 		    break;
 		  }
             }
@@ -1305,7 +1305,7 @@ void cdfDefUnstructured(stream_t *streamptr, int gridID, int gridindex)
   ncgrid[gridindex].ncIDs[CDF_DIMID_X] = dimID;
   ncgrid[gridindex].ncIDs[CDF_VARID_X] = ncxvarid;
   ncgrid[gridindex].ncIDs[CDF_VARID_Y] = ncyvarid;
-  ncgrid[gridindex].avarID = ncavarid;
+  ncgrid[gridindex].ncIDs[CDF_VARID_A] = ncavarid;
 }
 
 struct attTxtTab2
@@ -2069,7 +2069,6 @@ void cdfDefVars(stream_t *streamptr)
       streamptr->ncgrid[index].gridID = CDI_UNDEFID;
       for (size_t i = 0; i < CDF_SIZE_ncIDs; ++i)
         streamptr->ncgrid[index].ncIDs[i] = CDI_UNDEFID;
-      streamptr->ncgrid[index].avarID = CDI_UNDEFID;
     }
 
   for ( int index = 0; index < ngrids; ++index )
