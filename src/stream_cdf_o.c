@@ -506,11 +506,8 @@ cdfDefTrajLatLon(stream_t *streamptr, int gridID, int gridindex,
   if ( dimlen != 1 )
     Error("%c size isn't 1 for %s grid!", dimtype, gridNamePtr(gridInqType(gridID)));
 
-  int ncvarid = CDI_UNDEFID;
-  if ( dimtype == 'X' )
-    ncvarid = ncgrid[gridindex].ncIDs[CDF_DIMID_X];
-  else
-    ncvarid = ncgrid[gridindex].ncIDs[CDF_DIMID_Y];
+  int ncvarid
+    = ncgrid[gridindex].ncIDs[dimtype == 'X' ? CDF_DIMID_X : CDF_DIMID_Y];
 
   if ( ncvarid == CDI_UNDEFID )
     {
@@ -528,10 +525,8 @@ cdfDefTrajLatLon(stream_t *streamptr, int gridID, int gridindex,
     }
 
   ncgrid[gridindex].gridID = gridID;
-  if ( dimtype == 'X' )
-    ncgrid[gridindex].ncIDs[CDF_DIMID_X] = ncvarid; /* var ID for trajectory !!! */
-  else
-    ncgrid[gridindex].ncIDs[CDF_DIMID_Y] = ncvarid; /* var ID for trajectory !!! */
+  /* var ID for trajectory !!! */
+  ncgrid[gridindex].ncIDs[dimtype == 'X' ? CDF_DIMID_X : CDF_DIMID_Y] = ncvarid;
 }
 
 static
@@ -690,7 +685,8 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridindex, int ndims,
               if ( IS_EQUAL(inqVal(gridID0, 0), inqVal(gridID, 0)) &&
                    IS_EQUAL(inqVal(gridID0, (int)dimlen-1), inqVal(gridID, (int)dimlen-1)) )
                 {
-                  dimID = (dimKey == CDI_KEY_XDIMNAME) ? ncgrid[index].ncIDs[CDF_DIMID_X] : ncgrid[index].ncIDs[CDF_DIMID_Y];
+                  dimID = ncgrid[index].ncIDs[dimKey == CDI_KEY_XDIMNAME
+                                              ? CDF_DIMID_X : CDF_DIMID_Y];
                   break;
                 }
             }
@@ -782,10 +778,8 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridindex, int ndims,
     }
 
   ncgrid[gridindex].gridID = gridID;
-  if ( dimKey == CDI_KEY_XDIMNAME )
-    ncgrid[gridindex].ncIDs[CDF_DIMID_X] = dimID;
-  else
-    ncgrid[gridindex].ncIDs[CDF_DIMID_Y] = dimID;
+  ncgrid[gridindex].ncIDs[dimKey == CDI_KEY_XDIMNAME
+                          ? CDF_DIMID_X : CDF_DIMID_Y] = dimID;
 }
 
 static
@@ -2077,8 +2071,8 @@ void cdfDefVars(stream_t *streamptr)
   for ( int index = 0; index < 2*ngrids; ++index )
     {
       streamptr->ncgrid[index].gridID = CDI_UNDEFID;
-      streamptr->ncgrid[index].ncIDs[CDF_DIMID_X] = CDI_UNDEFID;
-      streamptr->ncgrid[index].ncIDs[CDF_DIMID_Y] = CDI_UNDEFID;
+      for (size_t i = 0; i < CDF_SIZE_ncIDs; ++i)
+        streamptr->ncgrid[index].ncIDs[i] = CDI_UNDEFID;
       streamptr->ncgrid[index].xvarID = CDI_UNDEFID;
       streamptr->ncgrid[index].yvarID = CDI_UNDEFID;
       streamptr->ncgrid[index].avarID = CDI_UNDEFID;
