@@ -221,12 +221,12 @@ enum {
   CDF_DIMID_X,
   CDF_DIMID_Y,
   CDF_VARID_X,
+  CDF_VARID_Y,
   CDF_SIZE_ncIDs,
 };
 typedef struct {
   int gridID;
   int ncIDs[CDF_SIZE_ncIDs];
-  int yvarID;
   int avarID;
 }
 ncgrid_t;

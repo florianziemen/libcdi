@@ -769,12 +769,8 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridindex, int ndims,
       if ( gen_bounds ) Free(pbounds);
 
       if ( ndims == 0 )
-        {
-          if ( dimKey == CDI_KEY_XDIMNAME )
-            ncgrid[gridindex].ncIDs[CDF_VARID_X] = ncvarid;
-          else
-            ncgrid[gridindex].yvarID = ncvarid;
-        }
+        ncgrid[gridindex].ncIDs[dimKey == CDI_KEY_XDIMNAME
+                                ? CDF_VARID_X : CDF_VARID_Y] = ncvarid;
     }
 
   ncgrid[gridindex].gridID = gridID;
@@ -855,7 +851,7 @@ void cdfDefCurvilinear(stream_t *streamptr, int gridID, int gridindex)
                     xdimID = ncgrid[index].ncIDs[CDF_DIMID_X];
                     ydimID = ncgrid[index].ncIDs[CDF_DIMID_Y];
                     ncxvarid = ncgrid[index].ncIDs[CDF_VARID_X];
-                    ncyvarid = ncgrid[index].yvarID;
+                    ncyvarid = ncgrid[index].ncIDs[CDF_VARID_Y];
                     break;
                   }
             }
@@ -979,7 +975,7 @@ void cdfDefCurvilinear(stream_t *streamptr, int gridID, int gridindex)
   ncgrid[gridindex].ncIDs[CDF_DIMID_X] = xdimID;
   ncgrid[gridindex].ncIDs[CDF_DIMID_Y] = ydimID;
   ncgrid[gridindex].ncIDs[CDF_VARID_X] = ncxvarid;
-  ncgrid[gridindex].yvarID = ncyvarid;
+  ncgrid[gridindex].ncIDs[CDF_VARID_Y] = ncyvarid;
   ncgrid[gridindex].avarID = ncavarid;
 }
 
@@ -1193,7 +1189,7 @@ void cdfDefUnstructured(stream_t *streamptr, int gridID, int gridindex)
 		  {
 		    dimID = ncgrid[index].ncIDs[CDF_DIMID_X];
                     ncxvarid = ncgrid[index].ncIDs[CDF_VARID_X];
-                    ncyvarid = ncgrid[index].yvarID;
+                    ncyvarid = ncgrid[index].ncIDs[CDF_VARID_Y];
                     ncavarid = ncgrid[index].avarID;
 		    break;
 		  }
@@ -1308,7 +1304,7 @@ void cdfDefUnstructured(stream_t *streamptr, int gridID, int gridindex)
   ncgrid[gridindex].gridID = gridID;
   ncgrid[gridindex].ncIDs[CDF_DIMID_X] = dimID;
   ncgrid[gridindex].ncIDs[CDF_VARID_X] = ncxvarid;
-  ncgrid[gridindex].yvarID = ncyvarid;
+  ncgrid[gridindex].ncIDs[CDF_VARID_Y] = ncyvarid;
   ncgrid[gridindex].avarID = ncavarid;
 }
 
@@ -2073,7 +2069,6 @@ void cdfDefVars(stream_t *streamptr)
       streamptr->ncgrid[index].gridID = CDI_UNDEFID;
       for (size_t i = 0; i < CDF_SIZE_ncIDs; ++i)
         streamptr->ncgrid[index].ncIDs[i] = CDI_UNDEFID;
-      streamptr->ncgrid[index].yvarID = CDI_UNDEFID;
       streamptr->ncgrid[index].avarID = CDI_UNDEFID;
     }
 
