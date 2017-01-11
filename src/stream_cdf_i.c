@@ -2072,6 +2072,8 @@ void cdf_copy_axis_attr(ncvar_t *ncvar, struct gridaxis_t *gridaxis)
   strcpy(gridaxis->name, ncvar->name);
   strcpy(gridaxis->longname, ncvar->longname);
   strcpy(gridaxis->units, ncvar->units);
+  if ( gridaxis->cvals )
+    gridaxis->stdname = ncvar->stdname;
 }
 
 static
