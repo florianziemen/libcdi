@@ -589,7 +589,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
     }
   else if ( gridtype == GRID_LONLAT && xid == CDI_UNDEFID && yid == CDI_UNDEFID && gridsize == 1 )
     {
-      int ncxvarID = streamptr->ncgrid[gridindex].xvarID;
+      int ncxvarID = streamptr->ncgrid[gridindex].ncIDs[CDF_VARID_X];
       int ncyvarID = streamptr->ncgrid[gridindex].yvarID;
       if ( ncyvarID != CDI_UNDEFID )
         {
@@ -607,7 +607,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
   else if ( gridtype == GRID_UNSTRUCTURED || gridtype == GRID_CURVILINEAR )
     {
       char cellarea[CDI_MAX_NAME] = "area: ";
-      int ncxvarID = streamptr->ncgrid[gridindex].xvarID;
+      int ncxvarID = streamptr->ncgrid[gridindex].ncIDs[CDF_VARID_X];
       int ncyvarID = streamptr->ncgrid[gridindex].yvarID;
       int ncavarID = streamptr->ncgrid[gridindex].avarID;
       if ( ncyvarID != CDI_UNDEFID )
