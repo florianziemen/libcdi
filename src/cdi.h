@@ -197,6 +197,7 @@ extern "C" {
 #define  ZAXIS_SEDIMENT_BOTTOM_TW  23  /* Bottom Of Sediment Layer Penetrated By Thermal Wave   */
 #define  ZAXIS_MIX_LAYER           24  /* Mixing Layer                                          */
 #define  ZAXIS_REFERENCE           25  /* zaxis reference number                                */
+#define  ZAXIS_CHAR                26  /* Area types                                            */
 
 /* SUBTYPE types */
 
@@ -786,11 +787,17 @@ void    gridDefXvals(int gridID, const double xvals[]);
 /*      gridInqXvals: Get all values of a X-axis */
 int     gridInqXvals(int gridID, double xvals[]);
 
+/*      gridInqXIsc: Find out whether X-coordinate is of type CHAR */
+int     gridInqXIsc(int gridID);
+
 /*      gridInqXCvals: Get strings from X-axis in case grid is of type GRID_CHARXY */
 int     gridInqXCvals(int gridID, char *xcvals[]);
 
 /*      gridDefYvals: Define the values of a Y-axis */
 void    gridDefYvals(int gridID, const double yvals[]);
+
+/*      gridInqYIsc: Find out whether Y-coordinate is of type CHAR */
+int     gridInqYIsc(int gridID);
 
 /*      gridInqYCvals: Get strings from Y-axis in case grid is of type GRID_CHARXY */
 int     gridInqYCvals(int gridID, char *ycvals[]);
@@ -992,6 +999,9 @@ void    zaxisPrint(int zaxisID, int index);
 
 /*      zaxisDefLevels: Define the levels of a Z-axis */
 void    zaxisDefLevels(int zaxisID, const double levels[]);
+
+/*      zaxisDefCvals: Define area types of a Z-axis */
+void    zaxisDefCvals(int zaxisID, const char *cvals[]);
 
 /*      zaxisInqLevels: Get all levels of a Z-axis */
 int     zaxisInqLevels(int zaxisID, double levels[]);
