@@ -3014,7 +3014,7 @@ void cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int model
       int ndims = ncvars[ncvarid].ndims;
       int iodim = 0;
       int ixyz = 0;
-      int ipow10[4] = {1, 10, 100, 1000};
+      static const int ipow10[4] = {1, 10, 100, 1000};
 
       if ( ncvars[ncvarid].tsteptype != TSTEP_CONSTANT ) iodim++;
 
