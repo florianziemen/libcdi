@@ -3018,7 +3018,7 @@ void cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int model
 
       if ( ncvars[ncvarid].tsteptype != TSTEP_CONSTANT ) iodim++;
 
-      int *dimids = ncvars[ncvarid].dimids;
+      const int *dimids = ncvars[ncvarid].dimids;
 
       if ( gridInqType(gridID) == GRID_UNSTRUCTURED && ndims-iodim <= 2 && ydimid == xdimid )
         {
