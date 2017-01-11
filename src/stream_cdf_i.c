@@ -68,7 +68,7 @@ typedef struct {
   int      xvarid;
   int      yvarid;
   int      zvarid;
-  int      cvarid;
+  int      cvarids[MAX_COORDVARS];
   int      tvarid;
   int      psvarid;
   int      p0varid;
@@ -659,13 +659,15 @@ void init_ncvars(long nvars, ncvar_t *ncvars)
       ncvars[ncvarid].xvarid          = CDI_UNDEFID;
       ncvars[ncvarid].yvarid          = CDI_UNDEFID;
       ncvars[ncvarid].zvarid          = CDI_UNDEFID;
-      ncvars[ncvarid].cvarid          = CDI_UNDEFID;
       ncvars[ncvarid].tvarid          = CDI_UNDEFID;
       ncvars[ncvarid].psvarid         = CDI_UNDEFID;
       ncvars[ncvarid].p0varid         = CDI_UNDEFID;
       ncvars[ncvarid].ncoordvars      = 0;
       for ( int i = 0; i < MAX_COORDVARS; ++i )
-        ncvars[ncvarid].coordvarids[i]  = CDI_UNDEFID;
+        {
+          ncvars[ncvarid].coordvarids[i]  = CDI_UNDEFID;
+          ncvars[ncvarid].cvarids[i]      = CDI_UNDEFID;
+        }
       ncvars[ncvarid].nauxvars      = 0;
       for ( int i = 0; i < MAX_AUXVARS; ++i )
         ncvars[ncvarid].auxvarids[i]  = CDI_UNDEFID;
@@ -1613,14 +1615,18 @@ void cdf_set_dimtype(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
       if ( ncvars[ncvarid].isvar == TRUE )
 	{
 	  bool lxdim = false, lydim = false, lzdim = false/* , ltdim = false */;
+          int lcdim = 0, allcdims = 0;
 	  int ndims = ncvars[ncvarid].ndims;
 	  for ( int i = 0; i < ndims; i++ )
 	    {
 	      if      ( ncvars[ncvarid].dimtype[i] == X_AXIS ) lxdim = true;
 	      else if ( ncvars[ncvarid].dimtype[i] == Y_AXIS ) lydim = true;
 	      else if ( ncvars[ncvarid].dimtype[i] == Z_AXIS ) lzdim = true;
+              else if ( ncvars[ncvarid].cvarids[i] != CDI_UNDEFID ) lcdim++;
 	      /* else if ( ncvars[ncvarid].dimtype[i] == T_AXIS ) ltdim = true; */
 	    }
+
+          allcdims=lcdim;
 
           if ( !lxdim && ncvars[ncvarid].xvarid != CDI_UNDEFID )
             {
@@ -1639,6 +1645,13 @@ void cdf_set_dimtype(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
                   {
                     if ( !lzdim )
                       {
+                        if ( lcdim )
+                          {
+                            int cdimvar = ncvars[ncvarid].cvarids[allcdims-lcdim];
+                            ncvars[ncvarid].zvarid = cdimvar;
+                            lcdim--;
+		            ncvars[cdimvar].zaxistype = ZAXIS_CHAR;
+                          }
                         cdf_set_dim(ncvars, ncvarid, i, Z_AXIS);
                         lzdim = true;
                         int ncdimid = ncvars[ncvarid].dimids[i];
@@ -1671,19 +1684,19 @@ void cdf_set_dimtype(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
     {
       if ( ncvars[ncvarid].isvar == TRUE )
 	{
-	  bool lxdim = false, lydim = false, lzdim = false, lcdim = false /*, ltdim = false */;
+	  bool lxdim = false, lydim = false, lzdim = false;
+          int lcdim = 0, allcdims = 0 /*, ltdim = false */;
 	  int ndims = ncvars[ncvarid].ndims;
-          if ( ncvars[ncvarid].cvarid != CDI_UNDEFID )
-            {
-              lcdim = true;
-            }
 	  for ( int i = 0; i < ndims; i++ )
 	    {
 	      if      ( ncvars[ncvarid].dimtype[i] == X_AXIS ) lxdim = true;
 	      else if ( ncvars[ncvarid].dimtype[i] == Y_AXIS ) lydim = true;
 	      else if ( ncvars[ncvarid].dimtype[i] == Z_AXIS ) lzdim = true;
+              else if ( ncvars[ncvarid].cvarids[i] != CDI_UNDEFID ) lcdim++;
 	      /* else if ( ncvars[ncvarid].dimtype[i] == T_AXIS ) ltdim = true; */
 	    }
+
+          allcdims=lcdim;
 
           if ( !lxdim && ncvars[ncvarid].xvarid != CDI_UNDEFID )
             {
@@ -1703,9 +1716,9 @@ void cdf_set_dimtype(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
                       {
                         if ( lcdim && ncvars[ncvarid].xvarid == CDI_UNDEFID )
                           {
-                            int cdimvar = ncvars[ncvarid].cvarid;
+                            int cdimvar = ncvars[ncvarid].cvarids[allcdims-lcdim];
                             ncvars[ncvarid].xvarid = cdimvar;
-                            lcdim = false;
+                            lcdim--;
                           }
                         cdf_set_dim(ncvars, ncvarid, i, X_AXIS);
                         lxdim = true;
@@ -1714,20 +1727,21 @@ void cdf_set_dimtype(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
                       {
                         if ( lcdim && ncvars[ncvarid].yvarid == CDI_UNDEFID )
                           {
-                            int cdimvar = ncvars[ncvarid].cvarid;
+                            int cdimvar = ncvars[ncvarid].cvarids[allcdims-lcdim];
                             ncvars[ncvarid].yvarid = cdimvar;
-                            lcdim = false;
+                            lcdim--;
                           }
                         cdf_set_dim(ncvars, ncvarid, i, Y_AXIS);
                         lydim = true;
                       }
                     else if ( !lzdim && ncvars[ncvarid].zvarid == CDI_UNDEFID )
                       {
-                        if ( lcdim )
+                        if ( lcdim > 0 )
                           {
-                            int cdimvar = ncvars[ncvarid].cvarid;
+                            int cdimvar = ncvars[ncvarid].cvarids[allcdims-lcdim];
                             ncvars[ncvarid].zvarid = cdimvar;
-                            lcdim = false;
+                            lcdim--;
+		            ncvars[cdimvar].zaxistype = ZAXIS_CHAR;
                           }
                         cdf_set_dim(ncvars, ncvarid, i, Z_AXIS);
                         lzdim = true;
