@@ -2204,7 +2204,10 @@ bool cdf_read_xcoord(struct cdfLazyGrid *restrict lazyGrid, ncdim_t *ncdims, ncv
   if ( prec != -1 )  grid->prec = prec;
 
   if ( prec == CDI_DATATYPE_UINT8 && !CDI_netcdf_lazy_grid_load )
-    cdf_load_cvals(size, xvarid, axisvar, &grid->x.cvals, *xsize);
+    {
+      cdf_load_cvals(size, xvarid, axisvar, &grid->x.cvals, *xsize);
+      grid->x.clength = size / (*xsize) ;
+    }
   else
     cdf_load_vals(size, ndims, xvarid, axisvar, &grid->x.vals, &lazyGrid->xValsGet, ntdims, start, count);
 
@@ -2222,8 +2225,6 @@ bool cdf_read_ycoord(struct cdfLazyGrid *restrict lazyGrid, ncdim_t *ncdims, ncv
   *islat = axisvar->islat;
   int ndims = axisvar->ndims;
   size_t size = 0;
-  size_t startc[] = {0, 0};
-  size_t countc[] = {1, 0};
   int prec = cdfInqDatatype(axisvar->xtype, axisvar->lunsigned);
 
   if ( (ndims - ntdims) == 2 )
@@ -2237,7 +2238,6 @@ bool cdf_read_ycoord(struct cdfLazyGrid *restrict lazyGrid, ncdim_t *ncdims, ncv
         {
           ncvar->gridtype = GRID_CHARXY;
           size = dimsize1*dimsize2;
-          countc[1] = dimsize2;
           skipvar = dimsize1 != *ysize;
         }
       else
@@ -2272,7 +2272,10 @@ bool cdf_read_ycoord(struct cdfLazyGrid *restrict lazyGrid, ncdim_t *ncdims, ncv
   if ( prec != -1 )  grid->prec = prec;
 
   if ( prec == CDI_DATATYPE_UINT8 && !CDI_netcdf_lazy_grid_load )
-    cdf_load_cvals(size, yvarid, axisvar, &grid->y.cvals, *ysize);
+    {
+      cdf_load_cvals(size, yvarid, axisvar, &grid->y.cvals, *ysize);
+      grid->y.clength = size / (*ysize) ;
+    }
   else
     cdf_load_vals(size, ndims, yvarid, axisvar, &grid->y.vals, &lazyGrid->yValsGet, ntdims, start, count);
 
@@ -2827,7 +2830,7 @@ void cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 
               if ( zdimid != CDI_UNDEFID )
                 {
-                  zvarid = ncdims[zdimid].ncvarid;
+                  zvarid = (ncvar->zvarid != CDI_UNDEFID) ? ncvar->zvarid : ncdims[zdimid].ncvarid;
                   zsize  = (int)ncdims[zdimid].len;
                 }
             }
@@ -2835,6 +2838,7 @@ void cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 	  if ( CDI_Debug ) Message("nlevs = %d", zsize);
 
 	  double *zvar = NULL;
+          char **zcvals = NULL;
 
 	  int zaxisType = CDI_UNDEFID;
 	  if ( zvarid != CDI_UNDEFID ) zaxisType = ncvars[zvarid].zaxistype;
@@ -2855,6 +2859,15 @@ void cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 		if ( pname[len-2] == '_' && isdigit((int) pname[len-1]) )
 		  pname[len-2] = 0;
 	      */
+              if ( zaxisType == ZAXIS_CHAR )
+                {
+                  if ( ncvars[zvarid].ndims == 2 )
+                    {
+                      zprec = CDI_DATATYPE_UINT8;
+                      size_t strlength = ncdims[ncvars[zvarid].dimids[1]].len;
+                      cdf_load_cvals(zsize*strlength, zvarid, ncvar, &zcvals, zsize);
+                    }
+                }
               if ( zaxisType == ZAXIS_HYBRID && ncvars[zvarid].vct )
                 {
                   vct = ncvars[zvarid].vct;
@@ -2863,9 +2876,11 @@ void cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
                   if ( ncvars[zvarid].psvarid != -1 ) psvarid = ncvars[zvarid].psvarid;
                   if ( ncvars[zvarid].p0varid != -1 ) p0varid = ncvars[zvarid].p0varid;
                 }
-
-              zvar = (double*) Malloc((size_t)zsize*sizeof(double));
-	      cdf_get_var_double(ncvars[zvarid].ncid, zvarid, zvar);
+              if ( zaxisType != ZAXIS_CHAR )
+                {
+                  zvar = (double*) Malloc((size_t)zsize*sizeof(double));
+                  cdf_get_var_double(ncvars[zvarid].ncid, zvarid, zvar);
+                }                
 
 	      if ( ncvars[zvarid].bounds != CDI_UNDEFID )
 		{
@@ -2907,7 +2922,7 @@ void cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
                 }
 	    }
 
-      	  ncvar->zaxisID = varDefZaxis(vlistID, zaxisType, (int) zsize, zvar, with_bounds, lbounds, ubounds,
+      	  ncvar->zaxisID = varDefZaxis(vlistID, zaxisType, (int) zsize, zvar, (const char **)zcvals, with_bounds, lbounds, ubounds,
                                        (int)vctsize, vct, pname, plongname, punits, zprec, 1, 0);
 
           int zaxisID = ncvar->zaxisID;
@@ -3831,7 +3846,7 @@ int cdfInqContents(stream_t *streamptr)
 	      else if ( ncvars[ncvar->coordvarids[i]].islat ||
                         ncvars[ncvar->coordvarids[i]].isy )   ncvar->yvarid = ncvar->coordvarids[i];
 	      else if ( ncvars[ncvar->coordvarids[i]].islev ) ncvar->zvarid = ncvar->coordvarids[i];
-	      else if ( ncvars[ncvar->coordvarids[i]].isc )   ncvar->cvarid = ncvar->coordvarids[i];
+	      else if ( ncvars[ncvar->coordvarids[i]].isc )   ncvar->cvarids[i] = ncvar->coordvarids[i];
 	    }
 	}
     }
