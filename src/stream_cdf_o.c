@@ -866,30 +866,36 @@ void cdfDefCurvilinear(stream_t *streamptr, int gridID, int gridindex)
   size_t xdimlen = (size_t)gridInqXsize(gridID);
   size_t ydimlen = (size_t)gridInqYsize(gridID);
 
-  for ( int index = 0; index < gridindex; index++ )
-    {
-      if ( ncgrid[index].ncIDs[CDF_DIMID_X] != CDI_UNDEFID )
+  {
+    size_t ofs = 0;
+    do {
+      struct idSearch search
+        = cdfSearchIDBySize(ofs, (size_t)gridindex, ncgrid, CDF_DIMID_X,
+                            GRID_CURVILINEAR, (int)dimlen,
+                            gridInqType, gridInqSize);
+      size_t index = search.foundIdx;
+      if ( index != SIZE_MAX )
         {
           int gridID0 = ncgrid[index].gridID;
-          int gridtype0 = gridInqType(gridID0);
-          if ( gridtype0 == GRID_CURVILINEAR )
+          if (    IS_EQUAL(gridInqXval(gridID0, 0), gridInqXval(gridID, 0))
+               && IS_EQUAL(gridInqXval(gridID0, (int)dimlen-1),
+                           gridInqXval(gridID, (int)dimlen-1))
+               && IS_EQUAL(gridInqYval(gridID0, 0), gridInqYval(gridID, 0))
+               && IS_EQUAL(gridInqYval(gridID0, (int)dimlen-1),
+                           gridInqYval(gridID, (int)dimlen-1)) )
             {
-              size_t dimlen0 = (size_t)gridInqSize(gridID0);
-              if ( dimlen == dimlen0 )
-                if ( IS_EQUAL(gridInqXval(gridID0, 0), gridInqXval(gridID, 0)) &&
-                     IS_EQUAL(gridInqXval(gridID0, (int)dimlen-1), gridInqXval(gridID, (int)dimlen-1)) &&
-                     IS_EQUAL(gridInqYval(gridID0, 0), gridInqYval(gridID, 0)) &&
-                     IS_EQUAL(gridInqYval(gridID0, (int)dimlen-1), gridInqYval(gridID, (int)dimlen-1)) )
-                  {
-                    xdimID = ncgrid[index].ncIDs[CDF_DIMID_X];
-                    ydimID = ncgrid[index].ncIDs[CDF_DIMID_Y];
-                    ncxvarid = ncgrid[index].ncIDs[CDF_VARID_X];
-                    ncyvarid = ncgrid[index].ncIDs[CDF_VARID_Y];
-                    break;
-                  }
+              xdimID = ncgrid[index].ncIDs[CDF_DIMID_X];
+              ydimID = ncgrid[index].ncIDs[CDF_DIMID_Y];
+              ncxvarid = ncgrid[index].ncIDs[CDF_VARID_X];
+              ncyvarid = ncgrid[index].ncIDs[CDF_VARID_Y];
+              break;
             }
+          ofs = search.foundIdx;
+          if ( ofs < (size_t)gridindex )
+            continue;
         }
-    }
+    } while (false);
+  }
 
   int ncbxvarid = CDI_UNDEFID, ncbyvarid = CDI_UNDEFID, ncavarid = CDI_UNDEFID;
   if ( xdimID == CDI_UNDEFID || ydimID == CDI_UNDEFID )
