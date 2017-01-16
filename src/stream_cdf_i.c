@@ -203,48 +203,48 @@ int setBaseTime(const char *timeunits, taxis_t *taxis)
   int rdate = -1, rtime = -1;
 
   size_t len = strlen(timeunits);
-  char *tu = (char*) Malloc((len+1) * sizeof(char));
-  memcpy(tu, timeunits, (len+1) * sizeof(char));
-  char *ptu = tu;
+  char *restrict tu = (char *)Malloc((len+1) * sizeof(char));
 
-  for ( size_t i = 0; i < len; i++ ) ptu[i] = (char)tolower((int) ptu[i]);
+  for ( size_t i = 0; i < len; i++ ) tu[i] = (char)tolower((int)timeunits[i]);
+  tu[len] = 0;
 
-  int timeunit = get_timeunit(len, ptu);
+  int timeunit = get_timeunit(len, tu);
   if ( timeunit == -1 )
     {
       Message("Unsupported TIMEUNIT: %s!", timeunits);
       return 1;
     }
 
-  while ( ! isspace(*ptu) && *ptu != 0 ) ptu++;
-  if ( *ptu )
+  size_t pos = 0;
+  while ( ! isspace(tu[pos]) && tu[pos] != 0 ) ++pos;
+  if ( tu[pos] )
     {
-      while ( isspace(*ptu) ) ptu++;
+      while ( isspace(tu[pos]) ) ++pos;
 
-      if ( str_is_equal(ptu, "since") )
+      if ( str_is_equal(tu+pos, "since") )
         timetype = TAXIS_RELATIVE;
 
-      while ( ! isspace(*ptu) && *ptu != 0 ) ptu++;
-      if ( *ptu )
+      while ( ! isspace(tu[pos]) && tu[pos] != 0 ) ++pos;
+      if ( tu[pos] )
         {
-          while ( isspace(*ptu) ) ptu++;
+          while ( isspace(tu[pos]) ) ++pos;
 
           if ( timetype == TAXIS_ABSOLUTE )
             {
-              if ( !str_is_equal(ptu, "%y%m%d.%f") && timeunit == TUNIT_DAY )
+              if ( !str_is_equal(tu+pos, "%y%m%d.%f") && timeunit == TUNIT_DAY )
                 {
-                  Message("Unsupported format %s for TIMEUNIT day!", ptu);
+                  Message("Unsupported format %s for TIMEUNIT day!", tu+pos);
                   timeunit = -1;
                 }
-              else if ( !str_is_equal(ptu, "%y%m.%f") && timeunit == TUNIT_MONTH )
+              else if ( !str_is_equal(tu+pos, "%y%m.%f") && timeunit == TUNIT_MONTH )
                 {
-                  Message("Unsupported format %s for TIMEUNIT month!", ptu);
+                  Message("Unsupported format %s for TIMEUNIT month!", tu+pos);
                   timeunit = -1;
                 }
             }
           else if ( timetype == TAXIS_RELATIVE )
             {
-              scanTimeString(ptu, &rdate, &rtime);
+              scanTimeString(tu+pos, &rdate, &rtime);
 
               (*taxis).rdate = rdate;
               (*taxis).rtime = rtime;
