@@ -231,15 +231,21 @@ int setBaseTime(const char *timeunits, taxis_t *taxis)
 
           if ( timetype == TAXIS_ABSOLUTE )
             {
-              if ( !str_is_equal(tu+pos, "%y%m%d.%f") && timeunit == TUNIT_DAY )
+              if ( timeunit == TUNIT_DAY )
                 {
-                  Message("Unsupported format %s for TIMEUNIT day!", tu+pos);
-                  timeunit = -1;
+                  if ( !str_is_equal(tu+pos, "%y%m%d.%f") )
+                    {
+                      Message("Unsupported format %s for TIMEUNIT day!", tu+pos);
+                      timeunit = -1;
+                    }
                 }
-              else if ( !str_is_equal(tu+pos, "%y%m.%f") && timeunit == TUNIT_MONTH )
+              else if ( timeunit == TUNIT_MONTH )
                 {
-                  Message("Unsupported format %s for TIMEUNIT month!", tu+pos);
-                  timeunit = -1;
+                  if ( !str_is_equal(tu+pos, "%y%m.%f") )
+                    {
+                      Message("Unsupported format %s for TIMEUNIT month!", tu+pos);
+                      timeunit = -1;
+                    }
                 }
             }
           else if ( timetype == TAXIS_RELATIVE )
