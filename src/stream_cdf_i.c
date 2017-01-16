@@ -183,17 +183,11 @@ int scanTimeUnit(const char *unitstr)
 static
 void setForecastTime(const char *timestr, taxis_t *taxis)
 {
-  (*taxis).fdate = 0;
-  (*taxis).ftime = 0;
-
-  int len = (int) strlen(timestr);
-  if ( len == 0 ) return;
-
-  int fdate = 0, ftime = 0;
-  scanTimeString(timestr, &fdate, &ftime);
-
-  (*taxis).fdate = fdate;
-  (*taxis).ftime = ftime;
+  size_t len = strlen(timestr);
+  if ( len != 0 )
+    scanTimeString(timestr, &taxis->fdate, &taxis->ftime);
+  else
+    taxis->fdate = taxis->ftime = 0;
 }
 
 static
