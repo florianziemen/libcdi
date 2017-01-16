@@ -252,8 +252,8 @@ int setBaseTime(const char *timeunits, taxis_t *taxis)
             {
               scanTimeString(tu+pos, &rdate, &rtime);
 
-              (*taxis).rdate = rdate;
-              (*taxis).rtime = rtime;
+              taxis->rdate = rdate;
+              taxis->rtime = rtime;
 
               if ( CDI_Debug )
                 Message("rdate = %d  rtime = %d", rdate, rtime);
@@ -261,8 +261,8 @@ int setBaseTime(const char *timeunits, taxis_t *taxis)
         }
     }
 
-  (*taxis).type = timetype;
-  (*taxis).unit = timeunit;
+  taxis->type = timetype;
+  taxis->unit = timeunit;
 
   Free(tu);
 
