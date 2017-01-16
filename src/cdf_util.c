@@ -37,10 +37,8 @@ int get_timeunit(size_t len, const char *ptu)
       else if ( str_is_equal(ptu, "calendar_month") ) timeunit = TUNIT_MONTH;
       else if ( str_is_equal(ptu, "year") )           timeunit = TUNIT_YEAR;
     }
-  else if ( len == 1 )
-    {
-      if ( ptu[0] == 's' ) timeunit = TUNIT_SECOND;
-    }
+  else if ( len == 1 && ptu[0] == 's' )
+    timeunit = TUNIT_SECOND;
 
   return timeunit;
 }
