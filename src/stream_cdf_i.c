@@ -216,7 +216,7 @@ int setBaseTime(const char *timeunits, taxis_t *taxis)
     }
 
   size_t pos = 0;
-  while ( ! isspace(tu[pos]) && tu[pos] != 0 ) ++pos;
+  while ( pos < len && !isspace(tu[pos]) ) ++pos;
   if ( tu[pos] )
     {
       while ( isspace(tu[pos]) ) ++pos;
@@ -224,7 +224,7 @@ int setBaseTime(const char *timeunits, taxis_t *taxis)
       if ( str_is_equal(tu+pos, "since") )
         timetype = TAXIS_RELATIVE;
 
-      while ( ! isspace(tu[pos]) && tu[pos] != 0 ) ++pos;
+      while ( pos < len && !isspace(tu[pos]) ) ++pos;
       if ( tu[pos] )
         {
           while ( isspace(tu[pos]) ) ++pos;
