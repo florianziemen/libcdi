@@ -281,24 +281,15 @@ cdfDefTimestep(stream_t *streamptr, int tsID)
       ncvarid = streamptr->basetime.ncvarboundsid;
       if (ncvarid == CDI_UNDEFID) Error("Call to taxisWithBounds() missing!");
 
-      timeValue = cdi_encode_timeval(taxis->vDateTime_lb, &streamptr->tsteps[0].taxis);
-      size_t start[2] = { tsID, 0 }, count[2] = { 1, 1 };
-      cdf_put_vara_double(fileID, ncvarid, start, count, &timeValue);
-
-      timeValue = cdi_encode_timeval(taxis->vDateTime_ub, &streamptr->tsteps[0].taxis);
-      start[0] = (size_t) tsID;
-      count[0] = 1;
-      start[1] = 1;
-      count[1] = 1;
-      cdf_put_vara_double(fileID, ncvarid, start, count, &timeValue);
+      double timebounds[2];
+      timebounds[0] = cdi_encode_timeval(taxis->vDateTime_lb, &streamptr->tsteps[0].taxis);
+      timebounds[1] = cdi_encode_timeval(taxis->vDateTime_ub, &streamptr->tsteps[0].taxis);
+      size_t start[2] = { tsID, 0 }, count[2] = { 1, 2 };
+      cdf_put_vara_double(fileID, ncvarid, start, count, timebounds);
     }
 
   ncvarid = streamptr->basetime.leadtimeid;
-  if (taxis->type == TAXIS_FORECAST && ncvarid != CDI_UNDEFID)
-    {
-      timeValue = taxis->fc_period;
-      cdf_put_var1_double(fileID, ncvarid, &index, &timeValue);
-    }
+  if (taxis->type == TAXIS_FORECAST && ncvarid != CDI_UNDEFID) cdf_put_var1_double(fileID, ncvarid, &index, &taxis->fc_period);
 }
 
 #endif
