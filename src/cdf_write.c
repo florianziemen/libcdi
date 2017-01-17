@@ -534,32 +534,6 @@ int cdfDefVar(stream_t *streamptr, int varID)
         }
     }
 
-  if ( streamptr->comptype == CDI_COMPRESS_SZIP )
-    {
-      if ( lchunk && (streamptr->filetype == CDI_FILETYPE_NC4 || streamptr->filetype == CDI_FILETYPE_NC4C) )
-        {
-#if defined (NC_SZIP_NN_OPTION_MASK)
-          cdfDefVarSzip(fileID, ncvarid);
-#else
-          static bool lwarn = true;
-          if ( lwarn )
-            {
-              lwarn = false;
-              Warning("NetCDF4/SZIP compression not available!");
-            }
-#endif
-        }
-      else
-        {
-          static bool lwarn = true;
-          if ( lwarn )
-            {
-              lwarn = false;
-              Warning("SZIP compression is only available for NetCDF4!");
-            }
-        }
-    }
-
   if ( stdname && *stdname )
     cdf_put_att_text(fileID, ncvarid, "standard_name", strlen(stdname), stdname);
 
