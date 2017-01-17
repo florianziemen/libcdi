@@ -1225,7 +1225,11 @@ void cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int *ncvaridp, int z
   cdiZaxisInqKeyStr(zaxisID, CDI_KEY_UNITS, CDI_MAX_NAME, zunits);
   if ( zname[0] ) strcpy(axisname, zname);
   if ( zlongname[0] == 0 ) strcpy(zlongname, "hybrid sigma pressure coordinate");
-  if ( zunits[0] == 0 ) strcpy(zunits, "1");
+  if ( zunits[0] == 0 )
+    {
+      zunits[0]='1';
+      zunits[1]='\0';
+    }
 
   cdf_def_dim(fileID, axisname, dimlen, dimID);
   cdf_def_var(fileID, axisname, (nc_type) xtype, 1, dimID, ncvaridp);
