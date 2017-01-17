@@ -999,7 +999,7 @@ cdf_def_vct_cf(stream_t *streamptr, int zaxisID, int nclevID, int ncbndsID, int 
       cdf_def_var(fileID, "b", NC_DOUBLE, 1, dimIDs, &hybmid);
 
       {
-        static const char *anametab[] = { "long_name", "units" };
+        static const char anametab[][10] = { "long_name", "units" };
         static const char lname_v_a[] = "vertical coordinate formula term: ap(k)",
                           lname_v_b[] = "vertical coordinate formula term: b(k)", units_v_a[] = "Pa", units_v_b[] = "1";
         static struct attTxtTab attvtab[][2] = { { { lname_v_a, sizeof(lname_v_a) - 1 }, { units_v_a, sizeof(units_v_a) - 1 } },
@@ -1020,7 +1020,7 @@ cdf_def_vct_cf(stream_t *streamptr, int zaxisID, int nclevID, int ncbndsID, int 
         {
           cdf_def_var(fileID, (p0status == 0) ? "a_bnds" : "ap_bnds", NC_DOUBLE, 2, dimIDs, &hyaiid);
           cdf_def_var(fileID, "b_bnds", NC_DOUBLE, 2, dimIDs, &hybiid);
-          static const char *anametab[] = { "long_name", "units" };
+          static const char anametab[][10] = { "long_name", "units" };
           static const char lname_v_a[] = "vertical coordinate formula term: ap(k+1/2)",
                             lname_v_b[] = "vertical coordinate formula term: b(k+1/2)", units_v_a[] = "Pa", units_v_b[] = "1";
           static struct attTxtTab attvtab[][2] = { { { lname_v_a, sizeof(lname_v_a) - 1 }, { units_v_a, sizeof(units_v_a) - 1 } },
