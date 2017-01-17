@@ -1042,7 +1042,7 @@ void cdf_def_vct_cf(stream_t *streamptr, int zaxisID, int nclevID, int ncbndsID,
       cdf_def_var(fileID, "b",  NC_DOUBLE, 1, dimIDs,  &hybmid);
 
       {
-        static const char *anametab[]
+        static const char anametab[][10]
           = { "long_name", "units" };
         static const char
           lname_v_a[] = "vertical coordinate formula term: ap(k)",
@@ -1072,7 +1072,7 @@ void cdf_def_vct_cf(stream_t *streamptr, int zaxisID, int nclevID, int ncbndsID,
           cdf_def_var(fileID, p0status == 0 ? "a_bnds" : "ap_bnds",
                       NC_DOUBLE, 2, dimIDs, &hyaiid);
           cdf_def_var(fileID, "b_bnds",  NC_DOUBLE, 2, dimIDs, &hybiid);
-          static const char *anametab[]
+          static const char anametab[][10]
             = { "long_name", "units" };
           static const char
             lname_v_a[] = "vertical coordinate formula term: ap(k+1/2)",
