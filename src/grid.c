@@ -574,8 +574,8 @@ void *grid_key_to_ptr(grid_t *gridptr, int key)
     case CDI_KEY_XDIMNAME:   keyptr = (void*)gridptr->x.dimname; break;
     case CDI_KEY_YDIMNAME:   keyptr = (void*)gridptr->y.dimname; break;
     case CDI_KEY_VDIMNAME:   keyptr = (void*)gridptr->vdimname; break;
-    case CDI_KEY_MAPNAME:    keyptr = (void*)gridptr->mapname; break;
-    case CDI_KEY_MAPPING:    keyptr = (void*)gridptr->mapping; break;
+    case CDI_KEY_MAPPING:    keyptr = (void*)gridptr->mapname; break;
+    case CDI_KEY_MAPNAME:    keyptr = (void*)gridptr->mapping; break;
     }
 
   return keyptr;
@@ -969,7 +969,7 @@ int gridInqProjType(int gridID)
   if ( projtype == -1 )
     {
       char mapping[CDI_MAX_NAME]; mapping[0] = 0;
-      cdiGridInqKeyStr(gridID, CDI_KEY_MAPPING, CDI_MAX_NAME, mapping);
+      cdiGridInqKeyStr(gridID, CDI_KEY_MAPNAME, CDI_MAX_NAME, mapping);
       if ( mapping[0] )
         {
           if      ( strcmp(mapping, "rotated_latitude_longitude") == 0 )   projtype = CDI_PROJ_RLL;
@@ -1782,7 +1782,7 @@ void gridInqParamRLL(int gridID, double *xpole, double *ypole, double *angle)
 
   const char *projection = "rotated_latitude_longitude";
   char mapping[CDI_MAX_NAME]; mapping[0] = 0;
-  cdiGridInqKeyStr(gridID, CDI_KEY_MAPPING, CDI_MAX_NAME, mapping);
+  cdiGridInqKeyStr(gridID, CDI_KEY_MAPNAME, CDI_MAX_NAME, mapping);
   if ( mapping[0] && strcmp(mapping, projection) == 0 )
     {
       int atttype, attlen;
@@ -1823,10 +1823,10 @@ void gridInqParamRLL(int gridID, double *xpole, double *ypole, double *angle)
 */
 void gridDefParamRLL(int gridID, double xpole, double ypole, double angle)
 {
-  cdiGridDefKeyStr(gridID, CDI_KEY_MAPNAME, CDI_MAX_NAME, "rotated_pole");
+  cdiGridDefKeyStr(gridID, CDI_KEY_MAPPING, CDI_MAX_NAME, "rotated_pole");
 
   const char *mapping = "rotated_latitude_longitude";
-  cdiGridDefKeyStr(gridID, CDI_KEY_MAPPING, CDI_MAX_NAME, mapping);
+  cdiGridDefKeyStr(gridID, CDI_KEY_MAPNAME, CDI_MAX_NAME, mapping);
   cdiDefAttTxt(gridID, CDI_GLOBAL, "grid_mapping_name", strlen(mapping), mapping);
   cdiDefAttFlt(gridID, CDI_GLOBAL, "grid_north_pole_longitude", CDI_DATATYPE_FLT64, 1, &xpole);
   cdiDefAttFlt(gridID, CDI_GLOBAL, "grid_north_pole_latitude", CDI_DATATYPE_FLT64, 1, &ypole);
