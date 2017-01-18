@@ -579,6 +579,7 @@ void cdi_generate_vars(stream_t *streamptr)
   double level_sf = 1;
   int vlistID = streamptr->vlistID;
 
+//  printf("cdi_generate_vars() ..\n"); // KNMI-debug-prints
   int *varids = (int *) Malloc(nvars*sizeof(int));
   for ( unsigned varID = 0; varID < nvars; varID++ ) varids[varID] = (int)varID;
 
@@ -625,6 +626,8 @@ void cdi_generate_vars(stream_t *streamptr)
       if ( vartable[varid].level_sf != 0 ) level_sf = 1./vartable[varid].level_sf;
 
       zaxisID = UNDEFID;
+
+//    printf("Processing (index=%d): param.nr. %d; gridID=%d, zaxistype=%d \n", index, param, gridID, zaxistype); // KNMI-debug-prints
 
       /* consistency check: test if all subtypes have the same levels: */
       unsigned nlevels = vartable[varid].recordTable[0].nlevels;
@@ -727,6 +730,7 @@ void cdi_generate_vars(stream_t *streamptr)
         }
 
       const char *unitptr = cdiUnitNamePtr(vartable[varid].level_unit);
+      //Message("calling varDefZaxis(zaxistype: %d, nlevels: %d) ",  zaxistype, nlevels);     // KNMI-debug-prints
       zaxisID = varDefZaxis(vlistID, zaxistype, (int)nlevels, dlevels, lbounds, dlevels1, dlevels2,
                             (int)Vctsize, Vct, NULL, NULL, unitptr, 0, 0, ltype1);
 
@@ -745,6 +749,7 @@ void cdi_generate_vars(stream_t *streamptr)
       if ( lbounds ) Free(dlevels1);
       if ( lbounds ) Free(dlevels2);
       Free(dlevels);
+//      printf("streamNewVar(streamID, gridID=%d, zaxisID=%d)\n",gridID, zaxisID); // KNMI-debug-prints
 
       /* define new subtype for tile set */
       int tilesetID = CDI_UNDEFID;
@@ -1019,6 +1024,7 @@ int varDefZaxis(int vlistID, int zaxistype, int nlevels, const double *levels, i
     {
       if ( ! zaxisglobdefined )
 	{
+	  //Message("calling zaxisCreate(zaxistype: %d, nlevels: %d) ",  zaxistype, nlevels); // KNMI-debug-prints
 	  zaxisID = zaxisCreate(zaxistype, nlevels);
 	  zaxisDefLevels(zaxisID, levels);
 	  if ( lbounds )

@@ -15,6 +15,20 @@
 #include "gribapi.h"
 #include "namespace.h"
 
+#ifdef HIRLAM_EXTENSIONS
+// Forward declarations:
+int gribapiGetScanningMode(grib_handle *gh);
+void gribapiSetScanningMode(grib_handle *gh, int scanningMode);
+int gribapiGetUvRelativeToGrid(grib_handle *gh);
+void gribapiSetUvRelativeToGrid(grib_handle *gh, int mode);
+void gribapiChangeParameterIdentification(grib_handle *gh, int code, int ltype, int lev);
+
+// This function is defined in grb_read.c
+// But we need it here as well.
+int grbDecode(int filetype, int memtype, void *gribbuffer, int gribsize, void *data, size_t datasize,
+          int unreduced, int *nmiss, double missval, int vlistID, int varID);
+
+#endif // HIRLAM_EXTENSIONS
 
 static
 size_t grbEncode(int filetype, int memtype, int varID, int levelID, int vlistID, int gridID, int zaxisID,
@@ -115,6 +129,85 @@ void grbCopyRecord(stream_t * streamptr2, stream_t * streamptr1)
     Error("Could not read GRIB record for copying!");
 
   size_t nbytes = recsize;
+
+#ifdef HIRLAM_EXTENSIONS
+  // Even if you are stream-copy records you might need to change a bit of grib-header !
+  grib_handle *gh = NULL;
+  gh = grib_handle_new_from_message(NULL, (void *) gribbuffer, recsize);
+
+  if (cdoGribChangeModeUvRelativeToGrid>=0)
+  {
+      if (cdoDebugExt>=20) Message("Change ModeUvRelativeToGrid =>%d", cdoGribChangeModeUvRelativeToGrid);
+      gribapiSetUvRelativeToGrid(gh,cdoGribChangeModeUvRelativeToGrid);
+  }
+  if (cdoGribChangeParameterIdentification==1)
+  {
+      if (cdoDebugExt>=20) Message("gribapiChangeParameterIdentification => (%d, %d, %d)", cdoGribChangeParID_code, cdoGribChangeParID_ltype, cdoGribChangeParID_lev);
+      gribapiChangeParameterIdentification(gh, cdoGribChangeParID_code, cdoGribChangeParID_ltype, cdoGribChangeParID_lev);
+      cdoGribChangeParameterIdentification = -1; // after grib attributes have been changed turn it off again
+  }
+
+  if (cdoGribDataScanningMode != -1)   // -1: not used; allowed modes: <0, 64, 96>; Default is 64
+  // This will overrule the old scanning mode of the given grid
+  {
+    int scanModeIN;
+    scanModeIN  = gribapiGetScanningMode(gh);
+
+    if (scanModeIN != cdoGribDataScanningMode)
+    {
+        if (cdoDebugExt>=20) Message("Change GribDataScanningMode => %d (scanModeIN = %d)", cdoGribDataScanningMode, scanModeIN);
+
+        int status = 0;
+        int gridID;
+        int varID, levelID;
+        int vlistID;
+        int zip;
+        int gridsize, nmiss;
+
+        vlistID = streamptr1->vlistID;
+        varID   = streamptr1->tsteps[tsID].records[recID].varID;
+        levelID   = streamptr1->tsteps[tsID].records[recID].levelID;
+        //gribbuffer = (unsigned char *) streamptr->record->buffer;
+        // allocate above ..
+        gridID   = vlistInqVarGrid(vlistID, varID);
+        gridsize = gridInqSize(gridID);
+
+        gridsize = vlistGridsizeMax(vlistID);
+        if ( vlistNumber(vlistID) != CDI_REAL ) gridsize *= 2;
+        double * data = (double *) malloc(gridsize*sizeof(double));
+        int missval = vlistInqVarMissval(vlistID, varID);
+
+        //streamptr->numvals += gridsize;
+
+        // memtype: MEMTYPE_FLOAT or MEMTYPE_DOUBLE
+        //int statusDC = grbDecode(filetype, MEMTYPE_DOUBLE, gribbuffer, recsize, data, gridsize, streamptr1->unreduced, &nmiss, missval, vlistID, varID);
+        //int grbDecode(int filetype, int memtype, void *gribbuffer, int gribsize, void *data, size_t datasize,
+        //              int unreduced, int *nmiss, double missval, int vlistID, int varID);
+
+        //streamptr1->tsteps[tsID].records[recID].zip = zip;
+        //gribapiSetScanningMode(gh, cdoGribDataScanningMode);  // T.B.D. this will be done by grbDecode..
+
+        //varID   = streamptr1->record->varID;
+        //levelID = streamptr1->record->levelID;
+
+        if (cdoDebugExt>=20) Message(" processing varID %d; levelID %d",varID,levelID);
+
+        grb_write_var_slice(streamptr2, varID, levelID, MEMTYPE_DOUBLE, (const void *) data, nmiss);
+        //grb_write_var_slice(streamptr, varID, levelID, memtype, ((double*)data)+levelID*gridsize, nmiss);
+
+        //grb_write_var(streamptr2, varID, MEMTYPE_DOUBLE, data, nmiss);
+        //grb_write_var(stream_t *streamptr, int varID, int memtype, const void *data, int nmiss)
+        //grb_write_var_slice(streamptr2, varID, levelID, MEMTYPE_DOUBLE, (const void *) data, nmiss);
+
+        free(data);
+        free(gribbuffer);
+        return status;
+    }
+    else
+        if (cdoDebugExt>=20) Message("Change GribDataScanningMode => %d (scanModeIN = %d)", cdoGribDataScanningMode, scanModeIN);
+
+  }
+#endif // HIRLAM_EXTENSIONS
 
   if ( filetype == FILETYPE_GRB )
     {

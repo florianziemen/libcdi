@@ -1567,6 +1567,7 @@ Optional Features:
   --enable-ieg            Use the ieg library [default=yes]
   --enable-all-static     build a completely statically linked CDO binary
                           [default=no]
+  --enable-HIRLAM-extensions        This will ensure that HIRLAM_EXTENSIONS is defined.
   --enable-mpi            Compile with MPI compiler [default=no]
   --enable-iso-c-interface
                           Create Fortran Interface via iso_c_bindings facility
@@ -28262,6 +28263,29 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $enable_cgribex" >&5
 $as_echo "$enable_cgribex" >&6; }
 ENABLE_CGRIBEX=$enable_cgribex
+
+#  ----------------------------------------------------------------------
+#  Compile interface with HIRLAM extensions
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for HIRLAM extensions" >&5
+$as_echo_n "checking for HIRLAM extensions... " >&6; }
+# Check whether --enable-HIRLAM-extensions was given.
+if test "${enable-HIRLAM-extensions+set}" = set; then :
+  enableval=$enable_HIRLAMext; if test "x$enable_HIRLAMext" != 'xno'; then :
+
+$as_echo "#define HIRLAM_EXTENSIONS 1" >>confdefs.h
+
+                      enable_HIRLAMext=yes
+fi
+else
+
+$as_echo "#define HIRLAM_EXTENSIONS 1" >>confdefs.h
+
+               enable_HIRLAMext=yes
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $enable_HIRLAMext" >&5
+$as_echo "$enable_HIRLAMext" >&6; }
+ENABLE_HIRLAMEXT=$enable_HIRLAMext
 
 #  ----------------------------------------------------------------------
 #  Compile interface with internal SERVICE library

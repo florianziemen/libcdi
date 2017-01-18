@@ -8,7 +8,9 @@
 #include <inttypes.h>
 #include <stdio.h>
 
+#ifndef _DTYPES_H
 #include "dtypes.h"
+#endif
 
 #ifndef HOST_ENDIANNESS
 #ifdef __cplusplus

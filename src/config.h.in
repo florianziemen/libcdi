@@ -100,6 +100,9 @@
 /* GRIB_API library is present if defined to 1 */
 #undef HAVE_LIBGRIB_API
 
+/* Define to 1 to use KNMI extensions */
+#undef HIRLAM_EXTENSIONS
+
 /* Define to 1 for IEG interface */
 #undef HAVE_LIBIEG
 

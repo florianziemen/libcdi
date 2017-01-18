@@ -489,6 +489,7 @@ int vlist_generate_zaxis(int vlistID, int zaxistype, int nlevels, const double *
     {
       if ( ! zaxisglobdefined )
 	{
+	  //Message("calling zaxisCreate(zaxistype: %d, nlevels: %d) ",  zaxistype, nlevels);  // KNMI-debug-prints
 	  zaxisID = zaxisCreate(zaxistype, nlevels);
 	  zaxisDefLevels(zaxisID, levels);
 	  if ( has_bounds )

@@ -10,7 +10,41 @@
 #include "file.h"
 #include "cgribex.h"  /* gribZip gribGetZip gribGinfo */
 #include "gribapi.h"
+#ifdef HIRLAM_EXTENSIONS
+#include "grib_api.h"
 
+int cdoDebugExt                        =  0;      //  Debug level for the KNMI extensions
+// *** RELATED to GRIB only ***
+int cdoGribDataScanningMode             = -1;      // -1: not used; allowed modes: <0, 64, 96>; Default is 64
+int cdoGribChangeModeUvRelativeToGrid   = -1;      // -1: don't set; 0: set to '0'; 1: set to '1'
+int cdoGribUseTimeRangeIndicator        = 0;       // normaly cdo looks in grib for attribute called "stepType"
+                                                   // but NWP models such as Harmonie 37h1.2, use "timeRangeIndicator"
+                                                   // where:  0: for instanteneous fields; 4: for accumulated fields
+extern void gribapiSetUvRelativeToGrid(grib_handle *gh, int mode);
+extern int  gribapiGetScanningMode(grib_handle *gh);
+extern void gribapiSetScanningMode(grib_handle *gh, int scanningMode);
+
+// Regarding operation to change parameter identification:
+// -1: don't change; 1: change (cdoGribChangeParID_code, cdoGribChangeParID_ltype, cdoGribChangeParID_lev)
+int cdoGribChangeParameterIdentification   = -1;
+int cdoGribChangeParID_code;
+int cdoGribChangeParID_ltype;
+int cdoGribChangeParID_lev;
+
+extern void gribapiChangeParameterIdentification(grib_handle *gh, int code, int ltype, int lev);  // Function defined in stream_gribapi.c
+
+void streamGrbChangeParameterIdentification(int code, int ltype, int lev)
+{   // NOTE this is a "PROXY" function for gribapiChangeParameterIdentification();
+    // This just sets the globals. There are probably better solutions to this.
+    // The parameter change is done by function  gribapiChangeParameterIdentification() in stream_gribapi.c
+    cdoGribChangeParameterIdentification  = 1;
+    // Setting this control variable to 1 will cause calling fnc. gribapiChangeParameterIdentification later.
+    // After grib attributes have been changed this variable goes to -1.
+    cdoGribChangeParID_code = code;
+    cdoGribChangeParID_ltype = ltype;
+    cdoGribChangeParID_lev = lev;
+}
+#endif // HIRLAM_EXTENSIONS
 
 int grib1ltypeToZaxisType(int grib_ltype)
 {

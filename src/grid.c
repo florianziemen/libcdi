@@ -167,6 +167,19 @@ void grid_init(grid_t *gridptr)
   gridptr->name          = NULL;
   gridptr->vtable        = &cdiGridVtable;
   gridptr->extraData     = NULL;
+#ifdef HIRLAM_EXTENSIONS
+  gridptr->iScansNegatively      = 0;
+  gridptr->jScansPositively      = 1;
+  gridptr->jPointsAreConsecutive = 0;
+  gridptr->scanningMode          = 128*gridptr->iScansNegatively + 64*gridptr->jScansPositively + 32*gridptr->jPointsAreConsecutive;
+  /* scanningMode  = 128 * iScansNegatively + 64 * jScansPositively + 32 * jPointsAreConsecutive;
+               64  = 128 * 0                + 64 *        1         + 32 * 0
+               00  = 128 * 0                + 64 *        0         + 32 * 0
+               96  = 128 * 0                + 64 *        1         + 32 * 1
+     Default / implicit scanning mode is 64:
+                        i and j scan positively, i points are consecutive (row-major)        */
+  gridptr->uvRelativeToGrid      = 0;   /* Some models deliver wind U,V relative to the grid-cell */
+#endif // HIRLAM_EXTENSIONS
 }
 
 
@@ -1793,6 +1806,40 @@ double gridInqYinc(int gridID)
         }
     }
 
+    #ifdef HIRLAM_EXTENSIONS__NOT_WORKING_OK
+      /* This is needed to correctly aquire scanning mode when working with NetCDF files.
+         Grib files contain the scanning mode implicitely.
+         Without the following would the conversion NetCDF => grib go wrong for the scanning mode.
+      */
+      double xinc = gridInqXinc(gridID); gridptr->xinc = xinc;
+
+      if (xinc > 0)
+        gridptr->iScansNegatively      = 0;
+      else
+        gridptr->iScansNegatively      = 1;   // this is rare but possible ...
+
+      /* .. TO BE DONE: Detection of array ordening with NetCDF ...
+            gridptr->jPointsAreConsecutive = 0;   ~ C-style: Default
+
+            C-style ordering (column-major) ~ the raw elements are stored first.
+            FORTRAN-style ordering (row-major) ~ the column elements are stored first
+      */
+      if (yinc > 0)
+        gridptr->jScansPositively      = 1;
+      else
+        gridptr->jScansPositively      = 0;
+      gridptr->scanningMode          = 128*gridptr->iScansNegatively + 64*gridptr->jScansPositively + 32*gridptr->jPointsAreConsecutive;
+      if ( cdoDebugExt>=10 )
+        printf("gridInqYinc(): xinc=%f; yinc=%f; scanningMode=%d\n", xinc, yinc, gridptr->scanningMode);
+
+      /* scanningMode  = 128 * iScansNegatively + 64 * jScansPositively + 32 * jPointsAreConsecutive;
+                   64  = 128 * 0                + 64 *        1         + 32 * 0
+                   00  = 128 * 0                + 64 *        0         + 32 * 0
+                   96  = 128 * 0                + 64 *        1         + 32 * 1
+         Default / implicit scanning mode is 64:
+                            i and j scan positively, i points are consecutive (row-major)        */
+    #endif // HIRLAM_EXTENSIONS
+
   return yinc;
 }
 
@@ -2404,6 +2451,17 @@ int gridCompare(int gridID, const grid_t *grid)
 	}
     }
 
+#ifdef HIRLAM_EXTENSIONS
+    if ( (grid->scanningMode != gridInqScanningMode(gridID)) || (grid->uvRelativeToGrid != gridInqUvRelativeToGrid(gridID)) )
+    {
+        // often grid definition may differ in UV-relativeToGrid, simply new or other GRID will be used in CDO
+        if ( cdoDebugExt>=200 )
+            printf("gridCompare(gridID=%d): Differs: grid.scanningMode [%d] != gridInqScanningMode(gridID) [%d] or  grid.uvRelativeToGrid [%ld] != gridInqUvRelativeToGrid(gridID) [%d]\n",
+                gridID, grid->scanningMode, gridInqScanningMode(gridID), grid->uvRelativeToGrid, gridInqUvRelativeToGrid(gridID) );
+          differ = 1;
+    }
+#endif // HIRLAM_EXTENSIONS
+
   return differ;
 }
 
@@ -2476,6 +2534,10 @@ int gridCompareP ( void * gridptr1, void * gridptr2 )
   if ( IS_NOT_EQUAL(g1->xpole         , g2->xpole)         ) return differ;
   if ( IS_NOT_EQUAL(g1->ypole         , g2->ypole)         ) return differ;
   if ( IS_NOT_EQUAL(g1->angle         , g2->angle)         ) return differ;
+#ifdef HIRLAM_EXTENSIONS
+  if ( IS_NOT_EQUAL(g1->scanningMode         , g2->scanningMode)         ) return differ;
+  if ( IS_NOT_EQUAL(g1->uvRelativeToGrid     , g2->uvRelativeToGrid)     ) return differ;
+#endif // HIRLAM_EXTENSIONS
 
   const double *restrict g1_xvals = g1->vtable->inqXValsPtr(g1),
     *restrict g2_xvals = g2->vtable->inqXValsPtr(g2);
@@ -2850,6 +2912,13 @@ int gridGenerate(const grid_t *grid)
   gridptr->lcc_scanflag = grid->lcc_scanflag;
   gridptr->number = grid->number;
   gridptr->position = grid->position;
+  #ifdef HIRLAM_EXTENSIONS
+    gridptr->scanningMode           = grid->scanningMode;
+    gridptr->iScansNegatively       = grid->iScansNegatively;
+    gridptr->jScansPositively       = grid->jScansPositively;
+    gridptr->jPointsAreConsecutive  = grid->jPointsAreConsecutive;
+    gridptr->uvRelativeToGrid       = grid->uvRelativeToGrid;
+#endif // HIRLAM_EXTENSIONS
   memcpy(gridptr->uuid, grid->uuid, CDI_UUID_SIZE);
   if ( gridtype == GRID_UNSTRUCTURED && grid->reference )
     gridDefReference(gridID, grid->reference);
@@ -3670,6 +3739,12 @@ static void gridPrintKernel(grid_t * gridptr, int index, int opt, FILE *fp)
       if ( uuidOfHGridStr[0] != 0 && strlen(uuidOfHGridStr) == 36 )
         fprintf(fp, "uuid      = %s\n", uuidOfHGridStr);
     }
+#ifdef HIRLAM_EXTENSIONS
+    {
+      int  scanningMode =  gridInqScanningMode(gridID);
+      fprintf(fp, "scanningMode = %d\n", scanningMode);
+    }
+#endif // HIRLAM_EXTENSIONS
 
   if ( gridptr->mask )
     {
@@ -4184,8 +4259,13 @@ gridTxCode ()
   return GRID;
 }
 
+#ifdef HIRLAM_EXTENSIONS
+enum { gridNint    = 33,
+       gridNdouble = 29,
+#else
 enum { gridNint    = 28,
        gridNdouble = 24,
+#endif // HIRLAM_EXTENSIONS
        gridHasMaskFlag = 1 << 0,
        gridHasGMEMaskFlag = 1 << 1,
        gridHasXValsFlag = 1 << 2,
@@ -4379,6 +4459,14 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
     memberMask           =   intBuffer[25];
     gridP->xstdname      =   xystdname_tab[intBuffer[26]][0];
     gridP->ystdname      =   xystdname_tab[intBuffer[27]][1];
+#ifdef HIRLAM_EXTENSIONS
+    gridP->iScansNegatively         =   intBuffer[28];
+    gridP->jScansPositively         =   intBuffer[29];
+    gridP->jPointsAreConsecutive    =   intBuffer[30];
+    gridP->scanningMode             =   intBuffer[31];
+    gridP->uvRelativeToGrid         =   intBuffer[32];
+#endif // HIRLAM_EXTENSIONS
+
   }
 
   if (memberMask & gridHasRowLonFlag)
@@ -4424,6 +4512,14 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
     gridP->xpole = doubleBuffer[21];
     gridP->ypole = doubleBuffer[22];
     gridP->angle = doubleBuffer[23];
+#ifdef HIRLAM_EXTENSIONS
+    gridP->iScansNegatively = doubleBuffer[24];
+    gridP->jScansPositively = doubleBuffer[25];
+    gridP->jPointsAreConsecutive = doubleBuffer[26];
+    gridP->scanningMode = doubleBuffer[27];
+    gridP->uvRelativeToGrid = doubleBuffer[28];
+#endif // HIRLAM_EXTENSIONS
+
   }
 
   int irregular = gridP->type == GRID_UNSTRUCTURED
@@ -4584,6 +4680,13 @@ gridPack(void * voidP, void * packBuffer, int packBufferSize,
                           - xystdname_tab);
     intBuffer[27] = (int)((const char (*)[2][24])gridP->ystdname
                           - (const char (*)[2][24])xystdname_tab[0][1]);
+#ifdef HIRLAM_EXTENSIONS
+    intBuffer[28] = gridP->iScansNegatively;
+    intBuffer[29] = gridP->jScansPositively;
+    intBuffer[30] = gridP->jPointsAreConsecutive;
+    intBuffer[31] = gridP->scanningMode;
+    intBuffer[32] = gridP->uvRelativeToGrid;
+#endif // HIRLAM_EXTENSIONS
 
     serializePack(intBuffer, gridNint, DATATYPE_INT,
                   packBuffer, packBufferSize, packBufferPos, context);
@@ -4630,6 +4733,14 @@ gridPack(void * voidP, void * packBuffer, int packBufferSize,
     doubleBuffer[21] = gridP->xpole;
     doubleBuffer[22] = gridP->ypole;
     doubleBuffer[23] = gridP->angle;
+#ifdef HIRLAM_EXTENSIONS
+    doubleBuffer[24] = gridP->iScansNegatively;
+    doubleBuffer[25] = gridP->jScansPositively;
+    doubleBuffer[26] = gridP->jPointsAreConsecutive;
+    doubleBuffer[27] = gridP->scanningMode;
+    doubleBuffer[28] = gridP->uvRelativeToGrid;
+#endif // HIRLAM_EXTENSIONS
+
 
     serializePack(doubleBuffer, gridNdouble, DATATYPE_FLT64,
                   packBuffer, packBufferSize, packBufferPos, context);
@@ -4875,6 +4986,551 @@ const struct gridVirtTable cdiGridVtable
   .inqXBoundsPtr = gridInqXBoundsPtrSerial,
   .inqYBoundsPtr = gridInqYBoundsPtrSerial,
 };
+
+#ifdef HIRLAM_EXTENSIONS
+
+extern int cdoDebugExt; // defined in cdo.c
+
+grid_t *grid_to_pointer(int gridID)
+{
+  grid_t *gridptr = NULL;
+
+  gridptr = ( grid_t *) reshGetVal ( gridID, &gridOps );
+  return gridptr;
+}
+
+static
+void gridCheckPtr(const char *caller, int gridID, grid_t *gridptr)
+{
+  if ( gridptr == NULL )
+    Errorc("grid %d undefined!", gridID);
+}
+
+#define  grid_check_ptr(gridID, gridptr)  gridCheckPtr(__func__, gridID, gridptr)
+
+
+
+/*
+@Function  define_destagered_grid
+@Title     Define a de-staggered grid for U and V
+
+@Prototype int define_destagered_grid(int gridID_u_stag, int gridID_v_stag, double *destagGridOffsets)
+@Parameter
+    @Item  grid_u_stag       Staggered grid of u-wind component
+    @Item  grid_v_stag       Staggered grid of v-wind component
+    @Item  grid_uv_destag    Destaggered grid of uv-wind
+
+@Description
+The function @func{define_destagered_grid} defines a de-staggered grid for U and V
+
+@EndFunction
+*/
+int define_destagered_grid(int gridID_u_stag, int gridID_v_stag, double *destagGridOffsets)
+{
+/* Example of horizontal grids (Hirlam LAMH_D11):
+     U : lonlat       > size      : dim = 399300  nlon = 726  nlat = 550
+                        rlon      : first = -30.15  last = 42.35  inc = 0.1  degrees
+                        rlat      : first = -30.8  last = 24.1  inc = 0.1  degrees
+                        northpole : lon = -195  lat = 30
+     V : lonlat       > size      : dim = 399300  nlon = 726  nlat = 550
+                        rlon      : first = -30.2  last = 42.3  inc = 0.1  degrees
+                        rlat      : first = -30.75  last = 24.15  inc = 0.1  degrees
+                        northpole : lon = -195  lat = 30
+=>   RESULT:
+     R : lonlat       > size      : dim = 399300  nlon = 726  nlat = 550
+                        rlon      : first = -30.2  last = 42.3  inc = 0.1  degrees
+                        rlat      : first = -30.8  last = 24.1  inc = 0.1  degrees
+                        northpole : lon = -195  lat = 30
+*/
+    if ( cdoDebugExt ) printf("cdo uvDestag: define_destagered_grid(gridID_u=%d,gridID_v=%d,destagGridOffsets(%02.1f,%02.1f)) ...\n",gridID_u_stag, gridID_v_stag, destagGridOffsets[0],destagGridOffsets[1]);
+
+    if ( cdoDebugExt>1 ) {
+        gridPrint(gridID_u_stag,1,0);
+        gridPrint(gridID_v_stag,1,0);
+    }
+
+    grid_t *grid_u_stag, *grid_v_stag;
+    grid_t *grid_uv_destag;
+    int gridID_uv_destag;
+
+    grid_u_stag =  grid_to_pointer(gridID_u_stag);
+    grid_check_ptr(gridID_u_stag, grid_u_stag);
+
+    grid_v_stag =  grid_to_pointer(gridID_v_stag);
+    grid_check_ptr(gridID_v_stag, grid_v_stag);
+
+
+    const double *xvals_U   = gridInqXvalsPtr(gridID_u_stag);
+    const double *yvals_U   = gridInqYvalsPtr(gridID_u_stag);
+    const double *xvals_V   = gridInqXvalsPtr(gridID_v_stag);
+    const double *yvals_V   = gridInqYvalsPtr(gridID_v_stag);
+
+    int gridXsize = gridInqXsize(gridID_u_stag);
+    int gridYsize = gridInqYsize(gridID_u_stag);
+
+    double xfirst_U = gridInqXval(gridID_u_stag,0);   // staggered grid of u-wind
+    double yfirst_U = gridInqYval(gridID_u_stag,0);
+    double xlast_U  = gridInqXval(gridID_u_stag, gridXsize-1);
+    double ylast_U  = gridInqYval(gridID_u_stag, gridYsize-1);
+    double xfirst_V = gridInqXval(gridID_v_stag,0);   // staggered grid of v-wind
+    double yfirst_V = gridInqYval(gridID_v_stag,0);
+    double xlast_V  = gridInqXval(gridID_v_stag, gridXsize-1);
+    double ylast_V  = gridInqYval(gridID_v_stag, gridYsize-1);
+    double xinc     = gridInqXinc(gridID_u_stag);
+    double yinc     = gridInqYinc(gridID_u_stag);
+
+
+    gridID_uv_destag = gridDuplicate(gridID_u_stag);
+
+    grid_uv_destag = grid_to_pointer(gridID_u_stag);
+    grid_check_ptr(gridID_uv_destag, grid_uv_destag);
+
+    grid_uv_destag->scanningMode          = grid_u_stag->scanningMode;
+    grid_uv_destag->iScansNegatively      = grid_u_stag->iScansNegatively;
+    grid_uv_destag->jScansPositively      = grid_u_stag->jScansPositively;
+    grid_uv_destag->jPointsAreConsecutive = grid_u_stag->jPointsAreConsecutive;
+    grid_uv_destag->uvRelativeToGrid      = grid_u_stag->uvRelativeToGrid;
+
+    gridPrint(gridID_uv_destag, 1,0);
+
+    if ( cdoDebugExt )
+    {
+        printf("cdo uvDestag: define_destagered_grid(): (grid_u_stag->xdef=%d, grid_u_stag->ydef=%d); (gridXsize=%d, gridYsize=%d)\n", grid_u_stag->xdef, grid_u_stag->ydef, gridXsize, gridYsize);
+        printf("cdo uvDestag: define_destagered_grid(): (xfirst_U = %3.2f; yfirst_U = %3.2f); (xfirst_V = %3.2f; yfirst_V = %3.2f);\n",xfirst_U,yfirst_U,xfirst_V,yfirst_V);
+        printf("define_cdo uvDestag: destagered_grid(): (xlast_U  = %3.2f; ylast_U  = %3.2f); (xlast_V  = %3.2f; ylast_V  = %3.2f);\n",xlast_U,ylast_U,xlast_V,ylast_V);
+        // NOTE: xdef, ydef, xfirst, yfirst, xlast, ylast == 0 ! Not defined after reading the GRIB file with GRIBAPI
+        //printf("define_destagered_grid(): (xfirst_U=%3.2f;yfirst_U=%3.2f); (xfirst_V=%3.2f;yfirst_V=%3.2f);\n",grid_u_stag->xfirst, grid_u_stag->xfirst, grid_v_stag->xfirst, grid_v_stag->yfirst);
+        //printf("define_destagered_grid(): (xlast_U =%3.2f;ylast_U =%3.2f); (xlast_V =%3.2f;ylast_V =%3.2f);\n",grid_u_stag->xlast, grid_u_stag->ylast, grid_v_stag->xlast, grid_v_stag->ylast);
+    }
+    grid_uv_destag->xinc    = xinc;
+    grid_uv_destag->yinc    = yinc;
+
+    if ( (destagGridOffsets[0]==-0.5) && (destagGridOffsets[1]==-0.5) )
+    {
+        grid_uv_destag->xfirst =  xfirst_V;
+        grid_uv_destag->xlast  =  xlast_V;
+
+        grid_uv_destag->yfirst =  yfirst_U;
+        grid_uv_destag->ylast  =  ylast_U;
+    }
+    else
+        if ( (destagGridOffsets[0]==0.5) && (destagGridOffsets[1]==0.5) )
+        {
+            grid_uv_destag->xfirst =  xfirst_V + xinc*destagGridOffsets[0];
+            grid_uv_destag->xlast  =  xlast_V  + xinc*destagGridOffsets[0];
+
+            grid_uv_destag->yfirst =  yfirst_U + yinc*destagGridOffsets[1];
+            grid_uv_destag->ylast  =  ylast_U  + yinc*destagGridOffsets[1];
+        }
+    else
+        Error("cdo uvDestag: define_destagered_grid() Unsupported destaggered grid offsets! We support only: (-0.5,-0.5) or (0.5,0.5)");
+
+    double *xvals = (double *) malloc(grid_uv_destag->xsize*sizeof(double));
+    gridGenXvals(grid_uv_destag->xsize, grid_uv_destag->xfirst, grid_uv_destag->xlast, grid_uv_destag->xinc, xvals);
+    gridDefXvals(gridID_uv_destag, xvals); free(xvals);
+    //gridDefXinc(gridID_uv_destag, grid_uv_destag->xinc); was not needed ..
+
+    double *yvals = (double *) malloc(grid_uv_destag->ysize*sizeof(double));
+    gridGenYvals(grid_uv_destag->type, grid_uv_destag->ysize, grid_uv_destag->yfirst, grid_uv_destag->ylast, grid_uv_destag->yinc, yvals);
+    gridDefYvals(gridID_uv_destag, yvals); free(yvals);
+    //gridDefYinc(gridID_uv_destag, grid_uv_destag->yinc); was not needed ..
+
+    if ( cdoDebugExt )
+    {
+        printf("cdo uvDestag: define_destagered_grid(): \n");
+        gridPrint(gridID_uv_destag, 1,0);
+    }
+
+    return gridID_uv_destag;
+}
+
+/*
+@Function  define_sample_grid
+@Title     Define a sampled grid of another grid
+
+@Prototype int define_sample_grid(int gridSrcID, int sampleFactor)
+@Parameter
+    @Item  gridSrcID       Source grid
+    @Item  sampleFactor    sampleFactor; typically 2,3,4 ...
+
+@Description
+The function @func{define_sample_grid} defines a sampled grid of another grid
+
+@EndFunction
+*/
+int define_sample_grid(int gridSrcID, int sampleFactor)
+{
+/* Example of horizontal grids (Harmonie HARM36_L25):
+            #
+            # gridID 2
+            #
+            gridtype  = lcc
+            gridsize  = 622521
+            xsize     = 789
+            ysize     = 789
+            originLon = -7.89
+            originLat = 42.935
+            lonParY   = 0
+            lat1      = 52.5
+            lat2      = 52.5
+            xinc      = 2500
+            yinc      = 2500
+            projection = northpole
+=>   RESULT:
+            #
+            # gridID 2
+            #
+            gridtype  = lcc
+            gridsize  = 156025
+            xsize     = 395
+            ysize     = 395
+            originLon = -7.89
+            originLat = 42.935
+            lonParY   = 0
+            lat1      = 52.5
+            lat2      = 52.5
+            xinc      = 5000
+            yinc      = 5000
+            projection = northpole
+*/
+    if ( cdoDebugExt )
+        printf("cdo SampleGrid: define_sample_grid(gridSrcID=%d, sampleFactor=%d) ...\n",gridSrcID, sampleFactor);
+
+    int gridXsize = gridInqXsize(gridSrcID);
+    int gridYsize = gridInqYsize(gridSrcID);
+
+    if ( (sampleFactor<1) || (gridXsize<1) || (gridYsize<1) || (sampleFactor > (gridXsize/4) ) || (sampleFactor > (gridYsize/4)) )
+        Error("cdo SampleGrid: define_sample_grid() Unsupported sampleFactor (%d)! Note that: gridXsize = %d, gridYsize = %d", sampleFactor, gridXsize, gridYsize);
+
+    if ( cdoDebugExt>20 ) {
+        gridPrint(gridSrcID,1,0);
+    }
+
+    grid_t *grid_src;
+    grid_t *grid_sampled;
+    int gridID_sampled;
+
+    grid_src =  grid_to_pointer(gridSrcID);
+    grid_check_ptr(gridSrcID, grid_src);
+
+    //const double *xvals   = gridInqXvalsPtr(gridSrcID);
+    //const double *yvals   = gridInqYvalsPtr(gridSrcID);
+    /*
+    double xfirst = gridInqXval(gridSrcID,0);   // staggered grid of u-wind
+    double yfirst = gridInqYval(gridSrcID,0);
+    double xlast  = gridInqXval(gridSrcID, gridXsize-1);
+    double ylast  = gridInqYval(gridSrcID, gridYsize-1);
+    double xinc     = gridInqXinc(gridSrcID);
+    double yinc     = gridInqYinc(gridSrcID);
+    */
+
+    gridID_sampled = gridDuplicate(gridSrcID);
+    grid_sampled = grid_to_pointer(gridID_sampled);
+    grid_check_ptr(gridID_sampled, grid_sampled);
+
+    grid_sampled->scanningMode          = grid_src->scanningMode;
+    grid_sampled->iScansNegatively      = grid_src->iScansNegatively;
+    grid_sampled->jScansPositively      = grid_src->jScansPositively;
+    grid_sampled->jPointsAreConsecutive = grid_src->jPointsAreConsecutive;
+    grid_sampled->uvRelativeToGrid      = grid_src->uvRelativeToGrid;
+
+    grid_sampled->xsize   = (grid_src->xsize + (sampleFactor-1)) / sampleFactor;  // HARM36_L25: (789 + 2-1) / 2 = 395
+    grid_sampled->ysize   = (grid_src->ysize + (sampleFactor-1)) / sampleFactor;
+    grid_sampled->size    = grid_sampled->xsize * grid_sampled->ysize;
+
+    // for the case of Lambert projection ...
+    grid_sampled->lcc_xinc   = grid_src->lcc_xinc * sampleFactor;
+    grid_sampled->lcc_yinc   = grid_src->lcc_yinc * sampleFactor;
+
+    grid_sampled->xinc   = grid_src->xinc * sampleFactor;
+    grid_sampled->yinc   = grid_src->yinc * sampleFactor;
+
+    double *xvals = (double *) malloc(grid_sampled->xsize*sizeof(double));
+    //void gridGenXvals(int xsize, double xfirst, double xlast, double xinc, double *restrict xvals)
+    gridGenXvals(grid_sampled->xsize, grid_sampled->xfirst, grid_sampled->xlast, grid_sampled->xinc, xvals);
+    gridDefXvals(gridID_sampled, xvals); free(xvals);
+    //gridDefXinc(gridID_sampled, grid_sampled->xinc); was not needed ..
+
+    double *yvals = (double *) malloc(grid_sampled->ysize*sizeof(double));
+    //void gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double yinc, double *restrict yvals)
+    gridGenYvals(grid_sampled->type, grid_sampled->ysize, grid_sampled->yfirst, grid_sampled->ylast, grid_sampled->yinc, yvals);
+    gridDefYvals(gridID_sampled, yvals); free(yvals);
+    //gridDefYinc(gridID_sampled, grid_sampled->yinc); was not needed ..
+
+    if ( grid_sampled->type == GRID_LCC )
+        gridDefLCC( gridID_sampled, grid_sampled->lcc_originLon, grid_sampled->lcc_originLat, grid_sampled->lcc_lonParY,
+                    grid_sampled->lcc_lat1, grid_sampled->lcc_lat2, grid_sampled->lcc_xinc, grid_sampled->lcc_yinc,
+                    grid_sampled->lcc_projflag, grid_sampled->lcc_scanflag);
+
+    if ( cdoDebugExt>20 )
+    {
+        printf("cdo SampleGrid: define_sample_grid(): \n");
+        gridPrint(gridID_sampled, 1,0);
+    }
+
+    return gridID_sampled;
+}
+
+
+/*
+@Function  define_subgrid_grid
+@Title     Define  a sub-grid of another grid (LCC)
+
+@Prototype int define_subgrid_grid(int gridIDsrc, int subI0, int subI1, int subJ0, int subJ1)
+@Parameter
+    @Item  gridSrcID                    Source grid
+    @Item  subI0,subI1, subJ0, subJ1    Sub-grid indices
+
+@Description
+The function @func{define_subgrid_grid} defines a sub-grid of another grid (LCC)
+
+@EndFunction
+*/
+int define_subgrid_grid(int gridSrcID, int gridIDcurvl, int subI0, int subI1, int subJ0, int subJ1)
+{
+/* Example of horizontal grids (Harmonie HARM36_L25):
+            #
+            # gridID 2
+            #
+            gridtype  = lcc
+            gridsize  = 622521
+            xsize     = 789
+            ysize     = 789
+            originLon = -7.89
+            originLat = 42.935
+            lonParY   = 0
+            lat1      = 52.5
+            lat2      = 52.5
+            xinc      = 2500
+            yinc      = 2500
+            projection = northpole
+=>   RESULT:
+            #
+            # gridID 2
+            #
+            gridtype  = lcc
+            gridsize  = 156025
+            xsize     = 350
+            ysize     = 350
+            originLon = ...
+            originLat = ...
+            lonParY   = 0
+            lat1      = 52.5
+            lat2      = 52.5
+            xinc      = 2500
+            yinc      = 2500
+            projection = northpole
+*/
+    if ( cdoDebugExt )
+        printf("cdo SampleGrid: define_subgrid_grid(gridSrcID=%d, (subI0,subI1,subJ0,subJ1) =(%d,%d,%d,%d) ...\n",gridSrcID, subI0,subI1, subJ0, subJ1 );
+
+
+    int gridXsize = gridInqXsize(gridSrcID);
+    int gridYsize = gridInqYsize(gridSrcID);
+    int maxIndexI = gridXsize-1;
+    int maxIndexJ = gridYsize-1;
+
+
+    if ( \
+         (subI0<0) || (subI0>maxIndexI) || \
+         (subI1<=subI0) || (subI1>maxIndexI) ||
+         (subJ0<0) || (subJ0>maxIndexJ) || \
+         (subJ1<=subJ0) || (subJ1>maxIndexJ) )
+        Error("cdo SampleGrid: define_subgrid_grid() Incorrect subgrid specified!  (subI0,subI1,subJ0,subJ1) =(%d,%d,%d,%d) Note that: gridXsize = %d, gridYsize = %d", subI0,subI1, subJ0, subJ1, gridXsize, gridYsize);
+
+
+    grid_t *grid_src;
+    grid_t *grid_sampled;
+    int gridID_sampled;
+
+    double originLon, originLat;
+
+    grid_src =  grid_to_pointer(gridSrcID);
+    grid_check_ptr(gridSrcID, grid_src);
+
+    if ( grid_src->type != GRID_LCC )
+        Error("cdo SampleGrid: define_subgrid_grid() Error; Only LCC grid is supported; use selindexbox");
+
+
+    double lonParY; double lat1; double lat2; double xinc; double yinc; int projflag; int scanflag;
+    gridInqLCC(gridSrcID, &originLon, &originLat, &lonParY, &lat1, &lat2, &xinc, &yinc, &projflag, &scanflag);
+
+    if ( cdoDebugExt>20 ) {
+        gridPrint(gridSrcID,1,0);
+    }
+
+    if (cdoDebugExt)
+    {
+        Message("cdo SampleGrid: define_subgrid_grid() Original LCC grid:");
+        Message("grid Xsize   %d, grid Ysize   %d", gridInqXsize(gridSrcID), gridInqYsize(gridSrcID));
+        Message("originLon %4.3f, originLon %4.3f", originLon, originLat);
+        Message("grid Xinc   %4.3f, grid Yinc   %4.3f", xinc, yinc);
+    }
+    originLon = gridInqXval(gridIDcurvl, 0);
+    originLat = gridInqYval(gridIDcurvl, 0);
+
+    if (cdoDebugExt)
+    {
+        Message("\ncdo SampleGrid: define_subgrid_grid() Original LCC grid as curvilinear (with lats-lons computed):");
+        Message("grid Xsize   %d, grid Ysize   %d", gridInqXsize(gridIDcurvl), gridInqYsize(gridIDcurvl));
+        Message("grid Xfirst  %4.3f, grid Yfirst  %4.3f", gridInqXval(gridIDcurvl, 0), gridInqYval(gridIDcurvl, 0));
+        Message("grid Xlast   %4.3f, grid Ylast   %4.3f", gridInqXval(gridIDcurvl, gridInqSize(gridIDcurvl) -1), gridInqYval(gridIDcurvl, gridInqSize(gridIDcurvl) -1));
+        Message("originLon %4.3f, originLon %4.3f", originLon, originLat);
+    }
+
+
+
+    //const double *xvals   = gridInqXvalsPtr(gridSrcID);
+    //const double *yvals   = gridInqYvalsPtr(gridSrcID);
+    /*
+    double xfirst = gridInqXval(gridSrcID,0);   // staggered grid of u-wind
+    double yfirst = gridInqYval(gridSrcID,0);
+    double xlast  = gridInqXval(gridSrcID, gridXsize-1);
+    double ylast  = gridInqYval(gridSrcID, gridYsize-1);
+    double xinc     = gridInqXinc(gridSrcID);
+    double yinc     = gridInqYinc(gridSrcID);
+    */
+
+    gridID_sampled = gridDuplicate(gridSrcID);
+    grid_sampled = grid_to_pointer(gridID_sampled);
+    grid_check_ptr(gridID_sampled, grid_sampled);
+
+    grid_sampled->scanningMode          = grid_src->scanningMode;
+    grid_sampled->iScansNegatively      = grid_src->iScansNegatively;
+    grid_sampled->jScansPositively      = grid_src->jScansPositively;
+    grid_sampled->jPointsAreConsecutive = grid_src->jPointsAreConsecutive;
+    grid_sampled->uvRelativeToGrid      = grid_src->uvRelativeToGrid;
+
+    grid_sampled->xsize   = subI1 - subI0 + 1;
+    grid_sampled->ysize   = subJ1 - subJ0 + 1;
+    grid_sampled->size    = grid_sampled->xsize * grid_sampled->ysize;
+    grid_sampled->xinc   = grid_src->xinc;
+    grid_sampled->yinc   = grid_src->yinc;
+
+    /* LCC: Lambert Conformal Conic
+    double  lcc_originLon;
+    double  lcc_originLat;
+    double  lcc_lonParY;
+    double  lcc_lat1;
+    double  lcc_lat2;
+    double  lcc_xinc;
+    double  lcc_yinc;
+    int     lcc_projflag;
+    int     lcc_scanflag;
+    int     lcc_defined; */
+
+    originLon = gridInqXval(gridIDcurvl, subJ0*gridInqXsize(gridIDcurvl) + subI0 );
+    originLat = gridInqYval(gridIDcurvl, subJ0*gridInqXsize(gridIDcurvl) + subI0 );
+
+    if (cdoDebugExt)
+    {
+        Message("\ncdo SampleGrid: define_subgrid_grid()  Sub-grid:");
+        Message("grid Xsize   %d, grid Ysize   %d", gridInqXsize(gridID_sampled), gridInqYsize(gridID_sampled));
+        Message("originLon %4.3f, originLon %4.3f", originLon, originLat);
+    }
+
+    grid_sampled->lcc_originLon   = originLon;
+    grid_sampled->lcc_originLat   = originLat;
+    grid_sampled->lcc_lat1   = grid_src->lcc_lat1;
+    grid_sampled->lcc_lat2   = grid_src->lcc_lat2;
+    grid_sampled->lcc_xinc   = grid_src->lcc_xinc;
+    grid_sampled->lcc_yinc   = grid_src->lcc_yinc;
+    grid_sampled->lcc_projflag   = grid_src->lcc_projflag;
+    grid_sampled->lcc_scanflag   = grid_src->lcc_scanflag;
+    grid_sampled->lcc_defined   = grid_src->lcc_defined;
+
+    if ( grid_sampled->type == GRID_LCC )
+      gridDefLCC(gridID_sampled, grid_sampled->lcc_originLon, grid_sampled->lcc_originLat, grid_sampled->lcc_lonParY,
+             grid_sampled->lcc_lat1, grid_sampled->lcc_lat2, grid_sampled->lcc_xinc, grid_sampled->lcc_yinc,
+             grid_sampled->lcc_projflag, grid_sampled->lcc_scanflag);
+
+
+    if ( cdoDebugExt>20 )
+    {
+        printf("cdo SampleGrid: define_subgrid_grid(): \n");
+        gridPrint(gridID_sampled, 1,0);
+    }
+
+    return gridID_sampled;
+}
+
+
+
+int gridInqScanningMode(int gridID)
+{
+  grid_t *gridptr;
+
+  gridptr = grid_to_pointer(gridID);
+
+  grid_check_ptr(gridID, gridptr);
+  int scanningModeTMP  = 128 * gridptr->iScansNegatively + 64 * gridptr->jScansPositively + 32 * gridptr->jPointsAreConsecutive;
+  if (scanningModeTMP != gridptr->scanningMode)
+  {
+    Message("WARNING: scanningMode (%d) ! = (%d) 128 * iScansNegatively(%d) + 64 * jScansPositively(%d) + 32 * jPointsAreConsecutive(%d) ", gridptr->scanningMode, scanningModeTMP, gridptr->iScansNegatively,gridptr->jScansPositively,gridptr->jPointsAreConsecutive );
+  }
+  return ( gridptr->scanningMode );
+}
+
+void gridInqScanningModeBits(int gridID, int *iScansNegatively,  int *jScansPositively,  int *jPointsAreConsecutive)
+{
+  grid_t *gridptr;
+
+  gridptr = grid_to_pointer(gridID);
+
+  grid_check_ptr(gridID, gridptr);
+
+  *iScansNegatively = gridptr->iScansNegatively;
+  *jScansPositively = gridptr->jScansPositively;
+  *jPointsAreConsecutive = gridptr->jPointsAreConsecutive;
+  /* scanningMode  = 128 * iScansNegatively + 64 * jScansPositively + 32 * jPointsAreConsecutive;
+               64  = 128 * 0                + 64 *        1         + 32 * 0
+               00  = 128 * 0                + 64 *        0         + 32 * 0
+               96  = 128 * 0                + 64 *        1         + 32 * 1
+     Default / implicit scanning mode is 64:
+                        i and j scan positively, i points are consecutive (row-major)        */
+  return;
+}
+
+int gridInqUvRelativeToGrid(int gridID)
+{
+  grid_t *gridptr;
+
+  gridptr = grid_to_pointer(gridID);
+
+  grid_check_ptr(gridID, gridptr);
+
+  return ( gridptr->uvRelativeToGrid );
+}
+
+void  gridSetScanningMode(int gridID, int mode)
+{
+  grid_t *gridptr;
+  gridptr = grid_to_pointer(gridID);
+  grid_check_ptr(gridID, gridptr);
+
+  gridptr->scanningMode = mode;
+}
+
+void gridSetScanningModeBits(int gridID, int iScansNegatively,  int jScansPositively,  int jPointsAreConsecutive)
+{
+  grid_t *gridptr;
+  gridptr = grid_to_pointer(gridID);
+  grid_check_ptr(gridID, gridptr);
+
+  gridptr->iScansNegatively = iScansNegatively;
+  gridptr->jScansPositively = jScansPositively;
+  gridptr->jPointsAreConsecutive = jPointsAreConsecutive;
+}
+
+void  gridSetUvRelativeToGrid(int gridID,int flag)
+{
+  grid_t *gridptr;
+  gridptr = grid_to_pointer(gridID);
+  grid_check_ptr(gridID, gridptr);
+
+  gridptr->uvRelativeToGrid = flag;
+}
+#endif // HIRLAM_EXTENSIONS
 
 /*
  * Local Variables:

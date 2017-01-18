@@ -9,6 +9,7 @@
 
 #include <stdio.h>
 #include <sys/types.h>
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -1230,6 +1231,69 @@ int     vlistInqVarSubtype(int vlistID, int varID);
 
 void gribapiLibraryVersion(int *major_version, int *minor_version, int *revision_version);
 
+#ifdef HIRLAM_EXTENSIONS
+// Make sure that CDO is configured with: --enable-HIRLAM-extensions
+// ./configure --enable-HIRLAM-extensions --prefix=${InstPathCDO} --with-hdf5=${InstPathHDF} --with-netcdf=${InstPathNetCDF} --enable-cdi-lib --enable-python --enable-swig --disable-cgribex --with-grib_api=${InstPathGribAPI} --with-proj=${InstPathProj4}
+
+// WITHOUT extensions:
+// ./configure --prefix=${InstPathCDO} --with-hdf5=${InstPathHDF} --with-netcdf=${InstPathNetCDF} --enable-cdi-lib --enable-python --enable-swig --disable-cgribex --with-grib_api=${InstPathGribAPI} --with-proj=${InstPathProj4}
+
+
+// The following global are defined in libcdi/src/stream_grb.c
+
+    extern int cdoDebugExt;            //  debug level for the KNMI extensions
+// *** RELATED to GRIB only ***
+extern int cdoGribDataScanningMode; // -1: not used; allowed modes: <0, 64, 96>; Default is 64
+extern int cdoGribChangeModeUvRelativeToGrid;  // -1: don't set; 0: set to '0'; 1: set to '1'
+extern int cdoGribUseTimeRangeIndicator;       // normaly cdo looks in grib for attribute called "stepType"
+                                               // but NWP models such as Harmonie 37h1.2, use "timeRangeIndicator"
+                                               // where:  0: for instanteneous fields; 4: for accumulated fields
+// Regarding operation to change parameter identification:
+// -1: don't change; 1: change (cdoGribChangeParID_code, cdoGribChangeParID_ltype, cdoGribChangeParID_lev)
+extern int cdoGribChangeParameterIdentification;
+extern int cdoGribChangeParID_code;
+extern int cdoGribChangeParID_ltype;
+extern int cdoGribChangeParID_lev;
+
+// *** RELATED to scanning mode and uv-grid-relative; defined in grid.c ***
+int           gridInqScanningMode(int gridID);
+void          gridInqScanningModeBits(int gridID, int *iScansNegatively,  int *jScansPositively,  int *jPointsAreConsecutive);
+int           gridInqUvRelativeToGrid(int gridID);
+void          gridSetScanningMode(int gridID, int mode);
+void          gridSetScanningModeBits(int gridID, int iScansNegatively,  int jScansPositively,  int jPointsAreConsecutive);
+void          gridSetUvRelativeToGrid(int gridID,int flag);
+
+void convertDataScanningMode(int scanModeOUT, double *data, int gridsize, int iDim, int jDim);
+void streamGrbChangeParameterIdentification(int code, int ltype, int lev);
+
+// Forward declarations:
+/*
+int gribapiGetScanningMode(grib_handle *gh);
+void gribapiSetScanningMode(grib_handle *gh, int scanningMode);
+int gribapiGetUvRelativeToGrid(grib_handle *gh);
+void gribapiSetUvRelativeToGrid(grib_handle *gh, int mode);
+void gribapiChangeParameterIdentification(grib_handle *gh, int code, int ltype, int lev);
+*/
+
+// *** RELATED to de-staggering, grid-sampling and sub-gridding; defined in grid.c ***
+int define_destagered_grid(int gridID_u_stag, int gridID_v_stag, double *destagGridOffsets);
+int define_sample_grid(int gridSrcID, int sampleFactor);
+int define_subgrid_grid(int gridSrcID, int gridIDcurvl, int subI0, int subI1, int subJ0, int subJ1);
+
+const double *gridInqXvalsPtr(int gridID);
+const double *gridInqYvalsPtr(int gridID);
+
+
+// The following global are defined in libcdi/src/stream_cdf.c
+// THIS NetCDF FEATURE is currently NOT included in this CDO branch...
+
+//extern bool CDI_netcdf_MAKE_LONG_AXISNAMES;
+    // Some applications may prefer to have long names for the dimension variables
+    // instead of lon, lat => longitude, latitude will be used..
+//extern bool CDI_netcdf_INCLUDE_NON_STANDARD_DIM_ATTRS;
+    // Some applications (Visualiasation Toolkit VTK, ParaView, IDV) cannot handle these non-standard attributes in NetCDF files.
+    // Set this to false NOT to includes these attributes.
+#endif // HIRLAM_EXTENSIONS
 
 #if defined (__cplusplus)
 }
