@@ -1924,11 +1924,11 @@ static
 void cdf_def_mapping(stream_t *streamptr, int gridID)
 {
   char mapping[CDI_MAX_NAME]; mapping[0] = 0;
-  cdiGridInqKeyStr(gridID, CDI_KEY_MAPPING, CDI_MAX_NAME, mapping);
+  cdiGridInqKeyStr(gridID, CDI_KEY_MAPNAME, CDI_MAX_NAME, mapping);
   if ( mapping[0] )
     {
       char gmapvarname[CDI_MAX_NAME]; gmapvarname[0] = 0;
-      cdiGridInqKeyStr(gridID, CDI_KEY_MAPNAME, CDI_MAX_NAME, gmapvarname);
+      cdiGridInqKeyStr(gridID, CDI_KEY_MAPPING, CDI_MAX_NAME, gmapvarname);
 
       int fileID = streamptr->fileID;
       cdf_redef(fileID);

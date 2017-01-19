@@ -14,7 +14,6 @@
 #define  IEG_LTYPE_LANDDEPTH           111
 #define  IEG_LTYPE_LANDDEPTH_LAYER     112
 #define  IEG_LTYPE_SEADEPTH            160
-#define  IEG_LTYPE_99_MARGIN          1000
 
 /*
  *  Data representation type (Grid Type) [Table 6]

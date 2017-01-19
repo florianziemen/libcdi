@@ -735,7 +735,7 @@ int     gridInqMaskGME(int gridID, int mask[]);
 void    gridDefMask(int gridID, const int mask[]);
 int     gridInqMask(int gridID, int mask[]);
 
-void    gridPrint(int gridID, int index, int opt);
+void    gridPrint(int gridID, int opt);
 
 /*      gridCreate: Create a horizontal Grid */
 int     gridCreate(int gridtype, int size);
@@ -801,8 +801,8 @@ int     gridInqYvals(int gridID, double yvals[]);
 #define  CDI_KEY_YLONGNAME   913  // Y-axis longname
 #define  CDI_KEY_YUNITS      914  // Y-axis units
 #define  CDI_KEY_VDIMNAME    920  // Vertex dimension name
-#define  CDI_KEY_MAPNAME     921  // Grid mapping var name
-#define  CDI_KEY_MAPPING     922  // Grid mapping name
+#define  CDI_KEY_MAPPING     921  // Grid mapping var name
+#define  CDI_KEY_MAPNAME     922  // Grid mapping name
 
 /* CDI zaxis string key values */
 #define  CDI_KEY_NAME        941  // Z-axis name
@@ -981,7 +981,7 @@ int     zaxisInqSize(int zaxisID);
 /*      zaxisDuplicate: Duplicate a Z-axis */
 int     zaxisDuplicate(int zaxisID);
 
-void    zaxisPrint(int zaxisID, int index);
+void    zaxisPrint(int zaxisID);
 
 /*      zaxisDefLevels: Define the levels of a Z-axis */
 void    zaxisDefLevels(int zaxisID, const double levels[]);

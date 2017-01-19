@@ -282,7 +282,7 @@ void cdf_get_gmapvarname(int gridID, char *gmapvarname)
 {
   int pgridID = gridID;
   char mapping[CDI_MAX_NAME]; mapping[0] = 0;
-  cdiGridInqKeyStr(pgridID, CDI_KEY_MAPPING, CDI_MAX_NAME, mapping);
+  cdiGridInqKeyStr(pgridID, CDI_KEY_MAPNAME, CDI_MAX_NAME, mapping);
 
   if ( !mapping[0] )
     {
@@ -290,12 +290,12 @@ void cdf_get_gmapvarname(int gridID, char *gmapvarname)
       if ( projID != CDI_UNDEFID )
         {
           pgridID = projID;
-          cdiGridInqKeyStr(pgridID, CDI_KEY_MAPPING, CDI_MAX_NAME, mapping);
+          cdiGridInqKeyStr(pgridID, CDI_KEY_MAPNAME, CDI_MAX_NAME, mapping);
         }
     }
 
   if ( mapping[0] )
-    cdiGridInqKeyStr(pgridID, CDI_KEY_MAPNAME, CDI_MAX_NAME, gmapvarname);
+    cdiGridInqKeyStr(pgridID, CDI_KEY_MAPPING, CDI_MAX_NAME, gmapvarname);
 }
 
 static
@@ -530,32 +530,6 @@ int cdfDefVar(stream_t *streamptr, int varID)
                   lwarn = false;
                   Warning("Deflate compression is only available for NetCDF4!");
                 }
-            }
-        }
-    }
-
-  if ( streamptr->comptype == CDI_COMPRESS_SZIP )
-    {
-      if ( lchunk && (streamptr->filetype == CDI_FILETYPE_NC4 || streamptr->filetype == CDI_FILETYPE_NC4C) )
-        {
-#if defined (NC_SZIP_NN_OPTION_MASK)
-          cdfDefVarSzip(fileID, ncvarid);
-#else
-          static bool lwarn = true;
-          if ( lwarn )
-            {
-              lwarn = false;
-              Warning("NetCDF4/SZIP compression not available!");
-            }
-#endif
-        }
-      else
-        {
-          static bool lwarn = true;
-          if ( lwarn )
-            {
-              lwarn = false;
-              Warning("SZIP compression is only available for NetCDF4!");
             }
         }
     }

@@ -80,6 +80,10 @@ AC_ARG_WITH([netcdf],
                             NETCDF_LIBS=" -lnetcdf"
                             AC_CHECK_PROG(NC_CONFIG,nc-config,nc-config)
                             AS_IF([test "x$NC_CONFIG" != "x"],
+                                  [AC_MSG_CHECKING([netcdf's OpenDAP support])
+                                   AS_IF([test "x$($NC_CONFIG --has-dap)" = "xyes"],
+                                         [AC_DEFINE([HAVE_LIBNC_DAP],[1],[Define to 1 for NetCDF OpenDAP])
+                                          AC_MSG_RESULT([yes])],[AC_MSG_RESULT([no])])]
                                   [AC_MSG_CHECKING([netcdf's nc2 support])
                                    AS_IF([test "x$($NC_CONFIG --has-nc2)" = "xyes"],
                                          [AC_DEFINE([HAVE_NETCDF2],[1],[Define to 1 for NetCDF2 support])
@@ -137,11 +141,11 @@ AC_ARG_WITH([netcdf],
 
 AS_IF([test "x$ENABLE_NC4HDF5" = "xyes"],
       [AC_SEARCH_LIBS([H5TS_mutex_lock], [netcdf],
-               [AC_DEFINE([HAVE_NC4HDF5_THREADSAFE],[1],[Define to 1 for NetCDF4/HDF5 threadsafe support])],,)])
+               [AC_DEFINE([HAVE_NC4HDF5_THREADSAFE],[1],[Define to 1 for NetCDF4/HDF5 threadsafe support])],,[-lhdf5])])
 
 AS_IF([test "x$ENABLE_NC4HDF5" = "xyes"],
       [AC_SEARCH_LIBS([H5get_libversion], [netcdf],
-               [AC_DEFINE([HAVE_H5GET_LIBVERSION],[1],[Define to 1 for H5get_libversion support])],,)])
+               [AC_DEFINE([HAVE_H5GET_LIBVERSION],[1],[Define to 1 for H5get_libversion support])],,[-lhdf5])])
 
 AC_SUBST([ENABLE_NETCDF])
 AC_SUBST([ENABLE_NC2])
