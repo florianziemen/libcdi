@@ -1705,7 +1705,7 @@ void cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int *ncvaridp, int z
   //if ( zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL) )
     {
       size_t nvertex = 2;
-      if ( nc_inq_dimid(fileID, bndsName, &nvdimID) != NC_NOERR )
+      if ( dimlen > 1 && nc_inq_dimid(fileID, bndsName, &nvdimID) != NC_NOERR )
         cdf_def_dim(fileID, bndsName, nvertex, &nvdimID);
 
       if ( nvdimID != CDI_UNDEFID )
