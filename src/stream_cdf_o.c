@@ -1337,46 +1337,60 @@ void cdf_def_vct_echam(stream_t *streamptr, int zaxisID)
 
       if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
-      int ncdimid, ncdimid2;
-      cdf_def_dim(fileID, "nhym", (size_t)mlev, &ncdimid);
-      cdf_def_dim(fileID, "nhyi", (size_t)ilev, &ncdimid2);
+      int ncdimid, ncdimid2 = -1;
+      int hyaiid, hybiid, hyamid = -1, hybmid = -1;
 
-      streamptr->vct.mlev   = mlev;
+      cdf_def_dim(fileID, "nhyi", (size_t)ilev, &ncdimid2);
+      cdf_def_var(fileID, "hyai", NC_DOUBLE, 1, &ncdimid2, &hyaiid);
+      cdf_def_var(fileID, "hybi", NC_DOUBLE, 1, &ncdimid2, &hybiid);
+      if ( mlev > 0 )
+        {
+          cdf_def_dim(fileID, "nhym", (size_t)mlev, &ncdimid);
+          cdf_def_var(fileID, "hyam", NC_DOUBLE, 1, &ncdimid,  &hyamid);
+          cdf_def_var(fileID, "hybm", NC_DOUBLE, 1, &ncdimid,  &hybmid);
+        }
+
       streamptr->vct.ilev   = ilev;
+      streamptr->vct.mlev   = mlev;
       streamptr->vct.mlevID = ncdimid;
       streamptr->vct.ilevID = ncdimid2;
 
-      int hyaiid, hybiid, hyamid, hybmid;
-      cdf_def_var(fileID, "hyai", NC_DOUBLE, 1, &ncdimid2, &hyaiid);
-      cdf_def_var(fileID, "hybi", NC_DOUBLE, 1, &ncdimid2, &hybiid);
-      cdf_def_var(fileID, "hyam", NC_DOUBLE, 1, &ncdimid,  &hyamid);
-      cdf_def_var(fileID, "hybm", NC_DOUBLE, 1, &ncdimid,  &hybmid);
-
       {
         static const char lname_n[] = "long_name",
-          lname_v_ai[] = "hybrid A coefficient at layer interfaces",
           units_n[] = "units",
+          lname_v_ai[] = "hybrid A coefficient at layer interfaces",
           units_v_ai[] = "Pa",
           lname_v_bi[] = "hybrid B coefficient at layer interfaces",
-          units_v_bi[] = "1",
-          lname_v_am[] = "hybrid A coefficient at layer midpoints",
-          units_v_am[] = "Pa",
-          lname_v_bm[] = "hybrid B coefficient at layer midpoints",
-          units_v_bm[] = "1";
+          units_v_bi[] = "1";
         static const struct attTxtTab2 tab[]
           = {
           { lname_n, lname_v_ai, sizeof (lname_v_ai) - 1 },
           { units_n, units_v_ai, sizeof (units_v_ai) - 1 },
           { lname_n, lname_v_bi, sizeof (lname_v_bi) - 1 },
           { units_n, units_v_bi, sizeof (units_v_bi) - 1 },
+        };
+        enum { tabLen = sizeof (tab) / sizeof (tab[0]) };
+        int ids[tabLen] = { hyaiid, hyaiid, hybiid, hybiid };
+        for ( size_t i = 0; i < tabLen; ++i )
+          cdf_put_att_text(fileID, ids[i], tab[i].attName, tab[i].valLen, tab[i].attVal);
+      }
+
+      {
+        static const char lname_n[] = "long_name",
+          units_n[] = "units",
+          lname_v_am[] = "hybrid A coefficient at layer midpoints",
+          units_v_am[] = "Pa",
+          lname_v_bm[] = "hybrid B coefficient at layer midpoints",
+          units_v_bm[] = "1";
+        static const struct attTxtTab2 tab[]
+          = {
           { lname_n, lname_v_am, sizeof (lname_v_am) - 1 },
           { units_n, units_v_am, sizeof (units_v_am) - 1 },
           { lname_n, lname_v_bm, sizeof (lname_v_bm) - 1 },
           { units_n, units_v_bm, sizeof (units_v_bm) - 1 },
         };
         enum { tabLen = sizeof (tab) / sizeof (tab[0]) };
-        int ids[tabLen] = { hyaiid, hyaiid, hybiid, hybiid,
-                            hyamid, hyamid, hybmid, hybmid };
+        int ids[tabLen] = { hyamid, hyamid, hybmid, hybmid };
         for ( size_t i = 0; i < tabLen; ++i )
           cdf_put_att_text(fileID, ids[i], tab[i].attName, tab[i].valLen, tab[i].attVal);
       }
