@@ -1121,7 +1121,7 @@ long iegScanTimestep(stream_t *streamptr)
 
       if ( streamptr->ntsteps != streamptr->rtsteps )
 	{
-	  int tsID = tstepsNewEntry(streamptr);
+	  tsID = tstepsNewEntry(streamptr);
 	  if ( tsID != streamptr->rtsteps )
 	    Error("Internal error. tsID = %d", tsID);
 
