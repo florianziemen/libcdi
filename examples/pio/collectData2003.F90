@@ -17,6 +17,7 @@ PROGRAM collectdata2003
   INTEGER, PARAMETER :: i8 = SELECTED_INT_KIND(14)
 #endif
 
+#ifdef USE_MPI
   ! For parallel IO:
   !  Parameter and variables needed.
   INTEGER, PARAMETER :: nProcsIO     = 3
@@ -25,6 +26,7 @@ PROGRAM collectdata2003
   ! INTEGER, PARAMETER :: IOMode       = PIO_WRITER
   ! INTEGER, PARAMETER :: IOMode       = PIO_ASYNCH
   INTEGER, PARAMETER :: IOMode       = PIO_FPGUARD
+#endif
 
   INTEGER :: commModel
 #ifdef USE_MPI
