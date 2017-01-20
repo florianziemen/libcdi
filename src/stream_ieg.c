@@ -395,16 +395,16 @@ void iegDefLevel(int *pdb, int *gdb, double *vct, int zaxisID, int levelID)
     {
     case ZAXIS_SURFACE:
       {
-        pdbDefLevel(pdb, IEG_LTYPE_SURFACE, 0, (int)zaxisInqLevel(zaxisID, levelID));
+        pdbDefLevel(pdb, IEG_LTYPE_SURFACE, 0, (int)(zaxisInqLevel(zaxisID, levelID)));
 	break;
       }
     case ZAXIS_HYBRID:
       {
 	if ( zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL) )
-          pdbDefLevel(pdb, IEG_LTYPE_HYBRID_LAYER, (int)zaxisInqLbound(zaxisID, levelID),
-                      (int)zaxisInqUbound(zaxisID, levelID));
+          pdbDefLevel(pdb, IEG_LTYPE_HYBRID_LAYER, (int)(zaxisInqLbound(zaxisID, levelID)),
+                      (int)(zaxisInqUbound(zaxisID, levelID)));
 	else
-          pdbDefLevel(pdb, IEG_LTYPE_HYBRID, 0, (int)zaxisInqLevel(zaxisID, levelID));
+          pdbDefLevel(pdb, IEG_LTYPE_HYBRID, 0, (int)(zaxisInqLevel(zaxisID, levelID)));
 
 	int vctsize = zaxisInqVctSize(zaxisID);
 	if ( vctsize > 100 )
@@ -460,9 +460,9 @@ void iegDefLevel(int *pdb, int *gdb, double *vct, int zaxisID, int levelID)
     case ZAXIS_DEPTH_BELOW_LAND:
       {
 	if ( zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL) )
-          pdbDefLevel(pdb, IEG_LTYPE_LANDDEPTH_LAYER, (int)zaxisInqLbound(zaxisID, levelID), (int)zaxisInqUbound(zaxisID, levelID));
+          pdbDefLevel(pdb, IEG_LTYPE_LANDDEPTH_LAYER, (int)(zaxisInqLbound(zaxisID, levelID)), (int)(zaxisInqUbound(zaxisID, levelID)));
 	else
-          pdbDefLevel(pdb, IEG_LTYPE_LANDDEPTH, 0, (int)zaxisInqLevel(zaxisID, levelID));
+          pdbDefLevel(pdb, IEG_LTYPE_LANDDEPTH, 0, (int)(zaxisInqLevel(zaxisID, levelID)));
 
 	break;
       }

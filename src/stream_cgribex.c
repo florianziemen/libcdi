@@ -1871,7 +1871,7 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
     case ZAXIS_DEPTH_BELOW_SEA:
     case ZAXIS_ISENTROPIC:
       {
-        isec1DefLevel(isec1, grib_ltype, (int) zaxisInqLevel(zaxisID, levelID), 0);
+        isec1DefLevel(isec1, grib_ltype, (int)(zaxisInqLevel(zaxisID, levelID)), 0);
 	break;
       }
     case ZAXIS_CLOUD_BASE:
@@ -1888,10 +1888,10 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
     case ZAXIS_HYBRID_HALF:
       {
 	if ( zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL) )
-          isec1DefLevel(isec1, GRIB1_LTYPE_HYBRID_LAYER, (int)zaxisInqLbound(zaxisID, levelID),
-                        (int)zaxisInqUbound(zaxisID, levelID));
+          isec1DefLevel(isec1, GRIB1_LTYPE_HYBRID_LAYER, (int)(zaxisInqLbound(zaxisID, levelID)),
+                        (int)(zaxisInqUbound(zaxisID, levelID)));
 	else
-          isec1DefLevel(isec1, GRIB1_LTYPE_HYBRID, (int) zaxisInqLevel(zaxisID, levelID), 0);
+          isec1DefLevel(isec1, GRIB1_LTYPE_HYBRID, (int)(zaxisInqLevel(zaxisID, levelID)), 0);
 
 	int vctsize = zaxisInqVctSize(zaxisID);
 	if ( vctsize > 255 )
@@ -1945,10 +1945,10 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
     case ZAXIS_SIGMA:
       {
 	if ( zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL) )
-          isec1DefLevel(isec1, GRIB1_LTYPE_SIGMA_LAYER, (int) zaxisInqLbound(zaxisID, levelID),
-                        (int) zaxisInqUbound(zaxisID, levelID));
+          isec1DefLevel(isec1, GRIB1_LTYPE_SIGMA_LAYER, (int)(zaxisInqLbound(zaxisID, levelID)),
+                        (int)(zaxisInqUbound(zaxisID, levelID)));
 	else
-          isec1DefLevel(isec1, GRIB1_LTYPE_SIGMA, (int) zaxisInqLevel(zaxisID, levelID), 0);
+          isec1DefLevel(isec1, GRIB1_LTYPE_SIGMA, (int)(zaxisInqLevel(zaxisID, levelID)), 0);
 
 	break;
       }
@@ -1971,7 +1971,7 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
       }
     case ZAXIS_GENERIC:
       {
-        isec1DefLevel(isec1, ltype, (int) zaxisInqLevel(zaxisID, levelID), 0);
+        isec1DefLevel(isec1, ltype, (int)(zaxisInqLevel(zaxisID, levelID)), 0);
 	break;
       }
     default:
