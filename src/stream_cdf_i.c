@@ -3458,7 +3458,7 @@ void cdf_set_ucla_dimtype(int ndims, ncdim_t *ncdims, ncvar_t *ncvars)
 }
 
 static
-int cdf_check_vars(int nvars, ncvar_t *ncvars, int ntsteps, int timedimid)
+int cdf_check_vars(int nvars, ncvar_t *ncvars, size_t ntsteps, int timedimid)
 {
   for ( int ncvarid = 0; ncvarid < nvars; ncvarid++ )
     {
@@ -3634,7 +3634,7 @@ int cdfInqContents(stream_t *streamptr)
   size_t ntsteps = 0;
   if ( timedimid != CDI_UNDEFID ) cdf_inq_dimlen(fileID, timedimid, &ntsteps);
 
-  if ( CDI_Debug ) Message("Number of timesteps = %d", ntsteps);
+  if ( CDI_Debug ) Message("Number of timesteps = %zu", ntsteps);
   if ( CDI_Debug ) Message("Time dimid = %d", streamptr->basetime.ncdimid);
 
   /* read ncdims */
@@ -3774,7 +3774,7 @@ int cdfInqContents(stream_t *streamptr)
   nvars_data = nvarids;
 
   if ( CDI_Debug ) Message("time varid = %d", streamptr->basetime.ncvarid);
-  if ( CDI_Debug ) Message("ntsteps = %d", ntsteps);
+  if ( CDI_Debug ) Message("ntsteps = %zu", ntsteps);
   if ( CDI_Debug ) Message("nvars_data = %d", nvars_data);
 
 
