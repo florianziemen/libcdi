@@ -2829,13 +2829,13 @@ void cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
           if ( zaxisType == ZAXIS_HYBRID )
             {
               if ( psvarid != -1 )
-                cdiZaxisDefKeyStr(zaxisID, CDI_KEY_PSNAME, strlen(ncvars[psvarid].name)+1, ncvars[psvarid].name);
+                cdiZaxisDefKeyStr(zaxisID, CDI_KEY_PSNAME, (int)(strlen(ncvars[psvarid].name)+1), ncvars[psvarid].name);
               if ( p0varid != -1 )
                 {
                   double px = 1;
                   cdf_get_var_double(ncvars[p0varid].ncid, p0varid, &px);
                   cdiZaxisDefKeyFlt(zaxisID, CDI_KEY_P0VALUE, px);
-                  cdiZaxisDefKeyStr(zaxisID, CDI_KEY_P0NAME, strlen(ncvars[p0varid].name)+1, ncvars[p0varid].name);
+                  cdiZaxisDefKeyStr(zaxisID, CDI_KEY_P0NAME, (int)(strlen(ncvars[p0varid].name)+1), ncvars[p0varid].name);
                 }
             }
 
