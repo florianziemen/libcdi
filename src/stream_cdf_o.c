@@ -197,20 +197,24 @@ cdfPutGridStdAtts(int fileID, int ncvarid, int gridID, int dimtype)
 
   int axisKey = (dimtype == 'Z') ? CDI_GLOBAL : ((dimtype == 'X') ? CDI_XAXIS : CDI_YAXIS);
 
-  char stdname[CDI_MAX_NAME];
-  int length = CDI_MAX_NAME;
-  cdiInqKeyString(gridID, axisKey, CDI_KEY_STDNAME, stdname, &length);
-  if (stdname[0] && (len = strlen(stdname))) cdf_put_att_text(fileID, ncvarid, "standard_name", len, stdname);
-
-  char longname[CDI_MAX_NAME];
-  length = CDI_MAX_NAME;
-  cdiInqKeyString(gridID, axisKey, CDI_KEY_LONGNAME, longname, &length);
-  if (longname[0] && (len = strlen(longname))) cdf_put_att_text(fileID, ncvarid, "long_name", len, longname);
-
-  char units[CDI_MAX_NAME];
-  length = CDI_MAX_NAME;
-  cdiInqKeyString(gridID, axisKey, CDI_KEY_UNITS, units, &length);
-  if (units[0] && (len = strlen(units))) cdf_put_att_text(fileID, ncvarid, "units", len, units);
+  {
+    char stdname[CDI_MAX_NAME];
+    int length = CDI_MAX_NAME;
+    cdiInqKeyString(gridID, axisKey, CDI_KEY_STDNAME, stdname, &length);
+    if (stdname[0] && (len = strlen(stdname))) cdf_put_att_text(fileID, ncvarid, "standard_name", len, stdname);
+  }
+  {
+    char longname[CDI_MAX_NAME];
+    int length = CDI_MAX_NAME;
+    cdiInqKeyString(gridID, axisKey, CDI_KEY_LONGNAME, longname, &length);
+    if (longname[0] && (len = strlen(longname))) cdf_put_att_text(fileID, ncvarid, "long_name", len, longname);
+  }
+  {
+    char units[CDI_MAX_NAME];
+    int length = CDI_MAX_NAME;
+    cdiInqKeyString(gridID, axisKey, CDI_KEY_UNITS, units, &length);
+    if (units[0] && (len = strlen(units))) cdf_put_att_text(fileID, ncvarid, "units", len, units);
+  }
 }
 
 static int
