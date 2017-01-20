@@ -3733,8 +3733,8 @@ int cdfInqContents(stream_t *streamptr)
       ncvar_t *ncvar = &ncvars[ncvarid];
       if ( ncvar->isvar == TRUE && ncvar->ncoordvars )
 	{
-	  int ndims = ncvar->ncoordvars;
-	  for ( int i = 0; i < ndims; i++ )
+	  int ncoordvars = ncvar->ncoordvars;
+	  for ( int i = 0; i < ncoordvars; i++ )
 	    {
 	      if      ( ncvars[ncvar->coordvarids[i]].islon ||
                         ncvars[ncvar->coordvarids[i]].isx )   ncvar->xvarid = ncvar->coordvarids[i];
