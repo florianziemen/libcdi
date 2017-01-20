@@ -226,23 +226,26 @@ static
 void cdfPutGridStdAtts(int fileID, int ncvarid, int gridID, int dimtype, const struct cdfDefGridAxisInqs *inqs)
 {
   size_t len;
-
-  char stdname[CDI_MAX_NAME];
-  inqs->axisStdname(gridID, stdname);
-  if ( (len = strlen(stdname)) )
-    cdf_put_att_text(fileID, ncvarid, "standard_name", len, stdname);
-
-  char longname[CDI_MAX_NAME]; longname[0] = 0;
-  int keyname = (dimtype == 'Z') ? CDI_KEY_LONGNAME : (dimtype == 'X') ? CDI_KEY_XLONGNAME : CDI_KEY_YLONGNAME;
-  inqs->axisLongname(gridID, keyname, CDI_MAX_NAME, longname);
-  if ( longname[0] && (len = strlen(longname)) )
-    cdf_put_att_text(fileID, ncvarid, "long_name", len, longname);
-
-  char units[CDI_MAX_NAME]; units[0] = 0;
-  keyname = (dimtype == 'Z') ? CDI_KEY_UNITS : (dimtype == 'X') ? CDI_KEY_XUNITS : CDI_KEY_YUNITS;
-  inqs->axisUnits(gridID, keyname, CDI_MAX_NAME, units);
-  if ( units[0] && (len = strlen(units)) )
-    cdf_put_att_text(fileID, ncvarid, "units", len, units);
+  {
+    char stdname[CDI_MAX_NAME];
+    inqs->axisStdname(gridID, stdname);
+    if ( (len = strlen(stdname)) )
+      cdf_put_att_text(fileID, ncvarid, "standard_name", len, stdname);
+  }
+  {
+    char longname[CDI_MAX_NAME]; longname[0] = 0;
+    int keyname = (dimtype == 'Z') ? CDI_KEY_LONGNAME : (dimtype == 'X') ? CDI_KEY_XLONGNAME : CDI_KEY_YLONGNAME;
+    inqs->axisLongname(gridID, keyname, CDI_MAX_NAME, longname);
+    if ( longname[0] && (len = strlen(longname)) )
+      cdf_put_att_text(fileID, ncvarid, "long_name", len, longname);
+  }
+  {
+    char units[CDI_MAX_NAME]; units[0] = 0;
+    int keyname = (dimtype == 'Z') ? CDI_KEY_UNITS : (dimtype == 'X') ? CDI_KEY_XUNITS : CDI_KEY_YUNITS;
+    inqs->axisUnits(gridID, keyname, CDI_MAX_NAME, units);
+    if ( units[0] && (len = strlen(units)) )
+      cdf_put_att_text(fileID, ncvarid, "units", len, units);
+  }
 }
 
 static void
