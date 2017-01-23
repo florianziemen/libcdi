@@ -1341,7 +1341,7 @@ void cdf_def_vct_echam(stream_t *streamptr, int zaxisID)
 
       if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
-      int ncdimid, ncdimid2 = -1;
+      int ncdimid = -1, ncdimid2 = -1;
       int hyaiid, hybiid, hyamid = -1, hybmid = -1;
 
       cdf_def_dim(fileID, "nhyi", (size_t)ilev, &ncdimid2);
