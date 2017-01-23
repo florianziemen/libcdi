@@ -117,6 +117,7 @@ am__aclocal_m4_deps =  \
 	$(top_srcdir)/m4/acx_lt_problems.m4 \
 	$(top_srcdir)/m4/acx_option_search_libs.m4 \
 	$(top_srcdir)/m4/acx_options.m4 \
+	$(top_srcdir)/m4/acx_prog_cc_posix.m4 \
 	$(top_srcdir)/m4/acx_sl_fc_mod_path_flag.m4 \
 	$(top_srcdir)/m4/acx_sl_mod_suffix.m4 \
 	$(top_srcdir)/m4/asx_tr_arg.m4 $(top_srcdir)/m4/asx_unset.m4 \
