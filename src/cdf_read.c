@@ -426,9 +426,14 @@ cdfGetSkipDim(int fileId, int ncvarid, int dimIds[3])
   return 0;
 }
 
+enum
+{
+  cdfSliceNDim = MAX_DIMENSIONS
+};
+
 static void
-cdfGetSliceSlapDescription(stream_t *streamptr, int varID, int levelID, bool *outSwapXY, size_t (*start)[MAX_DIMENSIONS],
-                           size_t (*count)[MAX_DIMENSIONS])
+cdfGetSliceSlapDescription(stream_t *streamptr, int varID, int levelID, bool *outSwapXY, size_t start[cdfSliceNDim],
+                           size_t count[cdfSliceNDim])
 {
   const int tsID = streamptr->curTsID;
   if (CDI_Debug) Message("tsID = %d", tsID);
@@ -463,8 +468,8 @@ cdfGetSliceSlapDescription(stream_t *streamptr, int varID, int levelID, bool *ou
 #define addDimension(startIndex, extent) \
   do                                     \
     {                                    \
-      (*start)[ndims] = startIndex;      \
-      (*count)[ndims] = extent;          \
+      start[ndims] = startIndex;         \
+      count[ndims] = extent;             \
       ndims++;                           \
     }                                    \
   while (0)
@@ -492,13 +497,12 @@ cdfGetSliceSlapDescription(stream_t *streamptr, int varID, int levelID, bool *ou
 
   if (skipdim == 2) addDimension(0, 1);
 
-  assert(ndims <= (int) (sizeof(*start) / sizeof(**start)));
-  assert(ndims <= (int) (sizeof(*count) / sizeof(**count)));
+  assert(ndims <= cdfSliceNDim);
 
 #undef addDimension
 
   if (CDI_Debug)
-    for (int idim = 0; idim < ndims; ++idim) Message("dim = %d  start = %d  count = %d", idim, (*start)[idim], (*count)[idim]);
+    for (int idim = 0; idim < ndims; ++idim) Message("dim = %d  start = %d  count = %d", idim, start[idim], count[idim]);
 
   int nvdims;
   cdf_inq_varndims(fileId, ncvarid, &nvdims);
@@ -694,8 +698,8 @@ cdfReadVarSliceDP(stream_t *streamptr, int varID, int levelID, double *data, siz
   if (CDI_Debug) Message("streamID = %d  varID = %d  levelID = %d", streamptr->self, varID, levelID);
 
   bool swapxy = false;
-  size_t start[MAX_DIMENSIONS], count[MAX_DIMENSIONS];
-  cdfGetSliceSlapDescription(streamptr, varID, levelID, &swapxy, &start, &count);
+  size_t start[cdfSliceNDim], count[cdfSliceNDim];
+  cdfGetSliceSlapDescription(streamptr, varID, levelID, &swapxy, start, count);
 
   const int vlistID = streamptr->vlistID;
   const int gridId = vlistInqVarGrid(vlistID, varID);
@@ -713,8 +717,8 @@ cdfReadVarSliceSP(stream_t *streamptr, int varID, int levelID, float *data, size
   if (CDI_Debug) Message("streamID = %d  varID = %d  levelID = %d", streamptr->self, varID, levelID);
 
   bool swapxy = false;
-  size_t start[MAX_DIMENSIONS], count[MAX_DIMENSIONS];
-  cdfGetSliceSlapDescription(streamptr, varID, levelID, &swapxy, &start, &count);
+  size_t start[cdfSliceNDim], count[cdfSliceNDim];
+  cdfGetSliceSlapDescription(streamptr, varID, levelID, &swapxy, start, count);
 
   const int vlistID = streamptr->vlistID;
   const int gridId = vlistInqVarGrid(vlistID, varID);
@@ -767,8 +771,8 @@ cdfReadVarSliceDPPart(stream_t *streamptr, int varID, int levelID, int varType, 
   const int vlistID = streamptr->vlistID;
 
   bool swapxy = false;
-  size_t start[MAX_DIMENSIONS], count[MAX_DIMENSIONS];
-  cdfGetSliceSlapDescription(streamptr, varID, levelID, &swapxy, &start, &count);
+  size_t start[cdfSliceNDim], count[cdfSliceNDim];
+  cdfGetSliceSlapDescription(streamptr, varID, levelID, &swapxy, start, count);
 
   const int gridId = vlistInqVarGrid(vlistID, varID);
   const size_t gridsize = gridInqSize(gridId);
@@ -798,8 +802,8 @@ cdfReadVarSliceSPPart(stream_t *streamptr, int varID, int levelID, int varType, 
   const int vlistID = streamptr->vlistID;
 
   bool swapxy = false;
-  size_t start[MAX_DIMENSIONS], count[MAX_DIMENSIONS];
-  cdfGetSliceSlapDescription(streamptr, varID, levelID, &swapxy, &start, &count);
+  size_t start[cdfSliceNDim], count[cdfSliceNDim];
+  cdfGetSliceSlapDescription(streamptr, varID, levelID, &swapxy, start, count);
 
   const int gridId = vlistInqVarGrid(vlistID, varID);
   size_t gridsize = gridInqSize(gridId);
