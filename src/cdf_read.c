@@ -578,8 +578,9 @@ void cdfReadVarSliceDP(stream_t *streamptr, int varID, int levelID, double *data
   size_t gridsize = (size_t)gridInqSize(gridId);
   size_t xsize = (size_t)gridInqXsize(gridId);
   size_t ysize = (size_t)gridInqYsize(gridId);
+  int varDatatype = vlistInqVarDatatype(vlistID, varID);
 
-  if ( vlistInqVarDatatype(vlistID, varID) == CDI_DATATYPE_FLT32 )
+  if ( varDatatype == CDI_DATATYPE_FLT32 )
     {
       float *data_fp = (float *) Malloc(gridsize*sizeof(*data_fp));
       cdf_get_vara_float(fileID, ncvarid, start, count, data_fp);
@@ -591,7 +592,7 @@ void cdfReadVarSliceDP(stream_t *streamptr, int varID, int levelID, double *data
     {
       cdf_get_vara_double(fileID, ncvarid, start, count, data);
       
-      if ( vlistInqVarDatatype(vlistID, varID) == CDI_DATATYPE_UINT8 )
+      if ( varDatatype == CDI_DATATYPE_UINT8 )
         {
           nc_type xtype;
           cdf_inq_vartype(fileID, ncvarid, &xtype);
@@ -635,8 +636,9 @@ void cdfReadVarSliceSP(stream_t *streamptr, int varID, int levelID, float *data,
   size_t gridsize = (size_t)gridInqSize(gridId);
   size_t xsize = (size_t)gridInqXsize(gridId);
   size_t ysize = (size_t)gridInqYsize(gridId);
+  int varDatatype = vlistInqVarDatatype(vlistID, varID);
 
-  if ( vlistInqVarDatatype(vlistID, varID) == CDI_DATATYPE_FLT64 )
+  if ( varDatatype == CDI_DATATYPE_FLT64 )
     {
       double *data_dp = (double *) Malloc(gridsize*sizeof(*data_dp));
       cdf_get_vara_double(fileID, ncvarid, start, count, data_dp);
@@ -648,7 +650,7 @@ void cdfReadVarSliceSP(stream_t *streamptr, int varID, int levelID, float *data,
     {
       cdf_get_vara_float(fileID, ncvarid, start, count, data);
 
-      if ( vlistInqVarDatatype(vlistID, varID) == CDI_DATATYPE_UINT8 )
+      if ( varDatatype == CDI_DATATYPE_UINT8 )
         {
           nc_type xtype;
           cdf_inq_vartype(fileID, ncvarid, &xtype);
