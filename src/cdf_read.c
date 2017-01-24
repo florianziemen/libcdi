@@ -408,8 +408,10 @@ int cdfGetSkipDim(int fileId, int ncvarid, int (*dimIds)[3])
   return 0;
 }
 
+enum { cdfSliceNDim = 4 };
+
 static
-void cdfGetSliceSlapDescription(stream_t *streamptr, int varId, int levelId, bool *outSwapXY, size_t (*start)[4], size_t (*count)[4])
+void cdfGetSliceSlapDescription(stream_t *streamptr, int varId, int levelId, bool *outSwapXY, size_t start[cdfSliceNDim], size_t count[cdfSliceNDim])
 {
   int tsID = streamptr->curTsID;
   if ( CDI_Debug ) Message("tsID = %d", tsID);
@@ -437,8 +439,8 @@ void cdfGetSliceSlapDescription(stream_t *streamptr, int varId, int levelId, boo
   int ndims = 0;
 
 #define addDimension(startIndex, extent) do {   \
-      (*start)[ndims] = startIndex; \
-      (*count)[ndims] = extent; \
+      start[ndims] = startIndex; \
+      count[ndims] = extent; \
       ndims++; \
   } while(0)
 
@@ -470,14 +472,13 @@ void cdfGetSliceSlapDescription(stream_t *streamptr, int varId, int levelId, boo
 
   if ( skipdim == 2 ) addDimension(0, 1);
 
-  assert(ndims <= (int)(sizeof(*start)/sizeof(**start)));
-  assert(ndims <= (int)(sizeof(*count)/sizeof(**count)));
+  assert(ndims <= cdfSliceNDim);
 
 #undef addDimension
 
   if ( CDI_Debug )
     for (int idim = 0; idim < ndims; idim++)
-      Message("dim = %d  start = %d  count = %d", idim, (*start)[idim], (*count)[idim]);
+      Message("dim = %d  start = %d  count = %d", idim, start[idim], count[idim]);
 
   int nvdims;
   cdf_inq_varndims(fileId, ncvarid, &nvdims);
@@ -568,9 +569,9 @@ void cdfReadVarSliceDP(stream_t *streamptr, int varID, int levelID, double *data
   int vlistID = streamptr->vlistID;
   int fileID = streamptr->fileID;
 
-  size_t start[4], count[4];
+  size_t start[cdfSliceNDim], count[cdfSliceNDim];
   bool swapxy;
-  cdfGetSliceSlapDescription(streamptr, varID, levelID, &swapxy, &start, &count);
+  cdfGetSliceSlapDescription(streamptr, varID, levelID, &swapxy, start, count);
 
   int ncvarid = streamptr->vars[varID].ncvarid;
   int gridId = vlistInqVarGrid(vlistID, varID);
@@ -625,9 +626,9 @@ void cdfReadVarSliceSP(stream_t *streamptr, int varID, int levelID, float *data,
   int vlistID = streamptr->vlistID;
   int fileID = streamptr->fileID;
 
-  size_t start[4], count[4];
+  size_t start[cdfSliceNDim], count[cdfSliceNDim];
   bool swapxy;
-  cdfGetSliceSlapDescription(streamptr, varID, levelID, &swapxy, &start, &count);
+  cdfGetSliceSlapDescription(streamptr, varID, levelID, &swapxy, start, count);
 
   int ncvarid = streamptr->vars[varID].ncvarid;
   int gridId = vlistInqVarGrid(vlistID, varID);
