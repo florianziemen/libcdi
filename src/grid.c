@@ -1924,28 +1924,34 @@ void gridInqParamRLL(int gridID, double *xpole, double *ypole, double *angle)
 {
   *xpole = 0; *ypole = 0; *angle = 0;
 
-  const char *projection = "rotated_latitude_longitude";
-  char mapping[CDI_MAX_NAME]; mapping[0] = 0;
-  cdiGridInqKeyStr(gridID, CDI_KEY_MAPNAME, CDI_MAX_NAME, mapping);
-  if ( mapping[0] && strcmp(mapping, projection) == 0 )
+  static const char projection[] = "rotated_latitude_longitude";
+  char name[CDI_MAX_NAME+1]; name[0] = 0;
+  cdiGridInqKeyStr(gridID, CDI_KEY_MAPNAME, CDI_MAX_NAME, name);
+  if ( name[0] && strcmp(name, projection) == 0 )
     {
       int atttype, attlen;
-      char attname[CDI_MAX_NAME+1];
 
-      int natts;
+      int natts, nfound = 0;
       cdiInqNatts(gridID, CDI_GLOBAL, &natts);
 
       for ( int iatt = 0; iatt < natts; ++iatt )
         {
-          cdiInqAtt(gridID, CDI_GLOBAL, iatt, attname, &atttype, &attlen);
-          if ( attlen != 1 ) continue;
-
-          double attflt;
-          if ( cdiInqAttConvertedToFloat(gridID, atttype, attname, attlen, &attflt) )
+          cdiInqAtt(gridID, CDI_GLOBAL, iatt, name, &atttype, &attlen);
+          if ( attlen == 1 )
             {
-              if      ( strcmp(attname, "grid_north_pole_longitude") == 0 ) *xpole = attflt;
-              else if ( strcmp(attname, "grid_north_pole_latitude")  == 0 ) *ypole = attflt;
-              else if ( strcmp(attname, "north_pole_grid_longitude") == 0 ) *angle = attflt;
+              double *attflt;
+              if      ( strcmp(name, "grid_north_pole_longitude") == 0 )
+                attflt = xpole;
+              else if ( strcmp(name, "grid_north_pole_latitude")  == 0 )
+                attflt = ypole;
+              else if ( strcmp(name, "north_pole_grid_longitude") == 0 )
+                attflt = angle;
+              else
+                continue;
+              bool valid
+                = cdiInqAttConvertedToFloat(gridID, atttype, name, attlen, attflt);
+              if ( (nfound+=valid) == 3 )
+                return;
             }
         }
     }
