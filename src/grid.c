@@ -1883,31 +1883,31 @@ gridInqParamRLL(int gridID, double *xpole, double *ypole, double *angle)
   *ypole = 0;
   *angle = 0;
 
-  const char *projection = "rotated_latitude_longitude";
-  char gmapname[CDI_MAX_NAME];
+  static const char projection[] = "rotated_latitude_longitude";
+  char name[CDI_MAX_NAME + 1];
   int length = CDI_MAX_NAME;
-  cdiInqKeyString(gridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_NAME, gmapname, &length);
-  if (gmapname[0] && strIsEqual(gmapname, projection))
+  cdiInqKeyString(gridID, CDI_GLOBAL, CDI_KEY_GRIDMAP_NAME, name, &length);
+  if (name[0] && strIsEqual(name, projection))
     {
       int atttype, attlen;
-      char attname[CDI_MAX_NAME + 1];
 
-      int natts;
+      int natts, nfound = 0;
       cdiInqNatts(gridID, CDI_GLOBAL, &natts);
 
       for (int iatt = 0; iatt < natts; ++iatt)
         {
-          cdiInqAtt(gridID, CDI_GLOBAL, iatt, attname, &atttype, &attlen);
-          if (attlen != 1) continue;
-
-          double attflt;
-          if (cdiInqAttConvertedToFloat(gridID, atttype, attname, attlen, &attflt))
+          cdiInqAtt(gridID, CDI_GLOBAL, iatt, name, &atttype, &attlen);
+          if (attlen == 1)
             {
+              double *attflt;
               // clang-format off
-              if      (strIsEqual(attname, "grid_north_pole_longitude")) *xpole = attflt;
-              else if (strIsEqual(attname, "grid_north_pole_latitude") ) *ypole = attflt;
-              else if (strIsEqual(attname, "north_pole_grid_longitude")) *angle = attflt;
+              if      (strIsEqual(name, "grid_north_pole_longitude")) attflt = xpole;
+              else if (strIsEqual(name, "grid_north_pole_latitude") ) attflt = ypole;
+              else if (strIsEqual(name, "north_pole_grid_longitude")) attflt = angle;
+              else continue;
               // clang-format on
+              bool valid = cdiInqAttConvertedToFloat(gridID, atttype, name, attlen, attflt);
+              if ((nfound += valid) == 3) return;
             }
         }
     }
