@@ -7,6 +7,7 @@
 //#define TEST_GROUPS 1
 
 #include <ctype.h>
+#include <limits.h>
 
 #include "dmemory.h"
 #include "gaussgrid.h"
@@ -294,6 +295,32 @@ void cdfGetAttInt(int fileID, int ncvarid, const char *attname, int attlen, int 
 }
 
 static
+void cdfGetAttLong(int fileID, int ncvarid, const char *attname, int attlen, long *attint)
+{
+  nc_type atttype;
+  size_t nc_attlen;
+
+  *attint = 0;
+
+  cdf_inq_atttype(fileID, ncvarid, attname, &atttype);
+  cdf_inq_attlen(fileID, ncvarid, attname, &nc_attlen);
+
+  if ( atttype != NC_CHAR )
+    {
+      long *pintatt = (int)nc_attlen > attlen
+        ? (long *)(Malloc(nc_attlen * sizeof (long))) : attint;
+
+      cdf_get_att_long(fileID, ncvarid, attname, pintatt);
+
+      if ( (int)nc_attlen > attlen )
+        {
+          memcpy(attint, pintatt, (size_t)attlen * sizeof (long));
+          Free(pintatt);
+        }
+    }
+}
+
+static
 void cdfGetAttDouble(int fileID, int ncvarid, char *attname, int attlen, double *attdouble)
 {
   nc_type atttype;
@@ -424,6 +451,18 @@ bool xtypeIsInt(nc_type xtype)
             || xtype == NC_UBYTE
 #endif
              ;
+
+  return isInt;
+}
+
+static
+bool xtypeIsInt64(nc_type xtype)
+{
+#if  defined  (HAVE_NETCDF4)
+  bool isInt = xtype == NC_INT64 || xtype == NC_UINT64;
+#else
+  bool isInt = false;
+#endif
 
   return isInt;
 }
@@ -873,7 +912,6 @@ void cdf_set_cdi_attr(int ncid, int ncvarid, int attnum, int cdiID, int varID)
   cdf_inq_attname(ncid, ncvarid, attnum, attname);
   cdf_inq_attlen(ncid, ncvarid, attname, &attlen);
   cdf_inq_atttype(ncid, ncvarid, attname, &atttype);
-
   if ( xtypeIsInt(atttype) )
     {
       int attint[attlen];
@@ -888,6 +926,24 @@ void cdf_set_cdi_attr(int ncid, int ncvarid, int attnum, int cdiID, int varID)
                      CDI_DATATYPE_INT32;
       cdiDefAttInt(cdiID, varID, attname, datatype, (int)attlen, attint);
     }
+  /*
+#if  defined  (HAVE_NETCDF4)
+  else if ( xtypeIsInt64(atttype) )
+    {
+      long attlong[attlen];
+      int attint[attlen];
+      cdfGetAttLong(ncid, ncvarid, attname, (int)attlen, attlong);
+      int datatype =  (atttype == NC_UINT64) ? CDI_DATATYPE_UINT32 : CDI_DATATYPE_INT32;
+      if ( datatype == CDI_DATATYPE_UINT32 )
+        {
+          size_t i;
+          for ( i = 0; i < attlen; ++i )
+            if ( attlong[i] < 0 || attlong[i] > INT_MAX ) break;
+          if ( i = attlen ) cdiDefAttInt(cdiID, varID, attname, datatype, (int)attlen, attint);
+        }
+    }
+#endif
+  */
   else if ( xtypeIsFloat(atttype) )
     {
       double attflt[attlen];

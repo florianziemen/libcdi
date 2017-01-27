@@ -690,6 +690,19 @@ void cdf_get_att_int(int ncid, int varid, const char *name, int *ip)
 }
 
 
+void cdf_get_att_long(int ncid, int varid, const char *name, long *ip)
+{
+#if  defined  (HAVE_NETCDF4)
+  int status = nc_get_att_long(ncid, varid, name, ip);
+
+  if ( CDF_Debug || status != NC_NOERR )
+    Message("ncid = %d varid = %d att = %s val = %ld", ncid, varid, name, *ip);
+
+  if ( status != NC_NOERR ) Error("%s", nc_strerror(status));
+#endif
+}
+
+
 void cdf_get_att_double(int ncid, int varid, const char *name, double *dp)
 {
   int status;
