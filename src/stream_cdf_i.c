@@ -1595,10 +1595,9 @@ void cdf_set_dimtype(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
 	  for ( int i = 0; i < ndims; i++ )
 	    {
 	      int ncdimid = ncvars[ncvarid].dimids[i];
-	      if      ( ncdims[ncdimid].dimtype == X_AXIS ) cdf_set_dim(ncvars, ncvarid, i, X_AXIS);
-	      else if ( ncdims[ncdimid].dimtype == Y_AXIS ) cdf_set_dim(ncvars, ncvarid, i, Y_AXIS);
-	      else if ( ncdims[ncdimid].dimtype == Z_AXIS ) cdf_set_dim(ncvars, ncvarid, i, Z_AXIS);
-	      else if ( ncdims[ncdimid].dimtype == T_AXIS ) cdf_set_dim(ncvars, ncvarid, i, T_AXIS);
+              int dimtype = ncdims[ncdimid].dimtype;
+	      if ( dimtype >= X_AXIS && dimtype <= T_AXIS )
+                cdf_set_dim(ncvars, ncvarid, i, dimtype);
 	    }
 
 	  if ( CDI_Debug )
