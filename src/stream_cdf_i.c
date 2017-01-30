@@ -3683,14 +3683,12 @@ cdf_scan_global_attr(int fileID, int vlistID, int ngatts, int *instID, int *mode
                 {
                   memcpy(gridInfo->gridfile, attstring, attstrlen + 1);
                 }
-              else if (strIsEqual(attname, "uuidOfHGrid") && attstrlen == 36)
+              else if (attstrlen == 36 && strIsEqual(attname, "uuidOfHGrid"))
                 {
-                  attstring[36] = 0;
                   cdiStr2UUID(attstring, gridInfo->uuid);
                 }
-              else if (strIsEqual(attname, "uuidOfVGrid") && attstrlen == 36)
+              else if (attstrlen == 36 && strIsEqual(attname, "uuidOfVGrid"))
                 {
-                  attstring[36] = 0;
                   cdiStr2UUID(attstring, uuidOfVGrid);
                 }
               else
