@@ -3223,15 +3223,13 @@ void cdf_scan_global_attr(int fileID, int vlistID, stream_t *streamptr, int ngat
 		{
                   memcpy(gridfile, attstring, attstrlen+1);
 		}
-	      else if ( strcmp(attname, "uuidOfHGrid") == 0 && attstrlen == 36 )
+	      else if ( attstrlen == 36 && strcmp(attname, "uuidOfHGrid") == 0 )
 		{
-                  attstring[36] = 0;
                   cdiStr2UUID(attstring, uuidOfHGrid);
                   //   printf("uuid: %d %s\n", attlen, attstring);
 		}
-	      else if ( strcmp(attname, "uuidOfVGrid") == 0 && attstrlen == 36 )
+	      else if ( attstrlen == 36 && strcmp(attname, "uuidOfVGrid") == 0 )
 		{
-                  attstring[36] = 0;
                   cdiStr2UUID(attstring, uuidOfVGrid);
 		}
 	      else
