@@ -3751,18 +3751,15 @@ find_time_vars(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimid, strea
       for (ncvarid = 0; ncvarid < nvars; ncvarid++)
         {
           ncvar_t *ncvar = &ncvars[ncvarid];
-          if (ncvar->ndims == 0 && strIsEqual(ncvar->name, "time"))
+          if (ncvar->ndims == 0 && ncvar->units[0] && strIsEqual(ncvar->name, "time"))
             {
-              if (ncvar->units[0])
-                {
-                  strcpy(timeunits, ncvar->units);
-                  strToLower(timeunits);
+              strcpy(timeunits, ncvar->units);
+              strToLower(timeunits);
 
-                  if (is_time_units(timeunits))
-                    {
-                      streamptr->basetime.ncvarid = ncvarid;
-                      break;
-                    }
+              if (is_time_units(timeunits))
+                {
+                  streamptr->basetime.ncvarid = ncvarid;
+                  break;
                 }
             }
         }
