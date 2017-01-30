@@ -3412,22 +3412,18 @@ void find_time_vars(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimid, 
       char timeunits[CDI_MAX_NAME];
 
       for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
-        {
-          if ( ncvars[ncvarid].ndims == 0 && strcmp(ncvars[ncvarid].name, "time") == 0 )
-            {
-              if ( ncvars[ncvarid].units[0] )
-                {
-                  strcpy(timeunits, ncvars[ncvarid].units);
-                  str_tolower(timeunits);
+        if ( ncvars[ncvarid].ndims == 0 &&  ncvars[ncvarid].units[0]
+             && strcmp(ncvars[ncvarid].name, "time") == 0 )
+          {
+            strcpy(timeunits, ncvars[ncvarid].units);
+            str_tolower(timeunits);
 
-                  if ( is_time_units(timeunits) )
-                    {
-                      streamptr->basetime.ncvarid = ncvarid;
-                      break;
-                    }
-                }
-            }
-        }
+            if ( is_time_units(timeunits) )
+              {
+                streamptr->basetime.ncvarid = ncvarid;
+                break;
+              }
+          }
     }
   else
     {
