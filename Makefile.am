@@ -20,3 +20,5 @@ doc/cdi_cman.pdf:
 #
 doc/cdi_fman.pdf: 
 	(cd $(top_srcdir)/doc/tex ; ./makepdf_f ; mv cdi_fman.pdf .. ; ./cleanup)
+
+libtool: config/ltmain.sh

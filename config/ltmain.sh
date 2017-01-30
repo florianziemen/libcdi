@@ -136,6 +136,18 @@ progpath="$0"
 
 
 : ${CP="cp -f"}
+# work around bug in libtool which raises an error when running in a
+# parallel make that should have been handled in printf internally
+printf()
+{
+  while ! builtin printf "$@" ; do
+    errcode=$?
+    # errcode might be EAGAIN=11 which means to simply try again
+    if [ $errcode != 11 ]; then
+      return $errcode
+    fi
+  done
+}
 test "${ECHO+set}" = set || ECHO=${as_echo-'printf %s\n'}
 : ${MAKE="make"}
 : ${MKDIR="mkdir"}
