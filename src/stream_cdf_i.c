@@ -3492,16 +3492,17 @@ void find_time_vars(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimid, 
     {
       if ( ncvars[ncvarid].units[0] != 0 ) *time_has_units = true;
 
-      if ( ncvars[ncvarid].bounds != CDI_UNDEFID )
+      int nbvarid = ncvars[ncvarid].bounds;
+      if ( nbvarid != CDI_UNDEFID )
         {
-          int nbdims = ncvars[ncvars[ncvarid].bounds].ndims;
+          int nbdims = ncvars[nbvarid].ndims;
           if ( nbdims == 2 )
             {
-              int len = (int) ncdims[ncvars[ncvars[ncvarid].bounds].dimids[nbdims-1]].len;
-              if ( len == 2 && timedimid == ncvars[ncvars[ncvarid].bounds].dimids[0] )
+              size_t len = ncdims[ncvars[nbvarid].dimids[nbdims-1]].len;
+              if ( len == 2 && timedimid == ncvars[nbvarid].dimids[0] )
                 {
                   *time_has_bounds = true;
-                  streamptr->basetime.ncvarboundsid = ncvars[ncvarid].bounds;
+                  streamptr->basetime.ncvarboundsid = nbvarid;
                   if ( ncvars[ncvarid].climatology ) *time_climatology = true;
                 }
             }
