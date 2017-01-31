@@ -162,6 +162,8 @@ grid_init(grid_t *gridptr)
   gridptr->atts.nelems = 0;
 
   cdiDefVarKeyInt(&gridptr->keys, CDI_KEY_DATATYPE, CDI_DATATYPE_FLT64);
+
+  gridptr->extraData = NULL;
 }
 
 static void
