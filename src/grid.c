@@ -163,6 +163,8 @@ grid_init(grid_t *gridptr)
 
   cdiDefVarKeyInt(&gridptr->keys, CDI_KEY_DATATYPE, CDI_DATATYPE_FLT64);
   cdiDefVarKeyInt(&gridptr->keys, CDI_KEY_SCANNINGMODE, 64);
+
+  gridptr->extraData = NULL;
 }
 
 static void

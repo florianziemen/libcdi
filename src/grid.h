@@ -132,6 +132,7 @@ struct grid_t
   const struct gridVirtTable *vtable;
   cdi_keys_t keys;
   cdi_atts_t atts;
+  void *extraData;
 };
 
 void grid_init(grid_t *gridptr);
