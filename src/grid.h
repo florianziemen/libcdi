@@ -147,6 +147,7 @@ struct grid_t {
   struct gridaxis_t x;
   struct gridaxis_t y;
   const struct gridVirtTable *vtable;
+  void   *extraData;
   cdi_atts_t atts;
   int  scanningMode;
   bool iScansNegatively, jScansPositively, jPointsAreConsecutive;
