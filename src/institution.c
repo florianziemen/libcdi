@@ -173,41 +173,25 @@ institutDef(int center, int subcenter, const char *name, const char *longname)
 int
 institutInqCenter(int instID)
 {
-  institute_t *instituteptr = NULL;
-
-  if (instID != CDI_UNDEFID) instituteptr = (institute_t *) reshGetVal(instID, &instituteOps);
-
-  return instituteptr ? instituteptr->center : CDI_UNDEFID;
+  return instID != CDI_UNDEFID ? ((institute_t *) (reshGetVal(instID, &instituteOps)))->center : CDI_UNDEFID;
 }
 
 int
 institutInqSubcenter(int instID)
 {
-  institute_t *instituteptr = NULL;
-
-  if (instID != CDI_UNDEFID) instituteptr = (institute_t *) reshGetVal(instID, &instituteOps);
-
-  return instituteptr ? instituteptr->subcenter : CDI_UNDEFID;
+  return instID != CDI_UNDEFID ? ((institute_t *) (reshGetVal(instID, &instituteOps)))->subcenter : CDI_UNDEFID;
 }
 
 const char *
 institutInqNamePtr(int instID)
 {
-  institute_t *instituteptr = NULL;
-
-  if (instID != CDI_UNDEFID) instituteptr = (institute_t *) reshGetVal(instID, &instituteOps);
-
-  return instituteptr ? instituteptr->name : NULL;
+  return instID != CDI_UNDEFID ? ((institute_t *) (reshGetVal(instID, &instituteOps)))->name : NULL;
 }
 
 const char *
 institutInqLongnamePtr(int instID)
 {
-  institute_t *instituteptr = NULL;
-
-  if (instID != CDI_UNDEFID) instituteptr = (institute_t *) reshGetVal(instID, &instituteOps);
-
-  return instituteptr ? instituteptr->longname : NULL;
+  return instID != CDI_UNDEFID ? ((institute_t *) (reshGetVal(instID, &instituteOps)))->longname : NULL;
 }
 
 int
