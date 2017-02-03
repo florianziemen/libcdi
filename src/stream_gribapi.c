@@ -20,10 +20,10 @@
 #include "subtype.h"
 
 
-#  include "cgribex.h"      /* gribGetSize, gribRead, gribGetZip, GRIB1_LTYPE_99 */
-#  include "gribapi.h"
+#include "cgribex.h"      /* gribGetSize, gribRead, gribGetZip, GRIB1_LTYPE_99 */
+#include "gribapi.h"
 
-#  include <grib_api.h>
+#include <grib_api.h>
 
 extern int cdiInventoryMode;
 
@@ -1918,14 +1918,23 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
     }
   else if ( gridtype == GRID_CURVILINEAR )
     {
-      static bool lwarning = true;
-      if ( lwarning && gridsize > 1 )
-	{
-	  lwarning = false;
-	  Warning("Curvilinear grids are unsupported in GRIB format! Created wrong Grid Description Section!");
-	}
-      gridtype = GRID_LONLAT;
-      lcurvi = true;
+      int projID = gridInqProj(gridID);
+      if ( projID != CDI_UNDEFID && gridInqType(projID) == GRID_PROJECTION )
+        {
+          gridID = projID;
+          gridtype = GRID_PROJECTION;
+        }
+      else
+        {
+          static bool lwarning = true;
+          if ( lwarning && gridsize > 1 )
+            {
+              lwarning = false;
+              Warning("Curvilinear grid is unsupported in GRIB format! Created wrong Grid Description Section!");
+            }
+          lcurvi = true;
+          gridtype = GRID_LONLAT;
+        }
     }
 
   if ( gridtype == GRID_PROJECTION && gridInqProjType(gridID) == CDI_PROJ_RLL )

@@ -1636,14 +1636,23 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
     }
   else if ( gridtype == GRID_CURVILINEAR )
     {
-      static bool lwarning = true;
-      if ( lwarning && gridInqSize(gridID) > 1 )
-	{
-	  lwarning = false;
-	  Warning("Curvilinear grids are unsupported in GRIB1! Created wrong Grid Description Section!");
-	}
-      gridtype = GRID_LONLAT;
-      lcurvi = true;
+      int projID = gridInqProj(gridID);
+      if ( projID != CDI_UNDEFID && gridInqType(projID) == GRID_PROJECTION )
+        {
+          gridID = projID;
+          gridtype = GRID_PROJECTION;
+        }
+      else
+        {
+          static bool lwarning = true;
+          if ( lwarning && gridInqSize(gridID) > 1 )
+            {
+              lwarning = false;
+              Warning("Curvilinear grid is unsupported in GRIB1! Created wrong Grid Description Section!");
+            }
+          lcurvi = true;
+          gridtype = GRID_LONLAT;
+        }
     }
 
   if ( gridtype == GRID_PROJECTION && gridInqProjType(gridID) == CDI_PROJ_RLL )
