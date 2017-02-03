@@ -1519,19 +1519,17 @@ int gridInqXCvalsSerial(grid_t *gridptr, char **xcvals)
     Error("Function only valid for grid type 'GRID_CHARXY'.");
 
   int size = gridptr->x.size;
-  int stringlen = 0;
+  const char **gridptr_xcvals = gridptr->vtable->inqXCvalsPtr(gridptr);
+  if ( size == 0 || !gridptr_xcvals )
+    Error("No string coordinates found!");
 
-  if ( gridptr->x.cvals )
-    {
-      if ( size && xcvals )
-        {
-          const char **gridptr_xcvals = gridptr->vtable->inqXCvalsPtr(gridptr);
-          stringlen = strlen(gridptr_xcvals[0]);
-          memcpy(xcvals, gridptr_xcvals, (size_t)size * sizeof ( (size_t)stringlen * sizeof(char)));
-        }
-    }
-  else
-    size = 0;
+  int stringlen = strlen(gridptr_xcvals[0]);
+  if ( stringlen == 0 )
+    Error("Length of string coordinates not defined.");
+
+  if ( xcvals )
+    for ( int i = 0; i < size; i++ )
+      memcpy(xcvals[i], gridptr_xcvals[i], (size_t)stringlen * sizeof(char));
 
   return (int)stringlen;
 }
