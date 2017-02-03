@@ -133,7 +133,6 @@ int      vlistInqVarMissvalUsed(int vlistID, int varID);
 int      vlistHasTime(int vlistID);
 
 int      cdiDelAtts(int vlistID, int varID);
-int      cdiCopyVarAtts(int vlistID1, int varID_1, int vlistID2, int varID_2);
 
 void     vlistUnpack(char * buffer, int bufferSize, int * pos,
                      int originNamespace, void *context, int force_id);

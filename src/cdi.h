@@ -707,6 +707,8 @@ int     cdiInqNatts(int cdiID, int varID, int *nattsp);
 int     cdiInqAtt(int cdiID, int varID, int attrnum, char *name, int *typep, int *lenp);
 int     cdiDelAtt(int cdiID, int varID, const char *name);
 
+int     cdiCopyAtts(int cdiID1, int varID1, int cdiID2, int varID2);
+
 /*      cdiDefAttInt: Define an integer attribute */
 int     cdiDefAttInt(int cdiID, int varID, const char *name, int type, int len, const int ip[]);
 /*      cdiDefAttFlt: Define a floating point attribute */
