@@ -3360,6 +3360,8 @@ void gridPrintKernel(grid_t *gridptr, int index, int opt, FILE *fp)
   int trunc    = gridInqTrunc(gridID);
   int gridsize = gridInqSize(gridID);
   int xsize    = gridInqXsize(gridID);
+  int xstrlen  = gridInqXIscPtr(gridID);
+  int ystrlen  = gridInqYIscPtr(gridID);
   int ysize    = gridInqYsize(gridID);
   int nvertex  = gridInqNvertex(gridID);
   int prec     = gridInqPrec(gridID);
@@ -3385,6 +3387,7 @@ void gridPrintKernel(grid_t *gridptr, int index, int opt, FILE *fp)
 
       if ( xvals || xcvals )
         {
+          if ( xstrlen            )  fprintf(fp, "xstringlen= %d\n", xstrlen);
           if ( xaxis->name[0]     )  fprintf(fp, "xname     = %s\n", xaxis->name);
           if ( xaxis->longname[0] )  fprintf(fp, "xlongname = %s\n", xaxis->longname);
           if ( xaxis->units[0]    )  fprintf(fp, "xunits    = %s\n", xaxis->units);
@@ -3394,6 +3397,7 @@ void gridPrintKernel(grid_t *gridptr, int index, int opt, FILE *fp)
         }
       if ( yvals || ycvals )
         {
+          if ( ystrlen            )  fprintf(fp, "ystringlen= %d\n", ystrlen);
           if ( yaxis->name[0]     )  fprintf(fp, "yname     = %s\n", yaxis->name);
           if ( yaxis->longname[0] )  fprintf(fp, "ylongname = %s\n", yaxis->longname);
           if ( yaxis->units[0]    )  fprintf(fp, "yunits    = %s\n", yaxis->units);
@@ -3487,9 +3491,12 @@ void gridPrintKernel(grid_t *gridptr, int index, int opt, FILE *fp)
 
         if ( xcvals )
           {
-            fprintf(fp, "xregions  = %s\n", xcvals[0]);
+            if ( xaxis->stdname )
+              fprintf(fp, "x%ss = %.*s\n", xaxis->stdname, xstrlen, xcvals[0]);
+            else
+              fprintf(fp, "xstrings  = %.*s\n", xstrlen, xcvals[0]);
             for ( int i = 1; i < xsize; i++ )
-              fprintf(fp, "          = %s\n", xcvals[i]);
+              fprintf(fp, "          = %.*s\n", xstrlen, xcvals[i]);
           }
 
 	if ( xbounds )
@@ -3526,9 +3533,12 @@ void gridPrintKernel(grid_t *gridptr, int index, int opt, FILE *fp)
 
         if ( ycvals )
           {
-            fprintf(fp, "yregions  = %s\n", ycvals[0]);
+            if ( yaxis->stdname )
+              fprintf(fp, "y%ss = %.*s\n", yaxis->stdname, ystrlen, ycvals[0]);
+            else
+              fprintf(fp, "ystrings  = %.*s\n", ystrlen, ycvals[0]);
             for ( int i = 1; i < ysize; i++ )
-              fprintf(fp, "          = %s\n", ycvals[i]);
+              fprintf(fp, "          = %.*s\n", ystrlen, ycvals[i]);
           }
 
 	if ( ybounds )
