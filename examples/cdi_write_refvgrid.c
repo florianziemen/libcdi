@@ -27,6 +27,7 @@ int main(void)
   zaxisID1 = zaxisCreate(ZAXIS_SURFACE, 1);
 
   // Create a general vertical height Z-axis
+  // zaxisID2 = zaxisCreate(ZAXIS_HEIGHT, nlev);
   zaxisID2 = zaxisCreate(ZAXIS_REFERENCE, nlev);
   zaxisDefLevels(zaxisID2, levs);
   zaxisDefNlevRef(zaxisID2, nlev);
