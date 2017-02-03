@@ -214,20 +214,10 @@ institutInqLongnamePtr(int instID)
   return instituteptr ? instituteptr->longname : NULL;
 }
 
-static enum cdiApplyRet
-activeInstitutes(int id, void *res, void *data)
-{
-  (void) id;
-  if (res && ((institute_t *) res)->used) ++(*(int *) data);
-  return CDI_APPLY_GO_ON;
-}
-
 int
 institutInqNumber(void)
 {
-  int instNum = 0;
-
-  cdiResHFilterApply(&instituteOps, activeInstitutes, &instNum);
+  int instNum = (int) (reshCountType(&instituteOps));
   return instNum;
 }
 
