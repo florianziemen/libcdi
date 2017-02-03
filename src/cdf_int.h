@@ -76,6 +76,7 @@ void cdf_put_att_double(int ncid, int varid, const char *name, nc_type xtype, si
 void cdf_get_att_string(int ncid, int varid, const char *name, char **tp);
 void cdf_get_att_text  (int ncid, int varid, const char *name, char *tp);
 void cdf_get_att_int   (int ncid, int varid, const char *name, int *ip);
+void cdf_get_att_long  (int ncid, int varid, const char *name, long *ip);
 void cdf_get_att_double(int ncid, int varid, const char *name, double *dp);
 
 void cdf_inq_att    (int ncid, int varid, const char *name, nc_type * xtypep, size_t * lenp);

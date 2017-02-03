@@ -7,6 +7,7 @@
 //#define TEST_GROUPS 1
 
 #include <ctype.h>
+#include <limits.h>
 
 #include "dmemory.h"
 #include "gaussgrid.h"
@@ -873,7 +874,6 @@ void cdf_set_cdi_attr(int ncid, int ncvarid, int attnum, int cdiID, int varID)
   cdf_inq_attname(ncid, ncvarid, attnum, attname);
   cdf_inq_attlen(ncid, ncvarid, attname, &attlen);
   cdf_inq_atttype(ncid, ncvarid, attname, &atttype);
-
   if ( xtypeIsInt(atttype) )
     {
       int attint[attlen];

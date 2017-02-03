@@ -645,12 +645,8 @@ void zaxisInqUnits(int zaxisID, char *units)
 
 void zaxisInqStdname(int zaxisID, char *stdname)
 {
-  if ( stdname )
-    {
-      stdname[0] = 0;
-      zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
-      if ( zaxisptr->stdname ) strcpy(stdname, zaxisptr->stdname);
-    }
+  zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
+  strcpy(stdname, zaxisptr->stdname);
 }
 
 
