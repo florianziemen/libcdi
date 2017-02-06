@@ -235,16 +235,15 @@ void
 modelPrintP(void *modelptr, FILE *fp)
 {
   model_t *mp = (model_t *) modelptr;
-
-  if (!mp) return;
-
-  fprintf(fp, "#\n");
-  fprintf(fp, "# modelID %d\n", mp->self);
-  fprintf(fp, "#\n");
-  fprintf(fp, "self          = %d\n", mp->self);
-  fprintf(fp, "instID        = %d\n", mp->instID);
-  fprintf(fp, "modelgribID   = %d\n", mp->modelgribID);
-  fprintf(fp, "name          = %s\n", mp->name ? mp->name : "NN");
+  fprintf(fp,
+          "#\n"
+          "# modelID %d\n"
+          "#\n"
+          "self          = %d\n"
+          "instID        = %d\n"
+          "modelgribID   = %d\n"
+          "name          = %s\n",
+          mp->self, mp->self, mp->instID, mp->modelgribID, mp->name ? mp->name : "NN");
 }
 
 static int
