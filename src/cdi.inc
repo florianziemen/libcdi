@@ -4,7 +4,7 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   January 2017
+! Uwe Schulzweida, MPI-MET, Hamburg,   February 2017
 !
 
       INTEGER    CDI_MAX_NAME          
@@ -1407,6 +1407,13 @@
 !                                     CHARACTER*(*)   name)
       EXTERNAL        cdiDelAtt
 
+      INTEGER         cdiCopyAtts
+!                                    (INTEGER         cdiID1,
+!                                     INTEGER         varID1,
+!                                     INTEGER         cdiID2,
+!                                     INTEGER         varID2)
+      EXTERNAL        cdiCopyAtts
+
       INTEGER         cdiDefAttInt
 !                                    (INTEGER         cdiID,
 !                                     INTEGER         varID,
@@ -1600,10 +1607,10 @@
       PARAMETER (CDI_KEY_YUNITS         = 914)
       INTEGER    CDI_KEY_VDIMNAME      
       PARAMETER (CDI_KEY_VDIMNAME       = 920)
-      INTEGER    CDI_KEY_MAPNAME       
-      PARAMETER (CDI_KEY_MAPNAME        = 921)
       INTEGER    CDI_KEY_MAPPING       
-      PARAMETER (CDI_KEY_MAPPING        = 922)
+      PARAMETER (CDI_KEY_MAPPING        = 921)
+      INTEGER    CDI_KEY_MAPNAME       
+      PARAMETER (CDI_KEY_MAPNAME        = 922)
 !
 !  CDI zaxis string key values
 !
