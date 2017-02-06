@@ -71,8 +71,7 @@ AC_CHECK_HEADERS([malloc.h uuid.h uuid/uuid.h])
 AX_EXECINFO
 #  ----------------------------------------------------------------------
 # Checks for the availability of functions
-AC_CHECK_FUNCS([mallinfo])
-AC_CHECK_FUNCS([getline])
+AC_CHECK_FUNCS([mallinfo getline pwrite])
 AC_CHECK_LIB([uuid],[uuid_generate],
   [AC_CHECK_DECLS([uuid_generate],
   [UUID_C_LIB=-luuid],,[AC_INCLUDES_DEFAULT
