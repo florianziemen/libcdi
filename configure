@@ -25952,23 +25952,13 @@ $as_echo "#define HAVE_BACKTRACE 1" >>confdefs.h
 fi
 #  ----------------------------------------------------------------------
 # Checks for the availability of functions
-for ac_func in mallinfo
+for ac_func in mallinfo getline pwrite
 do :
-  ac_fn_c_check_func "$LINENO" "mallinfo" "ac_cv_func_mallinfo"
-if test "x$ac_cv_func_mallinfo" = xyes; then :
+  as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
+ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
+if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
   cat >>confdefs.h <<_ACEOF
-#define HAVE_MALLINFO 1
-_ACEOF
-
-fi
-done
-
-for ac_func in getline
-do :
-  ac_fn_c_check_func "$LINENO" "getline" "ac_cv_func_getline"
-if test "x$ac_cv_func_getline" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_GETLINE 1
+#define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
 _ACEOF
 
 fi
