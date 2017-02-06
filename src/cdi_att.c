@@ -289,17 +289,17 @@ int cdi_inq_att(int indtype, int cdiID, int varID, const char *name, size_t mxsz
 }
 
 
-int cdiCopyVarAtts(int cdiID1, int varID_1, int cdiID2, int varID_2)
+int cdiCopyAtts(int cdiID1, int varID1, int cdiID2, int varID2)
 {
   int status = CDI_NOERR;
 
-  cdi_atts_t *attsp1 = cdi_get_attsp(cdiID1, varID_1);
+  cdi_atts_t *attsp1 = cdi_get_attsp(cdiID1, varID1);
   xassert(attsp1 != NULL);
 
   for ( int attid = 0; attid < (int)attsp1->nelems; attid++ )
     {
       cdi_att_t *attp = &(attsp1->value[attid]);
-      cdi_def_att(attp->indtype, attp->exdtype, cdiID2, varID_2, attp->name, attp->nelems, attp->xsz, attp->xvalue);
+      cdi_def_att(attp->indtype, attp->exdtype, cdiID2, varID2, attp->name, attp->nelems, attp->xsz, attp->xvalue);
     }
 
   return status;

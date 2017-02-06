@@ -648,12 +648,8 @@ void zaxisInqUnits(int zaxisID, char *units)
 
 void zaxisInqStdname(int zaxisID, char *stdname)
 {
-  if ( stdname )
-    {
-      stdname[0] = 0;
-      zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
-      if ( zaxisptr->stdname ) strcpy(stdname, zaxisptr->stdname);
-    }
+  zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
+  strcpy(stdname, zaxisptr->stdname);
 }
 
 
@@ -1352,7 +1348,7 @@ int zaxisDuplicate(int zaxisID)
 }
 
 static
-void zaxisPrintKernel(zaxis_t *zaxisptr, int index, FILE *fp)
+void zaxisPrintKernel(zaxis_t *zaxisptr, FILE *fp)
 {
   xassert(zaxisptr);
 
@@ -1365,9 +1361,6 @@ void zaxisPrintKernel(zaxis_t *zaxisptr, int index, FILE *fp)
 
   int nbyte;
   int nbyte0 = 0;
-  fprintf(fp, "#\n");
-  fprintf(fp, "# zaxisID %d\n", index);
-  fprintf(fp, "#\n");
   fprintf(fp, "zaxistype = %s\n", zaxisNamePtr(type));
   fprintf(fp, "size      = %d\n", nlevels);
   if ( nlevels == 1 )
@@ -1491,21 +1484,21 @@ void zaxisPrintKernel(zaxis_t *zaxisptr, int index, FILE *fp)
 }
 
 
-void zaxisPrint(int zaxisID, int index)
+void zaxisPrint(int zaxisID)
 {
   zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
-  zaxisPrintKernel(zaxisptr, index, stdout);
+  zaxisPrintKernel(zaxisptr, stdout);
 }
 
 
 static
-void zaxisPrintP ( void * voidptr, FILE * fp )
+void zaxisPrintP(void * voidptr, FILE * fp)
 {
   zaxis_t *zaxisptr = ( zaxis_t * ) voidptr;
 
   xassert ( zaxisptr );
 
-  zaxisPrintKernel(zaxisptr, zaxisptr->self, fp);
+  zaxisPrintKernel(zaxisptr, fp);
 }
 
 

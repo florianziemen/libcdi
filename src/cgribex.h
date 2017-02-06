@@ -16,6 +16,7 @@
 #define  GRIB1_LTYPE_ATMOSPHERE           10
 #define  GRIB1_LTYPE_99                   99
 #define  GRIB1_LTYPE_ISOBARIC            100
+#define  GRIB1_LTYPE_ISOBARIC_PA         210
 #define  GRIB1_LTYPE_MEANSEA             102
 #define  GRIB1_LTYPE_ALTITUDE            103
 #define  GRIB1_LTYPE_HEIGHT              105
@@ -32,7 +33,6 @@
 #define  GRIB1_LTYPE_SEDIMENT_BOTTOM_TA  164  /* Bottom Of Thermally Active Sediment Layer             */
 #define  GRIB1_LTYPE_SEDIMENT_BOTTOM_TW  165  /* Bottom Of Sediment Layer Penetrated By Thermal Wave   */
 #define  GRIB1_LTYPE_MIX_LAYER           166  /* Mixing Layer                                          */
-#define  GRIB1_LTYPE_99_MARGIN          1000
 
 /* GRIB1 Data representation type (Grid Type) [Table 6] */
 #define  GRIB1_GTYPE_LATLON                0  /*  latitude/longitude                                   */

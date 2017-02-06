@@ -27,6 +27,7 @@ int grib1ltypeToZaxisType(int grib_ltype)
     case GRIB1_LTYPE_ATMOSPHERE:         zaxistype = ZAXIS_ATMOSPHERE;             break;
     case GRIB1_LTYPE_MEANSEA:            zaxistype = ZAXIS_MEANSEA;                break;
     case GRIB1_LTYPE_99:
+    case GRIB1_LTYPE_ISOBARIC_PA:
     case GRIB1_LTYPE_ISOBARIC:           zaxistype = ZAXIS_PRESSURE;               break;
     case GRIB1_LTYPE_HEIGHT:             zaxistype = ZAXIS_HEIGHT;                 break;
     case GRIB1_LTYPE_ALTITUDE:           zaxistype = ZAXIS_ALTITUDE;	           break;

@@ -151,7 +151,7 @@ char* cdiUnescapeSpaces(const char* string, const char** outStringEnd)
   return result;
 }
 
-#ifdef HAVE_DECL_UUID_GENERATE
+#if defined (HAVE_DECL_UUID_GENERATE) && defined (HAVE_UUID_UUID_H)
 #include <sys/time.h>
 #include <uuid/uuid.h>
 void cdiCreateUUID(unsigned char *uuid)
@@ -178,7 +178,7 @@ void cdiCreateUUID(unsigned char *uuid)
   uuid_generate(uuid);
   setstate(caller_rand_state);
 }
-#elif defined (HAVE_DECL_UUID_CREATE)
+#elif defined (HAVE_DECL_UUID_CREATE) && defined (HAVE_UUID_H)
 typedef uint8_t u_int8_t;
 typedef uint16_t u_int16_t;
 typedef uint32_t u_int32_t;

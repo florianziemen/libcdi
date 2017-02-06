@@ -7,6 +7,7 @@
 //#define TEST_GROUPS 1
 
 #include <ctype.h>
+#include <limits.h>
 
 #include "dmemory.h"
 #include "gaussgrid.h"
@@ -879,7 +880,6 @@ void cdf_set_cdi_attr(int ncid, int ncvarid, int attnum, int cdiID, int varID)
   cdf_inq_attname(ncid, ncvarid, attnum, attname);
   cdf_inq_attlen(ncid, ncvarid, attname, &attlen);
   cdf_inq_atttype(ncid, ncvarid, attname, &atttype);
-
   if ( xtypeIsInt(atttype) )
     {
       int attint[attlen];
@@ -2558,7 +2558,7 @@ void cdf_read_mapping_atts(int ncid, int gmapvarid, int projID, const char *varn
     {
       char attstring[CDI_MAX_NAME];
       cdfGetAttText(ncid, gmapvarid, "grid_mapping_name", CDI_MAX_NAME, attstring);
-      cdiGridDefKeyStr(projID, CDI_KEY_MAPPING, (int)(strlen(attstring)+1), attstring);
+      cdiGridDefKeyStr(projID, CDI_KEY_MAPNAME, (int)(strlen(attstring)+1), attstring);
     }
   else
     {
@@ -2744,7 +2744,7 @@ void cdf_define_all_grids(ncgrid_t *ncgrid, int vlistID, ncdim_t *ncdims, int nv
               int ncid = ncvars[gmapvarid].ncid;
               const char *gmapname = ncvars[gmapvarid].name;
               cdf_read_mapping_atts(ncid, gmapvarid, projID, gmapname);
-              cdiGridDefKeyStr(projID, CDI_KEY_MAPNAME, (int)(strlen(gmapname)+1), gmapname);
+              cdiGridDefKeyStr(projID, CDI_KEY_MAPPING, (int)(strlen(gmapname)+1), gmapname);
               gridVerifyProj(projID);
             }
 

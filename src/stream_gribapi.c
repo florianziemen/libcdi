@@ -20,10 +20,10 @@
 #include "subtype.h"
 
 
-#  include "cgribex.h"      /* gribGetSize, gribRead, gribGetZip, GRIB1_LTYPE_99 */
-#  include "gribapi.h"
+#include "cgribex.h"      /* gribGetSize, gribRead, gribGetZip, GRIB1_LTYPE_99 */
+#include "gribapi.h"
 
-#  include <grib_api.h>
+#include <grib_api.h>
 
 extern int cdiInventoryMode;
 
@@ -276,9 +276,9 @@ void grib1GetLevel(grib_handle *gh, int *leveltype, int *lbounds, int *level1, i
 	{
           double dlevel;
 	  GRIB_CHECK(grib_get_double(gh, "level", &dlevel), 0); //2 byte
-	  if ( *leveltype == 100 ) dlevel *= 100;
+	  if ( *leveltype == GRIB1_LTYPE_ISOBARIC ) dlevel *= 100;
 	  if ( dlevel < -2.e9 || dlevel > 2.e9 ) dlevel = 0;
-	  if ( *leveltype == GRIB1_LTYPE_99 ) *leveltype = 100;
+	  if ( *leveltype == GRIB1_LTYPE_99 || *leveltype == GRIB1_LTYPE_ISOBARIC_PA ) *leveltype = GRIB1_LTYPE_ISOBARIC;
 
 	  *level1 = (int) dlevel;
 	  *level2 = 0;
@@ -1918,14 +1918,23 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
     }
   else if ( gridtype == GRID_CURVILINEAR )
     {
-      static bool lwarning = true;
-      if ( lwarning && gridsize > 1 )
-	{
-	  lwarning = false;
-	  Warning("Curvilinear grids are unsupported in GRIB format! Created wrong Grid Description Section!");
-	}
-      gridtype = GRID_LONLAT;
-      lcurvi = true;
+      int projID = gridInqProj(gridID);
+      if ( projID != CDI_UNDEFID && gridInqType(projID) == GRID_PROJECTION )
+        {
+          gridID = projID;
+          gridtype = GRID_PROJECTION;
+        }
+      else
+        {
+          static bool lwarning = true;
+          if ( lwarning && gridsize > 1 )
+            {
+              lwarning = false;
+              Warning("Curvilinear grid is unsupported in GRIB format! Created wrong Grid Description Section!");
+            }
+          lcurvi = true;
+          gridtype = GRID_LONLAT;
+        }
     }
 
   if ( gridtype == GRID_PROJECTION && gridInqProjType(gridID) == CDI_PROJ_RLL )
@@ -2449,7 +2458,7 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelI
           {
             double dum;
             if ( level < 32768 && (level < 100 || modf(level/100, &dum) > 0) )
-              grib_ltype = GRIB1_LTYPE_99;
+              grib_ltype = GRIB1_LTYPE_ISOBARIC_PA;
             else
               level /= 100;
 
