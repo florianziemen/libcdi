@@ -87,7 +87,7 @@ AC_CHECK_HEADERS([malloc.h unistd.h sys/time.h],,,[AC_INCLUDES_DEFAULT])
 AX_EXECINFO
 #  ----------------------------------------------------------------------
 # Checks for the availability of functions
-AC_CHECK_FUNCS([mallinfo])
+AC_CHECK_FUNCS([mallinfo pwrite])
 AC_REPLACE_FUNCS([getline])
 ACX_UUID
 LIBS="${LIBS+$LIBS }$UUID_C_LIB"
