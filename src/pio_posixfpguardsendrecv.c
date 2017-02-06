@@ -8,10 +8,16 @@
 #include "config.h"
 #endif
 
+#define _XOPEN_SOURCE 500
+
+#include <errno.h>
+#include <fcntl.h>
 #include <inttypes.h>
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 #include <mpi.h>
 
@@ -28,7 +34,7 @@ typedef struct
   struct dBuffer *db1;
   struct dBuffer *db2;
   struct dBuffer *db;
-  FILE *fp;
+  int fd;
   enum IO_Server_command command;
   int tsID, fileID;
   char name[];
@@ -90,7 +96,7 @@ initAFiledataPF(const char *key, size_t bs)
   /* open file */
   xdebug("name=%s, open file", afd->name);
 
-  if ((afd->fp = fopen(afd->name, "w")) == NULL) xabort("Failed to open %s", afd->name);
+  if ((afd->fd = open(afd->name, O_CREAT | O_WRONLY, 0666)) == -1) xabort("Failed to open %s", afd->name);
 
   afd->command = IO_Open_file;
   return afd;
@@ -120,7 +126,7 @@ destroyAFiledataPF(void *v)
 
   /* close file */
   xdebug("name=%s, close file", afd->name);
-  if ((iret = fclose(afd->fp)) == EOF) xabort("Failed to close %s", afd->name);
+  if ((iret = close(afd->fd)) == -1) xabort("Failed to close %s", afd->name);
 
   /* file closed, cleanup */
   xdebug("name=%s, file closed, cleanup ...", afd->name);
@@ -280,14 +286,27 @@ fpgPOSIXFPGUARDSENDRECV(void)
 }
 
 //*******************************************************
+#ifndef HAVE_PWRITE
+static ssize_t
+pwrite(int fd, const void *buf, size_t count, off_t offset)
+{
+  off_t pos;
+  ssize_t written;
+  if ((pos = lseek(fd, offset, SEEK_SET)) == (off_t) -1) xabort("did not succeed seeking file: %s", strerror(errno));
+  if ((written = write(fd, buf, count)) != amount)
+    xabort("fileId=%d, expect to write %zu byte, written %zd byte", id, count, written);
+  return written;
+}
+#endif
 
 static void
 writePF(aFiledataPF *afd)
 {
-  size_t amount, written;
+  size_t amount;
+  ssize_t written;
   long offset;
   long amountL;
-  int error, tag;
+  int tag;
   MPI_Status status;
   /* FIXME: pretend there's only one special rank for now */
   int specialRank = commInqSizePio() - 1;
@@ -304,10 +323,7 @@ writePF(aFiledataPF *afd)
   xdebug("id=%d, command=%d, amount=%zu, send amountL=%ld, recv offset=%ld", id, afd->command, amount, amountL, offset);
 
   /* write buffer */
-
-  if ((error = fseek(afd->fp, offset, SEEK_SET)) != 0) xabort("did not succeed seeking fp");
-
-  if ((written = fwrite(afd->db->buffer, sizeof(char), amount, afd->fp)) != amount)
+  if ((written = pwrite(afd->fd, afd->db->buffer, amount, offset)) != (ssize_t) amount)
     xabort("fileId=%d, expect to write %zu byte, written %zu byte", id, amount, written);
 
   xdebug("written %zu bytes in file %d with offset %ld", written, id, offset);
