@@ -295,7 +295,7 @@ static int modelGetSizeP(void * modelptr, void *context)
 {
   model_t *p = (model_t*)modelptr;
   size_t txsize = (size_t)serializeGetSize(model_nints, CDI_DATATYPE_INT, context)
-    + (size_t)serializeGetSize(p->name?(int)strlen(p->name) + 1:0, CDI_DATATYPE_TXT, context);
+    + (size_t)serializeGetSize(p->name?(int)strlen(p->name) : 0, CDI_DATATYPE_TXT, context);
   xassert(txsize <= INT_MAX);
   return (int)txsize;
 }
@@ -308,7 +308,7 @@ static void modelPackP(void * modelptr, void * buf, int size, int *position, voi
   tempbuf[0] = p->self;
   tempbuf[1] = p->instID;
   tempbuf[2] = p->modelgribID;
-  tempbuf[3] = p->name ? (int)strlen(p->name) + 1 : 0;
+  tempbuf[3] = p->name ? (int)strlen(p->name) : 0;
   serializePack(tempbuf, model_nints, CDI_DATATYPE_INT, buf, size, position, context);
   if (p->name)
     serializePack(p->name, tempbuf[3], CDI_DATATYPE_TXT, buf, size, position, context);
@@ -323,9 +323,11 @@ modelUnpack(void *buf, int size, int *position, int originNamespace, void *conte
   serializeUnpack(buf, size, position, tempbuf, model_nints, CDI_DATATYPE_INT, context);
   if (tempbuf[3] != 0)
     {
-      name = (char *) Malloc((size_t)tempbuf[3]);
+      size_t len = (size_t)tempbuf[3];
+      name = (char *) Malloc(len + 1);
       serializeUnpack(buf, size, position,
                       name, tempbuf[3], CDI_DATATYPE_TXT, context);
+      name[len] = '\0';
     }
   else
     {
