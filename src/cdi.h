@@ -967,6 +967,7 @@ int     gridInqComplexPacking(int gridID);
 /* ZAXIS routines */
 
 void    zaxisName(int zaxistype, char *zaxisname);
+const char *zaxisNamePtr(int leveltype);
 
 /*      zaxisCreate: Create a vertical Z-axis */
 int     zaxisCreate(int zaxistype, int size);
