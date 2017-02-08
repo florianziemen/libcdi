@@ -235,6 +235,7 @@ cdiPioClientSetup(int *pioNamespace_, struct cdiPioConf *conf)
   int pioNamespace = *pioNamespace_ = namespaceNew();
   int callerCDINamespace = namespaceGetActive();
   namespaceSetActive(pioNamespace);
+  namespaceSwitchSet(cdiPioExtraNSKeys[cdiPioEKConf], NSSW_DATA(conf));
   cdiPioSerializeSetMPI();
   namespaceSwitchSet(NSSWITCH_ABORT, NSSW_FUNC(cdiAbortC_MPI));
   namespaceSwitchSet(NSSWITCH_WARNING, NSSW_FUNC(cdiPioWarning));
@@ -251,7 +252,6 @@ cdiPioClientSetup(int *pioNamespace_, struct cdiPioConf *conf)
   namespaceSwitchSet(NSSWITCH_CDF_DEF_TIMESTEP, NSSW_FUNC(cdiPioCdfDefTimestepNOP));
   namespaceSwitchSet(NSSWITCH_CDF_STREAM_SETUP, NSSW_FUNC(cdiPioClientStreamNOP));
 #endif
-  namespaceSwitchSet(cdiPioExtraNSKeys[cdiPioEKXmapNew], NSSW_FUNC(conf->xmap_new));
   namespaceSetActive(callerCDINamespace);
 }
 
