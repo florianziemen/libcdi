@@ -16,7 +16,6 @@ enum IO_Server_command
 {
   IO_Open_file,
   IO_Close_file,
-  IO_Get_fp,
   IO_Set_fp,
   IO_Send_buffer,
   IO_Finalize,
