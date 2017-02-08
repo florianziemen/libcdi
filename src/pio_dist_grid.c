@@ -617,7 +617,7 @@ cdiPioDistGridLazyRedistCreate(grid_t *gridptr, enum cdiPioGDsa saIdx)
       int inClientGroup = !commInqIsProcIO();
       MPI_Comm comm = inClientGroup ? commInqCommModel() : commInqCommColl();
       xmap_new_func_ptr xmapNew
-        = (xmap_new_func_ptr)namespaceSwitchGet(cdiPioExtraNSKeys[cdiPioEKXmapNew]).func;
+        = cdiPioGetConf()->xmap_new;
       extraData->defXmaps[distType]
         = defXmap = xmapNew(extraData->partDesc[distType], distList, comm);
     }

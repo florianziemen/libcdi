@@ -1579,7 +1579,7 @@ cdiPioRecvStreamDefVlist(void *buffer, int size, int *pos,
  * @brief is encapsulated in CDI library and run on I/O PEs.
  */
 
-void cdiPioCollectorMessageLoop(const struct cdiPioConf *conf)
+void cdiPioCollectorMessageLoop()
 {
   MPI_Status status;
 
@@ -1590,6 +1590,7 @@ void cdiPioCollectorMessageLoop(const struct cdiPioConf *conf)
                      NSSW_FUNC(cdiPioServerStreamOpen));
   namespaceSwitchSet(NSSWITCH_STREAM_CLOSE_BACKEND,
                      NSSW_FUNC(cdiPioServerStreamClose));
+  const struct cdiPioConf *conf = cdiPioGetConf();
 #ifdef HAVE_PARALLEL_NC4
   cdiPioEnableNetCDFParAccess();
   numPioPrimes = PPM_prime_factorization_32((uint32_t)commInqSizeColl(),
