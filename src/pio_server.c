@@ -1360,7 +1360,7 @@ cdiPioRecvStreamDefVlist(void *buffer, int size, int *pos, MPI_Comm pioInterComm
  */
 
 void
-cdiPioCollectorMessageLoop(const struct cdiPioConf *conf)
+cdiPioCollectorMessageLoop()
 {
   MPI_Status status;
 
@@ -1369,6 +1369,7 @@ cdiPioCollectorMessageLoop(const struct cdiPioConf *conf)
   MPI_Comm pioInterComm = cdiPioInqInterComm();
   namespaceSwitchSet(NSSWITCH_STREAM_OPEN_BACKEND, NSSW_FUNC(cdiPioServerStreamOpen));
   namespaceSwitchSet(NSSWITCH_STREAM_CLOSE_BACKEND, NSSW_FUNC(cdiPioServerStreamClose));
+  const struct cdiPioConf *conf = cdiPioGetConf();
 #ifdef HAVE_PARALLEL_NC4
   cdiPioEnableNetCDFParAccess();
   numPioPrimes = PPM_prime_factorization_32((uint32_t) commInqSizeColl(), &pioPrimes);

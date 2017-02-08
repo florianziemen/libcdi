@@ -8,16 +8,25 @@
 #include <stdlib.h>
 #include <mpi.h>
 
+#include "namespace.h"
+#include "pio_conf.h"
+
 /* indices of extra keys put into cdiPioExtraNSKeys */
 
 enum
 {
   cdiPioEKFileWritingFinalize,
-  cdiPioEKXmapNew,
+  cdiPioEKConf,
   cdiPioExtraNSKeysSize
 };
 
 extern int cdiPioExtraNSKeys[cdiPioExtraNSKeysSize];
+
+static inline struct cdiPioConf *
+cdiPioGetConf(void)
+{
+  return (struct cdiPioConf *) namespaceSwitchGet(cdiPioExtraNSKeys[cdiPioEKConf]).data;
+}
 
 #endif
 /*
