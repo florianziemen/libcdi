@@ -7,8 +7,7 @@
 #include "cdipio.h"
 #include "pio_impl.h"
 
-const char *const cdiPioCmdStrTab[]
-    = { "IO_Open_file", "IO_Close_file", "IO_Get_fp", "IO_Set_fp", "IO_Send_buffer", "IO_Finalize" };
+const char *const cdiPioCmdStrTab[] = { "IO_Open_file", "IO_Close_file", "IO_Set_fp", "IO_Send_buffer", "IO_Finalize" };
 
 int cdiPioExtraNSKeys[cdiPioExtraNSKeysSize];
 
