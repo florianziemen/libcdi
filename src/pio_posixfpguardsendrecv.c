@@ -27,6 +27,7 @@
 #include "namespace.h"
 #include "pio.h"
 #include "pio_comm.h"
+#include "pio_conf.h"
 #include "pio_impl.h"
 #include "pio_util.h"
 

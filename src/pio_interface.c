@@ -411,7 +411,7 @@ pioInit(MPI_Comm commGlob, int nProcsIO, int IOMode, int *pioNamespace, float pa
   return retcomm;
 }
 
-static void cdiPioFileWritingInit(const struct cdiPioConf *conf);
+static void cdiPioFileWritingInit(void);
 
 MPI_Comm
 cdiPioInit(MPI_Comm commGlob, int confResH, int *pioNamespace)
@@ -420,6 +420,10 @@ cdiPioInit(MPI_Comm commGlob, int confResH, int *pioNamespace)
   namespaceSwitchSet(NSSWITCH_WARNING, NSSW_FUNC(cdiPioWarning));
 
   struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
+
+  if (cdiPioExtraNSKeys[cdiPioEKConf] == 0) cdiPioExtraNSKeys[cdiPioEKConf] = cdiNamespaceSwitchNewKey();
+  namespaceSwitchSet(cdiPioExtraNSKeys[cdiPioEKConf], NSSW_DATA(conf));
+
   int IOMode = conf->IOMode;
 
   if (IOMode < PIO_MINIOMODE || IOMode > PIO_MAXIOMODE) xabort("IOMODE IS NOT VALID.");
@@ -453,7 +457,6 @@ cdiPioInit(MPI_Comm commGlob, int confResH, int *pioNamespace)
     }
 
   reshRemove(confResH, &cdiPioConfOps);
-  if (cdiPioExtraNSKeys[cdiPioEKXmapNew] == 0) cdiPioExtraNSKeys[cdiPioEKXmapNew] = cdiNamespaceSwitchNewKey();
 
 #ifdef HAVE_PPM_DIST_ARRAY_H
   reshDistGridUnpack = cdiPioDistGridUnpack;
@@ -463,13 +466,13 @@ cdiPioInit(MPI_Comm commGlob, int confResH, int *pioNamespace)
     {
       int prevNamespace = namespaceGetActive(), serverNamespace = namespaceNew();
       namespaceSetActive(serverNamespace);
-      namespaceSwitchSet(cdiPioExtraNSKeys[cdiPioEKXmapNew], NSSW_FUNC(conf->xmap_new));
+      namespaceSwitchSet(cdiPioExtraNSKeys[cdiPioEKConf], NSSW_DATA(conf));
       cdiPioSerializeSetMPI();
       conf->postCommSetupActions();
-      cdiPioFileWritingInit(conf);
+      cdiPioFileWritingInit();
       if (commInqRankColl() >= 0)
         {
-          cdiPioCollectorMessageLoop(conf);
+          cdiPioCollectorMessageLoop();
           void (*cdiPioFileWritingFinalize)(void) = namespaceSwitchGet(cdiPioExtraNSKeys[cdiPioEKFileWritingFinalize]).func;
           cdiPioFileWritingFinalize();
         }
@@ -488,7 +491,6 @@ cdiPioInit(MPI_Comm commGlob, int confResH, int *pioNamespace)
     }
   else
     cdiPioClientSetup(pioNamespace, conf);
-  namespaceSwitchSet(cdiPioExtraNSKeys[cdiPioEKXmapNew], NSSW_FUNC(conf->xmap_new));
   reshReplace(confResH, conf, &cdiPioConfOps);
   xdebug("nProcsGlob=%d, RETURN", sizeGlob);
   return commInqCommModel();
@@ -501,8 +503,9 @@ cdiPioFileWritingFinalizeDefault(void)
 }
 
 static void
-cdiPioFileWritingInit(const struct cdiPioConf *conf)
+cdiPioFileWritingInit(void)
 {
+  const struct cdiPioConf *conf = cdiPioGetConf();
   if (cdiPioExtraNSKeys[cdiPioEKFileWritingFinalize] == 0)
     cdiPioExtraNSKeys[cdiPioEKFileWritingFinalize] = cdiNamespaceSwitchNewKey();
 
