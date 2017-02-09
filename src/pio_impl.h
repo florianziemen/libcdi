@@ -1,5 +1,5 @@
-#ifndef _PIO_IMPL_H
-#define _PIO_IMPL_H
+#ifndef CDI_PIO_IMPL_H
+#define CDI_PIO_IMPL_H
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
