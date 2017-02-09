@@ -291,11 +291,6 @@ buildVarRedist(int headerIdx, size_t streamIdx,
 }
 
 
-struct xyzDims
-{
-  int sizes[3];
-};
-
 static Xt_idxlist
 buildVarSlicesIdxList(int vlistID, int varID, int startLvl, int numLvl)
 {
@@ -447,6 +442,11 @@ findMaxDivision(int npartMax, int composite_div)
     }
   return maxDiv;
 }
+
+struct xyzDims
+{
+  int sizes[3];
+};
 
 static struct xyzDims
 varDimsCollGridMax(const struct PPM_extent varDims[3])
