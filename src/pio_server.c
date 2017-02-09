@@ -529,7 +529,7 @@ writeNetCDFStreamParallel(size_t streamIdx,
     vlistID = streamInqVlist(streamID);
   const MPI_Comm collComm = commInqCommColl();
   // init redistCache if applicable
-  const bool reuseRedists = conf->cacheRedists != 0
+  const bool reuseRedists = conf->cacheRedists
     ? handleRedistCache(streamIdx, mapping, (size_t)nvars, vlistID, collComm)
     : false;
   struct cacheRedist *restrict retained = rxWin[streamIdx].retained;
