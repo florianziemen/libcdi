@@ -31,6 +31,7 @@
 #include "pio_cdf_int.h"
 #include "pio_comm.h"
 #include "pio_conf.h"
+#include "pio_dstlist_cache.h"
 #include "pio_id_set.h"
 #include "pio_interface.h"
 #include "pio_rpc.h"
@@ -89,7 +90,11 @@ static struct
   void *aggBuf;
 } *rxWin;
 
+/* map streamID's and fileID's to linear index into arrays */
 static struct idList openStreams, openFiles;
+
+static struct dstIdxlistCache *DstIdxlistCache;
+static size_t neededDstIdxlistCacheSize;
 
 struct recordWrite
 {
@@ -111,7 +116,6 @@ struct streamMapping {
   struct streamMemLayout *layout;
   struct recordWrite writtenRecords[];
 };
-
 
 #ifdef HAVE_PARALLEL_NC4
 /* prime factorization of number of pio collectors */
@@ -309,15 +313,15 @@ buildVarSlicesIdxList(int vlistID, int varID, int startLvl, int numLvl,
   Xt_idxlist idxlist;
   if ( conf->stripify )
     {
-      struct Xt_stripe stripe;
       int sliceSize = varShape[0] * varShape[1];
-      stripe.start = (Xt_int)origin[0] * sliceSize;
-      stripe.stride = 1;
-      stripe.nstrides = sliceSize * sliceShape[0];
-      idxlist = xt_idxstripes_new(&stripe, 1);
+      Xt_int start = sliceSize * origin[0];
+      int nstrides = sliceSize * sliceShape[0];
+      idxlist
+        = cdiPioDstIdxlistCacheAddStripes1(DstIdxlistCache, start, nstrides);
     }
   else
-    idxlist = xt_idxsection_new(0, 3, varShapeXt, sliceShape, origin);
+    idxlist = cdiPioDstIdxlistCacheAddSection3D(DstIdxlistCache,
+                                                varShapeXt, origin, sliceShape);
   return idxlist;
 }
 
@@ -590,9 +594,10 @@ writeNetCDFStreamParallel(size_t streamIdx,
               preWriteChunkStart[2 - i] = (Xt_int)varChunk[i].first;
               preWriteChunkSize[2 - i] = (int)varChunk[i].size;
           }
-          preWriteChunk = xt_idxsection_new(0, 3, varDims,
-                                            preWriteChunkSize,
-                                            preWriteChunkStart);
+          preWriteChunk
+            = cdiPioDstIdxlistCacheAddSection3D(DstIdxlistCache,
+                                                varDims, preWriteChunkStart,
+                                                preWriteChunkSize);
         }
         xdebug("Writing chunk { { %d, %d }, { %d, %d },"
                " { %d, %d } }", myChunk[0][0], myChunk[0][1],
@@ -611,7 +616,6 @@ writeNetCDFStreamParallel(size_t streamIdx,
             retained[varID].sliceExtent[1] = varChunk[1];
             retained[varID].sliceExtent[2] = varChunk[2];
           }
-          xt_idxlist_delete(preWriteChunk);
         }
       }
       resizeVarGatherBuf(varSize, data_, currentDataBufSize);
@@ -744,7 +748,6 @@ writeNetCDFStreamSerial(size_t streamIdx,
           }
           int headerIdx = varMap[varID];
           gatherRedist = buildVarRedist(headerIdx, streamIdx, dstList, conf);
-          xt_idxlist_delete(dstList);
           if (conf->cacheRedists) {
             retained[varID].redist = gatherRedist;
             retained[varID].sliceSize = varSize;
@@ -1160,7 +1163,6 @@ writeGribStream(size_t streamIdx,
                 = (MPI_Aint)(sizeof (double) * myAggSize);
               varRedists[varIdx] = buildVarRedist(mapping->varMap[varID],
                                                   streamIdx, dstList, conf);
-              xt_idxlist_delete(dstList);
             }
           /* merge all redists for current pass */
           if (numVarsInPass > 1)
@@ -1445,11 +1447,51 @@ cdiPioServerStreamOpen(const char *filename, char filemode,
   return fileID;
 }
 
+static size_t
+getMaxNumStreamWrites(stream_t *streamptr)
+{
+  int filetype = streamptr->filetype;
+  int vlistID = streamptr->vlistID;
+  size_t numVars = (size_t)vlistNvars(streamptr->vlistID),
+    maxNumStreamWrites = 0,
+    numColl = (size_t)commInqSizeColl();
+  switch (filetype)
+    {
+#ifdef HAVE_LIBNETCDF
+        case CDI_FILETYPE_NC:
+        case CDI_FILETYPE_NC2:
+        case CDI_FILETYPE_NC4:
+        case CDI_FILETYPE_NC4C:
+          {
+            int rank, rankOpen = cdiPioSerialOpenFileMap(streamptr->self);
+            if (commInqIOMode() == PIO_NONE
+#ifdef HAVE_PARALLEL_NC4
+                || rankOpen == CDI_PIO_COLLECTIVE_OPEN
+#endif
+                || ((rank = commInqRankColl()) == rankOpen))
+              maxNumStreamWrites = (numVars + numColl - 1)/numColl;
+          }
+          break;
+#endif
+    default:
+      for (size_t varID = 0; varID < numVars; ++varID)
+        {
+          size_t numRec = (size_t)(zaxisInqSize(vlistInqVarZaxis(vlistID,
+                                                                 (int)varID)));
+          maxNumStreamWrites += (numRec + numColl - 1)/numColl;
+        }
+    }
+  return maxNumStreamWrites;
+}
+
 static void
 cdiPioServerStreamClose(stream_t *streamptr, int recordBufIsToBeDeleted)
 {
   int fileID   = streamptr->fileID;
   int filetype = streamptr->filetype;
+  int vlistID = streamptr->vlistID;
+  if (vlistID != CDI_UNDEFID)
+    neededDstIdxlistCacheSize -= getMaxNumStreamWrites(streamptr);
   if ( fileID == CDI_UNDEFID )
     Warning("File %s not open!", streamptr->filename);
   else
@@ -1564,7 +1606,8 @@ cdiPioRecvStreamDefVlist(void *buffer, int size, int *pos,
     serverStreamID = namespaceAdaptKey2(msgData[0]);
     serverVlistID = namespaceAdaptKey2(msgData[1]);
   }
-  cdiStreamSetupVlist(stream_to_pointer(serverStreamID), serverVlistID);
+  stream_t *streamptr = stream_to_pointer(serverStreamID);
+  cdiStreamSetupVlist(streamptr, serverVlistID);
   MPI_Info no_locks_info;
   xmpi(MPI_Info_create(&no_locks_info));
   xmpi(MPI_Info_set(no_locks_info, "no_locks", "true"));
@@ -1585,6 +1628,11 @@ cdiPioRecvStreamDefVlist(void *buffer, int size, int *pos,
                               cdiPioInqCollClientIntraComm(), bufSizes);
   xmpi(MPI_Info_free(&no_locks_info));
 
+  size_t maxNumStreamWrites = (size_t)getMaxNumStreamWrites(streamptr),
+    currentDstIdxlistCacheSize = cdiPioDstIdxlistCacheGetSize(DstIdxlistCache);
+  if ((neededDstIdxlistCacheSize += maxNumStreamWrites) > currentDstIdxlistCacheSize)
+    DstIdxlistCache = cdiPioDstIdxlistCacheResize(DstIdxlistCache,
+                                                  neededDstIdxlistCacheSize);
 }
 
 
@@ -1651,6 +1699,7 @@ void cdiPioCollectorMessageLoop()
 #elif defined (HAVE_LIBNETCDF)
           Free(cdiSerialOpenFileCount);
 #endif
+          cdiPioDstIdxlistCacheDelete(DstIdxlistCache);
           xdebug("%s", "RETURN");
           return;
         case STREAMOPEN:
