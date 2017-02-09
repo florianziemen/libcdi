@@ -28,6 +28,7 @@
 #include "namespace.h"
 #include "taxis.h"
 #include "pio.h"
+#include "pio_cdf_int.h"
 #include "pio_comm.h"
 #include "pio_conf.h"
 #include "pio_id_set.h"
@@ -45,7 +46,6 @@
 #pragma GCC diagnostic pop
 #endif
 #endif
-#include "pio_cdf_int.h"
 #include "resource_handle.h"
 #include "resource_unpack.h"
 #include "stream_cdf.h"
