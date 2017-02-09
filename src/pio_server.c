@@ -292,7 +292,8 @@ buildVarRedist(int headerIdx, size_t streamIdx,
 
 
 static Xt_idxlist
-buildVarSlicesIdxList(int vlistID, int varID, int startLvl, int numLvl)
+buildVarSlicesIdxList(int vlistID, int varID, int startLvl, int numLvl,
+                      const struct cdiPioConf *conf)
 {
   int varShape[3] = { 0, 0, 0 };
   cdiPioQueryVarDims(varShape, vlistID, varID);
@@ -305,7 +306,19 @@ buildVarSlicesIdxList(int vlistID, int varID, int startLvl, int numLvl)
   sliceShape[0] = numLvl >= 0 ? numLvl : (int)varShape[2];
   sliceShape[1] = varShape[1];
   sliceShape[2] = varShape[0];
-  return xt_idxsection_new(0, 3, varShapeXt, sliceShape, origin);
+  Xt_idxlist idxlist;
+  if ( conf->stripify )
+    {
+      struct Xt_stripe stripe;
+      int sliceSize = varShape[0] * varShape[1];
+      stripe.start = (Xt_int)origin[0] * sliceSize;
+      stripe.stride = 1;
+      stripe.nstrides = sliceSize * sliceShape[0];
+      idxlist = xt_idxstripes_new(&stripe, 1);
+    }
+  else
+    idxlist = xt_idxsection_new(0, 3, varShapeXt, sliceShape, origin);
+  return idxlist;
 }
 
 static int
@@ -720,7 +733,7 @@ writeNetCDFStreamSerial(size_t streamIdx,
           Xt_idxlist dstList;
           if (writerRank == collRank)
           {
-            dstList = buildVarSlicesIdxList(vlistID, varID, -1, -1);
+            dstList = buildVarSlicesIdxList(vlistID, varID, -1, -1, conf);
             varSize = (size_t)xt_idxlist_get_num_indices(dstList);
             resizeVarGatherBuf(varSize, data_, currentDataBufSize);
           }
@@ -1132,7 +1145,7 @@ writeGribStream(size_t streamIdx,
                     - myLevelStart + 1;
                   dstList
                     = buildVarSlicesIdxList(vlistID, varID, (int)myLevelStart,
-                                            (int)myNumLevels);
+                                            (int)myNumLevels, conf);
                   size_t sliceSize = (size_t)xt_idxlist_get_num_indices(dstList);
                   assert(sliceSize * sizeof (double)
                          == (writtenRecords[myVarRecordStart].dataSize
