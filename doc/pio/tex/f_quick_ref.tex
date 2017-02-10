@@ -93,6 +93,15 @@ Query size of pre-encoding
 aggregation buffer in MiB.
 
 
+\section*{\tt \htmlref{cdiPioConfGetXmapCache}{cdiPioConfGetXmapCache}}
+
+\begin{verbatim}
+    INTEGER FUNCTION cdiPioConfGetXmapCache (INTEGER confResH)
+\end{verbatim}
+
+query xmap caching status.
+
+
 \section*{\tt \htmlref{cdiPioConfSetCSRole}{cdiPioConfSetCSRole}}
 
 \begin{verbatim}
@@ -158,6 +167,19 @@ is always decomposed statically using the same partitioning
 description objects and the sequence of calls to streamWriteVarPart
 or streamWriteScatteredVarPart for a stream matches the sequence
 of the previous sequence (divided by pioWriteTimestep).
+
+
+\section*{\tt \htmlref{cdiPioConfSetXmapCache}{cdiPioConfSetXmapCache}}
+
+\begin{verbatim}
+    SUBROUTINE cdiPioConfSetXmapCache (INTEGER confResH, INTEGER doCache)
+\end{verbatim}
+
+set doCache to any non-zero value if data
+for internal data exchange maps is to be cached. This is helpful
+when the different variables of a file are decomposed identically
+and is active by default. Set doCache to 0 if decompositions are
+dynamic in both variables and time.
 
 
 \section*{\tt \htmlref{cdiPioDistGridCreate}{cdiPioDistGridCreate}}
