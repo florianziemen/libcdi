@@ -45,6 +45,7 @@ typedef struct
 
 typedef struct
 {
+  int            varID;
   int            param;
   int            prec;
   int            tsteptype;
@@ -95,6 +96,7 @@ static unsigned nvars = 0;
 static
 void paramInitEntry(unsigned varID, int param)
 {
+  vartable[varID].varID          = varID;
   vartable[varID].param          = param;
   vartable[varID].prec           = 0;
   vartable[varID].tsteptype      = TSTEP_INSTANT;
@@ -540,7 +542,7 @@ struct paraminfo
 };
 
 static
-int cmpparam(const void* s1, const void* s2)
+int cmp_param(const void* s1, const void* s2)
 {
   const struct paraminfo *x = (const struct paraminfo*) s1;
   const struct paraminfo *y = (const struct paraminfo*) s2;
@@ -551,6 +553,28 @@ int cmpparam(const void* s1, const void* s2)
   return cmp;
 }
 
+struct varinfo
+{
+  int        varid;
+  const char *name;
+};
+/*
+static
+int cmp_varname(const void *s1, const void *s2)
+{
+  const struct varinfo *x = (const struct varinfo *)s1,
+                       *y = (const struct varinfo *)s2;
+  return strcmp(x->name, y->name);
+}
+*/
+static
+int cmp_varname(const void *s1, const void *s2)
+{
+  const vartable_t *x = (const vartable_t *)s1,
+                   *y = (const vartable_t *)s2;
+  return strcmp(x->name, y->name);
+}
+
 
 void cdi_generate_vars(stream_t *streamptr)
 {
@@ -559,7 +583,7 @@ void cdi_generate_vars(stream_t *streamptr)
 
   int *varids = (int *) Malloc(nvars*sizeof(int));
   for ( unsigned varID = 0; varID < nvars; varID++ ) varids[varID] = (int)varID;
-
+  /*
   if ( streamptr->sortparam )
     {
       struct paraminfo *varInfo = (struct paraminfo *) Malloc((size_t)nvars * sizeof(struct paraminfo));
@@ -570,7 +594,7 @@ void cdi_generate_vars(stream_t *streamptr)
 	  varInfo[varID].param = vartable[varID].param;
 	  varInfo[varID].ltype = vartable[varID].ltype1;
 	}
-      qsort(varInfo, (size_t)nvars, sizeof(struct paraminfo), cmpparam);
+      qsort(varInfo, (size_t)nvars, sizeof(struct paraminfo), cmp_param);
       for ( unsigned varID = 0; varID < nvars; varID++ )
 	{
 	  varids[varID] = varInfo[varID].varid;
@@ -578,6 +602,11 @@ void cdi_generate_vars(stream_t *streamptr)
       Free(varInfo);
     }
 
+  if ( streamptr->sortname )
+    {
+      qsort(vartable, (size_t)nvars, sizeof(vartable_t), cmp_varname);
+    }
+  */
   for ( unsigned index = 0; index < nvars; index++ )
     {
       int varid      = varids[index];
