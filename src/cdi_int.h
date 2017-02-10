@@ -254,10 +254,11 @@ typedef struct {
   int         globalatts;
   int         localatts;
   int         unreduced;
-  int         sortname;
   int         have_missval;
   int         comptype;      // compression type
   int         complevel;     // compression level
+  bool        sortname;
+  bool        sortparam;
 #if defined (GRIBCONTAINER2D)
   void      **gribContainers;
 #else
@@ -317,6 +318,7 @@ extern int cdiChunkType;
 extern int cdiSplitLtype105;
 extern int cdiDataUnreduced;
 extern int cdiSortName;
+extern int cdiSortParam;
 extern int cdiHaveMissval;
 extern int cdiIgnoreAttCoordinates;
 extern int cdiIgnoreValidRange;

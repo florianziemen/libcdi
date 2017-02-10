@@ -2894,6 +2894,7 @@ void cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
     }
 }
 
+
 struct varinfo
 {
   int      ncvarid;

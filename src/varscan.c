@@ -534,20 +534,16 @@ int cmpLevelTableInv(const void* s1, const void* s2)
 }
 
 
-typedef struct
+struct paraminfo
 {
-  int      varid;
-  int      param;
-  int      ltype;
-}
-param_t;
-
+  int varid, param, ltype;
+};
 
 static
 int cmpparam(const void* s1, const void* s2)
 {
-  const param_t *x = (const param_t*) s1;
-  const param_t *y = (const param_t*) s2;
+  const struct paraminfo *x = (const struct paraminfo*) s1;
+  const struct paraminfo *y = (const struct paraminfo*) s2;
 
   int cmp = (( x->param > y->param ) - ( x->param < y->param )) * 2
            + ( x->ltype > y->ltype ) - ( x->ltype < y->ltype );
@@ -564,9 +560,9 @@ void cdi_generate_vars(stream_t *streamptr)
   int *varids = (int *) Malloc(nvars*sizeof(int));
   for ( unsigned varID = 0; varID < nvars; varID++ ) varids[varID] = (int)varID;
 
-  if ( streamptr->sortname )
+  if ( streamptr->sortparam )
     {
-      param_t *varInfo = (param_t *) Malloc((size_t)nvars * sizeof (param_t));
+      struct paraminfo *varInfo = (struct paraminfo *) Malloc((size_t)nvars * sizeof(struct paraminfo));
 
       for ( unsigned varID = 0; varID < nvars; varID++ )
 	{
@@ -574,7 +570,7 @@ void cdi_generate_vars(stream_t *streamptr)
 	  varInfo[varID].param = vartable[varID].param;
 	  varInfo[varID].ltype = vartable[varID].ltype1;
 	}
-      qsort(varInfo, (size_t)nvars, sizeof(param_t), cmpparam);
+      qsort(varInfo, (size_t)nvars, sizeof(struct paraminfo), cmpparam);
       for ( unsigned varID = 0; varID < nvars; varID++ )
 	{
 	  varids[varID] = varInfo[varID].varid;
