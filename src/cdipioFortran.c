@@ -134,6 +134,8 @@ FCALLSCSUB2 (cdiPioConfSetRecordAggBufLim, CDIPIOCONFSETRECORDAGGBUFLIM, cdipioc
 FCALLSCFUN1 (INT, cdiPioConfGetRecordAggBufLim, CDIPIOCONFGETRECORDAGGBUFLIM, cdipioconfgetrecordaggbuflim, INT)
 FCALLSCSUB2 (cdiPioConfSetRedistCache, CDIPIOCONFSETREDISTCACHE, cdipioconfsetredistcache, INT, INT)
 FCALLSCFUN1 (INT, cdiPioConfGetRedistCache, CDIPIOCONFGETREDISTCACHE, cdipioconfgetredistcache, INT)
+FCALLSCSUB2 (cdiPioConfSetXmapCache, CDIPIOCONFSETXMAPCACHE, cdipioconfsetxmapcache, INT, INT)
+FCALLSCFUN1 (INT, cdiPioConfGetXmapCache, CDIPIOCONFGETXMAPCACHE, cdipioconfgetxmapcache, INT)
 
 /*  convert index lists to stripes prior to intersection computation,
  * defaults to true  */

@@ -146,7 +146,7 @@ cdiPioConfCreate(void)
   conf->partInflate = 1.1f;
   conf->postCommSetupActions = cdiPioNoPostCommSetup;
   conf->largePageAlign = false;
-  conf->cacheRedists = true;
+  conf->cacheRedists = conf->cacheXmaps = true;
   conf->recordAggBufLimMB = 128;
   conf->xmap_new = xt_xmap_dist_dir_new;
   conf->stripify = true;
@@ -246,6 +246,20 @@ cdiPioConfGetRedistCache(int confResH)
 {
   struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
   return conf->cacheRedists;
+}
+
+void
+cdiPioConfSetXmapCache(int confResH, int doCache)
+{
+  struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
+  conf->cacheXmaps = doCache;
+}
+
+int
+cdiPioConfGetXmapCache(int confResH)
+{
+  struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
+  return conf->cacheXmaps;
 }
 
 void

@@ -35,6 +35,7 @@
 #include "pio_interface.h"
 #include "pio_rpc.h"
 #include "pio_util.h"
+#include "pio_xmap_cache.h"
 #ifndef HAVE_NETCDF_PAR_H
 /* the following causes netcdf.h to not try to redefine MPI_Comm etc. */
 #ifdef __clang__
@@ -94,6 +95,9 @@ static struct idList openStreams, openFiles;
 
 static struct dstIdxlistCache *DstIdxlistCache;
 static size_t neededDstIdxlistCacheSize;
+
+static struct xmapCache *XmapCache;
+static size_t neededXmapCacheSize;
 
 struct recordWrite
 {
@@ -1283,7 +1287,13 @@ cdiPioServerStreamClose(stream_t *streamptr, int recordBufIsToBeDeleted)
   int fileID = streamptr->fileID;
   int filetype = streamptr->filetype;
   int vlistID = streamptr->vlistID;
-  if (vlistID != CDI_UNDEFID) neededDstIdxlistCacheSize -= getMaxNumStreamWrites(streamptr);
+  if (vlistID != CDI_UNDEFID)
+    {
+      size_t maxNumStreamWrites = getMaxNumStreamWrites(streamptr);
+      neededDstIdxlistCacheSize -= maxNumStreamWrites;
+      const struct cdiPioConf *conf = cdiPioGetConf();
+      if (conf->cacheXmaps) neededXmapCacheSize -= maxNumStreamWrites;
+    }
   if (fileID == CDI_UNDEFID)
     Warning("File %s not open!", streamptr->filename);
   else
@@ -1374,7 +1384,7 @@ cdiPioRecvStreamClose(void *buffer, int size, int *pos, MPI_Comm pioInterComm)
 }
 
 static void
-cdiPioRecvStreamDefVlist(void *buffer, int size, int *pos, MPI_Comm pioInterComm)
+cdiPioRecvStreamDefVlist(void *buffer, int size, int *pos, MPI_Comm pioInterComm, const struct cdiPioConf *conf)
 {
   int serverStreamID, serverVlistID;
   {
@@ -1406,6 +1416,12 @@ cdiPioRecvStreamDefVlist(void *buffer, int size, int *pos, MPI_Comm pioInterComm
          currentDstIdxlistCacheSize = cdiPioDstIdxlistCacheGetSize(DstIdxlistCache);
   if ((neededDstIdxlistCacheSize += maxNumStreamWrites) > currentDstIdxlistCacheSize)
     DstIdxlistCache = cdiPioDstIdxlistCacheResize(DstIdxlistCache, neededDstIdxlistCacheSize);
+  if (conf->cacheXmaps)
+    {
+      size_t currentXmapCacheSize = cdiPioXmapCacheGetSize(XmapCache);
+      if ((neededXmapCacheSize += maxNumStreamWrites) > currentXmapCacheSize)
+        XmapCache = cdiPioXmapCacheResize(XmapCache, neededXmapCacheSize);
+    }
 }
 
 /**
@@ -1435,6 +1451,7 @@ cdiPioCollectorMessageLoop()
 
   int *streamActivity = NULL;
   setupClientRanks();
+  if (conf->cacheXmaps) XmapCache = cdiPioXmapCacheNew(16, (size_t) numClients_ + 1);
   for (;;)
     {
       xmpi(MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, pioInterComm, &status));
@@ -1465,6 +1482,7 @@ cdiPioCollectorMessageLoop()
 #elif defined(HAVE_LIBNETCDF)
           Free(cdiSerialOpenFileCount);
 #endif
+          if (conf->cacheXmaps) cdiPioXmapCacheDelete(XmapCache);
           cdiPioDstIdxlistCacheDelete(DstIdxlistCache);
           xdebug("%s", "RETURN");
           return;
@@ -1482,7 +1500,7 @@ cdiPioCollectorMessageLoop()
               {
               case STREAMOPEN: cdiPioRecvStreamOpen(buffer, size, &pos, pioInterComm); break;
               case STREAMCLOSE: cdiPioRecvStreamClose(buffer, size, &pos, pioInterComm); break;
-              case STREAMDEFVLIST: cdiPioRecvStreamDefVlist(buffer, size, &pos, pioInterComm); break;
+              case STREAMDEFVLIST: cdiPioRecvStreamDefVlist(buffer, size, &pos, pioInterComm, conf); break;
               }
             Free(buffer);
             streamActivity = Realloc(streamActivity, openStreams.size * sizeof(streamActivity[0]));

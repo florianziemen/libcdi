@@ -141,6 +141,16 @@ void cdiPioConfSetRedistCache(int confResH, int doCache);
  * be cached? */
 int cdiPioConfGetRedistCache(int confResH);
 
+/* cdiPioConfSetXmapCache: set doCache to any non-zero value if data
+ * for internal data exchange maps is to be cached. This is helpful
+ * when the different variables of a file are decomposed identically
+ * and is active by default. Set doCache to 0 if decompositions are
+ * dynamic in both variables and time */
+void cdiPioConfSetXmapCache(int confResH, int doCache);
+
+/* cdiPioConfGetXmapCache: query xmap caching status */
+int cdiPioConfGetXmapCache(int confResH);
+
 /* cdiPioConfSetXmapNew: set method to compute part intersections,
  * defaults to xt_xmap_dist_dir_new */
 void cdiPioConfSetXmapNew(int confResH, Xt_xmap (*xmap_new)(Xt_idxlist src_idxlist, Xt_idxlist dst_idxlist, MPI_Comm comm));

@@ -194,6 +194,15 @@
 !                                    (INTEGER         confResH)
       EXTERNAL        cdiPioConfGetRedistCache
 
+!                     cdiPioConfSetXmapCache
+!                                    (INTEGER         confResH,
+!                                     INTEGER         doCache)
+      EXTERNAL        cdiPioConfSetXmapCache
+
+      INTEGER         cdiPioConfGetXmapCache
+!                                    (INTEGER         confResH)
+      EXTERNAL        cdiPioConfGetXmapCache
+
 !
 !  convert index lists to stripes prior to intersection computation,
 !  defaults to true
