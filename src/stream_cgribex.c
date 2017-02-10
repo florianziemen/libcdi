@@ -424,10 +424,9 @@ void cgribexAddRecord(stream_t * streamptr, int param, int *isec1, int *isec2, d
 
   if ( varInqInst(varID) == CDI_UNDEFID )
     {
-      int center, subcenter, instID;
-      center    = ISEC1_CenterID;
-      subcenter = ISEC1_SubCenterID;
-      instID    = institutInq(center, subcenter, NULL, NULL);
+      int center    = ISEC1_CenterID;
+      int subcenter = ISEC1_SubCenterID;
+      int instID    = institutInq(center, subcenter, NULL, NULL);
       if ( instID == CDI_UNDEFID )
 	instID = institutDef(center, subcenter, NULL, NULL);
       varDefInst(varID, instID);
@@ -435,8 +434,7 @@ void cgribexAddRecord(stream_t * streamptr, int param, int *isec1, int *isec2, d
 
   if ( varInqModel(varID) == CDI_UNDEFID )
     {
-      int modelID;
-      modelID = modelInq(varInqInst(varID), ISEC1_ModelID, NULL);
+      int modelID = modelInq(varInqInst(varID), ISEC1_ModelID, NULL);
       if ( modelID == CDI_UNDEFID )
 	modelID = modelDef(varInqInst(varID), ISEC1_ModelID, NULL);
       varDefModel(varID, modelID);
@@ -444,10 +442,7 @@ void cgribexAddRecord(stream_t * streamptr, int param, int *isec1, int *isec2, d
 
   if ( varInqTable(varID) == CDI_UNDEFID )
     {
-      int tableID;
-
-      tableID = tableInq(varInqModel(varID), ISEC1_CodeTable, NULL);
-
+      int tableID = tableInq(varInqModel(varID), ISEC1_CodeTable, NULL);
       if ( tableID == CDI_UNDEFID )
 	tableID = tableDef(varInqModel(varID), ISEC1_CodeTable, NULL);
       varDefTable(varID, tableID);

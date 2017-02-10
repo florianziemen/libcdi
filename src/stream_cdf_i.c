@@ -2895,17 +2895,17 @@ void cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 }
 
 
-struct varinfo
+struct cdf_varinfo
 {
-  int      ncvarid;
+  int        varid;
   const char *name;
 };
 
 static
-int cmpvarname(const void *s1, const void *s2)
+int cdf_cmp_varname(const void *s1, const void *s2)
 {
-  const struct varinfo *x = (const struct varinfo *)s1,
-                       *y = (const struct varinfo *)s2;
+  const struct cdf_varinfo *x = (const struct cdf_varinfo *)s1,
+                           *y = (const struct cdf_varinfo *)s2;
   return strcmp(x->name, y->name);
 }
 
@@ -2918,19 +2918,19 @@ void cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int model
 
   if ( streamptr->sortname )
     {
-      struct varinfo *varInfo
-        = (struct varinfo *) Malloc((size_t)nvars * sizeof (struct varinfo));
+      struct cdf_varinfo *varInfo
+        = (struct cdf_varinfo *) Malloc((size_t)nvars * sizeof(struct cdf_varinfo));
 
       for ( int varID = 0; varID < nvars; varID++ )
 	{
 	  int ncvarid = varids[varID];
-	  varInfo[varID].ncvarid = ncvarid;
+	  varInfo[varID].varid = ncvarid;
 	  varInfo[varID].name = ncvars[ncvarid].name;
 	}
-      qsort(varInfo, (size_t)nvars, sizeof(varInfo[0]), cmpvarname);
+      qsort(varInfo, (size_t)nvars, sizeof(varInfo[0]), cdf_cmp_varname);
       for ( int varID = 0; varID < nvars; varID++ )
 	{
-	  varids[varID] = varInfo[varID].ncvarid;
+	  varids[varID] = varInfo[varID].varid;
 	}
       Free(varInfo);
       if ( CDI_Debug )

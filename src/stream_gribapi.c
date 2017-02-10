@@ -430,11 +430,11 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
   int vlistID = streamptr->vlistID;
   int tsID    = streamptr->curTsID;
   int recID   = recordNewEntry(streamptr, tsID);
-  record_t *record  = &streamptr->tsteps[tsID].records[recID];
+  record_t *record = &streamptr->tsteps[tsID].records[recID];
 
   int tsteptype = gribapiGetTsteptype(gh);
   // numavg  = ISEC1_AvgNum;
-  int numavg  = 0;
+  int numavg = 0;
 
   // fprintf(stderr, "param %d %d %d %d\n", param, level1, level2, leveltype1);
 
@@ -504,10 +504,7 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
         unsigned char uuid[CDI_UUID_SIZE];
         long lpar;
         GRIB_CHECK(grib_get_long(gh, "NV", &lpar), 0);
-        if ( lpar != 6 )
-          {
-            fprintf(stderr, "Warning ...\n");
-          }
+        if ( lpar != 6 ) fprintf(stderr, "Warning ...\n");
         GRIB_CHECK(grib_get_long(gh, "nlev", &lpar), 0);
         int nhlev = (int)lpar;
         GRIB_CHECK(grib_get_long(gh, "numberOfVGridUsed", &lpar), 0);
@@ -572,12 +569,11 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
   if ( grib_get_long(gh, "productDefinitionTemplateNumber", &productDefinitionTemplate) == 0 )
     varDefProductDefinitionTemplate(varID, (int) productDefinitionTemplate);
 
-  int    i;
   long   lval;
   double dval;
 
   if (lread_additional_keys)
-    for ( i = 0; i < cdiNAdditionalGRIBKeys; i++ )
+    for ( int i = 0; i < cdiNAdditionalGRIBKeys; i++ )
       {
         /* note: if the key is not defined, we do not throw an error! */
         if ( grib_get_long(gh, cdiAdditionalGRIBKeys[i], &lval) == 0 )
@@ -589,10 +585,9 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
   if ( varInqInst(varID) == CDI_UNDEFID )
     {
       long center, subcenter;
-      int instID;
       GRIB_CHECK(grib_get_long(gh, "centre", &center), 0);
       GRIB_CHECK(grib_get_long(gh, "subCentre", &subcenter), 0);
-      instID    = institutInq((int)center, (int)subcenter, NULL, NULL);
+      int instID = institutInq((int)center, (int)subcenter, NULL, NULL);
       if ( instID == CDI_UNDEFID )
 	instID = institutDef((int)center, (int)subcenter, NULL, NULL);
       varDefInst(varID, instID);
@@ -600,12 +595,11 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
 
   if ( varInqModel(varID) == CDI_UNDEFID )
     {
-      int modelID;
       long processID;
       if ( grib_get_long(gh, "generatingProcessIdentifier", &processID) == 0 )
 	{
           /* FIXME: assert(processID >= INT_MIN && processID <= INT_MAX) */
-	  modelID = modelInq(varInqInst(varID), (int)processID, NULL);
+	  int modelID = modelInq(varInqInst(varID), (int)processID, NULL);
 	  if ( modelID == CDI_UNDEFID )
 	    modelID = modelDef(varInqInst(varID), (int)processID, NULL);
 	  varDefModel(varID, modelID);
@@ -615,16 +609,12 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
   if ( varInqTable(varID) == CDI_UNDEFID )
     {
       int pdis, pcat, pnum;
-
       cdiDecodeParam(param, &pnum, &pcat, &pdis);
 
       if ( pdis == 255 )
 	{
-	  int tableID;
 	  int tabnum = pcat;
-
-	  tableID = tableInq(varInqModel(varID), tabnum, NULL);
-
+	  int tableID = tableInq(varInqModel(varID), tabnum, NULL);
 	  if ( tableID == CDI_UNDEFID )
 	    tableID = tableDef(varInqModel(varID), tabnum, NULL);
 	  varDefTable(varID, tableID);
@@ -639,7 +629,7 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
 	    varID, param, zaxistype, gridID, levelID);
 }
 
-static compvar2_t gribapiVarSet(int param, int level1, int level2, int leveltype, 
+static compvar2_t gribapiVarSet(int param, int level1, int level2, int leveltype,
                                 int tsteptype, char *name, var_tile_t tiles_data)
 {
   compvar2_t compVar;
