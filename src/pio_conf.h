@@ -28,7 +28,7 @@ struct cdiPioConf
   void (*postCommSetupActions)(void);
   xmap_new_func_ptr xmap_new;
   bool largePageAlign;
-  bool cacheRedists;
+  bool cacheRedists, cacheXmaps;
   bool stripify;
 };
 
@@ -65,6 +65,10 @@ void cdiPioConfSetLargePageAlign(int confResH, int largePageAlign);
 void cdiPioConfSetRedistCache(int confResH, int doCache);
 
 int cdiPioConfGetRedistCache(int confResH);
+
+void cdiPioConfSetXmapCache(int confResH, int doCache);
+
+int cdiPioConfGetXmapCache(int confResH);
 
 void cdiPioConfSetRecordAggBufLim(int confResH, int lim_mb);
 
