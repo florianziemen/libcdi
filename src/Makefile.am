@@ -212,6 +212,8 @@ libcdipio_la_SOURCES =							\
 	pio_serialize.c							\
 	pio_util.c							\
 	pio_util.h							\
+	pio_xmap_cache.c						\
+	pio_xmap_cache.h						\
 	pio_cdf_int.h
 
 libcdipio_la_HAVE_PARALLEL_NC4_extra_sources =				\
