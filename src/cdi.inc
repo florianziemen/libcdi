@@ -1946,6 +1946,10 @@
 !                                     CHARACTER*(*)   zaxisname)
       EXTERNAL        zaxisName
 
+      CHARACTER(80)   zaxisNamePtr
+!                                    (INTEGER         leveltype)
+      EXTERNAL        zaxisNamePtr
+
       INTEGER         zaxisCreate
 !                                    (INTEGER         zaxistype,
 !                                     INTEGER         size)
