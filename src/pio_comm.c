@@ -71,7 +71,6 @@ static void
 pioInfoInit(pioInfo_t *p, MPI_Comm commGlob, int clientServerRole)
 {
   xassert(info != NULL && commGlob != MPI_COMM_NULL );
-  p->IOMode = -1;
 
   xmpi(MPI_Comm_dup(commGlob, &p->commGlob));
   xmpi(MPI_Comm_size(p->commGlob, &p->sizeGlob));
@@ -157,6 +156,13 @@ pioInfoInit(pioInfo_t *p, MPI_Comm commGlob, int clientServerRole)
         p->collClientIntraComm = MPI_COMM_NULL;
         p->remoteGroup = MPI_GROUP_NULL;
       }
+
+    /* match output method and process distribution */
+    int IOMode = p->IOMode, sizeGlob = p->sizeGlob;
+    if (((IOMode != PIO_NONE && (nProcsIO <= 0 || nProcsIO > sizeGlob - 1)))
+        || (IOMode == PIO_NONE && nProcsIO != 1))
+      xabort("DISTRIBUTION OF TASKS ON PROCS IS NOT VALID.\n"
+             "nProcsIO=%d, sizeGlob=%d\n", nProcsIO, sizeGlob);
   }
 }
 
@@ -201,8 +207,8 @@ int cdiPioCommInit(MPI_Comm commGlob, int IOMode, int clientServerRole)
 {
   xassert(info == NULL && IOMode >= PIO_MINIOMODE && IOMode <= PIO_MAXIOMODE);
   info = Malloc(sizeof(*info));
-  pioInfoInit(info, commGlob, clientServerRole);
   info->IOMode = IOMode;
+  pioInfoInit(info, commGlob, clientServerRole);
   return info->sizePio;
 }
 

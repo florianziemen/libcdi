@@ -93,6 +93,16 @@ Query size of pre-encoding
 aggregation buffer in MiB.
 
 
+\section*{\tt \htmlref{cdiPioConfGetWriteAggBufLim}{cdiPioConfGetWriteAggBufLim}}
+
+\begin{verbatim}
+    INTEGER FUNCTION cdiPioConfGetWriteAggBufLim (INTEGER confResH)
+\end{verbatim}
+
+Query the size of write
+aggregation buffers..
+
+
 \section*{\tt \htmlref{cdiPioConfGetXmapCache}{cdiPioConfGetXmapCache}}
 
 \begin{verbatim}
@@ -167,6 +177,22 @@ is always decomposed statically using the same partitioning
 description objects and the sequence of calls to streamWriteVarPart
 or streamWriteScatteredVarPart for a stream matches the sequence
 of the previous sequence (divided by pioWriteTimestep).
+
+
+\section*{\tt \htmlref{cdiPioConfSetWriteAggBufLim}{cdiPioConfSetWriteAggBufLim}}
+
+\begin{verbatim}
+    SUBROUTINE cdiPioConfSetWriteAggBufLim (INTEGER confResH, INTEGER lim_mb)
+\end{verbatim}
+
+Set limit for write buffer aggregation
+(default: 16MiB or value of BUFSIZE environment variable (whichever
+is larger)). Before writing encoded data records to disk, data
+up to this size is concatenated. For this reason this must be at
+least equal in size to the largest GRIB record written.  Increasing
+this size increases memory consumed by I/O server ranks
+proportionally and can reduce the number of write operations. This
+value is rounded to the next (large) page size in many implementations..
 
 
 \section*{\tt \htmlref{cdiPioConfSetXmapCache}{cdiPioConfSetXmapCache}}
