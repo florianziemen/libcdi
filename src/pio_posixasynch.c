@@ -51,12 +51,12 @@ static int nPrefStreams = 4;
 /***************************************************************/
 
 static bFiledataPA *
-initBFiledataPA(char *filename, size_t bs, int nc)
+initBFiledataPA(char *filename, size_t bufSize, int nc)
 {
   bFiledataPA *bfd;
 
   xdebug ( "filename=%s, buffersize=%zu, ncollectors=%d, nPrefetchStreams=%d",
-           filename, bs, nc, nPrefStreams );
+           filename, bufSize, nc, nPrefStreams );
 
   bfd = (bFiledataPA*) Malloc( sizeof (*bfd) + strlen(filename) + 1);
   strcpy(bfd->name, filename);
@@ -64,14 +64,14 @@ initBFiledataPA(char *filename, size_t bs, int nc)
   if (( bfd->handle = open ( bfd->name, O_CREAT | O_WRONLY, 0666 )) == -1 )
     xabort("Failed to open %s", bfd->name);
 
-  dbuffer_init(&(bfd->fb), (size_t)nPrefStreams * bs);
+  dbuffer_init(&(bfd->fb), (size_t)nPrefStreams * bufSize);
 
   bfd->ctrlBlks = Calloc((size_t)nPrefStreams, sizeof (bfd->ctrlBlks[0]));
 
   for (int i = 0; i < nPrefStreams; i++ )
     {
       bfd->ctrlBlks[i].aio_fildes     = bfd->handle;
-      bfd->ctrlBlks[i].aio_buf = bfd->fb->buffer + (size_t)i * bs;
+      bfd->ctrlBlks[i].aio_buf = bfd->fb->buffer + (size_t)i * bufSize;
       bfd->ctrlBlks[i].aio_reqprio    = 0;
       bfd->ctrlBlks[i].aio_sigevent.sigev_notify = SIGEV_NONE;
     }
@@ -225,6 +225,7 @@ void pioWriterAIO(void)
   listSet * bibBFiledataPA;
   MPI_Comm commPio = commInqCommPio ();
   int nProcsColl = commInqSizeColl ();
+  struct cdiPioConf *conf = cdiPioGetConf();
 
   if ( nPrefStreams < 1 ) xabort("USAGE: # PREFETCH STREAMS >= 1");
   xdebug ( "nProcsColl=%d ", nProcsColl );
@@ -262,19 +263,16 @@ void pioWriterAIO(void)
 
             char *filename = (char *)pMB;
             pMB += (strlen(filename) + 1);
-            char *temp = (char *)pMB;
-            long buffersize = strtol(temp, NULL, 16);
-            pMB += (strlen(temp) + 1);
             size_t amount = (size_t)(messageBuffer + messagesize - pMB);
 
-            xdebug("command  %s, filename=%s, buffersize=%ld, amount=%zd",
-                   cdiPioCmdStrTab[rtag.command], filename, buffersize, amount);
+            xdebug("command  %s, filename=%s, amount=%zd",
+                   cdiPioCmdStrTab[rtag.command], filename, amount);
 
             if (!(bfd = listSetGet(bibBFiledataPA, fileIDTest,
                                    (void *)(intptr_t)rtag.id)))
               {
                 listSetForeach(bibBFiledataPA, elemCheck, filename);
-                bfd = initBFiledataPA(filename, (size_t)buffersize, nProcsColl);
+                bfd = initBFiledataPA(filename, conf->writeAggBufLim, nProcsColl);
                 int id;
                 if ((id = listSetAdd(bibBFiledataPA, bfd)) < 0)
                   xabort("fileID=%d not unique", rtag.id);

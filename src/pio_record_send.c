@@ -99,12 +99,10 @@ compareNames(void *v1, void *v2)
 static void
 sendP(remoteFileBuf *afd, int id)
 {
-  int tag;
-  size_t amount;
   MPI_Status status;
 
-  amount = dbuffer_data_size ( afd->db );
-  tag = encodeFileOpTag(id, afd->command);
+  size_t amount = dbuffer_data_size ( afd->db );
+  int tag = encodeFileOpTag(id, afd->command);
 
   xdebug("send buffer for %s, size: %zu bytes, command=%s, in",
          afd->name, amount, cdiPioCmdStrTab[afd->command]);
@@ -223,26 +221,13 @@ pioSendOpen(const char *filename, const char *mode)
   if ((mode[0] != 'w' && mode[0] != 'W') || mode[0] == 0 || mode[1] != 0)
     xabort("Unsupported mode \"%s\" in parallel file open.", mode);
   remoteFileBuf *afd;
-  static unsigned long buffersize = 0;
-  int id, iret;
-  enum {
-    bcastRoot = 0,
-    messageLength = 32,
-  };
-  char message[messageLength];
+  int id;
   MPI_Comm commCollectors = commInqCommColl();
 
-  /* broadcast buffersize to collectors */
-  if (!buffersize)
-    {
-      if (commInqRankColl() == bcastRoot)
-        buffersize = findWriteAccumBufsize();
-      xmpi(MPI_Bcast(&buffersize, 1, MPI_UNSIGNED_LONG, bcastRoot,
-                     commCollectors));
-    }
+  struct cdiPioConf *conf = cdiPioGetConf();
 
   /* init and add remoteFileBuf */
-  afd = initRemoteFileBuf(filename, (size_t)buffersize);
+  afd = initRemoteFileBuf(filename, conf->writeAggBufLim);
   if ((id = listSetAdd(bibRemoteFileBuf, afd)) < 0)
     xabort("filename %s is not unique", afd->name);
   afd->fileID = id;
@@ -251,29 +236,9 @@ pioSendOpen(const char *filename, const char *mode)
          filename, id);
 
   /* put filename, id and buffersize on buffer */
-  iret = dbuffer_push(afd->db, filename, strlen(filename) + 1);
-  xassert(iret == 0);
-  sprintf ( message,"%lX", buffersize);
-  iret = dbuffer_push(afd->db, message, strlen(message) + 1);
+  int iret = dbuffer_push(afd->db, filename, strlen(filename) + 1);
   xassert(iret == 0);
 
-#ifdef __clang__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunreachable-code"
-#endif
-  if ( ddebug )
-    {
-      size_t l = strlen(filename) + strlen(message) + 2;
-      char *temp = Malloc(l + 1);
-      strncpy(temp, (char *)afd->db->buffer, l);
-      temp[l] = '\0';
-      xdebug("filename=%s, put Open file message on buffer:\n%s,\t return",
-             filename, temp);
-      Free(temp);
-    }
-#ifdef __clang__
-#pragma GCC diagnostic pop
-#endif
   sendP(afd, afd->fileID);
   xmpi(MPI_Barrier(commCollectors));
   return id;

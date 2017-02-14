@@ -27,6 +27,7 @@ struct cdiPioConf {
   int clientServerRole;
   float partInflate;
   unsigned recordAggBufLimMB;
+  size_t writeAggBufLim;
   void (*postCommSetupActions)(void);
   xmap_new_func_ptr xmap_new;
   bool largePageAlign;
@@ -79,6 +80,10 @@ int cdiPioConfGetXmapCache(int confResH);
 void cdiPioConfSetRecordAggBufLim(int confResH, int lim_mb);
 
 int cdiPioConfGetRecordAggBufLim(int confResH);
+
+void cdiPioConfSetWriteAggBufLim(int confResH, int lim_mb);
+
+int cdiPioConfGetWriteAggBufLim(int confResH);
 
 void cdiPioConfSetXmapNew(int confResH, xmap_new_func_ptr xmap_new);
 

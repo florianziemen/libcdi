@@ -26,18 +26,6 @@ enum IO_Server_command
 extern const char *const cdiPioCmdStrTab[];
 
 
-static inline size_t
-findWriteAccumBufsize()
-{
-  unsigned long initial_buffersize = 16UL * 1024UL * 1024UL;
-  const char *p = getenv("BUFSIZE");
-  long temp = p ? atol(p) : -1;
-  unsigned long buffersize
-    = (temp > 0 && (unsigned long)temp > initial_buffersize)
-    ? (unsigned long)temp : initial_buffersize;
-  return buffersize;
-}
-
 
 struct dBuffer
 {

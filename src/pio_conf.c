@@ -153,6 +153,17 @@ cdiPioConfPrintP(void *cdiPioConfPtr, FILE * fp)
           (void *)conf->postCommSetupActions);
 }
 
+static inline size_t
+findWriteAccumBufsize()
+{
+  size_t initial_buffersize = (size_t)16 * 1024 * 1024;
+  const char *p = getenv("BUFSIZE");
+  long temp = p ? atol(p) : -1;
+  unsigned long buffersize
+    = (temp > 0 && (unsigned long)temp > initial_buffersize)
+    ? (unsigned long)temp : initial_buffersize;
+  return buffersize;
+}
 
 int cdiPioConfCreate(void)
 {
@@ -164,6 +175,7 @@ int cdiPioConfCreate(void)
   conf->largePageAlign = false;
   conf->cacheRedists = conf->cacheXmaps = true;
   conf->recordAggBufLimMB = 128;
+  conf->writeAggBufLim = findWriteAccumBufsize();
   conf->xmap_new = xt_xmap_dist_dir_new;
   conf->stripify = true;
   int resH = reshPut(conf, &cdiPioConfOps);
@@ -280,6 +292,21 @@ int cdiPioConfGetRecordAggBufLim(int confResH)
 {
   struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
   return (int)conf->recordAggBufLimMB;
+}
+
+void cdiPioConfSetWriteAggBufLim(int confResH, int lim_mb)
+{
+  struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
+  if (lim_mb > 0)
+    conf->writeAggBufLim = (size_t)lim_mb * 1024 * 1024;
+  else
+    Error("unexpected negative buffer size value %d requested", lim_mb);
+}
+
+int cdiPioConfGetWriteAggBufLim(int confResH)
+{
+  struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
+  return (int)(conf->recordAggBufLimMB / (1024 * 1024));
 }
 
 void cdiPioConfSetXmapNew(int confResH, xmap_new_func_ptr xmap_new)
