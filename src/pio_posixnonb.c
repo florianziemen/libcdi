@@ -13,6 +13,7 @@
 
 #include "pio.h"
 #include "pio_comm.h"
+#include "pio_conf.h"
 #include "pio_impl.h"
 #include "pio_util.h"
 
@@ -129,6 +130,7 @@ pioWriterStdIO(void)
   sentFinalize = Calloc((size_t) nProcsColl, sizeof(sentFinalize[0]));
   char *messageBuffer = NULL;
   size_t messageBufferSize = 0;
+  struct cdiPioConf *conf = cdiPioGetConf();
 
   for (;;)
     {
@@ -163,18 +165,16 @@ pioWriterStdIO(void)
 
             char *filename = pMB;
             pMB += (strlen(filename) + 1);
-            char *temp = pMB;
-            long buffersize = strtol(temp, NULL, 16);
-            pMB += (strlen(temp) + 1);
             size_t amount = (size_t) (messageBuffer + messageSize - pMB);
 
-            xdebug("command %s, filename=%s, buffersize=%ld, amount=%zu", cdiPioCmdStrTab[rtag.command], filename, buffersize,
+            size_t buffersize = conf->writeAggBufLim;
+            xdebug("command %s, filename=%s, buffersize=%zu, amount=%zu", cdiPioCmdStrTab[rtag.command], filename, buffersize,
                    amount);
 
             if (!(bfd = listSetGet(bibBFiledataP, fileIDTest, (void *) (intptr_t) rtag.id)))
               {
                 listSetForeach(bibBFiledataP, elemCheck, filename);
-                bfd = initBFiledataP(filename, (size_t) buffersize, nProcsColl, rtag.id);
+                bfd = initBFiledataP(filename, buffersize, nProcsColl, rtag.id);
                 if ((id = listSetAdd(bibBFiledataP, bfd)) < 0) xabort("fileID=%d not unique", rtag.id);
                 bfd->fileID = id;
               }
