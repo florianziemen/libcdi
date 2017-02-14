@@ -133,9 +133,14 @@ cdiPioConfPrintP(void *cdiPioConfPtr, FILE *fp)
           "part data imbalance = %f\n"
           "aligning of block buffers to large pages is %sabled\n"
           "record aggregation buffer size %zu\n"
+          "write aggregation buffer size %zu\n"
+          "stripe conversion of index lists is %sabled\n"
+          "caching of YAXT redists is %sabled\n"
+          "caching of YAXT xmaps is %sabled\n"
           "callback after setup of communication = %p\n",
           cdiPioConfPtr, iomodeStr, CSRoleStr, conf->partInflate, conf->largePageAlign ? "en" : "dis",
-          (size_t) conf->recordAggBufLimMB * 1024 * 1024, (void *) conf->postCommSetupActions);
+          (size_t) conf->recordAggBufLimMB * 1024 * 1024, conf->writeAggBufLim, conf->stripify ? "en" : "dis",
+          conf->cacheRedists ? "en" : "dis", conf->cacheXmaps ? "en" : "dis", (void *) conf->postCommSetupActions);
 }
 
 static inline size_t
