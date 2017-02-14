@@ -42,8 +42,6 @@ enum {
  */
 struct mwFileBuf
 {
-  struct dBuffer *db1;
-  struct dBuffer *db2;
   struct dBuffer *db;
   int fd;
   enum IO_Server_command command;
@@ -73,13 +71,10 @@ newMultiwriterFileBuf(const char *key, size_t bs)
 
   xdebug ( " name=%s, init output buffer",  afd->name );
 
-  int iret = dbuffer_init(&(afd->db1), bs);
-  iret += dbuffer_init(&(afd->db2), bs);
+  int iret = dbuffer_init(&afd->db, bs);
 
   if ( iret > 0 )
     xabort("dbuffer_init did not succeed");
-
-  afd->db = afd->db1;
 
   /* open file */
   xdebug ( "name=%s, open file",  afd->name );
@@ -104,8 +99,7 @@ deleteMultiwriterFileBuf(void *v)
 
   /* file closed, cleanup */
   xdebug("name=%s, file closed, cleanup ...",  afd->name);
-  dbuffer_cleanup(&(afd->db1));
-  dbuffer_cleanup(&(afd->db2));
+  dbuffer_cleanup(&afd->db);
 
   Free(afd);
 
@@ -171,17 +165,6 @@ writePF(struct mwFileBuf *afd)
     ftruncate(afd->fd, offset + (off_t)amount);
   /* change outputBuffer */
   dbuffer_reset(afd->db);
-
-  if ( afd->db == afd->db1 )
-    {
-      xdebug ( "id=%d, change to buffer 2 ...", file_id );
-      afd->db =  afd->db2;
-    }
-  else
-    {
-      xdebug ( "id=%d, change to buffer 1 ...", file_id );
-      afd->db =  afd->db1;
-    }
 
   afd->command = IO_Set_fp;
 }
