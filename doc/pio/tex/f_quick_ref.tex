@@ -83,6 +83,16 @@ query partition imbalance attribute of
 configuration object.
 
 
+\section*{\tt \htmlref{cdiPioConfGetRecordAggBufLim}{cdiPioConfGetRecordAggBufLim}}
+
+\begin{verbatim}
+    INTEGER FUNCTION cdiPioConfGetRecordAggBufLim (INTEGER confResH)
+\end{verbatim}
+
+Query size of pre-encoding
+aggregation buffer in MiB.
+
+
 \section*{\tt \htmlref{cdiPioConfSetCSRole}{cdiPioConfSetCSRole}}
 
 \begin{verbatim}
@@ -120,6 +130,19 @@ configuration object.
 
 set function to be called after
 setup of client/server communications of configuration object.
+
+
+\section*{\tt \htmlref{cdiPioConfSetRecordAggBufLim}{cdiPioConfSetRecordAggBufLim}}
+
+\begin{verbatim}
+    SUBROUTINE cdiPioConfSetRecordAggBufLim (INTEGER confResH, INTEGER lim_mb)
+\end{verbatim}
+
+Set limit to pre-encoding step
+aggregation of data in Mebibyte. Increasing this value trades fewer
+communication operations between I/O servers for higher packet
+sizes by transposing more data at once but increases total memory
+consumed by I/O server processes.  Default size is 128MiB..
 
 
 \section*{\tt \htmlref{cdiPioConfSetRedistCache}{cdiPioConfSetRedistCache}}
