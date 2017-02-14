@@ -169,6 +169,15 @@
 !                                    (INTEGER         confResH)
       EXTERNAL        cdiPioConfGetLargePageAlign
 
+!                     cdiPioConfSetRecordAggBufLim
+!                                    (INTEGER         confResH,
+!                                     INTEGER         lim_mb)
+      EXTERNAL        cdiPioConfSetRecordAggBufLim
+
+      INTEGER         cdiPioConfGetRecordAggBufLim
+!                                    (INTEGER         confResH)
+      EXTERNAL        cdiPioConfGetRecordAggBufLim
+
 !                     cdiPioConfSetRedistCache
 !                                    (INTEGER         confResH,
 !                                     INTEGER         doCache)

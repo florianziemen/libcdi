@@ -105,6 +105,8 @@ FCALLSCSUB2 (cdiPioConfSetPostCommSetupActions, CDIPIOCONFSETPOSTCOMMSETUPACTION
 
 FCALLSCSUB2 (cdiPioConfSetLargePageAlign, CDIPIOCONFSETLARGEPAGEALIGN, cdipioconfsetlargepagealign, INT, INT)
 FCALLSCFUN1 (INT, cdiPioConfGetLargePageAlign, CDIPIOCONFGETLARGEPAGEALIGN, cdipioconfgetlargepagealign, INT)
+FCALLSCSUB2 (cdiPioConfSetRecordAggBufLim, CDIPIOCONFSETRECORDAGGBUFLIM, cdipioconfsetrecordaggbuflim, INT, INT)
+FCALLSCFUN1 (INT, cdiPioConfGetRecordAggBufLim, CDIPIOCONFGETRECORDAGGBUFLIM, cdipioconfgetrecordaggbuflim, INT)
 FCALLSCSUB2 (cdiPioConfSetRedistCache, CDIPIOCONFSETREDISTCACHE, cdipioconfsetredistcache, INT, INT)
 FCALLSCFUN1 (INT, cdiPioConfGetRedistCache, CDIPIOCONFGETREDISTCACHE, cdipioconfgetredistcache, INT)
 
