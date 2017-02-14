@@ -185,6 +185,15 @@
 !                                    (INTEGER         confResH)
       EXTERNAL        cdiPioConfGetRecordAggBufLim
 
+!                     cdiPioConfSetWriteAggBufLim
+!                                    (INTEGER         confResH,
+!                                     INTEGER         lim_mb)
+      EXTERNAL        cdiPioConfSetWriteAggBufLim
+
+      INTEGER         cdiPioConfGetWriteAggBufLim
+!                                    (INTEGER         confResH)
+      EXTERNAL        cdiPioConfGetWriteAggBufLim
+
 !                     cdiPioConfSetRedistCache
 !                                    (INTEGER         confResH,
 !                                     INTEGER         doCache)

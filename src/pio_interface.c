@@ -424,6 +424,7 @@ cdiPioInit(MPI_Comm commGlob, int confResH, int *pioNamespace)
   if (cdiPioExtraNSKeys[cdiPioEKConf] == 0) cdiPioExtraNSKeys[cdiPioEKConf] = cdiNamespaceSwitchNewKey();
   namespaceSwitchSet(cdiPioExtraNSKeys[cdiPioEKConf], NSSW_DATA(conf));
 
+  /* check I/O method plausibility */
   int IOMode = conf->IOMode;
 
   if (IOMode < PIO_MINIOMODE || IOMode > PIO_MAXIOMODE) xabort("IOMODE IS NOT VALID.");
@@ -435,21 +436,19 @@ cdiPioInit(MPI_Comm commGlob, int confResH, int *pioNamespace)
       IOMode == PIO_ASYNCH)
     xabort("CDI-PIO Output method PIO_ASYNCH is unsupported on this system!");
 
+    /* initialize libraries */
 #ifdef HAVE_PPM_CORE
   if ((ppmInitByCDI = (!PPM_initialized() || PPM_finalized()))) PPM_initialize(&commGlob, NULL, NULL);
 #endif
   if ((xtInitByCDI = (!xt_initialized() || xt_finalized()))) xt_initialize(commGlob);
-  int nProcsIO = cdiPioCommInit(commGlob, IOMode, conf->clientServerRole);
-  int sizeGlob = commInqSizeGlob();
 
-  if (((IOMode != PIO_NONE && (nProcsIO <= 0 || nProcsIO > sizeGlob - 1))) || (IOMode == PIO_NONE && nProcsIO != 1))
-    xabort("DISTRIBUTION OF TASKS ON PROCS IS NOT VALID.\n"
-           "nProcsIO=%d, sizeGlob=%d\n",
-           nProcsIO, sizeGlob);
+  /* setup communication */
+  cdiPioCommInit(commGlob, IOMode, conf->clientServerRole);
 
   cdiPIOpartInflate_ = conf->partInflate;
 
   // JUST FOR TEST CASES WITH ONLY ONE MPI TASK
+  int sizeGlob = commInqSizeGlob();
   if (sizeGlob == 1)
     {
       *pioNamespace = namespaceNew();
@@ -462,6 +461,29 @@ cdiPioInit(MPI_Comm commGlob, int confResH, int *pioNamespace)
   reshDistGridUnpack = cdiPioDistGridUnpack;
 #endif
 
+  /* check write buffer size consistency */
+  {
+#ifdef MPI_SIZE_T
+    size_t writeAggBufLim = conf->writeAggBufLim;
+    xmpi(MPI_Allreduce(MPI_IN_PLACE, &conf->writeAggBufLim, 1, MPI_SIZE_T, MPI_MAX, commGlob));
+#else
+    unsigned long writeAggBufLim = conf->writeAggBufLim;
+    xmpi(MPI_Allreduce(MPI_IN_PLACE, &writeAggBufLim, 1, MPI_UNSIGNED_LONG, MPI_MAX, commGlob));
+#endif
+    if (conf->writeAggBufLim != writeAggBufLim)
+      fprintf(stderr,
+              "inconsistent write buffer size detected: %zu vs. "
+#ifdef MPI_SIZE_T
+              "%lu\n",
+#else
+              "%zu\n",
+#endif
+              conf->writeAggBufLim, writeAggBufLim);
+#ifndef MPI_SIZE_T
+    conf->writeAggBufLim = writeAggBufLim;
+#endif
+  }
+  MPI_Comm modelComm;
   if (commInqIsProcIO())
     {
       int prevNamespace = namespaceGetActive(), serverNamespace = namespaceNew();
@@ -477,7 +499,6 @@ cdiPioInit(MPI_Comm commGlob, int confResH, int *pioNamespace)
           cdiPioFileWritingFinalize();
         }
       namespaceSetActive(prevNamespace);
-      reshReplace(confResH, conf, &cdiPioConfOps);
       namespaceDelete(serverNamespace);
 #ifdef HAVE_PPM_DIST_ARRAY_H
       if (commInqRankColl() >= 0) cdiPioDistGridFinalizeOnce(serverNamespace);
@@ -487,13 +508,15 @@ cdiPioInit(MPI_Comm commGlob, int confResH, int *pioNamespace)
 #ifdef HAVE_PPM_CORE
       if (ppmInitByCDI) PPM_finalize();
 #endif
-      return MPI_COMM_NULL;
+      modelComm = MPI_COMM_NULL;
     }
   else
-    cdiPioClientSetup(pioNamespace, conf);
+    {
+      cdiPioClientSetup(pioNamespace, conf);
+      modelComm = commInqCommModel();
+    }
   reshReplace(confResH, conf, &cdiPioConfOps);
-  xdebug("nProcsGlob=%d, RETURN", sizeGlob);
-  return commInqCommModel();
+  return modelComm;
 }
 
 static void
