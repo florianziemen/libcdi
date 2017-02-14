@@ -66,14 +66,15 @@ initBFiledataPA(char *filename, size_t bufSize, int nc)
 
   dbuffer_init(&(bfd->fb), (size_t)nPrefStreams * bufSize);
 
-  bfd->ctrlBlks = Calloc((size_t)nPrefStreams, sizeof (bfd->ctrlBlks[0]));
+  struct aiocb *ctrlBlks
+    = bfd->ctrlBlks = Calloc((size_t)nPrefStreams, sizeof (*ctrlBlks));
 
   for (int i = 0; i < nPrefStreams; i++ )
     {
-      bfd->ctrlBlks[i].aio_fildes     = bfd->handle;
-      bfd->ctrlBlks[i].aio_buf = bfd->fb->buffer + (size_t)i * bufSize;
-      bfd->ctrlBlks[i].aio_reqprio    = 0;
-      bfd->ctrlBlks[i].aio_sigevent.sigev_notify = SIGEV_NONE;
+      ctrlBlks[i].aio_fildes = bfd->handle;
+      ctrlBlks[i].aio_buf = bfd->fb->buffer + (size_t)i * bufSize;
+      ctrlBlks[i].aio_reqprio = 0;
+      ctrlBlks[i].aio_sigevent.sigev_notify = SIGEV_NONE;
     }
 
   bfd->currOpIndex = nPrefStreams - 1;
