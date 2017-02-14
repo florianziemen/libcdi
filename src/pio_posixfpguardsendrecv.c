@@ -263,28 +263,16 @@ lookupMwFBFilename(void *q, void *nm)
 static int
 fowPOSIXFPGUARDSENDRECV(const char *filename, const char *mode)
 {
-  enum
-  {
-    bcastRoot = 0
-  };
   if ((mode[0] != 'w' && mode[0] != 'W') || mode[1] != 0) xabort("Unsupported mode \"%s\" in parallel file open.", mode);
-  static unsigned long buffersize = 0;
 
-  /* broadcast buffersize to collectors */
-  if (!buffersize)
-    {
-      if (commInqRankColl() == bcastRoot) buffersize = findWriteAccumBufsize();
-      xmpi(MPI_Bcast(&buffersize, 1, MPI_UNSIGNED_LONG, bcastRoot, commInqCommColl()));
-    }
+  struct cdiPioConf *conf = cdiPioGetConf();
 
-  /* init and add file element */
   listSetForeach(openedFiles, lookupMwFBFilename, (void *) filename);
-
-  struct mwFileBuf *afd = newMultiwriterFileBuf(filename, (size_t) buffersize);
+  /* init and add file element */
+  struct mwFileBuf *afd = newMultiwriterFileBuf(filename, conf->writeAggBufLim);
 
   int file_id;
-  if ((file_id = listSetAdd(openedFiles, afd)) < 0) xabort("filename %s not unique", afd->name);
-  afd->fileID = file_id;
+  if ((afd->fileID = file_id = listSetAdd(openedFiles, afd)) < 0) xabort("filename %s not unique", afd->name);
   xdebug("name=%s, init and add struct mwFileBuf, return id = %d", filename, file_id);
   long offset;
   int specialRank = commInqSpecialRank();

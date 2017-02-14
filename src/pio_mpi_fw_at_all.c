@@ -143,34 +143,16 @@ elemCheck(void *q, void *nm)
 static int
 fowFileWriteAtAll(const char *filename, const char *mode)
 {
-  static unsigned long buffersize = 0;
-  int id;
-  enum
-  {
-    bcastRoot = 0
-  };
-  MPI_Comm commPio = commInqCommPio();
-  int rankPio = commInqRankPio();
-
   if ((mode[0] != 'w' && mode[0] != 'W') || mode[0] == 0 || mode[1] != 0)
     xabort("Unsupported mode \"%s\" in parallel file open.", mode);
 
-  /* broadcast buffersize to collectors ( just once, for all files )*/
-
-  if (!buffersize)
-    {
-      if (rankPio == bcastRoot) buffersize = findWriteAccumBufsize();
-      xmpi(MPI_Bcast(&buffersize, 1, MPI_UNSIGNED_LONG, bcastRoot, commPio));
-    }
-
-  xdebug("buffersize=%lu", buffersize);
+  struct cdiPioConf *conf = cdiPioGetConf();
 
   listSetForeach(bibAFiledataM, elemCheck, (void *) filename);
-  aFiledataM *of = initAFiledataFileWriteAtAll(filename, (size_t) buffersize);
+  aFiledataM *of = initAFiledataFileWriteAtAll(filename, conf->writeAggBufLim);
 
-  if ((id = listSetAdd(bibAFiledataM, of)) < 0) xabort("filename %s not unique", of->name);
-
-  of->fileID = id;
+  int id;
+  if ((of->fileID = id = listSetAdd(bibAFiledataM, of)) < 0) xabort("filename %s not unique", of->name);
   return id;
 }
 

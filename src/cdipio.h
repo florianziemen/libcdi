@@ -128,6 +128,20 @@ void cdiPioConfSetRecordAggBufLim(int confResH, int lim_mb);
  * aggregation buffer in MiB */
 int cdiPioConfGetRecordAggBufLim(int confResH);
 
+/* cdiPioConfSetWriteAggBufLim: Set limit for write buffer aggregation
+ * (default: 16MiB or value of BUFSIZE environment variable (whichever
+ * is larger)). Before writing encoded data records to disk, data
+ * up to this size is concatenated. For this reason this must be at
+ * least equal in size to the largest GRIB record written.  Increasing
+ * this size increases memory consumed by I/O server ranks
+ * proportionally and can reduce the number of write operations. This
+ * value is rounded to the next (large) page size in many implementations. */
+void cdiPioConfSetWriteAggBufLim(int confResH, int lim_mb);
+
+/* cdiPioConfGetWriteAggBufLim: Query the size of write
+ * aggregation buffers. */
+int cdiPioConfGetWriteAggBufLim(int confResH);
+
 /* cdiPioConfSetRedistCache: set doCache to anything non-zero if data
  * for internal data exchanges is to be cached. This makes sense when
  * the data passed via streamWriteVarPart or streamWriteScatteredVarPart
