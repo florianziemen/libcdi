@@ -34,7 +34,6 @@ typedef struct
   struct aiocb *ctrlBlks;
   off_t offset;
   int currOpIndex;
-  int nextOpIndex;
   int prefIndex;
   int activeCollectors;
   int handle, fileID;
@@ -77,7 +76,7 @@ initBFiledataPA(char *filename, size_t bs, int nc)
       bfd->ctrlBlks[i].aio_sigevent.sigev_notify = SIGEV_NONE;
     }
 
-  bfd->nextOpIndex = 0;
+  bfd->currOpIndex = nPrefStreams - 1;
   bfd->prefIndex = 0;
   bfd->offset = 0;
   bfd->activeCollectors = nc;
@@ -97,9 +96,10 @@ destroyBFiledataPA ( void *v )
   int iret = 0;
   ssize_t ssiret;
   size_t prefIndex = (size_t)bfd->prefIndex;
+  size_t nextOpIndex
+    = ((size_t)bfd->currOpIndex + 1 ) % (size_t)nPrefStreams;
   size_t nextFinishOp
-    = ((size_t)bfd->nextOpIndex - prefIndex + (size_t)nPrefStreams)
-    % (size_t)nPrefStreams;
+    = (nextOpIndex - prefIndex + (size_t)nPrefStreams) % (size_t)nPrefStreams;
 
   xdebug ( "filename=%s, cleanup and close file", bfd->name );
 
@@ -157,7 +157,6 @@ static void
 writePA(bFiledataPA *bfd, size_t amount)
 {
   const struct aiocb *ccBP;
-  ssize_t iret;
 
   xdebug ( "file %s, in", bfd->name );
 
@@ -169,7 +168,7 @@ writePA(bFiledataPA *bfd, size_t amount)
            bfd->name, bfd->ctrlBlks[currOpIndex].aio_nbytes,
            bfd->ctrlBlks[currOpIndex].aio_offset );
 
-  iret = aio_write ( bfd->ctrlBlks + currOpIndex );
+  ssize_t iret = aio_write ( bfd->ctrlBlks + currOpIndex );
 
   xdebug ( "after aio_write(), file %s, aio_nbytes=%zu, aio_offset=%zu,"
            "iret=aio_write()=%d",
@@ -188,7 +187,9 @@ writePA(bFiledataPA *bfd, size_t amount)
 
   if ( bfd->prefIndex >= nPrefStreams )
     {
-      ccBP = bfd->ctrlBlks + bfd->nextOpIndex;
+      size_t nextOpIndex
+        = ((size_t)bfd->currOpIndex + 1 ) % (size_t)nPrefStreams;
+      ccBP = bfd->ctrlBlks + nextOpIndex;
       do
 	{
 	  iret = aio_suspend(&ccBP, 1, NULL);
@@ -196,7 +197,7 @@ writePA(bFiledataPA *bfd, size_t amount)
 	    xabort ( "aio_suspend () failed" );
 	} while ( iret != 0 );
 
-      if (( iret = aio_return ( bfd->ctrlBlks + bfd->nextOpIndex )) == -1 )
+      if (( iret = aio_return ( bfd->ctrlBlks + nextOpIndex )) == -1 )
 	xabort ( "aio_return () failed" );
 
       bfd->prefIndex --;
@@ -283,10 +284,11 @@ void pioWriterAIO(void)
               if (strcmp(filename, bfd->name) != 0)
                 xabort("filename is not consistent, fileID=%d", rtag.id);
 
-            bfd->currOpIndex = bfd->nextOpIndex;
-            bfd->nextOpIndex = ( bfd->nextOpIndex + 1 ) % nPrefStreams;
+            size_t currOpIndex
+              = ((size_t)bfd->currOpIndex + 1 ) % (size_t)nPrefStreams;
+            bfd->currOpIndex = (int)currOpIndex;
 
-            memcpy((void *)bfd->ctrlBlks[bfd->currOpIndex].aio_buf,
+            memcpy((void *)bfd->ctrlBlks[currOpIndex].aio_buf,
                    pMB, (size_t)amount);
 
             writePA(bfd, amount);
@@ -296,48 +298,51 @@ void pioWriterAIO(void)
 	  break;
 
 	case IO_Send_buffer:
+          {
+            if (!(bfd = listSetGet(bibBFiledataPA, fileIDTest,
+                                   (void *)(intptr_t)rtag.id)))
+              xabort("fileID=%d is not in set", rtag.id);
 
-          if (!(bfd = listSetGet(bibBFiledataPA, fileIDTest,
-                               (void *)(intptr_t)rtag.id)))
-            xabort("fileID=%d is not in set", rtag.id);
+            xdebug("command: %s, id=%d, name=%s",
+                   cdiPioCmdStrTab[rtag.command], rtag.id, bfd->name );
 
-	  xdebug("command: %s, id=%d, name=%s",
-                 cdiPioCmdStrTab[rtag.command], rtag.id, bfd->name );
+            size_t currOpIndex
+              = ((size_t)bfd->currOpIndex + 1 ) % (size_t)nPrefStreams;
+            bfd->currOpIndex = (int)currOpIndex;
 
-	  bfd->currOpIndex = bfd->nextOpIndex;
-	  bfd->nextOpIndex = ( bfd->nextOpIndex + 1 ) % nPrefStreams;
-
-	  xmpi(MPI_Recv((void *)bfd->ctrlBlks[bfd->currOpIndex].aio_buf,
-                        messagesize, MPI_UNSIGNED_CHAR, source, tag, commPio,
-                        &status));
-	  writePA(bfd, (size_t)messagesize);
+            xmpi(MPI_Recv((void *)bfd->ctrlBlks[currOpIndex].aio_buf,
+                          messagesize, MPI_UNSIGNED_CHAR, source, tag, commPio,
+                          &status));
+            writePA(bfd, (size_t)messagesize);
+          }
 	  break;
 
 	case IO_Close_file:
+          {
+            if (!(bfd = listSetGet(bibBFiledataPA, fileIDTest,
+                                   (void *)(intptr_t)rtag.id)))
+              xabort("fileID=%d is not in set", rtag.id);
 
-          if (!(bfd = listSetGet(bibBFiledataPA, fileIDTest,
-                               (void *)(intptr_t)rtag.id)))
-            xabort("fileID=%d is not in set", rtag.id);
+            xdebug(" command %s, id=%d, name=%s",
+                   cdiPioCmdStrTab[rtag.command], rtag.id, bfd->name);
 
-	  xdebug(" command %s, id=%d, name=%s",
-                 cdiPioCmdStrTab[rtag.command], rtag.id, bfd->name);
+            size_t currOpIndex
+              = ((size_t)bfd->currOpIndex + 1 ) % (size_t)nPrefStreams;
+            bfd->currOpIndex = (int)currOpIndex;
 
-	  bfd->currOpIndex = bfd->nextOpIndex;
+            xmpi(MPI_Recv((void *)bfd->ctrlBlks[currOpIndex].aio_buf,
+                          messagesize, MPI_UNSIGNED_CHAR,
+                          source, tag, commPio, &status));
 
-	  bfd->nextOpIndex = ( bfd->nextOpIndex + 1 ) % nPrefStreams;
+            writePA(bfd, (size_t)messagesize);
 
-	  xmpi(MPI_Recv((void *)bfd->ctrlBlks[bfd->currOpIndex].aio_buf,
-                        messagesize, MPI_UNSIGNED_CHAR,
-                        source, tag, commPio, &status));
-
-	  writePA(bfd, (size_t)messagesize);
-
-	  if ( ! --(bfd->activeCollectors))
-	    {
-              xdebug ( "all are finished with file %d, delete entry", rtag.id);
-              listSetRemove(bibBFiledataPA, fileIDTest,
-                            (void *)(intptr_t)rtag.id);
-	    }
+            if ( ! --(bfd->activeCollectors))
+              {
+                xdebug ( "all are finished with file %d, delete entry", rtag.id);
+                listSetRemove(bibBFiledataPA, fileIDTest,
+                              (void *)(intptr_t)rtag.id);
+              }
+          }
           break;
         case IO_Finalize:
           {
