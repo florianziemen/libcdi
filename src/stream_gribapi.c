@@ -2258,7 +2258,7 @@ static
 void gribapiDefLevelType(grib_handle *gh, int gcinit, const char *keyname, long leveltype)
 {
   bool lset = false;
-  if ( (leveltype == 99 || leveltype == 100) && gribEditionNumber(gh) == 1 )
+  if ( (leveltype == GRIB1_LTYPE_ISOBARIC_PA || leveltype == 99 || leveltype == 100) && gribEditionNumber(gh) == 1 )
     {
       if ( gribGetLong(gh, "indicatorOfTypeOfLevel") != leveltype ) lset = true;
     }
