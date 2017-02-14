@@ -1,3 +1,4 @@
+#include <errno.h>
 #include <limits.h>
 #include <stdlib.h>
 #include <string.h>
@@ -140,10 +141,19 @@ cdiPioConfPrintP(void *cdiPioConfPtr, FILE *fp)
 static inline size_t
 findWriteAccumBufsize()
 {
-  size_t initial_buffersize = (size_t) 16 * 1024 * 1024;
+  size_t buffersize = (size_t) 16 * 1024 * 1024;
   const char *p = getenv("BUFSIZE");
-  long temp = p ? atol(p) : -1;
-  unsigned long buffersize = (temp > 0 && (unsigned long) temp > initial_buffersize) ? (unsigned long) temp : initial_buffersize;
+  if (p)
+    {
+      char *end;
+      long temp = strtol(p, &end, 0);
+      if ((errno == ERANGE && (temp == LONG_MAX || temp == LONG_MIN)) || (errno != 0 && temp == 0))
+        {
+          perror("failed to parse BUFSIZE environment variable");
+        }
+      else if (temp > 0 && (unsigned long) temp > buffersize)
+        buffersize = (unsigned long) temp;
+    }
   return buffersize;
 }
 
