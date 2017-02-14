@@ -117,6 +117,17 @@ void cdiPioConfSetLargePageAlign(int confResH, int largePageAlign);
  * large pages instead of normal pages? */
 int cdiPioConfGetLargePageAlign(int confResH);
 
+/* cdiPioConfSetRecordAggBufLim: Set limit to pre-encoding step
+ * aggregation of data in Mebibyte. Increasing this value trades fewer
+ * communication operations between I/O servers for higher packet
+ * sizes by transposing more data at once but increases total memory
+ * consumed by I/O server processes.  Default size is 128MiB. */
+void cdiPioConfSetRecordAggBufLim(int confResH, int lim_mb);
+
+/* cdiPioConfGetRecordAggBufLim: Query size of pre-encoding
+ * aggregation buffer in MiB */
+int cdiPioConfGetRecordAggBufLim(int confResH);
+
 /* cdiPioConfSetRedistCache: set doCache to anything non-zero if data
  * for internal data exchanges is to be cached. This makes sense when
  * the data passed via streamWriteVarPart or streamWriteScatteredVarPart
