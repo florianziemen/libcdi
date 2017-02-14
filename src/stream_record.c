@@ -243,7 +243,7 @@ void streamCopyRecord(int streamID2, int streamID1)
             case CDI_FILETYPE_NC2:
             case CDI_FILETYPE_NC4:
             case CDI_FILETYPE_NC4C:
-              Warning("Streams have different file types (%s -> %s)!", strfiletype(filetype1), strfiletype(filetype2));
+              // Warning("Streams have different file types (%s -> %s)!", strfiletype(filetype1), strfiletype(filetype2));
               filetype = filetype2;
               break;
             }

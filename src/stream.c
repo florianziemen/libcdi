@@ -872,7 +872,8 @@ void streamDefaultValue ( stream_t * streamptr )
   streamptr->globalatts        = 0;
   streamptr->localatts         = 0;
   streamptr->unreduced         = cdiDataUnreduced;
-  streamptr->sortname          = cdiSortName;
+  streamptr->sortname          = cdiSortName > 0;
+  streamptr->sortparam         = cdiSortParam > 0;
   streamptr->have_missval      = cdiHaveMissval;
   streamptr->comptype          = CDI_COMPRESS_NONE;
   streamptr->complevel         = 0;

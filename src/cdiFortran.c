@@ -292,6 +292,7 @@ FCALLSCFUN2 (STRING, vlistInqVarUnitsPtr, VLISTINQVARUNITSPTR, vlistinqvarunitsp
 FCALLSCFUN3 (INT, cdiInqNatts, CDIINQNATTS, cdiinqnatts, INT, INT, PINT)
 FCALLSCFUN6 (INT, cdiInqAtt, CDIINQATT, cdiinqatt, INT, INT, INT, PSTRING, PINT, PINT)
 FCALLSCFUN3 (INT, cdiDelAtt, CDIDELATT, cdidelatt, INT, INT, STRING)
+FCALLSCFUN4 (INT, cdiCopyAtts, CDICOPYATTS, cdicopyatts, INT, INT, INT, INT)
 FCALLSCFUN6 (INT, cdiDefAttInt, CDIDEFATTINT, cdidefattint, INT, INT, STRING, INT, INT, INTV)
 FCALLSCFUN6 (INT, cdiDefAttFlt, CDIDEFATTFLT, cdidefattflt, INT, INT, STRING, INT, INT, DOUBLEV)
 FCALLSCFUN5 (INT, cdiDefAttTxt, CDIDEFATTTXT, cdidefatttxt, INT, INT, STRING, INT, PPSTRING)
@@ -404,6 +405,7 @@ FCALLSCFUN1 (INT, gridInqComplexPacking, GRIDINQCOMPLEXPACKING, gridinqcomplexpa
 /*  ZAXIS routines  */
 
 FCALLSCSUB2 (zaxisName, ZAXISNAME, zaxisname, INT, PSTRING)
+FCALLSCFUN1 (STRING, zaxisNamePtr, ZAXISNAMEPTR, zaxisnameptr, INT)
 FCALLSCFUN2 (INT, zaxisCreate, ZAXISCREATE, zaxiscreate, INT, INT)
 FCALLSCSUB1 (zaxisDestroy, ZAXISDESTROY, zaxisdestroy, INT)
 FCALLSCFUN1 (INT, zaxisInqType, ZAXISINQTYPE, zaxisinqtype, INT)

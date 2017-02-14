@@ -344,7 +344,7 @@ void vlistCopy(int vlistID2, int vlistID1)
   var_t *vars2 = vlistptr2->vars;
   vlist_copy(vlistptr2, vlistptr1);
 
-  cdiCopyVarAtts(vlistID1, CDI_GLOBAL, vlistID2, CDI_GLOBAL);
+  cdiCopyAtts(vlistID1, CDI_GLOBAL, vlistID2, CDI_GLOBAL);
 
   if ( vars1 )
     {
@@ -361,7 +361,7 @@ void vlistCopy(int vlistID2, int vlistID1)
           var_copy_entries(&vars2[varID], &vars1[varID]);
 
           vlistptr2->vars[varID].atts.nelems = 0;
-	  cdiCopyVarAtts(vlistID1, varID, vlistID2, varID);
+	  cdiCopyAtts(vlistID1, varID, vlistID2, varID);
 
           if ( vars1[varID].levinfo )
             {
@@ -526,7 +526,7 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
 
   vlist_copy(vlistptr2, vlistptr1);
 
-  cdiCopyVarAtts(vlistID1, CDI_GLOBAL, vlistID2, CDI_GLOBAL);
+  cdiCopyAtts(vlistID1, CDI_GLOBAL, vlistID2, CDI_GLOBAL);
 
   if ( vlistptr1->vars )
     {
@@ -567,7 +567,7 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
             var_copy_entries(&vars2[varID2], &vars1[varID]);
 
 	    vlistptr2->vars[varID2].atts.nelems = 0;
-	    cdiCopyVarAtts(vlistID1, varID, vlistID2, varID2);
+	    cdiCopyAtts(vlistID1, varID, vlistID2, varID2);
 
 	    int nlevs  = zaxisInqSize(vars1[varID].zaxisID);
 	    int nlevs2 = 0;
@@ -741,7 +741,7 @@ void vlistCat(int vlistID2, int vlistID1)
         }
 
       vars2[varID2].atts.nelems = 0;
-      cdiCopyVarAtts(vlistID1, varID, vlistID2, varID2);
+      cdiCopyAtts(vlistID1, varID, vlistID2, varID2);
 
       vlistAdd2GridIDs(vlistptr2, vars1[varID].gridID);
       vlistAdd2ZaxisIDs(vlistptr2, vars1[varID].zaxisID);
