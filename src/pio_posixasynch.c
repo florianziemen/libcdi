@@ -92,16 +92,17 @@ destroyBFiledataPA(void *v)
   const struct aiocb *ccBP[1];
   int iret = 0;
   ssize_t ssiret;
-  int nextFinishOp = (bfd->nextOpIndex - bfd->prefIndex + nPrefStreams) % nPrefStreams;
+  size_t prefIndex = (size_t) bfd->prefIndex;
+  size_t nextFinishOp = ((size_t) bfd->nextOpIndex - prefIndex + (size_t) nPrefStreams) % (size_t) nPrefStreams;
 
   xdebug("filename=%s, cleanup and close file", bfd->name);
 
   /* close file */
-
-  for (; bfd->prefIndex > 0; --(bfd->prefIndex))
+  struct aiocb *ctrlBlks = bfd->ctrlBlks;
+  for (; prefIndex > 0; --prefIndex)
     {
-      xdebug("file: %s, prefIndex=%d", bfd->name, (int) bfd->prefIndex);
-      ccBP[0] = (bfd->ctrlBlks + nextFinishOp);
+      xdebug("file: %s, prefIndex=%zu", bfd->name, prefIndex);
+      ccBP[0] = ctrlBlks + nextFinishOp;
       do
         {
           iret = aio_suspend(ccBP, 1, NULL);
@@ -109,11 +110,12 @@ destroyBFiledataPA(void *v)
         }
       while (iret != 0);
 
-      iret = aio_error(bfd->ctrlBlks + nextFinishOp);
-      if ((ssiret = aio_return(bfd->ctrlBlks + nextFinishOp)) == -1) xabort("aio_return () failed: %s", strerror(iret));
+      iret = aio_error(ctrlBlks + nextFinishOp);
+      if ((ssiret = aio_return(ctrlBlks + nextFinishOp)) == -1) xabort("aio_return () failed: %s", strerror(iret));
 
-      nextFinishOp = (nextFinishOp + 1) % nPrefStreams;
+      nextFinishOp = (nextFinishOp + 1) % (size_t) nPrefStreams;
     }
+  bfd->prefIndex = (int) prefIndex;
 
   if ((iret = ftruncate(bfd->handle, bfd->offset)) == -1) xabort("failed to truncate file %s: %s", bfd->name, strerror(errno));
   if ((iret = close(bfd->handle)) == -1) xabort("failed to close %s", bfd->name);
@@ -145,22 +147,23 @@ compareNamesBPA(void *v1, void *v2)
 static void
 writePA(bFiledataPA *bfd, size_t amount)
 {
-  const struct aiocb *ccBP[1];
+  const struct aiocb *ccBP;
   ssize_t iret;
 
   xdebug("file %s, in", bfd->name);
 
-  bfd->ctrlBlks[bfd->currOpIndex].aio_nbytes = amount;
-  bfd->ctrlBlks[bfd->currOpIndex].aio_offset = bfd->offset;
+  size_t currOpIndex = (size_t) bfd->currOpIndex;
+  bfd->ctrlBlks[currOpIndex].aio_nbytes = amount;
+  bfd->ctrlBlks[currOpIndex].aio_offset = bfd->offset;
 
-  xdebug(" before aio_write(), file %s, aio_nbytes=%zu, aio_offset=%zu", bfd->name, bfd->ctrlBlks[bfd->currOpIndex].aio_nbytes,
-         bfd->ctrlBlks[bfd->currOpIndex].aio_offset);
+  xdebug(" before aio_write(), file %s, aio_nbytes=%zu, aio_offset=%zu", bfd->name, bfd->ctrlBlks[currOpIndex].aio_nbytes,
+         bfd->ctrlBlks[currOpIndex].aio_offset);
 
-  iret = aio_write(bfd->ctrlBlks + bfd->currOpIndex);
+  iret = aio_write(bfd->ctrlBlks + currOpIndex);
 
   xdebug("after aio_write(), file %s, aio_nbytes=%zu, aio_offset=%zu,"
          "iret=aio_write()=%d",
-         bfd->name, bfd->ctrlBlks[bfd->currOpIndex].aio_nbytes, bfd->ctrlBlks[bfd->currOpIndex].aio_offset, (int) iret);
+         bfd->name, bfd->ctrlBlks[currOpIndex].aio_nbytes, bfd->ctrlBlks[currOpIndex].aio_offset, (int) iret);
 
   if (iret == -1)
     {
@@ -174,10 +177,10 @@ writePA(bFiledataPA *bfd, size_t amount)
 
   if (bfd->prefIndex >= nPrefStreams)
     {
-      ccBP[0] = (bfd->ctrlBlks + bfd->nextOpIndex);
+      ccBP = bfd->ctrlBlks + bfd->nextOpIndex;
       do
         {
-          iret = aio_suspend(ccBP, 1, NULL);
+          iret = aio_suspend(&ccBP, 1, NULL);
           if (iret < 0 && errno != EINTR) xabort("aio_suspend () failed");
         }
       while (iret != 0);
