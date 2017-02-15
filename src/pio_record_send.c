@@ -37,14 +37,11 @@ fileIDTest(void *a, void *fileID)
 static remoteFileBuf *
 initRemoteFileBuf(const char *filename, size_t bs)
 {
-  remoteFileBuf *afp;
-  size_t len;
-  int iret;
 
   xdebug ( "filename=%s, buffersize=%zu, in", filename, bs );
 
-  len = strlen(filename);
-  afp = Malloc(sizeof (remoteFileBuf) + len + 1);
+  size_t len = strlen(filename);
+  remoteFileBuf *afp = Malloc(sizeof (remoteFileBuf) + len + 1);
   strcpy(afp->name, filename);
   afp->size = bs;
   afp->tsID = 0;
@@ -53,7 +50,7 @@ initRemoteFileBuf(const char *filename, size_t bs)
 
   xdebug ( "filename=%s, init output buffer",  afp->name );
 
-  iret = dbuffer_init ( &( afp->db1 ), afp->size );
+  int iret = dbuffer_init ( &( afp->db1 ), afp->size );
   iret += dbuffer_init ( &( afp->db2 ), afp->size );
 
   if ( iret > 0 ) xabort ( "dbuffer_init did not succeed" );
@@ -220,14 +217,12 @@ pioSendOpen(const char *filename, const char *mode)
 {
   if ((mode[0] != 'w' && mode[0] != 'W') || mode[0] == 0 || mode[1] != 0)
     xabort("Unsupported mode \"%s\" in parallel file open.", mode);
-  remoteFileBuf *afd;
-  int id;
-  MPI_Comm commCollectors = commInqCommColl();
 
   struct cdiPioConf *conf = cdiPioGetConf();
 
   /* init and add remoteFileBuf */
-  afd = initRemoteFileBuf(filename, conf->writeAggBufLim);
+  remoteFileBuf *afd = initRemoteFileBuf(filename, conf->writeAggBufLim);
+  int id;
   if ((id = listSetAdd(bibRemoteFileBuf, afd)) < 0)
     xabort("filename %s is not unique", afd->name);
   afd->fileID = id;
@@ -240,6 +235,7 @@ pioSendOpen(const char *filename, const char *mode)
   xassert(iret == 0);
 
   sendP(afd, afd->fileID);
+  MPI_Comm commCollectors = commInqCommColl();
   xmpi(MPI_Barrier(commCollectors));
   return id;
 }
