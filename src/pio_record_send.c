@@ -16,7 +16,6 @@
 
 struct remoteFileBuf
 {
-  size_t size;
   struct dBuffer *db1;
   struct dBuffer *db2;
   struct dBuffer *db;
@@ -43,15 +42,14 @@ initRemoteFileBuf(const char *filename, size_t bs)
   size_t len = strlen(filename);
   struct remoteFileBuf *afp = Malloc(sizeof(struct remoteFileBuf) + len + 1);
   strcpy(afp->name, filename);
-  afp->size = bs;
   afp->tsID = 0;
 
   /* init output buffer */
 
   xdebug("filename=%s, init output buffer", afp->name);
 
-  int iret = dbuffer_init(&(afp->db1), afp->size);
-  iret += dbuffer_init(&(afp->db2), afp->size);
+  int iret = dbuffer_init(&afp->db1, bs);
+  iret += dbuffer_init(&afp->db2, bs);
 
   if (iret > 0) xabort("dbuffer_init did not succeed");
 
