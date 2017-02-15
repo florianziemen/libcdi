@@ -12,6 +12,7 @@
 
 #ifdef _POSIX_ASYNCHRONOUS_IO
 #include <aio.h>
+#include <assert.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <stdbool.h>
@@ -33,8 +34,8 @@ typedef struct
   struct dBuffer *fb;
   struct aiocb *ctrlBlks;
   off_t offset;
-  int currOpIndex;
-  int prefIndex;
+  unsigned short currOpIndex, aioQueueDepth;
+  unsigned numQueuedWrites;
   int activeCollectors;
   int handle, fileID;
   char name[];
@@ -46,17 +47,17 @@ fileIDTest(void *a, void *fileID)
   return ((bFiledataPA *)a)->fileID == (int)(intptr_t)fileID;
 }
 
-static int nPrefStreams = 4;
-
 /***************************************************************/
 
 static bFiledataPA *
-initBFiledataPA(char *filename, size_t bufSize, int nc)
+initBFiledataPA(char *filename, struct cdiPioConf *conf, int nc)
 {
   bFiledataPA *bfd;
 
-  xdebug ( "filename=%s, buffersize=%zu, ncollectors=%d, nPrefetchStreams=%d",
-           filename, bufSize, nc, nPrefStreams );
+  size_t bufSize = conf->writeAggBufLim;
+  size_t aioQueueDepth = conf->aioQueueDepth;
+  xdebug ( "filename=%s, buffersize=%zu, ncollectors=%d, AIO queue depth=%zu",
+           filename, bufSize, nc, aioQueueDepth );
 
   bfd = (bFiledataPA*) Malloc( sizeof (*bfd) + strlen(filename) + 1);
   strcpy(bfd->name, filename);
@@ -64,12 +65,12 @@ initBFiledataPA(char *filename, size_t bufSize, int nc)
   if (( bfd->handle = open ( bfd->name, O_CREAT | O_WRONLY, 0666 )) == -1 )
     xabort("Failed to open %s", bfd->name);
 
-  dbuffer_init(&(bfd->fb), (size_t)nPrefStreams * bufSize);
+  dbuffer_init(&(bfd->fb), aioQueueDepth * bufSize);
 
   struct aiocb *ctrlBlks
-    = bfd->ctrlBlks = Calloc((size_t)nPrefStreams, sizeof (*ctrlBlks));
+    = bfd->ctrlBlks = Calloc(aioQueueDepth, sizeof (*ctrlBlks));
 
-  for (int i = 0; i < nPrefStreams; i++ )
+  for ( size_t i = 0; i < aioQueueDepth; i++ )
     {
       ctrlBlks[i].aio_fildes = bfd->handle;
       ctrlBlks[i].aio_buf = bfd->fb->buffer + (size_t)i * bufSize;
@@ -77,8 +78,8 @@ initBFiledataPA(char *filename, size_t bufSize, int nc)
       ctrlBlks[i].aio_sigevent.sigev_notify = SIGEV_NONE;
     }
 
-  bfd->currOpIndex = nPrefStreams - 1;
-  bfd->prefIndex = 0;
+  bfd->currOpIndex = (unsigned short)(aioQueueDepth - 1);
+  bfd->numQueuedWrites = 0;
   bfd->offset = 0;
   bfd->activeCollectors = nc;
 
@@ -95,20 +96,21 @@ destroyBFiledataPA ( void *v )
   bFiledataPA *bfd = (bFiledataPA * ) v;
   const struct aiocb *ccBP[1];
   int iret = 0;
-  ssize_t ssiret;
-  size_t prefIndex = (size_t)bfd->prefIndex;
+  struct cdiPioConf *conf = cdiPioGetConf();
+  size_t aioQueueDepth = conf->aioQueueDepth;
+  size_t numQueuedWrites = bfd->numQueuedWrites;
   size_t nextOpIndex
-    = ((size_t)bfd->currOpIndex + 1 ) % (size_t)nPrefStreams;
+    = ((size_t)bfd->currOpIndex + 1 ) % aioQueueDepth;
   size_t nextFinishOp
-    = (nextOpIndex - prefIndex + (size_t)nPrefStreams) % (size_t)nPrefStreams;
+    = (nextOpIndex - numQueuedWrites + aioQueueDepth) % aioQueueDepth;
 
   xdebug ( "filename=%s, cleanup and close file", bfd->name );
 
   /* close file */
   struct aiocb *ctrlBlks = bfd->ctrlBlks;
-  for (; prefIndex > 0 ; --prefIndex)
+  for (; numQueuedWrites > 0 ; --numQueuedWrites)
     {
-      xdebug("file: %s, prefIndex=%zu", bfd->name, prefIndex);
+      xdebug("file: %s, numQueuedWrites=%zu", bfd->name, numQueuedWrites);
       ccBP[0] = ctrlBlks + nextFinishOp;
       do
 	{
@@ -118,12 +120,13 @@ destroyBFiledataPA ( void *v )
       while ( iret != 0 );
 
       iret = aio_error(ctrlBlks + nextFinishOp);
+      ssize_t ssiret;
       if (( ssiret = aio_return(ctrlBlks + nextFinishOp)) == -1 )
 	xabort("aio_return () failed: %s", strerror(iret));
 
-      nextFinishOp = ( nextFinishOp + 1 ) % (size_t)nPrefStreams;
+      nextFinishOp = ( nextFinishOp + 1 ) % aioQueueDepth;
     }
-  bfd->prefIndex = (int)prefIndex;
+  bfd->numQueuedWrites = (unsigned)numQueuedWrites;
 
   if ((iret = ftruncate(bfd->handle, bfd->offset)) == -1)
     xabort("failed to truncate file %s: %s", bfd->name, strerror(errno));
@@ -155,9 +158,10 @@ compareNamesBPA(void *v1, void *v2)
 /***************************************************************/
 
 static void
-writePA(bFiledataPA *bfd, size_t amount)
+writePA(bFiledataPA *bfd, size_t amount, struct cdiPioConf *conf)
 {
   const struct aiocb *ccBP;
+  size_t aioQueueDepth = conf->aioQueueDepth;
 
   xdebug ( "file %s, in", bfd->name );
 
@@ -184,12 +188,12 @@ writePA(bFiledataPA *bfd, size_t amount)
     xdebug ( "buffer written to %s",  bfd->name );
 
   bfd->offset += (off_t)amount;
-  bfd->prefIndex ++;
+  size_t numQueuedWrites = bfd->numQueuedWrites + 1;
 
-  if ( bfd->prefIndex >= nPrefStreams )
+  if ( numQueuedWrites >= aioQueueDepth )
     {
       size_t nextOpIndex
-        = ((size_t)bfd->currOpIndex + 1 ) % (size_t)nPrefStreams;
+        = ((size_t)bfd->currOpIndex + 1 ) % aioQueueDepth;
       ccBP = bfd->ctrlBlks + nextOpIndex;
       do
 	{
@@ -201,10 +205,11 @@ writePA(bFiledataPA *bfd, size_t amount)
       if (( iret = aio_return ( bfd->ctrlBlks + nextOpIndex )) == -1 )
 	xabort ( "aio_return () failed" );
 
-      bfd->prefIndex --;
+      --numQueuedWrites;
     }
+  bfd->numQueuedWrites = (unsigned)numQueuedWrites;
 
-  xdebug ( "filename=%s, prefIndex=%d, return", bfd->name, bfd->prefIndex );
+  xdebug ( "filename=%s, numQueuedWrites=%zu, return", bfd->name, numQueuedWrites );
 }
 
 /***************************************************************/
@@ -227,8 +232,9 @@ void pioWriterAIO(void)
   MPI_Comm commPio = commInqCommPio ();
   int nProcsColl = commInqSizeColl ();
   struct cdiPioConf *conf = cdiPioGetConf();
+  size_t aioQueueDepth = conf->aioQueueDepth;
 
-  if ( nPrefStreams < 1 ) xabort("USAGE: # PREFETCH STREAMS >= 1");
+  assert(aioQueueDepth >= 1);
   xdebug ( "nProcsColl=%d ", nProcsColl );
 
   bibBFiledataPA = listSetNew(destroyBFiledataPA, compareNamesBPA);
@@ -273,7 +279,7 @@ void pioWriterAIO(void)
                                    (void *)(intptr_t)rtag.id)))
               {
                 listSetForeach(bibBFiledataPA, elemCheck, filename);
-                bfd = initBFiledataPA(filename, conf->writeAggBufLim, nProcsColl);
+                bfd = initBFiledataPA(filename, conf, nProcsColl);
                 int id;
                 if ((id = listSetAdd(bibBFiledataPA, bfd)) < 0)
                   xabort("fileID=%d not unique", rtag.id);
@@ -284,13 +290,13 @@ void pioWriterAIO(void)
                 xabort("filename is not consistent, fileID=%d", rtag.id);
 
             size_t currOpIndex
-              = ((size_t)bfd->currOpIndex + 1 ) % (size_t)nPrefStreams;
-            bfd->currOpIndex = (int)currOpIndex;
+              = ((size_t)bfd->currOpIndex + 1 ) % aioQueueDepth;
+            bfd->currOpIndex = (unsigned short)currOpIndex;
 
             memcpy((void *)bfd->ctrlBlks[currOpIndex].aio_buf,
                    pMB, (size_t)amount);
 
-            writePA(bfd, amount);
+            writePA(bfd, amount, conf);
 
             Free(messageBuffer);
           }
@@ -306,13 +312,13 @@ void pioWriterAIO(void)
                    cdiPioCmdStrTab[rtag.command], rtag.id, bfd->name );
 
             size_t currOpIndex
-              = ((size_t)bfd->currOpIndex + 1 ) % (size_t)nPrefStreams;
-            bfd->currOpIndex = (int)currOpIndex;
+              = ((size_t)bfd->currOpIndex + 1 ) % aioQueueDepth;
+            bfd->currOpIndex = (unsigned short)currOpIndex;
 
             xmpi(MPI_Recv((void *)bfd->ctrlBlks[currOpIndex].aio_buf,
                           messagesize, MPI_UNSIGNED_CHAR, source, tag, commPio,
                           &status));
-            writePA(bfd, (size_t)messagesize);
+            writePA(bfd, (size_t)messagesize, conf);
           }
 	  break;
 
@@ -326,14 +332,14 @@ void pioWriterAIO(void)
                    cdiPioCmdStrTab[rtag.command], rtag.id, bfd->name);
 
             size_t currOpIndex
-              = ((size_t)bfd->currOpIndex + 1 ) % (size_t)nPrefStreams;
-            bfd->currOpIndex = (int)currOpIndex;
+              = ((size_t)bfd->currOpIndex + 1 ) % aioQueueDepth;
+            bfd->currOpIndex = (unsigned short)currOpIndex;
 
             xmpi(MPI_Recv((void *)bfd->ctrlBlks[currOpIndex].aio_buf,
                           messagesize, MPI_UNSIGNED_CHAR,
                           source, tag, commPio, &status));
 
-            writePA(bfd, (size_t)messagesize);
+            writePA(bfd, (size_t)messagesize, conf);
 
             if ( ! --(bfd->activeCollectors))
               {

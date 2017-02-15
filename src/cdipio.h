@@ -144,6 +144,16 @@ void cdiPioConfSetWriteAggBufLim(int confResH, int lim_mb);
  * aggregation buffers. */
 int cdiPioConfGetWriteAggBufLim(int confResH);
 
+/* cdiPioConfSetAioQueueDepth: Set number of concurrent async I/O
+ * requests to create. Depending on implementation, this might
+ * increase throughput by increasing the number of concurrent
+ * operations but also increases buffer size requirements.
+ * (Default value: 4) */
+void cdiPioConfSetAioQueueDepth(int confResH, int queue_depth);
+
+/* cdiPioConfGetAioQueueDepth: Query depth of AIO queue. */
+int cdiPioConfGetAioQueueDepth(int confResH);
+
 /* cdiPioConfSetRedistCache: set doCache to anything non-zero if data
  * for internal data exchanges is to be cached. This makes sense when
  * the data passed via streamWriteVarPart or streamWriteScatteredVarPart

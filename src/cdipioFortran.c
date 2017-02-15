@@ -109,6 +109,8 @@ FCALLSCSUB2 (cdiPioConfSetRecordAggBufLim, CDIPIOCONFSETRECORDAGGBUFLIM, cdipioc
 FCALLSCFUN1 (INT, cdiPioConfGetRecordAggBufLim, CDIPIOCONFGETRECORDAGGBUFLIM, cdipioconfgetrecordaggbuflim, INT)
 FCALLSCSUB2 (cdiPioConfSetWriteAggBufLim, CDIPIOCONFSETWRITEAGGBUFLIM, cdipioconfsetwriteaggbuflim, INT, INT)
 FCALLSCFUN1 (INT, cdiPioConfGetWriteAggBufLim, CDIPIOCONFGETWRITEAGGBUFLIM, cdipioconfgetwriteaggbuflim, INT)
+FCALLSCSUB2 (cdiPioConfSetAioQueueDepth, CDIPIOCONFSETAIOQUEUEDEPTH, cdipioconfsetaioqueuedepth, INT, INT)
+FCALLSCFUN1 (INT, cdiPioConfGetAioQueueDepth, CDIPIOCONFGETAIOQUEUEDEPTH, cdipioconfgetaioqueuedepth, INT)
 FCALLSCSUB2 (cdiPioConfSetRedistCache, CDIPIOCONFSETREDISTCACHE, cdipioconfsetredistcache, INT, INT)
 FCALLSCFUN1 (INT, cdiPioConfGetRedistCache, CDIPIOCONFGETREDISTCACHE, cdipioconfgetredistcache, INT)
 FCALLSCSUB2 (cdiPioConfSetXmapCache, CDIPIOCONFSETXMAPCACHE, cdipioconfsetxmapcache, INT, INT)
