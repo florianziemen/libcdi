@@ -174,6 +174,7 @@ cdiPioConfCreate(void)
   conf->cacheRedists = conf->cacheXmaps = true;
   conf->recordAggBufLimMB = 128;
   conf->writeAggBufLim = findWriteAccumBufsize();
+  conf->aioQueueDepth = 4U;
   conf->xmap_new = xt_xmap_dist_dir_new;
   conf->stripify = true;
   int resH = reshPut(conf, &cdiPioConfOps);
@@ -320,6 +321,23 @@ cdiPioConfGetWriteAggBufLim(int confResH)
 {
   struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
   return (int) (conf->recordAggBufLimMB / (1024 * 1024));
+}
+
+void
+cdiPioConfSetAioQueueDepth(int confResH, int queue_depth)
+{
+  struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
+  if (queue_depth >= 1 && queue_depth <= USHRT_MAX)
+    conf->aioQueueDepth = (unsigned short) queue_depth;
+  else
+    Error("out of range AIO queue size value %d requested (MIN: 1, MAX: %d)", queue_depth, USHRT_MAX);
+}
+
+int
+cdiPioConfGetAioQueueDepth(int confResH)
+{
+  struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
+  return conf->aioQueueDepth;
 }
 
 void
