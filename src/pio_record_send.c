@@ -14,7 +14,7 @@
 #include "pio_impl.h"
 #include "pio_util.h"
 
-typedef struct
+struct remoteFileBuf
 {
   size_t size;
   struct dBuffer *db1;
@@ -24,24 +24,24 @@ typedef struct
   MPI_Request request;
   int tsID, fileID;
   char name[];
-} remoteFileBuf;
+};
 
 static listSet *bibRemoteFileBuf;
 
 static int
 fileIDTest(void *a, void *fileID)
 {
-  return ((remoteFileBuf *) a)->fileID == (int) (intptr_t) fileID;
+  return ((struct remoteFileBuf *) a)->fileID == (int) (intptr_t) fileID;
 }
 
-static remoteFileBuf *
+static struct remoteFileBuf *
 initRemoteFileBuf(const char *filename, size_t bs)
 {
 
   xdebug("filename=%s, buffersize=%zu, in", filename, bs);
 
   size_t len = strlen(filename);
-  remoteFileBuf *afp = Malloc(sizeof(remoteFileBuf) + len + 1);
+  struct remoteFileBuf *afp = Malloc(sizeof(struct remoteFileBuf) + len + 1);
   strcpy(afp->name, filename);
   afp->size = bs;
   afp->tsID = 0;
@@ -67,7 +67,7 @@ initRemoteFileBuf(const char *filename, size_t bs)
 static int
 destroyRemoteFileBuf(void *v)
 {
-  remoteFileBuf *afp = (remoteFileBuf *) v;
+  struct remoteFileBuf *afp = (struct remoteFileBuf *) v;
   MPI_Status status;
 
   xdebug("filename=%s, cleanup, in", afp->name);
@@ -86,7 +86,7 @@ destroyRemoteFileBuf(void *v)
 static bool
 compareNames(void *v1, void *v2)
 {
-  remoteFileBuf *afd1 = v1, *afd2 = v2;
+  struct remoteFileBuf *afd1 = v1, *afd2 = v2;
 
   return !strcmp(afd1->name, afd2->name);
 }
@@ -94,7 +94,7 @@ compareNames(void *v1, void *v2)
 /***************************************************************/
 /* send buffer to writer and swap buffer for filling */
 static void
-sendP(remoteFileBuf *afd, int id)
+sendP(struct remoteFileBuf *afd, int id)
 {
   MPI_Status status;
 
@@ -126,14 +126,14 @@ sendP(remoteFileBuf *afd, int id)
 }
 
 static void
-defTimestep(remoteFileBuf *afd, int tsID)
+defTimestep(struct remoteFileBuf *afd, int tsID)
 {
   if (afd == NULL || tsID != afd->tsID + 1) xabort(" defTimestepPA () didn't succeed.");
   afd->tsID = tsID;
 }
 
 static void
-flushOp(remoteFileBuf *fb, int tsID)
+flushOp(struct remoteFileBuf *fb, int tsID)
 {
   sendP(fb, fb->fileID);
   defTimestep(fb, (int) (intptr_t) tsID);
@@ -145,7 +145,7 @@ pioSendWrite(int id, const void *buffer, size_t len, int tsID)
   int error = 0;
   int flush = 0;
   int filled;
-  remoteFileBuf *afd;
+  struct remoteFileBuf *afd;
 
   afd = listSetGet(bibRemoteFileBuf, fileIDTest, (void *) (intptr_t) id);
 
@@ -186,7 +186,7 @@ pioSendWrite(int id, const void *buffer, size_t len, int tsID)
 static int
 pioSendClose(int id)
 {
-  remoteFileBuf *afd;
+  struct remoteFileBuf *afd;
   xdebug("fileID %d: send buffer, close file and cleanup", id);
 
   afd = listSetGet(bibRemoteFileBuf, fileIDTest, (void *) (intptr_t) id);
@@ -212,8 +212,8 @@ pioSendOpen(const char *filename, const char *mode)
 
   struct cdiPioConf *conf = cdiPioGetConf();
 
-  /* init and add remoteFileBuf */
-  remoteFileBuf *afd = initRemoteFileBuf(filename, conf->writeAggBufLim);
+  /* init and add struct remoteFileBuf */
+  struct remoteFileBuf *afd = initRemoteFileBuf(filename, conf->writeAggBufLim);
   int id;
   if ((id = listSetAdd(bibRemoteFileBuf, afd)) < 0) xabort("filename %s is not unique", afd->name);
   afd->fileID = id;
