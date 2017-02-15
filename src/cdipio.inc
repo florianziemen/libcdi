@@ -187,6 +187,15 @@
 !                                    (INTEGER         confResH)
       EXTERNAL        cdiPioConfGetWriteAggBufLim
 
+!                     cdiPioConfSetAioQueueDepth
+!                                    (INTEGER         confResH,
+!                                     INTEGER         queue_depth)
+      EXTERNAL        cdiPioConfSetAioQueueDepth
+
+      INTEGER         cdiPioConfGetAioQueueDepth
+!                                    (INTEGER         confResH)
+      EXTERNAL        cdiPioConfGetAioQueueDepth
+
 !                     cdiPioConfSetRedistCache
 !                                    (INTEGER         confResH,
 !                                     INTEGER         doCache)

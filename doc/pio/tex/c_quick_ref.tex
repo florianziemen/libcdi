@@ -52,6 +52,15 @@ create new configuration object and return its handle.
 delete configuration object.
 
 
+\section*{\tt \htmlref{cdiPioConfGetAioQueueDepth}{cdiPioConfGetAioQueueDepth}}
+
+\begin{verbatim}
+    int cdiPioConfGetAioQueueDepth (int confResH);
+\end{verbatim}
+
+Query depth of AIO queue..
+
+
 \section*{\tt \htmlref{cdiPioConfGetCSRole}{cdiPioConfGetCSRole}}
 
 \begin{verbatim}
@@ -107,6 +116,19 @@ aggregation buffers..
 \end{verbatim}
 
 query xmap caching status.
+
+
+\section*{\tt \htmlref{cdiPioConfSetAioQueueDepth}{cdiPioConfSetAioQueueDepth}}
+
+\begin{verbatim}
+    void cdiPioConfSetAioQueueDepth (int confResH, int queue_depth);
+\end{verbatim}
+
+Set number of concurrent async I/O
+requests to create. Depending on implementation, this might
+increase throughput by increasing the number of concurrent
+operations but also increases buffer size requirements.
+(Default value: 4).
 
 
 \section*{\tt \htmlref{cdiPioConfSetCSRole}{cdiPioConfSetCSRole}}
