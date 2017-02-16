@@ -44,10 +44,8 @@ initAFiledataFileWriteAtAll(const char *filename, size_t bs)
   int sizePio = commInqSizePio();
   size_t nameSize = strlen(filename) + 1;
   struct fileMPIFWAA *of = Malloc(sizeof (*of)
-                           + sizeof (of->collWriteSize[0]) * (size_t)sizePio
-                           + nameSize);
-  of->name = (char *)((unsigned char *)of + sizeof (*of)
-                      + sizeof (of->collWriteSize[0]) * (size_t)sizePio);
+                           + sizeof (of->collWriteSize[0]) * (size_t)sizePio);
+  of->name = Malloc(nameSize);
   memcpy(of->name, filename, nameSize);
 
   MPI_Info open_info = MPI_INFO_NULL;
@@ -89,7 +87,8 @@ destroyAFiledataFileWriteAtAll(void *v)
   if (trailingOctets)
     xmpi(MPI_File_set_size(of->fh, endpos));
   int iret = MPI_File_close(&of->fh);
-
+  Free(of->name);
+  of->name = NULL;
   Free(of);
 
   return iret == MPI_SUCCESS ? 0 : -1;
