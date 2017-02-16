@@ -16,14 +16,16 @@
 #include "pio_impl.h"
 #include "pio_util.h"
 
+enum {
+  numRecordSendBuf = 2,
+};
 struct remoteFileBuf
 {
   char *name;
-  struct dBuffer *db1;
-  struct dBuffer *db2;
-  struct dBuffer *db;
-  enum IO_Server_command command;
+  struct dBuffer *dbuf[numRecordSendBuf];
   MPI_Request request;
+  unsigned dbufIdx;
+  enum IO_Server_command command;
   int tsID;
 };
 
@@ -46,13 +48,13 @@ initRemoteFileBuf(struct remoteFileBuf *restrict rfile,
 
   xdebug ( "filename=%s, init output buffer",  filename );
 
-  int iret = dbuffer_init(&rfile->db1, bs);
-  iret += dbuffer_init(&rfile->db2, bs);
+  int iret = 0;
+  for (size_t i = 0; i < numRecordSendBuf; ++i)
+    iret += dbuffer_init(rfile->dbuf+i, bs);
 
   if ( iret > 0 ) xabort ( "dbuffer_init did not succeed" );
 
-  rfile->db = rfile->db1;
-
+  rfile->dbufIdx = 0;
   rfile->command = IO_Open_file;
   rfile->request = MPI_REQUEST_NULL;
 
@@ -67,8 +69,8 @@ destroyRemoteFileBuf(struct remoteFileBuf *restrict rfile)
   xdebug ( "filename=%s, cleanup, in", rfile->name );
 
   xmpiStat(MPI_Wait(&rfile->request, &status), &status);
-  dbuffer_cleanup(&rfile->db1);
-  dbuffer_cleanup(&rfile->db2);
+  for (size_t i = 0; i < numRecordSendBuf; ++i)
+    dbuffer_cleanup(rfile->dbuf+i);
   Free(rfile->name);
   rfile->name = NULL;
 
@@ -83,8 +85,9 @@ static void
 sendP(struct remoteFileBuf *rfile)
 {
   MPI_Status status;
-
-  size_t amount = dbuffer_data_size ( rfile->db );
+  size_t dbufIdx = rfile->dbufIdx;
+  struct dBuffer **restrict dbuf = rfile->dbuf;
+  size_t amount = dbuffer_data_size(dbuf[dbufIdx]);
   int fileID = (int)(rfile - openRemoteFiles);
   int tag = encodeFileOpTag(fileID, rfile->command);
 
@@ -94,30 +97,20 @@ sendP(struct remoteFileBuf *rfile)
   xmpiStat(MPI_Wait(&(rfile->request), &status), &status);
 
   /* FIXME: amount > INT_MAX unhandled */
-  xmpi(MPI_Issend(rfile->db->buffer, (int)amount, MPI_UNSIGNED_CHAR,
+  xmpi(MPI_Issend(dbuf[dbufIdx]->buffer, (int)amount, MPI_UNSIGNED_CHAR,
                   commInqSizePio() - 1, tag, commInqCommPio(),
                   &rfile->request));
 
   /* change outputBuffer */
-  dbuffer_reset ( rfile->db );
-  if ( rfile->db == rfile->db1 )
-    {
-      xdebug("%s", "Change to buffer 2 ...");
-      rfile->db =  rfile->db2;
-    }
-  else
-    {
-      xdebug("%s", "Change to buffer 1 ...");
-      rfile->db =  rfile->db1;
-    }
+  dbuffer_reset(dbuf[dbufIdx]);
+  rfile->dbufIdx = (unsigned)(dbufIdx ^ 1);
   rfile->command = IO_Send_buffer;
 }
 
 static void
 defTimestep(struct remoteFileBuf *rfile, int tsID)
 {
-  if ( rfile == NULL || tsID != rfile->tsID + 1 )
-    xabort ( " defTimestepPA () didn't succeed." );
+  assert(rfile != NULL && tsID == rfile->tsID + 1);
   rfile->tsID = tsID;
 }
 
@@ -125,7 +118,7 @@ static void
 flushOp(struct remoteFileBuf *fb, int tsID)
 {
   sendP(fb);
-  defTimestep(fb, (int)(intptr_t)tsID);
+  defTimestep(fb, tsID);
 }
 
 
@@ -153,7 +146,10 @@ pioSendWrite(int fileID, const void *buffer, size_t len, int tsID)
       xmpi(MPI_Barrier(commInqCommColl()));
     }
 
-  filled = dbuffer_push(rfile->db, buffer, len);
+  size_t dbufIdx = rfile->dbufIdx;
+  struct dBuffer **restrict dbuf = rfile->dbuf;
+
+  filled = dbuffer_push(dbuf[dbufIdx], buffer, len);
 
   xdebug ( "id = %d, tsID = %d, pushed %lu byte data on buffer, filled = %d",
            fileID, tsID, len, filled);
@@ -165,7 +161,8 @@ pioSendWrite(int fileID, const void *buffer, size_t len, int tsID)
       else
         {
           sendP(rfile);
-          error = dbuffer_push(rfile->db, buffer, len);
+          dbufIdx = rfile->dbufIdx;
+          error = dbuffer_push(dbuf[dbufIdx], buffer, len);
         }
     }
 
@@ -245,7 +242,9 @@ pioSendOpen(const char *filename, const char *mode)
          filename, fileID);
 
   /* put filename, id and buffersize on buffer */
-  int iret = dbuffer_push(rfile->db, filename, strlen(filename) + 1);
+  size_t dbufIdx = rfile->dbufIdx;
+  struct dBuffer **restrict dbuf = rfile->dbuf;
+  int iret = dbuffer_push(dbuf[dbufIdx], filename, strlen(filename) + 1);
   xassert(iret == 0);
 
   sendP(rfile);
