@@ -98,8 +98,8 @@ void pcdiXMPIStat ( int iret, const char *filename, int line, MPI_Status *status
           MPI_Abort ( MPI_COMM_WORLD, iret );
         }
     }
-  else
-    xmpi ( iret );
+  else if (iret != MPI_SUCCESS)
+    pcdiXMPI(iret, filename, line);
 
   return;
 }
