@@ -601,7 +601,6 @@ static void cdiPioFileWritingFinalizeDefault(void)
 static void
 cdiPioFileWritingInit(void)
 {
-  const struct cdiPioConf *conf = cdiPioGetConf();
   if (cdiPioExtraNSKeys[cdiPioEKFileWritingFinalize] == 0)
     cdiPioExtraNSKeys[cdiPioEKFileWritingFinalize] = cdiNamespaceSwitchNewKey();
 
@@ -632,7 +631,7 @@ cdiPioFileWritingInit(void)
       cdiPioFileWriteAtAllInit();
       break;
     case PIO_MPI_FW_AT_REBLOCK:
-      cdiPioFileWriteAtReblockInit(conf);
+      cdiPioFileWriteAtReblockInit();
       break;
     }
 }
