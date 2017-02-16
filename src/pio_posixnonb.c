@@ -2,6 +2,7 @@
 #  include "config.h"
 #endif
 
+#include <assert.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
@@ -21,26 +22,17 @@ struct fileFunnelStdio
 {
   char *name;
   FILE *fp;
-  int fileID;
   int activeCollectors;
 };
 
-static int
-fileIDTest(void *a, void *fileID)
-{
-  return ((struct fileFunnelStdio *)a)->fileID == (int)(intptr_t)fileID;
-}
-
 /***************************************************************/
 
-static struct fileFunnelStdio *
-initBFiledataP(char *filename, size_t bs, int nc, int fileID)
+static void
+initBFiledataP(struct fileFunnelStdio *bfp,
+               const char *filename, size_t bs, int nc)
 {
-  struct fileFunnelStdio * bfp;
-
   xdebug ( "filename=%s, buffersize=%lu, ncollectors=%d", filename, bs, nc );
 
-  bfp = Malloc(sizeof (*bfp));
   {
     size_t nameSize = strlen(filename) + 1;
     char *name = bfp->name = Malloc(nameSize);
@@ -54,44 +46,29 @@ initBFiledataP(char *filename, size_t bs, int nc, int fileID)
 
   bfp->activeCollectors = nc;
 
-  bfp->fileID = fileID;
-
   xdebug ( "filename=%s, opened file, return", bfp->name );
-
-  return bfp;
 }
 
 /***************************************************************/
 
 static int
-destroyBFiledataP(void *v)
+destroyBFiledataP(struct fileFunnelStdio *bfp)
 {
-  int iret = 0;
-  struct fileFunnelStdio *bfp = ( struct fileFunnelStdio * ) v;
 
   xdebug ( "filename=%s, cleanup, in",  bfp->name );
 
   /* close file */
+  int iret;
   if (( iret = fclose ( bfp->fp )) == EOF )
     xabort("Failed to close %s", bfp->name);
 
   /* file closed, cleanup */
   Free(bfp->name);
-  Free(bfp);
+  bfp->name = NULL;
 
   xdebug("%s", "cleaned up, return");
 
   return iret;
-}
-
-/***************************************************************/
-
-static bool
-compareNamesBP(void *v1, void *v2)
-{
-  struct fileFunnelStdio *bfd1 = v1, *bfd2 = v2;
-
-  return !strcmp(bfd1->name, bfd2->name);
 }
 
 /***************************************************************/
@@ -110,23 +87,12 @@ writeP(struct fileFunnelStdio *bfd, void *buffer, size_t amount)
            bfd->name, written, amount );
 }
 
-/***************************************************************/
-static void
-elemCheck(void *q, void *nm)
-{
-  struct fileFunnelStdio *bfd = q;
-  const char *name = nm;
-
-  if (!strcmp(name, bfd->name))
-    xabort("Filename %s has already been added to the set\n", name);
-}
-
 void
 pioWriterStdIO(void)
 {
-  struct fileFunnelStdio *bfd;
-  listSet * bibBFiledataP;
-  int messageSize, source, tag, id;
+  struct fileFunnelStdio *openFileFunnels;
+  size_t openFileFunnelsSize, openFileFunnelsFill;
+  int messageSize, source, tag;
   struct fileOpTag rtag;
   MPI_Status status;
   MPI_Comm commPio = commInqCommPio ();
@@ -135,7 +101,11 @@ pioWriterStdIO(void)
 
   xdebug ( "ncollectors=%d", nProcsColl );
 
-  bibBFiledataP = listSetNew(destroyBFiledataP, compareNamesBP);
+  openFileFunnelsSize = 4;
+  openFileFunnelsFill = 0;
+  openFileFunnels = Malloc(sizeof (*openFileFunnels) * openFileFunnelsSize);
+  for (size_t i = 0; i < openFileFunnelsSize; ++i)
+    openFileFunnels[i].name = NULL;
   sentFinalize = Calloc((size_t)nProcsColl, sizeof (sentFinalize[0]));
   char *messageBuffer = NULL;
   size_t messageBufferSize = 0;
@@ -183,32 +153,51 @@ pioWriterStdIO(void)
             xdebug("command %s, filename=%s, buffersize=%zu, amount=%zu",
                    cdiPioCmdStrTab[rtag.command], filename, buffersize, amount);
 
-
-            if (!(bfd = listSetGet(bibBFiledataP, fileIDTest,
-                                   (void *)(intptr_t)rtag.id)))
+            int fileID = rtag.id;
+            size_t prevOpenFileFunnelsSize = openFileFunnelsSize;
+            if (openFileFunnelsSize <= (unsigned)fileID)
               {
-                listSetForeach(bibBFiledataP, elemCheck, filename);
-                bfd = initBFiledataP(filename, buffersize, nProcsColl, rtag.id);
-                if ((id = listSetAdd(bibBFiledataP, bfd)) < 0)
-                  xabort("fileID=%d not unique", rtag.id);
-                bfd->fileID = id;
+                while (openFileFunnelsSize <= (unsigned)fileID)
+                  openFileFunnelsSize *= 2;
+                if (openFileFunnelsSize > (unsigned)INT_MAX + 1)
+                  openFileFunnelsSize = (unsigned)INT_MAX + 1;
+                openFileFunnels
+                  = Realloc(openFileFunnels,
+                            sizeof (*openFileFunnels) * openFileFunnelsSize);
+                for (size_t i = prevOpenFileFunnelsSize;
+                     i < openFileFunnelsSize;
+                     ++i)
+                  openFileFunnels[i].name = NULL;
               }
-            else
-              if (strcmp(filename, bfd->name) != 0)
-                xabort("filename is not consistent, fileID=%d", rtag.id);
+            struct fileFunnelStdio *bfd = openFileFunnels + fileID;
+            if (!bfd->name)
+              {
+                for (size_t i = 0; i < prevOpenFileFunnelsSize; ++i)
+                  if (openFileFunnels[i].name
+                      && !strcmp(openFileFunnels[i].name, filename))
+                    xabort("filename %s is already open!"
+                           " CDI-PIO does not support concurrent access"
+                           " through different filehandles.", filename);
+                initBFiledataP(bfd, filename, buffersize, nProcsColl);
+                ++openFileFunnelsFill;
+              }
+            else if (strcmp(filename, bfd->name) != 0)
+              xabort("filename is not consistent, fileID=%d,"
+                     " \"%s\" vs. \"%s\"", fileID, filename, bfd->name);
             writeP(bfd, pMB, amount);
           }
 	  break;
 
 	case IO_Send_buffer:
           {
-            if (!(bfd = listSetGet(bibBFiledataP, fileIDTest,
-                                   (void *)(intptr_t)rtag.id)))
-              xabort("fileID=%d is not in set", rtag.id );
+            int fileID = rtag.id;
+            assert(fileID >= 0 && (size_t)fileID < openFileFunnelsSize
+                   && openFileFunnels[fileID].name);
+            struct fileFunnelStdio *bfd = openFileFunnels + fileID;
             size_t amount = (size_t)messageSize;
 
             xdebug("COMMAND %s, ID=%d, NAME=%s", cdiPioCmdStrTab[rtag.command],
-                   rtag.id, bfd->name);
+                   fileID, bfd->name);
 
             xmpi(MPI_Recv(messageBuffer, messageSize, MPI_UNSIGNED_CHAR,
                           source, tag, commPio, &status));
@@ -219,15 +208,17 @@ pioWriterStdIO(void)
 
 	case IO_Close_file:
           {
-            xdebug("COMMAND %s,  FILE%d, SOURCE%d",
-                   cdiPioCmdStrTab[rtag.command], rtag.id, source);
+            int fileID = rtag.id;
+            assert(fileID >= 0 && (size_t)fileID < openFileFunnelsSize
+                   && openFileFunnels[fileID].name);
+            struct fileFunnelStdio *bfd = openFileFunnels + fileID;
 
-            if (!(bfd = listSetGet(bibBFiledataP, fileIDTest,
-                                   (void *)(intptr_t)rtag.id)))
-              xabort("fileID=%d is not in set", rtag.id);
+            xdebug("COMMAND %s,  FILE%d, SOURCE%d",
+                   cdiPioCmdStrTab[rtag.command], fileID, source);
+
             size_t amount = (size_t)messageSize;
             xdebug("COMMAND %s, ID=%d, NAME=%s, AMOUNT=%zu",
-                   cdiPioCmdStrTab[rtag.command], rtag.id, bfd->name, amount);
+                   cdiPioCmdStrTab[rtag.command], fileID, bfd->name, amount);
 
             xmpi(MPI_Recv(messageBuffer, messageSize, MPI_UNSIGNED_CHAR,
                           source, tag, commPio, &status));
@@ -237,16 +228,16 @@ pioWriterStdIO(void)
             if ( ! --(bfd->activeCollectors))
               {
                 xdebug("all are finished with file %d, delete node", rtag.id);
-                listSetRemove(bibBFiledataP, fileIDTest,
-                              (void *)(intptr_t)rtag.id);
+                destroyBFiledataP(bfd);
+                --openFileFunnelsFill;
               }
           }
           break;
         case IO_Finalize:
           {
-            int buffer = CDI_UNDEFID, collID;
+            int buffer, collID;
 
-            xmpi ( MPI_Recv ( &buffer, 1, MPI_INT, source, tag, commPio, &status ));
+            xmpi(MPI_Recv(&buffer, 1, MPI_INT, source, tag, commPio, &status));
 
             sentFinalize[source] = true;
             doFinalize = true;
@@ -260,14 +251,14 @@ pioWriterStdIO(void)
 
             if ( doFinalize )
               {
-                if (!listSetIsEmpty(bibBFiledataP))
-                  xabort("set bibBfiledataP is not empty.");
+                if (openFileFunnelsFill)
+                  xabort("some files still not closed.");
                 else
                   {
                     xdebug("%s", "all files are finished, destroy file set,"
                            " return");
-                    listSetDelete(bibBFiledataP);
                   }
+                Free(openFileFunnels);
                 Free(sentFinalize);
                 Free(messageBuffer);
                 return;
