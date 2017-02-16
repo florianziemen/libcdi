@@ -101,6 +101,19 @@ pcdiXMPIStat(int iret, const char *filename, int line, MPI_Status *status)
   return;
 }
 
+void
+pcdiXMPIStats(int iret, const char *filename, int line, int n, MPI_Status *restrict statuses)
+{
+  if (iret == MPI_ERR_IN_STATUS)
+    {
+      for (size_t i = 0; i < (size_t) n; ++i)
+        if (statuses[i].MPI_ERROR != MPI_SUCCESS && statuses[i].MPI_ERROR != MPI_ERR_PENDING)
+          pcdiXMPIStat(iret, filename, line, statuses + i);
+    }
+  else if (iret != MPI_SUCCESS)
+    pcdiXMPI(iret, filename, line);
+}
+
 /****************************************************/
 
 void
