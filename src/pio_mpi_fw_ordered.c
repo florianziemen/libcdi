@@ -17,28 +17,28 @@
 #include "pio_impl.h"
 #include "pio_util.h"
 
-typedef struct
+struct fileMPIFWO
 {
   MPI_File fh;
   int fileID;
   char name[];
-} aFiledataM;
+};
 
 static listSet *bibAFiledataM;
 
 static int
 fileIDTest(void *a, void *fileID)
 {
-  return ((aFiledataM *) a)->fileID == (int) (intptr_t) fileID;
+  return ((struct fileMPIFWO *) a)->fileID == (int) (intptr_t) fileID;
 }
 
 /***************************************************************/
 
-static aFiledataM *
+static struct fileMPIFWO *
 initAFiledataFileWriteOrdered(const char *filename, size_t bs)
 {
   MPI_Comm commPio = commInqCommPio();
-  aFiledataM *of = Malloc(sizeof(*of) + strlen(filename) + 1);
+  struct fileMPIFWO *of = Malloc(sizeof(*of) + strlen(filename) + 1);
 
   strcpy(of->name, filename);
 
@@ -64,7 +64,7 @@ initAFiledataFileWriteOrdered(const char *filename, size_t bs)
 static int
 destroyAFiledataFileWriteOrdered(void *v)
 {
-  aFiledataM *of = v;
+  struct fileMPIFWO *of = v;
   /* close file */
   MPI_Offset endpos, fsize;
   xmpi(MPI_File_get_position_shared(of->fh, &endpos));
@@ -86,7 +86,7 @@ destroyAFiledataFileWriteOrdered(void *v)
 static bool
 compareNamesFileWriteOrdered(void *v1, void *v2)
 {
-  aFiledataM *afm1 = v1, *afm2 = v2;
+  struct fileMPIFWO *afm1 = v1, *afm2 = v2;
   return !strcmp(afm1->name, afm2->name);
 }
 
@@ -95,7 +95,7 @@ compareNamesFileWriteOrdered(void *v1, void *v2)
 static size_t
 fwFileWriteOrdered(int fileID, const void *buffer, size_t len)
 {
-  aFiledataM *of = listSetGet(bibAFiledataM, fileIDTest, (void *) (intptr_t) fileID);
+  struct fileMPIFWO *of = listSetGet(bibAFiledataM, fileIDTest, (void *) (intptr_t) fileID);
   xassert(of);
 
   /* write buffer */
@@ -110,7 +110,7 @@ fwFileWriteOrdered(int fileID, const void *buffer, size_t len)
 static int
 fcFileWriteOrdered(int fileID)
 {
-  aFiledataM *of = listSetGet(bibAFiledataM, fileIDTest, (void *) (intptr_t) fileID);
+  struct fileMPIFWO *of = listSetGet(bibAFiledataM, fileIDTest, (void *) (intptr_t) fileID);
   if (!of) xabort("listSet, fileID=%d not found", fileID);
   int iret = listSetRemove(bibAFiledataM, fileIDTest, (void *) (intptr_t) fileID);
   return iret;
@@ -120,7 +120,7 @@ fcFileWriteOrdered(int fileID)
 static void
 elemCheck(void *q, void *nm)
 {
-  aFiledataM *afm = q;
+  struct fileMPIFWO *afm = q;
   const char *name = nm;
 
   if (!strcmp(name, afm->name)) xabort("Filename %s has already been added to set\n", name);
@@ -135,7 +135,7 @@ fowFileWriteOrdered(const char *filename, const char *mode)
   struct cdiPioConf *conf = cdiPioGetConf();
 
   listSetForeach(bibAFiledataM, elemCheck, (void *) filename);
-  aFiledataM *of = initAFiledataFileWriteOrdered(filename, conf->writeAggBufLim);
+  struct fileMPIFWO *of = initAFiledataFileWriteOrdered(filename, conf->writeAggBufLim);
 
   int id;
   if ((of->fileID = id = listSetAdd(bibAFiledataM, of)) < 0) xabort("filename %s not unique", of->name);
