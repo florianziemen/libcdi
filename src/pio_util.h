@@ -73,6 +73,13 @@ void pcdiXMPIStat ( int, const char *, int, MPI_Status * );
       pcdiXMPIStat(ret, __FILE__, __LINE__, stat);      \
   } while(0)
 
+void pcdiXMPIStats(int, const char *, int, int, MPI_Status *);
+#define xmpiStats(ret,n,stats) do {                     \
+    int tmpIRet = (ret);                                \
+    if (tmpIRet != MPI_SUCCESS)                         \
+      pcdiXMPIStats(ret, __FILE__, __LINE__, n, stats); \
+  } while(0)
+
 void pcdiDebugMsg ( const char * cdiDebugString, const char *filename, const char *functionname, int line, \
                     int tag, int source, int nfinished );
 #define xdebugMsg(tag,source,nfinished) \
