@@ -19,9 +19,9 @@
 
 struct fileMPIFWO
 {
+  char *name;
   MPI_File fh;
   int fileID;
-  char name[];
 };
 
 static listSet *bibAFiledataM;
@@ -38,8 +38,9 @@ static struct fileMPIFWO *
 initAFiledataFileWriteOrdered(const char *filename, size_t bs)
 {
   MPI_Comm commPio = commInqCommPio();
-  struct fileMPIFWO *of = Malloc(sizeof(*of) + strlen(filename) + 1);
-
+  size_t nameSize = strlen(filename) + 1;
+  struct fileMPIFWO *of = Malloc(sizeof(*of));
+  of->name = Malloc(nameSize);
   strcpy(of->name, filename);
 
   MPI_Info open_info = MPI_INFO_NULL;
@@ -75,7 +76,8 @@ destroyAFiledataFileWriteOrdered(void *v)
   xmpi(MPI_Allreduce(MPI_IN_PLACE, &trailingOctets, 1, MPI_INT, MPI_LOR, commPio));
   if (trailingOctets) xmpi(MPI_File_set_size(of->fh, endpos));
   int iret = MPI_File_close(&of->fh);
-
+  Free(of->name);
+  of->name = NULL;
   Free(of);
 
   return iret == MPI_SUCCESS ? 0 : -1;
