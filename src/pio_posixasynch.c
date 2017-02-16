@@ -29,7 +29,7 @@
 #include "pio_util.h"
 #include "dmemory.h"
 
-typedef struct
+struct fileFunnelAIO
 {
   struct dBuffer *fb;
   struct aiocb *ctrlBlks;
@@ -39,27 +39,27 @@ typedef struct
   int activeCollectors;
   int handle, fileID;
   char name[];
-} bFiledataPA;
+};
 
 static int
 fileIDTest(void *a, void *fileID)
 {
-  return ((bFiledataPA *)a)->fileID == (int)(intptr_t)fileID;
+  return ((struct fileFunnelAIO *)a)->fileID == (int)(intptr_t)fileID;
 }
 
 /***************************************************************/
 
-static bFiledataPA *
+static struct fileFunnelAIO *
 initBFiledataPA(char *filename, struct cdiPioConf *conf, int nc)
 {
-  bFiledataPA *bfd;
+  struct fileFunnelAIO *bfd;
 
   size_t bufSize = conf->writeAggBufLim;
   size_t aioQueueDepth = conf->aioQueueDepth;
   xdebug ( "filename=%s, buffersize=%zu, ncollectors=%d, AIO queue depth=%zu",
            filename, bufSize, nc, aioQueueDepth );
 
-  bfd = (bFiledataPA*) Malloc( sizeof (*bfd) + strlen(filename) + 1);
+  bfd = (struct fileFunnelAIO*) Malloc( sizeof (*bfd) + strlen(filename) + 1);
   strcpy(bfd->name, filename);
 
   if (( bfd->handle = open ( bfd->name, O_CREAT | O_WRONLY, 0666 )) == -1 )
@@ -93,7 +93,7 @@ initBFiledataPA(char *filename, struct cdiPioConf *conf, int nc)
 static int
 destroyBFiledataPA ( void *v )
 {
-  bFiledataPA *bfd = (bFiledataPA * ) v;
+  struct fileFunnelAIO *bfd = (struct fileFunnelAIO * ) v;
   const struct aiocb *ccBP[1];
   int iret = 0;
   struct cdiPioConf *conf = cdiPioGetConf();
@@ -150,7 +150,7 @@ destroyBFiledataPA ( void *v )
 static bool
 compareNamesBPA(void *v1, void *v2)
 {
-  bFiledataPA *bfd1 = v1, *bfd2 = v2;
+  struct fileFunnelAIO *bfd1 = v1, *bfd2 = v2;
 
   return !strcmp(bfd1->name, bfd2->name);
 }
@@ -158,7 +158,7 @@ compareNamesBPA(void *v1, void *v2)
 /***************************************************************/
 
 static void
-writePA(bFiledataPA *bfd, size_t amount, struct cdiPioConf *conf)
+writePA(struct fileFunnelAIO *bfd, size_t amount, struct cdiPioConf *conf)
 {
   const struct aiocb *ccBP;
   size_t aioQueueDepth = conf->aioQueueDepth;
@@ -216,7 +216,7 @@ writePA(bFiledataPA *bfd, size_t amount, struct cdiPioConf *conf)
 static void
 elemCheck(void *q, void *nm)
 {
-  bFiledataPA *bfd = q;
+  struct fileFunnelAIO *bfd = q;
   const char *name = nm;
 
   if (!strcmp(name, bfd->name))
@@ -227,7 +227,7 @@ elemCheck(void *q, void *nm)
 
 void pioWriterAIO(void)
 {
-  bFiledataPA *bfd;
+  struct fileFunnelAIO *bfd;
   listSet * bibBFiledataPA;
   MPI_Comm commPio = commInqCommPio ();
   int nProcsColl = commInqSizeColl ();
