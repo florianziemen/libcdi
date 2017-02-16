@@ -61,8 +61,8 @@ pcdiXMPI(int iret, const char *filename, int line)
   MPI_Error_string(iret, errorString[1], &len);
   errorString[1][len] = '\0';
   fprintf(stderr,
-          "MPI ERROR, pe%d, %s, line %d,"
-          "errorClass: \"%s\""
+          "MPI ERROR, pe%d, %s, line %d, "
+          "errorClass: \"%s\", "
           "errorString: \"%s\"\n",
           rank, filename, line, errorString[0], errorString[1]);
   MPI_Abort(MPI_COMM_WORLD, 1);
