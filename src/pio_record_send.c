@@ -24,7 +24,7 @@ struct remoteFileBuf
 {
   char *name;
   struct dBuffer *dbuf[numRecordSendBuf];
-  MPI_Request request;
+  MPI_Request request[numRecordSendBuf];
   unsigned dbufIdx;
   enum IO_Server_command command;
   int tsID;
@@ -49,13 +49,16 @@ initRemoteFileBuf(struct remoteFileBuf *restrict rfile, const char *filename, si
   xdebug("filename=%s, init output buffer", filename);
 
   int iret = 0;
-  for (size_t i = 0; i < numRecordSendBuf; ++i) iret += dbuffer_init(rfile->dbuf + i, bs);
+  for (size_t i = 0; i < numRecordSendBuf; ++i)
+    {
+      iret += dbuffer_init(rfile->dbuf + i, bs);
+      rfile->request[i] = MPI_REQUEST_NULL;
+    }
 
   if (iret > 0) xabort("dbuffer_init did not succeed");
 
   rfile->dbufIdx = 0;
   rfile->command = IO_Open_file;
-  rfile->request = MPI_REQUEST_NULL;
 
   xdebug("added name=%s, return", rfile->name);
 }
@@ -63,11 +66,12 @@ initRemoteFileBuf(struct remoteFileBuf *restrict rfile, const char *filename, si
 static int
 destroyRemoteFileBuf(struct remoteFileBuf *restrict rfile)
 {
-  MPI_Status status;
+  MPI_Status status[numRecordSendBuf];
 
   xdebug("filename=%s, cleanup, in", rfile->name);
 
-  xmpiStat(MPI_Wait(&rfile->request, &status), &status);
+  xmpiStats(MPI_Waitall(numRecordSendBuf, rfile->request, status), numRecordSendBuf, status);
+
   for (size_t i = 0; i < numRecordSendBuf; ++i) dbuffer_cleanup(rfile->dbuf + i);
   Free(rfile->name);
   rfile->name = NULL;
@@ -91,15 +95,15 @@ sendP(struct remoteFileBuf *rfile)
 
   xdebug("send buffer for %s, size: %zu bytes, command=%s, in", rfile->name, amount, cdiPioCmdStrTab[rfile->command]);
 
-  xmpiStat(MPI_Wait(&(rfile->request), &status), &status);
-
   /* FIXME: amount > INT_MAX unhandled */
   xmpi(MPI_Issend(dbuf[dbufIdx]->buffer, (int) amount, MPI_UNSIGNED_CHAR, commInqSizePio() - 1, tag, commInqCommPio(),
-                  &rfile->request));
+                  rfile->request + dbufIdx));
 
   /* change outputBuffer */
+  dbufIdx ^= 1;
+  xmpiStat(MPI_Wait(rfile->request + dbufIdx, &status), &status);
   dbuffer_reset(dbuf[dbufIdx]);
-  rfile->dbufIdx = (unsigned) (dbufIdx ^ 1);
+  rfile->dbufIdx = (unsigned) dbufIdx;
   rfile->command = IO_Send_buffer;
 }
 
@@ -128,6 +132,9 @@ pioSendWrite(int fileID, const void *buffer, size_t len, int tsID)
 
   bool flush = tsID != rfile->tsID;
 
+  size_t dbufIdx = rfile->dbufIdx;
+  struct dBuffer **restrict dbuf = rfile->dbuf;
+
   if (flush)
     {
       xdebug("tsID = %d, flush buffer for fileID=%d", tsID, fileID);
@@ -135,13 +142,11 @@ pioSendWrite(int fileID, const void *buffer, size_t len, int tsID)
       flushOp(rfile, tsID);
       {
         MPI_Status status;
-        xmpiStat(MPI_Wait(&(rfile->request), &status), &status);
+        xmpiStat(MPI_Wait(rfile->request + dbufIdx, &status), &status);
       }
+      dbufIdx ^= 1;
       xmpi(MPI_Barrier(commInqCommColl()));
     }
-
-  size_t dbufIdx = rfile->dbufIdx;
-  struct dBuffer **restrict dbuf = rfile->dbuf;
 
   filled = dbuffer_push(dbuf[dbufIdx], buffer, len);
 
