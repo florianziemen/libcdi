@@ -50,7 +50,7 @@ struct pendingBufWrite
   int incoming;
 };
 
-typedef struct
+struct fileMPIFWAR
 {
   MPI_File fh;
   int fileID;
@@ -71,20 +71,20 @@ typedef struct
   MPI_Request *reqs;
   long collWriteSize[]; /* used to allgather sizes of writes
                          * on different processes */
-} aFiledataM;
+};
 
 static listSet *bibAFiledataM;
 
 static int
 fileIDTest(void *a, void *fileID)
 {
-  return ((aFiledataM *) a)->fileID == (int) (intptr_t) fileID;
+  return ((struct fileMPIFWAR *) a)->fileID == (int) (intptr_t) fileID;
 }
 
 /***************************************************************/
 
 static inline void
-initReblockPendingMsg(aFiledataM *of, size_t i)
+initReblockPendingMsg(struct fileMPIFWAR *of, size_t i)
 {
   of->msgs[i].pos = -1;
   of->msgs[i].len = -1;
@@ -132,7 +132,7 @@ getXferBufAlign(const char *path)
   return (size_t) align;
 }
 
-static aFiledataM *
+static struct fileMPIFWAR *
 initAFiledataFileWriteAtReblock(const char *filename, size_t bufSize)
 {
   MPI_Comm commPio = commInqCommPio();
@@ -181,7 +181,7 @@ initAFiledataFileWriteAtReblock(const char *filename, size_t bufSize)
       numBlockBuf = 2;
       bufSize = blockSize * 2;
     }
-  aFiledataM *of = Malloc(sizeof(*of) + sizeof(of->collWriteSize[0]) * (size_t) sizePio + nameSize);
+  struct fileMPIFWAR *of = Malloc(sizeof(*of) + sizeof(of->collWriteSize[0]) * (size_t) sizePio + nameSize);
   of->fh = fh;
   of->name = (char *) ((unsigned char *) of + sizeof(*of) + sizeof(of->collWriteSize[0]) * (size_t) sizePio);
   memcpy(of->name, filename, nameSize);
@@ -216,12 +216,12 @@ initAFiledataFileWriteAtReblock(const char *filename, size_t bufSize)
 
 /***************************************************************/
 
-static void flushReblockBuffer(aFiledataM *of, int blockBufIdx);
+static void flushReblockBuffer(struct fileMPIFWAR *of, int blockBufIdx);
 
 static int
 destroyAFiledataFileWriteAtReblock(void *v)
 {
-  aFiledataM *of = v;
+  struct fileMPIFWAR *of = v;
 
   size_t numBlockBuf = (size_t) of->numBlockBuf;
   /* flush pending buffers */
@@ -258,7 +258,7 @@ destroyAFiledataFileWriteAtReblock(void *v)
 static bool
 compareNamesFileWriteAtReblock(void *v1, void *v2)
 {
-  aFiledataM *afm1 = v1, *afm2 = v2;
+  struct fileMPIFWAR *afm1 = v1, *afm2 = v2;
   return !strcmp(afm1->name, afm2->name);
 }
 
@@ -271,7 +271,7 @@ lmin(long a, long b)
 }
 
 static void
-flushReblockBuffer(aFiledataM *of, int blockBufIdx)
+flushReblockBuffer(struct fileMPIFWAR *of, int blockBufIdx)
 {
   int blockSize = of->blockSize;
   unsigned char *blockBuf = of->blockBuf + blockSize * blockBufIdx;
@@ -306,7 +306,7 @@ flushReblockBuffer(aFiledataM *of, int blockBufIdx)
 }
 
 static void
-reblockMoreMsgs(aFiledataM *of, int numMsg)
+reblockMoreMsgs(struct fileMPIFWAR *of, int numMsg)
 {
   /* optimize with MPI_Testsome */
   if (of->msgSize == numMsg)
@@ -323,7 +323,7 @@ reblockMoreMsgs(aFiledataM *of, int numMsg)
 static size_t
 fwFileWriteAtReblock(int fileID, const void *buffer, size_t len)
 {
-  aFiledataM *of = listSetGet(bibAFiledataM, fileIDTest, (void *) (intptr_t) fileID);
+  struct fileMPIFWAR *of = listSetGet(bibAFiledataM, fileIDTest, (void *) (intptr_t) fileID);
   xassert(of && len <= INT_MAX);
   MPI_Comm commPio = commInqCommPio();
   int sizePio = commInqSizePio(), rankPio = commInqRankPio();
@@ -431,7 +431,7 @@ fwFileWriteAtReblock(int fileID, const void *buffer, size_t len)
 static int
 fcFileWriteAtReblock(int fileID)
 {
-  aFiledataM *of = listSetGet(bibAFiledataM, fileIDTest, (void *) (intptr_t) fileID);
+  struct fileMPIFWAR *of = listSetGet(bibAFiledataM, fileIDTest, (void *) (intptr_t) fileID);
   if (!of) xabort("listSet, fileID=%d not found", fileID);
   int iret = listSetRemove(bibAFiledataM, fileIDTest, (void *) (intptr_t) fileID);
   return iret;
@@ -441,7 +441,7 @@ fcFileWriteAtReblock(int fileID)
 static void
 elemCheck(void *q, void *nm)
 {
-  aFiledataM *afm = q;
+  struct fileMPIFWAR *afm = q;
   const char *name = nm;
 
   if (!strcmp(name, afm->name)) xabort("Filename %s has already been added to set\n", name);
@@ -456,7 +456,7 @@ fowFileWriteAtReblock(const char *filename, const char *mode)
   struct cdiPioConf *conf = cdiPioGetConf();
 
   listSetForeach(bibAFiledataM, elemCheck, (void *) filename);
-  aFiledataM *of = initAFiledataFileWriteAtReblock(filename, conf->writeAggBufLim);
+  struct fileMPIFWAR *of = initAFiledataFileWriteAtReblock(filename, conf->writeAggBufLim);
 
   int id;
   if ((of->fileID = id = listSetAdd(bibAFiledataM, of)) < 0) xabort("filename %s not unique", of->name);
