@@ -23,7 +23,7 @@ struct fileMPIFWAA
   MPI_File fh;
   int fileID;
   MPI_Offset pos;
-  int collWriteSize[];
+  int *collWriteSize;
 };
 
 static listSet *bibAFiledataM;
@@ -42,7 +42,8 @@ initAFiledataFileWriteAtAll(const char *filename, size_t bs)
   MPI_Comm commPio = commInqCommPio();
   int sizePio = commInqSizePio();
   size_t nameSize = strlen(filename) + 1;
-  struct fileMPIFWAA *of = Malloc(sizeof(*of) + sizeof(of->collWriteSize[0]) * (size_t) sizePio);
+  struct fileMPIFWAA *of = Malloc(sizeof(*of));
+  of->collWriteSize = Malloc(sizeof(of->collWriteSize[0]) * (size_t) sizePio);
   of->name = Malloc(nameSize);
   memcpy(of->name, filename, nameSize);
 
@@ -81,6 +82,7 @@ destroyAFiledataFileWriteAtAll(void *v)
   xmpi(MPI_Allreduce(MPI_IN_PLACE, &trailingOctets, 1, MPI_INT, MPI_LOR, commPio));
   if (trailingOctets) xmpi(MPI_File_set_size(of->fh, endpos));
   int iret = MPI_File_close(&of->fh);
+  Free(of->collWriteSize);
   Free(of->name);
   of->name = NULL;
   Free(of);
