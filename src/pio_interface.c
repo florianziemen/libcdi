@@ -528,7 +528,6 @@ cdiPioFileWritingFinalizeDefault(void)
 static void
 cdiPioFileWritingInit(void)
 {
-  const struct cdiPioConf *conf = cdiPioGetConf();
   if (cdiPioExtraNSKeys[cdiPioEKFileWritingFinalize] == 0)
     cdiPioExtraNSKeys[cdiPioEKFileWritingFinalize] = cdiNamespaceSwitchNewKey();
 
@@ -546,7 +545,7 @@ cdiPioFileWritingInit(void)
     case PIO_FPGUARD: initPOSIXFPGUARDSENDRECV(); break;
     case PIO_MPI_FW_ORDERED: cdiPioFileWriteOrderedInit(); break;
     case PIO_MPI_FW_AT_ALL: cdiPioFileWriteAtAllInit(); break;
-    case PIO_MPI_FW_AT_REBLOCK: cdiPioFileWriteAtReblockInit(conf); break;
+    case PIO_MPI_FW_AT_REBLOCK: cdiPioFileWriteAtReblockInit(); break;
     }
 }
 

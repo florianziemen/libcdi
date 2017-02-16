@@ -96,7 +96,7 @@ void cdiPioFileWriteOrderedInit(void);
 void cdiPioFileWriteAtAllInit(void);
 
 /* pio_mpi_fw_at_reblock.c */
-void cdiPioFileWriteAtReblockInit(const struct cdiPioConf *conf);
+void cdiPioFileWriteAtReblockInit(void);
 
 /* common functionality for file split between collectors and writer(s) */
 void pioSendInitialize(void);
