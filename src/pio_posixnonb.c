@@ -19,10 +19,10 @@
 
 struct fileFunnelStdio
 {
+  char *name;
   FILE *fp;
   int fileID;
   int activeCollectors;
-  char name[];
 };
 
 static int
@@ -40,8 +40,12 @@ initBFiledataP(char *filename, size_t bs, int nc, int fileID)
 
   xdebug ( "filename=%s, buffersize=%lu, ncollectors=%d", filename, bs, nc );
 
-  bfp = Malloc(sizeof (*bfp) + strlen(filename) + 1);
-  strcpy(bfp->name, filename);
+  bfp = Malloc(sizeof (*bfp));
+  {
+    size_t nameSize = strlen(filename) + 1;
+    char *name = bfp->name = Malloc(nameSize);
+    memcpy(name, filename, nameSize);
+  }
 
   if (( bfp->fp = fopen ( filename, "w" )) == NULL )
     xabort("Failed to open %s", bfp->name);
@@ -72,7 +76,7 @@ destroyBFiledataP(void *v)
     xabort("Failed to close %s", bfp->name);
 
   /* file closed, cleanup */
-
+  Free(bfp->name);
   Free(bfp);
 
   xdebug("%s", "cleaned up, return");
