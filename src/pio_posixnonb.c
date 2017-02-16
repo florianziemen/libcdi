@@ -39,8 +39,6 @@ initBFiledataP(struct fileFunnelStdio *bfp, const char *filename, size_t bs, int
   }
 
   if ((bfp->fp = fopen(filename, "w")) == NULL) xabort("Failed to open %s", bfp->name);
-  int fd = fileno(bfp->fp);
-  ftruncate(fd, (off_t) 0);
 
   bfp->activeCollectors = nc;
 
