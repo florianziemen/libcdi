@@ -72,24 +72,11 @@ dbuffer_cleanup(struct dBuffer **dbuffer)
   return;
 }
 
-size_t
-dbuffer_data_size(struct dBuffer *dbuffer)
-{
-  return dbuffer->wr_pointer;
-}
-
 static size_t
 dbuffer_freesize(struct dBuffer *dbuffer)
 {
   size_t free_size = (size_t) (dbuffer->size - dbuffer_data_size(dbuffer));
   return free_size;
-}
-
-int
-dbuffer_reset(struct dBuffer *dbuffer)
-{
-  dbuffer->wr_pointer = 0;
-  return 0;
 }
 
 int
