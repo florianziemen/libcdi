@@ -31,6 +31,7 @@
 
 struct fileFunnelAIO
 {
+  char *name;
   struct dBuffer *fb;
   struct aiocb *ctrlBlks;
   off_t offset;
@@ -38,7 +39,6 @@ struct fileFunnelAIO
   unsigned numQueuedWrites;
   int activeCollectors;
   int handle, fileID;
-  char name[];
 };
 
 static int
@@ -59,8 +59,12 @@ initBFiledataPA(char *filename, struct cdiPioConf *conf, int nc)
   xdebug ( "filename=%s, buffersize=%zu, ncollectors=%d, AIO queue depth=%zu",
            filename, bufSize, nc, aioQueueDepth );
 
-  bfd = (struct fileFunnelAIO*) Malloc( sizeof (*bfd) + strlen(filename) + 1);
-  strcpy(bfd->name, filename);
+  bfd = (struct fileFunnelAIO*) Malloc( sizeof (*bfd));
+  {
+    size_t filenameSize = strlen(filename) + 1;
+    char *name = bfd->name = Malloc(filenameSize);
+    strcpy(name, filename);
+  }
 
   if (( bfd->handle = open ( bfd->name, O_CREAT | O_WRONLY, 0666 )) == -1 )
     xabort("Failed to open %s", bfd->name);
@@ -136,7 +140,8 @@ destroyBFiledataPA ( void *v )
   /* file closed, cleanup */
 
   dbuffer_cleanup ( &( bfd->fb ));
-
+  Free(bfd->name);
+  bfd->name = NULL;
   Free(bfd->ctrlBlks);
   Free(bfd);
 
