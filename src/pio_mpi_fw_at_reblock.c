@@ -69,8 +69,8 @@ struct fileMPIFWAR
   int msgSize;
   struct IOmsg *msgs;
   MPI_Request *reqs;
-  long collWriteSize[]; /* used to allgather sizes of writes
-                         * on different processes */
+  long *collWriteSize; /* used to allgather sizes of writes
+                        * on different processes */
 };
 
 static listSet *bibAFiledataM;
@@ -181,7 +181,8 @@ initAFiledataFileWriteAtReblock(const char *filename, size_t bufSize)
       numBlockBuf = 2;
       bufSize = blockSize * 2;
     }
-  struct fileMPIFWAR *of = Malloc(sizeof(*of) + sizeof(of->collWriteSize[0]) * (size_t) sizePio);
+  struct fileMPIFWAR *of = Malloc(sizeof(*of));
+  of->collWriteSize = Malloc(sizeof(of->collWriteSize[0]) * (size_t) sizePio);
   of->fh = fh;
   of->name = Malloc(nameSize);
   memcpy(of->name, filename, nameSize);
@@ -248,6 +249,7 @@ destroyAFiledataFileWriteAtReblock(void *v)
   Free(of->msgs);
   Free(of->reqs);
   Free(of->pending);
+  Free(of->collWriteSize);
   Free(of->name);
   of->name = NULL;
   Free(of);
