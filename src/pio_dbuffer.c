@@ -21,7 +21,6 @@
 
 int dbuffer_init(struct dBuffer **dbuffer, size_t size)
 {
-  int status;
   assert(dbuffer);
   struct dBuffer *db = *dbuffer = (struct dBuffer *)Malloc(sizeof (*db));
   db->wr_pointer = 0;
@@ -33,6 +32,7 @@ int dbuffer_init(struct dBuffer **dbuffer, size_t size)
 
   db->size = size = (size + pagesize - 1)/pagesize*pagesize;
   void *buf = NULL;
+  int status;
   if ( (status = posix_memalign(&buf, pagesize, size)) != 0 )
     {
       switch ( status )
