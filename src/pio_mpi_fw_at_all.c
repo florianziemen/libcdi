@@ -17,32 +17,32 @@
 #include "pio_impl.h"
 #include "pio_util.h"
 
-typedef struct
+struct fileMPIFWAA
 {
+  char *name;
   MPI_File fh;
   int fileID;
   MPI_Offset pos;
-  char *name;
   int collWriteSize[];
-} aFiledataM;
+};
 
 static listSet *bibAFiledataM;
 
 static int
 fileIDTest(void *a, void *fileID)
 {
-  return ((aFiledataM *) a)->fileID == (int) (intptr_t) fileID;
+  return ((struct fileMPIFWAA *) a)->fileID == (int) (intptr_t) fileID;
 }
 
 /***************************************************************/
 
-static aFiledataM *
+static struct fileMPIFWAA *
 initAFiledataFileWriteAtAll(const char *filename, size_t bs)
 {
   MPI_Comm commPio = commInqCommPio();
   int sizePio = commInqSizePio();
   size_t nameSize = strlen(filename) + 1;
-  aFiledataM *of = Malloc(sizeof(*of) + sizeof(of->collWriteSize[0]) * (size_t) sizePio + nameSize);
+  struct fileMPIFWAA *of = Malloc(sizeof(*of) + sizeof(of->collWriteSize[0]) * (size_t) sizePio + nameSize);
   of->name = (char *) ((unsigned char *) of + sizeof(*of) + sizeof(of->collWriteSize[0]) * (size_t) sizePio);
   memcpy(of->name, filename, nameSize);
 
@@ -69,7 +69,7 @@ initAFiledataFileWriteAtAll(const char *filename, size_t bs)
 static int
 destroyAFiledataFileWriteAtAll(void *v)
 {
-  aFiledataM *of = v;
+  struct fileMPIFWAA *of = v;
 
   /* close file */
   MPI_Offset endpos, fsize;
@@ -92,7 +92,7 @@ destroyAFiledataFileWriteAtAll(void *v)
 static bool
 compareNamesFileWriteAtAll(void *v1, void *v2)
 {
-  aFiledataM *afm1 = v1, *afm2 = v2;
+  struct fileMPIFWAA *afm1 = v1, *afm2 = v2;
   return !strcmp(afm1->name, afm2->name);
 }
 
@@ -101,7 +101,7 @@ compareNamesFileWriteAtAll(void *v1, void *v2)
 static size_t
 fwFileWriteAtAll(int fileID, const void *buffer, size_t len)
 {
-  aFiledataM *of = listSetGet(bibAFiledataM, fileIDTest, (void *) (intptr_t) fileID);
+  struct fileMPIFWAA *of = listSetGet(bibAFiledataM, fileIDTest, (void *) (intptr_t) fileID);
   xassert(of && len <= INT_MAX);
   MPI_Comm commPio = commInqCommPio();
   int sizePio = commInqSizePio(), rankPio = commInqRankPio();
@@ -124,7 +124,7 @@ fwFileWriteAtAll(int fileID, const void *buffer, size_t len)
 static int
 fcFileWriteAtAll(int fileID)
 {
-  aFiledataM *of = listSetGet(bibAFiledataM, fileIDTest, (void *) (intptr_t) fileID);
+  struct fileMPIFWAA *of = listSetGet(bibAFiledataM, fileIDTest, (void *) (intptr_t) fileID);
   if (!of) xabort("listSet, fileID=%d not found", fileID);
   int iret = listSetRemove(bibAFiledataM, fileIDTest, (void *) (intptr_t) fileID);
   return iret;
@@ -134,7 +134,7 @@ fcFileWriteAtAll(int fileID)
 static void
 elemCheck(void *q, void *nm)
 {
-  aFiledataM *afm = q;
+  struct fileMPIFWAA *afm = q;
   const char *name = nm;
 
   if (!strcmp(name, afm->name)) xabort("Filename %s has already been added to set\n", name);
@@ -149,7 +149,7 @@ fowFileWriteAtAll(const char *filename, const char *mode)
   struct cdiPioConf *conf = cdiPioGetConf();
 
   listSetForeach(bibAFiledataM, elemCheck, (void *) filename);
-  aFiledataM *of = initAFiledataFileWriteAtAll(filename, conf->writeAggBufLim);
+  struct fileMPIFWAA *of = initAFiledataFileWriteAtAll(filename, conf->writeAggBufLim);
 
   int id;
   if ((of->fileID = id = listSetAdd(bibAFiledataM, of)) < 0) xabort("filename %s not unique", of->name);
