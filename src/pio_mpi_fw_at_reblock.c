@@ -181,9 +181,9 @@ initAFiledataFileWriteAtReblock(const char *filename, size_t bufSize)
       numBlockBuf = 2;
       bufSize = blockSize * 2;
     }
-  struct fileMPIFWAR *of = Malloc(sizeof(*of) + sizeof(of->collWriteSize[0]) * (size_t) sizePio + nameSize);
+  struct fileMPIFWAR *of = Malloc(sizeof(*of) + sizeof(of->collWriteSize[0]) * (size_t) sizePio);
   of->fh = fh;
-  of->name = (char *) ((unsigned char *) of + sizeof(*of) + sizeof(of->collWriteSize[0]) * (size_t) sizePio);
+  of->name = Malloc(nameSize);
   memcpy(of->name, filename, nameSize);
   {
     void *ptr;
@@ -248,6 +248,8 @@ destroyAFiledataFileWriteAtReblock(void *v)
   Free(of->msgs);
   Free(of->reqs);
   Free(of->pending);
+  Free(of->name);
+  of->name = NULL;
   Free(of);
 
   return iret == MPI_SUCCESS ? 0 : -1;
