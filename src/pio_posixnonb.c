@@ -17,26 +17,26 @@
 #include "pio_impl.h"
 #include "pio_util.h"
 
-typedef struct
+struct fileFunnelStdio
 {
   FILE *fp;
   int fileID;
   int activeCollectors;
   char name[];
-} bFiledataP;
+};
 
 static int
 fileIDTest(void *a, void *fileID)
 {
-  return ((bFiledataP *) a)->fileID == (int) (intptr_t) fileID;
+  return ((struct fileFunnelStdio *) a)->fileID == (int) (intptr_t) fileID;
 }
 
 /***************************************************************/
 
-static bFiledataP *
+static struct fileFunnelStdio *
 initBFiledataP(char *filename, size_t bs, int nc, int fileID)
 {
-  bFiledataP *bfp;
+  struct fileFunnelStdio *bfp;
 
   xdebug("filename=%s, buffersize=%lu, ncollectors=%d", filename, bs, nc);
 
@@ -62,7 +62,7 @@ static int
 destroyBFiledataP(void *v)
 {
   int iret = 0;
-  bFiledataP *bfp = (bFiledataP *) v;
+  struct fileFunnelStdio *bfp = (struct fileFunnelStdio *) v;
 
   xdebug("filename=%s, cleanup, in", bfp->name);
 
@@ -83,7 +83,7 @@ destroyBFiledataP(void *v)
 static bool
 compareNamesBP(void *v1, void *v2)
 {
-  bFiledataP *bfd1 = v1, *bfd2 = v2;
+  struct fileFunnelStdio *bfd1 = v1, *bfd2 = v2;
 
   return !strcmp(bfd1->name, bfd2->name);
 }
@@ -91,7 +91,7 @@ compareNamesBP(void *v1, void *v2)
 /***************************************************************/
 
 static void
-writeP(bFiledataP *bfd, void *buffer, size_t amount)
+writeP(struct fileFunnelStdio *bfd, void *buffer, size_t amount)
 {
   size_t written;
 
@@ -106,7 +106,7 @@ writeP(bFiledataP *bfd, void *buffer, size_t amount)
 static void
 elemCheck(void *q, void *nm)
 {
-  bFiledataP *bfd = q;
+  struct fileFunnelStdio *bfd = q;
   const char *name = nm;
 
   if (!strcmp(name, bfd->name)) xabort("Filename %s has already been added to the set\n", name);
@@ -115,7 +115,7 @@ elemCheck(void *q, void *nm)
 void
 pioWriterStdIO(void)
 {
-  bFiledataP *bfd;
+  struct fileFunnelStdio *bfd;
   listSet *bibBFiledataP;
   int messageSize, source, tag, id;
   struct fileOpTag rtag;
