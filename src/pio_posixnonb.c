@@ -235,7 +235,8 @@ pioWriterStdIO(void)
           {
             int buffer, collID;
 
-            xmpi(MPI_Recv(&buffer, 1, MPI_INT, source, tag, commPio, &status));
+            xmpiStat(MPI_Recv(&buffer, 1, MPI_INT, source, tag, commPio,
+                              &status), &status);
 
             sentFinalize[source] = true;
             doFinalize = true;
