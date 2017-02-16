@@ -31,7 +31,7 @@ static struct remoteFileBuf *openRemoteFiles;
 static unsigned openRemoteFilesSize, openRemoteFilesFill;
 
 static void
-initRemoteFileBuf(struct remoteFileBuf *rfile, const char *filename, size_t bs)
+initRemoteFileBuf(struct remoteFileBuf *restrict rfile, const char *filename, size_t bs)
 {
 
   xdebug("filename=%s, buffersize=%zu, in", filename, bs);
@@ -59,7 +59,7 @@ initRemoteFileBuf(struct remoteFileBuf *rfile, const char *filename, size_t bs)
 }
 
 static int
-destroyRemoteFileBuf(struct remoteFileBuf *rfile)
+destroyRemoteFileBuf(struct remoteFileBuf *restrict rfile)
 {
   MPI_Status status;
 
