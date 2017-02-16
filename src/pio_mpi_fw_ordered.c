@@ -2,6 +2,7 @@
 #  include "config.h"
 #endif
 
+#include <assert.h>
 #include <inttypes.h>
 #include <limits.h>
 #include <stdbool.h>
@@ -24,23 +25,17 @@ struct fileMPIFWO
   int fileID;
 };
 
-static listSet *bibAFiledataM;
-
-static int
-fileIDTest(void *a, void *fileID)
-{
-  return ((struct fileMPIFWO *)a)->fileID == (int)(intptr_t)fileID;
-}
-
+static struct fileMPIFWO *openFiles;
+static unsigned openFilesSize, openFilesFill;
 
 /***************************************************************/
 
-static struct fileMPIFWO *
-initAFiledataFileWriteOrdered(const char *filename, size_t bs)
+static void
+initAFiledataFileWriteOrdered(struct fileMPIFWO *of,
+                              const char *filename, size_t bs)
 {
   MPI_Comm commPio = commInqCommPio();
   size_t nameSize = strlen(filename) + 1;
-  struct fileMPIFWO *of = Malloc(sizeof (*of));
   of->name = Malloc(nameSize);
   strcpy(of->name, filename);
 
@@ -59,16 +54,13 @@ initAFiledataFileWriteOrdered(const char *filename, size_t bs)
                      MPI_MODE_CREATE|MPI_MODE_WRONLY|MPI_MODE_UNIQUE_OPEN,
                      open_info, &of->fh));
   xmpi(MPI_Info_free(&open_info));
-
-  return of;
 }
 
 /***************************************************************/
 
 static int
-destroyAFiledataFileWriteOrdered(void *v)
+destroyAFiledataFileWriteOrdered(struct fileMPIFWO *of)
 {
-  struct fileMPIFWO *of = v;
   /* close file */
   MPI_Offset endpos, fsize;
   xmpi(MPI_File_get_position_shared(of->fh, &endpos));
@@ -83,18 +75,8 @@ destroyAFiledataFileWriteOrdered(void *v)
   int iret = MPI_File_close(&of->fh);
   Free(of->name);
   of->name = NULL;
-  Free(of);
 
   return iret == MPI_SUCCESS ? 0 : -1;
-}
-
-/***************************************************************/
-
-static bool
-compareNamesFileWriteOrdered(void *v1, void *v2)
-{
-  struct fileMPIFWO *afm1 = v1, *afm2 = v2;
-  return !strcmp(afm1->name, afm2->name);
 }
 
 /***************************************************************/
@@ -102,9 +84,9 @@ compareNamesFileWriteOrdered(void *v1, void *v2)
 static size_t
 fwFileWriteOrdered(int fileID, const void *buffer, size_t len)
 {
-  struct fileMPIFWO *of
-    = listSetGet(bibAFiledataM, fileIDTest, (void *)(intptr_t)fileID);
-  xassert(of);
+  assert(fileID >= 0 && (size_t)fileID < openFilesSize
+         && openFiles[fileID].name);
+  struct fileMPIFWO *of = openFiles + fileID;
 
   /* write buffer */
   xassert(len <= INT_MAX);
@@ -118,25 +100,14 @@ fwFileWriteOrdered(int fileID, const void *buffer, size_t len)
 
 static int fcFileWriteOrdered(int fileID)
 {
-  struct fileMPIFWO *of
-    = listSetGet(bibAFiledataM, fileIDTest, (void *)(intptr_t)fileID);
-  if (!of)
-    xabort("listSet, fileID=%d not found", fileID);
-  int iret = listSetRemove(bibAFiledataM, fileIDTest, (void *)(intptr_t)fileID);
+  assert(fileID >= 0 && (size_t)fileID < openFilesSize
+         && openFiles[fileID].name);
+  struct fileMPIFWO *of = openFiles + fileID;
+  int iret = destroyAFiledataFileWriteOrdered(of);
   return iret;
 }
 
 /***************************************************************/
-static void
-elemCheck(void *q, void *nm)
-{
-  struct fileMPIFWO *afm = q;
-  const char *name = nm;
-
-  if (!strcmp(name, afm->name))
-    xabort("Filename %s has already been added to set\n", name);
-}
-
 
 static int
 fowFileWriteOrdered(const char *filename, const char *mode)
@@ -146,27 +117,41 @@ fowFileWriteOrdered(const char *filename, const char *mode)
 
   struct cdiPioConf *conf = cdiPioGetConf();
 
-  listSetForeach(bibAFiledataM, elemCheck, (void *)filename);
-  struct fileMPIFWO *of
-    = initAFiledataFileWriteOrdered(filename, conf->writeAggBufLim);
-
-  int id;
-  if ((of->fileID = id = listSetAdd(bibAFiledataM, of)) < 0 )
-    xabort("filename %s not unique", of->name);
-  return id;
+  size_t fileID = SIZE_MAX;
+  if (openFilesSize == openFilesFill)
+    {
+      fileID = openFilesSize;
+      if (openFilesSize == (size_t)INT_MAX + 1)
+        return CDI_ELIMIT;
+      openFilesSize = openFilesSize ? openFilesSize * 2 : 4;
+      if (openFilesSize > (size_t)INT_MAX + 1)
+        openFilesSize = (size_t)INT_MAX + 1;
+      openFiles = Realloc(openFiles, sizeof (*openFiles) * openFilesSize);
+      for (size_t i = fileID; i < openFilesSize; ++i)
+        openFiles[i].name = NULL;
+    }
+  else
+    {
+      for (size_t i = 0; i < openFilesSize; ++i)
+        if (openFiles[i].name == NULL)
+          {
+            fileID = i;
+            break;
+          }
+    }
+  struct fileMPIFWO *of = openFiles + fileID;
+  initAFiledataFileWriteOrdered(of, filename, conf->writeAggBufLim);
+  return (int)fileID;
 }
 
 /***************************************************************/
 
 static void finalizeFileWriteOrdered(void)
 {
-  if (!listSetIsEmpty(bibAFiledataM))
-    xabort("set bibAFiledataM not empty");
+  if (openFilesFill)
+    xabort("files still open on exit!");
   else
-    {
-      xdebug("%s", "destroy set");
-      listSetDelete(bibAFiledataM);
-    }
+    Free(openFiles);
 }
 
 /***************************************************************/
@@ -174,16 +159,11 @@ static void finalizeFileWriteOrdered(void)
 void
 cdiPioFileWriteOrderedInit(void)
 {
-  bibAFiledataM = listSetNew( destroyAFiledataFileWriteOrdered, compareNamesFileWriteOrdered );
-
   namespaceSwitchSet(NSSWITCH_FILE_OPEN, NSSW_FUNC(fowFileWriteOrdered));
   namespaceSwitchSet(NSSWITCH_FILE_CLOSE, NSSW_FUNC(fcFileWriteOrdered));
   namespaceSwitchSet(NSSWITCH_FILE_WRITE, NSSW_FUNC(fwFileWriteOrdered));
   namespaceSwitchSet(cdiPioExtraNSKeys[cdiPioEKFileWritingFinalize],
                      NSSW_FUNC(finalizeFileWriteOrdered));
-
-  if ( bibAFiledataM == NULL )
-    xabort ( "listSetNew did not succeed" );
 }
 
 /*
