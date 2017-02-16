@@ -74,7 +74,6 @@ void
 pcdiXMPIStat(int iret, const char *filename, int line, MPI_Status *status)
 {
   char errorString[MPI_MAX_ERROR_STRING + 1];
-  int len, rank = getMPICommWorldRank();
 
   if (iret == MPI_ERR_IN_STATUS)
     {
@@ -84,13 +83,16 @@ pcdiXMPIStat(int iret, const char *filename, int line, MPI_Status *status)
         case MPI_SUCCESS: fprintf(stderr, "-------- mpi_success -----------\n"); break;
         case MPI_ERR_PENDING: fprintf(stderr, "-------- mpi_err_pending ----------\n"); break;
         default:
-          MPI_Error_string(status->MPI_ERROR, errorString, &len);
-          errorString[len] = '\0';
-          fprintf(stderr,
-                  "MPI ERROR in request, pe%d, %s, line %d,"
-                  "return value: %d, error_string: %s\n",
-                  rank, filename, line, iret, errorString);
-          MPI_Abort(MPI_COMM_WORLD, iret);
+          {
+            int len, rank = getMPICommWorldRank();
+            MPI_Error_string(status->MPI_ERROR, errorString, &len);
+            errorString[len] = '\0';
+            fprintf(stderr,
+                    "MPI ERROR in request, pe%d, %s, line %d,"
+                    "return value: %d, error_string: %s\n",
+                    rank, filename, line, iret, errorString);
+            MPI_Abort(MPI_COMM_WORLD, iret);
+          }
         }
     }
   else if (iret != MPI_SUCCESS)
