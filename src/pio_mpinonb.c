@@ -17,7 +17,7 @@
 #include "pio_impl.h"
 #include "pio_util.h"
 
-typedef struct
+struct fileMPIFWS
 {
   size_t size;
   struct dBuffer *db1;
@@ -29,23 +29,23 @@ typedef struct
   int tsID;
   bool finished;
   char name[];
-} aFiledataM;
+};
 
 static listSet *bibAFiledataM;
 
 static int
 fileIDTest(void *a, void *fileID)
 {
-  return ((aFiledataM *) a)->fileID == (int) (intptr_t) fileID;
+  return ((struct fileMPIFWS *) a)->fileID == (int) (intptr_t) fileID;
 }
 
 /***************************************************************/
 
-static aFiledataM *
+static struct fileMPIFWS *
 initAFiledataMPINONB(const char *filename, size_t bs)
 {
   MPI_Comm commPio = commInqCommPio();
-  aFiledataM *of = (aFiledataM *) Malloc(sizeof(*of) + strlen(filename) + 1);
+  struct fileMPIFWS *of = (struct fileMPIFWS *) Malloc(sizeof(*of) + strlen(filename) + 1);
 
   strcpy(of->name, filename);
   of->size = bs;
@@ -85,11 +85,11 @@ static int
 destroyAFiledataMPINONB(void *v)
 {
   int iret = 0;
-  aFiledataM *of;
+  struct fileMPIFWS *of;
   MPI_Status status;
   MPI_Offset endpos;
 
-  of = (aFiledataM *) v;
+  of = (struct fileMPIFWS *) v;
 
   xdebug("IOPE%d: close file %d, name=\"%s\"", commInqRankGlob(), of->fileID, of->name);
 
@@ -117,14 +117,14 @@ destroyAFiledataMPINONB(void *v)
 static bool
 compareNamesMPINONB(void *v1, void *v2)
 {
-  aFiledataM *afm1 = v1, *afm2 = v2;
+  struct fileMPIFWS *afm1 = v1, *afm2 = v2;
   return !strcmp(afm1->name, afm2->name);
 }
 
 /***************************************************************/
 
 static void
-writeMPINONB(aFiledataM *of)
+writeMPINONB(struct fileMPIFWS *of)
 {
   int amount;
   MPI_Status status;
@@ -167,7 +167,7 @@ fwMPINONB(int fileID, const void *buffer, size_t len, int tsID)
 {
   int error = 0;
   int filled = 0;
-  aFiledataM *of;
+  struct fileMPIFWS *of;
   int rankPio = commInqRankPio();
 
   of = listSetGet(bibAFiledataM, fileIDTest, (void *) (intptr_t) fileID);
@@ -213,7 +213,7 @@ fwMPINONB(int fileID, const void *buffer, size_t len, int tsID)
 static int
 fcMPINONB(int fileID)
 {
-  aFiledataM *of;
+  struct fileMPIFWS *of;
 
   xdebug("IOPE%d: write buffer, close file and cleanup, in %d", commInqRankPio(), fileID);
 
@@ -231,7 +231,7 @@ fcMPINONB(int fileID)
 static void
 elemCheck(void *q, void *nm)
 {
-  aFiledataM *afm = q;
+  struct fileMPIFWS *afm = q;
   const char *name = nm;
 
   if (!strcmp(name, afm->name)) xabort("Filename %s has already been added to set\n", name);
@@ -246,7 +246,7 @@ fowMPINONB(const char *filename, const char *mode)
   struct cdiPioConf *conf = cdiPioGetConf();
 
   listSetForeach(bibAFiledataM, elemCheck, (void *) filename);
-  aFiledataM *of = initAFiledataMPINONB(filename, conf->writeAggBufLim);
+  struct fileMPIFWS *of = initAFiledataMPINONB(filename, conf->writeAggBufLim);
 
   int id;
   if ((of->fileID = id = listSetAdd(bibAFiledataM, of)) < 0) xabort("filename %s not unique", of->name);
