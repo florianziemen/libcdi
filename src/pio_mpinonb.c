@@ -28,7 +28,6 @@ struct fileMPIFWS
   MPI_Request request;
   int fileID;
   int tsID;
-  bool finished;
 };
 
 static listSet *bibAFiledataM;
@@ -79,8 +78,6 @@ static struct fileMPIFWS *initAFiledataMPINONB ( const char *filename, size_t bs
                      open_info, &of->fh));
   xmpi(MPI_Info_free(&open_info));
   of->request = MPI_REQUEST_NULL;
-  of->finished = false;
-
   return of;
 }
 
