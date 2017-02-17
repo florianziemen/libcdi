@@ -266,8 +266,7 @@ static void finalizeMPINONB(void)
 {
   if (openFilesFill)
     xabort("files still open on exit!");
-  else
-    Free(openFiles);
+  Free(openFiles);
 }
 
 /***************************************************************/
