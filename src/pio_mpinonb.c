@@ -20,7 +20,6 @@
 struct fileMPIFWS
 {
   char *name;
-  size_t size;
   struct dBuffer *db1;
   struct dBuffer *db2;
   struct dBuffer *db;
@@ -41,7 +40,7 @@ fileIDTest(void *a, void *fileID)
 /***************************************************************/
 
 static struct fileMPIFWS *
-initAFiledataMPINONB(const char *filename, size_t bs)
+initAFiledataMPINONB(const char *filename, size_t bufSize)
 {
   MPI_Comm commPio = commInqCommPio();
   struct fileMPIFWS *of = (struct fileMPIFWS *) Malloc(sizeof(*of));
@@ -50,13 +49,12 @@ initAFiledataMPINONB(const char *filename, size_t bs)
     char *name = of->name = Malloc(nameSize);
     memcpy(name, filename, nameSize);
   }
-  of->size = bs;
   of->db1 = NULL;
   of->db2 = NULL;
 
   /* init output buffer */
-  int iret = dbuffer_init(&(of->db1), of->size);
-  iret += dbuffer_init(&(of->db2), of->size);
+  int iret = dbuffer_init(&of->db1, bufSize);
+  iret += dbuffer_init(&of->db2, bufSize);
 
   if (iret > 0) xabort("dbuffer_init did not succeed");
 
@@ -69,7 +67,7 @@ initAFiledataMPINONB(const char *filename, size_t bs)
   {
     xmpi(MPI_Info_create(&open_info));
     char buf_size_str[3 * sizeof(size_t) * CHAR_BIT / 8 + 1];
-    snprintf(buf_size_str, sizeof(buf_size_str), "%zu", bs);
+    snprintf(buf_size_str, sizeof(buf_size_str), "%zu", bufSize);
     xmpi(MPI_Info_set(open_info, "IBM_io_buffer_size", buf_size_str));
     xmpi(MPI_Info_set(open_info, "IBM_largeblock_io", "true"));
   }
