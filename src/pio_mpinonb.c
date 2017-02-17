@@ -19,6 +19,7 @@
 
 struct fileMPIFWS
 {
+  char *name;
   size_t size;
   struct dBuffer *db1;
   struct dBuffer *db2;
@@ -28,7 +29,6 @@ struct fileMPIFWS
   int fileID;
   int tsID;
   bool finished;
-  char name[];
 };
 
 static listSet *bibAFiledataM;
@@ -45,9 +45,12 @@ static struct fileMPIFWS *
 initAFiledataMPINONB(const char *filename, size_t bs)
 {
   MPI_Comm commPio = commInqCommPio();
-  struct fileMPIFWS *of = (struct fileMPIFWS *) Malloc(sizeof(*of) + strlen(filename) + 1);
-
-  strcpy(of->name, filename);
+  struct fileMPIFWS *of = (struct fileMPIFWS *) Malloc(sizeof(*of));
+  {
+    size_t nameSize = strlen(filename) + 1;
+    char *name = of->name = Malloc(nameSize);
+    memcpy(name, filename, nameSize);
+  }
   of->size = bs;
   of->db1 = NULL;
   of->db2 = NULL;
@@ -104,7 +107,8 @@ destroyAFiledataMPINONB(void *v)
 
   dbuffer_cleanup(&(of->db1));
   dbuffer_cleanup(&(of->db2));
-
+  Free(of->name);
+  of->name = NULL;
   Free(of);
 
   xdebug("IOPE%d: closed file, cleaned up, return", commInqRankGlob());
