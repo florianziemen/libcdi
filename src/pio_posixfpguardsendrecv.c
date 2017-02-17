@@ -42,11 +42,11 @@ enum {
  */
 struct mwFileBuf
 {
+  char *name;
   struct dBuffer *db;
   int fd;
   enum IO_Server_command command;
   int tsID, fileID;
-  char name[];
 };
 
 static int
@@ -63,8 +63,12 @@ static struct mwFileBuf *
 newMultiwriterFileBuf(const char *key, size_t bs)
 {
   size_t len = strlen(key);
-  struct mwFileBuf *afd = Calloc(1, sizeof (*afd) + len + 1);
-  strcpy(afd->name, key);
+  struct mwFileBuf *afd = Calloc(1, sizeof (*afd));
+  {
+    size_t nameSize = len + 1;
+    char *name = afd->name = Malloc(nameSize);
+    memcpy(afd->name, key, nameSize);
+  }
   afd->tsID = 0;
 
   /* init output buffer */
@@ -100,7 +104,8 @@ deleteMultiwriterFileBuf(void *v)
   /* file closed, cleanup */
   xdebug("name=%s, file closed, cleanup ...",  afd->name);
   dbuffer_cleanup(&afd->db);
-
+  Free(afd->name);
+  afd->name = NULL;
   Free(afd);
 
   return iret;
