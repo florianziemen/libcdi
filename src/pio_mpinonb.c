@@ -250,10 +250,8 @@ fowMPINONB(const char *filename, const char *mode)
 static void
 finalizeMPINONB(void)
 {
-  if (openFilesFill)
-    xabort("files still open on exit!");
-  else
-    Free(openFiles);
+  if (openFilesFill) xabort("files still open on exit!");
+  Free(openFiles);
 }
 
 /***************************************************************/
