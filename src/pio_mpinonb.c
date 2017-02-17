@@ -82,7 +82,7 @@ destroyAFiledataMPINONB(struct fileMPIFWS *of)
   xdebug("IOPE%d: close file %d, name=\"%s\"", commInqRankGlob(), (int) (of - openFiles), of->name);
 
   /* close file */
-  xmpi(MPI_Wait(&of->request, &status));
+  xmpiStat(MPI_Wait(&of->request, &status), &status);
   xmpi(MPI_Barrier(commInqCommPio()));
   xmpi(MPI_File_get_position_shared(of->fh, &endpos));
   xmpi(MPI_File_set_size(of->fh, endpos));
@@ -117,7 +117,7 @@ writeMPINONB(struct fileMPIFWS *of)
 
   xdebug3("IOPI%d: Write buffer, size %d bytes, in", commInqRankGlob(), amount);
 
-  xmpi(MPI_Wait(&(of->request), &status));
+  xmpiStat(MPI_Wait(&of->request, &status), &status);
   xmpi(MPI_File_iwrite_shared(of->fh, of->db->buffer, amount, MPI_UNSIGNED_CHAR, &of->request));
   xdebug("%d bytes written for fileID=%d", amount, fileID);
 
@@ -155,7 +155,7 @@ fwMPINONB(int fileID, const void *buffer, size_t len, int tsID)
       writeMPINONB(of);
       of->tsID = tsID;
       MPI_Status status;
-      xmpi(MPI_Wait(&(of->request), &status));
+      xmpiStat(MPI_Wait(&(of->request), &status), &status);
       xmpi(MPI_Barrier(commInqCommPio()));
     }
 
