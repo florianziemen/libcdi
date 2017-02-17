@@ -198,7 +198,6 @@ libcdipio_la_SOURCES =							\
 	pio_posixasynch.c						\
 	pio_posixfpguardsendrecv.c					\
 	pio_posixnonb.c							\
-	pio_list_set.c							\
 	resource_unpack.h						\
 	resource_unpack.c						\
 	pio_client.c							\

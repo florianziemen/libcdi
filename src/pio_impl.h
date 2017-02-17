@@ -34,11 +34,6 @@ struct dBuffer
   unsigned char * buffer;
 };
 
-typedef int ( * valDestroyFunction ) ( void * );
-typedef bool (*eqPredicate)(void *, void *);
-
-typedef struct listSet listSet;
-
 struct fileOpTag
 {
   int id;
@@ -78,18 +73,6 @@ dbuffer_data_size(struct dBuffer *dbuffer)
 {
   return dbuffer->wr_pointer;
 }
-
-/* pio_list_set.c */
-listSet *listSetNew(valDestroyFunction, eqPredicate);
-void listSetDelete(listSet *);
-int listSetAdd(listSet *, void *);
-bool listSetIsEmpty(listSet *);
-int listSetRemove(listSet *, int (*predicate)(void *, void *),
-                  void *data);
-void *listSetGet(listSet *q, int (*predicate)(void *, void *), void *data);
-
-typedef void (*elemOp)(void *elem, void *data);
-void listSetForeach(listSet *q, elemOp func, void *data);
 
 /* pio_mpinonb.c */
 void initMPINONB(void);
