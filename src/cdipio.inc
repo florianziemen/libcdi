@@ -203,6 +203,15 @@
 !                                    (INTEGER         confResH)
       EXTERNAL        cdiPioConfGetAioQueueDepth
 
+!                     cdiPioConfSetMaxPathLen
+!                                    (INTEGER         confResH,
+!                                     INTEGER         max_path_len)
+      EXTERNAL        cdiPioConfSetMaxPathLen
+
+      INTEGER         cdiPioConfGetMaxPathLen
+!                                    (INTEGER         confResH)
+      EXTERNAL        cdiPioConfGetMaxPathLen
+
 !                     cdiPioConfSetRedistCache
 !                                    (INTEGER         confResH,
 !                                     INTEGER         doCache)
