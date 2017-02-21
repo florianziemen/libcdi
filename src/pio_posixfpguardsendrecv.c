@@ -35,14 +35,6 @@ enum {
   collGuardTag = 777,
 };
 
-/* datatype to communicate an off_t and a request message */
-static MPI_Datatype dt4Offset, guardMsgDt;
-
-struct guardMsg
-{
-  off_t amount;
-  int fileID, opCode;
-};
 
 /*
  * Represents file opened by multiple writers and the corresponding
@@ -139,11 +131,11 @@ writePF(struct mwFileBuf *afd)
   /* send buffersize, recv offset */
   size_t amount = dbuffer_data_size(afd->db);
 
-  struct guardMsg query
-    = { .amount = (off_t)amount, .fileID = fileID, .opCode = afd->command };
+  struct syncMsg query
+    = { .amount = (off_t)amount, .fileID = fileID, .command = afd->command };
   off_t offset;
-  xmpiStat(MPI_Sendrecv(&query, 1, guardMsgDt, specialRank, collGuardTag,
-                        &offset, 1, dt4Offset, specialRank, collGuardTag,
+  xmpiStat(MPI_Sendrecv(&query, 1, cdiPioSyncMsgDt, specialRank, collGuardTag,
+                        &offset, 1, cdiPioOffsetDt, specialRank, collGuardTag,
                         commPio, &status), &status);
   xdebug("id=%d, command=%d, amount=%zu, sent amount=%lld, recv offset=%ld",
          fileID, afd->command, amount, (long long)(off_t)amount , offset );
@@ -301,10 +293,10 @@ fowPOSIXFPGUARDSENDRECV(const char *filename, const char *mode)
   int specialRank = commInqSpecialRank ();
   MPI_Status status;
   MPI_Comm commPio = commInqCommPio();
-  struct guardMsg query
-    = { .amount = 0, .fileID = (int)fileID, .opCode = afd->command };
-  xmpiStat(MPI_Sendrecv(&query, 1, guardMsgDt, specialRank, collGuardTag,
-                        &offset, 1, dt4Offset, specialRank, collGuardTag,
+  struct syncMsg query
+    = { .amount = 0, .fileID = (int)fileID, .command = afd->command };
+  xmpiStat(MPI_Sendrecv(&query, 1, cdiPioSyncMsgDt, specialRank, collGuardTag,
+                        &offset, 1, cdiPioOffsetDt, specialRank, collGuardTag,
                         commPio, &status), &status);
   afd->command = IO_Set_fp;
   return (int)fileID;
@@ -315,15 +307,15 @@ fowPOSIXFPGUARDSENDRECV(const char *filename, const char *mode)
 static void
 finalizePOSIXFPGUARDSENDRECV(void)
 {
-  static const struct guardMsg query
-    = { .amount = 0, .fileID = 0, .opCode = IO_Finalize };
-  xmpi(MPI_Send((void *)&query, 1, guardMsgDt, commInqSpecialRank(),
+  static const struct syncMsg query
+    = { .amount = 0, .fileID = 0, .command = IO_Finalize };
+  xmpi(MPI_Send((void *)&query, 1, cdiPioSyncMsgDt, commInqSpecialRank(),
                 collGuardTag, commInqCommPio()));
 
   if (openFilesFill)
     xabort("files still open at CDI-PIO finalization");
   Free(openFiles);
-  MPI_Type_free(&guardMsgDt);
+  cdiPioDestroySyncMsgDt();
 }
 
 /***************************************************************/
@@ -339,21 +331,8 @@ initPOSIXFPGUARDSENDRECV(void)
     xabort("error: # of I/O processes must be >= 2 for mode, but is %d",
            numIOServers);
 
-  {
-    MPI_Comm commPio = commInqCommPio();
-    int so = sizeof (off_t);
-    xmpi(MPI_Type_match_size(MPI_TYPECLASS_INTEGER, so, &dt4Offset));
-  }
-  {
-    struct guardMsg dummy;
-    int bl[2] = { 1, 2 };
-    MPI_Aint displ[2];
-    displ[0] = 0;
-    displ[1] = (unsigned char *)&dummy.fileID - (unsigned char *)&dummy.amount;
-    MPI_Datatype dt[2] = { dt4Offset, MPI_INT };
-    xmpi(MPI_Type_create_struct(2, bl, displ, dt, &guardMsgDt));
-    xmpi(MPI_Type_commit(&guardMsgDt));
-  }
+  cdiPioLookupOffsetDt();
+  cdiPioCreateSyncMsgDt();
   int isCollector = commInqRankColl() != -1;
   if (!isCollector)
     fpgPOSIXFPGUARDSENDRECV ();
@@ -372,7 +351,7 @@ initPOSIXFPGUARDSENDRECV(void)
 
 /***************************************************************/
 /* the rank running the message loop below responds to queries of the form
- * struct guardMsg { int fileID, int operation code, off_t amount }
+ * struct syncMsg { off_t amount, int fileID, int operation code }
  * where the answer depends on the operation code:
  * IO_Open_file, IO_Set_fp or IO_Close_file:
  * off_t answer = offset to write to
@@ -403,13 +382,13 @@ fpgPOSIXFPGUARDSENDRECV(void)
   MPI_Comm commPio = commInqCommPio();
   size_t nProcsColl = (size_t)(commInqSizeColl()),
     sentFinalize = nProcsColl;
-  struct guardMsg *msgWords = Malloc(sizeof (*msgWords) * nProcsColl);
+  struct syncMsg *msgWords = Malloc(sizeof (*msgWords) * nProcsColl);
   MPI_Request *msgReq = Malloc(sizeof (*msgReq) * nProcsColl);
 
   xdebug("ncollectors=%zu", nProcsColl);
 
   for (size_t i = 0; i < nProcsColl; ++i)
-    xmpi(MPI_Irecv(msgWords + i, 1, guardMsgDt, (int)i, collGuardTag,
+    xmpi(MPI_Irecv(msgWords + i, 1, cdiPioSyncMsgDt, (int)i, collGuardTag,
                    commPio, msgReq + i));
 
   for ( ;; )
@@ -417,17 +396,17 @@ fpgPOSIXFPGUARDSENDRECV(void)
       xmpiStat(MPI_Waitany((int)nProcsColl, msgReq, &source, &status), &status);
       int fileID = msgWords[source].fileID;
       assert(fileID >= 0);
-      int opcode = msgWords[source].opCode;
+      int opcode = msgWords[source].command;
       off_t amount = msgWords[source].amount;
       /* re-instate listening */
       if (opcode != IO_Finalize)
-        xmpi(MPI_Irecv(msgWords + source, 1, guardMsgDt, source, collGuardTag,
-                       commPio, msgReq + source));
+        xmpi(MPI_Irecv(msgWords + source, 1, cdiPioSyncMsgDt,
+                       source, collGuardTag, commPio, msgReq + source));
 
       xdebug("receive message from source=%d, id=%d, command=%d (%s)",
              source, fileID, opcode, cdiPioCmdStrTab[opcode]);
 
-      if ( opcode >= IO_Open_file && opcode < IO_Finalize )
+      if ( opcode >= IO_Open_file && opcode < IO_Send_buffer )
         {
           if (opcode == IO_Open_file)
             {
@@ -453,7 +432,7 @@ fpgPOSIXFPGUARDSENDRECV(void)
           int unfinished = sharedFPs[fileID].unfinished;
           if (opcode == IO_Close_file && unfinished == 1)
             sharedFPs[fileID].offset = -sharedFPs[fileID].offset-1;
-	  xmpi(MPI_Send(&sharedFPs[fileID].offset, 1, dt4Offset, source,
+	  xmpi(MPI_Send(&sharedFPs[fileID].offset, 1, cdiPioOffsetDt, source,
                         collGuardTag, commPio));
 
           xdebug("id=%d, command=%d (%s), recv amount=%lld, set offset=%ld",
@@ -475,12 +454,12 @@ fpgPOSIXFPGUARDSENDRECV(void)
               Free(sharedFPs);
               Free(msgReq);
               Free(msgWords);
-              MPI_Type_free(&guardMsgDt);
+              cdiPioDestroySyncMsgDt();
               return;
             }
         }
       else
-        xabort("COMMAND NOT IMPLEMENTED");
+        xabort("COMMAND NOT IMPLEMENTED: %d", opcode);
     }
 }
 
