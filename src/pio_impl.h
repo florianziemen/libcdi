@@ -6,6 +6,7 @@
 #endif
 
 #include <stdbool.h>
+#include <sys/types.h>
 #include <unistd.h>
 
 #include <mpi.h>
@@ -19,11 +20,27 @@ enum IO_Server_command
   IO_Set_fp,
   IO_Send_buffer,
   IO_Finalize,
+  IO_Sync_file,
   tagKey = 8, /* should be power of 2, must be
                * larger than IO_Finalize */
 };
 
 extern const char *const cdiPioCmdStrTab[];
+
+struct syncMsg
+{
+  off_t amount;
+  int fileID, command;
+};
+
+/* datatype to communicate an off_t */
+extern MPI_Datatype cdiPioOffsetDt;
+/* datatype to communicate a sync message */
+extern MPI_Datatype cdiPioSyncMsgDt;
+
+void cdiPioLookupOffsetDt(void);
+void cdiPioCreateSyncMsgDt(void);
+void cdiPioDestroySyncMsgDt(void);
 
 struct dBuffer
 {

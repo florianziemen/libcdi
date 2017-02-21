@@ -152,6 +152,16 @@ void cdiPioConfSetAioQueueDepth(int confResH, int queue_depth);
 /* cdiPioConfGetAioQueueDepth: Query depth of AIO queue. */
 int cdiPioConfGetAioQueueDepth(int confResH);
 
+/* cdiPioConfSetMaxPathLen: Set maximal path length allowed in RPC
+ * operations. This defaults to 2*PATH_MAX and therefore should be
+ * safe in almost any environment. In case of deeply nested directory
+ * structures it might be necessary to adjust this value. */
+void cdiPioConfSetMaxPathLen(int confResH, int max_path_len);
+
+/* cdiPioConfGetMaxPathLen: Query maximal path length supported in
+ * streamOpen operations by some paths of parallel I/O. */
+int cdiPioConfGetMaxPathLen(int confResH);
+
 /* cdiPioConfSetRedistCache: set doCache to anything non-zero if data
  * for internal data exchanges is to be cached. This makes sense when
  * the data passed via streamWriteVarPart or streamWriteScatteredVarPart
