@@ -190,6 +190,7 @@ int cdiPioConfCreate(void)
   conf->cacheRedists = conf->cacheXmaps = true;
   conf->recordAggBufLimMB = 128;
   conf->writeAggBufLim = findWriteAccumBufsize();
+  conf->maxPathLen = 2 * (size_t)PATH_MAX;
   conf->aioQueueDepth = 4U;
   conf->xmap_new = xt_xmap_dist_dir_new;
   conf->stripify = true;
@@ -339,6 +340,21 @@ int cdiPioConfGetAioQueueDepth(int confResH)
 {
   struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
   return conf->aioQueueDepth;
+}
+
+void cdiPioConfSetMaxPathLen(int confResH, int max_path_len)
+{
+  struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
+  if (max_path_len >= 1)
+    conf->maxPathLen = max_path_len;
+  else
+    Error("negative value %d for maximum path length requested", max_path_len);
+}
+
+int cdiPioConfGetMaxPathLen(int confResH)
+{
+  struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
+  return conf->maxPathLen;
 }
 
 void cdiPioConfSetXmapNew(int confResH, xmap_new_func_ptr xmap_new)

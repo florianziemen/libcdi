@@ -30,6 +30,7 @@ struct cdiPioConf {
   size_t writeAggBufLim;
   void (*postCommSetupActions)(void);
   xmap_new_func_ptr xmap_new;
+  int maxPathLen;
   unsigned short aioQueueDepth;
   bool largePageAlign;
   bool cacheRedists, cacheXmaps;
@@ -89,6 +90,10 @@ int cdiPioConfGetWriteAggBufLim(int confResH);
 void cdiPioConfSetAioQueueDepth(int confResH, int queue_depth);
 
 int cdiPioConfGetAioQueueDepth(int confResH);
+
+void cdiPioConfSetMaxPathLen(int confResH, int max_path_len);
+
+int cdiPioConfGetMaxPathLen(int confResH);
 
 void cdiPioConfSetXmapNew(int confResH, xmap_new_func_ptr xmap_new);
 

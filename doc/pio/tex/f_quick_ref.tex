@@ -82,6 +82,16 @@ query role attribute of configuration object.
 query IOMode attribute of configuration object.
 
 
+\section*{\tt \htmlref{cdiPioConfGetMaxPathLen}{cdiPioConfGetMaxPathLen}}
+
+\begin{verbatim}
+    INTEGER FUNCTION cdiPioConfGetMaxPathLen (INTEGER confResH)
+\end{verbatim}
+
+Query maximal path length supported in
+streamOpen operations by some paths of parallel I/O..
+
+
 \section*{\tt \htmlref{cdiPioConfGetPartInflate}{cdiPioConfGetPartInflate}}
 
 \begin{verbatim}
@@ -150,6 +160,18 @@ set role attribute of configuration object.
 \end{verbatim}
 
 set IOMode attribute of configuration object.
+
+
+\section*{\tt \htmlref{cdiPioConfSetMaxPathLen}{cdiPioConfSetMaxPathLen}}
+
+\begin{verbatim}
+    SUBROUTINE cdiPioConfSetMaxPathLen (INTEGER confResH, INTEGER max_path_len)
+\end{verbatim}
+
+Set maximal path length allowed in RPC
+operations. This defaults to 2*PATH_MAX and therefore should be
+safe in almost any environment. In case of deeply nested directory
+structures it might be necessary to adjust this value..
 
 
 \section*{\tt \htmlref{cdiPioConfSetPartInflate}{cdiPioConfSetPartInflate}}
