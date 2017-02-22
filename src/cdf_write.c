@@ -406,10 +406,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
         }
       else if ( dimorder[id] == 2 && yid != CDI_UNDEFID )
         {
-          if ( chunktype == CDI_CHUNK_LINES )
-            chunks[ndims] = 1;
-          else
-            chunks[ndims] = ysize;
+          chunks[ndims] = (chunktype == CDI_CHUNK_LINES) ? 1 : ysize;
           dims[ndims] = yid;
           ndims++;
         }
@@ -656,14 +653,12 @@ int cdfDefVar(stream_t *streamptr, int varID)
 
   /*  if ( xtype == NC_BYTE || xtype == NC_SHORT || xtype == NC_INT ) */
     {
-      int laddoffset, lscalefactor;
-      double addoffset, scalefactor;
       int astype = NC_DOUBLE;
 
-      addoffset    = vlistInqVarAddoffset(vlistID, varID);
-      scalefactor  = vlistInqVarScalefactor(vlistID, varID);
-      laddoffset   = IS_NOT_EQUAL(addoffset, 0);
-      lscalefactor = IS_NOT_EQUAL(scalefactor, 1);
+      double addoffset   = vlistInqVarAddoffset(vlistID, varID);
+      double scalefactor = vlistInqVarScalefactor(vlistID, varID);
+      bool laddoffset   = IS_NOT_EQUAL(addoffset, 0);
+      bool lscalefactor = IS_NOT_EQUAL(scalefactor, 1);
 
       if ( laddoffset || lscalefactor )
         {
