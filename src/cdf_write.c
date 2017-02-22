@@ -350,7 +350,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
 
   vlistInqVarDimorder(vlistID, varID, &dimorder);
 
-  int gridsize  = gridInqSize(gridID);
+  size_t gridsize  = gridInqSize(gridID);
   bool lchunk = (gridsize > 1);
   int gridtype  = gridInqType(gridID);
   int gridindex = nc_grid_index(streamptr, gridID);
@@ -395,6 +395,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
   if ( xid != CDI_UNDEFID ) chunks[ndims] = xsize;
   if ( xid != CDI_UNDEFID ) dims[ndims++] = xid;
   */
+  size_t chunk_size_max = 128*1024; // 128MB
   for ( int id = 0; id < 3; ++id )
     {
       if ( dimorder[id] == 3 && zid != CDI_UNDEFID )
@@ -406,13 +407,19 @@ int cdfDefVar(stream_t *streamptr, int varID)
         }
       else if ( dimorder[id] == 2 && yid != CDI_UNDEFID )
         {
-          chunks[ndims] = (chunktype == CDI_CHUNK_LINES) ? 1 : ysize;
+          if ( chunktype == CDI_CHUNK_AUTO )
+            chunks[ndims] = (chunk_size_max > gridsize) ? ysize : chunk_size_max/xsize;
+          else
+            chunks[ndims] = (chunktype == CDI_CHUNK_LINES) ? 1 : ysize;
           dims[ndims] = yid;
           ndims++;
         }
       else if ( dimorder[id] == 1 && xid != CDI_UNDEFID )
         {
-          chunks[ndims] = xsize;
+          if ( chunktype == CDI_CHUNK_AUTO && yid == CDI_UNDEFID )
+            chunks[ndims] = (chunk_size_max > xsize) ? xsize : chunk_size_max;
+          else
+            chunks[ndims] = xsize;
           dims[ndims] = xid;
           ndims++;
         }
@@ -502,11 +509,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
 #if  defined  (HAVE_NETCDF4)
   if ( lchunk && (streamptr->filetype == CDI_FILETYPE_NC4 || streamptr->filetype == CDI_FILETYPE_NC4C) )
     {
-      if ( chunktype == CDI_CHUNK_AUTO )
-        retval = nc_def_var_chunking(fileID, ncvarid, NC_CHUNKED, NULL);
-      else
-        retval = nc_def_var_chunking(fileID, ncvarid, NC_CHUNKED, chunks);
-
+      retval = nc_def_var_chunking(fileID, ncvarid, NC_CHUNKED, chunks);
       if ( retval ) Error("nc_def_var_chunking failed, status = %d", retval);
     }
 #endif
