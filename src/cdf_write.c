@@ -395,7 +395,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
   if ( xid != CDI_UNDEFID ) chunks[ndims] = xsize;
   if ( xid != CDI_UNDEFID ) dims[ndims++] = xid;
   */
-  size_t chunk_size_max = 128*1024; // 128MB
+  size_t chunk_size_max = 65536;
   for ( int id = 0; id < 3; ++id )
     {
       if ( dimorder[id] == 3 && zid != CDI_UNDEFID )
