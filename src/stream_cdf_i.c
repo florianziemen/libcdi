@@ -1085,7 +1085,14 @@ void cdf_scan_var_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimi
           int storage_in;
           nc_inq_var_deflate(ncid, ncvarid, &shuffle, &deflate, &deflate_level);
           if ( deflate > 0 ) ncvars[ncvarid].deflate = 1;
-
+          /*
+          size_t cache_size, nelems;
+          float preemption;
+          nc_get_chunk_cache(&cache_size, &nelems, &preemption);
+          printf("cache_size %lu nelems %lu preemption %g\n", cache_size, nelems, preemption);
+          nc_get_var_chunk_cache(ncid, ncvarid, &cache_size, &nelems, &preemption);
+          printf("varid %d cache_size %lu nelems %lu preemption %g\n", ncvarid, cache_size, nelems, preemption);
+          */
           if ( nc_inq_var_chunking(ncid, ncvarid, &storage_in, chunks) == NC_NOERR )
             {
               if ( storage_in == NC_CHUNKED )
