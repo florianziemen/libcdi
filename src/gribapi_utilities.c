@@ -713,6 +713,11 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
       Error("Unsupported grid type: %s", gridNamePtr(gridtype));
     }
 
+  if ( gridtype == GRID_LONLAT || gridtype == GRID_CURVILINEAR || gridtype == GRID_LCC )
+    {
+      GRIB_CHECK(grib_get_long(gh, "uvRelativeToGrid", &grid->uvRelativeToGrid), 0);
+    }
+
   grid->type  = gridtype;
   grid->projtype  = projtype;
 }

@@ -157,6 +157,7 @@ void grid_init(grid_t *gridptr)
   gridptr->vtable        = &cdiGridVtable;
   gridptr->atts.nalloc   = MAX_ATTRIBUTES;
   gridptr->atts.nelems   = 0;
+  gridptr->uvRelativeToGrid      = 0;   // Some models deliver wind U,V relative to the grid-cell
 }
 
 
@@ -2217,6 +2218,11 @@ bool gridCompare(int gridID, const grid_t *grid, bool coord_compare)
 	}
     }
 
+  if ( (grid->uvRelativeToGrid != gridInqUvRelativeToGrid(gridID)) )
+    {
+      // often grid definition may differ in UV-relativeToGrid
+      differ = 1;
+    }
   return differ;
 }
 
@@ -2277,6 +2283,7 @@ int gridCompareP(void *gridptr1, void *gridptr2)
   if ( IS_NOT_EQUAL(g1->lcc.lat2      , g2->lcc.lat2)      ) return differ;
   if ( IS_NOT_EQUAL(g1->lcc.xinc      , g2->lcc.xinc)      ) return differ;
   if ( IS_NOT_EQUAL(g1->lcc.yinc      , g2->lcc.yinc)      ) return differ;
+  if ( IS_NOT_EQUAL(g1->uvRelativeToGrid     , g2->uvRelativeToGrid)     ) return differ;
 
   const double *restrict g1_xvals = g1->vtable->inqXValsPtr(g1),
                *restrict g2_xvals = g2->vtable->inqXValsPtr(g2);
@@ -2615,6 +2622,7 @@ int gridGenerate(const grid_t *grid)
   gridptr->lcc.scanflag = grid->lcc.scanflag;
   gridptr->number = grid->number;
   gridptr->position = grid->position;
+  gridptr->uvRelativeToGrid       = grid->uvRelativeToGrid;
   memcpy(gridptr->uuid, grid->uuid, CDI_UUID_SIZE);
   if ( gridtype == GRID_UNSTRUCTURED && grid->reference )
     gridDefReference(gridID, grid->reference);
@@ -3923,6 +3931,13 @@ void gridInqUUID(int gridID, unsigned char uuid[CDI_UUID_SIZE])
   grid_t *gridptr = grid_to_pointer(gridID);
 
   memcpy(uuid, gridptr->uuid, CDI_UUID_SIZE);
+}
+
+
+int gridInqUvRelativeToGrid(int gridID)
+{
+  grid_t *gridptr = grid_to_pointer(gridID);
+  return gridptr->uvRelativeToGrid;
 }
 
 

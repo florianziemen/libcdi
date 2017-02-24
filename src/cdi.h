@@ -964,6 +964,8 @@ void    gridChangeType(int gridID, int gridtype);
 void    gridDefComplexPacking(int gridID, int lpack);
 int     gridInqComplexPacking(int gridID);
 
+int     gridInqUvRelativeToGrid(int gridID);
+
 /* ZAXIS routines */
 
 void    zaxisName(int zaxistype, char *zaxisname);
