@@ -712,7 +712,12 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
     }
 
   if ( gridtype == GRID_GAUSSIAN || gridtype == GRID_LONLAT || gridtype == GRID_PROJECTION || gridtype == GRID_LCC )
-    GRIB_CHECK(grib_get_long(gh, "uvRelativeToGrid", &grid->uvRelativeToGrid), 0);
+    {
+      long temp;
+      GRIB_CHECK(grib_get_long(gh, "uvRelativeToGrid", &temp), 0);
+      assert(temp == 0 || temp == 1);
+      grid->uvRelativeToGrid = (bool)temp;
+    }
 
   grid->type  = gridtype;
   grid->projtype  = projtype;

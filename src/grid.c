@@ -3941,7 +3941,7 @@ void gridDefUvRelativeToGrid(int gridID, int uvRelativeToGrid)
   if ( gridptr->uvRelativeToGrid != uvRelativeToGrid )
     {
       gridMark4Update(gridID);
-      gridptr->uvRelativeToGrid = uvRelativeToGrid;
+      gridptr->uvRelativeToGrid = (bool)uvRelativeToGrid;
     }
 }
 

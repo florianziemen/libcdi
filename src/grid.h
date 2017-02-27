@@ -104,7 +104,8 @@ struct grid_t {
   int     np;                     /* number of parallels between a pole and the equator */
   bool    lcomplex;
   bool    hasdims;
-  long uvRelativeToGrid;           /* Some models deliver wind U,V relative to the grid-cell */
+  /* Some models deliver wind U,V relative to the grid-cell */
+  bool uvRelativeToGrid;
   struct gridaxis_t x;
   struct gridaxis_t y;
   const struct gridVirtTable *vtable;
