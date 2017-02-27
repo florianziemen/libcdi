@@ -96,7 +96,7 @@ static unsigned nvars = 0;
 static
 void paramInitEntry(unsigned varID, int param)
 {
-  vartable[varID].varID          = varID;
+  vartable[varID].varID          = (int)varID;
   vartable[varID].param          = param;
   vartable[varID].prec           = 0;
   vartable[varID].tsteptype      = TSTEP_INSTANT;
@@ -369,7 +369,7 @@ paramNewEntry(int param)
     {
       vartable = (vartable_t *) Realloc(vartable, (size_t)(varTablesize *= 2)
                                         * sizeof (vartable_t));
-      for ( unsigned i = varID; i < varTablesize; i++ )
+      for ( size_t i = varID; i < varTablesize; i++ )
         {
           vartable[i].param = UNDEF_PARAM;
           vartable[i].opt_grib_kvpair      = NULL;
