@@ -2086,6 +2086,9 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
         if ( lieee )
           GRIB_CHECK(my_grib_set_long(gh, "precision", datatype == CDI_DATATYPE_FLT64 ? 2 : 1), 0);
 
+        long uvRelativeToGrid = gridInqUvRelativeToGrid(gridID);
+        if ( uvRelativeToGrid ) GRIB_CHECK(my_grib_set_long(gh, "uvRelativeToGrid", uvRelativeToGrid), 0);
+
 	break;
       }
     case GRID_LCC:
@@ -2100,15 +2103,13 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
                         &projflag, &scanflag);
 
         static const char mesg[] = "lambert";
-        size_t len = sizeof (mesg) -1;
+        size_t len = sizeof(mesg) -1;
         GRIB_CHECK(my_grib_set_string(gh, "gridType", mesg, &len), 0);
 
 	GRIB_CHECK(my_grib_set_long(gh, "Nx", xsize), 0);
 	GRIB_CHECK(my_grib_set_long(gh, "Ny", ysize), 0);
 
-        /* FIXME: lround should probably be round here */
 	GRIB_CHECK(my_grib_set_double(gh, "DxInMetres", (double)lround(xincm)), 0);
-        /* FIXME: lround should probably be round here */
 	GRIB_CHECK(my_grib_set_double(gh, "DyInMetres", (double)lround(yincm)), 0);
 	GRIB_CHECK(my_grib_set_double(gh, "longitudeOfFirstGridPointInDegrees", originLon), 0);
 	GRIB_CHECK(my_grib_set_double(gh, "latitudeOfFirstGridPointInDegrees", originLat), 0);
@@ -2122,12 +2123,15 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
             GRIB_CHECK(my_grib_set_long(gh, "scanningMode", scanflag), 0);
           }
 
+        long uvRelativeToGrid = gridInqUvRelativeToGrid(gridID);
+        if ( uvRelativeToGrid ) GRIB_CHECK(my_grib_set_long(gh, "uvRelativeToGrid", uvRelativeToGrid), 0);
+
 	break;
       }
     case GRID_SPECTRAL:
       {
         static const char mesg[] = "sh";
-        size_t len = sizeof (mesg) -1;
+        size_t len = sizeof(mesg) -1;
 	GRIB_CHECK(my_grib_set_string(gh, "gridType", mesg, &len), 0);
 
 	int trunc = gridInqTrunc(gridID);

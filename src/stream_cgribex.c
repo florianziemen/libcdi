@@ -29,6 +29,8 @@ typedef struct {
 
 
 #if  defined  (HAVE_LIBCGRIBEX)
+static bool bit_get(int number, int bit) { return (bool)((number >> bit) & 1); }
+
 static
 int cgribexGetGridType(int *isec2)
 {
@@ -163,6 +165,9 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid, i
 
   if ( gridtype == GRID_LONLAT || gridtype == GRID_GAUSSIAN || projtype == CDI_PROJ_RLL )
     {
+      bool ijDirectionIncrementGiven = bit_get(ISEC2_ResFlag, 7);
+      bool uvRelativeToGrid = bit_get(ISEC2_ResFlag, 3);
+      if ( uvRelativeToGrid ) grid->uvRelativeToGrid = 1;
       if ( ISEC4_NumValues != ISEC2_NumLon*ISEC2_NumLat )
         Error("numberOfPoints (%d) and gridSize (%d) differ!", ISEC4_NumValues, ISEC2_NumLon*ISEC2_NumLat);
       grid->size  = ISEC4_NumValues;
@@ -180,7 +185,7 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid, i
 
             if ( ISEC2_LastLon < ISEC2_FirstLon && ISEC2_LastLon < 0 ) ISEC2_LastLon += 360000;
 
-            if ( ISEC2_ResFlag && ISEC2_LonIncr > 0 )
+            if ( ijDirectionIncrementGiven && ISEC2_LonIncr > 0 )
               {
                 if ( abs(ISEC2_LastLon - (ISEC2_FirstLon+ISEC2_LonIncr*(grid->x.size-1))) <= 2 )
                   {
@@ -213,7 +218,7 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid, i
         if ( grid->y.size > 1 && compyinc )
           {
             bool recompinc = true;
-            if ( ISEC2_ResFlag && ISEC2_LatIncr > 0 )
+            if ( ijDirectionIncrementGiven && ISEC2_LatIncr > 0 )
               {
                 if ( abs(ISEC2_LastLat - (ISEC2_FirstLat+ISEC2_LatIncr*(grid->y.size-1))) <= 2 )
                   {
@@ -232,6 +237,9 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid, i
     }
   else if ( gridtype == GRID_GAUSSIAN_REDUCED )
     {
+      bool ijDirectionIncrementGiven = bit_get(ISEC2_ResFlag, 7);
+      bool uvRelativeToGrid = bit_get(ISEC2_ResFlag, 3);
+      if ( uvRelativeToGrid ) grid->uvRelativeToGrid = 1;
       grid->np      = ISEC2_NumPar;
       grid->size    = ISEC4_NumValues;
       grid->rowlon  = ISEC2_RowLonPtr;
@@ -246,7 +254,7 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid, i
           {
             if ( ISEC2_LastLon < ISEC2_FirstLon && ISEC2_LastLon < 0 ) ISEC2_LastLon += 360000;
 
-            if ( ISEC2_ResFlag && ISEC2_LonIncr > 0 )
+            if ( ijDirectionIncrementGiven && ISEC2_LonIncr > 0 )
               grid->x.inc = ISEC2_LonIncr * 0.001;
             else
               grid->x.inc = (ISEC2_LastLon - ISEC2_FirstLon) * 0.001 / (grid->x.size - 1);
@@ -260,7 +268,7 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid, i
       {
         if ( grid->y.size > 1 )
           {
-            if ( ISEC2_ResFlag && ISEC2_LatIncr > 0 )
+            if ( ijDirectionIncrementGiven && ISEC2_LatIncr > 0 )
               grid->y.inc = ISEC2_LatIncr * 0.001;
             else
               grid->y.inc = (ISEC2_LastLat - ISEC2_FirstLat) * 0.001 / (grid->y.size - 1);
@@ -272,6 +280,9 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid, i
     }
   else if ( gridtype == GRID_LCC )
     {
+      bool uvRelativeToGrid = bit_get(ISEC2_ResFlag, 3);
+      if ( uvRelativeToGrid ) grid->uvRelativeToGrid = 1;
+
       if ( ISEC4_NumValues != ISEC2_NumLon*ISEC2_NumLat )
         Error("numberOfPoints (%d) and gridSize (%d) differ!",
               ISEC4_NumValues, ISEC2_NumLon*ISEC2_NumLat);
@@ -1719,7 +1730,8 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
 	if ( ISEC2_NumLon == 1 && ISEC2_NumLat > 1 )
 	  if ( ISEC2_LonIncr == 0 && ISEC2_LatIncr != 0 ) ISEC2_LonIncr = ISEC2_LatIncr;
 
-        ISEC2_ResFlag = ( ISEC2_LatIncr == 0 || ISEC2_LonIncr == 0 ) ? 0 : 128;
+        ISEC2_ResFlag = ( ISEC2_LatIncr == 0 || ISEC2_LonIncr == 0 ) ? 0 : 128; // Set bit 7
+        if ( gridInqUvRelativeToGrid(gridID) ) ISEC2_ResFlag += 8; // Set bit 3
 
 	if ( lrotated )
           {
@@ -1766,6 +1778,9 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
 	ISEC2_Lambert_LonSP  = 0;
 	ISEC2_Lambert_ProjFlag = projflag;
 	ISEC2_ScanFlag = scanflag;
+
+        ISEC2_ResFlag = ( ISEC2_Lambert_dx == 0 || ISEC2_Lambert_dy == 0 ) ? 0 : 128; // Set bit 7
+        if ( gridInqUvRelativeToGrid(gridID) ) ISEC2_ResFlag += 8; // Set bit 3
 
 	break;
       }
