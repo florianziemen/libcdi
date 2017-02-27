@@ -116,9 +116,9 @@ bool cgribexTimeIsFC(int *isec1)
 static
 int cgribexGetTsteptype(int timerange)
 {
-  int tsteptype = TSTEP_INSTANT;
   static bool lprint = true;
 
+  int tsteptype = TSTEP_INSTANT;
   switch ( timerange )
     {
     case  0:  tsteptype = TSTEP_INSTANT;  break;
@@ -494,7 +494,6 @@ void cgribexDecodeHeader(int *isec0, int *isec1, int *isec2, double *fsec2,
   if ( ISEC1_CenterID == 215 && (isec1[34] != 0 && isec1[34] != 255) )
     {
       double undef_pds, undef_eps;
-
       MCH_get_undef(isec1, &undef_pds, &undef_eps);
       FSEC3_MissVal = undef_pds;
       *lmv = 1;
@@ -504,9 +503,9 @@ void cgribexDecodeHeader(int *isec0, int *isec1, int *isec2, double *fsec2,
 static
 compvar_t cgribexVarSet(int param, int level1, int level2, int leveltype, int trange)
 {
-  compvar_t compVar;
   int tsteptype = cgribexGetTsteptype(trange);
 
+  compvar_t compVar;
   compVar.param     = param;
   compVar.level1    = level1;
   compVar.level2    = level2;
@@ -1353,33 +1352,18 @@ int cgribexDecode(int memtype, void *gribbuffer, int gribsize, void *data, long 
 static
 void cgribexDefInstitut(int *isec1, int vlistID, int varID)
 {
-  int instID;
-
-  if ( vlistInqInstitut(vlistID) != CDI_UNDEFID )
-    instID = vlistInqInstitut(vlistID);
-  else
-    instID = vlistInqVarInstitut(vlistID, varID);
-
+  int instID = (vlistInqInstitut(vlistID) != CDI_UNDEFID) ? vlistInqInstitut(vlistID) : vlistInqVarInstitut(vlistID, varID);
   if ( instID != CDI_UNDEFID )
     {
-      int center, subcenter;
-      center    = institutInqCenter(instID);
-      subcenter = institutInqSubcenter(instID);
-      ISEC1_CenterID    = center;
-      ISEC1_SubCenterID = subcenter;
+      ISEC1_CenterID    = institutInqCenter(instID);
+      ISEC1_SubCenterID = institutInqSubcenter(instID);
     }
 }
 
 static
 void cgribexDefModel(int *isec1, int vlistID, int varID)
 {
-  int modelID;
-
-  if ( vlistInqModel(vlistID) != CDI_UNDEFID )
-    modelID = vlistInqModel(vlistID);
-  else
-    modelID = vlistInqVarModel(vlistID, varID);
-
+  int modelID = (vlistInqModel(vlistID) != CDI_UNDEFID) ? vlistInqModel(vlistID) : vlistInqVarModel(vlistID, varID);
   if ( modelID != CDI_UNDEFID )
     ISEC1_ModelID = modelInqGribID(modelID);
 }
@@ -1388,9 +1372,7 @@ static
 void cgribexDefParam(int *isec1, int param)
 {
   int pdis, pcat, pnum;
-
   cdiDecodeParam(param, &pnum, &pcat, &pdis);
-
   if ( pnum < 0 ) pnum = -pnum;
 
   static bool lwarn_pdis = true;
@@ -1418,10 +1400,8 @@ static
 int cgribexDefTimerange(int tsteptype, int factor, int calendar,
 			int rdate, int rtime, int vdate, int vtime, int *pip1, int *pip2)
 {
-  int timerange = -1;
   int year, month, day, hour, minute, second;
   int julday1, secofday1, julday2, secofday2, days, secs;
-  int ip1 = 0, ip2 = 0;
 
   cdiDecodeDate(rdate, &year, &month, &day);
   cdiDecodeTime(rtime, &hour, &minute, &second);
@@ -1433,6 +1413,8 @@ int cgribexDefTimerange(int tsteptype, int factor, int calendar,
 
   (void) julday_sub(julday1, secofday1, julday2, secofday2, &days, &secs);
 
+  int timerange = -1;
+  int ip1 = 0, ip2 = 0;
   if ( !(int)(fmod(days*86400.0 + secs, factor)) )
     {
       int ip = (int) ((days*86400.0 + secs)/factor);
@@ -1462,13 +1444,10 @@ static
 int cgribexDefDateTime(int *isec1, int timeunit, int date, int time)
 {
   int year, month, day, hour, minute, second;
-  int century = 0;
-  int factor = 1;
-
   cdiDecodeDate(date, &year, &month, &day);
   cdiDecodeTime(time, &hour, &minute, &second);
 
-  century =  year / 100;
+  int century =  year / 100;
 
   ISEC1_Year = year - century*100;
 
@@ -1494,6 +1473,7 @@ int cgribexDefDateTime(int *isec1, int timeunit, int date, int time)
 
   ISEC1_Century = century;
 
+  int factor = 1;
   switch (timeunit)
     {
     case TUNIT_MINUTE:    factor =    60; ISEC1_TimeUnit = ISEC1_TABLE4_MINUTE;    break;
@@ -1770,7 +1750,7 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
           ysize = gridInqYsize(gridID);
 
 	gridInqParamLCC(gridID, &originLon, &originLat, &lonParY, &lat1, &lat2, &xincm, &yincm,
-		   &projflag, &scanflag);
+                        &projflag, &scanflag);
 
 	ISEC2_GridType = GRIB1_GTYPE_LCC;
 	ISEC2_NumLon   = xsize;
@@ -1851,7 +1831,6 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
 {
   char units[CDI_MAX_NAME];
   static bool lwarning_vct = true;
-  double level;
 
   int zaxistype = zaxisInqType(zaxisID);
   int ltype = zaxisInqLtype(zaxisID);
@@ -1918,7 +1897,7 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
       }
     case ZAXIS_PRESSURE:
       {
-	level = zaxisInqLevel(zaxisID, levelID);
+	double level = zaxisInqLevel(zaxisID, levelID);
 	if ( level < 0 ) Warning("Pressure level of %f Pa is below zero!", level);
 
 	zaxisInqUnits(zaxisID, units);
@@ -1935,7 +1914,7 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
       }
     case ZAXIS_HEIGHT:
       {
-	level = zaxisInqLevel(zaxisID, levelID);
+	double level = zaxisInqLevel(zaxisID, levelID);
 
 	zaxisInqUnits(zaxisID, units);
         if ( units[1] == 'm' && !units[2] )
@@ -1962,11 +1941,10 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
       {
 	zaxisInqUnits(zaxisID, units);
 
-	double factor;
+	double factor = 100; // default: meter
         if      ( units[0] == 'm' && units[1] == 'm' ) factor =   0.1;
         else if ( units[0] == 'c' && units[1] == 'm' ) factor =   1;
         else if ( units[0] == 'd' && units[1] == 'm' ) factor =  10;
-        else                                           factor = 100; // meter
 
 	if ( zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL) )
           isec1DefLevel(isec1, GRIB1_LTYPE_LANDDEPTH_LAYER, (int) (factor*zaxisInqLbound(zaxisID, levelID)),
@@ -2044,21 +2022,17 @@ size_t cgribexEncode(int memtype, int varID, int levelID, int vlistID, int gridI
 		     int vdate, int vtime, int tsteptype, int numavg,
 		     long datasize, const void *data, int nmiss, void *gribbuffer, size_t gribbuffersize)
 {
-  size_t nbytes = 0;
-  int gribsize;
   int iret = 0, iword = 0;
   int isec0[2], isec1[4096], isec2[4096], isec3[2], isec4[512];
   float fsec2f[512], fsec3f[2];
   double fsec2[512], fsec3[2];
-  int datatype;
-  int param;
 
   memset(isec1, 0, 256*sizeof(int));
   fsec2[0] = 0; fsec2[1] = 0;
   fsec2f[0] = 0; fsec2f[1] = 0;
 
-  gribsize = (int)(gribbuffersize / sizeof(int));
-  param    = vlistInqVarParam(vlistID, varID);
+  int gribsize = (int)(gribbuffersize / sizeof(int));
+  int param    = vlistInqVarParam(vlistID, varID);
 
   cgribexDefaultSec0(isec0);
   cgribexDefaultSec1(isec1);
@@ -2067,7 +2041,7 @@ size_t cgribexEncode(int memtype, int varID, int levelID, int vlistID, int gridI
   cgribexDefInstitut(isec1, vlistID, varID);
   cgribexDefModel(isec1, vlistID, varID);
 
-  datatype = vlistInqVarDatatype(vlistID, varID);
+  int datatype = vlistInqVarDatatype(vlistID, varID);
 
   cgribexDefParam(isec1, param);
   cgribexDefTime(isec1, vdate, vtime, tsteptype, numavg, vlistInqTaxis(vlistID));
@@ -2112,7 +2086,7 @@ size_t cgribexEncode(int memtype, int varID, int levelID, int vlistID, int gridI
 
   if ( iret ) Error("Problem during GRIB encode (errno = %d)!", iret);
 
-  nbytes = (size_t)iword * sizeof (int);
+  size_t nbytes = (size_t)iword * sizeof(int);
   return nbytes;
 }
 #endif
