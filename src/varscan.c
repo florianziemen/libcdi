@@ -91,7 +91,7 @@ vartable_t;
 
 static vartable_t *vartable;
 static unsigned varTablesize = 0;
-static unsigned nvars = 0;
+static unsigned varTableUsed = 0;
 
 static
 void paramInitEntry(unsigned varID, int param)
@@ -171,7 +171,7 @@ void varFree(void)
 {
   if ( CDI_Debug ) Message("call to varFree");
 
-  for ( unsigned varID = 0; varID < nvars; varID++ )
+  for ( size_t varID = 0; varID < varTableUsed; varID++ )
     {
       if ( vartable[varID].recordTable )
         {
@@ -205,7 +205,7 @@ void varFree(void)
 
   vartable = NULL;
   varTablesize = 0;
-  nvars = 0;
+  varTableUsed = 0;
 
   if ( Vct )
     Free(Vct);
@@ -433,7 +433,7 @@ void varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds,
 
   if ( varID == (unsigned) CDI_UNDEFID )
     {
-      nvars++;
+      varTableUsed++;
       varID = paramNewEntry(param);
       vartable[varID].gridID     = gridID;
       vartable[varID].zaxistype  = zaxistype;
@@ -581,21 +581,21 @@ void cdi_generate_vars(stream_t *streamptr)
   char name[CDI_MAX_NAME], longname[CDI_MAX_NAME], units[CDI_MAX_NAME];
   int vlistID = streamptr->vlistID;
 
-  int *varids = (int *) Malloc(nvars*sizeof(int));
-  for ( unsigned varID = 0; varID < nvars; varID++ ) varids[varID] = (int)varID;
+  int *varids = (int *) Malloc(varTableUsed*sizeof(int));
+  for ( size_t varID = 0; varID < varTableUsed; varID++ ) varids[varID] = (int)varID;
   /*
   if ( streamptr->sortparam )
     {
-      struct paraminfo *varInfo = (struct paraminfo *) Malloc((size_t)nvars * sizeof(struct paraminfo));
+      struct paraminfo *varInfo = (struct paraminfo *) Malloc((size_t)varTableUsed * sizeof(struct paraminfo));
 
-      for ( unsigned varID = 0; varID < nvars; varID++ )
+      for ( unsigned varID = 0; varID < varTableUsed; varID++ )
 	{
 	  varInfo[varID].varid = varids[varID];
 	  varInfo[varID].param = vartable[varID].param;
 	  varInfo[varID].ltype = vartable[varID].ltype1;
 	}
-      qsort(varInfo, (size_t)nvars, sizeof(struct paraminfo), cmp_param);
-      for ( unsigned varID = 0; varID < nvars; varID++ )
+      qsort(varInfo, (size_t)varTableUsed, sizeof(struct paraminfo), cmp_param);
+      for ( unsigned varID = 0; varID < varTableUsed; varID++ )
 	{
 	  varids[varID] = varInfo[varID].varid;
 	}
@@ -604,10 +604,10 @@ void cdi_generate_vars(stream_t *streamptr)
 
   if ( streamptr->sortname )
     {
-      qsort(vartable, (size_t)nvars, sizeof(vartable_t), cmp_varname);
+      qsort(vartable, (size_t)varTableUsed, sizeof(vartable_t), cmp_varname);
     }
   */
-  for ( unsigned index = 0; index < nvars; index++ )
+  for ( size_t index = 0; index < varTableUsed; index++ )
     {
       int varid      = varids[index];
 
@@ -830,7 +830,7 @@ void cdi_generate_vars(stream_t *streamptr)
       if ( tableID != CDI_UNDEFID ) vlistDefVarTable(vlistID, varID, tableID);
     }
 
-  for ( unsigned index = 0; index < nvars; index++ )
+  for ( size_t index = 0; index < varTableUsed; index++ )
     {
       int varid = varids[index];
       unsigned nlevels = vartable[varid].recordTable[0].nlevels;
