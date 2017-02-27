@@ -2069,14 +2069,13 @@ void cdfDefHistory(stream_t *streamptr, int size, const char *history)
 
 void cdfDefVars(stream_t *streamptr)
 {
-  int index = 0;
   int vlistID = streamptr->vlistID;
   if ( vlistID == CDI_UNDEFID )
     Error("Internal problem! vlist undefined for streamptr %p", streamptr);
 
   int ngrids = vlistNgrids(vlistID);
   if ( 2*ngrids > MAX_GRIDS_PS ) Error("Internal problem! Too many grids per stream (max=%d)\n", MAX_GRIDS_PS);
-  for ( index = 0; index < 2*ngrids; ++index )
+  for ( int index = 0; index < 2*ngrids; ++index )
     {
       streamptr->ncgrid[index].gridID = CDI_UNDEFID;
       streamptr->ncgrid[index].xdimID = CDI_UNDEFID;
@@ -2086,19 +2085,20 @@ void cdfDefVars(stream_t *streamptr)
       streamptr->ncgrid[index].avarID = CDI_UNDEFID;
     }
 
-  for ( index = 0; index < ngrids; ++index )
+  for ( int index = 0; index < ngrids; ++index )
     {
       int gridID = vlistGrid(vlistID, index);
       cdfDefGrid(streamptr, gridID, index);
     }
-  index = ngrids-1;
-  for ( int i = 0; i < ngrids; ++i )
-    {
-      int gridID = vlistGrid(vlistID, i);
-      int projID = gridInqProj(gridID);
-      if ( projID != CDI_UNDEFID ) cdfDefGrid(streamptr, projID, ++index);
-    }
-
+  {
+    int index = ngrids-1;
+    for ( int i = 0; i < ngrids; ++i )
+      {
+        int gridID = vlistGrid(vlistID, i);
+        int projID = gridInqProj(gridID);
+        if ( projID != CDI_UNDEFID ) cdfDefGrid(streamptr, projID, ++index);
+      }
+  }
   int nzaxis = vlistNzaxis(vlistID);
   for ( int index = 0; index < nzaxis; ++index )
     {
