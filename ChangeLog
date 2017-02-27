@@ -4,6 +4,7 @@
 
 2017-02-27  Uwe Schulzweida
 
+	* Added function gridDefUvRelativeToGrid()
 	* gridInqUvRelativeToGrid(): added cgribex support
 
 2017-02-24  Uwe Schulzweida

@@ -3934,6 +3934,18 @@ void gridInqUUID(int gridID, unsigned char uuid[CDI_UUID_SIZE])
 }
 
 
+void gridDefUvRelativeToGrid(int gridID, int uvRelativeToGrid)
+{
+  grid_t *gridptr = grid_to_pointer(gridID);
+
+  if ( gridptr->uvRelativeToGrid != uvRelativeToGrid )
+    {
+      gridMark4Update(gridID);
+      gridptr->uvRelativeToGrid = uvRelativeToGrid;
+    }
+}
+
+
 int gridInqUvRelativeToGrid(int gridID)
 {
   grid_t *gridptr = grid_to_pointer(gridID);
