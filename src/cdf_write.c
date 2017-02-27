@@ -350,7 +350,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
 
   vlistInqVarDimorder(vlistID, varID, &dimorder);
 
-  size_t gridsize  = gridInqSize(gridID);
+  size_t gridsize  = (size_t)(gridInqSize(gridID));
   bool lchunk = (gridsize > 1);
   int gridtype  = gridInqType(gridID);
   int gridindex = nc_grid_index(streamptr, gridID);
