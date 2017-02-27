@@ -1991,7 +1991,7 @@ void grid_check_cyclic(grid_t *gridptr)
               foundCloseVertices:
               ;
 	    }
-          gridptr->isCyclic = (int) isCyclic;
+          gridptr->isCyclic = isCyclic;
 	}
     }
 }
