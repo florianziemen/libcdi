@@ -19,7 +19,8 @@
 #include "pio_dbuffer.h"
 #include "pio_util.h"
 
-int cdiPioDbufferInit(struct dBuffer *db, size_t bufSize)
+void
+cdiPioDbufferInit(struct dBuffer *db, size_t bufSize)
 {
   assert(db);
   db->wr_pointer = 0;
@@ -56,7 +57,6 @@ int cdiPioDbufferInit(struct dBuffer *db, size_t bufSize)
   db->buffer = (unsigned char *)malloc(bufSize);
   assert(db->buffer);
 #endif
-  return 0;
 }
 
 void
