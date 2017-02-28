@@ -2108,9 +2108,8 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 
 	GRIB_CHECK(my_grib_set_long(gh, "Nx", xsize), 0);
 	GRIB_CHECK(my_grib_set_long(gh, "Ny", ysize), 0);
-
-	GRIB_CHECK(my_grib_set_double(gh, "DxInMetres", (double)lround(xincm)), 0);
-	GRIB_CHECK(my_grib_set_double(gh, "DyInMetres", (double)lround(yincm)), 0);
+	GRIB_CHECK(my_grib_set_long(gh, "DxInMetres", lround(xincm)), 0);
+	GRIB_CHECK(my_grib_set_long(gh, "DyInMetres", lround(yincm)), 0);
 	GRIB_CHECK(my_grib_set_double(gh, "longitudeOfFirstGridPointInDegrees", originLon), 0);
 	GRIB_CHECK(my_grib_set_double(gh, "latitudeOfFirstGridPointInDegrees", originLat), 0);
 	GRIB_CHECK(my_grib_set_double(gh, "LoVInDegrees", lonParY), 0);
@@ -2242,16 +2241,14 @@ static
 void getLevelFactor(double level, long *factor, long *out_scaled_value)
 {
   double scaled_value  = level;
-  /* FIXME: lround might be better here */
-  long   iscaled_value = (long) round(scaled_value);
+  long   iscaled_value = lround(scaled_value);
   long   i;
 
   const double eps = 1.e-8;
   for ( i=0; (fabs(scaled_value - (double) iscaled_value) >= eps) && i < 7; i++ )
     {
       scaled_value *= 10.;
-      /* FIXME: lround might be better here */
-      iscaled_value = (long)round(scaled_value);
+      iscaled_value = lround(scaled_value);
     }
 
   (*factor)           = i;
