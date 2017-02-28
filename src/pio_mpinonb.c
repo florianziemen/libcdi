@@ -22,12 +22,11 @@
 struct fileMPIFWS
 {
   char *name;
-  struct dBuffer *db1;
-  struct dBuffer *db2;
-  struct dBuffer *db;
+  struct dBuffer db[2];
   MPI_File fh;
   MPI_Request request;
   int tsID;
+  unsigned dbufIdx;
 };
 
 static struct fileMPIFWS *openFiles;
@@ -44,16 +43,14 @@ initAFiledataMPINONB(struct fileMPIFWS *of, const char *filename, size_t bufSize
     char *name = of->name = Malloc(nameSize);
     memcpy(name, filename, nameSize);
   }
-  of->db1 = NULL;
-  of->db2 = NULL;
 
   /* init output buffer */
-  int iret = cdiPioDbufferInit(&of->db1, bufSize);
-  iret += cdiPioDbufferInit(&of->db2, bufSize);
+  int iret = cdiPioDbufferInit(of->db, bufSize);
+  iret += cdiPioDbufferInit(of->db + 1, bufSize);
 
   if (iret > 0) xabort("cdiPioDbufferInit did not succeed");
 
-  of->db = of->db1;
+  of->dbufIdx = 0;
 
   of->tsID = -1;
 
@@ -91,8 +88,8 @@ destroyAFiledataMPINONB(struct fileMPIFWS *of)
 
   /* file closed, cleanup */
 
-  cdiPioDbufferDestroy(&(of->db1));
-  cdiPioDbufferDestroy(&(of->db2));
+  cdiPioDbufferDestroy(of->db);
+  cdiPioDbufferDestroy(of->db + 1);
   Free(of->name);
   of->name = NULL;
 
@@ -106,38 +103,25 @@ destroyAFiledataMPINONB(struct fileMPIFWS *of)
 static void
 writeMPINONB(struct fileMPIFWS *of)
 {
-  int amount;
   MPI_Status status;
   int fileID = (int) (of - openFiles);
 
   /* write buffer */
-
-  amount = (int) cdiPioDbufferGetPos(of->db);
+  size_t dbufIdx = of->dbufIdx;
+  int amount = (int) cdiPioDbufferGetPos(of->db + dbufIdx);
 
   if (amount == 0) return;
 
   xdebug3("IOPI%d: Write buffer, size %d bytes, in", commInqRankGlob(), amount);
 
   xmpiStat(MPI_Wait(&of->request, &status), &status);
-  xmpi(MPI_File_iwrite_shared(of->fh, of->db->buffer, amount, MPI_UNSIGNED_CHAR, &of->request));
+  xmpi(MPI_File_iwrite_shared(of->fh, of->db[dbufIdx].buffer, amount, MPI_UNSIGNED_CHAR, &of->request));
   xdebug("%d bytes written for fileID=%d", amount, fileID);
 
   /* change outputBuffer */
 
-  cdiPioDbufferReset(of->db);
-
-  if (of->db == of->db1)
-    {
-      xdebug3("IOPE%d: fileID=%d, change to buffer 2 ...", commInqRankGlob(), fileID);
-      of->db = of->db2;
-    }
-  else
-    {
-      xdebug3("IOPE%d: fileID=%d, change to buffer 1 ...", commInqRankGlob(), fileID);
-      of->db = of->db1;
-    }
-
-  return;
+  cdiPioDbufferReset(of->db + dbufIdx);
+  of->dbufIdx = (unsigned) (dbufIdx ^ 1);
 }
 
 /***************************************************************/
@@ -156,11 +140,12 @@ fwMPINONB(int fileID, const void *buffer, size_t len, int tsID)
       writeMPINONB(of);
       of->tsID = tsID;
       MPI_Status status;
-      xmpiStat(MPI_Wait(&(of->request), &status), &status);
+      xmpiStat(MPI_Wait(&of->request, &status), &status);
       xmpi(MPI_Barrier(commInqCommPio()));
     }
 
-  int filled = cdiPioDbufferAppend(of->db, buffer, len);
+  size_t dbufIdx = of->dbufIdx;
+  int filled = cdiPioDbufferAppend(of->db + dbufIdx, buffer, len);
 
   xdebug3("IOPE%d: fileID = %d, tsID = %d,"
           " pushed data on buffer, filled = %d",
@@ -174,8 +159,8 @@ fwMPINONB(int fileID, const void *buffer, size_t len, int tsID)
       else
         {
           writeMPINONB(of);
-
-          error = cdiPioDbufferAppend(of->db, buffer, len);
+          dbufIdx ^= 1;
+          error = cdiPioDbufferAppend(of->db + dbufIdx, buffer, len);
         }
     }
 
