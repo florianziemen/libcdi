@@ -16,6 +16,7 @@
 #include "pio.h"
 #include "pio_comm.h"
 #include "pio_conf.h"
+#include "pio_dbuffer.h"
 #include "pio_impl.h"
 #include "pio_util.h"
 
@@ -51,7 +52,7 @@ initBFiledataP(struct fileFunnelStdio *bfp, const char *filename, size_t bs, siz
 
   struct dBuffer **db = bfp->db = Malloc(sizeof(*db) * nc);
   int iret = 0;
-  for (size_t i = 0; i < nc; ++i) iret += dbuffer_init(db + i, bs);
+  for (size_t i = 0; i < nc; ++i) iret += cdiPioDbufferInit(db + i, bs);
   bfp->offset = 0;
   bfp->syncOffset = 0;
   bfp->activeCollectors = (int) nc;
@@ -77,7 +78,7 @@ destroyBFiledataP(struct fileFunnelStdio *bfp)
   /* file closed, cleanup */
   size_t numColl = (size_t) (commInqSizeColl());
   struct dBuffer **db = bfp->db;
-  for (size_t i = 0; i < numColl; ++i) dbuffer_cleanup(db + i);
+  for (size_t i = 0; i < numColl; ++i) cdiPioDbufferDestroy(db + i);
   Free(db);
   Free(bfp->perCollAmounts);
   bfp->name = NULL;
