@@ -51,8 +51,7 @@ initBFiledataP(struct fileFunnelStdio *bfp, const char *filename, size_t bs, siz
   if ((bfp->fp = fopen(filename, "w")) == NULL) xabort("Failed to open %s", bfp->name);
 
   struct dBuffer *db = bfp->db = Malloc(sizeof(*db) * nc);
-  int iret = 0;
-  for (size_t i = 0; i < nc; ++i) iret += cdiPioDbufferInit(db + i, bs);
+  for (size_t i = 0; i < nc; ++i) cdiPioDbufferInit(db + i, bs);
   bfp->offset = 0;
   bfp->syncOffset = 0;
   bfp->activeCollectors = (int) nc;
