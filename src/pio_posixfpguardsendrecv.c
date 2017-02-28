@@ -28,6 +28,7 @@
 #include "pio.h"
 #include "pio_comm.h"
 #include "pio_conf.h"
+#include "pio_dbuffer.h"
 #include "pio_impl.h"
 #include "pio_util.h"
 
@@ -67,9 +68,9 @@ newMultiwriterFileBuf(struct mwFileBuf *afd, const char *filename, size_t bs)
 
   xdebug(" name=%s, init output buffer", afd->name);
 
-  int iret = dbuffer_init(&afd->db, bs);
+  int iret = cdiPioDbufferInit(&afd->db, bs);
 
-  if (iret > 0) xabort("dbuffer_init did not succeed");
+  if (iret > 0) xabort("cdiPioDbufferInit did not succeed");
 
   /* open file */
   xdebug("name=%s, open file", afd->name);
@@ -90,7 +91,7 @@ deleteMultiwriterFileBuf(struct mwFileBuf *afd)
 
   /* file closed, cleanup */
   xdebug("name=%s, file closed, cleanup ...", afd->name);
-  dbuffer_cleanup(&afd->db);
+  cdiPioDbufferDestroy(&afd->db);
   Free(afd->name);
   afd->name = NULL;
 
@@ -122,7 +123,7 @@ writePF(struct mwFileBuf *afd)
   MPI_Comm commPio = commInqCommPio();
 
   /* send buffersize, recv offset */
-  size_t amount = dbuffer_data_size(afd->db);
+  size_t amount = cdiPioDbufferGetPos(afd->db);
 
   struct syncMsg query = { .amount = (off_t) amount, .fileID = fileID, .command = afd->command };
   off_t offset;
@@ -140,7 +141,7 @@ writePF(struct mwFileBuf *afd)
   xdebug("written %zu bytes in file %d with offset %ld", written, fileID, offset);
   if (doTruncate) ftruncate(afd->fd, offset + (off_t) amount);
   /* change outputBuffer */
-  dbuffer_reset(afd->db);
+  cdiPioDbufferReset(afd->db);
 
   afd->command = IO_Set_fp;
 }
@@ -178,7 +179,7 @@ fwPOSIXFPGUARDSENDRECV(int fileID, const void *buffer, size_t len, int tsID)
       xmpi(MPI_Barrier(commInqCommColl()));
     }
 
-  int filled = dbuffer_push(afd->db, buffer, len);
+  int filled = cdiPioDbufferAppend(afd->db, buffer, len);
 
   xdebug("fileID = %d, tsID = %d, pushed data on buffer, filled = %d", fileID, tsID, filled);
 
@@ -191,7 +192,7 @@ fwPOSIXFPGUARDSENDRECV(int fileID, const void *buffer, size_t len, int tsID)
         {
           writePF(afd);
 
-          error = dbuffer_push(afd->db, (unsigned char *) buffer, len);
+          error = cdiPioDbufferAppend(afd->db, buffer, len);
         }
     }
 
