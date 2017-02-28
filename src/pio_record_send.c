@@ -24,7 +24,7 @@ enum {
 struct remoteFileBuf
 {
   char *name;
-  struct dBuffer *dbuf[numRecordSendBuf];
+  struct dBuffer dbuf[numRecordSendBuf];
   /* extra request for sync signal to and go-on signal from writer */
   MPI_Request request[numRecordSendBuf+numFlushOp];
   struct syncMsg syncMsg;
@@ -95,8 +95,8 @@ sendP(struct remoteFileBuf *rfile)
     xmpiStats(MPI_Waitall(numFlushOp, rfile->request+numRecordSendBuf,
                           statui), numFlushOp, statui);
   size_t dbufIdx = rfile->dbufIdx;
-  struct dBuffer **restrict dbuf = rfile->dbuf;
-  size_t amount = cdiPioDbufferGetPos(dbuf[dbufIdx]);
+  struct dBuffer *restrict dbuf = rfile->dbuf;
+  size_t amount = cdiPioDbufferGetPos(dbuf+dbufIdx);
   if (amount)
     {
       int fileID = (int)(rfile - openRemoteFiles);
@@ -106,7 +106,7 @@ sendP(struct remoteFileBuf *rfile)
              rfile->name, amount, cdiPioCmdStrTab[IO_Send_buffer]);
 
       /* FIXME: amount > INT_MAX unhandled */
-      xmpi(MPI_Isend(dbuf[dbufIdx]->buffer, (int)amount, MPI_UNSIGNED_CHAR,
+      xmpi(MPI_Isend(dbuf[dbufIdx].buffer, (int)amount, MPI_UNSIGNED_CHAR,
                      commInqSizePio() - 1, tag, commInqCommPio(),
                      rfile->request+dbufIdx));
       rfile->amount += (off_t)amount;
@@ -114,7 +114,7 @@ sendP(struct remoteFileBuf *rfile)
       /* change outputBuffer */
       dbufIdx ^= 1;
       xmpiStat(MPI_Wait(rfile->request+dbufIdx, statui), statui);
-      cdiPioDbufferReset(dbuf[dbufIdx]);
+      cdiPioDbufferReset(dbuf+dbufIdx);
       rfile->dbufIdx = (unsigned)dbufIdx;
     }
 }
@@ -154,7 +154,7 @@ pioSendWrite(int fileID, const void *buffer, size_t len, int tsID)
   bool flush = tsID != rfile->tsID;
 
   size_t dbufIdx = rfile->dbufIdx;
-  struct dBuffer **restrict dbuf = rfile->dbuf;
+  struct dBuffer *restrict dbuf = rfile->dbuf;
 
   if ( flush )
     {
@@ -164,7 +164,7 @@ pioSendWrite(int fileID, const void *buffer, size_t len, int tsID)
     }
 
 
-  int filled = cdiPioDbufferAppend(dbuf[dbufIdx], buffer, len);
+  int filled = cdiPioDbufferAppend(dbuf+dbufIdx, buffer, len);
 
   xdebug ( "id = %d, tsID = %d, pushed %lu byte data on buffer, filled = %d",
            fileID, tsID, len, filled);
@@ -178,7 +178,7 @@ pioSendWrite(int fileID, const void *buffer, size_t len, int tsID)
         {
           sendP(rfile);
           dbufIdx = rfile->dbufIdx;
-          error = cdiPioDbufferAppend(dbuf[dbufIdx], buffer, len);
+          error = cdiPioDbufferAppend(dbuf+dbufIdx, buffer, len);
         }
     }
 
@@ -272,8 +272,8 @@ pioSendOpen(const char *filename, const char *mode)
   size_t maxPathLen = (size_t)conf->maxPathLen,
     openMsgSize = (size_t)intPackSize + maxPathLen;
 
-  unsigned char *buf = rfile->dbuf[dbufIdx]->size >= openMsgSize
-    ? rfile->dbuf[dbufIdx]->buffer : Malloc(openMsgSize);
+  unsigned char *buf = rfile->dbuf[dbufIdx].size >= openMsgSize
+    ? rfile->dbuf[dbufIdx].buffer : Malloc(openMsgSize);
   size_t bufSize = conf->writeAggBufLim;
   size_t nameLen = strlen(filename);
   assert(nameLen <= (size_t)conf->maxPathLen);
@@ -285,7 +285,7 @@ pioSendOpen(const char *filename, const char *mode)
   xmpi(MPI_Pack((void *)filename, (int)nameLen, MPI_CHAR,
                 buf, (int)bufSize, &position, commPio));
   xmpi(MPI_Send(buf, position, MPI_PACKED, funnelRank, IO_Open_file, commPio));
-  if (buf != rfile->dbuf[dbufIdx]->buffer)
+  if (buf != rfile->dbuf[dbufIdx].buffer)
     Free(buf);
   return fileID;
 }
