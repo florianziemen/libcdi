@@ -16,10 +16,10 @@
 
 #include "dmemory.h"
 
-#include "pio_impl.h"
+#include "pio_dbuffer.h"
 #include "pio_util.h"
 
-int dbuffer_init(struct dBuffer **dbuffer, size_t size)
+int cdiPioDbufferInit(struct dBuffer **dbuffer, size_t bufSize)
 {
   assert(dbuffer);
   struct dBuffer *db = *dbuffer = (struct dBuffer *)Malloc(sizeof (*db));
@@ -28,12 +28,12 @@ int dbuffer_init(struct dBuffer **dbuffer, size_t size)
 #ifndef _SX
   size_t pagesize = (size_t)(sysconf(_SC_PAGESIZE));
 
-  xdebug("dbuffer_init(): pagesize = %zu bytes, size = %zu", pagesize, size);
+  xdebug("cdiPioDbufferInit(): pagesize = %zu bytes, size = %zu", pagesize, bufSize);
 
-  db->size = size = (size + pagesize - 1)/pagesize*pagesize;
+  db->size = bufSize = (bufSize + pagesize - 1)/pagesize*pagesize;
   void *buf = NULL;
   int status;
-  if ( (status = posix_memalign(&buf, pagesize, size)) != 0 )
+  if ( (status = posix_memalign(&buf, pagesize, bufSize)) != 0 )
     {
       switch ( status )
 	{
@@ -53,14 +53,15 @@ int dbuffer_init(struct dBuffer **dbuffer, size_t size)
     }
   db->buffer = (unsigned char *)buf;
 #else
-  db->size = size;
-  db->buffer = (unsigned char *)malloc(size);
+  db->size = bufSize;
+  db->buffer = (unsigned char *)malloc(bufSize);
   assert(db->buffer);
 #endif
   return 0;
 }
 
-void dbuffer_cleanup ( struct dBuffer **dbuffer )
+void
+cdiPioDbufferDestroy(struct dBuffer **dbuffer)
 {
   struct dBuffer *db = *dbuffer;
 
@@ -71,25 +72,24 @@ void dbuffer_cleanup ( struct dBuffer **dbuffer )
 }
 
 static size_t
-dbuffer_freesize(struct dBuffer *dbuffer)
+dbufferFreesize(struct dBuffer *dbuffer)
 {
-  size_t free_size = (size_t)(dbuffer->size - dbuffer_data_size(dbuffer));
+  size_t free_size = (size_t)(dbuffer->size - cdiPioDbufferGetPos(dbuffer));
   return free_size;
 }
 
-int
-dbuffer_push(struct dBuffer *dbuffer, const void *buffer, size_t len)
+bool
+cdiPioDbufferAppend(struct dBuffer *dbuffer, const void *data, size_t dataLen)
 {
-  size_t space_left = dbuffer_freesize(dbuffer);
-  if ( len <= space_left )
+  size_t space_left = dbufferFreesize(dbuffer);
+  bool enoughSpaceLeft = dataLen <= space_left;
+  if ( dataLen <= space_left )
     {
       size_t wr_ptr = dbuffer->wr_pointer;
-      memcpy(dbuffer->buffer + wr_ptr, buffer, len);
-      dbuffer->wr_pointer = wr_ptr + len;
-      return 0;
+      memcpy(dbuffer->buffer + wr_ptr, data, dataLen);
+      dbuffer->wr_pointer = wr_ptr + dataLen;
     }
-  else
-    return 1; /* not enough space left */
+  return !enoughSpaceLeft;
 }
 
 /*

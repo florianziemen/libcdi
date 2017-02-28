@@ -183,6 +183,7 @@ libcdipio_la_SOURCES =							\
 	pio_conf.c							\
 	pio_conf.h							\
 	pio_dbuffer.c							\
+	pio_dbuffer.h							\
 	pio_dist_grid.c							\
 	pio_dstlist_cache.c						\
 	pio_dstlist_cache.h						\
