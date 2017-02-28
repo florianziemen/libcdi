@@ -12,6 +12,7 @@
 #include "namespace.h"
 #include "pio.h"
 #include "pio_comm.h"
+#include "pio_dbuffer.h"
 #include "pio_id_set.h"
 #include "pio_impl.h"
 #include "pio_util.h"
@@ -52,10 +53,10 @@ initRemoteFileBuf(struct remoteFileBuf *restrict rfile, const char *filename, si
   xdebug("filename=%s, init output buffer", filename);
 
   int iret = 0;
-  for (size_t i = 0; i < numRecordSendBuf; ++i) iret += dbuffer_init(rfile->dbuf + i, bs);
+  for (size_t i = 0; i < numRecordSendBuf; ++i) iret += cdiPioDbufferInit(rfile->dbuf + i, bs);
   for (size_t i = 0; i < numRecordSendBuf + numFlushOp; ++i) rfile->request[i] = MPI_REQUEST_NULL;
 
-  if (iret > 0) xabort("dbuffer_init did not succeed");
+  if (iret > 0) xabort("cdiPioDbufferInit did not succeed");
 
   rfile->dbufIdx = 0;
 
@@ -71,7 +72,7 @@ destroyRemoteFileBuf(struct remoteFileBuf *restrict rfile)
 
   xmpiStats(MPI_Waitall(numRecordSendBuf + numFlushOp, rfile->request, status), numRecordSendBuf, status);
 
-  for (size_t i = 0; i < numRecordSendBuf; ++i) dbuffer_cleanup(rfile->dbuf + i);
+  for (size_t i = 0; i < numRecordSendBuf; ++i) cdiPioDbufferDestroy(rfile->dbuf + i);
   Free(rfile->name);
   rfile->name = NULL;
 
@@ -90,7 +91,7 @@ sendP(struct remoteFileBuf *rfile)
     xmpiStats(MPI_Waitall(numFlushOp, rfile->request + numRecordSendBuf, statui), numFlushOp, statui);
   size_t dbufIdx = rfile->dbufIdx;
   struct dBuffer **restrict dbuf = rfile->dbuf;
-  size_t amount = dbuffer_data_size(dbuf[dbufIdx]);
+  size_t amount = cdiPioDbufferGetPos(dbuf[dbufIdx]);
   if (amount)
     {
       int fileID = (int) (rfile - openRemoteFiles);
@@ -106,7 +107,7 @@ sendP(struct remoteFileBuf *rfile)
       /* change outputBuffer */
       dbufIdx ^= 1;
       xmpiStat(MPI_Wait(rfile->request + dbufIdx, statui), statui);
-      dbuffer_reset(dbuf[dbufIdx]);
+      cdiPioDbufferReset(dbuf[dbufIdx]);
       rfile->dbufIdx = (unsigned) dbufIdx;
     }
 }
@@ -147,7 +148,7 @@ pioSendWrite(int fileID, const void *buffer, size_t len, int tsID)
       dbufIdx ^= 1;
     }
 
-  int filled = dbuffer_push(dbuf[dbufIdx], buffer, len);
+  int filled = cdiPioDbufferAppend(dbuf[dbufIdx], buffer, len);
 
   xdebug("id = %d, tsID = %d, pushed %lu byte data on buffer, filled = %d", fileID, tsID, len, filled);
 
@@ -160,7 +161,7 @@ pioSendWrite(int fileID, const void *buffer, size_t len, int tsID)
         {
           sendP(rfile);
           dbufIdx = rfile->dbufIdx;
-          error = dbuffer_push(dbuf[dbufIdx], buffer, len);
+          error = cdiPioDbufferAppend(dbuf[dbufIdx], buffer, len);
         }
     }
 

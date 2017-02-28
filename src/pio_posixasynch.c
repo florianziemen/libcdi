@@ -24,6 +24,7 @@
 
 #include "pio.h"
 #include "pio_comm.h"
+#include "pio_dbuffer.h"
 #include "pio_impl.h"
 #include "pio_util.h"
 #include "dmemory.h"
@@ -74,7 +75,7 @@ initBFiledataPA(struct fileFunnelAIO *bfd, const char *filename, const struct cd
   if ((bfd->handle = open(bfd->name, O_CREAT | O_WRONLY, 0666)) == -1) xabort("Failed to open %s", bfd->name);
 
   size_t numBuf = nc + aioQueueDepth;
-  dbuffer_init(&(bfd->fb), numBuf * bufSize);
+  cdiPioDbufferInit(&(bfd->fb), numBuf * bufSize);
   unsigned *bufAssign = bfd->bufAssign = Malloc(numBuf * sizeof(*bufAssign));
   for (size_t i = 0; i < numBuf; ++i) bufAssign[i] = BUF_UNUSED;
   struct aiocb *ctrlBlks = bfd->ctrlBlks = Calloc(aioQueueDepth, sizeof(*ctrlBlks)),
@@ -150,7 +151,7 @@ destroyBFiledataPA(struct fileFunnelAIO *bfd)
 
   /* file closed, cleanup */
 
-  dbuffer_cleanup(&bfd->fb);
+  cdiPioDbufferDestroy(&bfd->fb);
   Free(bfd->perCollAmounts);
   bfd->name = NULL;
   Free(bfd->ctrlBlks);
