@@ -68,9 +68,7 @@ newMultiwriterFileBuf(struct mwFileBuf *afd, const char *filename, size_t bs)
 
   xdebug(" name=%s, init output buffer", afd->name);
 
-  int iret = cdiPioDbufferInit(&afd->db, bs);
-
-  if (iret > 0) xabort("cdiPioDbufferInit did not succeed");
+  cdiPioDbufferInit(&afd->db, bs);
 
   /* open file */
   xdebug("name=%s, open file", afd->name);
