@@ -12,7 +12,7 @@ struct dBuffer
   unsigned char * buffer;
 };
 
-int
+void
 cdiPioDbufferInit(struct dBuffer *dbuffer, size_t bufSize);
 bool
 cdiPioDbufferAppend(struct dBuffer *dbuffer, const void *data, size_t dataLen);

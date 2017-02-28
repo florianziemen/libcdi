@@ -46,10 +46,8 @@ initAFiledataMPINONB(struct fileMPIFWS *of,
   }
 
   /* init output buffer */
-  int iret = cdiPioDbufferInit(of->db, bufSize);
-  iret += cdiPioDbufferInit(of->db+1, bufSize);
-
-  if ( iret > 0 ) xabort ( "cdiPioDbufferInit did not succeed" );
+  for (size_t dbufIdx = 0; dbufIdx < 2; ++dbufIdx)
+    cdiPioDbufferInit(of->db+dbufIdx, bufSize);
 
   of->dbufIdx = 0;
 

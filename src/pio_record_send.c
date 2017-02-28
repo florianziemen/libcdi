@@ -52,13 +52,10 @@ initRemoteFileBuf(struct remoteFileBuf *restrict rfile,
 
   xdebug ( "filename=%s, init output buffer",  filename );
 
-  int iret = 0;
   for (size_t i = 0; i < numRecordSendBuf; ++i)
-    iret += cdiPioDbufferInit(rfile->dbuf+i, bs);
+    cdiPioDbufferInit(rfile->dbuf+i, bs);
   for (size_t i = 0; i < numRecordSendBuf+numFlushOp; ++i)
     rfile->request[i] = MPI_REQUEST_NULL;
-
-  if ( iret > 0 ) xabort ( "cdiPioDbufferInit did not succeed" );
 
   rfile->dbufIdx = 0;
 
