@@ -45,13 +45,6 @@ void
 cdiPioDestroySyncMsgDt(void);
 
 
-struct dBuffer
-{
-  size_t wr_pointer;
-  size_t size;
-  unsigned char * buffer;
-};
-
 struct fileOpTag
 {
   int id;
@@ -71,25 +64,6 @@ decodeFileOpTag(int tag)
   struct fileOpTag rtag = { .id = tag / tagKey,
                             .command = tag % tagKey };
   return rtag;
-}
-
-
-/* pio_dbuffer.c */
-int       dbuffer_init ( struct dBuffer **, size_t );
-int       dbuffer_push(struct dBuffer *, const void *, size_t);
-void      dbuffer_cleanup ( struct dBuffer ** );
-
-static inline int
-dbuffer_reset(struct dBuffer *dbuffer)
-{
-  dbuffer->wr_pointer = 0;
-  return 0;
-}
-
-static inline size_t
-dbuffer_data_size(struct dBuffer *dbuffer)
-{
-  return dbuffer->wr_pointer;
 }
 
 /* pio_mpinonb.c */

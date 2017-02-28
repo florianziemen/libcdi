@@ -15,6 +15,7 @@
 #include "namespace.h"
 #include "pio.h"
 #include "pio_comm.h"
+#include "pio_dbuffer.h"
 #include "pio_impl.h"
 #include "pio_util.h"
 
@@ -48,10 +49,10 @@ initAFiledataMPINONB(struct fileMPIFWS *of,
   of->db2 = NULL;
 
   /* init output buffer */
-  int iret = dbuffer_init(&of->db1, bufSize);
-  iret += dbuffer_init(&of->db2, bufSize);
+  int iret = cdiPioDbufferInit(&of->db1, bufSize);
+  iret += cdiPioDbufferInit(&of->db2, bufSize);
 
-  if ( iret > 0 ) xabort ( "dbuffer_init did not succeed" );
+  if ( iret > 0 ) xabort ( "cdiPioDbufferInit did not succeed" );
 
   of->db = of->db1;
 
@@ -94,8 +95,8 @@ destroyAFiledataMPINONB(struct fileMPIFWS *of)
 
   /* file closed, cleanup */
 
-  dbuffer_cleanup ( & ( of->db1 ));
-  dbuffer_cleanup ( & ( of->db2 ));
+  cdiPioDbufferDestroy ( & ( of->db1 ));
+  cdiPioDbufferDestroy ( & ( of->db2 ));
   Free(of->name);
   of->name = NULL;
 
@@ -115,7 +116,7 @@ writeMPINONB(struct fileMPIFWS *of)
 
   /* write buffer */
 
-  amount = ( int ) dbuffer_data_size ( of->db );
+  amount = ( int ) cdiPioDbufferGetPos ( of->db );
 
   if ( amount == 0 ) return;
 
@@ -129,7 +130,7 @@ writeMPINONB(struct fileMPIFWS *of)
 
   /* change outputBuffer */
 
-  dbuffer_reset ( of->db );
+  cdiPioDbufferReset ( of->db );
 
   if ( of->db == of->db1 )
     {
@@ -169,7 +170,7 @@ fwMPINONB(int fileID, const void *buffer, size_t len, int tsID)
       xmpi(MPI_Barrier(commInqCommPio()));
     }
 
-  int filled = dbuffer_push(of->db, buffer, len);
+  int filled = cdiPioDbufferAppend(of->db, buffer, len);
 
   xdebug3("IOPE%d: fileID = %d, tsID = %d,"
           " pushed data on buffer, filled = %d",
@@ -184,7 +185,7 @@ fwMPINONB(int fileID, const void *buffer, size_t len, int tsID)
         {
           writeMPINONB(of);
 
-          error = dbuffer_push(of->db, buffer, len);
+          error = cdiPioDbufferAppend(of->db, buffer, len);
         }
     }
 
