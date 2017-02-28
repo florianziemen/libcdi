@@ -35,11 +35,11 @@
 struct fileFunnelAIO
 {
   char *name;
-  struct dBuffer *fb;
+  struct dBuffer fb;
   struct aiocb *ctrlBlks;
   struct aiocb **cBP;
   /* if bufAssign[i] == BUF_UNUSED, the buffer comprising the bytes in
-   * fb->buffer[i*writeAggBufLim..(i+1)*writeAggBufLim) are
+   * fb.buffer[i*writeAggBufLim..(i+1)*writeAggBufLim) are
    * available, values 0..aioQueueDepth-1 denote active aio_write
    * buffers and higher values in range
    * aioQueueDepth..(aioQueueDepth+numCollectors-1) denote active
@@ -81,7 +81,7 @@ initBFiledataPA(struct fileFunnelAIO *bfd,
     xabort("Failed to open %s", bfd->name);
 
   size_t numBuf = nc + aioQueueDepth;
-  cdiPioDbufferInit(&(bfd->fb), numBuf * bufSize);
+  cdiPioDbufferInit(&bfd->fb, numBuf * bufSize);
   unsigned *bufAssign = bfd->bufAssign = Malloc(numBuf * sizeof (*bufAssign));
   for (size_t i = 0; i < numBuf; ++i)
     bufAssign[i] = BUF_UNUSED;
@@ -219,7 +219,7 @@ completeSomeAIOWrites(struct fileFunnelAIO *bfd,
         cbIdx = i;
         cbBufIdx
           = (size_t)(ptrdiff_t)((unsigned char *)ctrlBlks[i].aio_buf
-                                - (unsigned char *)bfd->fb->buffer) / bufSize;
+                                - (unsigned char *)bfd->fb.buffer) / bufSize;
         bufAssign[cbBufIdx] = BUF_UNUSED;
         ctrlBlks[i].aio_buf = NULL;
       }
@@ -275,7 +275,7 @@ writePA(struct fileFunnelAIO *bfd, int source, size_t nProcsColl, size_t amount,
   assert(sourceBufIdx != SIZE_MAX);
   size_t cbIdx = bufReUse.cbIdx,
     bufSize = conf->writeAggBufLim;
-  ctrlBlks[cbIdx].aio_buf = bfd->fb->buffer + bufSize * sourceBufIdx;
+  ctrlBlks[cbIdx].aio_buf = bfd->fb.buffer + bufSize * sourceBufIdx;
   ctrlBlks[cbIdx].aio_nbytes = amount;
   ctrlBlks[cbIdx].aio_offset = bfd->offset;
   bufAssign[sourceBufIdx] = (unsigned)cbIdx;
@@ -381,7 +381,7 @@ reinstallListenReq(struct fileFunnelAIO *bfd, int fileID, int source,
 {
   size_t bufIdx = getNextFreeBuf(bfd, nProcsColl, conf);
   int tag = encodeFileOpTag(fileID, IO_Send_buffer);
-  xmpi(MPI_Irecv(bfd->fb->buffer + bufIdx * bufSize, (int)bufSize,
+  xmpi(MPI_Irecv(bfd->fb.buffer + bufIdx * bufSize, (int)bufSize,
                  MPI_UNSIGNED_CHAR, source, tag, commPio,
                  req[numMetaOp+fileID]+source));
   bfd->bufAssign[bufIdx] = aioQueueDepth + (unsigned)source;
