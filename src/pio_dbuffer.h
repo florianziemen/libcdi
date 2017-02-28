@@ -13,11 +13,11 @@ struct dBuffer
 };
 
 int
-cdiPioDbufferInit(struct dBuffer **dbuffer, size_t bufSize);
+cdiPioDbufferInit(struct dBuffer *dbuffer, size_t bufSize);
 bool
 cdiPioDbufferAppend(struct dBuffer *dbuffer, const void *data, size_t dataLen);
 void
-cdiPioDbufferDestroy( struct dBuffer **);
+cdiPioDbufferDestroy( struct dBuffer *dbuffer);
 
 static inline int
 cdiPioDbufferReset(struct dBuffer *dbuffer)

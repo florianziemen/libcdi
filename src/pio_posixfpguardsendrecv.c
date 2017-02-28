@@ -44,7 +44,7 @@ enum {
 struct mwFileBuf
 {
   char *name;
-  struct dBuffer *db;
+  struct dBuffer db;
   int fd, tsID;
   enum IO_Server_command command;
 };
@@ -130,7 +130,7 @@ writePF(struct mwFileBuf *afd)
   MPI_Comm commPio = commInqCommPio();
 
   /* send buffersize, recv offset */
-  size_t amount = cdiPioDbufferGetPos(afd->db);
+  size_t amount = cdiPioDbufferGetPos(&afd->db);
 
   struct syncMsg query
     = { .amount = (off_t)amount, .fileID = fileID, .command = afd->command };
@@ -145,7 +145,7 @@ writePF(struct mwFileBuf *afd)
   if (offset < 0)
     offset = -offset - 1;
   /* write buffer */
-  if ( (written = pwrite(afd->fd, afd->db->buffer, amount, offset) )
+  if ( (written = pwrite(afd->fd, afd->db.buffer, amount, offset) )
        != (ssize_t)amount )
     xabort("fileId=%d, expect to write %zu byte, written %zu byte",
            fileID, amount, written);
@@ -154,7 +154,7 @@ writePF(struct mwFileBuf *afd)
   if (doTruncate)
     ftruncate(afd->fd, offset + (off_t)amount);
   /* change outputBuffer */
-  cdiPioDbufferReset(afd->db);
+  cdiPioDbufferReset(&afd->db);
 
   afd->command = IO_Set_fp;
 }
@@ -196,7 +196,7 @@ fwPOSIXFPGUARDSENDRECV(int fileID, const void *buffer, size_t len, int tsID)
       xmpi(MPI_Barrier(commInqCommColl()));
     }
 
-  int filled = cdiPioDbufferAppend(afd->db, buffer, len);
+  int filled = cdiPioDbufferAppend(&afd->db, buffer, len);
 
   xdebug("fileID = %d, tsID = %d, pushed data on buffer, filled = %d",
          fileID, tsID, filled);
@@ -210,7 +210,7 @@ fwPOSIXFPGUARDSENDRECV(int fileID, const void *buffer, size_t len, int tsID)
 	{
 	  writePF(afd);
 
-	  error = cdiPioDbufferAppend(afd->db, buffer, len);
+	  error = cdiPioDbufferAppend(&afd->db, buffer, len);
 	}
     }
 

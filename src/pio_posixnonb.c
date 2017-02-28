@@ -23,7 +23,7 @@
 struct fileFunnelStdio
 {
   char *name;
-  struct dBuffer **db;
+  struct dBuffer *db;
   FILE *fp;
   off_t *perCollAmounts, offset, syncOffset;
   int activeCollectors, outstandingSync;
@@ -53,7 +53,7 @@ initBFiledataP(struct fileFunnelStdio *bfp,
   if (( bfp->fp = fopen ( filename, "w" )) == NULL )
     xabort("Failed to open %s", bfp->name);
 
-  struct dBuffer **db = bfp->db = Malloc(sizeof (*db) * nc);
+  struct dBuffer *db = bfp->db = Malloc(sizeof (*db) * nc);
   int iret = 0;
   for (size_t i = 0; i < nc; ++i)
     iret += cdiPioDbufferInit(db + i, bs);
@@ -81,7 +81,7 @@ destroyBFiledataP(struct fileFunnelStdio *bfp)
     }
   /* file closed, cleanup */
   size_t numColl = (size_t)(commInqSizeColl());
-  struct dBuffer **db = bfp->db;
+  struct dBuffer *db = bfp->db;
   for (size_t i = 0; i < numColl; ++i)
     cdiPioDbufferDestroy(db + i);
   Free(db);
@@ -103,7 +103,7 @@ writeP(struct fileFunnelStdio *bfd, int source, size_t amount)
 
   bfd->perCollAmounts[source] += (off_t)amount;
   bfd->offset += (off_t)amount;
-  if ( (written = fwrite(bfd->db[source]->buffer, 1, amount, bfd->fp))
+  if ( (written = fwrite(bfd->db[source].buffer, 1, amount, bfd->fp))
        != amount )
     xabort("did not succeed writing buffer to %s", bfd->name);
 
@@ -314,8 +314,8 @@ pioWriterStdIO(void)
                   xabort("filename is not consistent, fileID=%d,"
                          " \"%s\" vs. \"%s\"", fileID, filename, bfd->name);
                 int tag = encodeFileOpTag(fileID, IO_Send_buffer);
-                xmpi(MPI_Irecv(bfd->db[source]->buffer,
-                               (int)bfd->db[source]->size,
+                xmpi(MPI_Irecv(bfd->db[source].buffer,
+                               (int)bfd->db[source].size,
                                MPI_UNSIGNED_CHAR, source, tag, commPio,
                                req[numMetaOp+fileID]+source));
                 xmpi(MPI_Irecv(reqBuffer, (int)openMsgSize, MPI_PACKED,
@@ -349,8 +349,8 @@ pioWriterStdIO(void)
                 if (perCollAmounts[source] != perCollAmounts[nProcsColl+source])
                   {
                     int tag = encodeFileOpTag(fileID, IO_Send_buffer);
-                    xmpi(MPI_Irecv(bfd->db[source]->buffer,
-                                   (int)bfd->db[source]->size,
+                    xmpi(MPI_Irecv(bfd->db[source].buffer,
+                                   (int)bfd->db[source].size,
                                    MPI_UNSIGNED_CHAR, source, tag, commPio,
                                    req[numMetaOp+fileID]+source));
 

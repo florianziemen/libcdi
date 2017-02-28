@@ -19,10 +19,9 @@
 #include "pio_dbuffer.h"
 #include "pio_util.h"
 
-int cdiPioDbufferInit(struct dBuffer **dbuffer, size_t bufSize)
+int cdiPioDbufferInit(struct dBuffer *db, size_t bufSize)
 {
-  assert(dbuffer);
-  struct dBuffer *db = *dbuffer = (struct dBuffer *)Malloc(sizeof (*db));
+  assert(db);
   db->wr_pointer = 0;
 
 #ifndef _SX
@@ -61,14 +60,9 @@ int cdiPioDbufferInit(struct dBuffer **dbuffer, size_t bufSize)
 }
 
 void
-cdiPioDbufferDestroy(struct dBuffer **dbuffer)
+cdiPioDbufferDestroy(struct dBuffer *db)
 {
-  struct dBuffer *db = *dbuffer;
-
-  free( db->buffer );
-  Free( db );
-
-  return;
+  free(db->buffer);
 }
 
 static size_t
