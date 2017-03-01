@@ -2135,11 +2135,13 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
           size_t len = sizeof (mesg) -1;
           GRIB_CHECK(my_grib_set_string(gh, "gridType", mesg, &len), 0);
         }
-	int trunc = gridInqTrunc(gridID);
-	GRIB_CHECK(my_grib_set_long(gh, "J", trunc), 0);
-	GRIB_CHECK(my_grib_set_long(gh, "K", trunc), 0);
-	GRIB_CHECK(my_grib_set_long(gh, "M", trunc), 0);
-
+	{
+          int trunc = gridInqTrunc(gridID);
+          enum { numTruncAtt = 3 };
+          static const char truncAttNames[numTruncAtt][2] = { "J", "K", "M" };
+          for (size_t i = 0; i < numTruncAtt; ++i)
+            GRIB_CHECK(my_grib_set_long(gh, truncAttNames[i], trunc), 0);
+        }
 	// GRIB_CHECK(my_grib_set_long(gh, "numberOfDataPoints", gridsize), 0);
         /*
         if ( lieee )
@@ -2156,10 +2158,11 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
             static const char mesg[] = "spectral_complex";
             size_t len = sizeof (mesg) -1;
 	    GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
-
-	    GRIB_CHECK(my_grib_set_long(gh, "JS", 20), 0);
-	    GRIB_CHECK(my_grib_set_long(gh, "KS", 20), 0);
-	    GRIB_CHECK(my_grib_set_long(gh, "MS", 20), 0);
+            enum { numTruncAtt = 3 };
+            static const char truncAttNames[numTruncAtt][3]
+              = { "JS", "KS", "MS" };
+            for (size_t i = 0; i < numTruncAtt; ++i)
+              GRIB_CHECK(my_grib_set_long(gh, truncAttNames[i], 20), 0);
 	  }
 	else
 	  {
