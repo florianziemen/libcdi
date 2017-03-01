@@ -7,6 +7,10 @@
 #ifndef INCLUDE_GUARD_CDI_ITERATOR_GRIB_H
 #define INCLUDE_GUARD_CDI_ITERATOR_GRIB_H
 
+#if defined (HAVE_CONFIG_H)
+#  include "config.h"
+#endif
+
 #include "cdi.h"
 #include "cdi_int.h"
 #include "iterator.h"
