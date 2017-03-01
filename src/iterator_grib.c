@@ -25,11 +25,7 @@ struct CdiGribIterator {
   off_t fileOffset;
   unsigned char *gribBuffer;
   size_t bufferSize, curRecordSize;
-#ifdef HAVE_LIBGRIB_API
   grib_handle *gribHandle;
-#else
-  void *gribHandle;
-#endif
 };
 
 CdiIterator *cdiGribIterator_getSuper(CdiGribIterator *me)
