@@ -12,6 +12,8 @@
 #  include "config.h"
 #endif
 
+#include <stdlib.h>
+
 #include "cdi.h"
 #include "cdi_int.h"
 #include "iterator.h"
