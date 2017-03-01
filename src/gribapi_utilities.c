@@ -123,8 +123,8 @@ long gribGetLong(grib_handle* gh, const char* key)
 long gribGetLongDefault(grib_handle* gribHandle, const char* key, long defaultValue)
 {
   long result;
-  if(grib_get_long(gribHandle, key, &result)) return defaultValue;
-  if(result == GRIB_MISSING_LONG) return defaultValue;
+  if ( grib_get_long(gribHandle, key, &result) || result == GRIB_MISSING_LONG )
+    result = defaultValue;
   return result;
 }
 
@@ -140,8 +140,9 @@ double gribGetDouble(grib_handle* gh, const char* key)
 double gribGetDoubleDefault(grib_handle* gribHandle, const char* key, double defaultValue)
 {
   double result;
-  if(grib_get_double(gribHandle, key, &result)) return defaultValue;
-  if(IS_EQUAL(result, GRIB_MISSING_DOUBLE)) return defaultValue;
+  if ( grib_get_double(gribHandle, key, &result)
+       || IS_EQUAL(result, GRIB_MISSING_DOUBLE) )
+    result = defaultValue;
   return result;
 }
 
