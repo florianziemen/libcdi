@@ -386,8 +386,6 @@ void    recordInitEntry(record_t *record);
 
 void    cdiCheckZaxis(int zaxisID);
 
-void    cdiPrintDatatypes(void);
-
 void    cdiDefAccesstype(int streamID, int type);
 int     cdiInqAccesstype(int streamID);
 
