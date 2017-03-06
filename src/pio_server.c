@@ -638,7 +638,8 @@ writeNetCDFStreamParallel(size_t streamIdx,
       Xt_redist gatherRedist;
       struct PPM_extent varChunk[3];
       int myChunk[3][2];
-      if (reuseRedists) {
+      if (reuseRedists)
+        {
           gatherRedist = retained[varID].redist;
           varSize = retained[varID].sliceSize;
           varChunk[0] = retained[varID].sliceExtent[0];
@@ -650,55 +651,58 @@ writeNetCDFStreamParallel(size_t streamIdx,
           myChunk[1][1] = PPM_extent_end(  varChunk[1]);
           myChunk[2][0] = PPM_extent_start(varChunk[2]);
           myChunk[2][1] = PPM_extent_end(  varChunk[2]);
-      } else {
-        struct PPM_extent varShape[3];
-        queryVarBounds(varShape, vlistID, varID);
-        const struct xyzDims collGrid = varDimsCollGridMatch(varShape);
-        xdebug("writing varID %d with dimensions: "
-               "x=%d, y=%d, z=%d,\n"
-               "found distribution with dimensions:"
-               " x=%d, y=%d, z=%d.", varID,
-               varShape[0].size, varShape[1].size, varShape[2].size,
-               collGrid.sizes[0], collGrid.sizes[1],
-               collGrid.sizes[2]);
-        myVarPart(varShape, collGrid, varChunk);
-        Xt_idxlist preWriteChunk;
-        /* prepare yaxt descriptor for write chunk */
-        {
-          Xt_int preWriteChunkStart[3];
-          int preWriteChunkSize[3];
-          Xt_int varDims[3];
-          for (int i = 0; i < 3; ++i) {
-              myChunk[i][0] = PPM_extent_start(varChunk[i]);
-              myChunk[i][1] = PPM_extent_end(varChunk[i]);
-              varDims[2 - i] = varShape[i].size;
-              preWriteChunkStart[2 - i] = (Xt_int)varChunk[i].first;
-              preWriteChunkSize[2 - i] = (int)varChunk[i].size;
-          }
-          preWriteChunk
-            = cdiPioDstIdxlistCacheAddSection3D(DstIdxlistCache,
-                                                varDims, preWriteChunkStart,
-                                                preWriteChunkSize);
         }
-        xdebug("Writing chunk { { %d, %d }, { %d, %d },"
-               " { %d, %d } }", myChunk[0][0], myChunk[0][1],
-               myChunk[1][0], myChunk[1][1], myChunk[2][0],
-               myChunk[2][1]);
-        varSize = (size_t)xt_idxlist_get_num_indices(preWriteChunk);
-        /* transpose data into write deco */
+      else
         {
-          int headerIdx = varMap[varID];
-          gatherRedist = buildVarRedist(headerIdx, streamIdx,
-                                        preWriteChunk, conf);
-          if (conf->cacheRedists) {
-            retained[varID].redist = gatherRedist;
-            retained[varID].sliceSize = varSize;
-            retained[varID].sliceExtent[0] = varChunk[0];
-            retained[varID].sliceExtent[1] = varChunk[1];
-            retained[varID].sliceExtent[2] = varChunk[2];
+          struct PPM_extent varShape[3];
+          queryVarBounds(varShape, vlistID, varID);
+          const struct xyzDims collGrid = varDimsCollGridMatch(varShape);
+          xdebug("writing varID %d with dimensions: "
+                 "x=%d, y=%d, z=%d,\n"
+                 "found distribution with dimensions:"
+                 " x=%d, y=%d, z=%d.", varID,
+                 varShape[0].size, varShape[1].size, varShape[2].size,
+                 collGrid.sizes[0], collGrid.sizes[1],
+                 collGrid.sizes[2]);
+          myVarPart(varShape, collGrid, varChunk);
+          Xt_idxlist preWriteChunk;
+          /* prepare yaxt descriptor for write chunk */
+          {
+            Xt_int preWriteChunkStart[3];
+            int preWriteChunkSize[3];
+            Xt_int varDims[3];
+            for (int i = 0; i < 3; ++i)
+              {
+                myChunk[i][0] = PPM_extent_start(varChunk[i]);
+                myChunk[i][1] = PPM_extent_end(varChunk[i]);
+                varDims[2 - i] = varShape[i].size;
+                preWriteChunkStart[2 - i] = (Xt_int)varChunk[i].first;
+                preWriteChunkSize[2 - i] = (int)varChunk[i].size;
+              }
+            preWriteChunk
+              = cdiPioDstIdxlistCacheAddSection3D(DstIdxlistCache,
+                                                  varDims, preWriteChunkStart,
+                                                  preWriteChunkSize);
+          }
+          xdebug("Writing chunk { { %d, %d }, { %d, %d },"
+                 " { %d, %d } }", myChunk[0][0], myChunk[0][1],
+                 myChunk[1][0], myChunk[1][1], myChunk[2][0],
+                 myChunk[2][1]);
+          varSize = (size_t)xt_idxlist_get_num_indices(preWriteChunk);
+          /* transpose data into write deco */
+          {
+            int headerIdx = varMap[varID];
+            gatherRedist = buildVarRedist(headerIdx, streamIdx,
+                                          preWriteChunk, conf);
+            if (conf->cacheRedists) {
+              retained[varID].redist = gatherRedist;
+              retained[varID].sliceSize = varSize;
+              retained[varID].sliceExtent[0] = varChunk[0];
+              retained[varID].sliceExtent[1] = varChunk[1];
+              retained[varID].sliceExtent[2] = varChunk[2];
+            }
           }
         }
-      }
       resizeVarGatherBuf(varSize, data_, currentDataBufSize);
       double *restrict data = *data_;
       xt_redist_s_exchange1(gatherRedist,
