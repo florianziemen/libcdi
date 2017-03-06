@@ -262,7 +262,7 @@ pioBufferPartData_(int streamID, int varID, const void *packData, valPackFunc pa
   xassert(varID >= 0 && varID < streamInqNvars(streamID));
   collWaitAll();
 
-  struct winHeaderEntry dataHeader = { .id = streamID, .specific.dataRecord = { varID, nmiss }, .offset = -1 };
+  struct winHeaderEntry dataHeader = { .id = DATA_HEADER_DOUBLE, .specific.dataRecord = { varID, nmiss }, .offset = -1 };
   modelWinEnqueue(streamIdx, dataHeader, packData, packDataFunc);
   {
     struct winHeaderEntry partHeader = { .id = PARTDESCMARKER, .offset = 0 };
