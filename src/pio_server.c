@@ -219,7 +219,7 @@ resizeVarGatherBuf(size_t size, double **buf, size_t *bufSize)
 
 static Xt_xmap
 buildVarXmap(struct Xt_offset_ext *restrict partExts, const struct clientBuf *restrict clientBuf, size_t headerIdx,
-             Xt_idxlist dstList, MPI_Comm pioInterComm, MPI_Comm collComm, int streamID, int varID, const struct cdiPioConf *conf)
+             Xt_idxlist dstList, MPI_Comm pioInterComm, MPI_Comm collComm, int varID, const struct cdiPioConf *conf)
 {
   size_t numClients = (size_t) numClients_;
   Xt_idxlist *part = Malloc(numClients * sizeof(part[0]));
@@ -228,8 +228,7 @@ buildVarXmap(struct Xt_offset_ext *restrict partExts, const struct clientBuf *re
       unsigned char *clientMem = clientBuf[clientIdx].mem;
       struct dataRecord *dataHeader = &((wHECast) clientMem)[headerIdx].specific.dataRecord;
       int position = ((wHECast) clientMem)[headerIdx + 1].offset;
-      xassert(namespaceAdaptKey2(((wHECast) clientMem)[headerIdx].id) == streamID && dataHeader->varID == varID
-              && (((wHECast) clientMem)[headerIdx + 1].id == PARTDESCMARKER) && position > 0
+      xassert(dataHeader->varID == varID && (((wHECast) clientMem)[headerIdx + 1].id == PARTDESCMARKER) && position > 0
               && ((size_t) position >= sizeof(struct winHeaderEntry) * (size_t) clientBuf[clientIdx].dictSize)
               && ((size_t) position < clientBuf[clientIdx].size));
       part[clientIdx] = xt_idxlist_unpack(clientMem, (int) clientBuf[clientIdx].size, &position, pioInterComm);
@@ -263,7 +262,6 @@ buildVarRedist(int headerIdx, size_t streamIdx,
 {
   const struct clientBuf *restrict clientBuf = rxWin[streamIdx].clientBuf;
   const struct winHeaderEntry *winDict = (wHECast) clientBuf[0].mem;
-  int streamID = openStreams.entries[streamIdx];
   int varID = winDict[headerIdx].specific.dataRecord.varID;
   size_t numClients = (size_t) numClients_;
   struct Xt_offset_ext *partExts = Malloc(numClients * sizeof(partExts[0]));
@@ -296,8 +294,7 @@ buildVarRedist(int headerIdx, size_t streamIdx,
               unsigned char *clientMem = clientBuf[clientIdx].mem;
               struct dataRecord *dataHeader = &((wHECast) clientMem)[headerIdx].specific.dataRecord;
               int position = ((wHECast) clientMem)[headerIdx + 1].offset;
-              xassert(namespaceAdaptKey2(((wHECast) clientMem)[headerIdx].id) == streamID && dataHeader->varID == varID
-                      && position > 0
+              xassert(dataHeader->varID == varID && position > 0
                       && ((size_t) position >= sizeof(struct winHeaderEntry) * (size_t) clientBuf[clientIdx].dictSize)
                       && ((size_t) position < clientBuf[clientIdx].size));
               size_t charOfs = (size_t) ((clientMem + ((wHECast) clientMem)[headerIdx].offset) - clientBuf[0].mem);
@@ -311,7 +308,7 @@ buildVarRedist(int headerIdx, size_t streamIdx,
           goto finishXmapCaching;
         }
     }
-  gatherXmap = buildVarXmap(partExts, clientBuf, (size_t) headerIdx, dstList, pioInterComm, collComm, streamID, varID, conf);
+  gatherXmap = buildVarXmap(partExts, clientBuf, (size_t) headerIdx, dstList, pioInterComm, collComm, varID, conf);
   if (cacheXmaps)
     {
       partSizes[0] = gatherExt.size;
@@ -782,8 +779,8 @@ getLayout(size_t streamIdx)
   for (size_t client = 0; client < numClients; ++client)
     for (size_t headerIdx = 1; headerIdx < numDataEntries; headerIdx += 2)
       {
-        xassert(namespaceAdaptKey2(winDictEntry(streamIdx, client, headerIdx)->id) == streamID);
         struct winHeaderEntry *varHeader = winDictEntry(streamIdx, client, headerIdx);
+        xassert(varHeader->id == DATA_HEADER_DOUBLE);
         size_t varID = (size_t) varHeader[0].specific.dataRecord.varID;
         size_t offset = (size_t) varHeader[0].offset;
         Xt_uid uid = unpackXTUID(varHeader[1].specific.partDesc.packedUID);
@@ -807,7 +804,6 @@ streamMappingNew(size_t streamIdx, struct winHeaderEntry *winDict, const struct 
                 *restrict numLvlsW = varMap + 2 * numVars, *restrict hasMissing_ = varMap + 3 * numVars;
   for (int headerIdx = 1; headerIdx < numDataEntries; headerIdx += 2)
     {
-      xassert(namespaceAdaptKey2(winDict[headerIdx].id) == streamID);
       int varID = winDict[headerIdx].specific.dataRecord.varID;
       /* ensure a variable has not been enqueued twice */
       /* FIXME: this could better be ensured on client */
