@@ -261,8 +261,7 @@ static int
 cdiPioClientStreamDefTimestep_(stream_t *streamptr, int tsID)
 {
   int taxisID = vlistInqTaxis(streamptr->vlistID);
-  struct winHeaderEntry header = (struct winHeaderEntry){
-    .id = STREAMDEFTIMESTEP,
+  struct winHeaderEntry header = { .id = STREAMDEFTIMESTEP,
     .specific.funcArgs.streamNewTimestep = { streamptr->self, tsID } };
   xassert(sizeof (void *) >= sizeof (int));
   pioBufferFuncCall(streamptr->self, header,

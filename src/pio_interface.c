@@ -301,7 +301,8 @@ pioBufferPartData_(int streamID, int varID,
   collWaitAll();
 
   struct winHeaderEntry dataHeader
-    = { .id = streamID, .specific.dataRecord = { varID, nmiss }, .offset = -1 };
+    = { .id = DATA_HEADER_DOUBLE,
+        .specific.dataRecord = { varID, nmiss }, .offset = -1 };
   modelWinEnqueue(streamIdx, dataHeader, packData, packDataFunc);
   {
     struct winHeaderEntry partHeader
