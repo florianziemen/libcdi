@@ -129,7 +129,7 @@ void grbCopyRecord(stream_t * streamptr2, stream_t * streamptr1)
           cgribexChangeParameterIdentification(gh, GribChangeParID_code, GribChangeParID_ltype, GribChangeParID_lev);
           cgribex_handle_delete(gh);
 #elif defined HAVE_LIBGRIB_API
-          grib_handle *gh = grib_handle_new_from_message(NULL, (void*) gribbuffer, recsize);
+          void *gh = (void*)grib_handle_new_from_message(NULL, (void*) gribbuffer, recsize);
           gribapiChangeParameterIdentification(gh, GribChangeParID_code, GribChangeParID_ltype, GribChangeParID_lev);
           grib_handle_delete(gh);
 #endif
