@@ -12,7 +12,6 @@
 #include "stream_gribapi.h"
 #include "file.h"
 #include "cgribex.h"  /* gribZip gribGetZip gribGinfo */
-#include "gribapi.h"
 #include "namespace.h"
 
 
@@ -115,6 +114,28 @@ void grbCopyRecord(stream_t * streamptr2, stream_t * streamptr1)
     Error("Could not read GRIB record for copying!");
 
   size_t nbytes = recsize;
+
+  if ( filetype == CDI_FILETYPE_GRB )
+    {
+      extern int GribChangeParameterIdentification;
+      if ( GribChangeParameterIdentification == 1 )
+        {
+          extern int GribChangeParID_code;
+          extern int GribChangeParID_ltype;
+          extern int GribChangeParID_lev;
+          // Even if you are stream-copy records you might need to change a bit of grib-header !
+#if defined HAVE_LIBCGRIBEX
+          void *gh = cgribex_handle_new_from_meassage((void*) gribbuffer, recsize);
+          cgribexChangeParameterIdentification(gh, GribChangeParID_code, GribChangeParID_ltype, GribChangeParID_lev);
+          cgribex_handle_delete(gh);
+#elif defined HAVE_LIBGRIB_API
+          grib_handle *gh = grib_handle_new_from_message(NULL, (void*) gribbuffer, recsize);
+          gribapiChangeParameterIdentification(gh, GribChangeParID_code, GribChangeParID_ltype, GribChangeParID_lev);
+          grib_handle_delete(gh);
+#endif
+          GribChangeParameterIdentification = -1; // after grib attributes have been changed turn it off again
+        }
+    }
 
   if ( filetype == CDI_FILETYPE_GRB )
     {

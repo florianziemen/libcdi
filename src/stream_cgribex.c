@@ -2104,6 +2104,67 @@ size_t cgribexEncode(int memtype, int varID, int levelID, int vlistID, int gridI
   size_t nbytes = (size_t)iword * sizeof(int);
   return nbytes;
 }
+
+
+typedef struct
+{
+  void *gribbuffer;
+  size_t gribbuffersize;
+  unsigned char *pds;
+  unsigned char *gds;
+  unsigned char *bms;
+  unsigned char *bds;
+} cgribex_handle;
+
+
+int grib1Sections(unsigned char *gribbuffer, long gribbufsize, unsigned char **pdsp,
+		  unsigned char **gdsp, unsigned char **bmsp, unsigned char **bdsp, long *gribrecsize);
+
+void *cgribex_handle_new_from_meassage(void *gribbuffer, size_t gribbuffersize)
+{
+  cgribex_handle *gh = (cgribex_handle*) Malloc(sizeof(cgribex_handle));
+  gh->gribbuffer = NULL;
+  gh->gribbuffersize = 0;
+  gh->pds = NULL;
+
+  if ( gribbuffersize && gribbuffer )
+    {
+      unsigned char *pds = NULL, *gds = NULL, *bms = NULL, *bds = NULL;
+      long gribrecsize;
+      int status = grib1Sections((unsigned char *)gribbuffer, (long)gribbuffersize, &pds, &gds, &bms, &bds, &gribrecsize);
+      if ( status >= 0 )
+        {
+          gh->gribbuffer = gribbuffer;
+          gh->gribbuffersize = gribbuffersize;
+          gh->pds = pds;
+          gh->gds = gds;
+          gh->bms = bms;
+          gh->bds = bds;
+        }
+    }
+
+  return (void*)gh;
+}
+
+
+void cgribex_handle_delete(void *gh)
+{
+  if ( gh ) Free(gh);
+}
+
+
+void cgribexChangeParameterIdentification(void *gh, int code, int ltype, int lev)
+{
+  if ( !gh ) return;
+
+  unsigned char *pds = ((cgribex_handle*)gh)->pds;
+  if ( !pds ) return;
+
+  pds[8]  = (unsigned char) code;
+  pds[9]  = (unsigned char) ltype;
+  pds[10] = (unsigned char) lev;
+}
+
 #endif
 /*
  * Local Variables:
