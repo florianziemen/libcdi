@@ -722,6 +722,14 @@
 !                                     INTEGER         nmiss)
       EXTERNAL        streamWriteVarChunk
 
+!                     streamWriteVarChunkF
+!                                    (INTEGER         streamID,
+!                                     INTEGER         varID,
+!                                     INTEGER         rect(2,3),
+!                                     REAL            data(*),
+!                                     INTEGER         nmiss)
+      EXTERNAL        streamWriteVarChunkF
+
 !
 !  STREAM record I/O routines (sequential access)
 !
