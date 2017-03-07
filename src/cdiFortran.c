@@ -157,6 +157,7 @@ FCALLSCSUB5 (streamWriteVarSliceF, STREAMWRITEVARSLICEF, streamwritevarslicef, I
 FCALLSCSUB5 (streamReadVarSlice, STREAMREADVARSLICE, streamreadvarslice, INT, INT, INT, DOUBLEV, PINT)
 FCALLSCSUB5 (streamReadVarSliceF, STREAMREADVARSLICEF, streamreadvarslicef, INT, INT, INT, FLOATV, PINT)
 FCALLSCSUB5 (streamWriteVarChunk, STREAMWRITEVARCHUNK, streamwritevarchunk, INT, INT, INTVV, DOUBLEV, INT)
+FCALLSCSUB5 (streamWriteVarChunkF, STREAMWRITEVARCHUNKF, streamwritevarchunkf, INT, INT, INTVV, FLOATV, INT)
 
 /*  STREAM record I/O routines (sequential access)  */
 
