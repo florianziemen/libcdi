@@ -256,6 +256,11 @@ static void streamWriteVarChunk_fwrap(int streamID, int varID, const int rect[3]
   streamWriteVarChunk(streamID, varID, rect, data, (SizeType)nmiss);
 }
 FCALLSCSUB5 (streamWriteVarChunk_fwrap, STREAMWRITEVARCHUNK, streamwritevarchunk, INT, INT, INTVV, DOUBLEV, INT)
+static void streamWriteVarChunkF_fwrap(int streamID, int varID, const int rect[3][2], const float data[], int nmiss)
+{
+  streamWriteVarChunkF(streamID, varID, rect, data, (SizeType)nmiss);
+}
+FCALLSCSUB5 (streamWriteVarChunkF_fwrap, STREAMWRITEVARCHUNKF, streamwritevarchunkf, INT, INT, INTVV, FLOATV, INT)
 
 /*  STREAM record I/O routines (sequential access)  */
 

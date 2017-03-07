@@ -284,6 +284,7 @@ module mo_cdi
   public :: streamReadVarSlice
   public :: streamReadVarSliceF
   public :: streamWriteVarChunk
+  public :: streamWriteVarChunkF
   public :: streamDefRecord
   public :: streamInqRecord
   public :: streamWriteRecord
@@ -1015,6 +1016,16 @@ module mo_cdi
       real(c_double), intent(in) :: data_dummy(*)
       integer(c_int), value :: nmiss_dummy
     end subroutine streamWriteVarChunk
+
+    subroutine streamWriteVarChunkF(streamID_dummy, varID_dummy, rect_dummy,&
+    & data_dummy, nmiss_dummy) bind(c, name = 'streamWriteVarChunkF')
+      import c_float, c_int
+      integer(c_int), value :: streamID_dummy
+      integer(c_int), value :: varID_dummy
+      integer(c_int), intent(in) :: rect_dummy(2, 3)
+      real(c_float), intent(in) :: data_dummy(*)
+      integer(c_int), value :: nmiss_dummy
+    end subroutine streamWriteVarChunkF
 
     subroutine streamDefRecord(streamID_dummy, varID_dummy, levelID_dummy)&
     & bind(c, name = 'streamDefRecord')

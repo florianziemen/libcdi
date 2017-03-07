@@ -274,6 +274,15 @@ streamWriteVarChunk(int streamID, int varID, const int rect[3][2], const double 
   myCdiStreamWriteVarChunk_(streamID, varID, MEMTYPE_DOUBLE, rect, data, nmiss);
 }
 
+void
+streamWriteVarChunkF(int streamID, int varID, const int rect[3][2], const float *data, SizeType nmiss)
+{
+  void (*myCdiStreamWriteVarChunk_)(int streamID, int varID, int memtype, const int rect[3][2], const void *data, SizeType nmiss)
+      = (void (*)(int, int, int, const int[3][2], const void *, SizeType)) namespaceSwitchGet(NSSWITCH_STREAM_WRITE_VAR_CHUNK_)
+            .func;
+  myCdiStreamWriteVarChunk_(streamID, varID, MEMTYPE_FLOAT, rect, data, nmiss);
+}
+
 // single image implementation
 void
 cdiStreamWriteVarChunk_(int streamID, int varID, int memtype, const int rect[][2], const void *data, SizeType nmiss)
