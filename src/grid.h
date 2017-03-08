@@ -92,7 +92,6 @@ struct grid_t {
   double *area;
   struct grid_lcc_t  lcc;
   struct grid_gme_t  gme;
-  short   isCyclic;               /* TRUE for global cyclic grids   */
   int     number, position;       /* parameter for GRID_REFERENCE   */
   int     trunc;                  /* parameter for GRID_SPECTEAL    */
   int     nvertex;
@@ -102,6 +101,11 @@ struct grid_t {
   int     nrowlon;
   int     size;
   int     np;                     /* number of parallels between a pole and the equator */
+  signed char isCyclic;           /* three possible states:
+                                   * -1 if unknown,
+                                   * 0 if found not cyclic, or
+                                   * 1 for global cyclic grids
+                                   */
   bool    lcomplex;
   bool    hasdims;
   /* Some models deliver wind U,V relative to the grid-cell */

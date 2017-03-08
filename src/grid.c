@@ -1910,7 +1910,7 @@ void gridChangeType(int gridID, int gridtype)
 static
 void grid_check_cyclic(grid_t *gridptr)
 {
-  gridptr->isCyclic = FALSE;
+  gridptr->isCyclic = 0;
   enum { numVertices = 4 };
   size_t xsize = gridptr->x.size >= 0 ? (size_t)gridptr->x.size : 0,
     ysize = gridptr->y.size >= 0 ? (size_t)gridptr->y.size : 0;
@@ -1929,7 +1929,7 @@ void grid_check_cyclic(grid_t *gridptr)
           double x0 = 2*xvals[xsize-1]-xvals[xsize-2]-360;
 
           if ( IS_NOT_EQUAL(xvals[0], xvals[xsize-1]) )
-            if ( fabs(x0 - xvals[0]) < 0.01*xinc ) gridptr->isCyclic = TRUE;
+            if ( fabs(x0 - xvals[0]) < 0.01*xinc ) gridptr->isCyclic = 1;
         }
     }
   else if ( gridptr->type == GRID_CURVILINEAR )
@@ -1958,7 +1958,7 @@ void grid_check_cyclic(grid_t *gridptr)
 
               nc += fabs(x0-val1) < 0.5*xinc;
             }
-          gridptr->isCyclic = nc > ysize/2 ? TRUE : FALSE;
+          gridptr->isCyclic = nc > ysize/2;
         }
 
       if ( xbounds && xsize > 1 )
@@ -4183,7 +4183,7 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
     gridP->lcc.projflag  =   intBuffer[GRID_PACK_INT_IDX_LCC_PROJFLAG];
     gridP->lcc.scanflag  =   (short)intBuffer[GRID_PACK_INT_IDX_LCC_SCANFLAG];
     gridP->lcc.defined   =   (short)intBuffer[GRID_PACK_INT_IDX_LCC_DEFINED];
-    gridP->isCyclic      =   (short)intBuffer[GRID_PACK_INT_IDX_IS_CYCLIC];
+    gridP->isCyclic      =   (signed char)intBuffer[GRID_PACK_INT_IDX_IS_CYCLIC];
     gridP->x.flag        =   (short)intBuffer[GRID_PACK_INT_IDX_X_FLAG];
     gridP->y.flag        =   (short)intBuffer[GRID_PACK_INT_IDX_Y_FLAG];
     gridP->gme.nd        =   intBuffer[GRID_PACK_INT_IDX_GME_ND];
