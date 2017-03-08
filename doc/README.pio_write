@@ -172,3 +172,11 @@ Set the time unit to one of
 * year
 
 As with -qtaxis-type see the CDI library documentation for specifics.
+
+-qdatatype=<DATATYPE>
+
+Set the external representation of the written data. Valid values for
+DATATYPE are pack followed by the number of significant bits for GRIB
+and GRIB2 data and flt32 or flt64 for the other file formats (which
+store raw floating point values) to use 32 and 64 bit float formats.
+Note: this option must follow the -f option to become effective.
