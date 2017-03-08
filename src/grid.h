@@ -68,7 +68,7 @@ struct grid_lcc_t {
   double  xinc;
   double  yinc;
   int     projflag;
-  int     scanflag;
+  short   scanflag;             /* must be combination of 128, 64, 32 */
   short   defined;
 };
 

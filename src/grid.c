@@ -3634,7 +3634,7 @@ void gridDefParamLCC(int gridID, double originLon, double originLat, double lonP
       gridptr->lcc.xinc      = xinc;
       gridptr->lcc.yinc      = yinc;
       gridptr->lcc.projflag  = projflag;
-      gridptr->lcc.scanflag  = scanflag;
+      gridptr->lcc.scanflag  = (short)scanflag;
       gridptr->lcc.defined   = TRUE;
       gridMark4Update(gridID);
     }
@@ -4181,7 +4181,7 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
     gridP->type          =   intBuffer[GRID_PACK_INT_IDX_TYPE];
     gridP->prec          =   intBuffer[GRID_PACK_INT_IDX_PREC];
     gridP->lcc.projflag  =   intBuffer[GRID_PACK_INT_IDX_LCC_PROJFLAG];
-    gridP->lcc.scanflag  =   intBuffer[GRID_PACK_INT_IDX_LCC_SCANFLAG];
+    gridP->lcc.scanflag  =   (short)intBuffer[GRID_PACK_INT_IDX_LCC_SCANFLAG];
     gridP->lcc.defined   =   (short)intBuffer[GRID_PACK_INT_IDX_LCC_DEFINED];
     gridP->isCyclic      =   (short)intBuffer[GRID_PACK_INT_IDX_IS_CYCLIC];
     gridP->x.flag        =   (short)intBuffer[GRID_PACK_INT_IDX_X_FLAG];
