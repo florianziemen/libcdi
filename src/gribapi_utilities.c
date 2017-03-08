@@ -28,12 +28,11 @@
 //A simple wrapper for grib_get_string() that returns a newly allocated string.
 char* gribCopyString(grib_handle* gribHandle, const char* key)
 {
-  char* result = NULL;
   size_t length;
 #ifdef HAVE_GRIB_GET_LENGTH
   if (!grib_get_length(gribHandle, key, &length))
     {
-      result = (char *)Malloc(length);
+      char *result = (char *)Malloc(length);
       if (!grib_get_string(gribHandle, key, result, &length))
         result = (char *) Realloc(result, length);
       else
@@ -48,7 +47,7 @@ char* gribCopyString(grib_handle* gribHandle, const char* key)
                           * this unlikely in grib_api versions
                           * not providing grib_get_length */
   int rc;
-  result = (char *) Malloc(length);
+  char *result = (char *) Malloc(length);
   while ((rc = grib_get_string(gribHandle, key, result, &length))
          == GRIB_BUFFER_TOO_SMALL || rc == GRIB_ARRAY_TOO_SMALL)
     {
