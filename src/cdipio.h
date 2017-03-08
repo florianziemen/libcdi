@@ -52,13 +52,41 @@ MPI_Comm cdiPioInit(MPI_Comm commSuper, int confResH, int *pioNamespace);
 void pioWriteTimestep(void);
 void cdiPioRDMAProgress(void);
 
+/* streamWriteVarPart: Write part of the data making up variable varID
+ * of stream streamID.
+ *
+ * The processes in the communicator returned from cdiPioInit or
+ * pioInit must call this routine collectively and data must point to
+ * M items, where partDesc is a YAXT index list describing with M
+ * indices in 0 to N-1 the data items stored as doubles. N is the
+ * number of values per time step in the variable, i.e. the size of
+ * the corresponding array passed to streamWriteVar in the serial version.
+ * The group of processes collectively calling streamWriteVarPart
+ * must provide data for all indices or the behaviour is undefined. */
 void streamWriteVarPart(int streamID, int varID, const double *data, int nmiss, Xt_idxlist partDesc);
 
+/* streamWriteVarPartF: Write part of the data making up variable
+ * varID of stream streamID.
+ *
+ * Single-precision version of streamWriteVarPart.
+ */
 void streamWriteVarPartF(int streamID, int varID, const float *data, int nmiss, Xt_idxlist partDesc);
 
+/* streamWriteScatteredVarPart: Write part of the data making up
+ * variable varID of stream streamID.
+ *
+ * In contrast to streamWriteVarPart, the data is not read from data as one
+ * contiguous sequence but instead the numBlocks chunks of length
+ * blocklengths[i] and starting displacements[i] each for i in [0,numBlocks)
+ */
 void streamWriteScatteredVarPart(int streamID, int varID, const double *data, int numBlocks, const int blocklengths[],
                                  const int displacements[], int nmiss, Xt_idxlist partDesc);
 
+/* streamWriteScatteredVarPartF: Write part of the data making up
+ * variable varID of stream streamID.
+ *
+ * Single-precision version of streamWriteScatteredVarPart.
+ */
 void streamWriteScatteredVarPartF(int streamID, int varID, const float *data, int numBlocks, const int blocklengths[],
                                   const int displacements[], int nmiss, Xt_idxlist partDesc);
 /* cdiPioCSRLastN: return role codes appropriate to use the last
