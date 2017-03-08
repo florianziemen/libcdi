@@ -83,6 +83,7 @@ struct grid_t {
   char    mapping[CDI_MAX_NAME];
   char   *name;
   int     self;
+  int     size;
   int     type;                   /* grid type                      */
   int     prec;                   /* grid precision                 */
   int     proj;                   /* grid projection                */
@@ -99,7 +100,6 @@ struct grid_t {
   unsigned char uuid[CDI_UUID_SIZE]; /* uuid for grid reference        */
   int    *rowlon;
   int     nrowlon;
-  int     size;
   int     np;                     /* number of parallels between a pole and the equator */
   signed char isCyclic;           /* three possible states:
                                    * -1 if unknown,
