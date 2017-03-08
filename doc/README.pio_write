@@ -154,3 +154,21 @@ the distributed multi-array feature.
 
 Create a time axis following the conventions of TAXIS_ABSOLUTE,
 TAXIS_RELATIVE or TAXIS_FORECAST respectively.
+
+-qtaxis-unit=<UNIT>
+
+Set the time unit to one of
+
+* second
+* minute
+* quarter
+* 30minutes
+* hour
+* 3hours
+* 6hours
+* 12hours
+* day
+* month
+* year
+
+As with -qtaxis-type see the CDI library documentation for specifics.
