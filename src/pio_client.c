@@ -156,9 +156,8 @@ cdiPioClientStreamWriteVarChunk_(int streamID, int varID, int memtype,
                                  const int rect[][2],
                                  const void *data, int nmiss)
 {
-  /* todo: handle transmission of float data */
-  if (memtype != MEMTYPE_DOUBLE)
-    Error("Writing of non-double type data not implemented!");
+  if (memtype != MEMTYPE_DOUBLE && memtype != MEMTYPE_FLOAT)
+    Error("Writing of type data %d not implemented!", memtype);
   int vlistID = streamInqVlist(streamID);
   int size = vlistInqVarSize(vlistID, varID),
     varShape[3];
@@ -174,26 +173,8 @@ cdiPioClientStreamWriteVarChunk_(int streamID, int varID, int memtype,
   xassert(varSize == size);
   Xt_idxlist chunkDesc
     = xt_idxsection_new(0, (int)ndims, varShapeXt, chunkShape, origin);
-  pioBufferPartData(streamID, varID, data, nmiss, chunkDesc);
+  cdiPioBufferPartData(streamID, varID, memtype, data, nmiss, chunkDesc);
   xt_idxlist_delete(chunkDesc);
-}
-
-static void
-cdiPioClientStreamWriteVarPart(int streamID, int varID, const void *data,
-                               int nmiss, Xt_idxlist partDesc)
-{
-  pioBufferPartData(streamID, varID, data, nmiss, partDesc);
-}
-
-static void
-cdiPioClientStreamWriteScatteredVarPart(int streamID, int varID,
-                                        const void *data,
-                                        int numBlocks, const int blocklengths[],
-                                        const int displacements[],
-                                        int nmiss, Xt_idxlist partDesc)
-{
-  cdiPioBufferPartDataGather(streamID, varID, data, numBlocks,
-                             blocklengths, displacements, nmiss, partDesc);
 }
 
 #if defined HAVE_LIBNETCDF
@@ -288,9 +269,9 @@ cdiPioClientSetup(int *pioNamespace_, struct cdiPioConf *conf)
   namespaceSwitchSet(NSSWITCH_STREAM_WRITE_VAR_CHUNK_,
                      NSSW_FUNC(cdiPioClientStreamWriteVarChunk_));
   namespaceSwitchSet(NSSWITCH_STREAM_WRITE_VAR_PART_,
-                     NSSW_FUNC(cdiPioClientStreamWriteVarPart));
+                     NSSW_FUNC(cdiPioBufferPartData));
   namespaceSwitchSet(NSSWITCH_STREAM_WRITE_SCATTERED_VAR_PART_,
-                     NSSW_FUNC(cdiPioClientStreamWriteScatteredVarPart));
+                     NSSW_FUNC(cdiPioBufferPartDataGather));
   namespaceSwitchSet(NSSWITCH_STREAM_CLOSE_BACKEND,
                      NSSW_FUNC(cdiPioClientStreamClose));
   namespaceSwitchSet(NSSWITCH_STREAM_DEF_TIMESTEP_,
