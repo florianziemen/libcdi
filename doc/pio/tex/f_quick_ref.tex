@@ -317,3 +317,71 @@ representation of mode or -1 if no match was found.
 initialize I/O server processes and communication.
 
 
+\section*{\tt \htmlref{streamWriteScatteredVarPart}{streamWriteScatteredVarPart}}
+
+\begin{verbatim}
+    SUBROUTINE streamWriteScatteredVarPart (INTEGER streamID, INTEGER varID,
+                                            DOUBLEPRECISION data, INTEGER numBlocks,
+                                            INTEGER blocklengths(*),
+                                            INTEGER displacements(*), INTEGER nmiss,
+                                            TYPE(XT_IDXLIST) partDesc)
+\end{verbatim}
+
+Write part of the data making up
+variable varID of stream streamID.
+
+In contrast to streamWriteVarPart, the data is not read from data as one
+contiguous sequence but instead the numBlocks chunks of length
+blocklengths[i] and starting displacements[i] each for i in [0,numBlocks).
+
+
+\section*{\tt \htmlref{streamWriteScatteredVarPartF}{streamWriteScatteredVarPartF}}
+
+\begin{verbatim}
+    SUBROUTINE streamWriteScatteredVarPartF (INTEGER streamID, INTEGER varID,
+                                             REAL data, INTEGER numBlocks,
+                                             INTEGER blocklengths(*),
+                                             INTEGER displacements(*), INTEGER nmiss,
+                                             TYPE(XT_IDXLIST) partDesc)
+\end{verbatim}
+
+Write part of the data making up
+variable varID of stream streamID.
+
+Single-precision version of streamWriteScatteredVarPart..
+
+
+\section*{\tt \htmlref{streamWriteVarPart}{streamWriteVarPart}}
+
+\begin{verbatim}
+    SUBROUTINE streamWriteVarPart (INTEGER streamID, INTEGER varID,
+                                   DOUBLEPRECISION data, INTEGER nmiss,
+                                   TYPE(XT_IDXLIST) partDesc)
+\end{verbatim}
+
+Write part of the data making up variable varID
+of stream streamID.
+
+The processes in the communicator returned from cdiPioInit or
+pioInit must call this routine collectively and data must point to
+M items, where partDesc is a YAXT index list describing with M
+indices in 0 to N-1 the data items stored as doubles. N is the
+number of values per time step in the variable, i.e. the size of
+the corresponding array passed to streamWriteVar in the serial version.
+The group of processes collectively calling streamWriteVarPart
+must provide data for all indices or the behaviour is undefined..
+
+
+\section*{\tt \htmlref{streamWriteVarPartF}{streamWriteVarPartF}}
+
+\begin{verbatim}
+    SUBROUTINE streamWriteVarPartF (INTEGER streamID, INTEGER varID, REAL data,
+                                    INTEGER nmiss, TYPE(XT_IDXLIST) partDesc)
+\end{verbatim}
+
+Write part of the data making up variable
+varID of stream streamID.
+
+Single-precision version of streamWriteVarPart..
+
+
