@@ -19,7 +19,7 @@ test_variation()
   variation=$1
   ../libtool --mode=execute \
     @MPI_LAUNCH@ \
-    -n ${mpi_task_num} ${tool_wrap} ./pio_write ${pio_write_args} ${variation}
+    -n ${mpi_task_num} ${tool_wrap} ./pio_write ${pio_write_args} -s 7 ${variation}
   echo "checking example_0.$suffix" >&2
   ../libtool --mode=execute \
     ${tool_wrap} ./cksum_read example_0.${suffix} example_0.cksum

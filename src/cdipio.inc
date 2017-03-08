@@ -79,21 +79,40 @@
 !                     streamWriteVarPart
 !                                    (INTEGER         streamID,
 !                                     INTEGER         varID,
-!                                     CHOICE          data,
+!                                     DOUBLEPRECISION data,
 !                                     INTEGER         nmiss,
 !                                     TYPE(XT_IDXLIST)partDesc)
       EXTERNAL        streamWriteVarPart
 
+!                     streamWriteVarPartF
+!                                    (INTEGER         streamID,
+!                                     INTEGER         varID,
+!                                     REAL            data,
+!                                     INTEGER         nmiss,
+!                                     TYPE(XT_IDXLIST)partDesc)
+      EXTERNAL        streamWriteVarPartF
+
 !                     streamWriteScatteredVarPart
 !                                    (INTEGER         streamID,
 !                                     INTEGER         varID,
-!                                     CHOICE          data,
+!                                     DOUBLEPRECISION data,
 !                                     INTEGER         numBlocks,
 !                                     INTEGER         blocklengths(*),
 !                                     INTEGER         displacements(*),
 !                                     INTEGER         nmiss,
 !                                     TYPE(XT_IDXLIST)partDesc)
       EXTERNAL        streamWriteScatteredVarPart
+
+!                     streamWriteScatteredVarPartF
+!                                    (INTEGER         streamID,
+!                                     INTEGER         varID,
+!                                     REAL            data,
+!                                     INTEGER         numBlocks,
+!                                     INTEGER         blocklengths(*),
+!                                     INTEGER         displacements(*),
+!                                     INTEGER         nmiss,
+!                                     TYPE(XT_IDXLIST)partDesc)
+      EXTERNAL        streamWriteScatteredVarPartF
 
       INTEGER         cdiPioCSRLastN
 !                                    (INTEGER         commSuper,

@@ -12,10 +12,11 @@
 #include "pio_rpc.h"
 
 void
-pioBufferPartData(int streamID, int varID, const double *data,
-                  int nmiss, Xt_idxlist partDesc);
+cdiPioBufferPartData(int streamID, int varID, int memtype, const void *data,
+                     int nmiss, Xt_idxlist partDesc);
 void
-cdiPioBufferPartDataGather(int streamID, int varID, const double *data,
+cdiPioBufferPartDataGather(int streamID, int varID,
+                           int memtype, const void *data,
                            int numBlocks, const int blocklengths[],
                            const int displacements[],
                            int nmiss, Xt_idxlist partDesc);
