@@ -31,17 +31,16 @@ char* gribCopyString(grib_handle* gribHandle, const char* key)
   char* result = NULL;
   size_t length;
 #ifdef HAVE_GRIB_GET_LENGTH
-  if(!grib_get_length(gribHandle, key, &length))
+  if (!grib_get_length(gribHandle, key, &length))
     {
-      result = (char *) Malloc(length);
-    if(!grib_get_string(gribHandle, key, result, &length))
-    result = (char *) Realloc(result, length);
-
-    else
-      {
+      result = (char *)Malloc(length);
+      if (!grib_get_string(gribHandle, key, result, &length))
+        result = (char *) Realloc(result, length);
+      else
+        {
           Free(result);
           result = NULL;
-      }
+        }
     }
 #else
   length = 1024;         /* there's an implementation limit
