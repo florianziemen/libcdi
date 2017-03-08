@@ -184,8 +184,25 @@ parse_long_option(struct model_config *restrict setup, int pioConfHandle, pioRol
 #endif
   static const char cacheRedistStr[] = "no-cache-redists", pioRoleSchemeOptionStr[] = "pio-role-scheme",
                     curvilinearGridOptionStr[] = "no-create-curvilinear-grid", uuidCreateOptionStr[] = "no-create-uuid",
-                    useDistGridOptionStr[] = "no-use-dist-grid", taxistypeOptionStr[] = "taxis-type",
-                    taxisunitOptionStr[] = "taxis-unit";
+                    useDistGridOptionStr[] = "no-use-dist-grid", datatypeOptionStr[] = "datatype",
+                    taxistypeOptionStr[] = "taxis-type", taxisunitOptionStr[] = "taxis-unit";
+  static const struct string2int datatypeArgMap[] = {
+    { "pack", CDI_DATATYPE_PACK },     { "pack1", CDI_DATATYPE_PACK1 },   { "pack2", CDI_DATATYPE_PACK2 },
+    { "pack3", CDI_DATATYPE_PACK3 },   { "pack4", CDI_DATATYPE_PACK4 },   { "pack5", CDI_DATATYPE_PACK5 },
+    { "pack6", CDI_DATATYPE_PACK6 },   { "pack7", CDI_DATATYPE_PACK7 },   { "pack8", CDI_DATATYPE_PACK8 },
+    { "pack9", CDI_DATATYPE_PACK9 },   { "pack10", CDI_DATATYPE_PACK10 }, { "pack11", CDI_DATATYPE_PACK11 },
+    { "pack12", CDI_DATATYPE_PACK12 }, { "pack13", CDI_DATATYPE_PACK13 }, { "pack14", CDI_DATATYPE_PACK14 },
+    { "pack15", CDI_DATATYPE_PACK15 }, { "pack16", CDI_DATATYPE_PACK16 }, { "pack17", CDI_DATATYPE_PACK17 },
+    { "pack18", CDI_DATATYPE_PACK18 }, { "pack19", CDI_DATATYPE_PACK19 }, { "pack20", CDI_DATATYPE_PACK20 },
+    { "pack21", CDI_DATATYPE_PACK21 }, { "pack22", CDI_DATATYPE_PACK22 }, { "pack23", CDI_DATATYPE_PACK23 },
+    { "pack24", CDI_DATATYPE_PACK24 }, { "pack25", CDI_DATATYPE_PACK25 }, { "pack26", CDI_DATATYPE_PACK26 },
+    { "pack27", CDI_DATATYPE_PACK27 }, { "pack28", CDI_DATATYPE_PACK28 }, { "pack29", CDI_DATATYPE_PACK29 },
+    { "pack30", CDI_DATATYPE_PACK30 }, { "pack31", CDI_DATATYPE_PACK31 }, { "pack32", CDI_DATATYPE_PACK32 },
+    { "cpx32", CDI_DATATYPE_CPX32 },   { "cpx64", CDI_DATATYPE_CPX64 },   { "flt32", CDI_DATATYPE_FLT32 },
+    { "flt64", CDI_DATATYPE_FLT64 },   { "int8", CDI_DATATYPE_INT8 },     { "int16", CDI_DATATYPE_INT16 },
+    { "int32", CDI_DATATYPE_INT32 },   { "uint8", CDI_DATATYPE_UINT8 },   { "uint16", CDI_DATATYPE_UINT16 },
+    { "uint32", CDI_DATATYPE_UINT32 },
+  };
   static const struct string2int taxistypeArgMap[] = {
     { "absolute", TAXIS_ABSOLUTE },
     { "relative", TAXIS_RELATIVE },
@@ -198,6 +215,7 @@ parse_long_option(struct model_config *restrict setup, int pioConfHandle, pioRol
   };
   enum
   {
+    datatypeArgMapSize = sizeof(datatypeArgMap) / sizeof(datatypeArgMap[0]),
     taxistypeArgMapSize = sizeof(taxistypeArgMap) / sizeof(taxistypeArgMap[0]),
     taxisunitArgMapSize = sizeof(taxisunitArgMap) / sizeof(taxisunitArgMap[0]),
   };
@@ -215,6 +233,9 @@ parse_long_option(struct model_config *restrict setup, int pioConfHandle, pioRol
     ;
   else if (parseLongOptionArgStringToInt(str, sizeof(taxisunitOptionStr) - 1, taxisunitOptionStr, taxisunitArgMapSize,
                                          taxisunitArgMap, argc, argv, &setup->taxisunit))
+    ;
+  else if (parseLongOptionArgStringToInt(str, sizeof(datatypeOptionStr) - 1, datatypeOptionStr, datatypeArgMapSize, datatypeArgMap,
+                                         argc, argv, &setup->datatype))
     ;
   else if (!strncmp(str, pioRoleSchemeOptionStr,
                     sizeof (pioRoleSchemeOptionStr) - 1))
