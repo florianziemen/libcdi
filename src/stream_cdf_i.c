@@ -3836,6 +3836,9 @@ int cdfInqContents(stream_t *streamptr)
       if ( ncvars[nctimevarid].longname[0] )
         ptaxisDefLongname(taxis, ncvars[nctimevarid].longname);
 
+      if ( ncvars[nctimevarid].units[0] )
+        ptaxisDefUnits(taxis, ncvars[nctimevarid].units);
+
       int datatype = (ncvars[nctimevarid].xtype == NC_FLOAT) ? CDI_DATATYPE_FLT32 : CDI_DATATYPE_FLT64;
       ptaxisDefDatatype(taxis, datatype);
     }
