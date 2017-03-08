@@ -11,8 +11,8 @@
 #include "resource_handle.h"
 #include "pio_rpc.h"
 
-void pioBufferPartData(int streamID, int varID, const double *data, size_t nmiss, Xt_idxlist partDesc);
-void cdiPioBufferPartDataGather(int streamID, int varID, const double *data, int numBlocks, const int blocklengths[],
+void cdiPioBufferPartData(int streamID, int varID, int memtype, const void *data, size_t nmiss, Xt_idxlist partDesc);
+void cdiPioBufferPartDataGather(int streamID, int varID, int memtype, const void *data, int numBlocks, const int blocklengths[],
                                 const int displacements[], size_t nmiss, Xt_idxlist partDesc);
 
 void pioBufferFuncCall(int streamID, struct winHeaderEntry header, const void *data, valPackFunc dataPackFunc);

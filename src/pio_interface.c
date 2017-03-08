@@ -175,7 +175,7 @@ modelWinEnqueue(size_t streamIdx, struct winHeaderEntry header, const void *data
   if (header.id > 0)
     {
       int offset = header.offset
-          = (int) roundUpToMultiple((size_t) (txWin[streamIdx].head - txWin[streamIdx].buffer), sizeof(double));
+          = (int) roundUpToMultiple((size_t) (txWin[streamIdx].head - txWin[streamIdx].buffer), PIO_WIN_ALIGN);
       MPI_Comm comm = cdiPioInqInterComm();
       packFunc((void *) data, txWin[streamIdx].buffer, (int) txWin[streamIdx].size, &offset, &comm);
       txWin[streamIdx].head = txWin[streamIdx].buffer + offset;
@@ -255,14 +255,15 @@ cdiPioRDMAProgress(void)
 }
 
 static void
-pioBufferPartData_(int streamID, int varID, const void *packData, valPackFunc packDataFunc, size_t nmiss, Xt_idxlist partDesc)
+cdiPioBufferPartData_(int streamID, int varID, int memtype, const void *packData, valPackFunc packDataFunc, size_t nmiss,
+                      Xt_idxlist partDesc)
 {
   size_t streamIdx = indexOfID(&openStreams, streamID);
   xassert(streamIdx != SIZE_MAX);
   xassert(varID >= 0 && varID < streamInqNvars(streamID));
   collWaitAll();
-
-  struct winHeaderEntry dataHeader = { .id = DATA_HEADER_DOUBLE, .specific.dataRecord = { varID, nmiss }, .offset = -1 };
+  int dataHeaderID = memtype == MEMTYPE_DOUBLE ? DATA_HEADER_DOUBLE : DATA_HEADER_FLOAT;
+  struct winHeaderEntry dataHeader = { .id = dataHeaderID, .specific.dataRecord = { varID, nmiss }, .offset = -1 };
   modelWinEnqueue(streamIdx, dataHeader, packData, packDataFunc);
   {
     struct winHeaderEntry partHeader = { .id = PARTDESCMARKER, .offset = 0 };
@@ -272,13 +273,19 @@ pioBufferPartData_(int streamID, int varID, const void *packData, valPackFunc pa
   txWin[streamIdx].refuseFuncCall = 1;
 }
 
-void
-pioBufferPartData(int streamID, int varID, const double *data, size_t nmiss, Xt_idxlist partDesc)
+static inline size_t
+memtype2ElemSize(int memtype)
 {
-  int chunk = xt_idxlist_get_num_indices(partDesc);
-  xassert(chunk <= INT_MAX);
-  pioBufferPartData_(streamID, varID, &(struct memCpyDataDesc){ data, (size_t) chunk * sizeof(data[0]) }, memcpyPackFunc, nmiss,
-                     partDesc);
+  return memtype == MEMTYPE_DOUBLE ? sizeof(double) : sizeof(float);
+}
+
+void
+cdiPioBufferPartData(int streamID, int varID, int memtype, const void *data, size_t nmiss, Xt_idxlist partDesc)
+{
+  size_t chunk = (size_t) (xt_idxlist_get_num_indices(partDesc));
+  size_t elemSize = memtype2ElemSize(memtype);
+  cdiPioBufferPartData_(streamID, varID, memtype, &(struct memCpyDataDesc){ data, chunk * elemSize }, memcpyPackFunc, nmiss,
+                        partDesc);
 }
 
 struct scatterGatherDesc
@@ -323,18 +330,18 @@ scatterGatherPackFunc(void *dataDesc, void *buf, int size, int *pos, void *conte
 }
 
 void
-cdiPioBufferPartDataGather(int streamID, int varID, const double *data, int numBlocks, const int blocklengths[],
+cdiPioBufferPartDataGather(int streamID, int varID, int memtype, const void *data, int numBlocks, const int blocklengths[],
                            const int displacements[], size_t nmiss, Xt_idxlist partDesc)
 {
   xassert(numBlocks >= 0);
-  pioBufferPartData_(streamID, varID,
-                     &(struct scatterGatherDesc){ .data = (void *) data,
-                                                  .blocklengths = blocklengths,
-                                                  .displacements = displacements,
-                                                  .elemSize = sizeof(data[0]),
-                                                  .numBlocks = (unsigned) numBlocks,
-                                                  .numElems = (unsigned) xt_idxlist_get_num_indices(partDesc) },
-                     scatterGatherPackFunc, nmiss, partDesc);
+  cdiPioBufferPartData_(streamID, varID, memtype,
+                        &(struct scatterGatherDesc){ .data = (void *) data,
+                                                     .blocklengths = blocklengths,
+                                                     .displacements = displacements,
+                                                     .elemSize = memtype2ElemSize(memtype),
+                                                     .numBlocks = (unsigned) numBlocks,
+                                                     .numElems = (unsigned) xt_idxlist_get_num_indices(partDesc) },
+                        scatterGatherPackFunc, nmiss, partDesc);
 }
 
 /************************************************************************/
@@ -660,40 +667,66 @@ pioWriteTimestep(void)
   xdebug("%s", "RETURN. messages sent, windows posted");
 }
 
-void
-streamWriteVarPart(int streamID, int varID, const void *data, int nmiss, Xt_idxlist partDesc)
+static void
+streamWriteVarPart_(int streamID, int varID, int memtype, const void *data, int nmiss, Xt_idxlist partDesc)
 {
   if (CDI_Debug) Message("streamID = %d varID = %d", streamID, varID);
 
   int chunk = xt_idxlist_get_num_indices(partDesc);
   xassert(chunk == 0 || data);
 
-  void (*myStreamWriteVarPart)(int streamID, int varID, const void *data, int nmiss, Xt_idxlist partDesc)
-      = (void (*)(int, int, const void *, int, Xt_idxlist)) namespaceSwitchGet(NSSWITCH_STREAM_WRITE_VAR_PART_).func;
+  void (*myStreamWriteVarPart)(int streamID, int varID, int memtype, const void *data, int nmiss, Xt_idxlist partDesc)
+      = (void (*)(int, int, int, const void *, int, Xt_idxlist)) namespaceSwitchGet(NSSWITCH_STREAM_WRITE_VAR_PART_).func;
 
   if (!myStreamWriteVarPart) xabort("local part writing is unsupported!");
 
-  myStreamWriteVarPart(streamID, varID, data, nmiss, partDesc);
+  myStreamWriteVarPart(streamID, varID, memtype, data, nmiss, partDesc);
 }
 
 void
-streamWriteScatteredVarPart(int streamID, int varID, const void *data, int numBlocks, const int blocklengths[],
-                            const int displacements[], int nmiss, Xt_idxlist partDesc)
+streamWriteVarPart(int streamID, int varID, const double *data, int nmiss, Xt_idxlist partDesc)
+{
+  streamWriteVarPart_(streamID, varID, MEMTYPE_DOUBLE, data, nmiss, partDesc);
+}
+
+void
+streamWriteVarPartF(int streamID, int varID, const float *data, int nmiss, Xt_idxlist partDesc)
+{
+  streamWriteVarPart_(streamID, varID, MEMTYPE_FLOAT, data, nmiss, partDesc);
+}
+
+static void
+streamWriteScatteredVarPart_(int streamID, int varID, int memtype, const void *data, int numBlocks, const int blocklengths[],
+                             const int displacements[], int nmiss, Xt_idxlist partDesc)
 {
   if (CDI_Debug) Message("streamID = %d varID = %d", streamID, varID);
 
   int chunk = xt_idxlist_get_num_indices(partDesc);
   xassert(chunk == 0 || data);
 
-  void (*myStreamWriteScatteredVarPart)(int streamID, int varID, const void *data, int numBlocks, const int blocklengths[],
-                                        const int displacements[], int nmiss, Xt_idxlist partDesc)
-      = (void (*)(int, int, const void *, int, const int[], const int[], int, Xt_idxlist)) namespaceSwitchGet(
+  void (*myStreamWriteScatteredVarPart)(int streamID, int varID, int memtype, const void *data, int numBlocks,
+                                        const int blocklengths[], const int displacements[], int nmiss, Xt_idxlist partDesc)
+      = (void (*)(int, int, int, const void *, int, const int[], const int[], int, Xt_idxlist)) namespaceSwitchGet(
             NSSWITCH_STREAM_WRITE_SCATTERED_VAR_PART_)
             .func;
 
   if (!myStreamWriteScatteredVarPart) xabort("local part writing is unsupported!");
 
-  myStreamWriteScatteredVarPart(streamID, varID, data, numBlocks, blocklengths, displacements, nmiss, partDesc);
+  myStreamWriteScatteredVarPart(streamID, varID, memtype, data, numBlocks, blocklengths, displacements, nmiss, partDesc);
+}
+
+void
+streamWriteScatteredVarPart(int streamID, int varID, const double *data, int numBlocks, const int blocklengths[],
+                            const int displacements[], int nmiss, Xt_idxlist partDesc)
+{
+  streamWriteScatteredVarPart_(streamID, varID, MEMTYPE_DOUBLE, data, numBlocks, blocklengths, displacements, nmiss, partDesc);
+}
+
+void
+streamWriteScatteredVarPartF(int streamID, int varID, const float *data, int numBlocks, const int blocklengths[],
+                             const int displacements[], int nmiss, Xt_idxlist partDesc)
+{
+  streamWriteScatteredVarPart_(streamID, varID, MEMTYPE_FLOAT, data, numBlocks, blocklengths, displacements, nmiss, partDesc);
 }
 
 /*

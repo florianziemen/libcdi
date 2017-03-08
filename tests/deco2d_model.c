@@ -4,6 +4,7 @@
 
 #include <inttypes.h>
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -70,6 +71,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
     Xt_idxlist partDesc;
     Xt_redist redist4gather;
 #endif
+    bool useFloat;
   } * varDesc;
   int gridID, taxisID, vlistID, tsID, tfID = 0;
   enum
@@ -78,6 +80,10 @@ modelRun(struct model_config setup, MPI_Comm comm)
   };
   double *levs;
   double *var = NULL, *varslice = NULL;
+  float *varsliceF = NULL;
+#if !USE_MPI
+  float *varF = NULL;
+#endif
   double mscale, mrscale;
   time_t current_time;
   int vdate = 19850101, vtime = 120000;
@@ -85,7 +91,8 @@ modelRun(struct model_config setup, MPI_Comm comm)
   char *filename = NULL;
   int nlon = setup.nlon, nlat = setup.nlat;
   size_t nVars = setup.nvars > 0 ? (size_t) setup.nvars : 0;
-  size_t varslice_size = 0;
+  size_t varslice_size = 0, varsliceF_size = 0;
+  ;
 #if USE_MPI
   int comm_size = 1;
   int npart[2], rank_coord[2];
@@ -99,9 +106,17 @@ modelRun(struct model_config setup, MPI_Comm comm)
   (void) comm;
 #endif
 
+#if USE_MPI
+  bool needsGather = setup.flags & PIO_WRITE_CONFIG_CHECKSUM_FLAG;
+#else
+  bool needsGather = true;
+#endif
   if (rank == 0 && (setup.flags & PIO_WRITE_CONFIG_CHECKSUM_FLAG))
     {
       var = (double *) Malloc((size_t) nlon * (size_t) nlat * (size_t) setup.max_nlev * sizeof(var[0]));
+#if !USE_MPI
+      varF = (float *) Malloc((size_t) nlon * (size_t) nlat * (size_t) setup.max_nlev * sizeof(varF[0]));
+#endif
     }
 
 #if USE_MPI
@@ -225,6 +240,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
       varDesc[varIdx].code = GRIB_USERDEF + (int) varIdx;
       vlistDefVarCode(vlistID, varDesc[varIdx].id, varDesc[varIdx].code);
       vlistDefVarDatatype(vlistID, varDesc[varIdx].id, setup.datatype);
+      varDesc[varIdx].useFloat = (bool) (random() & 1);
     }
 
   taxisID = taxisCreate(setup.taxistype);
@@ -273,7 +289,18 @@ modelRun(struct model_config setup, MPI_Comm comm)
                   varslice_size = chunkSize;
                 }
               modelRegionCompute(varslice, (int) varLevs, nlat, nlon, start, chunk, tsID, mscale, mrscale);
-              if (setup.flags & PIO_WRITE_CONFIG_CHECKSUM_FLAG)
+              bool useFloat = varDesc[varIdx].useFloat;
+              if (useFloat)
+                {
+                  if (varsliceF_size < chunkSize)
+                    {
+                      varsliceF = (float *) Realloc(varsliceF, chunkSize * sizeof(varsliceF[0]));
+                      varsliceF_size = chunkSize;
+                    }
+                  for (size_t i = 0; i < chunkSize; ++i) varslice[i] = varsliceF[i] = (float) varslice[i];
+                }
+
+              if (needsGather)
                 {
 #if USE_MPI
                   xt_redist_s_exchange1(varDesc[varIdx].redist4gather, varslice, var);
@@ -289,6 +316,9 @@ modelRun(struct model_config setup, MPI_Comm comm)
                       for (size_t i = 0; i < npromz; ++i)
                         var[k * layerSize + nblk * nproma + i] = varslice[k * (nblk + 1) * nproma + nblk * nproma + i];
                     }
+                  if (useFloat)
+                    for (size_t k = 0; k < varLevs; ++k)
+                      for (size_t i = 0; i < layerSize; ++i) varF[k * layerSize + i] = (float) var[k * layerSize + i];
 #endif
                 }
               if (rank == 0 && (setup.flags & PIO_WRITE_CONFIG_CHECKSUM_FLAG))
@@ -305,10 +335,17 @@ modelRun(struct model_config setup, MPI_Comm comm)
                   blk_displ[k] = (int) (k * (nblk + 1) * nproma);
                   blk_lens[k] = (int) layerSize;
                 }
-              streamWriteScatteredVarPart(streamID, varDesc[varIdx].id, varslice, (int) varLevs, blk_lens, blk_displ, nmiss,
-                                          varDesc[varIdx].partDesc);
+              if (useFloat)
+                streamWriteScatteredVarPartF(streamID, varDesc[varIdx].id, varsliceF, (int) varLevs, blk_lens, blk_displ, nmiss,
+                                             varDesc[varIdx].partDesc);
+              else
+                streamWriteScatteredVarPart(streamID, varDesc[varIdx].id, varslice, (int) varLevs, blk_lens, blk_displ, nmiss,
+                                            varDesc[varIdx].partDesc);
 #else
-              streamWriteVar(streamID, varDesc[varIdx].id, var, nmiss);
+              if (useFloat)
+                streamWriteVarF(streamID, varDesc[varIdx].id, varF, nmiss);
+              else
+                streamWriteVar(streamID, varDesc[varIdx].id, var, nmiss);
 #endif
             }
           current_time += 86400;
@@ -326,13 +363,13 @@ modelRun(struct model_config setup, MPI_Comm comm)
               perror("failed to open table file");
               exit(EXIT_FAILURE);
             }
-          for (size_t i = 0; i < nVars; ++i)
+          for (size_t varIdx = 0; varIdx < nVars; ++varIdx)
             {
               uint32_t cksum;
               int code;
-              cksum = memcrc_finish(&varDesc[i].checksum_state,
-                                    (off_t) ((varDesc[i].size * sizeof(var[0]) + sizeof(int) * 2) * (size_t) setup.nts));
-              code = vlistInqVarCode(vlistID, varDesc[i].id);
+              cksum = memcrc_finish(&varDesc[varIdx].checksum_state,
+                                    (off_t) ((varDesc[varIdx].size * sizeof(var[0]) + sizeof(int) * 2) * (size_t) setup.nts));
+              code = vlistInqVarCode(vlistID, varDesc[varIdx].id);
               if (fprintf(tablefp, "%08lx %d\n", (unsigned long) cksum, code) < 0)
                 {
                   perror("failed to write table file");
@@ -346,6 +383,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
   pioEndTimestepping();
 #endif
   Free(varslice);
+  Free(varsliceF);
   vlistDestroy(vlistID);
   taxisDestroy(taxisID);
   for (size_t varIdx = 0; varIdx < nVars; varIdx++)
@@ -366,6 +404,8 @@ modelRun(struct model_config setup, MPI_Comm comm)
   Free(var);
 #if USE_MPI
   Free(blk_displ);
+#else
+  Free(varF);
 #endif
   Free(varDesc);
   Free(levs);
