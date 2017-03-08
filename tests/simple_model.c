@@ -65,11 +65,13 @@ modelRun(struct model_config setup, MPI_Comm comm)
     int chunkSize, start;
     Xt_idxlist partDesc;
 #endif
+    bool useFloat;
   } *varDesc;
   int gridID, taxisID, vlistID, tsID, tfID = 0;
   enum { nmiss = 0 };
   double *levs;
   double *var = NULL, *varslice = NULL;
+  float *varsliceF = NULL;
   double mscale, mrscale;
   time_t current_time;
   int vdate = 19850101, vtime = 120000;
@@ -77,7 +79,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
   char *filename = NULL;
   int nlon = setup.nlon, nlat = setup.nlat;
   size_t nVars = (size_t)setup.nvars;
-  size_t varslice_size = 0;
+  size_t varslice_size = 0, varsliceF_size = 0;
 #if USE_MPI
   int *chunks = NULL, *displs = NULL, comm_size = 1;
 #endif
@@ -144,10 +146,10 @@ modelRun(struct model_config setup, MPI_Comm comm)
           unsigned char uuid[CDI_UUID_SIZE];
           if (rank == 0) cdiCreateUUID(uuid);
 #if USE_MPI
-        MPI_Bcast(uuid, CDI_UUID_SIZE, MPI_UNSIGNED_CHAR, 0, comm);
+          MPI_Bcast(uuid, CDI_UUID_SIZE, MPI_UNSIGNED_CHAR, 0, comm);
 #endif
-        cdiDefKeyBytes(varDesc[varIdx].zaxisID, CDI_GLOBAL, CDI_KEY_UUID, uuid, CDI_UUID_SIZE);
-      }
+          cdiDefKeyBytes(varDesc[varIdx].zaxisID, CDI_GLOBAL, CDI_KEY_UUID, uuid, CDI_UUID_SIZE);
+        }
       zaxisIDset:
       varDesc[varIdx].id
         = vlistDefVar(vlistID, gridID, varDesc[varIdx].zaxisID, TIME_VARIABLE);
@@ -179,6 +181,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
       varDesc[varIdx].code = GRIB_USERDEF + (int)varIdx;
       vlistDefVarCode(vlistID, varDesc[varIdx].id, varDesc[varIdx].code);
       vlistDefVarDatatype(vlistID, varDesc[varIdx].id, setup.datatype);
+      varDesc[varIdx].useFloat = (bool) (random() & 1);
     }
 
   taxisID = taxisCreate(setup.taxistype);
@@ -226,6 +229,17 @@ modelRun(struct model_config setup, MPI_Comm comm)
                   varslice_size = chunkSize;
                 }
               modelRegionCompute(varslice, (size_t) start, chunkSize, varDesc[varIdx].nlev, nlat, nlon, tsID, mscale, mrscale);
+              bool useFloat = varDesc[varIdx].useFloat;
+              if (useFloat)
+                {
+                  if (varsliceF_size < chunkSize)
+                    {
+                      varsliceF = (float *) Realloc(varsliceF, chunkSize * sizeof(varsliceF[0]));
+                      varsliceF_size = chunkSize;
+                    }
+                  for (size_t i = 0; i < chunkSize; ++i) varslice[i] = varsliceF[i] = (float) varslice[i];
+                }
+
               if (setup.flags & PIO_WRITE_CONFIG_CHECKSUM_FLAG)
                 {
 #if USE_MPI
@@ -258,10 +272,15 @@ modelRun(struct model_config setup, MPI_Comm comm)
                 }
 
 #ifdef USE_MPI
-	      streamWriteVarPart(streamID, varDesc[varIdx].id, varslice, nmiss,
-                                 varDesc[varIdx].partDesc);
+              if (useFloat)
+                streamWriteVarPartF(streamID, varDesc[varIdx].id, varsliceF, nmiss, varDesc[varIdx].partDesc);
+              else
+                streamWriteVarPart(streamID, varDesc[varIdx].id, varslice, nmiss, varDesc[varIdx].partDesc);
 #else
-	      streamWriteVar(streamID, varDesc[varIdx].id, varslice, nmiss);
+              if (useFloat)
+                streamWriteVarF(streamID, varDesc[varIdx].id, varsliceF, nmiss);
+              else
+                streamWriteVar(streamID, varDesc[varIdx].id, varslice, nmiss);
 #endif
 	    }
           current_time += 86400;
@@ -279,11 +298,12 @@ modelRun(struct model_config setup, MPI_Comm comm)
               perror("failed to open table file");
               exit(EXIT_FAILURE);
             }
-          for (size_t i = 0; i < (size_t) nVars; ++i)
+          for (size_t varIdx = 0; varIdx < nVars; ++varIdx)
             {
-              uint32_t cksum = memcrc_finish(&varDesc[i].checksum_state,
-                                             (off_t) ((varDesc[i].size * sizeof(var[0]) + sizeof(int) * 2) * (size_t) setup.nts));
-              int code = vlistInqVarCode(vlistID, varDesc[i].id);
+              uint32_t cksum
+                  = memcrc_finish(&varDesc[varIdx].checksum_state,
+                                  (off_t) ((varDesc[varIdx].size * sizeof(var[0]) + sizeof(int) * 2) * (size_t) setup.nts));
+              int code = vlistInqVarCode(vlistID, varDesc[varIdx].id);
               if (fprintf(tablefp, "%08lx %d\n", (unsigned long) cksum, code) < 0)
                 {
                   perror("failed to write table file");
@@ -301,6 +321,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
   pioEndTimestepping ();
 #endif
   Free(varslice);
+  Free(varsliceF);
   vlistDestroy ( vlistID );
   taxisDestroy ( taxisID );
   for (size_t varIdx = 0; varIdx < nVars; varIdx++ )

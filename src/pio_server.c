@@ -62,7 +62,7 @@ struct clientBuf
 struct streamMemLayout
 {
   Xt_uid varPartIdxListUID;
-  size_t offset;
+  int offset, conversion;
 };
 
 struct cacheRedist
@@ -207,12 +207,12 @@ readFuncCall(struct winHeaderEntry *header, size_t streamIdx)
 /************************************************************************/
 
 static void
-resizeVarGatherBuf(size_t size, double **buf, size_t *bufSize)
+resizeVarGatherBuf(size_t size, void **buf, size_t *bufSize)
 {
   if (size <= *bufSize)
     ;
   else
-    *buf = Realloc(*buf, (*bufSize = size) * sizeof(buf[0][0]));
+    *buf = Realloc(*buf, *bufSize = size);
 }
 
 #define wHECast struct winHeaderEntry *)(void *
@@ -223,19 +223,22 @@ buildVarXmap(struct Xt_offset_ext *restrict partExts, const struct clientBuf *re
 {
   size_t numClients = (size_t) numClients_;
   Xt_idxlist *part = Malloc(numClients * sizeof(part[0]));
+  int conversion = ((wHECast) clientBuf[0].mem)[headerIdx].id;
+  size_t elemSize = conversion == DATA_HEADER_FLOAT ? sizeof(float) : sizeof(double);
   for (size_t clientIdx = 0; clientIdx < numClients; ++clientIdx)
     {
       unsigned char *clientMem = clientBuf[clientIdx].mem;
       struct dataRecord *dataHeader = &((wHECast) clientMem)[headerIdx].specific.dataRecord;
       int position = ((wHECast) clientMem)[headerIdx + 1].offset;
-      xassert(dataHeader->varID == varID && (((wHECast) clientMem)[headerIdx + 1].id == PARTDESCMARKER) && position > 0
+      xassert(dataHeader->varID == varID && ((wHECast) clientMem)[headerIdx].id == conversion
+              && (((wHECast) clientMem)[headerIdx + 1].id == PARTDESCMARKER) && position > 0
               && ((size_t) position >= sizeof(struct winHeaderEntry) * (size_t) clientBuf[clientIdx].dictSize)
               && ((size_t) position < clientBuf[clientIdx].size));
       part[clientIdx] = xt_idxlist_unpack(clientMem, (int) clientBuf[clientIdx].size, &position, pioInterComm);
       unsigned partSize = (unsigned) xt_idxlist_get_num_indices(part[clientIdx]);
       size_t charOfs = (size_t) ((clientMem + ((wHECast) clientMem)[headerIdx].offset) - clientBuf[0].mem);
-      xassert(charOfs % sizeof(double) == 0 && charOfs / sizeof(double) + partSize <= INT_MAX);
-      int elemOfs = (int) (charOfs / sizeof(double));
+      xassert(charOfs % PIO_WIN_ALIGN == 0 && charOfs / elemSize + partSize <= INT_MAX);
+      int elemOfs = (int) (charOfs / elemSize);
       partExts[clientIdx].start = elemOfs;
       partExts[clientIdx].size = (int) partSize;
       partExts[clientIdx].stride = 1;
@@ -263,6 +266,8 @@ buildVarRedist(int headerIdx, size_t streamIdx,
   const struct clientBuf *restrict clientBuf = rxWin[streamIdx].clientBuf;
   const struct winHeaderEntry *winDict = (wHECast) clientBuf[0].mem;
   int varID = winDict[headerIdx].specific.dataRecord.varID;
+  int conversion = winDict[headerIdx].id;
+  size_t elemSize = conversion == DATA_HEADER_FLOAT ? sizeof(float) : sizeof(double);
   size_t numClients = (size_t) numClients_;
   struct Xt_offset_ext *partExts = Malloc(numClients * sizeof(partExts[0]));
   MPI_Comm pioInterComm = cdiPioInqInterComm(), collComm = commInqCommColl();
@@ -294,13 +299,13 @@ buildVarRedist(int headerIdx, size_t streamIdx,
               unsigned char *clientMem = clientBuf[clientIdx].mem;
               struct dataRecord *dataHeader = &((wHECast) clientMem)[headerIdx].specific.dataRecord;
               int position = ((wHECast) clientMem)[headerIdx + 1].offset;
-              xassert(dataHeader->varID == varID && position > 0
+              xassert(dataHeader->varID == varID && ((wHECast) clientMem)[headerIdx].id == conversion && position > 0
                       && ((size_t) position >= sizeof(struct winHeaderEntry) * (size_t) clientBuf[clientIdx].dictSize)
                       && ((size_t) position < clientBuf[clientIdx].size));
               size_t charOfs = (size_t) ((clientMem + ((wHECast) clientMem)[headerIdx].offset) - clientBuf[0].mem);
               int partSize = partSizes[clientIdx + 1];
-              xassert(charOfs % sizeof(double) == 0 && charOfs / sizeof(double) + (size_t) partSize <= INT_MAX);
-              int elemOfs = (int) (charOfs / sizeof(double));
+              xassert(charOfs % PIO_WIN_ALIGN == 0 && charOfs / elemSize + (size_t) partSize <= INT_MAX);
+              int elemOfs = (int) (charOfs / elemSize);
               partExts[clientIdx].start = elemOfs;
               partExts[clientIdx].size = partSize;
               partExts[clientIdx].stride = 1;
@@ -317,7 +322,8 @@ buildVarRedist(int headerIdx, size_t streamIdx,
     finishXmapCaching:
       Free(uids);
     }
-  Xt_redist varRedist = xt_redist_p2p_ext_new(gatherXmap, (int) numClients, partExts, 1, &gatherExt, MPI_DOUBLE);
+  MPI_Datatype elemDt = conversion == DATA_HEADER_FLOAT ? MPI_FLOAT : MPI_DOUBLE;
+  Xt_redist varRedist = xt_redist_p2p_ext_new(gatherXmap, (int) numClients, partExts, 1, &gatherExt, elemDt);
   if (!cacheXmaps) xt_xmap_delete(gatherXmap);
   Free(partExts);
   return varRedist;
@@ -348,16 +354,38 @@ buildVarSlicesIdxList(int vlistID, int varID, int startLvl, int numLvl, const st
   return idxlist;
 }
 
+static inline size_t
+countMemMissingDouble(size_t n, const double *restrict data, double missVal)
+{
+  size_t nmiss = 0;
+  for (size_t i = 0; i < n; ++i) nmiss += (data[i] == missVal);
+  return nmiss;
+}
+
+static inline size_t
+countMemMissingFloat(size_t n, const float *restrict data, double missVal)
+{
+  size_t nmiss = 0;
+  float missValF = (float) missVal;
+  if (missValF == missVal)
+    for (size_t i = 0; i < n; ++i) nmiss += (data[i] == missValF);
+  return nmiss;
+}
+
 static int
-countVarChunkMissingVals(int vlistID, int varID, struct streamMapping *mapping, size_t chunkLen, const double *restrict data)
+countVarChunkMissingVals(int vlistID, int varID, struct streamMapping *mapping, size_t chunkLen, int conversion,
+                         const void *restrict data)
 {
   size_t nmiss = 0;
   if (mapping->hasMissing[varID])
     {
-      double missval = vlistInqVarMissval(vlistID, varID);
-      for (size_t i = 0; i < chunkLen; ++i) nmiss += (data[i] == missval);
+      double missVal = vlistInqVarMissval(vlistID, varID);
+      if (conversion == DATA_HEADER_DOUBLE)
+        nmiss = countMemMissingDouble(chunkLen, data, missVal);
+      else
+        nmiss = countMemMissingFloat(chunkLen, data, missVal);
     }
-  return nmiss;
+  return (int) nmiss;
 }
 
 static inline void
@@ -533,7 +561,7 @@ myVarPart(struct PPM_extent varShape[3], struct xyzDims collGrid, struct PPM_ext
 
 /* collective writing variant */
 static void
-writeNetCDFStreamParallel(size_t streamIdx, struct streamMapping *mapping, double **data_, size_t *currentDataBufSize,
+writeNetCDFStreamParallel(size_t streamIdx, struct streamMapping *mapping, void **data_, size_t *currentDataBufSize,
                           const struct cdiPioConf *conf)
 {
   const int nvars = mapping->numVars;
@@ -543,11 +571,14 @@ writeNetCDFStreamParallel(size_t streamIdx, struct streamMapping *mapping, doubl
   // init redistCache if applicable
   const bool reuseRedists = conf->cacheRedists ? handleRedistCache(streamIdx, mapping, (size_t) nvars, vlistID, collComm) : false;
   struct cacheRedist *restrict retained = rxWin[streamIdx].retained;
+  const struct clientBuf *restrict clientBuf = rxWin[streamIdx].clientBuf;
+  const struct winHeaderEntry *winDict = (wHECast) clientBuf[0].mem;
 
   for (int varID = 0; varID < nvars; ++varID)
     if (mapping->numLvlsW[varID])
       {
-        size_t varSize = 0;
+        int headerIdx = varMap[varID];
+        size_t varSize;
         Xt_redist gatherRedist;
         struct PPM_extent varChunk[3];
         int myChunk[3][2];
@@ -599,7 +630,6 @@ writeNetCDFStreamParallel(size_t streamIdx, struct streamMapping *mapping, doubl
             varSize = (size_t) xt_idxlist_get_num_indices(preWriteChunk);
             /* transpose data into write deco */
             {
-              int headerIdx = varMap[varID];
               gatherRedist = buildVarRedist(headerIdx, streamIdx, preWriteChunk, conf);
               if (conf->cacheRedists)
                 {
@@ -611,17 +641,22 @@ writeNetCDFStreamParallel(size_t streamIdx, struct streamMapping *mapping, doubl
                 }
             }
           }
-        resizeVarGatherBuf(varSize, data_, currentDataBufSize);
-        double *restrict data = *data_;
+        int conversion = winDict[headerIdx].id;
+        size_t elemSize = conversion == DATA_HEADER_FLOAT ? sizeof(float) : sizeof(double);
+        resizeVarGatherBuf(elemSize * varSize, data_, currentDataBufSize);
+        void *restrict data = *data_;
         xt_redist_s_exchange1(gatherRedist, rxWin[streamIdx].clientBuf[0].mem, data);
 
         if (!conf->cacheRedists) xt_redist_delete(gatherRedist);
 
         {
           /* count missing values if appropriate */
-          size_t nmiss = countVarChunkMissingVals(vlistID, varID, mapping, PPM_extents_size(3, varChunk), data);
+          size_t nmiss = countVarChunkMissingVals(vlistID, varID, mapping, PPM_extents_size(3, varChunk), conversion, data);
           /* write chunk */
-          streamWriteVarChunk(streamID, varID, (const int(*)[2]) myChunk, data, nmiss);
+          if (conversion == DATA_HEADER_DOUBLE)
+            streamWriteVarChunk(streamID, varID, (const int(*)[2]) myChunk, data, nmiss);
+          else
+            streamWriteVarChunkF(streamID, varID, (const int(*)[2]) myChunk, data, nmiss);
         }
       }
 }
@@ -685,7 +720,7 @@ cdiPioServerCdfDefVars(stream_t *streamptr)
 }
 
 static void
-writeNetCDFStreamSerial(size_t streamIdx, struct streamMapping *mapping, double **data_, size_t *currentDataBufSize,
+writeNetCDFStreamSerial(size_t streamIdx, struct streamMapping *mapping, void **data_, size_t *currentDataBufSize,
                         const struct cdiPioConf *conf)
 {
   const int nvars = mapping->numVars;
@@ -701,16 +736,23 @@ writeNetCDFStreamSerial(size_t streamIdx, struct streamMapping *mapping, double 
       = conf->cacheRedists != 0 ? handleRedistCache(streamIdx, mapping, (size_t) nvars, vlistID, collComm) : false;
   struct cacheRedist *restrict retained = rxWin[streamIdx].retained;
 
+  const struct clientBuf *restrict clientBuf = rxWin[streamIdx].clientBuf;
+  const struct winHeaderEntry *winDict = (wHECast) clientBuf[0].mem;
+
   for (int varID = 0; varID < nvars; ++varID)
     if (numLvlsW[varID])
       {
         size_t varSize;
         Xt_redist gatherRedist;
+        int headerIdx = varMap[varID];
+        int conversion = winDict[headerIdx].id;
+        size_t elemSize = conversion == DATA_HEADER_FLOAT ? sizeof(float) : sizeof(double);
+
         if (reuseRedists)
           {
             gatherRedist = retained[varID].redist;
             varSize = retained[varID].sliceSize;
-            if (writerRank == collRank) resizeVarGatherBuf(varSize, data_, currentDataBufSize);
+            if (writerRank == collRank) resizeVarGatherBuf(varSize * elemSize, data_, currentDataBufSize);
           }
         else
           {
@@ -719,14 +761,13 @@ writeNetCDFStreamSerial(size_t streamIdx, struct streamMapping *mapping, double 
               {
                 dstList = buildVarSlicesIdxList(vlistID, varID, -1, -1, conf);
                 varSize = (size_t) xt_idxlist_get_num_indices(dstList);
-                resizeVarGatherBuf(varSize, data_, currentDataBufSize);
+                resizeVarGatherBuf(varSize * elemSize, data_, currentDataBufSize);
               }
             else
               {
                 varSize = 0;
                 dstList = xt_idxempty_new();
               }
-            int headerIdx = varMap[varID];
             gatherRedist = buildVarRedist(headerIdx, streamIdx, dstList, conf);
             if (conf->cacheRedists)
               {
@@ -734,22 +775,25 @@ writeNetCDFStreamSerial(size_t streamIdx, struct streamMapping *mapping, double 
                 retained[varID].sliceSize = varSize;
               }
           }
-        double *restrict data = *data_;
+        void *restrict data = *data_;
         xt_redist_s_exchange1(gatherRedist, rxWin[streamIdx].clientBuf[0].mem, data);
         if (!conf->cacheRedists) xt_redist_delete(gatherRedist);
         if (writerRank == collRank)
           {
-            size_t nmiss = countVarChunkMissingVals(vlistID, varID, mapping, varSize, data);
-            streamWriteVar(streamID, varID, data, nmiss);
+            size_t nmiss = countVarChunkMissingVals(vlistID, varID, mapping, varSize, conversion, data);
+            if (conversion == DATA_HEADER_DOUBLE)
+              streamWriteVar(streamID, varID, data, nmiss);
+            else
+              streamWriteVarF(streamID, varID, data, nmiss);
           }
       }
 }
 
 static void
-writeNetCDFStream(size_t streamIdx, struct streamMapping *mapping, double **data_, size_t *currentDataBufSize,
+writeNetCDFStream(size_t streamIdx, struct streamMapping *mapping, void **data_, size_t *currentDataBufSize,
                   const struct cdiPioConf *conf)
 {
-  void (*writeNetCDFStream_)(size_t streamIdx, struct streamMapping * mapping, double **data_, size_t *currentDataBufSize,
+  void (*writeNetCDFStream_)(size_t streamIdx, struct streamMapping * mapping, void **data_, size_t *currentDataBufSize,
                              const struct cdiPioConf *conf)
       = writeNetCDFStreamSerial;
 #ifdef HAVE_PARALLEL_NC4
@@ -780,11 +824,12 @@ getLayout(size_t streamIdx)
     for (size_t headerIdx = 1; headerIdx < numDataEntries; headerIdx += 2)
       {
         struct winHeaderEntry *varHeader = winDictEntry(streamIdx, client, headerIdx);
-        xassert(varHeader->id == DATA_HEADER_DOUBLE);
+        xassert(varHeader->id == DATA_HEADER_DOUBLE || varHeader->id == DATA_HEADER_FLOAT);
+        int conversion = varHeader->id;
         size_t varID = (size_t) varHeader[0].specific.dataRecord.varID;
-        size_t offset = (size_t) varHeader[0].offset;
+        int offset = varHeader[0].offset;
         Xt_uid uid = unpackXTUID(varHeader[1].specific.partDesc.packedUID);
-        layout[client][varID] = (struct streamMemLayout){ .varPartIdxListUID = uid, .offset = offset };
+        layout[client][varID] = (struct streamMemLayout){ .varPartIdxListUID = uid, .offset = offset, .conversion = conversion };
       }
   return *layout;
 }
@@ -826,8 +871,8 @@ streamMappingNew(size_t streamIdx, struct winHeaderEntry *winDict, const struct 
   {
     size_t j = (size_t) -1;
     /* initialized to shut up gcc, loop logic ensures initialization
-     * at least once */
-    size_t recordDataSize = 0;
+     * to occur before first use */
+    size_t recordNumElem = 0;
     int lastVarID = -1;
     for (int varID = 0; varID < numVars; ++varID)
       {
@@ -836,9 +881,13 @@ streamMappingNew(size_t streamIdx, struct winHeaderEntry *winDict, const struct 
           {
             int varShape[3];
             cdiPioQueryVarDims(varShape, vlistID, varID);
-            recordDataSize = (size_t) varShape[0] * (size_t) varShape[1] * sizeof(double);
+            recordNumElem = (size_t) varShape[0] * (size_t) varShape[1];
             lastVarID = varID;
           }
+        size_t headerIdx = (size_t) varMap[varID];
+        int conversion = winDict[headerIdx].id;
+        size_t elemSize = conversion == DATA_HEADER_FLOAT ? sizeof(float) : sizeof(double);
+        size_t recordDataSize = recordNumElem * elemSize;
         result->varMap[varID] = varMap[varID];
         result->hasMissing[varID] = hasMissing_[varID];
         for (size_t lvl = 0; lvl < numLvl; ++lvl)
@@ -987,7 +1036,7 @@ aggBufFlush(size_t streamIdx, size_t (*cdiPioFileWrite)(int, const void *restric
 }
 
 static void
-writeGribStream(size_t streamIdx, struct streamMapping *mapping, double **data_, size_t *currentDataBufSize,
+writeGribStream(size_t streamIdx, struct streamMapping *mapping, void **data_, size_t *currentDataBufSize,
                 const struct cdiPioConf *conf)
 {
   const struct clientBuf *restrict clientBuf = rxWin[streamIdx].clientBuf;
@@ -1012,6 +1061,7 @@ writeGribStream(size_t streamIdx, struct streamMapping *mapping, double **data_,
     unsigned recordStart, recordEnd;
   } *varsInPass = NULL;
   MPI_Aint *displ = NULL;
+  const struct winHeaderEntry *winDict = (wHECast) clientBuf[0].mem;
   for (size_t pass = 0; pass < numPasses; ++pass)
     {
       unsigned base = passes[pass][0].recordAggStart;
@@ -1048,7 +1098,9 @@ writeGribStream(size_t streamIdx, struct streamMapping *mapping, double **data_,
           memset(displ, 0, sizeof(*displ) * (numVarsInPass + 1));
           for (unsigned varIdx = 0; varIdx < numVarsInPass; ++varIdx)
             {
-              int varID = varsInPass[varIdx].varID;
+              int varID = varsInPass[varIdx].varID, headerIdx = mapping->varMap[varID];
+              int conversion = winDict[headerIdx].id;
+              size_t elemSize = conversion == DATA_HEADER_FLOAT ? sizeof(float) : sizeof(double);
               Xt_idxlist dstList;
               /* is this process writing part of this variable? */
               if (myRecordStart <= myRecordEnd && myVarStart <= varID && myVarEnd >= varID)
@@ -1061,15 +1113,15 @@ writeGribStream(size_t streamIdx, struct streamMapping *mapping, double **data_,
                   size_t myNumLevels = (size_t) writtenRecords[myVarRecordEnd].level - myLevelStart + 1;
                   dstList = buildVarSlicesIdxList(vlistID, varID, (int) myLevelStart, (int) myNumLevels, conf);
                   size_t sliceSize = (size_t) xt_idxlist_get_num_indices(dstList);
-                  assert(sliceSize * sizeof(double) == (writtenRecords[myVarRecordStart].dataSize * myNumLevels));
-                  myAggSize += sliceSize;
+                  assert(sliceSize * elemSize == (writtenRecords[myVarRecordStart].dataSize * myNumLevels));
+                  myAggSize += sliceSize * elemSize;
                 }
               else
                 {
                   dstList = xt_idxempty_new();
                 }
-              displ[numVarsInPass + varIdx + 1] = (MPI_Aint) (sizeof(double) * myAggSize);
-              varRedists[varIdx] = buildVarRedist(mapping->varMap[varID], streamIdx, dstList, conf);
+              displ[numVarsInPass + varIdx + 1] = (MPI_Aint) myAggSize;
+              varRedists[varIdx] = buildVarRedist(headerIdx, streamIdx, dstList, conf);
             }
           /* merge all redists for current pass */
           if (numVarsInPass > 1)
@@ -1096,10 +1148,10 @@ writeGribStream(size_t streamIdx, struct streamMapping *mapping, double **data_,
 
       /* append encoded data records from this pass to buffer written later */
       /* todo: develop better heuristic for buffer size */
-      if (sizeof(double) * myAggSize > rxWin[streamIdx].aggBufSize)
+      if (myAggSize > rxWin[streamIdx].aggBufSize)
         {
           Free(rxWin[streamIdx].aggBuf);
-          size_t aggBufSize = szmax((size_t) conf->recordAggBufLimMB * (size_t) 1024 * (size_t) 1024, sizeof(double) * myAggSize);
+          size_t aggBufSize = szmax((size_t) conf->recordAggBufLimMB * (size_t) 1024 * (size_t) 1024, myAggSize);
           if (posix_memalign(&rxWin[streamIdx].aggBuf, cdiGetPageSize(conf->largePageAlign), aggBufSize) == 0)
             ;
           else
@@ -1112,7 +1164,7 @@ writeGribStream(size_t streamIdx, struct streamMapping *mapping, double **data_,
           size_t varIdx = (size_t) -1;
           int varID = -1;
           size_t recordDataOfs = 0;
-          const double *data = *data_;
+          const unsigned char *restrict data = *data_;
           for (size_t recordIdx = myRecordStart; recordIdx <= myRecordEnd; ++recordIdx)
             {
               int level = writtenRecords[recordIdx].level;
@@ -1120,10 +1172,16 @@ writeGribStream(size_t streamIdx, struct streamMapping *mapping, double **data_,
               varID = writtenRecords[recordIdx].varID;
               varIdx += varID != prevVarID;
               size_t recordSize = writtenRecords[recordIdx].dataSize;
-              size_t nvals = recordSize / sizeof(double);
-              size_t nmiss = countVarChunkMissingVals(vlistID, varID, mapping, nvals, data + recordDataOfs);
-              streamWriteVarSlice(streamID, varID, level, data + recordDataOfs, nmiss);
-              recordDataOfs += nvals;
+              int headerIdx = mapping->varMap[varID];
+              int conversion = winDict[headerIdx].id;
+              size_t elemSize = conversion == DATA_HEADER_FLOAT ? sizeof(float) : sizeof(double);
+              size_t nvals = recordSize / elemSize;
+              size_t nmiss = countVarChunkMissingVals(vlistID, varID, mapping, nvals, conversion, data + recordDataOfs);
+              if (conversion == DATA_HEADER_DOUBLE)
+                streamWriteVarSlice(streamID, varID, level, (const double *) (const void *) (data + recordDataOfs), nmiss);
+              else
+                streamWriteVarSliceF(streamID, varID, level, (const float *) (const void *) (data + recordDataOfs), nmiss);
+              recordDataOfs += recordSize;
             }
           aggBufFlush(streamIdx, cdiPioFileWrite);
         }
@@ -1162,7 +1220,7 @@ readGetBuffers(size_t streamIdx, const struct cdiPioConf *conf)
     struct streamMapping *map = streamMappingNew(streamIdx, winDict, conf);
     /* TODO: build list of rma buffer layout here to check if caching
      * can be done */
-    double *data = NULL;
+    void *data = NULL;
     size_t currentDataBufSize = 0;
     int filetype = streamInqFiletype(streamID);
 
