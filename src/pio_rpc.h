@@ -26,6 +26,7 @@ enum collectorCommandTags {
 
 enum
 {
+  DATA_HEADER_FLOAT = 4,
   DATA_HEADER_DOUBLE = 8,
   numRPCFuncs = 1,
   STREAMDEFTIMESTEP = -1,
