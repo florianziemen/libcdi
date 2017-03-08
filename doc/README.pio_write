@@ -149,3 +149,8 @@ This feature is off by default.
 If true, generate a distributed grid on the I/O clients and servers. This
 feature is only available when CDI was built with a PPM library including
 the distributed multi-array feature.
+
+-qtaxis-type=(absolute|relative|forecast)
+
+Create a time axis following the conventions of TAXIS_ABSOLUTE,
+TAXIS_RELATIVE or TAXIS_FORECAST respectively.
