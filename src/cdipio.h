@@ -52,9 +52,15 @@ MPI_Comm cdiPioInit(MPI_Comm commSuper, int confResH, int *pioNamespace);
 void pioWriteTimestep(void);
 void cdiPioRDMAProgress(void);
 
-void streamWriteVarPart(int streamID, int varID, const void *data, int nmiss, Xt_idxlist partDesc);
-void streamWriteScatteredVarPart(int streamID, int varID, const void *data, int numBlocks, const int blocklengths[],
+void streamWriteVarPart(int streamID, int varID, const double *data, int nmiss, Xt_idxlist partDesc);
+
+void streamWriteVarPartF(int streamID, int varID, const float *data, int nmiss, Xt_idxlist partDesc);
+
+void streamWriteScatteredVarPart(int streamID, int varID, const double *data, int numBlocks, const int blocklengths[],
                                  const int displacements[], int nmiss, Xt_idxlist partDesc);
+
+void streamWriteScatteredVarPartF(int streamID, int varID, const float *data, int numBlocks, const int blocklengths[],
+                                  const int displacements[], int nmiss, Xt_idxlist partDesc);
 /* cdiPioCSRLastN: return role codes appropriate to use the last
    \textit{nProcsIO} tasks as I/O servers */
 int cdiPioCSRLastN(MPI_Comm commSuper, int IOMode, int nProcsIO);
