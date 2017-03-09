@@ -50,6 +50,7 @@ void    ptaxisDefDatatype(taxis_t *taxisptr, int datatype);
 void    ptaxisDefName(taxis_t *taxisptr, const char *name);
 void    ptaxisDefLongname(taxis_t *taxisptr, const char *longname);
 void    ptaxisDefUnits(taxis_t *taxisptr, const char *units);
+char *ptaxisAllocUnits(taxis_t *taxisptr, size_t len);
 void    taxisDestroyKernel(taxis_t *taxisptr);
 #if !defined (SX)
 extern const resOps taxisOps;
