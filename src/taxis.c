@@ -252,11 +252,8 @@ taxisDefType(int taxisID, int taxistype)
     {
       taxisptr->type = taxistype;
       taxisptr->datatype = CDI_DATATYPE_FLT64;
-      if (taxisptr->units)
-        {
-          delete_refcount_string(taxisptr->units);
-          taxisptr->units = NULL;
-        }
+      delete_refcount_string(taxisptr->units);
+      taxisptr->units = NULL;
       reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
     }
 }
@@ -335,12 +332,8 @@ taxisDefRdate(int taxisID, DateType rdate)
   if (taxisptr->rdate != (int64_t) rdate)
     {
       taxisptr->rdate = (int64_t) rdate;
-
-      if (taxisptr->units)
-        {
-          delete_refcount_string(taxisptr->units);
-          taxisptr->units = NULL;
-        }
+      delete_refcount_string(taxisptr->units);
+      taxisptr->units = NULL;
       reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
     }
 }
@@ -367,11 +360,8 @@ taxisDefRtime(int taxisID, int rtime)
   if (taxisptr->rtime != rtime)
     {
       taxisptr->rtime = rtime;
-      if (taxisptr->units)
-        {
-          delete_refcount_string(taxisptr->units);
-          taxisptr->units = NULL;
-        }
+      delete_refcount_string(taxisptr->units);
+      taxisptr->units = NULL;
       reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
     }
 }
@@ -464,11 +454,8 @@ taxisDefTunit(int taxisID, int unit)
   if (taxisptr->unit != unit)
     {
       taxisptr->unit = unit;
-      if (taxisptr->units)
-        {
-          delete_refcount_string(taxisptr->units);
-          taxisptr->units = NULL;
-        }
+      delete_refcount_string(taxisptr->units);
+      taxisptr->units = NULL;
       reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
     }
 }
