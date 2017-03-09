@@ -59,6 +59,8 @@ int
 taxisUnpack(char *unpackBuffer, int unpackBufferSize, int *unpackBufferPos,
             int originNamespace, void *context, int checkForSameID);
 
+enum { TAXIS_MAX_UNIT_STR_LEN = 9 };
+
 #endif  /* _TAXIS_H */
 /*
  * Local Variables:
