@@ -16,7 +16,7 @@
 static int DefaultTimeType = TAXIS_ABSOLUTE;
 static int DefaultTimeUnit = TUNIT_HOUR;
 
-static const char *Timeunits[] = {
+static const char Timeunits[][TAXIS_MAX_UNIT_STR_LEN + 1] = {
   "undefined", "seconds", "minutes", "quarters", "30minutes", "hours", "3hours", "6hours", "12hours", "days", "months", "years",
 };
 
@@ -81,7 +81,10 @@ taxisNamePtr(int taxisID)
 const char *
 tunitNamePtr(int unitID)
 {
-  int size = sizeof(Timeunits) / sizeof(*Timeunits);
+  enum
+  {
+    size = sizeof(Timeunits) / sizeof(*Timeunits)
+  };
   return (unitID > 0 && unitID < size) ? Timeunits[unitID] : Timeunits[0];
 }
 
