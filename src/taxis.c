@@ -7,6 +7,7 @@
 #endif
 
 #include <stddef.h>
+#include <stdio.h>
 
 #include "cdi.h"
 #include "calendar.h"
