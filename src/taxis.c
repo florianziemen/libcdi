@@ -905,14 +905,20 @@ ptaxisDefLongname(taxis_t *taxisptr, const char *longname)
     }
 }
 
+char *
+ptaxisAllocUnits(taxis_t *taxisptr, size_t len)
+{
+  delete_refcount_string(taxisptr->units);
+  return taxisptr->units = new_refcount_string(len);
+}
+
 void
 ptaxisDefUnits(taxis_t *taxisptr, const char *units)
 {
   if (units)
     {
       const size_t len = strlen(units);
-      delete_refcount_string(taxisptr->units);
-      char *taxisunits = taxisptr->units = new_refcount_string(len);
+      char *taxisunits = ptaxisAllocUnits(taxisptr, len);
       strcpy(taxisunits, units);
     }
 }
