@@ -102,6 +102,7 @@ Makefile
 /examples/pio/collectData2003
 /examples/pio/collectDataNStreams
 /examples/pio/compareResourcesArray
+/tests/calendar_test1
 /tests/cksum_read
 /tests/cksum_verify
 /tests/cksum_write
