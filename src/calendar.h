@@ -1,6 +1,8 @@
 #ifndef _CALENDAR_H
 #define _CALENDAR_H
 
+#include "cdi.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -10,7 +12,18 @@ void encode_caldaysec(int calendar, int year, int month, int day, int hour, int 
 void decode_caldaysec(int calendar, int julday, int secofday,
 		      int *year, int *month, int *day, int *hour, int *minute, int *second);
 
-int calendar_dpy(int calendar);
+static inline int
+calendar_dpy(int calendar)
+{
+  int daysperyear = 0;
+
+  if      ( calendar == CALENDAR_360DAYS ) daysperyear = 360;
+  else if ( calendar == CALENDAR_365DAYS ) daysperyear = 365;
+  else if ( calendar == CALENDAR_366DAYS ) daysperyear = 366;
+
+  return daysperyear;
+}
+
 int days_per_year(int calendar, int year);
 int days_per_month(int calendar, int year, int month);
 

@@ -11,19 +11,6 @@ static const int month_360[12] = {30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30
 static const int month_365[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 static const int month_366[12] = {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
-
-int calendar_dpy(int calendar)
-{
-  int daysperyear = 0;
-
-  if      ( calendar == CALENDAR_360DAYS ) daysperyear = 360;
-  else if ( calendar == CALENDAR_365DAYS ) daysperyear = 365;
-  else if ( calendar == CALENDAR_366DAYS ) daysperyear = 366;
-
-  return daysperyear;
-}
-
-
 int days_per_month(int calendar, int year, int month)
 {
   int daysperyear = calendar_dpy(calendar);
