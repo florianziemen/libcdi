@@ -14,6 +14,9 @@ int calendar_dpy(int calendar);
 int days_per_year(int calendar, int year);
 int days_per_month(int calendar, int year, int month);
 
+void cdi_decode_day(int dpy, int days, int *year, int *month, int *day);
+int cdi_encode_day(int dpy, int year, int month, int day);
+
 #if defined (__cplusplus)
 }
 #endif
