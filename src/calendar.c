@@ -70,7 +70,7 @@ int days_per_year(int calendar, int year)
 }
 
 
-static void decode_day(int dpy, int days, int *year, int *month, int *day)
+void cdi_decode_day(int dpy, int days, int *year, int *month, int *day)
 {
   int i = 0;
 
@@ -94,7 +94,7 @@ static void decode_day(int dpy, int days, int *year, int *month, int *day)
 }
 
 
-static int encode_day(int dpy, int year, int month, int day)
+int cdi_encode_day(int dpy, int year, int month, int day)
 {
   long rval = (long)dpy * year + day;
 
@@ -117,7 +117,7 @@ void encode_caldaysec(int calendar, int year, int month, int day, int hour, int 
   int dpy = calendar_dpy(calendar);
 
   if ( dpy == 360 || dpy == 365 || dpy == 366 )
-    *julday = encode_day(dpy, year, month, day);
+    *julday = cdi_encode_day(dpy, year, month, day);
   else
     *julday = encode_julday(calendar, year, month, day);
 
@@ -131,7 +131,7 @@ void decode_caldaysec(int calendar, int julday, int secofday,
   int dpy = calendar_dpy(calendar);
 
   if ( dpy == 360 || dpy == 365 || dpy == 366 )
-    decode_day(dpy, julday, year, month, day);
+    cdi_decode_day(dpy, julday, year, month, day);
   else
     decode_julday(calendar, julday, year, month, day);
 
@@ -139,134 +139,6 @@ void decode_caldaysec(int calendar, int julday, int secofday,
   *minute = secofday/60 - *hour*60;
   *second = secofday - *hour*3600 - *minute*60;
 }
-
-
-#ifdef TEST
-static int date_to_calday(int calendar, int date)
-{
-  int dpy = calendar_dpy(calendar);
-
-  int year, month, day;
-  cdiDecodeDate(date, &year, &month, &day);
-
-  int calday;
-  if ( dpy == 360 || dpy == 365 || dpy == 366 )
-    calday = encode_day(dpy, year, month, day);
-  else
-    calday = encode_julday(calendar, year, month, day);
-
-  return calday;
-}
-
-
-static int calday_to_date(int calendar, int calday)
-{
-  int year, month, day;
-  int dpy = calendar_dpy(calendar);
-
-  if ( dpy == 360 || dpy == 365 || dpy == 366 )
-    decode_day(dpy, calday, &year, &month, &day);
-  else
-    decode_julday(calendar, calday, &year, &month, &day);
-
-  int date = cdiEncodeDate(year, month, day);
-
-  return date;
-}
-
-
-int main(void)
-{
-  int calendar = CALENDAR_STANDARD;
-  int nmin;
-  int vdate0, vtime0;
-  int vdate, vtime;
-  int ijulinc;
-  int i, j = 0;
-  int year, mon, day, hour, minute, second;
-  int calday, secofday;
-
-  /* 1 - Check valid range of years */
-
-  nmin = 11000;
-  vdate0 = -80001201;
-  vtime0 = 120500;
-
-  printf("start time: %8d %4d\n", vdate0, vtime0);
-
-  for ( i = 0; i < nmin; i++ )
-    {
-      cdiDecodeDate(vdate0, &year, &mon, &day);
-      cdiDecodeTime(vtime0, &hour, &minute, &second);
-
-      calday  = date_to_calday(calendar, vdate0);
-      secofday = time_to_sec(vtime0);
-
-      vdate = calday_to_date(calendar, calday);
-      vtime = sec_to_time(secofday);
-
-      if ( vdate0 != vdate || vtime0 != vtime )
-	printf("%4d %8d %4d %8d %4d %9d %9d\n",
-	       ++j, vdate0, vtime0, vdate, vtime, calday, secofday);
-
-      year++;
-      vdate0 = cdiEncodeDate(year, mon, day);
-      vtime0 = cdiEncodeTime(hour, minute, second);
-    }
-
-  printf("stop time: %8d %4d\n", vdate0, vtime0);
-
-  /* 2 - Check time increment of one minute */
-
-  nmin = 120000;
-  ijulinc = 60;
-  vdate0 = 20001201;
-  vtime0 = 0;
-
-  printf("start time: %8d %4d\n", vdate0, vtime0);
-
-  calday = date_to_calday(calendar, vdate0);
-  secofday = time_to_sec(vtime0);
-  for ( i = 0; i < nmin; i++ )
-    {
-      cdiDecodeDate(vdate0, &year, &mon, &day);
-      cdiDecodeTime(vtime0, &hour, &minute, &second);
-
-      if ( ++minute >= 60 )
-	{
-	  minute = 0;
-	  if ( ++hour >= 24 )
-	    {
-	      hour = 0;
-	      if ( ++day >= 32 )
-		{
-		  day = 1;
-		  if ( ++mon >= 13 )
-		    {
-		      mon = 1;
-		      year++;
-		    }
-		}
-	    }
-	}
-
-      vdate0 = cdiEncodeDate(year, mon, day);
-      vtime0 = cdiEncodeTime(hour, minute, second);
-
-      julday_add_seconds(ijulinc, &calday, &secofday);
-
-      vdate = calday_to_date(calendar, calday);
-      vtime = sec_to_time(secofday);
-      if ( vdate0 != vdate || vtime0 != vtime )
-	printf("%4d %8d %4d %8d %4d %9d %9d\n",
-	       ++j, vdate0, vtime0, vdate, vtime, calday, secofday);
-    }
-
-  printf("stop time: %8d %4d\n", vdate0, vtime0);
-
-  return (0);
-}
-#endif
 
 
 #ifdef TEST2

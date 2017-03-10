@@ -80,15 +80,16 @@ host_triplet = @host@
 TESTS = cksum_verify$(EXEEXT) test_cksum_grib test_cksum_grib2 \
 	test_cksum_nc test_cksum_extra test_cksum_service \
 	test_cksum_nc2 test_cksum_nc4 test_cksum_ieg test_chunk_cksum \
-	pio_write_run pio_cksum_mpinonb pio_cksum_fpguard \
-	pio_cksum_asynch pio_cksum_writer pio_cksum_cdf pio_cksum_grb2 \
-	pio_cksum_mpi_fw_ordered pio_cksum_mpi_fw_at_all \
-	pio_cksum_mpi_fw_at_reblock test_resource_copy$(EXEEXT) \
-	pio_write_deco2d_run test_f2003 test_cdf_transformation \
-	test_cdf_const test_table$(EXEEXT) test_byteswap$(EXEEXT) \
-	$(am__append_2)
+	calendar_test1$(EXEEXT) pio_write_run pio_cksum_mpinonb \
+	pio_cksum_fpguard pio_cksum_asynch pio_cksum_writer \
+	pio_cksum_cdf pio_cksum_grb2 pio_cksum_mpi_fw_ordered \
+	pio_cksum_mpi_fw_at_all pio_cksum_mpi_fw_at_reblock \
+	test_resource_copy$(EXEEXT) pio_write_deco2d_run test_f2003 \
+	test_cdf_transformation test_cdf_const test_table$(EXEEXT) \
+	test_byteswap$(EXEEXT) $(am__append_2)
 check_PROGRAMS = cksum_verify$(EXEEXT) test_grib$(EXEEXT) \
-	cksum_write$(EXEEXT) cksum_read$(EXEEXT) pio_write$(EXEEXT) \
+	cksum_write$(EXEEXT) cksum_read$(EXEEXT) \
+	calendar_test1$(EXEEXT) pio_write$(EXEEXT) \
 	test_resource_copy$(EXEEXT) cksum_write_chunk$(EXEEXT) \
 	pio_write_deco2d$(EXEEXT) test_table$(EXEEXT) \
 	test_byteswap$(EXEEXT) $(am__EXEEXT_1) $(am__EXEEXT_2)
@@ -161,15 +162,19 @@ CONFIG_CLEAN_VPATH_FILES =
 @ENABLE_NETCDF_TRUE@am__EXEEXT_1 = test_cdf_write$(EXEEXT) \
 @ENABLE_NETCDF_TRUE@	test_cdf_read$(EXEEXT)
 @USE_MPI_TRUE@am__EXEEXT_2 = test_resource_copy_mpi$(EXEEXT)
+calendar_test1_SOURCES = calendar_test1.c
+calendar_test1_OBJECTS = calendar_test1.$(OBJEXT)
+calendar_test1_LDADD = $(LDADD)
+calendar_test1_DEPENDENCIES = ../src/libcdi.la
+AM_V_lt = $(am__v_lt_@AM_V@)
+am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
+am__v_lt_0 = --silent
+am__v_lt_1 = 
 am_cksum_read_OBJECTS = cksum_read.$(OBJEXT) var_cksum.$(OBJEXT) \
 	stream_cksum.$(OBJEXT) ensure_array_size.$(OBJEXT)
 cksum_read_OBJECTS = $(am_cksum_read_OBJECTS)
 cksum_read_LDADD = $(LDADD)
 cksum_read_DEPENDENCIES = ../src/libcdi.la
-AM_V_lt = $(am__v_lt_@AM_V@)
-am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
-am__v_lt_0 = --silent
-am__v_lt_1 = 
 am_cksum_verify_OBJECTS = cksum_verify.$(OBJEXT)
 cksum_verify_OBJECTS = $(am_cksum_verify_OBJECTS)
 cksum_verify_LDADD = $(LDADD)
@@ -267,19 +272,19 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(cksum_read_SOURCES) $(cksum_verify_SOURCES) \
-	$(cksum_write_SOURCES) $(cksum_write_chunk_SOURCES) \
-	$(pio_write_SOURCES) $(pio_write_deco2d_SOURCES) \
-	$(test_byteswap_SOURCES) $(test_cdf_read_SOURCES) \
-	$(test_cdf_write_SOURCES) $(test_grib_SOURCES) \
-	$(test_resource_copy_SOURCES) \
+SOURCES = calendar_test1.c $(cksum_read_SOURCES) \
+	$(cksum_verify_SOURCES) $(cksum_write_SOURCES) \
+	$(cksum_write_chunk_SOURCES) $(pio_write_SOURCES) \
+	$(pio_write_deco2d_SOURCES) $(test_byteswap_SOURCES) \
+	$(test_cdf_read_SOURCES) $(test_cdf_write_SOURCES) \
+	$(test_grib_SOURCES) $(test_resource_copy_SOURCES) \
 	$(test_resource_copy_mpi_SOURCES) $(test_table_SOURCES)
-DIST_SOURCES = $(cksum_read_SOURCES) $(cksum_verify_SOURCES) \
-	$(cksum_write_SOURCES) $(cksum_write_chunk_SOURCES) \
-	$(pio_write_SOURCES) $(pio_write_deco2d_SOURCES) \
-	$(test_byteswap_SOURCES) $(test_cdf_read_SOURCES) \
-	$(test_cdf_write_SOURCES) $(test_grib_SOURCES) \
-	$(test_resource_copy_SOURCES) \
+DIST_SOURCES = calendar_test1.c $(cksum_read_SOURCES) \
+	$(cksum_verify_SOURCES) $(cksum_write_SOURCES) \
+	$(cksum_write_chunk_SOURCES) $(pio_write_SOURCES) \
+	$(pio_write_deco2d_SOURCES) $(test_byteswap_SOURCES) \
+	$(test_cdf_read_SOURCES) $(test_cdf_write_SOURCES) \
+	$(test_grib_SOURCES) $(test_resource_copy_SOURCES) \
 	$(test_resource_copy_mpi_SOURCES) $(test_table_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
@@ -523,6 +528,7 @@ cksum_read_SOURCES = cksum_read.c \
 	stream_cksum.c stream_cksum.h \
 	ensure_array_size.h ensure_array_size.c
 
+calendar_tes1_SOURCES = calendar_test1.c
 pio_write_SOURCES = pio_write.c pio_write.h simple_model.c \
 	simple_model_helper.h simple_model_helper.c \
 	pio_write_setup_grid.h pio_write_setup_grid.c
@@ -651,6 +657,10 @@ clean-checkPROGRAMS:
 	echo " rm -f" $$list; \
 	rm -f $$list
 
+calendar_test1$(EXEEXT): $(calendar_test1_OBJECTS) $(calendar_test1_DEPENDENCIES) $(EXTRA_calendar_test1_DEPENDENCIES) 
+	@rm -f calendar_test1$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(calendar_test1_OBJECTS) $(calendar_test1_LDADD) $(LIBS)
+
 cksum_read$(EXEEXT): $(cksum_read_OBJECTS) $(cksum_read_DEPENDENCIES) $(EXTRA_cksum_read_DEPENDENCIES) 
 	@rm -f cksum_read$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(cksum_read_OBJECTS) $(cksum_read_LDADD) $(LIBS)
@@ -709,6 +719,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/calendar_test1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cksum_read.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cksum_verify.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cksum_write.Po@am__quote@
