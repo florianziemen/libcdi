@@ -1475,7 +1475,7 @@ enum {
   VLIST_PACK_INT_TABLEID,
   VLIST_PACK_INT_INSTID,
   VLIST_PACK_INT_MODELID,
-  vlist_nints,
+  vlistNints,
 };
 
 static int
@@ -1491,7 +1491,7 @@ int  vlistGetSizeP ( void * vlistptr, void *context)
 {
   int txsize, varID;
   vlist_t *p = (vlist_t*) vlistptr;
-  txsize = serializeGetSize(vlist_nints, CDI_DATATYPE_INT, context);
+  txsize = serializeGetSize(vlistNints, CDI_DATATYPE_INT, context);
   txsize += serializeGetSize(1, CDI_DATATYPE_LONG, context);
   txsize += cdiAttsGetSize(p, CDI_GLOBAL, context);
   for ( varID = 0; varID <  p->nvars; varID++ )
@@ -1504,7 +1504,7 @@ static
 void vlistPackP ( void * vlistptr, void * buf, int size, int *position,
                   void *context )
 {
-  int varID, tempbuf[vlist_nints];
+  int varID, tempbuf[vlistNints];
   vlist_t *p = (vlist_t*) vlistptr;
   tempbuf[VLIST_PACK_INT_SELF] = p->self;
   tempbuf[VLIST_PACK_INT_NVARS] = p->nvars;
@@ -1512,7 +1512,7 @@ void vlistPackP ( void * vlistptr, void * buf, int size, int *position,
   tempbuf[VLIST_PACK_INT_TABLEID] = p->tableID;
   tempbuf[VLIST_PACK_INT_INSTID] = p->instID;
   tempbuf[VLIST_PACK_INT_MODELID] = p->modelID;
-  serializePack(tempbuf, vlist_nints, CDI_DATATYPE_INT, buf, size, position, context);
+  serializePack(tempbuf, vlistNints, CDI_DATATYPE_INT, buf, size, position, context);
   serializePack(&p->ntsteps, 1, CDI_DATATYPE_LONG, buf, size, position, context);
 
   cdiAttsPack(p, CDI_GLOBAL, buf, size, position, context);
@@ -1526,8 +1526,8 @@ void vlistUnpack(char * buf, int size, int *position, int originNamespace,
                  void *context, int force_id)
 {
 #define adaptKey(key) (namespaceAdaptKey((key), originNamespace))
-  int tempbuf[vlist_nints];
-  serializeUnpack(buf, size, position, tempbuf, vlist_nints, CDI_DATATYPE_INT, context);
+  int tempbuf[vlistNints];
+  serializeUnpack(buf, size, position, tempbuf, vlistNints, CDI_DATATYPE_INT, context);
   int nvars = tempbuf[VLIST_PACK_INT_NVARS];
   int targetID
     = force_id ? adaptKey(tempbuf[VLIST_PACK_INT_SELF]) : CDI_UNDEFID;
