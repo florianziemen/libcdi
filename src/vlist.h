@@ -48,7 +48,7 @@ typedef struct
   bool isUsed;
   bool flag;
   bool lvalidrange;
-  short xyz;         /* order of spatial dimensions,
+  signed char xyz;   /* order of spatial dimensions,
                       * a permutation of 123 */
   bool missvalused;  // true if missval is defined
   int mvarID;
