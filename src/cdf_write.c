@@ -863,7 +863,7 @@ cdfDefVar(stream_t *streamptr, int varID)
   const int zid = streamptr->zaxisID[zaxisindex];
 
   int dimorder[3];  // ZYX/321 and ZXY/312
-  vlistInqVarDimorder(vlistID, varID, &dimorder);
+  vlistInqVarDimorder(vlistID, varID, dimorder);
   const bool useGridsize = (dimorder[0] == 3) || (dimorder[1] == 3 && dimorder[2] == 1 && gridsize == gridInqXsize(gridID));
   const bool useChunks = useGridsize ? (gridsize >= 32) : false;
 
@@ -1517,7 +1517,7 @@ cdf_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, co
   cdfGetXYZid(streamptr, gridID, zaxisID, &xid, &yid, &zid);
 
   int dimorder[3];
-  vlistInqVarDimorder(vlistID, varID, &dimorder);
+  vlistInqVarDimorder(vlistID, varID, dimorder);
   const bool swapxy = (dimorder[2] == 2 || dimorder[0] == 1) && xid != CDI_UNDEFID && yid != CDI_UNDEFID;
 
   size_t xsize, ysize;
