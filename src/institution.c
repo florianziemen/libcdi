@@ -266,7 +266,12 @@ instituteTxCode(void *instituteptr)
 }
 
 enum {
-  institute_nints = 5,
+  INSTITUTE_PACK_INT_SELF,
+  INSTITUTE_PACK_INT_CENTER,
+  INSTITUTE_PACK_INT_SUBCENTER,
+  INSTITUTE_PACK_INT_NAMELEN,
+  INSTITUTE_PACK_INT_LNAMELEN,
+  institute_nints,
 };
 
 static int instituteGetPackSize(institute_t *ip, void *context)
@@ -284,35 +289,43 @@ static void institutePackP(void * instituteptr, void *buf, int size, int *positi
 {
   institute_t *p = (institute_t*) instituteptr;
   int tempbuf[institute_nints];
-  tempbuf[0] = p->self;
-  tempbuf[1] = p->center;
-  tempbuf[2] = p->subcenter;
-  tempbuf[3] = (int)strlen(p->name) + 1;
-  tempbuf[4] = (int)strlen(p->longname) + 1;
+  tempbuf[INSTITUTE_PACK_INT_SELF] = p->self;
+  tempbuf[INSTITUTE_PACK_INT_CENTER] = p->center;
+  tempbuf[INSTITUTE_PACK_INT_SUBCENTER] = p->subcenter;
+  tempbuf[INSTITUTE_PACK_INT_NAMELEN] = (int)strlen(p->name) + 1;
+  tempbuf[INSTITUTE_PACK_INT_LNAMELEN] = (int)strlen(p->longname) + 1;
   serializePack(tempbuf, institute_nints, CDI_DATATYPE_INT, buf, size, position, context);
-  serializePack(p->name, tempbuf[3], CDI_DATATYPE_TXT, buf, size, position, context);
-  serializePack(p->longname, tempbuf[4], CDI_DATATYPE_TXT, buf, size, position, context);
+  serializePack(p->name, tempbuf[INSTITUTE_PACK_INT_NAMELEN], CDI_DATATYPE_TXT, buf, size, position, context);
+  serializePack(p->longname, tempbuf[INSTITUTE_PACK_INT_LNAMELEN], CDI_DATATYPE_TXT, buf, size, position, context);
 }
 
 int instituteUnpack(void *buf, int size, int *position, int originNamespace,
                     void *context, int force_id)
 {
+#define adaptKey(key) (namespaceAdaptKey((key), originNamespace))
   int tempbuf[institute_nints];
   int instituteID;
-  char *name, *longname;
   serializeUnpack(buf, size, position, tempbuf, institute_nints, CDI_DATATYPE_INT, context);
-  name = (char *) Malloc((size_t)tempbuf[3] + (size_t)tempbuf[4]);
-  longname = name + tempbuf[3];
-  serializeUnpack(buf, size, position, name, tempbuf[3], CDI_DATATYPE_TXT, context);
-  serializeUnpack(buf, size, position, longname, tempbuf[4], CDI_DATATYPE_TXT, context);
-  int targetID = namespaceAdaptKey(tempbuf[0], originNamespace);
-  institute_t *ip = instituteNewEntry(force_id?targetID:CDI_UNDEFID,
-                                      tempbuf[1], tempbuf[2], name, longname);
+  char *name = (char *) Malloc((size_t)tempbuf[INSTITUTE_PACK_INT_NAMELEN] + (size_t)tempbuf[INSTITUTE_PACK_INT_LNAMELEN]),
+    *longname = name + tempbuf[INSTITUTE_PACK_INT_NAMELEN];
+  serializeUnpack(buf, size, position,
+                  name, tempbuf[INSTITUTE_PACK_INT_NAMELEN], CDI_DATATYPE_TXT,
+                  context);
+  serializeUnpack(buf, size, position,
+                  longname, tempbuf[INSTITUTE_PACK_INT_LNAMELEN],
+                  CDI_DATATYPE_TXT, context);
+  int targetID
+    = force_id ? adaptKey(tempbuf[INSTITUTE_PACK_INT_SELF]) : CDI_UNDEFID;
+  institute_t *ip = instituteNewEntry(targetID,
+                                      tempbuf[INSTITUTE_PACK_INT_CENTER],
+                                      tempbuf[INSTITUTE_PACK_INT_SUBCENTER],
+                                      name, longname);
   instituteID = ip->self;
   xassert(!force_id || instituteID == targetID);
   Free(name);
   reshSetStatus(instituteID, &instituteOps,
                 reshGetStatus(instituteID, &instituteOps) & ~RESH_SYNC_BIT);
+#undef adaptKey
   return instituteID;
 }
 
