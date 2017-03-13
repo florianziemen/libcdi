@@ -1458,9 +1458,9 @@ taxisCompareP(void *taxisptr1, void *taxisptr2)
 
   return !(t1->type == t2->type && t1->vdate == t2->vdate && t1->vtime == t2->vtime && t1->rdate == t2->rdate
            && t1->rtime == t2->rtime && t1->fdate == t2->fdate && t1->ftime == t2->ftime && t1->calendar == t2->calendar
-           && t1->unit == t2->unit && t1->fc_unit == t2->fc_unit && t1->numavg == t2->numavg && t1->climatology == t2->climatology
-           && t1->has_bounds == t2->has_bounds && t1->vdate_lb == t2->vdate_lb && t1->vtime_lb == t2->vtime_lb
-           && t1->vdate_ub == t2->vdate_ub && t1->vtime_ub == t2->vtime_ub);
+           && t1->unit == t2->unit && t1->fc_unit == t2->fc_unit && t1->fc_period == t2->fc_period && t1->numavg == t2->numavg
+           && t1->climatology == t2->climatology && t1->has_bounds == t2->has_bounds && t1->vdate_lb == t2->vdate_lb
+           && t1->vtime_lb == t2->vtime_lb && t1->vdate_ub == t2->vdate_ub && t1->vtime_ub == t2->vtime_ub);
 }
 
 static int
@@ -1496,14 +1496,22 @@ enum
   taxisNint
 };
 
+enum
+{
+  TAXIS_PACK_FC_PERIOD,
+  taxisNdouble
+};
+
 static int
 taxisGetPackSize(void *p, void *context)
 {
   taxis_t *taxisptr = (taxis_t *) p;
-  int packBufferSize = serializeGetSize(taxisNint, CDI_DATATYPE_INT, context) + serializeGetSize(1, CDI_DATATYPE_UINT32, context)
+  int packBufferSize = serializeGetSize(taxisNint, CDI_DATATYPE_INT, context)
+                       + serializeGetSize(taxisNdouble, CDI_DATATYPE_FLT64, context)
                        + (taxisptr->name ? serializeGetSize((int) strlen(taxisptr->name), CDI_DATATYPE_TXT, context) : 0)
                        + (taxisptr->longname ? serializeGetSize((int) strlen(taxisptr->longname), CDI_DATATYPE_TXT, context) : 0)
-                       + (taxisptr->units ? serializeGetSize((int) strlen(taxisptr->units), CDI_DATATYPE_TXT, context) : 0);
+                       + (taxisptr->units ? serializeGetSize((int) strlen(taxisptr->units), CDI_DATATYPE_TXT, context) : 0)
+                       + serializeGetSize(1, CDI_DATATYPE_UINT32, context);
   return packBufferSize;
 }
 
@@ -1513,9 +1521,11 @@ taxisUnpack(char *unpackBuffer, int unpackBufferSize, int *unpackBufferPos, int 
 #define adaptKey(key) (namespaceAdaptKey((key), originNamespace))
   taxis_t *taxisP;
   int intBuffer[taxisNint];
+  double dblBuffer[taxisNdouble];
   uint32_t d;
 
   serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos, intBuffer, taxisNint, CDI_DATATYPE_INT, context);
+  serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos, dblBuffer, taxisNdouble, CDI_DATATYPE_FLT64, context);
   serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos, &d, 1, CDI_DATATYPE_UINT32, context);
 
   xassert(cdiCheckSum(CDI_DATATYPE_INT, taxisNint, intBuffer) == d);
@@ -1544,7 +1554,7 @@ taxisUnpack(char *unpackBuffer, int unpackBufferSize, int *unpackBufferPos, int 
   taxisP->vdate_ub = intBuffer[TAXIS_PACK_INT_VDATE_UB];
   taxisP->vtime_lb = intBuffer[TAXIS_PACK_INT_VTIME_LB];
   taxisP->vtime_ub = intBuffer[TAXIS_PACK_INT_VTIME_UB];
-
+  taxisP->fc_period = dblBuffer[TAXIS_PACK_FC_PERIOD];
   if (intBuffer[TAXIS_PACK_INT_NAMELEN])
     {
       int len = intBuffer[TAXIS_PACK_INT_NAMELEN];
@@ -1580,43 +1590,46 @@ static void
 taxisPack(void *voidP, void *packBuffer, int packBufferSize, int *packBufferPos, void *context)
 {
   taxis_t *taxisP = (taxis_t *) voidP;
-  int intBuffer[taxisNint];
+  int nameLen, lnameLen, unitsLen;
   uint32_t d;
 
-  intBuffer[TAXIS_PACK_INT_SELF] = taxisP->self;
-  intBuffer[TAXIS_PACK_INT_TYPE] = taxisP->type;
-  intBuffer[TAXIS_PACK_INT_VDATE] = taxisP->vdate;
-  intBuffer[TAXIS_PACK_INT_VTIME] = taxisP->vtime;
-  intBuffer[TAXIS_PACK_INT_RDATE] = taxisP->rdate;
-  intBuffer[TAXIS_PACK_INT_RTIME] = taxisP->rtime;
-  intBuffer[TAXIS_PACK_INT_FDATE] = taxisP->fdate;
-  intBuffer[TAXIS_PACK_INT_FTIME] = taxisP->ftime;
-  intBuffer[TAXIS_PACK_INT_CALENDAR] = taxisP->calendar;
-  intBuffer[TAXIS_PACK_INT_UNIT] = taxisP->unit;
-  intBuffer[TAXIS_PACK_INT_FC_UNIT] = taxisP->fc_unit;
-  intBuffer[TAXIS_PACK_INT_NUMAVG] = taxisP->numavg;
-  intBuffer[TAXIS_PACK_INT_CLIMATOLOGY] = taxisP->climatology;
-  intBuffer[TAXIS_PACK_INT_HAS_BOUNDS] = taxisP->has_bounds;
-  intBuffer[TAXIS_PACK_INT_VDATE_LB] = taxisP->vdate_lb;
-  intBuffer[TAXIS_PACK_INT_VDATE_UB] = taxisP->vdate_ub;
-  intBuffer[TAXIS_PACK_INT_VTIME_LB] = taxisP->vtime_lb;
-  intBuffer[TAXIS_PACK_INT_VTIME_UB] = taxisP->vtime_ub;
-  intBuffer[TAXIS_PACK_INT_NAMELEN] = taxisP->name ? (int) strlen(taxisP->name) : 0;
-  intBuffer[TAXIS_PACK_INT_LNAMELEN] = taxisP->longname ? (int) strlen(taxisP->longname) : 0;
-  intBuffer[TAXIS_PACK_INT_UNITSLEN] = taxisP->units ? (int) strlen(taxisP->units) : 0;
+  {
+    int intBuffer[taxisNint];
+    intBuffer[TAXIS_PACK_INT_SELF] = taxisP->self;
+    intBuffer[TAXIS_PACK_INT_TYPE] = taxisP->type;
+    intBuffer[TAXIS_PACK_INT_VDATE] = taxisP->vdate;
+    intBuffer[TAXIS_PACK_INT_VTIME] = taxisP->vtime;
+    intBuffer[TAXIS_PACK_INT_RDATE] = taxisP->rdate;
+    intBuffer[TAXIS_PACK_INT_RTIME] = taxisP->rtime;
+    intBuffer[TAXIS_PACK_INT_FDATE] = taxisP->fdate;
+    intBuffer[TAXIS_PACK_INT_FTIME] = taxisP->ftime;
+    intBuffer[TAXIS_PACK_INT_CALENDAR] = taxisP->calendar;
+    intBuffer[TAXIS_PACK_INT_UNIT] = taxisP->unit;
+    intBuffer[TAXIS_PACK_INT_FC_UNIT] = taxisP->fc_unit;
+    intBuffer[TAXIS_PACK_INT_NUMAVG] = taxisP->numavg;
+    intBuffer[TAXIS_PACK_INT_CLIMATOLOGY] = taxisP->climatology;
+    intBuffer[TAXIS_PACK_INT_HAS_BOUNDS] = taxisP->has_bounds;
+    intBuffer[TAXIS_PACK_INT_VDATE_LB] = taxisP->vdate_lb;
+    intBuffer[TAXIS_PACK_INT_VDATE_UB] = taxisP->vdate_ub;
+    intBuffer[TAXIS_PACK_INT_VTIME_LB] = taxisP->vtime_lb;
+    intBuffer[TAXIS_PACK_INT_VTIME_UB] = taxisP->vtime_ub;
+    intBuffer[TAXIS_PACK_INT_NAMELEN] = nameLen = taxisP->name ? (int) strlen(taxisP->name) : 0;
+    intBuffer[TAXIS_PACK_INT_LNAMELEN] = lnameLen = taxisP->longname ? (int) strlen(taxisP->longname) : 0;
+    intBuffer[TAXIS_PACK_INT_UNITSLEN] = unitsLen = taxisP->units ? (int) strlen(taxisP->units) : 0;
+    serializePack(intBuffer, taxisNint, CDI_DATATYPE_INT, packBuffer, packBufferSize, packBufferPos, context);
+    d = cdiCheckSum(CDI_DATATYPE_INT, taxisNint, intBuffer);
+  }
 
-  serializePack(intBuffer, taxisNint, CDI_DATATYPE_INT, packBuffer, packBufferSize, packBufferPos, context);
-  d = cdiCheckSum(CDI_DATATYPE_INT, taxisNint, intBuffer);
+  {
+    double dblBuffer[taxisNdouble];
+    dblBuffer[TAXIS_PACK_FC_PERIOD] = taxisP->fc_period;
+    serializePack(dblBuffer, taxisNdouble, CDI_DATATYPE_FLT64, packBuffer, packBufferSize, packBufferPos, context);
+  }
   serializePack(&d, 1, CDI_DATATYPE_UINT32, packBuffer, packBufferSize, packBufferPos, context);
-  if (taxisP->name)
-    serializePack(taxisP->name, intBuffer[TAXIS_PACK_INT_NAMELEN], CDI_DATATYPE_TXT, packBuffer, packBufferSize, packBufferPos,
-                  context);
+  if (taxisP->name) serializePack(taxisP->name, nameLen, CDI_DATATYPE_TXT, packBuffer, packBufferSize, packBufferPos, context);
   if (taxisP->longname)
-    serializePack(taxisP->longname, intBuffer[TAXIS_PACK_INT_LNAMELEN], CDI_DATATYPE_TXT, packBuffer, packBufferSize, packBufferPos,
-                  context);
-  if (taxisP->units)
-    serializePack(taxisP->units, intBuffer[TAXIS_PACK_INT_UNITSLEN], CDI_DATATYPE_TXT, packBuffer, packBufferSize, packBufferPos,
-                  context);
+    serializePack(taxisP->longname, lnameLen, CDI_DATATYPE_TXT, packBuffer, packBufferSize, packBufferPos, context);
+  if (taxisP->units) serializePack(taxisP->units, unitsLen, CDI_DATATYPE_TXT, packBuffer, packBufferSize, packBufferPos, context);
 }
 
 /*
