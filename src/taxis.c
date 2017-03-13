@@ -1051,8 +1051,9 @@ void timeval2vtime(double timevalue, taxis_t *taxis, int *vdate, int *vtime)
 
       month += nmon;
 
-      while ( month > 12 ) { month -= 12; year++; }
-      while ( month <  1 ) { month += 12; year--; }
+      struct yearMonth ym = normalize_month(year, month);
+      year = ym.year;
+      month = ym.month;
 
       int dpm = days_per_month(calendar, year, month);
       timeunit = TUNIT_DAY;
@@ -1115,8 +1116,9 @@ double vtime2timeval(int vdate, int vtime, taxis_t *taxis)
       int nmonth = (int) value;
       month -= nmonth;
 
-      while ( month > 12 ) { month -= 12; year++; }
-      while ( month <  1 ) { month += 12; year--; }
+      struct yearMonth ym = normalize_month(year, month);
+      year = ym.year;
+      month = ym.month;
 
       int dpm = days_per_month(calendar, year, month);
 
@@ -1287,8 +1289,9 @@ void cdiSetForecastPeriod(double timevalue, taxis_t *taxis)
 
       month -= nmon;
 
-      while ( month > 12 ) { month -= 12; year++; }
-      while ( month <  1 ) { month += 12; year--; }
+      struct yearMonth ym = normalize_month(year, month);
+      year = ym.year;
+      month = ym.month;
 
       dpm = days_per_month(calendar, year, month);
       timeunit = TUNIT_DAY;
