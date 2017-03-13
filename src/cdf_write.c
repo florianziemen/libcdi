@@ -426,7 +426,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
     }
 
   if ( CDI_Debug )
-    fprintf(stderr, "chunktype %d  chunks %d %d %d %d\n", chunktype, (int)chunks[0], (int)chunks[1], (int)chunks[2], (int)chunks[3]);
+    fprintf(stderr, "chunktype %d  chunks %zu %zu %zu %zu\n", chunktype, chunks[0], chunks[1], chunks[2], chunks[3]);
 
   int tableID  = vlistInqVarTable(vlistID, varID);
 
