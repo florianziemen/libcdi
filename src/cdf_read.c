@@ -459,7 +459,7 @@ cdfGetSliceSlapDescription(stream_t *streamptr, int varID, int levelID, bool *ou
   if (dimIds[3] == CDI_UNDEFID)
     {
       int tmpdimorder[3];
-      vlistInqVarDimorder(vlistID, varID, &tmpdimorder);
+      vlistInqVarDimorder(vlistID, varID, tmpdimorder);
       for (int i = 0; i < 3; ++i) dimorder[i] = tmpdimorder[i];
       dimorder[3] = 4;
       *outSwapXY = ((dimorder[2] == 2 || dimorder[0] == 1) && (dimIds[0] != CDI_UNDEFID) && (dimIds[1] != CDI_UNDEFID));
