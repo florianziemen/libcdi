@@ -287,7 +287,11 @@ modelTxCode(void *modelptr)
 }
 
 enum {
-  model_nints = 4,
+  MODEL_PACK_INT_SELF,
+  MODEL_PACK_INT_INSTID,
+  MODEL_PACK_INT_MODELGRIBID,
+  MODEL_PACK_INT_NAMELEN,
+  model_nints,
 };
 
 
@@ -305,44 +309,47 @@ static void modelPackP(void * modelptr, void * buf, int size, int *position, voi
 {
   model_t *p = (model_t*) modelptr;
   int tempbuf[model_nints];
-  tempbuf[0] = p->self;
-  tempbuf[1] = p->instID;
-  tempbuf[2] = p->modelgribID;
-  tempbuf[3] = p->name ? (int)strlen(p->name) : 0;
+  tempbuf[MODEL_PACK_INT_SELF] = p->self;
+  tempbuf[MODEL_PACK_INT_INSTID] = p->instID;
+  tempbuf[MODEL_PACK_INT_MODELGRIBID] = p->modelgribID;
+  tempbuf[MODEL_PACK_INT_NAMELEN] = p->name ? (int)strlen(p->name) : 0;
   serializePack(tempbuf, model_nints, CDI_DATATYPE_INT, buf, size, position, context);
   if (p->name)
-    serializePack(p->name, tempbuf[3], CDI_DATATYPE_TXT, buf, size, position, context);
+    serializePack(p->name, tempbuf[MODEL_PACK_INT_NAMELEN], CDI_DATATYPE_TXT,
+                  buf, size, position, context);
 }
 
 int
 modelUnpack(void *buf, int size, int *position, int originNamespace, void *context,
             int force_id)
 {
+#define adaptKey(key) (namespaceAdaptKey((key), originNamespace))
   int tempbuf[model_nints];
   char *name;
   serializeUnpack(buf, size, position, tempbuf, model_nints, CDI_DATATYPE_INT, context);
-  if (tempbuf[3] != 0)
+  if (tempbuf[MODEL_PACK_INT_NAMELEN] != 0)
     {
-      size_t len = (size_t)tempbuf[3];
+      size_t len = (size_t)tempbuf[MODEL_PACK_INT_NAMELEN];
       name = (char *) Malloc(len + 1);
       serializeUnpack(buf, size, position,
-                      name, tempbuf[3], CDI_DATATYPE_TXT, context);
+                      name, tempbuf[MODEL_PACK_INT_NAMELEN], CDI_DATATYPE_TXT,
+                      context);
       name[len] = '\0';
     }
   else
     {
       name = (char*)"";
     }
-  int targetID = namespaceAdaptKey(tempbuf[0], originNamespace);
+  int targetID = adaptKey(tempbuf[MODEL_PACK_INT_SELF]);
   model_t *mp = modelNewEntry(force_id?targetID:CDI_UNDEFID,
-                              namespaceAdaptKey(tempbuf[1], originNamespace),
-                              tempbuf[2], name);
-  if (tempbuf[3] != 0)
+                              adaptKey(tempbuf[MODEL_PACK_INT_INSTID]),
+                              tempbuf[MODEL_PACK_INT_MODELGRIBID], name);
+  if (tempbuf[MODEL_PACK_INT_NAMELEN] != 0)
     Free(name);
-  xassert(!force_id
-          || (mp->self == namespaceAdaptKey(tempbuf[0], originNamespace)));
+  xassert(!force_id || (mp->self == adaptKey(tempbuf[0])));
   reshSetStatus(mp->self, &modelOps,
                 reshGetStatus(mp->self, &modelOps) & ~RESH_SYNC_BIT);
+#undef adaptKey
   return mp->self;
 }
 
