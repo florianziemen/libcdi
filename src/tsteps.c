@@ -53,8 +53,6 @@ int tstepsNewEntry(stream_t *streamptr)
 
   tstepsInitEntry(streamptr, tsID);
 
-  streamptr->tsteps[tsID].taxis.used = TRUE;
-
   return (int)tsID;
 }
 
@@ -76,10 +74,7 @@ void cdiCreateTimesteps(stream_t *streamptr)
   streamptr->tstepsNextID    = (int)ntsteps;
 
   for ( tsID = 0; tsID < ntsteps; tsID++ )
-    {
-      tstepsInitEntry(streamptr, (size_t)tsID);
-      streamptr->tsteps[tsID].taxis.used = TRUE;
-    }
+    tstepsInitEntry(streamptr, (size_t)tsID);
 }
 /*
  * Local Variables:

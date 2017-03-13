@@ -148,7 +148,6 @@ static
 void taxisDefaultValue(taxis_t* taxisptr)
 {
   taxisptr->self        = CDI_UNDEFID;
-  taxisptr->used        = false;
   taxisptr->datatype    = CDI_DATATYPE_FLT64;
   taxisptr->type        = DefaultTimeType;
   taxisptr->vdate       = 0;
@@ -1366,7 +1365,6 @@ void ptaxisCopy(taxis_t *dest, taxis_t *source)
   reshLock ();
 
   /* memcpy(dest, source, sizeof(taxis_t)); */
-  dest->used        = source->used;
   dest->datatype    = source->datatype;
   dest->type        = source->type;
   dest->vdate       = source->vdate;
@@ -1414,7 +1412,6 @@ taxisPrintKernel(taxis_t * taxisptr, FILE * fp)
           "# taxisID %d\n"
           "#\n"
           "self        = %d\n"
-          "used        = %d\n"
           "type        = %d\n"
           "vdate       = %d\n"
           "vtime       = %d\n"
@@ -1434,7 +1431,7 @@ taxisPrintKernel(taxis_t * taxisptr, FILE * fp)
           "fc_unit     = %d\n"
           "fc_period   = %g\n"
           "\n", taxisptr->self, taxisptr->self,
-          (int)taxisptr->used, taxisptr->type,
+          taxisptr->type,
           taxisptr->vdate, taxisptr->vtime,
           taxisptr->rdate, taxisptr->rtime,
           taxisptr->fdate, taxisptr->ftime,
@@ -1453,8 +1450,7 @@ taxisCompareP(void *taxisptr1, void *taxisptr2)
 
   xassert ( t1 && t2 );
 
-  return ! ( t1->used        == t2->used        &&
-	     t1->type        == t2->type        &&
+  return ! ( t1->type        == t2->type        &&
 	     t1->vdate       == t2->vdate       &&
 	     t1->vtime       == t2->vtime       &&
 	     t1->rdate       == t2->rdate       &&
@@ -1483,7 +1479,6 @@ taxisTxCode(void *taxisptr)
 
 enum {
   TAXIS_PACK_INT_SELF,
-  TAXIS_PACK_INT_USED,
   TAXIS_PACK_INT_TYPE,
   TAXIS_PACK_INT_VDATE,
   TAXIS_PACK_INT_VTIME,
@@ -1547,7 +1542,6 @@ taxisUnpack(char * unpackBuffer, int unpackBufferSize, int * unpackBufferPos,
 
   xassert(!force_id || targetID == taxisP->self);
 
-  taxisP->used        = (short)intBuffer[TAXIS_PACK_INT_USED];
   taxisP->type        = intBuffer[TAXIS_PACK_INT_TYPE];
   taxisP->vdate       = intBuffer[TAXIS_PACK_INT_VDATE];
   taxisP->vtime       = intBuffer[TAXIS_PACK_INT_VTIME];
@@ -1611,7 +1605,6 @@ taxisPack(void * voidP, void * packBuffer, int packBufferSize, int * packBufferP
   uint32_t d;
 
   intBuffer[TAXIS_PACK_INT_SELF] = taxisP->self;
-  intBuffer[TAXIS_PACK_INT_USED] = taxisP->used;
   intBuffer[TAXIS_PACK_INT_TYPE] = taxisP->type;
   intBuffer[TAXIS_PACK_INT_VDATE] = taxisP->vdate;
   intBuffer[TAXIS_PACK_INT_VTIME] = taxisP->vtime;
