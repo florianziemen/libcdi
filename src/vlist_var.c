@@ -2094,44 +2094,47 @@ int vlistVarGetPackSize(vlist_t *p, int varID, void *context)
 void vlistVarPack(vlist_t *p, int varID, char * buf, int size, int *position,
                   void *context)
 {
-  double dtempbuf[vlistvar_ndbls];
   var_t *var = p->vars + varID;
-  int tempbuf[vlistvar_nints], namesz, longnamesz, stdnamesz, unitssz,
-    extralen;
-
-  tempbuf[VLIST_VAR_PACK_INT_FLAG] = var->flag;
-  tempbuf[VLIST_VAR_PACK_INT_GRIDID] = var->gridID;
-  tempbuf[VLIST_VAR_PACK_INT_ZAXISID] = var->zaxisID;
-  tempbuf[VLIST_VAR_PACK_INT_TSTEPTYPE] = var->tsteptype;
-  tempbuf[VLIST_VAR_PACK_INT_NAMELEN]
-    = namesz = var->name?(int)strlen(var->name):0;
-  tempbuf[VLIST_VAR_PACK_INT_LNAMELEN]
-    = longnamesz = var->longname?(int)strlen(var->longname):0;
-  tempbuf[VLIST_VAR_PACK_INT_SNAMELEN]
-    = stdnamesz = var->stdname?(int)strlen(var->stdname):0;
-  tempbuf[VLIST_VAR_PACK_INT_UNITSLEN]
-    = unitssz = var->units?(int)strlen(var->units):0;
-  tempbuf[VLIST_VAR_PACK_INT_DATATYPE] = var->datatype;
-  tempbuf[VLIST_VAR_PACK_INT_PARAM] = var->param;
-  tempbuf[VLIST_VAR_PACK_INT_INSTID] = var->instID;
-  tempbuf[VLIST_VAR_PACK_INT_MODELID] = var->modelID;
-  tempbuf[VLIST_VAR_PACK_INT_TABLEID] = var->tableID;
-  tempbuf[VLIST_VAR_PACK_INT_TIMEAVE] = var->timave;
-  tempbuf[VLIST_VAR_PACK_INT_TIMEACCU] = var->timaccu;
-  tempbuf[VLIST_VAR_PACK_INT_MISSVALUSED] = var->missvalused;
-  tempbuf[VLIST_VAR_PACK_INT_COMPTYPE] = var->comptype;
-  tempbuf[VLIST_VAR_PACK_INT_COMPLEVEL] = var->complevel;
-  int nlevs = var->levinfo ? zaxisInqSize(var->zaxisID) : 0;
-  tempbuf[VLIST_VAR_PACK_INT_NLEVS] = nlevs;
-  tempbuf[VLIST_VAR_PACK_INT_EXTRALEN]
-    = extralen = var->extra?(int)strlen(var->extra):0;
-  dtempbuf[VLIST_VAR_PACK_DBL_MISSVAL] = var->missval;
-  dtempbuf[VLIST_VAR_PACK_DBL_SCALEFACTOR] = var->scalefactor;
-  dtempbuf[VLIST_VAR_PACK_DBL_ADDOFFSET] = var->addoffset;
-  serializePack(tempbuf, vlistvar_nints, CDI_DATATYPE_INT,
-                buf, size, position, context);
-  serializePack(dtempbuf, vlistvar_ndbls, CDI_DATATYPE_FLT64,
-                buf, size, position, context);
+  int namesz, longnamesz, stdnamesz, unitssz, extralen, nlevs;
+  {
+    int tempbuf[vlistvar_nints];
+    tempbuf[VLIST_VAR_PACK_INT_FLAG] = var->flag;
+    tempbuf[VLIST_VAR_PACK_INT_GRIDID] = var->gridID;
+    tempbuf[VLIST_VAR_PACK_INT_ZAXISID] = var->zaxisID;
+    tempbuf[VLIST_VAR_PACK_INT_TSTEPTYPE] = var->tsteptype;
+    tempbuf[VLIST_VAR_PACK_INT_NAMELEN]
+      = namesz = var->name?(int)strlen(var->name):0;
+    tempbuf[VLIST_VAR_PACK_INT_LNAMELEN]
+      = longnamesz = var->longname?(int)strlen(var->longname):0;
+    tempbuf[VLIST_VAR_PACK_INT_SNAMELEN]
+      = stdnamesz = var->stdname?(int)strlen(var->stdname):0;
+    tempbuf[VLIST_VAR_PACK_INT_UNITSLEN]
+      = unitssz = var->units?(int)strlen(var->units):0;
+    tempbuf[VLIST_VAR_PACK_INT_DATATYPE] = var->datatype;
+    tempbuf[VLIST_VAR_PACK_INT_PARAM] = var->param;
+    tempbuf[VLIST_VAR_PACK_INT_INSTID] = var->instID;
+    tempbuf[VLIST_VAR_PACK_INT_MODELID] = var->modelID;
+    tempbuf[VLIST_VAR_PACK_INT_TABLEID] = var->tableID;
+    tempbuf[VLIST_VAR_PACK_INT_TIMEAVE] = var->timave;
+    tempbuf[VLIST_VAR_PACK_INT_TIMEACCU] = var->timaccu;
+    tempbuf[VLIST_VAR_PACK_INT_MISSVALUSED] = var->missvalused;
+    tempbuf[VLIST_VAR_PACK_INT_COMPTYPE] = var->comptype;
+    tempbuf[VLIST_VAR_PACK_INT_COMPLEVEL] = var->complevel;
+    nlevs = var->levinfo ? zaxisInqSize(var->zaxisID) : 0;
+    tempbuf[VLIST_VAR_PACK_INT_NLEVS] = nlevs;
+    tempbuf[VLIST_VAR_PACK_INT_EXTRALEN]
+      = extralen = var->extra?(int)strlen(var->extra):0;
+    serializePack(tempbuf, vlistvar_nints, CDI_DATATYPE_INT,
+                  buf, size, position, context);
+  }
+  {
+    double dtempbuf[vlistvar_ndbls];
+    dtempbuf[VLIST_VAR_PACK_DBL_MISSVAL] = var->missval;
+    dtempbuf[VLIST_VAR_PACK_DBL_SCALEFACTOR] = var->scalefactor;
+    dtempbuf[VLIST_VAR_PACK_DBL_ADDOFFSET] = var->addoffset;
+    serializePack(dtempbuf, vlistvar_ndbls, CDI_DATATYPE_FLT64,
+                  buf, size, position, context);
+  }
   if (namesz)
     serializePack(var->name, namesz, CDI_DATATYPE_TXT, buf, size, position, context);
   if (longnamesz)
