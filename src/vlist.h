@@ -9,6 +9,7 @@
 #include "error.h"
 #endif
 
+#include <stdbool.h>
 #include <stddef.h> /* size_t */
 
 #ifndef CDI_LIMITS_H
@@ -46,6 +47,7 @@ typedef struct
 {
   bool isUsed;
   bool flag;
+  bool lvalidrange;
   short xyz; /* order of spatial dimensions,
               * a permutation of 123 */
   int mvarID;
@@ -62,7 +64,6 @@ typedef struct
   int timave;
   int chunktype;
   bool missvalused;  // true if missval is defined
-  bool lvalidrange;
   char *extra;
   double missval;
   double scalefactor;
