@@ -47,27 +47,31 @@ vlistVarGetPackSize(vlist_t *p, int varID, void *context)
 void
 vlistVarPack(vlist_t *p, int varID, char *buf, int size, int *position, void *context)
 {
-  double dtempbuf[vlistvar_ndbls];
   var_t *var = p->vars + varID;
-  int tempbuf[vlistvarNint];
-
-  tempbuf[VLISTVAR_PACK_INT_IDX_FLAG] = var->flag;
-  tempbuf[VLISTVAR_PACK_INT_IDX_GRIDID] = var->gridID;
-  tempbuf[VLISTVAR_PACK_INT_IDX_ZAXISID] = var->zaxisID;
-  tempbuf[VLISTVAR_PACK_INT_IDX_TIMETYPE] = var->timetype;
-  tempbuf[VLISTVAR_PACK_INT_IDX_DATATYPE] = var->datatype;
-  tempbuf[VLISTVAR_PACK_INT_IDX_PARAM] = var->param;
-  tempbuf[VLISTVAR_PACK_INT_IDX_INSTID] = var->instID;
-  tempbuf[VLISTVAR_PACK_INT_IDX_MODELID] = var->modelID;
-  tempbuf[VLISTVAR_PACK_INT_IDX_TABLEID] = var->tableID;
-  tempbuf[VLISTVAR_PACK_INT_IDX_MISSVALUSED] = (int) var->missvalused;
-  tempbuf[VLISTVAR_PACK_INT_IDX_COMPTYPE] = var->comptype;
-  tempbuf[VLISTVAR_PACK_INT_IDX_COMPLEVEL] = var->complevel;
-  int nlevs = var->levinfo ? zaxisInqSize(var->zaxisID) : 0;
-  tempbuf[VLISTVAR_PACK_INT_IDX_NLEVS] = nlevs;
-  dtempbuf[VLIST_VAR_PACK_DBL_MISSVAL] = var->missval;
-  serializePack(tempbuf, vlistvarNint, CDI_DATATYPE_INT, buf, size, position, context);
-  serializePack(dtempbuf, vlistvar_ndbls, CDI_DATATYPE_FLT64, buf, size, position, context);
+  int nlevs;
+  {
+    int tempbuf[vlistvarNint];
+    tempbuf[VLISTVAR_PACK_INT_IDX_FLAG] = var->flag;
+    tempbuf[VLISTVAR_PACK_INT_IDX_GRIDID] = var->gridID;
+    tempbuf[VLISTVAR_PACK_INT_IDX_ZAXISID] = var->zaxisID;
+    tempbuf[VLISTVAR_PACK_INT_IDX_TIMETYPE] = var->timetype;
+    tempbuf[VLISTVAR_PACK_INT_IDX_DATATYPE] = var->datatype;
+    tempbuf[VLISTVAR_PACK_INT_IDX_PARAM] = var->param;
+    tempbuf[VLISTVAR_PACK_INT_IDX_INSTID] = var->instID;
+    tempbuf[VLISTVAR_PACK_INT_IDX_MODELID] = var->modelID;
+    tempbuf[VLISTVAR_PACK_INT_IDX_TABLEID] = var->tableID;
+    tempbuf[VLISTVAR_PACK_INT_IDX_MISSVALUSED] = (int) var->missvalused;
+    tempbuf[VLISTVAR_PACK_INT_IDX_COMPTYPE] = var->comptype;
+    tempbuf[VLISTVAR_PACK_INT_IDX_COMPLEVEL] = var->complevel;
+    nlevs = var->levinfo ? zaxisInqSize(var->zaxisID) : 0;
+    tempbuf[VLISTVAR_PACK_INT_IDX_NLEVS] = nlevs;
+    serializePack(tempbuf, vlistvarNint, CDI_DATATYPE_INT, buf, size, position, context);
+  }
+  {
+    double dtempbuf[vlistvar_ndbls];
+    dtempbuf[VLIST_VAR_PACK_DBL_MISSVAL] = var->missval;
+    serializePack(dtempbuf, vlistvar_ndbls, CDI_DATATYPE_FLT64, buf, size, position, context);
+  }
   if (nlevs)
     {
       int *levbuf = (int *) malloc(nlevs * sizeof(int));
