@@ -130,6 +130,7 @@ Makefile
 /tests/test_cdf_read
 /tests/test_cdf_write
 /tests/test_grib
+/tests/test_month_adjust
 /tests/test_resource_copy
 /tests/test_resource_copy_mpi
 /tests/test_table

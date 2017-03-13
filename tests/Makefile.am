@@ -8,6 +8,7 @@ TESTS = cksum_verify \
 	test_cksum_service test_cksum_nc2 test_cksum_nc4 test_cksum_ieg \
 	test_chunk_cksum \
 	calendar_test1 \
+	test_month_adjust \
 	pio_write_run pio_cksum_mpinonb pio_cksum_fpguard \
 	pio_cksum_asynch pio_cksum_writer \
 	pio_cksum_cdf \
@@ -23,6 +24,7 @@ TESTS = cksum_verify \
 
 check_PROGRAMS = cksum_verify test_grib cksum_write cksum_read \
 	calendar_test1 \
+	test_month_adjust \
 	pio_write \
 	test_resource_copy cksum_write_chunk pio_write_deco2d test_table \
 	test_byteswap
@@ -41,6 +43,7 @@ cksum_read_SOURCES = cksum_read.c \
 	stream_cksum.c stream_cksum.h \
 	ensure_array_size.h ensure_array_size.c
 calendar_test1_SOURCES = calendar_test1.c
+test_month_adjust_SOURCES = test_month_adjust.c
 pio_write_SOURCES = pio_write.c pio_write.h simple_model.c \
 	simple_model_helper.h simple_model_helper.c \
 	pio_write_setup_grid.h pio_write_setup_grid.c
