@@ -83,8 +83,6 @@ typedef struct
   int         complevel;    // compression level
   ensinfo_t  *ensdata;      /* Ensemble information */
   cdi_atts_t  atts;
-  int         iorank;
-
   int         subtypeID;   /* subtype ID for tile-related meta-data, currently for GRIB-API only. */
 
   int                 opt_grib_nentries;       /* current no. key-value pairs            */
