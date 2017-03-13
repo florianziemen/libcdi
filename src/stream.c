@@ -977,6 +977,11 @@ void cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDelet
       case CDI_FILETYPE_NC4C:
         {
           cdfClose(fileID);
+          if (streamptr->ntsteps == 0)
+            {
+              Free(streamptr->tsteps[0].records);
+              Free(streamptr->tsteps[0].recIDs);
+            }
           break;
         }
 #endif
