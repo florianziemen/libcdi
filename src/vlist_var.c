@@ -26,6 +26,7 @@ void vlistvarInitEntry(int vlistID, int varID)
 {
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
+  vlistptr->vars[varID].lvalidrange   = false;
   vlistptr->vars[varID].fvarID        = varID;
   vlistptr->vars[varID].mvarID        = varID;
   vlistptr->vars[varID].flag          = 0;
@@ -58,7 +59,6 @@ void vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].complevel     = 1;
   vlistptr->vars[varID].atts.nalloc   = MAX_ATTRIBUTES;
   vlistptr->vars[varID].atts.nelems   = 0;
-  vlistptr->vars[varID].lvalidrange   = 0;
   vlistptr->vars[varID].validrange[0] = VALIDMISS;
   vlistptr->vars[varID].validrange[1] = VALIDMISS;
   vlistptr->vars[varID].ensdata       = NULL;
@@ -1162,7 +1162,7 @@ void vlistDefVarValidrange(int vlistID, int varID, const double *validrange)
 
   vlistptr->vars[varID].validrange[0] = validrange[0];
   vlistptr->vars[varID].validrange[1] = validrange[1];
-  vlistptr->vars[varID].lvalidrange = TRUE;
+  vlistptr->vars[varID].lvalidrange = true;
   reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
 }
 

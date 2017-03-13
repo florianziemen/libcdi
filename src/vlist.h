@@ -9,6 +9,7 @@
 #include "error.h"
 #endif
 
+#include <stdbool.h>
 #include <stddef.h>  /* size_t */
 
 #ifndef _CDI_LIMITS_H
@@ -48,6 +49,7 @@ ensinfo_t;
 typedef struct
 {
   bool        isUsed;
+  bool        lvalidrange;
   short       xyz;              /* order of spatial dimensions,
                                  * a permutation of 123 */
   int         flag;
@@ -67,7 +69,6 @@ typedef struct
   int         productDefinitionTemplate;
   int         chunktype;
   int         missvalused; /* TRUE if missval is defined */
-  int         lvalidrange;
   char       *name;
   char       *longname;
   char       *stdname;
