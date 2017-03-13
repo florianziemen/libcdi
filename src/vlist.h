@@ -46,6 +46,8 @@ typedef struct
 {
   bool isUsed;
   bool flag;
+  short xyz; /* order of spatial dimensions,
+              * a permutation of 123 */
   int mvarID;
   int fvarID;
   int param;
@@ -58,8 +60,7 @@ typedef struct
   int modelID;
   int tableID;
   int timave;
-  int nsb;  // Number of significant bits
-  int xyz;
+  int nsb;           // Number of significant bits
   bool missvalused;  // true if missval is defined
   bool lvalidrange;
   double missval;
