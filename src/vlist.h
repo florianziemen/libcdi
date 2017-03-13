@@ -48,8 +48,9 @@ typedef struct
   bool isUsed;
   bool flag;
   bool lvalidrange;
-  short xyz; /* order of spatial dimensions,
-              * a permutation of 123 */
+  short xyz;         /* order of spatial dimensions,
+                      * a permutation of 123 */
+  bool missvalused;  // true if missval is defined
   int mvarID;
   int fvarID;
   int param;
@@ -62,8 +63,7 @@ typedef struct
   int modelID;
   int tableID;
   int timave;
-  int nsb;           // Number of significant bits
-  bool missvalused;  // true if missval is defined
+  int nsb;  // Number of significant bits
   double missval;
   double validrange[2];
   levinfo_t *levinfo;
