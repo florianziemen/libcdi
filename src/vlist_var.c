@@ -1440,9 +1440,9 @@ vlistEncodeXyz(const int dimorder[3])
 static void
 vlistDecodeXyz(int xyz, int outDimorder[3])
 {
-  outDimorder[0] = xyz / 100, xyz -= outDimorder[0] * 100;
-  outDimorder[1] = xyz / 10, xyz -= outDimorder[1] * 10;
-  outDimorder[2] = xyz;
+  outDimorder[0] = xyz / 100, xyz = xyz % 100;
+  outDimorder[1] = xyz / 10;
+  outDimorder[2] = xyz % 10;
 }
 
 void
