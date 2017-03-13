@@ -1557,7 +1557,19 @@ zaxisTxCode(void *zaxisPtr)
   return ZAXIS;
 }
 
-enum { zaxisNint     = 8,
+enum {
+  ZAXIS_PACK_INT_SELF,
+  ZAXIS_PACK_INT_PREC,
+  ZAXIS_PACK_INT_TYPE,
+  ZAXIS_PACK_INT_LTYPE,
+  ZAXIS_PACK_INT_SIZE,
+  ZAXIS_PACK_INT_DIRECTION,
+  ZAXIS_PACK_INT_VCTSIZE,
+  ZAXIS_PACK_INT_MEMBERMASK,
+  zaxisNint
+};
+
+enum {
        vals     = 1 << 0,
        lbounds  = 1 << 1,
        ubounds  = 1 << 2,
@@ -1650,16 +1662,16 @@ zaxisUnpack(char * unpackBuffer, int unpackBufferSize,
   zaxisInit();
 
   zaxis_t *zaxisP
-    = zaxisNewEntry(force_id ? namespaceAdaptKey(intBuffer[0], originNamespace)
+    = zaxisNewEntry(force_id ? namespaceAdaptKey(intBuffer[ZAXIS_PACK_INT_SELF], originNamespace)
                     : CDI_UNDEFID);
 
-  zaxisP->prec      = intBuffer[1];
-  zaxisP->type      = intBuffer[2];
-  zaxisP->ltype     = intBuffer[3];
-  zaxisP->size      = intBuffer[4];
-  zaxisP->direction = intBuffer[5];
-  zaxisP->vctsize   = intBuffer[6];
-  memberMask        = intBuffer[7];
+  zaxisP->prec      = intBuffer[ZAXIS_PACK_INT_PREC];
+  zaxisP->type      = intBuffer[ZAXIS_PACK_INT_TYPE];
+  zaxisP->ltype     = intBuffer[ZAXIS_PACK_INT_LTYPE];
+  zaxisP->size      = intBuffer[ZAXIS_PACK_INT_SIZE];
+  zaxisP->direction = intBuffer[ZAXIS_PACK_INT_DIRECTION];
+  zaxisP->vctsize   = intBuffer[ZAXIS_PACK_INT_VCTSIZE];
+  memberMask        = intBuffer[ZAXIS_PACK_INT_MEMBERMASK];
 
   if (memberMask & vals)
     {
@@ -1753,14 +1765,15 @@ zaxisPack(void * voidP, void * packBuffer, int packBufferSize,
   int memberMask;
   uint32_t d;
 
-  intBuffer[0]  = zaxisP->self;
-  intBuffer[1]  = zaxisP->prec;
-  intBuffer[2]  = zaxisP->type;
-  intBuffer[3]  = zaxisP->ltype;
-  intBuffer[4]  = zaxisP->size;
-  intBuffer[5]  = zaxisP->direction;
-  intBuffer[6]  = zaxisP->vctsize;
-  intBuffer[7]  = memberMask = zaxisGetMemberMask ( zaxisP );
+  intBuffer[ZAXIS_PACK_INT_SELF]  = zaxisP->self;
+  intBuffer[ZAXIS_PACK_INT_PREC]  = zaxisP->prec;
+  intBuffer[ZAXIS_PACK_INT_TYPE]  = zaxisP->type;
+  intBuffer[ZAXIS_PACK_INT_LTYPE]  = zaxisP->ltype;
+  intBuffer[ZAXIS_PACK_INT_SIZE]  = zaxisP->size;
+  intBuffer[ZAXIS_PACK_INT_DIRECTION]  = zaxisP->direction;
+  intBuffer[ZAXIS_PACK_INT_VCTSIZE]  = zaxisP->vctsize;
+  intBuffer[ZAXIS_PACK_INT_MEMBERMASK]
+    = memberMask = zaxisGetMemberMask(zaxisP);
 
   serializePack(intBuffer, zaxisNint, CDI_DATATYPE_INT,
                 packBuffer, packBufferSize, packBufferPos, context);
