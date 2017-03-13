@@ -119,7 +119,7 @@ void vlistDefVarValidrange(int vlistID, int varID, const double *validrange);
 /*      vlistInqVarValidrange: Get the valid range of a Variable */
 int vlistInqVarValidrange(int vlistID, int varID, double *validrange);
 
-void vlistInqVarDimorder(int vlistID, int varID, int (*outDimorder)[3]);
+void vlistInqVarDimorder(int vlistID, int varID, int outDimorder[3]);
 
 void resize_opt_grib_entries(var_t *var, int nentries);
 
