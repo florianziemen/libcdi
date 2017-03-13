@@ -45,7 +45,6 @@ vlistvarInitEntry(int vlistID, int varID)
   for (int i = 0; i < MAX_KEYS; ++i) vlistptr->vars[varID].keys.value[i].length = 0;
   vlistptr->vars[varID].atts.nalloc = MAX_ATTRIBUTES;
   vlistptr->vars[varID].atts.nelems = 0;
-  vlistptr->vars[varID].iorank = CDI_UNDEFID;
   vlistptr->vars[varID].subtypeID = CDI_UNDEFID;
   vlistptr->vars[varID].opt_grib_nentries = 0;
   vlistptr->vars[varID].opt_grib_kvpair_size = 0;
@@ -1497,28 +1496,6 @@ vlistInqVarXYZ(int vlistID, int varID)
   vlistPtrCheckVarID(__func__, vlistptr, varID);
 
   return vlistptr->vars[varID].xyz;
-}
-
-void
-vlistDefVarIOrank(int vlistID, int varID, int iorank)
-{
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  vlistPtrCheckVarID(__func__, vlistptr, varID);
-
-  if (vlistptr->vars[varID].iorank != iorank)
-    {
-      vlistptr->vars[varID].iorank = iorank;
-      reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
-    }
-}
-
-int
-vlistInqVarIOrank(int vlistID, int varID)
-{
-  const vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  vlistPtrCheckVarID(__func__, vlistptr, varID);
-
-  return vlistptr->vars[varID].iorank;
 }
 
 int

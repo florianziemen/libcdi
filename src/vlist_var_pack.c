@@ -21,7 +21,6 @@ enum
   VLISTVAR_PACK_INT_IDX_COMPTYPE,
   VLISTVAR_PACK_INT_IDX_COMPLEVEL,
   VLISTVAR_PACK_INT_IDX_NLEVS,
-  VLISTVAR_PACK_INT_IDX_IORANK,
   VLISTVAR_PACK_INT_IDX_EXTRALEN,
   vlistvarNint
 };
@@ -31,7 +30,7 @@ enum
   VLIST_VAR_PACK_DBL_MISSVAL,
   VLIST_VAR_PACK_DBL_SCALEFACTOR,
   VLIST_VAR_PACK_DBL_ADDOFFSET,
-  vlistvar_ndbls = 3,
+  vlistvar_ndbls,
 };
 
 int
@@ -71,7 +70,6 @@ vlistVarPack(vlist_t *p, int varID, char *buf, int size, int *position, void *co
   tempbuf[VLISTVAR_PACK_INT_IDX_COMPLEVEL] = var->complevel;
   int nlevs = var->levinfo ? zaxisInqSize(var->zaxisID) : 0;
   tempbuf[VLISTVAR_PACK_INT_IDX_NLEVS] = nlevs;
-  tempbuf[VLISTVAR_PACK_INT_IDX_IORANK] = var->iorank;
   tempbuf[VLISTVAR_PACK_INT_IDX_EXTRALEN] = extralen = var->extra ? (int) strlen(var->extra) : 0;
   dtempbuf[VLIST_VAR_PACK_DBL_MISSVAL] = var->missval;
   dtempbuf[VLIST_VAR_PACK_DBL_SCALEFACTOR] = var->scalefactor;
@@ -154,7 +152,6 @@ vlistVarUnpack(int vlistID, char *buf, int size, int *position, int originNamesp
       for (i = 0; i < nlevs; ++i) var->levinfo[i].flevelID = levbuf[i];
       free(levbuf);
     }
-  vlistDefVarIOrank(vlistID, newvar, tempbuf[VLISTVAR_PACK_INT_IDX_IORANK]);
 
   serializeKeysUnpack(buf, size, position, &var->keys, context);
 
