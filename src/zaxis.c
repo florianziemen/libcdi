@@ -1373,7 +1373,17 @@ zaxisTxCode(void *zaxisPtr)
 
 enum
 {
-  zaxisNint = 6,
+  ZAXIS_PACK_INT_SELF,
+  ZAXIS_PACK_INT_TYPE,
+  ZAXIS_PACK_INT_SIZE,
+  ZAXIS_PACK_INT_DIRECTION,
+  ZAXIS_PACK_INT_VCTSIZE,
+  ZAXIS_PACK_INT_MEMBERMASK,
+  zaxisNint
+};
+
+enum
+{
   vals = 1 << 0,
   lbounds = 1 << 1,
   ubounds = 1 << 2,
@@ -1446,13 +1456,13 @@ zaxisUnpack(char *unpackBuffer, int unpackBufferSize, int *unpackBufferPos, int 
 
   zaxisInit();
 
-  zaxis_t *zaxisP = zaxisNewEntry(force_id ? namespaceAdaptKey(intBuffer[0], originNamespace) : CDI_UNDEFID);
+  zaxis_t *zaxisP = zaxisNewEntry(force_id ? namespaceAdaptKey(intBuffer[ZAXIS_PACK_INT_SELF], originNamespace) : CDI_UNDEFID);
 
-  zaxisP->type = intBuffer[1];
-  zaxisP->size = intBuffer[2];
-  zaxisP->direction = intBuffer[3];
-  zaxisP->vctsize = intBuffer[4];
-  memberMask = intBuffer[5];
+  zaxisP->type = intBuffer[ZAXIS_PACK_INT_TYPE];
+  zaxisP->size = intBuffer[ZAXIS_PACK_INT_SIZE];
+  zaxisP->direction = intBuffer[ZAXIS_PACK_INT_DIRECTION];
+  zaxisP->vctsize = intBuffer[ZAXIS_PACK_INT_VCTSIZE];
+  memberMask = intBuffer[ZAXIS_PACK_INT_MEMBERMASK];
 
   if (memberMask & vals)
     {
@@ -1524,12 +1534,12 @@ zaxisPack(void *voidP, void *packBuffer, int packBufferSize, int *packBufferPos,
   int memberMask;
   uint32_t d;
 
-  intBuffer[0] = zaxisP->self;
-  intBuffer[1] = zaxisP->type;
-  intBuffer[2] = zaxisP->size;
-  intBuffer[3] = zaxisP->direction;
-  intBuffer[4] = zaxisP->vctsize;
-  intBuffer[5] = memberMask = zaxisGetMemberMask(zaxisP);
+  intBuffer[ZAXIS_PACK_INT_SELF] = zaxisP->self;
+  intBuffer[ZAXIS_PACK_INT_TYPE] = zaxisP->type;
+  intBuffer[ZAXIS_PACK_INT_SIZE] = zaxisP->size;
+  intBuffer[ZAXIS_PACK_INT_DIRECTION] = zaxisP->direction;
+  intBuffer[ZAXIS_PACK_INT_VCTSIZE] = zaxisP->vctsize;
+  intBuffer[ZAXIS_PACK_INT_MEMBERMASK] = memberMask = zaxisGetMemberMask(zaxisP);
 
   serializePack(intBuffer, zaxisNint, CDI_DATATYPE_INT, packBuffer, packBufferSize, packBufferPos, context);
   d = cdiCheckSum(CDI_DATATYPE_INT, zaxisNint, intBuffer);
