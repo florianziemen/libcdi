@@ -61,7 +61,6 @@ void vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].ensdata       = NULL;
   vlistptr->vars[varID].atts.nalloc   = MAX_ATTRIBUTES;
   vlistptr->vars[varID].atts.nelems   = 0;
-  vlistptr->vars[varID].iorank        = CDI_UNDEFID;
   vlistptr->vars[varID].subtypeID     = CDI_UNDEFID;
   vlistptr->vars[varID].opt_grib_nentries    = 0;
   vlistptr->vars[varID].opt_grib_kvpair_size = 0;
@@ -1993,30 +1992,6 @@ int vlistInqVarIntKey(int vlistID, int varID, const char* name)
 }
 
 
-void vlistDefVarIOrank(int vlistID, int varID, int iorank)
-{
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-
-  vlistCheckVarID ( __func__, vlistID, varID );
-
-  if (vlistptr->vars[varID].iorank != iorank)
-    {
-      vlistptr->vars[varID].iorank = iorank;
-      reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
-    }
-}
-
-
-int vlistInqVarIOrank(int vlistID, int varID)
-{
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-
-  vlistPtrCheckVarID(__func__, vlistptr, varID);
-
-  return vlistptr->vars[varID].iorank;
-}
-
-
 int vlistVarCompare(vlist_t *a, int varIDA, vlist_t *b, int varIDB)
 {
   xassert(a && b
@@ -2085,7 +2060,6 @@ enum {
   VLIST_VAR_PACK_INT_COMPTYPE,
   VLIST_VAR_PACK_INT_COMPLEVEL,
   VLIST_VAR_PACK_INT_NLEVS,
-  VLIST_VAR_PACK_INT_IORANK,
   VLIST_VAR_PACK_INT_EXTRALEN,
   vlistvar_nints,
 };
@@ -2093,7 +2067,7 @@ enum {
   VLIST_VAR_PACK_DBL_MISSVAL,
   VLIST_VAR_PACK_DBL_SCALEFACTOR,
   VLIST_VAR_PACK_DBL_ADDOFFSET,
-  vlistvar_ndbls = 3,
+  vlistvar_ndbls,
 };
 
 int vlistVarGetPackSize(vlist_t *p, int varID, void *context)
@@ -2149,7 +2123,6 @@ void vlistVarPack(vlist_t *p, int varID, char * buf, int size, int *position,
   tempbuf[VLIST_VAR_PACK_INT_COMPLEVEL] = var->complevel;
   int nlevs = var->levinfo ? zaxisInqSize(var->zaxisID) : 0;
   tempbuf[VLIST_VAR_PACK_INT_NLEVS] = nlevs;
-  tempbuf[VLIST_VAR_PACK_INT_IORANK] = var->iorank;
   tempbuf[VLIST_VAR_PACK_INT_EXTRALEN]
     = extralen = var->extra?(int)strlen(var->extra):0;
   dtempbuf[VLIST_VAR_PACK_DBL_MISSVAL] = var->missval;
@@ -2301,7 +2274,6 @@ void vlistVarUnpack(int vlistID, char * buf, int size, int *position,
         }
       vlistDefFlag(vlistID, newvar, flagSetLev, levbuf[flagSetLev][0]);
     }
-  vlistDefVarIOrank(vlistID, newvar, tempbuf[VLIST_VAR_PACK_INT_IORANK]);
   cdiAttsUnpack(vlistID, newvar, buf, size, position, context);
 #undef adaptKey
 }
