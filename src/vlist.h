@@ -106,7 +106,6 @@ typedef struct
 vlist_t *vlist_to_pointer(int vlistID);
 void cdiVlistMakeInternal(int vlistID);
 void cdiVlistMakeImmutable(int vlistID);
-void vlistCheckVarID(const char *caller, int vlistID, int varID);
 void cdiVlistDestroy_(int vlistID);
 int vlistInqVarMissvalUsed(int vlistID, int varID);
 int vlistHasTime(int vlistID);
