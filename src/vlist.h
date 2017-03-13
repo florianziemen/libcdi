@@ -48,8 +48,9 @@ typedef struct
   bool isUsed;
   bool flag;
   bool lvalidrange;
-  short xyz; /* order of spatial dimensions,
-              * a permutation of 123 */
+  short xyz;         /* order of spatial dimensions,
+                      * a permutation of 123 */
+  bool missvalused;  // true if missval is defined
   int mvarID;
   int fvarID;
   int param;
@@ -63,7 +64,6 @@ typedef struct
   int tableID;
   int timave;
   int chunktype;
-  bool missvalused;  // true if missval is defined
   char *extra;
   double missval;
   double scalefactor;

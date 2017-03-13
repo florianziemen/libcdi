@@ -17,6 +17,7 @@ vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].flag = false;
   vlistptr->vars[varID].lvalidrange = false;
   vlistptr->vars[varID].xyz = 321;
+  vlistptr->vars[varID].missvalused = false;
   vlistptr->vars[varID].mvarID = varID;
   vlistptr->vars[varID].fvarID = varID;
   vlistptr->vars[varID].param = 0;
@@ -30,7 +31,6 @@ vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].tableID = CDI_UNDEFID;
   vlistptr->vars[varID].timave = 0;
   vlistptr->vars[varID].chunktype = CDI_Chunk_Type;
-  vlistptr->vars[varID].missvalused = false;
   vlistptr->vars[varID].extra = NULL;
   vlistptr->vars[varID].missval = CDI_Default_Missval;
   vlistptr->vars[varID].scalefactor = 1.0;
