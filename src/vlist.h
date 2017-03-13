@@ -52,6 +52,7 @@ typedef struct
   bool        lvalidrange;
   short       xyz;              /* order of spatial dimensions,
                                  * a permutation of 123 */
+  bool        missvalused;      /* true if missval is defined */
   int         flag;
   int         mvarID;
   int         fvarID;
@@ -68,7 +69,6 @@ typedef struct
   int         typeOfGeneratingProcess;
   int         productDefinitionTemplate;
   int         chunktype;
-  int         missvalused; /* TRUE if missval is defined */
   char       *name;
   char       *longname;
   char       *stdname;
