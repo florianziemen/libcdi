@@ -71,8 +71,6 @@ typedef struct
   int complevel;  // compression level
   cdi_keys_t keys;
   cdi_atts_t atts;
-  int iorank;
-
   int subtypeID;  // subtype ID for tile-related meta-data, currently for GRIB-API only.
 
   int opt_grib_nentries;                // current no. key-value pairs

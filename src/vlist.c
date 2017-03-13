@@ -1090,7 +1090,7 @@ vlistPrintKernel(vlist_t *vlistptr, FILE *fp)
 
   if (nvars > 0)
     {
-      fprintf(fp, " varID param    gridID zaxisID stypeID tsteptype flag iorank name     longname         units\n");
+      fprintf(fp, " varID param    gridID zaxisID stypeID tsteptype flag name     longname         units\n");
       for (int varID = 0; varID < nvars; varID++)
         {
           int param = vlistptr->vars[varID].param;
@@ -1106,12 +1106,11 @@ vlistPrintKernel(vlist_t *vlistptr, FILE *fp)
           length = CDI_MAX_NAME;
           (void) cdiInqKeyString(vlistID, varID, CDI_KEY_UNITS, units, &length);
           int flag = vlistptr->vars[varID].flag;
-          int iorank = vlistptr->vars[varID].iorank;
 
           char paramstr[32];
           cdiParamToString(param, paramstr, sizeof(paramstr));
-          fprintf(fp, "%6d %-8s %6d  %6d  %6d  %6d  %5d %6d %-8s %s [%s]\n", varID, paramstr, gridID, zaxisID, subtypeID, tsteptype,
-                  flag, iorank, name, longname, units);
+          fprintf(fp, "%6d %-8s %6d  %6d  %6d  %6d  %5d %-8s %s [%s]\n", varID, paramstr, gridID, zaxisID, subtypeID, tsteptype,
+                  flag, name, longname, units);
         }
 
       fputs("\n"
@@ -1144,12 +1143,11 @@ vlistPrintKernel(vlist_t *vlistptr, FILE *fp)
         }
 
       fputs("\n"
-            " varID  size iorank\n",
+            " varID  size\n",
             fp);
       for (int varID = 0; varID < nvars; varID++)
-        fprintf(fp, "%3d %8zu %6d\n", varID,
-                (size_t) zaxisInqSize(vlistptr->vars[varID].zaxisID) * gridInqSize(vlistptr->vars[varID].gridID),
-                vlistptr->vars[varID].iorank);
+        fprintf(fp, "%3d %8zu\n", varID,
+                (size_t) zaxisInqSize(vlistptr->vars[varID].zaxisID) * gridInqSize(vlistptr->vars[varID].gridID));
     }
 }
 

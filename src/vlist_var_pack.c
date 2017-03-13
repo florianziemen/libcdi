@@ -21,14 +21,13 @@ enum
   VLISTVAR_PACK_INT_IDX_COMPTYPE,
   VLISTVAR_PACK_INT_IDX_COMPLEVEL,
   VLISTVAR_PACK_INT_IDX_NLEVS,
-  VLISTVAR_PACK_INT_IDX_IORANK,
   vlistvarNint
 };
 
 enum
 {
   VLIST_VAR_PACK_DBL_MISSVAL,
-  vlistvar_ndbls = 1,
+  vlistvar_ndbls,
 };
 
 int
@@ -66,7 +65,6 @@ vlistVarPack(vlist_t *p, int varID, char *buf, int size, int *position, void *co
   tempbuf[VLISTVAR_PACK_INT_IDX_COMPLEVEL] = var->complevel;
   int nlevs = var->levinfo ? zaxisInqSize(var->zaxisID) : 0;
   tempbuf[VLISTVAR_PACK_INT_IDX_NLEVS] = nlevs;
-  tempbuf[VLISTVAR_PACK_INT_IDX_IORANK] = var->iorank;
   dtempbuf[VLIST_VAR_PACK_DBL_MISSVAL] = var->missval;
   serializePack(tempbuf, vlistvarNint, CDI_DATATYPE_INT, buf, size, position, context);
   serializePack(dtempbuf, vlistvar_ndbls, CDI_DATATYPE_FLT64, buf, size, position, context);
@@ -134,7 +132,6 @@ vlistVarUnpack(int vlistID, char *buf, int size, int *position, int originNamesp
       for (i = 0; i < nlevs; ++i) var->levinfo[i].flevelID = levbuf[i];
       free(levbuf);
     }
-  vlistDefVarIOrank(vlistID, newvar, tempbuf[VLISTVAR_PACK_INT_IDX_IORANK]);
 
   serializeKeysUnpack(buf, size, position, &var->keys, context);
 
