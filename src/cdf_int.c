@@ -247,12 +247,20 @@ cdf_def_var_serial(int ncid, const char *name, nc_type xtype, int ndims,
                    const int dimids[], int *varidp)
 {
   int status = nc_def_var(ncid, name, xtype, ndims, dimids, varidp);
-
   if ( CDF_Debug || status != NC_NOERR )
     Message("ncid = %d  name = %s  xtype = %d  ndims = %d  varid = %d",
-	    ncid, name, xtype, ndims, *varidp);
-
-  if ( status != NC_NOERR ) Error("%s", nc_strerror(status));
+            ncid, name, xtype, ndims, *varidp);
+  if ( status == NC_NOERR )
+    {
+      int fileFormat;
+      status = nc_inq_format(ncid,&fileFormat);
+      if ( status == NC_NOERR
+           && (fileFormat == NC_FORMAT_NETCDF4
+               || fileFormat == NC_FORMAT_NETCDF4_CLASSIC) )
+        status = nc_def_var_fill(ncid, *varidp, 1, NULL);
+    }
+  if ( status != NC_NOERR )
+    Error("%s", nc_strerror(status));
 }
 
 
