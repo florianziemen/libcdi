@@ -291,14 +291,14 @@ enum {
   MODEL_PACK_INT_INSTID,
   MODEL_PACK_INT_MODELGRIBID,
   MODEL_PACK_INT_NAMELEN,
-  model_nints,
+  modelNints,
 };
 
 
 static int modelGetSizeP(void * modelptr, void *context)
 {
   model_t *p = (model_t*)modelptr;
-  size_t txsize = (size_t)serializeGetSize(model_nints, CDI_DATATYPE_INT, context)
+  size_t txsize = (size_t)serializeGetSize(modelNints, CDI_DATATYPE_INT, context)
     + (size_t)serializeGetSize(p->name?(int)strlen(p->name) : 0, CDI_DATATYPE_TXT, context);
   xassert(txsize <= INT_MAX);
   return (int)txsize;
@@ -308,12 +308,12 @@ static int modelGetSizeP(void * modelptr, void *context)
 static void modelPackP(void * modelptr, void * buf, int size, int *position, void *context)
 {
   model_t *p = (model_t*) modelptr;
-  int tempbuf[model_nints];
+  int tempbuf[modelNints];
   tempbuf[MODEL_PACK_INT_SELF] = p->self;
   tempbuf[MODEL_PACK_INT_INSTID] = p->instID;
   tempbuf[MODEL_PACK_INT_MODELGRIBID] = p->modelgribID;
   tempbuf[MODEL_PACK_INT_NAMELEN] = p->name ? (int)strlen(p->name) : 0;
-  serializePack(tempbuf, model_nints, CDI_DATATYPE_INT, buf, size, position, context);
+  serializePack(tempbuf, modelNints, CDI_DATATYPE_INT, buf, size, position, context);
   if (p->name)
     serializePack(p->name, tempbuf[MODEL_PACK_INT_NAMELEN], CDI_DATATYPE_TXT,
                   buf, size, position, context);
@@ -324,9 +324,9 @@ modelUnpack(void *buf, int size, int *position, int originNamespace, void *conte
             int force_id)
 {
 #define adaptKey(key) (namespaceAdaptKey((key), originNamespace))
-  int tempbuf[model_nints];
+  int tempbuf[modelNints];
   char *name;
-  serializeUnpack(buf, size, position, tempbuf, model_nints, CDI_DATATYPE_INT, context);
+  serializeUnpack(buf, size, position, tempbuf, modelNints, CDI_DATATYPE_INT, context);
   if (tempbuf[MODEL_PACK_INT_NAMELEN] != 0)
     {
       size_t len = (size_t)tempbuf[MODEL_PACK_INT_NAMELEN];
