@@ -1327,7 +1327,7 @@ vlistInqVarNSB(int vlistID, int varID)
 static int
 vlistEncodeXyz(const int dimorder[3])
 {
-  return dimorder[0] * 100 + dimorder[1] * 10 + dimorder[2];
+  return (short) (dimorder[0] * 100 + dimorder[1] * 10 + dimorder[2]);
 }
 
 static void
@@ -1376,7 +1376,7 @@ vlistDefVarXYZ(int vlistID, int varID, int xyz)
 
   assert(xyz == 123 || xyz == 312 || xyz == 231 || xyz == 321 || xyz == 132 || xyz == 213);
 
-  vlistptr->vars[varID].xyz = xyz;
+  vlistptr->vars[varID].xyz = (short) xyz;
   reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
 }
 
