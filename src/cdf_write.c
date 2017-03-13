@@ -352,7 +352,6 @@ int cdfDefVar(stream_t *streamptr, int varID)
   vlistInqVarDimorder(vlistID, varID, dimorder);
 
   size_t gridsize  = (size_t)(gridInqSize(gridID));
-  bool lchunk = (gridsize >= 16);
   int gridtype  = gridInqType(gridID);
   int gridindex = nc_grid_index(streamptr, gridID);
   if ( gridtype != GRID_TRAJECTORY )
@@ -368,7 +367,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
   bool zaxis_is_scalar = false;
   if ( zid == CDI_UNDEFID ) zaxis_is_scalar = zaxisInqScalar(zaxisID) > 0;
 
-  if ( dimorder[0] != 3 ) lchunk = false; /* ZYX and ZXY */
+  bool lchunk = (gridsize >= 16) && (dimorder[0] == 3); /* ZYX and ZXY */
 
   if ( ((dimorder[0]>0)+(dimorder[1]>0)+(dimorder[2]>0)) < ((xid!=CDI_UNDEFID)+(yid!=CDI_UNDEFID)+(zid!=CDI_UNDEFID)) )
     {
