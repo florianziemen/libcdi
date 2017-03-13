@@ -121,7 +121,6 @@ vlist_t;
 vlist_t *vlist_to_pointer(int vlistID);
 void cdiVlistMakeInternal(int vlistID);
 void cdiVlistMakeImmutable(int vlistID);
-void vlistCheckVarID(const char *caller, int vlistID, int varID);
 const char *vlistInqVarStdnamePtr(int vlistID, int varID);
 void     vlistDestroyVarName(int vlistID, int varID);
 void     vlistDestroyVarLongname(int vlistID, int varID);

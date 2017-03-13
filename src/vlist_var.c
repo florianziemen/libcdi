@@ -112,15 +112,16 @@ int vlistvarNewEntry(int vlistID)
   return varID;
 }
 
-void vlistCheckVarID(const char *caller, int vlistID, int varID)
+static void vlistPtrCheckVarID(const char *caller, vlist_t *vlistptr, int varID)
+{
+  if ( varID < 0 || varID >= vlistptr->nvars || ! vlistptr->vars[varID].isUsed)
+    Errorc("varID %d undefined!", varID);
+}
+
+static void vlistCheckVarID(const char *caller, int vlistID, int varID)
 {
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
-
-  if ( varID < 0 || varID >= vlistptr->nvars )
-    Errorc("varID %d undefined!", varID);
-
-  if ( ! vlistptr->vars[varID].isUsed )
-    Errorc("varID %d undefined!", varID);
+  vlistPtrCheckVarID(caller, vlistptr, varID);
 }
 
 
