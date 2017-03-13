@@ -11,7 +11,6 @@ typedef struct {
   /* Date format  YYYYMMDD */
   /* Time format    hhmmss */
   int     self;
-  bool    used;
   short   has_bounds;
   int     datatype;       // datatype
   int     type;           // time type
