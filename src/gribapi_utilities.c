@@ -40,7 +40,10 @@ char* gribCopyString(grib_handle* gribHandle, const char* key)
           Free(result);
           result = NULL;
         }
+      return result;
     }
+  else
+    return NULL;
 #else
   length = 1024;         /* there's an implementation limit
                           * that makes strings longer than
@@ -66,8 +69,8 @@ char* gribCopyString(grib_handle* gribHandle, const char* key)
       Free(result);
       result = NULL;
     }
-#endif
   return result;
+#endif
 }
 
 //A simple wrapper for grib_get_string() for the usecase that the result is only compared to a given constant string.
