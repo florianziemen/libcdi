@@ -432,7 +432,7 @@ void cdfGetSliceSlapDescription(stream_t *streamptr, int varId, int levelId, boo
   int skipdim = cdfGetSkipDim(fileId, ncvarid, &dimIds);
 
   int dimorder[3];
-  vlistInqVarDimorder(vlistId, varId, &dimorder);
+  vlistInqVarDimorder(vlistId, varId, dimorder);
 
   *outSwapXY = (dimorder[2] == 2 || dimorder[0] == 1) && dimIds[0] != CDI_UNDEFID && dimIds[1] != CDI_UNDEFID ;
 
