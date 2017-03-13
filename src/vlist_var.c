@@ -16,7 +16,7 @@ vlistvarInitEntry(int vlistID, int varID)
 
   vlistptr->vars[varID].flag = false;
   vlistptr->vars[varID].lvalidrange = false;
-  vlistptr->vars[varID].xyz = 321;
+  vlistptr->vars[varID].xyz = 5; /* xyzStorVals[5] == 321 */
   vlistptr->vars[varID].missvalused = false;
   vlistptr->vars[varID].mvarID = varID;
   vlistptr->vars[varID].fvarID = varID;
@@ -1338,6 +1338,12 @@ vlistDecodeXyz(int xyz, int outDimorder[3])
   outDimorder[2] = xyz % 10;
 }
 
+static const short xyzStorVals[] = { 123, 132, 213, 231, 312, 321 };
+enum
+{
+  numXYZStorVals = sizeof(xyzStorVals) / sizeof(xyzStorVals[0])
+};
+
 void
 vlistDefVarXYZ(int vlistID, int varID, int xyz)
 {
@@ -1376,7 +1382,13 @@ vlistDefVarXYZ(int vlistID, int varID, int xyz)
 
   assert(xyz == 123 || xyz == 312 || xyz == 231 || xyz == 321 || xyz == 132 || xyz == 213);
 
-  vlistptr->vars[varID].xyz = (short) xyz;
+  for (size_t i = 0; i < numXYZStorVals; ++i)
+    if (xyz == xyzStorVals[i])
+      {
+        xyz = (int) i;
+        break;
+      }
+  vlistptr->vars[varID].xyz = (signed char) xyz;
   reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
 }
 
@@ -1386,7 +1398,7 @@ vlistInqVarDimorder(int vlistID, int varID, int outDimorder[3])
   const vlist_t *vlistptr = vlist_to_pointer(vlistID);
   vlistPtrCheckVarID(__func__, vlistptr, varID);
 
-  vlistDecodeXyz(vlistptr->vars[varID].xyz, outDimorder);
+  vlistDecodeXyz(xyzStorVals[vlistptr->vars[varID].xyz], outDimorder);
 }
 
 int
@@ -1395,7 +1407,7 @@ vlistInqVarXYZ(int vlistID, int varID)
   const vlist_t *vlistptr = vlist_to_pointer(vlistID);
   vlistPtrCheckVarID(__func__, vlistptr, varID);
 
-  return vlistptr->vars[varID].xyz;
+  return xyzStorVals[vlistptr->vars[varID].xyz];
 }
 
 int
