@@ -634,7 +634,7 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
           FAIL_ON_GRIB_ERROR(grib_get_long, gh, "projectionCenterFlag", &lpar);
           grid->lcc.projflag  = (int) lpar;
           FAIL_ON_GRIB_ERROR(grib_get_long, gh, "scanningMode", &lpar);
-          grid->lcc.scanflag  = (int) lpar;
+          grid->lcc.scanflag  = (short) lpar;
         }
 
       grid->x.flag = 0;
