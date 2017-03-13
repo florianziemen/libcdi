@@ -27,6 +27,7 @@ enum
 
 enum
 {
+  VLIST_VAR_PACK_DBL_MISSVAL,
   vlistvar_ndbls = 1,
 };
 
@@ -66,7 +67,7 @@ vlistVarPack(vlist_t *p, int varID, char *buf, int size, int *position, void *co
   int nlevs = var->levinfo ? zaxisInqSize(var->zaxisID) : 0;
   tempbuf[VLISTVAR_PACK_INT_IDX_NLEVS] = nlevs;
   tempbuf[VLISTVAR_PACK_INT_IDX_IORANK] = var->iorank;
-  dtempbuf[0] = var->missval;
+  dtempbuf[VLIST_VAR_PACK_DBL_MISSVAL] = var->missval;
   serializePack(tempbuf, vlistvarNint, CDI_DATATYPE_INT, buf, size, position, context);
   serializePack(dtempbuf, vlistvar_ndbls, CDI_DATATYPE_FLT64, buf, size, position, context);
   if (nlevs)
@@ -90,6 +91,7 @@ vlistVarPack(vlist_t *p, int varID, char *buf, int size, int *position, void *co
 void
 vlistVarUnpack(int vlistID, char *buf, int size, int *position, int originNamespace, void *context)
 {
+#define adaptKey(key) (namespaceAdaptKey((key), originNamespace))
   double dtempbuf[vlistvar_ndbls];
   int tempbuf[vlistvarNint];
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
@@ -100,16 +102,15 @@ vlistVarUnpack(int vlistID, char *buf, int size, int *position, int originNamesp
   /* NOTE: Tile sets  currently not supported!!! */
   /* ------------------------------------------- */
 
-  int newvar = vlistDefVar(vlistID, namespaceAdaptKey(tempbuf[VLISTVAR_PACK_INT_IDX_GRIDID], originNamespace),
-                           namespaceAdaptKey(tempbuf[VLISTVAR_PACK_INT_IDX_ZAXISID], originNamespace),
-                           tempbuf[VLISTVAR_PACK_INT_IDX_TIMETYPE]);
+  int newvar = vlistDefVar(vlistID, adaptKey(tempbuf[VLISTVAR_PACK_INT_IDX_GRIDID]),
+                           adaptKey(tempbuf[VLISTVAR_PACK_INT_IDX_ZAXISID]), tempbuf[VLISTVAR_PACK_INT_IDX_TIMETYPE]);
   vlistDefVarDatatype(vlistID, newvar, tempbuf[VLISTVAR_PACK_INT_IDX_DATATYPE]);
-  vlistDefVarInstitut(vlistID, newvar, namespaceAdaptKey(tempbuf[VLISTVAR_PACK_INT_IDX_INSTID], originNamespace));
-  vlistDefVarModel(vlistID, newvar, namespaceAdaptKey(tempbuf[VLISTVAR_PACK_INT_IDX_MODELID], originNamespace));
+  vlistDefVarInstitut(vlistID, newvar, adaptKey(tempbuf[VLISTVAR_PACK_INT_IDX_INSTID]));
+  vlistDefVarModel(vlistID, newvar, adaptKey(tempbuf[VLISTVAR_PACK_INT_IDX_MODELID]));
   vlistDefVarTable(vlistID, newvar, tempbuf[VLISTVAR_PACK_INT_IDX_TABLEID]);
   // FIXME: changing the table might change the param code
   vlistDefVarParam(vlistID, newvar, tempbuf[VLISTVAR_PACK_INT_IDX_PARAM]);
-  if (tempbuf[VLISTVAR_PACK_INT_IDX_MISSVALUSED]) vlistDefVarMissval(vlistID, newvar, dtempbuf[0]);
+  if (tempbuf[VLISTVAR_PACK_INT_IDX_MISSVALUSED]) vlistDefVarMissval(vlistID, newvar, dtempbuf[VLIST_VAR_PACK_DBL_MISSVAL]);
   vlistDefVarCompType(vlistID, newvar, tempbuf[VLISTVAR_PACK_INT_IDX_COMPTYPE]);
   vlistDefVarCompLevel(vlistID, newvar, tempbuf[VLISTVAR_PACK_INT_IDX_COMPLEVEL]);
   const int nlevs = tempbuf[VLISTVAR_PACK_INT_IDX_NLEVS];
@@ -138,6 +139,7 @@ vlistVarUnpack(int vlistID, char *buf, int size, int *position, int originNamesp
   serializeKeysUnpack(buf, size, position, &var->keys, context);
 
   cdiAttsUnpack(vlistID, newvar, buf, size, position, context);
+#undef adaptKey
 }
 
 /*
