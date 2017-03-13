@@ -46,8 +46,6 @@ tstepsNewEntry(stream_t *streamptr)
   tsteps_t *curTstep = &streamptr->tsteps[tsID];
   tstepsInitEntry(curTstep);
 
-  curTstep->taxis.used = true;
-
   return tsID;
 }
 
@@ -67,7 +65,6 @@ cdiCreateTimesteps(stream_t *streamptr)
     {
       tsteps_t *curTstep = &streamptr->tsteps[tsID];
       tstepsInitEntry(curTstep);
-      curTstep->taxis.used = true;
     }
 }
 /*
