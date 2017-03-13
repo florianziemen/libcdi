@@ -14,27 +14,29 @@ vlistvarInitEntry(int vlistID, int varID)
 {
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
+  vlistptr->vars[varID].flag = false;
   vlistptr->vars[varID].lvalidrange = false;
-  vlistptr->vars[varID].fvarID = varID;
-  vlistptr->vars[varID].mvarID = varID;
-  vlistptr->vars[varID].flag = 0;
-  vlistptr->vars[varID].param = 0;
-  vlistptr->vars[varID].datatype = CDI_UNDEFID;
-  vlistptr->vars[varID].timetype = CDI_UNDEFID;
-  vlistptr->vars[varID].tsteptype = TSTEP_INSTANT;
-  vlistptr->vars[varID].chunktype = CDI_Chunk_Type;
   vlistptr->vars[varID].xyz = 321;
+  vlistptr->vars[varID].mvarID = varID;
+  vlistptr->vars[varID].fvarID = varID;
+  vlistptr->vars[varID].param = 0;
   vlistptr->vars[varID].gridID = CDI_UNDEFID;
   vlistptr->vars[varID].zaxisID = CDI_UNDEFID;
-  vlistptr->vars[varID].subtypeID = CDI_UNDEFID;
+  vlistptr->vars[varID].timetype = CDI_UNDEFID;
+  vlistptr->vars[varID].tsteptype = TSTEP_INSTANT;
+  vlistptr->vars[varID].datatype = CDI_UNDEFID;
   vlistptr->vars[varID].instID = CDI_UNDEFID;
   vlistptr->vars[varID].modelID = CDI_UNDEFID;
   vlistptr->vars[varID].tableID = CDI_UNDEFID;
+  vlistptr->vars[varID].timave = 0;
+  vlistptr->vars[varID].chunktype = CDI_Chunk_Type;
   vlistptr->vars[varID].missvalused = false;
-  vlistptr->vars[varID].missval = CDI_Default_Missval;
-  vlistptr->vars[varID].addoffset = 0.0;
-  vlistptr->vars[varID].scalefactor = 1.0;
   vlistptr->vars[varID].extra = NULL;
+  vlistptr->vars[varID].missval = CDI_Default_Missval;
+  vlistptr->vars[varID].scalefactor = 1.0;
+  vlistptr->vars[varID].addoffset = 0.0;
+  vlistptr->vars[varID].validrange[0] = VALIDMISS;
+  vlistptr->vars[varID].validrange[1] = VALIDMISS;
   vlistptr->vars[varID].levinfo = NULL;
   vlistptr->vars[varID].comptype = CDI_COMPRESS_NONE;
   vlistptr->vars[varID].complevel = 1;
@@ -43,12 +45,11 @@ vlistvarInitEntry(int vlistID, int varID)
   for (int i = 0; i < MAX_KEYS; ++i) vlistptr->vars[varID].keys.value[i].length = 0;
   vlistptr->vars[varID].atts.nalloc = MAX_ATTRIBUTES;
   vlistptr->vars[varID].atts.nelems = 0;
-  vlistptr->vars[varID].validrange[0] = VALIDMISS;
-  vlistptr->vars[varID].validrange[1] = VALIDMISS;
   vlistptr->vars[varID].iorank = CDI_UNDEFID;
+  vlistptr->vars[varID].subtypeID = CDI_UNDEFID;
+  vlistptr->vars[varID].opt_grib_nentries = 0;
   vlistptr->vars[varID].opt_grib_kvpair_size = 0;
   vlistptr->vars[varID].opt_grib_kvpair = NULL;
-  vlistptr->vars[varID].opt_grib_nentries = 0;
 }
 
 static int
