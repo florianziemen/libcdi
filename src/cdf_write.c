@@ -836,7 +836,7 @@ cdfDefVar(stream_t *streamptr, int varID)
 
   int dimorder[3];  // ZYX and ZXY
   vlistInqVarDimorder(vlistID, varID, dimorder);
-  const bool lchunk = (dimorder[0] == 3) ? (gridsize >= 32) : false;
+  const bool lchunk = (gridsize >= 32) && (dimorder[0] == 3);
 
   if (((dimorder[0] > 0) + (dimorder[1] > 0) + (dimorder[2] > 0))
       < ((xid != CDI_UNDEFID) + (yid != CDI_UNDEFID) + (zid != CDI_UNDEFID)))
