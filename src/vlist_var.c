@@ -87,7 +87,6 @@ void
 vlistCheckVarID(const char *caller, int vlistID, int varID)
 {
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  if (vlistptr == NULL) Errorc("vlist undefined!");
 
   if (varID < 0 || varID >= vlistptr->nvars) Errorc("varID %d undefined!", varID);
 
