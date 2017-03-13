@@ -14,6 +14,7 @@ vlistvarInitEntry(int vlistID, int varID)
 {
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
+  vlistptr->vars[varID].lvalidrange = false;
   vlistptr->vars[varID].fvarID = varID;
   vlistptr->vars[varID].mvarID = varID;
   vlistptr->vars[varID].flag = 0;
@@ -39,7 +40,6 @@ vlistvarInitEntry(int vlistID, int varID)
   for (int i = 0; i < MAX_KEYS; ++i) vlistptr->vars[varID].keys.value[i].length = 0;
   vlistptr->vars[varID].atts.nalloc = MAX_ATTRIBUTES;
   vlistptr->vars[varID].atts.nelems = 0;
-  vlistptr->vars[varID].lvalidrange = false;
   vlistptr->vars[varID].validrange[0] = VALIDMISS;
   vlistptr->vars[varID].validrange[1] = VALIDMISS;
   vlistptr->vars[varID].iorank = CDI_UNDEFID;
