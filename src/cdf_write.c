@@ -349,7 +349,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
 
   int chunktype = vlistInqVarChunkType(vlistID, varID);
 
-  vlistInqVarDimorder(vlistID, varID, &dimorder);
+  vlistInqVarDimorder(vlistID, varID, dimorder);
 
   size_t gridsize  = (size_t)(gridInqSize(gridID));
   bool lchunk = (gridsize >= 16);
@@ -1186,7 +1186,7 @@ void cdf_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
   int gridID    = vlistInqVarGrid(vlistID, varID);
   int zaxisID   = vlistInqVarZaxis(vlistID, varID);
   int tsteptype = vlistInqVarTsteptype(vlistID, varID);
-  vlistInqVarDimorder(vlistID, varID, &dimorder);
+  vlistInqVarDimorder(vlistID, varID, dimorder);
 
   if ( gridInqType(gridID) == GRID_TRAJECTORY )
     {

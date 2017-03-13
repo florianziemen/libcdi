@@ -1659,18 +1659,18 @@ int vlistInqVarChunkType(int vlistID, int varID)
 }
 
 static
-int vlistEncodeXyz(int (*dimorder)[3])
+int vlistEncodeXyz(const int dimorder[3])
 {
-  return (*dimorder)[0]*100 + (*dimorder)[1]*10 + (*dimorder)[2];
+  return dimorder[0] * 100 + dimorder[1] * 10 + dimorder[2];
 }
 
 
 static
-void vlistDecodeXyz(int xyz, int (*outDimorder)[3])
+void vlistDecodeXyz(int xyz, int outDimorder[3])
 {
-  (*outDimorder)[0] = xyz/100, xyz -= (*outDimorder)[0]*100;
-  (*outDimorder)[1] = xyz/10, xyz -= (*outDimorder)[1]*10;
-  (*outDimorder)[2] = xyz;
+  outDimorder[0] = xyz/100, xyz -= outDimorder[0]*100;
+  outDimorder[1] = xyz/10, xyz -= outDimorder[1]*10;
+  outDimorder[2] = xyz;
 }
 
 
@@ -1685,7 +1685,7 @@ void  vlistDefVarXYZ(int vlistID, int varID, int xyz)
   /* check xyz dimension order */
   {
     int dimorder[3];
-    vlistDecodeXyz(xyz, &dimorder);
+    vlistDecodeXyz(xyz, dimorder);
     int dimx = 0, dimy = 0, dimz = 0;
     for ( int id = 0; id < 3; ++id )
       {
@@ -1703,7 +1703,7 @@ void  vlistDefVarXYZ(int vlistID, int varID, int xyz)
         if ( dimz == 0 ) for ( int id = 0; id < 3; ++id ) if ( dimorder[id] == 0 ) {dimorder[id] = 3; break;}
         if ( dimy == 0 ) for ( int id = 0; id < 3; ++id ) if ( dimorder[id] == 0 ) {dimorder[id] = 2; break;}
         if ( dimx == 0 ) for ( int id = 0; id < 3; ++id ) if ( dimorder[id] == 0 ) {dimorder[id] = 1; break;}
-        xyz = vlistEncodeXyz(&dimorder);
+        xyz = vlistEncodeXyz(dimorder);
       }
   }
 
@@ -1714,7 +1714,7 @@ void  vlistDefVarXYZ(int vlistID, int varID, int xyz)
 }
 
 
-void vlistInqVarDimorder(int vlistID, int varID, int (*outDimorder)[3])
+void vlistInqVarDimorder(int vlistID, int varID, int outDimorder[3])
 {
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
