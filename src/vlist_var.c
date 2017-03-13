@@ -27,6 +27,7 @@ void vlistvarInitEntry(int vlistID, int varID)
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
   vlistptr->vars[varID].lvalidrange   = false;
+  vlistptr->vars[varID].missvalused   = false;
   vlistptr->vars[varID].xyz           = 321;
   vlistptr->vars[varID].flag          = 0;
   vlistptr->vars[varID].mvarID        = varID;
@@ -44,7 +45,6 @@ void vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].typeOfGeneratingProcess   = 0;
   vlistptr->vars[varID].productDefinitionTemplate = -1;
   vlistptr->vars[varID].chunktype     = cdiChunkType;
-  vlistptr->vars[varID].missvalused   = FALSE;
   vlistptr->vars[varID].name          = NULL;
   vlistptr->vars[varID].longname      = NULL;
   vlistptr->vars[varID].stdname       = NULL;
@@ -804,7 +804,7 @@ void vlistDefVarDatatype(int vlistID, int varID, int datatype)
     {
       vlistptr->vars[varID].datatype = datatype;
 
-      if ( vlistptr->vars[varID].missvalused == FALSE )
+      if ( vlistptr->vars[varID].missvalused == false )
         switch (datatype)
           {
           case CDI_DATATYPE_INT8:   vlistptr->vars[varID].missval = -SCHAR_MAX; break;
@@ -1064,7 +1064,7 @@ void vlistDefVarMissval(int vlistID, int varID, double missval)
   vlistPtrCheckVarID(__func__, vlistptr, varID);
 
   vlistptr->vars[varID].missval = missval;
-  vlistptr->vars[varID].missvalused = TRUE;
+  vlistptr->vars[varID].missvalused = true;
 }
 
 /*
