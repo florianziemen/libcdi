@@ -174,9 +174,7 @@ void grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
   int tsID      = streamptr->curTsID;
   int date      = streamptr->tsteps[tsID].taxis.vdate;
   int time      = streamptr->tsteps[tsID].taxis.vtime;
-  int numavg    = 0;
-  if ( vlistInqVarTimave(vlistID, varID) )
-    numavg = streamptr->tsteps[tsID].taxis.numavg;
+  int numavg    = (tsteptype == TSTEP_AVG) ? streamptr->tsteps[tsID].taxis.numavg : 0;
 
   if ( CDI_Debug )
     Message("gridID = %d zaxisID = %d", gridID, zaxisID);
