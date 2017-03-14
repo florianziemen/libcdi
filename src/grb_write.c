@@ -117,23 +117,19 @@ void grbCopyRecord(stream_t * streamptr2, stream_t * streamptr1)
 
   if ( filetype == CDI_FILETYPE_GRB )
     {
-      extern int GribChangeParameterIdentification;
-      if ( GribChangeParameterIdentification == 1 )
+      if ( cdiGribChangeParameterID.active )
         {
-          extern int GribChangeParID_code;
-          extern int GribChangeParID_ltype;
-          extern int GribChangeParID_lev;
           // Even if you are stream-copy records you might need to change a bit of grib-header !
 #if defined HAVE_LIBCGRIBEX
           void *gh = cgribex_handle_new_from_meassage((void*) gribbuffer, recsize);
-          cgribexChangeParameterIdentification(gh, GribChangeParID_code, GribChangeParID_ltype, GribChangeParID_lev);
+          cgribexChangeParameterIdentification(gh, cdiGribChangeParameterID.code, cdiGribChangeParameterID.ltype, cdiGribChangeParameterID.lev);
           cgribex_handle_delete(gh);
 #elif defined HAVE_LIBGRIB_API
           void *gh = (void*)grib_handle_new_from_message(NULL, (void*) gribbuffer, recsize);
-          gribapiChangeParameterIdentification(gh, GribChangeParID_code, GribChangeParID_ltype, GribChangeParID_lev);
+          gribapiChangeParameterIdentification(gh, cdiGribChangeParameterID.code, cdiGribChangeParameterID.ltype, cdiGribChangeParameterID.lev);
           grib_handle_delete(gh);
 #endif
-          GribChangeParameterIdentification = -1; // after grib attributes have been changed turn it off again
+          cdiGribChangeParameterID.active = false; // after grib attributes have been changed turn it off again
         }
     }
 

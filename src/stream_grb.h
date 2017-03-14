@@ -24,6 +24,16 @@ int   grib2ltypeToZaxisType(int grib_ltype);
 int   zaxisTypeToGrib1ltype(int zaxistype);
 int   zaxisTypeToGrib2ltype(int zaxistype);
 
+struct cdiGribParamChange
+{
+  int code, ltype, lev;
+  bool active;
+};
+
+extern struct cdiGribParamChange cdiGribChangeParameterID;
+
+void streamGrbChangeParameterIdentification(int code, int ltype, int lev);
+
 #endif  /* _STREAM_GRB_H */
 /*
  * Local Variables:

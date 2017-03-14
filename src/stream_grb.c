@@ -12,11 +12,8 @@
 
 
 // Regarding operation to change parameter identification:
-// -1: don't change; 1: change (GribChangeParID_code, GribChangeParID_ltype, GribChangeParID_lev)
-int GribChangeParameterIdentification = -1;
-int GribChangeParID_code;
-int GribChangeParID_ltype;
-int GribChangeParID_lev;
+// change if cdiGribChangeParameterID.active
+struct cdiGribParamChange cdiGribChangeParameterID;
 
 // Used only in CDO
 void streamGrbChangeParameterIdentification(int code, int ltype, int lev)
@@ -24,12 +21,12 @@ void streamGrbChangeParameterIdentification(int code, int ltype, int lev)
   // NOTE this is a "PROXY" function for gribapiChangeParameterIdentification();
   // This just sets the globals. There are probably better solutions to this.
   // The parameter change is done by function  gribapiChangeParameterIdentification() in stream_gribapi.c
-  GribChangeParameterIdentification  = 1;
-  // Setting this control variable to 1 will cause calling fnc. gribapiChangeParameterIdentification later.
-  // After grib attributes have been changed this variable goes to -1.
-  GribChangeParID_code = code;
-  GribChangeParID_ltype = ltype;
-  GribChangeParID_lev = lev;
+  // Setting this control variable to true will cause calling fnc. gribapiChangeParameterIdentification later.
+  // After grib attributes have been changed this variable goes to false.
+  cdiGribChangeParameterID.active = true;
+  cdiGribChangeParameterID.code = code;
+  cdiGribChangeParameterID.ltype = ltype;
+  cdiGribChangeParameterID.lev = lev;
 }
 
 
