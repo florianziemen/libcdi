@@ -327,7 +327,6 @@ int cdfDefVar(stream_t *streamptr, int varID)
   size_t iax = 0;
   char axis[5];
   int ensID, ensCount, forecast_type;
-  int retval;
 
   int fileID  = streamptr->fileID;
 
