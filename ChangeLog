@@ -4,6 +4,7 @@
 
 2017-03-14  Uwe Schulzweida
 
+	* set chunk size of time axis to 512
 	* streamOpenAppend: set defmiss = true (Needed for NetCDF4)
 
 2017-03-08  Uwe Schulzweida

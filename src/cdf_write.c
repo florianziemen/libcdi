@@ -508,10 +508,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
 
 #if  defined  (HAVE_NETCDF4)
   if ( lchunk && (streamptr->filetype == CDI_FILETYPE_NC4 || streamptr->filetype == CDI_FILETYPE_NC4C) )
-    {
-      retval = nc_def_var_chunking(fileID, ncvarid, NC_CHUNKED, chunks);
-      if ( retval ) Error("nc_def_var_chunking failed, status = %d", retval);
-    }
+    cdf_def_var_chunking(fileID, ncvarid, NC_CHUNKED, chunks);
 #endif
 
   if ( streamptr->comptype == CDI_COMPRESS_ZIP )

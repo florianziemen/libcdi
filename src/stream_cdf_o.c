@@ -65,12 +65,11 @@ void cdfDefTimeValue(stream_t *streamptr, int tsID)
       streamptr->ncmode = 2;
     }
 
-  size_t index = (size_t)tsID;
-
   double timevalue = cdiEncodeTimeval(taxis->vdate, taxis->vtime, &streamptr->tsteps[0].taxis);
   if ( CDI_Debug ) Message("tsID = %d  timevalue = %f", tsID, timevalue);
 
   int ncvarid = streamptr->basetime.ncvarid;
+  size_t index = (size_t)tsID;
   cdf_put_var1_double(fileID, ncvarid, &index, &timevalue);
 
   if ( taxis->has_bounds )
@@ -94,10 +93,6 @@ void cdfDefTimeValue(stream_t *streamptr, int tsID)
       timevalue = taxis->fc_period;
       cdf_put_var1_double(fileID, ncvarid, &index, &timevalue);
     }
-
-  /*
-printf("fileID = %d %d %d %f\n", fileID, time_varid, index, timevalue);
-  */
 }
 
 static
@@ -119,7 +114,7 @@ int cdfDefTimeBounds(int fileID, int nctimevarid, int nctimedimid, const char *t
   if ( taxis->climatology )
     {
       static const char climatology_bndsName[] = "climatology_bnds",
-        climatology_bndsAttName[] = "climatology";
+                        climatology_bndsAttName[] = "climatology";
       bndsAttName = climatology_bndsAttName;
       bndsAttValLen = sizeof (climatology_bndsName) - 1;
       bndsAttVal = climatology_bndsName;
@@ -253,6 +248,14 @@ void cdfDefTime(stream_t* streamptr)
 
   streamptr->basetime.ncvarid = time_varid;
 
+#if  defined  (HAVE_NETCDF4)
+  if ( streamptr->filetype == CDI_FILETYPE_NC4 || streamptr->filetype == CDI_FILETYPE_NC4C )
+    {
+      size_t chunk = 512;
+      cdf_def_var_chunking(fileID, time_varid, NC_CHUNKED, &chunk);
+    }
+#endif
+
   {
     static const char timeStr[] = "time";
     cdf_put_att_text(fileID, time_varid, "standard_name", sizeof(timeStr) - 1, timeStr);
@@ -293,9 +296,7 @@ void cdfDefTime(stream_t* streamptr)
   if ( taxis->type == TAXIS_FORECAST )
     {
       int leadtimeid;
-
       cdf_def_var(fileID, "leadtime", xtype, 1, &time_dimid, &leadtimeid);
-
       streamptr->basetime.leadtimeid = leadtimeid;
 
       {
@@ -821,7 +822,7 @@ void cdfGridCompress(int fileID, int ncvarid, int gridsize, int filetype, int co
 #if  defined  (HAVE_NETCDF4)
   if ( gridsize > 1 && comptype == CDI_COMPRESS_ZIP && (filetype == CDI_FILETYPE_NC4 || filetype == CDI_FILETYPE_NC4C) )
     {
-      nc_def_var_chunking(fileID, ncvarid, NC_CHUNKED, NULL);
+      cdf_def_var_chunking(fileID, ncvarid, NC_CHUNKED, NULL);
       cdfDefVarDeflate(fileID, ncvarid, 1);
     }
 #endif
