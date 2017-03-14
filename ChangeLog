@@ -1,6 +1,10 @@
-2017-03-14  Uwe Schulzweida
+2017-03-24  Uwe Schulzweida
 
 	* Version 1.8.1 released
+
+2017-03-14  Uwe Schulzweida
+
+	* streamOpenAppend: set defmiss = true (Needed for NetCDF4)
 
 2017-03-08  Uwe Schulzweida
 

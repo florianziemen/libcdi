@@ -637,6 +637,11 @@ int streamOpenA(const char *filename, const char *filemode, int filetype)
   if ( status < 0 ) return status;
   vlist_t *vlistptr = vlist_to_pointer(streamptr->vlistID);
   vlistptr->ntsteps = (int)cdiInqTimeSize(streamID);
+
+  // Needed for NetCDF4
+  for ( int varID = 0; varID < vlistptr->nvars; ++varID )
+    streamptr->vars[varID].defmiss = true;
+
   if ( !strcmp(filemode, "r") ) cdiVlistMakeImmutable(streamptr->vlistID);
 
   {
