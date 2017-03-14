@@ -85,6 +85,8 @@ void cdf_inq_attlen (int ncid, int varid, const char *name, size_t *lenp);
 void cdf_inq_attname(int ncid, int varid, int attnum, char *name);
 void cdf_inq_attid  (int ncid, int varid, const char *name, int *attnump);
 
+void cdf_def_var_chunking(int ncid, int varid, int storage, const size_t *chunksizesp);
+
 typedef int (*cdi_nc__create_funcp)(const char *path, int cmode,
                                     size_t initialsz, size_t *chunksizehintp,
                                     int *ncidp);
