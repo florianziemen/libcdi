@@ -1478,7 +1478,7 @@ taxisGetPackSize(void *p, void *context)
     + (taxisptr->name ?
        serializeGetSize((int)strlen(taxisptr->name), CDI_DATATYPE_TXT, context) : 0)
     + (taxisptr->longname ?
-       serializeGetSize((int)strlen(taxisptr->longname), CDI_DATATYPE_TXT, context) : 0);
+       serializeGetSize((int)strlen(taxisptr->longname), CDI_DATATYPE_TXT, context) : 0)
     + (taxisptr->units ?
        serializeGetSize((int)strlen(taxisptr->units), CDI_DATATYPE_TXT, context) : 0);
   return packBufferSize;
