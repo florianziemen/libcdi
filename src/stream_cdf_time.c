@@ -166,7 +166,7 @@ cdfDefTime(stream_t *streamptr)
 #ifdef HAVE_NETCDF4
   if (streamptr->filetype == CDI_FILETYPE_NC4 || streamptr->filetype == CDI_FILETYPE_NC4C)
     {
-      const size_t chunk = 512;
+      static const size_t chunk = 512;
       cdf_def_var_chunking(fileID, time_varid, NC_CHUNKED, &chunk);
     }
 #endif
