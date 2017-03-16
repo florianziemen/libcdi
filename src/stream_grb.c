@@ -275,15 +275,11 @@ static
 int grbScanTimestep(stream_t * streamptr)
 {
   int status = CDI_EUFTYPE;
-  int filetype;
-
-  filetype  = streamptr->filetype;
+  int filetype  = streamptr->filetype;
 
 #if  defined  (HAVE_LIBCGRIBEX)
   if ( filetype == CDI_FILETYPE_GRB )
-    {
-      status = cgribexScanTimestep(streamptr);
-    }
+    status = cgribexScanTimestep(streamptr);
   else
 #endif
 #ifdef HAVE_LIBGRIB_API
@@ -299,17 +295,12 @@ int grbScanTimestep(stream_t * streamptr)
 #if  defined  (HAVE_LIBGRIB)
 int grbInqContents(stream_t * streamptr)
 {
-  int fileID;
-  int status = 0;
-
-  fileID = streamptr->fileID;
-
   streamptr->curTsID = 0;
 
-  status = grbScanTimestep1(streamptr);
-
+  int status = grbScanTimestep1(streamptr);
   if ( status == 0 && streamptr->ntsteps == -1 ) status = grbScanTimestep2(streamptr);
 
+  int fileID = streamptr->fileID;
   fileSetPos(fileID, 0, SEEK_SET);
 
   return status;
@@ -318,15 +309,13 @@ int grbInqContents(stream_t * streamptr)
 
 int grbInqTimestep(stream_t * streamptr, int tsID)
 {
-  int ntsteps, nrecs;
-
   if ( tsID == 0 && streamptr->rtsteps == 0 )
     Error("Call to cdiInqContents missing!");
 
   if ( CDI_Debug )
     Message("tsid = %d rtsteps = %d", tsID, streamptr->rtsteps);
 
-  ntsteps = CDI_UNDEFID;
+  int ntsteps = CDI_UNDEFID;
   while ( (tsID + 1) > streamptr->rtsteps && ntsteps == CDI_UNDEFID )
     {
       ntsteps = grbScanTimestep(streamptr);
@@ -336,6 +325,8 @@ int grbInqTimestep(stream_t * streamptr, int tsID)
 	  break;
 	}
     }
+
+  int nrecs;
 
   if ( tsID >= streamptr->ntsteps && streamptr->ntsteps != CDI_UNDEFID )
     {
