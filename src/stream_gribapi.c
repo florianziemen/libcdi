@@ -2677,6 +2677,13 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
       GRIB_CHECK(my_grib_set_double(gh, "missingValue", vlistInqVarMissval(vlistID, varID)), 0);
     }
 
+  if ( cdiGribChangeModeUvRelativeToGrid.active )
+    {
+      // this will overrule/change the UvRelativeToGrid flag;
+      // typically when the wind is rotated with respect to north pole
+      GRIB_CHECK(my_grib_set_long(gh, "uvRelativeToGrid", (long) cdiGribChangeModeUvRelativeToGrid.mode), 0);
+    }
+
   GRIB_CHECK(grib_set_double_array(gh, "values", data, (size_t)datasize), 0);
 
   /* get the size of coded message  */

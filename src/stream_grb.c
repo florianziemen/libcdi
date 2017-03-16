@@ -15,7 +15,7 @@
 // change if cdiGribChangeParameterID.active
 struct cdiGribParamChange cdiGribChangeParameterID;
 
-// Used only in CDO
+// Used only for CDO module Selmulti
 void streamGrbChangeParameterIdentification(int code, int ltype, int lev)
 {
   // NOTE this is a "PROXY" function for gribapiChangeParameterIdentification();
@@ -27,6 +27,15 @@ void streamGrbChangeParameterIdentification(int code, int ltype, int lev)
   cdiGribChangeParameterID.code = code;
   cdiGribChangeParameterID.ltype = ltype;
   cdiGribChangeParameterID.lev = lev;
+}
+
+struct cdiGribModeChange cdiGribChangeModeUvRelativeToGrid;
+
+// Used only for CDO module WindTrans
+void streamGrbChangeModeUvRelativeToGrid(int mode)
+{
+  cdiGribChangeModeUvRelativeToGrid.active = true;
+  cdiGribChangeModeUvRelativeToGrid.mode = (mode > 0);
 }
 
 

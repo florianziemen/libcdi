@@ -30,9 +30,17 @@ struct cdiGribParamChange
   bool active;
 };
 
+struct cdiGribModeChange
+{
+  bool mode;
+  bool active;
+};
+
 extern struct cdiGribParamChange cdiGribChangeParameterID;
+extern struct cdiGribModeChange cdiGribChangeModeUvRelativeToGrid;
 
 void streamGrbChangeParameterIdentification(int code, int ltype, int lev);
+void streamGrbChangeModeUvRelativeToGrid(int mode);
 
 #endif  /* _STREAM_GRB_H */
 /*

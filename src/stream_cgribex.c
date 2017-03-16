@@ -1831,6 +1831,18 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
 	break;
       }
     }
+
+
+  if ( cdiGribChangeModeUvRelativeToGrid.active )
+    {
+      // this will overrule/change the UvRelativeToGrid flag;
+      // typically when the wind is rotated with respect to north pole
+      bool uvRelativeToGrid = bit_get(ISEC2_ResFlag, 3);
+      if      ( uvRelativeToGrid && !cdiGribChangeModeUvRelativeToGrid.mode )
+        ISEC2_ResFlag -= 8;
+      else if ( !uvRelativeToGrid && cdiGribChangeModeUvRelativeToGrid.mode )
+        ISEC2_ResFlag += 8;
+    }
 }
 
 static
