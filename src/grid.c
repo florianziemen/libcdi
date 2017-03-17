@@ -4573,7 +4573,7 @@ gridCompareSearch(int id, void *res, void *data)
 {
   struct gridCompareSearchState *state = (struct gridCompareSearchState*)data;
   (void)res;
-  if ( gridCompare(id, state->queryKey, false) == false )
+  if ( gridCompare(id, state->queryKey, true) == false )
     {
       state->resIDValue = id;
       return CDI_APPLY_STOP;

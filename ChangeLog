@@ -2,6 +2,10 @@
 
 	* Version 1.8.1 released
 
+2017-03-17  Uwe Schulzweida
+
+	* gridCompareSearch: change 3rd parameter of gridCompare() to true.
+
 2017-03-14  Uwe Schulzweida
 
 	* set chunk size of time axis to 512
