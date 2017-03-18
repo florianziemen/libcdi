@@ -1913,8 +1913,9 @@ void grid_check_cyclic(grid_t *gridptr)
   gridptr->isCyclic = 0;
   enum { numVertices = 4 };
   size_t xsize = gridptr->x.size >= 0 ? (size_t)gridptr->x.size : 0,
-    ysize = gridptr->y.size >= 0 ? (size_t)gridptr->y.size : 0;
+         ysize = gridptr->y.size >= 0 ? (size_t)gridptr->y.size : 0;
   const double *xvals = gridptr->vtable->inqXValsPtr(gridptr),
+               *yvals = gridptr->vtable->inqYValsPtr(gridptr),
     (*xbounds)[numVertices]
     = (const double (*)[numVertices])gridptr->vtable->inqXBoundsPtr(gridptr);
 
@@ -1934,18 +1935,26 @@ void grid_check_cyclic(grid_t *gridptr)
     }
   else if ( gridptr->type == GRID_CURVILINEAR )
     {
-      if ( xvals && xsize > 1 )
+      bool lcheck = true;
+      if ( yvals && xvals )
+        {
+          if ( (fabs(yvals[0] - yvals[xsize-1]) > fabs(yvals[0] - yvals[xsize*ysize-xsize])) &&
+               (fabs(yvals[xsize*ysize-xsize] - yvals[xsize*ysize-1]) > fabs(yvals[xsize-1] - yvals[xsize*ysize-1])) )
+            lcheck = false;
+        }
+      else lcheck = false;
+
+      if ( lcheck && xvals && xsize > 1 )
         {
           size_t nc = 0;
           for ( size_t j = 0; j < ysize; ++j )
             {
               size_t i1 = j*xsize,
-                i2 = j*xsize+1,
-                in = j*xsize+(xsize-1);
+                     i2 = j*xsize+1,
+                     in = j*xsize+(xsize-1);
               double val1 = xvals[i1],
-                val2 = xvals[i2],
-                valn = xvals[in];
-
+                     val2 = xvals[i2],
+                     valn = xvals[in];
               double xinc = fabs(val2-val1);
 
 	      if ( val1 <    1 && valn > 300 ) val1 += 360;
@@ -1961,13 +1970,13 @@ void grid_check_cyclic(grid_t *gridptr)
           gridptr->isCyclic = nc > ysize/2;
         }
 
-      if ( xbounds && xsize > 1 )
+      if ( lcheck && xbounds && xsize > 1 )
 	{
           bool isCyclic = true;
 	  for ( size_t j = 0; j < ysize; ++j )
 	    {
 	      size_t i1 = j*xsize,
-                i2 = j*xsize+(xsize-1);
+                     i2 = j*xsize+(xsize-1);
 	      for (size_t k1 = 0; k1 < numVertices; ++k1 )
 		{
 		  double val1 = xbounds[i1][k1];
