@@ -108,12 +108,21 @@ struct grid_t {
                                    */
   bool    lcomplex;
   bool    hasdims;
-  /* Some models deliver wind U,V relative to the grid-cell */
-  bool uvRelativeToGrid;
+  bool uvRelativeToGrid;  /* Some models deliver wind U,V relative to the grid-cell */
   struct gridaxis_t x;
   struct gridaxis_t y;
   const struct gridVirtTable *vtable;
   cdi_atts_t atts;
+  long iScansNegatively;
+  long jScansPositively;
+  long jPointsAreConsecutive;
+  int  scanningMode;
+  /* scanningMode  = 128 * iScansNegatively + 64 * jScansPositively + 32 * jPointsAreConsecutive;
+               64  = 128 * 0                + 64 *        1         + 32 * 0
+               00  = 128 * 0                + 64 *        0         + 32 * 0
+               96  = 128 * 0                + 64 *        1         + 32 * 1
+     Default / implicit scanning mode is 64:
+                        i and j scan positively, i points are consecutive (row-major)        */
 };
 
 

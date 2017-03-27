@@ -133,6 +133,71 @@ void grbCopyRecord(stream_t * streamptr2, stream_t * streamptr1)
         }
     }
 
+#ifdef HIRLAM_EXTENSIONS
+  // Even if you are stream-copy records you might need to change a bit of grib-header !
+
+  if ( cdiGribDataScanningMode.active )
+    // allowed modes: <0, 64, 96>; Default is 64
+    // This will overrule the old scanning mode of the given grid
+  {
+    grib_handle *gh = NULL;
+    gh = grib_handle_new_from_message(NULL, (void *) gribbuffer, recsize);
+
+    int scanModeIN = gribapiGetScanningMode(gh);
+
+    grib_handle_delete(gh);
+
+    if (cdiDebugExt>=20) Message("Change GribDataScanningMode => %d (scanModeIN = %d)", cdiGribDataScanningMode.value, scanModeIN);
+
+    if (scanModeIN != cdiGribDataScanningMode.value)
+    {
+        int gridID;
+        int varID, levelID;
+        int vlistID;
+        //int zip;
+        int gridsize, nmiss = 0;
+
+        vlistID = streamptr1->vlistID;
+        varID   = streamptr1->tsteps[tsID].records[recID].varID;
+        levelID   = streamptr1->tsteps[tsID].records[recID].levelID;
+        //gribbuffer = (unsigned char *) streamptr->record->buffer;
+        // allocate above ..
+        gridID   = vlistInqVarGrid(vlistID, varID);
+        gridsize = gridInqSize(gridID);
+
+        gridsize = vlistGridsizeMax(vlistID);
+        if ( vlistNumber(vlistID) != CDI_REAL ) gridsize *= 2;
+        double * data = (double *) malloc(gridsize*sizeof(double));
+        //int missval = vlistInqVarMissval(vlistID, varID);
+
+        //streamptr->numvals += gridsize;
+
+        // memtype: MEMTYPE_FLOAT or MEMTYPE_DOUBLE
+        //int statusDC = grbDecode(filetype, MEMTYPE_DOUBLE, gribbuffer, recsize, data, gridsize, streamptr1->unreduced, &nmiss, missval, vlistID, varID);
+        //int grbDecode(int filetype, int memtype, void *gribbuffer, int gribsize, void *data, size_t datasize,
+        //              int unreduced, int *nmiss, double missval, int vlistID, int varID);
+
+        //streamptr1->tsteps[tsID].records[recID].zip = zip;
+        //gribapiSetScanningMode(gh, cdoGribDataScanningMode);  // T.B.D. this will be done by grbDecode..
+
+        //varID   = streamptr1->record->varID;
+        //levelID = streamptr1->record->levelID;
+
+        if (cdiDebugExt>=20) Message(" processing varID %d; levelID %d",varID,levelID);
+
+        grb_write_var_slice(streamptr2, varID, levelID, MEMTYPE_DOUBLE, (const void *) data, nmiss);
+        //grb_write_var_slice(streamptr, varID, levelID, memtype, ((double*)data)+levelID*gridsize, nmiss);
+
+        //grb_write_var(streamptr2, varID, MEMTYPE_DOUBLE, data, nmiss);
+        //grb_write_var(stream_t *streamptr, int varID, int memtype, const void *data, int nmiss)
+        //grb_write_var_slice(streamptr2, varID, levelID, MEMTYPE_DOUBLE, (const void *) data, nmiss);
+
+        free(data);
+        free(gribbuffer);
+    }
+  }
+#endif // HIRLAM_EXTENSIONS
+
   if ( filetype == CDI_FILETYPE_GRB )
     {
       size_t unzipsize;

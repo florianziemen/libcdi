@@ -158,6 +158,16 @@ void grid_init(grid_t *gridptr)
   gridptr->atts.nalloc   = MAX_ATTRIBUTES;
   gridptr->atts.nelems   = 0;
   gridptr->uvRelativeToGrid      = 0;   // Some models deliver wind U,V relative to the grid-cell
+  gridptr->iScansNegatively      = 0;
+  gridptr->jScansPositively      = 1;
+  gridptr->jPointsAreConsecutive = 0;
+  gridptr->scanningMode          = 128*gridptr->iScansNegatively + 64*gridptr->jScansPositively + 32*gridptr->jPointsAreConsecutive;
+  /* scanningMode  = 128 * iScansNegatively + 64 * jScansPositively + 32 * jPointsAreConsecutive;
+               64  = 128 * 0                + 64 *        1         + 32 * 0
+               00  = 128 * 0                + 64 *        0         + 32 * 0
+               96  = 128 * 0                + 64 *        1         + 32 * 1
+     Default / implicit scanning mode is 64:
+                        i and j scan positively, i points are consecutive (row-major)        */
 }
 
 
@@ -2227,10 +2237,15 @@ bool gridCompare(int gridID, const grid_t *grid, bool coord_compare)
 	}
     }
 
-  if ( (grid->uvRelativeToGrid != gridInqUvRelativeToGrid(gridID)) )
+  if ( (grid->scanningMode != gridInqScanningMode(gridID)) || (grid->uvRelativeToGrid != gridInqUvRelativeToGrid(gridID)) )
     {
       // often grid definition may differ in UV-relativeToGrid
       differ = 1;
+#ifdef HIRLAM_EXTENSIONS
+      if ( cdiDebugExt>=200 )
+        printf("gridCompare(gridID=%d): Differs: grid.scanningMode [%d] != gridInqScanningMode(gridID) [%d] or  grid.uvRelativeToGrid [%ld] != gridInqUvRelativeToGrid(gridID) [%d]\n",
+               gridID, grid->scanningMode, gridInqScanningMode(gridID), grid->uvRelativeToGrid, gridInqUvRelativeToGrid(gridID) );
+#endif // HIRLAM_EXTENSIONS
     }
   return differ;
 }
@@ -2293,6 +2308,7 @@ int gridCompareP(void *gridptr1, void *gridptr2)
   if ( IS_NOT_EQUAL(g1->lcc.xinc      , g2->lcc.xinc)      ) return differ;
   if ( IS_NOT_EQUAL(g1->lcc.yinc      , g2->lcc.yinc)      ) return differ;
   if ( IS_NOT_EQUAL(g1->uvRelativeToGrid     , g2->uvRelativeToGrid)     ) return differ;
+  if ( IS_NOT_EQUAL(g1->scanningMode         , g2->scanningMode)         ) return differ;
 
   const double *restrict g1_xvals = g1->vtable->inqXValsPtr(g1),
                *restrict g2_xvals = g2->vtable->inqXValsPtr(g2);
@@ -2632,6 +2648,10 @@ int gridGenerate(const grid_t *grid)
   gridptr->number = grid->number;
   gridptr->position = grid->position;
   gridptr->uvRelativeToGrid       = grid->uvRelativeToGrid;
+  gridptr->scanningMode           = grid->scanningMode;
+  gridptr->iScansNegatively       = grid->iScansNegatively;
+  gridptr->jScansPositively       = grid->jScansPositively;
+  gridptr->jPointsAreConsecutive  = grid->jPointsAreConsecutive;
   memcpy(gridptr->uuid, grid->uuid, CDI_UUID_SIZE);
   if ( gridtype == GRID_UNSTRUCTURED && grid->reference )
     gridDefReference(gridID, grid->reference);
@@ -3665,7 +3685,7 @@ void gridDefParamLCC(int gridID, double originLon, double originLat, double lonP
     @Item  yinc      Y-direction grid lenght in meter.
     @Item  projflag  Projection centre flag.
     @Item  scanflag  Scanning mode flag.
- 
+
 @Description
 The function @func{gridInqParamLCC} returns the parameter of a Lambert Conformal Conic grid.
 
@@ -3962,6 +3982,31 @@ int gridInqUvRelativeToGrid(int gridID)
 }
 
 
+void gridDefScanningMode(int gridID, int mode)
+{
+  grid_t *gridptr = grid_to_pointer(gridID);
+
+  if ( gridptr->scanningMode != mode )
+    {
+      gridMark4Update(gridID);
+      gridptr->scanningMode = mode;
+    }
+}
+
+
+int gridInqScanningMode(int gridID)
+{
+  grid_t *gridptr = grid_to_pointer(gridID);
+
+  int scanningModeTMP  = 128 * gridptr->iScansNegatively + 64 * gridptr->jScansPositively + 32 * gridptr->jPointsAreConsecutive;
+  if ( scanningModeTMP != gridptr->scanningMode )
+    Message("WARNING: scanningMode (%d) ! = (%d) 128 * iScansNegatively(%d) + 64 * jScansPositively(%d) + 32 * jPointsAreConsecutive(%d) ",
+            gridptr->scanningMode, scanningModeTMP, gridptr->iScansNegatively,gridptr->jScansPositively,gridptr->jPointsAreConsecutive );
+
+  return gridptr->scanningMode;
+}
+
+
 void cdiGridGetIndexList(unsigned ngrids, int * gridIndexList)
 {
   reshGetResHListOfType(ngrids, gridIndexList, &gridOps);
@@ -4000,6 +4045,11 @@ enum {
   GRID_PACK_INT_IDX_MEMBERMASK,
   GRID_PACK_INT_IDX_XTSTDNNAME,
   GRID_PACK_INT_IDX_YTSTDNNAME,
+  GRID_PACK_INT_IDX_UVRELATIVETOGRID,
+  GRID_PACK_INT_IDX_ISCANSNEGATIVELY,
+  GRID_PACK_INT_IDX_JSCANSPOSITIVELY,
+  GRID_PACK_INT_IDX_JPOINTSARECONSECUTIVE,
+  GRID_PACK_INT_IDX_SCANNINGMODE,
   gridNint
 };
 
@@ -4213,6 +4263,11 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
       xystdname_tab[intBuffer[GRID_PACK_INT_IDX_XTSTDNNAME]][0];
     gridP->y.stdname     =
       xystdname_tab[intBuffer[GRID_PACK_INT_IDX_YTSTDNNAME]][1];
+    gridP->uvRelativeToGrid         =   intBuffer[GRID_PACK_INT_IDX_UVRELATIVETOGRID];
+    gridP->iScansNegatively         =   intBuffer[GRID_PACK_INT_IDX_ISCANSNEGATIVELY];
+    gridP->jScansPositively         =   intBuffer[GRID_PACK_INT_IDX_JSCANSPOSITIVELY];
+    gridP->jPointsAreConsecutive    =   intBuffer[GRID_PACK_INT_IDX_JPOINTSARECONSECUTIVE];
+    gridP->scanningMode             =   intBuffer[GRID_PACK_INT_IDX_SCANNINGMODE];
   }
 
   if (memberMask & gridHasRowLonFlag)
@@ -4406,6 +4461,12 @@ gridPack(void * voidP, void * packBuffer, int packBufferSize,
     intBuffer[GRID_PACK_INT_IDX_YTSTDNNAME]   =
       (int)((const char (*)[2][24])gridP->y.stdname
             - (const char (*)[2][24])xystdname_tab[0][1]);
+
+    intBuffer[GRID_PACK_INT_IDX_UVRELATIVETOGRID] = gridP->uvRelativeToGrid;
+    intBuffer[GRID_PACK_INT_IDX_ISCANSNEGATIVELY] = gridP->iScansNegatively;
+    intBuffer[GRID_PACK_INT_IDX_JSCANSPOSITIVELY] = gridP->jScansPositively;
+    intBuffer[GRID_PACK_INT_IDX_JPOINTSARECONSECUTIVE] = gridP->jPointsAreConsecutive;
+    intBuffer[GRID_PACK_INT_IDX_SCANNINGMODE] = gridP->scanningMode;
 
     serializePack(intBuffer, gridNint, CDI_DATATYPE_INT,
                   packBuffer, packBufferSize, packBufferPos, context);

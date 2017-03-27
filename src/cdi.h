@@ -967,6 +967,9 @@ int     gridInqComplexPacking(int gridID);
 void    gridDefUvRelativeToGrid(int gridID, int uvRelativeToGrid);
 int     gridInqUvRelativeToGrid(int gridID);
 
+void    gridDefScanningMode(int gridID, int mode);
+int     gridInqScanningMode(int gridID);
+
 /* ZAXIS routines */
 
 void    zaxisName(int zaxistype, char *zaxisname);

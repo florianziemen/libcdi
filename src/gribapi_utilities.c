@@ -382,6 +382,48 @@ int gribapiGetTsteptype(grib_handle *gh)
 
           // printf("stepType: %s %ld %d\n", stepType, len, tsteptype);
         }
+#ifdef HIRLAM_EXTENSIONS
+      {
+      // Normaly cdo looks in grib for attribute called "stepType", see above.
+      // BUT NWP models such as Hirlam and Harmonie 37h1.2, use "timeRangeIndicator" instead!
+      // Where for example:       0: for instanteneous fields; 4: for accumulated fields
+      //  0:   Forecast product valid at reference time + P1
+      //  2:   Product with a valid time ranging between reference time + P1 and reference time + P2
+      //  4:   Accumulation (reference time + P1 to reference time + P2)
+      //  5:   Difference(reference time + P2 minus reference time + P1) product considered valid at reference time + P2
+      // More details on WMO standards:
+      //               http://www.wmo.int/pages/prog/www/WDM/Guides/Guide-binary-2.html
+      //tsteptype = TSTEP_INSTANT;  // default value for any case
+      long timeRangeIND = 0; // typically 0: for instanteneous fields; 4: for accumulated fields
+      int rc = grib_get_long(gh, "timeRangeIndicator", &timeRangeIND);
+      if (rc != 0) {
+            //if ( lprint )
+            Warning("Could not get 'stepType' either 'timeRangeIndicator'. Using defualt!");
+            return (tsteptype);
+      }
+      extern int cdiGribUseTimeRangeIndicator;
+      cdiGribUseTimeRangeIndicator = 1;
+      switch ( timeRangeIND )
+          {
+              case 0:  tsteptype = TSTEP_INSTANT; break;
+              case 2:  tsteptype = TSTEP_INSTANT2;
+                       strcpy(stepType, "instant2");  // was incorrectly set before into accum
+                       break;
+              case 4:  tsteptype = TSTEP_ACCUM; break;
+              case 5:  tsteptype = TSTEP_DIFF; break;
+              default:
+                if ( lprint )
+                {
+                  if (CDI_Debug)
+                      Warning("timeRangeIND = %d;  stepType= %s; tsteptype=%d unsupported timeRangeIND at the moment, set to instant!", timeRangeIND, stepType, tsteptype);
+                  lprint = FALSE;
+                }
+                break;
+          }
+      if (CDI_Debug)
+          Warning("timeRangeIND = %d;  stepType= %s; tsteptype=%d", timeRangeIND, stepType, tsteptype);
+      }
+#endif // HIRLAM_EXTENSIONS
     }
 
   return tsteptype;
@@ -721,6 +763,34 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
       GRIB_CHECK(grib_get_long(gh, "uvRelativeToGrid", &temp), 0);
       assert(temp == 0 || temp == 1);
       grid->uvRelativeToGrid = (bool)temp;
+    }
+
+  if ( gridtype == GRID_GAUSSIAN || gridtype == GRID_LONLAT || gridtype == GRID_PROJECTION || gridtype == GRID_LCC )
+    {
+      GRIB_CHECK(grib_get_long(gh, "iScansNegatively", &grid->iScansNegatively), 0);
+      GRIB_CHECK(grib_get_long(gh, "jScansPositively", &grid->jScansPositively), 0);
+      GRIB_CHECK(grib_get_long(gh, "jPointsAreConsecutive", &grid->jPointsAreConsecutive), 0);
+      grid->scanningMode = 128*grid->iScansNegatively + 64*grid->jScansPositively + 32*grid->jPointsAreConsecutive;
+      /* scanningMode  = 128 * iScansNegatively + 64 * jScansPositively + 32 * jPointsAreConsecutive;
+                   64  = 128 * 0                + 64 *        1         + 32 * 0
+                   00  = 128 * 0                + 64 *        0         + 32 * 0
+                   96  = 128 * 0                + 64 *        1         + 32 * 1
+         Default / implicit scanning mode is 64:
+                            i and j scan positively, i points are consecutive (row-major)        */
+#ifdef HIRLAM_EXTENSIONS
+      if (cdiDebugExt>=30)
+      {
+        //  indicatorOfParameter=33,indicatorOfTypeOfLevel=105,level
+        long paramId, levelTypeId, levelId;
+        GRIB_CHECK(grib_get_long(gh, "indicatorOfParameter", &paramId), 0);
+        GRIB_CHECK(grib_get_long(gh, "indicatorOfTypeOfLevel", &levelTypeId), 0);
+        GRIB_CHECK(grib_get_long(gh, "level", &levelId), 0);
+        Message("(param,ltype,level) = (%3d,%3d,%4d); Scanning mode = %02d -> bits:(%1d.%1d.%1d)*32;  uvRelativeToGrid = %02d",\
+                (int)paramId, (int)levelTypeId, (int)levelId,
+                grid->scanningMode,(int)grid->jPointsAreConsecutive,(int)grid->jScansPositively,(int)grid->iScansNegatively,
+                (int)grid->uvRelativeToGrid);
+      }
+#endif //HIRLAM_EXTENSIONS
     }
 
   grid->type  = gridtype;

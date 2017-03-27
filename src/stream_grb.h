@@ -38,7 +38,7 @@ struct cdiGribModeChange
 
 struct cdiGribScanModeChange
 {
-  int scanmode;
+  int value;
   bool active;
 };
 

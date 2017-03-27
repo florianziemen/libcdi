@@ -10,6 +10,14 @@
 #include "file.h"
 #include "cgribex.h"  /* gribZip gribGetZip gribGinfo */
 
+int cdiDebugExt                        =  0;      //  Debug level for the KNMI extensions
+#ifdef HIRLAM_EXTENSIONS
+// *** RELATED to GRIB only ***
+int cdiGribUseTimeRangeIndicator        = 0;       // normaly cdo looks in grib for attribute called "stepType"
+                                                   // but NWP models such as Harmonie 37h1.2, use "timeRangeIndicator"
+                                                   // where:  0: for instanteneous fields; 4: for accumulated fields
+#endif // HIRLAM_EXTENSIONS
+
 
 // Regarding operation to change parameter identification:
 // change if cdiGribChangeParameterID.active
@@ -43,12 +51,12 @@ struct cdiGribScanModeChange cdiGribDataScanningMode;
 void streamGrbDefDataScanningMode(int scanmode)
 {
   cdiGribDataScanningMode.active = true;
-  cdiGribDataScanningMode.scanmode = scanmode;
+  cdiGribDataScanningMode.value = scanmode;
 }
 
 int  streamGrbInqDataScanningMode(void)
 {
-  return cdiGribDataScanningMode.scanmode;
+  return cdiGribDataScanningMode.value;
 }
 
 
