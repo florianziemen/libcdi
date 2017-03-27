@@ -36,11 +36,20 @@ struct cdiGribModeChange
   bool active;
 };
 
+struct cdiGribScanModeChange
+{
+  int scanmode;
+  bool active;
+};
+
 extern struct cdiGribParamChange cdiGribChangeParameterID;
 extern struct cdiGribModeChange cdiGribChangeModeUvRelativeToGrid;
+extern struct cdiGribScanModeChange cdiGribDataScanningMode;
 
 void streamGrbChangeParameterIdentification(int code, int ltype, int lev);
 void streamGrbChangeModeUvRelativeToGrid(int mode);
+void streamGrbDefDataScanningMode(int scanmode);
+int  streamGrbInqDataScanningMode(void);
 
 #endif  /* _STREAM_GRB_H */
 /*

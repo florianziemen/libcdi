@@ -38,6 +38,19 @@ void streamGrbChangeModeUvRelativeToGrid(int mode)
   cdiGribChangeModeUvRelativeToGrid.mode = (mode > 0);
 }
 
+struct cdiGribScanModeChange cdiGribDataScanningMode;
+
+void streamGrbDefDataScanningMode(int scanmode)
+{
+  cdiGribDataScanningMode.active = true;
+  cdiGribDataScanningMode.scanmode = scanmode;
+}
+
+int  streamGrbInqDataScanningMode(void)
+{
+  return cdiGribDataScanningMode.scanmode;
+}
+
 
 int grib1ltypeToZaxisType(int grib_ltype)
 {
