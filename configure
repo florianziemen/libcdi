@@ -674,6 +674,8 @@ MPI_C_INCLUDE
 MPIROOT
 ENABLE_NETCDF_FALSE
 ENABLE_NETCDF_TRUE
+ENABLE_HIRLAM_EXTENSIONS_FALSE
+ENABLE_HIRLAM_EXTENSIONS_TRUE
 ENABLE_ALL_STATIC_FALSE
 ENABLE_ALL_STATIC_TRUE
 ENABLE_CDI_LIB
@@ -865,6 +867,7 @@ enable_service
 enable_extra
 enable_ieg
 enable_all_static
+enable_hirlam_extensions
 enable_mpi
 with_mpi_root
 with_mpi_include
@@ -1560,6 +1563,8 @@ Optional Features:
   --enable-ieg            Use the ieg library [default=yes]
   --enable-all-static     build a completely statically linked CDO binary
                           [default=no]
+  --enable-hirlam-extensions
+                          HIRLAM extensions [default=no]
   --enable-mpi            Compile with MPI compiler [default=no]
   --enable-iso-c-interface
                           Create Fortran Interface via iso_c_bindings facility
@@ -27925,6 +27930,35 @@ else
   ENABLE_ALL_STATIC_FALSE=
 fi
 
+#  ----------------------------------------------------------------------
+#  Build CDO with HIRLAM extensions
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for HIRLAM extensions" >&5
+$as_echo_n "checking for HIRLAM extensions... " >&6; }
+# Check whether --enable-hirlam-extensions was given.
+if test "${enable_hirlam_extensions+set}" = set; then :
+  enableval=$enable_hirlam_extensions; if test "x$enable_hirlam_extensions" != "xno"; then :
+
+$as_echo "#define HIRLAM_EXTENSIONS 1" >>confdefs.h
+
+                     enable_hirlam_extensions=yes
+else
+  enable_hirlam_extensions=no
+fi
+else
+  enable_hirlam_extensions=no
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $enable_hirlam_extensions" >&5
+$as_echo "$enable_hirlam_extensions" >&6; }
+ if test x$enable_hirlam_extensions = 'xyes'; then
+  ENABLE_HIRLAM_EXTENSIONS_TRUE=
+  ENABLE_HIRLAM_EXTENSIONS_FALSE='#'
+else
+  ENABLE_HIRLAM_EXTENSIONS_TRUE='#'
+  ENABLE_HIRLAM_EXTENSIONS_FALSE=
+fi
+
+#
 
  if test x$ENABLE_NETCDF = xyes; then
   ENABLE_NETCDF_TRUE=
@@ -30119,6 +30153,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${ENABLE_ALL_STATIC_TRUE}" && test -z "${ENABLE_ALL_STATIC_FALSE}"; then
   as_fn_error $? "conditional \"ENABLE_ALL_STATIC\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${ENABLE_HIRLAM_EXTENSIONS_TRUE}" && test -z "${ENABLE_HIRLAM_EXTENSIONS_FALSE}"; then
+  as_fn_error $? "conditional \"ENABLE_HIRLAM_EXTENSIONS\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${ENABLE_NETCDF_TRUE}" && test -z "${ENABLE_NETCDF_FALSE}"; then

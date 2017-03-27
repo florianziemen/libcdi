@@ -205,6 +205,9 @@
 /* yaxt library is available */
 #undef HAVE_YAXT
 
+/* Define to 1 for HIRLAM extensions */
+#undef HIRLAM_EXTENSIONS
+
 /* Host name */
 #undef HOST_NAME
 
