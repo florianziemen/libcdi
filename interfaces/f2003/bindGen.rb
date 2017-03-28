@@ -583,9 +583,9 @@ $verbatimDeclarations = '
 			type(c_ptr), value :: charPtr
 		end function lib_strlen
 
-		subroutine lib_free(pointer) bind(c, name = "free")
+		subroutine lib_free(ptr) bind(c, name = "free")
 			import c_ptr
-			type(c_ptr), value, intent(in) :: pointer
+			type(c_ptr), value, intent(in) :: ptr
 		end subroutine lib_free
 	end interface
 '
