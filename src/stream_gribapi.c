@@ -2593,16 +2593,12 @@ int gribapiGetScanningMode(grib_handle *gh)
 
 void gribapiSetScanningMode(grib_handle *gh, int scanningMode)
 {
-  long iScansNegatively;
-  long jScansPositively;
-  long jPointsAreConsecutive;
-
    // 127: reserved for testing; generated test data will be in 64 scanning mode
   //if (scanningMode== 127)  scanningMode = 64;
 
-  iScansNegatively      = (scanningMode & 128)/128;
-  jScansPositively      = (scanningMode & 64)/64;
-  jPointsAreConsecutive = (scanningMode & 32)/32;
+  long iScansNegatively      = (scanningMode & 128)/128;
+  long jScansPositively      = (scanningMode & 64)/64;
+  long jPointsAreConsecutive = (scanningMode & 32)/32;
 
   if (cdiDebugExt>=30)
   {
@@ -2620,7 +2616,6 @@ void gribapiSetScanningMode(grib_handle *gh, int scanningMode)
   GRIB_CHECK(my_grib_set_long(gh, "iScansNegatively", iScansNegatively), 0);
   GRIB_CHECK(my_grib_set_long(gh, "jScansPositively", jScansPositively), 0);
   GRIB_CHECK(my_grib_set_long(gh, "jPointsAreConsecutive", jPointsAreConsecutive), 0);
-
 }
 
 
@@ -2923,6 +2918,74 @@ void convertDataScanningMode(int scanModeOUT, double *data, int gridsize, int iD
 }
 #endif //HIRLAM_EXTENSIONS
 
+static
+void gridapiSetExtMode(grib_handle *gh, int gridID, long datasize, const double *data)
+{
+  /*
+  Nj = 550;
+  latitudeOfFirstGridPointInDegrees = -30.8;
+  latitudeOfLastGridPointInDegrees = 24.1;
+  iScansNegatively = 0;
+  jScansPositively = 0;
+  jPointsAreConsecutive = 0;
+  jDirectionIncrementInDegrees = 0.1; */
+
+  int gridtype = gridInqType(gridID);
+  if ( gridtype == GRID_GENERIC || gridtype == GRID_LONLAT || gridtype == GRID_GAUSSIAN ||
+       gridtype == GRID_GAUSSIAN_REDUCED || gridtype == GRID_PROJECTION || gridtype == GRID_LCC )
+    {
+      //scanModeIN  = gribapiGetScanningMode(gh);
+      scanModeIN = gridInqScanningMode(gridID); // use global variable scanModeIN
+
+      if (cdiDebugExt>=100)
+        {
+          int gridsize = gridInqSize(gridID);
+          Message("(scanModeIN=%d; gridsize=%d", scanModeIN, gridsize);
+        }
+
+#ifdef HIRLAM_EXTENSIONS
+      if ( cdiGribDataScanningMode.active )   // allowed modes: <0, 64, 96>; Default is 64
+        {
+          int iDim = gridInqXsize(gridID);
+          int jDim = gridInqYsize(gridID);
+
+          double yfirst = gridInqYval(gridID,      0);
+          double ylast  = gridInqYval(gridID, jDim-1);
+          double yinc   = gridInqYinc(gridID);
+
+          int scanModeOUT = cdiGribDataScanningMode.value;
+          convertDataScanningMode(scanModeOUT, (double*)data, datasize, iDim, jDim);
+          // This will overrule the old scanning mode of the given grid
+          if (cdiDebugExt>=10) Message("Set GribDataScanningMode (%d) => (%d)", scanModeIN, cdiGribDataScanningMode.value);
+          gribapiSetScanningMode(gh, cdiGribDataScanningMode.value);
+
+          if (((scanModeIN==00) && (cdiGribDataScanningMode.value==64)) ||
+              ((scanModeIN==64) && (cdiGribDataScanningMode.value==00)) )
+            verticallyFlipGridDefinitionWhenScanningModeChanged(gh, yfirst, ylast, yinc);
+        }
+      else
+#endif
+        {
+          if (cdiDebugExt>=100) Message("Set GribDataScanningMode => (%d) based on used grid", scanModeIN);
+          gribapiSetScanningMode(gh, scanModeIN);
+        }
+
+
+      if ( cdiGribChangeModeUvRelativeToGrid.active )
+        {
+          // this will overrule/change the UvRelativeToGrid flag;
+          // typically when the wind is rotated with respect to north pole
+          if (cdiDebugExt>=100) Message("Set ModeUvRelativeToGrid =>%d ( note grid has: %d)", cdiGribChangeModeUvRelativeToGrid.mode, gridInqUvRelativeToGrid(gridID));
+          GRIB_CHECK(my_grib_set_long(gh, "uvRelativeToGrid", (long) cdiGribChangeModeUvRelativeToGrid.mode), 0);
+        }
+      else
+        {
+          if (cdiDebugExt>=100) Message("Set ModeUvRelativeToGrid =>%d based on used grid", gridInqUvRelativeToGrid(gridID));
+          gribapiSetUvRelativeToGrid(gh, gridInqUvRelativeToGrid(gridID));
+        }
+    }
+}
+
 /* #define GRIBAPIENCODETEST 1 */
 
 size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisID,
@@ -2976,7 +3039,8 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
     }
   */
 
-  gribapiDefTime((int)editionNumber, productDefinitionTemplate, typeOfGeneratingProcess, gh, vdate, vtime, tsteptype, numavg, vlistInqTaxis(vlistID), gc->init);
+  gribapiDefTime((int)editionNumber, productDefinitionTemplate, typeOfGeneratingProcess,
+                 gh, vdate, vtime, tsteptype, numavg, vlistInqTaxis(vlistID), gc->init);
 
   if ( ! gc->init ) gribapiDefInstitut(gh, vlistID, varID);
   if ( ! gc->init ) gribapiDefModel(gh, vlistID, varID);
@@ -3042,77 +3106,7 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
       GRIB_CHECK(my_grib_set_double(gh, "missingValue", vlistInqVarMissval(vlistID, varID)), 0);
     }
 
-  /*
-  Nj = 550;
-  latitudeOfFirstGridPointInDegrees = -30.8;
-  latitudeOfLastGridPointInDegrees = 24.1;
-  iScansNegatively = 0;
-  jScansPositively = 0;
-  jPointsAreConsecutive = 0;
-  jDirectionIncrementInDegrees = 0.1; */
-
-
-  int iDim=0;
-  int jDim=0;
-  long gridsize;
-  double yfirst, ylast, yinc;
-
-  gridsize = gridInqSize(gridID);
-  iDim = gridInqXsize(gridID);
-  jDim = gridInqYsize(gridID);
-
-  //printf("gribapiEncode(): \n");
-
-  yfirst = gridInqYval(gridID,      0);
-  ylast  = gridInqYval(gridID, jDim-1);
-  yinc   = gridInqYinc(gridID);
-
-  //scanModeIN  = gribapiGetScanningMode(gh);
-  scanModeIN = gridInqScanningMode(gridID); // use global variable scanModeIN
-
-  if (cdiDebugExt>=100)
-      Message("(iDim,jDim) = (%d,%d); scanModeIN=%d; gridsize=%ld", iDim,jDim, scanModeIN, gridsize);
-
-
-  if ( cdiGribDataScanningMode.active )   // allowed modes: <0, 64, 96>; Default is 64
-    {
-#ifdef HIRLAM_EXTENSIONS
-      int scanModeOUT = cdiGribDataScanningMode.value;
-      convertDataScanningMode(scanModeOUT, (double*)data, datasize, iDim, jDim);
-      // This will overrule the old scanning mode of the given grid
-      if (cdiDebugExt>=10) Message("Set GribDataScanningMode (%d) => (%d)", scanModeIN, cdiGribDataScanningMode.value);
-      gribapiSetScanningMode(gh, cdiGribDataScanningMode.value);
-
-      if (((scanModeIN==00) && (cdiGribDataScanningMode.value==64)) ||
-          ((scanModeIN==64) && (cdiGribDataScanningMode.value==00)) )
-        verticallyFlipGridDefinitionWhenScanningModeChanged(gh, yfirst, ylast, yinc);
-#endif
-    }
-  else
-    {
-      if (cdiDebugExt>=100) Message("Set GribDataScanningMode => (%d) based on used grid", scanModeIN);
-      gribapiSetScanningMode(gh, scanModeIN);
-    }
-
-
-  //else
-  //{ // keep the same scanning mode ..
-  //      cdiGribDataScanningMode.value = scanModeIN;
-  //      convertDataScanningMode(scanModeIN , data, gridsize, iDim, jDim);
-  //}
-
-  if ( cdiGribChangeModeUvRelativeToGrid.active )
-    {
-      // this will overrule/change the UvRelativeToGrid flag;
-      // typically when the wind is rotated with respect to north pole
-      if (cdiDebugExt>=100) Message("Set ModeUvRelativeToGrid =>%d ( note grid has: %d)", cdiGribChangeModeUvRelativeToGrid.mode, gridInqUvRelativeToGrid(gridID));
-      GRIB_CHECK(my_grib_set_long(gh, "uvRelativeToGrid", (long) cdiGribChangeModeUvRelativeToGrid.mode), 0);
-    }
- else
-   {
-     if (cdiDebugExt>=100) Message("Set ModeUvRelativeToGrid =>%d based on used grid", gridInqUvRelativeToGrid(gridID));
-     gribapiSetUvRelativeToGrid(gh, gridInqUvRelativeToGrid(gridID));
-   }
+  gridapiSetExtMode(gh, gridID, datasize, data);
 
   GRIB_CHECK(grib_set_double_array(gh, "values", data, (size_t)datasize), 0);
 
