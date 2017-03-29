@@ -1,6 +1,8 @@
 #ifndef _STREAM_GRIBAPI_H
 #define _STREAM_GRIBAPI_H
 
+#ifdef HAVE_LIBGRIB_API
+
 #include "gribapi.h"
 
 int gribapiScanTimestep1(stream_t * streamptr);
@@ -15,7 +17,12 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
 		     long datasize, const double *data, int nmiss, void **gribbuffer, size_t *gribbuffersize,
 		     int ljpeg, void *gribContainer);
 
-void gribapiChangeParameterIdentification(void *gh, int code, int ltype, int lev);
+int gribapiGetScanningMode(grib_handle *gh);
+void gribapiSetScanningMode(grib_handle *gh, int scanningMode);
+
+void gribapiChangeParameterIdentification(grib_handle *gh, int code, int ltype, int lev);
+
+#endif
 
 #endif  /* _STREAM_GRIBAPI_H */
 /*

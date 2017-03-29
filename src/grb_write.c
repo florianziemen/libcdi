@@ -7,6 +7,7 @@
 #include "dmemory.h"
 #include "cdi.h"
 #include "cdi_int.h"
+#include "gribapi.h"
 #include "stream_cgribex.h"
 #include "stream_grb.h"
 #include "stream_gribapi.h"

@@ -7,6 +7,7 @@
 #include "stream_cgribex.h"
 #include "stream_grb.h"
 #include "stream_gribapi.h"
+#include "gribapi.h"
 #include "file.h"
 #include "cgribex.h"  /* gribZip gribGetZip gribGinfo */
 

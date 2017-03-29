@@ -2,7 +2,7 @@
 #  include "config.h"
 #endif
 
-#if  defined  (HAVE_LIBGRIB_API)
+#ifdef HAVE_LIBGRIB_API
 #include <limits.h>
 #include <stdio.h>
 
@@ -3133,16 +3133,16 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
 }
 
 
-void gribapiChangeParameterIdentification(void *gh, int code, int ltype, int lev)
+void gribapiChangeParameterIdentification(grib_handle *gh, int code, int ltype, int lev)
 {
   long  indicatorOfParameter,  indicatorOfTypeOfLevel,  level; //  timeRangeIndicator: could be included later
   indicatorOfParameter = code;
   indicatorOfTypeOfLevel = ltype;
   level = lev;
 
-  if (indicatorOfParameter!=-1) GRIB_CHECK(my_grib_set_long((grib_handle*)gh, "indicatorOfParameter", indicatorOfParameter), 0);
-  if (indicatorOfTypeOfLevel!=-1) GRIB_CHECK(my_grib_set_long((grib_handle*)gh, "indicatorOfTypeOfLevel", indicatorOfTypeOfLevel), 0);
-  if (level!=-1) GRIB_CHECK(my_grib_set_long((grib_handle*)gh, "level", level), 0);
+  if (indicatorOfParameter!=-1) GRIB_CHECK(my_grib_set_long(gh, "indicatorOfParameter", indicatorOfParameter), 0);
+  if (indicatorOfTypeOfLevel!=-1) GRIB_CHECK(my_grib_set_long(gh, "indicatorOfTypeOfLevel", indicatorOfTypeOfLevel), 0);
+  if (level!=-1) GRIB_CHECK(my_grib_set_long(gh, "level", level), 0);
 }
 
 #endif
