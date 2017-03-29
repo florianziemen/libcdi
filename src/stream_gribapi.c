@@ -2920,7 +2920,7 @@ void convertDataScanningMode(int scanModeOUT, double *data, int gridsize, int iD
 #endif //HIRLAM_EXTENSIONS
 
 static
-void gridapiSetExtMode(grib_handle *gh, int gridID, long datasize, const double *data)
+void gribapiSetExtMode(grib_handle *gh, int gridID, long datasize, const double *data)
 {
   /*
   Nj = 550;
@@ -3107,7 +3107,7 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
       GRIB_CHECK(my_grib_set_double(gh, "missingValue", vlistInqVarMissval(vlistID, varID)), 0);
     }
 
-  gridapiSetExtMode(gh, gridID, datasize, data);
+  gribapiSetExtMode(gh, gridID, datasize, data);
 
   GRIB_CHECK(grib_set_double_array(gh, "values", data, (size_t)datasize), 0);
 
