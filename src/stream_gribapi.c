@@ -2930,7 +2930,10 @@ void gribapiSetExtMode(grib_handle *gh, int gridID, long datasize, const double 
   jScansPositively = 0;
   jPointsAreConsecutive = 0;
   jDirectionIncrementInDegrees = 0.1; */
-
+#ifndef HIRLAM_EXTENSIONS
+  (void)data;
+  (void)datasize;
+#endif
   int gridtype = gridInqType(gridID);
   if ( gridtype == GRID_GENERIC || gridtype == GRID_LONLAT || gridtype == GRID_GAUSSIAN ||
        gridtype == GRID_GAUSSIAN_REDUCED || gridtype == GRID_PROJECTION || gridtype == GRID_LCC )
