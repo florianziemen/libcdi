@@ -113,10 +113,8 @@ struct grid_t {
   struct gridaxis_t y;
   const struct gridVirtTable *vtable;
   cdi_atts_t atts;
-  long iScansNegatively;
-  long jScansPositively;
-  long jPointsAreConsecutive;
   int  scanningMode;
+  bool iScansNegatively, jScansPositively, jPointsAreConsecutive;
   /* scanningMode  = 128 * iScansNegatively + 64 * jScansPositively + 32 * jPointsAreConsecutive;
                64  = 128 * 0                + 64 *        1         + 32 * 0
                00  = 128 * 0                + 64 *        0         + 32 * 0

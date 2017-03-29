@@ -767,9 +767,13 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
 
   if ( gridtype == GRID_GAUSSIAN || gridtype == GRID_LONLAT || gridtype == GRID_PROJECTION || gridtype == GRID_LCC )
     {
-      GRIB_CHECK(grib_get_long(gh, "iScansNegatively", &grid->iScansNegatively), 0);
-      GRIB_CHECK(grib_get_long(gh, "jScansPositively", &grid->jScansPositively), 0);
-      GRIB_CHECK(grib_get_long(gh, "jPointsAreConsecutive", &grid->jPointsAreConsecutive), 0);
+      long temp;
+      GRIB_CHECK(grib_get_long(gh, "iScansNegatively", &temp), 0);
+      grid->iScansNegatively = (bool)temp;
+      GRIB_CHECK(grib_get_long(gh, "jScansPositively", &temp), 0);
+      grid->jScansPositively = (bool)temp;
+      GRIB_CHECK(grib_get_long(gh, "jPointsAreConsecutive", &temp), 0);
+      grid->jPointsAreConsecutive = (bool)temp;
       grid->scanningMode = 128*grid->iScansNegatively + 64*grid->jScansPositively + 32*grid->jPointsAreConsecutive;
       /* scanningMode  = 128 * iScansNegatively + 64 * jScansPositively + 32 * jPointsAreConsecutive;
                    64  = 128 * 0                + 64 *        1         + 32 * 0
@@ -787,8 +791,9 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
         GRIB_CHECK(grib_get_long(gh, "level", &levelId), 0);
         Message("(param,ltype,level) = (%3d,%3d,%4d); Scanning mode = %02d -> bits:(%1d.%1d.%1d)*32;  uvRelativeToGrid = %02d",\
                 (int)paramId, (int)levelTypeId, (int)levelId,
-                grid->scanningMode,(int)grid->jPointsAreConsecutive,(int)grid->jScansPositively,(int)grid->iScansNegatively,
-                (int)grid->uvRelativeToGrid);
+                grid->scanningMode,grid->jPointsAreConsecutive,
+                grid->jScansPositively,grid->iScansNegatively,
+                grid->uvRelativeToGrid);
       }
 #endif //HIRLAM_EXTENSIONS
     }

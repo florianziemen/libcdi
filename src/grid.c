@@ -4264,9 +4264,9 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
     gridP->y.stdname     =
       xystdname_tab[intBuffer[GRID_PACK_INT_IDX_YTSTDNNAME]][1];
     gridP->uvRelativeToGrid         =   intBuffer[GRID_PACK_INT_IDX_UVRELATIVETOGRID];
-    gridP->iScansNegatively         =   intBuffer[GRID_PACK_INT_IDX_ISCANSNEGATIVELY];
-    gridP->jScansPositively         =   intBuffer[GRID_PACK_INT_IDX_JSCANSPOSITIVELY];
-    gridP->jPointsAreConsecutive    =   intBuffer[GRID_PACK_INT_IDX_JPOINTSARECONSECUTIVE];
+    gridP->iScansNegatively         =   (bool)intBuffer[GRID_PACK_INT_IDX_ISCANSNEGATIVELY];
+    gridP->jScansPositively         =   (bool)intBuffer[GRID_PACK_INT_IDX_JSCANSPOSITIVELY];
+    gridP->jPointsAreConsecutive    =   (bool)intBuffer[GRID_PACK_INT_IDX_JPOINTSARECONSECUTIVE];
     gridP->scanningMode             =   intBuffer[GRID_PACK_INT_IDX_SCANNINGMODE];
   }
 

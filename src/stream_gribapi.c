@@ -2051,8 +2051,7 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 	GRIB_CHECK(my_grib_set_double(gh, "latitudeOfLastGridPointInDegrees",   ylast), 0);
 
         {
-          long jscan = 0;
-          if ( yfirst < ylast ) jscan = 1;
+          long jscan = yfirst < ylast;
           GRIB_CHECK(my_grib_set_long(gh, "jScansPositively", jscan), 0);
         }
 
@@ -2581,8 +2580,10 @@ int gribapiGetScanningMode(grib_handle *gh)
   GRIB_CHECK(grib_get_long(gh, "iScansNegatively", &iScansNegatively), 0);
   GRIB_CHECK(grib_get_long(gh, "jScansPositively", &jScansPositively), 0);
   GRIB_CHECK(grib_get_long(gh, "jPointsAreConsecutive", &jPointsAreConsecutive), 0);
-  int scanningMode = 0;
-  scanningMode  = 128*iScansNegatively + 64*jScansPositively + 32*jPointsAreConsecutive;
+  int scanningMode
+    = 128*(bool)iScansNegatively
+    + 64 *(bool)jScansPositively
+    + 32 *(bool)jPointsAreConsecutive;
   if (cdiDebugExt>=30)
     printf("gribapiGetScanningMode(): Scanning mode = %02d (%1d%1d%1d)*32; \n",\
             scanningMode,(int)jPointsAreConsecutive,(int)jScansPositively,(int)iScansNegatively);
