@@ -2668,7 +2668,8 @@ void gribapiSetUvRelativeToGrid(grib_handle *gh, int mode)
     # ^ full domain data
   */
 
-void verticallyFlipGridDefinitionWhenScanningModeChanged(grib_handle *gh, double yfirst, double ylast, double yinc )
+static void
+verticallyFlipGridDefinitionWhenScanningModeChanged(grib_handle *gh, double yfirst, double ylast, double yinc )
 {
   /*
   Nj = 550;
