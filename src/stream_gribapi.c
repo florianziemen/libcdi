@@ -2617,7 +2617,7 @@ void gribapiSetScanningMode(grib_handle *gh, int scanningMode)
 }
 
 
-void gribapiSetUvRelativeToGrid(grib_handle *gh, int mode)
+static void gribapiSetUvRelativeToGrid(grib_handle *gh, int mode)
 {
   long uvRelativeToGridMode = mode;
   long uvRelativeToGridModeOld;
