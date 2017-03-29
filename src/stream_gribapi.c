@@ -51,9 +51,6 @@ typedef struct {
 } compvar2_t;
 
 
-int scanModeIN; // global variable
-
-
 static
 int gribapiGetZaxisType(long editionNumber, int grib_ltype)
 {
@@ -2722,7 +2719,9 @@ void verticallyFlipGridDefinitionWhenScanningModeChanged(grib_handle *gh, double
 }
 
 #ifdef HIRLAM_EXTENSIONS
-void convertDataScanningMode(int scanModeOUT, double *data, int gridsize, int iDim, int jDim)
+static void
+convertDataScanningMode(int scanModeIN, int scanModeOUT, double *data,
+                        int gridsize, int iDim, int jDim)
 {
   int i,j;
   int idxIN, idxOUT;
@@ -2936,7 +2935,7 @@ void gribapiSetExtMode(grib_handle *gh, int gridID, long datasize, const double 
        gridtype == GRID_GAUSSIAN_REDUCED || gridtype == GRID_PROJECTION || gridtype == GRID_LCC )
     {
       //scanModeIN  = gribapiGetScanningMode(gh);
-      scanModeIN = gridInqScanningMode(gridID); // use global variable scanModeIN
+      int scanModeIN = gridInqScanningMode(gridID);
 
       if (cdiDebugExt>=100)
         {
@@ -2955,7 +2954,7 @@ void gribapiSetExtMode(grib_handle *gh, int gridID, long datasize, const double 
           double yinc   = gridInqYinc(gridID);
 
           int scanModeOUT = cdiGribDataScanningMode.value;
-          convertDataScanningMode(scanModeOUT, (double*)data, datasize, iDim, jDim);
+          convertDataScanningMode(scanModeIN, scanModeOUT, (double*)data, datasize, iDim, jDim);
           // This will overrule the old scanning mode of the given grid
           if (cdiDebugExt>=10) Message("Set GribDataScanningMode (%d) => (%d)", scanModeIN, cdiGribDataScanningMode.value);
           gribapiSetScanningMode(gh, cdiGribDataScanningMode.value);
