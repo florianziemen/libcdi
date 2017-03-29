@@ -545,6 +545,8 @@ module mo_cdi
   public :: gridInqComplexPacking
   public :: gridDefUvRelativeToGrid
   public :: gridInqUvRelativeToGrid
+  public :: gridDefScanningMode
+  public :: gridInqScanningMode
   public :: zaxisName
   public :: zaxisNamePtr
   public :: zaxisCreate
@@ -2246,6 +2248,20 @@ module mo_cdi
       integer(c_int), value :: gridID_dummy
       integer(c_int) :: f_result
     end function gridInqUvRelativeToGrid
+
+    subroutine gridDefScanningMode(gridID_dummy, mode_dummy) bind(c, name =&
+    & 'gridDefScanningMode')
+      import c_int
+      integer(c_int), value :: gridID_dummy
+      integer(c_int), value :: mode_dummy
+    end subroutine gridDefScanningMode
+
+    function gridInqScanningMode(gridID_dummy) bind(c, name =&
+    & 'gridInqScanningMode') result(f_result)
+      import c_int
+      integer(c_int), value :: gridID_dummy
+      integer(c_int) :: f_result
+    end function gridInqScanningMode
 
     function zaxisCreate(zaxistype_dummy, size_dummy) bind(c, name =&
     & 'zaxisCreate') result(f_result)

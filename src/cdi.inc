@@ -1947,6 +1947,15 @@
 !                                    (INTEGER         gridID)
       EXTERNAL        gridInqUvRelativeToGrid
 
+!                     gridDefScanningMode
+!                                    (INTEGER         gridID,
+!                                     INTEGER         mode)
+      EXTERNAL        gridDefScanningMode
+
+      INTEGER         gridInqScanningMode
+!                                    (INTEGER         gridID)
+      EXTERNAL        gridInqScanningMode
+
 !
 !  ZAXIS routines
 !

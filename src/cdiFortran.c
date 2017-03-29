@@ -415,6 +415,8 @@ FCALLSCSUB2 (gridDefComplexPacking, GRIDDEFCOMPLEXPACKING, griddefcomplexpacking
 FCALLSCFUN1 (INT, gridInqComplexPacking, GRIDINQCOMPLEXPACKING, gridinqcomplexpacking, INT)
 FCALLSCSUB2 (gridDefUvRelativeToGrid, GRIDDEFUVRELATIVETOGRID, griddefuvrelativetogrid, INT, INT)
 FCALLSCFUN1 (INT, gridInqUvRelativeToGrid, GRIDINQUVRELATIVETOGRID, gridinquvrelativetogrid, INT)
+FCALLSCSUB2 (gridDefScanningMode, GRIDDEFSCANNINGMODE, griddefscanningmode, INT, INT)
+FCALLSCFUN1 (INT, gridInqScanningMode, GRIDINQSCANNINGMODE, gridinqscanningmode, INT)
 
 /*  ZAXIS routines  */
 
