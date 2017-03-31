@@ -1042,10 +1042,12 @@ int gribapiScanTimestep2(stream_t * streamptr)
   for ( recID = 0; recID < nrecords; recID++ )
     streamptr->tsteps[1].recIDs[recID] = -1;
 
+  record_t *restrict newRecs = streamptr->tsteps[tsID].records,
+    *restrict prvRecs = streamptr->tsteps[0].records;
   for ( recID = 0; recID < nrecords; recID++ )
     {
-      streamptr->tsteps[tsID].records[recID].position = streamptr->tsteps[0].records[recID].position;
-      streamptr->tsteps[tsID].records[recID].size     = streamptr->tsteps[0].records[recID].size;
+      newRecs[recID].position = prvRecs[recID].position;
+      newRecs[recID].size     = prvRecs[recID].size;
     }
 
   int nrecs_scanned = nrecords; //Only used for debug output
@@ -1128,7 +1130,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
       compvar2_t compVar = gribapiVarSet(param, level1, level2, leveltype1, tsteptype, varname, tiles);
 
       for ( recID = 0; recID < nrecords; recID++ )
-        if ( gribapiVarCompare(compVar, streamptr->tsteps[tsID].records[recID], 0) == 0 ) break;
+        if ( gribapiVarCompare(compVar, newRecs[recID], 0) == 0 ) break;
 
       if ( recID == nrecords )
 	{
@@ -1136,7 +1138,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
 	  return CDI_EUFSTRUCT;
 	}
 
-      if ( streamptr->tsteps[tsID].records[recID].used )
+      if ( newRecs[recID].used )
         {
           if ( cdiInventoryMode == 1 ) break;
           else
@@ -1148,7 +1150,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
 	    }
 	}
 
-      streamptr->tsteps[tsID].records[recID].used = TRUE;
+      newRecs[recID].used = TRUE;
       streamptr->tsteps[tsID].recIDs[rindex] = recID;
 
       if ( CDI_Debug )
@@ -1159,19 +1161,19 @@ int gribapiScanTimestep2(stream_t * streamptr)
                   nrecs_scanned, (long long)recpos, varname, paramstr, leveltype1, level1, level2, vdate, vtime);
         }
 
-      streamptr->tsteps[tsID].records[recID].size = recsize;
+      newRecs[recID].size = recsize;
 
-      if ( gribapiVarCompare(compVar, streamptr->tsteps[tsID].records[recID], 0) != 0 )
+      if ( gribapiVarCompare(compVar, newRecs[recID], 0) != 0 )
 	{
 	  Message("tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d",
 		  tsID, recID,
-		  streamptr->tsteps[tsID].records[recID].param, param,
-		  streamptr->tsteps[tsID].records[recID].ilevel, level1);
+		  newRecs[recID].param, param,
+		  newRecs[recID].ilevel, level1);
 	  return CDI_EUFSTRUCT;
 	}
 
       streamptr->tsteps[1].records[recID].position = recpos;
-      int varID = streamptr->tsteps[tsID].records[recID].varID;
+      int varID = newRecs[recID].varID;
       /*
       gridID = vlistInqVarGrid(vlistID, varID);
       if ( gridInqSize(gridID) == 1 && gridInqType(gridID) == GRID_LONLAT )
@@ -1193,9 +1195,9 @@ int gribapiScanTimestep2(stream_t * streamptr)
   int nrecs = 0;
   for ( recID = 0; recID < nrecords; recID++ )
     {
-      if ( ! streamptr->tsteps[tsID].records[recID].used )
+      if ( ! newRecs[recID].used )
 	{
-	  int varID = streamptr->tsteps[tsID].records[recID].varID;
+	  int varID = newRecs[recID].varID;
 	  vlistDefVarTsteptype(vlistID, varID, TSTEP_CONSTANT);
 	}
       else
