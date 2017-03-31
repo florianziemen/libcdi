@@ -836,7 +836,6 @@ int gribapiScanTimestep1(stream_t * streamptr)
   unsigned nrecs = 0;
   while ( TRUE )
     {
-      int level1 = 0, level2 = 0;
       size_t recsize = gribGetSize(fileID);
       recpos = fileGetPos(fileID);
 
@@ -859,7 +858,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
       GRIB_CHECK(my_grib_set_double(gh, "missingValue", cdiDefaultMissval), 0);
 
       int param = gribapiGetParam(gh);
-      int leveltype1 = -1, leveltype2 = -1, lbounds, level_sf, level_unit;
+      int level1 = 0, level2 = 0, leveltype1 = -1, leveltype2 = -1, lbounds, level_sf, level_unit;
       var_tile_t tiles = dummy_tiles;
       gribGetLevel(gh, &leveltype1, &leveltype2, &lbounds, &level1, &level2, &level_sf, &level_unit, &tiles);
 
