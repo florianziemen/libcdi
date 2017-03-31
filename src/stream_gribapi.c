@@ -1779,7 +1779,8 @@ gribapiDefInstitut(grib_handle *gh, int vlistID, int varID)
 static void
 gribapiDefModel(grib_handle *gh, int vlistID, int varID)
 {
-  int modelID = (vlistInqModel(vlistID) != CDI_UNDEFID) ? vlistInqModel(vlistID) : vlistInqVarModel(vlistID, varID);
+  int modelID = vlistInqModel(vlistID);
+  if (modelID == CDI_UNDEFID) modelID = vlistInqVarModel(vlistID, varID);
 
   if (modelID != CDI_UNDEFID) GRIB_CHECK(my_grib_set_long(gh, "generatingProcessIdentifier", modelInqGribID(modelID)), 0);
 }
