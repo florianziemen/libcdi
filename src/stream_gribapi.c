@@ -1539,11 +1539,9 @@ void gribapiDefInstitut(grib_handle *gh, int vlistID, int varID)
 static
 void gribapiDefModel(grib_handle *gh, int vlistID, int varID)
 {
-  int modelID;
+  int modelID = vlistInqModel(vlistID);
 
-  if ( vlistInqModel(vlistID) != CDI_UNDEFID )
-    modelID = vlistInqModel(vlistID);
-  else
+  if ( modelID == CDI_UNDEFID )
     modelID = vlistInqVarModel(vlistID, varID);
 
   if ( modelID != CDI_UNDEFID )
