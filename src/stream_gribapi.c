@@ -1330,11 +1330,8 @@ gribapiScanTimestep2(stream_t *streamptr)
   const int nrecords = streamScanInitRecords2(streamptr);
 
   int nrecs_scanned = nrecords;  // Only used for debug output
-  int rindex = 0;
-  while (true)
+  for (int rindex = 0; rindex <= nrecords; ++rindex)
     {
-      if (rindex > nrecords) break;
-
       const size_t recsize = gribGetSize(fileID);
       recpos = fileGetPos(fileID);
       if (recsize == 0)
@@ -1462,8 +1459,6 @@ gribapiScanTimestep2(stream_t *streamptr)
 
       grib_handle_delete(gh);
       gh = NULL;
-
-      rindex++;
     }
 
   if (gh) grib_handle_delete(gh);
@@ -1517,15 +1512,12 @@ gribapiScanTimestep(stream_t *streamptr)
       fileSetPos(fileID, streamptr->tsteps[tsID].position, SEEK_SET);
 
       int nrecs_scanned = streamptr->tsteps[0].nallrecs + streamptr->tsteps[1].nrecs * (tsID - 1);  // Only used for debug output.
-      int rindex = 0;
       off_t recpos = 0;
       DateTime datetime0 = { LONG_MIN, LONG_MIN };
       grib_handle *gh = NULL;
       char varname[256];
-      while (true)
+      for (int rindex = 0; rindex <= nrecs; ++rindex)
         {
-          if (rindex > nrecs) break;
-
           const size_t recsize = gribGetSize(fileID);
           recpos = fileGetPos(fileID);
           if (recsize == 0)
@@ -1656,8 +1648,6 @@ gribapiScanTimestep(stream_t *streamptr)
 
           grib_handle_delete(gh);
           gh = NULL;
-
-          rindex++;
         }
 
       if (gh) grib_handle_delete(gh);
