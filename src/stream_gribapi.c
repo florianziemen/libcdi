@@ -1155,8 +1155,8 @@ int gribapiScanTimestep2(stream_t * streamptr)
         {
           char paramstr[32];
           cdiParamToString(param, paramstr, sizeof(paramstr));
-          Message("%4d %8d name=%s id=%s ltype=%d lev1=%d lev2=%d vdate=%d vtime=%d",
-                  nrecs_scanned, (int)recpos, varname, paramstr, leveltype1, level1, level2, vdate, vtime);
+          Message("%4d %8lld name=%s id=%s ltype=%d lev1=%d lev2=%d vdate=%d vtime=%d",
+                  nrecs_scanned, (long long)recpos, varname, paramstr, leveltype1, level1, level2, vdate, vtime);
         }
 
       streamptr->tsteps[tsID].records[recID].size = recsize;
@@ -1385,7 +1385,7 @@ int gribapiScanTimestep(stream_t * streamptr)
           streamptr->tsteps[tsID].recIDs[rindex] = recID;
 
 	  if ( CDI_Debug )
-	    Message("%4d %8d %4d %8d %8d %6d", rindex+1, (int)recpos, param, level1, vdate, vtime);
+	    Message("%4d %8lld %4d %8d %8d %6d", rindex+1, (long long)recpos, param, level1, vdate, vtime);
 
 	  if ( gribapiVarCompare(compVar, streamptr->tsteps[tsID].records[recID], 0) != 0 )
 	    {
@@ -1400,7 +1400,7 @@ int gribapiScanTimestep(stream_t * streamptr)
 	  streamptr->tsteps[tsID].records[recID].size = recsize;
 
 	  if ( CDI_Debug )
-	    Message("%4d %8d %4d %8d %8d %6d", rindex, (int)recpos, param, level1, vdate, vtime);
+	    Message("%4d %8lld %4d %8d %8d %6d", rindex, (long long)recpos, param, level1, vdate, vtime);
 
 	  grib_handle_delete(gh);
 	  gh = NULL;
