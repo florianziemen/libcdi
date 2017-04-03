@@ -119,10 +119,13 @@ static int
 cdiPioConfCompareP(void *p1, void *p2)
 {
   struct cdiPioConf *a = p1, *b = p2;
+  bool callBackDifference = false;
+  for (size_t i = 0; i < CDIPIO_NUM_CALLBACKS; ++i)
+    callBackDifference |= (a->callbacks[i] != b->callbacks[i]);
   return (a->IOMode != b->IOMode)
     | (a->clientServerRole != b->clientServerRole)
     | (a->partInflate != b->partInflate)
-    | (a->postCommSetupActions != b->postCommSetupActions);
+    | callBackDifference;
 }
 
 static void
@@ -159,7 +162,7 @@ cdiPioConfPrintP(void *cdiPioConfPtr, FILE * fp)
           conf->stripify ? "en" : "dis",
           conf->cacheRedists ? "en" : "dis",
           conf->cacheXmaps ? "en" : "dis",
-          (void *)conf->postCommSetupActions);
+          (void *)conf->callbacks[CDIPIO_CALLBACK_POSTCOMMSETUP]);
 }
 
 static inline size_t
@@ -185,7 +188,8 @@ int cdiPioConfCreate(void)
   conf->IOMode = PIO_NONE;
   conf->clientServerRole = PIO_ROLE_CLIENT;
   conf->partInflate = 1.1f;
-  conf->postCommSetupActions = cdiPioNoPostCommSetup;
+  for (size_t i = 0; i < CDIPIO_NUM_CALLBACKS; ++i)
+    conf->callbacks[i] = cdiPioNoPostCommSetup;
   conf->largePageAlign = false;
   conf->cacheRedists = conf->cacheXmaps = true;
   conf->recordAggBufLimMB = 128;
@@ -246,17 +250,42 @@ int cdiPioConfGetCSRole(int confResH)
 }
 
 void
+cdiPioConfSetCallBackActions(int confResH, int trigger,
+                             void (*callback)(void))
+{
+  struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
+  if (trigger >= 0 && trigger < CDIPIO_NUM_CALLBACKS)
+    {
+      conf->callbacks[trigger] = callback;
+    }
+  else
+    Error("invalid trigger callback query: %d", trigger);
+}
+
+void (*cdiPioConfGetCallBackActions(int confResH, int trigger))(void)
+{
+  void (*callback)(void) = (void (*)(void))0;
+  struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
+  if (trigger >= 0 && trigger < CDIPIO_NUM_CALLBACKS)
+    {
+      callback = conf->callbacks[trigger];
+    }
+  else
+    Error("invalid trigger callback query: %d", trigger);
+  return callback;
+}
+
+void
 cdiPioConfSetPostCommSetupActions(int confResH,
                                   void (*postCommSetupActions)(void))
 {
-  struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
-  conf->postCommSetupActions = postCommSetupActions;
+  cdiPioConfSetCallBackActions(confResH, CDIPIO_CALLBACK_POSTCOMMSETUP,
+                               postCommSetupActions);
 }
 
 void (*cdiPioConfGetPostCommSetupActions(int confResH))(void)
 {
-  struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
-  return conf->postCommSetupActions;
+  return cdiPioConfGetCallBackActions(confResH, CDIPIO_CALLBACK_POSTCOMMSETUP);
 }
 
 void cdiPioConfSetLargePageAlign(int confResH, int largePageAlign)
@@ -381,3 +410,12 @@ int cdiPioConfGetStripeConversion(int confResH)
   return conf->stripify;
 }
 
+/*
+ * Local Variables:
+ * c-file-style: "Java"
+ * c-basic-offset: 2
+ * indent-tabs-mode: nil
+ * show-trailing-whitespace: t
+ * require-trailing-newline: t
+ * End:
+ */
