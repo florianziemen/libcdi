@@ -1652,11 +1652,11 @@ cdiPioServerStreamClose(stream_t *streamptr, int recordBufIsToBeDeleted)
   int fileID   = streamptr->fileID;
   int filetype = streamptr->filetype;
   int vlistID = streamptr->vlistID;
+  const struct cdiPioConf *conf = cdiPioGetConf();
   if (vlistID != CDI_UNDEFID)
     {
       size_t maxNumStreamWrites = getMaxNumStreamWrites(streamptr);
       neededDstIdxlistCacheSize -= maxNumStreamWrites;
-      const struct cdiPioConf *conf = cdiPioGetConf();
       if (conf->cacheXmaps)
         neededXmapCacheSize -= maxNumStreamWrites;
     }
@@ -1700,6 +1700,9 @@ cdiPioServerStreamClose(stream_t *streamptr, int recordBufIsToBeDeleted)
       removeID(&openStreams, streamID);
       removeID(&openFiles, fileID);
     }
+  void (*streamCloseCallBack)(int streamID)
+    = (void (*)(int))conf->callbacks[CDIPIO_CALLBACK_POSTSTREAMCLOSE];
+  streamCloseCallBack(streamptr->self);
 }
 
 #ifdef HAVE_LIBNETCDF

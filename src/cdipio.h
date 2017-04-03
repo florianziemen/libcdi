@@ -141,13 +141,40 @@ void cdiPioConfSetCSRole(int confResH, int CSRole);
 int cdiPioConfGetCSRole(int confResH);
 
 /* cdiPioConfSetPostCommSetupActions: set function to be called after
- * setup of client/server communications of configuration object */
+ * setup of client/server communications of configuration object.
+ * Deprecated: use cdiPioConfSetCallBackActions with
+ * trigger == CDIPIO_CALLBACK_POSTCOMMSETUP in new programs */
 void cdiPioConfSetPostCommSetupActions(int confResH,
                                        void (*postCommSetupActions)(void));
 
 /* cdiPioConfGetPostCommSetupActions: get function to be called after
- * setup of client/server communications from configuration object */
+ * setup of client/server communications from configuration object.
+ * Deprecated: use cdiPioConfGetCallBackActions with
+ * trigger == CDIPIO_CALLBACK_POSTCOMMSETUP in new programs. */
 void (*cdiPioConfGetPostCommSetupActions(int confResH))(void);
+
+/* CDIPIO_CALLBACK_POSTCOMMSETUP: trigger number of the hook called
+ * after communication has been established. This is the same hook
+ * previously setup with cdiPioConfSetPostCommSetupActions, takes no
+ * argument */
+#define CDIPIO_CALLBACK_POSTCOMMSETUP   0
+/* CDIPIO_CALLBACK_POSTSTREAMCLOSE: trigger number for callback
+ * invoked after each streamClose on the collector side.
+ * Accepts the streamID as int parameter, i.e. use INTEGER, VALUE and
+ * BIND(C) on Fortran side
+ */
+#define CDIPIO_CALLBACK_POSTSTREAMCLOSE 1
+
+/* cdiPioConfSetCallBack: set function to be called at
+ * indicated trigger of configuration object, action will be cast to
+ * the appropriate type as indicated for the respective trigger */
+void cdiPioConfSetCallBackActions(int confResH,
+                                  int trigger,
+                                  void (*action)(void));
+
+/* cdiPioConfGetCallBack: query function to be called at
+ * indicated trigger of configuration object */
+void (*cdiPioConfGetCallBackActions(int confResH, int trigger))(void);
 
 /* cdiPioConfSetLargePageAlign should block buffer be aligned to
  * large pages instead of normal pages? */
