@@ -497,7 +497,7 @@ cdiPioInit(MPI_Comm commGlob, int confResH, int *pioNamespace)
       namespaceSetActive(serverNamespace);
       namespaceSwitchSet(cdiPioExtraNSKeys[cdiPioEKConf], NSSW_DATA(conf));
       cdiPioSerializeSetMPI();
-      conf->postCommSetupActions();
+      conf->callbacks[CDIPIO_CALLBACK_POSTCOMMSETUP]();
       cdiPioFileWritingInit();
       if (commInqRankColl() >= 0)
         {
