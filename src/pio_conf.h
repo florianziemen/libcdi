@@ -17,6 +17,10 @@ typedef Xt_xmap (*xmap_new_func_ptr)(Xt_idxlist src_idxlist,
                                      Xt_idxlist dst_idxlist,
                                      MPI_Comm comm);
 
+enum {
+  CDIPIO_NUM_CALLBACKS = 2,
+};
+
 /*
  * cdiPioConf is meant to be internal to the library and not to be
  * used directly if possible, CDI-PIO users should rely on the
@@ -28,7 +32,7 @@ struct cdiPioConf {
   float partInflate;
   unsigned recordAggBufLimMB;
   size_t writeAggBufLim;
-  void (*postCommSetupActions)(void);
+  void (*callbacks[CDIPIO_NUM_CALLBACKS])(void);
   xmap_new_func_ptr xmap_new;
   int maxPathLen;
   unsigned short aioQueueDepth;
