@@ -2668,6 +2668,7 @@ static void gribapiSetUvRelativeToGrid(grib_handle *gh, int mode)
     # ^ full domain data
   */
 
+#ifdef HIRLAM_EXTENSIONS
 static void
 verticallyFlipGridDefinitionWhenScanningModeChanged(grib_handle *gh, double yfirst, double ylast, double yinc )
 {
@@ -2719,7 +2720,6 @@ verticallyFlipGridDefinitionWhenScanningModeChanged(grib_handle *gh, double yfir
   }
 }
 
-#ifdef HIRLAM_EXTENSIONS
 static void
 convertDataScanningMode(int scanModeIN, int scanModeOUT, double *data,
                         int gridsize, int iDim, int jDim)
