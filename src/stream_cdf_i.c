@@ -2780,10 +2780,10 @@ void cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 	      if ( ncvars[zvarid].bounds != CDI_UNDEFID )
 		{
 		  int nbdims = ncvars[ncvars[zvarid].bounds].ndims;
-		  if ( nbdims == 2 )
+		  if ( nbdims == 2 || is_scalar )
 		    {
-		      int nlevel  = (int)ncdims[ncvars[ncvars[zvarid].bounds].dimids[0]].len;
-		      int nvertex = (int)ncdims[ncvars[ncvars[zvarid].bounds].dimids[1]].len;
+		      int nlevel  = is_scalar ? 1 : (int)ncdims[ncvars[ncvars[zvarid].bounds].dimids[0]].len;
+		      int nvertex = (int)ncdims[ncvars[ncvars[zvarid].bounds].dimids[1-is_scalar]].len;
 		      if ( nlevel == zsize && nvertex == 2 )
 			{
 			  with_bounds = true;
