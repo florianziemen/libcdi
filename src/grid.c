@@ -114,6 +114,8 @@ void grid_init(grid_t *gridptr)
   gridptr->lcc.lat2      = 0.0;
   gridptr->lcc.xinc      = 0.0;
   gridptr->lcc.yinc      = 0.0;
+  gridptr->lcc.a         = 0.0;
+  gridptr->lcc.rf        = 0.0;
   gridptr->lcc.projflag  = 0;
   gridptr->lcc.scanflag  = 0;
   gridptr->lcc.defined   = FALSE;
@@ -1008,6 +1010,13 @@ void gridVerifyProj(int gridID)
       gridptr->y.stdname = xystdname_tab[grid_xystdname_grid_latlon][1];
       gridSetName(gridptr->x.units, "degrees");
       gridSetName(gridptr->y.units, "degrees");
+    }
+  else if ( projtype == CDI_PROJ_LCC )
+    {
+      gridptr->x.stdname = xystdname_tab[grid_xystdname_projection][0];
+      gridptr->y.stdname = xystdname_tab[grid_xystdname_projection][1];
+      gridSetName(gridptr->x.units, "m");
+      gridSetName(gridptr->y.units, "m");
     }
 }
 
@@ -2474,9 +2483,7 @@ void gridComplete(grid_t *grid)
 	    double *xvals = (double *) Malloc((size_t)grid->x.size * sizeof (double));
 	    gridGenXvals(grid->x.size, grid->x.first, grid->x.last, grid->x.inc, xvals);
 	    grid->x.vals = xvals;
-	    /*
-	    gridDefXinc(gridID, grid->x.inc);
-	    */
+	    // gridDefXinc(gridID, grid->x.inc);
 	  }
 
 	if ( grid->y.flag == 2 )
@@ -2485,9 +2492,7 @@ void gridComplete(grid_t *grid)
 	    double *yvals = (double *) Malloc((size_t)grid->y.size * sizeof (double));
 	    gridGenYvals(gridtype, grid->y.size, grid->y.first, grid->y.last, grid->y.inc, yvals);
 	    grid->y.vals = yvals;
-	    /*
-	    gridDefYinc(gridID, grid->y.inc);
-	    */
+	    // gridDefYinc(gridID, grid->y.inc);
 	  }
 
 	if ( grid->projtype == CDI_PROJ_RLL )
@@ -3667,6 +3672,32 @@ void gridDefParamLCC(int gridID, double originLon, double originLat, double lonP
       gridptr->lcc.defined   = TRUE;
       gridMark4Update(gridID);
     }
+
+#ifdef TEST_LCC
+  cdiGridDefKeyStr(gridID, CDI_KEY_MAPPING, CDI_MAX_NAME, "Lambert_Conformal");
+
+  const char *mapping = "lambert_conformal_conic";
+  cdiGridDefKeyStr(gridID, CDI_KEY_MAPNAME, CDI_MAX_NAME, mapping);
+  cdiDefAttTxt(gridID, CDI_GLOBAL, "grid_mapping_name", strlen(mapping), mapping);
+  int nlats = 0;
+  double lats[2];
+  lats[nlats++] = lat1;
+  if ( IS_NOT_EQUAL(lat1, lat2) ) lats[nlats++] = lat2;
+  cdiDefAttFlt(gridID, CDI_GLOBAL, "standard_parallel", CDI_DATATYPE_FLT64, nlats, lats);
+  cdiDefAttFlt(gridID, CDI_GLOBAL, "longitude_of_central_meridian", CDI_DATATYPE_FLT64, 1, &lonParY);
+  cdiDefAttFlt(gridID, CDI_GLOBAL, "latitude_of_projection_origin", CDI_DATATYPE_FLT64, 1, &lat2);
+  double a = 0;
+  if ( a > 0 ) cdiDefAttFlt(gridID, CDI_GLOBAL, "earth_radius", CDI_DATATYPE_FLT64, 1, &a);
+  double rf = 0;
+  if ( rf > 0 ) cdiDefAttFlt(gridID, CDI_GLOBAL, "inverse_flattening", CDI_DATATYPE_FLT64, 1, &rf);
+  cdiDefAttFlt(gridID, CDI_GLOBAL, "longitudeOfFirstGridPointInDegrees", CDI_DATATYPE_FLT64, 1, &originLon);
+  cdiDefAttFlt(gridID, CDI_GLOBAL, "latitudeOfFirstGridPointInDegrees", CDI_DATATYPE_FLT64, 1, &originLat);
+
+  //grid_t *gridptr = grid_to_pointer(gridID);
+  gridptr->projtype = CDI_PROJ_LCC;
+
+  gridVerifyProj(gridID);
+#endif
 }
 
 /*

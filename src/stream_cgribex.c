@@ -41,12 +41,7 @@ int cgribexGetGridType(int *isec2)
     case  GRIB1_GTYPE_LATLON:     { gridtype = GRID_LONLAT;     break; }
     case  GRIB1_GTYPE_LATLON_ROT: { gridtype = GRID_PROJECTION; break; }
     case  GRIB1_GTYPE_LCC:        { gridtype = GRID_LCC;        break; }
-    case  GRIB1_GTYPE_GAUSSIAN:   { if ( ISEC2_Reduced )
-	                              gridtype = GRID_GAUSSIAN_REDUCED;
-                         	    else
-				      gridtype = GRID_GAUSSIAN;
-          	                    break;
-                                  }
+    case  GRIB1_GTYPE_GAUSSIAN:   { gridtype = ISEC2_Reduced ? GRID_GAUSSIAN_REDUCED : GRID_GAUSSIAN; break; }
     case  GRIB1_GTYPE_SPECTRAL:   { gridtype = GRID_SPECTRAL;   break; }
     case  GRIB1_GTYPE_GME:        { gridtype = GRID_GME;        break; }
     }
@@ -287,7 +282,7 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid, i
         Error("numberOfPoints (%d) and gridSize (%d) differ!",
               ISEC4_NumValues, ISEC2_NumLon*ISEC2_NumLat);
 
-      grid->size  = ISEC4_NumValues;
+      grid->size   = ISEC4_NumValues;
       grid->x.size = ISEC2_NumLon;
       grid->y.size = ISEC2_NumLat;
 
@@ -394,6 +389,21 @@ void cgribexAddRecord(stream_t * streamptr, int param, int *isec1, int *isec2, d
           double ypole = - ISEC2_LatSP*0.001;
           double angle = - FSEC2_RotAngle;
           gridDefParamRLL(gridID, xpole, ypole, angle);
+        }
+      else if ( gridptr->projtype == CDI_PROJ_LCC )
+        {
+          double lcc_xinc      = ISEC2_Lambert_dx;
+          double lcc_yinc      = ISEC2_Lambert_dy;
+          double lcc_originLon = ISEC2_FirstLon * 0.001;
+          double lcc_originLat = ISEC2_FirstLat * 0.001;
+          double lcc_lonParY   = ISEC2_Lambert_Lov * 0.001;
+          double lcc_lat1      = ISEC2_Lambert_LatS1 * 0.001;
+          double lcc_lat2      = ISEC2_Lambert_LatS2 * 0.001;
+          double lcc_projflag  = ISEC2_Lambert_ProjFlag;
+          double lcc_scanflag  = (short)ISEC2_ScanFlag;
+          gridDefParamLCC(gridID, lcc_originLon, lcc_originLat, lcc_lonParY,
+                          lcc_lat1, lcc_lat2, lcc_xinc, lcc_yinc,
+                          lcc_projflag, lcc_scanflag);
         }
     }
   else
@@ -677,10 +687,7 @@ int cgribexScanTimestep1(stream_t *streamptr)
 
       gribDateTime(isec1, &vdate, &vtime);
 
-      if ( ISEC4_NumBits > 0 && ISEC4_NumBits <= 32 )
-	datatype = ISEC4_NumBits;
-      else
-        datatype = CDI_DATATYPE_PACK;
+      datatype = (ISEC4_NumBits > 0 && ISEC4_NumBits <= 32) ? ISEC4_NumBits : CDI_DATATYPE_PACK;
 
       if ( nrecs == 0 )
 	{
