@@ -2,6 +2,10 @@
 
 	* Version 1.8.1 released
 
+2017-04-09  Uwe Schulzweida
+
+	* Refactor GRID_LCC to GRID_PROJECTION
+
 2017-04-05  Uwe Schulzweida
 
 	* Scalar Z-Coordinate: added support for bounds (bug fix)

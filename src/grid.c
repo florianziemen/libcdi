@@ -83,6 +83,29 @@ grid_t *grid_to_pointer(int gridID)
 
 #define gridMark4Update(gridID) reshSetStatus(gridID, &gridOps, RESH_DESYNC_IN_USE)
 
+static
+bool cdiInqAttConvertedToFloat(int gridID, int atttype, const char *attname, int attlen, double *attflt)
+{
+  bool status = true;
+
+  if ( atttype == CDI_DATATYPE_INT32 )
+    {
+      int attint[attlen];
+      cdiInqAttInt(gridID, CDI_GLOBAL, attname, attlen, attint);
+      for ( int i = 0; i < attlen; ++i ) attflt[i] = (double)attint[i];
+    }
+  else if ( atttype == CDI_DATATYPE_FLT32 || atttype == CDI_DATATYPE_FLT64 )
+    {
+      cdiInqAttFlt(gridID, CDI_GLOBAL, attname, attlen, attflt);
+    }
+  else
+    {
+      status = false;
+    }
+
+  return status;
+}
+
 
 void grid_init(grid_t *gridptr)
 {
@@ -106,19 +129,6 @@ void grid_init(grid_t *gridptr)
   gridptr->y.first       = 0.0;
   gridptr->y.last        = 0.0;
   gridptr->y.inc         = 0.0;
-
-  gridptr->lcc.originLon = 0.0;
-  gridptr->lcc.originLat = 0.0;
-  gridptr->lcc.lonParY   = 0.0;
-  gridptr->lcc.lat1      = 0.0;
-  gridptr->lcc.lat2      = 0.0;
-  gridptr->lcc.xinc      = 0.0;
-  gridptr->lcc.yinc      = 0.0;
-  gridptr->lcc.a         = 0.0;
-  gridptr->lcc.rf        = 0.0;
-  gridptr->lcc.projflag  = 0;
-  gridptr->lcc.scanflag  = 0;
-  gridptr->lcc.defined   = FALSE;
 
   gridptr->gme.nd        = 0;
   gridptr->gme.ni        = 0;
@@ -468,7 +478,7 @@ void gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double y
 @Parameter
     @Item  gridtype  The type of the grid, one of the set of predefined CDI grid types.
                      The valid CDI grid types are @func{GRID_GENERIC}, @func{GRID_GAUSSIAN},
-                     @func{GRID_LONLAT}, @func{GRID_LCC}, @func{GRID_SPECTRAL},
+                     @func{GRID_LONLAT}, @func{GRID_PROJECTION}, @func{GRID_SPECTRAL},
                      @func{GRID_GME}, @func{GRID_CURVILINEAR} and @func{GRID_UNSTRUCTURED}.
     @Item  size      Number of gridpoints.
 
@@ -1035,7 +1045,7 @@ The function @func{gridInqType} returns the type of a Grid.
 @func{gridInqType} returns the type of the grid,
 one of the set of predefined CDI grid types.
 The valid CDI grid types are @func{GRID_GENERIC}, @func{GRID_GAUSSIAN},
-@func{GRID_LONLAT}, @func{GRID_LCC}, @func{GRID_SPECTRAL}, @func{GRID_GME},
+@func{GRID_LONLAT}, @func{GRID_PROJECTION}, @func{GRID_SPECTRAL}, @func{GRID_GME},
 @func{GRID_CURVILINEAR} and @func{GRID_UNSTRUCTURED}.
 
 @EndFunction
@@ -1814,13 +1824,11 @@ void gridInqParamRLL(int gridID, double *xpole, double *ypole, double *angle)
       for ( int iatt = 0; iatt < natts; ++iatt )
         {
           cdiInqAtt(gridID, CDI_GLOBAL, iatt, attname, &atttype, &attlen);
-
           if ( attlen != 1 ) continue;
 
-          if ( atttype == CDI_DATATYPE_FLT32 || atttype == CDI_DATATYPE_FLT64 )
+          double attflt;
+          if ( cdiInqAttConvertedToFloat(gridID, atttype, attname, attlen, &attflt) )
             {
-              double attflt;
-              cdiInqAttFlt(gridID, CDI_GLOBAL, attname, attlen, &attflt);
               if      ( strcmp(attname, "grid_north_pole_longitude") == 0 ) *xpole = attflt;
               else if ( strcmp(attname, "grid_north_pole_latitude")  == 0 ) *ypole = attflt;
               else if ( strcmp(attname, "north_pole_grid_longitude") == 0 ) *angle = attflt;
@@ -2283,9 +2291,6 @@ int gridCompareP(void *gridptr1, void *gridptr2)
 
   if ( g1->type          != g2->type         ) return differ;
   if ( g1->prec          != g2->prec         ) return differ;
-  if ( g1->lcc.projflag  != g2->lcc.projflag ) return differ;
-  if ( g1->lcc.scanflag  != g2->lcc.scanflag ) return differ;
-  if ( g1->lcc.defined   != g2->lcc.defined  ) return differ;
   if ( g1->isCyclic      != g2->isCyclic     ) return differ;
   if ( g1->x.flag        != g2->x.flag       ) return differ;
   if ( g1->y.flag        != g2->y.flag       ) return differ;
@@ -2309,13 +2314,6 @@ int gridCompareP(void *gridptr1, void *gridptr2)
   if ( IS_NOT_EQUAL(g1->y.last        , g2->y.last)        ) return differ;
   if ( IS_NOT_EQUAL(g1->x.inc	      , g2->x.inc)         ) return differ;
   if ( IS_NOT_EQUAL(g1->y.inc	      , g2->y.inc)         ) return differ;
-  if ( IS_NOT_EQUAL(g1->lcc.originLon , g2->lcc.originLon) ) return differ;
-  if ( IS_NOT_EQUAL(g1->lcc.originLat , g2->lcc.originLat) ) return differ;
-  if ( IS_NOT_EQUAL(g1->lcc.lonParY   , g2->lcc.lonParY)   ) return differ;
-  if ( IS_NOT_EQUAL(g1->lcc.lat1      , g2->lcc.lat1)      ) return differ;
-  if ( IS_NOT_EQUAL(g1->lcc.lat2      , g2->lcc.lat2)      ) return differ;
-  if ( IS_NOT_EQUAL(g1->lcc.xinc      , g2->lcc.xinc)      ) return differ;
-  if ( IS_NOT_EQUAL(g1->lcc.yinc      , g2->lcc.yinc)      ) return differ;
   if ( IS_NOT_EQUAL(g1->uvRelativeToGrid     , g2->uvRelativeToGrid)     ) return differ;
   if ( IS_NOT_EQUAL(g1->scanningMode         , g2->scanningMode)         ) return differ;
 
@@ -2466,7 +2464,6 @@ void gridComplete(grid_t *grid)
     case GRID_UNSTRUCTURED:
     case GRID_CURVILINEAR:
     case GRID_GENERIC:
-    case GRID_LCC:
     case GRID_PROJECTION:
       {
 	if ( grid->x.size > 0 ) gridDefXsize(gridID, grid->x.size);
@@ -2507,22 +2504,13 @@ void gridComplete(grid_t *grid)
 	    if ( grid->y.units[0] == 0 ) strcpy(grid->y.units, "degrees");
 	  }
 
-        switch (gridtype)
+        if ( gridtype == GRID_UNSTRUCTURED )
           {
-          case GRID_LCC:
-            gridDefParamLCC(gridID, grid->lcc.originLon, grid->lcc.originLat, grid->lcc.lonParY,
-                       grid->lcc.lat1, grid->lcc.lat2, grid->lcc.xinc, grid->lcc.yinc,
-                       grid->lcc.projflag, grid->lcc.scanflag);
-            break;
-          case GRID_UNSTRUCTURED:
-            {
-              int number = grid->number;
-              int position = grid->position >= 0 ? grid->position : 0;
-              if ( number > 0 ) gridDefNumber(gridID, number);
-              gridDefPosition(gridID, position);
-            }
-            break;
-	  }
+            int number = grid->number;
+            int position = grid->position >= 0 ? grid->position : 0;
+            if ( number > 0 ) gridDefNumber(gridID, number);
+            gridDefPosition(gridID, position);
+          }
 
 	break;
       }
@@ -2616,7 +2604,7 @@ int gridGenerate(const grid_t *grid)
   int valdef_group1 = 0;
   static const int valdef_group1_tab[] = {
     GRID_LONLAT, GRID_GAUSSIAN, GRID_UNSTRUCTURED, GRID_CURVILINEAR,
-    GRID_GENERIC, GRID_LCC, GRID_PROJECTION
+    GRID_GENERIC, GRID_PROJECTION
   };
   for ( size_t i = 0; i < sizeof (valdef_group1_tab) / sizeof (valdef_group1_tab[0]); ++i)
     valdef_group1 |= (gridtype == valdef_group1_tab[i]);
@@ -2641,15 +2629,6 @@ int gridGenerate(const grid_t *grid)
   gridptr->y.inc = grid->y.inc;
   if ( valdef_group1 && grid->area)
     gridDefArea(gridID, grid->area);
-  gridptr->lcc.originLon = grid->lcc.originLon;
-  gridptr->lcc.originLat = grid->lcc.originLat;
-  gridptr->lcc.lonParY = grid->lcc.lonParY;
-  gridptr->lcc.lat1 = grid->lcc.lat1;
-  gridptr->lcc.lat2 = grid->lcc.lat2;
-  gridptr->lcc.xinc = grid->lcc.xinc;
-  gridptr->lcc.yinc = grid->lcc.yinc;
-  gridptr->lcc.projflag = grid->lcc.projflag;
-  gridptr->lcc.scanflag = grid->lcc.scanflag;
   gridptr->number = grid->number;
   gridptr->position = grid->position;
   gridptr->uvRelativeToGrid       = grid->uvRelativeToGrid;
@@ -3487,27 +3466,6 @@ void gridPrintKernel(int gridID, int opt, FILE *fp)
 
 	break;
       }
-    case GRID_LCC:
-      {
-	double originLon = 0, originLat = 0, lonParY = 0, lat1 = 0, lat2 = 0, xincm = 0, yincm = 0;
-	int projflag = 0, scanflag = 0;
-	gridInqParamLCC(gridID, &originLon, &originLat, &lonParY, &lat1, &lat2, &xincm, &yincm,
-                        &projflag, &scanflag);
-
-	fprintf(fp,
-                "originLon = %.*g\n"
-                "originLat = %.*g\n"
-                "lonParY   = %.*g\n"
-                "lat1      = %.*g\n"
-                "lat2      = %.*g\n"
-                "xinc      = %.*g\n"
-                "yinc      = %.*g\n"
-                "projection = %s\n",
-                dig, originLon, dig, originLat, dig, lonParY,
-                dig, lat1, dig, lat2, dig, xincm, dig, yincm,
-                (projflag & 128) == 0 ? "northpole" : "southpole");
-	break;
-      }
     case GRID_SPECTRAL:
       {
         fprintf(fp, "truncation = %d\n"
@@ -3631,123 +3589,112 @@ const double *gridInqYvalsPtr(int gridID)
 @Function  gridDefParamLCC
 @Title     Define the parameter of a Lambert Conformal Conic grid
 
-@Prototype void gridDefParamLCC(int gridID, double originLon, double originLat, double lonParY, double lat1, double lat2, double xinc, double yinc, int projflag, int scanflag)
+@Prototype void gridDefParamLCC(int gridID, double a, double rf, double xval_0, double yval_0, double lon_0, double lat_1, double lat_2)
 @Parameter
     @Item  gridID    Grid ID, from a previous call to @fref{gridCreate}.
-    @Item  originLon Longitude of the first grid point.
-    @Item  originLat Latitude of the first grid point.
-    @Item  lonParY   The East longitude of the meridian which is parallel to the Y-axis.
-    @Item  lat1      First latitude from the pole at which the secant cone cuts the sphere.
-    @Item  lat2      Second latitude at which the secant cone cuts the sphere.
-    @Item  xinc      X-direction grid lenght in meter.
-    @Item  yinc      Y-direction grid lenght in meter.
-    @Item  projflag  Projection centre flag.
-    @Item  scanflag  Scanning mode flag.
+    @Item  a         Earth radius.
+    @Item  rf        Inverse flattening
+    @Item  xval_0    Longitude of the first grid point.
+    @Item  yval_0    Latitude of the first grid point.
+    @Item  lon_0     The East longitude of the meridian which is parallel to the Y-axis.
+    @Item  lat_1     First latitude from the pole at which the secant cone cuts the sphere.
+    @Item  lat_2     Second latitude at which the secant cone cuts the sphere.
 
 @Description
 The function @func{gridDefParamLCC} defines the parameter of a Lambert Conformal Conic grid.
 
 @EndFunction
 */
-void gridDefParamLCC(int gridID, double originLon, double originLat, double lonParY,
-                double lat1, double lat2, double xinc, double yinc,
-                int projflag, int scanflag)
+void gridDefParamLCC(int gridID, double a, double rf, double xval_0, double yval_0, double lon_0, double lat_1, double lat_2)
 {
-  grid_t *gridptr = grid_to_pointer(gridID);
-
-  if ( gridptr->type != GRID_LCC )
-    Warning("Definition of LCC grid for %s grid not allowed!",
-	    gridNamePtr(gridptr->type));
-  else
-    {
-      gridptr->lcc.originLon = originLon;
-      gridptr->lcc.originLat = originLat;
-      gridptr->lcc.lonParY   = lonParY;
-      gridptr->lcc.lat1      = lat1;
-      gridptr->lcc.lat2      = lat2;
-      gridptr->lcc.xinc      = xinc;
-      gridptr->lcc.yinc      = yinc;
-      gridptr->lcc.projflag  = projflag;
-      gridptr->lcc.scanflag  = (short)scanflag;
-      gridptr->lcc.defined   = TRUE;
-      gridMark4Update(gridID);
-    }
-
-#ifdef TEST_LCC
   cdiGridDefKeyStr(gridID, CDI_KEY_MAPPING, CDI_MAX_NAME, "Lambert_Conformal");
 
-  const char *mapping = "lambert_conformal_conic";
-  cdiGridDefKeyStr(gridID, CDI_KEY_MAPNAME, CDI_MAX_NAME, mapping);
-  cdiDefAttTxt(gridID, CDI_GLOBAL, "grid_mapping_name", strlen(mapping), mapping);
+  const char *mapname = "lambert_conformal_conic";
+  cdiGridDefKeyStr(gridID, CDI_KEY_MAPNAME, CDI_MAX_NAME, mapname);
+  cdiDefAttTxt(gridID, CDI_GLOBAL, "grid_mapping_name", strlen(mapname), mapname);
   int nlats = 0;
   double lats[2];
-  lats[nlats++] = lat1;
-  if ( IS_NOT_EQUAL(lat1, lat2) ) lats[nlats++] = lat2;
+  lats[nlats++] = lat_1;
+  if ( IS_NOT_EQUAL(lat_1, lat_2) ) lats[nlats++] = lat_2;
   cdiDefAttFlt(gridID, CDI_GLOBAL, "standard_parallel", CDI_DATATYPE_FLT64, nlats, lats);
-  cdiDefAttFlt(gridID, CDI_GLOBAL, "longitude_of_central_meridian", CDI_DATATYPE_FLT64, 1, &lonParY);
-  cdiDefAttFlt(gridID, CDI_GLOBAL, "latitude_of_projection_origin", CDI_DATATYPE_FLT64, 1, &lat2);
-  double a = 0;
+  cdiDefAttFlt(gridID, CDI_GLOBAL, "longitude_of_central_meridian", CDI_DATATYPE_FLT64, 1, &lon_0);
+  cdiDefAttFlt(gridID, CDI_GLOBAL, "latitude_of_projection_origin", CDI_DATATYPE_FLT64, 1, &lat_2);
   if ( a > 0 ) cdiDefAttFlt(gridID, CDI_GLOBAL, "earth_radius", CDI_DATATYPE_FLT64, 1, &a);
-  double rf = 0;
   if ( rf > 0 ) cdiDefAttFlt(gridID, CDI_GLOBAL, "inverse_flattening", CDI_DATATYPE_FLT64, 1, &rf);
-  cdiDefAttFlt(gridID, CDI_GLOBAL, "longitudeOfFirstGridPointInDegrees", CDI_DATATYPE_FLT64, 1, &originLon);
-  cdiDefAttFlt(gridID, CDI_GLOBAL, "latitudeOfFirstGridPointInDegrees", CDI_DATATYPE_FLT64, 1, &originLat);
+  cdiDefAttFlt(gridID, CDI_GLOBAL, "longitudeOfFirstGridPointInDegrees", CDI_DATATYPE_FLT64, 1, &xval_0);
+  cdiDefAttFlt(gridID, CDI_GLOBAL, "latitudeOfFirstGridPointInDegrees", CDI_DATATYPE_FLT64, 1, &yval_0);
 
-  //grid_t *gridptr = grid_to_pointer(gridID);
+  grid_t *gridptr = grid_to_pointer(gridID);
   gridptr->projtype = CDI_PROJ_LCC;
 
   gridVerifyProj(gridID);
-#endif
 }
 
 /*
 @Function  gridInqParamLCC
 @Title     Get the parameter of a Lambert Conformal Conic grid
 
-@Prototype void gridInqParamLCC(int gridID, double *originLon, double *originLat, double *lonParY, double *lat1, double *lat2, double *xinc, double *yinc, int *projflag, int *scanflag)
+@Prototype void gridInqParamLCC(int gridID, double *a, double *rf, double *xval_0, double *yval_0, double *lon_0, double *lat_1, double *lat_2)
 @Parameter
     @Item  gridID    Grid ID, from a previous call to @fref{gridCreate} or @fref{vlistInqVarGrid}.
-    @Item  originLon Longitude of the first grid point.
-    @Item  originLat Latitude of the first grid point.
-    @Item  lonParY   The East longitude of the meridian which is parallel to the Y-axis.
-    @Item  lat1      First latitude from the pole at which the secant cone cuts the sphere.
-    @Item  lat2      Second latitude at which the secant cone cuts the sphere.
-    @Item  xinc      X-direction grid lenght in meter.
-    @Item  yinc      Y-direction grid lenght in meter.
-    @Item  projflag  Projection centre flag.
-    @Item  scanflag  Scanning mode flag.
+    @Item  a         Earth radius.
+    @Item  rf        Inverse flattening
+    @Item  xval_0    Longitude of the first grid point.
+    @Item  yval_0    Latitude of the first grid point.
+    @Item  lon_0     The East longitude of the meridian which is parallel to the Y-axis.
+    @Item  lat_1     First latitude from the pole at which the secant cone cuts the sphere.
+    @Item  lat_2     Second latitude at which the secant cone cuts the sphere.
 
 @Description
 The function @func{gridInqParamLCC} returns the parameter of a Lambert Conformal Conic grid.
 
 @EndFunction
 */
-void gridInqParamLCC(int gridID, double *originLon, double *originLat, double *lonParY,
-                double *lat1, double *lat2, double *xinc, double *yinc,
-                int *projflag, int *scanflag)
+void gridInqParamLCC(int gridID, double *a, double *rf, double *xval_0, double *yval_0, double *lon_0,
+                     double *lat_1, double *lat_2)
 {
-  grid_t *gridptr = grid_to_pointer(gridID);
+  double x_0, y_0, lat_0;
+  *a = 0; *rf = 0;
+  *xval_0 = 0; *yval_0 = 0; *lon_0 = 0;
+  *lat_1 = 0; *lat_2 = 0;
 
-  if ( gridptr->type != GRID_LCC )
-    Warning("Inquire of LCC grid definition for %s grid not allowed!",
-	    gridNamePtr(gridptr->type));
-  else
+  const char *projection = "lambert_conformal_conic";
+  char mapname[CDI_MAX_NAME]; mapname[0] = 0;
+  cdiGridInqKeyStr(gridID, CDI_KEY_MAPNAME, CDI_MAX_NAME, mapname);
+  if ( mapname[0] && strcmp(mapname, projection) == 0 )
     {
-      if ( gridptr->lcc.defined )
+      int atttype, attlen;
+      char attname[CDI_MAX_NAME+1];
+
+      int natts;
+      cdiInqNatts(gridID, CDI_GLOBAL, &natts);
+
+      for ( int iatt = 0; iatt < natts; ++iatt )
         {
-          *originLon = gridptr->lcc.originLon;
-          *originLat = gridptr->lcc.originLat;
-          *lonParY   = gridptr->lcc.lonParY;
-          *lat1      = gridptr->lcc.lat1;
-          *lat2      = gridptr->lcc.lat2;
-          *xinc      = gridptr->lcc.xinc;
-          *yinc      = gridptr->lcc.yinc;
-          *projflag  = gridptr->lcc.projflag;
-          *scanflag  = gridptr->lcc.scanflag;
+          cdiInqAtt(gridID, CDI_GLOBAL, iatt, attname, &atttype, &attlen);
+          if ( attlen > 2 ) continue;
+
+          double attflt[2];
+          if ( cdiInqAttConvertedToFloat(gridID, atttype, attname, attlen, attflt) )
+            {
+              if      ( strcmp(attname, "earth_radius") == 0 )                       *a      = attflt[0];
+              else if ( strcmp(attname, "inverse_flattening") == 0 )                 *rf     = attflt[0];
+              else if ( strcmp(attname, "longitude_of_central_meridian") == 0 )      *lon_0  = attflt[0];
+              else if ( strcmp(attname, "latitude_of_projection_origin") == 0 )      lat_0   = attflt[0];
+              else if ( strcmp(attname, "false_easting")  == 0 )                     x_0     = attflt[0];
+              else if ( strcmp(attname, "false_northing") == 0 )                     y_0     = attflt[0];
+              else if ( strcmp(attname, "longitudeOfFirstGridPointInDegrees") == 0 ) *xval_0 = attflt[0];
+              else if ( strcmp(attname, "latitudeOfFirstGridPointInDegrees")  == 0 ) *yval_0 = attflt[0];
+              else if ( strcmp(attname, "standard_parallel") == 0 )
+                {
+                  *lat_1 = attflt[0];
+                  *lat_2 = (attlen == 2) ? attflt[1] : attflt[0];
+                }
+            }
         }
-      else
-	Warning("Lambert Conformal grid undefined (gridID = %d)", gridID);
     }
+  else
+    Warning("%s mapping parameter missing!", projection);
 }
 
 
@@ -4054,9 +4001,6 @@ enum {
   GRID_PACK_INT_IDX_SELF,
   GRID_PACK_INT_IDX_TYPE,
   GRID_PACK_INT_IDX_PREC,
-  GRID_PACK_INT_IDX_LCC_PROJFLAG,
-  GRID_PACK_INT_IDX_LCC_SCANFLAG,
-  GRID_PACK_INT_IDX_LCC_DEFINED,
   GRID_PACK_INT_IDX_IS_CYCLIC,
   GRID_PACK_INT_IDX_X_FLAG,
   GRID_PACK_INT_IDX_Y_FLAG,
@@ -4091,13 +4035,6 @@ enum {
   GRID_PACK_DBL_IDX_Y_LAST,
   GRID_PACK_DBL_IDX_X_INC,
   GRID_PACK_DBL_IDX_Y_INC,
-  GRID_PACK_DBL_IDX_LCC_ORIGIN_LON,
-  GRID_PACK_DBL_IDX_LCC_ORIGIN_LAT,
-  GRID_PACK_DBL_IDX_LCC_LON_PAR_Y,
-  GRID_PACK_DBL_IDX_LCC_LAT1,
-  GRID_PACK_DBL_IDX_LCC_LAT2,
-  GRID_PACK_DBL_IDX_LCC_XINC,
-  GRID_PACK_DBL_IDX_LCC_YINC,
   gridNdouble
 };
 
@@ -4270,9 +4207,6 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
 
     gridP->type          =   intBuffer[GRID_PACK_INT_IDX_TYPE];
     gridP->prec          =   intBuffer[GRID_PACK_INT_IDX_PREC];
-    gridP->lcc.projflag  =   intBuffer[GRID_PACK_INT_IDX_LCC_PROJFLAG];
-    gridP->lcc.scanflag  =   (short)intBuffer[GRID_PACK_INT_IDX_LCC_SCANFLAG];
-    gridP->lcc.defined   =   (short)intBuffer[GRID_PACK_INT_IDX_LCC_DEFINED];
     gridP->isCyclic      =   (signed char)intBuffer[GRID_PACK_INT_IDX_IS_CYCLIC];
     gridP->x.flag        =   (short)intBuffer[GRID_PACK_INT_IDX_X_FLAG];
     gridP->y.flag        =   (short)intBuffer[GRID_PACK_INT_IDX_Y_FLAG];
@@ -4326,13 +4260,6 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
     gridP->y.last = doubleBuffer[GRID_PACK_DBL_IDX_Y_LAST];
     gridP->x.inc = doubleBuffer[GRID_PACK_DBL_IDX_X_INC];
     gridP->y.inc = doubleBuffer[GRID_PACK_DBL_IDX_Y_INC];
-    gridP->lcc.originLon = doubleBuffer[GRID_PACK_DBL_IDX_LCC_ORIGIN_LON];
-    gridP->lcc.originLat = doubleBuffer[GRID_PACK_DBL_IDX_LCC_ORIGIN_LAT];
-    gridP->lcc.lonParY = doubleBuffer[GRID_PACK_DBL_IDX_LCC_LON_PAR_Y];
-    gridP->lcc.lat1 = doubleBuffer[GRID_PACK_DBL_IDX_LCC_LAT1];
-    gridP->lcc.lat2 = doubleBuffer[GRID_PACK_DBL_IDX_LCC_LAT2];
-    gridP->lcc.xinc = doubleBuffer[GRID_PACK_DBL_IDX_LCC_XINC];
-    gridP->lcc.yinc = doubleBuffer[GRID_PACK_DBL_IDX_LCC_YINC];
   }
 
   int irregular = gridP->type == GRID_UNSTRUCTURED
@@ -4466,9 +4393,6 @@ gridPack(void * voidP, void * packBuffer, int packBufferSize,
     intBuffer[GRID_PACK_INT_IDX_SELF]         = gridP->self;
     intBuffer[GRID_PACK_INT_IDX_TYPE]         = gridP->type;
     intBuffer[GRID_PACK_INT_IDX_PREC]         = gridP->prec;
-    intBuffer[GRID_PACK_INT_IDX_LCC_PROJFLAG] = gridP->lcc.projflag;
-    intBuffer[GRID_PACK_INT_IDX_LCC_SCANFLAG] = gridP->lcc.scanflag;
-    intBuffer[GRID_PACK_INT_IDX_LCC_DEFINED]  = gridP->lcc.defined;
     intBuffer[GRID_PACK_INT_IDX_IS_CYCLIC]    = gridP->isCyclic;
     intBuffer[GRID_PACK_INT_IDX_X_FLAG]       = gridP->x.flag;
     intBuffer[GRID_PACK_INT_IDX_Y_FLAG]       = gridP->y.flag;
@@ -4526,13 +4450,6 @@ gridPack(void * voidP, void * packBuffer, int packBufferSize,
     doubleBuffer[GRID_PACK_DBL_IDX_Y_LAST]         = gridP->y.last;
     doubleBuffer[GRID_PACK_DBL_IDX_X_INC]          = gridP->x.inc;
     doubleBuffer[GRID_PACK_DBL_IDX_Y_INC]          = gridP->y.inc;
-    doubleBuffer[GRID_PACK_DBL_IDX_LCC_ORIGIN_LON] = gridP->lcc.originLon;
-    doubleBuffer[GRID_PACK_DBL_IDX_LCC_ORIGIN_LAT] = gridP->lcc.originLat;
-    doubleBuffer[GRID_PACK_DBL_IDX_LCC_LON_PAR_Y]  = gridP->lcc.lonParY;
-    doubleBuffer[GRID_PACK_DBL_IDX_LCC_LAT1]       = gridP->lcc.lat1;
-    doubleBuffer[GRID_PACK_DBL_IDX_LCC_LAT2]       = gridP->lcc.lat2;
-    doubleBuffer[GRID_PACK_DBL_IDX_LCC_XINC]       = gridP->lcc.xinc;
-    doubleBuffer[GRID_PACK_DBL_IDX_LCC_YINC]       = gridP->lcc.yinc;
 
     serializePack(doubleBuffer, gridNdouble, CDI_DATATYPE_FLT64,
                   packBuffer, packBufferSize, packBufferPos, context);

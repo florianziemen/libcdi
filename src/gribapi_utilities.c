@@ -498,6 +498,11 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
   long editionNumber = gribEditionNumber(gh);
   int gridtype = gribapiGetGridType(gh);
   int projtype = (gridtype == GRID_PROJECTION && gribapiGetIsRotated(gh)) ? CDI_PROJ_RLL : CDI_UNDEFID;
+  if ( gridtype == GRID_LCC )
+    {
+      gridtype = GRID_PROJECTION;
+      projtype = CDI_PROJ_LCC;
+    }
   /*
   if ( streamptr->unreduced && gridtype == GRID_GAUSSIAN_REDUCED )
     {
@@ -531,7 +536,7 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
       if ( numberOfPoints != nlon*nlat )
         Error("numberOfPoints (%ld) and gridSize (%ld) differ!", numberOfPoints, nlon*nlat);
 
-      grid->size  = (int)numberOfPoints;
+      grid->size   = (int)numberOfPoints;
       grid->x.size = (int)nlon;
       grid->y.size = (int)nlat;
       grid->x.inc  = 0;
@@ -649,13 +654,12 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
         grid->y.flag = 2;
       }
     }
-  else if ( gridtype == GRID_LCC )
+  else if ( projtype == CDI_PROJ_LCC )
     {
-      int nlon, nlat;
       FAIL_ON_GRIB_ERROR(grib_get_long, gh, "Nx", &lpar);
-      nlon = (int)lpar;
+      int nlon = (int)lpar;
       FAIL_ON_GRIB_ERROR(grib_get_long, gh, "Ny", &lpar);
-      nlat = (int)lpar;
+      int nlat = (int)lpar;
 
       if ( numberOfPoints != nlon*nlat )
         Error("numberOfPoints (%d) and gridSize (%d) differ!", (int)numberOfPoints, nlon*nlat);
@@ -664,24 +668,18 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
       grid->x.size = nlon;
       grid->y.size = nlat;
 
-      FAIL_ON_GRIB_ERROR(grib_get_double, gh, "DxInMetres", &grid->lcc.xinc);
-      FAIL_ON_GRIB_ERROR(grib_get_double, gh, "DyInMetres", &grid->lcc.yinc);
-      FAIL_ON_GRIB_ERROR(grib_get_double, gh, "longitudeOfFirstGridPointInDegrees", &grid->lcc.originLon);
-      FAIL_ON_GRIB_ERROR(grib_get_double, gh, "latitudeOfFirstGridPointInDegrees", &grid->lcc.originLat);
-      FAIL_ON_GRIB_ERROR(grib_get_double, gh, "LoVInDegrees", &grid->lcc.lonParY);
-      FAIL_ON_GRIB_ERROR(grib_get_double, gh, "Latin1InDegrees", &grid->lcc.lat1);
-      FAIL_ON_GRIB_ERROR(grib_get_double, gh, "Latin2InDegrees", &grid->lcc.lat2);
+      double xinc, yinc;
+      FAIL_ON_GRIB_ERROR(grib_get_double, gh, "DxInMetres", &xinc);
+      FAIL_ON_GRIB_ERROR(grib_get_double, gh, "DyInMetres", &yinc);
 
-      if ( editionNumber <= 1 )
-        {
-          FAIL_ON_GRIB_ERROR(grib_get_long, gh, "projectionCenterFlag", &lpar);
-          grid->lcc.projflag  = (int) lpar;
-          FAIL_ON_GRIB_ERROR(grib_get_long, gh, "scanningMode", &lpar);
-          grid->lcc.scanflag  = (short) lpar;
-        }
-
-      grid->x.flag = 0;
-      grid->y.flag = 0;
+      grid->x.first = 0;
+      grid->x.last  = 0;
+      grid->x.inc   = xinc;
+      grid->y.first = 0;
+      grid->y.last  = 0;
+      grid->y.inc   = yinc;
+      grid->x.flag  = 2;
+      grid->y.flag  = 2;
     }
   else if ( gridtype == GRID_SPECTRAL )
     {

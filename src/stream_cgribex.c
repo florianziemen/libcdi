@@ -29,8 +29,6 @@ typedef struct {
 
 
 #if  defined  (HAVE_LIBCGRIBEX)
-static bool bit_get(int number, int bit) { return (bool)((number >> bit) & 1); }
-
 static
 int cgribexGetGridType(int *isec2)
 {
@@ -143,11 +141,16 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid, i
   bool compyinc = true;
   int gridtype = cgribexGetGridType(isec2);
   int projtype = (gridtype == GRID_PROJECTION && cgribexGetIsRotated(isec2)) ? CDI_PROJ_RLL : CDI_UNDEFID;
+  if ( gridtype == GRID_LCC )
+    {
+      gridtype = GRID_PROJECTION;
+      projtype = CDI_PROJ_LCC;
+    }
 
   if ( streamptr->unreduced && gridtype == GRID_GAUSSIAN_REDUCED && iret != -801 )
     {
-      int ilat, nlon = 0;
-      for ( ilat = 0; ilat < ISEC2_NumLat; ++ilat )
+      int nlon = 0;
+      for ( int ilat = 0; ilat < ISEC2_NumLat; ++ilat )
         if ( ISEC2_RowLon(ilat) > nlon ) nlon = ISEC2_RowLon(ilat);
       gridtype = GRID_GAUSSIAN;
       ISEC2_NumLon = nlon;
@@ -160,12 +163,14 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid, i
 
   if ( gridtype == GRID_LONLAT || gridtype == GRID_GAUSSIAN || projtype == CDI_PROJ_RLL )
     {
-      bool ijDirectionIncrementGiven = bit_get(ISEC2_ResFlag, 7);
-      bool uvRelativeToGrid = bit_get(ISEC2_ResFlag, 3);
+      bool ijDirectionIncrementGiven = gribbyte_get_bit(ISEC2_ResFlag, 1);
+      bool uvRelativeToGrid = gribbyte_get_bit(ISEC2_ResFlag, 5);
+
       if ( uvRelativeToGrid ) grid->uvRelativeToGrid = 1;
       if ( ISEC4_NumValues != ISEC2_NumLon*ISEC2_NumLat )
         Error("numberOfPoints (%d) and gridSize (%d) differ!", ISEC4_NumValues, ISEC2_NumLon*ISEC2_NumLat);
-      grid->size  = ISEC4_NumValues;
+
+      grid->size   = ISEC4_NumValues;
       grid->x.size = ISEC2_NumLon;
       grid->y.size = ISEC2_NumLat;
       if ( gridtype == GRID_GAUSSIAN ) grid->np = ISEC2_NumPar;
@@ -232,8 +237,8 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid, i
     }
   else if ( gridtype == GRID_GAUSSIAN_REDUCED )
     {
-      bool ijDirectionIncrementGiven = bit_get(ISEC2_ResFlag, 7);
-      bool uvRelativeToGrid = bit_get(ISEC2_ResFlag, 3);
+      bool ijDirectionIncrementGiven = gribbyte_get_bit(ISEC2_ResFlag, 1);
+      bool uvRelativeToGrid = gribbyte_get_bit(ISEC2_ResFlag, 5);
       if ( uvRelativeToGrid ) grid->uvRelativeToGrid = 1;
       grid->np      = ISEC2_NumPar;
       grid->size    = ISEC4_NumValues;
@@ -273,31 +278,26 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid, i
         grid->y.flag  = 2;
       }
     }
-  else if ( gridtype == GRID_LCC )
+  else if ( projtype == CDI_PROJ_LCC )
     {
-      bool uvRelativeToGrid = bit_get(ISEC2_ResFlag, 3);
+      bool uvRelativeToGrid = gribbyte_get_bit(ISEC2_ResFlag, 5);
       if ( uvRelativeToGrid ) grid->uvRelativeToGrid = 1;
 
       if ( ISEC4_NumValues != ISEC2_NumLon*ISEC2_NumLat )
-        Error("numberOfPoints (%d) and gridSize (%d) differ!",
-              ISEC4_NumValues, ISEC2_NumLon*ISEC2_NumLat);
+        Error("numberOfPoints (%d) and gridSize (%d) differ!", ISEC4_NumValues, ISEC2_NumLon*ISEC2_NumLat);
 
       grid->size   = ISEC4_NumValues;
       grid->x.size = ISEC2_NumLon;
       grid->y.size = ISEC2_NumLat;
 
-      grid->lcc.xinc      = ISEC2_Lambert_dx;
-      grid->lcc.yinc      = ISEC2_Lambert_dy;
-      grid->lcc.originLon = ISEC2_FirstLon * 0.001;
-      grid->lcc.originLat = ISEC2_FirstLat * 0.001;
-      grid->lcc.lonParY   = ISEC2_Lambert_Lov * 0.001;
-      grid->lcc.lat1      = ISEC2_Lambert_LatS1 * 0.001;
-      grid->lcc.lat2      = ISEC2_Lambert_LatS2 * 0.001;
-      grid->lcc.projflag  = ISEC2_Lambert_ProjFlag;
-      grid->lcc.scanflag  = (short)ISEC2_ScanFlag;
-
-      grid->x.flag = 0;
-      grid->y.flag = 0;
+      grid->x.first = 0;
+      grid->x.last  = 0;
+      grid->x.inc   = ISEC2_Lambert_dx;
+      grid->y.first = 0;
+      grid->y.last  = 0;
+      grid->y.inc   = ISEC2_Lambert_dy;
+      grid->x.flag  = 2;
+      grid->y.flag  = 2;
     }
   else if ( gridtype == GRID_SPECTRAL )
     {
@@ -392,18 +392,17 @@ void cgribexAddRecord(stream_t * streamptr, int param, int *isec1, int *isec2, d
         }
       else if ( gridptr->projtype == CDI_PROJ_LCC )
         {
-          double lcc_xinc      = ISEC2_Lambert_dx;
-          double lcc_yinc      = ISEC2_Lambert_dy;
-          double lcc_originLon = ISEC2_FirstLon * 0.001;
-          double lcc_originLat = ISEC2_FirstLat * 0.001;
-          double lcc_lonParY   = ISEC2_Lambert_Lov * 0.001;
-          double lcc_lat1      = ISEC2_Lambert_LatS1 * 0.001;
-          double lcc_lat2      = ISEC2_Lambert_LatS2 * 0.001;
-          double lcc_projflag  = ISEC2_Lambert_ProjFlag;
-          double lcc_scanflag  = (short)ISEC2_ScanFlag;
-          gridDefParamLCC(gridID, lcc_originLon, lcc_originLat, lcc_lonParY,
-                          lcc_lat1, lcc_lat2, lcc_xinc, lcc_yinc,
-                          lcc_projflag, lcc_scanflag);
+          double a = 6367470., rf = 0;
+          bool earthIsOblate = gribbyte_get_bit(ISEC2_ResFlag, 2);
+          if ( earthIsOblate ) { a = 6378160.; rf = 297.0; }
+          double xval_0 = ISEC2_FirstLon * 0.001;
+          double yval_0 = ISEC2_FirstLat * 0.001;
+          double lon_0  = ISEC2_Lambert_Lov * 0.001;
+          double lat_1  = ISEC2_Lambert_LatS1 * 0.001;
+          double lat_2  = ISEC2_Lambert_LatS2 * 0.001;
+          bool lsouth = gribbyte_get_bit(ISEC2_Lambert_ProjFlag, 1);
+          if ( lsouth ) { lat_1 = -lat_1; lat_2 = -lat_2; }
+          gridDefParamLCC(gridID, a, rf, xval_0, yval_0, lon_0, lat_1, lat_2);
         }
     }
   else
@@ -1648,10 +1647,17 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
         }
     }
 
-  if ( gridtype == GRID_PROJECTION && gridInqProjType(gridID) == CDI_PROJ_RLL )
+  if ( gridtype == GRID_PROJECTION )
     {
-      gridtype = GRID_LONLAT;
-      lrotated = true;
+      if ( gridInqProjType(gridID) == CDI_PROJ_RLL )
+        {
+          gridtype = GRID_LONLAT;
+          lrotated = true;
+        }
+      else if ( gridInqProjType(gridID) == CDI_PROJ_LCC )
+        {
+          gridtype = GRID_LCC;
+        }
     }
 
   ISEC2_Reduced  = FALSE;
@@ -1737,8 +1743,9 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
 	if ( ISEC2_NumLon == 1 && ISEC2_NumLat > 1 )
 	  if ( ISEC2_LonIncr == 0 && ISEC2_LatIncr != 0 ) ISEC2_LonIncr = ISEC2_LatIncr;
 
-        ISEC2_ResFlag = ( ISEC2_LatIncr == 0 || ISEC2_LonIncr == 0 ) ? 0 : 128; // Set bit 7
-        if ( gridInqUvRelativeToGrid(gridID) ) ISEC2_ResFlag += 8; // Set bit 3
+        ISEC2_ResFlag = 0;
+        if ( ISEC2_LatIncr && ISEC2_LonIncr )   gribbyte_set_bit(&ISEC2_ResFlag, 1);
+        if ( gridInqUvRelativeToGrid(gridID) )  gribbyte_set_bit(&ISEC2_ResFlag, 5);
 
 	if ( lrotated )
           {
@@ -1751,43 +1758,48 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
             FSEC2_RotAngle = angle;
           }
 
-	/* East -> West */
-	if ( ISEC2_LastLon < ISEC2_FirstLon ) ISEC2_ScanFlag += 128;
-
-	/* South -> North */
-	if ( ISEC2_LastLat > ISEC2_FirstLat ) ISEC2_ScanFlag += 64;
+        ISEC2_ScanFlag = 0;
+	if ( ISEC2_LastLon < ISEC2_FirstLon ) gribbyte_set_bit(&ISEC2_ScanFlag, 1); // East -> West
+	if ( ISEC2_LastLat > ISEC2_FirstLat ) gribbyte_set_bit(&ISEC2_ScanFlag, 2); // South -> North
 
 	break;
       }
     case GRID_LCC:
       {
-	double originLon = 0.0, originLat = 0.0, lonParY = 0.0,
-          lat1 = 0.0, lat2 = 0.0, xincm = 0.0, yincm = 0.0;
-	int projflag = 0, scanflag = 0;
+	int xsize = gridInqXsize(gridID);
+        int ysize = gridInqYsize(gridID);
 
-	int xsize = gridInqXsize(gridID),
-          ysize = gridInqYsize(gridID);
+        double a = 0, rf = 0, xval_0 = 0, yval_0 = 0, lon_0 = 0, lat_1 = 0, lat_2 = 0;
+	gridInqParamLCC(gridID, &a, &rf, &xval_0, &yval_0, &lon_0, &lat_1, &lat_2);
+        bool lsouth = (lat_1 < 0);
+        if ( lsouth ) { lat_1 = -lat_2; lat_2 = -lat_2; }
 
-	gridInqParamLCC(gridID, &originLon, &originLat, &lonParY, &lat1, &lat2, &xincm, &yincm,
-                        &projflag, &scanflag);
+        double xinc = gridInqXinc(gridID);
+        double yinc = gridInqYinc(gridID);
 
 	ISEC2_GridType = GRIB1_GTYPE_LCC;
 	ISEC2_NumLon   = xsize;
 	ISEC2_NumLat   = ysize;
-	ISEC2_FirstLon = (int)lround(originLon * 1000);
-	ISEC2_FirstLat = (int)lround(originLat * 1000);
-	ISEC2_Lambert_Lov    = (int)lround(lonParY * 1000);
-	ISEC2_Lambert_LatS1  = (int)lround(lat1 * 1000);
-	ISEC2_Lambert_LatS2  = (int)lround(lat2 * 1000);
-	ISEC2_Lambert_dx     = (int)lround(xincm);
-	ISEC2_Lambert_dy     = (int)lround(yincm);
+	ISEC2_FirstLon       = (int)lround(xval_0 * 1000);
+	ISEC2_FirstLat       = (int)lround(yval_0 * 1000);
+	ISEC2_Lambert_Lov    = (int)lround(lon_0 * 1000);
+	ISEC2_Lambert_LatS1  = (int)lround(lat_1 * 1000);
+	ISEC2_Lambert_LatS2  = (int)lround(lat_2 * 1000);
+	ISEC2_Lambert_dx     = (int)lround(xinc);
+	ISEC2_Lambert_dy     = (int)lround(yinc);
 	ISEC2_Lambert_LatSP  = 0;
 	ISEC2_Lambert_LonSP  = 0;
-	ISEC2_Lambert_ProjFlag = projflag;
-	ISEC2_ScanFlag = scanflag;
+	ISEC2_Lambert_ProjFlag = 0;
+        if ( lsouth ) gribbyte_set_bit(&ISEC2_Lambert_ProjFlag, 1);
 
-        ISEC2_ResFlag = ( ISEC2_Lambert_dx == 0 || ISEC2_Lambert_dy == 0 ) ? 0 : 128; // Set bit 7
-        if ( gridInqUvRelativeToGrid(gridID) ) ISEC2_ResFlag += 8; // Set bit 3
+        bool earthIsOblate = (IS_EQUAL(a, 6378160.) && IS_EQUAL(rf, 297.));
+        ISEC2_ResFlag = 0;
+        if ( ISEC2_Lambert_dx && ISEC2_Lambert_dy ) gribbyte_set_bit(&ISEC2_ResFlag, 1);
+        if ( earthIsOblate )                        gribbyte_set_bit(&ISEC2_ResFlag, 2);
+        if ( gridInqUvRelativeToGrid(gridID) )      gribbyte_set_bit(&ISEC2_ResFlag, 5);
+
+	ISEC2_ScanFlag = 0;
+        gribbyte_set_bit(&ISEC2_ScanFlag, 2); // South -> North
 
 	break;
       }
@@ -1844,11 +1856,11 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
     {
       // this will overrule/change the UvRelativeToGrid flag;
       // typically when the wind is rotated with respect to north pole
-      bool uvRelativeToGrid = bit_get(ISEC2_ResFlag, 3);
+      bool uvRelativeToGrid = gribbyte_get_bit(ISEC2_ResFlag, 5);
       if      ( uvRelativeToGrid && !cdiGribChangeModeUvRelativeToGrid.mode )
-        ISEC2_ResFlag -= 8;
+        gribbyte_clear_bit(&ISEC2_ResFlag, 5);
       else if ( !uvRelativeToGrid && cdiGribChangeModeUvRelativeToGrid.mode )
-        ISEC2_ResFlag += 8;
+        gribbyte_set_bit(&ISEC2_ResFlag, 5);
     }
 }
 

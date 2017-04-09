@@ -58,22 +58,6 @@ struct gridaxis_t {
   double *bounds;
 };
 
-// Lambert Conformal Conic
-struct grid_lcc_t {
-  double  originLon;
-  double  originLat;
-  double  lonParY;
-  double  lat1;
-  double  lat2;
-  double  xinc;
-  double  yinc;
-  double  a;
-  double  rf;
-  int     projflag;
-  short   scanflag;             /* must be combination of 128, 64, 32 */
-  short   defined;
-};
-
 // GME Grid
 struct grid_gme_t {
   int     nd, ni, ni2, ni3;       /* parameter for GRID_GME         */
@@ -93,7 +77,6 @@ struct grid_t {
   mask_t *mask;
   mask_t *mask_gme;
   double *area;
-  struct grid_lcc_t  lcc;
   struct grid_gme_t  gme;
   int     number, position;       /* parameter for GRID_REFERENCE   */
   int     trunc;                  /* parameter for GRID_SPECTEAL    */

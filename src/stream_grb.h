@@ -1,6 +1,10 @@
 #ifndef _STREAM_GRB_H
 #define _STREAM_GRB_H
 
+static inline bool gribbyte_get_bit(int number, int bit) { return (bool)((number >> (8-bit)) & 1); }
+static inline void gribbyte_set_bit(int *number, int bit) { *number |= 1 << (8-bit); }
+static inline void gribbyte_clear_bit(int *number, int bit) { *number &= ~(1 << (8-bit)); }
+
 int   grbBitsPerValue(int datatype);
 
 int   grbInqContents(stream_t *streamptr);

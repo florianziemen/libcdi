@@ -480,11 +480,30 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
       grib_get_double(gh, "latitudeOfSouthernPoleInDegrees",  &ypole);
       grib_get_double(gh, "longitudeOfSouthernPoleInDegrees", &xpole);
       grib_get_double(gh, "angleOfRotation", &angle);
-      xpole =  xpole - 180;
+      xpole -= 180;
       if ( fabs(ypole) > 0 ) ypole = -ypole; // change from south to north pole
       if ( fabs(angle) > 0 ) angle = -angle;
 
       gridDefParamRLL(gridID, xpole, ypole, angle);
+    }
+  else if ( grid->projtype == CDI_PROJ_LCC )
+    {
+      double a = 6367470., rf = 0;
+      long earthIsOblate;
+      grib_get_long(gh, "earthIsOblate", &earthIsOblate);
+      if ( earthIsOblate ) { a = 6378160.; rf = 297.0; }
+      double xval_0, yval_0, lon_0, lat_1, lat_2;
+      long projflag = 0;
+      grib_get_double(gh, "longitudeOfFirstGridPointInDegrees", &xval_0);
+      grib_get_double(gh, "latitudeOfFirstGridPointInDegrees", &yval_0);
+      grib_get_double(gh, "LoVInDegrees", &lon_0);
+      grib_get_double(gh, "Latin1InDegrees", &lat_1);
+      grib_get_double(gh, "Latin2InDegrees", &lat_2);
+      grib_get_long(gh, "projectionCenterFlag", &projflag);
+      bool lsouth = gribbyte_get_bit(projflag, 1);
+      if ( lsouth ) { lat_1 = -lat_1; lat_2 = -lat_2; }
+
+      gridDefParamLCC(gridID, a, rf, xval_0, yval_0, lon_0, lat_1, lat_2);
     }
 
   int zaxistype = gribapiGetZaxisType(gribEditionNumber(gh), leveltype1);
@@ -1938,10 +1957,17 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
         }
     }
 
-  if ( gridtype == GRID_PROJECTION && gridInqProjType(gridID) == CDI_PROJ_RLL )
+  if ( gridtype == GRID_PROJECTION )
     {
-      gridtype = GRID_LONLAT;
-      lrotated = true;
+      if ( gridInqProjType(gridID) == CDI_PROJ_RLL )
+        {
+          gridtype = GRID_LONLAT;
+          lrotated = true;
+        }
+      else if ( gridInqProjType(gridID) == CDI_PROJ_LCC )
+        {
+          gridtype = GRID_LCC;
+        }
     }
 
   if ( gridtype == GRID_LONLAT || gridtype == GRID_GAUSSIAN )
@@ -2070,7 +2096,7 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
             double xpole = 0, ypole = 0, angle = 0;
             gridInqParamRLL(gridID, &xpole, &ypole, &angle);
 
-            xpole =  xpole + 180;
+            xpole += 180;
             if ( fabs(ypole) > 0 ) ypole = -ypole; // change from north to south pole
             if ( fabs(angle) > 0 ) angle = -angle;
             GRIB_CHECK(my_grib_set_double(gh, "latitudeOfSouthernPoleInDegrees",  ypole), 0);
@@ -2103,14 +2129,19 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
       }
     case GRID_LCC:
       {
-	double originLon, originLat, lonParY, lat1, lat2, xincm, yincm;
-	int projflag, scanflag;
-
 	int xsize = gridInqXsize(gridID);
 	int ysize = gridInqYsize(gridID);
 
-	gridInqParamLCC(gridID, &originLon, &originLat, &lonParY, &lat1, &lat2, &xincm, &yincm,
-                        &projflag, &scanflag);
+        double a, rf, xval_0, yval_0, lon_0, lat_1, lat_2;
+	gridInqParamLCC(gridID, &a, &rf, &xval_0, &yval_0, &lon_0, &lat_1, &lat_2);
+        if ( xval_0 < 0 ) xval_0 += 360;
+        bool lsouth = (lat_1 < 0);
+        if ( lsouth ) { lat_1 = -lat_2; lat_2 = -lat_2; }
+        int projflag = 0;
+        if ( lsouth ) gribbyte_set_bit(&projflag, 1);
+
+        double xinc = gridInqXinc(gridID);
+        double yinc = gridInqYinc(gridID);
 
         static const char mesg[] = "lambert";
         size_t len = sizeof(mesg) -1;
@@ -2118,22 +2149,24 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 
 	GRIB_CHECK(my_grib_set_long(gh, "Nx", xsize), 0);
 	GRIB_CHECK(my_grib_set_long(gh, "Ny", ysize), 0);
-	GRIB_CHECK(my_grib_set_long(gh, "DxInMetres", lround(xincm)), 0);
-	GRIB_CHECK(my_grib_set_long(gh, "DyInMetres", lround(yincm)), 0);
-	GRIB_CHECK(my_grib_set_double(gh, "longitudeOfFirstGridPointInDegrees", originLon), 0);
-	GRIB_CHECK(my_grib_set_double(gh, "latitudeOfFirstGridPointInDegrees", originLat), 0);
-	GRIB_CHECK(my_grib_set_double(gh, "LoVInDegrees", lonParY), 0);
-	GRIB_CHECK(my_grib_set_double(gh, "Latin1InDegrees", lat1), 0);
-	GRIB_CHECK(my_grib_set_double(gh, "Latin2InDegrees", lat2), 0);
-
-        if ( editionNumber <= 1 )
-          {
-            GRIB_CHECK(my_grib_set_long(gh, "projectionCenterFlag", projflag), 0);
-            GRIB_CHECK(my_grib_set_long(gh, "scanningMode", scanflag), 0);
-          }
+	GRIB_CHECK(my_grib_set_long(gh, "DxInMetres", lround(xinc)), 0);
+	GRIB_CHECK(my_grib_set_long(gh, "DyInMetres", lround(yinc)), 0);
+	GRIB_CHECK(my_grib_set_double(gh, "longitudeOfFirstGridPointInDegrees", xval_0), 0);
+	GRIB_CHECK(my_grib_set_double(gh, "latitudeOfFirstGridPointInDegrees", yval_0), 0);
+	GRIB_CHECK(my_grib_set_double(gh, "LoVInDegrees", lon_0), 0);
+	GRIB_CHECK(my_grib_set_double(gh, "Latin1InDegrees", lat_1), 0);
+	GRIB_CHECK(my_grib_set_double(gh, "Latin2InDegrees", lat_2), 0);
+        GRIB_CHECK(my_grib_set_long(gh, "projectionCenterFlag", projflag), 0);
 
         long uvRelativeToGrid = gridInqUvRelativeToGrid(gridID);
         if ( uvRelativeToGrid ) GRIB_CHECK(my_grib_set_long(gh, "uvRelativeToGrid", uvRelativeToGrid), 0);
+        long earthIsOblate = (IS_EQUAL(a, 6378160.) && IS_EQUAL(rf, 297.));
+        if ( earthIsOblate ) GRIB_CHECK(my_grib_set_long(gh, "earthIsOblate", earthIsOblate), 0);
+
+        int scanflag = 0;
+        gribbyte_set_bit(&scanflag, 2);
+        if ( editionNumber <= 1 )
+          GRIB_CHECK(my_grib_set_long(gh, "scanningMode", (long)scanflag), 0);
 
 	break;
       }
