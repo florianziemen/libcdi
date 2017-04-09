@@ -1,10 +1,10 @@
 ! This file was automatically generated, don't edit!
 !
-! Fortran interface for CDI library version 1.8.0
+! Fortran interface for CDI library version 1.8.1
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   March 2017
+! Uwe Schulzweida, MPI-MET, Hamburg,   April 2017
 !
 
       INTEGER    CDI_MAX_NAME
@@ -1846,28 +1846,24 @@
 !
 !                     gridDefParamLCC
 !                                    (INTEGER         gridID,
-!                                     DOUBLEPRECISION originLon,
-!                                     DOUBLEPRECISION originLat,
-!                                     DOUBLEPRECISION lonParY,
-!                                     DOUBLEPRECISION lat1,
-!                                     DOUBLEPRECISION lat2,
-!                                     DOUBLEPRECISION xinc,
-!                                     DOUBLEPRECISION yinc,
-!                                     INTEGER         projflag,
-!                                     INTEGER         scanflag)
+!                                     DOUBLEPRECISION a,
+!                                     DOUBLEPRECISION rf,
+!                                     DOUBLEPRECISION xval_0,
+!                                     DOUBLEPRECISION yval_0,
+!                                     DOUBLEPRECISION lon_0,
+!                                     DOUBLEPRECISION lat_1,
+!                                     DOUBLEPRECISION lat_2)
       EXTERNAL        gridDefParamLCC
 
 !                     gridInqParamLCC
 !                                    (INTEGER         gridID,
-!                                     DOUBLEPRECISION originLon,
-!                                     DOUBLEPRECISION originLat,
-!                                     DOUBLEPRECISION lonParY,
-!                                     DOUBLEPRECISION lat1,
-!                                     DOUBLEPRECISION lat2,
-!                                     DOUBLEPRECISION xinc,
-!                                     DOUBLEPRECISION yinc,
-!                                     INTEGER         projflag,
-!                                     INTEGER         scanflag)
+!                                     DOUBLEPRECISION a,
+!                                     DOUBLEPRECISION rf,
+!                                     DOUBLEPRECISION xval_0,
+!                                     DOUBLEPRECISION yval_0,
+!                                     DOUBLEPRECISION lon_0,
+!                                     DOUBLEPRECISION lat_1,
+!                                     DOUBLEPRECISION lat_2)
       EXTERNAL        gridInqParamLCC
 
 !                     gridDefArea

@@ -15,7 +15,7 @@
 #endif
 
 //#include "config.h"
-#define VERSION "1.8.0"
+#define VERSION "1.8.1"
 typedef struct
 {
   size_t naline;
