@@ -492,7 +492,7 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
       long earthIsOblate;
       grib_get_long(gh, "earthIsOblate", &earthIsOblate);
       if ( earthIsOblate ) { a = 6378160.; rf = 297.0; }
-      double lon_0, lat_0, lat_1, lat_2, xval_0, yval_0, x_0 = grid_missval, y_0 = grid_missval;
+      double lon_0, lat_1, lat_2, xval_0, yval_0;
       long projflag = 0;
       grib_get_double(gh, "longitudeOfFirstGridPointInDegrees", &xval_0);
       grib_get_double(gh, "latitudeOfFirstGridPointInDegrees", &yval_0);
@@ -503,7 +503,17 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
       bool lsouth = gribbyte_get_bit(projflag, 1);
       if ( lsouth ) { lat_1 = -lat_1; lat_2 = -lat_2; }
 
-      lat_0  = lat_2;
+      double lat_0 = lat_2;
+      double x_0 = grid_missval;
+      double y_0 = grid_missval;
+
+      if ( proj_lonlat_to_lcc_func )
+        {
+          x_0 = xval_0; y_0 = yval_0;
+          proj_lonlat_to_lcc_func(grid_missval, lon_0, lat_0, lat_1, lat_2, a, rf, 1, &x_0, &y_0);
+          if ( IS_NOT_EQUAL(x_0, grid_missval) && IS_NOT_EQUAL(y_0, grid_missval) )
+            { x_0 = -x_0; y_0 = -y_0; }
+        }
       gridDefParamLCC(gridID, grid_missval, lon_0, lat_0, lat_1, lat_2, a, rf, xval_0, yval_0, x_0, y_0);
     }
 

@@ -7,6 +7,7 @@
 #include "cdi_att.h"
 
 extern double grid_missval;
+extern int (*proj_lonlat_to_lcc_func)();
 
 typedef unsigned char mask_t;
 
