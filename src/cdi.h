@@ -933,7 +933,7 @@ void    gridInqParamGME(int gridID, int *nd, int *ni, int *ni2, int *ni3);
 
   /* Lambert Conformal Conic grid (GRIB version) */
 void    gridDefParamLCC(int gridID, double a, double rf, double xval_0, double yval_0, double lon_0, double lat_1, double lat_2);
-void    gridInqParamLCC(int gridID, double *a, double *rf, double *xval_0, double *yval_0, double *lon_0, double *lat_1, double *lat_2);
+int gridInqParamLCC(int gridID, double missval, double *lon_0, double *lat_0, double *lat_1, double *lat_2, double *a, double *rf, double *xval_0, double *yval_0, double *x_0, double *y_0);
 
 void    gridDefArea(int gridID, const double area[]);
 void    gridInqArea(int gridID, double area[]);

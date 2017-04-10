@@ -20,6 +20,7 @@
 #include "serialize.h"
 #include "vlist.h"
 
+double grid_missval = -9999.;
 
 /* the value in the second pair of brackets must match the length of
  * the longest string (including terminating NUL) */
@@ -3634,30 +3635,37 @@ void gridDefParamLCC(int gridID, double a, double rf, double xval_0, double yval
 @Function  gridInqParamLCC
 @Title     Get the parameter of a Lambert Conformal Conic grid
 
-@Prototype void gridInqParamLCC(int gridID, double *a, double *rf, double *xval_0, double *yval_0, double *lon_0, double *lat_1, double *lat_2)
+@Prototype void gridInqParamLCC(int gridID, double missval, double *lon_0, double *lat_0, double *lat_1, double *lat_2, double *a, double *rf, double *xval_0, double *yval_0, double *x_0, double *y_0)
 @Parameter
     @Item  gridID    Grid ID, from a previous call to @fref{gridCreate} or @fref{vlistInqVarGrid}.
-    @Item  a         Earth radius.
-    @Item  rf        Inverse flattening
-    @Item  xval_0    Longitude of the first grid point.
-    @Item  yval_0    Latitude of the first grid point.
+    @Item  missval   Missing value
     @Item  lon_0     The East longitude of the meridian which is parallel to the Y-axis.
+    @Item  lat_0     Latitude of the projection origin
     @Item  lat_1     First latitude from the pole at which the secant cone cuts the sphere.
     @Item  lat_2     Second latitude at which the secant cone cuts the sphere.
+    @Item  a         Earth radius in metres (optional).
+    @Item  rf        Inverse flattening (1/f) (optional).
+    @Item  xval_0    Longitude of the first grid point in degree (optional).
+    @Item  yval_0    Latitude of the first grid point in degree (optional).
+    @Item  x_0       False easting (optional).
+    @Item  y_0       False northing (optional).
 
 @Description
 The function @func{gridInqParamLCC} returns the parameter of a Lambert Conformal Conic grid.
 
 @EndFunction
 */
-void gridInqParamLCC(int gridID, double *a, double *rf, double *xval_0, double *yval_0, double *lon_0,
-                     double *lat_1, double *lat_2)
+int gridInqParamLCC(int gridID, double missval, double *lon_0, double *lat_0, double *lat_1, double *lat_2,
+                    double *a, double *rf, double *xval_0, double *yval_0, double *x_0, double *y_0)
 {
-  double x_0, y_0, lat_0;
-  *a = 0; *rf = 0;
-  *xval_0 = 0; *yval_0 = 0; *lon_0 = 0;
-  *lat_1 = 0; *lat_2 = 0;
+  int status = -1;
+  if ( gridInqType(gridID) != GRID_PROJECTION ) return status;
 
+  *a = 0; *rf = 0;
+  *lon_0 = missval; *lat_0 = missval, *lat_1 = missval, *lat_2 = missval;
+  *xval_0 = missval; *yval_0 = missval; *x_0 = missval, *y_0 = missval;
+
+  status = -2;
   const char *projection = "lambert_conformal_conic";
   char mapname[CDI_MAX_NAME]; mapname[0] = 0;
   cdiGridInqKeyStr(gridID, CDI_KEY_MAPNAME, CDI_MAX_NAME, mapname);
@@ -3668,6 +3676,8 @@ void gridInqParamLCC(int gridID, double *a, double *rf, double *xval_0, double *
 
       int natts;
       cdiInqNatts(gridID, CDI_GLOBAL, &natts);
+
+      if ( natts ) status = 0;
 
       for ( int iatt = 0; iatt < natts; ++iatt )
         {
@@ -3680,9 +3690,9 @@ void gridInqParamLCC(int gridID, double *a, double *rf, double *xval_0, double *
               if      ( strcmp(attname, "earth_radius") == 0 )                       *a      = attflt[0];
               else if ( strcmp(attname, "inverse_flattening") == 0 )                 *rf     = attflt[0];
               else if ( strcmp(attname, "longitude_of_central_meridian") == 0 )      *lon_0  = attflt[0];
-              else if ( strcmp(attname, "latitude_of_projection_origin") == 0 )      lat_0   = attflt[0];
-              else if ( strcmp(attname, "false_easting")  == 0 )                     x_0     = attflt[0];
-              else if ( strcmp(attname, "false_northing") == 0 )                     y_0     = attflt[0];
+              else if ( strcmp(attname, "latitude_of_projection_origin") == 0 )      *lat_0  = attflt[0];
+              else if ( strcmp(attname, "false_easting")  == 0 )                     *x_0    = attflt[0];
+              else if ( strcmp(attname, "false_northing") == 0 )                     *y_0    = attflt[0];
               else if ( strcmp(attname, "longitudeOfFirstGridPointInDegrees") == 0 ) *xval_0 = attflt[0];
               else if ( strcmp(attname, "latitudeOfFirstGridPointInDegrees")  == 0 ) *yval_0 = attflt[0];
               else if ( strcmp(attname, "standard_parallel") == 0 )
@@ -3693,8 +3703,8 @@ void gridInqParamLCC(int gridID, double *a, double *rf, double *xval_0, double *
             }
         }
     }
-  else
-    Warning("%s mapping parameter missing!", projection);
+
+  return status;
 }
 
 

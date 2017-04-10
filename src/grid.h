@@ -6,6 +6,8 @@
 
 #include "cdi_att.h"
 
+extern double grid_missval;
+
 typedef unsigned char mask_t;
 
 typedef struct grid_t grid_t;
