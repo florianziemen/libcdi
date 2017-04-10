@@ -20,7 +20,7 @@
 #include "serialize.h"
 #include "vlist.h"
 
-double grid_missval = -9999.;
+double grid_missval = 9999.;
 
 /* the value in the second pair of brackets must match the length of
  * the longest string (including terminating NUL) */
@@ -3658,12 +3658,12 @@ The function @func{gridInqParamLCC} returns the parameter of a Lambert Conformal
 int gridInqParamLCC(int gridID, double missval, double *lon_0, double *lat_0, double *lat_1, double *lat_2,
                     double *a, double *rf, double *xval_0, double *yval_0, double *x_0, double *y_0)
 {
-  int status = -1;
-  if ( gridInqType(gridID) != GRID_PROJECTION ) return status;
-
   *a = 0; *rf = 0;
   *lon_0 = missval; *lat_0 = missval, *lat_1 = missval, *lat_2 = missval;
   *xval_0 = missval; *yval_0 = missval; *x_0 = missval, *y_0 = missval;
+
+  int status = -1;
+  if ( gridInqType(gridID) != GRID_PROJECTION ) return status;
 
   status = -2;
   const char *projection = "lambert_conformal_conic";
@@ -3705,6 +3705,26 @@ int gridInqParamLCC(int gridID, double missval, double *lon_0, double *lat_0, do
     }
 
   return status;
+}
+
+
+int gridVerifyGribParamLCC(int gridID, double missval, double *lon_0, double *lat_0, double *lat_1, double *lat_2,
+                           double *a, double *rf, double *xval_0, double *yval_0, double *x_0, double *y_0)
+{
+  static bool lwarn = true;
+
+  if ( lwarn )
+    {
+      lwarn = false;
+      const char *projection = "lambert_conformal_conic";
+      if ( IS_EQUAL(*lon_0, missval) ) { Warning("%s mapping parameter %s missing!", projection, "longitude_of_central_meridian"); }
+      if ( IS_EQUAL(*lat_0, missval) ) { Warning("%s mapping parameter %s missing!", projection, "latitude_of_central_meridian"); }
+      if ( IS_EQUAL(*lat_1, missval) ) { Warning("%s mapping parameter %s missing!", projection, "standard_parallel"); }
+      if ( IS_EQUAL(*xval_0, missval) || IS_EQUAL(*yval_0, missval) )
+        { Warning("%s mapping parameter %s missing!", projection, "longitudeOfFirstGridPointInDegrees and latitudeOfFirstGridPointInDegrees"); }
+    }
+
+  return 0;
 }
 
 
