@@ -402,7 +402,11 @@ void cgribexAddRecord(stream_t * streamptr, int param, int *isec1, int *isec2, d
           double lat_2  = ISEC2_Lambert_LatS2 * 0.001;
           bool lsouth = gribbyte_get_bit(ISEC2_Lambert_ProjFlag, 1);
           if ( lsouth ) { lat_1 = -lat_1; lat_2 = -lat_2; }
-          gridDefParamLCC(gridID, a, rf, xval_0, yval_0, lon_0, lat_1, lat_2);
+
+          double lat_0 = lat_2;
+          double x_0 = grid_missval;
+          double y_0 = grid_missval;
+          gridDefParamLCC(gridID, grid_missval, lon_0, lat_0, lat_1, lat_2, a, rf, xval_0, yval_0, x_0, y_0);
         }
     }
   else

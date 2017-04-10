@@ -492,7 +492,7 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
       long earthIsOblate;
       grib_get_long(gh, "earthIsOblate", &earthIsOblate);
       if ( earthIsOblate ) { a = 6378160.; rf = 297.0; }
-      double xval_0, yval_0, lon_0, lat_1, lat_2;
+      double lon_0, lat_0, lat_1, lat_2, xval_0, yval_0, x_0 = grid_missval, y_0 = grid_missval;
       long projflag = 0;
       grib_get_double(gh, "longitudeOfFirstGridPointInDegrees", &xval_0);
       grib_get_double(gh, "latitudeOfFirstGridPointInDegrees", &yval_0);
@@ -503,7 +503,8 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
       bool lsouth = gribbyte_get_bit(projflag, 1);
       if ( lsouth ) { lat_1 = -lat_1; lat_2 = -lat_2; }
 
-      gridDefParamLCC(gridID, a, rf, xval_0, yval_0, lon_0, lat_1, lat_2);
+      lat_0  = lat_2;
+      gridDefParamLCC(gridID, grid_missval, lon_0, lat_0, lat_1, lat_2, a, rf, xval_0, yval_0, x_0, y_0);
     }
 
   int zaxistype = gribapiGetZaxisType(gribEditionNumber(gh), leveltype1);

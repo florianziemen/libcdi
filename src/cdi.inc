@@ -1846,13 +1846,17 @@
 !
 !                     gridDefParamLCC
 !                                    (INTEGER         gridID,
+!                                     DOUBLEPRECISION missval,
+!                                     DOUBLEPRECISION lon_0,
+!                                     DOUBLEPRECISION lat_0,
+!                                     DOUBLEPRECISION lat_1,
+!                                     DOUBLEPRECISION lat_2,
 !                                     DOUBLEPRECISION a,
 !                                     DOUBLEPRECISION rf,
 !                                     DOUBLEPRECISION xval_0,
 !                                     DOUBLEPRECISION yval_0,
-!                                     DOUBLEPRECISION lon_0,
-!                                     DOUBLEPRECISION lat_1,
-!                                     DOUBLEPRECISION lat_2)
+!                                     DOUBLEPRECISION x_0,
+!                                     DOUBLEPRECISION y_0)
       EXTERNAL        gridDefParamLCC
 
       INTEGER         gridInqParamLCC
