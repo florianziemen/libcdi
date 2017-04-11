@@ -499,7 +499,7 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
       grib_get_double(gh, "LoVInDegrees", &lon_0);
       grib_get_double(gh, "Latin1InDegrees", &lat_1);
       grib_get_double(gh, "Latin2InDegrees", &lat_2);
-      grib_get_long(gh, "projectionCenterFlag", &projflag);
+      grib_get_long(gh, "projectionCentreFlag", &projflag);
       bool lsouth = gribbyte_get_bit(projflag, 1);
       if ( lsouth ) { lat_1 = -lat_1; lat_2 = -lat_2; }
 
@@ -2168,7 +2168,7 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 	GRIB_CHECK(my_grib_set_double(gh, "LoVInDegrees", lon_0), 0);
 	GRIB_CHECK(my_grib_set_double(gh, "Latin1InDegrees", lat_1), 0);
 	GRIB_CHECK(my_grib_set_double(gh, "Latin2InDegrees", lat_2), 0);
-        GRIB_CHECK(my_grib_set_long(gh, "projectionCenterFlag", projflag), 0);
+        GRIB_CHECK(my_grib_set_long(gh, "projectionCentreFlag", projflag), 0);
 
         long uvRelativeToGrid = gridInqUvRelativeToGrid(gridID);
         if ( uvRelativeToGrid ) GRIB_CHECK(my_grib_set_long(gh, "uvRelativeToGrid", uvRelativeToGrid), 0);
