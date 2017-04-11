@@ -2063,7 +2063,7 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 	      {
 		xfirst = gridInqXval(gridID, 0);
                 xlast  = gridInqXval(gridID, (lcurvi ? nlon*nlat : nlon) - 1);
-		xinc   = gridInqXinc(gridID);
+		xinc   = fabs(gridInqXinc(gridID));
 	      }
 	  }
 
@@ -2072,8 +2072,17 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 	  {
 	    yfirst = gridInqYval(gridID, 0);
             ylast  = gridInqYval(gridID, (lcurvi ? nlon*nlat : nlat) - 1);
-	    yinc   = gridInqYinc(gridID);
+	    yinc   = fabs(gridInqYinc(gridID));
 	  }
+
+        {
+          long iscan = xfirst > xlast;
+          GRIB_CHECK(my_grib_set_long(gh, "iScansNegatively", iscan), 0);
+        }
+        {
+          long jscan = yfirst < ylast;
+          GRIB_CHECK(my_grib_set_long(gh, "jScansPositively", jscan), 0);
+        }
 
 	if ( gridtype != GRID_GAUSSIAN_REDUCED ) GRIB_CHECK(my_grib_set_long(gh, "Ni", nlon), 0);
 	GRIB_CHECK(my_grib_set_double(gh, "longitudeOfFirstGridPointInDegrees", xfirst), 0);
@@ -2083,11 +2092,6 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 	GRIB_CHECK(my_grib_set_long(gh, "Nj", nlat), 0);
 	GRIB_CHECK(my_grib_set_double(gh, "latitudeOfFirstGridPointInDegrees",  yfirst), 0);
 	GRIB_CHECK(my_grib_set_double(gh, "latitudeOfLastGridPointInDegrees",   ylast), 0);
-
-        {
-          long jscan = yfirst < ylast;
-          GRIB_CHECK(my_grib_set_long(gh, "jScansPositively", jscan), 0);
-        }
 
 	if ( gridtype == GRID_GAUSSIAN || gridtype == GRID_GAUSSIAN_REDUCED )
           {

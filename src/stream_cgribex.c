@@ -1708,7 +1708,7 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
 	      {
 		xfirst = gridInqXval(gridID, 0);
                 xlast  = gridInqXval(gridID, (lcurvi ? nlon*nlat : nlon) - 1);
-		xinc   = gridInqXinc(gridID);
+		xinc   = fabs(gridInqXinc(gridID));
 	      }
 	  }
 
@@ -1746,7 +1746,6 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
 	else
 	  {
 	    ISEC2_LatIncr = (int)lround(yinc*1000);
-	    if ( ISEC2_LatIncr < 0 ) ISEC2_LatIncr = -ISEC2_LatIncr;
 	  }
 
 	if ( ISEC2_NumLon > 1 && ISEC2_NumLat == 1 )
