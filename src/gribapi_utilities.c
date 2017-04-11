@@ -755,7 +755,7 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
       Error("Unsupported grid type: %s", gridNamePtr(gridtype));
     }
 
-  if ( gridtype == GRID_GAUSSIAN || gridtype == GRID_LONLAT || gridtype == GRID_PROJECTION || gridtype == GRID_LCC )
+  if ( gridtype == GRID_GAUSSIAN || gridtype == GRID_LONLAT || gridtype == GRID_PROJECTION )
     {
       long temp;
       GRIB_CHECK(grib_get_long(gh, "uvRelativeToGrid", &temp), 0);
@@ -763,7 +763,7 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
       grid->uvRelativeToGrid = (bool)temp;
     }
 
-  if ( gridtype == GRID_GAUSSIAN || gridtype == GRID_LONLAT || gridtype == GRID_PROJECTION || gridtype == GRID_LCC )
+  if ( gridtype == GRID_GAUSSIAN || gridtype == GRID_LONLAT || gridtype == GRID_PROJECTION )
     {
       long temp;
       GRIB_CHECK(grib_get_long(gh, "iScansNegatively", &temp), 0);

@@ -510,7 +510,7 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
       if ( proj_lonlat_to_lcc_func )
         {
           x_0 = xval_0; y_0 = yval_0;
-          proj_lonlat_to_lcc_func(grid_missval, lon_0, lat_0, lat_1, lat_2, a, rf, 1, &x_0, &y_0);
+          proj_lonlat_to_lcc_func(grid_missval, lon_0, lat_0, lat_1, lat_2, a, rf, (size_t)1, &x_0, &y_0);
           if ( IS_NOT_EQUAL(x_0, grid_missval) && IS_NOT_EQUAL(y_0, grid_missval) )
             { x_0 = -x_0; y_0 = -y_0; }
         }
@@ -2981,7 +2981,7 @@ void gribapiSetExtMode(grib_handle *gh, int gridID, long datasize, const double 
 #endif
   int gridtype = gridInqType(gridID);
   if ( gridtype == GRID_GENERIC || gridtype == GRID_LONLAT || gridtype == GRID_GAUSSIAN ||
-       gridtype == GRID_GAUSSIAN_REDUCED || gridtype == GRID_PROJECTION || gridtype == GRID_LCC )
+       gridtype == GRID_GAUSSIAN_REDUCED || gridtype == GRID_PROJECTION )
     {
       //scanModeIN  = gribapiGetScanningMode(gh);
       int scanModeIN = gridInqScanningMode(gridID);

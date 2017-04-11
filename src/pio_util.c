@@ -184,7 +184,7 @@ cdiPioQueryVarDims(int varShape[3], int vlistID, int varID)
       varShape[1] = gridInqSize(gridID) / 2;
       break;
     case GRID_GENERIC:
-    case GRID_LCC:
+    case GRID_PROJECTION:
     case GRID_GME:
     case GRID_CURVILINEAR:
     case GRID_UNSTRUCTURED:

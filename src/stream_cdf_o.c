@@ -2053,12 +2053,6 @@ void cdfDefGrid(stream_t *streamptr, int gridID, int gridindex)
       cdfDefTrajLon(streamptr, gridID, gridindex);
       cdfDefTrajLat(streamptr, gridID, gridindex);
     }
-  /*
-  else if ( gridtype == GRID_LCC )
-    {
-      cdfDefLcc(streamptr, gridID);
-    }
-  */
   else
     {
       Error("Unsupported grid type: %s", gridNamePtr(gridtype));
