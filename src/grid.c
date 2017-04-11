@@ -22,6 +22,7 @@
 
 double grid_missval = -9999.;
 int (*proj_lonlat_to_lcc_func)() = NULL;
+int (*proj_lcc_to_lonlat_func)() = NULL;
 
 /* the value in the second pair of brackets must match the length of
  * the longest string (including terminating NUL) */
@@ -3723,13 +3724,21 @@ int gridVerifyGribParamLCC(int gridID, double missval, double *lon_0, double *la
 
   if ( lwarn )
     {
-      lwarn = false;
+      // lwarn = false;
       const char *projection = "lambert_conformal_conic";
       if ( IS_EQUAL(*lon_0, missval) ) { Warning("%s mapping parameter %s missing!", projection, "longitude_of_central_meridian"); }
       if ( IS_EQUAL(*lat_0, missval) ) { Warning("%s mapping parameter %s missing!", projection, "latitude_of_central_meridian"); }
       if ( IS_EQUAL(*lat_1, missval) ) { Warning("%s mapping parameter %s missing!", projection, "standard_parallel"); }
-      if ( IS_EQUAL(*xval_0, missval) || IS_EQUAL(*yval_0, missval) )
-        { Warning("%s mapping parameter %s missing!", projection, "longitudeOfFirstGridPointInDegrees and latitudeOfFirstGridPointInDegrees"); }
+      if ( IS_NOT_EQUAL(*x_0, missval) && IS_NOT_EQUAL(*y_0, grid_missval) && (IS_EQUAL(*xval_0, missval) || IS_EQUAL(*yval_0, missval)) )
+        {
+          if ( proj_lcc_to_lonlat_func )
+            {
+              *xval_0 = -(*x_0); *yval_0 = -(*y_0);
+              proj_lcc_to_lonlat_func(missval, *lon_0, *lat_0, *lat_1, *lat_2, *a, *rf, 0.0, 0.0, (size_t)1, xval_0, yval_0);
+            }
+          if ( IS_EQUAL(*xval_0, missval) || IS_EQUAL(*yval_0, missval) )
+            Warning("%s mapping parameter %s missing!", projection, "longitudeOfFirstGridPointInDegrees and latitudeOfFirstGridPointInDegrees");
+        }
     }
 
   return 0;
