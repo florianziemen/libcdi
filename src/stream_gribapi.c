@@ -2005,7 +2005,6 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
       {
 	double xfirst = 0, xlast = 0, xinc = 0;
 	double yfirst = 0, ylast = 0, yinc = 0;
-	double latIncr;
 
         const char *mesg;
         size_t len;
@@ -2075,15 +2074,6 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 	    yinc   = fabs(gridInqYinc(gridID));
 	  }
 
-        {
-          long iscan = xfirst > xlast;
-          GRIB_CHECK(my_grib_set_long(gh, "iScansNegatively", iscan), 0);
-        }
-        {
-          long jscan = yfirst < ylast;
-          GRIB_CHECK(my_grib_set_long(gh, "jScansPositively", jscan), 0);
-        }
-
 	if ( gridtype != GRID_GAUSSIAN_REDUCED ) GRIB_CHECK(my_grib_set_long(gh, "Ni", nlon), 0);
 	GRIB_CHECK(my_grib_set_double(gh, "longitudeOfFirstGridPointInDegrees", xfirst), 0);
 	GRIB_CHECK(my_grib_set_double(gh, "longitudeOfLastGridPointInDegrees",  xlast), 0);
@@ -2093,6 +2083,15 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 	GRIB_CHECK(my_grib_set_double(gh, "latitudeOfFirstGridPointInDegrees",  yfirst), 0);
 	GRIB_CHECK(my_grib_set_double(gh, "latitudeOfLastGridPointInDegrees",   ylast), 0);
 
+        {
+          long iscan = xfirst > xlast;
+          GRIB_CHECK(my_grib_set_long(gh, "iScansNegatively", iscan), 0);
+        }
+        {
+          long jscan = yfirst < ylast;
+          GRIB_CHECK(my_grib_set_long(gh, "jScansPositively", jscan), 0);
+        }
+
 	if ( gridtype == GRID_GAUSSIAN || gridtype == GRID_GAUSSIAN_REDUCED )
           {
             int np = gridInqNP(gridID);
@@ -2101,9 +2100,7 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
           }
 	else
 	  {
-	    latIncr = yinc;
-	    if ( latIncr < 0 ) latIncr = -latIncr;
-	    GRIB_CHECK(my_grib_set_double(gh, "jDirectionIncrementInDegrees", latIncr), 0);
+	    GRIB_CHECK(my_grib_set_double(gh, "jDirectionIncrementInDegrees", yinc), 0);
 	  }
 
 	if ( lrotated )
@@ -2996,6 +2993,7 @@ void gribapiSetExtMode(grib_handle *gh, int gridID, long datasize, const double 
           Message("(scanModeIN=%d; gridsize=%d", scanModeIN, gridsize);
         }
 
+      /*
 #ifdef HIRLAM_EXTENSIONS
       if ( cdiGribDataScanningMode.active )   // allowed modes: <0, 64, 96>; Default is 64
         {
@@ -3022,7 +3020,7 @@ void gribapiSetExtMode(grib_handle *gh, int gridID, long datasize, const double 
           if (cdiDebugExt>=100) Message("Set GribDataScanningMode => (%d) based on used grid", scanModeIN);
           gribapiSetScanningMode(gh, scanModeIN);
         }
-
+      */
 
       if ( cdiGribChangeModeUvRelativeToGrid.active )
         {

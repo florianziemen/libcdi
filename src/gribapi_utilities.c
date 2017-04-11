@@ -551,17 +551,19 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
       if ( gridtype == GRID_LONLAT && nlat > 1 )
         FAIL_ON_GRIB_ERROR(grib_get_double, gh, "jDirectionIncrementInDegrees", &grid->y.inc);
 
+      long iscan, jscan;
+      FAIL_ON_GRIB_ERROR(grib_get_long, gh, "iScansNegatively", &iscan);
+      FAIL_ON_GRIB_ERROR(grib_get_long, gh, "jScansPositively", &jscan);
+      if (  iscan ) grid->x.inc = - grid->x.inc;
+      if ( !jscan ) grid->y.inc = - grid->y.inc;
+
       if ( grid->x.inc < -999 || grid->x.inc > 999 ) grid->x.inc = 0;
       if ( grid->y.inc < -999 || grid->y.inc > 999 ) grid->y.inc = 0;
-
-      if ( grid->y.inc > 0 && grid->y.first > grid->y.last ) grid->y.inc = -grid->y.inc;
 
       /* if ( IS_NOT_EQUAL(grid->x.first, 0) || IS_NOT_EQUAL(grid->x.last, 0) ) */
       {
         if ( grid->x.size > 1 )
           {
-            if ( (grid->x.first >= grid->x.last) && (grid->x.first >= 180) ) grid->x.first -= 360;
-
             if ( editionNumber <= 1 )
               {
                 /* correct xinc if necessary */
