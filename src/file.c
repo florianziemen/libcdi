@@ -9,6 +9,8 @@
 #include <limits.h>
 #include <stdarg.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
 #include <string.h>
 #include <unistd.h>
 #include <sys/types.h>
@@ -47,14 +49,6 @@ char *strdup(const char *s);
 #endif
 
 
-#if ! defined   (FALSE)
-#  define  FALSE  0
-#endif
-
-#if ! defined   (TRUE)
-#  define  TRUE   1
-#endif
-
 /* #define  MAX_FILES  FOPEN_MAX */
 #define  MAX_FILES  4096
 
@@ -62,7 +56,7 @@ static int _file_max = MAX_FILES;
 
 static void file_initialize(void);
 
-static int _file_init = FALSE;
+static bool _file_init = false;
 
 #if  defined  (HAVE_LIBPTHREAD)
 #include <pthread.h>
@@ -73,14 +67,14 @@ static pthread_mutex_t _file_mutex;
 #  define FILE_LOCK()         pthread_mutex_lock(&_file_mutex)
 #  define FILE_UNLOCK()       pthread_mutex_unlock(&_file_mutex)
 #  define FILE_INIT()        \
-   if ( _file_init == FALSE ) pthread_once(&_file_init_thread, file_initialize)
+   if ( _file_init == false ) pthread_once(&_file_init_thread, file_initialize)
 
 #else
 
 #  define FILE_LOCK()
 #  define FILE_UNLOCK()
 #  define FILE_INIT()        \
-   if ( _file_init == FALSE ) file_initialize()
+   if ( _file_init == false ) file_initialize()
 
 #endif
 
@@ -125,7 +119,7 @@ enum F_I_L_E_Flags
   };
 
 
-static int FileInfo  = FALSE;
+static bool FileInfo = false;
 
 
 #if ! defined (MIN_BUF_SIZE)
@@ -150,7 +144,7 @@ static void file_table_print(void);
  * A version string.
  */
 #undef   LIBVERSION
-#define  LIBVERSION      1.8.2
+#define  LIBVERSION      1.8.3
 #define  XSTRING(x)	 #x
 #define  STRING(x) 	 XSTRING(x)
 static const char file_libvers[] = STRING(LIBVERSION) " of " __DATE__ " " __TIME__;
@@ -190,7 +184,7 @@ void file_list_new(void)
 {
   assert(_fileList == NULL);
 
-  _fileList = (filePtrToIdx *) Malloc((size_t)_file_max * sizeof (filePtrToIdx));
+  _fileList = (filePtrToIdx *) Malloc((size_t)_file_max*sizeof(filePtrToIdx));
 }
 
 static
@@ -206,9 +200,7 @@ void file_list_delete(void)
 static
 void file_init_pointer(void)
 {
-  int  i;
-
-  for ( i = 0; i < _file_max; i++ )
+  for ( int i = 0; i < _file_max; i++ )
     {
       _fileList[i].next = _fileList + i + 1;
       _fileList[i].idx  = i;
@@ -238,14 +230,14 @@ bfile_t *file_to_pointer(int idx)
   else
     Error("file index %d undefined!", idx);
 
-  return (fileptr);
+  return fileptr;
 }
 
 /* Create an index from a pointer */
 static
 int file_from_pointer(bfile_t *ptr)
 {
-  int      idx = -1;
+  int idx = -1;
   filePtrToIdx *newptr;
 
   if ( ptr )
@@ -271,7 +263,7 @@ int file_from_pointer(bfile_t *ptr)
   else
     Error("Internal problem (pointer %p undefined)", ptr);
 
-  return (idx);
+  return idx;
 }
 
 static
@@ -305,21 +297,16 @@ void file_init_entry(bfile_t *fileptr)
 static
 bfile_t *file_new_entry(void)
 {
-  bfile_t *fileptr;
-
-  fileptr = (bfile_t *) Malloc(sizeof(bfile_t));
-
+  bfile_t *fileptr = (bfile_t *) Malloc(sizeof(bfile_t));
   if ( fileptr ) file_init_entry(fileptr);
 
-  return (fileptr);
+  return fileptr;
 }
 
 static
 void file_delete_entry(bfile_t *fileptr)
 {
-  int idx;
-
-  idx = fileptr->self;
+  int idx = fileptr->self;
 
   FILE_LOCK();
 
@@ -338,49 +325,41 @@ void file_delete_entry(bfile_t *fileptr)
 
 const char *fileLibraryVersion(void)
 {
-  return (file_libvers);
+  return file_libvers;
 }
-
 
 static
 int pagesize(void)
 {
 #if defined(_SC_PAGESIZE)
-  return ((int) sysconf(_SC_PAGESIZE));
+  return (int) sysconf(_SC_PAGESIZE);
 #else
 #ifndef POSIXIO_DEFAULT_PAGESIZE
 #define POSIXIO_DEFAULT_PAGESIZE 4096
 #endif
-  return ((int) POSIXIO_DEFAULT_PAGESIZE);
+  return (int) POSIXIO_DEFAULT_PAGESIZE;
 #endif
 }
 
 static
 double file_time()
 {
-  double tseconds = 0.0;
   struct timeval mytime;
   gettimeofday(&mytime, NULL);
-  tseconds = (double) mytime.tv_sec + (double) mytime.tv_usec*1.0e-6;
-  return (tseconds);
+  double tseconds = (double) mytime.tv_sec + (double) mytime.tv_usec*1.0e-6;
+  return tseconds;
 }
 
 void fileDebug(int debug)
 {
   FILE_Debug = debug;
-
-  if ( FILE_Debug )
-    Message("Debug level %d", debug);
+  if ( FILE_Debug ) Message("Debug level %d", debug);
 }
 
 
 void *filePtr(int fileID)
 {
-  bfile_t *fileptr;
-
-  fileptr = file_to_pointer(fileID);
-
-  return (fileptr);
+  return (void*)file_to_pointer(fileID);
 }
 
 static
@@ -398,9 +377,7 @@ void file_pointer_info(const char *caller, int fileID)
 int fileSetBufferType(int fileID, int type)
 {
   int ret = 0;
-  bfile_t *fileptr;
-
-  fileptr = file_to_pointer(fileID);
+  bfile_t *fileptr = file_to_pointer(fileID);
 
   if ( fileptr )
     {
@@ -419,27 +396,22 @@ int fileSetBufferType(int fileID, int type)
   if ( type == FILE_BUFTYPE_MMAP ) ret = 1;
 #endif
 
-  return (ret);
+  return ret;
 }
 
 int fileFlush(int fileID)
 {
-  bfile_t *fileptr;
   int retval = 0;
-
-  fileptr = file_to_pointer(fileID);
-
+  bfile_t *fileptr = file_to_pointer(fileID);
   if ( fileptr ) retval = fflush(fileptr->fp);
 
-  return (retval);
+  return retval;
 }
 
 
 void fileClearerr(int fileID)
 {
-  bfile_t *fileptr;
-
-  fileptr = file_to_pointer(fileID);
+  bfile_t *fileptr = file_to_pointer(fileID);
 
   if ( fileptr )
     {
@@ -451,25 +423,21 @@ void fileClearerr(int fileID)
 
 int filePtrEOF(void *vfileptr)
 {
-  bfile_t *fileptr = (bfile_t *) vfileptr;
   int retval = 0;
-
+  bfile_t *fileptr = (bfile_t *) vfileptr;
   if ( fileptr ) retval = (fileptr->flag & FILE_EOF) != 0;
 
-  return (retval);
+  return retval;
 }
 
 
 int fileEOF(int fileID)
 {
-  bfile_t *fileptr;
   int retval = 0;
-
-  fileptr = file_to_pointer(fileID);
-
+  bfile_t *fileptr = file_to_pointer(fileID);
   if ( fileptr ) retval = (fileptr->flag & FILE_EOF) != 0;
 
-  return (retval);
+  return retval;
 }
 
 void fileRewind(int fileID)
@@ -482,9 +450,7 @@ void fileRewind(int fileID)
 off_t fileGetPos(int fileID)
 {
   off_t filepos = 0;
-  bfile_t *fileptr;
-
-  fileptr = file_to_pointer(fileID);
+  bfile_t *fileptr = file_to_pointer(fileID);
 
   if ( fileptr )
     {
@@ -496,23 +462,21 @@ off_t fileGetPos(int fileID)
 
   if ( FILE_Debug ) Message("Position %ld", filepos);
 
-  return (filepos);
+  return filepos;
 }
 
 
 int fileSetPos(int fileID, off_t offset, int whence)
 {
   int status = 0;
-  bfile_t *fileptr;
-
-  fileptr = file_to_pointer(fileID);
+  bfile_t *fileptr = file_to_pointer(fileID);
 
   if ( FILE_Debug ) Message("Offset %8ld  Whence %3d", (long) offset, whence);
 
   if ( fileptr == 0 )
     {
       file_pointer_info(__func__, fileID);
-      return (1);
+      return 1;
     }
 
   switch (whence)
@@ -593,19 +557,17 @@ int fileSetPos(int fileID, off_t offset, int whence)
     if ( (fileptr->flag & FILE_EOF) != 0 )
       fileptr->flag -= FILE_EOF;
 
-  return (status);
+  return status;
 }
 
 static
 void file_table_print(void)
 {
-  int fileID;
   int lprintHeader = 1;
-  bfile_t *fileptr;
 
-  for ( fileID = 0; fileID < _file_max; fileID++ )
+  for ( int fileID = 0; fileID < _file_max; fileID++ )
     {
-      fileptr = file_to_pointer(fileID);
+      bfile_t *fileptr = file_to_pointer(fileID);
 
       if ( fileptr )
 	{
@@ -652,43 +614,34 @@ void file_table_print(void)
 
 char *fileInqName(int fileID)
 {
-  bfile_t *fileptr;
   char *name = NULL;
-
-  fileptr = file_to_pointer(fileID);
-
+  bfile_t *fileptr = file_to_pointer(fileID);
   if ( fileptr ) name = fileptr->name;
 
-  return (name);
+  return name;
 }
 
 
 int fileInqMode(int fileID)
 {
-  bfile_t *fileptr;
   int mode = 0;
-
-  fileptr = file_to_pointer(fileID);
-
+  bfile_t *fileptr = file_to_pointer(fileID);
   if ( fileptr ) mode = fileptr->mode;
 
-  return (mode);
+  return mode;
 }
 
 static
 long file_getenv(const char *envName)
 {
-  char *envString;
   long envValue = -1;
   long fact = 1;
 
-  envString = getenv(envName);
+  char *envString = getenv(envName);
 
   if ( envString )
     {
-      int loop;
-
-      for ( loop = 0; loop < (int) strlen(envString); loop++ )
+      for ( int loop = 0; loop < (int) strlen(envString); loop++ )
 	{
 	  if ( ! isdigit((int) envString[loop]) )
 	    {
@@ -711,14 +664,13 @@ long file_getenv(const char *envName)
       if ( FILE_Debug ) Message("Set %s to %ld", envName, envValue);
     }
 
-  return (envValue);
+  return envValue;
 }
 
 static
 void file_initialize(void)
 {
   long value;
-  char *envString;
 
 #if  defined  (HAVE_LIBPTHREAD)
   /* initialize global API mutex lock */
@@ -734,7 +686,7 @@ void file_initialize(void)
   if ( FILE_Debug )
     Message("FILE_MAX = %d", _file_max);
 
-  FileInfo  = (int) file_getenv("FILE_INFO");
+  FileInfo = file_getenv("FILE_INFO") > 0;
 
   value  = file_getenv("FILE_BUFSIZE");
   if ( value >= 0 ) FileBufferSizeEnv = value;
@@ -775,7 +727,7 @@ void file_initialize(void)
 #if defined (O_NONBLOCK)
   FileFlagWrite = O_NONBLOCK;
 #endif
-  envString = getenv("FILE_FLAG_WRITE");
+  char *envString = getenv("FILE_FLAG_WRITE");
   if ( envString )
     {
 #if defined (O_NONBLOCK)
@@ -815,7 +767,7 @@ void file_initialize(void)
 
   if ( FILE_Debug ) atexit(file_table_print);
 
-  _file_init = TRUE;
+  _file_init = true;
 }
 
 static
@@ -891,20 +843,18 @@ static
 int file_fill_buffer(bfile_t *fileptr)
 {
   ssize_t nread;
-  int fd;
   long offset = 0;
-  off_t retseek;
 
   if ( FILE_Debug )
     Message("file ptr = %p  Cnt = %ld", fileptr, fileptr->bufferCnt);
 
-  if ( (fileptr->flag & FILE_EOF) != 0 ) return (EOF);
+  if ( (fileptr->flag & FILE_EOF) != 0 ) return EOF;
 
   if ( fileptr->buffer == NULL ) file_set_buffer(fileptr);
 
-  if ( fileptr->bufferSize == 0 ) return (EOF);
+  if ( fileptr->bufferSize == 0 ) return EOF;
 
-  fd = fileptr->fd;
+  int fd = fileptr->fd;
 
 #if defined (HAVE_MMAP)
   if ( fileptr->bufferType == FILE_BUFTYPE_MMAP )
@@ -922,8 +872,7 @@ int file_fill_buffer(bfile_t *fileptr)
 
 	  if ( fileptr->buffer )
 	    {
-              int ret;
-	      ret = munmap(fileptr->buffer, fileptr->mappedSize);
+              int ret = munmap(fileptr->buffer, fileptr->mappedSize);
 	      if ( ret == -1 ) SysError("munmap error for read %s", fileptr->name);
 	      fileptr->buffer = NULL;
 	    }
@@ -940,24 +889,19 @@ int file_fill_buffer(bfile_t *fileptr)
   else
 #endif
     {
-      retseek = lseek(fileptr->fd, fileptr->bufferPos, SEEK_SET);
+      off_t retseek = lseek(fileptr->fd, fileptr->bufferPos, SEEK_SET);
       if ( retseek == (off_t)-1 )
 	SysError("lseek error at pos %ld file %s", (long) fileptr->bufferPos, fileptr->name);
 
       nread = read(fd, fileptr->buffer, fileptr->bufferSize);
-
       if ( nread > 0 ) offset = fileptr->position - fileptr->bufferPos;
     }
 
   if ( nread <= 0 )
     {
-      if ( nread == 0 )
-	fileptr->flag |= FILE_EOF;
-      else
-	fileptr->flag |= FILE_ERROR;
-
+      fileptr->flag |= (nread == 0) ? FILE_EOF : FILE_ERROR;
       fileptr->bufferCnt = 0;
-      return (EOF);
+      return EOF;
     }
 
   fileptr->bufferPtr = fileptr->buffer;
@@ -989,7 +933,7 @@ int file_fill_buffer(bfile_t *fileptr)
 
   fileptr->bufferNumFill++;
 
-  return ((unsigned char) *fileptr->bufferPtr);
+  return (unsigned char) *fileptr->bufferPtr;
 }
 
 static
@@ -1020,7 +964,7 @@ void file_copy_from_buffer(bfile_t *fileptr, void *ptr, size_t size)
 static
 size_t file_read_from_buffer(bfile_t *fileptr, void *ptr, size_t size)
 {
-  size_t nread, rsize;
+  size_t nread;
   size_t offset = 0;
 
   if ( FILE_Debug )
@@ -1029,7 +973,7 @@ size_t file_read_from_buffer(bfile_t *fileptr, void *ptr, size_t size)
   if ( ((long)fileptr->bufferCnt) < 0L )
     Error("Internal problem. bufferCnt = %ld", (long) fileptr->bufferCnt);
 
-  rsize = size;
+  size_t rsize = size;
 
   while ( fileptr->bufferCnt < rsize )
     {
@@ -1082,13 +1026,12 @@ int fileOpen_serial(const char *filename, const char *mode)
   FILE *fp = NULL;    /* file pointer    (used for write) */
   int fd = -1;        /* file descriptor (used for read)  */
   int fileID = FILE_UNDEFID;
-  int fmode = 0;
   struct stat filestat;
   bfile_t *fileptr = NULL;
 
   FILE_INIT();
 
-  fmode = tolower((int) mode[0]);
+  int fmode = tolower((int) mode[0]);
 
   switch ( fmode )
     {
@@ -1115,7 +1058,7 @@ int fileOpen_serial(const char *filename, const char *mode)
 
   if ( fp )
     {
-      if ( stat(filename, &filestat) != 0 ) return (fileID);
+      if ( stat(filename, &filestat) != 0 ) return fileID;
 
       fileptr = file_new_entry();
       if ( fileptr )
@@ -1126,7 +1069,7 @@ int fileOpen_serial(const char *filename, const char *mode)
     }
   else if ( fd >= 0 )
     {
-      if ( fstat(fd, &filestat) != 0 ) return (fileID);
+      if ( fstat(fd, &filestat) != 0 ) return fileID;
 
       fileptr = file_new_entry();
       if ( fileptr )
@@ -1162,7 +1105,7 @@ int fileOpen_serial(const char *filename, const char *mode)
 	Message("File %s opened with ID %d", filename, fileID);
     }
 
-  return (fileID);
+  return fileID;
 }
 
 /*
@@ -1177,7 +1120,6 @@ int fileClose(int fileID)
 
 int fileClose_serial(int fileID)
 {
-  char *name;
   int ret;
   const char *fbtname[] = {"unknown", "standard", "mmap"};
   const char *ftname[] = {"unknown", "open", "fopen"};
@@ -1187,15 +1129,15 @@ int fileClose_serial(int fileID)
   if ( fileptr == NULL )
     {
       file_pointer_info(__func__, fileID);
-      return (1);
+      return 1;
     }
 
-  name = fileptr->name;
+  char *name = fileptr->name;
 
   if ( FILE_Debug )
     Message("fileID = %d  filename = %s", fileID, name);
 
-  if ( FileInfo > 0 )
+  if ( FileInfo )
     {
       fprintf(stderr, "____________________________________________\n");
       fprintf(stderr, " file ID          : %d\n",  fileID);
@@ -1234,9 +1176,7 @@ int fileClose_serial(int fileID)
 	}
 
       if ( fileptr->time_in_sec > 0 )
-        {
-          rout = (double)fileptr->byteTrans / (1024.*1024.*fileptr->time_in_sec);
-        }
+        rout = (double)fileptr->byteTrans / (1024.*1024.*fileptr->time_in_sec);
 
       fprintf(stderr, " wall time [s]    : %.2f\n", fileptr->time_in_sec);
       fprintf(stderr, " data rate [MB/s] : %.1f\n", rout);
@@ -1279,22 +1219,20 @@ int fileClose_serial(int fileID)
 
   file_delete_entry(fileptr);
 
-  return (0);
+  return 0;
 }
 
 
 int filePtrGetc(void *vfileptr)
 {
   int ivalue = EOF;
-  int fillret = 0;
   bfile_t *fileptr = (bfile_t *) vfileptr;
 
   if ( fileptr )
     {
       if ( fileptr->mode == 'r' && fileptr->type == FILE_TYPE_OPEN )
 	{
-	  if ( fileptr->bufferCnt == 0 ) fillret = file_fill_buffer(fileptr);
-
+	  int fillret = (fileptr->bufferCnt == 0) ? file_fill_buffer(fileptr) : 0;
 	  if ( fillret >= 0 )
 	    {
 	      ivalue = (unsigned char) *fileptr->bufferPtr++;
@@ -1318,20 +1256,14 @@ int filePtrGetc(void *vfileptr)
 	}
     }
 
-  return (ivalue);
+  return ivalue;
 }
 
 
 int fileGetc(int fileID)
 {
-  int ivalue;
-  bfile_t *fileptr;
-
-  fileptr = file_to_pointer(fileID);
-
-  ivalue = filePtrGetc((void *)fileptr);
-
-  return (ivalue);
+  bfile_t *fileptr = file_to_pointer(fileID);
+  return filePtrGetc((void *)fileptr);
 }
 
 
@@ -1348,12 +1280,7 @@ size_t filePtrRead(void *vfileptr, void *restrict ptr, size_t size)
 	{
 	  nread = fread(ptr, 1, size, fileptr->fp);
 	  if ( nread != size )
-	    {
-	      if ( nread == 0 )
-		fileptr->flag |= FILE_EOF;
-	      else
-		fileptr->flag |= FILE_ERROR;
-	    }
+            fileptr->flag |= (nread == 0) ? FILE_EOF : FILE_ERROR;
 	}
 
       fileptr->position  += (off_t)nread;
@@ -1363,16 +1290,14 @@ size_t filePtrRead(void *vfileptr, void *restrict ptr, size_t size)
 
   if ( FILE_Debug ) Message("size %ld  nread %ld", size, nread);
 
-  return (nread);
+  return nread;
 }
 
 
 size_t fileRead(int fileID, void *restrict ptr, size_t size)
 {
   size_t nread = 0;
-  bfile_t *fileptr;
-
-  fileptr = file_to_pointer(fileID);
+  bfile_t *fileptr = file_to_pointer(fileID);
 
   if ( fileptr )
     {
@@ -1403,22 +1328,18 @@ size_t fileRead(int fileID, void *restrict ptr, size_t size)
 
   if ( FILE_Debug ) Message("size %ld  nread %ld", size, nread);
 
-  return (nread);
+  return nread;
 }
 
 
 size_t fileWrite(int fileID, const void *restrict ptr, size_t size)
 {
   size_t nwrite = 0;
-  bfile_t *fileptr;
-
-  fileptr = file_to_pointer(fileID);
+  bfile_t *fileptr = file_to_pointer(fileID);
 
   if ( fileptr )
     {
       double t_begin = 0.0;
-
-      /* if ( fileptr->buffer == NULL ) file_set_buffer(fileptr); */
 
       if ( FileInfo ) t_begin = file_time();
 
@@ -1443,7 +1364,7 @@ size_t fileWrite(int fileID, const void *restrict ptr, size_t size)
       fileptr->access++;
     }
 
-  return (nwrite);
+  return nwrite;
 }
 /*
  * Local Variables:
