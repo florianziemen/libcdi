@@ -945,6 +945,8 @@ int file_fill_buffer(bfile_t *fileptr)
 	SysError("lseek error at pos %ld file %s", (long) fileptr->bufferPos, fileptr->name);
 
       nread = read(fd, fileptr->buffer, fileptr->bufferSize);
+
+      if ( nread > 0 ) offset = fileptr->position - fileptr->bufferPos;
     }
 
   if ( nread <= 0 )
