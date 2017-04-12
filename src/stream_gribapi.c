@@ -2984,7 +2984,7 @@ void gribapiSetExtMode(grib_handle *gh, int gridID, long datasize, const double 
   if ( gridtype == GRID_GENERIC || gridtype == GRID_LONLAT || gridtype == GRID_GAUSSIAN ||
        gridtype == GRID_GAUSSIAN_REDUCED || gridtype == GRID_PROJECTION )
     {
-      //scanModeIN  = gribapiGetScanningMode(gh);
+#ifdef HIRLAM_EXTENSIONS
       int scanModeIN = gridInqScanningMode(gridID);
 
       if (cdiDebugExt>=100)
@@ -2993,8 +2993,6 @@ void gribapiSetExtMode(grib_handle *gh, int gridID, long datasize, const double 
           Message("(scanModeIN=%d; gridsize=%d", scanModeIN, gridsize);
         }
 
-      /*
-#ifdef HIRLAM_EXTENSIONS
       if ( cdiGribDataScanningMode.active )   // allowed modes: <0, 64, 96>; Default is 64
         {
           int iDim = gridInqXsize(gridID);
@@ -3015,12 +3013,11 @@ void gribapiSetExtMode(grib_handle *gh, int gridID, long datasize, const double 
             verticallyFlipGridDefinitionWhenScanningModeChanged(gh, yfirst, ylast, yinc);
         }
       else
-#endif
         {
           if (cdiDebugExt>=100) Message("Set GribDataScanningMode => (%d) based on used grid", scanModeIN);
           gribapiSetScanningMode(gh, scanModeIN);
         }
-      */
+#endif
 
       if ( cdiGribChangeModeUvRelativeToGrid.active )
         {
