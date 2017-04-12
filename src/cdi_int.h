@@ -41,7 +41,7 @@ char *strdup(const char *s);
 #endif
 
 
-#ifndef  _ERROR_H
+#ifndef  ERROR_H
 #  include "error.h"
 #endif
 #ifndef _BASETIME_H

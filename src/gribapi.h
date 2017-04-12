@@ -3,7 +3,7 @@
 
 #ifdef HAVE_LIBGRIB_API
 #include <grib_api.h>
-#ifndef  _ERROR_H
+#ifndef  ERROR_H
 #include "error.h"
 #endif
 #endif
