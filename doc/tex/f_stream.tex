@@ -1,10 +1,10 @@
 
 
-\subsection{Create a new dataset: {\tt streamOpenWrite}}
+\subsection{Create a new dataset: \texttt{streamOpenWrite}}
 \index{streamOpenWrite}
 \label{streamOpenWrite}
 
-The function {\tt streamOpenWrite} creates a new datset.
+The function {\texttt{streamOpenWrite}} creates a new datset.
 \subsubsection*{Usage}
 
 \begin{verbatim}
@@ -12,21 +12,21 @@ The function {\tt streamOpenWrite} creates a new datset.
 \end{verbatim}
 
 \hspace*{4mm}\begin{minipage}[]{15cm}
-\begin{deflist}{\tt filetype\ }
-\item[{\tt path}]
+\begin{deflist}{\texttt{filetype}\ }
+\item[\texttt{path}]
 The name of the new dataset.
-\item[{\tt filetype}]
+\item[\texttt{filetype}]
 The type of the file format, one of the set of predefined {\CDI} file format types.
-                     The valid {\CDI} file format types are {\tt CDI\_FILETYPE\_GRB}, {\tt CDI\_FILETYPE\_GRB2}, {\tt CDI\_FILETYPE\_NC},
-                     {\tt CDI\_FILETYPE\_NC2}, {\tt CDI\_FILETYPE\_NC4}, {\tt CDI\_FILETYPE\_NC4C}, {\tt CDI\_FILETYPE\_SRV},
-                     {\tt CDI\_FILETYPE\_EXT} and {\tt CDI\_FILETYPE\_IEG}.
+                     The valid {\CDI} file format types are {\texttt{CDI\_FILETYPE\_GRB}}, {\texttt{CDI\_FILETYPE\_GRB2}}, {\texttt{CDI\_FILETYPE\_NC}},
+                     {\texttt{CDI\_FILETYPE\_NC2}}, {\texttt{CDI\_FILETYPE\_NC4}}, {\texttt{CDI\_FILETYPE\_NC4C}}, {\texttt{CDI\_FILETYPE\_SRV}},
+                     {\texttt{CDI\_FILETYPE\_EXT}} and {\texttt{CDI\_FILETYPE\_IEG}}.
 
 \end{deflist}
 \end{minipage}
 
 \subsubsection*{Result}
 
-Upon successful completion {\tt streamOpenWrite} returns an identifier to the
+Upon successful completion {\texttt{streamOpenWrite}} returns an identifier to the
 open stream. Otherwise, a negative number with the error status is returned.
 
 
@@ -34,14 +34,14 @@ open stream. Otherwise, a negative number with the error status is returned.
 
 
 \hspace*{4mm}\begin{minipage}[]{15cm}
-\begin{deflist}{\tt CDI\_EUFILETYPE\ }
-\item[{\tt CDI\_ESYSTEM}]
+\begin{deflist}{\texttt{CDI\_EUFILETYPE}\ }
+\item[\texttt{CDI\_ESYSTEM}]
 Operating system error.
-\item[{\tt CDI\_EINVAL}]
+\item[\texttt{CDI\_EINVAL}]
 Invalid argument.
-\item[{\tt CDI\_EUFILETYPE}]
+\item[\texttt{CDI\_EUFILETYPE}]
 Unsupported file type.
-\item[{\tt CDI\_ELIBNAVAIL}]
+\item[\texttt{CDI\_ELIBNAVAIL}]
 Library support not compiled in.
 \end{deflist}
 \end{minipage}
@@ -49,7 +49,7 @@ Library support not compiled in.
 
 \subsubsection*{Example}
 
-Here is an example using {\tt streamOpenWrite} to create a new NetCDF file named {\tt foo.nc} for writing:
+Here is an example using {\texttt{streamOpenWrite}} to create a new NetCDF file named {\texttt{foo.nc}} for writing:
 
 \begin{lstlisting}[language=Fortran, backgroundcolor=\color{pyellow}, basicstyle=\small, columns=flexible]
 
@@ -63,11 +63,11 @@ Here is an example using {\tt streamOpenWrite} to create a new NetCDF file named
 \end{lstlisting}
 
 
-\subsection{Open a dataset for reading: {\tt streamOpenRead}}
+\subsection{Open a dataset for reading: \texttt{streamOpenRead}}
 \index{streamOpenRead}
 \label{streamOpenRead}
 
-The function {\tt streamOpenRead} opens an existing dataset for reading.
+The function {\texttt{streamOpenRead}} opens an existing dataset for reading.
 
 \subsubsection*{Usage}
 
@@ -76,8 +76,8 @@ The function {\tt streamOpenRead} opens an existing dataset for reading.
 \end{verbatim}
 
 \hspace*{4mm}\begin{minipage}[]{15cm}
-\begin{deflist}{\tt path\ }
-\item[{\tt path}]
+\begin{deflist}{\texttt{path}\ }
+\item[\texttt{path}]
 The name of the dataset to be read.
 
 \end{deflist}
@@ -85,7 +85,7 @@ The name of the dataset to be read.
 
 \subsubsection*{Result}
 
-Upon successful completion {\tt streamOpenRead} returns an identifier to the
+Upon successful completion {\texttt{streamOpenRead}} returns an identifier to the
 open stream. Otherwise, a negative number with the error status is returned.
 
 
@@ -93,14 +93,14 @@ open stream. Otherwise, a negative number with the error status is returned.
 
 
 \hspace*{4mm}\begin{minipage}[]{15cm}
-\begin{deflist}{\tt CDI\_EUFILETYPE\ }
-\item[{\tt CDI\_ESYSTEM}]
+\begin{deflist}{\texttt{CDI\_EUFILETYPE}\ }
+\item[\texttt{CDI\_ESYSTEM}]
 Operating system error.
-\item[{\tt CDI\_EINVAL}]
+\item[\texttt{CDI\_EINVAL}]
 Invalid argument.
-\item[{\tt CDI\_EUFILETYPE}]
+\item[\texttt{CDI\_EUFILETYPE}]
 Unsupported file type.
-\item[{\tt CDI\_ELIBNAVAIL}]
+\item[\texttt{CDI\_ELIBNAVAIL}]
 Library support not compiled in.
 \end{deflist}
 \end{minipage}
@@ -108,8 +108,8 @@ Library support not compiled in.
 
 \subsubsection*{Example}
 
-Here is an example using {\tt streamOpenRead} to open an existing NetCDF
-file named {\tt foo.nc} for reading:
+Here is an example using {\texttt{streamOpenRead}} to open an existing NetCDF
+file named {\texttt{foo.nc}} for reading:
 
 \begin{lstlisting}[language=Fortran, backgroundcolor=\color{pyellow}, basicstyle=\small, columns=flexible]
 
@@ -123,11 +123,11 @@ file named {\tt foo.nc} for reading:
 \end{lstlisting}
 
 
-\subsection{Close an open dataset: {\tt streamClose}}
+\subsection{Close an open dataset: \texttt{streamClose}}
 \index{streamClose}
 \label{streamClose}
 
-The function {\tt streamClose} closes an open dataset.
+The function {\texttt{streamClose}} closes an open dataset.
 
 \subsubsection*{Usage}
 
@@ -136,19 +136,19 @@ The function {\tt streamClose} closes an open dataset.
 \end{verbatim}
 
 \hspace*{4mm}\begin{minipage}[]{15cm}
-\begin{deflist}{\tt streamID\ }
-\item[{\tt streamID}]
-Stream ID, from a previous call to {\htmlref{\tt streamOpenRead}{streamOpenRead}} or {\htmlref{\tt streamOpenWrite}{streamOpenWrite}}.
+\begin{deflist}{\texttt{streamID}\ }
+\item[\texttt{streamID}]
+Stream ID, from a previous call to {\htmlref{\texttt{streamOpenRead}}{streamOpenRead}} or {\htmlref{\texttt{streamOpenWrite}}{streamOpenWrite}}.
 
 \end{deflist}
 \end{minipage}
 
 
-\subsection{Get the filetype: {\tt streamInqFiletype}}
+\subsection{Get the filetype: \texttt{streamInqFiletype}}
 \index{streamInqFiletype}
 \label{streamInqFiletype}
 
-The function {\tt streamInqFiletype} returns the filetype of a stream.
+The function {\texttt{streamInqFiletype}} returns the filetype of a stream.
 
 \subsubsection*{Usage}
 
@@ -157,28 +157,28 @@ The function {\tt streamInqFiletype} returns the filetype of a stream.
 \end{verbatim}
 
 \hspace*{4mm}\begin{minipage}[]{15cm}
-\begin{deflist}{\tt streamID\ }
-\item[{\tt streamID}]
-Stream ID, from a previous call to {\htmlref{\tt streamOpenRead}{streamOpenRead}} or {\htmlref{\tt streamOpenWrite}{streamOpenWrite}}.
+\begin{deflist}{\texttt{streamID}\ }
+\item[\texttt{streamID}]
+Stream ID, from a previous call to {\htmlref{\texttt{streamOpenRead}}{streamOpenRead}} or {\htmlref{\texttt{streamOpenWrite}}{streamOpenWrite}}.
 
 \end{deflist}
 \end{minipage}
 
 \subsubsection*{Result}
 
-{\tt streamInqFiletype} returns the type of the file format,
+{\texttt{streamInqFiletype}} returns the type of the file format,
 one of the set of predefined {\CDI} file format types.
-The valid {\CDI} file format types are {\tt CDI\_FILETYPE\_GRB}, {\tt CDI\_FILETYPE\_GRB2}, {\tt CDI\_FILETYPE\_NC}, {\tt CDI\_FILETYPE\_NC2},
-{\tt CDI\_FILETYPE\_NC4}, {\tt CDI\_FILETYPE\_NC4C}, {\tt CDI\_FILETYPE\_SRV}, {\tt CDI\_FILETYPE\_EXT} and {\tt CDI\_FILETYPE\_IEG}.
+The valid {\CDI} file format types are {\texttt{CDI\_FILETYPE\_GRB}}, {\texttt{CDI\_FILETYPE\_GRB2}}, {\texttt{CDI\_FILETYPE\_NC}}, {\texttt{CDI\_FILETYPE\_NC2}},
+{\texttt{CDI\_FILETYPE\_NC4}}, {\texttt{CDI\_FILETYPE\_NC4C}}, {\texttt{CDI\_FILETYPE\_SRV}}, {\texttt{CDI\_FILETYPE\_EXT}} and {\texttt{CDI\_FILETYPE\_IEG}}.
 
 
 
-\subsection{Define the byte order: {\tt streamDefByteorder}}
+\subsection{Define the byte order: \texttt{streamDefByteorder}}
 \index{streamDefByteorder}
 \label{streamDefByteorder}
 
-The function {\tt streamDefByteorder} defines the byte order of a binary dataset
-with the file format type {\tt CDI\_FILETYPE\_SRV}, {\tt CDI\_FILETYPE\_EXT} or {\tt CDI\_FILETYPE\_IEG}.
+The function {\texttt{streamDefByteorder}} defines the byte order of a binary dataset
+with the file format type {\texttt{CDI\_FILETYPE\_SRV}}, {\texttt{CDI\_FILETYPE\_EXT}} or {\texttt{CDI\_FILETYPE\_IEG}}.
 
 \subsubsection*{Usage}
 
@@ -187,23 +187,23 @@ with the file format type {\tt CDI\_FILETYPE\_SRV}, {\tt CDI\_FILETYPE\_EXT} or 
 \end{verbatim}
 
 \hspace*{4mm}\begin{minipage}[]{15cm}
-\begin{deflist}{\tt byteorder\ }
-\item[{\tt streamID}]
-Stream ID, from a previous call to {\htmlref{\tt streamOpenWrite}{streamOpenWrite}}.
-\item[{\tt byteorder}]
-The byte order of a dataset, one of the {\CDI} constants {\tt CDI\_BIGENDIAN} and
-                     {\tt CDI\_LITTLEENDIAN}.
+\begin{deflist}{\texttt{byteorder}\ }
+\item[\texttt{streamID}]
+Stream ID, from a previous call to {\htmlref{\texttt{streamOpenWrite}}{streamOpenWrite}}.
+\item[\texttt{byteorder}]
+The byte order of a dataset, one of the {\CDI} constants {\texttt{CDI\_BIGENDIAN}} and
+                     {\texttt{CDI\_LITTLEENDIAN}}.
 
 \end{deflist}
 \end{minipage}
 
 
-\subsection{Get the byte order: {\tt streamInqByteorder}}
+\subsection{Get the byte order: \texttt{streamInqByteorder}}
 \index{streamInqByteorder}
 \label{streamInqByteorder}
 
-The function {\tt streamInqByteorder} returns the byte order of a binary dataset
-with the file format type {\tt CDI\_FILETYPE\_SRV}, {\tt CDI\_FILETYPE\_EXT} or {\tt CDI\_FILETYPE\_IEG}.
+The function {\texttt{streamInqByteorder}} returns the byte order of a binary dataset
+with the file format type {\texttt{CDI\_FILETYPE\_SRV}}, {\texttt{CDI\_FILETYPE\_EXT}} or {\texttt{CDI\_FILETYPE\_IEG}}.
 
 \subsubsection*{Usage}
 
@@ -212,25 +212,25 @@ with the file format type {\tt CDI\_FILETYPE\_SRV}, {\tt CDI\_FILETYPE\_EXT} or 
 \end{verbatim}
 
 \hspace*{4mm}\begin{minipage}[]{15cm}
-\begin{deflist}{\tt streamID\ }
-\item[{\tt streamID}]
-Stream ID, from a previous call to {\htmlref{\tt streamOpenRead}{streamOpenRead}} or {\htmlref{\tt streamOpenWrite}{streamOpenWrite}}.
+\begin{deflist}{\texttt{streamID}\ }
+\item[\texttt{streamID}]
+Stream ID, from a previous call to {\htmlref{\texttt{streamOpenRead}}{streamOpenRead}} or {\htmlref{\texttt{streamOpenWrite}}{streamOpenWrite}}.
 
 \end{deflist}
 \end{minipage}
 
 \subsubsection*{Result}
 
-{\tt streamInqByteorder} returns the type of the byte order.
-The valid {\CDI} byte order types are {\tt CDI\_BIGENDIAN} and {\tt CDI\_LITTLEENDIAN}
+{\texttt{streamInqByteorder}} returns the type of the byte order.
+The valid {\CDI} byte order types are {\texttt{CDI\_BIGENDIAN}} and {\texttt{CDI\_LITTLEENDIAN}}
 
 
 
-\subsection{Define the variable list: {\tt streamDefVlist}}
+\subsection{Define the variable list: \texttt{streamDefVlist}}
 \index{streamDefVlist}
 \label{streamDefVlist}
 
-The function {\tt streamDefVlist} defines the variable list of a stream.
+The function {\texttt{streamDefVlist}} defines the variable list of a stream.
 
 To safeguard against errors by modifying the wrong vlist object,
 this function makes the passed vlist object immutable.
@@ -243,21 +243,21 @@ All further vlist changes have to use the vlist object returned by streamInqVlis
 \end{verbatim}
 
 \hspace*{4mm}\begin{minipage}[]{15cm}
-\begin{deflist}{\tt streamID\ }
-\item[{\tt streamID}]
-Stream ID, from a previous call to {\htmlref{\tt streamOpenWrite}{streamOpenWrite}}.
-\item[{\tt vlistID}]
-Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}.
+\begin{deflist}{\texttt{streamID}\ }
+\item[\texttt{streamID}]
+Stream ID, from a previous call to {\htmlref{\texttt{streamOpenWrite}}{streamOpenWrite}}.
+\item[\texttt{vlistID}]
+Variable list ID, from a previous call to {\htmlref{\texttt{vlistCreate}}{vlistCreate}}.
 
 \end{deflist}
 \end{minipage}
 
 
-\subsection{Get the variable list: {\tt streamInqVlist}}
+\subsection{Get the variable list: \texttt{streamInqVlist}}
 \index{streamInqVlist}
 \label{streamInqVlist}
 
-The function {\tt streamInqVlist} returns the variable list of a stream.
+The function {\texttt{streamInqVlist}} returns the variable list of a stream.
 
 \subsubsection*{Usage}
 
@@ -266,24 +266,24 @@ The function {\tt streamInqVlist} returns the variable list of a stream.
 \end{verbatim}
 
 \hspace*{4mm}\begin{minipage}[]{15cm}
-\begin{deflist}{\tt streamID\ }
-\item[{\tt streamID}]
-Stream ID, from a previous call to {\htmlref{\tt streamOpenRead}{streamOpenRead}} or {\htmlref{\tt streamOpenWrite}{streamOpenWrite}}.
+\begin{deflist}{\texttt{streamID}\ }
+\item[\texttt{streamID}]
+Stream ID, from a previous call to {\htmlref{\texttt{streamOpenRead}}{streamOpenRead}} or {\htmlref{\texttt{streamOpenWrite}}{streamOpenWrite}}.
 
 \end{deflist}
 \end{minipage}
 
 \subsubsection*{Result}
 
-{\tt streamInqVlist} returns an identifier to the variable list.
+{\texttt{streamInqVlist}} returns an identifier to the variable list.
 
 
 
-\subsection{Define time step: {\tt streamDefTimestep}}
+\subsection{Define time step: \texttt{streamDefTimestep}}
 \index{streamDefTimestep}
 \label{streamDefTimestep}
 
-The function {\tt streamDefTimestep} defines the time step of a stream.
+The function {\texttt{streamDefTimestep}} defines the time step of a stream.
 
 \subsubsection*{Usage}
 
@@ -292,10 +292,10 @@ The function {\tt streamDefTimestep} defines the time step of a stream.
 \end{verbatim}
 
 \hspace*{4mm}\begin{minipage}[]{15cm}
-\begin{deflist}{\tt streamID\ }
-\item[{\tt streamID}]
-Stream ID, from a previous call to {\htmlref{\tt streamOpenWrite}{streamOpenWrite}}.
-\item[{\tt tsID}]
+\begin{deflist}{\texttt{streamID}\ }
+\item[\texttt{streamID}]
+Stream ID, from a previous call to {\htmlref{\texttt{streamOpenWrite}}{streamOpenWrite}}.
+\item[\texttt{tsID}]
 Timestep identifier.
 
 \end{deflist}
@@ -303,15 +303,15 @@ Timestep identifier.
 
 \subsubsection*{Result}
 
-{\tt streamDefTimestep} returns the number of records of the time step.
+{\texttt{streamDefTimestep}} returns the number of records of the time step.
 
 
 
-\subsection{Get time step: {\tt streamInqTimestep}}
+\subsection{Get time step: \texttt{streamInqTimestep}}
 \index{streamInqTimestep}
 \label{streamInqTimestep}
 
-The function {\tt streamInqTimestep} returns the time step of a stream.
+The function {\texttt{streamInqTimestep}} returns the time step of a stream.
 
 \subsubsection*{Usage}
 
@@ -320,10 +320,10 @@ The function {\tt streamInqTimestep} returns the time step of a stream.
 \end{verbatim}
 
 \hspace*{4mm}\begin{minipage}[]{15cm}
-\begin{deflist}{\tt streamID\ }
-\item[{\tt streamID}]
-Stream ID, from a previous call to {\htmlref{\tt streamOpenRead}{streamOpenRead}} or {\htmlref{\tt streamOpenWrite}{streamOpenWrite}}.
-\item[{\tt tsID}]
+\begin{deflist}{\texttt{streamID}\ }
+\item[\texttt{streamID}]
+Stream ID, from a previous call to {\htmlref{\texttt{streamOpenRead}}{streamOpenRead}} or {\htmlref{\texttt{streamOpenWrite}}{streamOpenWrite}}.
+\item[\texttt{tsID}]
 Timestep identifier.
 
 \end{deflist}
@@ -331,5 +331,5 @@ Timestep identifier.
 
 \subsubsection*{Result}
 
-{\tt streamInqTimestep} returns the number of records of the time step.
+{\texttt{streamInqTimestep}} returns the number of records of the time step.
 
