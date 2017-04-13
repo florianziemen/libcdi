@@ -327,7 +327,6 @@ int cdfDefVar(stream_t *streamptr, int varID)
   size_t iax = 0;
   char axis[5];
   int ensID, ensCount, forecast_type;
-  int retval;
 
   int fileID  = streamptr->fileID;
 
@@ -350,8 +349,8 @@ int cdfDefVar(stream_t *streamptr, int varID)
 
   vlistInqVarDimorder(vlistID, varID, &dimorder);
 
-  int gridsize  = gridInqSize(gridID);
-  bool lchunk = (gridsize > 1);
+  size_t gridsize  = (size_t)(gridInqSize(gridID));
+  bool lchunk = (gridsize >= 16);
   int gridtype  = gridInqType(gridID);
   int gridindex = nc_grid_index(streamptr, gridID);
   if ( gridtype != GRID_TRAJECTORY )
@@ -395,6 +394,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
   if ( xid != CDI_UNDEFID ) chunks[ndims] = xsize;
   if ( xid != CDI_UNDEFID ) dims[ndims++] = xid;
   */
+  size_t chunk_size_max = 65536;
   for ( int id = 0; id < 3; ++id )
     {
       if ( dimorder[id] == 3 && zid != CDI_UNDEFID )
@@ -406,16 +406,19 @@ int cdfDefVar(stream_t *streamptr, int varID)
         }
       else if ( dimorder[id] == 2 && yid != CDI_UNDEFID )
         {
-          if ( chunktype == CDI_CHUNK_LINES )
-            chunks[ndims] = 1;
+          if ( chunktype == CDI_CHUNK_AUTO )
+            chunks[ndims] = (chunk_size_max > gridsize) ? ysize : chunk_size_max/xsize;
           else
-            chunks[ndims] = ysize;
+            chunks[ndims] = (chunktype == CDI_CHUNK_LINES) ? 1 : ysize;
           dims[ndims] = yid;
           ndims++;
         }
       else if ( dimorder[id] == 1 && xid != CDI_UNDEFID )
         {
-          chunks[ndims] = xsize;
+          if ( chunktype == CDI_CHUNK_AUTO && yid == CDI_UNDEFID )
+            chunks[ndims] = (chunk_size_max > xsize) ? xsize : chunk_size_max;
+          else
+            chunks[ndims] = xsize;
           dims[ndims] = xid;
           ndims++;
         }
@@ -504,14 +507,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
 
 #if  defined  (HAVE_NETCDF4)
   if ( lchunk && (streamptr->filetype == CDI_FILETYPE_NC4 || streamptr->filetype == CDI_FILETYPE_NC4C) )
-    {
-      if ( chunktype == CDI_CHUNK_AUTO )
-        retval = nc_def_var_chunking(fileID, ncvarid, NC_CHUNKED, NULL);
-      else
-        retval = nc_def_var_chunking(fileID, ncvarid, NC_CHUNKED, chunks);
-
-      if ( retval ) Error("nc_def_var_chunking failed, status = %d", retval);
-    }
+    cdf_def_var_chunking(fileID, ncvarid, NC_CHUNKED, chunks);
 #endif
 
   if ( streamptr->comptype == CDI_COMPRESS_ZIP )
@@ -656,14 +652,12 @@ int cdfDefVar(stream_t *streamptr, int varID)
 
   /*  if ( xtype == NC_BYTE || xtype == NC_SHORT || xtype == NC_INT ) */
     {
-      int laddoffset, lscalefactor;
-      double addoffset, scalefactor;
       int astype = NC_DOUBLE;
 
-      addoffset    = vlistInqVarAddoffset(vlistID, varID);
-      scalefactor  = vlistInqVarScalefactor(vlistID, varID);
-      laddoffset   = IS_NOT_EQUAL(addoffset, 0);
-      lscalefactor = IS_NOT_EQUAL(scalefactor, 1);
+      double addoffset   = vlistInqVarAddoffset(vlistID, varID);
+      double scalefactor = vlistInqVarScalefactor(vlistID, varID);
+      bool laddoffset   = IS_NOT_EQUAL(addoffset, 0);
+      bool lscalefactor = IS_NOT_EQUAL(scalefactor, 1);
 
       if ( laddoffset || lscalefactor )
         {
@@ -960,8 +954,7 @@ void cdf_write_var(stream_t *streamptr, int varID, int memtype, const void *data
   size_t start[5];
   size_t count[5];
   bool swapxy = false;
-  int ndims = 0;
-  int idim;
+  size_t ndims = 0;
 
   if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamptr->self, varID);
 
@@ -1027,7 +1020,7 @@ void cdf_write_var(stream_t *streamptr, int varID, int memtype, const void *data
     }
 
   if ( CDI_Debug )
-    for (idim = 0; idim < ndims; idim++)
+    for (size_t idim = 0; idim < ndims; idim++)
       Message("dim = %d  start = %d  count = %d", idim, start[idim], count[idim]);
 
   if ( streamptr->ncmode == 1 )
@@ -1056,8 +1049,7 @@ void cdf_write_var_chunk(stream_t *streamptr, int varID, int memtype,
   size_t start[5];
   size_t count[5];
   bool swapxy = false;
-  int ndims = 0;
-  int idim;
+  size_t ndims = 0;
   int streamID = streamptr->self;
 
   if ( CDI_Debug )
@@ -1129,7 +1121,7 @@ void cdf_write_var_chunk(stream_t *streamptr, int varID, int memtype,
     }
 
   if ( CDI_Debug )
-    for (idim = 0; idim < ndims; idim++)
+    for (size_t idim = 0; idim < ndims; idim++)
       Message("dim = %d  start = %d  count = %d", idim, start[idim], count[idim]);
 
   if ( streamptr->ncmode == 1 )

@@ -5,7 +5,7 @@
 #include "config.h"
 #endif
 
-#ifndef  _ERROR_H
+#ifndef  ERROR_H
 #include "error.h"
 #endif
 

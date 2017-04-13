@@ -8,7 +8,7 @@
 
 #include <mpi.h>
 
-#ifndef _ERROR_H
+#ifndef ERROR_H
 #include "error.h"
 #endif
 

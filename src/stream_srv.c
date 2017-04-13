@@ -699,7 +699,7 @@ void srvWriteVarSliceDP(stream_t *streamptr, int varID, int levID, const double 
 
   int header[8];
   header[0] = pnum;
-  header[1] = (int) zaxisInqLevel(vlistInqVarZaxis(vlistID, varID), levID);
+  header[1] = (int)(zaxisInqLevel(vlistInqVarZaxis(vlistID, varID), levID));
   header[2] = streamptr->tsteps[tsID].taxis.vdate;
   header[3] = streamptr->tsteps[tsID].taxis.vtime;
 

@@ -1,5 +1,5 @@
-#ifndef _BINARY_H
-#define _BINARY_H
+#ifndef BINARY_H
+#define BINARY_H
 
 #ifdef HAVE_CONFIG_H
 #  include "config.h"
@@ -41,7 +41,7 @@ int binReadFlt64(int fileID, int byteswap, size_t size, FLT64 *ptr);
 int binWriteFlt32(int fileID, int byteswap, size_t size, FLT32 *ptr);
 int binWriteFlt64(int fileID, int byteswap, size_t size, FLT64 *ptr);
 
-#endif  /* _BINARY_H */
+#endif  /* BINARY_H */
 /*
  * Local Variables:
  * c-file-style: "Java"

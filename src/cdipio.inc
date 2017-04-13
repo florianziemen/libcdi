@@ -1,40 +1,44 @@
 ! This file was automatically generated, don't edit!
 !
-! Fortran interface for CDI library version 1.7.2
+! Fortran interface for CDI library version 1.8.0
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   April 2016
+! Uwe Schulzweida, MPI-MET, Hamburg,   March 2017
 !
 
 !
 !  parallel IO IOMode
 !
-      INTEGER    PIO_NONE              
+      INTEGER    PIO_NONE
       PARAMETER (PIO_NONE               =  0)
-      INTEGER    PIO_MPI               
+      INTEGER    PIO_MPI
       PARAMETER (PIO_MPI                =  1)
-      INTEGER    PIO_WRITER            
+      INTEGER    PIO_WRITER
       PARAMETER (PIO_WRITER             =  2)
-      INTEGER    PIO_ASYNCH            
+      INTEGER    PIO_ASYNCH
       PARAMETER (PIO_ASYNCH             =  3)
-      INTEGER    PIO_FPGUARD           
+      INTEGER    PIO_FPGUARD
       PARAMETER (PIO_FPGUARD            =  4)
-      INTEGER    PIO_MPI_FW_ORDERED    
+      INTEGER    PIO_MPI_FW_ORDERED
       PARAMETER (PIO_MPI_FW_ORDERED     =  5)
-      INTEGER    PIO_MPI_FW_AT_ALL     
+      INTEGER    PIO_MPI_FW_AT_ALL
       PARAMETER (PIO_MPI_FW_AT_ALL      =  6)
-      INTEGER    PIO_MPI_FW_AT_REBLOCK 
+      INTEGER    PIO_MPI_FW_AT_REBLOCK
       PARAMETER (PIO_MPI_FW_AT_REBLOCK  =  7)
-      INTEGER    PIO_ROLE_CLIENT       
+      INTEGER    PIO_MINIOMODE
+      PARAMETER (PIO_MINIOMODE          = PIO_NONE)
+      INTEGER    PIO_MAXIOMODE
+      PARAMETER (PIO_MAXIOMODE          = PIO_MPI_FW_AT_REBLOCK)
+      INTEGER    PIO_ROLE_CLIENT
       PARAMETER (PIO_ROLE_CLIENT        =  0)
-      INTEGER    PIO_ROLE_COLLECTOR    
+      INTEGER    PIO_ROLE_COLLECTOR
       PARAMETER (PIO_ROLE_COLLECTOR     =  1)
-      INTEGER    PIO_ROLE_WRITER       
+      INTEGER    PIO_ROLE_WRITER
       PARAMETER (PIO_ROLE_WRITER        =  2)
       INTEGER    PIO_ROLE_WRITER_COLLECTOR
       PARAMETER (PIO_ROLE_WRITER_COLLECTOR =  3)
-      INTEGER    PIO_ROLE_FPGUARD      
+      INTEGER    PIO_ROLE_FPGUARD
       PARAMETER (PIO_ROLE_FPGUARD       =  4)
 !
 !  parallel IO routines

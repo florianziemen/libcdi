@@ -6,6 +6,10 @@
 
 #include "cdi_att.h"
 
+extern double grid_missval;
+extern int (*proj_lonlat_to_lcc_func)();
+extern int (*proj_lcc_to_lonlat_func)();
+
 typedef unsigned char mask_t;
 
 typedef struct grid_t grid_t;
@@ -58,20 +62,6 @@ struct gridaxis_t {
   double *bounds;
 };
 
-// Lambert Conformal Conic
-struct grid_lcc_t {
-  double  originLon;
-  double  originLat;
-  double  lonParY;
-  double  lat1;
-  double  lat2;
-  double  xinc;
-  double  yinc;
-  int     projflag;
-  int     scanflag;
-  short   defined;
-};
-
 // GME Grid
 struct grid_gme_t {
   int     nd, ni, ni2, ni3;       /* parameter for GRID_GME         */
@@ -83,6 +73,7 @@ struct grid_t {
   char    mapping[CDI_MAX_NAME];
   char   *name;
   int     self;
+  int     size;
   int     type;                   /* grid type                      */
   int     prec;                   /* grid precision                 */
   int     proj;                   /* grid projection                */
@@ -90,9 +81,7 @@ struct grid_t {
   mask_t *mask;
   mask_t *mask_gme;
   double *area;
-  struct grid_lcc_t  lcc;
   struct grid_gme_t  gme;
-  short   isCyclic;               /* TRUE for global cyclic grids   */
   int     number, position;       /* parameter for GRID_REFERENCE   */
   int     trunc;                  /* parameter for GRID_SPECTEAL    */
   int     nvertex;
@@ -100,14 +89,27 @@ struct grid_t {
   unsigned char uuid[CDI_UUID_SIZE]; /* uuid for grid reference        */
   int    *rowlon;
   int     nrowlon;
-  int     size;
   int     np;                     /* number of parallels between a pole and the equator */
+  signed char isCyclic;           /* three possible states:
+                                   * -1 if unknown,
+                                   * 0 if found not cyclic, or
+                                   * 1 for global cyclic grids
+                                   */
   bool    lcomplex;
   bool    hasdims;
+  bool uvRelativeToGrid;  /* Some models deliver wind U,V relative to the grid-cell */
   struct gridaxis_t x;
   struct gridaxis_t y;
   const struct gridVirtTable *vtable;
   cdi_atts_t atts;
+  int  scanningMode;
+  bool iScansNegatively, jScansPositively, jPointsAreConsecutive;
+  /* scanningMode  = 128 * iScansNegatively + 64 * jScansPositively + 32 * jPointsAreConsecutive;
+               64  = 128 * 0                + 64 *        1         + 32 * 0
+               00  = 128 * 0                + 64 *        0         + 32 * 0
+               96  = 128 * 0                + 64 *        1         + 32 * 1
+     Default / implicit scanning mode is 64:
+                        i and j scan positively, i points are consecutive (row-major)        */
 };
 
 
@@ -148,6 +150,9 @@ struct addIfNewRes
 };
 
 struct addIfNewRes cdiVlistAddGridIfNew(int vlistID, grid_t *grid, int mode);
+
+int gridVerifyGribParamLCC(int gridID, double missval, double *lon_0, double *lat_0, double *lat_1, double *lat_2,
+                           double *a, double *rf, double *xval_0, double *yval_0, double *x_0, double *y_0);
 
 #endif
 /*

@@ -637,6 +637,11 @@ int streamOpenA(const char *filename, const char *filemode, int filetype)
   if ( status < 0 ) return status;
   vlist_t *vlistptr = vlist_to_pointer(streamptr->vlistID);
   vlistptr->ntsteps = (int)cdiInqTimeSize(streamID);
+
+  // Needed for NetCDF4
+  for ( int varID = 0; varID < vlistptr->nvars; ++varID )
+    streamptr->vars[varID].defmiss = true;
+
   if ( !strcmp(filemode, "r") ) cdiVlistMakeImmutable(streamptr->vlistID);
 
   {
@@ -972,6 +977,11 @@ void cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDelet
       case CDI_FILETYPE_NC4C:
         {
           cdfClose(fileID);
+          if (streamptr->ntsteps == 0)
+            {
+              Free(streamptr->tsteps[0].records);
+              Free(streamptr->tsteps[0].recIDs);
+            }
           break;
         }
 #endif
@@ -1349,15 +1359,14 @@ void streamWriteContents(int streamID, char *cname)
 
   if ( cnp == NULL ) SysError(cname);
 
-  fprintf(cnp, "#CDI library version %s\n", cdiLibraryVersion());
-  fprintf(cnp, "#\n");
+  fprintf(cnp, "#CDI library version %s\n"
+          "#\n", cdiLibraryVersion());
 
-  fprintf(cnp, "filename: %s\n", streamptr->filename);
   int filetype = streamptr->filetype;
-  fprintf(cnp, "filetype: %s\n", strfiletype(filetype));
+  fprintf(cnp, "filename: %s\n"
+          "filetype: %s\n", streamptr->filename, strfiletype(filetype));
 
-  fprintf(cnp, "#\n");
-  fprintf(cnp, "#grids:\n");
+  fputs("#\n#grids:\n", cnp);
 
   int ngrids = vlistNgrids(vlistID);
   for ( int i = 0; i < ngrids; i++ )
@@ -1369,9 +1378,7 @@ void streamWriteContents(int streamID, char *cname)
       fprintf(cnp, "%4d:%4d:%4d:%4d\n", i+1, gridtype, xsize, ysize);
     }
 
-  fprintf(cnp, "#\n");
-
-  fprintf(cnp, "varID:code:gridID:zaxisID:tsteptype:datatype\n");
+  fputs("#\nvarID:code:gridID:zaxisID:tsteptype:datatype\n", cnp);
 
   int nvars = vlistNvars(vlistID);
   for ( int varID = 0; varID < nvars; varID++ )
@@ -1385,9 +1392,7 @@ void streamWriteContents(int streamID, char *cname)
 	      varID+1, code, gridID, zaxisID, tsteptype, datatype);
     }
 
-  fprintf(cnp, "#\n");
-
-  fprintf(cnp, "tsID:nrecs:date:time\n");
+  fputs("#\ntsID:nrecs:date:time\n", cnp);
 
   int tsID = 0;
   while (1)
@@ -1406,9 +1411,7 @@ void streamWriteContents(int streamID, char *cname)
 	break;
     }
 
-  fprintf(cnp, "#\n");
-
-  fprintf(cnp, "tsID:recID:varID:levID:size:pos\n");
+  fputs("#\ntsID:recID:varID:levID:size:pos\n", cnp);
 
   tsID = 0;
   while (1)

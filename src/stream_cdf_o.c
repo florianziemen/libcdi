@@ -65,12 +65,11 @@ void cdfDefTimeValue(stream_t *streamptr, int tsID)
       streamptr->ncmode = 2;
     }
 
-  size_t index = (size_t)tsID;
-
   double timevalue = cdiEncodeTimeval(taxis->vdate, taxis->vtime, &streamptr->tsteps[0].taxis);
   if ( CDI_Debug ) Message("tsID = %d  timevalue = %f", tsID, timevalue);
 
   int ncvarid = streamptr->basetime.ncvarid;
+  size_t index = (size_t)tsID;
   cdf_put_var1_double(fileID, ncvarid, &index, &timevalue);
 
   if ( taxis->has_bounds )
@@ -94,10 +93,6 @@ void cdfDefTimeValue(stream_t *streamptr, int tsID)
       timevalue = taxis->fc_period;
       cdf_put_var1_double(fileID, ncvarid, &index, &timevalue);
     }
-
-  /*
-printf("fileID = %d %d %d %f\n", fileID, time_varid, index, timevalue);
-  */
 }
 
 static
@@ -119,7 +114,7 @@ int cdfDefTimeBounds(int fileID, int nctimevarid, int nctimedimid, const char *t
   if ( taxis->climatology )
     {
       static const char climatology_bndsName[] = "climatology_bnds",
-        climatology_bndsAttName[] = "climatology";
+                        climatology_bndsAttName[] = "climatology";
       bndsAttName = climatology_bndsAttName;
       bndsAttValLen = sizeof (climatology_bndsName) - 1;
       bndsAttVal = climatology_bndsName;
@@ -143,42 +138,46 @@ int cdfDefTimeBounds(int fileID, int nctimevarid, int nctimedimid, const char *t
 }
 
 static
-void cdfDefTimeUnits(char *unitstr, taxis_t* taxis0, taxis_t* taxis)
+void cdfDefTimeUnits(char *unitstr, taxis_t *taxis0, taxis_t *taxis)
 {
-  unitstr[0] = 0;
-
-  if ( taxis0->type == TAXIS_ABSOLUTE )
+  if ( taxis->units && taxis->units[0] )
     {
-      if ( taxis0->unit == TUNIT_YEAR )
-        sprintf(unitstr, "year as %s", "%Y.%f");
-      else if ( taxis0->unit == TUNIT_MONTH )
-        sprintf(unitstr, "month as %s", "%Y%m.%f");
-      else
-        sprintf(unitstr, "day as %s", "%Y%m%d.%f");
+      strcpy(unitstr, taxis->units);
     }
   else
     {
-      int timeunit = taxis->unit != -1 ? taxis->unit : TUNIT_HOUR;
-      int rdate    = taxis->rdate;
-      int rtime    = taxis->rtime;
-      if ( rdate == -1 )
+      unitstr[0] = 0;
+
+      if ( taxis0->type == TAXIS_ABSOLUTE )
         {
-          rdate  = taxis->vdate;
-          rtime  = taxis->vtime;
+          if      ( taxis0->unit == TUNIT_YEAR  ) sprintf(unitstr, "year as %s", "%Y.%f");
+          else if ( taxis0->unit == TUNIT_MONTH ) sprintf(unitstr, "month as %s", "%Y%m.%f");
+          else                                    sprintf(unitstr, "day as %s", "%Y%m%d.%f");
         }
+      else
+        {
+          int timeunit = taxis->unit != -1 ? taxis->unit : TUNIT_HOUR;
+          int rdate    = taxis->rdate;
+          int rtime    = taxis->rtime;
+          if ( rdate == -1 )
+            {
+              rdate  = taxis->vdate;
+              rtime  = taxis->vtime;
+            }
 
-      int year, month, day, hour, minute, second;
-      cdiDecodeDate(rdate, &year, &month, &day);
-      cdiDecodeTime(rtime, &hour, &minute, &second);
+          int year, month, day, hour, minute, second;
+          cdiDecodeDate(rdate, &year, &month, &day);
+          cdiDecodeTime(rtime, &hour, &minute, &second);
 
-      if ( timeunit == TUNIT_QUARTER   ) timeunit = TUNIT_MINUTE;
-      if ( timeunit == TUNIT_30MINUTES ) timeunit = TUNIT_MINUTE;
-      if ( timeunit == TUNIT_3HOURS  ||
-	   timeunit == TUNIT_6HOURS  ||
-	   timeunit == TUNIT_12HOURS ) timeunit = TUNIT_HOUR;
+          if ( timeunit == TUNIT_QUARTER   ) timeunit = TUNIT_MINUTE;
+          if ( timeunit == TUNIT_30MINUTES ) timeunit = TUNIT_MINUTE;
+          if ( timeunit == TUNIT_3HOURS  ||
+               timeunit == TUNIT_6HOURS  ||
+               timeunit == TUNIT_12HOURS ) timeunit = TUNIT_HOUR;
 
-      sprintf(unitstr, "%s since %d-%d-%d %02d:%02d:%02d",
-              tunitNamePtr(timeunit), year, month, day, hour, minute, second);
+          sprintf(unitstr, "%s since %d-%d-%d %02d:%02d:%02d",
+                  tunitNamePtr(timeunit), year, month, day, hour, minute, second);
+        }
     }
 }
 
@@ -249,6 +248,14 @@ void cdfDefTime(stream_t* streamptr)
 
   streamptr->basetime.ncvarid = time_varid;
 
+#if  defined  (HAVE_NETCDF4)
+  if ( streamptr->filetype == CDI_FILETYPE_NC4 || streamptr->filetype == CDI_FILETYPE_NC4C )
+    {
+      size_t chunk = 512;
+      cdf_def_var_chunking(fileID, time_varid, NC_CHUNKED, &chunk);
+    }
+#endif
+
   {
     static const char timeStr[] = "time";
     cdf_put_att_text(fileID, time_varid, "standard_name", sizeof(timeStr) - 1, timeStr);
@@ -289,9 +296,7 @@ void cdfDefTime(stream_t* streamptr)
   if ( taxis->type == TAXIS_FORECAST )
     {
       int leadtimeid;
-
       cdf_def_var(fileID, "leadtime", xtype, 1, &time_dimid, &leadtimeid);
-
       streamptr->basetime.leadtimeid = leadtimeid;
 
       {
@@ -817,7 +822,7 @@ void cdfGridCompress(int fileID, int ncvarid, int gridsize, int filetype, int co
 #if  defined  (HAVE_NETCDF4)
   if ( gridsize > 1 && comptype == CDI_COMPRESS_ZIP && (filetype == CDI_FILETYPE_NC4 || filetype == CDI_FILETYPE_NC4C) )
     {
-      nc_def_var_chunking(fileID, ncvarid, NC_CHUNKED, NULL);
+      cdf_def_var_chunking(fileID, ncvarid, NC_CHUNKED, NULL);
       cdfDefVarDeflate(fileID, ncvarid, 1);
     }
 #endif
@@ -829,7 +834,6 @@ void cdfDefCurvilinear(stream_t *streamptr, int gridID, int gridindex)
   int xdimID = CDI_UNDEFID;
   int ydimID = CDI_UNDEFID;
   int ncxvarid = CDI_UNDEFID, ncyvarid = CDI_UNDEFID;
-  int ncbxvarid = CDI_UNDEFID, ncbyvarid = CDI_UNDEFID, ncavarid = CDI_UNDEFID;
   nc_type xtype = (nc_type)cdfDefDatatype(gridInqPrec(gridID), streamptr->filetype);
   ncgrid_t *ncgrid = streamptr->ncgrid;
 
@@ -864,6 +868,7 @@ void cdfDefCurvilinear(stream_t *streamptr, int gridID, int gridindex)
         }
     }
 
+  int ncbxvarid = CDI_UNDEFID, ncbyvarid = CDI_UNDEFID, ncavarid = CDI_UNDEFID;
   if ( xdimID == CDI_UNDEFID || ydimID == CDI_UNDEFID )
     {
       if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
@@ -1231,7 +1236,9 @@ void cdfDefUnstructured(stream_t *streamptr, int gridID, int gridindex)
 
       cdfDefGridUUID(streamptr, gridID);
 
-      if ( gridInqXvalsPtr(gridID) )
+      const double *xvalsPtr = gridInqXvalsPtr(gridID),
+        *xboundsPtr = NULL;
+      if ( xvalsPtr )
         {
           char xaxisname[CDI_MAX_NAME]; xaxisname[0] = 0;
           cdiGridInqKeyStr(gridID, CDI_KEY_XNAME, CDI_MAX_NAME, xaxisname);
@@ -1241,7 +1248,7 @@ void cdfDefUnstructured(stream_t *streamptr, int gridID, int gridindex)
 
           cdfPutGridStdAtts(fileID, ncxvarid, gridID, 'X', &gridInqsX);
 
-          if ( gridInqXboundsPtr(gridID) && nvdimID != CDI_UNDEFID )
+          if ( (xboundsPtr = gridInqXboundsPtr(gridID)) && nvdimID != CDI_UNDEFID )
             {
               int dimIDs[2] = { dimID, nvdimID };
               size_t xaxisnameLen = strlen(xaxisname);
@@ -1254,7 +1261,9 @@ void cdfDefUnstructured(stream_t *streamptr, int gridID, int gridindex)
             }
         }
 
-      if ( gridInqYvalsPtr(gridID) )
+      const double *yvalsPtr = gridInqYvalsPtr(gridID),
+        *yboundsPtr = NULL;
+      if ( yvalsPtr )
         {
           char yaxisname[CDI_MAX_NAME];
           gridInqYname(gridID, yaxisname);
@@ -1264,7 +1273,8 @@ void cdfDefUnstructured(stream_t *streamptr, int gridID, int gridindex)
 
           cdfPutGridStdAtts(fileID, ncyvarid, gridID, 'Y', &gridInqsY);
 
-          if ( gridInqYboundsPtr(gridID) && nvdimID != CDI_UNDEFID )
+          if ( (yboundsPtr = gridInqYboundsPtr(gridID))
+               && nvdimID != CDI_UNDEFID )
             {
               int dimIDs[2] = { dimID, nvdimID };
               size_t yaxisnameLen = strlen(yaxisname);
@@ -1277,7 +1287,8 @@ void cdfDefUnstructured(stream_t *streamptr, int gridID, int gridindex)
             }
         }
 
-      if ( gridInqAreaPtr(gridID) )
+      const double *areaPtr = gridInqAreaPtr(gridID);
+      if ( areaPtr )
         {
           static const char yaxisname_[] = "cell_area";
           static const char units[] = "m2";
@@ -1294,11 +1305,11 @@ void cdfDefUnstructured(stream_t *streamptr, int gridID, int gridindex)
       cdf_enddef(fileID);
       streamptr->ncmode = 2;
 
-      if ( ncxvarid  != CDI_UNDEFID ) cdf_put_var_double(fileID, ncxvarid,  gridInqXvalsPtr(gridID));
-      if ( ncbxvarid != CDI_UNDEFID ) cdf_put_var_double(fileID, ncbxvarid, gridInqXboundsPtr(gridID));
-      if ( ncyvarid  != CDI_UNDEFID ) cdf_put_var_double(fileID, ncyvarid,  gridInqYvalsPtr(gridID));
-      if ( ncbyvarid != CDI_UNDEFID ) cdf_put_var_double(fileID, ncbyvarid, gridInqYboundsPtr(gridID));
-      if ( ncavarid  != CDI_UNDEFID ) cdf_put_var_double(fileID, ncavarid,  gridInqAreaPtr(gridID));
+      if ( ncxvarid  != CDI_UNDEFID ) cdf_put_var_double(fileID, ncxvarid,  xvalsPtr);
+      if ( ncbxvarid != CDI_UNDEFID ) cdf_put_var_double(fileID, ncbxvarid, xboundsPtr);
+      if ( ncyvarid  != CDI_UNDEFID ) cdf_put_var_double(fileID, ncyvarid,  yvalsPtr);
+      if ( ncbyvarid != CDI_UNDEFID ) cdf_put_var_double(fileID, ncbyvarid, yboundsPtr);
+      if ( ncavarid  != CDI_UNDEFID ) cdf_put_var_double(fileID, ncavarid,  areaPtr);
     }
 
   ncgrid[gridindex].gridID = gridID;
@@ -1337,7 +1348,7 @@ void cdf_def_vct_echam(stream_t *streamptr, int zaxisID)
 
       if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
-      int ncdimid, ncdimid2 = -1;
+      int ncdimid = -1, ncdimid2 = -1;
       int hyaiid, hybiid, hyamid = -1, hybmid = -1;
 
       cdf_def_dim(fileID, "nhyi", (size_t)ilev, &ncdimid2);
@@ -2042,12 +2053,6 @@ void cdfDefGrid(stream_t *streamptr, int gridID, int gridindex)
       cdfDefTrajLon(streamptr, gridID, gridindex);
       cdfDefTrajLat(streamptr, gridID, gridindex);
     }
-  /*
-  else if ( gridtype == GRID_LCC )
-    {
-      cdfDefLcc(streamptr, gridID);
-    }
-  */
   else
     {
       Error("Unsupported grid type: %s", gridNamePtr(gridtype));
@@ -2064,14 +2069,13 @@ void cdfDefHistory(stream_t *streamptr, int size, const char *history)
 
 void cdfDefVars(stream_t *streamptr)
 {
-  int index = 0;
   int vlistID = streamptr->vlistID;
   if ( vlistID == CDI_UNDEFID )
     Error("Internal problem! vlist undefined for streamptr %p", streamptr);
 
   int ngrids = vlistNgrids(vlistID);
-  if ( 2*ngrids > MAX_GRIDS_PS ) Error("Internaal problem! Too many grids per stream (max=%d)\n", MAX_GRIDS_PS);
-  for ( index = 0; index < 2*ngrids; ++index )
+  if ( 2*ngrids > MAX_GRIDS_PS ) Error("Internal problem! Too many grids per stream (max=%d)\n", MAX_GRIDS_PS);
+  for ( int index = 0; index < 2*ngrids; ++index )
     {
       streamptr->ncgrid[index].gridID = CDI_UNDEFID;
       streamptr->ncgrid[index].xdimID = CDI_UNDEFID;
@@ -2081,19 +2085,20 @@ void cdfDefVars(stream_t *streamptr)
       streamptr->ncgrid[index].avarID = CDI_UNDEFID;
     }
 
-  for ( index = 0; index < ngrids; ++index )
+  for ( int index = 0; index < ngrids; ++index )
     {
       int gridID = vlistGrid(vlistID, index);
       cdfDefGrid(streamptr, gridID, index);
     }
-  index = ngrids-1;
-  for ( int i = 0; i < ngrids; ++i )
-    {
-      int gridID = vlistGrid(vlistID, i);
-      int projID = gridInqProj(gridID);
-      if ( projID != CDI_UNDEFID ) cdfDefGrid(streamptr, projID, ++index);
-    }
-
+  {
+    int index = ngrids-1;
+    for ( int i = 0; i < ngrids; ++i )
+      {
+        int gridID = vlistGrid(vlistID, i);
+        int projID = gridInqProj(gridID);
+        if ( projID != CDI_UNDEFID ) cdfDefGrid(streamptr, projID, ++index);
+      }
+  }
   int nzaxis = vlistNzaxis(vlistID);
   for ( int index = 0; index < nzaxis; ++index )
     {

@@ -5,6 +5,7 @@
 #include <stdarg.h>
 #include <ctype.h>
 
+#include "binary.h"
 #include "cdf.h"
 #include "cdi.h"
 #include "cdi_int.h"
@@ -146,6 +147,48 @@ void cdiPrintVersion(void)
   fprintf(stderr, "     IEG library version : %s\n", iegLibraryVersion());
 #endif
   fprintf(stderr, "    FILE library version : %s\n", fileLibraryVersion());
+}
+
+static void cdiPrintDatatypes(void)
+{
+#define XSTRING(x)	#x
+#define STRING(x)	XSTRING(x)
+  fprintf (stderr, "+-------------+-------+\n"
+           "| types       | bytes |\n"
+           "+-------------+-------+\n"
+           "| void *      |   %3d |\n"
+           "+-------------+-------+\n"
+           "| char        |   %3d |\n"
+           "+-------------+-------+\n"
+           "| bool        |   %3d |\n"
+           "| short       |   %3d |\n"
+           "| int         |   %3d |\n"
+           "| long        |   %3d |\n"
+           "| long long   |   %3d |\n"
+           "| size_t      |   %3d |\n"
+           "| off_t       |   %3d |\n"
+           "+-------------+-------+\n"
+           "| float       |   %3d |\n"
+           "| double      |   %3d |\n"
+           "| long double |   %3d |\n"
+           "+-------------+-------+\n\n"
+           "+-------------+-----------+\n"
+           "| INT32       | %-9s |\n"
+           "| INT64       | %-9s |\n"
+           "| FLT32       | %-9s |\n"
+           "| FLT64       | %-9s |\n"
+           "+-------------+-----------+\n"
+           "\n  byte ordering is %s\n\n",
+           (int) sizeof(void *), (int) sizeof(char), (int) sizeof(bool),
+           (int) sizeof(short), (int) sizeof(int), (int) sizeof(long), (int) sizeof(long long),
+           (int) sizeof(size_t), (int) sizeof(off_t),
+           (int) sizeof(float), (int) sizeof(double), (int) sizeof(long double),
+           STRING(INT32), STRING(INT64), STRING(FLT32), STRING(FLT64),
+           ((HOST_ENDIANNESS == CDI_BIGENDIAN) ? "BIGENDIAN"
+            : ((HOST_ENDIANNESS == CDI_LITTLEENDIAN) ? "LITTLEENDIAN"
+               : "Unhandled endianness!")));
+#undef STRING
+#undef XSTRING
 }
 
 void cdiDebug(int level)

@@ -2,6 +2,7 @@
 #include "config.h"
 #endif
 
+#ifdef HAVE_LIBNETCDF
 #include "stream_cdf.h"
 #include "cdf_lazy_grid.h"
 
@@ -28,7 +29,6 @@ static bool cdfLazyInitialized;
 #endif
 
 
-#ifdef HAVE_LIBNETCDF
 
 void cdfLazyGridDestroy(struct cdfLazyGrid *lazyGrid)
 {

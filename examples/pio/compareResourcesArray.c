@@ -58,14 +58,7 @@ static int defineGrid()
   gridDefYlongname ( gridID, "myYlongname" );
   gridDefYunits ( gridID, "myYunits" );
   gridDefPrec ( gridID, DOUBLE_PRECISION );
-  gridDefXpole ( gridID, 90.0 );
-  gridDefYpole ( gridID, 180.0 );
-  gridDefAngle ( gridID, 360.0 );
   gridDefTrunc ( gridID, 1 );
-  gridDefGMEnd ( gridID, 2 );
-  gridDefGMEni ( gridID, 3 );
-  gridDefGMEni2 ( gridID, 4 );
-  gridDefGMEni3 ( gridID, 5 );
   gridDefNumber ( gridID, 6 );
   gridDefPosition ( gridID, 7 );
   gridDefReference ( gridID, "myReference" );
@@ -146,11 +139,11 @@ static int defineVlist ( int gridID, int zaxisID, int taxisID )
   vlistDefVarName(vlistID, varID1, "varname1");
   {
     int globfac[] = { 23, 42 };
-    vlistDefAttInt(vlistID, varID1, "seer's globule factors", CDI_DATATYPE_INT16,
+    cdiDefAttInt(vlistID, varID1, "seer's globule factors", CDI_DATATYPE_INT16,
                    2, globfac);
   }
   vlistDefVarName(vlistID, varID2, "varname2");
-  vlistDefAttTxt(vlistID, varID2, "txt demo", 6, "banana");
+  cdiDefAttTxt(vlistID, varID2, "txt demo", 6, "banana");
   vlistDefTaxis(vlistID, taxisID);
   return vlistID;
 }

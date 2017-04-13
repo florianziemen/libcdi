@@ -715,7 +715,7 @@ void extWriteVarSliceDP(stream_t *streamptr, int varID, int levID, const double 
   int header[4];
   header[0] = streamptr->tsteps[tsID].taxis.vdate;
   header[1] = pnum;
-  header[2] = (int) zaxisInqLevel(vlistInqVarZaxis(vlistID, varID), levID);
+  header[2] = (int)(zaxisInqLevel(vlistInqVarZaxis(vlistID, varID), levID));
   header[3] = gridInqSize(vlistInqVarGrid(vlistID, varID));
 
   extrec_t *extp = (extrec_t*) streamptr->record->exsep;
@@ -736,7 +736,7 @@ void extWriteVarDP(stream_t *streamptr, int varID, const double *data)
   size_t nlevs    = (size_t) zaxisInqSize(vlistInqVarZaxis(vlistID, varID));
 
   for ( size_t levID = 0;  levID < nlevs; levID++ )
-    extWriteVarSliceDP(streamptr, varID, levID, &data[levID*gridsize]);
+    extWriteVarSliceDP(streamptr, varID, (int)levID, &data[levID*gridsize]);
 }
 
 #endif /* HAVE_LIBEXTRA */

@@ -1,6 +1,10 @@
 #ifndef _STREAM_GRB_H
 #define _STREAM_GRB_H
 
+static inline bool gribbyte_get_bit(int number, int bit) { return (bool)((number >> (8-bit)) & 1); }
+static inline void gribbyte_set_bit(int *number, int bit) { *number |= 1 << (8-bit); }
+static inline void gribbyte_clear_bit(int *number, int bit) { *number &= ~(1 << (8-bit)); }
+
 int   grbBitsPerValue(int datatype);
 
 int   grbInqContents(stream_t *streamptr);
@@ -23,6 +27,34 @@ int   grib2ltypeToZaxisType(int grib_ltype);
 
 int   zaxisTypeToGrib1ltype(int zaxistype);
 int   zaxisTypeToGrib2ltype(int zaxistype);
+
+struct cdiGribParamChange
+{
+  int code, ltype, lev;
+  bool active;
+};
+
+struct cdiGribModeChange
+{
+  bool mode;
+  bool active;
+};
+
+struct cdiGribScanModeChange
+{
+  int value;
+  bool active;
+};
+
+extern struct cdiGribParamChange cdiGribChangeParameterID;
+extern struct cdiGribModeChange cdiGribChangeModeUvRelativeToGrid;
+extern struct cdiGribScanModeChange cdiGribDataScanningMode;
+
+// Used in CDO
+void streamGrbChangeParameterIdentification(int code, int ltype, int lev);
+void streamGrbChangeModeUvRelativeToGrid(int mode);
+void streamGrbDefDataScanningMode(int scanmode);
+int  streamGrbInqDataScanningMode(void);
 
 #endif  /* _STREAM_GRB_H */
 /*

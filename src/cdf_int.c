@@ -771,6 +771,15 @@ void cdf_inq_attid(int ncid, int varid, const char *name, int *attnump)
   if ( status != NC_NOERR ) Error("%s", nc_strerror(status));
 }
 
+
+#if  defined  (HAVE_NETCDF4)
+void cdf_def_var_chunking(int ncid, int varid, int storage, const size_t *chunksizesp)
+{
+  int status = nc_def_var_chunking(ncid, varid, storage, chunksizesp);
+  if ( status != NC_NOERR ) Error("%s", nc_strerror(status));
+}
+#endif
+
 #endif
 /*
  * Local Variables:

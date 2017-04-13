@@ -1,341 +1,341 @@
 ! This file was automatically generated, don't edit!
 !
-! Fortran interface for CDI library version 1.8.0
+! Fortran interface for CDI library version 1.8.1
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   February 2017
+! Uwe Schulzweida, MPI-MET, Hamburg,   April 2017
 !
 
-      INTEGER    CDI_MAX_NAME          
+      INTEGER    CDI_MAX_NAME
       PARAMETER (CDI_MAX_NAME           = 256)
-      INTEGER    CDI_UNDEFID           
+      INTEGER    CDI_UNDEFID
       PARAMETER (CDI_UNDEFID            = -1)
-      INTEGER    CDI_GLOBAL            
+      INTEGER    CDI_GLOBAL
       PARAMETER (CDI_GLOBAL             = -1)
 !
 !  Byte order
 !
-      INTEGER    CDI_BIGENDIAN         
+      INTEGER    CDI_BIGENDIAN
       PARAMETER (CDI_BIGENDIAN          =  0)
-      INTEGER    CDI_LITTLEENDIAN      
+      INTEGER    CDI_LITTLEENDIAN
       PARAMETER (CDI_LITTLEENDIAN       =  1)
-      INTEGER    CDI_PDPENDIAN         
+      INTEGER    CDI_PDPENDIAN
       PARAMETER (CDI_PDPENDIAN          =  2)
-      INTEGER    CDI_REAL              
+      INTEGER    CDI_REAL
       PARAMETER (CDI_REAL               =  1)
-      INTEGER    CDI_COMP              
+      INTEGER    CDI_COMP
       PARAMETER (CDI_COMP               =  2)
-      INTEGER    CDI_BOTH              
+      INTEGER    CDI_BOTH
       PARAMETER (CDI_BOTH               =  3)
 !
 !  Error identifier
 !
-      INTEGER    CDI_NOERR             
+      INTEGER    CDI_NOERR
       PARAMETER (CDI_NOERR              =  0)
-      INTEGER    CDI_EEOF              
+      INTEGER    CDI_EEOF
       PARAMETER (CDI_EEOF               = -1)
-      INTEGER    CDI_ESYSTEM           
+      INTEGER    CDI_ESYSTEM
       PARAMETER (CDI_ESYSTEM            = -10)
-      INTEGER    CDI_EINVAL            
+      INTEGER    CDI_EINVAL
       PARAMETER (CDI_EINVAL             = -20)
-      INTEGER    CDI_EUFTYPE           
+      INTEGER    CDI_EUFTYPE
       PARAMETER (CDI_EUFTYPE            = -21)
-      INTEGER    CDI_ELIBNAVAIL        
+      INTEGER    CDI_ELIBNAVAIL
       PARAMETER (CDI_ELIBNAVAIL         = -22)
-      INTEGER    CDI_EUFSTRUCT         
+      INTEGER    CDI_EUFSTRUCT
       PARAMETER (CDI_EUFSTRUCT          = -23)
-      INTEGER    CDI_EUNC4             
+      INTEGER    CDI_EUNC4
       PARAMETER (CDI_EUNC4              = -24)
-      INTEGER    CDI_ELIMIT            
+      INTEGER    CDI_ELIMIT
       PARAMETER (CDI_ELIMIT             = -99)
 !
 !  File types
 !
-      INTEGER    CDI_FILETYPE_GRB      
+      INTEGER    CDI_FILETYPE_GRB
       PARAMETER (CDI_FILETYPE_GRB       =  1)
-      INTEGER    CDI_FILETYPE_GRB2     
+      INTEGER    CDI_FILETYPE_GRB2
       PARAMETER (CDI_FILETYPE_GRB2      =  2)
-      INTEGER    CDI_FILETYPE_NC       
+      INTEGER    CDI_FILETYPE_NC
       PARAMETER (CDI_FILETYPE_NC        =  3)
-      INTEGER    CDI_FILETYPE_NC2      
+      INTEGER    CDI_FILETYPE_NC2
       PARAMETER (CDI_FILETYPE_NC2       =  4)
-      INTEGER    CDI_FILETYPE_NC4      
+      INTEGER    CDI_FILETYPE_NC4
       PARAMETER (CDI_FILETYPE_NC4       =  5)
-      INTEGER    CDI_FILETYPE_NC4C     
+      INTEGER    CDI_FILETYPE_NC4C
       PARAMETER (CDI_FILETYPE_NC4C      =  6)
-      INTEGER    CDI_FILETYPE_SRV      
+      INTEGER    CDI_FILETYPE_SRV
       PARAMETER (CDI_FILETYPE_SRV       =  7)
-      INTEGER    CDI_FILETYPE_EXT      
+      INTEGER    CDI_FILETYPE_EXT
       PARAMETER (CDI_FILETYPE_EXT       =  8)
-      INTEGER    CDI_FILETYPE_IEG      
+      INTEGER    CDI_FILETYPE_IEG
       PARAMETER (CDI_FILETYPE_IEG       =  9)
-      INTEGER    FILETYPE_GRB          
+      INTEGER    FILETYPE_GRB
       PARAMETER (FILETYPE_GRB           =  1)
-      INTEGER    FILETYPE_GRB2         
+      INTEGER    FILETYPE_GRB2
       PARAMETER (FILETYPE_GRB2          =  2)
-      INTEGER    FILETYPE_NC           
+      INTEGER    FILETYPE_NC
       PARAMETER (FILETYPE_NC            =  3)
-      INTEGER    FILETYPE_NC2          
+      INTEGER    FILETYPE_NC2
       PARAMETER (FILETYPE_NC2           =  4)
-      INTEGER    FILETYPE_NC4          
+      INTEGER    FILETYPE_NC4
       PARAMETER (FILETYPE_NC4           =  5)
-      INTEGER    FILETYPE_NC4C         
+      INTEGER    FILETYPE_NC4C
       PARAMETER (FILETYPE_NC4C          =  6)
-      INTEGER    FILETYPE_SRV          
+      INTEGER    FILETYPE_SRV
       PARAMETER (FILETYPE_SRV           =  7)
-      INTEGER    FILETYPE_EXT          
+      INTEGER    FILETYPE_EXT
       PARAMETER (FILETYPE_EXT           =  8)
-      INTEGER    FILETYPE_IEG          
+      INTEGER    FILETYPE_IEG
       PARAMETER (FILETYPE_IEG           =  9)
 !
 !  Compress types
 !
-      INTEGER    CDI_COMPRESS_NONE     
+      INTEGER    CDI_COMPRESS_NONE
       PARAMETER (CDI_COMPRESS_NONE      =  0)
-      INTEGER    CDI_COMPRESS_SZIP     
+      INTEGER    CDI_COMPRESS_SZIP
       PARAMETER (CDI_COMPRESS_SZIP      =  1)
-      INTEGER    CDI_COMPRESS_GZIP     
+      INTEGER    CDI_COMPRESS_GZIP
       PARAMETER (CDI_COMPRESS_GZIP      =  2)
-      INTEGER    CDI_COMPRESS_BZIP2    
+      INTEGER    CDI_COMPRESS_BZIP2
       PARAMETER (CDI_COMPRESS_BZIP2     =  3)
-      INTEGER    CDI_COMPRESS_ZIP      
+      INTEGER    CDI_COMPRESS_ZIP
       PARAMETER (CDI_COMPRESS_ZIP       =  4)
-      INTEGER    CDI_COMPRESS_JPEG     
+      INTEGER    CDI_COMPRESS_JPEG
       PARAMETER (CDI_COMPRESS_JPEG      =  5)
 !
 !  external data types
 !
-      INTEGER    CDI_DATATYPE_PACK     
+      INTEGER    CDI_DATATYPE_PACK
       PARAMETER (CDI_DATATYPE_PACK      =  0)
-      INTEGER    CDI_DATATYPE_PACK1    
+      INTEGER    CDI_DATATYPE_PACK1
       PARAMETER (CDI_DATATYPE_PACK1     =  1)
-      INTEGER    CDI_DATATYPE_PACK2    
+      INTEGER    CDI_DATATYPE_PACK2
       PARAMETER (CDI_DATATYPE_PACK2     =  2)
-      INTEGER    CDI_DATATYPE_PACK3    
+      INTEGER    CDI_DATATYPE_PACK3
       PARAMETER (CDI_DATATYPE_PACK3     =  3)
-      INTEGER    CDI_DATATYPE_PACK4    
+      INTEGER    CDI_DATATYPE_PACK4
       PARAMETER (CDI_DATATYPE_PACK4     =  4)
-      INTEGER    CDI_DATATYPE_PACK5    
+      INTEGER    CDI_DATATYPE_PACK5
       PARAMETER (CDI_DATATYPE_PACK5     =  5)
-      INTEGER    CDI_DATATYPE_PACK6    
+      INTEGER    CDI_DATATYPE_PACK6
       PARAMETER (CDI_DATATYPE_PACK6     =  6)
-      INTEGER    CDI_DATATYPE_PACK7    
+      INTEGER    CDI_DATATYPE_PACK7
       PARAMETER (CDI_DATATYPE_PACK7     =  7)
-      INTEGER    CDI_DATATYPE_PACK8    
+      INTEGER    CDI_DATATYPE_PACK8
       PARAMETER (CDI_DATATYPE_PACK8     =  8)
-      INTEGER    CDI_DATATYPE_PACK9    
+      INTEGER    CDI_DATATYPE_PACK9
       PARAMETER (CDI_DATATYPE_PACK9     =  9)
-      INTEGER    CDI_DATATYPE_PACK10   
+      INTEGER    CDI_DATATYPE_PACK10
       PARAMETER (CDI_DATATYPE_PACK10    = 10)
-      INTEGER    CDI_DATATYPE_PACK11   
+      INTEGER    CDI_DATATYPE_PACK11
       PARAMETER (CDI_DATATYPE_PACK11    = 11)
-      INTEGER    CDI_DATATYPE_PACK12   
+      INTEGER    CDI_DATATYPE_PACK12
       PARAMETER (CDI_DATATYPE_PACK12    = 12)
-      INTEGER    CDI_DATATYPE_PACK13   
+      INTEGER    CDI_DATATYPE_PACK13
       PARAMETER (CDI_DATATYPE_PACK13    = 13)
-      INTEGER    CDI_DATATYPE_PACK14   
+      INTEGER    CDI_DATATYPE_PACK14
       PARAMETER (CDI_DATATYPE_PACK14    = 14)
-      INTEGER    CDI_DATATYPE_PACK15   
+      INTEGER    CDI_DATATYPE_PACK15
       PARAMETER (CDI_DATATYPE_PACK15    = 15)
-      INTEGER    CDI_DATATYPE_PACK16   
+      INTEGER    CDI_DATATYPE_PACK16
       PARAMETER (CDI_DATATYPE_PACK16    = 16)
-      INTEGER    CDI_DATATYPE_PACK17   
+      INTEGER    CDI_DATATYPE_PACK17
       PARAMETER (CDI_DATATYPE_PACK17    = 17)
-      INTEGER    CDI_DATATYPE_PACK18   
+      INTEGER    CDI_DATATYPE_PACK18
       PARAMETER (CDI_DATATYPE_PACK18    = 18)
-      INTEGER    CDI_DATATYPE_PACK19   
+      INTEGER    CDI_DATATYPE_PACK19
       PARAMETER (CDI_DATATYPE_PACK19    = 19)
-      INTEGER    CDI_DATATYPE_PACK20   
+      INTEGER    CDI_DATATYPE_PACK20
       PARAMETER (CDI_DATATYPE_PACK20    = 20)
-      INTEGER    CDI_DATATYPE_PACK21   
+      INTEGER    CDI_DATATYPE_PACK21
       PARAMETER (CDI_DATATYPE_PACK21    = 21)
-      INTEGER    CDI_DATATYPE_PACK22   
+      INTEGER    CDI_DATATYPE_PACK22
       PARAMETER (CDI_DATATYPE_PACK22    = 22)
-      INTEGER    CDI_DATATYPE_PACK23   
+      INTEGER    CDI_DATATYPE_PACK23
       PARAMETER (CDI_DATATYPE_PACK23    = 23)
-      INTEGER    CDI_DATATYPE_PACK24   
+      INTEGER    CDI_DATATYPE_PACK24
       PARAMETER (CDI_DATATYPE_PACK24    = 24)
-      INTEGER    CDI_DATATYPE_PACK25   
+      INTEGER    CDI_DATATYPE_PACK25
       PARAMETER (CDI_DATATYPE_PACK25    = 25)
-      INTEGER    CDI_DATATYPE_PACK26   
+      INTEGER    CDI_DATATYPE_PACK26
       PARAMETER (CDI_DATATYPE_PACK26    = 26)
-      INTEGER    CDI_DATATYPE_PACK27   
+      INTEGER    CDI_DATATYPE_PACK27
       PARAMETER (CDI_DATATYPE_PACK27    = 27)
-      INTEGER    CDI_DATATYPE_PACK28   
+      INTEGER    CDI_DATATYPE_PACK28
       PARAMETER (CDI_DATATYPE_PACK28    = 28)
-      INTEGER    CDI_DATATYPE_PACK29   
+      INTEGER    CDI_DATATYPE_PACK29
       PARAMETER (CDI_DATATYPE_PACK29    = 29)
-      INTEGER    CDI_DATATYPE_PACK30   
+      INTEGER    CDI_DATATYPE_PACK30
       PARAMETER (CDI_DATATYPE_PACK30    = 30)
-      INTEGER    CDI_DATATYPE_PACK31   
+      INTEGER    CDI_DATATYPE_PACK31
       PARAMETER (CDI_DATATYPE_PACK31    = 31)
-      INTEGER    CDI_DATATYPE_PACK32   
+      INTEGER    CDI_DATATYPE_PACK32
       PARAMETER (CDI_DATATYPE_PACK32    = 32)
-      INTEGER    CDI_DATATYPE_CPX32    
+      INTEGER    CDI_DATATYPE_CPX32
       PARAMETER (CDI_DATATYPE_CPX32     = 64)
-      INTEGER    CDI_DATATYPE_CPX64    
+      INTEGER    CDI_DATATYPE_CPX64
       PARAMETER (CDI_DATATYPE_CPX64     = 128)
-      INTEGER    CDI_DATATYPE_FLT32    
+      INTEGER    CDI_DATATYPE_FLT32
       PARAMETER (CDI_DATATYPE_FLT32     = 132)
-      INTEGER    CDI_DATATYPE_FLT64    
+      INTEGER    CDI_DATATYPE_FLT64
       PARAMETER (CDI_DATATYPE_FLT64     = 164)
-      INTEGER    CDI_DATATYPE_INT8     
+      INTEGER    CDI_DATATYPE_INT8
       PARAMETER (CDI_DATATYPE_INT8      = 208)
-      INTEGER    CDI_DATATYPE_INT16    
+      INTEGER    CDI_DATATYPE_INT16
       PARAMETER (CDI_DATATYPE_INT16     = 216)
-      INTEGER    CDI_DATATYPE_INT32    
+      INTEGER    CDI_DATATYPE_INT32
       PARAMETER (CDI_DATATYPE_INT32     = 232)
-      INTEGER    CDI_DATATYPE_UINT8    
+      INTEGER    CDI_DATATYPE_UINT8
       PARAMETER (CDI_DATATYPE_UINT8     = 308)
-      INTEGER    CDI_DATATYPE_UINT16   
+      INTEGER    CDI_DATATYPE_UINT16
       PARAMETER (CDI_DATATYPE_UINT16    = 316)
-      INTEGER    CDI_DATATYPE_UINT32   
+      INTEGER    CDI_DATATYPE_UINT32
       PARAMETER (CDI_DATATYPE_UINT32    = 332)
-      INTEGER    DATATYPE_PACK         
+      INTEGER    DATATYPE_PACK
       PARAMETER (DATATYPE_PACK          =  0)
-      INTEGER    DATATYPE_PACK8        
+      INTEGER    DATATYPE_PACK8
       PARAMETER (DATATYPE_PACK8         =  8)
-      INTEGER    DATATYPE_PACK16       
+      INTEGER    DATATYPE_PACK16
       PARAMETER (DATATYPE_PACK16        = 16)
-      INTEGER    DATATYPE_PACK24       
+      INTEGER    DATATYPE_PACK24
       PARAMETER (DATATYPE_PACK24        = 24)
-      INTEGER    DATATYPE_FLT32        
+      INTEGER    DATATYPE_FLT32
       PARAMETER (DATATYPE_FLT32         = 132)
-      INTEGER    DATATYPE_FLT64        
+      INTEGER    DATATYPE_FLT64
       PARAMETER (DATATYPE_FLT64         = 164)
-      INTEGER    DATATYPE_INT32        
+      INTEGER    DATATYPE_INT32
       PARAMETER (DATATYPE_INT32         = 232)
 !
 !  internal data types
 !
-      INTEGER    CDI_DATATYPE_INT      
+      INTEGER    CDI_DATATYPE_INT
       PARAMETER (CDI_DATATYPE_INT       = 251)
-      INTEGER    CDI_DATATYPE_FLT      
+      INTEGER    CDI_DATATYPE_FLT
       PARAMETER (CDI_DATATYPE_FLT       = 252)
-      INTEGER    CDI_DATATYPE_TXT      
+      INTEGER    CDI_DATATYPE_TXT
       PARAMETER (CDI_DATATYPE_TXT       = 253)
-      INTEGER    CDI_DATATYPE_CPX      
+      INTEGER    CDI_DATATYPE_CPX
       PARAMETER (CDI_DATATYPE_CPX       = 254)
-      INTEGER    CDI_DATATYPE_UCHAR    
+      INTEGER    CDI_DATATYPE_UCHAR
       PARAMETER (CDI_DATATYPE_UCHAR     = 255)
-      INTEGER    CDI_DATATYPE_LONG     
+      INTEGER    CDI_DATATYPE_LONG
       PARAMETER (CDI_DATATYPE_LONG      = 256)
-      INTEGER    DATATYPE_INT          
+      INTEGER    DATATYPE_INT
       PARAMETER (DATATYPE_INT           = 251)
-      INTEGER    DATATYPE_FLT          
+      INTEGER    DATATYPE_FLT
       PARAMETER (DATATYPE_FLT           = 252)
-      INTEGER    DATATYPE_TXT          
+      INTEGER    DATATYPE_TXT
       PARAMETER (DATATYPE_TXT           = 253)
-      INTEGER    DATATYPE_CPX          
+      INTEGER    DATATYPE_CPX
       PARAMETER (DATATYPE_CPX           = 254)
-      INTEGER    DATATYPE_UCHAR        
+      INTEGER    DATATYPE_UCHAR
       PARAMETER (DATATYPE_UCHAR         = 255)
-      INTEGER    DATATYPE_LONG         
+      INTEGER    DATATYPE_LONG
       PARAMETER (DATATYPE_LONG          = 256)
 !
 !  Chunks
 !
-      INTEGER    CDI_CHUNK_AUTO        
+      INTEGER    CDI_CHUNK_AUTO
       PARAMETER (CDI_CHUNK_AUTO         =  1)
-      INTEGER    CDI_CHUNK_GRID        
+      INTEGER    CDI_CHUNK_GRID
       PARAMETER (CDI_CHUNK_GRID         =  2)
-      INTEGER    CDI_CHUNK_LINES       
+      INTEGER    CDI_CHUNK_LINES
       PARAMETER (CDI_CHUNK_LINES        =  3)
 !
 !  GRID types
 !
-      INTEGER    GRID_GENERIC          
+      INTEGER    GRID_GENERIC
       PARAMETER (GRID_GENERIC           =  1)
-      INTEGER    GRID_GAUSSIAN         
+      INTEGER    GRID_GAUSSIAN
       PARAMETER (GRID_GAUSSIAN          =  2)
-      INTEGER    GRID_GAUSSIAN_REDUCED 
+      INTEGER    GRID_GAUSSIAN_REDUCED
       PARAMETER (GRID_GAUSSIAN_REDUCED  =  3)
-      INTEGER    GRID_LONLAT           
+      INTEGER    GRID_LONLAT
       PARAMETER (GRID_LONLAT            =  4)
-      INTEGER    GRID_SPECTRAL         
+      INTEGER    GRID_SPECTRAL
       PARAMETER (GRID_SPECTRAL          =  5)
-      INTEGER    GRID_FOURIER          
+      INTEGER    GRID_FOURIER
       PARAMETER (GRID_FOURIER           =  6)
-      INTEGER    GRID_GME              
+      INTEGER    GRID_GME
       PARAMETER (GRID_GME               =  7)
-      INTEGER    GRID_TRAJECTORY       
+      INTEGER    GRID_TRAJECTORY
       PARAMETER (GRID_TRAJECTORY        =  8)
-      INTEGER    GRID_UNSTRUCTURED     
+      INTEGER    GRID_UNSTRUCTURED
       PARAMETER (GRID_UNSTRUCTURED      =  9)
-      INTEGER    GRID_CURVILINEAR      
+      INTEGER    GRID_CURVILINEAR
       PARAMETER (GRID_CURVILINEAR       = 10)
-      INTEGER    GRID_LCC              
+      INTEGER    GRID_LCC
       PARAMETER (GRID_LCC               = 11)
-      INTEGER    GRID_PROJECTION       
+      INTEGER    GRID_PROJECTION
       PARAMETER (GRID_PROJECTION        = 12)
-      INTEGER    CDI_PROJ_RLL          
+      INTEGER    CDI_PROJ_RLL
       PARAMETER (CDI_PROJ_RLL           = 21)
-      INTEGER    CDI_PROJ_LCC          
+      INTEGER    CDI_PROJ_LCC
       PARAMETER (CDI_PROJ_LCC           = 22)
-      INTEGER    CDI_PROJ_LAEA         
+      INTEGER    CDI_PROJ_LAEA
       PARAMETER (CDI_PROJ_LAEA          = 23)
-      INTEGER    CDI_PROJ_SINU         
+      INTEGER    CDI_PROJ_SINU
       PARAMETER (CDI_PROJ_SINU          = 24)
 !
 !  ZAXIS types
 !
-      INTEGER    ZAXIS_SURFACE         
+      INTEGER    ZAXIS_SURFACE
       PARAMETER (ZAXIS_SURFACE          =  0)
-      INTEGER    ZAXIS_GENERIC         
+      INTEGER    ZAXIS_GENERIC
       PARAMETER (ZAXIS_GENERIC          =  1)
-      INTEGER    ZAXIS_HYBRID          
+      INTEGER    ZAXIS_HYBRID
       PARAMETER (ZAXIS_HYBRID           =  2)
-      INTEGER    ZAXIS_HYBRID_HALF     
+      INTEGER    ZAXIS_HYBRID_HALF
       PARAMETER (ZAXIS_HYBRID_HALF      =  3)
-      INTEGER    ZAXIS_PRESSURE        
+      INTEGER    ZAXIS_PRESSURE
       PARAMETER (ZAXIS_PRESSURE         =  4)
-      INTEGER    ZAXIS_HEIGHT          
+      INTEGER    ZAXIS_HEIGHT
       PARAMETER (ZAXIS_HEIGHT           =  5)
-      INTEGER    ZAXIS_DEPTH_BELOW_SEA 
+      INTEGER    ZAXIS_DEPTH_BELOW_SEA
       PARAMETER (ZAXIS_DEPTH_BELOW_SEA  =  6)
       INTEGER    ZAXIS_DEPTH_BELOW_LAND
       PARAMETER (ZAXIS_DEPTH_BELOW_LAND =  7)
-      INTEGER    ZAXIS_ISENTROPIC      
+      INTEGER    ZAXIS_ISENTROPIC
       PARAMETER (ZAXIS_ISENTROPIC       =  8)
-      INTEGER    ZAXIS_TRAJECTORY      
+      INTEGER    ZAXIS_TRAJECTORY
       PARAMETER (ZAXIS_TRAJECTORY       =  9)
-      INTEGER    ZAXIS_ALTITUDE        
+      INTEGER    ZAXIS_ALTITUDE
       PARAMETER (ZAXIS_ALTITUDE         = 10)
-      INTEGER    ZAXIS_SIGMA           
+      INTEGER    ZAXIS_SIGMA
       PARAMETER (ZAXIS_SIGMA            = 11)
-      INTEGER    ZAXIS_MEANSEA         
+      INTEGER    ZAXIS_MEANSEA
       PARAMETER (ZAXIS_MEANSEA          = 12)
-      INTEGER    ZAXIS_TOA             
+      INTEGER    ZAXIS_TOA
       PARAMETER (ZAXIS_TOA              = 13)
-      INTEGER    ZAXIS_SEA_BOTTOM      
+      INTEGER    ZAXIS_SEA_BOTTOM
       PARAMETER (ZAXIS_SEA_BOTTOM       = 14)
-      INTEGER    ZAXIS_ATMOSPHERE      
+      INTEGER    ZAXIS_ATMOSPHERE
       PARAMETER (ZAXIS_ATMOSPHERE       = 15)
-      INTEGER    ZAXIS_CLOUD_BASE      
+      INTEGER    ZAXIS_CLOUD_BASE
       PARAMETER (ZAXIS_CLOUD_BASE       = 16)
-      INTEGER    ZAXIS_CLOUD_TOP       
+      INTEGER    ZAXIS_CLOUD_TOP
       PARAMETER (ZAXIS_CLOUD_TOP        = 17)
-      INTEGER    ZAXIS_ISOTHERM_ZERO   
+      INTEGER    ZAXIS_ISOTHERM_ZERO
       PARAMETER (ZAXIS_ISOTHERM_ZERO    = 18)
-      INTEGER    ZAXIS_SNOW            
+      INTEGER    ZAXIS_SNOW
       PARAMETER (ZAXIS_SNOW             = 19)
-      INTEGER    ZAXIS_LAKE_BOTTOM     
+      INTEGER    ZAXIS_LAKE_BOTTOM
       PARAMETER (ZAXIS_LAKE_BOTTOM      = 20)
-      INTEGER    ZAXIS_SEDIMENT_BOTTOM 
+      INTEGER    ZAXIS_SEDIMENT_BOTTOM
       PARAMETER (ZAXIS_SEDIMENT_BOTTOM  = 21)
       INTEGER    ZAXIS_SEDIMENT_BOTTOM_TA
       PARAMETER (ZAXIS_SEDIMENT_BOTTOM_TA = 22)
       INTEGER    ZAXIS_SEDIMENT_BOTTOM_TW
       PARAMETER (ZAXIS_SEDIMENT_BOTTOM_TW = 23)
-      INTEGER    ZAXIS_MIX_LAYER       
+      INTEGER    ZAXIS_MIX_LAYER
       PARAMETER (ZAXIS_MIX_LAYER        = 24)
-      INTEGER    ZAXIS_REFERENCE       
+      INTEGER    ZAXIS_REFERENCE
       PARAMETER (ZAXIS_REFERENCE        = 25)
 !
 !  SUBTYPE types
 !
-      INTEGER    MAX_KV_PAIRS_MATCH    
+      INTEGER    MAX_KV_PAIRS_MATCH
       PARAMETER (MAX_KV_PAIRS_MATCH     = 10)
 !
 !  Data structure defining a key-value search, possibly with multiple
@@ -346,94 +346,94 @@
 !
 !  TIME types
 !
-      INTEGER    TIME_CONSTANT         
+      INTEGER    TIME_CONSTANT
       PARAMETER (TIME_CONSTANT          =  0)
-      INTEGER    TIME_VARIABLE         
+      INTEGER    TIME_VARIABLE
       PARAMETER (TIME_VARIABLE          =  1)
 !
 !  TSTEP types
 !
-      INTEGER    TSTEP_CONSTANT        
+      INTEGER    TSTEP_CONSTANT
       PARAMETER (TSTEP_CONSTANT         =  0)
-      INTEGER    TSTEP_INSTANT         
+      INTEGER    TSTEP_INSTANT
       PARAMETER (TSTEP_INSTANT          =  1)
-      INTEGER    TSTEP_AVG             
+      INTEGER    TSTEP_AVG
       PARAMETER (TSTEP_AVG              =  2)
-      INTEGER    TSTEP_ACCUM           
+      INTEGER    TSTEP_ACCUM
       PARAMETER (TSTEP_ACCUM            =  3)
-      INTEGER    TSTEP_MAX             
+      INTEGER    TSTEP_MAX
       PARAMETER (TSTEP_MAX              =  4)
-      INTEGER    TSTEP_MIN             
+      INTEGER    TSTEP_MIN
       PARAMETER (TSTEP_MIN              =  5)
-      INTEGER    TSTEP_DIFF            
+      INTEGER    TSTEP_DIFF
       PARAMETER (TSTEP_DIFF             =  6)
-      INTEGER    TSTEP_RMS             
+      INTEGER    TSTEP_RMS
       PARAMETER (TSTEP_RMS              =  7)
-      INTEGER    TSTEP_SD              
+      INTEGER    TSTEP_SD
       PARAMETER (TSTEP_SD               =  8)
-      INTEGER    TSTEP_COV             
+      INTEGER    TSTEP_COV
       PARAMETER (TSTEP_COV              =  9)
-      INTEGER    TSTEP_RATIO           
+      INTEGER    TSTEP_RATIO
       PARAMETER (TSTEP_RATIO            = 10)
-      INTEGER    TSTEP_RANGE           
+      INTEGER    TSTEP_RANGE
       PARAMETER (TSTEP_RANGE            = 11)
-      INTEGER    TSTEP_INSTANT2        
+      INTEGER    TSTEP_INSTANT2
       PARAMETER (TSTEP_INSTANT2         = 12)
-      INTEGER    TSTEP_INSTANT3        
+      INTEGER    TSTEP_INSTANT3
       PARAMETER (TSTEP_INSTANT3         = 13)
 !
 !  TAXIS types
 !
-      INTEGER    TAXIS_ABSOLUTE        
+      INTEGER    TAXIS_ABSOLUTE
       PARAMETER (TAXIS_ABSOLUTE         =  1)
-      INTEGER    TAXIS_RELATIVE        
+      INTEGER    TAXIS_RELATIVE
       PARAMETER (TAXIS_RELATIVE         =  2)
-      INTEGER    TAXIS_FORECAST        
+      INTEGER    TAXIS_FORECAST
       PARAMETER (TAXIS_FORECAST         =  3)
 !
 !  TUNIT types
 !
-      INTEGER    TUNIT_SECOND          
+      INTEGER    TUNIT_SECOND
       PARAMETER (TUNIT_SECOND           =  1)
-      INTEGER    TUNIT_MINUTE          
+      INTEGER    TUNIT_MINUTE
       PARAMETER (TUNIT_MINUTE           =  2)
-      INTEGER    TUNIT_QUARTER         
+      INTEGER    TUNIT_QUARTER
       PARAMETER (TUNIT_QUARTER          =  3)
-      INTEGER    TUNIT_30MINUTES       
+      INTEGER    TUNIT_30MINUTES
       PARAMETER (TUNIT_30MINUTES        =  4)
-      INTEGER    TUNIT_HOUR            
+      INTEGER    TUNIT_HOUR
       PARAMETER (TUNIT_HOUR             =  5)
-      INTEGER    TUNIT_3HOURS          
+      INTEGER    TUNIT_3HOURS
       PARAMETER (TUNIT_3HOURS           =  6)
-      INTEGER    TUNIT_6HOURS          
+      INTEGER    TUNIT_6HOURS
       PARAMETER (TUNIT_6HOURS           =  7)
-      INTEGER    TUNIT_12HOURS         
+      INTEGER    TUNIT_12HOURS
       PARAMETER (TUNIT_12HOURS          =  8)
-      INTEGER    TUNIT_DAY             
+      INTEGER    TUNIT_DAY
       PARAMETER (TUNIT_DAY              =  9)
-      INTEGER    TUNIT_MONTH           
+      INTEGER    TUNIT_MONTH
       PARAMETER (TUNIT_MONTH            = 10)
-      INTEGER    TUNIT_YEAR            
+      INTEGER    TUNIT_YEAR
       PARAMETER (TUNIT_YEAR             = 11)
 !
 !  CALENDAR types
 !
-      INTEGER    CALENDAR_STANDARD     
+      INTEGER    CALENDAR_STANDARD
       PARAMETER (CALENDAR_STANDARD      =  0)
-      INTEGER    CALENDAR_PROLEPTIC    
+      INTEGER    CALENDAR_PROLEPTIC
       PARAMETER (CALENDAR_PROLEPTIC     =  1)
-      INTEGER    CALENDAR_360DAYS      
+      INTEGER    CALENDAR_360DAYS
       PARAMETER (CALENDAR_360DAYS       =  2)
-      INTEGER    CALENDAR_365DAYS      
+      INTEGER    CALENDAR_365DAYS
       PARAMETER (CALENDAR_365DAYS       =  3)
-      INTEGER    CALENDAR_366DAYS      
+      INTEGER    CALENDAR_366DAYS
       PARAMETER (CALENDAR_366DAYS       =  4)
-      INTEGER    CALENDAR_NONE         
+      INTEGER    CALENDAR_NONE
       PARAMETER (CALENDAR_NONE          =  5)
 !
 !  number of unsigned char needed to store UUID
 !
-      INTEGER    CDI_UUID_SIZE         
+      INTEGER    CDI_UUID_SIZE
       PARAMETER (CDI_UUID_SIZE          = 16)
 !
 !  Structs that are used to return data to the user
@@ -709,7 +709,7 @@
 !                     streamWriteVarChunk
 !                                    (INTEGER         streamID,
 !                                     INTEGER         varID,
-!                                     INTEGER         rect(*),
+!                                     INTEGER         rect(2,3),
 !                                     DOUBLEPRECISION data(*),
 !                                     INTEGER         nmiss)
       EXTERNAL        streamWriteVarChunk
@@ -1589,44 +1589,44 @@
 !
 !  CDI grid string key values
 !
-      INTEGER    CDI_KEY_XNAME         
+      INTEGER    CDI_KEY_XNAME
       PARAMETER (CDI_KEY_XNAME          = 901)
-      INTEGER    CDI_KEY_XDIMNAME      
+      INTEGER    CDI_KEY_XDIMNAME
       PARAMETER (CDI_KEY_XDIMNAME       = 902)
-      INTEGER    CDI_KEY_XLONGNAME     
+      INTEGER    CDI_KEY_XLONGNAME
       PARAMETER (CDI_KEY_XLONGNAME      = 903)
-      INTEGER    CDI_KEY_XUNITS        
+      INTEGER    CDI_KEY_XUNITS
       PARAMETER (CDI_KEY_XUNITS         = 904)
-      INTEGER    CDI_KEY_YNAME         
+      INTEGER    CDI_KEY_YNAME
       PARAMETER (CDI_KEY_YNAME          = 911)
-      INTEGER    CDI_KEY_YDIMNAME      
+      INTEGER    CDI_KEY_YDIMNAME
       PARAMETER (CDI_KEY_YDIMNAME       = 912)
-      INTEGER    CDI_KEY_YLONGNAME     
+      INTEGER    CDI_KEY_YLONGNAME
       PARAMETER (CDI_KEY_YLONGNAME      = 913)
-      INTEGER    CDI_KEY_YUNITS        
+      INTEGER    CDI_KEY_YUNITS
       PARAMETER (CDI_KEY_YUNITS         = 914)
-      INTEGER    CDI_KEY_VDIMNAME      
+      INTEGER    CDI_KEY_VDIMNAME
       PARAMETER (CDI_KEY_VDIMNAME       = 920)
-      INTEGER    CDI_KEY_MAPPING       
+      INTEGER    CDI_KEY_MAPPING
       PARAMETER (CDI_KEY_MAPPING        = 921)
-      INTEGER    CDI_KEY_MAPNAME       
+      INTEGER    CDI_KEY_MAPNAME
       PARAMETER (CDI_KEY_MAPNAME        = 922)
 !
 !  CDI zaxis string key values
 !
-      INTEGER    CDI_KEY_NAME          
+      INTEGER    CDI_KEY_NAME
       PARAMETER (CDI_KEY_NAME           = 941)
-      INTEGER    CDI_KEY_DIMNAME       
+      INTEGER    CDI_KEY_DIMNAME
       PARAMETER (CDI_KEY_DIMNAME        = 942)
-      INTEGER    CDI_KEY_LONGNAME      
+      INTEGER    CDI_KEY_LONGNAME
       PARAMETER (CDI_KEY_LONGNAME       = 943)
-      INTEGER    CDI_KEY_UNITS         
+      INTEGER    CDI_KEY_UNITS
       PARAMETER (CDI_KEY_UNITS          = 944)
-      INTEGER    CDI_KEY_PSNAME        
+      INTEGER    CDI_KEY_PSNAME
       PARAMETER (CDI_KEY_PSNAME         = 950)
-      INTEGER    CDI_KEY_P0NAME        
+      INTEGER    CDI_KEY_P0NAME
       PARAMETER (CDI_KEY_P0NAME         = 951)
-      INTEGER    CDI_KEY_P0VALUE       
+      INTEGER    CDI_KEY_P0VALUE
       PARAMETER (CDI_KEY_P0VALUE        = 952)
       INTEGER         cdiGridDefKeyStr
 !                                    (INTEGER         gridID,
@@ -1846,28 +1846,32 @@
 !
 !                     gridDefParamLCC
 !                                    (INTEGER         gridID,
-!                                     DOUBLEPRECISION originLon,
-!                                     DOUBLEPRECISION originLat,
-!                                     DOUBLEPRECISION lonParY,
-!                                     DOUBLEPRECISION lat1,
-!                                     DOUBLEPRECISION lat2,
-!                                     DOUBLEPRECISION xinc,
-!                                     DOUBLEPRECISION yinc,
-!                                     INTEGER         projflag,
-!                                     INTEGER         scanflag)
+!                                     DOUBLEPRECISION missval,
+!                                     DOUBLEPRECISION lon_0,
+!                                     DOUBLEPRECISION lat_0,
+!                                     DOUBLEPRECISION lat_1,
+!                                     DOUBLEPRECISION lat_2,
+!                                     DOUBLEPRECISION a,
+!                                     DOUBLEPRECISION rf,
+!                                     DOUBLEPRECISION xval_0,
+!                                     DOUBLEPRECISION yval_0,
+!                                     DOUBLEPRECISION x_0,
+!                                     DOUBLEPRECISION y_0)
       EXTERNAL        gridDefParamLCC
 
-!                     gridInqParamLCC
+      INTEGER         gridInqParamLCC
 !                                    (INTEGER         gridID,
-!                                     DOUBLEPRECISION originLon,
-!                                     DOUBLEPRECISION originLat,
-!                                     DOUBLEPRECISION lonParY,
-!                                     DOUBLEPRECISION lat1,
-!                                     DOUBLEPRECISION lat2,
-!                                     DOUBLEPRECISION xinc,
-!                                     DOUBLEPRECISION yinc,
-!                                     INTEGER         projflag,
-!                                     INTEGER         scanflag)
+!                                     DOUBLEPRECISION missval,
+!                                     DOUBLEPRECISION lon_0,
+!                                     DOUBLEPRECISION lat_0,
+!                                     DOUBLEPRECISION lat_1,
+!                                     DOUBLEPRECISION lat_2,
+!                                     DOUBLEPRECISION a,
+!                                     DOUBLEPRECISION rf,
+!                                     DOUBLEPRECISION xval_0,
+!                                     DOUBLEPRECISION yval_0,
+!                                     DOUBLEPRECISION x_0,
+!                                     DOUBLEPRECISION y_0)
       EXTERNAL        gridInqParamLCC
 
 !                     gridDefArea
@@ -1937,6 +1941,24 @@
       INTEGER         gridInqComplexPacking
 !                                    (INTEGER         gridID)
       EXTERNAL        gridInqComplexPacking
+
+!                     gridDefUvRelativeToGrid
+!                                    (INTEGER         gridID,
+!                                     INTEGER         uvRelativeToGrid)
+      EXTERNAL        gridDefUvRelativeToGrid
+
+      INTEGER         gridInqUvRelativeToGrid
+!                                    (INTEGER         gridID)
+      EXTERNAL        gridInqUvRelativeToGrid
+
+!                     gridDefScanningMode
+!                                    (INTEGER         gridID,
+!                                     INTEGER         mode)
+      EXTERNAL        gridDefScanningMode
+
+      INTEGER         gridInqScanningMode
+!                                    (INTEGER         gridID)
+      EXTERNAL        gridInqScanningMode
 
 !
 !  ZAXIS routines

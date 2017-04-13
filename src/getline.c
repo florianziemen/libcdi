@@ -30,7 +30,7 @@
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdint.h>
+#include <limits.h>
 #include <unistd.h>
 #include <string.h>
 #include <limits.h>
@@ -83,7 +83,7 @@ getline(char **linebuf, size_t *linebuf_size, FILE *fp)
               && (len += strlen(buf + len)) > old_len
               && buf[len-1] != '\n');
     }
-    status = len > SIZE_MAX ? SIZE_MAX : (ssize_t)len;
+    status = len > SSIZE_MAX ? SSIZE_MAX : (ssize_t)len;
   }
   if (linebuf_size)
     *linebuf_size = buf_size;

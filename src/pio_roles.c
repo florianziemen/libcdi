@@ -117,7 +117,7 @@ cdiPioCSRBalanced(MPI_Comm commSuper, int IOMode, int nProcsIO)
     if (commRank == commSize - 1)
       role = specialRole;
     else if (commRank <= clientsPerCollectorMax * (nProcsIO - 1 - rest))
-      role = (commRank + 1 % (clientsPerCollectorMax + 1)) != 0
+      role = ((commRank + 1) % (clientsPerCollectorMax + 1)) != 0
         ? PIO_ROLE_CLIENT : collType;
     else
       role = ((commRank - clientsPerCollectorMax * (nProcsIO - 1 - rest) + 1)
