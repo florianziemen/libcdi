@@ -1180,7 +1180,6 @@ void cdf_scan_var_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimi
           else if ( isNumber && strcmp(attname, "code") == 0 )
             {
               cdfGetAttInt(ncid, ncvarid, attname, 1, &ncvars[ncvarid].code);
-              printf("code %d\n", ncvars[ncvarid].code);
               cdf_set_var(ncvars, ncvarid, TRUE);
             }
           else if ( isNumber && strcmp(attname, "table") == 0 )
