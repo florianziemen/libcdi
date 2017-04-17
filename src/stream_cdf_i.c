@@ -336,14 +336,14 @@ void cdfGetAttInt(int fileID, int ncvarid, const char *attname, size_t attlen, i
   cdf_inq_atttype(fileID, ncvarid, attname, &atttype);
   cdf_inq_attlen(fileID, ncvarid, attname, &nc_attlen);
 
-  if ( atttype != NC_CHAR )
+  if ( xtypeIsFloat(atttype) || xtypeIsInt(atttype) )
     {
       bool lalloc = nc_attlen > attlen;
       int *pintatt = lalloc ? (int *)(Malloc(nc_attlen*sizeof(int))) : attint;
       cdf_get_att_int(fileID, ncvarid, attname, pintatt);
       if ( lalloc )
         {
-          memcpy(attint, pintatt, attlen*sizeof (int));
+          memcpy(attint, pintatt, attlen*sizeof(int));
           Free(pintatt);
         }
     }
@@ -870,7 +870,7 @@ void cdf_set_cdi_attr(int ncid, int ncvarid, int attnum, int cdiID, int varID)
   if ( xtypeIsInt(atttype) )
     {
       int attint[attlen];
-      cdfGetAttInt(ncid, ncvarid, attname, (int)attlen, attint);
+      cdfGetAttInt(ncid, ncvarid, attname, attlen, attint);
       int datatype = (atttype == NC_SHORT)  ? CDI_DATATYPE_INT16 :
                      (atttype == NC_BYTE)   ? CDI_DATATYPE_INT8 :
 #if  defined  (HAVE_NETCDF4)
@@ -3245,7 +3245,7 @@ void cdf_scan_global_attr(int fileID, int vlistID, stream_t *streamptr, int ngat
  	  else
             {
               int attint[attlen];
-              cdfGetAttInt(fileID, NC_GLOBAL, attname, (int)attlen, attint);
+              cdfGetAttInt(fileID, NC_GLOBAL, attname, attlen, attint);
               int datatype = (xtype == NC_SHORT) ? CDI_DATATYPE_INT16 : CDI_DATATYPE_INT32;
               cdiDefAttInt(vlistID, CDI_GLOBAL, attname, datatype, (int)attlen, attint);
             }
