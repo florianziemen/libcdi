@@ -267,56 +267,106 @@ int setBaseTime(const char *timeunits, taxis_t *taxis)
 }
 
 static
-void cdfGetAttInt(int fileID, int ncvarid, const char *attname, int attlen, int *attint)
+bool xtypeIsText(int xtype)
 {
-  nc_type atttype;
-  size_t nc_attlen;
+  bool isText = ( xtype == NC_CHAR )
+#if  defined  (HAVE_NETCDF4)
+    || ( xtype == NC_STRING )
+#endif
+    ;
+  return isText;
+}
 
+static
+bool xtypeIsFloat(nc_type xtype)
+{
+  bool isFloat = xtype == NC_FLOAT || xtype == NC_DOUBLE;
+
+  return isFloat;
+}
+
+static
+bool xtypeIsInt(nc_type xtype)
+{
+  bool isInt = xtype == NC_SHORT || xtype == NC_INT
+            || xtype == NC_BYTE
+#if  defined  (HAVE_NETCDF4)
+            || xtype == NC_USHORT || xtype == NC_UINT
+            || xtype == NC_UBYTE
+#endif
+             ;
+
+  return isInt;
+}
+
+static
+int cdfInqDatatype(int xtype, bool lunsigned)
+{
+  int datatype = -1;
+
+#if  defined  (HAVE_NETCDF4)
+  if ( xtype == NC_BYTE && lunsigned ) xtype = NC_UBYTE;
+#endif
+
+  if      ( xtype == NC_BYTE   )  datatype = CDI_DATATYPE_INT8;
+  /* else if ( xtype == NC_CHAR   )  datatype = CDI_DATATYPE_UINT8; */
+  else if ( xtype == NC_SHORT  )  datatype = CDI_DATATYPE_INT16;
+  else if ( xtype == NC_INT    )  datatype = CDI_DATATYPE_INT32;
+  else if ( xtype == NC_FLOAT  )  datatype = CDI_DATATYPE_FLT32;
+  else if ( xtype == NC_DOUBLE )  datatype = CDI_DATATYPE_FLT64;
+#if  defined  (HAVE_NETCDF4)
+  else if ( xtype == NC_UBYTE  )  datatype = CDI_DATATYPE_UINT8;
+  else if ( xtype == NC_LONG   )  datatype = CDI_DATATYPE_INT32;
+  else if ( xtype == NC_USHORT )  datatype = CDI_DATATYPE_UINT16;
+  else if ( xtype == NC_UINT   )  datatype = CDI_DATATYPE_UINT32;
+  else if ( xtype == NC_INT64  )  datatype = CDI_DATATYPE_FLT64;
+  else if ( xtype == NC_UINT64 )  datatype = CDI_DATATYPE_FLT64;
+#endif
+
+  return datatype;
+}
+
+static
+void cdfGetAttInt(int fileID, int ncvarid, const char *attname, size_t attlen, int *attint)
+{
   *attint = 0;
 
+  nc_type atttype;
+  size_t nc_attlen;
   cdf_inq_atttype(fileID, ncvarid, attname, &atttype);
   cdf_inq_attlen(fileID, ncvarid, attname, &nc_attlen);
 
   if ( atttype != NC_CHAR )
     {
-      int *pintatt = (int)nc_attlen > attlen
-        ? (int *)(Malloc(nc_attlen * sizeof (int))) : attint;
-
+      bool lalloc = nc_attlen > attlen;
+      int *pintatt = lalloc ? (int *)(Malloc(nc_attlen*sizeof(int))) : attint;
       cdf_get_att_int(fileID, ncvarid, attname, pintatt);
-
-      if ( (int)nc_attlen > attlen )
+      if ( lalloc )
         {
-          memcpy(attint, pintatt, (size_t)attlen * sizeof (int));
+          memcpy(attint, pintatt, attlen*sizeof (int));
           Free(pintatt);
         }
     }
 }
 
 static
-void cdfGetAttDouble(int fileID, int ncvarid, char *attname, int attlen, double *attdouble)
+void cdfGetAttDouble(int fileID, int ncvarid, char *attname, size_t attlen, double *attdouble)
 {
-  nc_type atttype;
-  size_t nc_attlen;
-
   *attdouble = 0;
 
+  nc_type atttype;
+  size_t nc_attlen;
   cdf_inq_atttype(fileID, ncvarid, attname, &atttype);
   cdf_inq_attlen(fileID, ncvarid, attname, &nc_attlen);
 
-  if ( atttype != NC_CHAR )
+  if ( xtypeIsFloat(atttype) || xtypeIsInt(atttype) )
     {
-      double *pdoubleatt = NULL;
-
-      if ( (int)nc_attlen > attlen )
-        pdoubleatt = (double *) Malloc(nc_attlen * sizeof (double));
-      else
-        pdoubleatt = attdouble;
-
+      bool lalloc = nc_attlen > attlen;
+      double *pdoubleatt = lalloc ? (double*)Malloc(nc_attlen*sizeof(double)) : attdouble;
       cdf_get_att_double(fileID, ncvarid, attname, pdoubleatt);
-
-      if ( (int)nc_attlen > attlen )
+      if ( lalloc )
         {
-          memcpy(attdouble, pdoubleatt, (size_t)attlen * sizeof (double));
+          memcpy(attdouble, pdoubleatt, attlen*sizeof(double));
           Free(pdoubleatt);
         }
     }
@@ -390,66 +440,6 @@ void cdfGetAttText(int fileID, int ncvarid, const char *attname, size_t attlen, 
         }
     }
 #endif
-}
-
-static
-bool xtypeIsText(int xtype)
-{
-  bool isText = ( xtype == NC_CHAR )
-#if  defined  (HAVE_NETCDF4)
-    || ( xtype == NC_STRING )
-#endif
-    ;
-  return isText;
-}
-
-static
-bool xtypeIsFloat(nc_type xtype)
-{
-  bool isFloat = xtype == NC_FLOAT || xtype == NC_DOUBLE;
-
-  return isFloat;
-}
-
-static
-bool xtypeIsInt(nc_type xtype)
-{
-  bool isInt = xtype == NC_SHORT || xtype == NC_INT
-            || xtype == NC_BYTE
-#if  defined  (HAVE_NETCDF4)
-            || xtype == NC_USHORT || xtype == NC_UINT
-            || xtype == NC_UBYTE
-#endif
-             ;
-
-  return isInt;
-}
-
-static
-int cdfInqDatatype(int xtype, bool lunsigned)
-{
-  int datatype = -1;
-
-#if  defined  (HAVE_NETCDF4)
-  if ( xtype == NC_BYTE && lunsigned ) xtype = NC_UBYTE;
-#endif
-
-  if      ( xtype == NC_BYTE   )  datatype = CDI_DATATYPE_INT8;
-  /* else if ( xtype == NC_CHAR   )  datatype = CDI_DATATYPE_UINT8; */
-  else if ( xtype == NC_SHORT  )  datatype = CDI_DATATYPE_INT16;
-  else if ( xtype == NC_INT    )  datatype = CDI_DATATYPE_INT32;
-  else if ( xtype == NC_FLOAT  )  datatype = CDI_DATATYPE_FLT32;
-  else if ( xtype == NC_DOUBLE )  datatype = CDI_DATATYPE_FLT64;
-#if  defined  (HAVE_NETCDF4)
-  else if ( xtype == NC_UBYTE  )  datatype = CDI_DATATYPE_UINT8;
-  else if ( xtype == NC_LONG   )  datatype = CDI_DATATYPE_INT32;
-  else if ( xtype == NC_USHORT )  datatype = CDI_DATATYPE_UINT16;
-  else if ( xtype == NC_UINT   )  datatype = CDI_DATATYPE_UINT32;
-  else if ( xtype == NC_INT64  )  datatype = CDI_DATATYPE_FLT64;
-  else if ( xtype == NC_UINT64 )  datatype = CDI_DATATYPE_FLT64;
-#endif
-
-  return datatype;
 }
 
 
@@ -894,7 +884,7 @@ void cdf_set_cdi_attr(int ncid, int ncvarid, int attnum, int cdiID, int varID)
   else if ( xtypeIsFloat(atttype) )
     {
       double attflt[attlen];
-      cdfGetAttDouble(ncid, ncvarid, attname, (int)attlen, attflt);
+      cdfGetAttDouble(ncid, ncvarid, attname, attlen, attflt);
       int datatype = (atttype == NC_FLOAT) ? CDI_DATATYPE_FLT32 : CDI_DATATYPE_FLT64;
       cdiDefAttFlt(cdiID, varID, attname, datatype, (int)attlen, attflt);
     }
@@ -3263,7 +3253,7 @@ void cdf_scan_global_attr(int fileID, int vlistID, stream_t *streamptr, int ngat
       else if ( xtype == NC_FLOAT || xtype == NC_DOUBLE )
 	{
 	  double attflt[attlen];
-	  cdfGetAttDouble(fileID, NC_GLOBAL, attname, (int)attlen, attflt);
+	  cdfGetAttDouble(fileID, NC_GLOBAL, attname, attlen, attflt);
           int datatype = (xtype == NC_FLOAT) ? CDI_DATATYPE_FLT32 : CDI_DATATYPE_FLT64;
           cdiDefAttFlt(vlistID, CDI_GLOBAL, attname, datatype, (int)attlen, attflt);
 	}
