@@ -1146,6 +1146,7 @@ void cdf_scan_var_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimi
 
           size_t attstringsize = sizeof(attstring);
           bool isText = xtypeIsText(atttype);
+          bool isNumber = xtypeIsFloat(atttype) || xtypeIsInt(atttype);
           if ( isText )
             {
               cdfGetAttText(ncid, ncvarid, attname, sizeof(attstring), attstring);
@@ -1176,12 +1177,13 @@ void cdf_scan_var_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimi
 	      ncvars[ncvarid].param = cdiEncodeParam(pnum, pcat, pdis);
               cdf_set_var(ncvars, ncvarid, TRUE);
             }
-          else if ( !isText && strcmp(attname, "code") == 0 )
+          else if ( isNumber && strcmp(attname, "code") == 0 )
             {
               cdfGetAttInt(ncid, ncvarid, attname, 1, &ncvars[ncvarid].code);
+              printf("code %d\n", ncvars[ncvarid].code);
               cdf_set_var(ncvars, ncvarid, TRUE);
             }
-          else if ( !isText && strcmp(attname, "table") == 0 )
+          else if ( isNumber && strcmp(attname, "table") == 0 )
             {
               int tablenum;
               cdfGetAttInt(ncid, ncvarid, attname, 1, &tablenum);
@@ -1211,19 +1213,19 @@ void cdf_scan_var_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimi
               set_zaxistype(attstring, &ncvars[ncvarid].zaxistype);
               cdf_set_var(ncvars, ncvarid, TRUE);
             }
-          else if ( !isText && strcmp(attname, "trunc_count") == 0 )
+          else if ( isNumber && strcmp(attname, "trunc_count") == 0 )
             {
               cdfGetAttInt(ncid, ncvarid, attname, 1, &ncvars[ncvarid].truncation);
             }
-          else if ( !isText && strcmp(attname, "truncation") == 0 )
+          else if ( isNumber && strcmp(attname, "truncation") == 0 )
             {
               cdfGetAttInt(ncid, ncvarid, attname, 1, &ncvars[ncvarid].truncation);
             }
-          else if ( !isText && strcmp(attname, "number_of_grid_in_reference") == 0 )
+          else if ( isNumber && strcmp(attname, "number_of_grid_in_reference") == 0 )
             {
               cdfGetAttInt(ncid, ncvarid, attname, 1, &ncvars[ncvarid].position);
             }
-          else if ( !isText && strcmp(attname, "add_offset") == 0 )
+          else if ( isNumber && strcmp(attname, "add_offset") == 0 )
             {
 	      cdfGetAttDouble(ncid, ncvarid, attname, 1, &ncvars[ncvarid].addoffset);
 	      /*
@@ -1233,7 +1235,7 @@ void cdf_scan_var_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimi
 	      */
 	      /* (also used for lon/lat) cdf_set_var(ncvars, ncvarid, TRUE); */
             }
-          else if ( !isText && strcmp(attname, "scale_factor") == 0 )
+          else if ( isNumber && strcmp(attname, "scale_factor") == 0 )
             {
 	      cdfGetAttDouble(ncid, ncvarid, attname, 1, &ncvars[ncvarid].scalefactor);
 	      /*
@@ -1407,19 +1409,19 @@ void cdf_scan_var_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimi
                   ncdims[ncvars[ncvarid].dimids[0]].dimtype = Z_AXIS;
                 }
             }
-          else if ( !isText && strcmp(attname, "_FillValue") == 0 )
+          else if ( isNumber && strcmp(attname, "_FillValue") == 0 )
             {
 	      cdfGetAttDouble(ncid, ncvarid, attname, 1, &ncvars[ncvarid].fillval);
 	      ncvars[ncvarid].deffillval = true;
 	      /* cdf_set_var(ncvars, ncvarid, TRUE); */
             }
-          else if ( !isText && strcmp(attname, "missing_value") == 0 )
+          else if ( isNumber && strcmp(attname, "missing_value") == 0 )
             {
 	      cdfGetAttDouble(ncid, ncvarid, attname, 1, &ncvars[ncvarid].missval);
 	      ncvars[ncvarid].defmissval = true;
 	      /* cdf_set_var(ncvars, ncvarid, TRUE); */
             }
-          else if ( strcmp(attname, "valid_range") == 0 && attlen == 2 )
+          else if ( isNumber && strcmp(attname, "valid_range") == 0 && attlen == 2 )
             {
               if ( ncvars[ncvarid].lvalidrange == false )
                 {
@@ -1439,7 +1441,7 @@ void cdf_scan_var_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimi
                     }
                 }
             }
-          else if ( strcmp(attname, "valid_min") == 0 && attlen == 1 )
+          else if ( isNumber && strcmp(attname, "valid_min") == 0 && attlen == 1 )
             {
               if ( ncvars[ncvarid].lvalidrange == false )
                 {
@@ -1456,7 +1458,7 @@ void cdf_scan_var_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimi
                     }
                 }
             }
-          else if ( strcmp(attname, "valid_max") == 0 && attlen == 1 )
+          else if ( isNumber && strcmp(attname, "valid_max") == 0 && attlen == 1 )
             {
               if ( ncvars[ncvarid].lvalidrange == false )
                 {
@@ -1520,9 +1522,10 @@ void cdf_scan_var_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimi
                   cdf_scan_attr_axis(ncvars, ncdims, ncvarid, attstring, attlen, nvdims, dimidsp, name);
 		}
 	    }
-	  else if ( ( strcmp(attname, "realization") == 0 )         ||
-	            ( strcmp(attname, "ensemble_members") == 0 )    ||
-	            ( strcmp(attname, "forecast_init_type") == 0 )    )
+	  else if ( isNumber &&
+                    (strcmp(attname, "realization") == 0       ||
+                     strcmp(attname, "ensemble_members") == 0  ||
+                     strcmp(attname, "forecast_init_type") == 0) )
 	    {
 	      int temp;
 
