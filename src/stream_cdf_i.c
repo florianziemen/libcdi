@@ -2388,7 +2388,7 @@ bool cdf_read_coordinates(struct cdfLazyGrid *restrict lazyGrid, ncvar_t *ncvar,
         }
       else
         {
-          Warning("Variable %s has an unsupported grid, skipped!", ncvar->name);
+          Warning("Unsupported grid, skipped variable %s!", ncvar->name);
           ncvar->isvar = -1;
           return true;
         }
@@ -3498,7 +3498,7 @@ int cdf_check_vars(int nvars, ncvar_t *ncvars, size_t ntsteps, int timedimid)
       if ( cdfInqDatatype(ncvars[ncvarid].xtype, ncvars[ncvarid].lunsigned) == -1 )
 	{
 	  ncvars[ncvarid].isvar = 0;
-	  Warning("Variable %s has an unsupported data type, skipped!", ncvars[ncvarid].name);
+	  Warning("Unsupported data type, skipped variable %s!", ncvars[ncvarid].name);
 	  continue;
 	}
 
