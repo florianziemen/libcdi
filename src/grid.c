@@ -3615,11 +3615,12 @@ The function @func{gridDefParamLCC} defines the parameter of a Lambert Conformal
 void gridDefParamLCC(int gridID, double missval, double lon_0, double lat_0, double lat_1, double lat_2,
                      double a, double rf, double xval_0, double yval_0, double x_0, double y_0)
 {
+  (void)lat_0;
   cdiGridDefKeyStr(gridID, CDI_KEY_MAPPING, CDI_MAX_NAME, "Lambert_Conformal");
 
   const char *mapname = "lambert_conformal_conic";
   cdiGridDefKeyStr(gridID, CDI_KEY_MAPNAME, CDI_MAX_NAME, mapname);
-  cdiDefAttTxt(gridID, CDI_GLOBAL, "grid_mapping_name", strlen(mapname), mapname);
+  cdiDefAttTxt(gridID, CDI_GLOBAL, "grid_mapping_name", (int)(strlen(mapname)), mapname);
   int nlats = 0;
   double lats[2];
   lats[nlats++] = lat_1;
