@@ -2102,37 +2102,43 @@ module mo_cdi
       integer(c_int), intent(inout) :: ni3_dummy
     end subroutine gridInqParamGME
 
-    subroutine gridDefParamLCC(gridID_dummy, originLon_dummy, originLat_dummy,&
-    & lonParY_dummy, lat1_dummy, lat2_dummy, xinc_dummy, yinc_dummy,&
-    & projflag_dummy, scanflag_dummy) bind(c, name = 'gridDefParamLCC')
+    subroutine gridDefParamLCC(gridID_dummy, missval_dummy, lon_0_dummy,&
+    & lat_0_dummy, lat_1_dummy, lat_2_dummy, a_dummy, rf_dummy, xval_0_dummy,&
+    & yval_0_dummy, x_0_dummy, y_0_dummy) bind(c, name = 'gridDefParamLCC')
       import c_double, c_int
       integer(c_int), value :: gridID_dummy
-      real(c_double), value :: originLon_dummy
-      real(c_double), value :: originLat_dummy
-      real(c_double), value :: lonParY_dummy
-      real(c_double), value :: lat1_dummy
-      real(c_double), value :: lat2_dummy
-      real(c_double), value :: xinc_dummy
-      real(c_double), value :: yinc_dummy
-      integer(c_int), value :: projflag_dummy
-      integer(c_int), value :: scanflag_dummy
+      real(c_double), value :: missval_dummy
+      real(c_double), value :: lon_0_dummy
+      real(c_double), value :: lat_0_dummy
+      real(c_double), value :: lat_1_dummy
+      real(c_double), value :: lat_2_dummy
+      real(c_double), value :: a_dummy
+      real(c_double), value :: rf_dummy
+      real(c_double), value :: xval_0_dummy
+      real(c_double), value :: yval_0_dummy
+      real(c_double), value :: x_0_dummy
+      real(c_double), value :: y_0_dummy
     end subroutine gridDefParamLCC
 
-    subroutine gridInqParamLCC(gridID_dummy, originLon_dummy, originLat_dummy,&
-    & lonParY_dummy, lat1_dummy, lat2_dummy, xinc_dummy, yinc_dummy,&
-    & projflag_dummy, scanflag_dummy) bind(c, name = 'gridInqParamLCC')
+    function gridInqParamLCC(gridID_dummy, missval_dummy, lon_0_dummy,&
+    & lat_0_dummy, lat_1_dummy, lat_2_dummy, a_dummy, rf_dummy, xval_0_dummy,&
+    & yval_0_dummy, x_0_dummy, y_0_dummy) bind(c, name = 'gridInqParamLCC')&
+    & result(f_result)
       import c_double, c_int
       integer(c_int), value :: gridID_dummy
-      real(c_double), intent(inout) :: originLon_dummy
-      real(c_double), intent(inout) :: originLat_dummy
-      real(c_double), intent(inout) :: lonParY_dummy
-      real(c_double), intent(inout) :: lat1_dummy
-      real(c_double), intent(inout) :: lat2_dummy
-      real(c_double), intent(inout) :: xinc_dummy
-      real(c_double), intent(inout) :: yinc_dummy
-      integer(c_int), intent(inout) :: projflag_dummy
-      integer(c_int), intent(inout) :: scanflag_dummy
-    end subroutine gridInqParamLCC
+      real(c_double), value :: missval_dummy
+      real(c_double), intent(inout) :: lon_0_dummy
+      real(c_double), intent(inout) :: lat_0_dummy
+      real(c_double), intent(inout) :: lat_1_dummy
+      real(c_double), intent(inout) :: lat_2_dummy
+      real(c_double), intent(inout) :: a_dummy
+      real(c_double), intent(inout) :: rf_dummy
+      real(c_double), intent(inout) :: xval_0_dummy
+      real(c_double), intent(inout) :: yval_0_dummy
+      real(c_double), intent(inout) :: x_0_dummy
+      real(c_double), intent(inout) :: y_0_dummy
+      integer(c_int) :: f_result
+    end function gridInqParamLCC
 
     subroutine gridDefArea(gridID_dummy, area_dummy) bind(c, name =&
     & 'gridDefArea')
