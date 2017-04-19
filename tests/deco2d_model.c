@@ -418,7 +418,8 @@ modelRun(struct model_config setup, MPI_Comm comm)
           zaxisDestroy(zID);
 #if USE_MPI
           xt_idxlist_delete(varDesc[varIdx].partDesc);
-          xt_redist_delete(varDesc[varIdx].redist4gather);
+          if (setup.flags & PIO_WRITE_CONFIG_CHECKSUM_FLAG)
+            xt_redist_delete(varDesc[varIdx].redist4gather);
 #endif
           for (size_t j = varIdx + 1; j < nVars; ++j)
             if (zID == varDesc[j].zaxisID)
