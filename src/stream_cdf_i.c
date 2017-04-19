@@ -1403,7 +1403,7 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
               bool lstop = false;
               char *pstring = attstring;
 
-              for (int i = 0; i < MAX_COORDVARS; i++)
+              for (int i = 0; i < MAX_COORDVARS && !lstop; i++)
                 {
                   while (isspace((int) *pstring)) pstring++;
                   if (*pstring == 0) break;
@@ -1438,8 +1438,6 @@ cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timed
                           Warning("%s - >%s<", nc_strerror(status), varname);
                         }
                     }
-
-                  if (lstop) break;
                 }
 
               cdf_set_var(ncvar, DataVar);
