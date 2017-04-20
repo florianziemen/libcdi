@@ -27533,12 +27533,12 @@ return H5get_libversion ();
   return 0;
 }
 _ACEOF
-for ac_lib in '' netcdf; do
+for ac_lib in '' netcdf hdf5; do
   if test -z "$ac_lib"; then
     ac_res="none required"
   else
     ac_res=-l$ac_lib
-    LIBS="-l$ac_lib -lhdf5 $ac_func_search_save_LIBS"
+    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
   fi
   if ac_fn_c_try_link "$LINENO"; then :
   ac_cv_search_H5get_libversion=$ac_res
