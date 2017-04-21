@@ -1,3 +1,11 @@
+2017-05-??  Uwe Schulzweida
+
+	* Version 1.8.2 released
+
+2017-04-21  Uwe Schulzweida
+
+	* gribapiGetDiskRepresentation: Wrong result with SZIP compressed GRIB records [Bug #7650]
+
 2017-04-13  Uwe Schulzweida
 
 	* Version 1.8.1 released

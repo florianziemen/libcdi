@@ -723,10 +723,26 @@ void ensureBufferSize(size_t requiredSize, size_t *curSize, void **buffer)
 static
 grib_handle *gribapiGetDiskRepresentation(size_t recsize, size_t *buffersize, void **gribbuffer, int *outDatatype, int *outCompressionType, size_t *outUnzipsize)
 {
-  bool lieee = false;
+  int gribversion = (int)((char*)*gribbuffer)[7];
+
+  if ( gribversion <= 1 )
+    {
+      if ( gribGetZip(recsize, *gribbuffer, outUnzipsize) > 0 )
+        {
+          *outCompressionType = CDI_COMPRESS_SZIP;
+          ensureBufferSize(*outUnzipsize + 100, buffersize, gribbuffer);
+        }
+      else
+        {
+          *outCompressionType = CDI_COMPRESS_NONE;
+        }
+    }
 
   grib_handle *gh = grib_handle_new_from_message(NULL, *gribbuffer, recsize);
-  if(gribEditionNumber(gh) > 1)
+
+  bool lieee = false;
+
+  if ( gribversion > 1 )
     {
       size_t len = 256;
       char typeOfPacking[256];
@@ -737,18 +753,6 @@ grib_handle *gribapiGetDiskRepresentation(size_t recsize, size_t *buffersize, vo
           if      ( strncmp(typeOfPacking, "grid_jpeg", len) == 0 ) *outCompressionType = CDI_COMPRESS_JPEG;
           else if ( strncmp(typeOfPacking, "grid_ccsds", len) == 0 ) *outCompressionType = CDI_COMPRESS_SZIP;
           else if ( strncmp(typeOfPacking, "grid_ieee", len) == 0 ) lieee = true;
-        }
-    }
-  else
-    {
-      if( gribGetZip(recsize, *gribbuffer, outUnzipsize) > 0 )
-        {
-          *outCompressionType = CDI_COMPRESS_SZIP;
-          ensureBufferSize(*outUnzipsize + 100, buffersize, gribbuffer);
-        }
-      else
-        {
-          *outCompressionType = CDI_COMPRESS_NONE;
         }
     }
 
@@ -768,6 +772,7 @@ grib_handle *gribapiGetDiskRepresentation(size_t recsize, size_t *buffersize, vo
           if ( bitsPerValue > 0 && bitsPerValue <= 32 ) *outDatatype = (int)bitsPerValue;
         }
     }
+
   return gh;
 }
 
