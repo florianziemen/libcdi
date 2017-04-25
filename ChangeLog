@@ -2,6 +2,10 @@
 
 	* Version 1.8.2 released
 
+2017-04-25  Uwe Schulzweida
+
+	* initialize taxisptr->units to NULL after calling delete_refcount_string() [Bug #7691]
+
 2017-04-21  Uwe Schulzweida
 
 	* gribapiGetDiskRepresentation: Wrong result with SZIP compressed GRIB records [Bug #7650]
