@@ -2527,8 +2527,8 @@ void cdf_set_grid_to_similar_vars(ncvar_t *ncvar1, ncvar_t *ncvar2, int gridtype
 }
 
 static
-void cdf_define_all_grids(ncgrid_t *ncgrid, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars,
-                          int timedimid, unsigned char *uuidOfHGrid, char *gridfile, int number_of_grid_used)
+int cdf_define_all_grids(ncgrid_t *ncgrid, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars,
+                         int timedimid, unsigned char *uuidOfHGrid, char *gridfile, int number_of_grid_used)
 {
   for ( int ncvarid = 0; ncvarid < nvars; ++ncvarid )
     {
@@ -2559,6 +2559,17 @@ void cdf_define_all_grids(ncgrid_t *ncgrid, int vlistID, ncdim_t *ncdims, int nv
 		  ysize  = ncdims[ydimid].len;
 		}
 	    }
+
+          if ( xsize > INT_MAX )
+            {
+              Warning("Size limit exceeded for x-axis dimension (limit=%d)!", INT_MAX);
+              return CDI_EDIMSIZE;
+            }
+          if ( ysize > INT_MAX )
+            {
+              Warning("Size limit exceeded for y-axis dimension (limit=%d)!", INT_MAX);
+              return CDI_EDIMSIZE;
+            }
 
           int gmapvarid = ncvar->gmapid;
           bool lproj = gmapvarid != CDI_UNDEFID;
@@ -2685,12 +2696,14 @@ void cdf_define_all_grids(ncgrid_t *ncgrid, int vlistID, ncdim_t *ncdims, int nv
             }
 	}
     }
+
+  return 0;
 }
 
 /* define all input zaxes */
 static
-void cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars,
-                          size_t vctsize_echam, double *vct_echam, unsigned char *uuidOfVGrid)
+int cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars,
+                         size_t vctsize_echam, double *vct_echam, unsigned char *uuidOfVGrid)
 {
   char *pname, *plongname, *punits;
   size_t vctsize = vctsize_echam;
@@ -2809,6 +2822,12 @@ void cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
                 }
 	    }
 
+          if ( zsize > INT_MAX )
+            {
+              Warning("Size limit exceeded for z-axis dimension (limit=%d)!", INT_MAX);
+              return CDI_EDIMSIZE;
+            }
+
       	  ncvar->zaxisID = varDefZaxis(vlistID, zaxisType, (int) zsize, zvar, with_bounds, lbounds, ubounds,
                                        (int)vctsize, vct, pname, plongname, punits, zprec, 1, 0);
 
@@ -2891,6 +2910,8 @@ void cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int
 	      }
 	}
     }
+
+  return 0;
 }
 
 
@@ -3523,7 +3544,6 @@ int cdfInqContents(stream_t *streamptr)
   int ndims, nvars, ngatts, unlimdimid;
   int ncvarid;
   int ncdimid;
-  int timedimid = -1;
   int *varids;
   int nvarids;
   bool time_has_units = false;
@@ -3616,15 +3636,17 @@ int cdfInqContents(stream_t *streamptr)
                        uuidOfHGrid, uuidOfVGrid, gridfile, &number_of_grid_used);
 
   /* find time dim */
-  if ( unlimdimid >= 0 )
-    timedimid = unlimdimid;
-  else
-    timedimid = cdf_time_dimid(fileID, ndims, nvars);
+  int timedimid = (unlimdimid >= 0) ? unlimdimid : cdf_time_dimid(fileID, ndims, nvars);
 
   streamptr->basetime.ncdimid = timedimid;
 
   size_t ntsteps = 0;
   if ( timedimid != CDI_UNDEFID ) cdf_inq_dimlen(fileID, timedimid, &ntsteps);
+  if ( ntsteps > INT_MAX )
+    {
+      Warning("Size limit exceeded for time dimension (limit=%d)!", INT_MAX);
+      return CDI_EDIMSIZE;
+    }
 
   if ( CDI_Debug ) Message("Number of timesteps = %zu", ntsteps);
   if ( CDI_Debug ) Message("Time dimid = %d", streamptr->basetime.ncdimid);
@@ -3749,12 +3771,14 @@ int cdfInqContents(stream_t *streamptr)
   if ( CDI_Debug ) cdf_print_vars(ncvars, nvars, "cdf_define_all_grids");
 
   /* define all grids */
-  cdf_define_all_grids(streamptr->ncgrid, vlistID, ncdims, nvars, ncvars, timedimid, uuidOfHGrid, gridfile, number_of_grid_used);
-
+  int status;
+  status = cdf_define_all_grids(streamptr->ncgrid, vlistID, ncdims, nvars, ncvars, timedimid, uuidOfHGrid, gridfile, number_of_grid_used);
+  if ( status < 0 ) return status;
 
   /* define all zaxes */
-  cdf_define_all_zaxes(streamptr, vlistID, ncdims, nvars, ncvars, vctsize, vct, uuidOfVGrid);
+  status = cdf_define_all_zaxes(streamptr, vlistID, ncdims, nvars, ncvars, vctsize, vct, uuidOfVGrid);
   if ( vct ) Free(vct);
+  if ( status < 0 ) return status;
 
 
   /* select vars */

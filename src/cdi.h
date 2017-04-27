@@ -40,6 +40,7 @@ extern "C" {
 #define  CDI_ELIBNAVAIL           -22   // xxx library not available
 #define  CDI_EUFSTRUCT            -23   // Unsupported file structure
 #define  CDI_EUNC4                -24   // Unsupported NetCDF4 structure
+#define  CDI_EDIMSIZE             -25   // Invalid dimension size
 #define  CDI_ELIMIT               -99   // Internal limits exceeded
 
 /* File types */
