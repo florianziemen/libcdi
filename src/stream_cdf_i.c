@@ -45,6 +45,7 @@ typedef struct {
   bool     ignore;
   bool     isx;
   bool     isy;
+  bool     isc;
   bool     islon;
   bool     islat;
   bool     islev;
@@ -310,7 +311,7 @@ int cdfInqDatatype(int xtype, bool lunsigned)
 #endif
 
   if      ( xtype == NC_BYTE   )  datatype = CDI_DATATYPE_INT8;
-  /* else if ( xtype == NC_CHAR   )  datatype = CDI_DATATYPE_UINT8; */
+  else if ( xtype == NC_CHAR   )  datatype = CDI_DATATYPE_UINT8;
   else if ( xtype == NC_SHORT  )  datatype = CDI_DATATYPE_INT16;
   else if ( xtype == NC_INT    )  datatype = CDI_DATATYPE_INT32;
   else if ( xtype == NC_FLOAT  )  datatype = CDI_DATATYPE_FLT32;
@@ -628,6 +629,7 @@ void init_ncvars(long nvars, ncvar_t *ncvars)
       ncvars[ncvarid].ignore          = false;
       ncvars[ncvarid].isx             = false;
       ncvars[ncvarid].isy             = false;
+      ncvars[ncvarid].isc             = false;
       ncvars[ncvarid].islon           = false;
       ncvars[ncvarid].islat           = false;
       ncvars[ncvarid].islev           = false;
@@ -1937,6 +1939,12 @@ void verify_coordinate_vars_2(int nvars, ncvar_t *ncvars)
 		  continue;
 		}
             }
+          else if ( strcmp(ncvars[ncvarid].stdname, "region") == 0  ||
+                    strcmp(ncvars[ncvarid].stdname, "area_type") == 0 ||
+                    cdfInqDatatype(ncvars[ncvarid].xtype, ncvars[ncvarid].lunsigned) == CDI_DATATYPE_UINT8 )
+            {
+              ncvars[ncvarid].isc = true;
+            }
 
 	  /* not needed anymore for rotated grids */
 	  if ( !ncvars[ncvarid].islon && ncvars[ncvarid].longname[0] != 0 &&
@@ -2300,7 +2308,7 @@ bool cdf_read_coordinates(struct cdfLazyGrid *restrict lazyGrid, ncvar_t *ncvar,
       if ( xvarid != CDI_UNDEFID && yvarid != CDI_UNDEFID )
         {
           int ndims = ncvars[xvarid].ndims;
-          if ( ndims != ncvars[yvarid].ndims )
+          if ( ndims != ncvars[yvarid].ndims && !ncvars[xvarid].isc && !ncvars[yvarid].isc )
             {
               Warning("Inconsistent grid structure for variable %s!", ncvar->name);
               ncvar->xvarid = xvarid = CDI_UNDEFID;
@@ -3864,6 +3872,7 @@ int cdfInqContents(stream_t *streamptr)
 	      else if ( ncvars[ncvar->coordvarids[i]].islat ||
                         ncvars[ncvar->coordvarids[i]].isy )   ncvar->yvarid = ncvar->coordvarids[i];
 	      else if ( ncvars[ncvar->coordvarids[i]].islev ) ncvar->zvarid = ncvar->coordvarids[i];
+	      else if ( ncvars[ncvar->coordvarids[i]].isc )   ncvar->cvarids[i] = ncvar->coordvarids[i];
 	    }
 	}
     }

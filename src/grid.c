@@ -3384,8 +3384,8 @@ void gridPrintKernel(int gridID, int opt, FILE *fp)
   int gridsize = gridInqSize(gridID);
   int xsize    = gridInqXsize(gridID);
   int ysize    = gridInqYsize(gridID);
-  int xstrlen  = gridInqXIscPtr(gridID);
-  int ystrlen  = gridInqYIscPtr(gridID);
+  int xstrlen  = gridInqXIsc(gridID);
+  int ystrlen  = gridInqYIsc(gridID);
   int nvertex  = gridInqNvertex(gridID);
   int prec     = gridInqPrec(gridID);
 
@@ -3705,6 +3705,11 @@ static const double *gridInqXValsPtrSerial(grid_t *gridptr)
   return gridptr->x.vals;
 }
 
+static const char **gridInqXCvalsPtrSerial(grid_t *gridptr)
+{
+  return (const char **) gridptr->x.cvals;
+}
+
 
 const double *gridInqXvalsPtr(int gridID)
 {
@@ -3719,16 +3724,14 @@ const char **gridInqXCvalsPtr(int gridID)
   return gridptr->vtable->inqXCvalsPtr(gridptr);
 }
 
-
-int gridInqXIscPtr(int gridID)
-{
-  grid_t *gridptr = grid_to_pointer(gridID);
-  return gridptr->vtable->inqXIscPtr(gridptr);
-}
-
 static const double *gridInqYValsPtrSerial(grid_t *gridptr)
 {
   return gridptr->y.vals;
+}
+
+static const char **gridInqYCvalsPtrSerial(grid_t *gridptr)
+{
+  return (const char **) gridptr->y.cvals;
 }
 
 const double *gridInqYvalsPtr(int gridID)
@@ -3741,12 +3744,6 @@ const char **gridInqYCvalsPtr(int gridID)
 {
   grid_t *gridptr = grid_to_pointer(gridID);
   return gridptr->vtable->inqYCvalsPtr(gridptr);
-}
-
-int gridInqYIscPtr(int gridID)
-{
-  grid_t *gridptr = grid_to_pointer(gridID);
-  return gridptr->vtable->inqYIscPtr(gridptr);
 }
 
 /*
@@ -4898,6 +4895,8 @@ const struct gridVirtTable cdiGridVtable
   .inqYIsc = gridInqYIscSerial,
   .inqXValsPtr = gridInqXValsPtrSerial,
   .inqYValsPtr = gridInqYValsPtrSerial,
+  .inqXCvalsPtr = gridInqXCvalsPtrSerial,
+  .inqYCvalsPtr = gridInqYCvalsPtrSerial,
   .compareXYFull = compareXYvals,
   .compareXYAO = compareXYvals2,
   .inqArea = gridInqAreaSerial,
