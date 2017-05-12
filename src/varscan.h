@@ -15,7 +15,7 @@ void varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds,
 void varDefVCT(size_t vctsize, double *vctptr);
 void varDefZAxisReference(int nlev, int nvgrid, unsigned char uuid[CDI_UUID_SIZE]);
 
-int  varDefZaxis(int vlistID, int zaxistype, int nlevels, const double *levels, bool lbounds,
+int  varDefZaxis(int vlistID, int zaxistype, int nlevels, const double *levels, const char **cvals, bool lbounds,
 		 const double *levels1, const double *levels2, int vctsize, const double *vct, char *name,
 		 const char *longname, const char *units, int prec, int mode, int ltype);
 
