@@ -2573,6 +2573,7 @@ void gridComplete(grid_t *grid)
     case GRID_CURVILINEAR:
     case GRID_GENERIC:
     case GRID_PROJECTION:
+    case GRID_CHARXY:
       {
 	if ( grid->x.size > 0 ) gridDefXsize(gridID, grid->x.size);
 	if ( grid->y.size > 0 ) gridDefYsize(gridID, grid->y.size);
@@ -3443,6 +3444,7 @@ void gridPrintKernel(int gridID, int opt, FILE *fp)
     case GRID_PROJECTION:
     case GRID_CURVILINEAR:
     case GRID_UNSTRUCTURED:
+    case GRID_CHARXY:
       {
         if ( type == GRID_GAUSSIAN || type == GRID_GAUSSIAN_REDUCED ) fprintf(fp, "np        = %d\n", gridInqNP(gridID));
 

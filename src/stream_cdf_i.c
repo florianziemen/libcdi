@@ -68,6 +68,7 @@ typedef struct {
   int      xvarid;
   int      yvarid;
   int      zvarid;
+  int      cvarids[MAX_COORDVARS];
   int      tvarid;
   int      psvarid;
   int      p0varid;
@@ -655,7 +656,10 @@ void init_ncvars(long nvars, ncvar_t *ncvars)
       ncvars[ncvarid].p0varid         = CDI_UNDEFID;
       ncvars[ncvarid].ncoordvars      = 0;
       for ( int i = 0; i < MAX_COORDVARS; ++i )
-        ncvars[ncvarid].coordvarids[i]  = CDI_UNDEFID;
+        {
+          ncvars[ncvarid].coordvarids[i]  = CDI_UNDEFID;
+          ncvars[ncvarid].cvarids[i]      = CDI_UNDEFID;
+        }
       ncvars[ncvarid].nauxvars      = 0;
       for ( int i = 0; i < MAX_AUXVARS; ++i )
         ncvars[ncvarid].auxvarids[i]  = CDI_UNDEFID;
@@ -1610,6 +1614,7 @@ void cdf_set_dimtype(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
       if ( ncvars[ncvarid].isvar == TRUE )
 	{
 	  bool lxdim = false, lydim = false, lzdim = false/* , ltdim = false */;
+          int lcdim = 0;
 	  int ndims = ncvars[ncvarid].ndims;
 	  for ( int i = 0; i < ndims; i++ )
 	    {
@@ -1617,8 +1622,11 @@ void cdf_set_dimtype(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
               lxdim = lxdim | (dimtype == X_AXIS);
 	      lydim = lydim | (dimtype == Y_AXIS);
 	      lzdim = lzdim | (dimtype == Z_AXIS);
+              if ( ncvars[ncvarid].cvarids[i] != CDI_UNDEFID ) lcdim++;
 	      /* else if ( ncvars[ncvarid].dimtype[i] == T_AXIS ) ltdim = true; */
 	    }
+
+          int allcdims = lcdim;
 
           if ( !lxdim && ncvars[ncvarid].xvarid != CDI_UNDEFID )
             {
@@ -1637,6 +1645,13 @@ void cdf_set_dimtype(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
                   {
                     if ( !lzdim )
                       {
+                        if ( lcdim )
+                          {
+                            int cdimvar = ncvars[ncvarid].cvarids[allcdims-lcdim];
+                            ncvars[ncvarid].zvarid = cdimvar;
+                            lcdim--;
+		            ncvars[cdimvar].zaxistype = ZAXIS_CHAR;
+                          }
                         cdf_set_dim(ncvars, ncvarid, i, Z_AXIS);
                         lzdim = true;
                         int ncdimid = ncvars[ncvarid].dimids[i];
@@ -1670,14 +1685,18 @@ void cdf_set_dimtype(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
       if ( ncvars[ncvarid].isvar == TRUE )
 	{
 	  bool lxdim = false, lydim = false, lzdim = false/* , ltdim = false */;
+          int lcdim = 0;
 	  int ndims = ncvars[ncvarid].ndims;
 	  for ( int i = 0; i < ndims; i++ )
 	    {
 	      if      ( ncvars[ncvarid].dimtype[i] == X_AXIS ) lxdim = true;
 	      else if ( ncvars[ncvarid].dimtype[i] == Y_AXIS ) lydim = true;
 	      else if ( ncvars[ncvarid].dimtype[i] == Z_AXIS ) lzdim = true;
+              else if ( ncvars[ncvarid].cvarids[i] != CDI_UNDEFID ) lcdim++;
 	      /* else if ( ncvars[ncvarid].dimtype[i] == T_AXIS ) ltdim = true; */
 	    }
+
+          int allcdims = lcdim;
 
           if ( !lxdim && ncvars[ncvarid].xvarid != CDI_UNDEFID )
             {
@@ -1696,16 +1715,35 @@ void cdf_set_dimtype(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
                   {
                     if ( !lxdim )
                       {
+                        if ( lcdim && ncvars[ncvarid].xvarid == CDI_UNDEFID )
+                          {
+                            int cdimvar = ncvars[ncvarid].cvarids[allcdims-lcdim];
+                            ncvars[ncvarid].xvarid = cdimvar;
+                            lcdim--;
+                          }
                         cdf_set_dim(ncvars, ncvarid, i, X_AXIS);
                         lxdim = true;
                       }
                     else if ( !lydim && ncvars[ncvarid].gridtype != GRID_UNSTRUCTURED )
                       {
+                        if ( lcdim && ncvars[ncvarid].yvarid == CDI_UNDEFID )
+                          {
+                            int cdimvar = ncvars[ncvarid].cvarids[allcdims-lcdim];
+                            ncvars[ncvarid].yvarid = cdimvar;
+                            lcdim--;
+                          }
                         cdf_set_dim(ncvars, ncvarid, i, Y_AXIS);
                         lydim = true;
                       }
                     else if ( !lzdim )
                       {
+                        if ( lcdim > 0 )
+                          {
+                            int cdimvar = ncvars[ncvarid].cvarids[allcdims-lcdim];
+                            ncvars[ncvarid].zvarid = cdimvar;
+                            lcdim--;
+		            ncvars[cdimvar].zaxistype = ZAXIS_CHAR;
+                          }
                         cdf_set_dim(ncvars, ncvarid, i, Z_AXIS);
                         lzdim = true;
                       }
@@ -2111,16 +2149,28 @@ bool cdf_read_xcoord(struct cdfLazyGrid *restrict lazyGrid, ncdim_t *ncdims, ncv
   *islon = axisvar->islon;
   int ndims = axisvar->ndims;
   size_t size = 0;
+  int prec = cdfInqDatatype(axisvar->xtype, axisvar->lunsigned);
+
   if ( (ndims - ntdims) == 2 )
     {
-      ncvar->gridtype = GRID_CURVILINEAR;
-      size = (*xsize)*ysize;
       /* Check size of 2 dimensional coordinate variables */
       int dimid = axisvar->dimids[ndims-2];
       size_t dimsize1 = ncdims[dimid].len;
       dimid = axisvar->dimids[ndims-1];
       size_t dimsize2 = ncdims[dimid].len;
-      skipvar = dimsize1*dimsize2 != size;
+
+      if ( prec == CDI_DATATYPE_UINT8 )
+        {
+          ncvar->gridtype = GRID_CHARXY;
+          size = dimsize1*dimsize2;
+          skipvar = dimsize1 != *xsize;
+        }
+      else
+        {
+          ncvar->gridtype = GRID_CURVILINEAR;
+          size = (*xsize)*ysize;
+          skipvar = dimsize1*dimsize2 != size;
+        }
     }
   else if ( (ndims - ntdims) == 1 )
     {
@@ -2143,7 +2193,6 @@ bool cdf_read_xcoord(struct cdfLazyGrid *restrict lazyGrid, ncdim_t *ncdims, ncv
       return true;
     }
 
-  int prec = cdfInqDatatype(axisvar->xtype, axisvar->lunsigned);
   if ( prec != -1 )  grid->prec = prec;
 
   if ( prec == CDI_DATATYPE_UINT8 && !CDI_netcdf_lazy_grid_load )
@@ -2168,16 +2217,28 @@ bool cdf_read_ycoord(struct cdfLazyGrid *restrict lazyGrid, ncdim_t *ncdims, ncv
   *islat = axisvar->islat;
   int ndims = axisvar->ndims;
   size_t size = 0;
+  int prec = cdfInqDatatype(axisvar->xtype, axisvar->lunsigned);
+
   if ( (ndims - ntdims) == 2 )
     {
-      ncvar->gridtype = GRID_CURVILINEAR;
-      size = xsize*(*ysize);
       /* Check size of 2 dimensional coordinate variables */
       int dimid = axisvar->dimids[ndims-2];
       size_t dimsize1 = ncdims[dimid].len;
       dimid = axisvar->dimids[ndims-1];
       size_t dimsize2 = ncdims[dimid].len;
-      skipvar = dimsize1*dimsize2 != size;
+
+      if ( prec == CDI_DATATYPE_UINT8 )
+        {
+          ncvar->gridtype = GRID_CHARXY;
+          size = dimsize1*dimsize2;
+          skipvar = dimsize1 != *ysize;
+        }
+      else
+        {
+          ncvar->gridtype = GRID_CURVILINEAR;
+          size = xsize*(*ysize);
+          skipvar = dimsize1*dimsize2 != size;
+        }
     }
   else if ( (ndims - ntdims) == 1 )
     {
@@ -2201,7 +2262,6 @@ bool cdf_read_ycoord(struct cdfLazyGrid *restrict lazyGrid, ncdim_t *ncdims, ncv
       return true;
     }
 
-  int prec = cdfInqDatatype(axisvar->xtype, axisvar->lunsigned);
   if ( prec != -1 )  grid->prec = prec;
 
   if ( prec == CDI_DATATYPE_UINT8 && !CDI_netcdf_lazy_grid_load )
@@ -2391,6 +2451,13 @@ bool cdf_read_coordinates(struct cdfLazyGrid *restrict lazyGrid, ncvar_t *ncvar,
     case GRID_TRAJECTORY:
       {
         grid->size = 1;
+        break;
+      }
+    case GRID_CHARXY:
+      {
+        grid->size = (int)size;
+        grid->x.size = (int)xsize;
+        grid->y.size = (int)ysize;
         break;
       }
     }
