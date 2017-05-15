@@ -334,6 +334,7 @@ extern int cdiSortName;
 extern int cdiSortParam;
 extern int cdiHaveMissval;
 extern int cdiIgnoreAttCoordinates;
+extern int cdiCoordinatesLonLat;
 extern int cdiIgnoreValidRange;
 extern int cdiSkipRecords;
 extern int cdiConvention;

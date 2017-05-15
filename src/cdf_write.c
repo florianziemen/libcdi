@@ -610,17 +610,36 @@ int cdfDefVar(stream_t *streamptr, int varID)
       int ncxvarID = streamptr->ncgrid[gridindex].ncIDs[CDF_VARID_X];
       int ncyvarID = streamptr->ncgrid[gridindex].ncIDs[CDF_VARID_Y];
       int ncavarID = streamptr->ncgrid[gridindex].ncIDs[CDF_VARID_A];
-      if ( ncyvarID != CDI_UNDEFID )
+      // CMOR order: coordinates = "lat lon"
+      if ( cdiCoordinatesLonLat )
         {
-          size_t len = strlen(coordinates);
-          if ( len ) coordinates[len++] = ' ';
-          cdf_inq_varname(fileID, ncyvarID, coordinates+len);
+          if ( ncxvarID != CDI_UNDEFID )
+            {
+              size_t len = strlen(coordinates);
+              if ( len ) coordinates[len++] = ' ';
+              cdf_inq_varname(fileID, ncxvarID, coordinates+len);
+            }
+          if ( ncyvarID != CDI_UNDEFID )
+            {
+              size_t len = strlen(coordinates);
+              if ( len ) coordinates[len++] = ' ';
+              cdf_inq_varname(fileID, ncyvarID, coordinates+len);
+            }
         }
-      if ( ncxvarID != CDI_UNDEFID )
+      else
         {
-          size_t len = strlen(coordinates);
-          if ( len ) coordinates[len++] = ' ';
-          cdf_inq_varname(fileID, ncxvarID, coordinates+len);
+          if ( ncyvarID != CDI_UNDEFID )
+            {
+              size_t len = strlen(coordinates);
+              if ( len ) coordinates[len++] = ' ';
+              cdf_inq_varname(fileID, ncyvarID, coordinates+len);
+            }
+          if ( ncxvarID != CDI_UNDEFID )
+            {
+              size_t len = strlen(coordinates);
+              if ( len ) coordinates[len++] = ' ';
+              cdf_inq_varname(fileID, ncxvarID, coordinates+len);
+            }
         }
 
       if ( ncavarID != CDI_UNDEFID )

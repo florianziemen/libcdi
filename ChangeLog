@@ -1,6 +1,10 @@
-2017-05-??  Uwe Schulzweida
+2017-05-16  Uwe Schulzweida
 
 	* Version 1.8.2 released
+
+2017-05-15  Uwe Schulzweida
+
+	* added env. variable CDI_COORDINATES_LONLAT to change the order of lon and lat for the coordinates attribute.
 
 2017-05-12  Uwe Schulzweida
 
