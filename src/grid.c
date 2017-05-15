@@ -1569,8 +1569,10 @@ static
 int gridInqXIscSerial(grid_t *gridptr)
 {
   int clen = gridptr->x.clength;
+  /*
   if ( gridptr->type != GRID_CHARXY )
     Error("Axis type is 'char' but grid is not type 'GRID_CHARXY'.");
+  */
   return clen;
 }
 
@@ -1665,8 +1667,10 @@ static
 int gridInqYIscSerial(grid_t *gridptr)
 {
   int clen = gridptr->y.clength;
+  /*
   if ( gridptr->type != GRID_CHARXY )
     Error("Axis type is 'char' but grid is not type 'GRID_CHARXY'.");
+  */
   return clen;
 }
 
