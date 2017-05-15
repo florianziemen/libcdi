@@ -2843,7 +2843,8 @@ int cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int 
 
               if ( zdimid != CDI_UNDEFID )
                 {
-                  zvarid = ncdims[zdimid].ncvarid;
+                  // zvarid = ncdims[zdimid].ncvarid;
+                  zvarid = (ncvar->zvarid != CDI_UNDEFID) ? ncvar->zvarid : ncdims[zdimid].ncvarid;
                   zsize  = (int)ncdims[zdimid].len;
                 }
             }
