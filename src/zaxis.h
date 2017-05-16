@@ -21,6 +21,7 @@ typedef struct {
   zkey_double_t p0value;
   double  *vals;
   char   **cvals;
+  int      clength;
   double  *lbounds;
   double  *ubounds;
   double  *weights;
@@ -63,6 +64,7 @@ const resOps *getZaxisOps(void);
 const char *zaxisInqNamePtr(int zaxisID);
 
 const double *zaxisInqLevelsPtr(int zaxisID);
+char **zaxisInqCLevelsPtr(int zaxisID);
 
 void zaxisResize(int zaxisID, int size);
 
