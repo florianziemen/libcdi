@@ -4,7 +4,7 @@
 #  autoconf 2.68
 #  libtool  2.4.2
 
-AC_INIT([cdi], [1.8.1], [http://mpimet.mpg.de/cdi])
+AC_INIT([cdi], [1.8.2], [http://mpimet.mpg.de/cdi])
 
 AC_DEFINE_UNQUOTED(CDI, ["$PACKAGE_VERSION"], [CDI version])
 
@@ -412,6 +412,7 @@ AC_CONFIG_FILES([tests/test_cksum_grib \
                  tests/pio_cksum_cdf \
                  tests/test_resource_copy_mpi_run \
                  tests/test_cdf_transformation \
+                 tests/test_cdf_const \
                  tables/gen_tableheaderfile \
                  util/serialrun],[chmod a+x "$ac_file"])
 

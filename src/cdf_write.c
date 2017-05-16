@@ -355,8 +355,8 @@ int cdfDefVar(stream_t *streamptr, int varID)
   int gridindex = nc_grid_index(streamptr, gridID);
   if ( gridtype != GRID_TRAJECTORY )
     {
-      xid = streamptr->ncgrid[gridindex].xdimID;
-      yid = streamptr->ncgrid[gridindex].ydimID;
+      xid = streamptr->ncgrid[gridindex].ncIDs[CDF_DIMID_X];
+      yid = streamptr->ncgrid[gridindex].ncIDs[CDF_DIMID_Y];
       if ( xid != CDI_UNDEFID ) cdf_inq_dimlen(fileID, xid, &xsize);
       if ( yid != CDI_UNDEFID ) cdf_inq_dimlen(fileID, yid, &ysize);
     }
@@ -570,7 +570,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
     }
 
   if ( gridtype != GRID_GENERIC && gridtype != GRID_LONLAT && gridtype != GRID_GAUSSIAN &&
-       gridtype != GRID_PROJECTION && gridtype != GRID_CURVILINEAR )
+       gridtype != GRID_PROJECTION && gridtype != GRID_CURVILINEAR && gridtype != GRID_CHARXY )
     {
       size_t len = strlen(gridNamePtr(gridtype));
       if ( len > 0 )
@@ -589,8 +589,8 @@ int cdfDefVar(stream_t *streamptr, int varID)
     }
   else if ( gridtype == GRID_LONLAT && xid == CDI_UNDEFID && yid == CDI_UNDEFID && gridsize == 1 )
     {
-      int ncxvarID = streamptr->ncgrid[gridindex].xvarID;
-      int ncyvarID = streamptr->ncgrid[gridindex].yvarID;
+      int ncxvarID = streamptr->ncgrid[gridindex].ncIDs[CDF_VARID_X];
+      int ncyvarID = streamptr->ncgrid[gridindex].ncIDs[CDF_VARID_Y];
       if ( ncyvarID != CDI_UNDEFID )
         {
           size_t len = strlen(coordinates);
@@ -607,20 +607,39 @@ int cdfDefVar(stream_t *streamptr, int varID)
   else if ( gridtype == GRID_UNSTRUCTURED || gridtype == GRID_CURVILINEAR )
     {
       char cellarea[CDI_MAX_NAME] = "area: ";
-      int ncxvarID = streamptr->ncgrid[gridindex].xvarID;
-      int ncyvarID = streamptr->ncgrid[gridindex].yvarID;
-      int ncavarID = streamptr->ncgrid[gridindex].avarID;
-      if ( ncyvarID != CDI_UNDEFID )
+      int ncxvarID = streamptr->ncgrid[gridindex].ncIDs[CDF_VARID_X];
+      int ncyvarID = streamptr->ncgrid[gridindex].ncIDs[CDF_VARID_Y];
+      int ncavarID = streamptr->ncgrid[gridindex].ncIDs[CDF_VARID_A];
+      // CMOR order: coordinates = "lat lon"
+      if ( cdiCoordinatesLonLat )
         {
-          size_t len = strlen(coordinates);
-          if ( len ) coordinates[len++] = ' ';
-          cdf_inq_varname(fileID, ncyvarID, coordinates+len);
+          if ( ncxvarID != CDI_UNDEFID )
+            {
+              size_t len = strlen(coordinates);
+              if ( len ) coordinates[len++] = ' ';
+              cdf_inq_varname(fileID, ncxvarID, coordinates+len);
+            }
+          if ( ncyvarID != CDI_UNDEFID )
+            {
+              size_t len = strlen(coordinates);
+              if ( len ) coordinates[len++] = ' ';
+              cdf_inq_varname(fileID, ncyvarID, coordinates+len);
+            }
         }
-      if ( ncxvarID != CDI_UNDEFID )
+      else
         {
-          size_t len = strlen(coordinates);
-          if ( len ) coordinates[len++] = ' ';
-          cdf_inq_varname(fileID, ncxvarID, coordinates+len);
+          if ( ncyvarID != CDI_UNDEFID )
+            {
+              size_t len = strlen(coordinates);
+              if ( len ) coordinates[len++] = ' ';
+              cdf_inq_varname(fileID, ncyvarID, coordinates+len);
+            }
+          if ( ncxvarID != CDI_UNDEFID )
+            {
+              size_t len = strlen(coordinates);
+              if ( len ) coordinates[len++] = ' ';
+              cdf_inq_varname(fileID, ncxvarID, coordinates+len);
+            }
         }
 
       if ( ncavarID != CDI_UNDEFID )
@@ -645,6 +664,23 @@ int cdfDefVar(stream_t *streamptr, int varID)
       axis[iax++] = '-';
       cdf_put_att_text(fileID, ncvarid, "axis", iax, axis);
       cdf_put_att_int(fileID, ncvarid, "truncation", NC_INT, 1, &gridTruncation);
+    }
+  else if ( gridtype == GRID_CHARXY )
+    {
+      if ( gridInqXIsc(gridID) )
+        {
+          int ncxvarID = streamptr->ncgrid[gridindex].ncIDs[CDF_VARID_X];
+          size_t len = strlen(coordinates);
+          if ( len ) coordinates[len++] = ' ';
+          cdf_inq_varname(fileID, ncxvarID, coordinates+len);
+        }
+      else if ( gridInqYIsc(gridID) )
+        {
+          int ncyvarID = streamptr->ncgrid[gridindex].ncIDs[CDF_VARID_Y];
+          size_t len = strlen(coordinates);
+          if ( len ) coordinates[len++] = ' ';
+          cdf_inq_varname(fileID, ncyvarID, coordinates+len);
+        }
     }
 
   size_t len = strlen(coordinates);
@@ -754,8 +790,8 @@ static
 void cdfWriteGridTraj(stream_t *streamptr, int gridID)
 {
   int gridindex = nc_grid_index(streamptr, gridID);
-  int lonID = streamptr->ncgrid[gridindex].xdimID;
-  int latID = streamptr->ncgrid[gridindex].ydimID;
+  int lonID = streamptr->ncgrid[gridindex].ncIDs[CDF_DIMID_X];
+  int latID = streamptr->ncgrid[gridindex].ncIDs[CDF_DIMID_Y];
 
   double xlon = gridInqXval(gridID, 0);
   double xlat = gridInqYval(gridID, 0);
@@ -980,8 +1016,8 @@ void cdf_write_var(stream_t *streamptr, int varID, int memtype, const void *data
   else
     {
       int gridindex = nc_grid_index(streamptr, gridID);
-      xid = streamptr->ncgrid[gridindex].xdimID;
-      yid = streamptr->ncgrid[gridindex].ydimID;
+      xid = streamptr->ncgrid[gridindex].ncIDs[CDF_DIMID_X];
+      yid = streamptr->ncgrid[gridindex].ncIDs[CDF_DIMID_Y];
     }
 
   int zaxisindex = vlistZaxisIndex(vlistID, zaxisID);
@@ -1077,8 +1113,8 @@ void cdf_write_var_chunk(stream_t *streamptr, int varID, int memtype,
   else
     {
       int gridindex = nc_grid_index(streamptr, gridID);
-      xid = streamptr->ncgrid[gridindex].xdimID;
-      yid = streamptr->ncgrid[gridindex].ydimID;
+      xid = streamptr->ncgrid[gridindex].ncIDs[CDF_DIMID_X];
+      yid = streamptr->ncgrid[gridindex].ncIDs[CDF_DIMID_Y];
     }
 
   int zaxisindex = vlistZaxisIndex(vlistID, zaxisID);
@@ -1175,8 +1211,8 @@ void cdf_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
   else
     {
       int gridindex = nc_grid_index(streamptr, gridID);
-      xid = streamptr->ncgrid[gridindex].xdimID;
-      yid = streamptr->ncgrid[gridindex].ydimID;
+      xid = streamptr->ncgrid[gridindex].ncIDs[CDF_DIMID_X];
+      yid = streamptr->ncgrid[gridindex].ncIDs[CDF_DIMID_Y];
     }
 
   int zaxisindex = vlistZaxisIndex(vlistID, zaxisID);

@@ -500,7 +500,7 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
       grib_get_double(gh, "Latin1InDegrees", &lat_1);
       grib_get_double(gh, "Latin2InDegrees", &lat_2);
       grib_get_long(gh, "projectionCentreFlag", &projflag);
-      bool lsouth = gribbyte_get_bit(projflag, 1);
+      bool lsouth = gribbyte_get_bit((int)projflag, 1);
       if ( lsouth ) { lat_1 = -lat_1; lat_2 = -lat_2; }
 
       double lat_0 = lat_2;
@@ -723,10 +723,26 @@ void ensureBufferSize(size_t requiredSize, size_t *curSize, void **buffer)
 static
 grib_handle *gribapiGetDiskRepresentation(size_t recsize, size_t *buffersize, void **gribbuffer, int *outDatatype, int *outCompressionType, size_t *outUnzipsize)
 {
-  bool lieee = false;
+  int gribversion = (int)((char*)*gribbuffer)[7];
+
+  if ( gribversion <= 1 )
+    {
+      if ( gribGetZip(recsize, *gribbuffer, outUnzipsize) > 0 )
+        {
+          *outCompressionType = CDI_COMPRESS_SZIP;
+          ensureBufferSize(*outUnzipsize + 100, buffersize, gribbuffer);
+        }
+      else
+        {
+          *outCompressionType = CDI_COMPRESS_NONE;
+        }
+    }
 
   grib_handle *gh = grib_handle_new_from_message(NULL, *gribbuffer, recsize);
-  if(gribEditionNumber(gh) > 1)
+
+  bool lieee = false;
+
+  if ( gribversion > 1 )
     {
       size_t len = 256;
       char typeOfPacking[256];
@@ -737,18 +753,6 @@ grib_handle *gribapiGetDiskRepresentation(size_t recsize, size_t *buffersize, vo
           if      ( strncmp(typeOfPacking, "grid_jpeg", len) == 0 ) *outCompressionType = CDI_COMPRESS_JPEG;
           else if ( strncmp(typeOfPacking, "grid_ccsds", len) == 0 ) *outCompressionType = CDI_COMPRESS_SZIP;
           else if ( strncmp(typeOfPacking, "grid_ieee", len) == 0 ) lieee = true;
-        }
-    }
-  else
-    {
-      if( gribGetZip(recsize, *gribbuffer, outUnzipsize) > 0 )
-        {
-          *outCompressionType = CDI_COMPRESS_SZIP;
-          ensureBufferSize(*outUnzipsize + 100, buffersize, gribbuffer);
-        }
-      else
-        {
-          *outCompressionType = CDI_COMPRESS_NONE;
         }
     }
 
@@ -768,6 +772,7 @@ grib_handle *gribapiGetDiskRepresentation(size_t recsize, size_t *buffersize, vo
           if ( bitsPerValue > 0 && bitsPerValue <= 32 ) *outDatatype = (int)bitsPerValue;
         }
     }
+
   return gh;
 }
 
@@ -1722,25 +1727,10 @@ int gribapiDefSteptype(int editionNumber, grib_handle *gh, int productDefinition
   size_t len = 64;
   const char *stepType;
 
-  static struct {
-    long productionTemplate;
-    const char sname[8];
-  } ts_tab[] = {
-    [TSTEP_INSTANT] = {  0, "instant" },
-    [TSTEP_AVG] = { 8, "avg" },
-    [TSTEP_ACCUM] = {  8, "accum" },
-    [TSTEP_MAX] = {  8, "max" },
-    [TSTEP_MIN] = {  8, "min" },
-    [TSTEP_DIFF] = {  8, "diff" },
-    [TSTEP_RMS] = {  8, "rms" },
-    [TSTEP_SD] = {  8, "sd" },
-    [TSTEP_COV] = { 8, "cov" },
-    [TSTEP_RATIO] = {  8, "ratio" }
-  };
   if (tsteptype >= TSTEP_INSTANT && tsteptype <= TSTEP_RATIO)
     {
-      stepType = ts_tab[tsteptype].sname;
-      proDefTempNum = ts_tab[tsteptype].productionTemplate;
+      stepType = cdiGribAPI_ts_str_map[tsteptype].sname;
+      proDefTempNum = cdiGribAPI_ts_str_map[tsteptype].productionTemplate;
     }
   else
     {
@@ -2146,7 +2136,7 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 
         double lon_0, lat_0, lat_1, lat_2, a, rf, xval_0, yval_0, x_0, y_0;
 	gridInqParamLCC(gridID, grid_missval, &lon_0, &lat_0, &lat_1, &lat_2, &a, &rf, &xval_0, &yval_0, &x_0, &y_0);
-	gridVerifyGribParamLCC(gridID, grid_missval, &lon_0, &lat_0, &lat_1, &lat_2, &a, &rf, &xval_0, &yval_0, &x_0, &y_0);
+	gridVerifyGribParamLCC(grid_missval, &lon_0, &lat_0, &lat_1, &lat_2, &a, &rf, &xval_0, &yval_0, &x_0, &y_0);
         if ( xval_0 < 0 ) xval_0 += 360;
         bool lsouth = (lat_1 < 0);
         if ( lsouth ) { lat_1 = -lat_2; lat_2 = -lat_2; }

@@ -892,11 +892,8 @@ void streamDefaultValue ( stream_t * streamptr )
   for ( int i = 0; i < MAX_GRIDS_PS; i++ )
     {
       streamptr->ncgrid[i].gridID = CDI_UNDEFID;
-      streamptr->ncgrid[i].xdimID = CDI_UNDEFID;
-      streamptr->ncgrid[i].ydimID = CDI_UNDEFID;
-      streamptr->ncgrid[i].xvarID = CDI_UNDEFID;
-      streamptr->ncgrid[i].yvarID = CDI_UNDEFID;
-      streamptr->ncgrid[i].avarID = CDI_UNDEFID;
+      for (size_t j = 0; j < CDF_SIZE_ncIDs; ++j)
+        streamptr->ncgrid[i].ncIDs[j] = CDI_UNDEFID;
     }
 
   streamptr->vct.ilev          = 0;
@@ -1607,6 +1604,9 @@ void cdiStreamSetupVlist_(stream_t *streamptr, int vlistID)
       case CDI_FILETYPE_NC4:
       case CDI_FILETYPE_NC4C:
         {
+          /* calls cdfDefVars in serial mode but
+           * cdiPioClientStreamNOP (i.e. nothing) on client ranks
+           * and cdiPioServerCdfDefVars on server ranks in parallel mode*/
           void (*myCdfDefVars)(stream_t *streamptr)
             = (void (*)(stream_t *)) namespaceSwitchGet(NSSWITCH_CDF_STREAM_SETUP).func;
           myCdfDefVars(streamptr);

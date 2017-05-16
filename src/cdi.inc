@@ -4,7 +4,7 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   April 2017
+! Uwe Schulzweida, MPI-MET, Hamburg,   May 2017
 !
 
       INTEGER    CDI_MAX_NAME
@@ -47,6 +47,8 @@
       PARAMETER (CDI_EUFSTRUCT          = -23)
       INTEGER    CDI_EUNC4
       PARAMETER (CDI_EUNC4              = -24)
+      INTEGER    CDI_EDIMSIZE
+      PARAMETER (CDI_EDIMSIZE           = -25)
       INTEGER    CDI_ELIMIT
       PARAMETER (CDI_ELIMIT             = -99)
 !
@@ -269,6 +271,8 @@
       PARAMETER (GRID_LCC               = 11)
       INTEGER    GRID_PROJECTION
       PARAMETER (GRID_PROJECTION        = 12)
+      INTEGER    GRID_CHARXY
+      PARAMETER (GRID_CHARXY            = 13)
       INTEGER    CDI_PROJ_RLL
       PARAMETER (CDI_PROJ_RLL           = 21)
       INTEGER    CDI_PROJ_LCC
@@ -332,6 +336,8 @@
       PARAMETER (ZAXIS_MIX_LAYER        = 24)
       INTEGER    ZAXIS_REFERENCE
       PARAMETER (ZAXIS_REFERENCE        = 25)
+      INTEGER    ZAXIS_CHAR
+      PARAMETER (ZAXIS_CHAR             = 26)
 !
 !  SUBTYPE types
 !
@@ -1576,6 +1582,10 @@
 !                                     DOUBLEPRECISION xvals(*))
       EXTERNAL        gridInqXvals
 
+      INTEGER         gridInqXIsc
+!                                    (INTEGER         gridID)
+      EXTERNAL        gridInqXIsc
+
 !                     gridDefYvals
 !                                    (INTEGER         gridID,
 !                                     DOUBLEPRECISION yvals(*))
@@ -1585,6 +1595,10 @@
 !                                    (INTEGER         gridID,
 !                                     DOUBLEPRECISION yvals(*))
       EXTERNAL        gridInqYvals
+
+      INTEGER         gridInqYIsc
+!                                    (INTEGER         gridID)
+      EXTERNAL        gridInqYIsc
 
 !
 !  CDI grid string key values

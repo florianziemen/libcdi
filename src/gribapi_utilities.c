@@ -349,6 +349,21 @@ int gribapiTimeIsFC(grib_handle *gh)
   return sigofrtime != 3;
 }
 
+struct cdiGribAPI_ts_str_map_elem cdiGribAPI_ts_str_map[] = {
+  [TSTEP_INSTANT] = {  0, "instant" },
+  [TSTEP_AVG] = { 8, "avg" },
+  [TSTEP_ACCUM] = {  8, "accum" },
+  [TSTEP_MAX] = {  8, "max" },
+  [TSTEP_MIN] = {  8, "min" },
+  [TSTEP_DIFF] = {  8, "diff" },
+  [TSTEP_RMS] = {  8, "rms" },
+  [TSTEP_SD] = {  8, "sd" },
+  [TSTEP_COV] = { 8, "cov" },
+  [TSTEP_RATIO] = {  8, "ratio" },
+  { 0, "" }
+};
+
+
 //Fetches the value of the "stepType" key and converts it into a constant in the TSTEP_* range.
 int gribapiGetTsteptype(grib_handle *gh)
 {
@@ -364,22 +379,18 @@ int gribapiGetTsteptype(grib_handle *gh)
       status = grib_get_string(gh, "stepType", stepType, &len);
       if ( status == 0 && len > 1 && len < 256 )
         {
-          if      ( strncmp("instant", stepType, len) == 0 ) tsteptype = TSTEP_INSTANT;
-          else if ( strncmp("avg",     stepType, len) == 0 ) tsteptype = TSTEP_AVG;
-          else if ( strncmp("accum",   stepType, len) == 0 ) tsteptype = TSTEP_ACCUM;
-          else if ( strncmp("max",     stepType, len) == 0 ) tsteptype = TSTEP_MAX;
-          else if ( strncmp("min",     stepType, len) == 0 ) tsteptype = TSTEP_MIN;
-          else if ( strncmp("diff",    stepType, len) == 0 ) tsteptype = TSTEP_DIFF;
-          else if ( strncmp("rms",     stepType, len) == 0 ) tsteptype = TSTEP_RMS;
-          else if ( strncmp("sd",      stepType, len) == 0 ) tsteptype = TSTEP_SD;
-          else if ( strncmp("cov",     stepType, len) == 0 ) tsteptype = TSTEP_COV;
-          else if ( strncmp("ratio",   stepType, len) == 0 ) tsteptype = TSTEP_RATIO;
-          else if ( lprint )
+          for (int i = TSTEP_INSTANT; cdiGribAPI_ts_str_map[i].sname[0]; ++i)
+            if ( strncmp(cdiGribAPI_ts_str_map[i].sname, stepType, len) == 0 )
+              {
+                tsteptype = i;
+                goto tsteptypeFound;
+              }
+
+          if ( lprint )
             {
               Message("Time stepType %s unsupported, set to instant!", stepType);
               lprint = false;
             }
-
           // printf("stepType: %s %ld %d\n", stepType, len, tsteptype);
         }
 #ifdef HIRLAM_EXTENSIONS
@@ -425,7 +436,7 @@ int gribapiGetTsteptype(grib_handle *gh)
       }
 #endif // HIRLAM_EXTENSIONS
     }
-
+  tsteptypeFound:
   return tsteptype;
 }
 

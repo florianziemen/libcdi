@@ -217,13 +217,17 @@ typedef struct {
 VCT;
 
 #ifdef HAVE_LIBNETCDF
+enum {
+  CDF_DIMID_X,
+  CDF_DIMID_Y,
+  CDF_VARID_X,
+  CDF_VARID_Y,
+  CDF_VARID_A,
+  CDF_SIZE_ncIDs,
+};
 typedef struct {
   int gridID;
-  int xdimID;
-  int ydimID;
-  int xvarID;
-  int yvarID;
-  int avarID;
+  int ncIDs[CDF_SIZE_ncIDs];
 }
 ncgrid_t;
 #endif
@@ -330,6 +334,7 @@ extern int cdiSortName;
 extern int cdiSortParam;
 extern int cdiHaveMissval;
 extern int cdiIgnoreAttCoordinates;
+extern int cdiCoordinatesLonLat;
 extern int cdiIgnoreValidRange;
 extern int cdiSkipRecords;
 extern int cdiConvention;

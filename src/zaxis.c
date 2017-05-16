@@ -57,6 +57,7 @@ ZaxistypeEntry[] = {
   { /* 23 */ 0, "sedimentbottomtw",  "sediment_bottom_tw",     "",               ""},
   { /* 24 */ 0, "mixlayer",          "mix_layer",              "",               ""},
   { /* 25 */ 0, "height",            "generalized_height",     "height",         ""},
+  { /* 26 */ 0, "character",         "area_type",              "",               ""},
 };
 
 enum {
@@ -127,6 +128,7 @@ void zaxis_init(zaxis_t *zaxisptr)
   zaxisptr->p0name[0]     = 0;
   zaxisptr->p0value.defined = false;
   zaxisptr->vals          = NULL;
+  zaxisptr->cvals         = NULL;
   zaxisptr->ubounds       = NULL;
   zaxisptr->lbounds       = NULL;
   zaxisptr->weights       = NULL;
@@ -271,6 +273,7 @@ void zaxisDestroyKernel( zaxis_t * zaxisptr )
   int id = zaxisptr->self;
 
   if ( zaxisptr->vals )    Free( zaxisptr->vals );
+  if ( zaxisptr->cvals )   Free( zaxisptr->cvals );
   if ( zaxisptr->lbounds ) Free( zaxisptr->lbounds );
   if ( zaxisptr->ubounds ) Free( zaxisptr->ubounds );
   if ( zaxisptr->weights ) Free( zaxisptr->weights );
@@ -768,6 +771,25 @@ void zaxisDefLevels(int zaxisID, const double *levels)
 
       for ( size_t ilev = 0; ilev < size; ++ilev )
         vals[ilev] = levels[ilev];
+
+      reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
+    }
+}
+
+
+void zaxisDefCvals(int zaxisID, const char **cvals)
+{
+  zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
+  size_t size = (size_t)zaxisptr->size;
+
+  if ( cvals )
+    {
+      if ( zaxisptr->cvals != NULL )
+        zaxisptr->cvals = NULL;
+      zaxisptr->cvals = (char**) Malloc(size*sizeof(char *));
+
+      for ( size_t ilev = 0; ilev < size; ++ilev )
+        zaxisptr->cvals[ilev] = strdup(cvals[ilev]);
 
       reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
     }
@@ -1364,6 +1386,21 @@ void zaxisPrintKernel(zaxis_t *zaxisptr, FILE *fp)
               nbyte = nbyte0;
             }
           nbyte += fprintf(fp, "%.*g ", dig, zaxisptr->vals[levelID]);
+        }
+      fprintf(fp, "\n");
+    }
+
+  if ( zaxisptr->cvals )
+    {
+      dig = prec;
+      nbyte0 = fprintf(fp, "types     = ");
+      nbyte = nbyte0;
+      for ( int levelID = 0; levelID < nlevels; levelID++ )
+        {
+          fprintf(fp, "\n");
+          fprintf(fp, "%*s", nbyte0, "");
+          nbyte = nbyte0;
+          nbyte += fprintf(fp, "%.*s [%d]", dig, zaxisptr->cvals[levelID], levelID+1);
         }
       fprintf(fp, "\n");
     }

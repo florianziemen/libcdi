@@ -40,6 +40,7 @@ extern "C" {
 #define  CDI_ELIBNAVAIL           -22   // xxx library not available
 #define  CDI_EUFSTRUCT            -23   // Unsupported file structure
 #define  CDI_EUNC4                -24   // Unsupported NetCDF4 structure
+#define  CDI_EDIMSIZE             -25   // Invalid dimension size
 #define  CDI_ELIMIT               -99   // Internal limits exceeded
 
 /* File types */
@@ -162,6 +163,7 @@ extern "C" {
 #define  GRID_CURVILINEAR          10  /* Curvilinear grid                                      */
 #define  GRID_LCC                  11  /* Lambert Conformal Conic (GRIB)                        */
 #define  GRID_PROJECTION           12  /* Projected coordinates                                 */
+#define  GRID_CHARXY               13  /* One horizontal character dimension                    */
 
 #define  CDI_PROJ_RLL              21  /* Rotated Latitude Longitude                            */
 #define  CDI_PROJ_LCC              22  /* Lambert Conformal Conic                               */
@@ -196,6 +198,7 @@ extern "C" {
 #define  ZAXIS_SEDIMENT_BOTTOM_TW  23  /* Bottom Of Sediment Layer Penetrated By Thermal Wave   */
 #define  ZAXIS_MIX_LAYER           24  /* Mixing Layer                                          */
 #define  ZAXIS_REFERENCE           25  /* zaxis reference number                                */
+#define  ZAXIS_CHAR                26  /* Area types                                            */
 
 /* SUBTYPE types */
 
@@ -787,11 +790,23 @@ void    gridDefXvals(int gridID, const double xvals[]);
 /*      gridInqXvals: Get all values of a X-axis */
 int     gridInqXvals(int gridID, double xvals[]);
 
+/*      gridInqXIsc: Find out whether X-coordinate is of type CHAR */
+int     gridInqXIsc(int gridID);
+
+/*      gridInqXCvals: Get strings from X-axis in case grid is of type GRID_CHARXY */
+int     gridInqXCvals(int gridID, char *xcvals[]);
+
 /*      gridDefYvals: Define the values of a Y-axis */
 void    gridDefYvals(int gridID, const double yvals[]);
 
 /*      gridInqYvals: Get all values of a Y-axis */
 int     gridInqYvals(int gridID, double yvals[]);
+
+/*      gridInqYIsc: Find out whether Y-coordinate is of type CHAR */
+int     gridInqYIsc(int gridID);
+
+/*      gridInqYCvals: Get strings from Y-axis in case grid is of type GRID_CHARXY */
+int     gridInqYCvals(int gridID, char *ycvals[]);
 
 /* CDI grid string key values */
 #define  CDI_KEY_XNAME       901  // X-axis name
@@ -994,6 +1009,9 @@ void    zaxisPrint(int zaxisID);
 
 /*      zaxisDefLevels: Define the levels of a Z-axis */
 void    zaxisDefLevels(int zaxisID, const double levels[]);
+
+/*      zaxisDefCvals: Define area types of a Z-axis */
+void    zaxisDefCvals(int zaxisID, const char *cvals[]);
 
 /*      zaxisInqLevels: Get all levels of a Z-axis */
 int     zaxisInqLevels(int zaxisID, double levels[]);

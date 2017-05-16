@@ -33,6 +33,7 @@ int cdiChunkType       = CDI_CHUNK_GRID;
 int cdiSplitLtype105   = CDI_UNDEFID;
 
 int cdiIgnoreAttCoordinates = FALSE;
+int cdiCoordinatesLonLat    = FALSE;
 int cdiIgnoreValidRange     = FALSE;
 int cdiSkipRecords          = 0;
 int cdiConvention           = CDI_CONVENTION_ECHAM;
@@ -370,6 +371,9 @@ void cdiInitialize(void)
 
       envstr = getenv("IGNORE_ATT_COORDINATES");
       if ( envstr ) cdiIgnoreAttCoordinates = atoi(envstr);
+
+      envstr = getenv("CDI_COORDINATES_LONLAT");
+      if ( envstr ) cdiCoordinatesLonLat = atoi(envstr);
 
       envstr = getenv("IGNORE_VALID_RANGE");
       if ( envstr ) cdiIgnoreValidRange = atoi(envstr);

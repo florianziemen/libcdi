@@ -11,7 +11,7 @@ TESTS = cksum_verify \
 	pio_cksum_mpi_fw_at_all \
 	pio_cksum_mpi_fw_at_reblock \
 	test_resource_copy pio_write_deco2d_run \
-	test_f2003 test_cdf_transformation \
+	test_f2003 test_cdf_transformation test_cdf_const \
 	test_table test_byteswap
 
 check_PROGRAMS = cksum_verify test_grib cksum_write cksum_read pio_write \
