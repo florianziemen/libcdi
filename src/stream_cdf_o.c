@@ -1460,6 +1460,7 @@ void cdfDefZaxisChar(stream_t *streamptr, int zaxisID, char *axisname, int *dimI
       cdfDefineAttributes(zaxisID, CDI_GLOBAL, fileID, ncvarID);
 
       streamptr->nczvarID[zaxisindex] = ncvarID;
+      cdf_enddef(fileID);
 
 /* Write Stringvalues */
       int status = 0;
@@ -1474,7 +1475,6 @@ void cdfDefZaxisChar(stream_t *streamptr, int zaxisID, char *axisname, int *dimI
         }
 
     }
-  cdf_enddef(fileID);
   streamptr->ncmode = 2;
 }
 
