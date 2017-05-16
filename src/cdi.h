@@ -1011,10 +1011,16 @@ void    zaxisPrint(int zaxisID);
 void    zaxisDefLevels(int zaxisID, const double levels[]);
 
 /*      zaxisDefCvals: Define area types of a Z-axis */
-void    zaxisDefCvals(int zaxisID, const char *cvals[]);
+void    zaxisDefCvals(int zaxisID, const char *cvals[], size_t clength);
 
 /*      zaxisInqLevels: Get all levels of a Z-axis */
 int     zaxisInqLevels(int zaxisID, double levels[]);
+
+/*      zaxisInqCLen: Get maximal string length of character Z-axis */
+int     zaxisInqCLen(int zaxisID);
+
+/*      zaxisInqCLevels: Get all string values of a character Z-axis */
+int     zaxisInqCLevels(int zaxisID, char ***clevels);
 
 /*      zaxisDefLevel: Define one level of a Z-axis */
 void    zaxisDefLevel(int zaxisID, int levelID, double levels);

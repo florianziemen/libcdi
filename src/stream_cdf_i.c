@@ -2853,6 +2853,7 @@ int cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int 
 
 	  double *zvar = NULL;
           char **zcvals = NULL;
+          size_t zclength = 0;
 
 	  int zaxisType = CDI_UNDEFID;
 	  if ( zvarid != CDI_UNDEFID ) zaxisType = ncvars[zvarid].zaxistype;
@@ -2880,8 +2881,8 @@ int cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int 
                   if ( ncvars[zvarid].ndims == 2 )
                     {
                       zprec = CDI_DATATYPE_UINT8;
-                      size_t strlength = ncdims[ncvars[zvarid].dimids[1]].len;
-                      cdf_load_cvals(zsize*strlength, zvarid, ncvar, &zcvals, zsize);
+                      zclength = ncdims[ncvars[zvarid].dimids[1]].len;
+                      cdf_load_cvals(zsize*zclength, zvarid, ncvar, &zcvals, zsize);
                     }
                 }
 
@@ -2946,7 +2947,7 @@ int cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int 
               return CDI_EDIMSIZE;
             }
 
-      	  ncvar->zaxisID = varDefZaxis(vlistID, zaxisType, (int) zsize, zvar, (const char **)zcvals, with_bounds, lbounds, ubounds,
+      	  ncvar->zaxisID = varDefZaxis(vlistID, zaxisType, (int) zsize, zvar, (const char **)zcvals, zclength, with_bounds, lbounds, ubounds,
                                        (int)vctsize, vct, pname, plongname, punits, zprec, 1, 0);
 
           int zaxisID = ncvar->zaxisID;

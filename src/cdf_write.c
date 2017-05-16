@@ -558,7 +558,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
 
   char coordinates[CDI_MAX_NAME]; coordinates[0] = 0;
 
-  if ( zaxis_is_scalar )
+  if ( zaxis_is_scalar || zaxisInqType(zaxisID) == ZAXIS_CHAR )
     {
       int nczvarID = streamptr->nczvarID[zaxisindex];
       if ( nczvarID != CDI_UNDEFID )
