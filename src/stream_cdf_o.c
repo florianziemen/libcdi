@@ -1435,8 +1435,8 @@ void cdfDefZaxisChar(stream_t *streamptr, int zaxisID, char *axisname, int *dimI
   char dimname[CDI_MAX_NAME+3]; dimname[0] = 0;
   cdiZaxisInqKeyStr(zaxisID, CDI_KEY_DIMNAME, CDI_MAX_NAME, dimname);
   *dimID = checkDimName(fileID, dimlen, dimname);
-  if ( !(dimlen > 1) )
-    Error("A character axis requires at least 2 strings.");
+  if ( !(dimlen > 0) )
+    Error("No strings delivered for a character axis.");
   if ( dimname[0] == 0 ) { memcpy(dimname, "area_type", 10); dimname[10] = 0; }
 
   if ( *dimID == CDI_UNDEFID ) cdf_def_dim(fileID, dimname, dimlen, dimID);
