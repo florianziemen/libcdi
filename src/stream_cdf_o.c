@@ -547,7 +547,7 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridindex, int ndims,
             }
           if ( pbounds )
             {
-              size_t nvertex = 2;
+              size_t nvertex = gridInqNvertex(gridID);
               if ( nc_inq_dimid(fileID, bndsName, &nvdimID) != NC_NOERR )
                 cdf_def_dim(fileID, bndsName, nvertex, &nvdimID);
             }
