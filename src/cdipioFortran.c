@@ -173,6 +173,9 @@ static int cdiPioDistGridCreate_fwrap(int gridtype, int size, int xsize, int ysi
   return v;
 }
 FCALLSCFUN9 (INT, cdiPioDistGridCreate_fwrap, CDIPIODISTGRIDCREATE, cdipiodistgridcreate, INT, INT, INT, INT, INT, INTVV, PVOID, PVOID, PVOID)
+FCALLSCSUB1 (cdiPioDistGridEnableIndividualQueries, CDIPIODISTGRIDENABLEINDIVIDUALQUERIES, cdipiodistgridenableindividualqueries, INT)
+FCALLSCSUB1 (cdiPioDistGridDisableIndividualQueries, CDIPIODISTGRIDDISABLEINDIVIDUALQUERIES, cdipiodistgriddisableindividualqueries, INT)
+FCALLSCFUN1 (LOGICAL, cdiPioDistGridIndividualQueriesEnabled, CDIPIODISTGRIDINDIVIDUALQUERIESENABLED, cdipiodistgridindividualqueriesenabled, INT)
 
 /*  End of fortran interface  */
 

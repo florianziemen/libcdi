@@ -290,6 +290,18 @@
 !                                     TYPE(XT_IDXLIST)partDescY)
       EXTERNAL        cdiPioDistGridCreate
 
+!                     cdiPioDistGridEnableIndividualQueries
+!                                    (INTEGER         gridID)
+      EXTERNAL        cdiPioDistGridEnableIndividualQueries
+
+!                     cdiPioDistGridDisableIndividualQueries
+!                                    (INTEGER         gridID)
+      EXTERNAL        cdiPioDistGridDisableIndividualQueries
+
+      LOGICAL         cdiPioDistGridIndividualQueriesEnabled
+!                                    (INTEGER         gridID)
+      EXTERNAL        cdiPioDistGridIndividualQueriesEnabled
+
 !
 !  End of fortran interface
 !
