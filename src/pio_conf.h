@@ -18,7 +18,7 @@ typedef Xt_xmap (*xmap_new_func_ptr)(Xt_idxlist src_idxlist,
                                      MPI_Comm comm);
 
 enum {
-  CDIPIO_NUM_CALLBACKS = 2,
+  CDIPIO_NUM_CALLBACKS = 3,
 };
 
 /*
