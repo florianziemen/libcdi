@@ -272,6 +272,48 @@ specify the part size of the y-dimension and chunk_decomposition[0][0] the x dim
 index. For unstructured grids only the x-dimension applies..
 
 
+\section*{\tt \htmlref{cdiPioDistGridDisableIndividualQueries}{cdiPioDistGridDisableIndividualQueries}}
+
+\begin{verbatim}
+    void cdiPioDistGridDisableIndividualQueries (int gridID);
+\end{verbatim}
+
+inverse of
+cdiPioDistGridEnableIndividualQueries, i.e. after calling this
+routine, inidividual grid queries must not be made for gridID.
+
+
+\section*{\tt \htmlref{cdiPioDistGridEnableIndividualQueries}{cdiPioDistGridEnableIndividualQueries}}
+
+\begin{verbatim}
+    void cdiPioDistGridEnableIndividualQueries (int gridID);
+\end{verbatim}
+
+for the provided gridID, the
+queries
+gridInqXval, gridInqYval, gridInqXinc, and gridInqYinc
+
+must not be called for a distributed grid before that has been
+enabled with this routine, also
+
+gridInqXvals, gridInqYvals, gridInqXbounds, gridInqYbounds,
+gridInqArea, gridInqMaskGME and gridInqMask
+
+can only be called collectively before this routine was
+called.
+
+
+\section*{\tt \htmlref{cdiPioDistGridIndividualQueriesEnabled}{cdiPioDistGridIndividualQueriesEnabled}}
+
+\begin{verbatim}
+    bool cdiPioDistGridIndividualQueriesEnabled (int gridID);
+\end{verbatim}
+
+determine if the inquiries
+listed for cdiPioDistGridEnableIndividualQueries can be issued for
+gridID.
+
+
 \section*{\tt \htmlref{cdiPioInit}{cdiPioInit}}
 
 \begin{verbatim}
