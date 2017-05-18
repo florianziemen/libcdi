@@ -107,7 +107,7 @@ static void doctotxt(FILE *fp, const Docu *doc, const size_t ndoc)
     }
 }
 
-enum cftype {ISVOID, ISCONSTSTRING, ISINT, ISREAL, ISDOUBLE, ISDATETYPE, ISSIZETYPE, ISMPI_COMM,
+enum cftype {ISVOID, ISCONSTSTRING, ISINT, ISLOGICAL, ISREAL, ISDOUBLE, ISDATETYPE, ISSIZETYPE, ISMPI_COMM,
              ISXT_IDXLIST, ISCHOICE, ISINTP, ISDATETYPEP, ISSIZETYPEP, ISFLOATV, ISFLOATVV,
              ISDOUBLEV, ISDOUBLEVV, ISINTV, ISINTVV, ISINTVVV, ISREALP,
              ISDOUBLEP, ISCBUF, ISUUID, ISUCHAR, ISSTRING, ISSTRINGP,
@@ -172,6 +172,8 @@ static struct symbol funArgSym[]
         "^"WS"*const"WS"+char"WS"+\\*"SYMRE WS"*\\(", 1, 0, 0 },
       { "INTEGER",         "INT",     "%sint %.*s",
         "^"WS"*(const"WS"+)?int("WS"+"SYMRE")?"WS"*[,\\)]", 3, 0, 0 },
+      { "LOGICAL",         "LOGICAL", "%bool %.*s",
+        "^"WS"*(const"WS"+)?bool("WS"+"SYMRE")?"WS"*[,\\)]", 3, 0, 0 },
       { "REAL",            "FLOAT",   "%sfloat %.*s",
         "^"WS"*(const"WS"+)?float"WS"+"SYMRE"?"WS"*[,\\)]", 2, 0, 0 },
       { "DOUBLEPRECISION", "DOUBLE",  "%sdouble %.*s",
@@ -247,6 +249,8 @@ static struct symbol funRet[] = {
     "char"WS"+\\*"WS"*"SYMRE WS"*\\(", 1, 0, 0 },
   { "INTEGER",         "INT",     "%sint %.*s",
     "(const"WS"+)?int"WS"+"SYMRE WS"*\\(", 2, 0, 0 },
+  { "LOGICAL",         "LOGICAL", "%sbool %.*s",
+    "(const"WS"+)?bool"WS"+"SYMRE WS"*\\(", 2, 0, 0 },
   { "REAL",            "FLOAT",   "%sfloat %.*s",
     "(const"WS"+)?float"WS"+"SYMRE WS"*\\(", 2, 0, 0 },
   { "DOUBLEPRECISION", "DOUBLE",  "%sdouble %.*s",
