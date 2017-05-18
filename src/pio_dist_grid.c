@@ -122,6 +122,7 @@ struct cdiPioDistGridExtraData
   struct PPM_dist_mult_array *distData;
   struct PPM_extent local_chunks[cdiPioGDsaNum*cdiPioGDsaMaxRank];
   struct PPM_global_array_desc sub_arrays[cdiPioGDsaNum];
+  bool rmaEnabled;
 };
 
 #endif
@@ -165,6 +166,69 @@ cdiPioDistGridCreate(int gridtype, int size, int xsize, int ysize, int nvertex,
   return CDI_UNDEFID;
 #endif
 }
+
+#ifdef HAVE_PPM_DIST_ARRAY_H
+static bool
+cdiPioDistGridSwitchSyncMode(int gridID, int mode)
+{
+  bool switched = false;
+  grid_t *gridptr = grid_to_pointer(gridID);
+  if (gridptr->vtable == &cdiPioDistGridVtable)
+    {
+      struct cdiPioDistGridExtraData *extraData
+        = (struct cdiPioDistGridExtraData *)gridptr->extraData;
+      PPM_dist_mult_array_set_sync_mode(extraData->distData,
+                                        (enum PPM_dma_sync_mode)mode, 0);
+      bool dataDefined = gridptr->x.vals || gridptr->y.vals
+        || gridptr->x.bounds || gridptr->y.bounds
+        || gridptr->area || gridptr->mask || gridptr->mask_gme;
+      if (dataDefined)
+        PPM_dist_mult_array_expose(extraData->distData);
+      extraData->rmaEnabled = mode == PPM_dma_sync_mode_passive_target;
+      switched = true;
+    }
+  return switched;
+}
+#endif
+
+
+void cdiPioDistGridEnableIndividualQueries(int gridID)
+{
+#ifdef HAVE_PPM_DIST_ARRAY_H
+  bool switched
+    = cdiPioDistGridSwitchSyncMode(gridID, PPM_dma_sync_mode_passive_target);
+#else
+  bool switched = false;
+#endif
+  if (!switched)
+    Error("called for non-distributed grid gridID=%d", gridID);
+}
+
+void cdiPioDistGridDisableIndividualQueries(int gridID)
+{
+#ifdef HAVE_PPM_DIST_ARRAY_H
+  bool switched
+    = cdiPioDistGridSwitchSyncMode(gridID, PPM_dma_sync_mode_local_only);
+#else
+  bool switched = false;
+#endif
+  if (!switched)
+    Error("called for non-distributed grid gridID=%d", gridID);
+}
+
+bool cdiPioDistGridIndividualQueriesEnabled(int gridID)
+{
+  bool enabled = true;
+#ifdef HAVE_PPM_DIST_ARRAY_H
+  grid_t *gridptr = grid_to_pointer(gridID);
+  if (gridptr->vtable == &cdiPioDistGridVtable)
+    enabled
+      = ((struct cdiPioDistGridExtraData *)gridptr->extraData)->rmaEnabled;
+#endif
+  return enabled;
+}
+
+
 
 #ifdef HAVE_PPM_DIST_ARRAY_H
 
@@ -407,6 +471,7 @@ cdiPioDistGridInit(grid_t *gridptr,
   struct cdiPioDistGridExtraData *extraData
     = (struct cdiPioDistGridExtraData *)(gridptr->extraData
                                          = Malloc(sizeof (*extraData)));
+  extraData->rmaEnabled = false;
   struct PPM_global_array_desc *sub_arrays = extraData->sub_arrays;
 
   sub_arrays[cdiPioGDsaXVals].element_dt = MPI_DOUBLE;
@@ -560,7 +625,7 @@ cdiPioDistGridInit(grid_t *gridptr,
       = PPM_dist_mult_array_new(cdiPioGDsaNum,
                                 sub_arrays, (struct PPM_extent *)local_chunks,
                                 cdiPioDistGridComm,
-                                0, PPM_dma_sync_mode_passive_target);
+                                0, PPM_dma_sync_mode_local_only);
   }
 
   extraData->partDesc[cdiPioGDdt2D] = xt_idxlist_copy(partDesc2D);
@@ -1027,6 +1092,8 @@ cdiPioDistGridInqYVal(grid_t *gridptr, int index)
                                   index);
 }
 
+/* todo: call collectively at definition of x values to facilitate
+ * query without remote data access */
 static double
 cdiPioDistGridInqXInc(grid_t *gridptr)
 {
@@ -1074,6 +1141,8 @@ cdiPioDistGridInqXInc(grid_t *gridptr)
   return xinc;
 }
 
+/* todo: call collectively at definition of x values to facilitate
+ * query without remote data access */
 static double
 cdiPioDistGridInqYInc(grid_t *gridptr)
 {

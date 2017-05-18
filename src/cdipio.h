@@ -292,4 +292,29 @@ int cdiPioDistGridCreate(int gridtype,
                          Xt_idxlist partDesc2D,
                          Xt_idxlist partDescX, Xt_idxlist partDescY);
 
+
+/* cdiPioDistGridEnableIndividualQueries: for the provided gridID, the
+ * queries
+ * gridInqXval, gridInqYval, gridInqXinc, and gridInqYinc
+ *
+ * must not be called for a distributed grid before that has been
+ * enabled with this routine, also
+ *
+ * gridInqXvals, gridInqYvals, gridInqXbounds, gridInqYbounds,
+ * gridInqArea, gridInqMaskGME and gridInqMask
+ *
+ * can only be called collectively before this routine was
+ * called */
+void cdiPioDistGridEnableIndividualQueries(int gridID);
+
+/* cdiPioDistGridDisableIndividualQueries: inverse of
+ * cdiPioDistGridEnableIndividualQueries, i.e. after calling this
+ * routine, inidividual grid queries must not be made for gridID */
+void cdiPioDistGridDisableIndividualQueries(int gridID);
+
+/* cdiPioDistGridIndividualQueriesEnabled: determine if the inquiries
+ * listed for cdiPioDistGridEnableIndividualQueries can be issued for
+ * gridID */
+bool cdiPioDistGridIndividualQueriesEnabled(int gridID);
+
 #endif
