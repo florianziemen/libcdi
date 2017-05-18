@@ -1258,7 +1258,7 @@ cdiPioDistGridPackAssist(void)
   cdiGridApply(cdiPioDistGridPackAssistFunc, NULL);
 }
 
-void
+int
 cdiPioDistGridUnpack(char *unpackBuffer, int unpackBufferSize, int *unpackBufferPos, int originNamespace, void *context,
                      int force_id)
 {
@@ -1268,6 +1268,7 @@ cdiPioDistGridUnpack(char *unpackBuffer, int unpackBufferSize, int *unpackBuffer
                                                      force_id, &memberMask);
   cdiPioDistGridVtable.unpackArrays(gridP, memberMask, unpackBuffer, unpackBufferSize, unpackBufferPos, originNamespace, context);
   reshSetStatus(gridP->self, NULL, reshGetStatus(gridP->self, NULL) & ~RESH_SYNC_BIT);
+  return gridP->self;
 }
 
 static void

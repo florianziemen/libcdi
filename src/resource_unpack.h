@@ -22,8 +22,8 @@ enum
 
 int reshUnpackResources(char *unpackBuffer, int unpackBufferSize, void *context);
 
-extern void (*reshDistGridUnpack)(char *unpackBuffer, int unpackBufferSize, int *unpackBufferPos, int originNamespace,
-                                  void *context, int force_id);
+extern int (*reshDistGridUnpack)(char *unpackBuffer, int unpackBufferSize, int *unpackBufferPos, int originNamespace, void *context,
+                                 int force_id);
 #endif
 
 /*

@@ -12,8 +12,8 @@
 #include "taxis.h"
 #include "zaxis.h"
 
-void (*reshDistGridUnpack)(char *unpackBuffer, int unpackBufferSize, int *unpackBufferPos, int originNamespace, void *context,
-                           int force_id);
+int (*reshDistGridUnpack)(char *unpackBuffer, int unpackBufferSize, int *unpackBufferPos, int originNamespace, void *context,
+                          int force_id);
 
 /*****************************************************************************/
 
