@@ -164,6 +164,10 @@ void (*cdiPioConfGetPostCommSetupActions(int confResH))(void);
  * BIND(C) on Fortran side
  */
 #define CDIPIO_CALLBACK_POSTSTREAMCLOSE 1
+/* CDIPIO_CALLBACK_POSTWRITEBATCH: trigger number for callback called
+ * on server side after the processing for all operations initiated by
+ * a client-side pioWriteTimestep have completed */
+#define CDIPIO_CALLBACK_POSTWRITEBATCH 2
 
 /* cdiPioConfSetCallBack: set function to be called at
  * indicated trigger of configuration object, action will be cast to

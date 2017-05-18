@@ -1928,6 +1928,7 @@ void cdiPioCollectorMessageLoop()
             xdebug("RECEIVED MESSAGE WITH TAG \"WRITETS\": source=%d",
                    source);
             getTimeStepData(streamActivity, conf);
+            conf->callbacks[CDIPIO_CALLBACK_POSTWRITEBATCH]();
           }
 	  break;
 

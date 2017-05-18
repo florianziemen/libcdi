@@ -179,6 +179,8 @@
       PARAMETER (CDIPIO_CALLBACK_POSTCOMMSETUP =  0)
       INTEGER    CDIPIO_CALLBACK_POSTSTREAMCLOSE
       PARAMETER (CDIPIO_CALLBACK_POSTSTREAMCLOSE =  1)
+      INTEGER    CDIPIO_CALLBACK_POSTWRITEBATCH
+      PARAMETER (CDIPIO_CALLBACK_POSTWRITEBATCH =  2)
 !                     cdiPioConfSetCallBackActions
 !                                    (INTEGER         confResH,
 !                                     INTEGER         trigger,
