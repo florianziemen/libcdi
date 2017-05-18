@@ -133,8 +133,8 @@ int      vlistHasTime(int vlistID);
 
 int      cdiDelAtts(int vlistID, int varID);
 
-void     vlistUnpack(char * buffer, int bufferSize, int * pos,
-                     int originNamespace, void *context, int force_id);
+int vlistUnpack(char * buffer, int bufferSize, int * pos,
+                int originNamespace, void *context, int force_id);
 
 /*      vlistDefVarValidrange: Define the valid range of a Variable */
 void    vlistDefVarValidrange(int vlistID, int varID, const double *validrange);

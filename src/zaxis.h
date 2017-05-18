@@ -51,7 +51,7 @@ zaxis_t *zaxis_to_pointer(int zaxisID);
 
 void cdiZaxisGetIndexList(unsigned numIDs, int *IDs);
 
-void
+int
 zaxisUnpack(char * unpackBuffer, int unpackBufferSize,
             int * unpackBufferPos, int originNamespace, void *context,
             int force_id);

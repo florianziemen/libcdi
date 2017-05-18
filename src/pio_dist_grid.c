@@ -1481,7 +1481,7 @@ cdiPioDistGridPackAssist(void)
 }
 
 
-void
+int
 cdiPioDistGridUnpack(char *unpackBuffer, int unpackBufferSize,
                      int *unpackBufferPos, int originNamespace, void *context,
                      int force_id)
@@ -1497,6 +1497,7 @@ cdiPioDistGridUnpack(char *unpackBuffer, int unpackBufferSize,
                                     originNamespace, context);
   reshSetStatus(gridP->self, NULL,
                 reshGetStatus(gridP->self, NULL) & ~RESH_SYNC_BIT);
+  return gridP->self;
 }
 
 

@@ -73,9 +73,9 @@ struct gridVirtTable
   int (*getPackSize)(grid_t *gridptr, void *context);
   int (*getPackSizeScalars)(grid_t *gridptr, void *context);
   int (*getPackSizeArrays)(grid_t *gridptr, void *context);
-  void (*unpack)(char * unpackBuffer, int unpackBufferSize,
-                 int * unpackBufferPos, int originNamespace, void *context,
-                 int force_id);
+  int (*unpack)(char * unpackBuffer, int unpackBufferSize,
+                int * unpackBufferPos, int originNamespace, void *context,
+                int force_id);
   grid_t *(*unpackScalars)(char * unpackBuffer, int unpackBufferSize,
                            int * unpackBufferPos, int originNamespace,
                            void *context, int force_id, int *memberMaskP);
@@ -190,7 +190,7 @@ int gridGenerate(const grid_t *grid);
 
 void cdiGridGetIndexList(unsigned, int * );
 
-void
+int
 gridUnpack(char * unpackBuffer, int unpackBufferSize,
            int * unpackBufferPos, int originNamespace, void *context,
            int force_id);
