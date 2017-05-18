@@ -1894,7 +1894,9 @@ void cdiPioCollectorMessageLoop()
             char *buffer = Malloc((size_t)size);
             xmpi(MPI_Recv(buffer, size, MPI_PACKED, source,
                           tag, pioInterComm, &status));
-            int pos = reshUnpackResources(buffer, size, &pioInterComm);
+            int pos
+              = reshUnpackResources(buffer, size, &pioInterComm,
+                                    (cdiPostResUpdateHook)0);
             switch (tag)
               {
               case STREAMOPEN:
