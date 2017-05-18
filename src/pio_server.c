@@ -1635,6 +1635,7 @@ cdiPioCollectorMessageLoop()
             xmpi(MPI_Recv(streamActivity, (int) openStreams.size, MPI_INT, source, tag, pioInterComm, &status));
             xdebug("RECEIVED MESSAGE WITH TAG \"WRITETS\": source=%d", source);
             getTimeStepData(streamActivity, conf);
+            conf->callbacks[CDIPIO_CALLBACK_POSTWRITEBATCH]();
           }
           break;
 
