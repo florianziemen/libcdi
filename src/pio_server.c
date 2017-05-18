@@ -1501,7 +1501,6 @@ getTimeStepData(int *streamActivity, const struct cdiPioConf *conf)
     if (streamActivity[streamIdx])
       {
         clearModelWinBuffer(streamIdx);
-        // todo put in correct lbs and ubs
         xmpi(MPI_Win_start(clientGroup, 0, rxWin[streamIdx].getWin));
         /* FIXME: this needs to use MPI_PACKED for portability */
         for (size_t i = 0; i < (size_t)numClients_; ++i)
