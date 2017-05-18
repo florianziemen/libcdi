@@ -1472,10 +1472,18 @@ void clearModelWinBuffer(size_t streamIdx)
 {
   xassert(streamIdx < openStreams.size &&
           rxWin != NULL && rxWin[streamIdx].clientBuf[0].mem != NULL);
-  size_t bufSizeTotal = (size_t)(rxWin[streamIdx].clientBuf[numClients_ - 1].mem
-                                 - rxWin[streamIdx].clientBuf[0].mem)
+  size_t clearSize;
+#if 0
+  /* for debugging purposes it might be smart to set the whole buffer
+   * to 0 */
+  clearSize = (size_t)(rxWin[streamIdx].clientBuf[numClients_ - 1].mem
+                          - rxWin[streamIdx].clientBuf[0].mem)
     + rxWin[streamIdx].clientBuf[numClients_ - 1].size;
-  memset(rxWin[streamIdx].clientBuf[0].mem, 0, bufSizeTotal);
+#else
+  /* but normally, setting the first header record to zero will suffice */
+  clearSize = sizeof (struct winHeaderEntry);
+#endif
+  memset(rxWin[streamIdx].clientBuf[0].mem, 0, clearSize);
 }
 
 
