@@ -22,7 +22,7 @@ enum
 int reshUnpackResources(char * unpackBuffer, int unpackBufferSize,
                         void *context);
 
-extern void
+extern int
 (*reshDistGridUnpack)(char *unpackBuffer, int unpackBufferSize,
                       int *unpackBufferPos, int originNamespace, void *context,
                       int force_id);
