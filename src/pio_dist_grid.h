@@ -8,8 +8,8 @@
 #ifdef HAVE_PPM_DIST_ARRAY_H
 void cdiPioDistGridPackAssist(void);
 
-void cdiPioDistGridUnpack(char *unpackBuffer, int unpackBufferSize, int *unpackBufferPos, int originNamespace, void *context,
-                          int force_id);
+int cdiPioDistGridUnpack(char *unpackBuffer, int unpackBufferSize, int *unpackBufferPos, int originNamespace, void *context,
+                         int force_id);
 
 void cdiPioDistGridFinalizeOnce(int namespace);
 
