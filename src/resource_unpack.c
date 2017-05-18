@@ -18,7 +18,7 @@ int (*reshDistGridUnpack)(char *unpackBuffer, int unpackBufferSize, int *unpackB
 /*****************************************************************************/
 
 int
-reshUnpackResources(char *unpackBuffer, int unpackBufferSize, void *context)
+reshUnpackResources(char *unpackBuffer, int unpackBufferSize, void *context, cdiPostResUpdateHook postHook)
 {
   int updateType, resH, originNamespace;
   int unpackBufferPos = 0;
@@ -35,29 +35,41 @@ reshUnpackResources(char *unpackBuffer, int unpackBufferSize, void *context)
     {
       serializeUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos, &updateType, 1, CDI_DATATYPE_INT, context);
       if (updateType == END) break;
+      int updatedResH;
       switch (updateType)
         {
-        case GRID: gridUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos, originNamespace, context, 1); break;
-        case ZAXIS: zaxisUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos, originNamespace, context, 1); break;
-        case TAXIS: taxisUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos, originNamespace, context, 1); break;
-        case INSTITUTE: instituteUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos, originNamespace, context, 1); break;
-        case MODEL: modelUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos, originNamespace, context, 1); break;
+        case GRID: updatedResH = gridUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos, originNamespace, context, 1); break;
+        case ZAXIS: updatedResH = zaxisUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos, originNamespace, context, 1); break;
+        case TAXIS: updatedResH = taxisUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos, originNamespace, context, 1); break;
+        case INSTITUTE:
+          updatedResH = instituteUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos, originNamespace, context, 1);
+          break;
+        case MODEL: updatedResH = modelUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos, originNamespace, context, 1); break;
         case STREAM:
           if (sizeAssociations == numAssociations)
             associations = (struct streamAssoc *) Realloc(associations, sizeof(associations[0]) * (size_t) (sizeAssociations *= 2));
-          associations[numAssociations] = streamUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos, originNamespace, context);
+          {
+            struct streamAssoc newAssoc;
+            associations[numAssociations] = newAssoc
+                = streamUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos, originNamespace, context);
+            updatedResH = newAssoc.streamID;
+          }
           ++numAssociations;
           break;
-        case VLIST: vlistUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos, originNamespace, context, 1); break;
-        case DIST_GRID: reshDistGridUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos, originNamespace, context, 1); break;
+        case VLIST: updatedResH = vlistUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos, originNamespace, context, 1); break;
+        case DIST_GRID:
+          updatedResH = reshDistGridUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos, originNamespace, context, 1);
+          break;
         case RESH_DELETE:
           serializeUnpack(unpackBuffer, unpackBufferSize, &unpackBufferPos, &resH, 1, CDI_DATATYPE_INT, context);
           resH = namespaceAdaptKey(resH, originNamespace);
           reshDestroy(resH);
+          updatedResH = resH;
           reshSetStatus(resH, NULL, RESH_UNUSED);
           break;
         default: xabort("Invalid/unexpected serialization type %d or transfer error!", updateType);
         }
+      if (postHook != (cdiPostResUpdateHook) 0) postHook(updatedResH, updateType);
     }
   for (int i = 0; i < numAssociations; ++i)
     {
