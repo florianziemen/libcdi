@@ -19,8 +19,10 @@ enum
   END       = 99999999
 };
 
+typedef void (*cdiPostResUpdateHook)(int resH, int resType);
+
 int reshUnpackResources(char * unpackBuffer, int unpackBufferSize,
-                        void *context);
+                        void *context, cdiPostResUpdateHook postHook);
 
 extern int
 (*reshDistGridUnpack)(char *unpackBuffer, int unpackBufferSize,

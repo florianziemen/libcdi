@@ -202,7 +202,7 @@ static void modelRun ( MPI_Comm comm )
 		    0, comm, &status ));
 
   namespaceSetActive ( 1 );
-  reshUnpackResources(recvBuffer, bufferSize, &comm);
+  reshUnpackResources(recvBuffer, bufferSize, &comm, (cdiPostResUpdateHook)0);
   Free ( recvBuffer );
   reshPackBufferDestroy ( &sendBuffer );
 
