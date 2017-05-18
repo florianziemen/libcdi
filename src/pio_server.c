@@ -1821,6 +1821,14 @@ cdiPioRecvStreamDefVlist(void *buffer, int size, int *pos,
 }
 
 
+static void
+unpackEnableDistGridIndividualAccessFilter(int resH, int resType)
+{
+  if (resType == DIST_GRID)
+    cdiPioDistGridEnableIndividualQueries(resH);
+}
+
+
 /**
  * @brief is encapsulated in CDI library and run on I/O PEs.
  */
@@ -1903,7 +1911,7 @@ void cdiPioCollectorMessageLoop()
                           tag, pioInterComm, &status));
             int pos
               = reshUnpackResources(buffer, size, &pioInterComm,
-                                    (cdiPostResUpdateHook)0);
+                                    unpackEnableDistGridIndividualAccessFilter);
             switch (tag)
               {
               case STREAMOPEN:
