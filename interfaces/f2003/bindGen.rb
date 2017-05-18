@@ -134,6 +134,16 @@ $argumentTemplates =
 		 :callExpression => '<name>_dummy',
 		 :passAs => 'integer(c_<type>), value :: <name>_dummy',
 		 :postcallStatements => ''
+	 }, {	#logical
+		 :regex => '^\s*(?<type>bool)\s+(?<name>\w+)\s*$',
+		 :placeholders => %w[name type],
+		 :dummyName => '<name>_dummy',
+		 :acceptAs => 'logical(c_<type>), value :: <name>_dummy',
+		 :helperVars => '',
+		 :precallStatements => '',
+		 :callExpression => '<name>_dummy',
+		 :passAs => 'logical(c_<type>), value :: <name>_dummy',
+		 :postcallStatements => ''
 	 }, {	#<floatTypes>
 		 :regex => '^\s*(?<type><floatTypes>)\s+(?<name>\w+)\s*$',
 		 :placeholders => %w[name type],
@@ -487,6 +497,16 @@ $returnTypeTemplates = [
 		:helperVars => '',
 		:precallStatements => '',
 		:receiveAs => 'integer(c_<type>)',
+		:assignVariable => $wrapperResultVarName,
+		:postcallStatements => ''
+	}, {	#bool
+		:regex => '^\s*(?<type>bool)\s*$',
+		:placeholders => %w[type],
+		:isVoid => false,
+		:returnAs => 'logical(c_<type>)',
+		:helperVars => '',
+		:precallStatements => '',
+		:receiveAs => 'logical(c_<type>)',
 		:assignVariable => $wrapperResultVarName,
 		:postcallStatements => ''
 	}, {	#<floatTypes>
