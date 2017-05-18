@@ -167,7 +167,7 @@ static inline int isSym(const int c)
 /* Note: size of this table must match the cftype enum */
 static struct symbol funArgSym[]
   = { { "",                "",        "%svoid",
-        "^"WS"*void"WS"*)", 0, 0, 0 },
+        "^"WS"*void"WS"*\\)", 0, 0, 0 },
       { "CHARACTER(80)",    "STRING",  "%schar *%.*s",
         "^"WS"*const"WS"+char"WS"+\\*"SYMRE WS"*\\(", 1, 0, 0 },
       { "INTEGER",         "INT",     "%sint %.*s",
