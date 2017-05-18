@@ -477,7 +477,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint, const
   }
   /* compile complete comment regular expression */
   {
-    static const char commentREString[]  = "^"WS"*/\\*"WS"*(.*"NWS")"WS"*\\*/";
+    static const char commentREString[]  = "^"WS"*/\\*"WS"*("NWS"+("WS"+"NWS"+)*)?"WS"*\\*/";
     static const char comment2REString[] = "^"WS"*//"WS"*(.*"NWS")";
     if (reCompile(&commentRE, commentREString, &line, &lineBufSize))
       exit(EXIT_FAILURE);
