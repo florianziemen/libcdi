@@ -1644,7 +1644,7 @@ zaxisGetPackSize(void * voidP, void *context)
 }
 
 
-void
+int
 zaxisUnpack(char * unpackBuffer, int unpackBufferSize,
             int * unpackBufferPos, int originNamespace, void *context,
             int force_id)
@@ -1754,6 +1754,7 @@ zaxisUnpack(char * unpackBuffer, int unpackBufferSize,
 
   reshSetStatus(zaxisP->self, &zaxisOps,
                 reshGetStatus(zaxisP->self, &zaxisOps) & ~RESH_SYNC_BIT);
+  return zaxisP->self;
 }
 
 static void
