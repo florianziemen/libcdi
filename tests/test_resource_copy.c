@@ -218,7 +218,7 @@ modelRun(MPI_Comm comm)
   memcpy(recvBuffer, sendBuffer, (size_t) bufferSize);
 #endif
   namespaceSetActive(destNamespace);
-  reshUnpackResources(recvBuffer, bufferSize, &comm);
+  reshUnpackResources(recvBuffer, bufferSize, &comm, (cdiPostResUpdateHook) 0);
   free(recvBuffer);
   reshPackBufferDestroy(&sendBuffer);
 
