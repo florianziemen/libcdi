@@ -72,7 +72,7 @@ struct gridVirtTable
   int (*getPackSize)(grid_t *gridptr, void *context);
   int (*getPackSizeScalars)(grid_t *gridptr, void *context);
   int (*getPackSizeArrays)(grid_t *gridptr, void *context);
-  void (*unpack)(char *unpackBuffer, int unpackBufferSize, int *unpackBufferPos, int originNamespace, void *context, int force_id);
+  int (*unpack)(char *unpackBuffer, int unpackBufferSize, int *unpackBufferPos, int originNamespace, void *context, int force_id);
   grid_t *(*unpackScalars)(char *unpackBuffer, int unpackBufferSize, int *unpackBufferPos, int originNamespace, void *context,
                            int force_id, int *memberMaskP);
   void (*unpackArrays)(grid_t *gridptr, int memberMask, char *unpackBuffer, int unpackBufferSize, int *unpackBufferPos,
@@ -166,7 +166,7 @@ int gridGenerate(const grid_t *grid);
 
 void cdiGridGetIndexList(unsigned, int *);
 
-void gridUnpack(char *unpackBuffer, int unpackBufferSize, int *unpackBufferPos, int originNamespace, void *context, int force_id);
+int gridUnpack(char *unpackBuffer, int unpackBufferSize, int *unpackBufferPos, int originNamespace, void *context, int force_id);
 
 /* apply func to each grid */
 enum cdiApplyRet cdiGridApply(enum cdiApplyRet (*func)(int id, void *res, void *data), void *data);

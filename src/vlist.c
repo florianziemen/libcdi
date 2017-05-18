@@ -1563,7 +1563,7 @@ vlistPackP(void *vlistptr, void *buf, int size, int *position, void *context)
     }
 }
 
-void
+int
 vlistUnpack(char *buf, int size, int *position, int originNamespace, void *context, int force_id)
 {
 #define adaptKey(key) (namespaceAdaptKey((key), originNamespace))
@@ -1584,6 +1584,7 @@ vlistUnpack(char *buf, int size, int *position, int originNamespace, void *conte
   for (int varID = 0; varID < nvars; varID++) vlistVarUnpack(targetID, buf, size, position, originNamespace, context);
   reshSetStatus(targetID, &vlistOps, reshGetStatus(targetID, &vlistOps) & ~RESH_SYNC_BIT);
 #undef adaptKey
+  return targetID;
 }
 
 void

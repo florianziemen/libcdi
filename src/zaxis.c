@@ -1443,7 +1443,7 @@ zaxisGetPackSize(void *voidP, void *context)
   return packBufferSize;
 }
 
-void
+int
 zaxisUnpack(char *unpackBuffer, int unpackBufferSize, int *unpackBufferPos, int originNamespace, void *context, int force_id)
 {
   int intBuffer[zaxisNint], memberMask;
@@ -1524,6 +1524,7 @@ zaxisUnpack(char *unpackBuffer, int unpackBufferSize, int *unpackBufferPos, int 
   serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos, &zaxisP->positive, 1, CDI_DATATYPE_UINT, context);
 
   reshSetStatus(zaxisP->self, &zaxisOps, reshGetStatus(zaxisP->self, &zaxisOps) & ~RESH_SYNC_BIT);
+  return zaxisP->self;
 }
 
 static void

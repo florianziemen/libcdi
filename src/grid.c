@@ -4355,7 +4355,7 @@ static grid_t *gridUnpackScalars(char *unpackBuffer, int unpackBufferSize, int *
 static void gridUnpackArrays(grid_t *gridP, int memberMask, char *unpackBuffer, int unpackBufferSize, int *unpackBufferPos,
                              int originNamespace, void *context);
 
-void
+int
 gridUnpack(char *unpackBuffer, int unpackBufferSize, int *unpackBufferPos, int originNamespace, void *context, int force_id)
 {
   gridInit();
@@ -4364,6 +4364,7 @@ gridUnpack(char *unpackBuffer, int unpackBufferSize, int *unpackBufferPos, int o
       = gridUnpackScalars(unpackBuffer, unpackBufferSize, unpackBufferPos, originNamespace, context, force_id, &memberMask);
   gridP->vtable->unpackArrays(gridP, memberMask, unpackBuffer, unpackBufferSize, unpackBufferPos, originNamespace, context);
   reshSetStatus(gridP->self, &gridOps, reshGetStatus(gridP->self, &gridOps) & ~RESH_SYNC_BIT);
+  return gridP->self;
 }
 
 static grid_t *
