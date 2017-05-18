@@ -1547,6 +1547,12 @@ cdiPioRecvStreamDefVlist(void *buffer, int size, int *pos, MPI_Comm pioInterComm
     }
 }
 
+static void
+unpackEnableDistGridIndividualAccessFilter(int resH, int resType)
+{
+  if (resType == DIST_GRID) cdiPioDistGridEnableIndividualQueries(resH);
+}
+
 /**
  * @brief is encapsulated in CDI library and run on I/O PEs.
  */
@@ -1618,7 +1624,7 @@ cdiPioCollectorMessageLoop()
             xmpi(MPI_Get_count(&status, MPI_PACKED, &size));
             char *buffer = Malloc((size_t) size);
             xmpi(MPI_Recv(buffer, size, MPI_PACKED, source, tag, pioInterComm, &status));
-            int pos = reshUnpackResources(buffer, size, &pioInterComm, (cdiPostResUpdateHook) 0);
+            int pos = reshUnpackResources(buffer, size, &pioInterComm, unpackEnableDistGridIndividualAccessFilter);
             switch (tag)
               {
               case STREAMOPEN: cdiPioRecvStreamOpen(buffer, size, &pos, pioInterComm); break;
