@@ -25498,12 +25498,16 @@ $SHELL "$CONFIG_LT" $lt_config_lt_args || lt_cl_success=false
 exec 5>>config.log
 $lt_cl_success || as_fn_exit 1
 
+
+acx_lt_saved_ac_objext=$ac_objext
+ac_objext=lo
 ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
-ac_link="./libtool --mode=link --tag=CC $ac_link"
+ac_link="$ac_pwd/libtool --mode=link --tag=CC $ac_link"
+ac_compile="$ac_pwd/libtool --mode=compile --tag=CC $ac_compile"
 
 
 # -----------------------------------------------------------------------
@@ -26232,7 +26236,8 @@ ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
-ac_link="./libtool --mode=link --tag=CC $ac_link"
+ac_link="$ac_pwd/libtool --mode=link --tag=CC $ac_link"
+ac_compile="$ac_pwd/libtool --mode=compile --tag=CC $ac_compile"
 
 	 for ax_cv_proto_backtrace_type in size_t int none; do
 	   if test "${ax_cv_proto_backtrace_type}" = none; then :
@@ -26264,7 +26269,8 @@ ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
-ac_link="./libtool --mode=link --tag=CC $ac_link"
+ac_link="$ac_pwd/libtool --mode=link --tag=CC $ac_link"
+ac_compile="$ac_pwd/libtool --mode=compile --tag=CC $ac_compile"
 
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_proto_backtrace_type" >&5
@@ -26722,7 +26728,8 @@ ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
-ac_link="./libtool --mode=link --tag=CC $ac_link"
+ac_link="$ac_pwd/libtool --mode=link --tag=CC $ac_link"
+ac_compile="$ac_pwd/libtool --mode=compile --tag=CC $ac_compile"
 
 ax_pthread_ok=no
 
@@ -27156,7 +27163,8 @@ ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
-ac_link="./libtool --mode=link --tag=CC $ac_link"
+ac_link="$ac_pwd/libtool --mode=link --tag=CC $ac_link"
+ac_compile="$ac_pwd/libtool --mode=compile --tag=CC $ac_compile"
 
 
                LIBS="$PTHREAD_LIBS $LIBS"
@@ -28340,7 +28348,8 @@ ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
-ac_link="./libtool --mode=link --tag=CC $ac_link"
+ac_link="$ac_pwd/libtool --mode=link --tag=CC $ac_link"
+ac_compile="$ac_pwd/libtool --mode=compile --tag=CC $ac_compile"
 
 
 
@@ -28552,14 +28561,16 @@ ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
-ac_link="./libtool --mode=link --tag=CC $ac_link"
+ac_link="$ac_pwd/libtool --mode=link --tag=CC $ac_link"
+ac_compile="$ac_pwd/libtool --mode=compile --tag=CC $ac_compile"
 
      if test -n "$FC" && test "X$FC" != "Xno"; then :
   ac_ext=${ac_fc_srcext-f}
 ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
 ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $ac_fcflags_srcext conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_fc_compiler_gnu
-ac_link="./libtool --mode=link --tag=FC $ac_link"
+ac_link="$ac_pwd/libtool --mode=link --tag=FC $ac_link"
+ac_compile="$ac_pwd/libtool --mode=compile --tag=FC $ac_compile"
 
 
 
@@ -28823,7 +28834,8 @@ ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
-ac_link="./libtool --mode=link --tag=CC $ac_link"
+ac_link="$ac_pwd/libtool --mode=link --tag=CC $ac_link"
+ac_compile="$ac_pwd/libtool --mode=compile --tag=CC $ac_compile"
 
 fi
 else
@@ -29510,7 +29522,8 @@ if test x"$enable_isoc" = xyes; then :
 ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
 ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $ac_fcflags_srcext conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_fc_compiler_gnu
-ac_link="./libtool --mode=link --tag=FC $ac_link"
+ac_link="$ac_pwd/libtool --mode=link --tag=FC $ac_link"
+ac_compile="$ac_pwd/libtool --mode=compile --tag=FC $ac_compile"
 
    { $as_echo "$as_me:${as_lineno-$LINENO}: checking if Fortran compiler can handle complex CHARACTER interoperability" >&5
 $as_echo_n "checking if Fortran compiler can handle complex CHARACTER interoperability... " >&6; }
@@ -29575,7 +29588,8 @@ ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
-ac_link="./libtool --mode=link --tag=CC $ac_link"
+ac_link="$ac_pwd/libtool --mode=link --tag=CC $ac_link"
+ac_compile="$ac_pwd/libtool --mode=compile --tag=CC $ac_compile"
 
 else
   enable_isoc=no
@@ -29600,7 +29614,8 @@ if test "x${enable_isoc}" = "xyes"; then :
 ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
 ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $ac_fcflags_srcext conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_fc_compiler_gnu
-ac_link="./libtool --mode=link --tag=FC $ac_link"
+ac_link="$ac_pwd/libtool --mode=link --tag=FC $ac_link"
+ac_compile="$ac_pwd/libtool --mode=compile --tag=FC $ac_compile"
 
 
 
@@ -29661,7 +29676,8 @@ ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
-ac_link="./libtool --mode=link --tag=CC $ac_link"
+ac_link="$ac_pwd/libtool --mode=link --tag=CC $ac_link"
+ac_compile="$ac_pwd/libtool --mode=compile --tag=CC $ac_compile"
 
    CDI_F90_INTERFACE_FCFLAGS="${FC_MOD_FLAG}${includedir}"
 fi
@@ -29678,7 +29694,8 @@ else
 ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
 ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $ac_fcflags_srcext conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_fc_compiler_gnu
-ac_link="./libtool --mode=link --tag=FC $ac_link"
+ac_link="$ac_pwd/libtool --mode=link --tag=FC $ac_link"
+ac_compile="$ac_pwd/libtool --mode=compile --tag=FC $ac_compile"
 
       cat > conftest.$ac_ext <<_ACEOF
       module conftest_module
@@ -29719,7 +29736,8 @@ ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
-ac_link="./libtool --mode=link --tag=CC $ac_link"
+ac_link="$ac_pwd/libtool --mode=link --tag=CC $ac_link"
+ac_compile="$ac_pwd/libtool --mode=compile --tag=CC $ac_compile"
 
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $acx_cv_fc_mod_name" >&5
@@ -30001,7 +30019,8 @@ done
 ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
 ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $ac_fcflags_srcext conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_fc_compiler_gnu
-ac_link="./libtool --mode=link --tag=FC $ac_link"
+ac_link="$ac_pwd/libtool --mode=link --tag=FC $ac_link"
+ac_compile="$ac_pwd/libtool --mode=compile --tag=FC $ac_compile"
 
 
 
@@ -30060,7 +30079,8 @@ ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
-ac_link="./libtool --mode=link --tag=CC $ac_link"
+ac_link="$ac_pwd/libtool --mode=link --tag=CC $ac_link"
+ac_compile="$ac_pwd/libtool --mode=compile --tag=CC $ac_compile"
 
 fi
          if test -n "$F77" -a X"$F77" != Xno; then :
@@ -30068,7 +30088,8 @@ fi
 ac_compile='$F77 -c $FFLAGS conftest.$ac_ext >&5'
 ac_link='$F77 -o conftest$ac_exeext $FFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_f77_compiler_gnu
-ac_link="./libtool --mode=link --tag=F77 $ac_link"
+ac_link="$ac_pwd/libtool --mode=link --tag=F77 $ac_link"
+ac_compile="$ac_pwd/libtool --mode=compile --tag=F77 $ac_compile"
 
 
 
@@ -30127,7 +30148,8 @@ ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
-ac_link="./libtool --mode=link --tag=CC $ac_link"
+ac_link="$ac_pwd/libtool --mode=link --tag=CC $ac_link"
+ac_compile="$ac_pwd/libtool --mode=compile --tag=CC $ac_compile"
 
 fi
                         if test -z "$FC" -o X"$FC" != Xno; then :
@@ -30199,7 +30221,8 @@ ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
-ac_link="./libtool --mode=link --tag=CC $ac_link"
+ac_link="$ac_pwd/libtool --mode=link --tag=CC $ac_link"
+ac_compile="$ac_pwd/libtool --mode=compile --tag=CC $ac_compile"
 
       cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
@@ -30248,17 +30271,26 @@ FCALLSCSUB0(errExit,ERR_EXIT,err_exit)
 
 _ACEOF
 if ac_fn_c_try_compile "$LINENO"; then :
+  if expr "$ac_compile" : '.*/libtool --mode=compile' >/dev/null; then :
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: Renaming C object file." >&5; } >&5
+  (sed 's@pic_object='"'"'\(.libs/\)\{0,1\}conftest@&_c@' "conftest.$ac_objext" >"conftest_c.$ac_objext"; rm "conftest.$ac_objext" ; if test -f "conftest.$OBJEXT" ; then mv "conftest.$OBJEXT" "conftest_c.$OBJEXT" ; fi ; if test -f ".libs/conftest.$OBJEXT" ; then mv ".libs/conftest.$OBJEXT" ".libs/conftest_c.$OBJEXT" ; fi) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+else
   { { $as_echo "$as_me:${as_lineno-$LINENO}: Renaming C object file." >&5; } >&5
   (mv "conftest.$ac_objext" "conftest_c.$ac_objext") 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }
+fi
          if test -n "$FC" -a X"$FC" != Xno; then :
   ac_ext=${ac_fc_srcext-f}
 ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
 ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $ac_fcflags_srcext conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_fc_compiler_gnu
-ac_link="./libtool --mode=link --tag=FC $ac_link"
+ac_link="$ac_pwd/libtool --mode=link --tag=FC $ac_link"
+ac_compile="$ac_pwd/libtool --mode=compile --tag=FC $ac_compile"
 
          cat > conftest.$ac_ext <<_ACEOF
       MODULE conftest_data
@@ -30277,11 +30309,19 @@ ac_link="./libtool --mode=link --tag=FC $ac_link"
       END FUNCTION cftstf
 _ACEOF
 if ac_fn_fc_try_compile "$LINENO"; then :
+  if expr "$ac_compile" : '.*/libtool --mode=compile' >/dev/null; then :
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: Renaming Fortran object file." >&5; } >&5
+  (sed 's@pic_object='"'"'\(.libs/\)\{0,1\}conftest@&_f@' "conftest.$ac_objext" >"conftest_f.$ac_objext"; rm "conftest.$ac_objext" ; if test -f "conftest.$OBJEXT" ; then mv "conftest.$OBJEXT" "conftest_f.$OBJEXT" ; fi ; if test -f ".libs/conftest.$OBJEXT" ; then mv ".libs/conftest.$OBJEXT" ".libs/conftest_f.$OBJEXT" ; fi) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+else
   { { $as_echo "$as_me:${as_lineno-$LINENO}: Renaming Fortran object file." >&5; } >&5
   (mv "conftest.$ac_objext" "conftest_f.$ac_objext") 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }
+fi
             save_LIBS=$LIBS
             LIBS="conftest_c.$ac_objext conftest_f.$ac_objext $LIBS"
             if test "$cross_compiling" = yes; then :
@@ -30368,7 +30408,8 @@ ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
-ac_link="./libtool --mode=link --tag=CC $ac_link"
+ac_link="$ac_pwd/libtool --mode=link --tag=CC $ac_link"
+ac_compile="$ac_pwd/libtool --mode=compile --tag=CC $ac_compile"
 
 else
   acx_cv_cfortran_works=${acx_cv_cfortran_works-yes}
@@ -30378,7 +30419,8 @@ fi
 ac_compile='$F77 -c $FFLAGS conftest.$ac_ext >&5'
 ac_link='$F77 -o conftest$ac_exeext $FFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_f77_compiler_gnu
-ac_link="./libtool --mode=link --tag=F77 $ac_link"
+ac_link="$ac_pwd/libtool --mode=link --tag=F77 $ac_link"
+ac_compile="$ac_pwd/libtool --mode=compile --tag=F77 $ac_compile"
 
          cat > conftest.$ac_ext <<_ACEOF
       REAL FUNCTION CFTSTF(v)
@@ -30391,11 +30433,19 @@ ac_link="./libtool --mode=link --tag=F77 $ac_link"
       END FUNCTION CFTSTF
 _ACEOF
 if ac_fn_f77_try_compile "$LINENO"; then :
+  if expr "$ac_compile" : '.*/libtool --mode=compile' >/dev/null; then :
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: Renaming Fortran object file." >&5; } >&5
+  (sed 's@pic_object='"'"'\(.libs/\)\{0,1\}conftest@&_f@' "conftest.$ac_objext" >"conftest_f.$ac_objext"; rm "conftest.$ac_objext" ; if test -f "conftest.$OBJEXT" ; then mv "conftest.$OBJEXT" "conftest_f.$OBJEXT" ; fi ; if test -f ".libs/conftest.$OBJEXT" ; then mv ".libs/conftest.$OBJEXT" ".libs/conftest_f.$OBJEXT" ; fi) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+else
   { { $as_echo "$as_me:${as_lineno-$LINENO}: Renaming Fortran object file." >&5; } >&5
   (mv "conftest.$ac_objext" "conftest_f.$ac_objext") 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }
+fi
             save_LIBS=$LIBS
             LIBS="conftest_c.$ac_objext conftest_f.$ac_objext $LIBS"
             if test "$cross_compiling" = yes; then :
@@ -30469,7 +30519,8 @@ ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
-ac_link="./libtool --mode=link --tag=CC $ac_link"
+ac_link="$ac_pwd/libtool --mode=link --tag=CC $ac_link"
+ac_compile="$ac_pwd/libtool --mode=compile --tag=CC $ac_compile"
 
 fi
 
@@ -30482,7 +30533,8 @@ ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
-ac_link="./libtool --mode=link --tag=CC $ac_link"
+ac_link="$ac_pwd/libtool --mode=link --tag=CC $ac_link"
+ac_compile="$ac_pwd/libtool --mode=compile --tag=CC $ac_compile"
 
       CPPFLAGS=$save_CPPFLAGS
 
@@ -30678,6 +30730,7 @@ if test -z "${am__fastdepCXX_TRUE}" && test -z "${am__fastdepCXX_FALSE}"; then
   as_fn_error $? "conditional \"am__fastdepCXX\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
+ac_objext=${acx_lt_saved_ac_objext}
 
 if test -z "${HAVE_LIBGRIB_API_TRUE}" && test -z "${HAVE_LIBGRIB_API_FALSE}"; then
   as_fn_error $? "conditional \"HAVE_LIBGRIB_API\" was never defined.
