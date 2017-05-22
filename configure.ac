@@ -34,9 +34,16 @@ AC_PROG_FC
 AS_IF([test -n "$FC" && test "X$FC" != Xno],
   [AC_FC_SRCEXT([f90])
    AC_LANG_PUSH([Fortran])
+   dnl check that FC is working just as well as CC
+   _AC_COMPILER_EXEEXT
    AC_PROG_FPP
    AC_LANG_POP([Fortran])])
 AC_PROG_F77
+AS_IF([test -n "$F77" && test "X$F77" != Xno],
+  [AC_LANG_PUSH([Fortran 77])
+   dnl check that F77 is working just as well as CC
+   _AC_COMPILER_EXEEXT
+   AC_LANG_POP([Fortran 77])])
 AC_PROG_CXX
 AC_PROG_INSTALL
 
