@@ -2881,8 +2881,8 @@ int cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int 
                   if ( ncvars[zvarid].ndims == 2 )
                     {
                       zprec = CDI_DATATYPE_UINT8;
-                      zclength = ncdims[ncvars[zvarid].dimids[1]].len;
-                      cdf_load_cvals(zsize*zclength, zvarid, ncvar, &zcvals, zsize);
+                      zclength = (size_t)ncdims[ncvars[zvarid].dimids[1]].len;
+                      cdf_load_cvals(zsize*zclength, zvarid, ncvar, &zcvals, (size_t)zsize);
                     }
                 }
 
@@ -2980,6 +2980,12 @@ int cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int 
             cdiZaxisDefKeyStr(zaxisID, CDI_KEY_VDIMNAME, strlen(ncdims[vdimid].name)+1, ncdims[vdimid].name);
           */
 	  if ( zvar    ) Free(zvar);
+	  if ( zcvals  ) 
+            {
+              for ( size_t i = 0; i < zsize; i++ )
+                Free(zcvals[i]);
+              Free(zcvals);
+            }
 	  if ( lbounds ) Free(lbounds);
 
           if ( zvarid != CDI_UNDEFID )

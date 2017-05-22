@@ -274,7 +274,12 @@ void zaxisDestroyKernel( zaxis_t * zaxisptr )
   int id = zaxisptr->self;
 
   if ( zaxisptr->vals )    Free( zaxisptr->vals );
-  if ( zaxisptr->cvals )   Free( zaxisptr->cvals );
+  if ( zaxisptr->cvals )
+    {
+      for ( int i=0; i<zaxisptr->size; i++)
+        Free(zaxisptr->cvals[i]);
+      Free( zaxisptr->cvals );
+    }
   if ( zaxisptr->lbounds ) Free( zaxisptr->lbounds );
   if ( zaxisptr->ubounds ) Free( zaxisptr->ubounds );
   if ( zaxisptr->weights ) Free( zaxisptr->weights );
@@ -793,7 +798,7 @@ void zaxisDefCvals(int zaxisID, const char **cvals, size_t clen)
       for ( size_t ilev = 0; ilev < size; ++ilev )
         {
           zaxisptr->cvals[ilev] = Malloc((clen+1)*sizeof(char));
-          strcpy(zaxisptr->cvals[ilev],cvals[ilev]);
+          memcpy(zaxisptr->cvals[ilev],cvals[ilev], clen);
           zaxisptr->cvals[ilev][clen] = '\0';
         }
       reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
@@ -1061,8 +1066,9 @@ int zaxisInqCLevels(int zaxisID, char ***clevels)
           (*clevels) = Malloc(size*sizeof(char*));
           for ( int i = 0; i < size; i++ )
             {
-              (*clevels)[i] = Malloc(clen*sizeof(char));
-              strcpy((*clevels)[i],zaxisptr->cvals[i]);
+              (*clevels)[i] = Malloc((clen+1)*sizeof(char));
+              memcpy((*clevels)[i], zaxisptr->cvals[i], clen);
+              (*clevels)[i][clen] = '\0';
             }
           }
     }
