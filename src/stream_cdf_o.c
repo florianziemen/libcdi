@@ -1447,7 +1447,7 @@ void cdfDefZaxisChar(stream_t *streamptr, int zaxisID, char *axisname, int *dimI
 
 /* Get Stringvalues */
   char **cvals = NULL;
-  cvals = zaxisInqCLevelsPtr(zaxisID);
+  cvals = zaxisInqCValsPtr(zaxisID);
 
   if ( cvals )
     {

@@ -624,12 +624,13 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
 
                 if ( zaxisType == ZAXIS_CHAR )
                   {
-                    cvals1 = zaxisInqCLevelsPtr(zaxisID);
+                    cvals1 = zaxisInqCValsPtr(zaxisID);
+                    size_t clen1 = (size_t)zaxisInqCLen(zaxisID);
                     for ( int levID = 0; levID < nlevs; ++levID )
                       if ( vars1[varID].levinfo[levID].flag )
                           {
-                            size_t testlen = (size_t) strlen(cvals1[levID]);
-                            while ( cvals1[levID][testlen-1] == ' ' )
+                            size_t testlen = clen1;
+                            while ( cvals1[levID][testlen] == ' ' )
                               testlen--;
                             if ( clen2 < testlen )
                               clen2 = testlen;
@@ -640,9 +641,8 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
                     for ( int levID = 0; levID < nlevs; ++levID )
                       if ( vars1[varID].levinfo[levID].flag )
                         {
-                          cvals2[levID2] = Malloc((size_t)(clen2+1) * sizeof (char));
-                          strcpy(cvals2[levID2], cvals1[levID]);
-                          cvals2[levID2][clen2] = 0;
+                          cvals2[levID2] = Malloc((size_t)(clen2) * sizeof (char));
+                          memcpy(cvals2[levID2], cvals1[levID], clen2*sizeof(char));
                           levID2++;
                         }
                   }

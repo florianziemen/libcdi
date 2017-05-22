@@ -1019,8 +1019,8 @@ int     zaxisInqLevels(int zaxisID, double levels[]);
 /*      zaxisInqCLen: Get maximal string length of character Z-axis */
 int     zaxisInqCLen(int zaxisID);
 
-/*      zaxisInqCLevels: Get all string values of a character Z-axis */
-int     zaxisInqCLevels(int zaxisID, char ***clevels);
+/*      zaxisInqCVals: Get all string values of a character Z-axis */
+int     zaxisInqCVals(int zaxisID, char ***clevels);
 
 /*      zaxisDefLevel: Define one level of a Z-axis */
 void    zaxisDefLevel(int zaxisID, int levelID, double levels);

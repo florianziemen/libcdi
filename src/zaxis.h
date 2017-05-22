@@ -64,7 +64,7 @@ const resOps *getZaxisOps(void);
 const char *zaxisInqNamePtr(int zaxisID);
 
 const double *zaxisInqLevelsPtr(int zaxisID);
-char **zaxisInqCLevelsPtr(int zaxisID);
+char **zaxisInqCValsPtr(int zaxisID);
 
 void zaxisResize(int zaxisID, int size);
 
