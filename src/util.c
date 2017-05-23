@@ -19,48 +19,6 @@
 #include "binary.h"
 
 
-void cdiPrintDatatypes(void)
-{
-#define XSTRING(x)	#x
-#define STRING(x)	XSTRING(x)
-  fprintf (stderr, "+-------------+-------+\n"
-           "| types       | bytes |\n"
-           "+-------------+-------+\n"
-           "| void *      |   %3d |\n"
-           "+-------------+-------+\n"
-           "| char        |   %3d |\n"
-           "+-------------+-------+\n"
-           "| bool        |   %3d |\n"
-           "| short       |   %3d |\n"
-           "| int         |   %3d |\n"
-           "| long        |   %3d |\n"
-           "| long long   |   %3d |\n"
-           "| size_t      |   %3d |\n"
-           "| off_t       |   %3d |\n"
-           "+-------------+-------+\n"
-           "| float       |   %3d |\n"
-           "| double      |   %3d |\n"
-           "| long double |   %3d |\n"
-           "+-------------+-------+\n\n"
-           "+-------------+-----------+\n"
-           "| INT32       | %-9s |\n"
-           "| INT64       | %-9s |\n"
-           "| FLT32       | %-9s |\n"
-           "| FLT64       | %-9s |\n"
-           "+-------------+-----------+\n"
-           "\n  byte ordering is %s\n\n",
-           (int) sizeof(void *), (int) sizeof(char), (int) sizeof(bool),
-           (int) sizeof(short), (int) sizeof(int), (int) sizeof(long), (int) sizeof(long long),
-           (int) sizeof(size_t), (int) sizeof(off_t),
-           (int) sizeof(float), (int) sizeof(double), (int) sizeof(long double),
-           STRING(INT32), STRING(INT64), STRING(FLT32), STRING(FLT64),
-           ((HOST_ENDIANNESS == CDI_BIGENDIAN) ? "BIGENDIAN"
-            : ((HOST_ENDIANNESS == CDI_LITTLEENDIAN) ? "LITTLEENDIAN"
-               : "Unhandled endianness!")));
-#undef STRING
-#undef XSTRING
-}
-
 static const char uuidFmt[] = "%02hhx%02hhx%02hhx%02hhx-"
   "%02hhx%02hhx-%02hhx%02hhx-%02hhx%02hhx-"
   "%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx";
@@ -198,8 +156,8 @@ void cdiCreateUUID(unsigned char *uuid)
 void cdiCreateUUID(unsigned char *uuid)
 {
   static int uuid_seeded = 0;
-  static char uuid_rand_state[31 * sizeof (long)];
 #ifndef _SX
+  static char uuid_rand_state[31 * sizeof (long)];
   char *caller_rand_state;
   if (uuid_seeded)
     caller_rand_state = setstate(uuid_rand_state);
@@ -220,6 +178,27 @@ void cdiCreateUUID(unsigned char *uuid)
   for (size_t i = 0; i < CDI_UUID_SIZE; ++i)
     uuid[i] = (unsigned char)random();
 #else
+  unsigned short caller_rand_state[3];
+  {
+    static unsigned short our_rand_state[3];
+    if (!uuid_seeded)
+      {
+        struct timeval tv;
+        int status = gettimeofday(&tv, NULL);
+        if (status != 0)
+          {
+            perror("failed seed generation!");
+            exit(1);
+          }
+        unsigned seed = tv.tv_sec ^ tv.tv_usec;
+        our_rand_state[0] = 0x330E;
+        our_rand_state[1] = (unsigned short)(seed & 0xFFFFU);
+        our_rand_state[2] = (unsigned short)((seed >> 16) & 0xFFFFU);
+      }
+    unsigned short *p = seed48(our_rand_state);
+    uuid_seeded = 1;
+    memcpy(caller_rand_state, p, sizeof (caller_rand_state));
+  }
   for (size_t i = 0; i < CDI_UUID_SIZE; ++i)
     uuid[i] = (unsigned char)lrand48();
 #endif
@@ -229,6 +208,8 @@ void cdiCreateUUID(unsigned char *uuid)
   uuid[7] = (unsigned char)((uuid[7] & 0x0f) | (4 << 4));
 #ifndef _SX
   setstate(caller_rand_state);
+#else
+  seed48(caller_rand_state);
 #endif
 }
 #endif

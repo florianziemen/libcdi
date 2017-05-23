@@ -11,7 +11,7 @@
 #ifndef  CDI_CKSUM_H_
 #include "cdi_cksum.h"
 #endif
-#ifndef  _ERROR_H
+#ifndef  ERROR_H
 #include "error.h"
 #endif
 

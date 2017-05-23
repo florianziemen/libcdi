@@ -2,7 +2,7 @@
 #  include "config.h"
 #endif
 
-#if  defined  (HAVE_LIBGRIB_API)
+#ifdef HAVE_LIBGRIB_API
 #include <limits.h>
 #include <stdio.h>
 
@@ -12,6 +12,7 @@
 #include "file.h"
 #include "gribapi_utilities.h"
 #include "stream_grb.h"
+#include "stream_gribapi.h"
 #include "varscan.h"
 #include "datetime.h"
 #include "vlist.h"
@@ -35,6 +36,14 @@ typedef struct {
   int level2;
   int ltype;
   int tsteptype;
+#ifdef HIRLAM_EXTENSIONS
+    // NOTE: tsteptype MUST be part of attributes used to compare variables!
+    // Modern NWP models (HARMONIE, HIRLAM) use timeRangeIndicator to specify
+    // if the field is instantanous or accumulated.
+    // Both types are typically in the same GRIB-file.
+    // (181; 105, 0, timeRangeIndicator=0) .. instantanous rain
+    // (181; 105, 0, timeRangeIndicator=4) .. accumulated rain  .. both can be in the same grib file
+#endif // HIRLAM_EXTENSIONS
   char name[32];
 
   var_tile_t tiles;
@@ -430,11 +439,11 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
   int vlistID = streamptr->vlistID;
   int tsID    = streamptr->curTsID;
   int recID   = recordNewEntry(streamptr, tsID);
-  record_t *record  = &streamptr->tsteps[tsID].records[recID];
+  record_t *record = &streamptr->tsteps[tsID].records[recID];
 
   int tsteptype = gribapiGetTsteptype(gh);
   // numavg  = ISEC1_AvgNum;
-  int numavg  = 0;
+  int numavg = 0;
 
   // fprintf(stderr, "param %d %d %d %d\n", param, level1, level2, leveltype1);
 
@@ -471,11 +480,41 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
       grib_get_double(gh, "latitudeOfSouthernPoleInDegrees",  &ypole);
       grib_get_double(gh, "longitudeOfSouthernPoleInDegrees", &xpole);
       grib_get_double(gh, "angleOfRotation", &angle);
-      xpole =  xpole - 180;
+      xpole -= 180;
       if ( fabs(ypole) > 0 ) ypole = -ypole; // change from south to north pole
       if ( fabs(angle) > 0 ) angle = -angle;
 
       gridDefParamRLL(gridID, xpole, ypole, angle);
+    }
+  else if ( grid->projtype == CDI_PROJ_LCC )
+    {
+      double a = 6367470., rf = 0;
+      long earthIsOblate;
+      grib_get_long(gh, "earthIsOblate", &earthIsOblate);
+      if ( earthIsOblate ) { a = 6378160.; rf = 297.0; }
+      double lon_0, lat_1, lat_2, xval_0, yval_0;
+      long projflag = 0;
+      grib_get_double(gh, "longitudeOfFirstGridPointInDegrees", &xval_0);
+      grib_get_double(gh, "latitudeOfFirstGridPointInDegrees", &yval_0);
+      grib_get_double(gh, "LoVInDegrees", &lon_0);
+      grib_get_double(gh, "Latin1InDegrees", &lat_1);
+      grib_get_double(gh, "Latin2InDegrees", &lat_2);
+      grib_get_long(gh, "projectionCentreFlag", &projflag);
+      bool lsouth = gribbyte_get_bit((int)projflag, 1);
+      if ( lsouth ) { lat_1 = -lat_1; lat_2 = -lat_2; }
+
+      double lat_0 = lat_2;
+      double x_0 = grid_missval;
+      double y_0 = grid_missval;
+
+      if ( proj_lonlat_to_lcc_func )
+        {
+          x_0 = xval_0; y_0 = yval_0;
+          proj_lonlat_to_lcc_func(grid_missval, lon_0, lat_0, lat_1, lat_2, a, rf, (size_t)1, &x_0, &y_0);
+          if ( IS_NOT_EQUAL(x_0, grid_missval) && IS_NOT_EQUAL(y_0, grid_missval) )
+            { x_0 = -x_0; y_0 = -y_0; }
+        }
+      gridDefParamLCC(gridID, grid_missval, lon_0, lat_0, lat_1, lat_2, a, rf, xval_0, yval_0, x_0, y_0);
     }
 
   int zaxistype = gribapiGetZaxisType(gribEditionNumber(gh), leveltype1);
@@ -504,10 +543,7 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
         unsigned char uuid[CDI_UUID_SIZE];
         long lpar;
         GRIB_CHECK(grib_get_long(gh, "NV", &lpar), 0);
-        if ( lpar != 6 )
-          {
-            fprintf(stderr, "Warning ...\n");
-          }
+        if ( lpar != 6 ) fprintf(stderr, "Warning ...\n");
         GRIB_CHECK(grib_get_long(gh, "nlev", &lpar), 0);
         int nhlev = (int)lpar;
         GRIB_CHECK(grib_get_long(gh, "numberOfVGridUsed", &lpar), 0);
@@ -572,12 +608,11 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
   if ( grib_get_long(gh, "productDefinitionTemplateNumber", &productDefinitionTemplate) == 0 )
     varDefProductDefinitionTemplate(varID, (int) productDefinitionTemplate);
 
-  int    i;
   long   lval;
   double dval;
 
   if (lread_additional_keys)
-    for ( i = 0; i < cdiNAdditionalGRIBKeys; i++ )
+    for ( int i = 0; i < cdiNAdditionalGRIBKeys; i++ )
       {
         /* note: if the key is not defined, we do not throw an error! */
         if ( grib_get_long(gh, cdiAdditionalGRIBKeys[i], &lval) == 0 )
@@ -589,10 +624,9 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
   if ( varInqInst(varID) == CDI_UNDEFID )
     {
       long center, subcenter;
-      int instID;
       GRIB_CHECK(grib_get_long(gh, "centre", &center), 0);
       GRIB_CHECK(grib_get_long(gh, "subCentre", &subcenter), 0);
-      instID    = institutInq((int)center, (int)subcenter, NULL, NULL);
+      int instID = institutInq((int)center, (int)subcenter, NULL, NULL);
       if ( instID == CDI_UNDEFID )
 	instID = institutDef((int)center, (int)subcenter, NULL, NULL);
       varDefInst(varID, instID);
@@ -600,12 +634,11 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
 
   if ( varInqModel(varID) == CDI_UNDEFID )
     {
-      int modelID;
       long processID;
       if ( grib_get_long(gh, "generatingProcessIdentifier", &processID) == 0 )
 	{
           /* FIXME: assert(processID >= INT_MIN && processID <= INT_MAX) */
-	  modelID = modelInq(varInqInst(varID), (int)processID, NULL);
+	  int modelID = modelInq(varInqInst(varID), (int)processID, NULL);
 	  if ( modelID == CDI_UNDEFID )
 	    modelID = modelDef(varInqInst(varID), (int)processID, NULL);
 	  varDefModel(varID, modelID);
@@ -615,16 +648,12 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
   if ( varInqTable(varID) == CDI_UNDEFID )
     {
       int pdis, pcat, pnum;
-
       cdiDecodeParam(param, &pnum, &pcat, &pdis);
 
       if ( pdis == 255 )
 	{
-	  int tableID;
 	  int tabnum = pcat;
-
-	  tableID = tableInq(varInqModel(varID), tabnum, NULL);
-
+	  int tableID = tableInq(varInqModel(varID), tabnum, NULL);
 	  if ( tableID == CDI_UNDEFID )
 	    tableID = tableDef(varInqModel(varID), tabnum, NULL);
 	  varDefTable(varID, tableID);
@@ -639,7 +668,7 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
 	    varID, param, zaxistype, gridID, levelID);
 }
 
-static compvar2_t gribapiVarSet(int param, int level1, int level2, int leveltype, 
+static compvar2_t gribapiVarSet(int param, int level1, int level2, int leveltype,
                                 int tsteptype, char *name, var_tile_t tiles_data)
 {
   compvar2_t compVar;
@@ -694,10 +723,26 @@ void ensureBufferSize(size_t requiredSize, size_t *curSize, void **buffer)
 static
 grib_handle *gribapiGetDiskRepresentation(size_t recsize, size_t *buffersize, void **gribbuffer, int *outDatatype, int *outCompressionType, size_t *outUnzipsize)
 {
-  bool lieee = false;
+  int gribversion = (int)((char*)*gribbuffer)[7];
+
+  if ( gribversion <= 1 )
+    {
+      if ( gribGetZip(recsize, *gribbuffer, outUnzipsize) > 0 )
+        {
+          *outCompressionType = CDI_COMPRESS_SZIP;
+          ensureBufferSize(*outUnzipsize + 100, buffersize, gribbuffer);
+        }
+      else
+        {
+          *outCompressionType = CDI_COMPRESS_NONE;
+        }
+    }
 
   grib_handle *gh = grib_handle_new_from_message(NULL, *gribbuffer, recsize);
-  if(gribEditionNumber(gh) > 1)
+
+  bool lieee = false;
+
+  if ( gribversion > 1 )
     {
       size_t len = 256;
       char typeOfPacking[256];
@@ -708,18 +753,6 @@ grib_handle *gribapiGetDiskRepresentation(size_t recsize, size_t *buffersize, vo
           if      ( strncmp(typeOfPacking, "grid_jpeg", len) == 0 ) *outCompressionType = CDI_COMPRESS_JPEG;
           else if ( strncmp(typeOfPacking, "grid_ccsds", len) == 0 ) *outCompressionType = CDI_COMPRESS_SZIP;
           else if ( strncmp(typeOfPacking, "grid_ieee", len) == 0 ) lieee = true;
-        }
-    }
-  else
-    {
-      if( gribGetZip(recsize, *gribbuffer, outUnzipsize) > 0 )
-        {
-          *outCompressionType = CDI_COMPRESS_SZIP;
-          ensureBufferSize(*outUnzipsize + 100, buffersize, gribbuffer);
-        }
-      else
-        {
-          *outCompressionType = CDI_COMPRESS_NONE;
         }
     }
 
@@ -739,6 +772,7 @@ grib_handle *gribapiGetDiskRepresentation(size_t recsize, size_t *buffersize, vo
           if ( bitsPerValue > 0 && bitsPerValue <= 32 ) *outDatatype = (int)bitsPerValue;
         }
     }
+
   return gh;
 }
 
@@ -1679,6 +1713,8 @@ void gribapiDefStepUnits(int editionNumber, grib_handle *gh, int timeunit, int p
         }
       else
         {
+	  // NOTE KNMI:  HIRLAM model files LAMH_D11 are in grib1 and do NOT have key indicatorOfUnitForTimeRange
+	  // Watch out for compatibility issues.
           GRIB_CHECK(my_grib_set_long(gh, "indicatorOfUnitOfTimeRange", unitsOfTime), 0);
         }
     }
@@ -1691,25 +1727,10 @@ int gribapiDefSteptype(int editionNumber, grib_handle *gh, int productDefinition
   size_t len = 64;
   const char *stepType;
 
-  static struct {
-    long productionTemplate;
-    const char sname[8];
-  } ts_tab[] = {
-    [TSTEP_INSTANT] = {  0, "instant" },
-    [TSTEP_AVG] = { 8, "avg" },
-    [TSTEP_ACCUM] = {  8, "accum" },
-    [TSTEP_MAX] = {  8, "max" },
-    [TSTEP_MIN] = {  8, "min" },
-    [TSTEP_DIFF] = {  8, "diff" },
-    [TSTEP_RMS] = {  8, "rms" },
-    [TSTEP_SD] = {  8, "sd" },
-    [TSTEP_COV] = { 8, "cov" },
-    [TSTEP_RATIO] = {  8, "ratio" }
-  };
   if (tsteptype >= TSTEP_INSTANT && tsteptype <= TSTEP_RATIO)
     {
-      stepType = ts_tab[tsteptype].sname;
-      proDefTempNum = ts_tab[tsteptype].productionTemplate;
+      stepType = cdiGribAPI_ts_str_map[tsteptype].sname;
+      proDefTempNum = cdiGribAPI_ts_str_map[tsteptype].productionTemplate;
     }
   else
     {
@@ -1770,7 +1791,7 @@ int gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, int rdate, int rti
 
   int factor = getTimeunitFactor(timeunit);
 
-  if ( !(int) fmod(days*86400.0 + secs, factor) )
+  if ( !(int)(fmod(days*86400.0 + secs, factor)))
     {
       int proDefTempNum = gribapiDefSteptype(editionNumber, gh, productDefinitionTemplate, typeOfGeneratingProcess, tsteptype, gcinit);
 
@@ -1937,10 +1958,17 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
         }
     }
 
-  if ( gridtype == GRID_PROJECTION && gridInqProjType(gridID) == CDI_PROJ_RLL )
+  if ( gridtype == GRID_PROJECTION )
     {
-      gridtype = GRID_LONLAT;
-      lrotated = true;
+      if ( gridInqProjType(gridID) == CDI_PROJ_RLL )
+        {
+          gridtype = GRID_LONLAT;
+          lrotated = true;
+        }
+      else if ( gridInqProjType(gridID) == CDI_PROJ_LCC )
+        {
+          gridtype = GRID_LCC;
+        }
     }
 
   if ( gridtype == GRID_LONLAT || gridtype == GRID_GAUSSIAN )
@@ -1967,7 +1995,6 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
       {
 	double xfirst = 0, xlast = 0, xinc = 0;
 	double yfirst = 0, ylast = 0, yinc = 0;
-	double latIncr;
 
         const char *mesg;
         size_t len;
@@ -1997,8 +2024,8 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
           }
         GRIB_CHECK(my_grib_set_string(gh, "gridType", mesg, &len), 0);
 
-	long nlon = gridInqXsize(gridID);
-	long nlat = gridInqYsize(gridID);
+	int nlon = gridInqXsize(gridID);
+	int nlat = gridInqYsize(gridID);
 
 	if ( gridtype == GRID_GAUSSIAN_REDUCED )
 	  {
@@ -2009,14 +2036,14 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 	    gridInqRowlon(gridID, rowlon);
 	    for ( int i = 0; i < nlat; ++i ) pl[i] = rowlon[i];
 
-            GRIB_CHECK(grib_set_long_array(gh, "pl", pl, nlat), 0);
+            GRIB_CHECK(grib_set_long_array(gh, "pl", pl, (size_t)nlat), 0);
 
 	    Free(pl);
 	    Free(rowlon);
 
 	    xfirst = 0;
-	    xlast  = 360.-360./(nlat*2);
-	    xinc   = 360./(nlat*2);
+	    xinc   =        360. * 0.5 / (double)nlat;
+	    xlast  = 360. - 360. * 0.5 / (double)nlat;
 	  }
 	else
 	  {
@@ -2025,7 +2052,7 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 	      {
 		xfirst = gridInqXval(gridID, 0);
                 xlast  = gridInqXval(gridID, (lcurvi ? nlon*nlat : nlon) - 1);
-		xinc   = gridInqXinc(gridID);
+		xinc   = fabs(gridInqXinc(gridID));
 	      }
 	  }
 
@@ -2034,7 +2061,7 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 	  {
 	    yfirst = gridInqYval(gridID, 0);
             ylast  = gridInqYval(gridID, (lcurvi ? nlon*nlat : nlat) - 1);
-	    yinc   = gridInqYinc(gridID);
+	    yinc   = fabs(gridInqYinc(gridID));
 	  }
 
 	if ( gridtype != GRID_GAUSSIAN_REDUCED ) GRIB_CHECK(my_grib_set_long(gh, "Ni", nlon), 0);
@@ -2047,8 +2074,11 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 	GRIB_CHECK(my_grib_set_double(gh, "latitudeOfLastGridPointInDegrees",   ylast), 0);
 
         {
-          long jscan = 0;
-          if ( yfirst < ylast ) jscan = 1;
+          long iscan = xfirst > xlast;
+          GRIB_CHECK(my_grib_set_long(gh, "iScansNegatively", iscan), 0);
+        }
+        {
+          long jscan = yfirst < ylast;
           GRIB_CHECK(my_grib_set_long(gh, "jScansPositively", jscan), 0);
         }
 
@@ -2060,9 +2090,7 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
           }
 	else
 	  {
-	    latIncr = yinc;
-	    if ( latIncr < 0 ) latIncr = -latIncr;
-	    GRIB_CHECK(my_grib_set_double(gh, "jDirectionIncrementInDegrees", latIncr), 0);
+	    GRIB_CHECK(my_grib_set_double(gh, "jDirectionIncrementInDegrees", yinc), 0);
 	  }
 
 	if ( lrotated )
@@ -2070,7 +2098,7 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
             double xpole = 0, ypole = 0, angle = 0;
             gridInqParamRLL(gridID, &xpole, &ypole, &angle);
 
-            xpole =  xpole + 180;
+            xpole += 180;
             if ( fabs(ypole) > 0 ) ypole = -ypole; // change from north to south pole
             if ( fabs(angle) > 0 ) angle = -angle;
             GRIB_CHECK(my_grib_set_double(gh, "latitudeOfSouthernPoleInDegrees",  ypole), 0);
@@ -2096,55 +2124,69 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
         if ( lieee )
           GRIB_CHECK(my_grib_set_long(gh, "precision", datatype == CDI_DATATYPE_FLT64 ? 2 : 1), 0);
 
+        long uvRelativeToGrid = gridInqUvRelativeToGrid(gridID);
+        if ( uvRelativeToGrid ) GRIB_CHECK(my_grib_set_long(gh, "uvRelativeToGrid", uvRelativeToGrid), 0);
+
 	break;
       }
     case GRID_LCC:
       {
-	double originLon, originLat, lonParY, lat1, lat2, xincm, yincm;
-	int projflag, scanflag;
-
 	int xsize = gridInqXsize(gridID);
 	int ysize = gridInqYsize(gridID);
 
-	gridInqParamLCC(gridID, &originLon, &originLat, &lonParY, &lat1, &lat2, &xincm, &yincm,
-                        &projflag, &scanflag);
+        double lon_0, lat_0, lat_1, lat_2, a, rf, xval_0, yval_0, x_0, y_0;
+	gridInqParamLCC(gridID, grid_missval, &lon_0, &lat_0, &lat_1, &lat_2, &a, &rf, &xval_0, &yval_0, &x_0, &y_0);
+	gridVerifyGribParamLCC(grid_missval, &lon_0, &lat_0, &lat_1, &lat_2, &a, &rf, &xval_0, &yval_0, &x_0, &y_0);
+        if ( xval_0 < 0 ) xval_0 += 360;
+        bool lsouth = (lat_1 < 0);
+        if ( lsouth ) { lat_1 = -lat_2; lat_2 = -lat_2; }
+        int projflag = 0;
+        if ( lsouth ) gribbyte_set_bit(&projflag, 1);
+
+        double xinc = gridInqXinc(gridID);
+        double yinc = gridInqYinc(gridID);
 
         static const char mesg[] = "lambert";
-        size_t len = sizeof (mesg) -1;
+        size_t len = sizeof(mesg) -1;
         GRIB_CHECK(my_grib_set_string(gh, "gridType", mesg, &len), 0);
 
 	GRIB_CHECK(my_grib_set_long(gh, "Nx", xsize), 0);
 	GRIB_CHECK(my_grib_set_long(gh, "Ny", ysize), 0);
+	GRIB_CHECK(my_grib_set_long(gh, "DxInMetres", lround(xinc)), 0);
+	GRIB_CHECK(my_grib_set_long(gh, "DyInMetres", lround(yinc)), 0);
+	GRIB_CHECK(my_grib_set_double(gh, "longitudeOfFirstGridPointInDegrees", xval_0), 0);
+	GRIB_CHECK(my_grib_set_double(gh, "latitudeOfFirstGridPointInDegrees", yval_0), 0);
+	GRIB_CHECK(my_grib_set_double(gh, "LoVInDegrees", lon_0), 0);
+	GRIB_CHECK(my_grib_set_double(gh, "Latin1InDegrees", lat_1), 0);
+	GRIB_CHECK(my_grib_set_double(gh, "Latin2InDegrees", lat_2), 0);
+        GRIB_CHECK(my_grib_set_long(gh, "projectionCentreFlag", projflag), 0);
 
-        /* FIXME: lround should probably be round here */
-	GRIB_CHECK(my_grib_set_double(gh, "DxInMetres", (double)lround(xincm)), 0);
-        /* FIXME: lround should probably be round here */
-	GRIB_CHECK(my_grib_set_double(gh, "DyInMetres", (double)lround(yincm)), 0);
-	GRIB_CHECK(my_grib_set_double(gh, "longitudeOfFirstGridPointInDegrees", originLon), 0);
-	GRIB_CHECK(my_grib_set_double(gh, "latitudeOfFirstGridPointInDegrees", originLat), 0);
-	GRIB_CHECK(my_grib_set_double(gh, "LoVInDegrees", lonParY), 0);
-	GRIB_CHECK(my_grib_set_double(gh, "Latin1InDegrees", lat1), 0);
-	GRIB_CHECK(my_grib_set_double(gh, "Latin2InDegrees", lat2), 0);
+        long uvRelativeToGrid = gridInqUvRelativeToGrid(gridID);
+        if ( uvRelativeToGrid ) GRIB_CHECK(my_grib_set_long(gh, "uvRelativeToGrid", uvRelativeToGrid), 0);
+        long earthIsOblate = (IS_EQUAL(a, 6378160.) && IS_EQUAL(rf, 297.));
+        if ( earthIsOblate ) GRIB_CHECK(my_grib_set_long(gh, "earthIsOblate", earthIsOblate), 0);
 
+        int scanflag = 0;
+        gribbyte_set_bit(&scanflag, 2);
         if ( editionNumber <= 1 )
-          {
-            GRIB_CHECK(my_grib_set_long(gh, "projectionCenterFlag", projflag), 0);
-            GRIB_CHECK(my_grib_set_long(gh, "scanningMode", scanflag), 0);
-          }
+          GRIB_CHECK(my_grib_set_long(gh, "scanningMode", (long)scanflag), 0);
 
 	break;
       }
     case GRID_SPECTRAL:
       {
-        static const char mesg[] = "sh";
-        size_t len = sizeof (mesg) -1;
-	GRIB_CHECK(my_grib_set_string(gh, "gridType", mesg, &len), 0);
-
-	int trunc = gridInqTrunc(gridID);
-	GRIB_CHECK(my_grib_set_long(gh, "J", trunc), 0);
-	GRIB_CHECK(my_grib_set_long(gh, "K", trunc), 0);
-	GRIB_CHECK(my_grib_set_long(gh, "M", trunc), 0);
-
+        {
+          static const char mesg[] = "sh";
+          size_t len = sizeof (mesg) -1;
+          GRIB_CHECK(my_grib_set_string(gh, "gridType", mesg, &len), 0);
+        }
+	{
+          int trunc = gridInqTrunc(gridID);
+          enum { numTruncAtt = 3 };
+          static const char truncAttNames[numTruncAtt][2] = { "J", "K", "M" };
+          for (size_t i = 0; i < numTruncAtt; ++i)
+            GRIB_CHECK(my_grib_set_long(gh, truncAttNames[i], trunc), 0);
+        }
 	// GRIB_CHECK(my_grib_set_long(gh, "numberOfDataPoints", gridsize), 0);
         /*
         if ( lieee )
@@ -2161,10 +2203,11 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
             static const char mesg[] = "spectral_complex";
             size_t len = sizeof (mesg) -1;
 	    GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
-
-	    GRIB_CHECK(my_grib_set_long(gh, "JS", 20), 0);
-	    GRIB_CHECK(my_grib_set_long(gh, "KS", 20), 0);
-	    GRIB_CHECK(my_grib_set_long(gh, "MS", 20), 0);
+            enum { numTruncAtt = 3 };
+            static const char truncAttNames[numTruncAtt][3]
+              = { "JS", "KS", "MS" };
+            for (size_t i = 0; i < numTruncAtt; ++i)
+              GRIB_CHECK(my_grib_set_long(gh, truncAttNames[i], 20), 0);
 	  }
 	else
 	  {
@@ -2248,16 +2291,14 @@ static
 void getLevelFactor(double level, long *factor, long *out_scaled_value)
 {
   double scaled_value  = level;
-  /* FIXME: lround might be better here */
-  long   iscaled_value = (long) round(scaled_value);
+  long   iscaled_value = lround(scaled_value);
   long   i;
 
   const double eps = 1.e-8;
   for ( i=0; (fabs(scaled_value - (double) iscaled_value) >= eps) && i < 7; i++ )
     {
       scaled_value *= 10.;
-      /* FIXME: lround might be better here */
-      iscaled_value = (long)round(scaled_value);
+      iscaled_value = lround(scaled_value);
     }
 
   (*factor)           = i;
@@ -2268,7 +2309,7 @@ static
 void gribapiDefLevelType(grib_handle *gh, int gcinit, const char *keyname, long leveltype)
 {
   bool lset = false;
-  if ( (leveltype == 99 || leveltype == 100) && gribEditionNumber(gh) == 1 )
+  if ( (leveltype == GRIB1_LTYPE_ISOBARIC_PA || leveltype == 99 || leveltype == 100) && gribEditionNumber(gh) == 1 )
     {
       if ( gribGetLong(gh, "indicatorOfTypeOfLevel") != leveltype ) lset = true;
     }
@@ -2562,6 +2603,427 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelI
     }
 }
 
+
+int gribapiGetScanningMode(grib_handle *gh)
+{
+  long iScansNegatively;
+  long jScansPositively;
+  long jPointsAreConsecutive;
+
+  GRIB_CHECK(grib_get_long(gh, "iScansNegatively", &iScansNegatively), 0);
+  GRIB_CHECK(grib_get_long(gh, "jScansPositively", &jScansPositively), 0);
+  GRIB_CHECK(grib_get_long(gh, "jPointsAreConsecutive", &jPointsAreConsecutive), 0);
+  int scanningMode
+    = 128*(bool)iScansNegatively
+    + 64 *(bool)jScansPositively
+    + 32 *(bool)jPointsAreConsecutive;
+  if (cdiDebugExt>=30)
+    printf("gribapiGetScanningMode(): Scanning mode = %02d (%1d%1d%1d)*32; \n",\
+            scanningMode,(int)jPointsAreConsecutive,(int)jScansPositively,(int)iScansNegatively);
+
+ return scanningMode;
+}
+
+
+void gribapiSetScanningMode(grib_handle *gh, int scanningMode)
+{
+   // 127: reserved for testing; generated test data will be in 64 scanning mode
+  //if (scanningMode== 127)  scanningMode = 64;
+
+  long iScansNegatively      = (scanningMode & 128)/128;
+  long jScansPositively      = (scanningMode & 64)/64;
+  long jPointsAreConsecutive = (scanningMode & 32)/32;
+
+  if (cdiDebugExt>=30)
+  {
+    long paramId, levelTypeId, levelId, uvRelativeToGrid;
+    GRIB_CHECK(grib_get_long(gh, "uvRelativeToGrid", &uvRelativeToGrid), 0);
+    GRIB_CHECK(grib_get_long(gh, "indicatorOfParameter", &paramId), 0);
+    GRIB_CHECK(grib_get_long(gh, "indicatorOfTypeOfLevel", &levelTypeId), 0);
+    GRIB_CHECK(grib_get_long(gh, "level", &levelId), 0);
+    printf("gribapiSetScanningMode(): (param,ltype,level) = (%3d,%3d,%4d); Scanning mode = %02d (%1d%1d%1d)*32;  uvRelativeToGrid = %02d\n",\
+            (int)paramId, (int)levelTypeId, (int)levelId,
+            scanningMode,(int)jPointsAreConsecutive,(int)jScansPositively,(int)iScansNegatively,
+            (int)uvRelativeToGrid);
+  }
+
+  GRIB_CHECK(my_grib_set_long(gh, "iScansNegatively", iScansNegatively), 0);
+  GRIB_CHECK(my_grib_set_long(gh, "jScansPositively", jScansPositively), 0);
+  GRIB_CHECK(my_grib_set_long(gh, "jPointsAreConsecutive", jPointsAreConsecutive), 0);
+}
+
+
+static void gribapiSetUvRelativeToGrid(grib_handle *gh, int mode)
+{
+  long uvRelativeToGridMode = mode;
+  long uvRelativeToGridModeOld;
+
+  GRIB_CHECK(grib_get_long(gh, "uvRelativeToGrid", &uvRelativeToGridModeOld), 0);
+
+  if (cdiDebugExt>=30)
+    printf("gribapiSetUvRelativeToGrid():  uvRelativeToGrid: %02d (old) => %02d (new); \n",(int)uvRelativeToGridModeOld,(int)uvRelativeToGridMode);
+
+  GRIB_CHECK(my_grib_set_long(gh, "uvRelativeToGrid", uvRelativeToGridMode), 0);
+}
+
+
+  /*
+    TABLE 8. SCANNING MODE FLAG
+
+    (GDS Octet 28)
+    BIT     VALUE     MEANING
+    1       0       Points scan in +i direction
+            1       Points scan in -i direction
+    2       0       Points scan in -j direction
+            1       Points scan in +j direction
+    3       0       Adjacent points in i direction are consecutive
+                      (FORTRAN: (I,J))
+            1       Adjacent points in j direction are consecutive
+                    (FORTRAN: (J,I))
+
+    => Scanning Mode     0 0 0 0 0 0 0 0  (00 dec)  +i, -j; i direction consecutive (row-major    order West->East   & North->South)
+    => Scanning Mode     0 1 0 0 0 0 0 0  (64 dec)  +i, +j; i direction consecutive (row-major    order West->East   & South->North )
+    => Scanning Mode     1 1 0 0 0 0 0 0  (96 dec)  +i, +j; j direction consecutive (column-major order South->North & West->East )
+
+    NOTE:  South->North  - As if you would plot the data as image on the screen
+                           where [0,0] of the data is the top-left pixel.
+
+                           grib2ppm LAMH_D11_201302150000_00000_oro | display ppm:-
+                           ImageMagick (display): [0,0] of an image belongs to the top-left pixel
+    [DEFAULT] : 64 dec
+
+    iScansNegatively = 0;
+    jScansPositively = 1;
+    jPointsAreConsecutive = 0;    => Scanning Mode 64
+
+    cdo selindexbox,1,726,100,550 LAMH_D11_201302150000_00000_oro LAMH_D11_201302150000_00000_oro_cropped
+    grib2ppm LAMH_D11_201302150000_00000_oro_cropped | /usr/bin/display ppm:- &
+    # ^^^ this image will be missing the souther parts of data
+
+    grib2ppm LAMH_D11_201302150000_00000_oro | /usr/bin/display ppm:- &
+    # ^ full domain data
+  */
+
+#ifdef HIRLAM_EXTENSIONS
+static void
+verticallyFlipGridDefinitionWhenScanningModeChanged(grib_handle *gh, double yfirst, double ylast, double yinc )
+{
+  /*
+  Nj = 550;
+  latitudeOfFirstGridPointInDegrees = -30.8;
+  latitudeOfLastGridPointInDegrees = 24.1;
+  iScansNegatively = 0;
+  jScansPositively = 0;
+  jPointsAreConsecutive = 0;
+  jDirectionIncrementInDegrees = 0.1;
+
+  When switching from scanning mode 0 <=> 64
+  yfirst = -30.8 + (550-1)*0.1
+
+  yfirst = yfirst + (ysize-1) * yinc
+  yinc   = -1.0*yinc
+
+  */
+
+
+  //long jDim=0;
+  //GRIB_CHECK(grib_get_long(gh, "Nj", &jDim), 0);
+
+  double latitudeOfFirstGridPointInDegrees;
+  double latitudeOfLastGridPointInDegrees;
+  double jDirectionIncrementInDegrees;
+
+  //GRIB_CHECK(grib_get_double(gh, "latitudeOfFirstGridPointInDegrees", &latitudeOfFirstGridPointInDegrees), 0);  // yfirst
+  //GRIB_CHECK(grib_get_double(gh, "latitudeOfLastGridPointInDegrees", &latitudeOfLastGridPointInDegrees), 0);    // ylast
+  //GRIB_CHECK(grib_get_double(gh, "jDirectionIncrementInDegrees", &jDirectionIncrementInDegrees), 0);  // yinc
+
+  if (cdiDebugExt>=10)
+  {
+      Message(" BEFORE: yfirst = %f; ylast = %f; yinc = %f; ", yfirst,ylast, yinc);
+  }
+
+  GRIB_CHECK(my_grib_set_double(gh, "latitudeOfFirstGridPointInDegrees", ylast), 0);
+  GRIB_CHECK(my_grib_set_double(gh, "latitudeOfLastGridPointInDegrees", yfirst), 0);
+  //yinc *= -1.0; // don't set yinc here ...
+  //GRIB_CHECK(my_grib_set_double(gh, "jDirectionIncrementInDegrees", yinc), 0);
+
+  if (cdiDebugExt>=10)
+  {
+    GRIB_CHECK(grib_get_double(gh, "latitudeOfFirstGridPointInDegrees", &latitudeOfFirstGridPointInDegrees), 0);  // yfirst
+    GRIB_CHECK(grib_get_double(gh, "latitudeOfLastGridPointInDegrees", &latitudeOfLastGridPointInDegrees), 0);    // ylast
+    GRIB_CHECK(grib_get_double(gh, "jDirectionIncrementInDegrees", &jDirectionIncrementInDegrees), 0);  // yinc
+    Message("CHANGED INTO:  yfirst = %f, ylast = %f, yinc = %f",latitudeOfFirstGridPointInDegrees,latitudeOfLastGridPointInDegrees, jDirectionIncrementInDegrees);
+  }
+}
+
+static void
+convertDataScanningMode(int scanModeIN, int scanModeOUT, double *data,
+                        int gridsize, int iDim, int jDim)
+{
+  int i,j;
+  int idxIN, idxOUT;
+
+   // 127: reserved for testing; it will generate test data in 64 scanning mode
+  if (scanModeOUT== 127)  // fill with testdata ...
+  {
+      scanModeOUT = 64;
+      if (cdiDebugExt>=30) printf("convertDataScanningMode(): Generating test data in 64 scanning mode..\n");
+      for (j=0; j<jDim; j++)
+      {
+        int jXiDim = j*iDim;
+        for (i=0; i<iDim; i++)
+        {
+          idxIN = i + jXiDim;
+          data[idxIN] = (double) (100.0*j +i);
+        }
+      }
+  }
+
+  if ( (iDim*jDim)!= gridsize)
+  {
+    if (cdiDebugExt>=30) printf("convertDataScanningMode(): ERROR: (iDim*jDim)!= gridsize;  (%d * %d) != %d\n", iDim,jDim, gridsize);
+    return;
+  }
+  if (cdiDebugExt>=30) printf("convertDataScanningMode(): scanModeIN=%02d => scanModeOUT=%02d ; where: (iDim * jDim == gridsize)  (%d*%d == %d)\n",scanModeIN, scanModeOUT, iDim,jDim, gridsize);
+
+  if (cdiDebugExt>=100)
+  {
+      printf("convertDataScanningMode(): data IN:\n");
+      for (j=0; j<jDim; j++)
+      {
+        int jXiDim = j*iDim;
+        for (i=0; i<iDim; i++)
+        {
+          idxIN = i + jXiDim;
+          printf("%03.0f, ",data[idxIN]);
+        }
+        printf("\n");
+      }
+  }
+
+  if (scanModeIN==scanModeOUT)
+  {
+    if (cdiDebugExt>=30) printf("convertDataScanningMode(): INFO: Nothing to do;  scanModeIN==scanModeOUT..\n");
+    return;
+  }
+
+  if (0)
+  {
+      return;
+      if (scanModeOUT==00)
+      {
+          if (cdiDebugExt>0) printf("convertDataScanningMode(): Leave data unchaged BUT set scanModeOUT=00.\n");
+          // CHECK:  Looks like that GRIB-API provide (no matter what) data in the scannning mode 00, even it is store in the gribfile as 64 !!
+          return;
+      }
+  }
+  double *dataCopy = NULL;
+  dataCopy = (double *) malloc(gridsize*sizeof(double));
+
+  memcpy((void*)dataCopy,(void*) data, gridsize*sizeof(double));
+
+  if (scanModeIN==64)           // Scanning Mode (00 dec)  +i, -j; i direction consecutive (row-major    order West->East   & South->North )
+  {                             // Scanning Mode (64 dec)  +i, +j; i direction consecutive (row-major    order West->East   & North->South )
+                                // Scanning Mode (96 dec)  +i, +j; j direction consecutive (column-major order North->South & West->East )
+      if (scanModeOUT==00)
+      // CHECK:  Looks like that GRIB-API provide (no matter what) data in the scannning mode 00, even it is store in the gribfile as 64 !!
+#define VERTICAL_FLIP
+#ifdef VERTICAL_FLIP
+      { // flip the data vertically ..
+        idxIN= 0; idxOUT= (jDim-1)*iDim;
+        if (cdiDebugExt>=30) printf("convertDataScanningMode():  copying rows nr. (%04d : %04d)\n",0,jDim-1);
+        for (j=0; j<jDim; j++)
+        {
+          memcpy((void*)&data[idxOUT], (void*)&dataCopy[idxIN], iDim*sizeof(double));
+          idxIN  += iDim; idxOUT -= iDim;
+        }
+      } // end if (scanModeOUT==00)*/
+#endif
+#ifdef HORIZONTAL_FLIP
+      { // flip data horizontally ...
+        if (1)
+        {
+            if (cdiDebugExt>=30) printf("convertDataScanningMode():  copying columns nr. (%04d : %04d);\n", 0, iDim-1);
+            for (i=0; i<iDim; i++)
+            {
+              for (j=0; j<jDim; j++)
+              {
+                int jXiDim = j*iDim;
+                idxIN  = i           + jXiDim;
+                //data[idxIN] = (double) (100.0*j +i);  // just some testdata ..
+                idxOUT = iDim - i -1 + jXiDim;
+                //printf("[%03d=>%03d] = %f;",idxIN,idxOUT,dataCopy[idxIN]);
+                data[idxOUT] =  dataCopy[idxIN];
+              }
+            }
+        }
+      } // end if (scanModeOUT==00)
+#endif
+
+      if (scanModeOUT==96)
+      { // transpose the data
+        if (cdiDebugExt>=30) printf("convertDataScanningMode():  transpose data rows=>columns nr. (%04d : %04d) => (%04d : %04d);\n", 0, iDim-1, 0, jDim-1);
+        for (j=0; j<jDim; j++)
+        {
+          int jXiDim = j*iDim;
+          for (i=0; i<iDim; i++)
+          {
+            idxIN  = i + jXiDim;
+            idxOUT = j + i*jDim;
+            //printf("[%03d=>%03d] = %f;",idxIN,idxOUT,dataCopy[idxIN]);
+            data[idxOUT] =  dataCopy[idxIN];
+          }
+          //printf(".\n");
+        }
+      } // end if (scanModeOUT==96)
+  } // end if (scanModeIN==64)
+
+  if (scanModeIN==00)           // Scanning Mode (00 dec)  +i, -j; i direction consecutive (row-major    order West->East   & South->North )
+  {                             // Scanning Mode (64 dec)  +i, +j; i direction consecutive (row-major    order West->East   & North->South )
+                               // Scanning Mode (96 dec)  +i, +j; j direction consecutive (column-major order North->South & West->East )
+    if (scanModeOUT==64)
+      { // flip the data vertically ..
+        idxIN= 0; idxOUT= (jDim-1)*iDim;
+        for (j=0; j<jDim; j++)
+        {
+          if (cdiDebugExt>=25) printf("convertDataScanningMode():  copying row nr. %04d; [idxIN=%08d] => [idxOUT=%08d]\n",j, idxIN, idxOUT);
+          memcpy((void*)&data[idxOUT], (void*)&dataCopy[idxIN], iDim*sizeof(double));
+          idxIN  += iDim; idxOUT -= iDim;
+        }
+      } // end if (scanModeOUT==64)
+
+      if (scanModeOUT==96)
+      { // transpose the data
+        int jInv;
+        for (j=0; j<jDim; j++)
+        {
+          if (cdiDebugExt>=30) printf("convertDataScanningMode():  processing row nr. %04d;\n", j);
+          jInv = (jDim-1) -j;
+          for (i=0; i<iDim; i++)
+            data[j + i*jDim] =  dataCopy[i + jInv*iDim];  // source data has -j
+        }
+      } // end if (scanModeOUT==96)
+  } // end if (scanModeIN==00)
+
+  if (scanModeIN==96)           // Scanning Mode (00 dec)  +i, -j; i direction consecutive (row-major    order West->East   & South->North )
+  {                             // Scanning Mode (64 dec)  +i, +j; i direction consecutive (row-major    order West->East   & North->South )
+                                // Scanning Mode (96 dec)  +i, +j; j direction consecutive (column-major order North->South & West->East )
+    if (scanModeOUT==64)
+      { // transpose the data
+        for (j=0; j<jDim; j++)
+        {
+          if (cdiDebugExt>=30) printf("convertDataScanningMode():  processing row nr. %04d;\n", j);
+          int jXiDim = j*iDim;
+          for (i=0; i<iDim; i++)
+            //data[j + i*jDim] =  dataCopy[i + j*iDim];
+            data[i + jXiDim] =  dataCopy[j + i*jDim];
+        }
+      } // end if (scanModeOUT==64)
+
+      if (scanModeOUT==00)
+      { // transpose the data
+        idxIN= 0; idxOUT= 0;
+        int jInv;
+        for (j=0; j<jDim; j++)
+        {
+          if (cdiDebugExt>=30) printf("convertDataScanningMode():  processing row nr. %04d;\n", j);
+          jInv = (jDim-1) -j;
+          int jXiDim = j*iDim;
+          for (i=0; i<iDim; i++)
+            //data[jInv + iXjDim] =  dataCopy[i + jXiDim];  // target data has -j
+            data[i + jXiDim] =  dataCopy[jInv + i*jDim];  // target data has -j
+        }
+      } // end if (scanModeOUT==00)
+  } // end if (scanModeIN==96)
+
+  if (cdiDebugExt>=100)
+  {
+      printf("convertDataScanningMode(): data OUT (new scanning mode):\n");
+      for (j=0; j<jDim; j++)
+      {
+        int jXiDim = j*iDim;
+        for (i=0; i<iDim; i++)
+        {
+          idxIN = i + jXiDim;
+          printf("%03.0f, ",data[idxIN]);
+        }
+        printf("\n");
+      }
+  }
+
+  free(dataCopy); return;
+}
+#endif //HIRLAM_EXTENSIONS
+
+static
+void gribapiSetExtMode(grib_handle *gh, int gridID, long datasize, const double *data)
+{
+  /*
+  Nj = 550;
+  latitudeOfFirstGridPointInDegrees = -30.8;
+  latitudeOfLastGridPointInDegrees = 24.1;
+  iScansNegatively = 0;
+  jScansPositively = 0;
+  jPointsAreConsecutive = 0;
+  jDirectionIncrementInDegrees = 0.1; */
+#ifndef HIRLAM_EXTENSIONS
+  (void)data;
+  (void)datasize;
+#endif
+  int gridtype = gridInqType(gridID);
+  if ( gridtype == GRID_GENERIC || gridtype == GRID_LONLAT || gridtype == GRID_GAUSSIAN ||
+       gridtype == GRID_GAUSSIAN_REDUCED || gridtype == GRID_PROJECTION )
+    {
+#ifdef HIRLAM_EXTENSIONS
+      int scanModeIN = gridInqScanningMode(gridID);
+
+      if (cdiDebugExt>=100)
+        {
+          int gridsize = gridInqSize(gridID);
+          Message("(scanModeIN=%d; gridsize=%d", scanModeIN, gridsize);
+        }
+
+      if ( cdiGribDataScanningMode.active )   // allowed modes: <0, 64, 96>; Default is 64
+        {
+          int iDim = gridInqXsize(gridID);
+          int jDim = gridInqYsize(gridID);
+
+          double yfirst = gridInqYval(gridID,      0);
+          double ylast  = gridInqYval(gridID, jDim-1);
+          double yinc   = gridInqYinc(gridID);
+
+          int scanModeOUT = cdiGribDataScanningMode.value;
+          convertDataScanningMode(scanModeIN, scanModeOUT, (double*)data, datasize, iDim, jDim);
+          // This will overrule the old scanning mode of the given grid
+          if (cdiDebugExt>=10) Message("Set GribDataScanningMode (%d) => (%d)", scanModeIN, cdiGribDataScanningMode.value);
+          gribapiSetScanningMode(gh, cdiGribDataScanningMode.value);
+
+          if (((scanModeIN==00) && (cdiGribDataScanningMode.value==64)) ||
+              ((scanModeIN==64) && (cdiGribDataScanningMode.value==00)) )
+            verticallyFlipGridDefinitionWhenScanningModeChanged(gh, yfirst, ylast, yinc);
+        }
+      else
+        {
+          if (cdiDebugExt>=100) Message("Set GribDataScanningMode => (%d) based on used grid", scanModeIN);
+          gribapiSetScanningMode(gh, scanModeIN);
+        }
+#endif
+
+      if ( cdiGribChangeModeUvRelativeToGrid.active )
+        {
+          // this will overrule/change the UvRelativeToGrid flag;
+          // typically when the wind is rotated with respect to north pole
+          if (cdiDebugExt>=100) Message("Set ModeUvRelativeToGrid =>%d ( note grid has: %d)", cdiGribChangeModeUvRelativeToGrid.mode, gridInqUvRelativeToGrid(gridID));
+          GRIB_CHECK(my_grib_set_long(gh, "uvRelativeToGrid", (long) cdiGribChangeModeUvRelativeToGrid.mode), 0);
+        }
+      else
+        {
+          if (cdiDebugExt>=100) Message("Set ModeUvRelativeToGrid =>%d based on used grid", gridInqUvRelativeToGrid(gridID));
+          gribapiSetUvRelativeToGrid(gh, gridInqUvRelativeToGrid(gridID));
+        }
+    }
+}
+
 /* #define GRIBAPIENCODETEST 1 */
 
 size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisID,
@@ -2615,7 +3077,8 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
     }
   */
 
-  gribapiDefTime((int)editionNumber, productDefinitionTemplate, typeOfGeneratingProcess, gh, vdate, vtime, tsteptype, numavg, vlistInqTaxis(vlistID), gc->init);
+  gribapiDefTime((int)editionNumber, productDefinitionTemplate, typeOfGeneratingProcess,
+                 gh, vdate, vtime, tsteptype, numavg, vlistInqTaxis(vlistID), gc->init);
 
   if ( ! gc->init ) gribapiDefInstitut(gh, vlistID, varID);
   if ( ! gc->init ) gribapiDefModel(gh, vlistID, varID);
@@ -2681,6 +3144,8 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
       GRIB_CHECK(my_grib_set_double(gh, "missingValue", vlistInqVarMissval(vlistID, varID)), 0);
     }
 
+  gribapiSetExtMode(gh, gridID, datasize, data);
+
   GRIB_CHECK(grib_set_double_array(gh, "values", data, (size_t)datasize), 0);
 
   /* get the size of coded message  */
@@ -2700,6 +3165,20 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
 
   return recsize;
 }
+
+
+void gribapiChangeParameterIdentification(grib_handle *gh, int code, int ltype, int lev)
+{
+  long  indicatorOfParameter,  indicatorOfTypeOfLevel,  level; //  timeRangeIndicator: could be included later
+  indicatorOfParameter = code;
+  indicatorOfTypeOfLevel = ltype;
+  level = lev;
+
+  if (indicatorOfParameter!=-1) GRIB_CHECK(my_grib_set_long(gh, "indicatorOfParameter", indicatorOfParameter), 0);
+  if (indicatorOfTypeOfLevel!=-1) GRIB_CHECK(my_grib_set_long(gh, "indicatorOfTypeOfLevel", indicatorOfTypeOfLevel), 0);
+  if (level!=-1) GRIB_CHECK(my_grib_set_long(gh, "level", level), 0);
+}
+
 #endif
 
 /*

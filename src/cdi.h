@@ -40,6 +40,7 @@ extern "C" {
 #define  CDI_ELIBNAVAIL           -22   // xxx library not available
 #define  CDI_EUFSTRUCT            -23   // Unsupported file structure
 #define  CDI_EUNC4                -24   // Unsupported NetCDF4 structure
+#define  CDI_EDIMSIZE             -25   // Invalid dimension size
 #define  CDI_ELIMIT               -99   // Internal limits exceeded
 
 /* File types */
@@ -798,14 +799,14 @@ int     gridInqXCvals(int gridID, char *xcvals[]);
 /*      gridDefYvals: Define the values of a Y-axis */
 void    gridDefYvals(int gridID, const double yvals[]);
 
+/*      gridInqYvals: Get all values of a Y-axis */
+int     gridInqYvals(int gridID, double yvals[]);
+
 /*      gridInqYIsc: Find out whether Y-coordinate is of type CHAR */
 int     gridInqYIsc(int gridID);
 
 /*      gridInqYCvals: Get strings from Y-axis in case grid is of type GRID_CHARXY */
 int     gridInqYCvals(int gridID, char *ycvals[]);
-
-/*      gridInqYvals: Get all values of a Y-axis */
-int     gridInqYvals(int gridID, double yvals[]);
 
 /* CDI grid string key values */
 #define  CDI_KEY_XNAME       901  // X-axis name
@@ -946,8 +947,8 @@ void    gridDefParamGME(int gridID, int nd, int ni, int ni2, int ni3);
 void    gridInqParamGME(int gridID, int *nd, int *ni, int *ni2, int *ni3);
 
   /* Lambert Conformal Conic grid (GRIB version) */
-void    gridDefParamLCC(int gridID, double originLon, double originLat, double lonParY, double lat1, double lat2, double xinc, double yinc, int projflag, int scanflag);
-void    gridInqParamLCC(int gridID, double *originLon, double *originLat, double *lonParY, double *lat1, double *lat2, double *xinc, double *yinc, int *projflag, int *scanflag);
+void gridDefParamLCC(int gridID, double missval, double lon_0, double lat_0, double lat_1, double lat_2, double a, double rf, double xval_0, double yval_0, double x_0, double y_0);
+int gridInqParamLCC(int gridID, double missval, double *lon_0, double *lat_0, double *lat_1, double *lat_2, double *a, double *rf, double *xval_0, double *yval_0, double *x_0, double *y_0);
 
 void    gridDefArea(int gridID, const double area[]);
 void    gridInqArea(int gridID, double area[]);
@@ -978,9 +979,16 @@ void    gridChangeType(int gridID, int gridtype);
 void    gridDefComplexPacking(int gridID, int lpack);
 int     gridInqComplexPacking(int gridID);
 
+void    gridDefUvRelativeToGrid(int gridID, int uvRelativeToGrid);
+int     gridInqUvRelativeToGrid(int gridID);
+
+void    gridDefScanningMode(int gridID, int mode);
+int     gridInqScanningMode(int gridID);
+
 /* ZAXIS routines */
 
 void    zaxisName(int zaxistype, char *zaxisname);
+const char *zaxisNamePtr(int leveltype);
 
 /*      zaxisCreate: Create a vertical Z-axis */
 int     zaxisCreate(int zaxistype, int size);
@@ -1003,10 +1011,16 @@ void    zaxisPrint(int zaxisID);
 void    zaxisDefLevels(int zaxisID, const double levels[]);
 
 /*      zaxisDefCvals: Define area types of a Z-axis */
-void    zaxisDefCvals(int zaxisID, const char *cvals[]);
+void    zaxisDefCvals(int zaxisID, const char *cvals[], size_t clength);
 
 /*      zaxisInqLevels: Get all levels of a Z-axis */
 int     zaxisInqLevels(int zaxisID, double levels[]);
+
+/*      zaxisInqCLen: Get maximal string length of character Z-axis */
+int     zaxisInqCLen(int zaxisID);
+
+/*      zaxisInqCVals: Get all string values of a character Z-axis */
+int     zaxisInqCVals(int zaxisID, char ***clevels);
 
 /*      zaxisDefLevel: Define one level of a Z-axis */
 void    zaxisDefLevel(int zaxisID, int levelID, double levels);

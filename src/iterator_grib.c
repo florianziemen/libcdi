@@ -1,3 +1,7 @@
+#if defined (HAVE_CONFIG_H)
+#  include "config.h"
+#endif
+
 #include "iterator_grib.h"
 
 #include "cdi.h"
@@ -25,11 +29,7 @@ struct CdiGribIterator {
   off_t fileOffset;
   unsigned char *gribBuffer;
   size_t bufferSize, curRecordSize;
-#ifdef HAVE_LIBGRIB_API
   grib_handle *gribHandle;
-#else
-  void *gribHandle;
-#endif
 };
 
 CdiIterator *cdiGribIterator_getSuper(CdiGribIterator *me)
@@ -85,7 +85,7 @@ CdiIterator *cdiGribIterator_new(const char *path, int filetype)
 
 CdiGribIterator *cdiGribIterator_makeClone(CdiIterator *super)
 {
-  CdiGribIterator *me = (CdiGribIterator*)super;
+  CdiGribIterator *me = (CdiGribIterator*)(void *)super;
 
   //Allocate memory and copy data. (operations that may fail)
   CdiGribIterator *result = (struct CdiGribIterator *) Malloc(sizeof(*result));
@@ -137,7 +137,7 @@ fail:
 
 char *cdiGribIterator_serialize(CdiIterator *super)
 {
-  CdiGribIterator *me = (CdiGribIterator*)super;
+  CdiGribIterator *me = (CdiGribIterator*)(void *)super;
 
   const char *path = cdiInputFile_getPath(me->file);
   char *escapedPath = cdiEscapeSpaces(path);
@@ -166,7 +166,9 @@ CdiGribIterator *cdiGribIterator_deserialize(const char *description)
 
   {
     const char *savedStart = description;
-    long long decodedOffset = strtoll(description, (char**)&description, 0);    //The cast is a workaround for the wrong signature of strtoll() (it should have been `long long strtoll(const char*, const char**, int)`, not `long long strtoll(const char*, char**, int)`.
+    char *description_ = (char *)description;
+    long long decodedOffset = strtoll(description, &description_, 0);
+    description = description_;
     me->fileOffset = (off_t)decodedOffset;
     if(savedStart == description) goto closeFile;
     if((unsigned long long)decodedOffset > (unsigned long long)me->fileOffset) goto closeFile;
@@ -348,7 +350,7 @@ fail:
 
 int cdiGribIterator_nextField(CdiIterator *super)
 {
-  CdiGribIterator *me = (CdiGribIterator*)super;
+  CdiGribIterator *me = (CdiGribIterator*)(void *)super;
 
   if(super->gridId != CDI_UNDEFID) gridDestroy(super->gridId), super->gridId = CDI_UNDEFID;
 
@@ -369,13 +371,13 @@ int cdiGribIterator_nextField(CdiIterator *super)
 
 char *cdiGribIterator_inqTime(CdiIterator *super, CdiTimeType timeType)
 {
-  CdiGribIterator *me = (CdiGribIterator*)super;
+  CdiGribIterator *me = (CdiGribIterator*)(void *)super;
   return gribMakeTimeString(me->gribHandle, timeType);
 }
 
 int cdiGribIterator_levelType(CdiIterator *super, int levelSelector, char **outName, char **outLongName, char **outStdName, char **outUnit)
 {
-  CdiGribIterator *me = (CdiGribIterator*)super;
+  CdiGribIterator *me = (CdiGribIterator*)(void *)super;
 
   //First determine the zaxis type corresponding to the given level.
   int zaxisType = ZAXIS_GENERIC;
@@ -462,7 +464,7 @@ static int readLevel2(grib_handle *gribHandle, const char *levelTypeKey, const c
 
 int cdiGribIterator_level(CdiIterator *super, int levelSelector, double *outValue1, double *outValue2)
 {
-  CdiGribIterator *me = (CdiGribIterator*)super;
+  CdiGribIterator *me = (CdiGribIterator*)(void *)super;
   double trash;
   if(!outValue1) outValue1 = &trash;
   if(!outValue2) outValue2 = &trash;
@@ -486,15 +488,15 @@ int cdiGribIterator_level(CdiIterator *super, int levelSelector, double *outValu
         {}
       else if(isGrib1DualLevel((int)levelType))
         {
-          *outValue1 = (double)gribGetLongDefault(me->gribHandle, (levelSelector ? "bottomLevel" : "topLevel"), 0);
+          *outValue1 = (double)(gribGetLongDefault(me->gribHandle, (levelSelector ? "bottomLevel" : "topLevel"), 0));
         }
       else if(levelType == 100)
         {
-          *outValue1 = 100 * (double)gribGetLongDefault(me->gribHandle, "level", 0);        //2 bytes
+          *outValue1 = 100 * (double)(gribGetLongDefault(me->gribHandle, "level", 0));        //2 bytes
         }
       else
         {
-          *outValue1 = (double)gribGetLongDefault(me->gribHandle, "level", 0);        //2 bytes
+          *outValue1 = (double)(gribGetLongDefault(me->gribHandle, "level", 0));        //2 bytes
         }
     }
   return CDI_NOERR;
@@ -502,7 +504,7 @@ int cdiGribIterator_level(CdiIterator *super, int levelSelector, double *outValu
 
 int cdiGribIterator_zaxisUuid(CdiIterator *super, int *outVgridNumber, int *outLevelCount, unsigned char outUuid[CDI_UUID_SIZE])
 {
-  CdiGribIterator *me = (CdiGribIterator*)super;
+  CdiGribIterator *me = (CdiGribIterator*)(void *)super;
 
   if(outVgridNumber)
     {
@@ -528,7 +530,7 @@ int cdiGribIterator_zaxisUuid(CdiIterator *super, int *outVgridNumber, int *outL
 
 int cdiGribIterator_inqTile(CdiIterator *super, int *outTileIndex, int *outTileAttribute)
 {
-  CdiGribIterator *me = (CdiGribIterator*)super;
+  CdiGribIterator *me = (CdiGribIterator*)(void *)super;
   int trash;
   if(!outTileIndex) outTileIndex = &trash;
   if(!outTileAttribute) outTileAttribute = &trash;
@@ -548,7 +550,7 @@ int cdiGribIterator_inqTile(CdiIterator *super, int *outTileIndex, int *outTileA
 
 int cdiGribIterator_inqTileCount(CdiIterator *super, int *outTileCount, int *outTileAttributeCount)
 {
-  CdiGribIterator *me = (CdiGribIterator*)super;
+  CdiGribIterator *me = (CdiGribIterator*)(void *)super;
   int trash;
   if(!outTileCount) outTileCount = &trash;
   if(!outTileAttributeCount) outTileAttributeCount = &trash;
@@ -568,13 +570,13 @@ int cdiGribIterator_inqTileCount(CdiIterator *super, int *outTileCount, int *out
 
 char *cdiGribIterator_copyVariableName(CdiIterator *super)
 {
-  CdiGribIterator *me = (CdiGribIterator*)super;
+  CdiGribIterator *me = (CdiGribIterator*)(void *)super;
   return gribCopyString(me->gribHandle, "shortName");
 }
 
 void cdiGribIterator_readField(CdiIterator *super, double *buffer, size_t *nmiss)
 {
-  CdiGribIterator *me = (CdiGribIterator*)super;
+  CdiGribIterator *me = (CdiGribIterator*)(void *)super;
 
   GRIB_CHECK(my_grib_set_double(me->gribHandle, "missingValue", cdiDefaultMissval), 0);
   gribGetDoubleArray(me->gribHandle, "values", buffer);
@@ -587,7 +589,7 @@ void cdiGribIterator_readField(CdiIterator *super, double *buffer, size_t *nmiss
 
 void cdiGribIterator_readFieldF(CdiIterator *super, float *buffer, size_t *nmiss)
 {
-  CdiGribIterator *me = (CdiGribIterator*)super;
+  CdiGribIterator *me = (CdiGribIterator*)(void *)super;
 
   size_t valueCount = gribGetArraySize(me->gribHandle, "values");
   double *temp = (double *) Malloc(valueCount*sizeof(*temp));
@@ -643,6 +645,7 @@ int cdiGribIterator_inqEdition(CdiGribIterator *me)
 #else
   (void)me;
   xabort("CDI was compiled without GribAPI support, so you can't possibly have a valid CdiGribIterator* to call this function with");
+  return -4;
 #endif
 }
 
@@ -669,6 +672,7 @@ int cdiGribIterator_getLong(CdiGribIterator *me, const char *key, long *result)
   (void)key;
   (void)result;
   xabort("CDI was compiled without GribAPI support, so you can't possibly have a valid CdiGribIterator* to call this function with");
+  return -4;
 #endif
 }
 
@@ -701,6 +705,7 @@ int cdiGribIterator_getLength(CdiGribIterator *me, const char *key, size_t *resu
   (void)key;
   (void)result;
   xabort("CDI was compiled without GribAPI support, so you can't possibly have a valid CdiGribIterator* to call this function with");
+  return -4;
 #endif
 }
 
@@ -728,6 +733,7 @@ int cdiGribIterator_getString(CdiGribIterator *me, const char *key, char *result
   (void)result;
   (void)length;
   xabort("CDI was compiled without GribAPI support, so you can't possibly have a valid CdiGribIterator* to call this function with");
+  return -4;
 #endif
 }
 
@@ -754,6 +760,7 @@ long cdiGribIterator_inqLongValue(CdiGribIterator *me, const char *key)
   (void)me;
   (void)key;
   xabort("CDI was compiled without GribAPI support, so you can't possibly have a valid CdiGribIterator* to call this function with");
+  return -4;
 #endif
 }
 
@@ -782,6 +789,7 @@ long cdiGribIterator_inqLongDefaultValue(CdiGribIterator *me, const char *key, l
   (void)key;
   (void)defaultValue;
   xabort("CDI was compiled without GribAPI support, so you can't possibly have a valid CdiGribIterator* to call this function with");
+  return -4;
 #endif
 }
 
@@ -809,6 +817,7 @@ char *cdiGribIterator_inqStringValue(CdiGribIterator *me, const char *key)
   (void)me;
   (void)key;
   xabort("CDI was compiled without GribAPI support, so you can't possibly have a valid CdiGribIterator* to call this function with");
+  return NULL;
 #endif
 }
 
@@ -835,6 +844,7 @@ int cdiGribIterator_getDouble(CdiGribIterator *me, const char *key, double *resu
   (void)key;
   (void)result;
   xabort("CDI was compiled without GribAPI support, so you can't possibly have a valid CdiGribIterator* to call this function with");
+  return -4;
 #endif
 }
 
@@ -861,6 +871,7 @@ int cdiGribIterator_getSize(CdiGribIterator *me, const char *key, size_t *result
   (void)key;
   (void)result;
   xabort("CDI was compiled without GribAPI support, so you can't possibly have a valid CdiGribIterator* to call this function with");
+  return -4;
 #endif
 }
 
@@ -888,6 +899,7 @@ int cdiGribIterator_getLongArray(CdiGribIterator *me, const char *key, long *res
   (void)result;
   (void)size;
   xabort("CDI was compiled without GribAPI support, so you can't possibly have a valid CdiGribIterator* to call this function with");
+  return -4;
 #endif
 }
 
@@ -915,6 +927,7 @@ int cdiGribIterator_getDoubleArray(CdiGribIterator *me, const char *key, double 
   (void)result;
   (void)size;
   xabort("CDI was compiled without GribAPI support, so you can't possibly have a valid CdiGribIterator* to call this function with");
+  return -4;
 #endif
 }
 
@@ -941,6 +954,7 @@ double cdiGribIterator_inqDoubleValue(CdiGribIterator *me, const char *key)
   (void)me;
   (void)key;
   xabort("CDI was compiled without GribAPI support, so you can't possibly have a valid CdiGribIterator* to call this function with");
+  return -4;
 #endif
 }
 
@@ -969,6 +983,7 @@ double cdiGribIterator_inqDoubleDefaultValue(CdiGribIterator *me, const char *ke
   (void)key;
   (void)defaultValue;
   xabort("CDI was compiled without GribAPI support, so you can't possibly have a valid CdiGribIterator* to call this function with");
+  return -4;
 #endif
 }
 

@@ -37,10 +37,8 @@ int get_timeunit(size_t len, const char *ptu)
       else if ( str_is_equal(ptu, "calendar_month") ) timeunit = TUNIT_MONTH;
       else if ( str_is_equal(ptu, "year") )           timeunit = TUNIT_YEAR;
     }
-  else if ( len == 1 )
-    {
-      if ( ptu[0] == 's' ) timeunit = TUNIT_SECOND;
-    }
+  else if ( len == 1 && ptu[0] == 's' )
+    timeunit = TUNIT_SECOND;
 
   return timeunit;
 }
@@ -94,14 +92,11 @@ bool is_timeaxis_units(const char *timeunits)
 
 bool is_height_units(const char *units)
 {
-  bool status = false;
   int u0 = units[0];
 
-  if ( (u0=='m' && (!units[1] || strncmp(units, "meter", 5) == 0)) ||
-       (!units[2] && units[1]=='m' && (u0=='c' || u0=='d' || u0=='k')) )
-    {
-      status = true;
-    }
+  bool status
+    = (u0=='m' && (!units[1] || strncmp(units, "meter", 5) == 0))
+    || (!units[2] && units[1]=='m' && (u0=='c' || u0=='d' || u0=='k'));
 
   return status;
 }
@@ -192,9 +187,9 @@ bool is_lon_axis(const char *units, const char *stdname)
     {
       status = true;
     }
-
-  if ( status == false && str_is_equal(lc_units, "degree") &&
-       !str_is_equal(stdname, "grid_latitude") && !str_is_equal(stdname, "latitude") )
+  else if ( str_is_equal(lc_units, "degree")
+            && !str_is_equal(stdname, "grid_latitude")
+            && !str_is_equal(stdname, "latitude") )
     {
       int ioff = 6;
       if ( lc_units[ioff] == 's' ) ioff++;
@@ -220,9 +215,9 @@ bool is_lat_axis(const char *units, const char *stdname)
     {
       status = true;
     }
-
-  if ( status == false && str_is_equal(lc_units, "degree") &&
-       !str_is_equal(stdname, "grid_longitude") && !str_is_equal(stdname, "longitude") )
+  else if ( str_is_equal(lc_units, "degree")
+            && !str_is_equal(stdname, "grid_longitude")
+            && !str_is_equal(stdname, "longitude") )
     {
       int ioff = 6;
       if ( lc_units[ioff] == 's' ) ioff++;

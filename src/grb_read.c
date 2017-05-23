@@ -12,7 +12,6 @@
 #include "stream_gribapi.h"
 #include "file.h"
 #include "cgribex.h"  /* gribZip gribGetZip gribGinfo */
-#include "gribapi.h"
 #include "namespace.h"
 
 

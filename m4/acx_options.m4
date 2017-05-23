@@ -144,8 +144,8 @@ AS_IF([test "x$ENABLE_NC4HDF5" = "xyes"],
                [AC_DEFINE([HAVE_NC4HDF5_THREADSAFE],[1],[Define to 1 for NetCDF4/HDF5 threadsafe support])],,[-lhdf5])])
 
 AS_IF([test "x$ENABLE_NC4HDF5" = "xyes"],
-      [AC_SEARCH_LIBS([H5get_libversion], [netcdf],
-               [AC_DEFINE([HAVE_H5GET_LIBVERSION],[1],[Define to 1 for H5get_libversion support])],,[-lhdf5])])
+      [AC_SEARCH_LIBS([H5get_libversion], [netcdf hdf5],
+               [AC_DEFINE([HAVE_H5GET_LIBVERSION],[1],[Define to 1 for H5get_libversion support])],,)])
 
 AC_SUBST([ENABLE_NETCDF])
 AC_SUBST([ENABLE_NC2])
@@ -266,6 +266,19 @@ AC_ARG_ENABLE([all-static],
               [enable_all_static=no])
 AC_MSG_RESULT([$enable_all_static])
 AM_CONDITIONAL([ENABLE_ALL_STATIC],[test x$enable_all_static = 'xyes'])
+#  ----------------------------------------------------------------------
+#  Build CDO with HIRLAM extensions
+AC_MSG_CHECKING([for HIRLAM extensions])
+AC_ARG_ENABLE([hirlam-extensions],
+              [AS_HELP_STRING([--enable-hirlam-extensions],[HIRLAM extensions [default=no]])],
+              [AS_IF([test "x$enable_hirlam_extensions" != "xno"],
+                    [AC_DEFINE(HIRLAM_EXTENSIONS,[1],[Define to 1 for HIRLAM extensions])
+                     enable_hirlam_extensions=yes],
+                    [enable_hirlam_extensions=no])],
+              [enable_hirlam_extensions=no])
+AC_MSG_RESULT([$enable_hirlam_extensions])
+AM_CONDITIONAL([ENABLE_HIRLAM_EXTENSIONS],[test x$enable_hirlam_extensions = 'xyes'])
+#
 ])
 dnl
 dnl Local Variables:

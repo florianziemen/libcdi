@@ -7,9 +7,9 @@
 #include "timebase.h"
 
 
-static int month_360[12] = {30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30};
-static int month_365[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-static int month_366[12] = {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+static const int month_360[12] = {30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30};
+static const int month_365[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+static const int month_366[12] = {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
 
 int calendar_dpy(int calendar)
@@ -26,9 +26,9 @@ int calendar_dpy(int calendar)
 
 int days_per_month(int calendar, int year, int month)
 {
-  int *dpm = NULL;
   int daysperyear = calendar_dpy(calendar);
 
+  const int *dpm;
   if      ( daysperyear == 360 ) dpm = month_360;
   else if ( daysperyear == 365 ) dpm = month_365;
   else                           dpm = month_366;
@@ -73,11 +73,11 @@ int days_per_year(int calendar, int year)
 static void decode_day(int dpy, int days, int *year, int *month, int *day)
 {
   int i = 0;
-  int *dpm = NULL;
 
   *year = (days-1) / dpy;
   days -= (*year*dpy);
 
+  const int *dpm = NULL;
   if      ( dpy == 360 ) dpm = month_360;
   else if ( dpy == 365 ) dpm = month_365;
   else if ( dpy == 366 ) dpm = month_366;
@@ -96,9 +96,9 @@ static void decode_day(int dpy, int days, int *year, int *month, int *day)
 
 static int encode_day(int dpy, int year, int month, int day)
 {
-  int *dpm = NULL;
   long rval = (long)dpy * year + day;
 
+  const int *dpm = NULL;
   if      ( dpy == 360 ) dpm = month_360;
   else if ( dpy == 365 ) dpm = month_365;
   else if ( dpy == 366 ) dpm = month_366;

@@ -7,12 +7,12 @@
 #include "dmemory.h"
 #include "cdi.h"
 #include "cdi_int.h"
+#include "gribapi.h"
 #include "stream_cgribex.h"
 #include "stream_grb.h"
 #include "stream_gribapi.h"
 #include "file.h"
 #include "cgribex.h"  /* gribZip gribGetZip gribGinfo */
-#include "gribapi.h"
 #include "namespace.h"
 
 
@@ -118,6 +118,89 @@ void grbCopyRecord(stream_t * streamptr2, stream_t * streamptr1)
 
   if ( filetype == CDI_FILETYPE_GRB )
     {
+      if ( cdiGribChangeParameterID.active )
+        {
+          // Even if you are stream-copy records you might need to change a bit of grib-header !
+#if defined HAVE_LIBCGRIBEX
+          void *gh = cgribex_handle_new_from_meassage((void*) gribbuffer, recsize);
+          cgribexChangeParameterIdentification(gh, cdiGribChangeParameterID.code, cdiGribChangeParameterID.ltype, cdiGribChangeParameterID.lev);
+          cgribex_handle_delete(gh);
+#elif defined HAVE_LIBGRIB_API
+          void *gh = (void*)grib_handle_new_from_message(NULL, (void*) gribbuffer, recsize);
+          gribapiChangeParameterIdentification(gh, cdiGribChangeParameterID.code, cdiGribChangeParameterID.ltype, cdiGribChangeParameterID.lev);
+          grib_handle_delete(gh);
+#endif
+          cdiGribChangeParameterID.active = false; // after grib attributes have been changed turn it off again
+        }
+    }
+
+#ifdef HIRLAM_EXTENSIONS
+  // Even if you are stream-copy records you might need to change a bit of grib-header !
+
+  if ( cdiGribDataScanningMode.active )
+    // allowed modes: <0, 64, 96>; Default is 64
+    // This will overrule the old scanning mode of the given grid
+  {
+    grib_handle *gh = NULL;
+    gh = grib_handle_new_from_message(NULL, (void *) gribbuffer, recsize);
+
+    int scanModeIN = gribapiGetScanningMode(gh);
+
+    grib_handle_delete(gh);
+
+    if (cdiDebugExt>=20) Message("Change GribDataScanningMode => %d (scanModeIN = %d)", cdiGribDataScanningMode.value, scanModeIN);
+
+    if (scanModeIN != cdiGribDataScanningMode.value)
+    {
+        int gridID;
+        int varID, levelID;
+        int vlistID;
+        //int zip;
+        int gridsize, nmiss = 0;
+
+        vlistID = streamptr1->vlistID;
+        varID   = streamptr1->tsteps[tsID].records[recID].varID;
+        levelID   = streamptr1->tsteps[tsID].records[recID].levelID;
+        //gribbuffer = (unsigned char *) streamptr->record->buffer;
+        // allocate above ..
+        gridID   = vlistInqVarGrid(vlistID, varID);
+        gridsize = gridInqSize(gridID);
+
+        gridsize = vlistGridsizeMax(vlistID);
+        if ( vlistNumber(vlistID) != CDI_REAL ) gridsize *= 2;
+        double * data = (double *) malloc(gridsize*sizeof(double));
+        //int missval = vlistInqVarMissval(vlistID, varID);
+
+        //streamptr->numvals += gridsize;
+
+        // memtype: MEMTYPE_FLOAT or MEMTYPE_DOUBLE
+        //int statusDC = grbDecode(filetype, MEMTYPE_DOUBLE, gribbuffer, recsize, data, gridsize, streamptr1->unreduced, &nmiss, missval, vlistID, varID);
+        //int grbDecode(int filetype, int memtype, void *gribbuffer, int gribsize, void *data, size_t datasize,
+        //              int unreduced, int *nmiss, double missval, int vlistID, int varID);
+
+        //streamptr1->tsteps[tsID].records[recID].zip = zip;
+        //gribapiSetScanningMode(gh, cdoGribDataScanningMode);  // T.B.D. this will be done by grbDecode..
+
+        //varID   = streamptr1->record->varID;
+        //levelID = streamptr1->record->levelID;
+
+        if (cdiDebugExt>=20) Message(" processing varID %d; levelID %d",varID,levelID);
+
+        grb_write_var_slice(streamptr2, varID, levelID, MEMTYPE_DOUBLE, (const void *) data, nmiss);
+        //grb_write_var_slice(streamptr, varID, levelID, memtype, ((double*)data)+levelID*gridsize, nmiss);
+
+        //grb_write_var(streamptr2, varID, MEMTYPE_DOUBLE, data, nmiss);
+        //grb_write_var(stream_t *streamptr, int varID, int memtype, const void *data, int nmiss)
+        //grb_write_var_slice(streamptr2, varID, levelID, MEMTYPE_DOUBLE, (const void *) data, nmiss);
+
+        free(data);
+        free(gribbuffer);
+    }
+  }
+#endif // HIRLAM_EXTENSIONS
+
+  if ( filetype == CDI_FILETYPE_GRB )
+    {
       size_t unzipsize;
       int izip = gribGetZip(recsize, gribbuffer, &unzipsize);
 
@@ -153,9 +236,7 @@ void grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
   int tsID      = streamptr->curTsID;
   int date      = streamptr->tsteps[tsID].taxis.vdate;
   int time      = streamptr->tsteps[tsID].taxis.vtime;
-  int numavg    = 0;
-  if ( vlistInqVarTimave(vlistID, varID) )
-    numavg = streamptr->tsteps[tsID].taxis.numavg;
+  int numavg    = (tsteptype == TSTEP_AVG) ? streamptr->tsteps[tsID].taxis.numavg : 0;
 
   if ( CDI_Debug )
     Message("gridID = %d zaxisID = %d", gridID, zaxisID);

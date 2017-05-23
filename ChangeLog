@@ -1,3 +1,78 @@
+2017-05-16  Uwe Schulzweida
+
+	* Version 1.8.2 released
+
+2017-05-15  Uwe Schulzweida
+
+	* added env. variable CDI_COORDINATES_LONLAT to change the order of lon and lat for the coordinates attribute.
+
+2017-05-12  Uwe Schulzweida
+
+	* merged branch charxy [Fabian Wachsmann]
+
+2017-04-25  Uwe Schulzweida
+
+	* initialize taxisptr->units to NULL after calling delete_refcount_string() [Bug #7691]
+
+2017-04-21  Uwe Schulzweida
+
+	* gribapiGetDiskRepresentation: Wrong result with SZIP compressed GRIB records [Bug #7650]
+
+2017-04-13  Uwe Schulzweida
+
+	* Version 1.8.1 released
+
+2017-04-12  Uwe Schulzweida
+
+	* file_fill_buffer: set offset (bug fix) [patch from Harald Anlauf]
+
+2017-04-10  Uwe Schulzweida
+
+	* gribapi: use keys iScansNegatively and jScansPositively
+
+2017-04-09  Uwe Schulzweida
+
+	* Refactor GRID_LCC to GRID_PROJECTION
+
+2017-04-05  Uwe Schulzweida
+
+	* Scalar Z-Coordinate: added support for bounds (bug fix)
+
+2017-03-18  Uwe Schulzweida
+
+	* grid_check_cyclic: check yvals for curvilinear grids (bug fix)
+
+2017-03-17  Uwe Schulzweida
+
+	* gridCompareSearch: change 3rd parameter of gridCompare() to true.
+
+2017-03-14  Uwe Schulzweida
+
+	* set chunk size of time axis to 512
+	* set min deflate size of data variables to 16
+	* streamOpenAppend: set defmiss = true (Needed for NetCDF4)
+
+2017-03-08  Uwe Schulzweida
+
+	* Preserve netcdf time units attribute
+
+2017-03-07  Uwe Schulzweida
+
+	* Added function streamGrbChangeParameterIdentification() (patch from Michal Koutek, KMNI)
+
+2017-02-27  Uwe Schulzweida
+
+	* Added function gridDefUvRelativeToGrid()
+	* gridInqUvRelativeToGrid(): added cgribex support
+
+2017-02-24  Uwe Schulzweida
+
+	* Added function gridInqUvRelativeToGrid() (patch from Michal Koutek, KMNI)
+
+2017-02-22  Uwe Schulzweida
+
+	* CDI_CHUNK_AUTO: set chunk_size_max to 65536
+
 2017-02-14  Uwe Schulzweida
 
         * using CGRIBEX library version 1.7.6

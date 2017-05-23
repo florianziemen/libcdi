@@ -1,5 +1,5 @@
-#ifndef _ERROR_H
-#define _ERROR_H
+#ifndef ERROR_H
+#define ERROR_H
 
 #include <stdarg.h>
 #include <stdlib.h>
@@ -70,7 +70,7 @@ cdiAbortC_serial(const char *caller, const char *filename,
 }
 #endif
 
-#endif  /* _ERROR_H */
+#endif  /* ERROR_H */
 /*
  * Local Variables:
  * c-file-style: "Java"

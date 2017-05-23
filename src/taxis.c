@@ -3,7 +3,6 @@
 #endif
 
 #include <stddef.h>
-#include <string.h>
 
 #include "cdi.h"
 #include "calendar.h"
@@ -16,6 +15,7 @@
 #include "serialize.h"
 #include "resource_handle.h"
 #include "resource_unpack.h"
+
 
 static int DefaultTimeType = TAXIS_ABSOLUTE;
 static int DefaultTimeUnit = TUNIT_HOUR;
@@ -104,24 +104,15 @@ static int  TAXIS_Debug = 0;   /* If set to 1, debugging */
 
 const char *tunitNamePtr(int unitID)
 {
-  const char *name;
   int size = sizeof(Timeunits)/sizeof(*Timeunits);
-
-  if ( unitID > 0 && unitID < size )
-    name = Timeunits[unitID];
-  else
-    name = Timeunits[0];
-
-  return name;
+  return (unitID > 0 && unitID < size) ? Timeunits[unitID] : Timeunits[0];
 }
 
 #if 0
 static
 void taxis_defaults(void)
 {
-  char *timeunit;
-
-  timeunit = getenv("TIMEUNIT");
+  char *timeunit = getenv("TIMEUNIT");
   if ( timeunit )
     {
       if ( strcmp(timeunit, "minutes") == 0 )
@@ -172,6 +163,7 @@ void taxisDefaultValue(taxis_t* taxisptr)
   taxisptr->fc_period   = 0;
   taxisptr->name        = NULL;
   taxisptr->longname    = NULL;
+  taxisptr->units       = NULL;
 }
 
 static taxis_t *
@@ -192,7 +184,7 @@ taxisNewEntry(cdiResH resH)
 }
 
 static
-void taxisInit (void)
+void taxisInit(void)
 {
   static bool taxisInitialized = false;
 
@@ -203,16 +195,6 @@ void taxisInit (void)
   char *env = getenv("TAXIS_DEBUG");
   if ( env ) TAXIS_Debug = atoi(env);
 }
-
-#if 0
-static
-void taxis_copy(taxis_t *taxisptr2, taxis_t *taxisptr1)
-{
-  int taxisID2 = taxisptr2->self;
-  memcpy(taxisptr2, taxisptr1, sizeof(taxis_t));
-  taxisptr2->self = taxisID2;
-}
-#endif
 
 /*
 @Function  taxisCreate
@@ -266,6 +248,7 @@ void taxisDestroyKernel(taxis_t *taxisptr)
 {
   delete_refcount_string(taxisptr->name);
   delete_refcount_string(taxisptr->longname);
+  delete_refcount_string(taxisptr->units);
 }
 
 /*
@@ -311,11 +294,16 @@ int taxisDuplicate(int taxisID1)
 
 void taxisDefType(int taxisID, int type)
 {
-  taxis_t *taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
+  taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
 
-  if (taxisptr->type != type)
+  if ( taxisptr->type != type )
     {
       taxisptr->type = type;
+      if ( taxisptr->units )
+        {
+          delete_refcount_string(taxisptr->units);
+          taxisptr->units = NULL;
+        }
       reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
     }
 }
@@ -391,6 +379,11 @@ void taxisDefRdate(int taxisID, int rdate)
   if (taxisptr->rdate != rdate)
     {
       taxisptr->rdate = rdate;
+      if ( taxisptr->units )
+        {
+          delete_refcount_string(taxisptr->units);
+          taxisptr->units = NULL;
+        }
       reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
     }
 }
@@ -416,6 +409,11 @@ void taxisDefRtime(int taxisID, int rtime)
   if (taxisptr->rtime != rtime)
     {
       taxisptr->rtime = rtime;
+      if ( taxisptr->units )
+        {
+          delete_refcount_string(taxisptr->units);
+          taxisptr->units = NULL;
+        }
       reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
     }
 }
@@ -505,6 +503,11 @@ void taxisDefTunit(int taxisID, int unit)
   if (taxisptr->unit != unit)
     {
       taxisptr->unit = unit;
+      if ( taxisptr->units )
+        {
+          delete_refcount_string(taxisptr->units);
+          taxisptr->units = NULL;
+        }
       reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
     }
 }
@@ -905,6 +908,18 @@ void ptaxisDefLongname(taxis_t *taxisptr, const char *longname)
       delete_refcount_string(taxisptr->longname);
       char *taxislongname = taxisptr->longname = new_refcount_string(len);
       strcpy(taxislongname, longname);
+    }
+}
+
+
+void ptaxisDefUnits(taxis_t *taxisptr, const char *units)
+{
+  if ( units )
+    {
+      size_t len = strlen(units);
+      delete_refcount_string(taxisptr->units);
+      char *taxisunits = taxisptr->units = new_refcount_string(len);
+      strcpy(taxisunits, units);
     }
 }
 
@@ -1318,21 +1333,15 @@ double cdiEncodeTimeval(int date, int time, taxis_t *taxis)
 	{
 	  int year, month, day;
 	  cdiDecodeDate(date, &year, &month, &day);
-          timevalue = date/100;
-	  if ( day != 0 )
-            {
-              if ( date < 0 ) timevalue -= 0.5;
-              else            timevalue += 0.5;
-            }
+          timevalue = date/100
+            + copysign((double)(day != 0) * 0.5, (double)date);
         }
       else
 	{
 	  int hour, minute, second;
 	  cdiDecodeTime(time, &hour, &minute, &second);
-	  if ( date < 0 )
-	    timevalue = -(-date + (hour*3600 + minute*60 + second)/86400.);
-	  else
-	    timevalue =    date + (hour*3600 + minute*60 + second)/86400.;
+          timevalue = copysign(1.0, (double)date)
+            * (fabs((double)date) + (hour*3600 + minute*60 + second)/86400.);
 	}
     }
   else
@@ -1377,8 +1386,10 @@ void ptaxisCopy(taxis_t *dest, taxis_t *source)
   dest->climatology = source->climatology;
   delete_refcount_string(dest->name);
   delete_refcount_string(dest->longname);
+  delete_refcount_string(dest->units);
   dest->name = dup_refcount_string(source->name);
   dest->longname = dup_refcount_string(source->longname);
+  dest->units = dup_refcount_string(source->units);
   if (dest->self != CDI_UNDEFID)
     reshSetStatus(dest->self, &taxisOps, RESH_DESYNC_IN_USE);
   reshUnlock ();
@@ -1465,7 +1476,7 @@ taxisTxCode ( void )
   return TAXIS;
 }
 
-enum { taxisNint = 21 };
+enum { taxisNint = 22 };
 
 static int
 taxisGetPackSize(void *p, void *context)
@@ -1477,8 +1488,9 @@ taxisGetPackSize(void *p, void *context)
     + (taxisptr->name ?
        serializeGetSize((int)strlen(taxisptr->name), CDI_DATATYPE_TXT, context) : 0)
     + (taxisptr->longname ?
-       serializeGetSize((int)strlen(taxisptr->longname), CDI_DATATYPE_TXT,
-                        context) : 0);
+       serializeGetSize((int)strlen(taxisptr->longname), CDI_DATATYPE_TXT, context) : 0)
+    + (taxisptr->units ?
+       serializeGetSize((int)strlen(taxisptr->units), CDI_DATATYPE_TXT, context) : 0);
   return packBufferSize;
 }
 
@@ -1543,6 +1555,15 @@ taxisUnpack(char * unpackBuffer, int unpackBufferSize, int * unpackBufferPos,
       longname[len] = '\0';
       taxisP->longname = longname;
     }
+  if (intBuffer[idx])
+    {
+      int len = intBuffer[idx];
+      char *units = new_refcount_string((size_t)len);
+      serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
+                      units, len, CDI_DATATYPE_TXT, context);
+      units[len] = '\0';
+      taxisP->units = units;
+    }
 
   reshSetStatus(taxisP->self, &taxisOps,
                 reshGetStatus(taxisP->self, &taxisOps) & ~RESH_SYNC_BIT);
@@ -1581,6 +1602,7 @@ taxisPack(void * voidP, void * packBuffer, int packBufferSize, int * packBufferP
   intBuffer[idx++] = taxisP->vtime_ub;
   intBuffer[idx++] = taxisP->name ? (int)strlen(taxisP->name) : 0;
   intBuffer[idx++] = taxisP->longname ? (int)strlen(taxisP->longname) : 0;
+  intBuffer[idx++] = taxisP->units ? (int)strlen(taxisP->units) : 0;
 
   serializePack(intBuffer, taxisNint, CDI_DATATYPE_INT,
                 packBuffer, packBufferSize, packBufferPos, context);
@@ -1592,6 +1614,9 @@ taxisPack(void * voidP, void * packBuffer, int packBufferSize, int * packBufferP
                   packBuffer, packBufferSize, packBufferPos, context);
   if (taxisP->longname)
     serializePack(taxisP->longname, intBuffer[16], CDI_DATATYPE_TXT,
+                  packBuffer, packBufferSize, packBufferPos, context);
+  if (taxisP->units)
+    serializePack(taxisP->units, intBuffer[16], CDI_DATATYPE_TXT,
                   packBuffer, packBufferSize, packBufferPos, context);
 
 }

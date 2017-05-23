@@ -129,6 +129,7 @@ void zaxis_init(zaxis_t *zaxisptr)
   zaxisptr->p0value.defined = false;
   zaxisptr->vals          = NULL;
   zaxisptr->cvals         = NULL;
+  zaxisptr->clength       = 0;
   zaxisptr->ubounds       = NULL;
   zaxisptr->lbounds       = NULL;
   zaxisptr->weights       = NULL;
@@ -273,7 +274,12 @@ void zaxisDestroyKernel( zaxis_t * zaxisptr )
   int id = zaxisptr->self;
 
   if ( zaxisptr->vals )    Free( zaxisptr->vals );
-  if ( zaxisptr->cvals )   Free( zaxisptr->cvals );
+  if ( zaxisptr->cvals )
+    {
+      for ( int i=0; i<zaxisptr->size; i++)
+        Free(zaxisptr->cvals[i]);
+      Free( zaxisptr->cvals );
+    }
   if ( zaxisptr->lbounds ) Free( zaxisptr->lbounds );
   if ( zaxisptr->ubounds ) Free( zaxisptr->ubounds );
   if ( zaxisptr->weights ) Free( zaxisptr->weights );
@@ -776,20 +782,22 @@ void zaxisDefLevels(int zaxisID, const double *levels)
     }
 }
 
-void zaxisDefCvals(int zaxisID, const char **cvals)
+
+void zaxisDefCvals(int zaxisID, const char **cvals, size_t clen)
 {
   zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
   size_t size = (size_t)zaxisptr->size;
 
-  if ( cvals )
+  if ( cvals && clen )
     {
-      if ( zaxisptr->cvals != NULL )
-        zaxisptr->cvals = NULL;
+      zaxisptr->clength = clen;
       zaxisptr->cvals = (char**) Malloc(size*sizeof(char *));
 
       for ( size_t ilev = 0; ilev < size; ++ilev )
-        zaxisptr->cvals[ilev] = strdup(cvals[ilev]);
-
+        {
+          zaxisptr->cvals[ilev] = Malloc(clen*sizeof(char));
+          memcpy(zaxisptr->cvals[ilev],cvals[ilev], clen*sizeof(char));
+        }
       reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
     }
 }
@@ -987,6 +995,15 @@ const double *zaxisInqLevelsPtr(int zaxisID)
   return zaxisptr->vals;
 }
 
+
+char **zaxisInqCValsPtr(int zaxisID)
+{
+  char **cvals = NULL;
+  zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
+  cvals = zaxisptr->cvals;
+  return cvals;
+}
+
 /*
 @Function  zaxisInqLevels
 @Title     Get all levels of a Z-axis
@@ -1016,6 +1033,40 @@ int zaxisInqLevels(int zaxisID, double *levels)
       if ( levels )
         for ( int i = 0; i < size; i++ )
           levels[i] = zaxisptr->vals[i];
+    }
+
+  return size;
+}
+
+int zaxisInqCLen(int zaxisID)
+{
+  int size = 0;
+  zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
+
+  if ( zaxisptr->cvals && zaxisptr->clength)
+    size = zaxisptr->clength;
+  return size;
+}
+
+int zaxisInqCVals(int zaxisID, char ***clevels)
+{
+  int size = 0;
+  size_t clen = 0;
+  zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
+
+  if ( zaxisptr->cvals )
+    {
+      size = zaxisptr->size;
+      clen = zaxisptr->clength;
+      if ( size && clen )
+        {
+          (*clevels) = Malloc(size*sizeof(char*));
+          for ( int i = 0; i < size; i++ )
+            {
+              (*clevels)[i] = Malloc(clen*sizeof(char));
+              memcpy((*clevels)[i], zaxisptr->cvals[i], clen*sizeof(char));
+            }
+          }
     }
 
   return size;
@@ -1388,6 +1439,7 @@ void zaxisPrintKernel(zaxis_t *zaxisptr, FILE *fp)
         }
       fprintf(fp, "\n");
     }
+
   if ( zaxisptr->cvals )
     {
       dig = prec;
@@ -1402,6 +1454,7 @@ void zaxisPrintKernel(zaxis_t *zaxisptr, FILE *fp)
         }
       fprintf(fp, "\n");
     }
+
   if ( zaxisptr->lbounds && zaxisptr->ubounds )
     {
       nbyte0 = fprintf(fp, "lbounds   = ");

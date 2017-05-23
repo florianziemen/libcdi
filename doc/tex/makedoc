@@ -142,7 +142,7 @@ while (<MOFILE>) {
     $hrefproto{$funcname} = $cproto;
     $hreftitle{$funcname} = $title;
 
-    printcfdoc ("\n\n\\subsection{$title: {\\tt $funcname}}\n");
+    printcfdoc ("\n\n\\subsection{$title: \\texttt{$funcname}}\n");
     printcfdoc ("\\index{$funcname}\n");
     printcfdoc ("\\label{$funcname}\n");
 
@@ -274,13 +274,13 @@ foreach $key (@sorted_func)  {
   $cproto = $hrefproto{$key};
   $title  = $hreftitle{$key};
 
-  printcfdoc ("\n\n\\section*{\\tt ");
+  printcfdoc ("\n\n\\section*{\\texttt{ ");
   printcfdoc ("\\ifpdf\n");
   printcfdoc ("\\hyperref[$key]{$key}\n");
   printcfdoc ("\\else\n");
   printcfdoc ("$key\n");
   printcfdoc ("\\fi\n");
-  printcfdoc ("}\n");
+  printcfdoc ("}}\n");
   printcfdoc ("\\begin{verbatim}\n");
   printproto ($cproto);
   printcfdoc ("\\end{verbatim}\n");
@@ -418,8 +418,8 @@ sub printcfdoc {
       chomp $tag;
       $tag =~ s/ CDI / {\\CDI} /og;
       $tag =~ s/_/\\_/og;
-      $tag =~ s/\@fref\{([^}]*)\}/{\\htmlref{\\tt \1}{\1}}/og;
-      $tag =~ s/\@func\{([^}]*)\}/{\\tt \1}/og;
+      $tag =~ s/\@fref\{([^}]*)\}/{\\htmlref{\\texttt{\1}}{\1}}/og;
+      $tag =~ s/\@func\{([^}]*)\}/{\\texttt{\1}}/og;
       print CDOCFILE "$tag\n";
       print FDOCFILE "$tag\n";
     }
@@ -448,12 +448,12 @@ sub printlist {
       }
     }
     printcfdoc "\n\\hspace*{4mm}\\begin{minipage}[]{15cm}\n";
-    printcfdoc "\\begin{deflist}{\\tt $mitem\\ }\n";
+    printcfdoc "\\begin{deflist}{\\texttt{$mitem}\\ }\n";
     foreach $tag (@list) {
       ($kword,$item,$line) = split(" ", $tag, 3);
       $kword = uc($kword);
       if ( "$kword" eq "\@ITEM" ) {
-	printcfdoc "\\item[{\\tt ${item}}]\n";
+	printcfdoc "\\item[\\texttt{${item}}]\n";
 	printcfdoc "$line\n";
       } else {
 	printcfdoc "$tag\n";

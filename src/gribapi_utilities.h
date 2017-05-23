@@ -33,6 +33,16 @@ int gribapiGetParam(grib_handle *gh);
 int gribapiGetGridType(grib_handle *gh);
 void gribapiGetGrid(grib_handle *gh, grid_t *grid);
 
+#ifdef HIRLAM_EXTENSIONS
+void gribapiSetDataTimeRangeIndicator(grib_handle *gh, int timeRangeIndicator);
+void gribapiGetDataTimeRangeIndicator(grib_handle *gh, int *timeRangeIndicator);
+#endif // #ifdef HIRLAM_EXTENSIONS
+
+extern struct cdiGribAPI_ts_str_map_elem {
+  long productionTemplate;
+  const char sname[8];
+} cdiGribAPI_ts_str_map[];
+
 #endif
 
 #endif

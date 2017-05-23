@@ -19,7 +19,7 @@ levels. Both variables are on the same lon/lat grid.
 
 \subsection{Result}
 
-This is the {\tt ncdump -h} output of the resulting NetCDF file {\tt example.nc}.
+This is the \texttt{ncdump -h} output of the resulting NetCDF file \texttt{example.nc}.
 
 \begin{lstlisting}[]
 netcdf example {
@@ -59,7 +59,7 @@ data:
 
 \section{\label{example_read}Read a dataset}
 
-This example reads the NetCDF file {\tt example.nc} from \htmlref{Appendix \ref{example_write}}{example_write}.
+This example reads the NetCDF file \texttt{example.nc} from \htmlref{Appendix \ref{example_write}}{example_write}.
 
 \lstinputlisting[language=Fortran]
 {../../examples/cdi_read_f.f}
@@ -67,9 +67,9 @@ This example reads the NetCDF file {\tt example.nc} from \htmlref{Appendix \ref{
 
 \section{Copy a dataset}
 
-This example reads the NetCDF file {\tt example.nc} from \htmlref{Appendix B.1}{example_write}
+This example reads the NetCDF file \texttt{example.nc} from \htmlref{Appendix B.1}{example_write}
 and writes the result to a GRIB dataset by simple setting the output file type
-to {\tt CDI\_FILETYPE\_GRB}.
+to \texttt{CDI\_FILETYPE\_GRB}.
 
 \lstinputlisting[language=Fortran]
 {../../examples/cdi_copy_f.f}
@@ -77,14 +77,14 @@ to {\tt CDI\_FILETYPE\_GRB}.
 \section{\label{examples_f2003}Fortran 2003: mo\_cdi and iso\_c\_binding}
 
 This is the Fortran 2003 version of the reading and writing examples above.
-The main differenc to {\tt cfortran.h} is the
-character handling. Here {\tt CHARACTER(type=c\_char)} is used instead of
-{\tt CHARACTER}. Additionally plain fortran charcters and character variables
+The main differenc to \texttt{cfortran.h} is the
+character handling. Here \texttt{CHARACTER(type=c\_char)} is used instead of
+\texttt{CHARACTER}. Additionally plain fortran charcters and character variables
 have to be convertet to C charcters by
 \begin{itemize}
-\item appending {\tt '\textbackslash 0'} with {\tt //C\_NULL\_CHAR} 
-\item prepending {\tt C\_CHAR\_} to plain charcters
-\item take {\tt ctrim} from {\tt mo\_cdi} for {\tt CHARACTER(type=c\_char)} variables
+\item appending \texttt{'\textbackslash 0'} with \texttt{//C\_NULL\_CHAR} 
+\item prepending \texttt{C\_CHAR\_} to plain charcters
+\item take \texttt{ctrim} from \texttt{mo\_cdi} for \texttt{CHARACTER(type=c\_char)} variables
 \end{itemize}
 
 \lstinputlisting[language=Fortran]

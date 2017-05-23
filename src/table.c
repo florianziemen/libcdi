@@ -377,71 +377,50 @@ int tableRead(const char *tablefile)
 
 static int tableFromEnv(int modelID, int tablenum)
 {
-  int tableID = CDI_UNDEFID;
   char tablename[256] = {'\0'};
-  int tablenamefound = 0;
+  size_t tablenameLen = 0;
+  int instID;
 
-  const char *modelName;
-  if ( (modelName = modelInqNamePtr(modelID)) )
+  const char *name2Use;
+  {
+    const char *modelName, *instName;
+    if ( (modelName = modelInqNamePtr(modelID)) )
+      name2Use = modelName;
+    else if ( (instID = modelInqInstitut(modelID)) != CDI_UNDEFID
+              && (instName = institutInqNamePtr(instID)) )
+      name2Use = instName;
+    else
+      return CDI_UNDEFID;
+  }
+  tablenameLen = strlen(name2Use);
+  memcpy(tablename, name2Use, tablenameLen);
+  if ( tablenum )
+    tablenameLen
+      += (size_t)(sprintf(tablename+tablenameLen, "_%03d", tablenum));
+  size_t lenp = 0, lenf = tablenameLen;
+  if ( tablePath )
+    lenp = strlen(tablePath);
+  /* if (tablePath) printf("tablePath = %s\n", tablePath); */
+  /* if (tablename) printf("tableName = %s\n", tablename); */
+  char *tablefile = (char *) Malloc(lenp+lenf+3);
+  if ( tablePath )
     {
-      strcpy(tablename, modelName);
-      if ( tablenum )
-	{
-	  size_t len = strlen(tablename);
-	  sprintf(tablename+len, "_%03d", tablenum);
-	}
-      tablenamefound = 1;
+      strcpy(tablefile, tablePath);
+      strcat(tablefile, "/");
     }
   else
+    tablefile[0] = '\0';
+  strcat(tablefile, tablename);
+  /* if (tablefile) printf("tableFile = %s\n", tablefile); */
+
+  int tableID = tableRead(tablefile);
+  if ( tableID != CDI_UNDEFID )
     {
-      int instID = modelInqInstitut(modelID);
-      if ( instID != CDI_UNDEFID )
-	{
-          const char *instName;
-	  if ( (instName = institutInqNamePtr(instID)) )
-	    {
-	      strcpy(tablename, instName);
-	      if ( tablenum )
-		{
-		  size_t len = strlen(tablename);
-		  sprintf(tablename+len, "_%03d", tablenum);
-		}
-	      tablenamefound = 1;
-	    }
-	}
+      tableDefModelID(tableID, modelID);
+      tableDefNum(tableID, tablenum);
     }
-
-  if ( tablenamefound )
-    {
-      size_t lenp = 0, lenf;
-      char *tablefile = NULL;
-      if ( tablePath )
-	lenp = strlen(tablePath);
-      lenf = strlen(tablename);
-      /* if (tablePath) printf("tablePath = %s\n", tablePath); */
-      /* if (tablename) printf("tableName = %s\n", tablename); */
-      tablefile = (char *) Malloc(lenp+lenf+3);
-      if ( tablePath )
-	{
-	  strcpy(tablefile, tablePath);
-	  strcat(tablefile, "/");
-	}
-      else
-	tablefile[0] = '\0';
-      strcat(tablefile, tablename);
-      /* if (tablefile) printf("tableFile = %s\n", tablefile); */
-
-      tableID = tableRead(tablefile);
-      if ( tableID != CDI_UNDEFID )
-	{
-	  tableDefModelID(tableID, modelID);
-	  tableDefNum(tableID, tablenum);
-	}
-      /* printf("tableID = %d %s\n", tableID, tablefile); */
-
-      Free(tablefile);
-    }
-
+  /* printf("tableID = %d %s\n", tableID, tablefile); */
+  Free(tablefile);
   return (tableID);
 }
 

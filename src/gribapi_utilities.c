@@ -28,28 +28,29 @@
 //A simple wrapper for grib_get_string() that returns a newly allocated string.
 char* gribCopyString(grib_handle* gribHandle, const char* key)
 {
-  char* result = NULL;
   size_t length;
 #ifdef HAVE_GRIB_GET_LENGTH
-  if(!grib_get_length(gribHandle, key, &length))
+  if (!grib_get_length(gribHandle, key, &length))
     {
-    char* result = (char *) Malloc(length);
-    if(!grib_get_string(gribHandle, key, result, &length))
-    result = (char *) Realloc(result, length);
-
-    else
-      {
+      char *result = (char *)Malloc(length);
+      if (!grib_get_string(gribHandle, key, result, &length))
+        result = (char *) Realloc(result, length);
+      else
+        {
           Free(result);
           result = NULL;
-      }
+        }
+      return result;
     }
+  else
+    return NULL;
 #else
   length = 1024;         /* there's an implementation limit
                           * that makes strings longer than
                           * this unlikely in grib_api versions
                           * not providing grib_get_length */
   int rc;
-  result = (char *) Malloc(length);
+  char *result = (char *) Malloc(length);
   while ((rc = grib_get_string(gribHandle, key, result, &length))
          == GRIB_BUFFER_TOO_SMALL || rc == GRIB_ARRAY_TOO_SMALL)
     {
@@ -68,8 +69,8 @@ char* gribCopyString(grib_handle* gribHandle, const char* key)
       Free(result);
       result = NULL;
     }
-#endif
   return result;
+#endif
 }
 
 //A simple wrapper for grib_get_string() for the usecase that the result is only compared to a given constant string.
@@ -122,8 +123,8 @@ long gribGetLong(grib_handle* gh, const char* key)
 long gribGetLongDefault(grib_handle* gribHandle, const char* key, long defaultValue)
 {
   long result;
-  if(grib_get_long(gribHandle, key, &result)) return defaultValue;
-  if(result == GRIB_MISSING_LONG) return defaultValue;
+  if ( grib_get_long(gribHandle, key, &result) || result == GRIB_MISSING_LONG )
+    result = defaultValue;
   return result;
 }
 
@@ -139,8 +140,9 @@ double gribGetDouble(grib_handle* gh, const char* key)
 double gribGetDoubleDefault(grib_handle* gribHandle, const char* key, double defaultValue)
 {
   double result;
-  if(grib_get_double(gribHandle, key, &result)) return defaultValue;
-  if(IS_EQUAL(result, GRIB_MISSING_DOUBLE)) return defaultValue;
+  if ( grib_get_double(gribHandle, key, &result)
+       || IS_EQUAL(result, GRIB_MISSING_DOUBLE) )
+    result = defaultValue;
   return result;
 }
 
@@ -347,6 +349,21 @@ int gribapiTimeIsFC(grib_handle *gh)
   return sigofrtime != 3;
 }
 
+struct cdiGribAPI_ts_str_map_elem cdiGribAPI_ts_str_map[] = {
+  [TSTEP_INSTANT] = {  0, "instant" },
+  [TSTEP_AVG] = { 8, "avg" },
+  [TSTEP_ACCUM] = {  8, "accum" },
+  [TSTEP_MAX] = {  8, "max" },
+  [TSTEP_MIN] = {  8, "min" },
+  [TSTEP_DIFF] = {  8, "diff" },
+  [TSTEP_RMS] = {  8, "rms" },
+  [TSTEP_SD] = {  8, "sd" },
+  [TSTEP_COV] = { 8, "cov" },
+  [TSTEP_RATIO] = {  8, "ratio" },
+  { 0, "" }
+};
+
+
 //Fetches the value of the "stepType" key and converts it into a constant in the TSTEP_* range.
 int gribapiGetTsteptype(grib_handle *gh)
 {
@@ -362,26 +379,64 @@ int gribapiGetTsteptype(grib_handle *gh)
       status = grib_get_string(gh, "stepType", stepType, &len);
       if ( status == 0 && len > 1 && len < 256 )
         {
-          if      ( strncmp("instant", stepType, len) == 0 ) tsteptype = TSTEP_INSTANT;
-          else if ( strncmp("avg",     stepType, len) == 0 ) tsteptype = TSTEP_AVG;
-          else if ( strncmp("accum",   stepType, len) == 0 ) tsteptype = TSTEP_ACCUM;
-          else if ( strncmp("max",     stepType, len) == 0 ) tsteptype = TSTEP_MAX;
-          else if ( strncmp("min",     stepType, len) == 0 ) tsteptype = TSTEP_MIN;
-          else if ( strncmp("diff",    stepType, len) == 0 ) tsteptype = TSTEP_DIFF;
-          else if ( strncmp("rms",     stepType, len) == 0 ) tsteptype = TSTEP_RMS;
-          else if ( strncmp("sd",      stepType, len) == 0 ) tsteptype = TSTEP_SD;
-          else if ( strncmp("cov",     stepType, len) == 0 ) tsteptype = TSTEP_COV;
-          else if ( strncmp("ratio",   stepType, len) == 0 ) tsteptype = TSTEP_RATIO;
-          else if ( lprint )
+          for (int i = TSTEP_INSTANT; cdiGribAPI_ts_str_map[i].sname[0]; ++i)
+            if ( strncmp(cdiGribAPI_ts_str_map[i].sname, stepType, len) == 0 )
+              {
+                tsteptype = i;
+                goto tsteptypeFound;
+              }
+
+          if ( lprint )
             {
               Message("Time stepType %s unsupported, set to instant!", stepType);
               lprint = false;
             }
-
           // printf("stepType: %s %ld %d\n", stepType, len, tsteptype);
         }
+#ifdef HIRLAM_EXTENSIONS
+      {
+      // Normaly cdo looks in grib for attribute called "stepType", see above.
+      // BUT NWP models such as Hirlam and Harmonie 37h1.2, use "timeRangeIndicator" instead!
+      // Where for example:       0: for instanteneous fields; 4: for accumulated fields
+      //  0:   Forecast product valid at reference time + P1
+      //  2:   Product with a valid time ranging between reference time + P1 and reference time + P2
+      //  4:   Accumulation (reference time + P1 to reference time + P2)
+      //  5:   Difference(reference time + P2 minus reference time + P1) product considered valid at reference time + P2
+      // More details on WMO standards:
+      //               http://www.wmo.int/pages/prog/www/WDM/Guides/Guide-binary-2.html
+      //tsteptype = TSTEP_INSTANT;  // default value for any case
+      long timeRangeIND = 0; // typically 0: for instanteneous fields; 4: for accumulated fields
+      int rc = grib_get_long(gh, "timeRangeIndicator", &timeRangeIND);
+      if (rc != 0) {
+            //if ( lprint )
+            Warning("Could not get 'stepType' either 'timeRangeIndicator'. Using defualt!");
+            return (tsteptype);
+      }
+      extern int cdiGribUseTimeRangeIndicator;
+      cdiGribUseTimeRangeIndicator = 1;
+      switch ( timeRangeIND )
+          {
+              case 0:  tsteptype = TSTEP_INSTANT; break;
+              case 2:  tsteptype = TSTEP_INSTANT2;
+                       strcpy(stepType, "instant2");  // was incorrectly set before into accum
+                       break;
+              case 4:  tsteptype = TSTEP_ACCUM; break;
+              case 5:  tsteptype = TSTEP_DIFF; break;
+              default:
+                if ( lprint )
+                {
+                  if (CDI_Debug)
+                      Warning("timeRangeIND = %d;  stepType= %s; tsteptype=%d unsupported timeRangeIND at the moment, set to instant!", timeRangeIND, stepType, tsteptype);
+                  lprint = FALSE;
+                }
+                break;
+          }
+      if (CDI_Debug)
+          Warning("timeRangeIND = %d;  stepType= %s; tsteptype=%d", timeRangeIND, stepType, tsteptype);
+      }
+#endif // HIRLAM_EXTENSIONS
     }
-
+  tsteptypeFound:
   return tsteptype;
 }
 
@@ -454,6 +509,11 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
   long editionNumber = gribEditionNumber(gh);
   int gridtype = gribapiGetGridType(gh);
   int projtype = (gridtype == GRID_PROJECTION && gribapiGetIsRotated(gh)) ? CDI_PROJ_RLL : CDI_UNDEFID;
+  if ( gridtype == GRID_LCC )
+    {
+      gridtype = GRID_PROJECTION;
+      projtype = CDI_PROJ_LCC;
+    }
   /*
   if ( streamptr->unreduced && gridtype == GRID_GAUSSIAN_REDUCED )
     {
@@ -487,7 +547,7 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
       if ( numberOfPoints != nlon*nlat )
         Error("numberOfPoints (%ld) and gridSize (%ld) differ!", numberOfPoints, nlon*nlat);
 
-      grid->size  = (int)numberOfPoints;
+      grid->size   = (int)numberOfPoints;
       grid->x.size = (int)nlon;
       grid->y.size = (int)nlat;
       grid->x.inc  = 0;
@@ -502,17 +562,19 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
       if ( gridtype == GRID_LONLAT && nlat > 1 )
         FAIL_ON_GRIB_ERROR(grib_get_double, gh, "jDirectionIncrementInDegrees", &grid->y.inc);
 
+      long iscan, jscan;
+      FAIL_ON_GRIB_ERROR(grib_get_long, gh, "iScansNegatively", &iscan);
+      FAIL_ON_GRIB_ERROR(grib_get_long, gh, "jScansPositively", &jscan);
+      if (  iscan ) grid->x.inc = - grid->x.inc;
+      if ( !jscan ) grid->y.inc = - grid->y.inc;
+
       if ( grid->x.inc < -999 || grid->x.inc > 999 ) grid->x.inc = 0;
       if ( grid->y.inc < -999 || grid->y.inc > 999 ) grid->y.inc = 0;
-
-      if ( grid->y.inc > 0 && grid->y.first > grid->y.last ) grid->y.inc = -grid->y.inc;
 
       /* if ( IS_NOT_EQUAL(grid->x.first, 0) || IS_NOT_EQUAL(grid->x.last, 0) ) */
       {
         if ( grid->x.size > 1 )
           {
-            if ( (grid->x.first >= grid->x.last) && (grid->x.first >= 180) ) grid->x.first -= 360;
-
             if ( editionNumber <= 1 )
               {
                 /* correct xinc if necessary */
@@ -605,13 +667,12 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
         grid->y.flag = 2;
       }
     }
-  else if ( gridtype == GRID_LCC )
+  else if ( projtype == CDI_PROJ_LCC )
     {
-      int nlon, nlat;
       FAIL_ON_GRIB_ERROR(grib_get_long, gh, "Nx", &lpar);
-      nlon = (int)lpar;
+      int nlon = (int)lpar;
       FAIL_ON_GRIB_ERROR(grib_get_long, gh, "Ny", &lpar);
-      nlat = (int)lpar;
+      int nlat = (int)lpar;
 
       if ( numberOfPoints != nlon*nlat )
         Error("numberOfPoints (%d) and gridSize (%d) differ!", (int)numberOfPoints, nlon*nlat);
@@ -620,24 +681,18 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
       grid->x.size = nlon;
       grid->y.size = nlat;
 
-      FAIL_ON_GRIB_ERROR(grib_get_double, gh, "DxInMetres", &grid->lcc.xinc);
-      FAIL_ON_GRIB_ERROR(grib_get_double, gh, "DyInMetres", &grid->lcc.yinc);
-      FAIL_ON_GRIB_ERROR(grib_get_double, gh, "longitudeOfFirstGridPointInDegrees", &grid->lcc.originLon);
-      FAIL_ON_GRIB_ERROR(grib_get_double, gh, "latitudeOfFirstGridPointInDegrees", &grid->lcc.originLat);
-      FAIL_ON_GRIB_ERROR(grib_get_double, gh, "LoVInDegrees", &grid->lcc.lonParY);
-      FAIL_ON_GRIB_ERROR(grib_get_double, gh, "Latin1InDegrees", &grid->lcc.lat1);
-      FAIL_ON_GRIB_ERROR(grib_get_double, gh, "Latin2InDegrees", &grid->lcc.lat2);
+      double xinc, yinc;
+      FAIL_ON_GRIB_ERROR(grib_get_double, gh, "DxInMetres", &xinc);
+      FAIL_ON_GRIB_ERROR(grib_get_double, gh, "DyInMetres", &yinc);
 
-      if ( editionNumber <= 1 )
-        {
-          FAIL_ON_GRIB_ERROR(grib_get_long, gh, "projectionCenterFlag", &lpar);
-          grid->lcc.projflag  = (int) lpar;
-          FAIL_ON_GRIB_ERROR(grib_get_long, gh, "scanningMode", &lpar);
-          grid->lcc.scanflag  = (int) lpar;
-        }
-
-      grid->x.flag = 0;
-      grid->y.flag = 0;
+      grid->x.first = 0;
+      grid->x.last  = 0;
+      grid->x.inc   = xinc;
+      grid->y.first = 0;
+      grid->y.last  = 0;
+      grid->y.inc   = yinc;
+      grid->x.flag  = 2;
+      grid->y.flag  = 2;
     }
   else if ( gridtype == GRID_SPECTRAL )
     {
@@ -711,6 +766,47 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
   else
     {
       Error("Unsupported grid type: %s", gridNamePtr(gridtype));
+    }
+
+  if ( gridtype == GRID_GAUSSIAN || gridtype == GRID_LONLAT || gridtype == GRID_PROJECTION )
+    {
+      long temp;
+      GRIB_CHECK(grib_get_long(gh, "uvRelativeToGrid", &temp), 0);
+      assert(temp == 0 || temp == 1);
+      grid->uvRelativeToGrid = (bool)temp;
+    }
+
+  if ( gridtype == GRID_GAUSSIAN || gridtype == GRID_LONLAT || gridtype == GRID_PROJECTION )
+    {
+      long temp;
+      GRIB_CHECK(grib_get_long(gh, "iScansNegatively", &temp), 0);
+      grid->iScansNegatively = (bool)temp;
+      GRIB_CHECK(grib_get_long(gh, "jScansPositively", &temp), 0);
+      grid->jScansPositively = (bool)temp;
+      GRIB_CHECK(grib_get_long(gh, "jPointsAreConsecutive", &temp), 0);
+      grid->jPointsAreConsecutive = (bool)temp;
+      grid->scanningMode = 128*grid->iScansNegatively + 64*grid->jScansPositively + 32*grid->jPointsAreConsecutive;
+      /* scanningMode  = 128 * iScansNegatively + 64 * jScansPositively + 32 * jPointsAreConsecutive;
+                   64  = 128 * 0                + 64 *        1         + 32 * 0
+                   00  = 128 * 0                + 64 *        0         + 32 * 0
+                   96  = 128 * 0                + 64 *        1         + 32 * 1
+         Default / implicit scanning mode is 64:
+                            i and j scan positively, i points are consecutive (row-major)        */
+#ifdef HIRLAM_EXTENSIONS
+      if (cdiDebugExt>=30)
+      {
+        //  indicatorOfParameter=33,indicatorOfTypeOfLevel=105,level
+        long paramId, levelTypeId, levelId;
+        GRIB_CHECK(grib_get_long(gh, "indicatorOfParameter", &paramId), 0);
+        GRIB_CHECK(grib_get_long(gh, "indicatorOfTypeOfLevel", &levelTypeId), 0);
+        GRIB_CHECK(grib_get_long(gh, "level", &levelId), 0);
+        Message("(param,ltype,level) = (%3d,%3d,%4d); Scanning mode = %02d -> bits:(%1d.%1d.%1d)*32;  uvRelativeToGrid = %02d",\
+                (int)paramId, (int)levelTypeId, (int)levelId,
+                grid->scanningMode,grid->jPointsAreConsecutive,
+                grid->jScansPositively,grid->iScansNegatively,
+                grid->uvRelativeToGrid);
+      }
+#endif //HIRLAM_EXTENSIONS
     }
 
   grid->type  = gridtype;

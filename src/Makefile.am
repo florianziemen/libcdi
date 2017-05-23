@@ -75,6 +75,7 @@ libcdi_la_SOURCES = 	 \
 	servicelib.c     \
 	stream_cdf_i.c   \
 	stream_cdf_o.c   \
+	stream_cdf_time.c \
 	stream_cdf.h	 \
 	stream_cgribex.c \
 	stream_cgribex.h \

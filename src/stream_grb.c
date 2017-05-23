@@ -7,9 +7,58 @@
 #include "stream_cgribex.h"
 #include "stream_grb.h"
 #include "stream_gribapi.h"
+#include "gribapi.h"
 #include "file.h"
 #include "cgribex.h"  /* gribZip gribGetZip gribGinfo */
-#include "gribapi.h"
+
+int cdiDebugExt                        =  0;      //  Debug level for the KNMI extensions
+#ifdef HIRLAM_EXTENSIONS
+// *** RELATED to GRIB only ***
+int cdiGribUseTimeRangeIndicator        = 0;       // normaly cdo looks in grib for attribute called "stepType"
+                                                   // but NWP models such as Harmonie 37h1.2, use "timeRangeIndicator"
+                                                   // where:  0: for instanteneous fields; 4: for accumulated fields
+#endif // HIRLAM_EXTENSIONS
+
+
+// Regarding operation to change parameter identification:
+// change if cdiGribChangeParameterID.active
+struct cdiGribParamChange cdiGribChangeParameterID;
+
+// Used only for CDO module Selmulti
+void streamGrbChangeParameterIdentification(int code, int ltype, int lev)
+{
+  // NOTE this is a "PROXY" function for gribapiChangeParameterIdentification();
+  // This just sets the globals. There are probably better solutions to this.
+  // The parameter change is done by function  gribapiChangeParameterIdentification() in stream_gribapi.c
+  // Setting this control variable to true will cause calling fnc. gribapiChangeParameterIdentification later.
+  // After grib attributes have been changed this variable goes to false.
+  cdiGribChangeParameterID.active = true;
+  cdiGribChangeParameterID.code = code;
+  cdiGribChangeParameterID.ltype = ltype;
+  cdiGribChangeParameterID.lev = lev;
+}
+
+struct cdiGribModeChange cdiGribChangeModeUvRelativeToGrid;
+
+// Used only for CDO module WindTrans
+void streamGrbChangeModeUvRelativeToGrid(int mode)
+{
+  cdiGribChangeModeUvRelativeToGrid.active = true;
+  cdiGribChangeModeUvRelativeToGrid.mode = (mode > 0);
+}
+
+struct cdiGribScanModeChange cdiGribDataScanningMode;
+
+void streamGrbDefDataScanningMode(int scanmode)
+{
+  cdiGribDataScanningMode.active = true;
+  cdiGribDataScanningMode.value = scanmode;
+}
+
+int  streamGrbInqDataScanningMode(void)
+{
+  return cdiGribDataScanningMode.value;
+}
 
 
 int grib1ltypeToZaxisType(int grib_ltype)
@@ -248,15 +297,11 @@ static
 int grbScanTimestep(stream_t * streamptr)
 {
   int status = CDI_EUFTYPE;
-  int filetype;
-
-  filetype  = streamptr->filetype;
+  int filetype  = streamptr->filetype;
 
 #if  defined  (HAVE_LIBCGRIBEX)
   if ( filetype == CDI_FILETYPE_GRB )
-    {
-      status = cgribexScanTimestep(streamptr);
-    }
+    status = cgribexScanTimestep(streamptr);
   else
 #endif
 #ifdef HAVE_LIBGRIB_API
@@ -272,17 +317,12 @@ int grbScanTimestep(stream_t * streamptr)
 #if  defined  (HAVE_LIBGRIB)
 int grbInqContents(stream_t * streamptr)
 {
-  int fileID;
-  int status = 0;
-
-  fileID = streamptr->fileID;
-
   streamptr->curTsID = 0;
 
-  status = grbScanTimestep1(streamptr);
-
+  int status = grbScanTimestep1(streamptr);
   if ( status == 0 && streamptr->ntsteps == -1 ) status = grbScanTimestep2(streamptr);
 
+  int fileID = streamptr->fileID;
   fileSetPos(fileID, 0, SEEK_SET);
 
   return status;
@@ -291,15 +331,13 @@ int grbInqContents(stream_t * streamptr)
 
 int grbInqTimestep(stream_t * streamptr, int tsID)
 {
-  int ntsteps, nrecs;
-
   if ( tsID == 0 && streamptr->rtsteps == 0 )
     Error("Call to cdiInqContents missing!");
 
   if ( CDI_Debug )
     Message("tsid = %d rtsteps = %d", tsID, streamptr->rtsteps);
 
-  ntsteps = CDI_UNDEFID;
+  int ntsteps = CDI_UNDEFID;
   while ( (tsID + 1) > streamptr->rtsteps && ntsteps == CDI_UNDEFID )
     {
       ntsteps = grbScanTimestep(streamptr);
@@ -309,6 +347,8 @@ int grbInqTimestep(stream_t * streamptr, int tsID)
 	  break;
 	}
     }
+
+  int nrecs;
 
   if ( tsID >= streamptr->ntsteps && streamptr->ntsteps != CDI_UNDEFID )
     {

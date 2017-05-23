@@ -12,6 +12,11 @@ size_t cgribexEncode(int memtype, int varID, int levelID, int vlistID, int gridI
 		     int vdate, int vtime, int tsteptype, int numavg,
 		     long datasize, const void *data, int nmiss, void *gribbuffer, size_t gribbuffersize);
 
+void *cgribex_handle_new_from_meassage(void *gribbuffer, size_t recsize);
+void cgribex_handle_delete(void *gh);
+
+void cgribexChangeParameterIdentification(void *gh, int code, int ltype, int lev);
+
 #endif  /* _STREAM_CGRIBEX_H */
 /*
  * Local Variables:

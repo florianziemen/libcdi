@@ -54,7 +54,7 @@
 #if ! defined   (_CGRIBEX_H)
 #  include "cgribex.h"
 #endif
-#if ! defined   (_ERROR_H)
+#if ! defined   (ERROR_H)
 #  include "error.h"
 #endif
 #if ! defined   (_DTYPES_H)

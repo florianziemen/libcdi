@@ -11,7 +11,19 @@
 #if defined (HAVE_CF_INTERFACE)
 
 #if ! defined (__CFORTRAN_LOADED)
+#  if defined __clang__
+#    pragma GCC diagnostic push
+#    pragma GCC diagnostic ignored "-Wreserved-id-macro"
+#  endif
 #  include "cfortran.h"
+#  if defined __clang__
+#    pragma GCC diagnostic pop
+#  endif
+#endif
+/* These functions are meant to be called from Fortran and don't
+ * need an interface declaration in a C header. */
+#if defined __clang__
+#  pragma GCC diagnostic ignored "-Wmissing-prototypes"
 #endif
 
 
@@ -326,8 +338,10 @@ FCALLSCSUB2 (gridDefNP, GRIDDEFNP, griddefnp, INT, INT)
 FCALLSCFUN1 (INT, gridInqNP, GRIDINQNP, gridinqnp, INT)
 FCALLSCSUB2 (gridDefXvals, GRIDDEFXVALS, griddefxvals, INT, DOUBLEV)
 FCALLSCFUN2 (INT, gridInqXvals, GRIDINQXVALS, gridinqxvals, INT, DOUBLEV)
+FCALLSCFUN1 (INT, gridInqXIsc, GRIDINQXISC, gridinqxisc, INT)
 FCALLSCSUB2 (gridDefYvals, GRIDDEFYVALS, griddefyvals, INT, DOUBLEV)
 FCALLSCFUN2 (INT, gridInqYvals, GRIDINQYVALS, gridinqyvals, INT, DOUBLEV)
+FCALLSCFUN1 (INT, gridInqYIsc, GRIDINQYISC, gridinqyisc, INT)
 
 /*  CDI grid string key values  */
 
@@ -385,8 +399,8 @@ FCALLSCSUB5 (gridInqParamGME, GRIDINQPARAMGME, gridinqparamgme, INT, PINT, PINT,
 
 /*  Lambert Conformal Conic grid (GRIB version)  */
 
-FCALLSCSUB10 (gridDefParamLCC, GRIDDEFPARAMLCC, griddefparamlcc, INT, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE, INT, INT)
-FCALLSCSUB10 (gridInqParamLCC, GRIDINQPARAMLCC, gridinqparamlcc, INT, PDOUBLE, PDOUBLE, PDOUBLE, PDOUBLE, PDOUBLE, PDOUBLE, PDOUBLE, PINT, PINT)
+FCALLSCSUB12 (gridDefParamLCC, GRIDDEFPARAMLCC, griddefparamlcc, INT, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE)
+FCALLSCFUN12 (INT, gridInqParamLCC, GRIDINQPARAMLCC, gridinqparamlcc, INT, DOUBLE, PDOUBLE, PDOUBLE, PDOUBLE, PDOUBLE, PDOUBLE, PDOUBLE, PDOUBLE, PDOUBLE, PDOUBLE, PDOUBLE)
 FCALLSCSUB2 (gridDefArea, GRIDDEFAREA, griddefarea, INT, DOUBLEV)
 FCALLSCSUB2 (gridInqArea, GRIDINQAREA, gridinqarea, INT, DOUBLEV)
 FCALLSCFUN1 (INT, gridHasArea, GRIDHASAREA, gridhasarea, INT)
@@ -401,10 +415,15 @@ FCALLSCSUB2 (gridInqRowlon, GRIDINQROWLON, gridinqrowlon, INT, INTV)
 FCALLSCSUB2 (gridChangeType, GRIDCHANGETYPE, gridchangetype, INT, INT)
 FCALLSCSUB2 (gridDefComplexPacking, GRIDDEFCOMPLEXPACKING, griddefcomplexpacking, INT, INT)
 FCALLSCFUN1 (INT, gridInqComplexPacking, GRIDINQCOMPLEXPACKING, gridinqcomplexpacking, INT)
+FCALLSCSUB2 (gridDefUvRelativeToGrid, GRIDDEFUVRELATIVETOGRID, griddefuvrelativetogrid, INT, INT)
+FCALLSCFUN1 (INT, gridInqUvRelativeToGrid, GRIDINQUVRELATIVETOGRID, gridinquvrelativetogrid, INT)
+FCALLSCSUB2 (gridDefScanningMode, GRIDDEFSCANNINGMODE, griddefscanningmode, INT, INT)
+FCALLSCFUN1 (INT, gridInqScanningMode, GRIDINQSCANNINGMODE, gridinqscanningmode, INT)
 
 /*  ZAXIS routines  */
 
 FCALLSCSUB2 (zaxisName, ZAXISNAME, zaxisname, INT, PSTRING)
+FCALLSCFUN1 (STRING, zaxisNamePtr, ZAXISNAMEPTR, zaxisnameptr, INT)
 FCALLSCFUN2 (INT, zaxisCreate, ZAXISCREATE, zaxiscreate, INT, INT)
 FCALLSCSUB1 (zaxisDestroy, ZAXISDESTROY, zaxisdestroy, INT)
 FCALLSCFUN1 (INT, zaxisInqType, ZAXISINQTYPE, zaxisinqtype, INT)
@@ -563,4 +582,7 @@ FCALLSCFUN4 (INT, subtypeInqAttribute, SUBTYPEINQATTRIBUTE, subtypeinqattribute,
 FCALLSCFUN2 (INT, vlistInqVarSubtype, VLISTINQVARSUBTYPE, vlistinqvarsubtype, INT, INT)
 FCALLSCSUB3 (gribapiLibraryVersion, GRIBAPILIBRARYVERSION, gribapilibraryversion, PINT, PINT, PINT)
 
+#if defined __clang__
+#  pragma GCC diagnostic pop
+#endif
 #endif

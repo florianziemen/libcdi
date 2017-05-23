@@ -41,7 +41,7 @@ char *strdup(const char *s);
 #endif
 
 
-#ifndef  _ERROR_H
+#ifndef  ERROR_H
 #  include "error.h"
 #endif
 #ifndef _BASETIME_H
@@ -152,6 +152,14 @@ typedef struct
   int       ilevel2;
   int       ltype;
   short     tsteptype;
+#ifdef HIRLAM_EXTENSIONS
+    // NOTE: tsteptype MUST be part of attributes used to compare variables!
+    // Modern NWP models (HARMONIE, HIRLAM) use timeRangeIndicator to specify
+    // if the field is instantanous or accumulated.
+    // Both types are typically in the same GRIB-file.
+    // (181; 105, 0, timeRangeIndicator=0) .. instantanous rain
+    // (181; 105, 0, timeRangeIndicator=4) .. accumulated rain  .. both can be in the same grib file
+#endif // HIRLAM_EXTENSIONS
   short     used;
   short     varID;
   short     levelID;
@@ -209,13 +217,17 @@ typedef struct {
 VCT;
 
 #ifdef HAVE_LIBNETCDF
+enum {
+  CDF_DIMID_X,
+  CDF_DIMID_Y,
+  CDF_VARID_X,
+  CDF_VARID_Y,
+  CDF_VARID_A,
+  CDF_SIZE_ncIDs,
+};
 typedef struct {
   int gridID;
-  int xdimID;
-  int ydimID;
-  int xvarID;
-  int yvarID;
-  int avarID;
+  int ncIDs[CDF_SIZE_ncIDs];
 }
 ncgrid_t;
 #endif
@@ -254,10 +266,11 @@ typedef struct {
   int         globalatts;
   int         localatts;
   int         unreduced;
-  int         sortname;
   int         have_missval;
   int         comptype;      // compression type
   int         complevel;     // compression level
+  bool        sortname;
+  bool        sortparam;
 #if defined (GRIBCONTAINER2D)
   void      **gribContainers;
 #else
@@ -302,6 +315,7 @@ typedef enum {
 #define  CDI_FILETYPE_UNDEF          -1   /* Unknown/not yet defined file type */
 
 
+extern int cdiDebugExt;
 extern int CDI_Debug;      /* If set to 1, debuggig (default 0)            */
 extern int CDI_Recopt;
 extern int cdiGribApiDebug;
@@ -317,8 +331,10 @@ extern int cdiChunkType;
 extern int cdiSplitLtype105;
 extern int cdiDataUnreduced;
 extern int cdiSortName;
+extern int cdiSortParam;
 extern int cdiHaveMissval;
 extern int cdiIgnoreAttCoordinates;
+extern int cdiCoordinatesLonLat;
 extern int cdiIgnoreValidRange;
 extern int cdiSkipRecords;
 extern int cdiConvention;
@@ -351,7 +367,6 @@ int     streamInqFileID(int streamID);
 
 void    gridDefHasDims(int gridID, int hasdims);
 int     gridInqHasDims(int gridID);
-const char   *zaxisNamePtr(int leveltype);
 int     zaxisInqLevelID(int zaxisID, double level);
 
 void    streamCheckID(const char *caller, int streamID);
@@ -384,8 +399,6 @@ void    cdiCreateTimesteps(stream_t *streamptr);
 void    recordInitEntry(record_t *record);
 
 void    cdiCheckZaxis(int zaxisID);
-
-void    cdiPrintDatatypes(void);
 
 void    cdiDefAccesstype(int streamID, int type);
 int     cdiInqAccesstype(int streamID);

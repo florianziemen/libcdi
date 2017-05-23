@@ -80,8 +80,9 @@ build_triplet = @build@
 host_triplet = @host@
 noinst_PROGRAMS = cdi_write$(EXEEXT) cdi_write_ens$(EXEEXT) \
 	cdi_write_hybrid$(EXEEXT) cdi_read$(EXEEXT) cdi_copy$(EXEEXT) \
-	$(am__EXEEXT_1)
+	$(am__EXEEXT_1) $(am__EXEEXT_2)
 @CREATE_ISOC_TRUE@am__append_1 = cdi_read_f2003 cdi_write_f2003
+@ENABLE_NETCDF_TRUE@am__append_2 = cdi_write_const
 subdir = examples
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/config/mkinstalldirs \
@@ -101,6 +102,7 @@ am__aclocal_m4_deps =  \
 	$(top_srcdir)/m4/acx_lt_problems.m4 \
 	$(top_srcdir)/m4/acx_option_search_libs.m4 \
 	$(top_srcdir)/m4/acx_options.m4 \
+	$(top_srcdir)/m4/acx_prog_cc_posix.m4 \
 	$(top_srcdir)/m4/acx_sl_fc_mod_path_flag.m4 \
 	$(top_srcdir)/m4/acx_sl_mod_suffix.m4 \
 	$(top_srcdir)/m4/asx_tr_arg.m4 $(top_srcdir)/m4/asx_unset.m4 \
@@ -122,9 +124,11 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 @CREATE_ISOC_TRUE@am__EXEEXT_1 = cdi_read_f2003$(EXEEXT) \
 @CREATE_ISOC_TRUE@	cdi_write_f2003$(EXEEXT)
+@ENABLE_NETCDF_TRUE@am__EXEEXT_2 = cdi_write_const$(EXEEXT)
 PROGRAMS = $(noinst_PROGRAMS)
 am_cdi_copy_OBJECTS = cdi_copy.$(OBJEXT)
 cdi_copy_OBJECTS = $(am_cdi_copy_OBJECTS)
+cdi_copy_LDADD = $(LDADD)
 cdi_copy_DEPENDENCIES = $(top_builddir)/src/libcdi.la
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -135,37 +139,45 @@ cdi_copy_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(cdi_copy_LDFLAGS) $(LDFLAGS) -o $@
 am_cdi_read_OBJECTS = cdi_read.$(OBJEXT)
 cdi_read_OBJECTS = $(am_cdi_read_OBJECTS)
+cdi_read_LDADD = $(LDADD)
 cdi_read_DEPENDENCIES = $(top_builddir)/src/libcdi.la
 cdi_read_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(cdi_read_LDFLAGS) $(LDFLAGS) -o $@
 am_cdi_read_f2003_OBJECTS = cdi_read_f2003.$(OBJEXT)
 cdi_read_f2003_OBJECTS = $(am_cdi_read_f2003_OBJECTS)
-cdi_read_f2003_DEPENDENCIES = $(top_builddir)/src/libcdi.la \
-	$(top_builddir)/src/mo_cdi.o
+cdi_read_f2003_DEPENDENCIES = $(top_builddir)/src/mo_cdi.o \
+	$(top_builddir)/src/libcdi.la
 cdi_read_f2003_LINK = $(LIBTOOL) $(AM_V_lt) --tag=FC \
 	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(FCLD) \
 	$(AM_FCFLAGS) $(FCFLAGS) $(cdi_read_f2003_LDFLAGS) $(LDFLAGS) \
 	-o $@
 am_cdi_write_OBJECTS = cdi_write.$(OBJEXT)
 cdi_write_OBJECTS = $(am_cdi_write_OBJECTS)
+cdi_write_LDADD = $(LDADD)
 cdi_write_DEPENDENCIES = $(top_builddir)/src/libcdi.la
 cdi_write_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(cdi_write_LDFLAGS) $(LDFLAGS) -o $@
+am_cdi_write_const_OBJECTS = cdi_write_const.$(OBJEXT)
+cdi_write_const_OBJECTS = $(am_cdi_write_const_OBJECTS)
+cdi_write_const_LDADD = $(LDADD)
+cdi_write_const_DEPENDENCIES = $(top_builddir)/src/libcdi.la
 am_cdi_write_ens_OBJECTS = cdi_write_ens.$(OBJEXT)
 cdi_write_ens_OBJECTS = $(am_cdi_write_ens_OBJECTS)
+cdi_write_ens_LDADD = $(LDADD)
 cdi_write_ens_DEPENDENCIES = $(top_builddir)/src/libcdi.la
 am_cdi_write_f2003_OBJECTS = cdi_write_f2003.$(OBJEXT)
 cdi_write_f2003_OBJECTS = $(am_cdi_write_f2003_OBJECTS)
-cdi_write_f2003_DEPENDENCIES = $(top_builddir)/src/libcdi.la \
-	$(top_builddir)/src/mo_cdi.$(OBJEXT)
+cdi_write_f2003_DEPENDENCIES = $(top_builddir)/src/mo_cdi.$(OBJEXT) \
+	$(top_builddir)/src/libcdi.la
 cdi_write_f2003_LINK = $(LIBTOOL) $(AM_V_lt) --tag=FC \
 	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(FCLD) \
 	$(AM_FCFLAGS) $(FCFLAGS) $(cdi_write_f2003_LDFLAGS) $(LDFLAGS) \
 	-o $@
 am_cdi_write_hybrid_OBJECTS = cdi_write_hybrid.$(OBJEXT)
 cdi_write_hybrid_OBJECTS = $(am_cdi_write_hybrid_OBJECTS)
+cdi_write_hybrid_LDADD = $(LDADD)
 cdi_write_hybrid_DEPENDENCIES = $(top_builddir)/src/libcdi.la
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -218,12 +230,12 @@ am__v_FCLD_0 = @echo "  FCLD    " $@;
 am__v_FCLD_1 = 
 SOURCES = $(cdi_copy_SOURCES) $(cdi_read_SOURCES) \
 	$(cdi_read_f2003_SOURCES) $(cdi_write_SOURCES) \
-	$(cdi_write_ens_SOURCES) $(cdi_write_f2003_SOURCES) \
-	$(cdi_write_hybrid_SOURCES)
+	$(cdi_write_const_SOURCES) $(cdi_write_ens_SOURCES) \
+	$(cdi_write_f2003_SOURCES) $(cdi_write_hybrid_SOURCES)
 DIST_SOURCES = $(cdi_copy_SOURCES) $(cdi_read_SOURCES) \
 	$(cdi_read_f2003_SOURCES) $(cdi_write_SOURCES) \
-	$(cdi_write_ens_SOURCES) $(cdi_write_f2003_SOURCES) \
-	$(cdi_write_hybrid_SOURCES)
+	$(cdi_write_const_SOURCES) $(cdi_write_ens_SOURCES) \
+	$(cdi_write_f2003_SOURCES) $(cdi_write_hybrid_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -439,27 +451,25 @@ EXTRA_DIST = cdi_read_f2003.f90 cdi_write_f2003.f90
 #
 AM_CPPFLAGS = -I$(top_srcdir)/src
 AM_FCFLAGS = $(FPP_INCOPT)$(top_srcdir)/src $(FC_MOD_FLAG)../src
+LDADD = $(top_builddir)/src/libcdi.la
 #
 cdi_write_SOURCES = cdi_write.c
-cdi_write_LDADD = $(top_builddir)/src/libcdi.la
 #
 cdi_write_ens_SOURCES = cdi_write_ens.c
-cdi_write_ens_LDADD = $(top_builddir)/src/libcdi.la
+#
+cdi_write_const_SOURCES = cdi_write_const.c
 #
 cdi_write_hybrid_SOURCES = cdi_write_hybrid.c
-cdi_write_hybrid_LDADD = $(top_builddir)/src/libcdi.la
 #
 cdi_read_SOURCES = cdi_read.c
-cdi_read_LDADD = $(top_builddir)/src/libcdi.la
 #
 cdi_copy_SOURCES = cdi_copy.c
-cdi_copy_LDADD = $(top_builddir)/src/libcdi.la
 #
 cdi_read_f2003_SOURCES = cdi_read_f2003.f90
-cdi_read_f2003_LDADD = $(top_builddir)/src/libcdi.la $(top_builddir)/src/mo_cdi.o
+cdi_read_f2003_LDADD = $(top_builddir)/src/mo_cdi.o $(top_builddir)/src/libcdi.la
 #
 cdi_write_f2003_SOURCES = cdi_write_f2003.f90
-cdi_write_f2003_LDADD = $(top_builddir)/src/libcdi.la $(top_builddir)/src/mo_cdi.$(OBJEXT)
+cdi_write_f2003_LDADD = $(top_builddir)/src/mo_cdi.$(OBJEXT) $(top_builddir)/src/libcdi.la
 
 #
 @ENABLE_ALL_STATIC_TRUE@cdi_write_LDFLAGS = -all-static
@@ -527,6 +537,10 @@ cdi_write$(EXEEXT): $(cdi_write_OBJECTS) $(cdi_write_DEPENDENCIES) $(EXTRA_cdi_w
 	@rm -f cdi_write$(EXEEXT)
 	$(AM_V_CCLD)$(cdi_write_LINK) $(cdi_write_OBJECTS) $(cdi_write_LDADD) $(LIBS)
 
+cdi_write_const$(EXEEXT): $(cdi_write_const_OBJECTS) $(cdi_write_const_DEPENDENCIES) $(EXTRA_cdi_write_const_DEPENDENCIES) 
+	@rm -f cdi_write_const$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(cdi_write_const_OBJECTS) $(cdi_write_const_LDADD) $(LIBS)
+
 cdi_write_ens$(EXEEXT): $(cdi_write_ens_OBJECTS) $(cdi_write_ens_DEPENDENCIES) $(EXTRA_cdi_write_ens_DEPENDENCIES) 
 	@rm -f cdi_write_ens$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(cdi_write_ens_OBJECTS) $(cdi_write_ens_LDADD) $(LIBS)
@@ -548,6 +562,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cdi_copy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cdi_read.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cdi_write.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cdi_write_const.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cdi_write_ens.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cdi_write_hybrid.Po@am__quote@
 

@@ -14,6 +14,7 @@ const char *cdiStringError(int cdiErrno)
   static const char _ELIBNAVAIL[]  = "Unsupported file type (library support not compiled in)";
   static const char _EUFSTRUCT[]   = "Unsupported file structure";
   static const char _EUNC4[]       = "Unsupported NetCDF4 structure";
+  static const char _EDIMSIZE[]    = "Invalid dimension size";
   static const char _ELIMIT[]      = "Internal limits exceeded";
 
   switch (cdiErrno) {
@@ -27,6 +28,7 @@ const char *cdiStringError(int cdiErrno)
   case CDI_ELIBNAVAIL: return _ELIBNAVAIL;
   case CDI_EUFSTRUCT:  return _EUFSTRUCT;
   case CDI_EUNC4:      return _EUNC4;
+  case CDI_EDIMSIZE:   return _EDIMSIZE;
   case CDI_ELIMIT:     return _ELIMIT;
   }
 

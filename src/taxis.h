@@ -33,6 +33,7 @@ typedef struct {
   double  fc_period;      // forecast time period
   char   *name;
   char   *longname;
+  char   *units;
 }
 taxis_t;
 
@@ -47,7 +48,8 @@ double   vtime2timeval(int vdate, int vtime, taxis_t *taxis);
 
 void    ptaxisDefDatatype(taxis_t *taxisptr, int datatype);
 void    ptaxisDefName(taxis_t *taxisptr, const char *name);
-void    ptaxisDefLongname(taxis_t *taxisptr, const char *name);
+void    ptaxisDefLongname(taxis_t *taxisptr, const char *longname);
+void    ptaxisDefUnits(taxis_t *taxisptr, const char *units);
 void    taxisDestroyKernel(taxis_t *taxisptr);
 #if !defined (SX)
 extern const resOps taxisOps;
