@@ -2881,7 +2881,7 @@ int cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int 
                   if ( ncvars[zvarid].ndims == 2 )
                     {
                       zprec = CDI_DATATYPE_UINT8;
-                      zclength = (size_t)ncdims[ncvars[zvarid].dimids[1]].len;
+                      zclength = ncdims[ncvars[zvarid].dimids[1]].len;
                       cdf_load_cvals(zsize*zclength, zvarid, ncvar, &zcvals, zsize);
                     }
                 }
