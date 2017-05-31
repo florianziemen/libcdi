@@ -36,11 +36,13 @@ extern "C" {
 #define  CDI_EEOF                  -1   // The end of file was encountered
 #define  CDI_ESYSTEM              -10   // Operating system error
 #define  CDI_EINVAL               -20   // Invalid argument
-#define  CDI_EUFTYPE              -21   // Unsupported file type
-#define  CDI_ELIBNAVAIL           -22   // xxx library not available
-#define  CDI_EUFSTRUCT            -23   // Unsupported file structure
-#define  CDI_EUNC4                -24   // Unsupported NetCDF4 structure
-#define  CDI_EDIMSIZE             -25   // Invalid dimension size
+#define  CDI_EISDIR               -21   // Is a directory
+#define  CDI_EISEMPTY             -22   // Is empty
+#define  CDI_EUFTYPE              -23   // Unsupported file type
+#define  CDI_ELIBNAVAIL           -24   // xxx library not available
+#define  CDI_EUFSTRUCT            -25   // Unsupported file structure
+#define  CDI_EUNC4                -26   // Unsupported NetCDF4 structure
+#define  CDI_EDIMSIZE             -27   // Invalid dimension size
 #define  CDI_ELIMIT               -99   // Internal limits exceeded
 
 /* File types */

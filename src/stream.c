@@ -6,6 +6,7 @@
 #define _XOPEN_SOURCE 600
 #endif
 
+#include <sys/stat.h> // struct stat
 #include <ctype.h>
 
 #include "binary.h"
@@ -78,7 +79,6 @@ int cdiGetFiletype(const char *filename, int *byteorder)
   int swap = 0;
   int version;
   long recpos;
-  char buffer[8];
 
   int fileID = fileOpen(filename, "r");
 
@@ -90,7 +90,18 @@ int cdiGetFiletype(const char *filename, int *byteorder)
 	return CDI_ESYSTEM;
     }
 
-  if ( fileRead(fileID, buffer, 8) != 8 ) return CDI_EUFTYPE;
+  char buffer[8];
+  if ( fileRead(fileID, buffer, 8) != 8 )
+    {
+      struct stat buf;
+      if ( stat(filename, &buf) == 0 )
+        {
+          if ( buf.st_size == 0 ) return CDI_EISEMPTY;
+          if ( buf.st_mode&S_IFDIR ) return CDI_EISDIR;
+        }
+
+      return CDI_EUFTYPE;
+    }
 
   fileRewind(fileID);
 
