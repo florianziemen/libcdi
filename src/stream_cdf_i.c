@@ -2821,7 +2821,7 @@ int cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int 
 	  bool with_bounds = false;
 	  int zdimid = CDI_UNDEFID;
 	  int zvarid = CDI_UNDEFID;
-	  int zsize = 1;
+	  size_t zsize = 1;
           int psvarid = -1;
           int p0varid = -1;
 
@@ -2845,11 +2845,11 @@ int cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int 
                 {
                   // zvarid = ncdims[zdimid].ncvarid;
                   zvarid = (ncvar->zvarid != CDI_UNDEFID) ? ncvar->zvarid : ncdims[zdimid].ncvarid;
-                  zsize  = (int)ncdims[zdimid].len;
+                  zsize  = ncdims[zdimid].len;
                 }
             }
 
-	  if ( CDI_Debug ) Message("nlevs = %d", zsize);
+	  if ( CDI_Debug ) Message("nlevs = %zu", zsize);
 
 	  double *zvar = NULL;
           char **zcvals = NULL;
@@ -2882,7 +2882,7 @@ int cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int 
                     {
                       zprec = CDI_DATATYPE_UINT8;
                       zclength = (size_t)ncdims[ncvars[zvarid].dimids[1]].len;
-                      cdf_load_cvals(zsize*zclength, zvarid, ncvar, &zcvals, (size_t)zsize);
+                      cdf_load_cvals(zsize*zclength, zvarid, ncvar, &zcvals, zsize);
                     }
                 }
 
@@ -2897,7 +2897,7 @@ int cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int 
 
               if ( zaxisType != ZAXIS_CHAR )
                 {
-                  zvar = (double*) Malloc((size_t)zsize*sizeof(double));
+                  zvar = (double*) Malloc(zsize*sizeof(double));
                   cdf_get_var_double(ncvars[zvarid].ncid, zvarid, zvar);
                 }
 
@@ -2906,16 +2906,16 @@ int cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int 
 		  int nbdims = ncvars[ncvars[zvarid].bounds].ndims;
 		  if ( nbdims == 2 || is_scalar )
 		    {
-		      int nlevel  = is_scalar ? 1 : (int)ncdims[ncvars[ncvars[zvarid].bounds].dimids[0]].len;
+		      size_t nlevel  = is_scalar ? 1 : (int)ncdims[ncvars[ncvars[zvarid].bounds].dimids[0]].len;
 		      int nvertex = (int)ncdims[ncvars[ncvars[zvarid].bounds].dimids[1-is_scalar]].len;
 		      if ( nlevel == zsize && nvertex == 2 )
 			{
 			  with_bounds = true;
-			  lbounds = (double *) Malloc(4 * (size_t)nlevel*sizeof(double));
+			  lbounds = (double *) Malloc(4 * nlevel*sizeof(double));
 			  ubounds = lbounds + nlevel;
 			  double *restrict zbounds = lbounds + 2 * nlevel;
 			  cdf_get_var_double(ncvars[zvarid].ncid, ncvars[zvarid].bounds, zbounds);
-			  for ( int i = 0; i < nlevel; ++i )
+			  for ( size_t i = 0; i < nlevel; ++i )
 			    {
 			      lbounds[i] = zbounds[i*2];
 			      ubounds[i] = zbounds[i*2+1];
@@ -2980,7 +2980,7 @@ int cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int 
             cdiZaxisDefKeyStr(zaxisID, CDI_KEY_VDIMNAME, strlen(ncdims[vdimid].name)+1, ncdims[vdimid].name);
           */
 	  if ( zvar    ) Free(zvar);
-	  if ( zcvals  ) 
+	  if ( zcvals  )
             {
               for ( size_t i = 0; i < zsize; i++ )
                 Free(zcvals[i]);
