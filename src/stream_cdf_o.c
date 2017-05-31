@@ -1415,15 +1415,15 @@ void cdfDefZaxisUUID(stream_t *streamptr, int zaxisID)
 }
 
 static
-void cdfDefZaxisChar(stream_t *streamptr, int zaxisID, char *axisname, int *dimID, size_t dimlen, int xtype, int zaxisindex)
+void cdfDefZaxisChar(stream_t *streamptr, int zaxisID, char *axisname, int *dimID, size_t dimlen, int zaxisindex)
 {
   int fileID  = streamptr->fileID;
   int ncvarID = CDI_UNDEFID;
   if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
-/* Check StrlenID */
+  /* Check StrlenID */
   char strlen[7] = "strlen\0";
-  size_t clen = (size_t) zaxisInqCLen(zaxisID); 
+  size_t clen = (size_t) zaxisInqCLen(zaxisID);
   if ( clen == 0 )
     Error("Maximal string length value is 0.\nA given character axis requires a dimension to save the maximal string length.");
   int strlenID = CDI_UNDEFID;
@@ -1431,7 +1431,7 @@ void cdfDefZaxisChar(stream_t *streamptr, int zaxisID, char *axisname, int *dimI
 
   if ( strlenID == CDI_UNDEFID ) cdf_def_dim(fileID, strlen, clen, &strlenID);
 
-/* Check 'areatype'dimID */
+  /* Check 'areatype'dimID */
   char dimname[CDI_MAX_NAME+3]; dimname[0] = 0;
   cdiZaxisInqKeyStr(zaxisID, CDI_KEY_DIMNAME, CDI_MAX_NAME, dimname);
   *dimID = checkDimName(fileID, dimlen, dimname);
@@ -1445,14 +1445,12 @@ void cdfDefZaxisChar(stream_t *streamptr, int zaxisID, char *axisname, int *dimI
   dimIDs[0] = *dimID;
   dimIDs[1] = strlenID;
 
-/* Get Stringvalues */
-  char **cvals = NULL;
-  cvals = zaxisInqCValsPtr(zaxisID);
+  /* Get Stringvalues */
+  char **cvals = zaxisInqCValsPtr(zaxisID);
 
   if ( cvals )
     {
-
-/* Define variable and its attributes */
+      /* Define variable and its attributes */
       cdf_def_var(fileID, axisname, NC_CHAR, 2, dimIDs, &ncvarID);
 
       cdfPutGridStdAtts(fileID, ncvarID, zaxisID, 'Z', &gridInqsZ);
@@ -1462,19 +1460,18 @@ void cdfDefZaxisChar(stream_t *streamptr, int zaxisID, char *axisname, int *dimI
       streamptr->nczvarID[zaxisindex] = ncvarID;
       cdf_enddef(fileID);
 
-/* Write Stringvalues */
-      int status = 0;
+      /* Write Stringvalues */
       size_t start[2], count[2];
       start[1] = 0;
       count[0] = 1;
       count[1] = clen;
-      for (int i = 0; i < dimlen; i++)
+      for ( size_t i = 0; i < dimlen; i++ )
         {
           start[0] = i;
-          status = nc_put_vara_text(fileID, ncvarID, start, count, cvals[i]);
+          nc_put_vara_text(fileID, ncvarID, start, count, cvals[i]);
         }
-
     }
+
   streamptr->ncmode = 2;
 }
 
@@ -1552,7 +1549,7 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
           if ( natts > 0 && streamptr->ncmode == 2 ) cdf_enddef(fileID);
         }
       else if ( type == ZAXIS_CHAR )
-        cdfDefZaxisChar(streamptr, zaxisID, axisname, &dimID, dimlen, xtype, zaxisindex);
+        cdfDefZaxisChar(streamptr, zaxisID, axisname, &dimID, dimlen, zaxisindex);
       else
         {
           dimID = checkDimName(fileID, dimlen, dimname);
