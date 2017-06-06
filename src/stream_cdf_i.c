@@ -1329,7 +1329,7 @@ void cdf_scan_var_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimi
                   if ( status == NC_NOERR )
                     {
                       cdf_set_var(ncvars, dimvarid, FALSE);
-                      if ( cdiIgnoreAttCoordinates == false )
+                      if ( !cdiIgnoreAttCoordinates )
                         {
                           ncvars[ncvarid].coordvarids[i] = dimvarid;
                           ncvars[ncvarid].ncoordvars++;
@@ -1372,7 +1372,7 @@ void cdf_scan_var_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimi
                   if ( status == NC_NOERR )
                     {
                       cdf_set_var(ncvars, dimvarid, FALSE);
-                      //  if ( cdiIgnoreAttCoordinates == FALSE )
+                      //  if ( !cdiIgnoreAttCoordinates )
                         {
                           ncvars[ncvarid].auxvarids[i] = dimvarid;
                           ncvars[ncvarid].nauxvars++;
@@ -1430,9 +1430,8 @@ void cdf_scan_var_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimi
             {
               if ( ncvars[ncvarid].lvalidrange == false )
                 {
-                  extern int cdiIgnoreValidRange;
                   bool lignore = xtypeIsFloat(atttype) != xtypeIsFloat(xtype);
-                  if ( cdiIgnoreValidRange == FALSE && lignore == false )
+                  if ( !cdiIgnoreValidRange && lignore == false )
                     {
                       cdfGetAttDouble(ncid, ncvarid, attname, 2, ncvars[ncvarid].validrange);
                       ncvars[ncvarid].lvalidrange = true;
@@ -1450,9 +1449,8 @@ void cdf_scan_var_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimi
             {
               if ( ncvars[ncvarid].lvalidrange == false )
                 {
-                  extern int cdiIgnoreValidRange;
                   bool lignore = xtypeIsFloat(atttype) != xtypeIsFloat(xtype);
-                  if ( cdiIgnoreValidRange == FALSE && lignore == false )
+                  if ( !cdiIgnoreValidRange && lignore == false )
                     {
                       cdfGetAttDouble(ncid, ncvarid, attname, 1, &(ncvars[ncvarid].validrange)[0]);
                       ncvars[ncvarid].lvalidrange = true;
@@ -1467,9 +1465,8 @@ void cdf_scan_var_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimi
             {
               if ( ncvars[ncvarid].lvalidrange == false )
                 {
-                  extern int cdiIgnoreValidRange;
                   bool lignore = xtypeIsFloat(atttype) != xtypeIsFloat(xtype);
-                  if ( cdiIgnoreValidRange == FALSE && lignore == false )
+                  if ( !cdiIgnoreValidRange && lignore == false )
                     {
                       cdfGetAttDouble(ncid, ncvarid, attname, 1, &(ncvars[ncvarid].validrange)[1]);
                       ncvars[ncvarid].lvalidrange = true;

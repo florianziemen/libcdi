@@ -1906,8 +1906,7 @@ void cdfDefGrid(stream_t *streamptr, int gridID, int gridindex)
         }
       else
         {
-          int ndims = !( gridtype == GRID_LONLAT && size == 1
-                         && gridInqHasDims(gridID) == FALSE );
+          int ndims = !(gridtype == GRID_LONLAT && size == 1 && !gridInqHasDims(gridID));
 
           if ( gridInqXsize(gridID) > 0 ) cdfDefXaxis(streamptr, gridID, gridindex, ndims);
           if ( gridInqYsize(gridID) > 0 ) cdfDefYaxis(streamptr, gridID, gridindex, ndims);

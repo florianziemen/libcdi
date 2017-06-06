@@ -160,9 +160,9 @@ typedef struct
     // (181; 105, 0, timeRangeIndicator=0) .. instantanous rain
     // (181; 105, 0, timeRangeIndicator=4) .. accumulated rain  .. both can be in the same grib file
 #endif // HIRLAM_EXTENSIONS
-  short     used;
   short     varID;
   short     levelID;
+  short     used;
   char      varname[32]; /* needed for grib decoding with GRIB_API */
   var_tile_t tiles;      /* tile-related meta-data, currently for GRIB-API only. */
 }
@@ -178,7 +178,7 @@ typedef struct {
                          /* tsID>0 number of non constant records */
   int       nallrecs;    /* number of all records                 */
   int       curRecID;    /* current record ID                     */
-  long      next;
+  bool      next;
   off_t     position;    /* timestep file position                */
   taxis_t   taxis;
 }
@@ -297,7 +297,7 @@ typedef enum {
 typedef struct
 {
   char*                  keyword;        /* keyword string */
-  int                    update;
+  bool                   update;
   key_val_pair_datatype  data_type;      /* data type of this key/value pair */
   double                 dbl_val;        /* double value (data_type == t_double) */
   int                    int_val;        /* integer value (data_type == t_int) */
@@ -333,9 +333,9 @@ extern int cdiDataUnreduced;
 extern int cdiSortName;
 extern int cdiSortParam;
 extern int cdiHaveMissval;
-extern int cdiIgnoreAttCoordinates;
-extern int cdiCoordinatesLonLat;
-extern int cdiIgnoreValidRange;
+extern bool cdiIgnoreAttCoordinates;
+extern bool cdiCoordinatesLonLat;
+extern bool cdiIgnoreValidRange;
 extern int cdiSkipRecords;
 extern int cdiConvention;
 extern int cdiInventoryMode;

@@ -53,7 +53,7 @@ int tstepsNewEntry(stream_t *streamptr)
 
   tstepsInitEntry(streamptr, tsID);
 
-  streamptr->tsteps[tsID].taxis.used = TRUE;
+  streamptr->tsteps[tsID].taxis.used = true;
 
   return (int)tsID;
 }
@@ -61,24 +61,20 @@ int tstepsNewEntry(stream_t *streamptr)
 
 void cdiCreateTimesteps(stream_t *streamptr)
 {
-  long ntsteps;
-  long tsID;
-
   if ( streamptr->ntsteps < 0 || streamptr->tstepsTableSize > 0 )
     return;
 
-  if ( streamptr->ntsteps == 0 ) ntsteps = 1;    /* <<<<<-------- */
-  else ntsteps = streamptr->ntsteps;
+  long ntsteps = (streamptr->ntsteps == 0) ? 1 : streamptr->ntsteps;
 
   streamptr->tsteps = (tsteps_t *) Malloc((size_t)ntsteps*sizeof(tsteps_t));
 
   streamptr->tstepsTableSize = (int)ntsteps;
   streamptr->tstepsNextID    = (int)ntsteps;
 
-  for ( tsID = 0; tsID < ntsteps; tsID++ )
+  for ( long tsID = 0; tsID < ntsteps; tsID++ )
     {
       tstepsInitEntry(streamptr, (size_t)tsID);
-      streamptr->tsteps[tsID].taxis.used = TRUE;
+      streamptr->tsteps[tsID].taxis.used = true;
     }
 }
 /*

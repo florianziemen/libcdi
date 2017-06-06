@@ -794,7 +794,7 @@ void cdi_generate_vars(stream_t *streamptr)
 	  if ( vartable[varid].opt_grib_kvpair[i].keyword )
 	    vlistptr->vars[varID].opt_grib_kvpair[idx].keyword =
 	      strdupx(vartable[varid].opt_grib_kvpair[i].keyword);
-          vlistptr->vars[varID].opt_grib_kvpair[i].update = TRUE;
+          vlistptr->vars[varID].opt_grib_kvpair[i].update = true;
         }
       /* note: if the key is not defined, we do not throw an error! */
 
@@ -1140,7 +1140,7 @@ void resize_vartable_opt_grib_entries(vartable_t *var, int nentries)
       for (i=var->opt_grib_kvpair_size; i<new_size; i++) {
         tmp[i].int_val =     0;
         tmp[i].dbl_val =     0;
-        tmp[i].update  = FALSE;
+        tmp[i].update  = false;
         tmp[i].keyword =  NULL;
       } // for
       var->opt_grib_kvpair_size = new_size;

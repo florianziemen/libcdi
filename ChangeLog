@@ -1,3 +1,12 @@
+2017-09-16  Uwe Schulzweida
+
+        * using CGRIBEX library version 1.8.1
+	* Version 1.9.0 released
+
+2017-06-06  Uwe Schulzweida
+
+	* Changed boolean ints to stdbool
+
 2017-05-16  Uwe Schulzweida
 
 	* Version 1.8.2 released

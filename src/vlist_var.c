@@ -44,7 +44,7 @@ void vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].instID        = CDI_UNDEFID;
   vlistptr->vars[varID].modelID       = CDI_UNDEFID;
   vlistptr->vars[varID].tableID       = CDI_UNDEFID;
-  vlistptr->vars[varID].missvalused   = FALSE;
+  vlistptr->vars[varID].missvalused   = false;
   vlistptr->vars[varID].missval       = cdiDefaultMissval;
   vlistptr->vars[varID].addoffset     = 0.0;
   vlistptr->vars[varID].scalefactor   = 1.0;
@@ -58,7 +58,7 @@ void vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].complevel     = 1;
   vlistptr->vars[varID].atts.nalloc   = MAX_ATTRIBUTES;
   vlistptr->vars[varID].atts.nelems   = 0;
-  vlistptr->vars[varID].lvalidrange   = 0;
+  vlistptr->vars[varID].lvalidrange   = false;
   vlistptr->vars[varID].validrange[0] = VALIDMISS;
   vlistptr->vars[varID].validrange[1] = VALIDMISS;
   vlistptr->vars[varID].ensdata       = NULL;
@@ -807,7 +807,7 @@ void vlistDefVarDatatype(int vlistID, int varID, int datatype)
     {
       vlistptr->vars[varID].datatype = datatype;
 
-      if ( vlistptr->vars[varID].missvalused == FALSE )
+      if ( !vlistptr->vars[varID].missvalused )
         switch (datatype)
           {
           case CDI_DATATYPE_INT8:   vlistptr->vars[varID].missval = -SCHAR_MAX; break;
@@ -1067,7 +1067,7 @@ void vlistDefVarMissval(int vlistID, int varID, double missval)
   vlistCheckVarID(__func__, vlistID, varID);
 
   vlistptr->vars[varID].missval = missval;
-  vlistptr->vars[varID].missvalused = TRUE;
+  vlistptr->vars[varID].missvalused = true;
 }
 
 /*
@@ -1152,7 +1152,7 @@ int vlistInqVarValidrange(int vlistID, int varID, double *validrange)
       validrange[1] = vlistptr->vars[varID].validrange[1];
     }
 
-  return vlistptr->vars[varID].lvalidrange;
+  return (int)vlistptr->vars[varID].lvalidrange;
 }
 
 
@@ -1164,7 +1164,7 @@ void vlistDefVarValidrange(int vlistID, int varID, const double *validrange)
 
   vlistptr->vars[varID].validrange[0] = validrange[0];
   vlistptr->vars[varID].validrange[1] = validrange[1];
-  vlistptr->vars[varID].lvalidrange = TRUE;
+  vlistptr->vars[varID].lvalidrange = true;
   reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
 }
 
@@ -1381,7 +1381,7 @@ void vlistDestroyVarUnits(int vlistID, int varID)
 int vlistInqVarMissvalUsed(int vlistID, int varID)
 {
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  return vlistptr->vars[varID].missvalused;
+  return (int)vlistptr->vars[varID].missvalused;
 }
 
 
@@ -1792,7 +1792,7 @@ void vlistDefVarIntKey(int vlistID, int varID, const char *name, int value)
   if ( idx < vlistptr->vars[varID].opt_grib_nentries )
     {
       vlistptr->vars[varID].opt_grib_kvpair[idx].int_val = value;
-      vlistptr->vars[varID].opt_grib_kvpair[idx].update  = TRUE;
+      vlistptr->vars[varID].opt_grib_kvpair[idx].update  = true;
     }
   else
     {
@@ -1801,7 +1801,7 @@ void vlistDefVarIntKey(int vlistID, int varID, const char *name, int value)
       idx = vlistptr->vars[varID].opt_grib_nentries -1;
       vlistptr->vars[varID].opt_grib_kvpair[idx].data_type   = t_int;
       vlistptr->vars[varID].opt_grib_kvpair[idx].int_val     = value;
-      vlistptr->vars[varID].opt_grib_kvpair[idx].update      = TRUE;
+      vlistptr->vars[varID].opt_grib_kvpair[idx].update      = true;
       if ( name )
         vlistptr->vars[varID].opt_grib_kvpair[idx].keyword = strdupx(name);
       else
@@ -1855,7 +1855,7 @@ void vlistDefVarDblKey(int vlistID, int varID, const char *name, double value)
   if ( idx < vlistptr->vars[varID].opt_grib_nentries )
     {
       vlistptr->vars[varID].opt_grib_kvpair[idx].dbl_val = value;
-      vlistptr->vars[varID].opt_grib_kvpair[idx].update  = TRUE;
+      vlistptr->vars[varID].opt_grib_kvpair[idx].update  = true;
     }
   else
     {
@@ -1864,7 +1864,7 @@ void vlistDefVarDblKey(int vlistID, int varID, const char *name, double value)
       idx = vlistptr->vars[varID].opt_grib_nentries - 1;
       vlistptr->vars[varID].opt_grib_kvpair[idx].data_type = t_double;
       vlistptr->vars[varID].opt_grib_kvpair[idx].dbl_val   = value;
-      vlistptr->vars[varID].opt_grib_kvpair[idx].update    = TRUE;
+      vlistptr->vars[varID].opt_grib_kvpair[idx].update    = true;
       if ( name )
         vlistptr->vars[varID].opt_grib_kvpair[idx].keyword = strdupx(name);
       else
@@ -2116,7 +2116,7 @@ void vlistVarPack(vlist_t *p, int varID, char * buf, int size, int *position,
   tempbuf[12] = var->tableID;
   tempbuf[13] = var->timave;
   tempbuf[14] = var->timaccu;
-  tempbuf[15] = var->missvalused;
+  tempbuf[15] = (int)var->missvalused;
   tempbuf[16] = var->comptype;
   tempbuf[17] = var->complevel;
   int nlevs = var->levinfo ? zaxisInqSize(var->zaxisID) : 0;

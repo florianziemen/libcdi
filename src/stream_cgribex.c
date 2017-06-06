@@ -577,7 +577,7 @@ cgribexScanTsFixNtsteps(stream_t *streamptr, off_t recpos)
       if ( tsID != streamptr->rtsteps )
 	Error("Internal error. tsID = %d", tsID);
 
-      streamptr->tsteps[tsID-1].next   = TRUE;
+      streamptr->tsteps[tsID-1].next   = true;
       streamptr->tsteps[tsID].position = recpos;
     }
 }
@@ -652,7 +652,7 @@ int cgribexScanTimestep1(stream_t *streamptr)
     }
 
   unsigned nrecs = 0;
-  while ( TRUE )
+  while ( true )
     {
       recsize = gribGetSize(fileID);
       recpos  = fileGetPos(fileID);
@@ -871,7 +871,7 @@ int cgribexScanTimestep2(stream_t * streamptr)
 
   int nrecs_scanned = nrecords;
   int rindex = 0;
-  while ( TRUE )
+  while ( true )
     {
       if ( rindex > nrecords ) break;
 
@@ -976,7 +976,7 @@ int cgribexScanTimestep2(stream_t * streamptr)
 	    }
 	  else
 	    {
-	      streamptr->tsteps[tsID].records[recID].used = TRUE;
+	      streamptr->tsteps[tsID].records[recID].used = true;
 	      streamptr->tsteps[tsID].recIDs[rindex] = recID;
 	    }
 	}
@@ -991,7 +991,7 @@ int cgribexScanTimestep2(stream_t * streamptr)
 	    }
 	  else
 	    {
-	      streamptr->tsteps[tsID].records[recID].used = TRUE;
+	      streamptr->tsteps[tsID].records[recID].used = true;
 	      streamptr->tsteps[tsID].recIDs[rindex] = recID;
 	    }
 	}
@@ -1114,7 +1114,7 @@ int cgribexScanTimestep(stream_t * streamptr)
 
       nrecs_scanned = streamptr->tsteps[0].nallrecs + streamptr->tsteps[1].nrecs*(tsID-1);
       rindex = 0;
-      while ( TRUE )
+      while ( true )
 	{
 	  if ( rindex > nrecs ) break;
 
@@ -1227,7 +1227,7 @@ int cgribexScanTimestep(stream_t * streamptr)
 
 	  if ( cdiInventoryMode == 1 )
 	    {
-	      streamptr->tsteps[tsID].records[recID].used = TRUE;
+	      streamptr->tsteps[tsID].records[recID].used = true;
 	      streamptr->tsteps[tsID].recIDs[rindex] = recID;
 	    }
 	  else
@@ -1246,7 +1246,7 @@ int cgribexScanTimestep(stream_t * streamptr)
 		}
 	      else
 		{
-		  streamptr->tsteps[tsID].records[recID].used = TRUE;
+		  streamptr->tsteps[tsID].records[recID].used = true;
 		  streamptr->tsteps[tsID].recIDs[rindex] = recID;
 		}
 	    }
@@ -1291,7 +1291,7 @@ int cgribexScanTimestep(stream_t * streamptr)
 	  if ( tsID != streamptr->rtsteps )
 	    Error("Internal error. tsID = %d", tsID);
 
-	  streamptr->tsteps[tsID-1].next   = 1;
+	  streamptr->tsteps[tsID-1].next   = true;
 	  streamptr->tsteps[tsID].position = recpos;
 	}
 
@@ -1672,7 +1672,7 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
         }
     }
 
-  ISEC2_Reduced  = FALSE;
+  ISEC2_Reduced  = false;
   ISEC2_ScanFlag = 0;
 
   switch (gridtype)
@@ -1697,7 +1697,7 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
 
 	if ( gridtype == GRID_GAUSSIAN_REDUCED )
 	  {
-	    ISEC2_Reduced = TRUE;
+	    ISEC2_Reduced = true;
 	    nlon = 0;
 	    gridInqRowlon(gridID, ISEC2_RowLonPtr);
 	  }

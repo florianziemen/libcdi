@@ -236,7 +236,7 @@ void extScanTimestep1(stream_t *streamptr)
   int fileID = streamptr->fileID;
 
   int nrecs = 0;
-  while ( TRUE )
+  while ( true )
     {
       recpos = fileGetPos(fileID);
       int status = extRead(fileID, extp);
@@ -320,7 +320,7 @@ void extScanTimestep1(stream_t *streamptr)
       if ( tsID != streamptr->rtsteps )
 	Error("Internal error. tsID = %d", tsID);
 
-      streamptr->tsteps[tsID-1].next   = TRUE;
+      streamptr->tsteps[tsID-1].next   = true;
       streamptr->tsteps[tsID].position = recpos;
     }
 
@@ -421,7 +421,7 @@ int extScanTimestep2(stream_t *streamptr)
 		}
 	      else
 		{
-		  streamptr->tsteps[tsID].records[recID].used = TRUE;
+		  streamptr->tsteps[tsID].records[recID].used = true;
 		  streamptr->tsteps[tsID].recIDs[rindex] = recID;
 		}
 	      break;
@@ -478,7 +478,7 @@ int extScanTimestep2(stream_t *streamptr)
       if ( tsID != streamptr->rtsteps )
 	Error("Internal error. tsID = %d", tsID);
 
-      streamptr->tsteps[tsID-1].next   = TRUE;
+      streamptr->tsteps[tsID-1].next   = true;
       streamptr->tsteps[tsID].position = recpos;
     }
 
@@ -599,7 +599,7 @@ long extScanTimestep(stream_t *streamptr)
 	  if ( tsID != streamptr->rtsteps )
 	    Error("Internal error. tsID = %d", tsID);
 
-	  streamptr->tsteps[tsID-1].next   = 1;
+	  streamptr->tsteps[tsID-1].next   = true;
 	  streamptr->tsteps[tsID].position = recpos;
 	}
 

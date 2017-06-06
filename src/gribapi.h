@@ -110,7 +110,7 @@ static inline void gribHandleDelete(void *gh)
 #endif
 
 typedef struct {
-  int init;
+  bool init;
   void *gribHandle;
 }
 gribContainer_t;

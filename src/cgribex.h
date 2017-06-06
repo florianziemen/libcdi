@@ -1,7 +1,8 @@
-#ifndef _CGRIBEX_H
-#define _CGRIBEX_H
+#ifndef CGRIBEX_H
+#define CGRIBEX_H
 
 #include <stdio.h>
+#include <stdbool.h>
 #include <sys/types.h>
 
 #define  GRIB_MISSVAL  -9.E33
@@ -206,7 +207,7 @@ void  gribSetCalendar(int calendar);
 void  gribDateTime(int *isec1, int *date, int *time);
 int   gribRefDate(int *isec1);
 int   gribRefTime(int *isec1);
-int   gribTimeIsFC(int *isec1);
+bool  gribTimeIsFC(int *isec1);
 
 void  gribPrintSec0(int *isec0);
 void  gribPrintSec1(int *isec0, int *isec1);
@@ -254,5 +255,5 @@ double calculate_pfactor_double(const double* spectralField, long fieldTruncatio
 }
 #endif
 
-#endif  /* _CGRIBEX_H */ 
+#endif  /* CGRIBEX_H */ 
 

@@ -22,7 +22,7 @@
 
 typedef struct
 {
-  int      flag;
+  bool     flag;
   int      index;
   int      mlevelID;
   int      flevelID;
@@ -48,7 +48,7 @@ ensinfo_t;
 typedef struct
 {
   bool        isUsed;
-  int         flag;
+  bool        flag;
   int         mvarID;
   int         fvarID;
   int         param;
@@ -65,8 +65,8 @@ typedef struct
   int         productDefinitionTemplate;
   int         chunktype;
   int         xyz;
-  int         missvalused; /* TRUE if missval is defined */
-  int         lvalidrange;
+  bool        missvalused; /* true if missval is defined */
+  bool        lvalidrange;
   char       *name;
   char       *longname;
   char       *stdname;

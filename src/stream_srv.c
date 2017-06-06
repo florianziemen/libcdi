@@ -241,7 +241,7 @@ void srvScanTimestep1(stream_t *streamptr)
   int fileID = streamptr->fileID;
 
   int nrecs = 0;
-  while ( TRUE )
+  while ( true )
     {
       int header[8];
       recpos = fileGetPos(fileID);
@@ -324,7 +324,7 @@ void srvScanTimestep1(stream_t *streamptr)
       if ( tsID != streamptr->rtsteps )
 	Error("Internal error. tsID = %d", tsID);
 
-      streamptr->tsteps[tsID-1].next   = TRUE;
+      streamptr->tsteps[tsID-1].next   = true;
       streamptr->tsteps[tsID].position = recpos;
     }
 
@@ -420,7 +420,7 @@ int srvScanTimestep2(stream_t *streamptr)
 		}
 	      else
 		{
-		  streamptr->tsteps[tsID].records[recID].used = TRUE;
+		  streamptr->tsteps[tsID].records[recID].used = true;
 		  streamptr->tsteps[tsID].recIDs[rindex] = recID;
 		}
 	      break;
@@ -477,7 +477,7 @@ int srvScanTimestep2(stream_t *streamptr)
       if ( tsID != streamptr->rtsteps )
 	Error("Internal error. tsID = %d", tsID);
 
-      streamptr->tsteps[tsID-1].next   = TRUE;
+      streamptr->tsteps[tsID-1].next   = true;
       streamptr->tsteps[tsID].position = recpos;
     }
 
@@ -595,7 +595,7 @@ long srvScanTimestep(stream_t *streamptr)
 	  if ( tsID != streamptr->rtsteps )
 	    Error("Internal error. tsID = %d", tsID);
 
-	  streamptr->tsteps[tsID-1].next   = 1;
+	  streamptr->tsteps[tsID-1].next   = true;
 	  streamptr->tsteps[tsID].position = recpos;
 	}
 
