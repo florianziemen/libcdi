@@ -134,28 +134,21 @@ int cdiGetFiletype(const char *filename, int *byteorder)
       filetype = CDI_FILETYPE_NC4;
       if ( CDI_Debug ) Message("found HDF file = %s", filename);
     }
-#if  defined  (HAVE_LIBSERVICE)
   else if ( srvCheckFiletype(fileID, &swap) )
     {
       filetype = CDI_FILETYPE_SRV;
       if ( CDI_Debug ) Message("found SRV file = %s", filename);
     }
-#endif
-#if  defined  (HAVE_LIBEXTRA)
   else if ( extCheckFiletype(fileID, &swap) )
     {
       filetype = CDI_FILETYPE_EXT;
       if ( CDI_Debug ) Message("found EXT file = %s", filename);
     }
-#endif
-#if  defined  (HAVE_LIBIEG)
   else if ( iegCheckFiletype(fileID, &swap) )
     {
       filetype = CDI_FILETYPE_IEG;
       if ( CDI_Debug ) Message("found IEG file = %s", filename);
     }
-#endif
-#if  defined  (HAVE_LIBCGRIBEX)
   else if ( gribCheckSeek(fileID, &recpos, &version) == 0 )
     {
       if ( version <= 1 )
@@ -169,7 +162,6 @@ int cdiGetFiletype(const char *filename, int *byteorder)
 	  if ( CDI_Debug ) Message("found seeked GRIB2 file = %s", filename);
 	}
     }
-#endif
 
   fileClose(fileID);
 
