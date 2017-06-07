@@ -345,6 +345,8 @@ DEPDIR = @DEPDIR@
 DLLTOOL = @DLLTOOL@
 DSYMUTIL = @DSYMUTIL@
 DUMPBIN = @DUMPBIN@
+ECCODES_INCLUDE = @ECCODES_INCLUDE@
+ECCODES_LIBS = @ECCODES_LIBS@
 ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
 ECHO_T = @ECHO_T@
@@ -551,7 +553,7 @@ libcdi_la_USE_FC_extra_sources = \
 	cdiFortran.c
 
 
-# these only contain code iff grib_api is available
+# these only contain code if grib_api is available
 libcdi_la_HAVE_LIBGRIB_API_extra_sources = \
 	gribapi_utilities.c stream_gribapi.c
 
