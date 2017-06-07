@@ -139,7 +139,7 @@ libcdi_la_USE_FC_extra_sources = \
 	cfortran.h       \
 	cdiFortran.c
 
-# these only contain code iff grib_api is available
+# these only contain code if grib_api is available
 libcdi_la_HAVE_LIBGRIB_API_extra_sources = \
 	gribapi_utilities.c stream_gribapi.c
 
