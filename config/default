@@ -57,7 +57,7 @@ case "${HOSTNAME}" in
                     --enable-iso-c-interface \
                     --enable-swig \
                     --enable-python \
-                    --with-eccodes=$HOME/local/eccodes-2.3.0 \
+                    --with-grib_api=$HOME/local/gribapi-1.13.0 \
                     --with-netcdf=$HOME/local \
 	            CC=gcc CFLAGS="-g -pipe -D_REENTRANT -Wall -Wwrite-strings -W -Wfloat-equal -pedantic -O3"
 	;;
