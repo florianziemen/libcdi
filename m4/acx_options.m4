@@ -163,12 +163,44 @@ AC_SUBST([NETCDF_ROOT])
 AC_SUBST([NETCDF_INCLUDE])
 AC_SUBST([NETCDF_LIBS])
 #  ----------------------------------------------------------------------
+#  Compile application with ECCODES library (for GRIB2 support)
+ECCODES_INCLUDE=''
+ECCODES_LIBS=''
+AC_ARG_WITH([eccodes],
+            [AS_HELP_STRING([--with-eccodes=<yes|no|directory>],
+                            [library for grib2 encoding/decoding; if a directory is given, it will be used as a value for --with-eccodes-root])],
+            [AS_CASE(["$with_eccodes"],
+                     [no],[AC_MSG_CHECKING([for ECCODES library])
+                           AC_MSG_RESULT([suppressed])],
+                     [yes],[AC_CHECK_HEADERS([grib_api.h])
+                            AC_SEARCH_LIBS([grib_get_message],
+                                           [eccodes],
+                                           [AC_DEFINE([HAVE_LIBGRIB_API],[1],[ECCODES library is present if defined to 1])],
+                                           [AC_MSG_ERROR([Could not link to eccodes library])])],
+                     [*],[ECCODES_ROOT=$with_eccodes
+                          AS_IF([test -d "$ECCODES_ROOT"],
+                                [LDFLAGS="-L$ECCODES_ROOT/lib $LDFLAGS"
+                                 CPPFLAGS="-I$ECCODES_ROOT/include $CPPFLAGS"
+                                 AC_CHECK_HEADERS([grib_api.h])
+                                 AC_SEARCH_LIBS([grib_get_message],
+                                                [eccodes],
+                                                [AC_DEFINE([HAVE_LIBGRIB_API],[1],[ECCODES library is present if defined to 1])],
+                                                [AC_MSG_ERROR([Could not link to eccodes library])])
+                                 ECCODES_LIBS=" -L$ECCODES_ROOT/lib -leccodes"
+                                 ECCODES_INCLUDE=" -I$ECCODES_ROOT/include"],
+                                [AC_MSG_ERROR([$ECCODES_ROOT is not a directory! ECCODES suppressed])])])],
+            [AC_MSG_CHECKING([for the ECCODES library])
+             AC_MSG_RESULT([suppressed])])
+AC_SUBST([ECCODES_INCLUDE])
+AC_SUBST([ECCODES_LIBS])
+# AM_CONDITIONAL([HAVE_LIBGRIB_API],[test "x$with_eccodes" != 'x' -a "x$with_eccodes" != 'xno' ])
+#  ----------------------------------------------------------------------
 #  Compile application with GRIB_API library (for GRIB2 support)
 GRIB_API_INCLUDE=''
 GRIB_API_LIBS=''
 AC_ARG_WITH([grib_api],
             [AS_HELP_STRING([--with-grib_api=<yes|no|directory>],
-                            [library for grib2 compression; if a directory is given, it will be used as a value for --with-jasper-root])],
+                            [library for grib2 encoding/decoding; if a directory is given, it will be used as a value for --with-grib_api-root])],
             [AS_CASE(["$with_grib_api"],
                      [no],[AC_MSG_CHECKING([for GRIB_API library])
                            AC_MSG_RESULT([suppressed])],
@@ -197,7 +229,7 @@ AC_ARG_WITH([grib_api],
              AC_MSG_RESULT([suppressed])])
 AC_SUBST([GRIB_API_INCLUDE])
 AC_SUBST([GRIB_API_LIBS])
-AM_CONDITIONAL([HAVE_LIBGRIB_API],[test "x$with_grib_api" != 'x' -a "x$with_grib_api" != 'xno' ])
+AM_CONDITIONAL([HAVE_LIBGRIB_API],[test \( "x$with_grib_api" != 'x' -a "x$with_grib_api" != 'xno' \) -o \( "x$with_eccodes" != 'x' -a "x$with_eccodes" != 'xno' \) ])
 #  ----------------------------------------------------------------------
 #  Enable GRIB support
 AC_MSG_CHECKING([for GRIB support])

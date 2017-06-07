@@ -47,6 +47,10 @@
       "grib_api" : {
         "lib"      : "@GRIB_API_LIBS@",
         "include"  : "@GRIB_API_INCLUDE@"
+      },
+      "eccodes" : {
+        "lib"      : "@ECCODES_LIBS@",
+        "include"  : "@ECCODES_INCLUDE@"
       }
     }
   },
