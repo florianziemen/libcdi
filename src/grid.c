@@ -2056,14 +2056,21 @@ void grid_check_cyclic(grid_t *gridptr)
     {
       if ( xvals && xsize > 1 )
         {
-          double xinc = xvals[1] - xvals[0];
-          if ( IS_EQUAL(xinc, 0) )
-            xinc = (xvals[xsize-1] - xvals[0])/(double)(xsize-1);
+          double xval1 = xvals[0];
+          double xval2 = xvals[1];
+          double xvaln = xvals[xsize-1];
+          if ( xval2 < xval1 ) xval2 += 360;
+          if ( xvaln < xval1 ) xvaln += 360;
 
-          double x0 = 2*xvals[xsize-1]-xvals[xsize-2]-360;
+          if ( IS_NOT_EQUAL(xval1, xvaln) )
+            {
+              double xinc = xval2 - xval1;
+              if ( IS_EQUAL(xinc, 0) ) xinc = (xvaln - xval1)/(xsize-1);
 
-          if ( IS_NOT_EQUAL(xvals[0], xvals[xsize-1]) )
-            if ( fabs(x0 - xvals[0]) < 0.01*xinc ) gridptr->isCyclic = 1;
+              double x0 = xvaln + xinc - 360;
+
+              if ( fabs(x0 - xval1) < 0.01*xinc ) gridptr->isCyclic = 1;
+            }
         }
     }
   else if ( gridptr->type == GRID_CURVILINEAR )

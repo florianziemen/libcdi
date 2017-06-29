@@ -3411,11 +3411,12 @@ int find_leadtime(int nvars, ncvar_t *ncvars)
 
   for ( int ncvarid = 0; ncvarid < nvars; ncvarid++ )
     {
-      if ( ncvars[ncvarid].stdname[0] && strcmp(ncvars[ncvarid].stdname, "forecast_period") == 0 )
-        {
-          leadtime_id = ncvarid;
-          break;
-        }
+      if ( ncvars[ncvarid].ndims == 1 )
+        if ( ncvars[ncvarid].stdname[0] && strcmp(ncvars[ncvarid].stdname, "forecast_period") == 0 )
+          {
+            leadtime_id = ncvarid;
+            break;
+          }
     }
 
   return leadtime_id;

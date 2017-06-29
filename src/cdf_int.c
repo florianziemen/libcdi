@@ -395,6 +395,52 @@ void cdf_put_var_float(int ncid, int varid, const float *fp)
   if ( status != NC_NOERR ) Error("%s", nc_strerror(status));
 }
 
+static
+const char *cdf_var_type(nc_type xtype)
+{
+  const char *ctype = "unknown";
+
+  if      ( xtype == NC_BYTE   )  ctype = "NC_BYTE";
+  else if ( xtype == NC_CHAR   )  ctype = "NC_CHAR";
+  else if ( xtype == NC_SHORT  )  ctype = "NC_SHORT";
+  else if ( xtype == NC_INT    )  ctype = "NC_INT";
+  else if ( xtype == NC_FLOAT  )  ctype = "NC_FLOAT";
+  else if ( xtype == NC_DOUBLE )  ctype = "NC_DOUBLE";
+#if  defined  (HAVE_NETCDF4)
+  else if ( xtype == NC_UBYTE  )  ctype = "NC_UBYTE";
+  else if ( xtype == NC_LONG   )  ctype = "NC_LONG";
+  else if ( xtype == NC_USHORT )  ctype = "NC_USHORT";
+  else if ( xtype == NC_UINT   )  ctype = "NC_UINT";
+  else if ( xtype == NC_INT64  )  ctype = "NC_INT64";
+  else if ( xtype == NC_UINT64 )  ctype = "NC_UINT64";
+#endif
+
+  return ctype;
+}
+
+static
+void minmaxval(size_t nvals, const double *array, double *minval, double *maxval)
+{
+  *minval = array[0];
+  *maxval = array[0];
+  for ( size_t i = 1; i < nvals; ++i )
+    {
+      if      ( array[i] > *maxval ) *maxval = array[i];
+      else if ( array[i] < *minval ) *minval = array[i];
+    }
+}
+
+static
+void minmaxvalf(size_t nvals, const float *array, double *minval, double *maxval)
+{
+  *minval = array[0];
+  *maxval = array[0];
+  for ( size_t i = 1; i < nvals; ++i )
+    {
+      if      ( array[i] > *maxval ) *maxval = array[i];
+      else if ( array[i] < *minval ) *minval = array[i];
+    }
+}
 
 void cdf_put_vara_double(int ncid, int varid, const size_t start[],
                          const size_t count[], const double *dp)
@@ -402,13 +448,19 @@ void cdf_put_vara_double(int ncid, int varid, const size_t start[],
   int status = nc_put_vara_double(ncid, varid, start, count, dp);
 
   if ( CDF_Debug || status != NC_NOERR )
-    Message("ncid = %d varid = %d val0 = %f", ncid, varid, *dp);
-
-  if ( status != NC_NOERR )
     {
       char name[256];
       nc_inq_varname(ncid, varid, name);
-      Message("varname = %s", name);
+      nc_type xtype;
+      nc_inq_vartype(ncid, varid, &xtype);
+      int ndims;
+      nc_inq_varndims(ncid, varid, &ndims);
+      double minval = 0, maxval = 0;
+      size_t nvals = 1;
+      for ( int i = 0; i < ndims; ++i ) nvals *= count[i];
+      minmaxval(nvals, dp, &minval, &maxval);
+      // Message("ncid = %d varid = %d val0 = %f", ncid, varid, *dp);
+      Message("name=%s  type=%s  minval=%f  maxval=%f", name, cdf_var_type(xtype), minval, maxval);
     }
 
   if ( status != NC_NOERR ) Error("%s", nc_strerror(status));
@@ -421,7 +473,20 @@ void  cdf_put_vara_float(int ncid, int varid, const size_t start[],
   int status = nc_put_vara_float(ncid, varid, start, count, fp);
 
   if ( CDF_Debug || status != NC_NOERR )
-    Message("ncid = %d varid = %d val0 = %f", ncid, varid, *fp);
+    {
+      char name[256];
+      nc_inq_varname(ncid, varid, name);
+      nc_type xtype;
+      nc_inq_vartype(ncid, varid, &xtype);
+      int ndims;
+      nc_inq_varndims(ncid, varid, &ndims);
+      double minval = 0, maxval = 0;
+      size_t nvals = 1;
+      for ( int i = 0; i < ndims; ++i ) nvals *= count[i];
+      minmaxvalf(nvals, fp, &minval, &maxval);
+      // Message("ncid = %d varid = %d val0 = %f", ncid, varid, *dp);
+      Message("name=%s  type=%s  minval=%f  maxval=%f", name, cdf_var_type(xtype), minval, maxval);
+    }
 
   if ( status != NC_NOERR ) Error("%s", nc_strerror(status));
 }
