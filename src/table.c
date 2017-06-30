@@ -29,9 +29,9 @@ typedef struct
   char  *name;
   param_type *pars;
 }
-PARTAB;
+paramtab_type;
 
-static PARTAB parTable[MAX_TABLE];
+static paramtab_type parTable[MAX_TABLE];
 static int  parTableSize = MAX_TABLE;
 static int  parTableNum  = 0;
 static int  ParTableInit = 0;
