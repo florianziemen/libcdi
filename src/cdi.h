@@ -1207,8 +1207,6 @@ const char *modelInqNamePtr(int modelID);
 
 /* Table routines */
 
-/*      tableWriteC: write table of parameters to file in C language format */
-void    tableWriteC(const char *filename, int tableID);
 /*      tableFWriteC: write table of parameters to FILE* in C language format */
 void    tableFWriteC(FILE *ptfp, int tableID);
 /*      tableWrite: write table of parameters to file in tabular format */

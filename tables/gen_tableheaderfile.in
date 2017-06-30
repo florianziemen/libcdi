@@ -6,6 +6,7 @@
 set -e
 DEFTABLES=@abs_top_srcdir@/tables/default_tables
 OFILE=@abs_top_srcdir@/src/table.h
+OFILE=table.h
 PTFILES=""
 #
 #########################################
@@ -31,8 +32,8 @@ unset PTFILE[item]
 #
 cat >&4 <<EOF
 /* Automatically generated, do not edit! */
-#ifndef _TABLE_H
-#define _TABLE_H
+#ifndef TABLE_H
+#define TABLE_H
 
 EOF
 #
@@ -47,8 +48,6 @@ cat >&4 <<EOF
 static
 void tableDefault(void)
 {
-  int tableID, instID, modelID;
-
 EOF
 #
 settabvar() {
@@ -78,21 +77,20 @@ TABLENAME=`echo ${TFBASENAME} | sed -e "s/\./_/g" `
 #
 cat >&4 <<EOF
 
-  /*
-   *  define table : ${TFBASENAME}
-   */
+  // define table : ${TFBASENAME}
+  {
+    int instID  = institutInq(${TABLE_CE}, ${TABLE_SU}, "${TABLE_IN}", NULL);
+    if ( instID == -1 )
+      instID  = institutDef(${TABLE_CE}, ${TABLE_SU}, "${TABLE_IN}", NULL);
 
-  instID  = institutInq(${TABLE_CE}, ${TABLE_SU}, "${TABLE_IN}", NULL);
-  if ( instID == -1 )
-    instID  = institutDef(${TABLE_CE}, ${TABLE_SU}, "${TABLE_IN}", NULL);
+    int modelID = modelInq(instID, 0, "${TABLE_MO}");
+    if ( modelID == -1 )
+      modelID = modelDef(instID, 0, "${TABLE_MO}");
 
-  modelID = modelInq(instID, 0, "${TABLE_MO}");
-  if ( modelID == -1 )
-    modelID = modelDef(instID, 0, "${TABLE_MO}");
+    int tableID = tableDef(modelID, ${TABLE_ID}, "${TABLE_NA}");
 
-  tableID = tableDef(modelID, ${TABLE_ID}, "${TABLE_NA}");
-
-  tableLink(tableID, ${TABLENAME}, sizeof(${TABLENAME}) / sizeof(PAR));
+    tableLink(tableID, ${TABLENAME}, sizeof(${TABLENAME}) / sizeof(PAR));
+  }
 EOF
 #
 done
@@ -100,7 +98,7 @@ done
 cat >&4 <<EOF
 }
 
-#endif  /* _TABLE_H */
+#endif  /* TABLE_H */
 EOF
 #
 rm -f ptfile

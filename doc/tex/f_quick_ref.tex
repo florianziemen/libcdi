@@ -818,15 +818,6 @@ read table of parameters from file in tabular format.
 write table of parameters to file in tabular format.
 
 
-\section*{\tt \htmlref{tableWriteC}{tableWriteC}}
-
-\begin{verbatim}
-    SUBROUTINE tableWriteC (CHARACTER*(*) filename, INTEGER tableID)
-\end{verbatim}
-
-write table of parameters to file in C language format.
-
-
 \section*{\tt \htmlref{taxisCreate}{taxisCreate}}
 
 \begin{verbatim}
@@ -1460,6 +1451,15 @@ Destroy a vertical Z-axis.
 \end{verbatim}
 
 Duplicate a Z-axis.
+
+
+\section*{\tt \htmlref{zaxisInqCLen}{zaxisInqCLen}}
+
+\begin{verbatim}
+    INTEGER FUNCTION zaxisInqCLen (INTEGER zaxisID)
+\end{verbatim}
+
+Get maximal string length of character Z-axis.
 
 
 \section*{\tt \htmlref{zaxisInqLevel}{zaxisInqLevel}}

@@ -704,17 +704,6 @@ void tableWrite(const char *ptfile, int tableID)
 }
 
 
-void tableWriteC(const char *filename, int tableID)
-{
-  FILE *ptfp = fopen(filename, "w");
-  if (!ptfp)
-    Error("failed to open file \"%s\"!", filename);
-  if ( CDI_Debug )
-    Message("write parameter table %d to %s", tableID, filename);
-  tableFWriteC(ptfp, tableID);
-  fclose(ptfp);
-}
-
 void tableFWriteC(FILE *ptfp, int tableID)
 {
   const char chelp[] = "";

@@ -4,7 +4,7 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   May 2017
+! Uwe Schulzweida, MPI-MET, Hamburg,   June 2017
 !
 
       INTEGER    CDI_MAX_NAME
@@ -39,16 +39,20 @@
       PARAMETER (CDI_ESYSTEM            = -10)
       INTEGER    CDI_EINVAL
       PARAMETER (CDI_EINVAL             = -20)
+      INTEGER    CDI_EISDIR
+      PARAMETER (CDI_EISDIR             = -21)
+      INTEGER    CDI_EISEMPTY
+      PARAMETER (CDI_EISEMPTY           = -22)
       INTEGER    CDI_EUFTYPE
-      PARAMETER (CDI_EUFTYPE            = -21)
+      PARAMETER (CDI_EUFTYPE            = -23)
       INTEGER    CDI_ELIBNAVAIL
-      PARAMETER (CDI_ELIBNAVAIL         = -22)
+      PARAMETER (CDI_ELIBNAVAIL         = -24)
       INTEGER    CDI_EUFSTRUCT
-      PARAMETER (CDI_EUFSTRUCT          = -23)
+      PARAMETER (CDI_EUFSTRUCT          = -25)
       INTEGER    CDI_EUNC4
-      PARAMETER (CDI_EUNC4              = -24)
+      PARAMETER (CDI_EUNC4              = -26)
       INTEGER    CDI_EDIMSIZE
-      PARAMETER (CDI_EDIMSIZE           = -25)
+      PARAMETER (CDI_EDIMSIZE           = -27)
       INTEGER    CDI_ELIMIT
       PARAMETER (CDI_ELIMIT             = -99)
 !
@@ -2021,6 +2025,10 @@
 !                                     DOUBLEPRECISION levels(*))
       EXTERNAL        zaxisInqLevels
 
+      INTEGER         zaxisInqCLen
+!                                    (INTEGER         zaxisID)
+      EXTERNAL        zaxisInqCLen
+
 !                     zaxisDefLevel
 !                                    (INTEGER         zaxisID,
 !                                     INTEGER         levelID,
@@ -2434,11 +2442,6 @@
 !
 !  Table routines
 !
-!                     tableWriteC
-!                                    (CHARACTER*(*)   filename,
-!                                     INTEGER         tableID)
-      EXTERNAL        tableWriteC
-
 !                     tableWrite
 !                                    (CHARACTER*(*)   filename,
 !                                     INTEGER         tableID)

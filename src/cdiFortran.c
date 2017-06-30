@@ -432,6 +432,7 @@ FCALLSCFUN1 (INT, zaxisDuplicate, ZAXISDUPLICATE, zaxisduplicate, INT)
 FCALLSCSUB1 (zaxisPrint, ZAXISPRINT, zaxisprint, INT)
 FCALLSCSUB2 (zaxisDefLevels, ZAXISDEFLEVELS, zaxisdeflevels, INT, DOUBLEV)
 FCALLSCFUN2 (INT, zaxisInqLevels, ZAXISINQLEVELS, zaxisinqlevels, INT, DOUBLEV)
+FCALLSCFUN1 (INT, zaxisInqCLen, ZAXISINQCLEN, zaxisinqclen, INT)
 FCALLSCSUB3 (zaxisDefLevel, ZAXISDEFLEVEL, zaxisdeflevel, INT, INT, DOUBLE)
 FCALLSCFUN2 (DOUBLE, zaxisInqLevel, ZAXISINQLEVEL, zaxisinqlevel, INT, INT)
 FCALLSCSUB2 (zaxisDefNlevRef, ZAXISDEFNLEVREF, zaxisdefnlevref, INT, INT)
@@ -528,7 +529,6 @@ FCALLSCFUN1 (STRING, modelInqNamePtr, MODELINQNAMEPTR, modelinqnameptr, INT)
 
 /*  Table routines  */
 
-FCALLSCSUB2 (tableWriteC, TABLEWRITEC, tablewritec, STRING, INT)
 FCALLSCSUB2 (tableWrite, TABLEWRITE, tablewrite, STRING, INT)
 FCALLSCFUN1 (INT, tableRead, TABLEREAD, tableread, STRING)
 FCALLSCFUN3 (INT, tableDef, TABLEDEF, tabledef, INT, INT, STRING)
