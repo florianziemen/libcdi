@@ -758,7 +758,7 @@ void tableFWriteC(FILE *ptfp, int tableID)
         ? strlen(parTable[tableID].pars[item].longname) : 0,
         ulen = parTable[tableID].pars[item].units
         ? strlen(parTable[tableID].pars[item].units) : 0;
-      fprintf(ptfp, "  {%4d, 0, \"%s\", %-*s%c%s%s, %-*s%c%s%s %-*s},\n",
+      fprintf(ptfp, "  {%4d, -1, 0, \"%s\", %-*s%c%s%s, %-*s%c%s%s %-*s},\n",
 	      parTable[tableID].pars[item].id,
 	      parTable[tableID].pars[item].name, (int)(maxname-len), chelp,
               llen?'"':' ',

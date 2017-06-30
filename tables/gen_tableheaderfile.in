@@ -6,7 +6,6 @@
 set -e
 DEFTABLES=@abs_top_srcdir@/tables/default_tables
 OFILE=@abs_top_srcdir@/src/table.h
-OFILE=table.h
 PTFILES=""
 #
 #########################################
@@ -89,7 +88,7 @@ cat >&4 <<EOF
 
     int tableID = tableDef(modelID, ${TABLE_ID}, "${TABLE_NA}");
 
-    tableLink(tableID, ${TABLENAME}, sizeof(${TABLENAME}) / sizeof(PAR));
+    tableLink(tableID, ${TABLENAME}, sizeof(${TABLENAME}) / sizeof(param_type));
   }
 EOF
 #

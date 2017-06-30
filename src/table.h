@@ -1228,199 +1228,186 @@ static const param_type cosmo250[] = {
 static
 void tableDefault(void)
 {
-  int tableID, instID, modelID;
 
-  /*
-   *  define table : echam4
-   */
+  // define table : echam4
+  {
+    int instID  = institutInq(98, 255, "MPIMET", NULL);
+    if ( instID == -1 )
+      instID  = institutDef(98, 255, "MPIMET", NULL);
 
-  instID  = institutInq(98, 255, "MPIMET", NULL);
-  if ( instID == -1 )
-    instID  = institutDef(98, 255, "MPIMET", NULL);
+    int modelID = modelInq(instID, 0, "ECHAM4");
+    if ( modelID == -1 )
+      modelID = modelDef(instID, 0, "ECHAM4");
 
-  modelID = modelInq(instID, 0, "ECHAM4");
-  if ( modelID == -1 )
-    modelID = modelDef(instID, 0, "ECHAM4");
+    int tableID = tableDef(modelID, 128, "echam4");
 
-  tableID = tableDef(modelID, 128, "echam4");
+    tableLink(tableID, echam4, sizeof(echam4) / sizeof(param_type));
+  }
 
-  tableLink(tableID, echam4, sizeof(echam4) / sizeof(param_type));
+  // define table : echam5
+  {
+    int instID  = institutInq(0, 0, "MPIMET", NULL);
+    if ( instID == -1 )
+      instID  = institutDef(0, 0, "MPIMET", NULL);
 
-  /*
-   *  define table : echam5
-   */
+    int modelID = modelInq(instID, 0, "ECHAM5");
+    if ( modelID == -1 )
+      modelID = modelDef(instID, 0, "ECHAM5");
 
-  instID  = institutInq(0, 0, "MPIMET", NULL);
-  if ( instID == -1 )
-    instID  = institutDef(0, 0, "MPIMET", NULL);
+    int tableID = tableDef(modelID, 128, "echam5");
 
-  modelID = modelInq(instID, 0, "ECHAM5");
-  if ( modelID == -1 )
-    modelID = modelDef(instID, 0, "ECHAM5");
+    tableLink(tableID, echam5, sizeof(echam5) / sizeof(param_type));
+  }
 
-  tableID = tableDef(modelID, 128, "echam5");
+  // define table : echam6
+  {
+    int instID  = institutInq(0, 0, "MPIMET", NULL);
+    if ( instID == -1 )
+      instID  = institutDef(0, 0, "MPIMET", NULL);
 
-  tableLink(tableID, echam5, sizeof(echam5) / sizeof(param_type));
+    int modelID = modelInq(instID, 0, "ECHAM6");
+    if ( modelID == -1 )
+      modelID = modelDef(instID, 0, "ECHAM6");
 
-  /*
-   *  define table : echam6
-   */
+    int tableID = tableDef(modelID, 128, "echam6");
 
-  instID  = institutInq(0, 0, "MPIMET", NULL);
-  if ( instID == -1 )
-    instID  = institutDef(0, 0, "MPIMET", NULL);
+    tableLink(tableID, echam6, sizeof(echam6) / sizeof(param_type));
+  }
 
-  modelID = modelInq(instID, 0, "ECHAM6");
-  if ( modelID == -1 )
-    modelID = modelDef(instID, 0, "ECHAM6");
+  // define table : mpiom1
+  {
+    int instID  = institutInq(0, 0, "MPIMET", NULL);
+    if ( instID == -1 )
+      instID  = institutDef(0, 0, "MPIMET", NULL);
 
-  tableID = tableDef(modelID, 128, "echam6");
+    int modelID = modelInq(instID, 0, "MPIOM1");
+    if ( modelID == -1 )
+      modelID = modelDef(instID, 0, "MPIOM1");
 
-  tableLink(tableID, echam6, sizeof(echam6) / sizeof(param_type));
+    int tableID = tableDef(modelID, 128, "mpiom1");
 
-  /*
-   *  define table : mpiom1
-   */
+    tableLink(tableID, mpiom1, sizeof(mpiom1) / sizeof(param_type));
+  }
 
-  instID  = institutInq(0, 0, "MPIMET", NULL);
-  if ( instID == -1 )
-    instID  = institutDef(0, 0, "MPIMET", NULL);
+  // define table : ecmwf
+  {
+    int instID  = institutInq(0, 0, "ECMWF", NULL);
+    if ( instID == -1 )
+      instID  = institutDef(0, 0, "ECMWF", NULL);
 
-  modelID = modelInq(instID, 0, "MPIOM1");
-  if ( modelID == -1 )
-    modelID = modelDef(instID, 0, "MPIOM1");
+    int modelID = modelInq(instID, 0, "");
+    if ( modelID == -1 )
+      modelID = modelDef(instID, 0, "");
 
-  tableID = tableDef(modelID, 128, "mpiom1");
+    int tableID = tableDef(modelID, 128, "ecmwf");
 
-  tableLink(tableID, mpiom1, sizeof(mpiom1) / sizeof(param_type));
+    tableLink(tableID, ecmwf, sizeof(ecmwf) / sizeof(param_type));
+  }
 
-  /*
-   *  define table : ecmwf
-   */
+  // define table : remo
+  {
+    int instID  = institutInq(0, 0, "MPIMET", NULL);
+    if ( instID == -1 )
+      instID  = institutDef(0, 0, "MPIMET", NULL);
 
-  instID  = institutInq(0, 0, "ECMWF", NULL);
-  if ( instID == -1 )
-    instID  = institutDef(0, 0, "ECMWF", NULL);
+    int modelID = modelInq(instID, 0, "REMO");
+    if ( modelID == -1 )
+      modelID = modelDef(instID, 0, "REMO");
 
-  modelID = modelInq(instID, 0, "");
-  if ( modelID == -1 )
-    modelID = modelDef(instID, 0, "");
+    int tableID = tableDef(modelID, 128, "remo");
 
-  tableID = tableDef(modelID, 128, "ecmwf");
+    tableLink(tableID, remo, sizeof(remo) / sizeof(param_type));
+  }
 
-  tableLink(tableID, ecmwf, sizeof(ecmwf) / sizeof(param_type));
+  // define table : cosmo002
+  {
+    int instID  = institutInq(0, 0, "MCH", NULL);
+    if ( instID == -1 )
+      instID  = institutDef(0, 0, "MCH", NULL);
 
-  /*
-   *  define table : remo
-   */
+    int modelID = modelInq(instID, 0, "COSMO");
+    if ( modelID == -1 )
+      modelID = modelDef(instID, 0, "COSMO");
 
-  instID  = institutInq(0, 0, "MPIMET", NULL);
-  if ( instID == -1 )
-    instID  = institutDef(0, 0, "MPIMET", NULL);
+    int tableID = tableDef(modelID, 002, "cosmo002");
 
-  modelID = modelInq(instID, 0, "REMO");
-  if ( modelID == -1 )
-    modelID = modelDef(instID, 0, "REMO");
+    tableLink(tableID, cosmo002, sizeof(cosmo002) / sizeof(param_type));
+  }
 
-  tableID = tableDef(modelID, 128, "remo");
+  // define table : cosmo201
+  {
+    int instID  = institutInq(0, 0, "MCH", NULL);
+    if ( instID == -1 )
+      instID  = institutDef(0, 0, "MCH", NULL);
 
-  tableLink(tableID, remo, sizeof(remo) / sizeof(param_type));
+    int modelID = modelInq(instID, 0, "COSMO");
+    if ( modelID == -1 )
+      modelID = modelDef(instID, 0, "COSMO");
 
-  /*
-   *  define table : cosmo002
-   */
+    int tableID = tableDef(modelID, 201, "cosmo201");
 
-  instID  = institutInq(0, 0, "MCH", NULL);
-  if ( instID == -1 )
-    instID  = institutDef(0, 0, "MCH", NULL);
+    tableLink(tableID, cosmo201, sizeof(cosmo201) / sizeof(param_type));
+  }
 
-  modelID = modelInq(instID, 0, "COSMO");
-  if ( modelID == -1 )
-    modelID = modelDef(instID, 0, "COSMO");
+  // define table : cosmo202
+  {
+    int instID  = institutInq(0, 0, "MCH", NULL);
+    if ( instID == -1 )
+      instID  = institutDef(0, 0, "MCH", NULL);
 
-  tableID = tableDef(modelID, 002, "cosmo002");
+    int modelID = modelInq(instID, 0, "COSMO");
+    if ( modelID == -1 )
+      modelID = modelDef(instID, 0, "COSMO");
 
-  tableLink(tableID, cosmo002, sizeof(cosmo002) / sizeof(param_type));
+    int tableID = tableDef(modelID, 202, "cosmo202");
 
-  /*
-   *  define table : cosmo201
-   */
+    tableLink(tableID, cosmo202, sizeof(cosmo202) / sizeof(param_type));
+  }
 
-  instID  = institutInq(0, 0, "MCH", NULL);
-  if ( instID == -1 )
-    instID  = institutDef(0, 0, "MCH", NULL);
+  // define table : cosmo203
+  {
+    int instID  = institutInq(0, 0, "MCH", NULL);
+    if ( instID == -1 )
+      instID  = institutDef(0, 0, "MCH", NULL);
 
-  modelID = modelInq(instID, 0, "COSMO");
-  if ( modelID == -1 )
-    modelID = modelDef(instID, 0, "COSMO");
+    int modelID = modelInq(instID, 0, "COSMO");
+    if ( modelID == -1 )
+      modelID = modelDef(instID, 0, "COSMO");
 
-  tableID = tableDef(modelID, 201, "cosmo201");
+    int tableID = tableDef(modelID, 203, "cosmo203");
 
-  tableLink(tableID, cosmo201, sizeof(cosmo201) / sizeof(param_type));
+    tableLink(tableID, cosmo203, sizeof(cosmo203) / sizeof(param_type));
+  }
 
-  /*
-   *  define table : cosmo202
-   */
+  // define table : cosmo205
+  {
+    int instID  = institutInq(0, 0, "MCH", NULL);
+    if ( instID == -1 )
+      instID  = institutDef(0, 0, "MCH", NULL);
 
-  instID  = institutInq(0, 0, "MCH", NULL);
-  if ( instID == -1 )
-    instID  = institutDef(0, 0, "MCH", NULL);
+    int modelID = modelInq(instID, 0, "COSMO");
+    if ( modelID == -1 )
+      modelID = modelDef(instID, 0, "COSMO");
 
-  modelID = modelInq(instID, 0, "COSMO");
-  if ( modelID == -1 )
-    modelID = modelDef(instID, 0, "COSMO");
+    int tableID = tableDef(modelID, 205, "cosmo205");
 
-  tableID = tableDef(modelID, 202, "cosmo202");
+    tableLink(tableID, cosmo205, sizeof(cosmo205) / sizeof(param_type));
+  }
 
-  tableLink(tableID, cosmo202, sizeof(cosmo202) / sizeof(param_type));
+  // define table : cosmo250
+  {
+    int instID  = institutInq(0, 0, "MCH", NULL);
+    if ( instID == -1 )
+      instID  = institutDef(0, 0, "MCH", NULL);
 
-  /*
-   *  define table : cosmo203
-   */
+    int modelID = modelInq(instID, 0, "COSMO");
+    if ( modelID == -1 )
+      modelID = modelDef(instID, 0, "COSMO");
 
-  instID  = institutInq(0, 0, "MCH", NULL);
-  if ( instID == -1 )
-    instID  = institutDef(0, 0, "MCH", NULL);
+    int tableID = tableDef(modelID, 250, "cosmo250");
 
-  modelID = modelInq(instID, 0, "COSMO");
-  if ( modelID == -1 )
-    modelID = modelDef(instID, 0, "COSMO");
-
-  tableID = tableDef(modelID, 203, "cosmo203");
-
-  tableLink(tableID, cosmo203, sizeof(cosmo203) / sizeof(param_type));
-
-  /*
-   *  define table : cosmo205
-   */
-
-  instID  = institutInq(0, 0, "MCH", NULL);
-  if ( instID == -1 )
-    instID  = institutDef(0, 0, "MCH", NULL);
-
-  modelID = modelInq(instID, 0, "COSMO");
-  if ( modelID == -1 )
-    modelID = modelDef(instID, 0, "COSMO");
-
-  tableID = tableDef(modelID, 205, "cosmo205");
-
-  tableLink(tableID, cosmo205, sizeof(cosmo205) / sizeof(param_type));
-
-  /*
-   *  define table : cosmo250
-   */
-
-  instID  = institutInq(0, 0, "MCH", NULL);
-  if ( instID == -1 )
-    instID  = institutDef(0, 0, "MCH", NULL);
-
-  modelID = modelInq(instID, 0, "COSMO");
-  if ( modelID == -1 )
-    modelID = modelDef(instID, 0, "COSMO");
-
-  tableID = tableDef(modelID, 250, "cosmo250");
-
-  tableLink(tableID, cosmo250, sizeof(cosmo250) / sizeof(param_type));
+    tableLink(tableID, cosmo250, sizeof(cosmo250) / sizeof(param_type));
+  }
 }
 
 #endif  /* TABLE_H */
