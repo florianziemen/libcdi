@@ -22,12 +22,12 @@
 
 typedef struct
 {
-  int    used;
+  bool   used;
   int    npars;
-  PAR   *pars;
   int    modelID;
   int    number;
   char  *name;
+  param_type *pars;
 }
 PARTAB;
 
@@ -72,7 +72,7 @@ void tableDefEntry(int tableID, int id, const char *name,
     }
 }
 
-static void tableLink(int tableID, const PAR *pars, int npars)
+static void tableLink(int tableID, const param_type *pars, int npars)
 {
   for ( int item = 0; item < npars; item++ )
     {
@@ -88,7 +88,7 @@ static void tableLink(int tableID, const PAR *pars, int npars)
 
 static void parTableInitEntry(int tableID)
 {
-  parTable[tableID].used    = 0;
+  parTable[tableID].used    = false;
   parTable[tableID].pars    = NULL;
   parTable[tableID].npars   = 0;
   parTable[tableID].modelID = CDI_UNDEFID;
@@ -160,7 +160,7 @@ static int tableNewEntry()
   if ( tableID == parTableSize )
     Error("no more entries!");
 
-  parTable[tableID].used = 1;
+  parTable[tableID].used = true;
   parTableNum++;
 
   return tableID;
@@ -317,9 +317,9 @@ int tableRead(const char *tablefile)
 {
   char line[1024], *pline;
   int lnr = 0;
-  int id;
   char name[256], longname[256], units[256];
   int err;
+  int tableID = CDI_UNDEFID;
 
   FILE *tablefp = fopen(tablefile, "r");
   if ( tablefp == NULL ) return tableID;
@@ -328,14 +328,15 @@ int tableRead(const char *tablefile)
   if ( tablename == 0 ) tablename = (char *) tablefile;
   else                  tablename++;
 
-  int tableID = tableDef(-1, 0, tablename);
+  tableID = tableDef(-1, 0, tablename);
 
   while ( fgets(line, 1023, tablefp) )
     {
       size_t len = strlen(line);
       if ( line[len-1] == '\n' ) line[len-1] = '\0';
       lnr++;
-      id       = CDI_UNDEFID;
+      int id      = CDI_UNDEFID;
+      int ltype   = CDI_UNDEFID;
       name[0]     = 0;
       longname[0] = 0;
       units[0]    = 0;
@@ -350,6 +351,21 @@ int tableRead(const char *tablefile)
       if ( id > 255 ) id -= 256;
       */
       if ( id == 0 ) continue;
+
+      while ( isdigit((int) *pline) ) pline++;
+
+      if ( *pline == ';' )
+        {
+          pline++;
+          ltype = atoi(pline);
+          while ( isdigit((int) *pline) ) pline++;
+
+          if ( *pline == ';' )
+            {
+              pline++;
+              while ( isdigit((int) *pline) ) pline++;
+            }
+        }
 
       while ( isdigit((int) *pline) ) pline++;
 
@@ -517,7 +533,7 @@ int tableDef(int modelID, int tablenum, const char *tablename)
       if ( tablename )
 	parTable[tableID].name = strdupx(tablename);
 
-      parTable[tableID].pars = (PAR *) Malloc(MAX_PARS * sizeof(PAR));
+      parTable[tableID].pars = (param_type *) Malloc(MAX_PARS * sizeof(param_type));
     }
 
   return tableID;
@@ -744,7 +760,7 @@ void tableFWriteC(FILE *ptfp, int tableID)
     for (size_t i = 0; i < len; i++ )
       if ( tablename[i] == '.' ) tablename[i] = '_';
   }
-  fprintf(ptfp, "static const PAR %s[] = {\n", tablename);
+  fprintf(ptfp, "static const param_type %s[] = {\n", tablename);
 
   for ( int item = 0; item < npars; item++ )
     {
