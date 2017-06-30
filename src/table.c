@@ -41,8 +41,8 @@ static char *tablePath = NULL;
 static void tableDefModelID(int tableID, int modelID);
 static void tableDefNum(int tableID, int tablenum);
 
-
-void tableDefEntry(int tableID, int id, const char *name,
+static
+void tableDefEntry(int tableID, int id, int ltype, const char *name,
 		   const char *longname, const char *units)
 {
   if ( tableID >= 0 && tableID < MAX_TABLE && parTable[tableID].used) { } else
@@ -50,6 +50,7 @@ void tableDefEntry(int tableID, int id, const char *name,
 
   int item = parTable[tableID].npars++;
   parTable[tableID].pars[item].id       = id;
+  parTable[tableID].pars[item].ltype    = ltype;
   parTable[tableID].pars[item].dupflags = 0;
   parTable[tableID].pars[item].name     = NULL;
   parTable[tableID].pars[item].longname = NULL;
@@ -378,7 +379,7 @@ int tableRead(const char *tablefile)
 
       if ( name[0] == 0 ) sprintf(name, "var%d", id);
 
-      tableDefEntry(tableID, id, name, longname, units);
+      tableDefEntry(tableID, id, ltype, name, longname, units);
     }
 
   return tableID;
@@ -940,28 +941,6 @@ int tableInqParUnits(int tableID, int code, char *units)
   return err;
 }
 
-
-void tableInqPar(int tableID, int code, char *name, char *longname, char *units)
-{
-  if ( ((tableID >= 0) & (tableID < MAX_TABLE)) | (tableID == CDI_UNDEFID) ) { } else
-    Error("Invalid table ID %d", tableID);
-
-  int npars = parTable[tableID].npars;
-
-  for ( int item = 0; item < npars; item++ )
-    {
-      if ( parTable[tableID].pars[item].id == code )
-	{
-	  if ( parTable[tableID].pars[item].name )
-	    strcpy(name, parTable[tableID].pars[item].name);
-	  if ( parTable[tableID].pars[item].longname )
-	    strcpy(longname, parTable[tableID].pars[item].longname);
-	  if ( parTable[tableID].pars[item].units )
-	    strcpy(units, parTable[tableID].pars[item].units);
-	  break;
-	}
-    }
-}
 
 int tableInqNumber(void)
 {

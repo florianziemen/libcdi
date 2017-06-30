@@ -1216,15 +1216,12 @@ int     tableRead(const char *tablefile);
 int     tableDef(int modelID, int tablenum, const char *tablename);
 
 const char *tableInqNamePtr(int tableID);
-void    tableDefEntry(int tableID, int code, const char *name, const char *longname, const char *units);
 
 int     tableInq(int modelID, int tablenum, const char *tablename);
 int     tableInqNumber(void);
 
 int     tableInqNum(int tableID);
 int     tableInqModel(int tableID);
-
-void    tableInqPar(int tableID, int code, char *name, char *longname, char *units);
 
 int     tableInqParCode(int tableID, char *name, int *code);
 int     tableInqParName(int tableID, int code, char *name);
