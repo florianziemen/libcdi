@@ -438,16 +438,6 @@ const char *vlistInqVarNamePtr(int vlistID, int varID)
   return vlistptr->vars[varID].name;
 }
 
-
-const char *vlistInqVarUnitsPtr(int vlistID, int varID)
-{
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-
-  vlistCheckVarID(__func__, vlistID, varID);
-
-  return vlistptr->vars[varID].units;
-}
-
 /*
 @Function  vlistInqVarName
 @Title     Get the name of a Variable
