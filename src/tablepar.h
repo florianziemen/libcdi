@@ -22,8 +22,6 @@ param_type;
 static void tableLink(int tableID, const param_type *pars, int npars);
 int tableDef(int modelID, int tablegribID, const char *tablename);
 
-const char *tableInqParNamePtr(int tableID, int parID);
-
 #endif
 /*
  * Local Variables:

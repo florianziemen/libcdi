@@ -541,24 +541,29 @@ char* vlistCopyVarName(int vlistId, int varId)
   vlistCheckVarID(__func__, vlistId, varId);
 
   //If a name is set in the variable description, use that.
-  const char* name = vlistptr->vars[varId].name;
-  if(name) return strdup(name);
+  {
+    const char* name = vlistptr->vars[varId].name;
+    if (name) return strdup(name);
+  }
 
   //Otherwise we check if we should use the table of parameter descriptions.
   int param = vlistptr->vars[varId].param;
   int discipline, category, number;
   cdiDecodeParam(param, &number, &category, &discipline);
   char *result = NULL;
-  if(discipline == 255)
+  if (discipline == 255)
     {
       int tableId = vlistptr->vars[varId].tableID;
-      if(( name = tableInqParNamePtr(tableId, number) ))
+      char name[CDI_MAX_NAME]; name[0] = 0;
+      tableInqParName(tableId, number, name);
+      if ( name[0] )
         result = strdup(name);
-      {
-        //No luck, fall back to outputting a name of the format "var<num>".
-        result = (char *) Malloc(3 + 3 * sizeof (int) * CHAR_BIT / 8 + 2);
-        sprintf(result, "var%d", number);
-      }
+      else
+        {
+          //No luck, fall back to outputting a name of the format "var<num>".
+          result = (char *) Malloc(3 + 3 * sizeof (int) * CHAR_BIT / 8 + 2);
+          sprintf(result, "var%d", number);
+        }
     }
   else
     {
