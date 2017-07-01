@@ -4,7 +4,7 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   June 2017
+! Uwe Schulzweida, MPI-MET, Hamburg,   July 2017
 !
 
       INTEGER    CDI_MAX_NAME
@@ -1376,24 +1376,6 @@
       EXTERNAL        vlistInqVarIntKey
 
 !
-!  needed only for CDO operator after
-!
-      CHARACTER(80)   vlistInqVarNamePtr
-!                                    (INTEGER         vlistID,
-!                                     INTEGER         varID)
-      EXTERNAL        vlistInqVarNamePtr
-
-      CHARACTER(80)   vlistInqVarLongnamePtr
-!                                    (INTEGER         vlistID,
-!                                     INTEGER         varID)
-      EXTERNAL        vlistInqVarLongnamePtr
-
-      CHARACTER(80)   vlistInqVarUnitsPtr
-!                                    (INTEGER         vlistID,
-!                                     INTEGER         varID)
-      EXTERNAL        vlistInqVarUnitsPtr
-
-!
 !  CDI attributes
 !
       INTEGER         cdiInqNatts
@@ -2461,14 +2443,6 @@
 !                                    (INTEGER         tableID)
       EXTERNAL        tableInqNamePtr
 
-!                     tableDefEntry
-!                                    (INTEGER         tableID,
-!                                     INTEGER         code,
-!                                     CHARACTER*(*)   name,
-!                                     CHARACTER*(*)   longname,
-!                                     CHARACTER*(*)   units)
-      EXTERNAL        tableDefEntry
-
       INTEGER         tableInq
 !                                    (INTEGER         modelID,
 !                                     INTEGER         tablenum,
@@ -2485,14 +2459,6 @@
       INTEGER         tableInqModel
 !                                    (INTEGER         tableID)
       EXTERNAL        tableInqModel
-
-!                     tableInqPar
-!                                    (INTEGER         tableID,
-!                                     INTEGER         code,
-!                                     CHARACTER*(*)   name,
-!                                     CHARACTER*(*)   longname,
-!                                     CHARACTER*(*)   units)
-      EXTERNAL        tableInqPar
 
       INTEGER         tableInqParCode
 !                                    (INTEGER         tableID,
@@ -2517,24 +2483,6 @@
 !                                     INTEGER         code,
 !                                     CHARACTER*(*)   units)
       EXTERNAL        tableInqParUnits
-
-!
-!  needed only for CDO operator after
-!
-      CHARACTER(80)   tableInqParNamePtr
-!                                    (INTEGER         tableID,
-!                                     INTEGER         parID)
-      EXTERNAL        tableInqParNamePtr
-
-      CHARACTER(80)   tableInqParLongnamePtr
-!                                    (INTEGER         tableID,
-!                                     INTEGER         parID)
-      EXTERNAL        tableInqParLongnamePtr
-
-      CHARACTER(80)   tableInqParUnitsPtr
-!                                    (INTEGER         tableID,
-!                                     INTEGER         parID)
-      EXTERNAL        tableInqParUnitsPtr
 
 !
 !  History routines

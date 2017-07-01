@@ -293,12 +293,6 @@ FCALLSCFUN3 (INT, vlistHasVarKey, VLISTHASVARKEY, vlisthasvarkey, INT, INT, STRI
 FCALLSCFUN3 (DOUBLE, vlistInqVarDblKey, VLISTINQVARDBLKEY, vlistinqvardblkey, INT, INT, STRING)
 FCALLSCFUN3 (INT, vlistInqVarIntKey, VLISTINQVARINTKEY, vlistinqvarintkey, INT, INT, STRING)
 
-/*  needed only for CDO operator after  */
-
-FCALLSCFUN2 (STRING, vlistInqVarNamePtr, VLISTINQVARNAMEPTR, vlistinqvarnameptr, INT, INT)
-FCALLSCFUN2 (STRING, vlistInqVarLongnamePtr, VLISTINQVARLONGNAMEPTR, vlistinqvarlongnameptr, INT, INT)
-FCALLSCFUN2 (STRING, vlistInqVarUnitsPtr, VLISTINQVARUNITSPTR, vlistinqvarunitsptr, INT, INT)
-
 /*  CDI attributes  */
 
 FCALLSCFUN3 (INT, cdiInqNatts, CDIINQNATTS, cdiinqnatts, INT, INT, PINT)
@@ -533,22 +527,14 @@ FCALLSCSUB2 (tableWrite, TABLEWRITE, tablewrite, STRING, INT)
 FCALLSCFUN1 (INT, tableRead, TABLEREAD, tableread, STRING)
 FCALLSCFUN3 (INT, tableDef, TABLEDEF, tabledef, INT, INT, STRING)
 FCALLSCFUN1 (STRING, tableInqNamePtr, TABLEINQNAMEPTR, tableinqnameptr, INT)
-FCALLSCSUB5 (tableDefEntry, TABLEDEFENTRY, tabledefentry, INT, INT, STRING, STRING, STRING)
 FCALLSCFUN3 (INT, tableInq, TABLEINQ, tableinq, INT, INT, STRING)
 FCALLSCFUN0 (INT, tableInqNumber, TABLEINQNUMBER, tableinqnumber)
 FCALLSCFUN1 (INT, tableInqNum, TABLEINQNUM, tableinqnum, INT)
 FCALLSCFUN1 (INT, tableInqModel, TABLEINQMODEL, tableinqmodel, INT)
-FCALLSCSUB5 (tableInqPar, TABLEINQPAR, tableinqpar, INT, INT, PSTRING, PSTRING, PSTRING)
 FCALLSCFUN3 (INT, tableInqParCode, TABLEINQPARCODE, tableinqparcode, INT, PSTRING, PINT)
 FCALLSCFUN3 (INT, tableInqParName, TABLEINQPARNAME, tableinqparname, INT, INT, PSTRING)
 FCALLSCFUN3 (INT, tableInqParLongname, TABLEINQPARLONGNAME, tableinqparlongname, INT, INT, PSTRING)
 FCALLSCFUN3 (INT, tableInqParUnits, TABLEINQPARUNITS, tableinqparunits, INT, INT, PSTRING)
-
-/*  needed only for CDO operator after  */
-
-FCALLSCFUN2 (STRING, tableInqParNamePtr, TABLEINQPARNAMEPTR, tableinqparnameptr, INT, INT)
-FCALLSCFUN2 (STRING, tableInqParLongnamePtr, TABLEINQPARLONGNAMEPTR, tableinqparlongnameptr, INT, INT)
-FCALLSCFUN2 (STRING, tableInqParUnitsPtr, TABLEINQPARUNITSPTR, tableinqparunitsptr, INT, INT)
 
 /*  History routines  */
 
