@@ -802,22 +802,16 @@ void cdi_generate_vars(stream_t *streamptr)
 	  int pdis, pcat, pnum;
 	  cdiDecodeParam(param, &pnum, &pcat, &pdis);
           char name[CDI_MAX_NAME]; name[0] = 0;
-          tableInqParName(cdiDefaultTableID, pnum, name);
+          char longname[CDI_MAX_NAME]; longname[0] = 0;
+          char units[CDI_MAX_NAME]; units[0] = 0;
+          tableInqEntry(cdiDefaultTableID, pnum, -1, name, longname, units);
 	  if ( name[0] )
 	    {
 	      if ( tableID != CDI_UNDEFID )
 		{
 		  vlistDefVarName(vlistID, varID, name);
-                  {
-                    char longname[CDI_MAX_NAME]; longname[0] = 0;
-                    tableInqParLongname(cdiDefaultTableID, pnum, longname);
-                    if ( longname[0] ) vlistDefVarLongname(vlistID, varID, longname);
-                  }
-                  {
-                    char units[CDI_MAX_NAME]; units[0] = 0;
-                    tableInqParUnits(cdiDefaultTableID, pnum, units);
-                    if ( units[0] ) vlistDefVarUnits(vlistID, varID, units);
-                  }
+                  if ( longname[0] ) vlistDefVarLongname(vlistID, varID, longname);
+                  if ( units[0] ) vlistDefVarUnits(vlistID, varID, units);
                 }
 	      else
 		tableID = cdiDefaultTableID;

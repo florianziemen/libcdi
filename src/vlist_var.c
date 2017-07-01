@@ -474,8 +474,9 @@ void vlistInqVarName(int vlistID, int varID, char *name)
 	{
 	  int code = pnum;
 	  int tableID = vlistptr->vars[varID].tableID;
-	  if ( tableInqParName(tableID, code, name) != 0 )
-	    sprintf(name, "var%d", code);
+          name[0] = 0;
+          tableInqEntry(tableID, code, -1, name, NULL, NULL);
+	  if ( !name[0] ) sprintf(name, "var%d", code);
 	}
       else
 	{
@@ -525,7 +526,7 @@ char* vlistCopyVarName(int vlistId, int varId)
     {
       int tableId = vlistptr->vars[varId].tableID;
       char name[CDI_MAX_NAME]; name[0] = 0;
-      tableInqParName(tableId, number, name);
+      tableInqEntry(tableId, number, -1, name, NULL, NULL);
       if ( name[0] )
         result = strdup(name);
       else

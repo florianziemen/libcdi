@@ -776,6 +776,32 @@ void tableFWriteC(FILE *ptfp, int tableID)
 }
 
 
+void tableInqEntry(int tableID, int id, int ltype, char *name, char *longname, char *units)
+{
+  if ( ((tableID >= 0) & (tableID < MAX_TABLE)) | (tableID == CDI_UNDEFID) ) { } else
+    Error("Invalid table ID %d", tableID);
+
+  if ( tableID != CDI_UNDEFID )
+    {
+      int npars = parTable[tableID].npars;
+      for ( int item = 0; item < npars; item++ )
+	{
+	  if ( parTable[tableID].pars[item].id == id )
+	    {
+	      if ( name && parTable[tableID].pars[item].name )
+		strcpy(name, parTable[tableID].pars[item].name);
+	      if ( longname && parTable[tableID].pars[item].longname )
+		strcpy(longname, parTable[tableID].pars[item].longname);
+	      if ( units && parTable[tableID].pars[item].units )
+		strcpy(units, parTable[tableID].pars[item].units);
+
+	      break;
+	    }
+	}
+    }
+}
+
+
 int tableInqParCode(int tableID, char *varname, int *code)
 {
   int err = 1;
@@ -794,33 +820,6 @@ int tableInqParCode(int tableID, char *varname, int *code)
             }
 	}
     }
-
-  return err;
-}
-
-
-int tableInqParName(int tableID, int code, char *varname)
-{
-  int err = 1;
-
-  if ( tableID >= 0 && tableID < MAX_TABLE )
-    {
-      int npars = parTable[tableID].npars;
-      for ( int item = 0; item < npars; item++ )
-	{
-	  if ( parTable[tableID].pars[item].id == code )
-	    {
-	      if ( parTable[tableID].pars[item].name )
-		strcpy(varname, parTable[tableID].pars[item].name);     //FIXME: This may overrun the supplied buffer!
-              err = 0;
-	      break;
-	    }
-	}
-    }
-  else if ( tableID == CDI_UNDEFID )
-    { }
-  else
-    Error("Invalid table ID %d", tableID);
 
   return err;
 }

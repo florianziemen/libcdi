@@ -438,9 +438,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
   vlistInqVarUnits(vlistID, varID, units);
 
   int tableID  = vlistInqVarTable(vlistID, varID);
-  if ( !name[0] )     tableInqParName(tableID, code, name);
-  if ( !longname[0] ) tableInqParLongname(tableID, code, longname);
-  if ( !units[0] )    tableInqParUnits(tableID, code, units);
+  if ( !name[0] ) tableInqEntry(tableID, code, -1, name, longname, units);
   if ( name[0] )
     {
       sprintf(varname, "%s", name);
