@@ -825,32 +825,6 @@ int tableInqParCode(int tableID, char *varname, int *code)
 }
 
 
-int tableInqParUnits(int tableID, int code, char *units)
-{
-  if ( ((tableID >= 0) & (tableID < MAX_TABLE)) | (tableID == CDI_UNDEFID) ) { } else
-    Error("Invalid table ID %d", tableID);
-
-  int err = 1;
-
-  if ( tableID != CDI_UNDEFID )
-    {
-      int npars = parTable[tableID].npars;
-      for ( int item = 0; item < npars; item++ )
-	{
-	  if ( parTable[tableID].pars[item].id == code )
-	    {
-	      if ( parTable[tableID].pars[item].units )
-		strcpy(units, parTable[tableID].pars[item].units);
-              err = 0;
-	      break;
-	    }
-	}
-    }
-
-  return err;
-}
-
-
 int tableInqNumber(void)
 {
   if ( ! ParTableInit ) parTableInit();

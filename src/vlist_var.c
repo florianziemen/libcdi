@@ -583,7 +583,6 @@ void vlistInqVarLongname(int vlistID, int varID, char *longname)
 	{
 	  int code = pnum;
           int tableID = vlistptr->vars[varID].tableID;
-          name[0] = 0;
           tableInqEntry(tableID, code, -1, NULL, longname, NULL);
 	}
     }
@@ -668,8 +667,7 @@ void vlistInqVarUnits(int vlistID, int varID, char *units)
 	{
 	  int code = pnum;
 	  int tableID = vlistptr->vars[varID].tableID;
-	  if ( tableInqParUnits(tableID, code, units) != 0 )
-	    units[0] = '\0';
+          tableInqEntry(tableID, code, -1, NULL, NULL, units);
 	}
     }
   else
