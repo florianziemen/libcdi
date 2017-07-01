@@ -917,7 +917,6 @@ int tableInqParLongname(int tableID, int code, char *longname)
 
 int tableInqParUnits(int tableID, int code, char *units)
 {
-
   if ( ((tableID >= 0) & (tableID < MAX_TABLE)) | (tableID == CDI_UNDEFID) ) { } else
     Error("Invalid table ID %d", tableID);
 

@@ -3223,34 +3223,37 @@ void cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int model
 
   if ( varids ) Free(varids);
 
+  char name[CDI_MAX_NAME];
+
   for ( int varID = 0; varID < nvars; varID++ )
     {
       if ( vlistInqVarCode(vlistID, varID) == -varID-1 )
 	{
-	  const char *pname = vlistInqVarNamePtr(vlistID, varID);
-	  size_t len = strlen(pname);
-	  if ( len > 3 && isdigit((int) pname[3]) )
+          name[0] = 0;
+	  vlistInqVarName(vlistID, varID, name);
+	  size_t len = strlen(name);
+	  if ( len > 3 && isdigit((int) name[3]) )
 	    {
-	      if ( str_is_equal(pname, "var") )
+	      if ( str_is_equal(name, "var") )
 		{
-		  vlistDefVarCode(vlistID, varID, atoi(pname+3));
+		  vlistDefVarCode(vlistID, varID, atoi(name+3));
                   // vlistDestroyVarName(vlistID, varID);
 		}
 	    }
-	  else if ( len > 4 && isdigit((int) pname[4]) )
+	  else if ( len > 4 && isdigit((int) name[4]) )
 	    {
-	      if ( str_is_equal(pname, "code") )
+	      if ( str_is_equal(name, "code") )
 		{
-		  vlistDefVarCode(vlistID, varID, atoi(pname+4));
+		  vlistDefVarCode(vlistID, varID, atoi(name+4));
 		  // vlistDestroyVarName(vlistID, varID);
 		}
 	    }
-	  else if ( len > 5 && isdigit((int) pname[5]) )
+	  else if ( len > 5 && isdigit((int) name[5]) )
 	    {
-	      if ( str_is_equal(pname, "param") )
+	      if ( str_is_equal(name, "param") )
 		{
 		  int pnum = -1, pcat = 255, pdis = 255;
-		  sscanf(pname+5, "%d.%d.%d", &pnum, &pcat, &pdis);
+		  sscanf(name+5, "%d.%d.%d", &pnum, &pcat, &pdis);
 		  vlistDefVarParam(vlistID, varID, cdiEncodeParam(pnum, pcat, pdis));
                   // vlistDestroyVarName(vlistID, varID);
 		}

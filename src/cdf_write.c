@@ -11,6 +11,7 @@
 #include "cdf.h"
 #include "cdf_int.h"
 #include "vlist.h"
+#include "vlist_var.h"
 
 
 void cdfDefVarDeflate(int ncid, int ncvarid, int deflate_level)
@@ -427,13 +428,12 @@ int cdfDefVar(stream_t *streamptr, int varID)
   if ( CDI_Debug )
     fprintf(stderr, "chunktype %d  chunks %d %d %d %d\n", chunktype, (int)chunks[0], (int)chunks[1], (int)chunks[2], (int)chunks[3]);
 
-  int tableID  = vlistInqVarTable(vlistID, varID);
-
   const char *name     = vlistInqVarNamePtr(vlistID, varID);
   const char *longname = vlistInqVarLongnamePtr(vlistID, varID);
   const char *stdname  = vlistInqVarStdnamePtr(vlistID, varID);
   const char *units    = vlistInqVarUnitsPtr(vlistID, varID);
 
+  int tableID  = vlistInqVarTable(vlistID, varID);
   if ( name     == NULL )     name = tableInqParNamePtr(tableID, code);
   if ( longname == NULL ) longname = tableInqParLongnamePtr(tableID, code);
   if ( units    == NULL )    units = tableInqParUnitsPtr(tableID, code);

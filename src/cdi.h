@@ -699,11 +699,6 @@ double  vlistInqVarDblKey(int vlistID, int varID, const char *name);
 /* vlistInqVarIntKey: raw access to GRIB meta-data */
 int     vlistInqVarIntKey(int vlistID, int varID, const char *name);
 
-/* needed only for CDO operator after */
-const char *vlistInqVarNamePtr(int vlistID, int varID);
-const char *vlistInqVarLongnamePtr(int vlistID, int varID);
-const char *vlistInqVarUnitsPtr(int vlistID, int varID);
-
 /* CDI attributes */
 
 /*      cdiInqNatts: Get number of attributes assigned to this variable */
