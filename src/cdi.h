@@ -1221,7 +1221,6 @@ int     tableInqModel(int tableID);
 void    tableInqEntry(int tableID, int id, int ltype, char *name, char *longname, char *units);
 
 int     tableInqParCode(int tableID, char *name, int *code);
-int     tableInqParLongname(int tableID, int code, char *longname);
 int     tableInqParUnits(int tableID, int code, char *units);
 
 /* History routines */

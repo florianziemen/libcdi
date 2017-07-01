@@ -825,32 +825,6 @@ int tableInqParCode(int tableID, char *varname, int *code)
 }
 
 
-int tableInqParLongname(int tableID, int code, char *longname)
-{
-  if ( ((tableID >= 0) & (tableID < MAX_TABLE)) | (tableID == CDI_UNDEFID) ) { } else
-    Error("Invalid table ID %d", tableID);
-
-  int err = 1;
-
-  if ( tableID != CDI_UNDEFID )
-    {
-      int npars = parTable[tableID].npars;
-      for ( int item = 0; item < npars; item++ )
-	{
-	  if ( parTable[tableID].pars[item].id == code )
-	    {
-	      if ( parTable[tableID].pars[item].longname )
-		strcpy(longname, parTable[tableID].pars[item].longname);
-              err = 0;
-	      break;
-	    }
-	}
-    }
-
-  return err;
-}
-
-
 int tableInqParUnits(int tableID, int code, char *units)
 {
   if ( ((tableID >= 0) & (tableID < MAX_TABLE)) | (tableID == CDI_UNDEFID) ) { } else

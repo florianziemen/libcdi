@@ -583,8 +583,8 @@ void vlistInqVarLongname(int vlistID, int varID, char *longname)
 	{
 	  int code = pnum;
           int tableID = vlistptr->vars[varID].tableID;
-	  if ( tableInqParLongname(tableID, code, longname) != 0 )
-	    longname[0] = '\0';
+          name[0] = 0;
+          tableInqEntry(tableID, code, -1, NULL, longname, NULL);
 	}
     }
   else
