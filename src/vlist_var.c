@@ -439,16 +439,6 @@ const char *vlistInqVarNamePtr(int vlistID, int varID)
 }
 
 
-const char *vlistInqVarLongnamePtr(int vlistID, int varID)
-{
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-
-  vlistCheckVarID(__func__, vlistID, varID);
-
-  return vlistptr->vars[varID].longname;
-}
-
-
 const char *vlistInqVarUnitsPtr(int vlistID, int varID)
 {
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
