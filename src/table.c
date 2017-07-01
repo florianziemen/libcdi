@@ -868,27 +868,6 @@ const char *tableInqParLongnamePtr(int tableID, int code)
 }
 
 
-const char *tableInqParUnitsPtr(int tableID, int code)
-{
-  const char *units = NULL;
-
-  if ( tableID != CDI_UNDEFID )
-    {
-      int npars = parTable[tableID].npars;
-      for ( int item = 0; item < npars; item++ )
-	{
-	  if ( parTable[tableID].pars[item].id == code )
-	    {
-	      units = parTable[tableID].pars[item].units;
-	      break;
-	    }
-	}
-    }
-
-  return units;
-}
-
-
 int tableInqParLongname(int tableID, int code, char *longname)
 {
   if ( ((tableID >= 0) & (tableID < MAX_TABLE)) | (tableID == CDI_UNDEFID) ) { } else

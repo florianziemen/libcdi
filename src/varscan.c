@@ -578,7 +578,6 @@ int cmp_varname(const void *s1, const void *s2)
 
 void cdi_generate_vars(stream_t *streamptr)
 {
-  char name[CDI_MAX_NAME], longname[CDI_MAX_NAME], units[CDI_MAX_NAME];
   int vlistID = streamptr->vlistID;
 
   int *varids = (int *) Malloc(varTableUsed*sizeof(int));
@@ -802,23 +801,24 @@ void cdi_generate_vars(stream_t *streamptr)
 	{
 	  int pdis, pcat, pnum;
 	  cdiDecodeParam(param, &pnum, &pcat, &pdis);
-	  if ( tableInqParNamePtr(cdiDefaultTableID, pnum) )
+          char name[CDI_MAX_NAME]; name[0] = 0;
+          tableInqParName(cdiDefaultTableID, pnum, name);
+	  if ( name[0] )
 	    {
 	      if ( tableID != CDI_UNDEFID )
 		{
-		  strcpy(name, tableInqParNamePtr(cdiDefaultTableID, pnum));
 		  vlistDefVarName(vlistID, varID, name);
-		  if ( tableInqParLongnamePtr(cdiDefaultTableID, pnum) )
-		    {
-		      strcpy(longname, tableInqParLongnamePtr(cdiDefaultTableID, pnum));
-		      vlistDefVarLongname(vlistID, varID, longname);
-		    }
-		  if ( tableInqParUnitsPtr(cdiDefaultTableID, pnum) )
-		    {
-		      strcpy(units, tableInqParUnitsPtr(cdiDefaultTableID, pnum));
-		      vlistDefVarUnits(vlistID, varID, units);
-		    }
-		}
+                  {
+                    char longname[CDI_MAX_NAME]; longname[0] = 0;
+                    tableInqParLongname(cdiDefaultTableID, pnum, longname);
+                    if ( longname[0] ) vlistDefVarLongname(vlistID, varID, longname);
+                  }
+                  {
+                    char units[CDI_MAX_NAME]; units[0] = 0;
+                    tableInqParUnits(cdiDefaultTableID, pnum, units);
+                    if ( units[0] ) vlistDefVarUnits(vlistID, varID, units);
+                  }
+                }
 	      else
 		tableID = cdiDefaultTableID;
 	    }

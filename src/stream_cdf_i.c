@@ -3223,13 +3223,11 @@ void cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int model
 
   if ( varids ) Free(varids);
 
-  char name[CDI_MAX_NAME];
-
   for ( int varID = 0; varID < nvars; varID++ )
     {
       if ( vlistInqVarCode(vlistID, varID) == -varID-1 )
 	{
-          name[0] = 0;
+          char name[CDI_MAX_NAME]; name[0] = 0;
 	  vlistInqVarName(vlistID, varID, name);
 	  size_t len = strlen(name);
 	  if ( len > 3 && isdigit((int) name[3]) )
@@ -3269,7 +3267,9 @@ void cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int model
       int code = vlistInqVarCode(vlistID, varID);
       if ( cdiDefaultTableID != CDI_UNDEFID )
 	{
-	  if ( tableInqParNamePtr(cdiDefaultTableID, code) )
+          char buf[CDI_MAX_NAME]; buf[0] = 0;
+          tableInqParName(cdiDefaultTableID, code, buf);
+	  if ( buf[0] )
 	    {
 	      vlistDestroyVarName(vlistID, varID);
 	      vlistDestroyVarLongname(vlistID, varID);
@@ -3277,11 +3277,13 @@ void cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int model
 
 	      if ( varTableID != CDI_UNDEFID )
 		{
-		  vlistDefVarName(vlistID, varID, tableInqParNamePtr(cdiDefaultTableID, code));
-		  if ( tableInqParLongnamePtr(cdiDefaultTableID, code) )
-		    vlistDefVarLongname(vlistID, varID, tableInqParLongnamePtr(cdiDefaultTableID, code));
-		  if ( tableInqParUnitsPtr(cdiDefaultTableID, code) )
-		    vlistDefVarUnits(vlistID, varID, tableInqParUnitsPtr(cdiDefaultTableID, code));
+		  vlistDefVarName(vlistID, varID, buf);
+                  buf[0] = 0;
+                  tableInqParLongname(cdiDefaultTableID, code, buf);
+		  if ( buf[0] ) vlistDefVarLongname(vlistID, varID, buf);
+                  buf[0] = 0;
+                  tableInqParUnits(cdiDefaultTableID, code, buf);
+		  if ( buf[0] ) vlistDefVarUnits(vlistID, varID, buf);
 		}
 	      else
 		{

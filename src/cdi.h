@@ -1223,11 +1223,6 @@ int     tableInqParName(int tableID, int code, char *name);
 int     tableInqParLongname(int tableID, int code, char *longname);
 int     tableInqParUnits(int tableID, int code, char *units);
 
-/* needed only for CDO operator after */
-const char *tableInqParNamePtr(int tableID, int parID);
-const char *tableInqParLongnamePtr(int tableID, int parID);
-const char *tableInqParUnitsPtr(int tableID, int parID);
-
 /* History routines */
 
 void    streamDefHistory(int streamID, int size, const char *history);
