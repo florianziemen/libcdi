@@ -786,7 +786,9 @@ void tableInqEntry(int tableID, int id, int ltype, char *name, char *longname, c
       int npars = parTable[tableID].npars;
       for ( int item = 0; item < npars; item++ )
 	{
-	  if ( parTable[tableID].pars[item].id == id )
+	  if ( parTable[tableID].pars[item].id == id &&
+               (parTable[tableID].pars[item].ltype == -1 || ltype == -1 ||
+                parTable[tableID].pars[item].ltype == ltype) )
 	    {
 	      if ( name && parTable[tableID].pars[item].name )
 		strcpy(name, parTable[tableID].pars[item].name);
