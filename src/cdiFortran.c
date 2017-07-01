@@ -531,10 +531,7 @@ FCALLSCFUN3 (INT, tableInq, TABLEINQ, tableinq, INT, INT, STRING)
 FCALLSCFUN0 (INT, tableInqNumber, TABLEINQNUMBER, tableinqnumber)
 FCALLSCFUN1 (INT, tableInqNum, TABLEINQNUM, tableinqnum, INT)
 FCALLSCFUN1 (INT, tableInqModel, TABLEINQMODEL, tableinqmodel, INT)
-FCALLSCFUN3 (INT, tableInqParCode, TABLEINQPARCODE, tableinqparcode, INT, PSTRING, PINT)
-FCALLSCFUN3 (INT, tableInqParName, TABLEINQPARNAME, tableinqparname, INT, INT, PSTRING)
-FCALLSCFUN3 (INT, tableInqParLongname, TABLEINQPARLONGNAME, tableinqparlongname, INT, INT, PSTRING)
-FCALLSCFUN3 (INT, tableInqParUnits, TABLEINQPARUNITS, tableinqparunits, INT, INT, PSTRING)
+FCALLSCSUB6 (tableInqEntry, TABLEINQENTRY, tableinqentry, INT, INT, INT, PSTRING, PSTRING, PSTRING)
 
 /*  History routines  */
 

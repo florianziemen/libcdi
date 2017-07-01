@@ -2460,29 +2460,14 @@
 !                                    (INTEGER         tableID)
       EXTERNAL        tableInqModel
 
-      INTEGER         tableInqParCode
+!                     tableInqEntry
 !                                    (INTEGER         tableID,
+!                                     INTEGER         id,
+!                                     INTEGER         ltype,
 !                                     CHARACTER*(*)   name,
-!                                     INTEGER         code)
-      EXTERNAL        tableInqParCode
-
-      INTEGER         tableInqParName
-!                                    (INTEGER         tableID,
-!                                     INTEGER         code,
-!                                     CHARACTER*(*)   name)
-      EXTERNAL        tableInqParName
-
-      INTEGER         tableInqParLongname
-!                                    (INTEGER         tableID,
-!                                     INTEGER         code,
-!                                     CHARACTER*(*)   longname)
-      EXTERNAL        tableInqParLongname
-
-      INTEGER         tableInqParUnits
-!                                    (INTEGER         tableID,
-!                                     INTEGER         code,
+!                                     CHARACTER*(*)   longname,
 !                                     CHARACTER*(*)   units)
-      EXTERNAL        tableInqParUnits
+      EXTERNAL        tableInqEntry
 
 !
 !  History routines
