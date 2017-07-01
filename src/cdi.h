@@ -1220,8 +1220,6 @@ int     tableInqModel(int tableID);
 
 void    tableInqEntry(int tableID, int id, int ltype, char *name, char *longname, char *units);
 
-int     tableInqParCode(int tableID, char *name, int *code);
-
 /* History routines */
 
 void    streamDefHistory(int streamID, int size, const char *history);

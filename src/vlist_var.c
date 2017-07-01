@@ -11,6 +11,7 @@
 #include "vlist_var.h"
 #include "resource_handle.h"
 #include "cdi_att.h"
+#include "tablepar.h"
 #include "namespace.h"
 #include "serialize.h"
 #include "error.h"
