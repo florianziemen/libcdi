@@ -355,13 +355,13 @@ int tableRead(const char *tablefile)
 
       while ( isdigit((int) *pline) ) pline++;
 
-      if ( *pline == ';' )
+      if ( *pline == ';' || *pline == ':' )
         {
           pline++;
           ltype = atoi(pline);
           while ( isdigit((int) *pline) ) pline++;
 
-          if ( *pline == ';' )
+          if ( *pline == ';' || *pline == ':' )
             {
               pline++;
               while ( isdigit((int) *pline) ) pline++;
