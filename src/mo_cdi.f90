@@ -35,10 +35,13 @@ module mo_cdi
   integer(c_int), public, parameter :: CDI_EEOF = -1
   integer(c_int), public, parameter :: CDI_ESYSTEM = -10
   integer(c_int), public, parameter :: CDI_EINVAL = -20
-  integer(c_int), public, parameter :: CDI_EUFTYPE = -21
-  integer(c_int), public, parameter :: CDI_ELIBNAVAIL = -22
-  integer(c_int), public, parameter :: CDI_EUFSTRUCT = -23
-  integer(c_int), public, parameter :: CDI_EUNC4 = -24
+  integer(c_int), public, parameter :: CDI_EISDIR = -21
+  integer(c_int), public, parameter :: CDI_EISEMPTY = -22
+  integer(c_int), public, parameter :: CDI_EUFTYPE = -23
+  integer(c_int), public, parameter :: CDI_ELIBNAVAIL = -24
+  integer(c_int), public, parameter :: CDI_EUFSTRUCT = -25
+  integer(c_int), public, parameter :: CDI_EUNC4 = -26
+  integer(c_int), public, parameter :: CDI_EDIMSIZE = -27
   integer(c_int), public, parameter :: CDI_ELIMIT = -99
   integer(c_int), public, parameter :: CDI_FILETYPE_GRB = 1
   integer(c_int), public, parameter :: CDI_FILETYPE_GRB2 = 2
@@ -141,6 +144,7 @@ module mo_cdi
   integer(c_int), public, parameter :: GRID_CURVILINEAR = 10
   integer(c_int), public, parameter :: GRID_LCC = 11
   integer(c_int), public, parameter :: GRID_PROJECTION = 12
+  integer(c_int), public, parameter :: GRID_CHARXY = 13
   integer(c_int), public, parameter :: CDI_PROJ_RLL = 21
   integer(c_int), public, parameter :: CDI_PROJ_LCC = 22
   integer(c_int), public, parameter :: CDI_PROJ_LAEA = 23
@@ -171,6 +175,7 @@ module mo_cdi
   integer(c_int), public, parameter :: ZAXIS_SEDIMENT_BOTTOM_TW = 23
   integer(c_int), public, parameter :: ZAXIS_MIX_LAYER = 24
   integer(c_int), public, parameter :: ZAXIS_REFERENCE = 25
+  integer(c_int), public, parameter :: ZAXIS_CHAR = 26
   integer(c_int), public, parameter :: MAX_KV_PAIRS_MATCH = 10
   integer(c_int), public, parameter :: TIME_CONSTANT = 0
   integer(c_int), public, parameter :: TIME_VARIABLE = 1
@@ -468,8 +473,10 @@ module mo_cdi
   public :: gridInqNP
   public :: gridDefXvals
   public :: gridInqXvals
+  public :: gridInqXIsc
   public :: gridDefYvals
   public :: gridInqYvals
+  public :: gridInqYIsc
   integer(c_int), public, parameter :: CDI_KEY_XNAME = 901
   integer(c_int), public, parameter :: CDI_KEY_XDIMNAME = 902
   integer(c_int), public, parameter :: CDI_KEY_XLONGNAME = 903
@@ -557,6 +564,7 @@ module mo_cdi
   public :: zaxisPrint
   public :: zaxisDefLevels
   public :: zaxisInqLevels
+  public :: zaxisInqCLen
   public :: zaxisDefLevel
   public :: zaxisInqLevel
   public :: zaxisDefNlevRef
@@ -642,7 +650,6 @@ module mo_cdi
   public :: modelInqInstitut
   public :: modelInqGribID
   public :: modelInqNamePtr
-  public :: tableWriteC
   public :: tableWrite
   public :: tableRead
   public :: tableDef
@@ -1815,9 +1822,9 @@ module mo_cdi
 
     function gridCreate(gridtype_dummy, size_dummy) bind(c, name =&
     & 'gridCreate') result(f_result)
-      import c_int
+      import c_int, c_size_t
       integer(c_int), value :: gridtype_dummy
-      integer(c_int), value :: size_dummy
+      integer(c_size_t), value :: size_dummy
       integer(c_int) :: f_result
     end function gridCreate
 
@@ -1863,37 +1870,37 @@ module mo_cdi
 
     function gridInqSize(gridID_dummy) bind(c, name = 'gridInqSize')&
     & result(f_result)
-      import c_int
+      import c_int, c_size_t
       integer(c_int), value :: gridID_dummy
-      integer(c_int) :: f_result
+      integer(c_size_t) :: f_result
     end function gridInqSize
 
     subroutine gridDefXsize(gridID_dummy, xsize_dummy) bind(c, name =&
     & 'gridDefXsize')
-      import c_int
+      import c_int, c_size_t
       integer(c_int), value :: gridID_dummy
-      integer(c_int), value :: xsize_dummy
+      integer(c_size_t), value :: xsize_dummy
     end subroutine gridDefXsize
 
     function gridInqXsize(gridID_dummy) bind(c, name = 'gridInqXsize')&
     & result(f_result)
-      import c_int
+      import c_int, c_size_t
       integer(c_int), value :: gridID_dummy
-      integer(c_int) :: f_result
+      integer(c_size_t) :: f_result
     end function gridInqXsize
 
     subroutine gridDefYsize(gridID_dummy, ysize_dummy) bind(c, name =&
     & 'gridDefYsize')
-      import c_int
+      import c_int, c_size_t
       integer(c_int), value :: gridID_dummy
-      integer(c_int), value :: ysize_dummy
+      integer(c_size_t), value :: ysize_dummy
     end subroutine gridDefYsize
 
     function gridInqYsize(gridID_dummy) bind(c, name = 'gridInqYsize')&
     & result(f_result)
-      import c_int
+      import c_int, c_size_t
       integer(c_int), value :: gridID_dummy
-      integer(c_int) :: f_result
+      integer(c_size_t) :: f_result
     end function gridInqYsize
 
     subroutine gridDefNP(gridID_dummy, np_dummy) bind(c, name = 'gridDefNP')
@@ -1918,11 +1925,18 @@ module mo_cdi
 
     function gridInqXvals(gridID_dummy, xvals_dummy) bind(c, name =&
     & 'gridInqXvals') result(f_result)
-      import c_double, c_int
+      import c_double, c_int, c_size_t
       integer(c_int), value :: gridID_dummy
       real(c_double), intent(inout) :: xvals_dummy(*)
-      integer(c_int) :: f_result
+      integer(c_size_t) :: f_result
     end function gridInqXvals
+
+    function gridInqXIsc(gridID_dummy) bind(c, name = 'gridInqXIsc')&
+    & result(f_result)
+      import c_int
+      integer(c_int), value :: gridID_dummy
+      integer(c_int) :: f_result
+    end function gridInqXIsc
 
     subroutine gridDefYvals(gridID_dummy, yvals_dummy) bind(c, name =&
     & 'gridDefYvals')
@@ -1933,11 +1947,18 @@ module mo_cdi
 
     function gridInqYvals(gridID_dummy, yvals_dummy) bind(c, name =&
     & 'gridInqYvals') result(f_result)
-      import c_double, c_int
+      import c_double, c_int, c_size_t
       integer(c_int), value :: gridID_dummy
       real(c_double), intent(inout) :: yvals_dummy(*)
-      integer(c_int) :: f_result
+      integer(c_size_t) :: f_result
     end function gridInqYvals
+
+    function gridInqYIsc(gridID_dummy) bind(c, name = 'gridInqYIsc')&
+    & result(f_result)
+      import c_int
+      integer(c_int), value :: gridID_dummy
+      integer(c_int) :: f_result
+    end function gridInqYIsc
 
     function cdiZaxisDefKeyFlt(zaxisID_dummy, key_dummy, value_dummy) bind(c,&
     & name = 'cdiZaxisDefKeyFlt') result(f_result)
@@ -1973,17 +1994,17 @@ module mo_cdi
 
     function gridInqXval(gridID_dummy, index_dummy) bind(c, name =&
     & 'gridInqXval') result(f_result)
-      import c_double, c_int
+      import c_double, c_int, c_size_t
       integer(c_int), value :: gridID_dummy
-      integer(c_int), value :: index_dummy
+      integer(c_size_t), value :: index_dummy
       real(c_double) :: f_result
     end function gridInqXval
 
     function gridInqYval(gridID_dummy, index_dummy) bind(c, name =&
     & 'gridInqYval') result(f_result)
-      import c_double, c_int
+      import c_double, c_int, c_size_t
       integer(c_int), value :: gridID_dummy
-      integer(c_int), value :: index_dummy
+      integer(c_size_t), value :: index_dummy
       real(c_double) :: f_result
     end function gridInqYval
 
@@ -2322,6 +2343,13 @@ module mo_cdi
       real(c_double), intent(inout) :: levels_dummy(*)
       integer(c_int) :: f_result
     end function zaxisInqLevels
+
+    function zaxisInqCLen(zaxisID_dummy) bind(c, name = 'zaxisInqCLen')&
+    & result(f_result)
+      import c_int
+      integer(c_int), value :: zaxisID_dummy
+      integer(c_int) :: f_result
+    end function zaxisInqCLen
 
     subroutine zaxisDefLevel(zaxisID_dummy, levelID_dummy, levels_dummy)&
     & bind(c, name = 'zaxisDefLevel')
@@ -5978,26 +6006,6 @@ contains
       call c_f_pointer(ptr, f_result, rv_shape)
     end if
   end function modelInqNamePtr
-
-  subroutine tableWriteC(filename_dummy, tableID_dummy)
-    character(kind = c_char, len = *), intent(in) :: filename_dummy
-    integer(c_int), value :: tableID_dummy
-    character(kind = c_char) :: filename_temp(len(filename_dummy) + 1)
-    integer :: filename_i
-    interface
-      subroutine lib_tableWriteC(filename_dummy, tableID_dummy) bind(c, name =&
-      & 'tableWriteC')
-        import c_char, c_int
-        character(kind = c_char) :: filename_dummy(*)
-        integer(c_int), value :: tableID_dummy
-      end subroutine lib_tableWriteC
-    end interface
-    do filename_i = 1, len(filename_dummy)
-      filename_temp(filename_i) = filename_dummy(filename_i:filename_i)
-    end do
-    filename_temp(len(filename_dummy) + 1) = c_null_char
-    call lib_tableWriteC(filename_temp, tableID_dummy)
-  end subroutine tableWriteC
 
   subroutine tableWrite(filename_dummy, tableID_dummy)
     character(kind = c_char, len = *), intent(in) :: filename_dummy

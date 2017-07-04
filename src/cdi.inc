@@ -4,7 +4,7 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   June 2017
+! Uwe Schulzweida, MPI-MET, Hamburg,   July 2017
 !
 
       INTEGER    CDI_MAX_NAME
@@ -1517,7 +1517,7 @@
 
       INTEGER         gridCreate
 !                                    (INTEGER         gridtype,
-!                                     INTEGER         size)
+!                                     INTEGER*8       size)
       EXTERNAL        gridCreate
 
 !                     gridDestroy
@@ -1551,7 +1551,7 @@
 
 !                     gridDefXsize
 !                                    (INTEGER         gridID,
-!                                     INTEGER         xsize)
+!                                     INTEGER*8       xsize)
       EXTERNAL        gridDefXsize
 
       INTEGER         gridInqXsize
@@ -1560,7 +1560,7 @@
 
 !                     gridDefYsize
 !                                    (INTEGER         gridID,
-!                                     INTEGER         ysize)
+!                                     INTEGER*8       ysize)
       EXTERNAL        gridDefYsize
 
       INTEGER         gridInqYsize
@@ -1753,12 +1753,12 @@
 
       DOUBLEPRECISION gridInqXval
 !                                    (INTEGER         gridID,
-!                                     INTEGER         index)
+!                                     INTEGER*8       index)
       EXTERNAL        gridInqXval
 
       DOUBLEPRECISION gridInqYval
 !                                    (INTEGER         gridID,
-!                                     INTEGER         index)
+!                                     INTEGER*8       index)
       EXTERNAL        gridInqYval
 
       DOUBLEPRECISION gridInqXinc

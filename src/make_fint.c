@@ -86,7 +86,7 @@ static void doctotxt(FILE *fp, Docu *doc, size_t ndoc)
     }
 }
 
-enum cftype {ISVOID, ISCONSTSTRING, ISINT, ISREAL, ISDOUBLE, ISMPI_COMM,
+enum cftype {ISVOID, ISCONSTSTRING, ISINT, ISREAL, ISDOUBLE, ISSIZE_T, ISMPI_COMM,
              ISXT_IDXLIST, ISCHOICE, ISINTP, ISFLOATV, ISFLOATVV,
              ISDOUBLEV, ISDOUBLEVV, ISINTV, ISINTVV, ISINTVVV, ISREALP,
              ISDOUBLEP, ISCBUF, ISUUID, ISUCHAR, ISSTRING, ISSTRINGP,
@@ -156,6 +156,8 @@ static struct symbol funArgSym[]
         "^"WS"*(const"WS"+)?float"WS"+"SYMRE"?"WS"*[,\\)]", 2, 0, 0 },
       { "DOUBLEPRECISION", "DOUBLE",  "%sdouble %.*s",
         "^"WS"*(const"WS"+)?double"WS"+"SYMRE"?"WS"*[,\\)]", 2, 0, 0 },
+      { "INTEGER*8",       "LONG",    "%ssize_t %.*s",
+        "^"WS"*(const"WS"+)?size_t("WS"+"SYMRE")?"WS"*[,\\)]", 3, 0, 0 },
       { "INTEGER",         "INT", "%sMPI_Comm %.*s",
         "^"WS"*MPI_Comm"WS"+"SYMRE"?"WS"*[,\\)]", 1, 1, 0,
         cfMPICommConvert, "%sint %.*s" },
@@ -221,6 +223,8 @@ static struct symbol funRet[] = {
     "(const"WS"+)?double"WS"+"SYMRE WS"*\\(", 2, 0, 0 },
   { "INTEGER",         "INT",     "%sMPI_Comm %.*s",
     "MPI_Comm"WS"+"SYMRE WS"*\\(", 1, 0, 0, cfMPICommConvert, "%sint %.*s" },
+  { "INTEGER*8",       "LONG",    "%ssize_t %.*s",
+    "(const"WS"+)?size_t"WS"+"SYMRE WS"*\\(", 2, 0, 0 },
 };
 #if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 5)
 #pragma GCC diagnostic pop

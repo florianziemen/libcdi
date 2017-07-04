@@ -4,7 +4,8 @@ PROGRAM CDIREADF2003
 
   IMPLICIT NONE
 
-  INTEGER :: gsize, nlevel, nvars, code
+  INTEGER*8 :: gsize
+  INTEGER :: nlevel, nvars, code
   INTEGER :: vdate, vtime, nmiss, status, ilev
   INTEGER :: streamID, varID, gridID, zaxisID
   INTEGER :: tsID, vlistID, taxisID

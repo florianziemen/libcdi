@@ -745,7 +745,7 @@ int     gridInqMask(int gridID, int mask[]);
 void    gridPrint(int gridID, int opt);
 
 /*      gridCreate: Create a horizontal Grid */
-int     gridCreate(int gridtype, int size);
+int     gridCreate(int gridtype, size_t size);
 
 /*      gridDestroy: Destroy a horizontal Grid */
 void    gridDestroy(int gridID);
@@ -766,19 +766,19 @@ int     gridInqProjType(int gridID);
 int     gridInqType(int gridID);
 
 /*      gridInqSize: Get the size of a Grid */
-int     gridInqSize(int gridID);
+size_t  gridInqSize(int gridID);
 
 /*      gridDefXsize: Define the size of a X-axis */
-void    gridDefXsize(int gridID, int xsize);
+void    gridDefXsize(int gridID, size_t xsize);
 
 /*      gridInqXsize: Get the size of a X-axis */
-int     gridInqXsize(int gridID);
+size_t  gridInqXsize(int gridID);
 
 /*      gridDefYsize: Define the size of a Y-axis */
-void    gridDefYsize(int gridID, int ysize);
+void    gridDefYsize(int gridID, size_t ysize);
 
 /*      gridInqYsize: Get the size of a Y-axis */
-int     gridInqYsize(int gridID);
+size_t  gridInqYsize(int gridID);
 
 /*      gridDefNP: Define the number of parallels between a pole and the equator */
 void    gridDefNP(int gridID, int np);
@@ -790,25 +790,25 @@ int     gridInqNP(int gridID);
 void    gridDefXvals(int gridID, const double xvals[]);
 
 /*      gridInqXvals: Get all values of a X-axis */
-int     gridInqXvals(int gridID, double xvals[]);
+size_t  gridInqXvals(int gridID, double xvals[]);
 
 /*      gridInqXIsc: Find out whether X-coordinate is of type CHAR */
 int     gridInqXIsc(int gridID);
 
 /*      gridInqXCvals: Get strings from X-axis in case grid is of type GRID_CHARXY */
-int     gridInqXCvals(int gridID, char *xcvals[]);
+size_t  gridInqXCvals(int gridID, char *xcvals[]);
 
 /*      gridDefYvals: Define the values of a Y-axis */
 void    gridDefYvals(int gridID, const double yvals[]);
 
 /*      gridInqYvals: Get all values of a Y-axis */
-int     gridInqYvals(int gridID, double yvals[]);
+size_t  gridInqYvals(int gridID, double yvals[]);
 
 /*      gridInqYIsc: Find out whether Y-coordinate is of type CHAR */
 int     gridInqYIsc(int gridID);
 
 /*      gridInqYCvals: Get strings from Y-axis in case grid is of type GRID_CHARXY */
-int     gridInqYCvals(int gridID, char *ycvals[]);
+size_t  gridInqYCvals(int gridID, char *ycvals[]);
 
 /* CDI grid string key values */
 #define  CDI_KEY_XNAME       901  // X-axis name
@@ -893,10 +893,10 @@ void    gridDefPrec(int gridID, int prec);
 int     gridInqPrec(int gridID);
 
 /*      gridInqXval: Get one value of a X-axis */
-double  gridInqXval(int gridID, int index);
+double  gridInqXval(int gridID, size_t index);
 
 /*      gridInqYval: Get one value of a Y-axis */
-double  gridInqYval(int gridID, int index);
+double  gridInqYval(int gridID, size_t index);
 
 double  gridInqXinc(int gridID);
 double  gridInqYinc(int gridID);
