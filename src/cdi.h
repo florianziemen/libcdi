@@ -699,11 +699,6 @@ double  vlistInqVarDblKey(int vlistID, int varID, const char *name);
 /* vlistInqVarIntKey: raw access to GRIB meta-data */
 int     vlistInqVarIntKey(int vlistID, int varID, const char *name);
 
-/* needed only for CDO operator after */
-const char *vlistInqVarNamePtr(int vlistID, int varID);
-const char *vlistInqVarLongnamePtr(int vlistID, int varID);
-const char *vlistInqVarUnitsPtr(int vlistID, int varID);
-
 /* CDI attributes */
 
 /*      cdiInqNatts: Get number of attributes assigned to this variable */
@@ -1216,7 +1211,6 @@ int     tableRead(const char *tablefile);
 int     tableDef(int modelID, int tablenum, const char *tablename);
 
 const char *tableInqNamePtr(int tableID);
-void    tableDefEntry(int tableID, int code, const char *name, const char *longname, const char *units);
 
 int     tableInq(int modelID, int tablenum, const char *tablename);
 int     tableInqNumber(void);
@@ -1224,17 +1218,7 @@ int     tableInqNumber(void);
 int     tableInqNum(int tableID);
 int     tableInqModel(int tableID);
 
-void    tableInqPar(int tableID, int code, char *name, char *longname, char *units);
-
-int     tableInqParCode(int tableID, char *name, int *code);
-int     tableInqParName(int tableID, int code, char *name);
-int     tableInqParLongname(int tableID, int code, char *longname);
-int     tableInqParUnits(int tableID, int code, char *units);
-
-/* needed only for CDO operator after */
-const char *tableInqParNamePtr(int tableID, int parID);
-const char *tableInqParLongnamePtr(int tableID, int parID);
-const char *tableInqParUnitsPtr(int tableID, int parID);
+void    tableInqEntry(int tableID, int id, int ltype, char *name, char *longname, char *units);
 
 /* History routines */
 

@@ -5,6 +5,7 @@
 
 int main()
 {
-  assert(tableInqParName(-1, -1, NULL) != 0);
+  tableInqEntry(-1, -1, -1, NULL, NULL, NULL);
+  //assert(tableInqEntry(-1, -1, -1, NULL, NULL, NULL) != 0);
   return EXIT_SUCCESS;
 }

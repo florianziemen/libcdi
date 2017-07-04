@@ -11,6 +11,7 @@
 #include "vlist_var.h"
 #include "resource_handle.h"
 #include "cdi_att.h"
+#include "tablepar.h"
 #include "namespace.h"
 #include "serialize.h"
 #include "error.h"
@@ -438,36 +439,6 @@ const char *vlistInqVarNamePtr(int vlistID, int varID)
   return vlistptr->vars[varID].name;
 }
 
-
-const char *vlistInqVarLongnamePtr(int vlistID, int varID)
-{
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-
-  vlistCheckVarID(__func__, vlistID, varID);
-
-  return vlistptr->vars[varID].longname;
-}
-
-
-const char *vlistInqVarStdnamePtr(int vlistID, int varID)
-{
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-
-  vlistCheckVarID(__func__, vlistID, varID);
-
-  return vlistptr->vars[varID].stdname;
-}
-
-
-const char *vlistInqVarUnitsPtr(int vlistID, int varID)
-{
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-
-  vlistCheckVarID(__func__, vlistID, varID);
-
-  return vlistptr->vars[varID].units;
-}
-
 /*
 @Function  vlistInqVarName
 @Title     Get the name of a Variable
@@ -504,8 +475,9 @@ void vlistInqVarName(int vlistID, int varID, char *name)
 	{
 	  int code = pnum;
 	  int tableID = vlistptr->vars[varID].tableID;
-	  if ( tableInqParName(tableID, code, name) != 0 )
-	    sprintf(name, "var%d", code);
+          name[0] = 0;
+          tableInqEntry(tableID, code, -1, name, NULL, NULL);
+	  if ( !name[0] ) sprintf(name, "var%d", code);
 	}
       else
 	{
@@ -541,24 +513,29 @@ char* vlistCopyVarName(int vlistId, int varId)
   vlistCheckVarID(__func__, vlistId, varId);
 
   //If a name is set in the variable description, use that.
-  const char* name = vlistptr->vars[varId].name;
-  if(name) return strdup(name);
+  {
+    const char* name = vlistptr->vars[varId].name;
+    if (name) return strdup(name);
+  }
 
   //Otherwise we check if we should use the table of parameter descriptions.
   int param = vlistptr->vars[varId].param;
   int discipline, category, number;
   cdiDecodeParam(param, &number, &category, &discipline);
   char *result = NULL;
-  if(discipline == 255)
+  if (discipline == 255)
     {
       int tableId = vlistptr->vars[varId].tableID;
-      if(( name = tableInqParNamePtr(tableId, number) ))
+      char name[CDI_MAX_NAME]; name[0] = 0;
+      tableInqEntry(tableId, number, -1, name, NULL, NULL);
+      if ( name[0] )
         result = strdup(name);
-      {
-        //No luck, fall back to outputting a name of the format "var<num>".
-        result = (char *) Malloc(3 + 3 * sizeof (int) * CHAR_BIT / 8 + 2);
-        sprintf(result, "var%d", number);
-      }
+      else
+        {
+          //No luck, fall back to outputting a name of the format "var<num>".
+          result = (char *) Malloc(3 + 3 * sizeof (int) * CHAR_BIT / 8 + 2);
+          sprintf(result, "var%d", number);
+        }
     }
   else
     {
@@ -607,8 +584,7 @@ void vlistInqVarLongname(int vlistID, int varID, char *longname)
 	{
 	  int code = pnum;
           int tableID = vlistptr->vars[varID].tableID;
-	  if ( tableInqParLongname(tableID, code, longname) != 0 )
-	    longname[0] = '\0';
+          tableInqEntry(tableID, code, -1, NULL, longname, NULL);
 	}
     }
   else
@@ -692,8 +668,7 @@ void vlistInqVarUnits(int vlistID, int varID, char *units)
 	{
 	  int code = pnum;
 	  int tableID = vlistptr->vars[varID].tableID;
-	  if ( tableInqParUnits(tableID, code, units) != 0 )
-	    units[0] = '\0';
+          tableInqEntry(tableID, code, -1, NULL, NULL, units);
 	}
     }
   else
