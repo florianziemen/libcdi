@@ -291,7 +291,7 @@ void grb_write_var(stream_t *streamptr, int varID, int memtype, const void *data
     gridID   = vlistInqVarGrid(vlistID, varID),
     zaxisID  = vlistInqVarZaxis(vlistID, varID),
     nlevs    = zaxisInqSize(zaxisID);
-  size_t gridsize = gridInqSize(gridID),
+  size_t gridsize = gridInqSize(gridID);
   double missval = vlistInqVarMissval(vlistID, varID);
 
   size_t chunkLen = gridsize;

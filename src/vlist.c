@@ -1296,15 +1296,15 @@ int vlistInqModel(int vlistID)
 }
 
 
-int vlistGridsizeMax(int vlistID)
+size_t vlistGridsizeMax(int vlistID)
 {
-  int gridsizemax = 0;
+  size_t gridsizemax = 0;
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
   for ( int index = 0 ; index < vlistptr->ngrids ; index++ )
     {
       int gridID = vlistptr->gridIDs[index];
-      int gridsize = gridInqSize(gridID);
+      size_t gridsize = gridInqSize(gridID);
       if ( gridsize > gridsizemax ) gridsizemax = gridsize;
     }
 

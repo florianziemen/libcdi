@@ -524,7 +524,7 @@ int     vlistNsubtypes(int vlistID);
 
 void    vlistDefNtsteps(int vlistID, int nts);
 int     vlistNtsteps(int vlistID);
-int     vlistGridsizeMax(int vlistID);
+size_t  vlistGridsizeMax(int vlistID);
 int     vlistGrid(int vlistID, int index);
 int     vlistGridIndex(int vlistID, int gridID);
 void    vlistChangeGridIndex(int vlistID, int index, int gridID);
