@@ -1140,7 +1140,7 @@ void vlistPrintKernel(vlist_t *vlistptr, FILE *fp)
       fputs("\n"
             " varID  size iorank\n", fp);
       for ( int varID = 0; varID < nvars; varID++ )
-        fprintf(fp, "%3d %8d %6d\n", varID,
+        fprintf(fp, "%3d %8zu %6d\n", varID,
                 zaxisInqSize(vlistptr->vars[varID].zaxisID)
                 * gridInqSize(vlistptr->vars[varID].gridID),
                 vlistptr->vars[varID].iorank);

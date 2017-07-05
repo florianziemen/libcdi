@@ -142,8 +142,8 @@ void srvDefRecord(stream_t *streamptr)
   header[3] = record->time;
 
   int gridID = record->gridID;
-  int xsize = gridInqXsize(gridID),
-      ysize = gridInqYsize(gridID);
+  size_t xsize = gridInqXsize(gridID),
+         ysize = gridInqYsize(gridID);
   if ( xsize == 0 || ysize == 0 )
     {
       xsize = gridInqSize(gridID);
@@ -703,8 +703,8 @@ void srvWriteVarSliceDP(stream_t *streamptr, int varID, int levID, const double 
   header[2] = streamptr->tsteps[tsID].taxis.vdate;
   header[3] = streamptr->tsteps[tsID].taxis.vtime;
 
-  int xsize = gridInqXsize(gridID);
-  int ysize = gridInqYsize(gridID);
+  size_t xsize = gridInqXsize(gridID);
+  size_t ysize = gridInqYsize(gridID);
   if ( xsize == 0 || ysize == 0 )
     {
       xsize = gridInqSize(gridID);

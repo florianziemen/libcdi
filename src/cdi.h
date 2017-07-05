@@ -961,13 +961,13 @@ int     gridInqNvertex(int gridID);
 void    gridDefXbounds(int gridID, const double xbounds[]);
 
 /*      gridInqXbounds: Get the bounds of a X-axis */
-int     gridInqXbounds(int gridID, double xbounds[]);
+size_t  gridInqXbounds(int gridID, double xbounds[]);
 
 /*      gridDefYbounds: Define the bounds of a Y-axis */
 void    gridDefYbounds(int gridID, const double ybounds[]);
 
 /*      gridInqYbounds: Get the bounds of a Y-axis */
-int     gridInqYbounds(int gridID, double ybounds[]);
+size_t  gridInqYbounds(int gridID, double ybounds[]);
 
 void    gridDefRowlon(int gridID, int nrowlon, const int rowlon[]);
 void    gridInqRowlon(int gridID, int rowlon[]);

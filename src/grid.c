@@ -4,8 +4,6 @@
 
 #include <assert.h>
 #include <string.h>
-#include <float.h>  /* FLT_EPSILON */
-#include <limits.h> /* INT_MAX     */
 
 #include "dmemory.h"
 #include "cdi.h"
@@ -412,7 +410,8 @@ void gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double y
 	    if ( fabs(yvals[0] - yfirst) > deleps || fabs(yvals[ysize-1] - ylast) > deleps )
 	      {
 		double *restrict ytmp = NULL;
-		int nstart, lfound = 0;
+		int nstart;
+                bool lfound = false;
 		int ny = (int) (180./(fabs(ylast-yfirst)/(ysize-1)) + 0.5);
 		ny -= ny%2;
 		if ( ny > ysize && ny < 4096 )
@@ -1078,7 +1077,7 @@ int gridInqType(int gridID)
 @Function  gridInqSize
 @Title     Get the size of a Grid
 
-@Prototype int gridInqSize(int gridID)
+@Prototype size_t gridInqSize(int gridID)
 @Parameter
     @Item  gridID   Grid ID, from a previous call to @fref{gridCreate} or @fref{vlistInqVarGrid}.
 
@@ -1573,7 +1572,7 @@ int gridInqXIscSerial(grid_t *gridptr)
 @Function  gridInqXvals
 @Title     Get all values of a X-axis
 
-@Prototype int gridInqXvals(int gridID, double *xvals)
+@Prototype size_t gridInqXvals(int gridID, double *xvals)
 @Parameter
     @Item  gridID   Grid ID, from a previous call to @fref{gridCreate} or @fref{vlistInqVarGrid}.
     @Item  xvals    Pointer to the location into which the X-values are read.
@@ -2191,7 +2190,7 @@ bool compareXYvals2(grid_t *gridRef, grid_t *gridTest)
   bool differ = ((gridTest->x.vals == NULL) ^ (gridRef->x.vals == NULL))
              || ((gridTest->y.vals == NULL) ^ (gridRef->y.vals == NULL));
 
-  typedef double (*inqVal)(grid_t *grid, int index);
+  typedef double (*inqVal)(grid_t *grid, size_t index);
   inqVal inqXValRef = gridRef->vtable->inqXVal,
          inqYValRef = gridRef->vtable->inqYVal,
          inqXValTest = gridTest->vtable->inqXVal,
@@ -3100,7 +3099,7 @@ gridInqXBoundsSerial(grid_t *gridptr, double *xbounds)
 @Function  gridInqXbounds
 @Title     Get the bounds of a X-axis
 
-@Prototype int gridInqXbounds(int gridID, double *xbounds)
+@Prototype size_t gridInqXbounds(int gridID, double *xbounds)
 @Parameter
     @Item  gridID   Grid ID, from a previous call to @fref{gridCreate} or @fref{vlistInqVarGrid}.
     @Item  xbounds  Pointer to the location into which the X-bounds are read.
@@ -3116,7 +3115,7 @@ Otherwise, 0 is returned and @func{xbounds} is empty.
 
 @EndFunction
 */
-int gridInqXbounds(int gridID, double *xbounds)
+size_t gridInqXbounds(int gridID, double *xbounds)
 {
   grid_t *gridptr = grid_to_pointer(gridID);
   return gridptr->vtable->inqXBounds(gridptr, xbounds);
@@ -3188,7 +3187,7 @@ gridInqYBoundsSerial(grid_t *gridptr, double *ybounds)
 @Function  gridInqYbounds
 @Title     Get the bounds of a Y-axis
 
-@Prototype int gridInqYbounds(int gridID, double *ybounds)
+@Prototype size_t gridInqYbounds(int gridID, double *ybounds)
 @Parameter
     @Item  gridID   Grid ID, from a previous call to @fref{gridCreate} or @fref{vlistInqVarGrid}.
     @Item  ybounds  Pointer to the location into which the Y-bounds are read.
@@ -3204,7 +3203,7 @@ Otherwise, 0 is returned and @func{ybounds} is empty.
 
 @EndFunction
 */
-int gridInqYbounds(int gridID, double *ybounds)
+size_t gridInqYbounds(int gridID, double *ybounds)
 {
   grid_t *gridptr = grid_to_pointer(gridID);
   return gridptr->vtable->inqYBounds(gridptr, ybounds);
@@ -3522,7 +3521,7 @@ void gridPrintKernel(int gridID, int opt, FILE *fp)
               fprintf(fp, "x%ss = %.*s\n", attstr, xstrlen, xcvals[0]);
             else
               fprintf(fp, "xstrings  = %.*s\n", xstrlen, xcvals[0]);
-            for ( int i = 1; i < xsize; i++ )
+            for ( size_t i = 1; i < xsize; i++ )
               fprintf(fp, "          = %.*s\n", xstrlen, xcvals[i]);
           }
 
@@ -3568,7 +3567,7 @@ void gridPrintKernel(int gridID, int opt, FILE *fp)
               fprintf(fp, "x%ss = %.*s\n", attstr, ystrlen, ycvals[0]);
             else
               fprintf(fp, "ystrings  = %.*s\n", ystrlen, ycvals[0]);
-            for ( int i = 1; i < ysize; i++ )
+            for ( size_t i = 1; i < ysize; i++ )
               fprintf(fp, "          = %.*s\n", ystrlen, ycvals[i]);
           }
 
@@ -3690,7 +3689,7 @@ void gridPrintP(void *voidptr, FILE *fp)
 
   if ( gridInqMaskGME(gridID, NULL) )
     {
-      int gridsize = gridptr->size;
+      size_t gridsize = gridptr->size;
       int *mask = (gridsize>0) ? (int*) Malloc(gridsize*sizeof(int)) : NULL;
       gridInqMaskGME(gridID, mask);
       static const char prefix[] = "mask_gme  = ";
@@ -4468,7 +4467,7 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
     gridP->y.inc = doubleBuffer[GRID_PACK_DBL_IDX_Y_INC];
   }
 
-  int irregular = gridP->type == GRID_UNSTRUCTURED
+  bool irregular = gridP->type == GRID_UNSTRUCTURED
     || gridP->type == GRID_CURVILINEAR;
   if (memberMask & gridHasXValsFlag)
     {

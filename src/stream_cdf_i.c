@@ -89,7 +89,7 @@ typedef struct {
   int      ndims;
   int      dimids[8];
   int      dimtype[8];
-  int      chunks[8];
+  size_t   chunks[8];
   int      chunked;
   int      chunktype;
   int      natts;
@@ -1097,11 +1097,11 @@ void cdf_scan_var_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimi
               if ( storage_in == NC_CHUNKED )
                 {
                   ncvars[ncvarid].chunked = 1;
-                  for ( int i = 0; i < nvdims; ++i ) ncvars[ncvarid].chunks[i] = (int)chunks[i];
+                  for ( int i = 0; i < nvdims; ++i ) ncvars[ncvarid].chunks[i] = chunks[i];
                   if ( CDI_Debug )
                     {
                       fprintf(stderr, "%s: chunking %d %d %d  chunks ", name, storage_in, NC_CONTIGUOUS, NC_CHUNKED);
-                      for ( int i = 0; i < nvdims; ++i ) fprintf(stderr, "%ld ", chunks[i]);
+                      for ( int i = 0; i < nvdims; ++i ) fprintf(stderr, "%zu ", chunks[i]);
                       fprintf(stderr, "\n");
                     }
                   {
@@ -1112,8 +1112,7 @@ void cdf_scan_var_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimi
                     pos += sizeof (prefix) - 1;
                     for ( int i = nvdims-1; i >= 0; --i )
                       {
-                        pos += (size_t)(sprintf(buf + pos, "%zu%s", chunks[i],
-                                                i > 0 ? "x" : ""));
+                        pos += (size_t)(sprintf(buf + pos, "%zu%s", chunks[i], i > 0 ? "x" : ""));
                       }
                     buf[pos] = ' '; buf[pos + 1] = 0;
                   }
@@ -2119,7 +2118,7 @@ void cdf_check_gridtype(int *gridtype, bool islon, bool islat, size_t xsize, siz
   if ( islat && (islon || xsize == 0) )
     {
       double yinc = 0;
-      if ( islon && (int) ysize > 1 )
+      if ( islon && ysize > 1 )
         {
           yinc = fabs(grid->y.vals[0] - grid->y.vals[1]);
           for ( size_t i = 2; i < ysize; i++ )
@@ -2247,8 +2246,8 @@ bool cdf_read_ycoord(struct cdfLazyGrid *restrict lazyGrid, ncdim_t *ncdims, ncv
     }
   else if ( (ndims - ntdims) == 1 )
     {
-      if ( (int) *ysize == 0 ) size = xsize;
-      else                    size = *ysize;
+      if ( *ysize == 0 ) size = xsize;
+      else               size = *ysize;
 
       int dimid = axisvar->dimids[ndims-1];
       size_t dimsize = ncdims[dimid].len;
@@ -2367,8 +2366,8 @@ bool cdf_read_coordinates(struct cdfLazyGrid *restrict lazyGrid, ncvar_t *ncvar,
                              xsize, &ysize, ntdims, start, count, &islat) )
           return true;
 
-      if      ( (int) ysize == 0 ) size = xsize;
-      else if ( (int) xsize == 0 ) size = ysize;
+      if      ( ysize == 0 ) size = xsize;
+      else if ( xsize == 0 ) size = ysize;
       else if ( ncvar->gridtype == GRID_UNSTRUCTURED ) size = xsize;
       else                         size = xsize*ysize;
 
@@ -2398,9 +2397,9 @@ bool cdf_read_coordinates(struct cdfLazyGrid *restrict lazyGrid, ncvar_t *ncvar,
     case GRID_CURVILINEAR:
     case GRID_PROJECTION:
       {
-        grid->size  = (int)size;
-        grid->x.size = (int)xsize;
-        grid->y.size = (int)ysize;
+        grid->size  = size;
+        grid->x.size = xsize;
+        grid->y.size = ysize;
         if ( xvarid != CDI_UNDEFID )
           {
             grid->x.flag = 1;
@@ -2442,14 +2441,14 @@ bool cdf_read_coordinates(struct cdfLazyGrid *restrict lazyGrid, ncvar_t *ncvar,
       }
     case GRID_SPECTRAL:
       {
-        grid->size = (int)size;
+        grid->size = size;
         grid->lcomplex = 1;
         grid->trunc = ncvar->truncation;
         break;
       }
     case GRID_FOURIER:
       {
-        grid->size = (int)size;
+        grid->size = size;
         grid->trunc = ncvar->truncation;
         break;
       }
@@ -2460,9 +2459,9 @@ bool cdf_read_coordinates(struct cdfLazyGrid *restrict lazyGrid, ncvar_t *ncvar,
       }
     case GRID_CHARXY:
       {
-        grid->size = (int)size;
-        grid->x.size = (int)xsize;
-        grid->y.size = (int)ysize;
+        grid->size = size;
+        grid->x.size = xsize;
+        grid->y.size = ysize;
         break;
       }
     }
@@ -2660,17 +2659,6 @@ int cdf_define_all_grids(ncgrid_t *ncgrid, int vlistID, ncdim_t *ncdims, int nva
 		}
 	    }
 
-          if ( xsize > INT_MAX )
-            {
-              Warning("Size limit exceeded for x-axis dimension (limit=%d)!", INT_MAX);
-              return CDI_EDIMSIZE;
-            }
-          if ( ysize > INT_MAX )
-            {
-              Warning("Size limit exceeded for y-axis dimension (limit=%d)!", INT_MAX);
-              return CDI_EDIMSIZE;
-            }
-
           int gmapvarid = ncvar->gmapid;
           bool lproj = gmapvarid != CDI_UNDEFID;
 
@@ -2729,10 +2717,10 @@ int cdf_define_all_grids(ncgrid_t *ncgrid, int vlistID, ncdim_t *ncdims, int nva
 
 	  if ( CDI_Debug )
 	    {
-	      Message("grid: type = %d, size = %d, nx = %d, ny %d",
+	      Message("grid: type = %d, size = %zu, nx = %zu, ny = %zu",
 		      grid->type, grid->size, grid->x.size, grid->y.size);
               if ( proj )
-                Message("proj: type = %d, size = %d, nx = %d, ny %d",
+                Message("proj: type = %d, size = %zu, nx = %zu, ny = %zu",
                         proj->type, proj->size, proj->x.size, proj->y.size);
 	    }
 
@@ -2903,7 +2891,7 @@ int cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int 
 		  int nbdims = ncvars[ncvars[zvarid].bounds].ndims;
 		  if ( nbdims == 2 || is_scalar )
 		    {
-		      size_t nlevel  = is_scalar ? 1 : (int)ncdims[ncvars[ncvars[zvarid].bounds].dimids[0]].len;
+		      size_t nlevel  = is_scalar ? 1 : ncdims[ncvars[ncvars[zvarid].bounds].dimids[0]].len;
 		      int nvertex = (int)ncdims[ncvars[ncvars[zvarid].bounds].dimids[1-is_scalar]].len;
 		      if ( nlevel == zsize && nvertex == 2 )
 			{

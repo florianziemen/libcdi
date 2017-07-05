@@ -27,8 +27,8 @@ struct gridVirtTable
   void (*defXBounds)(grid_t *gridptr, const double *xbounds);
   void (*defYBounds)(grid_t *gridptr, const double *ybounds);
   void (*defArea)(grid_t *gridptr, const double *area);
-  double (*inqXVal)(grid_t *gridptr, int index);
-  double (*inqYVal)(grid_t *gridptr, int index);
+  double (*inqXVal)(grid_t *gridptr, size_t index);
+  double (*inqYVal)(grid_t *gridptr, size_t index);
   size_t (*inqXVals)(grid_t *gridptr, double *xvals);
   size_t (*inqXCvals)(grid_t *gridptr, char **xcvals);
   int (*inqXIsc)(grid_t *gridptr);
@@ -47,10 +47,10 @@ struct gridVirtTable
   void (*inqArea)(grid_t *gridptr, double *area);
   const double *(*inqAreaPtr)(grid_t *gridptr);
   int (*hasArea)(grid_t *gridptr);
-  int (*inqMask)(grid_t *gridptr, int *mask);
+  size_t (*inqMask)(grid_t *gridptr, int *mask);
   int (*inqMaskGME)(grid_t *gridptr, int *mask_gme);
-  int (*inqXBounds)(grid_t *gridptr, double *xbounds);
-  int (*inqYBounds)(grid_t *gridptr, double *ybounds);
+  size_t (*inqXBounds)(grid_t *gridptr, double *xbounds);
+  size_t (*inqYBounds)(grid_t *gridptr, double *ybounds);
   const double *(*inqXBoundsPtr)(grid_t *gridptr);
   const double *(*inqYBoundsPtr)(grid_t *gridptr);
 };
