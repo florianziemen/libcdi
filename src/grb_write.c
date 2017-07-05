@@ -152,23 +152,19 @@ void grbCopyRecord(stream_t * streamptr2, stream_t * streamptr1)
 
     if (scanModeIN != cdiGribDataScanningMode.value)
     {
-        int gridID;
-        int varID, levelID;
-        int vlistID;
         //int zip;
-        int gridsize, nmiss = 0;
+        int nmiss = 0;
 
-        vlistID = streamptr1->vlistID;
-        varID   = streamptr1->tsteps[tsID].records[recID].varID;
-        levelID   = streamptr1->tsteps[tsID].records[recID].levelID;
+        int vlistID = streamptr1->vlistID;
+        int varID   = streamptr1->tsteps[tsID].records[recID].varID;
+        int levelID = streamptr1->tsteps[tsID].records[recID].levelID;
         //gribbuffer = (unsigned char *) streamptr->record->buffer;
         // allocate above ..
-        gridID   = vlistInqVarGrid(vlistID, varID);
-        gridsize = gridInqSize(gridID);
+        int gridID   = vlistInqVarGrid(vlistID, varID);
 
-        gridsize = vlistGridsizeMax(vlistID);
+        size_t gridsize = vlistGridsizeMax(vlistID);
         if ( vlistNumber(vlistID) != CDI_REAL ) gridsize *= 2;
-        double * data = (double *) malloc(gridsize*sizeof(double));
+        double *data = (double *) malloc(gridsize*sizeof(double));
         //int missval = vlistInqVarMissval(vlistID, varID);
 
         //streamptr->numvals += gridsize;
@@ -241,7 +237,7 @@ void grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
   if ( CDI_Debug )
     Message("gridID = %d zaxisID = %d", gridID, zaxisID);
 
-  size_t datasize = (size_t)gridInqSize(gridID);
+  size_t datasize = gridInqSize(gridID);
 
 #ifdef HAVE_LIBCGRIBEX
   if ( filetype == CDI_FILETYPE_GRB )
@@ -293,12 +289,12 @@ void grb_write_var(stream_t *streamptr, int varID, int memtype, const void *data
 {
   int vlistID  = streamptr->vlistID,
     gridID   = vlistInqVarGrid(vlistID, varID),
-    gridsize = gridInqSize(gridID),
     zaxisID  = vlistInqVarZaxis(vlistID, varID),
     nlevs    = zaxisInqSize(zaxisID);
+  size_t gridsize = gridInqSize(gridID),
   double missval = vlistInqVarMissval(vlistID, varID);
 
-  size_t chunkLen = (size_t)gridsize;
+  size_t chunkLen = gridsize;
   if ( memtype == MEMTYPE_FLOAT )
     for ( int levelID = 0; levelID < nlevs; levelID++ )
       {

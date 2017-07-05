@@ -241,7 +241,7 @@ typedef struct {
   int         fileID;
   int         filemode;
   int         nrecs;        /* number of records                  */
-  off_t       numvals;
+  size_t      numvals;
   char       *filename;
   Record     *record;
   svarinfo_t *vars;

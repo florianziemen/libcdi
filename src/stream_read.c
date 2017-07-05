@@ -130,7 +130,7 @@ void streamReadVarF(int streamID, int varID, float *data, int *nmiss)
     {
       // In case the file format does not support single precision reading,
       // we fall back to double precision reading, converting the data on the fly.
-      size_t elementCount = (size_t) gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
+      size_t elementCount = gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
       elementCount *= (size_t) zaxisInqSize(vlistInqVarZaxis(streamInqVlist(streamID), varID));
       double *conversionBuffer = (double *) Malloc(elementCount*sizeof(*conversionBuffer));
       streamReadVar(streamID, varID, conversionBuffer, nmiss);
@@ -235,7 +235,7 @@ void streamReadVarSlice(int streamID, int varID, int levelID, double *data, int 
   if ( cdiStreamReadVarSlice(streamID, varID, levelID, MEMTYPE_DOUBLE, data, nmiss) )
     {
       Warning("Unexpected error returned from cdiStreamReadVarSlice()!");
-      size_t elementCount = (size_t)gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
+      size_t elementCount = gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
       memset(data, 0, elementCount * sizeof(*data));
     }
 }
@@ -264,7 +264,7 @@ void streamReadVarSliceF(int streamID, int varID, int levelID, float *data, int 
     {
       // In case the file format does not support single precision reading,
       // we fall back to double precision reading, converting the data on the fly.
-      size_t elementCount = (size_t) gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
+      size_t elementCount = gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
       double *conversionBuffer = (double *) Malloc(elementCount*sizeof(*conversionBuffer));
       streamReadVarSlice(streamID, varID, levelID, conversionBuffer, nmiss);
       for ( size_t i = elementCount; i--; ) data[i] = (float) conversionBuffer[i];
@@ -348,7 +348,7 @@ void streamReadRecordF(int streamID, float *data, int *nmiss)
       int vrecID = streamptr->tsteps[tsID].curRecID;
       int recID  = streamptr->tsteps[tsID].recIDs[vrecID];
       int varID  = streamptr->tsteps[tsID].records[recID].varID;
-      size_t elementCount = (size_t) gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
+      size_t elementCount = gridInqSize(vlistInqVarGrid(streamInqVlist(streamID), varID));
       double *conversionBuffer = (double *) Malloc(elementCount*sizeof(*conversionBuffer));
       streamReadRecord(streamID, conversionBuffer, nmiss);
       for ( size_t i = elementCount; i--; ) data[i] = (float) conversionBuffer[i];

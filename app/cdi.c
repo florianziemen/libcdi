@@ -921,6 +921,7 @@ int main(int argc, char *argv[])
 	  printShortinfo(streamID1, vlistID1, Vardis);
 	}
 
+      int idum;
       int tsID = 0;
       if ( Info || fname2 )
       while ( (nrecs = streamInqTimestep(streamID1, tsID)) > 0 )
@@ -941,7 +942,8 @@ int main(int argc, char *argv[])
 	      for ( recID = 0; recID < nrecs; recID++ )
 		{
 		  streamInqRecord(streamID1, &varID, &levelID);
-		  streamReadRecord(streamID1, data, &nmiss);
+		  streamReadRecord(streamID1, data, &idum);
+                  nmiss = idum;
 
 		  number   = vlistInqVarNumber(vlistID1, varID);
 		  gridID   = vlistInqVarGrid(vlistID1, varID);
@@ -969,7 +971,7 @@ int main(int argc, char *argv[])
 		      if ( Move )
 			streamCopyRecord(streamID2, streamID1);
 		      else
-			streamWriteRecord(streamID2, data, nmiss);
+			streamWriteRecord(streamID2, data, idum);
 		    }
 	      	}
 	    }
@@ -1000,7 +1002,8 @@ int main(int argc, char *argv[])
 		  for ( levelID = 0; levelID < levelsize; levelID++ )
 		    {
                       double level = zaxisInqLevels(zaxisID, NULL) ? zaxisInqLevel(zaxisID, levelID) : levelID+1;
-		      streamReadVarSlice(streamID1, varID, levelID, data, &nmiss);
+		      streamReadVarSlice(streamID1, varID, levelID, data, &idum);
+                      nmiss = idum;
 
 		      if ( Info )
 			printInfo(vdate, vtime, varname, level, gridsize, number, nmiss, missval, data, Vardis);

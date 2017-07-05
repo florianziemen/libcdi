@@ -189,7 +189,7 @@ cdfDefSPorFC(stream_t *streamptr, int gridID, int gridindex,
 {
   ncgrid_t *ncgrid = streamptr->ncgrid;
 
-  size_t dimlen = (size_t)(gridInqSize(gridID))/2;
+  size_t dimlen = gridInqSize(gridID)/2;
 
   int iz;
   int dimID;

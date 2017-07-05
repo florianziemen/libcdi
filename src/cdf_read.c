@@ -72,8 +72,8 @@ void cdfGetSlapDescription(stream_t *streamptr, int varID, size_t (*start)[4], s
     } while(0)
   if ( tsteptype != TSTEP_CONSTANT ) addDimension((size_t)tsID, 1);
   if ( zid != CDI_UNDEFID ) addDimension(0, (size_t)zaxisInqSize(zaxisID));
-  if ( yid != CDI_UNDEFID ) addDimension(0, (size_t)gridInqYsize(gridID));
-  if ( xid != CDI_UNDEFID ) addDimension(0, (size_t)gridInqXsize(gridID));
+  if ( yid != CDI_UNDEFID ) addDimension(0, gridInqYsize(gridID));
+  if ( xid != CDI_UNDEFID ) addDimension(0, gridInqXsize(gridID));
 #undef addDimension
 
   assert(ndims <= (int)(sizeof(*start)/sizeof(**start)));
@@ -506,7 +506,7 @@ void cdfReadVarDP(stream_t *streamptr, int varID, double *data, int *nmiss)
 
   cdf_get_vara_double(fileID, ncvarid, start, count, data);
 
-  size_t size = (size_t)gridInqSize(gridID)*(size_t)zaxisInqSize(zaxisID);
+  size_t size = gridInqSize(gridID)*(size_t)zaxisInqSize(zaxisID);
   double missval = vlistInqVarMissval(vlistID, varID);
   const bool haveMissVal = vlistInqVarMissvalUsed(vlistID, varID);
   double validRange[2];
@@ -538,7 +538,7 @@ void cdfReadVarSP(stream_t *streamptr, int varID, float *data, int *nmiss)
 
   cdf_get_vara_float(fileID, ncvarid, start, count, data);
 
-  size_t size = (size_t)gridInqSize(gridID) * (size_t)zaxisInqSize(zaxisID);
+  size_t size = gridInqSize(gridID) * (size_t)zaxisInqSize(zaxisID);
   double missval = vlistInqVarMissval(vlistID, varID);
   const bool haveMissVal = vlistInqVarMissvalUsed(vlistID, varID);
   double validRange[2];
@@ -575,9 +575,9 @@ void cdfReadVarSliceDP(stream_t *streamptr, int varID, int levelID, double *data
 
   int ncvarid = streamptr->vars[varID].ncvarid;
   int gridId = vlistInqVarGrid(vlistID, varID);
-  size_t gridsize = (size_t)gridInqSize(gridId);
-  size_t xsize = (size_t)gridInqXsize(gridId);
-  size_t ysize = (size_t)gridInqYsize(gridId);
+  size_t gridsize = gridInqSize(gridId);
+  size_t xsize = gridInqXsize(gridId);
+  size_t ysize = gridInqYsize(gridId);
 
   if ( vlistInqVarDatatype(vlistID, varID) == CDI_DATATYPE_FLT32 )
     {
@@ -632,9 +632,9 @@ void cdfReadVarSliceSP(stream_t *streamptr, int varID, int levelID, float *data,
 
   int ncvarid = streamptr->vars[varID].ncvarid;
   int gridId = vlistInqVarGrid(vlistID, varID);
-  size_t gridsize = (size_t)gridInqSize(gridId);
-  size_t xsize = (size_t)gridInqXsize(gridId);
-  size_t ysize = (size_t)gridInqYsize(gridId);
+  size_t gridsize = gridInqSize(gridId);
+  size_t xsize = gridInqXsize(gridId);
+  size_t ysize = gridInqYsize(gridId);
 
   if ( vlistInqVarDatatype(vlistID, varID) == CDI_DATATYPE_FLT64 )
     {
