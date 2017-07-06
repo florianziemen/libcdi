@@ -32,7 +32,7 @@ size_t grbEncode(int filetype, int memtype, int varID, int levelID, int vlistID,
 
       nbytes = cgribexEncode(memtype, varID, levelID, vlistID, gridID, zaxisID,
 			     date, time, tsteptype, numavg,
-			     (long) datasize, data, nmiss, *gribbuffer, gribbuffersize);
+			     datasize, data, nmiss, *gribbuffer, gribbuffersize);
     }
   else
 #endif

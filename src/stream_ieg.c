@@ -246,7 +246,7 @@ void iegDefGrid(int *gdb, int gridID)
   size_t xsize = gridInqXsize(gridID);
   size_t ysize = gridInqYsize(gridID);
 
-  exse_check_gridsize("IEG", xsize*ysize);
+  cdi_check_gridsize_int_limit("IEG", xsize*ysize);
 
   if ( gridtype == GRID_GENERIC )
     {

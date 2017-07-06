@@ -148,7 +148,7 @@ void srvDefRecord(stream_t *streamptr)
   if ( gridInqSize(gridID) != xsize*ysize )
     Error("Internal problem with gridsize!");
 
-  exse_check_gridsize("SERVICE", gridInqSize(gridID));
+  cdi_check_gridsize_int_limit("SERVICE", gridInqSize(gridID));
 
   header[4] = (int)xsize;
   header[5] = (int)ysize;
@@ -711,7 +711,7 @@ void srvWriteVarSliceDP(stream_t *streamptr, int varID, int levID, const double 
   if ( gridInqSize(gridID) != xsize*ysize )
     Error("Internal problem with gridsize!");
 
-  exse_check_gridsize("SERVICE", gridInqSize(gridID));
+  cdi_check_gridsize_int_limit("SERVICE", gridInqSize(gridID));
 
   header[4] = xsize;
   header[5] = ysize;

@@ -10,6 +10,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <errno.h>
+#include <limits.h>
 #include <math.h>
 #include <sys/types.h>
 
@@ -478,6 +479,13 @@ void cdiDefTableID(int tableID);
 
 void gridGenXvals(int xsize, double xfirst, double xlast, double xinc, double *xvals);
 void gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double yinc, double *yvals);
+
+static inline
+void cdi_check_gridsize_int_limit(const char *format, size_t gridsize)
+{
+  if ( gridsize > INT_MAX ) Error("%s format grid size (%zu) limit exceeded (%zu)!", format, gridsize, INT_MAX);
+}
+
 
 #if defined (__cplusplus)
 }
