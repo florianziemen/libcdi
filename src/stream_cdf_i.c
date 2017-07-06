@@ -199,6 +199,8 @@ int setBaseTime(const char *timeunits, taxis_t *taxis)
   int rdate = -1, rtime = -1;
 
   size_t len = strlen(timeunits);
+  while ( isspace(*timeunits) && len ) { timeunits++; len--; }
+
   char *restrict tu = (char *)Malloc((len+1) * sizeof(char));
 
   for ( size_t i = 0; i < len; i++ ) tu[i] = (char)tolower((int)timeunits[i]);

@@ -3,6 +3,10 @@
         * using CGRIBEX library version 1.8.1
 	* Version 1.9.0 released
 
+2017-07-06  Uwe Schulzweida
+
+	* removed leading space from time units (bug fix)
+
 2017-07-01  Uwe Schulzweida
 
 	* Added function tableInqEntry().
