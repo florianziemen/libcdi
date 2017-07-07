@@ -5,7 +5,7 @@ int cgribexScanTimestep1(stream_t * streamptr);
 int cgribexScanTimestep2(stream_t * streamptr);
 int cgribexScanTimestep(stream_t * streamptr);
 
-int cgribexDecode(int memtype, void *gribbuffer, int gribsize, void *data, long datasize,
+int cgribexDecode(int memtype, void *gribbuffer, size_t gribsize, void *data, size_t datasize,
 		  int unreduced, int *nmiss, double missval);
 
 size_t cgribexEncode(int memtype, int varID, int levelID, int vlistID, int gridID, int zaxisID,

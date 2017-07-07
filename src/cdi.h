@@ -667,7 +667,7 @@ int     vlistInqVarTypeOfGeneratingProcess(int vlistID, int varID);
 void    vlistDefVarProductDefinitionTemplate(int vlistID, int varID, int productDefinitionTemplate);
 int     vlistInqVarProductDefinitionTemplate(int vlistID, int varID);
 
-int     vlistInqVarSize(int vlistID, int varID);
+size_t  vlistInqVarSize(int vlistID, int varID);
 
 void    vlistDefIndex(int vlistID, int varID, int levID, int index);
 int     vlistInqIndex(int vlistID, int varID, int levID);

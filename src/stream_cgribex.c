@@ -1323,7 +1323,7 @@ int cgribexScanTimestep(stream_t * streamptr)
 #endif
 
 #if  defined  (HAVE_LIBCGRIBEX)
-int cgribexDecode(int memtype, void *gribbuffer, int gribsize, void *data, long datasize,
+int cgribexDecode(int memtype, void *gribbuffer, size_t gribsize, void *data, size_t datasize,
 		  int unreduced, int *nmiss, double missval)
 {
   int status = 0;
@@ -1340,10 +1340,10 @@ int cgribexDecode(int memtype, void *gribbuffer, int gribsize, void *data, long 
 
   if ( memtype == MEMTYPE_FLOAT )
     gribExSP(isec0, isec1, isec2, fsec2f, isec3, fsec3f, isec4, (float*) data,
-             (int) datasize, (int*) gribbuffer, gribsize, &iword, hoper, &iret);
+             (int) datasize, (int*) gribbuffer, (int)gribsize, &iword, hoper, &iret);
   else
     gribExDP(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, (double*) data,
-             (int) datasize, (int*) gribbuffer, gribsize, &iword, hoper, &iret);
+             (int) datasize, (int*) gribbuffer, (int)gribsize, &iword, hoper, &iret);
 
   if ( ISEC1_Sec2Or3Flag & 64 )
     *nmiss = ISEC4_NumValues - ISEC4_NumNonMissValues;

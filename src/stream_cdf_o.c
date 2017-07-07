@@ -1,5 +1,5 @@
 #if defined (HAVE_CONFIG_H)
-#  include "config.h"
+#include "config.h"
 #endif
 
 #ifdef HAVE_LIBNETCDF
@@ -29,12 +29,11 @@ void cdfCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
   int recID    = streamptr1->tsteps[tsID].recIDs[vrecID];
   int ivarID   = streamptr1->tsteps[tsID].records[recID].varID;
   int gridID   = vlistInqVarGrid(vlistID1, ivarID);
-  int datasize = gridInqSize(gridID);
+  size_t datasize = gridInqSize(gridID);
   int datatype = vlistInqVarDatatype(vlistID1, ivarID);
   int memtype  = datatype != CDI_DATATYPE_FLT32 ? MEMTYPE_DOUBLE : MEMTYPE_FLOAT;
 
-  void *data = Malloc((size_t)datasize
-             * (memtype == MEMTYPE_DOUBLE ? sizeof(double) : sizeof(float)));
+  void *data = Malloc(datasize * (memtype == MEMTYPE_DOUBLE ? sizeof(double) : sizeof(float)));
 
   int nmiss;
   cdf_read_record(streamptr1, memtype, data, &nmiss);
@@ -609,7 +608,7 @@ void cdfDefYaxis(stream_t *streamptr, int gridID, int gridindex, int ndims)
 }
 
 static
-void cdfGridCompress(int fileID, int ncvarid, int gridsize, int filetype, int comptype)
+void cdfGridCompress(int fileID, int ncvarid, size_t gridsize, int filetype, int comptype)
 {
 #if  defined  (HAVE_NETCDF4)
   if ( gridsize > 1 && comptype == CDI_COMPRESS_ZIP && (filetype == CDI_FILETYPE_NC4 || filetype == CDI_FILETYPE_NC4C) )
@@ -1869,10 +1868,10 @@ void cdfDefGrid(stream_t *streamptr, int gridID, int gridindex)
   if ( streamptr->ncgrid[gridindex].ncIDs[CDF_DIMID_X] != CDI_UNDEFID ) return;
 
   int gridtype = gridInqType(gridID);
-  int size     = gridInqSize(gridID);
+  size_t size = gridInqSize(gridID);
 
   if ( CDI_Debug )
-    Message("gridtype = %d  size = %d", gridtype, size);
+    Message("gridtype = %d  size = %zu", gridtype, size);
 
   if ( gridtype == GRID_GAUSSIAN    ||
        gridtype == GRID_LONLAT      ||

@@ -822,8 +822,8 @@ void vlistMerge(int vlistID2, int vlistID1)
     {
       for ( varID = 0; varID < nvars2; varID++ )
 	{
-          int ngp1 = gridInqSize(vars1[varID].gridID);
-          int ngp2 = gridInqSize(vars2[varID].gridID);
+          size_t ngp1 = gridInqSize(vars1[varID].gridID);
+          size_t ngp2 = gridInqSize(vars2[varID].gridID);
           if ( ngp1 != ngp2 ) break;
 
 	  if ( vars1[varID].name && vars2[varID].name )

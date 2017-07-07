@@ -1373,9 +1373,9 @@ void streamWriteContents(int streamID, char *cname)
     {
       int gridID   = vlistGrid(vlistID, i);
       int gridtype = gridInqType(gridID);
-      int xsize    = gridInqXsize(gridID);
-      int ysize    = gridInqYsize(gridID);
-      fprintf(cnp, "%4d:%4d:%4d:%4d\n", i+1, gridtype, xsize, ysize);
+      size_t xsize    = gridInqXsize(gridID);
+      size_t ysize    = gridInqYsize(gridID);
+      fprintf(cnp, "%4d:%4d:%4zu:%4zu\n", i+1, gridtype, xsize, ysize);
     }
 
   fputs("#\nvarID:code:gridID:zaxisID:tsteptype:datatype\n", cnp);

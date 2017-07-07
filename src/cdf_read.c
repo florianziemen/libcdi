@@ -421,7 +421,7 @@ void cdfGetSliceSlapDescription(stream_t *streamptr, int varId, int levelId, boo
 
   int gridId = vlistInqVarGrid(vlistId, varId);
   int tsteptype = vlistInqVarTsteptype(vlistId, varId);
-  int gridsize = gridInqSize(gridId);
+  size_t gridsize = gridInqSize(gridId);
 
   streamptr->numvals += gridsize;
 

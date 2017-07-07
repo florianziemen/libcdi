@@ -1,11 +1,8 @@
 #if defined (HAVE_CONFIG_H)
-#  include "config.h"
+#include "config.h"
 #endif
 
 #ifdef HAVE_LIBGRIB_API
-#include <limits.h>
-#include <stdio.h>
-
 #include "dmemory.h"
 #include "cdi.h"
 #include "cdi_int.h"
@@ -1470,7 +1467,7 @@ int gribapiScanTimestep(stream_t * streamptr)
 #undef gribWarning
 #endif
 
-int gribapiDecode(void *gribbuffer, int gribsize, double *data, long gridsize,
+int gribapiDecode(void *gribbuffer, size_t gribsize, double *data, size_t gridsize,
 		  int unreduced, int *nmiss, double missval, int vlistID, int varID)
 {
   int status = 0;
@@ -1502,8 +1499,8 @@ int gribapiDecode(void *gribbuffer, int gribsize, double *data, long gridsize,
 
   // printf("values_size = %d  numberOfPoints = %ld\n", datasize, numberOfPoints);
 
-  if ( gridsize != (long) datasize )
-    Error("Internal problem: gridsize(%ld) != datasize(%zu)!", gridsize, datasize);
+  if ( gridsize != datasize )
+    Error("Internal problem: gridsize(%zu) != datasize(%zu)!", gridsize, datasize);
   size_t dummy = datasize;
   GRIB_CHECK(grib_get_double_array(gh, "values", data, &dummy), 0);
 
@@ -1870,7 +1867,7 @@ struct gribApiMsg {
 };
 
 static struct gribApiMsg
-getGribApiCompTypeMsg(int comptype, int gridsize)
+getGribApiCompTypeMsg(int comptype, size_t gridsize)
 {
   const char *mesg;
   size_t len;
@@ -1906,7 +1903,7 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
   bool lcurvi = false;
 
   int gridtype = gridInqType(gridID);
-  int gridsize = gridInqSize(gridID);
+  size_t gridsize = gridInqSize(gridID);
 
   if ( editionNumber <= 1 )
     if ( gridtype == GRID_GME || gridtype == GRID_UNSTRUCTURED )
@@ -1914,8 +1911,8 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 
   if ( gridtype == GRID_GENERIC )
     {
-      int xsize = gridInqXsize(gridID);
-      int ysize = gridInqYsize(gridID);
+      int xsize = (int) gridInqXsize(gridID);
+      int ysize = (int) gridInqYsize(gridID);
 
       if ( (ysize ==  32 || ysize ==  48 || ysize ==  64 ||
 	    ysize ==  96 || ysize == 160 || ysize == 192 ||
@@ -2024,8 +2021,8 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
           }
         GRIB_CHECK(my_grib_set_string(gh, "gridType", mesg, &len), 0);
 
-	int nlon = gridInqXsize(gridID);
-	int nlat = gridInqYsize(gridID);
+	int nlon = (int) gridInqXsize(gridID);
+	int nlat = (int) gridInqYsize(gridID);
 
 	if ( gridtype == GRID_GAUSSIAN_REDUCED )
 	  {
@@ -2131,8 +2128,8 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
       }
     case GRID_LCC:
       {
-	int xsize = gridInqXsize(gridID);
-	int ysize = gridInqYsize(gridID);
+	int xsize = (int) gridInqXsize(gridID);
+	int ysize = (int) gridInqYsize(gridID);
 
         double lon_0, lat_0, lat_1, lat_2, a, rf, xval_0, yval_0, x_0, y_0;
 	gridInqParamLCC(gridID, grid_missval, &lon_0, &lat_0, &lat_1, &lat_2, &a, &rf, &xval_0, &yval_0, &x_0, &y_0);
@@ -2187,19 +2184,19 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
           for (size_t i = 0; i < numTruncAtt; ++i)
             GRIB_CHECK(my_grib_set_long(gh, truncAttNames[i], trunc), 0);
         }
-	// GRIB_CHECK(my_grib_set_long(gh, "numberOfDataPoints", gridsize), 0);
+	// GRIB_CHECK(my_grib_set_long(gh, "numberOfDataPoints", (long)gridsize), 0);
         /*
         if ( lieee )
           {
             printf("spectral_ieee\n");
-            if ( editionNumber == 2 ) GRIB_CHECK(my_grib_set_long(gh, "numberOfValues", gridsize, 0);
+            if ( editionNumber == 2 ) GRIB_CHECK(my_grib_set_long(gh, "numberOfValues", (long)gridsize, 0);
             static const char mesg[] = "spectral_ieee";
             size_t len = sizeof (mesg) -1;
             GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
           }
         else */ if ( gridInqComplexPacking(gridID) )
 	  {
-	    if ( editionNumber == 2 ) GRIB_CHECK(my_grib_set_long(gh, "numberOfValues", gridsize), 0);
+	    if ( editionNumber == 2 ) GRIB_CHECK(my_grib_set_long(gh, "numberOfValues", (long)gridsize), 0);
             static const char mesg[] = "spectral_complex";
             size_t len = sizeof (mesg) -1;
 	    GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
@@ -2231,8 +2228,8 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 	GRIB_CHECK(my_grib_set_long(gh, "latitudeOfThePolePoint", 90000000), 0);
 	GRIB_CHECK(my_grib_set_long(gh, "longitudeOfThePolePoint", 0), 0);
 
-	GRIB_CHECK(my_grib_set_long(gh, "numberOfDataPoints", gridsize), 0);
-	GRIB_CHECK(my_grib_set_long(gh, "totalNumberOfGridPoints", gridsize), 0);
+	GRIB_CHECK(my_grib_set_long(gh, "numberOfDataPoints", (long)gridsize), 0);
+	GRIB_CHECK(my_grib_set_long(gh, "totalNumberOfGridPoints", (long)gridsize), 0);
 
         if ( comptype == CDI_COMPRESS_SZIP )
           {
@@ -2758,10 +2755,10 @@ verticallyFlipGridDefinitionWhenScanningModeChanged(grib_handle *gh, double yfir
 
 static void
 convertDataScanningMode(int scanModeIN, int scanModeOUT, double *data,
-                        int gridsize, int iDim, int jDim)
+                        size_t gridsize, size_t iDim, size_t jDim)
 {
-  int i,j;
-  int idxIN, idxOUT;
+  size_t i,j;
+  size_t idxIN, idxOUT;
 
    // 127: reserved for testing; it will generate test data in 64 scanning mode
   if (scanModeOUT== 127)  // fill with testdata ...
@@ -2770,7 +2767,7 @@ convertDataScanningMode(int scanModeIN, int scanModeOUT, double *data,
       if (cdiDebugExt>=30) printf("convertDataScanningMode(): Generating test data in 64 scanning mode..\n");
       for (j=0; j<jDim; j++)
       {
-        int jXiDim = j*iDim;
+        size_t jXiDim = j*iDim;
         for (i=0; i<iDim; i++)
         {
           idxIN = i + jXiDim;
@@ -2781,17 +2778,17 @@ convertDataScanningMode(int scanModeIN, int scanModeOUT, double *data,
 
   if ( (iDim*jDim)!= gridsize)
   {
-    if (cdiDebugExt>=30) printf("convertDataScanningMode(): ERROR: (iDim*jDim)!= gridsize;  (%d * %d) != %d\n", iDim,jDim, gridsize);
+    if (cdiDebugExt>=30) printf("convertDataScanningMode(): ERROR: (iDim*jDim)!= gridsize;  (%zu * %zu) != %zu\n", iDim,jDim, gridsize);
     return;
   }
-  if (cdiDebugExt>=30) printf("convertDataScanningMode(): scanModeIN=%02d => scanModeOUT=%02d ; where: (iDim * jDim == gridsize)  (%d*%d == %d)\n",scanModeIN, scanModeOUT, iDim,jDim, gridsize);
+  if (cdiDebugExt>=30) printf("convertDataScanningMode(): scanModeIN=%02d => scanModeOUT=%02d ; where: (iDim * jDim == gridsize)  (%zu*%zu == %zu)\n",scanModeIN, scanModeOUT, iDim,jDim, gridsize);
 
   if (cdiDebugExt>=100)
   {
       printf("convertDataScanningMode(): data IN:\n");
       for (j=0; j<jDim; j++)
       {
-        int jXiDim = j*iDim;
+        size_t jXiDim = j*iDim;
         for (i=0; i<iDim; i++)
         {
           idxIN = i + jXiDim;
@@ -2817,9 +2814,7 @@ convertDataScanningMode(int scanModeIN, int scanModeOUT, double *data,
           return;
       }
   }
-  double *dataCopy = NULL;
-  dataCopy = (double *) malloc(gridsize*sizeof(double));
-
+  double *dataCopy = (double *) malloc(gridsize*sizeof(double));
   memcpy((void*)dataCopy,(void*) data, gridsize*sizeof(double));
 
   if (scanModeIN==64)           // Scanning Mode (00 dec)  +i, -j; i direction consecutive (row-major    order West->East   & South->North )
@@ -2848,7 +2843,7 @@ convertDataScanningMode(int scanModeIN, int scanModeOUT, double *data,
             {
               for (j=0; j<jDim; j++)
               {
-                int jXiDim = j*iDim;
+                size_t jXiDim = j*iDim;
                 idxIN  = i           + jXiDim;
                 //data[idxIN] = (double) (100.0*j +i);  // just some testdata ..
                 idxOUT = iDim - i -1 + jXiDim;
@@ -2862,10 +2857,10 @@ convertDataScanningMode(int scanModeIN, int scanModeOUT, double *data,
 
       if (scanModeOUT==96)
       { // transpose the data
-        if (cdiDebugExt>=30) printf("convertDataScanningMode():  transpose data rows=>columns nr. (%04d : %04d) => (%04d : %04d);\n", 0, iDim-1, 0, jDim-1);
+        if (cdiDebugExt>=30) printf("convertDataScanningMode():  transpose data rows=>columns nr. (%04d : %04zu) => (%04d : %04zu);\n", 0, iDim-1, 0, jDim-1);
         for (j=0; j<jDim; j++)
         {
-          int jXiDim = j*iDim;
+          size_t jXiDim = j*iDim;
           for (i=0; i<iDim; i++)
           {
             idxIN  = i + jXiDim;
@@ -2886,7 +2881,7 @@ convertDataScanningMode(int scanModeIN, int scanModeOUT, double *data,
         idxIN= 0; idxOUT= (jDim-1)*iDim;
         for (j=0; j<jDim; j++)
         {
-          if (cdiDebugExt>=25) printf("convertDataScanningMode():  copying row nr. %04d; [idxIN=%08d] => [idxOUT=%08d]\n",j, idxIN, idxOUT);
+          if (cdiDebugExt>=25) printf("convertDataScanningMode():  copying row nr. %04zu; [idxIN=%08zu] => [idxOUT=%08zu]\n",j, idxIN, idxOUT);
           memcpy((void*)&data[idxOUT], (void*)&dataCopy[idxIN], iDim*sizeof(double));
           idxIN  += iDim; idxOUT -= iDim;
         }
@@ -2894,10 +2889,10 @@ convertDataScanningMode(int scanModeIN, int scanModeOUT, double *data,
 
       if (scanModeOUT==96)
       { // transpose the data
-        int jInv;
+        size_t jInv;
         for (j=0; j<jDim; j++)
         {
-          if (cdiDebugExt>=30) printf("convertDataScanningMode():  processing row nr. %04d;\n", j);
+          if (cdiDebugExt>=30) printf("convertDataScanningMode():  processing row nr. %04zu;\n", j);
           jInv = (jDim-1) -j;
           for (i=0; i<iDim; i++)
             data[j + i*jDim] =  dataCopy[i + jInv*iDim];  // source data has -j
@@ -2912,8 +2907,8 @@ convertDataScanningMode(int scanModeIN, int scanModeOUT, double *data,
       { // transpose the data
         for (j=0; j<jDim; j++)
         {
-          if (cdiDebugExt>=30) printf("convertDataScanningMode():  processing row nr. %04d;\n", j);
-          int jXiDim = j*iDim;
+          if (cdiDebugExt>=30) printf("convertDataScanningMode():  processing row nr. %04zu;\n", j);
+          size_t jXiDim = j*iDim;
           for (i=0; i<iDim; i++)
             //data[j + i*jDim] =  dataCopy[i + j*iDim];
             data[i + jXiDim] =  dataCopy[j + i*jDim];
@@ -2923,12 +2918,12 @@ convertDataScanningMode(int scanModeIN, int scanModeOUT, double *data,
       if (scanModeOUT==00)
       { // transpose the data
         idxIN= 0; idxOUT= 0;
-        int jInv;
+        size_t jInv;
         for (j=0; j<jDim; j++)
         {
-          if (cdiDebugExt>=30) printf("convertDataScanningMode():  processing row nr. %04d;\n", j);
+          if (cdiDebugExt>=30) printf("convertDataScanningMode():  processing row nr. %04zu;\n", j);
           jInv = (jDim-1) -j;
-          int jXiDim = j*iDim;
+          size_t jXiDim = j*iDim;
           for (i=0; i<iDim; i++)
             //data[jInv + iXjDim] =  dataCopy[i + jXiDim];  // target data has -j
             data[i + jXiDim] =  dataCopy[jInv + i*jDim];  // target data has -j
@@ -2941,7 +2936,7 @@ convertDataScanningMode(int scanModeIN, int scanModeOUT, double *data,
       printf("convertDataScanningMode(): data OUT (new scanning mode):\n");
       for (j=0; j<jDim; j++)
       {
-        int jXiDim = j*iDim;
+        size_t jXiDim = j*iDim;
         for (i=0; i<iDim; i++)
         {
           idxIN = i + jXiDim;
@@ -2956,7 +2951,7 @@ convertDataScanningMode(int scanModeIN, int scanModeOUT, double *data,
 #endif //HIRLAM_EXTENSIONS
 
 static
-void gribapiSetExtMode(grib_handle *gh, int gridID, long datasize, const double *data)
+void gribapiSetExtMode(grib_handle *gh, int gridID, size_t datasize, const double *data)
 {
   /*
   Nj = 550;
@@ -2979,14 +2974,14 @@ void gribapiSetExtMode(grib_handle *gh, int gridID, long datasize, const double 
 
       if (cdiDebugExt>=100)
         {
-          int gridsize = gridInqSize(gridID);
-          Message("(scanModeIN=%d; gridsize=%d", scanModeIN, gridsize);
+          size_t gridsize = gridInqSize(gridID);
+          Message("(scanModeIN=%d; gridsize=%zu", scanModeIN, gridsize);
         }
 
       if ( cdiGribDataScanningMode.active )   // allowed modes: <0, 64, 96>; Default is 64
         {
-          int iDim = gridInqXsize(gridID);
-          int jDim = gridInqYsize(gridID);
+          size_t iDim = gridInqXsize(gridID);
+          size_t jDim = gridInqYsize(gridID);
 
           double yfirst = gridInqYval(gridID,      0);
           double ylast  = gridInqYval(gridID, jDim-1);
@@ -3028,7 +3023,7 @@ void gribapiSetExtMode(grib_handle *gh, int gridID, long datasize, const double 
 
 size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisID,
 		     int vdate, int vtime, int tsteptype, int numavg,
-		     long datasize, const double *data, int nmiss, void **gribbuffer, size_t *gribbuffersize,
+		     size_t datasize, const double *data, int nmiss, void **gribbuffer, size_t *gribbuffersize,
 		     int comptype, void *gribContainer)
 {
   size_t recsize = 0;
@@ -3043,6 +3038,7 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   char stdname[256];
 
   // extern unsigned char _grib_template_GRIB2[];
+  cdi_check_gridsize_int_limit("GRIB", datasize);
 
   int param    = vlistInqVarParam(vlistID, varID);
   int datatype = vlistInqVarDatatype(vlistID, varID);
@@ -3146,7 +3142,7 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
 
   gribapiSetExtMode(gh, gridID, datasize, data);
 
-  GRIB_CHECK(grib_set_double_array(gh, "values", data, (size_t)datasize), 0);
+  GRIB_CHECK(grib_set_double_array(gh, "values", data, datasize), 0);
 
   /* get the size of coded message  */
   GRIB_CHECK(grib_get_message(gh, (const void **)&dummy, &recsize), 0);
