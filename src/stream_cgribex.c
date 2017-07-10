@@ -1359,7 +1359,7 @@ int cgribexDecode(int memtype, void *gribbuffer, size_t gribsize, void *data, si
       if ( memtype == MEMTYPE_FLOAT )
         {
           float *restrict dataf = (float*) data;
-          for ( long i = 0; i < datasize; i++ )
+          for ( size_t i = 0; i < datasize; i++ )
             if ( (fabs(dataf[i]-undef_pds) < undef_eps) || IS_EQUAL(dataf[i],FSEC3_MissVal) ) {
               dataf[i] = (float)missval;
               (*nmiss)++;
@@ -1368,7 +1368,7 @@ int cgribexDecode(int memtype, void *gribbuffer, size_t gribsize, void *data, si
       else
         {
           double *restrict datad = (double*) data;
-          for ( long i = 0; i < datasize; i++ )
+          for ( size_t i = 0; i < datasize; i++ )
             if ( (fabs(datad[i]-undef_pds) < undef_eps) || IS_EQUAL(datad[i],FSEC3_MissVal) ) {
               datad[i] = missval;
               (*nmiss)++;

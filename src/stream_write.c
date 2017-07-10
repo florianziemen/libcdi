@@ -106,7 +106,7 @@ The values are converted to the external data type of the variable, if necessary
 void streamWriteVar(int streamID, int varID, const double *data, size_t nmiss)
 {
   void (*myCdiStreamWriteVar_)(int streamID, int varID, int memtype, const void *data, size_t nmiss)
-    = (void (*)(int, int, int, const void *, int))
+    = (void (*)(int, int, int, const void *, size_t))
     namespaceSwitchGet(NSSWITCH_STREAM_WRITE_VAR_).func;
 
   myCdiStreamWriteVar_(streamID, varID, MEMTYPE_DOUBLE, (const void *) data, nmiss);
@@ -131,7 +131,7 @@ The values are converted to the external data type of the variable, if necessary
 void streamWriteVarF(int streamID, int varID, const float *data, size_t nmiss)
 {
   int (*myCdiStreamWriteVar_)(int streamID, int varID, int memtype, const void *data, size_t nmiss)
-    = (int (*)(int, int, int, const void *, int))
+    = (int (*)(int, int, int, const void *, size_t))
     namespaceSwitchGet(NSSWITCH_STREAM_WRITE_VAR_).func;
 
   if ( myCdiStreamWriteVar_(streamID, varID, MEMTYPE_FLOAT, (const void *) data, nmiss) )
@@ -280,7 +280,7 @@ void streamWriteVarChunk(int streamID, int varID,
 {
   void (*myCdiStreamWriteVarChunk_)(int streamID, int varID, int memtype,
                                     const int rect[][2], const void *data, size_t nmiss)
-    = (void (*)(int, int, int, const int [][2], const void *, int))
+    = (void (*)(int, int, int, const int [][2], const void *, size_t))
     namespaceSwitchGet(NSSWITCH_STREAM_WRITE_VAR_CHUNK_).func;
   myCdiStreamWriteVarChunk_(streamID, varID, MEMTYPE_DOUBLE, rect, data, nmiss);
 }

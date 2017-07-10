@@ -176,7 +176,7 @@ void grb_read_var(stream_t * streamptr, int varID, int memtype, void *data, size
 
       double missval = vlistInqVarMissval(vlistID, varID);
 
-      int imiss;
+      size_t imiss;
 
       streamptr->tsteps[tsID].records[recID].zip = grbUnzipRecord(gribbuffer, &recsize);
 

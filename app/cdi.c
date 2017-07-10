@@ -921,7 +921,7 @@ int main(int argc, char *argv[])
 	  printShortinfo(streamID1, vlistID1, Vardis);
 	}
 
-      int idum;
+      size_t idum;
       int tsID = 0;
       if ( Info || fname2 )
       while ( (nrecs = streamInqTimestep(streamID1, tsID)) > 0 )
