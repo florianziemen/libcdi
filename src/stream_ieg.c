@@ -81,7 +81,7 @@ int iegInqRecord(stream_t *streamptr, int *varID, int *levelID)
 }
 */
 
-void iegReadRecord(stream_t *streamptr, double *data, int *nmiss)
+void iegReadRecord(stream_t *streamptr, double *data, size_t *nmiss)
 {
   int vlistID = streamptr->vlistID;
   int fileID  = streamptr->fileID;
@@ -1162,7 +1162,7 @@ int iegInqTimestep(stream_t *streamptr, int tsID)
 }
 
 
-void iegReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, int *nmiss)
+void iegReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, size_t *nmiss)
 {
   if ( CDI_Debug ) Message("streamID = %d  varID = %d  levID = %d", streamptr->self, varID, levID);
 
@@ -1196,7 +1196,7 @@ void iegReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, 
 }
 
 
-void iegReadVarDP(stream_t *streamptr, int varID, double *data, int *nmiss)
+void iegReadVarDP(stream_t *streamptr, int varID, double *data, size_t *nmiss)
 {
   if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamptr->self, varID);
 

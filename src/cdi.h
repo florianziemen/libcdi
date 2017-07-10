@@ -395,16 +395,16 @@ void    streamWriteVar(int streamID, int varID, const double data[], size_t nmis
 void    streamWriteVarF(int streamID, int varID, const float data[], size_t nmiss);
 
 /*      streamReadVar: Read a variable */
-void    streamReadVar(int streamID, int varID, double data[], int *nmiss);
-void    streamReadVarF(int streamID, int varID, float data[], int *nmiss);
+void    streamReadVar(int streamID, int varID, double data[], size_t *nmiss);
+void    streamReadVarF(int streamID, int varID, float data[], size_t *nmiss);
 
 /*      streamWriteVarSlice: Write a horizontal slice of a variable */
 void    streamWriteVarSlice(int streamID, int varID, int levelID, const double data[], size_t nmiss);
 void    streamWriteVarSliceF(int streamID, int varID, int levelID, const float data[], size_t nmiss);
 
 /*      streamReadVarSlice: Read a horizontal slice of a variable */
-void    streamReadVarSlice(int streamID, int varID, int levelID, double data[], int *nmiss);
-void    streamReadVarSliceF(int streamID, int varID, int levelID, float data[], int *nmiss);
+void    streamReadVarSlice(int streamID, int varID, int levelID, double data[], size_t *nmiss);
+void    streamReadVarSliceF(int streamID, int varID, int levelID, float data[], size_t *nmiss);
 
 void    streamWriteVarChunk(int streamID, int varID, const int rect[3][2], const double data[], size_t nmiss);
 
@@ -415,8 +415,8 @@ void    streamDefRecord(int streamID, int  varID, int  levelID);
 void    streamInqRecord(int streamID, int *varID, int *levelID);
 void    streamWriteRecord(int streamID, const double data[], size_t nmiss);
 void    streamWriteRecordF(int streamID, const float data[], size_t nmiss);
-void    streamReadRecord(int streamID, double data[], int *nmiss);
-void    streamReadRecordF(int streamID, float data[], int *nmiss);
+void    streamReadRecord(int streamID, double data[], size_t *nmiss);
+void    streamReadRecordF(int streamID, float data[], size_t *nmiss);
 void    streamCopyRecord(int streamIDdest, int streamIDsrc);
 
 void    streamInqGRIBinfo(int streamID, int *intnum, float *fltnum, off_t *bignum);

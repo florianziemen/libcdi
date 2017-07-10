@@ -488,7 +488,7 @@ void cdfGetSliceSlapDescription(stream_t *streamptr, int varId, int levelId, boo
 }
 
 static
-void cdfReadVarDP(stream_t *streamptr, int varID, double *data, int *nmiss)
+void cdfReadVarDP(stream_t *streamptr, int varID, double *data, size_t *nmiss)
 {
   if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamptr->self, varID);
 
@@ -520,7 +520,7 @@ void cdfReadVarDP(stream_t *streamptr, int varID, double *data, int *nmiss)
 }
 
 static
-void cdfReadVarSP(stream_t *streamptr, int varID, float *data, int *nmiss)
+void cdfReadVarSP(stream_t *streamptr, int varID, float *data, size_t *nmiss)
 {
   if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamptr->self, varID);
 
@@ -552,7 +552,7 @@ void cdfReadVarSP(stream_t *streamptr, int varID, float *data, int *nmiss)
 }
 
 
-void cdf_read_var(stream_t *streamptr, int varID, int memtype, void *data, int *nmiss)
+void cdf_read_var(stream_t *streamptr, int varID, int memtype, void *data, size_t *nmiss)
 {
   if ( memtype == MEMTYPE_DOUBLE )
     cdfReadVarDP(streamptr, varID, (double*) data, nmiss);
@@ -561,7 +561,7 @@ void cdf_read_var(stream_t *streamptr, int varID, int memtype, void *data, int *
 }
 
 static
-void cdfReadVarSliceDP(stream_t *streamptr, int varID, int levelID, double *data, int *nmiss)
+void cdfReadVarSliceDP(stream_t *streamptr, int varID, int levelID, double *data, size_t *nmiss)
 {
   if ( CDI_Debug )
     Message("streamID = %d  varID = %d  levelID = %d", streamptr->self, varID, levelID);
@@ -618,7 +618,7 @@ void cdfReadVarSliceDP(stream_t *streamptr, int varID, int levelID, double *data
 }
 
 static
-void cdfReadVarSliceSP(stream_t *streamptr, int varID, int levelID, float *data, int *nmiss)
+void cdfReadVarSliceSP(stream_t *streamptr, int varID, int levelID, float *data, size_t *nmiss)
 {
   if ( CDI_Debug )
     Message("streamID = %d  varID = %d  levelID = %d", streamptr->self, varID, levelID);
@@ -675,7 +675,7 @@ void cdfReadVarSliceSP(stream_t *streamptr, int varID, int levelID, float *data,
 }
 
 
-void cdf_read_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, void *data, int *nmiss)
+void cdf_read_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, void *data, size_t *nmiss)
 {
   if ( memtype == MEMTYPE_DOUBLE )
     cdfReadVarSliceDP(streamptr, varID, levelID, (double*) data, nmiss);
@@ -684,7 +684,7 @@ void cdf_read_var_slice(stream_t *streamptr, int varID, int levelID, int memtype
 }
 
 
-void cdf_read_record(stream_t *streamptr, int memtype, void *data, int *nmiss)
+void cdf_read_record(stream_t *streamptr, int memtype, void *data, size_t *nmiss)
 {
   if ( CDI_Debug ) Message("streamID = %d", streamptr->self);
 

@@ -17,7 +17,7 @@
 
 static
 int grbDecode(int filetype, int memtype, void *gribbuffer, size_t gribsize, void *data, size_t datasize,
-	      int unreduced, int *nmiss, double missval, int vlistID, int varID)
+	      int unreduced, size_t *nmiss, double missval, int vlistID, int varID)
 {
   int status = 0;
 
@@ -111,7 +111,7 @@ int grbUnzipRecord(void *gribbuffer, size_t *gribsize)
 }
 
 
-void grb_read_record(stream_t * streamptr, int memtype, void *data, int *nmiss)
+void grb_read_record(stream_t * streamptr, int memtype, void *data, size_t *nmiss)
 {
   int filetype = streamptr->filetype;
 
@@ -144,7 +144,7 @@ void grb_read_record(stream_t * streamptr, int memtype, void *data, int *nmiss)
 }
 
 
-void grb_read_var(stream_t * streamptr, int varID, int memtype, void *data, int *nmiss)
+void grb_read_var(stream_t * streamptr, int varID, int memtype, void *data, size_t *nmiss)
 {
   int filetype = streamptr->filetype;
 
@@ -196,7 +196,7 @@ void grb_read_var(stream_t * streamptr, int varID, int memtype, void *data, int 
 }
 
 
-void grb_read_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, void *data, int *nmiss)
+void grb_read_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, void *data, size_t *nmiss)
 {
   int filetype = streamptr->filetype;
 

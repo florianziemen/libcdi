@@ -1324,7 +1324,7 @@ int cgribexScanTimestep(stream_t * streamptr)
 
 #if  defined  (HAVE_LIBCGRIBEX)
 int cgribexDecode(int memtype, void *gribbuffer, size_t gribsize, void *data, size_t datasize,
-		  int unreduced, int *nmiss, double missval)
+		  int unreduced, size_t *nmiss, double missval)
 {
   int status = 0;
   int iret = 0, iword = 0;

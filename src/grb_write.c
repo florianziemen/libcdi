@@ -172,7 +172,7 @@ void grbCopyRecord(stream_t * streamptr2, stream_t * streamptr1)
         // memtype: MEMTYPE_FLOAT or MEMTYPE_DOUBLE
         //int statusDC = grbDecode(filetype, MEMTYPE_DOUBLE, gribbuffer, recsize, data, gridsize, streamptr1->unreduced, &nmiss, missval, vlistID, varID);
         //int grbDecode(int filetype, int memtype, void *gribbuffer, int gribsize, void *data, size_t datasize,
-        //              int unreduced, int *nmiss, double missval, int vlistID, int varID);
+        //              int unreduced, size_t *nmiss, double missval, int vlistID, int varID);
 
         //streamptr1->tsteps[tsID].records[recID].zip = zip;
         //gribapiSetScanningMode(gh, cdoGribDataScanningMode);  // T.B.D. this will be done by grbDecode..

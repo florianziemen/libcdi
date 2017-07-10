@@ -79,7 +79,7 @@ int srvInqRecord(stream_t *streamptr, int *varID, int *levelID)
 }
 */
 
-void srvReadRecord(stream_t *streamptr, double *data, int *nmiss)
+void srvReadRecord(stream_t *streamptr, double *data, size_t *nmiss)
 {
   int vlistID  = streamptr->vlistID;
   int fileID   = streamptr->fileID;
@@ -633,7 +633,7 @@ int srvInqTimestep(stream_t *streamptr, int tsID)
 }
 
 
-void srvReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, int *nmiss)
+void srvReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, size_t *nmiss)
 {
   if ( CDI_Debug ) Message("streamID = %d  varID = %d  levID = %d", streamptr->self, varID, levID);
 
@@ -669,7 +669,7 @@ void srvReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, 
 }
 
 
-void srvReadVarDP(stream_t *streamptr, int varID, double *data, int *nmiss)
+void srvReadVarDP(stream_t *streamptr, int varID, double *data, size_t *nmiss)
 {
   if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamptr->self, varID);
 

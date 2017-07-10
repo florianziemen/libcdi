@@ -86,7 +86,7 @@ int extInqRecord(stream_t *streamptr, int *varID, int *levelID)
 }
 */
 
-void extReadRecord(stream_t *streamptr, double *data, int *nmiss)
+void extReadRecord(stream_t *streamptr, double *data, size_t *nmiss)
 {
   int vlistID = streamptr->vlistID;
   int fileID  = streamptr->fileID;
@@ -637,7 +637,7 @@ int extInqTimestep(stream_t *streamptr, int tsID)
 }
 
 
-void extReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, int *nmiss)
+void extReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, size_t *nmiss)
 {
   if ( CDI_Debug ) Message("streamID = %d  varID = %d  levID = %d", streamptr->self, varID, levID);
 
@@ -685,7 +685,7 @@ void extReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, 
 }
 
 
-void extReadVarDP(stream_t *streamptr, int varID, double *data, int *nmiss)
+void extReadVarDP(stream_t *streamptr, int varID, double *data, size_t *nmiss)
 {
   if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamptr->self, varID);
 
