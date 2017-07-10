@@ -391,30 +391,30 @@ int     streamInqNvars(int streamID);
 /* STREAM var I/O routines (random access) */
 
 /*      streamWriteVar: Write a variable */
-void    streamWriteVar(int streamID, int varID, const double data[], int nmiss);
-void    streamWriteVarF(int streamID, int varID, const float data[], int nmiss);
+void    streamWriteVar(int streamID, int varID, const double data[], size_t nmiss);
+void    streamWriteVarF(int streamID, int varID, const float data[], size_t nmiss);
 
 /*      streamReadVar: Read a variable */
 void    streamReadVar(int streamID, int varID, double data[], int *nmiss);
 void    streamReadVarF(int streamID, int varID, float data[], int *nmiss);
 
 /*      streamWriteVarSlice: Write a horizontal slice of a variable */
-void    streamWriteVarSlice(int streamID, int varID, int levelID, const double data[], int nmiss);
-void    streamWriteVarSliceF(int streamID, int varID, int levelID, const float data[], int nmiss);
+void    streamWriteVarSlice(int streamID, int varID, int levelID, const double data[], size_t nmiss);
+void    streamWriteVarSliceF(int streamID, int varID, int levelID, const float data[], size_t nmiss);
 
 /*      streamReadVarSlice: Read a horizontal slice of a variable */
 void    streamReadVarSlice(int streamID, int varID, int levelID, double data[], int *nmiss);
 void    streamReadVarSliceF(int streamID, int varID, int levelID, float data[], int *nmiss);
 
-void    streamWriteVarChunk(int streamID, int varID, const int rect[3][2], const double data[], int nmiss);
+void    streamWriteVarChunk(int streamID, int varID, const int rect[3][2], const double data[], size_t nmiss);
 
 
 /* STREAM record I/O routines (sequential access) */
 
 void    streamDefRecord(int streamID, int  varID, int  levelID);
 void    streamInqRecord(int streamID, int *varID, int *levelID);
-void    streamWriteRecord(int streamID, const double data[], int nmiss);
-void    streamWriteRecordF(int streamID, const float data[], int nmiss);
+void    streamWriteRecord(int streamID, const double data[], size_t nmiss);
+void    streamWriteRecordF(int streamID, const float data[], size_t nmiss);
 void    streamReadRecord(int streamID, double data[], int *nmiss);
 void    streamReadRecordF(int streamID, float data[], int *nmiss);
 void    streamCopyRecord(int streamIDdest, int streamIDsrc);

@@ -14,7 +14,7 @@ int gribapiDecode(void *gribbuffer, size_t gribsize, double *data, size_t datasi
 
 size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisID,
 		     int vdate, int vtime, int tsteptype, int numavg,
-		     size_t datasize, const double *data, int nmiss, void **gribbuffer, size_t *gribbuffersize,
+		     size_t datasize, const double *data, size_t nmiss, void **gribbuffer, size_t *gribbuffersize,
 		     int ljpeg, void *gribContainer);
 
 int gribapiGetScanningMode(grib_handle *gh);

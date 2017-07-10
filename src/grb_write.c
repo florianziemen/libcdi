@@ -19,7 +19,7 @@
 static
 size_t grbEncode(int filetype, int memtype, int varID, int levelID, int vlistID, int gridID, int zaxisID,
 		 int date, int time, int tsteptype, int numavg,
-		 size_t datasize, const void *data, int nmiss, void **gribbuffer,
+		 size_t datasize, const void *data, size_t nmiss, void **gribbuffer,
 		 int comptype, void *gribContainer)
 {
   size_t nbytes = 0;
@@ -153,7 +153,7 @@ void grbCopyRecord(stream_t * streamptr2, stream_t * streamptr1)
     if (scanModeIN != cdiGribDataScanningMode.value)
     {
         //int zip;
-        int nmiss = 0;
+        size_t nmiss = 0;
 
         int vlistID = streamptr1->vlistID;
         int varID   = streamptr1->tsteps[tsID].records[recID].varID;
@@ -186,7 +186,7 @@ void grbCopyRecord(stream_t * streamptr2, stream_t * streamptr1)
         //grb_write_var_slice(streamptr, varID, levelID, memtype, ((double*)data)+levelID*gridsize, nmiss);
 
         //grb_write_var(streamptr2, varID, MEMTYPE_DOUBLE, data, nmiss);
-        //grb_write_var(stream_t *streamptr, int varID, int memtype, const void *data, int nmiss)
+        //grb_write_var(stream_t *streamptr, int varID, int memtype, const void *data, size_t nmiss)
         //grb_write_var_slice(streamptr2, varID, levelID, MEMTYPE_DOUBLE, (const void *) data, nmiss);
 
         free(data);
@@ -217,7 +217,7 @@ void grbCopyRecord(stream_t * streamptr2, stream_t * streamptr1)
 }
 
 
-void grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, const void *data, int nmiss)
+void grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, const void *data, size_t nmiss)
 {
   void *gribbuffer = NULL;
   void *gc = NULL;
@@ -285,7 +285,7 @@ void grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
 }
 
 
-void grb_write_var(stream_t *streamptr, int varID, int memtype, const void *data, int nmiss)
+void grb_write_var(stream_t *streamptr, int varID, int memtype, const void *data, size_t nmiss)
 {
   int vlistID  = streamptr->vlistID,
     gridID   = vlistInqVarGrid(vlistID, varID),
@@ -300,7 +300,7 @@ void grb_write_var(stream_t *streamptr, int varID, int memtype, const void *data
       {
         const float *restrict fdata = ((const float *)data)+levelID*gridsize;
         
-        int nmiss_slice = 0;
+        size_t nmiss_slice = 0;
         if ( nmiss )
           for ( size_t i = 0; i < chunkLen; ++i )
             nmiss_slice += DBL_IS_EQUAL(fdata[i], missval);
@@ -312,7 +312,7 @@ void grb_write_var(stream_t *streamptr, int varID, int memtype, const void *data
       {
         const double *restrict ddata = ((const double *)data)+levelID*gridsize;
         
-        int nmiss_slice = 0;
+        size_t nmiss_slice = 0;
         if ( nmiss )
           for ( size_t i = 0; i < chunkLen; ++i )
             nmiss_slice += DBL_IS_EQUAL(ddata[i], missval);
@@ -322,7 +322,7 @@ void grb_write_var(stream_t *streamptr, int varID, int memtype, const void *data
 }
 
 
-void grb_write_record(stream_t *streamptr, int memtype, const void *data, int nmiss)
+void grb_write_record(stream_t *streamptr, int memtype, const void *data, size_t nmiss)
 {
   int varID   = streamptr->record->varID;
   int levelID = streamptr->record->levelID;

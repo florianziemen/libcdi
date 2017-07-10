@@ -14,7 +14,7 @@
 
 
 /* the single image implementation */
-int cdiStreamWriteVar_(int streamID, int varID, int memtype, const void *data, int nmiss)
+int cdiStreamWriteVar_(int streamID, int varID, int memtype, const void *data, size_t nmiss)
 {
   // May fail if memtype == MEMTYPE_FLOAT and the file format does not support single precision writing.
   // A value > 0 is returned in this case, otherwise it returns zero.
@@ -91,7 +91,7 @@ int cdiStreamWriteVar_(int streamID, int varID, int memtype, const void *data, i
 @Function  streamWriteVar
 @Title     Write a variable
 
-@Prototype void streamWriteVar(int streamID, int varID, const double *data, int nmiss)
+@Prototype void streamWriteVar(int streamID, int varID, const double *data, size_t nmiss)
 @Parameter
     @Item  streamID  Stream ID, from a previous call to @fref{streamOpenWrite}.
     @Item  varID     Variable identifier.
@@ -103,9 +103,9 @@ The function streamWriteVar writes the values of one time step of a variable to 
 The values are converted to the external data type of the variable, if necessary.
 @EndFunction
 */
-void streamWriteVar(int streamID, int varID, const double *data, int nmiss)
+void streamWriteVar(int streamID, int varID, const double *data, size_t nmiss)
 {
-  void (*myCdiStreamWriteVar_)(int streamID, int varID, int memtype, const void *data, int nmiss)
+  void (*myCdiStreamWriteVar_)(int streamID, int varID, int memtype, const void *data, size_t nmiss)
     = (void (*)(int, int, int, const void *, int))
     namespaceSwitchGet(NSSWITCH_STREAM_WRITE_VAR_).func;
 
@@ -116,7 +116,7 @@ void streamWriteVar(int streamID, int varID, const double *data, int nmiss)
 @Function  streamWriteVarF
 @Title     Write a variable
 
-@Prototype void streamWriteVarF(int streamID, int varID, const float *data, int nmiss)
+@Prototype void streamWriteVarF(int streamID, int varID, const float *data, size_t nmiss)
 @Parameter
     @Item  streamID  Stream ID, from a previous call to @fref{streamOpenWrite}.
     @Item  varID     Variable identifier.
@@ -128,9 +128,9 @@ The function streamWriteVarF writes the values of one time step of a variable to
 The values are converted to the external data type of the variable, if necessary.
 @EndFunction
 */
-void streamWriteVarF(int streamID, int varID, const float *data, int nmiss)
+void streamWriteVarF(int streamID, int varID, const float *data, size_t nmiss)
 {
-  int (*myCdiStreamWriteVar_)(int streamID, int varID, int memtype, const void *data, int nmiss)
+  int (*myCdiStreamWriteVar_)(int streamID, int varID, int memtype, const void *data, size_t nmiss)
     = (int (*)(int, int, int, const void *, int))
     namespaceSwitchGet(NSSWITCH_STREAM_WRITE_VAR_).func;
 
@@ -150,7 +150,7 @@ void streamWriteVarF(int streamID, int varID, const float *data, int nmiss)
 }
 
 static
-int cdiStreamWriteVarSlice(int streamID, int varID, int levelID, int memtype, const void *data, int nmiss)
+int cdiStreamWriteVarSlice(int streamID, int varID, int levelID, int memtype, const void *data, size_t nmiss)
 {
   // May fail if memtype == MEMTYPE_FLOAT and the file format does not support single precision writing.
   // A value > 0 is returned in this case, otherwise it returns zero.
@@ -225,7 +225,7 @@ int cdiStreamWriteVarSlice(int streamID, int varID, int levelID, int memtype, co
 @Function  streamWriteVarSlice
 @Title     Write a horizontal slice of a variable
 
-@Prototype void streamWriteVarSlice(int streamID, int varID, int levelID, const double *data, int nmiss)
+@Prototype void streamWriteVarSlice(int streamID, int varID, int levelID, const double *data, size_t nmiss)
 @Parameter
     @Item  streamID  Stream ID, from a previous call to @fref{streamOpenWrite}.
     @Item  varID     Variable identifier.
@@ -238,7 +238,7 @@ The function streamWriteVarSlice writes the values of a horizontal slice of a va
 The values are converted to the external data type of the variable, if necessary.
 @EndFunction
 */
-void streamWriteVarSlice(int streamID, int varID, int levelID, const double *data, int nmiss)
+void streamWriteVarSlice(int streamID, int varID, int levelID, const double *data, size_t nmiss)
 {
   cdiStreamWriteVarSlice(streamID, varID, levelID, MEMTYPE_DOUBLE, (const void *) data, nmiss);
 }
@@ -247,7 +247,7 @@ void streamWriteVarSlice(int streamID, int varID, int levelID, const double *dat
 @Function  streamWriteVarSliceF
 @Title     Write a horizontal slice of a variable
 
-@Prototype void streamWriteVarSliceF(int streamID, int varID, int levelID, const float *data, int nmiss)
+@Prototype void streamWriteVarSliceF(int streamID, int varID, int levelID, const float *data, size_t nmiss)
 @Parameter
     @Item  streamID  Stream ID, from a previous call to @fref{streamOpenWrite}.
     @Item  varID     Variable identifier.
@@ -260,7 +260,7 @@ The function streamWriteVarSliceF writes the values of a horizontal slice of a v
 The values are converted to the external data type of the variable, if necessary.
 @EndFunction
 */
-void streamWriteVarSliceF(int streamID, int varID, int levelID, const float *data, int nmiss)
+void streamWriteVarSliceF(int streamID, int varID, int levelID, const float *data, size_t nmiss)
 {
   if ( cdiStreamWriteVarSlice(streamID, varID, levelID, MEMTYPE_FLOAT, (const void *) data, nmiss) )
     {
@@ -276,10 +276,10 @@ void streamWriteVarSliceF(int streamID, int varID, int levelID, const float *dat
 
 
 void streamWriteVarChunk(int streamID, int varID,
-                         const int rect[][2], const double *data, int nmiss)
+                         const int rect[][2], const double *data, size_t nmiss)
 {
   void (*myCdiStreamWriteVarChunk_)(int streamID, int varID, int memtype,
-                                    const int rect[][2], const void *data, int nmiss)
+                                    const int rect[][2], const void *data, size_t nmiss)
     = (void (*)(int, int, int, const int [][2], const void *, int))
     namespaceSwitchGet(NSSWITCH_STREAM_WRITE_VAR_CHUNK_).func;
   myCdiStreamWriteVarChunk_(streamID, varID, MEMTYPE_DOUBLE, rect, data, nmiss);
@@ -287,7 +287,7 @@ void streamWriteVarChunk(int streamID, int varID,
 
 /* single image implementation */
 void cdiStreamWriteVarChunk_(int streamID, int varID, int memtype,
-                             const int rect[][2], const void *data, int nmiss)
+                             const int rect[][2], const void *data, size_t nmiss)
 {
   if ( CDI_Debug ) Message("streamID = %d varID = %d", streamID, varID);
 
@@ -333,7 +333,7 @@ void cdiStreamWriteVarChunk_(int streamID, int varID, int memtype,
 }
 
 static
-int stream_write_record(int streamID, int memtype, const void *data, int nmiss)
+int stream_write_record(int streamID, int memtype, const void *data, size_t nmiss)
 {
   // May fail if memtype == MEMTYPE_FLOAT and the file format does not support single precision writing.
   // A value > 0 is returned in this case, otherwise it returns zero.
@@ -393,7 +393,7 @@ int stream_write_record(int streamID, int memtype, const void *data, int nmiss)
 @Function  streamWriteRecord
 @Title     Write a horizontal slice of a variable
 
-@Prototype void streamWriteRecord(int streamID, const double *data, int nmiss)
+@Prototype void streamWriteRecord(int streamID, const double *data, size_t nmiss)
 @Parameter
     @Item  streamID  Stream ID, from a previous call to @fref{streamOpenWrite}.
     @Item  data      Pointer to a block of double precision floating point data values to be written.
@@ -404,13 +404,13 @@ The function streamWriteRecord writes the values of a horizontal slice (record) 
 The values are converted to the external data type of the variable, if necessary.
 @EndFunction
 */
-void streamWriteRecord(int streamID, const double *data, int nmiss)
+void streamWriteRecord(int streamID, const double *data, size_t nmiss)
 {
   stream_write_record(streamID, MEMTYPE_DOUBLE, (const void *) data, nmiss);
 }
 
 
-void streamWriteRecordF(int streamID, const float *data, int nmiss)
+void streamWriteRecordF(int streamID, const float *data, size_t nmiss)
 {
   if ( stream_write_record(streamID, MEMTYPE_FLOAT, (const void *) data, nmiss) )
     {

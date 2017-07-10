@@ -10,7 +10,7 @@ int cgribexDecode(int memtype, void *gribbuffer, size_t gribsize, void *data, si
 
 size_t cgribexEncode(int memtype, int varID, int levelID, int vlistID, int gridID, int zaxisID,
 		     int vdate, int vtime, int tsteptype, int numavg,
-		     size_t datasize, const void *data, int nmiss, void *gribbuffer, size_t gribbuffersize);
+		     size_t datasize, const void *data, size_t nmiss, void *gribbuffer, size_t gribbuffersize);
 
 void *cgribex_handle_new_from_meassage(void *gribbuffer, size_t recsize);
 void cgribex_handle_delete(void *gh);

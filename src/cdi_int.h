@@ -442,11 +442,11 @@ void
 cdiStreamDefVlist_(int streamID, int vlistID);
 
 int
-cdiStreamWriteVar_(int streamID, int varID, int memtype, const void *data, int nmiss);
+cdiStreamWriteVar_(int streamID, int varID, int memtype, const void *data, size_t nmiss);
 
 void
 cdiStreamWriteVarChunk_(int streamID, int varID, int memtype,
-                        const int rect[][2], const void *data, int nmiss);
+                        const int rect[][2], const void *data, size_t nmiss);
 void
 cdiStreamCloseDefaultDelegate(stream_t *streamptr,
                               int recordBufIsToBeDeleted);

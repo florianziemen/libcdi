@@ -1896,7 +1896,7 @@ getGribApiCompTypeMsg(int comptype, size_t gridsize)
 
 
 static
-void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype, bool lieee, int datatype, int nmiss, int gcinit)
+void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype, bool lieee, int datatype, size_t nmiss, int gcinit)
 {
   UNUSED(nmiss);
   bool lrotated = false;
@@ -3023,7 +3023,7 @@ void gribapiSetExtMode(grib_handle *gh, int gridID, size_t datasize, const doubl
 
 size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisID,
 		     int vdate, int vtime, int tsteptype, int numavg,
-		     size_t datasize, const double *data, int nmiss, void **gribbuffer, size_t *gribbuffersize,
+		     size_t datasize, const double *data, size_t nmiss, void **gribbuffer, size_t *gribbuffersize,
 		     int comptype, void *gribContainer)
 {
   size_t recsize = 0;

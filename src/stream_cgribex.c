@@ -2082,7 +2082,7 @@ void cgribexDefEnsembleVar(int *isec1, int vlistID, int varID)
 #if  defined  (HAVE_LIBCGRIBEX)
 size_t cgribexEncode(int memtype, int varID, int levelID, int vlistID, int gridID, int zaxisID,
 		     int vdate, int vtime, int tsteptype, int numavg,
-		     size_t datasize, const void *data, int nmiss, void *gribbuffer, size_t gribbuffersize)
+		     size_t datasize, const void *data, size_t nmiss, void *gribbuffer, size_t gribbuffersize)
 {
   int iret = 0, iword = 0;
   int isec0[2], isec1[4096], isec2[4096], isec3[2], isec4[512];

@@ -49,12 +49,12 @@ void     pioWriteTimestep(void);
 void     cdiPioRDMAProgress(void);
 
 void     streamWriteVarPart    (int streamID, int varID,
-                                const void *data, int nmiss,
+                                const void *data, size_t nmiss,
                                 Xt_idxlist partDesc);
 void     streamWriteScatteredVarPart(int streamID, int varID, const void *data,
                                      int numBlocks, const int blocklengths[],
                                      const int displacements[],
-                                     int nmiss, Xt_idxlist partDesc);
+                                     size_t nmiss, Xt_idxlist partDesc);
 /* cdiPioCSRLastN: return role codes appropriate to use the last
    \textit{nProcsIO} tasks as I/O servers */
 int cdiPioCSRLastN(MPI_Comm commSuper, int IOMode, int nProcsIO);
