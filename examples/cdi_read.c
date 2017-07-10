@@ -7,7 +7,7 @@ int main(void)
   const int nlat =  6; // Number of latitudes
   const int nlev =  5; // Number of levels
   const int nts  =  3; // Number of time steps
-  int nmiss, vdate, vtime;
+  size_t nmiss;
   double var1[nlon*nlat];
   double var2[nlon*nlat*nlev];
 
@@ -37,8 +37,8 @@ int main(void)
       streamInqTimestep(streamID, tsID);
 
       // Get the verification date and time 
-      vdate = taxisInqVdate(taxisID);
-      vtime = taxisInqVtime(taxisID);
+      int vdate = taxisInqVdate(taxisID);
+      int vtime = taxisInqVtime(taxisID);
       printf("read timestep %d:  date=%d  time=%d\n", tsID+1, vdate, vtime);
 
       // Read var1 and var2 

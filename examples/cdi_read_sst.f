@@ -9,7 +9,8 @@
 
       INTEGER gridID, taxisID
       INTEGER vlistID, varID1, streamID, tsID
-      INTEGER nmiss, status, vdate, vtime
+      INTEGER status, vdate, vtime
+      INTEGER*8 nmiss
       REAL*8 sst(nvals)
 
 !      CALL cdiDebug(1)

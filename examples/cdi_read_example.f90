@@ -5,9 +5,10 @@ PROGRAM CDIREAD
   INCLUDE 'cdi.inc'
 
   INTEGER :: gsize, nlevel, nvars, code
-  INTEGER :: vdate, vtime, nmiss, status, ilev
+  INTEGER :: vdate, vtime, status, ilev
   INTEGER :: streamID, varID, levelID, gridID, zaxisID
   INTEGER :: tsID, vlistID, taxisID
+  INTEGER*8 :: nmiss
   REAL*8, ALLOCATABLE :: field(:,:)
   CHARACTER(len=256) :: name, longname, units
 

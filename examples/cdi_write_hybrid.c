@@ -10,8 +10,8 @@
 int main(void)
 {
   int gridID, zaxisID1, zaxisID2, zaxisID3, zaxisID4, taxisID;
-  int vlistID, varID1, varID2, varID3, varID4, streamID, tsID;
-  int i, k, nmiss = 0;
+  int vlistID, varID1, varID2, varID3, varID4, streamID;
+  size_t nmiss = 0;
   double lons[nlon] = {0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330};
   double lats[nlat] = {-75, -45, -15, 15, 45, 75};
   double levs[nhlev] = {1, 2, 3, 4, 5, 6};
@@ -83,7 +83,7 @@ int main(void)
   streamDefVlist(streamID, vlistID);
 
   // Loop over the number of time steps
-  for ( tsID = 0; tsID < nts; tsID++ )
+  for ( int tsID = 0; tsID < nts; tsID++ )
     {
       // Set the verification date to 1985-01-01 + tsID
       taxisDefVdate(taxisID, 19850101+tsID);
@@ -93,13 +93,13 @@ int main(void)
       streamDefTimestep(streamID, tsID);
 
       // Init var1 and var2
-      for ( i = 0; i < nlon*nlat; ++i ) var1[i] = 1.1;
-      for ( k = 0; k < nflev; ++k )
-	for ( i = 0; i < nlon*nlat; ++i ) var2[i+k*nlon*nlat] = 2.2+k;
-      for ( k = 0; k < nhlev; ++k )
-	for ( i = 0; i < nlon*nlat; ++i ) var3[i+k*nlon*nlat] = -2.2-k;
-      for ( k = 0; k < nflev; ++k )
-	for ( i = 0; i < nlon*nlat; ++i ) var4[i+k*nlon*nlat] = 100+k;
+      for ( size_t i = 0; i < nlon*nlat; ++i ) var1[i] = 1.1;
+      for ( size_t k = 0; k < nflev; ++k )
+	for ( size_t i = 0; i < nlon*nlat; ++i ) var2[i+k*nlon*nlat] = 2.2+k;
+      for ( size_t k = 0; k < nhlev; ++k )
+	for ( size_t i = 0; i < nlon*nlat; ++i ) var3[i+k*nlon*nlat] = -2.2-k;
+      for ( size_t k = 0; k < nflev; ++k )
+	for ( size_t i = 0; i < nlon*nlat; ++i ) var4[i+k*nlon*nlat] = 100+k;
  
       // Write var1 and var2
       streamWriteVar(streamID, varID1, var1, nmiss);

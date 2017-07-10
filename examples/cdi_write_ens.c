@@ -18,7 +18,7 @@ int main(void)
   int tsID;
   int levelID;
   int vlistID, taxisID;
-  int nmiss;
+  size_t nmiss;
 
   int instID;
   int i1,i2,i3;
