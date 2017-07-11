@@ -699,7 +699,7 @@ Create a new dataset.
 
 \begin{verbatim}
     SUBROUTINE streamReadVar (INTEGER streamID, INTEGER varID,
-                              DOUBLEPRECISION data(*), INTEGER nmiss)
+                              DOUBLEPRECISION data(*), INTEGER*8 nmiss)
 \end{verbatim}
 
 Read a variable.
@@ -709,7 +709,7 @@ Read a variable.
 
 \begin{verbatim}
     SUBROUTINE streamReadVarSlice (INTEGER streamID, INTEGER varID, INTEGER levelID,
-                                   DOUBLEPRECISION data(*), INTEGER nmiss)
+                                   DOUBLEPRECISION data(*), INTEGER*8 nmiss)
 \end{verbatim}
 
 Read a horizontal slice of a variable.
@@ -728,7 +728,7 @@ Synchronize an Open Dataset to Disk.
 
 \begin{verbatim}
     SUBROUTINE streamWriteVar (INTEGER streamID, INTEGER varID,
-                               DOUBLEPRECISION data(*), INTEGER nmiss)
+                               DOUBLEPRECISION data(*), INTEGER*8 nmiss)
 \end{verbatim}
 
 Write a variable.
@@ -738,7 +738,7 @@ Write a variable.
 
 \begin{verbatim}
     SUBROUTINE streamWriteVarSlice (INTEGER streamID, INTEGER varID, INTEGER levelID,
-                                    DOUBLEPRECISION data(*), INTEGER nmiss)
+                                    DOUBLEPRECISION data(*), INTEGER*8 nmiss)
 \end{verbatim}
 
 Write a horizontal slice of a variable.

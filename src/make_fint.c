@@ -86,8 +86,8 @@ static void doctotxt(FILE *fp, Docu *doc, size_t ndoc)
     }
 }
 
-enum cftype {ISVOID, ISCONSTSTRING, ISINT, ISREAL, ISDOUBLE, ISSIZE_T, ISMPI_COMM,
-             ISXT_IDXLIST, ISCHOICE, ISINTP, ISFLOATV, ISFLOATVV,
+enum cftype {ISVOID, ISCONSTSTRING, ISINT, ISREAL, ISDOUBLE, ISSIZET, ISMPI_COMM,
+             ISXT_IDXLIST, ISCHOICE, ISINTP, ISSIZETP, ISFLOATV, ISFLOATVV,
              ISDOUBLEV, ISDOUBLEVV, ISINTV, ISINTVV, ISINTVVV, ISREALP,
              ISDOUBLEP, ISCBUF, ISUUID, ISUCHAR, ISSTRING, ISSTRINGP,
              VOIDFUNCVOID,
@@ -168,6 +168,8 @@ static struct symbol funArgSym[]
         "^"WS"*const"WS"+void"WS"*\\*"WS"*"SYMRE"?"WS"*[,\\)]", 1, 0, 0 },
       { "INTEGER",         "PINT",    "%sint *%.*s",
         "^"WS"*(const"WS"+)?int"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2, 0, 0 },
+      { "INTEGER*8",       "PLONG",    "%ssize_t *%.*s",
+        "^"WS"*(const"WS"+)?size_t"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2, 0, 0 },
       { "REAL",            "FLOATV",  "%sfloat %.*s[]",
         "^"WS"*(const"WS"+)?float("WS"+"SYMRE")?"WS"*"ARRAY_BOUND
         "[,\\)]", 3, 0, 0 },

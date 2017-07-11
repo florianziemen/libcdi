@@ -417,7 +417,7 @@ Find out whether X-coordinate is of type CHAR.
 \section*{\tt \htmlref{gridInqXbounds}{gridInqXbounds}}
 
 \begin{verbatim}
-    int gridInqXbounds (int gridID, double xbounds[]);
+    size_t gridInqXbounds (int gridID, double xbounds[]);
 \end{verbatim}
 
 Get the bounds of a X-axis.
@@ -498,7 +498,7 @@ Find out whether Y-coordinate is of type CHAR.
 \section*{\tt \htmlref{gridInqYbounds}{gridInqYbounds}}
 
 \begin{verbatim}
-    int gridInqYbounds (int gridID, double ybounds[]);
+    size_t gridInqYbounds (int gridID, double ybounds[]);
 \end{verbatim}
 
 Get the bounds of a Y-axis.
@@ -696,7 +696,7 @@ Create a new dataset.
 \section*{\tt \htmlref{streamReadVar}{streamReadVar}}
 
 \begin{verbatim}
-    void streamReadVar (int streamID, int varID, double data[], int *nmiss);
+    void streamReadVar (int streamID, int varID, double data[], size_t *nmiss);
 \end{verbatim}
 
 Read a variable.
@@ -706,7 +706,7 @@ Read a variable.
 
 \begin{verbatim}
     void streamReadVarSlice (int streamID, int varID, int levelID, double data[],
-                             int *nmiss);
+                             size_t *nmiss);
 \end{verbatim}
 
 Read a horizontal slice of a variable.
@@ -724,7 +724,7 @@ Synchronize an Open Dataset to Disk.
 \section*{\tt \htmlref{streamWriteVar}{streamWriteVar}}
 
 \begin{verbatim}
-    void streamWriteVar (int streamID, int varID, const double data[], int nmiss);
+    void streamWriteVar (int streamID, int varID, const double data[], size_t nmiss);
 \end{verbatim}
 
 Write a variable.
@@ -734,7 +734,7 @@ Write a variable.
 
 \begin{verbatim}
     void streamWriteVarSlice (int streamID, int varID, int levelID,
-                              const double data[], int nmiss);
+                              const double data[], size_t nmiss);
 \end{verbatim}
 
 Write a horizontal slice of a variable.
