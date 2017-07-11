@@ -1011,7 +1011,7 @@ int varDefZaxis(int vlistID, int zaxistype, int nlevels, const double *levels, c
 	      zaxisDefUbounds(zaxisID, levels2);
 	    }
 
-          if ( cvals != NULL && nlevels != 0 && clength != 0 ) zaxisDefCvals(zaxisID, cvals, clength);
+          if ( cvals != NULL && nlevels != 0 && clength != 0 ) zaxisDefCvals(zaxisID, cvals, (int)clength);
 
 	  if ( (zaxistype == ZAXIS_HYBRID || zaxistype == ZAXIS_HYBRID_HALF) && vctsize > 0 )
             zaxisDefVct(zaxisID, vctsize, vct);

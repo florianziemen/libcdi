@@ -1008,7 +1008,7 @@ void    zaxisPrint(int zaxisID);
 void    zaxisDefLevels(int zaxisID, const double levels[]);
 
 /*      zaxisDefCvals: Define area types of a Z-axis */
-void    zaxisDefCvals(int zaxisID, const char *cvals[], size_t clength);
+void    zaxisDefCvals(int zaxisID, const char *cvals[], int clength);
 
 /*      zaxisInqLevels: Get all levels of a Z-axis */
 int     zaxisInqLevels(int zaxisID, double levels[]);

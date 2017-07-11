@@ -488,7 +488,7 @@ int vlist_generate_zaxis(int vlistID, int zaxistype, int nlevels, const double *
 	  zaxisDefLevels(zaxisID, levels);
 
           if ( zaxistype == ZAXIS_CHAR )
-            zaxisDefCvals(zaxisID, cvals, clen);
+            zaxisDefCvals(zaxisID, cvals, (int)clen);
 
 	  if ( has_bounds )
 	    {
