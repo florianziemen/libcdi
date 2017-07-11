@@ -5,8 +5,8 @@
 
       IMPLICIT NONE
 
-      INTEGER nlev, nts
-      INTEGER nlon, nlat, nmiss
+      INTEGER :: nlev, nts
+      INTEGER(c_size_t) ::  nlon, nlat, nmiss
       PARAMETER (nlon = 12)   ! Number of longitudes
       PARAMETER (nlat =  6)   ! Number of latitudes
       PARAMETER (nlev =  5)   ! Number of levels

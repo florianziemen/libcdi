@@ -104,7 +104,7 @@ Get number of attributes assigned to this variable.
 \section*{\tt \htmlref{gridCreate}{gridCreate}}
 
 \begin{verbatim}
-    INTEGER FUNCTION gridCreate (INTEGER gridtype, INTEGER*8 size)
+    INTEGER FUNCTION gridCreate (INTEGER gridtype, INTEGER size)
 \end{verbatim}
 
 Create a horizontal Grid.
@@ -212,7 +212,7 @@ Define the name of a X-axis.
 \section*{\tt \htmlref{gridDefXsize}{gridDefXsize}}
 
 \begin{verbatim}
-    SUBROUTINE gridDefXsize (INTEGER gridID, INTEGER*8 xsize)
+    SUBROUTINE gridDefXsize (INTEGER gridID, INTEGER xsize)
 \end{verbatim}
 
 Define the size of a X-axis.
@@ -266,7 +266,7 @@ Define the name of a Y-axis.
 \section*{\tt \htmlref{gridDefYsize}{gridDefYsize}}
 
 \begin{verbatim}
-    SUBROUTINE gridDefYsize (INTEGER gridID, INTEGER*8 ysize)
+    SUBROUTINE gridDefYsize (INTEGER gridID, INTEGER ysize)
 \end{verbatim}
 
 Define the size of a Y-axis.
@@ -473,7 +473,7 @@ Get the units of a X-axis.
 \section*{\tt \htmlref{gridInqXval}{gridInqXval}}
 
 \begin{verbatim}
-    DOUBLEPRECISION FUNCTION gridInqXval (INTEGER gridID, INTEGER*8 index)
+    DOUBLEPRECISION FUNCTION gridInqXval (INTEGER gridID, INTEGER index)
 \end{verbatim}
 
 Get one value of a X-axis.
@@ -554,7 +554,7 @@ Get the units of a Y-axis.
 \section*{\tt \htmlref{gridInqYval}{gridInqYval}}
 
 \begin{verbatim}
-    DOUBLEPRECISION FUNCTION gridInqYval (INTEGER gridID, INTEGER*8 index)
+    DOUBLEPRECISION FUNCTION gridInqYval (INTEGER gridID, INTEGER index)
 \end{verbatim}
 
 Get one value of a Y-axis.
@@ -699,7 +699,7 @@ Create a new dataset.
 
 \begin{verbatim}
     SUBROUTINE streamReadVar (INTEGER streamID, INTEGER varID,
-                              DOUBLEPRECISION data(*), INTEGER*8 nmiss)
+                              DOUBLEPRECISION data(*), INTEGER nmiss)
 \end{verbatim}
 
 Read a variable.
@@ -709,7 +709,7 @@ Read a variable.
 
 \begin{verbatim}
     SUBROUTINE streamReadVarSlice (INTEGER streamID, INTEGER varID, INTEGER levelID,
-                                   DOUBLEPRECISION data(*), INTEGER*8 nmiss)
+                                   DOUBLEPRECISION data(*), INTEGER nmiss)
 \end{verbatim}
 
 Read a horizontal slice of a variable.
@@ -728,7 +728,7 @@ Synchronize an Open Dataset to Disk.
 
 \begin{verbatim}
     SUBROUTINE streamWriteVar (INTEGER streamID, INTEGER varID,
-                               DOUBLEPRECISION data(*), INTEGER*8 nmiss)
+                               DOUBLEPRECISION data(*), INTEGER nmiss)
 \end{verbatim}
 
 Write a variable.
@@ -738,7 +738,7 @@ Write a variable.
 
 \begin{verbatim}
     SUBROUTINE streamWriteVarSlice (INTEGER streamID, INTEGER varID, INTEGER levelID,
-                                    DOUBLEPRECISION data(*), INTEGER*8 nmiss)
+                                    DOUBLEPRECISION data(*), INTEGER nmiss)
 \end{verbatim}
 
 Write a horizontal slice of a variable.
