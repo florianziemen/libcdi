@@ -6,7 +6,7 @@
       IMPLICIT NONE
 
       INTEGER nlev, nts
-      INTEGER*8 nlon, nlat, nmiss
+      INTEGER nlon, nlat, nmiss
       PARAMETER (nlon = 12)   ! Number of longitudes
       PARAMETER (nlat =  6)   ! Number of latitudes
       PARAMETER (nlev =  5)   ! Number of levels

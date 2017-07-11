@@ -8,7 +8,7 @@ PROGRAM CDIREAD
   INTEGER :: vdate, vtime, status, ilev
   INTEGER :: streamID, varID, levelID, gridID, zaxisID
   INTEGER :: tsID, vlistID, taxisID
-  INTEGER*8 :: nmiss
+  INTEGER :: nmiss
   REAL*8, ALLOCATABLE :: field(:,:)
   CHARACTER(len=256) :: name, longname, units
 

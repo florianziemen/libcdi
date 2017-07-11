@@ -14,7 +14,7 @@
       INTEGER gridID, zaxisID1, zaxisID2, taxisID
       INTEGER vlistID, varID1, varID2, streamID, tsID
       INTEGER status, vdate, vtime
-      INTEGER*8 nmiss
+      INTEGER nmiss
       REAL*8 var1(nlon*nlat), var2(nlon*nlat*nlev)
 
 !     Open the dataset
