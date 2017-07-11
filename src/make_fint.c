@@ -107,6 +107,12 @@ typedef int (*cfPrologueEmitter)(FILE *outfp, size_t argNum);
 static int cfMPICommConvert(FILE *outfp, const char *argName,
                             size_t argNameLen, enum conversionType part);
 
+static int cfSizetConvert(FILE *outfp, const char *argName,
+                            size_t argNameLen, enum conversionType part);
+
+static int cfSizetpConvert(FILE *outfp, const char *argName,
+                            size_t argNameLen, enum conversionType part);
+
 static int cfXtIdxlistConvert(FILE *outfp, const char *argName,
                             size_t argNameLen, enum conversionType part);
 
@@ -156,8 +162,9 @@ static struct symbol funArgSym[]
         "^"WS"*(const"WS"+)?float"WS"+"SYMRE"?"WS"*[,\\)]", 2, 0, 0 },
       { "DOUBLEPRECISION", "DOUBLE",  "%sdouble %.*s",
         "^"WS"*(const"WS"+)?double"WS"+"SYMRE"?"WS"*[,\\)]", 2, 0, 0 },
-      { "INTEGER*8",       "LONG",    "%ssize_t %.*s",
-        "^"WS"*(const"WS"+)?size_t("WS"+"SYMRE")?"WS"*[,\\)]", 3, 0, 0 },
+      { "INTEGER",         "INT",     "%ssize_t %.*s",
+        "^"WS"*(const"WS"+)?size_t("WS"+"SYMRE")?"WS"*[,\\)]", 3, 1, 0,
+        cfSizetConvert, "%sint %.*s" },
       { "INTEGER",         "INT", "%sMPI_Comm %.*s",
         "^"WS"*MPI_Comm"WS"+"SYMRE"?"WS"*[,\\)]", 1, 1, 0,
         cfMPICommConvert, "%sint %.*s" },
@@ -168,8 +175,9 @@ static struct symbol funArgSym[]
         "^"WS"*const"WS"+void"WS"*\\*"WS"*"SYMRE"?"WS"*[,\\)]", 1, 0, 0 },
       { "INTEGER",         "PINT",    "%sint *%.*s",
         "^"WS"*(const"WS"+)?int"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2, 0, 0 },
-      { "INTEGER*8",       "PLONG",    "%ssize_t *%.*s",
-        "^"WS"*(const"WS"+)?size_t"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2, 0, 0 },
+      { "INTEGER",         "PINT",    "%ssize_t *%.*s",
+        "^"WS"*(const"WS"+)?size_t"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2, 1, 0,
+        cfSizetpConvert, "%sint *%.*s"},
       { "REAL",            "FLOATV",  "%sfloat %.*s[]",
         "^"WS"*(const"WS"+)?float("WS"+"SYMRE")?"WS"*"ARRAY_BOUND
         "[,\\)]", 3, 0, 0 },
@@ -1198,6 +1206,42 @@ reCompile(regex_t *restrict RE, const char *restrict REstring,
         }
     }
   return errcode;
+}
+
+/* emit conversion code for size_t argument */
+static int cfSizetConvert(FILE *outfp, const char *argName,
+                            size_t argNameLen, enum conversionType part)
+{
+  int retval = 0;
+  switch (part)
+    {
+    case CONV_ARG:
+      retval
+        = fprintf(outfp, "size_t_f2c(%.*s)", (int)argNameLen, argName);
+      break;
+    case CONV_RET:
+      retval = fprintf(outfp, "size_t_c2f(%.*s)", (int)argNameLen, argName);
+      break;
+    }
+  return retval;
+}
+
+/* emit conversion code for size_t* argument */
+static int cfSizetpConvert(FILE *outfp, const char *argName,
+                            size_t argNameLen, enum conversionType part)
+{
+  int retval = 0;
+  switch (part)
+    {
+    case CONV_ARG:
+      retval
+        = fprintf(outfp, "size_t_p_f2c(%.*s)", (int)argNameLen, argName);
+      break;
+    case CONV_RET:
+      retval = fprintf(outfp, "size_t_p_c2f(%.*s)", (int)argNameLen, argName);
+      break;
+    }
+  return retval;
 }
 
 /* emit conversion code for MPI_Comm argument */

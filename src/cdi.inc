@@ -664,28 +664,28 @@
 !                                    (INTEGER         streamID,
 !                                     INTEGER         varID,
 !                                     DOUBLEPRECISION data(*),
-!                                     INTEGER*8       nmiss)
+!                                     INTEGER         nmiss)
       EXTERNAL        streamWriteVar
 
 !                     streamWriteVarF
 !                                    (INTEGER         streamID,
 !                                     INTEGER         varID,
 !                                     REAL            data(*),
-!                                     INTEGER*8       nmiss)
+!                                     INTEGER         nmiss)
       EXTERNAL        streamWriteVarF
 
 !                     streamReadVar
 !                                    (INTEGER         streamID,
 !                                     INTEGER         varID,
 !                                     DOUBLEPRECISION data(*),
-!                                     INTEGER*8       nmiss)
+!                                     INTEGER         nmiss)
       EXTERNAL        streamReadVar
 
 !                     streamReadVarF
 !                                    (INTEGER         streamID,
 !                                     INTEGER         varID,
 !                                     REAL            data(*),
-!                                     INTEGER*8       nmiss)
+!                                     INTEGER         nmiss)
       EXTERNAL        streamReadVarF
 
 !                     streamWriteVarSlice
@@ -693,7 +693,7 @@
 !                                     INTEGER         varID,
 !                                     INTEGER         levelID,
 !                                     DOUBLEPRECISION data(*),
-!                                     INTEGER*8       nmiss)
+!                                     INTEGER         nmiss)
       EXTERNAL        streamWriteVarSlice
 
 !                     streamWriteVarSliceF
@@ -701,7 +701,7 @@
 !                                     INTEGER         varID,
 !                                     INTEGER         levelID,
 !                                     REAL            data(*),
-!                                     INTEGER*8       nmiss)
+!                                     INTEGER         nmiss)
       EXTERNAL        streamWriteVarSliceF
 
 !                     streamReadVarSlice
@@ -709,7 +709,7 @@
 !                                     INTEGER         varID,
 !                                     INTEGER         levelID,
 !                                     DOUBLEPRECISION data(*),
-!                                     INTEGER*8       nmiss)
+!                                     INTEGER         nmiss)
       EXTERNAL        streamReadVarSlice
 
 !                     streamReadVarSliceF
@@ -717,7 +717,7 @@
 !                                     INTEGER         varID,
 !                                     INTEGER         levelID,
 !                                     REAL            data(*),
-!                                     INTEGER*8       nmiss)
+!                                     INTEGER         nmiss)
       EXTERNAL        streamReadVarSliceF
 
 !                     streamWriteVarChunk
@@ -725,7 +725,7 @@
 !                                     INTEGER         varID,
 !                                     INTEGER         rect(2,3),
 !                                     DOUBLEPRECISION data(*),
-!                                     INTEGER*8       nmiss)
+!                                     INTEGER         nmiss)
       EXTERNAL        streamWriteVarChunk
 
 !
@@ -746,25 +746,25 @@
 !                     streamWriteRecord
 !                                    (INTEGER         streamID,
 !                                     DOUBLEPRECISION data(*),
-!                                     INTEGER*8       nmiss)
+!                                     INTEGER         nmiss)
       EXTERNAL        streamWriteRecord
 
 !                     streamWriteRecordF
 !                                    (INTEGER         streamID,
 !                                     REAL            data(*),
-!                                     INTEGER*8       nmiss)
+!                                     INTEGER         nmiss)
       EXTERNAL        streamWriteRecordF
 
 !                     streamReadRecord
 !                                    (INTEGER         streamID,
 !                                     DOUBLEPRECISION data(*),
-!                                     INTEGER*8       nmiss)
+!                                     INTEGER         nmiss)
       EXTERNAL        streamReadRecord
 
 !                     streamReadRecordF
 !                                    (INTEGER         streamID,
 !                                     REAL            data(*),
-!                                     INTEGER*8       nmiss)
+!                                     INTEGER         nmiss)
       EXTERNAL        streamReadRecordF
 
 !                     streamCopyRecord
@@ -1503,7 +1503,7 @@
 
       INTEGER         gridCreate
 !                                    (INTEGER         gridtype,
-!                                     INTEGER*8       size)
+!                                     INTEGER         size)
       EXTERNAL        gridCreate
 
 !                     gridDestroy
@@ -1537,7 +1537,7 @@
 
 !                     gridDefXsize
 !                                    (INTEGER         gridID,
-!                                     INTEGER*8       xsize)
+!                                     INTEGER         xsize)
       EXTERNAL        gridDefXsize
 
       INTEGER         gridInqXsize
@@ -1546,7 +1546,7 @@
 
 !                     gridDefYsize
 !                                    (INTEGER         gridID,
-!                                     INTEGER*8       ysize)
+!                                     INTEGER         ysize)
       EXTERNAL        gridDefYsize
 
       INTEGER         gridInqYsize
@@ -1739,12 +1739,12 @@
 
       DOUBLEPRECISION gridInqXval
 !                                    (INTEGER         gridID,
-!                                     INTEGER*8       index)
+!                                     INTEGER         index)
       EXTERNAL        gridInqXval
 
       DOUBLEPRECISION gridInqYval
 !                                    (INTEGER         gridID,
-!                                     INTEGER*8       index)
+!                                     INTEGER         index)
       EXTERNAL        gridInqYval
 
       DOUBLEPRECISION gridInqXinc

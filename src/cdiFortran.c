@@ -149,24 +149,76 @@ FCALLSCFUN1 (INT, streamInqNvars, STREAMINQNVARS, streaminqnvars, INT)
 
 /*  STREAM var I/O routines (random access)  */
 
-FCALLSCSUB4 (streamWriteVar, STREAMWRITEVAR, streamwritevar, INT, INT, DOUBLEV, LONG)
-FCALLSCSUB4 (streamWriteVarF, STREAMWRITEVARF, streamwritevarf, INT, INT, FLOATV, LONG)
-FCALLSCSUB4 (streamReadVar, STREAMREADVAR, streamreadvar, INT, INT, DOUBLEV, PLONG)
-FCALLSCSUB4 (streamReadVarF, STREAMREADVARF, streamreadvarf, INT, INT, FLOATV, PLONG)
-FCALLSCSUB5 (streamWriteVarSlice, STREAMWRITEVARSLICE, streamwritevarslice, INT, INT, INT, DOUBLEV, LONG)
-FCALLSCSUB5 (streamWriteVarSliceF, STREAMWRITEVARSLICEF, streamwritevarslicef, INT, INT, INT, FLOATV, LONG)
-FCALLSCSUB5 (streamReadVarSlice, STREAMREADVARSLICE, streamreadvarslice, INT, INT, INT, DOUBLEV, PLONG)
-FCALLSCSUB5 (streamReadVarSliceF, STREAMREADVARSLICEF, streamreadvarslicef, INT, INT, INT, FLOATV, PLONG)
-FCALLSCSUB5 (streamWriteVarChunk, STREAMWRITEVARCHUNK, streamwritevarchunk, INT, INT, INTVV, DOUBLEV, LONG)
+static void streamWriteVar_fwrap(int streamID, int varID, const double data[], int nmiss)
+{
+  streamWriteVar(streamID, varID, data, size_t_f2c(nmiss));
+}
+FCALLSCSUB4 (streamWriteVar_fwrap, STREAMWRITEVAR, streamwritevar, INT, INT, DOUBLEV, INT)
+static void streamWriteVarF_fwrap(int streamID, int varID, const float data[], int nmiss)
+{
+  streamWriteVarF(streamID, varID, data, size_t_f2c(nmiss));
+}
+FCALLSCSUB4 (streamWriteVarF_fwrap, STREAMWRITEVARF, streamwritevarf, INT, INT, FLOATV, INT)
+static void streamReadVar_fwrap(int streamID, int varID, double data[], int *nmiss)
+{
+  streamReadVar(streamID, varID, data, size_t_p_f2c(nmiss));
+}
+FCALLSCSUB4 (streamReadVar_fwrap, STREAMREADVAR, streamreadvar, INT, INT, DOUBLEV, PINT)
+static void streamReadVarF_fwrap(int streamID, int varID, float data[], int *nmiss)
+{
+  streamReadVarF(streamID, varID, data, size_t_p_f2c(nmiss));
+}
+FCALLSCSUB4 (streamReadVarF_fwrap, STREAMREADVARF, streamreadvarf, INT, INT, FLOATV, PINT)
+static void streamWriteVarSlice_fwrap(int streamID, int varID, int levelID, const double data[], int nmiss)
+{
+  streamWriteVarSlice(streamID, varID, levelID, data, size_t_f2c(nmiss));
+}
+FCALLSCSUB5 (streamWriteVarSlice_fwrap, STREAMWRITEVARSLICE, streamwritevarslice, INT, INT, INT, DOUBLEV, INT)
+static void streamWriteVarSliceF_fwrap(int streamID, int varID, int levelID, const float data[], int nmiss)
+{
+  streamWriteVarSliceF(streamID, varID, levelID, data, size_t_f2c(nmiss));
+}
+FCALLSCSUB5 (streamWriteVarSliceF_fwrap, STREAMWRITEVARSLICEF, streamwritevarslicef, INT, INT, INT, FLOATV, INT)
+static void streamReadVarSlice_fwrap(int streamID, int varID, int levelID, double data[], int *nmiss)
+{
+  streamReadVarSlice(streamID, varID, levelID, data, size_t_p_f2c(nmiss));
+}
+FCALLSCSUB5 (streamReadVarSlice_fwrap, STREAMREADVARSLICE, streamreadvarslice, INT, INT, INT, DOUBLEV, PINT)
+static void streamReadVarSliceF_fwrap(int streamID, int varID, int levelID, float data[], int *nmiss)
+{
+  streamReadVarSliceF(streamID, varID, levelID, data, size_t_p_f2c(nmiss));
+}
+FCALLSCSUB5 (streamReadVarSliceF_fwrap, STREAMREADVARSLICEF, streamreadvarslicef, INT, INT, INT, FLOATV, PINT)
+static void streamWriteVarChunk_fwrap(int streamID, int varID, const int rect[3][2], const double data[], int nmiss)
+{
+  streamWriteVarChunk(streamID, varID, rect, data, size_t_f2c(nmiss));
+}
+FCALLSCSUB5 (streamWriteVarChunk_fwrap, STREAMWRITEVARCHUNK, streamwritevarchunk, INT, INT, INTVV, DOUBLEV, INT)
 
 /*  STREAM record I/O routines (sequential access)  */
 
 FCALLSCSUB3 (streamDefRecord, STREAMDEFRECORD, streamdefrecord, INT, INT, INT)
 FCALLSCSUB3 (streamInqRecord, STREAMINQRECORD, streaminqrecord, INT, PINT, PINT)
-FCALLSCSUB3 (streamWriteRecord, STREAMWRITERECORD, streamwriterecord, INT, DOUBLEV, LONG)
-FCALLSCSUB3 (streamWriteRecordF, STREAMWRITERECORDF, streamwriterecordf, INT, FLOATV, LONG)
-FCALLSCSUB3 (streamReadRecord, STREAMREADRECORD, streamreadrecord, INT, DOUBLEV, PLONG)
-FCALLSCSUB3 (streamReadRecordF, STREAMREADRECORDF, streamreadrecordf, INT, FLOATV, PLONG)
+static void streamWriteRecord_fwrap(int streamID, const double data[], int nmiss)
+{
+  streamWriteRecord(streamID, data, size_t_f2c(nmiss));
+}
+FCALLSCSUB3 (streamWriteRecord_fwrap, STREAMWRITERECORD, streamwriterecord, INT, DOUBLEV, INT)
+static void streamWriteRecordF_fwrap(int streamID, const float data[], int nmiss)
+{
+  streamWriteRecordF(streamID, data, size_t_f2c(nmiss));
+}
+FCALLSCSUB3 (streamWriteRecordF_fwrap, STREAMWRITERECORDF, streamwriterecordf, INT, FLOATV, INT)
+static void streamReadRecord_fwrap(int streamID, double data[], int *nmiss)
+{
+  streamReadRecord(streamID, data, size_t_p_f2c(nmiss));
+}
+FCALLSCSUB3 (streamReadRecord_fwrap, STREAMREADRECORD, streamreadrecord, INT, DOUBLEV, PINT)
+static void streamReadRecordF_fwrap(int streamID, float data[], int *nmiss)
+{
+  streamReadRecordF(streamID, data, size_t_p_f2c(nmiss));
+}
+FCALLSCSUB3 (streamReadRecordF_fwrap, STREAMREADRECORDF, streamreadrecordf, INT, FLOATV, PINT)
 FCALLSCSUB2 (streamCopyRecord, STREAMCOPYRECORD, streamcopyrecord, INT, INT)
 
 /*  File driven I/O (may yield better performance than using the streamXXX functions)  */
@@ -317,7 +369,13 @@ FCALLSCFUN2 (INT, gridInqMaskGME, GRIDINQMASKGME, gridinqmaskgme, INT, INTV)
 FCALLSCSUB2 (gridDefMask, GRIDDEFMASK, griddefmask, INT, INTV)
 FCALLSCFUN2 (INT, gridInqMask, GRIDINQMASK, gridinqmask, INT, INTV)
 FCALLSCSUB2 (gridPrint, GRIDPRINT, gridprint, INT, INT)
-FCALLSCFUN2 (INT, gridCreate, GRIDCREATE, gridcreate, INT, LONG)
+static int gridCreate_fwrap(int gridtype, int size)
+{
+  int v;
+  v = gridCreate(gridtype, size_t_f2c(size));
+  return v;
+}
+FCALLSCFUN2 (INT, gridCreate_fwrap, GRIDCREATE, gridcreate, INT, INT)
 FCALLSCSUB1 (gridDestroy, GRIDDESTROY, griddestroy, INT)
 FCALLSCFUN1 (INT, gridDuplicate, GRIDDUPLICATE, gridduplicate, INT)
 FCALLSCSUB2 (gridDefProj, GRIDDEFPROJ, griddefproj, INT, INT)
@@ -325,9 +383,17 @@ FCALLSCFUN1 (INT, gridInqProj, GRIDINQPROJ, gridinqproj, INT)
 FCALLSCFUN1 (INT, gridInqProjType, GRIDINQPROJTYPE, gridinqprojtype, INT)
 FCALLSCFUN1 (INT, gridInqType, GRIDINQTYPE, gridinqtype, INT)
 FCALLSCFUN1 (LONG, gridInqSize, GRIDINQSIZE, gridinqsize, INT)
-FCALLSCSUB2 (gridDefXsize, GRIDDEFXSIZE, griddefxsize, INT, LONG)
+static void gridDefXsize_fwrap(int gridID, int xsize)
+{
+  gridDefXsize(gridID, size_t_f2c(xsize));
+}
+FCALLSCSUB2 (gridDefXsize_fwrap, GRIDDEFXSIZE, griddefxsize, INT, INT)
 FCALLSCFUN1 (LONG, gridInqXsize, GRIDINQXSIZE, gridinqxsize, INT)
-FCALLSCSUB2 (gridDefYsize, GRIDDEFYSIZE, griddefysize, INT, LONG)
+static void gridDefYsize_fwrap(int gridID, int ysize)
+{
+  gridDefYsize(gridID, size_t_f2c(ysize));
+}
+FCALLSCSUB2 (gridDefYsize_fwrap, GRIDDEFYSIZE, griddefysize, INT, INT)
 FCALLSCFUN1 (LONG, gridInqYsize, GRIDINQYSIZE, gridinqysize, INT)
 FCALLSCSUB2 (gridDefNP, GRIDDEFNP, griddefnp, INT, INT)
 FCALLSCFUN1 (INT, gridInqNP, GRIDINQNP, gridinqnp, INT)
@@ -363,8 +429,20 @@ FCALLSCSUB2 (gridInqXstdname, GRIDINQXSTDNAME, gridinqxstdname, INT, PSTRING)
 FCALLSCSUB2 (gridInqYstdname, GRIDINQYSTDNAME, gridinqystdname, INT, PSTRING)
 FCALLSCSUB2 (gridDefPrec, GRIDDEFPREC, griddefprec, INT, INT)
 FCALLSCFUN1 (INT, gridInqPrec, GRIDINQPREC, gridinqprec, INT)
-FCALLSCFUN2 (DOUBLE, gridInqXval, GRIDINQXVAL, gridinqxval, INT, LONG)
-FCALLSCFUN2 (DOUBLE, gridInqYval, GRIDINQYVAL, gridinqyval, INT, LONG)
+static double gridInqXval_fwrap(int gridID, int index)
+{
+  double v;
+  v = gridInqXval(gridID, size_t_f2c(index));
+  return v;
+}
+FCALLSCFUN2 (DOUBLE, gridInqXval_fwrap, GRIDINQXVAL, gridinqxval, INT, INT)
+static double gridInqYval_fwrap(int gridID, int index)
+{
+  double v;
+  v = gridInqYval(gridID, size_t_f2c(index));
+  return v;
+}
+FCALLSCFUN2 (DOUBLE, gridInqYval_fwrap, GRIDINQYVAL, gridinqyval, INT, INT)
 FCALLSCFUN1 (DOUBLE, gridInqXinc, GRIDINQXINC, gridinqxinc, INT)
 FCALLSCFUN1 (DOUBLE, gridInqYinc, GRIDINQYINC, gridinqyinc, INT)
 FCALLSCFUN1 (INT, gridIsCircular, GRIDISCIRCULAR, gridiscircular, INT)
