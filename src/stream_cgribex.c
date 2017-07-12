@@ -517,6 +517,8 @@ void cgribexDecodeHeader(int *isec0, int *isec1, int *isec2, double *fsec2,
   int ipunp = 0, iword = 0;
 
   memset(isec1, 0, 256*sizeof(int));
+  memset(isec2, 0, 32*sizeof(int));
+  isec2[0] = -1; // default generic grid
 
   gribExDP(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, fsec4,
 	   ipunp, (int *) gribbuffer, recsize, &iword, "J", iret);
