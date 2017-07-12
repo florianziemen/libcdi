@@ -518,10 +518,11 @@ void cgribexDecodeHeader(int *isec0, int *isec1, int *isec2, double *fsec2,
 
   memset(isec1, 0, 256*sizeof(int));
   memset(isec2, 0, 32*sizeof(int));
-  isec2[0] = -1; // default generic grid
 
   gribExDP(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, fsec4,
 	   ipunp, (int *) gribbuffer, recsize, &iword, "J", iret);
+
+  if ( !(ISEC1_Sec2Or3Flag & 128) ) isec2[0] = -1; // default generic grid
 
   *lmv = 0;
 
@@ -1343,10 +1344,7 @@ int cgribexDecode(int memtype, void *gribbuffer, int gribsize, void *data, long 
     gribExDP(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, (double*) data,
              (int) datasize, (int*) gribbuffer, gribsize, &iword, hoper, &iret);
 
-  if ( ISEC1_Sec2Or3Flag & 64 )
-    *nmiss = ISEC4_NumValues - ISEC4_NumNonMissValues;
-  else
-    *nmiss = 0;
+  *nmiss = (ISEC1_Sec2Or3Flag & 64) ? ISEC4_NumValues - ISEC4_NumNonMissValues : 0;
 
   if ( ISEC1_CenterID == 215 && (isec1[34] != 0 && isec1[34] != 255) )
     {
@@ -1857,10 +1855,15 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
 	ISEC2_GME_BFlag  = 0;
 	break;
       }
+    case GRID_GENERIC:
+      {
+        ISEC1_Sec2Or3Flag = 0;
+	break;
+      }
     default:
       {
-	Warning("The CGRIBEX library can not store fields on the used grid!");
-	Error("Unsupported grid type: %s", gridNamePtr(gridtype));
+        ISEC1_Sec2Or3Flag = 0;
+	Warning("CGRIBEX library doesn't support %s grids, grid information will be lost!", gridNamePtr(gridtype));
 	break;
       }
     }
