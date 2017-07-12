@@ -10,6 +10,9 @@
 
 #if defined (HAVE_CF_INTERFACE)
 
+#include <limits.h>
+#include <assert.h>
+
 #if ! defined (__CFORTRAN_LOADED)
 #  if defined __clang__
 #    pragma GCC diagnostic push
@@ -25,6 +28,13 @@
 #if defined __clang__
 #  pragma GCC diagnostic ignored "-Wmissing-prototypes"
 #endif
+
+static
+int size_t_c2f(size_t value_size_t)
+{
+  assert(value_size_t < INT_MAX);
+  return (int) value_size_t;
+}
 
 
 /*  Byte order  */
