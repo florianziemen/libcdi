@@ -979,8 +979,16 @@ void cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDelet
           cdfClose(fileID);
           if (streamptr->ntsteps == 0)
             {
-              Free(streamptr->tsteps[0].records);
-              Free(streamptr->tsteps[0].recIDs);
+              if ( streamptr->tsteps[0].records )
+                {
+                  Free(streamptr->tsteps[0].records);
+                  streamptr->tsteps[0].records = NULL;
+                }
+              if ( streamptr->tsteps[0].recIDs )
+                {
+                  Free(streamptr->tsteps[0].recIDs);
+                  streamptr->tsteps[0].recIDs = NULL;
+                }
             }
           break;
         }
