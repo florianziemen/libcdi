@@ -3,6 +3,10 @@
         * using CGRIBEX library version 1.8.1
 	* Version 1.9.0 released
 
+2017-07-18  Uwe Schulzweida
+
+	* cdfDefVarMissval: behavior of _FillValue handling has been changed in netCDF4 (bug fix)
+
 2017-07-12  Uwe Schulzweida
 
         * grib1(cgribex): added support for GRIB1 records without GridDecriptionSection
