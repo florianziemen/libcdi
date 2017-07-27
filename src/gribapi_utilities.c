@@ -427,7 +427,7 @@ int gribapiGetTsteptype(grib_handle *gh)
                 {
                   if (CDI_Debug)
                       Warning("timeRangeIND = %d;  stepType= %s; tsteptype=%d unsupported timeRangeIND at the moment, set to instant!", timeRangeIND, stepType, tsteptype);
-                  lprint = FALSE;
+                  lprint = false;
                 }
                 break;
           }

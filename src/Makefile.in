@@ -339,6 +339,8 @@ DEPDIR = @DEPDIR@
 DLLTOOL = @DLLTOOL@
 DSYMUTIL = @DSYMUTIL@
 DUMPBIN = @DUMPBIN@
+ECCODES_INCLUDE = @ECCODES_INCLUDE@
+ECCODES_LIBS = @ECCODES_LIBS@
 ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
 ECHO_T = @ECHO_T@
@@ -541,7 +543,7 @@ libcdi_la_USE_FC_extra_sources = \
 	cdiFortran.c
 
 
-# these only contain code iff grib_api is available
+# these only contain code if grib_api is available
 libcdi_la_HAVE_LIBGRIB_API_extra_sources = \
 	gribapi_utilities.c stream_gribapi.c
 
@@ -945,8 +947,8 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
-@ENABLE_CDI_LIB_FALSE@install-exec-local:
 @ENABLE_CDI_LIB_FALSE@uninstall-local:
+@ENABLE_CDI_LIB_FALSE@install-exec-local:
 clean: clean-am
 
 clean-am: clean-generic clean-libLTLIBRARIES clean-libtool \

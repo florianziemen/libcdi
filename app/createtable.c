@@ -22,13 +22,13 @@ static void usage(void)
         "   -version      display version number\n", stderr);
 }
 
+
 int main(int argc, char *argv[])
 {
   int c;
   char  *cstring;
   char *ifile = NULL, *ofile = NULL;
   int debug = 0;
-  int tableID;
 
 
   Progname = argv[0];
@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
   /*
   if ( debug ) cdiDebug(debug);
   */
-  tableID = tableRead(ifile);
+  int tableID = tableRead(ifile);
   if ( CDI_Debug )
     Message("write parameter table %d to %s", tableID, ofile);
   FILE *ptfp = (ofile[0] == '-' && ofile[1] == '\0')?stdout:fopen(ofile, "w");

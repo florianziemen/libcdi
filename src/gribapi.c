@@ -15,7 +15,7 @@
 
 static char gribapi_libvers[64] = "";
 #if  defined  (HAVE_LIBGRIB_API)
-static int gribapi_libvers_init;
+static bool gribapi_libvers_init;
 #endif
 
 
@@ -43,7 +43,7 @@ const char *gribapiLibraryVersionString(void)
       gribapiLibraryVersion(&major_version, &minor_version, &revision_version);
 
       sprintf(gribapi_libvers, "%d.%d.%d", major_version, minor_version, revision_version);
-      gribapi_libvers_init = 1;
+      gribapi_libvers_init = true;
     }
 #endif
 
@@ -76,7 +76,7 @@ void gribContainersNew(stream_t * streamptr)
           for ( int levelID = 0; levelID < nlevs; ++levelID )
             {
               gribContainers[varID][levelID].gribHandle = gribHandleNew(editionNumber);
-              gribContainers[varID][levelID].init = FALSE;
+              gribContainers[varID][levelID].init = false;
             }
 	}
 
@@ -88,7 +88,7 @@ void gribContainersNew(stream_t * streamptr)
       for ( int varID = 0; varID < nvars; ++varID )
         {
           gribContainers[varID].gribHandle = gribHandleNew(editionNumber);
-          gribContainers[varID].init = FALSE;
+          gribContainers[varID].init = false;
 	}
 
       streamptr->gribContainers = (void *) gribContainers;

@@ -1,10 +1,10 @@
 ! This file was automatically generated, don't edit!
 !
-! Fortran interface for CDI library version 1.8.1
+! Fortran interface for CDI library version 1.9.0
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   May 2017
+! Uwe Schulzweida, MPI-MET, Hamburg,   July 2017
 !
 
       INTEGER    CDI_MAX_NAME
@@ -39,16 +39,20 @@
       PARAMETER (CDI_ESYSTEM            = -10)
       INTEGER    CDI_EINVAL
       PARAMETER (CDI_EINVAL             = -20)
+      INTEGER    CDI_EISDIR
+      PARAMETER (CDI_EISDIR             = -21)
+      INTEGER    CDI_EISEMPTY
+      PARAMETER (CDI_EISEMPTY           = -22)
       INTEGER    CDI_EUFTYPE
-      PARAMETER (CDI_EUFTYPE            = -21)
+      PARAMETER (CDI_EUFTYPE            = -23)
       INTEGER    CDI_ELIBNAVAIL
-      PARAMETER (CDI_ELIBNAVAIL         = -22)
+      PARAMETER (CDI_ELIBNAVAIL         = -24)
       INTEGER    CDI_EUFSTRUCT
-      PARAMETER (CDI_EUFSTRUCT          = -23)
+      PARAMETER (CDI_EUFSTRUCT          = -25)
       INTEGER    CDI_EUNC4
-      PARAMETER (CDI_EUNC4              = -24)
+      PARAMETER (CDI_EUNC4              = -26)
       INTEGER    CDI_EDIMSIZE
-      PARAMETER (CDI_EDIMSIZE           = -25)
+      PARAMETER (CDI_EDIMSIZE           = -27)
       INTEGER    CDI_ELIMIT
       PARAMETER (CDI_ELIMIT             = -99)
 !
@@ -1372,24 +1376,6 @@
       EXTERNAL        vlistInqVarIntKey
 
 !
-!  needed only for CDO operator after
-!
-      CHARACTER(80)   vlistInqVarNamePtr
-!                                    (INTEGER         vlistID,
-!                                     INTEGER         varID)
-      EXTERNAL        vlistInqVarNamePtr
-
-      CHARACTER(80)   vlistInqVarLongnamePtr
-!                                    (INTEGER         vlistID,
-!                                     INTEGER         varID)
-      EXTERNAL        vlistInqVarLongnamePtr
-
-      CHARACTER(80)   vlistInqVarUnitsPtr
-!                                    (INTEGER         vlistID,
-!                                     INTEGER         varID)
-      EXTERNAL        vlistInqVarUnitsPtr
-
-!
 !  CDI attributes
 !
       INTEGER         cdiInqNatts
@@ -2021,6 +2007,10 @@
 !                                     DOUBLEPRECISION levels(*))
       EXTERNAL        zaxisInqLevels
 
+      INTEGER         zaxisInqCLen
+!                                    (INTEGER         zaxisID)
+      EXTERNAL        zaxisInqCLen
+
 !                     zaxisDefLevel
 !                                    (INTEGER         zaxisID,
 !                                     INTEGER         levelID,
@@ -2434,11 +2424,6 @@
 !
 !  Table routines
 !
-!                     tableWriteC
-!                                    (CHARACTER*(*)   filename,
-!                                     INTEGER         tableID)
-      EXTERNAL        tableWriteC
-
 !                     tableWrite
 !                                    (CHARACTER*(*)   filename,
 !                                     INTEGER         tableID)
@@ -2458,14 +2443,6 @@
 !                                    (INTEGER         tableID)
       EXTERNAL        tableInqNamePtr
 
-!                     tableDefEntry
-!                                    (INTEGER         tableID,
-!                                     INTEGER         code,
-!                                     CHARACTER*(*)   name,
-!                                     CHARACTER*(*)   longname,
-!                                     CHARACTER*(*)   units)
-      EXTERNAL        tableDefEntry
-
       INTEGER         tableInq
 !                                    (INTEGER         modelID,
 !                                     INTEGER         tablenum,
@@ -2483,55 +2460,14 @@
 !                                    (INTEGER         tableID)
       EXTERNAL        tableInqModel
 
-!                     tableInqPar
+!                     tableInqEntry
 !                                    (INTEGER         tableID,
-!                                     INTEGER         code,
+!                                     INTEGER         id,
+!                                     INTEGER         ltype,
 !                                     CHARACTER*(*)   name,
 !                                     CHARACTER*(*)   longname,
 !                                     CHARACTER*(*)   units)
-      EXTERNAL        tableInqPar
-
-      INTEGER         tableInqParCode
-!                                    (INTEGER         tableID,
-!                                     CHARACTER*(*)   name,
-!                                     INTEGER         code)
-      EXTERNAL        tableInqParCode
-
-      INTEGER         tableInqParName
-!                                    (INTEGER         tableID,
-!                                     INTEGER         code,
-!                                     CHARACTER*(*)   name)
-      EXTERNAL        tableInqParName
-
-      INTEGER         tableInqParLongname
-!                                    (INTEGER         tableID,
-!                                     INTEGER         code,
-!                                     CHARACTER*(*)   longname)
-      EXTERNAL        tableInqParLongname
-
-      INTEGER         tableInqParUnits
-!                                    (INTEGER         tableID,
-!                                     INTEGER         code,
-!                                     CHARACTER*(*)   units)
-      EXTERNAL        tableInqParUnits
-
-!
-!  needed only for CDO operator after
-!
-      CHARACTER(80)   tableInqParNamePtr
-!                                    (INTEGER         tableID,
-!                                     INTEGER         parID)
-      EXTERNAL        tableInqParNamePtr
-
-      CHARACTER(80)   tableInqParLongnamePtr
-!                                    (INTEGER         tableID,
-!                                     INTEGER         parID)
-      EXTERNAL        tableInqParLongnamePtr
-
-      CHARACTER(80)   tableInqParUnitsPtr
-!                                    (INTEGER         tableID,
-!                                     INTEGER         parID)
-      EXTERNAL        tableInqParUnitsPtr
+      EXTERNAL        tableInqEntry
 
 !
 !  History routines

@@ -20,6 +20,8 @@ int  vlistInqVarIOrank    ( int, int );
 
 void cdiVlistCreateVarLevInfo(vlist_t *vlistptr, int varID);
 
+const char *vlistInqVarNamePtr(int vlistID, int varID);
+
 #endif
 /*
  * Local Variables:

@@ -517,9 +517,12 @@ void cgribexDecodeHeader(int *isec0, int *isec1, int *isec2, double *fsec2,
   int ipunp = 0, iword = 0;
 
   memset(isec1, 0, 256*sizeof(int));
+  memset(isec2, 0, 32*sizeof(int));
 
   gribExDP(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, fsec4,
 	   ipunp, (int *) gribbuffer, recsize, &iword, "J", iret);
+
+  if ( !(ISEC1_Sec2Or3Flag & 128) ) isec2[0] = -1; // default generic grid
 
   *lmv = 0;
 
@@ -577,7 +580,7 @@ cgribexScanTsFixNtsteps(stream_t *streamptr, off_t recpos)
       if ( tsID != streamptr->rtsteps )
 	Error("Internal error. tsID = %d", tsID);
 
-      streamptr->tsteps[tsID-1].next   = TRUE;
+      streamptr->tsteps[tsID-1].next   = true;
       streamptr->tsteps[tsID].position = recpos;
     }
 }
@@ -652,7 +655,7 @@ int cgribexScanTimestep1(stream_t *streamptr)
     }
 
   unsigned nrecs = 0;
-  while ( TRUE )
+  while ( true )
     {
       recsize = gribGetSize(fileID);
       recpos  = fileGetPos(fileID);
@@ -871,7 +874,7 @@ int cgribexScanTimestep2(stream_t * streamptr)
 
   int nrecs_scanned = nrecords;
   int rindex = 0;
-  while ( TRUE )
+  while ( true )
     {
       if ( rindex > nrecords ) break;
 
@@ -976,7 +979,7 @@ int cgribexScanTimestep2(stream_t * streamptr)
 	    }
 	  else
 	    {
-	      streamptr->tsteps[tsID].records[recID].used = TRUE;
+	      streamptr->tsteps[tsID].records[recID].used = true;
 	      streamptr->tsteps[tsID].recIDs[rindex] = recID;
 	    }
 	}
@@ -991,7 +994,7 @@ int cgribexScanTimestep2(stream_t * streamptr)
 	    }
 	  else
 	    {
-	      streamptr->tsteps[tsID].records[recID].used = TRUE;
+	      streamptr->tsteps[tsID].records[recID].used = true;
 	      streamptr->tsteps[tsID].recIDs[rindex] = recID;
 	    }
 	}
@@ -1114,7 +1117,7 @@ int cgribexScanTimestep(stream_t * streamptr)
 
       nrecs_scanned = streamptr->tsteps[0].nallrecs + streamptr->tsteps[1].nrecs*(tsID-1);
       rindex = 0;
-      while ( TRUE )
+      while ( true )
 	{
 	  if ( rindex > nrecs ) break;
 
@@ -1227,7 +1230,7 @@ int cgribexScanTimestep(stream_t * streamptr)
 
 	  if ( cdiInventoryMode == 1 )
 	    {
-	      streamptr->tsteps[tsID].records[recID].used = TRUE;
+	      streamptr->tsteps[tsID].records[recID].used = true;
 	      streamptr->tsteps[tsID].recIDs[rindex] = recID;
 	    }
 	  else
@@ -1246,7 +1249,7 @@ int cgribexScanTimestep(stream_t * streamptr)
 		}
 	      else
 		{
-		  streamptr->tsteps[tsID].records[recID].used = TRUE;
+		  streamptr->tsteps[tsID].records[recID].used = true;
 		  streamptr->tsteps[tsID].recIDs[rindex] = recID;
 		}
 	    }
@@ -1291,7 +1294,7 @@ int cgribexScanTimestep(stream_t * streamptr)
 	  if ( tsID != streamptr->rtsteps )
 	    Error("Internal error. tsID = %d", tsID);
 
-	  streamptr->tsteps[tsID-1].next   = 1;
+	  streamptr->tsteps[tsID-1].next   = true;
 	  streamptr->tsteps[tsID].position = recpos;
 	}
 
@@ -1341,10 +1344,7 @@ int cgribexDecode(int memtype, void *gribbuffer, int gribsize, void *data, long 
     gribExDP(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, (double*) data,
              (int) datasize, (int*) gribbuffer, gribsize, &iword, hoper, &iret);
 
-  if ( ISEC1_Sec2Or3Flag & 64 )
-    *nmiss = ISEC4_NumValues - ISEC4_NumNonMissValues;
-  else
-    *nmiss = 0;
+  *nmiss = (ISEC1_Sec2Or3Flag & 64) ? ISEC4_NumValues - ISEC4_NumNonMissValues : 0;
 
   if ( ISEC1_CenterID == 215 && (isec1[34] != 0 && isec1[34] != 255) )
     {
@@ -1672,7 +1672,7 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
         }
     }
 
-  ISEC2_Reduced  = FALSE;
+  ISEC2_Reduced  = false;
   ISEC2_ScanFlag = 0;
 
   switch (gridtype)
@@ -1697,7 +1697,7 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
 
 	if ( gridtype == GRID_GAUSSIAN_REDUCED )
 	  {
-	    ISEC2_Reduced = TRUE;
+	    ISEC2_Reduced = true;
 	    nlon = 0;
 	    gridInqRowlon(gridID, ISEC2_RowLonPtr);
 	  }
@@ -1855,10 +1855,15 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
 	ISEC2_GME_BFlag  = 0;
 	break;
       }
+    case GRID_GENERIC:
+      {
+        ISEC1_Sec2Or3Flag = 0;
+	break;
+      }
     default:
       {
-	Warning("The CGRIBEX library can not store fields on the used grid!");
-	Error("Unsupported grid type: %s", gridNamePtr(gridtype));
+        ISEC1_Sec2Or3Flag = 0;
+	Warning("CGRIBEX library doesn't support %s grids, grid information will be lost!", gridNamePtr(gridtype));
 	break;
       }
     }

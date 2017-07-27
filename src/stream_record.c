@@ -24,7 +24,7 @@ void recordInitEntry(record_t *record)
   record->size     = 0;
   record->param    = 0;
   record->ilevel   = CDI_UNDEFID;
-  record->used     = FALSE;
+  record->used     = false;
   record->varID    = CDI_UNDEFID;
   record->levelID  = CDI_UNDEFID;
   memset(record->varname, 0, sizeof(record->varname));
@@ -366,7 +366,7 @@ void cdi_create_records(stream_t *streamptr, int tsID)
                 {
                   destTstep->records[recID].position = CDI_UNDEFID;
                   destTstep->records[recID].size     = 0;
-                  destTstep->records[recID].used     = FALSE;
+                  destTstep->records[recID].used     = false;
                 }
             }
 	}

@@ -199,6 +199,8 @@ int setBaseTime(const char *timeunits, taxis_t *taxis)
   int rdate = -1, rtime = -1;
 
   size_t len = strlen(timeunits);
+  while ( isspace(*timeunits) && len ) { timeunits++; len--; }
+
   char *restrict tu = (char *)Malloc((len+1) * sizeof(char));
 
   for ( size_t i = 0; i < len; i++ ) tu[i] = (char)tolower((int)timeunits[i]);
@@ -1329,7 +1331,7 @@ void cdf_scan_var_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimi
                   if ( status == NC_NOERR )
                     {
                       cdf_set_var(ncvars, dimvarid, FALSE);
-                      if ( cdiIgnoreAttCoordinates == false )
+                      if ( !cdiIgnoreAttCoordinates )
                         {
                           ncvars[ncvarid].coordvarids[i] = dimvarid;
                           ncvars[ncvarid].ncoordvars++;
@@ -1372,7 +1374,7 @@ void cdf_scan_var_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimi
                   if ( status == NC_NOERR )
                     {
                       cdf_set_var(ncvars, dimvarid, FALSE);
-                      //  if ( cdiIgnoreAttCoordinates == FALSE )
+                      //  if ( !cdiIgnoreAttCoordinates )
                         {
                           ncvars[ncvarid].auxvarids[i] = dimvarid;
                           ncvars[ncvarid].nauxvars++;
@@ -1430,9 +1432,8 @@ void cdf_scan_var_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimi
             {
               if ( ncvars[ncvarid].lvalidrange == false )
                 {
-                  extern int cdiIgnoreValidRange;
                   bool lignore = xtypeIsFloat(atttype) != xtypeIsFloat(xtype);
-                  if ( cdiIgnoreValidRange == FALSE && lignore == false )
+                  if ( !cdiIgnoreValidRange && lignore == false )
                     {
                       cdfGetAttDouble(ncid, ncvarid, attname, 2, ncvars[ncvarid].validrange);
                       ncvars[ncvarid].lvalidrange = true;
@@ -1450,9 +1451,8 @@ void cdf_scan_var_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimi
             {
               if ( ncvars[ncvarid].lvalidrange == false )
                 {
-                  extern int cdiIgnoreValidRange;
                   bool lignore = xtypeIsFloat(atttype) != xtypeIsFloat(xtype);
-                  if ( cdiIgnoreValidRange == FALSE && lignore == false )
+                  if ( !cdiIgnoreValidRange && lignore == false )
                     {
                       cdfGetAttDouble(ncid, ncvarid, attname, 1, &(ncvars[ncvarid].validrange)[0]);
                       ncvars[ncvarid].lvalidrange = true;
@@ -1467,9 +1467,8 @@ void cdf_scan_var_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimi
             {
               if ( ncvars[ncvarid].lvalidrange == false )
                 {
-                  extern int cdiIgnoreValidRange;
                   bool lignore = xtypeIsFloat(atttype) != xtypeIsFloat(xtype);
-                  if ( cdiIgnoreValidRange == FALSE && lignore == false )
+                  if ( !cdiIgnoreValidRange && lignore == false )
                     {
                       cdfGetAttDouble(ncid, ncvarid, attname, 1, &(ncvars[ncvarid].validrange)[1]);
                       ncvars[ncvarid].lvalidrange = true;
@@ -2821,7 +2820,7 @@ int cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int 
 	  bool with_bounds = false;
 	  int zdimid = CDI_UNDEFID;
 	  int zvarid = CDI_UNDEFID;
-	  int zsize = 1;
+	  size_t zsize = 1;
           int psvarid = -1;
           int p0varid = -1;
 
@@ -2845,14 +2844,15 @@ int cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int 
                 {
                   // zvarid = ncdims[zdimid].ncvarid;
                   zvarid = (ncvar->zvarid != CDI_UNDEFID) ? ncvar->zvarid : ncdims[zdimid].ncvarid;
-                  zsize  = (int)ncdims[zdimid].len;
+                  zsize  = ncdims[zdimid].len;
                 }
             }
 
-	  if ( CDI_Debug ) Message("nlevs = %d", zsize);
+	  if ( CDI_Debug ) Message("nlevs = %zu", zsize);
 
 	  double *zvar = NULL;
           char **zcvals = NULL;
+          size_t zclength = 0;
 
 	  int zaxisType = CDI_UNDEFID;
 	  if ( zvarid != CDI_UNDEFID ) zaxisType = ncvars[zvarid].zaxistype;
@@ -2880,8 +2880,8 @@ int cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int 
                   if ( ncvars[zvarid].ndims == 2 )
                     {
                       zprec = CDI_DATATYPE_UINT8;
-                      size_t strlength = ncdims[ncvars[zvarid].dimids[1]].len;
-                      cdf_load_cvals(zsize*strlength, zvarid, ncvar, &zcvals, zsize);
+                      zclength = ncdims[ncvars[zvarid].dimids[1]].len;
+                      cdf_load_cvals(zsize*zclength, zvarid, ncvar, &zcvals, zsize);
                     }
                 }
 
@@ -2896,7 +2896,7 @@ int cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int 
 
               if ( zaxisType != ZAXIS_CHAR )
                 {
-                  zvar = (double*) Malloc((size_t)zsize*sizeof(double));
+                  zvar = (double*) Malloc(zsize*sizeof(double));
                   cdf_get_var_double(ncvars[zvarid].ncid, zvarid, zvar);
                 }
 
@@ -2905,16 +2905,16 @@ int cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int 
 		  int nbdims = ncvars[ncvars[zvarid].bounds].ndims;
 		  if ( nbdims == 2 || is_scalar )
 		    {
-		      int nlevel  = is_scalar ? 1 : (int)ncdims[ncvars[ncvars[zvarid].bounds].dimids[0]].len;
+		      size_t nlevel  = is_scalar ? 1 : (int)ncdims[ncvars[ncvars[zvarid].bounds].dimids[0]].len;
 		      int nvertex = (int)ncdims[ncvars[ncvars[zvarid].bounds].dimids[1-is_scalar]].len;
 		      if ( nlevel == zsize && nvertex == 2 )
 			{
 			  with_bounds = true;
-			  lbounds = (double *) Malloc(4 * (size_t)nlevel*sizeof(double));
+			  lbounds = (double *) Malloc(4 * nlevel*sizeof(double));
 			  ubounds = lbounds + nlevel;
 			  double *restrict zbounds = lbounds + 2 * nlevel;
 			  cdf_get_var_double(ncvars[zvarid].ncid, ncvars[zvarid].bounds, zbounds);
-			  for ( int i = 0; i < nlevel; ++i )
+			  for ( size_t i = 0; i < nlevel; ++i )
 			    {
 			      lbounds[i] = zbounds[i*2];
 			      ubounds[i] = zbounds[i*2+1];
@@ -2946,7 +2946,7 @@ int cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int 
               return CDI_EDIMSIZE;
             }
 
-      	  ncvar->zaxisID = varDefZaxis(vlistID, zaxisType, (int) zsize, zvar, (const char **)zcvals, with_bounds, lbounds, ubounds,
+      	  ncvar->zaxisID = varDefZaxis(vlistID, zaxisType, (int) zsize, zvar, (const char **)zcvals, zclength, with_bounds, lbounds, ubounds,
                                        (int)vctsize, vct, pname, plongname, punits, zprec, 1, 0);
 
           int zaxisID = ncvar->zaxisID;
@@ -2979,6 +2979,12 @@ int cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int 
             cdiZaxisDefKeyStr(zaxisID, CDI_KEY_VDIMNAME, strlen(ncdims[vdimid].name)+1, ncdims[vdimid].name);
           */
 	  if ( zvar    ) Free(zvar);
+	  if ( zcvals  )
+            {
+              for ( size_t i = 0; i < zsize; i++ )
+                Free(zcvals[i]);
+              Free(zcvals);
+            }
 	  if ( lbounds ) Free(lbounds);
 
           if ( zvarid != CDI_UNDEFID )
@@ -3223,30 +3229,31 @@ void cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int model
     {
       if ( vlistInqVarCode(vlistID, varID) == -varID-1 )
 	{
-	  const char *pname = vlistInqVarNamePtr(vlistID, varID);
-	  size_t len = strlen(pname);
-	  if ( len > 3 && isdigit((int) pname[3]) )
+          char name[CDI_MAX_NAME]; name[0] = 0;
+	  vlistInqVarName(vlistID, varID, name);
+	  size_t len = strlen(name);
+	  if ( len > 3 && isdigit((int) name[3]) )
 	    {
-	      if ( str_is_equal(pname, "var") )
+	      if ( str_is_equal(name, "var") )
 		{
-		  vlistDefVarCode(vlistID, varID, atoi(pname+3));
+		  vlistDefVarCode(vlistID, varID, atoi(name+3));
                   // vlistDestroyVarName(vlistID, varID);
 		}
 	    }
-	  else if ( len > 4 && isdigit((int) pname[4]) )
+	  else if ( len > 4 && isdigit((int) name[4]) )
 	    {
-	      if ( str_is_equal(pname, "code") )
+	      if ( str_is_equal(name, "code") )
 		{
-		  vlistDefVarCode(vlistID, varID, atoi(pname+4));
+		  vlistDefVarCode(vlistID, varID, atoi(name+4));
 		  // vlistDestroyVarName(vlistID, varID);
 		}
 	    }
-	  else if ( len > 5 && isdigit((int) pname[5]) )
+	  else if ( len > 5 && isdigit((int) name[5]) )
 	    {
-	      if ( str_is_equal(pname, "param") )
+	      if ( str_is_equal(name, "param") )
 		{
 		  int pnum = -1, pcat = 255, pdis = 255;
-		  sscanf(pname+5, "%d.%d.%d", &pnum, &pcat, &pdis);
+		  sscanf(name+5, "%d.%d.%d", &pnum, &pcat, &pdis);
 		  vlistDefVarParam(vlistID, varID, cdiEncodeParam(pnum, pcat, pdis));
                   // vlistDestroyVarName(vlistID, varID);
 		}
@@ -3262,7 +3269,11 @@ void cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int model
       int code = vlistInqVarCode(vlistID, varID);
       if ( cdiDefaultTableID != CDI_UNDEFID )
 	{
-	  if ( tableInqParNamePtr(cdiDefaultTableID, code) )
+          char name[CDI_MAX_NAME]; name[0] = 0;
+          char longname[CDI_MAX_NAME]; longname[0] = 0;
+          char units[CDI_MAX_NAME]; units[0] = 0;
+          tableInqEntry(cdiDefaultTableID, code, -1, name, longname, units);
+	  if ( name[0] )
 	    {
 	      vlistDestroyVarName(vlistID, varID);
 	      vlistDestroyVarLongname(vlistID, varID);
@@ -3270,11 +3281,9 @@ void cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int model
 
 	      if ( varTableID != CDI_UNDEFID )
 		{
-		  vlistDefVarName(vlistID, varID, tableInqParNamePtr(cdiDefaultTableID, code));
-		  if ( tableInqParLongnamePtr(cdiDefaultTableID, code) )
-		    vlistDefVarLongname(vlistID, varID, tableInqParLongnamePtr(cdiDefaultTableID, code));
-		  if ( tableInqParUnitsPtr(cdiDefaultTableID, code) )
-		    vlistDefVarUnits(vlistID, varID, tableInqParUnitsPtr(cdiDefaultTableID, code));
+		  vlistDefVarName(vlistID, varID, name);
+		  if ( longname[0] ) vlistDefVarLongname(vlistID, varID, longname);
+		  if ( units[0] ) vlistDefVarUnits(vlistID, varID, units);
 		}
 	      else
 		{
@@ -3407,11 +3416,12 @@ int find_leadtime(int nvars, ncvar_t *ncvars)
 
   for ( int ncvarid = 0; ncvarid < nvars; ncvarid++ )
     {
-      if ( ncvars[ncvarid].stdname[0] && strcmp(ncvars[ncvarid].stdname, "forecast_period") == 0 )
-        {
-          leadtime_id = ncvarid;
-          break;
-        }
+      if ( ncvars[ncvarid].ndims == 1 )
+        if ( ncvars[ncvarid].stdname[0] && strcmp(ncvars[ncvarid].stdname, "forecast_period") == 0 )
+          {
+            leadtime_id = ncvarid;
+            break;
+          }
     }
 
   return leadtime_id;

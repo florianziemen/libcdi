@@ -22,7 +22,7 @@
 
 typedef struct
 {
-  int      flag;
+  bool     flag;
   int      index;
   int      mlevelID;
   int      flevelID;
@@ -48,7 +48,7 @@ ensinfo_t;
 typedef struct
 {
   bool        isUsed;
-  int         flag;
+  bool        flag;
   int         mvarID;
   int         fvarID;
   int         param;
@@ -65,8 +65,8 @@ typedef struct
   int         productDefinitionTemplate;
   int         chunktype;
   int         xyz;
-  int         missvalused; /* TRUE if missval is defined */
-  int         lvalidrange;
+  bool        missvalused; /* true if missval is defined */
+  bool        lvalidrange;
   char       *name;
   char       *longname;
   char       *stdname;
@@ -122,7 +122,6 @@ vlist_t *vlist_to_pointer(int vlistID);
 void cdiVlistMakeInternal(int vlistID);
 void cdiVlistMakeImmutable(int vlistID);
 void vlistCheckVarID(const char *caller, int vlistID, int varID);
-const char *vlistInqVarStdnamePtr(int vlistID, int varID);
 void     vlistDestroyVarName(int vlistID, int varID);
 void     vlistDestroyVarLongname(int vlistID, int varID);
 void     vlistDestroyVarStdname(int vlistID, int varID);

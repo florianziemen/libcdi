@@ -32,9 +32,9 @@ int cdiNcChunksizehint = CDI_UNDEFID;
 int cdiChunkType       = CDI_CHUNK_GRID;
 int cdiSplitLtype105   = CDI_UNDEFID;
 
-int cdiIgnoreAttCoordinates = FALSE;
-int cdiCoordinatesLonLat    = FALSE;
-int cdiIgnoreValidRange     = FALSE;
+bool cdiIgnoreAttCoordinates = false;
+bool cdiCoordinatesLonLat    = false;
+bool cdiIgnoreValidRange     = false;
 int cdiSkipRecords          = 0;
 int cdiConvention           = CDI_CONVENTION_ECHAM;
 int cdiInventoryMode        = 1;
@@ -314,13 +314,13 @@ void cdiSetChunk(const char *chunkAlgo)
 
 void cdiInitialize(void)
 {
-  static int Init_CDI = FALSE;
-  char *envstr;
-  long value;
+  static bool Init_CDI = false;
 
   if ( ! Init_CDI )
     {
-      Init_CDI = TRUE;
+      Init_CDI = true;
+      char *envstr;
+      long value;
 
 #if  defined  (HAVE_LIBCGRIBEX)
       gribFixZSE(1);   // 1: Fix ZeroShiftError of simple packed spherical harmonics
@@ -370,13 +370,13 @@ void cdiInitialize(void)
       if ( envstr ) cdiSplitLtype105 = atoi(envstr);
 
       envstr = getenv("IGNORE_ATT_COORDINATES");
-      if ( envstr ) cdiIgnoreAttCoordinates = atoi(envstr);
+      if ( envstr ) cdiIgnoreAttCoordinates = atoi(envstr) > 0;
 
       envstr = getenv("CDI_COORDINATES_LONLAT");
-      if ( envstr ) cdiCoordinatesLonLat = atoi(envstr);
+      if ( envstr ) cdiCoordinatesLonLat = atoi(envstr) > 0;
 
       envstr = getenv("IGNORE_VALID_RANGE");
-      if ( envstr ) cdiIgnoreValidRange = atoi(envstr);
+      if ( envstr ) cdiIgnoreValidRange = atoi(envstr) > 0;
 
       envstr = getenv("CDI_SKIP_RECORDS");
       if ( envstr )

@@ -1,5 +1,5 @@
-#ifndef _TABLEPAR_H
-#define _TABLEPAR_H
+#ifndef TABLEPAR_H
+#define TABLEPAR_H
 
 enum {
   TABLE_DUP_NAME = 1 << 0,
@@ -9,17 +9,20 @@ enum {
 
 typedef struct
 {
-  int   id;	     /* Parameter number (GRIB) */
-  int dupflags;      /* keep track of which attributes got strdup'ed */
-  const char *name;	     /* Parameter name */
-  const char *longname;    /* Parameter long name */
-  const char *units;	     /* Parameter units */
+  int id;	        // Parameter number (GRIB)
+  int ltype;	        // Level type (GRIB)
+  int dupflags;         // keep track of which attributes got strdup'ed
+  const char *name;	// Parameter name
+  const char *longname; // Parameter long name
+  const char *units;	// Parameter units
 }
-PAR;
+param_type;
 
 
-static void tableLink(int tableID, const PAR *pars, int npars);
+static void tableLink(int tableID, const param_type *pars, int npars);
 int tableDef(int modelID, int tablegribID, const char *tablename);
+
+int tableInqParCode(int tableID, char *name, int *code);
 
 #endif
 /*

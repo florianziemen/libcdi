@@ -578,7 +578,6 @@ int cmp_varname(const void *s1, const void *s2)
 
 void cdi_generate_vars(stream_t *streamptr)
 {
-  char name[CDI_MAX_NAME], longname[CDI_MAX_NAME], units[CDI_MAX_NAME];
   int vlistID = streamptr->vlistID;
 
   int *varids = (int *) Malloc(varTableUsed*sizeof(int));
@@ -734,7 +733,7 @@ void cdi_generate_vars(stream_t *streamptr)
 
       const char **cvals = NULL;
       const char *unitptr = cdiUnitNamePtr(vartable[varid].level_unit);
-      int zaxisID = varDefZaxis(vlistID, zaxistype, (int)nlevels, dlevels, cvals, lbounds, dlevels1, dlevels2,
+      int zaxisID = varDefZaxis(vlistID, zaxistype, (int)nlevels, dlevels, cvals, 0, lbounds, dlevels1, dlevels2,
                                 (int)Vctsize, Vct, NULL, NULL, unitptr, 0, 0, ltype1);
 
       if ( CDI_cmor_mode && nlevels == 1 && zaxistype != ZAXIS_HYBRID ) zaxisDefScalar(zaxisID);
@@ -794,7 +793,7 @@ void cdi_generate_vars(stream_t *streamptr)
 	  if ( vartable[varid].opt_grib_kvpair[i].keyword )
 	    vlistptr->vars[varID].opt_grib_kvpair[idx].keyword =
 	      strdupx(vartable[varid].opt_grib_kvpair[i].keyword);
-          vlistptr->vars[varID].opt_grib_kvpair[i].update = TRUE;
+          vlistptr->vars[varID].opt_grib_kvpair[i].update = true;
         }
       /* note: if the key is not defined, we do not throw an error! */
 
@@ -802,23 +801,18 @@ void cdi_generate_vars(stream_t *streamptr)
 	{
 	  int pdis, pcat, pnum;
 	  cdiDecodeParam(param, &pnum, &pcat, &pdis);
-	  if ( tableInqParNamePtr(cdiDefaultTableID, pnum) )
+          char name[CDI_MAX_NAME]; name[0] = 0;
+          char longname[CDI_MAX_NAME]; longname[0] = 0;
+          char units[CDI_MAX_NAME]; units[0] = 0;
+          tableInqEntry(cdiDefaultTableID, pnum, -1, name, longname, units);
+	  if ( name[0] )
 	    {
 	      if ( tableID != CDI_UNDEFID )
 		{
-		  strcpy(name, tableInqParNamePtr(cdiDefaultTableID, pnum));
 		  vlistDefVarName(vlistID, varID, name);
-		  if ( tableInqParLongnamePtr(cdiDefaultTableID, pnum) )
-		    {
-		      strcpy(longname, tableInqParLongnamePtr(cdiDefaultTableID, pnum));
-		      vlistDefVarLongname(vlistID, varID, longname);
-		    }
-		  if ( tableInqParUnitsPtr(cdiDefaultTableID, pnum) )
-		    {
-		      strcpy(units, tableInqParUnitsPtr(cdiDefaultTableID, pnum));
-		      vlistDefVarUnits(vlistID, varID, units);
-		    }
-		}
+                  if ( longname[0] ) vlistDefVarLongname(vlistID, varID, longname);
+                  if ( units[0] ) vlistDefVarUnits(vlistID, varID, units);
+                }
 	      else
 		tableID = cdiDefaultTableID;
 	    }
@@ -955,8 +949,7 @@ varDefZAxisSearch(int id, void *res, void *data)
 }
 
 
-int varDefZaxis(int vlistID, int zaxistype, int nlevels, const double *levels, const char **cvals, bool lbounds,
-		const double *levels1, const double *levels2, int vctsize, const double *vct, char *name,
+int varDefZaxis(int vlistID, int zaxistype, int nlevels, const double *levels, const char **cvals, size_t clength, bool lbounds,        const double *levels1, const double *levels2, int vctsize, const double *vct, char *name,
 		const char *longname, const char *units, int prec, int mode, int ltype1)
 {
   /*
@@ -1018,7 +1011,7 @@ int varDefZaxis(int vlistID, int zaxistype, int nlevels, const double *levels, c
 	      zaxisDefUbounds(zaxisID, levels2);
 	    }
 
-          if ( cvals ) zaxisDefCvals(zaxisID, cvals);
+          if ( cvals != NULL && nlevels != 0 && clength != 0 ) zaxisDefCvals(zaxisID, cvals, clength);
 
 	  if ( (zaxistype == ZAXIS_HYBRID || zaxistype == ZAXIS_HYBRID_HALF) && vctsize > 0 )
             zaxisDefVct(zaxisID, vctsize, vct);
@@ -1141,7 +1134,7 @@ void resize_vartable_opt_grib_entries(vartable_t *var, int nentries)
       for (i=var->opt_grib_kvpair_size; i<new_size; i++) {
         tmp[i].int_val =     0;
         tmp[i].dbl_val =     0;
-        tmp[i].update  = FALSE;
+        tmp[i].update  = false;
         tmp[i].keyword =  NULL;
       } // for
       var->opt_grib_kvpair_size = new_size;

@@ -36,11 +36,13 @@ extern "C" {
 #define  CDI_EEOF                  -1   // The end of file was encountered
 #define  CDI_ESYSTEM              -10   // Operating system error
 #define  CDI_EINVAL               -20   // Invalid argument
-#define  CDI_EUFTYPE              -21   // Unsupported file type
-#define  CDI_ELIBNAVAIL           -22   // xxx library not available
-#define  CDI_EUFSTRUCT            -23   // Unsupported file structure
-#define  CDI_EUNC4                -24   // Unsupported NetCDF4 structure
-#define  CDI_EDIMSIZE             -25   // Invalid dimension size
+#define  CDI_EISDIR               -21   // Is a directory
+#define  CDI_EISEMPTY             -22   // Is empty
+#define  CDI_EUFTYPE              -23   // Unsupported file type
+#define  CDI_ELIBNAVAIL           -24   // xxx library not available
+#define  CDI_EUFSTRUCT            -25   // Unsupported file structure
+#define  CDI_EUNC4                -26   // Unsupported NetCDF4 structure
+#define  CDI_EDIMSIZE             -27   // Invalid dimension size
 #define  CDI_ELIMIT               -99   // Internal limits exceeded
 
 /* File types */
@@ -697,11 +699,6 @@ double  vlistInqVarDblKey(int vlistID, int varID, const char *name);
 /* vlistInqVarIntKey: raw access to GRIB meta-data */
 int     vlistInqVarIntKey(int vlistID, int varID, const char *name);
 
-/* needed only for CDO operator after */
-const char *vlistInqVarNamePtr(int vlistID, int varID);
-const char *vlistInqVarLongnamePtr(int vlistID, int varID);
-const char *vlistInqVarUnitsPtr(int vlistID, int varID);
-
 /* CDI attributes */
 
 /*      cdiInqNatts: Get number of attributes assigned to this variable */
@@ -1011,10 +1008,16 @@ void    zaxisPrint(int zaxisID);
 void    zaxisDefLevels(int zaxisID, const double levels[]);
 
 /*      zaxisDefCvals: Define area types of a Z-axis */
-void    zaxisDefCvals(int zaxisID, const char *cvals[]);
+void    zaxisDefCvals(int zaxisID, const char *cvals[], size_t clength);
 
 /*      zaxisInqLevels: Get all levels of a Z-axis */
 int     zaxisInqLevels(int zaxisID, double levels[]);
+
+/*      zaxisInqCLen: Get maximal string length of character Z-axis */
+int     zaxisInqCLen(int zaxisID);
+
+/*      zaxisInqCVals: Get all string values of a character Z-axis */
+int     zaxisInqCVals(int zaxisID, char ***clevels);
 
 /*      zaxisDefLevel: Define one level of a Z-axis */
 void    zaxisDefLevel(int zaxisID, int levelID, double levels);
@@ -1199,8 +1202,6 @@ const char *modelInqNamePtr(int modelID);
 
 /* Table routines */
 
-/*      tableWriteC: write table of parameters to file in C language format */
-void    tableWriteC(const char *filename, int tableID);
 /*      tableFWriteC: write table of parameters to FILE* in C language format */
 void    tableFWriteC(FILE *ptfp, int tableID);
 /*      tableWrite: write table of parameters to file in tabular format */
@@ -1210,7 +1211,6 @@ int     tableRead(const char *tablefile);
 int     tableDef(int modelID, int tablenum, const char *tablename);
 
 const char *tableInqNamePtr(int tableID);
-void    tableDefEntry(int tableID, int code, const char *name, const char *longname, const char *units);
 
 int     tableInq(int modelID, int tablenum, const char *tablename);
 int     tableInqNumber(void);
@@ -1218,17 +1218,7 @@ int     tableInqNumber(void);
 int     tableInqNum(int tableID);
 int     tableInqModel(int tableID);
 
-void    tableInqPar(int tableID, int code, char *name, char *longname, char *units);
-
-int     tableInqParCode(int tableID, char *name, int *code);
-int     tableInqParName(int tableID, int code, char *name);
-int     tableInqParLongname(int tableID, int code, char *longname);
-int     tableInqParUnits(int tableID, int code, char *units);
-
-/* needed only for CDO operator after */
-const char *tableInqParNamePtr(int tableID, int parID);
-const char *tableInqParLongnamePtr(int tableID, int parID);
-const char *tableInqParUnitsPtr(int tableID, int parID);
+void    tableInqEntry(int tableID, int id, int ltype, char *name, char *longname, char *units);
 
 /* History routines */
 

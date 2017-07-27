@@ -207,7 +207,7 @@ int gribapiGetValidityDateTime(grib_handle *gh, int *vdate, int *vtime)
 	}
 
       {
-	static int lprint = TRUE;
+	static bool lprint = true;
 	extern int grib_calendar;
 	int ryear, rmonth, rday, rhour, rminute, rsecond;
 	int julday, secofday;
@@ -235,7 +235,7 @@ int gribapiGetValidityDateTime(grib_handle *gh, int *vdate, int *vtime)
                 if ( lprint )
                   {
                     Warning("Time unit %d unsupported", timeUnits);
-                    lprint = FALSE;
+                    lprint = false;
                   }
                 break;
               }
@@ -819,8 +819,8 @@ int gribapiScanTimestep1(stream_t * streamptr)
   size_t buffersize = 0;
   DateTime datetime0 = { .date = 10101, .time = 0 };
   int nrecs_scanned = 0;        //Only used for debug output.
-  int warn_time = TRUE;
-  // int warn_numavg = TRUE;
+  bool warn_time = true;
+  // bool warn_numavg = true;
   int rdate = 0, rtime = 0, tunit = 0, fcast = 0;
   grib_handle *gh = NULL;
 
@@ -835,7 +835,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
   int fileID = streamptr->fileID;
 
   unsigned nrecs = 0;
-  while ( TRUE )
+  while ( true )
     {
       int level1 = 0, level2 = 0;
       size_t recsize = gribGetSize(fileID);
@@ -905,7 +905,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
           else if ( result == CHECKTIME_INCONSISTENT && warn_time )
             {
               gribWarning("Inconsistent verification time!", nrecs_scanned, tsID+1, varname, param, level1, level2);
-              warn_time = FALSE;
+              warn_time = false;
             }
           assert(result == CHECKTIME_OK || result == CHECKTIME_INCONSISTENT);
         }
@@ -916,7 +916,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
             {
               Message("Change numavg from %d to %d not allowed!",
                       taxis->numavg, ISEC1_AvgNum);
-              warn_numavg = FALSE;
+              warn_numavg = false;
             }
           else
             {
@@ -994,7 +994,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
       if ( tsID != streamptr->rtsteps )
         Error("Internal error. tsID = %d", tsID);
 
-      streamptr->tsteps[tsID-1].next   = TRUE;
+      streamptr->tsteps[tsID-1].next   = true;
       streamptr->tsteps[tsID].position = recpos;
     }
 
@@ -1021,7 +1021,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
   DateTime datetime0 = { LONG_MIN, LONG_MIN };
   // int gridID;
   int recID;
-  //  int warn_numavg = TRUE;
+  //  bool warn_numavg = true;
   grib_handle *gh = NULL;
 
   streamptr->curTsID = 1;
@@ -1057,7 +1057,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
 
   int nrecs_scanned = nrecords; //Only used for debug output
   int rindex = 0;
-  while ( TRUE )
+  while ( true )
     {
       if ( rindex > nrecords ) break;
 
@@ -1122,7 +1122,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
 	  if (  taxis->numavg && warn_numavg &&
 		(taxis->numavg != ISEC1_AvgNum) )
 	    {
-	      warn_numavg = FALSE;
+	      warn_numavg = false;
 	    }
 	  else
 	    {
@@ -1158,7 +1158,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
 	    }
 	}
 
-      streamptr->tsteps[tsID].records[recID].used = TRUE;
+      streamptr->tsteps[tsID].records[recID].used = true;
       streamptr->tsteps[tsID].recIDs[rindex] = recID;
 
       if ( CDI_Debug )
@@ -1225,7 +1225,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
       if ( tsID != streamptr->rtsteps )
 	Error("Internal error. tsID = %d", tsID);
 
-      streamptr->tsteps[tsID-1].next   = TRUE;
+      streamptr->tsteps[tsID-1].next   = true;
       streamptr->tsteps[tsID].position = recpos;
     }
 
@@ -1239,7 +1239,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
 int gribapiScanTimestep(stream_t * streamptr)
 {
   int vrecID, recID;
-  //int warn_numavg = TRUE;
+  //bool warn_numavg = true;
   int nrecs = 0;
   int vlistID = streamptr->vlistID;
 
@@ -1278,7 +1278,7 @@ int gribapiScanTimestep(stream_t * streamptr)
       DateTime datetime0 = { LONG_MIN, LONG_MIN };
       grib_handle *gh = NULL;
       char varname[256];
-      while ( TRUE )
+      while ( true )
 	{
 	  if ( rindex > nrecs ) break;
 
@@ -1350,7 +1350,7 @@ int gribapiScanTimestep(stream_t * streamptr)
 	      if (  taxis->numavg && warn_numavg &&
 		   (taxis->numavg != ISEC1_AvgNum) )
 		{
-		  warn_numavg = FALSE;
+		  warn_numavg = false;
 		}
 	      else
 		{
@@ -1396,7 +1396,7 @@ int gribapiScanTimestep(stream_t * streamptr)
 		}
 	    }
 
-          streamptr->tsteps[tsID].records[recID].used = TRUE;
+          streamptr->tsteps[tsID].records[recID].used = true;
           streamptr->tsteps[tsID].recIDs[rindex] = recID;
 
 	  if ( CDI_Debug )
@@ -1446,7 +1446,7 @@ int gribapiScanTimestep(stream_t * streamptr)
 	  if ( tsID != streamptr->rtsteps )
 	    Error("Internal error. tsID = %d", tsID);
 
-	  streamptr->tsteps[tsID-1].next   = 1;
+	  streamptr->tsteps[tsID-1].next   = true;
 	  streamptr->tsteps[tsID].position = recpos;
 	}
 
@@ -3112,7 +3112,7 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
           {
             //DR: Fix for multi-level fields (otherwise only the 1st level is correct)
             if ( zaxisInqSize(zaxisID)==(levelID+1) )
-              vlistptr->vars[varID].opt_grib_kvpair[i].update = FALSE;
+              vlistptr->vars[varID].opt_grib_kvpair[i].update = false;
 
             if (vlistptr->vars[varID].opt_grib_kvpair[i].data_type == t_double)
               {
@@ -3161,7 +3161,7 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   gribHandleDelete(gh);
 #endif
 
-  gc->init = TRUE;
+  gc->init = true;
 
   return recsize;
 }

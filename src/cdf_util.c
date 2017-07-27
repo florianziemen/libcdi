@@ -13,6 +13,7 @@ void str_tolower(char *str)
       str[i] = (char)tolower((int)str[i]);
 }
 
+
 bool str_is_equal(const char *vstr, const char *cstr)
 {
   bool is_equal = false;
@@ -27,6 +28,8 @@ int get_timeunit(size_t len, const char *ptu)
 {
   int timeunit = -1;
 
+  while ( isspace(*ptu) && len ) { ptu++; len--; }
+
   if ( len > 2 )
     {
       if      ( str_is_equal(ptu, "sec") )            timeunit = TUNIT_SECOND;
@@ -37,8 +40,7 @@ int get_timeunit(size_t len, const char *ptu)
       else if ( str_is_equal(ptu, "calendar_month") ) timeunit = TUNIT_MONTH;
       else if ( str_is_equal(ptu, "year") )           timeunit = TUNIT_YEAR;
     }
-  else if ( len == 1 && ptu[0] == 's' )
-    timeunit = TUNIT_SECOND;
+  else if ( len == 1 && ptu[0] == 's' )  timeunit = TUNIT_SECOND;
 
   return timeunit;
 }
@@ -46,6 +48,8 @@ int get_timeunit(size_t len, const char *ptu)
 
 bool is_time_units(const char *timeunits)
 {
+  while ( isspace(*timeunits) ) timeunits++; 
+
   bool status = str_is_equal(timeunits, "sec")
              || str_is_equal(timeunits, "minute")
              || str_is_equal(timeunits, "hour")

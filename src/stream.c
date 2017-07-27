@@ -6,6 +6,7 @@
 #define _XOPEN_SOURCE 600
 #endif
 
+#include <sys/stat.h> // struct stat
 #include <ctype.h>
 
 #include "binary.h"
@@ -78,7 +79,6 @@ int cdiGetFiletype(const char *filename, int *byteorder)
   int swap = 0;
   int version;
   long recpos;
-  char buffer[8];
 
   int fileID = fileOpen(filename, "r");
 
@@ -90,7 +90,18 @@ int cdiGetFiletype(const char *filename, int *byteorder)
 	return CDI_ESYSTEM;
     }
 
-  if ( fileRead(fileID, buffer, 8) != 8 ) return CDI_EUFTYPE;
+  char buffer[8];
+  if ( fileRead(fileID, buffer, 8) != 8 )
+    {
+      struct stat buf;
+      if ( stat(filename, &buf) == 0 )
+        {
+          if ( buf.st_size == 0 ) return CDI_EISEMPTY;
+          if ( buf.st_mode&S_IFDIR ) return CDI_EISDIR;
+        }
+
+      return CDI_EUFTYPE;
+    }
 
   fileRewind(fileID);
 
@@ -123,28 +134,21 @@ int cdiGetFiletype(const char *filename, int *byteorder)
       filetype = CDI_FILETYPE_NC4;
       if ( CDI_Debug ) Message("found HDF file = %s", filename);
     }
-#if  defined  (HAVE_LIBSERVICE)
   else if ( srvCheckFiletype(fileID, &swap) )
     {
       filetype = CDI_FILETYPE_SRV;
       if ( CDI_Debug ) Message("found SRV file = %s", filename);
     }
-#endif
-#if  defined  (HAVE_LIBEXTRA)
   else if ( extCheckFiletype(fileID, &swap) )
     {
       filetype = CDI_FILETYPE_EXT;
       if ( CDI_Debug ) Message("found EXT file = %s", filename);
     }
-#endif
-#if  defined  (HAVE_LIBIEG)
   else if ( iegCheckFiletype(fileID, &swap) )
     {
       filetype = CDI_FILETYPE_IEG;
       if ( CDI_Debug ) Message("found IEG file = %s", filename);
     }
-#endif
-#if  defined  (HAVE_LIBCGRIBEX)
   else if ( gribCheckSeek(fileID, &recpos, &version) == 0 )
     {
       if ( version <= 1 )
@@ -158,7 +162,6 @@ int cdiGetFiletype(const char *filename, int *byteorder)
 	  if ( CDI_Debug ) Message("found seeked GRIB2 file = %s", filename);
 	}
     }
-#endif
 
   fileClose(fileID);
 
@@ -976,8 +979,16 @@ void cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDelet
           cdfClose(fileID);
           if (streamptr->ntsteps == 0)
             {
-              Free(streamptr->tsteps[0].records);
-              Free(streamptr->tsteps[0].recIDs);
+              if ( streamptr->tsteps[0].records )
+                {
+                  Free(streamptr->tsteps[0].records);
+                  streamptr->tsteps[0].records = NULL;
+                }
+              if ( streamptr->tsteps[0].recIDs )
+                {
+                  Free(streamptr->tsteps[0].recIDs);
+                  streamptr->tsteps[0].recIDs = NULL;
+                }
             }
           break;
         }

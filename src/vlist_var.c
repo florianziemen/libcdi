@@ -11,6 +11,7 @@
 #include "vlist_var.h"
 #include "resource_handle.h"
 #include "cdi_att.h"
+#include "tablepar.h"
 #include "namespace.h"
 #include "serialize.h"
 #include "error.h"
@@ -44,7 +45,7 @@ void vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].instID        = CDI_UNDEFID;
   vlistptr->vars[varID].modelID       = CDI_UNDEFID;
   vlistptr->vars[varID].tableID       = CDI_UNDEFID;
-  vlistptr->vars[varID].missvalused   = FALSE;
+  vlistptr->vars[varID].missvalused   = false;
   vlistptr->vars[varID].missval       = cdiDefaultMissval;
   vlistptr->vars[varID].addoffset     = 0.0;
   vlistptr->vars[varID].scalefactor   = 1.0;
@@ -58,7 +59,7 @@ void vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].complevel     = 1;
   vlistptr->vars[varID].atts.nalloc   = MAX_ATTRIBUTES;
   vlistptr->vars[varID].atts.nelems   = 0;
-  vlistptr->vars[varID].lvalidrange   = 0;
+  vlistptr->vars[varID].lvalidrange   = false;
   vlistptr->vars[varID].validrange[0] = VALIDMISS;
   vlistptr->vars[varID].validrange[1] = VALIDMISS;
   vlistptr->vars[varID].ensdata       = NULL;
@@ -438,36 +439,6 @@ const char *vlistInqVarNamePtr(int vlistID, int varID)
   return vlistptr->vars[varID].name;
 }
 
-
-const char *vlistInqVarLongnamePtr(int vlistID, int varID)
-{
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-
-  vlistCheckVarID(__func__, vlistID, varID);
-
-  return vlistptr->vars[varID].longname;
-}
-
-
-const char *vlistInqVarStdnamePtr(int vlistID, int varID)
-{
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-
-  vlistCheckVarID(__func__, vlistID, varID);
-
-  return vlistptr->vars[varID].stdname;
-}
-
-
-const char *vlistInqVarUnitsPtr(int vlistID, int varID)
-{
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-
-  vlistCheckVarID(__func__, vlistID, varID);
-
-  return vlistptr->vars[varID].units;
-}
-
 /*
 @Function  vlistInqVarName
 @Title     Get the name of a Variable
@@ -504,8 +475,9 @@ void vlistInqVarName(int vlistID, int varID, char *name)
 	{
 	  int code = pnum;
 	  int tableID = vlistptr->vars[varID].tableID;
-	  if ( tableInqParName(tableID, code, name) != 0 )
-	    sprintf(name, "var%d", code);
+          name[0] = 0;
+          tableInqEntry(tableID, code, -1, name, NULL, NULL);
+	  if ( !name[0] ) sprintf(name, "var%d", code);
 	}
       else
 	{
@@ -541,24 +513,29 @@ char* vlistCopyVarName(int vlistId, int varId)
   vlistCheckVarID(__func__, vlistId, varId);
 
   //If a name is set in the variable description, use that.
-  const char* name = vlistptr->vars[varId].name;
-  if(name) return strdup(name);
+  {
+    const char* name = vlistptr->vars[varId].name;
+    if (name) return strdup(name);
+  }
 
   //Otherwise we check if we should use the table of parameter descriptions.
   int param = vlistptr->vars[varId].param;
   int discipline, category, number;
   cdiDecodeParam(param, &number, &category, &discipline);
   char *result = NULL;
-  if(discipline == 255)
+  if (discipline == 255)
     {
       int tableId = vlistptr->vars[varId].tableID;
-      if(( name = tableInqParNamePtr(tableId, number) ))
+      char name[CDI_MAX_NAME]; name[0] = 0;
+      tableInqEntry(tableId, number, -1, name, NULL, NULL);
+      if ( name[0] )
         result = strdup(name);
-      {
-        //No luck, fall back to outputting a name of the format "var<num>".
-        result = (char *) Malloc(3 + 3 * sizeof (int) * CHAR_BIT / 8 + 2);
-        sprintf(result, "var%d", number);
-      }
+      else
+        {
+          //No luck, fall back to outputting a name of the format "var<num>".
+          result = (char *) Malloc(3 + 3 * sizeof (int) * CHAR_BIT / 8 + 2);
+          sprintf(result, "var%d", number);
+        }
     }
   else
     {
@@ -607,8 +584,7 @@ void vlistInqVarLongname(int vlistID, int varID, char *longname)
 	{
 	  int code = pnum;
           int tableID = vlistptr->vars[varID].tableID;
-	  if ( tableInqParLongname(tableID, code, longname) != 0 )
-	    longname[0] = '\0';
+          tableInqEntry(tableID, code, -1, NULL, longname, NULL);
 	}
     }
   else
@@ -692,8 +668,7 @@ void vlistInqVarUnits(int vlistID, int varID, char *units)
 	{
 	  int code = pnum;
 	  int tableID = vlistptr->vars[varID].tableID;
-	  if ( tableInqParUnits(tableID, code, units) != 0 )
-	    units[0] = '\0';
+          tableInqEntry(tableID, code, -1, NULL, NULL, units);
 	}
     }
   else
@@ -807,7 +782,7 @@ void vlistDefVarDatatype(int vlistID, int varID, int datatype)
     {
       vlistptr->vars[varID].datatype = datatype;
 
-      if ( vlistptr->vars[varID].missvalused == FALSE )
+      if ( !vlistptr->vars[varID].missvalused )
         switch (datatype)
           {
           case CDI_DATATYPE_INT8:   vlistptr->vars[varID].missval = -SCHAR_MAX; break;
@@ -1067,7 +1042,7 @@ void vlistDefVarMissval(int vlistID, int varID, double missval)
   vlistCheckVarID(__func__, vlistID, varID);
 
   vlistptr->vars[varID].missval = missval;
-  vlistptr->vars[varID].missvalused = TRUE;
+  vlistptr->vars[varID].missvalused = true;
 }
 
 /*
@@ -1152,7 +1127,7 @@ int vlistInqVarValidrange(int vlistID, int varID, double *validrange)
       validrange[1] = vlistptr->vars[varID].validrange[1];
     }
 
-  return vlistptr->vars[varID].lvalidrange;
+  return (int)vlistptr->vars[varID].lvalidrange;
 }
 
 
@@ -1164,7 +1139,7 @@ void vlistDefVarValidrange(int vlistID, int varID, const double *validrange)
 
   vlistptr->vars[varID].validrange[0] = validrange[0];
   vlistptr->vars[varID].validrange[1] = validrange[1];
-  vlistptr->vars[varID].lvalidrange = TRUE;
+  vlistptr->vars[varID].lvalidrange = true;
   reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
 }
 
@@ -1381,7 +1356,7 @@ void vlistDestroyVarUnits(int vlistID, int varID)
 int vlistInqVarMissvalUsed(int vlistID, int varID)
 {
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  return vlistptr->vars[varID].missvalused;
+  return (int)vlistptr->vars[varID].missvalused;
 }
 
 
@@ -1792,7 +1767,7 @@ void vlistDefVarIntKey(int vlistID, int varID, const char *name, int value)
   if ( idx < vlistptr->vars[varID].opt_grib_nentries )
     {
       vlistptr->vars[varID].opt_grib_kvpair[idx].int_val = value;
-      vlistptr->vars[varID].opt_grib_kvpair[idx].update  = TRUE;
+      vlistptr->vars[varID].opt_grib_kvpair[idx].update  = true;
     }
   else
     {
@@ -1801,7 +1776,7 @@ void vlistDefVarIntKey(int vlistID, int varID, const char *name, int value)
       idx = vlistptr->vars[varID].opt_grib_nentries -1;
       vlistptr->vars[varID].opt_grib_kvpair[idx].data_type   = t_int;
       vlistptr->vars[varID].opt_grib_kvpair[idx].int_val     = value;
-      vlistptr->vars[varID].opt_grib_kvpair[idx].update      = TRUE;
+      vlistptr->vars[varID].opt_grib_kvpair[idx].update      = true;
       if ( name )
         vlistptr->vars[varID].opt_grib_kvpair[idx].keyword = strdupx(name);
       else
@@ -1855,7 +1830,7 @@ void vlistDefVarDblKey(int vlistID, int varID, const char *name, double value)
   if ( idx < vlistptr->vars[varID].opt_grib_nentries )
     {
       vlistptr->vars[varID].opt_grib_kvpair[idx].dbl_val = value;
-      vlistptr->vars[varID].opt_grib_kvpair[idx].update  = TRUE;
+      vlistptr->vars[varID].opt_grib_kvpair[idx].update  = true;
     }
   else
     {
@@ -1864,7 +1839,7 @@ void vlistDefVarDblKey(int vlistID, int varID, const char *name, double value)
       idx = vlistptr->vars[varID].opt_grib_nentries - 1;
       vlistptr->vars[varID].opt_grib_kvpair[idx].data_type = t_double;
       vlistptr->vars[varID].opt_grib_kvpair[idx].dbl_val   = value;
-      vlistptr->vars[varID].opt_grib_kvpair[idx].update    = TRUE;
+      vlistptr->vars[varID].opt_grib_kvpair[idx].update    = true;
       if ( name )
         vlistptr->vars[varID].opt_grib_kvpair[idx].keyword = strdupx(name);
       else
@@ -2116,7 +2091,7 @@ void vlistVarPack(vlist_t *p, int varID, char * buf, int size, int *position,
   tempbuf[12] = var->tableID;
   tempbuf[13] = var->timave;
   tempbuf[14] = var->timaccu;
-  tempbuf[15] = var->missvalused;
+  tempbuf[15] = (int)var->missvalused;
   tempbuf[16] = var->comptype;
   tempbuf[17] = var->complevel;
   int nlevs = var->levinfo ? zaxisInqSize(var->zaxisID) : 0;

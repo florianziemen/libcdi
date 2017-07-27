@@ -15,7 +15,7 @@
 #endif
 
 //#include "config.h"
-#define VERSION "1.8.1"
+#define VERSION "1.9.0"
 typedef struct
 {
   size_t naline;
@@ -86,8 +86,8 @@ static void doctotxt(FILE *fp, Docu *doc, size_t ndoc)
     }
 }
 
-enum cftype {ISVOID, ISCONSTSTRING, ISINT, ISREAL, ISDOUBLE, ISMPI_COMM,
-             ISXT_IDXLIST, ISCHOICE, ISINTP, ISFLOATV, ISFLOATVV,
+enum cftype {ISVOID, ISCONSTSTRING, ISINT, ISREAL, ISDOUBLE, ISSIZET, ISMPI_COMM,
+             ISXT_IDXLIST, ISCHOICE, ISINTP, ISSIZETP, ISFLOATV, ISFLOATVV,
              ISDOUBLEV, ISDOUBLEVV, ISINTV, ISINTVV, ISINTVVV, ISREALP,
              ISDOUBLEP, ISCBUF, ISUUID, ISUCHAR, ISSTRING, ISSTRINGP,
              VOIDFUNCVOID,
@@ -107,8 +107,14 @@ typedef int (*cfPrologueEmitter)(FILE *outfp, size_t argNum);
 static int cfMPICommConvert(FILE *outfp, const char *argName,
                             size_t argNameLen, enum conversionType part);
 
+static int cfSizetConvert(FILE *outfp, const char *argName,
+                          size_t argNameLen, enum conversionType part);
+
+static int cfSizetpConvert(FILE *outfp, const char *argName,
+                           size_t argNameLen, enum conversionType part);
+
 static int cfXtIdxlistConvert(FILE *outfp, const char *argName,
-                            size_t argNameLen, enum conversionType part);
+                              size_t argNameLen, enum conversionType part);
 
 static int cfVoidFuncPrologue(FILE *outfp, size_t argNum);
 
@@ -156,6 +162,9 @@ static struct symbol funArgSym[]
         "^"WS"*(const"WS"+)?float"WS"+"SYMRE"?"WS"*[,\\)]", 2, 0, 0 },
       { "DOUBLEPRECISION", "DOUBLE",  "%sdouble %.*s",
         "^"WS"*(const"WS"+)?double"WS"+"SYMRE"?"WS"*[,\\)]", 2, 0, 0 },
+      { "INTEGER",         "INT",     "%ssize_t %.*s",
+        "^"WS"*(const"WS"+)?size_t("WS"+"SYMRE")?"WS"*[,\\)]", 3, 1, 0,
+        cfSizetConvert, "%sint %.*s" },
       { "INTEGER",         "INT", "%sMPI_Comm %.*s",
         "^"WS"*MPI_Comm"WS"+"SYMRE"?"WS"*[,\\)]", 1, 1, 0,
         cfMPICommConvert, "%sint %.*s" },
@@ -166,6 +175,9 @@ static struct symbol funArgSym[]
         "^"WS"*const"WS"+void"WS"*\\*"WS"*"SYMRE"?"WS"*[,\\)]", 1, 0, 0 },
       { "INTEGER",         "PINT",    "%sint *%.*s",
         "^"WS"*(const"WS"+)?int"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2, 0, 0 },
+      { "INTEGER",         "PINT",    "%ssize_t *%.*s",
+        "^"WS"*(const"WS"+)?size_t"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2, 1, 0,
+        cfSizetpConvert, "%sint *%.*s"},
       { "REAL",            "FLOATV",  "%sfloat %.*s[]",
         "^"WS"*(const"WS"+)?float("WS"+"SYMRE")?"WS"*"ARRAY_BOUND
         "[,\\)]", 3, 0, 0 },
@@ -221,6 +233,8 @@ static struct symbol funRet[] = {
     "(const"WS"+)?double"WS"+"SYMRE WS"*\\(", 2, 0, 0 },
   { "INTEGER",         "INT",     "%sMPI_Comm %.*s",
     "MPI_Comm"WS"+"SYMRE WS"*\\(", 1, 0, 0, cfMPICommConvert, "%sint %.*s" },
+  { "INTEGER",         "INT",    "%ssize_t %.*s",
+    "(const"WS"+)?size_t"WS"+"SYMRE WS"*\\(", 2, 1, 0, cfSizetConvert, "%sint %.*s" },
 };
 #if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 5)
 #pragma GCC diagnostic pop
@@ -404,6 +418,9 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
   }
   fputs("#if defined (HAVE_CF_INTERFACE)\n"
         "\n"
+        "#include <limits.h>\n"
+        "#include <assert.h>\n"
+        "\n"
         "#if ! defined (__CFORTRAN_LOADED)\n"
         "#  if defined __clang__\n"
         "#    pragma GCC diagnostic push\n"
@@ -419,6 +436,14 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
         "#if defined __clang__\n"
         "#  pragma GCC diagnostic ignored \"-Wmissing-prototypes\"\n"
         "#endif\n"
+        "\n", fpint);
+
+  fputs("static\n"
+        "int size_t_c2f(size_t value_size_t)\n"
+        "{\n"
+        "  assert(value_size_t < INT_MAX);\n"
+        "  return (int) value_size_t;\n"
+        "}\n"
         "\n", fpint);
 
   ssize_t lineLen;
@@ -673,6 +698,15 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
                           line + funcargname[i].rm_so, arrayDimsC);
                 }
               fputs(")\n{\n", fpint);
+              for (size_t i = 0; i < funcargc; i++ )
+                {
+                  if (funArgSym[funcargtype[i]].convert && funcargtype[i] == ISSIZETP)
+                    {
+                      // create temporary size_t variable
+                      fprintf(fpint, "  size_t %.*s_size_t;\n",
+                              (int)(funcargname[i].rm_eo - funcargname[i].rm_so), line + funcargname[i].rm_so);
+                    }
+                }
               if (functype != ISVOID)
                 {
                   fputs("  ", fpint);
@@ -700,6 +734,18 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
                             line + funcargname[i].rm_so);
                 }
               fputs(");\n", fpint);
+              for (size_t i = 0; i < funcargc; i++ )
+                {
+                  if (funArgSym[funcargtype[i]].convert && funcargtype[i] == ISSIZETP)
+                    {
+                      fprintf(fpint, "  assert(%.*s_size_t < INT_MAX);\n",
+                              (int)(funcargname[i].rm_eo - funcargname[i].rm_so), line + funcargname[i].rm_so);
+                      // copy temporary size_t variable
+                      fprintf(fpint, "  *%.*s = %.*s_size_t;\n",
+                              (int)(funcargname[i].rm_eo - funcargname[i].rm_so), line + funcargname[i].rm_so,
+                              (int)(funcargname[i].rm_eo - funcargname[i].rm_so), line + funcargname[i].rm_so);
+                    }
+                }
               if (functype != ISVOID)
                 {
                   fputs("  return ", fpint);
@@ -1194,6 +1240,41 @@ reCompile(regex_t *restrict RE, const char *restrict REstring,
   return errcode;
 }
 
+/* emit conversion code for size_t argument */
+static int cfSizetConvert(FILE *outfp, const char *argName,
+                            size_t argNameLen, enum conversionType part)
+{
+  int retval = 0;
+  switch (part)
+    {
+    case CONV_ARG:
+      retval = fprintf(outfp, "(size_t)%.*s", (int)argNameLen, argName);
+      break;
+    case CONV_RET:
+      retval = fprintf(outfp, "size_t_c2f(%.*s)", (int)argNameLen, argName);
+      break;
+    }
+  return retval;
+}
+
+/* emit conversion code for size_t* argument */
+static int cfSizetpConvert(FILE *outfp, const char *argName,
+                           size_t argNameLen, enum conversionType part)
+{
+  int retval = 0;
+  switch (part)
+    {
+    case CONV_ARG:
+      retval = fprintf(outfp, "&%.*s_size_t", (int)argNameLen, argName);
+      break;
+    case CONV_RET:
+      abort();
+
+      break;
+    }
+  return retval;
+}
+
 /* emit conversion code for MPI_Comm argument */
 static int cfMPICommConvert(FILE *outfp, const char *argName,
                             size_t argNameLen, enum conversionType part)
@@ -1202,8 +1283,7 @@ static int cfMPICommConvert(FILE *outfp, const char *argName,
   switch (part)
     {
     case CONV_ARG:
-      retval
-        = fprintf(outfp, "MPI_Comm_f2c(%.*s)", (int)argNameLen, argName);
+      retval = fprintf(outfp, "MPI_Comm_f2c(%.*s)", (int)argNameLen, argName);
       break;
     case CONV_RET:
       retval = fprintf(outfp, "MPI_Comm_c2f(%.*s)", (int)argNameLen, argName);
@@ -1220,8 +1300,7 @@ static int cfXtIdxlistConvert(FILE *outfp, const char *argName,
   switch (part)
     {
     case CONV_ARG:
-      retval
-        = fprintf(outfp, "(*(Xt_idxlist *)%.*s)", (int)argNameLen, argName);
+      retval = fprintf(outfp, "(*(Xt_idxlist *)%.*s)", (int)argNameLen, argName);
       break;
     case CONV_RET:
       abort();

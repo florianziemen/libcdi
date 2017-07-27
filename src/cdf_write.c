@@ -11,6 +11,7 @@
 #include "cdf.h"
 #include "cdf_int.h"
 #include "vlist.h"
+#include "vlist_var.h"
 
 
 void cdfDefVarDeflate(int ncid, int ncvarid, int deflate_level)
@@ -93,7 +94,12 @@ void cdfDefVarMissval(stream_t *streamptr, int varID, int dtype, int lcheck)
 
       if ( xtype == NC_BYTE && missval > 127 && missval < 256 ) xtype = NC_INT;
 
-      cdf_put_att_double(fileID, ncvarid, "_FillValue", (nc_type) xtype, 1, &missval);
+      if ( lcheck == 0 ||
+           streamptr->ncmode != 2 ||
+           streamptr->filetype == CDI_FILETYPE_NC ||
+           streamptr->filetype == CDI_FILETYPE_NC2 )
+        cdf_put_att_double(fileID, ncvarid, "_FillValue", (nc_type) xtype, 1, &missval);
+
       cdf_put_att_double(fileID, ncvarid, "missing_value", (nc_type) xtype, 1, &missval);
 
       if ( lcheck && streamptr->ncmode == 2 ) cdf_enddef(fileID);
@@ -318,7 +324,6 @@ int cdfDefVar(stream_t *streamptr, int varID)
   int ncvarid = -1;
   int xid = CDI_UNDEFID, yid = CDI_UNDEFID;
   size_t xsize = 0, ysize = 0;
-  char varname[CDI_MAX_NAME];
   int dims[4];
   size_t chunks[4] = {0,0,0,0};
   int ndims = 0;
@@ -427,17 +432,19 @@ int cdfDefVar(stream_t *streamptr, int varID)
   if ( CDI_Debug )
     fprintf(stderr, "chunktype %d  chunks %d %d %d %d\n", chunktype, (int)chunks[0], (int)chunks[1], (int)chunks[2], (int)chunks[3]);
 
+  char varname[CDI_MAX_NAME];
+  char name[CDI_MAX_NAME]; name[0] = 0;
+  char longname[CDI_MAX_NAME]; longname[0] = 0;
+  char stdname[CDI_MAX_NAME]; stdname[0] = 0;
+  char units[CDI_MAX_NAME]; units[0] = 0;
+  if ( vlistInqVarNamePtr(vlistID, varID) ) vlistInqVarName(vlistID, varID, name);
+  vlistInqVarLongname(vlistID, varID, longname);
+  vlistInqVarStdname(vlistID, varID, stdname);
+  vlistInqVarUnits(vlistID, varID, units);
+
   int tableID  = vlistInqVarTable(vlistID, varID);
-
-  const char *name     = vlistInqVarNamePtr(vlistID, varID);
-  const char *longname = vlistInqVarLongnamePtr(vlistID, varID);
-  const char *stdname  = vlistInqVarStdnamePtr(vlistID, varID);
-  const char *units    = vlistInqVarUnitsPtr(vlistID, varID);
-
-  if ( name     == NULL )     name = tableInqParNamePtr(tableID, code);
-  if ( longname == NULL ) longname = tableInqParLongnamePtr(tableID, code);
-  if ( units    == NULL )    units = tableInqParUnitsPtr(tableID, code);
-  if ( name )
+  if ( !name[0] ) tableInqEntry(tableID, code, -1, name, longname, units);
+  if ( name[0] )
     {
       sprintf(varname, "%s", name);
 
@@ -464,7 +471,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
             Warning("Changed multiple entry of variable name '%s' to '%s'!", name, varname);
         }
 
-      name = varname;
+      strcpy(name, varname);
     }
   else
     {
@@ -493,7 +500,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
           if ( iz >= CDI_MAX_NAME ) break;
         }
 
-      name = varname;
+      strcpy(name, varname);
       code = 0;
       pdis = 255;
     }
@@ -530,14 +537,9 @@ int cdfDefVar(stream_t *streamptr, int varID)
         }
     }
 
-  if ( stdname && *stdname )
-    cdf_put_att_text(fileID, ncvarid, "standard_name", strlen(stdname), stdname);
-
-  if ( longname && *longname )
-    cdf_put_att_text(fileID, ncvarid, "long_name", strlen(longname), longname);
-
-  if ( units && *units )
-    cdf_put_att_text(fileID, ncvarid, "units", strlen(units), units);
+  if ( *stdname )  cdf_put_att_text(fileID, ncvarid, "standard_name", strlen(stdname), stdname);
+  if ( *longname ) cdf_put_att_text(fileID, ncvarid, "long_name", strlen(longname), longname);
+  if ( *units )    cdf_put_att_text(fileID, ncvarid, "units", strlen(units), units);
 
   if ( code > 0 && pdis == 255 )
     cdf_put_att_int(fileID, ncvarid, "code", NC_INT, 1, &code);
@@ -558,7 +560,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
 
   char coordinates[CDI_MAX_NAME]; coordinates[0] = 0;
 
-  if ( zaxis_is_scalar )
+  if ( zaxis_is_scalar || zaxisInqType(zaxisID) == ZAXIS_CHAR )
     {
       int nczvarID = streamptr->nczvarID[zaxisindex];
       if ( nczvarID != CDI_UNDEFID )

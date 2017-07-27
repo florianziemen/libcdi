@@ -547,7 +547,7 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridindex, int ndims,
             }
           if ( pbounds )
             {
-              size_t nvertex = 2;
+              size_t nvertex = gridInqNvertex(gridID);
               if ( nc_inq_dimid(fileID, bndsName, &nvdimID) != NC_NOERR )
                 cdf_def_dim(fileID, bndsName, nvertex, &nvdimID);
             }
@@ -1415,6 +1415,67 @@ void cdfDefZaxisUUID(stream_t *streamptr, int zaxisID)
 }
 
 static
+void cdfDefZaxisChar(stream_t *streamptr, int zaxisID, char *axisname, int *dimID, size_t dimlen, int zaxisindex)
+{
+  int fileID  = streamptr->fileID;
+  int ncvarID = CDI_UNDEFID;
+  if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
+
+  /* Check StrlenID */
+  char strlen[7] = "strlen\0";
+  size_t clen = (size_t) zaxisInqCLen(zaxisID);
+  if ( clen == 0 )
+    Error("Maximal string length value is 0.\nA given character axis requires a dimension to save the maximal string length.");
+  int strlenID = CDI_UNDEFID;
+  strlenID = checkDimName(fileID, clen, strlen);
+
+  if ( strlenID == CDI_UNDEFID ) cdf_def_dim(fileID, strlen, clen, &strlenID);
+
+  /* Check 'areatype'dimID */
+  char dimname[CDI_MAX_NAME+3]; dimname[0] = 0;
+  cdiZaxisInqKeyStr(zaxisID, CDI_KEY_DIMNAME, CDI_MAX_NAME, dimname);
+  *dimID = checkDimName(fileID, dimlen, dimname);
+  if ( !(dimlen > 0) )
+    Error("No strings delivered for a character axis.");
+  if ( dimname[0] == 0 ) { memcpy(dimname, "area_type", 10); dimname[10] = 0; }
+
+  if ( *dimID == CDI_UNDEFID ) cdf_def_dim(fileID, dimname, dimlen, dimID);
+
+  int dimIDs[2];
+  dimIDs[0] = *dimID;
+  dimIDs[1] = strlenID;
+
+  /* Get Stringvalues */
+  char **cvals = zaxisInqCValsPtr(zaxisID);
+
+  if ( cvals )
+    {
+      /* Define variable and its attributes */
+      cdf_def_var(fileID, axisname, NC_CHAR, 2, dimIDs, &ncvarID);
+
+      cdfPutGridStdAtts(fileID, ncvarID, zaxisID, 'Z', &gridInqsZ);
+      cdf_put_att_text(fileID, ncvarID, "axis", 1, "Z");
+      cdfDefineAttributes(zaxisID, CDI_GLOBAL, fileID, ncvarID);
+
+      streamptr->nczvarID[zaxisindex] = ncvarID;
+      cdf_enddef(fileID);
+
+      /* Write Stringvalues */
+      size_t start[2], count[2];
+      start[1] = 0;
+      count[0] = 1;
+      count[1] = clen;
+      for ( size_t i = 0; i < dimlen; i++ )
+        {
+          start[0] = i;
+          nc_put_vara_text(fileID, ncvarID, start, count, cvals[i]);
+        }
+    }
+
+  streamptr->ncmode = 2;
+}
+
+static
 void cdfDefZaxis(stream_t *streamptr, int zaxisID)
 {
   /*  char zaxisname0[CDI_MAX_NAME]; */
@@ -1487,6 +1548,8 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
           cdfDefineAttributes(zaxisID, CDI_GLOBAL, fileID, ncvarid);
           if ( natts > 0 && streamptr->ncmode == 2 ) cdf_enddef(fileID);
         }
+      else if ( type == ZAXIS_CHAR )
+        cdfDefZaxisChar(streamptr, zaxisID, axisname, &dimID, dimlen, zaxisindex);
       else
         {
           dimID = checkDimName(fileID, dimlen, dimname);
@@ -1581,7 +1644,7 @@ void cdf_def_mapping(stream_t *streamptr, int gridID)
       cdiGridInqKeyStr(gridID, CDI_KEY_MAPPING, CDI_MAX_NAME, gmapvarname);
 
       int fileID = streamptr->fileID;
-      cdf_redef(fileID);
+      if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
       int ncvarid;
       int ncerrcode = nc_def_var(fileID, gmapvarname, (nc_type) NC_INT, 0, NULL, &ncvarid);
@@ -1843,8 +1906,7 @@ void cdfDefGrid(stream_t *streamptr, int gridID, int gridindex)
         }
       else
         {
-          int ndims = !( gridtype == GRID_LONLAT && size == 1
-                         && gridInqHasDims(gridID) == FALSE );
+          int ndims = !(gridtype == GRID_LONLAT && size == 1 && !gridInqHasDims(gridID));
 
           if ( gridInqXsize(gridID) > 0 ) cdfDefXaxis(streamptr, gridID, gridindex, ndims);
           if ( gridInqYsize(gridID) > 0 ) cdfDefYaxis(streamptr, gridID, gridindex, ndims);
