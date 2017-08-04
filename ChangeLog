@@ -1,5 +1,6 @@
 2017-08-04  Uwe Schulzweida
 
+	* Added CALENDAR_GREGORIAN
 	* cdiGridTypeInit: don't overwrite exsisting attributes (bug fix)
 
 2017-07-27  Uwe Schulzweida
