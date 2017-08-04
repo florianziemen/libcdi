@@ -310,22 +310,23 @@ void cdiGridTypeInit(grid_t *gridptr, int gridtype, int size)
       {
         if ( gridtype == GRID_TRAJECTORY )
           {
-            if ( gridptr->x.name[0] == 0 ) gridSetName(gridptr->x.name, "tlon");
-            if ( gridptr->y.name[0] == 0 ) gridSetName(gridptr->y.name, "tlat");
+            if ( !gridptr->x.name[0] ) gridSetName(gridptr->x.name, "tlon");
+            if ( !gridptr->y.name[0] ) gridSetName(gridptr->y.name, "tlat");
           }
         else
           {
-            if ( gridptr->x.name[0] == 0 ) gridSetName(gridptr->x.name, "lon");
-            if ( gridptr->y.name[0] == 0 ) gridSetName(gridptr->y.name, "lat");
+            if ( !gridptr->x.name[0] ) gridSetName(gridptr->x.name, "lon");
+            if ( !gridptr->y.name[0] ) gridSetName(gridptr->y.name, "lat");
           }
 
-        gridSetName(gridptr->x.longname, "longitude");
-        gridSetName(gridptr->y.longname, "latitude");
+        if ( !gridptr->x.longname[0] ) gridSetName(gridptr->x.longname, "longitude");
+        if ( !gridptr->y.longname[0] ) gridSetName(gridptr->y.longname, "latitude");
+
+        if ( !gridptr->x.units[0] ) gridSetName(gridptr->x.units, "degrees_east");
+        if ( !gridptr->y.units[0] ) gridSetName(gridptr->y.units, "degrees_north");
 
         gridptr->x.stdname = xystdname_tab[grid_xystdname_latlon][0];
         gridptr->y.stdname = xystdname_tab[grid_xystdname_latlon][1];
-        gridSetName(gridptr->x.units, "degrees_east");
-        gridSetName(gridptr->y.units, "degrees_north");
 
         break;
       }
