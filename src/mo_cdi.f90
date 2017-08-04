@@ -271,6 +271,7 @@ module mo_cdi
   public :: streamInqCurTimestepID
   public :: streamFilename
   public :: streamFilesuffix
+  public :: streamNvals
   public :: streamInqNvars
   public :: streamWriteVar
   public :: streamWriteVarF
@@ -436,9 +437,6 @@ module mo_cdi
   public :: vlistHasVarKey
   public :: vlistInqVarDblKey
   public :: vlistInqVarIntKey
-  public :: vlistInqVarNamePtr
-  public :: vlistInqVarLongnamePtr
-  public :: vlistInqVarUnitsPtr
   public :: cdiInqNatts
   public :: cdiInqAtt
   public :: cdiDelAtt
@@ -654,19 +652,11 @@ module mo_cdi
   public :: tableRead
   public :: tableDef
   public :: tableInqNamePtr
-  public :: tableDefEntry
   public :: tableInq
   public :: tableInqNumber
   public :: tableInqNum
   public :: tableInqModel
-  public :: tableInqPar
-  public :: tableInqParCode
-  public :: tableInqParName
-  public :: tableInqParLongname
-  public :: tableInqParUnits
-  public :: tableInqParNamePtr
-  public :: tableInqParLongnamePtr
-  public :: tableInqParUnitsPtr
+  public :: tableInqEntry
   public :: streamDefHistory
   public :: streamInqHistorySize
   public :: streamInqHistoryString
@@ -883,6 +873,13 @@ module mo_cdi
       integer(c_int) :: f_result
     end function streamInqCurTimestepID
 
+    function streamNvals(streamID_dummy) bind(c, name = 'streamNvals')&
+    & result(f_result)
+      import c_int, c_size_t
+      integer(c_int), value :: streamID_dummy
+      integer(c_size_t) :: f_result
+    end function streamNvals
+
     function streamInqNvars(streamID_dummy) bind(c, name = 'streamInqNvars')&
     & result(f_result)
       import c_int
@@ -892,88 +889,88 @@ module mo_cdi
 
     subroutine streamWriteVar(streamID_dummy, varID_dummy, data_dummy,&
     & nmiss_dummy) bind(c, name = 'streamWriteVar')
-      import c_double, c_int
+      import c_double, c_int, c_size_t
       integer(c_int), value :: streamID_dummy
       integer(c_int), value :: varID_dummy
       real(c_double), intent(in) :: data_dummy(*)
-      integer(c_int), value :: nmiss_dummy
+      integer(c_size_t), value :: nmiss_dummy
     end subroutine streamWriteVar
 
     subroutine streamWriteVarF(streamID_dummy, varID_dummy, data_dummy,&
     & nmiss_dummy) bind(c, name = 'streamWriteVarF')
-      import c_float, c_int
+      import c_float, c_int, c_size_t
       integer(c_int), value :: streamID_dummy
       integer(c_int), value :: varID_dummy
       real(c_float), intent(in) :: data_dummy(*)
-      integer(c_int), value :: nmiss_dummy
+      integer(c_size_t), value :: nmiss_dummy
     end subroutine streamWriteVarF
 
     subroutine streamReadVar(streamID_dummy, varID_dummy, data_dummy,&
     & nmiss_dummy) bind(c, name = 'streamReadVar')
-      import c_double, c_int
+      import c_double, c_int, c_size_t
       integer(c_int), value :: streamID_dummy
       integer(c_int), value :: varID_dummy
       real(c_double), intent(inout) :: data_dummy(*)
-      integer(c_int), intent(inout) :: nmiss_dummy
+      integer(c_size_t), intent(inout) :: nmiss_dummy
     end subroutine streamReadVar
 
     subroutine streamReadVarF(streamID_dummy, varID_dummy, data_dummy,&
     & nmiss_dummy) bind(c, name = 'streamReadVarF')
-      import c_float, c_int
+      import c_float, c_int, c_size_t
       integer(c_int), value :: streamID_dummy
       integer(c_int), value :: varID_dummy
       real(c_float), intent(inout) :: data_dummy(*)
-      integer(c_int), intent(inout) :: nmiss_dummy
+      integer(c_size_t), intent(inout) :: nmiss_dummy
     end subroutine streamReadVarF
 
     subroutine streamWriteVarSlice(streamID_dummy, varID_dummy, levelID_dummy,&
     & data_dummy, nmiss_dummy) bind(c, name = 'streamWriteVarSlice')
-      import c_double, c_int
+      import c_double, c_int, c_size_t
       integer(c_int), value :: streamID_dummy
       integer(c_int), value :: varID_dummy
       integer(c_int), value :: levelID_dummy
       real(c_double), intent(in) :: data_dummy(*)
-      integer(c_int), value :: nmiss_dummy
+      integer(c_size_t), value :: nmiss_dummy
     end subroutine streamWriteVarSlice
 
     subroutine streamWriteVarSliceF(streamID_dummy, varID_dummy, levelID_dummy,&
     & data_dummy, nmiss_dummy) bind(c, name = 'streamWriteVarSliceF')
-      import c_float, c_int
+      import c_float, c_int, c_size_t
       integer(c_int), value :: streamID_dummy
       integer(c_int), value :: varID_dummy
       integer(c_int), value :: levelID_dummy
       real(c_float), intent(in) :: data_dummy(*)
-      integer(c_int), value :: nmiss_dummy
+      integer(c_size_t), value :: nmiss_dummy
     end subroutine streamWriteVarSliceF
 
     subroutine streamReadVarSlice(streamID_dummy, varID_dummy, levelID_dummy,&
     & data_dummy, nmiss_dummy) bind(c, name = 'streamReadVarSlice')
-      import c_double, c_int
+      import c_double, c_int, c_size_t
       integer(c_int), value :: streamID_dummy
       integer(c_int), value :: varID_dummy
       integer(c_int), value :: levelID_dummy
       real(c_double), intent(inout) :: data_dummy(*)
-      integer(c_int), intent(inout) :: nmiss_dummy
+      integer(c_size_t), intent(inout) :: nmiss_dummy
     end subroutine streamReadVarSlice
 
     subroutine streamReadVarSliceF(streamID_dummy, varID_dummy, levelID_dummy,&
     & data_dummy, nmiss_dummy) bind(c, name = 'streamReadVarSliceF')
-      import c_float, c_int
+      import c_float, c_int, c_size_t
       integer(c_int), value :: streamID_dummy
       integer(c_int), value :: varID_dummy
       integer(c_int), value :: levelID_dummy
       real(c_float), intent(inout) :: data_dummy(*)
-      integer(c_int), intent(inout) :: nmiss_dummy
+      integer(c_size_t), intent(inout) :: nmiss_dummy
     end subroutine streamReadVarSliceF
 
     subroutine streamWriteVarChunk(streamID_dummy, varID_dummy, rect_dummy,&
     & data_dummy, nmiss_dummy) bind(c, name = 'streamWriteVarChunk')
-      import c_double, c_int
+      import c_double, c_int, c_size_t
       integer(c_int), value :: streamID_dummy
       integer(c_int), value :: varID_dummy
       integer(c_int), intent(in) :: rect_dummy(2, 3)
       real(c_double), intent(in) :: data_dummy(*)
-      integer(c_int), value :: nmiss_dummy
+      integer(c_size_t), value :: nmiss_dummy
     end subroutine streamWriteVarChunk
 
     subroutine streamDefRecord(streamID_dummy, varID_dummy, levelID_dummy)&
@@ -994,34 +991,34 @@ module mo_cdi
 
     subroutine streamWriteRecord(streamID_dummy, data_dummy, nmiss_dummy)&
     & bind(c, name = 'streamWriteRecord')
-      import c_double, c_int
+      import c_double, c_int, c_size_t
       integer(c_int), value :: streamID_dummy
       real(c_double), intent(in) :: data_dummy(*)
-      integer(c_int), value :: nmiss_dummy
+      integer(c_size_t), value :: nmiss_dummy
     end subroutine streamWriteRecord
 
     subroutine streamWriteRecordF(streamID_dummy, data_dummy, nmiss_dummy)&
     & bind(c, name = 'streamWriteRecordF')
-      import c_float, c_int
+      import c_float, c_int, c_size_t
       integer(c_int), value :: streamID_dummy
       real(c_float), intent(in) :: data_dummy(*)
-      integer(c_int), value :: nmiss_dummy
+      integer(c_size_t), value :: nmiss_dummy
     end subroutine streamWriteRecordF
 
     subroutine streamReadRecord(streamID_dummy, data_dummy, nmiss_dummy)&
     & bind(c, name = 'streamReadRecord')
-      import c_double, c_int
+      import c_double, c_int, c_size_t
       integer(c_int), value :: streamID_dummy
       real(c_double), intent(inout) :: data_dummy(*)
-      integer(c_int), intent(inout) :: nmiss_dummy
+      integer(c_size_t), intent(inout) :: nmiss_dummy
     end subroutine streamReadRecord
 
     subroutine streamReadRecordF(streamID_dummy, data_dummy, nmiss_dummy)&
     & bind(c, name = 'streamReadRecordF')
-      import c_float, c_int
+      import c_float, c_int, c_size_t
       integer(c_int), value :: streamID_dummy
       real(c_float), intent(inout) :: data_dummy(*)
-      integer(c_int), intent(inout) :: nmiss_dummy
+      integer(c_size_t), intent(inout) :: nmiss_dummy
     end subroutine streamReadRecordF
 
     subroutine streamCopyRecord(streamIDdest_dummy, streamIDsrc_dummy) bind(c,&
@@ -1137,9 +1134,9 @@ module mo_cdi
 
     function vlistGridsizeMax(vlistID_dummy) bind(c, name = 'vlistGridsizeMax')&
     & result(f_result)
-      import c_int
+      import c_int, c_size_t
       integer(c_int), value :: vlistID_dummy
-      integer(c_int) :: f_result
+      integer(c_size_t) :: f_result
     end function vlistGridsizeMax
 
     function vlistGrid(vlistID_dummy, index_dummy) bind(c, name = 'vlistGrid')&
@@ -1657,10 +1654,10 @@ module mo_cdi
 
     function vlistInqVarSize(vlistID_dummy, varID_dummy) bind(c, name =&
     & 'vlistInqVarSize') result(f_result)
-      import c_int
+      import c_int, c_size_t
       integer(c_int), value :: vlistID_dummy
       integer(c_int), value :: varID_dummy
-      integer(c_int) :: f_result
+      integer(c_size_t) :: f_result
     end function vlistInqVarSize
 
     subroutine vlistDefIndex(vlistID_dummy, varID_dummy, levID_dummy,&
@@ -2205,10 +2202,10 @@ module mo_cdi
 
     function gridInqXbounds(gridID_dummy, xbounds_dummy) bind(c, name =&
     & 'gridInqXbounds') result(f_result)
-      import c_double, c_int
+      import c_double, c_int, c_size_t
       integer(c_int), value :: gridID_dummy
       real(c_double), intent(inout) :: xbounds_dummy(*)
-      integer(c_int) :: f_result
+      integer(c_size_t) :: f_result
     end function gridInqXbounds
 
     subroutine gridDefYbounds(gridID_dummy, ybounds_dummy) bind(c, name =&
@@ -2220,10 +2217,10 @@ module mo_cdi
 
     function gridInqYbounds(gridID_dummy, ybounds_dummy) bind(c, name =&
     & 'gridInqYbounds') result(f_result)
-      import c_double, c_int
+      import c_double, c_int, c_size_t
       integer(c_int), value :: gridID_dummy
       real(c_double), intent(inout) :: ybounds_dummy(*)
-      integer(c_int) :: f_result
+      integer(c_size_t) :: f_result
     end function gridInqYbounds
 
     subroutine gridDefRowlon(gridID_dummy, nrowlon_dummy, rowlon_dummy) bind(c,&
@@ -4524,75 +4521,6 @@ contains
     f_result = lib_vlistInqVarIntKey(vlistID_dummy, varID_dummy, name_temp)
   end function vlistInqVarIntKey
 
-  function vlistInqVarNamePtr(vlistID_dummy, varID_dummy) result(f_result)
-    character(kind = c_char), dimension(:), pointer :: f_result
-    integer(c_int), value :: vlistID_dummy
-    integer(c_int), value :: varID_dummy
-    type(c_ptr) :: ptr
-    integer :: rv_shape(1)
-    interface
-      function lib_vlistInqVarNamePtr(vlistID_dummy, varID_dummy) bind(c, name&
-      & = 'vlistInqVarNamePtr') result(c_result)
-        import c_int, c_ptr
-        type(c_ptr) :: c_result
-        integer(c_int), value :: vlistID_dummy
-        integer(c_int), value :: varID_dummy
-      end function lib_vlistInqVarNamePtr
-    end interface
-    f_result => null()
-    ptr = lib_vlistInqVarNamePtr(vlistID_dummy, varID_dummy)
-    if(c_associated(ptr)) then
-      rv_shape(1) = int(lib_strlen(ptr))
-      call c_f_pointer(ptr, f_result, rv_shape)
-    end if
-  end function vlistInqVarNamePtr
-
-  function vlistInqVarLongnamePtr(vlistID_dummy, varID_dummy) result(f_result)
-    character(kind = c_char), dimension(:), pointer :: f_result
-    integer(c_int), value :: vlistID_dummy
-    integer(c_int), value :: varID_dummy
-    type(c_ptr) :: ptr
-    integer :: rv_shape(1)
-    interface
-      function lib_vlistInqVarLongnamePtr(vlistID_dummy, varID_dummy) bind(c,&
-      & name = 'vlistInqVarLongnamePtr') result(c_result)
-        import c_int, c_ptr
-        type(c_ptr) :: c_result
-        integer(c_int), value :: vlistID_dummy
-        integer(c_int), value :: varID_dummy
-      end function lib_vlistInqVarLongnamePtr
-    end interface
-    f_result => null()
-    ptr = lib_vlistInqVarLongnamePtr(vlistID_dummy, varID_dummy)
-    if(c_associated(ptr)) then
-      rv_shape(1) = int(lib_strlen(ptr))
-      call c_f_pointer(ptr, f_result, rv_shape)
-    end if
-  end function vlistInqVarLongnamePtr
-
-  function vlistInqVarUnitsPtr(vlistID_dummy, varID_dummy) result(f_result)
-    character(kind = c_char), dimension(:), pointer :: f_result
-    integer(c_int), value :: vlistID_dummy
-    integer(c_int), value :: varID_dummy
-    type(c_ptr) :: ptr
-    integer :: rv_shape(1)
-    interface
-      function lib_vlistInqVarUnitsPtr(vlistID_dummy, varID_dummy) bind(c, name&
-      & = 'vlistInqVarUnitsPtr') result(c_result)
-        import c_int, c_ptr
-        type(c_ptr) :: c_result
-        integer(c_int), value :: vlistID_dummy
-        integer(c_int), value :: varID_dummy
-      end function lib_vlistInqVarUnitsPtr
-    end interface
-    f_result => null()
-    ptr = lib_vlistInqVarUnitsPtr(vlistID_dummy, varID_dummy)
-    if(c_associated(ptr)) then
-      rv_shape(1) = int(lib_strlen(ptr))
-      call c_f_pointer(ptr, f_result, rv_shape)
-    end if
-  end function vlistInqVarUnitsPtr
-
   function cdiInqAtt(cdiID_dummy, varID_dummy, attrnum_dummy, name_dummy,&
   & typep_dummy, lenp_dummy) result(f_result)
     integer(c_int) :: f_result
@@ -6093,46 +6021,6 @@ contains
     end if
   end function tableInqNamePtr
 
-  subroutine tableDefEntry(tableID_dummy, code_dummy, name_dummy,&
-  & longname_dummy, units_dummy)
-    integer(c_int), value :: tableID_dummy
-    integer(c_int), value :: code_dummy
-    character(kind = c_char, len = *), intent(in) :: name_dummy
-    character(kind = c_char, len = *), intent(in) :: longname_dummy
-    character(kind = c_char, len = *), intent(in) :: units_dummy
-    character(kind = c_char) :: name_temp(len(name_dummy) + 1)
-    integer :: name_i
-    character(kind = c_char) :: longname_temp(len(longname_dummy) + 1)
-    integer :: longname_i
-    character(kind = c_char) :: units_temp(len(units_dummy) + 1)
-    integer :: units_i
-    interface
-      subroutine lib_tableDefEntry(tableID_dummy, code_dummy, name_dummy,&
-      & longname_dummy, units_dummy) bind(c, name = 'tableDefEntry')
-        import c_char, c_int
-        integer(c_int), value :: tableID_dummy
-        integer(c_int), value :: code_dummy
-        character(kind = c_char) :: name_dummy(*)
-        character(kind = c_char) :: longname_dummy(*)
-        character(kind = c_char) :: units_dummy(*)
-      end subroutine lib_tableDefEntry
-    end interface
-    do name_i = 1, len(name_dummy)
-      name_temp(name_i) = name_dummy(name_i:name_i)
-    end do
-    name_temp(len(name_dummy) + 1) = c_null_char
-    do longname_i = 1, len(longname_dummy)
-      longname_temp(longname_i) = longname_dummy(longname_i:longname_i)
-    end do
-    longname_temp(len(longname_dummy) + 1) = c_null_char
-    do units_i = 1, len(units_dummy)
-      units_temp(units_i) = units_dummy(units_i:units_i)
-    end do
-    units_temp(len(units_dummy) + 1) = c_null_char
-    call lib_tableDefEntry(tableID_dummy, code_dummy, name_temp, longname_temp,&
-    & units_temp)
-  end subroutine tableDefEntry
-
   function tableInq(modelID_dummy, tablenum_dummy, tablename_dummy)&
   & result(f_result)
     integer(c_int) :: f_result
@@ -6158,10 +6046,11 @@ contains
     f_result = lib_tableInq(modelID_dummy, tablenum_dummy, tablename_temp)
   end function tableInq
 
-  subroutine tableInqPar(tableID_dummy, code_dummy, name_dummy, longname_dummy,&
-  & units_dummy)
+  subroutine tableInqEntry(tableID_dummy, id_dummy, ltype_dummy, name_dummy,&
+  & longname_dummy, units_dummy)
     integer(c_int), value :: tableID_dummy
-    integer(c_int), value :: code_dummy
+    integer(c_int), value :: id_dummy
+    integer(c_int), value :: ltype_dummy
     character(kind = c_char, len = *), intent(inout) :: name_dummy
     character(kind = c_char, len = *), intent(inout) :: longname_dummy
     character(kind = c_char, len = *), intent(inout) :: units_dummy
@@ -6172,15 +6061,17 @@ contains
     character(kind = c_char) :: units_temp(len(units_dummy) + 1)
     integer :: units_i
     interface
-      subroutine lib_tableInqPar(tableID_dummy, code_dummy, name_dummy,&
-      & longname_dummy, units_dummy) bind(c, name = 'tableInqPar')
+      subroutine lib_tableInqEntry(tableID_dummy, id_dummy, ltype_dummy,&
+      & name_dummy, longname_dummy, units_dummy) bind(c, name =&
+      & 'tableInqEntry')
         import c_char, c_int
         integer(c_int), value :: tableID_dummy
-        integer(c_int), value :: code_dummy
+        integer(c_int), value :: id_dummy
+        integer(c_int), value :: ltype_dummy
         character(kind = c_char) :: name_dummy(*)
         character(kind = c_char) :: longname_dummy(*)
         character(kind = c_char) :: units_dummy(*)
-      end subroutine lib_tableInqPar
+      end subroutine lib_tableInqEntry
     end interface
     name_temp(len(name_dummy) + 1) = c_null_char
     do name_i = len(name_dummy), 1, -1
@@ -6206,8 +6097,8 @@ contains
     do units_i = units_i, 1, -1
         units_temp(units_i) = units_dummy(units_i:units_i)
     end do
-    call lib_tableInqPar(tableID_dummy, code_dummy, name_temp, longname_temp,&
-    & units_temp)
+    call lib_tableInqEntry(tableID_dummy, id_dummy, ltype_dummy, name_temp,&
+    & longname_temp, units_temp)
     do name_i = 1, len(name_dummy)
       if(name_temp(name_i) == c_null_char) exit
       name_dummy(name_i:name_i) = name_temp(name_i)
@@ -6229,221 +6120,7 @@ contains
     do units_i = units_i, len(units_dummy)
       units_dummy(units_i:units_i) = ' '
     end do
-  end subroutine tableInqPar
-
-  function tableInqParCode(tableID_dummy, name_dummy, code_dummy)&
-  & result(f_result)
-    integer(c_int) :: f_result
-    integer(c_int), value :: tableID_dummy
-    character(kind = c_char, len = *), intent(inout) :: name_dummy
-    integer(c_int), intent(inout) :: code_dummy
-    character(kind = c_char) :: name_temp(len(name_dummy) + 1)
-    integer :: name_i
-    interface
-      function lib_tableInqParCode(tableID_dummy, name_dummy, code_dummy)&
-      & bind(c, name = 'tableInqParCode') result(c_result)
-        import c_char, c_int
-        integer(c_int) :: c_result
-        integer(c_int), value :: tableID_dummy
-        character(kind = c_char) :: name_dummy(*)
-        integer(c_int), intent(inout) :: code_dummy
-      end function lib_tableInqParCode
-    end interface
-    name_temp(len(name_dummy) + 1) = c_null_char
-    do name_i = len(name_dummy), 1, -1
-      if(name_dummy(name_i:name_i) /= ' ') exit
-      name_temp(name_i) = c_null_char
-    end do
-    do name_i = name_i, 1, -1
-        name_temp(name_i) = name_dummy(name_i:name_i)
-    end do
-    f_result = lib_tableInqParCode(tableID_dummy, name_temp, code_dummy)
-    do name_i = 1, len(name_dummy)
-      if(name_temp(name_i) == c_null_char) exit
-      name_dummy(name_i:name_i) = name_temp(name_i)
-    end do
-    do name_i = name_i, len(name_dummy)
-      name_dummy(name_i:name_i) = ' '
-    end do
-  end function tableInqParCode
-
-  function tableInqParName(tableID_dummy, code_dummy, name_dummy)&
-  & result(f_result)
-    integer(c_int) :: f_result
-    integer(c_int), value :: tableID_dummy
-    integer(c_int), value :: code_dummy
-    character(kind = c_char, len = *), intent(inout) :: name_dummy
-    character(kind = c_char) :: name_temp(len(name_dummy) + 1)
-    integer :: name_i
-    interface
-      function lib_tableInqParName(tableID_dummy, code_dummy, name_dummy)&
-      & bind(c, name = 'tableInqParName') result(c_result)
-        import c_char, c_int
-        integer(c_int) :: c_result
-        integer(c_int), value :: tableID_dummy
-        integer(c_int), value :: code_dummy
-        character(kind = c_char) :: name_dummy(*)
-      end function lib_tableInqParName
-    end interface
-    name_temp(len(name_dummy) + 1) = c_null_char
-    do name_i = len(name_dummy), 1, -1
-      if(name_dummy(name_i:name_i) /= ' ') exit
-      name_temp(name_i) = c_null_char
-    end do
-    do name_i = name_i, 1, -1
-        name_temp(name_i) = name_dummy(name_i:name_i)
-    end do
-    f_result = lib_tableInqParName(tableID_dummy, code_dummy, name_temp)
-    do name_i = 1, len(name_dummy)
-      if(name_temp(name_i) == c_null_char) exit
-      name_dummy(name_i:name_i) = name_temp(name_i)
-    end do
-    do name_i = name_i, len(name_dummy)
-      name_dummy(name_i:name_i) = ' '
-    end do
-  end function tableInqParName
-
-  function tableInqParLongname(tableID_dummy, code_dummy, longname_dummy)&
-  & result(f_result)
-    integer(c_int) :: f_result
-    integer(c_int), value :: tableID_dummy
-    integer(c_int), value :: code_dummy
-    character(kind = c_char, len = *), intent(inout) :: longname_dummy
-    character(kind = c_char) :: longname_temp(len(longname_dummy) + 1)
-    integer :: longname_i
-    interface
-      function lib_tableInqParLongname(tableID_dummy, code_dummy,&
-      & longname_dummy) bind(c, name = 'tableInqParLongname') result(c_result)
-        import c_char, c_int
-        integer(c_int) :: c_result
-        integer(c_int), value :: tableID_dummy
-        integer(c_int), value :: code_dummy
-        character(kind = c_char) :: longname_dummy(*)
-      end function lib_tableInqParLongname
-    end interface
-    longname_temp(len(longname_dummy) + 1) = c_null_char
-    do longname_i = len(longname_dummy), 1, -1
-      if(longname_dummy(longname_i:longname_i) /= ' ') exit
-      longname_temp(longname_i) = c_null_char
-    end do
-    do longname_i = longname_i, 1, -1
-        longname_temp(longname_i) = longname_dummy(longname_i:longname_i)
-    end do
-    f_result = lib_tableInqParLongname(tableID_dummy, code_dummy,&
-    & longname_temp)
-    do longname_i = 1, len(longname_dummy)
-      if(longname_temp(longname_i) == c_null_char) exit
-      longname_dummy(longname_i:longname_i) = longname_temp(longname_i)
-    end do
-    do longname_i = longname_i, len(longname_dummy)
-      longname_dummy(longname_i:longname_i) = ' '
-    end do
-  end function tableInqParLongname
-
-  function tableInqParUnits(tableID_dummy, code_dummy, units_dummy)&
-  & result(f_result)
-    integer(c_int) :: f_result
-    integer(c_int), value :: tableID_dummy
-    integer(c_int), value :: code_dummy
-    character(kind = c_char, len = *), intent(inout) :: units_dummy
-    character(kind = c_char) :: units_temp(len(units_dummy) + 1)
-    integer :: units_i
-    interface
-      function lib_tableInqParUnits(tableID_dummy, code_dummy, units_dummy)&
-      & bind(c, name = 'tableInqParUnits') result(c_result)
-        import c_char, c_int
-        integer(c_int) :: c_result
-        integer(c_int), value :: tableID_dummy
-        integer(c_int), value :: code_dummy
-        character(kind = c_char) :: units_dummy(*)
-      end function lib_tableInqParUnits
-    end interface
-    units_temp(len(units_dummy) + 1) = c_null_char
-    do units_i = len(units_dummy), 1, -1
-      if(units_dummy(units_i:units_i) /= ' ') exit
-      units_temp(units_i) = c_null_char
-    end do
-    do units_i = units_i, 1, -1
-        units_temp(units_i) = units_dummy(units_i:units_i)
-    end do
-    f_result = lib_tableInqParUnits(tableID_dummy, code_dummy, units_temp)
-    do units_i = 1, len(units_dummy)
-      if(units_temp(units_i) == c_null_char) exit
-      units_dummy(units_i:units_i) = units_temp(units_i)
-    end do
-    do units_i = units_i, len(units_dummy)
-      units_dummy(units_i:units_i) = ' '
-    end do
-  end function tableInqParUnits
-
-  function tableInqParNamePtr(tableID_dummy, parID_dummy) result(f_result)
-    character(kind = c_char), dimension(:), pointer :: f_result
-    integer(c_int), value :: tableID_dummy
-    integer(c_int), value :: parID_dummy
-    type(c_ptr) :: ptr
-    integer :: rv_shape(1)
-    interface
-      function lib_tableInqParNamePtr(tableID_dummy, parID_dummy) bind(c, name&
-      & = 'tableInqParNamePtr') result(c_result)
-        import c_int, c_ptr
-        type(c_ptr) :: c_result
-        integer(c_int), value :: tableID_dummy
-        integer(c_int), value :: parID_dummy
-      end function lib_tableInqParNamePtr
-    end interface
-    f_result => null()
-    ptr = lib_tableInqParNamePtr(tableID_dummy, parID_dummy)
-    if(c_associated(ptr)) then
-      rv_shape(1) = int(lib_strlen(ptr))
-      call c_f_pointer(ptr, f_result, rv_shape)
-    end if
-  end function tableInqParNamePtr
-
-  function tableInqParLongnamePtr(tableID_dummy, parID_dummy) result(f_result)
-    character(kind = c_char), dimension(:), pointer :: f_result
-    integer(c_int), value :: tableID_dummy
-    integer(c_int), value :: parID_dummy
-    type(c_ptr) :: ptr
-    integer :: rv_shape(1)
-    interface
-      function lib_tableInqParLongnamePtr(tableID_dummy, parID_dummy) bind(c,&
-      & name = 'tableInqParLongnamePtr') result(c_result)
-        import c_int, c_ptr
-        type(c_ptr) :: c_result
-        integer(c_int), value :: tableID_dummy
-        integer(c_int), value :: parID_dummy
-      end function lib_tableInqParLongnamePtr
-    end interface
-    f_result => null()
-    ptr = lib_tableInqParLongnamePtr(tableID_dummy, parID_dummy)
-    if(c_associated(ptr)) then
-      rv_shape(1) = int(lib_strlen(ptr))
-      call c_f_pointer(ptr, f_result, rv_shape)
-    end if
-  end function tableInqParLongnamePtr
-
-  function tableInqParUnitsPtr(tableID_dummy, parID_dummy) result(f_result)
-    character(kind = c_char), dimension(:), pointer :: f_result
-    integer(c_int), value :: tableID_dummy
-    integer(c_int), value :: parID_dummy
-    type(c_ptr) :: ptr
-    integer :: rv_shape(1)
-    interface
-      function lib_tableInqParUnitsPtr(tableID_dummy, parID_dummy) bind(c, name&
-      & = 'tableInqParUnitsPtr') result(c_result)
-        import c_int, c_ptr
-        type(c_ptr) :: c_result
-        integer(c_int), value :: tableID_dummy
-        integer(c_int), value :: parID_dummy
-      end function lib_tableInqParUnitsPtr
-    end interface
-    f_result => null()
-    ptr = lib_tableInqParUnitsPtr(tableID_dummy, parID_dummy)
-    if(c_associated(ptr)) then
-      rv_shape(1) = int(lib_strlen(ptr))
-      call c_f_pointer(ptr, f_result, rv_shape)
-    end if
-  end function tableInqParUnitsPtr
+  end subroutine tableInqEntry
 
   subroutine streamDefHistory(streamID_dummy, size_dummy, history_dummy)
     integer(c_int), value :: streamID_dummy
