@@ -267,11 +267,12 @@ typedef struct  {
 /* CALENDAR types */
 
 #define  CALENDAR_STANDARD        0  /* don't change this value (used also in cgribexlib)! */
-#define  CALENDAR_PROLEPTIC       1
-#define  CALENDAR_360DAYS         2
-#define  CALENDAR_365DAYS         3
-#define  CALENDAR_366DAYS         4
-#define  CALENDAR_NONE            5
+#define  CALENDAR_GREGORIAN       1
+#define  CALENDAR_PROLEPTIC       2
+#define  CALENDAR_360DAYS         3
+#define  CALENDAR_365DAYS         4
+#define  CALENDAR_366DAYS         5
+#define  CALENDAR_NONE            6
 
 /* number of unsigned char needed to store UUID */
 #define  CDI_UUID_SIZE           16
