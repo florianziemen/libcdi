@@ -189,14 +189,13 @@ setupCollectorInterComm(pioInfo_t *p, int isCollector, MPI_Comm localGroupComm, 
   xmpi(MPI_Group_free(&collClientGroup));
 }
 
-int
+void
 cdiPioCommInit(MPI_Comm commGlob, int IOMode, int clientServerRole)
 {
   xassert(info == NULL && IOMode >= PIO_MINIOMODE && IOMode <= PIO_MAXIOMODE);
   info = Malloc(sizeof(*info));
   info->IOMode = IOMode;
   pioInfoInit(info, commGlob, clientServerRole);
-  return info->sizePio;
 }
 
 void

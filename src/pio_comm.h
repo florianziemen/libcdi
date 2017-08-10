@@ -8,7 +8,7 @@
 #include <mpi.h>
 #include <stdio.h>
 
-int cdiPioCommInit(MPI_Comm commGlob, int IOMode, int clientServerRole);
+void cdiPioCommInit(MPI_Comm commGlob, int IOMode, int clientServerRole);
 void cdiPioCommFinalize(void);
 
 MPI_Comm commInqCommGlob(void);
