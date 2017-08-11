@@ -521,6 +521,8 @@ cdiPioInit(MPI_Comm commGlob, int confResH, int *pioNamespace)
   if ((xtInitByCDI = (!xt_initialized() || xt_finalized())))
     xt_initialize(commGlob);
 
+  int pioNamespace_ = namespaceNew();
+
   /* setup communication */
   cdiPioCommInit(commGlob, IOMode, conf->clientServerRole);
 
@@ -530,7 +532,7 @@ cdiPioInit(MPI_Comm commGlob, int confResH, int *pioNamespace)
   int sizeGlob = commInqSizeGlob ();
   if ( sizeGlob == 1 )
     {
-      *pioNamespace = namespaceNew();
+      *pioNamespace = pioNamespace_;
       return commInqCommGlob ();
     }
 
@@ -567,7 +569,7 @@ cdiPioInit(MPI_Comm commGlob, int confResH, int *pioNamespace)
   if ( commInqIsProcIO ())
     {
       int prevNamespace = namespaceGetActive(),
-        serverNamespace = namespaceNew();
+        serverNamespace = pioNamespace_;
       namespaceSetActive(serverNamespace);
       namespaceSwitchSet(cdiPioExtraNSKeys[cdiPioEKConf], NSSW_DATA(conf));
       cdiPioSerializeSetMPI();
@@ -597,7 +599,8 @@ cdiPioInit(MPI_Comm commGlob, int confResH, int *pioNamespace)
     }
   else
     {
-      cdiPioClientSetup(pioNamespace, conf);
+      *pioNamespace = pioNamespace_;
+      cdiPioClientSetup(pioNamespace_, conf);
       modelComm = commInqCommModel();
     }
   reshReplace(confResH, conf, &cdiPioConfOps);

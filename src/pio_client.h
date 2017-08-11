@@ -4,7 +4,7 @@
 #include <pio_conf.h>
 
 void
-cdiPioClientSetup(int *pioNamespace, struct cdiPioConf *conf);
+cdiPioClientSetup(int pioNamespace, struct cdiPioConf *conf);
 
 #endif
 
