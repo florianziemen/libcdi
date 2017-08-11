@@ -302,6 +302,9 @@
 !                                    (INTEGER         gridID)
       EXTERNAL        cdiPioDistGridIndividualQueriesEnabled
 
+      INTEGER         cdiPioInqInterComm
+      EXTERNAL        cdiPioInqInterComm
+
 !
 !  End of fortran interface
 !

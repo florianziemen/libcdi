@@ -300,6 +300,10 @@ void cdiPioDistGridDisableIndividualQueries(int gridID);
  * gridID */
 bool cdiPioDistGridIndividualQueriesEnabled(int gridID);
 
+/* cdiPioInqInterComm: query the intercommunicator of active CDI-PIO
+ * namespace */
+MPI_Comm cdiPioInqInterComm(void);
+
 // End of fortran interface
 //FINT_OFF  <--- don't change or remove this line!!!
 
