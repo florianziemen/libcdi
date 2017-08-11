@@ -358,13 +358,6 @@ commInqCommCalc(void)
   return info->commCalc;
 }
 
-int
-commInqNProcsColl(void)
-{
-  xassert(info != NULL && info->sizeColl != CDI_UNDEFID);
-  return info->sizeColl;
-}
-
 void
 commPrint(FILE *fp)
 {
