@@ -255,13 +255,6 @@ int commInqRankGlob ( void )
 }
 
 
-int commInqRootGlob ( void )
-{
-  xassert ( info != NULL &&
-           info->root != CDI_UNDEFID );
-  return info->root;
-}
-
 int cdiPioInqCollectorOfClient(void)
 {
   xassert(info != NULL);
@@ -416,7 +409,6 @@ void commPrint ( FILE * fp )
   fprintf ( fp, "# commGlob    = %d\n", (int)MPI_Comm_c2f(info->commGlob));
   fprintf ( fp, "# sizeGlob    = %d\n", info->sizeGlob );
   fprintf ( fp, "# rankGlob    = %d\n", info->rankGlob );
-  fprintf ( fp, "# root        = %d\n", info->root );
   fprintf ( fp, "#\n" );
   fprintf ( fp, "# commPio     = %d\n", (int)MPI_Comm_c2f(info->commPio));
   fprintf ( fp, "# sizePio     = %d\n", info->sizePio );
