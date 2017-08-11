@@ -151,6 +151,13 @@ FCALLSCFUN9 (INT, cdiPioDistGridCreate_fwrap, CDIPIODISTGRIDCREATE, cdipiodistgr
 FCALLSCSUB1 (cdiPioDistGridEnableIndividualQueries, CDIPIODISTGRIDENABLEINDIVIDUALQUERIES, cdipiodistgridenableindividualqueries, INT)
 FCALLSCSUB1 (cdiPioDistGridDisableIndividualQueries, CDIPIODISTGRIDDISABLEINDIVIDUALQUERIES, cdipiodistgriddisableindividualqueries, INT)
 FCALLSCFUN1 (LOGICAL, cdiPioDistGridIndividualQueriesEnabled, CDIPIODISTGRIDINDIVIDUALQUERIESENABLED, cdipiodistgridindividualqueriesenabled, INT)
+static int cdiPioInqInterComm_fwrap()
+{
+  MPI_Comm v;
+  v = cdiPioInqInterComm();
+  return MPI_Comm_c2f(v);
+}
+FCALLSCFUN0 (INT, cdiPioInqInterComm_fwrap, CDIPIOINQINTERCOMM, cdipioinqintercomm)
 
 #if defined __clang__
 #  pragma GCC diagnostic pop

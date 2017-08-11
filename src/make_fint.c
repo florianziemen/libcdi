@@ -224,7 +224,7 @@ static struct symbol funRet[] = {
   { "DOUBLEPRECISION", "DOUBLE",  "%sdouble %.*s",
     "(const"WS"+)?double"WS"+"SYMRE WS"*\\(", 2, 0, 0 },
   { "INTEGER",         "INT",     "%sMPI_Comm %.*s",
-    "MPI_Comm"WS"+"SYMRE WS"*\\(", 1, 0, 0, cfMPICommConvert, "%sint %.*s" },
+    "MPI_Comm"WS"+"SYMRE WS"*\\(", 1, 1, 0, cfMPICommConvert, "%sint %.*s" },
 };
 #if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 5)
 #pragma GCC diagnostic pop

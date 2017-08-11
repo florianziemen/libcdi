@@ -317,4 +317,8 @@ void cdiPioDistGridDisableIndividualQueries(int gridID);
  * gridID */
 bool cdiPioDistGridIndividualQueriesEnabled(int gridID);
 
+/* cdiPioInqInterComm: query the intercommunicator of active CDI-PIO
+ * namespace */
+MPI_Comm cdiPioInqInterComm(void);
+
 #endif

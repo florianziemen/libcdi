@@ -295,3 +295,6 @@
 !                                    (INTEGER         gridID)
       EXTERNAL        cdiPioDistGridIndividualQueriesEnabled
 
+      INTEGER         cdiPioInqInterComm
+      EXTERNAL        cdiPioInqInterComm
+
