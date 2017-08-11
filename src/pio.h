@@ -16,6 +16,7 @@
 enum {
   cdiPioEKFileWritingFinalize,
   cdiPioEKConf,
+  cdiPioEKComms,
   cdiPioExtraNSKeysSize
 };
 
