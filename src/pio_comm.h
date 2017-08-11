@@ -39,7 +39,6 @@ int commRankGlob2CollID(int rankGlob);
 int      commInqSizeColl        ( void );
 int      commInqRankColl        ( void );
 MPI_Comm commInqCommCalc        ( void );
-int      commInqNProcsColl      ( void );
 
 void     commPrint              ( FILE * );
 
