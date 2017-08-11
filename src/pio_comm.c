@@ -386,14 +386,6 @@ MPI_Comm commInqCommCalc    ( void )
 }
 
 
-int      commInqNProcsColl  ( void )
-{
-  xassert ( info != NULL &&
-           info->sizeColl != CDI_UNDEFID );
-  return info->sizeColl;
-}
-
-
 void commPrint ( FILE * fp )
 {
   if ( ddebug == 0 ) return;
