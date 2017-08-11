@@ -251,9 +251,8 @@ cdiPioClientStreamDefTimestep_(stream_t *streamptr, int tsID)
 }
 
 void
-cdiPioClientSetup(int *pioNamespace_, struct cdiPioConf *conf)
+cdiPioClientSetup(int pioNamespace, struct cdiPioConf *conf)
 {
-  int pioNamespace = *pioNamespace_ = namespaceNew();
   int callerCDINamespace = namespaceGetActive();
   namespaceSetActive(pioNamespace);
   namespaceSwitchSet(cdiPioExtraNSKeys[cdiPioEKConf], NSSW_DATA(conf));
