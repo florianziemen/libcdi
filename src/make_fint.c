@@ -256,7 +256,7 @@ static struct symbol funRet[] = {
   { "DOUBLEPRECISION", "DOUBLE",  "%sdouble %.*s",
     "(const"WS"+)?double"WS"+"SYMRE WS"*\\(", 2, 0, 0 },
   { "INTEGER",         "INT",     "%sMPI_Comm %.*s",
-    "MPI_Comm"WS"+"SYMRE WS"*\\(", 1, 0, 0, cfMPICommConvert, "%sint %.*s" },
+    "MPI_Comm"WS"+"SYMRE WS"*\\(", 1, 1, 0, cfMPICommConvert, "%sint %.*s" },
   { "INTEGER",         "INT",    "%sDateType %.*s",
     "(const"WS"+)?DateType"WS"+"SYMRE WS"*\\(", 2, 1, 0, cfDateTypeConvert, "%sint %.*s" },
   { "INTEGER",         "INT",    "%sSizeType %.*s",
