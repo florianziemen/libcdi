@@ -450,21 +450,24 @@ cdiPioInit(MPI_Comm commGlob, int confResH, int *pioNamespace)
   if ((xtInitByCDI = (!xt_initialized() || xt_finalized()))) xt_initialize(commGlob);
 
   int pioNamespace_ = namespaceNew();
+  int prevNamespace = namespaceGetActive();
+  namespaceSetActive(pioNamespace_);
 
   /* setup communication */
   cdiPioCommInit(commGlob, IOMode, conf->clientServerRole);
+  int sizeGlob = commInqSizeGlob();
 
   cdiPIOpartInflate_ = conf->partInflate;
 
+  namespaceSetActive(prevNamespace);
   // JUST FOR TEST CASES WITH ONLY ONE MPI TASK
-  int sizeGlob = commInqSizeGlob();
   if (sizeGlob == 1)
     {
       *pioNamespace = pioNamespace_;
       return commInqCommGlob();
     }
-
   reshRemove(confResH, &cdiPioConfOps);
+  namespaceSetActive(pioNamespace_);
 
 #ifdef HAVE_PPM_DIST_ARRAY_H
   reshDistGridUnpack = cdiPioDistGridUnpack;
@@ -495,7 +498,7 @@ cdiPioInit(MPI_Comm commGlob, int confResH, int *pioNamespace)
   MPI_Comm modelComm;
   if (commInqIsProcIO())
     {
-      int prevNamespace = namespaceGetActive(), serverNamespace = pioNamespace_;
+      int serverNamespace = pioNamespace_;
       namespaceSetActive(serverNamespace);
       namespaceSwitchSet(cdiPioExtraNSKeys[cdiPioEKConf], NSSW_DATA(conf));
       cdiPioSerializeSetMPI();
@@ -507,8 +510,7 @@ cdiPioInit(MPI_Comm commGlob, int confResH, int *pioNamespace)
           void (*cdiPioFileWritingFinalize)(void) = namespaceSwitchGet(cdiPioExtraNSKeys[cdiPioEKFileWritingFinalize]).func;
           cdiPioFileWritingFinalize();
         }
-      namespaceSetActive(prevNamespace);
-      namespaceDelete(serverNamespace);
+      reshListDestruct(serverNamespace);
 #ifdef HAVE_PPM_DIST_ARRAY_H
       if (commInqRankColl() >= 0) cdiPioDistGridFinalizeOnce(serverNamespace);
 #endif
@@ -518,6 +520,8 @@ cdiPioInit(MPI_Comm commGlob, int confResH, int *pioNamespace)
       if (ppmInitByCDI) PPM_finalize();
 #endif
       modelComm = MPI_COMM_NULL;
+      namespaceSetActive(prevNamespace);
+      namespaceDelete(serverNamespace);
     }
   else
     {
@@ -525,6 +529,7 @@ cdiPioInit(MPI_Comm commGlob, int confResH, int *pioNamespace)
       cdiPioClientSetup(pioNamespace_, conf);
       modelComm = commInqCommModel();
     }
+  namespaceSetActive(prevNamespace);
   reshReplace(confResH, conf, &cdiPioConfOps);
   return modelComm;
 }
@@ -607,7 +612,6 @@ pioFinalize(void)
 #ifdef HAVE_PPM_DIST_ARRAY_H
   cdiPioDistGridFinalizeOnce(pioNamespace);
 #endif
-  namespaceDelete(pioNamespace);
   int clientRank = commInqRankModel(), numClients = cdiPioCommInqSizeClients(), numColl = commInqSizeColl(),
       collRank = cdiPioCollRank(clientRank, numClients, numColl);
 
@@ -621,6 +625,7 @@ pioFinalize(void)
 #ifdef HAVE_PPM_CORE
   if (ppmInitByCDI) PPM_finalize();
 #endif
+  namespaceDelete(pioNamespace);
   xdebug("%s", "RETURN");
 }
 
