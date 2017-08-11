@@ -255,17 +255,6 @@ int commInqRankGlob ( void )
 }
 
 
-int cdiPioInqCollectorOfClient(void)
-{
-  xassert(info != NULL);
-  int clientRank = commInqRankModel(),
-    numClients = cdiPioCommInqSizeClients(),
-    numServers = commInqSizeColl(),
-    numClientsPerServer = (numClients + numServers - 1) / numServers,
-    collRank = clientRank / numClientsPerServer;
-  return (!info->isProcIO) ? collRank : -1;
-}
-
 MPI_Group cdiPioInqRemoteGroup(void)
 {
   xassert(info != NULL);
