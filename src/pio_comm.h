@@ -14,7 +14,6 @@ void cdiPioCommFinalize(void);
 MPI_Comm commInqCommGlob(void);
 int commInqSizeGlob(void);
 int commInqRankGlob(void);
-int commInqRootGlob(void);
 
 /* returns the inter-communicator used to connect from
  * client to server group */
