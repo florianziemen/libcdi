@@ -8,14 +8,17 @@
 #include <mpi.h>
 #include <yaxt.h>
 
-#include "pio_comm.h"
+
 #include "cdi.h"
 #include "dmemory.h"
+
+#include "pio.h"
+#include "pio_comm.h"
 #include "pio_util.h"
 
 #include "cdipio.h"
 
-typedef struct {
+struct cdiPioComms {
   int IOMode;
   int isProcIO;
 
@@ -58,19 +61,17 @@ typedef struct {
    * sequence they have on their own communicator.
    */
   MPI_Comm collClientIntraComm;
-} pioInfo_t;
+};
 
 
-static pioInfo_t * info = NULL;
-
-static void setupCollectorInterComm(pioInfo_t *p, int isCollector,
+static void setupCollectorInterComm(struct cdiPioComms *p, int isCollector,
                                     MPI_Comm localGroupComm,
                                     int globRankOfGroupLeader[2]);
 
 static void
-pioInfoInit(pioInfo_t *p, MPI_Comm commGlob, int clientServerRole)
+pioInfoInit(struct cdiPioComms *p, MPI_Comm commGlob, int clientServerRole)
 {
-  xassert(info != NULL && commGlob != MPI_COMM_NULL );
+  xassert(p && commGlob != MPI_COMM_NULL );
 
   xmpi(MPI_Comm_dup(commGlob, &p->commGlob));
   xmpi(MPI_Comm_size(p->commGlob, &p->sizeGlob));
@@ -167,7 +168,7 @@ pioInfoInit(pioInfo_t *p, MPI_Comm commGlob, int clientServerRole)
 }
 
 /* create client <-> collector intercomm and fill-in related information */
-static void setupCollectorInterComm(pioInfo_t *p, int isCollector,
+static void setupCollectorInterComm(struct cdiPioComms *p, int isCollector,
                                     MPI_Comm localGroupComm,
                                     int globRankOfGroupLeader[2])
 {
@@ -203,8 +204,11 @@ static void setupCollectorInterComm(pioInfo_t *p, int isCollector,
 
 void cdiPioCommInit(MPI_Comm commGlob, int IOMode, int clientServerRole)
 {
-  xassert(info == NULL && IOMode >= PIO_MINIOMODE && IOMode <= PIO_MAXIOMODE);
-  info = Malloc(sizeof(*info));
+  xassert(IOMode >= PIO_MINIOMODE && IOMode <= PIO_MAXIOMODE);
+  if (cdiPioExtraNSKeys[cdiPioEKComms] == 0)
+    cdiPioExtraNSKeys[cdiPioEKComms] = cdiNamespaceSwitchNewKey();
+  struct cdiPioComms *info = Malloc(sizeof(*info));
+  namespaceSwitchSet(cdiPioExtraNSKeys[cdiPioEKComms], NSSW_DATA(info));
   info->IOMode = IOMode;
   pioInfoInit(info, commGlob, clientServerRole);
 }
@@ -212,165 +216,193 @@ void cdiPioCommInit(MPI_Comm commGlob, int IOMode, int clientServerRole)
 
 void cdiPioCommFinalize(void)
 {
-  xassert ( info != NULL );
+  xassert(cdiPioExtraNSKeys[cdiPioEKComms] != 0);
+  struct cdiPioComms *info
+    = namespaceSwitchGet(cdiPioExtraNSKeys[cdiPioEKComms]).data;
 
-  MPI_Comm *comms[] = { &info->commGlob, &info->commPio, &info->commColl,
-                        &info->commCalc, &info->pioInterComm,
-                        &info->collClientIntraComm };
+  {
+    MPI_Comm *comms[] = { &info->commGlob, &info->commPio, &info->commColl,
+                          &info->commCalc, &info->pioInterComm,
+                          &info->collClientIntraComm };
 
-  for (size_t i = 0; i < sizeof (comms) / sizeof (comms[0]); ++i)
-    if ( *comms[i] != MPI_COMM_NULL )
-      xmpi(MPI_Comm_free(comms[i]));
+    for (size_t i = 0; i < sizeof (comms) / sizeof (comms[0]); ++i)
+      if ( *comms[i] != MPI_COMM_NULL )
+        xmpi(MPI_Comm_free(comms[i]));
+  }
 
-  MPI_Group *groups[] = { &info->remoteGroup };
-  for (size_t i = 0; i < sizeof (groups) / sizeof (groups[0]); ++i)
-    if ( *groups[i] != MPI_GROUP_NULL )
-      xmpi(MPI_Group_free(groups[i]));
+  {
+    MPI_Group *groups[] = { &info->remoteGroup };
+    for (size_t i = 0; i < sizeof (groups) / sizeof (groups[0]); ++i)
+      if ( *groups[i] != MPI_GROUP_NULL )
+        xmpi(MPI_Group_free(groups[i]));
+  }
 
   Free(info);
-  info = NULL;
+  namespaceSwitchSet(cdiPioExtraNSKeys[cdiPioEKComms], NSSW_DATA(NULL));
 }
 
 MPI_Comm commInqCommGlob ( void )
 {
-  xassert ( info != NULL &&
-           info->commGlob != MPI_COMM_NULL );
+  struct cdiPioComms *info
+    = namespaceSwitchGet(cdiPioExtraNSKeys[cdiPioEKComms]).data;
+  xassert(info && info->commGlob != MPI_COMM_NULL);
   return info->commGlob;
 }
 
 
 int commInqSizeGlob ( void )
 {
-  xassert ( info != NULL  &&
-           info->sizeGlob != CDI_UNDEFID );
+  struct cdiPioComms *info
+    = namespaceSwitchGet(cdiPioExtraNSKeys[cdiPioEKComms]).data;
+  xassert(info && info->sizeGlob != CDI_UNDEFID);
   return info->sizeGlob;
 }
 
 
 int commInqRankGlob ( void )
 {
-  xassert ( info != NULL &&
-           info->rankGlob != CDI_UNDEFID );
+  struct cdiPioComms *info
+    = namespaceSwitchGet(cdiPioExtraNSKeys[cdiPioEKComms]).data;
+  xassert(info && info->rankGlob != -1);
   return info->rankGlob;
 }
 
 
 MPI_Group cdiPioInqRemoteGroup(void)
 {
-  xassert(info != NULL);
+  struct cdiPioComms *info
+    = namespaceSwitchGet(cdiPioExtraNSKeys[cdiPioEKComms]).data;
+  xassert(info);
   return info->remoteGroup;
 }
 
 
-int      commInqIsProcIO     ( void )
+int commInqIsProcIO(void)
 {
-  xassert ( info != NULL &&
-           info->isProcIO != CDI_UNDEFID );
+  struct cdiPioComms *info
+    = namespaceSwitchGet(cdiPioExtraNSKeys[cdiPioEKComms]).data;
+  xassert(info && info->isProcIO != CDI_UNDEFID);
   return info->isProcIO;
 }
 
+
 int commInqIOMode(void)
 {
+  struct cdiPioComms *info
+    = cdiPioExtraNSKeys[cdiPioEKComms] == 0 ? NULL
+    : namespaceSwitchGet(cdiPioExtraNSKeys[cdiPioEKComms]).data;
   return info != NULL ? info->IOMode : PIO_NONE;
 }
 
 
-MPI_Comm commInqCommPio  ( void )
+MPI_Comm commInqCommPio(void)
 {
-  xassert ( info != NULL &&
-           info->commPio != MPI_COMM_NULL &&
-           info->isProcIO == 1 );
+  struct cdiPioComms *info
+    = namespaceSwitchGet(cdiPioExtraNSKeys[cdiPioEKComms]).data;
+  xassert(info && info->commPio != MPI_COMM_NULL && info->isProcIO == 1);
   return info->commPio;
 }
 
 int commInqSizePio(void)
 {
-  xassert ( info != NULL &&
-            info->sizePio > 0);
+  struct cdiPioComms *info
+    = namespaceSwitchGet(cdiPioExtraNSKeys[cdiPioEKComms]).data;
+  xassert(info && info->sizePio > 0);
   return info->sizePio;
 }
 
 
-
-
-MPI_Comm commInqCommModel ( void )
+MPI_Comm commInqCommModel(void)
 {
-  xassert ( info != NULL &&
-           info->commCalc != MPI_COMM_NULL &&
-           info->isProcIO == 0 );
+  struct cdiPioComms *info
+    = namespaceSwitchGet(cdiPioExtraNSKeys[cdiPioEKComms]).data;
+  xassert(info && info->commCalc != MPI_COMM_NULL && info->isProcIO == 0);
   return info->commCalc;
 }
 
 
-int      commInqRankPio       ( void )
-{ 
-  xassert ( info != NULL &&
-           info->rankPio >= 0 &&
-           info->isProcIO == 1 );
+int commInqRankPio(void)
+{
+  struct cdiPioComms *info
+    = namespaceSwitchGet(cdiPioExtraNSKeys[cdiPioEKComms]).data;
+  xassert(info && info->rankPio >= 0 && info->isProcIO == 1);
   return info->rankPio;
 }
 
 
-int      commInqRankModel       ( void )
-{ 
-  xassert ( info != NULL &&
-           info->rankCalc >= 0 &&
-           info->isProcIO == 0 );
+int commInqRankModel(void)
+{
+  struct cdiPioComms *info
+    = namespaceSwitchGet(cdiPioExtraNSKeys[cdiPioEKComms]).data;
+  xassert(info && info->rankCalc >= 0 && info->isProcIO == 0);
   return info->rankCalc;
 }
 
 int cdiPioCommInqSizeClients(void)
 {
-  xassert(info != NULL && info->sizeCalc >= 0);
+  struct cdiPioComms *info
+    = namespaceSwitchGet(cdiPioExtraNSKeys[cdiPioEKComms]).data;
+  xassert(info && info->sizeCalc >= 0);
   return info->sizeCalc;
 }
 
 MPI_Comm commInqCommColl    ( void )
 {
-  xassert ( info != NULL &&
-           info->commColl != MPI_COMM_NULL );
+  struct cdiPioComms *info
+    = namespaceSwitchGet(cdiPioExtraNSKeys[cdiPioEKComms]).data;
+  xassert(info && info->commColl != MPI_COMM_NULL);
   return info->commColl;
 }
 
 
 int commInqSizeColl    ( void )
 {
-  xassert(info != NULL &&
-          info->sizeColl >= 0);
+  struct cdiPioComms *info
+    = namespaceSwitchGet(cdiPioExtraNSKeys[cdiPioEKComms]).data;
+  xassert(info && info->sizeColl >= 0);
   return info->sizeColl;
 }
 
 
 int commInqRankColl(void)
 {
-  xassert(info != NULL);
+  struct cdiPioComms *info
+    = namespaceSwitchGet(cdiPioExtraNSKeys[cdiPioEKComms]).data;
+  xassert(info);
   return info->rankColl;
 }
 
 MPI_Comm cdiPioInqInterComm(void)
 {
-  xassert(info != NULL);
+  struct cdiPioComms *info
+    = namespaceSwitchGet(cdiPioExtraNSKeys[cdiPioEKComms]).data;
+  xassert(info);
   return info->pioInterComm;
 }
 
 MPI_Comm cdiPioInqCollClientIntraComm(void)
 {
-  xassert(info != NULL);
+  struct cdiPioComms *info
+    = namespaceSwitchGet(cdiPioExtraNSKeys[cdiPioEKComms]).data;
+  xassert(info);
   return info->collClientIntraComm;
 }
 
 
 int commInqSpecialRank(void)
 {
-  xassert ( info != NULL );
+  struct cdiPioComms *info
+    = namespaceSwitchGet(cdiPioExtraNSKeys[cdiPioEKComms]).data;
+  xassert(info);
   return info->sizeColl;
 }
 
 
 MPI_Comm commInqCommCalc    ( void )
 {
-  xassert ( info != NULL &&
-           info->commCalc != MPI_COMM_NULL );
+  struct cdiPioComms *info
+    = namespaceSwitchGet(cdiPioExtraNSKeys[cdiPioEKComms]).data;
+  xassert(info && info->commCalc != MPI_COMM_NULL);
   return info->commCalc;
 }
 
@@ -378,6 +410,9 @@ MPI_Comm commInqCommCalc    ( void )
 void commPrint ( FILE * fp )
 {
   if ( ddebug == 0 ) return;
+
+  struct cdiPioComms *info
+    = namespaceSwitchGet(cdiPioExtraNSKeys[cdiPioEKComms]).data;
 
   xassert ( info != NULL );
 
