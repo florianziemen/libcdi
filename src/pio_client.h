@@ -3,7 +3,7 @@
 
 #include <pio_conf.h>
 
-void cdiPioClientSetup(int *pioNamespace, struct cdiPioConf *conf);
+void cdiPioClientSetup(int pioNamespace, struct cdiPioConf *conf);
 
 #endif
 
