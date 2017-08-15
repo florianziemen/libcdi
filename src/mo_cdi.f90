@@ -208,11 +208,12 @@ module mo_cdi
   integer(c_int), public, parameter :: TUNIT_MONTH = 10
   integer(c_int), public, parameter :: TUNIT_YEAR = 11
   integer(c_int), public, parameter :: CALENDAR_STANDARD = 0
-  integer(c_int), public, parameter :: CALENDAR_PROLEPTIC = 1
-  integer(c_int), public, parameter :: CALENDAR_360DAYS = 2
-  integer(c_int), public, parameter :: CALENDAR_365DAYS = 3
-  integer(c_int), public, parameter :: CALENDAR_366DAYS = 4
-  integer(c_int), public, parameter :: CALENDAR_NONE = 5
+  integer(c_int), public, parameter :: CALENDAR_GREGORIAN = 1
+  integer(c_int), public, parameter :: CALENDAR_PROLEPTIC = 2
+  integer(c_int), public, parameter :: CALENDAR_360DAYS = 3
+  integer(c_int), public, parameter :: CALENDAR_365DAYS = 4
+  integer(c_int), public, parameter :: CALENDAR_366DAYS = 5
+  integer(c_int), public, parameter :: CALENDAR_NONE = 6
   integer(c_int), public, parameter :: CDI_UUID_SIZE = 16
 
   public t_CdiParam
