@@ -102,7 +102,7 @@ void zaxisGetTypeDescription(int zaxisType, int *outPositive, const char **outNa
     {
       if (outPositive) *outPositive = ZaxistypeEntry[zaxisType].positive;
       if (outName) *outName = ZaxistypeEntry[zaxisType].name;
-      if (outLongName) *outLongName = ZaxistypeEntry[zaxisType].longname;
+      if (outLongName && zaxisType != ZAXIS_GENERIC) *outLongName = ZaxistypeEntry[zaxisType].longname;
       if (outStdName) *outStdName = ZaxistypeEntry[zaxisType].stdname;
       if (outUnit) *outUnit = ZaxistypeEntry[zaxisType].units;
     }
@@ -206,7 +206,7 @@ int zaxisCreate_(int zaxistype, int size, int id)
 
   int zaxisID = zaxisptr->self;
   zaxisDefName(zaxisID, ZaxistypeEntry[zaxistype].name);
-  zaxisDefLongname(zaxisID, ZaxistypeEntry[zaxistype].longname);
+  if ( zaxistype != ZAXIS_GENERIC ) zaxisDefLongname(zaxisID, ZaxistypeEntry[zaxistype].longname);
   zaxisDefUnits(zaxisID, ZaxistypeEntry[zaxistype].units);
 
   if ( *ZaxistypeEntry[zaxistype].stdname )

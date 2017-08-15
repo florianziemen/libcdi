@@ -4,15 +4,15 @@
 
 #ifdef HAVE_LIBNETCDF
 
-#  include <stdio.h>
-#  include <string.h>
+#include <stdio.h>
+#include <string.h>
 
-#  include <netcdf.h>
+#include <netcdf.h>
 
-#  include "cdi.h"
-#  include "cdi_int.h"
-#  include "stream_cdf.h"
-#  include "cdf_int.h"
+#include "cdi.h"
+#include "cdi_int.h"
+#include "stream_cdf.h"
+#include "cdf_int.h"
 
 static
 int cdfDefTimeBounds(int fileID, int nctimevarid, int nctimedimid, const char *taxis_name, taxis_t* taxis)
@@ -119,6 +119,7 @@ void cdfDefCalendar(int fileID, int ncvarid, int calendar)
 {
   static const struct { int calCode; const char *calStr; } calTab[] = {
     { CALENDAR_STANDARD, "standard" },
+    { CALENDAR_GREGORIAN, "gregorian" },
     { CALENDAR_PROLEPTIC, "proleptic_gregorian" },
     { CALENDAR_NONE, "none" },
     { CALENDAR_360DAYS, "360_day" },

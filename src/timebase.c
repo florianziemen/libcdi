@@ -17,7 +17,7 @@ void decode_julday(int calendar,
   double b = floor((a - 1867216.25)/36524.25);
   double c = a + b - floor(b/4) + 1525;
 
-  if ( calendar == CALENDAR_STANDARD )
+  if ( calendar == CALENDAR_STANDARD || calendar == CALENDAR_GREGORIAN )
     if ( a < 2299161 ) c = a + 1524;
 
   double d = floor((c - 122.1)/365.25);
@@ -54,7 +54,7 @@ int encode_julday(int calendar, int year, int month, int day)
   else
     ib = (int)(iy/400) - (int)(iy/100);
 
-  if ( calendar == CALENDAR_STANDARD )
+  if ( calendar == CALENDAR_STANDARD || calendar == CALENDAR_GREGORIAN )
     {
       if ( year > 1582 || (year == 1582 && (month > 10 || (month == 10 && day >= 15))) )
 	{

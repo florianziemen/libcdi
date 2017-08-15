@@ -425,6 +425,8 @@ void cdiInitialize(void)
 	{
 	  if      ( strncmp(envstr, "standard", 8) == 0 )
 	    cdiDefaultCalendar = CALENDAR_STANDARD;
+	  else if ( strncmp(envstr, "gregorian", 9) == 0 )
+	    cdiDefaultCalendar = CALENDAR_GREGORIAN;
 	  else if ( strncmp(envstr, "proleptic", 9) == 0 )
 	    cdiDefaultCalendar = CALENDAR_PROLEPTIC;
 	  else if ( strncmp(envstr, "360days", 7) == 0 )

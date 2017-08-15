@@ -1,3 +1,12 @@
+2017-08-08  Uwe Schulzweida
+
+	* Bug fix for CF conform hybrid sigma pressure levels
+
+2017-08-04  Uwe Schulzweida
+
+	* Added CALENDAR_GREGORIAN
+	* cdiGridTypeInit: don't overwrite exsisting attributes (bug fix)
+
 2017-07-27  Uwe Schulzweida
 
         * using CGRIBEX library version 1.8.1

@@ -316,9 +316,10 @@ void set_zaxistype(const char *attstring, int *zaxistype)
 
 void set_calendar(const char *attstring, int *calendar)
 {
-  if ( str_is_equal(attstring, "standard") ||
-       str_is_equal(attstring, "gregorian") )
+  if ( str_is_equal(attstring, "standard") )
     *calendar = CALENDAR_STANDARD;
+  else if ( str_is_equal(attstring, "gregorian") )
+    *calendar = CALENDAR_GREGORIAN;
   else if ( str_is_equal(attstring, "none") )
     *calendar = CALENDAR_NONE;
   else if ( str_is_equal(attstring, "proleptic") )
