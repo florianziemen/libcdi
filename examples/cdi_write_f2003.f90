@@ -43,8 +43,8 @@
       vlistID = vlistCreate()
 
 !     Define the variables
-      varID1 = vlistDefVar(vlistID, gridID, zaxisID1, TIME_VARIABLE)
-      varID2 = vlistDefVar(vlistID, gridID, zaxisID2, TIME_VARIABLE)
+      varID1 = vlistDefVar(vlistID, gridID, zaxisID1, TSTEP_INSTANT)
+      varID2 = vlistDefVar(vlistID, gridID, zaxisID2, TSTEP_INSTANT)
 
 !     Define the variable names
       varname = "varname1" // c_null_char
