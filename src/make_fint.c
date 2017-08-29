@@ -668,9 +668,10 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
 
 	      nch = sprintf(xline, funRet[functype].cfmt,
                             "", (int)funcnameLen, funcname);
-              xline[nch++] = ' ';
-              xline[nch++] = '(';
-              xline[nch] = '\0';
+              xline[nch  ] = ' ';
+              xline[nch+1] = '(';
+              xline[nch+2] = '\0';
+              nch += 2;
               xlineLen = (size_t)nch;
 
 	      if ( (funcargc == 1 && funcargtype[0] == ISVOID) ) funcargc = 0;
@@ -679,7 +680,9 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
 		{
 		  if (i)
                     {
-                      strcat(xline, ", ");
+                      xline[xlineLen  ] = ',';
+                      xline[xlineLen+1] = ' ';
+                      xline[xlineLen+2] = '\0';
                       xlineLen += 2;
                     }
 
@@ -704,7 +707,10 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
 		  strcat(xline, farg);
                   xlineLen += (size_t)nchn;
 		}
-	      strcat(xline, ");");
+              xline[xlineLen  ] = ')';
+              xline[xlineLen+1] = ';';
+              xline[xlineLen+2] = '\0';
+              xlineLen += 2;
 	      cdoc[ncdoc].aline[cdoc[ncdoc].naline++] = strdup(xline);
 	      cdoc[ncdoc].text  = strdup(xdes);
 
@@ -721,7 +727,13 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
                             xname);
 
 	      if ( (funcargc == 1 && funcargtype[0] == ISVOID) ) funcargc = 0;
-              if (funcargc) strcat(xline, " ("), nch += 2;
+              if (funcargc)
+                {
+                  xline[nch  ] = ' ';
+                  xline[nch+1] = '(';
+                  xline[nch+2] = '\0';
+                  nch += 2;
+                }
 
               xlineLen = (size_t)nch;
 
@@ -729,7 +741,9 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
 		{
 		  if (i)
                     {
-                      strcat(xline, ", ");
+                      xline[xlineLen  ] = ',';
+                      xline[xlineLen+1] = ' ';
+                      xline[xlineLen+2] = '\0';
                       xlineLen += 2U;
                     }
 
@@ -763,7 +777,12 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
 		  strcat(xline, farg);
                   xlineLen += (size_t)nchn;
 		}
-	      if ( funcargc ) strcat(xline, ")");
+	      if ( funcargc )
+                {
+                  xline[xlineLen  ] = ')';
+                  xline[xlineLen+1] = '\0';
+                  xlineLen += 1;
+                }
 	      fdoc[nfdoc].aline[fdoc[nfdoc].naline++] = strdup(xline);
 	      fdoc[nfdoc].text  = strdup(xdes);
 
