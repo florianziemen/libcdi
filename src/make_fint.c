@@ -769,10 +769,9 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint, const
 	      fdoc[nfdoc].text   = NULL;
 	      fdoc[nfdoc].fname  = strdup(funcname);
 
-	      if ( functype == ISVOID )
-		nch = sprintf(xline, "SUBROUTINE %s", xname);
-	      else
-		nch = sprintf(xline, "%s FUNCTION %s", funArgSym[functype].f77name, xname);
+              nch = sprintf(xline, "%s%s %s", funArgSym[functype].f77name,
+                            functype == ISVOID ? "SUBROUTINE" : " FUNCTION",
+                            xname);
 
 	      if ( (funcargc == 1 && funcargtype[0] == ISVOID) ) funcargc = 0;
               if (funcargc) strcat(xline, " ("), nch += 2;
