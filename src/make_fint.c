@@ -803,9 +803,9 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint, const
           else
             delegateName = funcname;
 
-          fprintf(fpint, (functype == ISVOID) ? "FCALLSCSUB" : "FCALLSCFUN");
+	  fputs(functype == ISVOID ? "FCALLSCSUB" : "FCALLSCFUN", fpint);
 	  fprintf(fpint, "%zd ", funcargc);
-	  fprintf(fpint, "(");
+	  fputs("(", fpint);
 	  if ( functype != ISVOID )
 	    fprintf(fpint, "%s, ", funRet[functype].cfint);
 	  fprintf(fpint, "%s, ", delegateName);
@@ -819,7 +819,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint, const
 	    {
 	      fprintf(fpint, ", %s", funArgSym[funcargtype[i]].cfint);
 	    }
-	  fprintf(fpint, ")\n");
+	  fputs(")\n", fpint);
 
 
 	  if ( funcnameLen == xnameLen && memcmp(funcname, xname, funcnameLen) == 0 )
