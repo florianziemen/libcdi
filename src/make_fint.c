@@ -1463,6 +1463,13 @@ sprintFortranArrayArgDims(size_t argDimsFSize, char argDimsF[argDimsFSize],
   argDimsF[argDimsFPos++] = 0;
 }
 
+/*
+ * Creates a wrapper function to call funcname indirectly.
+ *
+ * This is needed in case a function needs a wrapper going from
+ * Fortran to C or back because a variable type cannot be used
+ * directly like e.g. MPI_Comm
+ */
 static void
 emitWrapper(char *restrict delegateNameBuf, FILE *fpint,
             const char *line,
