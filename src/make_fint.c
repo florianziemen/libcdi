@@ -3,6 +3,7 @@
 #include <ctype.h>
 #include <errno.h>
 #include <regex.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -116,7 +117,7 @@ struct symbol {
   const char *f77name, *cfint, *cfmt, *parseRE;
   /* pair of parentheses which matches the argument name */
   size_t nameMatch;
-  int needsExtraWrapper, needsPrologue;
+  bool needsExtraWrapper, needsPrologue;
   cfConversionEmitter convert;
   const char *convcfmt;
   cfPrologueEmitter prologue;
@@ -149,82 +150,82 @@ static struct symbol funArgSym[]
   = { { "",                "",        "%svoid",
         "^"WS"*void"WS"*\\)", 0, 0, 0 },
       { "CHARACTER(80)",    "STRING",  "%schar *%.*s",
-        "^"WS"*const"WS"+char"WS"+\\*"SYMRE WS"*\\(", 1, 0, 0 },
+        "^"WS"*const"WS"+char"WS"+\\*"SYMRE WS"*\\(", 1, false, false },
       { "INTEGER",         "INT",     "%sint %.*s",
-        "^"WS"*(const"WS"+)?int("WS"+"SYMRE")?"WS"*[,\\)]", 3, 0, 0 },
+        "^"WS"*(const"WS"+)?int("WS"+"SYMRE")?"WS"*[,\\)]", 3, false, false },
       { "LOGICAL",         "LOGICAL", "%bool %.*s",
-        "^"WS"*(const"WS"+)?bool("WS"+"SYMRE")?"WS"*[,\\)]", 3, 0, 0 },
+        "^"WS"*(const"WS"+)?bool("WS"+"SYMRE")?"WS"*[,\\)]", 3, false, false },
       { "REAL",            "FLOAT",   "%sfloat %.*s",
-        "^"WS"*(const"WS"+)?float"WS"+"SYMRE"?"WS"*[,\\)]", 2, 0, 0 },
+        "^"WS"*(const"WS"+)?float"WS"+"SYMRE"?"WS"*[,\\)]", 2, false, false },
       { "DOUBLEPRECISION", "DOUBLE",  "%sdouble %.*s",
-        "^"WS"*(const"WS"+)?double"WS"+"SYMRE"?"WS"*[,\\)]", 2, 0, 0 },
+        "^"WS"*(const"WS"+)?double"WS"+"SYMRE"?"WS"*[,\\)]", 2, false, false },
       { "INTEGER",         "INT", "%sMPI_Comm %.*s",
-        "^"WS"*MPI_Comm"WS"+"SYMRE"?"WS"*[,\\)]", 1, 1, 0,
+        "^"WS"*MPI_Comm"WS"+"SYMRE"?"WS"*[,\\)]", 1, true, false,
         cfMPICommConvert, "%sint %.*s" },
       { "TYPE(XT_IDXLIST)", "PVOID", "%sXt_idxlist %.*s",
-        "^"WS"*Xt_idxlist"WS"+"SYMRE"?"WS"*[,\\)]", 1, 1, 0,
+        "^"WS"*Xt_idxlist"WS"+"SYMRE"?"WS"*[,\\)]", 1, true, false,
         cfXtIdxlistConvert, "%svoid *%.*s" },
       { "CHOICE", "PVOID", "%sconst void *%.*s",
-        "^"WS"*const"WS"+void"WS"*\\*"WS"*"SYMRE"?"WS"*[,\\)]", 1, 0, 0 },
+        "^"WS"*const"WS"+void"WS"*\\*"WS"*"SYMRE"?"WS"*[,\\)]", 1, false, false },
       { "INTEGER",         "PINT",    "%sint *%.*s",
-        "^"WS"*(const"WS"+)?int"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2, 0, 0 },
+        "^"WS"*(const"WS"+)?int"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2, false, false },
       { "REAL",            "FLOATV",  "%sfloat %.*s[]",
         "^"WS"*(const"WS"+)?float("WS"+"SYMRE")?"WS"*"ARRAY_BOUND
-        "[,\\)]", 3, 0, 0 },
+        "[,\\)]", 3, false, false },
       { "REAL",            "FLOATVV", "%sfloat %.*s%s",
         "^"WS"*(const"WS"+)?float("WS"+"SYMRE")?"WS"*"ARRAY_BOUND
-        ARRAY_BOUND"[,\\)]", 3, 0, 0 },
+        ARRAY_BOUND"[,\\)]", 3, false, false },
       { "DOUBLEPRECISION", "DOUBLEV",  "%sdouble %.*s[]",
         "^"WS"*(const"WS"+)?double("WS"+"SYMRE")?"WS"*"ARRAY_BOUND
-        "[,\\)]", 3, 0, 0 },
+        "[,\\)]", 3, false, false },
       { "DOUBLEPRECISION", "DOUBLEVV", "%sdouble %.*s%s",
         "^"WS"*(const"WS"+)?double("WS"+"SYMRE")?"WS"*"ARRAY_BOUND
-        ARRAY_BOUND"[,\\)]", 3, 0, 0 },
+        ARRAY_BOUND"[,\\)]", 3, false, false },
       { "INTEGER",         "INTV",    "%sint  %.*s[]",
         "^"WS"*(const"WS"+)?int("WS"+"SYMRE")?"WS"*"ARRAY_BOUND
-        "[,\\)]", 3, 0, 0 },
+        "[,\\)]", 3, false, false },
       { "INTEGER",         "INTVV",    "%sint %.*s%s",
         "^"WS"*(const"WS"+)?int("WS"+"SYMRE")?"WS"*"ARRAY_BOUND
-        ARRAY_BOUND "[,\\)]", 3, 0, 0 },
+        ARRAY_BOUND "[,\\)]", 3, false, false },
       { "INTEGER",         "INTVVV",    "%sint %.*s%s",
         "^"WS"*(const"WS"+)?int("WS"+"SYMRE")?"WS"*"ARRAY_BOUND
-        ARRAY_BOUND ARRAY_BOUND"[,\\)]", 3, 0, 0 },
+        ARRAY_BOUND ARRAY_BOUND"[,\\)]", 3, false, false },
       { "REAL",            "PFLOAT",  "%sfloat *%.*s",
-        "^"WS"*(const"WS"+)?float"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2, 0, 0 },
+        "^"WS"*(const"WS"+)?float"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2, false, false },
       { "DOUBLEPRECISION", "PDOUBLE", "%sdouble *%.*s",
-        "^"WS"*(const"WS"+)?double"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2, 0, 0 },
+        "^"WS"*(const"WS"+)?double"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2, false, false },
       { "CHARACTER*(*)",   "PPSTRING",    "%schar *%.*s",
         "^"WS"*(const"WS"+)?char"WS"+\\*""([A-Za-z_][A-Za-z_0-9]*_cbuf)"
-        WS"*[,\\)]", 2, 0, 0 },
+        WS"*[,\\)]", 2, false, false },
       { "INTEGER*1(16)",   "PVOID",    "%sunsigned char %.*s[16]",
-        "^"WS"*(const"WS"+)?unsigned"WS"+char"WS"+"SYMRE"?\\[(16|CDI_UUID_SIZE)\\]"WS"*[,\\)]", 2, 0, 0 },
+        "^"WS"*(const"WS"+)?unsigned"WS"+char"WS"+"SYMRE"?\\[(16|CDI_UUID_SIZE)\\]"WS"*[,\\)]", 2, false, false },
       { "INTEGER*1(*)",   "PVOID",    "%sunsigned char *%.*s",
-        "^"WS"*(const"WS"+)?unsigned"WS"+char"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2, 0, 0 },
+        "^"WS"*(const"WS"+)?unsigned"WS"+char"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2, false, false },
       { "CHARACTER*(*)",   "STRING",  "%schar *%.*s",
-        "^"WS"*const"WS"+char"WS"+\\*"WS"*"SYMRE"?"WS"*[,\\)]", 1, 0, 0 },
+        "^"WS"*const"WS"+char"WS"+\\*"WS"*"SYMRE"?"WS"*[,\\)]", 1, false, false },
       { "CHARACTER*(*)",   "PSTRING", "%schar *%.*s",
-        "^"WS"*char"WS"+\\*"SYMRE"?"WS"*[,\\)]", 1, 0, 0 },
+        "^"WS"*char"WS"+\\*"SYMRE"?"WS"*[,\\)]", 1, false, false },
       { "PROCEDURE", "ROUTINE", "%svoid (*%.*s)(void)",
         "^"WS"*void"WS"*\\("WS"*\\*"WS"*"SYMRE"?"WS"*\\)"
-        WS"*\\("WS"*void"WS"*\\)"WS"*[,\\)]", 1, 0, 1,
+        WS"*\\("WS"*void"WS"*\\)"WS"*[,\\)]", 1, false, true,
         NULL, NULL, cfVoidFuncPrologue },
 };
 
 static struct symbol funRet[] = {
   { "",                "",        "%svoid %.*s",
-    "void"WS"+"SYMRE WS"*\\(", 1, 0, 0 },
+    "void"WS"+"SYMRE WS"*\\(", 1, false, false },
   { "CHARACTER",       "STRING",  "%schar *%.*s",
-    "char"WS"+\\*"WS"*"SYMRE WS"*\\(", 1, 0, 0 },
+    "char"WS"+\\*"WS"*"SYMRE WS"*\\(", 1, false, false },
   { "INTEGER",         "INT",     "%sint %.*s",
-    "(const"WS"+)?int"WS"+"SYMRE WS"*\\(", 2, 0, 0 },
+    "(const"WS"+)?int"WS"+"SYMRE WS"*\\(", 2, false, false },
   { "LOGICAL",         "LOGICAL", "%sbool %.*s",
-    "(const"WS"+)?bool"WS"+"SYMRE WS"*\\(", 2, 0, 0 },
+    "(const"WS"+)?bool"WS"+"SYMRE WS"*\\(", 2, false, false },
   { "REAL",            "FLOAT",   "%sfloat %.*s",
-    "(const"WS"+)?float"WS"+"SYMRE WS"*\\(", 2, 0, 0 },
+    "(const"WS"+)?float"WS"+"SYMRE WS"*\\(", 2, false, false },
   { "DOUBLEPRECISION", "DOUBLE",  "%sdouble %.*s",
-    "(const"WS"+)?double"WS"+"SYMRE WS"*\\(", 2, 0, 0 },
+    "(const"WS"+)?double"WS"+"SYMRE WS"*\\(", 2, false, false },
   { "INTEGER",         "INT",     "%sMPI_Comm %.*s",
-    "MPI_Comm"WS"+"SYMRE WS"*\\(", 1, 1, 0, cfMPICommConvert, "%sint %.*s" },
+    "MPI_Comm"WS"+"SYMRE WS"*\\(", 1, true, false, cfMPICommConvert, "%sint %.*s" },
 };
 #if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 5)
 #pragma GCC diagnostic pop
@@ -434,7 +435,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
         continue;
       functype = ISVOID;
       pline = line;
-      int needsExtraWrapper = 0, needsPrologue = 0;
+      bool needsExtraWrapper = false, needsPrologue = false;
       size_t funcnameLen;
       enum decl declType = UNKNOWN_DECL;
       do {
@@ -443,8 +444,8 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
             {
               functype = retType;
               declType = FUNC_DECL;
-              needsExtraWrapper
-                = needsExtraWrapper || funRet[retType].needsExtraWrapper;
+              needsPrologue |= funRet[retType].needsPrologue;
+              needsExtraWrapper |= funRet[retType].needsExtraWrapper;
               break;
             }
         if (declType == UNKNOWN_DECL)
@@ -551,10 +552,8 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
                       regmatch_t *nameMatch = reMatch + funArgSym[argtype].nameMatch;
                       funcargname[i].rm_so = nameMatch->rm_so + argStart;
                       funcargname[i].rm_eo = nameMatch->rm_eo + argStart;
-                      needsExtraWrapper
-                        = needsExtraWrapper || funArgSym[argtype].needsExtraWrapper;
-                      needsPrologue = needsPrologue
-                        || funArgSym[argtype].needsPrologue;
+                      needsExtraWrapper |= funArgSym[argtype].needsExtraWrapper;
+                      needsPrologue |= funArgSym[argtype].needsPrologue;
                       break;
                     }
                 if (argtype == NUM_KNOWN_ARG_TYPES)
