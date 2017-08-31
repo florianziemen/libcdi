@@ -1493,39 +1493,40 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
   int nzaxis = vlistNzaxis(vlistID);
 
   size_t dimlen = (size_t)zaxisInqSize(zaxisID);
-  int type   = zaxisInqType(zaxisID);
+  int type = zaxisInqType(zaxisID);
 
-  bool is_scalar = false;
+  int ndims = 1;
+
   if ( dimlen == 1 )
     {
-      is_scalar = zaxisInqScalar(zaxisID) > 0;
+      bool is_scalar = zaxisInqScalar(zaxisID) > 0;
       if ( !is_scalar && CDI_cmor_mode )
         {
           is_scalar = true;
           zaxisDefScalar(zaxisID);
         }
+
+      if ( is_scalar ) ndims = 0;
+      // if ( CDI_reduce_dim ) return;
+
+      switch (type)
+        {
+        case ZAXIS_SURFACE:
+        case ZAXIS_CLOUD_BASE:
+        case ZAXIS_CLOUD_TOP:
+        case ZAXIS_ISOTHERM_ZERO:
+        case ZAXIS_TOA:
+        case ZAXIS_SEA_BOTTOM:
+        case ZAXIS_ATMOSPHERE:
+        case ZAXIS_MEANSEA:
+        case ZAXIS_LAKE_BOTTOM:
+        case ZAXIS_SEDIMENT_BOTTOM:
+        case ZAXIS_SEDIMENT_BOTTOM_TA:
+        case ZAXIS_SEDIMENT_BOTTOM_TW:
+        case ZAXIS_MIX_LAYER:
+          return;
+        }
     }
-
-  int ndims = is_scalar ? 0 : 1;
-
-  if ( dimlen == 1 )
-    switch (type)
-      {
-      case ZAXIS_SURFACE:
-      case ZAXIS_CLOUD_BASE:
-      case ZAXIS_CLOUD_TOP:
-      case ZAXIS_ISOTHERM_ZERO:
-      case ZAXIS_TOA:
-      case ZAXIS_SEA_BOTTOM:
-      case ZAXIS_ATMOSPHERE:
-      case ZAXIS_MEANSEA:
-      case ZAXIS_LAKE_BOTTOM:
-      case ZAXIS_SEDIMENT_BOTTOM:
-      case ZAXIS_SEDIMENT_BOTTOM_TA:
-      case ZAXIS_SEDIMENT_BOTTOM_TW:
-      case ZAXIS_MIX_LAYER:
-        return;
-      }
 
   zaxisInqName(zaxisID, axisname);
 
