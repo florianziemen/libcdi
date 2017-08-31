@@ -2482,7 +2482,8 @@ bool cdf_read_coordinates(struct cdfLazyGrid *restrict lazyGrid, ncvar_t *ncvar,
     {
       int ndims = ncvar->ndims;
       int *dimtype = ncvar->dimtype;
-      if ( (ndims == 1 && dimtype[0] == T_AXIS) ||
+      if ( ndims == 0 ||
+           (ndims == 1 && dimtype[0] == T_AXIS) ||
            (ndims == 1 && dimtype[0] == Z_AXIS) ||
            (ndims == 2 && dimtype[0] == T_AXIS && dimtype[1] == Z_AXIS) )
         {
@@ -3709,15 +3710,15 @@ int cdfInqContents(stream_t *streamptr)
 
   if ( CDI_Debug )
     Message("root: ndims %d, nvars %d, ngatts %d", ndims, nvars, ngatts);
-
+  /*
   if ( ndims == 0 )
     {
       Warning("No dimensions found!");
       return CDI_EUFSTRUCT;
     }
-
-  /* alloc ncdims */
-  ncdim_t *ncdims = (ncdim_t *) Malloc((size_t)ndims * sizeof (ncdim_t));
+  */
+  // alloc ncdims
+  ncdim_t *ncdims = ndims ? (ncdim_t *) Malloc((size_t)ndims * sizeof(ncdim_t)) : NULL;
   init_ncdims(ndims, ncdims);
 
 #if  defined  (TEST_GROUPS)
@@ -3753,18 +3754,18 @@ int cdfInqContents(stream_t *streamptr)
       return CDI_EUFSTRUCT;
     }
 
-  /* alloc ncvars */
-  ncvar_t *ncvars = (ncvar_t *) Malloc((size_t)nvars * sizeof (ncvar_t));
+  // alloc ncvars
+  ncvar_t *ncvars = nvars ? (ncvar_t *) Malloc((size_t)nvars * sizeof (ncvar_t)) : NULL;
   init_ncvars(nvars, ncvars);
 
   for ( ncvarid = 0; ncvarid < nvars; ++ncvarid ) ncvars[ncvarid].ncid = fileID;
 
 
-  /* scan global attributes */
+  // scan global attributes
   cdf_scan_global_attr(fileID, vlistID, streamptr, ngatts, &instID, &modelID, &ucla_les,
                        uuidOfHGrid, uuidOfVGrid, gridfile, &number_of_grid_used);
 
-  /* find time dim */
+  // find time dim
   int timedimid = (unlimdimid >= 0) ? unlimdimid : cdf_time_dimid(fileID, ndims, nvars);
 
   streamptr->basetime.ncdimid = timedimid;
@@ -3780,7 +3781,7 @@ int cdfInqContents(stream_t *streamptr)
   if ( CDI_Debug ) Message("Number of timesteps = %zu", ntsteps);
   if ( CDI_Debug ) Message("Time dimid = %d", streamptr->basetime.ncdimid);
 
-  /* read ncdims */
+  // read ncdims
   for ( ncdimid = 0; ncdimid < ndims; ncdimid++ )
     {
       cdf_inq_dimlen(fileID, ncdimid, &ncdims[ncdimid].len);
@@ -3791,13 +3792,13 @@ int cdfInqContents(stream_t *streamptr)
 
   if ( CDI_Debug ) cdf_print_vars(ncvars, nvars, "cdf_scan_var_attr");
 
-  /* scan attributes of all variables */
+  // scan attributes of all variables
   cdf_scan_var_attr(nvars, ncvars, ncdims, timedimid, modelID, format);
 
 
   if ( CDI_Debug ) cdf_print_vars(ncvars, nvars, "find coordinate vars");
 
-  /* find coordinate vars */
+  // find coordinate vars
   for ( ncdimid = 0; ncdimid < ndims; ncdimid++ )
     {
       for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
@@ -3824,20 +3825,20 @@ int cdfInqContents(stream_t *streamptr)
 	}
     }
 
-  /* find time vars */
+  // find time vars
   find_time_vars(nvars, ncvars, ncdims, timedimid, streamptr, &time_has_units, &time_has_bounds, &time_climatology);
 
   leadtime_id = find_leadtime(nvars, ncvars);
   if ( leadtime_id != CDI_UNDEFID ) ncvars[leadtime_id].isvar = FALSE;
 
-  /* check ncvars */
+  // check ncvars
   timedimid = cdf_check_vars(nvars, ncvars, ntsteps, timedimid);
 
-  /* verify coordinate vars - first scan (dimname == varname) */
+  // verify coordinate vars - first scan (dimname == varname)
   bool lhybrid_cf = false;
   verify_coordinate_vars_1(fileID, ndims, ncdims, ncvars, timedimid, &lhybrid_cf);
 
-  /* verify coordinate vars - second scan (all other variables) */
+  // verify coordinate vars - second scan (all other variables)
   verify_coordinate_vars_2(nvars, ncvars);
 
   if ( CDI_Debug ) cdf_print_vars(ncvars, nvars, "verify_coordinate_vars");
@@ -3870,7 +3871,7 @@ int cdfInqContents(stream_t *streamptr)
     }
   */
 
-  /* Set coordinate varids (att: associate)  */
+  // Set coordinate varids (att: associate)
   for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
     {
       ncvar_t *ncvar = &ncvars[ncvarid];
@@ -3889,10 +3890,10 @@ int cdfInqContents(stream_t *streamptr)
 	}
     }
 
-  /* set dim type */
+  // set dim type
   cdf_set_dimtype(nvars, ncvars, ncdims);
 
-  /* read ECHAM VCT if present */
+  // read ECHAM VCT if present
   size_t vctsize = 0;
   double *vct = NULL;
   if ( !lhybrid_cf ) read_vct_echam(fileID, nvars, ncvars, ncdims, &vct, &vctsize);
@@ -3900,18 +3901,18 @@ int cdfInqContents(stream_t *streamptr)
 
   if ( CDI_Debug ) cdf_print_vars(ncvars, nvars, "cdf_define_all_grids");
 
-  /* define all grids */
+  // define all grids
   int status;
   status = cdf_define_all_grids(streamptr->ncgrid, vlistID, ncdims, nvars, ncvars, timedimid, uuidOfHGrid, gridfile, number_of_grid_used);
   if ( status < 0 ) return status;
 
-  /* define all zaxes */
+  // define all zaxes
   status = cdf_define_all_zaxes(streamptr, vlistID, ncdims, nvars, ncvars, vctsize, vct, uuidOfVGrid);
   if ( vct ) Free(vct);
   if ( status < 0 ) return status;
 
 
-  /* select vars */
+  // select vars
   varids = (int *) Malloc((size_t)nvars * sizeof (int));
   nvarids = 0;
   for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
@@ -3935,13 +3936,13 @@ int cdfInqContents(stream_t *streamptr)
 
   streamptr->ntsteps = (long)ntsteps;
 
-  /* define all data variables */
+  // define all data variables
   cdf_define_all_vars(streamptr, vlistID, instID, modelID, varids, nvars_data, nvars, ncvars);
 
 
   cdiCreateTimesteps(streamptr);
 
-  /* time varID */
+  // time varID
   int nctimevarid = streamptr->basetime.ncvarid;
 
   if ( time_has_units )
@@ -4046,11 +4047,11 @@ int cdfInqContents(stream_t *streamptr)
 
   cdfCreateRecords(streamptr, 0);
 
-  /* free ncdims */
-  Free(ncdims);
+  // free ncdims
+  if ( ncdims ) Free(ncdims);
 
-  /* free ncvars */
-  Free(ncvars);
+  // free ncvars
+  if ( ncvars ) Free(ncvars);
 
   return 0;
 }
