@@ -1875,6 +1875,13 @@ void cdfDefGrid(stream_t *streamptr, int gridID, int gridindex)
   if ( CDI_Debug )
     Message("gridtype = %d  size = %d", gridtype, size);
 
+  if ( CDI_reduce_dim && size == 1 )
+    {
+      // no grid information
+      streamptr->ncgrid[gridindex].gridID = gridID;
+      return;
+    }
+
   if ( gridtype == GRID_GAUSSIAN    ||
        gridtype == GRID_LONLAT      ||
        gridtype == GRID_PROJECTION  ||
@@ -1884,7 +1891,7 @@ void cdfDefGrid(stream_t *streamptr, int gridID, int gridindex)
         {
           if ( size == 1 && gridInqXsize(gridID) == 0 && gridInqYsize(gridID) == 0 )
             {
-              /* no grid information */
+              // no grid information
               streamptr->ncgrid[gridindex].gridID = gridID;
             }
           else
