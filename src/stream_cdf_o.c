@@ -532,11 +532,13 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridindex, int ndims,
             cdf_put_att_text(fileID, ncvarid, "axis", 1, axisStr);
           }
 
+          size_t nvertex = gridInqNvertex(gridID);
           pbounds = (double *)gridAxisInq->axisBoundsPtr(gridID);
 
           if ( CDI_cmor_mode && grid_is_cyclic && !pbounds )
             {
               gen_bounds = true;
+              nvertex = 2;
               pbounds = (double*) Malloc(2*dimlen*sizeof(double));
               for ( size_t i = 0; i < dimlen-1; ++i )
                 {
@@ -547,13 +549,12 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridindex, int ndims,
             }
           if ( pbounds )
             {
-              size_t nvertex = gridInqNvertex(gridID);
               if ( nc_inq_dimid(fileID, bndsName, &nvdimID) != NC_NOERR )
                 cdf_def_dim(fileID, bndsName, nvertex, &nvdimID);
             }
           if ( pbounds && nvdimID != CDI_UNDEFID )
             {
-              char boundsname[extendedAxisnameLen + 1 + sizeof (bndsName)];
+              char boundsname[extendedAxisnameLen + 1 + sizeof(bndsName)];
               memcpy(boundsname, axisname, extendedAxisnameLen);
               boundsname[extendedAxisnameLen] = '_';
               memcpy(boundsname + extendedAxisnameLen + 1, bndsName, sizeof bndsName);
