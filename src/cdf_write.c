@@ -982,7 +982,7 @@ void cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarid, int dty
   if ( sdata_sp ) Free(sdata_sp);
 }
 
-x
+
 void cdf_write_var(stream_t *streamptr, int varID, int memtype, const void *data, int nmiss)
 {
   if ( streamptr->accessmode == 0 ) cdfEndDef(streamptr);
