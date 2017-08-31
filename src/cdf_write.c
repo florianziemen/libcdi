@@ -381,7 +381,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
 
   int tid = streamptr->basetime.ncdimid;
 
-  if ( tsteptype != TSTEP_CONSTANT )
+  if ( !CDI_reduce_dim && tsteptype != TSTEP_CONSTANT )
     {
       if ( tid == CDI_UNDEFID ) Error("Internal problem, time undefined!");
       chunks[ndims] = 1;

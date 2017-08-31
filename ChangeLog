@@ -4,6 +4,7 @@
 
 2017-08-30  Uwe Schulzweida
 
+	* Implementation of CDI_reduce_dim for time axis
 	* cdfDefAxisCommon: bug fix for zaxis bounds in CDI_cmor_mode
 
 2017-08-08  Uwe Schulzweida
