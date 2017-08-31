@@ -2,6 +2,10 @@
 
 	* Version 1.9.1 released
 
+2017-09-01  Uwe Schulzweida
+
+	* Implementation of CDI_reduce_dim for z axis
+
 2017-08-30  Uwe Schulzweida
 
 	* Implementation of CDI_reduce_dim for time axis

@@ -1507,7 +1507,7 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
         }
 
       if ( is_scalar ) ndims = 0;
-      // if ( CDI_reduce_dim ) return;
+      if ( CDI_reduce_dim ) return;
 
       switch (type)
         {
@@ -2010,6 +2010,12 @@ void cdfDefVars(stream_t *streamptr)
     {
       int zaxisID = vlistZaxis(vlistID, index);
       if ( streamptr->zaxisID[index] == CDI_UNDEFID ) cdfDefZaxis(streamptr, zaxisID);
+    }
+
+  if ( streamptr->ncmode != 2 )
+    {
+      cdf_enddef(streamptr->fileID);
+      streamptr->ncmode = 2;
     }
 }
 
