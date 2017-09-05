@@ -1499,12 +1499,15 @@ int vlistHasTime(int vlistID)
   bool hastime = false;
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
-  for ( int varID = 0; varID <  vlistptr->nvars; varID++ )
-    if ( vlistptr->vars[varID].tsteptype != TSTEP_CONSTANT )
-      {
-        hastime = true;
-        break;
-      }
+  if ( !(CDI_reduce_dim && vlistptr->ntsteps == 1) )
+    {
+      for ( int varID = 0; varID <  vlistptr->nvars; varID++ )
+        if ( vlistptr->vars[varID].tsteptype != TSTEP_CONSTANT )
+          {
+            hastime = true;
+            break;
+          }
+    }
 
   return (int)hastime;
 }

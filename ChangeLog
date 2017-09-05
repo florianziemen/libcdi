@@ -1,3 +1,21 @@
+2017-09-27  Uwe Schulzweida
+
+	* Version 1.9.1 released
+
+2017-09-05  Uwe Schulzweida
+
+	* netcdf: added support for GRID_TRAJECTORY
+
+2017-09-01  Uwe Schulzweida
+
+	* Implementation of CDI_reduce_dim for z axis
+
+2017-08-30  Uwe Schulzweida
+
+	* Implementation of CDI_reduce_dim for time axis
+	* Implementation of CDI_reduce_dim for x/y axis
+	* cdfDefAxisCommon: bug fix for zaxis bounds in CDI_cmor_mode
+
 2017-08-08  Uwe Schulzweida
 
 	* Bug fix for CF conform hybrid sigma pressure levels

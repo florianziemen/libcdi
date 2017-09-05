@@ -78,6 +78,7 @@ static void tableLink(int tableID, const param_type *pars, int npars)
   for ( int item = 0; item < npars; item++ )
     {
       parTable[tableID].pars[item].id       = pars[item].id;
+      parTable[tableID].pars[item].ltype    = pars[item].ltype;
       parTable[tableID].pars[item].dupflags = 0;
       parTable[tableID].pars[item].name     = pars[item].name;
       parTable[tableID].pars[item].longname = pars[item].longname;

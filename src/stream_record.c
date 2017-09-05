@@ -131,7 +131,7 @@ void streamInqRecord(int streamID, int *varID, int *levelID)
   *levelID = streamptr->vars[*varID].recordTable[isub].lindex[lindex];
 
   if ( CDI_Debug )
-    Message("tsID = %d, recID = %d, varID = %d, levelID = %d\n", tsID, recID, *varID, *levelID);
+    Message("tsID = %d, recID = %d, varID = %d, levelID = %d", tsID, recID, *varID, *levelID);
 
   streamptr->curTsID = tsID;
   streamptr->tsteps[tsID].curRecID = rindex;

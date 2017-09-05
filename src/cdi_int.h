@@ -342,6 +342,7 @@ extern int cdiConvention;
 extern int cdiInventoryMode;
 extern int CDI_Version_Info;
 extern int CDI_cmor_mode;
+extern int CDI_reduce_dim;
 extern size_t CDI_netcdf_hdr_pad;
 extern bool CDI_netcdf_lazy_grid_load;
 extern int STREAM_Debug;
