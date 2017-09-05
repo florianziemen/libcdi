@@ -24,8 +24,8 @@ void cdfReadGridTraj(stream_t *streamptr, int gridID)
   int fileID  = streamptr->fileID;
 
   int gridindex = vlistGridIndex(vlistID, gridID);
-  int lonID = streamptr->ncgrid[gridindex].ncIDs[CDF_DIMID_X];
-  int latID = streamptr->ncgrid[gridindex].ncIDs[CDF_DIMID_Y];
+  int lonID = streamptr->ncgrid[gridindex].ncIDs[CDF_VARID_X];
+  int latID = streamptr->ncgrid[gridindex].ncIDs[CDF_VARID_Y];
 
   int tsID = streamptr->curTsID;
   size_t index = (size_t)tsID;

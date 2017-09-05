@@ -2771,6 +2771,11 @@ int cdf_define_all_grids(ncgrid_t *ncgrid, int vlistID, ncdim_t *ncdims, int nva
           ncgrid[gridindex].gridID = gridID;
           ncgrid[gridindex].ncIDs[CDF_DIMID_X] = xdimid;
           ncgrid[gridindex].ncIDs[CDF_DIMID_Y] = ydimid;
+          if ( grid->type == GRID_TRAJECTORY )
+            {
+              ncgrid[gridindex].ncIDs[CDF_VARID_X] = xvarid;
+              ncgrid[gridindex].ncIDs[CDF_VARID_Y] = yvarid;
+            }
 
           if ( xdimid == CDI_UNDEFID && ydimid == CDI_UNDEFID && grid->size == 1 )
             gridDefHasDims(gridID, FALSE);
@@ -4133,7 +4138,7 @@ int cdfInqTimestep(stream_t * streamptr, int tsID)
       if ( nctimevarid != CDI_UNDEFID )
 	{
 	  int fileID = streamptr->fileID;
-	  size_t index  = (size_t)tsID;
+	  size_t index = (size_t)tsID;
 
 	  if ( streamptr->basetime.lwrf )
 	    {

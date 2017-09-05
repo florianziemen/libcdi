@@ -587,7 +587,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
 
   if ( gridtype == GRID_TRAJECTORY )
     {
-      cdf_put_att_text(fileID, ncvarid, "coordinates", 9, "tlon tlat" );
+      cdf_put_att_text(fileID, ncvarid, "coordinates", 9, "lon lat" );
     }
   else if ( gridtype == GRID_LONLAT && xid == CDI_UNDEFID && yid == CDI_UNDEFID && gridsize == 1 )
     {
@@ -1002,8 +1002,6 @@ void cdf_write_var(stream_t *streamptr, int varID, int memtype, const void *data
   long ntsteps = streamptr->ntsteps;
   if ( CDI_Debug ) Message("ntsteps = %ld", ntsteps);
 
-  if ( vlistHasTime(vlistID) ) cdfDefTime(streamptr);
-
   int ncvarid = cdfDefVar(streamptr, varID);
 
   int gridID    = vlistInqVarGrid(vlistID, varID);
@@ -1097,10 +1095,7 @@ void cdf_write_var_chunk(stream_t *streamptr, int varID, int memtype,
   int fileID  = streamInqFileID(streamID);
 
   long ntsteps = streamptr->ntsteps;
-  if ( CDI_Debug )
-    Message("ntsteps = %ld", ntsteps);
-
-  if ( vlistHasTime(vlistID) ) cdfDefTime(streamptr);
+  if ( CDI_Debug ) Message("ntsteps = %ld", ntsteps);
 
   int ncvarid = cdfDefVar(streamptr, varID);
 
@@ -1196,8 +1191,6 @@ void cdf_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
 
   long ntsteps = streamptr->ntsteps;
   if ( CDI_Debug ) Message("ntsteps = %ld", ntsteps);
-
-  if ( vlistHasTime(vlistID) ) cdfDefTime(streamptr);
 
   int ncvarid = cdfDefVar(streamptr, varID);
 

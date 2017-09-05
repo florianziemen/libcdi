@@ -1184,10 +1184,12 @@ int cdiStreamDefTimestep_(stream_t *streamptr, int tsID)
         }
     }
 
-  int newtsID = tstepsNewEntry(streamptr);
-
-  if ( tsID != newtsID )
-    Error("Internal problem: tsID = %d newtsID = %d", tsID, newtsID);
+  if ( tsID > 0 )
+    {
+      int newtsID = tstepsNewEntry(streamptr);
+      if ( tsID != newtsID )
+        Error("Internal problem: tsID = %d newtsID = %d", tsID, newtsID);
+    }
 
   streamptr->curTsID = tsID;
 
@@ -1607,32 +1609,36 @@ void cdiStreamSetupVlist_(stream_t *streamptr, int vlistID)
     }
 
   if (streamptr->filemode == 'w')
-    switch (streamptr->filetype)
-      {
-#ifdef HAVE_LIBNETCDF
-      case CDI_FILETYPE_NC:
-      case CDI_FILETYPE_NC2:
-      case CDI_FILETYPE_NC4:
-      case CDI_FILETYPE_NC4C:
+    {
+      tstepsNewEntry(streamptr); // timestep 0
+
+      switch (streamptr->filetype)
         {
-          /* calls cdfDefVars in serial mode but
-           * cdiPioClientStreamNOP (i.e. nothing) on client ranks
-           * and cdiPioServerCdfDefVars on server ranks in parallel mode*/
-          void (*myCdfDefVars)(stream_t *streamptr)
-            = (void (*)(stream_t *)) namespaceSwitchGet(NSSWITCH_CDF_STREAM_SETUP).func;
-          myCdfDefVars(streamptr);
-        }
-        break;
+#ifdef HAVE_LIBNETCDF
+        case CDI_FILETYPE_NC:
+        case CDI_FILETYPE_NC2:
+        case CDI_FILETYPE_NC4:
+        case CDI_FILETYPE_NC4C:
+          {
+            /* calls cdfDefVars in serial mode but
+             * cdiPioClientStreamNOP (i.e. nothing) on client ranks
+             * and cdiPioServerCdfDefVars on server ranks in parallel mode*/
+            void (*myCdfDefVars)(stream_t *streamptr)
+              = (void (*)(stream_t *)) namespaceSwitchGet(NSSWITCH_CDF_STREAM_SETUP).func;
+            myCdfDefVars(streamptr);
+          }
+          break;
 #endif
 #ifdef HAVE_LIBGRIB
-      case CDI_FILETYPE_GRB:
-      case CDI_FILETYPE_GRB2:
-        gribContainersNew(streamptr);
-        break;
+        case CDI_FILETYPE_GRB:
+        case CDI_FILETYPE_GRB2:
+          gribContainersNew(streamptr);
+          break;
 #endif
-      default:
-        ;
-      }
+        default:
+          ;
+        }
+    }
 }
 
 

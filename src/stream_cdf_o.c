@@ -97,10 +97,6 @@ void cdfDefTimeValue(stream_t *streamptr, int tsID)
 
 void cdfDefTimestep(stream_t *streamptr, int tsID)
 {
-  int vlistID = streamptr->vlistID;
-
-  if ( vlistHasTime(vlistID) ) cdfDefTime(streamptr);
-
   cdfDefTimeValue(streamptr, tsID);
 }
 
@@ -308,8 +304,7 @@ cdfDefTrajLatLon(stream_t *streamptr, int gridID, int gridindex,
   if ( dimlen != 1 )
     Error("%c size isn't 1 for %s grid!", dimtype, gridNamePtr(gridInqType(gridID)));
 
-  int ncvarid
-    = ncgrid[gridindex].ncIDs[dimtype == 'X' ? CDF_DIMID_X : CDF_DIMID_Y];
+  int ncvarid = ncgrid[gridindex].ncIDs[dimtype == 'X' ? CDF_DIMID_X : CDF_DIMID_Y];
 
   if ( ncvarid == CDI_UNDEFID )
     {
@@ -1981,6 +1976,8 @@ void cdfDefVars(stream_t *streamptr)
   int vlistID = streamptr->vlistID;
   if ( vlistID == CDI_UNDEFID )
     Error("Internal problem! vlist undefined for streamptr %p", streamptr);
+
+  if ( vlistHasTime(vlistID) ) cdfDefTime(streamptr);
 
   int ngrids = vlistNgrids(vlistID);
   if ( 2*ngrids > MAX_GRIDS_PS ) Error("Internal problem! Too many grids per stream (max=%d)\n", MAX_GRIDS_PS);
