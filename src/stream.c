@@ -129,6 +129,11 @@ int cdiGetFiletype(const char *filename, int *byteorder)
       filetype = CDI_FILETYPE_NC2;
       if ( CDI_Debug ) Message("found CDF2 file = %s", filename);
     }
+  else if ( memcmp(buffer, "CDF\005", 4) == 0 )
+    {
+      filetype = CDI_FILETYPE_NC2;
+      if ( CDI_Debug ) Message("found CDF5 file = %s", filename);
+    }
   else if ( memcmp(buffer+1, "HDF", 3) == 0 )
     {
       filetype = CDI_FILETYPE_NC4;
