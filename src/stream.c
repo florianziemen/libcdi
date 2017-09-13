@@ -1168,19 +1168,18 @@ void streamSync(int streamID)
 
 int cdiStreamDefTimestep_(stream_t *streamptr, int tsID)
 {
-  int taxisID = 0;
-
   stream_check_ptr(__func__, streamptr);
 
   if ( CDI_Debug ) Message("streamID = %d  tsID = %d", streamptr->self, tsID);
 
   int vlistID = streamptr->vlistID;
-
   int time_is_varying = vlistHasTime(vlistID);
+  int taxisID = vlistInqTaxis(vlistID) ;
 
+  /* moved to cdiStreamSetupVlist
+  int taxisID = time_is_varying ? vlistInqTaxis(vlistID) : CDI_UNDEFID;
   if ( time_is_varying )
     {
-      taxisID = vlistInqTaxis(vlistID);
       if ( taxisID == CDI_UNDEFID )
         {
           Warning("taxisID undefined for fileID = %d! Using absolute time axis.", streamptr->self);
@@ -1188,7 +1187,7 @@ int cdiStreamDefTimestep_(stream_t *streamptr, int tsID)
           vlistDefTaxis(vlistID, taxisID);
         }
     }
-
+  */
   if ( tsID > 0 )
     {
       int newtsID = tstepsNewEntry(streamptr);
@@ -1196,15 +1195,10 @@ int cdiStreamDefTimestep_(stream_t *streamptr, int tsID)
         Error("Internal problem: tsID = %d newtsID = %d", tsID, newtsID);
     }
 
-  streamptr->curTsID = tsID;
-
   if ( time_is_varying )
-    {
-      taxis_t *taxisptr1 = taxisPtr(taxisID);
-      taxis_t *taxisptr2 = &streamptr->tsteps[tsID].taxis;
-      ptaxisCopy(taxisptr2, taxisptr1);
-    }
+    ptaxisCopy(&streamptr->tsteps[tsID].taxis, taxisPtr(taxisID));
 
+  streamptr->curTsID = tsID;
   streamptr->ntsteps = tsID + 1;
 
 #ifdef HAVE_LIBNETCDF
@@ -1616,6 +1610,37 @@ void cdiStreamSetupVlist_(stream_t *streamptr, int vlistID)
   if (streamptr->filemode == 'w')
     {
       tstepsNewEntry(streamptr); // timestep 0
+      int vlistID = streamptr->vlistID;
+      int time_is_varying = vlistHasTime(vlistID);
+      if ( time_is_varying )
+        {
+          int taxisID = vlistInqTaxis(vlistID);
+          if ( taxisID == CDI_UNDEFID )
+            {
+              Warning("taxisID undefined for fileID = %d! Using absolute time axis.", streamptr->self);
+              taxisID = taxisCreate(TAXIS_ABSOLUTE);
+              vlistDefTaxis(vlistID, taxisID);
+            }
+
+          if ( taxisInqType(taxisID) == TAXIS_RELATIVE )
+            switch (streamptr->filetype)
+              {
+#ifdef HAVE_LIBNETCDF
+              case CDI_FILETYPE_NC:
+              case CDI_FILETYPE_NC2:
+              case CDI_FILETYPE_NC4:
+              case CDI_FILETYPE_NC4C:
+                {
+                  taxis_t *taxisptr = taxisPtr(taxisID);
+                  if ( taxisptr->rdate == -1 ) taxisDefRdate(taxisID, 10101);
+                }
+                break;
+#endif
+              default:
+                ;
+              }
+          ptaxisCopy(&streamptr->tsteps[0].taxis, taxisPtr(taxisID));
+        }
 
       switch (streamptr->filetype)
         {

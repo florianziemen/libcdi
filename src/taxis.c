@@ -379,6 +379,7 @@ void taxisDefRdate(int taxisID, int rdate)
   if (taxisptr->rdate != rdate)
     {
       taxisptr->rdate = rdate;
+
       if ( taxisptr->units )
         {
           delete_refcount_string(taxisptr->units);
@@ -1084,8 +1085,8 @@ double vtime2timeval(int vdate, int vtime, taxis_t *taxis)
   int rtime = (*taxis).rtime;
   if ( rdate == -1 )
     {
-      rdate  = (*taxis).vdate;
-      rtime  = (*taxis).vtime;
+      rdate = (*taxis).vdate;
+      rtime = (*taxis).vtime;
     }
 
   if ( rdate == 0 && rtime == 0 && vdate == 0 && vtime == 0 ) return value;
@@ -1392,6 +1393,7 @@ void ptaxisCopy(taxis_t *dest, taxis_t *source)
   dest->units = dup_refcount_string(source->units);
   if (dest->self != CDI_UNDEFID)
     reshSetStatus(dest->self, &taxisOps, RESH_DESYNC_IN_USE);
+
   reshUnlock ();
 }
 
