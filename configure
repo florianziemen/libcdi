@@ -662,11 +662,15 @@ HAVE_PARALLEL_NC4
 HAVE_PPM_DIST_ARRAY
 PPM_CORE_LIBS
 PPM_CORE_CFLAGS
+YAXT_C_LIBS
+YAXT_C_CFLAGS
 YAXT_LIBS
 YAXT_CFLAGS
 PKG_CONFIG_LIBDIR
 PKG_CONFIG_PATH
 PKG_CONFIG
+YAXT_FC_INCLUDE
+YAXT_FC_LIB
 MPI_LAUNCH
 MPI_FC_LIB
 MPI_FC_INCLUDE
@@ -903,11 +907,15 @@ MPI_C_INCLUDE
 MPI_C_LIB
 MPI_FC_INCLUDE
 MPI_FC_LIB
+YAXT_FC_LIB
+YAXT_FC_INCLUDE
 PKG_CONFIG
 PKG_CONFIG_PATH
 PKG_CONFIG_LIBDIR
 YAXT_CFLAGS
 YAXT_LIBS
+YAXT_C_CFLAGS
+YAXT_C_LIBS
 PPM_CORE_CFLAGS
 PPM_CORE_LIBS
 FCMODEXT
@@ -1628,6 +1636,9 @@ Some influential environment variables:
               specifically set flags to use when compiling sources using MPI
               includes.
   MPI_FC_LIB  specifically set flags to use when linking MPI.
+  YAXT_FC_LIB Flags needed to link YAXT for the Fortran API
+  YAXT_FC_INCLUDE
+              Flags needed to compile for the Fortran API of YAXT
   PKG_CONFIG  path to pkg-config utility
   PKG_CONFIG_PATH
               directories to add to pkg-config's search path
@@ -1635,6 +1646,9 @@ Some influential environment variables:
               path overriding pkg-config's built-in search path
   YAXT_CFLAGS C compiler flags for YAXT, overriding pkg-config
   YAXT_LIBS   linker flags for YAXT, overriding pkg-config
+  YAXT_C_CFLAGS
+              C compiler flags for YAXT_C, overriding pkg-config
+  YAXT_C_LIBS linker flags for YAXT_C, overriding pkg-config
   PPM_CORE_CFLAGS
               C compiler flags for PPM_CORE, overriding pkg-config
   PPM_CORE_LIBS
@@ -29082,6 +29096,8 @@ $as_echo "$as_me: WARNING: MPI launch command unavailable" >&2;}
 fi
 
 
+
+
 pkg_failed=no
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for YAXT" >&5
 $as_echo_n "checking for YAXT... " >&6; }
@@ -29159,6 +29175,94 @@ $as_echo "yes" >&6; }
 
 $as_echo "#define HAVE_YAXT /**/" >>confdefs.h
 
+fi
+   if test x${YAXT_FC_LIB+set} != xset; then :
+  YAXT_FC_LIB=$YAXT_LIBS
+fi
+   if test x${YAXT_FC_INCLUDE+set} != xset; then :
+  YAXT_FC_INCLUDE=$YAXT_CFLAGS
+fi
+
+pkg_failed=no
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for YAXT_C" >&5
+$as_echo_n "checking for YAXT_C... " >&6; }
+
+if test -n "$YAXT_C_CFLAGS"; then
+    pkg_cv_YAXT_C_CFLAGS="$YAXT_C_CFLAGS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"yaxt_c\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "yaxt_c") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_YAXT_C_CFLAGS=`$PKG_CONFIG --cflags "yaxt_c" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+if test -n "$YAXT_C_LIBS"; then
+    pkg_cv_YAXT_C_LIBS="$YAXT_C_LIBS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"yaxt_c\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "yaxt_c") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_YAXT_C_LIBS=`$PKG_CONFIG --libs "yaxt_c" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+
+
+
+if test $pkg_failed = yes; then
+   	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
+        _pkg_short_errors_supported=yes
+else
+        _pkg_short_errors_supported=no
+fi
+        if test $_pkg_short_errors_supported = yes; then
+	        YAXT_C_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "yaxt_c" 2>&1`
+        else
+	        YAXT_C_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "yaxt_c" 2>&1`
+        fi
+	# Put the nasty error message in config.log where it belongs
+	echo "$YAXT_C_PKG_ERRORS" >&5
+
+	YAXT_VERSION=`pkg-config --modversion yaxt`
+      YAXT_MAJOR_VERSION=`expr "$YAXT_VERSION" : "[0-9]*"`
+      YAXT_MINOR_VERSION=`echo "$YAXT_VERSION" | sed -e 's/^[0-9]*\.\([0-9]*\).*/\1/'`
+      if test "$YAXT_MAJOR_VERSION" -gt 0 -o "$YAXT_MINOR_VERSION" -gt 4; then :
+  YAXT_LIBS=`echo "$YAXT_LIBS" | sed -e 's/-lyaxt *$/-lyaxt_c/'`
+fi
+elif test $pkg_failed = untried; then
+     	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+	YAXT_VERSION=`pkg-config --modversion yaxt`
+      YAXT_MAJOR_VERSION=`expr "$YAXT_VERSION" : "[0-9]*"`
+      YAXT_MINOR_VERSION=`echo "$YAXT_VERSION" | sed -e 's/^[0-9]*\.\([0-9]*\).*/\1/'`
+      if test "$YAXT_MAJOR_VERSION" -gt 0 -o "$YAXT_MINOR_VERSION" -gt 4; then :
+  YAXT_LIBS=`echo "$YAXT_LIBS" | sed -e 's/-lyaxt *$/-lyaxt_c/'`
+fi
+else
+	YAXT_C_CFLAGS=$pkg_cv_YAXT_C_CFLAGS
+	YAXT_C_LIBS=$pkg_cv_YAXT_C_LIBS
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+	YAXT_LIBS=$YAXT_C_LIBS
+      YAXT_CFLAGS=$YAXT_C_CFLAGS
 fi
 
 pkg_failed=no
