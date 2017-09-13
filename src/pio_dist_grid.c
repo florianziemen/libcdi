@@ -141,8 +141,11 @@ cdiPioDistGridCreate(int gridtype, int size, int xsize, int ysize, int nvertex,
 {
 #ifdef HAVE_PPM_DIST_ARRAY_H
   int gridID = gridCreate(gridtype, size);
-  gridDefXsize(gridID, xsize);
-  gridDefYsize(gridID, ysize);
+  if (gridtype != GRID_UNSTRUCTURED)
+    {
+      gridDefXsize(gridID, xsize);
+      gridDefYsize(gridID, ysize);
+    }
   gridDefNvertex(gridID, nvertex);
   grid_t *gridptr = grid_to_pointer(gridID);
   cdiPioDistGridInit(gridptr, gridtype, size, xsize, ysize, nvertex,
