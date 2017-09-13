@@ -145,7 +145,7 @@ collectData2003_OBJECTS = $(am_collectData2003_OBJECTS)
 @USE_MPI_FALSE@	$(top_builddir)/src/libcdi.la
 @USE_MPI_TRUE@collectData2003_DEPENDENCIES =  \
 @USE_MPI_TRUE@	$(top_builddir)/src/libcdipio.la \
-@USE_MPI_TRUE@	$(am__DEPENDENCIES_1)
+@USE_MPI_TRUE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_collectDataNStreams_OBJECTS = collectDataNStreams.$(OBJEXT)
 collectDataNStreams_OBJECTS = $(am_collectDataNStreams_OBJECTS)
 collectDataNStreams_LDADD = $(LDADD)
@@ -372,6 +372,10 @@ USE_MPI = @USE_MPI@
 UUID_C_LIB = @UUID_C_LIB@
 VERSION = @VERSION@
 YAXT_CFLAGS = @YAXT_CFLAGS@
+YAXT_C_CFLAGS = @YAXT_C_CFLAGS@
+YAXT_C_LIBS = @YAXT_C_LIBS@
+YAXT_FC_INCLUDE = @YAXT_FC_INCLUDE@
+YAXT_FC_LIB = @YAXT_FC_LIB@
 YAXT_LIBS = @YAXT_LIBS@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
@@ -437,7 +441,7 @@ collectData_SOURCES = collectData.c
 @USE_MPI_FALSE@LDADD = $(top_builddir)/src/libcdi.la
 @USE_MPI_TRUE@LDADD = $(top_builddir)/src/libcdipio.la $(MPI_C_LIB)
 @USE_MPI_FALSE@collectData2003_LDADD = $(top_builddir)/src/libcdi.la
-@USE_MPI_TRUE@collectData2003_LDADD = $(top_builddir)/src/libcdipio.la $(MPI_FC_LIB)
+@USE_MPI_TRUE@collectData2003_LDADD = $(top_builddir)/src/libcdipio.la $(YAXT_FC_LIB) $(MPI_FC_LIB)
 collectData2003_SOURCES = collectData2003.F90
 collectDataNStreams_SOURCES = collectDataNStreams.c
 compareResourcesArray_SOURCES = compareResourcesArray.c

@@ -225,9 +225,24 @@ main(int argc, char **argv)
    AS_IF([test "x$MPI_LAUNCH" = xtrue],
      [AC_MSG_WARN([MPI launch command unavailable])])
 
+   AC_ARG_VAR([YAXT_FC_LIB],[Flags needed to link YAXT for the Fortran API])
+   AC_ARG_VAR([YAXT_FC_INCLUDE],
+     [Flags needed to compile for the Fortran API of YAXT])
    PKG_CHECK_MODULES([YAXT],[yaxt],
      [AC_DEFINE([HAVE_YAXT],,[yaxt library is available])],
      [AC_MSG_FAILURE([Required yaxt library unavailable.])])
+   AS_IF([test x${YAXT_FC_LIB+set} != xset],
+     [YAXT_FC_LIB=$YAXT_LIBS])
+   AS_IF([test x${YAXT_FC_INCLUDE+set} != xset],
+     [YAXT_FC_INCLUDE=$YAXT_CFLAGS])
+   PKG_CHECK_MODULES([YAXT_C],[yaxt_c],
+     [YAXT_LIBS=$YAXT_C_LIBS
+      YAXT_CFLAGS=$YAXT_C_CFLAGS],
+     [YAXT_VERSION=`pkg-config --modversion yaxt`
+      YAXT_MAJOR_VERSION=`expr "$YAXT_VERSION" : "@<:@0-9@:>@*"`
+      YAXT_MINOR_VERSION=`echo "$YAXT_VERSION" | sed -e 's/^@<:@0-9@:>@*\.\(@<:@0-9@:>@*\).*/\1/'`
+      AS_IF([test "$YAXT_MAJOR_VERSION" -gt 0 -o "$YAXT_MINOR_VERSION" -gt 4],
+        [YAXT_LIBS=`echo "$YAXT_LIBS" | sed -e 's/-lyaxt *$/-lyaxt_c/'`])])
    dnl parallel netCDF support still requires ScalES-PPM and YAXT to
    dnl re-arrange the data when running with more than one collector
    PKG_CHECK_MODULES([PPM_CORE],[scales-ppm-core],
