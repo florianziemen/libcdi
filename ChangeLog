@@ -2,6 +2,10 @@
 
 	* Version 1.9.1 released
 
+2017-09-13  Uwe Schulzweida
+
+	* Added interface function taxisWithBounds()
+
 2017-09-07  Uwe Schulzweida
 
 	* Read NC_FORMAT_CDF5 data as CDF2 (preliminary fix)

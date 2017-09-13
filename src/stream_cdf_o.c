@@ -74,11 +74,11 @@ void cdfDefTimeValue(stream_t *streamptr, int tsID)
 
   if ( taxis->has_bounds )
     {
-      size_t start[2], count[2];
-
       ncvarid = streamptr->basetime.ncvarboundsid;
+      assert(ncvarid != CDI_UNDEFID);
 
       timevalue = cdiEncodeTimeval(taxis->vdate_lb, taxis->vtime_lb, &streamptr->tsteps[0].taxis);
+      size_t start[2], count[2];
       start[0] = (size_t)tsID; count[0] = 1; start[1] = 0; count[1] = 1;
       cdf_put_vara_double(fileID, ncvarid, start, count, &timevalue);
 

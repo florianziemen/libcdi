@@ -1148,6 +1148,7 @@ int     taxisInqFdate(int taxisID);
 int     taxisInqFtime(int taxisID);
 
 int     taxisHasBounds(int taxisID);
+void    taxisWithBounds(int taxisID);
 
 void    taxisDeleteBounds(int taxisID);
 

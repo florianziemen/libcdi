@@ -567,6 +567,18 @@ int taxisHasBounds(int taxisID)
 }
 
 
+void taxisWithBounds(int taxisID)
+{
+  taxis_t *taxisptr = (taxis_t *)reshGetVal(taxisID, &taxisOps);
+
+  if ( taxisptr->has_bounds == false )
+    {
+      taxisptr->has_bounds = true;
+      reshSetStatus(taxisID, &taxisOps, RESH_DESYNC_IN_USE);
+    }
+}
+
+
 void taxisDeleteBounds(int taxisID)
 {
   taxis_t *taxisptr = ( taxis_t * ) reshGetVal ( taxisID, &taxisOps );
