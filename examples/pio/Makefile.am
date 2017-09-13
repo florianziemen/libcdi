@@ -17,7 +17,7 @@ collectData_SOURCES=collectData.c
 
 if USE_MPI
 LDADD=$(top_builddir)/src/libcdipio.la $(MPI_C_LIB)
-collectData2003_LDADD=$(top_builddir)/src/libcdipio.la $(MPI_FC_LIB)
+collectData2003_LDADD=$(top_builddir)/src/libcdipio.la $(YAXT_FC_LIB) $(MPI_FC_LIB)
 else
 LDADD=$(top_builddir)/src/libcdi.la
 collectData2003_LDADD=$(top_builddir)/src/libcdi.la
