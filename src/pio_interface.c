@@ -161,6 +161,14 @@ cdiPioClientStreamWinCreate(int streamID, struct collSpec *cspec)
   xmpi(MPI_Info_free(&no_locks_info));
 }
 
+bool
+cdiPioClientStreamNeedsFlush(int streamID)
+{
+  size_t streamIdx = indexOfID(&openStreams, streamID);
+  xassert(streamIdx != SIZE_MAX);
+  return txWin[streamIdx].pendingUpdate & !txWin[streamIdx].postSet;
+}
+
 /************************************************************************/
 
 static void
@@ -631,6 +639,26 @@ pioFinalize(void)
 
 /************************************************************************/
 
+static void
+cdiPioClientStreamIdxWinPost(size_t streamIdx, MPI_Group remoteGroup)
+{
+  struct winHeaderEntry header = { .id = HEADERSIZEMARKER,
+                                   .specific.headerSize = { .numDataEntries = txWin[streamIdx].dictDataUsed,
+                                                            .numRPCEntries = txWin[streamIdx].dictRPCUsed } };
+  struct winHeaderEntry *winDict = (struct winHeaderEntry *) (void *) txWin[streamIdx].buffer;
+  winDict[0] = header;
+  xmpi(MPI_Win_post(remoteGroup, MPI_MODE_NOPUT, txWin[streamIdx].win));
+  txWin[streamIdx].postSet = true;
+}
+
+void
+cdiPioClientStreamWinPost(int streamID)
+{
+  MPI_Group remoteGroup = cdiPioInqRemoteGroup();
+  size_t streamIdx = indexOfID(&openStreams, streamID);
+  cdiPioClientStreamIdxWinPost(streamIdx, remoteGroup);
+}
+
 void
 pioWriteTimestep(void)
 {
@@ -656,20 +684,8 @@ pioWriteTimestep(void)
 
   MPI_Group remoteGroup = cdiPioInqRemoteGroup();
   for (size_t streamIdx = 0; streamIdx < nStreams; ++streamIdx)
-    {
-      if (openStreams.entries[streamIdx] != CDI_UNDEFID && hasUpdates[streamIdx])
-        {
-        }
-      else
-        continue;
-      struct winHeaderEntry header = { .id = HEADERSIZEMARKER,
-                                       .specific.headerSize = { .numDataEntries = txWin[streamIdx].dictDataUsed,
-                                                                .numRPCEntries = txWin[streamIdx].dictRPCUsed } };
-      struct winHeaderEntry *winDict = (struct winHeaderEntry *) (void *) txWin[streamIdx].buffer;
-      winDict[0] = header;
-      xmpi(MPI_Win_post(remoteGroup, MPI_MODE_NOPUT, txWin[streamIdx].win));
-      txWin[streamIdx].postSet = true;
-    }
+    if (openStreams.entries[streamIdx] != CDI_UNDEFID && hasUpdates[streamIdx])
+      cdiPioClientStreamIdxWinPost(streamIdx, remoteGroup);
 
   Free(hasUpdates);
   xdebug("%s", "RETURN. messages sent, windows posted");

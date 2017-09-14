@@ -172,6 +172,7 @@ cdiPioClientStreamClose(stream_t *streamptr, int recordBufIsToBeDeleted)
   int streamID = streamptr->self;
   int clientRank = commInqRankModel(), numClients = cdiPioCommInqSizeClients(), numColl = commInqSizeColl(),
       collRank = cdiPioCollRank(clientRank, numClients, numColl);
+  bool needsFlush = cdiPioClientStreamNeedsFlush(streamID);
   if (clientRank == cdiPioClientRangeStart(collRank, numClients, numColl))
     {
       MPI_Comm comm = cdiPioInqInterComm();
@@ -187,13 +188,15 @@ cdiPioClientStreamClose(stream_t *streamptr, int recordBufIsToBeDeleted)
       /* optimize: pos + size */
       msgBuffer = Realloc(msgBuffer, (size_t) msgSize);
       xmpi(MPI_Pack(&streamptr->self, 1, MPI_INT, msgBuffer, msgSize, &msgBufPos, comm));
-      xmpi(MPI_Send(msgBuffer, msgBufPos, MPI_PACKED, collRank, STREAMCLOSE, comm));
+      int tag = needsFlush ? STREAMFLUSHCLOSE : STREAMCLOSE;
+      xmpi(MPI_Send(msgBuffer, msgBufPos, MPI_PACKED, collRank, tag, comm));
       Free(msgBuffer);
     }
 #ifdef HAVE_PPM_DIST_ARRAY_H
   else
     cdiPioDistGridPackAssist();
 #endif
+  if (needsFlush) cdiPioClientStreamWinPost(streamID);
   cdiPioClientStreamWinDestroy(streamID);
 }
 
