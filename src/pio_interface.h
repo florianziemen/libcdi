@@ -42,6 +42,10 @@ void
 cdiPioClientStreamWinCreate(int streamID, struct collSpec *cspec);
 void
 cdiPioClientStreamWinDestroy(int streamID);
+bool
+cdiPioClientStreamNeedsFlush(int streamID);
+void
+cdiPioClientStreamWinPost(int streamID);
 
 #endif
 /*

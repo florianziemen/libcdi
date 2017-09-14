@@ -1763,12 +1763,23 @@ cdiPioRecvStreamOpen(void *buffer, int size, int *pos, MPI_Comm pioInterComm)
 }
 
 static void
-cdiPioRecvStreamClose(void *buffer, int size, int *pos, MPI_Comm pioInterComm)
+cdiPioRecvStreamClose(void *buffer, int size, int *pos, MPI_Comm pioInterComm,
+                      bool flushNeeded, const struct cdiPioConf *conf)
 {
   int clientStreamID;
   xmpi(MPI_Unpack(buffer, size, pos,
                   &clientStreamID, 1, MPI_INT, pioInterComm));
   int serverStreamID = namespaceAdaptKey2(clientStreamID);
+  if (flushNeeded)
+    {
+      int streamActivity[openStreams.size];
+      size_t streamIdx = indexOfID(&openStreams, serverStreamID);
+      for (size_t i = 0; i < openStreams.size; ++i)
+        streamActivity[i] = 0;
+      streamActivity[streamIdx] = 1;
+      getTimeStepData(streamActivity, conf);
+      conf->callbacks[CDIPIO_CALLBACK_POSTWRITEBATCH]();
+    }
   streamClose(serverStreamID);
 }
 
@@ -1899,10 +1910,11 @@ void cdiPioCollectorMessageLoop()
           cdiPioDstIdxlistCacheDelete(DstIdxlistCache);
           xdebug("%s", "RETURN");
           return;
+	case RESOURCES:
         case STREAMOPEN:
+        case STREAMFLUSHCLOSE:
         case STREAMCLOSE:
         case STREAMDEFVLIST:
-	case RESOURCES:
           {
             int size;
             xmpi(MPI_Get_count(&status, MPI_PACKED, &size));
@@ -1917,8 +1929,10 @@ void cdiPioCollectorMessageLoop()
               case STREAMOPEN:
                 cdiPioRecvStreamOpen(buffer, size, &pos, pioInterComm);
                 break;
+              case STREAMFLUSHCLOSE:
               case STREAMCLOSE:
-                cdiPioRecvStreamClose(buffer, size, &pos, pioInterComm);
+                cdiPioRecvStreamClose(buffer, size, &pos, pioInterComm,
+                                      tag == STREAMFLUSHCLOSE, conf);
                 break;
               case STREAMDEFVLIST:
                 cdiPioRecvStreamDefVlist(buffer, size, &pos, pioInterComm, conf);
