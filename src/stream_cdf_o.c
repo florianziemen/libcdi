@@ -1795,7 +1795,7 @@ void cdfDefRgrid(stream_t *streamptr, int gridID, int gridindex)
           lwarn = false;
         }
 
-      char axisname[7] = "rgridX";
+      char axisname[16] = "rgridX";
       if ( iz == 0 ) axisname[5] = '\0';
       else           sprintf(&axisname[5], "%1d", iz+1);
 
