@@ -30,6 +30,8 @@ extern float cdiPIOpartInflate_;
 void cdiPioClientStreamWinInit(int streamID);
 void cdiPioClientStreamWinCreate(int streamID, struct collSpec *cspec);
 void cdiPioClientStreamWinDestroy(int streamID);
+bool cdiPioClientStreamNeedsFlush(int streamID);
+void cdiPioClientStreamWinPost(int streamID);
 
 #endif
 /*
