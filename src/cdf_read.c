@@ -453,7 +453,6 @@ void cdfGetSliceSlapDescription(stream_t *streamptr, int varId, int levelId, boo
       if ( curDimId == CDI_UNDEFID ) continue;
       switch ( dimorder[id] )
         {
-          Error("Internal errror: Malformed dimension order encountered. Please report this bug.\n");
           case 1:
           case 2:
             cdf_inq_dimlen(fileId, curDimId, &size);
