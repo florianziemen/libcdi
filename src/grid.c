@@ -332,11 +332,11 @@ void cdiGridTypeInit(grid_t *gridptr, int gridtype, int size)
       }
     case GRID_CHARXY:
       {
-        if ( gridptr->x.cvals )
-          gridptr->x.stdname = xystdname_tab[grid_xystdname_char][0];
-        if ( gridptr->y.cvals )
-          gridptr->y.stdname = xystdname_tab[grid_xystdname_char][0];
-      }
+        if ( gridptr->x.cvals ) gridptr->x.stdname = xystdname_tab[grid_xystdname_char][0];
+        if ( gridptr->y.cvals ) gridptr->y.stdname = xystdname_tab[grid_xystdname_char][0];
+
+        break;
+     }
     case GRID_GENERIC:
     case GRID_PROJECTION:
       {
