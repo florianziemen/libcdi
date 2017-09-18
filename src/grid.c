@@ -348,8 +348,9 @@ void cdiGridTypeInit(grid_t *gridptr, int gridtype, int size)
 
             gridptr->x.stdname = xystdname_tab[grid_xystdname_projection][0];
             gridptr->y.stdname = xystdname_tab[grid_xystdname_projection][1];
-            gridSetName(gridptr->x.units, "m");
-            gridSetName(gridptr->y.units, "m");
+
+            if ( !gridptr->x.units[0] ) gridSetName(gridptr->x.units, "m");
+            if ( !gridptr->y.units[0] ) gridSetName(gridptr->y.units, "m");
           }
         break;
       }
@@ -1044,8 +1045,8 @@ void gridVerifyProj(int gridID)
     {
       gridptr->x.stdname = xystdname_tab[grid_xystdname_projection][0];
       gridptr->y.stdname = xystdname_tab[grid_xystdname_projection][1];
-      gridSetName(gridptr->x.units, "m");
-      gridSetName(gridptr->y.units, "m");
+      if ( !gridptr->x.units[0] ) gridSetName(gridptr->x.units, "m");
+      if ( !gridptr->y.units[0] ) gridSetName(gridptr->y.units, "m");
     }
 }
 
