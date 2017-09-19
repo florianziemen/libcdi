@@ -7,8 +7,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <netcdf.h>
-
 #include "cdi.h"
 #include "cdi_int.h"
 #include "stream_cdf.h"

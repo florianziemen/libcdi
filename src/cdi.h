@@ -50,12 +50,13 @@ extern "C" {
 #define  CDI_FILETYPE_GRB           1   // File type GRIB
 #define  CDI_FILETYPE_GRB2          2   // File type GRIB version 2
 #define  CDI_FILETYPE_NC            3   // File type NetCDF
-#define  CDI_FILETYPE_NC2           4   // File type NetCDF version 2 (64-bit)
+#define  CDI_FILETYPE_NC2           4   // File type NetCDF version 2 (64-bit offset)
 #define  CDI_FILETYPE_NC4           5   // File type NetCDF version 4
 #define  CDI_FILETYPE_NC4C          6   // File type NetCDF version 4 (classic)
-#define  CDI_FILETYPE_SRV           7   // File type SERVICE
-#define  CDI_FILETYPE_EXT           8   // File type EXTRA
-#define  CDI_FILETYPE_IEG           9   // File type IEG
+#define  CDI_FILETYPE_NC5           7   // File type NetCDF version 5 (64-bit data)
+#define  CDI_FILETYPE_SRV           8   // File type SERVICE
+#define  CDI_FILETYPE_EXT           9   // File type EXTRA
+#define  CDI_FILETYPE_IEG          10   // File type IEG
 
 #define  FILETYPE_GRB           1
 #define  FILETYPE_GRB2          2
