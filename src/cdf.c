@@ -145,35 +145,27 @@ static int cdfOpenFile(const char *filename, const char *mode, int *filetype)
 }
 
 
-int cdfOpen(const char *filename, const char *mode)
-{
-  int filetype = CDI_FILETYPE_NC;
-
-  if ( CDF_Debug )
-    Message("Open %s with mode %c", filename, *mode);
-
-  int fileID = cdfOpenFile(filename, mode, &filetype);
-
-  if ( CDF_Debug )
-    Message("File %s opened with id %d", filename, fileID);
-
-  return fileID;
-}
-
-
-int cdf2Open(const char *filename, const char *mode)
+int cdfOpen(const char *filename, const char *mode, int filetype)
 {
   int fileID = -1;
-  int filetype = CDI_FILETYPE_NC2;
   bool open_file = true;
 
   if ( CDF_Debug )
     Message("Open %s with mode %c", filename, *mode);
 
 #ifdef  HAVE_LIBNETCDF
+  if ( filetype == CDI_FILETYPE_NC2 )
+    {
 #ifndef  NC_64BIT_OFFSET
-  open_file = false;
+      open_file = false;
 #endif
+    }
+  else if ( filetype == CDI_FILETYPE_NC5 )
+    {
+#ifndef  NC_64BIT_DATA
+      open_file = false;
+#endif
+    }
 #endif
 
   if ( open_file )
@@ -181,7 +173,7 @@ int cdf2Open(const char *filename, const char *mode)
       fileID = cdfOpenFile(filename, mode, &filetype);
 
       if ( CDF_Debug )
-	Message("File %s opened with id %d", filename, fileID);
+        Message("File %s opened with id %d", filename, fileID);
     }
   else
     {

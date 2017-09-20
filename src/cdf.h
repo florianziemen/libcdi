@@ -8,8 +8,7 @@ extern int CDF_Debug;
 const char *cdfLibraryVersion(void);
 const char *hdfLibraryVersion(void);
 
-int  cdfOpen(const char *filename, const char *mode);
-int  cdf2Open(const char *filename, const char *mode);
+int  cdfOpen(const char *filename, const char *mode, int filetype);
 int  cdf4Open(const char *filename, const char *mode, int *filetype);
 void cdfClose(int fileID);
 

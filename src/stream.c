@@ -498,23 +498,14 @@ int cdiStreamOpenDefaultDelegate(const char *filename, char filemode,
 #endif
 #ifdef  HAVE_LIBNETCDF
     case CDI_FILETYPE_NC:
-      {
-#ifndef __cplusplus
-        fileID = cdfOpen(filename, (char [2]){filemode, 0});
-#else
-        char temp[2] = { filemode, 0 };
-        fileID = cdfOpen(filename, temp);
-#endif
-        break;
-      }
     case CDI_FILETYPE_NC2:
     case CDI_FILETYPE_NC5:
       {
 #ifndef __cplusplus
-        fileID = cdf2Open(filename, (char [2]){filemode, 0});
+        fileID = cdfOpen(filename, (char [2]){filemode, 0}, filetype);
 #else
         char temp[2] = { filemode, 0 };
-        fileID = cdf2Open(filename, temp);
+        fileID = cdfOpen(filename, temp, filetype);
 #endif
         break;
       }
@@ -698,15 +689,10 @@ int streamOpenA(const char *filename, const char *filemode, int filetype)
 #endif
 #ifdef  HAVE_LIBNETCDF
     case CDI_FILETYPE_NC:
-      {
-	fileID = cdfOpen(filename, filemode);
-	streamptr->ncmode = 2;
-	break;
-      }
     case CDI_FILETYPE_NC2:
     case CDI_FILETYPE_NC5:
       {
-	fileID = cdf2Open(filename, filemode);
+	fileID = cdfOpen(filename, filemode, filetype);
 	streamptr->ncmode = 2;
 	break;
       }
