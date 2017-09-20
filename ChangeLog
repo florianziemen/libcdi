@@ -1,7 +1,11 @@
-2017-09-27  Uwe Schulzweida
+2017-10-27  Uwe Schulzweida
 
         * using CGRIBEX library version 1.9.0
 	* Version 1.9.1 released
+
+2017-09-20  Uwe Schulzweida
+
+	* Added support for CDI_FILETYPE_NC5
 
 2017-09-18  Uwe Schulzweida
 
