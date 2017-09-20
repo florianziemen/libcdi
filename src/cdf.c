@@ -1,5 +1,5 @@
-#if defined (HAVE_CONFIG_H)
-#  include "config.h"
+#ifdef  HAVE_CONFIG_H
+#include "config.h"
 #endif
 
 #include <stdio.h>
@@ -16,32 +16,32 @@
 
 const char *cdfLibraryVersion(void)
 {
-#if  defined  (HAVE_LIBNETCDF)
+#ifdef  HAVE_LIBNETCDF
   return nc_inq_libvers();
 #else
   return "library undefined";
 #endif
 }
 
-#if  defined(HAVE_H5GET_LIBVERSION)
-#if  defined(__cplusplus)
+#ifdef  HAVE_H5GET_LIBVERSION
+#ifdef  __cplusplus
 extern "C" {
 #endif
   int H5get_libversion(unsigned *, unsigned *, unsigned *);
-#if defined(__cplusplus)
+#ifdef  __cplusplus
 }
 #endif
 #endif
 
 const char *hdfLibraryVersion(void)
 {
-#if  defined(HAVE_H5GET_LIBVERSION)
+#ifdef  HAVE_H5GET_LIBVERSION
   static char hdf_libvers[256];
   unsigned majnum, minnum, relnum;
 
   H5get_libversion(&majnum, &minnum, &relnum);
 
-#if  defined(HAVE_NC4HDF5_THREADSAFE)
+#ifdef  HAVE_NC4HDF5_THREADSAFE
   sprintf(hdf_libvers, "%u.%u.%u threadsafe", majnum, minnum, relnum);
 #else
   sprintf(hdf_libvers, "%u.%u.%u", majnum, minnum, relnum);
@@ -64,7 +64,7 @@ void cdfDebug(int debug)
     Message("debug level %d", debug);
 }
 
-#if  defined  (HAVE_LIBNETCDF)
+#ifdef  HAVE_LIBNETCDF
 static
 void cdfComment(int ncid)
 {
@@ -92,11 +92,10 @@ void cdfComment(int ncid)
 static int cdfOpenFile(const char *filename, const char *mode, int *filetype)
 {
   int ncid = -1;
-#if  defined  (HAVE_LIBNETCDF)
+#ifdef  HAVE_LIBNETCDF
   int fmode = tolower(*mode);
   int writemode = NC_CLOBBER;
   int readmode = NC_NOWRITE;
-  int status;
 
   if ( filename == NULL )
     ncid = CDI_EINVAL;
@@ -105,25 +104,27 @@ static int cdfOpenFile(const char *filename, const char *mode, int *filetype)
       switch (fmode)
 	{
 	case 'r':
-	  status = cdf_open(filename, readmode, &ncid);
-	  if ( status > 0 && ncid < 0 ) ncid = CDI_ESYSTEM;
-#if  defined  (HAVE_NETCDF4)
-	  else
-	    {
-	      int format;
-	      (void) nc_inq_format(ncid, &format);
-	      if ( format == NC_FORMAT_NETCDF4_CLASSIC )
-		{
-		  *filetype = CDI_FILETYPE_NC4C;
-		}
-	    }
+          {
+            int status = cdf_open(filename, readmode, &ncid);
+            if ( status > 0 && ncid < 0 ) ncid = CDI_ESYSTEM;
+#ifdef  HAVE_NETCDF4
+            else
+              {
+                int format;
+                (void) nc_inq_format(ncid, &format);
+                if ( format == NC_FORMAT_NETCDF4_CLASSIC )
+                  {
+                    *filetype = CDI_FILETYPE_NC4C;
+                  }
+              }
+          }
 #endif
 	  break;
 	case 'w':
-#if  defined  (NC_64BIT_OFFSET)
+#ifdef  NC_64BIT_OFFSET
 	  if      ( *filetype == CDI_FILETYPE_NC2  ) writemode |= NC_64BIT_OFFSET;
 #endif
-#if  defined  (HAVE_NETCDF4)
+#ifdef  HAVE_NETCDF4
 	  if      ( *filetype == CDI_FILETYPE_NC4  ) writemode |= NC_NETCDF4;
 	  else if ( *filetype == CDI_FILETYPE_NC4C ) writemode |= NC_NETCDF4 | NC_CLASSIC_MODEL;
 #endif
@@ -160,7 +161,7 @@ int cdfOpen(const char *filename, const char *mode)
 }
 
 
-int cdfOpen64(const char *filename, const char *mode)
+int cdf2Open(const char *filename, const char *mode)
 {
   int fileID = -1;
   int filetype = CDI_FILETYPE_NC2;
@@ -169,8 +170,8 @@ int cdfOpen64(const char *filename, const char *mode)
   if ( CDF_Debug )
     Message("Open %s with mode %c", filename, *mode);
 
-#if  defined  (HAVE_LIBNETCDF)
-#if  ! defined  (NC_64BIT_OFFSET)
+#ifdef  HAVE_LIBNETCDF
+#ifndef  NC_64BIT_OFFSET
   open_file = false;
 #endif
 #endif
@@ -199,7 +200,7 @@ int cdf4Open(const char *filename, const char *mode, int *filetype)
   if ( CDF_Debug )
     Message("Open %s with mode %c", filename, *mode);
 
-#if  defined  (HAVE_NETCDF4)
+#ifdef  HAVE_NETCDF4
   open_file = true;
 #endif
 
@@ -221,7 +222,7 @@ int cdf4Open(const char *filename, const char *mode, int *filetype)
 
 static void cdfCloseFile(int fileID)
 {
-#if  defined  (HAVE_LIBNETCDF)
+#ifdef  HAVE_LIBNETCDF
   cdf_close(fileID);
 #endif
 }
