@@ -124,6 +124,9 @@ static int cdfOpenFile(const char *filename, const char *mode, int *filetype)
 #ifdef  NC_64BIT_OFFSET
 	  if      ( *filetype == CDI_FILETYPE_NC2  ) writemode |= NC_64BIT_OFFSET;
 #endif
+#ifdef  NC_64BIT_DATA
+	  if      ( *filetype == CDI_FILETYPE_NC5  ) writemode |= NC_64BIT_DATA;
+#endif
 #ifdef  HAVE_NETCDF4
 	  if      ( *filetype == CDI_FILETYPE_NC4  ) writemode |= NC_NETCDF4;
 	  else if ( *filetype == CDI_FILETYPE_NC4C ) writemode |= NC_NETCDF4 | NC_CLASSIC_MODEL;
@@ -154,18 +157,12 @@ int cdfOpen(const char *filename, const char *mode, int filetype)
     Message("Open %s with mode %c", filename, *mode);
 
 #ifdef  HAVE_LIBNETCDF
-  if ( filetype == CDI_FILETYPE_NC2 )
-    {
 #ifndef  NC_64BIT_OFFSET
-      open_file = false;
+  if ( filetype == CDI_FILETYPE_NC2 ) open_file = false;
 #endif
-    }
-  else if ( filetype == CDI_FILETYPE_NC5 )
-    {
 #ifndef  NC_64BIT_DATA
-      open_file = false;
+  if ( filetype == CDI_FILETYPE_NC5 ) open_file = false;
 #endif
-    }
 #endif
 
   if ( open_file )

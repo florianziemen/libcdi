@@ -1117,6 +1117,8 @@ readGetBuffers(size_t streamIdx, const struct cdiPioConf *conf)
       case CDI_FILETYPE_NC:
       case CDI_FILETYPE_NC2:
       case CDI_FILETYPE_NC4:
+      case CDI_FILETYPE_NC4C:
+      case CDI_FILETYPE_NC5:
         writeNetCDFStream(streamIdx, map, &data, &currentDataBufSize, conf);
         break;
 #endif
@@ -1262,6 +1264,7 @@ cdiPioServerStreamClose(stream_t *streamptr, int recordBufIsToBeDeleted)
         case CDI_FILETYPE_NC2:
         case CDI_FILETYPE_NC4:
         case CDI_FILETYPE_NC4C:
+        case CDI_FILETYPE_NC5:
           {
             int rank, rankOpen = cdiPioSerialOpenFileMap(streamptr->self);
             if (commInqIOMode() == PIO_NONE

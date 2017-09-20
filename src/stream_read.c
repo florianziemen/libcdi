@@ -70,6 +70,7 @@ int cdiStreamReadVar(int streamID, int varID, int memtype, void *data, int *nmis
     case CDI_FILETYPE_NC2:
     case CDI_FILETYPE_NC4:
     case CDI_FILETYPE_NC4C:
+    case CDI_FILETYPE_NC5:
       {
         cdf_read_var(streamptr, varID, memtype, data, nmiss);
 	break;
@@ -196,6 +197,7 @@ int cdiStreamReadVarSlice(int streamID, int varID, int levelID, int memtype, voi
     case CDI_FILETYPE_NC2:
     case CDI_FILETYPE_NC4:
     case CDI_FILETYPE_NC4C:
+    case CDI_FILETYPE_NC5:
       {
         cdf_read_var_slice(streamptr, varID, levelID, memtype, data, nmiss);
         break;
@@ -317,6 +319,7 @@ int stream_read_record(int streamID, int memtype, void *data, int *nmiss)
     case CDI_FILETYPE_NC2:
     case CDI_FILETYPE_NC4:
     case CDI_FILETYPE_NC4C:
+    case CDI_FILETYPE_NC5:
       cdf_read_record(streamptr, memtype, data, nmiss);
       break;
 #endif
