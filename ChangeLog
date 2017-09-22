@@ -1,6 +1,27 @@
-2017-09-27  Uwe Schulzweida
+2017-10-27  Uwe Schulzweida
 
+        * using CGRIBEX library version 1.9.0
 	* Version 1.9.1 released
+
+2017-09-20  Uwe Schulzweida
+
+	* vlistCopyFlag: copy datatype (bug fix)
+
+2017-09-20  Uwe Schulzweida
+
+	* Added support for CDI_FILETYPE_NC5
+
+2017-09-18  Uwe Schulzweida
+
+	* CDI_PROJ_LCC: don't overwrite NetCDF units (bug fix)
+
+2017-09-13  Uwe Schulzweida
+
+	* Added interface function taxisWithBounds()
+
+2017-09-07  Uwe Schulzweida
+
+	* Read NC_FORMAT_CDF5 data as CDF2 (preliminary fix)
 
 2017-09-05  Uwe Schulzweida
 

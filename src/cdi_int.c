@@ -1,5 +1,5 @@
-#if defined (HAVE_CONFIG_H)
-#  include "config.h"
+#ifdef  HAVE_CONFIG_H
+#include "config.h"
 #endif
 
 #include <stdarg.h>
@@ -12,13 +12,13 @@
 #include "dmemory.h"
 #include "file.h"
 #include "gribapi.h"
-#ifdef HAVE_LIBNETCDF
+#ifdef  HAVE_LIBNETCDF
 #include "stream_cdf.h"
 #endif
 #include "namespace.h"
 #include "resource_handle.h"
 
-#if  defined  (HAVE_LIBCGRIBEX)
+#ifdef  HAVE_LIBCGRIBEX
 #include "cgribex.h"
 #endif
 
@@ -57,6 +57,7 @@ static const char Filetypes[][9] = {
   "NetCDF2",
   "NetCDF4",
   "NetCDF4c",
+  "NetCDF5",
   "SERVICE",
   "EXTRA",
   "IEG",
@@ -76,18 +77,14 @@ int cdiHaveMissval = 0;
 
 static long cdiGetenvInt(const char *envName)
 {
-  char *envString;
   long envValue = -1;
-  long fact = 1;
 
-  envString = getenv(envName);
-
+  char *envString = getenv(envName);
   if ( envString )
     {
-      int loop, len;
-
-      len = (int) strlen(envString);
-      for ( loop = 0; loop < len; loop++ )
+      long fact = 1;
+      int len = (int) strlen(envString);
+      for ( int loop = 0; loop < len; loop++ )
 	{
 	  if ( ! isdigit((int) envString[loop]) )
 	    {
@@ -111,7 +108,7 @@ static long cdiGetenvInt(const char *envName)
       if ( CDI_Debug ) Message("set %s to %ld", envName, envValue);
     }
 
-  return (envValue);
+  return envValue;
 }
 
 static void
@@ -127,25 +124,25 @@ cdiPrintDefaults(void)
 void cdiPrintVersion(void)
 {
   fprintf(stderr, "     CDI library version : %s\n", cdiLibraryVersion());
-#if  defined  (HAVE_LIBCGRIBEX)
+#ifdef  HAVE_LIBCGRIBEX
   fprintf(stderr, " CGRIBEX library version : %s\n", cgribexLibraryVersion());
 #endif
-#if  defined  (HAVE_LIBGRIB_API)
+#ifdef  HAVE_LIBGRIB_API
   fprintf(stderr, "GRIB_API library version : %s\n", gribapiLibraryVersionString());
 #endif
-#if  defined  (HAVE_LIBNETCDF)
+#ifdef  HAVE_LIBNETCDF
   fprintf(stderr, "  NetCDF library version : %s\n", cdfLibraryVersion());
 #endif
-#if  defined  (HAVE_NC4HDF5)
+#ifdef  HAVE_NC4HDF5
   fprintf(stderr, "    HDF5 library version : %s\n", hdfLibraryVersion());
 #endif
-#if  defined  (HAVE_LIBSERVICE)
+#ifdef  HAVE_LIBSERVICE
   fprintf(stderr, " SERVICE library version : %s\n", srvLibraryVersion());
 #endif
-#if  defined  (HAVE_LIBEXTRA)
+#ifdef  HAVE_LIBEXTRA
   fprintf(stderr, "   EXTRA library version : %s\n", extLibraryVersion());
 #endif
-#if  defined  (HAVE_LIBIEG)
+#ifdef  HAVE_LIBIEG
   fprintf(stderr, "     IEG library version : %s\n", iegLibraryVersion());
 #endif
   fprintf(stderr, "    FILE library version : %s\n", fileLibraryVersion());
@@ -193,6 +190,7 @@ static void cdiPrintDatatypes(void)
 #undef XSTRING
 }
 
+
 void cdiDebug(int level)
 {
   if ( level == 1 || (level &  2) ) CDI_Debug = 1;
@@ -236,37 +234,40 @@ int cdiHaveFiletype(int filetype)
 
   switch (filetype)
     {
-#if  defined  (HAVE_LIBSERVICE)
-    case CDI_FILETYPE_SRV:  { status = 1; break; }
+#ifdef  HAVE_LIBSERVICE
+    case CDI_FILETYPE_SRV:  status = 1; break;
 #endif
-#if  defined  (HAVE_LIBEXTRA)
-    case CDI_FILETYPE_EXT:  { status = 1; break; }
+#ifdef  HAVE_LIBEXTRA
+    case CDI_FILETYPE_EXT:  status = 1; break;
 #endif
-#if  defined  (HAVE_LIBIEG)
-    case CDI_FILETYPE_IEG:  { status = 1; break; }
+#ifdef  HAVE_LIBIEG
+    case CDI_FILETYPE_IEG:  status = 1; break;
 #endif
-#if  defined  (HAVE_LIBGRIB)
+#ifdef  HAVE_LIBGRIB
 #if  defined  (HAVE_LIBGRIB_API) || defined  (HAVE_LIBCGRIBEX)
-    case CDI_FILETYPE_GRB:  { status = 1; break; }
+    case CDI_FILETYPE_GRB:  status = 1; break;
 #endif
-#if  defined  (HAVE_LIBGRIB_API)
-    case CDI_FILETYPE_GRB2: { status = 1; break; }
-#endif
-#endif
-#if  defined  (HAVE_LIBNETCDF)
-    case CDI_FILETYPE_NC:   { status = 1; break; }
-#if  defined  (HAVE_NETCDF2)
-    case CDI_FILETYPE_NC2:  { status = 1; break; }
-#endif
-#if  defined  (HAVE_NETCDF4)
-    case CDI_FILETYPE_NC4:  { status = 1; break; }
-    case CDI_FILETYPE_NC4C: { status = 1; break; }
+#ifdef  HAVE_LIBGRIB_API
+    case CDI_FILETYPE_GRB2: status = 1; break;
 #endif
 #endif
-    default: { status = 0; break; }
+#ifdef  HAVE_LIBNETCDF
+    case CDI_FILETYPE_NC:   status = 1; break;
+#ifdef  HAVE_NETCDF2
+    case CDI_FILETYPE_NC2:  status = 1; break;
+#endif
+#ifdef  HAVE_NETCDF4
+    case CDI_FILETYPE_NC4:  status = 1; break;
+    case CDI_FILETYPE_NC4C: status = 1; break;
+#endif
+#ifdef  HAVE_NETCDF5
+    case CDI_FILETYPE_NC5:  status = 1; break;
+#endif
+#endif
+    default: status = 0; break;
     }
 
-  return (status);
+  return status;
 }
 
 void cdiDefTableID(int tableID)
@@ -323,7 +324,7 @@ void cdiInitialize(void)
       char *envstr;
       long value;
 
-#if  defined  (HAVE_LIBCGRIBEX)
+#ifdef  HAVE_LIBCGRIBEX
       gribFixZSE(1);   // 1: Fix ZeroShiftError of simple packed spherical harmonics
       gribSetConst(1); // 1: Don't pack constant fields on regular grids
 #endif
@@ -442,7 +443,7 @@ void cdiInitialize(void)
 	  if ( CDI_Debug )
 	    Message("Default calendar set to %s!", envstr);
 	}
-#if  defined  (HAVE_LIBCGRIBEX)
+#ifdef  HAVE_LIBCGRIBEX
       gribSetCalendar(cdiDefaultCalendar);
 #endif
 
@@ -457,15 +458,10 @@ void cdiInitialize(void)
 
 const char *strfiletype(int filetype)
 {
-  const char *name;
   int size = (int) (sizeof(Filetypes)/sizeof(char *));
+  const char *name = (filetype > 0 && filetype < size) ? Filetypes[filetype] : Filetypes[0];
 
-  if ( filetype > 0 && filetype < size )
-    name = Filetypes[filetype];
-  else
-    name = Filetypes[0];
-
-  return (name);
+  return name;
 }
 
 
@@ -498,7 +494,7 @@ double cdiInqMissval(void)
 {
   cdiInitialize();
 
-  return (cdiDefaultMissval);
+  return cdiDefaultMissval;
 }
 
 /*

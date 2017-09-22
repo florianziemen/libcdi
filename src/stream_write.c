@@ -72,6 +72,7 @@ int cdiStreamWriteVar_(int streamID, int varID, int memtype, const void *data, s
     case CDI_FILETYPE_NC2:
     case CDI_FILETYPE_NC4:
     case CDI_FILETYPE_NC4C:
+    case CDI_FILETYPE_NC5:
       {
         cdf_write_var(streamptr, varID, memtype, data, nmiss);
 	break;
@@ -208,6 +209,7 @@ int cdiStreamWriteVarSlice(int streamID, int varID, int levelID, int memtype, co
     case CDI_FILETYPE_NC2:
     case CDI_FILETYPE_NC4:
     case CDI_FILETYPE_NC4C:
+    case CDI_FILETYPE_NC5:
       cdf_write_var_slice(streamptr, varID, levelID, memtype, data, nmiss);
       break;
 #endif
@@ -323,6 +325,7 @@ void cdiStreamWriteVarChunk_(int streamID, int varID, int memtype,
     case CDI_FILETYPE_NC2:
     case CDI_FILETYPE_NC4:
     case CDI_FILETYPE_NC4C:
+    case CDI_FILETYPE_NC5:
       cdf_write_var_chunk(streamptr, varID, memtype, rect, data, nmiss);
       break;
 #endif
@@ -374,6 +377,7 @@ int stream_write_record(int streamID, int memtype, const void *data, size_t nmis
     case CDI_FILETYPE_NC2:
     case CDI_FILETYPE_NC4:
     case CDI_FILETYPE_NC4C:
+    case CDI_FILETYPE_NC5:
       {
 	cdf_write_record(streamptr, memtype, data, nmiss);
 	break;

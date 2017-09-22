@@ -22,7 +22,7 @@ typedef int MPI_Comm;
 #endif
 
 enum {
-  DOUBLE_PRECISION = 8,
+  DOUBLE_PRECISION = CDI_DATATYPE_FLT64,
   nlon             = 12,
   nlat             = 6,
   nlev             = 5,
@@ -61,7 +61,7 @@ static int defineGrid (void)
   gridDefYname ( gridID, "myYname" );
   gridDefYlongname ( gridID, "myYlongname" );
   gridDefYunits ( gridID, "myYunits" );
-  gridDefPrec ( gridID, DOUBLE_PRECISION );
+  gridDefDatatype ( gridID, DOUBLE_PRECISION );
   gridDefTrunc ( gridID, 1 );
   gridDefParamGME ( gridID, 2, 3, 4, 5 );
   gridDefNumber ( gridID, 6 );
@@ -94,7 +94,7 @@ static int defineZaxis (void)
   zaxisDefName ( zaxisID, "myName" );
   zaxisDefLongname ( zaxisID, "myLongname" );
   zaxisDefUnits ( zaxisID, "myUnits" );
-  zaxisDefPrec ( zaxisID, DOUBLE_PRECISION );
+  zaxisDefDatatype ( zaxisID, DOUBLE_PRECISION );
   zaxisDefLtype ( zaxisID, 1 );
   zaxisDefVct ( zaxisID, 3, vct );
   zaxisDefLbounds ( zaxisID, &levs[0] );

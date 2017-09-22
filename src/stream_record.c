@@ -1,5 +1,5 @@
-#if defined (HAVE_CONFIG_H)
-#  include "config.h"
+#ifdef  HAVE_CONFIG_H
+#include "config.h"
 #endif
 
 #include <limits.h>
@@ -209,6 +209,7 @@ void streamDefRecord(int streamID, int varID, int levelID)
     case CDI_FILETYPE_NC2:
     case CDI_FILETYPE_NC4:
     case CDI_FILETYPE_NC4C:
+    case CDI_FILETYPE_NC5:
       if ( streamptr->accessmode == 0 ) cdfEndDef(streamptr);
       cdfDefRecord(streamptr);
       break;
@@ -237,12 +238,14 @@ void streamCopyRecord(int streamID2, int streamID1)
         case CDI_FILETYPE_NC2:
         case CDI_FILETYPE_NC4:
         case CDI_FILETYPE_NC4C:
+        case CDI_FILETYPE_NC5:
           switch (filetype2)
             {
             case CDI_FILETYPE_NC:
             case CDI_FILETYPE_NC2:
             case CDI_FILETYPE_NC4:
             case CDI_FILETYPE_NC4C:
+            case CDI_FILETYPE_NC5:
               // Warning("Streams have different file types (%s -> %s)!", strfiletype(filetype1), strfiletype(filetype2));
               filetype = filetype2;
               break;
@@ -282,6 +285,7 @@ void streamCopyRecord(int streamID2, int streamID1)
     case CDI_FILETYPE_NC2:
     case CDI_FILETYPE_NC4:
     case CDI_FILETYPE_NC4C:
+    case CDI_FILETYPE_NC5:
       cdfCopyRecord(streamptr2, streamptr1);
       break;
 #endif

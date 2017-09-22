@@ -1,5 +1,5 @@
-#if defined (HAVE_CONFIG_H)
-#  include "config.h"
+#ifdef  HAVE_CONFIG_H
+#include "config.h"
 #endif
 
 #include "dmemory.h"
@@ -12,6 +12,7 @@ filetypeIsNetCDF(int filetype)
 {
   return filetype == CDI_FILETYPE_NC
     ||   filetype == CDI_FILETYPE_NC2
+    ||   filetype == CDI_FILETYPE_NC5
     ||   filetype == CDI_FILETYPE_NC4
     ||   filetype == CDI_FILETYPE_NC4C;
 }

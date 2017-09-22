@@ -512,8 +512,8 @@ module mo_cdi
   public :: gridInqYunits
   public :: gridInqXstdname
   public :: gridInqYstdname
-  public :: gridDefPrec
-  public :: gridInqPrec
+  public :: gridDefDatatype
+  public :: gridInqDatatype
   public :: gridInqXval
   public :: gridInqYval
   public :: gridInqXinc
@@ -581,8 +581,8 @@ module mo_cdi
   public :: zaxisDefUnits
   public :: zaxisInqUnits
   public :: zaxisInqStdname
-  public :: zaxisDefPrec
-  public :: zaxisInqPrec
+  public :: zaxisDefDatatype
+  public :: zaxisInqDatatype
   public :: zaxisDefPositive
   public :: zaxisInqPositive
   public :: zaxisDefScalar
@@ -1976,19 +1976,19 @@ module mo_cdi
       integer(c_int) :: f_result
     end function cdiZaxisInqKeyFlt
 
-    subroutine gridDefPrec(gridID_dummy, prec_dummy) bind(c, name =&
-    & 'gridDefPrec')
+    subroutine gridDefDatatype(gridID_dummy, prec_dummy) bind(c, name =&
+    & 'gridDefDatatype')
       import c_int
       integer(c_int), value :: gridID_dummy
       integer(c_int), value :: prec_dummy
-    end subroutine gridDefPrec
+    end subroutine gridDefDatatype
 
-    function gridInqPrec(gridID_dummy) bind(c, name = 'gridInqPrec')&
+    function gridInqDatatype(gridID_dummy) bind(c, name = 'gridInqDatatype')&
     & result(f_result)
       import c_int
       integer(c_int), value :: gridID_dummy
       integer(c_int) :: f_result
-    end function gridInqPrec
+    end function gridInqDatatype
 
     function gridInqXval(gridID_dummy, index_dummy) bind(c, name =&
     & 'gridInqXval') result(f_result)
@@ -2407,19 +2407,19 @@ module mo_cdi
       integer(kind = c_signed_char), intent(inout) :: uuid_dummy(CDI_UUID_SIZE)
     end subroutine zaxisInqUUID
 
-    subroutine zaxisDefPrec(zaxisID_dummy, prec_dummy) bind(c, name =&
-    & 'zaxisDefPrec')
+    subroutine zaxisDefDatatype(zaxisID_dummy, prec_dummy) bind(c, name =&
+    & 'zaxisDefDatatype')
       import c_int
       integer(c_int), value :: zaxisID_dummy
       integer(c_int), value :: prec_dummy
-    end subroutine zaxisDefPrec
+    end subroutine zaxisDefDatatype
 
-    function zaxisInqPrec(zaxisID_dummy) bind(c, name = 'zaxisInqPrec')&
+    function zaxisInqDatatype(zaxisID_dummy) bind(c, name = 'zaxisInqDatatype')&
     & result(f_result)
       import c_int
       integer(c_int), value :: zaxisID_dummy
       integer(c_int) :: f_result
-    end function zaxisInqPrec
+    end function zaxisInqDatatype
 
     subroutine zaxisDefPositive(zaxisID_dummy, positive_dummy) bind(c, name =&
     & 'zaxisDefPositive')

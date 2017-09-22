@@ -38,7 +38,7 @@ CdiGrid::CdiGrid(int gridid) {
   getValues();
   getBounds();
 
-  prec = gridInqPrec(gridID);
+  prec = gridInqDatatype(gridID);
 
   gridInqXname(gridID    , _xname);
   gridInqXlongname(gridID, _xlongname);
@@ -212,7 +212,7 @@ CdiZaxis::CdiZaxis(int zaxisid) {
 
   zaxisID = zaxisid;
   size    = zaxisInqSize(zaxisID);
-  prec    = zaxisInqPrec(zaxisID);
+  prec    = zaxisInqDatatype(zaxisID);
   type    = zaxisInqType(zaxisID);
   ltype   = zaxisInqLtype(zaxisID);
 

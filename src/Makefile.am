@@ -22,6 +22,7 @@ libcdi_la_SOURCES = 	 \
 	calendar.h	 \
 	cdf.c            \
 	cdf.h	 	 \
+	cdf_config.h	 \
 	cdf_int.c	 \
 	cdf_int.h	 \
 	cdf_util.c	 \

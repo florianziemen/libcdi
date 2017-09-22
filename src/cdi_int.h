@@ -1,5 +1,5 @@
-#ifndef _CDI_INT_H
-#define _CDI_INT_H
+#ifndef  CDI_INT_H
+#define  CDI_INT_H
 
 #if defined (HAVE_CONFIG_H)
 #include "config.h"
@@ -15,6 +15,7 @@
 #include <sys/types.h>
 
 #include "cdi.h"
+#include "cdf_config.h"
 
 /* dummy use of unused parameters to silence compiler warnings */
 #ifndef UNUSED
@@ -492,7 +493,7 @@ void cdi_check_gridsize_int_limit(const char *format, size_t gridsize)
 }
 #endif
 
-#endif  /* _CDI_INT_H */
+#endif  /* CDI_INT_H */
 /*
  * Local Variables:
  * c-file-style: "Java"

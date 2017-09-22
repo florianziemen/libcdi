@@ -73,11 +73,11 @@ void cdfDefTimeValue(stream_t *streamptr, int tsID)
 
   if ( taxis->has_bounds )
     {
-      size_t start[2], count[2];
-
       ncvarid = streamptr->basetime.ncvarboundsid;
+      assert(ncvarid != CDI_UNDEFID);
 
       timevalue = cdiEncodeTimeval(taxis->vdate_lb, taxis->vtime_lb, &streamptr->tsteps[0].taxis);
+      size_t start[2], count[2];
       start[0] = (size_t)tsID; count[0] = 1; start[1] = 0; count[1] = 1;
       cdf_put_vara_double(fileID, ncvarid, start, count, &timevalue);
 
@@ -296,7 +296,7 @@ static void
 cdfDefTrajLatLon(stream_t *streamptr, int gridID, int gridindex,
                  const struct cdfDefGridAxisInqs *inqs, int dimtype)
 {
-  nc_type xtype = (gridInqPrec(gridID) == CDI_DATATYPE_FLT32) ? NC_FLOAT : NC_DOUBLE;
+  nc_type xtype = (gridInqDatatype(gridID) == CDI_DATATYPE_FLT32) ? NC_FLOAT : NC_DOUBLE;
   ncgrid_t *ncgrid = streamptr->ncgrid;
 
   size_t dimlen = inqs->axisSize(gridID);
@@ -452,7 +452,7 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridindex, int ndims,
   int nvdimID = CDI_UNDEFID;
   int fileID  = streamptr->fileID;
   size_t dimlen = gridAxisInq->axisSize(gridID);
-  nc_type xtype = (nc_type)cdfDefDatatype(gridInqPrec(gridID), streamptr->filetype);
+  nc_type xtype = (nc_type)cdfDefDatatype(gridInqDatatype(gridID), streamptr->filetype);
 
   ncgrid_t *ncgrid = streamptr->ncgrid;
 
@@ -663,7 +663,7 @@ cdfDefIrregularGridCommon(stream_t *streamptr, int gridID,
                           size_t nvertex, const char *vdimname_default,
                           bool setVdimname)
 {
-  nc_type xtype = (nc_type)cdfDefDatatype(gridInqPrec(gridID), streamptr->filetype);
+  nc_type xtype = (nc_type)cdfDefDatatype(gridInqDatatype(gridID), streamptr->filetype);
   int xdimID = CDI_UNDEFID;
   int ydimID = CDI_UNDEFID;
   int ncxvarid = CDI_UNDEFID, ncyvarid = CDI_UNDEFID, ncavarid = CDI_UNDEFID;
@@ -1477,7 +1477,7 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
   char axisname[CDI_MAX_NAME];
   int dimID = CDI_UNDEFID;
   int ncvarid = CDI_UNDEFID, ncbvarid = CDI_UNDEFID;
-  int xtype = zaxisInqPrec(zaxisID) == CDI_DATATYPE_FLT32 ? NC_FLOAT : NC_DOUBLE;
+  int xtype = zaxisInqDatatype(zaxisID) == CDI_DATATYPE_FLT32 ? NC_FLOAT : NC_DOUBLE;
 
   int vlistID = streamptr->vlistID;
   int fileID  = streamptr->fileID;
@@ -1794,7 +1794,7 @@ void cdfDefRgrid(stream_t *streamptr, int gridID, int gridindex)
           lwarn = false;
         }
 
-      char axisname[7] = "rgridX";
+      char axisname[16] = "rgridX";
       if ( iz == 0 ) axisname[5] = '\0';
       else           sprintf(&axisname[5], "%1d", iz+1);
 

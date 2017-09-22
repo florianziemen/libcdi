@@ -535,21 +535,17 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
 
   if ( vlistptr1->vars )
     {
-      int nvars = vlistptr1->nvars;
-      int nvars2 = 0;
-
       vlistptr2->ngrids = 0;
       vlistptr2->nzaxis = 0;
 
+      int nvars = vlistptr1->nvars;
+      int nvars2 = 0;
       for ( int varID = 0; varID < nvars; varID++ )
         nvars2 += vars1[varID].flag;
 
       vlistptr2->nvars = nvars2;
       vlistptr2->varsAllocated = nvars2;
-      if ( nvars2 > 0 )
-        vars2 = (var_t *) Malloc((size_t)nvars2*sizeof(var_t));
-      else
-        vars2 = NULL;
+      vars2 = (nvars2 > 0) ? (var_t *) Malloc((size_t)nvars2*sizeof(var_t)) : NULL;
 
       vlistptr2->vars = vars2;
 
@@ -686,6 +682,7 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
                 zaxisDefLongname(zaxisID2, ctemp);
                 zaxisInqUnits(zaxisID, ctemp);
                 zaxisDefUnits(zaxisID2, ctemp);
+                zaxisDefDatatype(zaxisID2, zaxisInqDatatype(zaxisID));
 
                 if ( zaxisType == ZAXIS_CHAR )
                   {

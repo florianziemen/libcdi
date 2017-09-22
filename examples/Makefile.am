@@ -2,8 +2,7 @@
 #
 EXTRA_DIST = cdi_read_f2003.f90 cdi_write_f2003.f90
 #
-noinst_PROGRAMS = cdi_write cdi_write_ens cdi_write_hybrid cdi_read \
-	cdi_copy
+noinst_PROGRAMS = cdi_write cdi_write_relativ cdi_write_ens cdi_write_hybrid cdi_read cdi_copy
 if CREATE_ISOC
   noinst_PROGRAMS += cdi_read_f2003 cdi_write_f2003
 endif
@@ -17,9 +16,11 @@ LDADD = $(top_builddir)/src/libcdi.la
 #
 cdi_write_SOURCES        = cdi_write.c
 #
+cdi_write_relativ_SOURCES = cdi_write_relativ.c
+#
 cdi_write_ens_SOURCES    = cdi_write_ens.c
 #
-cdi_write_const_SOURCES    = cdi_write_const.c
+cdi_write_const_SOURCES  = cdi_write_const.c
 #
 cdi_write_hybrid_SOURCES = cdi_write_hybrid.c
 #

@@ -148,7 +148,7 @@ void grid_init(grid_t *gridptr)
   gridptr->number        = 0;
   gridptr->position      = 0;
   gridptr->reference     = NULL;
-  gridptr->prec          = 0;
+  gridptr->datatype      = 0;
   gridptr->size          = 0;
   gridptr->x.size        = 0;
   gridptr->y.size        = 0;
@@ -330,11 +330,11 @@ void cdiGridTypeInit(grid_t *gridptr, int gridtype, size_t size)
       }
     case GRID_CHARXY:
       {
-        if ( gridptr->x.cvals )
-          gridptr->x.stdname = xystdname_tab[grid_xystdname_char][0];
-        if ( gridptr->y.cvals )
-          gridptr->y.stdname = xystdname_tab[grid_xystdname_char][0];
-      }
+        if ( gridptr->x.cvals ) gridptr->x.stdname = xystdname_tab[grid_xystdname_char][0];
+        if ( gridptr->y.cvals ) gridptr->y.stdname = xystdname_tab[grid_xystdname_char][0];
+
+        break;
+     }
     case GRID_GENERIC:
     case GRID_PROJECTION:
       {
@@ -346,8 +346,9 @@ void cdiGridTypeInit(grid_t *gridptr, int gridtype, size_t size)
 
             gridptr->x.stdname = xystdname_tab[grid_xystdname_projection][0];
             gridptr->y.stdname = xystdname_tab[grid_xystdname_projection][1];
-            gridSetName(gridptr->x.units, "m");
-            gridSetName(gridptr->y.units, "m");
+
+            if ( !gridptr->x.units[0] ) gridSetName(gridptr->x.units, "m");
+            if ( !gridptr->y.units[0] ) gridSetName(gridptr->y.units, "m");
           }
         break;
       }
@@ -1041,8 +1042,8 @@ void gridVerifyProj(int gridID)
     {
       gridptr->x.stdname = xystdname_tab[grid_xystdname_projection][0];
       gridptr->y.stdname = xystdname_tab[grid_xystdname_projection][1];
-      gridSetName(gridptr->x.units, "m");
-      gridSetName(gridptr->y.units, "m");
+      if ( !gridptr->x.units[0] ) gridSetName(gridptr->x.units, "m");
+      if ( !gridptr->y.units[0] ) gridSetName(gridptr->y.units, "m");
     }
 }
 
@@ -1203,14 +1204,14 @@ void gridDefXsize(int gridID, size_t xsize)
 
 @EndFunction
 */
-void gridDefPrec(int gridID, int prec)
+void gridDefDatatype(int gridID, int datatype)
 {
   grid_t *gridptr = grid_to_pointer(gridID);
 
-  if ( gridptr->prec != prec )
+  if ( gridptr->datatype != datatype )
     {
       gridMark4Update(gridID);
-      gridptr->prec = prec;
+      gridptr->datatype = datatype;
     }
 }
 
@@ -1224,10 +1225,10 @@ void gridDefPrec(int gridID, int prec)
 
 @EndFunction
 */
-int gridInqPrec(int gridID)
+int gridInqDatatype(int gridID)
 {
   grid_t *gridptr = grid_to_pointer(gridID);
-  return gridptr->prec;
+  return gridptr->datatype;
 }
 
 /*
@@ -2398,7 +2399,7 @@ int gridCompareP(void *gridptr1, void *gridptr2)
   xassert ( g2 );
 
   if ( g1->type          != g2->type         ) return differ;
-  if ( g1->prec          != g2->prec         ) return differ;
+  if ( g1->datatype      != g2->datatype     ) return differ;
   if ( g1->isCyclic      != g2->isCyclic     ) return differ;
   if ( g1->x.flag        != g2->x.flag       ) return differ;
   if ( g1->y.flag        != g2->y.flag       ) return differ;
@@ -2562,7 +2563,7 @@ static
 void gridComplete(grid_t *grid)
 {
   int gridID = grid->self;
-  gridDefPrec(gridID, grid->prec);
+  gridDefDatatype(gridID, grid->datatype);
 
   int gridtype = grid->type;
   switch (gridtype)
@@ -2704,7 +2705,7 @@ int gridGenerate(const grid_t *grid)
   int gridtype = grid->type;
   int gridID = gridCreate(gridtype, grid->size);
   grid_t *restrict gridptr = grid_to_pointer(gridID);
-  gridptr->prec = grid->prec;
+  gridptr->datatype = grid->datatype;
   gridptr->x.size = grid->x.size;
   gridptr->y.size = grid->y.size;
   gridptr->np = grid->np;
@@ -3387,9 +3388,9 @@ void gridPrintKernel(int gridID, int opt, FILE *fp)
   int xstrlen  = gridInqXIsc(gridID);
   int ystrlen  = gridInqYIsc(gridID);
   int nvertex  = gridInqNvertex(gridID);
-  int prec     = gridInqPrec(gridID);
+  int datatype = gridInqDatatype(gridID);
 
-  int dig = (prec == CDI_DATATYPE_FLT64) ? 15 : 7;
+  int dig = (datatype == CDI_DATATYPE_FLT64) ? 15 : 7;
 
   fprintf(fp, "gridtype  = %s\n" "gridsize  = %zu\n", gridNamePtr(type), gridsize);
 
@@ -3666,7 +3667,7 @@ void gridPrintP(void *voidptr, FILE *fp)
   gridPrintKernel(gridID, 0, fp);
 
   fprintf(fp,
-          "precision = %d\n"
+          "datatype  = %d\n"
           "nd        = %d\n"
           "ni        = %d\n"
           "ni2       = %d\n"
@@ -3676,7 +3677,7 @@ void gridPrintP(void *voidptr, FILE *fp)
           "trunc     = %d\n"
           "lcomplex  = %d\n"
           "nrowlon   = %d\n",
-          gridptr->prec, gridptr->gme.nd, gridptr->gme.ni, gridptr->gme.ni2,
+          gridptr->datatype, gridptr->gme.nd, gridptr->gme.ni, gridptr->gme.ni2,
           gridptr->gme.ni3, gridptr->number, gridptr->position, gridptr->trunc,
           gridptr->lcomplex, gridptr->nrowlon );
 
@@ -4206,7 +4207,7 @@ gridTxCode ()
 enum {
   GRID_PACK_INT_IDX_SELF,
   GRID_PACK_INT_IDX_TYPE,
-  GRID_PACK_INT_IDX_PREC,
+  GRID_PACK_INT_IDX_DATATYPE,
   GRID_PACK_INT_IDX_IS_CYCLIC,
   GRID_PACK_INT_IDX_X_FLAG,
   GRID_PACK_INT_IDX_Y_FLAG,
@@ -4412,7 +4413,7 @@ gridUnpack(char * unpackBuffer, int unpackBufferSize,
     xassert(!force_id || targetID == gridP->self);
 
     gridP->type          =   intBuffer[GRID_PACK_INT_IDX_TYPE];
-    gridP->prec          =   intBuffer[GRID_PACK_INT_IDX_PREC];
+    gridP->datatype      =   intBuffer[GRID_PACK_INT_IDX_DATATYPE];
     gridP->isCyclic      =   (signed char)intBuffer[GRID_PACK_INT_IDX_IS_CYCLIC];
     gridP->x.flag        =   (short)intBuffer[GRID_PACK_INT_IDX_X_FLAG];
     gridP->y.flag        =   (short)intBuffer[GRID_PACK_INT_IDX_Y_FLAG];
@@ -4598,7 +4599,7 @@ gridPack(void * voidP, void * packBuffer, int packBufferSize,
 
     intBuffer[GRID_PACK_INT_IDX_SELF]         = gridP->self;
     intBuffer[GRID_PACK_INT_IDX_TYPE]         = gridP->type;
-    intBuffer[GRID_PACK_INT_IDX_PREC]         = gridP->prec;
+    intBuffer[GRID_PACK_INT_IDX_DATATYPE]     = gridP->datatype;
     intBuffer[GRID_PACK_INT_IDX_IS_CYCLIC]    = gridP->isCyclic;
     intBuffer[GRID_PACK_INT_IDX_X_FLAG]       = gridP->x.flag;
     intBuffer[GRID_PACK_INT_IDX_Y_FLAG]       = gridP->y.flag;

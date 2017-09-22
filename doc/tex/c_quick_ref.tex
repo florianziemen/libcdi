@@ -108,6 +108,15 @@ Get number of attributes assigned to this variable.
 Create a horizontal Grid.
 
 
+\section*{\tt \htmlref{gridDefDatatype}{gridDefDatatype}}
+
+\begin{verbatim}
+    void gridDefDatatype (int gridID, int prec);
+\end{verbatim}
+
+Define the data type of a Grid.
+
+
 \section*{\tt \htmlref{gridDefNP}{gridDefNP}}
 
 \begin{verbatim}
@@ -142,15 +151,6 @@ Define the number of vertex of a Gridbox.
 \end{verbatim}
 
 Define the position of grid in the reference file.
-
-
-\section*{\tt \htmlref{gridDefPrec}{gridDefPrec}}
-
-\begin{verbatim}
-    void gridDefPrec (int gridID, int prec);
-\end{verbatim}
-
-Define the precision of a Grid.
 
 
 \section*{\tt \htmlref{gridDefProj}{gridDefProj}}
@@ -306,6 +306,15 @@ Destroy a horizontal Grid.
 Duplicate a Grid.
 
 
+\section*{\tt \htmlref{gridInqDatatype}{gridInqDatatype}}
+
+\begin{verbatim}
+    int gridInqDatatype (int gridID);
+\end{verbatim}
+
+Get the data type of a Grid.
+
+
 \section*{\tt \htmlref{gridInqNP}{gridInqNP}}
 
 \begin{verbatim}
@@ -340,15 +349,6 @@ Get the number of vertex of a Gridbox.
 \end{verbatim}
 
 Get the position of grid in the reference file.
-
-
-\section*{\tt \htmlref{gridInqPrec}{gridInqPrec}}
-
-\begin{verbatim}
-    int gridInqPrec (int gridID);
-\end{verbatim}
-
-Get the precision of a Grid.
 
 
 \section*{\tt \htmlref{gridInqProj}{gridInqProj}}
