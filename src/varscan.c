@@ -1019,7 +1019,7 @@ int varDefZaxis(int vlistID, int zaxistype, int nlevels, const double *levels, c
 	  if ( name && name[0] ) zaxisDefName(zaxisID, name);
 	  if ( longname && longname[0] ) zaxisDefLongname(zaxisID, longname);
 	  if ( units && units[0] ) zaxisDefUnits(zaxisID, units);
-	  zaxisDefPrec(zaxisID, prec);
+	  zaxisDefDatatype(zaxisID, prec);
 	  zaxisDefLtype(zaxisID, ltype1);
 	}
 

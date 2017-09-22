@@ -883,11 +883,11 @@ void    gridInqXstdname(int gridID, char *xstdname);
 /*      gridInqYstdname: Get the standard name of a Y-axis */
 void    gridInqYstdname(int gridID, char *ystdname);
 
-/*      gridDefPrec: Define the precision of a Grid */
-void    gridDefPrec(int gridID, int prec);
+/*      gridDefDatatype: Define the precision of a Grid */
+void    gridDefDatatype(int gridID, int prec);
 
-/*      gridInqPrec: Get the precision of a Grid */
-int     gridInqPrec(int gridID);
+/*      gridInqDatatype: Get the precision of a Grid */
+int     gridInqDatatype(int gridID);
 
 /*      gridInqXval: Get one value of a X-axis */
 double  gridInqXval(int gridID, int index);
@@ -1072,8 +1072,8 @@ void    zaxisInqUnits(int zaxisID, char *units);
 /*      zaxisInqStdname: Get the standard name of a Z-axis */
 void    zaxisInqStdname(int zaxisID, char *stdname);
 
-void    zaxisDefPrec(int zaxisID, int prec);
-int     zaxisInqPrec(int zaxisID);
+void    zaxisDefDatatype(int zaxisID, int prec);
+int     zaxisInqDatatype(int zaxisID);
 
 void    zaxisDefPositive(int zaxisID, int positive);
 int     zaxisInqPositive(int zaxisID);

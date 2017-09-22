@@ -682,7 +682,7 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
                 zaxisDefLongname(zaxisID2, ctemp);
                 zaxisInqUnits(zaxisID, ctemp);
                 zaxisDefUnits(zaxisID2, ctemp);
-                zaxisDefPrec(zaxisID2, zaxisInqPrec(zaxisID));
+                zaxisDefDatatype(zaxisID2, zaxisInqDatatype(zaxisID));
 
                 if ( zaxisType == ZAXIS_CHAR )
                   {

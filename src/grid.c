@@ -1210,7 +1210,7 @@ void gridDefXsize(int gridID, int xsize)
 
 @EndFunction
 */
-void gridDefPrec(int gridID, int prec)
+void gridDefDatatype(int gridID, int prec)
 {
   grid_t *gridptr = grid_to_pointer(gridID);
 
@@ -1231,7 +1231,7 @@ void gridDefPrec(int gridID, int prec)
 
 @EndFunction
 */
-int gridInqPrec(int gridID)
+int gridInqDatatype(int gridID)
 {
   grid_t *gridptr = grid_to_pointer(gridID);
   return gridptr->prec;
@@ -2569,7 +2569,7 @@ static
 void gridComplete(grid_t *grid)
 {
   int gridID = grid->self;
-  gridDefPrec(gridID, grid->prec);
+  gridDefDatatype(gridID, grid->prec);
 
   int gridtype = grid->type;
   switch (gridtype)
@@ -3394,7 +3394,7 @@ void gridPrintKernel(int gridID, int opt, FILE *fp)
   int xstrlen  = gridInqXIsc(gridID);
   int ystrlen  = gridInqYIsc(gridID);
   int nvertex  = gridInqNvertex(gridID);
-  int prec     = gridInqPrec(gridID);
+  int prec     = gridInqDatatype(gridID);
 
   int dig = (prec == CDI_DATATYPE_FLT64) ? 15 : 7;
 

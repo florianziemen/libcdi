@@ -297,7 +297,7 @@ static void
 cdfDefTrajLatLon(stream_t *streamptr, int gridID, int gridindex,
                  const struct cdfDefGridAxisInqs *inqs, int dimtype)
 {
-  nc_type xtype = (gridInqPrec(gridID) == CDI_DATATYPE_FLT32) ? NC_FLOAT : NC_DOUBLE;
+  nc_type xtype = (gridInqDatatype(gridID) == CDI_DATATYPE_FLT32) ? NC_FLOAT : NC_DOUBLE;
   ncgrid_t *ncgrid = streamptr->ncgrid;
 
   int dimlen = inqs->axisSize(gridID);
@@ -453,7 +453,7 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridindex, int ndims,
   int nvdimID = CDI_UNDEFID;
   int fileID  = streamptr->fileID;
   size_t dimlen = (size_t)gridAxisInq->axisSize(gridID);
-  nc_type xtype = (nc_type)cdfDefDatatype(gridInqPrec(gridID), streamptr->filetype);
+  nc_type xtype = (nc_type)cdfDefDatatype(gridInqDatatype(gridID), streamptr->filetype);
 
   ncgrid_t *ncgrid = streamptr->ncgrid;
 
@@ -664,7 +664,7 @@ cdfDefIrregularGridCommon(stream_t *streamptr, int gridID,
                           size_t nvertex, const char *vdimname_default,
                           bool setVdimname)
 {
-  nc_type xtype = (nc_type)cdfDefDatatype(gridInqPrec(gridID), streamptr->filetype);
+  nc_type xtype = (nc_type)cdfDefDatatype(gridInqDatatype(gridID), streamptr->filetype);
   int xdimID = CDI_UNDEFID;
   int ydimID = CDI_UNDEFID;
   int ncxvarid = CDI_UNDEFID, ncyvarid = CDI_UNDEFID, ncavarid = CDI_UNDEFID;
@@ -1478,7 +1478,7 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
   char axisname[CDI_MAX_NAME];
   int dimID = CDI_UNDEFID;
   int ncvarid = CDI_UNDEFID, ncbvarid = CDI_UNDEFID;
-  int xtype = zaxisInqPrec(zaxisID) == CDI_DATATYPE_FLT32 ? NC_FLOAT : NC_DOUBLE;
+  int xtype = zaxisInqDatatype(zaxisID) == CDI_DATATYPE_FLT32 ? NC_FLOAT : NC_DOUBLE;
 
   int vlistID = streamptr->vlistID;
   int fileID  = streamptr->fileID;

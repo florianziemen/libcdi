@@ -659,7 +659,7 @@ void zaxisInqStdname(int zaxisID, char *stdname)
 }
 
 
-void zaxisDefPrec(int zaxisID, int prec)
+void zaxisDefDatatype(int zaxisID, int prec)
 {
   zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
 
@@ -671,7 +671,7 @@ void zaxisDefPrec(int zaxisID, int prec)
 }
 
 
-int zaxisInqPrec(int zaxisID)
+int zaxisInqDatatype(int zaxisID)
 {
   zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
   return zaxisptr->prec;
