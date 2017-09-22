@@ -26,7 +26,7 @@ typedef struct {
   double  *ubounds;
   double  *weights;
   int      self;
-  int      prec;
+  int      datatype;
   int      scalar;
   int      type;
   int      ltype;    /* GRIB level type */

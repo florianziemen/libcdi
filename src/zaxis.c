@@ -139,7 +139,7 @@ void zaxis_init(zaxis_t *zaxisptr)
   zaxisptr->positive      = 0;
   zaxisptr->scalar        = 0;
   zaxisptr->direction     = 0;
-  zaxisptr->prec          = 0;
+  zaxisptr->datatype      = 0;
   zaxisptr->size          = 0;
   zaxisptr->vctsize       = 0;
   zaxisptr->vct           = NULL;
@@ -659,13 +659,13 @@ void zaxisInqStdname(int zaxisID, char *stdname)
 }
 
 
-void zaxisDefDatatype(int zaxisID, int prec)
+void zaxisDefDatatype(int zaxisID, int datatype)
 {
   zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
 
-  if ( zaxisptr->prec != prec )
+  if ( zaxisptr->datatype != datatype )
     {
-      zaxisptr->prec = prec;
+      zaxisptr->datatype = datatype;
       reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
     }
 }
@@ -674,7 +674,7 @@ void zaxisDefDatatype(int zaxisID, int prec)
 int zaxisInqDatatype(int zaxisID)
 {
   zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
-  return zaxisptr->prec;
+  return zaxisptr->datatype;
 }
 
 
@@ -1406,9 +1406,9 @@ void zaxisPrintKernel(zaxis_t *zaxisptr, FILE *fp)
   int zaxisID = zaxisptr->self;
   int type    = zaxisptr->type;
   int nlevels = zaxisptr->size;
-  int prec    = zaxisptr->prec;
+  int datatype = zaxisptr->datatype;
 
-  int dig = (prec == CDI_DATATYPE_FLT64) ? 15 : 7;
+  int dig = (datatype == CDI_DATATYPE_FLT64) ? 15 : 7;
 
   int nbyte;
   int nbyte0 = 0;
@@ -1442,7 +1442,7 @@ void zaxisPrintKernel(zaxis_t *zaxisptr, FILE *fp)
 
   if ( zaxisptr->cvals )
     {
-      dig = prec;
+      dig = datatype;
       nbyte0 = fprintf(fp, "types     = ");
       nbyte = nbyte0;
       for ( int levelID = 0; levelID < nlevels; levelID++ )
@@ -1565,7 +1565,7 @@ int zaxisCompareP(zaxis_t *z1, zaxis_t *z2)
   diff |= (z1->type != z2->type)
     | (z1->ltype != z2->ltype)
     | (z1->direction != z2->direction)
-    | (z1->prec != z2->prec)
+    | (z1->datatype != z2->datatype)
     | (z1->size != z2->size)
     | (z1->vctsize != z2->vctsize)
     | (z1->positive != z2->positive);
@@ -1739,7 +1739,7 @@ zaxisUnpack(char * unpackBuffer, int unpackBufferSize,
     = zaxisNewEntry(force_id ? namespaceAdaptKey(intBuffer[0], originNamespace)
                     : CDI_UNDEFID);
 
-  zaxisP->prec      = intBuffer[1];
+  zaxisP->datatype  = intBuffer[1];
   zaxisP->type      = intBuffer[2];
   zaxisP->ltype     = intBuffer[3];
   zaxisP->size      = intBuffer[4];
@@ -1840,7 +1840,7 @@ zaxisPack(void * voidP, void * packBuffer, int packBufferSize,
   uint32_t d;
 
   intBuffer[0]  = zaxisP->self;
-  intBuffer[1]  = zaxisP->prec;
+  intBuffer[1]  = zaxisP->datatype;
   intBuffer[2]  = zaxisP->type;
   intBuffer[3]  = zaxisP->ltype;
   intBuffer[4]  = zaxisP->size;
