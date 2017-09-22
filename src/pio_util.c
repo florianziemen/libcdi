@@ -188,14 +188,17 @@ cdiPioQueryVarDims(int varShape[3], int vlistID, int varID)
       varShape[0] = 2;
       varShape[1] = gridInqSize(gridID) / 2;
       break;
+    case GRID_UNSTRUCTURED:
+      varShape[0] = gridInqSize(gridID);
+      varShape[1] = 1;
+      break;
     case GRID_GENERIC:
     case GRID_PROJECTION:
-    case GRID_GME:
-    case GRID_UNSTRUCTURED: xabort("unimplemented grid type: %d", gridType);
+    case GRID_GME: xabort("unimplemented grid type: %d", gridType);
     }
   varShape[2] = zaxisInqSize(zaxisID);
   /* FIXME: other grids have different dimensionality */
-  return (varShape[2] == 1) ? 2 : 3;
+  return (varShape[2] > 1) ? 2 : 3;
 }
 
 void
