@@ -967,7 +967,7 @@ getLayout(size_t streamIdx)
 
 /* build inventory of written variables for stream */
 static struct streamMapping *
-streamMappingNew(size_t streamIdx, struct winHeaderEntry *winDict,
+streamMappingNew(size_t streamIdx, const struct winHeaderEntry *winDict,
                  const struct cdiPioConf *conf)
 {
   int streamID = openStreams.entries[streamIdx];
