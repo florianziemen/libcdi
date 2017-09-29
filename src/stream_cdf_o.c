@@ -74,7 +74,7 @@ void cdfDefTimeValue(stream_t *streamptr, int tsID)
   if ( taxis->has_bounds )
     {
       ncvarid = streamptr->basetime.ncvarboundsid;
-      assert(ncvarid != CDI_UNDEFID);
+      if ( ncvarid == CDI_UNDEFID ) Error("Call to taxisWithBounds() missing!");
 
       timevalue = cdiEncodeTimeval(taxis->vdate_lb, taxis->vtime_lb, &streamptr->tsteps[0].taxis);
       size_t start[2], count[2];

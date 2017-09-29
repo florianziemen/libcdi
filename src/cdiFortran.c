@@ -505,20 +505,8 @@ FCALLSCSUB2 (gridInqXstdname, GRIDINQXSTDNAME, gridinqxstdname, INT, PSTRING)
 FCALLSCSUB2 (gridInqYstdname, GRIDINQYSTDNAME, gridinqystdname, INT, PSTRING)
 FCALLSCSUB2 (gridDefDatatype, GRIDDEFDATATYPE, griddefdatatype, INT, INT)
 FCALLSCFUN1 (INT, gridInqDatatype, GRIDINQDATATYPE, gridinqdatatype, INT)
-static double gridInqXval_fwrap(int gridID, int index)
-{
-  double v;
-  v = gridInqXval(gridID, (size_t)index);
-  return v;
-}
-FCALLSCFUN2 (DOUBLE, gridInqXval_fwrap, GRIDINQXVAL, gridinqxval, INT, INT)
-static double gridInqYval_fwrap(int gridID, int index)
-{
-  double v;
-  v = gridInqYval(gridID, (size_t)index);
-  return v;
-}
-FCALLSCFUN2 (DOUBLE, gridInqYval_fwrap, GRIDINQYVAL, gridinqyval, INT, INT)
+FCALLSCFUN2 (DOUBLE, gridInqXval, GRIDINQXVAL, gridinqxval, INT, INT)
+FCALLSCFUN2 (DOUBLE, gridInqYval, GRIDINQYVAL, gridinqyval, INT, INT)
 FCALLSCFUN1 (DOUBLE, gridInqXinc, GRIDINQXINC, gridinqxinc, INT)
 FCALLSCFUN1 (DOUBLE, gridInqYinc, GRIDINQYINC, gridinqyinc, INT)
 FCALLSCFUN1 (INT, gridIsCircular, GRIDISCIRCULAR, gridiscircular, INT)

@@ -1214,7 +1214,7 @@ int cdiStreamDefTimestep_(stream_t *streamptr, int tsID)
 
 /*
 @Function  streamDefTimestep
-@Title     Define time step
+@Title     Define a timestep
 
 @Prototype int streamDefTimestep(int streamID, int tsID)
 @Parameter
@@ -1222,10 +1222,13 @@ int cdiStreamDefTimestep_(stream_t *streamptr, int tsID)
     @Item  tsID      Timestep identifier.
 
 @Description
-The function @func{streamDefTimestep} defines the time step of a stream.
+The function @func{streamDefTimestep} defines a timestep of a stream by the identifier tsID.
+The identifier tsID is the timestep index starting at 0 for the first timestep.
+Before calling this function the functions @func{taxisDefVdate} and @func{taxisDefVtime} should be used
+to define the timestamp for this timestep. All calls to write the data refer to this timestep.
 
 @Result
-@func{streamDefTimestep} returns the number of records of the time step.
+@func{streamDefTimestep} returns the number of expected records of the timestep.
 
 @EndFunction
 */
@@ -1247,7 +1250,7 @@ int streamInqCurTimestepID(int streamID)
 
 /*
 @Function  streamInqTimestep
-@Title     Get time step
+@Title     Get timestep information
 
 @Prototype int streamInqTimestep(int streamID, int tsID)
 @Parameter
@@ -1255,10 +1258,13 @@ int streamInqCurTimestepID(int streamID)
     @Item  tsID      Timestep identifier.
 
 @Description
-The function @func{streamInqTimestep} returns the time step of a stream.
+The function @func{streamInqTimestep} sets the next timestep to the identifier tsID.
+The identifier tsID is the timestep index starting at 0 for the first timestep.
+After a call to this function the functions @func{taxisInqVdate} and @func{taxisInqVtime} can be used
+to read the timestamp for this timestep. All calls to read the data refer to this timestep.
 
 @Result
-@func{streamInqTimestep} returns the number of records of the time step.
+@func{streamInqTimestep} returns the number of records of the timestep or 0, if the end of the file is reached.
 
 @EndFunction
 */
