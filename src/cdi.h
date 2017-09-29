@@ -225,8 +225,9 @@ typedef struct  {
 
 /* TIME types */
 
-#define  TIME_CONSTANT              0  /* obsolate, use TSTEP_CONSTANT                          */
-#define  TIME_VARIABLE              1  /* obsolate, use TSTEP_INSTANT                           */
+#define  TIME_CONSTANT              0  /* Time constant              */
+#define  TIME_VARYING               1  /* Time varying               */
+#define  TIME_VARIABLE              1  /* obsolate, use TIME_VARYING */
 
 /* TSTEP types */
 
@@ -570,6 +571,9 @@ int     vlistInqVarZaxis(int vlistID, int varID);
 
 /* used in MPIOM */
 int     vlistInqVarID(int vlistID, int code);
+
+void    vlistDefVarTimetype(int vlistID, int varID, int tsteptype);
+int     vlistInqVarTimetype(int vlistID, int varID);
 
 void    vlistDefVarTsteptype(int vlistID, int varID, int tsteptype);
 

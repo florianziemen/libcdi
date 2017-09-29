@@ -32,6 +32,7 @@ void vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].flag          = 0;
   vlistptr->vars[varID].param         = 0;
   vlistptr->vars[varID].datatype      = CDI_UNDEFID;
+  vlistptr->vars[varID].timetype      = CDI_UNDEFID;
   vlistptr->vars[varID].tsteptype     = TSTEP_INSTANT;
   vlistptr->vars[varID].timave        = 0;
   vlistptr->vars[varID].timaccu       = 0;
@@ -1189,6 +1190,24 @@ void vlistDefVarAddoffset(int vlistID, int varID, double addoffset)
       vlistptr->vars[varID].addoffset = addoffset;
       reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
     }
+}
+
+
+void vlistDefVarTimetype(int vlistID, int varID, int timetype)
+{
+  vlist_t *vlistptr = vlist_to_pointer(vlistID);
+  if (vlistptr->vars[varID].timetype != timetype)
+    {
+      vlistptr->vars[varID].timetype = timetype;
+      reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
+    }
+}
+
+
+int vlistInqVarTimetype(int vlistID, int varID)
+{
+  vlist_t *vlistptr = vlist_to_pointer(vlistID);
+  return vlistptr->vars[varID].timetype;
 }
 
 
