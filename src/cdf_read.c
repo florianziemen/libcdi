@@ -420,7 +420,7 @@ void cdfGetSliceSlapDescription(stream_t *streamptr, int varId, int levelId, boo
   int ncvarid = streamptr->vars[varId].ncvarid;
 
   int gridId = vlistInqVarGrid(vlistId, varId);
-  int timetype = vlistInqVarTimeptype(vlistId, varId);
+  int timetype = vlistInqVarTimetype(vlistId, varId);
   int gridsize = gridInqSize(gridId);
 
   streamptr->numvals += gridsize;
