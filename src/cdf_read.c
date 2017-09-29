@@ -43,9 +43,9 @@ void cdfGetSlapDescription(stream_t *streamptr, int varID, size_t (*start)[4], s
 {
   int vlistID = streamptr->vlistID;
   int tsID = streamptr->curTsID;
-  int gridID    = vlistInqVarGrid(vlistID, varID);
-  int zaxisID   = vlistInqVarZaxis(vlistID, varID);
-  int tsteptype = vlistInqVarTsteptype(vlistID, varID);
+  int gridID = vlistInqVarGrid(vlistID, varID);
+  int zaxisID = vlistInqVarZaxis(vlistID, varID);
+  int timetype = vlistInqVarTimetype(vlistID, varID);
   int gridindex = vlistGridIndex(vlistID, gridID);
 
   if ( CDI_Debug ) Message("tsID = %d", tsID);
@@ -70,7 +70,7 @@ void cdfGetSlapDescription(stream_t *streamptr, int varID, size_t (*start)[4], s
       (*count)[ndims] = length; \
       ndims++; \
     } while(0)
-  if ( tsteptype != TSTEP_CONSTANT ) addDimension((size_t)tsID, 1);
+  if ( timetype != TIME_CONSTANT ) addDimension((size_t)tsID, 1);
   if ( zid != CDI_UNDEFID ) addDimension(0, (size_t)zaxisInqSize(zaxisID));
   if ( yid != CDI_UNDEFID ) addDimension(0, (size_t)gridInqYsize(gridID));
   if ( xid != CDI_UNDEFID ) addDimension(0, (size_t)gridInqXsize(gridID));
@@ -420,7 +420,7 @@ void cdfGetSliceSlapDescription(stream_t *streamptr, int varId, int levelId, boo
   int ncvarid = streamptr->vars[varId].ncvarid;
 
   int gridId = vlistInqVarGrid(vlistId, varId);
-  int tsteptype = vlistInqVarTsteptype(vlistId, varId);
+  int timetype = vlistInqVarTimeptype(vlistId, varId);
   int gridsize = gridInqSize(gridId);
 
   streamptr->numvals += gridsize;
@@ -443,7 +443,7 @@ void cdfGetSliceSlapDescription(stream_t *streamptr, int varId, int levelId, boo
       ndims++; \
   } while(0)
 
-  if ( tsteptype != TSTEP_CONSTANT ) addDimension((size_t)tsID, 1);
+  if ( timetype != TIME_CONSTANT ) addDimension((size_t)tsID, 1);
   if ( skipdim == 1 ) addDimension(0, 1);
 
   for ( int id = 0; id < 3; ++id )

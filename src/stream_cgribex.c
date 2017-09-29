@@ -595,7 +595,7 @@ cgribexScanTsConstAdjust(stream_t *streamptr, taxis_t *taxis)
 	{
 	  streamptr->ntsteps = 0;
 	  for ( int varID = 0; varID < streamptr->nvars; varID++ )
-            vlistDefVarTsteptype(vlistID, varID, TSTEP_CONSTANT);
+            vlistDefVarTimetype(vlistID, varID, TIME_CONSTANT);
 	}
     }
 }
@@ -1035,7 +1035,7 @@ int cgribexScanTimestep2(stream_t * streamptr)
       if ( ! streamptr->tsteps[tsID].records[recID].used )
 	{
 	  varID = streamptr->tsteps[tsID].records[recID].varID;
-          vlistDefVarTsteptype(vlistID, varID, TSTEP_CONSTANT);
+          vlistDefVarTimetype(vlistID, varID, TIME_CONSTANT);
 	}
       else
 	{

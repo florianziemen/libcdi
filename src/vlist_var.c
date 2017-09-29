@@ -129,10 +129,10 @@ void vlistCheckVarID(const char *caller, int vlistID, int varID)
 }
 
 
-int vlistDefVarTiles(int vlistID, int gridID, int zaxisID, int tsteptype, int tilesetID)
+int vlistDefVarTiles(int vlistID, int gridID, int zaxisID, int timetype, int tilesetID)
 {
   if ( CDI_Debug )
-    Message("gridID = %d  zaxisID = %d  tsteptype = %d", gridID, zaxisID, tsteptype);
+    Message("gridID = %d  zaxisID = %d  timetype = %d", gridID, zaxisID, timetype);
 
   int varID = vlistvarNewEntry(vlistID);
 
@@ -140,13 +140,13 @@ int vlistDefVarTiles(int vlistID, int gridID, int zaxisID, int tsteptype, int ti
   vlistptr->nvars++;
   vlistptr->vars[varID].gridID    = gridID;
   vlistptr->vars[varID].zaxisID   = zaxisID;
-  vlistptr->vars[varID].tsteptype = tsteptype;
+  vlistptr->vars[varID].timetype = timetype;
   vlistptr->vars[varID].subtypeID = tilesetID;
 
-  if ( tsteptype < 0 )
+  if ( timetype < 0 )
     {
-      Message("Unexpected tstep type %d, set to TSTEP_INSTANT!", tsteptype);
-      vlistptr->vars[varID].tsteptype = TSTEP_INSTANT;
+      Message("Unexpected time type %d, set to TIME_VARYING!", timetype);
+      vlistptr->vars[varID].timetype = TIME_VARYING;
     }
 
   vlistAdd2GridIDs(vlistptr, gridID);
@@ -163,14 +163,13 @@ int vlistDefVarTiles(int vlistID, int gridID, int zaxisID, int tsteptype, int ti
 @Function  vlistDefVar
 @Title     Define a Variable
 
-@Prototype int vlistDefVar(int vlistID, int gridID, int zaxisID, int tsteptype)
+@Prototype int vlistDefVar(int vlistID, int gridID, int zaxisID, int timetype)
 @Parameter
     @Item  vlistID   Variable list ID, from a previous call to @fref{vlistCreate}.
     @Item  gridID    Grid ID, from a previous call to @fref{gridCreate}.
     @Item  zaxisID   Z-axis ID, from a previous call to @fref{zaxisCreate}.
-    @Item  tsteptype One of the set of predefined CDI timestep types.
-                     The valid CDI timestep types are @func{TSTEP_CONSTANT}, @func{TSTEP_INSTANT},
-                     @func{TSTEP_ACCUM}, @func{TSTEP_AVG}, @func{TSTEP_MAX}, @func{TSTEP_MIN} and @func{TSTEP_SD}.
+    @Item  timetype  One of the set of predefined CDI timestep types.
+                     The valid CDI timestep types are @func{TIME_CONSTANT} and @func{TIME_VARYING}.
 
 @Description
 The function @func{vlistDefVar} adds a new variable to vlistID.
@@ -188,7 +187,7 @@ and add a variable with @func{vlistDefVar}.
 int vlistID, varID;
    ...
 vlistID = vlistCreate();
-varID = vlistDefVar(vlistID, gridID, zaxisID, TIME_INSTANT);
+varID = vlistDefVar(vlistID, gridID, zaxisID, TIME_VARYING);
    ...
 streamDefVlist(streamID, vlistID);
    ...
@@ -197,10 +196,10 @@ vlistDestroy(vlistID);
 @EndSource
 @EndFunction
 */
-int vlistDefVar(int vlistID, int gridID, int zaxisID, int tsteptype)
+int vlistDefVar(int vlistID, int gridID, int zaxisID, int timetype)
 {
   /* call "vlistDefVarTiles" with a trivial tile index: */
-  return vlistDefVarTiles(vlistID, gridID, zaxisID, tsteptype, CDI_UNDEFID);
+  return vlistDefVarTiles(vlistID, gridID, zaxisID, timetype, CDI_UNDEFID);
 }
 
 void
@@ -279,15 +278,15 @@ void vlistDefVarCode(int vlistID, int varID, int code)
 }
 
 
-void vlistInqVar(int vlistID, int varID, int *gridID, int *zaxisID, int *tsteptype)
+void vlistInqVar(int vlistID, int varID, int *gridID, int *zaxisID, int *timetype)
 {
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
   vlistCheckVarID(__func__, vlistID, varID);
 
-  *gridID    = vlistptr->vars[varID].gridID;
-  *zaxisID   = vlistptr->vars[varID].zaxisID;
-  *tsteptype = vlistptr->vars[varID].tsteptype;
+  *gridID   = vlistptr->vars[varID].gridID;
+  *zaxisID  = vlistptr->vars[varID].zaxisID;
+  *timetype = vlistptr->vars[varID].timetype;
 
   return;
 }
@@ -699,8 +698,8 @@ int vlistInqVarSize(int vlistID, int varID)
 {
   vlistCheckVarID(__func__, vlistID, varID);
 
-  int zaxisID, gridID, tsteptype;
-  vlistInqVar(vlistID, varID, &gridID, &zaxisID, &tsteptype);
+  int zaxisID, gridID, timetype;
+  vlistInqVar(vlistID, varID, &gridID, &zaxisID, &timetype);
 
   int nlevs = zaxisInqSize(zaxisID);
 
@@ -1236,7 +1235,7 @@ The function @func{vlistInqVarTsteptype} returns the timestep type of a Variable
 @Result
 @func{vlistInqVarTsteptype} returns the timestep type of the Variable,
 one of the set of predefined CDI timestep types.
-The valid CDI timestep types are @func{TSTEP_CONSTANT}, @func{TSTEP_INSTANT},
+The valid CDI timestep types are @func{TSTEP_INSTANT},
 @func{TSTEP_ACCUM}, @func{TSTEP_AVG}, @func{TSTEP_MAX}, @func{TSTEP_MIN} and @func{TSTEP_SD}.
 
 @EndFunction
@@ -2025,7 +2024,7 @@ int vlistVarCompare(vlist_t *a, int varIDA, vlist_t *b, int varIDB)
 #define FCMP2(f) (namespaceResHDecode(pva->f).idx       \
                   != namespaceResHDecode(pvb->f).idx)
   int diff = FCMP(fvarID) | FCMP(mvarID) | FCMP(flag) | FCMP(param)
-    | FCMP(datatype) | FCMP(tsteptype) | FCMP(timave) | FCMP(timaccu)
+    | FCMP(datatype) | FCMP(timetype) | FCMP(tsteptype) | FCMP(timave) | FCMP(timaccu)
     | FCMP(chunktype) | FCMP(xyz) | FCMP2(gridID) | FCMP2(zaxisID)
     | FCMP2(instID) | FCMP2(modelID) | FCMP2(tableID) | FCMP(missvalused)
     | FCMPFLT(missval) | FCMPFLT(addoffset) | FCMPFLT(scalefactor) | FCMPSTR(name)
@@ -2098,7 +2097,7 @@ void vlistVarPack(vlist_t *p, int varID, char * buf, int size, int *position,
   tempbuf[0] = var->flag;
   tempbuf[1] = var->gridID;
   tempbuf[2] = var->zaxisID;
-  tempbuf[3] = var->tsteptype;
+  tempbuf[3] = var->timetype;
   tempbuf[4] = namesz = var->name?(int)strlen(var->name):0;
   tempbuf[5] = longnamesz = var->longname?(int)strlen(var->longname):0;
   tempbuf[6] = stdnamesz = var->stdname?(int)strlen(var->stdname):0;

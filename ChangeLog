@@ -3,6 +3,10 @@
         * using CGRIBEX library version 1.9.0
 	* Version 1.9.1 released
 
+2017-09-28  Uwe Schulzweida
+
+	* Renamed TAXIS_CONSTANT to TIME_CONSTANT
+
 2017-09-20  Uwe Schulzweida
 
 	* vlistCopyFlag: copy datatype (bug fix)

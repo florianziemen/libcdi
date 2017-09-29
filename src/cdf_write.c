@@ -342,12 +342,12 @@ int cdfDefVar(stream_t *streamptr, int varID)
   if ( streamptr->vars[varID].ncvarid != CDI_UNDEFID )
     return streamptr->vars[varID].ncvarid;
 
-  int vlistID   = streamptr->vlistID;
-  int gridID    = vlistInqVarGrid(vlistID, varID);
-  int zaxisID   = vlistInqVarZaxis(vlistID, varID);
-  int tsteptype = vlistInqVarTsteptype(vlistID, varID);
-  int code      = vlistInqVarCode(vlistID, varID);
-  int param     = vlistInqVarParam(vlistID, varID);
+  int vlistID  = streamptr->vlistID;
+  int gridID   = vlistInqVarGrid(vlistID, varID);
+  int zaxisID  = vlistInqVarZaxis(vlistID, varID);
+  int timetype = vlistInqVarTimetype(vlistID, varID);
+  int code     = vlistInqVarCode(vlistID, varID);
+  int param    = vlistInqVarParam(vlistID, varID);
   int pnum, pcat, pdis;
   cdiDecodeParam(param, &pnum, &pcat, &pdis);
 
@@ -382,7 +382,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
 
   int tid = streamptr->basetime.ncdimid;
 
-  if ( vlistHasTime(vlistID) && tsteptype != TSTEP_CONSTANT )
+  if ( vlistHasTime(vlistID) && timetype != TIME_CONSTANT )
     {
       if ( tid == CDI_UNDEFID ) Error("Internal problem, time undefined!");
       chunks[ndims] = 1;
@@ -1005,9 +1005,9 @@ void cdf_write_var(stream_t *streamptr, int varID, int memtype, const void *data
 
   int ncvarid = cdfDefVar(streamptr, varID);
 
-  int gridID    = vlistInqVarGrid(vlistID, varID);
-  int zaxisID   = vlistInqVarZaxis(vlistID, varID);
-  int tsteptype = vlistInqVarTsteptype(vlistID, varID);
+  int gridID   = vlistInqVarGrid(vlistID, varID);
+  int zaxisID  = vlistInqVarZaxis(vlistID, varID);
+  int timetype = vlistInqVarTimetype(vlistID, varID);
 
   int xid = CDI_UNDEFID, yid = CDI_UNDEFID;
   if ( gridInqType(gridID) == GRID_TRAJECTORY )
@@ -1024,7 +1024,7 @@ void cdf_write_var(stream_t *streamptr, int varID, int memtype, const void *data
   int zaxisindex = vlistZaxisIndex(vlistID, zaxisID);
   int zid = streamptr->zaxisID[zaxisindex];
 
-  if ( tsteptype != TSTEP_CONSTANT )
+  if ( timetype != TIME_CONSTANT )
     {
       start[ndims] = (size_t)ntsteps - 1;
       count[ndims] = 1;
@@ -1100,9 +1100,9 @@ void cdf_write_var_chunk(stream_t *streamptr, int varID, int memtype,
 
   int ncvarid = cdfDefVar(streamptr, varID);
 
-  int gridID    = vlistInqVarGrid(vlistID, varID);
-  int zaxisID   = vlistInqVarZaxis(vlistID, varID);
-  int tsteptype = vlistInqVarTsteptype(vlistID, varID);
+  int gridID   = vlistInqVarGrid(vlistID, varID);
+  int zaxisID  = vlistInqVarZaxis(vlistID, varID);
+  int timetype = vlistInqVarTimetype(vlistID, varID);
 
   if ( gridInqType(gridID) == GRID_TRAJECTORY )
     {
@@ -1118,7 +1118,7 @@ void cdf_write_var_chunk(stream_t *streamptr, int varID, int memtype,
   int zaxisindex = vlistZaxisIndex(vlistID, zaxisID);
   int zid = streamptr->zaxisID[zaxisindex];
 
-  if ( tsteptype != TSTEP_CONSTANT )
+  if ( timetype != TIME_CONSTANT )
     {
       start[ndims] = (size_t)ntsteps - 1;
       count[ndims] = 1;
@@ -1195,9 +1195,9 @@ void cdf_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
 
   int ncvarid = cdfDefVar(streamptr, varID);
 
-  int gridID    = vlistInqVarGrid(vlistID, varID);
-  int zaxisID   = vlistInqVarZaxis(vlistID, varID);
-  int tsteptype = vlistInqVarTsteptype(vlistID, varID);
+  int gridID   = vlistInqVarGrid(vlistID, varID);
+  int zaxisID  = vlistInqVarZaxis(vlistID, varID);
+  int timetype = vlistInqVarTimetype(vlistID, varID);
   vlistInqVarDimorder(vlistID, varID, &dimorder);
 
   if ( gridInqType(gridID) == GRID_TRAJECTORY )
@@ -1217,7 +1217,7 @@ void cdf_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
   bool swapxy = (dimorder[2] == 2 || dimorder[0] == 1) && xid != CDI_UNDEFID && yid != CDI_UNDEFID;
 
   size_t ndims = 0;
-  if ( tsteptype != TSTEP_CONSTANT )
+  if ( timetype != TIME_CONSTANT )
     {
       start[ndims] = (size_t)ntsteps - 1;
       count[ndims] = 1;

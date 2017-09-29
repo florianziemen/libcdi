@@ -1499,7 +1499,7 @@ int vlistHasTime(int vlistID)
   if ( !(CDI_reduce_dim && vlistptr->ntsteps == 1) )
     {
       for ( int varID = 0; varID <  vlistptr->nvars; varID++ )
-        if ( vlistptr->vars[varID].tsteptype != TSTEP_CONSTANT )
+        if ( vlistptr->vars[varID].timetype != TIME_CONSTANT )
           {
             hastime = true;
             break;
