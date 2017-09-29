@@ -36,7 +36,7 @@ int main(void)
   instID  = institutDef( 252, 0, NULL, NULL );
 
   vlistID = vlistCreate();
-  varID = vlistDefVar(vlistID, gridID, zaxisID, TSTEP_INSTANT);
+  varID = vlistDefVar(vlistID, gridID, zaxisID, TIME_VARYING);
   
   vlistDefVarEnsemble( vlistID, varID, 1, 2, 3);
   
