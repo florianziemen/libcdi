@@ -231,7 +231,6 @@ typedef struct  {
 
 /* TSTEP types */
 
-#define  TSTEP_CONSTANT             0  /* Constant            */
 #define  TSTEP_INSTANT              1  /* Instant             */
 #define  TSTEP_AVG                  2  /* Average             */
 #define  TSTEP_ACCUM                3  /* Accumulation        */
