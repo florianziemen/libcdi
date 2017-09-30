@@ -344,9 +344,9 @@ void printShortinfo(int streamID, int vlistID, int vardis)
       int nsubtypes = vlistNsubtypes(vlistID);
 
       if ( nsubtypes > 0 )
-        fprintf(stdout, "   Var : Institut Source   Ttype    Subtypes Num  Levels Num  Gridsize Num Dtype : ");
+	fprintf(stdout, "   Var : Institut Source   T Steptype Subtypes Levels Num    Points Num Dtype : ");
       else
-        fprintf(stdout, "   Var : Institut Source   Ttype    Levels Num  Gridsize Num Dtype : ");
+	fprintf(stdout, "   Var : Institut Source   T Steptype Levels Num    Points Num Dtype : ");
 
       if ( vardis )
 	fprintf(stdout, "Parameter name\n");
@@ -361,21 +361,25 @@ void printShortinfo(int streamID, int vlistID, int vardis)
 
 	  fprintf(stdout, "%6d : ", varID + 1);
 
-	  /* institute info */
+	  // institute info
 	  const char *instptr = institutInqNamePtr(vlistInqVarInstitut(vlistID, varID));
 	  strcpy(tmpname, "unknown");
 	  if ( instptr ) strncpy(tmpname, instptr, CDI_MAX_NAME);
 	  limit_string_length(tmpname, CDI_MAX_NAME);
 	  fprintf(stdout, "%-8s ", tmpname);
 
-	  /* source info */
+	  // source info
 	  const char *modelptr = modelInqNamePtr(vlistInqVarModel(vlistID, varID));
 	  strcpy(tmpname, "unknown");
 	  if ( modelptr ) strncpy(tmpname, modelptr, CDI_MAX_NAME);
 	  limit_string_length(tmpname, CDI_MAX_NAME);
 	  fprintf(stdout, "%-8s ", tmpname);
 
-	  /* tsteptype */
+          // timetype
+          int timetype = vlistInqVarTimetype(vlistID, varID);
+          fprintf(stdout, "%c ", timetype==TIME_CONSTANT ? 'c' : 'v');
+
+	  // tsteptype
 	  int tsteptype = vlistInqVarTsteptype(vlistID, varID);
 	  if      ( tsteptype == TSTEP_INSTANT  ) fprintf(stdout, "%-8s ", "instant");
 	  else if ( tsteptype == TSTEP_INSTANT2 ) fprintf(stdout, "%-8s ", "instant");
