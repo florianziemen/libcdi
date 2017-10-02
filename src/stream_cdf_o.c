@@ -614,9 +614,9 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridindex, int ndims, bool
             char axisStr[2] = { axisLetter, '\0' };
             cdf_put_att_text(fileID, ncvarid, "axis", 1, axisStr);
           }
-          void (*mycdfPostDefActionGridProp)(int, int, int, enum gridPropInq, struct cdfPostDefActionList **)
-              = namespaceSwitchGet(NSSWITCH_CDF_POSTDEFACTION_GRID_PROP).func;
-          mycdfPostDefActionGridProp(gridID, fileID, ncvarid, gridAxisInq->valsQueryKey, &delayed);
+          cdfFuncPtrPostDefActionGridProp mycdfPostDefActionGridProp
+              = (cdfFuncPtrPostDefActionGridProp) namespaceSwitchGet(NSSWITCH_CDF_POSTDEFACTION_GRID_PROP).func;
+          mycdfPostDefActionGridProp(streamptr, gridID, ncvarid, gridAxisInq->valsQueryKey, &delayed);
 
           bool genBounds = false, hasBounds = gridInqPropPresence(gridID, gridAxisInq->bndsQueryKey);
           const bool grid_is_cyclic = gridIsCircular(gridID) > 0;
@@ -744,7 +744,8 @@ cdfDefGridUUID(stream_t *streamptr, int gridID)
 }
 
 void
-cdfPostDefActionGridProp(int gridID, int fileID, int ncvarid, enum gridPropInq gridProp, struct cdfPostDefActionList **delayed)
+cdfPostDefActionGridProp(stream_t *streamptr, int gridID, int ncvarid, enum gridPropInq gridProp,
+                         struct cdfPostDefActionList **delayed)
 {
   const void *valsPtr = NULL;
   switch (gridProp)
@@ -757,7 +758,7 @@ cdfPostDefActionGridProp(int gridID, int fileID, int ncvarid, enum gridPropInq g
     case GRID_PROP_XBOUNDS: valsPtr = gridInqXboundsPtr(gridID); break;
     case GRID_PROP_YBOUNDS: valsPtr = gridInqYboundsPtr(gridID); break;
     }
-  cdfPostDefActionAddPutVal(delayed, fileID, ncvarid, valsPtr, (void (*)(void *)) memFree);
+  cdfPostDefActionAddPutVal(delayed, streamptr->fileID, ncvarid, valsPtr, (void (*)(void *)) memFree);
 }
 
 static int
@@ -776,9 +777,9 @@ cdfDefIrregularGridAxisSetup(stream_t *streamptr, int gridID, nc_type xtype, int
       cdfGridCompress(fileID, ncvarid, dimlens, streamptr->filetype, streamptr->comptype);
 
       cdfPutGridStdAtts(fileID, ncvarid, gridID, inqs->axisSym);
-      void (*mycdfPostDefActionGridProp)(int, int, int, enum gridPropInq, struct cdfPostDefActionList **)
-          = namespaceSwitchGet(NSSWITCH_CDF_POSTDEFACTION_GRID_PROP).func;
-      mycdfPostDefActionGridProp(gridID, fileID, ncvarid, inqs->valsQueryKey, delayed);
+      cdfFuncPtrPostDefActionGridProp mycdfPostDefActionGridProp
+          = (cdfFuncPtrPostDefActionGridProp) namespaceSwitchGet(NSSWITCH_CDF_POSTDEFACTION_GRID_PROP).func;
+      mycdfPostDefActionGridProp(streamptr, gridID, ncvarid, inqs->valsQueryKey, delayed);
 
       // attribute for Panoply
       if (ndims == 3) cdf_put_att_text(fileID, ncvarid, "_CoordinateAxisType", 3, inqs->axisPanoplyName);
@@ -793,7 +794,7 @@ cdfDefIrregularGridAxisSetup(stream_t *streamptr, int gridID, nc_type xtype, int
           cdfGridCompress(fileID, ncbvarid, dimlens, streamptr->filetype, streamptr->comptype);
 
           cdf_put_att_text(fileID, ncvarid, "bounds", axisnameLen + sizeof(bndsName), axisname);
-          mycdfPostDefActionGridProp(gridID, fileID, ncbvarid, inqs->bndsQueryKey, delayed);
+          mycdfPostDefActionGridProp(streamptr, gridID, ncbvarid, inqs->bndsQueryKey, delayed);
         }
     }
   return ncvarid;
@@ -891,9 +892,9 @@ cdfDefIrregularGridCommon(stream_t *streamptr, int gridID, size_t xdimlen, size_
       cdf_put_att_text(fileID, ncavarid, "standard_name", sizeof(stdname) - 1, stdname);
       cdf_put_att_text(fileID, ncavarid, "long_name", sizeof(longname) - 1, longname);
       cdf_put_att_text(fileID, ncavarid, "units", sizeof(units) - 1, units);
-      void (*mycdfPostDefActionGridProp)(int, int, int, enum gridPropInq, struct cdfPostDefActionList **)
-          = namespaceSwitchGet(NSSWITCH_CDF_POSTDEFACTION_GRID_PROP).func;
-      mycdfPostDefActionGridProp(gridID, fileID, ncavarid, GRID_PROP_AREA, &delayed);
+      cdfFuncPtrPostDefActionGridProp mycdfPostDefActionGridProp
+          = (cdfFuncPtrPostDefActionGridProp) namespaceSwitchGet(NSSWITCH_CDF_POSTDEFACTION_GRID_PROP).func;
+      mycdfPostDefActionGridProp(streamptr, gridID, ncavarid, GRID_PROP_AREA, &delayed);
     }
 
   if (switchNCMode)
