@@ -673,10 +673,10 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridindex, int ndims,
             char axisStr[2] = { gridAxisInq->axisSym, '\0' };
             cdf_put_att_text(fileID, ncvarid, "axis", 1, axisStr);
           }
-          void (*mycdfPostDefActionGridProp)(int, int, int, enum gridPropInq,
-                                             struct cdfPostDefActionList **)
-            = namespaceSwitchGet(NSSWITCH_CDF_POSTDEFACTION_GRID_PROP).func;
-          mycdfPostDefActionGridProp(gridID, fileID, ncvarid,
+          cdfFuncPtrPostDefActionGridProp mycdfPostDefActionGridProp
+            = (cdfFuncPtrPostDefActionGridProp)
+            namespaceSwitchGet(NSSWITCH_CDF_POSTDEFACTION_GRID_PROP).func;
+          mycdfPostDefActionGridProp(streamptr, gridID, ncvarid,
                                      gridAxisInq->valsQueryKey, &delayed);
 
           bool genBounds = false,
@@ -814,7 +814,7 @@ void cdfDefGridUUID(stream_t *streamptr, int gridID)
 }
 
 void
-cdfPostDefActionGridProp(int gridID, int fileID, int ncvarid,
+cdfPostDefActionGridProp(stream_t *streamptr, int gridID, int ncvarid,
                          enum gridPropInq gridProp,
                          struct cdfPostDefActionList **delayed)
 {
@@ -841,7 +841,7 @@ cdfPostDefActionGridProp(int gridID, int fileID, int ncvarid,
       valsPtr = gridInqYboundsPtr(gridID);
       break;
     }
-  cdfPostDefActionAddPutVal(delayed, fileID, ncvarid, valsPtr,
+  cdfPostDefActionAddPutVal(delayed, streamptr->fileID, ncvarid, valsPtr,
                             (void (*)(void *))memFree);
 }
 
@@ -862,10 +862,10 @@ cdfDefIrregularGridAxisSetup(stream_t *streamptr, int gridID, nc_type xtype,
       cdfGridCompress(fileID, ncvarid, dimlens, streamptr->filetype, streamptr->comptype);
 
       cdfPutGridStdAtts(fileID, ncvarid, gridID, inqs);
-      void (*mycdfPostDefActionGridProp)(int, int, int, enum gridPropInq,
-                                       struct cdfPostDefActionList **)
-        = namespaceSwitchGet(NSSWITCH_CDF_POSTDEFACTION_GRID_PROP).func;
-      mycdfPostDefActionGridProp(gridID, fileID, ncvarid, inqs->valsQueryKey,
+      cdfFuncPtrPostDefActionGridProp mycdfPostDefActionGridProp
+        = (cdfFuncPtrPostDefActionGridProp)
+        namespaceSwitchGet(NSSWITCH_CDF_POSTDEFACTION_GRID_PROP).func;
+      mycdfPostDefActionGridProp(streamptr, gridID, ncvarid, inqs->valsQueryKey,
                                  delayed);
 
       /* attribute for Panoply */
@@ -884,8 +884,8 @@ cdfDefIrregularGridAxisSetup(stream_t *streamptr, int gridID, nc_type xtype,
           cdfGridCompress(fileID, ncbvarid, dimlens, streamptr->filetype, streamptr->comptype);
 
           cdf_put_att_text(fileID, ncvarid, "bounds", axisnameLen + sizeof (bndsName), axisname);
-          mycdfPostDefActionGridProp(gridID, fileID, ncbvarid, inqs->bndsQueryKey,
-                                     delayed);
+          mycdfPostDefActionGridProp(streamptr, gridID, ncbvarid,
+                                     inqs->bndsQueryKey, delayed);
         }
     }
   return ncvarid;
@@ -985,10 +985,10 @@ cdfDefIrregularGridCommon(stream_t *streamptr, int gridID,
       cdf_put_att_text(fileID, ncavarid, "standard_name", sizeof (stdname) - 1, stdname);
       cdf_put_att_text(fileID, ncavarid, "long_name", sizeof (longname) - 1, longname);
       cdf_put_att_text(fileID, ncavarid, "units", sizeof (units) - 1, units);
-      void (*mycdfPostDefActionGridProp)(int, int, int, enum gridPropInq,
-                                       struct cdfPostDefActionList **)
-        = namespaceSwitchGet(NSSWITCH_CDF_POSTDEFACTION_GRID_PROP).func;
-      mycdfPostDefActionGridProp(gridID, fileID, ncavarid, GRID_PROP_AREA,
+      cdfFuncPtrPostDefActionGridProp mycdfPostDefActionGridProp
+        = (cdfFuncPtrPostDefActionGridProp)
+        namespaceSwitchGet(NSSWITCH_CDF_POSTDEFACTION_GRID_PROP).func;
+      mycdfPostDefActionGridProp(streamptr, gridID, ncavarid, GRID_PROP_AREA,
                                  &delayed);
     }
 

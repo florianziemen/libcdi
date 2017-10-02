@@ -9,6 +9,8 @@
 
 void cdiPioCollectorMessageLoop(void);
 
+int cdiPioStream2Owner(int streamID);
+
 #endif
 /*
  * Local Variables:
