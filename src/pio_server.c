@@ -772,8 +772,8 @@ writeNetCDFStreamParallel(size_t streamIdx,
 #endif
 #if defined (HAVE_LIBNETCDF)
 /* needed for writing when some files are only written to by a single process */
-/* cdiOpenFileMap(fileID) gives the writer process */
-static int cdiPioSerialOpenFileMap(int streamID)
+/* cdiOpenStreamMap(streamID) gives the writer process */
+static int cdiPioStream2Owner(int streamID)
 {
   size_t streamIdx = indexOfID(&openStreams, streamID);
   xassert(streamIdx < SIZE_MAX);
@@ -821,7 +821,7 @@ static void
 cdiPioServerCdfDefVars(stream_t *streamptr)
 {
   int rank,
-    rankOpen = cdiPioSerialOpenFileMap(streamptr->self);
+    rankOpen = cdiPioStream2Owner(streamptr->self);
   if (commInqIOMode() == PIO_NONE
 #ifdef HAVE_PARALLEL_NC4
       || rankOpen == CDI_PIO_COLLECTIVE_OPEN
@@ -844,7 +844,7 @@ writeNetCDFStreamSerial(size_t streamIdx,
    * three cases need to be distinguished */
   const int streamID = openStreams.entries[streamIdx],
     vlistID = streamInqVlist(streamID);
-  const int writerRank = cdiPioSerialOpenFileMap(streamID);
+  const int writerRank = cdiPioStream2Owner(streamID);
   const int collRank = commInqRankColl();
   const MPI_Comm collComm = commInqCommColl(); //HB: which communicator is to be supplied here?
   const bool reuseRedists = conf->cacheRedists != 0
@@ -920,7 +920,7 @@ writeNetCDFStream(size_t streamIdx,
     = writeNetCDFStreamSerial;
 #ifdef HAVE_PARALLEL_NC4
   int streamID = openStreams.entries[streamIdx];
-  int rankOpen = cdiPioSerialOpenFileMap(streamID);
+  int rankOpen = cdiPioStream2Owner(streamID);
   if (rankOpen == CDI_PIO_COLLECTIVE_OPEN)
     writeNetCDFStream_ = writeNetCDFStreamParallel;
 #endif
@@ -1632,7 +1632,7 @@ getMaxNumStreamWrites(stream_t *streamptr)
         case CDI_FILETYPE_NC4:
         case CDI_FILETYPE_NC4C:
           {
-            int rank, rankOpen = cdiPioSerialOpenFileMap(streamptr->self);
+            int rank, rankOpen = cdiPioStream2Owner(streamptr->self);
             if (commInqIOMode() == PIO_NONE
 #ifdef HAVE_PARALLEL_NC4
                 || rankOpen == CDI_PIO_COLLECTIVE_OPEN
@@ -1679,7 +1679,7 @@ cdiPioServerStreamClose(stream_t *streamptr, int recordBufIsToBeDeleted)
         case CDI_FILETYPE_NC4:
         case CDI_FILETYPE_NC4C:
           {
-            int rank, rankOpen = cdiPioSerialOpenFileMap(streamptr->self);
+            int rank, rankOpen = cdiPioStream2Owner(streamptr->self);
             if (commInqIOMode() == PIO_NONE
 #ifdef HAVE_PARALLEL_NC4
                 || rankOpen == CDI_PIO_COLLECTIVE_OPEN
@@ -1717,7 +1717,7 @@ static void
 cdiPioCdfDefTimestep(stream_t *streamptr, int tsID)
 {
   int rank, streamID = streamptr->self,
-    rankOpen = cdiPioSerialOpenFileMap(streamID);
+    rankOpen = cdiPioStream2Owner(streamID);
   if (commInqIOMode() == PIO_NONE
 #ifdef HAVE_PARALLEL_NC4
       || rankOpen == CDI_PIO_COLLECTIVE_OPEN
