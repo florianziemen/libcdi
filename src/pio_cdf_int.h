@@ -6,6 +6,8 @@
 #endif
 
 #ifdef HAVE_PARALLEL_NC4
+#include <setjmp.h>
+
 #include "cdf_int.h"
 
 enum
