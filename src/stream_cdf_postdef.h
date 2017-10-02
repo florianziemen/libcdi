@@ -3,6 +3,8 @@
 
 #include <stdlib.h>
 
+#include "cdi_int.h"
+
 struct cdfPostDefAction
 {
   void *data;
@@ -17,9 +19,14 @@ struct cdfPostDefActionList
 };
 
 void
-cdfPostDefActionGridProp(int gridID, int fileID, int ncvarid,
+cdfPostDefActionGridProp(stream_t *streamptr, int gridID, int ncvarid,
                          enum gridPropInq gridProp,
                          struct cdfPostDefActionList **delayed);
+
+typedef void
+(*cdfFuncPtrPostDefActionGridProp)(stream_t *streamptr, int gridID, int ncvarid,
+                                   enum gridPropInq gridProp,
+                                   struct cdfPostDefActionList **delayed);
 
 struct cdfPostDefActionList *
 cdfPostDefActionAdd(struct cdfPostDefActionList *list,

@@ -30,10 +30,12 @@
 #include "serialize.h"
 
 #include "pio.h"
+#include "pio_cdf_int.h"
 #include "pio_comm.h"
 #include "pio_conf.h"
 #include "pio_dist_grid.h"
 #include "pio_rpc.h"
+#include "pio_server.h"
 #include "pio_util.h"
 
 #ifdef HAVE_PPM_DIST_ARRAY_H
@@ -232,6 +234,7 @@ bool cdiPioDistGridIndividualQueriesEnabled(int gridID)
 
 #ifdef HAVE_PPM_DIST_ARRAY_H
 
+#ifdef HAVE_LIBNETCDF
 #ifdef HAVE_PARALLEL_NC4
 /* maximal spatial rank of variable */
 enum { maxCdfVarRank = 3 };
@@ -249,14 +252,19 @@ cdiPioDistGridCdfDelayedPutVarDouble(void *data)
   cdf_put_vara_double(put->fileID, put->ncvarid, put->start, put->count,
                       put->values);
 }
+#endif
 
 static void
-cdiPioParCdfPostDefActionGridProp(int gridID, int fileID, int ncvarid,
+cdiPioParCdfPostDefActionGridProp(stream_t *streamptr, int gridID, int ncvarid,
                                   enum gridPropInq gridProp,
                                   struct cdfPostDefActionList **delayed)
 {
   grid_t *gridptr = grid_to_pointer(gridID);
-  if (gridptr->vtable == &cdiPioDistGridVtable)
+  int fileID = streamptr->fileID;
+#ifdef HAVE_PARALLEL_NC4
+  int ownerRank = cdiPioStream2Owner(streamptr->self);
+  if (gridptr->vtable == &cdiPioDistGridVtable
+      && ownerRank == CDI_PIO_COLLECTIVE_OPEN)
     {
       struct cdfPostDefPutVarADouble *put
         = (struct cdfPostDefPutVarADouble *)Malloc(sizeof (*put));
@@ -316,17 +324,7 @@ cdiPioParCdfPostDefActionGridProp(int gridID, int fileID, int ncvarid,
       *delayed = cdfPostDefActionAdd(*delayed, addendum);
     }
   else
-    cdfPostDefActionGridProp(gridID, fileID, ncvarid, gridProp, delayed);
-}
-
-#elif defined HAVE_LIBNETCDF
-
-static void
-cdiPioParCdfPostDefActionGridProp(int gridID, int fileID, int ncvarid,
-                                  enum gridPropInq gridProp,
-                                  struct cdfPostDefActionList **delayed)
-{
-  grid_t *gridptr = grid_to_pointer(gridID);
+#endif
   if (gridptr->vtable == &cdiPioDistGridVtable)
     {
       const struct cdiPioDistGridExtraData *extraData
@@ -398,7 +396,7 @@ cdiPioParCdfPostDefActionGridProp(int gridID, int fileID, int ncvarid,
                                 cdfDelayedPutVarDeepCleanup);
     }
   else
-    cdfPostDefActionGridProp(gridID, fileID, ncvarid, gridProp, delayed);
+    cdfPostDefActionGridProp(streamptr, gridID, ncvarid, gridProp, delayed);
 }
 
 #endif
