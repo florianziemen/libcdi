@@ -666,10 +666,11 @@ writeNetCDFStreamParallel(size_t streamIdx, struct streamMapping *mapping, void 
 }
 
 #endif
+
 #if defined(HAVE_LIBNETCDF)
 /* needed for writing when some files are only written to by a single process */
 /* cdiOpenStreamMap(streamID) gives the writer process */
-static int
+int
 cdiPioStream2Owner(int streamID)
 {
   size_t streamIdx = indexOfID(&openStreams, streamID);
