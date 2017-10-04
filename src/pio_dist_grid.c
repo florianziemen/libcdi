@@ -594,8 +594,7 @@ cdiPioDistGridLazyRedistCreate(grid_t *gridptr, enum cdiPioGDsa saIdx)
     }
   if (!defXmap)
     {
-      int inClientGroup = !commInqIsProcIO();
-      MPI_Comm comm = inClientGroup ? commInqCommModel() : commInqCommColl();
+      MPI_Comm comm = cdiPioDistGridComm;
       xmap_new_func_ptr xmapNew = cdiPioGetConf()->xmap_new;
       extraData->defXmaps[distType] = defXmap = xmapNew(extraData->partDesc[distType], distList, comm);
     }
