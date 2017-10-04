@@ -544,24 +544,25 @@ cdiPioDistGridInit(grid_t *gridptr,
       extraData->defXmaps[i] = NULL;
     }
 
+  bool inClientGroup = !commInqIsProcIO();
+  int (*rankQuery)(void)
+    = inClientGroup ? commInqRankModel : commInqRankColl;
+  int commRank = rankQuery();
   {
     struct PPM_extent (*local_chunks)[saMaxRank]
       = (struct PPM_extent (*)[saMaxRank])extraData->local_chunks;
     /* improve automatic finding of partitioning if saMaxRank == 2 */
     if (!xy_decomposition)
       {
-        bool inClientGroup = !commInqIsProcIO();
         int (*commSizeQuery)(void)
-          = inClientGroup ? cdiPioCommInqSizeClients : commInqSizeColl,
-          (*rankQuery)(void)
-          = inClientGroup ? commInqRankModel : commInqRankColl;
-        int numClients = commSizeQuery(), clientRank = rankQuery();
+          = inClientGroup ? cdiPioCommInqSizeClients : commInqSizeColl;
+        int numClients = commSizeQuery();
         for (size_t j = 0; j < cdiPioGDsaNum; ++j)
           {
             size_t aRank = (size_t)sub_arrays[j].a_rank;
             local_chunks[j][0]
               = PPM_uniform_partition(sub_arrays[j].rect[0],
-                                      numClients, clientRank);
+                                      numClients, commRank);
             for (size_t i = 1; i < aRank; ++i)
               local_chunks[j][i] = sub_arrays[j].rect[i];
           }
