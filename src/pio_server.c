@@ -1523,6 +1523,30 @@ cdiPioRecvStreamDefVlist(void *buffer, int size, int *pos, MPI_Comm pioInterComm
     serverVlistID = namespaceAdaptKey2(msgData[1]);
   }
   stream_t *streamptr = stream_to_pointer(serverStreamID);
+#ifdef HAVE_LIBNETCDF
+  int filetype = streamInqFiletype(serverStreamID);
+#ifdef HAVE_PARALLEL_NC4
+  int rankOpen;
+#endif
+  switch (filetype)
+    {
+    case CDI_FILETYPE_NC:
+    case CDI_FILETYPE_NC2:
+    case CDI_FILETYPE_NC4:
+    case CDI_FILETYPE_NC4C:
+#ifdef HAVE_PARALLEL_NC4
+      if ((rankOpen = cdiPioStream2Owner(serverStreamID)) != CDI_PIO_COLLECTIVE_OPEN)
+#endif
+        {
+          int nGrids = vlistNgrids(serverVlistID);
+          for (int gridIdx = 0; gridIdx < nGrids; ++gridIdx)
+            {
+              int gridID = vlistGrid(serverVlistID, gridIdx);
+              if (!cdiPioDistGridIndividualQueriesEnabled(gridID)) cdiPioDistGridEnableIndividualQueries(gridID);
+            }
+        }
+    }
+#endif
   cdiStreamSetupVlist(streamptr, serverVlistID);
   MPI_Info no_locks_info;
   xmpi(MPI_Info_create(&no_locks_info));
@@ -1551,12 +1575,6 @@ cdiPioRecvStreamDefVlist(void *buffer, int size, int *pos, MPI_Comm pioInterComm
       if ((neededXmapCacheSize += maxNumStreamWrites) > currentXmapCacheSize)
         XmapCache = cdiPioXmapCacheResize(XmapCache, neededXmapCacheSize);
     }
-}
-
-static void
-unpackEnableDistGridIndividualAccessFilter(int resH, int resType)
-{
-  if (resType == DIST_GRID) cdiPioDistGridEnableIndividualQueries(resH);
 }
 
 /**
@@ -1631,7 +1649,7 @@ cdiPioCollectorMessageLoop()
             xmpi(MPI_Get_count(&status, MPI_PACKED, &size));
             char *buffer = Malloc((size_t) size);
             xmpi(MPI_Recv(buffer, size, MPI_PACKED, source, tag, pioInterComm, &status));
-            int pos = reshUnpackResources(buffer, size, &pioInterComm, unpackEnableDistGridIndividualAccessFilter);
+            int pos = reshUnpackResources(buffer, size, &pioInterComm, (cdiPostResUpdateHook) 0);
             switch (tag)
               {
               case STREAMOPEN: cdiPioRecvStreamOpen(buffer, size, &pos, pioInterComm); break;
