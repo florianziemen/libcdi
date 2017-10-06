@@ -50,12 +50,13 @@ extern "C" {
 #define  CDI_FILETYPE_GRB           1   // File type GRIB
 #define  CDI_FILETYPE_GRB2          2   // File type GRIB version 2
 #define  CDI_FILETYPE_NC            3   // File type NetCDF
-#define  CDI_FILETYPE_NC2           4   // File type NetCDF version 2 (64-bit)
+#define  CDI_FILETYPE_NC2           4   // File type NetCDF version 2 (64-bit offset)
 #define  CDI_FILETYPE_NC4           5   // File type NetCDF version 4
 #define  CDI_FILETYPE_NC4C          6   // File type NetCDF version 4 (classic)
-#define  CDI_FILETYPE_SRV           7   // File type SERVICE
-#define  CDI_FILETYPE_EXT           8   // File type EXTRA
-#define  CDI_FILETYPE_IEG           9   // File type IEG
+#define  CDI_FILETYPE_NC5           7   // File type NetCDF version 5 (64-bit data)
+#define  CDI_FILETYPE_SRV           8   // File type SERVICE
+#define  CDI_FILETYPE_EXT           9   // File type EXTRA
+#define  CDI_FILETYPE_IEG          10   // File type IEG
 
 #define  FILETYPE_GRB           1
 #define  FILETYPE_GRB2          2
@@ -224,12 +225,12 @@ typedef struct  {
 
 /* TIME types */
 
-#define  TIME_CONSTANT              0  /* obsolate, use TSTEP_CONSTANT                          */
-#define  TIME_VARIABLE              1  /* obsolate, use TSTEP_INSTANT                           */
+#define  TIME_CONSTANT              0  /* Time constant              */
+#define  TIME_VARYING               1  /* Time varying               */
+#define  TIME_VARIABLE              1  /* obsolate, use TIME_VARYING */
 
 /* TSTEP types */
 
-#define  TSTEP_CONSTANT             0  /* Constant            */
 #define  TSTEP_INSTANT              1  /* Instant             */
 #define  TSTEP_AVG                  2  /* Average             */
 #define  TSTEP_ACCUM                3  /* Accumulation        */
@@ -267,11 +268,12 @@ typedef struct  {
 /* CALENDAR types */
 
 #define  CALENDAR_STANDARD        0  /* don't change this value (used also in cgribexlib)! */
-#define  CALENDAR_PROLEPTIC       1
-#define  CALENDAR_360DAYS         2
-#define  CALENDAR_365DAYS         3
-#define  CALENDAR_366DAYS         4
-#define  CALENDAR_NONE            5
+#define  CALENDAR_GREGORIAN       1
+#define  CALENDAR_PROLEPTIC       2
+#define  CALENDAR_360DAYS         3
+#define  CALENDAR_365DAYS         4
+#define  CALENDAR_366DAYS         5
+#define  CALENDAR_NONE            6
 
 /* number of unsigned char needed to store UUID */
 #define  CDI_UUID_SIZE           16
@@ -554,20 +556,23 @@ int     vlistInqModel(int vlistID);
 /* VLIST VAR routines */
 
 /*      vlistDefVarTiles: Create a new tile-based variable */
-int     vlistDefVarTiles(int vlistID, int gridID, int zaxisID, int tsteptype, int tilesetID);
+int     vlistDefVarTiles(int vlistID, int gridID, int zaxisID, int timetype, int tilesetID);
 
 /*      vlistDefVar: Create a new variable */
-int     vlistDefVar(int vlistID, int gridID, int zaxisID, int tsteptype);
+int     vlistDefVar(int vlistID, int gridID, int zaxisID, int timetype);
 
 void    vlistChangeVarGrid(int vlistID, int varID, int gridID);
 void    vlistChangeVarZaxis(int vlistID, int varID, int zaxisID);
 
-void    vlistInqVar(int vlistID, int varID, int *gridID, int *zaxisID, int *tsteptype);
+void    vlistInqVar(int vlistID, int varID, int *gridID, int *zaxisID, int *timetype);
 int     vlistInqVarGrid(int vlistID, int varID);
 int     vlistInqVarZaxis(int vlistID, int varID);
 
 /* used in MPIOM */
 int     vlistInqVarID(int vlistID, int code);
+
+void    vlistDefVarTimetype(int vlistID, int varID, int timetype);
+int     vlistInqVarTimetype(int vlistID, int varID);
 
 void    vlistDefVarTsteptype(int vlistID, int varID, int tsteptype);
 
@@ -881,11 +886,11 @@ void    gridInqXstdname(int gridID, char *xstdname);
 /*      gridInqYstdname: Get the standard name of a Y-axis */
 void    gridInqYstdname(int gridID, char *ystdname);
 
-/*      gridDefPrec: Define the precision of a Grid */
-void    gridDefPrec(int gridID, int prec);
+/*      gridDefDatatype: Define the data type of a Grid */
+void    gridDefDatatype(int gridID, int prec);
 
-/*      gridInqPrec: Get the precision of a Grid */
-int     gridInqPrec(int gridID);
+/*      gridInqDatatype: Get the data type of a Grid */
+int     gridInqDatatype(int gridID);
 
 /*      gridInqXval: Get one value of a X-axis */
 double  gridInqXval(int gridID, int index);
@@ -1070,8 +1075,8 @@ void    zaxisInqUnits(int zaxisID, char *units);
 /*      zaxisInqStdname: Get the standard name of a Z-axis */
 void    zaxisInqStdname(int zaxisID, char *stdname);
 
-void    zaxisDefPrec(int zaxisID, int prec);
-int     zaxisInqPrec(int zaxisID);
+void    zaxisDefDatatype(int zaxisID, int prec);
+int     zaxisInqDatatype(int zaxisID);
 
 void    zaxisDefPositive(int zaxisID, int positive);
 int     zaxisInqPositive(int zaxisID);
@@ -1147,6 +1152,7 @@ int     taxisInqFdate(int taxisID);
 int     taxisInqFtime(int taxisID);
 
 int     taxisHasBounds(int taxisID);
+void    taxisWithBounds(int taxisID);
 
 void    taxisDeleteBounds(int taxisID);
 

@@ -54,6 +54,7 @@ typedef struct
   int         param;
   int         gridID;
   int         zaxisID;
+  int         timetype;  /* TIME_* */
   int         tsteptype; /* TSTEP_* */
   int         datatype;  /* CDI_DATATYPE_PACKX for GRIB data, else CDI_DATATYPE_FLT32 or CDI_DATATYPE_FLT64 */
   int         instID;
@@ -127,7 +128,6 @@ void     vlistDestroyVarLongname(int vlistID, int varID);
 void     vlistDestroyVarStdname(int vlistID, int varID);
 void     vlistDestroyVarUnits(int vlistID, int varID);
 void     cdiVlistDestroy_(int vlistID);
-void     vlistDefVarTsteptype(int vlistID, int varID, int tsteptype);
 int      vlistInqVarMissvalUsed(int vlistID, int varID);
 int      vlistHasTime(int vlistID);
 

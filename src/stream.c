@@ -1,5 +1,5 @@
-#if defined (HAVE_CONFIG_H)
-#  include "config.h"
+#ifdef  HAVE_CONFIG_H
+#include "config.h"
 #endif
 
 #ifndef _XOPEN_SOURCE
@@ -129,6 +129,11 @@ int cdiGetFiletype(const char *filename, int *byteorder)
       filetype = CDI_FILETYPE_NC2;
       if ( CDI_Debug ) Message("found CDF2 file = %s", filename);
     }
+  else if ( memcmp(buffer, "CDF\005", 4) == 0 )
+    {
+      filetype = CDI_FILETYPE_NC5;
+      if ( CDI_Debug ) Message("found CDF5 file = %s", filename);
+    }
   else if ( memcmp(buffer+1, "HDF", 3) == 0 )
     {
       filetype = CDI_FILETYPE_NC4;
@@ -185,7 +190,7 @@ The function @func{streamInqFiletype} returns the filetype of a stream.
 @func{streamInqFiletype} returns the type of the file format,
 one of the set of predefined CDI file format types.
 The valid CDI file format types are @func{CDI_FILETYPE_GRB}, @func{CDI_FILETYPE_GRB2}, @func{CDI_FILETYPE_NC}, @func{CDI_FILETYPE_NC2},
-@func{CDI_FILETYPE_NC4}, @func{CDI_FILETYPE_NC4C}, @func{CDI_FILETYPE_SRV}, @func{CDI_FILETYPE_EXT} and @func{CDI_FILETYPE_IEG}.
+@func{CDI_FILETYPE_NC4}, @func{CDI_FILETYPE_NC4C}, @func{CDI_FILETYPE_NC5}, @func{CDI_FILETYPE_SRV}, @func{CDI_FILETYPE_EXT} and @func{CDI_FILETYPE_IEG}.
 
 @EndFunction
 */
@@ -240,7 +245,7 @@ void streamDefByteorder(int streamID, int byteorder)
 
   switch (filetype)
     {
-#if  defined  (HAVE_LIBSERVICE)
+#ifdef  HAVE_LIBSERVICE
     case CDI_FILETYPE_SRV:
       {
 	srvrec_t *srvp = (srvrec_t*) streamptr->record->exsep;
@@ -249,7 +254,7 @@ void streamDefByteorder(int streamID, int byteorder)
 	break;
       }
 #endif
-#if  defined  (HAVE_LIBEXTRA)
+#ifdef  HAVE_LIBEXTRA
     case CDI_FILETYPE_EXT:
       {
 	extrec_t *extp = (extrec_t*) streamptr->record->exsep;
@@ -258,7 +263,7 @@ void streamDefByteorder(int streamID, int byteorder)
 	break;
       }
 #endif
-#if  defined  (HAVE_LIBIEG)
+#ifdef  HAVE_LIBIEG
     case CDI_FILETYPE_IEG:
       {
 	iegrec_t *iegp = (iegrec_t*) streamptr->record->exsep;
@@ -340,7 +345,7 @@ int cdiInqContents(stream_t *streamptr)
 
   switch (filetype)
     {
-#if  defined  (HAVE_LIBGRIB)
+#ifdef  HAVE_LIBGRIB
     case CDI_FILETYPE_GRB:
     case CDI_FILETYPE_GRB2:
       {
@@ -348,32 +353,33 @@ int cdiInqContents(stream_t *streamptr)
 	break;
       }
 #endif
-#if  defined  (HAVE_LIBSERVICE)
+#ifdef  HAVE_LIBSERVICE
     case CDI_FILETYPE_SRV:
       {
         status = srvInqContents(streamptr);
 	break;
       }
 #endif
-#if  defined  (HAVE_LIBEXTRA)
+#ifdef  HAVE_LIBEXTRA
     case CDI_FILETYPE_EXT:
       {
         status = extInqContents(streamptr);
 	break;
       }
 #endif
-#if  defined  (HAVE_LIBIEG)
+#ifdef  HAVE_LIBIEG
     case CDI_FILETYPE_IEG:
       {
         status = iegInqContents(streamptr);
 	break;
       }
 #endif
-#if  defined  (HAVE_LIBNETCDF)
+#ifdef  HAVE_LIBNETCDF
     case CDI_FILETYPE_NC:
     case CDI_FILETYPE_NC2:
     case CDI_FILETYPE_NC4:
     case CDI_FILETYPE_NC4C:
+    case CDI_FILETYPE_NC5:
       {
         status = cdfInqContents(streamptr);
 	break;
@@ -411,9 +417,9 @@ int cdiStreamOpenDefaultDelegate(const char *filename, char filemode,
   int fileID;
   switch (filetype)
     {
-#if  defined  (HAVE_LIBGRIB)
+#ifdef  HAVE_LIBGRIB
     case CDI_FILETYPE_GRB:
-#if  defined  (HAVE_LIBGRIB_API)
+#ifdef  HAVE_LIBGRIB_API
     case CDI_FILETYPE_GRB2:
 #endif
       {
@@ -432,7 +438,7 @@ int cdiStreamOpenDefaultDelegate(const char *filename, char filemode,
         break;
       }
 #endif
-#if  defined  (HAVE_LIBSERVICE)
+#ifdef  HAVE_LIBSERVICE
     case CDI_FILETYPE_SRV:
       {
 #ifndef __cplusplus
@@ -451,7 +457,7 @@ int cdiStreamOpenDefaultDelegate(const char *filename, char filemode,
         break;
       }
 #endif
-#if  defined  (HAVE_LIBEXTRA)
+#ifdef  HAVE_LIBEXTRA
     case CDI_FILETYPE_EXT:
       {
 #ifndef __cplusplus
@@ -471,7 +477,7 @@ int cdiStreamOpenDefaultDelegate(const char *filename, char filemode,
         break;
       }
 #endif
-#if  defined  (HAVE_LIBIEG)
+#ifdef  HAVE_LIBIEG
     case CDI_FILETYPE_IEG:
       {
 #ifndef __cplusplus
@@ -490,24 +496,16 @@ int cdiStreamOpenDefaultDelegate(const char *filename, char filemode,
         break;
       }
 #endif
-#if  defined  (HAVE_LIBNETCDF)
+#ifdef  HAVE_LIBNETCDF
     case CDI_FILETYPE_NC:
-      {
-#ifndef __cplusplus
-        fileID = cdfOpen(filename, (char [2]){filemode, 0});
-#else
-        char temp[2] = { filemode, 0 };
-        fileID = cdfOpen(filename, temp);
-#endif
-        break;
-      }
     case CDI_FILETYPE_NC2:
+    case CDI_FILETYPE_NC5:
       {
 #ifndef __cplusplus
-        fileID = cdfOpen64(filename, (char [2]){filemode, 0});
+        fileID = cdfOpen(filename, (char [2]){filemode, 0}, filetype);
 #else
         char temp[2] = { filemode, 0 };
-        fileID = cdfOpen64(filename, temp);
+        fileID = cdfOpen(filename, temp, filetype);
 #endif
         break;
       }
@@ -657,9 +655,9 @@ int streamOpenA(const char *filename, const char *filemode, int filetype)
 
   switch (filetype)
     {
-#if  defined  (HAVE_LIBGRIB)
+#ifdef  HAVE_LIBGRIB
     case CDI_FILETYPE_GRB:
-#if  defined  (HAVE_LIBGRIB_API)
+#ifdef  HAVE_LIBGRIB_API
     case CDI_FILETYPE_GRB2:
 #endif
       {
@@ -668,37 +666,33 @@ int streamOpenA(const char *filename, const char *filemode, int filetype)
 	break;
       }
 #endif
-#if  defined  (HAVE_LIBSERVICE)
+#ifdef  HAVE_LIBSERVICE
     case CDI_FILETYPE_SRV:
       {
         fileID = fileOpen(filename, filemode);
 	break;
       }
 #endif
-#if  defined  (HAVE_LIBEXTRA)
+#ifdef  HAVE_LIBEXTRA
     case CDI_FILETYPE_EXT:
       {
         fileID = fileOpen(filename, filemode);
 	break;
       }
 #endif
-#if  defined  (HAVE_LIBIEG)
+#ifdef  HAVE_LIBIEG
     case CDI_FILETYPE_IEG:
       {
         fileID = fileOpen(filename, filemode);
 	break;
       }
 #endif
-#if  defined  (HAVE_LIBNETCDF)
+#ifdef  HAVE_LIBNETCDF
     case CDI_FILETYPE_NC:
-      {
-	fileID = cdfOpen(filename, filemode);
-	streamptr->ncmode = 2;
-	break;
-      }
     case CDI_FILETYPE_NC2:
+    case CDI_FILETYPE_NC5:
       {
-	fileID = cdfOpen64(filename, filemode);
+	fileID = cdfOpen(filename, filemode, filetype);
 	streamptr->ncmode = 2;
 	break;
       }
@@ -813,7 +807,7 @@ int streamOpenAppend(const char *filename)
     @Item  path      The name of the new dataset.
     @Item  filetype  The type of the file format, one of the set of predefined CDI file format types.
                      The valid CDI file format types are @func{CDI_FILETYPE_GRB}, @func{CDI_FILETYPE_GRB2}, @func{CDI_FILETYPE_NC},
-                     @func{CDI_FILETYPE_NC2}, @func{CDI_FILETYPE_NC4}, @func{CDI_FILETYPE_NC4C}, @func{CDI_FILETYPE_SRV},
+                     @func{CDI_FILETYPE_NC2}, @func{CDI_FILETYPE_NC4}, @func{CDI_FILETYPE_NC4C}, @func{CDI_FILETYPE_NC5}, @func{CDI_FILETYPE_SRV},
                      @func{CDI_FILETYPE_EXT} and @func{CDI_FILETYPE_IEG}.
 
 @Description
@@ -937,7 +931,7 @@ void cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDelet
   else
     switch (filetype)
       {
-#if  defined  (HAVE_LIBGRIB)
+#ifdef  HAVE_LIBGRIB
       case CDI_FILETYPE_GRB:
       case CDI_FILETYPE_GRB2:
         {
@@ -946,7 +940,7 @@ void cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDelet
           break;
         }
 #endif
-#if  defined  (HAVE_LIBSERVICE)
+#ifdef  HAVE_LIBSERVICE
       case CDI_FILETYPE_SRV:
         {
           fileClose(fileID);
@@ -954,7 +948,7 @@ void cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDelet
           break;
         }
 #endif
-#if  defined  (HAVE_LIBEXTRA)
+#ifdef  HAVE_LIBEXTRA
       case CDI_FILETYPE_EXT:
         {
           fileClose(fileID);
@@ -962,7 +956,7 @@ void cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDelet
           break;
         }
 #endif
-#if  defined  (HAVE_LIBIEG)
+#ifdef  HAVE_LIBIEG
       case CDI_FILETYPE_IEG:
         {
           fileClose(fileID);
@@ -970,11 +964,12 @@ void cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDelet
           break;
         }
 #endif
-#if  defined  (HAVE_LIBNETCDF)
+#ifdef  HAVE_LIBNETCDF
       case CDI_FILETYPE_NC:
       case CDI_FILETYPE_NC2:
       case CDI_FILETYPE_NC4:
       case CDI_FILETYPE_NC4C:
+      case CDI_FILETYPE_NC5:
         {
           cdfClose(fileID);
           if (streamptr->ntsteps == 0)
@@ -1117,11 +1112,12 @@ void cdiStreamSync_(stream_t *streamptr)
 	{
 	  switch (filetype)
 	    {
-#if  defined  (HAVE_LIBNETCDF)
+#ifdef  HAVE_LIBNETCDF
 	    case CDI_FILETYPE_NC:
 	    case CDI_FILETYPE_NC2:
 	    case CDI_FILETYPE_NC4:
 	    case CDI_FILETYPE_NC4C:
+	    case CDI_FILETYPE_NC5:
 	      {
 		void cdf_sync(int ncid);
 		if ( streamptr->ncmode == 2 ) cdf_sync(fileID);
@@ -1163,19 +1159,18 @@ void streamSync(int streamID)
 
 int cdiStreamDefTimestep_(stream_t *streamptr, int tsID)
 {
-  int taxisID = 0;
-
   stream_check_ptr(__func__, streamptr);
 
   if ( CDI_Debug ) Message("streamID = %d  tsID = %d", streamptr->self, tsID);
 
   int vlistID = streamptr->vlistID;
-
   int time_is_varying = vlistHasTime(vlistID);
+  int taxisID = vlistInqTaxis(vlistID) ;
 
+  /* moved to cdiStreamSetupVlist
+  int taxisID = time_is_varying ? vlistInqTaxis(vlistID) : CDI_UNDEFID;
   if ( time_is_varying )
     {
-      taxisID = vlistInqTaxis(vlistID);
       if ( taxisID == CDI_UNDEFID )
         {
           Warning("taxisID undefined for fileID = %d! Using absolute time axis.", streamptr->self);
@@ -1183,26 +1178,24 @@ int cdiStreamDefTimestep_(stream_t *streamptr, int tsID)
           vlistDefTaxis(vlistID, taxisID);
         }
     }
-
-  int newtsID = tstepsNewEntry(streamptr);
-
-  if ( tsID != newtsID )
-    Error("Internal problem: tsID = %d newtsID = %d", tsID, newtsID);
-
-  streamptr->curTsID = tsID;
-
-  if ( time_is_varying )
+  */
+  if ( tsID > 0 )
     {
-      taxis_t *taxisptr1 = taxisPtr(taxisID);
-      taxis_t *taxisptr2 = &streamptr->tsteps[tsID].taxis;
-      ptaxisCopy(taxisptr2, taxisptr1);
+      int newtsID = tstepsNewEntry(streamptr);
+      if ( tsID != newtsID )
+        Error("Internal problem: tsID = %d newtsID = %d", tsID, newtsID);
     }
 
+  if ( time_is_varying )
+    ptaxisCopy(&streamptr->tsteps[tsID].taxis, taxisPtr(taxisID));
+
+  streamptr->curTsID = tsID;
   streamptr->ntsteps = tsID + 1;
 
 #ifdef HAVE_LIBNETCDF
   if ((streamptr->filetype == CDI_FILETYPE_NC  ||
        streamptr->filetype == CDI_FILETYPE_NC2 ||
+       streamptr->filetype == CDI_FILETYPE_NC5 ||
        streamptr->filetype == CDI_FILETYPE_NC4 ||
        streamptr->filetype == CDI_FILETYPE_NC4C)
       && time_is_varying)
@@ -1221,7 +1214,7 @@ int cdiStreamDefTimestep_(stream_t *streamptr, int tsID)
 
 /*
 @Function  streamDefTimestep
-@Title     Define time step
+@Title     Define a timestep
 
 @Prototype int streamDefTimestep(int streamID, int tsID)
 @Parameter
@@ -1229,10 +1222,13 @@ int cdiStreamDefTimestep_(stream_t *streamptr, int tsID)
     @Item  tsID      Timestep identifier.
 
 @Description
-The function @func{streamDefTimestep} defines the time step of a stream.
+The function @func{streamDefTimestep} defines a timestep of a stream by the identifier tsID.
+The identifier tsID is the timestep index starting at 0 for the first timestep.
+Before calling this function the functions @func{taxisDefVdate} and @func{taxisDefVtime} should be used
+to define the timestamp for this timestep. All calls to write the data refer to this timestep.
 
 @Result
-@func{streamDefTimestep} returns the number of records of the time step.
+@func{streamDefTimestep} returns the number of expected records of the timestep.
 
 @EndFunction
 */
@@ -1254,7 +1250,7 @@ int streamInqCurTimestepID(int streamID)
 
 /*
 @Function  streamInqTimestep
-@Title     Get time step
+@Title     Get timestep information
 
 @Prototype int streamInqTimestep(int streamID, int tsID)
 @Parameter
@@ -1262,10 +1258,13 @@ int streamInqCurTimestepID(int streamID)
     @Item  tsID      Timestep identifier.
 
 @Description
-The function @func{streamInqTimestep} returns the time step of a stream.
+The function @func{streamInqTimestep} sets the next timestep to the identifier tsID.
+The identifier tsID is the timestep index starting at 0 for the first timestep.
+After a call to this function the functions @func{taxisInqVdate} and @func{taxisInqVtime} can be used
+to read the timestamp for this timestep. All calls to read the data refer to this timestep.
 
 @Result
-@func{streamInqTimestep} returns the number of records of the time step.
+@func{streamInqTimestep} returns the number of records of the timestep or 0, if the end of the file is reached.
 
 @EndFunction
 */
@@ -1301,7 +1300,7 @@ int streamInqTimestep(int streamID, int tsID)
 
   switch (filetype)
     {
-#if  defined  (HAVE_LIBGRIB)
+#ifdef  HAVE_LIBGRIB
     case CDI_FILETYPE_GRB:
     case CDI_FILETYPE_GRB2:
       {
@@ -1309,32 +1308,33 @@ int streamInqTimestep(int streamID, int tsID)
 	break;
       }
 #endif
-#if  defined  (HAVE_LIBSERVICE)
+#ifdef  HAVE_LIBSERVICE
     case CDI_FILETYPE_SRV:
       {
         nrecs = srvInqTimestep(streamptr, tsID);
 	break;
       }
 #endif
-#if  defined  (HAVE_LIBEXTRA)
+#ifdef  HAVE_LIBEXTRA
     case CDI_FILETYPE_EXT:
       {
         nrecs = extInqTimestep(streamptr, tsID);
 	break;
       }
 #endif
-#if  defined  (HAVE_LIBIEG)
+#ifdef  HAVE_LIBIEG
     case CDI_FILETYPE_IEG:
       {
         nrecs = iegInqTimestep(streamptr, tsID);
 	break;
       }
 #endif
-#if  defined  (HAVE_LIBNETCDF)
+#ifdef  HAVE_LIBNETCDF
     case CDI_FILETYPE_NC:
     case CDI_FILETYPE_NC2:
     case CDI_FILETYPE_NC4:
     case CDI_FILETYPE_NC4C:
+    case CDI_FILETYPE_NC5:
       {
         nrecs = cdfInqTimestep(streamptr, tsID);
 	break;
@@ -1607,32 +1607,69 @@ void cdiStreamSetupVlist_(stream_t *streamptr, int vlistID)
     }
 
   if (streamptr->filemode == 'w')
-    switch (streamptr->filetype)
-      {
-#ifdef HAVE_LIBNETCDF
-      case CDI_FILETYPE_NC:
-      case CDI_FILETYPE_NC2:
-      case CDI_FILETYPE_NC4:
-      case CDI_FILETYPE_NC4C:
+    {
+      tstepsNewEntry(streamptr); // timestep 0
+      int vlistID = streamptr->vlistID;
+      int time_is_varying = vlistHasTime(vlistID);
+      if ( time_is_varying )
         {
-          /* calls cdfDefVars in serial mode but
-           * cdiPioClientStreamNOP (i.e. nothing) on client ranks
-           * and cdiPioServerCdfDefVars on server ranks in parallel mode*/
-          void (*myCdfDefVars)(stream_t *streamptr)
-            = (void (*)(stream_t *)) namespaceSwitchGet(NSSWITCH_CDF_STREAM_SETUP).func;
-          myCdfDefVars(streamptr);
+          int taxisID = vlistInqTaxis(vlistID);
+          if ( taxisID == CDI_UNDEFID )
+            {
+              Warning("taxisID undefined for fileID = %d! Using absolute time axis.", streamptr->self);
+              taxisID = taxisCreate(TAXIS_ABSOLUTE);
+              vlistDefTaxis(vlistID, taxisID);
+            }
+
+          if ( taxisInqType(taxisID) == TAXIS_RELATIVE )
+            switch (streamptr->filetype)
+              {
+#ifdef HAVE_LIBNETCDF
+              case CDI_FILETYPE_NC:
+              case CDI_FILETYPE_NC2:
+              case CDI_FILETYPE_NC4:
+              case CDI_FILETYPE_NC4C:
+              case CDI_FILETYPE_NC5:
+                {
+                  taxis_t *taxisptr = taxisPtr(taxisID);
+                  if ( taxisptr->rdate == -1 ) taxisDefRdate(taxisID, 10101);
+                }
+                break;
+#endif
+              default:
+                ;
+              }
+          ptaxisCopy(&streamptr->tsteps[0].taxis, taxisPtr(taxisID));
         }
-        break;
+
+      switch (streamptr->filetype)
+        {
+#ifdef HAVE_LIBNETCDF
+        case CDI_FILETYPE_NC:
+        case CDI_FILETYPE_NC2:
+        case CDI_FILETYPE_NC4:
+        case CDI_FILETYPE_NC4C:
+        case CDI_FILETYPE_NC5:
+          {
+            /* calls cdfDefVars in serial mode but
+             * cdiPioClientStreamNOP (i.e. nothing) on client ranks
+             * and cdiPioServerCdfDefVars on server ranks in parallel mode*/
+            void (*myCdfDefVars)(stream_t *streamptr)
+              = (void (*)(stream_t *)) namespaceSwitchGet(NSSWITCH_CDF_STREAM_SETUP).func;
+            myCdfDefVars(streamptr);
+          }
+          break;
 #endif
 #ifdef HAVE_LIBGRIB
-      case CDI_FILETYPE_GRB:
-      case CDI_FILETYPE_GRB2:
-        gribContainersNew(streamptr);
-        break;
+        case CDI_FILETYPE_GRB:
+        case CDI_FILETYPE_GRB2:
+          gribContainersNew(streamptr);
+          break;
 #endif
-      default:
-        ;
-      }
+        default:
+          ;
+        }
+    }
 }
 
 

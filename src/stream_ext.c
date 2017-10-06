@@ -178,7 +178,7 @@ void extAddRecord(stream_t *streamptr, int param, int level, int xysize,
   int vlistID = streamptr->vlistID;
   int tsID    = streamptr->curTsID;
   int recID   = recordNewEntry(streamptr, tsID);
-  record_t *record  = &streamptr->tsteps[tsID].records[recID];
+  record_t *record = &streamptr->tsteps[tsID].records[recID];
 
   record->size     = recsize;
   record->position = position;
@@ -330,9 +330,7 @@ void extScanTimestep1(stream_t *streamptr)
 	{
 	  streamptr->ntsteps = 0;
 	  for ( varID = 0; varID < streamptr->nvars; varID++ )
-	    {
-	      vlistDefVarTsteptype(vlistID, varID, TSTEP_CONSTANT);
-	    }
+            vlistDefVarTimetype(vlistID, varID, TIME_CONSTANT);
 	}
     }
 }
@@ -461,7 +459,7 @@ int extScanTimestep2(stream_t *streamptr)
       if ( ! streamptr->tsteps[tsID].records[recID].used )
 	{
 	  varID = streamptr->tsteps[tsID].records[recID].varID;
-          vlistDefVarTsteptype(vlistID, varID, TSTEP_CONSTANT);
+          vlistDefVarTimetype(vlistID, varID, TIME_CONSTANT);
 	}
       else
 	{

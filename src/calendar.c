@@ -58,7 +58,7 @@ int days_per_year(int calendar, int year)
 
   if ( daysperyear == 0 )
     {
-      if ( year == 1582 && calendar == CALENDAR_STANDARD )
+      if ( year == 1582 && (calendar == CALENDAR_STANDARD || calendar == CALENDAR_GREGORIAN) )
         daysperyear = 355;
       else if ( (year%4 == 0 && year%100 != 0) || year%400 == 0 )
         daysperyear = 366;

@@ -4,7 +4,7 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   July 2017
+! Uwe Schulzweida, MPI-MET, Hamburg,   October 2017
 !
 
       INTEGER    CDI_MAX_NAME
@@ -70,12 +70,14 @@
       PARAMETER (CDI_FILETYPE_NC4       =  5)
       INTEGER    CDI_FILETYPE_NC4C
       PARAMETER (CDI_FILETYPE_NC4C      =  6)
+      INTEGER    CDI_FILETYPE_NC5
+      PARAMETER (CDI_FILETYPE_NC5       =  7)
       INTEGER    CDI_FILETYPE_SRV
-      PARAMETER (CDI_FILETYPE_SRV       =  7)
+      PARAMETER (CDI_FILETYPE_SRV       =  8)
       INTEGER    CDI_FILETYPE_EXT
-      PARAMETER (CDI_FILETYPE_EXT       =  8)
+      PARAMETER (CDI_FILETYPE_EXT       =  9)
       INTEGER    CDI_FILETYPE_IEG
-      PARAMETER (CDI_FILETYPE_IEG       =  9)
+      PARAMETER (CDI_FILETYPE_IEG       = 10)
       INTEGER    FILETYPE_GRB
       PARAMETER (FILETYPE_GRB           =  1)
       INTEGER    FILETYPE_GRB2
@@ -358,13 +360,13 @@
 !
       INTEGER    TIME_CONSTANT
       PARAMETER (TIME_CONSTANT          =  0)
+      INTEGER    TIME_VARYING
+      PARAMETER (TIME_VARYING           =  1)
       INTEGER    TIME_VARIABLE
       PARAMETER (TIME_VARIABLE          =  1)
 !
 !  TSTEP types
 !
-      INTEGER    TSTEP_CONSTANT
-      PARAMETER (TSTEP_CONSTANT         =  0)
       INTEGER    TSTEP_INSTANT
       PARAMETER (TSTEP_INSTANT          =  1)
       INTEGER    TSTEP_AVG
@@ -430,16 +432,18 @@
 !
       INTEGER    CALENDAR_STANDARD
       PARAMETER (CALENDAR_STANDARD      =  0)
+      INTEGER    CALENDAR_GREGORIAN
+      PARAMETER (CALENDAR_GREGORIAN     =  1)
       INTEGER    CALENDAR_PROLEPTIC
-      PARAMETER (CALENDAR_PROLEPTIC     =  1)
+      PARAMETER (CALENDAR_PROLEPTIC     =  2)
       INTEGER    CALENDAR_360DAYS
-      PARAMETER (CALENDAR_360DAYS       =  2)
+      PARAMETER (CALENDAR_360DAYS       =  3)
       INTEGER    CALENDAR_365DAYS
-      PARAMETER (CALENDAR_365DAYS       =  3)
+      PARAMETER (CALENDAR_365DAYS       =  4)
       INTEGER    CALENDAR_366DAYS
-      PARAMETER (CALENDAR_366DAYS       =  4)
+      PARAMETER (CALENDAR_366DAYS       =  5)
       INTEGER    CALENDAR_NONE
-      PARAMETER (CALENDAR_NONE          =  5)
+      PARAMETER (CALENDAR_NONE          =  6)
 !
 !  number of unsigned char needed to store UUID
 !
@@ -947,7 +951,7 @@
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         gridID,
 !                                     INTEGER         zaxisID,
-!                                     INTEGER         tsteptype,
+!                                     INTEGER         timetype,
 !                                     INTEGER         tilesetID)
       EXTERNAL        vlistDefVarTiles
 
@@ -955,7 +959,7 @@
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         gridID,
 !                                     INTEGER         zaxisID,
-!                                     INTEGER         tsteptype)
+!                                     INTEGER         timetype)
       EXTERNAL        vlistDefVar
 
 !                     vlistChangeVarGrid
@@ -975,7 +979,7 @@
 !                                     INTEGER         varID,
 !                                     INTEGER         gridID,
 !                                     INTEGER         zaxisID,
-!                                     INTEGER         tsteptype)
+!                                     INTEGER         timetype)
       EXTERNAL        vlistInqVar
 
       INTEGER         vlistInqVarGrid
@@ -995,6 +999,17 @@
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         code)
       EXTERNAL        vlistInqVarID
+
+!                     vlistDefVarTimetype
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     INTEGER         timetype)
+      EXTERNAL        vlistDefVarTimetype
+
+      INTEGER         vlistInqVarTimetype
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID)
+      EXTERNAL        vlistInqVarTimetype
 
 !                     vlistDefVarTsteptype
 !                                    (INTEGER         vlistID,
@@ -1724,14 +1739,14 @@
 !                                     CHARACTER*(*)   ystdname)
       EXTERNAL        gridInqYstdname
 
-!                     gridDefPrec
+!                     gridDefDatatype
 !                                    (INTEGER         gridID,
 !                                     INTEGER         prec)
-      EXTERNAL        gridDefPrec
+      EXTERNAL        gridDefDatatype
 
-      INTEGER         gridInqPrec
+      INTEGER         gridInqDatatype
 !                                    (INTEGER         gridID)
-      EXTERNAL        gridInqPrec
+      EXTERNAL        gridInqDatatype
 
       DOUBLEPRECISION gridInqXval
 !                                    (INTEGER         gridID,
@@ -2099,14 +2114,14 @@
 !                                     CHARACTER*(*)   stdname)
       EXTERNAL        zaxisInqStdname
 
-!                     zaxisDefPrec
+!                     zaxisDefDatatype
 !                                    (INTEGER         zaxisID,
 !                                     INTEGER         prec)
-      EXTERNAL        zaxisDefPrec
+      EXTERNAL        zaxisDefDatatype
 
-      INTEGER         zaxisInqPrec
+      INTEGER         zaxisInqDatatype
 !                                    (INTEGER         zaxisID)
-      EXTERNAL        zaxisInqPrec
+      EXTERNAL        zaxisInqDatatype
 
 !                     zaxisDefPositive
 !                                    (INTEGER         zaxisID,
@@ -2276,6 +2291,10 @@
       INTEGER         taxisHasBounds
 !                                    (INTEGER         taxisID)
       EXTERNAL        taxisHasBounds
+
+!                     taxisWithBounds
+!                                    (INTEGER         taxisID)
+      EXTERNAL        taxisWithBounds
 
 !                     taxisDeleteBounds
 !                                    (INTEGER         taxisID)

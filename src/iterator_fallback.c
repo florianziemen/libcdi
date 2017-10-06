@@ -54,7 +54,7 @@ static CdiFallbackIterator *cdiFallbackIterator_condestruct(CdiFallbackIterator 
   me->curVariable = -1;
   me->curSubtype = -1;
   me->curLevel = -1;
-  me->path = strdup(path);
+  me->path = path ? strdup(path) : NULL;
   if(!me->path) goto closeStream;
 
   return me;

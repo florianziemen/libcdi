@@ -78,9 +78,10 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-noinst_PROGRAMS = cdi_write$(EXEEXT) cdi_write_ens$(EXEEXT) \
-	cdi_write_hybrid$(EXEEXT) cdi_read$(EXEEXT) cdi_copy$(EXEEXT) \
-	$(am__EXEEXT_1) $(am__EXEEXT_2)
+noinst_PROGRAMS = cdi_write$(EXEEXT) cdi_write_relativ$(EXEEXT) \
+	cdi_write_ens$(EXEEXT) cdi_write_hybrid$(EXEEXT) \
+	cdi_read$(EXEEXT) cdi_copy$(EXEEXT) $(am__EXEEXT_1) \
+	$(am__EXEEXT_2)
 @CREATE_ISOC_TRUE@am__append_1 = cdi_read_f2003 cdi_write_f2003
 @ENABLE_NETCDF_TRUE@am__append_2 = cdi_write_const
 subdir = examples
@@ -179,6 +180,10 @@ am_cdi_write_hybrid_OBJECTS = cdi_write_hybrid.$(OBJEXT)
 cdi_write_hybrid_OBJECTS = $(am_cdi_write_hybrid_OBJECTS)
 cdi_write_hybrid_LDADD = $(LDADD)
 cdi_write_hybrid_DEPENDENCIES = $(top_builddir)/src/libcdi.la
+am_cdi_write_relativ_OBJECTS = cdi_write_relativ.$(OBJEXT)
+cdi_write_relativ_OBJECTS = $(am_cdi_write_relativ_OBJECTS)
+cdi_write_relativ_LDADD = $(LDADD)
+cdi_write_relativ_DEPENDENCIES = $(top_builddir)/src/libcdi.la
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -231,11 +236,13 @@ am__v_FCLD_1 =
 SOURCES = $(cdi_copy_SOURCES) $(cdi_read_SOURCES) \
 	$(cdi_read_f2003_SOURCES) $(cdi_write_SOURCES) \
 	$(cdi_write_const_SOURCES) $(cdi_write_ens_SOURCES) \
-	$(cdi_write_f2003_SOURCES) $(cdi_write_hybrid_SOURCES)
+	$(cdi_write_f2003_SOURCES) $(cdi_write_hybrid_SOURCES) \
+	$(cdi_write_relativ_SOURCES)
 DIST_SOURCES = $(cdi_copy_SOURCES) $(cdi_read_SOURCES) \
 	$(cdi_read_f2003_SOURCES) $(cdi_write_SOURCES) \
 	$(cdi_write_const_SOURCES) $(cdi_write_ens_SOURCES) \
-	$(cdi_write_f2003_SOURCES) $(cdi_write_hybrid_SOURCES)
+	$(cdi_write_f2003_SOURCES) $(cdi_write_hybrid_SOURCES) \
+	$(cdi_write_relativ_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -457,6 +464,8 @@ LDADD = $(top_builddir)/src/libcdi.la
 #
 cdi_write_SOURCES = cdi_write.c
 #
+cdi_write_relativ_SOURCES = cdi_write_relativ.c
+#
 cdi_write_ens_SOURCES = cdi_write_ens.c
 #
 cdi_write_const_SOURCES = cdi_write_const.c
@@ -555,6 +564,10 @@ cdi_write_hybrid$(EXEEXT): $(cdi_write_hybrid_OBJECTS) $(cdi_write_hybrid_DEPEND
 	@rm -f cdi_write_hybrid$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(cdi_write_hybrid_OBJECTS) $(cdi_write_hybrid_LDADD) $(LIBS)
 
+cdi_write_relativ$(EXEEXT): $(cdi_write_relativ_OBJECTS) $(cdi_write_relativ_DEPENDENCIES) $(EXTRA_cdi_write_relativ_DEPENDENCIES) 
+	@rm -f cdi_write_relativ$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(cdi_write_relativ_OBJECTS) $(cdi_write_relativ_LDADD) $(LIBS)
+
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
 
@@ -567,6 +580,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cdi_write_const.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cdi_write_ens.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cdi_write_hybrid.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cdi_write_relativ.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

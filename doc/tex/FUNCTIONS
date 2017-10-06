@@ -15,8 +15,8 @@ Function catalog:
    streamInqByteorder   Get the byte order
    streamDefVlist       Define the variable list
    streamInqVlist       Get the variable list
-   streamDefTimestep    Define time step
-   streamInqTimestep    Get time step
+   streamDefTimestep    Define a timestep
+   streamInqTimestep    Get timestep information
 -------------------------------------------------------------
    stream_write
 -------------------------------------------------------------

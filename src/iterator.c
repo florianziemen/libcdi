@@ -29,6 +29,7 @@ static const char* fileType2String(int fileType)
         case CDI_FILETYPE_NC2: return "CDI::Iterator::NetCDF2";
         case CDI_FILETYPE_NC4: return "CDI::Iterator::NetCDF4";
         case CDI_FILETYPE_NC4C: return "CDI::Iterator::NetCDF4C";
+        case CDI_FILETYPE_NC5: return "CDI::Iterator::NetCDF5";
 #endif
 #ifdef HAVE_LIBSERVICE
         case CDI_FILETYPE_SRV: return "CDI::Iterator::SRV";
@@ -63,6 +64,7 @@ static int string2FileType(const char* fileType, const char **outRestString)
   check(fileType, "CDI::Iterator::NetCDF2", CDI_FILETYPE_NC2);
   check(fileType, "CDI::Iterator::NetCDF4", CDI_FILETYPE_NC4);
   check(fileType, "CDI::Iterator::NetCDF4C", CDI_FILETYPE_NC4C);
+  check(fileType, "CDI::Iterator::NetCDF5", CDI_FILETYPE_NC5);
   check(fileType, "CDI::Iterator::SRV", CDI_FILETYPE_SRV);
   check(fileType, "CDI::Iterator::EXT", CDI_FILETYPE_EXT);
   check(fileType, "CDI::Iterator::IEG", CDI_FILETYPE_IEG);
@@ -114,6 +116,7 @@ CdiIterator* cdiIterator_new(const char* path)
         case CDI_FILETYPE_NC2:
         case CDI_FILETYPE_NC4:
         case CDI_FILETYPE_NC4C:
+        case CDI_FILETYPE_NC5:
 #endif
 #ifdef HAVE_LIBSERVICE
         case CDI_FILETYPE_SRV:
@@ -203,6 +206,7 @@ CdiIterator* cdiIterator_clone(CdiIterator* me)
         case CDI_FILETYPE_NC2:
         case CDI_FILETYPE_NC4:
         case CDI_FILETYPE_NC4C:
+        case CDI_FILETYPE_NC5:
 #endif
 #ifdef HAVE_LIBSERVICE
         case CDI_FILETYPE_SRV:
@@ -284,6 +288,7 @@ char* cdiIterator_serialize(CdiIterator* me)
         case CDI_FILETYPE_NC2:
         case CDI_FILETYPE_NC4:
         case CDI_FILETYPE_NC4C:
+        case CDI_FILETYPE_NC5:
 #endif
 #ifdef HAVE_LIBSERVICE
         case CDI_FILETYPE_SRV:
@@ -343,6 +348,7 @@ CdiIterator* cdiIterator_deserialize(const char* description)
         case CDI_FILETYPE_NC2:
         case CDI_FILETYPE_NC4:
         case CDI_FILETYPE_NC4C:
+        case CDI_FILETYPE_NC5:
 #endif
 #ifdef HAVE_LIBSERVICE
         case CDI_FILETYPE_SRV:
@@ -415,6 +421,7 @@ int cdiIterator_nextField(CdiIterator* me)
         case CDI_FILETYPE_NC2:
         case CDI_FILETYPE_NC4:
         case CDI_FILETYPE_NC4C:
+        case CDI_FILETYPE_NC5:
 #endif
 #ifdef HAVE_LIBSERVICE
         case CDI_FILETYPE_SRV:
@@ -449,6 +456,7 @@ static char* cdiIterator_inqTime(CdiIterator* me, CdiTimeType timeType)
         case CDI_FILETYPE_NC2:
         case CDI_FILETYPE_NC4:
         case CDI_FILETYPE_NC4C:
+        case CDI_FILETYPE_NC5:
 #endif
 #ifdef HAVE_LIBSERVICE
         case CDI_FILETYPE_SRV:
@@ -609,6 +617,7 @@ int cdiIterator_inqLevelType(CdiIterator* me, int levelSelector, char **outName,
         case CDI_FILETYPE_NC2:
         case CDI_FILETYPE_NC4:
         case CDI_FILETYPE_NC4C:
+        case CDI_FILETYPE_NC5:
 #endif
 #ifdef HAVE_LIBSERVICE
         case CDI_FILETYPE_SRV:
@@ -659,6 +668,7 @@ int cdiIterator_inqLevel(CdiIterator* me, int levelSelector, double* outValue1, 
         case CDI_FILETYPE_NC2:
         case CDI_FILETYPE_NC4:
         case CDI_FILETYPE_NC4C:
+        case CDI_FILETYPE_NC5:
 #endif
 #ifdef HAVE_LIBSERVICE
         case CDI_FILETYPE_SRV:
@@ -709,6 +719,7 @@ int cdiIterator_inqLevelUuid(CdiIterator* me, int* outVgridNumber, int* outLevel
         case CDI_FILETYPE_NC2:
         case CDI_FILETYPE_NC4:
         case CDI_FILETYPE_NC4C:
+        case CDI_FILETYPE_NC5:
 #endif
 #ifdef HAVE_LIBSERVICE
         case CDI_FILETYPE_SRV:
@@ -758,6 +769,7 @@ int cdiIterator_inqTile(CdiIterator* me, int* outTileIndex, int* outTileAttribut
         case CDI_FILETYPE_NC2:
         case CDI_FILETYPE_NC4:
         case CDI_FILETYPE_NC4C:
+        case CDI_FILETYPE_NC5:
       #endif
       #ifdef HAVE_LIBSERVICE
         case CDI_FILETYPE_SRV:
@@ -808,6 +820,7 @@ int cdiIterator_inqTileCount(CdiIterator* me, int* outTileCount, int* outTileAtt
         case CDI_FILETYPE_NC2:
         case CDI_FILETYPE_NC4:
         case CDI_FILETYPE_NC4C:
+        case CDI_FILETYPE_NC5:
       #endif
       #ifdef HAVE_LIBSERVICE
         case CDI_FILETYPE_SRV:
@@ -938,6 +951,7 @@ char* cdiIterator_inqVariableName(CdiIterator* me)
         case CDI_FILETYPE_NC2:
         case CDI_FILETYPE_NC4:
         case CDI_FILETYPE_NC4C:
+        case CDI_FILETYPE_NC5:
 #endif
 #ifdef HAVE_LIBSERVICE
         case CDI_FILETYPE_SRV:
@@ -1008,6 +1022,7 @@ void cdiIterator_readField(CdiIterator* me, double* buffer, size_t* nmiss)
         case CDI_FILETYPE_NC2:
         case CDI_FILETYPE_NC4:
         case CDI_FILETYPE_NC4C:
+        case CDI_FILETYPE_NC5:
 #endif
 #ifdef HAVE_LIBSERVICE
         case CDI_FILETYPE_SRV:
@@ -1057,6 +1072,7 @@ void cdiIterator_readFieldF(CdiIterator* me, float* buffer, size_t* nmiss)
         case CDI_FILETYPE_NC2:
         case CDI_FILETYPE_NC4:
         case CDI_FILETYPE_NC4C:
+        case CDI_FILETYPE_NC5:
 #endif
 #ifdef HAVE_LIBSERVICE
         case CDI_FILETYPE_SRV:
@@ -1068,7 +1084,7 @@ void cdiIterator_readFieldF(CdiIterator* me, float* buffer, size_t* nmiss)
         case CDI_FILETYPE_IEG:
 #endif
           cdiFallbackIterator_readFieldF(me, buffer, nmiss);
-          return; 
+          return;
       default:
         Error(kUnexpectedFileTypeMessage);
     }
@@ -1102,6 +1118,7 @@ void cdiIterator_delete(CdiIterator* me)
         case CDI_FILETYPE_NC2:
         case CDI_FILETYPE_NC4:
         case CDI_FILETYPE_NC4C:
+        case CDI_FILETYPE_NC5:
 #endif
 #ifdef HAVE_LIBSERVICE
         case CDI_FILETYPE_SRV:

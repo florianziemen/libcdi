@@ -18,7 +18,7 @@ The name of the new dataset.
 \item[\texttt{filetype}]
 The type of the file format, one of the set of predefined {\CDI} file format types.
                      The valid {\CDI} file format types are {\texttt{CDI\_FILETYPE\_GRB}}, {\texttt{CDI\_FILETYPE\_GRB2}}, {\texttt{CDI\_FILETYPE\_NC}},
-                     {\texttt{CDI\_FILETYPE\_NC2}}, {\texttt{CDI\_FILETYPE\_NC4}}, {\texttt{CDI\_FILETYPE\_NC4C}}, {\texttt{CDI\_FILETYPE\_SRV}},
+                     {\texttt{CDI\_FILETYPE\_NC2}}, {\texttt{CDI\_FILETYPE\_NC4}}, {\texttt{CDI\_FILETYPE\_NC4C}}, {\texttt{CDI\_FILETYPE\_NC5}}, {\texttt{CDI\_FILETYPE\_SRV}},
                      {\texttt{CDI\_FILETYPE\_EXT}} and {\texttt{CDI\_FILETYPE\_IEG}}.
 
 \end{deflist}
@@ -169,7 +169,7 @@ Stream ID, from a previous call to {\htmlref{\texttt{streamOpenRead}}{streamOpen
 {\texttt{streamInqFiletype}} returns the type of the file format,
 one of the set of predefined {\CDI} file format types.
 The valid {\CDI} file format types are {\texttt{CDI\_FILETYPE\_GRB}}, {\texttt{CDI\_FILETYPE\_GRB2}}, {\texttt{CDI\_FILETYPE\_NC}}, {\texttt{CDI\_FILETYPE\_NC2}},
-{\texttt{CDI\_FILETYPE\_NC4}}, {\texttt{CDI\_FILETYPE\_NC4C}}, {\texttt{CDI\_FILETYPE\_SRV}}, {\texttt{CDI\_FILETYPE\_EXT}} and {\texttt{CDI\_FILETYPE\_IEG}}.
+{\texttt{CDI\_FILETYPE\_NC4}}, {\texttt{CDI\_FILETYPE\_NC4C}}, {\texttt{CDI\_FILETYPE\_NC5}}, {\texttt{CDI\_FILETYPE\_SRV}}, {\texttt{CDI\_FILETYPE\_EXT}} and {\texttt{CDI\_FILETYPE\_IEG}}.
 
 
 
@@ -279,11 +279,14 @@ Stream ID, from a previous call to {\htmlref{\texttt{streamOpenRead}}{streamOpen
 
 
 
-\subsection{Define time step: \texttt{streamDefTimestep}}
+\subsection{Define a timestep: \texttt{streamDefTimestep}}
 \index{streamDefTimestep}
 \label{streamDefTimestep}
 
-The function {\texttt{streamDefTimestep}} defines the time step of a stream.
+The function {\texttt{streamDefTimestep}} defines a timestep of a stream by the identifier tsID.
+The identifier tsID is the timestep index starting at 0 for the first timestep.
+Before calling this function the functions {\texttt{taxisDefVdate}} and {\texttt{taxisDefVtime}} should be used
+to define the timestamp for this timestep. All calls to write the data refer to this timestep.
 
 \subsubsection*{Usage}
 
@@ -303,15 +306,18 @@ Timestep identifier.
 
 \subsubsection*{Result}
 
-{\texttt{streamDefTimestep}} returns the number of records of the time step.
+{\texttt{streamDefTimestep}} returns the number of expected records of the timestep.
 
 
 
-\subsection{Get time step: \texttt{streamInqTimestep}}
+\subsection{Get timestep information: \texttt{streamInqTimestep}}
 \index{streamInqTimestep}
 \label{streamInqTimestep}
 
-The function {\texttt{streamInqTimestep}} returns the time step of a stream.
+The function {\texttt{streamInqTimestep}} sets the next timestep to the identifier tsID.
+The identifier tsID is the timestep index starting at 0 for the first timestep.
+After a call to this function the functions {\texttt{taxisInqVdate}} and {\texttt{taxisInqVtime}} can be used
+to read the timestamp for this timestep. All calls to read the data refer to this timestep.
 
 \subsubsection*{Usage}
 
@@ -331,5 +337,5 @@ Timestep identifier.
 
 \subsubsection*{Result}
 
-{\texttt{streamInqTimestep}} returns the number of records of the time step.
+{\texttt{streamInqTimestep}} returns the number of records of the timestep or 0, if the end of the file is reached.
 

@@ -1,5 +1,5 @@
-#if defined (HAVE_CONFIG_H)
-#  include "config.h"
+#ifdef  HAVE_CONFIG_H
+#include "config.h"
 #endif
 
 #include "dmemory.h"
@@ -7,15 +7,17 @@
 #include "cdi_int.h"
 #include "stream_cdf.h"
 
+#ifdef HAVE_LIBNETCDF
 static inline bool
 filetypeIsNetCDF(int filetype)
 {
   return filetype == CDI_FILETYPE_NC
     ||   filetype == CDI_FILETYPE_NC2
+    ||   filetype == CDI_FILETYPE_NC5
     ||   filetype == CDI_FILETYPE_NC4
     ||   filetype == CDI_FILETYPE_NC4C;
 }
-
+#endif
 
 void streamDefHistory(int streamID, int length, const char *history)
 {

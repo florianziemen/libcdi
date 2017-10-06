@@ -39,9 +39,9 @@ fi
 
 #PATTERNS
 #^   File format : NetCDF
-#^   Var : Institut Source   Ttype    Levels Num  Gridsize Num Dtype : Parameter ID
-#^     1 : unknown  unknown  constant      1   1        72   1  F32  : -1         
-#^     2 : unknown  unknown  constant      5   2        72   1  F32  : -2         
+#^   Var : Institut Source   T Steptype Levels Num    Points Num Dtype : Parameter ID
+#^     1 : unknown  unknown  c instant       1   1        72   1  F32  : -1         
+#^     2 : unknown  unknown  c instant       5   2        72   1  F32  : -2         
 #^   Grid coordinates :
 #^     1 : lonlat                   : points=72 (12x6)
 #^                              lon : 0 to 330 by 30 degrees_east  circular

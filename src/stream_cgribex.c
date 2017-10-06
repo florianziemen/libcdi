@@ -595,7 +595,7 @@ cgribexScanTsConstAdjust(stream_t *streamptr, taxis_t *taxis)
 	{
 	  streamptr->ntsteps = 0;
 	  for ( int varID = 0; varID < streamptr->nvars; varID++ )
-            vlistDefVarTsteptype(vlistID, varID, TSTEP_CONSTANT);
+            vlistDefVarTimetype(vlistID, varID, TIME_CONSTANT);
 	}
     }
 }
@@ -1035,7 +1035,7 @@ int cgribexScanTimestep2(stream_t * streamptr)
       if ( ! streamptr->tsteps[tsID].records[recID].used )
 	{
 	  varID = streamptr->tsteps[tsID].records[recID].varID;
-          vlistDefVarTsteptype(vlistID, varID, TSTEP_CONSTANT);
+          vlistDefVarTimetype(vlistID, varID, TIME_CONSTANT);
 	}
       else
 	{
@@ -1534,16 +1534,12 @@ void cgribexDefTime(int *isec1, int vdate, int vtime, int tsteptype, int numavg,
 
   if ( timetype == TAXIS_RELATIVE )
     {
-      int factor = 1;
-      int rdate, rtime;
+      int calendar = taxisInqCalendar(taxisID);
+      int rdate    = taxisInqRdate(taxisID);
+      int rtime    = taxisInqRtime(taxisID);
+
+      int factor = cgribexDefDateTime(isec1, timeunit, rdate, rtime);
       int ip1 = 0, ip2 = 0;
-      int calendar;
-
-      calendar = taxisInqCalendar(taxisID);
-      rdate    = taxisInqRdate(taxisID);
-      rtime    = taxisInqRtime(taxisID);
-
-      factor = cgribexDefDateTime(isec1, timeunit, rdate, rtime);
       timerange = cgribexDefTimerange(tsteptype, factor, calendar,
 				      rdate, rtime, vdate, vtime, &ip1, &ip2);
 

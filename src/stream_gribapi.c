@@ -1004,9 +1004,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
         {
           streamptr->ntsteps = 0;
           for ( int varID = 0; varID < streamptr->nvars; varID++ )
-            {
-              vlistDefVarTsteptype(vlistID, varID, TSTEP_CONSTANT);
-            }
+            vlistDefVarTimetype(vlistID, varID, TIME_CONSTANT);
         }
     }
 
@@ -1208,7 +1206,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
       if ( ! streamptr->tsteps[tsID].records[recID].used )
 	{
 	  int varID = streamptr->tsteps[tsID].records[recID].varID;
-	  vlistDefVarTsteptype(vlistID, varID, TSTEP_CONSTANT);
+	  vlistDefVarTimetype(vlistID, varID, TIME_CONSTANT);
 	}
       else
 	{

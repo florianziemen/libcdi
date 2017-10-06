@@ -37,7 +37,7 @@ int main(void)
 
   // Define the variables
   varID1 = vlistDefVar(vlistID, gridID, zaxisID1, TSTEP_AVG);
-  varID2 = vlistDefVar(vlistID, gridID, zaxisID2, TSTEP_INSTANT);
+  varID2 = vlistDefVar(vlistID, gridID, zaxisID2, TIME_VARYING);
 
   // Define the variable names
   vlistDefVarName(vlistID, varID1, "varname1");
