@@ -4,7 +4,7 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   September 2017
+! Uwe Schulzweida, MPI-MET, Hamburg,   October 2017
 !
 
       INTEGER    CDI_MAX_NAME
@@ -360,13 +360,13 @@
 !
       INTEGER    TIME_CONSTANT
       PARAMETER (TIME_CONSTANT          =  0)
+      INTEGER    TIME_VARYING
+      PARAMETER (TIME_VARYING           =  1)
       INTEGER    TIME_VARIABLE
       PARAMETER (TIME_VARIABLE          =  1)
 !
 !  TSTEP types
 !
-      INTEGER    TSTEP_CONSTANT
-      PARAMETER (TSTEP_CONSTANT         =  0)
       INTEGER    TSTEP_INSTANT
       PARAMETER (TSTEP_INSTANT          =  1)
       INTEGER    TSTEP_AVG
@@ -955,7 +955,7 @@
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         gridID,
 !                                     INTEGER         zaxisID,
-!                                     INTEGER         tsteptype,
+!                                     INTEGER         timetype,
 !                                     INTEGER         tilesetID)
       EXTERNAL        vlistDefVarTiles
 
@@ -963,7 +963,7 @@
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         gridID,
 !                                     INTEGER         zaxisID,
-!                                     INTEGER         tsteptype)
+!                                     INTEGER         timetype)
       EXTERNAL        vlistDefVar
 
 !                     vlistChangeVarGrid
@@ -983,7 +983,7 @@
 !                                     INTEGER         varID,
 !                                     INTEGER         gridID,
 !                                     INTEGER         zaxisID,
-!                                     INTEGER         tsteptype)
+!                                     INTEGER         timetype)
       EXTERNAL        vlistInqVar
 
       INTEGER         vlistInqVarGrid
@@ -1003,6 +1003,17 @@
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         code)
       EXTERNAL        vlistInqVarID
+
+!                     vlistDefVarTimetype
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     INTEGER         timetype)
+      EXTERNAL        vlistDefVarTimetype
+
+      INTEGER         vlistInqVarTimetype
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID)
+      EXTERNAL        vlistInqVarTimetype
 
 !                     vlistDefVarTsteptype
 !                                    (INTEGER         vlistID,

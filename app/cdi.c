@@ -178,7 +178,7 @@ void usage(void)
   fprintf(stderr, "       jpeg        JPEG compression of GRIB2 records\n");
   fprintf(stderr, "        zip[_1-9]  Deflate compression of netCDF4 variables\n");
   fprintf(stderr, "\n");
-  fprintf(stderr, "  Report bugs to <http://code.zmaw.de/projects/cdi>\n");
+  fprintf(stderr, "  Report bugs to <https://code.mpimet.mpg.de/projects/cdi>\n");
 }
 
 
@@ -344,9 +344,9 @@ void printShortinfo(int streamID, int vlistID, int vardis)
       int nsubtypes = vlistNsubtypes(vlistID);
 
       if ( nsubtypes > 0 )
-        fprintf(stdout, "   Var : Institut Source   Ttype    Subtypes Num  Levels Num  Gridsize Num Dtype : ");
+	fprintf(stdout, "   Var : Institut Source   T Steptype Subtypes Levels Num    Points Num Dtype : ");
       else
-        fprintf(stdout, "   Var : Institut Source   Ttype    Levels Num  Gridsize Num Dtype : ");
+	fprintf(stdout, "   Var : Institut Source   T Steptype Levels Num    Points Num Dtype : ");
 
       if ( vardis )
 	fprintf(stdout, "Parameter name\n");
@@ -361,24 +361,27 @@ void printShortinfo(int streamID, int vlistID, int vardis)
 
 	  fprintf(stdout, "%6d : ", varID + 1);
 
-	  /* institute info */
+	  // institute info
 	  const char *instptr = institutInqNamePtr(vlistInqVarInstitut(vlistID, varID));
 	  strcpy(tmpname, "unknown");
 	  if ( instptr ) strncpy(tmpname, instptr, CDI_MAX_NAME);
 	  limit_string_length(tmpname, CDI_MAX_NAME);
 	  fprintf(stdout, "%-8s ", tmpname);
 
-	  /* source info */
+	  // source info
 	  const char *modelptr = modelInqNamePtr(vlistInqVarModel(vlistID, varID));
 	  strcpy(tmpname, "unknown");
 	  if ( modelptr ) strncpy(tmpname, modelptr, CDI_MAX_NAME);
 	  limit_string_length(tmpname, CDI_MAX_NAME);
 	  fprintf(stdout, "%-8s ", tmpname);
 
-	  /* tsteptype */
+          // timetype
+          int timetype = vlistInqVarTimetype(vlistID, varID);
+          fprintf(stdout, "%c ", timetype==TIME_CONSTANT ? 'c' : 'v');
+
+	  // tsteptype
 	  int tsteptype = vlistInqVarTsteptype(vlistID, varID);
-	  if      ( tsteptype == TSTEP_CONSTANT ) fprintf(stdout, "%-8s ", "constant");
-	  else if ( tsteptype == TSTEP_INSTANT  ) fprintf(stdout, "%-8s ", "instant");
+	  if      ( tsteptype == TSTEP_INSTANT  ) fprintf(stdout, "%-8s ", "instant");
 	  else if ( tsteptype == TSTEP_INSTANT2 ) fprintf(stdout, "%-8s ", "instant");
 	  else if ( tsteptype == TSTEP_INSTANT3 ) fprintf(stdout, "%-8s ", "instant");
 	  else if ( tsteptype == TSTEP_MIN      ) fprintf(stdout, "%-8s ", "min");
@@ -980,7 +983,7 @@ int main(int argc, char *argv[])
 	    {
 	      for ( varID = 0; varID < nvars; varID++ )
 		{
-		  if ( vlistInqVarTsteptype(vlistID1, varID) == TSTEP_CONSTANT && tsID > 0 ) continue;
+		  if ( vlistInqVarTimetype(vlistID1, varID) == TIME_CONSTANT && tsID > 0 ) continue;
 
 		  number   = vlistInqVarNumber(vlistID1, varID);
 		  gridID   = vlistInqVarGrid(vlistID1, varID);

@@ -54,13 +54,13 @@ typedef struct {
   bool     calendar;
   bool     climatology;
   bool     lformulaterms;
-  int      tsteptype;
   int      param;
   int      code;
   int      tabnum;
   int      bounds;
   int      gridID;
   int      zaxisID;
+  int      timetype;
   int      gridtype;
   int      zaxistype;
   int      xdim;
@@ -195,7 +195,7 @@ void setForecastTime(const char *timestr, taxis_t *taxis)
 static
 int setBaseTime(const char *timeunits, taxis_t *taxis)
 {
-  int timetype = TAXIS_ABSOLUTE;
+  int taxistype = TAXIS_ABSOLUTE;
   int rdate = -1, rtime = -1;
 
   size_t len = strlen(timeunits);
@@ -220,14 +220,14 @@ int setBaseTime(const char *timeunits, taxis_t *taxis)
       while ( isspace(tu[pos]) ) ++pos;
 
       if ( str_is_equal(tu+pos, "since") )
-        timetype = TAXIS_RELATIVE;
+        taxistype = TAXIS_RELATIVE;
 
       while ( pos < len && !isspace(tu[pos]) ) ++pos;
       if ( tu[pos] )
         {
           while ( isspace(tu[pos]) ) ++pos;
 
-          if ( timetype == TAXIS_ABSOLUTE )
+          if ( taxistype == TAXIS_ABSOLUTE )
             {
               if ( timeunit == TUNIT_DAY )
                 {
@@ -246,7 +246,7 @@ int setBaseTime(const char *timeunits, taxis_t *taxis)
                     }
                 }
             }
-          else if ( timetype == TAXIS_RELATIVE )
+          else if ( taxistype == TAXIS_RELATIVE )
             {
               scanTimeString(tu+pos, &rdate, &rtime);
 
@@ -259,13 +259,13 @@ int setBaseTime(const char *timeunits, taxis_t *taxis)
         }
     }
 
-  taxis->type = timetype;
+  taxis->type = taxistype;
   taxis->unit = timeunit;
 
   Free(tu);
 
   if ( CDI_Debug )
-    Message("timetype = %d  unit = %d", timetype, timeunit);
+    Message("taxistype = %d  unit = %d", taxistype, timeunit);
 
   return 0;
 }
@@ -520,7 +520,7 @@ void cdfCreateRecords(stream_t *streamptr, int tsID)
       int nvrecs = 0;
       for ( int varID = 0; varID < nvars; varID++ )
         {
-          if ( vlistInqVarTsteptype(vlistID, varID) != TSTEP_CONSTANT )
+          if ( vlistInqVarTimetype(vlistID, varID) != TIME_CONSTANT )
             {
               int zaxisID = vlistInqVarZaxis(vlistID, varID);
               nvrecs += zaxisInqSize(zaxisID);
@@ -543,7 +543,7 @@ void cdfCreateRecords(stream_t *streamptr, int tsID)
           for ( int recID = 0, vrecID = 0; recID < nrecs; recID++ )
             {
               int varID = destTstep->records[recID].varID;
-              if ( vlistInqVarTsteptype(vlistID, varID) != TSTEP_CONSTANT )
+              if ( vlistInqVarTimetype(vlistID, varID) != TIME_CONSTANT )
                 {
                   destTstep->recIDs[vrecID++] = recID;
                 }
@@ -640,7 +640,7 @@ void init_ncvars(long nvars, ncvar_t *ncvars)
       ncvars[ncvarid].calendar        = false;
       ncvars[ncvarid].climatology     = false;
       ncvars[ncvarid].lformulaterms   = false;
-      ncvars[ncvarid].tsteptype       = TSTEP_CONSTANT;
+      ncvars[ncvarid].timetype        = TIME_CONSTANT;
       ncvars[ncvarid].param           = CDI_UNDEFID;
       ncvars[ncvarid].code            = CDI_UNDEFID;
       ncvars[ncvarid].tabnum          = 0;
@@ -1127,7 +1127,7 @@ void cdf_scan_var_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimi
         {
           if ( timedimid == dimidsp[0] )
             {
-              ncvars[ncvarid].tsteptype = TSTEP_INSTANT;
+              ncvars[ncvarid].timetype = TIME_VARYING;
               cdf_set_dim(ncvars, ncvarid, 0, T_AXIS);
             }
           else
@@ -3083,7 +3083,7 @@ void cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int model
       int zaxisID = ncvars[ncvarid].zaxisID;
 
       stream_new_var(streamptr, gridID, zaxisID, CDI_UNDEFID);
-      int varID = vlistDefVar(vlistID, gridID, zaxisID, ncvars[ncvarid].tsteptype);
+      int varID = vlistDefVar(vlistID, gridID, zaxisID, ncvars[ncvarid].timetype);
 
 #if  defined  (HAVE_NETCDF4)
       if ( ncvars[ncvarid].deflate )
@@ -3148,7 +3148,7 @@ void cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int model
       int ixyz = 0;
       static const int ipow10[4] = {1, 10, 100, 1000};
 
-      if ( ncvars[ncvarid].tsteptype != TSTEP_CONSTANT ) iodim++;
+      if ( ncvars[ncvarid].timetype != TIME_CONSTANT ) iodim++;
 
       const int *dimids = ncvars[ncvarid].dimids;
 

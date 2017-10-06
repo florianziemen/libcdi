@@ -113,12 +113,10 @@ static int cdfOpenFile(const char *filename, const char *mode, int *filetype)
                 int format;
                 (void) nc_inq_format(ncid, &format);
                 if ( format == NC_FORMAT_NETCDF4_CLASSIC )
-                  {
-                    *filetype = CDI_FILETYPE_NC4C;
-                  }
+                  *filetype = CDI_FILETYPE_NC4C;
               }
-          }
 #endif
+          }
 	  break;
 	case 'w':
 #ifdef  NC_64BIT_OFFSET

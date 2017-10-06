@@ -7,6 +7,7 @@
 #include "cdi_int.h"
 #include "stream_cdf.h"
 
+#ifdef HAVE_LIBNETCDF
 static inline bool
 filetypeIsNetCDF(int filetype)
 {
@@ -16,7 +17,7 @@ filetypeIsNetCDF(int filetype)
     ||   filetype == CDI_FILETYPE_NC4
     ||   filetype == CDI_FILETYPE_NC4C;
 }
-
+#endif
 
 void streamDefHistory(int streamID, int length, const char *history)
 {

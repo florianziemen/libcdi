@@ -54,10 +54,10 @@ int main(void)
   vlistID = vlistCreate();
 
   // Define the variables
-  varID1 = vlistDefVar(vlistID, gridID, zaxisID1, TSTEP_INSTANT);
-  varID2 = vlistDefVar(vlistID, gridID, zaxisID2, TSTEP_INSTANT);
-  varID3 = vlistDefVar(vlistID, gridID, zaxisID3, TSTEP_INSTANT);
-  varID4 = vlistDefVar(vlistID, gridID, zaxisID4, TSTEP_INSTANT);
+  varID1 = vlistDefVar(vlistID, gridID, zaxisID1, TIME_VARYING);
+  varID2 = vlistDefVar(vlistID, gridID, zaxisID2, TIME_VARYING);
+  varID3 = vlistDefVar(vlistID, gridID, zaxisID3, TIME_VARYING);
+  varID4 = vlistDefVar(vlistID, gridID, zaxisID4, TIME_VARYING);
 
   // Define the variable names
   vlistDefVarName(vlistID, varID1, "sp");

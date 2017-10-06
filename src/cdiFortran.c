@@ -316,6 +316,8 @@ FCALLSCFUN2 (INT, vlistInqVarZaxis, VLISTINQVARZAXIS, vlistinqvarzaxis, INT, INT
 /*  used in MPIOM  */
 
 FCALLSCFUN2 (INT, vlistInqVarID, VLISTINQVARID, vlistinqvarid, INT, INT)
+FCALLSCSUB3 (vlistDefVarTimetype, VLISTDEFVARTIMETYPE, vlistdefvartimetype, INT, INT, INT)
+FCALLSCFUN2 (INT, vlistInqVarTimetype, VLISTINQVARTIMETYPE, vlistinqvartimetype, INT, INT)
 FCALLSCSUB3 (vlistDefVarTsteptype, VLISTDEFVARTSTEPTYPE, vlistdefvartsteptype, INT, INT, INT)
 FCALLSCFUN2 (INT, vlistInqVarTsteptype, VLISTINQVARTSTEPTYPE, vlistinqvartsteptype, INT, INT)
 FCALLSCSUB3 (vlistDefVarCompType, VLISTDEFVARCOMPTYPE, vlistdefvarcomptype, INT, INT, INT)

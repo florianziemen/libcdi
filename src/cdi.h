@@ -225,12 +225,12 @@ typedef struct  {
 
 /* TIME types */
 
-#define  TIME_CONSTANT              0  /* obsolate, use TSTEP_CONSTANT                          */
-#define  TIME_VARIABLE              1  /* obsolate, use TSTEP_INSTANT                           */
+#define  TIME_CONSTANT              0  /* Time constant              */
+#define  TIME_VARYING               1  /* Time varying               */
+#define  TIME_VARIABLE              1  /* obsolate, use TIME_VARYING */
 
 /* TSTEP types */
 
-#define  TSTEP_CONSTANT             0  /* Constant            */
 #define  TSTEP_INSTANT              1  /* Instant             */
 #define  TSTEP_AVG                  2  /* Average             */
 #define  TSTEP_ACCUM                3  /* Accumulation        */
@@ -556,20 +556,23 @@ int     vlistInqModel(int vlistID);
 /* VLIST VAR routines */
 
 /*      vlistDefVarTiles: Create a new tile-based variable */
-int     vlistDefVarTiles(int vlistID, int gridID, int zaxisID, int tsteptype, int tilesetID);
+int     vlistDefVarTiles(int vlistID, int gridID, int zaxisID, int timetype, int tilesetID);
 
 /*      vlistDefVar: Create a new variable */
-int     vlistDefVar(int vlistID, int gridID, int zaxisID, int tsteptype);
+int     vlistDefVar(int vlistID, int gridID, int zaxisID, int timetype);
 
 void    vlistChangeVarGrid(int vlistID, int varID, int gridID);
 void    vlistChangeVarZaxis(int vlistID, int varID, int zaxisID);
 
-void    vlistInqVar(int vlistID, int varID, int *gridID, int *zaxisID, int *tsteptype);
+void    vlistInqVar(int vlistID, int varID, int *gridID, int *zaxisID, int *timetype);
 int     vlistInqVarGrid(int vlistID, int varID);
 int     vlistInqVarZaxis(int vlistID, int varID);
 
 /* used in MPIOM */
 int     vlistInqVarID(int vlistID, int code);
+
+void    vlistDefVarTimetype(int vlistID, int varID, int timetype);
+int     vlistInqVarTimetype(int vlistID, int varID);
 
 void    vlistDefVarTsteptype(int vlistID, int varID, int tsteptype);
 

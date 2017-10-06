@@ -334,7 +334,7 @@ void cdi_create_records(stream_t *streamptr, int tsID)
 	{
 	  int varID = sourceTstep->records[recID].varID;
 	  nrecords += (varID == CDI_UNDEFID /* varID = CDI_UNDEFID for write mode !!! */
-                       || vlistInqVarTsteptype(vlistID, varID) != TSTEP_CONSTANT);
+                       || vlistInqVarTimetype(vlistID, varID) != TIME_CONSTANT);
           //    printf("varID nrecords %d %d %d \n", varID, nrecords, vlistInqVarTsteptype(vlistID, varID));
 	}
     }
@@ -366,7 +366,7 @@ void cdi_create_records(stream_t *streamptr, int tsID)
           destTstep->records[recID].used = curRecord->used;
           if ( curRecord->used != CDI_UNDEFID && curRecord->varID != -1 ) /* curRecord->varID = -1 for write mode !!! */
             {
-              if ( vlistInqVarTsteptype(vlistID, curRecord->varID) != TSTEP_CONSTANT )
+              if ( vlistInqVarTimetype(vlistID, curRecord->varID) != TIME_CONSTANT )
                 {
                   destTstep->records[recID].position = CDI_UNDEFID;
                   destTstep->records[recID].size     = 0;

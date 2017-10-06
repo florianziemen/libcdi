@@ -757,8 +757,9 @@ void cdi_generate_vars(stream_t *streamptr)
 
       /* generate new variable */
       int varID = stream_new_var(streamptr, gridID, zaxisID, tilesetID);
-      varID = vlistDefVarTiles(vlistID, gridID, zaxisID, tsteptype, tilesetID);
+      varID = vlistDefVarTiles(vlistID, gridID, zaxisID, TIME_VARYING, tilesetID);
 
+      vlistDefVarTsteptype(vlistID, varID, tsteptype);
       vlistDefVarParam(vlistID, varID, param);
       vlistDefVarDatatype(vlistID, varID, prec);
       vlistDefVarTimave(vlistID, varID, timave);
