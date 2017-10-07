@@ -902,17 +902,17 @@ bool zaxisCompare(int zaxisID, int zaxistype, int nlevels, bool lbounds, const d
 
 	  if ( ! differ )
 	    {
-              if ( longname )
+              if ( longname && longname[0] )
                 {
-                  char zlongname[CDI_MAX_NAME];
+                  char zlongname[CDI_MAX_NAME]; zlongname[0] = 0;
                   zaxisInqLongname(zaxisID, zlongname);
-                  if ( zlongname[0] && strcmp(longname, zlongname) != 0 ) differ = true;
+                  if ( zlongname[0] && (strcmp(longname, zlongname) != 0) ) differ = true;
                 }
-              if ( units )
+              if ( units && units[0] )
                 {
-                  char zunits[CDI_MAX_NAME];
+                  char zunits[CDI_MAX_NAME]; zunits[0] = 0;
                   zaxisInqUnits(zaxisID, zunits);
-                  if ( zunits[0] && strcmp(units, zunits) != 0 ) differ = true;
+                  if ( zunits[0] && (strcmp(units, zunits) != 0) ) differ = true;
                 }
             }
 	}
