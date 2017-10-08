@@ -446,10 +446,10 @@ void varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds,
 
       if ( numavg ) vartable[varID].timave = 1;
 
-      if ( name )     if ( name[0] )     vartable[varID].name     = strdup(name);
-      if ( stdname )  if ( stdname[0] )  vartable[varID].stdname  = strdup(stdname);
-      if ( longname ) if ( longname[0] ) vartable[varID].longname = strdup(longname);
-      if ( units )    if ( units[0] )    vartable[varID].units    = strdup(units);
+      if ( name && name[0] )         vartable[varID].name     = strdup(name);
+      if ( stdname && stdname[0] )   vartable[varID].stdname  = strdup(stdname);
+      if ( longname && longname[0] ) vartable[varID].longname = strdup(longname);
+      if ( units && units[0] )       vartable[varID].units    = strdup(units);
     }
   else
     {
@@ -950,7 +950,8 @@ varDefZAxisSearch(int id, void *res, void *data)
 }
 
 
-int varDefZaxis(int vlistID, int zaxistype, int nlevels, const double *levels, const char **cvals, size_t clength, bool lbounds,        const double *levels1, const double *levels2, int vctsize, const double *vct, char *name,
+int varDefZaxis(int vlistID, int zaxistype, int nlevels, const double *levels, const char **cvals, size_t clength, bool lbounds,
+                const double *levels1, const double *levels2, int vctsize, const double *vct, char *name,
 		const char *longname, const char *units, int prec, int mode, int ltype1)
 {
   /*
