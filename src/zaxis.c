@@ -387,7 +387,7 @@ The function @func{cdiZaxisDefKeyStr} defines a CDI Z-axis string value from a k
 */
 int cdiZaxisDefKeyStr(int zaxisID, int key, int size, const char *mesg)
 {
-  if ( size < 1 || mesg == NULL || *mesg == 0 ) return -1;
+  if ( size < 1 || mesg == NULL ) return -1;
 
   zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
 

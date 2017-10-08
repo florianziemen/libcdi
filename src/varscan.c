@@ -446,10 +446,10 @@ void varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds,
 
       if ( numavg ) vartable[varID].timave = 1;
 
-      if ( name )     if ( name[0] )     vartable[varID].name     = strdup(name);
-      if ( stdname )  if ( stdname[0] )  vartable[varID].stdname  = strdup(stdname);
-      if ( longname ) if ( longname[0] ) vartable[varID].longname = strdup(longname);
-      if ( units )    if ( units[0] )    vartable[varID].units    = strdup(units);
+      if ( name && name[0] )         vartable[varID].name     = strdup(name);
+      if ( stdname && stdname[0] )   vartable[varID].stdname  = strdup(stdname);
+      if ( longname && longname[0] ) vartable[varID].longname = strdup(longname);
+      if ( units && units[0] )       vartable[varID].units    = strdup(units);
     }
   else
     {
@@ -902,17 +902,17 @@ bool zaxisCompare(int zaxisID, int zaxistype, int nlevels, bool lbounds, const d
 
 	  if ( ! differ )
 	    {
-              if ( longname )
+              if ( longname && longname[0] )
                 {
-                  char zlongname[CDI_MAX_NAME];
+                  char zlongname[CDI_MAX_NAME]; zlongname[0] = 0;
                   zaxisInqLongname(zaxisID, zlongname);
-                  if ( zlongname[0] && strcmp(longname, zlongname) != 0 ) differ = true;
+                  if ( zlongname[0] && (strcmp(longname, zlongname) != 0) ) differ = true;
                 }
-              if ( units )
+              if ( units && units[0] )
                 {
-                  char zunits[CDI_MAX_NAME];
+                  char zunits[CDI_MAX_NAME]; zunits[0] = 0;
                   zaxisInqUnits(zaxisID, zunits);
-                  if ( zunits[0] && strcmp(units, zunits) != 0 ) differ = true;
+                  if ( zunits[0] && (strcmp(units, zunits) != 0) ) differ = true;
                 }
             }
 	}
@@ -950,7 +950,8 @@ varDefZAxisSearch(int id, void *res, void *data)
 }
 
 
-int varDefZaxis(int vlistID, int zaxistype, int nlevels, const double *levels, const char **cvals, size_t clength, bool lbounds,        const double *levels1, const double *levels2, int vctsize, const double *vct, char *name,
+int varDefZaxis(int vlistID, int zaxistype, int nlevels, const double *levels, const char **cvals, size_t clength, bool lbounds,
+                const double *levels1, const double *levels2, int vctsize, const double *vct, char *name,
 		const char *longname, const char *units, int prec, int mode, int ltype1)
 {
   /*
@@ -1019,7 +1020,9 @@ int varDefZaxis(int vlistID, int zaxistype, int nlevels, const double *levels, c
 
 	  if ( name && name[0] ) zaxisDefName(zaxisID, name);
 	  if ( longname && longname[0] ) zaxisDefLongname(zaxisID, longname);
+          else                           zaxisDefLongname(zaxisID, "");
 	  if ( units && units[0] ) zaxisDefUnits(zaxisID, units);
+          else                     zaxisDefUnits(zaxisID, "");
 	  zaxisDefDatatype(zaxisID, prec);
 	  zaxisDefLtype(zaxisID, ltype1);
 	}
