@@ -1323,6 +1323,7 @@ void cdf_scan_var_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimi
                   char *varname = pstring;
                   while ( !isspace((int) *pstring) && *pstring != 0 ) pstring++;
                   if ( *pstring == 0 ) lstop = true;
+                  if ( *(pstring-1) == ',' ) *(pstring-1) = 0;
                   *pstring++ = 0;
 
                   int dimvarid;
@@ -1345,7 +1346,7 @@ void cdf_scan_var_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimi
                       if ( k == nchecked_vars )
                         {
                           if ( nchecked_vars < max_check_vars ) checked_vars[nchecked_vars++] = strdup(varname);
-                          Warning("%s - %s", nc_strerror(status), varname);
+                          Warning("%s - >%s<", nc_strerror(status), varname);
                         }
                     }
 
