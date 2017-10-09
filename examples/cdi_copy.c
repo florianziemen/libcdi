@@ -7,7 +7,7 @@ int main(void)
   const int nlat =  6; // Number of latitudes 
   const int nlev =  5; // Number of levels    
   const int nts  =  3; // Number of time steps
-  int nmiss;
+  size_t nmiss;
   double var1[nlon*nlat];
   double var2[nlon*nlat*nlev];
 

@@ -4,8 +4,9 @@ PROGRAM CDIREADF2003
 
   IMPLICIT NONE
 
-  INTEGER :: gsize, nlevel, nvars, code
-  INTEGER :: vdate, vtime, nmiss, status, ilev
+  INTEGER(c_size_t) :: gsize, nmiss
+  INTEGER :: nlevel, nvars, code
+  INTEGER :: vdate, vtime, status, ilev
   INTEGER :: streamID, varID, gridID, zaxisID
   INTEGER :: tsID, vlistID, taxisID
   DOUBLE PRECISION, ALLOCATABLE :: field(:,:)

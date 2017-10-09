@@ -653,6 +653,10 @@
 !                                    (INTEGER         filetype)
       EXTERNAL        streamFilesuffix
 
+      INTEGER         streamNvals
+!                                    (INTEGER         streamID)
+      EXTERNAL        streamNvals
+
       INTEGER         streamInqNvars
 !                                    (INTEGER         streamID)
       EXTERNAL        streamInqNvars

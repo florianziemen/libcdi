@@ -165,14 +165,18 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid, i
     {
       bool ijDirectionIncrementGiven = gribbyte_get_bit(ISEC2_ResFlag, 1);
       bool uvRelativeToGrid = gribbyte_get_bit(ISEC2_ResFlag, 5);
-
       if ( uvRelativeToGrid ) grid->uvRelativeToGrid = 1;
-      if ( ISEC4_NumValues != ISEC2_NumLon*ISEC2_NumLat )
-        Error("numberOfPoints (%d) and gridSize (%d) differ!", ISEC4_NumValues, ISEC2_NumLon*ISEC2_NumLat);
 
-      grid->size   = ISEC4_NumValues;
-      grid->x.size = ISEC2_NumLon;
-      grid->y.size = ISEC2_NumLat;
+      size_t nvalues = (size_t) ISEC4_NumValues;
+      size_t nlon = (size_t) ISEC2_NumLon;
+      size_t nlat = (size_t) ISEC2_NumLat;
+      if ( nvalues != nlon*nlat )
+        Error("numberOfPoints (%zu) and gridSize (%zu) differ!", nvalues, nlon*nlat);
+
+      grid->size   = nvalues;
+      grid->x.size = nlon;
+      grid->y.size = nlat;
+
       if ( gridtype == GRID_GAUSSIAN ) grid->np = ISEC2_NumPar;
       grid->x.inc  = 0;
       grid->y.inc  = 0;
@@ -241,10 +245,10 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid, i
       bool uvRelativeToGrid = gribbyte_get_bit(ISEC2_ResFlag, 5);
       if ( uvRelativeToGrid ) grid->uvRelativeToGrid = 1;
       grid->np      = ISEC2_NumPar;
-      grid->size    = ISEC4_NumValues;
+      grid->size    = (size_t)ISEC4_NumValues;
       grid->rowlon  = ISEC2_RowLonPtr;
-      grid->nrowlon = ISEC2_NumLat;
-      grid->y.size  = ISEC2_NumLat;
+      grid->nrowlon = (size_t)ISEC2_NumLat;
+      grid->y.size  = (size_t)ISEC2_NumLat;
       grid->x.inc   = 0;
       grid->y.inc   = 0;
       grid->x.flag  = 0;
@@ -283,12 +287,15 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid, i
       bool uvRelativeToGrid = gribbyte_get_bit(ISEC2_ResFlag, 5);
       if ( uvRelativeToGrid ) grid->uvRelativeToGrid = 1;
 
-      if ( ISEC4_NumValues != ISEC2_NumLon*ISEC2_NumLat )
-        Error("numberOfPoints (%d) and gridSize (%d) differ!", ISEC4_NumValues, ISEC2_NumLon*ISEC2_NumLat);
+      size_t nvalues = (size_t) ISEC4_NumValues;
+      size_t nlon = (size_t) ISEC2_NumLon;
+      size_t nlat = (size_t) ISEC2_NumLat;
+      if ( nvalues != nlon*nlat )
+        Error("numberOfPoints (%zu) and gridSize (%zu) differ!", nvalues, nlon*nlat);
 
-      grid->size   = ISEC4_NumValues;
-      grid->x.size = ISEC2_NumLon;
-      grid->y.size = ISEC2_NumLat;
+      grid->size   = nvalues;
+      grid->x.size = nlon;
+      grid->y.size = nlat;
 
       grid->x.first = 0;
       grid->x.last  = 0;
@@ -301,16 +308,13 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid, i
     }
   else if ( gridtype == GRID_SPECTRAL )
     {
-      grid->size  = ISEC4_NumValues;
+      grid->size  = (size_t) ISEC4_NumValues;
       grid->trunc = ISEC2_PentaJ;
-      if ( ISEC2_RepMode == 2 )
-        grid->lcomplex = 1;
-      else
-        grid->lcomplex = 0;
-    }
+      grid->lcomplex = (ISEC2_RepMode == 2) ? 1 : 0;
+   }
   else if ( gridtype == GRID_GME )
     {
-      grid->size  = ISEC4_NumValues;
+      grid->size  = (size_t) ISEC4_NumValues;
       grid->gme.nd  = ISEC2_GME_ND;
       grid->gme.ni  = ISEC2_GME_NI;
       grid->gme.ni2 = ISEC2_GME_NI2;
@@ -318,7 +322,7 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid, i
     }
   else if ( gridtype == GRID_GENERIC )
     {
-      grid->size  = ISEC4_NumValues;
+      grid->size  = (size_t) ISEC4_NumValues;
       grid->x.size = 0;
       grid->y.size = 0;
     }
@@ -1322,8 +1326,8 @@ int cgribexScanTimestep(stream_t * streamptr)
 #endif
 
 #if  defined  (HAVE_LIBCGRIBEX)
-int cgribexDecode(int memtype, void *gribbuffer, int gribsize, void *data, long datasize,
-		  int unreduced, int *nmiss, double missval)
+int cgribexDecode(int memtype, void *gribbuffer, size_t gribsize, void *data, size_t datasize,
+		  int unreduced, size_t *nmiss, double missval)
 {
   int status = 0;
   int iret = 0, iword = 0;
@@ -1339,10 +1343,10 @@ int cgribexDecode(int memtype, void *gribbuffer, int gribsize, void *data, long 
 
   if ( memtype == MEMTYPE_FLOAT )
     gribExSP(isec0, isec1, isec2, fsec2f, isec3, fsec3f, isec4, (float*) data,
-             (int) datasize, (int*) gribbuffer, gribsize, &iword, hoper, &iret);
+             (int) datasize, (int*) gribbuffer, (int)gribsize, &iword, hoper, &iret);
   else
     gribExDP(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, (double*) data,
-             (int) datasize, (int*) gribbuffer, gribsize, &iword, hoper, &iret);
+             (int) datasize, (int*) gribbuffer, (int)gribsize, &iword, hoper, &iret);
 
   *nmiss = (ISEC1_Sec2Or3Flag & 64) ? ISEC4_NumValues - ISEC4_NumNonMissValues : 0;
 
@@ -1355,7 +1359,7 @@ int cgribexDecode(int memtype, void *gribbuffer, int gribsize, void *data, long 
       if ( memtype == MEMTYPE_FLOAT )
         {
           float *restrict dataf = (float*) data;
-          for ( long i = 0; i < datasize; i++ )
+          for ( size_t i = 0; i < datasize; i++ )
             if ( (fabs(dataf[i]-undef_pds) < undef_eps) || IS_EQUAL(dataf[i],FSEC3_MissVal) ) {
               dataf[i] = (float)missval;
               (*nmiss)++;
@@ -1364,7 +1368,7 @@ int cgribexDecode(int memtype, void *gribbuffer, int gribsize, void *data, long 
       else
         {
           double *restrict datad = (double*) data;
-          for ( long i = 0; i < datasize; i++ )
+          for ( size_t i = 0; i < datasize; i++ )
             if ( (fabs(datad[i]-undef_pds) < undef_eps) || IS_EQUAL(datad[i],FSEC3_MissVal) ) {
               datad[i] = missval;
               (*nmiss)++;
@@ -1610,9 +1614,9 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
 
   if ( gridtype == GRID_GENERIC )
     {
-      int gridsize = gridInqSize(gridID);
-      int xsize = gridInqXsize(gridID);
-      int ysize = gridInqYsize(gridID);
+      int gridsize = (int)gridInqSize(gridID);
+      int xsize = (int)gridInqXsize(gridID);
+      int ysize = (int)gridInqYsize(gridID);
 
       if ( (ysize ==  32 || ysize ==  48 || ysize ==  64 ||
 	    ysize ==  96 || ysize == 160 || ysize == 192 ||
@@ -1688,8 +1692,8 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
 	else
 	  ISEC2_GridType = GRIB1_GTYPE_LATLON;
 
-	int nlon = gridInqXsize(gridID);
-	int nlat = gridInqYsize(gridID);
+	int nlon = (int)gridInqXsize(gridID);
+	int nlat = (int)gridInqYsize(gridID);
 
 	if ( gridtype == GRID_GAUSSIAN_REDUCED )
 	  {
@@ -1773,8 +1777,8 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
       }
     case GRID_LCC:
       {
-	int xsize = gridInqXsize(gridID);
-        int ysize = gridInqYsize(gridID);
+	int xsize = (int)gridInqXsize(gridID);
+        int ysize = (int)gridInqYsize(gridID);
 
         double lon_0, lat_0, lat_1, lat_2, a, rf, xval_0, yval_0, x_0, y_0;
 	gridInqParamLCC(gridID, grid_missval, &lon_0, &lat_0, &lat_1, &lat_2, &a, &rf, &xval_0, &yval_0, &x_0, &y_0);
@@ -2079,7 +2083,7 @@ void cgribexDefEnsembleVar(int *isec1, int vlistID, int varID)
 #if  defined  (HAVE_LIBCGRIBEX)
 size_t cgribexEncode(int memtype, int varID, int levelID, int vlistID, int gridID, int zaxisID,
 		     int vdate, int vtime, int tsteptype, int numavg,
-		     long datasize, const void *data, int nmiss, void *gribbuffer, size_t gribbuffersize)
+		     size_t datasize, const void *data, size_t nmiss, void *gribbuffer, size_t gribbuffersize)
 {
   int iret = 0, iword = 0;
   int isec0[2], isec1[4096], isec2[4096], isec3[2], isec4[512];
@@ -2109,7 +2113,9 @@ size_t cgribexEncode(int memtype, int varID, int levelID, int vlistID, int gridI
 
   cgribexDefEnsembleVar(isec1, vlistID, varID);
 
-  ISEC4_NumValues = gridInqSize(gridID);
+  cdi_check_gridsize_int_limit("GRIB1", datasize);
+
+  ISEC4_NumValues = (int) datasize;
   ISEC4_NumBits   = grbBitsPerValue(datatype);
 
   if ( nmiss > 0 )

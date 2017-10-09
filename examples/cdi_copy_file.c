@@ -10,8 +10,9 @@
 int main(int argc, char *argv[])
 {
   int linfo = 0;
-  int vlistID1, vlistID2, varID, streamID1, streamID2, tsID;
-  int nmiss, nvars, status, gridsize;
+  int vlistID1, vlistID2, varID, streamID1, streamID2;
+  size_t nmiss;
+  int nvars, status;
   double *vardata = NULL;
   const char *ifile, *ofile;
 
@@ -35,7 +36,7 @@ int main(int argc, char *argv[])
   /* Get the variable list of the dataset */
   vlistID1 = streamInqVlist(streamID1);
   nvars = vlistNvars(vlistID1);
-  gridsize = vlistGridsizeMax(vlistID1);
+  size_t gridsize = vlistGridsizeMax(vlistID1);
 
   vardata = (double *) malloc(gridsize*MAX_LEVEL*sizeof(double));
 
@@ -52,7 +53,7 @@ int main(int argc, char *argv[])
   streamDefVlist(streamID2, vlistID2);
 
   /* Loop over all time steps */
-  tsID = 0;
+  int tsID = 0;
   while ( (status = streamInqTimestep(streamID1, tsID)) )
     {
       /* Define the output time step */

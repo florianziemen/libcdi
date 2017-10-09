@@ -1,8 +1,6 @@
 #if defined (HAVE_CONFIG_H)
-#  include "config.h"
+#include "config.h"
 #endif
-
-#include <limits.h>
 
 #include "dmemory.h"
 #include "cdi.h"
@@ -17,8 +15,8 @@
 #include "error.h"
 
 #if  defined  (HAVE_LIBGRIB_API)
-#  include "file.h"
-#  include <grib_api.h>
+#include "file.h"
+#include <grib_api.h>
 #endif
 
 
@@ -694,18 +692,18 @@ int vlistInqVarID(int vlistID, int code)
 }
 
 
-int vlistInqVarSize(int vlistID, int varID)
+size_t vlistInqVarSize(int vlistID, int varID)
 {
   vlistCheckVarID(__func__, vlistID, varID);
 
   int zaxisID, gridID, timetype;
   vlistInqVar(vlistID, varID, &gridID, &zaxisID, &timetype);
 
-  int nlevs = zaxisInqSize(zaxisID);
+  size_t nlevs = (size_t)zaxisInqSize(zaxisID);
 
-  int gridsize = gridInqSize(gridID);
+  size_t gridsize = gridInqSize(gridID);
 
-  int size = gridsize*nlevs;
+  size_t size = gridsize*nlevs;
 
   return size;
 }

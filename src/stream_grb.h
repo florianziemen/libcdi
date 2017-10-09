@@ -12,15 +12,15 @@ int   grbInqTimestep(stream_t *streamptr, int tsID);
 
 int   grbInqRecord(stream_t *streamptr, int *varID, int *levelID);
 void  grbDefRecord(stream_t *streamptr);
-void  grb_read_record(stream_t *streamptr, int memtype, void *data, int *nmiss);
-void  grb_write_record(stream_t *streamptr, int memtype, const void *data, int nmiss);
+void  grb_read_record(stream_t *streamptr, int memtype, void *data, size_t *nmiss);
+void  grb_write_record(stream_t *streamptr, int memtype, const void *data, size_t nmiss);
 void  grbCopyRecord(stream_t *streamptr2, stream_t *streamptr1);
 
-void  grb_read_var(stream_t *streamptr, int varID, int memtype, void *data, int *nmiss);
-void  grb_write_var(stream_t *streamptr, int varID, int memtype, const void *data, int nmiss);
+void  grb_read_var(stream_t *streamptr, int varID, int memtype, void *data, size_t *nmiss);
+void  grb_write_var(stream_t *streamptr, int varID, int memtype, const void *data, size_t nmiss);
 
-void  grb_read_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, void *data, int *nmiss);
-void  grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, const void *data, int nmiss);
+void  grb_read_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, void *data, size_t *nmiss);
+void  grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, const void *data, size_t nmiss);
 
 int   grib1ltypeToZaxisType(int grib_ltype);
 int   grib2ltypeToZaxisType(int grib_ltype);

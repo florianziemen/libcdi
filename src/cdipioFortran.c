@@ -55,12 +55,12 @@ static int cdiPioInit_fwrap(int commSuper, int confResH, int *pioNamespace)
 FCALLSCFUN3 (INT, cdiPioInit_fwrap, CDIPIOINIT, cdipioinit, INT, INT, PINT)
 FCALLSCSUB0 (pioWriteTimestep, PIOWRITETIMESTEP, piowritetimestep)
 FCALLSCSUB0 (cdiPioRDMAProgress, CDIPIORDMAPROGRESS, cdipiordmaprogress)
-static void streamWriteVarPart_fwrap(int streamID, int varID, const void *data, int nmiss, void *partDesc)
+static void streamWriteVarPart_fwrap(int streamID, int varID, const void *data, size_t nmiss, void *partDesc)
 {
   streamWriteVarPart(streamID, varID, data, nmiss, (*(Xt_idxlist *)partDesc));
 }
 FCALLSCSUB5 (streamWriteVarPart_fwrap, STREAMWRITEVARPART, streamwritevarpart, INT, INT, PVOID, INT, PVOID)
-static void streamWriteScatteredVarPart_fwrap(int streamID, int varID, const void *data, int numBlocks, const int  blocklengths[], const int  displacements[], int nmiss, void *partDesc)
+static void streamWriteScatteredVarPart_fwrap(int streamID, int varID, const void *data, int numBlocks, const int  blocklengths[], const int  displacements[], size_t nmiss, void *partDesc)
 {
   streamWriteScatteredVarPart(streamID, varID, data, numBlocks, blocklengths, displacements, nmiss, (*(Xt_idxlist *)partDesc));
 }

@@ -10,6 +10,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <errno.h>
+#include <limits.h>
 #include <math.h>
 #include <sys/types.h>
 
@@ -242,7 +243,7 @@ typedef struct {
   int         fileID;
   int         filemode;
   int         nrecs;        /* number of records                  */
-  off_t       numvals;
+  size_t      numvals;
   char       *filename;
   Record     *record;
   svarinfo_t *vars;
@@ -443,11 +444,11 @@ void
 cdiStreamDefVlist_(int streamID, int vlistID);
 
 int
-cdiStreamWriteVar_(int streamID, int varID, int memtype, const void *data, int nmiss);
+cdiStreamWriteVar_(int streamID, int varID, int memtype, const void *data, size_t nmiss);
 
 void
 cdiStreamWriteVarChunk_(int streamID, int varID, int memtype,
-                        const int rect[][2], const void *data, int nmiss);
+                        const int rect[][2], const void *data, size_t nmiss);
 void
 cdiStreamCloseDefaultDelegate(stream_t *streamptr,
                               int recordBufIsToBeDeleted);
@@ -480,6 +481,13 @@ void cdiDefTableID(int tableID);
 
 void gridGenXvals(int xsize, double xfirst, double xlast, double xinc, double *xvals);
 void gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double yinc, double *yvals);
+
+static inline
+void cdi_check_gridsize_int_limit(const char *format, size_t gridsize)
+{
+  if ( gridsize > INT_MAX ) Error("%s format grid size (%zu) limit exceeded (%zu)!", format, gridsize, INT_MAX);
+}
+
 
 #if defined (__cplusplus)
 }

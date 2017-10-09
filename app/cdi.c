@@ -184,10 +184,10 @@ void usage(void)
 
 static
 void printInfo(int vdate, int vtime, char *varname, double level,
-	       int datasize, int number, int nmiss, double missval, const double *data, int vardis)
+	       size_t datasize, int number, size_t nmiss, double missval, const double *data, int vardis)
 {
   static int rec = 0;
-  int i, ivals = 0, imiss = 0;
+  size_t ivals = 0, imiss = 0;
   double arrmean, arrmin, arrmax;
   char vdatestr[32], vtimestr[32];
 
@@ -208,9 +208,9 @@ void printInfo(int vdate, int vtime, char *varname, double level,
 
   fprintf(stdout, "%6d :%s %s %7g ", ++rec, vdatestr, vtimestr, level);
 
-  fprintf(stdout, "%8d ", datasize);
+  fprintf(stdout, "%8zu ", datasize);
 
-  fprintf(stdout, "%7d :", nmiss);
+  fprintf(stdout, "%7zu :", nmiss);
 
   if ( number == CDI_REAL )
     {
@@ -219,7 +219,7 @@ void printInfo(int vdate, int vtime, char *varname, double level,
 	  arrmean = 0;
 	  arrmin  =  1.e300;
 	  arrmax  = -1.e300;
-	  for ( i = 0; i < datasize; i++ )
+	  for ( size_t i = 0; i < datasize; i++ )
 	    {
 	      if ( !DBL_IS_EQUAL(data[i], missval) )
 		{
@@ -237,7 +237,7 @@ void printInfo(int vdate, int vtime, char *varname, double level,
 	  arrmean = data[0];
 	  arrmin  = data[0];
 	  arrmax  = data[0];
-	  for ( i = 1; i < datasize; i++ )
+	  for ( size_t i = 1; i < datasize; i++ )
 	    {
 	      if ( data[i] < arrmin ) arrmin = data[i];
 	      if ( data[i] > arrmax ) arrmax = data[i];
@@ -251,10 +251,10 @@ void printInfo(int vdate, int vtime, char *varname, double level,
     }
   else
     {
-      int nvals_r = 0, nvals_i = 0;
+      size_t nvals_r = 0, nvals_i = 0;
       double arrsum_r = 0, arrsum_i = 0, arrmean_r = 0, arrmean_i = 0;
 
-      for ( i = 0; i < datasize; i++ )
+      for ( size_t i = 0; i < datasize; i++ )
 	{
 	  if ( !DBL_IS_EQUAL(data[i*2], missval) )
 	    {
@@ -278,7 +278,7 @@ void printInfo(int vdate, int vtime, char *varname, double level,
   fprintf(stdout, " : %-14s\n", varname);
 
   if ( imiss != nmiss && nmiss > 0 )
-    fprintf(stdout, "Found %d of %d missing values!\n", imiss, nmiss);
+    fprintf(stdout, "Found %zu of %zu missing values!\n", imiss, nmiss);
 }
 
 static const char *tunit2str(int tunits)
@@ -406,8 +406,8 @@ void printShortinfo(int streamID, int vlistID, int vardis)
 	  fprintf(stdout, "%3d ", vlistZaxisIndex(vlistID, zaxisID) + 1);
 
 	  /* grid info */
-	  int gridsize = gridInqSize(gridID);
-	  fprintf(stdout, "%9d ", gridsize);
+	  size_t gridsize = gridInqSize(gridID);
+	  fprintf(stdout, "%9zu ", gridsize);
 	  fprintf(stdout, "%3d ", vlistGridIndex(vlistID, gridID) + 1);
 
 	  /* datatype */
@@ -836,9 +836,9 @@ int main(int argc, char *argv[])
 
   if ( fname1 )
     {
-      int nmiss;
+      size_t nmiss;
       int number;
-      int datasize = 0;
+      size_t datasize = 0;
       int streamID2 = CDI_UNDEFID;
       int filetype;
       int gridID, zaxisID;
@@ -846,7 +846,7 @@ int main(int argc, char *argv[])
       int nrecs;
       int levelID, levelsize;
       int nts = 0;
-      int gridsize = 0;
+      size_t gridsize = 0;
       int recID;
       int taxisID2 = CDI_UNDEFID;
       int vlistID2 = CDI_UNDEFID;
@@ -911,7 +911,7 @@ int main(int argc, char *argv[])
 	}
 
       if ( vlistNumber(vlistID1) != CDI_REAL ) datasize *= 2;
-      double *data = (double *) malloc((size_t)datasize * sizeof (double));
+      double *data = (double *) malloc(datasize * sizeof (double));
 
       /*
 	nts = cdiInqTimeSize(streamID1);
@@ -925,6 +925,7 @@ int main(int argc, char *argv[])
 	  printShortinfo(streamID1, vlistID1, Vardis);
 	}
 
+      size_t idum;
       int tsID = 0;
       if ( Info || fname2 )
       while ( (nrecs = streamInqTimestep(streamID1, tsID)) > 0 )
@@ -945,7 +946,8 @@ int main(int argc, char *argv[])
 	      for ( recID = 0; recID < nrecs; recID++ )
 		{
 		  streamInqRecord(streamID1, &varID, &levelID);
-		  streamReadRecord(streamID1, data, &nmiss);
+		  streamReadRecord(streamID1, data, &idum);
+                  nmiss = idum;
 
 		  number   = vlistInqVarNumber(vlistID1, varID);
 		  gridID   = vlistInqVarGrid(vlistID1, varID);
@@ -973,7 +975,7 @@ int main(int argc, char *argv[])
 		      if ( Move )
 			streamCopyRecord(streamID2, streamID1);
 		      else
-			streamWriteRecord(streamID2, data, nmiss);
+			streamWriteRecord(streamID2, data, idum);
 		    }
 	      	}
 	    }
@@ -1004,7 +1006,8 @@ int main(int argc, char *argv[])
 		  for ( levelID = 0; levelID < levelsize; levelID++ )
 		    {
                       double level = zaxisInqLevels(zaxisID, NULL) ? zaxisInqLevel(zaxisID, levelID) : levelID+1;
-		      streamReadVarSlice(streamID1, varID, levelID, data, &nmiss);
+		      streamReadVarSlice(streamID1, varID, levelID, data, &idum);
+                      nmiss = idum;
 
 		      if ( Info )
 			printInfo(vdate, vtime, varname, level, gridsize, number, nmiss, missval, data, Vardis);
