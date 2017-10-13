@@ -100,7 +100,11 @@ bool is_height_units(const char *units)
 
   bool status
     = (u0=='m' && (!units[1] || strncmp(units, "meter", 5) == 0))
-    || (!units[2] && units[1]=='m' && (u0=='c' || u0=='d' || u0=='k'));
+    || (!units[2] && units[1]=='m' && (u0=='c' || u0=='d' || u0=='k'))
+    || (strncmp(units, "decimeter", 9) == 0)
+    || (strncmp(units, "centimeter", 10) == 0)
+    || (strncmp(units, "millimeter", 10) == 0)
+    || (strncmp(units, "kilometer", 9) == 0);
 
   return status;
 }
