@@ -9,7 +9,7 @@ from an open dataset.
 \subsubsection*{Usage}
 
 \begin{verbatim}
-    void streamReadVar(int streamID, int varID, double *data, int *nmiss);
+    void streamReadVar(int streamID, int varID, double *data, size_t *nmiss);
 \end{verbatim}
 
 \hspace*{4mm}\begin{minipage}[]{15cm}
@@ -37,7 +37,7 @@ from an open dataset.
 \subsubsection*{Usage}
 
 \begin{verbatim}
-    void streamReadVar(int streamID, int varID, float *data, int *nmiss);
+    void streamReadVar(int streamID, int varID, float *data, size_t *nmiss);
 \end{verbatim}
 
 \hspace*{4mm}\begin{minipage}[]{15cm}
@@ -66,7 +66,7 @@ from an open dataset.
 
 \begin{verbatim}
     void streamReadVarSlice(int streamID, int varID, int levelID, double *data, 
-                            int *nmiss);
+                            size_t *nmiss);
 \end{verbatim}
 
 \hspace*{4mm}\begin{minipage}[]{15cm}
@@ -97,7 +97,7 @@ from an open dataset.
 
 \begin{verbatim}
     void streamReadVarSliceF(int streamID, int varID, int levelID, float *data, 
-                             int *nmiss);
+                             size_t *nmiss);
 \end{verbatim}
 
 \hspace*{4mm}\begin{minipage}[]{15cm}

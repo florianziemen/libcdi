@@ -527,16 +527,17 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
 
   size_t datasize;
   FAIL_ON_GRIB_ERROR(grib_get_size, gh, "values", &datasize);
-  long numberOfPoints;
-  FAIL_ON_GRIB_ERROR(grib_get_long, gh, "numberOfPoints", &numberOfPoints);
-
   long lpar;
+  FAIL_ON_GRIB_ERROR(grib_get_long, gh, "numberOfPoints", &lpar);
+  size_t numberOfPoints = (size_t) lpar;
+
 
   if ( gridtype == GRID_LONLAT || gridtype == GRID_GAUSSIAN || projtype == CDI_PROJ_RLL )
     {
-      long nlon, nlat;
-      FAIL_ON_GRIB_ERROR(grib_get_long, gh, "Ni", &nlon);
-      FAIL_ON_GRIB_ERROR(grib_get_long, gh, "Nj", &nlat);
+      FAIL_ON_GRIB_ERROR(grib_get_long, gh, "Ni", &lpar);
+      size_t nlon = (size_t) lpar;
+      FAIL_ON_GRIB_ERROR(grib_get_long, gh, "Nj", &lpar);
+      size_t nlat = (size_t) lpar;
 
       if ( gridtype == GRID_GAUSSIAN )
         {
@@ -545,11 +546,11 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
         }
 
       if ( numberOfPoints != nlon*nlat )
-        Error("numberOfPoints (%ld) and gridSize (%ld) differ!", numberOfPoints, nlon*nlat);
+        Error("numberOfPoints (%zu) and gridSize (%zu) differ!", numberOfPoints, nlon*nlat);
 
-      grid->size   = (int)numberOfPoints;
-      grid->x.size = (int)nlon;
-      grid->y.size = (int)nlat;
+      grid->size   = numberOfPoints;
+      grid->x.size = nlon;
+      grid->y.size = nlat;
       grid->x.inc  = 0;
       grid->y.inc  = 0;
       grid->x.flag = 0;
@@ -611,7 +612,7 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
       FAIL_ON_GRIB_ERROR(grib_get_long, gh, "Nj", &lpar);
       int nlat = (int)lpar;
 
-      grid->size   = (int)numberOfPoints;
+      grid->size   = numberOfPoints;
 
       grid->nrowlon = nlat;
       grid->rowlon = (int *) Malloc((size_t)nlat * sizeof (int));
@@ -621,7 +622,7 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
       for ( int i = 0; i < nlat; ++i ) grid->rowlon[i] = (int)pl[i];
       Free(pl);
 
-      grid->y.size  = nlat;
+      grid->y.size  = (size_t)nlat;
       grid->x.inc   = 0;
       grid->y.inc   = 0;
       grid->x.flag  = 0;
@@ -670,14 +671,14 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
   else if ( projtype == CDI_PROJ_LCC )
     {
       FAIL_ON_GRIB_ERROR(grib_get_long, gh, "Nx", &lpar);
-      int nlon = (int)lpar;
+      size_t nlon = (size_t)lpar;
       FAIL_ON_GRIB_ERROR(grib_get_long, gh, "Ny", &lpar);
-      int nlat = (int)lpar;
+      size_t nlat = (size_t)lpar;
 
       if ( numberOfPoints != nlon*nlat )
-        Error("numberOfPoints (%d) and gridSize (%d) differ!", (int)numberOfPoints, nlon*nlat);
+        Error("numberOfPoints (%zu) and gridSize (%zu) differ!", numberOfPoints, nlon*nlat);
 
-      grid->size  = (int)numberOfPoints;
+      grid->size  = numberOfPoints;
       grid->x.size = nlon;
       grid->y.size = nlat;
 
@@ -702,14 +703,14 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
       grid->lcomplex = 0;
       if ( strncmp(typeOfPacking, "spectral_complex", len) == 0 ) grid->lcomplex = 1;
 
-      grid->size  = (int)datasize;
+      grid->size = datasize;
 
       FAIL_ON_GRIB_ERROR(grib_get_long, gh, "J", &lpar);
       grid->trunc = (int)lpar;
     }
   else if ( gridtype == GRID_GME )
     {
-      grid->size  = (int)numberOfPoints;
+      grid->size = numberOfPoints;
       if ( grib_get_long(gh, "nd", &lpar) == 0 ) grid->gme.nd  = (int)lpar;
       if ( grib_get_long(gh, "Ni", &lpar) == 0 ) grid->gme.ni  = (int)lpar;
       if ( grib_get_long(gh, "n2", &lpar) == 0 ) grid->gme.ni2 = (int)lpar;
@@ -723,7 +724,7 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
         size_t len = sizeof(reference_link);
         reference_link[0] = 0;
       */
-      grid->size  = (int)numberOfPoints;
+      grid->size = numberOfPoints;
 
       if ( grib_get_long(gh, "numberOfGridUsed", &lpar) == 0 )
         {
@@ -746,11 +747,11 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
     }
   else if ( gridtype == GRID_GENERIC )
     {
-      int nlon = 0, nlat = 0;
-      if ( grib_get_long(gh, "Ni", &lpar) == 0 ) nlon = (int)lpar;
-      if ( grib_get_long(gh, "Nj", &lpar) == 0 ) nlat = (int)lpar;
+      size_t nlon = 0, nlat = 0;
+      if ( grib_get_long(gh, "Ni", &lpar) == 0 ) nlon = (size_t)lpar;
+      if ( grib_get_long(gh, "Nj", &lpar) == 0 ) nlat = (size_t)lpar;
 
-      grid->size  = (int)numberOfPoints;
+      grid->size = numberOfPoints;
 
       if ( nlon > 0 && nlat > 0 && nlon*nlat == grid->size )
         {

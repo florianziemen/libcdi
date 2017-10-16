@@ -41,7 +41,7 @@ int main(int argc, const char **argv)
         {
           size_t memSize = (size_t)vlistInqVarSize(vlistID, (int)varID)
             * sizeof (double);
-          int nmiss;
+          size_t nmiss;
           if (memSize > bufSize)
             {
               double *temp = (double *)realloc(buf, memSize);
@@ -53,7 +53,7 @@ int main(int argc, const char **argv)
               buf = temp;
             }
           streamReadVar(streamID, (int)varID, buf, &nmiss);
-          allNmissSum += (size_t)nmiss;
+          allNmissSum += nmiss;
         }
     }
   if (countMissingValues)

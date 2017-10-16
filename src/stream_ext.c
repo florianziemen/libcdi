@@ -2,10 +2,6 @@
 #  include "config.h"
 #endif
 
-#include <limits.h>
-#include <stdio.h>
-#include <string.h>
-
 #include "dmemory.h"
 
 #include "error.h"
@@ -90,7 +86,7 @@ int extInqRecord(stream_t *streamptr, int *varID, int *levelID)
 }
 */
 
-void extReadRecord(stream_t *streamptr, double *data, int *nmiss)
+void extReadRecord(stream_t *streamptr, double *data, size_t *nmiss)
 {
   int vlistID = streamptr->vlistID;
   int fileID  = streamptr->fileID;
@@ -112,14 +108,14 @@ void extReadRecord(stream_t *streamptr, double *data, int *nmiss)
 
   double missval = vlistInqVarMissval(vlistID, varID);
   int gridID  = vlistInqVarGrid(vlistID, varID);
-  int size    = gridInqSize(gridID);
+  size_t size = gridInqSize(gridID);
 
   streamptr->numvals += size;
 
   *nmiss = 0;
   if ( vlistInqVarNumber(vlistID, varID) == CDI_REAL )
     {
-      for ( int i = 0; i < size; i++ )
+      for ( size_t i = 0; i < size; i++ )
 	if ( DBL_IS_EQUAL(data[i], missval) || DBL_IS_EQUAL(data[i], (float)missval) )
 	  {
 	    data[i] = missval;
@@ -128,7 +124,7 @@ void extReadRecord(stream_t *streamptr, double *data, int *nmiss)
     }
   else
     {
-      for ( int i = 0; i < 2*size; i+=2 )
+      for ( size_t i = 0; i < 2*size; i+=2 )
 	if ( DBL_IS_EQUAL(data[i], missval) || DBL_IS_EQUAL(data[i], (float)missval) )
 	  {
 	    data[i] = missval;
@@ -154,7 +150,8 @@ void extDefRecord(stream_t *streamptr)
   header[1] = pnum;
   header[2] = streamptr->record->level;
   int gridID = streamptr->record->gridID;
-  header[3] = gridInqSize(gridID);
+  cdi_check_gridsize_int_limit("EXTRA", gridInqSize(gridID));
+  header[3] = (int) gridInqSize(gridID);
 
   extrec_t *extp = (extrec_t*) streamptr->record->exsep;
   extDefDatatype(streamptr->record->prec, &extp->prec, &extp->number);
@@ -172,7 +169,7 @@ void extWriteRecord(stream_t *streamptr, const double *data)
 }
 
 static
-void extAddRecord(stream_t *streamptr, int param, int level, int xysize,
+void extAddRecord(stream_t *streamptr, int param, int level, size_t xysize,
 		  size_t recsize, off_t position, int prec, int number)
 {
   int vlistID = streamptr->vlistID;
@@ -638,7 +635,7 @@ int extInqTimestep(stream_t *streamptr, int tsID)
 }
 
 
-void extReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, int *nmiss)
+void extReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, size_t *nmiss)
 {
   if ( CDI_Debug ) Message("streamID = %d  varID = %d  levID = %d", streamptr->self, varID, levID);
 
@@ -648,7 +645,7 @@ void extReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, 
   int fileID   = streamptr->fileID;
   /* NOTE: tiles are not supported here! */
   double missval = vlistInqVarMissval(vlistID, varID);
-  int gridsize = gridInqSize(vlistInqVarGrid(vlistID, varID));
+  size_t gridsize = gridInqSize(vlistInqVarGrid(vlistID, varID));
   int tsid     = streamptr->curTsID;
 
   off_t currentfilepos = fileGetPos(fileID);
@@ -667,7 +664,7 @@ void extReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, 
   *nmiss = 0;
   if ( vlistInqVarNumber(vlistID, varID) == CDI_REAL )
     {
-      for ( int i = 0; i < gridsize; i++ )
+      for ( size_t i = 0; i < gridsize; i++ )
 	if ( DBL_IS_EQUAL(data[i], missval) || DBL_IS_EQUAL(data[i], (float)missval) )
 	  {
 	    data[i] = missval;
@@ -676,7 +673,7 @@ void extReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, 
     }
   else
     {
-      for ( int i = 0; i < 2*gridsize; i+=2 )
+      for ( size_t i = 0; i < 2*gridsize; i+=2 )
 	if ( DBL_IS_EQUAL(data[i], missval) || DBL_IS_EQUAL(data[i], (float)missval) )
 	  {
 	    data[i] = missval;
@@ -686,12 +683,12 @@ void extReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, 
 }
 
 
-void extReadVarDP(stream_t *streamptr, int varID, double *data, int *nmiss)
+void extReadVarDP(stream_t *streamptr, int varID, double *data, size_t *nmiss)
 {
   if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamptr->self, varID);
 
   int vlistID = streamptr->vlistID;
-  size_t gridsize = (size_t) gridInqSize(vlistInqVarGrid(vlistID, varID));
+  size_t gridsize = gridInqSize(vlistInqVarGrid(vlistID, varID));
   size_t nlevs    = (size_t) streamptr->vars[varID].recordTable[0].nlevs;
 
   for ( size_t levID = 0; levID < nlevs; levID++)
@@ -714,7 +711,9 @@ void extWriteVarSliceDP(stream_t *streamptr, int varID, int levID, const double 
   header[0] = streamptr->tsteps[tsID].taxis.vdate;
   header[1] = pnum;
   header[2] = (int)(zaxisInqLevel(vlistInqVarZaxis(vlistID, varID), levID));
-  header[3] = gridInqSize(vlistInqVarGrid(vlistID, varID));
+  int gridID = vlistInqVarGrid(vlistID, varID);
+  cdi_check_gridsize_int_limit("EXTRA", gridInqSize(gridID));
+  header[3] = (int) gridInqSize(gridID);
 
   extrec_t *extp = (extrec_t*) streamptr->record->exsep;
   extDefDatatype(vlistInqVarDatatype(vlistID, varID), &extp->prec, &extp->number);
@@ -730,7 +729,7 @@ void extWriteVarDP(stream_t *streamptr, int varID, const double *data)
   if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamptr->self, varID);
 
   int vlistID = streamptr->vlistID;
-  size_t gridsize = (size_t) gridInqSize(vlistInqVarGrid(vlistID, varID));
+  size_t gridsize = gridInqSize(vlistInqVarGrid(vlistID, varID));
   size_t nlevs    = (size_t) zaxisInqSize(vlistInqVarZaxis(vlistID, varID));
 
   for ( size_t levID = 0;  levID < nlevs; levID++ )

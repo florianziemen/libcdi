@@ -2,11 +2,6 @@
 #  include "config.h"
 #endif
 
-#include <limits.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include "dmemory.h"
 
 #include "error.h"
@@ -84,7 +79,7 @@ int srvInqRecord(stream_t *streamptr, int *varID, int *levelID)
 }
 */
 
-void srvReadRecord(stream_t *streamptr, double *data, int *nmiss)
+void srvReadRecord(stream_t *streamptr, double *data, size_t *nmiss)
 {
   int vlistID  = streamptr->vlistID;
   int fileID   = streamptr->fileID;
@@ -107,12 +102,12 @@ void srvReadRecord(stream_t *streamptr, double *data, int *nmiss)
 
   double missval = vlistInqVarMissval(vlistID, varID);
   int gridID  = vlistInqVarGrid(vlistID, varID);
-  int size    = gridInqSize(gridID);
+  size_t size = gridInqSize(gridID);
 
   streamptr->numvals += size;
 
   *nmiss = 0;
-  for ( int i = 0; i < size; i++ )
+  for ( size_t i = 0; i < size; i++ )
     if ( DBL_IS_EQUAL(data[i], missval) || DBL_IS_EQUAL(data[i], (float)missval) )
       {
 	data[i] = missval;
@@ -142,8 +137,8 @@ void srvDefRecord(stream_t *streamptr)
   header[3] = record->time;
 
   int gridID = record->gridID;
-  int xsize = gridInqXsize(gridID),
-      ysize = gridInqYsize(gridID);
+  size_t xsize = gridInqXsize(gridID),
+         ysize = gridInqYsize(gridID);
   if ( xsize == 0 || ysize == 0 )
     {
       xsize = gridInqSize(gridID);
@@ -153,8 +148,10 @@ void srvDefRecord(stream_t *streamptr)
   if ( gridInqSize(gridID) != xsize*ysize )
     Error("Internal problem with gridsize!");
 
-  header[4] = xsize;
-  header[5] = ysize;
+  cdi_check_gridsize_int_limit("SERVICE", gridInqSize(gridID));
+
+  header[4] = (int)xsize;
+  header[5] = (int)ysize;
   header[6] = 0;
   header[7] = 0;
 
@@ -175,7 +172,7 @@ void srvWriteRecord(stream_t *streamptr, const double *data)
 }
 
 static
-void srv_add_record(stream_t *streamptr, int param, int level, int xsize, int ysize,
+void srv_add_record(stream_t *streamptr, int param, int level, size_t xsize, size_t ysize,
                     size_t recsize, off_t position, int prec)
 {
   int vlistID = streamptr->vlistID;
@@ -636,7 +633,7 @@ int srvInqTimestep(stream_t *streamptr, int tsID)
 }
 
 
-void srvReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, int *nmiss)
+void srvReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, size_t *nmiss)
 {
   if ( CDI_Debug ) Message("streamID = %d  varID = %d  levID = %d", streamptr->self, varID, levID);
 
@@ -646,7 +643,7 @@ void srvReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, 
   int fileID   = streamptr->fileID;
   /* NOTE: tiles are not supported here! */
   double missval = vlistInqVarMissval(vlistID, varID);
-  int gridsize = gridInqSize(vlistInqVarGrid(vlistID, varID));
+  size_t gridsize = gridInqSize(vlistInqVarGrid(vlistID, varID));
   int tsid     = streamptr->curTsID;
 
   off_t currentfilepos = fileGetPos(fileID);
@@ -663,7 +660,7 @@ void srvReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, 
   fileSetPos(fileID, currentfilepos, SEEK_SET);
 
   *nmiss = 0;
-  for ( int i = 0; i < gridsize; i++ )
+  for ( size_t i = 0; i < gridsize; i++ )
     if ( DBL_IS_EQUAL(data[i], missval) || DBL_IS_EQUAL(data[i], (float)missval) )
       {
 	data[i] = missval;
@@ -672,12 +669,12 @@ void srvReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, 
 }
 
 
-void srvReadVarDP(stream_t *streamptr, int varID, double *data, int *nmiss)
+void srvReadVarDP(stream_t *streamptr, int varID, double *data, size_t *nmiss)
 {
   if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamptr->self, varID);
 
   int vlistID = streamptr->vlistID;
-  size_t gridsize = (size_t) gridInqSize(vlistInqVarGrid(vlistID, varID));
+  size_t gridsize = gridInqSize(vlistInqVarGrid(vlistID, varID));
   size_t nlevs    = (size_t) streamptr->vars[varID].recordTable[0].nlevs;
 
   for ( size_t levID = 0; levID < nlevs; levID++)
@@ -703,8 +700,8 @@ void srvWriteVarSliceDP(stream_t *streamptr, int varID, int levID, const double 
   header[2] = streamptr->tsteps[tsID].taxis.vdate;
   header[3] = streamptr->tsteps[tsID].taxis.vtime;
 
-  int xsize = gridInqXsize(gridID);
-  int ysize = gridInqYsize(gridID);
+  size_t xsize = gridInqXsize(gridID);
+  size_t ysize = gridInqYsize(gridID);
   if ( xsize == 0 || ysize == 0 )
     {
       xsize = gridInqSize(gridID);
@@ -713,6 +710,8 @@ void srvWriteVarSliceDP(stream_t *streamptr, int varID, int levID, const double 
   if ( gridInqType(gridID) == GRID_UNSTRUCTURED ) ysize = 1;
   if ( gridInqSize(gridID) != xsize*ysize )
     Error("Internal problem with gridsize!");
+
+  cdi_check_gridsize_int_limit("SERVICE", gridInqSize(gridID));
 
   header[4] = xsize;
   header[5] = ysize;
@@ -735,7 +734,7 @@ void srvWriteVarDP(stream_t *streamptr, int varID, const double *data)
   if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamptr->self, varID);
 
   int vlistID = streamptr->vlistID;
-  size_t gridsize = (size_t) gridInqSize(vlistInqVarGrid(vlistID, varID));
+  size_t gridsize = gridInqSize(vlistInqVarGrid(vlistID, varID));
   size_t nlevs    = (size_t) zaxisInqSize(vlistInqVarZaxis(vlistID, varID));
 
   for ( size_t levID = 0; levID < nlevs; levID++ )

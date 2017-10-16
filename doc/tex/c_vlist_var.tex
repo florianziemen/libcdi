@@ -9,21 +9,20 @@ The function {\texttt{vlistDefVar}} adds a new variable to vlistID.
 \subsubsection*{Usage}
 
 \begin{verbatim}
-    int vlistDefVar(int vlistID, int gridID, int zaxisID, int tsteptype);
+    int vlistDefVar(int vlistID, int gridID, int zaxisID, int timetype);
 \end{verbatim}
 
 \hspace*{4mm}\begin{minipage}[]{15cm}
-\begin{deflist}{\texttt{tsteptype}\ }
+\begin{deflist}{\texttt{timetype}\ }
 \item[\texttt{vlistID}]
 Variable list ID, from a previous call to {\htmlref{\texttt{vlistCreate}}{vlistCreate}}.
 \item[\texttt{gridID}]
 Grid ID, from a previous call to {\htmlref{\texttt{gridCreate}}{gridCreate}}.
 \item[\texttt{zaxisID}]
 Z-axis ID, from a previous call to {\htmlref{\texttt{zaxisCreate}}{zaxisCreate}}.
-\item[\texttt{tsteptype}]
+\item[\texttt{timetype}]
 One of the set of predefined {\CDI} timestep types.
-                     The valid {\CDI} timestep types are {\texttt{TSTEP\_CONSTANT}}, {\texttt{TSTEP\_INSTANT}},
-                     {\texttt{TSTEP\_ACCUM}}, {\texttt{TSTEP\_AVG}}, {\texttt{TSTEP\_MAX}}, {\texttt{TSTEP\_MIN}} and {\texttt{TSTEP\_SD}}.
+                     The valid {\CDI} timestep types are {\texttt{TIME\_CONSTANT}} and {\texttt{TIME\_VARYING}}.
 
 \end{deflist}
 \end{minipage}
@@ -45,7 +44,7 @@ and add a variable with {\texttt{vlistDefVar}}.
     int vlistID, varID;
        ...
     vlistID = vlistCreate();
-    varID = vlistDefVar(vlistID, gridID, zaxisID, TIME_INSTANT);
+    varID = vlistDefVar(vlistID, gridID, zaxisID, TIME_VARYING);
        ...
     streamDefVlist(streamID, vlistID);
        ...
@@ -136,7 +135,7 @@ Variable identifier.
 
 {\texttt{vlistInqVarTsteptype}} returns the timestep type of the Variable,
 one of the set of predefined {\CDI} timestep types.
-The valid {\CDI} timestep types are {\texttt{TSTEP\_CONSTANT}}, {\texttt{TSTEP\_INSTANT}},
+The valid {\CDI} timestep types are {\texttt{TSTEP\_INSTANT}},
 {\texttt{TSTEP\_ACCUM}}, {\texttt{TSTEP\_AVG}}, {\texttt{TSTEP\_MAX}}, {\texttt{TSTEP\_MIN}} and {\texttt{TSTEP\_SD}}.
 
 

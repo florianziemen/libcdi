@@ -386,39 +386,39 @@ int     streamInqCurTimestepID(int streamID);
 const char *streamFilename(int streamID);
 const char *streamFilesuffix(int filetype);
 
-off_t   streamNvals(int streamID);
+size_t  streamNvals(int streamID);
 
 int     streamInqNvars(int streamID);
 
 /* STREAM var I/O routines (random access) */
 
 /*      streamWriteVar: Write a variable */
-void    streamWriteVar(int streamID, int varID, const double data[], int nmiss);
-void    streamWriteVarF(int streamID, int varID, const float data[], int nmiss);
+void    streamWriteVar(int streamID, int varID, const double data[], size_t nmiss);
+void    streamWriteVarF(int streamID, int varID, const float data[], size_t nmiss);
 
 /*      streamReadVar: Read a variable */
-void    streamReadVar(int streamID, int varID, double data[], int *nmiss);
-void    streamReadVarF(int streamID, int varID, float data[], int *nmiss);
+void    streamReadVar(int streamID, int varID, double data[], size_t *nmiss);
+void    streamReadVarF(int streamID, int varID, float data[], size_t *nmiss);
 
 /*      streamWriteVarSlice: Write a horizontal slice of a variable */
-void    streamWriteVarSlice(int streamID, int varID, int levelID, const double data[], int nmiss);
-void    streamWriteVarSliceF(int streamID, int varID, int levelID, const float data[], int nmiss);
+void    streamWriteVarSlice(int streamID, int varID, int levelID, const double data[], size_t nmiss);
+void    streamWriteVarSliceF(int streamID, int varID, int levelID, const float data[], size_t nmiss);
 
 /*      streamReadVarSlice: Read a horizontal slice of a variable */
-void    streamReadVarSlice(int streamID, int varID, int levelID, double data[], int *nmiss);
-void    streamReadVarSliceF(int streamID, int varID, int levelID, float data[], int *nmiss);
+void    streamReadVarSlice(int streamID, int varID, int levelID, double data[], size_t *nmiss);
+void    streamReadVarSliceF(int streamID, int varID, int levelID, float data[], size_t *nmiss);
 
-void    streamWriteVarChunk(int streamID, int varID, const int rect[3][2], const double data[], int nmiss);
+void    streamWriteVarChunk(int streamID, int varID, const int rect[3][2], const double data[], size_t nmiss);
 
 
 /* STREAM record I/O routines (sequential access) */
 
 void    streamDefRecord(int streamID, int  varID, int  levelID);
 void    streamInqRecord(int streamID, int *varID, int *levelID);
-void    streamWriteRecord(int streamID, const double data[], int nmiss);
-void    streamWriteRecordF(int streamID, const float data[], int nmiss);
-void    streamReadRecord(int streamID, double data[], int *nmiss);
-void    streamReadRecordF(int streamID, float data[], int *nmiss);
+void    streamWriteRecord(int streamID, const double data[], size_t nmiss);
+void    streamWriteRecordF(int streamID, const float data[], size_t nmiss);
+void    streamReadRecord(int streamID, double data[], size_t *nmiss);
+void    streamReadRecordF(int streamID, float data[], size_t *nmiss);
 void    streamCopyRecord(int streamIDdest, int streamIDsrc);
 
 void    streamInqGRIBinfo(int streamID, int *intnum, float *fltnum, off_t *bignum);
@@ -526,7 +526,7 @@ int     vlistNsubtypes(int vlistID);
 
 void    vlistDefNtsteps(int vlistID, int nts);
 int     vlistNtsteps(int vlistID);
-int     vlistGridsizeMax(int vlistID);
+size_t  vlistGridsizeMax(int vlistID);
 int     vlistGrid(int vlistID, int index);
 int     vlistGridIndex(int vlistID, int gridID);
 void    vlistChangeGridIndex(int vlistID, int index, int gridID);
@@ -672,7 +672,7 @@ int     vlistInqVarTypeOfGeneratingProcess(int vlistID, int varID);
 void    vlistDefVarProductDefinitionTemplate(int vlistID, int varID, int productDefinitionTemplate);
 int     vlistInqVarProductDefinitionTemplate(int vlistID, int varID);
 
-int     vlistInqVarSize(int vlistID, int varID);
+size_t  vlistInqVarSize(int vlistID, int varID);
 
 void    vlistDefIndex(int vlistID, int varID, int levID, int index);
 int     vlistInqIndex(int vlistID, int varID, int levID);
@@ -745,7 +745,7 @@ int     gridInqMask(int gridID, int mask[]);
 void    gridPrint(int gridID, int opt);
 
 /*      gridCreate: Create a horizontal Grid */
-int     gridCreate(int gridtype, int size);
+int     gridCreate(int gridtype, size_t size);
 
 /*      gridDestroy: Destroy a horizontal Grid */
 void    gridDestroy(int gridID);
@@ -766,19 +766,19 @@ int     gridInqProjType(int gridID);
 int     gridInqType(int gridID);
 
 /*      gridInqSize: Get the size of a Grid */
-int     gridInqSize(int gridID);
+size_t  gridInqSize(int gridID);
 
 /*      gridDefXsize: Define the size of a X-axis */
-void    gridDefXsize(int gridID, int xsize);
+void    gridDefXsize(int gridID, size_t xsize);
 
 /*      gridInqXsize: Get the size of a X-axis */
-int     gridInqXsize(int gridID);
+size_t  gridInqXsize(int gridID);
 
 /*      gridDefYsize: Define the size of a Y-axis */
-void    gridDefYsize(int gridID, int ysize);
+void    gridDefYsize(int gridID, size_t ysize);
 
 /*      gridInqYsize: Get the size of a Y-axis */
-int     gridInqYsize(int gridID);
+size_t  gridInqYsize(int gridID);
 
 /*      gridDefNP: Define the number of parallels between a pole and the equator */
 void    gridDefNP(int gridID, int np);
@@ -790,25 +790,25 @@ int     gridInqNP(int gridID);
 void    gridDefXvals(int gridID, const double xvals[]);
 
 /*      gridInqXvals: Get all values of a X-axis */
-int     gridInqXvals(int gridID, double xvals[]);
+size_t  gridInqXvals(int gridID, double xvals[]);
 
 /*      gridInqXIsc: Find out whether X-coordinate is of type CHAR */
 int     gridInqXIsc(int gridID);
 
 /*      gridInqXCvals: Get strings from X-axis in case grid is of type GRID_CHARXY */
-int     gridInqXCvals(int gridID, char *xcvals[]);
+size_t  gridInqXCvals(int gridID, char *xcvals[]);
 
 /*      gridDefYvals: Define the values of a Y-axis */
 void    gridDefYvals(int gridID, const double yvals[]);
 
 /*      gridInqYvals: Get all values of a Y-axis */
-int     gridInqYvals(int gridID, double yvals[]);
+size_t  gridInqYvals(int gridID, double yvals[]);
 
 /*      gridInqYIsc: Find out whether Y-coordinate is of type CHAR */
 int     gridInqYIsc(int gridID);
 
 /*      gridInqYCvals: Get strings from Y-axis in case grid is of type GRID_CHARXY */
-int     gridInqYCvals(int gridID, char *ycvals[]);
+size_t  gridInqYCvals(int gridID, char *ycvals[]);
 
 /* CDI grid string key values */
 #define  CDI_KEY_XNAME       901  // X-axis name
@@ -893,10 +893,10 @@ void    gridDefDatatype(int gridID, int prec);
 int     gridInqDatatype(int gridID);
 
 /*      gridInqXval: Get one value of a X-axis */
-double  gridInqXval(int gridID, int index);
+double  gridInqXval(int gridID, size_t index);
 
 /*      gridInqYval: Get one value of a Y-axis */
-double  gridInqYval(int gridID, int index);
+double  gridInqYval(int gridID, size_t index);
 
 double  gridInqXinc(int gridID);
 double  gridInqYinc(int gridID);
@@ -966,13 +966,13 @@ int     gridInqNvertex(int gridID);
 void    gridDefXbounds(int gridID, const double xbounds[]);
 
 /*      gridInqXbounds: Get the bounds of a X-axis */
-int     gridInqXbounds(int gridID, double xbounds[]);
+size_t  gridInqXbounds(int gridID, double xbounds[]);
 
 /*      gridDefYbounds: Define the bounds of a Y-axis */
 void    gridDefYbounds(int gridID, const double ybounds[]);
 
 /*      gridInqYbounds: Get the bounds of a Y-axis */
-int     gridInqYbounds(int gridID, double ybounds[]);
+size_t  gridInqYbounds(int gridID, double ybounds[]);
 
 void    gridDefRowlon(int gridID, int nrowlon, const int rowlon[]);
 void    gridInqRowlon(int gridID, int rowlon[]);
@@ -1013,7 +1013,7 @@ void    zaxisPrint(int zaxisID);
 void    zaxisDefLevels(int zaxisID, const double levels[]);
 
 /*      zaxisDefCvals: Define area types of a Z-axis */
-void    zaxisDefCvals(int zaxisID, const char *cvals[], size_t clength);
+void    zaxisDefCvals(int zaxisID, const char *cvals[], int clength);
 
 /*      zaxisInqLevels: Get all levels of a Z-axis */
 int     zaxisInqLevels(int zaxisID, double levels[]);

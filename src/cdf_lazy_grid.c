@@ -198,22 +198,22 @@ cdfLazyGridDefYVals(grid_t *grid, const double *vals)
 }
 
 static double
-cdfLazyGridInqXVal(grid_t *grid, int index)
+cdfLazyGridInqXVal(grid_t *grid, size_t index)
 {
   struct cdfLazyGrid *lazyGrid = (struct cdfLazyGrid *)grid;
   lock_lazy_load(lazyGrid);
-  double rv = cdfLazyGridInqXYVal(grid, (size_t)index, &lazyGrid->xValsGet,
+  double rv = cdfLazyGridInqXYVal(grid, index, &lazyGrid->xValsGet,
                                   grid->x.vals, grid->vtable->inqXValsPtr);
   unlock_lazy_load(lazyGrid);
   return rv;
 }
 
 static double
-cdfLazyGridInqYVal(grid_t *grid, int index)
+cdfLazyGridInqYVal(grid_t *grid, size_t index)
 {
   struct cdfLazyGrid *lazyGrid = (struct cdfLazyGrid *)grid;
   lock_lazy_load(lazyGrid);
-  double rv = cdfLazyGridInqXYVal(grid, (size_t)index, &lazyGrid->yValsGet,
+  double rv = cdfLazyGridInqXYVal(grid, index, &lazyGrid->yValsGet,
                                   grid->y.vals, grid->vtable->inqYValsPtr);
   unlock_lazy_load(lazyGrid);
   return rv;

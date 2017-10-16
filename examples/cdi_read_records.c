@@ -15,14 +15,16 @@
 
 typedef struct {
   int streamID;
-  int *varID, *levelID, *nmiss;
+  int *varID, *levelID;
+  size_t *nmiss;
   double *array;
 }
 read_arg_t;
 
 
 typedef struct {
-  int varID, levelID, nmiss;
+  int varID, levelID;
+  size_t nmiss;
   double *array;
   int array_size;
   int recID, nrecs;
@@ -39,7 +41,8 @@ typedef struct work_st{
 
 
 typedef struct {
-  int varID, levelID, nmiss;
+  int varID, levelID;
+  size_t nmiss;
   double *array;
   int array_size;
   int recID, nrecs;
@@ -60,7 +63,8 @@ void readRecord(void *arg)
 {
   read_arg_t *read_arg = (read_arg_t *) arg;
   int streamID;
-  int *varID, *levelID, *nmiss;
+  int *varID, *levelID;
+  size_t *nmiss;
   double *array;
 
   streamID = read_arg->streamID;
@@ -249,7 +253,7 @@ void destroy_iothread(void *p)
 #endif
 
 
-void stream_read_record_par(int streamID, int *varID, int *levelID, double *array, int *nmiss, par_io_t *parIO)
+void stream_read_record_par(int streamID, int *varID, int *levelID, double *array, size_t *nmiss, par_io_t *parIO)
 {
   int lpario = 0;
   int recID = 0, nrecs = 0;
@@ -311,7 +315,7 @@ void stream_read_record_par(int streamID, int *varID, int *levelID, double *arra
 }
 
 
-void stream_read_record(int streamID, int *varID, int *levelID, double *data, int *nmiss)
+void stream_read_record(int streamID, int *varID, int *levelID, double *data, size_t *nmiss)
 {
   streamInqRecord(streamID, varID, levelID);
   streamReadRecord(streamID, data, nmiss);
@@ -321,7 +325,8 @@ void stream_read_record(int streamID, int *varID, int *levelID, double *data, in
 int main(int argc, char *argv[])
 {
   int taxisID, vlistID, varID, levelID, streamID, tsID;
-  int nmiss, vdate, vtime;
+  size_t nmiss;
+  int vdate, vtime;
   int nrecs, recID, code;
   int gridsize, i;
   double *data;

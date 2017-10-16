@@ -27,13 +27,13 @@ struct gridVirtTable
   void (*defXBounds)(grid_t *gridptr, const double *xbounds);
   void (*defYBounds)(grid_t *gridptr, const double *ybounds);
   void (*defArea)(grid_t *gridptr, const double *area);
-  double (*inqXVal)(grid_t *gridptr, int index);
-  double (*inqYVal)(grid_t *gridptr, int index);
-  int (*inqXVals)(grid_t *gridptr, double *xvals);
-  int (*inqXCvals)(grid_t *gridptr, char **xcvals);
+  double (*inqXVal)(grid_t *gridptr, size_t index);
+  double (*inqYVal)(grid_t *gridptr, size_t index);
+  size_t (*inqXVals)(grid_t *gridptr, double *xvals);
+  size_t (*inqXCvals)(grid_t *gridptr, char **xcvals);
   int (*inqXIsc)(grid_t *gridptr);
-  int (*inqYVals)(grid_t *gridptr, double *yvals);
-  int (*inqYCvals)(grid_t *gridptr, char **ycvals);
+  size_t (*inqYVals)(grid_t *gridptr, double *yvals);
+  size_t (*inqYCvals)(grid_t *gridptr, char **ycvals);
   int (*inqYIsc)(grid_t *gridptr);
   const double *(*inqXValsPtr)(grid_t *gridptr);
   const char **(*inqXCvalsPtr)(grid_t *gridptr);
@@ -47,10 +47,10 @@ struct gridVirtTable
   void (*inqArea)(grid_t *gridptr, double *area);
   const double *(*inqAreaPtr)(grid_t *gridptr);
   int (*hasArea)(grid_t *gridptr);
-  int (*inqMask)(grid_t *gridptr, int *mask);
+  size_t (*inqMask)(grid_t *gridptr, int *mask);
   int (*inqMaskGME)(grid_t *gridptr, int *mask_gme);
-  int (*inqXBounds)(grid_t *gridptr, double *xbounds);
-  int (*inqYBounds)(grid_t *gridptr, double *ybounds);
+  size_t (*inqXBounds)(grid_t *gridptr, double *xbounds);
+  size_t (*inqYBounds)(grid_t *gridptr, double *ybounds);
   const double *(*inqXBoundsPtr)(grid_t *gridptr);
   const double *(*inqYBoundsPtr)(grid_t *gridptr);
 };
@@ -61,7 +61,7 @@ struct gridaxis_t {
   char    units[CDI_MAX_NAME];
   char    dimname[CDI_MAX_NAME];
   const char *stdname;
-  int     size;                  // number of values
+  size_t  size;                  // number of values
   short   flag;                  // 0: undefined 1:vals 2:first+inc
   double  first, last, inc;
   double *vals;
@@ -81,7 +81,7 @@ struct grid_t {
   char    mapping[CDI_MAX_NAME];
   char   *name;
   int     self;
-  int     size;
+  size_t  size;
   int     type;                   /* grid type                      */
   int     datatype;               /* grid data type                 */
   int     proj;                   /* grid projection                */
@@ -122,7 +122,7 @@ struct grid_t {
 
 
 void grid_init(grid_t *gridptr);
-void cdiGridTypeInit(grid_t *gridptr, int gridtype, int size);
+void cdiGridTypeInit(grid_t *gridptr, int gridtype, size_t size);
 void grid_free(grid_t *gridptr);
 grid_t *grid_to_pointer(int gridID);
 extern const struct gridVirtTable cdiGridVtable;

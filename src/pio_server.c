@@ -303,7 +303,7 @@ countVarChunkMissingVals(int vlistID, int varID,
                          struct streamMapping *mapping,
                          int chunkLen, const double *restrict data)
 {
-  int nmiss = 0;
+  size_t nmiss = 0;
   if (mapping->hasMissing[varID])
     {
       double missval = vlistInqVarMissval(vlistID, varID);
@@ -450,7 +450,7 @@ writeNetCDFStream(size_t streamIdx,
           xt_idxlist_delete(preWriteChunk);
         }
         /* count missing values if appropriate */
-        int nmiss
+        size_t nmiss
           = countVarChunkMissingVals(vlistID, varID, mapping,
                                      PPM_extents_size(3, varChunk),
                                      data);
@@ -553,7 +553,7 @@ writeNetCDFStream(size_t streamIdx,
         gatherArray(headerIdx, streamIdx, data, dstList, conf);
         if (writerRank == collRank)
           {
-            int nmiss = countVarChunkMissingVals(vlistID, varID,
+            size_t nmiss = countVarChunkMissingVals(vlistID, varID,
                                                  mapping, varSize, data);
             streamWriteVar(streamID, varID, data, nmiss);
           }
@@ -1053,7 +1053,7 @@ writeGribStream(size_t streamIdx,
             varIdx += varID != prevVarID;
             size_t recordSize = writtenRecords[recordIdx].dataSize;
             size_t nvals = recordSize / sizeof (double);
-            int nmiss
+            size_t nmiss
               = countVarChunkMissingVals(vlistID, varID, mapping, (int)nvals,
                                          data + recordDataOfs);
             streamWriteVarSlice(streamID, varID, level, data + recordDataOfs, nmiss);
