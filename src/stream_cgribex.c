@@ -1964,7 +1964,7 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
 	if ( level < 0 ) Warning("Pressure level of %f Pa is below zero!", level);
 
 	zaxisInqUnits(zaxisID, units);
-	if ( (units[0] != 'P') | (units[1] != 'a') ) level *= 100;
+	if ( units[0] && (units[0] != 'P') | (units[1] != 'a') ) level *= 100;
 
 	double dum;
 	if ( level < 32768 && (level < 100 || modf(level/100, &dum) > 0) )

@@ -2483,7 +2483,7 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelI
 	if ( level < 0 ) Warning("Pressure level of %f Pa is below zero!", level);
 
 	zaxisInqUnits(zaxisID, units);
-	if ( memcmp(units, "Pa", 2) != 0 )
+        if ( units[0] && (units[0] != 'P') | (units[1] != 'a') )
           {
             level   *= 100;
             dlevel1 *= 100;
