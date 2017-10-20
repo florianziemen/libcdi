@@ -1846,9 +1846,10 @@ double gridInqXinc(int gridID)
       size_t xsize = gridptr->x.size;
       if ( xsize > 1 )
         {
-          xinc = fabs(xvals[xsize-1] - xvals[0])/(xsize-1);
+          xinc = xvals[1] - xvals[0];
+          double abs_xinc = fabs(xinc);
           for ( size_t i = 2; i < xsize; i++ )
-            if ( fabs(fabs(xvals[i-1] - xvals[i]) - xinc) > 0.01*xinc )
+            if ( fabs(fabs(xvals[i-1] - xvals[i]) - abs_xinc) > 0.01*abs_xinc )
               {
                 xinc = 0;
                 break;

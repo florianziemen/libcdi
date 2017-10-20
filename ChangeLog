@@ -2,6 +2,10 @@
 
 	* Version 1.9.2 released
 
+2017-10-20  Uwe Schulzweida
+
+	* gridInqXinc: added support for negativ values (bug fix)
+
 2017-10-09  Uwe Schulzweida
 
 	* changed type of gridsize from int to size_t
