@@ -20,11 +20,6 @@
       "RANLIB"   : "@RANLIB@",
       "INSTALL"  : "@INSTALL@"
     },
-    "platform" : {
-      "USER_NAME"   : "@USER_NAME@",
-      "HOST_NAME"   : "@HOST_NAME@",
-      "SYSTEM_TYPE" : "@SYSTEM_TYPE@"
-    },
     "libraries" : {
       "threads"    : {
         "lib"      : "@THREADS_LIBS@",
@@ -53,6 +48,11 @@
         "include"  : "@ECCODES_INCLUDE@"
       }
     }
+    "platform" : {
+      "USER_NAME"   : "@USER_NAME@",
+      "HOST_NAME"   : "@HOST_NAME@",
+      "SYSTEM_TYPE" : "@SYSTEM_TYPE@"
+    },
   },
   "features" : {
     "enable_cdi_lib" : @ENABLE_CDI_LIB@,
@@ -61,9 +61,9 @@
     "service"        : "@ENABLE_SERVICE@",
     "extra"          : "@ENABLE_EXTRA@",
     "ieg"            : "@ENABLE_IEG@",
-    "enable_mpi"    : @ENABLE_MPI@,
-    "parallel_nc4"  : @HAVE_PARALLEL_NC4@,
-    "enable_python" : @ENABLE_PYTHON@,
-    "enable_ruby"   : @ENABLE_RUBY@
+    "enable_mpi"     : @ENABLE_MPI@,
+    "parallel_nc4"   : @HAVE_PARALLEL_NC4@,
+    "enable_python"  : @ENABLE_PYTHON@,
+    "enable_ruby"    : @ENABLE_RUBY@
   }
 }
