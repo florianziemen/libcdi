@@ -1825,6 +1825,26 @@ double gridInqYval(int gridID, size_t index)
   return gridptr->vtable->inqYVal(gridptr, index);
 }
 
+static
+double grid_calc_increment(size_t size, const double *vals)
+{
+  if ( size > 1 )
+    {
+      double inc = (vals[size-1] - vals[0])/(size-1);
+      double abs_inc = fabs(inc);
+      for ( size_t i = 1; i < size; ++i )
+        if ( fabs(fabs(vals[i-1] - vals[i]) - abs_inc) > 0.01*abs_inc )
+          {
+            inc = 0;
+            break;
+          }
+
+      return inc;
+    }
+
+  return 0;
+}
+
 /*
 @Function
 @Title
@@ -1838,28 +1858,15 @@ double gridInqYval(int gridID, size_t index)
 double gridInqXinc(int gridID)
 {
   grid_t *gridptr = grid_to_pointer(gridID);
-  double xinc = gridptr->x.inc;
   const double *restrict xvals = gridptr->vtable->inqXValsPtr(gridptr);
 
-  if ( (! (fabs(xinc) > 0)) && xvals )
+  if ( (! (fabs(gridptr->x.inc) > 0)) && xvals )
     {
       size_t xsize = gridptr->x.size;
-      if ( xsize > 1 )
-        {
-          xinc = xvals[1] - xvals[0];
-          double abs_xinc = fabs(xinc);
-          for ( size_t i = 2; i < xsize; i++ )
-            if ( fabs(fabs(xvals[i-1] - xvals[i]) - abs_xinc) > 0.01*abs_xinc )
-              {
-                xinc = 0;
-                break;
-              }
-
-          gridptr->x.inc = xinc;
-        }
+      if ( xsize > 1 ) gridptr->x.inc = grid_calc_increment(xsize, xvals);
     }
 
-  return xinc;
+  return gridptr->x.inc;
 }
 
 /*
@@ -1875,28 +1882,15 @@ double gridInqXinc(int gridID)
 double gridInqYinc(int gridID)
 {
   grid_t *gridptr = grid_to_pointer(gridID);
-  double yinc = gridptr->y.inc;
   const double *yvals = gridptr->vtable->inqYValsPtr(gridptr);
 
-  if ( (! (fabs(yinc) > 0)) && yvals )
+  if ( (! (fabs(gridptr->y.inc) > 0)) && yvals )
     {
       size_t ysize = gridptr->y.size;
-      if ( ysize > 1 )
-        {
-          yinc = yvals[1] - yvals[0];
-          double abs_yinc = fabs(yinc);
-          for ( size_t i = 2; i < ysize; i++ )
-            if ( fabs(fabs(yvals[i] - yvals[i-1]) - abs_yinc) > (0.01*abs_yinc) )
-              {
-                yinc = 0;
-                break;
-              }
-
-          gridptr->y.inc = yinc;
-        }
+      if ( ysize > 1 ) gridptr->y.inc = grid_calc_increment(ysize, yvals);
     }
 
-  return yinc;
+  return gridptr->y.inc;
 }
 
 /*
