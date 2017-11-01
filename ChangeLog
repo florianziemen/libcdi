@@ -2,6 +2,10 @@
 
 	* Version 1.9.2 released
 
+2017-11-01  Uwe Schulzweida
+
+	* Check chunk size limit of 2GB
+
 2017-10-20  Uwe Schulzweida
 
 	* gridInqXinc: added support for negativ values (bug fix)
