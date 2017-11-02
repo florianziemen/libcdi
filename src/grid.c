@@ -2185,7 +2185,9 @@ bool compareXYvals2(grid_t *gridRef, grid_t *gridTest)
 {
   size_t gridsize = gridTest->size;
   bool differ = ((gridTest->x.vals == NULL) ^ (gridRef->x.vals == NULL))
-             || ((gridTest->y.vals == NULL) ^ (gridRef->y.vals == NULL));
+             || ((gridTest->y.vals == NULL) ^ (gridRef->y.vals == NULL))
+             || ((gridTest->x.bounds == NULL) ^ (gridRef->x.bounds == NULL))
+             || ((gridTest->y.bounds == NULL) ^ (gridRef->y.bounds == NULL));
 
   typedef double (*inqVal)(grid_t *grid, size_t index);
   inqVal inqXValRef = gridRef->vtable->inqXVal,
