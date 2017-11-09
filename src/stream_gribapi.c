@@ -2019,19 +2019,19 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
           }
         GRIB_CHECK(my_grib_set_string(gh, "gridType", mesg, &len), 0);
 
-	int nlon = (int) gridInqXsize(gridID);
-	int nlat = (int) gridInqYsize(gridID);
+	size_t nlon = gridInqXsize(gridID);
+	size_t nlat = gridInqYsize(gridID);
 
 	if ( gridtype == GRID_GAUSSIAN_REDUCED )
 	  {
 	    nlon = 0;
 
-	    int *rowlon = (int *) Malloc((size_t)nlat*sizeof(int));
-	    long *pl    = (long *) Malloc((size_t)nlat*sizeof(long));
+	    int *rowlon = (int *) Malloc(nlat*sizeof(int));
+	    long *pl    = (long *) Malloc(nlat*sizeof(long));
 	    gridInqRowlon(gridID, rowlon);
-	    for ( int i = 0; i < nlat; ++i ) pl[i] = rowlon[i];
+	    for ( size_t i = 0; i < nlat; ++i ) pl[i] = rowlon[i];
 
-            GRIB_CHECK(grib_set_long_array(gh, "pl", pl, (size_t)nlat), 0);
+            GRIB_CHECK(grib_set_long_array(gh, "pl", pl, nlat), 0);
 
 	    Free(pl);
 	    Free(rowlon);
@@ -2064,7 +2064,7 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 	GRIB_CHECK(my_grib_set_double(gh, "longitudeOfLastGridPointInDegrees",  xlast), 0);
 	GRIB_CHECK(my_grib_set_double(gh, "iDirectionIncrementInDegrees", xinc), 0);
 
-	GRIB_CHECK(my_grib_set_long(gh, "Nj", nlat), 0);
+	GRIB_CHECK(my_grib_set_long(gh, "Nj", (long)nlat), 0);
 	GRIB_CHECK(my_grib_set_double(gh, "latitudeOfFirstGridPointInDegrees",  yfirst), 0);
 	GRIB_CHECK(my_grib_set_double(gh, "latitudeOfLastGridPointInDegrees",   ylast), 0);
 
