@@ -711,11 +711,6 @@ void defineCompress(const char *arg)
     {
       comptype = CDI_COMPRESS_JPEG;
     }
-  else if ( strncmp(arg, "gzip", len) == 0 )
-    {
-      comptype = CDI_COMPRESS_GZIP;
-      complevel = 6;
-    }
   else if ( strncmp(arg, "zip", 3) == 0 )
     {
       comptype = CDI_COMPRESS_ZIP;

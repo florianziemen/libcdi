@@ -72,10 +72,9 @@ extern "C" {
 
 #define  CDI_COMPRESS_NONE          0
 #define  CDI_COMPRESS_SZIP          1
-#define  CDI_COMPRESS_GZIP          2
-#define  CDI_COMPRESS_BZIP2         3
-#define  CDI_COMPRESS_ZIP           4
-#define  CDI_COMPRESS_JPEG          5
+#define  CDI_COMPRESS_AEC           2
+#define  CDI_COMPRESS_ZIP           3
+#define  CDI_COMPRESS_JPEG          4
 
 /* external data types */
 

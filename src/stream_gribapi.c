@@ -725,7 +725,7 @@ grib_handle *gribapiGetDiskRepresentation(size_t recsize, size_t *buffersize, vo
         {
           // fprintf(stderr, "packingType %d %s\n", len, typeOfPacking);
           if      ( strncmp(typeOfPacking, "grid_jpeg", len) == 0 ) *outCompressionType = CDI_COMPRESS_JPEG;
-          else if ( strncmp(typeOfPacking, "grid_ccsds", len) == 0 ) *outCompressionType = CDI_COMPRESS_SZIP;
+          else if ( strncmp(typeOfPacking, "grid_ccsds", len) == 0 ) *outCompressionType = CDI_COMPRESS_AEC;
           else if ( strncmp(typeOfPacking, "grid_ieee", len) == 0 ) lieee = true;
         }
     }
@@ -1836,7 +1836,7 @@ getGribApiCompTypeMsg(int comptype, size_t gridsize)
       len = sizeof (mesg_grid_jpeg) - 1;
       mesg = mesg_grid_jpeg;
     }
-  else if ( comptype == CDI_COMPRESS_SZIP && gridsize > 1 )
+  else if ( (comptype == CDI_COMPRESS_SZIP || comptype == CDI_COMPRESS_AEC) && gridsize > 1 )
     {
       static const char mesg_grid_ccsds[] = "grid_ccsds";
       len = sizeof (mesg_grid_ccsds) - 1;
@@ -2189,7 +2189,7 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 	GRIB_CHECK(my_grib_set_long(gh, "numberOfDataPoints", (long)gridsize), 0);
 	GRIB_CHECK(my_grib_set_long(gh, "totalNumberOfGridPoints", (long)gridsize), 0);
 
-        if ( comptype == CDI_COMPRESS_SZIP )
+        if ( comptype == CDI_COMPRESS_SZIP || comptype == CDI_COMPRESS_AEC )
           {
             static const char mesg[] = "grid_ccsds";
             size_t len = sizeof (mesg) -1;
@@ -2225,7 +2225,7 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 	      Warning("Can't write UUID!");
 	  }
 
-        if ( comptype == CDI_COMPRESS_SZIP )
+        if ( comptype == CDI_COMPRESS_SZIP || comptype == CDI_COMPRESS_AEC )
           {
             static const char mesg[] = "grid_ccsds";
             size_t len = sizeof (mesg) -1;
