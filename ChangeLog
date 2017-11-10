@@ -1,6 +1,10 @@
-2017-11-05  Uwe Schulzweida
+2017-11-23  Uwe Schulzweida
 
 	* Version 1.9.2 released
+
+2017-11-10  Uwe Schulzweida
+
+	* gribapiDefGrid: set numberOfValues, needed for ccsds compression (bug fix)
 
 2017-11-01  Uwe Schulzweida
 

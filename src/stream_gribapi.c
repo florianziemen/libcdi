@@ -1981,6 +1981,8 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 
   if ( gcinit ) return;
 
+  if ( editionNumber == 2 ) GRIB_CHECK(my_grib_set_long(gh, "numberOfValues", (long)gridsize), 0);
+
   switch (gridtype)
     {
     case GRID_LONLAT:
@@ -2187,14 +2189,12 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
         if ( lieee )
           {
             printf("spectral_ieee\n");
-            if ( editionNumber == 2 ) GRIB_CHECK(my_grib_set_long(gh, "numberOfValues", (long)gridsize, 0);
             static const char mesg[] = "spectral_ieee";
             size_t len = sizeof (mesg) -1;
             GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
           }
         else */ if ( gridInqComplexPacking(gridID) )
 	  {
-	    if ( editionNumber == 2 ) GRIB_CHECK(my_grib_set_long(gh, "numberOfValues", (long)gridsize), 0);
             static const char mesg[] = "spectral_complex";
             size_t len = sizeof (mesg) -1;
 	    GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
