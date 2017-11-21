@@ -9,8 +9,8 @@
 int main(void)
 {
   int gridID, zaxisID1, zaxisID2, taxisID;
-  int vlistID, varID1, varID2, streamID, tsID;
-  int i, nmiss = 0;
+  int vlistID, varID1, varID2, streamID;
+  size_t nmiss = 0;
   double levs[nlev] = {101300, 92500, 85000, 50000, 20000};
   double var1[nlon*nlat];
   double var2[nlon*nlat*nlev];
@@ -60,7 +60,7 @@ int main(void)
   streamDefVlist(streamID, vlistID);
 
   // Loop over the number of time steps
-  for ( tsID = 0; tsID < nts; tsID++ )
+  for ( int tsID = 0; tsID < nts; tsID++ )
     {
       // Set the verification date to 1985-01-01 + tsID
       taxisDefVdate(taxisID, 19850101+tsID);
@@ -70,8 +70,8 @@ int main(void)
       streamDefTimestep(streamID, tsID);
 
       // Init var1 and var2
-      for ( i = 0; i < nlon*nlat;      i++ ) var1[i] = 1.1;
-      for ( i = 0; i < nlon*nlat*nlev; i++ ) var2[i] = 2.2;
+      for ( size_t i = 0; i < nlon*nlat;      i++ ) var1[i] = 1.1;
+      for ( size_t i = 0; i < nlon*nlat*nlev; i++ ) var2[i] = 2.2;
 
       // Write var1 and var2
       streamWriteVar(streamID, varID1, var1, nmiss);

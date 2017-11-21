@@ -5,7 +5,8 @@
 
       IMPLICIT NONE
 
-      INTEGER nlon, nlat, nlev, nts
+      INTEGER :: nlev, nts
+      INTEGER(c_size_t) ::  nlon, nlat, nmiss
       PARAMETER (nlon = 12)   ! Number of longitudes
       PARAMETER (nlat =  6)   ! Number of latitudes
       PARAMETER (nlev =  5)   ! Number of levels
@@ -13,7 +14,7 @@
 
       INTEGER gridID, zaxisID1, zaxisID2, taxisID
       INTEGER vlistID, varID1, varID2, streamID, tsID
-      INTEGER i, nmiss, status
+      INTEGER i, status
       DOUBLE PRECISION lons(nlon), lats(nlat), levs(nlev)
       DOUBLE PRECISION var1(nlon*nlat), var2(nlon*nlat*nlev)
       CHARACTER(len=256, kind=c_char) :: varname

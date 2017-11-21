@@ -130,7 +130,7 @@ gridCreate
 \fi
 }}
 \begin{verbatim}
-    int gridCreate(int gridtype, int size);
+    int gridCreate(int gridtype, size_t size);
 \end{verbatim}
 
 Create a horizontal Grid
@@ -265,7 +265,7 @@ gridDefXsize
 \fi
 }}
 \begin{verbatim}
-    void gridDefXsize(int gridID, int xsize);
+    void gridDefXsize(int gridID, size_t xsize);
 \end{verbatim}
 
 Define the number of values of a X-axis
@@ -355,7 +355,7 @@ gridDefYsize
 \fi
 }}
 \begin{verbatim}
-    void gridDefYsize(int gridID, int ysize);
+    void gridDefYsize(int gridID, size_t ysize);
 \end{verbatim}
 
 Define the number of values of a Y-axis
@@ -490,7 +490,7 @@ gridInqSize
 \fi
 }}
 \begin{verbatim}
-    int gridInqSize(int gridID);
+    size_t gridInqSize(int gridID);
 \end{verbatim}
 
 Get the size of a Grid
@@ -535,7 +535,7 @@ gridInqXbounds
 \fi
 }}
 \begin{verbatim}
-    int gridInqXbounds(int gridID, double *xbounds);
+    size_t gridInqXbounds(int gridID, double *xbounds);
 \end{verbatim}
 
 Get the bounds of a X-axis
@@ -580,7 +580,7 @@ gridInqXsize
 \fi
 }}
 \begin{verbatim}
-    int gridInqXsize(int gridID);
+    size_t gridInqXsize(int gridID);
 \end{verbatim}
 
 Get the number of values of a X-axis
@@ -610,7 +610,7 @@ gridInqXvals
 \fi
 }}
 \begin{verbatim}
-    int gridInqXvals(int gridID, double *xvals);
+    size_t gridInqXvals(int gridID, double *xvals);
 \end{verbatim}
 
 Get all values of a X-axis
@@ -625,7 +625,7 @@ gridInqYbounds
 \fi
 }}
 \begin{verbatim}
-    int gridInqYbounds(int gridID, double *ybounds);
+    size_t gridInqYbounds(int gridID, double *ybounds);
 \end{verbatim}
 
 Get the bounds of a Y-axis
@@ -670,7 +670,7 @@ gridInqYsize
 \fi
 }}
 \begin{verbatim}
-    int gridInqYsize(int gridID);
+    size_t gridInqYsize(int gridID);
 \end{verbatim}
 
 Get the number of values of a Y-axis
@@ -700,7 +700,7 @@ gridInqYvals
 \fi
 }}
 \begin{verbatim}
-    int gridInqYvals(int gridID, double *yvals);
+    size_t gridInqYvals(int gridID, double *yvals);
 \end{verbatim}
 
 Get all values of a Y-axis
@@ -880,7 +880,7 @@ streamReadVar
 \fi
 }}
 \begin{verbatim}
-    void streamReadVar(int streamID, int varID, double *data, int *nmiss);
+    void streamReadVar(int streamID, int varID, double *data, size_t *nmiss);
 \end{verbatim}
 
 Read a variable
@@ -895,7 +895,7 @@ streamReadVarF
 \fi
 }}
 \begin{verbatim}
-    void streamReadVar(int streamID, int varID, float *data, int *nmiss);
+    void streamReadVar(int streamID, int varID, float *data, size_t *nmiss);
 \end{verbatim}
 
 Read a variable
@@ -911,7 +911,7 @@ streamReadVarSlice
 }}
 \begin{verbatim}
     void streamReadVarSlice(int streamID, int varID, int levelID, double *data, 
-                            int *nmiss);
+                            size_t *nmiss);
 \end{verbatim}
 
 Read a horizontal slice of a variable
@@ -927,7 +927,7 @@ streamReadVarSliceF
 }}
 \begin{verbatim}
     void streamReadVarSliceF(int streamID, int varID, int levelID, float *data, 
-                             int *nmiss);
+                             size_t *nmiss);
 \end{verbatim}
 
 Read a horizontal slice of a variable
@@ -942,7 +942,7 @@ streamWriteVar
 \fi
 }}
 \begin{verbatim}
-    void streamWriteVar(int streamID, int varID, const double *data, int nmiss);
+    void streamWriteVar(int streamID, int varID, const double *data, size_t nmiss);
 \end{verbatim}
 
 Write a variable
@@ -957,7 +957,7 @@ streamWriteVarF
 \fi
 }}
 \begin{verbatim}
-    void streamWriteVarF(int streamID, int varID, const float *data, int nmiss);
+    void streamWriteVarF(int streamID, int varID, const float *data, size_t nmiss);
 \end{verbatim}
 
 Write a variable
@@ -973,7 +973,7 @@ streamWriteVarSlice
 }}
 \begin{verbatim}
     void streamWriteVarSlice(int streamID, int varID, int levelID, const double *data, 
-                             int nmiss);
+                             size_t nmiss);
 \end{verbatim}
 
 Write a horizontal slice of a variable
@@ -989,7 +989,7 @@ streamWriteVarSliceF
 }}
 \begin{verbatim}
     void streamWriteVarSliceF(int streamID, int varID, int levelID, const float *data, 
-                              int nmiss);
+                              size_t nmiss);
 \end{verbatim}
 
 Write a horizontal slice of a variable
@@ -1259,7 +1259,7 @@ vlistDefVar
 \fi
 }}
 \begin{verbatim}
-    int vlistDefVar(int vlistID, int gridID, int zaxisID, int tsteptype);
+    int vlistDefVar(int vlistID, int gridID, int zaxisID, int timetype);
 \end{verbatim}
 
 Define a Variable

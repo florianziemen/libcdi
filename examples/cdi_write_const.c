@@ -9,7 +9,7 @@ int main(void)
 {
   int gridID, zaxisID1, zaxisID2;
   int vlistID, varID1, varID2, streamID;
-  int i, nmiss = 0;
+  size_t i, nmiss = 0;
   double lons[nlon] = {0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330};
   double lats[nlat] = {-75, -45, -15, 15, 45, 75};
   double levs[nlev] = {101300, 92500, 85000, 50000, 20000};

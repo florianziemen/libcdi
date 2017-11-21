@@ -4,15 +4,16 @@
 
       INCLUDE 'cdi.inc'
 
-      INTEGER nlon, nlat, nlev, nts
+      INTEGER nlon, nlat
+      INTEGER nlev, nts
       PARAMETER (nlon = 12)   ! Number of longitudes
       PARAMETER (nlat =  6)   ! Number of latitudes
       PARAMETER (nlev =  5)   ! Number of levels
       PARAMETER (nts  =  3)   ! Number of time steps
 
       INTEGER gridID, zaxisID1, zaxisID2, taxisID
-      INTEGER vlistID, varID1, varID2, streamID, tsID
-      INTEGER i, nmiss, status
+      INTEGER vlistID, varID1, varID2, streamID, tsID, i, status
+      INTEGER nmiss
       REAL*8 lons(nlon), lats(nlat), levs(nlev)
       REAL*8 var1(nlon*nlat), var2(nlon*nlat*nlev)
 

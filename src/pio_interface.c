@@ -286,7 +286,7 @@ cdiPioRDMAProgress(void)
 static void
 pioBufferPartData_(int streamID, int varID,
                    const void *packData, valPackFunc packDataFunc,
-                   int nmiss, Xt_idxlist partDesc)
+                   size_t nmiss, Xt_idxlist partDesc)
 {
   size_t streamIdx = indexOfID(&openStreams, streamID);
   xassert(streamIdx != SIZE_MAX);
@@ -309,7 +309,7 @@ pioBufferPartData_(int streamID, int varID,
 
 void
 pioBufferPartData(int streamID, int varID, const double *data,
-                  int nmiss, Xt_idxlist partDesc)
+                  size_t nmiss, Xt_idxlist partDesc)
 {
   int chunk = xt_idxlist_get_num_indices(partDesc);
   xassert(chunk <= INT_MAX);
@@ -368,7 +368,7 @@ void
 cdiPioBufferPartDataGather(int streamID, int varID, const double *data,
                            int numBlocks, const int blocklengths[],
                            const int displacements[],
-                           int nmiss, Xt_idxlist partDesc)
+                           size_t nmiss, Xt_idxlist partDesc)
 {
   xassert(numBlocks >= 0);
   pioBufferPartData_(streamID, varID,
@@ -684,7 +684,7 @@ void pioWriteTimestep(void)
 
 void
 streamWriteVarPart(int streamID, int varID, const void *data,
-                   int nmiss, Xt_idxlist partDesc)
+                   size_t nmiss, Xt_idxlist partDesc)
 {
   if ( CDI_Debug ) Message("streamID = %d varID = %d", streamID, varID);
 
@@ -692,7 +692,7 @@ streamWriteVarPart(int streamID, int varID, const void *data,
   xassert(chunk == 0 || data);
 
   void (*myStreamWriteVarPart)(int streamID, int varID, const void *data,
-                               int nmiss, Xt_idxlist partDesc)
+                               size_t nmiss, Xt_idxlist partDesc)
     = (void (*)(int, int, const void *, int, Xt_idxlist))
     namespaceSwitchGet(NSSWITCH_STREAM_WRITE_VAR_PART_).func;
 
@@ -706,7 +706,7 @@ void
 streamWriteScatteredVarPart(int streamID, int varID, const void *data,
                             int numBlocks, const int blocklengths[],
                             const int displacements[],
-                            int nmiss, Xt_idxlist partDesc)
+                            size_t nmiss, Xt_idxlist partDesc)
 {
   if ( CDI_Debug ) Message("streamID = %d varID = %d", streamID, varID);
 
@@ -717,7 +717,7 @@ streamWriteScatteredVarPart(int streamID, int varID, const void *data,
                                         const void *data,
                                         int numBlocks, const int blocklengths[],
                                         const int displacements[],
-                                        int nmiss, Xt_idxlist partDesc)
+                                        size_t nmiss, Xt_idxlist partDesc)
     = (void (*)(int, int, const void *, int, const int[], const int[], int,
                 Xt_idxlist))
     namespaceSwitchGet(NSSWITCH_STREAM_WRITE_SCATTERED_VAR_PART_).func;

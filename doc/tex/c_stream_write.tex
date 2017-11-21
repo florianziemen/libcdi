@@ -9,7 +9,7 @@ The values are converted to the external data type of the variable, if necessary
 \subsubsection*{Usage}
 
 \begin{verbatim}
-    void streamWriteVar(int streamID, int varID, const double *data, int nmiss);
+    void streamWriteVar(int streamID, int varID, const double *data, size_t nmiss);
 \end{verbatim}
 
 \hspace*{4mm}\begin{minipage}[]{15cm}
@@ -36,7 +36,7 @@ The values are converted to the external data type of the variable, if necessary
 \subsubsection*{Usage}
 
 \begin{verbatim}
-    void streamWriteVarF(int streamID, int varID, const float *data, int nmiss);
+    void streamWriteVarF(int streamID, int varID, const float *data, size_t nmiss);
 \end{verbatim}
 
 \hspace*{4mm}\begin{minipage}[]{15cm}
@@ -64,7 +64,7 @@ The values are converted to the external data type of the variable, if necessary
 
 \begin{verbatim}
     void streamWriteVarSlice(int streamID, int varID, int levelID, const double *data, 
-                             int nmiss);
+                             size_t nmiss);
 \end{verbatim}
 
 \hspace*{4mm}\begin{minipage}[]{15cm}
@@ -94,7 +94,7 @@ The values are converted to the external data type of the variable, if necessary
 
 \begin{verbatim}
     void streamWriteVarSliceF(int streamID, int varID, int levelID, const float *data, 
-                              int nmiss);
+                              size_t nmiss);
 \end{verbatim}
 
 \hspace*{4mm}\begin{minipage}[]{15cm}

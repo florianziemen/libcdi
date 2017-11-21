@@ -11,13 +11,13 @@ int    extInqTimestep(stream_t *streamptr, int tsID);
 int    extInqRecord(stream_t *streamptr, int *varID, int *levelID);
 void   extDefRecord(stream_t *streamptr);
 void   extCopyRecord(stream_t *streamptr2, stream_t *streamptr1);
-void   extReadRecord(stream_t *streamptr, double *data, int *nmiss);
+void   extReadRecord(stream_t *streamptr, double *data, size_t *nmiss);
 void   extWriteRecord(stream_t *streamptr, const double *data);
 
-void   extReadVarDP (stream_t *streamptr, int varID,       double *data, int *nmiss);
+void   extReadVarDP (stream_t *streamptr, int varID,       double *data, size_t *nmiss);
 void   extWriteVarDP(stream_t *streamptr, int varID, const double *data);
 
-void   extReadVarSliceDP (stream_t *streamptr, int varID, int levelID,       double *data, int *nmiss);
+void   extReadVarSliceDP (stream_t *streamptr, int varID, int levelID,       double *data, size_t *nmiss);
 void   extWriteVarSliceDP(stream_t *streamptr, int varID, int levelID, const double *data);
 
 #endif  /* _STREAM_EXT_H */

@@ -488,7 +488,7 @@ int vlist_generate_zaxis(int vlistID, int zaxistype, int nlevels, const double *
 	  zaxisDefLevels(zaxisID, levels);
 
           if ( zaxistype == ZAXIS_CHAR )
-            zaxisDefCvals(zaxisID, cvals, clen);
+            zaxisDefCvals(zaxisID, cvals, (int)clen);
 
 	  if ( has_bounds )
 	    {
@@ -819,8 +819,8 @@ void vlistMerge(int vlistID2, int vlistID1)
     {
       for ( varID = 0; varID < nvars2; varID++ )
 	{
-          int ngp1 = gridInqSize(vars1[varID].gridID);
-          int ngp2 = gridInqSize(vars2[varID].gridID);
+          size_t ngp1 = gridInqSize(vars1[varID].gridID);
+          size_t ngp2 = gridInqSize(vars2[varID].gridID);
           if ( ngp1 != ngp2 ) break;
 
 	  if ( vars1[varID].name && vars2[varID].name )
@@ -1137,7 +1137,7 @@ void vlistPrintKernel(vlist_t *vlistptr, FILE *fp)
       fputs("\n"
             " varID  size iorank\n", fp);
       for ( int varID = 0; varID < nvars; varID++ )
-        fprintf(fp, "%3d %8d %6d\n", varID,
+        fprintf(fp, "%3d %8zu %6d\n", varID,
                 zaxisInqSize(vlistptr->vars[varID].zaxisID)
                 * gridInqSize(vlistptr->vars[varID].gridID),
                 vlistptr->vars[varID].iorank);
@@ -1293,15 +1293,15 @@ int vlistInqModel(int vlistID)
 }
 
 
-int vlistGridsizeMax(int vlistID)
+size_t vlistGridsizeMax(int vlistID)
 {
-  int gridsizemax = 0;
+  size_t gridsizemax = 0;
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
   for ( int index = 0 ; index < vlistptr->ngrids ; index++ )
     {
       int gridID = vlistptr->gridIDs[index];
-      int gridsize = gridInqSize(gridID);
+      size_t gridsize = gridInqSize(gridID);
       if ( gridsize > gridsizemax ) gridsizemax = gridsize;
     }
 

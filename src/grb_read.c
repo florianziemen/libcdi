@@ -16,8 +16,8 @@
 
 
 static
-int grbDecode(int filetype, int memtype, void *gribbuffer, int gribsize, void *data, size_t datasize,
-	      int unreduced, int *nmiss, double missval, int vlistID, int varID)
+int grbDecode(int filetype, int memtype, void *gribbuffer, size_t gribsize, void *data, size_t datasize,
+	      int unreduced, size_t *nmiss, double missval, int vlistID, int varID)
 {
   int status = 0;
 
@@ -29,7 +29,7 @@ int grbDecode(int filetype, int memtype, void *gribbuffer, int gribsize, void *d
       if ( cdiNAdditionalGRIBKeys > 0 )
 	Error("CGRIBEX decode does not support reading of additional GRIB keys!");
 #endif
-      status = cgribexDecode(memtype, gribbuffer, gribsize, data, (long) datasize, unreduced, nmiss, missval);
+      status = cgribexDecode(memtype, gribbuffer, gribsize, data, datasize, unreduced, nmiss, missval);
     }
   else
 #endif
@@ -39,7 +39,7 @@ int grbDecode(int filetype, int memtype, void *gribbuffer, int gribsize, void *d
       if ( memtype == MEMTYPE_FLOAT )
         datap = Malloc(datasize*sizeof(double));
 
-      status = gribapiDecode(gribbuffer, gribsize, datap, (long) datasize, unreduced, nmiss, missval, vlistID, varID);
+      status = gribapiDecode(gribbuffer, gribsize, datap, datasize, unreduced, nmiss, missval, vlistID, varID);
 
       if ( memtype == MEMTYPE_FLOAT )
         {
@@ -111,7 +111,7 @@ int grbUnzipRecord(void *gribbuffer, size_t *gribsize)
 }
 
 
-void grb_read_record(stream_t * streamptr, int memtype, void *data, int *nmiss)
+void grb_read_record(stream_t * streamptr, int memtype, void *data, size_t *nmiss)
 {
   int filetype = streamptr->filetype;
 
@@ -127,7 +127,7 @@ void grb_read_record(stream_t * streamptr, int memtype, void *data, int *nmiss)
   int varID   = streamptr->tsteps[tsID].records[recID].varID;
 
   int gridID   = vlistInqVarGrid(vlistID, varID);
-  int gridsize = gridInqSize(gridID);
+  size_t gridsize = gridInqSize(gridID);
 
   streamptr->numvals += gridsize;
 
@@ -140,11 +140,11 @@ void grb_read_record(stream_t * streamptr, int memtype, void *data, int *nmiss)
 
   streamptr->tsteps[tsID].records[recID].zip = grbUnzipRecord(gribbuffer, &recsize);
 
-  grbDecode(filetype, memtype, gribbuffer, (int)recsize, data, (size_t)gridsize, streamptr->unreduced, nmiss, missval, vlistID, varID);
+  grbDecode(filetype, memtype, gribbuffer, recsize, data, gridsize, streamptr->unreduced, nmiss, missval, vlistID, varID);
 }
 
 
-void grb_read_var(stream_t * streamptr, int varID, int memtype, void *data, int *nmiss)
+void grb_read_var(stream_t * streamptr, int varID, int memtype, void *data, size_t *nmiss)
 {
   int filetype = streamptr->filetype;
 
@@ -155,14 +155,14 @@ void grb_read_var(stream_t * streamptr, int varID, int memtype, void *data, int 
   int tsID    = streamptr->curTsID;
 
   int gridID   = vlistInqVarGrid(vlistID, varID);
-  int gridsize = gridInqSize(gridID);
+  size_t gridsize = gridInqSize(gridID);
 
   off_t currentfilepos = fileGetPos(fileID);
 
   int isub     = subtypeInqActiveIndex(streamptr->vars[varID].subtypeID);
   int nlevs    = streamptr->vars[varID].recordTable[0].nlevs;
   if ( CDI_Debug )
-    Message("nlevs = %d gridID = %d gridsize = %d", nlevs, gridID, gridsize);
+    Message("nlevs = %d gridID = %d gridsize = %zu", nlevs, gridID, gridsize);
   *nmiss = 0;
   for (int levelID = 0; levelID < nlevs; levelID++ )
     {
@@ -176,7 +176,7 @@ void grb_read_var(stream_t * streamptr, int varID, int memtype, void *data, int 
 
       double missval = vlistInqVarMissval(vlistID, varID);
 
-      int imiss;
+      size_t imiss;
 
       streamptr->tsteps[tsID].records[recID].zip = grbUnzipRecord(gribbuffer, &recsize);
 
@@ -186,7 +186,7 @@ void grb_read_var(stream_t * streamptr, int varID, int memtype, void *data, int 
       else
         datap = (double*)data + levelID*gridsize;
 
-      grbDecode(filetype, memtype, gribbuffer, (int)recsize, datap, (size_t)gridsize,
+      grbDecode(filetype, memtype, gribbuffer, recsize, datap, gridsize,
                 streamptr->unreduced, &imiss, missval, vlistID, varID);
 
       *nmiss += imiss;
@@ -196,7 +196,7 @@ void grb_read_var(stream_t * streamptr, int varID, int memtype, void *data, int 
 }
 
 
-void grb_read_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, void *data, int *nmiss)
+void grb_read_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, void *data, size_t *nmiss)
 {
   int filetype = streamptr->filetype;
 
@@ -204,11 +204,11 @@ void grb_read_var_slice(stream_t *streamptr, int varID, int levelID, int memtype
 
   int vlistID = streamptr->vlistID;
   int gridID   = vlistInqVarGrid(vlistID, varID);
-  int gridsize = gridInqSize(gridID);
+  size_t gridsize = gridInqSize(gridID);
   int tsID = streamptr->curTsID;
 
   if ( CDI_Debug )
-    Message("gridID = %d gridsize = %d", gridID, gridsize);
+    Message("gridID = %d gridsize = %zu", gridID, gridsize);
 
   int fileID = streamptr->fileID;
 
@@ -230,7 +230,7 @@ void grb_read_var_slice(stream_t *streamptr, int varID, int levelID, int memtype
   streamptr->tsteps[tsID].records[recID].zip = grbUnzipRecord(gribbuffer, &recsize);
 
   double missval = vlistInqVarMissval(vlistID, varID);
-  grbDecode(filetype, memtype, gribbuffer, (int)recsize, data, (size_t)gridsize, streamptr->unreduced, nmiss, missval, vlistID, varID);
+  grbDecode(filetype, memtype, gribbuffer, recsize, data, gridsize, streamptr->unreduced, nmiss, missval, vlistID, varID);
 
   fileSetPos(fileID, currentfilepos, SEEK_SET);
 }
