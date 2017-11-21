@@ -1,10 +1,10 @@
 ! This file was automatically generated, don't edit!
 !
-! Fortran interface for CDI library version 1.9.1
+! Fortran interface for CDI library version 1.9.2
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   October 2017
+! Uwe Schulzweida, MPI-MET, Hamburg,   November 2017
 !
 
       INTEGER    CDI_MAX_NAME
@@ -103,14 +103,12 @@
       PARAMETER (CDI_COMPRESS_NONE      =  0)
       INTEGER    CDI_COMPRESS_SZIP
       PARAMETER (CDI_COMPRESS_SZIP      =  1)
-      INTEGER    CDI_COMPRESS_GZIP
-      PARAMETER (CDI_COMPRESS_GZIP      =  2)
-      INTEGER    CDI_COMPRESS_BZIP2
-      PARAMETER (CDI_COMPRESS_BZIP2     =  3)
+      INTEGER    CDI_COMPRESS_AEC
+      PARAMETER (CDI_COMPRESS_AEC       =  2)
       INTEGER    CDI_COMPRESS_ZIP
-      PARAMETER (CDI_COMPRESS_ZIP       =  4)
+      PARAMETER (CDI_COMPRESS_ZIP       =  3)
       INTEGER    CDI_COMPRESS_JPEG
-      PARAMETER (CDI_COMPRESS_JPEG      =  5)
+      PARAMETER (CDI_COMPRESS_JPEG      =  4)
 !
 !  external data types
 !
