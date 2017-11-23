@@ -594,7 +594,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
 
   if ( gridtype == GRID_TRAJECTORY )
     {
-      cdf_put_att_text(fileID, ncvarid, "coordinates", 9, "lon lat" );
+      cdf_put_att_text(fileID, ncvarid, "coordinates", 9, "tlon tlat" );
     }
   else if ( gridtype == GRID_LONLAT && xid == CDI_UNDEFID && yid == CDI_UNDEFID && gridsize == 1 )
     {
