@@ -5,6 +5,7 @@
 
 #include "cdi.h"
 #include "basetime.h"
+#include "error.h"
 
 
 void basetimeInit(basetime_t *basetime)
