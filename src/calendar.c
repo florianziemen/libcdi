@@ -1,5 +1,4 @@
 #include <limits.h>
-#include <stdio.h>
 
 #include "cdi.h"  		/* CALENDAR_ */
 #include "calendar.h"
