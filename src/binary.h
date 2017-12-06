@@ -6,7 +6,6 @@
 #endif
 
 #include <inttypes.h>
-#include <stdio.h>
 
 #include "dtypes.h"
 

@@ -3,7 +3,6 @@
 
 #if  defined  (HAVE_LIBNETCDF)
 
-#include <stdlib.h>
 #include <netcdf.h>
 
 void cdf_create (const char *path, int cmode, int *idp);
