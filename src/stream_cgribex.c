@@ -191,7 +191,7 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid, i
 
             if ( ijDirectionIncrementGiven && ISEC2_LonIncr > 0 )
               {
-                if ( abs(ISEC2_LastLon - (ISEC2_FirstLon+ISEC2_LonIncr*(grid->x.size-1))) <= 2 )
+                if ( labs(ISEC2_LastLon - (ISEC2_FirstLon+ISEC2_LonIncr*((long)grid->x.size-1))) <= 2 )
                   {
                     recompinc = false;
                     grid->x.inc = ISEC2_LonIncr * 0.001;
@@ -224,7 +224,7 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid, i
             bool recompinc = true;
             if ( ijDirectionIncrementGiven && ISEC2_LatIncr > 0 )
               {
-                if ( abs(ISEC2_LastLat - (ISEC2_FirstLat+ISEC2_LatIncr*(grid->y.size-1))) <= 2 )
+                if ( labs(ISEC2_LastLat - (ISEC2_FirstLat+ISEC2_LatIncr*((long)grid->y.size-1))) <= 2 )
                   {
                     recompinc = false;
                     grid->y.inc = ISEC2_LatIncr * 0.001;
