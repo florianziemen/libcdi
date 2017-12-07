@@ -1,3 +1,7 @@
+2017-12-07  Uwe Schulzweida
+
+	* Check positive attribute for scalar z coordinates (bug fix)
+
 2017-11-23  Uwe Schulzweida
 
 	* netCDF: set coordinate attribute to "tlon tlat" for GRID_TRAJECTORY (bug fix)

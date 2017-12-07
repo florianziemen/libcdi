@@ -1415,6 +1415,11 @@ void cdf_scan_var_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimi
                   cdf_set_dim(ncvars, ncvarid, 0, Z_AXIS);
                   ncdims[ncvars[ncvarid].dimids[0]].dimtype = Z_AXIS;
                 }
+              if ( ncvars[ncvarid].ndims == 0 )
+                {
+                  cdf_set_var(ncvars, ncvarid, FALSE);
+                  ncvars[ncvarid].islev = true;
+                }
             }
           else if ( isNumber && strcmp(attname, "_FillValue") == 0 )
             {
