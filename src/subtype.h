@@ -26,6 +26,7 @@ extern const char * const cdiSubtypeAttributeName[];
    of a linked list. */
 struct subtype_attr_t {
   int   key, val;                                /* key/value pair */
+  char *cval;
   struct subtype_attr_t* next;                   /* next element in linked list */
 };
 
@@ -71,15 +72,19 @@ struct subtype_entry_t* subtypeEntryInsert(subtype_t* head);
 /* prototypes: accessing global attributes */
 void  subtypePrint(int subtypeID);
 void  subtypePrintPtr(subtype_t* subtype_ptr);
-void  subtypeDefGlobalDataP(subtype_t *subtype_ptr, int key, int val);
-void  subtypeDefGlobalData(int subtypeID, int key, int val);
-int   subtypeGetGlobalData(int subtypeID, int key);
-int   subtypeGetGlobalDataP(subtype_t *subtype_ptr, int key);
+void  subtypeDefGlobalDataP(subtype_t *subtype_ptr, int key, int val, char *cval);
+void  subtypeDefGlobalData(int subtypeID, int key, int val, char *cval);
+void  subtypeGetGlobalData(int subtypeID, int key, int *val, char *cval);
+void  subtypeGetGlobalDataP(subtype_t *subtype_ptr, int key, int *val, char *cval);
 int   subtypeComparePtr(int s1_ID, subtype_t *s2);
+int   subtypeTypeattsPtr(subtype_t* subtype_ptr, int nr);
+int   subtypeKind(int subtypeID);
+int   subtypeNentries(int subtypeID);
 
 /* prototypes: accessing subtype entries */
-void  subtypeDefEntryDataP(struct subtype_entry_t *subtype_entry_ptr, int key, int val);
-
+void  subtypeDefEntryDataP(struct subtype_entry_t *subtype_entry_ptr, int key, int val, char *cval);
+void  subtypeGetCharaxisDataP(struct subtype_entry_t *subtype_entry_ptr, int key, int *val, char *cval)
+void  subtypeGetCharaxisData(int subtypeID, int key, int *val, char *cval)
 
 /* prototypes: tile implementations */
 void  tilesetInsertP(subtype_t *s1, subtype_t *s2);

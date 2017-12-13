@@ -98,13 +98,17 @@ static int attribute_to_index(const char *key)
   @Title     Create new linked list of subtype attributes.
   @EndFunction
 */
-static struct subtype_attr_t* subtypeAttrNewList(struct subtype_entry_t* head, int key, int val)
+static struct subtype_attr_t* subtypeAttrNewList(struct subtype_entry_t* head, int key, int val, char *cval)
 {
   if (head == NULL)  Error("Internal error!");
   struct subtype_attr_t *ptr = (struct subtype_attr_t*) Malloc(sizeof(struct subtype_attr_t));
   if(NULL == ptr)  Error("Node creation failed");
   ptr->key   = key;
   ptr->val   = val;
+  if ( cval )
+    ptr->cval  = strdup(cval);
+  else
+    ptr->cval = NULL;
   ptr->next  = NULL;
 
   head->atts = ptr;
@@ -119,10 +123,10 @@ static struct subtype_attr_t* subtypeAttrNewList(struct subtype_entry_t* head, i
          smallest-to-largest ordered list.
   @EndFunction
 */
-static struct subtype_attr_t* subtypeAttrInsert(struct subtype_entry_t* head, int key, int val)
+static struct subtype_attr_t* subtypeAttrInsert(struct subtype_entry_t* head, int key, int val, char *cval)
 {
   if (head == NULL)  Error("Internal error!");
-  if (head->atts == NULL)  return (subtypeAttrNewList(head, key, val));
+  if (head->atts == NULL)  return (subtypeAttrNewList(head, key, val, cval));
 
   /* create new attribute */
   struct subtype_attr_t* ptr = (struct subtype_attr_t*) Malloc(sizeof(struct subtype_attr_t));
@@ -130,6 +134,10 @@ static struct subtype_attr_t* subtypeAttrInsert(struct subtype_entry_t* head, in
 
   ptr->key   = key;
   ptr->val   = val;
+  if ( cval )
+    ptr->cval  = strdup(cval);
+  else
+    ptr->cval = NULL;
   ptr->next  = NULL;
 
   /* find the right place for insertion: */
@@ -175,7 +183,7 @@ static struct subtype_attr_t* subtypeAttrFind(struct subtype_attr_t* head, int k
 /* Recursively compares two subtype attribute lists under the implicit
    assumptions that both lists are ordered by their keys and that keys
    are unique. */
-static int subtypeAttsCompare(struct subtype_attr_t *a1, struct subtype_attr_t *a2)
+static int subtypeAttsCompare(struct subtype_attr_t *a1, struct subtype_attr_t *a2, int subtype )
 {
   if ((a1 == NULL) && (a2 == NULL)) 
     return 0;
@@ -194,8 +202,14 @@ static int subtypeAttsCompare(struct subtype_attr_t *a1, struct subtype_attr_t *
     }
   if (a1->val != a2->val)
     return differ;
+ 
+  if ( subtype == SUBTYPE_CHARAXIS )
+    {
+      if ( a1->cval != a2->cval || strncmp(a1->cval, a2->cval, a1->val) != 0 )
+        return differ;
+    }
     
-  return subtypeAttsCompare(a1->next, a2->next);
+  return subtypeAttsCompare(a1->next, a2->next, subtype);
 }
 
 
@@ -205,7 +219,7 @@ static void subtypeAttsDuplicate(struct subtype_attr_t *a1, struct subtype_entry
   if (a1 == NULL)  return;
   /* duplicate "a1->key", "a1->val" */
   subtypeAttsDuplicate(a1->next, dst);
-  (void) subtypeAttrInsert(dst, a1->key, a1->val);
+  (void) subtypeAttrInsert(dst, a1->key, a1->val, a1->cval);
 }
 
 
@@ -309,13 +323,13 @@ static void subtypeEntryDestroy(struct subtype_entry_t *entry)
 
 
 /* Compares two subtype entries. */
-static int subtypeEntryCompare(struct subtype_entry_t *e1, struct subtype_entry_t *e2)
+static int subtypeEntryCompare(struct subtype_entry_t *e1, struct subtype_entry_t *e2, int subtype)
 {
   if (e1 == NULL)  Error("Internal error!");
   if (e2 == NULL)  Error("Internal error!");
   return 
     (e1->self == e2->self) && 
-    subtypeAttsCompare(e1->atts, e2->atts);
+    subtypeAttsCompare(e1->atts, e2->atts, subtype);
 }
 
 
@@ -366,6 +380,48 @@ static void subtypePrintKernel(subtype_t *subtype_ptr, FILE *fp)
   fprintf(fp, "\n");
 }
 
+static void subtypePrintKernelCharaxis(subtype_t *subtype_ptr, FILE *fp)
+{
+  if (subtype_ptr == NULL)  Error("Internal error!");
+
+  /* print global attributes of this subtype */
+  struct subtype_attr_t* ptr = subtype_ptr->globals.atts;
+  if (ptr != NULL)  fprintf(fp, "# \n# character axis ID %d\n#\n# character axis attributes\n", subtype_ptr->self);
+  while (ptr != NULL) {
+    char temp[CDI_MAX_NAME];
+    switch (ptr->key)
+      {
+      case CDI_KEY_XNAME: 
+      case CDI_KEY_YNAME:      strcpy(temp, "name"); break;
+      case CDI_KEY_XLONGNAME:
+      case CDI_KEY_YLONGNAME:  strcpy(temp, "longname"); break;
+      case CDI_KEY_XDIMNAME:
+      case CDI_KEY_YDIMNAME:  strcpy(temp, "dimname"); break;
+      case CDI_KEY_XSTDNAME:
+      case CDI_KEY_YSTDNAME:   strcpy(temp, "stdname"); break;
+      case CDI_KEY_STRLEN:     strcpy(temp, "stringlen"); break;
+      default: sprintf(temp, "%d", ptr->key); break;
+      }
+    if ( ptr->cval != NULL )
+      fprintf(fp, "%10s = %30s\n", temp, ptr->cval);    
+    else
+      fprintf(fp, "%10s = %30d\n", temp, ptr->val);    
+    ptr = ptr->next;
+  } 
+  /* print attributes for each subtype */
+
+  struct subtype_entry_t *entry = subtype_ptr->entries;
+  if (entry != NULL)  fprintf(fp, "# character axis entries:\n");
+  while (entry != NULL) {
+    ptr = entry->atts;
+    while (ptr != NULL) {
+      fprintf(fp, "%10d = %30s\n", ptr->key, ptr->cval);    
+      ptr = ptr->next;
+    } 
+    entry = entry->next;
+  }
+}
+
 
 /* Compares two subtype data structures. Pointer version of this
    method. */
@@ -373,12 +429,12 @@ static int subtypeCompareP(subtype_t *s1, subtype_t *s2)
 {
   xassert(s1 && s2);
   if (s1->subtype != s2->subtype) return differ;
-  if (subtypeEntryCompare(&s1->globals, &s2->globals) != 0) return differ;
+  if (subtypeEntryCompare(&s1->globals, &s2->globals, s1->subtype) != 0) return differ;
 
   struct subtype_entry_t *entry1 = s1->entries;
   struct subtype_entry_t *entry2 = s2->entries;
   while ((entry1 != NULL) && (entry2 != NULL)) {
-    if (subtypeEntryCompare(entry1, entry2) != 0)  return differ;
+    if (subtypeEntryCompare(entry1, entry2, s1->subtype) != 0)  return differ;
     entry1 = entry1->next;
     entry2 = entry2->next;
   }
@@ -484,65 +540,133 @@ int subtypePush(subtype_t *subtype_ptr)
 /* Sets an attribute for a subtype (for example a set of TILES). If
    the attribute has already been defined, then its value is
    overwritten. */
-void subtypeDefGlobalDataP(subtype_t *subtype_ptr, int key, int val)
+void subtypeDefGlobalDataP(subtype_t *subtype_ptr, int key, int val, char *cval)
 {
   if (subtype_ptr == NULL)  Error("Internal error!");
   /* find entry in linked list or append otherwise */
   struct subtype_attr_t* att_ptr = subtypeAttrFind(subtype_ptr->globals.atts, key);
   if (att_ptr == NULL) 
-    subtypeAttrInsert(&subtype_ptr->globals, key, val);
+    {
+      subtypeAttrInsert(&subtype_ptr->globals, key, val, cval);
+    }
   else
-    att_ptr->val = val;
+    {
+      att_ptr->val = val;
+      if ( cval )
+        {
+          Free(att_ptr->cval);
+          att_ptr->cval = strdup(cval);
+        }      
+    }
 }
 
 
 /* Sets an attribute for a subtype (for example a set of TILES). If
    the attribute has already been defined, then its value is
    overwritten. */
-void subtypeDefGlobalData(int subtypeID, int key, int val)
+void subtypeDefGlobalData(int subtypeID, int key, int val, char *cval)
 {
   subtype_t *subtype_ptr = (subtype_t *)reshGetVal(subtypeID, &subtypeOps);
-  subtypeDefGlobalDataP(subtype_ptr, key, val);
+  subtypeDefGlobalDataP(subtype_ptr, key, val, cval);
 }
 
 
 /* Retrieves an attribute for a subtype (for example a set of TILES).
    If the attribute has not been defined, then return -1. */
-int subtypeGetGlobalDataP(subtype_t *subtype_ptr, int key)
+void subtypeGetGlobalDataP(subtype_t *subtype_ptr, int key, int *val, char *cval)
 {
   if (subtype_ptr == NULL)  Error("Internal error!");
   /* find entry in linked list */
   struct subtype_attr_t* att_ptr = subtypeAttrFind(subtype_ptr->globals.atts, key);
   if (att_ptr == NULL) 
-    return -1;
+    {
+      Error("Could not find attribute with key %d", key);
+    }
   else
-    return att_ptr->val;
+    {
+      *val = att_ptr->val;
+      cval = att_ptr->cval;
+    }
 }
 
 
 /* Retrieves an attribute for a subtype (for example a set of TILES) .
    If the attribute has not been defined, then return -1. */
-int subtypeGetGlobalData(int subtypeID, int key)
+void subtypeGetGlobalData(int subtypeID, int key, int *val, char *cval)
 {
   subtype_t *subtype_ptr = (subtype_t *)reshGetVal(subtypeID, &subtypeOps);
-  return subtypeGetGlobalDataP(subtype_ptr, key);
+  subtypeGetGlobalDataP(subtype_ptr, key, val, cval);
 }
 
+int subtypeTypeattsPtr(subtype_t* subtype_ptr, int nr )
+{
+  if (subtype_ptr == NULL)  Error("Internal error!");
+  switch (nr)
+    {
+    case 0: return subtype_ptr->subtype; break;
+    case 1: return subtype_ptr->nentries; break;
+    default: Error("Structure subtype does not define a %dth attribute", nr);
+    } 
+}
+
+int   subtypeKind(int subtypeID)
+{
+  subtype_t *subtype_ptr = (subtype_t *)reshGetVal(subtypeID, &subtypeOps);
+  return subtypeTypeattsPtr(subtype_ptr, 0);
+}
+
+int   subtypeNentries(int subtypeID)
+{
+  subtype_t *subtype_ptr = (subtype_t *)reshGetVal(subtypeID, &subtypeOps);
+  return subtypeTypeattsPtr(subtype_ptr, 1);
+}
 
 /* Sets an attribute for a single subtype entry (e.g. a single TILE).
    If the attribute has already been defined, then its value is
    overwritten. */
-void subtypeDefEntryDataP(struct subtype_entry_t *subtype_entry_ptr, int key, int val)
+void subtypeDefEntryDataP(struct subtype_entry_t *subtype_entry_ptr, int key, int val, char *cval)
 {
   if (subtype_entry_ptr == NULL)  Error("Internal error!");
   /* find entry in linked list or append otherwise */
   struct subtype_attr_t* att_ptr = subtypeAttrFind(subtype_entry_ptr->atts, key);
   if (att_ptr == NULL) 
-    subtypeAttrInsert(subtype_entry_ptr, key, val);
+    subtypeAttrInsert(subtype_entry_ptr, key, val, cval);
   else
-    att_ptr->val = val;
+    {
+      att_ptr->val = val;
+      if ( cval )
+        {
+          Free(att_ptr->cval);
+          att_ptr->cval = strdup(cval);
+        }      
+    }
 }
 
+void subtypeGetCharaxisDataP(subtype_t* subtype_ptr, int key, int *val, char *cval)
+{
+  struct subtype_entry_t *subtype_entry_ptr = subtype_ptr->entries;
+  if (subtype_entry_ptr == NULL)  Error("Internal error!");
+
+  struct subtype_attr_t* att_ptr = subtype_entry_ptr->atts;
+  if (att_ptr == NULL)  Error("Internal error!");
+
+  while ( key != att_ptr->key )
+    {
+      subtype_entry_ptr = subtype_entry_ptr->next;
+      if ( subtype_entry_ptr == NULL )
+        break;
+      att_ptr = subtype_entry_ptr->atts;
+      if ( att_ptr == NULL )
+        break;
+    }
+  
+}
+
+void   subtypeGetCharaxisData(int subtypeID, int key, int *val, char *cval)
+{
+  subtype_t *subtype_ptr = (subtype_t *)reshGetVal(subtypeID, &subtypeOps);
+  return subtypeGetEntryDataP(subtype_ptr, key, val, cval);
+}
 
 
 /* ------------------------------------------------------------------- */
@@ -615,13 +739,13 @@ void tilesetInsertP(subtype_t *s1, subtype_t *s2)
 
   /* test all entries of set 2 against set 1, to check if entry
      already exists: */
-  if (subtypeAttsCompare(s1->globals.atts, s2->globals.atts) != differ)
+  if (subtypeAttsCompare(s1->globals.atts, s2->globals.atts, s1->subtype) != differ)
     {
       while (entry1 != NULL) {
         int found = 1;
         entry2 = s2->entries;
         while (entry2 != NULL) {
-          found &= (subtypeAttsCompare(entry1->atts, entry2->atts) != differ);
+          found &= (subtypeAttsCompare(entry1->atts, entry2->atts, s1->subtype) != differ);
           entry2 = entry2->next;
         }
         if (found)
@@ -637,7 +761,7 @@ void tilesetInsertP(subtype_t *s1, subtype_t *s2)
 
         att_ptr2 = entry2->atts;
         while (att_ptr2 != NULL) {
-          (void) subtypeAttrInsert(entry1, att_ptr2->key, att_ptr2->val);
+          (void) subtypeAttrInsert(entry1, att_ptr2->key, att_ptr2->val, att_ptr2->cval);
           att_ptr2 = att_ptr2->next;
         }
         entry2 = entry2->next;
@@ -689,12 +813,14 @@ int subtypeCreate(int subtype)
   return subtypePush(subtype_ptr);
 }
 
-
 /* Print-out subtype data structure together with its attributes. */
 void subtypePrint(int subtypeID)
 {
   subtype_t *subtype_ptr = (subtype_t *)reshGetVal(subtypeID, &subtypeOps);
-  subtypePrintKernel(subtype_ptr, stdout);
+  if ( subtype_ptr->subtype == SUBTYPE_CHARAXIS )
+    subtypePrintKernelCharaxis(subtype_ptr, stdout);
+  else
+    subtypePrintKernel(subtype_ptr, stdout);
 }
 
 
