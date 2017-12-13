@@ -208,6 +208,10 @@ extern "C" {
 enum {
   SUBTYPE_TILES                         = 0  /* Tiles variable                                  */
 };
+#define SUBTYPE_CHARAXIS 1
+#define CDI_KEY_STRLEN 2
+#define CDI_KEY_XSTDNAME 3
+#define CDI_KEY_YSTDNAME 4
 
 #define MAX_KV_PAIRS_MATCH 10
 
