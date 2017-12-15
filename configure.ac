@@ -306,6 +306,11 @@ main(int argc, char **argv)
       dnl used in serial mode
       AS_IF([test x$enable_ppm != xyes],
         [HAVE_PARALLEL_NC4=0])
+      AS_IF([test $HAVE_PARALLEL_NC4 -gt 0],
+        [AC_CHECK_DECLS([nc_inq_format_extended],,
+           [AC_MSG_NOTICE([The supplied netCDF library does not support nc_inq_format_extended.])],
+           [AC_INCLUDES_DEFAULT
+@%:@include <netcdf.h>])])
      ])
   ],
   [MPI_LAUNCH="`pwd`/util/serialrun"
