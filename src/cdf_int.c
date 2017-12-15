@@ -87,22 +87,38 @@ cdf_redef(int ncid)
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 
-void
-cdf_enddef(int ncid)
+int
+cdi_nc_enddef_serial(int ncid, int streamID)
 {
-  const int status = nc_enddef(ncid);
+  (void) streamID;
+  return nc_enddef(ncid);
+}
+
+int
+cdi_nc__enddef_serial(int ncid, int streamID, size_t hdr_pad, size_t v_align, size_t v_minfree, size_t r_align)
+{
+  (void) streamID;
+  return nc__enddef(ncid, hdr_pad, v_align, v_minfree, r_align);
+}
+
+void
+cdf_enddef(int ncid, int streamID)
+{
+  cdi_nc_enddef_funcp my_nc_enddef = (cdi_nc_enddef_funcp) namespaceSwitchGet(NSSWITCH_NC_ENDDEF).func;
+  const int status = my_nc_enddef(ncid, streamID);
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 
 void
-cdf__enddef(const int ncid, const size_t hdr_pad)
+cdf__enddef(const int ncid, int streamID, const size_t hdr_pad)
 {
   const size_t v_align = 4UL;    // [B] Alignment of beginning of data section for fixed variables
   const size_t v_minfree = 0UL;  // [B] Pad at end of data section for fixed size variables
   const size_t r_align = 4UL;    // [B] Alignment of beginning of data section for record variables
 
   // nc_enddef(ncid) is equivalent to nc__enddef(ncid, 0, 4, 0, 4)
-  const int status = nc__enddef(ncid, hdr_pad, v_align, v_minfree, r_align);
+  cdi_nc__enddef_funcp my_nc__enddef = (cdi_nc__enddef_funcp) namespaceSwitchGet(NSSWITCH_NC_ENDDEF).func;
+  const int status = my_nc__enddef(ncid, streamID, hdr_pad, v_align, v_minfree, r_align);
   if (status != NC_NOERR) Error("%s", nc_strerror(status));
 }
 

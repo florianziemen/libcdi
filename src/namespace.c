@@ -10,15 +10,15 @@
 #include <stdio.h>
 
 #include "cdi.h"
+#include "cdi_int.h"
 #include "dmemory.h"
 #include "namespace.h"
 #include "resource_handle.h"
 #include "serialize.h"
 #include "error.h"
-#include "cdf_int.h"
 #include "file.h"
-#include "cdi_int.h"
 #ifdef HAVE_LIBNETCDF
+#include "cdf_int.h"
 #include "stream_cdf.h"
 #include "stream_cdf_postdef.h"
 #endif
@@ -31,6 +31,8 @@ static int activeNamespace = 0;
 #define CDI_NETCDF_SWITCHES                          \
   { .func = (void (*)()) nc__create },               \
   { .func = (void (*)()) cdf_def_var_serial },       \
+  { .func = (void (*)()) cdi_nc_enddef_serial },     \
+  { .func = (void (*)()) cdi_nc__enddef_serial },    \
   { .func = (void (*)()) cdfDefTimestep },           \
   { .func = (void (*)()) cdfDefCoordinateVars },     \
   { .func = (void (*)()) cdfPostDefActionGridProp }

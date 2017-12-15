@@ -179,7 +179,7 @@ cdfDefVarMissval(stream_t *streamptr, int varID, int dtype, int lcheck)
 
       cdf_put_att_double(fileID, ncvarID, "missing_value", xtype, 1, &missval);
 
-      if (lcheck && streamptr->ncmode == 2) cdf_enddef(fileID);
+      if (lcheck && streamptr->ncmode == 2) cdf_enddef(fileID, streamptr->self);
 
       streamptr->vars[varID].defmiss = true;
     }
@@ -202,7 +202,7 @@ cdfDefInstituteGlobal(const stream_t *streamptr)
             {
               if (streamptr->ncmode == 2) cdf_redef(fileID);
               cdf_put_att_text(fileID, NC_GLOBAL, "institution", len, longname);
-              if (streamptr->ncmode == 2) cdf_enddef(fileID);
+              if (streamptr->ncmode == 2) cdf_enddef(fileID, streamptr->self);
             }
         }
     }
@@ -225,7 +225,7 @@ cdfDefSourceGlobal(const stream_t *streamptr)
             {
               if (streamptr->ncmode == 2) cdf_redef(fileID);
               cdf_put_att_text(fileID, NC_GLOBAL, "source", len, longname);
-              if (streamptr->ncmode == 2) cdf_enddef(fileID);
+              if (streamptr->ncmode == 2) cdf_enddef(fileID, streamptr->self);
             }
         }
     }
@@ -368,7 +368,7 @@ cdfDefGlobalAtts(stream_t *streamptr)
 
   cdfDefineAttributes(vlistID, CDI_GLOBAL, fileID, NC_GLOBAL);
 
-  if (natts > 0 && streamptr->ncmode == 2) cdf_enddef(fileID);
+  if (natts > 0 && streamptr->ncmode == 2) cdf_enddef(fileID, streamptr->self);
 
   streamptr->globalatts = 1;
 }
@@ -964,9 +964,9 @@ cdfEndDef(stream_t *streamptr)
       if (streamptr->ncmode != 2)
         {
           if (CDI_Netcdf_Hdr_Pad == 0UL)
-            cdf_enddef(fileID);
+            cdf_enddef(fileID, streamptr->self);
           else
-            cdf__enddef(fileID, CDI_Netcdf_Hdr_Pad);
+            cdf__enddef(fileID, streamptr->self, CDI_Netcdf_Hdr_Pad);
           streamptr->ncmode = 2;
         }
 
@@ -1297,7 +1297,7 @@ cdf_write_var(stream_t *streamptr, int varID, int memtype, const void *data, siz
 
   if (streamptr->ncmode == 1)
     {
-      cdf_enddef(fileID);
+      cdf_enddef(fileID, streamptr->self);
       streamptr->ncmode = 2;
     }
 
@@ -1394,7 +1394,7 @@ cdf_write_var_chunk(stream_t *streamptr, int varID, int memtype, const int rect[
 
   if (streamptr->ncmode == 1)
     {
-      cdf_enddef(fileID);
+      cdf_enddef(fileID, streamptr->self);
       streamptr->ncmode = 2;
     }
 

@@ -229,7 +229,7 @@ cdfDefTime(stream_t *streamptr)
 
   cdf_put_att_text(fileID, time_varid, "axis", 1, "T");
 
-  if (streamptr->ncmode == 2) cdf_enddef(fileID);
+  if (streamptr->ncmode == 2) cdf_enddef(fileID, streamptr->self);
 }
 
 static void
@@ -243,7 +243,7 @@ cdfDefTimeValue(stream_t *streamptr, int tsID)
 
   if (streamptr->ncmode == 1)
     {
-      cdf_enddef(fileID);
+      cdf_enddef(fileID, streamptr->self);
       streamptr->ncmode = 2;
     }
 

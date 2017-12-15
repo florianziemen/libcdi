@@ -10,8 +10,8 @@ int cdf_open(const char *path, int omode, int *idp);
 void cdf_close(int ncid);
 
 void cdf_redef(int ncid);
-void cdf_enddef(int ncid);
-void cdf__enddef(const int ncid, const size_t hdr_pad);
+void cdf_enddef(int ncid, int streamID);
+void cdf__enddef(const int ncid, int streamID, const size_t hdr_pad);
 void cdf_sync(int ncid);
 
 void cdf_inq(int ncid, int *ndimsp, int *nvarsp, int *ngattsp, int *unlimdimidp);
@@ -92,6 +92,10 @@ typedef int (*cdi_nc__create_funcp)(const char *path, int cmode, size_t initials
 
 typedef void (*cdi_cdf_def_var_funcp)(int ncid, const char *name, nc_type xtype, int ndims, const int dimids[], int *varidp);
 
+int cdi_nc_enddef_serial(int ncid, int streamID);
+int cdi_nc__enddef_serial(int ncid, int streamID, size_t hdr_pad, size_t v_align, size_t v_minfree, size_t r_align);
+typedef int (*cdi_nc_enddef_funcp)(int ncid, int streamID);
+typedef int (*cdi_nc__enddef_funcp)(int ncid, int streamID, size_t hdr_pad, size_t v_align, size_t v_minfree, size_t r_align);
 #endif
 
 #endif /* CDF_INT_H */
