@@ -22,6 +22,10 @@
    */
 #undef HAVE_DECL_ISNAN
 
+/* Define to 1 if you have the declaration of `nc_inq_format_extended', and to
+   0 if you don't. */
+#undef HAVE_DECL_NC_INQ_FORMAT_EXTENDED
+
 /* Define to 1 if you have the declaration of `PAGESIZE', and to 0 if you
    don't. */
 #undef HAVE_DECL_PAGESIZE
