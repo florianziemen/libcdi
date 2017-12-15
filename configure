@@ -29394,6 +29394,27 @@ done
                   if test x$enable_ppm != xyes; then :
   HAVE_PARALLEL_NC4=0
 fi
+      if test $HAVE_PARALLEL_NC4 -gt 0; then :
+  ac_fn_c_check_decl "$LINENO" "nc_inq_format_extended" "ac_cv_have_decl_nc_inq_format_extended" "$ac_includes_default
+#include <netcdf.h>
+"
+if test "x$ac_cv_have_decl_nc_inq_format_extended" = xyes; then :
+  ac_have_decl=1
+else
+  ac_have_decl=0
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_NC_INQ_FORMAT_EXTENDED $ac_have_decl
+_ACEOF
+if test $ac_have_decl = 1; then :
+
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: The supplied netCDF library does not support nc_inq_format_extended." >&5
+$as_echo "$as_me: The supplied netCDF library does not support nc_inq_format_extended." >&6;}
+fi
+
+fi
 
 fi
 
