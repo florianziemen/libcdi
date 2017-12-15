@@ -81,7 +81,7 @@ cdfDefComplex(stream_t *streamptr, int gridID, int gridIndex)
 
     if (switchNCMode)
       {
-        cdf_enddef(fileID);
+        cdf_enddef(fileID, streamptr->self);
         streamptr->ncmode = 2;
       }
   }
@@ -161,7 +161,7 @@ cdfDefSPorFC(stream_t *streamptr, int gridID, int gridIndex, char *restrict axis
 
       if (switchNCMode)
         {
-          cdf_enddef(fileID);
+          cdf_enddef(fileID, streamptr->self);
           streamptr->ncmode = 2;
         }
     }
@@ -284,7 +284,7 @@ cdfDefTrajLatLon(stream_t *streamptr, int gridID, int gridIndex, const struct cd
       cdfPutGridStdAtts(fileID, ncvarid, gridID, inqs->axisSym);
       if (switchNCMode)
         {
-          cdf_enddef(fileID);
+          cdf_enddef(fileID, streamptr->self);
           streamptr->ncmode = 2;
         }
     }
@@ -686,7 +686,7 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridIndex, int ndims, bool
 
       if (switchNCMode)
         {
-          cdf_enddef(fileID);
+          cdf_enddef(fileID, streamptr->self);
           streamptr->ncmode = 2;
         }
 
@@ -752,7 +752,7 @@ cdfDefGridUUID(stream_t *streamptr, int gridID)
           const int fileID = streamptr->fileID;
           // if (streamptr->ncmode == 2) cdf_redef(fileID);
           cdf_put_att_text(fileID, NC_GLOBAL, "uuidOfHGrid", uuidNumHexChars, uuidStr);
-          // if (streamptr->ncmode == 2  cdf_enddef(fileID);
+          // if (streamptr->ncmode == 2  cdf_enddef(fileID, streamptr->self);
         }
     }
 }
@@ -927,7 +927,7 @@ cdfDefIrregularGridCommon(stream_t *streamptr, int gridID, size_t xsize, size_t 
 
   if (switchNCMode)
     {
-      cdf_enddef(fileID);
+      cdf_enddef(fileID, streamptr->self);
       streamptr->ncmode = 2;
     }
 
@@ -1146,7 +1146,7 @@ cdf_def_vct_echam(stream_t *streamptr, int zaxisID)
 
       if (switchNCMode)
         {
-          cdf_enddef(fileID);
+          cdf_enddef(fileID, streamptr->self);
           streamptr->ncmode = 2;
         }
 
@@ -1285,7 +1285,7 @@ cdf_def_vct_cf(stream_t *streamptr, int zaxisID, int nclevID, int ncbndsID, int 
 
       if (switchNCMode)
         {
-          cdf_enddef(fileID);
+          cdf_enddef(fileID, streamptr->self);
           streamptr->ncmode = 2;
         }
     }
@@ -1353,7 +1353,7 @@ cdf_def_zaxis_hybrid_echam(stream_t *streamptr, int type, int *ncvaridp, int zax
 
   if (switchNCMode)
     {
-      cdf_enddef(fileID);
+      cdf_enddef(fileID, streamptr->self);
       streamptr->ncmode = 2;
     }
 
@@ -1518,7 +1518,7 @@ cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int *ncvaridp, int zaxisI
 
   if (switchNCMode)
     {
-      cdf_enddef(fileID);
+      cdf_enddef(fileID, streamptr->self);
       streamptr->ncmode = 2;
     }
 
@@ -1584,7 +1584,7 @@ cdfDefZaxisUUID(stream_t *streamptr, int zaxisID)
           cdf_put_att_text(fileID, NC_GLOBAL, "uuidOfVGrid", uuidNumHexChars, uuidStr);
           if (switchNCMode)
             {
-              cdf_enddef(fileID);
+              cdf_enddef(fileID, streamptr->self);
               streamptr->ncmode = 2;
             }
         }
@@ -1640,7 +1640,7 @@ cdfDefZaxisChar(stream_t *streamptr, int zaxisID, char *axisname, int *dimID, si
       cdfDefineAttributes(zaxisID, CDI_GLOBAL, fileID, ncvarID);
 
       streamptr->nczvarID[zaxisindex] = ncvarID;
-      cdf_enddef(fileID);
+      cdf_enddef(fileID, streamptr->self);
 
       // Write Stringvalues
       size_t start[2], count[2];
@@ -1818,7 +1818,7 @@ cdfDefZaxis(stream_t *streamptr, int zaxisID)
 
       if (switchNCMode)
         {
-          cdf_enddef(fileID);
+          cdf_enddef(fileID, streamptr->self);
           streamptr->ncmode = 2;
         }
 
@@ -1860,7 +1860,7 @@ cdf_def_mapping(stream_t *streamptr, int gridID)
 
   if (switchNCMode)
     {
-      cdf_enddef(fileID);
+      cdf_enddef(fileID, streamptr->self);
       streamptr->ncmode = 2;
     }
 
@@ -1939,7 +1939,7 @@ cdfDefCharacter(stream_t *streamptr, int gridID, int gridIndex, int cdiAxisID, i
   cdf_def_var(fileID, axisname, NC_CHAR, 2, dimIDs, &ncaxisid);
   cdfPutGridStdAtts(fileID, ncaxisid, gridID, isXaxis ? 'X' : 'Y');
 
-  cdf_enddef(fileID);
+  cdf_enddef(fileID, streamptr->self);
 
   // Write Var
 
@@ -1996,7 +1996,7 @@ cdfDefRgrid(stream_t *streamptr, int gridID, int gridIndex)
 
         if (switchNCMode)
           {
-            cdf_enddef(fileID);
+            cdf_enddef(fileID, streamptr->self);
             streamptr->ncmode = 2;
           }
       }
@@ -2039,7 +2039,7 @@ cdfDefRgrid(stream_t *streamptr, int gridID, int gridIndex)
 
         if (switchNCMode)
           {
-            cdf_enddef(fileID);
+            cdf_enddef(fileID, streamptr->self);
             streamptr->ncmode = 2;
           }
 
@@ -2098,7 +2098,7 @@ cdfDefGdim(stream_t *streamptr, int gridID, int gridIndex)
 
           if (switchNCMode)
             {
-              cdf_enddef(fileID);
+              cdf_enddef(fileID, streamptr->self);
               streamptr->ncmode = 2;
             }
         }
@@ -2282,7 +2282,7 @@ cdfDefCoordinateVars(stream_t *streamptr)
 
   if (streamptr->ncmode != 2)
     {
-      cdf_enddef(streamptr->fileID);
+      cdf_enddef(streamptr->fileID, streamptr->self);
       streamptr->ncmode = 2;
     }
 

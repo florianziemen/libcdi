@@ -20,6 +20,7 @@
 #include "pio_util.h"
 
 #include "pio_cdf_int.h"
+#include "pio_server.h"
 
 #if defined HAVE_PARALLEL_NC4
 #if !defined TLS && defined HAVE_PTHREAD
@@ -112,10 +113,60 @@ cdiPioCdfDefVar(int ncid, const char *name, nc_type xtype, int ndims, const int 
     }
 }
 
+#ifdef NC_PNETCDF
+static void
+cdiPio_enable_nc_par_access(int ncid, int streamID)
+{
+  bool setVarParAccess;
+#if HAVE_DECL_NC_INQ_FORMAT_EXTENDED
+  int formatNC, modeNC;
+  int statusInq = nc_inq_format_extended(ncid, &formatNC, &modeNC);
+  if (statusInq != NC_NOERR) Error("%s", nc_strerror(statusInq));
+  setVarParAccess = (modeNC & NC_PNETCDF);
+#else
+  int cf_format, owner = cdiPioStream2Owner(streamID);
+  int statusInq = nc_inq_format(ncid, &cf_format);
+  if (statusInq != NC_NOERR) Error("%s", nc_strerror(statusInq));
+  setVarParAccess = (owner == CDI_PIO_COLLECTIVE_OPEN && cf_format != NC_FORMAT_NETCDF4);
+#endif
+  if (setVarParAccess)
+    {
+      int nvars;
+      cdf_inq_nvars(ncid, &nvars);
+      for (int i = 0; i < nvars; ++i)
+        {
+          int statusParAcc = nc_var_par_access(ncid, i, NC_COLLECTIVE);
+          if (statusParAcc != NC_NOERR) Warning("cannot set collective access for variable %d, %s", i, nc_strerror(statusParAcc));
+        }
+    }
+}
+
+static int
+cdiPio_nc_enddef(int ncid, int streamID)
+{
+  int statusEndDef = nc_enddef(ncid);
+  if (statusEndDef == NC_NOERR) cdiPio_enable_nc_par_access(ncid, streamID);
+  return statusEndDef;
+}
+
+static int
+cdiPio_nc__enddef(int ncid, int streamID, size_t hdr_pad, size_t v_align, size_t v_minfree, size_t r_align)
+{
+  int statusEndDef = nc__enddef(ncid, hdr_pad, v_align, v_minfree, r_align);
+  if (statusEndDef == NC_NOERR) cdiPio_enable_nc_par_access(ncid, streamID);
+  return statusEndDef;
+}
+
+#endif
+
 void
 cdiPioEnableNetCDFParAccess(void)
 {
   namespaceSwitchSet(NSSWITCH_NC__CREATE, NSSW_FUNC(cdiPio_nc__create));
+#ifdef NC_PNETCDF
+  namespaceSwitchSet(NSSWITCH_NC_ENDDEF, NSSW_FUNC(cdiPio_nc_enddef));
+  namespaceSwitchSet(NSSWITCH_NC__ENDDEF, NSSW_FUNC(cdiPio_nc__enddef));
+#endif
   namespaceSwitchSet(NSSWITCH_CDF_DEF_VAR, NSSW_FUNC(cdiPioCdfDefVar));
 #if !defined TLS && defined HAVE_PTHREAD
   int ierror = pthread_key_create(&cdiPioCdfJmpKey, NULL);
