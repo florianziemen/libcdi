@@ -28,7 +28,7 @@ static const char Grids[][17] = {
   /*  0 */  "undefined",
   /*  1 */  "generic",
   /*  2 */  "gaussian",
-  /*  3 */  "gaussian reduced",
+  /*  3 */  "gaussian_reduced",
   /*  4 */  "lonlat",
   /*  5 */  "spectral",
   /*  6 */  "fourier",
