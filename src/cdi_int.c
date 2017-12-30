@@ -137,6 +137,10 @@ void cdiPrintVersion(void)
   fprintf(stderr, "    HDF5 library version : %s\n", hdfLibraryVersion());
 #endif
 #ifdef  HAVE_LIBSERVICE
+  fprintf(stderr, "    EXSE library version : %s\n", srvLibraryVersion());
+#endif
+  /*
+#ifdef  HAVE_LIBSERVICE
   fprintf(stderr, " SERVICE library version : %s\n", srvLibraryVersion());
 #endif
 #ifdef  HAVE_LIBEXTRA
@@ -145,6 +149,7 @@ void cdiPrintVersion(void)
 #ifdef  HAVE_LIBIEG
   fprintf(stderr, "     IEG library version : %s\n", iegLibraryVersion());
 #endif
+  */
   fprintf(stderr, "    FILE library version : %s\n", fileLibraryVersion());
 }
 
