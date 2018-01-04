@@ -2351,7 +2351,7 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelI
     }
 
   long grib_ltype = (editionNumber <= 1) ? zaxisTypeToGrib1ltype(zaxistype) : zaxisTypeToGrib2ltype(zaxistype);
-  // long grib_ltype2 = (ltype != ltype2) ? ltype2 : grib_ltype;
+  long grib_ltype2 = (ltype != ltype2) ? ltype2 : grib_ltype;
 
   switch (zaxistype)
     {
@@ -2415,7 +2415,7 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelI
         if ( editionNumber <= 1 )
           grib1DefLevel(gh, gcinit, grib_ltype, lbounds, level, dlevel1, dlevel2);
         else
-          grib2DefLevel(gh, gcinit, grib_ltype, grib_ltype, lbounds, level, dlevel1, dlevel2);
+          grib2DefLevel(gh, gcinit, grib_ltype, grib_ltype2, lbounds, level, dlevel1, dlevel2);
 
         break;
       }

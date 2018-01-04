@@ -4,6 +4,7 @@
 
 2018-01-04  Uwe Schulzweida
 
+	* GRIB2: use typeOfSecondFixedSurface if present
 	* Added support for GRIB2 key tablesVersion/localTablesVersion
 	* Added CDI function cdiDefKeyInt()/cdiInqKeyInt()
 
