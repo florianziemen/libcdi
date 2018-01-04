@@ -17,6 +17,7 @@
 
 #define VALIDMISS 1.e+303
 
+#include "cdi_key.h"
 #include "cdi_att.h"
 #include "grid.h"
 
@@ -54,9 +55,9 @@ typedef struct
   int         param;
   int         gridID;
   int         zaxisID;
-  int         timetype;  /* TIME_* */
-  int         tsteptype; /* TSTEP_* */
-  int         datatype;  /* CDI_DATATYPE_PACKX for GRIB data, else CDI_DATATYPE_FLT32 or CDI_DATATYPE_FLT64 */
+  int         timetype;  // TIME_*
+  int         tsteptype; // TSTEP_*
+  int         datatype;  // CDI_DATATYPE_PACKX for GRIB data, else CDI_DATATYPE_FLT32 or CDI_DATATYPE_FLT64
   int         instID;
   int         modelID;
   int         tableID;
@@ -66,7 +67,7 @@ typedef struct
   int         productDefinitionTemplate;
   int         chunktype;
   int         xyz;
-  bool        missvalused; /* true if missval is defined */
+  bool        missvalused; // true if missval is defined
   bool        lvalidrange;
   char       *name;
   char       *longname;
@@ -80,15 +81,16 @@ typedef struct
   levinfo_t  *levinfo;
   int         comptype;     // compression type
   int         complevel;    // compression level
-  ensinfo_t  *ensdata;      /* Ensemble information */
+  ensinfo_t  *ensdata;      // Ensemble information
+  cdi_keys_t  keys;
   cdi_atts_t  atts;
   int         iorank;
 
-  int         subtypeID;   /* subtype ID for tile-related meta-data, currently for GRIB-API only. */
+  int         subtypeID;   // subtype ID for tile-related meta-data, currently for GRIB-API only.
 
-  int                 opt_grib_nentries;       /* current no. key-value pairs            */
-  int                 opt_grib_kvpair_size;    /* current allocated size                 */
-  opt_key_val_pair_t *opt_grib_kvpair;         /* (optional) list of keyword/value pairs */
+  int                 opt_grib_nentries;       // current no. key-value pairs
+  int                 opt_grib_kvpair_size;    // current allocated size
+  opt_key_val_pair_t *opt_grib_kvpair;         // (optional) list of keyword/value pairs
 }
 var_t;
 

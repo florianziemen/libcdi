@@ -1,3 +1,11 @@
+2018-02-25  Uwe Schulzweida
+
+	* Version 1.9.3 released
+
+2018-01-04  Uwe Schulzweida
+
+	* Added CDI function cdiDefKeyInt()/cdiInqKeyInt()
+
 2017-12-07  Uwe Schulzweida
 
 	* Check positive attribute for scalar z coordinates (bug fix)

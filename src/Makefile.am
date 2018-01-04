@@ -117,6 +117,8 @@ libcdi_la_SOURCES = 	 \
 	version.c      	 \
 	vlist.c 	 \
 	vlist.h	         \
+	cdi_key.c 	 \
+	cdi_key.h 	 \
 	cdi_att.c 	 \
 	cdi_att.h 	 \
 	vlist_var.c 	 \

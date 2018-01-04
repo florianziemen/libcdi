@@ -13,23 +13,23 @@
  * CDI attribute
  */
 typedef struct {
-  size_t    xsz;	  /* amount of space at xvalue                      */
-  size_t    namesz;       /* size of name                                   */
-  char     *name;         /* attribute name                                 */
-  int       indtype;	  /* internal data type of xvalue (INT, FLT or TXT) */
-  int       exdtype;      /* external data type                             */
-                          /* indtype    exdtype                             */
-                          /* TXT        TXT                                 */
-                          /* INT        INT16, INT32                        */
-                          /* FLT        FLT32, FLT64                        */
-  size_t    nelems;    	  /* number of elements                             */
-  void     *xvalue;       /* the actual data                                */
+  size_t    xsz;	  // amount of space at xvalue
+  size_t    namesz;       // size of name
+  char     *name;         // attribute name
+  int       indtype;	  // internal data type of xvalue (INT, FLT or TXT)
+  int       exdtype;      // external data type
+                          // indtype    exdtype
+                          // TXT        TXT
+                          // INT        INT16, INT32
+                          // FLT        FLT32, FLT64
+  size_t    nelems;    	  // number of elements
+  void     *xvalue;       // the actual data
 } cdi_att_t;
 
 
 typedef struct {
-  size_t     nalloc;		/* number allocated >= nelems */
-  size_t     nelems;		/* length of the array */
+  size_t     nalloc;		// number allocated >= nelems
+  size_t     nelems;		// length of the array
   cdi_att_t  value[MAX_ATTRIBUTES];
 } cdi_atts_t;
 
