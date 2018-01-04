@@ -4,6 +4,7 @@
 
 2018-01-04  Uwe Schulzweida
 
+	* Added support for GRIB2 key tablesVersion/localTablesVersion
 	* Added CDI function cdiDefKeyInt()/cdiInqKeyInt()
 
 2017-12-07  Uwe Schulzweida

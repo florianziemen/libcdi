@@ -33,6 +33,7 @@ void varDefEnsembleInfo(int varID, int ens_idx, int ens_count, int forecast_type
 void varDefTypeOfGeneratingProcess(int varID, int typeOfGeneratingProcess);
 void varDefProductDefinitionTemplate(int varID, int productDefinitionTemplate);
 
+void varDefKeyInt(int varID, int key, int value);
 
 void varDefOptGribInt(int varID, int tile_index, long lval, const char *keyword);
 void varDefOptGribDbl(int varID, int tile_index, double dval, const char *keyword);

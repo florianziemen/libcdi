@@ -82,6 +82,14 @@ typedef struct
   /* meta-data for specification of tiles (currently only GRIB-API: */
   subtype_t     *tiles;
 
+  size_t         nikeys;
+  struct ikeyvalue_t
+  {
+    int          key;
+    int          value;
+  } ikeyvalue_t;
+  struct ikeyvalue_t  ikeyvalues[MAX_KEYS];
+
   int                 opt_grib_nentries;                       /* current no. key-value pairs            */
   int                 opt_grib_kvpair_size;                    /* current allocated size                 */
   opt_key_val_pair_t *opt_grib_kvpair;                         /* (optional) list of keyword/value pairs */
@@ -117,6 +125,8 @@ void paramInitEntry(unsigned varID, int param)
   vartable[varID].tableID        = CDI_UNDEFID;
   vartable[varID].typeOfGeneratingProcess   = CDI_UNDEFID;
   vartable[varID].productDefinitionTemplate = CDI_UNDEFID;
+  vartable[varID].nikeys         = 0;
+  for ( int i = 0; i < MAX_KEYS; ++i ) vartable[varID].ikeyvalues[i].value = 0;
   vartable[varID].comptype       = CDI_COMPRESS_NONE;
   vartable[varID].complevel      = 1;
   vartable[varID].lmissval       = false;
@@ -576,6 +586,13 @@ int cmp_varname(const void *s1, const void *s2)
 }
 
 
+void varCopyKeys(int vlistID, int varID)
+{
+  for ( int i = 0; i < vartable[varID].nikeys; ++i )
+    cdiDefKeyInt(vlistID, varID, vartable[varID].ikeyvalues[i].key, vartable[varID].ikeyvalues[i].value);
+}
+
+
 void cdi_generate_vars(stream_t *streamptr)
 {
   int vlistID = streamptr->vlistID;
@@ -769,8 +786,7 @@ void cdi_generate_vars(stream_t *streamptr)
       if ( vartable[varid].typeOfGeneratingProcess != CDI_UNDEFID )
         vlistDefVarTypeOfGeneratingProcess(vlistID, varID, vartable[varid].typeOfGeneratingProcess);
 
-      if ( vartable[varid].productDefinitionTemplate != CDI_UNDEFID )
-        vlistDefVarProductDefinitionTemplate(vlistID, varID, vartable[varid].productDefinitionTemplate);
+      varCopyKeys(vlistID, varID);
 
       if ( vartable[varid].lmissval ) vlistDefVarMissval(vlistID, varID, vartable[varid].missval);
       if ( vartable[varid].name )     vlistDefVarName(vlistID, varID, vartable[varid].name);
@@ -1112,6 +1128,18 @@ void varDefProductDefinitionTemplate(int varID, int productDefinitionTemplate)
 {
   vartable[varID].productDefinitionTemplate = productDefinitionTemplate;
 }
+
+
+void varDefKeyInt(int varID, int key, int value)
+{
+  if ( vartable[varID].nikeys < MAX_KEYS )
+    {
+      vartable[varID].ikeyvalues[vartable[varID].nikeys].key   = key;
+      vartable[varID].ikeyvalues[vartable[varID].nikeys].value = value;
+      vartable[varID].nikeys++;
+    }
+}
+
 
 #if  defined  (HAVE_LIBGRIB_API)
 /* Resizes and initializes opt_grib_kvpair data structure. */

@@ -574,17 +574,14 @@ void gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh,
   if ( ens_index > 0 )
     varDefEnsembleInfo(varID, (int)ens_index, (int)ens_count, (int)ens_forecast_type);
 
-  /*
   long tablesVersion = 0;
   if ( grib_get_long(gh, "tablesVersion", &tablesVersion) == 0 )
-    printf("tablesVersion %ld\n", tablesVersion);
-    // varDefTablesVersion(varID, (int) tablesVersion);
+    varDefKeyInt(varID, CDI_KEY_TABLESVERSION, (int) tablesVersion);
 
   long localTablesVersion = 0;
   if ( grib_get_long(gh, "localTablesVersion", &localTablesVersion) == 0 )
-    printf("localTablesVersion %ld\n", localTablesVersion);
-  //varDefLocalTablesVersion(varID, (int) localTablesVersion);
-  */
+    varDefKeyInt(varID, CDI_KEY_LOCALTABLESVERSION, (int) localTablesVersion);
+
   long typeOfGeneratingProcess = 0;
   if ( grib_get_long(gh, "typeOfGeneratingProcess", &typeOfGeneratingProcess) == 0 )
     varDefTypeOfGeneratingProcess(varID, (int) typeOfGeneratingProcess);
@@ -1697,7 +1694,7 @@ int gribapiDefSteptype(int editionNumber, grib_handle *gh, int productDefinition
   long proDefTempNum = 0;
   const char *stepType;
 
-  if (tsteptype >= TSTEP_INSTANT && tsteptype <= TSTEP_RATIO)
+  if ( tsteptype >= TSTEP_INSTANT && tsteptype <= TSTEP_RATIO )
     {
       stepType = cdiGribAPI_ts_str_map[tsteptype].sname;
       proDefTempNum = cdiGribAPI_ts_str_map[tsteptype].productionTemplate;
@@ -2354,6 +2351,7 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelI
     }
 
   long grib_ltype = (editionNumber <= 1) ? zaxisTypeToGrib1ltype(zaxistype) : zaxisTypeToGrib2ltype(zaxistype);
+  // long grib_ltype2 = (ltype != ltype2) ? ltype2 : grib_ltype;
 
   switch (zaxistype)
     {
@@ -3022,7 +3020,15 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   if ( editionNumber == 2 )
     {
       if ( typeOfGeneratingProcess == -1 ) typeOfGeneratingProcess = 0;
-      if ( ! gc->init ) GRIB_CHECK(my_grib_set_long(gh, "typeOfGeneratingProcess", typeOfGeneratingProcess), 0);
+      if ( ! gc->init )
+        {
+          GRIB_CHECK(my_grib_set_long(gh, "typeOfGeneratingProcess", typeOfGeneratingProcess), 0);
+          int status, tablesVersion, localTablesVersion;
+          status = cdiInqKeyInt(vlistID, varID, CDI_KEY_TABLESVERSION, &tablesVersion);
+          if ( status == 0 ) GRIB_CHECK(my_grib_set_long(gh, "tablesVersion", (long)tablesVersion), 0);
+          status = cdiInqKeyInt(vlistID, varID, CDI_KEY_LOCALTABLESVERSION, &localTablesVersion);
+          if ( status == 0 ) GRIB_CHECK(my_grib_set_long(gh, "localTablesVersion", (long)localTablesVersion), 0);
+        }
     }
 
   /*
