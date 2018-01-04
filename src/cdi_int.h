@@ -55,7 +55,7 @@ char *strdup(const char *s);
 #ifndef  _TAXIS_H
 #  include "taxis.h"
 #endif
-#ifndef  _CDI_LIMITS_H
+#ifndef  CDI_LIMITS_H
 #  include "cdi_limits.h"
 #endif
 #ifndef  _SERVICE_H

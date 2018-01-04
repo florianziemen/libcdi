@@ -809,7 +809,17 @@ int     gridInqYIsc(int gridID);
 /*      gridInqYCvals: Get strings from Y-axis in case grid is of type GRID_CHARXY */
 size_t  gridInqYCvals(int gridID, char *ycvals[]);
 
-/* CDI grid string key values */
+// CDI var key values
+#define  CDI_KEY_TABLESVERSION         801  // GRIB2 tablesVersion
+#define  CDI_KEY_LOCALTABLESVERSION    802  // GRIB2 localTablesVersion
+
+//      cdiDefKeyInt: Define a CDI varianble integer value from a key
+int     cdiDefKeyInt(int cdiID, int varID, int key, int value);
+
+//      cdiInqKeyInt: Get a CDI variable integer value from a key
+int     cdiInqKeyInt(int cdiID, int varID, int key, int *value);
+
+// CDI grid key values
 #define  CDI_KEY_XNAME       901  // X-axis name
 #define  CDI_KEY_XDIMNAME    902  // X-axis dimension name
 #define  CDI_KEY_XLONGNAME   903  // X-axis longname
@@ -822,7 +832,7 @@ size_t  gridInqYCvals(int gridID, char *ycvals[]);
 #define  CDI_KEY_MAPPING     921  // Grid mapping var name
 #define  CDI_KEY_MAPNAME     922  // Grid mapping name
 
-/* CDI zaxis string key values */
+// CDI zaxis key values
 #define  CDI_KEY_NAME        941  // Z-axis name
 #define  CDI_KEY_DIMNAME     942  // Z-axis dimension name
 #define  CDI_KEY_LONGNAME    943  // Z-axis longname
@@ -831,11 +841,19 @@ size_t  gridInqYCvals(int gridID, char *ycvals[]);
 #define  CDI_KEY_P0NAME      951  // Z-axis reference pressure name
 #define  CDI_KEY_P0VALUE     952  // Z-axis reference pressure in Pa
 
+// CDI var key values
+
 //      cdiGridDefKeyStr: Define a CDI grid string value from a key
 int     cdiGridDefKeyStr(int gridID, int key, int size, const char *mesg);
 
 //      cdiGridInqKeyStr: Get a CDI grid string value from a key
 int     cdiGridInqKeyStr(int gridID, int key, int size, char *mesg);
+
+//      cdiZaxisDefKeyStr: Define a CDI Z-axis string value from a key
+int     cdiZaxisDefKeyStr(int zaxisID, int key, int size, const char *mesg);
+
+//      cdiZaxisInqKeyStr: Get a CDI Z-axis string value from a key
+int     cdiZaxisInqKeyStr(int zaxisID, int key, int size, char *mesg);
 
 //      cdiZaxisDefKeyFlt: Define a CDI Z-axis floating point value from a key
 int     cdiZaxisDefKeyFlt(int zaxisID, int key, double value);
@@ -1046,12 +1064,6 @@ void    zaxisDefUUID(int zaxisID, const unsigned char uuid[CDI_UUID_SIZE]);
 
 /*      zaxisInqUUID: Get the UUID of a generalized Z-axis */
 void    zaxisInqUUID(int zaxisID, unsigned char uuid[CDI_UUID_SIZE]);
-
-//      cdiZaxisDefKeyStr: Define a CDI Z-axis string value from a key
-int     cdiZaxisDefKeyStr(int zaxisID, int key, int size, const char *mesg);
-
-//      cdiZaxisInqKeyStr: Get a CDI Z-axis string value from a key
-int     cdiZaxisInqKeyStr(int zaxisID, int key, int size, char *mesg);
 
 /*      zaxisDefName: Define the name of a Z-axis */
 void    zaxisDefName(int zaxisID, const char *name_optional);

@@ -1,7 +1,7 @@
-#ifndef _VLIST_H
-#define _VLIST_H
+#ifndef  VLIST_H
+#define  VLIST_H
 
-#ifdef HAVE_CONFIG_H
+#ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
 
@@ -11,7 +11,7 @@
 
 #include <stddef.h>  /* size_t */
 
-#ifndef _CDI_LIMITS_H
+#ifndef  CDI_LIMITS_H
 #include "cdi_limits.h"
 #endif
 
@@ -216,7 +216,7 @@ const
 #endif
 resOps vlistOps;
 
-#endif  /* _VLIST_H */
+#endif  /* VLIST_H */
 /*
  * Local Variables:
  * c-file-style: "Java"

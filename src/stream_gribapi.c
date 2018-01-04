@@ -401,14 +401,12 @@ void gribapiGetString(grib_handle *gh, const char *key, char *string, size_t len
 }
 
 static
-void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
+void gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh,
                       size_t recsize, off_t position, int datatype, int comptype, const char *varname,
                       int leveltype1, int leveltype2, int lbounds, int level1, int level2, int level_sf, int level_unit,
                       const var_tile_t *tiles, int lread_additional_keys)
 {
-  int levelID = 0;
   char stdname[CDI_MAX_NAME], longname[CDI_MAX_NAME], units[CDI_MAX_NAME];
-  long ens_index = 0, ens_count = 0, ens_forecast_type = 0;
 
   int vlistID = streamptr->vlistID;
   int tsID    = streamptr->curTsID;
@@ -551,6 +549,7 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
   // fprintf(stderr, "param %d name %s %s %s\n", param, name, longname, units);
 
   /* add the previously read record data to the (intermediate) list of records */
+  int levelID = 0;
   int tile_index = 0, varID;
   varAddRecord(recID, param, gridID, zaxistype, lbounds, level1, level2, level_sf, level_unit,
 	       datatype, &varID, &levelID, tsteptype, numavg, leveltype1, leveltype2,
@@ -565,15 +564,27 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
     Get the ensemble Info from the grib-2 Tables and update the intermediate datastructure.
     Further update to the "vlist" is handled in the same way as for GRIB-1 by "cdi_generate_vars"
   */
+  long ens_index = 0, ens_count = 0, ens_forecast_type = 0;
   if ( grib_get_long(gh, "typeOfEnsembleForecast", &ens_forecast_type) == 0 )
     {
-      GRIB_CHECK(grib_get_long(gh, "numberOfForecastsInEnsemble", &ens_count ), 0);
-      GRIB_CHECK(grib_get_long(gh, "perturbationNumber", &ens_index ), 0);
+      GRIB_CHECK(grib_get_long(gh, "numberOfForecastsInEnsemble", &ens_count), 0);
+      GRIB_CHECK(grib_get_long(gh, "perturbationNumber", &ens_index), 0);
     }
 
   if ( ens_index > 0 )
     varDefEnsembleInfo(varID, (int)ens_index, (int)ens_count, (int)ens_forecast_type);
 
+  /*
+  long tablesVersion = 0;
+  if ( grib_get_long(gh, "tablesVersion", &tablesVersion) == 0 )
+    printf("tablesVersion %ld\n", tablesVersion);
+    // varDefTablesVersion(varID, (int) tablesVersion);
+
+  long localTablesVersion = 0;
+  if ( grib_get_long(gh, "localTablesVersion", &localTablesVersion) == 0 )
+    printf("localTablesVersion %ld\n", localTablesVersion);
+  //varDefLocalTablesVersion(varID, (int) localTablesVersion);
+  */
   long typeOfGeneratingProcess = 0;
   if ( grib_get_long(gh, "typeOfGeneratingProcess", &typeOfGeneratingProcess) == 0 )
     varDefTypeOfGeneratingProcess(varID, (int) typeOfGeneratingProcess);
@@ -582,18 +593,19 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
   if ( grib_get_long(gh, "productDefinitionTemplateNumber", &productDefinitionTemplate) == 0 )
     varDefProductDefinitionTemplate(varID, (int) productDefinitionTemplate);
 
-  long   lval;
-  double dval;
-
   if (lread_additional_keys)
-    for ( int i = 0; i < cdiNAdditionalGRIBKeys; i++ )
-      {
-        /* note: if the key is not defined, we do not throw an error! */
-        if ( grib_get_long(gh, cdiAdditionalGRIBKeys[i], &lval) == 0 )
-          varDefOptGribInt(varID, tile_index, lval, cdiAdditionalGRIBKeys[i]);
-        if ( grib_get_double(gh, cdiAdditionalGRIBKeys[i], &dval) == 0 )
-          varDefOptGribDbl(varID, tile_index, dval, cdiAdditionalGRIBKeys[i]);
-      }
+    {
+      long   lval;
+      double dval;
+      for ( int i = 0; i < cdiNAdditionalGRIBKeys; i++ )
+        {
+          /* note: if the key is not defined, we do not throw an error! */
+          if ( grib_get_long(gh, cdiAdditionalGRIBKeys[i], &lval) == 0 )
+            varDefOptGribInt(varID, tile_index, lval, cdiAdditionalGRIBKeys[i]);
+          if ( grib_get_double(gh, cdiAdditionalGRIBKeys[i], &dval) == 0 )
+            varDefOptGribDbl(varID, tile_index, dval, cdiAdditionalGRIBKeys[i]);
+        }
+    }
 
   if ( varInqInst(varID) == CDI_UNDEFID )
     {
