@@ -362,8 +362,6 @@ FCALLSCSUB3 (vlistDefVarTimave, VLISTDEFVARTIMAVE, vlistdefvartimave, INT, INT, 
 FCALLSCFUN2 (INT, vlistInqVarTimave, VLISTINQVARTIMAVE, vlistinqvartimave, INT, INT)
 FCALLSCSUB3 (vlistDefVarTimaccu, VLISTDEFVARTIMACCU, vlistdefvartimaccu, INT, INT, INT)
 FCALLSCFUN2 (INT, vlistInqVarTimaccu, VLISTINQVARTIMACCU, vlistinqvartimaccu, INT, INT)
-FCALLSCSUB3 (vlistDefVarTypeOfGeneratingProcess, VLISTDEFVARTYPEOFGENERATINGPROCESS, vlistdefvartypeofgeneratingprocess, INT, INT, INT)
-FCALLSCFUN2 (INT, vlistInqVarTypeOfGeneratingProcess, VLISTINQVARTYPEOFGENERATINGPROCESS, vlistinqvartypeofgeneratingprocess, INT, INT)
 FCALLSCSUB3 (vlistDefVarProductDefinitionTemplate, VLISTDEFVARPRODUCTDEFINITIONTEMPLATE, vlistdefvarproductdefinitiontemplate, INT, INT, INT)
 FCALLSCFUN2 (INT, vlistInqVarProductDefinitionTemplate, VLISTINQVARPRODUCTDEFINITIONTEMPLATE, vlistinqvarproductdefinitiontemplate, INT, INT)
 static int vlistInqVarSize_fwrap(int vlistID, int varID)
@@ -481,14 +479,12 @@ static int gridInqYvals_fwrap(int gridID, double yvals[])
 }
 FCALLSCFUN2 (INT, gridInqYvals_fwrap, GRIDINQYVALS, gridinqyvals, INT, DOUBLEV)
 FCALLSCFUN1 (INT, gridInqYIsc, GRIDINQYISC, gridinqyisc, INT)
-
-/*  CDI grid string key values  */
-
-
-/*  CDI zaxis string key values  */
-
+FCALLSCFUN4 (INT, cdiDefKeyInt, CDIDEFKEYINT, cdidefkeyint, INT, INT, INT, INT)
+FCALLSCFUN4 (INT, cdiInqKeyInt, CDIINQKEYINT, cdiinqkeyint, INT, INT, INT, PINT)
 FCALLSCFUN4 (INT, cdiGridDefKeyStr, CDIGRIDDEFKEYSTR, cdigriddefkeystr, INT, INT, INT, STRING)
 FCALLSCFUN4 (INT, cdiGridInqKeyStr, CDIGRIDINQKEYSTR, cdigridinqkeystr, INT, INT, INT, PSTRING)
+FCALLSCFUN4 (INT, cdiZaxisDefKeyStr, CDIZAXISDEFKEYSTR, cdizaxisdefkeystr, INT, INT, INT, STRING)
+FCALLSCFUN4 (INT, cdiZaxisInqKeyStr, CDIZAXISINQKEYSTR, cdizaxisinqkeystr, INT, INT, INT, PSTRING)
 FCALLSCFUN3 (INT, cdiZaxisDefKeyFlt, CDIZAXISDEFKEYFLT, cdizaxisdefkeyflt, INT, INT, DOUBLE)
 FCALLSCFUN3 (INT, cdiZaxisInqKeyFlt, CDIZAXISINQKEYFLT, cdizaxisinqkeyflt, INT, INT, PDOUBLE)
 FCALLSCSUB2 (gridDefXname, GRIDDEFXNAME, griddefxname, INT, STRING)
@@ -604,8 +600,6 @@ FCALLSCSUB2 (zaxisDefNumber, ZAXISDEFNUMBER, zaxisdefnumber, INT, INT)
 FCALLSCFUN1 (INT, zaxisInqNumber, ZAXISINQNUMBER, zaxisinqnumber, INT)
 FCALLSCSUB2 (zaxisDefUUID, ZAXISDEFUUID, zaxisdefuuid, INT, PVOID)
 FCALLSCSUB2 (zaxisInqUUID, ZAXISINQUUID, zaxisinquuid, INT, PVOID)
-FCALLSCFUN4 (INT, cdiZaxisDefKeyStr, CDIZAXISDEFKEYSTR, cdizaxisdefkeystr, INT, INT, INT, STRING)
-FCALLSCFUN4 (INT, cdiZaxisInqKeyStr, CDIZAXISINQKEYSTR, cdizaxisinqkeystr, INT, INT, INT, PSTRING)
 FCALLSCSUB2 (zaxisDefName, ZAXISDEFNAME, zaxisdefname, INT, STRING)
 FCALLSCSUB2 (zaxisInqName, ZAXISINQNAME, zaxisinqname, INT, PSTRING)
 FCALLSCSUB2 (zaxisDefLongname, ZAXISDEFLONGNAME, zaxisdeflongname, INT, STRING)

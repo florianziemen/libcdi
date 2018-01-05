@@ -2,7 +2,7 @@
 #include "config.h"
 #endif
 
-#ifdef HAVE_LIBGRIB_API
+#ifdef  HAVE_LIBGRIB_API
 #include "dmemory.h"
 #include "cdi.h"
 #include "cdi_int.h"
@@ -584,7 +584,7 @@ void gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh,
 
   long typeOfGeneratingProcess = 0;
   if ( grib_get_long(gh, "typeOfGeneratingProcess", &typeOfGeneratingProcess) == 0 )
-    varDefTypeOfGeneratingProcess(varID, (int) typeOfGeneratingProcess);
+    varDefKeyInt(varID, CDI_KEY_TYPEOFGENERATINGPROCESS, (int) typeOfGeneratingProcess);
 
   long productDefinitionTemplate = 0;
   if ( grib_get_long(gh, "productDefinitionTemplateNumber", &productDefinitionTemplate) == 0 )
@@ -2999,7 +2999,8 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
 
   int param    = vlistInqVarParam(vlistID, varID);
   int datatype = vlistInqVarDatatype(vlistID, varID);
-  int typeOfGeneratingProcess = vlistInqVarTypeOfGeneratingProcess(vlistID, varID);
+  int typeOfGeneratingProcess = 0;
+  cdiInqKeyInt(vlistID, varID, CDI_KEY_TYPEOFGENERATINGPROCESS, &typeOfGeneratingProcess);
   int productDefinitionTemplate = vlistInqVarProductDefinitionTemplate(vlistID, varID);
 
   char name[256];
@@ -3019,7 +3020,6 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
 
   if ( editionNumber == 2 )
     {
-      if ( typeOfGeneratingProcess == -1 ) typeOfGeneratingProcess = 0;
       if ( ! gc->init )
         {
           GRIB_CHECK(my_grib_set_long(gh, "typeOfGeneratingProcess", typeOfGeneratingProcess), 0);

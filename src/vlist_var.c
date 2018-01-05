@@ -34,7 +34,6 @@ void vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].tsteptype     = TSTEP_INSTANT;
   vlistptr->vars[varID].timave        = 0;
   vlistptr->vars[varID].timaccu       = 0;
-  vlistptr->vars[varID].typeOfGeneratingProcess   = 0;
   vlistptr->vars[varID].productDefinitionTemplate = -1;
   vlistptr->vars[varID].chunktype     = cdiChunkType;
   vlistptr->vars[varID].xyz           = 321;
@@ -1283,28 +1282,9 @@ int vlistInqVarTimaccu(int vlistID, int varID)
 }
 
 
-void vlistDefVarTypeOfGeneratingProcess(int vlistID, int varID, int typeOfGeneratingProcess)
-{
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  if (vlistptr->vars[varID].typeOfGeneratingProcess != typeOfGeneratingProcess)
-    {
-      vlistptr->vars[varID].typeOfGeneratingProcess = typeOfGeneratingProcess;
-      reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
-    }
-}
-
-
-int vlistInqVarTypeOfGeneratingProcess(int vlistID, int varID)
-{
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  return vlistptr->vars[varID].typeOfGeneratingProcess;
-}
-
-
 void vlistDefVarProductDefinitionTemplate(int vlistID, int varID, int productDefinitionTemplate)
 {
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
-
   if (vlistptr->vars[varID].productDefinitionTemplate != productDefinitionTemplate)
     {
       vlistptr->vars[varID].productDefinitionTemplate = productDefinitionTemplate;

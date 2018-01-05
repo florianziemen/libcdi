@@ -1,8 +1,8 @@
-#ifndef _VARSCAN_H
-#define _VARSCAN_H
+#ifndef  VARSCAN_H
+#define  VARSCAN_H
 
-#ifndef _GRID_H
-#  include "grid.h"
+#ifndef  GRID_H
+#include "grid.h"
 #endif
 
 
@@ -30,7 +30,6 @@ void varDefTable(int varID, int tableID);
 int  varInqTable(int varID);
 void varDefEnsembleInfo(int varID, int ens_idx, int ens_count, int forecast_type);
 
-void varDefTypeOfGeneratingProcess(int varID, int typeOfGeneratingProcess);
 void varDefProductDefinitionTemplate(int varID, int productDefinitionTemplate);
 
 void varDefKeyInt(int varID, int key, int value);

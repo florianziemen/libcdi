@@ -63,7 +63,6 @@ typedef struct
   int         tableID;
   int         timave;
   int         timaccu;
-  int         typeOfGeneratingProcess;
   int         productDefinitionTemplate;
   int         chunktype;
   int         xyz;

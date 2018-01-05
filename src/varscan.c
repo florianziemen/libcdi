@@ -76,7 +76,6 @@ typedef struct
   char          *longname;
   char          *units;
   ensinfo_t     *ensdata;
-  int            typeOfGeneratingProcess;
   int            productDefinitionTemplate;
 
   /* meta-data for specification of tiles (currently only GRIB-API: */
@@ -123,7 +122,6 @@ void paramInitEntry(unsigned varID, int param)
   vartable[varID].instID         = CDI_UNDEFID;
   vartable[varID].modelID        = CDI_UNDEFID;
   vartable[varID].tableID        = CDI_UNDEFID;
-  vartable[varID].typeOfGeneratingProcess   = CDI_UNDEFID;
   vartable[varID].productDefinitionTemplate = CDI_UNDEFID;
   vartable[varID].nikeys         = 0;
   for ( int i = 0; i < MAX_KEYS; ++i ) vartable[varID].ikeyvalues[i].value = 0;
@@ -783,9 +781,6 @@ void cdi_generate_vars(stream_t *streamptr)
       vlistDefVarTimaccu(vlistID, varID, timaccu);
       vlistDefVarCompType(vlistID, varID, comptype);
 
-      if ( vartable[varid].typeOfGeneratingProcess != CDI_UNDEFID )
-        vlistDefVarTypeOfGeneratingProcess(vlistID, varID, vartable[varid].typeOfGeneratingProcess);
-
       varCopyKeys(vlistID, varID);
 
       if ( vartable[varid].lmissval ) vlistDefVarMissval(vlistID, varID, vartable[varid].missval);
@@ -1115,12 +1110,6 @@ void varDefEnsembleInfo(int varID, int ens_idx, int ens_count, int forecast_type
   vartable[varID].ensdata->ens_index = ens_idx;
   vartable[varID].ensdata->ens_count = ens_count;
   vartable[varID].ensdata->forecast_init_type = forecast_type;
-}
-
-
-void varDefTypeOfGeneratingProcess(int varID, int typeOfGeneratingProcess)
-{
-  vartable[varID].typeOfGeneratingProcess = typeOfGeneratingProcess;
 }
 
 
