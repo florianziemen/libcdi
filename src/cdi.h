@@ -665,9 +665,6 @@ int     vlistInqVarTimave(int vlistID, int varID);
 void    vlistDefVarTimaccu(int vlistID, int varID, int timaccu);
 int     vlistInqVarTimaccu(int vlistID, int varID);
 
-void    vlistDefVarProductDefinitionTemplate(int vlistID, int varID, int productDefinitionTemplate);
-int     vlistInqVarProductDefinitionTemplate(int vlistID, int varID);
-
 size_t  vlistInqVarSize(int vlistID, int varID);
 
 void    vlistDefIndex(int vlistID, int varID, int levID, int index);
@@ -807,9 +804,10 @@ int     gridInqYIsc(int gridID);
 size_t  gridInqYCvals(int gridID, char *ycvals[]);
 
 // CDI var key values
-#define  CDI_KEY_TABLESVERSION               801  // GRIB2 tablesVersion
-#define  CDI_KEY_LOCALTABLESVERSION          802  // GRIB2 localTablesVersion
-#define  CDI_KEY_TYPEOFGENERATINGPROCESS     803  // GRIB2 typeOfGeneratingProcess
+#define  CDI_KEY_TABLESVERSION                 801  // GRIB2 tablesVersion
+#define  CDI_KEY_LOCALTABLESVERSION            802  // GRIB2 localTablesVersion
+#define  CDI_KEY_TYPEOFGENERATINGPROCESS       803  // GRIB2 typeOfGeneratingProcess
+#define  CDI_KEY_PRODUCTDEFINITIONTEMPLATE     804  // GRIB2 productDefinitionTemplate
 
 //      cdiDefKeyInt: Define a CDI varianble integer value from a key
 int     cdiDefKeyInt(int cdiID, int varID, int key, int value);

@@ -588,7 +588,7 @@ void gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh,
 
   long productDefinitionTemplate = 0;
   if ( grib_get_long(gh, "productDefinitionTemplateNumber", &productDefinitionTemplate) == 0 )
-    varDefProductDefinitionTemplate(varID, (int) productDefinitionTemplate);
+    varDefKeyInt(varID, CDI_KEY_PRODUCTDEFINITIONTEMPLATE, (int) productDefinitionTemplate);
 
   if (lread_additional_keys)
     {
@@ -3001,7 +3001,8 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   int datatype = vlistInqVarDatatype(vlistID, varID);
   int typeOfGeneratingProcess = 0;
   cdiInqKeyInt(vlistID, varID, CDI_KEY_TYPEOFGENERATINGPROCESS, &typeOfGeneratingProcess);
-  int productDefinitionTemplate = vlistInqVarProductDefinitionTemplate(vlistID, varID);
+  int productDefinitionTemplate = 0;
+  cdiInqKeyInt(vlistID, varID, CDI_KEY_PRODUCTDEFINITIONTEMPLATE, &productDefinitionTemplate);
 
   char name[256];
   char stdname[256];

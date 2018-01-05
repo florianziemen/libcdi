@@ -362,8 +362,6 @@ FCALLSCSUB3 (vlistDefVarTimave, VLISTDEFVARTIMAVE, vlistdefvartimave, INT, INT, 
 FCALLSCFUN2 (INT, vlistInqVarTimave, VLISTINQVARTIMAVE, vlistinqvartimave, INT, INT)
 FCALLSCSUB3 (vlistDefVarTimaccu, VLISTDEFVARTIMACCU, vlistdefvartimaccu, INT, INT, INT)
 FCALLSCFUN2 (INT, vlistInqVarTimaccu, VLISTINQVARTIMACCU, vlistinqvartimaccu, INT, INT)
-FCALLSCSUB3 (vlistDefVarProductDefinitionTemplate, VLISTDEFVARPRODUCTDEFINITIONTEMPLATE, vlistdefvarproductdefinitiontemplate, INT, INT, INT)
-FCALLSCFUN2 (INT, vlistInqVarProductDefinitionTemplate, VLISTINQVARPRODUCTDEFINITIONTEMPLATE, vlistinqvarproductdefinitiontemplate, INT, INT)
 static int vlistInqVarSize_fwrap(int vlistID, int varID)
 {
   size_t v;

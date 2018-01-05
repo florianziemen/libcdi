@@ -30,8 +30,6 @@ void varDefTable(int varID, int tableID);
 int  varInqTable(int varID);
 void varDefEnsembleInfo(int varID, int ens_idx, int ens_count, int forecast_type);
 
-void varDefProductDefinitionTemplate(int varID, int productDefinitionTemplate);
-
 void varDefKeyInt(int varID, int key, int value);
 
 void varDefOptGribInt(int varID, int tile_index, long lval, const char *keyword);

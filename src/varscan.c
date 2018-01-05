@@ -76,7 +76,6 @@ typedef struct
   char          *longname;
   char          *units;
   ensinfo_t     *ensdata;
-  int            productDefinitionTemplate;
 
   /* meta-data for specification of tiles (currently only GRIB-API: */
   subtype_t     *tiles;
@@ -122,7 +121,6 @@ void paramInitEntry(unsigned varID, int param)
   vartable[varID].instID         = CDI_UNDEFID;
   vartable[varID].modelID        = CDI_UNDEFID;
   vartable[varID].tableID        = CDI_UNDEFID;
-  vartable[varID].productDefinitionTemplate = CDI_UNDEFID;
   vartable[varID].nikeys         = 0;
   for ( int i = 0; i < MAX_KEYS; ++i ) vartable[varID].ikeyvalues[i].value = 0;
   vartable[varID].comptype       = CDI_COMPRESS_NONE;
@@ -1110,12 +1108,6 @@ void varDefEnsembleInfo(int varID, int ens_idx, int ens_count, int forecast_type
   vartable[varID].ensdata->ens_index = ens_idx;
   vartable[varID].ensdata->ens_count = ens_count;
   vartable[varID].ensdata->forecast_init_type = forecast_type;
-}
-
-
-void varDefProductDefinitionTemplate(int varID, int productDefinitionTemplate)
-{
-  vartable[varID].productDefinitionTemplate = productDefinitionTemplate;
 }
 
 

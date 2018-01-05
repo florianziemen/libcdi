@@ -2,6 +2,11 @@
 
 	* Version 1.9.3 released
 
+2018-01-05  Uwe Schulzweida
+
+	* Replaced vlistDefVarProductDefinitionTemplate() by cdiDefKeyInt().
+	* Replaced vlistDefVarTypeOfGeneratingProcess() by cdiDefKeyInt().
+
 2018-01-04  Uwe Schulzweida
 
 	* GRIB2: use typeOfSecondFixedSurface if present

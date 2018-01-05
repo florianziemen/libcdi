@@ -1259,17 +1259,6 @@
 !                                     INTEGER         varID)
       EXTERNAL        vlistInqVarTimaccu
 
-!                     vlistDefVarProductDefinitionTemplate
-!                                    (INTEGER         vlistID,
-!                                     INTEGER         varID,
-!                                     INTEGER         productDefinitionTemplate)
-      EXTERNAL        vlistDefVarProductDefinitionTemplate
-
-      INTEGER         vlistInqVarProductDefinitionTemplate
-!                                    (INTEGER         vlistID,
-!                                     INTEGER         varID)
-      EXTERNAL        vlistInqVarProductDefinitionTemplate
-
       INTEGER         vlistInqVarSize
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         varID)
@@ -1598,6 +1587,8 @@
       PARAMETER (CDI_KEY_LOCALTABLESVERSION = 802)
       INTEGER    CDI_KEY_TYPEOFGENERATINGPROCESS
       PARAMETER (CDI_KEY_TYPEOFGENERATINGPROCESS = 803)
+      INTEGER    CDI_KEY_PRODUCTDEFINITIONTEMPLATE
+      PARAMETER (CDI_KEY_PRODUCTDEFINITIONTEMPLATE = 804)
       INTEGER         cdiDefKeyInt
 !                                    (INTEGER         cdiID,
 !                                     INTEGER         varID,
