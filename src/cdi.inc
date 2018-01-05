@@ -1312,25 +1312,6 @@
 !                                     INTEGER         levelID)
       EXTERNAL        vlistMergedLevel
 
-!
-!  Ensemble info routines
-!
-!                     vlistDefVarEnsemble
-!                                    (INTEGER         vlistID,
-!                                     INTEGER         varID,
-!                                     INTEGER         ensID,
-!                                     INTEGER         ensCount,
-!                                     INTEGER         forecast_type)
-      EXTERNAL        vlistDefVarEnsemble
-
-      INTEGER         vlistInqVarEnsemble
-!                                    (INTEGER         vlistID,
-!                                     INTEGER         varID,
-!                                     INTEGER         ensID,
-!                                     INTEGER         ensCount,
-!                                     INTEGER         forecast_type)
-      EXTERNAL        vlistInqVarEnsemble
-
 !                     cdiClearAdditionalKeys
       EXTERNAL        cdiClearAdditionalKeys
 
@@ -1595,6 +1576,12 @@
       PARAMETER (CDI_KEY_SHAPEOFTHEEARTH = 806)
       INTEGER    CDI_KEY_BACKGROUNDPROCESS
       PARAMETER (CDI_KEY_BACKGROUNDPROCESS = 807)
+      INTEGER    CDI_KEY_TYPEOFENSEMBLEFORECAST
+      PARAMETER (CDI_KEY_TYPEOFENSEMBLEFORECAST = 808)
+      INTEGER    CDI_KEY_NUMBEROFFORECASTSINENSEMBLE
+      PARAMETER (CDI_KEY_NUMBEROFFORECASTSINENSEMBLE = 809)
+      INTEGER    CDI_KEY_PERTURBATIONNUMBER
+      PARAMETER (CDI_KEY_PERTURBATIONNUMBER = 810)
       INTEGER         cdiDefKeyInt
 !                                    (INTEGER         cdiID,
 !                                     INTEGER         varID,

@@ -3057,11 +3057,11 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
     }
 
   /*
-  if( vlistInqVarEnsemble( vlistID,  varID, &ensID, &ensCount, &forecast_type ) )
+  if( vlistInqVarEnsemble(vlistID,  varID, &perturbationNumber, &numberOfForecastsInEnsemble, &typeOfEnsembleForecast) )
     {
-      GRIB_CHECK(my_grib_set_long(gh, "typeOfEnsembleForecast", forecast_type ), 0);
-      GRIB_CHECK(my_grib_set_long(gh, "numberOfForecastsInEnsemble", ensCount ), 0);
-      GRIB_CHECK(my_grib_set_long(gh, "perturbationNumber", ensID ), 0);
+      GRIB_CHECK(my_grib_set_long(gh, "typeOfEnsembleForecast", typeOfEnsembleForecast), 0);
+      GRIB_CHECK(my_grib_set_long(gh, "numberOfForecastsInEnsemble", numberOfForecastsInEnsemble), 0);
+      GRIB_CHECK(my_grib_set_long(gh, "perturbationNumber", perturbationNumber), 0);
     }
   */
 

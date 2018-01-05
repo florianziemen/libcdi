@@ -676,10 +676,6 @@ int     vlistFindLevel(int vlistID, int fvarID, int flevelID);
 int     vlistMergedVar(int vlistID, int varID);
 int     vlistMergedLevel(int vlistID, int varID, int levelID);
 
-/*     Ensemble info routines */
-void    vlistDefVarEnsemble(int vlistID, int varID, int ensID, int ensCount, int forecast_type);
-int     vlistInqVarEnsemble(int vlistID, int varID, int *ensID, int *ensCount, int *forecast_type);
-
 /* cdiClearAdditionalKeys: Clear the list of additional GRIB keys. */
 void    cdiClearAdditionalKeys(void);
 /* cdiDefAdditionalKey: Register an additional GRIB key which is read when file is opened. */
@@ -803,7 +799,7 @@ int     gridInqYIsc(int gridID);
 /*      gridInqYCvals: Get strings from Y-axis in case grid is of type GRID_CHARXY */
 size_t  gridInqYCvals(int gridID, char *ycvals[]);
 
-// CDI var key values
+// CDI var keys
 #define  CDI_KEY_TABLESVERSION                 801  // GRIB2 tablesVersion
 #define  CDI_KEY_LOCALTABLESVERSION            802  // GRIB2 localTablesVersion
 #define  CDI_KEY_TYPEOFGENERATINGPROCESS       803  // GRIB2 typeOfGeneratingProcess
@@ -811,6 +807,9 @@ size_t  gridInqYCvals(int gridID, char *ycvals[]);
 #define  CDI_KEY_TYPEOFPROCESSEDDATA           805  // GRIB2 typeOfProcessedData
 #define  CDI_KEY_SHAPEOFTHEEARTH               806  // GRIB2 shapeOfTheEarth
 #define  CDI_KEY_BACKGROUNDPROCESS             807  // GRIB2 backgroundProcess
+#define  CDI_KEY_TYPEOFENSEMBLEFORECAST        808  // GRIB2 typeOfEnsembleForecast
+#define  CDI_KEY_NUMBEROFFORECASTSINENSEMBLE   809  // GRIB2 numberOfForecastsInEnsemble
+#define  CDI_KEY_PERTURBATIONNUMBER            810  // GRIB2 perturbationNumber
 
 //      cdiDefKeyInt: Define a CDI varianble integer value from a key
 int     cdiDefKeyInt(int cdiID, int varID, int key, int value);
@@ -818,7 +817,7 @@ int     cdiDefKeyInt(int cdiID, int varID, int key, int value);
 //      cdiInqKeyInt: Get a CDI variable integer value from a key
 int     cdiInqKeyInt(int cdiID, int varID, int key, int *value);
 
-// CDI grid key values
+// CDI grid keys
 #define  CDI_KEY_XNAME       901  // X-axis name
 #define  CDI_KEY_XDIMNAME    902  // X-axis dimension name
 #define  CDI_KEY_XLONGNAME   903  // X-axis longname
@@ -831,7 +830,7 @@ int     cdiInqKeyInt(int cdiID, int varID, int key, int *value);
 #define  CDI_KEY_MAPPING     921  // Grid mapping var name
 #define  CDI_KEY_MAPNAME     922  // Grid mapping name
 
-// CDI zaxis key values
+// CDI zaxis keys
 #define  CDI_KEY_NAME        941  // Z-axis name
 #define  CDI_KEY_DIMNAME     942  // Z-axis dimension name
 #define  CDI_KEY_LONGNAME    943  // Z-axis longname
@@ -839,8 +838,6 @@ int     cdiInqKeyInt(int cdiID, int varID, int key, int *value);
 #define  CDI_KEY_PSNAME      950  // Z-axis surface pressure name
 #define  CDI_KEY_P0NAME      951  // Z-axis reference pressure name
 #define  CDI_KEY_P0VALUE     952  // Z-axis reference pressure in Pa
-
-// CDI var key values
 
 //      cdiGridDefKeyStr: Define a CDI grid string value from a key
 int     cdiGridDefKeyStr(int gridID, int key, int size, const char *mesg);

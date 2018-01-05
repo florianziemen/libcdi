@@ -1687,45 +1687,6 @@ int vlistInqVarXYZ(int vlistID, int varID)
   return vlistptr->vars[varID].xyz;
 }
 
-/* Ensemble Info Routines */
-void vlistDefVarEnsemble(int vlistID, int varID, int ensID, int ensCount, int forecast_type )
-{
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-
-  vlistCheckVarID(__func__, vlistID, varID);
-
-  if ( vlistptr->vars[varID].ensdata == NULL )
-    vlistptr->vars[varID].ensdata
-      = (ensinfo_t *) Malloc( sizeof( ensinfo_t ) );
-
-  vlistptr->vars[varID].ensdata->ens_index          = ensID;
-  vlistptr->vars[varID].ensdata->ens_count          = ensCount;
-  vlistptr->vars[varID].ensdata->forecast_init_type = forecast_type;
-  reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
-}
-
-
-int vlistInqVarEnsemble( int vlistID, int varID, int *ensID, int *ensCount, int *forecast_type )
-{
-  int status = 0;
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-
-  vlistCheckVarID(__func__, vlistID, varID);
-
-  if ( vlistptr->vars[varID].ensdata )
-    {
-      *ensID = vlistptr->vars[varID].ensdata->ens_index;
-      *ensCount = vlistptr->vars[varID].ensdata->ens_count;
-      *forecast_type = vlistptr->vars[varID].ensdata->forecast_init_type;
-
-      status = 1;
-    }
-
-  return status;
-}
-
-
-
 /* vlistDefVarIntKey: Set an arbitrary keyword/integer value pair for GRIB API */
 void vlistDefVarIntKey(int vlistID, int varID, const char *name, int value)
 {

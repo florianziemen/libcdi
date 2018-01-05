@@ -787,10 +787,6 @@ void cdi_generate_vars(stream_t *streamptr)
       if ( vartable[varid].longname ) vlistDefVarLongname(vlistID, varID, vartable[varid].longname);
       if ( vartable[varid].units )    vlistDefVarUnits(vlistID, varID, vartable[varid].units);
 
-      if ( vartable[varid].ensdata )  vlistDefVarEnsemble(vlistID, varID, vartable[varid].ensdata->ens_index,
-	                                                  vartable[varid].ensdata->ens_count,
-							  vartable[varid].ensdata->forecast_init_type);
-
       vlist_t *vlistptr = vlist_to_pointer(vlistID);
       for ( int i = 0; i < vartable[varid].opt_grib_nentries; i++ )
         {
