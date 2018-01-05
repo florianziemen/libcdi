@@ -3145,6 +3145,19 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   *gribbuffersize = recsize;
   *gribbuffer = Malloc(*gribbuffersize);
 
+  if ( ! gc->init )
+    {
+      char cdi_name[CDI_MAX_NAME]; cdi_name[0] = 0;
+      char grb_name[256];          grb_name[0] = 0;
+      vlistInqVarName(vlistID, varID, cdi_name);
+      gribapiGetString(gh, "shortName", grb_name, sizeof(grb_name));
+      str_tolower(cdi_name);
+      str_tolower(grb_name);
+      if ( (strlen(cdi_name) != strlen(grb_name)) || !str_is_equal(cdi_name, grb_name) )
+        Message("*** GRIB2 shortName does not correspond to chosen variable name: \"%s\" (\"%s\").",
+                grb_name[0]?grb_name:"unknown", cdi_name);
+    }
+
   /* get a copy of the coded message */
   GRIB_CHECK(grib_get_message_copy(gh, *gribbuffer, &recsize), 0);
 
