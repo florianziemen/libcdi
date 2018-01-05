@@ -808,6 +808,9 @@ size_t  gridInqYCvals(int gridID, char *ycvals[]);
 #define  CDI_KEY_LOCALTABLESVERSION            802  // GRIB2 localTablesVersion
 #define  CDI_KEY_TYPEOFGENERATINGPROCESS       803  // GRIB2 typeOfGeneratingProcess
 #define  CDI_KEY_PRODUCTDEFINITIONTEMPLATE     804  // GRIB2 productDefinitionTemplate
+#define  CDI_KEY_TYPEOFPROCESSEDDATA           805  // GRIB2 typeOfProcessedData
+#define  CDI_KEY_SHAPEOFTHEEARTH               806  // GRIB2 shapeOfTheEarth
+#define  CDI_KEY_BACKGROUNDPROCESS             807  // GRIB2 backgroundProcess
 
 //      cdiDefKeyInt: Define a CDI varianble integer value from a key
 int     cdiDefKeyInt(int cdiID, int varID, int key, int value);

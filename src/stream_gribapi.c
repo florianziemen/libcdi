@@ -401,6 +401,38 @@ void gribapiGetString(grib_handle *gh, const char *key, char *string, size_t len
 }
 
 static
+void gribapiGetKeys(grib_handle *gh, int varID)
+{
+  long tablesVersion = 0;
+  if ( grib_get_long(gh, "tablesVersion", &tablesVersion) == 0 )
+    varDefKeyInt(varID, CDI_KEY_TABLESVERSION, (int) tablesVersion);
+
+  long localTablesVersion = 0;
+  if ( grib_get_long(gh, "localTablesVersion", &localTablesVersion) == 0 )
+    varDefKeyInt(varID, CDI_KEY_LOCALTABLESVERSION, (int) localTablesVersion);
+
+  long typeOfGeneratingProcess = 0;
+  if ( grib_get_long(gh, "typeOfGeneratingProcess", &typeOfGeneratingProcess) == 0 )
+    varDefKeyInt(varID, CDI_KEY_TYPEOFGENERATINGPROCESS, (int) typeOfGeneratingProcess);
+
+  long productDefinitionTemplate = 0;
+  if ( grib_get_long(gh, "productDefinitionTemplateNumber", &productDefinitionTemplate) == 0 )
+    varDefKeyInt(varID, CDI_KEY_PRODUCTDEFINITIONTEMPLATE, (int) productDefinitionTemplate);
+
+  long typeOfProcessedData = 0;
+  if ( grib_get_long(gh, "typeOfProcessedData", &typeOfProcessedData) == 0 )
+    varDefKeyInt(varID, CDI_KEY_TYPEOFPROCESSEDDATA, (int) typeOfProcessedData);
+
+  long shapeOfTheEarth = 0;
+  if ( grib_get_long(gh, "shapeOfTheEarth", &shapeOfTheEarth) == 0 )
+    varDefKeyInt(varID, CDI_KEY_SHAPEOFTHEEARTH, (int) shapeOfTheEarth);
+
+  long backgroundProcess = 0;
+  if ( grib_get_long(gh, "backgroundProcess", &backgroundProcess) == 0 )
+    varDefKeyInt(varID, CDI_KEY_BACKGROUNDPROCESS, (int) backgroundProcess);
+}
+
+static
 void gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh,
                       size_t recsize, off_t position, int datatype, int comptype, const char *varname,
                       int leveltype1, int leveltype2, int lbounds, int level1, int level2, int level_sf, int level_unit,
@@ -574,21 +606,7 @@ void gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh,
   if ( ens_index > 0 )
     varDefEnsembleInfo(varID, (int)ens_index, (int)ens_count, (int)ens_forecast_type);
 
-  long tablesVersion = 0;
-  if ( grib_get_long(gh, "tablesVersion", &tablesVersion) == 0 )
-    varDefKeyInt(varID, CDI_KEY_TABLESVERSION, (int) tablesVersion);
-
-  long localTablesVersion = 0;
-  if ( grib_get_long(gh, "localTablesVersion", &localTablesVersion) == 0 )
-    varDefKeyInt(varID, CDI_KEY_LOCALTABLESVERSION, (int) localTablesVersion);
-
-  long typeOfGeneratingProcess = 0;
-  if ( grib_get_long(gh, "typeOfGeneratingProcess", &typeOfGeneratingProcess) == 0 )
-    varDefKeyInt(varID, CDI_KEY_TYPEOFGENERATINGPROCESS, (int) typeOfGeneratingProcess);
-
-  long productDefinitionTemplate = 0;
-  if ( grib_get_long(gh, "productDefinitionTemplateNumber", &productDefinitionTemplate) == 0 )
-    varDefKeyInt(varID, CDI_KEY_PRODUCTDEFINITIONTEMPLATE, (int) productDefinitionTemplate);
+  gribapiGetKeys(gh, varID);
 
   if (lread_additional_keys)
     {
@@ -1861,9 +1879,8 @@ getGribApiCompTypeMsg(int comptype, size_t gridsize)
   return (struct gribApiMsg){ .msgLen = len, .msg = mesg };
 }
 
-
 static
-void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype, bool lieee, int datatype, size_t nmiss, int gcinit)
+void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype, bool lieee, int datatype, size_t nmiss, int gcinit, int shapeOfTheEarth)
 {
   UNUSED(nmiss);
   bool lrotated = false;
@@ -1950,7 +1967,11 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 
   if ( gcinit ) return;
 
-  if ( editionNumber == 2 ) GRIB_CHECK(my_grib_set_long(gh, "numberOfValues", (long)gridsize), 0);
+  if ( editionNumber == 2 )
+    {
+      GRIB_CHECK(my_grib_set_long(gh, "numberOfValues", (long)gridsize), 0);
+      GRIB_CHECK(my_grib_set_long(gh, "shapeOfTheEarth", (long)shapeOfTheEarth), 0);
+    }
 
   switch (gridtype)
     {
@@ -3058,7 +3079,9 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
       GRIB_CHECK(my_grib_set_long(gh, "bitsPerValue", bitsPerValue), 0);
     }
 
-  gribapiDefGrid((int)editionNumber, gh, gridID, comptype, lieee, datatype, nmiss, gc->init);
+  int shapeOfTheEarth = 0;
+  cdiInqKeyInt(vlistID, varID, CDI_KEY_SHAPEOFTHEEARTH, &shapeOfTheEarth);
+  gribapiDefGrid((int)editionNumber, gh, gridID, comptype, lieee, datatype, nmiss, gc->init, shapeOfTheEarth);
 
   gribapiDefLevel((int)editionNumber, gh, zaxisID, levelID, gc->init, productDefinitionTemplate);
 
