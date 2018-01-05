@@ -4,7 +4,7 @@
 
 2018-01-05  Uwe Schulzweida
 
-	* Added support for GRIB2 key shapeOfTheEarth
+	* Added support for GRIB2 keys shapeOfTheEarth and typeOfProcessedData
 	* Replaced vlistDefVarProductDefinitionTemplate() by cdiDefKeyInt().
 	* Replaced vlistDefVarTypeOfGeneratingProcess() by cdiDefKeyInt().
 
