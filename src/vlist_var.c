@@ -1962,16 +1962,38 @@ int vlistVarCompare(vlist_t *a, int varIDA, vlist_t *b, int varIDB)
 }
 
 
+enum {
+  VLISTVAR_PACK_INT_IDX_FLAG,
+  VLISTVAR_PACK_INT_IDX_GRIDID,
+  VLISTVAR_PACK_INT_IDX_ZAXISID,
+  VLISTVAR_PACK_INT_IDX_TIMETYPE,
+  VLISTVAR_PACK_INT_IDX_NAMESZ,
+  VLISTVAR_PACK_INT_IDX_LONGNAMESZ,
+  VLISTVAR_PACK_INT_IDX_STDNAMESZ,
+  VLISTVAR_PACK_INT_IDX_UNITSSZ,
+  VLISTVAR_PACK_INT_IDX_DATATYPE,
+  VLISTVAR_PACK_INT_IDX_PARAM,
+  VLISTVAR_PACK_INT_IDX_INSTID,
+  VLISTVAR_PACK_INT_IDX_MODELID,
+  VLISTVAR_PACK_INT_IDX_TABLEID,
+  VLISTVAR_PACK_INT_IDX_TIMAVE,
+  VLISTVAR_PACK_INT_IDX_MISSVALUSED,
+  VLISTVAR_PACK_INT_IDX_COMPTYPE,
+  VLISTVAR_PACK_INT_IDX_COMPLEVEL,
+  VLISTVAR_PACK_INT_IDX_NLEVS,
+  VLISTVAR_PACK_INT_IDX_IORANK,
+  VLISTVAR_PACK_INT_IDX_EXTRALEN,
+  vlistvarNint
+};
 
 enum {
-  vlistvar_nints = 21,
   vlistvar_ndbls = 3,
 };
 
 int vlistVarGetPackSize(vlist_t *p, int varID, void *context)
 {
   var_t *var = p->vars + varID;
-  int varsize = serializeGetSize(vlistvar_nints, CDI_DATATYPE_INT, context)
+  int varsize = serializeGetSize(vlistvarNint, CDI_DATATYPE_INT, context)
     + serializeGetSize(vlistvar_ndbls, CDI_DATATYPE_FLT64, context);
   if (var->name)
     varsize += serializeGetSize((int)strlen(var->name), CDI_DATATYPE_TXT, context);
@@ -1994,34 +2016,33 @@ void vlistVarPack(vlist_t *p, int varID, char * buf, int size, int *position,
 {
   double dtempbuf[vlistvar_ndbls];
   var_t *var = p->vars + varID;
-  int tempbuf[vlistvar_nints], namesz, longnamesz, stdnamesz, unitssz,
-    extralen;
+  int tempbuf[vlistvarNint], namesz, longnamesz, stdnamesz, unitssz, extralen;
 
-  tempbuf[0] = var->flag;
-  tempbuf[1] = var->gridID;
-  tempbuf[2] = var->zaxisID;
-  tempbuf[3] = var->timetype;
-  tempbuf[4] = namesz = var->name?(int)strlen(var->name):0;
-  tempbuf[5] = longnamesz = var->longname?(int)strlen(var->longname):0;
-  tempbuf[6] = stdnamesz = var->stdname?(int)strlen(var->stdname):0;
-  tempbuf[7] = unitssz = var->units?(int)strlen(var->units):0;
-  tempbuf[8] = var->datatype;
-  tempbuf[9] = var->param;
-  tempbuf[10] = var->instID;
-  tempbuf[11] = var->modelID;
-  tempbuf[12] = var->tableID;
-  tempbuf[13] = var->timave;
-  tempbuf[15] = (int)var->missvalused;
-  tempbuf[16] = var->comptype;
-  tempbuf[17] = var->complevel;
+  tempbuf[VLISTVAR_PACK_INT_IDX_FLAG] = var->flag;
+  tempbuf[VLISTVAR_PACK_INT_IDX_GRIDID] = var->gridID;
+  tempbuf[VLISTVAR_PACK_INT_IDX_ZAXISID] = var->zaxisID;
+  tempbuf[VLISTVAR_PACK_INT_IDX_TIMETYPE] = var->timetype;
+  tempbuf[VLISTVAR_PACK_INT_IDX_NAMESZ] = namesz = var->name?(int)strlen(var->name):0;
+  tempbuf[VLISTVAR_PACK_INT_IDX_LONGNAMESZ] = longnamesz = var->longname?(int)strlen(var->longname):0;
+  tempbuf[VLISTVAR_PACK_INT_IDX_STDNAMESZ] = stdnamesz = var->stdname?(int)strlen(var->stdname):0;
+  tempbuf[VLISTVAR_PACK_INT_IDX_UNITSSZ] = unitssz = var->units?(int)strlen(var->units):0;
+  tempbuf[VLISTVAR_PACK_INT_IDX_DATATYPE] = var->datatype;
+  tempbuf[VLISTVAR_PACK_INT_IDX_PARAM] = var->param;
+  tempbuf[VLISTVAR_PACK_INT_IDX_INSTID] = var->instID;
+  tempbuf[VLISTVAR_PACK_INT_IDX_MODELID] = var->modelID;
+  tempbuf[VLISTVAR_PACK_INT_IDX_TABLEID] = var->tableID;
+  tempbuf[VLISTVAR_PACK_INT_IDX_TIMAVE] = var->timave;
+  tempbuf[VLISTVAR_PACK_INT_IDX_MISSVALUSED] = (int)var->missvalused;
+  tempbuf[VLISTVAR_PACK_INT_IDX_COMPTYPE] = var->comptype;
+  tempbuf[VLISTVAR_PACK_INT_IDX_COMPLEVEL] = var->complevel;
   int nlevs = var->levinfo ? zaxisInqSize(var->zaxisID) : 0;
-  tempbuf[18] = nlevs;
-  tempbuf[19] = var->iorank;
-  tempbuf[20] = extralen = var->extra?(int)strlen(var->extra):0;
+  tempbuf[VLISTVAR_PACK_INT_IDX_NLEVS] = nlevs;
+  tempbuf[VLISTVAR_PACK_INT_IDX_IORANK] = var->iorank;
+  tempbuf[VLISTVAR_PACK_INT_IDX_EXTRALEN] = extralen = var->extra?(int)strlen(var->extra):0;
   dtempbuf[0] = var->missval;
   dtempbuf[1] = var->scalefactor;
   dtempbuf[2] = var->addoffset;
-  serializePack(tempbuf, vlistvar_nints, CDI_DATATYPE_INT,
+  serializePack(tempbuf, vlistvarNint, CDI_DATATYPE_INT,
                 buf, size, position, context);
   serializePack(dtempbuf, vlistvar_ndbls, CDI_DATATYPE_FLT64,
                 buf, size, position, context);
@@ -2066,11 +2087,11 @@ void vlistVarUnpack(int vlistID, char * buf, int size, int *position,
 		    int originNamespace, void *context)
 {
   double dtempbuf[vlistvar_ndbls];
-  int tempbuf[vlistvar_nints];
+  int tempbuf[vlistvarNint];
   char *varname = NULL;
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
   serializeUnpack(buf, size, position,
-                  tempbuf, vlistvar_nints, CDI_DATATYPE_INT, context);
+                  tempbuf, vlistvarNint, CDI_DATATYPE_INT, context);
   serializeUnpack(buf, size, position,
                   dtempbuf, vlistvar_ndbls, CDI_DATATYPE_FLT64, context);
 
@@ -2079,66 +2100,68 @@ void vlistVarUnpack(int vlistID, char * buf, int size, int *position,
   /* ------------------------------------------- */
 
   int newvar = vlistDefVar ( vlistID,
-			 namespaceAdaptKey ( tempbuf[1], originNamespace ),
-			 namespaceAdaptKey ( tempbuf[2], originNamespace ),
-			 tempbuf[3]);
-  if (tempbuf[4] || tempbuf[5] || tempbuf[6] || tempbuf[7] || tempbuf[20])
-    varname = (char *)Malloc((size_t)imax(imax(imax(imax(tempbuf[4],
-                                                         tempbuf[5]),
-                                                    tempbuf[6]),
-                                               tempbuf[7]), tempbuf[20]) + 1);
-  if (tempbuf[4])
+			 namespaceAdaptKey ( tempbuf[VLISTVAR_PACK_INT_IDX_GRIDID], originNamespace ),
+			 namespaceAdaptKey ( tempbuf[VLISTVAR_PACK_INT_IDX_ZAXISID], originNamespace ),
+			 tempbuf[VLISTVAR_PACK_INT_IDX_TIMETYPE]);
+  if (tempbuf[VLISTVAR_PACK_INT_IDX_NAMESZ] || tempbuf[VLISTVAR_PACK_INT_IDX_LONGNAMESZ] ||
+      tempbuf[VLISTVAR_PACK_INT_IDX_STDNAMESZ] || tempbuf[VLISTVAR_PACK_INT_IDX_UNITSSZ] ||
+      tempbuf[VLISTVAR_PACK_INT_IDX_EXTRALEN])
+    varname = (char *)Malloc((size_t)imax(imax(imax(imax(tempbuf[VLISTVAR_PACK_INT_IDX_NAMESZ],
+                                                         tempbuf[VLISTVAR_PACK_INT_IDX_LONGNAMESZ]),
+                                                    tempbuf[VLISTVAR_PACK_INT_IDX_STDNAMESZ]),
+                                               tempbuf[VLISTVAR_PACK_INT_IDX_UNITSSZ]), tempbuf[VLISTVAR_PACK_INT_IDX_EXTRALEN]) + 1);
+  if (tempbuf[VLISTVAR_PACK_INT_IDX_NAMESZ])
   {
     serializeUnpack(buf, size, position,
-                    varname, tempbuf[4], CDI_DATATYPE_TXT, context);
-    varname[tempbuf[4]] = '\0';
+                    varname, tempbuf[VLISTVAR_PACK_INT_IDX_NAMESZ], CDI_DATATYPE_TXT, context);
+    varname[tempbuf[VLISTVAR_PACK_INT_IDX_NAMESZ]] = '\0';
     vlistDefVarName(vlistID, newvar, varname);
   }
-  if (tempbuf[5])
+  if (tempbuf[VLISTVAR_PACK_INT_IDX_LONGNAMESZ])
   {
     serializeUnpack(buf, size, position,
-                    varname, tempbuf[5], CDI_DATATYPE_TXT, context);
-    varname[tempbuf[5]] = '\0';
+                    varname, tempbuf[VLISTVAR_PACK_INT_IDX_LONGNAMESZ], CDI_DATATYPE_TXT, context);
+    varname[tempbuf[VLISTVAR_PACK_INT_IDX_LONGNAMESZ]] = '\0';
     vlistDefVarLongname(vlistID, newvar, varname);
   }
-  if (tempbuf[6])
+  if (tempbuf[VLISTVAR_PACK_INT_IDX_STDNAMESZ])
   {
     serializeUnpack(buf, size, position,
-                    varname, tempbuf[6], CDI_DATATYPE_TXT, context);
-    varname[tempbuf[6]] = '\0';
+                    varname, tempbuf[VLISTVAR_PACK_INT_IDX_STDNAMESZ], CDI_DATATYPE_TXT, context);
+    varname[tempbuf[VLISTVAR_PACK_INT_IDX_STDNAMESZ]] = '\0';
     vlistDefVarStdname(vlistID, newvar, varname);
   }
-  if (tempbuf[7])
+  if (tempbuf[VLISTVAR_PACK_INT_IDX_UNITSSZ])
   {
     serializeUnpack(buf, size, position,
-                    varname, tempbuf[7], CDI_DATATYPE_TXT, context);
-    varname[tempbuf[7]] = '\0';
+                    varname, tempbuf[VLISTVAR_PACK_INT_IDX_UNITSSZ], CDI_DATATYPE_TXT, context);
+    varname[tempbuf[VLISTVAR_PACK_INT_IDX_UNITSSZ]] = '\0';
     vlistDefVarUnits(vlistID, newvar, varname);
   }
-  if (tempbuf[20])
+  if (tempbuf[VLISTVAR_PACK_INT_IDX_EXTRALEN])
     {
       serializeUnpack(buf, size, position,
-                      varname, tempbuf[20], CDI_DATATYPE_TXT, context);
-      varname[tempbuf[20]] = '\0';
+                      varname, tempbuf[VLISTVAR_PACK_INT_IDX_EXTRALEN], CDI_DATATYPE_TXT, context);
+      varname[tempbuf[VLISTVAR_PACK_INT_IDX_EXTRALEN]] = '\0';
       vlistDefVarExtra(vlistID, newvar, varname);
     }
   Free(varname);
-  vlistDefVarDatatype(vlistID, newvar, tempbuf[8]);
+  vlistDefVarDatatype(vlistID, newvar, tempbuf[VLISTVAR_PACK_INT_IDX_DATATYPE]);
   vlistDefVarInstitut ( vlistID, newvar,
-			namespaceAdaptKey ( tempbuf[10], originNamespace ));
+			namespaceAdaptKey ( tempbuf[VLISTVAR_PACK_INT_IDX_INSTID], originNamespace ));
   vlistDefVarModel ( vlistID, newvar,
-		     namespaceAdaptKey ( tempbuf[11], originNamespace ));
-  vlistDefVarTable(vlistID, newvar, tempbuf[12]);
+		     namespaceAdaptKey ( tempbuf[VLISTVAR_PACK_INT_IDX_MODELID], originNamespace ));
+  vlistDefVarTable(vlistID, newvar, tempbuf[VLISTVAR_PACK_INT_IDX_TABLEID]);
   /* FIXME: changing the table might change the param code */
-  vlistDefVarParam(vlistID, newvar, tempbuf[9]);
-  vlistDefVarTimave(vlistID, newvar, tempbuf[13]);
-  if (tempbuf[15])
+  vlistDefVarParam(vlistID, newvar, tempbuf[VLISTVAR_PACK_INT_IDX_PARAM]);
+  vlistDefVarTimave(vlistID, newvar, tempbuf[VLISTVAR_PACK_INT_IDX_TIMAVE]);
+  if (tempbuf[VLISTVAR_PACK_INT_IDX_MISSVALUSED])
     vlistDefVarMissval(vlistID, newvar, dtempbuf[0]);
   vlistDefVarScalefactor(vlistID, newvar, dtempbuf[1]);
   vlistDefVarAddoffset(vlistID, newvar, dtempbuf[2]);
-  vlistDefVarCompType(vlistID, newvar, tempbuf[16]);
-  vlistDefVarCompLevel(vlistID, newvar, tempbuf[17]);
-  int nlevs = tempbuf[18];
+  vlistDefVarCompType(vlistID, newvar, tempbuf[VLISTVAR_PACK_INT_IDX_COMPTYPE]);
+  vlistDefVarCompLevel(vlistID, newvar, tempbuf[VLISTVAR_PACK_INT_IDX_COMPLEVEL]);
+  int nlevs = tempbuf[VLISTVAR_PACK_INT_IDX_NLEVS];
   if (nlevs)
     {
       int levbuf[nlevs][4];
@@ -2159,7 +2182,7 @@ void vlistVarUnpack(int vlistID, char * buf, int size, int *position,
         }
       vlistDefFlag(vlistID, newvar, flagSetLev, levbuf[flagSetLev][0]);
     }
-  vlistDefVarIOrank(vlistID, newvar, tempbuf[19]);
+  vlistDefVarIOrank(vlistID, newvar, tempbuf[VLISTVAR_PACK_INT_IDX_IORANK]);
   cdiAttsUnpack(vlistID, newvar, buf, size, position, context);
 }
 
