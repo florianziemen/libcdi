@@ -33,7 +33,6 @@ void vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].timetype      = CDI_UNDEFID;
   vlistptr->vars[varID].tsteptype     = TSTEP_INSTANT;
   vlistptr->vars[varID].timave        = 0;
-  vlistptr->vars[varID].timaccu       = 0;
   vlistptr->vars[varID].chunktype     = cdiChunkType;
   vlistptr->vars[varID].xyz           = 321;
   vlistptr->vars[varID].gridID        = CDI_UNDEFID;
@@ -1263,24 +1262,6 @@ int vlistInqVarTimave(int vlistID, int varID)
 }
 
 
-void vlistDefVarTimaccu(int vlistID, int varID, int timaccu)
-{
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  if (vlistptr->vars[varID].timaccu != timaccu)
-    {
-      vlistptr->vars[varID].timaccu = timaccu;
-      reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
-    }
-}
-
-
-int vlistInqVarTimaccu(int vlistID, int varID)
-{
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  return vlistptr->vars[varID].timaccu;
-}
-
-
 void vlistDestroyVarName(int vlistID, int varID)
 {
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
@@ -1887,7 +1868,7 @@ double vlistInqVarDblKey(int vlistID, int varID, const char* name)
 /* vlistInqVarIntKey: raw access to GRIB meta-data */
 int vlistInqVarIntKey(int vlistID, int varID, const char* name)
 {
-  long int value = 0;
+  long value = 0;
 #if  defined  (HAVE_LIBGRIB_API)
   /* check if the GRIB key was previously read and is stored in "opt_grib_int_val" */
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
@@ -1946,7 +1927,7 @@ int vlistVarCompare(vlist_t *a, int varIDA, vlist_t *b, int varIDB)
 #define FCMP2(f) (namespaceResHDecode(pva->f).idx       \
                   != namespaceResHDecode(pvb->f).idx)
   int diff = FCMP(fvarID) | FCMP(mvarID) | FCMP(flag) | FCMP(param)
-    | FCMP(datatype) | FCMP(timetype) | FCMP(tsteptype) | FCMP(timave) | FCMP(timaccu)
+    | FCMP(datatype) | FCMP(timetype) | FCMP(tsteptype) | FCMP(timave)
     | FCMP(chunktype) | FCMP(xyz) | FCMP2(gridID) | FCMP2(zaxisID)
     | FCMP2(instID) | FCMP2(modelID) | FCMP2(tableID) | FCMP(missvalused)
     | FCMPFLT(missval) | FCMPFLT(addoffset) | FCMPFLT(scalefactor) | FCMPSTR(name)
@@ -2030,7 +2011,6 @@ void vlistVarPack(vlist_t *p, int varID, char * buf, int size, int *position,
   tempbuf[11] = var->modelID;
   tempbuf[12] = var->tableID;
   tempbuf[13] = var->timave;
-  tempbuf[14] = var->timaccu;
   tempbuf[15] = (int)var->missvalused;
   tempbuf[16] = var->comptype;
   tempbuf[17] = var->complevel;
@@ -2152,7 +2132,6 @@ void vlistVarUnpack(int vlistID, char * buf, int size, int *position,
   /* FIXME: changing the table might change the param code */
   vlistDefVarParam(vlistID, newvar, tempbuf[9]);
   vlistDefVarTimave(vlistID, newvar, tempbuf[13]);
-  vlistDefVarTimaccu(vlistID, newvar, tempbuf[14]);
   if (tempbuf[15])
     vlistDefVarMissval(vlistID, newvar, dtempbuf[0]);
   vlistDefVarScalefactor(vlistID, newvar, dtempbuf[1]);

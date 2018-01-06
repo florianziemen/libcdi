@@ -1248,17 +1248,6 @@
 !                                     INTEGER         varID)
       EXTERNAL        vlistInqVarTimave
 
-!                     vlistDefVarTimaccu
-!                                    (INTEGER         vlistID,
-!                                     INTEGER         varID,
-!                                     INTEGER         timaccu)
-      EXTERNAL        vlistDefVarTimaccu
-
-      INTEGER         vlistInqVarTimaccu
-!                                    (INTEGER         vlistID,
-!                                     INTEGER         varID)
-      EXTERNAL        vlistInqVarTimaccu
-
       INTEGER         vlistInqVarSize
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         varID)

@@ -2,6 +2,10 @@
 
 	* Version 1.9.3 released
 
+2018-01-06  Uwe Schulzweida
+
+	* Removed CDI function vlistDefVarTimaccu()/vlistInqVarTimaccu().
+
 2018-01-05  Uwe Schulzweida
 
 	* Replaced vlistDefVarEnsemble() by cdiDefKeyInt().

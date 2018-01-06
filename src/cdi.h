@@ -662,8 +662,6 @@ double  vlistInqVarAddoffset(int vlistID, int varID);
 
 void    vlistDefVarTimave(int vlistID, int varID, int timave);
 int     vlistInqVarTimave(int vlistID, int varID);
-void    vlistDefVarTimaccu(int vlistID, int varID, int timaccu);
-int     vlistInqVarTimaccu(int vlistID, int varID);
 
 size_t  vlistInqVarSize(int vlistID, int varID);
 

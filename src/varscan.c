@@ -49,7 +49,6 @@ typedef struct
   int            param;
   int            prec;
   int            tsteptype;
-  int            timaccu;
   int            gridID;
   int            zaxistype;
   int            ltype1;     /* GRIB first level type */
@@ -107,7 +106,6 @@ void paramInitEntry(unsigned varID, int param)
   vartable[varID].prec           = 0;
   vartable[varID].tsteptype      = TSTEP_INSTANT;
   vartable[varID].timave         = 0;
-  vartable[varID].timaccu        = 0;
   vartable[varID].gridID         = CDI_UNDEFID;
   vartable[varID].zaxistype      = 0;
   vartable[varID].ltype1         = 0;
@@ -637,7 +635,6 @@ void cdi_generate_vars(stream_t *streamptr)
       int tableID    = vartable[varid].tableID;
       int tsteptype  = vartable[varid].tsteptype;
       int timave     = vartable[varid].timave;
-      int timaccu    = vartable[varid].timaccu;
       int comptype   = vartable[varid].comptype;
 
       double level_sf = 1;
@@ -776,7 +773,6 @@ void cdi_generate_vars(stream_t *streamptr)
       vlistDefVarParam(vlistID, varID, param);
       vlistDefVarDatatype(vlistID, varID, prec);
       vlistDefVarTimave(vlistID, varID, timave);
-      vlistDefVarTimaccu(vlistID, varID, timaccu);
       vlistDefVarCompType(vlistID, varID, comptype);
 
       varCopyKeys(vlistID, varID);
