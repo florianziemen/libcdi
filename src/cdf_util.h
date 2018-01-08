@@ -3,9 +3,6 @@
 
 #include <stdbool.h>
 
-void str_tolower(char *str);
-bool str_is_equal(const char *vstr, const char *cstr);
-
 int get_timeunit(size_t len, const char *ptu);
 
 bool is_time_units(const char *timeunits);

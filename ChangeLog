@@ -2,6 +2,18 @@
 
 	* Version 1.9.3 released
 
+2018-01-06  Uwe Schulzweida
+
+	* Removed CDI function vlistDefVarTimaccu()/vlistInqVarTimaccu().
+
+2018-01-05  Uwe Schulzweida
+
+	* Replaced vlistDefVarEnsemble() by cdiDefKeyInt().
+	* Consistent test for GRIB2 shortName [patch from: Florian Prill]
+	* Added support for GRIB2 keys shapeOfTheEarth and typeOfProcessedData
+	* Replaced vlistDefVarProductDefinitionTemplate() by cdiDefKeyInt().
+	* Replaced vlistDefVarTypeOfGeneratingProcess() by cdiDefKeyInt().
+
 2018-01-04  Uwe Schulzweida
 
 	* GRIB2: use typeOfSecondFixedSurface if present

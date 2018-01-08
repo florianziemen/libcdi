@@ -49,7 +49,6 @@ typedef struct
   int            param;
   int            prec;
   int            tsteptype;
-  int            timaccu;
   int            gridID;
   int            zaxistype;
   int            ltype1;     /* GRIB first level type */
@@ -76,8 +75,6 @@ typedef struct
   char          *longname;
   char          *units;
   ensinfo_t     *ensdata;
-  int            typeOfGeneratingProcess;
-  int            productDefinitionTemplate;
 
   /* meta-data for specification of tiles (currently only GRIB-API: */
   subtype_t     *tiles;
@@ -109,7 +106,6 @@ void paramInitEntry(unsigned varID, int param)
   vartable[varID].prec           = 0;
   vartable[varID].tsteptype      = TSTEP_INSTANT;
   vartable[varID].timave         = 0;
-  vartable[varID].timaccu        = 0;
   vartable[varID].gridID         = CDI_UNDEFID;
   vartable[varID].zaxistype      = 0;
   vartable[varID].ltype1         = 0;
@@ -123,8 +119,6 @@ void paramInitEntry(unsigned varID, int param)
   vartable[varID].instID         = CDI_UNDEFID;
   vartable[varID].modelID        = CDI_UNDEFID;
   vartable[varID].tableID        = CDI_UNDEFID;
-  vartable[varID].typeOfGeneratingProcess   = CDI_UNDEFID;
-  vartable[varID].productDefinitionTemplate = CDI_UNDEFID;
   vartable[varID].nikeys         = 0;
   for ( int i = 0; i < MAX_KEYS; ++i ) vartable[varID].ikeyvalues[i].value = 0;
   vartable[varID].comptype       = CDI_COMPRESS_NONE;
@@ -641,7 +635,6 @@ void cdi_generate_vars(stream_t *streamptr)
       int tableID    = vartable[varid].tableID;
       int tsteptype  = vartable[varid].tsteptype;
       int timave     = vartable[varid].timave;
-      int timaccu    = vartable[varid].timaccu;
       int comptype   = vartable[varid].comptype;
 
       double level_sf = 1;
@@ -780,11 +773,7 @@ void cdi_generate_vars(stream_t *streamptr)
       vlistDefVarParam(vlistID, varID, param);
       vlistDefVarDatatype(vlistID, varID, prec);
       vlistDefVarTimave(vlistID, varID, timave);
-      vlistDefVarTimaccu(vlistID, varID, timaccu);
       vlistDefVarCompType(vlistID, varID, comptype);
-
-      if ( vartable[varid].typeOfGeneratingProcess != CDI_UNDEFID )
-        vlistDefVarTypeOfGeneratingProcess(vlistID, varID, vartable[varid].typeOfGeneratingProcess);
 
       varCopyKeys(vlistID, varID);
 
@@ -793,10 +782,6 @@ void cdi_generate_vars(stream_t *streamptr)
       if ( vartable[varid].stdname )  vlistDefVarStdname(vlistID, varID, vartable[varid].stdname);
       if ( vartable[varid].longname ) vlistDefVarLongname(vlistID, varID, vartable[varid].longname);
       if ( vartable[varid].units )    vlistDefVarUnits(vlistID, varID, vartable[varid].units);
-
-      if ( vartable[varid].ensdata )  vlistDefVarEnsemble(vlistID, varID, vartable[varid].ensdata->ens_index,
-	                                                  vartable[varid].ensdata->ens_count,
-							  vartable[varid].ensdata->forecast_init_type);
 
       vlist_t *vlistptr = vlist_to_pointer(vlistID);
       for ( int i = 0; i < vartable[varid].opt_grib_nentries; i++ )
@@ -1115,18 +1100,6 @@ void varDefEnsembleInfo(int varID, int ens_idx, int ens_count, int forecast_type
   vartable[varID].ensdata->ens_index = ens_idx;
   vartable[varID].ensdata->ens_count = ens_count;
   vartable[varID].ensdata->forecast_init_type = forecast_type;
-}
-
-
-void varDefTypeOfGeneratingProcess(int varID, int typeOfGeneratingProcess)
-{
-  vartable[varID].typeOfGeneratingProcess = typeOfGeneratingProcess;
-}
-
-
-void varDefProductDefinitionTemplate(int varID, int productDefinitionTemplate)
-{
-  vartable[varID].productDefinitionTemplate = productDefinitionTemplate;
 }
 
 

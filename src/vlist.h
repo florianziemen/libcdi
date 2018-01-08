@@ -62,9 +62,6 @@ typedef struct
   int         modelID;
   int         tableID;
   int         timave;
-  int         timaccu;
-  int         typeOfGeneratingProcess;
-  int         productDefinitionTemplate;
   int         chunktype;
   int         xyz;
   bool        missvalused; // true if missval is defined
