@@ -33,6 +33,7 @@ typedef struct {
   int level2;
   int ltype;
   int tsteptype;
+  size_t gridsize;
 #ifdef HIRLAM_EXTENSIONS
     // NOTE: tsteptype MUST be part of attributes used to compare variables!
     // Modern NWP models (HARMONIE, HIRLAM) use timeRangeIndicator to specify
@@ -458,6 +459,7 @@ void gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh,
   record->ilevel2   = level2;
   record->ltype     = leveltype1;
   record->tsteptype = (short)tsteptype;
+  record->gridsize  = gribapiGetGridsize(gh);
   record->tiles = tiles ? *tiles : dummy_tiles;
 
   //FIXME: This may leave the variable name unterminated (which is the behavior that I found in the code).
@@ -669,8 +671,9 @@ void gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh,
 	    varID, param, zaxistype, gridID, levelID);
 }
 
-static compvar2_t gribapiVarSet(int param, int level1, int level2, int leveltype,
-                                int tsteptype, char *name, var_tile_t tiles_data)
+static
+compvar2_t gribapiVarSet(int param, int level1, int level2, int leveltype, int tsteptype,
+                         size_t gridsize, char *name, var_tile_t tiles_data)
 {
   compvar2_t compVar;
   size_t maxlen = sizeof(compVar.name);
@@ -682,6 +685,7 @@ static compvar2_t gribapiVarSet(int param, int level1, int level2, int leveltype
   compVar.level2    = level2;
   compVar.ltype     = leveltype;
   compVar.tsteptype = tsteptype;
+  compVar.gridsize  = gridsize;
   memset(compVar.name, 0, maxlen);
   memcpy(compVar.name, name, len);
   compVar.tiles = tiles_data;
@@ -698,6 +702,7 @@ int gribapiVarCompare(compvar2_t compVar, record_t record, int flag)
   compVar0.level2    = record.ilevel2;
   compVar0.ltype     = record.ltype;
   compVar0.tsteptype = record.tsteptype;
+  compVar0.gridsize  = record.gridsize;
   memcpy(compVar0.name, record.varname, sizeof(compVar.name));
 
   if ( flag == 0 )
@@ -874,13 +879,10 @@ int gribapiScanTimestep1(stream_t * streamptr)
       int vdate = 0, vtime = 0;
       gribapiGetValidityDateTime(gh, &vdate, &vtime);
       DateTime datetime = { .date = vdate, .time = vtime };
-      /*
-      printf("%d %d %d\n", vdate, vtime, leveltype1);
-      */
 
       if ( datetime0.date == 10101 && datetime0.time == 0 )
         {
-          if( datetimeCmp(datetime, datetime0) || !nrecs )       //Do we really need this condition? I have included it in order not to change the number of times gribapiGetDataDateTime() etc. get called. But if those are sideeffect-free, this condition should be removed.
+          if ( datetimeCmp(datetime, datetime0) || !nrecs ) //Do we really need this condition? I have included it in order not to change the number of times gribapiGetDataDateTime() etc. get called. But if those are sideeffect-free, this condition should be removed.
             {
               datetime0 = datetime;
 
@@ -893,7 +895,9 @@ int gribapiScanTimestep1(stream_t * streamptr)
 
       if ( nrecs )
         {
-          checkTimeResult result = checkTime(streamptr, gribapiVarSet(param, level1, level2, leveltype1, tsteptype, varname, tiles), &datetime, &datetime0);
+          size_t gridsize = gribapiGetGridsize(gh);
+          checkTimeResult result = checkTime(streamptr, gribapiVarSet(param, level1, level2, leveltype1, tsteptype, gridsize, varname, tiles),
+                                             &datetime, &datetime0);
           if ( result == CHECKTIME_STOP )
             {
               break;
@@ -1134,7 +1138,8 @@ int gribapiScanTimestep2(stream_t * streamptr)
         .time = vtime
       };
 
-      compvar2_t compVar = gribapiVarSet(param, level1, level2, leveltype1, tsteptype, varname, tiles);
+      size_t gridsize = gribapiGetGridsize(gh);
+      compvar2_t compVar = gribapiVarSet(param, level1, level2, leveltype1, tsteptype, gridsize, varname, tiles);
 
       for ( recID = 0; recID < nrecords; recID++ )
         if ( gribapiVarCompare(compVar, streamptr->tsteps[tsID].records[recID], 0) == 0 ) break;
@@ -1364,7 +1369,8 @@ int gribapiScanTimestep(stream_t * streamptr)
 
           int tsteptype = gribapiGetTsteptype(gh);
 
-          compvar2_t compVar = gribapiVarSet(param, level1, level2, leveltype1, tsteptype, varname, tiles);
+          size_t gridsize = gribapiGetGridsize(gh);
+          compvar2_t compVar = gribapiVarSet(param, level1, level2, leveltype1, tsteptype, gridsize, varname, tiles);
 
 	  for ( vrecID = 0; vrecID < nrecs; vrecID++ )
 	    {
@@ -2350,17 +2356,12 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelI
   long ltype2 = zaxisInqLtype2(zaxisID);
   double level = zaxisInqLevels(zaxisID, NULL) ? zaxisInqLevel(zaxisID, levelID) : levelID+1;
 
-  double dlevel1 = 0, dlevel2 = 0;
+  double dlevel1 = level, dlevel2 = 0;
   if ( zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL) )
     {
       lbounds = true;
       dlevel1 = zaxisInqLbound(zaxisID, levelID);
       dlevel2 = zaxisInqUbound(zaxisID, levelID);
-    }
-  else
-    {
-      dlevel1 = level;
-      dlevel2 = 0;
     }
 
   if ( zaxistype == ZAXIS_GENERIC && ltype == 0 )

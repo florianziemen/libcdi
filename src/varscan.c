@@ -136,7 +136,7 @@ void paramInitEntry(unsigned varID, int param)
 /* Test if a variable specified by the given meta-data has already
  * been registered in "vartable". */
 static unsigned
-varGetEntry(int param, int zaxistype, int ltype1, int tsteptype, const char *name, const var_tile_t *tiles)
+varGetEntry(int param, int gridID, int zaxistype, int ltype1, int tsteptype, const char *name, const var_tile_t *tiles)
 {
   for ( unsigned varID = 0; varID < varTablesize; varID++ )
     {
@@ -153,6 +153,7 @@ varGetEntry(int param, int zaxistype, int ltype1, int tsteptype, const char *nam
           if ( (vartable[varID].zaxistype  == zaxistype)               &&
                (vartable[varID].ltype1     == ltype1   )               &&
                (vartable[varID].tsteptype  == tsteptype)               &&
+               (vartable[varID].gridID     == gridID   )               &&
                (vt_no_of_tiles == no_of_tiles) )
             {
               if ( name && name[0] && vartable[varID].name && vartable[varID].name[0] )
@@ -433,7 +434,7 @@ void varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds,
                   const var_tile_t *tiles, int *tile_index)
 {
   unsigned varID = (cdiSplitLtype105 != 1 || zaxistype != ZAXIS_HEIGHT) ?
-    varGetEntry(param, zaxistype, ltype1, tsteptype, name, tiles) : (unsigned) CDI_UNDEFID;
+    varGetEntry(param, gridID, zaxistype, ltype1, tsteptype, name, tiles) : (unsigned) CDI_UNDEFID;
 
   if ( varID == (unsigned) CDI_UNDEFID )
     {

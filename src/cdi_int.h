@@ -151,6 +151,7 @@ typedef struct
 {
   off_t     position;
   size_t    size;
+  size_t    gridsize;
   int       zip;
   int       param;
   int       ilevel;
