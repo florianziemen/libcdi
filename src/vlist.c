@@ -1,5 +1,5 @@
-#if defined (HAVE_CONFIG_H)
-#  include "config.h"
+#ifdef  HAVE_CONFIG_H
+#include "config.h"
 #endif
 
 #include "dmemory.h"
@@ -17,7 +17,7 @@
 #include "resource_unpack.h"
 #include "serialize.h"
 
-#if  defined  (HAVE_LIBGRIB_API)
+#ifdef  HAVE_LIBGRIB_API
 /* list of additional GRIB2 keywords which are read by the open process */
 int    cdiNAdditionalGRIBKeys = 0;
 char*  cdiAdditionalGRIBKeys[MAX_OPT_GRIB_ENTRIES];
@@ -27,19 +27,19 @@ static int VLIST_Debug = 0;
 
 static void vlist_initialize(void);
 
-#if  defined  (HAVE_LIBPTHREAD)
-#  include <pthread.h>
+#ifdef  HAVE_LIBPTHREAD
+#include <pthread.h>
 
 static pthread_once_t  _vlist_init_thread = PTHREAD_ONCE_INIT;
 
-#  define VLIST_INIT()        \
+#define  VLIST_INIT()        \
   pthread_once(&_vlist_init_thread, vlist_initialize)
 
 #else
 
 static bool vlistIsInitialized = false;
 
-#  define VLIST_INIT()               \
+#define  VLIST_INIT()               \
   if ( !vlistIsInitialized ) vlist_initialize()
 #endif
 
@@ -208,8 +208,8 @@ int vlistCreate(void)
   return vlistptr->self;
 }
 
-static void
-vlist_delete(vlist_t *vlistptr)
+static
+void vlist_delete(vlist_t *vlistptr)
 {
   int vlistID = vlistptr->self;
   if ( CDI_Debug ) Message("call to vlist_delete, vlistID = %d", vlistID);
@@ -226,7 +226,6 @@ vlist_delete(vlist_t *vlistptr)
       if ( vars[varID].longname ) Free(vars[varID].longname);
       if ( vars[varID].stdname )  Free(vars[varID].stdname);
       if ( vars[varID].units )    Free(vars[varID].units);
-      if ( vars[varID].ensdata )  Free(vars[varID].ensdata);
 
       if ( vlistptr->vars[varID].opt_grib_kvpair )
         {
@@ -290,10 +289,12 @@ void var_copy_entries(var_t *var2, var_t *var1)
   if ( var1->longname ) var2->longname = strdupx(var1->longname);
   if ( var1->stdname )  var2->stdname  = strdupx(var1->stdname);
   if ( var1->units )    var2->units    = strdupx(var1->units);
-  if ( var1->ensdata )
+
+  size_t nkeys = var1->keys.nelems;
+  for ( size_t i = 0; i < nkeys; ++i )
     {
-      var2->ensdata = (ensinfo_t *) Malloc(sizeof(ensinfo_t));
-      memcpy(var2->ensdata, var1->ensdata, sizeof(ensinfo_t));
+      var2->keys.value[i].v.i = var1->keys.value[i].v.i;
+      var2->keys.nelems++;
     }
 
   var2->opt_grib_kvpair_size = 0;

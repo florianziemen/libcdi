@@ -8,7 +8,6 @@
 #include "vlist.h"
 #include "vlist_var.h"
 #include "resource_handle.h"
-#include "cdi_att.h"
 #include "tablepar.h"
 #include "namespace.h"
 #include "serialize.h"
@@ -60,7 +59,6 @@ void vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].lvalidrange   = false;
   vlistptr->vars[varID].validrange[0] = VALIDMISS;
   vlistptr->vars[varID].validrange[1] = VALIDMISS;
-  vlistptr->vars[varID].ensdata       = NULL;
   vlistptr->vars[varID].iorank        = CDI_UNDEFID;
   vlistptr->vars[varID].opt_grib_kvpair_size = 0;
   vlistptr->vars[varID].opt_grib_kvpair      = NULL;
@@ -1949,15 +1947,19 @@ int vlistVarCompare(vlist_t *a, int varIDA, vlist_t *b, int varIDB)
       if (diff)
         return 1;
     }
+
   size_t natts = a->vars[varIDA].atts.nelems;
   if (natts != b->vars[varIDB].atts.nelems)
     return 1;
   for (size_t attID = 0; attID < natts; ++attID)
     diff |= cdi_att_compare(a, varIDA, b, varIDB, (int)attID);
-  if ((diff |= ((pva->ensdata == NULL) ^ (pvb->ensdata == NULL))))
+
+  size_t nkeys = a->vars[varIDA].keys.nelems;
+  if (nkeys != b->vars[varIDB].keys.nelems)
     return 1;
-  if (pva->ensdata)
-    diff = (memcmp(pva->ensdata, pvb->ensdata, sizeof (*(pva->ensdata)))) != 0;
+  for (size_t keyID = 0; keyID < nkeys; ++keyID)
+    diff |= vlist_key_compare(a, varIDA, b, varIDB, (int)keyID);
+
   return diff;
 }
 

@@ -431,6 +431,24 @@ void gribapiGetKeys(grib_handle *gh, int varID)
   long backgroundProcess = 0;
   if ( grib_get_long(gh, "backgroundProcess", &backgroundProcess) == 0 )
     varDefKeyInt(varID, CDI_KEY_BACKGROUNDPROCESS, (int) backgroundProcess);
+
+  /*
+    Get the ensemble Info from the grib-2 Tables and update the intermediate datastructure.
+    Further update to the "vlist" is handled in the same way as for GRIB-1 by "cdi_generate_vars"
+  */
+  long typeOfEnsembleForecast = 0;
+  if ( grib_get_long(gh, "typeOfEnsembleForecast", &typeOfEnsembleForecast) == 0 )
+    {
+      long perturbationNumber = 0, numberOfForecastsInEnsemble = 0;
+      GRIB_CHECK(grib_get_long(gh, "numberOfForecastsInEnsemble", &numberOfForecastsInEnsemble), 0);
+      GRIB_CHECK(grib_get_long(gh, "perturbationNumber", &perturbationNumber), 0);
+      if ( perturbationNumber > 0 )
+        {
+          varDefKeyInt(varID, CDI_KEY_TYPEOFENSEMBLEFORECAST, (int) typeOfEnsembleForecast);
+          varDefKeyInt(varID, CDI_KEY_NUMBEROFFORECASTSINENSEMBLE, (int) numberOfForecastsInEnsemble);
+          varDefKeyInt(varID, CDI_KEY_PERTURBATIONNUMBER, (int) perturbationNumber);
+        }
+    }
 }
 
 static
@@ -593,20 +611,6 @@ void gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh,
   record->levelID = (short)levelID;
 
   varDefCompType(varID, comptype);
-
-  /*
-    Get the ensemble Info from the grib-2 Tables and update the intermediate datastructure.
-    Further update to the "vlist" is handled in the same way as for GRIB-1 by "cdi_generate_vars"
-  */
-  long ens_index = 0, ens_count = 0, ens_forecast_type = 0;
-  if ( grib_get_long(gh, "typeOfEnsembleForecast", &ens_forecast_type) == 0 )
-    {
-      GRIB_CHECK(grib_get_long(gh, "numberOfForecastsInEnsemble", &ens_count), 0);
-      GRIB_CHECK(grib_get_long(gh, "perturbationNumber", &ens_index), 0);
-    }
-
-  if ( ens_index > 0 )
-    varDefEnsembleInfo(varID, (int)ens_index, (int)ens_count, (int)ens_forecast_type);
 
   gribapiGetKeys(gh, varID);
 

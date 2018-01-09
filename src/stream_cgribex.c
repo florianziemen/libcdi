@@ -451,9 +451,17 @@ void cgribexAddRecord(stream_t * streamptr, int param, int *isec1, int *isec2, d
   if ( ISEC1_LocalFLag )
     {
       if      ( ISEC1_CenterID == 78  && isec1[36] == 253 ) // DWD local extension
-        varDefEnsembleInfo(varID, isec1[54], isec1[53], isec1[52]);
+        {
+          varDefKeyInt(varID, CDI_KEY_TYPEOFENSEMBLEFORECAST, isec1[52]);
+          varDefKeyInt(varID, CDI_KEY_NUMBEROFFORECASTSINENSEMBLE, isec1[53]);
+          varDefKeyInt(varID, CDI_KEY_PERTURBATIONNUMBER, isec1[54]);
+        }
       else if ( ISEC1_CenterID == 252 && isec1[36] ==   1 ) // MPIM local extension
-        varDefEnsembleInfo(varID, isec1[38], isec1[39], isec1[37]);
+        {
+          varDefKeyInt(varID, CDI_KEY_TYPEOFENSEMBLEFORECAST, isec1[37]);
+          varDefKeyInt(varID, CDI_KEY_NUMBEROFFORECASTSINENSEMBLE, isec1[39]);
+          varDefKeyInt(varID, CDI_KEY_PERTURBATIONNUMBER, isec1[38]);
+        }
     }
 
   if ( lmv ) varDefMissval(varID, FSEC3_MissVal);

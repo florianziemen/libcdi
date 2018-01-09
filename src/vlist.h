@@ -78,7 +78,6 @@ typedef struct
   levinfo_t  *levinfo;
   int         comptype;     // compression type
   int         complevel;    // compression level
-  ensinfo_t  *ensdata;      // Ensemble information
   cdi_keys_t  keys;
   cdi_atts_t  atts;
   int         iorank;
@@ -117,6 +116,8 @@ typedef struct
 }
 vlist_t;
 
+
+int vlist_key_compare(vlist_t *a, int varIDA, vlist_t *b, int varIDB, int keynum);
 
 vlist_t *vlist_to_pointer(int vlistID);
 void cdiVlistMakeInternal(int vlistID);

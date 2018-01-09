@@ -28,7 +28,6 @@ void varDefModel(int varID, int modelID);
 int  varInqModel(int varID);
 void varDefTable(int varID, int tableID);
 int  varInqTable(int varID);
-void varDefEnsembleInfo(int varID, int ens_idx, int ens_count, int forecast_type);
 
 void varDefKeyInt(int varID, int key, int value);
 

@@ -62,7 +62,6 @@ cdi_key_t *find_key(cdi_keys_t *keysp, int key)
   return NULL;
 }
 
-
 static
 cdi_keys_t *cdi_get_keysp(int objID, int varID)
 {
@@ -87,6 +86,27 @@ cdi_keys_t *cdi_get_keysp(int objID, int varID)
     }
 
   return keysp;
+}
+
+
+int vlist_key_compare(vlist_t *a, int varIDA, vlist_t *b, int varIDB, int keynum)
+{
+  cdi_keys_t *keyspa = get_keysp(a, varIDA),
+             *keyspb = get_keysp(b, varIDB);
+  if (keyspa == NULL && keyspb == NULL)
+    return 0;
+  xassert(keynum >= 0 && keynum < (int)keyspa->nelems
+          && keynum < (int)keyspb->nelems);
+  cdi_key_t *keypa = keyspa->value + keynum,
+    *keypb = keyspb->value + keynum;
+
+  if ( keypa->key != keypb->key )
+    return 1;
+
+  if ( keypa->v.i != keypb->v.i )
+    return 1;
+
+  return 0;
 }
 
 //      cqdiDefKeyInt: Define a CDI varianble integer value from a key

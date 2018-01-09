@@ -74,7 +74,6 @@ typedef struct
   char          *stdname;
   char          *longname;
   char          *units;
-  ensinfo_t     *ensdata;
 
   /* meta-data for specification of tiles (currently only GRIB-API: */
   subtype_t     *tiles;
@@ -129,7 +128,6 @@ void paramInitEntry(unsigned varID, int param)
   vartable[varID].stdname        = NULL;
   vartable[varID].longname       = NULL;
   vartable[varID].units          = NULL;
-  vartable[varID].ensdata        = NULL;
   vartable[varID].tiles          = NULL;
 }
 
@@ -189,7 +187,6 @@ void varFree(void)
       if ( vartable[varID].stdname )  Free(vartable[varID].stdname);
       if ( vartable[varID].longname ) Free(vartable[varID].longname);
       if ( vartable[varID].units )    Free(vartable[varID].units);
-      if ( vartable[varID].ensdata )  Free(vartable[varID].ensdata);
       if ( vartable[varID].tiles )    subtypeDestroyPtr(vartable[varID].tiles);
 
       if ( vartable[varID].opt_grib_kvpair )
@@ -1090,17 +1087,6 @@ int varInqTable(int varID)
 void varDefTable(int varID, int tableID)
 {
   vartable[varID].tableID = tableID;
-}
-
-
-void varDefEnsembleInfo(int varID, int ens_idx, int ens_count, int forecast_type)
-{
-  if ( vartable[varID].ensdata == NULL )
-      vartable[varID].ensdata = (ensinfo_t *) Malloc( sizeof( ensinfo_t ) );
-
-  vartable[varID].ensdata->ens_index = ens_idx;
-  vartable[varID].ensdata->ens_count = ens_count;
-  vartable[varID].ensdata->forecast_init_type = forecast_type;
 }
 
 
