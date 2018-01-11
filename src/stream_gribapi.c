@@ -680,6 +680,7 @@ compvar2_t gribapiVarSet(int param, int level1, int level2, int leveltype, int t
                          size_t gridsize, char *name, var_tile_t tiles_data)
 {
   compvar2_t compVar;
+  memset(&compVar, 0, sizeof(compvar2_t));
   size_t maxlen = sizeof(compVar.name);
   size_t len = strlen(name);
   if ( len > maxlen ) len = maxlen;
@@ -690,7 +691,7 @@ compvar2_t gribapiVarSet(int param, int level1, int level2, int leveltype, int t
   compVar.ltype     = leveltype;
   compVar.tsteptype = tsteptype;
   compVar.gridsize  = gridsize;
-  memset(compVar.name, 0, maxlen);
+  //memset(compVar.name, 0, maxlen);
   memcpy(compVar.name, name, len);
   compVar.tiles = tiles_data;
 
@@ -701,6 +702,7 @@ static
 int gribapiVarCompare(compvar2_t compVar, record_t record, int flag)
 {
   compvar2_t compVar0;
+  memset(&compVar0, 0, sizeof(compvar2_t));
   compVar0.param     = record.param;
   compVar0.level1    = record.ilevel;
   compVar0.level2    = record.ilevel2;
