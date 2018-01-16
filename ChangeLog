@@ -2,6 +2,10 @@
 
 	* Version 1.9.3 released
 
+2018-01-16  Uwe Schulzweida
+
+	* Skip unavailable coordinate variables (bug fix)
+
 2018-01-13  Uwe Schulzweida
 
 	* streamFilesuffix(): refactoring (bug fix)
