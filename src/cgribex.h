@@ -1,5 +1,5 @@
-#ifndef CGRIBEX_H
-#define CGRIBEX_H
+#ifndef  CGRIBEX_H
+#define  CGRIBEX_H
 
 #include <stdio.h>
 #include <stdbool.h>
@@ -251,7 +251,7 @@ double calculate_pfactor_float(const float* spectralField, long fieldTruncation,
 double calculate_pfactor_double(const double* spectralField, long fieldTruncation, long subsetTruncation);
 
 
-#if defined (__cplusplus)
+#ifdef  __cplusplus
 }
 #endif
 

@@ -1,5 +1,5 @@
-#ifndef _DMEMORY_H
-#define _DMEMORY_H
+#ifndef  _DMEMORY_H
+#define  _DMEMORY_H
 
 #include <stdio.h>
 
@@ -25,11 +25,11 @@ extern void   *memCalloc (size_t nmemb, size_t size, const char *file, const cha
 extern void   *memMalloc (size_t size, const char *file, const char *functionname, int line);
 extern void    memFree   (void *ptr, const char *file, const char *functionname, int line);
 
-#if defined (__cplusplus)
+#ifdef  __cplusplus
 }
 #endif
 
-#if  defined  WITH_FUNCTION_NAME
+#ifdef  WITH_FUNCTION_NAME
 #  define  Realloc(p, s)  memRealloc((p), (s), __FILE__, __func__, __LINE__)
 #  define   Calloc(n, s)   memCalloc((n), (s), __FILE__, __func__, __LINE__)
 #  define   Malloc(s)      memMalloc((s), __FILE__, __func__, __LINE__)
