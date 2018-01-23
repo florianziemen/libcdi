@@ -3071,20 +3071,18 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
         }
     }
 
-  /*
+  gribapiDefTime((int)editionNumber, productDefinitionTemplate, typeOfGeneratingProcess,
+                 gh, vdate, vtime, tsteptype, numavg, vlistInqTaxis(vlistID), gc->init);
+
   {
     int status, perturbationNumber, numberOfForecastsInEnsemble, typeOfEnsembleForecast;
     status = cdiInqKeyInt(vlistID, varID, CDI_KEY_TYPEOFENSEMBLEFORECAST, &typeOfEnsembleForecast);
-    if ( status == 0 ) GRIB_CHECK(my_grib_set_long(gh, "typeOfEnsembleForecast", typeOfEnsembleForecast), 0);
+    if ( status == 0 ) grib_set_long(gh, "typeOfEnsembleForecast", typeOfEnsembleForecast);
     status = cdiInqKeyInt(vlistID, varID, CDI_KEY_NUMBEROFFORECASTSINENSEMBLE, &numberOfForecastsInEnsemble);
-    if ( status == 0 ) GRIB_CHECK(my_grib_set_long(gh, "numberOfForecastsInEnsemble", numberOfForecastsInEnsemble), 0);
+    if ( status == 0 ) grib_set_long(gh, "numberOfForecastsInEnsemble", numberOfForecastsInEnsemble);
     status = cdiInqKeyInt(vlistID, varID, CDI_KEY_PERTURBATIONNUMBER, &perturbationNumber);
-    if ( status == 0 ) GRIB_CHECK(my_grib_set_long(gh, "perturbationNumber", perturbationNumber), 0);
+    if ( status == 0 ) grib_set_long(gh, "perturbationNumber", perturbationNumber);
   }
-  */
-
-  gribapiDefTime((int)editionNumber, productDefinitionTemplate, typeOfGeneratingProcess,
-                 gh, vdate, vtime, tsteptype, numavg, vlistInqTaxis(vlistID), gc->init);
 
   if ( ! gc->init ) gribapiDefInstitut(gh, vlistID, varID);
   if ( ! gc->init ) gribapiDefModel(gh, vlistID, varID);
