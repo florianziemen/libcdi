@@ -3034,6 +3034,8 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   int datatype = vlistInqVarDatatype(vlistID, varID);
   int typeOfGeneratingProcess = 0;
   cdiInqKeyInt(vlistID, varID, CDI_KEY_TYPEOFGENERATINGPROCESS, &typeOfGeneratingProcess);
+  int backgroundProcess = 0;
+  cdiInqKeyInt(vlistID, varID, CDI_KEY_BACKGROUNDPROCESS, &backgroundProcess);
   int productDefinitionTemplate = 0;
   cdiInqKeyInt(vlistID, varID, CDI_KEY_PRODUCTDEFINITIONTEMPLATE, &productDefinitionTemplate);
 
@@ -3057,6 +3059,7 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
       if ( ! gc->init )
         {
           GRIB_CHECK(my_grib_set_long(gh, "typeOfGeneratingProcess", typeOfGeneratingProcess), 0);
+          GRIB_CHECK(my_grib_set_long(gh, "backgroundProcess", backgroundProcess), 0);
           int status, tablesVersion, localTablesVersion;
           status = cdiInqKeyInt(vlistID, varID, CDI_KEY_TABLESVERSION, &tablesVersion);
           if ( status == 0 ) GRIB_CHECK(my_grib_set_long(gh, "tablesVersion", (long)tablesVersion), 0);
