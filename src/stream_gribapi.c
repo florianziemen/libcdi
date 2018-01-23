@@ -2063,9 +2063,14 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 	    yinc   = fabs(gridInqYinc(gridID));
 	  }
 
+        double xfirsto = xfirst;
+        double xlasto = xlast;
+        while ( xfirsto > 360 ) xfirsto -= 360;
+        while ( xlasto  > 360 ) xlasto  -= 360;
+
 	if ( gridtype != GRID_GAUSSIAN_REDUCED ) GRIB_CHECK(my_grib_set_long(gh, "Ni", nlon), 0);
-	GRIB_CHECK(my_grib_set_double(gh, "longitudeOfFirstGridPointInDegrees", xfirst), 0);
-	GRIB_CHECK(my_grib_set_double(gh, "longitudeOfLastGridPointInDegrees",  xlast), 0);
+	GRIB_CHECK(my_grib_set_double(gh, "longitudeOfFirstGridPointInDegrees", xfirsto), 0);
+	GRIB_CHECK(my_grib_set_double(gh, "longitudeOfLastGridPointInDegrees",  xlasto), 0);
 	GRIB_CHECK(my_grib_set_double(gh, "iDirectionIncrementInDegrees", xinc), 0);
 
 	GRIB_CHECK(my_grib_set_long(gh, "Nj", (long)nlat), 0);
@@ -3064,12 +3069,15 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
     }
 
   /*
-  if( vlistInqVarEnsemble(vlistID,  varID, &perturbationNumber, &numberOfForecastsInEnsemble, &typeOfEnsembleForecast) )
-    {
-      GRIB_CHECK(my_grib_set_long(gh, "typeOfEnsembleForecast", typeOfEnsembleForecast), 0);
-      GRIB_CHECK(my_grib_set_long(gh, "numberOfForecastsInEnsemble", numberOfForecastsInEnsemble), 0);
-      GRIB_CHECK(my_grib_set_long(gh, "perturbationNumber", perturbationNumber), 0);
-    }
+  {
+    int status, perturbationNumber, numberOfForecastsInEnsemble, typeOfEnsembleForecast;
+    status = cdiInqKeyInt(vlistID, varID, CDI_KEY_TYPEOFENSEMBLEFORECAST, &typeOfEnsembleForecast);
+    if ( status == 0 ) GRIB_CHECK(my_grib_set_long(gh, "typeOfEnsembleForecast", typeOfEnsembleForecast), 0);
+    status = cdiInqKeyInt(vlistID, varID, CDI_KEY_NUMBEROFFORECASTSINENSEMBLE, &numberOfForecastsInEnsemble);
+    if ( status == 0 ) GRIB_CHECK(my_grib_set_long(gh, "numberOfForecastsInEnsemble", numberOfForecastsInEnsemble), 0);
+    status = cdiInqKeyInt(vlistID, varID, CDI_KEY_PERTURBATIONNUMBER, &perturbationNumber);
+    if ( status == 0 ) GRIB_CHECK(my_grib_set_long(gh, "perturbationNumber", perturbationNumber), 0);
+  }
   */
 
   gribapiDefTime((int)editionNumber, productDefinitionTemplate, typeOfGeneratingProcess,
