@@ -137,6 +137,7 @@ extern "C" {
 #define  CDI_DATATYPE_CPX         254
 #define  CDI_DATATYPE_UCHAR       255
 #define  CDI_DATATYPE_LONG        256
+#define  CDI_DATATYPE_UINT        257
 
 #define  DATATYPE_INT           251
 #define  DATATYPE_FLT           252

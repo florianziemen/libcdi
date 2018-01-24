@@ -123,6 +123,7 @@ module mo_cdi
   integer(c_int), public, parameter :: CDI_DATATYPE_CPX = 254
   integer(c_int), public, parameter :: CDI_DATATYPE_UCHAR = 255
   integer(c_int), public, parameter :: CDI_DATATYPE_LONG = 256
+  integer(c_int), public, parameter :: CDI_DATATYPE_UINT = 257
   integer(c_int), public, parameter :: DATATYPE_INT = 251
   integer(c_int), public, parameter :: DATATYPE_FLT = 252
   integer(c_int), public, parameter :: DATATYPE_TXT = 253

@@ -1820,7 +1820,7 @@ zaxisUnpack(char * unpackBuffer, int unpackBufferSize,
   }
 
   serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                  &zaxisP->positive, 1, CDI_DATATYPE_UCHAR, context);
+                  &zaxisP->positive, 1, CDI_DATATYPE_UINT, context);
 
   if (memberMask & zaxisHasUUIDFlag)
     serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
@@ -1915,7 +1915,7 @@ zaxisPack(void * voidP, void * packBuffer, int packBufferSize,
                         packBuffer, packBufferSize, packBufferPos, context);
   }
 
-  serializePack(&zaxisP->positive, 1, CDI_DATATYPE_UCHAR,
+  serializePack(&zaxisP->positive, 1, CDI_DATATYPE_UINT,
                 packBuffer, packBufferSize, packBufferPos, context);
 
   if (memberMask & zaxisHasUUIDFlag)
