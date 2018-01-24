@@ -1901,10 +1901,6 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
   int gridtype = gridInqType(gridID);
   size_t gridsize = gridInqSize(gridID);
 
-  if ( editionNumber <= 1 )
-    if ( gridtype == GRID_GME || gridtype == GRID_UNSTRUCTURED )
-      gridtype = -1;
-
   if ( gridtype == GRID_GENERIC )
     {
       int xsize = (int) gridInqXsize(gridID);
@@ -2222,6 +2218,8 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
       }
     case GRID_GME:
       {
+        if ( editionNumber <= 1 ) Error("GME grid can't be stored in GRIB edition %d!", editionNumber);
+
 	GRIB_CHECK(my_grib_set_long(gh, "gridDefinitionTemplateNumber", GRIB2_GTYPE_GME), 0);
 
         int nd = 0, ni = 0, ni2 = 0, ni3 = 0;
@@ -2247,6 +2245,8 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
       }
     case GRID_UNSTRUCTURED:
       {
+        if ( editionNumber <= 1 ) Error("Unstructured grid can't be stored in GRIB edition %d!", editionNumber);
+
 	static bool warning = true;
 
 	int status = my_grib_set_long(gh, "gridDefinitionTemplateNumber", GRIB2_GTYPE_UNSTRUCTURED);
