@@ -572,7 +572,7 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
       if ( gridtype == GRID_LONLAT && nlat > 1 )
         FAIL_ON_GRIB_ERROR(grib_get_double, gh, "jDirectionIncrementInDegrees", &grid->y.inc);
 
-      long iscan, jscan;
+      long iscan = 0, jscan = 0;
       FAIL_ON_GRIB_ERROR(grib_get_long, gh, "iScansNegatively", &iscan);
       FAIL_ON_GRIB_ERROR(grib_get_long, gh, "jScansPositively", &jscan);
       if (  iscan ) grid->x.inc = - grid->x.inc;
