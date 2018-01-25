@@ -29,7 +29,7 @@
 #  pragma GCC diagnostic ignored "-Wmissing-prototypes"
 #endif
 
-static
+static inline
 int size_t_c2f(size_t value_size_t)
 {
   assert(value_size_t < INT_MAX);
