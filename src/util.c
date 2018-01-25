@@ -137,10 +137,51 @@ void cdiCreateUUID(unsigned char *uuid)
   setstate(caller_rand_state);
 }
 #elif defined (HAVE_DECL_UUID_CREATE) && defined (HAVE_UUID_H)
+#  ifdef HAVE_DECL_UUID_MAKE_V5
+#    include <uuid.h>
+void cdiCreateUUID(unsigned char *uuid)
+{
+  static const char error_stage[][16]
+    = { "uuid_create", "uuid_create", "uuid_load", "uuid_make", "uuid_export",
+        "uuid_destroy1", "uuid_destroy2" };
+  uuid_t *objuuid, *nsuuid;
+  int stage = 0;
+  uuid_rc_t status;
+  if ((status = uuid_create(&objuuid)) == UUID_RC_OK)
+    {
+      ++stage;
+      if ((status = uuid_create(&nsuuid)) == UUID_RC_OK)
+        {
+          ++stage;
+          if ((status = uuid_load(nsuuid, "ns:OID")) == UUID_RC_OK)
+            {
+              ++stage;
+              if ((status = uuid_make(objuuid, UUID_MAKE_V5,
+                                      nsuuid, cdiLibraryVersion()))
+                  == UUID_RC_OK)
+                {
+                  ++stage;
+                  size_t datalen = CDI_UUID_SIZE;
+                  status = uuid_export(objuuid, UUID_FMT_BIN, &uuid,
+                                       &datalen);
+                }
+            }
+        }
+    }
+  if (status != UUID_RC_OK)
+    Error("failed to generate UUID at stage %s\n", error_stage[stage]);
+  stage = 5;
+  if ((status = uuid_destroy(nsuuid)) != UUID_RC_OK)
+    Error("failed to generate UUID at stage %s\n", error_stage[stage]);
+  ++stage;
+  if ((status = uuid_destroy(objuuid)) != UUID_RC_OK)
+    Error("failed to generate UUID at stage %s\n", error_stage[stage]);
+}
+#  else
 typedef uint8_t u_int8_t;
 typedef uint16_t u_int16_t;
 typedef uint32_t u_int32_t;
-#include <uuid.h>
+#    include <uuid.h>
 void cdiCreateUUID(unsigned char *uuid)
 {
   uint32_t status;
@@ -151,6 +192,7 @@ void cdiCreateUUID(unsigned char *uuid)
       exit(1);
     }
 }
+#  endif
 #else
 #include <sys/time.h>
 void cdiCreateUUID(unsigned char *uuid)
