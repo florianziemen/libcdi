@@ -865,6 +865,7 @@ with_gnu_ld
 with_sysroot
 enable_libtool_lock
 enable_largefile
+enable_util_linux_uuid
 with_util_linux_uuid_root
 with_util_linux_uuid_include
 with_util_linux_uuid_lib
@@ -1575,6 +1576,9 @@ Optional Features:
                           optimize for fast installation [default=yes]
   --disable-libtool-lock  avoid locking (might break parallel builds)
   --disable-largefile     omit support for large files
+  --disable-util-linux-uuid
+                          Do not test for the util-linux UUID library, use
+                          OSSP or DCE versions instead
   --enable-grib           GRIB support [default=yes]
   --enable-cgribex        Use the CGRIBEX library [default=yes]
   --enable-service        Use the service library [default=yes]
@@ -26063,10 +26067,18 @@ _ACEOF
 fi
 done
 
+# Check whether --enable-util-linux-uuid was given.
+if test "${enable_util_linux_uuid+set}" = set; then :
+  enableval=$enable_util_linux_uuid;
+else
+  enable_util_linux_uuid=auto
+fi
+
 # Sed expression to map a string onto a valid argument string part.
 asx_tr_arg="eval sed 'y%*+%pp%;s%[^-$as_cr_alnum]%-%g'"
 
-ac_ext=c
+if test x"${enable_util_linux_uuid}" != xno; then :
+  ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
@@ -26277,6 +26289,7 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 ac_link="./libtool --mode=link --tag=CC $ac_link"
 
+fi
 if test x"$have_util_linux_uuid_c_bindings" = xyes; then :
   CPPFLAGS="${CPPFLAGS+$CPPFLAGS }$UTIL_LINUX_UUID_C_INCLUDE"
    UUID_C_LIB=$UTIL_LINUX_UUID_C_LIB
@@ -26528,6 +26541,11 @@ fi
 cat >>confdefs.h <<_ACEOF
 #define HAVE_DECL_UUID_MAKE_V5 $ac_have_decl
 _ACEOF
+if test $ac_have_decl = 1; then :
+
+else
+  have_ossp_uuid_c_bindings=no
+fi
 
 else
   have_ossp_uuid_c_bindings=no
