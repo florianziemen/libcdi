@@ -61,7 +61,7 @@ endif
 LDADD = ../src/libcdi.la -lm
 AM_CPPFLAGS = -I$(top_srcdir)/src
 #
-EXTRA_DIST = test_cdf_write.c test_cdf_read.c
+EXTRA_DIST = test_cdf_write.c test_cdf_read.c test_cksum_base
 #
 CLEANFILES  = `ls *~ *.grb *.nc *.srv *.ext example_*.cksum`
 #
