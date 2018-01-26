@@ -622,11 +622,11 @@ void init_ncdims(long ndims, ncdim_t *ncdims)
 }
 
 static
-void init_ncvars(long nvars, ncvar_t *ncvars)
+void init_ncvars(long nvars, ncvar_t *ncvars, int ncid)
 {
   for ( long ncvarid = 0; ncvarid < nvars; ++ncvarid )
     {
-      ncvars[ncvarid].ncid            = CDI_UNDEFID;
+      ncvars[ncvarid].ncid            = ncid;
       ncvars[ncvarid].isvar           = CDI_UNDEFID;
       ncvars[ncvarid].ignore          = false;
       ncvars[ncvarid].isx             = false;
@@ -3611,11 +3611,7 @@ int cdfInqContents(stream_t *streamptr)
 
   /* alloc ncvars */
   ncvar_t *ncvars = (ncvar_t *) Malloc((size_t)nvars * sizeof (ncvar_t));
-  init_ncvars(nvars, ncvars);
-
-  for ( int ncvarid = 0; ncvarid < nvars; ++ncvarid )
-    ncvars[ncvarid].ncid = fileID;
-
+  init_ncvars(nvars, ncvars, fileID);
 
   /* scan global attributes */
   cdf_scan_global_attr(fileID, vlistID, streamptr, ngatts, &instID, &modelID, &ucla_les,
