@@ -3529,8 +3529,6 @@ int cdf_check_vars(int nvars, ncvar_t *ncvars, size_t ntsteps, int timedimid)
 int cdfInqContents(stream_t *streamptr)
 {
   int ndims, nvars, ngatts, unlimdimid;
-  int ncvarid;
-  int ncdimid;
   int *varids;
   int nvarids;
   bool time_has_units = false;
@@ -3615,7 +3613,8 @@ int cdfInqContents(stream_t *streamptr)
   ncvar_t *ncvars = (ncvar_t *) Malloc((size_t)nvars * sizeof (ncvar_t));
   init_ncvars(nvars, ncvars);
 
-  for ( ncvarid = 0; ncvarid < nvars; ++ncvarid ) ncvars[ncvarid].ncid = fileID;
+  for ( int ncvarid = 0; ncvarid < nvars; ++ncvarid )
+    ncvars[ncvarid].ncid = fileID;
 
 
   /* scan global attributes */
@@ -3639,7 +3638,7 @@ int cdfInqContents(stream_t *streamptr)
   if ( CDI_Debug ) Message("Time dimid = %d", streamptr->basetime.ncdimid);
 
   /* read ncdims */
-  for ( ncdimid = 0; ncdimid < ndims; ncdimid++ )
+  for ( int ncdimid = 0; ncdimid < ndims; ncdimid++ )
     {
       cdf_inq_dimlen(fileID, ncdimid, &ncdims[ncdimid].len);
       cdf_inq_dimname(fileID, ncdimid, ncdims[ncdimid].name);
@@ -3656,9 +3655,9 @@ int cdfInqContents(stream_t *streamptr)
   if ( CDI_Debug ) cdf_print_vars(ncvars, nvars, "find coordinate vars");
 
   /* find coordinate vars */
-  for ( ncdimid = 0; ncdimid < ndims; ncdimid++ )
+  for ( int ncdimid = 0; ncdimid < ndims; ncdimid++ )
     {
-      for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
+      for ( int ncvarid = 0; ncvarid < nvars; ncvarid++ )
 	{
 	  if ( ncvars[ncvarid].ndims == 1 )
 	    {
@@ -3703,7 +3702,7 @@ int cdfInqContents(stream_t *streamptr)
   if ( ucla_les ) cdf_set_ucla_dimtype(ndims, ncdims, ncvars);
 
   /*
-  for ( ncdimid = 0; ncdimid < ndims; ncdimid++ )
+  for ( int ncdimid = 0; ncdimid < ndims; ncdimid++ )
     {
       ncvarid = ncdims[ncdimid].ncvarid;
       if ( ncvarid != -1 )
@@ -3729,7 +3728,7 @@ int cdfInqContents(stream_t *streamptr)
   */
 
   /* Set coordinate varids (att: associate)  */
-  for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
+  for ( int ncvarid = 0; ncvarid < nvars; ncvarid++ )
     {
       ncvar_t *ncvar = &ncvars[ncvarid];
       if ( ncvar->isvar == TRUE && ncvar->ncoordvars )
@@ -3771,7 +3770,7 @@ int cdfInqContents(stream_t *streamptr)
   /* select vars */
   varids = (int *) Malloc((size_t)nvars * sizeof (int));
   nvarids = 0;
-  for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
+  for ( int ncvarid = 0; ncvarid < nvars; ncvarid++ )
     if ( ncvars[ncvarid].isvar == TRUE ) varids[nvarids++] = ncvarid;
 
   nvars_data = nvarids;
