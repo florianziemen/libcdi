@@ -650,12 +650,12 @@ init_ncdims(int ndims, ncdim_t *ncdims)
 }
 
 static void
-init_ncvars(int nvars, ncvar_t *ncvars)
+init_ncvars(int nvars, ncvar_t *ncvars, int ncid)
 {
   for (int ncvarid = 0; ncvarid < nvars; ncvarid++)
     {
       ncvar_t *ncvar = &ncvars[ncvarid];
-      ncvar->ncid = CDI_UNDEFID;
+      ncvar->ncid = ncid;
       ncvar->varStatus = UndefVar;
       ncvar->ignoreVar = false;
       ncvar->isCubeSphere = false;
@@ -4132,9 +4132,7 @@ cdfInqContents(stream_t *streamptr)
 
   // alloc ncvars
   ncvar_t *ncvars = (ncvar_t *) Malloc((size_t) nvars * sizeof(ncvar_t));
-  init_ncvars(nvars, ncvars);
-
-  for (int ncvarid = 0; ncvarid < nvars; ++ncvarid) ncvars[ncvarid].ncid = fileID;
+  init_ncvars(nvars, ncvars, fileID);
 
   // scan global attributes
   int instID = CDI_UNDEFID;
