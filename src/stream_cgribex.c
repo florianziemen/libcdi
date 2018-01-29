@@ -187,11 +187,11 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid, i
           {
             bool recompinc = true;
 
-            if ( ISEC2_LastLon < ISEC2_FirstLon && ISEC2_LastLon < 0 ) ISEC2_LastLon += 360000;
+            if ( ISEC2_LastLon < ISEC2_FirstLon ) ISEC2_LastLon += 360000;
 
             if ( ijDirectionIncrementGiven && ISEC2_LonIncr > 0 )
               {
-                if ( abs(ISEC2_LastLon - (ISEC2_FirstLon+ISEC2_LonIncr*(grid->x.size-1))) <= 2 )
+                if ( labs(ISEC2_LastLon - (ISEC2_FirstLon+ISEC2_LonIncr*((long)grid->x.size-1))) <= 2 )
                   {
                     recompinc = false;
                     grid->x.inc = ISEC2_LonIncr * 0.001;
@@ -224,7 +224,7 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid, i
             bool recompinc = true;
             if ( ijDirectionIncrementGiven && ISEC2_LatIncr > 0 )
               {
-                if ( abs(ISEC2_LastLat - (ISEC2_FirstLat+ISEC2_LatIncr*(grid->y.size-1))) <= 2 )
+                if ( labs(ISEC2_LastLat - (ISEC2_FirstLat+ISEC2_LatIncr*((long)grid->y.size-1))) <= 2 )
                   {
                     recompinc = false;
                     grid->y.inc = ISEC2_LatIncr * 0.001;
@@ -451,9 +451,17 @@ void cgribexAddRecord(stream_t * streamptr, int param, int *isec1, int *isec2, d
   if ( ISEC1_LocalFLag )
     {
       if      ( ISEC1_CenterID == 78  && isec1[36] == 253 ) // DWD local extension
-        varDefEnsembleInfo(varID, isec1[54], isec1[53], isec1[52]);
+        {
+          varDefKeyInt(varID, CDI_KEY_TYPEOFENSEMBLEFORECAST, isec1[52]);
+          varDefKeyInt(varID, CDI_KEY_NUMBEROFFORECASTSINENSEMBLE, isec1[53]);
+          varDefKeyInt(varID, CDI_KEY_PERTURBATIONNUMBER, isec1[54]);
+        }
       else if ( ISEC1_CenterID == 252 && isec1[36] ==   1 ) // MPIM local extension
-        varDefEnsembleInfo(varID, isec1[38], isec1[39], isec1[37]);
+        {
+          varDefKeyInt(varID, CDI_KEY_TYPEOFENSEMBLEFORECAST, isec1[37]);
+          varDefKeyInt(varID, CDI_KEY_NUMBEROFFORECASTSINENSEMBLE, isec1[39]);
+          varDefKeyInt(varID, CDI_KEY_PERTURBATIONNUMBER, isec1[38]);
+        }
     }
 
   if ( lmv ) varDefMissval(varID, FSEC3_MissVal);
@@ -2054,8 +2062,6 @@ void cgribexDefaultSec4(int *isec4)
 static
 void cgribexDefEnsembleVar(int *isec1, int vlistID, int varID)
 {
-  int ensID, ensCount, forecast_type;
-
   /* For Ensemble info  */
 
   //Put1Byte(isec1[36]);        /* MPIM local GRIB use definition identifier  */
@@ -2064,16 +2070,21 @@ void cgribexDefEnsembleVar(int *isec1, int vlistID, int varID)
   //Put2Byte(isec1[38]);        /* individual ensemble member                 */
   //Put2Byte(isec1[39]);        /* number of forecasts in ensemble            */
 
-  if ( vlistInqVarEnsemble(vlistID, varID, &ensID, &ensCount, &forecast_type) )
+  int perturbationNumber, numberOfForecastsInEnsemble, typeOfEnsembleForecast;
+  int r1 = cdiInqKeyInt(vlistID, varID, CDI_KEY_PERTURBATIONNUMBER, &perturbationNumber);
+  int r2 = cdiInqKeyInt(vlistID, varID, CDI_KEY_NUMBEROFFORECASTSINENSEMBLE, &numberOfForecastsInEnsemble);
+  int r3 = cdiInqKeyInt(vlistID, varID, CDI_KEY_TYPEOFENSEMBLEFORECAST, &typeOfEnsembleForecast);
+
+  if ( r1 == 0 && r2 == 0 && r3 == 0 )
     {
       if ( ISEC1_CenterID == 252 )
         {
           ISEC1_LocalFLag = 1;
           isec1[36] = 1;
 
-          isec1[37] =  forecast_type;
-          isec1[38] =  ensID;
-          isec1[39] =  ensCount;
+          isec1[37] =  typeOfEnsembleForecast;
+          isec1[38] =  perturbationNumber;
+          isec1[39] =  numberOfForecastsInEnsemble;
         }
     }
 }

@@ -20,13 +20,15 @@
 
 void recordInitEntry(record_t *record)
 {
-  record->position = CDI_UNDEFID;
-  record->size     = 0;
-  record->param    = 0;
-  record->ilevel   = CDI_UNDEFID;
-  record->used     = false;
-  record->varID    = CDI_UNDEFID;
-  record->levelID  = CDI_UNDEFID;
+  record->position  = CDI_UNDEFID;
+  record->size      = 0;
+  record->gridsize  = 0;
+  record->param     = 0;
+  record->ilevel    = CDI_UNDEFID;
+  record->used      = false;
+  record->tsteptype = CDI_UNDEFID;
+  record->varID     = CDI_UNDEFID;
+  record->levelID   = CDI_UNDEFID;
   memset(record->varname, 0, sizeof(record->varname));
   memset(&record->tiles, 0, sizeof(record->tiles));
 }

@@ -109,7 +109,9 @@ typedef struct {
   char     stdname[CDI_MAX_NAME];
   char     units[CDI_MAX_NAME];
   char     extra[CDI_MAX_NAME];
-  ensinfo_t   *ensdata;    /* Ensemble information */
+  int      typeOfEnsembleForecast;
+  int      numberOfForecastsInEnsemble;
+  int      perturbationNumber;
 }
 ncvar_t;
 
@@ -692,7 +694,9 @@ void init_ncvars(long nvars, ncvar_t *ncvars)
       ncvars[ncvarid].lvalidrange     = false;
       ncvars[ncvarid].validrange[0]   = VALIDMISS;
       ncvars[ncvarid].validrange[1]   = VALIDMISS;
-      ncvars[ncvarid].ensdata         = NULL;
+      ncvars[ncvarid].typeOfEnsembleForecast      = -1;
+      ncvars[ncvarid].numberOfForecastsInEnsemble = -1;
+      ncvars[ncvarid].perturbationNumber          = -1;
       memset(ncvars[ncvarid].name, 0, CDI_MAX_NAME);
       memset(ncvars[ncvarid].longname, 0, CDI_MAX_NAME);
       memset(ncvars[ncvarid].stdname, 0, CDI_MAX_NAME);
@@ -1339,6 +1343,8 @@ void cdf_scan_var_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimi
                     }
                   else
                     {
+                      if ( !cdiIgnoreAttCoordinates ) ncvars[ncvarid].ncoordvars++;
+
                       int k;
                       for ( k = 0; k < nchecked_vars; ++k )
                         if ( strcmp(checked_vars[k], varname) == 0 ) break;
@@ -1414,6 +1420,11 @@ void cdf_scan_var_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimi
                   cdf_set_var(ncvars, ncvarid, FALSE);
                   cdf_set_dim(ncvars, ncvarid, 0, Z_AXIS);
                   ncdims[ncvars[ncvarid].dimids[0]].dimtype = Z_AXIS;
+                }
+              if ( ncvars[ncvarid].ndims == 0 )
+                {
+                  cdf_set_var(ncvars, ncvarid, FALSE);
+                  ncvars[ncvarid].islev = true;
                 }
             }
           else if ( isNumber && strcmp(attname, "_FillValue") == 0 )
@@ -1532,18 +1543,11 @@ void cdf_scan_var_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimi
                      strcmp(attname, "forecast_init_type") == 0) )
 	    {
 	      int temp;
-
-	      if( ncvars[ncvarid].ensdata == NULL )
-		ncvars[ncvarid].ensdata = (ensinfo_t *) Malloc( sizeof( ensinfo_t ) );
-
 	      cdfGetAttInt(ncid, ncvarid, attname, 1, &temp);
 
-	      if( strcmp(attname, "realization") == 0 )
-		ncvars[ncvarid].ensdata->ens_index = temp;
-	      else if( strcmp(attname, "ensemble_members") == 0 )
-		ncvars[ncvarid].ensdata->ens_count = temp;
-	      else if( strcmp(attname, "forecast_init_type") == 0 )
-		ncvars[ncvarid].ensdata->forecast_init_type = temp;
+	      if      ( strcmp(attname, "realization") == 0 )  ncvars[ncvarid].perturbationNumber = temp;
+	      else if ( strcmp(attname, "ensemble_members") == 0 ) ncvars[ncvarid].numberOfForecastsInEnsemble = temp;
+	      else if ( strcmp(attname, "forecast_init_type") == 0 ) ncvars[ncvarid].typeOfEnsembleForecast = temp;
 
 	      cdf_set_var(ncvars, ncvarid, TRUE);
 	    }
@@ -3175,13 +3179,11 @@ void cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int model
         printf("dimids: %d %d\n", i, dimids[i]);
       printf("xdimid, ydimid %d %d\n", xdimid, ydimid);
       */
-      if ( ncvars[ncvarid].ensdata != NULL )
+      if ( ncvars[ncvarid].numberOfForecastsInEnsemble != -1 )
         {
-          vlistDefVarEnsemble( vlistID, varID, ncvars[ncvarid].ensdata->ens_index,
-                               ncvars[ncvarid].ensdata->ens_count,
-                               ncvars[ncvarid].ensdata->forecast_init_type );
-          Free(ncvars[ncvarid].ensdata);
-          ncvars[ncvarid].ensdata = NULL;
+          cdiDefKeyInt(vlistID, varID, CDI_KEY_TYPEOFENSEMBLEFORECAST, ncvars[ncvarid].typeOfEnsembleForecast);
+          cdiDefKeyInt(vlistID, varID, CDI_KEY_NUMBEROFFORECASTSINENSEMBLE, ncvars[ncvarid].numberOfForecastsInEnsemble);
+          cdiDefKeyInt(vlistID, varID, CDI_KEY_PERTURBATIONNUMBER, ncvars[ncvarid].perturbationNumber);
         }
 
       if ( ncvars[ncvarid].extra[0] != 0 )
@@ -3874,13 +3876,16 @@ int cdfInqContents(stream_t *streamptr)
 	  int ncoordvars = ncvar->ncoordvars;
 	  for ( int i = 0; i < ncoordvars; i++ )
 	    {
-	      if      ( ncvars[ncvar->coordvarids[i]].islon ||
-                        ncvars[ncvar->coordvarids[i]].isx )   ncvar->xvarid = ncvar->coordvarids[i];
-	      else if ( ncvars[ncvar->coordvarids[i]].islat ||
-                        ncvars[ncvar->coordvarids[i]].isy )   ncvar->yvarid = ncvar->coordvarids[i];
-	      else if ( ncvars[ncvar->coordvarids[i]].islev ) ncvar->zvarid = ncvar->coordvarids[i];
-	      else if ( ncvars[ncvar->coordvarids[i]].isc )   ncvar->cvarids[i] = ncvar->coordvarids[i];
-	    }
+              if ( ncvar->coordvarids[i] != CDI_UNDEFID )
+                {
+                  if      ( ncvars[ncvar->coordvarids[i]].islon ||
+                            ncvars[ncvar->coordvarids[i]].isx )   ncvar->xvarid = ncvar->coordvarids[i];
+                  else if ( ncvars[ncvar->coordvarids[i]].islat ||
+                            ncvars[ncvar->coordvarids[i]].isy )   ncvar->yvarid = ncvar->coordvarids[i];
+                  else if ( ncvars[ncvar->coordvarids[i]].islev ) ncvar->zvarid = ncvar->coordvarids[i];
+                  else if ( ncvars[ncvar->coordvarids[i]].isc )   ncvar->cvarids[i] = ncvar->coordvarids[i];
+                }
+            }
 	}
     }
 

@@ -18,7 +18,7 @@
 #include "cdf_config.h"
 
 /* dummy use of unused parameters to silence compiler warnings */
-#ifndef UNUSED
+#ifndef  UNUSED
 #define  UNUSED(x) (void)x
 #endif
 
@@ -38,6 +38,9 @@ char *strdup(const char *s);
 */
 #endif
 
+void str_tolower(char *str);
+bool str_is_equal(const char *vstr, const char *cstr);
+
 #ifndef  M_PI
 #define  M_PI        3.14159265358979323846  /* pi */
 #endif
@@ -55,7 +58,7 @@ char *strdup(const char *s);
 #ifndef  _TAXIS_H
 #  include "taxis.h"
 #endif
-#ifndef  _CDI_LIMITS_H
+#ifndef  CDI_LIMITS_H
 #  include "cdi_limits.h"
 #endif
 #ifndef  _SERVICE_H
@@ -148,6 +151,7 @@ typedef struct
 {
   off_t     position;
   size_t    size;
+  size_t    gridsize;
   int       zip;
   int       param;
   int       ilevel;

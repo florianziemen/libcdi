@@ -57,7 +57,7 @@ static int defineGrid()
   gridDefYname ( gridID, "myYname" );
   gridDefYlongname ( gridID, "myYlongname" );
   gridDefYunits ( gridID, "myYunits" );
-  gridDefPrec ( gridID, DOUBLE_PRECISION );
+  gridDefDatatype ( gridID, DOUBLE_PRECISION );
   gridDefTrunc ( gridID, 1 );
   gridDefNumber ( gridID, 6 );
   gridDefPosition ( gridID, 7 );
@@ -89,7 +89,7 @@ static int defineZaxis ()
   zaxisDefName ( zaxisID, "myName" );
   zaxisDefLongname ( zaxisID, "myLongname" );
   zaxisDefUnits ( zaxisID, "myUnits" );
-  zaxisDefPrec ( zaxisID, DOUBLE_PRECISION );
+  zaxisDefDatatype ( zaxisID, DOUBLE_PRECISION );
   zaxisDefLtype ( zaxisID, 1 );
   zaxisDefVct ( zaxisID, 3, vct );
   zaxisDefLbounds ( zaxisID, &levs[0] );

@@ -1,11 +1,11 @@
-#ifndef VLIST_VAR_H
-#define VLIST_VAR_H
+#ifndef  VLIST_VAR_H
+#define  VLIST_VAR_H
 
-#ifdef HAVE_CONFIG_H
+#ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
 
-#ifndef _VLIST_H
+#ifndef  VLIST_H
 #include "vlist.h"
 #endif
 

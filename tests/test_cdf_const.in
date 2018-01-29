@@ -6,9 +6,13 @@ if [ @ENABLE_NETCDF@ = yes ]; then
   mkdir -p test_cdf_const.d
   cd test_cdf_const.d
   \rm -f *
-  @abs_top_builddir@/examples/cdi_write_const
-  ( @abs_top_builddir@/app/cdi -s example_const.nc \
-        && @abs_top_builddir@/app/cdi example_const.nc) >cdi.$$.stdout 2>cdi.$$.stderr
+  ../../libtool --mode=execute ${tool_wrap} \
+    @abs_top_builddir@/examples/cdi_write_const
+  ( ../../libtool --mode=execute ${tool_wrap} \
+      @abs_top_builddir@/app/cdi -s example_const.nc \
+        && ../../libtool --mode=execute ${tool_wrap} \
+             @abs_top_builddir@/app/cdi example_const.nc) \
+      >cdi.$$.stdout 2>cdi.$$.stderr
   echo "$0"
   exec 6<cdi.$$.stdout 7<../"$0"
   while read pattern <&7 ; do

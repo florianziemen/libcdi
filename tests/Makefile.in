@@ -83,9 +83,9 @@ TESTS = cksum_verify$(EXEEXT) test_cksum_grib test_cksum_nc \
 	pio_cksum_mpinonb pio_cksum_fpguard pio_cksum_asynch \
 	pio_cksum_writer pio_cksum_cdf pio_cksum_mpi_fw_ordered \
 	pio_cksum_mpi_fw_at_all pio_cksum_mpi_fw_at_reblock \
-	test_resource_copy$(EXEEXT) pio_write_deco2d_run test_f2003 \
-	test_cdf_transformation test_cdf_const test_table$(EXEEXT) \
-	test_byteswap$(EXEEXT) $(am__append_2)
+	test_resource_copy_run pio_write_deco2d_run test_f2003 \
+	test_cdf_transformation test_cdf_const test_table_run \
+	test_byteswap_run $(am__append_2)
 check_PROGRAMS = cksum_verify$(EXEEXT) test_grib$(EXEEXT) \
 	cksum_write$(EXEEXT) cksum_read$(EXEEXT) pio_write$(EXEEXT) \
 	test_resource_copy$(EXEEXT) cksum_write_chunk$(EXEEXT) \
@@ -109,9 +109,12 @@ DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(srcdir)/pio_cksum_mpi_fw_at_reblock.in \
 	$(srcdir)/pio_cksum_fpguard.in $(srcdir)/pio_cksum_asynch.in \
 	$(srcdir)/pio_cksum_writer.in $(srcdir)/pio_cksum_cdf.in \
+	$(srcdir)/test_byteswap_run.in \
+	$(srcdir)/test_resource_copy_run.in \
 	$(srcdir)/test_resource_copy_mpi_run.in \
 	$(srcdir)/test_cdf_transformation.in \
-	$(srcdir)/test_cdf_const.in $(top_srcdir)/config/depcomp
+	$(srcdir)/test_cdf_const.in $(srcdir)/test_table_run.in \
+	$(top_srcdir)/config/depcomp
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps =  \
 	$(top_srcdir)/m4/acx_assert_lang_is_fortran_variant.m4 \
@@ -151,8 +154,9 @@ CONFIG_CLEAN_FILES = test_cksum_grib test_cksum_nc test_cksum_nc2 \
 	pio_write_deco2d_run pio_cksum_mpinonb \
 	pio_cksum_mpi_fw_ordered pio_cksum_mpi_fw_at_all \
 	pio_cksum_mpi_fw_at_reblock pio_cksum_fpguard pio_cksum_asynch \
-	pio_cksum_writer pio_cksum_cdf test_resource_copy_mpi_run \
-	test_cdf_transformation test_cdf_const
+	pio_cksum_writer pio_cksum_cdf test_byteswap_run \
+	test_resource_copy_run test_resource_copy_mpi_run \
+	test_cdf_transformation test_cdf_const test_table_run
 CONFIG_CLEAN_VPATH_FILES =
 @ENABLE_NETCDF_TRUE@am__EXEEXT_1 = test_cdf_write$(EXEEXT) \
 @ENABLE_NETCDF_TRUE@	test_cdf_read$(EXEEXT)
@@ -419,6 +423,9 @@ NM = @NM@
 NMEDIT = @NMEDIT@
 OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
+OSSP_UUIDROOT = @OSSP_UUIDROOT@
+OSSP_UUID_C_INCLUDE = @OSSP_UUID_C_INCLUDE@
+OSSP_UUID_C_LIB = @OSSP_UUID_C_LIB@
 OTOOL = @OTOOL@
 OTOOL64 = @OTOOL64@
 PACKAGE = @PACKAGE@
@@ -452,6 +459,9 @@ THREADS_INCLUDE = @THREADS_INCLUDE@
 THREADS_LIBS = @THREADS_LIBS@
 USER_NAME = @USER_NAME@
 USE_MPI = @USE_MPI@
+UTIL_LINUX_UUIDROOT = @UTIL_LINUX_UUIDROOT@
+UTIL_LINUX_UUID_C_INCLUDE = @UTIL_LINUX_UUID_C_INCLUDE@
+UTIL_LINUX_UUID_C_LIB = @UTIL_LINUX_UUID_C_LIB@
 UUID_C_LIB = @UUID_C_LIB@
 VERSION = @VERSION@
 YAXT_CFLAGS = @YAXT_CFLAGS@
@@ -550,7 +560,7 @@ AM_CFLAGS = $(PPM_CORE_CFLAGS) $(YAXT_CFLAGS) $(MPI_C_INCLUDE)
 LDADD = ../src/libcdi.la -lm
 AM_CPPFLAGS = -I$(top_srcdir)/src
 #
-EXTRA_DIST = test_cdf_write.c test_cdf_read.c
+EXTRA_DIST = test_cdf_write.c test_cdf_read.c test_cksum_base
 #
 CLEANFILES = `ls *~ *.grb *.nc *.srv *.ext example_*.cksum`
 #
@@ -627,11 +637,17 @@ pio_cksum_writer: $(top_builddir)/config.status $(srcdir)/pio_cksum_writer.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 pio_cksum_cdf: $(top_builddir)/config.status $(srcdir)/pio_cksum_cdf.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+test_byteswap_run: $(top_builddir)/config.status $(srcdir)/test_byteswap_run.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+test_resource_copy_run: $(top_builddir)/config.status $(srcdir)/test_resource_copy_run.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 test_resource_copy_mpi_run: $(top_builddir)/config.status $(srcdir)/test_resource_copy_mpi_run.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 test_cdf_transformation: $(top_builddir)/config.status $(srcdir)/test_cdf_transformation.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 test_cdf_const: $(top_builddir)/config.status $(srcdir)/test_cdf_const.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+test_table_run: $(top_builddir)/config.status $(srcdir)/test_table_run.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
 clean-checkPROGRAMS:

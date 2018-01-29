@@ -49,7 +49,6 @@ typedef struct
   int            param;
   int            prec;
   int            tsteptype;
-  int            timaccu;
   int            gridID;
   int            zaxistype;
   int            ltype1;     /* GRIB first level type */
@@ -75,12 +74,17 @@ typedef struct
   char          *stdname;
   char          *longname;
   char          *units;
-  ensinfo_t     *ensdata;
-  int            typeOfGeneratingProcess;
-  int            productDefinitionTemplate;
 
   /* meta-data for specification of tiles (currently only GRIB-API: */
   subtype_t     *tiles;
+
+  size_t         nikeys;
+  struct ikeyvalue_t
+  {
+    int          key;
+    int          value;
+  } ikeyvalue_t;
+  struct ikeyvalue_t  ikeyvalues[MAX_KEYS];
 
   int                 opt_grib_nentries;                       /* current no. key-value pairs            */
   int                 opt_grib_kvpair_size;                    /* current allocated size                 */
@@ -101,7 +105,6 @@ void paramInitEntry(unsigned varID, int param)
   vartable[varID].prec           = 0;
   vartable[varID].tsteptype      = TSTEP_INSTANT;
   vartable[varID].timave         = 0;
-  vartable[varID].timaccu        = 0;
   vartable[varID].gridID         = CDI_UNDEFID;
   vartable[varID].zaxistype      = 0;
   vartable[varID].ltype1         = 0;
@@ -115,8 +118,8 @@ void paramInitEntry(unsigned varID, int param)
   vartable[varID].instID         = CDI_UNDEFID;
   vartable[varID].modelID        = CDI_UNDEFID;
   vartable[varID].tableID        = CDI_UNDEFID;
-  vartable[varID].typeOfGeneratingProcess   = CDI_UNDEFID;
-  vartable[varID].productDefinitionTemplate = CDI_UNDEFID;
+  vartable[varID].nikeys         = 0;
+  for ( int i = 0; i < MAX_KEYS; ++i ) vartable[varID].ikeyvalues[i].value = 0;
   vartable[varID].comptype       = CDI_COMPRESS_NONE;
   vartable[varID].complevel      = 1;
   vartable[varID].lmissval       = false;
@@ -125,14 +128,13 @@ void paramInitEntry(unsigned varID, int param)
   vartable[varID].stdname        = NULL;
   vartable[varID].longname       = NULL;
   vartable[varID].units          = NULL;
-  vartable[varID].ensdata        = NULL;
   vartable[varID].tiles          = NULL;
 }
 
 /* Test if a variable specified by the given meta-data has already
  * been registered in "vartable". */
 static unsigned
-varGetEntry(int param, int zaxistype, int ltype1, int tsteptype, const char *name, const var_tile_t *tiles)
+varGetEntry(int param, int gridID, int zaxistype, int ltype1, int tsteptype, const char *name, const var_tile_t *tiles)
 {
   for ( unsigned varID = 0; varID < varTablesize; varID++ )
     {
@@ -149,6 +151,7 @@ varGetEntry(int param, int zaxistype, int ltype1, int tsteptype, const char *nam
           if ( (vartable[varID].zaxistype  == zaxistype)               &&
                (vartable[varID].ltype1     == ltype1   )               &&
                (vartable[varID].tsteptype  == tsteptype)               &&
+               (vartable[varID].gridID     == gridID   )               &&
                (vt_no_of_tiles == no_of_tiles) )
             {
               if ( name && name[0] && vartable[varID].name && vartable[varID].name[0] )
@@ -184,7 +187,6 @@ void varFree(void)
       if ( vartable[varID].stdname )  Free(vartable[varID].stdname);
       if ( vartable[varID].longname ) Free(vartable[varID].longname);
       if ( vartable[varID].units )    Free(vartable[varID].units);
-      if ( vartable[varID].ensdata )  Free(vartable[varID].ensdata);
       if ( vartable[varID].tiles )    subtypeDestroyPtr(vartable[varID].tiles);
 
       if ( vartable[varID].opt_grib_kvpair )
@@ -429,7 +431,7 @@ void varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds,
                   const var_tile_t *tiles, int *tile_index)
 {
   unsigned varID = (cdiSplitLtype105 != 1 || zaxistype != ZAXIS_HEIGHT) ?
-    varGetEntry(param, zaxistype, ltype1, tsteptype, name, tiles) : (unsigned) CDI_UNDEFID;
+    varGetEntry(param, gridID, zaxistype, ltype1, tsteptype, name, tiles) : (unsigned) CDI_UNDEFID;
 
   if ( varID == (unsigned) CDI_UNDEFID )
     {
@@ -576,6 +578,13 @@ int cmp_varname(const void *s1, const void *s2)
 }
 
 
+void varCopyKeys(int vlistID, int varID)
+{
+  for ( int i = 0; i < vartable[varID].nikeys; ++i )
+    cdiDefKeyInt(vlistID, varID, vartable[varID].ikeyvalues[i].key, vartable[varID].ikeyvalues[i].value);
+}
+
+
 void cdi_generate_vars(stream_t *streamptr)
 {
   int vlistID = streamptr->vlistID;
@@ -624,7 +633,6 @@ void cdi_generate_vars(stream_t *streamptr)
       int tableID    = vartable[varid].tableID;
       int tsteptype  = vartable[varid].tsteptype;
       int timave     = vartable[varid].timave;
-      int timaccu    = vartable[varid].timaccu;
       int comptype   = vartable[varid].comptype;
 
       double level_sf = 1;
@@ -763,24 +771,15 @@ void cdi_generate_vars(stream_t *streamptr)
       vlistDefVarParam(vlistID, varID, param);
       vlistDefVarDatatype(vlistID, varID, prec);
       vlistDefVarTimave(vlistID, varID, timave);
-      vlistDefVarTimaccu(vlistID, varID, timaccu);
       vlistDefVarCompType(vlistID, varID, comptype);
 
-      if ( vartable[varid].typeOfGeneratingProcess != CDI_UNDEFID )
-        vlistDefVarTypeOfGeneratingProcess(vlistID, varID, vartable[varid].typeOfGeneratingProcess);
-
-      if ( vartable[varid].productDefinitionTemplate != CDI_UNDEFID )
-        vlistDefVarProductDefinitionTemplate(vlistID, varID, vartable[varid].productDefinitionTemplate);
+      varCopyKeys(vlistID, varID);
 
       if ( vartable[varid].lmissval ) vlistDefVarMissval(vlistID, varID, vartable[varid].missval);
       if ( vartable[varid].name )     vlistDefVarName(vlistID, varID, vartable[varid].name);
       if ( vartable[varid].stdname )  vlistDefVarStdname(vlistID, varID, vartable[varid].stdname);
       if ( vartable[varid].longname ) vlistDefVarLongname(vlistID, varID, vartable[varid].longname);
       if ( vartable[varid].units )    vlistDefVarUnits(vlistID, varID, vartable[varid].units);
-
-      if ( vartable[varid].ensdata )  vlistDefVarEnsemble(vlistID, varID, vartable[varid].ensdata->ens_index,
-	                                                  vartable[varid].ensdata->ens_count,
-							  vartable[varid].ensdata->forecast_init_type);
 
       vlist_t *vlistptr = vlist_to_pointer(vlistID);
       for ( int i = 0; i < vartable[varid].opt_grib_nentries; i++ )
@@ -1091,27 +1090,16 @@ void varDefTable(int varID, int tableID)
 }
 
 
-void varDefEnsembleInfo(int varID, int ens_idx, int ens_count, int forecast_type)
+void varDefKeyInt(int varID, int key, int value)
 {
-  if ( vartable[varID].ensdata == NULL )
-      vartable[varID].ensdata = (ensinfo_t *) Malloc( sizeof( ensinfo_t ) );
-
-  vartable[varID].ensdata->ens_index = ens_idx;
-  vartable[varID].ensdata->ens_count = ens_count;
-  vartable[varID].ensdata->forecast_init_type = forecast_type;
+  if ( vartable[varID].nikeys < MAX_KEYS )
+    {
+      vartable[varID].ikeyvalues[vartable[varID].nikeys].key   = key;
+      vartable[varID].ikeyvalues[vartable[varID].nikeys].value = value;
+      vartable[varID].nikeys++;
+    }
 }
 
-
-void varDefTypeOfGeneratingProcess(int varID, int typeOfGeneratingProcess)
-{
-  vartable[varID].typeOfGeneratingProcess = typeOfGeneratingProcess;
-}
-
-
-void varDefProductDefinitionTemplate(int varID, int productDefinitionTemplate)
-{
-  vartable[varID].productDefinitionTemplate = productDefinitionTemplate;
-}
 
 #if  defined  (HAVE_LIBGRIB_API)
 /* Resizes and initializes opt_grib_kvpair data structure. */

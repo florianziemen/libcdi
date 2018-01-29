@@ -32,6 +32,8 @@ int gribGetDatatype(grib_handle* gribHandle);
 int gribapiGetParam(grib_handle *gh);
 int gribapiGetGridType(grib_handle *gh);
 void gribapiGetGrid(grib_handle *gh, grid_t *grid);
+size_t gribapiGetGridsize(grib_handle *gh);
+
 
 #ifdef HIRLAM_EXTENSIONS
 void gribapiSetDataTimeRangeIndicator(grib_handle *gh, int timeRangeIndicator);

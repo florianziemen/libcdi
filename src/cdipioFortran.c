@@ -10,6 +10,9 @@
 
 #if defined (HAVE_CF_INTERFACE)
 
+#include <limits.h>
+#include <assert.h>
+
 #if ! defined (__CFORTRAN_LOADED)
 #  if defined __clang__
 #    pragma GCC diagnostic push
@@ -25,6 +28,13 @@
 #if defined __clang__
 #  pragma GCC diagnostic ignored "-Wmissing-prototypes"
 #endif
+
+static inline
+int size_t_c2f(size_t value_size_t)
+{
+  assert(value_size_t < INT_MAX);
+  return (int) value_size_t;
+}
 
 
 /*  parallel IO IOMode  */
@@ -55,14 +65,14 @@ static int cdiPioInit_fwrap(int commSuper, int confResH, int *pioNamespace)
 FCALLSCFUN3 (INT, cdiPioInit_fwrap, CDIPIOINIT, cdipioinit, INT, INT, PINT)
 FCALLSCSUB0 (pioWriteTimestep, PIOWRITETIMESTEP, piowritetimestep)
 FCALLSCSUB0 (cdiPioRDMAProgress, CDIPIORDMAPROGRESS, cdipiordmaprogress)
-static void streamWriteVarPart_fwrap(int streamID, int varID, const void *data, size_t nmiss, void *partDesc)
+static void streamWriteVarPart_fwrap(int streamID, int varID, const void *data, int nmiss, void *partDesc)
 {
-  streamWriteVarPart(streamID, varID, data, nmiss, (*(Xt_idxlist *)partDesc));
+  streamWriteVarPart(streamID, varID, data, (size_t)nmiss, (*(Xt_idxlist *)partDesc));
 }
 FCALLSCSUB5 (streamWriteVarPart_fwrap, STREAMWRITEVARPART, streamwritevarpart, INT, INT, PVOID, INT, PVOID)
-static void streamWriteScatteredVarPart_fwrap(int streamID, int varID, const void *data, int numBlocks, const int  blocklengths[], const int  displacements[], size_t nmiss, void *partDesc)
+static void streamWriteScatteredVarPart_fwrap(int streamID, int varID, const void *data, int numBlocks, const int  blocklengths[], const int  displacements[], int nmiss, void *partDesc)
 {
-  streamWriteScatteredVarPart(streamID, varID, data, numBlocks, blocklengths, displacements, nmiss, (*(Xt_idxlist *)partDesc));
+  streamWriteScatteredVarPart(streamID, varID, data, numBlocks, blocklengths, displacements, (size_t)nmiss, (*(Xt_idxlist *)partDesc));
 }
 FCALLSCSUB8 (streamWriteScatteredVarPart_fwrap, STREAMWRITESCATTEREDVARPART, streamwritescatteredvarpart, INT, INT, PVOID, INT, INTV, INTV, INT, PVOID)
 static int cdiPioCSRLastN_fwrap(int commSuper, int IOMode, int nProcsIO)
