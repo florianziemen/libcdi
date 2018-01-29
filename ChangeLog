@@ -1,6 +1,10 @@
-2018-02-25  Uwe Schulzweida
+2018-01-29  Uwe Schulzweida
 
 	* Version 1.9.3 released
+
+2018-01-29  Uwe Schulzweida
+
+	* Set GRIB center=252, subcenter=1 for MPI-M
 
 2018-01-16  Uwe Schulzweida
 
