@@ -37,20 +37,21 @@ cdiPio_nc__create(const char *path, int cmode,
   int status, ioMode = commInqIOMode();
   if (ioMode != PIO_NONE)
     {
+#ifdef NC_PNETCDF
+#if ! defined TLS && defined HAVE_PTHREAD
+      struct cdiPioNcCreateLongJmpRetBuf *cdiPioCdfJmpBuf
+        = pthread_getspecific(cdiPioCdfJmpKey);
+#endif
       if (cmode & NC_NETCDF4)
         {
           cmode |= NC_MPIPOSIX;
           status = nc_create_par(path, cmode, commInqCommColl(),
                                  MPI_INFO_NULL, ncidp);
-          cdiPioCdfJmpBuf->openRank = CDI_PIO_COLLECTIVE_OPEN;
+          if (status == NC_NOERR)
+            cdiPioCdfJmpBuf->openRank = CDI_PIO_COLLECTIVE_OPEN;
         }
       else
         {
-#ifdef NC_PNETCDF
-#if ! defined TLS && defined HAVE_PTHREAD
-          struct cdiPioNcCreateLongJmpRetBuf *cdiPioCdfJmpBuf
-            = pthread_getspecific(cdiPioCdfJmpKey);
-#endif
           /* which combination of cmode flags has already been tested? */
           static bool pnetcdfWontWork[] = {
             false,       /* CDF-1 */
@@ -62,9 +63,9 @@ cdiPio_nc__create(const char *path, int cmode,
           if (cmode & NC_64BIT_OFFSET)
             cdfIdx = 1;
           else if (cmode & NC_CLASSIC_MODEL)
-            cdfIdx = 2;
-          else
             cdfIdx = 0;
+          else
+            cdfIdx = 2;
           MPI_Comm collComm = commInqCommColl();
           int rank = commInqRankColl();
           cmode |= NC_PNETCDF;
@@ -78,7 +79,7 @@ cdiPio_nc__create(const char *path, int cmode,
                             " for cdf-%c format!\n", cdfVers[cdfIdx]);
                   pnetcdfWontWork[cdfIdx] = true;
                 }
-              else
+              else if (status == NC_NOERR)
                 cdiPioCdfJmpBuf->openRank = CDI_PIO_COLLECTIVE_OPEN;
             }
           if (pnetcdfWontWork[cdfIdx])
