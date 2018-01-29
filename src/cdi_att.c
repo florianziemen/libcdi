@@ -53,7 +53,7 @@ cdi_att_t *find_att(cdi_atts_t *attsp, const char *name)
     {
       cdi_att_t *attp = atts + attid;
       if ( attp->namesz == slen && memcmp(attp->name, name, slen) == 0 )
-        return attp; /* Normal return */
+        return attp; // Normal return
     }
 
   return NULL;
@@ -264,7 +264,7 @@ int cdi_inq_att(int indtype, int cdiID, int varID, const char *name, size_t mxsz
   xassert(attsp != NULL);
 
   cdi_att_t *attp = find_att(attsp, name);
-  if ( attp != NULL ) /* name in use */
+  if ( attp != NULL ) // name in use
     {
       if ( attp->indtype == indtype )
 	{

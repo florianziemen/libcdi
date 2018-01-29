@@ -332,7 +332,6 @@ int cdfDefVar(stream_t *streamptr, int varID)
   int dimorder[3];
   size_t iax = 0;
   char axis[5];
-  int ensID, ensCount, forecast_type;
 
   int fileID  = streamptr->fileID;
 
@@ -594,7 +593,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
 
   if ( gridtype == GRID_TRAJECTORY )
     {
-      cdf_put_att_text(fileID, ncvarid, "coordinates", 9, "lon lat" );
+      cdf_put_att_text(fileID, ncvarid, "coordinates", 9, "tlon tlat" );
     }
   else if ( gridtype == GRID_LONLAT && xid == CDI_UNDEFID && yid == CDI_UNDEFID && gridsize == 1 )
     {
@@ -750,15 +749,13 @@ int cdfDefVar(stream_t *streamptr, int varID)
         }
     }
 
-  if ( vlistInqVarEnsemble( vlistID,  varID, &ensID, &ensCount, &forecast_type ) )
-    {
-      /* void cdf_put_att_int(  int ncid, int varid, const char *name, nc_type xtype,
-	                        size_t len, const int *ip )
-       */
-	cdf_put_att_int(fileID, ncvarid, "realization", NC_INT, 1, &ensID);
-	cdf_put_att_int(fileID, ncvarid, "ensemble_members", NC_INT, 1, &ensCount);
-	cdf_put_att_int(fileID, ncvarid, "forecast_init_type", NC_INT, 1, &forecast_type);
-    }
+  int perturbationNumber, numberOfForecastsInEnsemble, typeOfEnsembleForecast;
+  if ( cdiInqKeyInt(vlistID, varID, CDI_KEY_PERTURBATIONNUMBER, &perturbationNumber) == 0 )
+    cdf_put_att_int(fileID, ncvarid, "realization", NC_INT, 1, &perturbationNumber);
+  if ( cdiInqKeyInt(vlistID, varID, CDI_KEY_NUMBEROFFORECASTSINENSEMBLE, &numberOfForecastsInEnsemble) == 0 )
+    cdf_put_att_int(fileID, ncvarid, "ensemble_members", NC_INT, 1, &numberOfForecastsInEnsemble);
+  if ( cdiInqKeyInt(vlistID, varID, CDI_KEY_TYPEOFENSEMBLEFORECAST, &typeOfEnsembleForecast) == 0 )
+    cdf_put_att_int(fileID, ncvarid, "forecast_init_type", NC_INT, 1, &typeOfEnsembleForecast);
 
   /* Attributes */
   cdfDefineAttributes(vlistID, varID, fileID, ncvarid);

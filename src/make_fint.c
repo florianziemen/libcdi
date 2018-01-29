@@ -15,7 +15,7 @@
 #endif
 
 //#include "config.h"
-#define VERSION "1.9.2"
+#define VERSION "1.9.3"
 typedef struct
 {
   size_t naline;
@@ -438,7 +438,7 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
         "#endif\n"
         "\n", fpint);
 
-  fputs("static\n"
+  fputs("static inline\n"
         "int size_t_c2f(size_t value_size_t)\n"
         "{\n"
         "  assert(value_size_t < INT_MAX);\n"

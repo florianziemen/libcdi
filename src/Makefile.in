@@ -188,11 +188,12 @@ am__libcdi_la_SOURCES_DIST = basetime.c basetime.h binary.c binary.h \
 	cdf_read.c cdf_lazy_grid.c cdf_lazy_grid.h subtype.c subtype.h \
 	swap.h table.c table.h tablepar.h taxis.c taxis.h timebase.c \
 	timebase.h tsteps.c util.c varscan.c varscan.h version.c \
-	vlist.c vlist.h cdi_att.c cdi_att.h vlist_var.c vlist_var.h \
-	zaxis.c zaxis.h stream.c stream_write.c stream_read.c swap.c \
-	iterator.c iterator.h iterator_fallback.c iterator_fallback.h \
-	iterator_grib.c iterator_grib.h cfortran.h cdiFortran.c \
-	gribapi_utilities.c stream_gribapi.c
+	vlist.c vlist.h cdi_key.c cdi_key.h cdi_att.c cdi_att.h \
+	vlist_var.c vlist_var.h zaxis.c zaxis.h stream.c \
+	stream_write.c stream_read.c swap.c iterator.c iterator.h \
+	iterator_fallback.c iterator_fallback.h iterator_grib.c \
+	iterator_grib.h cfortran.h cdiFortran.c gribapi_utilities.c \
+	stream_gribapi.c
 am__objects_1 = cdiFortran.lo
 @USE_FC_TRUE@am__objects_2 = $(am__objects_1)
 am__objects_3 = gribapi_utilities.lo stream_gribapi.lo
@@ -209,7 +210,7 @@ am_libcdi_la_OBJECTS = basetime.lo binary.lo calendar.lo cdf.lo \
 	stream_srv.lo stream_var.lo grb_write.lo grb_read.lo \
 	cdf_write.lo cdf_read.lo cdf_lazy_grid.lo subtype.lo table.lo \
 	taxis.lo timebase.lo tsteps.lo util.lo varscan.lo version.lo \
-	vlist.lo cdi_att.lo vlist_var.lo zaxis.lo stream.lo \
+	vlist.lo cdi_key.lo cdi_att.lo vlist_var.lo zaxis.lo stream.lo \
 	stream_write.lo stream_read.lo swap.lo iterator.lo \
 	iterator_fallback.lo iterator_grib.lo $(am__objects_2) \
 	$(am__objects_4)
@@ -408,6 +409,9 @@ NM = @NM@
 NMEDIT = @NMEDIT@
 OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
+OSSP_UUIDROOT = @OSSP_UUIDROOT@
+OSSP_UUID_C_INCLUDE = @OSSP_UUID_C_INCLUDE@
+OSSP_UUID_C_LIB = @OSSP_UUID_C_LIB@
 OTOOL = @OTOOL@
 OTOOL64 = @OTOOL64@
 PACKAGE = @PACKAGE@
@@ -441,6 +445,9 @@ THREADS_INCLUDE = @THREADS_INCLUDE@
 THREADS_LIBS = @THREADS_LIBS@
 USER_NAME = @USER_NAME@
 USE_MPI = @USE_MPI@
+UTIL_LINUX_UUIDROOT = @UTIL_LINUX_UUIDROOT@
+UTIL_LINUX_UUID_C_INCLUDE = @UTIL_LINUX_UUID_C_INCLUDE@
+UTIL_LINUX_UUID_C_LIB = @UTIL_LINUX_UUID_C_LIB@
 UUID_C_LIB = @UUID_C_LIB@
 VERSION = @VERSION@
 YAXT_CFLAGS = @YAXT_CFLAGS@
@@ -531,11 +538,11 @@ libcdi_la_SOURCES = basetime.c basetime.h binary.c binary.h calendar.c \
 	cdf_read.c cdf_lazy_grid.c cdf_lazy_grid.h subtype.c subtype.h \
 	swap.h table.c table.h tablepar.h taxis.c taxis.h timebase.c \
 	timebase.h tsteps.c util.c varscan.c varscan.h version.c \
-	vlist.c vlist.h cdi_att.c cdi_att.h vlist_var.c vlist_var.h \
-	zaxis.c zaxis.h stream.c stream_write.c stream_read.c swap.c \
-	iterator.c iterator.h iterator_fallback.c iterator_fallback.h \
-	iterator_grib.c iterator_grib.h $(am__append_2) \
-	$(am__append_3)
+	vlist.c vlist.h cdi_key.c cdi_key.h cdi_att.c cdi_att.h \
+	vlist_var.c vlist_var.h zaxis.c zaxis.h stream.c \
+	stream_write.c stream_read.c swap.c iterator.c iterator.h \
+	iterator_fallback.c iterator_fallback.h iterator_grib.c \
+	iterator_grib.h $(am__append_2) $(am__append_3)
 
 # cfortran.h is an optional part of libcdi
 libcdi_la_USE_FC_extra_sources = \
@@ -703,6 +710,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cdi_cksum.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cdi_error.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cdi_int.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cdi_key.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cdi_util.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cdipioFortran.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cgribexlib.Plo@am__quote@
@@ -947,8 +955,8 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
-@ENABLE_CDI_LIB_FALSE@uninstall-local:
 @ENABLE_CDI_LIB_FALSE@install-exec-local:
+@ENABLE_CDI_LIB_FALSE@uninstall-local:
 clean: clean-am
 
 clean-am: clean-generic clean-libLTLIBRARIES clean-libtool \

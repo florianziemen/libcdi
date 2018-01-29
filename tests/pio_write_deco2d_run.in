@@ -6,7 +6,7 @@ if [ @ENABLE_GRIB@ = yes ]; then
   suffix="${suffix-grb}"
   exec 5>&1 6>&2 >"$LOG" 2>&1
   ../libtool --mode=execute @MPI_LAUNCH@ -n ${mpi_task_num} \
-    ${tool_wrap} ./pio_write_deco2d ${pio_write_args}
+    ${tool_wrap_mpi} ./pio_write_deco2d ${pio_write_args}
   exec 2>&6 1>&5 5>&- 6>&-
   ../libtool --mode=execute \
     ${tool_wrap} ./cksum_read example_0.${suffix} example_0.cksum

@@ -4,7 +4,7 @@
 #  autoconf 2.68
 #  libtool  2.4.2
 
-AC_INIT([cdi], [1.9.2], [http://mpimet.mpg.de/cdi])
+AC_INIT([cdi], [1.9.3], [http://mpimet.mpg.de/cdi])
 
 AC_DEFINE_UNQUOTED(CDI, ["$PACKAGE_VERSION"], [CDI version])
 
@@ -73,14 +73,40 @@ AX_EXECINFO
 # Checks for the availability of functions
 AC_CHECK_FUNCS([mallinfo])
 AC_CHECK_FUNCS([getline])
-AC_CHECK_LIB([uuid],[uuid_generate],
-  [AC_CHECK_DECLS([uuid_generate],
-  [UUID_C_LIB=-luuid],,[AC_INCLUDES_DEFAULT
+AC_ARG_ENABLE([util-linux-uuid],
+  [AS_HELP_STRING([--disable-util-linux-uuid],
+     [Do not test for the util-linux UUID library, use OSSP or DCE versions instead])],,
+  [enable_util_linux_uuid=auto])
+AS_IF([test x"${enable_util_linux_uuid}" != xno],
+  [ACX_C_PACKAGE([util-linux-uuid],[uuid/uuid.h],,,[],
+     [uuid_generate],[[uuid]],,,[])])
+AS_IF([test x"$have_util_linux_uuid_c_bindings" = xyes],
+  [CPPFLAGS="${CPPFLAGS+$CPPFLAGS }$UTIL_LINUX_UUID_C_INCLUDE"
+   UUID_C_LIB=$UTIL_LINUX_UUID_C_LIB],
+  [ACX_C_PACKAGE([ossp-uuid],[uuid.h],,[-I/usr/include/ossp],[],
+     [uuid_create],[[ossp-uuid]],,,[])
+   AS_IF([test x"$have_ossp_uuid_c_bindings" = xyes],
+     [CPPFLAGS_save=$CPPFLAGS
+      CPPFLAGS="${CPPFLAGS+$CPPFLAGS }$OSSP_UUID_C_INCLUDE"
+      UUID_C_LIB=$OSSP_UUID_C_LIB
+      AC_CHECK_HEADERS([uuid.h],
+        [AC_CHECK_DECLS([uuid_create],
+           [AC_CHECK_DECLS([UUID_MAKE_V5],,[have_ossp_uuid_c_bindings=no],
+              [AC_INCLUDES_DEFAULT
+@%:@include <uuid.h>])],[have_ossp_uuid_c_bindings=no],
+           [AC_INCLUDES_DEFAULT
+@%:@include <uuid.h>])],[have_ossp_uuid_c_bindings=no])
+      AS_IF([test x"$have_ossp_uuid_c_bindings" = xno],
+        [UUID_C_LIB=
+         CPPFLAGS=$CPPFLAGS_save])],
+     [AC_CHECK_LIB([uuid],[uuid_generate],
+        [AC_CHECK_DECLS([uuid_generate],
+           [UUID_C_LIB=-luuid],,[AC_INCLUDES_DEFAULT
 @%:@include <uuid/uuid.h>])],
-  [AC_CHECK_FUNCS([uuid_create],
-     [AC_CHECK_DECLS([uuid_create],
-        [UUID_C_LIB=""],,[AC_INCLUDES_DEFAULT
-@%:@include <uuid.h>])])])
+        [AC_CHECK_FUNCS([uuid_create],
+           [AC_CHECK_DECLS([uuid_create],
+           [UUID_C_LIB=""],,[AC_INCLUDES_DEFAULT
+@%:@include <uuid.h>])])])])])
 AC_SUBST([UUID_C_LIB])
 #  ----------------------------------------------------------------------
 # Checks for the availability of ANSI-C99 functions
@@ -410,9 +436,12 @@ AC_CONFIG_FILES([tests/test_cksum_grib \
                  tests/pio_cksum_asynch \
                  tests/pio_cksum_writer \
                  tests/pio_cksum_cdf \
+                 tests/test_byteswap_run \
+                 tests/test_resource_copy_run \
                  tests/test_resource_copy_mpi_run \
                  tests/test_cdf_transformation \
                  tests/test_cdf_const \
+                 tests/test_table_run \
                  tables/gen_tableheaderfile \
                  util/serialrun],[chmod a+x "$ac_file"])
 

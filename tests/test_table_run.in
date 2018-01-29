@@ -1,0 +1,8 @@
+#! @SHELL@
+
+../libtool --mode=execute ${tool_wrap} ./test_table
+#
+# Local Variables:
+# mode: sh
+# End:
+#

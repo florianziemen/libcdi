@@ -303,17 +303,27 @@ int streamInqByteorder(int streamID)
 
 const char *streamFilesuffix(int filetype)
 {
-  // static char *fileSuffix[] = {"", ".grb", ".g2", ".nc", ".nc", ".nc4", ".nc4", ".srv", ".ext", ".ieg"};
-  /* note: the 2nd dimenstion of the fileSuffix array must be equal to or
-   * larger than the length of the longest suffix (dot and \0 terminator
-   * included) */
-  static const char fileSuffix[][5] = {"", ".grb", ".grb", ".nc", ".nc", ".nc", ".nc", ".srv", ".ext", ".ieg"};
-  int size = (int)(sizeof(fileSuffix)/sizeof(fileSuffix[0]));
+  static const char *noSuffix  = "";
+  static const char *ncSuffix  = ".nc";
+  static const char *grbSuffix = ".grb";
+  static const char *srvSuffix = ".srv";
+  static const char *extSuffix = ".ext";
+  static const char *iegSuffix = ".ieg";
 
-  if ( filetype > 0 && filetype < size )
-    return fileSuffix[filetype];
-  else
-    return fileSuffix[0];
+  switch (filetype)
+    {
+    case CDI_FILETYPE_NC:
+    case CDI_FILETYPE_NC2:
+    case CDI_FILETYPE_NC4:
+    case CDI_FILETYPE_NC4C:
+    case CDI_FILETYPE_NC5:   return ncSuffix;
+    case CDI_FILETYPE_GRB:
+    case CDI_FILETYPE_GRB2:  return grbSuffix;
+    case CDI_FILETYPE_SRV:   return srvSuffix;
+    case CDI_FILETYPE_EXT:   return extSuffix;
+    case CDI_FILETYPE_IEG:   return iegSuffix;
+    default:                 return noSuffix;
+    }
 }
 
 

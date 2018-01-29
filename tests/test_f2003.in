@@ -4,8 +4,10 @@ set -e
 format=nc
 if [ @ENABLE_NETCDF@ = yes -a @ENABLE_F2003_ISOC@ = yes ]; then
   exec >test_f2003_$format.log 2>&1
-  @abs_top_builddir@/examples/cdi_write_f2003
-  @abs_top_builddir@/examples/cdi_read_f2003 \
+  ../libtool --mode=execute ${tool_wrap} \
+    @abs_top_builddir@/examples/cdi_write_f2003
+  ../libtool --mode=execute ${tool_wrap} \
+    @abs_top_builddir@/examples/cdi_read_f2003 \
     >cdi_read_f2003.$$.stdout \
     2>cdi_read_f2003.$$.stderr
   echo "$0"

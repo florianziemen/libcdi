@@ -1,6 +1,56 @@
-2017-11-05  Uwe Schulzweida
+2018-01-29  Uwe Schulzweida
+
+	* Version 1.9.3 released
+
+2018-01-29  Uwe Schulzweida
+
+	* Set GRIB center=252, subcenter=1 for MPI-M
+
+2018-01-16  Uwe Schulzweida
+
+	* Skip unavailable coordinate variables (bug fix)
+
+2018-01-13  Uwe Schulzweida
+
+	* streamFilesuffix(): refactoring (bug fix)
+
+2018-01-09  Uwe Schulzweida
+
+	* GRIBAPI: Added support for variables with same name and different gridsize.
+
+2018-01-06  Uwe Schulzweida
+
+	* Removed CDI function vlistDefVarTimaccu()/vlistInqVarTimaccu().
+
+2018-01-05  Uwe Schulzweida
+
+	* Replaced vlistDefVarEnsemble() by cdiDefKeyInt().
+	* Consistent test for GRIB2 shortName [patch from: Florian Prill]
+	* Added support for GRIB2 keys shapeOfTheEarth and typeOfProcessedData
+	* Replaced vlistDefVarProductDefinitionTemplate() by cdiDefKeyInt().
+	* Replaced vlistDefVarTypeOfGeneratingProcess() by cdiDefKeyInt().
+
+2018-01-04  Uwe Schulzweida
+
+	* GRIB2: use typeOfSecondFixedSurface if present
+	* Added support for GRIB2 key tablesVersion/localTablesVersion
+	* Added CDI function cdiDefKeyInt()/cdiInqKeyInt()
+
+2017-12-07  Uwe Schulzweida
+
+	* Check positive attribute for scalar z coordinates (bug fix)
+
+2017-11-23  Uwe Schulzweida
+
+	* netCDF: set coordinate attribute to "tlon tlat" for GRID_TRAJECTORY (bug fix)
+
+2017-11-21  Uwe Schulzweida
 
 	* Version 1.9.2 released
+
+2017-11-10  Uwe Schulzweida
+
+	* gribapiDefGrid: set numberOfValues, needed for ccsds compression (bug fix)
 
 2017-11-01  Uwe Schulzweida
 

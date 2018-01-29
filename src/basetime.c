@@ -2,12 +2,10 @@
 #  include "config.h"
 #endif
 
-#include <stdio.h>
-#include <stdbool.h>
 
-#include "error.h"
 #include "cdi.h"
 #include "basetime.h"
+#include "error.h"
 
 
 void basetimeInit(basetime_t *basetime)

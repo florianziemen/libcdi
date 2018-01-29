@@ -1,5 +1,5 @@
-#if defined (HAVE_CONFIG_H)
-#  include "config.h"
+#ifdef  HAVE_CONFIG_H
+#include "config.h"
 #endif
 
 #include <stdio.h>
@@ -32,7 +32,7 @@ void SysError_(const char *caller, const char *fmt, ...)
   va_start(args, fmt);
 
   printf("\n");
-   fprintf(stderr, "Error (%s) : ", caller);
+   fprintf(stderr, "Error (%s): ", caller);
   vfprintf(stderr, fmt, args);
    fprintf(stderr, "\n");
 
@@ -55,7 +55,7 @@ void Error_(const char *caller, const char *fmt, ...)
   va_start(args, fmt);
 
   printf("\n");
-   fprintf(stderr, "Error (%s) : ", caller);
+   fprintf(stderr, "Error (%s): ", caller);
   vfprintf(stderr, fmt, args);
    fprintf(stderr, "\n");
 
@@ -118,7 +118,7 @@ void Warning_(const char *caller, const char *fmt, ...)
 
 void cdiWarning(const char *caller, const char *fmt, va_list ap)
 {
-  fprintf(stderr, "Warning (%s) : ", caller);
+  fprintf(stderr, "Warning (%s): ", caller);
   vfprintf(stderr, fmt, ap);
   fputc('\n', stderr);
 }
@@ -130,7 +130,7 @@ void Message_(const char *caller, const char *fmt, ...)
 
   va_start(args, fmt);
 
-   fprintf(stdout, "%-18s : ", caller);
+   fprintf(stdout, "%-18s: ", caller);
   vfprintf(stdout, fmt, args);
    fprintf(stdout, "\n");
 
