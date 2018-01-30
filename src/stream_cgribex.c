@@ -1633,17 +1633,14 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
 	   (xsize == 2*ysize || xsize == 1) )
 	{
 	  gridtype = GRID_GAUSSIAN;
-	  gridChangeType(gridID, gridtype);
 	}
       else if ( gridsize == 1 )
 	{
 	  gridtype = GRID_LONLAT;
-	  gridChangeType(gridID, gridtype);
 	}
       else if ( gridInqXvals(gridID, NULL) && gridInqYvals(gridID, NULL) )
 	{
 	  gridtype = GRID_LONLAT;
-	  gridChangeType(gridID, gridtype);
 	}
     }
   else if ( gridtype == GRID_CURVILINEAR )

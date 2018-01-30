@@ -1892,7 +1892,7 @@ getGribApiCompTypeMsg(int comptype, size_t gridsize)
 }
 
 static
-void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype, bool lieee, int datatype, int shapeOfTheEarth)
+void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype, bool lieee, int datatype)
 {
   bool lrotated = false;
   bool lcurvi = false;
@@ -1912,17 +1912,14 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 	   (xsize == 2*ysize || xsize == 1) )
 	{
 	  gridtype = GRID_GAUSSIAN;
-	  gridChangeType(gridID, gridtype);
 	}
       else if ( gridsize == 1 )
 	{
 	  gridtype = GRID_LONLAT;
-	  gridChangeType(gridID, gridtype);
 	}
       else if ( gridInqXvals(gridID, NULL) && gridInqYvals(gridID, NULL) )
 	{
 	  gridtype = GRID_LONLAT;
-	  gridChangeType(gridID, gridtype);
 	}
     }
   else if ( gridtype == GRID_CURVILINEAR )
@@ -1975,7 +1972,6 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
   if ( editionNumber == 2 )
     {
       GRIB_CHECK(my_grib_set_long(gh, "numberOfValues", (long)gridsize), 0);
-      GRIB_CHECK(my_grib_set_long(gh, "shapeOfTheEarth", (long)shapeOfTheEarth), 0);
     }
 
   switch (gridtype)
@@ -3095,9 +3091,14 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
       GRIB_CHECK(my_grib_set_long(gh, "bitsPerValue", bitsPerValue), 0);
     }
 
-  int shapeOfTheEarth = 0;
-  cdiInqKeyInt(vlistID, varID, CDI_KEY_SHAPEOFTHEEARTH, &shapeOfTheEarth);
-  if ( ! gc->init ) gribapiDefGrid((int)editionNumber, gh, gridID, comptype, lieee, datatype, shapeOfTheEarth);
+  if ( ! gc->init && editionNumber == 2 )
+    {
+      int shapeOfTheEarth = 0;
+      cdiInqKeyInt(vlistID, varID, CDI_KEY_SHAPEOFTHEEARTH, &shapeOfTheEarth);
+      GRIB_CHECK(my_grib_set_long(gh, "shapeOfTheEarth", (long)shapeOfTheEarth), 0);
+    }
+
+  if ( ! gc->init ) gribapiDefGrid((int)editionNumber, gh, gridID, comptype, lieee, datatype);
 
   gribapiDefLevel((int)editionNumber, gh, zaxisID, levelID, gc->init, productDefinitionTemplate);
 
