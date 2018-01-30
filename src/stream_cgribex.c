@@ -1609,76 +1609,16 @@ void cgribexDefTime(int *isec1, int vdate, int vtime, int tsteptype, int numavg,
 static
 void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridID)
 {
-  bool lrotated = false;
-  bool lcurvi = false;
-
   memset(isec2, 0, 16*sizeof(int));
-
   ISEC1_Sec2Or3Flag = 128;
-
-  int gridtype = gridInqType(gridID);
-
   ISEC1_GridDefinition = 255;
-
-  if ( gridtype == GRID_GENERIC )
-    {
-      int gridsize = (int)gridInqSize(gridID);
-      int xsize = (int)gridInqXsize(gridID);
-      int ysize = (int)gridInqYsize(gridID);
-
-      if ( (ysize ==  32 || ysize ==  48 || ysize ==  64 ||
-	    ysize ==  96 || ysize == 160 || ysize == 192 ||
-	    ysize == 240 || ysize == 320 || ysize == 384 ||
-	    ysize == 480 || ysize == 768 ) &&
-	   (xsize == 2*ysize || xsize == 1) )
-	{
-	  gridtype = GRID_GAUSSIAN;
-	}
-      else if ( gridsize == 1 )
-	{
-	  gridtype = GRID_LONLAT;
-	}
-      else if ( gridInqXvals(gridID, NULL) && gridInqYvals(gridID, NULL) )
-	{
-	  gridtype = GRID_LONLAT;
-	}
-    }
-  else if ( gridtype == GRID_CURVILINEAR )
-    {
-      int projID = gridInqProj(gridID);
-      if ( projID != CDI_UNDEFID && gridInqType(projID) == GRID_PROJECTION )
-        {
-          gridID = projID;
-          gridtype = GRID_PROJECTION;
-        }
-      else
-        {
-          static bool lwarning = true;
-          if ( lwarning && gridInqSize(gridID) > 1 )
-            {
-              lwarning = false;
-              Warning("Curvilinear grid is unsupported in GRIB1! Created wrong Grid Description Section!");
-            }
-          lcurvi = true;
-          gridtype = GRID_LONLAT;
-        }
-    }
-
-  if ( gridtype == GRID_PROJECTION )
-    {
-      if ( gridInqProjType(gridID) == CDI_PROJ_RLL )
-        {
-          gridtype = GRID_LONLAT;
-          lrotated = true;
-        }
-      else if ( gridInqProjType(gridID) == CDI_PROJ_LCC )
-        {
-          gridtype = GRID_LCC;
-        }
-    }
-
   ISEC2_Reduced  = false;
   ISEC2_ScanFlag = 0;
+
+  int gridsize = (int) gridInqSize(gridID);
+  bool gridIsRotated = false;
+  bool gridIsCurvilinear = false;
+  int gridtype = grbGetGridtype(gridID, gridsize, &gridIsRotated, &gridIsCurvilinear);
 
   switch (gridtype)
     {
@@ -1692,7 +1632,7 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
 
 	if ( gridtype == GRID_GAUSSIAN || gridtype == GRID_GAUSSIAN_REDUCED )
           ISEC2_GridType = GRIB1_GTYPE_GAUSSIAN;
-        else if ( gridtype == GRID_LONLAT && lrotated )
+        else if ( gridtype == GRID_LONLAT && gridIsRotated )
 	  ISEC2_GridType = GRIB1_GTYPE_LATLON_ROT;
 	else
 	  ISEC2_GridType = GRIB1_GTYPE_LATLON;
@@ -1712,7 +1652,7 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
 	    else
 	      {
 		xfirst = gridInqXval(gridID, 0);
-                xlast  = gridInqXval(gridID, (lcurvi ? nlon*nlat : nlon) - 1);
+                xlast  = gridInqXval(gridID, (gridIsCurvilinear ? nlon*nlat : nlon) - 1);
 		xinc   = fabs(gridInqXinc(gridID));
 	      }
 	  }
@@ -1721,7 +1661,7 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
 	else
 	  {
 	    yfirst = gridInqYval(gridID, 0);
-            ylast  = gridInqYval(gridID, (lcurvi ? nlon*nlat : nlat) - 1);
+            ylast  = gridInqYval(gridID, (gridIsCurvilinear ? nlon*nlat : nlat) - 1);
 	    yinc   = fabs(gridInqYinc(gridID));
 	  }
 
@@ -1763,7 +1703,7 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
         if ( ISEC2_LatIncr && ISEC2_LonIncr )   gribbyte_set_bit(&ISEC2_ResFlag, 1);
         if ( gridInqUvRelativeToGrid(gridID) )  gribbyte_set_bit(&ISEC2_ResFlag, 5);
 
-	if ( lrotated )
+	if ( gridIsRotated )
           {
             double xpole = 0, ypole = 0, angle = 0;
             gridInqParamRLL(gridID, &xpole, &ypole, &angle);
