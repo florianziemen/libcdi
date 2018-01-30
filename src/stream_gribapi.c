@@ -1892,9 +1892,8 @@ getGribApiCompTypeMsg(int comptype, size_t gridsize)
 }
 
 static
-void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype, bool lieee, int datatype, size_t nmiss, int gcinit, int shapeOfTheEarth)
+void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype, bool lieee, int datatype, int shapeOfTheEarth)
 {
-  UNUSED(nmiss);
   bool lrotated = false;
   bool lcurvi = false;
 
@@ -1972,8 +1971,6 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
           GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
         }
     }
-
-  if ( gcinit ) return;
 
   if ( editionNumber == 2 )
     {
@@ -3100,7 +3097,7 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
 
   int shapeOfTheEarth = 0;
   cdiInqKeyInt(vlistID, varID, CDI_KEY_SHAPEOFTHEEARTH, &shapeOfTheEarth);
-  gribapiDefGrid((int)editionNumber, gh, gridID, comptype, lieee, datatype, nmiss, gc->init, shapeOfTheEarth);
+  if ( ! gc->init ) gribapiDefGrid((int)editionNumber, gh, gridID, comptype, lieee, datatype, shapeOfTheEarth);
 
   gribapiDefLevel((int)editionNumber, gh, zaxisID, levelID, gc->init, productDefinitionTemplate);
 
