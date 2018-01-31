@@ -1892,8 +1892,13 @@ getGribapiPackingTypeMsg(int comptype, size_t gridsize)
 }
 
 static
-void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype, bool lieee, int datatype)
+void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype, int datatype)
 {
+  // bitsPerValue have to be defined first (complex packing)
+  GRIB_CHECK(my_grib_set_long(gh, "bitsPerValue", (long)grbBitsPerValue(datatype)), 0);
+
+  bool lieee = (editionNumber == 2 && (datatype == CDI_DATATYPE_FLT32 || datatype == CDI_DATATYPE_FLT64));
+
   size_t gridsize = gridInqSize(gridID);
   bool gridIsRotated = false;
   bool gridIsCurvilinear = false;
@@ -3026,15 +3031,6 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
 
   if ( ! gc->init ) gribapiDefParam((int)editionNumber, gh, param, name, stdname);
 
-  bool lieee = (editionNumber == 2 && (datatype == CDI_DATATYPE_FLT32 || datatype == CDI_DATATYPE_FLT64));
-
-  /* bitsPerValue have to be defined before call to DefGrid (complex packing) */
-  //  if ( lieee == false )
-    {
-      long bitsPerValue = grbBitsPerValue(datatype);
-      GRIB_CHECK(my_grib_set_long(gh, "bitsPerValue", bitsPerValue), 0);
-    }
-
   if ( ! gc->init && editionNumber == 2 )
     {
       int shapeOfTheEarth = 0;
@@ -3042,7 +3038,7 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
       GRIB_CHECK(my_grib_set_long(gh, "shapeOfTheEarth", (long)shapeOfTheEarth), 0);
     }
 
-  if ( ! gc->init ) gribapiDefGrid((int)editionNumber, gh, gridID, comptype, lieee, datatype);
+  if ( ! gc->init ) gribapiDefGrid((int)editionNumber, gh, gridID, comptype, datatype);
 
   gribapiDefLevel((int)editionNumber, gh, zaxisID, levelID, gc->init, productDefinitionTemplate);
 
