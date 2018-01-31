@@ -1858,18 +1858,28 @@ void gribapiDefTime(int editionNumber, int productDefinitionTemplate, int typeOf
     }
 }
 
-struct gribapiMsg {
-  size_t msgLen;
-  const char *msg;
-};
-
-static struct gribapiMsg
-getGribapiPackingTypeMsg(int comptype, size_t gridsize)
+static
+void gribapiDefPackingType(grib_handle *gh, bool lieee, bool lspectral, bool lcomplex, int comptype, size_t gridsize)
 {
   const char *mesg;
   size_t len;
 
-  if ( comptype == CDI_COMPRESS_JPEG && gridsize > 1 )
+  if ( lspectral )
+    {
+      if ( lcomplex )
+        {
+          static const char mesg_spectral_complex[] = "spectral_complex";
+          len = sizeof (mesg_spectral_complex) - 1;
+          mesg = mesg_spectral_complex;
+        }
+      else
+        {
+          static const char mesg_spectral_simple[] = "spectral_simple";
+          len = sizeof (mesg_spectral_simple) - 1;
+          mesg = mesg_spectral_simple;
+        }
+    }
+  else if ( comptype == CDI_COMPRESS_JPEG && gridsize > 1 )
     {
       static const char mesg_grid_jpeg[] = "grid_jpeg";
       len = sizeof (mesg_grid_jpeg) - 1;
@@ -1881,6 +1891,12 @@ getGribapiPackingTypeMsg(int comptype, size_t gridsize)
       len = sizeof (mesg_grid_ccsds) - 1;
       mesg = mesg_grid_ccsds;
     }
+  else if ( lieee )
+    {
+      static const char mesg_ieee[] = "grid_ieee";
+      len = sizeof (mesg_ieee) - 1;
+      mesg = mesg_ieee;
+    }
   else
     {
       static const char mesg_simple[] = "grid_simple";
@@ -1888,7 +1904,7 @@ getGribapiPackingTypeMsg(int comptype, size_t gridsize)
       mesg = mesg_simple;
     }
 
-  return (struct gribapiMsg){ .msgLen = len, .msg = mesg };
+  GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
 }
 
 static
@@ -1897,30 +1913,26 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
   // bitsPerValue have to be defined first (complex packing)
   GRIB_CHECK(my_grib_set_long(gh, "bitsPerValue", (long)grbBitsPerValue(datatype)), 0);
 
-  bool lieee = (editionNumber == 2 && (datatype == CDI_DATATYPE_FLT32 || datatype == CDI_DATATYPE_FLT64));
-
   size_t gridsize = gridInqSize(gridID);
   bool gridIsRotated = false;
   bool gridIsCurvilinear = false;
   int gridtype = grbGetGridtype(gridID, gridsize, &gridIsRotated, &gridIsCurvilinear);
 
+  bool lieee = (editionNumber == 2 && (datatype == CDI_DATATYPE_FLT32 || datatype == CDI_DATATYPE_FLT64));
+  bool lspectral = (gridtype == GRID_SPECTRAL);
+  bool lcomplex = (lspectral && gridInqComplexPacking(gridID));
+
+  if ( lieee ) comptype = 0;
+  if ( lspectral ) lieee = false;
+
   if ( gridtype == GRID_LONLAT || gridtype == GRID_GAUSSIAN )
     {
-      if ( editionNumber != 2 || lieee ) { comptype = 0; }
-
-      if ( comptype )
-        {
-          struct gribapiMsg gaMsg = getGribapiPackingTypeMsg(comptype, gridsize);
-          size_t len = gaMsg.msgLen;
-          const char *mesg = gaMsg.msg;
-          GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
-        }
+      gribapiDefPackingType(gh, lieee, lspectral, lcomplex, comptype, gridsize);
     }
 
-  if ( editionNumber == 2 )
-    {
-      GRIB_CHECK(my_grib_set_long(gh, "numberOfValues", (long)gridsize), 0);
-    }
+  if ( lieee ) GRIB_CHECK(my_grib_set_long(gh, "precision", datatype == CDI_DATATYPE_FLT64 ? 2 : 1), 0);
+
+  if ( editionNumber == 2 ) GRIB_CHECK(my_grib_set_long(gh, "numberOfValues", (long)gridsize), 0);
 
   switch (gridtype)
     {
@@ -1929,9 +1941,6 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
     case GRID_GAUSSIAN_REDUCED:
     case GRID_TRAJECTORY:
       {
-	double xfirst = 0, xlast = 0, xinc = 0;
-	double yfirst = 0, ylast = 0, yinc = 0;
-
         const char *mesg;
         size_t len;
         if ( gridtype == GRID_GAUSSIAN )
@@ -1959,6 +1968,9 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
             mesg = mesg_regular_ll;
           }
         GRIB_CHECK(my_grib_set_string(gh, "gridType", mesg, &len), 0);
+
+	double xfirst = 0, xlast = 0, xinc = 0;
+	double yfirst = 0, ylast = 0, yinc = 0;
 
 	size_t nlon = gridInqXsize(gridID);
 	size_t nlat = gridInqYsize(gridID);
@@ -2047,25 +2059,6 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
             GRIB_CHECK(my_grib_set_double(gh, "angleOfRotation", angle), 0);
           }
 
-        if ( editionNumber != 2 ) { lieee = false; comptype = 0; }
-
-        if ( lieee )
-          {
-            static const char mesg_grid_ieee[] = "grid_ieee";
-            len = sizeof (mesg_grid_ieee) - 1;
-            mesg = mesg_grid_ieee;
-            GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
-          }
-        else
-          {
-            struct gribapiMsg gaMsg = getGribapiPackingTypeMsg(comptype, gridsize);
-            len = gaMsg.msgLen;
-            mesg = gaMsg.msg;
-            GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
-          }
-        if ( lieee )
-          GRIB_CHECK(my_grib_set_long(gh, "precision", datatype == CDI_DATATYPE_FLT64 ? 2 : 1), 0);
-
         long uvRelativeToGrid = gridInqUvRelativeToGrid(gridID);
         if ( uvRelativeToGrid ) GRIB_CHECK(my_grib_set_long(gh, "uvRelativeToGrid", uvRelativeToGrid), 0);
 
@@ -2129,16 +2122,7 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
           for (size_t i = 0; i < numTruncAtt; ++i)
             GRIB_CHECK(my_grib_set_long(gh, truncAttNames[i], trunc), 0);
         }
-	// GRIB_CHECK(my_grib_set_long(gh, "numberOfDataPoints", (long)gridsize), 0);
-        /*
-        if ( lieee )
-          {
-            printf("spectral_ieee\n");
-            static const char mesg[] = "spectral_ieee";
-            size_t len = sizeof (mesg) -1;
-            GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
-          }
-        else */ if ( gridInqComplexPacking(gridID) )
+        if ( gridInqComplexPacking(gridID) )
 	  {
             static const char mesg[] = "spectral_complex";
             size_t len = sizeof (mesg) -1;
