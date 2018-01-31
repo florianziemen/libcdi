@@ -1858,13 +1858,13 @@ void gribapiDefTime(int editionNumber, int productDefinitionTemplate, int typeOf
     }
 }
 
-struct gribApiMsg {
+struct gribapiMsg {
   size_t msgLen;
   const char *msg;
 };
 
-static struct gribApiMsg
-getGribApiCompTypeMsg(int comptype, size_t gridsize)
+static struct gribapiMsg
+getGribapiPackingTypeMsg(int comptype, size_t gridsize)
 {
   const char *mesg;
   size_t len;
@@ -1888,7 +1888,7 @@ getGribApiCompTypeMsg(int comptype, size_t gridsize)
       mesg = mesg_simple;
     }
 
-  return (struct gribApiMsg){ .msgLen = len, .msg = mesg };
+  return (struct gribapiMsg){ .msgLen = len, .msg = mesg };
 }
 
 static
@@ -1905,7 +1905,7 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 
       if ( comptype )
         {
-          struct gribApiMsg gaMsg = getGribApiCompTypeMsg(comptype, gridsize);
+          struct gribapiMsg gaMsg = getGribapiPackingTypeMsg(comptype, gridsize);
           size_t len = gaMsg.msgLen;
           const char *mesg = gaMsg.msg;
           GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
@@ -2049,14 +2049,15 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
             static const char mesg_grid_ieee[] = "grid_ieee";
             len = sizeof (mesg_grid_ieee) - 1;
             mesg = mesg_grid_ieee;
+            GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
           }
         else
           {
-            struct gribApiMsg gaMsg = getGribApiCompTypeMsg(comptype, gridsize);
+            struct gribapiMsg gaMsg = getGribapiPackingTypeMsg(comptype, gridsize);
             len = gaMsg.msgLen;
             mesg = gaMsg.msg;
+            GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
           }
-        GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
         if ( lieee )
           GRIB_CHECK(my_grib_set_long(gh, "precision", datatype == CDI_DATATYPE_FLT64 ? 2 : 1), 0);
 
