@@ -1925,10 +1925,7 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
   if ( lieee ) comptype = 0;
   if ( lspectral ) lieee = false;
 
-  if ( gridtype == GRID_LONLAT || gridtype == GRID_GAUSSIAN )
-    {
-      gribapiDefPackingType(gh, lieee, lspectral, lcomplex, comptype, gridsize);
-    }
+  if ( gridtype != GRID_SPECTRAL ) gribapiDefPackingType(gh, lieee, lspectral, lcomplex, comptype, gridsize);
 
   if ( lieee ) GRIB_CHECK(my_grib_set_long(gh, "precision", datatype == CDI_DATATYPE_FLT64 ? 2 : 1), 0);
 
@@ -2160,13 +2157,6 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 	GRIB_CHECK(my_grib_set_long(gh, "numberOfDataPoints", (long)gridsize), 0);
 	GRIB_CHECK(my_grib_set_long(gh, "totalNumberOfGridPoints", (long)gridsize), 0);
 
-        if ( comptype == CDI_COMPRESS_SZIP || comptype == CDI_COMPRESS_AEC )
-          {
-            static const char mesg[] = "grid_ccsds";
-            size_t len = sizeof (mesg) -1;
-            GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
-          }
-
 	break;
       }
     case GRID_UNSTRUCTURED:
@@ -2197,13 +2187,6 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
 	    if (grib_set_bytes(gh, "uuidOfHGrid", uuid, &len) != 0)
 	      Warning("Can't write UUID!");
 	  }
-
-        if ( comptype == CDI_COMPRESS_SZIP || comptype == CDI_COMPRESS_AEC )
-          {
-            static const char mesg[] = "grid_ccsds";
-            size_t len = sizeof (mesg) -1;
-            GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
-          }
 
 	break;
       }
