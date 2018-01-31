@@ -2075,6 +2075,23 @@ void gribapiDefGridUnstructured(grib_handle *gh, int gridID)
 }
 
 static
+void gribapiDefGridSpectral(grib_handle *gh, int gridID)
+{
+  int trunc = gridInqTrunc(gridID);
+  enum { numTruncAtt = 3 };
+  static const char truncAttNames[numTruncAtt][2] = { "J", "K", "M" };
+  for (size_t i = 0; i < numTruncAtt; ++i)
+    GRIB_CHECK(my_grib_set_long(gh, truncAttNames[i], trunc), 0);
+
+  if ( gridInqComplexPacking(gridID) )
+    {
+      static const char truncAttNames[numTruncAtt][3] = { "JS", "KS", "MS" };
+      for (size_t i = 0; i < numTruncAtt; ++i)
+        GRIB_CHECK(my_grib_set_long(gh, truncAttNames[i], 20), 0);
+    }
+}
+
+static
 void gribapiDefPackingType(grib_handle *gh, bool lieee, bool lspectral, bool lcomplex, int comptype, size_t gridsize)
 {
   const char *mesg;
@@ -2141,7 +2158,14 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
   if ( lieee ) comptype = 0;
   if ( lspectral ) lieee = false;
 
-  if ( gridtype != GRID_SPECTRAL ) gribapiDefPackingType(gh, lieee, lspectral, lcomplex, comptype, gridsize);
+  if ( lspectral ) // gridType needs to be defined before packingType !!!
+    {
+      static const char mesg[] = "sh";
+      size_t len = sizeof (mesg) -1;
+      GRIB_CHECK(my_grib_set_string(gh, "gridType", mesg, &len), 0);
+    }
+
+  gribapiDefPackingType(gh, lieee, lspectral, lcomplex, comptype, gridsize);
 
   if ( lieee ) GRIB_CHECK(my_grib_set_long(gh, "precision", datatype == CDI_DATATYPE_FLT64 ? 2 : 1), 0);
 
@@ -2164,36 +2188,7 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
       }
     case GRID_SPECTRAL:
       {
-        {
-          static const char mesg[] = "sh";
-          size_t len = sizeof (mesg) -1;
-          GRIB_CHECK(my_grib_set_string(gh, "gridType", mesg, &len), 0);
-        }
-	{
-          int trunc = gridInqTrunc(gridID);
-          enum { numTruncAtt = 3 };
-          static const char truncAttNames[numTruncAtt][2] = { "J", "K", "M" };
-          for (size_t i = 0; i < numTruncAtt; ++i)
-            GRIB_CHECK(my_grib_set_long(gh, truncAttNames[i], trunc), 0);
-        }
-        if ( gridInqComplexPacking(gridID) )
-	  {
-            static const char mesg[] = "spectral_complex";
-            size_t len = sizeof (mesg) -1;
-	    GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
-            enum { numTruncAtt = 3 };
-            static const char truncAttNames[numTruncAtt][3]
-              = { "JS", "KS", "MS" };
-            for (size_t i = 0; i < numTruncAtt; ++i)
-              GRIB_CHECK(my_grib_set_long(gh, truncAttNames[i], 20), 0);
-	  }
-	else
-	  {
-            static const char mesg[] = "spectral_simple";
-            size_t len = sizeof (mesg) -1;
-	    GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
-	  }
-
+        gribapiDefGridSpectral(gh, gridID);
 	break;
       }
     case GRID_GME:
