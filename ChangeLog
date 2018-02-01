@@ -1,3 +1,7 @@
+2018-01-31  Uwe Schulzweida
+
+	* Fix GRIB_API AEC compression for unstructured grids
+
 2018-01-29  Uwe Schulzweida
 
 	* Version 1.9.3 released

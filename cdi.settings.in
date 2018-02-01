@@ -42,17 +42,17 @@
       "grib_api" : {
         "lib"      : "@GRIB_API_LIBS@",
         "include"  : "@GRIB_API_INCLUDE@"
-      }
+      },
       "eccodes" : {
         "lib"      : "@ECCODES_LIBS@",
         "include"  : "@ECCODES_INCLUDE@"
       }
-    }
+    },
     "platform" : {
       "USER_NAME"   : "@USER_NAME@",
       "HOST_NAME"   : "@HOST_NAME@",
       "SYSTEM_TYPE" : "@SYSTEM_TYPE@"
-    },
+    }
   },
   "features" : {
     "enable_cdi_lib" : @ENABLE_CDI_LIB@,
