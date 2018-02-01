@@ -1607,81 +1607,195 @@ void cgribexDefTime(int *isec1, int vdate, int vtime, int tsteptype, int numavg,
 }
 
 static
-void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridID)
+void cgribexDefGridRegular(int *isec2, double *fsec2, int gridID, int gridtype, bool gridIsRotated, bool gridIsCurvilinear)
 {
-  bool lrotated = false;
-  bool lcurvi = false;
+  if ( gridtype == GRID_GAUSSIAN || gridtype == GRID_GAUSSIAN_REDUCED )
+    ISEC2_GridType = GRIB1_GTYPE_GAUSSIAN;
+  else if ( gridtype == GRID_LONLAT && gridIsRotated )
+    ISEC2_GridType = GRIB1_GTYPE_LATLON_ROT;
+  else
+    ISEC2_GridType = GRIB1_GTYPE_LATLON;
 
-  memset(isec2, 0, 16*sizeof(int));
+  double xfirst = 0, xlast = 0, xinc = 0;
+  double yfirst = 0, ylast = 0, yinc = 0;
 
-  ISEC1_Sec2Or3Flag = 128;
+  int nlon = (int)gridInqXsize(gridID);
+  int nlat = (int)gridInqYsize(gridID);
 
-  int gridtype = gridInqType(gridID);
-
-  ISEC1_GridDefinition = 255;
-
-  if ( gridtype == GRID_GENERIC )
+  if ( gridtype == GRID_GAUSSIAN_REDUCED )
     {
-      int gridsize = (int)gridInqSize(gridID);
-      int xsize = (int)gridInqXsize(gridID);
-      int ysize = (int)gridInqYsize(gridID);
-
-      if ( (ysize ==  32 || ysize ==  48 || ysize ==  64 ||
-	    ysize ==  96 || ysize == 160 || ysize == 192 ||
-	    ysize == 240 || ysize == 320 || ysize == 384 ||
-	    ysize == 480 || ysize == 768 ) &&
-	   (xsize == 2*ysize || xsize == 1) )
-	{
-	  gridtype = GRID_GAUSSIAN;
-	  gridChangeType(gridID, gridtype);
-	}
-      else if ( gridsize == 1 )
-	{
-	  gridtype = GRID_LONLAT;
-	  gridChangeType(gridID, gridtype);
-	}
-      else if ( gridInqXvals(gridID, NULL) && gridInqYvals(gridID, NULL) )
-	{
-	  gridtype = GRID_LONLAT;
-	  gridChangeType(gridID, gridtype);
-	}
+      ISEC2_Reduced = true;
+      nlon = 0;
+      gridInqRowlon(gridID, ISEC2_RowLonPtr);
     }
-  else if ( gridtype == GRID_CURVILINEAR )
+  else
     {
-      int projID = gridInqProj(gridID);
-      if ( projID != CDI_UNDEFID && gridInqType(projID) == GRID_PROJECTION )
-        {
-          gridID = projID;
-          gridtype = GRID_PROJECTION;
-        }
+      if ( nlon == 0 ) nlon = 1;
       else
         {
-          static bool lwarning = true;
-          if ( lwarning && gridInqSize(gridID) > 1 )
-            {
-              lwarning = false;
-              Warning("Curvilinear grid is unsupported in GRIB1! Created wrong Grid Description Section!");
-            }
-          lcurvi = true;
-          gridtype = GRID_LONLAT;
+          xfirst = gridInqXval(gridID, 0);
+          xlast  = gridInqXval(gridID, (gridIsCurvilinear ? nlon*nlat : nlon) - 1);
+          xinc   = fabs(gridInqXinc(gridID));
         }
     }
 
-  if ( gridtype == GRID_PROJECTION )
+  if ( nlat == 0 ) nlat = 1;
+  else
     {
-      if ( gridInqProjType(gridID) == CDI_PROJ_RLL )
-        {
-          gridtype = GRID_LONLAT;
-          lrotated = true;
-        }
-      else if ( gridInqProjType(gridID) == CDI_PROJ_LCC )
-        {
-          gridtype = GRID_LCC;
-        }
+      yfirst = gridInqYval(gridID, 0);
+      ylast  = gridInqYval(gridID, (gridIsCurvilinear ? nlon*nlat : nlat) - 1);
+      yinc   = fabs(gridInqYinc(gridID));
     }
 
+  ISEC2_NumLon   = nlon;
+  ISEC2_NumLat   = nlat;
+  ISEC2_FirstLat = (int)lround(yfirst*1000);
+  ISEC2_LastLat  = (int)lround(ylast*1000);
+  if ( gridtype == GRID_GAUSSIAN_REDUCED )
+    {
+      ISEC2_FirstLon = 0;
+      ISEC2_LastLon  = (int)lround(1000*(360.-360./(nlat*2)));
+      ISEC2_LonIncr  = (int)lround(1000*360./(nlat*2));
+    }
+  else
+    {
+      ISEC2_FirstLon = (int)lround(xfirst*1000);
+      ISEC2_LastLon  = (int)lround(xlast*1000);
+      ISEC2_LonIncr  = (int)lround(xinc*1000);
+    }
+
+  if ( gridtype == GRID_GAUSSIAN || gridtype == GRID_GAUSSIAN_REDUCED )
+    {
+      int np = gridInqNP(gridID);
+      if ( np == 0 ) np = nlat/2;
+      ISEC2_NumPar = np;
+    }
+  else
+    {
+      ISEC2_LatIncr = (int)lround(yinc*1000);
+    }
+
+  if ( ISEC2_NumLon > 1 && ISEC2_NumLat == 1 )
+    if ( ISEC2_LonIncr != 0 && ISEC2_LatIncr == 0 ) ISEC2_LatIncr = ISEC2_LonIncr;
+
+  if ( ISEC2_NumLon == 1 && ISEC2_NumLat > 1 )
+    if ( ISEC2_LonIncr == 0 && ISEC2_LatIncr != 0 ) ISEC2_LonIncr = ISEC2_LatIncr;
+
+  ISEC2_ResFlag = 0;
+  if ( ISEC2_LatIncr && ISEC2_LonIncr )   gribbyte_set_bit(&ISEC2_ResFlag, 1);
+  if ( gridInqUvRelativeToGrid(gridID) )  gribbyte_set_bit(&ISEC2_ResFlag, 5);
+
+  if ( gridIsRotated )
+    {
+      double xpole = 0, ypole = 0, angle = 0;
+      gridInqParamRLL(gridID, &xpole, &ypole, &angle);
+
+      ISEC2_LatSP = - (int)lround(ypole * 1000);
+      ISEC2_LonSP =   (int)lround((xpole + 180) * 1000);
+      if ( fabs(angle) > 0 ) angle = -angle;
+      FSEC2_RotAngle = angle;
+    }
+
+  ISEC2_ScanFlag = 0;
+  if ( ISEC2_LastLon < ISEC2_FirstLon ) gribbyte_set_bit(&ISEC2_ScanFlag, 1); // East -> West
+  if ( ISEC2_LastLat > ISEC2_FirstLat ) gribbyte_set_bit(&ISEC2_ScanFlag, 2); // South -> North
+}
+
+static
+void cgribexDefGridLambert(int *isec2, int gridID)
+{
+  int xsize = (int)gridInqXsize(gridID);
+  int ysize = (int)gridInqYsize(gridID);
+
+  double lon_0, lat_0, lat_1, lat_2, a, rf, xval_0, yval_0, x_0, y_0;
+  gridInqParamLCC(gridID, grid_missval, &lon_0, &lat_0, &lat_1, &lat_2, &a, &rf, &xval_0, &yval_0, &x_0, &y_0);
+  gridVerifyGribParamLCC(grid_missval, &lon_0, &lat_0, &lat_1, &lat_2, &a, &rf, &xval_0, &yval_0, &x_0, &y_0);
+  bool lsouth = (lat_1 < 0);
+  if ( lsouth ) { lat_1 = -lat_2; lat_2 = -lat_2; }
+
+  double xinc = gridInqXinc(gridID);
+  double yinc = gridInqYinc(gridID);
+
+  ISEC2_GridType = GRIB1_GTYPE_LCC;
+  ISEC2_NumLon   = xsize;
+  ISEC2_NumLat   = ysize;
+  ISEC2_FirstLon       = (int)lround(xval_0 * 1000);
+  ISEC2_FirstLat       = (int)lround(yval_0 * 1000);
+  ISEC2_Lambert_Lov    = (int)lround(lon_0 * 1000);
+  ISEC2_Lambert_LatS1  = (int)lround(lat_1 * 1000);
+  ISEC2_Lambert_LatS2  = (int)lround(lat_2 * 1000);
+  ISEC2_Lambert_dx     = (int)lround(xinc);
+  ISEC2_Lambert_dy     = (int)lround(yinc);
+  ISEC2_Lambert_LatSP  = 0;
+  ISEC2_Lambert_LonSP  = 0;
+  ISEC2_Lambert_ProjFlag = 0;
+  if ( lsouth ) gribbyte_set_bit(&ISEC2_Lambert_ProjFlag, 1);
+
+  bool earthIsOblate = (IS_EQUAL(a, 6378160.) && IS_EQUAL(rf, 297.));
+  ISEC2_ResFlag = 0;
+  if ( ISEC2_Lambert_dx && ISEC2_Lambert_dy ) gribbyte_set_bit(&ISEC2_ResFlag, 1);
+  if ( earthIsOblate )                        gribbyte_set_bit(&ISEC2_ResFlag, 2);
+  if ( gridInqUvRelativeToGrid(gridID) )      gribbyte_set_bit(&ISEC2_ResFlag, 5);
+
+  ISEC2_ScanFlag = 0;
+  gribbyte_set_bit(&ISEC2_ScanFlag, 2); // South -> North
+}
+
+static
+void cgribexDefGridSpectal(int *isec2, int *isec4, int gridID)
+{
+  ISEC2_GridType = GRIB1_GTYPE_SPECTRAL;
+  ISEC2_PentaJ   = gridInqTrunc(gridID);
+  ISEC2_PentaK   = ISEC2_PentaJ;
+  ISEC2_PentaM   = ISEC2_PentaJ;
+  ISEC2_RepType  = 1;
+  isec4[2]       = 128;
+  if ( gridInqComplexPacking(gridID) && ISEC2_PentaJ >= 21 )
+    {
+      ISEC2_RepMode  = 2;
+      isec4[3]       = 64;
+      isec4[16]      = 0;
+      isec4[17]      = 20;
+      isec4[18]      = 20;
+      isec4[19]      = 20;
+    }
+  else
+    {
+      ISEC2_RepMode  = 1;
+      isec4[3]       = 0;
+    }
+}
+
+static
+void cgribexDefGridGME(int *isec2, int gridID)
+{
+  ISEC2_GridType   = GRIB1_GTYPE_GME;
+  int nd = 0, ni = 0, ni2 = 0, ni3 = 0;
+  gridInqParamGME(gridID, &nd, &ni, &ni2, &ni3);
+  ISEC2_GME_ND     = nd;
+  ISEC2_GME_NI     = ni;
+  ISEC2_GME_NI2    = ni2;
+  ISEC2_GME_NI3    = ni3;
+  ISEC2_GME_AFlag  = 0;
+  ISEC2_GME_LatPP  = 90000;
+  ISEC2_GME_LonPP  = 0;
+  ISEC2_GME_LonMPL = 0;
+  ISEC2_GME_BFlag  = 0;
+}
+
+static
+void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridID)
+{
+  memset(isec2, 0, 16*sizeof(int));
+  ISEC1_Sec2Or3Flag = 128;
+  ISEC1_GridDefinition = 255;
   ISEC2_Reduced  = false;
   ISEC2_ScanFlag = 0;
+
+  int gridsize = (int) gridInqSize(gridID);
+  bool gridIsRotated = false;
+  bool gridIsCurvilinear = false;
+  int gridtype = grbGetGridtype(gridID, gridsize, &gridIsRotated, &gridIsCurvilinear);
 
   switch (gridtype)
     {
@@ -1690,177 +1804,22 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
     case GRID_GAUSSIAN_REDUCED:
     case GRID_TRAJECTORY:
       {
-	double xfirst = 0, xlast = 0, xinc = 0;
-	double yfirst = 0, ylast = 0, yinc = 0;
-
-	if ( gridtype == GRID_GAUSSIAN || gridtype == GRID_GAUSSIAN_REDUCED )
-          ISEC2_GridType = GRIB1_GTYPE_GAUSSIAN;
-        else if ( gridtype == GRID_LONLAT && lrotated )
-	  ISEC2_GridType = GRIB1_GTYPE_LATLON_ROT;
-	else
-	  ISEC2_GridType = GRIB1_GTYPE_LATLON;
-
-	int nlon = (int)gridInqXsize(gridID);
-	int nlat = (int)gridInqYsize(gridID);
-
-	if ( gridtype == GRID_GAUSSIAN_REDUCED )
-	  {
-	    ISEC2_Reduced = true;
-	    nlon = 0;
-	    gridInqRowlon(gridID, ISEC2_RowLonPtr);
-	  }
-	else
-	  {
-	    if ( nlon == 0 ) nlon = 1;
-	    else
-	      {
-		xfirst = gridInqXval(gridID, 0);
-                xlast  = gridInqXval(gridID, (lcurvi ? nlon*nlat : nlon) - 1);
-		xinc   = fabs(gridInqXinc(gridID));
-	      }
-	  }
-
-	if ( nlat == 0 ) nlat = 1;
-	else
-	  {
-	    yfirst = gridInqYval(gridID, 0);
-            ylast  = gridInqYval(gridID, (lcurvi ? nlon*nlat : nlat) - 1);
-	    yinc   = fabs(gridInqYinc(gridID));
-	  }
-
-	ISEC2_NumLon   = nlon;
-	ISEC2_NumLat   = nlat;
-	ISEC2_FirstLat = (int)lround(yfirst*1000);
-	ISEC2_LastLat  = (int)lround(ylast*1000);
-	if ( gridtype == GRID_GAUSSIAN_REDUCED )
-	  {
-	    ISEC2_FirstLon = 0;
-	    ISEC2_LastLon  = (int)lround(1000*(360.-360./(nlat*2)));
-	    ISEC2_LonIncr  = (int)lround(1000*360./(nlat*2));
-	  }
-	else
-	  {
-	    ISEC2_FirstLon = (int)lround(xfirst*1000);
-	    ISEC2_LastLon  = (int)lround(xlast*1000);
-	    ISEC2_LonIncr  = (int)lround(xinc*1000);
-	  }
-
-	if ( gridtype == GRID_GAUSSIAN || gridtype == GRID_GAUSSIAN_REDUCED )
-          {
-            int np = gridInqNP(gridID);
-            if ( np == 0 ) np = nlat/2;
-            ISEC2_NumPar = np;
-          }
-	else
-	  {
-	    ISEC2_LatIncr = (int)lround(yinc*1000);
-	  }
-
-	if ( ISEC2_NumLon > 1 && ISEC2_NumLat == 1 )
-	  if ( ISEC2_LonIncr != 0 && ISEC2_LatIncr == 0 ) ISEC2_LatIncr = ISEC2_LonIncr;
-
-	if ( ISEC2_NumLon == 1 && ISEC2_NumLat > 1 )
-	  if ( ISEC2_LonIncr == 0 && ISEC2_LatIncr != 0 ) ISEC2_LonIncr = ISEC2_LatIncr;
-
-        ISEC2_ResFlag = 0;
-        if ( ISEC2_LatIncr && ISEC2_LonIncr )   gribbyte_set_bit(&ISEC2_ResFlag, 1);
-        if ( gridInqUvRelativeToGrid(gridID) )  gribbyte_set_bit(&ISEC2_ResFlag, 5);
-
-	if ( lrotated )
-          {
-            double xpole = 0, ypole = 0, angle = 0;
-            gridInqParamRLL(gridID, &xpole, &ypole, &angle);
-
-	    ISEC2_LatSP = - (int)lround(ypole * 1000);
-	    ISEC2_LonSP =   (int)lround((xpole + 180) * 1000);
-            if ( fabs(angle) > 0 ) angle = -angle;
-            FSEC2_RotAngle = angle;
-          }
-
-        ISEC2_ScanFlag = 0;
-	if ( ISEC2_LastLon < ISEC2_FirstLon ) gribbyte_set_bit(&ISEC2_ScanFlag, 1); // East -> West
-	if ( ISEC2_LastLat > ISEC2_FirstLat ) gribbyte_set_bit(&ISEC2_ScanFlag, 2); // South -> North
-
+        cgribexDefGridRegular(isec2, fsec2, gridID, gridtype, gridIsRotated, gridIsCurvilinear);
 	break;
       }
     case GRID_LCC:
       {
-	int xsize = (int)gridInqXsize(gridID);
-        int ysize = (int)gridInqYsize(gridID);
-
-        double lon_0, lat_0, lat_1, lat_2, a, rf, xval_0, yval_0, x_0, y_0;
-	gridInqParamLCC(gridID, grid_missval, &lon_0, &lat_0, &lat_1, &lat_2, &a, &rf, &xval_0, &yval_0, &x_0, &y_0);
-	gridVerifyGribParamLCC(grid_missval, &lon_0, &lat_0, &lat_1, &lat_2, &a, &rf, &xval_0, &yval_0, &x_0, &y_0);
-        bool lsouth = (lat_1 < 0);
-        if ( lsouth ) { lat_1 = -lat_2; lat_2 = -lat_2; }
-
-        double xinc = gridInqXinc(gridID);
-        double yinc = gridInqYinc(gridID);
-
-	ISEC2_GridType = GRIB1_GTYPE_LCC;
-	ISEC2_NumLon   = xsize;
-	ISEC2_NumLat   = ysize;
-	ISEC2_FirstLon       = (int)lround(xval_0 * 1000);
-	ISEC2_FirstLat       = (int)lround(yval_0 * 1000);
-	ISEC2_Lambert_Lov    = (int)lround(lon_0 * 1000);
-	ISEC2_Lambert_LatS1  = (int)lround(lat_1 * 1000);
-	ISEC2_Lambert_LatS2  = (int)lround(lat_2 * 1000);
-	ISEC2_Lambert_dx     = (int)lround(xinc);
-	ISEC2_Lambert_dy     = (int)lround(yinc);
-	ISEC2_Lambert_LatSP  = 0;
-	ISEC2_Lambert_LonSP  = 0;
-	ISEC2_Lambert_ProjFlag = 0;
-        if ( lsouth ) gribbyte_set_bit(&ISEC2_Lambert_ProjFlag, 1);
-
-        bool earthIsOblate = (IS_EQUAL(a, 6378160.) && IS_EQUAL(rf, 297.));
-        ISEC2_ResFlag = 0;
-        if ( ISEC2_Lambert_dx && ISEC2_Lambert_dy ) gribbyte_set_bit(&ISEC2_ResFlag, 1);
-        if ( earthIsOblate )                        gribbyte_set_bit(&ISEC2_ResFlag, 2);
-        if ( gridInqUvRelativeToGrid(gridID) )      gribbyte_set_bit(&ISEC2_ResFlag, 5);
-
-	ISEC2_ScanFlag = 0;
-        gribbyte_set_bit(&ISEC2_ScanFlag, 2); // South -> North
-
+        cgribexDefGridLambert(isec2, gridID);
 	break;
       }
     case GRID_SPECTRAL:
       {
-	ISEC2_GridType = GRIB1_GTYPE_SPECTRAL;
-	ISEC2_PentaJ   = gridInqTrunc(gridID);
-	ISEC2_PentaK   = ISEC2_PentaJ;
-	ISEC2_PentaM   = ISEC2_PentaJ;
-	ISEC2_RepType  = 1;
-	isec4[2]       = 128;
-	if ( gridInqComplexPacking(gridID) && ISEC2_PentaJ >= 21 )
-	  {
-	    ISEC2_RepMode  = 2;
-	    isec4[3]       = 64;
-	    isec4[16]      = 0;
-	    isec4[17]      = 20;
-	    isec4[18]      = 20;
-	    isec4[19]      = 20;
-	  }
-	else
-	  {
-	    ISEC2_RepMode  = 1;
-	    isec4[3]       = 0;
-	  }
+        cgribexDefGridSpectal(isec2, isec4, gridID);
 	break;
       }
     case GRID_GME:
       {
-	ISEC2_GridType   = GRIB1_GTYPE_GME;
-        int nd = 0, ni = 0, ni2 = 0, ni3 = 0;
-        gridInqParamGME(gridID, &nd, &ni, &ni2, &ni3);
-	ISEC2_GME_ND     = nd;
-	ISEC2_GME_NI     = ni;
-	ISEC2_GME_NI2    = ni2;
-	ISEC2_GME_NI3    = ni3;
-	ISEC2_GME_AFlag  = 0;
-	ISEC2_GME_LatPP  = 90000;
-	ISEC2_GME_LonPP  = 0;
-	ISEC2_GME_LonMPL = 0;
-	ISEC2_GME_BFlag  = 0;
+        cgribexDefGridGME(isec2, gridID);
 	break;
       }
     case GRID_GENERIC:
@@ -1875,7 +1834,6 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
 	break;
       }
     }
-
 
   if ( cdiGribChangeModeUvRelativeToGrid.active )
     {

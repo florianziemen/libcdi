@@ -58,15 +58,6 @@ void gribContainersNew(stream_t * streamptr);
 void gribContainersDelete(stream_t * streamptr);
 
 #ifdef HAVE_LIBGRIB_API
-static inline void *gribHandleNew(int editionNumber)
-{
-  void *gh = (void *)grib_handle_new_from_samples(NULL, (editionNumber == 1) ? "GRIB1" : "GRIB2");
-
-  if ( gh == NULL ) Error("grib_handle_new_from_samples failed!");
-
-  return gh;
-}
-
 static inline int my_grib_set_double(grib_handle* h, const char* key, double val)
 {
   if ( cdiGribApiDebug )
@@ -98,6 +89,16 @@ static inline int my_grib_set_string(grib_handle* h, const char* key, const char
   if (ret_val != 0)
     fprintf(stderr, "!!! grib_set_string(\tgrib_handle* h, \"%s\", \"%s\") !!!\n", key, val);
   return ret_val;
+}
+
+static inline void *gribHandleNew(int editionNumber)
+{
+  void *gh = (void *)grib_handle_new_from_samples(NULL, (editionNumber == 1) ? "GRIB1" : "GRIB2");
+  if ( gh == NULL ) Error("grib_handle_new_from_samples failed!");
+
+  if ( editionNumber > 1 ) GRIB_CHECK(my_grib_set_long(gh, "numberOfValues", 0L), 0);
+
+  return gh;
 }
 
 static inline void gribHandleDelete(void *gh)
