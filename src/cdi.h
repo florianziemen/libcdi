@@ -810,7 +810,7 @@ size_t  gridInqYCvals(int gridID, char *ycvals[]);
 #define  CDI_KEY_NUMBEROFFORECASTSINENSEMBLE   809  // GRIB2 numberOfForecastsInEnsemble
 #define  CDI_KEY_PERTURBATIONNUMBER            810  // GRIB2 perturbationNumber
 
-//      cdiDefKeyInt: Define a CDI varianble integer value from a key
+//      cdiDefKeyInt: Define a CDI variable integer value from a key
 int     cdiDefKeyInt(int cdiID, int varID, int key, int value);
 
 //      cdiInqKeyInt: Get a CDI variable integer value from a key
