@@ -4,6 +4,7 @@
 
 #include <ctype.h>
 #include <errno.h>
+#include <stdbool.h>
 
 #include <yaxt.h>
 
