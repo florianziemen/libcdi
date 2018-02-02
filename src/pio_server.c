@@ -591,15 +591,12 @@ writeNetCDFStreamParallel(size_t streamIdx, struct streamMapping *mapping, void 
           {
             gatherRedist = retained[varID].redist;
             varSize = retained[varID].sliceSize;
-            varChunk[0] = retained[varID].sliceExtent[0];
-            varChunk[1] = retained[varID].sliceExtent[1];
-            varChunk[2] = retained[varID].sliceExtent[2];
-            myChunk[0][0] = PPM_extent_start(varChunk[0]);
-            myChunk[0][1] = PPM_extent_end(varChunk[0]);
-            myChunk[1][0] = PPM_extent_start(varChunk[1]);
-            myChunk[1][1] = PPM_extent_end(varChunk[1]);
-            myChunk[2][0] = PPM_extent_start(varChunk[2]);
-            myChunk[2][1] = PPM_extent_end(varChunk[2]);
+            for (size_t i = 0; i < 3; ++i)
+              {
+                varChunk[i] = retained[varID].sliceExtent[i];
+                myChunk[i][0] = PPM_extent_start(varChunk[i]);
+                myChunk[i][1] = PPM_extent_end(varChunk[i]);
+              }
           }
         else
           {
