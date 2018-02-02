@@ -14,6 +14,7 @@
 #include <stdio.h>
 
 #ifdef HAVE_PARALLEL_NC4
+#include <core/ppm_extents.h>
 #include <core/ppm_combinatorics.h>
 #include <core/ppm_rectilinear.h>
 #include <ppm/ppm_uniform_partition.h>
