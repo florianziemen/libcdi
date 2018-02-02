@@ -38,11 +38,11 @@
 #include "pio_util.h"
 #include "pio_xmap_cache.h"
 #ifndef HAVE_NETCDF_PAR_H
-/* the following causes netcdf.h to not try to redefine MPI_Comm etc. */
 #ifdef __clang__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-macros"
 #endif
+/* the following causes netcdf.h to not try to redefine MPI_Comm etc. */
 #define MPI_INCLUDED
 #ifdef __clang__
 #pragma GCC diagnostic pop
