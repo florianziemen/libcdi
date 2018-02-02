@@ -3,6 +3,7 @@
 #endif
 
 #include <ctype.h>
+#include <errno.h>
 
 #include <yaxt.h>
 
@@ -78,8 +79,30 @@ cdiPioClientStreamOpen(const char *filename, char filemode, int filetype, stream
 }
 
 static void
+checkVlistForPIO(int vlistID)
+{
+  int nVars = vlistNvars(vlistID);
+  int varShape[3];
+  for (int varID = 0; varID < nVars; ++varID)
+    {
+      cdiPioQueryVarDims(varShape, vlistID, varID);
+      intmax_t size = 1;
+      for (size_t i = 0; i < 3; ++i) size *= varShape[i];
+      if (size > XT_INT_MAX)
+        {
+          errno = EOVERFLOW;
+          SysError("CDI Variable too large for YAXT,"
+                   " use configure with larger index type\n"
+                   "vlistID=%d, varID=%d, variable size=%zu",
+                   vlistID, varID, (size_t) size);
+        }
+    }
+}
+
+static void
 cdiPioClientStreamDefVlist_(int streamID, int vlistID)
 {
+  checkVlistForPIO(vlistID);
   cdiStreamDefVlist_(streamID, vlistID);
   int clientRank = commInqRankModel(), numClients = cdiPioCommInqSizeClients(), numColl = commInqSizeColl(),
       collRank = cdiPioCollRank(clientRank, numClients, numColl);
