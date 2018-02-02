@@ -712,6 +712,10 @@ SYSTEM_TYPE
 HOST_NAME
 USER_NAME
 UUID_C_LIB
+UUID_C_INCLUDE
+DCE_UUID_C_LIB
+DCE_UUID_C_INCLUDE
+DCE_UUIDROOT
 OSSP_UUID_C_LIB
 OSSP_UUID_C_INCLUDE
 OSSP_UUIDROOT
@@ -866,12 +870,20 @@ with_sysroot
 enable_libtool_lock
 enable_largefile
 enable_util_linux_uuid
+enable_ossp_uuid
+enable_dce_uuid
+with_util_linux_uuid
+with_ossp_uuid
+with_dce_uuid
 with_util_linux_uuid_root
 with_util_linux_uuid_include
 with_util_linux_uuid_lib
 with_ossp_uuid_root
 with_ossp_uuid_include
 with_ossp_uuid_lib
+with_dce_uuid_root
+with_dce_uuid_include
+with_dce_uuid_lib
 with_threads
 with_szlib
 with_netcdf
@@ -917,6 +929,8 @@ UTIL_LINUX_UUID_C_INCLUDE
 UTIL_LINUX_UUID_C_LIB
 OSSP_UUID_C_INCLUDE
 OSSP_UUID_C_LIB
+DCE_UUID_C_INCLUDE
+DCE_UUID_C_LIB
 MPI_C_INCLUDE
 MPI_C_LIB
 MPI_FC_INCLUDE
@@ -1579,6 +1593,10 @@ Optional Features:
   --disable-util-linux-uuid
                           Do not test for the util-linux UUID library, use
                           OSSP or DCE versions instead
+  --disable-ossp-uuid     Do not test for the OSSP UUID library, use
+                          util-linux or DCE versions instead
+  --disable-dce-uuid      Do not test for the DCE UUID library, use util-linux
+                          or OSSP versions instead
   --enable-grib           GRIB support [default=yes]
   --enable-cgribex        Use the CGRIBEX library [default=yes]
   --enable-service        Use the service library [default=yes]
@@ -1606,6 +1624,15 @@ Optional Packages:
   --with-gnu-ld           assume the C compiler uses GNU ld [default=no]
   --with-sysroot=DIR Search for dependent libraries within DIR
                         (or the compiler's sysroot if not specified).
+  --with-util-linux-uuid[=yes|no|directory>]
+                          Use util-linux UUID library, do not test for OSSP
+                          UUID library.
+  --with-ossp-uuid[=yes|no|directory>]
+                          Use OSSP UUID library, do not test for the
+                          util-linux UUID library.
+  --with-dce-uuid[=yes|no|directory>]
+                          Use DCE UUID library, do not test for the util-linux
+                          UUID library.
   --with-util-linux-uuid-root
                           set directory to search for util-linux-uuid headers
                           and library
@@ -1624,6 +1651,12 @@ Optional Packages:
                           headers, [default=$with_ossp_uuid_root/include]
   --with-ossp-uuid-lib    specifically set directory to search for ossp-uuid
                           library, [default=$with_ossp_uuid_root/lib]
+  --with-dce-uuid-root    set directory to search for dce-uuid headers and
+                          library
+  --with-dce-uuid-include specifically set directory to search for dce-uuid
+                          headers, [default=$with_dce_uuid_root/include]
+  --with-dce-uuid-lib     specifically set directory to search for dce-uuid
+                          library, [default=$with_dce_uuid_root/lib]
   --with-threads=<yes/no/directory>
                           Compile + link for multithreading [default=yes]
   --with-szlib=<yes|no|directory> (default=no)
@@ -1673,6 +1706,11 @@ Some influential environment variables:
               ossp-uuid includes.
   OSSP_UUID_C_LIB
               specifically set flags to use when linking ossp-uuid.
+  DCE_UUID_C_INCLUDE
+              specifically set flags to use when compiling sources using
+              dce-uuid includes.
+  DCE_UUID_C_LIB
+              specifically set flags to use when linking dce-uuid.
   MPI_C_INCLUDE
               specifically set flags to use when compiling sources using MPI
               includes.
@@ -25900,13 +25938,12 @@ fi
 
 #  ----------------------------------------------------------------------
 # Checks for header files
-for ac_header in malloc.h uuid.h uuid/uuid.h
+for ac_header in malloc.h
 do :
-  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
-ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
-if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
+  ac_fn_c_check_header_mongrel "$LINENO" "malloc.h" "ac_cv_header_malloc_h" "$ac_includes_default"
+if test "x$ac_cv_header_malloc_h" = xyes; then :
   cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
+#define HAVE_MALLOC_H 1
 _ACEOF
 
 fi
@@ -26067,17 +26104,105 @@ _ACEOF
 fi
 done
 
-# Check whether --enable-util-linux-uuid was given.
+# Sed expression to map a string onto a valid argument string part.
+asx_tr_arg="eval sed 'y%*+%pp%;s%[^-$as_cr_alnum]%-%g'"
+
+have_dce_uuid_c_bindings=no
+   have_util_linux_uuid_c_bindings=no
+   have_ossp_uuid_c_bindings=no
+   # Check whether --enable-util-linux-uuid was given.
 if test "${enable_util_linux_uuid+set}" = set; then :
   enableval=$enable_util_linux_uuid;
 else
   enable_util_linux_uuid=auto
 fi
 
-# Sed expression to map a string onto a valid argument string part.
-asx_tr_arg="eval sed 'y%*+%pp%;s%[^-$as_cr_alnum]%-%g'"
+   # Check whether --enable-ossp-uuid was given.
+if test "${enable_ossp_uuid+set}" = set; then :
+  enableval=$enable_ossp_uuid;
+else
+  enable_ossp_uuid=auto
+fi
 
-if test x"${enable_util_linux_uuid}" != xno; then :
+   # Check whether --enable-dce-uuid was given.
+if test "${enable_dce_uuid+set}" = set; then :
+  enableval=$enable_dce_uuid;
+else
+  enable_dce_uuid=auto
+fi
+
+
+
+# Check whether --with-util-linux-uuid was given.
+if test "${with_util_linux_uuid+set}" = set; then :
+  withval=$with_util_linux_uuid; case $with_util_linux_uuid in #(
+  yes) :
+    enable_ossp_uuid=no enable_dce_uuid=no ;; #(
+  no) :
+    enable_util_linux_uuid=no ;; #(
+  /*) :
+    if test x${with_util_linux_uuid_root+set} != xset; then :
+  with_util_linux_uuid_root=$with_util_linux_uuid
+elif test x"${with_util_linux_uuid_root}" != x"${with_util_linux_uuid}"; then :
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "inconsistent directories specified for --with-util-linux-uuid and --with-util-linux-uuid-root
+See \`config.log' for more details" "$LINENO" 5; }
+fi
+         enable_ossp_uuid=no enable_dce_uuid=no ;; #(
+  *) :
+     ;;
+esac
+fi
+
+
+# Check whether --with-ossp-uuid was given.
+if test "${with_ossp_uuid+set}" = set; then :
+  withval=$with_ossp_uuid; case $with_ossp_uuid in #(
+  yes) :
+    enable_util_linux_uuid=no enable_dce_uuid=no ;; #(
+  no) :
+    enable_ossp_uuid=no ;; #(
+  /*) :
+    if test x${with_ossp_uuid_root+set} != xset; then :
+  with_ossp_uuid_root=$with_ossp_uuid
+elif test x"${with_ossp_uuid_root}" != x"${with_ossp_uuid}"; then :
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "inconsistent directories specified for --with-ossp-uuid and --with-ossp-uuid-root
+See \`config.log' for more details" "$LINENO" 5; }
+fi
+         enable_util_linux_uuid=no enable_dce_uuid=no ;; #(
+  *) :
+     ;;
+esac
+fi
+
+
+# Check whether --with-dce-uuid was given.
+if test "${with_dce_uuid+set}" = set; then :
+  withval=$with_dce_uuid; case $with_dce_uuid in #(
+  yes) :
+    enable_util_linux_uuid=no enable_ossp_uuid=no ;; #(
+  no) :
+    enable_dce_uuid=no ;; #(
+  /*) :
+    if test x${with_dce_uuid_root+set} != xset; then :
+  with_dce_uuid_root=$with_dce_uuid
+elif test x"${with_dce_uuid_root}" != x"${with_dce_uuid}"; then :
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "inconsistent directories specified for --with-dce-uuid and --with-dce-uuid-root
+See \`config.log' for more details" "$LINENO" 5; }
+fi
+         enable_util_linux_uuid=no enable_ossp_uuid=no ;; #(
+  *) :
+     ;;
+esac
+fi
+
+
+   if test x"$enable_util_linux_uuid" != xno; then :
   ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -26289,11 +26414,46 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 ac_link="./libtool --mode=link --tag=CC $ac_link"
 
-fi
-if test x"$have_util_linux_uuid_c_bindings" = xyes; then :
-  CPPFLAGS="${CPPFLAGS+$CPPFLAGS }$UTIL_LINUX_UUID_C_INCLUDE"
-   UUID_C_LIB=$UTIL_LINUX_UUID_C_LIB
+      if test x"$have_util_linux_uuid_c_bindings" = xyes; then :
+  acx_save_CPPFLAGS=$CPPFLAGS
+         CPPFLAGS="$CPPFLAGS $UTIL_LINUX_UUID_C_INCLUDE"
+         for ac_header in uuid/uuid.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "uuid/uuid.h" "ac_cv_header_uuid_uuid_h" "$ac_includes_default"
+if test "x$ac_cv_header_uuid_uuid_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_UUID_UUID_H 1
+_ACEOF
+ ac_fn_c_check_decl "$LINENO" "uuid_generate" "ac_cv_have_decl_uuid_generate" "$ac_includes_default
+#include <uuid/uuid.h>
+"
+if test "x$ac_cv_have_decl_uuid_generate" = xyes; then :
+  ac_have_decl=1
 else
+  ac_have_decl=0
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_UUID_GENERATE $ac_have_decl
+_ACEOF
+if test $ac_have_decl = 1; then :
+
+else
+  have_util_linux_uuid_c_bindings=no
+fi
+
+else
+  have_util_linux_uuid_c_bindings=no
+fi
+
+done
+
+         CPPFLAGS=$acx_save_CPPFLAGS
+fi
+else
+  have_util_linux_uuid_c_bindings=no
+fi
+   if test x"$enable_ossp_uuid" != xno -a x"$have_util_linux_uuid_c_bindings" = xno; then :
   ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -26505,11 +26665,10 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 ac_link="./libtool --mode=link --tag=CC $ac_link"
 
-   if test x"$have_ossp_uuid_c_bindings" = xyes; then :
-  CPPFLAGS_save=$CPPFLAGS
-      CPPFLAGS="${CPPFLAGS+$CPPFLAGS }$OSSP_UUID_C_INCLUDE"
-      UUID_C_LIB=$OSSP_UUID_C_LIB
-      for ac_header in uuid.h
+      if test x"$have_ossp_uuid_c_bindings" = xyes; then :
+  acx_save_CPPFLAGS=$CPPFLAGS
+         CPPFLAGS="${CPPFLAGS+$CPPFLAGS }$OSSP_UUID_C_INCLUDE"
+         for ac_header in uuid.h
 do :
   ac_fn_c_check_header_mongrel "$LINENO" "uuid.h" "ac_cv_header_uuid_h" "$ac_includes_default"
 if test "x$ac_cv_header_uuid_h" = xyes; then :
@@ -26557,19 +26716,139 @@ fi
 
 done
 
-      if test x"$have_ossp_uuid_c_bindings" = xno; then :
-  UUID_C_LIB=
-         CPPFLAGS=$CPPFLAGS_save
+         CPPFLAGS=$acx_save_CPPFLAGS
 fi
 else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for uuid_generate in -luuid" >&5
-$as_echo_n "checking for uuid_generate in -luuid... " >&6; }
-if ${ac_cv_lib_uuid_uuid_generate+:} false; then :
+  have_ossp_uuid_c_bindings=no
+fi
+   # check for DCE uuid_create if util-linux and OSSP variants cannot be found
+   if test x"$enable_dce_uuid" != xno -a x"$have_util_linux_uuid_c_bindings$have_ossp_uuid_c_bindings" = xnono; then :
+  ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+ac_link="./libtool --mode=link --tag=CC $ac_link"
+
+
+
+
+
+
+
+   have_dce_uuid_c_bindings=yes
+
+
+# Check whether --with-dce-uuid-root was given.
+if test "${with_dce_uuid_root+set}" = set; then :
+  withval=$with_dce_uuid_root; DCE_UUIDROOT="$with_dce_uuid_root"
+fi
+
+   if ${DCE_UUIDROOT+:} false; then :
+  if ${DCE_UUID_C_LIB+:} false; then :
+
+else
+  acx_temp=$DCE_UUIDROOT
+         DCE_UUID_C_LIB="-L$acx_temp/lib"
+fi
+      if ${DCE_UUID_C_INCLUDE+:} false; then :
+
+else
+  acx_temp=$DCE_UUIDROOT
+         DCE_UUID_C_INCLUDE="-I$acx_temp/include"
+fi
+fi
+
+# Check whether --with-dce-uuid-include was given.
+if test "${with_dce_uuid_include+set}" = set; then :
+  withval=$with_dce_uuid_include; DCE_UUID_C_INCLUDE="-I$with_dce_uuid_include"
+fi
+
+
+
+   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for uuid.h extra include path" >&5
+$as_echo_n "checking for uuid.h extra include path... " >&6; }
+   if ${acx_cv_c_include_uuid_h+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-luuid  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+       ac_include_search_uuid_h_SAVE="$CPPFLAGS"
+      while :; do
+        for ac_incdir in ''; do
+             if test -z "$ac_incdir"; then :
+  ac_res="none required"
+                CPPFLAGS="$DCE_UUID_C_INCLUDE $ac_include_search_uuid_h_SAVE"
+else
+  ac_res="-I$ac_incdir"
+                CPPFLAGS="$DCE_UUID_C_INCLUDE $ac_res $ac_include_search_uuid_h_SAVE"
+fi
+             cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+$ac_includes_default
+#include <uuid.h>
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  acx_cv_c_include_uuid_h=yes
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+   if ${acx_cv_c_include_uuid_h+:} false; then :
+                 if test -z "$ac_incdir"; then :
+                    acx_cv_c_include_uuid_h="$DCE_UUID_C_INCLUDE"
+else
+                    acx_cv_c_include_uuid_h="$DCE_UUID_C_INCLUDE -I$ac_incdir"
+fi
+fi
+             if ${acx_cv_c_include_uuid_h+:} false; then :
+  break
+fi
+           done
+           if ${acx_cv_c_include_uuid_h+:} false; then :
+  break
+fi
+
+        break
+      done
+      CPPFLAGS=$ac_include_search_uuid_h_SAVE
+fi
+
+   if ${acx_cv_c_include_uuid_h+:} false; then :
+  acx_temp=$acx_cv_c_include_uuid_h
+      if test x"$acx_temp" = x; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: (none required)" >&5
+$as_echo "(none required)" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $acx_temp" >&5
+$as_echo "$acx_temp" >&6; }
+fi
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: not found" >&5
+$as_echo "not found" >&6; }
+fi
+   if ${acx_cv_c_include_uuid_h+:} false; then :
+  acx_temp=$acx_cv_c_include_uuid_h
+         acx_temp=`echo "$acx_temp" | sed -e 's/^ *//;s/ *$//'`
+         DCE_UUID_C_INCLUDE=$acx_temp
+else
+  have_dce_uuid_c_bindings=no
+
+fi
+
+
+# Check whether --with-dce-uuid-lib was given.
+if test "${with_dce_uuid_lib+set}" = set; then :
+  withval=$with_dce_uuid_lib; DCE_UUID_C_LIB="-L$with_dce_uuid_lib"
+fi
+
+
+
+      if test "x$have_dce_uuid_c_bindings" = xyes; then :
+              { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing uuid_create" >&5
+$as_echo_n "checking for library containing uuid_create... " >&6; }
+   if ${acx_cv_option_search_uuid_create_c+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+       while :; do
+        acx_option_func_search_save_LIBS="$LIBS"
+   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
 /* Override any GCC internal prototype to avoid an error.
@@ -26578,50 +26857,92 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 #ifdef __cplusplus
 extern "C"
 #endif
-char uuid_generate ();
+char uuid_create ();
 int
 main ()
 {
-return uuid_generate ();
+return uuid_create ();
   ;
   return 0;
 }
 _ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_uuid_uuid_generate=yes
+   for ac_lib in '' ; do
+     if test -z "$ac_lib"; then :
+  ac_res="none required"
+        LIBS="$DCE_UUID_C_LIB $acx_option_func_search_save_LIBS"
 else
-  ac_cv_lib_uuid_uuid_generate=no
+  ac_res="-l$ac_lib"
+        LIBS="$DCE_UUID_C_LIB $ac_res $acx_option_func_search_save_LIBS"
+fi
+     if ac_fn_c_try_link "$LINENO"; then :
+  if test x"$ac_res" = x"none required"; then :
+          acx_cv_option_search_uuid_create_c="$DCE_UUID_C_LIB "
+else
+          acx_cv_option_search_uuid_create_c="$DCE_UUID_C_LIB -l$ac_lib "
+fi
 fi
 rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
+    conftest$ac_exeext
+     if ${acx_cv_option_search_uuid_create_c+:} false; then :
+  break
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_uuid_uuid_generate" >&5
-$as_echo "$ac_cv_lib_uuid_uuid_generate" >&6; }
-if test "x$ac_cv_lib_uuid_uuid_generate" = xyes; then :
-  ac_fn_c_check_decl "$LINENO" "uuid_generate" "ac_cv_have_decl_uuid_generate" "$ac_includes_default
-#include <uuid/uuid.h>
-"
-if test "x$ac_cv_have_decl_uuid_generate" = xyes; then :
-  ac_have_decl=1
-else
-  ac_have_decl=0
+   done
+   rm conftest.$ac_ext
+   LIBS="$acx_option_func_search_save_LIBS"
+        if ${acx_cv_option_search_uuid_create_c+:} false; then :
+  break
 fi
 
-cat >>confdefs.h <<_ACEOF
-#define HAVE_DECL_UUID_GENERATE $ac_have_decl
-_ACEOF
-if test $ac_have_decl = 1; then :
-  UUID_C_LIB=-luuid
+        break
+      done
 fi
 
+   if ${acx_cv_option_search_uuid_create_c+:} false; then :
+       if test x"$acx_cv_option_search_uuid_create_c" = x; then :
+          { $as_echo "$as_me:${as_lineno-$LINENO}: result: (none required)" >&5
+$as_echo "(none required)" >&6; }
 else
-  for ac_func in uuid_create
+          { $as_echo "$as_me:${as_lineno-$LINENO}: result: $acx_cv_option_search_uuid_create_c" >&5
+$as_echo "$acx_cv_option_search_uuid_create_c" >&6; }
+fi
+else
+       { $as_echo "$as_me:${as_lineno-$LINENO}: result: not found" >&5
+$as_echo "not found" >&6; }
+fi
+   if ${acx_cv_option_search_uuid_create_c+:} false; then :
+
+else
+             have_dce_uuid_c_bindings=no
+
+fi
+
+         acx_temp=$acx_cv_option_search_uuid_create_c
+         acx_temp=`echo "$acx_temp" | sed -e 's/^ *//;s/ *$//'`
+         DCE_UUID_C_LIB=$acx_temp
+
+fi
+
+
+
+
+
+
+   ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+ac_link="./libtool --mode=link --tag=CC $ac_link"
+
+      if test x"$have_dce_uuid_c_bindings" = xyes; then :
+  acx_save_CPPFLAGS=$CPPFLAGS
+         CPPFLAGS="$CPPFLAGS $DCE_UUID_C_INCLUDE"
+         for ac_header in uuid.h
 do :
-  ac_fn_c_check_func "$LINENO" "uuid_create" "ac_cv_func_uuid_create"
-if test "x$ac_cv_func_uuid_create" = xyes; then :
+  ac_fn_c_check_header_mongrel "$LINENO" "uuid.h" "ac_cv_header_uuid_h" "$ac_includes_default"
+if test "x$ac_cv_header_uuid_h" = xyes; then :
   cat >>confdefs.h <<_ACEOF
-#define HAVE_UUID_CREATE 1
+#define HAVE_UUID_H 1
 _ACEOF
  ac_fn_c_check_decl "$LINENO" "uuid_create" "ac_cv_have_decl_uuid_create" "$ac_includes_default
 #include <uuid.h>
@@ -26636,17 +26957,35 @@ cat >>confdefs.h <<_ACEOF
 #define HAVE_DECL_UUID_CREATE $ac_have_decl
 _ACEOF
 if test $ac_have_decl = 1; then :
-  UUID_C_LIB=""
+  have_dce_uuid_c_bindings=yes
+else
+  have_dce_uuid_c_bindings=no
 fi
 
+else
+  have_dce_uuid_c_bindings=yes
 fi
+
 done
 
+         CPPFLAGS=$acx_save_CPPFLAGS
+fi
 fi
 
-fi
+if test x"$have_util_linux_uuid_c_bindings" = xyes; then :
+  UUID_C_INCLUDE=$UTIL_LINUX_UUID_C_INCLUDE
+   UUID_C_LIB=$UTIL_LINUX_UUID_C_LIB
+elif test x"$have_ossp_uuid_c_bindings" = xyes; then :
+  UUID_C_INCLUDE=$OSSP_UUID_C_INCLUDE
+   UUID_C_LIB=$OSSP_UUID_C_LIB
+elif test x"$have_dce_uuid_c_bindings" = xyes; then :
+  UUID_C_INCLUDE=$DCE_UUID_C_INCLUDE
+   UUID_C_LIB=$DCE_UUID_C_LIB
 fi
 
+
+LIBS="${LIBS+$LIBS }$UUID_C_LIB"
+CPPFLAGS="${CPPFLAGS+$CPPFLAGS }$UUID_C_INCLUDE"
 #  ----------------------------------------------------------------------
 # Checks for the availability of ANSI-C99 functions
 ac_fn_c_check_decl "$LINENO" "isnan" "ac_cv_have_decl_isnan" "$ac_includes_default
