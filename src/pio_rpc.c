@@ -13,6 +13,22 @@
 #include "pio_interface.h"
 #include "pio_rpc.h"
 
+/* replace once size_t-based version of vlistInqVarSize is merged */
+static size_t
+cdiPioVlistInqVarSize(int vlistID, int varID)
+{
+  int zaxisID, gridID, tsteptype;
+  vlistInqVar(vlistID, varID, &gridID, &zaxisID, &tsteptype);
+
+  int nlevs = zaxisInqSize(zaxisID);
+
+  int gridsize = gridInqSize(gridID);
+
+  size_t size = (size_t)gridsize*(size_t)nlevs;
+
+  return size;
+
+}
 
 
 struct clientBufSize
@@ -27,7 +43,7 @@ computeClientStreamBufSize(int streamID, const struct collSpec *collector)
     {
       size_t chunkSize;
       {
-        int varSize = vlistInqVarSize(vlistID, (int)varID);
+        size_t varSize = cdiPioVlistInqVarSize(vlistID, (int)varID);
         chunkSize = (size_t)(ceilf(cdiPIOpartInflate_
                                    * (float)varSize
                                    / (float)collector->numClients));
