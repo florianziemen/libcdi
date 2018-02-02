@@ -1,14 +1,14 @@
-#ifndef _GRIBAPI_H
-#define _GRIBAPI_H
+#ifndef  GRIBAPI_H
+#define  GRIBAPI_H
 
-#ifdef HAVE_LIBGRIB_API
+#ifdef  HAVE_LIBGRIB_API
 #include <grib_api.h>
 #ifndef  ERROR_H
 #include "error.h"
 #endif
 #endif
 
-#ifndef  _CDI_INT_H
+#ifndef  CDI_INT_H
 #include "cdi_int.h"
 #endif
 
@@ -116,7 +116,7 @@ typedef struct {
 }
 gribContainer_t;
 
-#endif  /* _GRIBAPI_H */
+#endif  /* GRIBAPI_H */
 /*
  * Local Variables:
  * c-file-style: "Java"

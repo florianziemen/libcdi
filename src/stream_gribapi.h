@@ -24,7 +24,7 @@ void gribapiChangeParameterIdentification(grib_handle *gh, int code, int ltype, 
 
 #endif
 
-#endif  /* _STREAM_GRIBAPI_H */
+#endif  /* STREAM_GRIBAPI_H */
 /*
  * Local Variables:
  * c-file-style: "Java"

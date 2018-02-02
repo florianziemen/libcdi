@@ -1,6 +1,6 @@
 ! This file was automatically generated, don't edit!
 !
-! Fortran interface for CDI library version 1.9.3
+! Fortran interface for CDI library version 1.9.4rc1
 !
 ! Author:
 ! -------
