@@ -1,3 +1,7 @@
+2018-02-03  Uwe Schulzweida
+
+	* Fix brocken ECHAM5 modelIDs (introduced in 1.9.3)
+
 2018-01-31  Uwe Schulzweida
 
 	* Fix GRIB_API AEC compression for unstructured grids

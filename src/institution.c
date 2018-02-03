@@ -328,10 +328,9 @@ int instituteUnpack(void *buf, int size, int *position, int originNamespace,
 {
   int tempbuf[institute_nints];
   int instituteID;
-  char *name, *longname;
   serializeUnpack(buf, size, position, tempbuf, institute_nints, CDI_DATATYPE_INT, context);
-  name = (char *) Malloc((size_t)tempbuf[3] + (size_t)tempbuf[4]);
-  longname = name + tempbuf[3];
+  char *name = (char *) Malloc((size_t)tempbuf[3] + (size_t)tempbuf[4]);
+  char *longname = name + tempbuf[3];
   serializeUnpack(buf, size, position, name, tempbuf[3], CDI_DATATYPE_TXT, context);
   serializeUnpack(buf, size, position, longname, tempbuf[4], CDI_DATATYPE_TXT, context);
   int targetID = namespaceAdaptKey(tempbuf[0], originNamespace);

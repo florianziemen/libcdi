@@ -66,9 +66,7 @@ void modelDefaultValue ( model_t *modelptr )
 static model_t *
 modelNewEntry(cdiResH resH, int instID, int modelgribID, const char *name)
 {
-  model_t *modelptr;
-
-  modelptr = (model_t *) Malloc(sizeof(model_t));
+  model_t *modelptr = (model_t *) Malloc(sizeof(model_t));
   modelDefaultValue ( modelptr );
   if (resH == CDI_UNDEFID)
     modelptr->self = reshPut(modelptr, &modelOps);
@@ -87,14 +85,14 @@ modelNewEntry(cdiResH resH, int instID, int modelgribID, const char *name)
 
 void modelDefaultEntries ( void )
 {
-  int instID, i;
+  int instID;
   enum { nDefModels = 10 };
   cdiResH resH[nDefModels];
 
   instID  = institutInq(  0,   0, "ECMWF", NULL);
   /* (void)    modelDef(instID, 131, "ERA15"); */
   /* (void)    modelDef(instID, 199, "ERA40"); */
-  instID  = institutInq(  0,   0, "MPIMET", NULL);
+  instID  = institutInq( 98, 232, "MPIMET", NULL);
 
   resH[0] = ECHAM5  = modelDef(instID,  64, "ECHAM5.4");
   resH[1] = modelDef(instID,  63, "ECHAM5.3");
@@ -117,18 +115,18 @@ void modelDefaultEntries ( void )
   resH[9] = modelDef(instID,  80, "T62L28MRF");
 
   /* pre-defined models are not synchronized */
-  for ( i = 0; i < nDefModels ; i++ )
+  for ( int i = 0; i < nDefModels ; i++ )
     reshSetStatus(resH[i], &modelOps, RESH_IN_USE);
 }
 
 static
 void modelInit(void)
 {
-  static int modelInitialized = 0;
+  static bool modelInitialized = false;
 
   if (modelInitialized) return;
 
-  modelInitialized = 1;
+  modelInitialized = true;
   char *env = getenv("MODEL_DEBUG");
   if ( env ) MODEL_Debug = atoi(env);
 }
