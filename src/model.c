@@ -16,10 +16,6 @@
 #undef  CDI_UNDEFID
 #define CDI_UNDEFID -1
 
-static int ECHAM4 = CDI_UNDEFID,
-  ECHAM5 = CDI_UNDEFID,
-  COSMO  = CDI_UNDEFID;
-
 typedef struct
 {
   int      self;
@@ -92,16 +88,16 @@ void modelDefaultEntries ( void )
   instID  = institutInq(  0,   0, "ECMWF", NULL);
   /* (void)    modelDef(instID, 131, "ERA15"); */
   /* (void)    modelDef(instID, 199, "ERA40"); */
-  instID  = institutInq( 98, 232, "MPIMET", NULL);
 
-  resH[0] = ECHAM5  = modelDef(instID,  64, "ECHAM5.4");
+  instID  = institutInq( 98, 232, "MPIMET", NULL);
+  resH[0] = modelDef(instID,  64, "ECHAM5.4");
   resH[1] = modelDef(instID,  63, "ECHAM5.3");
   resH[2] = modelDef(instID,  62, "ECHAM5.2");
   resH[3] = modelDef(instID,  61, "ECHAM5.1");
 
   instID  = institutInq( 98, 255, "MPIMET", NULL);
   resH[4] = modelDef(instID,  60, "ECHAM5.0");
-  resH[5] = ECHAM4  = modelDef(instID,  50, "ECHAM4");
+  resH[5] = modelDef(instID,  50, "ECHAM4");
   resH[6] = modelDef(instID, 110, "MPIOM1");
 
   instID  = institutInq(  0,   0, "DWD", NULL);
@@ -109,7 +105,7 @@ void modelDefaultEntries ( void )
 
   instID  = institutInq(  0,   0, "MCH", NULL);
   //(void)  = modelDef(instID, 137, "COSMO");
-  resH[8] = COSMO   = modelDef(instID, 255, "COSMO");
+  resH[8] = modelDef(instID, 255, "COSMO");
 
   instID  = institutInq(  0,   1, "NCEP", NULL);
   resH[9] = modelDef(instID,  80, "T62L28MRF");
