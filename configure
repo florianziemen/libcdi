@@ -28408,15 +28408,16 @@ $as_echo_n "checking for mpi.h extra include path... " >&6; }
 else
        ac_include_search_mpi_h_SAVE="$CPPFLAGS"
       while :; do
-        for ac_incdir in ''; do
-             if test -z "$ac_incdir"; then :
+        for ac_incdir in ''
+do :
+  if test -z "$ac_incdir"; then :
   ac_res="none required"
-                CPPFLAGS="$MPI_C_INCLUDE $ac_include_search_mpi_h_SAVE"
+                 CPPFLAGS="$MPI_C_INCLUDE $ac_include_search_mpi_h_SAVE"
 else
   ac_res="-I$ac_incdir"
-                CPPFLAGS="$MPI_C_INCLUDE $ac_res $ac_include_search_mpi_h_SAVE"
+                 CPPFLAGS="$MPI_C_INCLUDE $ac_res $ac_include_search_mpi_h_SAVE"
 fi
-             cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+              cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 $ac_includes_default
 #include <mpi.h>
@@ -28426,16 +28427,16 @@ if ac_fn_c_try_compile "$LINENO"; then :
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
    if ${acx_cv_c_include_mpi_h+:} false; then :
-                 if test -z "$ac_incdir"; then :
-                    acx_cv_c_include_mpi_h="$MPI_C_INCLUDE"
+                  if test -z "$ac_incdir"; then :
+                     acx_cv_c_include_mpi_h="$MPI_C_INCLUDE"
 else
-                    acx_cv_c_include_mpi_h="$MPI_C_INCLUDE -I$ac_incdir"
+                     acx_cv_c_include_mpi_h="$MPI_C_INCLUDE -I$ac_incdir"
 fi
 fi
-             if ${acx_cv_c_include_mpi_h+:} false; then :
+              if ${acx_cv_c_include_mpi_h+:} false; then :
   break
 fi
-           done
+done
            if ${acx_cv_c_include_mpi_h+:} false; then :
   break
 fi
@@ -28505,15 +28506,16 @@ return MPI_Waitall ();
   return 0;
 }
 _ACEOF
-   for ac_lib in '' mpi mpich; do
-     if test -z "$ac_lib"; then :
+   for ac_lib in '' mpi mpich
+do :
+  if test -z "$ac_lib"; then :
   ac_res="none required"
-        LIBS="$MPI_C_LIB $acx_option_func_search_save_LIBS"
+         LIBS="$MPI_C_LIB $acx_option_func_search_save_LIBS"
 else
   ac_res="-l$ac_lib"
-        LIBS="$MPI_C_LIB $ac_res $acx_option_func_search_save_LIBS"
+         LIBS="$MPI_C_LIB $ac_res $acx_option_func_search_save_LIBS"
 fi
-     if ac_fn_c_try_link "$LINENO"; then :
+      if ac_fn_c_try_link "$LINENO"; then :
   if test x"$ac_res" = x"none required"; then :
           acx_cv_option_search_MPI_Waitall_c="$MPI_C_LIB "
 else
@@ -28522,10 +28524,10 @@ fi
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext
-     if ${acx_cv_option_search_MPI_Waitall_c+:} false; then :
+      if ${acx_cv_option_search_MPI_Waitall_c+:} false; then :
   break
 fi
-   done
+done
    rm conftest.$ac_ext
    LIBS="$acx_option_func_search_save_LIBS"
         if ${acx_cv_option_search_MPI_Waitall_c+:} false; then :
@@ -28630,15 +28632,16 @@ $as_echo_n "checking for mpif.h extra include path... " >&6; }
 else
        ac_include_search_mpif_h_SAVE="$FCFLAGS"
       while :; do
-        for ac_incdir in ''; do
-             if test -z "$ac_incdir"; then :
+        for ac_incdir in ''
+do :
+  if test -z "$ac_incdir"; then :
   ac_res="none required"
-                FCFLAGS="$MPI_FC_INCLUDE $ac_include_search_mpif_h_SAVE"
+                 FCFLAGS="$MPI_FC_INCLUDE $ac_include_search_mpif_h_SAVE"
 else
   ac_res="$FPP_INCOPT$ac_incdir"
-                FCFLAGS="$MPI_FC_INCLUDE $ac_res $ac_include_search_mpif_h_SAVE"
+                 FCFLAGS="$MPI_FC_INCLUDE $ac_res $ac_include_search_mpif_h_SAVE"
 fi
-             cat > conftest.$ac_ext <<_ACEOF
+              cat > conftest.$ac_ext <<_ACEOF
       program conftest
       include 'mpif.h'
       end
@@ -28648,16 +28651,16 @@ if ac_fn_fc_try_compile "$LINENO"; then :
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
    if ${acx_cv_fc_include_mpif_h+:} false; then :
-                 if test -z "$ac_incdir"; then :
-                    acx_cv_fc_include_mpif_h="$MPI_FC_INCLUDE"
+                  if test -z "$ac_incdir"; then :
+                     acx_cv_fc_include_mpif_h="$MPI_FC_INCLUDE"
 else
-                    acx_cv_fc_include_mpif_h="$MPI_FC_INCLUDE $FPP_INCOPT$ac_incdir"
+                     acx_cv_fc_include_mpif_h="$MPI_FC_INCLUDE $FPP_INCOPT$ac_incdir"
 fi
 fi
-             if ${acx_cv_fc_include_mpif_h+:} false; then :
+              if ${acx_cv_fc_include_mpif_h+:} false; then :
   break
 fi
-           done
+done
            if ${acx_cv_fc_include_mpif_h+:} false; then :
   break
 fi
@@ -28714,15 +28717,16 @@ else
       call mpi_waitall
       end
 _ACEOF
-   for ac_lib in '' mpi mpi_f90 mpi_f77 mpich; do
-     if test -z "$ac_lib"; then :
+   for ac_lib in '' mpi mpi_f90 mpi_f77 mpich
+do :
+  if test -z "$ac_lib"; then :
   ac_res="none required"
-        LIBS="$MPI_FC_LIB $acx_option_func_search_save_LIBS"
+         LIBS="$MPI_FC_LIB $acx_option_func_search_save_LIBS"
 else
   ac_res="-l$ac_lib"
-        LIBS="$MPI_FC_LIB $ac_res $acx_option_func_search_save_LIBS"
+         LIBS="$MPI_FC_LIB $ac_res $acx_option_func_search_save_LIBS"
 fi
-     if ac_fn_fc_try_link "$LINENO"; then :
+      if ac_fn_fc_try_link "$LINENO"; then :
   if test x"$ac_res" = x"none required"; then :
           acx_cv_option_search_mpi_waitall_fc="$MPI_FC_LIB "
 else
@@ -28731,10 +28735,10 @@ fi
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext
-     if ${acx_cv_option_search_mpi_waitall_fc+:} false; then :
+      if ${acx_cv_option_search_mpi_waitall_fc+:} false; then :
   break
 fi
-   done
+done
    rm conftest.$ac_ext
    LIBS="$acx_option_func_search_save_LIBS"
         if ${acx_cv_option_search_mpi_waitall_fc+:} false; then :
@@ -28746,15 +28750,16 @@ fi
       call mpi_waitall
       end
 _ACEOF
-   for ac_lib in '' mpi mpi_f90 mpi_f77 mpich; do
-     if test -z "$ac_lib"; then :
+   for ac_lib in '' mpi mpi_f90 mpi_f77 mpich
+do :
+  if test -z "$ac_lib"; then :
   ac_res="none required"
-        LIBS="$MPI_FC_LIB -lmpi_f77 -lmpi $acx_option_func_search_save_LIBS"
+         LIBS="$MPI_FC_LIB -lmpi_f77 -lmpi $acx_option_func_search_save_LIBS"
 else
   ac_res="-l$ac_lib"
-        LIBS="$MPI_FC_LIB $ac_res -lmpi_f77 -lmpi $acx_option_func_search_save_LIBS"
+         LIBS="$MPI_FC_LIB $ac_res -lmpi_f77 -lmpi $acx_option_func_search_save_LIBS"
 fi
-     if ac_fn_fc_try_link "$LINENO"; then :
+      if ac_fn_fc_try_link "$LINENO"; then :
   if test x"$ac_res" = x"none required"; then :
           acx_cv_option_search_mpi_waitall_fc="$MPI_FC_LIB -lmpi_f77 -lmpi"
 else
@@ -28763,10 +28768,10 @@ fi
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext
-     if ${acx_cv_option_search_mpi_waitall_fc+:} false; then :
+      if ${acx_cv_option_search_mpi_waitall_fc+:} false; then :
   break
 fi
-   done
+done
    rm conftest.$ac_ext
    LIBS="$acx_option_func_search_save_LIBS"
            if ${acx_cv_option_search_mpi_waitall_fc+:} false; then :
@@ -28778,15 +28783,16 @@ fi
       call mpi_waitall
       end
 _ACEOF
-   for ac_lib in '' mpi mpi_f90 mpi_f77 mpich; do
-     if test -z "$ac_lib"; then :
+   for ac_lib in '' mpi mpi_f90 mpi_f77 mpich
+do :
+  if test -z "$ac_lib"; then :
   ac_res="none required"
-        LIBS="$MPI_FC_LIB -lmpi $acx_option_func_search_save_LIBS"
+         LIBS="$MPI_FC_LIB -lmpi $acx_option_func_search_save_LIBS"
 else
   ac_res="-l$ac_lib"
-        LIBS="$MPI_FC_LIB $ac_res -lmpi $acx_option_func_search_save_LIBS"
+         LIBS="$MPI_FC_LIB $ac_res -lmpi $acx_option_func_search_save_LIBS"
 fi
-     if ac_fn_fc_try_link "$LINENO"; then :
+      if ac_fn_fc_try_link "$LINENO"; then :
   if test x"$ac_res" = x"none required"; then :
           acx_cv_option_search_mpi_waitall_fc="$MPI_FC_LIB -lmpi"
 else
@@ -28795,10 +28801,10 @@ fi
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext
-     if ${acx_cv_option_search_mpi_waitall_fc+:} false; then :
+      if ${acx_cv_option_search_mpi_waitall_fc+:} false; then :
   break
 fi
-   done
+done
    rm conftest.$ac_ext
    LIBS="$acx_option_func_search_save_LIBS"
            if ${acx_cv_option_search_mpi_waitall_fc+:} false; then :
