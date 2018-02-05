@@ -77,4 +77,36 @@ int PPM_prime_factorization_32(uint32_t n, uint32_t **factors);
 
 #endif
 
+#ifdef HAVE_PPM_CORE
+#include <ppm/ppm.h>
+#include <core/ppm_random.h>
+#ifdef _OPENMP
+#define cdi_omp_pragma(prg) _Pragma(prg)
+#else
+#define cdi_omp_pragma(prg)
+#endif
+#define cdi_seed_repeatable_random(seed)                                                                                \
+  do                                                                                                                    \
+    {                                                                                                                   \
+      int seed_ = (int) seed;                                                                                           \
+      MPI_Comm comm_ = MPI_COMM_WORLD;                                                                                  \
+      cdi_omp_pragma("omp parallel") if ((!PPM_initialized() || PPM_finalized())) PPM_initialize(&comm_, &seed_, NULL); \
+      else PPM_ya_rand_init(MPI_COMM_WORLD, seed_);                                                                     \
+    }                                                                                                                   \
+  while (0)
+#define cdi_repeatable_random() ((long) (PPM_irandp()))
+#define cdi_repeatable_finalize() PPM_finalize()
+
+#else
+/* add random-wrapper to make call results repeatable, if PPM_random
+ * can't be used */
+void cdi_seed_repeatable_random(unsigned seed);
+long cdi_repeatable_random(void);
+#define cdi_repeatable_finalize() \
+  do                              \
+    {                             \
+    }                             \
+  while (0)
+#endif
+
 #endif
