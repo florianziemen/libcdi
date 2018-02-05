@@ -25,6 +25,7 @@
 #include "error.h"
 #include "dmemory.h"
 #include "pio_write.h"
+#include "simple_model_helper.h"
 #ifdef USE_MPI
 #include "cdipio.h"
 #include "pio_util.h"
@@ -495,7 +496,7 @@ int main(int argc, char *argv[])
 #ifdef USE_MPI
   MPI_Bcast(&randSeed, 1, MPI_UNSIGNED, 0, MPI_COMM_WORLD);
 #endif
-  srandom(randSeed);
+  cdi_seed_repeatable_random(randSeed);
 #ifdef USE_MPI
   if (rankGlob == 0)
 #endif
@@ -520,6 +521,7 @@ int main(int argc, char *argv[])
 
 #ifdef USE_MPI
     }
+  cdi_repeatable_finalize();
   pioFinalize ();
   namespaceSetActive(initNamespace);
   cdiPioConfDestroy(pioConfHandle);
