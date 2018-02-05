@@ -47,18 +47,18 @@ struct idxlistDesc
   Xt_idxlist idxlist;
 };
 
-struct dstIdxlistCache {
+struct cdiPioIdxlistCache {
   size_t size, numEntries;
   struct idxlistDesc entries[];
 };
 
-struct dstIdxlistCache *
+struct cdiPioIdxlistCache *
 cdiPioDstIdxlistCacheNew(size_t sizeEntries)
 {
   if (sizeEntries > MAX_CACHE_SIZE)
     xabort("cache cannot hold more than %zu entries", MAX_CACHE_SIZE);
-  struct dstIdxlistCache *cache
-    = Malloc(sizeof (struct dstIdxlistCache)
+  struct cdiPioIdxlistCache *cache
+    = Malloc(sizeof (struct cdiPioIdxlistCache)
              + sizeof (struct idxlistDesc) * sizeEntries);
   cache->size = sizeEntries;
   cache->numEntries = 0;
@@ -69,18 +69,18 @@ cdiPioDstIdxlistCacheNew(size_t sizeEntries)
 }
 
 size_t
-cdiPioDstIdxlistCacheGetSize(struct dstIdxlistCache *cache)
+cdiPioDstIdxlistCacheGetSize(struct cdiPioIdxlistCache *cache)
 {
   return cache ? cache->size : 0;
 }
 
-struct dstIdxlistCache *
-cdiPioDstIdxlistCacheResize(struct dstIdxlistCache *cache, size_t sizeEntries)
+struct cdiPioIdxlistCache *
+cdiPioDstIdxlistCacheResize(struct cdiPioIdxlistCache *cache, size_t sizeEntries)
 {
   size_t cacheSize = cache ? cache->size : 0;
   if (sizeEntries > MAX_CACHE_SIZE)
     xabort("cache cannot hold more than %zu entries", MAX_CACHE_SIZE);
-  struct dstIdxlistCache *newCache;
+  struct cdiPioIdxlistCache *newCache;
   if (sizeEntries < cacheSize)
     {
       struct idxlistDesc *restrict entries = cache->entries;
@@ -90,12 +90,12 @@ cdiPioDstIdxlistCacheResize(struct dstIdxlistCache *cache, size_t sizeEntries)
       cache->numEntries = numEntries > sizeEntries ? sizeEntries : numEntries;
       cache->size = sizeEntries;
       newCache = Realloc(cache,
-                         (sizeEntries ? sizeof (struct dstIdxlistCache) : 0)
+                         (sizeEntries ? sizeof (struct cdiPioIdxlistCache) : 0)
                          + sizeof (struct idxlistDesc) * sizeEntries);
     }
   else if (sizeEntries > cacheSize)
     {
-      newCache = Realloc(cache, sizeof (struct dstIdxlistCache)
+      newCache = Realloc(cache, sizeof (struct cdiPioIdxlistCache)
                          + sizeof (struct idxlistDesc) * sizeEntries);
       if (!cache)
         newCache->numEntries = 0;
@@ -110,7 +110,7 @@ cdiPioDstIdxlistCacheResize(struct dstIdxlistCache *cache, size_t sizeEntries)
 }
 
 void
-cdiPioDstIdxlistCacheDelete(struct dstIdxlistCache *cache)
+cdiPioDstIdxlistCacheDelete(struct cdiPioIdxlistCache *cache)
 {
   if (cache)
     {
@@ -123,7 +123,7 @@ cdiPioDstIdxlistCacheDelete(struct dstIdxlistCache *cache)
 }
 
 static Xt_idxlist
-cdiPioDstIdxlistCacheAddSectionND(struct dstIdxlistCache *cache,
+cdiPioDstIdxlistCacheAddSectionND(struct cdiPioIdxlistCache *cache,
                                   enum cdiPioDstIdxlistType type,
                                   size_t ndims,
                                   const Xt_int wholeShape[],
@@ -176,7 +176,7 @@ cdiPioDstIdxlistCacheAddSectionND(struct dstIdxlistCache *cache,
 }
 
 Xt_idxlist
-cdiPioDstIdxlistCacheAddSection2D(struct dstIdxlistCache *cache,
+cdiPioDstIdxlistCacheAddSection2D(struct cdiPioIdxlistCache *cache,
                                   const Xt_int wholeShape[2],
                                   const Xt_int sliceOrigin[2],
                                   const int sliceShape[2])
@@ -188,7 +188,7 @@ cdiPioDstIdxlistCacheAddSection2D(struct dstIdxlistCache *cache,
 
 
 Xt_idxlist
-cdiPioDstIdxlistCacheAddSection3D(struct dstIdxlistCache *cache,
+cdiPioDstIdxlistCacheAddSection3D(struct cdiPioIdxlistCache *cache,
                                   const Xt_int wholeShape[3],
                                   const Xt_int sliceOrigin[3],
                                   const int sliceShape[3])
@@ -199,7 +199,7 @@ cdiPioDstIdxlistCacheAddSection3D(struct dstIdxlistCache *cache,
 }
 
 Xt_idxlist
-cdiPioDstIdxlistCacheAddStripes1(struct dstIdxlistCache *cache,
+cdiPioDstIdxlistCacheAddStripes1(struct cdiPioIdxlistCache *cache,
                                  Xt_int start, int nstrides)
 {
   size_t cacheSize=cache->size, cacheFill = cache->numEntries,
