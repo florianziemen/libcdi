@@ -7,21 +7,21 @@
 
 #include <stdlib.h>
 
-struct dstIdxlistCache *cdiPioDstIdxlistCacheNew(size_t sizeEntries);
+struct cdiPioIdxlistCache *cdiPioDstIdxlistCacheNew(size_t sizeEntries);
 
-size_t cdiPioDstIdxlistCacheGetSize(struct dstIdxlistCache *cache);
+size_t cdiPioDstIdxlistCacheGetSize(struct cdiPioIdxlistCache *cache);
 
-struct dstIdxlistCache *cdiPioDstIdxlistCacheResize(struct dstIdxlistCache *cache, size_t sizeEntries);
+struct cdiPioIdxlistCache *cdiPioDstIdxlistCacheResize(struct cdiPioIdxlistCache *cache, size_t sizeEntries);
 
-void cdiPioDstIdxlistCacheDelete(struct dstIdxlistCache *cache);
+void cdiPioDstIdxlistCacheDelete(struct cdiPioIdxlistCache *cache);
 
-Xt_idxlist cdiPioDstIdxlistCacheAddSection2D(struct dstIdxlistCache *cache, const Xt_int wholeShape[2], const Xt_int sliceOrigin[2],
-                                             const int sliceShape[2]);
+Xt_idxlist cdiPioDstIdxlistCacheAddSection2D(struct cdiPioIdxlistCache *cache, const Xt_int wholeShape[2],
+                                             const Xt_int sliceOrigin[2], const int sliceShape[2]);
 
-Xt_idxlist cdiPioDstIdxlistCacheAddSection3D(struct dstIdxlistCache *cache, const Xt_int wholeShape[3], const Xt_int sliceOrigin[3],
-                                             const int sliceShape[3]);
+Xt_idxlist cdiPioDstIdxlistCacheAddSection3D(struct cdiPioIdxlistCache *cache, const Xt_int wholeShape[3],
+                                             const Xt_int sliceOrigin[3], const int sliceShape[3]);
 
-Xt_idxlist cdiPioDstIdxlistCacheAddStripes1(struct dstIdxlistCache *cache, Xt_int start, int nstrides);
+Xt_idxlist cdiPioDstIdxlistCacheAddStripes1(struct cdiPioIdxlistCache *cache, Xt_int start, int nstrides);
 
 #endif
 

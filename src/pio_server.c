@@ -98,7 +98,7 @@ static struct
 /* map streamID's to linear index into arrays */
 static struct idList openStreams;
 
-static struct dstIdxlistCache *DstIdxlistCache;
+static struct cdiPioIdxlistCache *DstIdxlistCache;
 static size_t neededDstIdxlistCacheSize;
 
 static struct xmapCache *XmapCache;
