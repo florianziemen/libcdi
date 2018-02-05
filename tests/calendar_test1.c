@@ -30,7 +30,7 @@ main(void)
 
         if (vdate0 != vdate || vtime0 != vtime)
           fprintf(stderr, "%4d %8d %4d %8d %4d %9d %g\n", ++j, vdate0, vtime0, vdate, vtime, (int) julianDate.julianDay,
-                 julianDate.secondOfDay);
+                  julianDate.secondOfDay);
 
         dt.date.year++;
         julianDate = julianDate_encode(calendar, dt);
@@ -88,7 +88,7 @@ main(void)
 
         if (vdate0 != vdate || vtime0 != vtime)
           fprintf(stderr, "%4d %8d %4d %8d %4d %9d %g\n", ++j, vdate0, vtime0, vdate, vtime, (int) julianDate.julianDay,
-                 julianDate.secondOfDay);
+                  julianDate.secondOfDay);
       }
 
     // printf("stop time: %8d %4d\n", vdate0, vtime0);
