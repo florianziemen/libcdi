@@ -118,8 +118,8 @@ AC_DEFUN([ACX_UUID],
          CPPFLAGS=$acx_save_CPPFLAGS])],
      [have_util_linux_uuid_c_bindings=no])
    AS_IF([test x"$enable_ossp_uuid" != xno -a x"$have_util_linux_uuid_c_bindings" = xno],
-     [ACX_C_PACKAGE([ossp-uuid],[uuid.h],,[-I/usr/include/ossp],[],
-        [uuid_create],[[ossp-uuid]],,,[])
+     [ACX_C_PACKAGE([ossp-uuid],[uuid.h],,,[],
+        [uuid_create],[[ossp-uuid] [uuid]],,,[],,[[/usr/include/ossp]])
       AS_IF([test x"$have_ossp_uuid_c_bindings" = xyes],
         [acx_save_CPPFLAGS=$CPPFLAGS
          CPPFLAGS="${CPPFLAGS+$CPPFLAGS }$OSSP_UUID_C_INCLUDE"
