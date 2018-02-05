@@ -187,6 +187,8 @@ cdiPioClientStreamWriteVarChunk_(int streamID, int varID, int memtype,
   int vlistID = streamInqVlist(streamID);
   int size = vlistInqVarSize(vlistID, varID),
     varShape[3];
+  /* FIXME: ndims does not work this way, ndims == 2 means
+   * varShape[1] == 1 and can be left out */
   unsigned ndims = (unsigned)cdiPioQueryVarDims(varShape, vlistID, varID);
   Xt_int varShapeXt[3], origin[3] = { 0, 0, 0 };
   int chunkShape[3] = { 1, 1, 1 };
