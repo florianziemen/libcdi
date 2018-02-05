@@ -116,7 +116,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
   varDesc = (struct varDesc_t *)Malloc(nVars * sizeof (varDesc[0]));
   for (size_t varIdx = 0; varIdx < nVars; varIdx++ )
     {
-      int varLevs = (int)random()%4;
+      int varLevs = (int)cdi_repeatable_random()%4;
       switch (varLevs)
         {
         case 1:
@@ -186,7 +186,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
       varDesc[varIdx].code = GRIB_USERDEF + (int)varIdx;
       vlistDefVarCode(vlistID, varDesc[varIdx].id, varDesc[varIdx].code);
       vlistDefVarDatatype(vlistID, varDesc[varIdx].id, setup.datatype);
-      varDesc[varIdx].useFloat = (bool)(random()&1);
+      varDesc[varIdx].useFloat = (bool)(cdi_repeatable_random()&1);
     }
 
   taxisID = taxisCreate ( setup.taxistype );
