@@ -349,6 +349,7 @@ buildVarSlicesIdxList(int vlistID, int varID, int startLvl, int numLvl, const st
   Xt_idxlist idxlist;
   if (conf->stripify)
     {
+      /* FIXME: does not support grids larger than INT_MAX cells */
       int sliceSize = varShape[0] * varShape[1];
       Xt_int start = sliceSize * origin[0];
       int nstrides = sliceSize * sliceShape[0];
