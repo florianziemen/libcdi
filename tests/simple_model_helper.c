@@ -272,6 +272,27 @@ PPM_prime_factorization_32(uint32_t n, uint32_t **factors)
   *factors = pfactors;
   return numFactors;
 }
+
+#endif
+
+#ifndef HAVE_PPM_CORE
+static char repeatable_rand_state[31 * sizeof(long)];
+
+long
+cdi_repeatable_random(void)
+{
+  char *caller_rand_state = setstate(repeatable_rand_state);
+  long retval = random();
+  setstate(caller_rand_state);
+  return retval;
+}
+
+void
+cdi_seed_repeatable_random(unsigned seed)
+{
+  char *caller_rand_state = initstate(seed, repeatable_rand_state, sizeof(repeatable_rand_state));
+  setstate(caller_rand_state);
+}
 #endif
 
 /*
