@@ -447,7 +447,6 @@ int tableInq(int modelID, int tablenum, const char *tablename)
 
   if ( tablename )
     {
-      size_t len;
       strcpy(tablefile, tablename);
       /*
       printf("tableInq: tablefile = >%s<\n", tablefile);
@@ -458,7 +457,7 @@ int tableInq(int modelID, int tablenum, const char *tablename)
 	  if ( parTable[tableID].used && parTable[tableID].name )
 	    {
 	      /* len = strlen(parTable[tableID].name); */
-	      len = strlen(tablename);
+	      size_t len = strlen(tablename);
 	      if ( memcmp(parTable[tableID].name, tablename, len) == 0 ) break;
 	    }
 	}

@@ -3,6 +3,8 @@
 # TABLE_ID=128
 # TABLE_MODEL=ECHAM5
 # TABLE_INSTITUT=MPIMET
+# TABLE_CENTER=98
+# TABLE_SUBCENTER=232
 #
 #-------------------------------------------------------------------------
 #!variable
