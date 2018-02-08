@@ -49,7 +49,7 @@ dnl
 dnl ACX_GENERIC_PACKAGE(PACKAGE, [INCLUDE], INC_FLAG, [EXTRA-INCLUDES],
 dnl [EXTRA-INCLUDEFLAGS], [ACTION-IF_HEADER-NOT-FOUND], [FUNCTION],
 dnl LIBFLAG, [LIB-CANDIDATES], [EXTRA-LIBS], [EXTRA-LIBFLAGS],
-dnl [ACTION-IF-LIB-NOT-FOUND], [DEFAULT-ROOT])
+dnl [ACTION-IF-LIB-NOT-FOUND], [DEFAULT-ROOT], [EXTRA-INCLUDE-DIRS-TO-TRY])
 dnl -------------------------------------------------------------------
 dnl Check wether INCLUDE can be compiled and FUNCTION is found in
 dnl LIB-CANDIDATES with current language compiler. Sets PACKAGE_LANG_LIB
@@ -93,7 +93,7 @@ AC_DEFUN([ACX_GENERIC_PACKAGE],
       AC_ARG_VAR(acx_pkg_inc,dnl
 [specifically set flags to use when compiling sources
 using $1 includes.])
-      ACX_LANG_CHECK_INCLUDE_PATHS_IFELSE([$2],[],
+      ACX_LANG_CHECK_INCLUDE_PATHS_IFELSE([$2],[$14],
         [AS_VAR_COPY([acx_temp],[acx_cv_pkg_inc])
          acx_temp=`echo "$acx_temp" | sed -e 's/^ *//;s/ *$//'`
          AS_VAR_COPY([acx_pkg_inc],[acx_temp])],

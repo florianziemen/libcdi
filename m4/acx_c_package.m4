@@ -46,7 +46,7 @@ dnl    [INCLUDE], [EXTRA-INCLUDES], [EXTRA-INCLUDEFLAGS],
 dnl       [ACTION-IF_HEADER-NOT-FOUND],
 dnl    [FUNCTION], [LIB-CANDIDATES], [EXTRA-LIBS], [EXTRA-LIBFLAGS],
 dnl      [ACTION-IF-LIB-NOT-FOUND],
-dnl    [DEFAULT-ROOT])
+dnl    [DEFAULT-ROOT], [EXTRA-INCLUDE-PATHS-TO-TRY])
 dnl -------------------------------------------------------------------
 dnl Check wether INCLUDE can be compiled and FUNCTION is found in
 dnl LIB-CANDIDATES. Sets PACKAGE_C_LIB and PACKAGE_C_INCLUDE variables to
@@ -57,7 +57,7 @@ dnl Also defines configure --with arguments for PACKAGEROOT,
 dnl PACKAGE-LIB and PACKAGE-INCLUDE.
 AC_DEFUN([ACX_C_PACKAGE],
   [AC_LANG_PUSH([C])
-   ACX_GENERIC_PACKAGE([$1],[$2],[-I],[$3],[$4],[$5],[$6],[-L],[$7],[$8],[$9],[$10],[$11],[$12])
+   ACX_GENERIC_PACKAGE([$1],[$2],[-I],[$3],[$4],[$5],[$6],[-L],[$7],[$8],[$9],[$10],[$11],[$12],[$13])
    AC_LANG_POP([C])dnl
   ])
 dnl
