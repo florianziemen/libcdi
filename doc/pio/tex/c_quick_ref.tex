@@ -109,6 +109,16 @@ Query size of pre-encoding
 aggregation buffer in MiB.
 
 
+\section*{\tt \htmlref{cdiPioConfGetStripeConversion}{cdiPioConfGetStripeConversion}}
+
+\begin{verbatim}
+    int cdiPioConfGetStripeConversion (int confResH);
+\end{verbatim}
+
+Are index lists of parts converted
+into stripes before being passed to the xmap constructor?.
+
+
 \section*{\tt \htmlref{cdiPioConfGetWriteAggBufLim}{cdiPioConfGetWriteAggBufLim}}
 
 \begin{verbatim}
@@ -220,6 +230,17 @@ is always decomposed statically using the same partitioning
 description objects and the sequence of calls to streamWriteVarPart
 or streamWriteScatteredVarPart for a stream matches the sequence
 of the previous sequence (divided by pioWriteTimestep).
+
+
+\section*{\tt \htmlref{cdiPioConfSetStripeConversion}{cdiPioConfSetStripeConversion}}
+
+\begin{verbatim}
+    void cdiPioConfSetStripeConversion (int confResH, int doStripify);
+\end{verbatim}
+
+Convert index lists to stripes prior
+to intersection computation, defaults to true. Only if parts are
+strictly sections, it can be beneficial to set this to 0, i.e. false.
 
 
 \section*{\tt \htmlref{cdiPioConfSetWriteAggBufLim}{cdiPioConfSetWriteAggBufLim}}
