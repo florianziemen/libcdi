@@ -156,15 +156,7 @@ FCALLSCSUB2 (cdiPioConfSetRedistCache, CDIPIOCONFSETREDISTCACHE, cdipioconfsetre
 FCALLSCFUN1 (INT, cdiPioConfGetRedistCache, CDIPIOCONFGETREDISTCACHE, cdipioconfgetredistcache, INT)
 FCALLSCSUB2 (cdiPioConfSetXmapCache, CDIPIOCONFSETXMAPCACHE, cdipioconfsetxmapcache, INT, INT)
 FCALLSCFUN1 (INT, cdiPioConfGetXmapCache, CDIPIOCONFGETXMAPCACHE, cdipioconfgetxmapcache, INT)
-
-/*  convert index lists to stripes prior to intersection computation,
- * defaults to true  */
-
 FCALLSCSUB2 (cdiPioConfSetStripeConversion, CDIPIOCONFSETSTRIPECONVERSION, cdipioconfsetstripeconversion, INT, INT)
-
-/*  are index lists of parts converted stripes before being passed
- * to the xmap constructor?  */
-
 FCALLSCFUN1 (INT, cdiPioConfGetStripeConversion, CDIPIOCONFGETSTRIPECONVERSION, cdipioconfgetstripeconversion, INT)
 static int cdiPioDistGridCreate_fwrap(int gridtype, int size, int xsize, int ysize, int nvertex, const int xy_decomposition_optional[][2], void *partDesc2D, void *partDescX, void *partDescY)
 {

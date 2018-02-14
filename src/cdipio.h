@@ -254,12 +254,13 @@ void cdiPioConfSetXmapNew(int confResH, Xt_xmap (*xmap_new)(Xt_idxlist src_idxli
 
 /* cdiPioConfSetXmapNew: get method to compute part intersections */
 Xt_xmap (*cdiPioConfGetXmapNew(int confResH))(Xt_idxlist src_idxlist, Xt_idxlist dst_idxlist, MPI_Comm comm);
-/* convert index lists to stripes prior to intersection computation,
- * defaults to true */
+/* cdiPioConfSetStripeConversion: Convert index lists to stripes prior
+ * to intersection computation, defaults to true. Only if parts are
+ * strictly sections, it can be beneficial to set this to 0, i.e. false */
 void cdiPioConfSetStripeConversion(int confResH, int doStripify);
 
-/* are index lists of parts converted stripes before being passed
- * to the xmap constructor? */
+/* cdiPioConfGetStripeConversion: Are index lists of parts converted
+ * into stripes before being passed to the xmap constructor? */
 int cdiPioConfGetStripeConversion(int confResH);
 
 /* cdiPioDistGridCreate: create a grid data structure where the
