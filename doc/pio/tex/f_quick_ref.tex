@@ -64,6 +64,16 @@ delete configuration object.
 Query depth of AIO queue..
 
 
+\section*{\tt \htmlref{cdiPioConfGetBatchedRMA}{cdiPioConfGetBatchedRMA}}
+
+\begin{verbatim}
+    INTEGER FUNCTION cdiPioConfGetBatchedRMA (INTEGER confResH)
+\end{verbatim}
+
+query if batched RMA is active, see
+cdiPioConfSetBatchedRMA.
+
+
 \section*{\tt \htmlref{cdiPioConfGetCSRole}{cdiPioConfGetCSRole}}
 
 \begin{verbatim}
@@ -152,6 +162,21 @@ requests to create. Depending on implementation, this might
 increase throughput by increasing the number of concurrent
 operations but also increases buffer size requirements.
 (Default value: 4).
+
+
+\section*{\tt \htmlref{cdiPioConfSetBatchedRMA}{cdiPioConfSetBatchedRMA}}
+
+\begin{verbatim}
+    SUBROUTINE cdiPioConfSetBatchedRMA (INTEGER confResH, INTEGER doBatchedRMA)
+\end{verbatim}
+
+(de-)activate batched transfer of data
+for all streams before any data is written to disk, i.e. if
+doBatchedRMA is set to 0, data is written as soon as it can be
+retrieved from client ranks, any other value results in all RMA
+transfers occurring immediately. doBatchedRMA == 0 implies less
+memory used on server ranks at the cost of distributing
+disturbances over a longer time.
 
 
 \section*{\tt \htmlref{cdiPioConfSetCSRole}{cdiPioConfSetCSRole}}

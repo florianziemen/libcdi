@@ -39,6 +39,7 @@ struct cdiPioConf {
   bool largePageAlign;
   bool cacheRedists, cacheXmaps;
   bool stripify;
+  bool batchedRMA;
 };
 
 extern const resOps cdiPioConfOps;
@@ -106,5 +107,9 @@ xmap_new_func_ptr cdiPioConfGetXmapNew(int confResH);
 void cdiPioConfSetStripeConversion(int confResH, int doConversion);
 
 int cdiPioConfGetStripeConversion(int confResH);
+
+void cdiPioConfSetBatchedRMA(int confResH, int doBatchedRMA);
+
+int cdiPioConfGetBatchedRMA(int confResH);
 
 #endif

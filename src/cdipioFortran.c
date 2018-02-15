@@ -133,6 +133,8 @@ FCALLSCSUB2 (cdiPioConfSetXmapCache, CDIPIOCONFSETXMAPCACHE, cdipioconfsetxmapca
 FCALLSCFUN1 (INT, cdiPioConfGetXmapCache, CDIPIOCONFGETXMAPCACHE, cdipioconfgetxmapcache, INT)
 FCALLSCSUB2 (cdiPioConfSetStripeConversion, CDIPIOCONFSETSTRIPECONVERSION, cdipioconfsetstripeconversion, INT, INT)
 FCALLSCFUN1 (INT, cdiPioConfGetStripeConversion, CDIPIOCONFGETSTRIPECONVERSION, cdipioconfgetstripeconversion, INT)
+FCALLSCSUB2 (cdiPioConfSetBatchedRMA, CDIPIOCONFSETBATCHEDRMA, cdipioconfsetbatchedrma, INT, INT)
+FCALLSCFUN1 (INT, cdiPioConfGetBatchedRMA, CDIPIOCONFGETBATCHEDRMA, cdipioconfgetbatchedrma, INT)
 static int cdiPioDistGridCreate_fwrap(int gridtype, int size, int xsize, int ysize, int nvertex, const int xy_decomposition_optional[][2], void *partDesc2D, void *partDescX, void *partDescY)
 {
   int v;

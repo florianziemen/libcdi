@@ -198,6 +198,7 @@ int cdiPioConfCreate(void)
   conf->aioQueueDepth = 4U;
   conf->xmap_new = xt_xmap_dist_dir_new;
   conf->stripify = true;
+  conf->batchedRMA = true;
   int resH = reshPut(conf, &cdiPioConfOps);
   /* configuration objects are never forwarded */
   reshSetStatus(resH, &cdiPioConfOps,
@@ -408,6 +409,18 @@ int cdiPioConfGetStripeConversion(int confResH)
 {
   struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
   return conf->stripify;
+}
+
+void cdiPioConfSetBatchedRMA(int confResH, int doBatchedRMA)
+{
+  struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
+  conf->batchedRMA = doBatchedRMA;
+}
+
+int cdiPioConfGetBatchedRMA(int confResH)
+{
+  struct cdiPioConf *conf = reshGetVal(confResH, &cdiPioConfOps);
+  return conf->batchedRMA;
 }
 
 /*
