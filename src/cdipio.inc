@@ -270,6 +270,15 @@
 !                                    (INTEGER         confResH)
       EXTERNAL        cdiPioConfGetStripeConversion
 
+!                     cdiPioConfSetBatchedRMA
+!                                    (INTEGER         confResH,
+!                                     INTEGER         doBatchedRMA)
+      EXTERNAL        cdiPioConfSetBatchedRMA
+
+      INTEGER         cdiPioConfGetBatchedRMA
+!                                    (INTEGER         confResH)
+      EXTERNAL        cdiPioConfGetBatchedRMA
+
       INTEGER         cdiPioDistGridCreate
 !                                    (INTEGER         gridtype,
 !                                     INTEGER         size,
