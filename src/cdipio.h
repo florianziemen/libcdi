@@ -263,6 +263,19 @@ void cdiPioConfSetStripeConversion(int confResH, int doStripify);
  * into stripes before being passed to the xmap constructor? */
 int cdiPioConfGetStripeConversion(int confResH);
 
+/* cdiPioConfSetBatchedRMA: (de-)activate batched transfer of data
+ * for all streams before any data is written to disk, i.e. if
+ * doBatchedRMA is set to 0, data is written as soon as it can be
+ * retrieved from client ranks, any other value results in all RMA
+ * transfers occurring immediately. doBatchedRMA == 0 implies less
+ * memory used on server ranks at the cost of distributing
+ * disturbances over a longer time */
+void cdiPioConfSetBatchedRMA(int confResH, int doBatchedRMA);
+
+/* cdiPioConfGetBatchedRMA: query if batched RMA is active, see
+ * cdiPioConfSetBatchedRMA */
+int cdiPioConfGetBatchedRMA(int confResH);
+
 /* cdiPioDistGridCreate: create a grid data structure where the
  * per-coordinate data is distributed over the client tasks
  * chunk_decomposition specifies how to distribute the data of each of
