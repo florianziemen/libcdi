@@ -185,8 +185,8 @@ parse_long_option(struct model_config *restrict setup, int pioConfHandle, pioRol
 #endif
   static const char cacheRedistStr[] = "no-cache-redists", pioRoleSchemeOptionStr[] = "pio-role-scheme",
                     curvilinearGridOptionStr[] = "no-create-curvilinear-grid", uuidCreateOptionStr[] = "no-create-uuid",
-                    useDistGridOptionStr[] = "no-use-dist-grid", datatypeOptionStr[] = "datatype",
-                    taxistypeOptionStr[] = "taxis-type", taxisunitOptionStr[] = "taxis-unit";
+                    useDistGridOptionStr[] = "no-use-dist-grid", batchedRmaOptionStr[] = "no-batch-rma",
+                    datatypeOptionStr[] = "datatype", taxistypeOptionStr[] = "taxis-type", taxisunitOptionStr[] = "taxis-unit";
   static const struct string2int datatypeArgMap[] = {
     { "pack", CDI_DATATYPE_PACK },     { "pack1", CDI_DATATYPE_PACK1 },   { "pack2", CDI_DATATYPE_PACK2 },
     { "pack3", CDI_DATATYPE_PACK3 },   { "pack4", CDI_DATATYPE_PACK4 },   { "pack5", CDI_DATATYPE_PACK5 },
@@ -281,6 +281,14 @@ parse_long_option(struct model_config *restrict setup, int pioConfHandle, pioRol
   else if ((bop = parseBooleanLongOption(sizeof(uuidCreateOptionStr), uuidCreateOptionStr, str)).matched)
     {
       setup->flags = (setup->flags & ~PIO_WRITE_CONFIG_CREATE_UUID_FLAG) | (bop.value << PIO_WRITE_CONFIG_CREATE_UUID_BIT);
+    }
+  else if ((bop = parseBooleanLongOption(sizeof(batchedRmaOptionStr), batchedRmaOptionStr, str)).matched)
+    {
+#ifdef USE_MPI
+      cdiPioConfSetBatchedRMA(pioConfHandle, bop.value);
+#else
+      invalidOptionDie("CDI-PIO option -q%s unavailable in non-MPI mode\n", batchedRmaOptionStr + (bop.invert ? 0 : 3));
+#endif
     }
   else if ((bop = parseBooleanLongOption(sizeof(curvilinearGridOptionStr), curvilinearGridOptionStr, str)).matched)
     {
