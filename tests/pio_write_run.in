@@ -8,7 +8,7 @@ fi
 mpi_task_num="${mpi_task_num-4}"
 suffix="${suffix-grb}"
 if [ "@USE_MPI@" = yes ]; then
-  variations="-qcache-redists -qcreate-curvilinear-grid"
+  variations="-qno-batch-rma -qcache-redists -qcreate-curvilinear-grid"
 else
   variations="-qcreate-curvilinear-grid"
 fi
