@@ -963,20 +963,12 @@ int gribapiScanTimestep1(stream_t * streamptr)
   cdi_generate_vars(streamptr);
 
   int taxisID = -1;
-  if ( fcast )
-    {
-      taxisID = taxisCreate(TAXIS_RELATIVE);
-      taxis->type  = TAXIS_RELATIVE;
-      taxis->rdate = rdate;
-      taxis->rtime = rtime;
-      taxis->unit  = tunit;
-    }
-  else
-    {
-      taxisID = taxisCreate(TAXIS_ABSOLUTE);
-      taxis->type  = TAXIS_ABSOLUTE;
-    }
 
+  taxis->unit = tunit;
+  taxis->type = fcast ? TAXIS_RELATIVE : TAXIS_ABSOLUTE;
+  taxisID = taxisCreate(taxis->type);
+  taxis->rdate = rdate;
+  taxis->rtime = rtime;
   taxis->vdate = (int)datetime0.date;
   taxis->vtime = (int)datetime0.time;
 
