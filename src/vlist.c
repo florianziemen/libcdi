@@ -247,7 +247,7 @@ vlist_delete(vlist_t *vlistptr)
   vlist_delete_entry(vlistptr);
 }
 
-// destroy a vlist object
+// destroy a vlist object, should always be called through namespace lookup
 void
 cdiVlistDestroy_(int vlistID, bool assertInternal)
 {
@@ -278,7 +278,8 @@ cdiVlistDestroy_(int vlistID, bool assertInternal)
 void
 vlistDestroy(int vlistID)
 {
-  cdiVlistDestroy_(vlistID, false);
+  void (*mycdiVlistDestroy_)(int, bool) = (void (*)(int, bool)) namespaceSwitchGet(NSSWITCH_VLIST_DESTROY_).func;
+  mycdiVlistDestroy_(vlistID, false);
 }
 
 static void
