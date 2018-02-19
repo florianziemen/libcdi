@@ -227,7 +227,7 @@ libcdipio_la_DEPENDENCIES = libcdi.la $(am__DEPENDENCIES_1) \
 am__libcdipio_la_SOURCES_DIST = cdipio.h cdipioFortran.c cfortran.h \
 	pio.c pio.h pio_comm.c pio_comm.h pio_conf.c pio_conf.h \
 	pio_dbuffer.c pio_dbuffer.h pio_dist_grid.c \
-	pio_dstlist_cache.c pio_dstlist_cache.h pio_id_set.h \
+	pio_idxlist_cache.c pio_idxlist_cache.h pio_id_set.h \
 	pio_impl.h pio_interface.c pio_interface.h pio_mpinonb.c \
 	pio_mpi_fw_ordered.c pio_mpi_fw_at_all.c \
 	pio_mpi_fw_at_reblock.c pio_record_send.c pio_posixasynch.c \
@@ -241,7 +241,7 @@ am__objects_5 = pio_cdf_int.lo
 @HAVE_PARALLEL_NC4_TRUE@@USE_MPI_TRUE@	$(am__objects_5)
 am_libcdipio_la_OBJECTS = cdipioFortran.lo pio.lo pio_comm.lo \
 	pio_conf.lo pio_dbuffer.lo pio_dist_grid.lo \
-	pio_dstlist_cache.lo pio_interface.lo pio_mpinonb.lo \
+	pio_idxlist_cache.lo pio_interface.lo pio_mpinonb.lo \
 	pio_mpi_fw_ordered.lo pio_mpi_fw_at_all.lo \
 	pio_mpi_fw_at_reblock.lo pio_record_send.lo pio_posixasynch.lo \
 	pio_posixfpguardsendrecv.lo pio_posixnonb.lo \
@@ -560,8 +560,8 @@ libcdiresunpack_la_SOURCES = \
 
 libcdipio_la_SOURCES = cdipio.h cdipioFortran.c cfortran.h pio.c pio.h \
 	pio_comm.c pio_comm.h pio_conf.c pio_conf.h pio_dbuffer.c \
-	pio_dbuffer.h pio_dist_grid.c pio_dstlist_cache.c \
-	pio_dstlist_cache.h pio_id_set.h pio_impl.h pio_interface.c \
+	pio_dbuffer.h pio_dist_grid.c pio_idxlist_cache.c \
+	pio_idxlist_cache.h pio_id_set.h pio_impl.h pio_interface.c \
 	pio_interface.h pio_mpinonb.c pio_mpi_fw_ordered.c \
 	pio_mpi_fw_at_all.c pio_mpi_fw_at_reblock.c pio_record_send.c \
 	pio_posixasynch.c pio_posixfpguardsendrecv.c pio_posixnonb.c \
@@ -742,7 +742,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_conf.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_dbuffer.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_dist_grid.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_dstlist_cache.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_idxlist_cache.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_interface.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_mpi_fw_at_all.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_mpi_fw_at_reblock.Plo@am__quote@
@@ -959,8 +959,8 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
-@ENABLE_CDI_LIB_FALSE@install-exec-local:
 @ENABLE_CDI_LIB_FALSE@uninstall-local:
+@ENABLE_CDI_LIB_FALSE@install-exec-local:
 clean: clean-am
 
 clean-am: clean-generic clean-libLTLIBRARIES clean-libtool \
