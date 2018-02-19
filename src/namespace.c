@@ -17,6 +17,7 @@
 #include "serialize.h"
 #include "error.h"
 #include "file.h"
+#include "vlist.h"
 #ifdef HAVE_LIBNETCDF
 #include "cdf_int.h"
 #include "stream_cdf.h"
@@ -61,6 +62,7 @@ static int activeNamespace = 0;
     { .func = (void (*)()) cdiStreamCloseDefaultDelegate }, \
     { .func = (void (*)()) cdiStreamDefTimestep_ }, \
     { .func = (void (*)()) cdiStreamSync_ },                \
+    { .func = (void (*)()) cdiVlistDestroy_ },              \
     CDI_NETCDF_SWITCHES                        \
     }
 // clang-format on
