@@ -126,7 +126,7 @@ void     vlistDestroyVarName(int vlistID, int varID);
 void     vlistDestroyVarLongname(int vlistID, int varID);
 void     vlistDestroyVarStdname(int vlistID, int varID);
 void     vlistDestroyVarUnits(int vlistID, int varID);
-void     cdiVlistDestroy_(int vlistID);
+void     cdiVlistDestroy_(int vlistID, bool assertInternal);
 void     vlistDefVarTsteptype(int vlistID, int varID, int tsteptype);
 int      vlistInqVarMissvalUsed(int vlistID, int varID);
 int      vlistHasTime(int vlistID);

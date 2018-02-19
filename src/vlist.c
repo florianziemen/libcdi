@@ -251,6 +251,25 @@ vlist_delete(vlist_t *vlistptr)
   vlist_delete_entry(vlistptr);
 }
 
+// destroy a vlist object
+void cdiVlistDestroy_(int vlistID, bool assertInternal)
+{
+  vlist_t *vlistptr = vlist_to_pointer(vlistID);
+
+  static const char warningTextUserByInternal[]
+    = "Destroying a vlist object that is owned by the user (vlistID=%d).\n"
+    "This is most likely because of a missing vlistDestroy() in the application code.\n"
+    "If that's not the case, and you are absolutely certain about it, please report the bug.",
+    warningTextInternalByUser[]
+    = "Attempt to destroy an internal vlist object by the user (vlistID=%d).";
+  static const char *const wText[2]
+    = { warningTextUserByInternal, warningTextInternalByUser };
+  if (vlistptr->internal == assertInternal)
+    vlist_delete(vlistptr);
+  else
+    Warning(wText[!assertInternal], vlistID);
+}
+
 
 /*
 @Function  vlistDestroy
@@ -264,25 +283,7 @@ vlist_delete(vlist_t *vlistptr)
 */
 void vlistDestroy(int vlistID)
 {
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-
-  if ( vlistptr->internal )
-    Warning("Attempt to destroy an internal vlist object by the user (vlistID=%d).", vlistID);
-  else
-    vlist_delete(vlistptr);
-}
-
-// destroy an internal vlist object
-void cdiVlistDestroy_(int vlistID)
-{
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-
-  if(!vlistptr->internal)
-    Warning("Destroying a vlist object that is owned by the user.\n"
-            "This is most likely because of a missing vlistDestroy() in the application code.\n"
-            "If that's not the case, and you are absolutely certain about it, please report the bug.");
-
-  vlist_delete(vlistptr);
+  cdiVlistDestroy_(vlistID, false);
 }
 
 static
