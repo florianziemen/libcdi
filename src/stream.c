@@ -1204,7 +1204,8 @@ streamClose(int streamID)
   if (vlistID != -1)
     {
       if (streamptr->filemode != 'w' && vlistInqTaxis(vlistID) != -1) taxisDestroy(vlistInqTaxis(vlistID));
-      cdiVlistDestroy_(vlistID, true);
+      void (*mycdiVlistDestroy_)(int, bool) = (void (*)(int, bool)) namespaceSwitchGet(NSSWITCH_VLIST_DESTROY_).func;
+      mycdiVlistDestroy_(vlistID, true);
     }
 
   if (streamptr->jobs) free(streamptr->jobs);
