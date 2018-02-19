@@ -13,12 +13,15 @@
 #include "dmemory.h"
 #include "namespace.h"
 #include "taxis.h"
+#include "vlist.h"
 
 #include "cdipio.h"
 #include "pio.h"
 #include "pio_client.h"
 #include "pio_dist_grid.h"
 #include "pio_comm.h"
+#include "pio_id_set.h"
+#include "pio_idxlist_cache.h"
 #include "pio_interface.h"
 #include "pio_rpc.h"
 #include "pio_util.h"
@@ -113,7 +116,6 @@ checkVlistForPIO(int vlistID)
     }
 }
 
-
 static void
 cdiPioClientStreamDefVlist_(int streamID, int vlistID)
 {
@@ -177,6 +179,11 @@ cdiPioClientStreamWriteVar_(int streamID, int varID, int memtype,
          " use streamWriteVarPart!");
 }
 
+static struct cdiPioIdxlistCache *clientIdxlistCache;
+static size_t neededClientIdxlistCacheSize;
+static struct idList seenStreamWriteVarChunk;
+
+
 static void
 cdiPioClientStreamWriteVarChunk_(int streamID, int varID, int memtype,
                                  const int rect[][2],
@@ -185,24 +192,45 @@ cdiPioClientStreamWriteVarChunk_(int streamID, int varID, int memtype,
   if (memtype != MEMTYPE_DOUBLE && memtype != MEMTYPE_FLOAT)
     Error("Writing of type data %d not implemented!", memtype);
   int vlistID = streamInqVlist(streamID);
+  if (indexOfID(&seenStreamWriteVarChunk, vlistID) == SIZE_MAX)
+    {
+      insertID(&seenStreamWriteVarChunk, vlistID);
+      int nvars = vlistNvars(vlistID);
+      neededClientIdxlistCacheSize += (size_t)nvars;
+      clientIdxlistCache
+        = cdiPioIdxlistCacheResize(clientIdxlistCache,
+                                   neededClientIdxlistCacheSize);
+    }
   int size = vlistInqVarSize(vlistID, varID),
     varShape[3];
-  /* FIXME: ndims does not work this way, ndims == 2 means
-   * varShape[1] == 1 and can be left out */
-  unsigned ndims = (unsigned)cdiPioQueryVarDims(varShape, vlistID, varID);
+  int ndims = cdiPioQueryVarDims(varShape, vlistID, varID);
   Xt_int varShapeXt[3], origin[3] = { 0, 0, 0 };
   int chunkShape[3] = { 1, 1, 1 };
-  /* FIXME: verify xt_int ranges are good enough */
-  for (unsigned i = 0; i < 3; ++i)
-    varShapeXt[i] = varShape[i];
-  for (unsigned i = 0; i < ndims; ++i)
+  if (ndims == 3)
+    for (int i = 0; i < 3; ++i)
+      varShapeXt[i] = varShape[i];
+  else
+    {
+      varShapeXt[0] = varShape[0];
+      varShapeXt[1] = varShape[2];
+    }
+  for (int i = 0; i < ndims; ++i)
     chunkShape[i] = rect[i][1] - rect[i][0] + 1;
-  int varSize = varShape[0] * varShape[1] * varShape[2];
-  xassert(varSize == size);
+  size_t varSize = (size_t)varShape[0]
+    * (size_t)varShape[1] * (size_t)varShape[2];
+  xassert(varSize == (size_t)size);
+  if (clientIdxlistCache) ; else
+    clientIdxlistCache = cdiPioIdxlistCacheNew(31);
+  Xt_idxlist (*cacheSection)(struct cdiPioIdxlistCache *cache,
+                             const Xt_int wholeShape[],
+                             const Xt_int sliceOrigin[],
+                             const int sliceShape[])
+    = (ndims == 3)
+    ? cdiPioIdxlistCacheAddSection3D
+    : cdiPioIdxlistCacheAddSection2D;
   Xt_idxlist chunkDesc
-    = xt_idxsection_new(0, (int)ndims, varShapeXt, chunkShape, origin);
+    = cacheSection(clientIdxlistCache, varShapeXt, origin, chunkShape);
   cdiPioBufferPartData(streamID, varID, memtype, data, nmiss, chunkDesc);
-  xt_idxlist_delete(chunkDesc);
 }
 
 #if defined HAVE_LIBNETCDF
@@ -281,6 +309,22 @@ cdiPioClientStreamDefTimestep_(stream_t *streamptr, int tsID)
   return cdiStreamDefTimestep_(streamptr, tsID);
 }
 
+static void
+cdiPioClientVlistDestroy_(int vlistID, bool assertInternal)
+{
+  if (indexOfID(&seenStreamWriteVarChunk, vlistID) != SIZE_MAX)
+    {
+      int nvars = vlistNvars(vlistID);
+      neededClientIdxlistCacheSize -= (size_t)nvars;
+      clientIdxlistCache
+        = cdiPioIdxlistCacheResize(clientIdxlistCache,
+                                   neededClientIdxlistCacheSize);
+      removeID(&seenStreamWriteVarChunk, vlistID);
+    }
+  cdiVlistDestroy_(vlistID, assertInternal);
+}
+
+
 void
 cdiPioClientSetup(int pioNamespace, struct cdiPioConf *conf)
 {
@@ -308,6 +352,8 @@ cdiPioClientSetup(int pioNamespace, struct cdiPioConf *conf)
                      NSSW_FUNC(cdiPioClientStreamDefTimestep_));
   namespaceSwitchSet(NSSWITCH_STREAM_SYNC,
                      NSSW_FUNC(cdiPioClientStreamNOP));
+  namespaceSwitchSet(NSSWITCH_VLIST_DESTROY_,
+                     NSSW_FUNC(cdiPioClientVlistDestroy_));
 #ifdef HAVE_LIBNETCDF
   namespaceSwitchSet(NSSWITCH_CDF_DEF_TIMESTEP,
                      NSSW_FUNC(cdiPioCdfDefTimestepNOP));
