@@ -452,11 +452,11 @@ buildVarSlicesIdxList(int vlistID, int varID, int startLvl, int numLvl,
       Xt_int start = sliceSize * origin[0];
       int nstrides = sliceSize * sliceShape[0];
       idxlist
-        = cdiPioDstIdxlistCacheAddStripes1(DstIdxlistCache, start, nstrides);
+        = cdiPioIdxlistCacheAddStripes1(DstIdxlistCache, start, nstrides);
     }
   else
-    idxlist = cdiPioDstIdxlistCacheAddSection3D(DstIdxlistCache,
-                                                varShapeXt, origin, sliceShape);
+    idxlist = cdiPioIdxlistCacheAddSection3D(DstIdxlistCache,
+                                             varShapeXt, origin, sliceShape);
   return idxlist;
 }
 
@@ -759,9 +759,9 @@ writeNetCDFStreamParallel(size_t streamIdx,
                 preWriteChunkSize[2 - i] = (int)varChunk[i].size;
               }
             preWriteChunk
-              = cdiPioDstIdxlistCacheAddSection3D(DstIdxlistCache,
-                                                  varDims, preWriteChunkStart,
-                                                  preWriteChunkSize);
+              = cdiPioIdxlistCacheAddSection3D(DstIdxlistCache,
+                                               varDims, preWriteChunkStart,
+                                               preWriteChunkSize);
           }
           xdebug("Writing chunk { { %d, %d }, { %d, %d },"
                  " { %d, %d } }", myChunk[0][0], myChunk[0][1],
@@ -1884,10 +1884,10 @@ cdiPioRecvStreamDefVlist(void *buffer, int size, int *pos,
   xmpi(MPI_Info_free(&no_locks_info));
 
   size_t maxNumStreamWrites = (size_t)getMaxNumStreamWrites(streamptr),
-    currentDstIdxlistCacheSize = cdiPioDstIdxlistCacheGetSize(DstIdxlistCache);
+    currentDstIdxlistCacheSize = cdiPioIdxlistCacheGetSize(DstIdxlistCache);
   if ((neededDstIdxlistCacheSize += maxNumStreamWrites) > currentDstIdxlistCacheSize)
-    DstIdxlistCache = cdiPioDstIdxlistCacheResize(DstIdxlistCache,
-                                                  neededDstIdxlistCacheSize);
+    DstIdxlistCache = cdiPioIdxlistCacheResize(DstIdxlistCache,
+                                               neededDstIdxlistCacheSize);
   if (conf->cacheXmaps)
     {
       size_t currentXmapCacheSize = cdiPioXmapCacheGetSize(XmapCache);
@@ -1964,7 +1964,7 @@ void cdiPioCollectorMessageLoop()
 #endif
           if (conf->cacheXmaps)
             cdiPioXmapCacheDelete(XmapCache);
-          cdiPioDstIdxlistCacheDelete(DstIdxlistCache);
+          cdiPioIdxlistCacheDelete(DstIdxlistCache);
           xdebug("%s", "RETURN");
           return;
 	case RESOURCES:
