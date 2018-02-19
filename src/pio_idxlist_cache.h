@@ -1,5 +1,5 @@
-#ifndef CDI_PIO_DSTLIST_CACHE_H
-#define CDI_PIO_DSTLIST_CACHE_H
+#ifndef CDI_PIO_IDXLIST_CACHE_H
+#define CDI_PIO_IDXLIST_CACHE_H
 
 #ifdef HAVE_CONFIG_H
 #  include "config.h"
