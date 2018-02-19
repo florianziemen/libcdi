@@ -109,7 +109,7 @@ typedef struct
 vlist_t *vlist_to_pointer(int vlistID);
 void cdiVlistMakeInternal(int vlistID);
 void cdiVlistMakeImmutable(int vlistID);
-void cdiVlistDestroy_(int vlistID);
+void cdiVlistDestroy_(int vlistID, bool assertInternal);
 int vlistInqVarMissvalUsed(int vlistID, int varID);
 int vlistHasTime(int vlistID);
 

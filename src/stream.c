@@ -1215,7 +1215,7 @@ streamClose(int streamID)
   if (vlistID != -1)
     {
       if (streamptr->filemode != 'w' && vlistInqTaxis(vlistID) != -1) taxisDestroy(vlistInqTaxis(vlistID));
-      cdiVlistDestroy_(vlistID);
+      cdiVlistDestroy_(vlistID, true);
     }
 
   if (streamptr->jobs) free(streamptr->jobs);
