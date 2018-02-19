@@ -31,7 +31,7 @@
 #include "pio_cdf_int.h"
 #include "pio_comm.h"
 #include "pio_conf.h"
-#include "pio_dstlist_cache.h"
+#include "pio_idxlist_cache.h"
 #include "pio_id_set.h"
 #include "pio_interface.h"
 #include "pio_rpc.h"
