@@ -9,7 +9,7 @@
 
 #include "dmemory.h"
 #include "error.h"
-#include "pio_dstlist_cache.h"
+#include "pio_idxlist_cache.h"
 
 enum
 {
