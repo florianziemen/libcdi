@@ -1069,7 +1069,7 @@ void streamClose(int streamID)
       if ( streamptr->filemode != 'w' && vlistInqTaxis(vlistID) != -1 )
         taxisDestroy(vlistInqTaxis(vlistID));
 
-      cdiVlistDestroy_(vlistID);
+      cdiVlistDestroy_(vlistID, true);
     }
 
   stream_delete_entry(streamptr);
