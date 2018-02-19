@@ -17,12 +17,12 @@ enum
 };
 #define MAX_CACHE_SIZE ((((size_t) 1) << LRAND48_BITS) - 1)
 
-enum cdiPioDstIdxlistType
+enum cdiPioIdxlistType
 {
-  CDIPIO_DSTIDXLISTTYPE_EMPTY,
-  CDIPIO_DSTIDXLISTTYPE_SECTION2D,
-  CDIPIO_DSTIDXLISTTYPE_SECTION3D,
-  CDIPIO_DSTIDXLISTTYPE_STRIPES1,
+  CDIPIO_IDXLISTTYPE_EMPTY,
+  CDIPIO_IDXLISTTYPE_SECTION2D,
+  CDIPIO_IDXLISTTYPE_SECTION3D,
+  CDIPIO_IDXLISTTYPE_STRIPES1,
 };
 
 struct sectionNDDesc
@@ -39,7 +39,7 @@ struct stripes1Desc
 
 struct idxlistDesc
 {
-  enum cdiPioDstIdxlistType type;
+  enum cdiPioIdxlistType type;
   union
   {
     struct sectionNDDesc sectionND;
@@ -55,25 +55,25 @@ struct cdiPioIdxlistCache
 };
 
 struct cdiPioIdxlistCache *
-cdiPioDstIdxlistCacheNew(size_t sizeEntries)
+cdiPioIdxlistCacheNew(size_t sizeEntries)
 {
   if (sizeEntries > MAX_CACHE_SIZE) xabort("cache cannot hold more than %zu entries", MAX_CACHE_SIZE);
   struct cdiPioIdxlistCache *cache = Malloc(sizeof(struct cdiPioIdxlistCache) + sizeof(struct idxlistDesc) * sizeEntries);
   cache->size = sizeEntries;
   cache->numEntries = 0;
   struct idxlistDesc *restrict entries = cache->entries;
-  for (size_t i = 0; i < sizeEntries; ++i) entries[i].type = CDIPIO_DSTIDXLISTTYPE_EMPTY;
+  for (size_t i = 0; i < sizeEntries; ++i) entries[i].type = CDIPIO_IDXLISTTYPE_EMPTY;
   return cache;
 }
 
 size_t
-cdiPioDstIdxlistCacheGetSize(struct cdiPioIdxlistCache *cache)
+cdiPioIdxlistCacheGetSize(struct cdiPioIdxlistCache *cache)
 {
   return cache ? cache->size : 0;
 }
 
 struct cdiPioIdxlistCache *
-cdiPioDstIdxlistCacheResize(struct cdiPioIdxlistCache *cache, size_t sizeEntries)
+cdiPioIdxlistCacheResize(struct cdiPioIdxlistCache *cache, size_t sizeEntries)
 {
   size_t cacheSize = cache ? cache->size : 0;
   if (sizeEntries > MAX_CACHE_SIZE) xabort("cache cannot hold more than %zu entries", MAX_CACHE_SIZE);
@@ -93,7 +93,7 @@ cdiPioDstIdxlistCacheResize(struct cdiPioIdxlistCache *cache, size_t sizeEntries
       if (!cache) newCache->numEntries = 0;
       newCache->size = sizeEntries;
       struct idxlistDesc *restrict entries = newCache->entries;
-      for (size_t i = cacheSize; i < sizeEntries; ++i) entries[i].type = CDIPIO_DSTIDXLISTTYPE_EMPTY;
+      for (size_t i = cacheSize; i < sizeEntries; ++i) entries[i].type = CDIPIO_IDXLISTTYPE_EMPTY;
     }
   else
     newCache = cache;
@@ -101,7 +101,7 @@ cdiPioDstIdxlistCacheResize(struct cdiPioIdxlistCache *cache, size_t sizeEntries
 }
 
 void
-cdiPioDstIdxlistCacheDelete(struct cdiPioIdxlistCache *cache)
+cdiPioIdxlistCacheDelete(struct cdiPioIdxlistCache *cache)
 {
   if (cache)
     {
@@ -113,8 +113,8 @@ cdiPioDstIdxlistCacheDelete(struct cdiPioIdxlistCache *cache)
 }
 
 static Xt_idxlist
-cdiPioDstIdxlistCacheAddSectionND(struct cdiPioIdxlistCache *cache, enum cdiPioDstIdxlistType type, size_t ndims,
-                                  const Xt_int wholeShape[], const Xt_int sliceOrigin[], const int sliceShape[])
+cdiPioIdxlistCacheAddSectionND(struct cdiPioIdxlistCache *cache, enum cdiPioIdxlistType type, size_t ndims,
+                               const Xt_int wholeShape[], const Xt_int sliceOrigin[], const int sliceShape[])
 {
   size_t cacheSize = cache->size, cacheFill = cache->numEntries, cacheInsertPos;
   struct idxlistDesc *restrict entries = cache->entries;
@@ -155,26 +155,26 @@ cdiPioDstIdxlistCacheAddSectionND(struct cdiPioIdxlistCache *cache, enum cdiPioD
 }
 
 Xt_idxlist
-cdiPioDstIdxlistCacheAddSection2D(struct cdiPioIdxlistCache *cache, const Xt_int wholeShape[2], const Xt_int sliceOrigin[2],
-                                  const int sliceShape[2])
+cdiPioIdxlistCacheAddSection2D(struct cdiPioIdxlistCache *cache, const Xt_int wholeShape[2], const Xt_int sliceOrigin[2],
+                               const int sliceShape[2])
 {
-  return cdiPioDstIdxlistCacheAddSectionND(cache, CDIPIO_DSTIDXLISTTYPE_SECTION2D, 2, wholeShape, sliceOrigin, sliceShape);
+  return cdiPioIdxlistCacheAddSectionND(cache, CDIPIO_IDXLISTTYPE_SECTION2D, 2, wholeShape, sliceOrigin, sliceShape);
 }
 
 Xt_idxlist
-cdiPioDstIdxlistCacheAddSection3D(struct cdiPioIdxlistCache *cache, const Xt_int wholeShape[3], const Xt_int sliceOrigin[3],
-                                  const int sliceShape[3])
+cdiPioIdxlistCacheAddSection3D(struct cdiPioIdxlistCache *cache, const Xt_int wholeShape[3], const Xt_int sliceOrigin[3],
+                               const int sliceShape[3])
 {
-  return cdiPioDstIdxlistCacheAddSectionND(cache, CDIPIO_DSTIDXLISTTYPE_SECTION3D, 3, wholeShape, sliceOrigin, sliceShape);
+  return cdiPioIdxlistCacheAddSectionND(cache, CDIPIO_IDXLISTTYPE_SECTION3D, 3, wholeShape, sliceOrigin, sliceShape);
 }
 
 Xt_idxlist
-cdiPioDstIdxlistCacheAddStripes1(struct cdiPioIdxlistCache *cache, Xt_int start, int nstrides)
+cdiPioIdxlistCacheAddStripes1(struct cdiPioIdxlistCache *cache, Xt_int start, int nstrides)
 {
   size_t cacheSize = cache->size, cacheFill = cache->numEntries, cacheInsertPos;
   struct idxlistDesc *restrict entries = cache->entries;
   for (size_t i = 0; i < cacheFill; ++i)
-    if (entries[i].type == CDIPIO_DSTIDXLISTTYPE_STRIPES1 && entries[i].desc.stripes1.start == start
+    if (entries[i].type == CDIPIO_IDXLISTTYPE_STRIPES1 && entries[i].desc.stripes1.start == start
         && entries[i].desc.stripes1.nstrides == nstrides)
       return entries[i].idxlist;
   /* at this point it's definite that the requested section is not
@@ -192,7 +192,7 @@ cdiPioDstIdxlistCacheAddStripes1(struct cdiPioIdxlistCache *cache, Xt_int start,
       cacheInsertPos %= cacheSize;
       xt_idxlist_delete(entries[cacheInsertPos].idxlist);
     }
-  entries[cacheInsertPos].type = CDIPIO_DSTIDXLISTTYPE_STRIPES1;
+  entries[cacheInsertPos].type = CDIPIO_IDXLISTTYPE_STRIPES1;
   entries[cacheInsertPos].desc.stripes1.start = start;
   entries[cacheInsertPos].desc.stripes1.nstrides = nstrides;
   struct Xt_stripe stripe = { .start = start, .stride = 1, .nstrides = nstrides };
