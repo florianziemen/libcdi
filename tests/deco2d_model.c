@@ -86,6 +86,9 @@ modelRun(struct model_config setup, MPI_Comm comm)
   double *levs;
   double *var = NULL, *varslice = NULL;
   float *varsliceF = NULL;
+#if ! USE_MPI
+  float *varF = NULL;
+#endif
   double mscale, mrscale;
   time_t current_time;
   int vdate = 19850101, vtime = 120000;
@@ -107,10 +110,19 @@ modelRun(struct model_config setup, MPI_Comm comm)
   (void)comm;
 #endif
 
+#if USE_MPI
+              bool needsGather = setup.flags & PIO_WRITE_CONFIG_CHECKSUM_FLAG;
+#else
+              bool needsGather = true;
+#endif
   if (rank == 0 && (setup.flags & PIO_WRITE_CONFIG_CHECKSUM_FLAG))
     {
       var = (double *)Malloc((size_t)nlon * (size_t)nlat
                     * (size_t)setup.max_nlev * sizeof(var[0]));
+#if ! USE_MPI
+      varF = (float *)Malloc((size_t)nlon * (size_t)nlat
+                             * (size_t)setup.max_nlev * sizeof(varF[0]));
+#endif
     }
 
 #if USE_MPI
@@ -335,7 +347,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
                     varslice[i] = varsliceF[i] = (float)varslice[i];
                 }
 
-              if (setup.flags & PIO_WRITE_CONFIG_CHECKSUM_FLAG)
+              if (needsGather)
                 {
 #if USE_MPI
                   xt_redist_s_exchange1(varDesc[varIdx].redist4gather,
@@ -354,6 +366,11 @@ modelRun(struct model_config setup, MPI_Comm comm)
                         var[k * layerSize + nblk * nproma + i] =
                           varslice[k * (nblk + 1) * nproma + nblk * nproma + i];
                     }
+                  if (useFloat)
+                    for (size_t k = 0; k < varLevs; ++k)
+                      for (size_t i = 0; i < layerSize; ++i)
+                        varF[k * layerSize + i]
+                          = (float)var[k * layerSize + i];
 #endif
                 }
               if (rank == 0 && (setup.flags & PIO_WRITE_CONFIG_CHECKSUM_FLAG))
@@ -386,9 +403,9 @@ modelRun(struct model_config setup, MPI_Comm comm)
                                             nmiss, varDesc[varIdx].partDesc);
 #else
               if (useFloat)
-                streamWriteVarF(streamID, varDesc[varIdx].id, varsliceF, nmiss);
+                streamWriteVarF(streamID, varDesc[varIdx].id, varF, nmiss);
               else
-                streamWriteVar(streamID, varDesc[varIdx].id, varslice, nmiss);
+                streamWriteVar(streamID, varDesc[varIdx].id, var, nmiss);
 #endif
 	    }
           current_time += 86400;
@@ -430,6 +447,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
   pioEndTimestepping ();
 #endif
   Free(varslice);
+  Free(varsliceF);
   vlistDestroy ( vlistID );
   taxisDestroy ( taxisID );
   for (size_t varIdx = 0; varIdx < nVars; varIdx++ )
@@ -452,6 +470,8 @@ modelRun(struct model_config setup, MPI_Comm comm)
   Free(var);
 #if USE_MPI
   Free(blk_displ);
+#else
+  Free(varF);
 #endif
   Free(varDesc);
   Free(levs);
