@@ -54,6 +54,8 @@ void vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].complevel     = 1;
   vlistptr->vars[varID].keys.nalloc   = MAX_KEYS;
   vlistptr->vars[varID].keys.nelems   = 0;
+  for ( int i = 0; i < MAX_KEYS; ++i )
+    vlistptr->vars[varID].keys.value[i].length = 0;
   vlistptr->vars[varID].atts.nalloc   = MAX_ATTRIBUTES;
   vlistptr->vars[varID].atts.nelems   = 0;
   vlistptr->vars[varID].lvalidrange   = false;

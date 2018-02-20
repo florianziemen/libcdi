@@ -1,14 +1,16 @@
 #ifndef  CDI_KEY_H
 #define  CDI_KEY_H
 
+
 // CDI key
 typedef struct {
   int       key;          // CDI key
-  int       nelems;       // length of buffer v.s
+  int       type;         // KEY_INT, KEY_FLOAT, KEY_BYTES
+  int       length;       // number of bytes in v.s
   union {
     int i;
     double d;
-    char *s;
+    unsigned char *s;
   } v;
 } cdi_key_t;
 

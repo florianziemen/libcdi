@@ -817,11 +817,17 @@ size_t  gridInqYCvals(int gridID, char *ycvals[]);
 #define  CDI_KEY_REVSTATUS                     816  // GRIB2 revStatus
 #define  CDI_KEY_REVNUMBER                     817  // GRIB2 revNumber
 
-//      cdiDefKeyInt: Define a CDI variable integer value from a key
+//      cdiDefKeyInt: Define an integer value from a key of a CDI variable
 int     cdiDefKeyInt(int cdiID, int varID, int key, int value);
 
-//      cdiInqKeyInt: Get a CDI variable integer value from a key
+//      cdiInqKeyInt: Get an integer value from a key of a CDI variable
 int     cdiInqKeyInt(int cdiID, int varID, int key, int *value);
+
+//      cdiDefKeyBytes: Define a bytes array from a key of a CDI variable
+int     cdiDefKeyBytes(int cdiID, int varID, int key, unsigned char *bytes, int length);
+
+//      cdiInqKeyBytes: Get a bytes array from a key of a CDI variable
+int     cdiInqKeyBytes(int cdiID, int varID, int key, unsigned char *bytes, int *length);
 
 int     cdiCopyKeys(int cdiID1, int varID1, int cdiID2, int varID2);
 

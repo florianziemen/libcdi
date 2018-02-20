@@ -107,6 +107,8 @@ void vlist_init_entry(vlist_t *vlistptr)
   vlistptr->ntsteps        = CDI_UNDEFID;
   vlistptr->keys.nalloc    = MAX_KEYS;
   vlistptr->keys.nelems    = 0;
+  for ( int i = 0; i < MAX_KEYS; ++i )
+    vlistptr->keys.value[i].length = 0;
   vlistptr->atts.nalloc    = MAX_ATTRIBUTES;
   vlistptr->atts.nelems    = 0;
   vlistptr->nsubtypes      = 0;

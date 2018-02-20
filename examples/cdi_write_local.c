@@ -44,6 +44,16 @@ int main(void)
   vlistDefVarName(vlistID, varID2, "P");
 
   cdiDefKeyInt(vlistID, CDI_GLOBAL, CDI_KEY_CENTRE, 252);
+  cdiDefKeyInt(vlistID, CDI_GLOBAL, CDI_KEY_SUBCENTRE, 0);
+  cdiDefKeyInt(vlistID, CDI_GLOBAL, CDI_KEY_MPIMTYPE, 1);
+  cdiDefKeyInt(vlistID, CDI_GLOBAL, CDI_KEY_MPIMCLASS, 2);
+  cdiDefKeyInt(vlistID, CDI_GLOBAL, CDI_KEY_MPIMUSER, 1403);
+  cdiDefKeyInt(vlistID, CDI_GLOBAL, CDI_KEY_REVSTATUS, 0);
+
+  unsigned char revNumber[] = { 187, 128,  50, 251, 161,  44, 146,  63, 154, 149,
+                                 83,  90,  81, 103, 109, 138, 157, 216, 208,  64 };
+    
+  cdiDefKeyBytes(vlistID, CDI_GLOBAL, CDI_KEY_REVNUMBER, revNumber, 20);
 
   // Create a Time axis
   taxisID = taxisCreate(TAXIS_ABSOLUTE);
@@ -63,7 +73,7 @@ int main(void)
   streamDefVlist(streamID, vlistID);
 
   int vlistID0 = streamInqVlist(streamID);
-
+  /*
   for ( int varID = 0; varID < 2; ++varID )
     {
       // vlistDefVarIntKey(vlistID0, varID, "centre", 252); 
@@ -74,7 +84,7 @@ int main(void)
       vlistDefVarIntKey(vlistID0, varID, "mpimUser", 1403); 
       //  vlistDefVarIntKey(vlistID0, varID, "shortendRevNo", 99); 
     }
-
+  */
   // Loop over the number of time steps
   for ( int tsID = 0; tsID < nts; tsID++ )
     {
