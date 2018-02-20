@@ -36,14 +36,14 @@ int main(void)
   vlistID = vlistCreate();
 
   // Define the variables
-  varID1 = vlistDefVar(vlistID, gridID, zaxisID1, TSTEP_AVG);
+  varID1 = vlistDefVar(vlistID, gridID, zaxisID1, TIME_VARYING);
   varID2 = vlistDefVar(vlistID, gridID, zaxisID2, TIME_VARYING);
 
   // Define the variable names
-  vlistDefVarName(vlistID, varID1, "varname1");
-  vlistDefVarName(vlistID, varID2, "varname2");
+  vlistDefVarName(vlistID, varID1, "T");
+  vlistDefVarName(vlistID, varID2, "P");
 
-  cdiDefKeyInt(vlistID, varID1, CDI_KEY_TYPEOFGENERATINGPROCESS, 4);
+  cdiDefKeyInt(vlistID, CDI_GLOBAL, CDI_KEY_CENTRE, 252);
 
   // Create a Time axis
   taxisID = taxisCreate(TAXIS_ABSOLUTE);
@@ -63,15 +63,12 @@ int main(void)
   streamDefVlist(streamID, vlistID);
 
   int vlistID0 = streamInqVlist(streamID);
-  printf("vlist ID %d %d\n", vlistID, vlistID0);
 
   for ( int varID = 0; varID < 2; ++varID )
     {
-      vlistDefVarIntKey(vlistID0, varID, "centre", 252); 
-      vlistDefVarIntKey(vlistID0, varID, "subCentre", 2); 
+      // vlistDefVarIntKey(vlistID0, varID, "centre", 252); 
       vlistDefVarIntKey(vlistID0, varID, "grib2LocalSectionPresent", 1); 
       vlistDefVarIntKey(vlistID0, varID, "grib2LocalSectionNumber", 1); 
-      vlistDefVarIntKey(vlistID0, varID, "localDefinitionNumber", 1); 
       vlistDefVarIntKey(vlistID0, varID, "mpimType", 1); 
       vlistDefVarIntKey(vlistID0, varID, "mpimClass", 2); 
       vlistDefVarIntKey(vlistID0, varID, "mpimUser", 1403); 
