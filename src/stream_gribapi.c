@@ -1545,6 +1545,18 @@ void gribapiDefInstitut(grib_handle *gh, int vlistID, int varID)
       if ( subcenter != subcenter0 )
 	GRIB_CHECK(my_grib_set_long(gh, "subCentre", subcenter), 0);
     }
+
+  int status;
+  int centre, subCentre;
+  status = cdiInqKeyInt(vlistID, CDI_GLOBAL, CDI_KEY_CENTRE, &centre);
+  if ( status == 0 ) grib_set_long(gh, "centre", centre);
+  status = cdiInqKeyInt(vlistID, CDI_GLOBAL, CDI_KEY_SUBCENTRE, &subCentre);
+  if ( status == 0 ) grib_set_long(gh, "subCentre", subCentre);
+
+  status = cdiInqKeyInt(vlistID, varID, CDI_KEY_CENTRE, &centre);
+  if ( status == 0 ) grib_set_long(gh, "centre", centre);
+  status = cdiInqKeyInt(vlistID, varID, CDI_KEY_SUBCENTRE, &subCentre);
+  if ( status == 0 ) grib_set_long(gh, "subCentre", subCentre);
 }
 
 static

@@ -1,11 +1,10 @@
-#ifndef CDI_KEY_H
-#define CDI_KEY_H
+#ifndef  CDI_KEY_H
+#define  CDI_KEY_H
 
-/*
- * CDI key
- */
+// CDI key
 typedef struct {
   int       key;          // CDI key
+  int       nelems;       // length of buffer v.s
   union {
     int i;
     double d;

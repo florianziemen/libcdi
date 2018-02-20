@@ -7,19 +7,19 @@
 #include "vlist.h"
 #include "grid.h"
 #include "zaxis.h"
+#include "resource_unpack.h"
 
 
 static
 cdi_keys_t *get_keysp(vlist_t *vlistptr, int varID)
 {
   cdi_keys_t *keysp = NULL;
-  /*
+
   if ( varID == CDI_GLOBAL )
     {
       keysp = &vlistptr->keys;
     }
   else
-  */
     {
       if ( varID >= 0 && varID < vlistptr->nvars )
 	keysp = &(vlistptr->vars[varID].keys);
@@ -80,6 +80,7 @@ cdi_keys_t *cdi_get_keysp(int objID, int varID)
     }
   else
   */
+  if ( reshGetTxCode(objID) == VLIST )
     {
       vlist_t *vlistptr = vlist_to_pointer(objID);
       keysp = get_keysp(vlistptr, varID);
@@ -109,8 +110,25 @@ int vlist_key_compare(vlist_t *a, int varIDA, vlist_t *b, int varIDB, int keynum
   return 0;
 }
 
-//      cqdiDefKeyInt: Define a CDI varianble integer value from a key
-int     cdiDefKeyInt(int cdiID, int varID, int key, int value)
+
+int cdiCopyKeys(int cdiID1, int varID1, int cdiID2, int varID2)
+{
+  int status = CDI_NOERR;
+
+  cdi_keys_t *keysp = cdi_get_keysp(cdiID1, varID1);
+  xassert(keysp != NULL);
+
+  for ( size_t keyid = 0; keyid < keysp->nelems; keyid++ )
+    {
+      cdi_key_t *keyp = &(keysp->value[keyid]);
+      cdiDefKeyInt(cdiID2, varID2, keyp->key, keyp->v.i);
+    }
+
+  return status;
+}
+
+//  cdiDefKeyInt: Define a CDI variable integer value from a key
+int cdiDefKeyInt(int cdiID, int varID, int key, int value)
 {
   int status = CDI_NOERR;
 
@@ -132,8 +150,8 @@ int     cdiDefKeyInt(int cdiID, int varID, int key, int value)
   return status;
 }
 
-//      cdiInqKeyInt: Get a CDI variable integer value from a key
-int     cdiInqKeyInt(int cdiID, int varID, int key, int *value)
+//  cdiInqKeyInt: Get a CDI variable integer value from a key
+int cdiInqKeyInt(int cdiID, int varID, int key, int *value)
 {
   int status = CDI_NOERR;
 

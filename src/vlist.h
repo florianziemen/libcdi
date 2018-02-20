@@ -112,6 +112,7 @@ typedef struct
   int         zaxisIDs[MAX_ZAXES_PS];
   int         subtypeIDs[MAX_SUBTYPES_PS];
   var_t      *vars;
+  cdi_keys_t  keys;
   cdi_atts_t  atts;
 }
 vlist_t;

@@ -809,12 +809,16 @@ size_t  gridInqYCvals(int gridID, char *ycvals[]);
 #define  CDI_KEY_TYPEOFENSEMBLEFORECAST        808  // GRIB2 typeOfEnsembleForecast
 #define  CDI_KEY_NUMBEROFFORECASTSINENSEMBLE   809  // GRIB2 numberOfForecastsInEnsemble
 #define  CDI_KEY_PERTURBATIONNUMBER            810  // GRIB2 perturbationNumber
+#define  CDI_KEY_CENTRE                        811  // GRIB2 centre
+#define  CDI_KEY_SUBCENTRE                     812  // GRIB2 subCentre
 
 //      cdiDefKeyInt: Define a CDI variable integer value from a key
 int     cdiDefKeyInt(int cdiID, int varID, int key, int value);
 
 //      cdiInqKeyInt: Get a CDI variable integer value from a key
 int     cdiInqKeyInt(int cdiID, int varID, int key, int *value);
+
+int     cdiCopyKeys(int cdiID1, int varID1, int cdiID2, int varID2);
 
 // CDI grid keys
 #define  CDI_KEY_XNAME       901  // X-axis name

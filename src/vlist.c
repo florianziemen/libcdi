@@ -105,6 +105,8 @@ void vlist_init_entry(vlist_t *vlistptr)
   vlistptr->tableID        = cdiDefaultTableID;
   vlistptr->varsAllocated  = 0;
   vlistptr->ntsteps        = CDI_UNDEFID;
+  vlistptr->keys.nalloc    = MAX_KEYS;
+  vlistptr->keys.nelems    = 0;
   vlistptr->atts.nalloc    = MAX_ATTRIBUTES;
   vlistptr->atts.nelems    = 0;
   vlistptr->nsubtypes      = 0;
@@ -290,13 +292,6 @@ void var_copy_entries(var_t *var2, var_t *var1)
   if ( var1->stdname )  var2->stdname  = strdupx(var1->stdname);
   if ( var1->units )    var2->units    = strdupx(var1->units);
 
-  size_t nkeys = var1->keys.nelems;
-  for ( size_t i = 0; i < nkeys; ++i )
-    {
-      var2->keys.value[i].v.i = var1->keys.value[i].v.i;
-      var2->keys.nelems++;
-    }
-
   var2->opt_grib_kvpair_size = 0;
   var2->opt_grib_kvpair      = NULL;
   var2->opt_grib_nentries    = 0;
@@ -345,6 +340,7 @@ void vlistCopy(int vlistID2, int vlistID1)
   var_t *vars2 = vlistptr2->vars;
   vlist_copy(vlistptr2, vlistptr1);
 
+  cdiCopyKeys(vlistID1, CDI_GLOBAL, vlistID2, CDI_GLOBAL);
   cdiCopyAtts(vlistID1, CDI_GLOBAL, vlistID2, CDI_GLOBAL);
 
   if ( vars1 )
@@ -360,6 +356,7 @@ void vlistCopy(int vlistID2, int vlistID1)
       for ( int varID = 0; varID < nvars; varID++ )
         {
           var_copy_entries(&vars2[varID], &vars1[varID]);
+	  cdiCopyKeys(vlistID1, varID, vlistID2, varID);
 
           vlistptr2->vars[varID].atts.nelems = 0;
 	  cdiCopyAtts(vlistID1, varID, vlistID2, varID);
@@ -532,6 +529,7 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
 
   vlist_copy(vlistptr2, vlistptr1);
 
+  cdiCopyKeys(vlistID1, CDI_GLOBAL, vlistID2, CDI_GLOBAL);
   cdiCopyAtts(vlistID1, CDI_GLOBAL, vlistID2, CDI_GLOBAL);
 
   if ( vlistptr1->vars )
@@ -567,6 +565,7 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
 	    vars2[varID2].mvarID = varID2;
 
             var_copy_entries(&vars2[varID2], &vars1[varID]);
+            cdiCopyKeys(vlistID1, varID, vlistID2, varID2);
 
 	    vlistptr2->vars[varID2].atts.nelems = 0;
 	    cdiCopyAtts(vlistID1, varID, vlistID2, varID2);
@@ -774,6 +773,7 @@ void vlistCat(int vlistID2, int vlistID1)
 	}
 
       var_copy_entries(&vars2[varID2], &vars1[varID]);
+      cdiCopyKeys(vlistID1, varID, vlistID2, varID2);
 
       if ( vars1[varID].levinfo )
         {
