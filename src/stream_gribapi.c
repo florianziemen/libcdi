@@ -1810,7 +1810,7 @@ int gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, int rdate, int rti
 
       // Product Definition Template Number: defined in GRIB_API file 4.0.table
       // point in time products:
-      if ( (proDefTempNum >= 0 && proDefTempNum <=  7) || 
+      if ( (proDefTempNum >= 0 && proDefTempNum <=  7) ||
            proDefTempNum == 55 || proDefTempNum == 40055 ) // Tile
         startStep = endStep;
 
@@ -3020,6 +3020,23 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
       int shapeOfTheEarth = 0;
       cdiInqKeyInt(vlistID, varID, CDI_KEY_SHAPEOFTHEEARTH, &shapeOfTheEarth);
       GRIB_CHECK(my_grib_set_long(gh, "shapeOfTheEarth", (long)shapeOfTheEarth), 0);
+
+      int mpimType, mpimClass, mpimUser;
+      if ( cdiInqKeyInt(vlistID, varID, CDI_KEY_MPIMTYPE, &mpimType) == CDI_NOERR &&
+           cdiInqKeyInt(vlistID, varID, CDI_KEY_MPIMCLASS, &mpimClass) == CDI_NOERR &&
+           cdiInqKeyInt(vlistID, varID, CDI_KEY_MPIMUSER, &mpimUser) == CDI_NOERR )
+        {
+          grib_set_long(gh, "grib2LocalSectionPresent", 1);
+          grib_set_long(gh, "grib2LocalSectionNumber", 1);
+          grib_set_long(gh, "mpimType", mpimType);
+          grib_set_long(gh, "mpimClass", mpimClass);
+          grib_set_long(gh, "mpimUser", mpimUser);
+
+          int revNumber;
+          if ( cdiInqKeyInt(vlistID, varID, CDI_KEY_REVNUMBER, &revNumber) == CDI_NOERR )
+            grib_set_long(gh, "revNumber", revNumber);
+            
+        }
     }
 
   if ( ! gc->init ) gribapiDefGrid((int)editionNumber, gh, gridID, comptype, datatype);

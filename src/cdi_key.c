@@ -153,7 +153,9 @@ int cdiDefKeyInt(int cdiID, int varID, int key, int value)
 //  cdiInqKeyInt: Get a CDI variable integer value from a key
 int cdiInqKeyInt(int cdiID, int varID, int key, int *value)
 {
-  int status = CDI_NOERR;
+  int status = -1;
+
+  if ( varID != CDI_GLOBAL ) status = cdiInqKeyInt(cdiID, CDI_GLOBAL, key, value);
 
   cdi_keys_t *keysp = cdi_get_keysp(cdiID, varID);
   xassert(keysp != NULL);
@@ -164,6 +166,7 @@ int cdiInqKeyInt(int cdiID, int varID, int key, int *value)
       // if ( keyp->indtype == indtype )
 	{
          *value = keyp->v.i;
+         status = CDI_NOERR;
 	}
         /*
       else
@@ -172,11 +175,6 @@ int cdiInqKeyInt(int cdiID, int varID, int key, int *value)
           status = -2;
 	}
         */
-    }
-  else
-    {
-      //Warning("Internal problem, key %d not found!", key);
-      status = -1;
     }
 
   return status;

@@ -811,6 +811,11 @@ size_t  gridInqYCvals(int gridID, char *ycvals[]);
 #define  CDI_KEY_PERTURBATIONNUMBER            810  // GRIB2 perturbationNumber
 #define  CDI_KEY_CENTRE                        811  // GRIB2 centre
 #define  CDI_KEY_SUBCENTRE                     812  // GRIB2 subCentre
+#define  CDI_KEY_MPIMTYPE                      813  // GRIB2 mpimType
+#define  CDI_KEY_MPIMCLASS                     814  // GRIB2 mpimClass
+#define  CDI_KEY_MPIMUSER                      815  // GRIB2 mpimUser
+#define  CDI_KEY_REVSTATUS                     816  // GRIB2 revStatus
+#define  CDI_KEY_REVNUMBER                     817  // GRIB2 revNumber
 
 //      cdiDefKeyInt: Define a CDI variable integer value from a key
 int     cdiDefKeyInt(int cdiID, int varID, int key, int value);
