@@ -111,6 +111,30 @@ int vlist_key_compare(vlist_t *a, int varIDA, vlist_t *b, int varIDB, int keynum
 }
 
 
+int cdiDelKeys(int cdiID, int varID)
+{
+  int status = CDI_NOERR;
+
+  cdi_keys_t *keysp = cdi_get_keysp(cdiID, varID);
+  xassert(keysp != NULL);
+
+  for ( int keyid = 0; keyid < (int)keysp->nelems; keyid++ )
+    {
+      cdi_key_t *keyp = &(keysp->value[keyid]);
+      if ( keyp->length && keyp->v.s )
+        {
+          free(keyp->v.s);
+          keyp->v.s = NULL;
+          keyp->length = 0;
+        }
+    }
+
+  keysp->nelems = 0;
+
+  return status;
+}
+
+
 int cdiCopyKeys(int cdiID1, int varID1, int cdiID2, int varID2)
 {
   int status = CDI_NOERR;
