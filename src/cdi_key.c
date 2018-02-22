@@ -199,6 +199,24 @@ int cdiDefKeyBytes(int cdiID, int varID, int key, unsigned char *bytes, int leng
   return status;
 }
 
+//  cdiInqKeyLen: Get the length of the string representation of the key
+int cdiInqKeyLen(int cdiID, int varID, int key, int *length)
+{
+  int status = -1;
+
+  cdi_keys_t *keysp = cdi_get_keysp(cdiID, varID);
+  xassert(keysp != NULL);
+
+  cdi_key_t *keyp = find_key(keysp, key);
+  if ( keyp != NULL )
+    {
+      *length = keyp->length;
+      status = CDI_NOERR;
+    }
+
+  return status;
+}
+
 //  cdiInqKeyBytes: Get a bytes array from a key of a CDI variable
 int cdiInqKeyBytes(int cdiID, int varID, int key, unsigned char *bytes, int *length)
 {

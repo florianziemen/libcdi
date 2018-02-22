@@ -829,6 +829,9 @@ int     cdiDefKeyBytes(int cdiID, int varID, int key, unsigned char *bytes, int 
 //      cdiInqKeyBytes: Get a bytes array from a key of a CDI variable
 int     cdiInqKeyBytes(int cdiID, int varID, int key, unsigned char *bytes, int *length);
 
+//      cdiInqKeyLen: Get the length of the string representation of the key
+int     cdiInqKeyLen(int cdiID, int varID, int key, int *length);
+
 int     cdiCopyKeys(int cdiID1, int varID1, int cdiID2, int varID2);
 
 // CDI grid keys
