@@ -9,7 +9,7 @@
 #include "zaxis.h"
 #include "resource_unpack.h"
 
-enum  {KEY_INT, KEY_FLOAT, KEY_BYTES};
+enum  {KEY_INT, KEY_FLOAT, KEY_BYTES, KEY_STRING};
 
 static
 cdi_keys_t *get_keysp(vlist_t *vlistptr, int varID)
@@ -134,6 +134,25 @@ int cdiDelKeys(int cdiID, int varID)
   return status;
 }
 
+//  cdiInqKeyLen: Get the length of the string representation of the key
+int cdiInqKeyLen(int cdiID, int varID, int key, int *length)
+{
+  int status = -1;
+
+  cdi_keys_t *keysp = cdi_get_keysp(cdiID, varID);
+  xassert(keysp != NULL);
+
+  cdi_key_t *keyp = find_key(keysp, key);
+  if ( keyp != NULL )
+    {
+      *length = keyp->length;
+      if ( *length == 0 ) *length = 1;
+      status = CDI_NOERR;
+    }
+
+  return status;
+}
+
 
 int cdiCopyKeys(int cdiID1, int varID1, int cdiID2, int varID2)
 {
@@ -223,28 +242,33 @@ int cdiDefKeyBytes(int cdiID, int varID, int key, unsigned char *bytes, int leng
   return status;
 }
 
-//  cdiInqKeyLen: Get the length of the string representation of the key
-int cdiInqKeyLen(int cdiID, int varID, int key, int *length)
+//  cdiInqKeyBytes: Get a bytes array from a key of a CDI variable
+int cdiInqKeyBytes(int cdiID, int varID, int key, unsigned char *bytes, int *length)
 {
   int status = -1;
+  return status;
+}
+
+//  cdiDefKeyString: Define a string value from a key of a CDI variable
+int cdiDefKeyString(int cdiID, int varID, int key, unsigned char *bytes, int length)
+{
+  int status = CDI_NOERR;
 
   cdi_keys_t *keysp = cdi_get_keysp(cdiID, varID);
   xassert(keysp != NULL);
 
   cdi_key_t *keyp = find_key(keysp, key);
+  if ( keyp == NULL ) keyp = new_key(keysp, key);
+
   if ( keyp != NULL )
     {
-      *length = keyp->length;
-      status = CDI_NOERR;
+      if ( keyp->length != 0 && keyp->length != length ) free(keyp->v.s);
+      keyp->length = length;
+      keyp->v.s = (unsigned char *) malloc(length+1);
+      memcpy(keyp->v.s, bytes, length+1);
+      keyp->type = KEY_STRING;
     }
 
-  return status;
-}
-
-//  cdiInqKeyBytes: Get a bytes array from a key of a CDI variable
-int cdiInqKeyBytes(int cdiID, int varID, int key, unsigned char *bytes, int *length)
-{
-  int status = -1;
   return status;
 }
 
