@@ -449,6 +449,12 @@ void gribapiGetKeys(grib_handle *gh, int varID)
           varDefKeyInt(varID, CDI_KEY_PERTURBATIONNUMBER, (int) perturbationNumber);
         }
     }
+
+  long ltmp;
+  if ( grib_get_long(gh, "grib2LocalSectionNumber", &ltmp) == 0 )
+    {
+      // printf("grib2LocalSectionNumber %ld\n", ltmp);
+    }
 }
 
 static

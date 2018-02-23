@@ -21,7 +21,10 @@ typedef struct {
   cdi_key_t  value[MAX_KEYS];
 } cdi_keys_t;
 
+
 void cdiDefVarKeyInt(cdi_keys_t *keysp, int key, int value);
+void cdiDefVarKeyBytes(cdi_keys_t *keysp, int key, const unsigned char *bytes, int length);
+
 void cdiCopyVarKeys(cdi_keys_t *keysp, int cdiID2, int varID2);
 void cdiDeleteVarKeys(cdi_keys_t *keysp);
 int cdiDeleteKeys(int cdiID, int varID);

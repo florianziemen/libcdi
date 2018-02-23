@@ -1097,6 +1097,13 @@ void varDefKeyInt(int varID, int key, int value)
 }
 
 
+void varDefKeyBytes(int varID, int key, const unsigned char *bytes, int length)
+{
+  cdi_keys_t *keysp = &(vartable[varID].keys);
+  cdiDefVarKeyBytes(keysp, key, bytes, length);
+}
+
+
 #if  defined  (HAVE_LIBGRIB_API)
 /* Resizes and initializes opt_grib_kvpair data structure. */
 static

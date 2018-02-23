@@ -237,14 +237,9 @@ int cdiInqKeyInt(int cdiID, int varID, int key, int *value)
   return status;
 }
 
-//  cdiDefKeyBytes: Define a bytes array from a key of a CDI variable
-int cdiDefKeyBytes(int cdiID, int varID, int key, const unsigned char *bytes, int length)
+
+void cdiDefVarKeyBytes(cdi_keys_t *keysp, int key, const unsigned char *bytes, int length)
 {
-  int status = CDI_NOERR;
-
-  cdi_keys_t *keysp = cdi_get_keysp(cdiID, varID);
-  xassert(keysp != NULL);
-
   cdi_key_t *keyp = find_key(keysp, key);
   if ( keyp == NULL ) keyp = new_key(keysp, key);
 
@@ -264,6 +259,17 @@ int cdiDefKeyBytes(int cdiID, int varID, int key, const unsigned char *bytes, in
       memcpy(keyp->v.s, bytes, length);
       keyp->type = KEY_BYTES;
     }
+}
+
+//  cdiDefKeyBytes: Define a bytes array from a key of a CDI variable
+int cdiDefKeyBytes(int cdiID, int varID, int key, const unsigned char *bytes, int length)
+{
+  int status = CDI_NOERR;
+
+  cdi_keys_t *keysp = cdi_get_keysp(cdiID, varID);
+  xassert(keysp != NULL);
+
+  cdiDefVarKeyBytes(keysp, key, bytes, length);
 
   return status;
 }
