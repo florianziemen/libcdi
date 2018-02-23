@@ -9,7 +9,7 @@
 #include "zaxis.h"
 #include "resource_unpack.h"
 
-enum  {KEY_INT, KEY_FLOAT, KEY_BYTES, KEY_STRING};
+enum  {KEY_INT, KEY_FLOAT, KEY_BYTES};
 
 static
 cdi_keys_t *get_keysp(vlist_t *vlistptr, int varID)
@@ -123,6 +123,7 @@ int cdiDelKeys(int cdiID, int varID)
       cdi_key_t *keyp = &(keysp->value[keyid]);
       if ( keyp->length && keyp->v.s )
         {
+          printf("length %d %p %d %d %d\n", keyp->length, keyp->v.s, keyp->v.s[0], cdiID, varID);
           free(keyp->v.s);
           keyp->v.s = NULL;
           keyp->length = 0;
@@ -220,8 +221,9 @@ int cdiInqKeyInt(int cdiID, int varID, int key, int *value)
 }
 
 //  cdiDefKeyBytes: Define a bytes array from a key of a CDI variable
-int cdiDefKeyBytes(int cdiID, int varID, int key, unsigned char *bytes, int length)
+int cdiDefKeyBytes(int cdiID, int varID, int key, const unsigned char *bytes, int length)
 {
+  printf("cdiDefKeyBytes %d %d %d\n", cdiID, varID, length);
   int status = CDI_NOERR;
 
   cdi_keys_t *keysp = cdi_get_keysp(cdiID, varID);
@@ -232,9 +234,18 @@ int cdiDefKeyBytes(int cdiID, int varID, int key, unsigned char *bytes, int leng
 
   if ( keyp != NULL )
     {
-      if ( keyp->length != 0 && keyp->length != length ) free(keyp->v.s);
-      keyp->length = length;
-      keyp->v.s = (unsigned char *) malloc(length);
+      if ( keyp->length != 0 && keyp->length != length )
+        {
+          free(keyp->v.s);
+          keyp->length = 0;
+        }
+      if ( keyp->length == 0 )
+        {
+          keyp->v.s = (unsigned char *) malloc(length);
+          printf("alloc %d %p\n", length, keyp->v.s);
+          keyp->length = length;
+        }
+
       memcpy(keyp->v.s, bytes, length);
       keyp->type = KEY_BYTES;
     }
@@ -246,28 +257,48 @@ int cdiDefKeyBytes(int cdiID, int varID, int key, unsigned char *bytes, int leng
 int cdiInqKeyBytes(int cdiID, int varID, int key, unsigned char *bytes, int *length)
 {
   int status = -1;
-  return status;
-}
+  xassert(bytes != NULL);
+  xassert(length != NULL);
 
-//  cdiDefKeyString: Define a string value from a key of a CDI variable
-int cdiDefKeyString(int cdiID, int varID, int key, unsigned char *bytes, int length)
-{
-  int status = CDI_NOERR;
+  if ( varID != CDI_GLOBAL ) status = cdiInqKeyBytes(cdiID, CDI_GLOBAL, key, bytes, length);
 
   cdi_keys_t *keysp = cdi_get_keysp(cdiID, varID);
   xassert(keysp != NULL);
 
   cdi_key_t *keyp = find_key(keysp, key);
-  if ( keyp == NULL ) keyp = new_key(keysp, key);
-
-  if ( keyp != NULL )
+  if ( keyp != NULL ) // key in use
     {
-      if ( keyp->length != 0 && keyp->length != length ) free(keyp->v.s);
-      keyp->length = length;
-      keyp->v.s = (unsigned char *) malloc(length+1);
-      memcpy(keyp->v.s, bytes, length+1);
-      keyp->type = KEY_STRING;
+      if ( keyp->type == KEY_BYTES )
+	{
+          if ( keyp->length < *length ) *length = keyp->length;
+          memcpy(bytes, keyp->v.s, *length);
+          status = CDI_NOERR;
+	}
     }
+
+  return status;
+}
+
+//  cdiDefKeyString: Define a string value from a key of a CDI variable
+int cdiDefKeyString(int cdiID, int varID, int key, const char *string)
+{
+  xassert(string != NULL);
+
+  int length = strlen(string)+1;
+  int status = cdiDefKeyBytes(cdiID, varID, key, (const unsigned char *) string, length);
+
+  return status;
+}
+
+//  cdiInqKeyString: Get a string value from a key of a CDI variable
+int cdiInqKeyString(int cdiID, int varID, int key, char *string, int *length)
+{
+  xassert(string != NULL);
+  xassert(length != NULL);
+
+  string[0] = '\0';
+
+  int status = cdiInqKeyBytes(cdiID, varID, key, (unsigned char *) string, length);
 
   return status;
 }

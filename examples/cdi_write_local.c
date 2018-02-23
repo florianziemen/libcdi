@@ -72,19 +72,6 @@ int main(void)
   // Assign the variable list to the dataset
   streamDefVlist(streamID, vlistID);
 
-  int vlistID0 = streamInqVlist(streamID);
-  /*
-  for ( int varID = 0; varID < 2; ++varID )
-    {
-      // vlistDefVarIntKey(vlistID0, varID, "centre", 252); 
-      vlistDefVarIntKey(vlistID0, varID, "grib2LocalSectionPresent", 1); 
-      vlistDefVarIntKey(vlistID0, varID, "grib2LocalSectionNumber", 1); 
-      vlistDefVarIntKey(vlistID0, varID, "mpimType", 1); 
-      vlistDefVarIntKey(vlistID0, varID, "mpimClass", 2); 
-      vlistDefVarIntKey(vlistID0, varID, "mpimUser", 1403); 
-      //  vlistDefVarIntKey(vlistID0, varID, "shortendRevNo", 99); 
-    }
-  */
   // Loop over the number of time steps
   for ( int tsID = 0; tsID < nts; tsID++ )
     {
@@ -94,8 +81,6 @@ int main(void)
       taxisDefVtime(taxisID, 120000);
       // Define the time step
       streamDefTimestep(streamID, tsID);
-
-      vlistDefVarIntKey(vlistID0, varID1, "dataTime", 1200+(tsID+1)*10); 
 
       // Init var1 and var2
       for ( size_t i = 0; i < nlon*nlat;      i++ ) var1[i] = 1.1;

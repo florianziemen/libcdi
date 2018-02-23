@@ -162,6 +162,9 @@ void vlist_copy(vlist_t *vlistptr2, vlist_t *vlistptr1)
   memcpy(vlistptr2, vlistptr1, sizeof(vlist_t));
   vlistptr2->internal = vlist2internal;    //the question who's responsible to destroy the vlist is tied to its containing memory region, so we retain this flag
   vlistptr2->immutable = 0;    //this is a copy, so it's mutable, independent of whether the original is mutable or not
+  vlistptr2->keys.nelems = 0;
+  for ( int i = 0; i < MAX_KEYS; ++i )
+    vlistptr2->keys.value[i].length = 0;
   vlistptr2->atts.nelems = 0;
   vlistptr2->self = vlistID2;
 }

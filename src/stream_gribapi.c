@@ -3032,10 +3032,16 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
           grib_set_long(gh, "mpimClass", mpimClass);
           grib_set_long(gh, "mpimUser", mpimUser);
 
-          int revNumber;
-          if ( cdiInqKeyInt(vlistID, varID, CDI_KEY_REVNUMBER, &revNumber) == CDI_NOERR )
-            grib_set_long(gh, "revNumber", revNumber);
-            
+          int revNumLen = 20;
+          unsigned char revNumber[revNumLen];
+          if ( cdiInqKeyBytes(vlistID, varID, CDI_KEY_REVNUMBER, revNumber, &revNumLen) == CDI_NOERR )
+            {
+              size_t revNumLenS = revNumLen;
+              grib_set_bytes(gh, "revNumber", revNumber, &revNumLenS);
+            }
+          int revStatus;
+          if ( cdiInqKeyInt(vlistID, varID, CDI_KEY_REVSTATUS, &revStatus) == CDI_NOERR )
+            grib_set_long(gh, "revStatus", revStatus);
         }
     }
 

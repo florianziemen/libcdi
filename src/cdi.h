@@ -824,13 +824,19 @@ int     cdiDefKeyInt(int cdiID, int varID, int key, int value);
 int     cdiInqKeyInt(int cdiID, int varID, int key, int *value);
 
 //      cdiDefKeyBytes: Define a bytes array from a key of a CDI variable
-int     cdiDefKeyBytes(int cdiID, int varID, int key, unsigned char *bytes, int length);
+int     cdiDefKeyBytes(int cdiID, int varID, int key, const unsigned char *bytes, int length);
 
 //      cdiInqKeyBytes: Get a bytes array from a key of a CDI variable
 int     cdiInqKeyBytes(int cdiID, int varID, int key, unsigned char *bytes, int *length);
 
+//      cdiDefKeyString: Define a string value from a key of a CDI variable
+int     cdiDefKeyString(int cdiID, int varID, int key, const char *string);
+
 //      cdiInqKeyLen: Get the length of the string representation of the key
 int     cdiInqKeyLen(int cdiID, int varID, int key, int *length);
+
+//      cdiInqKeyString: Get a string value from a key of a CDI variable
+int     cdiInqKeyString(int cdiID, int varID, int key, char *string, int *length);
 
 int     cdiCopyKeys(int cdiID1, int varID1, int cdiID2, int varID2);
 
