@@ -102,7 +102,15 @@ modelWinFlushBuffer(size_t streamIdx)
           && openStreams.entries[streamIdx] != CDI_UNDEFID
           && txWin != NULL
           && txWin[streamIdx].buffer != NULL);
-  memset(txWin[streamIdx].buffer, 0, txWin[streamIdx].size);
+#if 0
+  /* for debugging purposes it might be smart to set the whole buffer
+   * to 0 */
+  size_t clearSize = txWin[streamIdx].size;
+  memset(txWin[streamIdx].buffer, 0, clearSize);
+#else
+  /* but normally, setting the first header record to zero will
+   * suffice (see below) */
+#endif
   txWin[streamIdx].head = txWin[streamIdx].buffer
     + (size_t)txWin[streamIdx].dictSize * sizeof (struct winHeaderEntry);
   txWin[streamIdx].refuseFuncCall = 0;
