@@ -123,7 +123,6 @@ int cdiDelKeys(int cdiID, int varID)
       cdi_key_t *keyp = &(keysp->value[keyid]);
       if ( keyp->length && keyp->v.s )
         {
-          printf("length %d %p %d %d %d\n", keyp->length, keyp->v.s, keyp->v.s[0], cdiID, varID);
           free(keyp->v.s);
           keyp->v.s = NULL;
           keyp->length = 0;
@@ -223,7 +222,6 @@ int cdiInqKeyInt(int cdiID, int varID, int key, int *value)
 //  cdiDefKeyBytes: Define a bytes array from a key of a CDI variable
 int cdiDefKeyBytes(int cdiID, int varID, int key, const unsigned char *bytes, int length)
 {
-  printf("cdiDefKeyBytes %d %d %d\n", cdiID, varID, length);
   int status = CDI_NOERR;
 
   cdi_keys_t *keysp = cdi_get_keysp(cdiID, varID);
@@ -242,7 +240,6 @@ int cdiDefKeyBytes(int cdiID, int varID, int key, const unsigned char *bytes, in
       if ( keyp->length == 0 )
         {
           keyp->v.s = (unsigned char *) malloc(length);
-          printf("alloc %d %p\n", length, keyp->v.s);
           keyp->length = length;
         }
 
