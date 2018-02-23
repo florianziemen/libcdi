@@ -32,6 +32,7 @@ typedef struct {
 } cdi_atts_t;
 
 
+int cdiDeleteAtts(int vlistID, int varID);
 int cdiAttsGetSize(void *p, int varID, void *context);
 void cdiAttsPack(void *p, int varID, void *buf, int size, int *position, void *context);
 void cdiAttsUnpack(int cdiID, int varID, void *buf, int size, int *position, void *context);

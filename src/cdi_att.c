@@ -200,7 +200,7 @@ int cdiInqAtt(int cdiID, int varID, int attnum, char *name, int *typep, int *len
 }
 
 
-int cdiDelAtts(int cdiID, int varID)
+int cdiDeleteAtts(int cdiID, int varID)
 {
   int status = CDI_NOERR;
 

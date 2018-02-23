@@ -132,9 +132,6 @@ void     cdiVlistDestroy_(int vlistID);
 int      vlistInqVarMissvalUsed(int vlistID, int varID);
 int      vlistHasTime(int vlistID);
 
-int      cdiDelKeys(int vlistID, int varID);
-int      cdiDelAtts(int vlistID, int varID);
-
 void     vlistUnpack(char * buffer, int bufferSize, int * pos,
                      int originNamespace, void *context, int force_id);
 

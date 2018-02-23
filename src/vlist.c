@@ -221,8 +221,8 @@ void vlist_delete(vlist_t *vlistptr)
   int vlistID = vlistptr->self;
   if ( CDI_Debug ) Message("call to vlist_delete, vlistID = %d", vlistID);
 
-  cdiDelKeys(vlistID, CDI_GLOBAL);
-  cdiDelAtts(vlistID, CDI_GLOBAL);
+  cdiDeleteKeys(vlistID, CDI_GLOBAL);
+  cdiDeleteAtts(vlistID, CDI_GLOBAL);
 
   int nvars = vlistptr->nvars;
   var_t *vars = vlistptr->vars;
@@ -248,8 +248,8 @@ void vlist_delete(vlist_t *vlistptr)
       vlistptr->vars[varID].opt_grib_kvpair_size = 0;
       vlistptr->vars[varID].opt_grib_kvpair      = NULL;
 
-      cdiDelKeys(vlistID, varID);
-      cdiDelAtts(vlistID, varID);
+      cdiDeleteKeys(vlistID, varID);
+      cdiDeleteAtts(vlistID, varID);
     }
 
   if ( vars ) Free(vars);
