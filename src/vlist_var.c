@@ -560,7 +560,7 @@ The function @func{vlistInqVarLongname} returns the longname of a variable if av
 otherwise the result is an empty string.
 
 @Result
-@func{vlistInqVaeLongname} returns the longname of the variable to the parameter longname.
+@func{vlistInqVarLongname} returns the longname of the variable to the parameter longname.
 
 @EndFunction
 */
