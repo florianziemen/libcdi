@@ -107,8 +107,6 @@ void vlist_init_entry(vlist_t *vlistptr)
   vlistptr->ntsteps        = CDI_UNDEFID;
   vlistptr->keys.nalloc    = MAX_KEYS;
   vlistptr->keys.nelems    = 0;
-  for ( int i = 0; i < MAX_KEYS; ++i )
-    memset(&vlistptr->keys.value[i], 0, sizeof(cdi_key_t));
   vlistptr->atts.nalloc    = MAX_ATTRIBUTES;
   vlistptr->atts.nelems    = 0;
   vlistptr->nsubtypes      = 0;
@@ -163,8 +161,6 @@ void vlist_copy(vlist_t *vlistptr2, vlist_t *vlistptr1)
   vlistptr2->internal = vlist2internal;    //the question who's responsible to destroy the vlist is tied to its containing memory region, so we retain this flag
   vlistptr2->immutable = 0;    //this is a copy, so it's mutable, independent of whether the original is mutable or not
   vlistptr2->keys.nelems = 0;
-  for ( int i = 0; i < MAX_KEYS; ++i )
-    vlistptr2->keys.value[i].length = 0;
   vlistptr2->atts.nelems = 0;
   vlistptr2->self = vlistID2;
 }
@@ -347,7 +343,9 @@ void vlistCopy(int vlistID2, int vlistID1)
   var_t *vars2 = vlistptr2->vars;
   vlist_copy(vlistptr2, vlistptr1);
 
+  vlistptr2->keys.nelems = 0;
   cdiCopyKeys(vlistID1, CDI_GLOBAL, vlistID2, CDI_GLOBAL);
+  vlistptr2->atts.nelems = 0;
   cdiCopyAtts(vlistID1, CDI_GLOBAL, vlistID2, CDI_GLOBAL);
 
   if ( vars1 )
@@ -363,6 +361,7 @@ void vlistCopy(int vlistID2, int vlistID1)
       for ( int varID = 0; varID < nvars; varID++ )
         {
           var_copy_entries(&vars2[varID], &vars1[varID]);
+          vlistptr2->vars[varID].keys.nelems = 0;
 	  cdiCopyKeys(vlistID1, varID, vlistID2, varID);
 
           vlistptr2->vars[varID].atts.nelems = 0;
@@ -536,7 +535,9 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
 
   vlist_copy(vlistptr2, vlistptr1);
 
+  vlistptr2->keys.nelems = 0;
   cdiCopyKeys(vlistID1, CDI_GLOBAL, vlistID2, CDI_GLOBAL);
+  vlistptr2->atts.nelems = 0;
   cdiCopyAtts(vlistID1, CDI_GLOBAL, vlistID2, CDI_GLOBAL);
 
   if ( vlistptr1->vars )
@@ -572,6 +573,7 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
 	    vars2[varID2].mvarID = varID2;
 
             var_copy_entries(&vars2[varID2], &vars1[varID]);
+	    vlistptr2->vars[varID2].keys.nelems = 0;
             cdiCopyKeys(vlistID1, varID, vlistID2, varID2);
 
 	    vlistptr2->vars[varID2].atts.nelems = 0;
@@ -780,6 +782,7 @@ void vlistCat(int vlistID2, int vlistID1)
 	}
 
       var_copy_entries(&vars2[varID2], &vars1[varID]);
+      vars2[varID2].keys.nelems = 0;
       cdiCopyKeys(vlistID1, varID, vlistID2, varID2);
 
       if ( vars1[varID].levinfo )
