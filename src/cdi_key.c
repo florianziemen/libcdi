@@ -9,7 +9,7 @@
 #include "zaxis.h"
 #include "resource_unpack.h"
 
-enum  {KEY_INT, KEY_FLOAT, KEY_BYTES};
+enum  {KEY_INT = 1, KEY_FLOAT, KEY_BYTES};
 
 static
 cdi_keys_t *get_keysp(vlist_t *vlistptr, int varID)
@@ -193,7 +193,7 @@ void cdiDefVarKeyInt(cdi_keys_t *keysp, int key, int value)
 
   if ( keyp != NULL )
     {
-      if ( keyp->v.i != value )
+      //if ( keyp->v.i != value )
         {
           keyp->type = KEY_INT;
           keyp->v.i = value;

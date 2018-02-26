@@ -450,10 +450,23 @@ void gribapiGetKeys(grib_handle *gh, int varID)
         }
     }
 
-  long ltmp;
-  if ( grib_get_long(gh, "grib2LocalSectionNumber", &ltmp) == 0 )
+  long section2Length;
+  grib_get_long(gh, "section2Length", &section2Length);
+  if ( section2Length > 0 )
     {
-      // printf("grib2LocalSectionNumber %ld\n", ltmp);
+      long grib2LocalSectionNumber;
+      grib_get_long(gh, "grib2LocalSectionNumber", &grib2LocalSectionNumber);
+      size_t size;
+      grib_get_size(gh, "section2Padding", &size);
+      if ( size > 0 )
+        {
+          varDefKeyInt(varID, CDI_KEY_GRIB2LOCALSECTIONNUMBER, (int) grib2LocalSectionNumber);
+          varDefKeyInt(varID, CDI_KEY_SECTION2PADDINGLENGTH, (int) size);
+          unsigned char *section2Padding = (unsigned char*) Malloc(size);
+          grib_get_bytes(gh, "section2Padding", section2Padding, &size);
+          varDefKeyBytes(varID, CDI_KEY_SECTION2PADDING, section2Padding, size);
+          Free(section2Padding);
+        }
     }
 }
 

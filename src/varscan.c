@@ -116,7 +116,7 @@ void paramInitEntry(unsigned varID, int param)
   vartable[varID].keys.nalloc    = MAX_KEYS;
   vartable[varID].keys.nelems    = 0;
   for ( int i = 0; i < MAX_KEYS; ++i )
-    vartable[varID].keys.value[i].length = 0;
+    memset(&vartable[varID].keys.value[i], 0, sizeof(cdi_key_t));
   vartable[varID].comptype       = CDI_COMPRESS_NONE;
   vartable[varID].complevel      = 1;
   vartable[varID].lmissval       = false;

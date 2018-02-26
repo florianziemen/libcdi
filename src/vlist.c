@@ -108,7 +108,7 @@ void vlist_init_entry(vlist_t *vlistptr)
   vlistptr->keys.nalloc    = MAX_KEYS;
   vlistptr->keys.nelems    = 0;
   for ( int i = 0; i < MAX_KEYS; ++i )
-    vlistptr->keys.value[i].length = 0;
+    memset(&vlistptr->keys.value[i], 0, sizeof(cdi_key_t));
   vlistptr->atts.nalloc    = MAX_ATTRIBUTES;
   vlistptr->atts.nelems    = 0;
   vlistptr->nsubtypes      = 0;
