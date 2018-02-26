@@ -6,6 +6,7 @@
 #include "cdi.h"
 #include "cdi_int.h"
 #include "cdi_uuid.h"
+#include "cdi_key.h"
 #include "dmemory.h"
 #include "resource_handle.h"
 #include "varscan.h"
@@ -78,13 +79,7 @@ typedef struct
   /* meta-data for specification of tiles (currently only GRIB-API: */
   subtype_t     *tiles;
 
-  size_t         nikeys;
-  struct ikeyvalue_t
-  {
-    int          key;
-    int          value;
-  } ikeyvalue_t;
-  struct ikeyvalue_t  ikeyvalues[MAX_KEYS];
+  cdi_keys_t     keys;
 
   int                 opt_grib_nentries;                       /* current no. key-value pairs            */
   int                 opt_grib_kvpair_size;                    /* current allocated size                 */
@@ -118,8 +113,10 @@ void paramInitEntry(unsigned varID, int param)
   vartable[varID].instID         = CDI_UNDEFID;
   vartable[varID].modelID        = CDI_UNDEFID;
   vartable[varID].tableID        = CDI_UNDEFID;
-  vartable[varID].nikeys         = 0;
-  for ( int i = 0; i < MAX_KEYS; ++i ) vartable[varID].ikeyvalues[i].value = 0;
+  vartable[varID].keys.nalloc    = MAX_KEYS;
+  vartable[varID].keys.nelems    = 0;
+  for ( int i = 0; i < MAX_KEYS; ++i )
+    memset(&vartable[varID].keys.value[i], 0, sizeof(cdi_key_t));
   vartable[varID].comptype       = CDI_COMPRESS_NONE;
   vartable[varID].complevel      = 1;
   vartable[varID].lmissval       = false;
@@ -188,6 +185,9 @@ void varFree(void)
       if ( vartable[varID].longname ) Free(vartable[varID].longname);
       if ( vartable[varID].units )    Free(vartable[varID].units);
       if ( vartable[varID].tiles )    subtypeDestroyPtr(vartable[varID].tiles);
+
+      cdi_keys_t *keysp = &(vartable[varID].keys);
+      cdiDeleteVarKeys(keysp);
 
       if ( vartable[varID].opt_grib_kvpair )
         {
@@ -580,8 +580,8 @@ int cmp_varname(const void *s1, const void *s2)
 
 void varCopyKeys(int vlistID, int varID)
 {
-  for ( int i = 0; i < vartable[varID].nikeys; ++i )
-    cdiDefKeyInt(vlistID, varID, vartable[varID].ikeyvalues[i].key, vartable[varID].ikeyvalues[i].value);
+  cdi_keys_t *keysp = &(vartable[varID].keys);
+  cdiCopyVarKeys(keysp, vlistID, varID);
 }
 
 
@@ -1019,9 +1019,9 @@ int varDefZaxis(int vlistID, int zaxistype, int nlevels, const double *levels, c
 
 	  if ( name && name[0] ) zaxisDefName(zaxisID, name);
 	  if ( longname && longname[0] ) zaxisDefLongname(zaxisID, longname);
-          else                           zaxisDefLongname(zaxisID, "");
+          //else                           zaxisDefLongname(zaxisID, "");
 	  if ( units && units[0] ) zaxisDefUnits(zaxisID, units);
-          else                     zaxisDefUnits(zaxisID, "");
+          //else                     zaxisDefUnits(zaxisID, "");
 	  zaxisDefDatatype(zaxisID, prec);
 	  zaxisDefLtype(zaxisID, ltype1);
 	}
@@ -1092,12 +1092,15 @@ void varDefTable(int varID, int tableID)
 
 void varDefKeyInt(int varID, int key, int value)
 {
-  if ( vartable[varID].nikeys < MAX_KEYS )
-    {
-      vartable[varID].ikeyvalues[vartable[varID].nikeys].key   = key;
-      vartable[varID].ikeyvalues[vartable[varID].nikeys].value = value;
-      vartable[varID].nikeys++;
-    }
+  cdi_keys_t *keysp = &(vartable[varID].keys);
+  cdiDefVarKeyInt(keysp, key, value);
+}
+
+
+void varDefKeyBytes(int varID, int key, const unsigned char *bytes, int length)
+{
+  cdi_keys_t *keysp = &(vartable[varID].keys);
+  cdiDefVarKeyBytes(keysp, key, bytes, length);
 }
 
 

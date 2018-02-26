@@ -292,9 +292,11 @@ void srvScanTimestep1(stream_t *streamptr)
   cdi_generate_vars(streamptr);
 
   int taxisID = taxisCreate(TAXIS_ABSOLUTE);
-  taxis->type  = TAXIS_ABSOLUTE;
+  taxis->type = TAXIS_ABSOLUTE;
   taxis->vdate = (int)datetime0.date;
   taxis->vtime = (int)datetime0.time;
+  taxis->rdate = taxis->vdate;
+  taxis->rtime = taxis->vtime;
 
   int vlistID = streamptr->vlistID;
   vlistDefTaxis(vlistID, taxisID);

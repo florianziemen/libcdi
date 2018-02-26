@@ -449,6 +449,25 @@ void gribapiGetKeys(grib_handle *gh, int varID)
           varDefKeyInt(varID, CDI_KEY_PERTURBATIONNUMBER, (int) perturbationNumber);
         }
     }
+
+  long section2Length;
+  grib_get_long(gh, "section2Length", &section2Length);
+  if ( section2Length > 0 )
+    {
+      long grib2LocalSectionNumber;
+      grib_get_long(gh, "grib2LocalSectionNumber", &grib2LocalSectionNumber);
+      size_t size;
+      grib_get_size(gh, "section2Padding", &size);
+      if ( size > 0 )
+        {
+          varDefKeyInt(varID, CDI_KEY_GRIB2LOCALSECTIONNUMBER, (int) grib2LocalSectionNumber);
+          varDefKeyInt(varID, CDI_KEY_SECTION2PADDINGLENGTH, (int) size);
+          unsigned char *section2Padding = (unsigned char*) Malloc(size);
+          grib_get_bytes(gh, "section2Padding", section2Padding, &size);
+          varDefKeyBytes(varID, CDI_KEY_SECTION2PADDING, section2Padding, size);
+          Free(section2Padding);
+        }
+    }
 }
 
 static
@@ -963,20 +982,12 @@ int gribapiScanTimestep1(stream_t * streamptr)
   cdi_generate_vars(streamptr);
 
   int taxisID = -1;
-  if ( fcast )
-    {
-      taxisID = taxisCreate(TAXIS_RELATIVE);
-      taxis->type  = TAXIS_RELATIVE;
-      taxis->rdate = rdate;
-      taxis->rtime = rtime;
-      taxis->unit  = tunit;
-    }
-  else
-    {
-      taxisID = taxisCreate(TAXIS_ABSOLUTE);
-      taxis->type  = TAXIS_ABSOLUTE;
-    }
 
+  taxis->unit = tunit;
+  taxis->type = fcast ? TAXIS_RELATIVE : TAXIS_ABSOLUTE;
+  taxisID = taxisCreate(taxis->type);
+  taxis->rdate = rdate;
+  taxis->rtime = rtime;
   taxis->vdate = (int)datetime0.date;
   taxis->vtime = (int)datetime0.time;
 
@@ -1553,6 +1564,18 @@ void gribapiDefInstitut(grib_handle *gh, int vlistID, int varID)
       if ( subcenter != subcenter0 )
 	GRIB_CHECK(my_grib_set_long(gh, "subCentre", subcenter), 0);
     }
+
+  int status;
+  int centre, subCentre;
+  status = cdiInqKeyInt(vlistID, CDI_GLOBAL, CDI_KEY_CENTRE, &centre);
+  if ( status == 0 ) grib_set_long(gh, "centre", centre);
+  status = cdiInqKeyInt(vlistID, CDI_GLOBAL, CDI_KEY_SUBCENTRE, &subCentre);
+  if ( status == 0 ) grib_set_long(gh, "subCentre", subCentre);
+
+  status = cdiInqKeyInt(vlistID, varID, CDI_KEY_CENTRE, &centre);
+  if ( status == 0 ) grib_set_long(gh, "centre", centre);
+  status = cdiInqKeyInt(vlistID, varID, CDI_KEY_SUBCENTRE, &subCentre);
+  if ( status == 0 ) grib_set_long(gh, "subCentre", subCentre);
 }
 
 static
@@ -1806,7 +1829,7 @@ int gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, int rdate, int rti
 
       // Product Definition Template Number: defined in GRIB_API file 4.0.table
       // point in time products:
-      if ( (proDefTempNum >= 0 && proDefTempNum <=  7) || 
+      if ( (proDefTempNum >= 0 && proDefTempNum <=  7) ||
            proDefTempNum == 55 || proDefTempNum == 40055 ) // Tile
         startStep = endStep;
 
@@ -3016,6 +3039,29 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
       int shapeOfTheEarth = 0;
       cdiInqKeyInt(vlistID, varID, CDI_KEY_SHAPEOFTHEEARTH, &shapeOfTheEarth);
       GRIB_CHECK(my_grib_set_long(gh, "shapeOfTheEarth", (long)shapeOfTheEarth), 0);
+
+      int mpimType, mpimClass, mpimUser;
+      if ( cdiInqKeyInt(vlistID, varID, CDI_KEY_MPIMTYPE, &mpimType) == CDI_NOERR &&
+           cdiInqKeyInt(vlistID, varID, CDI_KEY_MPIMCLASS, &mpimClass) == CDI_NOERR &&
+           cdiInqKeyInt(vlistID, varID, CDI_KEY_MPIMUSER, &mpimUser) == CDI_NOERR )
+        {
+          grib_set_long(gh, "grib2LocalSectionPresent", 1);
+          grib_set_long(gh, "grib2LocalSectionNumber", 1);
+          grib_set_long(gh, "mpimType", mpimType);
+          grib_set_long(gh, "mpimClass", mpimClass);
+          grib_set_long(gh, "mpimUser", mpimUser);
+
+          int revNumLen = 20;
+          unsigned char revNumber[revNumLen];
+          if ( cdiInqKeyBytes(vlistID, varID, CDI_KEY_REVNUMBER, revNumber, &revNumLen) == CDI_NOERR )
+            {
+              size_t revNumLenS = revNumLen;
+              grib_set_bytes(gh, "revNumber", revNumber, &revNumLenS);
+            }
+          int revStatus;
+          if ( cdiInqKeyInt(vlistID, varID, CDI_KEY_REVSTATUS, &revStatus) == CDI_NOERR )
+            grib_set_long(gh, "revStatus", revStatus);
+        }
     }
 
   if ( ! gc->init ) gribapiDefGrid((int)editionNumber, gh, gridID, comptype, datatype);

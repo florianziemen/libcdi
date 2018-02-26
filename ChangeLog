@@ -1,3 +1,11 @@
+2018-02-19  Uwe Schulzweida
+
+	* scanTimestep1: set default of rdate to vdate (bug fix)
+
+2018-02-12  Uwe Schulzweida
+
+	* varDefZaxis: don't remove default of longname and units
+
 2018-02-03  Uwe Schulzweida
 
 	* Fix brocken ECHAM5 modelIDs (introduced in 1.9.3)
