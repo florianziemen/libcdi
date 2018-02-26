@@ -81,15 +81,6 @@ memcpyPackFunc(void *dataDesc, void *buf, int size, int *pos, void *context)
 
 /****************************************************/
 
-struct clientBufferSetup
-{
-  struct collSpec collectData;
-  struct clientBufSize *bufSizes;
-  size_t bufSizesCount;
-};
-
-/************************************************************************/
-
 static void
 modelWinFlushBuffer(size_t streamIdx)
 {
