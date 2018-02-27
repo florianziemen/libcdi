@@ -48,6 +48,13 @@ MPI_Comm cdiPioInit(MPI_Comm commSuper, int confResH, int *pioNamespace);
 void     pioWriteTimestep(void);
 void     cdiPioRDMAProgress(void);
 
+
+/* cdiPioStreamDefDecomposedVlist: collectively define the vlist assigned to a
+ * stream together with a fixed decomposition where for each variable
+ * an entry of partDesc specifies the local part at the caller */
+void cdiPioStreamDefDecomposedVlist(int streamID, int vlistID,
+                                    Xt_idxlist partDesc[]);
+
 /* streamWriteVarPart: Write part of the data making up variable varID
  * of stream streamID.
  *
