@@ -1744,26 +1744,45 @@ void cdfDefCharaxis(int subtypeID, stream_t *streamptr, int vlistID)
   count[1] = stringlen;
   for (size_t i = 0; i < nentries; i++)
     {
-      char *cvalptr;
-      char cval[CDI_MAX_NAME];
+      char cval[CDI_MAX_NAME]; cval[0]=0;
       subtypeGetCharaxisData(subtypeID, i, &dummyval, cval);
-      strcpy(cval, cvalptr);
       start[0] = i;
       status = nc_put_vara_text(fileID, ncaxisid, start, count, cval);
     }
 
-/*  ncgrid_t *ncgrid = streamptr->ncgrid;
-  ncgrid[gridindex].gridID = gridID;
-  if ( isy == 0 )
+/* Define grid ncIDs */
+
+  ncgrid_t *ncgrid = streamptr->ncgrid;
+  int ngrids = vlistNgrids(vlistID);
+  for ( int gridindex = 0; gridindex < ngrids; ++gridindex )
     {
-      ncgrid[gridindex].ncIDs[CDF_DIMID_X] = dimID;
-      ncgrid[gridindex].ncIDs[CDF_VARID_X] = ncaxisid;
+      int gridID = vlistGrid(vlistID, gridindex);
+      int gridtype = gridInqType(gridID);
+      if ( gridtype == GRID_CHARXY )
+        {
+          if ( !isy )
+            {
+              char xname[CDI_MAX_NAME]; xname[0] = 0;
+              cdiGridInqKeyStr(gridID, CDI_KEY_XNAME, CDI_MAX_NAME, xname);
+              if ( gridInqXIsc(gridID) == stringlen && strcmp(xname, axisname) == 0 )
+                {
+                  ncgrid[gridindex].ncIDs[CDF_DIMID_X] = dimID;
+                  ncgrid[gridindex].ncIDs[CDF_VARID_X] = ncaxisid;
+                }
+            }
+          else
+            {
+              char yname[CDI_MAX_NAME]; yname[0] = 0;
+              cdiGridInqKeyStr(gridID, CDI_KEY_YNAME, CDI_MAX_NAME, yname);
+              if ( gridInqYIsc(gridID) == stringlen && strcmp(yname, axisname) == 0 )
+                {
+                  ncgrid[gridindex].ncIDs[CDF_DIMID_Y] = dimID;
+                  ncgrid[gridindex].ncIDs[CDF_VARID_Y] = ncaxisid;
+                }
+            }
+        }
     }
-  else
-    {
-      ncgrid[gridindex].ncIDs[CDF_DIMID_Y] = dimID;
-      ncgrid[gridindex].ncIDs[CDF_VARID_Y] = ncaxisid;
-    } */
+
   streamptr->ncmode = 2;
 }
 
@@ -2010,6 +2029,7 @@ void cdfDefVars(stream_t *streamptr)
       if ( subtypeKind(subtypeID) == SUBTYPE_CHARAXIS )
         cdfDefCharaxis(subtypeID, streamptr, vlistID);
     }
+
   if ( streamptr->ncmode != 2 )
     {
       cdf_enddef(streamptr->fileID);
