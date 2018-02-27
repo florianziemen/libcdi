@@ -406,6 +406,18 @@ return integer code corresponding to string
 representation of mode or -1 if no match was found.
 
 
+\section*{\tt \htmlref{cdiPioStreamDefDecomposedVlist}{cdiPioStreamDefDecomposedVlist}}
+
+\begin{verbatim}
+    SUBROUTINE cdiPioStreamDefDecomposedVlist (INTEGER streamID, INTEGER vlistID,
+                                               TYPE(XT_IDXLIST) partDesc(*))
+\end{verbatim}
+
+collectively define the vlist assigned to a
+stream together with a fixed decomposition where for each variable
+an entry of partDesc specifies the local part at the caller.
+
+
 \section*{\tt \htmlref{pioInit}{pioInit}}
 
 \begin{verbatim}

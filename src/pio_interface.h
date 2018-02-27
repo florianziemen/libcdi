@@ -47,6 +47,12 @@ cdiPioClientStreamNeedsFlush(int streamID);
 void
 cdiPioClientStreamWinPost(int streamID);
 
+void
+cdiPioSetStreamPartDescPreset(int streamID, size_t nVars,
+                              Xt_idxlist partDesc[]);
+struct partDescPreset
+cdiPioGetStreamPartDescPreset(int streamID);
+
 #endif
 /*
  * Local Variables:

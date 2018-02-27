@@ -4,8 +4,6 @@
 #  include "config.h"
 #endif
 
-#include "pio_server.h"
-
 
 #include <limits.h>
 #ifdef HAVE_PARALLEL_NC4
@@ -20,6 +18,7 @@
 #include <core/ppm_rectilinear.h>
 #include <ppm/ppm_uniform_partition.h>
 #endif
+#include <mpi.h>
 #include <yaxt.h>
 
 #include "cdi.h"
@@ -36,6 +35,7 @@
 #include "pio_id_set.h"
 #include "pio_interface.h"
 #include "pio_rpc.h"
+#include "pio_server.h"
 #include "pio_util.h"
 #include "pio_xmap_cache.h"
 #ifndef HAVE_NETCDF_PAR_H
@@ -91,6 +91,7 @@ static struct
   struct streamMemLayout *prevLayout;
   size_t numRetained;
   struct cacheRedist *retained;
+  struct partDescPreset clientDeco;
 } *rxWin;
 
 static struct
@@ -276,13 +277,15 @@ static Xt_xmap
 buildVarXmap(struct Xt_offset_ext *restrict partExts,
              const struct clientBuf *restrict clientBuf, size_t headerIdx,
              Xt_idxlist dstList,
+             Xt_idxlist *partDescPreset,
              MPI_Comm pioInterComm,
              MPI_Comm collComm,
              int varID,
              const struct cdiPioConf *conf)
 {
   size_t numClients = (size_t)numClients_;
-  Xt_idxlist *part = Malloc(numClients * sizeof (part[0]));
+  Xt_idxlist *part
+    = partDescPreset ? partDescPreset : Malloc(numClients * sizeof (part[0]));
   int conversion = ((wHECast)clientBuf[0].mem)[headerIdx].id;
   size_t elemSize
     = conversion == DATA_HEADER_FLOAT ? sizeof (float) : sizeof (double);
@@ -291,18 +294,21 @@ buildVarXmap(struct Xt_offset_ext *restrict partExts,
       unsigned char *clientMem = clientBuf[clientIdx].mem;
       struct dataRecord *dataHeader
         = &((wHECast)clientMem)[headerIdx].specific.dataRecord;
-      int position = ((wHECast)clientMem)[headerIdx + 1].offset;
       xassert(dataHeader->varID == varID
               && ((wHECast)clientMem)[headerIdx].id == conversion
-              && (((wHECast)clientMem)[headerIdx + 1].id == PARTDESCMARKER)
-              && position > 0
-              && ((size_t)position
-                  >= sizeof (struct winHeaderEntry)
-                  * (size_t)clientBuf[clientIdx].dictSize)
-              && ((size_t)position < clientBuf[clientIdx].size));
-      part[clientIdx]
-        = xt_idxlist_unpack(clientMem, (int)clientBuf[clientIdx].size,
-                            &position, pioInterComm);
+              && (((wHECast)clientMem)[headerIdx + 1].id == PARTDESCMARKER));
+      if (!partDescPreset)
+        {
+          int position = ((wHECast)clientMem)[headerIdx + 1].offset;
+          xassert(position > 0
+                  && ((size_t)position
+                      >= sizeof (struct winHeaderEntry)
+                      * (size_t)clientBuf[clientIdx].dictSize)
+                  && ((size_t)position < clientBuf[clientIdx].size));
+          part[clientIdx]
+            = xt_idxlist_unpack(clientMem, (int)clientBuf[clientIdx].size,
+                                &position, pioInterComm);
+        }
       unsigned partSize
         = (unsigned)xt_idxlist_get_num_indices(part[clientIdx]);
       size_t charOfs = (size_t)((clientMem
@@ -316,9 +322,12 @@ buildVarXmap(struct Xt_offset_ext *restrict partExts,
       partExts[clientIdx].stride = 1;
     }
   Xt_idxlist srcList = xt_idxlist_collection_new(part, (int)numClients);
-  for (size_t clientIdx = 0; clientIdx < numClients; ++clientIdx)
-    xt_idxlist_delete(part[clientIdx]);
-  Free(part);
+  if (!partDescPreset)
+    {
+      for (size_t clientIdx = 0; clientIdx < numClients; ++clientIdx)
+        xt_idxlist_delete(part[clientIdx]);
+      Free(part);
+    }
   if (conf->stripify)
     {
       Xt_idxlist srcListStriped = xt_idxstripes_from_idxlist_new(srcList);
@@ -336,6 +345,7 @@ buildVarRedist(int headerIdx, size_t streamIdx,
                /* index list representing the data elements gathered on
                 * this rank */
                Xt_idxlist dstList,
+               Xt_idxlist *partDescPreset,
                const struct cdiPioConf *conf)
 {
   const struct clientBuf *restrict clientBuf = rxWin[streamIdx].clientBuf;
@@ -384,14 +394,8 @@ buildVarRedist(int headerIdx, size_t streamIdx,
               unsigned char *clientMem = clientBuf[clientIdx].mem;
               struct dataRecord *dataHeader
                 = &((wHECast)clientMem)[headerIdx].specific.dataRecord;
-              int position = ((wHECast)clientMem)[headerIdx + 1].offset;
               xassert(dataHeader->varID == varID
-                      && ((wHECast)clientMem)[headerIdx].id == conversion
-                      && position > 0
-                      && ((size_t)position
-                          >= sizeof (struct winHeaderEntry)
-                          * (size_t)clientBuf[clientIdx].dictSize)
-                      && ((size_t)position < clientBuf[clientIdx].size));
+                      && ((wHECast)clientMem)[headerIdx].id == conversion);
               size_t charOfs = (size_t)((clientMem
                                          + ((wHECast)clientMem)[headerIdx].offset)
                                         - clientBuf[0].mem);
@@ -407,7 +411,8 @@ buildVarRedist(int headerIdx, size_t streamIdx,
         }
     }
   gatherXmap = buildVarXmap(partExts, clientBuf, (size_t)headerIdx,
-                            dstList, pioInterComm, collComm, varID, conf);
+                            dstList, partDescPreset, pioInterComm, collComm,
+                            varID, conf);
   if (cacheXmaps)
     {
       partSizes[0] = gatherExt.size;
@@ -712,6 +717,7 @@ writeNetCDFStreamParallel(size_t streamIdx,
   struct cacheRedist *restrict retained = rxWin[streamIdx].retained;
   const struct clientBuf *restrict clientBuf = rxWin[streamIdx].clientBuf;
   const struct winHeaderEntry *winDict = (wHECast)clientBuf[0].mem;
+  Xt_idxlist *partDescPreset = rxWin[streamIdx].clientDeco.lists;
 
   for (int varID = 0; varID < nvars; ++varID)
     if (mapping->numLvlsW[varID]) {
@@ -770,8 +776,11 @@ writeNetCDFStreamParallel(size_t streamIdx,
           varSize = (size_t)xt_idxlist_get_num_indices(preWriteChunk);
           /* transpose data into write deco */
           {
+            Xt_idxlist *varPartDescPreset
+              = partDescPreset ? partDescPreset + numClients_ * varID : NULL;
             gatherRedist = buildVarRedist(headerIdx, streamIdx,
-                                          preWriteChunk, conf);
+                                          preWriteChunk, varPartDescPreset,
+                                          conf);
             if (conf->cacheRedists) {
               retained[varID].redist = gatherRedist;
               retained[varID].sliceSize = varSize;
@@ -898,6 +907,7 @@ writeNetCDFStreamSerial(size_t streamIdx,
 
   const struct clientBuf *restrict clientBuf = rxWin[streamIdx].clientBuf;
   const struct winHeaderEntry *winDict = (wHECast)clientBuf[0].mem;
+  Xt_idxlist *partDescPreset = rxWin[streamIdx].clientDeco.lists;
 
   for (int varID = 0; varID < nvars; ++varID)
     if (numLvlsW[varID])
@@ -927,7 +937,10 @@ writeNetCDFStreamSerial(size_t streamIdx,
             varSize = 0;
             dstList = xt_idxempty_new();
           }
-          gatherRedist = buildVarRedist(headerIdx, streamIdx, dstList, conf);
+          Xt_idxlist *varPartDescPreset
+            = partDescPreset ? partDescPreset + numClients_ * varID : NULL;
+          gatherRedist = buildVarRedist(headerIdx, streamIdx,
+                                        dstList, varPartDescPreset, conf);
           if (conf->cacheRedists) {
             retained[varID].redist = gatherRedist;
             retained[varID].sliceSize = varSize;
@@ -1257,6 +1270,9 @@ writeGribStream(size_t streamIdx,
   struct passPlan (*passes)[collSize] = NULL;
   size_t numPasses = planPasses(streamIdx, mapping, conf, collSize, &passes);
   Xt_redist *varRedists = NULL;
+  size_t numClients = (size_t)numClients_;
+  Xt_idxlist (*partDescPreset)[numClients]
+    = (Xt_idxlist (*)[numClients])rxWin[streamIdx].clientDeco.lists;
   struct recordWrite *restrict writtenRecords = mapping->writtenRecords;
   size_t (*cdiPioFileWrite)(int fileID, const void *restrict buffer,
                             size_t len, int tsID)
@@ -1315,7 +1331,7 @@ writeGribStream(size_t streamIdx,
             myVarEnd = passes[pass][collRank].varEnd;
           displ = Realloc(displ, sizeof (*displ) * (numVarsInPass * 2 + 1));
           memset(displ, 0, sizeof (*displ) * (numVarsInPass + 1));
-          for (unsigned varIdx = 0; varIdx < numVarsInPass; ++varIdx)
+          for (size_t varIdx = 0; varIdx < numVarsInPass; ++varIdx)
             {
               int varID = varsInPass[varIdx].varID,
                 headerIdx = mapping->varMap[varID];
@@ -1353,8 +1369,11 @@ writeGribStream(size_t streamIdx,
                   dstList = xt_idxempty_new();
                 }
               displ[numVarsInPass + varIdx + 1] = (MPI_Aint)myAggSize;
-              varRedists[varIdx] = buildVarRedist(headerIdx,
-                                                  streamIdx, dstList, conf);
+              Xt_idxlist *varPartDescPreset
+                = partDescPreset ? partDescPreset[varIdx] : NULL;
+              varRedists[varIdx] = buildVarRedist(headerIdx, streamIdx,
+                                                  dstList, varPartDescPreset,
+                                                  conf);
             }
           /* merge all redists for current pass */
           if (numVarsInPass > 1)
@@ -1650,6 +1669,8 @@ cdiPioServerStreamOpen(const char *filename, char filemode,
       rxWin[streamIdx].prevLayout = NULL;
       rxWin[streamIdx].retained = NULL;
       rxWin[streamIdx].numRetained = 0;
+      rxWin[streamIdx].clientDeco.lists = NULL;
+      rxWin[streamIdx].clientDeco.uids = NULL;
 #ifdef HAVE_LIBNETCDF
       rxWin[streamIdx].ownerRank = rank;
 #endif
@@ -1741,6 +1762,10 @@ cdiPioServerStreamClose(stream_t *streamptr, int recordBufIsToBeDeleted)
       size_t streamIdx = indexOfID(&openStreams, streamID);
       destructRetained(rxWin[streamIdx].retained,
                        rxWin[streamIdx].numRetained);
+      if (rxWin[streamIdx].clientDeco.lists)
+        cdiPioDestroyPartDescPreset((size_t)numClients_,
+                                    (size_t)(vlistNvars(vlistID)),
+                                    &rxWin[streamIdx].clientDeco);
       Free(rxWin[streamIdx].retained);
       Free(rxWin[streamIdx].prevLayout);
       cdiPioServerStreamWinDestroy(streamIdx, conf);
@@ -1824,7 +1849,7 @@ cdiPioRecvStreamClose(void *buffer, int size, int *pos, MPI_Comm pioInterComm,
 
 static void
 cdiPioRecvStreamDefVlist(void *buffer, int size, int *pos,
-                         MPI_Comm pioInterComm,
+                         MPI_Comm pioInterComm, int tag,
                          const struct cdiPioConf *conf)
 {
   int serverStreamID, serverVlistID;
@@ -1875,10 +1900,58 @@ cdiPioRecvStreamDefVlist(void *buffer, int size, int *pos,
     .sendRPCData = 1,
   };
   struct clientBufSize bufSizes[numClients_];
-  bufSizes[0] = computeClientStreamBufSize(serverStreamID, &collectorData);
-  collectorData.sendRPCData = 0;
-  for (size_t i = 1; i < (size_t)numClients_; ++i)
-    bufSizes[i] = computeClientStreamBufSize(serverStreamID, &collectorData);
+  if (tag == STREAMDEFVLIST)
+    {
+      collectorData.partDesc = NULL;
+      bufSizes[0] = computeClientStreamBufSize(serverStreamID, &collectorData);
+      collectorData.sendRPCData = 0;
+      for (size_t clientIdx = 1; clientIdx < (size_t)numClients_; ++clientIdx)
+        bufSizes[clientIdx]
+          = computeClientStreamBufSize(serverStreamID, &collectorData);
+    }
+  else /* tag == STREAM_DEF_DECOMPOSED_VLIST */
+    {
+      size_t nVars = (size_t)(vlistNvars(serverVlistID));
+      /* unpack per-client index lists */
+      Xt_idxlist (*partDescPreset)[numClients_]
+        = Malloc(nVars * sizeof (*partDescPreset)),
+        *clientPartDesc = Malloc(nVars * sizeof (*clientPartDesc));
+      Xt_uid (*partDescUID)[numClients_]
+        = Malloc(nVars * sizeof (*partDescUID));
+      int remainingSize = size - *pos;
+      for (int clientIdx = 0; clientIdx < numClients_; ++clientIdx)
+        {
+          unsigned char *clientBuf = (unsigned char *)buffer + *pos;
+          int clientPos = 0;
+          for (size_t varIdx = 0; varIdx < nVars; ++varIdx)
+            {
+              xmpi(MPI_Unpack(clientBuf, remainingSize, &clientPos,
+                              partDescUID[varIdx]+clientIdx, 1, YAXT_UID_DT,
+                              pioInterComm));
+              Xt_uid uid = partDescUID[varIdx][clientIdx];
+              for (size_t prevVarIdx = 0; prevVarIdx < varIdx; ++prevVarIdx)
+                if (partDescUID[prevVarIdx][clientIdx] == uid)
+                  {
+                    clientPartDesc[varIdx] = clientPartDesc[prevVarIdx];
+                    goto got_idxlist;
+                  }
+              clientPartDesc[varIdx]
+                = xt_idxlist_unpack(clientBuf, remainingSize, &clientPos,
+                                    pioInterComm);
+              got_idxlist:
+              partDescPreset[varIdx][clientIdx] = clientPartDesc[varIdx];
+            }
+          remainingSize -= clientPos;
+          *pos += clientPos;
+          collectorData.partDesc = clientPartDesc;
+          bufSizes[clientIdx]
+            = computeClientStreamBufSize(serverStreamID, &collectorData);
+          collectorData.sendRPCData = 0;
+        }
+      Free(clientPartDesc);
+      rxWin[streamIdx].clientDeco.lists = &partDescPreset[0][0];
+      rxWin[streamIdx].clientDeco.uids = &partDescUID[0][0];
+    }
   cdiPioServerStreamWinCreate(streamIdx, no_locks_info,
                               cdiPioInqCollClientIntraComm(), bufSizes, conf);
   xmpi(MPI_Info_free(&no_locks_info));
@@ -1972,6 +2045,7 @@ void cdiPioCollectorMessageLoop()
         case STREAMFLUSHCLOSE:
         case STREAMCLOSE:
         case STREAMDEFVLIST:
+        case STREAM_DEF_DECOMPOSED_VLIST:
           {
             int size;
             xmpi(MPI_Get_count(&status, MPI_PACKED, &size));
@@ -1992,7 +2066,9 @@ void cdiPioCollectorMessageLoop()
                                       tag == STREAMFLUSHCLOSE, conf);
                 break;
               case STREAMDEFVLIST:
-                cdiPioRecvStreamDefVlist(buffer, size, &pos, pioInterComm, conf);
+              case STREAM_DEF_DECOMPOSED_VLIST:
+                cdiPioRecvStreamDefVlist(buffer, size, &pos, pioInterComm,
+                                         tag, conf);
                 break;
               }
             Free(buffer);
