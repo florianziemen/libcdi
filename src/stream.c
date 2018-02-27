@@ -1642,7 +1642,12 @@ void cdiStreamSetupVlist_(stream_t *streamptr, int vlistID)
               case CDI_FILETYPE_NC5:
                 {
                   taxis_t *taxisptr = taxisPtr(taxisID);
-                  if ( taxisptr->rdate == -1 ) taxisDefRdate(taxisID, 10101);
+                  if ( taxisptr->rdate == -1 )
+                    {
+                      int vdate = taxisInqVdate(taxisID);
+                      if ( vdate == 0 ) vdate = 10101;
+                      taxisDefRdate(taxisID, vdate);
+                    }
                 }
                 break;
 #endif
