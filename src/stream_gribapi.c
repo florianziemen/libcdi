@@ -464,7 +464,7 @@ void gribapiGetKeys(grib_handle *gh, int varID)
           varDefKeyInt(varID, CDI_KEY_SECTION2PADDINGLENGTH, (int) size);
           unsigned char *section2Padding = (unsigned char*) Malloc(size);
           grib_get_bytes(gh, "section2Padding", section2Padding, &size);
-          varDefKeyBytes(varID, CDI_KEY_SECTION2PADDING, section2Padding, size);
+          varDefKeyBytes(varID, CDI_KEY_SECTION2PADDING, section2Padding, (int)size);
           Free(section2Padding);
         }
     }
@@ -3040,6 +3040,7 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
       cdiInqKeyInt(vlistID, varID, CDI_KEY_SHAPEOFTHEEARTH, &shapeOfTheEarth);
       GRIB_CHECK(my_grib_set_long(gh, "shapeOfTheEarth", (long)shapeOfTheEarth), 0);
 
+      int grib2LocalSectionNumber, section2PaddingLength;
       int mpimType, mpimClass, mpimUser;
       if ( cdiInqKeyInt(vlistID, varID, CDI_KEY_MPIMTYPE, &mpimType) == CDI_NOERR &&
            cdiInqKeyInt(vlistID, varID, CDI_KEY_MPIMCLASS, &mpimClass) == CDI_NOERR &&
@@ -3061,6 +3062,17 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
           int revStatus;
           if ( cdiInqKeyInt(vlistID, varID, CDI_KEY_REVSTATUS, &revStatus) == CDI_NOERR )
             grib_set_long(gh, "revStatus", revStatus);
+        }
+      else if ( cdiInqKeyInt(vlistID, varID, CDI_KEY_GRIB2LOCALSECTIONNUMBER, &grib2LocalSectionNumber) == CDI_NOERR &&
+                cdiInqKeyInt(vlistID, varID, CDI_KEY_SECTION2PADDINGLENGTH, &section2PaddingLength) == CDI_NOERR )
+        {
+          grib_set_long(gh, "grib2LocalSectionPresent", 1);
+          grib_set_long(gh, "grib2LocalSectionNumber", grib2LocalSectionNumber);
+          unsigned char *section2Padding = (unsigned char*) Malloc(section2PaddingLength);
+          cdiInqKeyBytes(vlistID, varID, CDI_KEY_SECTION2PADDING, section2Padding, &section2PaddingLength);
+          size_t len = section2PaddingLength;
+          grib_set_bytes(gh, "section2Padding", section2Padding, &len);
+          Free(section2Padding);
         }
     }
 

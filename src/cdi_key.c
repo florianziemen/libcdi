@@ -40,6 +40,9 @@ cdi_key_t *new_key(cdi_keys_t *keysp, int key)
   keysp->nelems++;
 
   keyp->key = key;
+  keyp->length = 0;
+  keyp->type = 0;
+  keyp->v.s = NULL;
 
   return keyp;
 }
