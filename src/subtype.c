@@ -586,7 +586,8 @@ void subtypeGetGlobalDataP(subtype_t *subtype_ptr, int key, int *val, char *cval
   if (att_ptr != NULL) 
     {
       *val = att_ptr->val;
-      cval = att_ptr->cval;
+      if ( att_ptr->cval )
+        strcpy(cval, att_ptr->cval);
 /*      Error("Could not find attribute with key %d", key); */
     }
 }
