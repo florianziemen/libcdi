@@ -1661,53 +1661,46 @@ void cdf_def_mapping(stream_t *streamptr, int gridID)
 static
 void cdfDefCharaxis(int subtypeID, stream_t *streamptr, int vlistID)
 {
-
   int fileID = streamptr->fileID;
 /* Retrieve global Data of char axis */
-
   int dummyval;
-  char *dimnameptr, *stdnameptr, *longnameptr, *axisnameptr;
+  char axisname[CDI_MAX_NAME]; axisname[0] = 0;
   char longname[CDI_MAX_NAME]; longname[0] = 0;
-  char stdname[CDI_MAX_NAME]; longname[0] = 0;
+  char stdname[CDI_MAX_NAME]; stdname[0] = 0;
+  char dimname[CDI_MAX_NAME]; dimname[0] = 0;
 
   bool isy = false;
-  subtypeGetGlobalData(subtypeID, CDI_KEY_XNAME, &dummyval, axisnameptr);
-  if ( !axisnameptr )
+  subtypeGetGlobalData(subtypeID, CDI_KEY_XNAME, &dummyval, axisname);
+  if ( !axisname[0] )
     {
-      subtypeGetGlobalData(subtypeID, CDI_KEY_YNAME, &dummyval, axisnameptr);
-      if ( !axisnameptr )
+      subtypeGetGlobalData(subtypeID, CDI_KEY_YNAME, &dummyval, axisname);
+      if ( !axisname[0] )
         return;
       isy = true;
     }
        
   if ( !isy )
     {
-      subtypeGetGlobalData(subtypeID, CDI_KEY_XLONGNAME, &dummyval, longnameptr);
-      strcpy(longname, longnameptr);
-      subtypeGetGlobalData(subtypeID, CDI_KEY_XSTDNAME, &dummyval, stdnameptr);
-      strcpy(stdname, stdnameptr);
-      subtypeGetGlobalData(subtypeID, CDI_KEY_XDIMNAME, &dummyval, dimnameptr);
+      subtypeGetGlobalData(subtypeID, CDI_KEY_XLONGNAME, &dummyval, longname);
+      subtypeGetGlobalData(subtypeID, CDI_KEY_XSTDNAME, &dummyval, stdname);
+      subtypeGetGlobalData(subtypeID, CDI_KEY_XDIMNAME, &dummyval, dimname);
     }
   else
     {
-
-      subtypeGetGlobalData(subtypeID, CDI_KEY_YLONGNAME, &dummyval, longnameptr);
-      strcpy(longname, longnameptr);
-      subtypeGetGlobalData(subtypeID, CDI_KEY_YSTDNAME, &dummyval, stdnameptr);
-      strcpy(stdname, stdnameptr);
-      subtypeGetGlobalData(subtypeID, CDI_KEY_YDIMNAME, &dummyval, dimnameptr);
+      subtypeGetGlobalData(subtypeID, CDI_KEY_YLONGNAME, &dummyval, longname);
+      subtypeGetGlobalData(subtypeID, CDI_KEY_YSTDNAME, &dummyval, stdname);
+      subtypeGetGlobalData(subtypeID, CDI_KEY_YDIMNAME, &dummyval, dimname);
     }
 
 /* Define first dimension; topic of strings, e.g. basin: */
 
-  char dimname[CDI_MAX_NAME]; dimname[0] = 0;
-  if ( !dimnameptr )
+  if ( !dimname[0] )
     {
       memcpy(dimname, "region", 7);
       dimname[6] = 0;
     }
-  else
-    strcpy(dimname, dimnameptr);
+
+  if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
   int nentries = subtypeNentries(subtypeID);
   int dimID = checkDimName(fileID, nentries, dimname);
@@ -1729,15 +1722,15 @@ void cdfDefCharaxis(int subtypeID, stream_t *streamptr, int vlistID)
   dimIDs[0] = dimID;
   dimIDs[1] = strlenID;
 
-  char axisname[CDI_MAX_NAME]; axisname[0] = 0; strcpy(axisname, axisnameptr);
-
   int ncaxisid;
   int status = nc_inq_varid(fileID, axisname, &ncaxisid);
   if ( status != NC_NOERR )
     {
       cdf_def_var(fileID, axisname, NC_CHAR, 2, dimIDs, &ncaxisid);
-      cdf_put_att_text(fileID, ncaxisid, "long_name", strlen(longname), longname);
-      cdf_put_att_text(fileID, ncaxisid, "std_name", strlen(stdname), stdname);
+      if ( longname[0] )
+        cdf_put_att_text(fileID, ncaxisid, "long_name", strlen(longname), longname);
+      if ( stdname[0] )
+        cdf_put_att_text(fileID, ncaxisid, "standard_name", strlen(stdname), stdname);
     }
   else
     return;
