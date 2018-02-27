@@ -2618,7 +2618,7 @@ void cdf_set_grid_to_similar_vars(ncvar_t *ncvar1, ncvar_t *ncvar2, int gridtype
 }
 
 static
-char *cdf_load_cval(size_t strlen, int varid, int ncid, int cnr, size_t dimlength)
+char *cdf_load_cval(size_t strlen, int varid, int ncid, int cnr)
 {
   size_t startc[] = {cnr, 0};
   size_t countc[] = {1, strlen};
@@ -2626,10 +2626,9 @@ char *cdf_load_cval(size_t strlen, int varid, int ncid, int cnr, size_t dimlengt
   char *cval = (char*) Malloc((strlen) * sizeof(char));
   cdf_get_vara_text(ncid, varid, startc, countc, cval);
 
-  if ( cval != NULL )
-    return cval;
-  else
+  if ( !cval )
     Error("Could not get character axis value from variable %d for index %d\n", varid, cnr);
+  return cval;
 }
 
 static
@@ -2649,7 +2648,7 @@ void add_charsubtype(int axis, int vlistID, grid_t *grid, int axisvarid, int nci
 
       for ( int cnr = 0; cnr < grid->x.size; cnr++ )
         {
-          char *cval = cdf_load_cval(grid->x.clength, axisvarid, ncid, cnr, grid->x.size);
+          char *cval = cdf_load_cval(grid->x.clength, axisvarid, ncid, cnr);
           struct subtype_entry_t *string = subtypeEntryInsert(charAxis);
           subtypeDefEntryDataP(string, cnr, strlen(cval), cval);
         }
@@ -2670,7 +2669,7 @@ void add_charsubtype(int axis, int vlistID, grid_t *grid, int axisvarid, int nci
 
       for ( int cnr = 0; cnr < grid->y.size;  cnr++)
         {
-          char *cval = cdf_load_cval(grid->y.clength, axisvarid, ncid, cnr, grid->y.size);
+          char *cval = cdf_load_cval(grid->y.clength, axisvarid, ncid, cnr);
           struct subtype_entry_t *string = subtypeEntryInsert(charAxis);
           subtypeDefEntryDataP(string, cnr, strlen(cval), cval);
         }

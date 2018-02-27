@@ -12,6 +12,7 @@
 #include "varscan.h"
 #include "vlist.h"
 #include "zaxis.h"
+#include "subtype.h"
 
 
 #define  POSITIVE_UP    1
@@ -1658,175 +1659,69 @@ void cdf_def_mapping(stream_t *streamptr, int gridID)
 }
 
 static
-void cdfDefCharaxis(int subtypeID)
+void cdfDefCharaxis(int subtypeID, stream_t *streamptr, int vlistID)
 {
-/* Define Variable */
 
-  int dimIDs[2];
-  dimIDs[0] = dimID;
-  dimIDs[1] = strlenID;
+  int fileID = streamptr->fileID;
+/* Retrieve global Data of char axis */
 
-  char axisname[CDI_MAX_NAME]; axisname[0] = 0;
-  char **cvals = (char **) Malloc(dimlen * sizeof(char *));
-  for ( size_t i = 0; i < dimlen; i++ )
-    cvals[i] = Malloc(strlen * sizeof(char) );
-  int ncaxisid;
-  if ( xory == 0 )
+  int dummyval;
+  char *dimnameptr, *stdnameptr, *longnameptr, *axisnameptr;
+  char longname[CDI_MAX_NAME]; longname[0] = 0;
+  char stdname[CDI_MAX_NAME]; longname[0] = 0;
+
+  bool isy = false;
+  subtypeGetGlobalData(subtypeID, CDI_KEY_XNAME, &dummyval, axisnameptr);
+  if ( !axisnameptr )
     {
-      cdiGridInqKeyStr(gridID, CDI_KEY_XNAME, CDI_MAX_NAME, axisname);
-      gridInqXCvals(gridID, cvals);
+      subtypeGetGlobalData(subtypeID, CDI_KEY_YNAME, &dummyval, axisnameptr);
+      if ( !axisnameptr )
+        return;
+      isy = true;
+    }
+       
+  if ( !isy )
+    {
+      subtypeGetGlobalData(subtypeID, CDI_KEY_XLONGNAME, &dummyval, longnameptr);
+      strcpy(longname, longnameptr);
+      subtypeGetGlobalData(subtypeID, CDI_KEY_XSTDNAME, &dummyval, stdnameptr);
+      strcpy(stdname, stdnameptr);
+      subtypeGetGlobalData(subtypeID, CDI_KEY_XDIMNAME, &dummyval, dimnameptr);
     }
   else
     {
-      cdiGridInqKeyStr(gridID, CDI_KEY_YNAME, CDI_MAX_NAME, axisname);
-      gridInqXCvals(gridID, cvals);
+
+      subtypeGetGlobalData(subtypeID, CDI_KEY_YLONGNAME, &dummyval, longnameptr);
+      strcpy(longname, longnameptr);
+      subtypeGetGlobalData(subtypeID, CDI_KEY_YSTDNAME, &dummyval, stdnameptr);
+      strcpy(stdname, stdnameptr);
+      subtypeGetGlobalData(subtypeID, CDI_KEY_YDIMNAME, &dummyval, dimnameptr);
     }
-  int status = nc_inq_varid(fileID, axisname, &ncaxisid);
-  if ( status != NC_NOERR )
+
+/* Define first dimension; topic of strings, e.g. basin: */
+
+  char dimname[CDI_MAX_NAME]; dimname[0] = 0;
+  if ( !dimnameptr )
     {
-      cdf_def_var(fileID, axisname, NC_CHAR, 2, dimIDs, &ncaxisid);
-      if ( xory == 0 )
-        cdfPutGridStdAtts(fileID, ncaxisid, gridID, 'X', &gridInqsX);
-      else
-        cdfPutGridStdAtts(fileID, ncaxisid, gridID, 'Y', &gridInqsY);
+      memcpy(dimname, "region", 7);
+      dimname[6] = 0;
     }
   else
-    return;
-  cdf_enddef(fileID);
+    strcpy(dimname, dimnameptr);
 
-/* Write Var */
+  int nentries = subtypeNentries(subtypeID);
+  int dimID = checkDimName(fileID, nentries, dimname);
+  if ( dimID == CDI_UNDEFID ) cdf_def_dim(fileID, dimname, nentries, &dimID);
 
-  size_t start[2], count[2];
-  start[1] = 0;
-  count[0] = 1;
-  count[1] = strlen;
-  for (size_t i = 0; i < dimlen; i++)
-    {
-      start[0] = i;
-      status = nc_put_vara_text(fileID, ncaxisid, start, count, cvals[i]);
-    }
+/* Define second dimension; maximal string length */
 
-  ncgrid[gridindex].gridID = gridID;
-  if ( xory == 0 )
-    {
-      ncgrid[gridindex].ncIDs[CDF_DIMID_X] = dimID;
-      ncgrid[gridindex].ncIDs[CDF_VARID_X] = ncaxisid;
-    }
-  else
-    {
-      ncgrid[gridindex].ncIDs[CDF_DIMID_Y] = dimID;
-      ncgrid[gridindex].ncIDs[CDF_VARID_Y] = ncaxisid;
-    }
-  streamptr->ncmode = 2;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  if ( streamptr->ncgrid[gridindex].ncIDs[CDF_DIMID_X] != CDI_UNDEFID ) return;
-
-  size_t dimlen = ( xory == 0 ) ? gridInqXsize(gridID) : gridInqYsize(gridID);
-  int dimID, strlenID;
-  ncgrid_t *ncgrid = streamptr->ncgrid;
-
-  char dimname[CDI_MAX_NAME+3]; dimname[0] = 0;
-  if ( dimname[0] ) cdiGridInqKeyStr(gridID, dimKey, CDI_MAX_NAME, dimname);
-
-  /* Check for all grids up to gridindex whether it already is defined */
-
-  int nsubs = vlistNsubtypes(int vlistID)
-  for ( int subt = 0; subt<nsubs; subt++ )
-    {
-      int subtypeID = vlistSubtype(vlistID, subt);
-
-      int dimlenLoop = subtypeNentries(subtypeID);
-      char *dimnameLoop, *dummyc;
-      int strlenLoop, dummy;
-      if ( xory == 0 )
-        subtypeGetGlobalData(subtypeID, CDI_KEY_XDIMNAME, dummy, dimnameLoop);
-      else
-        subtypeGetGlobalData(subtypeID, CDI_KEY_YDIMNAME, dummy, dimnameLoop);
-      subtypeGetGlobalData(subtypeID, CDI_KEY_STRLEN, strlenLoop, dummyc);
-
-      if ( (size_t )dimlenLoop == dimlen && strcmp(dimnameLoop, dimname) == 0 )
-    }
-
-
-  if ( ndims && pvals == NULL ) cdiGridInqKeyStr(gridID, dimKey, CDI_MAX_NAME, dimname);
-
-          if ( dimlen == dimlen0 && lname )
-            {
-              double (*inqVal)(int gridID, size_t index) = gridAxisInq->axisVal;
-              if ( IS_EQUAL(inqVal(gridID0, 0), inqVal(gridID, 0)) &&
-                   IS_EQUAL(inqVal(gridID0, dimlen-1), inqVal(gridID, dimlen-1)) )
-                {
-                  dimID = ncgrid[index].ncIDs[dimKey == CDI_KEY_XDIMNAME
-                                              ? CDF_DIMID_X : CDF_DIMID_Y];
-                  break;
-                }
-            }
-
-  for ( int index = 0; index < gridindex; index++ )
-    {
-      int gridID0 = ncgrid[index].gridID;
-      int gridtype0 = gridInqType(gridID0);
-      if ( gridtype0 == GRID_CHARXY )
-        {
-          if ( gridInqXIsc(gridID0) == strlen &&
-               gridInqXsize(gridID0) == dimlen )
-            return;
-          else if ( gridInqYIsc(gridID0) == strlen &&
-               gridInqYsize(gridID0) == dimlen )
-            return;
-        }
-    }
-
-  int fileID  = streamptr->fileID;
-
-  if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
-
-/* Define Dims */
-
-  char dimname[CDI_MAX_NAME+3];
-  dimname[0] = 0;
-  if ( xory == 0 )
-    cdiGridInqKeyStr(gridID, CDI_KEY_XDIMNAME, CDI_MAX_NAME, dimname);
-  else
-    cdiGridInqKeyStr(gridID, CDI_KEY_YDIMNAME, CDI_MAX_NAME, dimname);
-  if ( dimname[0] == 0 ) { memcpy(dimname, "region", 7); dimname[6] = 0; }
-  dimID = checkDimName(fileID, dimlen, dimname);
-  if ( dimID == CDI_UNDEFID ) cdf_def_dim(fileID, dimname, dimlen, &dimID);
-
-/* Define strlength dim */
-
+  int stringlen;
   strcpy(dimname, "strlen");
-  strlenID = checkDimName(fileID, strlen, dimname);
-  if ( strlenID == CDI_UNDEFID ) cdf_def_dim(fileID, dimname, strlen, &strlenID);
+
+  subtypeGetGlobalData(subtypeID, CDI_KEY_STRLEN, &stringlen, NULL);
+
+  int strlenID = checkDimName(fileID, stringlen, dimname);
+  if ( strlenID == CDI_UNDEFID ) cdf_def_dim(fileID, dimname, stringlen, &strlenID);
 
 /* Define Variable */
 
@@ -1834,29 +1729,15 @@ void cdfDefCharaxis(int subtypeID)
   dimIDs[0] = dimID;
   dimIDs[1] = strlenID;
 
-  char axisname[CDI_MAX_NAME]; axisname[0] = 0;
-  char **cvals = (char **) Malloc(dimlen * sizeof(char *));
-  for ( size_t i = 0; i < dimlen; i++ )
-    cvals[i] = Malloc(strlen * sizeof(char) );
+  char axisname[CDI_MAX_NAME]; axisname[0] = 0; strcpy(axisname, axisnameptr);
+
   int ncaxisid;
-  if ( xory == 0 )
-    {
-      cdiGridInqKeyStr(gridID, CDI_KEY_XNAME, CDI_MAX_NAME, axisname);
-      gridInqXCvals(gridID, cvals);
-    }
-  else
-    {
-      cdiGridInqKeyStr(gridID, CDI_KEY_YNAME, CDI_MAX_NAME, axisname);
-      gridInqXCvals(gridID, cvals);
-    }
   int status = nc_inq_varid(fileID, axisname, &ncaxisid);
   if ( status != NC_NOERR )
     {
       cdf_def_var(fileID, axisname, NC_CHAR, 2, dimIDs, &ncaxisid);
-      if ( xory == 0 )
-        cdfPutGridStdAtts(fileID, ncaxisid, gridID, 'X', &gridInqsX);
-      else
-        cdfPutGridStdAtts(fileID, ncaxisid, gridID, 'Y', &gridInqsY);
+      cdf_put_att_text(fileID, ncaxisid, "long_name", strlen(longname), longname);
+      cdf_put_att_text(fileID, ncaxisid, "std_name", strlen(stdname), stdname);
     }
   else
     return;
@@ -1867,15 +1748,20 @@ void cdfDefCharaxis(int subtypeID)
   size_t start[2], count[2];
   start[1] = 0;
   count[0] = 1;
-  count[1] = strlen;
-  for (size_t i = 0; i < dimlen; i++)
+  count[1] = stringlen;
+  for (size_t i = 0; i < nentries; i++)
     {
+      char *cvalptr;
+      char cval[CDI_MAX_NAME];
+      subtypeGetCharaxisData(subtypeID, i, &dummyval, cval);
+      strcpy(cval, cvalptr);
       start[0] = i;
-      status = nc_put_vara_text(fileID, ncaxisid, start, count, cvals[i]);
+      status = nc_put_vara_text(fileID, ncaxisid, start, count, cval);
     }
 
+/*  ncgrid_t *ncgrid = streamptr->ncgrid;
   ncgrid[gridindex].gridID = gridID;
-  if ( xory == 0 )
+  if ( isy == 0 )
     {
       ncgrid[gridindex].ncIDs[CDF_DIMID_X] = dimID;
       ncgrid[gridindex].ncIDs[CDF_VARID_X] = ncaxisid;
@@ -1884,7 +1770,7 @@ void cdfDefCharaxis(int subtypeID)
     {
       ncgrid[gridindex].ncIDs[CDF_DIMID_Y] = dimID;
       ncgrid[gridindex].ncIDs[CDF_VARID_Y] = ncaxisid;
-    }
+    } */
   streamptr->ncmode = 2;
 }
 
@@ -2124,11 +2010,12 @@ void cdfDefVars(stream_t *streamptr)
       if ( streamptr->zaxisID[index] == CDI_UNDEFID ) cdfDefZaxis(streamptr, zaxisID);
     }
 
-  int nsubs = vlistNsubtypes(int vlistID)
-  for ( int subt = 0; subt<nsubs; subt++ )
+  int nsubs = vlistNsubtypes(vlistID);
+  for ( int subt = 0; subt < nsubs; subt++ )
     {
       int subtypeID = vlistSubtype(vlistID, subt);
-      cdfDefCharaxis(stream_t *streamptr, int gridID, int gridindex, int xory, int strlen, int vlistID)
+      if ( subtypeKind(subtypeID) == SUBTYPE_CHARAXIS )
+        cdfDefCharaxis(subtypeID, streamptr, vlistID);
     }
   if ( streamptr->ncmode != 2 )
     {

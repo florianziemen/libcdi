@@ -578,14 +578,11 @@ void subtypeGetGlobalDataP(subtype_t *subtype_ptr, int key, int *val, char *cval
   if (subtype_ptr == NULL)  Error("Internal error!");
   /* find entry in linked list */
   struct subtype_attr_t* att_ptr = subtypeAttrFind(subtype_ptr->globals.atts, key);
-  if (att_ptr == NULL) 
-    {
-      Error("Could not find attribute with key %d", key);
-    }
-  else
+  if (att_ptr != NULL) 
     {
       *val = att_ptr->val;
       cval = att_ptr->cval;
+/*      Error("Could not find attribute with key %d", key); */
     }
 }
 
@@ -605,11 +602,11 @@ int subtypeTypeattsPtr(subtype_t* subtype_ptr, int nr )
     {
     case 0: return subtype_ptr->subtype; break;
     case 1: return subtype_ptr->nentries; break;
-    default: Error("Structure subtype does not define a %dth attribute", nr);
+    default: Error("Structure subtype does not define a %dth attribute", nr); return 0;
     } 
 }
 
-int   subtypeKind(int subtypeID)
+int subtypeKind(int subtypeID)
 {
   subtype_t *subtype_ptr = (subtype_t *)reshGetVal(subtypeID, &subtypeOps);
   return subtypeTypeattsPtr(subtype_ptr, 0);
@@ -642,30 +639,32 @@ void subtypeDefEntryDataP(struct subtype_entry_t *subtype_entry_ptr, int key, in
     }
 }
 
-void subtypeGetCharaxisDataP(subtype_t* subtype_ptr, int key, int *val, char *cval)
+int subtypeGetCharaxisDataP(subtype_t* subtype_ptr, int key, int *val, char *cval)
 {
   struct subtype_entry_t *subtype_entry_ptr = subtype_ptr->entries;
   if (subtype_entry_ptr == NULL)  Error("Internal error!");
 
-  struct subtype_attr_t* att_ptr = subtype_entry_ptr->atts;
-  if (att_ptr == NULL)  Error("Internal error!");
-
-  while ( key != att_ptr->key )
+  while ( key != subtype_entry_ptr->self )
     {
       subtype_entry_ptr = subtype_entry_ptr->next;
       if ( subtype_entry_ptr == NULL )
-        break;
-      att_ptr = subtype_entry_ptr->atts;
-      if ( att_ptr == NULL )
-        break;
+        return 1;
+      if ( key > subtype_entry_ptr->self )
+        return 2;
     }
-  
+
+  struct subtype_attr_t* att_ptr = subtype_entry_ptr->atts;
+  if (att_ptr == NULL)  Error("Internal error!");
+
+  cval = att_ptr->cval;
+  *val = att_ptr->val;
+  return 0;
 }
 
-void   subtypeGetCharaxisData(int subtypeID, int key, int *val, char *cval)
+int subtypeGetCharaxisData(int subtypeID, int key, int *val, char *cval)
 {
   subtype_t *subtype_ptr = (subtype_t *)reshGetVal(subtypeID, &subtypeOps);
-  return subtypeGetEntryDataP(subtype_ptr, key, val, cval);
+  return subtypeGetCharaxisDataP(subtype_ptr, key, val, cval);
 }
 
 
