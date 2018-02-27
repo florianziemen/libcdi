@@ -387,6 +387,7 @@ static void subtypePrintKernelCharaxis(subtype_t *subtype_ptr, FILE *fp)
   /* print global attributes of this subtype */
   struct subtype_attr_t* ptr = subtype_ptr->globals.atts;
   if (ptr != NULL)  fprintf(fp, "# \n# character axis ID %d\n#\n# character axis attributes\n", subtype_ptr->self);
+  int stringlen = 0;
   while (ptr != NULL) {
     char temp[CDI_MAX_NAME];
     switch (ptr->key)
@@ -399,13 +400,17 @@ static void subtypePrintKernelCharaxis(subtype_t *subtype_ptr, FILE *fp)
       case CDI_KEY_YDIMNAME:  strcpy(temp, "dimname"); break;
       case CDI_KEY_XSTDNAME:
       case CDI_KEY_YSTDNAME:   strcpy(temp, "stdname"); break;
-      case CDI_KEY_STRLEN:     strcpy(temp, "stringlen"); break;
       default: sprintf(temp, "%d", ptr->key); break;
       }
+    if ( ptr->key == CDI_KEY_STRLEN )
+      {
+        strcpy(temp, "stringlen");
+        stringlen = ptr->val;
+        fprintf(fp, "%-9s = %d\n", temp, stringlen);  
+      } 
     if ( ptr->cval != NULL )
-      fprintf(fp, "%10s = %30s\n", temp, ptr->cval);    
-    else
-      fprintf(fp, "%10s = %30d\n", temp, ptr->val);    
+      fprintf(fp, "%-9s = %-.*s\n", temp, (int) strlen(ptr->cval), ptr->cval);    
+
     ptr = ptr->next;
   } 
   /* print attributes for each subtype */
@@ -415,7 +420,7 @@ static void subtypePrintKernelCharaxis(subtype_t *subtype_ptr, FILE *fp)
   while (entry != NULL) {
     ptr = entry->atts;
     while (ptr != NULL) {
-      fprintf(fp, "%10d = %30s\n", ptr->key, ptr->cval);    
+      fprintf(fp, "%-9d = %-.*s\n", ptr->key, stringlen, ptr->cval);    
       ptr = ptr->next;
     } 
     entry = entry->next;
