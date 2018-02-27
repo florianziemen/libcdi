@@ -16,6 +16,7 @@
 #include "stream_cdf.h"
 #include "cdf_int.h"
 #include "varscan.h"
+#include "subtype.h"
 #include "vlist.h"
 #include "cdf_util.h"
 #include "cdf_lazy_grid.h"
@@ -2030,20 +2031,6 @@ void cdf_load_vals(size_t size, int ndims, int varid, ncvar_t *ncvar, double **g
 }
 
 static
-void cdf_load_cvals(size_t size, int varid, ncvar_t *ncvar, char ***gridvals, size_t dimlength)
-{
-  size_t startc[] = {0, 0};
-  size_t countc[] = {1, size/dimlength};
-  *gridvals = (char **) Malloc(dimlength * sizeof(char *));
-  for ( size_t i = 0; i < dimlength; i++ )
-    {
-      (*gridvals)[i] = (char*) Malloc((size/dimlength) * sizeof(char));
-      cdf_get_vara_text(ncvar->ncid, varid, startc, countc, (*gridvals)[i]);
-      startc[0] = i+1;
-    }
-}
-
-static
 void cdf_load_bounds(size_t size, ncvar_t *ncvar, double **gridbounds, struct cdfLazyGridIds *cellBoundsGet)
 {
   if ( CDI_netcdf_lazy_grid_load )
@@ -2213,7 +2200,7 @@ bool cdf_read_xcoord(struct cdfLazyGrid *restrict lazyGrid, ncdim_t *ncdims, ncv
 
   if ( datatype == CDI_DATATYPE_UINT8 && !CDI_netcdf_lazy_grid_load )
     {
-      cdf_load_cvals(size, xvarid, axisvar, &grid->x.cvals, *xsize);
+/*      cdf_load_cvals(size, xvarid, axisvar, &grid->x.cvals, *xsize); */
       grid->x.clength = size / (*xsize) ;
     }
   else
@@ -2282,7 +2269,7 @@ bool cdf_read_ycoord(struct cdfLazyGrid *restrict lazyGrid, ncdim_t *ncdims, ncv
 
   if ( datatype == CDI_DATATYPE_UINT8 && !CDI_netcdf_lazy_grid_load )
     {
-      cdf_load_cvals(size, yvarid, axisvar, &grid->y.cvals, *ysize);
+/*      cdf_load_cvals(size, yvarid, axisvar, &grid->y.cvals, *ysize); */
       grid->y.clength = size / (*ysize) ;
     }
   else
@@ -2639,6 +2626,67 @@ void cdf_set_grid_to_similar_vars(ncvar_t *ncvar1, ncvar_t *ncvar2, int gridtype
 }
 
 static
+char *cdf_load_cval(size_t strlen, int varid, int ncid, int cnr)
+{
+  size_t startc[] = {cnr, 0};
+  size_t countc[] = {1, strlen};
+
+  char *cval = (char*) Malloc((strlen) * sizeof(char));
+  cdf_get_vara_text(ncid, varid, startc, countc, cval);
+
+  if ( !cval )
+    Error("Could not get character axis value from variable %d for index %d\n", varid, cnr);
+  return cval;
+}
+
+static
+void add_charsubtype(int axis, int vlistID, grid_t *grid, int axisvarid, int ncid)
+{
+  if ( axis == X_AXIS )
+    {
+      subtype_t *charAxis;
+      subtypeAllocate(&charAxis, SUBTYPE_CHARAXIS);
+
+      subtypeDefGlobalDataP(charAxis, CDI_KEY_STRLEN, grid->x.clength, NULL);
+
+      subtypeDefGlobalDataP(charAxis, CDI_KEY_XNAME, 0, (char *)grid->x.name);
+      subtypeDefGlobalDataP(charAxis, CDI_KEY_XDIMNAME, 0, (char *)grid->x.dimname);
+      subtypeDefGlobalDataP(charAxis, CDI_KEY_XLONGNAME, 0, (char *)grid->x.longname);
+      subtypeDefGlobalDataP(charAxis, CDI_KEY_XSTDNAME, 0, (char *)grid->x.stdname);
+
+      for ( int cnr = 0; cnr < grid->x.size; cnr++ )
+        {
+          char *cval = cdf_load_cval(grid->x.clength, axisvarid, ncid, cnr);
+          struct subtype_entry_t *string = subtypeEntryInsert(charAxis);
+          subtypeDefEntryDataP(string, cnr, strlen(cval), cval);
+        }
+
+      vlistDefTileSubtype(vlistID, charAxis);
+    }
+  else if ( axis == Y_AXIS )
+    {
+      subtype_t *charAxis;
+      subtypeAllocate(&charAxis, SUBTYPE_CHARAXIS);
+
+      subtypeDefGlobalDataP(charAxis, CDI_KEY_STRLEN, grid->y.clength, NULL);
+
+      subtypeDefGlobalDataP(charAxis, CDI_KEY_YNAME, 0, (char *)grid->y.name);
+      subtypeDefGlobalDataP(charAxis, CDI_KEY_YDIMNAME, 0, (char *)grid->y.dimname);
+      subtypeDefGlobalDataP(charAxis, CDI_KEY_YLONGNAME, 0, (char *)grid->y.longname);
+      subtypeDefGlobalDataP(charAxis, CDI_KEY_YSTDNAME, 0, (char *)grid->y.stdname);
+
+      for ( int cnr = 0; cnr < grid->y.size;  cnr++)
+        {
+          char *cval = cdf_load_cval(grid->y.clength, axisvarid, ncid, cnr);
+          struct subtype_entry_t *string = subtypeEntryInsert(charAxis);
+          subtypeDefEntryDataP(string, cnr, strlen(cval), cval);
+        }
+
+      vlistDefTileSubtype(vlistID, charAxis);
+    }
+}
+
+static
 int cdf_define_all_grids(ncgrid_t *ncgrid, int vlistID, ncdim_t *ncdims, int nvars, ncvar_t *ncvars,
                          int timedimid, unsigned char *uuidOfHGrid, char *gridfile, int number_of_grid_used)
 {
@@ -2789,6 +2837,13 @@ int cdf_define_all_grids(ncgrid_t *ncgrid, int vlistID, ncdim_t *ncdims, int nva
           if ( gridAdded.isNew ) lazyGrid = NULL;
           if ( projAdded.isNew ) lazyProj = NULL;
 
+          if ( grid->type == GRID_CHARXY )
+            {
+              if ( grid->x.clength > 0 )
+                add_charsubtype(X_AXIS, vlistID, grid, xvarid, ncvars[xvarid].ncid);
+              if ( grid->y.clength > 0 )
+                add_charsubtype(Y_AXIS, vlistID, grid, yvarid, ncvars[yvarid].ncid);
+            }
           if ( lazyGrid )
             {
               if ( CDI_netcdf_lazy_grid_load ) cdfLazyGridDestroy(lazyGrid);
@@ -2885,7 +2940,7 @@ int cdf_define_all_zaxes(stream_t *streamptr, int vlistID, ncdim_t *ncdims, int 
                     {
                       zdatatype = CDI_DATATYPE_UINT8;
                       zclength = ncdims[ncvars[zvarid].dimids[1]].len;
-                      cdf_load_cvals(zsize*zclength, zvarid, ncvar, &zcvals, zsize);
+/*                      cdf_load_cvals(zsize*zclength, zvarid, ncvar, &zcvals, zsize); */
                     }
                 }
 
