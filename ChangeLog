@@ -1,3 +1,7 @@
+2018-02-27  Uwe Schulzweida
+
+        * Added support for GRIB2 key section2Padding
+
 2018-02-19  Uwe Schulzweida
 
 	* scanTimestep1: set default of rdate to vdate (bug fix)
