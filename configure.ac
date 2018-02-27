@@ -176,19 +176,20 @@ AC_ARG_ENABLE([mpi],
           [AC_MSG_FAILURE([Cannot link Fortran MPI programs.])
            enable_MPI=no],[])])],
     [enable_mpi=no])
-AS_IF([test x"${enable_mpi}" = x"yes"],
+AS_IF([test x"${enable_mpi}" = xyes],
       [USE_MPI=yes])
 HAVE_PARALLEL_NC4=0
 enable_ppm=no
 AS_IF([test x"$USE_MPI" = xyes],
   [AC_DEFINE([USE_MPI],[1],[parallel I/O requested and available])
+dnl test properties of MPI system
    AC_PATH_PROGS([MPI_LAUNCH],[mpirun mpiexec],[true])
+   saved_CFLAGS=$CFLAGS
+   saved_LIBS=$LIBS
+   CFLAGS="$CFLAGS $MPI_C_INCLUDE"
+   LIBS="$LIBS $MPI_C_LIB"
    AS_IF([test x"$cross_compiling" = xno],
      [AC_MSG_CHECKING([if $MPI_LAUNCH works])
-      saved_CFLAGS=$CFLAGS
-      saved_LIBS=$LIBS
-      CFLAGS="$CFLAGS $MPI_C_INCLUDE"
-      LIBS="$LIBS $MPI_C_LIB"
       AC_LINK_IFELSE([AC_LANG_SOURCE([
 @%:@include <stdio.h>
 @%:@include <stdlib.h>
@@ -219,11 +220,19 @@ main(int argc, char **argv)
             [AC_MSG_RESULT([no])
              AC_MSG_FAILURE([mpirun doesn't work])])],
          [AC_MSG_FAILURE([Cannot compile simple MPI program])])
-      CFLAGS=$saved_CFLAGS
-      LIBS=$saved_LIBS
      ])
    AS_IF([test "x$MPI_LAUNCH" = xtrue],
      [AC_MSG_WARN([MPI launch command unavailable])])
+   AH_TEMPLATE([YAXT_UID_DT],[Defined to MPI datatype to be used for Xt_uid])dnl
+   AC_CHECK_DECL([MPI_UINT64_T],
+     [AC_DEFINE([YAXT_UID_DT],[MPI_UINT64_T])],
+     [AC_CHECK_SIZEOF([unsigned long])
+      AC_CHECK_SIZEOF([unsigned long long])
+      AC_CHECK_DECLS([MPI_UNSIGNED_LONG_LONG],,,[AC_INCLUDES_DEFAULT
+@%:@include <mpi.h>])],[AC_INCLUDES_DEFAULT
+@%:@include <mpi.h>])
+   CFLAGS=$saved_CFLAGS
+   LIBS=$saved_LIBS
 
    AC_ARG_VAR([YAXT_FC_LIB],[Flags needed to link YAXT for the Fortran API])
    AC_ARG_VAR([YAXT_FC_INCLUDE],
@@ -243,6 +252,23 @@ main(int argc, char **argv)
       YAXT_MINOR_VERSION=`echo "$YAXT_VERSION" | sed -e 's/^@<:@0-9@:>@*\.\(@<:@0-9@:>@*\).*/\1/'`
       AS_IF([test "$YAXT_MAJOR_VERSION" -gt 0 -o "$YAXT_MINOR_VERSION" -gt 4],
         [YAXT_LIBS=`echo "$YAXT_LIBS" | sed -e 's/-lyaxt *$/-lyaxt_c/'`])])
+
+   AS_IF([test "x$ac_cv_have_decl_MPI_UINT64_T" != xyes],
+     [saved_CFLAGS=$CFLAGS
+      saved_LIBS=$LIBS
+      CFLAGS="$CFLAGS $YAXT_CFLAGS"
+      LIBS="$LIBS $YAXT_LIBS"
+      AC_CHECK_SIZEOF([Xt_uid],,[AC_INCLUDES_DEFAULT
+@%:@include <yaxt.h>])
+      AS_IF([test "$ac_cv_sizeof_unsigned_long" -eq "$ac_cv_sizeof_Xt_uid"],
+        [AC_DEFINE([YAXT_UID_DT],[MPI_UNSIGNED_LONG])],
+        [test "x$ac_cv_have_decl_MPI_UNSIGNED_LONG_LONG" = xyes \
+          -a "$ac_cv_sizeof_unsigned_long_long" -eq "$ac_cv_sizeof_Xt_uid"],
+        [AC_DEFINE([YAXT_UID_DT],[MPI_UNSIGNED_LONG_LONG])],
+        [AC_MSG_FAILURE([no way to communicate Xt_uid found])])
+      CFLAGS=$saved_CFLAGS
+      LIBS=$saved_LIBS])
+
    dnl parallel netCDF support still requires ScalES-PPM and YAXT to
    dnl re-arrange the data when running with more than one collector
    PKG_CHECK_MODULES([PPM_CORE],[scales-ppm-core],

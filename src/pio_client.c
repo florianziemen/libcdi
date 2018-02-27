@@ -6,6 +6,7 @@
 #include <errno.h>
 #include <stdbool.h>
 
+#include <mpi.h>
 #include <yaxt.h>
 
 #include "cdi.h"
@@ -47,7 +48,7 @@ cdiPioClientUpdateResHList()
     collRank = cdiPioCollRank(clientRank, numClients, numColl);
   int groupLeader = cdiPioClientRangeStart(collRank, numClients, numColl);
   int sendRPCData = (clientRank == groupLeader);
-  unsigned char *msgBuffer = NULL;
+  char *msgBuffer = NULL;
   int msgSize = 0, msgBufPos = 0;
   if (sendRPCData)
     {
@@ -57,7 +58,7 @@ cdiPioClientUpdateResHList()
   else
     cdiPioDistGridPackAssist();
 #endif
-  return (struct vlistMetaReturn){ .msgBuffer = msgBuffer,
+  return (struct ResHListUpdate){ .msgBuffer = (unsigned char *)msgBuffer,
       .comm = comm,
       .numClients = numClients, .clientRank = clientRank,
       .groupLeader = groupLeader,
@@ -84,7 +85,7 @@ cdiPioClientStreamOpen(const char *filename, char filemode,
       int collRank = rup.collRank;
       if (rup.sendRPCData)
         {
-          char *msgBuffer = rup.msgBuffer;
+          unsigned char *msgBuffer = rup.msgBuffer;
           int msgSize = rup.msgSize;
           int size;
           size_t filename_len = strlen(filename);
@@ -97,7 +98,7 @@ cdiPioClientStreamOpen(const char *filename, char filemode,
           xmpi(MPI_Pack_size((int)filename_len, MPI_CHAR, comm, &size));
           msgSize += size;
           /* optimize to pos + size */
-          msgBuffer = (char *)Realloc(msgBuffer, (size_t)msgSize);
+          msgBuffer = Realloc(msgBuffer, (size_t)msgSize);
           xmpi(MPI_Pack(soHdr, 3, MPI_INT,
                         msgBuffer, msgSize, &rup.msgPos, comm));
           xmpi(MPI_Pack(&filemode, 1, MPI_CHAR,
@@ -165,6 +166,7 @@ cdiPioClientStreamDefVlist_(int streamID, int vlistID)
   struct ResHListUpdate rup = cdiPioClientUpdateResHList();
   if (rup.sendRPCData)
     {
+      MPI_Comm comm = rup.comm;
       unsigned char *msgBuffer = rup.msgBuffer;
       /* optimize: pos + size */
       int msgSize = rup.msgSize;
@@ -183,9 +185,155 @@ cdiPioClientStreamDefVlist_(int streamID, int vlistID)
     }
   struct collSpec cspec = { .numClients = rup.numClients,
                             .numServers = rup.numColl,
-                            .sendRPCData = rup.sendRPCData };
+                            .sendRPCData = rup.sendRPCData,
+                            .partDesc = NULL };
   cdiPioClientStreamWinCreate(streamID, &cspec);
 }
+
+static int
+sizePartDescPresetPack(size_t nVars, const struct partDescPreset clientDeco,
+                       bool *isDuplicate, MPI_Comm comm)
+{
+  int packSize = 0;
+  const Xt_uid *uids = clientDeco.uids;
+  Xt_idxlist *partDesc = clientDeco.lists;
+  {
+    int sizeXtUID;
+    xmpi(MPI_Pack_size(1, YAXT_UID_DT, comm, &sizeXtUID));
+    packSize += (int)nVars * sizeXtUID;
+  }
+  for (size_t varIdx = 0; varIdx < nVars; ++varIdx)
+    {
+      Xt_uid uid = uids[varIdx];
+      for (size_t j = 0; j < varIdx; ++j)
+        if (uids[j] != uid)
+          ;
+        else
+          {
+            isDuplicate[varIdx] = true;
+            goto next_index_list;
+          }
+      isDuplicate[varIdx] = false;
+      packSize += (int)xt_idxlist_get_pack_size(partDesc[varIdx], comm);
+      next_index_list:;
+    }
+  return packSize;
+}
+
+static int
+packPartDescPreset(void *packBuf, int bufSize,
+                   size_t nVars, struct partDescPreset clientDeco,
+                   const bool *isDuplicate,
+                   MPI_Comm comm)
+{
+  const Xt_uid *uids = clientDeco.uids;
+  Xt_idxlist *partDesc = clientDeco.lists;
+  int position = 0;
+  for (size_t varIdx = 0; varIdx < nVars; ++varIdx)
+    {
+      xmpi(MPI_Pack((void*)(uids+varIdx), 1, YAXT_UID_DT,
+                    packBuf, bufSize, &position, comm));
+      if (!isDuplicate[varIdx])
+        xt_idxlist_pack(partDesc[varIdx], packBuf, bufSize, &position, comm);
+    }
+  return position;
+}
+
+
+void cdiPioStreamDefDecomposedVlist(int streamID, int vlistID,
+                                    Xt_idxlist partDesc[])
+{
+  cdiPioClientStreamDefVlistCommon(streamID, vlistID);
+  struct ResHListUpdate rup = cdiPioClientUpdateResHList();
+  MPI_Comm comm = rup.comm;
+  int collRank = rup.collRank;
+  size_t nVars = (size_t)(vlistNvars(vlistID));
+  cdiPioSetStreamPartDescPreset(streamID, nVars, partDesc);
+  int lastClientInGroup
+    = cdiPioClientRangeStart(collRank + 1, rup.numClients, rup.numColl) - 1,
+    clientRank = rup.clientRank,
+    numClientsInGroup = lastClientInGroup - clientRank + 1;
+  MPI_Comm aggComm = cdiPioInqCollClientIntraComm();
+  struct partDescPreset clientDeco = cdiPioGetStreamPartDescPreset(streamID);
+  bool *partDescDuplicates = Malloc(nVars * sizeof (*partDescDuplicates));
+  int listPackSizeTotal
+    = sizePartDescPresetPack(nVars, clientDeco, partDescDuplicates, comm);
+  if (rup.sendRPCData)
+    {
+      unsigned char *msgBuffer = rup.msgBuffer;
+      /* optimize: pos + size */
+      int msgSize = rup.msgSize;
+      /* TODO: find size of idxlists for packing */
+      int (*listPackSizes)
+        = Malloc((size_t)numClientsInGroup * sizeof (*listPackSizes));
+      listPackSizes[0] = listPackSizeTotal;
+      MPI_Request *req = (numClientsInGroup-1)
+        ? Malloc((size_t)(numClientsInGroup-1) * sizeof(*req))
+        : NULL;
+      for (int rank = rup.clientRank + 1; rank <= lastClientInGroup; ++rank)
+        {
+          size_t rankOfs = (size_t)(rank - clientRank);
+          xmpi(MPI_Irecv(listPackSizes+rankOfs, 1, MPI_INT,
+                         rank, IDXLIST_PRESET_SIZE, aggComm, req+rankOfs-1));
+        }
+      xmpi(MPI_Waitall(numClientsInGroup-1, req, MPI_STATUSES_IGNORE));
+      for (int rank = rup.clientRank; rank <= lastClientInGroup; ++rank)
+        {
+          size_t rankOfs = (size_t)(rank - clientRank);
+          msgSize += listPackSizes[rankOfs];
+        }
+      {
+        int size;
+        xmpi(MPI_Pack_size(defVlistNInts, MPI_INT, comm, &size));
+        msgSize += size;
+      }
+      /* size of extra packaging:  */
+      msgBuffer = Realloc(msgBuffer, (size_t)msgSize);
+      int msgData[defVlistNInts] = { streamID, streamInqVlist(streamID) };
+      xmpi(MPI_Pack(&msgData, defVlistNInts, MPI_INT,
+                    msgBuffer, msgSize, &rup.msgPos, comm));
+      rup.msgPos
+        += packPartDescPreset(msgBuffer + rup.msgPos, listPackSizeTotal,
+                              nVars, clientDeco, partDescDuplicates, comm);
+      for (int rank = rup.clientRank + 1; rank <= lastClientInGroup; ++rank)
+        {
+          size_t rankOfs = (size_t)(rank - clientRank);
+          int clientPackSize = listPackSizes[rankOfs];
+          xmpi(MPI_Irecv(msgBuffer + rup.msgPos, clientPackSize, MPI_PACKED,
+                         rank, IDXLIST_PRESET, aggComm, req+rankOfs-1));
+          rup.msgPos += clientPackSize;
+        }
+      xmpi(MPI_Waitall(numClientsInGroup-1, req, MPI_STATUSES_IGNORE));
+      xmpi(MPI_Send(msgBuffer, rup.msgPos, MPI_PACKED, collRank,
+                    STREAM_DEF_DECOMPOSED_VLIST, comm));
+      Free(msgBuffer);
+      Free(req);
+      Free(listPackSizes);
+    }
+  else
+    {
+      int groupLeader = rup.groupLeader;
+      MPI_Request req[2];
+      unsigned char *ilPackBuf = Malloc((size_t)listPackSizeTotal);
+      int position
+        = packPartDescPreset(ilPackBuf, listPackSizeTotal,
+                             nVars, clientDeco, partDescDuplicates, comm);
+      xmpi(MPI_Isend(&position, 1, MPI_INT,
+                     groupLeader, IDXLIST_PRESET_SIZE, aggComm, req));
+      xmpi(MPI_Isend(ilPackBuf, position, MPI_PACKED,
+                     groupLeader, IDXLIST_PRESET, aggComm, req+1));
+      xmpi(MPI_Waitall(2, req, MPI_STATUSES_IGNORE));
+      Free(ilPackBuf);
+    }
+  Free(partDescDuplicates);
+  struct collSpec cspec = { .numClients = rup.numClients,
+                            .numServers = rup.numColl,
+                            .sendRPCData = rup.sendRPCData,
+                            .partDesc = partDesc };
+  cdiPioClientStreamWinCreate(streamID, &cspec);
+}
+
+
 
 /* If we're not using GNU C, elide __attribute__ */
 #if ! defined __GNUC__ && ! defined __attribute__
@@ -291,7 +439,7 @@ cdiPioClientStreamClose(stream_t *streamptr, int recordBufIsToBeDeleted)
   if (rup.sendRPCData)
     {
       MPI_Comm comm = rup.comm;
-      char *msgBuffer = rup.msgBuffer;
+      unsigned char *msgBuffer = rup.msgBuffer;
       int msgSize = rup.msgSize;
       {
         int size;

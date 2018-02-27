@@ -88,7 +88,7 @@ static void doctotxt(FILE *fp, Docu *doc, size_t ndoc)
 }
 
 enum cftype {ISVOID, ISCONSTSTRING, ISINT, ISLOGICAL, ISREAL, ISDOUBLE, ISMPI_COMM,
-             ISXT_IDXLIST, ISCHOICE, ISINTP, ISFLOATV, ISFLOATVV,
+             ISXT_IDXLIST, ISXT_IDXLISTV, ISCHOICE, ISINTP, ISFLOATV, ISFLOATVV,
              ISDOUBLEV, ISDOUBLEVV, ISINTV, ISINTVV, ISINTVVV, ISREALP,
              ISDOUBLEP, ISCBUF, ISUUID, ISUCHAR, ISSTRING, ISSTRINGP,
              VOIDFUNCVOID,
@@ -165,6 +165,9 @@ static struct symbol funArgSym[]
       { "TYPE(XT_IDXLIST)", "PVOID", "%sXt_idxlist %.*s",
         "^"WS"*Xt_idxlist"WS"+"SYMRE"?"WS"*[,\\)]", 1, true, false,
         cfXtIdxlistConvert, "%svoid *%.*s" },
+      { "TYPE(XT_IDXLIST)", "PVOID", "%sXt_idxlist %.*s[]",
+        "^"WS"*(const"WS"+)?Xt_idxlist("WS"+"SYMRE")?"WS"*"ARRAY_BOUND
+        "[,\\)]", 3, false, false },
       { "CHOICE", "PVOID", "%sconst void *%.*s",
         "^"WS"*const"WS"+void"WS"*\\*"WS"*"SYMRE"?"WS"*[,\\)]", 1, false, false },
       { "INTEGER",         "PINT",    "%sint *%.*s",
@@ -1284,6 +1287,7 @@ isArrayArgType(int argType)
     || argType == ISFLOATVV
     || argType == ISDOUBLEV
     || argType == ISDOUBLEVV
+    || argType == ISXT_IDXLISTV
     || argType == ISINTV
     || argType == ISINTVV
     || argType == ISINTVVV;
@@ -1297,6 +1301,7 @@ arrayArgRank(int argType)
   case ISFLOATV:
   case ISDOUBLEV:
   case ISINTV:
+  case ISXT_IDXLISTV:
     rank = 1;
     break;
   case ISINTVV:

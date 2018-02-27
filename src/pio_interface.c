@@ -48,6 +48,7 @@ static struct rdmaWin
   bool postSet, refuseFuncCall;
   /** data or meta-data updates on this stream are to be communicated */
   bool pendingUpdate;
+  struct partDescPreset clientDeco;
 } *txWin = NULL;
 
 static struct idList openStreams;
@@ -127,6 +128,8 @@ cdiPioClientStreamWinInit(int streamID)
   txWin[streamIdx].win = MPI_WIN_NULL;
   txWin[streamIdx].buffer = NULL;
   txWin[streamIdx].postSet = false;
+  txWin[streamIdx].clientDeco.lists = NULL;
+  txWin[streamIdx].clientDeco.uids = NULL;
 }
 
 void
@@ -137,6 +140,11 @@ cdiPioClientStreamWinDestroy(int streamID)
    */
   collWaitAll();
   size_t streamIdx = indexOfID(&openStreams, streamID);
+  if (txWin[streamIdx].clientDeco.lists)
+    {
+      size_t nVars = (size_t)(vlistNvars(streamInqVlist(streamID)));
+      cdiPioDestroyPartDescPreset(1, nVars, &txWin[streamIdx].clientDeco);
+    }
   if (txWin[streamIdx].postSet)
     xmpi(MPI_Win_wait(txWin[streamIdx].win));
   if (txWin[streamIdx].win != MPI_WIN_NULL)
@@ -144,6 +152,38 @@ cdiPioClientStreamWinDestroy(int streamID)
   if (txWin[streamIdx].buffer)
     xmpi(MPI_Free_mem(txWin[streamIdx].buffer));
   removeID(&openStreams, streamID);
+}
+
+void
+cdiPioSetStreamPartDescPreset(int streamID, size_t nVars,
+                              Xt_idxlist partDesc[])
+{
+  size_t streamIdx = indexOfID(&openStreams, streamID);
+  Xt_idxlist *restrict partDescCopy = Malloc(nVars * sizeof (Xt_idxlist));
+  Xt_uid *restrict partDescUID = Malloc(nVars * sizeof (Xt_uid));
+  for (size_t i = 0; i < nVars; ++i)
+    {
+      Xt_uid uid = partDescUID[i] = xt_idxlist_get_uid(partDesc[i]);
+      for (size_t j = 0; j < i; ++j)
+        if (partDescUID[j] != uid)
+          ;
+        else
+          {
+            partDescCopy[i] = partDescCopy[j];
+            goto next_index_list;
+          }
+      partDescCopy[i] = xt_idxlist_copy(partDesc[i]);
+      next_index_list:;
+    }
+  txWin[streamIdx].clientDeco.uids = partDescUID;
+  txWin[streamIdx].clientDeco.lists = partDescCopy;
+}
+
+struct partDescPreset
+cdiPioGetStreamPartDescPreset(int streamID)
+{
+  size_t streamIdx = indexOfID(&openStreams, streamID);
+  return txWin[streamIdx].clientDeco;
 }
 
 
@@ -155,7 +195,7 @@ cdiPioClientStreamWinCreate(int streamID, struct collSpec *cspec)
    */
   collWaitAll();
   struct clientBufSize bufSize
-    =  computeClientStreamBufSize(streamID, cspec);
+    = computeClientStreamBufSize(streamID, cspec);
   MPI_Info no_locks_info;
   xmpi(MPI_Info_create(&no_locks_info));
   xmpi(MPI_Info_set(no_locks_info, "no_locks", "true"));
@@ -213,19 +253,20 @@ modelWinEnqueue(size_t streamIdx,
   else if (header.id == PARTDESCMARKER)
     {
       Xt_uid uid = unpackXTUID(header.specific.partDesc.packedUID);
-      int offset = -1;
-      /* search if same uid entry has already been enqueued */
-      for (int entry = 2; entry < targetEntry; entry += 2)
+      Xt_idxlist (*restrict partDescPreset) = txWin[streamIdx].clientDeco.lists;
+      if (!partDescPreset)
         {
-          xassert(winDict[entry].id == PARTDESCMARKER);
-          if (unpackXTUID(winDict[entry].specific.partDesc.packedUID) == uid)
+          /* search if same uid entry has already been enqueued */
+          for (int entry = 2; entry < targetEntry; entry += 2)
             {
-              offset = winDict[entry].offset;
-              break;
+              xassert(winDict[entry].id == PARTDESCMARKER);
+              if (unpackXTUID(winDict[entry].specific.partDesc.packedUID) == uid)
+                {
+                  /* duplicate entries are copied only once per timestep */
+                  header.offset = winDict[entry].offset;
+                  goto partDescHeaderFinished;
+                }
             }
-        }
-      if (offset == -1)
-        {
           /* not yet used partition descriptor, serialize at
            * current position */
           int position = header.offset
@@ -236,8 +277,15 @@ modelWinEnqueue(size_t streamIdx,
           txWin[streamIdx].head = txWin[streamIdx].buffer + position;
         }
       else
-        /* duplicate entries are copied only once per timestep */
-        header.offset = offset;
+        {
+          int varID = winDict[targetEntry-1].specific.dataRecord.varID;
+          Xt_uid (*restrict uids) = txWin[streamIdx].clientDeco.uids;
+          if (uid != uids[varID] && data != partDescPreset[varID])
+            xabort("error: incorrect index list passed to streamWriteVarPart"
+                   " or streamWriteVarPartF!");
+          header.offset = -1;
+        }
+      partDescHeaderFinished:;
     }
   else
     {
@@ -314,8 +362,8 @@ cdiPioBufferPartData_(int streamID, int varID,
     struct winHeaderEntry partHeader
       = { .id = PARTDESCMARKER,
           .offset = 0 };
-    packXTUID(partHeader.specific.partDesc.packedUID,
-              xt_idxlist_get_uid(partDesc));
+    Xt_uid uid = xt_idxlist_get_uid(partDesc);
+    packXTUID(partHeader.specific.partDesc.packedUID, uid);
     modelWinEnqueue(streamIdx, partHeader, partDesc, cdiPio_xt_idxlist_pack_wrap);
   }
   txWin[streamIdx].refuseFuncCall = 1;
