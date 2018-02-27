@@ -9,7 +9,7 @@ int main(void)
 {
   int gridID, zaxisID1, zaxisID2;
   int vlistID, varID1, varID2, streamID;
-  int i, nmiss = 0;
+  size_t i, nmiss = 0;
   double lons[nlon] = {0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330};
   double lats[nlat] = {-75, -45, -15, 15, 45, 75};
   double levs[nlev] = {101300, 92500, 85000, 50000, 20000};
@@ -35,8 +35,8 @@ int main(void)
   vlistID = vlistCreate();
 
   // Define the variables
-  varID1 = vlistDefVar(vlistID, gridID, zaxisID1, TSTEP_CONSTANT);
-  varID2 = vlistDefVar(vlistID, gridID, zaxisID2, TSTEP_CONSTANT);
+  varID1 = vlistDefVar(vlistID, gridID, zaxisID1, TIME_CONSTANT);
+  varID2 = vlistDefVar(vlistID, gridID, zaxisID2, TIME_CONSTANT);
 
   // Define the variable names
   vlistDefVarName(vlistID, varID1, "varname1");

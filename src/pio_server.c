@@ -303,7 +303,7 @@ countVarChunkMissingVals(int vlistID, int varID,
                          struct streamMapping *mapping,
                          int chunkLen, const double *restrict data)
 {
-  int nmiss = 0;
+  size_t nmiss = 0;
   if (mapping->hasMissing[varID])
     {
       double missval = vlistInqVarMissval(vlistID, varID);
@@ -450,7 +450,7 @@ writeNetCDFStream(size_t streamIdx,
           xt_idxlist_delete(preWriteChunk);
         }
         /* count missing values if appropriate */
-        int nmiss
+        size_t nmiss
           = countVarChunkMissingVals(vlistID, varID, mapping,
                                      PPM_extents_size(3, varChunk),
                                      data);
@@ -553,7 +553,7 @@ writeNetCDFStream(size_t streamIdx,
         gatherArray(headerIdx, streamIdx, data, dstList, conf);
         if (writerRank == collRank)
           {
-            int nmiss = countVarChunkMissingVals(vlistID, varID,
+            size_t nmiss = countVarChunkMissingVals(vlistID, varID,
                                                  mapping, varSize, data);
             streamWriteVar(streamID, varID, data, nmiss);
           }
@@ -1053,7 +1053,7 @@ writeGribStream(size_t streamIdx,
             varIdx += varID != prevVarID;
             size_t recordSize = writtenRecords[recordIdx].dataSize;
             size_t nvals = recordSize / sizeof (double);
-            int nmiss
+            size_t nmiss
               = countVarChunkMissingVals(vlistID, varID, mapping, (int)nvals,
                                          data + recordDataOfs);
             streamWriteVarSlice(streamID, varID, level, data + recordDataOfs, nmiss);
@@ -1117,6 +1117,8 @@ readGetBuffers(size_t streamIdx, const struct cdiPioConf *conf)
       case CDI_FILETYPE_NC:
       case CDI_FILETYPE_NC2:
       case CDI_FILETYPE_NC4:
+      case CDI_FILETYPE_NC4C:
+      case CDI_FILETYPE_NC5:
         writeNetCDFStream(streamIdx, map, &data, &currentDataBufSize, conf);
         break;
 #endif
@@ -1262,6 +1264,7 @@ cdiPioServerStreamClose(stream_t *streamptr, int recordBufIsToBeDeleted)
         case CDI_FILETYPE_NC2:
         case CDI_FILETYPE_NC4:
         case CDI_FILETYPE_NC4C:
+        case CDI_FILETYPE_NC5:
           {
             int rank, rankOpen = cdiPioSerialOpenFileMap(streamptr->self);
             if (commInqIOMode() == PIO_NONE

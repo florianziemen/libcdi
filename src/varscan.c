@@ -6,6 +6,7 @@
 #include "cdi.h"
 #include "cdi_int.h"
 #include "cdi_uuid.h"
+#include "cdi_key.h"
 #include "dmemory.h"
 #include "resource_handle.h"
 #include "varscan.h"
@@ -49,7 +50,6 @@ typedef struct
   int            param;
   int            prec;
   int            tsteptype;
-  int            timaccu;
   int            gridID;
   int            zaxistype;
   int            ltype1;     /* GRIB first level type */
@@ -75,12 +75,11 @@ typedef struct
   char          *stdname;
   char          *longname;
   char          *units;
-  ensinfo_t     *ensdata;
-  int            typeOfGeneratingProcess;
-  int            productDefinitionTemplate;
 
   /* meta-data for specification of tiles (currently only GRIB-API: */
   subtype_t     *tiles;
+
+  cdi_keys_t     keys;
 
   int                 opt_grib_nentries;                       /* current no. key-value pairs            */
   int                 opt_grib_kvpair_size;                    /* current allocated size                 */
@@ -101,7 +100,6 @@ void paramInitEntry(unsigned varID, int param)
   vartable[varID].prec           = 0;
   vartable[varID].tsteptype      = TSTEP_INSTANT;
   vartable[varID].timave         = 0;
-  vartable[varID].timaccu        = 0;
   vartable[varID].gridID         = CDI_UNDEFID;
   vartable[varID].zaxistype      = 0;
   vartable[varID].ltype1         = 0;
@@ -115,8 +113,8 @@ void paramInitEntry(unsigned varID, int param)
   vartable[varID].instID         = CDI_UNDEFID;
   vartable[varID].modelID        = CDI_UNDEFID;
   vartable[varID].tableID        = CDI_UNDEFID;
-  vartable[varID].typeOfGeneratingProcess   = CDI_UNDEFID;
-  vartable[varID].productDefinitionTemplate = CDI_UNDEFID;
+  vartable[varID].keys.nalloc    = MAX_KEYS;
+  vartable[varID].keys.nelems    = 0;
   vartable[varID].comptype       = CDI_COMPRESS_NONE;
   vartable[varID].complevel      = 1;
   vartable[varID].lmissval       = false;
@@ -125,14 +123,13 @@ void paramInitEntry(unsigned varID, int param)
   vartable[varID].stdname        = NULL;
   vartable[varID].longname       = NULL;
   vartable[varID].units          = NULL;
-  vartable[varID].ensdata        = NULL;
   vartable[varID].tiles          = NULL;
 }
 
 /* Test if a variable specified by the given meta-data has already
  * been registered in "vartable". */
 static unsigned
-varGetEntry(int param, int zaxistype, int ltype1, int tsteptype, const char *name, const var_tile_t *tiles)
+varGetEntry(int param, int gridID, int zaxistype, int ltype1, int tsteptype, const char *name, const var_tile_t *tiles)
 {
   for ( unsigned varID = 0; varID < varTablesize; varID++ )
     {
@@ -149,6 +146,7 @@ varGetEntry(int param, int zaxistype, int ltype1, int tsteptype, const char *nam
           if ( (vartable[varID].zaxistype  == zaxistype)               &&
                (vartable[varID].ltype1     == ltype1   )               &&
                (vartable[varID].tsteptype  == tsteptype)               &&
+               (vartable[varID].gridID     == gridID   )               &&
                (vt_no_of_tiles == no_of_tiles) )
             {
               if ( name && name[0] && vartable[varID].name && vartable[varID].name[0] )
@@ -184,8 +182,10 @@ void varFree(void)
       if ( vartable[varID].stdname )  Free(vartable[varID].stdname);
       if ( vartable[varID].longname ) Free(vartable[varID].longname);
       if ( vartable[varID].units )    Free(vartable[varID].units);
-      if ( vartable[varID].ensdata )  Free(vartable[varID].ensdata);
       if ( vartable[varID].tiles )    subtypeDestroyPtr(vartable[varID].tiles);
+
+      cdi_keys_t *keysp = &(vartable[varID].keys);
+      cdiDeleteVarKeys(keysp);
 
       if ( vartable[varID].opt_grib_kvpair )
         {
@@ -429,7 +429,7 @@ void varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds,
                   const var_tile_t *tiles, int *tile_index)
 {
   unsigned varID = (cdiSplitLtype105 != 1 || zaxistype != ZAXIS_HEIGHT) ?
-    varGetEntry(param, zaxistype, ltype1, tsteptype, name, tiles) : (unsigned) CDI_UNDEFID;
+    varGetEntry(param, gridID, zaxistype, ltype1, tsteptype, name, tiles) : (unsigned) CDI_UNDEFID;
 
   if ( varID == (unsigned) CDI_UNDEFID )
     {
@@ -446,10 +446,10 @@ void varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds,
 
       if ( numavg ) vartable[varID].timave = 1;
 
-      if ( name )     if ( name[0] )     vartable[varID].name     = strdup(name);
-      if ( stdname )  if ( stdname[0] )  vartable[varID].stdname  = strdup(stdname);
-      if ( longname ) if ( longname[0] ) vartable[varID].longname = strdup(longname);
-      if ( units )    if ( units[0] )    vartable[varID].units    = strdup(units);
+      if ( name && name[0] )         vartable[varID].name     = strdup(name);
+      if ( stdname && stdname[0] )   vartable[varID].stdname  = strdup(stdname);
+      if ( longname && longname[0] ) vartable[varID].longname = strdup(longname);
+      if ( units && units[0] )       vartable[varID].units    = strdup(units);
     }
   else
     {
@@ -576,9 +576,15 @@ int cmp_varname(const void *s1, const void *s2)
 }
 
 
+void varCopyKeys(int vlistID, int varID)
+{
+  cdi_keys_t *keysp = &(vartable[varID].keys);
+  cdiCopyVarKeys(keysp, vlistID, varID);
+}
+
+
 void cdi_generate_vars(stream_t *streamptr)
 {
-  char name[CDI_MAX_NAME], longname[CDI_MAX_NAME], units[CDI_MAX_NAME];
   int vlistID = streamptr->vlistID;
 
   int *varids = (int *) Malloc(varTableUsed*sizeof(int));
@@ -625,7 +631,6 @@ void cdi_generate_vars(stream_t *streamptr)
       int tableID    = vartable[varid].tableID;
       int tsteptype  = vartable[varid].tsteptype;
       int timave     = vartable[varid].timave;
-      int timaccu    = vartable[varid].timaccu;
       int comptype   = vartable[varid].comptype;
 
       double level_sf = 1;
@@ -758,29 +763,21 @@ void cdi_generate_vars(stream_t *streamptr)
 
       /* generate new variable */
       int varID = stream_new_var(streamptr, gridID, zaxisID, tilesetID);
-      varID = vlistDefVarTiles(vlistID, gridID, zaxisID, tsteptype, tilesetID);
+      varID = vlistDefVarTiles(vlistID, gridID, zaxisID, TIME_VARYING, tilesetID);
 
+      vlistDefVarTsteptype(vlistID, varID, tsteptype);
       vlistDefVarParam(vlistID, varID, param);
       vlistDefVarDatatype(vlistID, varID, prec);
       vlistDefVarTimave(vlistID, varID, timave);
-      vlistDefVarTimaccu(vlistID, varID, timaccu);
       vlistDefVarCompType(vlistID, varID, comptype);
 
-      if ( vartable[varid].typeOfGeneratingProcess != CDI_UNDEFID )
-        vlistDefVarTypeOfGeneratingProcess(vlistID, varID, vartable[varid].typeOfGeneratingProcess);
-
-      if ( vartable[varid].productDefinitionTemplate != CDI_UNDEFID )
-        vlistDefVarProductDefinitionTemplate(vlistID, varID, vartable[varid].productDefinitionTemplate);
+      varCopyKeys(vlistID, varID);
 
       if ( vartable[varid].lmissval ) vlistDefVarMissval(vlistID, varID, vartable[varid].missval);
       if ( vartable[varid].name )     vlistDefVarName(vlistID, varID, vartable[varid].name);
       if ( vartable[varid].stdname )  vlistDefVarStdname(vlistID, varID, vartable[varid].stdname);
       if ( vartable[varid].longname ) vlistDefVarLongname(vlistID, varID, vartable[varid].longname);
       if ( vartable[varid].units )    vlistDefVarUnits(vlistID, varID, vartable[varid].units);
-
-      if ( vartable[varid].ensdata )  vlistDefVarEnsemble(vlistID, varID, vartable[varid].ensdata->ens_index,
-	                                                  vartable[varid].ensdata->ens_count,
-							  vartable[varid].ensdata->forecast_init_type);
 
       vlist_t *vlistptr = vlist_to_pointer(vlistID);
       for ( int i = 0; i < vartable[varid].opt_grib_nentries; i++ )
@@ -794,7 +791,7 @@ void cdi_generate_vars(stream_t *streamptr)
 	  if ( vartable[varid].opt_grib_kvpair[i].keyword )
 	    vlistptr->vars[varID].opt_grib_kvpair[idx].keyword =
 	      strdupx(vartable[varid].opt_grib_kvpair[i].keyword);
-          vlistptr->vars[varID].opt_grib_kvpair[i].update = TRUE;
+          vlistptr->vars[varID].opt_grib_kvpair[i].update = true;
         }
       /* note: if the key is not defined, we do not throw an error! */
 
@@ -802,23 +799,18 @@ void cdi_generate_vars(stream_t *streamptr)
 	{
 	  int pdis, pcat, pnum;
 	  cdiDecodeParam(param, &pnum, &pcat, &pdis);
-	  if ( tableInqParNamePtr(cdiDefaultTableID, pnum) )
+          char name[CDI_MAX_NAME]; name[0] = 0;
+          char longname[CDI_MAX_NAME]; longname[0] = 0;
+          char units[CDI_MAX_NAME]; units[0] = 0;
+          tableInqEntry(cdiDefaultTableID, pnum, -1, name, longname, units);
+	  if ( name[0] )
 	    {
 	      if ( tableID != CDI_UNDEFID )
 		{
-		  strcpy(name, tableInqParNamePtr(cdiDefaultTableID, pnum));
 		  vlistDefVarName(vlistID, varID, name);
-		  if ( tableInqParLongnamePtr(cdiDefaultTableID, pnum) )
-		    {
-		      strcpy(longname, tableInqParLongnamePtr(cdiDefaultTableID, pnum));
-		      vlistDefVarLongname(vlistID, varID, longname);
-		    }
-		  if ( tableInqParUnitsPtr(cdiDefaultTableID, pnum) )
-		    {
-		      strcpy(units, tableInqParUnitsPtr(cdiDefaultTableID, pnum));
-		      vlistDefVarUnits(vlistID, varID, units);
-		    }
-		}
+                  if ( longname[0] ) vlistDefVarLongname(vlistID, varID, longname);
+                  if ( units[0] ) vlistDefVarUnits(vlistID, varID, units);
+                }
 	      else
 		tableID = cdiDefaultTableID;
 	    }
@@ -907,17 +899,17 @@ bool zaxisCompare(int zaxisID, int zaxistype, int nlevels, bool lbounds, const d
 
 	  if ( ! differ )
 	    {
-              if ( longname )
+              if ( longname && longname[0] )
                 {
-                  char zlongname[CDI_MAX_NAME];
+                  char zlongname[CDI_MAX_NAME]; zlongname[0] = 0;
                   zaxisInqLongname(zaxisID, zlongname);
-                  if ( zlongname[0] && strcmp(longname, zlongname) != 0 ) differ = true;
+                  if ( zlongname[0] && (strcmp(longname, zlongname) != 0) ) differ = true;
                 }
-              if ( units )
+              if ( units && units[0] )
                 {
-                  char zunits[CDI_MAX_NAME];
+                  char zunits[CDI_MAX_NAME]; zunits[0] = 0;
                   zaxisInqUnits(zaxisID, zunits);
-                  if ( zunits[0] && strcmp(units, zunits) != 0 ) differ = true;
+                  if ( zunits[0] && (strcmp(units, zunits) != 0) ) differ = true;
                 }
             }
 	}
@@ -955,7 +947,8 @@ varDefZAxisSearch(int id, void *res, void *data)
 }
 
 
-int varDefZaxis(int vlistID, int zaxistype, int nlevels, const double *levels, const char **cvals, size_t clength, bool lbounds,        const double *levels1, const double *levels2, int vctsize, const double *vct, char *name,
+int varDefZaxis(int vlistID, int zaxistype, int nlevels, const double *levels, const char **cvals, size_t clength, bool lbounds,
+                const double *levels1, const double *levels2, int vctsize, const double *vct, char *name,
 		const char *longname, const char *units, int prec, int mode, int ltype1)
 {
   /*
@@ -1017,15 +1010,17 @@ int varDefZaxis(int vlistID, int zaxistype, int nlevels, const double *levels, c
 	      zaxisDefUbounds(zaxisID, levels2);
 	    }
 
-          if ( cvals != NULL && nlevels != 0 && clength != 0 ) zaxisDefCvals(zaxisID, cvals, clength);
+          if ( cvals != NULL && nlevels != 0 && clength != 0 ) zaxisDefCvals(zaxisID, cvals, (int)clength);
 
 	  if ( (zaxistype == ZAXIS_HYBRID || zaxistype == ZAXIS_HYBRID_HALF) && vctsize > 0 )
             zaxisDefVct(zaxisID, vctsize, vct);
 
 	  if ( name && name[0] ) zaxisDefName(zaxisID, name);
 	  if ( longname && longname[0] ) zaxisDefLongname(zaxisID, longname);
+          //else                           zaxisDefLongname(zaxisID, "");
 	  if ( units && units[0] ) zaxisDefUnits(zaxisID, units);
-	  zaxisDefPrec(zaxisID, prec);
+          //else                     zaxisDefUnits(zaxisID, "");
+	  zaxisDefDatatype(zaxisID, prec);
 	  zaxisDefLtype(zaxisID, ltype1);
 	}
 
@@ -1093,27 +1088,19 @@ void varDefTable(int varID, int tableID)
 }
 
 
-void varDefEnsembleInfo(int varID, int ens_idx, int ens_count, int forecast_type)
+void varDefKeyInt(int varID, int key, int value)
 {
-  if ( vartable[varID].ensdata == NULL )
-      vartable[varID].ensdata = (ensinfo_t *) Malloc( sizeof( ensinfo_t ) );
-
-  vartable[varID].ensdata->ens_index = ens_idx;
-  vartable[varID].ensdata->ens_count = ens_count;
-  vartable[varID].ensdata->forecast_init_type = forecast_type;
+  cdi_keys_t *keysp = &(vartable[varID].keys);
+  cdiDefVarKeyInt(keysp, key, value);
 }
 
 
-void varDefTypeOfGeneratingProcess(int varID, int typeOfGeneratingProcess)
+void varDefKeyBytes(int varID, int key, const unsigned char *bytes, int length)
 {
-  vartable[varID].typeOfGeneratingProcess = typeOfGeneratingProcess;
+  cdi_keys_t *keysp = &(vartable[varID].keys);
+  cdiDefVarKeyBytes(keysp, key, bytes, length);
 }
 
-
-void varDefProductDefinitionTemplate(int varID, int productDefinitionTemplate)
-{
-  vartable[varID].productDefinitionTemplate = productDefinitionTemplate;
-}
 
 #if  defined  (HAVE_LIBGRIB_API)
 /* Resizes and initializes opt_grib_kvpair data structure. */
@@ -1140,7 +1127,7 @@ void resize_vartable_opt_grib_entries(vartable_t *var, int nentries)
       for (i=var->opt_grib_kvpair_size; i<new_size; i++) {
         tmp[i].int_val =     0;
         tmp[i].dbl_val =     0;
-        tmp[i].update  = FALSE;
+        tmp[i].update  = false;
         tmp[i].keyword =  NULL;
       } // for
       var->opt_grib_kvpair_size = new_size;

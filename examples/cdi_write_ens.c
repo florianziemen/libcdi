@@ -18,10 +18,9 @@ int main(void)
   int tsID;
   int levelID;
   int vlistID, taxisID;
-  int nmiss;
+  size_t nmiss;
 
   int instID;
-  int i1,i2,i3;
 
   size_t datasize = (size_t)nlon * (size_t)nlat;
   data = (double *) malloc(datasize * sizeof (double));
@@ -36,12 +35,19 @@ int main(void)
   instID  = institutDef( 252, 0, NULL, NULL );
 
   vlistID = vlistCreate();
-  varID = vlistDefVar(vlistID, gridID, zaxisID, TSTEP_INSTANT);
+  varID = vlistDefVar(vlistID, gridID, zaxisID, TIME_VARYING);
+
+  int perturbationNumber = 1;
+  int numberOfForecastsInEnsemble = 2;
+  int typeOfEnsembleForecast = 3;
   
-  vlistDefVarEnsemble( vlistID, varID, 1, 2, 3);
-  
-  vlistInqVarEnsemble(  vlistID, varID, &i1,&i2,&i3);
-  
+  cdiDefKeyInt(vlistID, varID, CDI_KEY_TYPEOFENSEMBLEFORECAST, typeOfEnsembleForecast);
+  cdiDefKeyInt(vlistID, varID, CDI_KEY_NUMBEROFFORECASTSINENSEMBLE, numberOfForecastsInEnsemble);
+  cdiDefKeyInt(vlistID, varID, CDI_KEY_PERTURBATIONNUMBER, perturbationNumber);
+
+  cdiInqKeyInt(vlistID, varID, CDI_KEY_PERTURBATIONNUMBER, &perturbationNumber);
+  cdiInqKeyInt(vlistID, varID, CDI_KEY_NUMBEROFFORECASTSINENSEMBLE, &numberOfForecastsInEnsemble);
+  cdiInqKeyInt(vlistID, varID, CDI_KEY_TYPEOFENSEMBLEFORECAST, &typeOfEnsembleForecast);
   
   vlistDefInstitut( vlistID,instID );
 

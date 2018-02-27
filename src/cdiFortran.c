@@ -10,6 +10,9 @@
 
 #if defined (HAVE_CF_INTERFACE)
 
+#include <limits.h>
+#include <assert.h>
+
 #if ! defined (__CFORTRAN_LOADED)
 #  if defined __clang__
 #    pragma GCC diagnostic push
@@ -25,6 +28,13 @@
 #if defined __clang__
 #  pragma GCC diagnostic ignored "-Wmissing-prototypes"
 #endif
+
+static inline
+int size_t_c2f(size_t value_size_t)
+{
+  assert(value_size_t < INT_MAX);
+  return (int) value_size_t;
+}
 
 
 /*  Byte order  */
@@ -144,28 +154,105 @@ FCALLSCFUN2 (INT, streamInqTimestep, STREAMINQTIMESTEP, streaminqtimestep, INT, 
 FCALLSCFUN1 (INT, streamInqCurTimestepID, STREAMINQCURTIMESTEPID, streaminqcurtimestepid, INT)
 FCALLSCFUN1 (STRING, streamFilename, STREAMFILENAME, streamfilename, INT)
 FCALLSCFUN1 (STRING, streamFilesuffix, STREAMFILESUFFIX, streamfilesuffix, INT)
+static int streamNvals_fwrap(int streamID)
+{
+  size_t v;
+  v = streamNvals(streamID);
+  return size_t_c2f(v);
+}
+FCALLSCFUN1 (INT, streamNvals_fwrap, STREAMNVALS, streamnvals, INT)
 FCALLSCFUN1 (INT, streamInqNvars, STREAMINQNVARS, streaminqnvars, INT)
 
 /*  STREAM var I/O routines (random access)  */
 
-FCALLSCSUB4 (streamWriteVar, STREAMWRITEVAR, streamwritevar, INT, INT, DOUBLEV, INT)
-FCALLSCSUB4 (streamWriteVarF, STREAMWRITEVARF, streamwritevarf, INT, INT, FLOATV, INT)
-FCALLSCSUB4 (streamReadVar, STREAMREADVAR, streamreadvar, INT, INT, DOUBLEV, PINT)
-FCALLSCSUB4 (streamReadVarF, STREAMREADVARF, streamreadvarf, INT, INT, FLOATV, PINT)
-FCALLSCSUB5 (streamWriteVarSlice, STREAMWRITEVARSLICE, streamwritevarslice, INT, INT, INT, DOUBLEV, INT)
-FCALLSCSUB5 (streamWriteVarSliceF, STREAMWRITEVARSLICEF, streamwritevarslicef, INT, INT, INT, FLOATV, INT)
-FCALLSCSUB5 (streamReadVarSlice, STREAMREADVARSLICE, streamreadvarslice, INT, INT, INT, DOUBLEV, PINT)
-FCALLSCSUB5 (streamReadVarSliceF, STREAMREADVARSLICEF, streamreadvarslicef, INT, INT, INT, FLOATV, PINT)
-FCALLSCSUB5 (streamWriteVarChunk, STREAMWRITEVARCHUNK, streamwritevarchunk, INT, INT, INTVV, DOUBLEV, INT)
+static void streamWriteVar_fwrap(int streamID, int varID, const double data[], int nmiss)
+{
+  streamWriteVar(streamID, varID, data, (size_t)nmiss);
+}
+FCALLSCSUB4 (streamWriteVar_fwrap, STREAMWRITEVAR, streamwritevar, INT, INT, DOUBLEV, INT)
+static void streamWriteVarF_fwrap(int streamID, int varID, const float data[], int nmiss)
+{
+  streamWriteVarF(streamID, varID, data, (size_t)nmiss);
+}
+FCALLSCSUB4 (streamWriteVarF_fwrap, STREAMWRITEVARF, streamwritevarf, INT, INT, FLOATV, INT)
+static void streamReadVar_fwrap(int streamID, int varID, double data[], int *nmiss)
+{
+  size_t nmiss_size_t;
+  streamReadVar(streamID, varID, data, &nmiss_size_t);
+  assert(nmiss_size_t < INT_MAX);
+  *nmiss = nmiss_size_t;
+}
+FCALLSCSUB4 (streamReadVar_fwrap, STREAMREADVAR, streamreadvar, INT, INT, DOUBLEV, PINT)
+static void streamReadVarF_fwrap(int streamID, int varID, float data[], int *nmiss)
+{
+  size_t nmiss_size_t;
+  streamReadVarF(streamID, varID, data, &nmiss_size_t);
+  assert(nmiss_size_t < INT_MAX);
+  *nmiss = nmiss_size_t;
+}
+FCALLSCSUB4 (streamReadVarF_fwrap, STREAMREADVARF, streamreadvarf, INT, INT, FLOATV, PINT)
+static void streamWriteVarSlice_fwrap(int streamID, int varID, int levelID, const double data[], int nmiss)
+{
+  streamWriteVarSlice(streamID, varID, levelID, data, (size_t)nmiss);
+}
+FCALLSCSUB5 (streamWriteVarSlice_fwrap, STREAMWRITEVARSLICE, streamwritevarslice, INT, INT, INT, DOUBLEV, INT)
+static void streamWriteVarSliceF_fwrap(int streamID, int varID, int levelID, const float data[], int nmiss)
+{
+  streamWriteVarSliceF(streamID, varID, levelID, data, (size_t)nmiss);
+}
+FCALLSCSUB5 (streamWriteVarSliceF_fwrap, STREAMWRITEVARSLICEF, streamwritevarslicef, INT, INT, INT, FLOATV, INT)
+static void streamReadVarSlice_fwrap(int streamID, int varID, int levelID, double data[], int *nmiss)
+{
+  size_t nmiss_size_t;
+  streamReadVarSlice(streamID, varID, levelID, data, &nmiss_size_t);
+  assert(nmiss_size_t < INT_MAX);
+  *nmiss = nmiss_size_t;
+}
+FCALLSCSUB5 (streamReadVarSlice_fwrap, STREAMREADVARSLICE, streamreadvarslice, INT, INT, INT, DOUBLEV, PINT)
+static void streamReadVarSliceF_fwrap(int streamID, int varID, int levelID, float data[], int *nmiss)
+{
+  size_t nmiss_size_t;
+  streamReadVarSliceF(streamID, varID, levelID, data, &nmiss_size_t);
+  assert(nmiss_size_t < INT_MAX);
+  *nmiss = nmiss_size_t;
+}
+FCALLSCSUB5 (streamReadVarSliceF_fwrap, STREAMREADVARSLICEF, streamreadvarslicef, INT, INT, INT, FLOATV, PINT)
+static void streamWriteVarChunk_fwrap(int streamID, int varID, const int rect[3][2], const double data[], int nmiss)
+{
+  streamWriteVarChunk(streamID, varID, rect, data, (size_t)nmiss);
+}
+FCALLSCSUB5 (streamWriteVarChunk_fwrap, STREAMWRITEVARCHUNK, streamwritevarchunk, INT, INT, INTVV, DOUBLEV, INT)
 
 /*  STREAM record I/O routines (sequential access)  */
 
 FCALLSCSUB3 (streamDefRecord, STREAMDEFRECORD, streamdefrecord, INT, INT, INT)
 FCALLSCSUB3 (streamInqRecord, STREAMINQRECORD, streaminqrecord, INT, PINT, PINT)
-FCALLSCSUB3 (streamWriteRecord, STREAMWRITERECORD, streamwriterecord, INT, DOUBLEV, INT)
-FCALLSCSUB3 (streamWriteRecordF, STREAMWRITERECORDF, streamwriterecordf, INT, FLOATV, INT)
-FCALLSCSUB3 (streamReadRecord, STREAMREADRECORD, streamreadrecord, INT, DOUBLEV, PINT)
-FCALLSCSUB3 (streamReadRecordF, STREAMREADRECORDF, streamreadrecordf, INT, FLOATV, PINT)
+static void streamWriteRecord_fwrap(int streamID, const double data[], int nmiss)
+{
+  streamWriteRecord(streamID, data, (size_t)nmiss);
+}
+FCALLSCSUB3 (streamWriteRecord_fwrap, STREAMWRITERECORD, streamwriterecord, INT, DOUBLEV, INT)
+static void streamWriteRecordF_fwrap(int streamID, const float data[], int nmiss)
+{
+  streamWriteRecordF(streamID, data, (size_t)nmiss);
+}
+FCALLSCSUB3 (streamWriteRecordF_fwrap, STREAMWRITERECORDF, streamwriterecordf, INT, FLOATV, INT)
+static void streamReadRecord_fwrap(int streamID, double data[], int *nmiss)
+{
+  size_t nmiss_size_t;
+  streamReadRecord(streamID, data, &nmiss_size_t);
+  assert(nmiss_size_t < INT_MAX);
+  *nmiss = nmiss_size_t;
+}
+FCALLSCSUB3 (streamReadRecord_fwrap, STREAMREADRECORD, streamreadrecord, INT, DOUBLEV, PINT)
+static void streamReadRecordF_fwrap(int streamID, float data[], int *nmiss)
+{
+  size_t nmiss_size_t;
+  streamReadRecordF(streamID, data, &nmiss_size_t);
+  assert(nmiss_size_t < INT_MAX);
+  *nmiss = nmiss_size_t;
+}
+FCALLSCSUB3 (streamReadRecordF_fwrap, STREAMREADRECORDF, streamreadrecordf, INT, FLOATV, PINT)
 FCALLSCSUB2 (streamCopyRecord, STREAMCOPYRECORD, streamcopyrecord, INT, INT)
 
 /*  File driven I/O (may yield better performance than using the streamXXX functions)  */
@@ -189,7 +276,13 @@ FCALLSCFUN1 (INT, vlistNzaxis, VLISTNZAXIS, vlistnzaxis, INT)
 FCALLSCFUN1 (INT, vlistNsubtypes, VLISTNSUBTYPES, vlistnsubtypes, INT)
 FCALLSCSUB2 (vlistDefNtsteps, VLISTDEFNTSTEPS, vlistdefntsteps, INT, INT)
 FCALLSCFUN1 (INT, vlistNtsteps, VLISTNTSTEPS, vlistntsteps, INT)
-FCALLSCFUN1 (INT, vlistGridsizeMax, VLISTGRIDSIZEMAX, vlistgridsizemax, INT)
+static int vlistGridsizeMax_fwrap(int vlistID)
+{
+  size_t v;
+  v = vlistGridsizeMax(vlistID);
+  return size_t_c2f(v);
+}
+FCALLSCFUN1 (INT, vlistGridsizeMax_fwrap, VLISTGRIDSIZEMAX, vlistgridsizemax, INT)
 FCALLSCFUN2 (INT, vlistGrid, VLISTGRID, vlistgrid, INT, INT)
 FCALLSCFUN2 (INT, vlistGridIndex, VLISTGRIDINDEX, vlistgridindex, INT, INT)
 FCALLSCSUB3 (vlistChangeGridIndex, VLISTCHANGEGRIDINDEX, vlistchangegridindex, INT, INT, INT)
@@ -223,6 +316,8 @@ FCALLSCFUN2 (INT, vlistInqVarZaxis, VLISTINQVARZAXIS, vlistinqvarzaxis, INT, INT
 /*  used in MPIOM  */
 
 FCALLSCFUN2 (INT, vlistInqVarID, VLISTINQVARID, vlistinqvarid, INT, INT)
+FCALLSCSUB3 (vlistDefVarTimetype, VLISTDEFVARTIMETYPE, vlistdefvartimetype, INT, INT, INT)
+FCALLSCFUN2 (INT, vlistInqVarTimetype, VLISTINQVARTIMETYPE, vlistinqvartimetype, INT, INT)
 FCALLSCSUB3 (vlistDefVarTsteptype, VLISTDEFVARTSTEPTYPE, vlistdefvartsteptype, INT, INT, INT)
 FCALLSCFUN2 (INT, vlistInqVarTsteptype, VLISTINQVARTSTEPTYPE, vlistinqvartsteptype, INT, INT)
 FCALLSCSUB3 (vlistDefVarCompType, VLISTDEFVARCOMPTYPE, vlistdefvarcomptype, INT, INT, INT)
@@ -265,13 +360,13 @@ FCALLSCSUB3 (vlistDefVarAddoffset, VLISTDEFVARADDOFFSET, vlistdefvaraddoffset, I
 FCALLSCFUN2 (DOUBLE, vlistInqVarAddoffset, VLISTINQVARADDOFFSET, vlistinqvaraddoffset, INT, INT)
 FCALLSCSUB3 (vlistDefVarTimave, VLISTDEFVARTIMAVE, vlistdefvartimave, INT, INT, INT)
 FCALLSCFUN2 (INT, vlistInqVarTimave, VLISTINQVARTIMAVE, vlistinqvartimave, INT, INT)
-FCALLSCSUB3 (vlistDefVarTimaccu, VLISTDEFVARTIMACCU, vlistdefvartimaccu, INT, INT, INT)
-FCALLSCFUN2 (INT, vlistInqVarTimaccu, VLISTINQVARTIMACCU, vlistinqvartimaccu, INT, INT)
-FCALLSCSUB3 (vlistDefVarTypeOfGeneratingProcess, VLISTDEFVARTYPEOFGENERATINGPROCESS, vlistdefvartypeofgeneratingprocess, INT, INT, INT)
-FCALLSCFUN2 (INT, vlistInqVarTypeOfGeneratingProcess, VLISTINQVARTYPEOFGENERATINGPROCESS, vlistinqvartypeofgeneratingprocess, INT, INT)
-FCALLSCSUB3 (vlistDefVarProductDefinitionTemplate, VLISTDEFVARPRODUCTDEFINITIONTEMPLATE, vlistdefvarproductdefinitiontemplate, INT, INT, INT)
-FCALLSCFUN2 (INT, vlistInqVarProductDefinitionTemplate, VLISTINQVARPRODUCTDEFINITIONTEMPLATE, vlistinqvarproductdefinitiontemplate, INT, INT)
-FCALLSCFUN2 (INT, vlistInqVarSize, VLISTINQVARSIZE, vlistinqvarsize, INT, INT)
+static int vlistInqVarSize_fwrap(int vlistID, int varID)
+{
+  size_t v;
+  v = vlistInqVarSize(vlistID, varID);
+  return size_t_c2f(v);
+}
+FCALLSCFUN2 (INT, vlistInqVarSize_fwrap, VLISTINQVARSIZE, vlistinqvarsize, INT, INT)
 FCALLSCSUB4 (vlistDefIndex, VLISTDEFINDEX, vlistdefindex, INT, INT, INT, INT)
 FCALLSCFUN3 (INT, vlistInqIndex, VLISTINQINDEX, vlistinqindex, INT, INT, INT)
 FCALLSCSUB4 (vlistDefFlag, VLISTDEFFLAG, vlistdefflag, INT, INT, INT, INT)
@@ -280,11 +375,6 @@ FCALLSCFUN2 (INT, vlistFindVar, VLISTFINDVAR, vlistfindvar, INT, INT)
 FCALLSCFUN3 (INT, vlistFindLevel, VLISTFINDLEVEL, vlistfindlevel, INT, INT, INT)
 FCALLSCFUN2 (INT, vlistMergedVar, VLISTMERGEDVAR, vlistmergedvar, INT, INT)
 FCALLSCFUN3 (INT, vlistMergedLevel, VLISTMERGEDLEVEL, vlistmergedlevel, INT, INT, INT)
-
-/*  Ensemble info routines  */
-
-FCALLSCSUB5 (vlistDefVarEnsemble, VLISTDEFVARENSEMBLE, vlistdefvarensemble, INT, INT, INT, INT, INT)
-FCALLSCFUN5 (INT, vlistInqVarEnsemble, VLISTINQVARENSEMBLE, vlistinqvarensemble, INT, INT, PINT, PINT, PINT)
 FCALLSCSUB0 (cdiClearAdditionalKeys, CDICLEARADDITIONALKEYS, cdiclearadditionalkeys)
 FCALLSCSUB1 (cdiDefAdditionalKey, CDIDEFADDITIONALKEY, cdidefadditionalkey, STRING)
 FCALLSCSUB4 (vlistDefVarIntKey, VLISTDEFVARINTKEY, vlistdefvarintkey, INT, INT, STRING, INT)
@@ -292,12 +382,6 @@ FCALLSCSUB4 (vlistDefVarDblKey, VLISTDEFVARDBLKEY, vlistdefvardblkey, INT, INT, 
 FCALLSCFUN3 (INT, vlistHasVarKey, VLISTHASVARKEY, vlisthasvarkey, INT, INT, STRING)
 FCALLSCFUN3 (DOUBLE, vlistInqVarDblKey, VLISTINQVARDBLKEY, vlistinqvardblkey, INT, INT, STRING)
 FCALLSCFUN3 (INT, vlistInqVarIntKey, VLISTINQVARINTKEY, vlistinqvarintkey, INT, INT, STRING)
-
-/*  needed only for CDO operator after  */
-
-FCALLSCFUN2 (STRING, vlistInqVarNamePtr, VLISTINQVARNAMEPTR, vlistinqvarnameptr, INT, INT)
-FCALLSCFUN2 (STRING, vlistInqVarLongnamePtr, VLISTINQVARLONGNAMEPTR, vlistinqvarlongnameptr, INT, INT)
-FCALLSCFUN2 (STRING, vlistInqVarUnitsPtr, VLISTINQVARUNITSPTR, vlistinqvarunitsptr, INT, INT)
 
 /*  CDI attributes  */
 
@@ -322,34 +406,82 @@ FCALLSCFUN2 (INT, gridInqMaskGME, GRIDINQMASKGME, gridinqmaskgme, INT, INTV)
 FCALLSCSUB2 (gridDefMask, GRIDDEFMASK, griddefmask, INT, INTV)
 FCALLSCFUN2 (INT, gridInqMask, GRIDINQMASK, gridinqmask, INT, INTV)
 FCALLSCSUB2 (gridPrint, GRIDPRINT, gridprint, INT, INT)
-FCALLSCFUN2 (INT, gridCreate, GRIDCREATE, gridcreate, INT, INT)
+static int gridCreate_fwrap(int gridtype, int size)
+{
+  int v;
+  v = gridCreate(gridtype, (size_t)size);
+  return v;
+}
+FCALLSCFUN2 (INT, gridCreate_fwrap, GRIDCREATE, gridcreate, INT, INT)
 FCALLSCSUB1 (gridDestroy, GRIDDESTROY, griddestroy, INT)
 FCALLSCFUN1 (INT, gridDuplicate, GRIDDUPLICATE, gridduplicate, INT)
 FCALLSCSUB2 (gridDefProj, GRIDDEFPROJ, griddefproj, INT, INT)
 FCALLSCFUN1 (INT, gridInqProj, GRIDINQPROJ, gridinqproj, INT)
 FCALLSCFUN1 (INT, gridInqProjType, GRIDINQPROJTYPE, gridinqprojtype, INT)
 FCALLSCFUN1 (INT, gridInqType, GRIDINQTYPE, gridinqtype, INT)
-FCALLSCFUN1 (INT, gridInqSize, GRIDINQSIZE, gridinqsize, INT)
-FCALLSCSUB2 (gridDefXsize, GRIDDEFXSIZE, griddefxsize, INT, INT)
-FCALLSCFUN1 (INT, gridInqXsize, GRIDINQXSIZE, gridinqxsize, INT)
-FCALLSCSUB2 (gridDefYsize, GRIDDEFYSIZE, griddefysize, INT, INT)
-FCALLSCFUN1 (INT, gridInqYsize, GRIDINQYSIZE, gridinqysize, INT)
+static int gridInqSize_fwrap(int gridID)
+{
+  size_t v;
+  v = gridInqSize(gridID);
+  return size_t_c2f(v);
+}
+FCALLSCFUN1 (INT, gridInqSize_fwrap, GRIDINQSIZE, gridinqsize, INT)
+static void gridDefXsize_fwrap(int gridID, int xsize)
+{
+  gridDefXsize(gridID, (size_t)xsize);
+}
+FCALLSCSUB2 (gridDefXsize_fwrap, GRIDDEFXSIZE, griddefxsize, INT, INT)
+static int gridInqXsize_fwrap(int gridID)
+{
+  size_t v;
+  v = gridInqXsize(gridID);
+  return size_t_c2f(v);
+}
+FCALLSCFUN1 (INT, gridInqXsize_fwrap, GRIDINQXSIZE, gridinqxsize, INT)
+static void gridDefYsize_fwrap(int gridID, int ysize)
+{
+  gridDefYsize(gridID, (size_t)ysize);
+}
+FCALLSCSUB2 (gridDefYsize_fwrap, GRIDDEFYSIZE, griddefysize, INT, INT)
+static int gridInqYsize_fwrap(int gridID)
+{
+  size_t v;
+  v = gridInqYsize(gridID);
+  return size_t_c2f(v);
+}
+FCALLSCFUN1 (INT, gridInqYsize_fwrap, GRIDINQYSIZE, gridinqysize, INT)
 FCALLSCSUB2 (gridDefNP, GRIDDEFNP, griddefnp, INT, INT)
 FCALLSCFUN1 (INT, gridInqNP, GRIDINQNP, gridinqnp, INT)
 FCALLSCSUB2 (gridDefXvals, GRIDDEFXVALS, griddefxvals, INT, DOUBLEV)
-FCALLSCFUN2 (INT, gridInqXvals, GRIDINQXVALS, gridinqxvals, INT, DOUBLEV)
+static int gridInqXvals_fwrap(int gridID, double xvals[])
+{
+  size_t v;
+  v = gridInqXvals(gridID, xvals);
+  return size_t_c2f(v);
+}
+FCALLSCFUN2 (INT, gridInqXvals_fwrap, GRIDINQXVALS, gridinqxvals, INT, DOUBLEV)
 FCALLSCFUN1 (INT, gridInqXIsc, GRIDINQXISC, gridinqxisc, INT)
 FCALLSCSUB2 (gridDefYvals, GRIDDEFYVALS, griddefyvals, INT, DOUBLEV)
-FCALLSCFUN2 (INT, gridInqYvals, GRIDINQYVALS, gridinqyvals, INT, DOUBLEV)
+static int gridInqYvals_fwrap(int gridID, double yvals[])
+{
+  size_t v;
+  v = gridInqYvals(gridID, yvals);
+  return size_t_c2f(v);
+}
+FCALLSCFUN2 (INT, gridInqYvals_fwrap, GRIDINQYVALS, gridinqyvals, INT, DOUBLEV)
 FCALLSCFUN1 (INT, gridInqYIsc, GRIDINQYISC, gridinqyisc, INT)
-
-/*  CDI grid string key values  */
-
-
-/*  CDI zaxis string key values  */
-
+FCALLSCFUN4 (INT, cdiDefKeyInt, CDIDEFKEYINT, cdidefkeyint, INT, INT, INT, INT)
+FCALLSCFUN4 (INT, cdiInqKeyInt, CDIINQKEYINT, cdiinqkeyint, INT, INT, INT, PINT)
+FCALLSCFUN5 (INT, cdiDefKeyBytes, CDIDEFKEYBYTES, cdidefkeybytes, INT, INT, INT, PVOID, INT)
+FCALLSCFUN5 (INT, cdiInqKeyBytes, CDIINQKEYBYTES, cdiinqkeybytes, INT, INT, INT, PVOID, PINT)
+FCALLSCFUN4 (INT, cdiDefKeyString, CDIDEFKEYSTRING, cdidefkeystring, INT, INT, INT, STRING)
+FCALLSCFUN4 (INT, cdiInqKeyLen, CDIINQKEYLEN, cdiinqkeylen, INT, INT, INT, PINT)
+FCALLSCFUN5 (INT, cdiInqKeyString, CDIINQKEYSTRING, cdiinqkeystring, INT, INT, INT, PSTRING, PINT)
+FCALLSCFUN4 (INT, cdiCopyKeys, CDICOPYKEYS, cdicopykeys, INT, INT, INT, INT)
 FCALLSCFUN4 (INT, cdiGridDefKeyStr, CDIGRIDDEFKEYSTR, cdigriddefkeystr, INT, INT, INT, STRING)
 FCALLSCFUN4 (INT, cdiGridInqKeyStr, CDIGRIDINQKEYSTR, cdigridinqkeystr, INT, INT, INT, PSTRING)
+FCALLSCFUN4 (INT, cdiZaxisDefKeyStr, CDIZAXISDEFKEYSTR, cdizaxisdefkeystr, INT, INT, INT, STRING)
+FCALLSCFUN4 (INT, cdiZaxisInqKeyStr, CDIZAXISINQKEYSTR, cdizaxisinqkeystr, INT, INT, INT, PSTRING)
 FCALLSCFUN3 (INT, cdiZaxisDefKeyFlt, CDIZAXISDEFKEYFLT, cdizaxisdefkeyflt, INT, INT, DOUBLE)
 FCALLSCFUN3 (INT, cdiZaxisInqKeyFlt, CDIZAXISINQKEYFLT, cdizaxisinqkeyflt, INT, INT, PDOUBLE)
 FCALLSCSUB2 (gridDefXname, GRIDDEFXNAME, griddefxname, INT, STRING)
@@ -366,10 +498,22 @@ FCALLSCSUB2 (gridDefYunits, GRIDDEFYUNITS, griddefyunits, INT, STRING)
 FCALLSCSUB2 (gridInqYunits, GRIDINQYUNITS, gridinqyunits, INT, PSTRING)
 FCALLSCSUB2 (gridInqXstdname, GRIDINQXSTDNAME, gridinqxstdname, INT, PSTRING)
 FCALLSCSUB2 (gridInqYstdname, GRIDINQYSTDNAME, gridinqystdname, INT, PSTRING)
-FCALLSCSUB2 (gridDefPrec, GRIDDEFPREC, griddefprec, INT, INT)
-FCALLSCFUN1 (INT, gridInqPrec, GRIDINQPREC, gridinqprec, INT)
-FCALLSCFUN2 (DOUBLE, gridInqXval, GRIDINQXVAL, gridinqxval, INT, INT)
-FCALLSCFUN2 (DOUBLE, gridInqYval, GRIDINQYVAL, gridinqyval, INT, INT)
+FCALLSCSUB2 (gridDefDatatype, GRIDDEFDATATYPE, griddefdatatype, INT, INT)
+FCALLSCFUN1 (INT, gridInqDatatype, GRIDINQDATATYPE, gridinqdatatype, INT)
+static double gridInqXval_fwrap(int gridID, int index)
+{
+  double v;
+  v = gridInqXval(gridID, (size_t)index);
+  return v;
+}
+FCALLSCFUN2 (DOUBLE, gridInqXval_fwrap, GRIDINQXVAL, gridinqxval, INT, INT)
+static double gridInqYval_fwrap(int gridID, int index)
+{
+  double v;
+  v = gridInqYval(gridID, (size_t)index);
+  return v;
+}
+FCALLSCFUN2 (DOUBLE, gridInqYval_fwrap, GRIDINQYVAL, gridinqyval, INT, INT)
 FCALLSCFUN1 (DOUBLE, gridInqXinc, GRIDINQXINC, gridinqxinc, INT)
 FCALLSCFUN1 (DOUBLE, gridInqYinc, GRIDINQYINC, gridinqyinc, INT)
 FCALLSCFUN1 (INT, gridIsCircular, GRIDISCIRCULAR, gridiscircular, INT)
@@ -407,9 +551,21 @@ FCALLSCFUN1 (INT, gridHasArea, GRIDHASAREA, gridhasarea, INT)
 FCALLSCSUB2 (gridDefNvertex, GRIDDEFNVERTEX, griddefnvertex, INT, INT)
 FCALLSCFUN1 (INT, gridInqNvertex, GRIDINQNVERTEX, gridinqnvertex, INT)
 FCALLSCSUB2 (gridDefXbounds, GRIDDEFXBOUNDS, griddefxbounds, INT, DOUBLEV)
-FCALLSCFUN2 (INT, gridInqXbounds, GRIDINQXBOUNDS, gridinqxbounds, INT, DOUBLEV)
+static int gridInqXbounds_fwrap(int gridID, double xbounds[])
+{
+  size_t v;
+  v = gridInqXbounds(gridID, xbounds);
+  return size_t_c2f(v);
+}
+FCALLSCFUN2 (INT, gridInqXbounds_fwrap, GRIDINQXBOUNDS, gridinqxbounds, INT, DOUBLEV)
 FCALLSCSUB2 (gridDefYbounds, GRIDDEFYBOUNDS, griddefybounds, INT, DOUBLEV)
-FCALLSCFUN2 (INT, gridInqYbounds, GRIDINQYBOUNDS, gridinqybounds, INT, DOUBLEV)
+static int gridInqYbounds_fwrap(int gridID, double ybounds[])
+{
+  size_t v;
+  v = gridInqYbounds(gridID, ybounds);
+  return size_t_c2f(v);
+}
+FCALLSCFUN2 (INT, gridInqYbounds_fwrap, GRIDINQYBOUNDS, gridinqybounds, INT, DOUBLEV)
 FCALLSCSUB3 (gridDefRowlon, GRIDDEFROWLON, griddefrowlon, INT, INT, INTV)
 FCALLSCSUB2 (gridInqRowlon, GRIDINQROWLON, gridinqrowlon, INT, INTV)
 FCALLSCSUB2 (gridChangeType, GRIDCHANGETYPE, gridchangetype, INT, INT)
@@ -432,6 +588,7 @@ FCALLSCFUN1 (INT, zaxisDuplicate, ZAXISDUPLICATE, zaxisduplicate, INT)
 FCALLSCSUB1 (zaxisPrint, ZAXISPRINT, zaxisprint, INT)
 FCALLSCSUB2 (zaxisDefLevels, ZAXISDEFLEVELS, zaxisdeflevels, INT, DOUBLEV)
 FCALLSCFUN2 (INT, zaxisInqLevels, ZAXISINQLEVELS, zaxisinqlevels, INT, DOUBLEV)
+FCALLSCFUN1 (INT, zaxisInqCLen, ZAXISINQCLEN, zaxisinqclen, INT)
 FCALLSCSUB3 (zaxisDefLevel, ZAXISDEFLEVEL, zaxisdeflevel, INT, INT, DOUBLE)
 FCALLSCFUN2 (DOUBLE, zaxisInqLevel, ZAXISINQLEVEL, zaxisinqlevel, INT, INT)
 FCALLSCSUB2 (zaxisDefNlevRef, ZAXISDEFNLEVREF, zaxisdefnlevref, INT, INT)
@@ -440,8 +597,6 @@ FCALLSCSUB2 (zaxisDefNumber, ZAXISDEFNUMBER, zaxisdefnumber, INT, INT)
 FCALLSCFUN1 (INT, zaxisInqNumber, ZAXISINQNUMBER, zaxisinqnumber, INT)
 FCALLSCSUB2 (zaxisDefUUID, ZAXISDEFUUID, zaxisdefuuid, INT, PVOID)
 FCALLSCSUB2 (zaxisInqUUID, ZAXISINQUUID, zaxisinquuid, INT, PVOID)
-FCALLSCFUN4 (INT, cdiZaxisDefKeyStr, CDIZAXISDEFKEYSTR, cdizaxisdefkeystr, INT, INT, INT, STRING)
-FCALLSCFUN4 (INT, cdiZaxisInqKeyStr, CDIZAXISINQKEYSTR, cdizaxisinqkeystr, INT, INT, INT, PSTRING)
 FCALLSCSUB2 (zaxisDefName, ZAXISDEFNAME, zaxisdefname, INT, STRING)
 FCALLSCSUB2 (zaxisInqName, ZAXISINQNAME, zaxisinqname, INT, PSTRING)
 FCALLSCSUB2 (zaxisDefLongname, ZAXISDEFLONGNAME, zaxisdeflongname, INT, STRING)
@@ -449,8 +604,8 @@ FCALLSCSUB2 (zaxisInqLongname, ZAXISINQLONGNAME, zaxisinqlongname, INT, PSTRING)
 FCALLSCSUB2 (zaxisDefUnits, ZAXISDEFUNITS, zaxisdefunits, INT, STRING)
 FCALLSCSUB2 (zaxisInqUnits, ZAXISINQUNITS, zaxisinqunits, INT, PSTRING)
 FCALLSCSUB2 (zaxisInqStdname, ZAXISINQSTDNAME, zaxisinqstdname, INT, PSTRING)
-FCALLSCSUB2 (zaxisDefPrec, ZAXISDEFPREC, zaxisdefprec, INT, INT)
-FCALLSCFUN1 (INT, zaxisInqPrec, ZAXISINQPREC, zaxisinqprec, INT)
+FCALLSCSUB2 (zaxisDefDatatype, ZAXISDEFDATATYPE, zaxisdefdatatype, INT, INT)
+FCALLSCFUN1 (INT, zaxisInqDatatype, ZAXISINQDATATYPE, zaxisinqdatatype, INT)
 FCALLSCSUB2 (zaxisDefPositive, ZAXISDEFPOSITIVE, zaxisdefpositive, INT, INT)
 FCALLSCFUN1 (INT, zaxisInqPositive, ZAXISINQPOSITIVE, zaxisinqpositive, INT)
 FCALLSCSUB1 (zaxisDefScalar, ZAXISDEFSCALAR, zaxisdefscalar, INT)
@@ -490,6 +645,7 @@ FCALLSCSUB2 (taxisDefFtime, TAXISDEFFTIME, taxisdefftime, INT, INT)
 FCALLSCFUN1 (INT, taxisInqFdate, TAXISINQFDATE, taxisinqfdate, INT)
 FCALLSCFUN1 (INT, taxisInqFtime, TAXISINQFTIME, taxisinqftime, INT)
 FCALLSCFUN1 (INT, taxisHasBounds, TAXISHASBOUNDS, taxishasbounds, INT)
+FCALLSCSUB1 (taxisWithBounds, TAXISWITHBOUNDS, taxiswithbounds, INT)
 FCALLSCSUB1 (taxisDeleteBounds, TAXISDELETEBOUNDS, taxisdeletebounds, INT)
 FCALLSCSUB3 (taxisDefVdateBounds, TAXISDEFVDATEBOUNDS, taxisdefvdatebounds, INT, INT, INT)
 FCALLSCSUB3 (taxisDefVtimeBounds, TAXISDEFVTIMEBOUNDS, taxisdefvtimebounds, INT, INT, INT)
@@ -528,27 +684,15 @@ FCALLSCFUN1 (STRING, modelInqNamePtr, MODELINQNAMEPTR, modelinqnameptr, INT)
 
 /*  Table routines  */
 
-FCALLSCSUB2 (tableWriteC, TABLEWRITEC, tablewritec, STRING, INT)
 FCALLSCSUB2 (tableWrite, TABLEWRITE, tablewrite, STRING, INT)
 FCALLSCFUN1 (INT, tableRead, TABLEREAD, tableread, STRING)
 FCALLSCFUN3 (INT, tableDef, TABLEDEF, tabledef, INT, INT, STRING)
 FCALLSCFUN1 (STRING, tableInqNamePtr, TABLEINQNAMEPTR, tableinqnameptr, INT)
-FCALLSCSUB5 (tableDefEntry, TABLEDEFENTRY, tabledefentry, INT, INT, STRING, STRING, STRING)
 FCALLSCFUN3 (INT, tableInq, TABLEINQ, tableinq, INT, INT, STRING)
 FCALLSCFUN0 (INT, tableInqNumber, TABLEINQNUMBER, tableinqnumber)
 FCALLSCFUN1 (INT, tableInqNum, TABLEINQNUM, tableinqnum, INT)
 FCALLSCFUN1 (INT, tableInqModel, TABLEINQMODEL, tableinqmodel, INT)
-FCALLSCSUB5 (tableInqPar, TABLEINQPAR, tableinqpar, INT, INT, PSTRING, PSTRING, PSTRING)
-FCALLSCFUN3 (INT, tableInqParCode, TABLEINQPARCODE, tableinqparcode, INT, PSTRING, PINT)
-FCALLSCFUN3 (INT, tableInqParName, TABLEINQPARNAME, tableinqparname, INT, INT, PSTRING)
-FCALLSCFUN3 (INT, tableInqParLongname, TABLEINQPARLONGNAME, tableinqparlongname, INT, INT, PSTRING)
-FCALLSCFUN3 (INT, tableInqParUnits, TABLEINQPARUNITS, tableinqparunits, INT, INT, PSTRING)
-
-/*  needed only for CDO operator after  */
-
-FCALLSCFUN2 (STRING, tableInqParNamePtr, TABLEINQPARNAMEPTR, tableinqparnameptr, INT, INT)
-FCALLSCFUN2 (STRING, tableInqParLongnamePtr, TABLEINQPARLONGNAMEPTR, tableinqparlongnameptr, INT, INT)
-FCALLSCFUN2 (STRING, tableInqParUnitsPtr, TABLEINQPARUNITSPTR, tableinqparunitsptr, INT, INT)
+FCALLSCSUB6 (tableInqEntry, TABLEINQENTRY, tableinqentry, INT, INT, INT, PSTRING, PSTRING, PSTRING)
 
 /*  History routines  */
 

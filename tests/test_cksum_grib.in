@@ -1,14 +1,16 @@
-#! /bin/sh
+#! @SHELL@
 
 set -e
 format=grb
 if [ @ENABLE_GRIB@ = yes ]; then
-  exec >test_cksum_$format.log 2>&1
-  ./cksum_write -f $format
-  ./cksum_read example.$format
-  \rm example.cksum example.$format
-  \rm test_cksum_$format.log
+  . ${srcdir}/test_cksum_base
 else
   # skip tests for unsupported formats
   exit 77
 fi
+
+#
+# Local Variables:
+# mode: sh
+# End:
+#

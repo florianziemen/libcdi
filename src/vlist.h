@@ -1,7 +1,7 @@
-#ifndef _VLIST_H
-#define _VLIST_H
+#ifndef  VLIST_H
+#define  VLIST_H
 
-#ifdef HAVE_CONFIG_H
+#ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
 
@@ -11,18 +11,19 @@
 
 #include <stddef.h>  /* size_t */
 
-#ifndef _CDI_LIMITS_H
+#ifndef  CDI_LIMITS_H
 #include "cdi_limits.h"
 #endif
 
 #define VALIDMISS 1.e+303
 
+#include "cdi_key.h"
 #include "cdi_att.h"
 #include "grid.h"
 
 typedef struct
 {
-  int      flag;
+  bool     flag;
   int      index;
   int      mlevelID;
   int      flevelID;
@@ -48,25 +49,23 @@ ensinfo_t;
 typedef struct
 {
   bool        isUsed;
-  int         flag;
+  bool        flag;
   int         mvarID;
   int         fvarID;
   int         param;
   int         gridID;
   int         zaxisID;
-  int         tsteptype; /* TSTEP_* */
-  int         datatype;  /* CDI_DATATYPE_PACKX for GRIB data, else CDI_DATATYPE_FLT32 or CDI_DATATYPE_FLT64 */
+  int         timetype;  // TIME_*
+  int         tsteptype; // TSTEP_*
+  int         datatype;  // CDI_DATATYPE_PACKX for GRIB data, else CDI_DATATYPE_FLT32 or CDI_DATATYPE_FLT64
   int         instID;
   int         modelID;
   int         tableID;
   int         timave;
-  int         timaccu;
-  int         typeOfGeneratingProcess;
-  int         productDefinitionTemplate;
   int         chunktype;
   int         xyz;
-  int         missvalused; /* TRUE if missval is defined */
-  int         lvalidrange;
+  bool        missvalused; // true if missval is defined
+  bool        lvalidrange;
   char       *name;
   char       *longname;
   char       *stdname;
@@ -79,15 +78,15 @@ typedef struct
   levinfo_t  *levinfo;
   int         comptype;     // compression type
   int         complevel;    // compression level
-  ensinfo_t  *ensdata;      /* Ensemble information */
+  cdi_keys_t  keys;
   cdi_atts_t  atts;
   int         iorank;
 
-  int         subtypeID;   /* subtype ID for tile-related meta-data, currently for GRIB-API only. */
+  int         subtypeID;   // subtype ID for tile-related meta-data, currently for GRIB-API only.
 
-  int                 opt_grib_nentries;       /* current no. key-value pairs            */
-  int                 opt_grib_kvpair_size;    /* current allocated size                 */
-  opt_key_val_pair_t *opt_grib_kvpair;         /* (optional) list of keyword/value pairs */
+  int                 opt_grib_nentries;       // current no. key-value pairs
+  int                 opt_grib_kvpair_size;    // current allocated size
+  opt_key_val_pair_t *opt_grib_kvpair;         // (optional) list of keyword/value pairs
 }
 var_t;
 
@@ -113,26 +112,25 @@ typedef struct
   int         zaxisIDs[MAX_ZAXES_PS];
   int         subtypeIDs[MAX_SUBTYPES_PS];
   var_t      *vars;
+  cdi_keys_t  keys;
   cdi_atts_t  atts;
 }
 vlist_t;
 
 
+int vlist_key_compare(vlist_t *a, int varIDA, vlist_t *b, int varIDB, int keynum);
+
 vlist_t *vlist_to_pointer(int vlistID);
 void cdiVlistMakeInternal(int vlistID);
 void cdiVlistMakeImmutable(int vlistID);
 void vlistCheckVarID(const char *caller, int vlistID, int varID);
-const char *vlistInqVarStdnamePtr(int vlistID, int varID);
 void     vlistDestroyVarName(int vlistID, int varID);
 void     vlistDestroyVarLongname(int vlistID, int varID);
 void     vlistDestroyVarStdname(int vlistID, int varID);
 void     vlistDestroyVarUnits(int vlistID, int varID);
 void     cdiVlistDestroy_(int vlistID);
-void     vlistDefVarTsteptype(int vlistID, int varID, int tsteptype);
 int      vlistInqVarMissvalUsed(int vlistID, int varID);
 int      vlistHasTime(int vlistID);
-
-int      cdiDelAtts(int vlistID, int varID);
 
 void     vlistUnpack(char * buffer, int bufferSize, int * pos,
                      int originNamespace, void *context, int force_id);
@@ -217,7 +215,7 @@ const
 #endif
 resOps vlistOps;
 
-#endif  /* _VLIST_H */
+#endif  /* VLIST_H */
 /*
  * Local Variables:
  * c-file-style: "Java"

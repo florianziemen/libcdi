@@ -4,15 +4,13 @@
 
 #ifdef HAVE_LIBNETCDF
 
-#  include <stdio.h>
-#  include <string.h>
+#include <stdio.h>
+#include <string.h>
 
-#  include <netcdf.h>
-
-#  include "cdi.h"
-#  include "cdi_int.h"
-#  include "stream_cdf.h"
-#  include "cdf_int.h"
+#include "cdi.h"
+#include "cdi_int.h"
+#include "stream_cdf.h"
+#include "cdf_int.h"
 
 static
 int cdfDefTimeBounds(int fileID, int nctimevarid, int nctimedimid, const char *taxis_name, taxis_t* taxis)
@@ -57,7 +55,7 @@ int cdfDefTimeBounds(int fileID, int nctimevarid, int nctimedimid, const char *t
 }
 
 static
-void cdfDefTimeUnits(char *unitstr, taxis_t* taxis0, taxis_t* taxis)
+void cdfDefTimeUnits(char *unitstr, taxis_t *taxis0, taxis_t *taxis)
 {
   if ( taxis->units && taxis->units[0] )
     {
@@ -80,14 +78,12 @@ void cdfDefTimeUnits(char *unitstr, taxis_t* taxis0, taxis_t* taxis)
         }
       else
         {
-          int timeunit = taxis->unit != -1 ? taxis->unit : TUNIT_HOUR;
-          int rdate    = taxis->rdate != -1 ? taxis->rdate : taxis->vdate;
-          int rtime    = taxis->rdate != -1 ? taxis->rtime : taxis->vtime;
           int year, month, day, hour, minute, second;
-          cdiDecodeDate(rdate, &year, &month, &day);
-          cdiDecodeTime(rtime, &hour, &minute, &second);
+          cdiDecodeDate(taxis->rdate, &year, &month, &day);
+          cdiDecodeTime(taxis->rtime, &hour, &minute, &second);
 
-          if ( timeunit == TUNIT_QUARTER   ) timeunit = TUNIT_MINUTE;
+          int timeunit = taxis->unit  != -1 ? taxis->unit  : TUNIT_HOUR;
+          if      ( timeunit == TUNIT_QUARTER   ) timeunit = TUNIT_MINUTE;
           else if ( timeunit == TUNIT_30MINUTES ) timeunit = TUNIT_MINUTE;
           else if (    timeunit == TUNIT_3HOURS
                     || timeunit == TUNIT_6HOURS
@@ -119,6 +115,7 @@ void cdfDefCalendar(int fileID, int ncvarid, int calendar)
 {
   static const struct { int calCode; const char *calStr; } calTab[] = {
     { CALENDAR_STANDARD, "standard" },
+    { CALENDAR_GREGORIAN, "gregorian" },
     { CALENDAR_PROLEPTIC, "proleptic_gregorian" },
     { CALENDAR_NONE, "none" },
     { CALENDAR_360DAYS, "360_day" },

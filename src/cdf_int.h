@@ -1,9 +1,8 @@
-#ifndef _CDF_INT_H
-#define _CDF_INT_H
+#ifndef  CDF_INT_H
+#define  CDF_INT_H
 
 #if  defined  (HAVE_LIBNETCDF)
 
-#include <stdlib.h>
 #include <netcdf.h>
 
 void cdf_create (const char *path, int cmode, int *idp);
@@ -97,7 +96,7 @@ typedef void (*cdi_cdf_def_var_funcp)(int ncid, const char *name,
 
 #endif
 
-#endif  /* _CDF_INT_H */
+#endif  /* CDF_INT_H */
 /*
  * Local Variables:
  * c-file-style: "Java"

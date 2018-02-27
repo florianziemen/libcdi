@@ -1,8 +1,6 @@
 #if defined (HAVE_CONFIG_H)
-#  include "config.h"
+#include "config.h"
 #endif
-
-#include <limits.h>
 
 #include "dmemory.h"
 #include "cdi.h"
@@ -10,14 +8,14 @@
 #include "vlist.h"
 #include "vlist_var.h"
 #include "resource_handle.h"
-#include "cdi_att.h"
+#include "tablepar.h"
 #include "namespace.h"
 #include "serialize.h"
 #include "error.h"
 
 #if  defined  (HAVE_LIBGRIB_API)
-#  include "file.h"
-#  include <grib_api.h>
+#include "file.h"
+#include <grib_api.h>
 #endif
 
 
@@ -31,11 +29,9 @@ void vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].flag          = 0;
   vlistptr->vars[varID].param         = 0;
   vlistptr->vars[varID].datatype      = CDI_UNDEFID;
+  vlistptr->vars[varID].timetype      = CDI_UNDEFID;
   vlistptr->vars[varID].tsteptype     = TSTEP_INSTANT;
   vlistptr->vars[varID].timave        = 0;
-  vlistptr->vars[varID].timaccu       = 0;
-  vlistptr->vars[varID].typeOfGeneratingProcess   = 0;
-  vlistptr->vars[varID].productDefinitionTemplate = -1;
   vlistptr->vars[varID].chunktype     = cdiChunkType;
   vlistptr->vars[varID].xyz           = 321;
   vlistptr->vars[varID].gridID        = CDI_UNDEFID;
@@ -44,7 +40,7 @@ void vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].instID        = CDI_UNDEFID;
   vlistptr->vars[varID].modelID       = CDI_UNDEFID;
   vlistptr->vars[varID].tableID       = CDI_UNDEFID;
-  vlistptr->vars[varID].missvalused   = FALSE;
+  vlistptr->vars[varID].missvalused   = false;
   vlistptr->vars[varID].missval       = cdiDefaultMissval;
   vlistptr->vars[varID].addoffset     = 0.0;
   vlistptr->vars[varID].scalefactor   = 1.0;
@@ -56,12 +52,15 @@ void vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].levinfo       = NULL;
   vlistptr->vars[varID].comptype      = CDI_COMPRESS_NONE;
   vlistptr->vars[varID].complevel     = 1;
+  vlistptr->vars[varID].keys.nalloc   = MAX_KEYS;
+  vlistptr->vars[varID].keys.nelems   = 0;
+  for ( int i = 0; i < MAX_KEYS; ++i )
+    vlistptr->vars[varID].keys.value[i].length = 0;
   vlistptr->vars[varID].atts.nalloc   = MAX_ATTRIBUTES;
   vlistptr->vars[varID].atts.nelems   = 0;
-  vlistptr->vars[varID].lvalidrange   = 0;
+  vlistptr->vars[varID].lvalidrange   = false;
   vlistptr->vars[varID].validrange[0] = VALIDMISS;
   vlistptr->vars[varID].validrange[1] = VALIDMISS;
-  vlistptr->vars[varID].ensdata       = NULL;
   vlistptr->vars[varID].iorank        = CDI_UNDEFID;
   vlistptr->vars[varID].opt_grib_kvpair_size = 0;
   vlistptr->vars[varID].opt_grib_kvpair      = NULL;
@@ -127,10 +126,10 @@ void vlistCheckVarID(const char *caller, int vlistID, int varID)
 }
 
 
-int vlistDefVarTiles(int vlistID, int gridID, int zaxisID, int tsteptype, int tilesetID)
+int vlistDefVarTiles(int vlistID, int gridID, int zaxisID, int timetype, int tilesetID)
 {
   if ( CDI_Debug )
-    Message("gridID = %d  zaxisID = %d  tsteptype = %d", gridID, zaxisID, tsteptype);
+    Message("gridID = %d  zaxisID = %d  timetype = %d", gridID, zaxisID, timetype);
 
   int varID = vlistvarNewEntry(vlistID);
 
@@ -138,13 +137,13 @@ int vlistDefVarTiles(int vlistID, int gridID, int zaxisID, int tsteptype, int ti
   vlistptr->nvars++;
   vlistptr->vars[varID].gridID    = gridID;
   vlistptr->vars[varID].zaxisID   = zaxisID;
-  vlistptr->vars[varID].tsteptype = tsteptype;
+  vlistptr->vars[varID].timetype = timetype;
   vlistptr->vars[varID].subtypeID = tilesetID;
 
-  if ( tsteptype < 0 )
+  if ( timetype < 0 )
     {
-      Message("Unexpected tstep type %d, set to TSTEP_INSTANT!", tsteptype);
-      vlistptr->vars[varID].tsteptype = TSTEP_INSTANT;
+      Message("Unexpected time type %d, set to TIME_VARYING!", timetype);
+      vlistptr->vars[varID].timetype = TIME_VARYING;
     }
 
   vlistAdd2GridIDs(vlistptr, gridID);
@@ -161,14 +160,13 @@ int vlistDefVarTiles(int vlistID, int gridID, int zaxisID, int tsteptype, int ti
 @Function  vlistDefVar
 @Title     Define a Variable
 
-@Prototype int vlistDefVar(int vlistID, int gridID, int zaxisID, int tsteptype)
+@Prototype int vlistDefVar(int vlistID, int gridID, int zaxisID, int timetype)
 @Parameter
     @Item  vlistID   Variable list ID, from a previous call to @fref{vlistCreate}.
     @Item  gridID    Grid ID, from a previous call to @fref{gridCreate}.
     @Item  zaxisID   Z-axis ID, from a previous call to @fref{zaxisCreate}.
-    @Item  tsteptype One of the set of predefined CDI timestep types.
-                     The valid CDI timestep types are @func{TSTEP_CONSTANT}, @func{TSTEP_INSTANT},
-                     @func{TSTEP_ACCUM}, @func{TSTEP_AVG}, @func{TSTEP_MAX}, @func{TSTEP_MIN} and @func{TSTEP_SD}.
+    @Item  timetype  One of the set of predefined CDI timestep types.
+                     The valid CDI timestep types are @func{TIME_CONSTANT} and @func{TIME_VARYING}.
 
 @Description
 The function @func{vlistDefVar} adds a new variable to vlistID.
@@ -186,7 +184,7 @@ and add a variable with @func{vlistDefVar}.
 int vlistID, varID;
    ...
 vlistID = vlistCreate();
-varID = vlistDefVar(vlistID, gridID, zaxisID, TIME_INSTANT);
+varID = vlistDefVar(vlistID, gridID, zaxisID, TIME_VARYING);
    ...
 streamDefVlist(streamID, vlistID);
    ...
@@ -195,10 +193,10 @@ vlistDestroy(vlistID);
 @EndSource
 @EndFunction
 */
-int vlistDefVar(int vlistID, int gridID, int zaxisID, int tsteptype)
+int vlistDefVar(int vlistID, int gridID, int zaxisID, int timetype)
 {
   /* call "vlistDefVarTiles" with a trivial tile index: */
-  return vlistDefVarTiles(vlistID, gridID, zaxisID, tsteptype, CDI_UNDEFID);
+  return vlistDefVarTiles(vlistID, gridID, zaxisID, timetype, CDI_UNDEFID);
 }
 
 void
@@ -277,15 +275,15 @@ void vlistDefVarCode(int vlistID, int varID, int code)
 }
 
 
-void vlistInqVar(int vlistID, int varID, int *gridID, int *zaxisID, int *tsteptype)
+void vlistInqVar(int vlistID, int varID, int *gridID, int *zaxisID, int *timetype)
 {
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
   vlistCheckVarID(__func__, vlistID, varID);
 
-  *gridID    = vlistptr->vars[varID].gridID;
-  *zaxisID   = vlistptr->vars[varID].zaxisID;
-  *tsteptype = vlistptr->vars[varID].tsteptype;
+  *gridID   = vlistptr->vars[varID].gridID;
+  *zaxisID  = vlistptr->vars[varID].zaxisID;
+  *timetype = vlistptr->vars[varID].timetype;
 
   return;
 }
@@ -438,36 +436,6 @@ const char *vlistInqVarNamePtr(int vlistID, int varID)
   return vlistptr->vars[varID].name;
 }
 
-
-const char *vlistInqVarLongnamePtr(int vlistID, int varID)
-{
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-
-  vlistCheckVarID(__func__, vlistID, varID);
-
-  return vlistptr->vars[varID].longname;
-}
-
-
-const char *vlistInqVarStdnamePtr(int vlistID, int varID)
-{
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-
-  vlistCheckVarID(__func__, vlistID, varID);
-
-  return vlistptr->vars[varID].stdname;
-}
-
-
-const char *vlistInqVarUnitsPtr(int vlistID, int varID)
-{
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-
-  vlistCheckVarID(__func__, vlistID, varID);
-
-  return vlistptr->vars[varID].units;
-}
-
 /*
 @Function  vlistInqVarName
 @Title     Get the name of a Variable
@@ -504,8 +472,9 @@ void vlistInqVarName(int vlistID, int varID, char *name)
 	{
 	  int code = pnum;
 	  int tableID = vlistptr->vars[varID].tableID;
-	  if ( tableInqParName(tableID, code, name) != 0 )
-	    sprintf(name, "var%d", code);
+          name[0] = 0;
+          tableInqEntry(tableID, code, -1, name, NULL, NULL);
+	  if ( !name[0] ) sprintf(name, "var%d", code);
 	}
       else
 	{
@@ -541,24 +510,29 @@ char* vlistCopyVarName(int vlistId, int varId)
   vlistCheckVarID(__func__, vlistId, varId);
 
   //If a name is set in the variable description, use that.
-  const char* name = vlistptr->vars[varId].name;
-  if(name) return strdup(name);
+  {
+    const char* name = vlistptr->vars[varId].name;
+    if (name) return strdup(name);
+  }
 
   //Otherwise we check if we should use the table of parameter descriptions.
   int param = vlistptr->vars[varId].param;
   int discipline, category, number;
   cdiDecodeParam(param, &number, &category, &discipline);
   char *result = NULL;
-  if(discipline == 255)
+  if (discipline == 255)
     {
       int tableId = vlistptr->vars[varId].tableID;
-      if(( name = tableInqParNamePtr(tableId, number) ))
+      char name[CDI_MAX_NAME]; name[0] = 0;
+      tableInqEntry(tableId, number, -1, name, NULL, NULL);
+      if ( name[0] )
         result = strdup(name);
-      {
-        //No luck, fall back to outputting a name of the format "var<num>".
-        result = (char *) Malloc(3 + 3 * sizeof (int) * CHAR_BIT / 8 + 2);
-        sprintf(result, "var%d", number);
-      }
+      else
+        {
+          //No luck, fall back to outputting a name of the format "var<num>".
+          result = (char *) Malloc(3 + 3 * sizeof (int) * CHAR_BIT / 8 + 2);
+          sprintf(result, "var%d", number);
+        }
     }
   else
     {
@@ -586,7 +560,7 @@ The function @func{vlistInqVarLongname} returns the longname of a variable if av
 otherwise the result is an empty string.
 
 @Result
-@func{vlistInqVaeLongname} returns the longname of the variable to the parameter longname.
+@func{vlistInqVarLongname} returns the longname of the variable to the parameter longname.
 
 @EndFunction
 */
@@ -607,8 +581,7 @@ void vlistInqVarLongname(int vlistID, int varID, char *longname)
 	{
 	  int code = pnum;
           int tableID = vlistptr->vars[varID].tableID;
-	  if ( tableInqParLongname(tableID, code, longname) != 0 )
-	    longname[0] = '\0';
+          tableInqEntry(tableID, code, -1, NULL, longname, NULL);
 	}
     }
   else
@@ -692,8 +665,7 @@ void vlistInqVarUnits(int vlistID, int varID, char *units)
 	{
 	  int code = pnum;
 	  int tableID = vlistptr->vars[varID].tableID;
-	  if ( tableInqParUnits(tableID, code, units) != 0 )
-	    units[0] = '\0';
+          tableInqEntry(tableID, code, -1, NULL, NULL, units);
 	}
     }
   else
@@ -719,18 +691,18 @@ int vlistInqVarID(int vlistID, int code)
 }
 
 
-int vlistInqVarSize(int vlistID, int varID)
+size_t vlistInqVarSize(int vlistID, int varID)
 {
   vlistCheckVarID(__func__, vlistID, varID);
 
-  int zaxisID, gridID, tsteptype;
-  vlistInqVar(vlistID, varID, &gridID, &zaxisID, &tsteptype);
+  int zaxisID, gridID, timetype;
+  vlistInqVar(vlistID, varID, &gridID, &zaxisID, &timetype);
 
-  int nlevs = zaxisInqSize(zaxisID);
+  size_t nlevs = (size_t)zaxisInqSize(zaxisID);
 
-  int gridsize = gridInqSize(gridID);
+  size_t gridsize = gridInqSize(gridID);
 
-  int size = gridsize*nlevs;
+  size_t size = gridsize*nlevs;
 
   return size;
 }
@@ -807,7 +779,7 @@ void vlistDefVarDatatype(int vlistID, int varID, int datatype)
     {
       vlistptr->vars[varID].datatype = datatype;
 
-      if ( vlistptr->vars[varID].missvalused == FALSE )
+      if ( !vlistptr->vars[varID].missvalused )
         switch (datatype)
           {
           case CDI_DATATYPE_INT8:   vlistptr->vars[varID].missval = -SCHAR_MAX; break;
@@ -1067,7 +1039,7 @@ void vlistDefVarMissval(int vlistID, int varID, double missval)
   vlistCheckVarID(__func__, vlistID, varID);
 
   vlistptr->vars[varID].missval = missval;
-  vlistptr->vars[varID].missvalused = TRUE;
+  vlistptr->vars[varID].missvalused = true;
 }
 
 /*
@@ -1152,7 +1124,7 @@ int vlistInqVarValidrange(int vlistID, int varID, double *validrange)
       validrange[1] = vlistptr->vars[varID].validrange[1];
     }
 
-  return vlistptr->vars[varID].lvalidrange;
+  return (int)vlistptr->vars[varID].lvalidrange;
 }
 
 
@@ -1164,7 +1136,7 @@ void vlistDefVarValidrange(int vlistID, int varID, const double *validrange)
 
   vlistptr->vars[varID].validrange[0] = validrange[0];
   vlistptr->vars[varID].validrange[1] = validrange[1];
-  vlistptr->vars[varID].lvalidrange = TRUE;
+  vlistptr->vars[varID].lvalidrange = true;
   reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
 }
 
@@ -1217,6 +1189,24 @@ void vlistDefVarAddoffset(int vlistID, int varID, double addoffset)
 }
 
 
+void vlistDefVarTimetype(int vlistID, int varID, int timetype)
+{
+  vlist_t *vlistptr = vlist_to_pointer(vlistID);
+  if (vlistptr->vars[varID].timetype != timetype)
+    {
+      vlistptr->vars[varID].timetype = timetype;
+      reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
+    }
+}
+
+
+int vlistInqVarTimetype(int vlistID, int varID)
+{
+  vlist_t *vlistptr = vlist_to_pointer(vlistID);
+  return vlistptr->vars[varID].timetype;
+}
+
+
 void vlistDefVarTsteptype(int vlistID, int varID, int tsteptype)
 {
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
@@ -1242,7 +1232,7 @@ The function @func{vlistInqVarTsteptype} returns the timestep type of a Variable
 @Result
 @func{vlistInqVarTsteptype} returns the timestep type of the Variable,
 one of the set of predefined CDI timestep types.
-The valid CDI timestep types are @func{TSTEP_CONSTANT}, @func{TSTEP_INSTANT},
+The valid CDI timestep types are @func{TSTEP_INSTANT},
 @func{TSTEP_ACCUM}, @func{TSTEP_AVG}, @func{TSTEP_MAX}, @func{TSTEP_MIN} and @func{TSTEP_SD}.
 
 @EndFunction
@@ -1269,61 +1259,6 @@ int vlistInqVarTimave(int vlistID, int varID)
 {
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
   return vlistptr->vars[varID].timave;
-}
-
-
-void vlistDefVarTimaccu(int vlistID, int varID, int timaccu)
-{
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  if (vlistptr->vars[varID].timaccu != timaccu)
-    {
-      vlistptr->vars[varID].timaccu = timaccu;
-      reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
-    }
-}
-
-
-int vlistInqVarTimaccu(int vlistID, int varID)
-{
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  return vlistptr->vars[varID].timaccu;
-}
-
-
-void vlistDefVarTypeOfGeneratingProcess(int vlistID, int varID, int typeOfGeneratingProcess)
-{
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  if (vlistptr->vars[varID].typeOfGeneratingProcess != typeOfGeneratingProcess)
-    {
-      vlistptr->vars[varID].typeOfGeneratingProcess = typeOfGeneratingProcess;
-      reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
-    }
-}
-
-
-int vlistInqVarTypeOfGeneratingProcess(int vlistID, int varID)
-{
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  return vlistptr->vars[varID].typeOfGeneratingProcess;
-}
-
-
-void vlistDefVarProductDefinitionTemplate(int vlistID, int varID, int productDefinitionTemplate)
-{
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-
-  if (vlistptr->vars[varID].productDefinitionTemplate != productDefinitionTemplate)
-    {
-      vlistptr->vars[varID].productDefinitionTemplate = productDefinitionTemplate;
-      reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
-    }
-}
-
-
-int vlistInqVarProductDefinitionTemplate(int vlistID, int varID)
-{
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  return vlistptr->vars[varID].productDefinitionTemplate;
 }
 
 
@@ -1381,7 +1316,7 @@ void vlistDestroyVarUnits(int vlistID, int varID)
 int vlistInqVarMissvalUsed(int vlistID, int varID)
 {
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
-  return vlistptr->vars[varID].missvalused;
+  return (int)vlistptr->vars[varID].missvalused;
 }
 
 
@@ -1733,45 +1668,6 @@ int vlistInqVarXYZ(int vlistID, int varID)
   return vlistptr->vars[varID].xyz;
 }
 
-/* Ensemble Info Routines */
-void vlistDefVarEnsemble(int vlistID, int varID, int ensID, int ensCount, int forecast_type )
-{
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-
-  vlistCheckVarID(__func__, vlistID, varID);
-
-  if ( vlistptr->vars[varID].ensdata == NULL )
-    vlistptr->vars[varID].ensdata
-      = (ensinfo_t *) Malloc( sizeof( ensinfo_t ) );
-
-  vlistptr->vars[varID].ensdata->ens_index          = ensID;
-  vlistptr->vars[varID].ensdata->ens_count          = ensCount;
-  vlistptr->vars[varID].ensdata->forecast_init_type = forecast_type;
-  reshSetStatus(vlistID, &vlistOps, RESH_DESYNC_IN_USE);
-}
-
-
-int vlistInqVarEnsemble( int vlistID, int varID, int *ensID, int *ensCount, int *forecast_type )
-{
-  int status = 0;
-  vlist_t *vlistptr = vlist_to_pointer(vlistID);
-
-  vlistCheckVarID(__func__, vlistID, varID);
-
-  if ( vlistptr->vars[varID].ensdata )
-    {
-      *ensID = vlistptr->vars[varID].ensdata->ens_index;
-      *ensCount = vlistptr->vars[varID].ensdata->ens_count;
-      *forecast_type = vlistptr->vars[varID].ensdata->forecast_init_type;
-
-      status = 1;
-    }
-
-  return status;
-}
-
-
-
 /* vlistDefVarIntKey: Set an arbitrary keyword/integer value pair for GRIB API */
 void vlistDefVarIntKey(int vlistID, int varID, const char *name, int value)
 {
@@ -1792,7 +1688,7 @@ void vlistDefVarIntKey(int vlistID, int varID, const char *name, int value)
   if ( idx < vlistptr->vars[varID].opt_grib_nentries )
     {
       vlistptr->vars[varID].opt_grib_kvpair[idx].int_val = value;
-      vlistptr->vars[varID].opt_grib_kvpair[idx].update  = TRUE;
+      vlistptr->vars[varID].opt_grib_kvpair[idx].update  = true;
     }
   else
     {
@@ -1801,7 +1697,7 @@ void vlistDefVarIntKey(int vlistID, int varID, const char *name, int value)
       idx = vlistptr->vars[varID].opt_grib_nentries -1;
       vlistptr->vars[varID].opt_grib_kvpair[idx].data_type   = t_int;
       vlistptr->vars[varID].opt_grib_kvpair[idx].int_val     = value;
-      vlistptr->vars[varID].opt_grib_kvpair[idx].update      = TRUE;
+      vlistptr->vars[varID].opt_grib_kvpair[idx].update      = true;
       if ( name )
         vlistptr->vars[varID].opt_grib_kvpair[idx].keyword = strdupx(name);
       else
@@ -1855,7 +1751,7 @@ void vlistDefVarDblKey(int vlistID, int varID, const char *name, double value)
   if ( idx < vlistptr->vars[varID].opt_grib_nentries )
     {
       vlistptr->vars[varID].opt_grib_kvpair[idx].dbl_val = value;
-      vlistptr->vars[varID].opt_grib_kvpair[idx].update  = TRUE;
+      vlistptr->vars[varID].opt_grib_kvpair[idx].update  = true;
     }
   else
     {
@@ -1864,7 +1760,7 @@ void vlistDefVarDblKey(int vlistID, int varID, const char *name, double value)
       idx = vlistptr->vars[varID].opt_grib_nentries - 1;
       vlistptr->vars[varID].opt_grib_kvpair[idx].data_type = t_double;
       vlistptr->vars[varID].opt_grib_kvpair[idx].dbl_val   = value;
-      vlistptr->vars[varID].opt_grib_kvpair[idx].update    = TRUE;
+      vlistptr->vars[varID].opt_grib_kvpair[idx].update    = true;
       if ( name )
         vlistptr->vars[varID].opt_grib_kvpair[idx].keyword = strdupx(name);
       else
@@ -1972,7 +1868,7 @@ double vlistInqVarDblKey(int vlistID, int varID, const char* name)
 /* vlistInqVarIntKey: raw access to GRIB meta-data */
 int vlistInqVarIntKey(int vlistID, int varID, const char* name)
 {
-  long int value = 0;
+  long value = 0;
 #if  defined  (HAVE_LIBGRIB_API)
   /* check if the GRIB key was previously read and is stored in "opt_grib_int_val" */
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
@@ -2031,7 +1927,7 @@ int vlistVarCompare(vlist_t *a, int varIDA, vlist_t *b, int varIDB)
 #define FCMP2(f) (namespaceResHDecode(pva->f).idx       \
                   != namespaceResHDecode(pvb->f).idx)
   int diff = FCMP(fvarID) | FCMP(mvarID) | FCMP(flag) | FCMP(param)
-    | FCMP(datatype) | FCMP(tsteptype) | FCMP(timave) | FCMP(timaccu)
+    | FCMP(datatype) | FCMP(timetype) | FCMP(tsteptype) | FCMP(timave)
     | FCMP(chunktype) | FCMP(xyz) | FCMP2(gridID) | FCMP2(zaxisID)
     | FCMP2(instID) | FCMP2(modelID) | FCMP2(tableID) | FCMP(missvalused)
     | FCMPFLT(missval) | FCMPFLT(addoffset) | FCMPFLT(scalefactor) | FCMPSTR(name)
@@ -2053,29 +1949,55 @@ int vlistVarCompare(vlist_t *a, int varIDA, vlist_t *b, int varIDB)
       if (diff)
         return 1;
     }
+
   size_t natts = a->vars[varIDA].atts.nelems;
   if (natts != b->vars[varIDB].atts.nelems)
     return 1;
   for (size_t attID = 0; attID < natts; ++attID)
     diff |= cdi_att_compare(a, varIDA, b, varIDB, (int)attID);
-  if ((diff |= ((pva->ensdata == NULL) ^ (pvb->ensdata == NULL))))
+
+  size_t nkeys = a->vars[varIDA].keys.nelems;
+  if (nkeys != b->vars[varIDB].keys.nelems)
     return 1;
-  if (pva->ensdata)
-    diff = (memcmp(pva->ensdata, pvb->ensdata, sizeof (*(pva->ensdata)))) != 0;
+  for (size_t keyID = 0; keyID < nkeys; ++keyID)
+    diff |= vlist_key_compare(a, varIDA, b, varIDB, (int)keyID);
+
   return diff;
 }
 
 
+enum {
+  VLISTVAR_PACK_INT_IDX_FLAG,
+  VLISTVAR_PACK_INT_IDX_GRIDID,
+  VLISTVAR_PACK_INT_IDX_ZAXISID,
+  VLISTVAR_PACK_INT_IDX_TIMETYPE,
+  VLISTVAR_PACK_INT_IDX_NAMESZ,
+  VLISTVAR_PACK_INT_IDX_LONGNAMESZ,
+  VLISTVAR_PACK_INT_IDX_STDNAMESZ,
+  VLISTVAR_PACK_INT_IDX_UNITSSZ,
+  VLISTVAR_PACK_INT_IDX_DATATYPE,
+  VLISTVAR_PACK_INT_IDX_PARAM,
+  VLISTVAR_PACK_INT_IDX_INSTID,
+  VLISTVAR_PACK_INT_IDX_MODELID,
+  VLISTVAR_PACK_INT_IDX_TABLEID,
+  VLISTVAR_PACK_INT_IDX_TIMAVE,
+  VLISTVAR_PACK_INT_IDX_MISSVALUSED,
+  VLISTVAR_PACK_INT_IDX_COMPTYPE,
+  VLISTVAR_PACK_INT_IDX_COMPLEVEL,
+  VLISTVAR_PACK_INT_IDX_NLEVS,
+  VLISTVAR_PACK_INT_IDX_IORANK,
+  VLISTVAR_PACK_INT_IDX_EXTRALEN,
+  vlistvarNint
+};
 
 enum {
-  vlistvar_nints = 21,
   vlistvar_ndbls = 3,
 };
 
 int vlistVarGetPackSize(vlist_t *p, int varID, void *context)
 {
   var_t *var = p->vars + varID;
-  int varsize = serializeGetSize(vlistvar_nints, CDI_DATATYPE_INT, context)
+  int varsize = serializeGetSize(vlistvarNint, CDI_DATATYPE_INT, context)
     + serializeGetSize(vlistvar_ndbls, CDI_DATATYPE_FLT64, context);
   if (var->name)
     varsize += serializeGetSize((int)strlen(var->name), CDI_DATATYPE_TXT, context);
@@ -2098,35 +2020,33 @@ void vlistVarPack(vlist_t *p, int varID, char * buf, int size, int *position,
 {
   double dtempbuf[vlistvar_ndbls];
   var_t *var = p->vars + varID;
-  int tempbuf[vlistvar_nints], namesz, longnamesz, stdnamesz, unitssz,
-    extralen;
+  int tempbuf[vlistvarNint], namesz, longnamesz, stdnamesz, unitssz, extralen;
 
-  tempbuf[0] = var->flag;
-  tempbuf[1] = var->gridID;
-  tempbuf[2] = var->zaxisID;
-  tempbuf[3] = var->tsteptype;
-  tempbuf[4] = namesz = var->name?(int)strlen(var->name):0;
-  tempbuf[5] = longnamesz = var->longname?(int)strlen(var->longname):0;
-  tempbuf[6] = stdnamesz = var->stdname?(int)strlen(var->stdname):0;
-  tempbuf[7] = unitssz = var->units?(int)strlen(var->units):0;
-  tempbuf[8] = var->datatype;
-  tempbuf[9] = var->param;
-  tempbuf[10] = var->instID;
-  tempbuf[11] = var->modelID;
-  tempbuf[12] = var->tableID;
-  tempbuf[13] = var->timave;
-  tempbuf[14] = var->timaccu;
-  tempbuf[15] = var->missvalused;
-  tempbuf[16] = var->comptype;
-  tempbuf[17] = var->complevel;
+  tempbuf[VLISTVAR_PACK_INT_IDX_FLAG] = var->flag;
+  tempbuf[VLISTVAR_PACK_INT_IDX_GRIDID] = var->gridID;
+  tempbuf[VLISTVAR_PACK_INT_IDX_ZAXISID] = var->zaxisID;
+  tempbuf[VLISTVAR_PACK_INT_IDX_TIMETYPE] = var->timetype;
+  tempbuf[VLISTVAR_PACK_INT_IDX_NAMESZ] = namesz = var->name?(int)strlen(var->name):0;
+  tempbuf[VLISTVAR_PACK_INT_IDX_LONGNAMESZ] = longnamesz = var->longname?(int)strlen(var->longname):0;
+  tempbuf[VLISTVAR_PACK_INT_IDX_STDNAMESZ] = stdnamesz = var->stdname?(int)strlen(var->stdname):0;
+  tempbuf[VLISTVAR_PACK_INT_IDX_UNITSSZ] = unitssz = var->units?(int)strlen(var->units):0;
+  tempbuf[VLISTVAR_PACK_INT_IDX_DATATYPE] = var->datatype;
+  tempbuf[VLISTVAR_PACK_INT_IDX_PARAM] = var->param;
+  tempbuf[VLISTVAR_PACK_INT_IDX_INSTID] = var->instID;
+  tempbuf[VLISTVAR_PACK_INT_IDX_MODELID] = var->modelID;
+  tempbuf[VLISTVAR_PACK_INT_IDX_TABLEID] = var->tableID;
+  tempbuf[VLISTVAR_PACK_INT_IDX_TIMAVE] = var->timave;
+  tempbuf[VLISTVAR_PACK_INT_IDX_MISSVALUSED] = (int)var->missvalused;
+  tempbuf[VLISTVAR_PACK_INT_IDX_COMPTYPE] = var->comptype;
+  tempbuf[VLISTVAR_PACK_INT_IDX_COMPLEVEL] = var->complevel;
   int nlevs = var->levinfo ? zaxisInqSize(var->zaxisID) : 0;
-  tempbuf[18] = nlevs;
-  tempbuf[19] = var->iorank;
-  tempbuf[20] = extralen = var->extra?(int)strlen(var->extra):0;
+  tempbuf[VLISTVAR_PACK_INT_IDX_NLEVS] = nlevs;
+  tempbuf[VLISTVAR_PACK_INT_IDX_IORANK] = var->iorank;
+  tempbuf[VLISTVAR_PACK_INT_IDX_EXTRALEN] = extralen = var->extra?(int)strlen(var->extra):0;
   dtempbuf[0] = var->missval;
   dtempbuf[1] = var->scalefactor;
   dtempbuf[2] = var->addoffset;
-  serializePack(tempbuf, vlistvar_nints, CDI_DATATYPE_INT,
+  serializePack(tempbuf, vlistvarNint, CDI_DATATYPE_INT,
                 buf, size, position, context);
   serializePack(dtempbuf, vlistvar_ndbls, CDI_DATATYPE_FLT64,
                 buf, size, position, context);
@@ -2171,11 +2091,11 @@ void vlistVarUnpack(int vlistID, char * buf, int size, int *position,
 		    int originNamespace, void *context)
 {
   double dtempbuf[vlistvar_ndbls];
-  int tempbuf[vlistvar_nints];
+  int tempbuf[vlistvarNint];
   char *varname = NULL;
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
   serializeUnpack(buf, size, position,
-                  tempbuf, vlistvar_nints, CDI_DATATYPE_INT, context);
+                  tempbuf, vlistvarNint, CDI_DATATYPE_INT, context);
   serializeUnpack(buf, size, position,
                   dtempbuf, vlistvar_ndbls, CDI_DATATYPE_FLT64, context);
 
@@ -2184,67 +2104,68 @@ void vlistVarUnpack(int vlistID, char * buf, int size, int *position,
   /* ------------------------------------------- */
 
   int newvar = vlistDefVar ( vlistID,
-			 namespaceAdaptKey ( tempbuf[1], originNamespace ),
-			 namespaceAdaptKey ( tempbuf[2], originNamespace ),
-			 tempbuf[3]);
-  if (tempbuf[4] || tempbuf[5] || tempbuf[6] || tempbuf[7] || tempbuf[20])
-    varname = (char *)Malloc((size_t)imax(imax(imax(imax(tempbuf[4],
-                                                         tempbuf[5]),
-                                                    tempbuf[6]),
-                                               tempbuf[7]), tempbuf[20]) + 1);
-  if (tempbuf[4])
+			 namespaceAdaptKey ( tempbuf[VLISTVAR_PACK_INT_IDX_GRIDID], originNamespace ),
+			 namespaceAdaptKey ( tempbuf[VLISTVAR_PACK_INT_IDX_ZAXISID], originNamespace ),
+			 tempbuf[VLISTVAR_PACK_INT_IDX_TIMETYPE]);
+  if (tempbuf[VLISTVAR_PACK_INT_IDX_NAMESZ] || tempbuf[VLISTVAR_PACK_INT_IDX_LONGNAMESZ] ||
+      tempbuf[VLISTVAR_PACK_INT_IDX_STDNAMESZ] || tempbuf[VLISTVAR_PACK_INT_IDX_UNITSSZ] ||
+      tempbuf[VLISTVAR_PACK_INT_IDX_EXTRALEN])
+    varname = (char *)Malloc((size_t)imax(imax(imax(imax(tempbuf[VLISTVAR_PACK_INT_IDX_NAMESZ],
+                                                         tempbuf[VLISTVAR_PACK_INT_IDX_LONGNAMESZ]),
+                                                    tempbuf[VLISTVAR_PACK_INT_IDX_STDNAMESZ]),
+                                               tempbuf[VLISTVAR_PACK_INT_IDX_UNITSSZ]), tempbuf[VLISTVAR_PACK_INT_IDX_EXTRALEN]) + 1);
+  if (tempbuf[VLISTVAR_PACK_INT_IDX_NAMESZ])
   {
     serializeUnpack(buf, size, position,
-                    varname, tempbuf[4], CDI_DATATYPE_TXT, context);
-    varname[tempbuf[4]] = '\0';
+                    varname, tempbuf[VLISTVAR_PACK_INT_IDX_NAMESZ], CDI_DATATYPE_TXT, context);
+    varname[tempbuf[VLISTVAR_PACK_INT_IDX_NAMESZ]] = '\0';
     vlistDefVarName(vlistID, newvar, varname);
   }
-  if (tempbuf[5])
+  if (tempbuf[VLISTVAR_PACK_INT_IDX_LONGNAMESZ])
   {
     serializeUnpack(buf, size, position,
-                    varname, tempbuf[5], CDI_DATATYPE_TXT, context);
-    varname[tempbuf[5]] = '\0';
+                    varname, tempbuf[VLISTVAR_PACK_INT_IDX_LONGNAMESZ], CDI_DATATYPE_TXT, context);
+    varname[tempbuf[VLISTVAR_PACK_INT_IDX_LONGNAMESZ]] = '\0';
     vlistDefVarLongname(vlistID, newvar, varname);
   }
-  if (tempbuf[6])
+  if (tempbuf[VLISTVAR_PACK_INT_IDX_STDNAMESZ])
   {
     serializeUnpack(buf, size, position,
-                    varname, tempbuf[6], CDI_DATATYPE_TXT, context);
-    varname[tempbuf[6]] = '\0';
+                    varname, tempbuf[VLISTVAR_PACK_INT_IDX_STDNAMESZ], CDI_DATATYPE_TXT, context);
+    varname[tempbuf[VLISTVAR_PACK_INT_IDX_STDNAMESZ]] = '\0';
     vlistDefVarStdname(vlistID, newvar, varname);
   }
-  if (tempbuf[7])
+  if (tempbuf[VLISTVAR_PACK_INT_IDX_UNITSSZ])
   {
     serializeUnpack(buf, size, position,
-                    varname, tempbuf[7], CDI_DATATYPE_TXT, context);
-    varname[tempbuf[7]] = '\0';
+                    varname, tempbuf[VLISTVAR_PACK_INT_IDX_UNITSSZ], CDI_DATATYPE_TXT, context);
+    varname[tempbuf[VLISTVAR_PACK_INT_IDX_UNITSSZ]] = '\0';
     vlistDefVarUnits(vlistID, newvar, varname);
   }
-  if (tempbuf[20])
+  if (tempbuf[VLISTVAR_PACK_INT_IDX_EXTRALEN])
     {
       serializeUnpack(buf, size, position,
-                      varname, tempbuf[20], CDI_DATATYPE_TXT, context);
-      varname[tempbuf[20]] = '\0';
+                      varname, tempbuf[VLISTVAR_PACK_INT_IDX_EXTRALEN], CDI_DATATYPE_TXT, context);
+      varname[tempbuf[VLISTVAR_PACK_INT_IDX_EXTRALEN]] = '\0';
       vlistDefVarExtra(vlistID, newvar, varname);
     }
   Free(varname);
-  vlistDefVarDatatype(vlistID, newvar, tempbuf[8]);
+  vlistDefVarDatatype(vlistID, newvar, tempbuf[VLISTVAR_PACK_INT_IDX_DATATYPE]);
   vlistDefVarInstitut ( vlistID, newvar,
-			namespaceAdaptKey ( tempbuf[10], originNamespace ));
+			namespaceAdaptKey ( tempbuf[VLISTVAR_PACK_INT_IDX_INSTID], originNamespace ));
   vlistDefVarModel ( vlistID, newvar,
-		     namespaceAdaptKey ( tempbuf[11], originNamespace ));
-  vlistDefVarTable(vlistID, newvar, tempbuf[12]);
+		     namespaceAdaptKey ( tempbuf[VLISTVAR_PACK_INT_IDX_MODELID], originNamespace ));
+  vlistDefVarTable(vlistID, newvar, tempbuf[VLISTVAR_PACK_INT_IDX_TABLEID]);
   /* FIXME: changing the table might change the param code */
-  vlistDefVarParam(vlistID, newvar, tempbuf[9]);
-  vlistDefVarTimave(vlistID, newvar, tempbuf[13]);
-  vlistDefVarTimaccu(vlistID, newvar, tempbuf[14]);
-  if (tempbuf[15])
+  vlistDefVarParam(vlistID, newvar, tempbuf[VLISTVAR_PACK_INT_IDX_PARAM]);
+  vlistDefVarTimave(vlistID, newvar, tempbuf[VLISTVAR_PACK_INT_IDX_TIMAVE]);
+  if (tempbuf[VLISTVAR_PACK_INT_IDX_MISSVALUSED])
     vlistDefVarMissval(vlistID, newvar, dtempbuf[0]);
   vlistDefVarScalefactor(vlistID, newvar, dtempbuf[1]);
   vlistDefVarAddoffset(vlistID, newvar, dtempbuf[2]);
-  vlistDefVarCompType(vlistID, newvar, tempbuf[16]);
-  vlistDefVarCompLevel(vlistID, newvar, tempbuf[17]);
-  int nlevs = tempbuf[18];
+  vlistDefVarCompType(vlistID, newvar, tempbuf[VLISTVAR_PACK_INT_IDX_COMPTYPE]);
+  vlistDefVarCompLevel(vlistID, newvar, tempbuf[VLISTVAR_PACK_INT_IDX_COMPLEVEL]);
+  int nlevs = tempbuf[VLISTVAR_PACK_INT_IDX_NLEVS];
   if (nlevs)
     {
       int levbuf[nlevs][4];
@@ -2265,7 +2186,7 @@ void vlistVarUnpack(int vlistID, char * buf, int size, int *position,
         }
       vlistDefFlag(vlistID, newvar, flagSetLev, levbuf[flagSetLev][0]);
     }
-  vlistDefVarIOrank(vlistID, newvar, tempbuf[19]);
+  vlistDefVarIOrank(vlistID, newvar, tempbuf[VLISTVAR_PACK_INT_IDX_IORANK]);
   cdiAttsUnpack(vlistID, newvar, buf, size, position, context);
 }
 

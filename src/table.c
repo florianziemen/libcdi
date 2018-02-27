@@ -22,16 +22,16 @@
 
 typedef struct
 {
-  int    used;
+  bool   used;
   int    npars;
-  PAR   *pars;
   int    modelID;
   int    number;
   char  *name;
+  param_type *pars;
 }
-PARTAB;
+paramtab_type;
 
-static PARTAB parTable[MAX_TABLE];
+static paramtab_type parTable[MAX_TABLE];
 static int  parTableSize = MAX_TABLE;
 static int  parTableNum  = 0;
 static int  ParTableInit = 0;
@@ -41,16 +41,16 @@ static char *tablePath = NULL;
 static void tableDefModelID(int tableID, int modelID);
 static void tableDefNum(int tableID, int tablenum);
 
-
-void tableDefEntry(int tableID, int id, const char *name,
+static
+void tableDefEntry(int tableID, int id, int ltype, const char *name,
 		   const char *longname, const char *units)
 {
-  int item;
-
   if ( tableID >= 0 && tableID < MAX_TABLE && parTable[tableID].used) { } else
     Error("Invalid table ID %d", tableID);
-  item = parTable[tableID].npars++;
+
+  int item = parTable[tableID].npars++;
   parTable[tableID].pars[item].id       = id;
+  parTable[tableID].pars[item].ltype    = ltype;
   parTable[tableID].pars[item].dupflags = 0;
   parTable[tableID].pars[item].name     = NULL;
   parTable[tableID].pars[item].longname = NULL;
@@ -73,13 +73,12 @@ void tableDefEntry(int tableID, int id, const char *name,
     }
 }
 
-static void tableLink(int tableID, const PAR *pars, int npars)
+static void tableLink(int tableID, const param_type *pars, int npars)
 {
-  int item;
-
-  for ( item = 0; item < npars; item++ )
+  for ( int item = 0; item < npars; item++ )
     {
       parTable[tableID].pars[item].id       = pars[item].id;
+      parTable[tableID].pars[item].ltype    = pars[item].ltype;
       parTable[tableID].pars[item].dupflags = 0;
       parTable[tableID].pars[item].name     = pars[item].name;
       parTable[tableID].pars[item].longname = pars[item].longname;
@@ -91,7 +90,7 @@ static void tableLink(int tableID, const PAR *pars, int npars)
 
 static void parTableInitEntry(int tableID)
 {
-  parTable[tableID].used    = 0;
+  parTable[tableID].used    = false;
   parTable[tableID].pars    = NULL;
   parTable[tableID].npars   = 0;
   parTable[tableID].modelID = CDI_UNDEFID;
@@ -101,9 +100,7 @@ static void parTableInitEntry(int tableID)
 
 static void tableGetPath(void)
 {
-  char *path;
-
-  path = getenv("TABLEPATH");
+  char *path = getenv("TABLEPATH");
 
   if ( path ) tablePath = strdupx(path);
   /*
@@ -165,10 +162,10 @@ static int tableNewEntry()
   if ( tableID == parTableSize )
     Error("no more entries!");
 
-  parTable[tableID].used = 1;
+  parTable[tableID].used = true;
   parTableNum++;
 
-  return (tableID);
+  return tableID;
 }
 
 static int
@@ -189,9 +186,9 @@ decodeForm1(char *pline, char *name, char *longname, char *units)
       name[len] = 0;
     }
   else
-    return (0);
+    return 0;
 
-  if ( pline[0] == 0 ) return (0);
+  if ( pline[0] == 0 ) return 0;
 
   /* Format 1 : code name add mult longname [units] */
   /* FIXME: successful parse isn't verified */
@@ -228,7 +225,7 @@ decodeForm1(char *pline, char *name, char *longname, char *units)
 	  pstart++;
 	  while ( isspace((int) *pstart) ) pstart++;
 	  pend = strchr(pstart, ']');
-	  if ( ! pend ) return (0);
+	  if ( ! pend ) return 0;
 	  pend--;
 	  while ( isspace((int) *pend) ) pend--;
 	  len = (size_t)(pend - pstart + 1);
@@ -240,7 +237,7 @@ decodeForm1(char *pline, char *name, char *longname, char *units)
 	}
     }
 
-  return (0);
+  return 0;
 }
 
 static int
@@ -266,7 +263,7 @@ decodeForm2(char *pline, char *name, char *longname, char *units)
               memcpy(name, pline, len);
               name[len] = 0;
             }
-          return (0);
+          return 0;
         }
       else
         {
@@ -314,24 +311,22 @@ decodeForm2(char *pline, char *name, char *longname, char *units)
       units[len] = 0;
     }
 
-  return (0);
+  return 0;
 }
+
 
 int tableRead(const char *tablefile)
 {
   char line[1024], *pline;
   int lnr = 0;
-  int id;
   char name[256], longname[256], units[256];
-  int tableID = CDI_UNDEFID;
   int err;
-  char *tablename;
-  FILE *tablefp;
+  int tableID = CDI_UNDEFID;
 
-  tablefp = fopen(tablefile, "r");
-  if ( tablefp == NULL ) return (tableID);
+  FILE *tablefp = fopen(tablefile, "r");
+  if ( tablefp == NULL ) return tableID;
 
-  tablename = (char* )strrchr(tablefile, '/');
+  char *tablename = (char* )strrchr(tablefile, '/');
   if ( tablename == 0 ) tablename = (char *) tablefile;
   else                  tablename++;
 
@@ -342,7 +337,8 @@ int tableRead(const char *tablefile)
       size_t len = strlen(line);
       if ( line[len-1] == '\n' ) line[len-1] = '\0';
       lnr++;
-      id       = CDI_UNDEFID;
+      int id      = CDI_UNDEFID;
+      int ltype   = CDI_UNDEFID;
       name[0]     = 0;
       longname[0] = 0;
       units[0]    = 0;
@@ -360,6 +356,21 @@ int tableRead(const char *tablefile)
 
       while ( isdigit((int) *pline) ) pline++;
 
+      if ( *pline == ';' || *pline == ':' )
+        {
+          pline++;
+          ltype = atoi(pline);
+          while ( isdigit((int) *pline) ) pline++;
+
+          if ( *pline == ';' || *pline == ':' )
+            {
+              pline++;
+              while ( isdigit((int) *pline) ) pline++;
+            }
+        }
+
+      while ( isdigit((int) *pline) ) pline++;
+
       if ( strchr(pline, '|') )
 	err = decodeForm2(pline, name, longname, units);
       else
@@ -369,11 +380,12 @@ int tableRead(const char *tablefile)
 
       if ( name[0] == 0 ) sprintf(name, "var%d", id);
 
-      tableDefEntry(tableID, id, name, longname, units);
+      tableDefEntry(tableID, id, ltype, name, longname, units);
     }
 
-  return (tableID);
+  return tableID;
 }
+
 
 static int tableFromEnv(int modelID, int tablenum)
 {
@@ -421,7 +433,8 @@ static int tableFromEnv(int modelID, int tablenum)
     }
   /* printf("tableID = %d %s\n", tableID, tablefile); */
   Free(tablefile);
-  return (tableID);
+
+  return tableID;
 }
 
 int tableInq(int modelID, int tablenum, const char *tablename)
@@ -434,7 +447,6 @@ int tableInq(int modelID, int tablenum, const char *tablename)
 
   if ( tablename )
     {
-      size_t len;
       strcpy(tablefile, tablename);
       /*
       printf("tableInq: tablefile = >%s<\n", tablefile);
@@ -445,7 +457,7 @@ int tableInq(int modelID, int tablenum, const char *tablename)
 	  if ( parTable[tableID].used && parTable[tableID].name )
 	    {
 	      /* len = strlen(parTable[tableID].name); */
-	      len = strlen(tablename);
+	      size_t len = strlen(tablename);
 	      if ( memcmp(parTable[tableID].name, tablename, len) == 0 ) break;
 	    }
 	}
@@ -501,7 +513,7 @@ int tableInq(int modelID, int tablenum, const char *tablename)
 	  Message("tableID = %d tablename = %s", tableID, tablename);
     }
 
-  return (tableID);
+  return tableID;
 }
 
 int tableDef(int modelID, int tablenum, const char *tablename)
@@ -522,21 +534,24 @@ int tableDef(int modelID, int tablenum, const char *tablename)
       if ( tablename )
 	parTable[tableID].name = strdupx(tablename);
 
-      parTable[tableID].pars = (PAR *) Malloc(MAX_PARS * sizeof(PAR));
+      parTable[tableID].pars = (param_type *) Malloc(MAX_PARS * sizeof(param_type));
     }
 
-  return (tableID);
+  return tableID;
 }
 
-static void tableDefModelID(int tableID, int modelID)
+static
+void tableDefModelID(int tableID, int modelID)
 {
   parTable[tableID].modelID = modelID;
 }
 
-static void tableDefNum(int tableID, int tablenum)
+static
+void tableDefNum(int tableID, int tablenum)
 {
   parTable[tableID].number  = tablenum;
 }
+
 
 int tableInqNum(int tableID)
 {
@@ -545,8 +560,9 @@ int tableInqNum(int tableID)
   if ( tableID >= 0 && tableID < MAX_TABLE )
     number = parTable[tableID].number;
 
-  return (number);
+  return number;
 }
+
 
 int tableInqModel(int tableID)
 {
@@ -555,8 +571,9 @@ int tableInqModel(int tableID)
   if ( tableID >= 0 && tableID < MAX_TABLE )
     modelID = parTable[tableID].modelID;
 
-  return (modelID);
+  return modelID;
 }
+
 
 static void partabCheckID(int item)
 {
@@ -566,6 +583,7 @@ static void partabCheckID(int item)
   if ( ! parTable[item].name )
     Error("item %d name undefined!", item);
 }
+
 
 const char *tableInqNamePtr(int tableID)
 {
@@ -580,15 +598,14 @@ const char *tableInqNamePtr(int tableID)
     if ( parTable[tableID].name )
       tablename = parTable[tableID].name;
 
-  return (tablename);
+  return tablename;
 }
+
 
 void tableWrite(const char *ptfile, int tableID)
 {
-  int item, npars;
   size_t maxname = 4, maxlname = 10, maxunits = 2;
-  FILE *ptfp;
-  int tablenum, modelID, instID = CDI_UNDEFID;
+  int instID = CDI_UNDEFID;
   int center = 0, subcenter = 0;
   const char *instnameptr = NULL, *modelnameptr = NULL;
 
@@ -603,11 +620,11 @@ void tableWrite(const char *ptfile, int tableID)
 
   partabCheckID(tableID);
 
-  ptfp = fopen(ptfile, "w");
+  FILE *ptfp = fopen(ptfile, "w");
 
-  npars = parTable[tableID].npars;
+  int npars = parTable[tableID].npars;
 
-  for ( item = 0; item < npars; item++)
+  for ( int item = 0; item < npars; item++)
     {
       if ( parTable[tableID].pars[item].name )
 	{
@@ -628,8 +645,8 @@ void tableWrite(const char *ptfile, int tableID)
 	}
     }
 
-  tablenum = tableInqNum(tableID);
-  modelID = parTable[tableID].modelID;
+  int tablenum = tableInqNum(tableID);
+  int modelID = parTable[tableID].modelID;
   if ( modelID != CDI_UNDEFID )
     {
       modelnameptr = modelInqNamePtr(modelID);
@@ -668,8 +685,8 @@ void tableWrite(const char *ptfile, int tableID)
 	  (int)maxname,  "name",
 	  (int)maxlname, "title",
 	  (int)maxunits, "units");
-	  
-  for ( item = 0; item < npars; item++)
+
+  for ( int item = 0; item < npars; item++)
     {
       const char *name = parTable[tableID].pars[item].name,
         *longname = parTable[tableID].pars[item].longname,
@@ -688,21 +705,9 @@ void tableWrite(const char *ptfile, int tableID)
 }
 
 
-void tableWriteC(const char *filename, int tableID)
-{
-  FILE *ptfp = fopen(filename, "w");
-  if (!ptfp)
-    Error("failed to open file \"%s\"!", filename);
-  if ( CDI_Debug )
-    Message("write parameter table %d to %s", tableID, filename);
-  tableFWriteC(ptfp, tableID);
-  fclose(ptfp);
-}
-
 void tableFWriteC(FILE *ptfp, int tableID)
 {
   const char chelp[] = "";
-  int item, npars;
   size_t maxname = 0, maxlname = 0, maxunits = 0;
   char tablename[256];
 
@@ -715,9 +720,9 @@ void tableFWriteC(FILE *ptfp, int tableID)
 
   partabCheckID(tableID);
 
-  npars = parTable[tableID].npars;
+  int npars = parTable[tableID].npars;
 
-  for ( item = 0; item < npars; item++)
+  for ( int item = 0; item < npars; item++)
     {
       if ( parTable[tableID].pars[item].name )
 	{
@@ -745,16 +750,16 @@ void tableFWriteC(FILE *ptfp, int tableID)
     for (size_t i = 0; i < len; i++ )
       if ( tablename[i] == '.' ) tablename[i] = '_';
   }
-  fprintf(ptfp, "static const PAR %s[] = {\n", tablename);
+  fprintf(ptfp, "static const param_type %s[] = {\n", tablename);
 
-  for ( item = 0; item < npars; item++ )
+  for ( int item = 0; item < npars; item++ )
     {
       size_t len = strlen(parTable[tableID].pars[item].name),
         llen = parTable[tableID].pars[item].longname
         ? strlen(parTable[tableID].pars[item].longname) : 0,
         ulen = parTable[tableID].pars[item].units
         ? strlen(parTable[tableID].pars[item].units) : 0;
-      fprintf(ptfp, "  {%4d, 0, \"%s\", %-*s%c%s%s, %-*s%c%s%s %-*s},\n",
+      fprintf(ptfp, "  {%4d, -1, 0, \"%s\", %-*s%c%s%s, %-*s%c%s%s %-*s},\n",
 	      parTable[tableID].pars[item].id,
 	      parTable[tableID].pars[item].name, (int)(maxname-len), chelp,
               llen?'"':' ',
@@ -768,6 +773,34 @@ void tableFWriteC(FILE *ptfp, int tableID)
     }
 
   fprintf(ptfp, "};\n\n");
+}
+
+
+void tableInqEntry(int tableID, int id, int ltype, char *name, char *longname, char *units)
+{
+  if ( ((tableID >= 0) & (tableID < MAX_TABLE)) | (tableID == CDI_UNDEFID) ) { } else
+    Error("Invalid table ID %d", tableID);
+
+  if ( tableID != CDI_UNDEFID )
+    {
+      int npars = parTable[tableID].npars;
+      for ( int item = 0; item < npars; item++ )
+	{
+	  if ( parTable[tableID].pars[item].id == id &&
+               (parTable[tableID].pars[item].ltype == -1 || ltype == -1 ||
+                parTable[tableID].pars[item].ltype == ltype) )
+	    {
+	      if ( name && parTable[tableID].pars[item].name )
+		strcpy(name, parTable[tableID].pars[item].name);
+	      if ( longname && parTable[tableID].pars[item].longname )
+		strcpy(longname, parTable[tableID].pars[item].longname);
+	      if ( units && parTable[tableID].pars[item].units )
+		strcpy(units, parTable[tableID].pars[item].units);
+
+	      break;
+	    }
+	}
+    }
 }
 
 
@@ -790,181 +823,15 @@ int tableInqParCode(int tableID, char *varname, int *code)
 	}
     }
 
-  return (err);
+  return err;
 }
 
-
-int tableInqParName(int tableID, int code, char *varname)
-{
-  int err = 1;
-
-  if ( tableID >= 0 && tableID < MAX_TABLE )
-    {
-      int npars = parTable[tableID].npars;
-      for ( int item = 0; item < npars; item++ )
-	{
-	  if ( parTable[tableID].pars[item].id == code )
-	    {
-	      if ( parTable[tableID].pars[item].name )
-		strcpy(varname, parTable[tableID].pars[item].name);     //FIXME: This may overrun the supplied buffer!
-              err = 0;
-	      break;
-	    }
-	}
-    }
-  else if ( tableID == CDI_UNDEFID )
-    { }
-  else
-    Error("Invalid table ID %d", tableID);
-
-  return (err);
-}
-
-
-const char *tableInqParNamePtr(int tableID, int code)
-{
-  const char *name = NULL;
-
-  if ( tableID != CDI_UNDEFID )
-    {
-      int npars = parTable[tableID].npars;
-      for ( int item = 0; item < npars; item++ )
-	{
-	  if ( parTable[tableID].pars[item].id == code )
-	    {
-	      name = parTable[tableID].pars[item].name;
-	      break;
-	    }
-	}
-    }
-
-  return (name);
-}
-
-
-const char *tableInqParLongnamePtr(int tableID, int code)
-{
-  const char *longname = NULL;
-
-  if ( tableID != CDI_UNDEFID )
-    {
-      int npars = parTable[tableID].npars;
-      for ( int item = 0; item < npars; item++ )
-	{
-	  if ( parTable[tableID].pars[item].id == code )
-	    {
-	      longname = parTable[tableID].pars[item].longname;
-	      break;
-	    }
-	}
-    }
-
-  return (longname);
-}
-
-
-const char *tableInqParUnitsPtr(int tableID, int code)
-{
-  const char *units = NULL;
-
-  if ( tableID != CDI_UNDEFID )
-    {
-      int npars = parTable[tableID].npars;
-      for ( int item = 0; item < npars; item++ )
-	{
-	  if ( parTable[tableID].pars[item].id == code )
-	    {
-	      units = parTable[tableID].pars[item].units;
-	      break;
-	    }
-	}
-    }
-
-  return (units);
-}
-
-
-int tableInqParLongname(int tableID, int code, char *longname)
-{
-  if ( ((tableID >= 0) & (tableID < MAX_TABLE)) | (tableID == CDI_UNDEFID) ) { } else
-    Error("Invalid table ID %d", tableID);
-
-  int err = 1;
-
-  if ( tableID != CDI_UNDEFID )
-    {
-      int npars = parTable[tableID].npars;
-      for ( int item = 0; item < npars; item++ )
-	{
-	  if ( parTable[tableID].pars[item].id == code )
-	    {
-	      if ( parTable[tableID].pars[item].longname )
-		strcpy(longname, parTable[tableID].pars[item].longname);
-              err = 0;
-	      break;
-	    }
-	}
-    }
-
-  return (err);
-}
-
-
-int tableInqParUnits(int tableID, int code, char *units)
-{
-
-  if ( ((tableID >= 0) & (tableID < MAX_TABLE)) | (tableID == CDI_UNDEFID) ) { } else
-    Error("Invalid table ID %d", tableID);
-
-  int err = 1;
-
-  if ( tableID != CDI_UNDEFID )
-    {
-      int npars = parTable[tableID].npars;
-      for ( int item = 0; item < npars; item++ )
-	{
-	  if ( parTable[tableID].pars[item].id == code )
-	    {
-	      if ( parTable[tableID].pars[item].units )
-		strcpy(units, parTable[tableID].pars[item].units);
-              err = 0;
-	      break;
-	    }
-	}
-    }
-
-  return (err);
-}
-
-
-void tableInqPar(int tableID, int code, char *name, char *longname, char *units)
-{
-
-  if ( ((tableID >= 0) & (tableID < MAX_TABLE)) | (tableID == CDI_UNDEFID) ) { } else
-    Error("Invalid table ID %d", tableID);
-
-  int npars = parTable[tableID].npars;
-
-  for ( int item = 0; item < npars; item++ )
-    {
-      if ( parTable[tableID].pars[item].id == code )
-	{
-	  if ( parTable[tableID].pars[item].name )
-	    strcpy(name, parTable[tableID].pars[item].name);
-	  if ( parTable[tableID].pars[item].longname )
-	    strcpy(longname, parTable[tableID].pars[item].longname);
-	  if ( parTable[tableID].pars[item].units )
-	    strcpy(units, parTable[tableID].pars[item].units);
-	  break;
-	}
-    }
-}
 
 int tableInqNumber(void)
 {
   if ( ! ParTableInit ) parTableInit();
 
-  return (parTableNum);
+  return parTableNum;
 }
 /*
  * Local Variables:

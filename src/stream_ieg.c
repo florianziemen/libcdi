@@ -2,13 +2,7 @@
 #  include "config.h"
 #endif
 
-#include <limits.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <float.h>
-#include <math.h>
 
 #include "dmemory.h"
 
@@ -87,7 +81,7 @@ int iegInqRecord(stream_t *streamptr, int *varID, int *levelID)
 }
 */
 
-void iegReadRecord(stream_t *streamptr, double *data, int *nmiss)
+void iegReadRecord(stream_t *streamptr, double *data, size_t *nmiss)
 {
   int vlistID = streamptr->vlistID;
   int fileID  = streamptr->fileID;
@@ -108,12 +102,12 @@ void iegReadRecord(stream_t *streamptr, double *data, int *nmiss)
 
   double missval = vlistInqVarMissval(vlistID, varID);
   int gridID  = vlistInqVarGrid(vlistID, varID);
-  int size    = gridInqSize(gridID);
+  size_t size = gridInqSize(gridID);
 
   streamptr->numvals += size;
 
   *nmiss = 0;
-  for ( int i = 0; i < size; i++ )
+  for ( size_t i = 0; i < size; i++ )
     if ( DBL_IS_EQUAL(data[i], missval) || DBL_IS_EQUAL(data[i], (float)missval) )
       {
 	data[i] = missval;
@@ -249,8 +243,10 @@ void iegDefGrid(int *gdb, int gridID)
   int projtype = CDI_UNDEFID;
   if ( gridtype == GRID_PROJECTION && gridInqProjType(gridID) == CDI_PROJ_RLL ) projtype = CDI_PROJ_RLL;
 
-  int xsize = gridInqXsize(gridID);
-  int ysize = gridInqYsize(gridID);
+  size_t xsize = gridInqXsize(gridID);
+  size_t ysize = gridInqYsize(gridID);
+
+  cdi_check_gridsize_int_limit("IEG", xsize*ysize);
 
   if ( gridtype == GRID_GENERIC )
     {
@@ -313,8 +309,8 @@ void iegDefGrid(int *gdb, int gridID)
 
       IEG_G_ResFac(gdb)   = iresfac;
 
-      IEG_G_NumLon(gdb)   = xsize;
-      IEG_G_NumLat(gdb)   = ysize;
+      IEG_G_NumLon(gdb)   = (int)xsize;
+      IEG_G_NumLat(gdb)   = (int)ysize;
       IEG_G_FirstLat(gdb) = (int)lround(yfirst*resfac);
       IEG_G_LastLat(gdb)  = (int)lround(ylast*resfac);
       IEG_G_FirstLon(gdb) = (int)lround(xfirst*resfac);
@@ -324,7 +320,7 @@ void iegDefGrid(int *gdb, int gridID)
 	IEG_G_LonIncr(gdb) = 0;
 
       if ( gridtype == GRID_GAUSSIAN )
-	IEG_G_LatIncr(gdb) = ysize/2;
+	IEG_G_LatIncr(gdb) = (int)ysize/2;
       else
 	{
 	  IEG_G_LatIncr(gdb) = (int)lround(yinc*resfac);
@@ -535,10 +531,10 @@ void iegWriteRecord(stream_t *streamptr, const double *data)
   iegrec_t *iegp = (iegrec_t*) record->exsep;
 
   int fileID = streamptr->fileID;
-  int gridsize = gridInqSize(record->gridID);
+  size_t gridsize = gridInqSize(record->gridID);
 
   double refval = data[0];
-  for ( int i = 1; i < gridsize; i++ )
+  for ( size_t i = 1; i < gridsize; i++ )
     if ( data[i] < refval ) refval = data[i];
 
   iegp->refval = refval;
@@ -583,8 +579,8 @@ void iegAddRecord(stream_t *streamptr, int param, int *pdb, int *gdb, double *vc
   grid_t *grid = (grid_t *)Malloc(sizeof (*grid));
   grid_init(grid);
   cdiGridTypeInit(grid, gridtype, IEG_G_NumLon(gdb)*IEG_G_NumLat(gdb));
-  int xsize = IEG_G_NumLon(gdb);
-  int ysize = IEG_G_NumLat(gdb);
+  size_t xsize = (size_t)IEG_G_NumLon(gdb);
+  size_t ysize = (size_t)IEG_G_NumLat(gdb);
   grid->x.size = xsize;
   grid->y.size = ysize;
   grid->x.inc  = 0;
@@ -683,7 +679,7 @@ void iegAddRecord(stream_t *streamptr, int param, int *pdb, int *gdb, double *vc
 #if 0
 static
 void iegCmpRecord(stream_t *streamptr, int tsID, int recID, off_t position, int param,
-		  int level, int xsize, int ysize)
+		  int level, size_t xsize, size_t ysize)
 {
   int varID = 0;
   int levelID = 0;
@@ -743,7 +739,7 @@ void iegScanTimestep1(stream_t *streamptr)
   int fileID = streamptr->fileID;
 
   int nrecs = 0;
-  while ( TRUE )
+  while ( true )
     {
       recpos = fileGetPos(fileID);
       int status = iegRead(fileID, iegp);
@@ -809,6 +805,8 @@ void iegScanTimestep1(stream_t *streamptr)
   taxis->type  = TAXIS_ABSOLUTE;
   taxis->vdate = (int)datetime0.date;
   taxis->vtime = (int)datetime0.time;
+  taxis->rdate = taxis->vdate;
+  taxis->rtime = taxis->vtime;
 
   int vlistID = streamptr->vlistID;
   vlistDefTaxis(vlistID, taxisID);
@@ -835,7 +833,7 @@ void iegScanTimestep1(stream_t *streamptr)
       if ( tsID != streamptr->rtsteps )
 	Error("Internal error. tsID = %d", tsID);
 
-      streamptr->tsteps[tsID-1].next   = TRUE;
+      streamptr->tsteps[tsID-1].next   = true;
       streamptr->tsteps[tsID].position = recpos;
     }
 
@@ -845,9 +843,7 @@ void iegScanTimestep1(stream_t *streamptr)
 	{
 	  streamptr->ntsteps = 0;
 	  for ( int varID = 0; varID < streamptr->nvars; varID++ )
-	    {
-	      vlistDefVarTsteptype(vlistID, varID, TSTEP_CONSTANT);
-	    }
+            vlistDefVarTimetype(vlistID, varID, TIME_CONSTANT);
 	}
     }
 }
@@ -938,7 +934,7 @@ int iegScanTimestep2(stream_t *streamptr)
 		}
 	      else
 		{
-		  streamptr->tsteps[tsID].records[recID].used = TRUE;
+		  streamptr->tsteps[tsID].records[recID].used = true;
 		  streamptr->tsteps[tsID].recIDs[rindex] = recID;
 		}
 	      break;
@@ -980,7 +976,7 @@ int iegScanTimestep2(stream_t *streamptr)
       if ( ! streamptr->tsteps[tsID].records[recID].used )
 	{
 	  int varID = streamptr->tsteps[tsID].records[recID].varID;
-          vlistDefVarTsteptype(vlistID, varID, TSTEP_CONSTANT);
+          vlistDefVarTimetype(vlistID, varID, TIME_CONSTANT);
 	}
       else
 	{
@@ -997,7 +993,7 @@ int iegScanTimestep2(stream_t *streamptr)
       if ( tsID != streamptr->rtsteps )
 	Error("Internal error. tsID = %d", tsID);
 
-      streamptr->tsteps[tsID-1].next   = TRUE;
+      streamptr->tsteps[tsID-1].next   = true;
       streamptr->tsteps[tsID].position = recpos;
     }
 
@@ -1125,7 +1121,7 @@ long iegScanTimestep(stream_t *streamptr)
 	  if ( tsID != streamptr->rtsteps )
 	    Error("Internal error. tsID = %d", tsID);
 
-	  streamptr->tsteps[tsID-1].next   = 1;
+	  streamptr->tsteps[tsID-1].next   = true;
 	  streamptr->tsteps[tsID].position = recpos;
 	}
 
@@ -1166,7 +1162,7 @@ int iegInqTimestep(stream_t *streamptr, int tsID)
 }
 
 
-void iegReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, int *nmiss)
+void iegReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, size_t *nmiss)
 {
   if ( CDI_Debug ) Message("streamID = %d  varID = %d  levID = %d", streamptr->self, varID, levID);
 
@@ -1176,7 +1172,7 @@ void iegReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, 
   int fileID   = streamptr->fileID;
   /* NOTE: tiles are not supported here! */
   double missval = vlistInqVarMissval(vlistID, varID);
-  int gridsize = gridInqSize(vlistInqVarGrid(vlistID, varID));
+  size_t gridsize = gridInqSize(vlistInqVarGrid(vlistID, varID));
   int tsid     = streamptr->curTsID;
 
   off_t currentfilepos = fileGetPos(fileID);
@@ -1191,7 +1187,7 @@ void iegReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, 
   fileSetPos(fileID, currentfilepos, SEEK_SET);
 
   *nmiss = 0;
-  for ( int i = 0; i < gridsize; i++ )
+  for ( size_t i = 0; i < gridsize; i++ )
     if ( DBL_IS_EQUAL(data[i], missval) || DBL_IS_EQUAL(data[i], (float)missval) )
       {
 	data[i] = missval;
@@ -1200,12 +1196,12 @@ void iegReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, 
 }
 
 
-void iegReadVarDP(stream_t *streamptr, int varID, double *data, int *nmiss)
+void iegReadVarDP(stream_t *streamptr, int varID, double *data, size_t *nmiss)
 {
   if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamptr->self, varID);
 
   int vlistID = streamptr->vlistID;
-  size_t gridsize = (size_t) gridInqSize(vlistInqVarGrid(vlistID, varID));
+  size_t gridsize = gridInqSize(vlistInqVarGrid(vlistID, varID));
   size_t nlevs    = (size_t) streamptr->vars[varID].recordTable[0].nlevs;
 
   for ( size_t levID = 0; levID < nlevs; levID++)
@@ -1241,10 +1237,10 @@ void iegWriteVarSliceDP(stream_t *streamptr, int varID, int levID, const double 
 
   iegp->dprec = iegDefDatatype(vlistInqVarDatatype(vlistID, varID));
 
-  int gridsize = gridInqSize(gridID);
+  size_t gridsize = gridInqSize(gridID);
 
   double refval = data[0];
-  for ( int i = 1; i < gridsize; i++ )
+  for ( size_t i = 1; i < gridsize; i++ )
     if ( data[i] < refval ) refval = data[i];
 
   iegp->refval = refval;
@@ -1259,7 +1255,7 @@ void iegWriteVarDP(stream_t *streamptr, int varID, const double *data)
   if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamptr->self, varID);
 
   int vlistID = streamptr->vlistID;
-  size_t gridsize = (size_t) gridInqSize(vlistInqVarGrid(vlistID, varID));
+  size_t gridsize = gridInqSize(vlistInqVarGrid(vlistID, varID));
   size_t nlevs    = (size_t) zaxisInqSize(vlistInqVarZaxis(vlistID, varID));
 
   for ( size_t levID = 0;  levID < nlevs; levID++ )

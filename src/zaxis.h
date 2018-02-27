@@ -1,5 +1,5 @@
-#ifndef _ZAXIS_H
-#define _ZAXIS_H
+#ifndef  ZAXIS_H
+#define  ZAXIS_H
 
 #include "cdi_att.h"
 
@@ -26,7 +26,7 @@ typedef struct {
   double  *ubounds;
   double  *weights;
   int      self;
-  int      prec;
+  int      datatype;
   int      scalar;
   int      type;
   int      ltype;    /* GRIB level type */

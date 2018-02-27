@@ -2,7 +2,6 @@
 #  include "config.h"
 #endif
 
-#include <inttypes.h>
 
 #include "cdi.h"
 #include "error.h"

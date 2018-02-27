@@ -102,10 +102,19 @@ Get number of attributes assigned to this variable.
 \section*{\tt \htmlref{gridCreate}{gridCreate}}
 
 \begin{verbatim}
-    int gridCreate (int gridtype, int size);
+    int gridCreate (int gridtype, size_t size);
 \end{verbatim}
 
 Create a horizontal Grid.
+
+
+\section*{\tt \htmlref{gridDefDatatype}{gridDefDatatype}}
+
+\begin{verbatim}
+    void gridDefDatatype (int gridID, int prec);
+\end{verbatim}
+
+Define the data type of a Grid.
 
 
 \section*{\tt \htmlref{gridDefNP}{gridDefNP}}
@@ -142,15 +151,6 @@ Define the number of vertex of a Gridbox.
 \end{verbatim}
 
 Define the position of grid in the reference file.
-
-
-\section*{\tt \htmlref{gridDefPrec}{gridDefPrec}}
-
-\begin{verbatim}
-    void gridDefPrec (int gridID, int prec);
-\end{verbatim}
-
-Define the precision of a Grid.
 
 
 \section*{\tt \htmlref{gridDefProj}{gridDefProj}}
@@ -210,7 +210,7 @@ Define the name of a X-axis.
 \section*{\tt \htmlref{gridDefXsize}{gridDefXsize}}
 
 \begin{verbatim}
-    void gridDefXsize (int gridID, int xsize);
+    void gridDefXsize (int gridID, size_t xsize);
 \end{verbatim}
 
 Define the size of a X-axis.
@@ -264,7 +264,7 @@ Define the name of a Y-axis.
 \section*{\tt \htmlref{gridDefYsize}{gridDefYsize}}
 
 \begin{verbatim}
-    void gridDefYsize (int gridID, int ysize);
+    void gridDefYsize (int gridID, size_t ysize);
 \end{verbatim}
 
 Define the size of a Y-axis.
@@ -306,6 +306,15 @@ Destroy a horizontal Grid.
 Duplicate a Grid.
 
 
+\section*{\tt \htmlref{gridInqDatatype}{gridInqDatatype}}
+
+\begin{verbatim}
+    int gridInqDatatype (int gridID);
+\end{verbatim}
+
+Get the data type of a Grid.
+
+
 \section*{\tt \htmlref{gridInqNP}{gridInqNP}}
 
 \begin{verbatim}
@@ -342,15 +351,6 @@ Get the number of vertex of a Gridbox.
 Get the position of grid in the reference file.
 
 
-\section*{\tt \htmlref{gridInqPrec}{gridInqPrec}}
-
-\begin{verbatim}
-    int gridInqPrec (int gridID);
-\end{verbatim}
-
-Get the precision of a Grid.
-
-
 \section*{\tt \htmlref{gridInqProj}{gridInqProj}}
 
 \begin{verbatim}
@@ -381,7 +381,7 @@ Get the reference URI to an unstructured grid.
 \section*{\tt \htmlref{gridInqSize}{gridInqSize}}
 
 \begin{verbatim}
-    int gridInqSize (int gridID);
+    size_t gridInqSize (int gridID);
 \end{verbatim}
 
 Get the size of a Grid.
@@ -417,7 +417,7 @@ Find out whether X-coordinate is of type CHAR.
 \section*{\tt \htmlref{gridInqXbounds}{gridInqXbounds}}
 
 \begin{verbatim}
-    int gridInqXbounds (int gridID, double xbounds[]);
+    size_t gridInqXbounds (int gridID, double xbounds[]);
 \end{verbatim}
 
 Get the bounds of a X-axis.
@@ -444,7 +444,7 @@ Get the name of a X-axis.
 \section*{\tt \htmlref{gridInqXsize}{gridInqXsize}}
 
 \begin{verbatim}
-    int gridInqXsize (int gridID);
+    size_t gridInqXsize (int gridID);
 \end{verbatim}
 
 Get the size of a X-axis.
@@ -471,7 +471,7 @@ Get the units of a X-axis.
 \section*{\tt \htmlref{gridInqXval}{gridInqXval}}
 
 \begin{verbatim}
-    double gridInqXval (int gridID, int index);
+    double gridInqXval (int gridID, size_t index);
 \end{verbatim}
 
 Get one value of a X-axis.
@@ -480,7 +480,7 @@ Get one value of a X-axis.
 \section*{\tt \htmlref{gridInqXvals}{gridInqXvals}}
 
 \begin{verbatim}
-    int gridInqXvals (int gridID, double xvals[]);
+    size_t gridInqXvals (int gridID, double xvals[]);
 \end{verbatim}
 
 Get all values of a X-axis.
@@ -498,7 +498,7 @@ Find out whether Y-coordinate is of type CHAR.
 \section*{\tt \htmlref{gridInqYbounds}{gridInqYbounds}}
 
 \begin{verbatim}
-    int gridInqYbounds (int gridID, double ybounds[]);
+    size_t gridInqYbounds (int gridID, double ybounds[]);
 \end{verbatim}
 
 Get the bounds of a Y-axis.
@@ -525,7 +525,7 @@ Get the name of a Y-axis.
 \section*{\tt \htmlref{gridInqYsize}{gridInqYsize}}
 
 \begin{verbatim}
-    int gridInqYsize (int gridID);
+    size_t gridInqYsize (int gridID);
 \end{verbatim}
 
 Get the size of a Y-axis.
@@ -552,7 +552,7 @@ Get the units of a Y-axis.
 \section*{\tt \htmlref{gridInqYval}{gridInqYval}}
 
 \begin{verbatim}
-    double gridInqYval (int gridID, int index);
+    double gridInqYval (int gridID, size_t index);
 \end{verbatim}
 
 Get one value of a Y-axis.
@@ -561,7 +561,7 @@ Get one value of a Y-axis.
 \section*{\tt \htmlref{gridInqYvals}{gridInqYvals}}
 
 \begin{verbatim}
-    int gridInqYvals (int gridID, double yvals[]);
+    size_t gridInqYvals (int gridID, double yvals[]);
 \end{verbatim}
 
 Get all values of a Y-axis.
@@ -696,7 +696,7 @@ Create a new dataset.
 \section*{\tt \htmlref{streamReadVar}{streamReadVar}}
 
 \begin{verbatim}
-    void streamReadVar (int streamID, int varID, double data[], int *nmiss);
+    void streamReadVar (int streamID, int varID, double data[], size_t *nmiss);
 \end{verbatim}
 
 Read a variable.
@@ -706,7 +706,7 @@ Read a variable.
 
 \begin{verbatim}
     void streamReadVarSlice (int streamID, int varID, int levelID, double data[],
-                             int *nmiss);
+                             size_t *nmiss);
 \end{verbatim}
 
 Read a horizontal slice of a variable.
@@ -724,7 +724,7 @@ Synchronize an Open Dataset to Disk.
 \section*{\tt \htmlref{streamWriteVar}{streamWriteVar}}
 
 \begin{verbatim}
-    void streamWriteVar (int streamID, int varID, const double data[], int nmiss);
+    void streamWriteVar (int streamID, int varID, const double data[], size_t nmiss);
 \end{verbatim}
 
 Write a variable.
@@ -734,7 +734,7 @@ Write a variable.
 
 \begin{verbatim}
     void streamWriteVarSlice (int streamID, int varID, int levelID,
-                              const double data[], int nmiss);
+                              const double data[], size_t nmiss);
 \end{verbatim}
 
 Write a horizontal slice of a variable.
@@ -811,15 +811,6 @@ read table of parameters from file in tabular format.
 \end{verbatim}
 
 write table of parameters to file in tabular format.
-
-
-\section*{\tt \htmlref{tableWriteC}{tableWriteC}}
-
-\begin{verbatim}
-    void tableWriteC (const char *filename, int tableID);
-\end{verbatim}
-
-write table of parameters to file in C language format.
 
 
 \section*{\tt \htmlref{taxisCreate}{taxisCreate}}
@@ -1023,7 +1014,7 @@ Define the time axis of a variable list.
 \section*{\tt \htmlref{vlistDefVar}{vlistDefVar}}
 
 \begin{verbatim}
-    int vlistDefVar (int vlistID, int gridID, int zaxisID, int tsteptype);
+    int vlistDefVar (int vlistID, int gridID, int zaxisID, int timetype);
 \end{verbatim}
 
 Create a new variable.
@@ -1122,7 +1113,7 @@ Define the standard name of a Variable.
 \section*{\tt \htmlref{vlistDefVarTiles}{vlistDefVarTiles}}
 
 \begin{verbatim}
-    int vlistDefVarTiles (int vlistID, int gridID, int zaxisID, int tsteptype,
+    int vlistDefVarTiles (int vlistID, int gridID, int zaxisID, int timetype,
                           int tilesetID);
 \end{verbatim}
 
@@ -1442,6 +1433,15 @@ Destroy a vertical Z-axis.
 \end{verbatim}
 
 Duplicate a Z-axis.
+
+
+\section*{\tt \htmlref{zaxisInqCLen}{zaxisInqCLen}}
+
+\begin{verbatim}
+    int zaxisInqCLen (int zaxisID);
+\end{verbatim}
+
+Get maximal string length of character Z-axis.
 
 
 \section*{\tt \htmlref{zaxisInqLevel}{zaxisInqLevel}}

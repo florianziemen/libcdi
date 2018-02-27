@@ -38,7 +38,7 @@ CdiGrid::CdiGrid(int gridid) {
   getValues();
   getBounds();
 
-  prec = gridInqPrec(gridID);
+  prec = gridInqDatatype(gridID);
 
   gridInqXname(gridID    , _xname);
   gridInqXlongname(gridID, _xlongname);
@@ -212,7 +212,7 @@ CdiZaxis::CdiZaxis(int zaxisid) {
 
   zaxisID = zaxisid;
   size    = zaxisInqSize(zaxisID);
-  prec    = zaxisInqPrec(zaxisID);
+  prec    = zaxisInqDatatype(zaxisID);
   type    = zaxisInqType(zaxisID);
   ltype   = zaxisInqLtype(zaxisID);
 
@@ -270,14 +270,13 @@ CdiVariable::sinfo() { std::cout << "code:"  << std::endl; }
 double *
 CdiVariable::getValuesAsPointer()
 {
-  int levelID = 0, tsID = 0, nmiss;
-  int vdate, vtime, nrecs;
-  double *field;
+  int levelID = 0, tsID = 0;
+  size_t nmiss;
 
-  nrecs = streamInqTimestep(streamID, tsID);
-  vdate = taxisInqVdate(taxisID);
-  vtime = taxisInqVtime(taxisID);
-  field = (double *) malloc(grid.size*sizeof(double));
+  int nrecs = streamInqTimestep(streamID, tsID);
+  int vdate = taxisInqVdate(taxisID);
+  int vtime = taxisInqVtime(taxisID);
+  double *field = (double *) malloc(grid.size*sizeof(double));
   streamReadVarSlice(streamID, varID, levelID, field, &nmiss);
 
   return field;
@@ -286,7 +285,8 @@ CdiVariable::getValuesAsPointer()
 double **
 CdiVariable::getValuesWithLevelAsPointer(int tsID)
 {
-  int    levelID, nmiss, nrecs;
+  int    levelID, nrecs;
+  size_t nmiss;
   double **fieldWithLevel, *field;
 
   nrecs          = streamInqTimestep(streamID, tsID);

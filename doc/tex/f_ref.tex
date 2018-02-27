@@ -768,7 +768,7 @@ streamDefTimestep
     INTEGER FUNCTION streamDefTimestep(INTEGER streamID, INTEGER tsID)
 \end{verbatim}
 
-Define time step
+Define a timestep
 \ifpdfoutput{}{(\ref{streamDefTimestep})}
 
 
@@ -828,7 +828,7 @@ streamInqTimestep
     INTEGER FUNCTION streamInqTimestep(INTEGER streamID, INTEGER tsID)
 \end{verbatim}
 
-Get time step
+Get timestep information
 \ifpdfoutput{}{(\ref{streamInqTimestep})}
 
 
@@ -1269,7 +1269,7 @@ vlistDefVar
 }}
 \begin{verbatim}
     INTEGER FUNCTION vlistDefVar(INTEGER vlistID, INTEGER gridID, INTEGER zaxisID, 
-                                 INTEGER tsteptype)
+                                 INTEGER timetype)
 \end{verbatim}
 
 Define a Variable

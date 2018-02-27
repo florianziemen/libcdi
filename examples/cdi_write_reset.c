@@ -11,8 +11,8 @@ static
 int run(int irun)
 {
   int gridID, zaxisID1, zaxisID2, taxisID;
-  int vlistID, varID1, varID2, streamID, tsID;
-  int i, nmiss = 0;
+  int vlistID, varID1, varID2, streamID;
+  size_t nmiss = 0;
   double lons[nlon] = {0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330};
   double lats[nlat] = {-75, -45, -15, 15, 45, 75};
   double levs[nlev] = {101300, 92500, 85000, 50000, 20000};
@@ -37,8 +37,8 @@ int run(int irun)
   vlistID = vlistCreate();
 
   // Define the variables
-  varID1 = vlistDefVar(vlistID, gridID, zaxisID1, TSTEP_INSTANT);
-  varID2 = vlistDefVar(vlistID, gridID, zaxisID2, TSTEP_INSTANT);
+  varID1 = vlistDefVar(vlistID, gridID, zaxisID1, TIME_VARYING);
+  varID2 = vlistDefVar(vlistID, gridID, zaxisID2, TIME_VARYING);
 
   // Define the variable names
   vlistDefVarName(vlistID, varID1, "varname1");
@@ -62,7 +62,7 @@ int run(int irun)
   streamDefVlist(streamID, vlistID);
 
   // Loop over the number of time steps
-  for ( tsID = 0; tsID < nts; tsID++ )
+  for ( int tsID = 0; tsID < nts; tsID++ )
     {
       // Set the verification date to 1985-01-01 + tsID
       taxisDefVdate(taxisID, 19850101+tsID);
@@ -72,8 +72,8 @@ int run(int irun)
       streamDefTimestep(streamID, tsID);
 
       // Init var1 and var2
-      for ( i = 0; i < nlon*nlat;      i++ ) var1[i] = 1.1;
-      for ( i = 0; i < nlon*nlat*nlev; i++ ) var2[i] = 2.2;
+      for ( size_t i = 0; i < nlon*nlat;      i++ ) var1[i] = 1.1;
+      for ( size_t i = 0; i < nlon*nlat*nlev; i++ ) var2[i] = 2.2;
 
       // Write var1 and var2
       streamWriteVar(streamID, varID1, var1, nmiss);

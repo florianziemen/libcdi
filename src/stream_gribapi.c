@@ -1,11 +1,8 @@
-#if defined (HAVE_CONFIG_H)
-#  include "config.h"
+#ifdef  HAVE_CONFIG_H
+#include "config.h"
 #endif
 
-#ifdef HAVE_LIBGRIB_API
-#include <limits.h>
-#include <stdio.h>
-
+#ifdef  HAVE_LIBGRIB_API
 #include "dmemory.h"
 #include "cdi.h"
 #include "cdi_int.h"
@@ -36,6 +33,7 @@ typedef struct {
   int level2;
   int ltype;
   int tsteptype;
+  size_t gridsize;
 #ifdef HIRLAM_EXTENSIONS
     // NOTE: tsteptype MUST be part of attributes used to compare variables!
     // Modern NWP models (HARMONIE, HIRLAM) use timeRangeIndicator to specify
@@ -54,18 +52,7 @@ typedef struct {
 static
 int gribapiGetZaxisType(long editionNumber, int grib_ltype)
 {
-  int zaxistype = ZAXIS_GENERIC;
-
-  if ( editionNumber <= 1 )
-    {
-      zaxistype = grib1ltypeToZaxisType(grib_ltype);
-    }
-  else
-    {
-      zaxistype = grib2ltypeToZaxisType(grib_ltype);
-    }
-
-  return zaxistype;
+  return (editionNumber <= 1) ? grib1ltypeToZaxisType(grib_ltype) : grib2ltypeToZaxisType(grib_ltype);
 }
 
 static
@@ -113,14 +100,13 @@ double timeunit_factor(int tu1, int tu2)
 static
 int gribapiGetTimeUnits(grib_handle *gh)
 {
-  int timeunits = -1;
   long unitsOfTime = -1;
 
   grib_get_long(gh, "indicatorOfUnitOfTimeRange", &unitsOfTime);
 
   GRIB_CHECK(my_grib_set_long(gh, "stepUnits", unitsOfTime), 0);
 
-  timeunits = getTimeunits(unitsOfTime);
+  int timeunits = getTimeunits(unitsOfTime);
 
   return timeunits;
 }
@@ -155,7 +141,6 @@ static
 void gribapiGetDataDateTime(grib_handle *gh, int *datadate, int *datatime)
 {
   long lpar;
-
   GRIB_CHECK(grib_get_long(gh, "dataDate", &lpar), 0);
   *datadate = (int) lpar;
   GRIB_CHECK(grib_get_long(gh, "dataTime", &lpar), 0);  //FIXME: This looses the seconds in GRIB2 files.
@@ -172,20 +157,13 @@ void gribapiSetDataDateTime(grib_handle *gh, int datadate, int datatime)
 static
 int gribapiGetValidityDateTime(grib_handle *gh, int *vdate, int *vtime)
 {
-  int rdate, rtime;
-  int timeUnits, startStep = 0, endStep;
   int tstepRange = 0;
-  int range;
-  long sigofrtime = 3;
 
+  long sigofrtime = 3;
   if ( gribEditionNumber(gh) > 1 )
-    {
-      GRIB_CHECK(grib_get_long(gh, "significanceOfReferenceTime", &sigofrtime), 0);
-    }
+    GRIB_CHECK(grib_get_long(gh, "significanceOfReferenceTime", &sigofrtime), 0);
   else
-    {
-      GRIB_CHECK(grib_get_long(gh, "timeRangeIndicator", &sigofrtime), 0);
-    }
+    GRIB_CHECK(grib_get_long(gh, "timeRangeIndicator", &sigofrtime), 0);
 
   if ( sigofrtime == 3 )        //XXX: This looks like a bug to me, because timeRangeIndicator == 3 does not seem to have the same meaning as significanceOfReferenceTime == 3. I would recommend replacing this condition with `if(!gribapiTimeIsFC())`.
     {
@@ -193,13 +171,14 @@ int gribapiGetValidityDateTime(grib_handle *gh, int *vdate, int *vtime)
     }
   else
     {
+      int rdate, rtime;
       gribapiGetDataDateTime(gh, &rdate, &rtime);
 
-      timeUnits = gribapiGetTimeUnits(gh);
+      int timeUnits = gribapiGetTimeUnits(gh);
+      int startStep = 0, endStep = 0;
       gribapiGetSteps(gh, timeUnits, &startStep, &endStep);
 
-      range = endStep - startStep;
-
+      int range = endStep - startStep;
       if ( range > 0 )
 	{
 	  if ( startStep == 0 ) tstepRange = -1;
@@ -207,21 +186,19 @@ int gribapiGetValidityDateTime(grib_handle *gh, int *vdate, int *vtime)
 	}
 
       {
-	static int lprint = TRUE;
-	extern int grib_calendar;
 	int ryear, rmonth, rday, rhour, rminute, rsecond;
-	int julday, secofday;
-	int64_t time_period = endStep;
-        int64_t addsec;
-
 	cdiDecodeDate(rdate, &ryear, &rmonth, &rday);
 	cdiDecodeTime(rtime, &rhour, &rminute, &rsecond);
 
         if ( rday > 0 )
           {
+            static bool lprint = true;
+            extern int grib_calendar;
+            int julday, secofday;
             encode_caldaysec(grib_calendar, ryear, rmonth, rday, rhour, rminute, rsecond, &julday, &secofday);
 
-            addsec = 0;
+            int64_t time_period = endStep;
+            int64_t addsec = 0;
             switch ( timeUnits )
               {
               case TUNIT_SECOND:  addsec =         time_period; break;
@@ -235,7 +212,7 @@ int gribapiGetValidityDateTime(grib_handle *gh, int *vdate, int *vtime)
                 if ( lprint )
                   {
                     Warning("Time unit %d unsupported", timeUnits);
-                    lprint = FALSE;
+                    lprint = false;
                   }
                 break;
               }
@@ -319,8 +296,8 @@ static
 int calcLevel(int level_sf, long factor, long level)
 {
   double result = 0;
-  if(level != GRIB_MISSING_LONG) result = (double)level*grib2ScaleFactor(factor);
-  if(level_sf) result *= level_sf;
+  if (level != GRIB_MISSING_LONG) result = (double)level*grib2ScaleFactor(factor);
+  if (level_sf) result *= level_sf;
   return (int)result;
 }
 
@@ -328,10 +305,6 @@ static
 void grib2GetLevel(grib_handle *gh, int *leveltype1, int *leveltype2, int *lbounds, int *level1,
                    int *level2, int *level_sf, int *level_unit)
 {
-  int status;
-  long lpar;
-  long factor;
-
   *leveltype1 = 0;
   *leveltype2 = -1;
   *lbounds    = 0;
@@ -340,7 +313,8 @@ void grib2GetLevel(grib_handle *gh, int *leveltype1, int *leveltype2, int *lboun
   *level_sf   = 0;
   *level_unit = 0;
 
-  status = grib_get_long(gh, "typeOfFirstFixedSurface", &lpar); //1 byte
+  long lpar;
+  int status = grib_get_long(gh, "typeOfFirstFixedSurface", &lpar); //1 byte
   if ( status == 0 )
     {
       long llevel;
@@ -374,6 +348,7 @@ void grib2GetLevel(grib_handle *gh, int *leveltype1, int *leveltype2, int *lboun
             break;
         }
 
+      long factor;
       GRIB_CHECK(grib_get_long(gh, "scaleFactorOfFirstFixedSurface", &factor), 0);      //1 byte
       GRIB_CHECK(grib_get_long(gh, "scaledValueOfFirstFixedSurface", &llevel), 0);      //4 byte
       *level1 = calcLevel(*level_sf, factor, llevel);
@@ -427,14 +402,81 @@ void gribapiGetString(grib_handle *gh, const char *key, char *string, size_t len
 }
 
 static
-void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
+void gribapiGetKeys(grib_handle *gh, int varID)
+{
+  long tablesVersion = 0;
+  if ( grib_get_long(gh, "tablesVersion", &tablesVersion) == 0 )
+    varDefKeyInt(varID, CDI_KEY_TABLESVERSION, (int) tablesVersion);
+
+  long localTablesVersion = 0;
+  if ( grib_get_long(gh, "localTablesVersion", &localTablesVersion) == 0 )
+    varDefKeyInt(varID, CDI_KEY_LOCALTABLESVERSION, (int) localTablesVersion);
+
+  long typeOfGeneratingProcess = 0;
+  if ( grib_get_long(gh, "typeOfGeneratingProcess", &typeOfGeneratingProcess) == 0 )
+    varDefKeyInt(varID, CDI_KEY_TYPEOFGENERATINGPROCESS, (int) typeOfGeneratingProcess);
+
+  long productDefinitionTemplate = 0;
+  if ( grib_get_long(gh, "productDefinitionTemplateNumber", &productDefinitionTemplate) == 0 )
+    varDefKeyInt(varID, CDI_KEY_PRODUCTDEFINITIONTEMPLATE, (int) productDefinitionTemplate);
+
+  long typeOfProcessedData = 0;
+  if ( grib_get_long(gh, "typeOfProcessedData", &typeOfProcessedData) == 0 )
+    varDefKeyInt(varID, CDI_KEY_TYPEOFPROCESSEDDATA, (int) typeOfProcessedData);
+
+  long shapeOfTheEarth = 0;
+  if ( grib_get_long(gh, "shapeOfTheEarth", &shapeOfTheEarth) == 0 )
+    varDefKeyInt(varID, CDI_KEY_SHAPEOFTHEEARTH, (int) shapeOfTheEarth);
+
+  long backgroundProcess = 0;
+  if ( grib_get_long(gh, "backgroundProcess", &backgroundProcess) == 0 )
+    varDefKeyInt(varID, CDI_KEY_BACKGROUNDPROCESS, (int) backgroundProcess);
+
+  /*
+    Get the ensemble Info from the grib-2 Tables and update the intermediate datastructure.
+    Further update to the "vlist" is handled in the same way as for GRIB-1 by "cdi_generate_vars"
+  */
+  long typeOfEnsembleForecast = 0;
+  if ( grib_get_long(gh, "typeOfEnsembleForecast", &typeOfEnsembleForecast) == 0 )
+    {
+      long perturbationNumber = 0, numberOfForecastsInEnsemble = 0;
+      GRIB_CHECK(grib_get_long(gh, "numberOfForecastsInEnsemble", &numberOfForecastsInEnsemble), 0);
+      GRIB_CHECK(grib_get_long(gh, "perturbationNumber", &perturbationNumber), 0);
+      if ( perturbationNumber > 0 )
+        {
+          varDefKeyInt(varID, CDI_KEY_TYPEOFENSEMBLEFORECAST, (int) typeOfEnsembleForecast);
+          varDefKeyInt(varID, CDI_KEY_NUMBEROFFORECASTSINENSEMBLE, (int) numberOfForecastsInEnsemble);
+          varDefKeyInt(varID, CDI_KEY_PERTURBATIONNUMBER, (int) perturbationNumber);
+        }
+    }
+
+  long section2Length;
+  grib_get_long(gh, "section2Length", &section2Length);
+  if ( section2Length > 0 )
+    {
+      long grib2LocalSectionNumber;
+      grib_get_long(gh, "grib2LocalSectionNumber", &grib2LocalSectionNumber);
+      size_t size;
+      grib_get_size(gh, "section2Padding", &size);
+      if ( size > 0 )
+        {
+          varDefKeyInt(varID, CDI_KEY_GRIB2LOCALSECTIONNUMBER, (int) grib2LocalSectionNumber);
+          varDefKeyInt(varID, CDI_KEY_SECTION2PADDINGLENGTH, (int) size);
+          unsigned char *section2Padding = (unsigned char*) Malloc(size);
+          grib_get_bytes(gh, "section2Padding", section2Padding, &size);
+          varDefKeyBytes(varID, CDI_KEY_SECTION2PADDING, section2Padding, (int)size);
+          Free(section2Padding);
+        }
+    }
+}
+
+static
+void gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh,
                       size_t recsize, off_t position, int datatype, int comptype, const char *varname,
                       int leveltype1, int leveltype2, int lbounds, int level1, int level2, int level_sf, int level_unit,
                       const var_tile_t *tiles, int lread_additional_keys)
 {
-  int levelID = 0;
   char stdname[CDI_MAX_NAME], longname[CDI_MAX_NAME], units[CDI_MAX_NAME];
-  long ens_index = 0, ens_count = 0, ens_forecast_type = 0;
 
   int vlistID = streamptr->vlistID;
   int tsID    = streamptr->curTsID;
@@ -454,6 +496,7 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
   record->ilevel2   = level2;
   record->ltype     = leveltype1;
   record->tsteptype = (short)tsteptype;
+  record->gridsize  = gribapiGetGridsize(gh);
   record->tiles = tiles ? *tiles : dummy_tiles;
 
   //FIXME: This may leave the variable name unterminated (which is the behavior that I found in the code).
@@ -577,6 +620,7 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
   // fprintf(stderr, "param %d name %s %s %s\n", param, name, longname, units);
 
   /* add the previously read record data to the (intermediate) list of records */
+  int levelID = 0;
   int tile_index = 0, varID;
   varAddRecord(recID, param, gridID, zaxistype, lbounds, level1, level2, level_sf, level_unit,
 	       datatype, &varID, &levelID, tsteptype, numavg, leveltype1, leveltype2,
@@ -587,39 +631,21 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
 
   varDefCompType(varID, comptype);
 
-  /*
-    Get the ensemble Info from the grib-2 Tables and update the intermediate datastructure.
-    Further update to the "vlist" is handled in the same way as for GRIB-1 by "cdi_generate_vars"
-  */
-  if ( grib_get_long(gh, "typeOfEnsembleForecast", &ens_forecast_type) == 0 )
-    {
-      GRIB_CHECK(grib_get_long(gh, "numberOfForecastsInEnsemble", &ens_count ), 0);
-      GRIB_CHECK(grib_get_long(gh, "perturbationNumber", &ens_index ), 0);
-    }
-
-  if ( ens_index > 0 )
-    varDefEnsembleInfo(varID, (int)ens_index, (int)ens_count, (int)ens_forecast_type);
-
-  long typeOfGeneratingProcess = 0;
-  if ( grib_get_long(gh, "typeOfGeneratingProcess", &typeOfGeneratingProcess) == 0 )
-    varDefTypeOfGeneratingProcess(varID, (int) typeOfGeneratingProcess);
-
-  long productDefinitionTemplate = 0;
-  if ( grib_get_long(gh, "productDefinitionTemplateNumber", &productDefinitionTemplate) == 0 )
-    varDefProductDefinitionTemplate(varID, (int) productDefinitionTemplate);
-
-  long   lval;
-  double dval;
+  gribapiGetKeys(gh, varID);
 
   if (lread_additional_keys)
-    for ( int i = 0; i < cdiNAdditionalGRIBKeys; i++ )
-      {
-        /* note: if the key is not defined, we do not throw an error! */
-        if ( grib_get_long(gh, cdiAdditionalGRIBKeys[i], &lval) == 0 )
-          varDefOptGribInt(varID, tile_index, lval, cdiAdditionalGRIBKeys[i]);
-        if ( grib_get_double(gh, cdiAdditionalGRIBKeys[i], &dval) == 0 )
-          varDefOptGribDbl(varID, tile_index, dval, cdiAdditionalGRIBKeys[i]);
-      }
+    {
+      long   lval;
+      double dval;
+      for ( int i = 0; i < cdiNAdditionalGRIBKeys; i++ )
+        {
+          /* note: if the key is not defined, we do not throw an error! */
+          if ( grib_get_long(gh, cdiAdditionalGRIBKeys[i], &lval) == 0 )
+            varDefOptGribInt(varID, tile_index, lval, cdiAdditionalGRIBKeys[i]);
+          if ( grib_get_double(gh, cdiAdditionalGRIBKeys[i], &dval) == 0 )
+            varDefOptGribDbl(varID, tile_index, dval, cdiAdditionalGRIBKeys[i]);
+        }
+    }
 
   if ( varInqInst(varID) == CDI_UNDEFID )
     {
@@ -668,10 +694,12 @@ void gribapiAddRecord(stream_t * streamptr, int param, grib_handle *gh,
 	    varID, param, zaxistype, gridID, levelID);
 }
 
-static compvar2_t gribapiVarSet(int param, int level1, int level2, int leveltype,
-                                int tsteptype, char *name, var_tile_t tiles_data)
+static
+compvar2_t gribapiVarSet(int param, int level1, int level2, int leveltype, int tsteptype,
+                         size_t gridsize, char *name, var_tile_t tiles_data)
 {
   compvar2_t compVar;
+  memset(&compVar, 0, sizeof(compvar2_t));
   size_t maxlen = sizeof(compVar.name);
   size_t len = strlen(name);
   if ( len > maxlen ) len = maxlen;
@@ -681,7 +709,8 @@ static compvar2_t gribapiVarSet(int param, int level1, int level2, int leveltype
   compVar.level2    = level2;
   compVar.ltype     = leveltype;
   compVar.tsteptype = tsteptype;
-  memset(compVar.name, 0, maxlen);
+  compVar.gridsize  = gridsize;
+  //memset(compVar.name, 0, maxlen);
   memcpy(compVar.name, name, len);
   compVar.tiles = tiles_data;
 
@@ -692,11 +721,13 @@ static
 int gribapiVarCompare(compvar2_t compVar, record_t record, int flag)
 {
   compvar2_t compVar0;
+  memset(&compVar0, 0, sizeof(compvar2_t));
   compVar0.param     = record.param;
   compVar0.level1    = record.ilevel;
   compVar0.level2    = record.ilevel2;
   compVar0.ltype     = record.ltype;
   compVar0.tsteptype = record.tsteptype;
+  compVar0.gridsize  = record.gridsize;
   memcpy(compVar0.name, record.varname, sizeof(compVar.name));
 
   if ( flag == 0 )
@@ -751,7 +782,7 @@ grib_handle *gribapiGetDiskRepresentation(size_t recsize, size_t *buffersize, vo
         {
           // fprintf(stderr, "packingType %d %s\n", len, typeOfPacking);
           if      ( strncmp(typeOfPacking, "grid_jpeg", len) == 0 ) *outCompressionType = CDI_COMPRESS_JPEG;
-          else if ( strncmp(typeOfPacking, "grid_ccsds", len) == 0 ) *outCompressionType = CDI_COMPRESS_SZIP;
+          else if ( strncmp(typeOfPacking, "grid_ccsds", len) == 0 ) *outCompressionType = CDI_COMPRESS_AEC;
           else if ( strncmp(typeOfPacking, "grid_ieee", len) == 0 ) lieee = true;
         }
     }
@@ -819,8 +850,8 @@ int gribapiScanTimestep1(stream_t * streamptr)
   size_t buffersize = 0;
   DateTime datetime0 = { .date = 10101, .time = 0 };
   int nrecs_scanned = 0;        //Only used for debug output.
-  int warn_time = TRUE;
-  // int warn_numavg = TRUE;
+  bool warn_time = true;
+  // bool warn_numavg = true;
   int rdate = 0, rtime = 0, tunit = 0, fcast = 0;
   grib_handle *gh = NULL;
 
@@ -835,7 +866,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
   int fileID = streamptr->fileID;
 
   unsigned nrecs = 0;
-  while ( TRUE )
+  while ( true )
     {
       int level1 = 0, level2 = 0;
       size_t recsize = gribGetSize(fileID);
@@ -873,13 +904,10 @@ int gribapiScanTimestep1(stream_t * streamptr)
       int vdate = 0, vtime = 0;
       gribapiGetValidityDateTime(gh, &vdate, &vtime);
       DateTime datetime = { .date = vdate, .time = vtime };
-      /*
-      printf("%d %d %d\n", vdate, vtime, leveltype1);
-      */
 
       if ( datetime0.date == 10101 && datetime0.time == 0 )
         {
-          if( datetimeCmp(datetime, datetime0) || !nrecs )       //Do we really need this condition? I have included it in order not to change the number of times gribapiGetDataDateTime() etc. get called. But if those are sideeffect-free, this condition should be removed.
+          if ( datetimeCmp(datetime, datetime0) || !nrecs ) //Do we really need this condition? I have included it in order not to change the number of times gribapiGetDataDateTime() etc. get called. But if those are sideeffect-free, this condition should be removed.
             {
               datetime0 = datetime;
 
@@ -892,7 +920,9 @@ int gribapiScanTimestep1(stream_t * streamptr)
 
       if ( nrecs )
         {
-          checkTimeResult result = checkTime(streamptr, gribapiVarSet(param, level1, level2, leveltype1, tsteptype, varname, tiles), &datetime, &datetime0);
+          size_t gridsize = gribapiGetGridsize(gh);
+          checkTimeResult result = checkTime(streamptr, gribapiVarSet(param, level1, level2, leveltype1, tsteptype, gridsize, varname, tiles),
+                                             &datetime, &datetime0);
           if ( result == CHECKTIME_STOP )
             {
               break;
@@ -905,7 +935,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
           else if ( result == CHECKTIME_INCONSISTENT && warn_time )
             {
               gribWarning("Inconsistent verification time!", nrecs_scanned, tsID+1, varname, param, level1, level2);
-              warn_time = FALSE;
+              warn_time = false;
             }
           assert(result == CHECKTIME_OK || result == CHECKTIME_INCONSISTENT);
         }
@@ -916,7 +946,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
             {
               Message("Change numavg from %d to %d not allowed!",
                       taxis->numavg, ISEC1_AvgNum);
-              warn_numavg = FALSE;
+              warn_numavg = false;
             }
           else
             {
@@ -952,20 +982,12 @@ int gribapiScanTimestep1(stream_t * streamptr)
   cdi_generate_vars(streamptr);
 
   int taxisID = -1;
-  if ( fcast )
-    {
-      taxisID = taxisCreate(TAXIS_RELATIVE);
-      taxis->type  = TAXIS_RELATIVE;
-      taxis->rdate = rdate;
-      taxis->rtime = rtime;
-      taxis->unit  = tunit;
-    }
-  else
-    {
-      taxisID = taxisCreate(TAXIS_ABSOLUTE);
-      taxis->type  = TAXIS_ABSOLUTE;
-    }
 
+  taxis->unit = tunit;
+  taxis->type = fcast ? TAXIS_RELATIVE : TAXIS_ABSOLUTE;
+  taxisID = taxisCreate(taxis->type);
+  taxis->rdate = rdate;
+  taxis->rtime = rtime;
   taxis->vdate = (int)datetime0.date;
   taxis->vtime = (int)datetime0.time;
 
@@ -994,7 +1016,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
       if ( tsID != streamptr->rtsteps )
         Error("Internal error. tsID = %d", tsID);
 
-      streamptr->tsteps[tsID-1].next   = TRUE;
+      streamptr->tsteps[tsID-1].next   = true;
       streamptr->tsteps[tsID].position = recpos;
     }
 
@@ -1004,9 +1026,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
         {
           streamptr->ntsteps = 0;
           for ( int varID = 0; varID < streamptr->nvars; varID++ )
-            {
-              vlistDefVarTsteptype(vlistID, varID, TSTEP_CONSTANT);
-            }
+            vlistDefVarTimetype(vlistID, varID, TIME_CONSTANT);
         }
     }
 
@@ -1021,7 +1041,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
   DateTime datetime0 = { LONG_MIN, LONG_MIN };
   // int gridID;
   int recID;
-  //  int warn_numavg = TRUE;
+  //  bool warn_numavg = true;
   grib_handle *gh = NULL;
 
   streamptr->curTsID = 1;
@@ -1057,7 +1077,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
 
   int nrecs_scanned = nrecords; //Only used for debug output
   int rindex = 0;
-  while ( TRUE )
+  while ( true )
     {
       if ( rindex > nrecords ) break;
 
@@ -1122,7 +1142,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
 	  if (  taxis->numavg && warn_numavg &&
 		(taxis->numavg != ISEC1_AvgNum) )
 	    {
-	      warn_numavg = FALSE;
+	      warn_numavg = false;
 	    }
 	  else
 	    {
@@ -1135,7 +1155,8 @@ int gribapiScanTimestep2(stream_t * streamptr)
         .time = vtime
       };
 
-      compvar2_t compVar = gribapiVarSet(param, level1, level2, leveltype1, tsteptype, varname, tiles);
+      size_t gridsize = gribapiGetGridsize(gh);
+      compvar2_t compVar = gribapiVarSet(param, level1, level2, leveltype1, tsteptype, gridsize, varname, tiles);
 
       for ( recID = 0; recID < nrecords; recID++ )
         if ( gribapiVarCompare(compVar, streamptr->tsteps[tsID].records[recID], 0) == 0 ) break;
@@ -1158,7 +1179,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
 	    }
 	}
 
-      streamptr->tsteps[tsID].records[recID].used = TRUE;
+      streamptr->tsteps[tsID].records[recID].used = true;
       streamptr->tsteps[tsID].recIDs[rindex] = recID;
 
       if ( CDI_Debug )
@@ -1208,7 +1229,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
       if ( ! streamptr->tsteps[tsID].records[recID].used )
 	{
 	  int varID = streamptr->tsteps[tsID].records[recID].varID;
-	  vlistDefVarTsteptype(vlistID, varID, TSTEP_CONSTANT);
+	  vlistDefVarTimetype(vlistID, varID, TIME_CONSTANT);
 	}
       else
 	{
@@ -1225,7 +1246,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
       if ( tsID != streamptr->rtsteps )
 	Error("Internal error. tsID = %d", tsID);
 
-      streamptr->tsteps[tsID-1].next   = TRUE;
+      streamptr->tsteps[tsID-1].next   = true;
       streamptr->tsteps[tsID].position = recpos;
     }
 
@@ -1239,7 +1260,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
 int gribapiScanTimestep(stream_t * streamptr)
 {
   int vrecID, recID;
-  //int warn_numavg = TRUE;
+  //bool warn_numavg = true;
   int nrecs = 0;
   int vlistID = streamptr->vlistID;
 
@@ -1278,7 +1299,7 @@ int gribapiScanTimestep(stream_t * streamptr)
       DateTime datetime0 = { LONG_MIN, LONG_MIN };
       grib_handle *gh = NULL;
       char varname[256];
-      while ( TRUE )
+      while ( true )
 	{
 	  if ( rindex > nrecs ) break;
 
@@ -1350,7 +1371,7 @@ int gribapiScanTimestep(stream_t * streamptr)
 	      if (  taxis->numavg && warn_numavg &&
 		   (taxis->numavg != ISEC1_AvgNum) )
 		{
-		  warn_numavg = FALSE;
+		  warn_numavg = false;
 		}
 	      else
 		{
@@ -1365,7 +1386,8 @@ int gribapiScanTimestep(stream_t * streamptr)
 
           int tsteptype = gribapiGetTsteptype(gh);
 
-          compvar2_t compVar = gribapiVarSet(param, level1, level2, leveltype1, tsteptype, varname, tiles);
+          size_t gridsize = gribapiGetGridsize(gh);
+          compvar2_t compVar = gribapiVarSet(param, level1, level2, leveltype1, tsteptype, gridsize, varname, tiles);
 
 	  for ( vrecID = 0; vrecID < nrecs; vrecID++ )
 	    {
@@ -1396,7 +1418,7 @@ int gribapiScanTimestep(stream_t * streamptr)
 		}
 	    }
 
-          streamptr->tsteps[tsID].records[recID].used = TRUE;
+          streamptr->tsteps[tsID].records[recID].used = true;
           streamptr->tsteps[tsID].recIDs[rindex] = recID;
 
 	  if ( CDI_Debug )
@@ -1446,7 +1468,7 @@ int gribapiScanTimestep(stream_t * streamptr)
 	  if ( tsID != streamptr->rtsteps )
 	    Error("Internal error. tsID = %d", tsID);
 
-	  streamptr->tsteps[tsID-1].next   = 1;
+	  streamptr->tsteps[tsID-1].next   = true;
 	  streamptr->tsteps[tsID].position = recpos;
 	}
 
@@ -1470,13 +1492,10 @@ int gribapiScanTimestep(stream_t * streamptr)
 #undef gribWarning
 #endif
 
-int gribapiDecode(void *gribbuffer, int gribsize, double *data, long gridsize,
-		  int unreduced, int *nmiss, double missval, int vlistID, int varID)
+int gribapiDecode(void *gribbuffer, size_t gribsize, double *data, size_t gridsize,
+		  int unreduced, size_t *nmiss, double missval, int vlistID, int varID)
 {
   int status = 0;
-  long lpar;
-  long numberOfPoints;
-  size_t datasize;
 
   UNUSED(vlistID);
   UNUSED(varID);
@@ -1484,7 +1503,6 @@ int gribapiDecode(void *gribbuffer, int gribsize, double *data, long gridsize,
   if ( unreduced )
     {
       static bool lwarn = true;
-
       if ( lwarn )
 	{
 	  lwarn = false;
@@ -1497,16 +1515,18 @@ int gribapiDecode(void *gribbuffer, int gribsize, double *data, long gridsize,
   GRIB_CHECK(my_grib_set_double(gh, "missingValue", missval), 0);
 
   /* get the size of the values array*/
+  size_t datasize;
   GRIB_CHECK(grib_get_size(gh, "values", &datasize), 0);
-  GRIB_CHECK(grib_get_long(gh, "numberOfPoints", &numberOfPoints), 0);
-
+  // long numberOfPoints;
+  // GRIB_CHECK(grib_get_long(gh, "numberOfPoints", &numberOfPoints), 0);
   // printf("values_size = %d  numberOfPoints = %ld\n", datasize, numberOfPoints);
 
-  if ( gridsize != (long) datasize )
-    Error("Internal problem: gridsize(%ld) != datasize(%zu)!", gridsize, datasize);
+  if ( gridsize != datasize )
+    Error("Internal problem: gridsize(%zu) != datasize(%zu)!", gridsize, datasize);
   size_t dummy = datasize;
   GRIB_CHECK(grib_get_double_array(gh, "values", data, &dummy), 0);
 
+  long lpar;
   GRIB_CHECK(grib_get_long(gh, "gridDefinitionTemplateNumber", &lpar), 0);
   int gridtype = (int) lpar;
 
@@ -1527,21 +1547,15 @@ int gribapiDecode(void *gribbuffer, int gribsize, double *data, long gridsize,
 static
 void gribapiDefInstitut(grib_handle *gh, int vlistID, int varID)
 {
-  int instID;
-
-  if ( vlistInqInstitut(vlistID) != CDI_UNDEFID )
-    instID = vlistInqInstitut(vlistID);
-  else
-    instID = vlistInqVarInstitut(vlistID, varID);
+  int instID = (vlistInqInstitut(vlistID) != CDI_UNDEFID) ?
+    vlistInqInstitut(vlistID) : vlistInqVarInstitut(vlistID, varID);
 
   if ( instID != CDI_UNDEFID )
     {
-      long center, subcenter;
+      long center    = institutInqCenter(instID);
+      long subcenter = institutInqSubcenter(instID);
+
       long center0, subcenter0;
-
-      center    = institutInqCenter(instID);
-      subcenter = institutInqSubcenter(instID);
-
       GRIB_CHECK(grib_get_long(gh, "centre", &center0), 0);
       GRIB_CHECK(grib_get_long(gh, "subCentre", &subcenter0), 0);
 
@@ -1550,17 +1564,25 @@ void gribapiDefInstitut(grib_handle *gh, int vlistID, int varID)
       if ( subcenter != subcenter0 )
 	GRIB_CHECK(my_grib_set_long(gh, "subCentre", subcenter), 0);
     }
+
+  int status;
+  int centre, subCentre;
+  status = cdiInqKeyInt(vlistID, CDI_GLOBAL, CDI_KEY_CENTRE, &centre);
+  if ( status == 0 ) grib_set_long(gh, "centre", centre);
+  status = cdiInqKeyInt(vlistID, CDI_GLOBAL, CDI_KEY_SUBCENTRE, &subCentre);
+  if ( status == 0 ) grib_set_long(gh, "subCentre", subCentre);
+
+  status = cdiInqKeyInt(vlistID, varID, CDI_KEY_CENTRE, &centre);
+  if ( status == 0 ) grib_set_long(gh, "centre", centre);
+  status = cdiInqKeyInt(vlistID, varID, CDI_KEY_SUBCENTRE, &subCentre);
+  if ( status == 0 ) grib_set_long(gh, "subCentre", subCentre);
 }
 
 static
 void gribapiDefModel(grib_handle *gh, int vlistID, int varID)
 {
-  int modelID;
-
-  if ( vlistInqModel(vlistID) != CDI_UNDEFID )
-    modelID = vlistInqModel(vlistID);
-  else
-    modelID = vlistInqVarModel(vlistID, varID);
+  int modelID = (vlistInqModel(vlistID) != CDI_UNDEFID) ?
+    vlistInqModel(vlistID) : vlistInqVarModel(vlistID, varID);
 
   if ( modelID != CDI_UNDEFID )
     GRIB_CHECK(my_grib_set_long(gh, "generatingProcessIdentifier", modelInqGribID(modelID)), 0);
@@ -1576,8 +1598,7 @@ void gribapiDefParam(int editionNumber, grib_handle *gh, int param, const char *
 
   if ( pnum < 0 )
     {
-      size_t len;
-      len = strlen(stdname);
+      size_t len = strlen(stdname);
       if ( len )
         {
           int status = my_grib_set_string(gh, "cfName", stdname, &len);
@@ -1724,10 +1745,9 @@ static
 int gribapiDefSteptype(int editionNumber, grib_handle *gh, int productDefinitionTemplate, int typeOfGeneratingProcess, int tsteptype, int gcinit)
 {
   long proDefTempNum = 0;
-  size_t len = 64;
   const char *stepType;
 
-  if (tsteptype >= TSTEP_INSTANT && tsteptype <= TSTEP_RATIO)
+  if ( tsteptype >= TSTEP_INSTANT && tsteptype <= TSTEP_RATIO )
     {
       stepType = cdiGribAPI_ts_str_map[tsteptype].sname;
       proDefTempNum = cdiGribAPI_ts_str_map[tsteptype].productionTemplate;
@@ -1749,7 +1769,7 @@ int gribapiDefSteptype(int editionNumber, grib_handle *gh, int productDefinition
   if ( !gcinit )
     {
       if ( editionNumber > 1 ) GRIB_CHECK(my_grib_set_long(gh, "productDefinitionTemplateNumber", proDefTempNum), 0);
-      len = strlen(stepType);
+      size_t len = strlen(stepType);
       GRIB_CHECK(my_grib_set_string(gh, "stepType", stepType, &len), 0);
     }
 
@@ -1775,7 +1795,6 @@ int gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, int rdate, int rti
   int status = -1;
   int year, month, day, hour, minute, second;
   int julday1, secofday1, julday2, secofday2, days, secs;
-  long startStep = 0, endStep;
 
   cdiDecodeDate(rdate, &year, &month, &day);
   cdiDecodeTime(rtime, &hour, &minute, &second);
@@ -1797,7 +1816,8 @@ int gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, int rdate, int rti
 
       gribapiDefStepUnits(editionNumber, gh, timeunit, proDefTempNum, gcinit);
 
-      endStep = (int) ((days*86400.0 + secs)/factor);
+      long startStep = 0;
+      long endStep = (long) ((days*86400.0 + secs)/factor);
 
       if ( editionNumber > 1 ) GRIB_CHECK(my_grib_set_long(gh, "significanceOfReferenceTime", 1), 0);
       if ( editionNumber > 1 ) GRIB_CHECK(my_grib_set_long(gh, "stepRange", 0), 0);
@@ -1809,7 +1829,7 @@ int gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, int rdate, int rti
 
       // Product Definition Template Number: defined in GRIB_API file 4.0.table
       // point in time products:
-      if ( (proDefTempNum >= 0 && proDefTempNum <=  7) || 
+      if ( (proDefTempNum >= 0 && proDefTempNum <=  7) ||
            proDefTempNum == 55 || proDefTempNum == 40055 ) // Tile
         startStep = endStep;
 
@@ -1826,10 +1846,9 @@ static
 void gribapiDefTime(int editionNumber, int productDefinitionTemplate, int typeOfGeneratingProcess, grib_handle *gh,
                     int vdate, int vtime, int tsteptype, int numavg, int taxisID, int gcinit)
 {
-  int taxistype = -1;
-
   UNUSED(numavg);
 
+  int taxistype = -1;
   if ( taxisID != -1 ) taxistype = taxisInqType(taxisID);
 
   if ( typeOfGeneratingProcess == 196 )
@@ -1846,15 +1865,13 @@ void gribapiDefTime(int editionNumber, int productDefinitionTemplate, int typeOf
 
   if ( taxistype == TAXIS_RELATIVE )
     {
-      int status;
       int calendar = taxisInqCalendar(taxisID);
       int rdate    = taxisInqRdate(taxisID);
       int rtime    = taxisInqRtime(taxisID);
       int timeunit = taxisInqTunit(taxisID);
 
-      status = gribapiDefDateTimeRel(editionNumber, gh, rdate, rtime, vdate, vtime,
+      int status = gribapiDefDateTimeRel(editionNumber, gh, rdate, rtime, vdate, vtime,
                                      productDefinitionTemplate, typeOfGeneratingProcess, tsteptype, timeunit, calendar, gcinit);
-
       if ( status != 0 ) taxistype = TAXIS_ABSOLUTE;
     }
 
@@ -1864,28 +1881,277 @@ void gribapiDefTime(int editionNumber, int productDefinitionTemplate, int typeOf
     }
 }
 
-struct gribApiMsg {
-  size_t msgLen;
-  const char *msg;
-};
+static
+void gribapiDefGridRegular(grib_handle *gh, int gridID, int gridtype, bool gridIsRotated, bool gridIsCurvilinear)
+{
+  const char *mesg;
+  size_t len;
+  if ( gridtype == GRID_GAUSSIAN )
+    {
+      static const char mesg_gaussian[] = "regular_gg";
+      len = sizeof(mesg_gaussian) - 1;
+      mesg = mesg_gaussian;
+    }
+  else if ( gridtype == GRID_GAUSSIAN_REDUCED )
+    {
+      static const char mesg_gaussian_reduced[] = "reduced_gg";
+      len = sizeof(mesg_gaussian_reduced) - 1;
+      mesg = mesg_gaussian_reduced;
+    }
+  else if ( gridIsRotated )
+    {
+      static const char mesg_rot_lonlat[] = "rotated_ll";
+      len = sizeof(mesg_rot_lonlat) - 1;
+      mesg = mesg_rot_lonlat;
+    }
+  else
+    {
+      static const char mesg_regular_ll[] = "regular_ll";
+      len = sizeof(mesg_regular_ll) - 1;
+      mesg = mesg_regular_ll;
+    }
+  GRIB_CHECK(my_grib_set_string(gh, "gridType", mesg, &len), 0);
 
-static struct gribApiMsg
-getGribApiCompTypeMsg(int comptype, int gridsize)
+  double xfirst = 0, xlast = 0, xinc = 0;
+  double yfirst = 0, ylast = 0, yinc = 0;
+
+  size_t nlon = gridInqXsize(gridID);
+  size_t nlat = gridInqYsize(gridID);
+
+  if ( gridtype == GRID_GAUSSIAN_REDUCED )
+    {
+      nlon = 0;
+
+      int *rowlon = (int *) Malloc(nlat*sizeof(int));
+      long *pl    = (long *) Malloc(nlat*sizeof(long));
+      gridInqRowlon(gridID, rowlon);
+      for ( size_t i = 0; i < nlat; ++i ) pl[i] = rowlon[i];
+
+      GRIB_CHECK(grib_set_long_array(gh, "pl", pl, nlat), 0);
+
+      Free(pl);
+      Free(rowlon);
+
+      xfirst = 0;
+      xinc   =        360. * 0.5 / (double)nlat;
+      xlast  = 360. - 360. * 0.5 / (double)nlat;
+    }
+  else
+    {
+      if ( nlon == 0 ) nlon = 1;
+      else
+        {
+          xfirst = gridInqXval(gridID, 0);
+          xlast  = gridInqXval(gridID, (gridIsCurvilinear ? nlon*nlat : nlon) - 1);
+          xinc   = fabs(gridInqXinc(gridID));
+        }
+    }
+
+  if ( nlat == 0 ) nlat = 1;
+  else
+    {
+      yfirst = gridInqYval(gridID, 0);
+      ylast  = gridInqYval(gridID, (gridIsCurvilinear ? nlon*nlat : nlat) - 1);
+      yinc   = fabs(gridInqYinc(gridID));
+    }
+
+  double xfirsto = xfirst;
+  double xlasto = xlast;
+  while ( xfirsto > 360 ) xfirsto -= 360;
+  while ( xlasto  > 360 ) xlasto  -= 360;
+
+  if ( gridtype != GRID_GAUSSIAN_REDUCED ) GRIB_CHECK(my_grib_set_long(gh, "Ni", nlon), 0);
+  GRIB_CHECK(my_grib_set_double(gh, "longitudeOfFirstGridPointInDegrees", xfirsto), 0);
+  GRIB_CHECK(my_grib_set_double(gh, "longitudeOfLastGridPointInDegrees",  xlasto), 0);
+  GRIB_CHECK(my_grib_set_double(gh, "iDirectionIncrementInDegrees", xinc), 0);
+
+  GRIB_CHECK(my_grib_set_long(gh, "Nj", (long)nlat), 0);
+  GRIB_CHECK(my_grib_set_double(gh, "latitudeOfFirstGridPointInDegrees",  yfirst), 0);
+  GRIB_CHECK(my_grib_set_double(gh, "latitudeOfLastGridPointInDegrees",   ylast), 0);
+
+  {
+    long iscan = xfirst > xlast;
+    GRIB_CHECK(my_grib_set_long(gh, "iScansNegatively", iscan), 0);
+  }
+  {
+    long jscan = yfirst < ylast;
+    GRIB_CHECK(my_grib_set_long(gh, "jScansPositively", jscan), 0);
+  }
+
+  if ( gridtype == GRID_GAUSSIAN || gridtype == GRID_GAUSSIAN_REDUCED )
+    {
+      int np = gridInqNP(gridID);
+      if ( np == 0 ) np = nlat/2;
+      GRIB_CHECK(my_grib_set_long(gh, "numberOfParallelsBetweenAPoleAndTheEquator", np), 0);
+    }
+  else
+    {
+      GRIB_CHECK(my_grib_set_double(gh, "jDirectionIncrementInDegrees", yinc), 0);
+    }
+
+  if ( gridIsRotated )
+    {
+      double xpole = 0, ypole = 0, angle = 0;
+      gridInqParamRLL(gridID, &xpole, &ypole, &angle);
+
+      xpole += 180;
+      if ( fabs(ypole) > 0 ) ypole = -ypole; // change from north to south pole
+      if ( fabs(angle) > 0 ) angle = -angle;
+      GRIB_CHECK(my_grib_set_double(gh, "latitudeOfSouthernPoleInDegrees",  ypole), 0);
+      GRIB_CHECK(my_grib_set_double(gh, "longitudeOfSouthernPoleInDegrees", xpole), 0);
+      GRIB_CHECK(my_grib_set_double(gh, "angleOfRotation", angle), 0);
+    }
+
+  long uvRelativeToGrid = gridInqUvRelativeToGrid(gridID);
+  if ( uvRelativeToGrid ) GRIB_CHECK(my_grib_set_long(gh, "uvRelativeToGrid", uvRelativeToGrid), 0);
+}
+
+static
+void gribapiDefGridLambert(grib_handle *gh, int editionNumber, int gridID)
+{
+  int xsize = (int) gridInqXsize(gridID);
+  int ysize = (int) gridInqYsize(gridID);
+
+  double lon_0, lat_0, lat_1, lat_2, a, rf, xval_0, yval_0, x_0, y_0;
+  gridInqParamLCC(gridID, grid_missval, &lon_0, &lat_0, &lat_1, &lat_2, &a, &rf, &xval_0, &yval_0, &x_0, &y_0);
+  gridVerifyGribParamLCC(grid_missval, &lon_0, &lat_0, &lat_1, &lat_2, &a, &rf, &xval_0, &yval_0, &x_0, &y_0);
+  if ( xval_0 < 0 ) xval_0 += 360;
+  bool lsouth = (lat_1 < 0);
+  if ( lsouth ) { lat_1 = -lat_2; lat_2 = -lat_2; }
+  int projflag = 0;
+  if ( lsouth ) gribbyte_set_bit(&projflag, 1);
+
+  double xinc = gridInqXinc(gridID);
+  double yinc = gridInqYinc(gridID);
+
+  static const char mesg[] = "lambert";
+  size_t len = sizeof(mesg) -1;
+  GRIB_CHECK(my_grib_set_string(gh, "gridType", mesg, &len), 0);
+
+  GRIB_CHECK(my_grib_set_long(gh, "Nx", xsize), 0);
+  GRIB_CHECK(my_grib_set_long(gh, "Ny", ysize), 0);
+  GRIB_CHECK(my_grib_set_long(gh, "DxInMetres", lround(xinc)), 0);
+  GRIB_CHECK(my_grib_set_long(gh, "DyInMetres", lround(yinc)), 0);
+  GRIB_CHECK(my_grib_set_double(gh, "longitudeOfFirstGridPointInDegrees", xval_0), 0);
+  GRIB_CHECK(my_grib_set_double(gh, "latitudeOfFirstGridPointInDegrees", yval_0), 0);
+  GRIB_CHECK(my_grib_set_double(gh, "LoVInDegrees", lon_0), 0);
+  GRIB_CHECK(my_grib_set_double(gh, "Latin1InDegrees", lat_1), 0);
+  GRIB_CHECK(my_grib_set_double(gh, "Latin2InDegrees", lat_2), 0);
+  GRIB_CHECK(my_grib_set_long(gh, "projectionCentreFlag", projflag), 0);
+
+  long uvRelativeToGrid = gridInqUvRelativeToGrid(gridID);
+  if ( uvRelativeToGrid ) GRIB_CHECK(my_grib_set_long(gh, "uvRelativeToGrid", uvRelativeToGrid), 0);
+  long earthIsOblate = (IS_EQUAL(a, 6378160.) && IS_EQUAL(rf, 297.));
+  if ( earthIsOblate ) GRIB_CHECK(my_grib_set_long(gh, "earthIsOblate", earthIsOblate), 0);
+
+  int scanflag = 0;
+  gribbyte_set_bit(&scanflag, 2);
+  if ( editionNumber <= 1 )
+    GRIB_CHECK(my_grib_set_long(gh, "scanningMode", (long)scanflag), 0);
+}
+
+static
+void gribapiDefGridGME(grib_handle *gh, int gridID, long gridsize)
+{
+  GRIB_CHECK(my_grib_set_long(gh, "gridDefinitionTemplateNumber", GRIB2_GTYPE_GME), 0);
+
+  int nd = 0, ni = 0, ni2 = 0, ni3 = 0;
+  gridInqParamGME(gridID, &nd, &ni, &ni2, &ni3);
+  GRIB_CHECK(my_grib_set_long(gh, "nd", nd), 0);
+  GRIB_CHECK(my_grib_set_long(gh, "Ni", ni), 0);
+  GRIB_CHECK(my_grib_set_long(gh, "n2", ni2), 0);
+  GRIB_CHECK(my_grib_set_long(gh, "n3", ni3), 0);
+  GRIB_CHECK(my_grib_set_long(gh, "latitudeOfThePolePoint", 90000000), 0);
+  GRIB_CHECK(my_grib_set_long(gh, "longitudeOfThePolePoint", 0), 0);
+
+  GRIB_CHECK(my_grib_set_long(gh, "numberOfDataPoints", gridsize), 0);
+  GRIB_CHECK(my_grib_set_long(gh, "totalNumberOfGridPoints", gridsize), 0);
+}
+
+static
+void gribapiDefGridUnstructured(grib_handle *gh, int gridID)
+{
+  static bool warning = true;
+
+  int status = my_grib_set_long(gh, "gridDefinitionTemplateNumber", GRIB2_GTYPE_UNSTRUCTURED);
+  if ( status != 0 && warning )
+    {
+      warning = false;
+      Warning("Can't write reference grid!");
+      Warning("gridDefinitionTemplateNumber %d not found (grib2/template.3.%d.def)!",
+              GRIB2_GTYPE_UNSTRUCTURED, GRIB2_GTYPE_UNSTRUCTURED);
+    }
+  else
+    {
+      unsigned char uuid[CDI_UUID_SIZE];
+      int position = gridInqPosition(gridID);
+      int number = gridInqNumber(gridID);
+      if ( position < 0 ) position = 0;
+      if ( number < 0 ) number = 0;
+      GRIB_CHECK(my_grib_set_long(gh, "numberOfGridUsed", number), 0);
+      GRIB_CHECK(my_grib_set_long(gh, "numberOfGridInReference", position), 0);
+      size_t len = CDI_UUID_SIZE;
+      gridInqUUID(gridID, uuid);
+      if (grib_set_bytes(gh, "uuidOfHGrid", uuid, &len) != 0)
+        Warning("Can't write UUID!");
+    }
+}
+
+static
+void gribapiDefGridSpectral(grib_handle *gh, int gridID)
+{
+  int trunc = gridInqTrunc(gridID);
+  enum { numTruncAtt = 3 };
+  static const char truncAttNames[numTruncAtt][2] = { "J", "K", "M" };
+  for (size_t i = 0; i < numTruncAtt; ++i)
+    GRIB_CHECK(my_grib_set_long(gh, truncAttNames[i], trunc), 0);
+
+  if ( gridInqComplexPacking(gridID) )
+    {
+      static const char truncAttNames[numTruncAtt][3] = { "JS", "KS", "MS" };
+      for (size_t i = 0; i < numTruncAtt; ++i)
+        GRIB_CHECK(my_grib_set_long(gh, truncAttNames[i], 20), 0);
+    }
+}
+
+static
+void gribapiDefPackingType(grib_handle *gh, bool lieee, bool lspectral, bool lcomplex, int comptype, size_t gridsize)
 {
   const char *mesg;
   size_t len;
 
-  if ( comptype == CDI_COMPRESS_JPEG && gridsize > 1 )
+  if ( lspectral )
+    {
+      if ( lcomplex )
+        {
+          static const char mesg_spectral_complex[] = "spectral_complex";
+          len = sizeof (mesg_spectral_complex) - 1;
+          mesg = mesg_spectral_complex;
+        }
+      else
+        {
+          static const char mesg_spectral_simple[] = "spectral_simple";
+          len = sizeof (mesg_spectral_simple) - 1;
+          mesg = mesg_spectral_simple;
+        }
+    }
+  else if ( comptype == CDI_COMPRESS_JPEG && gridsize > 1 )
     {
       static const char mesg_grid_jpeg[] = "grid_jpeg";
       len = sizeof (mesg_grid_jpeg) - 1;
       mesg = mesg_grid_jpeg;
     }
-  else if ( comptype == CDI_COMPRESS_SZIP && gridsize > 1 )
+  else if ( (comptype == CDI_COMPRESS_SZIP || comptype == CDI_COMPRESS_AEC) && gridsize > 1 )
     {
       static const char mesg_grid_ccsds[] = "grid_ccsds";
       len = sizeof (mesg_grid_ccsds) - 1;
       mesg = mesg_grid_ccsds;
+    }
+  else if ( lieee )
+    {
+      static const char mesg_ieee[] = "grid_ieee";
+      len = sizeof (mesg_ieee) - 1;
+      mesg = mesg_ieee;
     }
   else
     {
@@ -1894,97 +2160,39 @@ getGribApiCompTypeMsg(int comptype, int gridsize)
       mesg = mesg_simple;
     }
 
-  return (struct gribApiMsg){ .msgLen = len, .msg = mesg };
+  GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
 }
 
-
 static
-void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype, bool lieee, int datatype, int nmiss, int gcinit)
+void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype, int datatype)
 {
-  UNUSED(nmiss);
-  bool lrotated = false;
-  bool lcurvi = false;
+  // bitsPerValue have to be defined first (complex packing)
+  GRIB_CHECK(my_grib_set_long(gh, "bitsPerValue", (long)grbBitsPerValue(datatype)), 0);
 
-  int gridtype = gridInqType(gridID);
-  int gridsize = gridInqSize(gridID);
+  size_t gridsize = gridInqSize(gridID);
+  bool gridIsRotated = false;
+  bool gridIsCurvilinear = false;
+  int gridtype = grbGetGridtype(gridID, gridsize, &gridIsRotated, &gridIsCurvilinear);
 
-  if ( editionNumber <= 1 )
-    if ( gridtype == GRID_GME || gridtype == GRID_UNSTRUCTURED )
-      gridtype = -1;
+  bool lieee = (editionNumber == 2 && (datatype == CDI_DATATYPE_FLT32 || datatype == CDI_DATATYPE_FLT64));
+  bool lspectral = (gridtype == GRID_SPECTRAL);
+  bool lcomplex = (lspectral && gridInqComplexPacking(gridID));
 
-  if ( gridtype == GRID_GENERIC )
+  if ( lieee ) comptype = 0;
+  if ( lspectral ) lieee = false;
+
+  if ( lspectral ) // gridType needs to be defined before packingType !!!
     {
-      int xsize = gridInqXsize(gridID);
-      int ysize = gridInqYsize(gridID);
-
-      if ( (ysize ==  32 || ysize ==  48 || ysize ==  64 ||
-	    ysize ==  96 || ysize == 160 || ysize == 192 ||
-	    ysize == 240 || ysize == 320 || ysize == 384 ||
-	    ysize == 480 || ysize == 768 ) &&
-	   (xsize == 2*ysize || xsize == 1) )
-	{
-	  gridtype = GRID_GAUSSIAN;
-	  gridChangeType(gridID, gridtype);
-	}
-      else if ( gridsize == 1 )
-	{
-	  gridtype = GRID_LONLAT;
-	  gridChangeType(gridID, gridtype);
-	}
-      else if ( gridInqXvals(gridID, NULL) && gridInqYvals(gridID, NULL) )
-	{
-	  gridtype = GRID_LONLAT;
-	  gridChangeType(gridID, gridtype);
-	}
-    }
-  else if ( gridtype == GRID_CURVILINEAR )
-    {
-      int projID = gridInqProj(gridID);
-      if ( projID != CDI_UNDEFID && gridInqType(projID) == GRID_PROJECTION )
-        {
-          gridID = projID;
-          gridtype = GRID_PROJECTION;
-        }
-      else
-        {
-          static bool lwarning = true;
-          if ( lwarning && gridsize > 1 )
-            {
-              lwarning = false;
-              Warning("Curvilinear grid is unsupported in GRIB format! Created wrong Grid Description Section!");
-            }
-          lcurvi = true;
-          gridtype = GRID_LONLAT;
-        }
+      static const char mesg[] = "sh";
+      size_t len = sizeof (mesg) -1;
+      GRIB_CHECK(my_grib_set_string(gh, "gridType", mesg, &len), 0);
     }
 
-  if ( gridtype == GRID_PROJECTION )
-    {
-      if ( gridInqProjType(gridID) == CDI_PROJ_RLL )
-        {
-          gridtype = GRID_LONLAT;
-          lrotated = true;
-        }
-      else if ( gridInqProjType(gridID) == CDI_PROJ_LCC )
-        {
-          gridtype = GRID_LCC;
-        }
-    }
+  gribapiDefPackingType(gh, lieee, lspectral, lcomplex, comptype, gridsize);
 
-  if ( gridtype == GRID_LONLAT || gridtype == GRID_GAUSSIAN )
-    {
-      if ( editionNumber != 2 || lieee ) { comptype = 0; }
+  if ( lieee ) GRIB_CHECK(my_grib_set_long(gh, "precision", datatype == CDI_DATATYPE_FLT64 ? 2 : 1), 0);
 
-      if ( comptype )
-        {
-          struct gribApiMsg gaMsg = getGribApiCompTypeMsg(comptype, gridsize);
-          size_t len = gaMsg.msgLen;
-          const char *mesg = gaMsg.msg;
-          GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
-        }
-    }
-
-  if ( gcinit ) return;
+  if ( editionNumber == 2 ) GRIB_CHECK(my_grib_set_long(gh, "numberOfValues", (long)gridsize), 0);
 
   switch (gridtype)
     {
@@ -1993,290 +2201,29 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
     case GRID_GAUSSIAN_REDUCED:
     case GRID_TRAJECTORY:
       {
-	double xfirst = 0, xlast = 0, xinc = 0;
-	double yfirst = 0, ylast = 0, yinc = 0;
-
-        const char *mesg;
-        size_t len;
-        if ( gridtype == GRID_GAUSSIAN )
-          {
-            static const char mesg_gaussian[] = "regular_gg";
-            len = sizeof(mesg_gaussian) - 1;
-            mesg = mesg_gaussian;
-          }
-        else if ( gridtype == GRID_GAUSSIAN_REDUCED )
-          {
-            static const char mesg_gaussian_reduced[] = "reduced_gg";
-            len = sizeof(mesg_gaussian_reduced) - 1;
-            mesg = mesg_gaussian_reduced;
-          }
-        else if ( lrotated )
-          {
-            static const char mesg_rot_lonlat[] = "rotated_ll";
-            len = sizeof(mesg_rot_lonlat) - 1;
-            mesg = mesg_rot_lonlat;
-          }
-        else
-          {
-            static const char mesg_regular_ll[] = "regular_ll";
-            len = sizeof(mesg_regular_ll) - 1;
-            mesg = mesg_regular_ll;
-          }
-        GRIB_CHECK(my_grib_set_string(gh, "gridType", mesg, &len), 0);
-
-	int nlon = gridInqXsize(gridID);
-	int nlat = gridInqYsize(gridID);
-
-	if ( gridtype == GRID_GAUSSIAN_REDUCED )
-	  {
-	    nlon = 0;
-
-	    int *rowlon = (int *) Malloc((size_t)nlat*sizeof(int));
-	    long *pl    = (long *) Malloc((size_t)nlat*sizeof(long));
-	    gridInqRowlon(gridID, rowlon);
-	    for ( int i = 0; i < nlat; ++i ) pl[i] = rowlon[i];
-
-            GRIB_CHECK(grib_set_long_array(gh, "pl", pl, (size_t)nlat), 0);
-
-	    Free(pl);
-	    Free(rowlon);
-
-	    xfirst = 0;
-	    xinc   =        360. * 0.5 / (double)nlat;
-	    xlast  = 360. - 360. * 0.5 / (double)nlat;
-	  }
-	else
-	  {
-	    if ( nlon == 0 ) nlon = 1;
-	    else
-	      {
-		xfirst = gridInqXval(gridID, 0);
-                xlast  = gridInqXval(gridID, (lcurvi ? nlon*nlat : nlon) - 1);
-		xinc   = fabs(gridInqXinc(gridID));
-	      }
-	  }
-
-	if ( nlat == 0 ) nlat = 1;
-	else
-	  {
-	    yfirst = gridInqYval(gridID, 0);
-            ylast  = gridInqYval(gridID, (lcurvi ? nlon*nlat : nlat) - 1);
-	    yinc   = fabs(gridInqYinc(gridID));
-	  }
-
-	if ( gridtype != GRID_GAUSSIAN_REDUCED ) GRIB_CHECK(my_grib_set_long(gh, "Ni", nlon), 0);
-	GRIB_CHECK(my_grib_set_double(gh, "longitudeOfFirstGridPointInDegrees", xfirst), 0);
-	GRIB_CHECK(my_grib_set_double(gh, "longitudeOfLastGridPointInDegrees",  xlast), 0);
-	GRIB_CHECK(my_grib_set_double(gh, "iDirectionIncrementInDegrees", xinc), 0);
-
-	GRIB_CHECK(my_grib_set_long(gh, "Nj", nlat), 0);
-	GRIB_CHECK(my_grib_set_double(gh, "latitudeOfFirstGridPointInDegrees",  yfirst), 0);
-	GRIB_CHECK(my_grib_set_double(gh, "latitudeOfLastGridPointInDegrees",   ylast), 0);
-
-        {
-          long iscan = xfirst > xlast;
-          GRIB_CHECK(my_grib_set_long(gh, "iScansNegatively", iscan), 0);
-        }
-        {
-          long jscan = yfirst < ylast;
-          GRIB_CHECK(my_grib_set_long(gh, "jScansPositively", jscan), 0);
-        }
-
-	if ( gridtype == GRID_GAUSSIAN || gridtype == GRID_GAUSSIAN_REDUCED )
-          {
-            int np = gridInqNP(gridID);
-            if ( np == 0 ) np = nlat/2;
-            GRIB_CHECK(my_grib_set_long(gh, "numberOfParallelsBetweenAPoleAndTheEquator", np), 0);
-          }
-	else
-	  {
-	    GRIB_CHECK(my_grib_set_double(gh, "jDirectionIncrementInDegrees", yinc), 0);
-	  }
-
-	if ( lrotated )
-	  {
-            double xpole = 0, ypole = 0, angle = 0;
-            gridInqParamRLL(gridID, &xpole, &ypole, &angle);
-
-            xpole += 180;
-            if ( fabs(ypole) > 0 ) ypole = -ypole; // change from north to south pole
-            if ( fabs(angle) > 0 ) angle = -angle;
-            GRIB_CHECK(my_grib_set_double(gh, "latitudeOfSouthernPoleInDegrees",  ypole), 0);
-            GRIB_CHECK(my_grib_set_double(gh, "longitudeOfSouthernPoleInDegrees", xpole), 0);
-            GRIB_CHECK(my_grib_set_double(gh, "angleOfRotation", angle), 0);
-          }
-
-        if ( editionNumber != 2 ) { lieee = false; comptype = 0; }
-
-        if ( lieee )
-          {
-            static const char mesg_grid_ieee[] = "grid_ieee";
-            len = sizeof (mesg_grid_ieee) - 1;
-            mesg = mesg_grid_ieee;
-          }
-        else
-          {
-            struct gribApiMsg gaMsg = getGribApiCompTypeMsg(comptype, gridsize);
-            len = gaMsg.msgLen;
-            mesg = gaMsg.msg;
-          }
-        GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
-        if ( lieee )
-          GRIB_CHECK(my_grib_set_long(gh, "precision", datatype == CDI_DATATYPE_FLT64 ? 2 : 1), 0);
-
-        long uvRelativeToGrid = gridInqUvRelativeToGrid(gridID);
-        if ( uvRelativeToGrid ) GRIB_CHECK(my_grib_set_long(gh, "uvRelativeToGrid", uvRelativeToGrid), 0);
-
+        gribapiDefGridRegular(gh, gridID, gridtype, gridIsRotated, gridIsCurvilinear);
 	break;
       }
     case GRID_LCC:
       {
-	int xsize = gridInqXsize(gridID);
-	int ysize = gridInqYsize(gridID);
-
-        double lon_0, lat_0, lat_1, lat_2, a, rf, xval_0, yval_0, x_0, y_0;
-	gridInqParamLCC(gridID, grid_missval, &lon_0, &lat_0, &lat_1, &lat_2, &a, &rf, &xval_0, &yval_0, &x_0, &y_0);
-	gridVerifyGribParamLCC(grid_missval, &lon_0, &lat_0, &lat_1, &lat_2, &a, &rf, &xval_0, &yval_0, &x_0, &y_0);
-        if ( xval_0 < 0 ) xval_0 += 360;
-        bool lsouth = (lat_1 < 0);
-        if ( lsouth ) { lat_1 = -lat_2; lat_2 = -lat_2; }
-        int projflag = 0;
-        if ( lsouth ) gribbyte_set_bit(&projflag, 1);
-
-        double xinc = gridInqXinc(gridID);
-        double yinc = gridInqYinc(gridID);
-
-        static const char mesg[] = "lambert";
-        size_t len = sizeof(mesg) -1;
-        GRIB_CHECK(my_grib_set_string(gh, "gridType", mesg, &len), 0);
-
-	GRIB_CHECK(my_grib_set_long(gh, "Nx", xsize), 0);
-	GRIB_CHECK(my_grib_set_long(gh, "Ny", ysize), 0);
-	GRIB_CHECK(my_grib_set_long(gh, "DxInMetres", lround(xinc)), 0);
-	GRIB_CHECK(my_grib_set_long(gh, "DyInMetres", lround(yinc)), 0);
-	GRIB_CHECK(my_grib_set_double(gh, "longitudeOfFirstGridPointInDegrees", xval_0), 0);
-	GRIB_CHECK(my_grib_set_double(gh, "latitudeOfFirstGridPointInDegrees", yval_0), 0);
-	GRIB_CHECK(my_grib_set_double(gh, "LoVInDegrees", lon_0), 0);
-	GRIB_CHECK(my_grib_set_double(gh, "Latin1InDegrees", lat_1), 0);
-	GRIB_CHECK(my_grib_set_double(gh, "Latin2InDegrees", lat_2), 0);
-        GRIB_CHECK(my_grib_set_long(gh, "projectionCentreFlag", projflag), 0);
-
-        long uvRelativeToGrid = gridInqUvRelativeToGrid(gridID);
-        if ( uvRelativeToGrid ) GRIB_CHECK(my_grib_set_long(gh, "uvRelativeToGrid", uvRelativeToGrid), 0);
-        long earthIsOblate = (IS_EQUAL(a, 6378160.) && IS_EQUAL(rf, 297.));
-        if ( earthIsOblate ) GRIB_CHECK(my_grib_set_long(gh, "earthIsOblate", earthIsOblate), 0);
-
-        int scanflag = 0;
-        gribbyte_set_bit(&scanflag, 2);
-        if ( editionNumber <= 1 )
-          GRIB_CHECK(my_grib_set_long(gh, "scanningMode", (long)scanflag), 0);
-
+        gribapiDefGridLambert(gh, editionNumber, gridID);
 	break;
       }
     case GRID_SPECTRAL:
       {
-        {
-          static const char mesg[] = "sh";
-          size_t len = sizeof (mesg) -1;
-          GRIB_CHECK(my_grib_set_string(gh, "gridType", mesg, &len), 0);
-        }
-	{
-          int trunc = gridInqTrunc(gridID);
-          enum { numTruncAtt = 3 };
-          static const char truncAttNames[numTruncAtt][2] = { "J", "K", "M" };
-          for (size_t i = 0; i < numTruncAtt; ++i)
-            GRIB_CHECK(my_grib_set_long(gh, truncAttNames[i], trunc), 0);
-        }
-	// GRIB_CHECK(my_grib_set_long(gh, "numberOfDataPoints", gridsize), 0);
-        /*
-        if ( lieee )
-          {
-            printf("spectral_ieee\n");
-            if ( editionNumber == 2 ) GRIB_CHECK(my_grib_set_long(gh, "numberOfValues", gridsize, 0);
-            static const char mesg[] = "spectral_ieee";
-            size_t len = sizeof (mesg) -1;
-            GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
-          }
-        else */ if ( gridInqComplexPacking(gridID) )
-	  {
-	    if ( editionNumber == 2 ) GRIB_CHECK(my_grib_set_long(gh, "numberOfValues", gridsize), 0);
-            static const char mesg[] = "spectral_complex";
-            size_t len = sizeof (mesg) -1;
-	    GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
-            enum { numTruncAtt = 3 };
-            static const char truncAttNames[numTruncAtt][3]
-              = { "JS", "KS", "MS" };
-            for (size_t i = 0; i < numTruncAtt; ++i)
-              GRIB_CHECK(my_grib_set_long(gh, truncAttNames[i], 20), 0);
-	  }
-	else
-	  {
-            static const char mesg[] = "spectral_simple";
-            size_t len = sizeof (mesg) -1;
-	    GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
-	  }
-
+        gribapiDefGridSpectral(gh, gridID);
 	break;
       }
     case GRID_GME:
       {
-	GRIB_CHECK(my_grib_set_long(gh, "gridDefinitionTemplateNumber", GRIB2_GTYPE_GME), 0);
-
-        int nd = 0, ni = 0, ni2 = 0, ni3 = 0;
-        gridInqParamGME(gridID, &nd, &ni, &ni2, &ni3);
-	GRIB_CHECK(my_grib_set_long(gh, "nd", nd), 0);
-	GRIB_CHECK(my_grib_set_long(gh, "Ni", ni), 0);
-	GRIB_CHECK(my_grib_set_long(gh, "n2", ni2), 0);
-	GRIB_CHECK(my_grib_set_long(gh, "n3", ni3), 0);
-	GRIB_CHECK(my_grib_set_long(gh, "latitudeOfThePolePoint", 90000000), 0);
-	GRIB_CHECK(my_grib_set_long(gh, "longitudeOfThePolePoint", 0), 0);
-
-	GRIB_CHECK(my_grib_set_long(gh, "numberOfDataPoints", gridsize), 0);
-	GRIB_CHECK(my_grib_set_long(gh, "totalNumberOfGridPoints", gridsize), 0);
-
-        if ( comptype == CDI_COMPRESS_SZIP )
-          {
-            static const char mesg[] = "grid_ccsds";
-            size_t len = sizeof (mesg) -1;
-            GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
-          }
-
+        if ( editionNumber <= 1 ) Error("GME grid can't be stored in GRIB edition %d!", editionNumber);
+        gribapiDefGridGME(gh, gridID, (long) gridsize);
 	break;
       }
     case GRID_UNSTRUCTURED:
       {
-	static bool warning = true;
-
-	int status = my_grib_set_long(gh, "gridDefinitionTemplateNumber", GRIB2_GTYPE_UNSTRUCTURED);
-	if ( status != 0 && warning )
-	  {
-	    warning = false;
-	    Warning("Can't write reference grid!");
-	    Warning("gridDefinitionTemplateNumber %d not found (grib2/template.3.%d.def)!",
-		    GRIB2_GTYPE_UNSTRUCTURED, GRIB2_GTYPE_UNSTRUCTURED);
-	  }
-	else
-	  {
-            unsigned char uuid[CDI_UUID_SIZE];
-            int position = gridInqPosition(gridID);
-            int number = gridInqNumber(gridID);
-            if ( position < 0 ) position = 0;
-            if ( number < 0 ) number = 0;
-	    GRIB_CHECK(my_grib_set_long(gh, "numberOfGridUsed", number), 0);
-	    GRIB_CHECK(my_grib_set_long(gh, "numberOfGridInReference", position), 0);
-            size_t len = CDI_UUID_SIZE;
-            gridInqUUID(gridID, uuid);
-	    if (grib_set_bytes(gh, "uuidOfHGrid", uuid, &len) != 0)
-	      Warning("Can't write UUID!");
-	  }
-
-        if ( comptype == CDI_COMPRESS_SZIP )
-          {
-            static const char mesg[] = "grid_ccsds";
-            size_t len = sizeof (mesg) -1;
-            GRIB_CHECK(my_grib_set_string(gh, "packingType", mesg, &len), 0);
-          }
-
+        if ( editionNumber <= 1 ) Error("Unstructured grid can't be stored in GRIB edition %d!", editionNumber);
+        gribapiDefGridUnstructured(gh, gridID);
 	break;
       }
     default:
@@ -2359,23 +2306,18 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelI
 {
   char units[CDI_MAX_NAME];
   bool lbounds = false;
-  double dlevel1 = 0, dlevel2 = 0;
 
   int zaxistype = zaxisInqType(zaxisID);
   long ltype = zaxisInqLtype(zaxisID);
   long ltype2 = zaxisInqLtype2(zaxisID);
   double level = zaxisInqLevels(zaxisID, NULL) ? zaxisInqLevel(zaxisID, levelID) : levelID+1;
 
+  double dlevel1 = level, dlevel2 = 0;
   if ( zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL) )
     {
       lbounds = true;
       dlevel1 = zaxisInqLbound(zaxisID, levelID);
       dlevel2 = zaxisInqUbound(zaxisID, levelID);
-    }
-  else
-    {
-      dlevel1 = level;
-      dlevel2 = 0;
     }
 
   if ( zaxistype == ZAXIS_GENERIC && ltype == 0 )
@@ -2386,11 +2328,8 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelI
       zaxisDefUnits(zaxisID, "Pa");
     }
 
-  long grib_ltype = -1;
-  if ( editionNumber <= 1 )
-    grib_ltype = zaxisTypeToGrib1ltype(zaxistype);
-  else
-    grib_ltype = zaxisTypeToGrib2ltype(zaxistype);
+  long grib_ltype = (editionNumber <= 1) ? zaxisTypeToGrib1ltype(zaxistype) : zaxisTypeToGrib2ltype(zaxistype);
+  long grib_ltype2 = (ltype != ltype2) ? ltype2 : grib_ltype;
 
   switch (zaxistype)
     {
@@ -2454,7 +2393,7 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelI
         if ( editionNumber <= 1 )
           grib1DefLevel(gh, gcinit, grib_ltype, lbounds, level, dlevel1, dlevel2);
         else
-          grib2DefLevel(gh, gcinit, grib_ltype, grib_ltype, lbounds, level, dlevel1, dlevel2);
+          grib2DefLevel(gh, gcinit, grib_ltype, grib_ltype2, lbounds, level, dlevel1, dlevel2);
 
         break;
       }
@@ -2488,7 +2427,7 @@ void gribapiDefLevel(int editionNumber, grib_handle *gh, int zaxisID, int levelI
 	if ( level < 0 ) Warning("Pressure level of %f Pa is below zero!", level);
 
 	zaxisInqUnits(zaxisID, units);
-	if ( memcmp(units, "Pa", 2) != 0 )
+        if ( units[0] && (units[0] != 'P') | (units[1] != 'a') )
           {
             level   *= 100;
             dlevel1 *= 100;
@@ -2758,10 +2697,10 @@ verticallyFlipGridDefinitionWhenScanningModeChanged(grib_handle *gh, double yfir
 
 static void
 convertDataScanningMode(int scanModeIN, int scanModeOUT, double *data,
-                        int gridsize, int iDim, int jDim)
+                        size_t gridsize, size_t iDim, size_t jDim)
 {
-  int i,j;
-  int idxIN, idxOUT;
+  size_t i,j;
+  size_t idxIN, idxOUT;
 
    // 127: reserved for testing; it will generate test data in 64 scanning mode
   if (scanModeOUT== 127)  // fill with testdata ...
@@ -2770,7 +2709,7 @@ convertDataScanningMode(int scanModeIN, int scanModeOUT, double *data,
       if (cdiDebugExt>=30) printf("convertDataScanningMode(): Generating test data in 64 scanning mode..\n");
       for (j=0; j<jDim; j++)
       {
-        int jXiDim = j*iDim;
+        size_t jXiDim = j*iDim;
         for (i=0; i<iDim; i++)
         {
           idxIN = i + jXiDim;
@@ -2781,17 +2720,17 @@ convertDataScanningMode(int scanModeIN, int scanModeOUT, double *data,
 
   if ( (iDim*jDim)!= gridsize)
   {
-    if (cdiDebugExt>=30) printf("convertDataScanningMode(): ERROR: (iDim*jDim)!= gridsize;  (%d * %d) != %d\n", iDim,jDim, gridsize);
+    if (cdiDebugExt>=30) printf("convertDataScanningMode(): ERROR: (iDim*jDim)!= gridsize;  (%zu * %zu) != %zu\n", iDim,jDim, gridsize);
     return;
   }
-  if (cdiDebugExt>=30) printf("convertDataScanningMode(): scanModeIN=%02d => scanModeOUT=%02d ; where: (iDim * jDim == gridsize)  (%d*%d == %d)\n",scanModeIN, scanModeOUT, iDim,jDim, gridsize);
+  if (cdiDebugExt>=30) printf("convertDataScanningMode(): scanModeIN=%02d => scanModeOUT=%02d ; where: (iDim * jDim == gridsize)  (%zu*%zu == %zu)\n",scanModeIN, scanModeOUT, iDim,jDim, gridsize);
 
   if (cdiDebugExt>=100)
   {
       printf("convertDataScanningMode(): data IN:\n");
       for (j=0; j<jDim; j++)
       {
-        int jXiDim = j*iDim;
+        size_t jXiDim = j*iDim;
         for (i=0; i<iDim; i++)
         {
           idxIN = i + jXiDim;
@@ -2817,9 +2756,7 @@ convertDataScanningMode(int scanModeIN, int scanModeOUT, double *data,
           return;
       }
   }
-  double *dataCopy = NULL;
-  dataCopy = (double *) malloc(gridsize*sizeof(double));
-
+  double *dataCopy = (double *) malloc(gridsize*sizeof(double));
   memcpy((void*)dataCopy,(void*) data, gridsize*sizeof(double));
 
   if (scanModeIN==64)           // Scanning Mode (00 dec)  +i, -j; i direction consecutive (row-major    order West->East   & South->North )
@@ -2848,7 +2785,7 @@ convertDataScanningMode(int scanModeIN, int scanModeOUT, double *data,
             {
               for (j=0; j<jDim; j++)
               {
-                int jXiDim = j*iDim;
+                size_t jXiDim = j*iDim;
                 idxIN  = i           + jXiDim;
                 //data[idxIN] = (double) (100.0*j +i);  // just some testdata ..
                 idxOUT = iDim - i -1 + jXiDim;
@@ -2862,10 +2799,10 @@ convertDataScanningMode(int scanModeIN, int scanModeOUT, double *data,
 
       if (scanModeOUT==96)
       { // transpose the data
-        if (cdiDebugExt>=30) printf("convertDataScanningMode():  transpose data rows=>columns nr. (%04d : %04d) => (%04d : %04d);\n", 0, iDim-1, 0, jDim-1);
+        if (cdiDebugExt>=30) printf("convertDataScanningMode():  transpose data rows=>columns nr. (%04d : %04zu) => (%04d : %04zu);\n", 0, iDim-1, 0, jDim-1);
         for (j=0; j<jDim; j++)
         {
-          int jXiDim = j*iDim;
+          size_t jXiDim = j*iDim;
           for (i=0; i<iDim; i++)
           {
             idxIN  = i + jXiDim;
@@ -2886,7 +2823,7 @@ convertDataScanningMode(int scanModeIN, int scanModeOUT, double *data,
         idxIN= 0; idxOUT= (jDim-1)*iDim;
         for (j=0; j<jDim; j++)
         {
-          if (cdiDebugExt>=25) printf("convertDataScanningMode():  copying row nr. %04d; [idxIN=%08d] => [idxOUT=%08d]\n",j, idxIN, idxOUT);
+          if (cdiDebugExt>=25) printf("convertDataScanningMode():  copying row nr. %04zu; [idxIN=%08zu] => [idxOUT=%08zu]\n",j, idxIN, idxOUT);
           memcpy((void*)&data[idxOUT], (void*)&dataCopy[idxIN], iDim*sizeof(double));
           idxIN  += iDim; idxOUT -= iDim;
         }
@@ -2894,10 +2831,10 @@ convertDataScanningMode(int scanModeIN, int scanModeOUT, double *data,
 
       if (scanModeOUT==96)
       { // transpose the data
-        int jInv;
+        size_t jInv;
         for (j=0; j<jDim; j++)
         {
-          if (cdiDebugExt>=30) printf("convertDataScanningMode():  processing row nr. %04d;\n", j);
+          if (cdiDebugExt>=30) printf("convertDataScanningMode():  processing row nr. %04zu;\n", j);
           jInv = (jDim-1) -j;
           for (i=0; i<iDim; i++)
             data[j + i*jDim] =  dataCopy[i + jInv*iDim];  // source data has -j
@@ -2912,8 +2849,8 @@ convertDataScanningMode(int scanModeIN, int scanModeOUT, double *data,
       { // transpose the data
         for (j=0; j<jDim; j++)
         {
-          if (cdiDebugExt>=30) printf("convertDataScanningMode():  processing row nr. %04d;\n", j);
-          int jXiDim = j*iDim;
+          if (cdiDebugExt>=30) printf("convertDataScanningMode():  processing row nr. %04zu;\n", j);
+          size_t jXiDim = j*iDim;
           for (i=0; i<iDim; i++)
             //data[j + i*jDim] =  dataCopy[i + j*iDim];
             data[i + jXiDim] =  dataCopy[j + i*jDim];
@@ -2923,12 +2860,12 @@ convertDataScanningMode(int scanModeIN, int scanModeOUT, double *data,
       if (scanModeOUT==00)
       { // transpose the data
         idxIN= 0; idxOUT= 0;
-        int jInv;
+        size_t jInv;
         for (j=0; j<jDim; j++)
         {
-          if (cdiDebugExt>=30) printf("convertDataScanningMode():  processing row nr. %04d;\n", j);
+          if (cdiDebugExt>=30) printf("convertDataScanningMode():  processing row nr. %04zu;\n", j);
           jInv = (jDim-1) -j;
-          int jXiDim = j*iDim;
+          size_t jXiDim = j*iDim;
           for (i=0; i<iDim; i++)
             //data[jInv + iXjDim] =  dataCopy[i + jXiDim];  // target data has -j
             data[i + jXiDim] =  dataCopy[jInv + i*jDim];  // target data has -j
@@ -2941,7 +2878,7 @@ convertDataScanningMode(int scanModeIN, int scanModeOUT, double *data,
       printf("convertDataScanningMode(): data OUT (new scanning mode):\n");
       for (j=0; j<jDim; j++)
       {
-        int jXiDim = j*iDim;
+        size_t jXiDim = j*iDim;
         for (i=0; i<iDim; i++)
         {
           idxIN = i + jXiDim;
@@ -2956,7 +2893,7 @@ convertDataScanningMode(int scanModeIN, int scanModeOUT, double *data,
 #endif //HIRLAM_EXTENSIONS
 
 static
-void gribapiSetExtMode(grib_handle *gh, int gridID, long datasize, const double *data)
+void gribapiSetExtMode(grib_handle *gh, int gridID, size_t datasize, const double *data)
 {
   /*
   Nj = 550;
@@ -2979,14 +2916,14 @@ void gribapiSetExtMode(grib_handle *gh, int gridID, long datasize, const double 
 
       if (cdiDebugExt>=100)
         {
-          int gridsize = gridInqSize(gridID);
-          Message("(scanModeIN=%d; gridsize=%d", scanModeIN, gridsize);
+          size_t gridsize = gridInqSize(gridID);
+          Message("(scanModeIN=%d; gridsize=%zu", scanModeIN, gridsize);
         }
 
       if ( cdiGribDataScanningMode.active )   // allowed modes: <0, 64, 96>; Default is 64
         {
-          int iDim = gridInqXsize(gridID);
-          int jDim = gridInqYsize(gridID);
+          size_t iDim = gridInqXsize(gridID);
+          size_t jDim = gridInqYsize(gridID);
 
           double yfirst = gridInqYval(gridID,      0);
           double ylast  = gridInqYval(gridID, jDim-1);
@@ -3028,27 +2965,25 @@ void gribapiSetExtMode(grib_handle *gh, int gridID, long datasize, const double 
 
 size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisID,
 		     int vdate, int vtime, int tsteptype, int numavg,
-		     long datasize, const double *data, int nmiss, void **gribbuffer, size_t *gribbuffersize,
+		     size_t datasize, const double *data, size_t nmiss, void **gribbuffer, size_t *gribbuffersize,
 		     int comptype, void *gribContainer)
 {
-  size_t recsize = 0;
   void *dummy = NULL;
-  bool lieee = false;
   /*  int ensID, ensCount, forecast_type; *//* Ensemble Data */
-  int typeOfGeneratingProcess;
-  int productDefinitionTemplate;
-  long bitsPerValue;
   long editionNumber = 2;
-  char name[256];
-  char stdname[256];
 
   // extern unsigned char _grib_template_GRIB2[];
+  cdi_check_gridsize_int_limit("GRIB", datasize);
 
   int param    = vlistInqVarParam(vlistID, varID);
   int datatype = vlistInqVarDatatype(vlistID, varID);
-  typeOfGeneratingProcess = vlistInqVarTypeOfGeneratingProcess(vlistID, varID);
-  productDefinitionTemplate = vlistInqVarProductDefinitionTemplate(vlistID, varID);
+  int typeOfGeneratingProcess = 0;
+  cdiInqKeyInt(vlistID, varID, CDI_KEY_TYPEOFGENERATINGPROCESS, &typeOfGeneratingProcess);
+  int productDefinitionTemplate = 0;
+  cdiInqKeyInt(vlistID, varID, CDI_KEY_PRODUCTDEFINITIONTEMPLATE, &productDefinitionTemplate);
 
+  char name[256];
+  char stdname[256];
   vlistInqVarName(vlistID, varID, name);
   vlistInqVarStdname(vlistID, varID, stdname);
 
@@ -3064,37 +2999,84 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
 
   if ( editionNumber == 2 )
     {
-      if ( typeOfGeneratingProcess == -1 ) typeOfGeneratingProcess = 0;
-      if ( ! gc->init ) GRIB_CHECK(my_grib_set_long(gh, "typeOfGeneratingProcess", typeOfGeneratingProcess), 0);
+      if ( ! gc->init )
+        {
+          int backgroundProcess = 0;
+          cdiInqKeyInt(vlistID, varID, CDI_KEY_BACKGROUNDPROCESS, &backgroundProcess);
+          GRIB_CHECK(my_grib_set_long(gh, "typeOfGeneratingProcess", typeOfGeneratingProcess), 0);
+          GRIB_CHECK(my_grib_set_long(gh, "backgroundProcess", backgroundProcess), 0);
+          int status, tablesVersion, localTablesVersion;
+          status = cdiInqKeyInt(vlistID, varID, CDI_KEY_TABLESVERSION, &tablesVersion);
+          if ( status == 0 ) GRIB_CHECK(my_grib_set_long(gh, "tablesVersion", (long)tablesVersion), 0);
+          status = cdiInqKeyInt(vlistID, varID, CDI_KEY_LOCALTABLESVERSION, &localTablesVersion);
+          if ( status == 0 ) GRIB_CHECK(my_grib_set_long(gh, "localTablesVersion", (long)localTablesVersion), 0);
+          int typeOfProcessedData = 0;
+          status = cdiInqKeyInt(vlistID, varID, CDI_KEY_TYPEOFPROCESSEDDATA, &typeOfProcessedData);
+          if ( status == 0 ) GRIB_CHECK(my_grib_set_long(gh, "typeOfProcessedData", (long)typeOfProcessedData), 0);
+        }
     }
-
-  /*
-  if( vlistInqVarEnsemble( vlistID,  varID, &ensID, &ensCount, &forecast_type ) )
-    {
-      GRIB_CHECK(my_grib_set_long(gh, "typeOfEnsembleForecast", forecast_type ), 0);
-      GRIB_CHECK(my_grib_set_long(gh, "numberOfForecastsInEnsemble", ensCount ), 0);
-      GRIB_CHECK(my_grib_set_long(gh, "perturbationNumber", ensID ), 0);
-    }
-  */
 
   gribapiDefTime((int)editionNumber, productDefinitionTemplate, typeOfGeneratingProcess,
                  gh, vdate, vtime, tsteptype, numavg, vlistInqTaxis(vlistID), gc->init);
+
+  {
+    int status, perturbationNumber, numberOfForecastsInEnsemble, typeOfEnsembleForecast;
+    status = cdiInqKeyInt(vlistID, varID, CDI_KEY_TYPEOFENSEMBLEFORECAST, &typeOfEnsembleForecast);
+    if ( status == 0 ) grib_set_long(gh, "typeOfEnsembleForecast", typeOfEnsembleForecast);
+    status = cdiInqKeyInt(vlistID, varID, CDI_KEY_NUMBEROFFORECASTSINENSEMBLE, &numberOfForecastsInEnsemble);
+    if ( status == 0 ) grib_set_long(gh, "numberOfForecastsInEnsemble", numberOfForecastsInEnsemble);
+    status = cdiInqKeyInt(vlistID, varID, CDI_KEY_PERTURBATIONNUMBER, &perturbationNumber);
+    if ( status == 0 ) grib_set_long(gh, "perturbationNumber", perturbationNumber);
+  }
 
   if ( ! gc->init ) gribapiDefInstitut(gh, vlistID, varID);
   if ( ! gc->init ) gribapiDefModel(gh, vlistID, varID);
 
   if ( ! gc->init ) gribapiDefParam((int)editionNumber, gh, param, name, stdname);
 
-  if ( editionNumber == 2 && (datatype == CDI_DATATYPE_FLT32 || datatype == CDI_DATATYPE_FLT64) ) lieee = true;
-
-  /* bitsPerValue have to be defined before call to DefGrid (complex packing) */
-  //  if ( lieee == false )
+  if ( ! gc->init && editionNumber == 2 )
     {
-      bitsPerValue = grbBitsPerValue(datatype);
-      GRIB_CHECK(my_grib_set_long(gh, "bitsPerValue", bitsPerValue), 0);
+      int shapeOfTheEarth = 0;
+      cdiInqKeyInt(vlistID, varID, CDI_KEY_SHAPEOFTHEEARTH, &shapeOfTheEarth);
+      GRIB_CHECK(my_grib_set_long(gh, "shapeOfTheEarth", (long)shapeOfTheEarth), 0);
+
+      int grib2LocalSectionNumber, section2PaddingLength;
+      int mpimType, mpimClass, mpimUser;
+      if ( cdiInqKeyInt(vlistID, varID, CDI_KEY_MPIMTYPE, &mpimType) == CDI_NOERR &&
+           cdiInqKeyInt(vlistID, varID, CDI_KEY_MPIMCLASS, &mpimClass) == CDI_NOERR &&
+           cdiInqKeyInt(vlistID, varID, CDI_KEY_MPIMUSER, &mpimUser) == CDI_NOERR )
+        {
+          grib_set_long(gh, "grib2LocalSectionPresent", 1);
+          grib_set_long(gh, "grib2LocalSectionNumber", 1);
+          grib_set_long(gh, "mpimType", mpimType);
+          grib_set_long(gh, "mpimClass", mpimClass);
+          grib_set_long(gh, "mpimUser", mpimUser);
+
+          int revNumLen = 20;
+          unsigned char revNumber[revNumLen];
+          if ( cdiInqKeyBytes(vlistID, varID, CDI_KEY_REVNUMBER, revNumber, &revNumLen) == CDI_NOERR )
+            {
+              size_t revNumLenS = revNumLen;
+              grib_set_bytes(gh, "revNumber", revNumber, &revNumLenS);
+            }
+          int revStatus;
+          if ( cdiInqKeyInt(vlistID, varID, CDI_KEY_REVSTATUS, &revStatus) == CDI_NOERR )
+            grib_set_long(gh, "revStatus", revStatus);
+        }
+      else if ( cdiInqKeyInt(vlistID, varID, CDI_KEY_GRIB2LOCALSECTIONNUMBER, &grib2LocalSectionNumber) == CDI_NOERR &&
+                cdiInqKeyInt(vlistID, varID, CDI_KEY_SECTION2PADDINGLENGTH, &section2PaddingLength) == CDI_NOERR )
+        {
+          grib_set_long(gh, "grib2LocalSectionPresent", 1);
+          grib_set_long(gh, "grib2LocalSectionNumber", grib2LocalSectionNumber);
+          unsigned char *section2Padding = (unsigned char*) Malloc(section2PaddingLength);
+          cdiInqKeyBytes(vlistID, varID, CDI_KEY_SECTION2PADDING, section2Padding, &section2PaddingLength);
+          size_t len = section2PaddingLength;
+          grib_set_bytes(gh, "section2Padding", section2Padding, &len);
+          Free(section2Padding);
+        }
     }
 
-  gribapiDefGrid((int)editionNumber, gh, gridID, comptype, lieee, datatype, nmiss, gc->init);
+  if ( ! gc->init ) gribapiDefGrid((int)editionNumber, gh, gridID, comptype, datatype);
 
   gribapiDefLevel((int)editionNumber, gh, zaxisID, levelID, gc->init, productDefinitionTemplate);
 
@@ -3112,7 +3094,7 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
           {
             //DR: Fix for multi-level fields (otherwise only the 1st level is correct)
             if ( zaxisInqSize(zaxisID)==(levelID+1) )
-              vlistptr->vars[varID].opt_grib_kvpair[i].update = FALSE;
+              vlistptr->vars[varID].opt_grib_kvpair[i].update = false;
 
             if (vlistptr->vars[varID].opt_grib_kvpair[i].data_type == t_double)
               {
@@ -3146,13 +3128,27 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
 
   gribapiSetExtMode(gh, gridID, datasize, data);
 
-  GRIB_CHECK(grib_set_double_array(gh, "values", data, (size_t)datasize), 0);
+  GRIB_CHECK(grib_set_double_array(gh, "values", data, datasize), 0);
 
   /* get the size of coded message  */
+  size_t recsize = 0;
   GRIB_CHECK(grib_get_message(gh, (const void **)&dummy, &recsize), 0);
   recsize += 512; /* add some space for possible filling */
   *gribbuffersize = recsize;
   *gribbuffer = Malloc(*gribbuffersize);
+
+  if ( ! gc->init )
+    {
+      char cdi_name[CDI_MAX_NAME]; cdi_name[0] = 0;
+      char grb_name[256];          grb_name[0] = 0;
+      vlistInqVarName(vlistID, varID, cdi_name);
+      gribapiGetString(gh, "shortName", grb_name, sizeof(grb_name));
+      str_tolower(cdi_name);
+      str_tolower(grb_name);
+      if ( (strlen(cdi_name) != strlen(grb_name)) || !str_is_equal(cdi_name, grb_name) )
+        Message("*** GRIB2 shortName does not correspond to chosen variable name: \"%s\" (\"%s\").",
+                grb_name[0]?grb_name:"unknown", cdi_name);
+    }
 
   /* get a copy of the coded message */
   GRIB_CHECK(grib_get_message_copy(gh, *gribbuffer, &recsize), 0);
@@ -3161,7 +3157,7 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   gribHandleDelete(gh);
 #endif
 
-  gc->init = TRUE;
+  gc->init = true;
 
   return recsize;
 }
@@ -3169,10 +3165,10 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
 
 void gribapiChangeParameterIdentification(grib_handle *gh, int code, int ltype, int lev)
 {
-  long  indicatorOfParameter,  indicatorOfTypeOfLevel,  level; //  timeRangeIndicator: could be included later
-  indicatorOfParameter = code;
-  indicatorOfTypeOfLevel = ltype;
-  level = lev;
+  //  timeRangeIndicator: could be included later
+  long indicatorOfParameter = code;
+  long indicatorOfTypeOfLevel = ltype;
+  long level = lev;
 
   if (indicatorOfParameter!=-1) GRIB_CHECK(my_grib_set_long(gh, "indicatorOfParameter", indicatorOfParameter), 0);
   if (indicatorOfTypeOfLevel!=-1) GRIB_CHECK(my_grib_set_long(gh, "indicatorOfTypeOfLevel", indicatorOfTypeOfLevel), 0);

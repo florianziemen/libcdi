@@ -13,6 +13,7 @@ void str_tolower(char *str)
       str[i] = (char)tolower((int)str[i]);
 }
 
+
 bool str_is_equal(const char *vstr, const char *cstr)
 {
   bool is_equal = false;
@@ -27,6 +28,8 @@ int get_timeunit(size_t len, const char *ptu)
 {
   int timeunit = -1;
 
+  while ( isspace(*ptu) && len ) { ptu++; len--; }
+
   if ( len > 2 )
     {
       if      ( str_is_equal(ptu, "sec") )            timeunit = TUNIT_SECOND;
@@ -37,8 +40,7 @@ int get_timeunit(size_t len, const char *ptu)
       else if ( str_is_equal(ptu, "calendar_month") ) timeunit = TUNIT_MONTH;
       else if ( str_is_equal(ptu, "year") )           timeunit = TUNIT_YEAR;
     }
-  else if ( len == 1 && ptu[0] == 's' )
-    timeunit = TUNIT_SECOND;
+  else if ( len == 1 && ptu[0] == 's' )  timeunit = TUNIT_SECOND;
 
   return timeunit;
 }
@@ -46,6 +48,8 @@ int get_timeunit(size_t len, const char *ptu)
 
 bool is_time_units(const char *timeunits)
 {
+  while ( isspace(*timeunits) ) timeunits++; 
+
   bool status = str_is_equal(timeunits, "sec")
              || str_is_equal(timeunits, "minute")
              || str_is_equal(timeunits, "hour")
@@ -96,7 +100,11 @@ bool is_height_units(const char *units)
 
   bool status
     = (u0=='m' && (!units[1] || strncmp(units, "meter", 5) == 0))
-    || (!units[2] && units[1]=='m' && (u0=='c' || u0=='d' || u0=='k'));
+    || (!units[2] && units[1]=='m' && (u0=='c' || u0=='d' || u0=='k'))
+    || (strncmp(units, "decimeter", 9) == 0)
+    || (strncmp(units, "centimeter", 10) == 0)
+    || (strncmp(units, "millimeter", 10) == 0)
+    || (strncmp(units, "kilometer", 9) == 0);
 
   return status;
 }
@@ -312,9 +320,10 @@ void set_zaxistype(const char *attstring, int *zaxistype)
 
 void set_calendar(const char *attstring, int *calendar)
 {
-  if ( str_is_equal(attstring, "standard") ||
-       str_is_equal(attstring, "gregorian") )
+  if ( str_is_equal(attstring, "standard") )
     *calendar = CALENDAR_STANDARD;
+  else if ( str_is_equal(attstring, "gregorian") )
+    *calendar = CALENDAR_GREGORIAN;
   else if ( str_is_equal(attstring, "none") )
     *calendar = CALENDAR_NONE;
   else if ( str_is_equal(attstring, "proleptic") )

@@ -159,7 +159,7 @@ cksum_stream(const char *fname, size_t *table_len)
         // Read var1 and var2
         for (int varIdx = 0; varIdx < nvars; ++varIdx)
           {
-            int nmiss;
+            size_t nmiss;
             streamReadVar(streamID, varIdx, buf, &nmiss);
             memcrc_r(checksum_state + varIdx, (const unsigned char *)vdatetime,
                      sizeof (vdatetime));

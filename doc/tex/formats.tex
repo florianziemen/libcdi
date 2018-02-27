@@ -88,13 +88,13 @@ The configure option \texttt{--disable-cgribex} will disable the encoding/decodi
 
 \subsection{GRIB edition 2}
 
-GRIB2 is available in {\CDI} via the ECMWF GRIB\_API \cite{GRIBAPI}.
-GRIB\_API is an external library and not part of {\CDI}. To use GRIB2 with
-{\CDI} the GRIB\_API library must be installed before the configuration
-of the {\CDI} library. Use the configure option \texttt{--with-grib\_api} to
+GRIB2 is available in {\CDI} via the ECMWF ecCodes \cite{ecCodes} library.
+ecCodes is an external library and not part of {\CDI}. To use GRIB2 with
+{\CDI} the ecCodes library must be installed before the configuration
+of the {\CDI} library. Use the configure option \texttt{--with-eccodes} to
 enable GRIB2 support. 
 
-The GRIB\_API library is also used to encode/decode GRIB1 records if the support for the CGRIBEX library is disabled.
+The ecCodes library is also used to encode/decode GRIB1 records if the support for the CGRIBEX library is disabled.
 This feature is not tested regulary and the status is experimental!
 
 \section{NetCDF}

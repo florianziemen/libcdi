@@ -42,6 +42,10 @@
    don't. */
 #undef HAVE_DECL_UUID_GENERATE
 
+/* Define to 1 if you have the declaration of `UUID_MAKE_V5', and to 0 if you
+   don't. */
+#undef HAVE_DECL_UUID_MAKE_V5
+
 /* Define to 1 if you have the declaration of `_PC_REC_XFER_ALIGN', and to 0
    if you don't. */
 #undef HAVE_DECL__PC_REC_XFER_ALIGN
@@ -192,9 +196,6 @@
 
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
-
-/* Define to 1 if you have the `uuid_create' function. */
-#undef HAVE_UUID_CREATE
 
 /* Define to 1 if you have the <uuid.h> header file. */
 #undef HAVE_UUID_H

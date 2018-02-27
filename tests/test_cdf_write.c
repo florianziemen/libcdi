@@ -78,7 +78,7 @@ int main(int argc, const char **argv)
   int zaxisID = zaxisCreate(ZAXIS_SURFACE, 1);
 
   int vlistID = vlistCreate();
-  int varID = vlistDefVar(vlistID, gridID, zaxisID, TSTEP_INSTANT);
+  int varID = vlistDefVar(vlistID, gridID, zaxisID, TIME_VARYING);
   vlistDefVarMissval(vlistID, varID, missValue);
   {
     static const char creatorText[] = "CDI test_cdf_write";

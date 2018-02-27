@@ -36,11 +36,13 @@ extern "C" {
 #define  CDI_EEOF                  -1   // The end of file was encountered
 #define  CDI_ESYSTEM              -10   // Operating system error
 #define  CDI_EINVAL               -20   // Invalid argument
-#define  CDI_EUFTYPE              -21   // Unsupported file type
-#define  CDI_ELIBNAVAIL           -22   // xxx library not available
-#define  CDI_EUFSTRUCT            -23   // Unsupported file structure
-#define  CDI_EUNC4                -24   // Unsupported NetCDF4 structure
-#define  CDI_EDIMSIZE             -25   // Invalid dimension size
+#define  CDI_EISDIR               -21   // Is a directory
+#define  CDI_EISEMPTY             -22   // Is empty
+#define  CDI_EUFTYPE              -23   // Unsupported file type
+#define  CDI_ELIBNAVAIL           -24   // xxx library not available
+#define  CDI_EUFSTRUCT            -25   // Unsupported file structure
+#define  CDI_EUNC4                -26   // Unsupported NetCDF4 structure
+#define  CDI_EDIMSIZE             -27   // Invalid dimension size
 #define  CDI_ELIMIT               -99   // Internal limits exceeded
 
 /* File types */
@@ -48,12 +50,13 @@ extern "C" {
 #define  CDI_FILETYPE_GRB           1   // File type GRIB
 #define  CDI_FILETYPE_GRB2          2   // File type GRIB version 2
 #define  CDI_FILETYPE_NC            3   // File type NetCDF
-#define  CDI_FILETYPE_NC2           4   // File type NetCDF version 2 (64-bit)
+#define  CDI_FILETYPE_NC2           4   // File type NetCDF version 2 (64-bit offset)
 #define  CDI_FILETYPE_NC4           5   // File type NetCDF version 4
 #define  CDI_FILETYPE_NC4C          6   // File type NetCDF version 4 (classic)
-#define  CDI_FILETYPE_SRV           7   // File type SERVICE
-#define  CDI_FILETYPE_EXT           8   // File type EXTRA
-#define  CDI_FILETYPE_IEG           9   // File type IEG
+#define  CDI_FILETYPE_NC5           7   // File type NetCDF version 5 (64-bit data)
+#define  CDI_FILETYPE_SRV           8   // File type SERVICE
+#define  CDI_FILETYPE_EXT           9   // File type EXTRA
+#define  CDI_FILETYPE_IEG          10   // File type IEG
 
 #define  FILETYPE_GRB           1
 #define  FILETYPE_GRB2          2
@@ -69,10 +72,9 @@ extern "C" {
 
 #define  CDI_COMPRESS_NONE          0
 #define  CDI_COMPRESS_SZIP          1
-#define  CDI_COMPRESS_GZIP          2
-#define  CDI_COMPRESS_BZIP2         3
-#define  CDI_COMPRESS_ZIP           4
-#define  CDI_COMPRESS_JPEG          5
+#define  CDI_COMPRESS_AEC           2
+#define  CDI_COMPRESS_ZIP           3
+#define  CDI_COMPRESS_JPEG          4
 
 /* external data types */
 
@@ -135,6 +137,7 @@ extern "C" {
 #define  CDI_DATATYPE_CPX         254
 #define  CDI_DATATYPE_UCHAR       255
 #define  CDI_DATATYPE_LONG        256
+#define  CDI_DATATYPE_UINT        257
 
 #define  DATATYPE_INT           251
 #define  DATATYPE_FLT           252
@@ -222,12 +225,12 @@ typedef struct  {
 
 /* TIME types */
 
-#define  TIME_CONSTANT              0  /* obsolate, use TSTEP_CONSTANT                          */
-#define  TIME_VARIABLE              1  /* obsolate, use TSTEP_INSTANT                           */
+#define  TIME_CONSTANT              0  /* Time constant              */
+#define  TIME_VARYING               1  /* Time varying               */
+#define  TIME_VARIABLE              1  /* obsolate, use TIME_VARYING */
 
 /* TSTEP types */
 
-#define  TSTEP_CONSTANT             0  /* Constant            */
 #define  TSTEP_INSTANT              1  /* Instant             */
 #define  TSTEP_AVG                  2  /* Average             */
 #define  TSTEP_ACCUM                3  /* Accumulation        */
@@ -265,11 +268,12 @@ typedef struct  {
 /* CALENDAR types */
 
 #define  CALENDAR_STANDARD        0  /* don't change this value (used also in cgribexlib)! */
-#define  CALENDAR_PROLEPTIC       1
-#define  CALENDAR_360DAYS         2
-#define  CALENDAR_365DAYS         3
-#define  CALENDAR_366DAYS         4
-#define  CALENDAR_NONE            5
+#define  CALENDAR_GREGORIAN       1
+#define  CALENDAR_PROLEPTIC       2
+#define  CALENDAR_360DAYS         3
+#define  CALENDAR_365DAYS         4
+#define  CALENDAR_366DAYS         5
+#define  CALENDAR_NONE            6
 
 /* number of unsigned char needed to store UUID */
 #define  CDI_UUID_SIZE           16
@@ -382,39 +386,39 @@ int     streamInqCurTimestepID(int streamID);
 const char *streamFilename(int streamID);
 const char *streamFilesuffix(int filetype);
 
-off_t   streamNvals(int streamID);
+size_t  streamNvals(int streamID);
 
 int     streamInqNvars(int streamID);
 
 /* STREAM var I/O routines (random access) */
 
 /*      streamWriteVar: Write a variable */
-void    streamWriteVar(int streamID, int varID, const double data[], int nmiss);
-void    streamWriteVarF(int streamID, int varID, const float data[], int nmiss);
+void    streamWriteVar(int streamID, int varID, const double data[], size_t nmiss);
+void    streamWriteVarF(int streamID, int varID, const float data[], size_t nmiss);
 
 /*      streamReadVar: Read a variable */
-void    streamReadVar(int streamID, int varID, double data[], int *nmiss);
-void    streamReadVarF(int streamID, int varID, float data[], int *nmiss);
+void    streamReadVar(int streamID, int varID, double data[], size_t *nmiss);
+void    streamReadVarF(int streamID, int varID, float data[], size_t *nmiss);
 
 /*      streamWriteVarSlice: Write a horizontal slice of a variable */
-void    streamWriteVarSlice(int streamID, int varID, int levelID, const double data[], int nmiss);
-void    streamWriteVarSliceF(int streamID, int varID, int levelID, const float data[], int nmiss);
+void    streamWriteVarSlice(int streamID, int varID, int levelID, const double data[], size_t nmiss);
+void    streamWriteVarSliceF(int streamID, int varID, int levelID, const float data[], size_t nmiss);
 
 /*      streamReadVarSlice: Read a horizontal slice of a variable */
-void    streamReadVarSlice(int streamID, int varID, int levelID, double data[], int *nmiss);
-void    streamReadVarSliceF(int streamID, int varID, int levelID, float data[], int *nmiss);
+void    streamReadVarSlice(int streamID, int varID, int levelID, double data[], size_t *nmiss);
+void    streamReadVarSliceF(int streamID, int varID, int levelID, float data[], size_t *nmiss);
 
-void    streamWriteVarChunk(int streamID, int varID, const int rect[3][2], const double data[], int nmiss);
+void    streamWriteVarChunk(int streamID, int varID, const int rect[3][2], const double data[], size_t nmiss);
 
 
 /* STREAM record I/O routines (sequential access) */
 
 void    streamDefRecord(int streamID, int  varID, int  levelID);
 void    streamInqRecord(int streamID, int *varID, int *levelID);
-void    streamWriteRecord(int streamID, const double data[], int nmiss);
-void    streamWriteRecordF(int streamID, const float data[], int nmiss);
-void    streamReadRecord(int streamID, double data[], int *nmiss);
-void    streamReadRecordF(int streamID, float data[], int *nmiss);
+void    streamWriteRecord(int streamID, const double data[], size_t nmiss);
+void    streamWriteRecordF(int streamID, const float data[], size_t nmiss);
+void    streamReadRecord(int streamID, double data[], size_t *nmiss);
+void    streamReadRecordF(int streamID, float data[], size_t *nmiss);
 void    streamCopyRecord(int streamIDdest, int streamIDsrc);
 
 void    streamInqGRIBinfo(int streamID, int *intnum, float *fltnum, off_t *bignum);
@@ -522,7 +526,7 @@ int     vlistNsubtypes(int vlistID);
 
 void    vlistDefNtsteps(int vlistID, int nts);
 int     vlistNtsteps(int vlistID);
-int     vlistGridsizeMax(int vlistID);
+size_t  vlistGridsizeMax(int vlistID);
 int     vlistGrid(int vlistID, int index);
 int     vlistGridIndex(int vlistID, int gridID);
 void    vlistChangeGridIndex(int vlistID, int index, int gridID);
@@ -552,20 +556,23 @@ int     vlistInqModel(int vlistID);
 /* VLIST VAR routines */
 
 /*      vlistDefVarTiles: Create a new tile-based variable */
-int     vlistDefVarTiles(int vlistID, int gridID, int zaxisID, int tsteptype, int tilesetID);
+int     vlistDefVarTiles(int vlistID, int gridID, int zaxisID, int timetype, int tilesetID);
 
 /*      vlistDefVar: Create a new variable */
-int     vlistDefVar(int vlistID, int gridID, int zaxisID, int tsteptype);
+int     vlistDefVar(int vlistID, int gridID, int zaxisID, int timetype);
 
 void    vlistChangeVarGrid(int vlistID, int varID, int gridID);
 void    vlistChangeVarZaxis(int vlistID, int varID, int zaxisID);
 
-void    vlistInqVar(int vlistID, int varID, int *gridID, int *zaxisID, int *tsteptype);
+void    vlistInqVar(int vlistID, int varID, int *gridID, int *zaxisID, int *timetype);
 int     vlistInqVarGrid(int vlistID, int varID);
 int     vlistInqVarZaxis(int vlistID, int varID);
 
 /* used in MPIOM */
 int     vlistInqVarID(int vlistID, int code);
+
+void    vlistDefVarTimetype(int vlistID, int varID, int timetype);
+int     vlistInqVarTimetype(int vlistID, int varID);
 
 void    vlistDefVarTsteptype(int vlistID, int varID, int tsteptype);
 
@@ -656,16 +663,8 @@ double  vlistInqVarAddoffset(int vlistID, int varID);
 
 void    vlistDefVarTimave(int vlistID, int varID, int timave);
 int     vlistInqVarTimave(int vlistID, int varID);
-void    vlistDefVarTimaccu(int vlistID, int varID, int timaccu);
-int     vlistInqVarTimaccu(int vlistID, int varID);
 
-void    vlistDefVarTypeOfGeneratingProcess(int vlistID, int varID, int typeOfGeneratingProcess);
-int     vlistInqVarTypeOfGeneratingProcess(int vlistID, int varID);
-
-void    vlistDefVarProductDefinitionTemplate(int vlistID, int varID, int productDefinitionTemplate);
-int     vlistInqVarProductDefinitionTemplate(int vlistID, int varID);
-
-int     vlistInqVarSize(int vlistID, int varID);
+size_t  vlistInqVarSize(int vlistID, int varID);
 
 void    vlistDefIndex(int vlistID, int varID, int levID, int index);
 int     vlistInqIndex(int vlistID, int varID, int levID);
@@ -675,10 +674,6 @@ int     vlistFindVar(int vlistID, int fvarID);
 int     vlistFindLevel(int vlistID, int fvarID, int flevelID);
 int     vlistMergedVar(int vlistID, int varID);
 int     vlistMergedLevel(int vlistID, int varID, int levelID);
-
-/*     Ensemble info routines */
-void    vlistDefVarEnsemble(int vlistID, int varID, int ensID, int ensCount, int forecast_type);
-int     vlistInqVarEnsemble(int vlistID, int varID, int *ensID, int *ensCount, int *forecast_type);
 
 /* cdiClearAdditionalKeys: Clear the list of additional GRIB keys. */
 void    cdiClearAdditionalKeys(void);
@@ -696,11 +691,6 @@ int     vlistHasVarKey(int vlistID, int varID, const char *name);
 double  vlistInqVarDblKey(int vlistID, int varID, const char *name);
 /* vlistInqVarIntKey: raw access to GRIB meta-data */
 int     vlistInqVarIntKey(int vlistID, int varID, const char *name);
-
-/* needed only for CDO operator after */
-const char *vlistInqVarNamePtr(int vlistID, int varID);
-const char *vlistInqVarLongnamePtr(int vlistID, int varID);
-const char *vlistInqVarUnitsPtr(int vlistID, int varID);
 
 /* CDI attributes */
 
@@ -743,7 +733,7 @@ int     gridInqMask(int gridID, int mask[]);
 void    gridPrint(int gridID, int opt);
 
 /*      gridCreate: Create a horizontal Grid */
-int     gridCreate(int gridtype, int size);
+int     gridCreate(int gridtype, size_t size);
 
 /*      gridDestroy: Destroy a horizontal Grid */
 void    gridDestroy(int gridID);
@@ -764,19 +754,19 @@ int     gridInqProjType(int gridID);
 int     gridInqType(int gridID);
 
 /*      gridInqSize: Get the size of a Grid */
-int     gridInqSize(int gridID);
+size_t  gridInqSize(int gridID);
 
 /*      gridDefXsize: Define the size of a X-axis */
-void    gridDefXsize(int gridID, int xsize);
+void    gridDefXsize(int gridID, size_t xsize);
 
 /*      gridInqXsize: Get the size of a X-axis */
-int     gridInqXsize(int gridID);
+size_t  gridInqXsize(int gridID);
 
 /*      gridDefYsize: Define the size of a Y-axis */
-void    gridDefYsize(int gridID, int ysize);
+void    gridDefYsize(int gridID, size_t ysize);
 
 /*      gridInqYsize: Get the size of a Y-axis */
-int     gridInqYsize(int gridID);
+size_t  gridInqYsize(int gridID);
 
 /*      gridDefNP: Define the number of parallels between a pole and the equator */
 void    gridDefNP(int gridID, int np);
@@ -788,27 +778,72 @@ int     gridInqNP(int gridID);
 void    gridDefXvals(int gridID, const double xvals[]);
 
 /*      gridInqXvals: Get all values of a X-axis */
-int     gridInqXvals(int gridID, double xvals[]);
+size_t  gridInqXvals(int gridID, double xvals[]);
 
 /*      gridInqXIsc: Find out whether X-coordinate is of type CHAR */
 int     gridInqXIsc(int gridID);
 
 /*      gridInqXCvals: Get strings from X-axis in case grid is of type GRID_CHARXY */
-int     gridInqXCvals(int gridID, char *xcvals[]);
+size_t  gridInqXCvals(int gridID, char *xcvals[]);
 
 /*      gridDefYvals: Define the values of a Y-axis */
 void    gridDefYvals(int gridID, const double yvals[]);
 
 /*      gridInqYvals: Get all values of a Y-axis */
-int     gridInqYvals(int gridID, double yvals[]);
+size_t  gridInqYvals(int gridID, double yvals[]);
 
 /*      gridInqYIsc: Find out whether Y-coordinate is of type CHAR */
 int     gridInqYIsc(int gridID);
 
 /*      gridInqYCvals: Get strings from Y-axis in case grid is of type GRID_CHARXY */
-int     gridInqYCvals(int gridID, char *ycvals[]);
+size_t  gridInqYCvals(int gridID, char *ycvals[]);
 
-/* CDI grid string key values */
+// CDI var keys
+#define  CDI_KEY_TABLESVERSION                 801  // GRIB2 tablesVersion
+#define  CDI_KEY_LOCALTABLESVERSION            802  // GRIB2 localTablesVersion
+#define  CDI_KEY_TYPEOFGENERATINGPROCESS       803  // GRIB2 typeOfGeneratingProcess
+#define  CDI_KEY_PRODUCTDEFINITIONTEMPLATE     804  // GRIB2 productDefinitionTemplate
+#define  CDI_KEY_TYPEOFPROCESSEDDATA           805  // GRIB2 typeOfProcessedData
+#define  CDI_KEY_SHAPEOFTHEEARTH               806  // GRIB2 shapeOfTheEarth
+#define  CDI_KEY_BACKGROUNDPROCESS             807  // GRIB2 backgroundProcess
+#define  CDI_KEY_TYPEOFENSEMBLEFORECAST        808  // GRIB2 typeOfEnsembleForecast
+#define  CDI_KEY_NUMBEROFFORECASTSINENSEMBLE   809  // GRIB2 numberOfForecastsInEnsemble
+#define  CDI_KEY_PERTURBATIONNUMBER            810  // GRIB2 perturbationNumber
+#define  CDI_KEY_CENTRE                        811  // GRIB2 centre
+#define  CDI_KEY_SUBCENTRE                     812  // GRIB2 subCentre
+#define  CDI_KEY_MPIMTYPE                      813  // GRIB2 mpimType
+#define  CDI_KEY_MPIMCLASS                     814  // GRIB2 mpimClass
+#define  CDI_KEY_MPIMUSER                      815  // GRIB2 mpimUser
+#define  CDI_KEY_REVSTATUS                     816  // GRIB2 revStatus
+#define  CDI_KEY_REVNUMBER                     817  // GRIB2 revNumber
+#define  CDI_KEY_GRIB2LOCALSECTIONNUMBER       818  // GRIB2 grib2LocalSectionNumber
+#define  CDI_KEY_SECTION2PADDINGLENGTH         819  // GRIB2 length of section2Padding
+#define  CDI_KEY_SECTION2PADDING               820  // GRIB2 section2Padding
+
+//      cdiDefKeyInt: Define an integer value from a key of a CDI variable
+int     cdiDefKeyInt(int cdiID, int varID, int key, int value);
+
+//      cdiInqKeyInt: Get an integer value from a key of a CDI variable
+int     cdiInqKeyInt(int cdiID, int varID, int key, int *value);
+
+//      cdiDefKeyBytes: Define a bytes array from a key of a CDI variable
+int     cdiDefKeyBytes(int cdiID, int varID, int key, const unsigned char bytes[], int length);
+
+//      cdiInqKeyBytes: Get a bytes array from a key of a CDI variable
+int     cdiInqKeyBytes(int cdiID, int varID, int key, unsigned char bytes[], int *length);
+
+//      cdiDefKeyString: Define a string value from a key of a CDI variable
+int     cdiDefKeyString(int cdiID, int varID, int key, const char *string);
+
+//      cdiInqKeyString: Get a string value from a key of a CDI variable
+int     cdiInqKeyString(int cdiID, int varID, int key, char *string, int *length);
+
+//      cdiInqKeyLen: Get the length of the string representation of the key
+int     cdiInqKeyLen(int cdiID, int varID, int key, int *length);
+
+int     cdiCopyKeys(int cdiID1, int varID1, int cdiID2, int varID2);
+
+// CDI grid keys
 #define  CDI_KEY_XNAME       901  // X-axis name
 #define  CDI_KEY_XDIMNAME    902  // X-axis dimension name
 #define  CDI_KEY_XLONGNAME   903  // X-axis longname
@@ -821,7 +856,7 @@ int     gridInqYCvals(int gridID, char *ycvals[]);
 #define  CDI_KEY_MAPPING     921  // Grid mapping var name
 #define  CDI_KEY_MAPNAME     922  // Grid mapping name
 
-/* CDI zaxis string key values */
+// CDI zaxis keys
 #define  CDI_KEY_NAME        941  // Z-axis name
 #define  CDI_KEY_DIMNAME     942  // Z-axis dimension name
 #define  CDI_KEY_LONGNAME    943  // Z-axis longname
@@ -835,6 +870,12 @@ int     cdiGridDefKeyStr(int gridID, int key, int size, const char *mesg);
 
 //      cdiGridInqKeyStr: Get a CDI grid string value from a key
 int     cdiGridInqKeyStr(int gridID, int key, int size, char *mesg);
+
+//      cdiZaxisDefKeyStr: Define a CDI Z-axis string value from a key
+int     cdiZaxisDefKeyStr(int zaxisID, int key, int size, const char *mesg);
+
+//      cdiZaxisInqKeyStr: Get a CDI Z-axis string value from a key
+int     cdiZaxisInqKeyStr(int zaxisID, int key, int size, char *mesg);
 
 //      cdiZaxisDefKeyFlt: Define a CDI Z-axis floating point value from a key
 int     cdiZaxisDefKeyFlt(int zaxisID, int key, double value);
@@ -884,17 +925,17 @@ void    gridInqXstdname(int gridID, char *xstdname);
 /*      gridInqYstdname: Get the standard name of a Y-axis */
 void    gridInqYstdname(int gridID, char *ystdname);
 
-/*      gridDefPrec: Define the precision of a Grid */
-void    gridDefPrec(int gridID, int prec);
+/*      gridDefDatatype: Define the data type of a Grid */
+void    gridDefDatatype(int gridID, int prec);
 
-/*      gridInqPrec: Get the precision of a Grid */
-int     gridInqPrec(int gridID);
+/*      gridInqDatatype: Get the data type of a Grid */
+int     gridInqDatatype(int gridID);
 
 /*      gridInqXval: Get one value of a X-axis */
-double  gridInqXval(int gridID, int index);
+double  gridInqXval(int gridID, size_t index);
 
 /*      gridInqYval: Get one value of a Y-axis */
-double  gridInqYval(int gridID, int index);
+double  gridInqYval(int gridID, size_t index);
 
 double  gridInqXinc(int gridID);
 double  gridInqYinc(int gridID);
@@ -925,18 +966,10 @@ void    gridDefReference(int gridID, const char *reference);
 int     gridInqReference(int gridID, char *reference);
 
 /*      gridDefUUID: Define the UUID of an unstructured grid */
-#ifdef __cplusplus
-void    gridDefUUID(int gridID, const unsigned char *uuid);
-#else
 void    gridDefUUID(int gridID, const unsigned char uuid[CDI_UUID_SIZE]);
-#endif
 
 /*      gridInqUUID: Get the UUID of an unstructured grid */
-#ifdef __cplusplus
-void    gridInqUUID(int gridID, unsigned char *uuid);
-#else
 void    gridInqUUID(int gridID, unsigned char uuid[CDI_UUID_SIZE]);
-#endif
 
 /* Rotated Lon/Lat grid */
 void    gridDefParamRLL(int gridID, double xpole, double ypole, double angle);
@@ -964,13 +997,13 @@ int     gridInqNvertex(int gridID);
 void    gridDefXbounds(int gridID, const double xbounds[]);
 
 /*      gridInqXbounds: Get the bounds of a X-axis */
-int     gridInqXbounds(int gridID, double xbounds[]);
+size_t  gridInqXbounds(int gridID, double xbounds[]);
 
 /*      gridDefYbounds: Define the bounds of a Y-axis */
 void    gridDefYbounds(int gridID, const double ybounds[]);
 
 /*      gridInqYbounds: Get the bounds of a Y-axis */
-int     gridInqYbounds(int gridID, double ybounds[]);
+size_t  gridInqYbounds(int gridID, double ybounds[]);
 
 void    gridDefRowlon(int gridID, int nrowlon, const int rowlon[]);
 void    gridInqRowlon(int gridID, int rowlon[]);
@@ -1011,7 +1044,7 @@ void    zaxisPrint(int zaxisID);
 void    zaxisDefLevels(int zaxisID, const double levels[]);
 
 /*      zaxisDefCvals: Define area types of a Z-axis */
-void    zaxisDefCvals(int zaxisID, const char *cvals[], size_t clength);
+void    zaxisDefCvals(int zaxisID, const char *cvals[], int clength);
 
 /*      zaxisInqLevels: Get all levels of a Z-axis */
 int     zaxisInqLevels(int zaxisID, double levels[]);
@@ -1046,12 +1079,6 @@ void    zaxisDefUUID(int zaxisID, const unsigned char uuid[CDI_UUID_SIZE]);
 /*      zaxisInqUUID: Get the UUID of a generalized Z-axis */
 void    zaxisInqUUID(int zaxisID, unsigned char uuid[CDI_UUID_SIZE]);
 
-//      cdiZaxisDefKeyStr: Define a CDI Z-axis string value from a key
-int     cdiZaxisDefKeyStr(int zaxisID, int key, int size, const char *mesg);
-
-//      cdiZaxisInqKeyStr: Get a CDI Z-axis string value from a key
-int     cdiZaxisInqKeyStr(int zaxisID, int key, int size, char *mesg);
-
 /*      zaxisDefName: Define the name of a Z-axis */
 void    zaxisDefName(int zaxisID, const char *name_optional);
 
@@ -1073,8 +1100,8 @@ void    zaxisInqUnits(int zaxisID, char *units);
 /*      zaxisInqStdname: Get the standard name of a Z-axis */
 void    zaxisInqStdname(int zaxisID, char *stdname);
 
-void    zaxisDefPrec(int zaxisID, int prec);
-int     zaxisInqPrec(int zaxisID);
+void    zaxisDefDatatype(int zaxisID, int prec);
+int     zaxisInqDatatype(int zaxisID);
 
 void    zaxisDefPositive(int zaxisID, int positive);
 int     zaxisInqPositive(int zaxisID);
@@ -1150,6 +1177,7 @@ int     taxisInqFdate(int taxisID);
 int     taxisInqFtime(int taxisID);
 
 int     taxisHasBounds(int taxisID);
+void    taxisWithBounds(int taxisID);
 
 void    taxisDeleteBounds(int taxisID);
 
@@ -1205,8 +1233,6 @@ const char *modelInqNamePtr(int modelID);
 
 /* Table routines */
 
-/*      tableWriteC: write table of parameters to file in C language format */
-void    tableWriteC(const char *filename, int tableID);
 /*      tableFWriteC: write table of parameters to FILE* in C language format */
 void    tableFWriteC(FILE *ptfp, int tableID);
 /*      tableWrite: write table of parameters to file in tabular format */
@@ -1216,7 +1242,6 @@ int     tableRead(const char *tablefile);
 int     tableDef(int modelID, int tablenum, const char *tablename);
 
 const char *tableInqNamePtr(int tableID);
-void    tableDefEntry(int tableID, int code, const char *name, const char *longname, const char *units);
 
 int     tableInq(int modelID, int tablenum, const char *tablename);
 int     tableInqNumber(void);
@@ -1224,17 +1249,7 @@ int     tableInqNumber(void);
 int     tableInqNum(int tableID);
 int     tableInqModel(int tableID);
 
-void    tableInqPar(int tableID, int code, char *name, char *longname, char *units);
-
-int     tableInqParCode(int tableID, char *name, int *code);
-int     tableInqParName(int tableID, int code, char *name);
-int     tableInqParLongname(int tableID, int code, char *longname);
-int     tableInqParUnits(int tableID, int code, char *units);
-
-/* needed only for CDO operator after */
-const char *tableInqParNamePtr(int tableID, int parID);
-const char *tableInqParLongnamePtr(int tableID, int parID);
-const char *tableInqParUnitsPtr(int tableID, int parID);
+void    tableInqEntry(int tableID, int id, int ltype, char *name, char *longname, char *units);
 
 /* History routines */
 

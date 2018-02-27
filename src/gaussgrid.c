@@ -1,12 +1,15 @@
-#ifdef HAVE_CONFIG_H
+#ifdef  HAVE_CONFIG_H
 #include "config.h"
 #endif
 
-#include <math.h>
-#include <float.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <float.h>
+#include <math.h>
 
+#ifndef  M_SQRT2
+#define  M_SQRT2  1.41421356237309504880168872420969808
+#endif
 
 #include "dmemory.h"
 #include "gaussgrid.h"

@@ -1,13 +1,13 @@
-#ifndef DTYPES_H
-#define DTYPES_H
+#ifndef  DTYPES_H
+#define  DTYPES_H
 
 #include <stdio.h>
 #include <limits.h>
 
 /* INT32 */
 
-#if ! defined (INT_MAX)
-#  error INT_MAX undefined
+#ifndef  INT_MAX
+#error INT_MAX undefined
 #endif
 
 #undef  INT32
@@ -19,7 +19,7 @@
 
 /* INT64 */
 
-#if ! defined (LONG_MAX)
+#ifndef  LONG_MAX
 #  error LONG_MAX undefined
 #endif
 

@@ -1,10 +1,10 @@
 ! This file was automatically generated, don't edit!
 !
-! Fortran interface for CDI library version 1.8.1
+! Fortran interface for CDI library version 1.9.4rc1
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   May 2017
+! Uwe Schulzweida, MPI-MET, Hamburg,   February 2018
 !
 
       INTEGER    CDI_MAX_NAME
@@ -39,16 +39,20 @@
       PARAMETER (CDI_ESYSTEM            = -10)
       INTEGER    CDI_EINVAL
       PARAMETER (CDI_EINVAL             = -20)
+      INTEGER    CDI_EISDIR
+      PARAMETER (CDI_EISDIR             = -21)
+      INTEGER    CDI_EISEMPTY
+      PARAMETER (CDI_EISEMPTY           = -22)
       INTEGER    CDI_EUFTYPE
-      PARAMETER (CDI_EUFTYPE            = -21)
+      PARAMETER (CDI_EUFTYPE            = -23)
       INTEGER    CDI_ELIBNAVAIL
-      PARAMETER (CDI_ELIBNAVAIL         = -22)
+      PARAMETER (CDI_ELIBNAVAIL         = -24)
       INTEGER    CDI_EUFSTRUCT
-      PARAMETER (CDI_EUFSTRUCT          = -23)
+      PARAMETER (CDI_EUFSTRUCT          = -25)
       INTEGER    CDI_EUNC4
-      PARAMETER (CDI_EUNC4              = -24)
+      PARAMETER (CDI_EUNC4              = -26)
       INTEGER    CDI_EDIMSIZE
-      PARAMETER (CDI_EDIMSIZE           = -25)
+      PARAMETER (CDI_EDIMSIZE           = -27)
       INTEGER    CDI_ELIMIT
       PARAMETER (CDI_ELIMIT             = -99)
 !
@@ -66,12 +70,14 @@
       PARAMETER (CDI_FILETYPE_NC4       =  5)
       INTEGER    CDI_FILETYPE_NC4C
       PARAMETER (CDI_FILETYPE_NC4C      =  6)
+      INTEGER    CDI_FILETYPE_NC5
+      PARAMETER (CDI_FILETYPE_NC5       =  7)
       INTEGER    CDI_FILETYPE_SRV
-      PARAMETER (CDI_FILETYPE_SRV       =  7)
+      PARAMETER (CDI_FILETYPE_SRV       =  8)
       INTEGER    CDI_FILETYPE_EXT
-      PARAMETER (CDI_FILETYPE_EXT       =  8)
+      PARAMETER (CDI_FILETYPE_EXT       =  9)
       INTEGER    CDI_FILETYPE_IEG
-      PARAMETER (CDI_FILETYPE_IEG       =  9)
+      PARAMETER (CDI_FILETYPE_IEG       = 10)
       INTEGER    FILETYPE_GRB
       PARAMETER (FILETYPE_GRB           =  1)
       INTEGER    FILETYPE_GRB2
@@ -97,14 +103,12 @@
       PARAMETER (CDI_COMPRESS_NONE      =  0)
       INTEGER    CDI_COMPRESS_SZIP
       PARAMETER (CDI_COMPRESS_SZIP      =  1)
-      INTEGER    CDI_COMPRESS_GZIP
-      PARAMETER (CDI_COMPRESS_GZIP      =  2)
-      INTEGER    CDI_COMPRESS_BZIP2
-      PARAMETER (CDI_COMPRESS_BZIP2     =  3)
+      INTEGER    CDI_COMPRESS_AEC
+      PARAMETER (CDI_COMPRESS_AEC       =  2)
       INTEGER    CDI_COMPRESS_ZIP
-      PARAMETER (CDI_COMPRESS_ZIP       =  4)
+      PARAMETER (CDI_COMPRESS_ZIP       =  3)
       INTEGER    CDI_COMPRESS_JPEG
-      PARAMETER (CDI_COMPRESS_JPEG      =  5)
+      PARAMETER (CDI_COMPRESS_JPEG      =  4)
 !
 !  external data types
 !
@@ -223,6 +227,8 @@
       PARAMETER (CDI_DATATYPE_UCHAR     = 255)
       INTEGER    CDI_DATATYPE_LONG
       PARAMETER (CDI_DATATYPE_LONG      = 256)
+      INTEGER    CDI_DATATYPE_UINT
+      PARAMETER (CDI_DATATYPE_UINT      = 257)
       INTEGER    DATATYPE_INT
       PARAMETER (DATATYPE_INT           = 251)
       INTEGER    DATATYPE_FLT
@@ -354,13 +360,13 @@
 !
       INTEGER    TIME_CONSTANT
       PARAMETER (TIME_CONSTANT          =  0)
+      INTEGER    TIME_VARYING
+      PARAMETER (TIME_VARYING           =  1)
       INTEGER    TIME_VARIABLE
       PARAMETER (TIME_VARIABLE          =  1)
 !
 !  TSTEP types
 !
-      INTEGER    TSTEP_CONSTANT
-      PARAMETER (TSTEP_CONSTANT         =  0)
       INTEGER    TSTEP_INSTANT
       PARAMETER (TSTEP_INSTANT          =  1)
       INTEGER    TSTEP_AVG
@@ -426,16 +432,18 @@
 !
       INTEGER    CALENDAR_STANDARD
       PARAMETER (CALENDAR_STANDARD      =  0)
+      INTEGER    CALENDAR_GREGORIAN
+      PARAMETER (CALENDAR_GREGORIAN     =  1)
       INTEGER    CALENDAR_PROLEPTIC
-      PARAMETER (CALENDAR_PROLEPTIC     =  1)
+      PARAMETER (CALENDAR_PROLEPTIC     =  2)
       INTEGER    CALENDAR_360DAYS
-      PARAMETER (CALENDAR_360DAYS       =  2)
+      PARAMETER (CALENDAR_360DAYS       =  3)
       INTEGER    CALENDAR_365DAYS
-      PARAMETER (CALENDAR_365DAYS       =  3)
+      PARAMETER (CALENDAR_365DAYS       =  4)
       INTEGER    CALENDAR_366DAYS
-      PARAMETER (CALENDAR_366DAYS       =  4)
+      PARAMETER (CALENDAR_366DAYS       =  5)
       INTEGER    CALENDAR_NONE
-      PARAMETER (CALENDAR_NONE          =  5)
+      PARAMETER (CALENDAR_NONE          =  6)
 !
 !  number of unsigned char needed to store UUID
 !
@@ -644,6 +652,10 @@
       CHARACTER(80)   streamFilesuffix
 !                                    (INTEGER         filetype)
       EXTERNAL        streamFilesuffix
+
+      INTEGER         streamNvals
+!                                    (INTEGER         streamID)
+      EXTERNAL        streamNvals
 
       INTEGER         streamInqNvars
 !                                    (INTEGER         streamID)
@@ -943,7 +955,7 @@
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         gridID,
 !                                     INTEGER         zaxisID,
-!                                     INTEGER         tsteptype,
+!                                     INTEGER         timetype,
 !                                     INTEGER         tilesetID)
       EXTERNAL        vlistDefVarTiles
 
@@ -951,7 +963,7 @@
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         gridID,
 !                                     INTEGER         zaxisID,
-!                                     INTEGER         tsteptype)
+!                                     INTEGER         timetype)
       EXTERNAL        vlistDefVar
 
 !                     vlistChangeVarGrid
@@ -971,7 +983,7 @@
 !                                     INTEGER         varID,
 !                                     INTEGER         gridID,
 !                                     INTEGER         zaxisID,
-!                                     INTEGER         tsteptype)
+!                                     INTEGER         timetype)
       EXTERNAL        vlistInqVar
 
       INTEGER         vlistInqVarGrid
@@ -991,6 +1003,17 @@
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         code)
       EXTERNAL        vlistInqVarID
+
+!                     vlistDefVarTimetype
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID,
+!                                     INTEGER         timetype)
+      EXTERNAL        vlistDefVarTimetype
+
+      INTEGER         vlistInqVarTimetype
+!                                    (INTEGER         vlistID,
+!                                     INTEGER         varID)
+      EXTERNAL        vlistInqVarTimetype
 
 !                     vlistDefVarTsteptype
 !                                    (INTEGER         vlistID,
@@ -1227,39 +1250,6 @@
 !                                     INTEGER         varID)
       EXTERNAL        vlistInqVarTimave
 
-!                     vlistDefVarTimaccu
-!                                    (INTEGER         vlistID,
-!                                     INTEGER         varID,
-!                                     INTEGER         timaccu)
-      EXTERNAL        vlistDefVarTimaccu
-
-      INTEGER         vlistInqVarTimaccu
-!                                    (INTEGER         vlistID,
-!                                     INTEGER         varID)
-      EXTERNAL        vlistInqVarTimaccu
-
-!                     vlistDefVarTypeOfGeneratingProcess
-!                                    (INTEGER         vlistID,
-!                                     INTEGER         varID,
-!                                     INTEGER         typeOfGeneratingProcess)
-      EXTERNAL        vlistDefVarTypeOfGeneratingProcess
-
-      INTEGER         vlistInqVarTypeOfGeneratingProcess
-!                                    (INTEGER         vlistID,
-!                                     INTEGER         varID)
-      EXTERNAL        vlistInqVarTypeOfGeneratingProcess
-
-!                     vlistDefVarProductDefinitionTemplate
-!                                    (INTEGER         vlistID,
-!                                     INTEGER         varID,
-!                                     INTEGER         productDefinitionTemplate)
-      EXTERNAL        vlistDefVarProductDefinitionTemplate
-
-      INTEGER         vlistInqVarProductDefinitionTemplate
-!                                    (INTEGER         vlistID,
-!                                     INTEGER         varID)
-      EXTERNAL        vlistInqVarProductDefinitionTemplate
-
       INTEGER         vlistInqVarSize
 !                                    (INTEGER         vlistID,
 !                                     INTEGER         varID)
@@ -1313,25 +1303,6 @@
 !                                     INTEGER         levelID)
       EXTERNAL        vlistMergedLevel
 
-!
-!  Ensemble info routines
-!
-!                     vlistDefVarEnsemble
-!                                    (INTEGER         vlistID,
-!                                     INTEGER         varID,
-!                                     INTEGER         ensID,
-!                                     INTEGER         ensCount,
-!                                     INTEGER         forecast_type)
-      EXTERNAL        vlistDefVarEnsemble
-
-      INTEGER         vlistInqVarEnsemble
-!                                    (INTEGER         vlistID,
-!                                     INTEGER         varID,
-!                                     INTEGER         ensID,
-!                                     INTEGER         ensCount,
-!                                     INTEGER         forecast_type)
-      EXTERNAL        vlistInqVarEnsemble
-
 !                     cdiClearAdditionalKeys
       EXTERNAL        cdiClearAdditionalKeys
 
@@ -1370,24 +1341,6 @@
 !                                     INTEGER         varID,
 !                                     CHARACTER*(*)   name)
       EXTERNAL        vlistInqVarIntKey
-
-!
-!  needed only for CDO operator after
-!
-      CHARACTER(80)   vlistInqVarNamePtr
-!                                    (INTEGER         vlistID,
-!                                     INTEGER         varID)
-      EXTERNAL        vlistInqVarNamePtr
-
-      CHARACTER(80)   vlistInqVarLongnamePtr
-!                                    (INTEGER         vlistID,
-!                                     INTEGER         varID)
-      EXTERNAL        vlistInqVarLongnamePtr
-
-      CHARACTER(80)   vlistInqVarUnitsPtr
-!                                    (INTEGER         vlistID,
-!                                     INTEGER         varID)
-      EXTERNAL        vlistInqVarUnitsPtr
 
 !
 !  CDI attributes
@@ -1600,9 +1553,99 @@
 !                                    (INTEGER         gridID)
       EXTERNAL        gridInqYIsc
 
-!
-!  CDI grid string key values
-!
+      INTEGER    CDI_KEY_TABLESVERSION
+      PARAMETER (CDI_KEY_TABLESVERSION  = 801)
+      INTEGER    CDI_KEY_LOCALTABLESVERSION
+      PARAMETER (CDI_KEY_LOCALTABLESVERSION = 802)
+      INTEGER    CDI_KEY_TYPEOFGENERATINGPROCESS
+      PARAMETER (CDI_KEY_TYPEOFGENERATINGPROCESS = 803)
+      INTEGER    CDI_KEY_PRODUCTDEFINITIONTEMPLATE
+      PARAMETER (CDI_KEY_PRODUCTDEFINITIONTEMPLATE = 804)
+      INTEGER    CDI_KEY_TYPEOFPROCESSEDDATA
+      PARAMETER (CDI_KEY_TYPEOFPROCESSEDDATA = 805)
+      INTEGER    CDI_KEY_SHAPEOFTHEEARTH
+      PARAMETER (CDI_KEY_SHAPEOFTHEEARTH = 806)
+      INTEGER    CDI_KEY_BACKGROUNDPROCESS
+      PARAMETER (CDI_KEY_BACKGROUNDPROCESS = 807)
+      INTEGER    CDI_KEY_TYPEOFENSEMBLEFORECAST
+      PARAMETER (CDI_KEY_TYPEOFENSEMBLEFORECAST = 808)
+      INTEGER    CDI_KEY_NUMBEROFFORECASTSINENSEMBLE
+      PARAMETER (CDI_KEY_NUMBEROFFORECASTSINENSEMBLE = 809)
+      INTEGER    CDI_KEY_PERTURBATIONNUMBER
+      PARAMETER (CDI_KEY_PERTURBATIONNUMBER = 810)
+      INTEGER    CDI_KEY_CENTRE
+      PARAMETER (CDI_KEY_CENTRE         = 811)
+      INTEGER    CDI_KEY_SUBCENTRE
+      PARAMETER (CDI_KEY_SUBCENTRE      = 812)
+      INTEGER    CDI_KEY_MPIMTYPE
+      PARAMETER (CDI_KEY_MPIMTYPE       = 813)
+      INTEGER    CDI_KEY_MPIMCLASS
+      PARAMETER (CDI_KEY_MPIMCLASS      = 814)
+      INTEGER    CDI_KEY_MPIMUSER
+      PARAMETER (CDI_KEY_MPIMUSER       = 815)
+      INTEGER    CDI_KEY_REVSTATUS
+      PARAMETER (CDI_KEY_REVSTATUS      = 816)
+      INTEGER    CDI_KEY_REVNUMBER
+      PARAMETER (CDI_KEY_REVNUMBER      = 817)
+      INTEGER         cdiDefKeyInt
+!                                    (INTEGER         cdiID,
+!                                     INTEGER         varID,
+!                                     INTEGER         key,
+!                                     INTEGER         value)
+      EXTERNAL        cdiDefKeyInt
+
+      INTEGER         cdiInqKeyInt
+!                                    (INTEGER         cdiID,
+!                                     INTEGER         varID,
+!                                     INTEGER         key,
+!                                     INTEGER         value)
+      EXTERNAL        cdiInqKeyInt
+
+      INTEGER         cdiDefKeyBytes
+!                                    (INTEGER         cdiID,
+!                                     INTEGER         varID,
+!                                     INTEGER         key,
+!                                     INTEGER*1(*)    bytes,
+!                                     INTEGER         length)
+      EXTERNAL        cdiDefKeyBytes
+
+      INTEGER         cdiInqKeyBytes
+!                                    (INTEGER         cdiID,
+!                                     INTEGER         varID,
+!                                     INTEGER         key,
+!                                     INTEGER*1(*)    bytes,
+!                                     INTEGER         length)
+      EXTERNAL        cdiInqKeyBytes
+
+      INTEGER         cdiDefKeyString
+!                                    (INTEGER         cdiID,
+!                                     INTEGER         varID,
+!                                     INTEGER         key,
+!                                     CHARACTER*(*)   string)
+      EXTERNAL        cdiDefKeyString
+
+      INTEGER         cdiInqKeyLen
+!                                    (INTEGER         cdiID,
+!                                     INTEGER         varID,
+!                                     INTEGER         key,
+!                                     INTEGER         length)
+      EXTERNAL        cdiInqKeyLen
+
+      INTEGER         cdiInqKeyString
+!                                    (INTEGER         cdiID,
+!                                     INTEGER         varID,
+!                                     INTEGER         key,
+!                                     CHARACTER*(*)   string,
+!                                     INTEGER         length)
+      EXTERNAL        cdiInqKeyString
+
+      INTEGER         cdiCopyKeys
+!                                    (INTEGER         cdiID1,
+!                                     INTEGER         varID1,
+!                                     INTEGER         cdiID2,
+!                                     INTEGER         varID2)
+      EXTERNAL        cdiCopyKeys
+
       INTEGER    CDI_KEY_XNAME
       PARAMETER (CDI_KEY_XNAME          = 901)
       INTEGER    CDI_KEY_XDIMNAME
@@ -1625,9 +1668,6 @@
       PARAMETER (CDI_KEY_MAPPING        = 921)
       INTEGER    CDI_KEY_MAPNAME
       PARAMETER (CDI_KEY_MAPNAME        = 922)
-!
-!  CDI zaxis string key values
-!
       INTEGER    CDI_KEY_NAME
       PARAMETER (CDI_KEY_NAME           = 941)
       INTEGER    CDI_KEY_DIMNAME
@@ -1655,6 +1695,20 @@
 !                                     INTEGER         size,
 !                                     CHARACTER*(*)   mesg)
       EXTERNAL        cdiGridInqKeyStr
+
+      INTEGER         cdiZaxisDefKeyStr
+!                                    (INTEGER         zaxisID,
+!                                     INTEGER         key,
+!                                     INTEGER         size,
+!                                     CHARACTER*(*)   mesg)
+      EXTERNAL        cdiZaxisDefKeyStr
+
+      INTEGER         cdiZaxisInqKeyStr
+!                                    (INTEGER         zaxisID,
+!                                     INTEGER         key,
+!                                     INTEGER         size,
+!                                     CHARACTER*(*)   mesg)
+      EXTERNAL        cdiZaxisInqKeyStr
 
       INTEGER         cdiZaxisDefKeyFlt
 !                                    (INTEGER         zaxisID,
@@ -1738,14 +1792,14 @@
 !                                     CHARACTER*(*)   ystdname)
       EXTERNAL        gridInqYstdname
 
-!                     gridDefPrec
+!                     gridDefDatatype
 !                                    (INTEGER         gridID,
 !                                     INTEGER         prec)
-      EXTERNAL        gridDefPrec
+      EXTERNAL        gridDefDatatype
 
-      INTEGER         gridInqPrec
+      INTEGER         gridInqDatatype
 !                                    (INTEGER         gridID)
-      EXTERNAL        gridInqPrec
+      EXTERNAL        gridInqDatatype
 
       DOUBLEPRECISION gridInqXval
 !                                    (INTEGER         gridID,
@@ -2021,6 +2075,10 @@
 !                                     DOUBLEPRECISION levels(*))
       EXTERNAL        zaxisInqLevels
 
+      INTEGER         zaxisInqCLen
+!                                    (INTEGER         zaxisID)
+      EXTERNAL        zaxisInqCLen
+
 !                     zaxisDefLevel
 !                                    (INTEGER         zaxisID,
 !                                     INTEGER         levelID,
@@ -2060,20 +2118,6 @@
 !                                     INTEGER*1(16)   uuid)
       EXTERNAL        zaxisInqUUID
 
-      INTEGER         cdiZaxisDefKeyStr
-!                                    (INTEGER         zaxisID,
-!                                     INTEGER         key,
-!                                     INTEGER         size,
-!                                     CHARACTER*(*)   mesg)
-      EXTERNAL        cdiZaxisDefKeyStr
-
-      INTEGER         cdiZaxisInqKeyStr
-!                                    (INTEGER         zaxisID,
-!                                     INTEGER         key,
-!                                     INTEGER         size,
-!                                     CHARACTER*(*)   mesg)
-      EXTERNAL        cdiZaxisInqKeyStr
-
 !                     zaxisDefName
 !                                    (INTEGER         zaxisID,
 !                                     CHARACTER*(*)   name_optional)
@@ -2109,14 +2153,14 @@
 !                                     CHARACTER*(*)   stdname)
       EXTERNAL        zaxisInqStdname
 
-!                     zaxisDefPrec
+!                     zaxisDefDatatype
 !                                    (INTEGER         zaxisID,
 !                                     INTEGER         prec)
-      EXTERNAL        zaxisDefPrec
+      EXTERNAL        zaxisDefDatatype
 
-      INTEGER         zaxisInqPrec
+      INTEGER         zaxisInqDatatype
 !                                    (INTEGER         zaxisID)
-      EXTERNAL        zaxisInqPrec
+      EXTERNAL        zaxisInqDatatype
 
 !                     zaxisDefPositive
 !                                    (INTEGER         zaxisID,
@@ -2287,6 +2331,10 @@
 !                                    (INTEGER         taxisID)
       EXTERNAL        taxisHasBounds
 
+!                     taxisWithBounds
+!                                    (INTEGER         taxisID)
+      EXTERNAL        taxisWithBounds
+
 !                     taxisDeleteBounds
 !                                    (INTEGER         taxisID)
       EXTERNAL        taxisDeleteBounds
@@ -2434,11 +2482,6 @@
 !
 !  Table routines
 !
-!                     tableWriteC
-!                                    (CHARACTER*(*)   filename,
-!                                     INTEGER         tableID)
-      EXTERNAL        tableWriteC
-
 !                     tableWrite
 !                                    (CHARACTER*(*)   filename,
 !                                     INTEGER         tableID)
@@ -2458,14 +2501,6 @@
 !                                    (INTEGER         tableID)
       EXTERNAL        tableInqNamePtr
 
-!                     tableDefEntry
-!                                    (INTEGER         tableID,
-!                                     INTEGER         code,
-!                                     CHARACTER*(*)   name,
-!                                     CHARACTER*(*)   longname,
-!                                     CHARACTER*(*)   units)
-      EXTERNAL        tableDefEntry
-
       INTEGER         tableInq
 !                                    (INTEGER         modelID,
 !                                     INTEGER         tablenum,
@@ -2483,55 +2518,14 @@
 !                                    (INTEGER         tableID)
       EXTERNAL        tableInqModel
 
-!                     tableInqPar
+!                     tableInqEntry
 !                                    (INTEGER         tableID,
-!                                     INTEGER         code,
+!                                     INTEGER         id,
+!                                     INTEGER         ltype,
 !                                     CHARACTER*(*)   name,
 !                                     CHARACTER*(*)   longname,
 !                                     CHARACTER*(*)   units)
-      EXTERNAL        tableInqPar
-
-      INTEGER         tableInqParCode
-!                                    (INTEGER         tableID,
-!                                     CHARACTER*(*)   name,
-!                                     INTEGER         code)
-      EXTERNAL        tableInqParCode
-
-      INTEGER         tableInqParName
-!                                    (INTEGER         tableID,
-!                                     INTEGER         code,
-!                                     CHARACTER*(*)   name)
-      EXTERNAL        tableInqParName
-
-      INTEGER         tableInqParLongname
-!                                    (INTEGER         tableID,
-!                                     INTEGER         code,
-!                                     CHARACTER*(*)   longname)
-      EXTERNAL        tableInqParLongname
-
-      INTEGER         tableInqParUnits
-!                                    (INTEGER         tableID,
-!                                     INTEGER         code,
-!                                     CHARACTER*(*)   units)
-      EXTERNAL        tableInqParUnits
-
-!
-!  needed only for CDO operator after
-!
-      CHARACTER(80)   tableInqParNamePtr
-!                                    (INTEGER         tableID,
-!                                     INTEGER         parID)
-      EXTERNAL        tableInqParNamePtr
-
-      CHARACTER(80)   tableInqParLongnamePtr
-!                                    (INTEGER         tableID,
-!                                     INTEGER         parID)
-      EXTERNAL        tableInqParLongnamePtr
-
-      CHARACTER(80)   tableInqParUnitsPtr
-!                                    (INTEGER         tableID,
-!                                     INTEGER         parID)
-      EXTERNAL        tableInqParUnitsPtr
+      EXTERNAL        tableInqEntry
 
 !
 !  History routines

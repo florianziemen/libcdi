@@ -22,6 +22,7 @@ libcdi_la_SOURCES = 	 \
 	calendar.h	 \
 	cdf.c            \
 	cdf.h	 	 \
+	cdf_config.h	 \
 	cdf_int.c	 \
 	cdf_int.h	 \
 	cdf_util.c	 \
@@ -116,6 +117,8 @@ libcdi_la_SOURCES = 	 \
 	version.c      	 \
 	vlist.c 	 \
 	vlist.h	         \
+	cdi_key.c 	 \
+	cdi_key.h 	 \
 	cdi_att.c 	 \
 	cdi_att.h 	 \
 	vlist_var.c 	 \
@@ -138,7 +141,7 @@ libcdi_la_USE_FC_extra_sources = \
 	cfortran.h       \
 	cdiFortran.c
 
-# these only contain code iff grib_api is available
+# these only contain code if grib_api is available
 libcdi_la_HAVE_LIBGRIB_API_extra_sources = \
 	gribapi_utilities.c stream_gribapi.c
 

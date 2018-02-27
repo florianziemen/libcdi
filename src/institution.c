@@ -9,16 +9,11 @@
 #include "cdi.h"
 #include "cdi_int.h"
 #include "resource_handle.h"
-#include "resource_handle.h"
 #include "resource_unpack.h"
 #include "namespace.h"
 #include "serialize.h"
 #include "institution.h"
 
-
-static int ECMWF  = CDI_UNDEFID,
-  MPIMET = CDI_UNDEFID,
-  MCH    = CDI_UNDEFID;
 
 typedef struct
 {
@@ -62,13 +57,13 @@ void instituteDefaultValue ( institute_t * instituteptr )
 void instituteDefaultEntries ( void )
 {
   cdiResH resH[]
-    = { ECMWF   = institutDef( 98,   0, "ECMWF",     "European Centre for Medium-Range Weather Forecasts"),
-        MPIMET  = institutDef( 98, 232, "MPIMET",    "Max-Planck-Institute for Meteorology"),
-        institutDef( 98, 255, "MPIMET",    "Max-Planck-Institute for Meteorology"),
+    = { institutDef( 98,   0, "ECMWF",     "European Centre for Medium-Range Weather Forecasts"),
+        institutDef(252,   1, "MPIMET",    "Max-Planck-Institute for Meteorology"),
         institutDef( 98, 232, "MPIMET",    "Max Planck Institute for Meteorology"),
-        institutDef( 78,   0, "DWD",       "Deutscher Wetterdienst"),
+        institutDef( 98, 255, "MPIMET",    "Max-Planck-Institute for Meteorology"),
         institutDef( 78, 255, "DWD",       "Deutscher Wetterdienst"),
-        MCH     = institutDef(215, 255, "MCH",       "MeteoSwiss"),
+        institutDef( 78,   0, "DWD",       "Deutscher Wetterdienst"),
+        institutDef(215, 255, "MCH",       "MeteoSwiss"),
         institutDef(  7,   0, "NCEP",      "National Centers for Environmental Prediction"),
         institutDef(  7,   1, "NCEP",      "National Centers for Environmental Prediction"),
         institutDef( 60,   0, "NCAR",      "National Center for Atmospheric Research"),
@@ -328,10 +323,9 @@ int instituteUnpack(void *buf, int size, int *position, int originNamespace,
 {
   int tempbuf[institute_nints];
   int instituteID;
-  char *name, *longname;
   serializeUnpack(buf, size, position, tempbuf, institute_nints, CDI_DATATYPE_INT, context);
-  name = (char *) Malloc((size_t)tempbuf[3] + (size_t)tempbuf[4]);
-  longname = name + tempbuf[3];
+  char *name = (char *) Malloc((size_t)tempbuf[3] + (size_t)tempbuf[4]);
+  char *longname = name + tempbuf[3];
   serializeUnpack(buf, size, position, name, tempbuf[3], CDI_DATATYPE_TXT, context);
   serializeUnpack(buf, size, position, longname, tempbuf[4], CDI_DATATYPE_TXT, context);
   int targetID = namespaceAdaptKey(tempbuf[0], originNamespace);

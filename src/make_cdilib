@@ -150,6 +150,7 @@ files="basetime.c \
    util.c \
    varscan.c \
    vlist.c \
+   cdi_key.c \
    cdi_att.c \
    vlist_var.c \
    zaxis.c"

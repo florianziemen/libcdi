@@ -7,8 +7,8 @@ fi
 ncdatafile="test$$.nc"
 tempfiles="${ncdatafile}"
 trap "EC=\$? ; \rm -f ${tempfiles}; exit \$EC" EXIT
-./test_cdf_write "${ncdatafile}"
-digest=$(./test_cdf_read "${ncdatafile}")
+../libtool --mode=execute ${tool_wrap} ./test_cdf_write "${ncdatafile}"
+digest=$(../libtool --mode=execute ${tool_wrap} ./test_cdf_read "${ncdatafile}")
 missValueCount=$(echo "$digest" | @SED@ -n '/^missing values count =/{
 s/^missing values count *= *//
 p

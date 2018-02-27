@@ -54,7 +54,7 @@ static CdiFallbackIterator *cdiFallbackIterator_condestruct(CdiFallbackIterator 
   me->curVariable = -1;
   me->curSubtype = -1;
   me->curLevel = -1;
-  me->path = strdup(path);
+  me->path = path ? strdup(path) : NULL;
   if(!me->path) goto closeStream;
 
   return me;
@@ -378,7 +378,7 @@ char *cdiFallbackIterator_copyVariableName(CdiIterator *super)
 void cdiFallbackIterator_readField(CdiIterator *super, double *buffer, size_t *nmiss)
 {
   CdiFallbackIterator *me = (CdiFallbackIterator*)(void *)super;
-  int missingValues = 0;
+  size_t missingValues = 0;
   streamReadVarSlice(me->streamId, me->curVariable, me->curLevel, buffer, &missingValues);
   if(nmiss) *nmiss = (size_t)missingValues;
 }
@@ -386,7 +386,7 @@ void cdiFallbackIterator_readField(CdiIterator *super, double *buffer, size_t *n
 void cdiFallbackIterator_readFieldF(CdiIterator *super, float *buffer, size_t *nmiss)
 {
   CdiFallbackIterator *me = (CdiFallbackIterator*)(void *)super;
-  int missingValues = 0;
+  size_t missingValues = 0;
   streamReadVarSliceF(me->streamId, me->curVariable, me->curLevel, buffer, &missingValues);
   if(nmiss) *nmiss = (size_t)missingValues;
 }

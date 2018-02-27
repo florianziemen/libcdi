@@ -1,5 +1,5 @@
-#ifndef _CDI_INT_H
-#define _CDI_INT_H
+#ifndef  CDI_INT_H
+#define  CDI_INT_H
 
 #if defined (HAVE_CONFIG_H)
 #include "config.h"
@@ -10,13 +10,15 @@
 #include <stdbool.h>
 #include <string.h>
 #include <errno.h>
+#include <limits.h>
 #include <math.h>
 #include <sys/types.h>
 
 #include "cdi.h"
+#include "cdf_config.h"
 
 /* dummy use of unused parameters to silence compiler warnings */
-#ifndef UNUSED
+#ifndef  UNUSED
 #define  UNUSED(x) (void)x
 #endif
 
@@ -36,6 +38,9 @@ char *strdup(const char *s);
 */
 #endif
 
+void str_tolower(char *str);
+bool str_is_equal(const char *vstr, const char *cstr);
+
 #ifndef  M_PI
 #define  M_PI        3.14159265358979323846  /* pi */
 #endif
@@ -53,7 +58,7 @@ char *strdup(const char *s);
 #ifndef  _TAXIS_H
 #  include "taxis.h"
 #endif
-#ifndef  _CDI_LIMITS_H
+#ifndef  CDI_LIMITS_H
 #  include "cdi_limits.h"
 #endif
 #ifndef  _SERVICE_H
@@ -146,6 +151,7 @@ typedef struct
 {
   off_t     position;
   size_t    size;
+  size_t    gridsize;
   int       zip;
   int       param;
   int       ilevel;
@@ -160,9 +166,9 @@ typedef struct
     // (181; 105, 0, timeRangeIndicator=0) .. instantanous rain
     // (181; 105, 0, timeRangeIndicator=4) .. accumulated rain  .. both can be in the same grib file
 #endif // HIRLAM_EXTENSIONS
-  short     used;
   short     varID;
   short     levelID;
+  short     used;
   char      varname[32]; /* needed for grib decoding with GRIB_API */
   var_tile_t tiles;      /* tile-related meta-data, currently for GRIB-API only. */
 }
@@ -178,7 +184,7 @@ typedef struct {
                          /* tsID>0 number of non constant records */
   int       nallrecs;    /* number of all records                 */
   int       curRecID;    /* current record ID                     */
-  long      next;
+  bool      next;
   off_t     position;    /* timestep file position                */
   taxis_t   taxis;
 }
@@ -241,7 +247,7 @@ typedef struct {
   int         fileID;
   int         filemode;
   int         nrecs;        /* number of records                  */
-  off_t       numvals;
+  size_t      numvals;
   char       *filename;
   Record     *record;
   svarinfo_t *vars;
@@ -297,7 +303,7 @@ typedef enum {
 typedef struct
 {
   char*                  keyword;        /* keyword string */
-  int                    update;
+  bool                   update;
   key_val_pair_datatype  data_type;      /* data type of this key/value pair */
   double                 dbl_val;        /* double value (data_type == t_double) */
   int                    int_val;        /* integer value (data_type == t_int) */
@@ -333,14 +339,15 @@ extern int cdiDataUnreduced;
 extern int cdiSortName;
 extern int cdiSortParam;
 extern int cdiHaveMissval;
-extern int cdiIgnoreAttCoordinates;
-extern int cdiCoordinatesLonLat;
-extern int cdiIgnoreValidRange;
+extern bool cdiIgnoreAttCoordinates;
+extern bool cdiCoordinatesLonLat;
+extern bool cdiIgnoreValidRange;
 extern int cdiSkipRecords;
 extern int cdiConvention;
 extern int cdiInventoryMode;
 extern int CDI_Version_Info;
 extern int CDI_cmor_mode;
+extern int CDI_reduce_dim;
 extern size_t CDI_netcdf_hdr_pad;
 extern bool CDI_netcdf_lazy_grid_load;
 extern int STREAM_Debug;
@@ -441,11 +448,11 @@ void
 cdiStreamDefVlist_(int streamID, int vlistID);
 
 int
-cdiStreamWriteVar_(int streamID, int varID, int memtype, const void *data, int nmiss);
+cdiStreamWriteVar_(int streamID, int varID, int memtype, const void *data, size_t nmiss);
 
 void
 cdiStreamWriteVarChunk_(int streamID, int varID, int memtype,
-                        const int rect[][2], const void *data, int nmiss);
+                        const int rect[][2], const void *data, size_t nmiss);
 void
 cdiStreamCloseDefaultDelegate(stream_t *streamptr,
                               int recordBufIsToBeDeleted);
@@ -479,11 +486,18 @@ void cdiDefTableID(int tableID);
 void gridGenXvals(int xsize, double xfirst, double xlast, double xinc, double *xvals);
 void gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double yinc, double *yvals);
 
+static inline
+void cdi_check_gridsize_int_limit(const char *format, size_t gridsize)
+{
+  if ( gridsize > INT_MAX ) Error("%s format grid size (%zu) limit exceeded (%zu)!", format, gridsize, INT_MAX);
+}
+
+
 #if defined (__cplusplus)
 }
 #endif
 
-#endif  /* _CDI_INT_H */
+#endif  /* CDI_INT_H */
 /*
  * Local Variables:
  * c-file-style: "Java"

@@ -1,5 +1,5 @@
 #if defined (HAVE_CONFIG_H)
-#  include "config.h"
+#include "config.h"
 #endif
 
 #include <stdio.h>
@@ -10,6 +10,8 @@
 const char *cdiStringError(int cdiErrno)
 {
   static const char UnknownError[] = "Unknown Error";
+  static const char _EISDIR[]      = "Is a directory";
+  static const char _EISEMPTY[]    = "File is empty";
   static const char _EUFTYPE[]     = "Unsupported file type";
   static const char _ELIBNAVAIL[]  = "Unsupported file type (library support not compiled in)";
   static const char _EUFSTRUCT[]   = "Unsupported file structure";
@@ -24,6 +26,8 @@ const char *cdiStringError(int cdiErrno)
       if ( cp == NULL ) break;
       return cp;
     }
+  case CDI_EISDIR:     return _EISDIR;
+  case CDI_EISEMPTY:   return _EISEMPTY;
   case CDI_EUFTYPE:    return _EUFTYPE;
   case CDI_ELIBNAVAIL: return _ELIBNAVAIL;
   case CDI_EUFSTRUCT:  return _EUFSTRUCT;

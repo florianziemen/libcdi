@@ -1,3 +1,171 @@
+2018-02-27  Uwe Schulzweida
+
+        * Added support for GRIB2 key section2Padding
+
+2018-02-19  Uwe Schulzweida
+
+	* scanTimestep1: set default of rdate to vdate (bug fix)
+
+2018-02-12  Uwe Schulzweida
+
+	* varDefZaxis: don't remove default of longname and units
+
+2018-02-03  Uwe Schulzweida
+
+	* Fix brocken ECHAM5 modelIDs (introduced in 1.9.3)
+
+2018-01-31  Uwe Schulzweida
+
+	* Fix GRIB_API AEC compression for unstructured grids
+
+2018-01-29  Uwe Schulzweida
+
+	* Version 1.9.3 released
+
+2018-01-29  Uwe Schulzweida
+
+	* Set GRIB center=252, subcenter=1 for MPI-M
+
+2018-01-16  Uwe Schulzweida
+
+	* Skip unavailable coordinate variables (bug fix)
+
+2018-01-13  Uwe Schulzweida
+
+	* streamFilesuffix(): refactoring (bug fix)
+
+2018-01-09  Uwe Schulzweida
+
+	* GRIBAPI: Added support for variables with same name and different gridsize.
+
+2018-01-06  Uwe Schulzweida
+
+	* Removed CDI function vlistDefVarTimaccu()/vlistInqVarTimaccu().
+
+2018-01-05  Uwe Schulzweida
+
+	* Replaced vlistDefVarEnsemble() by cdiDefKeyInt().
+	* Consistent test for GRIB2 shortName [patch from: Florian Prill]
+	* Added support for GRIB2 keys shapeOfTheEarth and typeOfProcessedData
+	* Replaced vlistDefVarProductDefinitionTemplate() by cdiDefKeyInt().
+	* Replaced vlistDefVarTypeOfGeneratingProcess() by cdiDefKeyInt().
+
+2018-01-04  Uwe Schulzweida
+
+	* GRIB2: use typeOfSecondFixedSurface if present
+	* Added support for GRIB2 key tablesVersion/localTablesVersion
+	* Added CDI function cdiDefKeyInt()/cdiInqKeyInt()
+
+2017-12-07  Uwe Schulzweida
+
+	* Check positive attribute for scalar z coordinates (bug fix)
+
+2017-11-23  Uwe Schulzweida
+
+	* netCDF: set coordinate attribute to "tlon tlat" for GRID_TRAJECTORY (bug fix)
+
+2017-11-21  Uwe Schulzweida
+
+	* Version 1.9.2 released
+
+2017-11-10  Uwe Schulzweida
+
+	* gribapiDefGrid: set numberOfValues, needed for ccsds compression (bug fix)
+
+2017-11-01  Uwe Schulzweida
+
+	* Check chunk size limit of 2GB
+
+2017-10-20  Uwe Schulzweida
+
+	* gridInqXinc: added support for negativ values (bug fix)
+
+2017-10-09  Uwe Schulzweida
+
+	* changed type of gridsize from int to size_t
+
+2017-10-05  Uwe Schulzweida
+
+        * using CGRIBEX library version 1.9.0
+	* Version 1.9.1 released
+
+2017-09-28  Uwe Schulzweida
+
+	* Renamed TAXIS_CONSTANT to TIME_CONSTANT
+
+2017-09-20  Uwe Schulzweida
+
+	* vlistCopyFlag: copy datatype (bug fix)
+
+2017-09-20  Uwe Schulzweida
+
+	* Added support for CDI_FILETYPE_NC5
+
+2017-09-18  Uwe Schulzweida
+
+	* CDI_PROJ_LCC: don't overwrite NetCDF units (bug fix)
+
+2017-09-13  Uwe Schulzweida
+
+	* Added interface function taxisWithBounds()
+
+2017-09-07  Uwe Schulzweida
+
+	* Read NC_FORMAT_CDF5 data as CDF2 (preliminary fix)
+
+2017-09-05  Uwe Schulzweida
+
+	* netcdf: added support for GRID_TRAJECTORY
+
+2017-09-01  Uwe Schulzweida
+
+	* Implementation of CDI_reduce_dim for z axis
+
+2017-08-30  Uwe Schulzweida
+
+	* Implementation of CDI_reduce_dim for time axis
+	* Implementation of CDI_reduce_dim for x/y axis
+	* cdfDefAxisCommon: bug fix for zaxis bounds in CDI_cmor_mode
+
+2017-08-08  Uwe Schulzweida
+
+	* Bug fix for CF conform hybrid sigma pressure levels
+
+2017-08-04  Uwe Schulzweida
+
+	* Added CALENDAR_GREGORIAN
+	* cdiGridTypeInit: don't overwrite exsisting attributes (bug fix)
+
+2017-07-27  Uwe Schulzweida
+
+        * using CGRIBEX library version 1.8.1
+	* Version 1.9.0 released
+
+2017-07-18  Uwe Schulzweida
+
+	* cdfDefVarMissval: behavior of _FillValue handling has been changed in netCDF4 (bug fix)
+
+2017-07-12  Uwe Schulzweida
+
+        * grib1(cgribex): added support for GRIB1 records without GridDecriptionSection
+
+2017-07-06  Uwe Schulzweida
+
+	* removed leading space from time units (bug fix)
+
+2017-07-01  Uwe Schulzweida
+
+	* Added function tableInqEntry().
+	* removed:  tableInqParNamePtr(), tableInqParNamePtr(), tableInqParUnitsPtr().
+
+2017-06-21  Uwe Schulzweida
+
+	* find_leadtime: check number of dimensions [Bug #7779]
+
+2017-06-06  Uwe Schulzweida
+
+	* Changed boolean ints to stdbool
+
 2017-05-16  Uwe Schulzweida
 
 	* Version 1.8.2 released

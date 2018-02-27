@@ -129,12 +129,12 @@ cdiPioClientStreamDefVlist_(int streamID, int vlistID)
 
 static void
 cdiPioClientStreamWriteVar_(int streamID, int varID, int memtype,
-                            const void *data, int nmiss)
+                            const void *data, size_t nmiss)
   __attribute__((noreturn));
 
 static void
 cdiPioClientStreamWriteVar_(int streamID, int varID, int memtype,
-                            const void *data, int nmiss)
+                            const void *data, size_t nmiss)
 {
   (void)streamID; (void)varID; (void)memtype; (void)data; (void)nmiss;
   xabort("parallel writing requires explicit partition information,"
@@ -144,7 +144,7 @@ cdiPioClientStreamWriteVar_(int streamID, int varID, int memtype,
 static void
 cdiPioClientStreamWriteVarChunk_(int streamID, int varID, int memtype,
                                  const int rect[][2],
-                                 const void *data, int nmiss)
+                                 const void *data, size_t nmiss)
 {
   /* todo: handle transmission of float data */
   if (memtype != MEMTYPE_DOUBLE)
@@ -170,7 +170,7 @@ cdiPioClientStreamWriteVarChunk_(int streamID, int varID, int memtype,
 
 static void
 cdiPioClientStreamWriteVarPart(int streamID, int varID, const void *data,
-                               int nmiss, Xt_idxlist partDesc)
+                               size_t nmiss, Xt_idxlist partDesc)
 {
   pioBufferPartData(streamID, varID, data, nmiss, partDesc);
 }
@@ -180,7 +180,7 @@ cdiPioClientStreamWriteScatteredVarPart(int streamID, int varID,
                                         const void *data,
                                         int numBlocks, const int blocklengths[],
                                         const int displacements[],
-                                        int nmiss, Xt_idxlist partDesc)
+                                        size_t nmiss, Xt_idxlist partDesc)
 {
   cdiPioBufferPartDataGather(streamID, varID, data, numBlocks,
                              blocklengths, displacements, nmiss, partDesc);

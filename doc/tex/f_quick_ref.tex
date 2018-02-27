@@ -110,6 +110,15 @@ Get number of attributes assigned to this variable.
 Create a horizontal Grid.
 
 
+\section*{\tt \htmlref{gridDefDatatype}{gridDefDatatype}}
+
+\begin{verbatim}
+    SUBROUTINE gridDefDatatype (INTEGER gridID, INTEGER prec)
+\end{verbatim}
+
+Define the data type of a Grid.
+
+
 \section*{\tt \htmlref{gridDefNP}{gridDefNP}}
 
 \begin{verbatim}
@@ -144,15 +153,6 @@ Define the number of vertex of a Gridbox.
 \end{verbatim}
 
 Define the position of grid in the reference file.
-
-
-\section*{\tt \htmlref{gridDefPrec}{gridDefPrec}}
-
-\begin{verbatim}
-    SUBROUTINE gridDefPrec (INTEGER gridID, INTEGER prec)
-\end{verbatim}
-
-Define the precision of a Grid.
 
 
 \section*{\tt \htmlref{gridDefProj}{gridDefProj}}
@@ -308,6 +308,15 @@ Destroy a horizontal Grid.
 Duplicate a Grid.
 
 
+\section*{\tt \htmlref{gridInqDatatype}{gridInqDatatype}}
+
+\begin{verbatim}
+    INTEGER FUNCTION gridInqDatatype (INTEGER gridID)
+\end{verbatim}
+
+Get the data type of a Grid.
+
+
 \section*{\tt \htmlref{gridInqNP}{gridInqNP}}
 
 \begin{verbatim}
@@ -342,15 +351,6 @@ Get the number of vertex of a Gridbox.
 \end{verbatim}
 
 Get the position of grid in the reference file.
-
-
-\section*{\tt \htmlref{gridInqPrec}{gridInqPrec}}
-
-\begin{verbatim}
-    INTEGER FUNCTION gridInqPrec (INTEGER gridID)
-\end{verbatim}
-
-Get the precision of a Grid.
 
 
 \section*{\tt \htmlref{gridInqProj}{gridInqProj}}
@@ -818,15 +818,6 @@ read table of parameters from file in tabular format.
 write table of parameters to file in tabular format.
 
 
-\section*{\tt \htmlref{tableWriteC}{tableWriteC}}
-
-\begin{verbatim}
-    SUBROUTINE tableWriteC (CHARACTER*(*) filename, INTEGER tableID)
-\end{verbatim}
-
-write table of parameters to file in C language format.
-
-
 \section*{\tt \htmlref{taxisCreate}{taxisCreate}}
 
 \begin{verbatim}
@@ -1029,7 +1020,7 @@ Define the time axis of a variable list.
 
 \begin{verbatim}
     INTEGER FUNCTION vlistDefVar (INTEGER vlistID, INTEGER gridID, INTEGER zaxisID,
-                                  INTEGER tsteptype)
+                                  INTEGER timetype)
 \end{verbatim}
 
 Create a new variable.
@@ -1134,7 +1125,7 @@ Define the standard name of a Variable.
 
 \begin{verbatim}
     INTEGER FUNCTION vlistDefVarTiles (INTEGER vlistID, INTEGER gridID,
-                                       INTEGER zaxisID, INTEGER tsteptype,
+                                       INTEGER zaxisID, INTEGER timetype,
                                        INTEGER tilesetID)
 \end{verbatim}
 
@@ -1460,6 +1451,15 @@ Destroy a vertical Z-axis.
 \end{verbatim}
 
 Duplicate a Z-axis.
+
+
+\section*{\tt \htmlref{zaxisInqCLen}{zaxisInqCLen}}
+
+\begin{verbatim}
+    INTEGER FUNCTION zaxisInqCLen (INTEGER zaxisID)
+\end{verbatim}
+
+Get maximal string length of character Z-axis.
 
 
 \section*{\tt \htmlref{zaxisInqLevel}{zaxisInqLevel}}

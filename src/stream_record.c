@@ -1,5 +1,5 @@
-#if defined (HAVE_CONFIG_H)
-#  include "config.h"
+#ifdef  HAVE_CONFIG_H
+#include "config.h"
 #endif
 
 #include <limits.h>
@@ -20,13 +20,15 @@
 
 void recordInitEntry(record_t *record)
 {
-  record->position = CDI_UNDEFID;
-  record->size     = 0;
-  record->param    = 0;
-  record->ilevel   = CDI_UNDEFID;
-  record->used     = FALSE;
-  record->varID    = CDI_UNDEFID;
-  record->levelID  = CDI_UNDEFID;
+  record->position  = CDI_UNDEFID;
+  record->size      = 0;
+  record->gridsize  = 0;
+  record->param     = 0;
+  record->ilevel    = CDI_UNDEFID;
+  record->used      = false;
+  record->tsteptype = CDI_UNDEFID;
+  record->varID     = CDI_UNDEFID;
+  record->levelID   = CDI_UNDEFID;
   memset(record->varname, 0, sizeof(record->varname));
   memset(&record->tiles, 0, sizeof(record->tiles));
 }
@@ -131,7 +133,7 @@ void streamInqRecord(int streamID, int *varID, int *levelID)
   *levelID = streamptr->vars[*varID].recordTable[isub].lindex[lindex];
 
   if ( CDI_Debug )
-    Message("tsID = %d, recID = %d, varID = %d, levelID = %d\n", tsID, recID, *varID, *levelID);
+    Message("tsID = %d, recID = %d, varID = %d, levelID = %d", tsID, recID, *varID, *levelID);
 
   streamptr->curTsID = tsID;
   streamptr->tsteps[tsID].curRecID = rindex;
@@ -209,6 +211,7 @@ void streamDefRecord(int streamID, int varID, int levelID)
     case CDI_FILETYPE_NC2:
     case CDI_FILETYPE_NC4:
     case CDI_FILETYPE_NC4C:
+    case CDI_FILETYPE_NC5:
       if ( streamptr->accessmode == 0 ) cdfEndDef(streamptr);
       cdfDefRecord(streamptr);
       break;
@@ -237,12 +240,14 @@ void streamCopyRecord(int streamID2, int streamID1)
         case CDI_FILETYPE_NC2:
         case CDI_FILETYPE_NC4:
         case CDI_FILETYPE_NC4C:
+        case CDI_FILETYPE_NC5:
           switch (filetype2)
             {
             case CDI_FILETYPE_NC:
             case CDI_FILETYPE_NC2:
             case CDI_FILETYPE_NC4:
             case CDI_FILETYPE_NC4C:
+            case CDI_FILETYPE_NC5:
               // Warning("Streams have different file types (%s -> %s)!", strfiletype(filetype1), strfiletype(filetype2));
               filetype = filetype2;
               break;
@@ -282,6 +287,7 @@ void streamCopyRecord(int streamID2, int streamID1)
     case CDI_FILETYPE_NC2:
     case CDI_FILETYPE_NC4:
     case CDI_FILETYPE_NC4C:
+    case CDI_FILETYPE_NC5:
       cdfCopyRecord(streamptr2, streamptr1);
       break;
 #endif
@@ -330,7 +336,7 @@ void cdi_create_records(stream_t *streamptr, int tsID)
 	{
 	  int varID = sourceTstep->records[recID].varID;
 	  nrecords += (varID == CDI_UNDEFID /* varID = CDI_UNDEFID for write mode !!! */
-                       || vlistInqVarTsteptype(vlistID, varID) != TSTEP_CONSTANT);
+                       || vlistInqVarTimetype(vlistID, varID) != TIME_CONSTANT);
           //    printf("varID nrecords %d %d %d \n", varID, nrecords, vlistInqVarTsteptype(vlistID, varID));
 	}
     }
@@ -362,11 +368,11 @@ void cdi_create_records(stream_t *streamptr, int tsID)
           destTstep->records[recID].used = curRecord->used;
           if ( curRecord->used != CDI_UNDEFID && curRecord->varID != -1 ) /* curRecord->varID = -1 for write mode !!! */
             {
-              if ( vlistInqVarTsteptype(vlistID, curRecord->varID) != TSTEP_CONSTANT )
+              if ( vlistInqVarTimetype(vlistID, curRecord->varID) != TIME_CONSTANT )
                 {
                   destTstep->records[recID].position = CDI_UNDEFID;
                   destTstep->records[recID].size     = 0;
-                  destTstep->records[recID].used     = FALSE;
+                  destTstep->records[recID].used     = false;
                 }
             }
 	}

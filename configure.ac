@@ -4,7 +4,7 @@
 #  autoconf 2.68
 #  libtool  2.4.2
 
-AC_INIT([cdi], [1.8.2], [http://mpimet.mpg.de/cdi])
+AC_INIT([cdi], [1.9.4rc1], [http://mpimet.mpg.de/cdi])
 
 AC_DEFINE_UNQUOTED(CDI, ["$PACKAGE_VERSION"], [CDI version])
 
@@ -67,21 +67,15 @@ AC_CHECK_LIB(malloc, malloc)
 AC_CHECK_MEMBERS([struct stat.st_blksize])
 #  ----------------------------------------------------------------------
 # Checks for header files
-AC_CHECK_HEADERS([malloc.h uuid.h uuid/uuid.h])
+AC_CHECK_HEADERS([malloc.h])
 AX_EXECINFO
 #  ----------------------------------------------------------------------
 # Checks for the availability of functions
 AC_CHECK_FUNCS([mallinfo])
 AC_CHECK_FUNCS([getline])
-AC_CHECK_LIB([uuid],[uuid_generate],
-  [AC_CHECK_DECLS([uuid_generate],
-  [UUID_C_LIB=-luuid],,[AC_INCLUDES_DEFAULT
-@%:@include <uuid/uuid.h>])],
-  [AC_CHECK_FUNCS([uuid_create],
-     [AC_CHECK_DECLS([uuid_create],
-        [UUID_C_LIB=""],,[AC_INCLUDES_DEFAULT
-@%:@include <uuid.h>])])])
-AC_SUBST([UUID_C_LIB])
+ACX_UUID
+LIBS="${LIBS+$LIBS }$UUID_C_LIB"
+CPPFLAGS="${CPPFLAGS+$CPPFLAGS }$UUID_C_INCLUDE"
 #  ----------------------------------------------------------------------
 # Checks for the availability of ANSI-C99 functions
 AC_CHECK_DECLS([isnan],,,[AC_INCLUDES_DEFAULT
@@ -410,9 +404,12 @@ AC_CONFIG_FILES([tests/test_cksum_grib \
                  tests/pio_cksum_asynch \
                  tests/pio_cksum_writer \
                  tests/pio_cksum_cdf \
+                 tests/test_byteswap_run \
+                 tests/test_resource_copy_run \
                  tests/test_resource_copy_mpi_run \
                  tests/test_cdf_transformation \
                  tests/test_cdf_const \
+                 tests/test_table_run \
                  tables/gen_tableheaderfile \
                  util/serialrun],[chmod a+x "$ac_file"])
 

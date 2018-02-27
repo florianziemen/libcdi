@@ -8056,7 +8056,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_gridDefPrec(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_gridDefDatatype(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   int arg1 ;
   int arg2 ;
@@ -8067,18 +8067,18 @@ SWIGINTERN PyObject *_wrap_gridDefPrec(PyObject *SWIGUNUSEDPARM(self), PyObject 
   PyObject * obj0 = 0 ;
   PyObject * obj1 = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OO:gridDefPrec",&obj0,&obj1)) SWIG_fail;
+  if (!PyArg_ParseTuple(args,(char *)"OO:gridDefDatatype",&obj0,&obj1)) SWIG_fail;
   ecode1 = SWIG_AsVal_int(obj0, &val1);
   if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "gridDefPrec" "', argument " "1"" of type '" "int""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "gridDefDatatype" "', argument " "1"" of type '" "int""'");
   } 
   arg1 = (int)(val1);
   ecode2 = SWIG_AsVal_int(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "gridDefPrec" "', argument " "2"" of type '" "int""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "gridDefDatatype" "', argument " "2"" of type '" "int""'");
   } 
   arg2 = (int)(val2);
-  gridDefPrec(arg1,arg2);
+  gridDefDatatype(arg1,arg2);
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -8086,7 +8086,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_gridInqPrec(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_gridInqDatatype(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   int arg1 ;
   int val1 ;
@@ -8094,13 +8094,13 @@ SWIGINTERN PyObject *_wrap_gridInqPrec(PyObject *SWIGUNUSEDPARM(self), PyObject 
   PyObject * obj0 = 0 ;
   int result;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:gridInqPrec",&obj0)) SWIG_fail;
+  if (!PyArg_ParseTuple(args,(char *)"O:gridInqDatatype",&obj0)) SWIG_fail;
   ecode1 = SWIG_AsVal_int(obj0, &val1);
   if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "gridInqPrec" "', argument " "1"" of type '" "int""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "gridInqDatatype" "', argument " "1"" of type '" "int""'");
   } 
   arg1 = (int)(val1);
-  result = (int)gridInqPrec(arg1);
+  result = (int)gridInqDatatype(arg1);
   resultobj = SWIG_From_int((int)(result));
   return resultobj;
 fail:
@@ -10004,7 +10004,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_zaxisDefPrec(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_zaxisDefDatatype(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   int arg1 ;
   int arg2 ;
@@ -10015,18 +10015,18 @@ SWIGINTERN PyObject *_wrap_zaxisDefPrec(PyObject *SWIGUNUSEDPARM(self), PyObject
   PyObject * obj0 = 0 ;
   PyObject * obj1 = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OO:zaxisDefPrec",&obj0,&obj1)) SWIG_fail;
+  if (!PyArg_ParseTuple(args,(char *)"OO:zaxisDefDatatype",&obj0,&obj1)) SWIG_fail;
   ecode1 = SWIG_AsVal_int(obj0, &val1);
   if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "zaxisDefPrec" "', argument " "1"" of type '" "int""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "zaxisDefDatatype" "', argument " "1"" of type '" "int""'");
   } 
   arg1 = (int)(val1);
   ecode2 = SWIG_AsVal_int(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "zaxisDefPrec" "', argument " "2"" of type '" "int""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "zaxisDefDatatype" "', argument " "2"" of type '" "int""'");
   } 
   arg2 = (int)(val2);
-  zaxisDefPrec(arg1,arg2);
+  zaxisDefDatatype(arg1,arg2);
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -10034,7 +10034,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_zaxisInqPrec(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_zaxisInqDatatype(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   int arg1 ;
   int val1 ;
@@ -10042,13 +10042,13 @@ SWIGINTERN PyObject *_wrap_zaxisInqPrec(PyObject *SWIGUNUSEDPARM(self), PyObject
   PyObject * obj0 = 0 ;
   int result;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:zaxisInqPrec",&obj0)) SWIG_fail;
+  if (!PyArg_ParseTuple(args,(char *)"O:zaxisInqDatatype",&obj0)) SWIG_fail;
   ecode1 = SWIG_AsVal_int(obj0, &val1);
   if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "zaxisInqPrec" "', argument " "1"" of type '" "int""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "zaxisInqDatatype" "', argument " "1"" of type '" "int""'");
   } 
   arg1 = (int)(val1);
-  result = (int)zaxisInqPrec(arg1);
+  result = (int)zaxisInqDatatype(arg1);
   resultobj = SWIG_From_int((int)(result));
   return resultobj;
 fail:
@@ -12474,8 +12474,8 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"gridInqYlongname", _wrap_gridInqYlongname, METH_VARARGS, NULL},
 	 { (char *)"gridInqYstdname", _wrap_gridInqYstdname, METH_VARARGS, NULL},
 	 { (char *)"gridInqYunits", _wrap_gridInqYunits, METH_VARARGS, NULL},
-	 { (char *)"gridDefPrec", _wrap_gridDefPrec, METH_VARARGS, NULL},
-	 { (char *)"gridInqPrec", _wrap_gridInqPrec, METH_VARARGS, NULL},
+	 { (char *)"gridDefDatatype", _wrap_gridDefDatatype, METH_VARARGS, NULL},
+	 { (char *)"gridInqDatatype", _wrap_gridInqDatatype, METH_VARARGS, NULL},
 	 { (char *)"gridInqXval", _wrap_gridInqXval, METH_VARARGS, NULL},
 	 { (char *)"gridInqYval", _wrap_gridInqYval, METH_VARARGS, NULL},
 	 { (char *)"gridInqXinc", _wrap_gridInqXinc, METH_VARARGS, NULL},
@@ -12535,8 +12535,8 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"zaxisInqName", _wrap_zaxisInqName, METH_VARARGS, NULL},
 	 { (char *)"zaxisInqLongname", _wrap_zaxisInqLongname, METH_VARARGS, NULL},
 	 { (char *)"zaxisInqUnits", _wrap_zaxisInqUnits, METH_VARARGS, NULL},
-	 { (char *)"zaxisDefPrec", _wrap_zaxisDefPrec, METH_VARARGS, NULL},
-	 { (char *)"zaxisInqPrec", _wrap_zaxisInqPrec, METH_VARARGS, NULL},
+	 { (char *)"zaxisDefDatatype", _wrap_zaxisDefDatatype, METH_VARARGS, NULL},
+	 { (char *)"zaxisInqDatatype", _wrap_zaxisInqDatatype, METH_VARARGS, NULL},
 	 { (char *)"zaxisDefLtype", _wrap_zaxisDefLtype, METH_VARARGS, NULL},
 	 { (char *)"zaxisInqLtype", _wrap_zaxisInqLtype, METH_VARARGS, NULL},
 	 { (char *)"zaxisInqLevelsPtr", _wrap_zaxisInqLevelsPtr, METH_VARARGS, NULL},

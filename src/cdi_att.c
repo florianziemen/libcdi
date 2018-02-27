@@ -53,7 +53,7 @@ cdi_att_t *find_att(cdi_atts_t *attsp, const char *name)
     {
       cdi_att_t *attp = atts + attid;
       if ( attp->namesz == slen && memcmp(attp->name, name, slen) == 0 )
-        return attp; /* Normal return */
+        return attp; // Normal return
     }
 
   return NULL;
@@ -200,7 +200,7 @@ int cdiInqAtt(int cdiID, int varID, int attnum, char *name, int *typep, int *len
 }
 
 
-int cdiDelAtts(int cdiID, int varID)
+int cdiDeleteAtts(int cdiID, int varID)
 {
   int status = CDI_NOERR;
 
@@ -238,7 +238,7 @@ int cdi_def_att(int indtype, int exdtype, int cdiID, int varID, const char *name
 {
   int status = CDI_NOERR;
 
-  if ( len != 0 && xp == NULL ) /* Null arg */
+  if ( len != 0 && xp == NULL ) // Null arg
     return CDI_EINVAL;
 
   cdi_atts_t *attsp = cdi_get_attsp(cdiID, varID);
@@ -257,14 +257,14 @@ int cdi_inq_att(int indtype, int cdiID, int varID, const char *name, size_t mxsz
 {
   int status = CDI_NOERR;
 
-  if ( mxsz != 0 && xp == NULL ) /* Null arg */
+  if ( mxsz != 0 && xp == NULL ) // Null arg
     return CDI_EINVAL;
 
   cdi_atts_t *attsp = cdi_get_attsp(cdiID, varID);
   xassert(attsp != NULL);
 
   cdi_att_t *attp = find_att(attsp, name);
-  if ( attp != NULL ) /* name in use */
+  if ( attp != NULL ) // name in use
     {
       if ( attp->indtype == indtype )
 	{
@@ -296,7 +296,7 @@ int cdiCopyAtts(int cdiID1, int varID1, int cdiID2, int varID2)
   cdi_atts_t *attsp1 = cdi_get_attsp(cdiID1, varID1);
   xassert(attsp1 != NULL);
 
-  for ( int attid = 0; attid < (int)attsp1->nelems; attid++ )
+  for ( size_t attid = 0; attid < attsp1->nelems; attid++ )
     {
       cdi_att_t *attp = &(attsp1->value[attid]);
       cdi_def_att(attp->indtype, attp->exdtype, cdiID2, varID2, attp->name, attp->nelems, attp->xsz, attp->xvalue);

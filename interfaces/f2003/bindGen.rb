@@ -306,6 +306,16 @@ $argumentTemplates =
 		 :callExpression => '<name>_dummy',
 		 :passAs => 'integer(kind = c_signed_char), intent(inout) :: <name>_dummy(<size>)',
 		 :postcallStatements => ""
+	 }, {	#unsigned char <name>[]
+		 :regex => '^\s*unsigned\s+char\s+(?<name>\w+)\s*\[\]\s*$',
+		 :placeholders => %w[name],
+		 :dummyName => '<name>_dummy',
+		 :acceptAs => 'integer(kind = c_signed_char), intent(inout) :: <name>_dummy(*)',
+		 :helperVars => "",
+		 :precallStatements => "",
+		 :callExpression => '<name>_dummy',
+		 :passAs => 'integer(kind = c_signed_char), intent(inout) :: <name>_dummy(*)',
+		 :postcallStatements => ""
 	 }, {	#const <integerTypes>* <name>_vec
 		 :regex => '^\s*const\s+(?<type><integerTypes>)\s*(?:\*\s*(?<name>\w+_vec)|(?<name>\w+)\[\])\s*$',
 		 :placeholders => %w[name type],
@@ -325,6 +335,16 @@ $argumentTemplates =
 		 :precallStatements => "",
 		 :callExpression => '<name>_dummy',
 		 :passAs => 'real(c_<type>), intent(in) :: <name>_dummy(*)',
+		 :postcallStatements => ""
+	 }, {	#const unsigned char <name>[]
+		 :regex => '^\s*(const\s+unsigned\s+char|unsigned\s+char\s+const)\s+(?<name>\w+)\s*\[\]\s*$',
+		 :placeholders => %w[name],
+		 :dummyName => '<name>_dummy',
+		 :acceptAs => 'integer(kind = c_signed_char), intent(in) :: <name>_dummy(*)',
+		 :helperVars => "",
+		 :precallStatements => "",
+		 :callExpression => '<name>_dummy',
+		 :passAs => 'integer(kind = c_signed_char), intent(in) :: <name>_dummy(*)',
 		 :postcallStatements => ""
 	 }, {	#const unsigned char <name>[<size>]
 		 :regex => '^\s*(const\s+unsigned\s+char|unsigned\s+char\s+const)\s+(?<name>\w+)\s*\[\s*(?<size>[^\]]+)\s*\]\s*$',

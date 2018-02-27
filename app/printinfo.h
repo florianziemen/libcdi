@@ -1,10 +1,16 @@
 // This file is used in CDI and CDO !!!
 
 #if defined (HAVE_CONFIG_H)
-#  include "../src/config.h"
+#include "../src/config.h"
 #endif
 
 #include <stdio.h>
+
+#ifdef CDO
+#define  streamInqFiletype        pstreamInqFiletype
+#define  streamInqByteorder       pstreamInqByteorder
+#define  streamInqTimestep        pstreamInqTimestep
+#endif
 
 #define DATE_FORMAT "%5.4d-%2.2d-%2.2d"
 #define TIME_FORMAT "%2.2d:%2.2d:%2.2d"
@@ -56,52 +62,32 @@ void printFiletype(int streamID, int vlistID)
 {
   int filetype = streamInqFiletype(streamID);
 
+  // clang-format off
   switch ( filetype )
     {
-    case CDI_FILETYPE_GRB:
-      printf("GRIB");
-      break;
-    case CDI_FILETYPE_GRB2:
-      printf("GRIB2");
-      break;
-    case CDI_FILETYPE_NC:
-      printf("NetCDF");
-      break;
-    case CDI_FILETYPE_NC2:
-      printf("NetCDF2");
-      break;
-    case CDI_FILETYPE_NC4:
-      printf("NetCDF4");
-      break;
-    case CDI_FILETYPE_NC4C:
-      printf("NetCDF4 classic");
-      break;
-    case CDI_FILETYPE_SRV:
-      printf("SERVICE");
-      break;
-    case CDI_FILETYPE_EXT:
-      printf("EXTRA");
-      break;
-    case CDI_FILETYPE_IEG:
-      printf("IEG");
-      break;
-    default:
-      printf("  File format: unsupported filetype %d" , filetype);
-      break;
+    case CDI_FILETYPE_GRB:  printf("GRIB");  break;
+    case CDI_FILETYPE_GRB2: printf("GRIB2");  break;
+    case CDI_FILETYPE_NC:   printf("NetCDF");  break;
+    case CDI_FILETYPE_NC2:  printf("NetCDF2");  break;
+    case CDI_FILETYPE_NC4:  printf("NetCDF4");  break;
+    case CDI_FILETYPE_NC4C: printf("NetCDF4 classic");  break;
+    case CDI_FILETYPE_NC5:  printf("NetCDF5");  break;
+    case CDI_FILETYPE_SRV:  printf("SERVICE");  break;
+    case CDI_FILETYPE_EXT:  printf("EXTRA");  break;
+    case CDI_FILETYPE_IEG:  printf("IEG");  break;
+    default: printf("  File format: unsupported filetype %d" , filetype);  break;
     }
 
   if ( filetype == CDI_FILETYPE_SRV || filetype == CDI_FILETYPE_EXT || filetype == CDI_FILETYPE_IEG )
     {
       switch ( streamInqByteorder(streamID) )
 	{
-	case CDI_BIGENDIAN:
-	  printf("  BIGENDIAN"); break;
-	case CDI_LITTLEENDIAN:
-	  printf("  LITTLEENDIAN"); break;
-	default:
-	  printf("  byteorder: %d undefined", streamInqByteorder(streamID)); break;
+	case CDI_BIGENDIAN:    printf("  BIGENDIAN");  break;
+	case CDI_LITTLEENDIAN: printf("  LITTLEENDIAN");  break;
+	default: printf("  byteorder: %d undefined", streamInqByteorder(streamID));  break;
 	}
     }
+  // clang-format on
 
   if ( filetype == CDI_FILETYPE_GRB || filetype == CDI_FILETYPE_NC4 || filetype == CDI_FILETYPE_NC4C )
     {
@@ -199,9 +185,9 @@ void print_xyvals2D(int gridID, int dig)
       gridInqXunits(gridID, xunits);
       gridInqYunits(gridID, yunits);
 
-      int gridsize = gridInqSize(gridID);
-      double *xvals2D = (double*) malloc((size_t)gridsize*sizeof(double));
-      double *yvals2D = (double*) malloc((size_t)gridsize*sizeof(double));
+      size_t gridsize = gridInqSize(gridID);
+      double *xvals2D = (double*) malloc(gridsize*sizeof(double));
+      double *yvals2D = (double*) malloc(gridsize*sizeof(double));
 
       gridInqXvals(gridID, xvals2D);
       gridInqYvals(gridID, yvals2D);
@@ -210,7 +196,7 @@ void print_xyvals2D(int gridID, int dig)
       double xlast  = xvals2D[0];
       double yfirst = yvals2D[0];
       double ylast  = yvals2D[0];
-      for ( int i = 1; i < gridsize; i++ )
+      for ( size_t i = 1; i < gridsize; i++ )
         {
           if ( xvals2D[i] < xfirst ) xfirst = xvals2D[i];
           if ( xvals2D[i] > xlast  ) xlast  = xvals2D[i];
@@ -245,16 +231,16 @@ void print_xyvals2D(int gridID, int dig)
             }
         }
 
-      fprintf(stdout, "%33s : %.*g to %.*g", xname, dig, xfirst, dig, xlast);
-      if ( IS_NOT_EQUAL(xinc, 0) )
-        fprintf(stdout, " by %.*g", dig, xinc);
+      fprintf(stdout, "%33s : %.*g", xname, dig, xfirst);
+      if ( gridsize > 1 ) fprintf(stdout, " to %.*g", dig, xlast);
+      if ( IS_NOT_EQUAL(xinc, 0) ) fprintf(stdout, " by %.*g", dig, xinc);
       fprintf(stdout, " %s", xunits);
       if ( gridIsCircular(gridID) ) fprintf(stdout, "  circular");
       fprintf(stdout, "\n");
-      fprintf(stdout, "%33s : %.*g to %.*g", yname, dig, yfirst, dig, ylast);
-      if ( IS_NOT_EQUAL(yinc, 0) )
-        fprintf(stdout, " by %.*g", dig, yinc);
-      fprintf(stdout, " %s", xunits);
+      fprintf(stdout, "%33s : %.*g", yname, dig, yfirst);
+      if ( gridsize > 1 ) fprintf(stdout, " to %.*g", dig, ylast);
+      if ( IS_NOT_EQUAL(yinc, 0) ) fprintf(stdout, " by %.*g", dig, yinc);
+      fprintf(stdout, " %s", yunits);
       fprintf(stdout, "\n");
 
       free(xvals2D);
@@ -271,12 +257,12 @@ void printGridInfoKernel(int gridID, int index, bool lproj)
     fprintf(stderr, "Internal problem (%s): sub grid not equal GRID_PROJECTION!\n", __func__);
 
   int trunc    = gridInqTrunc(gridID);
-  int gridsize = gridInqSize(gridID);
-  int xsize    = gridInqXsize(gridID);
-  int ysize    = gridInqYsize(gridID);
-  int xysize   = xsize*ysize;
+  size_t gridsize = gridInqSize(gridID);
+  size_t xsize    = gridInqXsize(gridID);
+  size_t ysize    = gridInqYsize(gridID);
+  size_t xysize   = xsize*ysize;
 
-  // int prec     = gridInqPrec(gridID);
+  // int prec     = gridInqDatatype(gridID);
   // int dig = (prec == CDI_DATATYPE_FLT64) ? 15 : 7;
   int dig = 7;
 #ifdef CDO
@@ -298,6 +284,7 @@ void printGridInfoKernel(int gridID, int index, bool lproj)
   if ( gridtype == GRID_LONLAT     ||
        gridtype == GRID_PROJECTION ||
        gridtype == GRID_GENERIC    ||
+       gridtype == GRID_CHARXY    ||
        gridtype == GRID_GAUSSIAN   ||
        gridtype == GRID_GAUSSIAN_REDUCED )
     {
@@ -306,11 +293,11 @@ void printGridInfoKernel(int gridID, int index, bool lproj)
 #ifdef CDO
           set_text_color(stdout, RESET, GREEN);
 #endif
-          fprintf(stdout, "points=%d", gridsize);
+          fprintf(stdout, "points=%zu", gridsize);
           if ( gridtype == GRID_GAUSSIAN_REDUCED )
-            fprintf(stdout, "  nlat=%d", ysize);
+            fprintf(stdout, "  nlat=%zu", ysize);
           else if ( xysize )
-            fprintf(stdout, " (%dx%d)", xsize, ysize);
+            fprintf(stdout, " (%zux%zu)", xsize, ysize);
 
           if ( gridtype == GRID_GAUSSIAN || gridtype == GRID_GAUSSIAN_REDUCED )
             fprintf(stdout, "  np=%d", gridInqNP(gridID));
@@ -354,7 +341,7 @@ void printGridInfoKernel(int gridID, int index, bool lproj)
 #ifdef CDO
       set_text_color(stdout, RESET, GREEN);
 #endif
-      fprintf(stdout, "points=%d  nsp=%d  truncation=%d", gridsize, gridsize/2, trunc);
+      fprintf(stdout, "points=%zu  nsp=%zu  truncation=%d", gridsize, gridsize/2, trunc);
       if ( gridInqComplexPacking(gridID) ) fprintf(stdout, "  complexPacking");
       my_reset_text_color(stdout);
       fprintf(stdout, "\n");
@@ -364,7 +351,7 @@ void printGridInfoKernel(int gridID, int index, bool lproj)
 #ifdef CDO
       set_text_color(stdout, RESET, GREEN);
 #endif
-      fprintf(stdout, "points=%d  nfc=%d  truncation=%d\n", gridsize, gridsize/2, trunc);
+      fprintf(stdout, "points=%zu  nfc=%zu  truncation=%d\n", gridsize, gridsize/2, trunc);
       my_reset_text_color(stdout);
     }
   else if ( gridtype == GRID_GME )
@@ -374,7 +361,7 @@ void printGridInfoKernel(int gridID, int index, bool lproj)
 #ifdef CDO
       set_text_color(stdout, RESET, GREEN);
 #endif
-      fprintf(stdout, "points=%d  nd=%d  ni=%d\n", gridsize, nd, ni);
+      fprintf(stdout, "points=%zu  nd=%d  ni=%d\n", gridsize, nd, ni);
       my_reset_text_color(stdout);
     }
   else if ( gridtype == GRID_CURVILINEAR || gridtype == GRID_UNSTRUCTURED )
@@ -383,9 +370,9 @@ void printGridInfoKernel(int gridID, int index, bool lproj)
       set_text_color(stdout, RESET, GREEN);
 #endif
       if ( gridtype == GRID_CURVILINEAR )
-        fprintf(stdout, "points=%d (%dx%d)", gridsize, xsize, ysize);
+        fprintf(stdout, "points=%zu (%zux%zu)", gridsize, xsize, ysize);
       else
-        fprintf(stdout, "points=%d", gridsize);
+        fprintf(stdout, "points=%zu", gridsize);
 
       if ( gridtype == GRID_UNSTRUCTURED && gridInqNvertex(gridID) > 0 )
         fprintf(stdout, "  nvertex=%d", gridInqNvertex(gridID));
@@ -416,9 +403,9 @@ void printGridInfoKernel(int gridID, int index, bool lproj)
       set_text_color(stdout, RESET, GREEN);
 #endif
       if ( ysize == 0 )
-        fprintf(stdout, "points=%d\n", gridsize);
+        fprintf(stdout, "points=%zu\n", gridsize);
       else
-        fprintf(stdout, "points=%d (%dx%d)\n", gridsize, xsize, ysize);
+        fprintf(stdout, "points=%zu (%zux%zu)\n", gridsize, xsize, ysize);
       my_reset_text_color(stdout);
     }
 
@@ -475,7 +462,7 @@ void printZaxisInfo(int vlistID)
       int zaxistype = zaxisInqType(zaxisID);
       int ltype     = zaxisInqLtype(zaxisID);
       int levelsize = zaxisInqSize(zaxisID);
-      // int prec      = zaxisInqPrec(zaxisID);
+      // int prec      = zaxisInqDatatype(zaxisID);
       // int dig = (prec == CDI_DATATYPE_FLT64) ? 15 : 7;
       int dig = 7;
 #ifdef CDO
@@ -584,7 +571,7 @@ void printZaxisInfo(int vlistID)
           if ( number > 0 )
             {
               fprintf(stdout, "%33s : ", "zaxis");
-              fprintf(stdout, "number = %d\n", number);
+              fprintf(stdout, "number=%d\n", number);
             }
 
           unsigned char uuidOfVGrid[CDI_UUID_SIZE];

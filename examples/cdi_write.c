@@ -7,7 +7,7 @@ int main(void)
   const int nlat =  6; // Number of latitudes
   const int nlev =  5; // Number of levels
   const int nts  =  3; // Number of time steps
-  int nmiss = 0;
+  size_t nmiss = 0;
   double lons[] = {0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330};
   double lats[] = {-75, -45, -15, 15, 45, 75};
   double levs[] = {101300, 92500, 85000, 50000, 20000};
@@ -33,8 +33,8 @@ int main(void)
   int vlistID = vlistCreate();
 
   // Define the variables
-  int varID1 = vlistDefVar(vlistID, gridID, zaxisID1, TSTEP_INSTANT);
-  int varID2 = vlistDefVar(vlistID, gridID, zaxisID2, TSTEP_INSTANT);
+  int varID1 = vlistDefVar(vlistID, gridID, zaxisID1, TIME_VARYING);
+  int varID2 = vlistDefVar(vlistID, gridID, zaxisID2, TIME_VARYING);
 
   // Define the variable names
   vlistDefVarName(vlistID, varID1, "varname1");
@@ -68,8 +68,8 @@ int main(void)
       streamDefTimestep(streamID, tsID);
 
       // Init var1 and var2
-      for ( int i = 0; i < nlon*nlat;      i++ ) var1[i] = 1.1;
-      for ( int i = 0; i < nlon*nlat*nlev; i++ ) var2[i] = 2.2;
+      for ( size_t i = 0; i < nlon*nlat;      i++ ) var1[i] = 1.1;
+      for ( size_t i = 0; i < nlon*nlat*nlev; i++ ) var2[i] = 2.2;
 
       // Write var1 and var2
       streamWriteVar(streamID, varID1, var1, nmiss);

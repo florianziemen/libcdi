@@ -102,7 +102,7 @@ void zaxisGetTypeDescription(int zaxisType, int *outPositive, const char **outNa
     {
       if (outPositive) *outPositive = ZaxistypeEntry[zaxisType].positive;
       if (outName) *outName = ZaxistypeEntry[zaxisType].name;
-      if (outLongName) *outLongName = ZaxistypeEntry[zaxisType].longname;
+      if (outLongName && zaxisType != ZAXIS_GENERIC) *outLongName = ZaxistypeEntry[zaxisType].longname;
       if (outStdName) *outStdName = ZaxistypeEntry[zaxisType].stdname;
       if (outUnit) *outUnit = ZaxistypeEntry[zaxisType].units;
     }
@@ -139,7 +139,7 @@ void zaxis_init(zaxis_t *zaxisptr)
   zaxisptr->positive      = 0;
   zaxisptr->scalar        = 0;
   zaxisptr->direction     = 0;
-  zaxisptr->prec          = 0;
+  zaxisptr->datatype      = 0;
   zaxisptr->size          = 0;
   zaxisptr->vctsize       = 0;
   zaxisptr->vct           = NULL;
@@ -206,7 +206,7 @@ int zaxisCreate_(int zaxistype, int size, int id)
 
   int zaxisID = zaxisptr->self;
   zaxisDefName(zaxisID, ZaxistypeEntry[zaxistype].name);
-  zaxisDefLongname(zaxisID, ZaxistypeEntry[zaxistype].longname);
+  if ( zaxistype != ZAXIS_GENERIC ) zaxisDefLongname(zaxisID, ZaxistypeEntry[zaxistype].longname);
   zaxisDefUnits(zaxisID, ZaxistypeEntry[zaxistype].units);
 
   if ( *ZaxistypeEntry[zaxistype].stdname )
@@ -387,7 +387,7 @@ The function @func{cdiZaxisDefKeyStr} defines a CDI Z-axis string value from a k
 */
 int cdiZaxisDefKeyStr(int zaxisID, int key, int size, const char *mesg)
 {
-  if ( size < 1 || mesg == NULL || *mesg == 0 ) return -1;
+  if ( size < 1 || mesg == NULL ) return -1;
 
   zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
 
@@ -659,22 +659,22 @@ void zaxisInqStdname(int zaxisID, char *stdname)
 }
 
 
-void zaxisDefPrec(int zaxisID, int prec)
+void zaxisDefDatatype(int zaxisID, int datatype)
 {
   zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
 
-  if ( zaxisptr->prec != prec )
+  if ( zaxisptr->datatype != datatype )
     {
-      zaxisptr->prec = prec;
+      zaxisptr->datatype = datatype;
       reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
     }
 }
 
 
-int zaxisInqPrec(int zaxisID)
+int zaxisInqDatatype(int zaxisID)
 {
   zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
-  return zaxisptr->prec;
+  return zaxisptr->datatype;
 }
 
 
@@ -783,20 +783,20 @@ void zaxisDefLevels(int zaxisID, const double *levels)
 }
 
 
-void zaxisDefCvals(int zaxisID, const char **cvals, size_t clen)
+void zaxisDefCvals(int zaxisID, const char **cvals, int clen)
 {
   zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
-  size_t size = (size_t)zaxisptr->size;
+  int size = zaxisptr->size;
 
   if ( cvals && clen )
     {
       zaxisptr->clength = clen;
-      zaxisptr->cvals = (char**) Malloc(size*sizeof(char *));
+      zaxisptr->cvals = (char**) Malloc((size_t)size*sizeof(char *));
 
-      for ( size_t ilev = 0; ilev < size; ++ilev )
+      for ( int ilev = 0; ilev < size; ++ilev )
         {
-          zaxisptr->cvals[ilev] = Malloc(clen*sizeof(char));
-          memcpy(zaxisptr->cvals[ilev],cvals[ilev], clen*sizeof(char));
+          zaxisptr->cvals[ilev] = Malloc((size_t)clen*sizeof(char));
+          memcpy(zaxisptr->cvals[ilev],cvals[ilev], (size_t)clen*sizeof(char));
         }
       reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
     }
@@ -1406,9 +1406,9 @@ void zaxisPrintKernel(zaxis_t *zaxisptr, FILE *fp)
   int zaxisID = zaxisptr->self;
   int type    = zaxisptr->type;
   int nlevels = zaxisptr->size;
-  int prec    = zaxisptr->prec;
+  int datatype = zaxisptr->datatype;
 
-  int dig = (prec == CDI_DATATYPE_FLT64) ? 15 : 7;
+  int dig = (datatype == CDI_DATATYPE_FLT64) ? 15 : 7;
 
   int nbyte;
   int nbyte0 = 0;
@@ -1442,7 +1442,7 @@ void zaxisPrintKernel(zaxis_t *zaxisptr, FILE *fp)
 
   if ( zaxisptr->cvals )
     {
-      dig = prec;
+      dig = datatype;
       nbyte0 = fprintf(fp, "types     = ");
       nbyte = nbyte0;
       for ( int levelID = 0; levelID < nlevels; levelID++ )
@@ -1565,7 +1565,7 @@ int zaxisCompareP(zaxis_t *z1, zaxis_t *z2)
   diff |= (z1->type != z2->type)
     | (z1->ltype != z2->ltype)
     | (z1->direction != z2->direction)
-    | (z1->prec != z2->prec)
+    | (z1->datatype != z2->datatype)
     | (z1->size != z2->size)
     | (z1->vctsize != z2->vctsize)
     | (z1->positive != z2->positive);
@@ -1739,7 +1739,7 @@ zaxisUnpack(char * unpackBuffer, int unpackBufferSize,
     = zaxisNewEntry(force_id ? namespaceAdaptKey(intBuffer[0], originNamespace)
                     : CDI_UNDEFID);
 
-  zaxisP->prec      = intBuffer[1];
+  zaxisP->datatype  = intBuffer[1];
   zaxisP->type      = intBuffer[2];
   zaxisP->ltype     = intBuffer[3];
   zaxisP->size      = intBuffer[4];
@@ -1820,7 +1820,7 @@ zaxisUnpack(char * unpackBuffer, int unpackBufferSize,
   }
 
   serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
-                  &zaxisP->positive, 1, CDI_DATATYPE_UCHAR, context);
+                  &zaxisP->positive, 1, CDI_DATATYPE_UINT, context);
 
   if (memberMask & zaxisHasUUIDFlag)
     serializeUnpack(unpackBuffer, unpackBufferSize, unpackBufferPos,
@@ -1840,7 +1840,7 @@ zaxisPack(void * voidP, void * packBuffer, int packBufferSize,
   uint32_t d;
 
   intBuffer[0]  = zaxisP->self;
-  intBuffer[1]  = zaxisP->prec;
+  intBuffer[1]  = zaxisP->datatype;
   intBuffer[2]  = zaxisP->type;
   intBuffer[3]  = zaxisP->ltype;
   intBuffer[4]  = zaxisP->size;
@@ -1915,7 +1915,7 @@ zaxisPack(void * voidP, void * packBuffer, int packBufferSize,
                         packBuffer, packBufferSize, packBufferPos, context);
   }
 
-  serializePack(&zaxisP->positive, 1, CDI_DATATYPE_UCHAR,
+  serializePack(&zaxisP->positive, 1, CDI_DATATYPE_UINT,
                 packBuffer, packBufferSize, packBufferPos, context);
 
   if (memberMask & zaxisHasUUIDFlag)

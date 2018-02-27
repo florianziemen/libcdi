@@ -4,7 +4,8 @@
 
       INCLUDE 'cdi.inc'
 
-      INTEGER nlon, nlat, nlev, nts
+      INTEGER nlon, nlat
+      INTEGER nlev, nts
       PARAMETER (nlon = 12)   ! Number of longitudes
       PARAMETER (nlat =  6)   ! Number of latitudes
       PARAMETER (nlev =  5)   ! Number of levels
@@ -12,7 +13,8 @@
 
       INTEGER gridID, zaxisID1, zaxisID2, taxisID
       INTEGER vlistID, varID1, varID2, streamID, tsID
-      INTEGER nmiss, status, vdate, vtime
+      INTEGER status, vdate, vtime
+      INTEGER nmiss
       REAL*8 var1(nlon*nlat), var2(nlon*nlat*nlev)
 
 !     Open the dataset
