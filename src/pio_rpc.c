@@ -6,6 +6,7 @@
 #include <stdbool.h>
 
 #include "cdi.h"
+#include "dmemory.h"
 #include "resource_handle.h"
 /* FIXME: no longer needed when taxis updates are sent as separate data */
 #include "taxis.h"
@@ -36,23 +37,43 @@ computeClientStreamBufSize(int streamID, const struct collSpec *collector)
   struct clientBufSize rmaSizeSpec = { .bufSize = sizeof(struct winHeaderEntry), .numDataRecords = 1, .numRPCRecords = 0 };
   int vlistID = streamInqVlist(streamID);
   size_t nvars = (size_t) vlistNvars(vlistID);
-  for (size_t varID = 0; varID < nvars; ++varID)
+  if (collector->partDesc)
     {
-      size_t chunkSize;
-      {
-        size_t varSize = cdiPioVlistInqVarSize(vlistID, (int) varID);
-        chunkSize = (size_t) (ceilf(cdiPIOpartInflate_ * (float) varSize / (float) collector->numClients));
-      }
-      rmaSizeSpec.numDataRecords += 2;
-      rmaSizeSpec.bufSize += chunkSize * sizeof(double)
-                             /* re-align chunk to multiple of double size */
-                             + sizeof(double)
-                             - 1
-                             /* one header for data record, one for corresponding part
-                              * descriptor*/
-                             + 2 * sizeof(struct winHeaderEntry)
-                             /* FIXME: heuristic for size of packed Xt_idxlist */
-                             + sizeof(Xt_int) * chunkSize * 3;
+      /* the distribution of data is fully prescribed in this case,
+       * i.e. memory needed can be computed exactly for the double
+       * precision case */
+      Xt_idxlist *partDesc = collector->partDesc;
+      for (size_t varID = 0; varID < nvars; ++varID)
+        {
+          size_t chunkSize = (size_t) (xt_idxlist_get_num_indices(partDesc[varID]));
+          rmaSizeSpec.numDataRecords += 2;
+          rmaSizeSpec.bufSize += chunkSize * sizeof(double)
+                                 /* one header for data record, one for corresponding part
+                                  * descriptor*/
+                                 + 2 * sizeof(struct winHeaderEntry);
+        }
+    }
+  else
+    {
+      /* the data distribution is unknown, use heuristic  */
+      for (size_t varID = 0; varID < nvars; ++varID)
+        {
+          size_t chunkSize;
+          {
+            size_t varSize = cdiPioVlistInqVarSize(vlistID, (int) varID);
+            chunkSize = (size_t) (ceilf(cdiPIOpartInflate_ * (float) varSize / (float) collector->numClients));
+          }
+          rmaSizeSpec.numDataRecords += 2;
+          rmaSizeSpec.bufSize += chunkSize * sizeof(double)
+                                 /* re-align chunk to multiple of double size */
+                                 + sizeof(double)
+                                 - 1
+                                 /* one header for data record, one for corresponding part
+                                  * descriptor*/
+                                 + 2 * sizeof(struct winHeaderEntry)
+                                 /* FIXME: heuristic for size of packed Xt_idxlist */
+                                 + sizeof(Xt_int) * chunkSize * 3;
+        }
     }
 
   // memory required for the function calls encoded
@@ -69,3 +90,37 @@ computeClientStreamBufSize(int streamID, const struct collSpec *collector)
   rmaSizeSpec.bufSize = roundUpToMultiple(rmaSizeSpec.bufSize, PIO_WIN_ALIGN);
   return rmaSizeSpec;
 }
+
+void
+cdiPioDestroyPartDescPreset(size_t nRanks, size_t nVars, struct partDescPreset *deco)
+{
+  Xt_idxlist(*restrict partDesc)[nRanks] = (Xt_idxlist(*)[nRanks]) deco->lists;
+  Xt_uid(*restrict partDescUID)[nRanks] = (Xt_uid(*restrict)[nRanks]) deco->uids;
+  deco->lists = NULL;
+  deco->uids = NULL;
+  for (size_t k = 0; k < nRanks; ++k)
+    {
+      for (size_t i = 0; i < nVars; ++i)
+        {
+          Xt_uid uid = partDescUID[i][k];
+          if (uid != 0)
+            {
+              xt_idxlist_delete(partDesc[i][k]);
+              for (size_t j = i + 1; j < nVars; ++j)
+                if (partDescUID[j][k] == uid) partDescUID[j][k] = 0;
+            }
+        }
+    }
+  Free(partDesc);
+  Free(partDescUID);
+}
+
+/*
+ * Local Variables:
+ * c-file-style: "Java"
+ * c-basic-offset: 2
+ * indent-tabs-mode: nil
+ * show-trailing-whitespace: t
+ * require-trailing-newline: t
+ * End:
+ */

@@ -79,6 +79,7 @@ static int cdiPioInit_fwrap(int commSuper, int confResH, int *pioNamespace)
 FCALLSCFUN3 (INT, cdiPioInit_fwrap, CDIPIOINIT, cdipioinit, INT, INT, PINT)
 FCALLSCSUB0 (pioWriteTimestep, PIOWRITETIMESTEP, piowritetimestep)
 FCALLSCSUB0 (cdiPioRDMAProgress, CDIPIORDMAPROGRESS, cdipiordmaprogress)
+FCALLSCSUB3 (cdiPioStreamDefDecomposedVlist, CDIPIOSTREAMDEFDECOMPOSEDVLIST, cdipiostreamdefdecomposedvlist, INT, INT, PVOID)
 static void streamWriteVarPart_fwrap(int streamID, int varID, double *data, int nmiss, void *partDesc)
 {
   streamWriteVarPart(streamID, varID, data, nmiss, (*(Xt_idxlist *)partDesc));

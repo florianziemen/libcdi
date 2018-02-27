@@ -79,6 +79,12 @@
 !                     cdiPioRDMAProgress
       EXTERNAL        cdiPioRDMAProgress
 
+!                     cdiPioStreamDefDecomposedVlist
+!                                    (INTEGER         streamID,
+!                                     INTEGER         vlistID,
+!                                     TYPE(XT_IDXLIST)partDesc(*))
+      EXTERNAL        cdiPioStreamDefDecomposedVlist
+
 !                     streamWriteVarPart
 !                                    (INTEGER         streamID,
 !                                     INTEGER         varID,
