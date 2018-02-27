@@ -83,8 +83,8 @@ int   subtypeNentries(int subtypeID);
 
 /* prototypes: accessing subtype entries */
 void  subtypeDefEntryDataP(struct subtype_entry_t *subtype_entry_ptr, int key, int val, char *cval);
-void  subtypeGetCharaxisDataP(struct subtype_entry_t *subtype_entry_ptr, int key, int *val, char *cval)
-void  subtypeGetCharaxisData(int subtypeID, int key, int *val, char *cval)
+int  subtypeGetCharaxisDataP(subtype_t *subtype_ptr, int key, int *val, char *cval);
+int  subtypeGetCharaxisData(int subtypeID, int key, int *val, char *cval);
 
 /* prototypes: tile implementations */
 void  tilesetInsertP(subtype_t *s1, subtype_t *s2);
