@@ -655,14 +655,15 @@ int subtypeGetCharaxisDataP(subtype_t* subtype_ptr, int key, int *val, char *cva
       subtype_entry_ptr = subtype_entry_ptr->next;
       if ( subtype_entry_ptr == NULL )
         return 1;
-      if ( key > subtype_entry_ptr->self )
+      if ( key < subtype_entry_ptr->self )
         return 2;
     }
 
   struct subtype_attr_t* att_ptr = subtype_entry_ptr->atts;
   if (att_ptr == NULL)  Error("Internal error!");
 
-  cval = att_ptr->cval;
+  if ( att_ptr->cval )
+    strcpy(cval, att_ptr->cval);
   *val = att_ptr->val;
   return 0;
 }
