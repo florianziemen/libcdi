@@ -85,6 +85,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
   size_t varslice_size = 0, varsliceF_size = 0;
 #if USE_MPI
   int *chunks = NULL, *displs = NULL, comm_size = 1;
+  Xt_idxlist *partDescPreset = NULL;
 #endif
 
 #if USE_MPI
@@ -114,6 +115,10 @@ modelRun(struct model_config setup, MPI_Comm comm)
   vlistID = vlistCreate ();
 
   varDesc = (struct varDesc_t *)Malloc(nVars * sizeof (varDesc[0]));
+#if USE_MPI
+  if (setup.flags & PIO_WRITE_CONFIG_PRESET_DECOMPOSITION_FLAG)
+    partDescPreset = (Xt_idxlist *)Malloc(nVars * sizeof (*partDescPreset));
+#endif
   for (size_t varIdx = 0; varIdx < nVars; varIdx++ )
     {
       int varLevs = (int)cdi_repeatable_random()%4;
@@ -182,6 +187,8 @@ modelRun(struct model_config setup, MPI_Comm comm)
                 .nstrides = chunkSize, .stride = 1 }, 1);
         partDescriptionSet: ;
       }
+      if (setup.flags & PIO_WRITE_CONFIG_PRESET_DECOMPOSITION_FLAG)
+        partDescPreset[varIdx] = varDesc[varIdx].partDesc;
 #endif
       varDesc[varIdx].code = GRIB_USERDEF + (int)varIdx;
       vlistDefVarCode(vlistID, varDesc[varIdx].id, varDesc[varIdx].code);
@@ -201,7 +208,12 @@ modelRun(struct model_config setup, MPI_Comm comm)
 
       int streamID = composeStream(&filename, fname_prefix, tfID, setup.suffix,
                                    setup.filetype);
-      streamDefVlist(streamID, vlistID);
+#ifdef USE_MPI
+      if (partDescPreset)
+        cdiPioStreamDefDecomposedVlist(streamID, vlistID, partDescPreset);
+      else
+#endif
+        streamDefVlist(streamID, vlistID);
 
       vdate = 19850101;
       vtime = 120000;
@@ -357,6 +369,7 @@ modelRun(struct model_config setup, MPI_Comm comm)
     }
   gridDestroy ( gridID );
 #if USE_MPI
+  Free(partDescPreset);
   Free(displs);
   Free(chunks);
   Free(var);
