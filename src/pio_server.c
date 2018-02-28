@@ -340,6 +340,170 @@ buildVarXmap(struct Xt_offset_ext *restrict partExts,
   return gatherXmap;
 }
 
+#ifdef HAVE_PARALLEL_NC4
+/*
+ * Given a divisor @a composite_div,
+ * find subset $F$ of prime divisors of @a composite_div such that the
+ * product of $F$ is less than npartMax and maximal
+ */
+int
+findMaxDivision(int npartMax, int composite_div)
+{
+  uint32_t factors[31], *factors_ = factors;
+  xassert(composite_div > 0);
+  int numFactors
+    = PPM_prime_factorization_32((uint32_t)composite_div, &factors_);
+  /* try to use prime factors */
+  uint_fast32_t divAttempt, maxDiv = 1;
+  /* test all possible assignments of factors, starting with
+   * only one assigned (omitting no assigned case because that would
+   * never be better than start value of maxDiv */
+  for (int numAssigned = 1; numAssigned <= numFactors; ++numAssigned)
+    {
+      uint_fast32_t pattern = (UINT32_C(1) << numAssigned) - 1,
+        lastPattern = pattern << (numFactors - numAssigned);
+      do {
+        divAttempt = 1;
+        /* loop over all factors */
+        for (uint_fast32_t i = 0; i < (uint_fast32_t)numFactors; ++i)
+          {
+            uint_fast32_t assigned = (pattern >> i) & 1;
+            if (assigned) divAttempt *= factors[i];
+          }
+        if (divAttempt <= npartMax && divAttempt > maxDiv)
+          maxDiv = divAttempt;
+        /* find next sequence of numAssigned set bits and numFactors
+         * - numFactors unset bits */
+        {
+          uint_fast32_t t;
+#if HAVE_DECL___BUILTIN_CTZ
+          t = pattern | (pattern - 1);
+          pattern = (t + 1)
+            | (((~t & -~t) - 1) >> (__builtin_ctz((unsigned)pattern) + 1));
+#else
+          t = (pattern | (pattern - 1)) + 1;
+          pattern = t | ((((t & -t) / (pattern & -pattern)) >> 1) - 1);
+#endif
+        }
+      } while (pattern <= lastPattern);
+    }
+  return maxDiv;
+}
+
+static void
+queryVarBounds(struct PPM_extent varShape[3], int vlistID, int varID)
+{
+  int sizes[3];
+  cdiPioQueryVarDims(sizes, vlistID, varID);
+  for (unsigned i = 0; i < 3; ++i)
+    varShape[i].first = 0, varShape[i].size = sizes[i];
+}
+
+struct xyzDims
+{
+  int sizes[3];
+};
+
+static struct xyzDims
+varDimsCollGridMax(const struct PPM_extent varDims[3])
+{
+  struct xyzDims collGrid = { { 1, 1, 1 } };
+  int collDiv = commInqSizeColl();
+  for (size_t i = 3; i > 0; --i)
+    {
+      int usedDiv = collGrid.sizes[i-1]
+        = findMaxDivision(varDims[i-1].size, collDiv);
+      collDiv /= usedDiv;
+    }
+  return collGrid;
+}
+
+/* compute distribution of collectors such that number of collectors
+ * <= number of variable grid cells in each dimension */
+static struct xyzDims
+varDimsCollGridMatch(const struct PPM_extent varDims[3])
+{
+  struct xyzDims collGrid = { { 1, 1, 1 } };
+  /* because of storage order, dividing dimension 3 first is preferred */
+  for (int i = 0; i < numPioPrimes; ++i)
+    {
+      for (int dim = 2; dim >=0; --dim)
+        if (collGrid.sizes[dim] * pioPrimes[i] <= varDims[dim].size)
+          {
+            collGrid.sizes[dim] *= pioPrimes[i];
+            goto nextPrime;
+          }
+      /* no easy I/O decomposition found, do exhaustive search for not
+       * necessarily perfect decomposition */
+      return varDimsCollGridMax(varDims);
+      nextPrime:
+      ;
+    }
+  return collGrid;
+}
+
+
+
+static void
+myVarPart(struct PPM_extent varShape[3], struct xyzDims collGrid,
+          struct PPM_extent myPart[3])
+{
+  int32_t myCollGridCoord[3];
+  struct PPM_extent collGridShape[3];
+  int collGridSize = 1;
+  for (size_t i = 0; i < 3; ++i)
+    {
+      collGridShape[i].first = 0;
+      collGridShape[i].size = collGrid.sizes[i];
+      collGridSize *= collGrid.sizes[i];
+    }
+  int collRank = commInqRankColl();
+  if (collRank < collGridSize)
+    {
+      PPM_lidx2rlcoord_e(3, collGridShape, collRank, myCollGridCoord);
+      xdebug("my coord: (%d, %d, %d)", myCollGridCoord[0], myCollGridCoord[1],
+             myCollGridCoord[2]);
+      PPM_uniform_partition_nd(3, varShape, collGrid.sizes,
+                               myCollGridCoord, myPart);
+    }
+  else
+    for (size_t i = 0; i < 3; ++i)
+      myPart[i].first = myPart[i].size = 0;
+}
+
+static void
+cdiPioNetCDFParChunk(int vlistID, int varID,
+                     Xt_idxlist *preWriteChunk, struct PPM_extent varChunk[3])
+{
+  struct PPM_extent varShape[3];
+  queryVarBounds(varShape, vlistID, varID);
+  const struct xyzDims collGrid = varDimsCollGridMatch(varShape);
+  xdebug("writing varID %d with dimensions: "
+         "x=%d, y=%d, z=%d,\n"
+         "found distribution with dimensions:"
+         " x=%d, y=%d, z=%d.", varID,
+         varShape[0].size, varShape[1].size, varShape[2].size,
+         collGrid.sizes[0], collGrid.sizes[1],
+         collGrid.sizes[2]);
+  myVarPart(varShape, collGrid, varChunk);
+  {
+    Xt_int preWriteChunkStart[3];
+    int preWriteChunkSize[3];
+    Xt_int varDims[3];
+    for (int i = 0; i < 3; ++i)
+      {
+        varDims[2 - i] = varShape[i].size;
+        preWriteChunkStart[2 - i] = (Xt_int)varChunk[i].first;
+        preWriteChunkSize[2 - i] = (int)varChunk[i].size;
+      }
+    *preWriteChunk
+      = cdiPioIdxlistCacheAddSection3D(DstIdxlistCache,
+                                       varDims, preWriteChunkStart,
+                                       preWriteChunkSize);
+  }
+}
+#endif
+
 
 static Xt_redist
 buildVarRedist(int headerIdx, size_t streamIdx,
@@ -568,134 +732,6 @@ handleRedistCache(size_t streamIdx,
 }
 
 #ifdef HAVE_PARALLEL_NC4
-static void
-queryVarBounds(struct PPM_extent varShape[3], int vlistID, int varID)
-{
-  int sizes[3];
-  cdiPioQueryVarDims(sizes, vlistID, varID);
-  for (unsigned i = 0; i < 3; ++i)
-    varShape[i].first = 0, varShape[i].size = sizes[i];
-}
-
-/*
- * Given a divisor @a composite_div,
- * find subset $F$ of prime divisors of @a composite_div such that the
- * product of $F$ is less than npartMax and maximal
- */
-int
-findMaxDivision(int npartMax, int composite_div)
-{
-  uint32_t factors[31], *factors_ = factors;
-  xassert(composite_div > 0);
-  int numFactors
-    = PPM_prime_factorization_32((uint32_t)composite_div, &factors_);
-  /* try to use prime factors */
-  uint_fast32_t divAttempt, maxDiv = 1;
-  /* test all possible assignments of factors, starting with
-   * only one assigned (omitting no assigned case because that would
-   * never be better than start value of maxDiv */
-  for (int numAssigned = 1; numAssigned <= numFactors; ++numAssigned)
-    {
-      uint_fast32_t pattern = (UINT32_C(1) << numAssigned) - 1,
-        lastPattern = pattern << (numFactors - numAssigned);
-      do {
-        divAttempt = 1;
-        /* loop over all factors */
-        for (uint_fast32_t i = 0; i < (uint_fast32_t)numFactors; ++i)
-          {
-            uint_fast32_t assigned = (pattern >> i) & 1;
-            if (assigned) divAttempt *= factors[i];
-          }
-        if (divAttempt <= npartMax && divAttempt > maxDiv)
-          maxDiv = divAttempt;
-        /* find next sequence of numAssigned set bits and numFactors
-         * - numFactors unset bits */
-        {
-          uint_fast32_t t;
-#if HAVE_DECL___BUILTIN_CTZ
-          t = pattern | (pattern - 1);
-          pattern = (t + 1)
-            | (((~t & -~t) - 1) >> (__builtin_ctz((unsigned)pattern) + 1));
-#else
-          t = (pattern | (pattern - 1)) + 1;
-          pattern = t | ((((t & -t) / (pattern & -pattern)) >> 1) - 1);
-#endif
-        }
-      } while (pattern <= lastPattern);
-    }
-  return maxDiv;
-}
-
-struct xyzDims
-{
-  int sizes[3];
-};
-
-static struct xyzDims
-varDimsCollGridMax(const struct PPM_extent varDims[3])
-{
-  struct xyzDims collGrid = { { 1, 1, 1 } };
-  int collDiv = commInqSizeColl();
-  for (size_t i = 3; i > 0; --i)
-    {
-      int usedDiv = collGrid.sizes[i-1]
-        = findMaxDivision(varDims[i-1].size, collDiv);
-      collDiv /= usedDiv;
-    }
-  return collGrid;
-}
-
-/* compute distribution of collectors such that number of collectors
- * <= number of variable grid cells in each dimension */
-static struct xyzDims
-varDimsCollGridMatch(const struct PPM_extent varDims[3])
-{
-  struct xyzDims collGrid = { { 1, 1, 1 } };
-  /* because of storage order, dividing dimension 3 first is preferred */
-  for (int i = 0; i < numPioPrimes; ++i)
-    {
-      for (int dim = 2; dim >=0; --dim)
-        if (collGrid.sizes[dim] * pioPrimes[i] <= varDims[dim].size)
-          {
-            collGrid.sizes[dim] *= pioPrimes[i];
-            goto nextPrime;
-          }
-      /* no easy I/O decomposition found, do exhaustive search for not
-       * necessarily perfect decomposition */
-      return varDimsCollGridMax(varDims);
-      nextPrime:
-      ;
-    }
-  return collGrid;
-}
-
-
-static void
-myVarPart(struct PPM_extent varShape[3], struct xyzDims collGrid,
-          struct PPM_extent myPart[3])
-{
-  int32_t myCollGridCoord[3];
-  struct PPM_extent collGridShape[3];
-  int collGridSize = 1;
-  for (size_t i = 0; i < 3; ++i)
-    {
-      collGridShape[i].first = 0;
-      collGridShape[i].size = collGrid.sizes[i];
-      collGridSize *= collGrid.sizes[i];
-    }
-  int collRank = commInqRankColl();
-  if (collRank < collGridSize)
-    {
-      PPM_lidx2rlcoord_e(3, collGridShape, collRank, myCollGridCoord);
-      xdebug("my coord: (%d, %d, %d)", myCollGridCoord[0], myCollGridCoord[1],
-             myCollGridCoord[2]);
-      PPM_uniform_partition_nd(3, varShape, collGrid.sizes,
-                               myCollGridCoord, myPart);
-    }
-  else
-    for (size_t i = 0; i < 3; ++i)
-      myPart[i].first = myPart[i].size = 0;
-}
 
 #include <core/ppm_combinatorics.h>
 
@@ -740,36 +776,14 @@ writeNetCDFStreamParallel(size_t streamIdx,
         }
       else
         {
-          struct PPM_extent varShape[3];
-          queryVarBounds(varShape, vlistID, varID);
-          const struct xyzDims collGrid = varDimsCollGridMatch(varShape);
-          xdebug("writing varID %d with dimensions: "
-                 "x=%d, y=%d, z=%d,\n"
-                 "found distribution with dimensions:"
-                 " x=%d, y=%d, z=%d.", varID,
-                 varShape[0].size, varShape[1].size, varShape[2].size,
-                 collGrid.sizes[0], collGrid.sizes[1],
-                 collGrid.sizes[2]);
-          myVarPart(varShape, collGrid, varChunk);
-          Xt_idxlist preWriteChunk;
           /* prepare yaxt descriptor for write chunk */
-          {
-            Xt_int preWriteChunkStart[3];
-            int preWriteChunkSize[3];
-            Xt_int varDims[3];
-            for (int i = 0; i < 3; ++i)
-              {
-                myChunk[i][0] = PPM_extent_start(varChunk[i]);
-                myChunk[i][1] = PPM_extent_end(varChunk[i]);
-                varDims[2 - i] = varShape[i].size;
-                preWriteChunkStart[2 - i] = (Xt_int)varChunk[i].first;
-                preWriteChunkSize[2 - i] = (int)varChunk[i].size;
-              }
-            preWriteChunk
-              = cdiPioIdxlistCacheAddSection3D(DstIdxlistCache,
-                                               varDims, preWriteChunkStart,
-                                               preWriteChunkSize);
-          }
+          Xt_idxlist preWriteChunk;
+          cdiPioNetCDFParChunk(vlistID, varID, &preWriteChunk, varChunk);
+          for (int i = 0; i < 3; ++i)
+            {
+              myChunk[i][0] = PPM_extent_start(varChunk[i]);
+              myChunk[i][1] = PPM_extent_end(varChunk[i]);
+            }
           xdebug("Writing chunk { { %d, %d }, { %d, %d },"
                  " { %d, %d } }", myChunk[0][0], myChunk[0][1],
                  myChunk[1][0], myChunk[1][1], myChunk[2][0],
