@@ -188,6 +188,7 @@ parse_long_option(struct model_config *restrict setup,
     uuidCreateOptionStr[] = "no-create-uuid",
     useDistGridOptionStr[] = "no-use-dist-grid",
     batchedRmaOptionStr[] = "no-batch-rma",
+    presetDecoOptionStr[] = "no-preset-decomposition",
     datatypeOptionStr[] = "datatype",
     taxistypeOptionStr[] = "taxis-type",
     taxisunitOptionStr[] = "taxis-unit";
@@ -334,6 +335,18 @@ parse_long_option(struct model_config *restrict setup,
     {
       setup->flags = (setup->flags & ~PIO_WRITE_CONFIG_CREATE_UUID_FLAG)
         | (bop.value << PIO_WRITE_CONFIG_CREATE_UUID_BIT);
+    }
+  else if ((bop = parseBooleanLongOption(sizeof (presetDecoOptionStr),
+                                         presetDecoOptionStr, str)).matched)
+    {
+#ifdef USE_MPI
+      setup->flags = (setup->flags
+                      & ~PIO_WRITE_CONFIG_PRESET_DECOMPOSITION_FLAG)
+        | (bop.value << PIO_WRITE_CONFIG_PRESET_DECOMPOSITION_BIT);
+#else
+      invalidOptionDie("CDI-PIO option -q%s unavailable in non-MPI mode\n",
+                       presetDecoOptionStr + (bop.invert ? 0 : 3));
+#endif
     }
   else if ((bop = parseBooleanLongOption(sizeof (batchedRmaOptionStr),
                                          batchedRmaOptionStr, str)).matched)
