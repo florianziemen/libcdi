@@ -1566,6 +1566,37 @@ cdiPioRecvStreamClose(void *buffer, int size, int *pos, MPI_Comm pioInterComm, b
   streamClose(serverStreamID);
 }
 
+#ifdef HAVE_LIBNETCDF
+static void
+cdiPioCdfGridAccess(int streamID, int vlistID)
+{
+  int filetype = streamInqFiletype(streamID);
+#ifdef HAVE_PARALLEL_NC4
+  int rankOpen;
+#endif
+  switch (filetype)
+    {
+    case CDI_FILETYPE_NC:
+    case CDI_FILETYPE_NC2:
+    case CDI_FILETYPE_NC4:
+    case CDI_FILETYPE_NC4C:
+#ifdef HAVE_PARALLEL_NC4
+      if ((rankOpen = cdiPioStream2Owner(streamID)) != CDI_PIO_COLLECTIVE_OPEN)
+#endif
+        {
+          int nGrids = vlistNgrids(vlistID);
+          for (int gridIdx = 0; gridIdx < nGrids; ++gridIdx)
+            {
+              int gridID = vlistGrid(vlistID, gridIdx);
+              if (!cdiPioDistGridIndividualQueriesEnabled(gridID)) cdiPioDistGridEnableIndividualQueries(gridID);
+            }
+        }
+    }
+}
+#else
+#define cdiPioCdfGridAccess(streamID, vlistID)
+#endif
+
 static void
 cdiPioRecvStreamDefVlist(void *buffer, int size, int *pos, MPI_Comm pioInterComm, int tag, const struct cdiPioConf *conf)
 {
@@ -1577,30 +1608,7 @@ cdiPioRecvStreamDefVlist(void *buffer, int size, int *pos, MPI_Comm pioInterComm
     serverVlistID = namespaceAdaptKey2(msgData[1]);
   }
   stream_t *streamptr = stream_to_pointer(serverStreamID);
-#ifdef HAVE_LIBNETCDF
-  int filetype = streamInqFiletype(serverStreamID);
-#ifdef HAVE_PARALLEL_NC4
-  int rankOpen;
-#endif
-  switch (filetype)
-    {
-    case CDI_FILETYPE_NC:
-    case CDI_FILETYPE_NC2:
-    case CDI_FILETYPE_NC4:
-    case CDI_FILETYPE_NC4C:
-#ifdef HAVE_PARALLEL_NC4
-      if ((rankOpen = cdiPioStream2Owner(serverStreamID)) != CDI_PIO_COLLECTIVE_OPEN)
-#endif
-        {
-          int nGrids = vlistNgrids(serverVlistID);
-          for (int gridIdx = 0; gridIdx < nGrids; ++gridIdx)
-            {
-              int gridID = vlistGrid(serverVlistID, gridIdx);
-              if (!cdiPioDistGridIndividualQueriesEnabled(gridID)) cdiPioDistGridEnableIndividualQueries(gridID);
-            }
-        }
-    }
-#endif
+  cdiPioCdfGridAccess(serverStreamID, serverVlistID);
   cdiStreamSetupVlist(streamptr, serverVlistID);
   size_t streamIdx = indexOfID(&openStreams, serverStreamID);
   cdiPioServerStreamWinCreate(streamIdx, cdiPioInqCollClientIntraComm());
@@ -1668,7 +1676,6 @@ cdiPioRecvStreamDefVlist(void *buffer, int size, int *pos, MPI_Comm pioInterComm
         XmapCache = cdiPioXmapCacheResize(XmapCache, neededXmapCacheSize);
     }
 }
-
 
 /**
  * @brief is encapsulated in CDI library and run on I/O PEs.
