@@ -9,7 +9,7 @@
  */
 
 #if defined (VERSION)
-   static const char cdi_libvers[] = VERSION " of " __DATE__" " __TIME__;
+   static const char cdi_libvers[] = VERSION;
 #else
 #  error "VERSION undefined"
 #endif

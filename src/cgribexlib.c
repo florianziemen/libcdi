@@ -13161,7 +13161,7 @@ void encode_dummy(void)
   (void) encode_array_unrolled_double(0, 0, 0, NULL, NULL, 0, 0, NULL);
   (void) encode_array_unrolled_float(0, 0, 0, NULL, NULL, 0, 0, NULL);
 }
-static const char grb_libvers[] = "1.9.0" " of ""Jan 22 2018"" ""09:24:03";
+static const char grb_libvers[] = "1.9.0";
 const char *
 cgribexLibraryVersion(void)
 {

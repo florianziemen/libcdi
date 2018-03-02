@@ -86,8 +86,7 @@ void version(void)
   fprintf(stderr, " version: %s\n", COMP_VERSION);
 #endif
 #if defined (USER_NAME) && defined(HOST_NAME) && defined(SYSTEM_TYPE)
-  fprintf(stderr, "Compiled: by %s on %s (%s) %s %s\n",
-	  USER_NAME, HOST_NAME, SYSTEM_TYPE, __DATE__, __TIME__);
+  fprintf(stderr, "Compiled: by %s on %s (%s)\n", USER_NAME, HOST_NAME, SYSTEM_TYPE);
 #endif
 
   fprintf(stderr, "filetype: ");
