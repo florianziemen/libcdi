@@ -13,6 +13,7 @@
 
 #include "pio_interface.h"
 #include "pio_rpc.h"
+#include "pio_util.h"
 
 /* replace once size_t-based version of vlistInqVarSize is merged */
 static size_t
@@ -43,11 +44,16 @@ computeClientStreamBufSize(int streamID, const struct collSpec *collector)
        * i.e. memory needed can be computed exactly for the double
        * precision case */
       Xt_idxlist *partDesc = collector->partDesc;
+      const int *conversion = collector->conversion;
       for (size_t varID = 0; varID < nvars; ++varID)
         {
           size_t chunkSize = (size_t) (xt_idxlist_get_num_indices(partDesc[varID]));
           rmaSizeSpec.numDataRecords += 2;
-          rmaSizeSpec.bufSize += chunkSize * sizeof(double)
+          size_t elemSize = cdiPioElemSizeInference(varID, conversion);
+          rmaSizeSpec.bufSize += chunkSize * elemSize
+                                 /* re-align chunk to multiple of double size */
+                                 + elemSize
+                                 - 1
                                  /* one header for data record, one for corresponding part
                                   * descriptor*/
                                  + 2 * sizeof(struct winHeaderEntry);
@@ -111,6 +117,7 @@ cdiPioDestroyPartDescPreset(size_t nRanks, size_t nVars, struct partDescPreset *
             }
         }
     }
+  Free(deco->conversion);
   Free(partDesc);
   Free(partDescUID);
 }

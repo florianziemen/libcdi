@@ -122,6 +122,7 @@ cdiPioClientStreamWinInit(int streamID)
   txWin[streamIdx].postSet = false;
   txWin[streamIdx].clientDeco.lists = NULL;
   txWin[streamIdx].clientDeco.uids = NULL;
+  txWin[streamIdx].clientDeco.conversion = NULL;
 }
 
 void
@@ -144,7 +145,7 @@ cdiPioClientStreamWinDestroy(int streamID)
 }
 
 void
-cdiPioSetStreamPartDescPreset(int streamID, size_t nVars, Xt_idxlist partDesc[])
+cdiPioSetStreamPartDescPreset(int streamID, size_t nVars, const Xt_idxlist *restrict partDesc, const int *restrict conversion)
 {
   size_t streamIdx = indexOfID(&openStreams, streamID);
   Xt_idxlist *restrict partDescCopy = Malloc(nVars * sizeof(Xt_idxlist));
@@ -165,6 +166,9 @@ cdiPioSetStreamPartDescPreset(int streamID, size_t nVars, Xt_idxlist partDesc[])
     }
   txWin[streamIdx].clientDeco.uids = partDescUID;
   txWin[streamIdx].clientDeco.lists = partDescCopy;
+  int *restrict conversionCopy = Malloc(nVars * sizeof(*conversion));
+  memcpy(conversionCopy, conversion, nVars * sizeof(*conversion));
+  txWin[streamIdx].clientDeco.conversion = conversionCopy;
 }
 
 struct partDescPreset
