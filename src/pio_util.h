@@ -79,15 +79,6 @@ void pcdiXMPIStats(int, const char *, int, int, MPI_Status *);
     }                                                                               \
   while (0)
 
-void pcdiDebugMsg(const char *cdiDebugString, const char *filename, const char *functionname, int line, int tag, int source,
-                  int nfinished);
-#define xdebugMsg(tag, source, nfinished) \
-  if (ddebug) pcdiDebugMsg(debugString, __FILE__, __func__, __LINE__, tag, source, nfinished)
-
-void pcdiDebugMsg2(const char *filename, const char *functionname, int line, int tag, int source, char *text);
-#define xdebugMsg2(tag, source, text) \
-  if (ddebug) pcdiDebugMsg(__FILE__, __func__, __LINE__, tag, source, text)
-
 static inline int
 sum_int(size_t n, int *a)
 {
