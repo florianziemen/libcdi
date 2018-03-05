@@ -23,6 +23,7 @@ enum collectorCommandTags
   WRITETS,
   BLOCK_XFER,
   DIST_DATA_AGG,
+  ASSERT_CONSISTENCY,
   IDXLIST_PRESET,
   IDXLIST_PRESET_SIZE,
 };
@@ -130,6 +131,7 @@ struct clientBufSize
 struct collSpec
 {
   Xt_idxlist *partDesc;
+  int *conversion;
   int numClients;
   int numServers;
   bool sendRPCData;
@@ -141,6 +143,7 @@ struct partDescPreset
 {
   Xt_idxlist *lists;
   Xt_uid *uids;
+  int *conversion;
 };
 
 void cdiPioDestroyPartDescPreset(size_t nRanks, size_t nVars, struct partDescPreset *deco);

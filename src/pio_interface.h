@@ -33,7 +33,7 @@ void cdiPioClientStreamWinDestroy(int streamID);
 bool cdiPioClientStreamNeedsFlush(int streamID);
 void cdiPioClientStreamWinPost(int streamID);
 
-void cdiPioSetStreamPartDescPreset(int streamID, size_t nVars, Xt_idxlist partDesc[]);
+void cdiPioSetStreamPartDescPreset(int streamID, size_t nVars, const Xt_idxlist partDesc[], const int conversion[]);
 struct partDescPreset cdiPioGetStreamPartDescPreset(int streamID);
 
 #endif
