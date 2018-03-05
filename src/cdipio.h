@@ -54,8 +54,13 @@ void cdiPioRDMAProgress(void);
 
 /* cdiPioStreamDefDecomposedVlist: collectively define the vlist assigned to a
  * stream together with a fixed decomposition where for each variable
- * an entry of partDesc specifies the local part at the caller */
-void cdiPioStreamDefDecomposedVlist(int streamID, int vlistID, Xt_idxlist partDesc[]);
+ * an entry of partDesc specifies the local part at the caller, and
+ * an entry of conversion specifies if data will be written with
+ * streamWriteVar (i.e. as double) with
+ * conversion[varID] == CDI_DATATYPE_FLT64 or with streamWriteVarF
+ * (i.e. as float) with conversion[varID] == CDI_DATATYPE_FLT32
+ */
+void cdiPioStreamDefDecomposedVlist(int streamID, int vlistID, const Xt_idxlist partDesc[], const int conversion[]);
 
 /* streamWriteVarPart: Write part of the data making up variable varID
  * of stream streamID.
