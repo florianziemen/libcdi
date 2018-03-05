@@ -1129,6 +1129,31 @@ buildPassVarDict(size_t collSize, const struct passPlan *passes, const struct re
   return numVarsInPass;
 }
 
+static struct idxlistAndSize
+dstListFromRecordRange(int vlistID, int varID, int myVarStart, int myVarEnd, size_t myRecordStart, size_t myRecordEnd,
+                       const struct recordWrite *restrict writtenRecords, size_t recordStart, size_t recordEnd,
+                       const struct cdiPioConf *conf)
+{
+  /* is this process writing part of this variable? */
+  Xt_idxlist dstList;
+  int listSize;
+  if (myRecordStart <= myRecordEnd && myVarStart <= varID && myVarEnd >= varID)
+    {
+      size_t myVarRecordStart = writtenRecords[myRecordStart].varID == varID ? myRecordStart : recordStart;
+      size_t myLevelStart = (size_t) writtenRecords[myVarRecordStart].level;
+      size_t myVarRecordEnd = writtenRecords[myRecordEnd].varID == varID ? myRecordEnd : recordEnd;
+      size_t myNumLevels = (size_t) writtenRecords[myVarRecordEnd].level - myLevelStart + 1;
+      dstList = buildVarSlicesIdxList(vlistID, varID, (int) myLevelStart, (int) myNumLevels, conf);
+      listSize = xt_idxlist_get_num_indices(dstList);
+    }
+  else
+    {
+      dstList = xt_idxempty_new();
+      listSize = 0;
+    }
+  return (struct idxlistAndSize){ .list = dstList, .listSize = listSize };
+}
+
 static void
 writeGribStream(size_t streamIdx, struct streamMapping *mapping, void **data_, size_t *currentDataBufSize,
                 const struct cdiPioConf *conf)
@@ -1178,28 +1203,13 @@ writeGribStream(size_t streamIdx, struct streamMapping *mapping, void **data_, s
               int varID = varsInPass[varIdx].varID, headerIdx = mapping->varMap[varID];
               int conversion = winDict[headerIdx].id;
               size_t elemSize = conversion == DATA_HEADER_FLOAT ? sizeof(float) : sizeof(double);
-              Xt_idxlist dstList;
-              /* is this process writing part of this variable? */
-              if (myRecordStart <= myRecordEnd && myVarStart <= varID && myVarEnd >= varID)
-                {
-                  size_t myVarRecordStart
-                      = writtenRecords[myRecordStart].varID == varID ? myRecordStart : varsInPass[varIdx].recordStart;
-                  size_t myLevelStart = (size_t) writtenRecords[myVarRecordStart].level;
-                  size_t myVarRecordEnd
-                      = writtenRecords[myRecordEnd].varID == varID ? myRecordEnd : (size_t) varsInPass[varIdx].recordEnd;
-                  size_t myNumLevels = (size_t) writtenRecords[myVarRecordEnd].level - myLevelStart + 1;
-                  dstList = buildVarSlicesIdxList(vlistID, varID, (int) myLevelStart, (int) myNumLevels, conf);
-                  size_t sliceSize = (size_t) xt_idxlist_get_num_indices(dstList);
-                  assert(sliceSize * elemSize == (writtenRecords[myVarRecordStart].dataSize * myNumLevels));
-                  myAggSize += sliceSize * elemSize;
-                }
-              else
-                {
-                  dstList = xt_idxempty_new();
-                }
+              struct idxlistAndSize dst
+                  = dstListFromRecordRange(vlistID, varID, myVarStart, myVarEnd, myRecordStart, myRecordEnd, writtenRecords,
+                                           varsInPass[varIdx].recordStart, varsInPass[varIdx].recordEnd, conf);
+              myAggSize += (size_t) dst.listSize * elemSize;
               displ[numVarsInPass + varIdx + 1] = (MPI_Aint) myAggSize;
               Xt_idxlist *varPartDescPreset = partDescPreset ? partDescPreset[varIdx] : NULL;
-              varRedists[varIdx] = buildVarRedist(headerIdx, streamIdx, dstList, varPartDescPreset, conf);
+              varRedists[varIdx] = buildVarRedist(headerIdx, streamIdx, dst.list, varPartDescPreset, conf);
             }
           /* merge all redists for current pass */
           if (numVarsInPass > 1)
