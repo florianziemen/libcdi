@@ -2,7 +2,9 @@
 #  include "config.h"
 #endif
 
+#include <assert.h>
 #include <errno.h>
+#include <limits.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,6 +12,7 @@
 
 #include <unistd.h>
 
+#include "pio_rpc.h"
 #include "pio_util.h"
 #include "cdi.h"
 #include "dmemory.h"
@@ -115,6 +118,29 @@ void pcdiXMPIStats(int iret, const char *filename, int line,
 }
 
 /****************************************************/
+
+#ifndef NDEBUG
+void
+cdiPioAssertConsistentIntVec(size_t n, const int *restrict a,
+                             MPI_Comm comm, int commRank,
+                             int rankRangeStart, int rankRangeSize)
+{
+  int *restrict b = Malloc(n * sizeof (*b));
+  int rankDst = rankRangeStart + (commRank + 1 - rankRangeStart)%rankRangeSize,
+    rankSrc = rankRangeStart
+    + (commRank + rankRangeSize - 1 - rankRangeStart)%rankRangeSize;
+  MPI_Request req[2];
+  assert(n <= INT_MAX);
+  xmpi(MPI_Irecv(b, (int)n, MPI_INT, rankSrc, ASSERT_CONSISTENCY, comm, req+0));
+  xmpi(MPI_Isend((int*)a, (int)n, MPI_INT, rankDst, ASSERT_CONSISTENCY, comm, req+1));
+  xmpi(MPI_Waitall(2, req, MPI_STATUSES_IGNORE));
+  bool allEqual = true;
+  for (size_t i = 0; i < n; ++i)
+    allEqual &= (a[i] == b[i]);
+  assert(allEqual);
+  Free(b);
+}
+#endif
 
 void printArray ( const char *cdiPioDebugString, const char *ps, const void *array, int n,
                   int datatype, const char * funname, const char * filename, int line )
