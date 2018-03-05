@@ -79,7 +79,8 @@
 !                     cdiPioStreamDefDecomposedVlist
 !                                    (INTEGER         streamID,
 !                                     INTEGER         vlistID,
-!                                     TYPE(XT_IDXLIST)partDesc(*))
+!                                     TYPE(XT_IDXLIST)partDesc(*),
+!                                     INTEGER         conversion(*))
       EXTERNAL        cdiPioStreamDefDecomposedVlist
 
 !                     streamWriteVarPart

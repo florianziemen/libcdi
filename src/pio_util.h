@@ -12,6 +12,8 @@
 #include "error.h"
 #endif
 
+#include "cdi.h"
+
 #define MAXDEBUG           3
 
 #define ddebug             0
@@ -89,6 +91,14 @@ sum_int(size_t n, int *a)
   return sum;
 }
 
+#ifndef NDEBUG
+void
+cdiPioAssertConsistentIntVec(size_t n, const int *restrict a,
+                             MPI_Comm comm, int commRank,
+                             int rankRangeStart, int rankRangeEnd);
+#else
+#define cdiPioAssertConsistentIntVec(n, a, comm, r, rs, re) do { } while (0)
+#endif
 
 void printArray ( const char *, const char *, const void *, int, int, const char *, const char *, int );
 #define xprintArray(ps,array,n,datatype)                                \
@@ -108,6 +118,27 @@ cdiPioQueryVarDims(int varShape[3], int vlistID, int varID);
 void
 cdiPioDeco1D_CCP(size_t n, const size_t weightPfxSums[n],
                  size_t nparts, size_t separators[nparts + 1]);
+
+
+static inline size_t
+cdiPioElemSizeInference(size_t varID, const int *conversion)
+{
+  int conv = conversion ? conversion[varID] : CDI_DATATYPE_FLT64;
+  size_t elemSize;
+  switch(conv) {
+  case CDI_DATATYPE_FLT32:
+    elemSize = sizeof (float);
+    break;
+  case CDI_DATATYPE_FLT64:
+    elemSize = sizeof (double);
+    break;
+  default:
+    Error("Invalid conversion specification: %d\n", conv);
+    elemSize = (size_t)-1;
+  }
+  return elemSize;
+}
+
 
 #endif
 /*

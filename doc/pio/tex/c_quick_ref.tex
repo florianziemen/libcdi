@@ -403,12 +403,17 @@ representation of mode or -1 if no match was found.
 
 \begin{verbatim}
     void cdiPioStreamDefDecomposedVlist (int streamID, int vlistID,
-                                         Xt_idxlist partDesc[]);
+                                         const Xt_idxlist partDesc[],
+                                         const int conversion[]);
 \end{verbatim}
 
 collectively define the vlist assigned to a
 stream together with a fixed decomposition where for each variable
-an entry of partDesc specifies the local part at the caller.
+an entry of partDesc specifies the local part at the caller, and
+an entry of conversion specifies if data will be written with
+streamWriteVar (i.e. as double) with
+conversion[varID] == CDI_DATATYPE_FLT64 or with streamWriteVarF
+(i.e. as float) with conversion[varID] == CDI_DATATYPE_FLT32.
 
 
 \section*{\tt \htmlref{pioInit}{pioInit}}
