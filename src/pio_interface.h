@@ -49,7 +49,8 @@ cdiPioClientStreamWinPost(int streamID);
 
 void
 cdiPioSetStreamPartDescPreset(int streamID, size_t nVars,
-                              Xt_idxlist partDesc[]);
+                              const Xt_idxlist partDesc[],
+                              const int conversion[]);
 struct partDescPreset
 cdiPioGetStreamPartDescPreset(int streamID);
 

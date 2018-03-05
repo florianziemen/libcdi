@@ -186,7 +186,8 @@ cdiPioClientStreamDefVlist_(int streamID, int vlistID)
   struct collSpec cspec = { .numClients = rup.numClients,
                             .numServers = rup.numColl,
                             .sendRPCData = rup.sendRPCData,
-                            .partDesc = NULL };
+                            .partDesc = NULL,
+                            .conversion = NULL };
   cdiPioClientStreamWinCreate(streamID, &cspec);
 }
 
@@ -241,19 +242,22 @@ packPartDescPreset(void *packBuf, int bufSize,
 
 
 void cdiPioStreamDefDecomposedVlist(int streamID, int vlistID,
-                                    Xt_idxlist partDesc[])
+                                    const Xt_idxlist partDesc[],
+                                    const int conversion[])
 {
   cdiPioClientStreamDefVlistCommon(streamID, vlistID);
   struct ResHListUpdate rup = cdiPioClientUpdateResHList();
   MPI_Comm comm = rup.comm;
   int collRank = rup.collRank;
   size_t nVars = (size_t)(vlistNvars(vlistID));
-  cdiPioSetStreamPartDescPreset(streamID, nVars, partDesc);
+  MPI_Comm aggComm = cdiPioInqCollClientIntraComm();
+  cdiPioAssertConsistentIntVec(nVars, conversion, aggComm, rup.clientRank,
+                               0, rup.numClients);
+  cdiPioSetStreamPartDescPreset(streamID, nVars, partDesc, conversion);
   int lastClientInGroup
     = cdiPioClientRangeStart(collRank + 1, rup.numClients, rup.numColl) - 1,
     clientRank = rup.clientRank,
     numClientsInGroup = lastClientInGroup - clientRank + 1;
-  MPI_Comm aggComm = cdiPioInqCollClientIntraComm();
   struct partDescPreset clientDeco = cdiPioGetStreamPartDescPreset(streamID);
   bool *partDescDuplicates = Malloc(nVars * sizeof (*partDescDuplicates));
   int listPackSizeTotal
@@ -284,13 +288,15 @@ void cdiPioStreamDefDecomposedVlist(int streamID, int vlistID,
         }
       {
         int size;
-        xmpi(MPI_Pack_size(defVlistNInts, MPI_INT, comm, &size));
+        xmpi(MPI_Pack_size(defVlistNInts+(int)nVars, MPI_INT, comm, &size));
         msgSize += size;
       }
       /* size of extra packaging:  */
       msgBuffer = Realloc(msgBuffer, (size_t)msgSize);
       int msgData[defVlistNInts] = { streamID, streamInqVlist(streamID) };
       xmpi(MPI_Pack(&msgData, defVlistNInts, MPI_INT,
+                    msgBuffer, msgSize, &rup.msgPos, comm));
+      xmpi(MPI_Pack((int *)conversion, (int)nVars, MPI_INT,
                     msgBuffer, msgSize, &rup.msgPos, comm));
       rup.msgPos
         += packPartDescPreset(msgBuffer + rup.msgPos, listPackSizeTotal,
@@ -329,7 +335,8 @@ void cdiPioStreamDefDecomposedVlist(int streamID, int vlistID,
   struct collSpec cspec = { .numClients = rup.numClients,
                             .numServers = rup.numColl,
                             .sendRPCData = rup.sendRPCData,
-                            .partDesc = partDesc };
+                            .partDesc = (Xt_idxlist *)partDesc,
+                            .conversion = (int *)conversion};
   cdiPioClientStreamWinCreate(streamID, &cspec);
 }
 
