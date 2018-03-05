@@ -14,8 +14,6 @@
 #include "cdi.h"
 #include "dmemory.h"
 
-static char commands[][13] = { "FINALIZE", "RESOURCES", "WRITETS" };
-
 /*****************************************************************************/
 void
 cdiAbortC_MPI(const char *caller, const char *filename, const char *functionname, int line, const char *errorString, va_list ap)
@@ -112,29 +110,6 @@ pcdiXMPIStats(int iret, const char *filename, int line, int n, MPI_Status *restr
     }
   else if (iret != MPI_SUCCESS)
     pcdiXMPI(iret, filename, line);
-}
-
-/****************************************************/
-
-void
-pcdiDebugMsg(const char *cdiPioDebugString, const char *filename, const char *functionname, int line, int tag, int source,
-             int nfinished)
-{
-  int rank = getMPICommWorldRank();
-
-  fprintf(stdout, "%s pe%d in %s, %s, line %d: command %s, source %d, finalized=%d\n", cdiPioDebugString, rank, functionname,
-          filename, line, &commands[tag][0], source, nfinished);
-}
-
-/****************************************************/
-
-void
-pcdiDebugMsg2(const char *filename, const char *functionname, int line, int tag, int source, char *text)
-{
-  int rank = getMPICommWorldRank();
-
-  fprintf(stdout, "pe%d in %s, %s, line %d: command %s, source %d, %s\n", rank, functionname, filename, line, &commands[tag][0],
-          source, text);
 }
 
 /****************************************************/
