@@ -1422,6 +1422,7 @@ cdiPioServerStreamOpen(const char *filename, char filemode, int filetype, stream
       rxWin[streamIdx].numRetained = 0;
       rxWin[streamIdx].clientDeco.lists = NULL;
       rxWin[streamIdx].clientDeco.uids = NULL;
+      rxWin[streamIdx].clientDeco.conversion = NULL;
 #ifdef HAVE_LIBNETCDF
       rxWin[streamIdx].ownerRank = rank;
 #endif
@@ -1632,6 +1633,7 @@ cdiPioRecvStreamDefVlist(void *buffer, int size, int *pos, MPI_Comm pioInterComm
   if (tag == STREAMDEFVLIST)
     {
       collectorData.partDesc = NULL;
+      collectorData.conversion = NULL;
       bufSizes[0] = computeClientStreamBufSize(serverStreamID, &collectorData);
       collectorData.sendRPCData = 0;
       for (size_t clientIdx = 1; clientIdx < (size_t) numClients_; ++clientIdx)
@@ -1640,10 +1642,16 @@ cdiPioRecvStreamDefVlist(void *buffer, int size, int *pos, MPI_Comm pioInterComm
   else /* tag == STREAM_DEF_DECOMPOSED_VLIST */
     {
       size_t nVars = (size_t) (vlistNvars(serverVlistID));
+      /* unpack client data representation */
+      int *conversion = Malloc(nVars * sizeof(*conversion));
+      xmpi(MPI_Unpack(buffer, size, pos, conversion, (int) nVars, MPI_INT, pioInterComm));
+      collectorData.conversion = rxWin[streamIdx].clientDeco.conversion = conversion;
       /* unpack per-client index lists */
       Xt_idxlist(*partDescPreset)[numClients_] = Malloc(nVars * sizeof(*partDescPreset)),
       *clientPartDesc = Malloc(nVars * sizeof(*clientPartDesc));
       Xt_uid(*partDescUID)[numClients_] = Malloc(nVars * sizeof(*partDescUID));
+      rxWin[streamIdx].clientDeco.lists = &partDescPreset[0][0];
+      rxWin[streamIdx].clientDeco.uids = &partDescUID[0][0];
       int remainingSize = size - *pos;
       for (int clientIdx = 0; clientIdx < numClients_; ++clientIdx)
         {
@@ -1670,8 +1678,6 @@ cdiPioRecvStreamDefVlist(void *buffer, int size, int *pos, MPI_Comm pioInterComm
           collectorData.sendRPCData = 0;
         }
       Free(clientPartDesc);
-      rxWin[streamIdx].clientDeco.lists = &partDescPreset[0][0];
-      rxWin[streamIdx].clientDeco.uids = &partDescUID[0][0];
     }
   createClientStreamBuf(streamIdx, bufSizes, conf);
 
