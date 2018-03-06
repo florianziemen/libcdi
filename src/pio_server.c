@@ -1177,13 +1177,11 @@ writeGribStream(size_t streamIdx, struct streamMapping *mapping, void **data_, s
       = conf->cacheRedists != 0 ? handleRedistCache(streamIdx, mapping, (size_t) numPasses, vlistID, collComm) : false;
   struct cacheRedist *restrict retained = rxWin[streamIdx].retained;
   struct passDict *varsInPass = NULL;
-  size_t varsInPassSize = 0;
+  size_t varsInPassSize = 0, maxNumVarsAlloc = 0;
   MPI_Aint *displ = NULL;
   const struct winHeaderEntry *winDict = (wHECast) clientBuf[0].mem;
   for (size_t pass = 0; pass < numPasses; ++pass)
     {
-      size_t numVarsInPass = buildPassVarDict(collSize, passes[pass], writtenRecords, &varsInPassSize, &varsInPass);
-      varRedists = Realloc(varRedists, numVarsInPass * sizeof(*varRedists));
       size_t myRecordStart = passes[pass][collRank].recordAggStart, myRecordEnd = passes[pass][collRank].recordAggEnd;
       size_t myAggSize = 0;
       /* build or fetch from cache redists for all variables involved in current write pass */
@@ -1195,8 +1193,14 @@ writeGribStream(size_t streamIdx, struct streamMapping *mapping, void **data_, s
         }
       else
         {
+          size_t numVarsInPass = buildPassVarDict(collSize, passes[pass], writtenRecords, &varsInPassSize, &varsInPass);
           int myVarStart = passes[pass][collRank].varStart, myVarEnd = passes[pass][collRank].varEnd;
-          displ = Realloc(displ, sizeof(*displ) * (numVarsInPass * 2 + 1));
+          if (numVarsInPass > maxNumVarsAlloc)
+            {
+              maxNumVarsAlloc = numVarsInPass;
+              varRedists = Realloc(varRedists, numVarsInPass * sizeof(*varRedists));
+              displ = Realloc(displ, (numVarsInPass * 2 + 1) * sizeof(*displ));
+            }
           memset(displ, 0, sizeof(*displ) * (numVarsInPass + 1));
           for (size_t varIdx = 0; varIdx < numVarsInPass; ++varIdx)
             {
