@@ -168,7 +168,7 @@ setupClientRanks(void)
 }
 
 static void
-createClientStreamBuf(size_t streamIdx, struct clientBufSize *bufSizes, const struct cdiPioConf *conf)
+createClientStreamBuf(size_t streamIdx, const struct clientBufSize *bufSizes, const struct cdiPioConf *conf)
 {
   size_t streamBufferSize = 0;
   for (size_t i = 0; i < (size_t) numClients_; ++i)
