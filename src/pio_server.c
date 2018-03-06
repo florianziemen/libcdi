@@ -1355,6 +1355,7 @@ writeGribStream(size_t streamIdx,
                              aggBufSize) == 0) ;
           else
             rxWin[streamIdx].aggBuf = Malloc(aggBufSize);
+          rxWin[streamIdx].aggBufSize = aggBufSize;
         }
       namespaceSwitchSet(NSSWITCH_FILE_WRITE, NSSW_FUNC(aggBufAppend));
       /* write records to aggregation buffer */
