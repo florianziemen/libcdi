@@ -504,6 +504,20 @@ cdiPioNetCDFParChunk(int vlistID, int varID,
 }
 #endif
 
+static void
+allocUIDLookup(size_t numClients,
+               Xt_uid *restrict *uids, int *restrict *partSizes)
+{
+  size_t uidBytes = sizeof (**uids) * (numClients + 1),
+    partSizesBytes = sizeof (**partSizes) * (numClients + 1),
+    partSizeAlign = sizeof (**partSizes),
+    uidBytesRoundUp = ((uidBytes + partSizeAlign - 1)/partSizeAlign
+                       * partSizeAlign);
+  *uids = Malloc(uidBytes+uidBytesRoundUp+partSizesBytes);
+  *partSizes = (int *)(void *)((unsigned char *)*uids
+                               + uidBytes + uidBytesRoundUp);
+}
+
 
 static Xt_redist
 buildVarRedist(int headerIdx, size_t streamIdx,
@@ -533,15 +547,7 @@ buildVarRedist(int headerIdx, size_t streamIdx,
   bool cacheXmaps = conf->cacheXmaps;
   if (cacheXmaps)
     {
-      {
-        size_t uidBytes = sizeof (*uids) * (numClients + 1),
-          partSizesBytes = sizeof (*partSizes) * (numClients + 1),
-          partSizeAlign = sizeof (*partSizes),
-          uidBytesRoundUp = (uidBytes + partSizeAlign - 1)/partSizeAlign
-          * partSizeAlign;
-        uids = Malloc(uidBytes+uidBytesRoundUp+partSizesBytes);
-        partSizes = (int *)(void *)((unsigned char *)uids + uidBytes + uidBytesRoundUp);
-      }
+      allocUIDLookup(numClients, &uids, &partSizes);
       uids[0] = xt_idxlist_get_uid(dstList);
       for (size_t clientIdx = 0; clientIdx < numClients; ++clientIdx)
         {
