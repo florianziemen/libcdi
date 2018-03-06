@@ -1147,11 +1147,10 @@ struct passPlan
  * @return number of passes
  */
 static size_t
-planPasses(size_t streamIdx, const struct streamMapping *mapping,
+planPasses(const struct streamMapping *mapping,
            const struct cdiPioConf *conf, size_t collSize,
            struct passPlan (**passes_)[collSize])
 {
-  (void)streamIdx;
   size_t numPasses = 0;
   size_t recordAggBufLim = conf->recordAggBufLimMB * 1024 * 1024,
     totalAggBufSpace = recordAggBufLim * collSize,
@@ -1366,7 +1365,7 @@ writeGribStream(size_t streamIdx,
   size_t collSize = (size_t)commInqSizeColl();
   size_t collRank = (size_t)commInqRankColl();
   struct passPlan (*passes)[collSize] = NULL;
-  size_t numPasses = planPasses(streamIdx, mapping, conf, collSize, &passes);
+  size_t numPasses = planPasses(mapping, conf, collSize, &passes);
   Xt_redist *varRedists = NULL;
   size_t numClients = (size_t)numClients_;
   Xt_idxlist (*partDescPreset)[numClients]
