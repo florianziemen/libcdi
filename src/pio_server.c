@@ -175,6 +175,7 @@ createClientStreamBuf(size_t streamIdx,
                       const struct clientBufSize *bufSizes,
                       const struct cdiPioConf *conf)
 {
+  /* find and tabulate aggregate size needed for all clients of collector */
   size_t streamBufferSize = 0;
   for (size_t i = 0; i < (size_t)numClients_; ++i)
     {
@@ -183,6 +184,7 @@ createClientStreamBuf(size_t streamIdx,
       rxWin[streamIdx].clientBuf[i].dictSize
         = bufSizes[i].numDataRecords + bufSizes[i].numRPCRecords;
     }
+  /* set pointer to RMA buffer for client 0 of collector */
   if (conf->batchedRMA)
     rxWin[streamIdx].clientBuf[0].mem = Malloc(streamBufferSize);
   else
@@ -198,20 +200,26 @@ createClientStreamBuf(size_t streamIdx,
               for (size_t j = 0; j < numStreams; ++j)
                 if (rxWin[j].getWin != MPI_WIN_NULL)
                   {
-                    rxWin[j].clientBuf[0].mem = sharedClientBuf;
-                    for (size_t i = 1; i < (size_t)numClients_; ++i)
-                      rxWin[j].clientBuf[i].mem
-                        = rxWin[j].clientBuf[i-1].mem
-                        + rxWin[j].clientBuf[i-1].size;
+                    unsigned char *newmem = sharedClientBuf;
+                    for (size_t i = 0; i < (size_t)numClients_; ++i)
+                      {
+                        rxWin[j].clientBuf[i].mem = newmem;
+                        newmem += rxWin[j].clientBuf[i].size;
+                      }
                   }
             }
         }
       rxWin[streamIdx].clientBuf[0].mem = sharedClientBuf;
     }
-  for (size_t i = 1; i < (size_t)numClients_; ++i)
-    rxWin[streamIdx].clientBuf[i].mem
-      = rxWin[streamIdx].clientBuf[i-1].mem
-      + rxWin[streamIdx].clientBuf[i-1].size;
+  /* set pointers for other clients */
+  {
+    unsigned char *newmem = rxWin[streamIdx].clientBuf[0].mem;
+    for (size_t i = 1; i < (size_t)numClients_; ++i)
+      {
+        newmem += rxWin[streamIdx].clientBuf[i-1].size;
+        rxWin[streamIdx].clientBuf[i].mem = newmem;
+      }
+  }
 }
 
 
