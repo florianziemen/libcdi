@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+$VERBOSE=true
 
 # This script generates a fortran source file that uses the ISO_C_BINDINGS to interface to the functions defined in the given C header file.
 # The basic approach is, that every C function is wrapped in a fortran function/subroutine, which internally uses a bind(c) interface to the C code.
@@ -954,13 +955,42 @@ end
 #Scan the given header and collect the interface information in the global variables.
 def scanHeader(headerPath)
 	#Scan the given header.
-	headerLines = IO.popen('cpp -fpreprocessed -dD ' + headerPath).readlines	#The options cause the preprocessor to strip all comments, but retain all #defines, and ignore #includes.
-	headerLines.each do |line|
+	headerFile = File.open(headerPath, 'r')
+	commentTerm = %r{\*/}
+	commentInit = %r{/[*/]}
+	while line = headerFile.gets
 		line.chomp!
 
 		line.gsub!(/SizeType/,'int')
 		line.gsub!(/DateType/,'int')
 
+		commentBeginLineNo = headerFile.lineno
+		while foundComment = commentInit.match(line)
+			commentBegin = foundComment.begin(0)
+			typeChar = line[commentBegin+1]
+			if typeChar == "/"
+				line = line[0,commentBegin]
+				line.rstrip!
+				foundComment = false
+			elsif typeChar == "*"
+				commentSubStr=line[commentBegin..-1]
+				if commentTerm.match(commentSubStr)
+					newLine =	line.gsub(%r{/\*.*?\*/},'')
+					line = newLine.rstrip
+				else
+					while newLine = headerFile.gets and not foundCommentEnd = commentTerm.match(newLine)
+					end
+					if not newLine
+						$stderr.puts("Unterminated comment started at line ",
+												 commentBeginLineNo, "'", line, "'")
+						exit(1)
+					end
+					newLine.chomp!
+					line = line[0,commentBegin] +
+								 newLine[foundCommentEnd.begin(0)+2..-1]
+				end
+			end
+		end
 		if /^\s*$/.match(line)
 			#Empty lines are ignored.
 
@@ -994,7 +1024,7 @@ def fortranLine(file, line)
 		mline = line.gsub("\t", ' '*spacesPerTab)
 		charsPerLine=79
 		indentation = /^ */.match(mline)[0]
-		if not /^ *!/.match(mline)
+		if not %r{^ *!}.match(mline)
 			while mline.length > charsPerLine
 				# last position of space preceding line break
 				tspos = mline[0..charsPerLine].rindex(' ') || charsPerLine
