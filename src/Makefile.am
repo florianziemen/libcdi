@@ -248,7 +248,8 @@ LOCALTARGETS += mo_cdi.$(OBJEXT)
 endif
 #
 mo_cdi.f90: $(top_srcdir)/src/cdi.h $(top_srcdir)/interfaces/f2003/bindGen.rb
-	$(RUBY) $(top_srcdir)/interfaces/f2003/bindGen.rb $(top_srcdir)/src/cdi.h $@
+	$(RUBY) $(top_srcdir)/interfaces/f2003/bindGen.rb \
+		$(top_srcdir)/src/cdi.h $@
 #
 mo_cdi.$(OBJEXT): mo_cdi.f90
 	$(FC) $(FCFLAGS) -c $(FCFLAGS_f90) $<
