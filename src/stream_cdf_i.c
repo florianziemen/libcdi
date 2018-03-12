@@ -4,8 +4,6 @@
 
 #ifdef HAVE_LIBNETCDF
 
-//#define TEST_GROUPS 1
-
 #include <ctype.h>
 #include <limits.h>
 
@@ -3717,31 +3715,30 @@ int cdfInqContents(stream_t *streamptr)
   ncdim_t *ncdims = ndims ? (ncdim_t *) Malloc((size_t)ndims * sizeof(ncdim_t)) : NULL;
   init_ncdims(ndims, ncdims);
 
-#if  defined  (TEST_GROUPS)
-#if  defined  (HAVE_NETCDF4)
+#ifdef  HAVE_NETCDF4
   if ( format == NC_FORMAT_NETCDF4 )
     {
       int ncid;
-      int numgrps;
+      int numgrps = 0;
       int ncids[NC_MAX_VARS];
-      char name1[CDI_MAX_NAME];
+      char gname[CDI_MAX_NAME];
       int gndims, gnvars, gngatts, gunlimdimid;
       nc_inq_grps(fileID, &numgrps, ncids);
       for ( int i = 0; i < numgrps; ++i )
         {
           ncid = ncids[i];
-          nc_inq_grpname(ncid, name1);
+          nc_inq_grpname(ncid, gname);
           cdf_inq(ncid, &gndims , &gnvars, &gngatts, &gunlimdimid);
 
           if ( CDI_Debug )
-            Message("%s: ndims %d, nvars %d, ngatts %d", name1, gndims, gnvars, gngatts);
+            Message("%s: ndims %d, nvars %d, ngatts %d", gname, gndims, gnvars, gngatts);
 
           if ( gndims == 0 )
             {
             }
         }
+      if ( numgrps ) Warning("NetCDF4 groups not supported! Found %d root group%s.", numgrps, numgrps>1?"s":"");
     }
-#endif
 #endif
 
   if ( nvars == 0 )
