@@ -1,30 +1,20 @@
-#if defined (HAVE_CONFIG_H)
-#  include "config.h"
+#ifdef HAVE_CONFIG_H
+#include "config.h"
 #endif
 
 #include "cdi.h"
 
-/*
- * A version string.
- */
+// A version string
 
-#if defined (VERSION)
-   static const char cdi_libvers[] = VERSION;
+#ifdef VERSION
+static const char cdi_libvers[] = VERSION;
 #else
-#  error "VERSION undefined"
+#error "VERSION undefined"
 #endif
-/*
-#if defined(__cplusplus)
-extern "C" {
-#endif
-const char *cdiLibraryVersion(void);
-#if defined(__cplusplus)
-}
-#endif
-*/
+
 const char *cdiLibraryVersion(void)
 {
-  return (cdi_libvers);
+  return cdi_libvers;
 }
 /*
  * Local Variables:
