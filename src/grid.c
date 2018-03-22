@@ -148,7 +148,7 @@ void grid_init(grid_t *gridptr)
   gridptr->number        = 0;
   gridptr->position      = 0;
   gridptr->reference     = NULL;
-  gridptr->datatype      = 0;
+  gridptr->datatype      = CDI_DATATYPE_FLT64;
   gridptr->size          = 0;
   gridptr->x.size        = 0;
   gridptr->y.size        = 0;

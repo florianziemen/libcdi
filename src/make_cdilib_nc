@@ -117,12 +117,9 @@ files="basetime.c \
    stream_history.c \
    stream_record.c \
    stream_var.c \
-   grb_write.c \
-   grb_read.c \
    cdf_write.c \
    cdf_read.c \
    subtype.c \
-   table.c \
    taxis.c \
    timebase.c \
    tsteps.c \

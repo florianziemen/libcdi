@@ -38,7 +38,7 @@ else
 fi
 
 #PATTERNS
-#^cdi version: @VERSION@ of [A-Z][a-z][a-z]  *[0-9][0-9]*  *[0-9][0-9]*  *[0-9][0-9]\\{0,1\\}:[0-9][0-9]\\{0,1\\}:[0-9][0-9]\\{0,1\\}$
+#^cdi version: @VERSION@$
 #^Parameter:  *1  *-1  *varname1  *\\|$
 #^Parameter:  *2  *-2  *varname2  *\\|$
 #^Timestep:  *1  *19850101  *120000$

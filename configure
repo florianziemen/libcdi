@@ -709,8 +709,6 @@ PTHREAD_LIBS
 PTHREAD_CC
 ax_pthread_config
 SYSTEM_TYPE
-HOST_NAME
-USER_NAME
 UUID_C_LIB
 UUID_C_INCLUDE
 DCE_UUID_C_LIB
@@ -27159,36 +27157,7 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
 
-# Checks for username, hostname and system type
-USERNAME=$LOGNAME
-if test -z "$USERNAME" ; then USERNAME=$USER; fi;
-if test -z "$USERNAME" ; then USERNAME="unknown"; fi;
-
-cat >>confdefs.h <<_ACEOF
-#define USER_NAME "$USERNAME"
-_ACEOF
-
-USER_NAME="$USERNAME"
-
-
-if test -z "$HOST"; then :
-  HOST=unknown
-       if test -x /bin/hostname; then :
-  HOST=$(hostname)
-else
-  if test -x /bin/uname; then :
-  HOST=$(uname -n)
-fi
-fi
-fi
-
-cat >>confdefs.h <<_ACEOF
-#define HOST_NAME "$HOST"
-_ACEOF
-
-HOST_NAME="$HOST"
-
-
+# Check for system type
 
 cat >>confdefs.h <<_ACEOF
 #define SYSTEM_TYPE "$ac_cv_build"

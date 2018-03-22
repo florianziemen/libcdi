@@ -28,7 +28,7 @@ static int iegDefaultDprec = 0;
 #define LIBVERSION      1.4.0
 #define XSTRING(x)	#x
 #define STRING(x)	XSTRING(x)
-static const char ieg_libvers[] = STRING(LIBVERSION) " of " __DATE__ " " __TIME__;
+static const char ieg_libvers[] = STRING(LIBVERSION);
 
 const char *iegLibraryVersion(void)
 {

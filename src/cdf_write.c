@@ -44,7 +44,7 @@ int cdfDefDatatype(int datatype, int filetype)
   int xtype = NC_FLOAT;
 
   if ( datatype == CDI_DATATYPE_CPX32 || datatype == CDI_DATATYPE_CPX64 )
-    Error("CDI/NetCDF library does not support complex numbers!");
+    Error("CDI library does not support complex numbers with NetCDF!");
 
   if ( filetype == CDI_FILETYPE_NC4 )
     {

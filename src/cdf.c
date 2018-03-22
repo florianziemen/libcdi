@@ -65,19 +65,17 @@ static
 void cdfComment(int ncid)
 {
   static char comment[256] = "Climate Data Interface version ";
-  static int init = 0;
+  static bool init = false;
 
   if ( ! init )
     {
-      init = 1;
+      init = true;
       const char *libvers = cdiLibraryVersion();
-      const char *blank = strchr(libvers, ' ');
-      size_t size = blank ? (size_t)(blank - libvers) : 0;
 
-      if ( size == 0 || ! isdigit((int) *libvers) )
+      if ( ! isdigit((int) *libvers) )
 	strcat(comment, "??");
       else
-	strncat(comment, libvers, size);
+	strcat(comment, libvers);
       strcat(comment, " (http://mpimet.mpg.de/cdi)");
     }
 

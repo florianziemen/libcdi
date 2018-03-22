@@ -139,7 +139,7 @@ void zaxis_init(zaxis_t *zaxisptr)
   zaxisptr->positive      = 0;
   zaxisptr->scalar        = 0;
   zaxisptr->direction     = 0;
-  zaxisptr->datatype      = 0;
+  zaxisptr->datatype      = CDI_DATATYPE_FLT64;
   zaxisptr->size          = 0;
   zaxisptr->vctsize       = 0;
   zaxisptr->vct           = NULL;
