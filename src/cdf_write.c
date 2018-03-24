@@ -38,7 +38,6 @@ void cdfDefVarDeflate(int ncid, int ncvarid, int deflate_level)
 #endif
 }
 
-
 int cdfDefDatatype(int datatype, stream_t *streamptr)
 {
   int xtype = NC_FLOAT;
@@ -53,7 +52,7 @@ int cdfDefDatatype(int datatype, stream_t *streamptr)
       else if ( datatype == CDI_DATATYPE_UINT16 ) xtype = NC_USHORT;
       else if ( datatype == CDI_DATATYPE_UINT32 ) xtype = NC_UINT;
       else if ( datatype == CDI_DATATYPE_CPX32 || datatype == CDI_DATATYPE_CPX64 )
-        Error("CDI library does not support complex numbers with NetCDF!");
+        Error("CDI library does not support complex numbers with NetCDF4/HDF5!");
 #else
       else if ( datatype == CDI_DATATYPE_UINT8  ) xtype = NC_SHORT;
       else if ( datatype == CDI_DATATYPE_UINT16 ) xtype = NC_INT;
