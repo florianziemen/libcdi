@@ -452,7 +452,7 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridindex, int ndims,
   int nvdimID = CDI_UNDEFID;
   int fileID  = streamptr->fileID;
   size_t dimlen = gridAxisInq->axisSize(gridID);
-  nc_type xtype = (nc_type)cdfDefDatatype(gridInqDatatype(gridID), streamptr->filetype);
+  nc_type xtype = (nc_type)cdfDefDatatype(gridInqDatatype(gridID), streamptr);
 
   ncgrid_t *ncgrid = streamptr->ncgrid;
 
@@ -663,7 +663,7 @@ cdfDefIrregularGridCommon(stream_t *streamptr, int gridID,
                           size_t nvertex, const char *vdimname_default,
                           bool setVdimname)
 {
-  nc_type xtype = (nc_type)cdfDefDatatype(gridInqDatatype(gridID), streamptr->filetype);
+  nc_type xtype = (nc_type)cdfDefDatatype(gridInqDatatype(gridID), streamptr);
   int xdimID = CDI_UNDEFID;
   int ydimID = CDI_UNDEFID;
   int ncxvarid = CDI_UNDEFID, ncyvarid = CDI_UNDEFID, ncavarid = CDI_UNDEFID;

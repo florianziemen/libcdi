@@ -39,29 +39,30 @@ void cdfDefVarDeflate(int ncid, int ncvarid, int deflate_level)
 }
 
 
-int cdfDefDatatype(int datatype, int filetype)
+int cdfDefDatatype(int datatype, stream_t *streamptr)
 {
   int xtype = NC_FLOAT;
 
-  if ( datatype == CDI_DATATYPE_CPX32 || datatype == CDI_DATATYPE_CPX64 )
-    Error("CDI library does not support complex numbers with NetCDF!");
-
-  if ( filetype == CDI_FILETYPE_NC4 )
+  if ( streamptr->filetype == CDI_FILETYPE_NC4 )
     {
       if      ( datatype == CDI_DATATYPE_INT8   ) xtype = NC_BYTE;
       else if ( datatype == CDI_DATATYPE_INT16  ) xtype = NC_SHORT;
       else if ( datatype == CDI_DATATYPE_INT32  ) xtype = NC_INT;
-#if  defined  (HAVE_NETCDF4)
+#ifdef  HAVE_NETCDF4
       else if ( datatype == CDI_DATATYPE_UINT8  ) xtype = NC_UBYTE;
       else if ( datatype == CDI_DATATYPE_UINT16 ) xtype = NC_USHORT;
       else if ( datatype == CDI_DATATYPE_UINT32 ) xtype = NC_UINT;
+      else if ( datatype == CDI_DATATYPE_CPX32 || datatype == CDI_DATATYPE_CPX64 )
+        Error("CDI library does not support complex numbers with NetCDF!");
 #else
       else if ( datatype == CDI_DATATYPE_UINT8  ) xtype = NC_SHORT;
       else if ( datatype == CDI_DATATYPE_UINT16 ) xtype = NC_INT;
       else if ( datatype == CDI_DATATYPE_UINT32 ) xtype = NC_INT;
+      else if ( datatype == CDI_DATATYPE_CPX32 || datatype == CDI_DATATYPE_CPX64 )
+        Error("CDI library does not support complex numbers with NetCDF4 classic!");
 #endif
       else if ( datatype == CDI_DATATYPE_FLT64  ) xtype = NC_DOUBLE;
-      else                                        xtype = NC_FLOAT;
+      else if ( datatype == CDI_DATATYPE_FLT32  ) xtype = NC_FLOAT;
     }
   else
     {
@@ -72,7 +73,9 @@ int cdfDefDatatype(int datatype, int filetype)
       else if ( datatype == CDI_DATATYPE_UINT16 ) xtype = NC_INT;
       else if ( datatype == CDI_DATATYPE_UINT32 ) xtype = NC_INT;
       else if ( datatype == CDI_DATATYPE_FLT64  ) xtype = NC_DOUBLE;
-      else                                        xtype = NC_FLOAT;
+      else if ( datatype == CDI_DATATYPE_FLT32  ) xtype = NC_FLOAT;
+      else if ( datatype == CDI_DATATYPE_CPX32 || datatype == CDI_DATATYPE_CPX64 )
+        Error("CDI library does not support complex numbers with NetCDF classic!");
     }
 
   return xtype;
@@ -90,7 +93,7 @@ void cdfDefVarMissval(stream_t *streamptr, int varID, int dtype, int lcheck)
 
       if ( lcheck && streamptr->ncmode == 2 ) cdf_redef(fileID);
 
-      int xtype = cdfDefDatatype(dtype, streamptr->filetype);
+      int xtype = cdfDefDatatype(dtype, streamptr);
 
       if ( xtype == NC_BYTE && missval > 127 && missval < 256 ) xtype = NC_INT;
 
@@ -514,7 +517,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
   /* if ( streamptr->ncmode == 2 ) cdf_redef(fileID); */
 
   int dtype = vlistInqVarDatatype(vlistID, varID);
-  int xtype = cdfDefDatatype(dtype, streamptr->filetype);
+  int xtype = cdfDefDatatype(dtype, streamptr);
 
   cdf_def_var(fileID, name, (nc_type) xtype, ndims, dims, &ncvarid);
 
