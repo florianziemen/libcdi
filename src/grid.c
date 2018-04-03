@@ -3139,6 +3139,32 @@ gridDefYBoundsSerial(grid_t *gridptr, const double *ybounds)
   gridDefBoundsGeneric(gridptr, ybounds, gridptr->y.size, &gridptr->y.bounds);
 }
 
+//----------------------------------------------------------------------------
+// Parallel Version
+//----------------------------------------------------------------------------
+
+size_t gridInqXboundsPart(int gridID, int start, size_t size, double *xbounds)
+{
+  grid_t *gridptr = grid_to_pointer(gridID);
+  const double *gridptr_xbounds = gridptr->vtable->inqXBoundsPtr(gridptr);
+  if ( gridptr_xbounds )
+    if ( size && xbounds )
+      memcpy(xbounds, gridptr_xbounds+start, size * sizeof (double));
+
+  return size;
+}
+
+size_t gridInqYboundsPart(int gridID, int start, size_t size, double *ybounds)
+{
+  grid_t *gridptr = grid_to_pointer(gridID);
+  const double *gridptr_ybounds = gridptr->vtable->inqYBoundsPtr(gridptr);
+  if ( gridptr_ybounds )
+    if ( size && ybounds )
+      memcpy(ybounds, gridptr_ybounds+start, size * sizeof (double));
+
+  return size;
+}
+
 /*
 @Function  gridDefYbounds
 @Title     Define the bounds of a Y-axis
