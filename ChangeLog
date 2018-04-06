@@ -2,6 +2,10 @@
 
 	* Version 1.9.4 released
 
+2018-04-03  Uwe Schulzweida
+
+	* Added streamReadVarPart() and streamReadVarSlicePart() [patch from: Niklas Röber]
+
 2018-03-16  Uwe Schulzweida
 
 	* Set default data type for grids to CDI_DATATYPE_FLT64

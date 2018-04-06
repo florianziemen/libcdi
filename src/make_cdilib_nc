@@ -113,6 +113,7 @@ files="basetime.c \
    stream_write.c \
    stream_read.c \
    stream_cdf_i.c \
+   stream_cdf_o.c \
    stream_cdf_time.c \
    stream_history.c \
    stream_record.c \
@@ -129,6 +130,7 @@ files="basetime.c \
    cdi_key.c \
    cdi_att.c \
    vlist_var.c \
+   table.c \
    zaxis.c"
 
 car () {

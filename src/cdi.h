@@ -399,10 +399,12 @@ void    streamWriteVarF(int streamID, int varID, const float data[], size_t nmis
 /*      streamReadVar: Read a variable */
 void    streamReadVar(int streamID, int varID, double data[], size_t *nmiss);
 void    streamReadVarF(int streamID, int varID, float data[], size_t *nmiss);
+void    streamReadVarPart(int streamID, int varID, int varType, int start, size_t size, void *data, size_t *nmiss, int memtype);
 
 /*      streamWriteVarSlice: Write a horizontal slice of a variable */
 void    streamWriteVarSlice(int streamID, int varID, int levelID, const double data[], size_t nmiss);
 void    streamWriteVarSliceF(int streamID, int varID, int levelID, const float data[], size_t nmiss);
+void    streamReadVarSlicePart(int streamID, int varID, int levelID, int varType, int start, size_t size, void *data, size_t *nmiss, int memtype);
 
 /*      streamReadVarSlice: Read a horizontal slice of a variable */
 void    streamReadVarSlice(int streamID, int varID, int levelID, double data[], size_t *nmiss);
@@ -998,12 +1000,14 @@ void    gridDefXbounds(int gridID, const double xbounds[]);
 
 /*      gridInqXbounds: Get the bounds of a X-axis */
 size_t  gridInqXbounds(int gridID, double xbounds[]);
+size_t  gridInqXboundsPart(int gridID, int start, size_t size, double xbounds[]);
 
 /*      gridDefYbounds: Define the bounds of a Y-axis */
 void    gridDefYbounds(int gridID, const double ybounds[]);
 
 /*      gridInqYbounds: Get the bounds of a Y-axis */
 size_t  gridInqYbounds(int gridID, double ybounds[]);
+size_t  gridInqYboundsPart(int gridID, int start, size_t size, double ybounds[]);
 
 void    gridDefRowlon(int gridID, int nrowlon, const int rowlon[]);
 void    gridInqRowlon(int gridID, int rowlon[]);

@@ -699,4 +699,329 @@ void cdf_read_record(stream_t *streamptr, int memtype, void *data, size_t *nmiss
     cdfReadVarSliceSP(streamptr, varID, levelID, (float*) data, nmiss);
 }
 
+//----------------------------------------------------------------------------
+// Parallel Version
+//----------------------------------------------------------------------------
+
+void cdfReadVarSliceDPPart(stream_t *streamptr, int varID, int levelID, int varType, int startpoint, size_t length, double *data, size_t *nmiss)
+{
+  (void)(varType);
+  size_t start[4];
+  size_t count[4];
+
+  if ( CDI_Debug )
+    Message("streamID = %d  varID = %d  levelID = %d", streamptr->self, varID, levelID);
+
+  int vlistID = streamptr->vlistID;
+  int fileID = streamptr->fileID;
+
+  bool swapxy;
+  cdfGetSliceSlapDescription(streamptr, varID, levelID, &swapxy, &start, &count);
+
+  int ncvarid = streamptr->vars[varID].ncvarid;
+  int gridId = vlistInqVarGrid(vlistID, varID);
+  //int time = vlistInqVarTsteptype(vlistID, varID);
+  size_t gridsize = (size_t)gridInqSize(gridId);
+  size_t xsize = (size_t)gridInqXsize(gridId);
+  size_t ysize = (size_t)gridInqYsize(gridId);
+
+  unsigned int position = 0; 
+  for (int i=0 ; i<4 ; i++)
+    if (count[i] == gridsize)
+      position = i;
+
+  start[position] = start[position]+startpoint;
+  count[position] = length;
+
+  if ( vlistInqVarDatatype(vlistID, varID) == DATATYPE_FLT32 )
+    {      
+      float *data_fp = (float *) Malloc(length*sizeof(*data_fp));
+      cdf_get_vara_float(fileID, ncvarid, start, count, data_fp);
+    
+      for ( size_t i = 0; i < length; i++ )
+        data[i] = (double) data_fp[i];
+
+      Free(data_fp);
+    }
+  else if ( vlistInqVarDatatype(vlistID, varID) == CDI_DATATYPE_UINT8 )
+    {
+      nc_type xtype;
+      cdf_inq_vartype(fileID, ncvarid, &xtype);
+      if ( xtype == NC_BYTE )
+        {
+          for ( size_t i = 0; i < length; i++ )
+            if ( data[i] < 0 ) data[i] += 256;
+        }
+    }
+  else
+    {
+      cdf_get_vara_double(fileID, ncvarid, start, count, data);
+    }
+
+  if ( swapxy ) transpose2dArrayDP(ysize, xsize, data);
+
+  double missval = vlistInqVarMissval(vlistID, varID);
+  const bool haveMissVal = vlistInqVarMissvalUsed(vlistID, varID);
+  double validRange[2];
+  if (!(haveMissVal && vlistInqVarValidrange(vlistID, varID, validRange)))
+    validRange[0] = DBL_MIN, validRange[1] = DBL_MAX;
+  double addoffset = vlistInqVarAddoffset(vlistID, varID);
+  double scalefactor = vlistInqVarScalefactor(vlistID, varID);
+  size_t nmiss_ = cdfDoInputDataTransformationDP(length, data, haveMissVal, missval, scalefactor, addoffset, validRange[0], validRange[1]);
+  assert(nmiss_ <= INT_MAX);
+  *nmiss = (size_t)nmiss_;
+}
+
+void cdfReadVarSliceSPPart(stream_t *streamptr, int varID, int levelID, int varType, int startpoint, size_t length, float *data, size_t *nmiss)
+{
+  (void)(varType);
+  size_t start[4];
+  size_t count[4];
+
+  if ( CDI_Debug )
+    Message("streamID = %d  varID = %d  levelID = %d", streamptr->self, varID, levelID);
+
+  int vlistID = streamptr->vlistID;
+  int fileID = streamptr->fileID;
+
+  bool swapxy;
+  cdfGetSliceSlapDescription(streamptr, varID, levelID, &swapxy, &start, &count);
+
+  int ncvarid = streamptr->vars[varID].ncvarid;
+  int gridId = vlistInqVarGrid(vlistID, varID);
+  // int time = vlistInqVarTsteptype(vlistID, varID);
+  size_t gridsize = (size_t)gridInqSize(gridId);
+  size_t xsize = (size_t)gridInqXsize(gridId);
+  size_t ysize = (size_t)gridInqYsize(gridId);
+
+  unsigned int position = 0; 
+  for (int i=0 ; i<4 ; i++)
+    if (count[i] == gridsize)
+      position = i;
+
+  start[position] = start[position]+startpoint;
+  count[position] = length;
+
+  if ( vlistInqVarDatatype(vlistID, varID) == DATATYPE_FLT32 )
+    {      
+      float *data_fp = (float *) Malloc(length*sizeof(*data_fp));
+      cdf_get_vara_float(fileID, ncvarid, start, count, data_fp);
+    
+      for ( size_t i = 0; i < length; i++ )
+        data[i] = (float) data_fp[i];
+
+      Free(data_fp);
+    }
+  else if ( vlistInqVarDatatype(vlistID, varID) == CDI_DATATYPE_UINT8 )
+    {
+      nc_type xtype;
+      cdf_inq_vartype(fileID, ncvarid, &xtype);
+      if ( xtype == NC_BYTE )
+        {
+          for ( size_t i = 0; i < length; i++ )
+            if ( data[i] < 0 ) data[i] += 256;
+        }
+    }
+  else
+    {
+      cdf_get_vara_float(fileID, ncvarid, start, count, data);
+    }
+
+  if ( swapxy ) transpose2dArraySP(ysize, xsize, data);
+
+  float missval = vlistInqVarMissval(vlistID, varID);
+  const bool haveMissVal = vlistInqVarMissvalUsed(vlistID, varID);
+  double validRange[2];
+  if (!(haveMissVal && vlistInqVarValidrange(vlistID, varID, validRange)))
+    validRange[0] = DBL_MIN, validRange[1] = DBL_MAX;
+  float addoffset = vlistInqVarAddoffset(vlistID, varID);
+  float scalefactor = vlistInqVarScalefactor(vlistID, varID);
+  size_t nmiss_ = cdfDoInputDataTransformationSP(length, data, haveMissVal, missval, scalefactor, addoffset, validRange[0], validRange[1]);
+  assert(nmiss_ <= INT_MAX);
+  *nmiss = (size_t)nmiss_;
+}
+
+static
+int cdiStreamReadVarSlicePart(int streamID, int varID, int levelID, int varType, int start, size_t size, int memtype, void *data, size_t *nmiss)
+{
+  int status = 0;
+
+  if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamID, varID);
+
+  check_parg(data);
+  check_parg(nmiss);
+
+  stream_t *streamptr = stream_to_pointer(streamID);
+  int filetype = streamptr->filetype;
+
+  *nmiss = 0;
+
+  // currently we only care for netcdf data
+  switch (filetype)
+    {
+#if defined (HAVE_LIBNETCDF)
+    case FILETYPE_NC:
+    case FILETYPE_NC2:
+    case FILETYPE_NC4:
+    case FILETYPE_NC4C:
+      {
+        if ( memtype == MEMTYPE_FLOAT )
+        cdfReadVarSliceSPPart(streamptr, varID, levelID, varType, start, size, (float *)data, nmiss);
+        else
+        cdfReadVarSliceDPPart(streamptr, varID, levelID, varType, start, size, (double *)data, nmiss);
+        break;
+      }
+#endif
+    default:
+      {
+        Error("%s support not compiled in!", strfiletype(filetype));
+        status = 2;
+        break;
+      }
+    }
+
+  return status;
+}
+
+
+void cdfReadVarDPPart(stream_t *streamptr, int varID, int varType, int startpoint, size_t length, double *data, size_t *nmiss)
+{
+  (void)(varType);
+  if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamptr->self, varID);
+
+  int vlistID = streamptr->vlistID;
+  int fileID = streamptr->fileID;
+
+  int ncvarid = streamptr->vars[varID].ncvarid;
+
+  int gridID = vlistInqVarGrid(vlistID, varID);
+  int zaxisID = vlistInqVarZaxis(vlistID, varID);
+
+  size_t start[4];
+  size_t count[4];
+  cdfGetSlapDescription(streamptr, varID, &start, &count);
+
+  int time = vlistInqVarTimetype(vlistID, varID);
+  if (time)
+    {
+      start[2] = start[2]+startpoint;
+      count[2] = length;
+    }
+  else
+    {
+      start[1] = start[1]+startpoint;
+      count[1] = length;
+    } 
+
+  cdf_get_vara_double(fileID, ncvarid, start, count, data);
+
+  size_t size = (size_t)gridInqSize(gridID)*(size_t)zaxisInqSize(zaxisID);
+  double missval = vlistInqVarMissval(vlistID, varID);
+  const bool haveMissVal = vlistInqVarMissvalUsed(vlistID, varID);
+  double validRange[2];
+  if (!(haveMissVal && vlistInqVarValidrange(vlistID, varID, validRange)))
+    validRange[0] = DBL_MIN, validRange[1] = DBL_MAX;
+  double addoffset = vlistInqVarAddoffset(vlistID, varID);
+  double scalefactor = vlistInqVarScalefactor(vlistID, varID);
+  size_t nmiss_ = cdfDoInputDataTransformationDP(size, data, haveMissVal, missval, scalefactor, addoffset, validRange[0], validRange[1]);
+  assert(nmiss_ <= INT_MAX);
+  *nmiss = (size_t)nmiss_;
+}
+
+void cdfReadVarSPPart(stream_t *streamptr, int varID, int varType, int startpoint, size_t length, float *data, size_t *nmiss)
+{
+  (void)(varType);
+  if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamptr->self, varID);
+
+  int vlistID = streamptr->vlistID;
+  int fileID = streamptr->fileID;
+
+  int ncvarid = streamptr->vars[varID].ncvarid;
+
+  int gridID = vlistInqVarGrid(vlistID, varID);
+  int zaxisID = vlistInqVarZaxis(vlistID, varID);
+
+  size_t start[4];
+  size_t count[4];
+  cdfGetSlapDescription(streamptr, varID, &start, &count);
+
+  int time = vlistInqVarTimetype(vlistID, varID);
+  if (time)
+    {
+      start[2] = start[2]+startpoint;
+      count[2] = length;
+    }
+  else
+    {
+      start[1] = start[1]+startpoint;
+      count[1] = length;
+    } 
+
+  cdf_get_vara_float(fileID, ncvarid, start, count, data);
+
+  size_t size = (size_t)gridInqSize(gridID)*(size_t)zaxisInqSize(zaxisID);
+  float missval = vlistInqVarMissval(vlistID, varID);
+  const bool haveMissVal = vlistInqVarMissvalUsed(vlistID, varID);
+  double validRange[2];
+  if (!(haveMissVal && vlistInqVarValidrange(vlistID, varID, validRange)))
+    validRange[0] = DBL_MIN, validRange[1] = DBL_MAX;
+  float addoffset = vlistInqVarAddoffset(vlistID, varID);
+  float scalefactor = vlistInqVarScalefactor(vlistID, varID);
+  size_t nmiss_ = cdfDoInputDataTransformationSP(size, data, haveMissVal, missval, scalefactor, addoffset, validRange[0], validRange[1]);
+  assert(nmiss_ <= INT_MAX);
+  *nmiss = (size_t)nmiss_;
+}
+
+static
+void cdiStreamReadVarPart(int streamID, int varID, int varType, int start, size_t size, int memtype, void *data, size_t *nmiss)
+{
+  (void)(varType);
+  if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamID, varID);
+
+  check_parg(data);
+  check_parg(nmiss);
+
+  stream_t *streamptr = stream_to_pointer(streamID);
+  int filetype = streamptr->filetype;
+
+  *nmiss = 0;
+
+  // currently we only care for netcdf data
+  switch (filetype)
+    {
+#if defined (HAVE_LIBNETCDF)
+    case FILETYPE_NC:
+    case FILETYPE_NC2:
+    case FILETYPE_NC4:
+    case FILETYPE_NC4C:
+      {
+        if ( memtype == MEMTYPE_FLOAT )
+        cdfReadVarSPPart(streamptr, varID, varType, start, size, (float *)data, nmiss);
+        else
+        cdfReadVarDPPart(streamptr, varID, varType, start, size, (double *)data, nmiss);
+
+        break;
+      }
+#endif
+    default:
+      {
+        Error("%s support not compiled in!", strfiletype(filetype));
+        break;
+      }
+    }
+}
+
+void streamReadVarSlicePart(int streamID, int varID, int levelID, int varType, int start, size_t size, void *data, size_t *nmiss, int memtype)
+{
+  if ( cdiStreamReadVarSlicePart(streamID, varID, levelID, varType, start, size, memtype, data, nmiss) )
+    {
+      Error("Unexpected error returned from cdiStreamReadVarSlicePart()!");
+    }
+}
+
+void streamReadVarPart(int streamID, int varID, int varType, int start, size_t size, void *data, size_t *nmiss, int memtype)
+{
+  cdiStreamReadVarPart(streamID, varID, varType, start, size, memtype, data, nmiss);
+}
+
 #endif
