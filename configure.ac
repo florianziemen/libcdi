@@ -283,7 +283,17 @@ main(int argc, char **argv)
       CPPFLAGS=$saved_CPPFLAGS
      ],
      [enable_ppm=no])
-
+   dnl
+   dnl NC_HAS_PNETCDF is useful when available to short-circuit some tests
+   AS_IF([test x"$ENABLE_NETCDF" = xyes],
+     [AC_CHECK_HEADERS([netcdf_meta.h])
+      AS_IF([test "x$NC_CONFIG" != "x"],
+        [AC_MSG_CHECKING([parallel netcdf's pnetcdf support])
+         acx_temp=`$NC_CONFIG --has-pnetcdf`
+         AS_IF([test "x$acx_temp" = "xyes"],
+           [AC_DEFINE([HAVE_NETCDF_PAR_PNETCDF],[1],
+              [Defined to 1 if NetCDF parallel open supports NC_PNETCDF])])
+      AC_MSG_RESULT([$acx_temp])])])
    AS_IF([test x"$ENABLE_NC4" = xyes],
      [AC_CHECK_HEADERS([netcdf_par.h],
         [AC_CHECK_DECL([MPI_Bcast],
