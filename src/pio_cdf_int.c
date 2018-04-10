@@ -7,9 +7,14 @@
 #include <setjmp.h>
 #include <stdbool.h>
 
+#include <mpi.h>
+
 #include <netcdf.h>
 #if defined HAVE_PARALLEL_NC4 && defined HAVE_NETCDF_PAR_H
 #include <netcdf_par.h>
+#endif
+#ifdef HAVE_NETCDF_META_H
+#include <netcdf_meta.h>
 #endif
 
 #include "namespace.h"
@@ -29,15 +34,27 @@ pthread_key_t cdiPioCdfJmpKey;
 TLS struct cdiPioNcCreateLongJmpRetBuf *cdiPioCdfJmpBuf;
 #endif
 
+#if defined NC_HAS_PNETCDF && NC_HAS_PNETCDF
+/* NetCDF 4.3.3 introduced the NC_HAS_PNETCDF define so we can deduce
+ * reliably in this and later versions if parallel opening of
+ * classic, 64bit-offset and CDF-5 files can even succeed at all. */
+#define CDI_PIO_TRY_PNETCDF 1
+#elif defined NC_PNETCDF && defined HAVE_NETCDF_PAR_PNETCDF
+#define CDI_PIO_TRY_PNETCDF HAVE_NETCDF_PAR_PNETCDF
+#else
+#define CDI_PIO_TRY_PNETCDF 0
+#endif
+
 static int
 cdiPio_nc__create(const char *path, int cmode, size_t initialsz, size_t *chunksizehintp, int *ncidp)
 {
   int status, ioMode = commInqIOMode();
   if (ioMode != PIO_NONE)
     {
-#ifdef NC_PNETCDF
+#if CDI_PIO_TRY_PNETCDF
 #if !defined TLS && defined HAVE_PTHREAD
       struct cdiPioNcCreateLongJmpRetBuf *cdiPioCdfJmpBuf = pthread_getspecific(cdiPioCdfJmpKey);
+#endif
 #endif
       if (cmode & NC_NETCDF4)
         {
@@ -47,6 +64,8 @@ cdiPio_nc__create(const char *path, int cmode, size_t initialsz, size_t *chunksi
         }
       else
         {
+          int rank = commInqRankColl();
+#if CDI_PIO_TRY_PNETCDF
           /* which combination of cmode flags has already been tested? */
           static bool pnetcdfWontWork[] = {
             false, /* CDF-1 */
@@ -62,7 +81,6 @@ cdiPio_nc__create(const char *path, int cmode, size_t initialsz, size_t *chunksi
           else
             cdfIdx = 2;
           MPI_Comm collComm = commInqCommColl();
-          int rank = commInqRankColl();
           cmode |= NC_PNETCDF;
           if (!pnetcdfWontWork[cdfIdx])
             {
@@ -88,7 +106,7 @@ cdiPio_nc__create(const char *path, int cmode, size_t initialsz, size_t *chunksi
                 status = nc__create(path, cmode, initialsz, chunksizehintp, ncidp);
               else
                 longjmp(cdiPioCdfJmpBuf->jmpBuf, 1);
-#ifdef NC_PNETCDF
+#if CDI_PIO_TRY_PNETCDF
             }
 #endif
         }
@@ -113,7 +131,7 @@ cdiPioCdfDefVar(int ncid, const char *name, nc_type xtype, int ndims, const int 
     }
 }
 
-#ifdef NC_PNETCDF
+#if CDI_PIO_TRY_PNETCDF
 static void
 cdiPio_enable_nc_par_access(int ncid, int streamID)
 {
@@ -156,14 +174,13 @@ cdiPio_nc__enddef(int ncid, int streamID, size_t hdr_pad, size_t v_align, size_t
   if (statusEndDef == NC_NOERR) cdiPio_enable_nc_par_access(ncid, streamID);
   return statusEndDef;
 }
-
-#endif
+#endif /* CDI_PIO_TRY_PNETCDF */
 
 void
 cdiPioEnableNetCDFParAccess(void)
 {
   namespaceSwitchSet(NSSWITCH_NC__CREATE, NSSW_FUNC(cdiPio_nc__create));
-#ifdef NC_PNETCDF
+#if CDI_PIO_TRY_PNETCDF
   namespaceSwitchSet(NSSWITCH_NC_ENDDEF, NSSW_FUNC(cdiPio_nc_enddef));
   namespaceSwitchSet(NSSWITCH_NC__ENDDEF, NSSW_FUNC(cdiPio_nc__enddef));
 #endif
