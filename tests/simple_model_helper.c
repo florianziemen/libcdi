@@ -118,11 +118,13 @@ createGlobalLatLonGrid(int nlon, int nlat)
   size_t maxAxisSize = (size_t) (nlon > nlat ? nlon : nlat);
   double *restrict coords = (double *) Malloc(maxAxisSize * sizeof(coords[0]));
   {
-    for (size_t i = 0; i < (size_t) nlon; ++i) coords[i] = ((double) (i * 360)) / nlon;
+    double step = 360.0 / (double) nlon, ofs = step * 0.5;
+    for (size_t i = 0; i < (size_t) nlon; ++i) coords[i] = (double) i * step + ofs;
     gridDefXvals(gridID, coords);
   }
   {
-    for (size_t i = 0; i < (size_t) nlat; ++i) coords[i] = ((double) (i * 180)) / nlat - 90.0;
+    double step = 180.0 / (double) nlat, ofs = step * 0.5;
+    for (size_t i = 0; i < (size_t) nlat; ++i) coords[i] = (double) i * step - 90.0 + ofs;
     gridDefYvals(gridID, coords);
   }
   Free(coords);
