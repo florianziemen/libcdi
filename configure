@@ -29623,7 +29623,32 @@ done
       CPPFLAGS=$saved_CPPFLAGS
 
 fi
+         if test x"$ENABLE_NETCDF" = xyes; then :
+  for ac_header in netcdf_meta.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "netcdf_meta.h" "ac_cv_header_netcdf_meta_h" "$ac_includes_default"
+if test "x$ac_cv_header_netcdf_meta_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_NETCDF_META_H 1
+_ACEOF
 
+fi
+
+done
+
+      if test "x$NC_CONFIG" != "x"; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking parallel netcdf's pnetcdf support" >&5
+$as_echo_n "checking parallel netcdf's pnetcdf support... " >&6; }
+         acx_temp=`$NC_CONFIG --has-pnetcdf`
+         if test "x$acx_temp" = "xyes"; then :
+
+$as_echo "#define HAVE_NETCDF_PAR_PNETCDF 1" >>confdefs.h
+
+fi
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: $acx_temp" >&5
+$as_echo "$acx_temp" >&6; }
+fi
+fi
    if test x"$ENABLE_NC4" = xyes; then :
   for ac_header in netcdf_par.h
 do :

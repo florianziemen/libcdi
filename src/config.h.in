@@ -156,8 +156,14 @@
 /* Define to 1 if you have the <netcdf.h> header file. */
 #undef HAVE_NETCDF_H
 
+/* Define to 1 if you have the <netcdf_meta.h> header file. */
+#undef HAVE_NETCDF_META_H
+
 /* Define to 1 if you have the <netcdf_par.h> header file. */
 #undef HAVE_NETCDF_PAR_H
+
+/* Defined to 1 if NetCDF parallel open supports NC_PNETCDF */
+#undef HAVE_NETCDF_PAR_PNETCDF
 
 /* netCDF library does support MPI parallel invocations */
 #undef HAVE_PARALLEL_NC4
