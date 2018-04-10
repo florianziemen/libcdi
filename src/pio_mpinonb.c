@@ -66,6 +66,19 @@ initAFiledataMPINONB(struct fileMPIFWS *of,
   xmpi(MPI_File_open(commPio, of->name, MPI_MODE_CREATE|MPI_MODE_WRONLY,
                      open_info, &of->fh));
   xmpi(MPI_Info_free(&open_info));
+#ifdef OMPI_MINOR_VERSION
+  /* Bull X MPI 1.2.x has a defective shared file pointer that can be
+   * righted with a collective operation, thus we write zero bytes
+   * from all tasks iff we detect that this is Bull X MPI, which
+   * fortunately can be found from a mismatch in MPI and OMPI versions. */
+#  if OMPI_MAJOR_VERSION == 1 && OMPI_MINOR_VERSION == 2 && MPI_SUBVERSION == 1
+#  warning "implementing Bull X MPI work-around"
+  {
+    MPI_Status stat;
+    xmpi(MPI_File_write_ordered(of->fh, filename, 0, MPI_BYTE, &stat));
+  }
+#  endif
+#endif
   of->request = MPI_REQUEST_NULL;
 }
 
