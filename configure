@@ -27742,62 +27742,7 @@ else
 $as_echo "no" >&6; }
 fi
 
-
-                            if test "x$NC_CONFIG" != "x"; then :
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking netcdf's OpenDAP support" >&5
-$as_echo_n "checking netcdf's OpenDAP support... " >&6; }
-                                   if test "x$($NC_CONFIG --has-dap)" = "xyes"; then :
-
-$as_echo "#define HAVE_LIBNC_DAP 1" >>confdefs.h
-
-                                          { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-                                  { $as_echo "$as_me:${as_lineno-$LINENO}: checking netcdf's nc2 support" >&5
-$as_echo_n "checking netcdf's nc2 support... " >&6; }
-                                   if test "x$($NC_CONFIG --has-nc2)" = "xyes"; then :
-
-$as_echo "#define HAVE_NETCDF2 1" >>confdefs.h
-
-                                          ENABLE_NC2=yes
-                                          { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-                                   { $as_echo "$as_me:${as_lineno-$LINENO}: checking netcdf's nc4 support" >&5
-$as_echo_n "checking netcdf's nc4 support... " >&6; }
-                                   if test "x$($NC_CONFIG --has-nc4)" = "xyes"; then :
-
-$as_echo "#define HAVE_NETCDF4 1" >>confdefs.h
-
-                                          ENABLE_NC4=yes
-                                          { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-			           { $as_echo "$as_me:${as_lineno-$LINENO}: checking netcdf's nc4/hdf5 support" >&5
-$as_echo_n "checking netcdf's nc4/hdf5 support... " >&6; }
-                                   if test "x$($NC_CONFIG --has-hdf5)" = "xyes"; then :
-
-$as_echo "#define HAVE_NC4HDF5 1" >>confdefs.h
-
-                                          ENABLE_NC4HDF5=yes
-                                          { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-else
-  $as_echo Could not find nc-config! go on with default configuration
-fi ;; #(
+ ;; #(
   *) :
     if test -d "$with_netcdf"; then :
   NETCDF_ROOT=$with_netcdf
@@ -27917,62 +27862,6 @@ $as_echo "no" >&6; }
 fi
 
 
-                                 if test "x$NC_CONFIG" != "x"; then :
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking netcdf's OpenDAP support" >&5
-$as_echo_n "checking netcdf's OpenDAP support... " >&6; }
-                                   if test "x$($NC_CONFIG --has-dap)" = "xyes"; then :
-
-$as_echo "#define HAVE_LIBNC_DAP 1" >>confdefs.h
-
-                                          { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-                                   { $as_echo "$as_me:${as_lineno-$LINENO}: checking netcdf's nc2 support" >&5
-$as_echo_n "checking netcdf's nc2 support... " >&6; }
-                                   if test "x$($NC_CONFIG --has-nc2)" = "xyes"; then :
-
-$as_echo "#define HAVE_NETCDF2 1" >>confdefs.h
-
-                                          ENABLE_NC2=yes
-                                          { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-                                   { $as_echo "$as_me:${as_lineno-$LINENO}: checking netcdf's nc4 support" >&5
-$as_echo_n "checking netcdf's nc4 support... " >&6; }
-                                   if test "x$($NC_CONFIG --has-nc4)" = "xyes"; then :
-
-$as_echo "#define HAVE_NETCDF4 1" >>confdefs.h
-
-                                          ENABLE_NC4=yes
-                                          { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-			           { $as_echo "$as_me:${as_lineno-$LINENO}: checking netcdf's nc4/hdf5 support" >&5
-$as_echo_n "checking netcdf's nc4/hdf5 support... " >&6; }
-                                   if test "x$($NC_CONFIG --has-hdf5)" = "xyes"; then :
-
-$as_echo "#define HAVE_NC4HDF5 1" >>confdefs.h
-
-                                          ENABLE_NC4HDF5=yes
-                                          { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: Could not find nc-config! go on with default configuration" >&5
-$as_echo "Could not find nc-config! go on with default configuration" >&6; }
-fi
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: $with_netcdf is not a directory! NetCDF suppressed" >&5
 $as_echo "$as_me: $with_netcdf is not a directory! NetCDF suppressed" >&6;}
@@ -27987,6 +27876,54 @@ $as_echo_n "checking for NetCDF library... " >&6; }
 $as_echo "suppressed" >&6; }
 fi
 
+
+if test x"$ENABLE_NETCDF" = xyes -a "x$NC_CONFIG" != "x"; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking netcdf's OpenDAP support" >&5
+$as_echo_n "checking netcdf's OpenDAP support... " >&6; }
+   acx_temp=`$NC_CONFIG --has-dap`
+   if test "x$acx_temp" = "xyes"; then :
+
+$as_echo "#define HAVE_LIBNC_DAP 1" >>confdefs.h
+
+fi
+   { $as_echo "$as_me:${as_lineno-$LINENO}: result: $acx_temp" >&5
+$as_echo "$acx_temp" >&6; }
+   { $as_echo "$as_me:${as_lineno-$LINENO}: checking netcdf's nc2 support" >&5
+$as_echo_n "checking netcdf's nc2 support... " >&6; }
+   acx_temp=`$NC_CONFIG --has-nc2`
+   if test "x$acx_temp" = "xyes"; then :
+
+$as_echo "#define HAVE_NETCDF2 1" >>confdefs.h
+
+      ENABLE_NC2=yes
+fi
+   { $as_echo "$as_me:${as_lineno-$LINENO}: result: $acx_temp" >&5
+$as_echo "$acx_temp" >&6; }
+   { $as_echo "$as_me:${as_lineno-$LINENO}: checking netcdf's nc4 support" >&5
+$as_echo_n "checking netcdf's nc4 support... " >&6; }
+   acx_temp=`$NC_CONFIG --has-nc4`
+   if test "x$acx_temp" = "xyes"; then :
+
+$as_echo "#define HAVE_NETCDF4 1" >>confdefs.h
+
+      ENABLE_NC4=yes
+fi
+   { $as_echo "$as_me:${as_lineno-$LINENO}: result: $acx_temp" >&5
+$as_echo "$acx_temp" >&6; }
+   { $as_echo "$as_me:${as_lineno-$LINENO}: checking netcdf's nc4/hdf5 support" >&5
+$as_echo_n "checking netcdf's nc4/hdf5 support... " >&6; }
+   acx_temp=`$NC_CONFIG --has-hdf5`
+   if test "x$acx_temp" = "xyes"; then :
+
+$as_echo "#define HAVE_NC4HDF5 1" >>confdefs.h
+
+      ENABLE_NC4HDF5=yes
+fi
+   { $as_echo "$as_me:${as_lineno-$LINENO}: result: $acx_temp" >&5
+$as_echo "$acx_temp" >&6; }
+elif test x"$ENABLE_NETCDF" = xyes -a "x$NC_CONFIG" = "x"; then :
+  $as_echo Could not find nc-config! go on with default configuration
+fi
 
 if test "x$ENABLE_NC4HDF5" = "xyes"; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing H5TS_mutex_lock" >&5
