@@ -124,7 +124,7 @@ AC_SUBST([SYSTEM_TYPE],["$ac_cv_build"])
 AC_CHECK_LIB(m, floor)
 #  ----------------------------------------------------------------------
 # Add basic configure options
-ACX_OPTIONS
+ACX_CDI_OPTIONS
 AM_CONDITIONAL([ENABLE_NETCDF],[test x$ENABLE_NETCDF = xyes])
 AC_CHECK_FUNCS([grib_get_length])
 #  ----------------------------------------------------------------------
