@@ -1817,7 +1817,9 @@ int gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, int rdate, int rti
       gribapiDefStepUnits(editionNumber, gh, timeunit, proDefTempNum, gcinit);
 
       long startStep = 0;
-      long endStep = (long) ((days*86400.0 + secs)/factor);
+      double endStepF = (days*86400.0 + secs)/factor;
+      if ( endStepF > INT_MAX ) return status;
+      long endStep = (long) endStepF;
 
       if ( editionNumber > 1 ) GRIB_CHECK(my_grib_set_long(gh, "significanceOfReferenceTime", 1), 0);
       if ( editionNumber > 1 ) GRIB_CHECK(my_grib_set_long(gh, "stepRange", 0), 0);
@@ -1870,8 +1872,8 @@ void gribapiDefTime(int editionNumber, int productDefinitionTemplate, int typeOf
       int rtime    = taxisInqRtime(taxisID);
       int timeunit = taxisInqTunit(taxisID);
 
-      int status = gribapiDefDateTimeRel(editionNumber, gh, rdate, rtime, vdate, vtime,
-                                     productDefinitionTemplate, typeOfGeneratingProcess, tsteptype, timeunit, calendar, gcinit);
+      int status = gribapiDefDateTimeRel(editionNumber, gh, rdate, rtime, vdate, vtime, productDefinitionTemplate,
+                                         typeOfGeneratingProcess, tsteptype, timeunit, calendar, gcinit);
       if ( status != 0 ) taxistype = TAXIS_ABSOLUTE;
     }
 

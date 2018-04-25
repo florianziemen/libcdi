@@ -2,6 +2,10 @@
 
 	* Version 1.9.4 released
 
+2018-04-25  Uwe Schulzweida
+
+	* gribapiDefDateTimeRel: check range of endStep (bug fix)
+
 2018-04-03  Uwe Schulzweida
 
 	* Added streamReadVarPart() and streamReadVarSlicePart() [patch from: Niklas Röber]
