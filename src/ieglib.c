@@ -46,12 +46,9 @@ void iegLibInit(void)
   char *envString = getenv(envName);
   if ( envString )
     {
-      int pos;
-      int nrun;
-      if ( strlen(envString) == 2 ) nrun = 1;
-      else                          nrun = 2;
+      int nrun = (strlen(envString) == 2) ? 1 : 2;
 
-      pos = 0;
+      int pos = 0;
       while ( nrun-- )
 	{
 	  switch ( tolower((int) envString[pos]) )

@@ -1619,11 +1619,14 @@ void gribapiDefParam(int editionNumber, grib_handle *gh, int param, const char *
     {
       if ( pnum < 0 ) pnum = -pnum;
 
-      static bool lwarn_pnum = true;
-      if ( pnum > 255 && lwarn_pnum )
+      if ( pnum > 255 )
         {
-          Warning("Parameter number %d out of range (1-255), set to %d!", pnum, pnum%256);
-          lwarn_pnum = false;
+          static bool lwarn_pnum = true;
+          if ( lwarn_pnum )
+            {
+              Warning("Parameter number %d out of range (1-255), set to %d!", pnum, pnum%256);
+              lwarn_pnum = false;
+            }
           pnum = pnum%256;
         }
 
@@ -3139,17 +3142,22 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   *gribbuffersize = recsize;
   *gribbuffer = Malloc(*gribbuffersize);
 
-  if ( ! gc->init )
+  if ( ! gc->init && editionNumber == 2 )
     {
-      char cdi_name[CDI_MAX_NAME]; cdi_name[0] = 0;
-      char grb_name[256];          grb_name[0] = 0;
-      vlistInqVarName(vlistID, varID, cdi_name);
-      gribapiGetString(gh, "shortName", grb_name, sizeof(grb_name));
-      str_tolower(cdi_name);
-      str_tolower(grb_name);
-      if ( (strlen(cdi_name) != strlen(grb_name)) || !str_is_equal(cdi_name, grb_name) )
-        Message("*** GRIB2 shortName does not correspond to chosen variable name: \"%s\" (\"%s\").",
-                grb_name[0]?grb_name:"unknown", cdi_name);
+      long pdis;
+      grib_get_long(gh, "discipline", &pdis);
+      if ( pdis != 255 )
+        {
+          char cdi_name[CDI_MAX_NAME]; cdi_name[0] = 0;
+          char grb_name[256];          grb_name[0] = 0;
+          vlistInqVarName(vlistID, varID, cdi_name);
+          gribapiGetString(gh, "shortName", grb_name, sizeof(grb_name));
+          str_tolower(cdi_name);
+          str_tolower(grb_name);
+          if ( (strlen(cdi_name) != strlen(grb_name)) || !str_is_equal(cdi_name, grb_name) )
+            Message("*** GRIB2 shortName does not correspond to chosen variable name: \"%s\" (\"%s\").",
+                    grb_name[0]?grb_name:"unknown", cdi_name);
+        }
     }
 
   /* get a copy of the coded message */

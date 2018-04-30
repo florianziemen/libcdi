@@ -61,9 +61,7 @@ void srvLibInit()
   char *envString = getenv(envName);
   if ( envString )
     {
-      int nrun;
-      if ( strlen(envString) == 2 ) nrun = 1;
-      else                          nrun = 2;
+      int nrun = (strlen(envString) == 2) ? 1 : 2;
 
       int pos = 0;
       while ( nrun-- )
