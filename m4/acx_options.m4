@@ -1,4 +1,4 @@
-AC_DEFUN([ACX_OPTIONS],
+AC_DEFUN([ACX_CDI_OPTIONS],
 [
 #  ----------------------------------------------------------------------
 #  Checks for multithreaded compiling + linking

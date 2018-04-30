@@ -386,6 +386,71 @@ void streamInqGRIBinfo(int streamID, int *intnum, float *fltnum, off_t *bignum)
         grib_info_for_grads(recpos, (long)gribbuffersize, (unsigned char *) gribbuffer, intnum, fltnum, bignum);
     }
 }
+
+
+int grbGetGridtype(int gridID, size_t gridsize, bool *gridIsRotated, bool *gridIsCurvilinear)
+{
+  int gridtype = gridInqType(gridID);
+
+  if ( gridtype == GRID_GENERIC )
+    {
+      int xsize = (int) gridInqXsize(gridID);
+      int ysize = (int) gridInqYsize(gridID);
+
+      if ( (ysize ==  32 || ysize ==  48 || ysize ==  64 ||
+	    ysize ==  96 || ysize == 160 || ysize == 192 ||
+	    ysize == 240 || ysize == 320 || ysize == 384 ||
+	    ysize == 480 || ysize == 768 ) &&
+	   (xsize == 2*ysize || xsize == 1) )
+	{
+	  gridtype = GRID_GAUSSIAN;
+	}
+      else if ( gridsize == 1 )
+	{
+	  gridtype = GRID_LONLAT;
+	}
+      else if ( gridInqXvals(gridID, NULL) && gridInqYvals(gridID, NULL) )
+	{
+	  gridtype = GRID_LONLAT;
+	}
+    }
+  else if ( gridtype == GRID_CURVILINEAR )
+    {
+      int projID = gridInqProj(gridID);
+      if ( projID != CDI_UNDEFID && gridInqType(projID) == GRID_PROJECTION )
+        {
+          gridID = projID;
+          gridtype = GRID_PROJECTION;
+        }
+      else
+        {
+          static bool lwarning = true;
+          if ( lwarning && gridsize > 1 )
+            {
+              lwarning = false;
+              Warning("Curvilinear grid is unsupported in GRIB format! Created wrong Grid Description Section!");
+            }
+          *gridIsCurvilinear = true;
+          gridtype = GRID_LONLAT;
+        }
+    }
+
+  if ( gridtype == GRID_PROJECTION )
+    {
+      if ( gridInqProjType(gridID) == CDI_PROJ_RLL )
+        {
+          gridtype = GRID_LONLAT;
+          *gridIsRotated = true;
+        }
+      else if ( gridInqProjType(gridID) == CDI_PROJ_LCC )
+        {
+          gridtype = GRID_LCC;
+        }
+    }
+
+  return gridtype;
+}
+
 /*
  * Local Variables:
  * c-file-style: "Java"

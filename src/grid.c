@@ -148,7 +148,7 @@ void grid_init(grid_t *gridptr)
   gridptr->number        = 0;
   gridptr->position      = 0;
   gridptr->reference     = NULL;
-  gridptr->datatype      = 0;
+  gridptr->datatype      = CDI_DATATYPE_FLT64;
   gridptr->size          = 0;
   gridptr->x.size        = 0;
   gridptr->y.size        = 0;
@@ -3137,6 +3137,32 @@ static void
 gridDefYBoundsSerial(grid_t *gridptr, const double *ybounds)
 {
   gridDefBoundsGeneric(gridptr, ybounds, gridptr->y.size, &gridptr->y.bounds);
+}
+
+//----------------------------------------------------------------------------
+// Parallel Version
+//----------------------------------------------------------------------------
+
+size_t gridInqXboundsPart(int gridID, int start, size_t size, double *xbounds)
+{
+  grid_t *gridptr = grid_to_pointer(gridID);
+  const double *gridptr_xbounds = gridptr->vtable->inqXBoundsPtr(gridptr);
+  if ( gridptr_xbounds )
+    if ( size && xbounds )
+      memcpy(xbounds, gridptr_xbounds+start, size * sizeof (double));
+
+  return size;
+}
+
+size_t gridInqYboundsPart(int gridID, int start, size_t size, double *ybounds)
+{
+  grid_t *gridptr = grid_to_pointer(gridID);
+  const double *gridptr_ybounds = gridptr->vtable->inqYBoundsPtr(gridptr);
+  if ( gridptr_ybounds )
+    if ( size && ybounds )
+      memcpy(ybounds, gridptr_ybounds+start, size * sizeof (double));
+
+  return size;
 }
 
 /*

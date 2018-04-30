@@ -292,6 +292,8 @@ void extScanTimestep1(stream_t *streamptr)
   taxis->type  = TAXIS_ABSOLUTE;
   taxis->vdate = (int)datetime0.date;
   taxis->vtime = (int)datetime0.time;
+  taxis->rdate = taxis->vdate;
+  taxis->rtime = taxis->vtime;
 
   int vlistID = streamptr->vlistID;
   vlistDefTaxis(vlistID, taxisID);

@@ -91,6 +91,8 @@ files="basetime.c \
    calendar.c \
    cdf.c \
    cdf_int.c \
+   cdf_util.c \
+   cdf_lazy_grid.c \
    cdi_cksum.c \
    cdi_error.c \
    cdi_int.c \
@@ -110,24 +112,25 @@ files="basetime.c \
    stream.c \
    stream_write.c \
    stream_read.c \
-   stream_cdf.c \
+   stream_cdf_i.c \
+   stream_cdf_o.c \
+   stream_cdf_time.c \
    stream_history.c \
    stream_record.c \
    stream_var.c \
-   grb_write.c \
-   grb_read.c \
    cdf_write.c \
    cdf_read.c \
    subtype.c \
-   table.c \
    taxis.c \
    timebase.c \
    tsteps.c \
    util.c \
    varscan.c \
    vlist.c \
-   vlist_att.c \
+   cdi_key.c \
+   cdi_att.c \
    vlist_var.c \
+   table.c \
    zaxis.c"
 
 car () {

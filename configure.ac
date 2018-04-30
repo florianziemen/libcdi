@@ -4,7 +4,7 @@
 #  autoconf 2.68
 #  libtool  2.4.2
 
-AC_INIT([cdi], [1.9.3], [http://mpimet.mpg.de/cdi])
+AC_INIT([cdi], [1.9.4], [http://mpimet.mpg.de/cdi])
 
 AC_DEFINE_UNQUOTED(CDI, ["$PACKAGE_VERSION"], [CDI version])
 
@@ -67,47 +67,15 @@ AC_CHECK_LIB(malloc, malloc)
 AC_CHECK_MEMBERS([struct stat.st_blksize])
 #  ----------------------------------------------------------------------
 # Checks for header files
-AC_CHECK_HEADERS([malloc.h uuid.h uuid/uuid.h])
+AC_CHECK_HEADERS([malloc.h])
 AX_EXECINFO
 #  ----------------------------------------------------------------------
 # Checks for the availability of functions
 AC_CHECK_FUNCS([mallinfo])
 AC_CHECK_FUNCS([getline])
-AC_ARG_ENABLE([util-linux-uuid],
-  [AS_HELP_STRING([--disable-util-linux-uuid],
-     [Do not test for the util-linux UUID library, use OSSP or DCE versions instead])],,
-  [enable_util_linux_uuid=auto])
-AS_IF([test x"${enable_util_linux_uuid}" != xno],
-  [ACX_C_PACKAGE([util-linux-uuid],[uuid/uuid.h],,,[],
-     [uuid_generate],[[uuid]],,,[])])
-AS_IF([test x"$have_util_linux_uuid_c_bindings" = xyes],
-  [CPPFLAGS="${CPPFLAGS+$CPPFLAGS }$UTIL_LINUX_UUID_C_INCLUDE"
-   UUID_C_LIB=$UTIL_LINUX_UUID_C_LIB],
-  [ACX_C_PACKAGE([ossp-uuid],[uuid.h],,[-I/usr/include/ossp],[],
-     [uuid_create],[[ossp-uuid]],,,[])
-   AS_IF([test x"$have_ossp_uuid_c_bindings" = xyes],
-     [CPPFLAGS_save=$CPPFLAGS
-      CPPFLAGS="${CPPFLAGS+$CPPFLAGS }$OSSP_UUID_C_INCLUDE"
-      UUID_C_LIB=$OSSP_UUID_C_LIB
-      AC_CHECK_HEADERS([uuid.h],
-        [AC_CHECK_DECLS([uuid_create],
-           [AC_CHECK_DECLS([UUID_MAKE_V5],,[have_ossp_uuid_c_bindings=no],
-              [AC_INCLUDES_DEFAULT
-@%:@include <uuid.h>])],[have_ossp_uuid_c_bindings=no],
-           [AC_INCLUDES_DEFAULT
-@%:@include <uuid.h>])],[have_ossp_uuid_c_bindings=no])
-      AS_IF([test x"$have_ossp_uuid_c_bindings" = xno],
-        [UUID_C_LIB=
-         CPPFLAGS=$CPPFLAGS_save])],
-     [AC_CHECK_LIB([uuid],[uuid_generate],
-        [AC_CHECK_DECLS([uuid_generate],
-           [UUID_C_LIB=-luuid],,[AC_INCLUDES_DEFAULT
-@%:@include <uuid/uuid.h>])],
-        [AC_CHECK_FUNCS([uuid_create],
-           [AC_CHECK_DECLS([uuid_create],
-           [UUID_C_LIB=""],,[AC_INCLUDES_DEFAULT
-@%:@include <uuid.h>])])])])])
-AC_SUBST([UUID_C_LIB])
+ACX_UUID
+LIBS="${LIBS+$LIBS }$UUID_C_LIB"
+CPPFLAGS="${CPPFLAGS+$CPPFLAGS }$UUID_C_INCLUDE"
 #  ----------------------------------------------------------------------
 # Checks for the availability of ANSI-C99 functions
 AC_CHECK_DECLS([isnan],,,[AC_INCLUDES_DEFAULT
@@ -148,21 +116,7 @@ esac
 if test -z "$COMP_VERSION" ; then COMP_VERSION="unknown"; fi;
 AC_DEFINE_UNQUOTED(COMP_VERSION, ["$COMP_VERSION"], [Compiler version])
 
-# Checks for username, hostname and system type
-USERNAME=$LOGNAME
-if test -z "$USERNAME" ; then USERNAME=$USER; fi;
-if test -z "$USERNAME" ; then USERNAME="unknown"; fi;
-AC_DEFINE_UNQUOTED([USER_NAME],["$USERNAME"], [User name])
-AC_SUBST([USER_NAME],["$USERNAME"])
-
-AS_IF([test -z "$HOST"],
-      [HOST=unknown
-       AS_IF([test -x /bin/hostname],[HOST=$(hostname)],
-             [AS_IF([test -x /bin/uname],
-                    [HOST=$(uname -n)])])])
-AC_DEFINE_UNQUOTED([HOST_NAME],["$HOST"],[Host name])
-AC_SUBST([HOST_NAME],["$HOST"])
-
+# Check for system type
 AC_DEFINE_UNQUOTED([SYSTEM_TYPE],["$ac_cv_build"], [System type])
 AC_SUBST([SYSTEM_TYPE],["$ac_cv_build"])
 #  ----------------------------------------------------------------------
@@ -170,7 +124,7 @@ AC_SUBST([SYSTEM_TYPE],["$ac_cv_build"])
 AC_CHECK_LIB(m, floor)
 #  ----------------------------------------------------------------------
 # Add basic configure options
-ACX_OPTIONS
+ACX_CDI_OPTIONS
 AM_CONDITIONAL([ENABLE_NETCDF],[test x$ENABLE_NETCDF = xyes])
 AC_CHECK_FUNCS([grib_get_length])
 #  ----------------------------------------------------------------------

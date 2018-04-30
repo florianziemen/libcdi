@@ -1,14 +1,14 @@
-#ifndef _GRIBAPI_H
-#define _GRIBAPI_H
+#ifndef  GRIBAPI_H
+#define  GRIBAPI_H
 
-#ifdef HAVE_LIBGRIB_API
+#ifdef  HAVE_LIBGRIB_API
 #include <grib_api.h>
 #ifndef  ERROR_H
 #include "error.h"
 #endif
 #endif
 
-#ifndef  _CDI_INT_H
+#ifndef  CDI_INT_H
 #include "cdi_int.h"
 #endif
 
@@ -58,15 +58,6 @@ void gribContainersNew(stream_t * streamptr);
 void gribContainersDelete(stream_t * streamptr);
 
 #ifdef HAVE_LIBGRIB_API
-static inline void *gribHandleNew(int editionNumber)
-{
-  void *gh = (void *)grib_handle_new_from_samples(NULL, (editionNumber == 1) ? "GRIB1" : "GRIB2");
-
-  if ( gh == NULL ) Error("grib_handle_new_from_samples failed!");
-
-  return gh;
-}
-
 static inline int my_grib_set_double(grib_handle* h, const char* key, double val)
 {
   if ( cdiGribApiDebug )
@@ -100,6 +91,16 @@ static inline int my_grib_set_string(grib_handle* h, const char* key, const char
   return ret_val;
 }
 
+static inline void *gribHandleNew(int editionNumber)
+{
+  void *gh = (void *)grib_handle_new_from_samples(NULL, (editionNumber == 1) ? "GRIB1" : "GRIB2");
+  if ( gh == NULL ) Error("grib_handle_new_from_samples failed!");
+
+  if ( editionNumber > 1 ) GRIB_CHECK(my_grib_set_long(gh, "numberOfValues", 0L), 0);
+
+  return gh;
+}
+
 static inline void gribHandleDelete(void *gh)
 {
   grib_handle_delete((struct grib_handle *)gh);
@@ -115,7 +116,7 @@ typedef struct {
 }
 gribContainer_t;
 
-#endif  /* _GRIBAPI_H */
+#endif  /* GRIBAPI_H */
 /*
  * Local Variables:
  * c-file-style: "Java"

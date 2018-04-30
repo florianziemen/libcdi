@@ -399,10 +399,12 @@ void    streamWriteVarF(int streamID, int varID, const float data[], size_t nmis
 /*      streamReadVar: Read a variable */
 void    streamReadVar(int streamID, int varID, double data[], size_t *nmiss);
 void    streamReadVarF(int streamID, int varID, float data[], size_t *nmiss);
+void    streamReadVarPart(int streamID, int varID, int varType, int start, size_t size, void *data, size_t *nmiss, int memtype);
 
 /*      streamWriteVarSlice: Write a horizontal slice of a variable */
 void    streamWriteVarSlice(int streamID, int varID, int levelID, const double data[], size_t nmiss);
 void    streamWriteVarSliceF(int streamID, int varID, int levelID, const float data[], size_t nmiss);
+void    streamReadVarSlicePart(int streamID, int varID, int levelID, int varType, int start, size_t size, void *data, size_t *nmiss, int memtype);
 
 /*      streamReadVarSlice: Read a horizontal slice of a variable */
 void    streamReadVarSlice(int streamID, int varID, int levelID, double data[], size_t *nmiss);
@@ -809,12 +811,39 @@ size_t  gridInqYCvals(int gridID, char *ycvals[]);
 #define  CDI_KEY_TYPEOFENSEMBLEFORECAST        808  // GRIB2 typeOfEnsembleForecast
 #define  CDI_KEY_NUMBEROFFORECASTSINENSEMBLE   809  // GRIB2 numberOfForecastsInEnsemble
 #define  CDI_KEY_PERTURBATIONNUMBER            810  // GRIB2 perturbationNumber
+#define  CDI_KEY_CENTRE                        811  // GRIB2 centre
+#define  CDI_KEY_SUBCENTRE                     812  // GRIB2 subCentre
+#define  CDI_KEY_MPIMTYPE                      813  // GRIB2 mpimType
+#define  CDI_KEY_MPIMCLASS                     814  // GRIB2 mpimClass
+#define  CDI_KEY_MPIMUSER                      815  // GRIB2 mpimUser
+#define  CDI_KEY_REVSTATUS                     816  // GRIB2 revStatus
+#define  CDI_KEY_REVNUMBER                     817  // GRIB2 revNumber
+#define  CDI_KEY_GRIB2LOCALSECTIONNUMBER       818  // GRIB2 grib2LocalSectionNumber
+#define  CDI_KEY_SECTION2PADDINGLENGTH         819  // GRIB2 length of section2Padding
+#define  CDI_KEY_SECTION2PADDING               820  // GRIB2 section2Padding
 
-//      cdiDefKeyInt: Define a CDI varianble integer value from a key
+//      cdiDefKeyInt: Define an integer value from a key of a CDI variable
 int     cdiDefKeyInt(int cdiID, int varID, int key, int value);
 
-//      cdiInqKeyInt: Get a CDI variable integer value from a key
+//      cdiInqKeyInt: Get an integer value from a key of a CDI variable
 int     cdiInqKeyInt(int cdiID, int varID, int key, int *value);
+
+//      cdiDefKeyBytes: Define a bytes array from a key of a CDI variable
+int     cdiDefKeyBytes(int cdiID, int varID, int key, const unsigned char bytes[], int length);
+
+//      cdiInqKeyBytes: Get a bytes array from a key of a CDI variable
+int     cdiInqKeyBytes(int cdiID, int varID, int key, unsigned char bytes[], int *length);
+
+//      cdiDefKeyString: Define a string value from a key of a CDI variable
+int     cdiDefKeyString(int cdiID, int varID, int key, const char *string);
+
+//      cdiInqKeyString: Get a string value from a key of a CDI variable
+int     cdiInqKeyString(int cdiID, int varID, int key, char *string, int *length);
+
+//      cdiInqKeyLen: Get the length of the string representation of the key
+int     cdiInqKeyLen(int cdiID, int varID, int key, int *length);
+
+int     cdiCopyKeys(int cdiID1, int varID1, int cdiID2, int varID2);
 
 // CDI grid keys
 #define  CDI_KEY_XNAME       901  // X-axis name
@@ -939,18 +968,10 @@ void    gridDefReference(int gridID, const char *reference);
 int     gridInqReference(int gridID, char *reference);
 
 /*      gridDefUUID: Define the UUID of an unstructured grid */
-#ifdef __cplusplus
-void    gridDefUUID(int gridID, const unsigned char *uuid);
-#else
 void    gridDefUUID(int gridID, const unsigned char uuid[CDI_UUID_SIZE]);
-#endif
 
 /*      gridInqUUID: Get the UUID of an unstructured grid */
-#ifdef __cplusplus
-void    gridInqUUID(int gridID, unsigned char *uuid);
-#else
 void    gridInqUUID(int gridID, unsigned char uuid[CDI_UUID_SIZE]);
-#endif
 
 /* Rotated Lon/Lat grid */
 void    gridDefParamRLL(int gridID, double xpole, double ypole, double angle);
@@ -979,12 +1000,14 @@ void    gridDefXbounds(int gridID, const double xbounds[]);
 
 /*      gridInqXbounds: Get the bounds of a X-axis */
 size_t  gridInqXbounds(int gridID, double xbounds[]);
+size_t  gridInqXboundsPart(int gridID, int start, size_t size, double xbounds[]);
 
 /*      gridDefYbounds: Define the bounds of a Y-axis */
 void    gridDefYbounds(int gridID, const double ybounds[]);
 
 /*      gridInqYbounds: Get the bounds of a Y-axis */
 size_t  gridInqYbounds(int gridID, double ybounds[]);
+size_t  gridInqYboundsPart(int gridID, int start, size_t size, double ybounds[]);
 
 void    gridDefRowlon(int gridID, int nrowlon, const int rowlon[]);
 void    gridInqRowlon(int gridID, int rowlon[]);

@@ -14,8 +14,8 @@
 m4_ifndef([AC_CONFIG_MACRO_DIRS], [m4_defun([_AM_CONFIG_MACRO_DIRS], [])m4_defun([AC_CONFIG_MACRO_DIRS], [_AM_CONFIG_MACRO_DIRS($@)])])
 m4_ifndef([AC_AUTOCONF_VERSION],
   [m4_copy([m4_PACKAGE_VERSION], [AC_AUTOCONF_VERSION])])dnl
-m4_if(m4_defn([AC_AUTOCONF_VERSION]), [2.68],,
-[m4_warning([this file was generated for autoconf 2.68.
+m4_if(m4_defn([AC_AUTOCONF_VERSION]), [2.69],,
+[m4_warning([this file was generated for autoconf 2.69.
 You have another version of autoconf.  It may work, but is not guaranteed to.
 If you have problems, you may need to regenerate the build system entirely.
 To do so, use the procedure documented by the package, typically 'autoreconf'.])])
@@ -1199,6 +1199,7 @@ m4_include([m4/acx_options.m4])
 m4_include([m4/acx_prog_cc_posix.m4])
 m4_include([m4/acx_sl_fc_mod_path_flag.m4])
 m4_include([m4/acx_sl_mod_suffix.m4])
+m4_include([m4/acx_uuid.m4])
 m4_include([m4/asx_tr_arg.m4])
 m4_include([m4/asx_unset.m4])
 m4_include([m4/ax_pthread.m4])

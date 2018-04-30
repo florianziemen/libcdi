@@ -1246,9 +1246,9 @@ void tableDefault(void)
 
   // define table : echam5
   {
-    int instID  = institutInq(0, 0, "MPIMET", NULL);
+    int instID  = institutInq(98, 232, "MPIMET", NULL);
     if ( instID == -1 )
-      instID  = institutDef(0, 0, "MPIMET", NULL);
+      instID  = institutDef(98, 232, "MPIMET", NULL);
 
     int modelID = modelInq(instID, 0, "ECHAM5");
     if ( modelID == -1 )

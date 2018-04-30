@@ -1,10 +1,10 @@
 ! This file was automatically generated, don't edit!
 !
-! Fortran interface for CDI library version 1.9.3
+! Fortran interface for CDI library version 1.9.4rc1
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   January 2018
+! Uwe Schulzweida, MPI-MET, Hamburg,   February 2018
 !
 
       INTEGER    CDI_MAX_NAME
@@ -1573,6 +1573,20 @@
       PARAMETER (CDI_KEY_NUMBEROFFORECASTSINENSEMBLE = 809)
       INTEGER    CDI_KEY_PERTURBATIONNUMBER
       PARAMETER (CDI_KEY_PERTURBATIONNUMBER = 810)
+      INTEGER    CDI_KEY_CENTRE
+      PARAMETER (CDI_KEY_CENTRE         = 811)
+      INTEGER    CDI_KEY_SUBCENTRE
+      PARAMETER (CDI_KEY_SUBCENTRE      = 812)
+      INTEGER    CDI_KEY_MPIMTYPE
+      PARAMETER (CDI_KEY_MPIMTYPE       = 813)
+      INTEGER    CDI_KEY_MPIMCLASS
+      PARAMETER (CDI_KEY_MPIMCLASS      = 814)
+      INTEGER    CDI_KEY_MPIMUSER
+      PARAMETER (CDI_KEY_MPIMUSER       = 815)
+      INTEGER    CDI_KEY_REVSTATUS
+      PARAMETER (CDI_KEY_REVSTATUS      = 816)
+      INTEGER    CDI_KEY_REVNUMBER
+      PARAMETER (CDI_KEY_REVNUMBER      = 817)
       INTEGER         cdiDefKeyInt
 !                                    (INTEGER         cdiID,
 !                                     INTEGER         varID,
@@ -1586,6 +1600,51 @@
 !                                     INTEGER         key,
 !                                     INTEGER         value)
       EXTERNAL        cdiInqKeyInt
+
+      INTEGER         cdiDefKeyBytes
+!                                    (INTEGER         cdiID,
+!                                     INTEGER         varID,
+!                                     INTEGER         key,
+!                                     INTEGER*1(*)    bytes,
+!                                     INTEGER         length)
+      EXTERNAL        cdiDefKeyBytes
+
+      INTEGER         cdiInqKeyBytes
+!                                    (INTEGER         cdiID,
+!                                     INTEGER         varID,
+!                                     INTEGER         key,
+!                                     INTEGER*1(*)    bytes,
+!                                     INTEGER         length)
+      EXTERNAL        cdiInqKeyBytes
+
+      INTEGER         cdiDefKeyString
+!                                    (INTEGER         cdiID,
+!                                     INTEGER         varID,
+!                                     INTEGER         key,
+!                                     CHARACTER*(*)   string)
+      EXTERNAL        cdiDefKeyString
+
+      INTEGER         cdiInqKeyLen
+!                                    (INTEGER         cdiID,
+!                                     INTEGER         varID,
+!                                     INTEGER         key,
+!                                     INTEGER         length)
+      EXTERNAL        cdiInqKeyLen
+
+      INTEGER         cdiInqKeyString
+!                                    (INTEGER         cdiID,
+!                                     INTEGER         varID,
+!                                     INTEGER         key,
+!                                     CHARACTER*(*)   string,
+!                                     INTEGER         length)
+      EXTERNAL        cdiInqKeyString
+
+      INTEGER         cdiCopyKeys
+!                                    (INTEGER         cdiID1,
+!                                     INTEGER         varID1,
+!                                     INTEGER         cdiID2,
+!                                     INTEGER         varID2)
+      EXTERNAL        cdiCopyKeys
 
       INTEGER    CDI_KEY_XNAME
       PARAMETER (CDI_KEY_XNAME          = 901)

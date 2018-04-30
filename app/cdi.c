@@ -78,24 +78,21 @@ void version(void)
   int   filetypes[] = {CDI_FILETYPE_SRV, CDI_FILETYPE_EXT, CDI_FILETYPE_IEG, CDI_FILETYPE_GRB, CDI_FILETYPE_GRB2, CDI_FILETYPE_NC, CDI_FILETYPE_NC2, CDI_FILETYPE_NC4, CDI_FILETYPE_NC4C, CDI_FILETYPE_NC5};
    const char *typenames[] = {        "srv",        "ext",        "ieg",        "grb",        "grb2",        "nc",        "nc2",        "nc4",        "nc4c",        "nc5"};
 
-  fprintf(stderr, "CDI version 1.8\n");
+  fprintf(stderr, "CDI version 1.9\n");
 #if defined (COMPILER)
-  fprintf(stderr, "Compiler: %s\n", COMPILER);
+  fprintf(stderr, "C Compiler: %s\n", COMPILER);
 #endif
 #if defined (COMP_VERSION)
-  fprintf(stderr, " version: %s\n", COMP_VERSION);
+  fprintf(stderr, "C version: %s\n", COMP_VERSION);
 #endif
-#if defined (USER_NAME) && defined(HOST_NAME) && defined(SYSTEM_TYPE)
-  fprintf(stderr, "Compiled: by %s on %s (%s) %s %s\n",
-	  USER_NAME, HOST_NAME, SYSTEM_TYPE, __DATE__, __TIME__);
+#ifdef SYSTEM_TYPE
+  fprintf(stderr, "System: %s\n", SYSTEM_TYPE);
 #endif
 
-  fprintf(stderr, "filetype: ");
-  for ( size_t i = 0; i < sizeof(filetypes)/sizeof(int); ++i )
-    if ( cdiHaveFiletype(filetypes[i]) ) fprintf(stderr, "%s ", typenames[i]);
-  fprintf(stderr, "\n");
-
-  fprintf(stderr, "    with:");
+  fprintf(stderr, "Features:");
+#if defined(HAVE_CF_INTERFACE)
+  fprintf(stderr, " Fortran");
+#endif
 #if defined (HAVE_LIBPTHREAD)
   fprintf(stderr, " PTHREADS");
 #endif
@@ -130,6 +127,12 @@ void version(void)
   fprintf(stderr, " CURL");
 #endif
   fprintf(stderr, "\n");
+
+  fprintf(stderr, "Filetypes: ");
+  for ( size_t i = 0; i < sizeof(filetypes)/sizeof(int); ++i )
+    if ( cdiHaveFiletype(filetypes[i]) ) fprintf(stderr, "%s ", typenames[i]);
+  fprintf(stderr, "\n");
+
   cdiPrintVersion();
   fprintf(stderr, "\n");
 /*

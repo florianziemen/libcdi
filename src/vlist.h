@@ -112,6 +112,7 @@ typedef struct
   int         zaxisIDs[MAX_ZAXES_PS];
   int         subtypeIDs[MAX_SUBTYPES_PS];
   var_t      *vars;
+  cdi_keys_t  keys;
   cdi_atts_t  atts;
 }
 vlist_t;
@@ -130,8 +131,6 @@ void     vlistDestroyVarUnits(int vlistID, int varID);
 void     cdiVlistDestroy_(int vlistID);
 int      vlistInqVarMissvalUsed(int vlistID, int varID);
 int      vlistHasTime(int vlistID);
-
-int      cdiDelAtts(int vlistID, int varID);
 
 void     vlistUnpack(char * buffer, int bufferSize, int * pos,
                      int originNamespace, void *context, int force_id);

@@ -30,6 +30,7 @@ void varDefTable(int varID, int tableID);
 int  varInqTable(int varID);
 
 void varDefKeyInt(int varID, int key, int value);
+void varDefKeyBytes(int varID, int key, const unsigned char *bytes, int length);
 
 void varDefOptGribInt(int varID, int tile_index, long lval, const char *keyword);
 void varDefOptGribDbl(int varID, int tile_index, double dval, const char *keyword);

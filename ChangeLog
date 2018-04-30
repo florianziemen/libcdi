@@ -1,3 +1,39 @@
+2018-04-30  Uwe Schulzweida
+
+	* Version 1.9.4 released
+
+2018-04-25  Uwe Schulzweida
+
+	* gribapiDefDateTimeRel: check range of endStep (bug fix)
+
+2018-04-03  Uwe Schulzweida
+
+	* Added streamReadVarPart() and streamReadVarSlicePart() [patch from: Niklas Röber]
+
+2018-03-16  Uwe Schulzweida
+
+	* Set default data type for grids to CDI_DATATYPE_FLT64
+
+2018-02-27  Uwe Schulzweida
+
+        * Added support for GRIB2 key section2Padding
+
+2018-02-19  Uwe Schulzweida
+
+	* scanTimestep1: set default of rdate to vdate (bug fix)
+
+2018-02-12  Uwe Schulzweida
+
+	* varDefZaxis: don't remove default of longname and units
+
+2018-02-03  Uwe Schulzweida
+
+	* Fix brocken ECHAM5 modelIDs (introduced in 1.9.3)
+
+2018-01-31  Uwe Schulzweida
+
+	* Fix GRIB_API AEC compression for unstructured grids
+
 2018-01-29  Uwe Schulzweida
 
 	* Version 1.9.3 released

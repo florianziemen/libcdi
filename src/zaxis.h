@@ -1,5 +1,5 @@
-#ifndef _ZAXIS_H
-#define _ZAXIS_H
+#ifndef  ZAXIS_H
+#define  ZAXIS_H
 
 #include "cdi_att.h"
 

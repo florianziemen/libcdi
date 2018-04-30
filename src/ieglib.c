@@ -28,7 +28,7 @@ static int iegDefaultDprec = 0;
 #define LIBVERSION      1.4.0
 #define XSTRING(x)	#x
 #define STRING(x)	XSTRING(x)
-static const char ieg_libvers[] = STRING(LIBVERSION) " of " __DATE__ " " __TIME__;
+static const char ieg_libvers[] = STRING(LIBVERSION);
 
 const char *iegLibraryVersion(void)
 {
@@ -46,12 +46,9 @@ void iegLibInit(void)
   char *envString = getenv(envName);
   if ( envString )
     {
-      int pos;
-      int nrun;
-      if ( strlen(envString) == 2 ) nrun = 1;
-      else                          nrun = 2;
+      int nrun = (strlen(envString) == 2) ? 1 : 2;
 
-      pos = 0;
+      int pos = 0;
       while ( nrun-- )
 	{
 	  switch ( tolower((int) envString[pos]) )
