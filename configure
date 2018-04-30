@@ -884,6 +884,7 @@ with_pic
 enable_shared
 enable_static
 enable_fast_install
+with_aix_soname
 with_gnu_ld
 with_sysroot
 enable_libtool_lock
@@ -1639,6 +1640,9 @@ Optional Packages:
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
   --with-pic[=PKGS]       try to use only PIC/non-PIC objects [default=use
                           both]
+  --with-aix-soname=aix|svr4|both
+                          shared library versioning (aka "SONAME") variant to
+                          provide on AIX, [default=aix].
   --with-gnu-ld           assume the C compiler uses GNU ld [default=no]
   --with-sysroot[=DIR]    Search for dependent libraries within DIR (or the
                           compiler's sysroot if not specified).
@@ -3152,7 +3156,7 @@ case $host_os in *\ *) host_os=`echo "$host_os" | sed 's/ /-/g'`;; esac
 
 
 
-am__api_version='1.14'
+am__api_version='1.15'
 
 # Find a good install program.  We prefer a C program (faster),
 # so one script is as good as another.  But avoid the broken or
@@ -3324,8 +3328,8 @@ test "$program_suffix" != NONE &&
 ac_script='s/[\\$]/&&/g;s/;s,x,x,$//'
 program_transform_name=`$as_echo "$program_transform_name" | sed "$ac_script"`
 
-# expand $ac_aux_dir to an absolute path
-am_aux_dir=`cd $ac_aux_dir && pwd`
+# Expand $ac_aux_dir to an absolute path.
+am_aux_dir=`cd "$ac_aux_dir" && pwd`
 
 if test x"${MISSING+set}" != xset; then
   case $am_aux_dir in
@@ -3344,7 +3348,7 @@ else
 $as_echo "$as_me: WARNING: 'missing' script is too old or missing" >&2;}
 fi
 
-if test x"${install_sh}" != xset; then
+if test x"${install_sh+set}" != xset; then
   case $am_aux_dir in
   *\ * | *\	*)
     install_sh="\${SHELL} '$am_aux_dir/install-sh'" ;;
@@ -3672,8 +3676,8 @@ MAKEINFO=${MAKEINFO-"${am_missing_run}makeinfo"}
 # <http://lists.gnu.org/archive/html/automake/2012-07/msg00014.html>
 mkdir_p='$(MKDIR_P)'
 
-# We need awk for the "check" target.  The system "awk" is bad on
-# some platforms.
+# We need awk for the "check" target (and possibly the TAP driver).  The
+# system "awk" is bad on some platforms.
 # Always define AMTAR for backward compatibility.  Yes, it's still used
 # in the wild :-(  We should find a proper way to deprecate it ...
 AMTAR='$${TAR-tar}'
@@ -3730,6 +3734,7 @@ END
     as_fn_error $? "Your 'rm' program is bad, sorry." "$LINENO" 5
   fi
 fi
+
 ac_config_headers="$ac_config_headers src/config.h"
 
 
@@ -6855,8 +6860,8 @@ esac
 
 
 
-macro_version='2.4.2'
-macro_revision='1.3337'
+macro_version='2.4.6'
+macro_revision='2.4.6'
 
 
 
@@ -10586,22 +10591,20 @@ if test "${with_pic+set}" = set; then :
     *)
       pic_mode=default
       # Look at the argument we got.  We use all the common list separators.
-      lt_save_ifs="$IFS"; IFS="${IFS}$PATH_SEPARATOR,"
+      lt_save_ifs=$IFS; IFS=$IFS$PATH_SEPARATOR,
       for lt_pkg in $withval; do
-	IFS="$lt_save_ifs"
+	IFS=$lt_save_ifs
 	if test "X$lt_pkg" = "X$lt_p"; then
 	  pic_mode=yes
 	fi
       done
-      IFS="$lt_save_ifs"
+      IFS=$lt_save_ifs
       ;;
     esac
 else
-  pic_mode=default
+  pic_mode=yes
 fi
 
-
-test -z "$pic_mode" && pic_mode=yes
 
 
 
@@ -10625,14 +10628,14 @@ if test "${enable_shared+set}" = set; then :
     *)
       enable_shared=no
       # Look at the argument we got.  We use all the common list separators.
-      lt_save_ifs="$IFS"; IFS="${IFS}$PATH_SEPARATOR,"
+      lt_save_ifs=$IFS; IFS=$IFS$PATH_SEPARATOR,
       for pkg in $enableval; do
-	IFS="$lt_save_ifs"
+	IFS=$lt_save_ifs
 	if test "X$pkg" = "X$p"; then
 	  enable_shared=yes
 	fi
       done
-      IFS="$lt_save_ifs"
+      IFS=$lt_save_ifs
       ;;
     esac
 else
@@ -10656,14 +10659,14 @@ if test "${enable_static+set}" = set; then :
     *)
      enable_static=no
       # Look at the argument we got.  We use all the common list separators.
-      lt_save_ifs="$IFS"; IFS="${IFS}$PATH_SEPARATOR,"
+      lt_save_ifs=$IFS; IFS=$IFS$PATH_SEPARATOR,
       for pkg in $enableval; do
-	IFS="$lt_save_ifs"
+	IFS=$lt_save_ifs
 	if test "X$pkg" = "X$p"; then
 	  enable_static=yes
 	fi
       done
-      IFS="$lt_save_ifs"
+      IFS=$lt_save_ifs
       ;;
     esac
 else
@@ -10688,20 +10691,72 @@ if test "${enable_fast_install+set}" = set; then :
     *)
       enable_fast_install=no
       # Look at the argument we got.  We use all the common list separators.
-      lt_save_ifs="$IFS"; IFS="${IFS}$PATH_SEPARATOR,"
+      lt_save_ifs=$IFS; IFS=$IFS$PATH_SEPARATOR,
       for pkg in $enableval; do
-	IFS="$lt_save_ifs"
+	IFS=$lt_save_ifs
 	if test "X$pkg" = "X$p"; then
 	  enable_fast_install=yes
 	fi
       done
-      IFS="$lt_save_ifs"
+      IFS=$lt_save_ifs
       ;;
     esac
 else
   enable_fast_install=yes
 fi
 
+
+
+
+
+
+
+
+  shared_archive_member_spec=
+case $host,$enable_shared in
+power*-*-aix[5-9]*,yes)
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking which variant of shared library versioning to provide" >&5
+$as_echo_n "checking which variant of shared library versioning to provide... " >&6; }
+
+# Check whether --with-aix-soname was given.
+if test "${with_aix_soname+set}" = set; then :
+  withval=$with_aix_soname; case $withval in
+    aix|svr4|both)
+      ;;
+    *)
+      as_fn_error $? "Unknown argument to --with-aix-soname" "$LINENO" 5
+      ;;
+    esac
+    lt_cv_with_aix_soname=$with_aix_soname
+else
+  if ${lt_cv_with_aix_soname+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  lt_cv_with_aix_soname=aix
+fi
+
+    with_aix_soname=$lt_cv_with_aix_soname
+fi
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_aix_soname" >&5
+$as_echo "$with_aix_soname" >&6; }
+  if test aix != "$with_aix_soname"; then
+    # For the AIX way of multilib, we name the shared archive member
+    # based on the bitwidth used, traditionally 'shr.o' or 'shr_64.o',
+    # and 'shr.imp' or 'shr_64.imp', respectively, for the Import File.
+    # Even when GNU compilers ignore OBJECT_MODE but need '-maix64' flag,
+    # the AIX toolchain works better with OBJECT_MODE set (default 32).
+    if test 64 = "${OBJECT_MODE-32}"; then
+      shared_archive_member_spec=shr_64
+    else
+      shared_archive_member_spec=shr
+    fi
+  fi
+  ;;
+*)
+  with_aix_soname=aix
+  ;;
+esac
 
 
 
@@ -24629,6 +24684,7 @@ pic_mode='`$ECHO "$pic_mode" | $SED "$delay_single_quote_subst"`'
 enable_shared='`$ECHO "$enable_shared" | $SED "$delay_single_quote_subst"`'
 enable_static='`$ECHO "$enable_static" | $SED "$delay_single_quote_subst"`'
 enable_fast_install='`$ECHO "$enable_fast_install" | $SED "$delay_single_quote_subst"`'
+shared_archive_member_spec='`$ECHO "$shared_archive_member_spec" | $SED "$delay_single_quote_subst"`'
 SHELL='`$ECHO "$SHELL" | $SED "$delay_single_quote_subst"`'
 ECHO='`$ECHO "$ECHO" | $SED "$delay_single_quote_subst"`'
 PATH_SEPARATOR='`$ECHO "$PATH_SEPARATOR" | $SED "$delay_single_quote_subst"`'
@@ -25238,6 +25294,9 @@ build_old_libs=$enable_static
 
 # Whether or not to optimize for fast installation.
 fast_install=$enable_fast_install
+
+# Shared archive member basename,for filename based shared library versioning on AIX.
+shared_archive_member_spec=$shared_archive_member_spec
 
 # Shell to use when invoking shell scripts.
 SHELL=$lt_SHELL
@@ -32814,6 +32873,7 @@ pic_mode='`$ECHO "$pic_mode" | $SED "$delay_single_quote_subst"`'
 enable_shared='`$ECHO "$enable_shared" | $SED "$delay_single_quote_subst"`'
 enable_static='`$ECHO "$enable_static" | $SED "$delay_single_quote_subst"`'
 enable_fast_install='`$ECHO "$enable_fast_install" | $SED "$delay_single_quote_subst"`'
+shared_archive_member_spec='`$ECHO "$shared_archive_member_spec" | $SED "$delay_single_quote_subst"`'
 SHELL='`$ECHO "$SHELL" | $SED "$delay_single_quote_subst"`'
 ECHO='`$ECHO "$ECHO" | $SED "$delay_single_quote_subst"`'
 PATH_SEPARATOR='`$ECHO "$PATH_SEPARATOR" | $SED "$delay_single_quote_subst"`'
@@ -34156,6 +34216,9 @@ build_old_libs=$enable_static
 
 # Whether or not to optimize for fast installation.
 fast_install=$enable_fast_install
+
+# Shared archive member basename,for filename based shared library versioning on AIX.
+shared_archive_member_spec=$shared_archive_member_spec
 
 # Shell to use when invoking shell scripts.
 SHELL=$lt_SHELL
