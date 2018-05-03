@@ -2,6 +2,10 @@
 
 	* Version 1.9.4 released
 
+2018-05-03  Uwe Schulzweida
+
+	* cdf_scan_var_attr: valid_min bug fix
+
 2018-04-25  Uwe Schulzweida
 
 	* gribapiDefDateTimeRel: check range of endStep (bug fix)

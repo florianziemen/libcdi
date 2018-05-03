@@ -1458,34 +1458,28 @@ void cdf_scan_var_attr(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimi
             }
           else if ( isNumber && strcmp(attname, "valid_min") == 0 && attlen == 1 )
             {
-              if ( ncvars[ncvarid].lvalidrange == false )
+              bool lignore = xtypeIsFloat(atttype) != xtypeIsFloat(xtype);
+              if ( !cdiIgnoreValidRange && lignore == false )
                 {
-                  bool lignore = xtypeIsFloat(atttype) != xtypeIsFloat(xtype);
-                  if ( !cdiIgnoreValidRange && lignore == false )
-                    {
-                      cdfGetAttDouble(ncid, ncvarid, attname, 1, &(ncvars[ncvarid].validrange)[0]);
-                      ncvars[ncvarid].lvalidrange = true;
-                    }
-                  else if ( lignore )
-                    {
-                      Warning("Inconsistent data type for attribute %s:valid_min, ignored!", name);
-                    }
+                  cdfGetAttDouble(ncid, ncvarid, attname, 1, &(ncvars[ncvarid].validrange)[0]);
+                  ncvars[ncvarid].lvalidrange = true;
+                }
+              else if ( lignore )
+                {
+                  Warning("Inconsistent data type for attribute %s:valid_min, ignored!", name);
                 }
             }
           else if ( isNumber && strcmp(attname, "valid_max") == 0 && attlen == 1 )
             {
-              if ( ncvars[ncvarid].lvalidrange == false )
+              bool lignore = xtypeIsFloat(atttype) != xtypeIsFloat(xtype);
+              if ( !cdiIgnoreValidRange && lignore == false )
                 {
-                  bool lignore = xtypeIsFloat(atttype) != xtypeIsFloat(xtype);
-                  if ( !cdiIgnoreValidRange && lignore == false )
-                    {
-                      cdfGetAttDouble(ncid, ncvarid, attname, 1, &(ncvars[ncvarid].validrange)[1]);
-                      ncvars[ncvarid].lvalidrange = true;
-                    }
-                  else if ( lignore )
-                    {
-                      Warning("Inconsistent data type for attribute %s:valid_max, ignored!", name);
-                    }
+                  cdfGetAttDouble(ncid, ncvarid, attname, 1, &(ncvars[ncvarid].validrange)[1]);
+                  ncvars[ncvarid].lvalidrange = true;
+                }
+              else if ( lignore )
+                {
+                  Warning("Inconsistent data type for attribute %s:valid_max, ignored!", name);
                 }
             }
           else if ( isText && strcmp(attname, "_Unsigned") == 0 )
