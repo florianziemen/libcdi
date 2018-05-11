@@ -52,7 +52,7 @@ bool str_is_equal(const char *vstr, const char *cstr);
 #ifndef _BASETIME_H
 #  include "basetime.h"
 #endif
-#ifndef _TIMEBASE_H
+#ifndef TIMEBASE_H
 #  include "timebase.h"
 #endif
 #ifndef TAXIS_H

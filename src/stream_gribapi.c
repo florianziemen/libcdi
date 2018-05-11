@@ -195,7 +195,8 @@ int gribapiGetValidityDateTime(grib_handle *gh, int64_t *vdate, int *vtime)
           {
             static bool lprint = true;
             extern int grib_calendar;
-            int julday, secofday;
+            int64_t julday;
+            int secofday;
             encode_caldaysec(grib_calendar, ryear, rmonth, rday, rhour, rminute, rsecond, &julday, &secofday);
 
             int64_t time_period = endStep;
@@ -1802,7 +1803,8 @@ int gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, int64_t rdate, int
 {
   int status = -1;
   int year, month, day, hour, minute, second;
-  int julday1, secofday1, julday2, secofday2, days, secs;
+  int64_t julday1, julday2, days;
+  int secofday1, secofday2, secs;
 
   cdiDecodeDate(rdate, &year, &month, &day);
   cdiDecodeTime(rtime, &hour, &minute, &second);

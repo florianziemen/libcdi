@@ -1,4 +1,4 @@
-#if defined (HAVE_CONFIG_H)
+#ifdef HAVE_CONFIG_H
 #  include "config.h"
 #endif
 
@@ -938,7 +938,7 @@ void ptaxisDefUnits(taxis_t *taxisptr, const char *units)
 
 
 static void
-cdiDecodeTimevalue(int timeunit, double timevalue, int *days, int *secs)
+cdiDecodeTimevalue(int timeunit, double timevalue, int64_t *days, int *secs)
 {
   *days = 0;
   *secs = 0;
@@ -1071,7 +1071,8 @@ void timeval2vtime(double timevalue, taxis_t *taxis, int64_t *vdate, int *vtime)
       timevalue = fmon*dpm;
     }
 
-  int julday, secofday, days, secs;
+  int64_t julday, days;
+  int secofday, secs;
   encode_caldaysec(calendar, year, month, day, hour, minute, second, &julday, &secofday);
 
   cdiDecodeTimevalue(timeunit, timevalue, &days, &secs);
@@ -1088,7 +1089,8 @@ void timeval2vtime(double timevalue, taxis_t *taxis, int64_t *vdate, int *vtime)
 double vtime2timeval(int64_t vdate, int vtime, taxis_t *taxis)
 {
   double value = 0;
-  int julday1, secofday1, julday2, secofday2, days, secs;
+  int64_t julday1, julday2, days;
+  int secofday1, secofday2, secs;
 
   int timeunit = (*taxis).unit;
   int calendar = (*taxis).calendar;
@@ -1266,7 +1268,8 @@ void splitTimevalue(double timevalue, int timeunit, int64_t *date, int *time)
 
 void cdiSetForecastPeriod(double timevalue, taxis_t *taxis)
 {
-  int julday, secofday, days, secs;
+  int64_t julday, days;
+  int secofday, secs;
 
   (*taxis).fc_period = timevalue;
 
