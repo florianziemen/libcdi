@@ -536,6 +536,19 @@
 !
 !  time format:    hhmmss
 !
+!                     cdiDecodeDate
+!                                    (INTEGER         date,
+!                                     INTEGER         year,
+!                                     INTEGER         month,
+!                                     INTEGER         day)
+      EXTERNAL        cdiDecodeDate
+
+      INTEGER         cdiEncodeDate
+!                                    (INTEGER         year,
+!                                     INTEGER         month,
+!                                     INTEGER         day)
+      EXTERNAL        cdiEncodeDate
+
 !                     cdiDecodeTime
 !                                    (INTEGER         time,
 !                                     INTEGER         hour,
