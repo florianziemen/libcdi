@@ -87,7 +87,7 @@ static void doctotxt(FILE *fp, Docu *doc, size_t ndoc)
 }
 
 enum cftype {ISVOID, ISCONSTSTRING, ISINT, ISREAL, ISDOUBLE, ISINT64T, ISSIZET, ISMPI_COMM,
-             ISXT_IDXLIST, ISCHOICE, ISINTP, ISSIZETP, ISFLOATV, ISFLOATVV,
+             ISXT_IDXLIST, ISCHOICE, ISINTP, ISINT64TP, ISSIZETP, ISFLOATV, ISFLOATVV,
              ISDOUBLEV, ISDOUBLEVV, ISINTV, ISINTVV, ISINTVVV, ISREALP,
              ISDOUBLEP, ISCBUF, ISUUID, ISUCHAR, ISSTRING, ISSTRINGP,
              VOIDFUNCVOID,
@@ -112,6 +112,9 @@ static int cfInt64tConvert(FILE *outfp, const char *argName,
 
 static int cfSizetConvert(FILE *outfp, const char *argName,
                           size_t argNameLen, enum conversionType part);
+
+static int cfInt64tpConvert(FILE *outfp, const char *argName,
+                           size_t argNameLen, enum conversionType part);
 
 static int cfSizetpConvert(FILE *outfp, const char *argName,
                            size_t argNameLen, enum conversionType part);
@@ -181,6 +184,9 @@ static struct symbol funArgSym[]
         "^"WS"*const"WS"+void"WS"*\\*"WS"*"SYMRE"?"WS"*[,\\)]", 1, 0, 0 },
       { "INTEGER",         "PINT",    "%sint *%.*s",
         "^"WS"*(const"WS"+)?int"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2, 0, 0 },
+      { "INTEGER",         "PINT",    "%sint64_t *%.*s",
+        "^"WS"*(const"WS"+)?int64_t"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2, 1, 0,
+        cfInt64tpConvert, "%sint *%.*s"},
       { "INTEGER",         "PINT",    "%ssize_t *%.*s",
         "^"WS"*(const"WS"+)?size_t"WS"+\\*"SYMRE"?"WS"*[,\\)]", 2, 1, 0,
         cfSizetpConvert, "%sint *%.*s"},
@@ -716,6 +722,12 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
               fputs(")\n{\n", fpint);
               for (size_t i = 0; i < funcargc; i++ )
                 {
+                  if (funArgSym[funcargtype[i]].convert && funcargtype[i] == ISINT64TP)
+                    {
+                      // create temporary int64_t variable
+                      fprintf(fpint, "  int64_t %.*s_int64_t;\n",
+                              (int)(funcargname[i].rm_eo - funcargname[i].rm_so), line + funcargname[i].rm_so);
+                    }
                   if (funArgSym[funcargtype[i]].convert && funcargtype[i] == ISSIZETP)
                     {
                       // create temporary size_t variable
@@ -752,6 +764,15 @@ static void fortran_interface(char *fname, char *fnameinc, char *fnameint,
               fputs(");\n", fpint);
               for (size_t i = 0; i < funcargc; i++ )
                 {
+                  if (funArgSym[funcargtype[i]].convert && funcargtype[i] == ISINT64TP)
+                    {
+                      fprintf(fpint, "  assert(%.*s_int64_t < INT_MAX);\n",
+                              (int)(funcargname[i].rm_eo - funcargname[i].rm_so), line + funcargname[i].rm_so);
+                      // copy temporary int64_t variable
+                      fprintf(fpint, "  *%.*s = %.*s_int64_t;\n",
+                              (int)(funcargname[i].rm_eo - funcargname[i].rm_so), line + funcargname[i].rm_so,
+                              (int)(funcargname[i].rm_eo - funcargname[i].rm_so), line + funcargname[i].rm_so);
+                    }
                   if (funArgSym[funcargtype[i]].convert && funcargtype[i] == ISSIZETP)
                     {
                       fprintf(fpint, "  assert(%.*s_size_t < INT_MAX);\n",
@@ -1285,6 +1306,24 @@ static int cfSizetConvert(FILE *outfp, const char *argName,
       break;
     case CONV_RET:
       retval = fprintf(outfp, "size_t_c2f(%.*s)", (int)argNameLen, argName);
+      break;
+    }
+  return retval;
+}
+
+/* emit conversion code for size_t* argument */
+static int cfInt64tpConvert(FILE *outfp, const char *argName,
+                           size_t argNameLen, enum conversionType part)
+{
+  int retval = 0;
+  switch (part)
+    {
+    case CONV_ARG:
+      retval = fprintf(outfp, "&%.*s_int64_t", (int)argNameLen, argName);
+      break;
+    case CONV_RET:
+      abort();
+
       break;
     }
   return retval;

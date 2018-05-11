@@ -55,10 +55,10 @@ bool str_is_equal(const char *vstr, const char *cstr);
 #ifndef _TIMEBASE_H
 #  include "timebase.h"
 #endif
-#ifndef  _TAXIS_H
+#ifndef TAXIS_H
 #  include "taxis.h"
 #endif
-#ifndef  CDI_LIMITS_H
+#ifndef CDI_LIMITS_H
 #  include "cdi_limits.h"
 #endif
 #ifndef  _SERVICE_H

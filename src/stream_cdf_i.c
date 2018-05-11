@@ -115,7 +115,7 @@ ncvar_t;
 
 
 static
-void scanTimeString(const char *ptu, int *rdate, int *rtime)
+void scanTimeString(const char *ptu, int64_t *rdate, int *rtime)
 {
   int year = 1, month = 1, day = 1;
   int hour = 0, minute = 0, second = 0;
@@ -196,7 +196,8 @@ static
 int setBaseTime(const char *timeunits, taxis_t *taxis)
 {
   int taxistype = TAXIS_ABSOLUTE;
-  int rdate = -1, rtime = -1;
+  int64_t rdate = -1;
+  int rtime = -1;
 
   size_t len = strlen(timeunits);
   while ( isspace(*timeunits) && len ) { timeunits++; len--; }
@@ -254,7 +255,7 @@ int setBaseTime(const char *timeunits, taxis_t *taxis)
               taxis->rtime = rtime;
 
               if ( CDI_Debug )
-                Message("rdate = %d  rtime = %d", rdate, rtime);
+                Message("rdate = %lld  rtime = %d", rdate, rtime);
             }
         }
     }

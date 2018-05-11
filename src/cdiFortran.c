@@ -661,24 +661,68 @@ FCALLSCSUB1 (taxisDestroy, TAXISDESTROY, taxisdestroy, INT)
 FCALLSCFUN1 (INT, taxisDuplicate, TAXISDUPLICATE, taxisduplicate, INT)
 FCALLSCSUB2 (taxisCopyTimestep, TAXISCOPYTIMESTEP, taxiscopytimestep, INT, INT)
 FCALLSCSUB2 (taxisDefType, TAXISDEFTYPE, taxisdeftype, INT, INT)
-FCALLSCSUB2 (taxisDefVdate, TAXISDEFVDATE, taxisdefvdate, INT, INT)
+static void taxisDefVdate_fwrap(int taxisID, int date)
+{
+  taxisDefVdate(taxisID, (int64_t)date);
+}
+FCALLSCSUB2 (taxisDefVdate_fwrap, TAXISDEFVDATE, taxisdefvdate, INT, INT)
 FCALLSCSUB2 (taxisDefVtime, TAXISDEFVTIME, taxisdefvtime, INT, INT)
-FCALLSCFUN1 (INT, taxisInqVdate, TAXISINQVDATE, taxisinqvdate, INT)
+static int taxisInqVdate_fwrap(int taxisID)
+{
+  int64_t v;
+  v = taxisInqVdate(taxisID);
+  return int64_t_c2f(v);
+}
+FCALLSCFUN1 (INT, taxisInqVdate_fwrap, TAXISINQVDATE, taxisinqvdate, INT)
 FCALLSCFUN1 (INT, taxisInqVtime, TAXISINQVTIME, taxisinqvtime, INT)
-FCALLSCSUB2 (taxisDefRdate, TAXISDEFRDATE, taxisdefrdate, INT, INT)
+static void taxisDefRdate_fwrap(int taxisID, int date)
+{
+  taxisDefRdate(taxisID, (int64_t)date);
+}
+FCALLSCSUB2 (taxisDefRdate_fwrap, TAXISDEFRDATE, taxisdefrdate, INT, INT)
 FCALLSCSUB2 (taxisDefRtime, TAXISDEFRTIME, taxisdefrtime, INT, INT)
-FCALLSCFUN1 (INT, taxisInqRdate, TAXISINQRDATE, taxisinqrdate, INT)
+static int taxisInqRdate_fwrap(int taxisID)
+{
+  int64_t v;
+  v = taxisInqRdate(taxisID);
+  return int64_t_c2f(v);
+}
+FCALLSCFUN1 (INT, taxisInqRdate_fwrap, TAXISINQRDATE, taxisinqrdate, INT)
 FCALLSCFUN1 (INT, taxisInqRtime, TAXISINQRTIME, taxisinqrtime, INT)
-FCALLSCSUB2 (taxisDefFdate, TAXISDEFFDATE, taxisdeffdate, INT, INT)
+static void taxisDefFdate_fwrap(int taxisID, int date)
+{
+  taxisDefFdate(taxisID, (int64_t)date);
+}
+FCALLSCSUB2 (taxisDefFdate_fwrap, TAXISDEFFDATE, taxisdeffdate, INT, INT)
 FCALLSCSUB2 (taxisDefFtime, TAXISDEFFTIME, taxisdefftime, INT, INT)
-FCALLSCFUN1 (INT, taxisInqFdate, TAXISINQFDATE, taxisinqfdate, INT)
+static int taxisInqFdate_fwrap(int taxisID)
+{
+  int64_t v;
+  v = taxisInqFdate(taxisID);
+  return int64_t_c2f(v);
+}
+FCALLSCFUN1 (INT, taxisInqFdate_fwrap, TAXISINQFDATE, taxisinqfdate, INT)
 FCALLSCFUN1 (INT, taxisInqFtime, TAXISINQFTIME, taxisinqftime, INT)
 FCALLSCFUN1 (INT, taxisHasBounds, TAXISHASBOUNDS, taxishasbounds, INT)
 FCALLSCSUB1 (taxisWithBounds, TAXISWITHBOUNDS, taxiswithbounds, INT)
 FCALLSCSUB1 (taxisDeleteBounds, TAXISDELETEBOUNDS, taxisdeletebounds, INT)
-FCALLSCSUB3 (taxisDefVdateBounds, TAXISDEFVDATEBOUNDS, taxisdefvdatebounds, INT, INT, INT)
+static void taxisDefVdateBounds_fwrap(int taxisID, int vdate_lb, int vdate_ub)
+{
+  taxisDefVdateBounds(taxisID, (int64_t)vdate_lb, (int64_t)vdate_ub);
+}
+FCALLSCSUB3 (taxisDefVdateBounds_fwrap, TAXISDEFVDATEBOUNDS, taxisdefvdatebounds, INT, INT, INT)
 FCALLSCSUB3 (taxisDefVtimeBounds, TAXISDEFVTIMEBOUNDS, taxisdefvtimebounds, INT, INT, INT)
-FCALLSCSUB3 (taxisInqVdateBounds, TAXISINQVDATEBOUNDS, taxisinqvdatebounds, INT, PINT, PINT)
+static void taxisInqVdateBounds_fwrap(int taxisID, int *vdate_lb, int *vdate_ub)
+{
+  int64_t vdate_lb_int64_t;
+  int64_t vdate_ub_int64_t;
+  taxisInqVdateBounds(taxisID, &vdate_lb_int64_t, &vdate_ub_int64_t);
+  assert(vdate_lb_int64_t < INT_MAX);
+  *vdate_lb = vdate_lb_int64_t;
+  assert(vdate_ub_int64_t < INT_MAX);
+  *vdate_ub = vdate_ub_int64_t;
+}
+FCALLSCSUB3 (taxisInqVdateBounds_fwrap, TAXISINQVDATEBOUNDS, taxisinqvdatebounds, INT, PINT, PINT)
 FCALLSCSUB3 (taxisInqVtimeBounds, TAXISINQVTIMEBOUNDS, taxisinqvtimebounds, INT, PINT, PINT)
 FCALLSCSUB2 (taxisDefCalendar, TAXISDEFCALENDAR, taxisdefcalendar, INT, INT)
 FCALLSCFUN1 (INT, taxisInqCalendar, TAXISINQCALENDAR, taxisinqcalendar, INT)
