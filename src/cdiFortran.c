@@ -127,8 +127,6 @@ FCALLSCFUN3 (INT, cdiEncodeParam, CDIENCODEPARAM, cdiencodeparam, INT, INT, INT)
 
 /*  time format:    hhmmss  */
 
-FCALLSCSUB4 (cdiDecodeDate, CDIDECODEDATE, cdidecodedate, INT, PINT, PINT, PINT)
-FCALLSCFUN3 (INT, cdiEncodeDate, CDIENCODEDATE, cdiencodedate, INT, INT, INT)
 FCALLSCSUB4 (cdiDecodeTime, CDIDECODETIME, cdidecodetime, INT, PINT, PINT, PINT)
 FCALLSCFUN3 (INT, cdiEncodeTime, CDIENCODETIME, cdiencodetime, INT, INT, INT)
 
@@ -472,11 +470,9 @@ FCALLSCFUN2 (INT, gridInqYvals_fwrap, GRIDINQYVALS, gridinqyvals, INT, DOUBLEV)
 FCALLSCFUN1 (INT, gridInqYIsc, GRIDINQYISC, gridinqyisc, INT)
 FCALLSCFUN4 (INT, cdiDefKeyInt, CDIDEFKEYINT, cdidefkeyint, INT, INT, INT, INT)
 FCALLSCFUN4 (INT, cdiInqKeyInt, CDIINQKEYINT, cdiinqkeyint, INT, INT, INT, PINT)
-FCALLSCFUN5 (INT, cdiDefKeyBytes, CDIDEFKEYBYTES, cdidefkeybytes, INT, INT, INT, PVOID, INT)
-FCALLSCFUN5 (INT, cdiInqKeyBytes, CDIINQKEYBYTES, cdiinqkeybytes, INT, INT, INT, PVOID, PINT)
 FCALLSCFUN4 (INT, cdiDefKeyString, CDIDEFKEYSTRING, cdidefkeystring, INT, INT, INT, STRING)
-FCALLSCFUN4 (INT, cdiInqKeyLen, CDIINQKEYLEN, cdiinqkeylen, INT, INT, INT, PINT)
 FCALLSCFUN5 (INT, cdiInqKeyString, CDIINQKEYSTRING, cdiinqkeystring, INT, INT, INT, PSTRING, PINT)
+FCALLSCFUN4 (INT, cdiInqKeyLen, CDIINQKEYLEN, cdiinqkeylen, INT, INT, INT, PINT)
 FCALLSCFUN4 (INT, cdiCopyKeys, CDICOPYKEYS, cdicopykeys, INT, INT, INT, INT)
 FCALLSCFUN4 (INT, cdiGridDefKeyStr, CDIGRIDDEFKEYSTR, cdigriddefkeystr, INT, INT, INT, STRING)
 FCALLSCFUN4 (INT, cdiGridInqKeyStr, CDIGRIDINQKEYSTR, cdigridinqkeystr, INT, INT, INT, PSTRING)
@@ -558,6 +554,13 @@ static int gridInqXbounds_fwrap(int gridID, double xbounds[])
   return size_t_c2f(v);
 }
 FCALLSCFUN2 (INT, gridInqXbounds_fwrap, GRIDINQXBOUNDS, gridinqxbounds, INT, DOUBLEV)
+static int gridInqXboundsPart_fwrap(int gridID, int start, int size, double xbounds[])
+{
+  size_t v;
+  v = gridInqXboundsPart(gridID, start, (size_t)size, xbounds);
+  return size_t_c2f(v);
+}
+FCALLSCFUN4 (INT, gridInqXboundsPart_fwrap, GRIDINQXBOUNDSPART, gridinqxboundspart, INT, INT, INT, DOUBLEV)
 FCALLSCSUB2 (gridDefYbounds, GRIDDEFYBOUNDS, griddefybounds, INT, DOUBLEV)
 static int gridInqYbounds_fwrap(int gridID, double ybounds[])
 {
@@ -566,6 +569,13 @@ static int gridInqYbounds_fwrap(int gridID, double ybounds[])
   return size_t_c2f(v);
 }
 FCALLSCFUN2 (INT, gridInqYbounds_fwrap, GRIDINQYBOUNDS, gridinqybounds, INT, DOUBLEV)
+static int gridInqYboundsPart_fwrap(int gridID, int start, int size, double ybounds[])
+{
+  size_t v;
+  v = gridInqYboundsPart(gridID, start, (size_t)size, ybounds);
+  return size_t_c2f(v);
+}
+FCALLSCFUN4 (INT, gridInqYboundsPart_fwrap, GRIDINQYBOUNDSPART, gridinqyboundspart, INT, INT, INT, DOUBLEV)
 FCALLSCSUB3 (gridDefRowlon, GRIDDEFROWLON, griddefrowlon, INT, INT, INTV)
 FCALLSCSUB2 (gridInqRowlon, GRIDINQROWLON, gridinqrowlon, INT, INTV)
 FCALLSCSUB2 (gridChangeType, GRIDCHANGETYPE, gridchangetype, INT, INT)

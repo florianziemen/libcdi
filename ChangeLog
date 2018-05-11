@@ -1,3 +1,8 @@
+2018-05-11  Uwe Schulzweida
+
+	* cdiDecodeDate: changed type of date to int64_t
+	* cdiEncodeDate: changed type of return value to int64_t
+
 2018-04-30  Uwe Schulzweida
 
 	* Version 1.9.4 released

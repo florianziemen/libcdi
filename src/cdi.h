@@ -8,6 +8,7 @@
 #define  CDI_H_
 
 #include <stdio.h>
+#include <stdint.h>    // int64_t
 #include <sys/types.h>
 
 #ifdef __cplusplus
@@ -322,8 +323,8 @@ int     cdiEncodeParam(int pnum, int pcat, int pdis);
 /* date format:  YYYYMMDD */
 /* time format:    hhmmss */
 
-void    cdiDecodeDate(int date, int *year, int *month, int *day);
-int     cdiEncodeDate(int year, int month, int day);
+void    cdiDecodeDate(int64_t date, int *year, int *month, int *day);
+int64_t cdiEncodeDate(int year, int month, int day);
 
 void    cdiDecodeTime(int time, int *hour, int *minute, int *second);
 int     cdiEncodeTime(int hour, int minute, int second);
