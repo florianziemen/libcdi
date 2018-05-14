@@ -2366,7 +2366,7 @@ bool gridCompare(int gridID, const grid_t *grid, bool coord_compare)
       differ = 1;
 #ifdef HIRLAM_EXTENSIONS
       if ( cdiDebugExt>=200 )
-        printf("gridCompare(gridID=%d): Differs: grid.scanningMode [%d] != gridInqScanningMode(gridID) [%d] or  grid.uvRelativeToGrid [%ld] != gridInqUvRelativeToGrid(gridID) [%d]\n",
+        printf("gridCompare(gridID=%d): Differs: grid.scanningMode [%d] != gridInqScanningMode(gridID) [%d] or  grid.uvRelativeToGrid [%d] != gridInqUvRelativeToGrid(gridID) [%d]\n",
                gridID, grid->scanningMode, gridInqScanningMode(gridID), grid->uvRelativeToGrid, gridInqUvRelativeToGrid(gridID) );
 #endif // HIRLAM_EXTENSIONS
     }
