@@ -25,38 +25,37 @@ void cdiDecodeParam(int param, int *pnum, int *pcat, int *pdis)
 
 int cdiEncodeParam(int pnum, int pcat, int pdis)
 {
-  unsigned uparam, upnum;
-
   if ( pcat < 0 || pcat > 255 ) pcat = 255;
   if ( pdis < 0 || pdis > 255 ) pdis = 255;
 
-  upnum = (unsigned)pnum;
+  unsigned upnum = (unsigned)pnum;
   if ( pnum < 0 ) upnum = (unsigned)(0x8000 - pnum);
 
-  uparam = upnum << 16 | (unsigned)(pcat << 8) | (unsigned)pdis;
+  unsigned uparam = upnum << 16 | (unsigned)(pcat << 8) | (unsigned)pdis;
 
-  return ((int)uparam);
+  return (int)uparam;
 }
 
 
-void cdiDecodeDate(int date, int *year, int *month, int *day)
+void cdiDecodeDate(int64_t date, int *year, int *month, int *day)
 {
-
-  int iyear = date / 10000;
-  *year = iyear;
-  int idate = abs(date - iyear * 10000),
-    imonth = idate / 100;
-  *month = imonth;
-  *day   = idate - imonth * 100;
+  int64_t iyear = (int)(date / 10000);
+  *year = (int)iyear;
+  int64_t idate = date - iyear * 10000;
+  if ( idate < 0 ) idate = -idate;
+  int64_t imonth = idate / 100;
+  *month = (int)imonth;
+  *day   = (int)(idate - imonth * 100);
 }
 
 
-int cdiEncodeDate(int year, int month, int day)
+int64_t cdiEncodeDate(int year, int month, int day)
 {
-  int iyear = abs(year),
-    date = iyear * 10000 + month * 100 + day;
+  int64_t iyear = abs(year);
+  int64_t date = iyear * 10000 + month * 100 + day;
   if ( year < 0 ) date = -date;
-  return (date);
+
+  return date;
 }
 
 
@@ -73,20 +72,17 @@ void cdiDecodeTime(int time, int *hour, int *minute, int *second)
 
 int cdiEncodeTime(int hour, int minute, int second)
 {
-  int time = hour*10000 + minute*100 + second;
-
-  return time;
+  return hour*10000 + minute*100 + second;
 }
 
 
 void cdiParamToString(int param, char *paramstr, int maxlen)
 {
   int dis, cat, num;
-  int len;
-
   cdiDecodeParam(param, &num, &cat, &dis);
 
   size_t umaxlen = maxlen >= 0 ? (unsigned)maxlen : 0U;
+  int len;
   if ( dis == 255 && (cat == 255 || cat == 0 ) )
     len = snprintf(paramstr, umaxlen, "%d", num);
   else  if ( dis == 255 )
@@ -113,6 +109,7 @@ const char *cdiUnitNamePtr(int cdi_unit)
   enum { numUnits = (int) (sizeof(cdiUnits)/sizeof(char *)) };
   const char *name = ( cdi_unit > 0 && cdi_unit < numUnits ) ?
     cdiUnits[cdi_unit] : NULL;
+
   return name;
 }
 

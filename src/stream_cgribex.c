@@ -1,4 +1,4 @@
-#if defined (HAVE_CONFIG_H)
+#ifdef HAVE_CONFIG_H
 #  include "config.h"
 #endif
 
@@ -15,7 +15,7 @@
 #include "stream_grb.h"
 #include "stream_cgribex.h"
 
-#if  defined  (HAVE_LIBCGRIBEX)
+#ifdef HAVE_LIBCGRIBEX
 #  include "cgribex.h"
 #endif
 
@@ -1432,7 +1432,8 @@ int cgribexDefTimerange(int tsteptype, int factor, int calendar,
 			int rdate, int rtime, int vdate, int vtime, int *pip1, int *pip2)
 {
   int year, month, day, hour, minute, second;
-  int julday1, secofday1, julday2, secofday2, days, secs;
+  int64_t julday1, julday2, days;
+  int secofday1, secofday2, secs;
 
   cdiDecodeDate(rdate, &year, &month, &day);
   cdiDecodeTime(rtime, &hour, &minute, &second);

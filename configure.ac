@@ -4,7 +4,7 @@
 #  autoconf 2.68
 #  libtool  2.4.2
 
-AC_INIT([cdi], [1.9.4], [http://mpimet.mpg.de/cdi])
+AC_INIT([cdi], [1.9.5rc1], [http://mpimet.mpg.de/cdi])
 
 AC_DEFINE_UNQUOTED(CDI, ["$PACKAGE_VERSION"], [CDI version])
 
@@ -124,7 +124,7 @@ AC_SUBST([SYSTEM_TYPE],["$ac_cv_build"])
 AC_CHECK_LIB(m, floor)
 #  ----------------------------------------------------------------------
 # Add basic configure options
-ACX_OPTIONS
+ACX_CDI_OPTIONS
 AM_CONDITIONAL([ENABLE_NETCDF],[test x$ENABLE_NETCDF = xyes])
 AC_CHECK_FUNCS([grib_get_length])
 #  ----------------------------------------------------------------------

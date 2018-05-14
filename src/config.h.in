@@ -209,8 +209,7 @@
 /* Define to 1 for HIRLAM extensions */
 #undef HIRLAM_EXTENSIONS
 
-/* Define to the sub-directory in which libtool stores uninstalled libraries.
-   */
+/* Define to the sub-directory where libtool stores uninstalled libraries. */
 #undef LT_OBJDIR
 
 /* Name of package */

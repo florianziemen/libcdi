@@ -186,7 +186,7 @@ void usage(void)
 
 
 static
-void printInfo(int vdate, int vtime, char *varname, double level,
+void printInfo(int64_t vdate, int vtime, char *varname, double level,
 	       size_t datasize, int number, size_t nmiss, double missval, const double *data, int vardis)
 {
   static int rec = 0;
@@ -484,7 +484,7 @@ void printShortinfo(int streamID, int vlistID, int vardis)
 	    {
 	      if ( taxisInqType(taxisID) == TAXIS_RELATIVE )
 		{
-		  int vdate = taxisInqRdate(taxisID);
+		  int64_t vdate = taxisInqRdate(taxisID);
 		  int vtime = taxisInqRtime(taxisID);
 
 		  cdiDecodeDate(vdate, &year, &month, &day);
@@ -933,11 +933,11 @@ int main(int argc, char *argv[])
               taxisCopyTimestep(taxisID2, taxisID1);
               streamDefTimestep(streamID2, tsID);
             }
-	  int vdate = taxisInqVdate(taxisID1);
+	  int64_t vdate = taxisInqVdate(taxisID1);
 	  int vtime = taxisInqVtime(taxisID1);
 
 	  if ( Debug )
-	    fprintf(stdout, "tsID = %d nrecs = %d date = %d time = %d\n", tsID, nrecs, vdate, vtime);
+	    fprintf(stdout, "tsID = %d nrecs = %d date = %lld time = %d\n", tsID, nrecs, vdate, vtime);
 
 	  if ( Record )
 	    {
