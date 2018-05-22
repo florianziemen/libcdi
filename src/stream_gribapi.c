@@ -1798,7 +1798,7 @@ void gribapiDefDateTimeAbs(int editionNumber, grib_handle *gh, int64_t date, int
 }
 
 static
-int gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, int64_t rdate, int rtime, int vdate, int vtime,
+int gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, int64_t rdate, int rtime, int64_t vdate, int vtime,
                           int productDefinitionTemplate, int typeOfGeneratingProcess, int tsteptype, int timeunit, int calendar, int gcinit)
 {
   int status = -1;
