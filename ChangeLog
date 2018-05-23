@@ -3,6 +3,10 @@
         * using CGRIBEX library version 1.9.1
 	* Version 1.9.5 released
 
+2018-05-23  Uwe Schulzweida
+
+	* gribapiGetKeys: get MPIM local section
+
 2018-05-11  Uwe Schulzweida
 
 	* taxis: changed type of date to int64_t
