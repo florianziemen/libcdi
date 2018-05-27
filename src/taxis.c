@@ -626,7 +626,7 @@ void taxisCopyTimestep(int taxisID2, int taxisID1)
 @Function  taxisInqVdate
 @Title     Get the verification date
 
-@Prototype int taxisInqVdate(int taxisID)
+@Prototype int64_t taxisInqVdate(int taxisID)
 @Parameter
     @Item  taxisID  Time axis ID, from a previous call to @fref{taxisCreate} or @fref{vlistInqTaxis}
 
