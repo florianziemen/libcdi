@@ -201,6 +201,7 @@ bool is_lon_axis(const char *units, const char *stdname)
     {
       int ioff = 6;
       if ( lc_units[ioff] == 's' ) ioff++;
+      if ( lc_units[ioff] == ' ' ) ioff++;
       if ( lc_units[ioff] == '_' ) ioff++;
       if ( lc_units[ioff] == 'e' ) status = true;
     }
@@ -229,6 +230,7 @@ bool is_lat_axis(const char *units, const char *stdname)
     {
       int ioff = 6;
       if ( lc_units[ioff] == 's' ) ioff++;
+      if ( lc_units[ioff] == ' ' ) ioff++;
       if ( lc_units[ioff] == '_' ) ioff++;
       if ( lc_units[ioff] == 'n' || lc_units[ioff] == 's' ) status = true;
     }

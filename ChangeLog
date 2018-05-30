@@ -5,6 +5,7 @@
 
 2018-05-30  Uwe Schulzweida
 
+	* Added error code CDI_ETMOF (Too many open files)
 	* file.c set default of MAX_FILES to 8192
 
 2018-05-23  Uwe Schulzweida

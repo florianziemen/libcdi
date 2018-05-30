@@ -255,7 +255,10 @@ int file_from_pointer(bfile_t *ptr)
 	    Message("Pointer %p has idx %d from file list", ptr, idx);
 	}
       else
-	Warning("Too many open files (limit is %d)!", _file_max);
+        {
+          Warning("Too many open files (limit is %d)!", _file_max);
+          idx = -2;
+        }
 
       FILE_UNLOCK();
     }
