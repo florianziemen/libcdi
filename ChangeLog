@@ -3,6 +3,10 @@
         * using CGRIBEX library version 1.9.1
 	* Version 1.9.5 released
 
+2018-06-23  Uwe Schulzweida
+
+	* NetCDF dimension IDs do not have to start at 0 and their increment can not be equal to 1! (bug fix)
+
 2018-05-30  Uwe Schulzweida
 
 	* Added error code CDI_ETMOF (Too many open files)
