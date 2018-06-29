@@ -684,18 +684,21 @@ int reshGetStatus ( cdiResH resH, const resOps * ops )
   nspT = namespaceResHDecode ( resH );
 
   xassert ( nspT.nsp == nsp &&
-            nspT.idx >= 0 &&
-            nspT.idx < resHList[nsp].size );
+            nspT.idx >= 0 );
+  int status;
+  if (nspT.idx < resHList[nsp].size) {
+    listElem_t *listElem = resHList[nsp].resources + nspT.idx;
 
-  listElem_t *listElem = resHList[nsp].resources + nspT.idx;
-
-  const resOps *elemOps = listElem->res.v.ops;
-
+    const resOps *elemOps = listElem->res.v.ops;
+    xassert(listElem && (!(listElem->status & RESH_IN_USE_BIT) || elemOps == ops));
+    status = listElem->status;
+  } else {
+    status = RESH_UNUSED;
+  }
   LIST_UNLOCK();
 
-  xassert(listElem && (!(listElem->status & RESH_IN_USE_BIT) || elemOps == ops));
 
-  return listElem->status;
+  return status;
 }
 
 /**************************************************************/
