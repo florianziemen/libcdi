@@ -3,6 +3,10 @@
         * using CGRIBEX library version 1.9.1
 	* Version 1.9.5 released
 
+2018-07-02  Uwe Schulzweida
+
+	* reshGetStatus: applied patch from Kalle+Thomas
+
 2018-05-31  Uwe Schulzweida
 
 	* Limit chunksizehint to filesize
