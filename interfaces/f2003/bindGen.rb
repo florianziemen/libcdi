@@ -661,7 +661,7 @@ def matchTemplate(regexString, matchString)
 	regexString = regexString.gsub("<opaqueTypes>", opaqueTypesString)
 	publicTypesString = '(' + $publicTypes.collect{ |type| type }.join('|') + ')'
 	regexString = regexString.gsub('<publicTypes>', publicTypesString)
-	regexString = regexString.gsub('<integerTypes>', '(short|int|long|size_t|intmax_t|int_(least|fast)(8|16|32|64)_t)')
+	regexString = regexString.gsub('<integerTypes>', '\b(short|int|long|size_t|intmax_t|int_(least|fast)(8|16|32|64)_t|int(8|16|32|64)_t)\b')
 	regexString = regexString.gsub('<floatTypes>',  '(float|double)')
 	return Regexp.new(regexString).match(matchString)
 end
