@@ -1653,7 +1653,7 @@ void cgribexDefGridRegular(int *isec2, double *fsec2, int gridID, int gridtype, 
     {
       ISEC2_FirstLon = 0;
       ISEC2_LastLon  = (int)lround(1000*(360.-360./(nlat*2)));
-      ISEC2_LonIncr  = (int)lround(1000*360./(nlat*2));
+      //ISEC2_LonIncr  = (int)lround(1000*360./(nlat*2)); // gribapi gridType detector doesn't like lonIncr
     }
   else
     {
