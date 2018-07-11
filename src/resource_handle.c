@@ -697,30 +697,29 @@ void reshSetStatus ( cdiResH resH, const resOps * ops, int status )
 
 int reshGetStatus ( cdiResH resH, const resOps * ops )
 {
-  int nsp;
-  namespaceTuple_t nspT;
-
   LIST_INIT(1);
 
   LIST_LOCK();
 
-  nsp = namespaceGetActive ();
+  int nsp = namespaceGetActive ();
 
-  nspT = namespaceResHDecode ( resH );
+  namespaceTuple_t nspT = namespaceResHDecode ( resH );
 
   xassert ( nspT.nsp == nsp &&
-            nspT.idx >= 0 &&
-            nspT.idx < resHList[nsp].size );
+            nspT.idx >= 0 );
 
-  listElem_t *listElem = resHList[nsp].resources + nspT.idx;
-
-  const resOps *elemOps = listElem->res.v.ops;
+  int status = RESH_UNUSED;
+  if (nspT.idx < resHList[nsp].size)
+    {
+      listElem_t *listElem = resHList[nsp].resources + nspT.idx;
+      const resOps *elemOps = listElem->res.v.ops;
+      xassert(listElem && (!(listElem->status & RESH_IN_USE_BIT) || elemOps == ops));
+      status = listElem->status;
+    }
 
   LIST_UNLOCK();
 
-  xassert(listElem && (!(listElem->status & RESH_IN_USE_BIT) || elemOps == ops));
-
-  return listElem->status;
+  return status;
 }
 
 /**************************************************************/

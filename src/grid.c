@@ -2331,7 +2331,7 @@ bool gridCompare(int gridID, const grid_t *grid, bool coord_compare)
               else
                 {
                   /* FIXME: not octet 0 but octet 7 is guaranteed  non-zero for any non-NULL UUID */
-                  differ = differ || (gridRef->uuid[0] && grid->uuid[0] && memcmp(gridRef->uuid, grid->uuid, CDI_UUID_SIZE) != 0);
+                  differ |= ((gridRef->uuid[0] || grid->uuid[0]) && memcmp(gridRef->uuid, grid->uuid, CDI_UUID_SIZE));
 
                   if ( !differ &&
                        ((grid->x.vals == NULL) ^ (gridRef->x.vals == NULL)) &&
@@ -2366,7 +2366,7 @@ bool gridCompare(int gridID, const grid_t *grid, bool coord_compare)
       differ = 1;
 #ifdef HIRLAM_EXTENSIONS
       if ( cdiDebugExt>=200 )
-        printf("gridCompare(gridID=%d): Differs: grid.scanningMode [%d] != gridInqScanningMode(gridID) [%d] or  grid.uvRelativeToGrid [%ld] != gridInqUvRelativeToGrid(gridID) [%d]\n",
+        printf("gridCompare(gridID=%d): Differs: grid.scanningMode [%d] != gridInqScanningMode(gridID) [%d] or  grid.uvRelativeToGrid [%d] != gridInqUvRelativeToGrid(gridID) [%d]\n",
                gridID, grid->scanningMode, gridInqScanningMode(gridID), grid->uvRelativeToGrid, gridInqUvRelativeToGrid(gridID) );
 #endif // HIRLAM_EXTENSIONS
     }

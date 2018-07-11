@@ -177,8 +177,8 @@ int main(void)
 {
   int calendar = CALENDAR_STANDARD;
   int nmin;
-  int vdate0, vtime0;
-  int vdate, vtime;
+  int64_t vdate0, vdate;
+  int vtime0, vtime;
   int ijulinc;
   int i, j = 0;
   int year, mon, day, hour, minute, second;

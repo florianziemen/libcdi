@@ -1570,7 +1570,14 @@ void cgribexDefTime(int *isec1, int vdate, int vtime, int tsteptype, int numavg,
 	  if ( ip1 < 0 || ip1 > 0xFF   ) timetype = TAXIS_ABSOLUTE;
 	  if ( ip2 < 0 || ip2 > 0xFF   ) timetype = TAXIS_ABSOLUTE;
 	}
-
+      /*
+      static bool lwarn = true;
+      if ( lwarn && timetype == TAXIS_ABSOLUTE )
+        {
+          lwarn = false;
+          Warning("Can't store forecast time %ld %d relative to %ld %d, converted to absolute time!", (long)vdate, vtime, (long)rdate, rtime);
+        }
+      */
       ISEC1_TimeRange   = timerange;
       ISEC1_TimePeriod1 = ip1;
       ISEC1_TimePeriod2 = ip2;
@@ -1646,7 +1653,7 @@ void cgribexDefGridRegular(int *isec2, double *fsec2, int gridID, int gridtype, 
     {
       ISEC2_FirstLon = 0;
       ISEC2_LastLon  = (int)lround(1000*(360.-360./(nlat*2)));
-      ISEC2_LonIncr  = (int)lround(1000*360./(nlat*2));
+      //ISEC2_LonIncr  = (int)lround(1000*360./(nlat*2)); // gribapi gridType detector doesn't like lonIncr
     }
   else
     {

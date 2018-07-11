@@ -77,7 +77,7 @@ int cdf_open(const char *path, int omode, int *ncidp)
   struct stat filestat;
   size_t chunksizehint = 0;
 
-#if  defined  (HAVE_LIBNC_DAP)
+#ifdef HAVE_LIBNC_DAP
   if ( strncmp(path, "http:", 5) == 0 || strncmp(path, "https:", 6) == 0 ) dapfile = true;
 #endif
 
@@ -89,8 +89,9 @@ int cdf_open(const char *path, int omode, int *ncidp)
     {
       if ( stat(path, &filestat) != 0 ) SysError(path);
 
-#if defined (HAVE_STRUCT_STAT_ST_BLKSIZE)
+#ifdef HAVE_STRUCT_STAT_ST_BLKSIZE
       chunksizehint = (size_t) filestat.st_blksize * 4;
+      if ( chunksizehint > (size_t) filestat.st_size ) chunksizehint = (size_t) filestat.st_size;
 #endif
       /*
       if ( chunksizehint < ChunkSizeMin ) chunksizehint = ChunkSizeMin;
@@ -101,7 +102,7 @@ int cdf_open(const char *path, int omode, int *ncidp)
       /* FIXME: parallel part missing */
       status = nc__open(path, omode, &chunksizehint, ncidp);
 
-      if ( CDF_Debug ) Message("chunksizehint %d", chunksizehint);
+      if ( CDF_Debug ) Message("chunksizehint %zu", chunksizehint);
     }
 
   if ( CDF_Debug )

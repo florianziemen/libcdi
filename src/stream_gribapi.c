@@ -457,18 +457,36 @@ void gribapiGetKeys(grib_handle *gh, int varID)
   if ( section2Length > 0 )
     {
       long grib2LocalSectionNumber;
+      long mpimType, mpimClass, mpimUser;
       grib_get_long(gh, "grib2LocalSectionNumber", &grib2LocalSectionNumber);
-      size_t size = 0;
-      if ( grib_get_size(gh, "section2Padding", &size) == 0 )
-        if ( size > 0 )
-          {
-            varDefKeyInt(varID, CDI_KEY_GRIB2LOCALSECTIONNUMBER, (int) grib2LocalSectionNumber);
-            varDefKeyInt(varID, CDI_KEY_SECTION2PADDINGLENGTH, (int) size);
-            unsigned char *section2Padding = (unsigned char*) Malloc(size);
-            grib_get_bytes(gh, "section2Padding", section2Padding, &size);
-            varDefKeyBytes(varID, CDI_KEY_SECTION2PADDING, section2Padding, (int)size);
-            Free(section2Padding);
-          }
+      size_t section2PaddingLength = 0;
+      int status = grib_get_size(gh, "section2Padding", &section2PaddingLength);
+      if ( status == 0 && section2PaddingLength > 0 )
+        {
+          varDefKeyInt(varID, CDI_KEY_GRIB2LOCALSECTIONNUMBER, (int) grib2LocalSectionNumber);
+          varDefKeyInt(varID, CDI_KEY_SECTION2PADDINGLENGTH, (int) section2PaddingLength);
+          unsigned char *section2Padding = (unsigned char*) Malloc(section2PaddingLength);
+          grib_get_bytes(gh, "section2Padding", section2Padding, &section2PaddingLength);
+          varDefKeyBytes(varID, CDI_KEY_SECTION2PADDING, section2Padding, (int)section2PaddingLength);
+          Free(section2Padding);
+        }
+      else if ( grib_get_long(gh, "mpimType", &mpimType) == 0 &&
+                grib_get_long(gh, "mpimClass", &mpimClass) == 0 &&
+                grib_get_long(gh, "mpimUser", &mpimUser) == 0)
+        {
+          varDefKeyInt(varID, CDI_KEY_MPIMTYPE, mpimType);
+          varDefKeyInt(varID, CDI_KEY_MPIMCLASS, mpimClass);
+          varDefKeyInt(varID, CDI_KEY_MPIMUSER, mpimUser);
+
+          size_t revNumLen = 20;
+          unsigned char revNumber[revNumLen];
+          if ( grib_get_bytes(gh, "revNumber", revNumber, &revNumLen) == 0 )
+            varDefKeyBytes(varID, CDI_KEY_REVNUMBER, revNumber, (int)revNumLen);
+
+          long revStatus;
+          grib_get_long(gh, "revStatus", &revStatus);
+          varDefKeyInt(varID, CDI_KEY_REVSTATUS, revStatus);
+       }
     }
 }
 
@@ -1798,7 +1816,7 @@ void gribapiDefDateTimeAbs(int editionNumber, grib_handle *gh, int64_t date, int
 }
 
 static
-int gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, int64_t rdate, int rtime, int vdate, int vtime,
+int gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, int64_t rdate, int rtime, int64_t vdate, int vtime,
                           int productDefinitionTemplate, int typeOfGeneratingProcess, int tsteptype, int timeunit, int calendar, int gcinit)
 {
   int status = -1;
@@ -1975,7 +1993,7 @@ void gribapiDefGridRegular(grib_handle *gh, int gridID, int gridtype, bool gridI
   if ( gridtype != GRID_GAUSSIAN_REDUCED ) GRIB_CHECK(my_grib_set_long(gh, "Ni", nlon), 0);
   GRIB_CHECK(my_grib_set_double(gh, "longitudeOfFirstGridPointInDegrees", xfirsto), 0);
   GRIB_CHECK(my_grib_set_double(gh, "longitudeOfLastGridPointInDegrees",  xlasto), 0);
-  GRIB_CHECK(my_grib_set_double(gh, "iDirectionIncrementInDegrees", xinc), 0);
+  if ( gridtype != GRID_GAUSSIAN_REDUCED ) GRIB_CHECK(my_grib_set_double(gh, "iDirectionIncrementInDegrees", xinc), 0);
 
   GRIB_CHECK(my_grib_set_long(gh, "Nj", (long)nlat), 0);
   GRIB_CHECK(my_grib_set_double(gh, "latitudeOfFirstGridPointInDegrees",  yfirst), 0);
@@ -3097,8 +3115,7 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
   {
     int ret = 0;
 
-    /* NOTE: Optional key/value pairs: Note that we do not distinguish
-     *       between tiles here! */
+    /* NOTE: Optional key/value pairs: Note that we do not distinguish between tiles here! */
 
     for ( int i=0; i<vlistptr->vars[varID].opt_grib_nentries; i++ )
       {

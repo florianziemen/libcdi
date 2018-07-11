@@ -204,8 +204,8 @@ void decode_juldaysec(int calendar, int64_t julday, int secofday, int *year, int
 int main(void)
 {
   int nmin;
-  int vdate0, vtime0;
-  int vdate, vtime;
+  int64_t vdate0, vdate;
+  int vtime0, vtime;
   int ijulinc;
   int i, j = 0;
   int year, mon, day, hour, minute, second;

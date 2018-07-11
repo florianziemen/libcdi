@@ -1,5 +1,5 @@
-#if defined (HAVE_CONFIG_H)
-#  include "config.h"
+#ifdef HAVE_CONFIG_H
+#include "config.h"
 #endif
 
 #include <assert.h>
@@ -23,7 +23,7 @@
 
 #include "namespace.h"
 
-#if ! defined (O_BINARY)
+#ifndef O_BINARY
 #define O_BINARY 0
 #endif
 
@@ -44,36 +44,35 @@ char *strdup(const char *s);
 #endif
 
 
-#if defined (HAVE_MMAP)
-#  include <sys/mman.h> /* mmap() is defined in this header */
+#ifdef HAVE_MMAP
+#include <sys/mman.h> /* mmap() is defined in this header */
 #endif
 
 
 /* #define  MAX_FILES  FOPEN_MAX */
-#define  MAX_FILES  4096
-
+#define  MAX_FILES  8192
 static int _file_max = MAX_FILES;
 
 static void file_initialize(void);
 
 static bool _file_init = false;
 
-#if  defined  (HAVE_LIBPTHREAD)
+#ifdef HAVE_LIBPTHREAD
 #include <pthread.h>
 
 static pthread_once_t  _file_init_thread = PTHREAD_ONCE_INIT;
 static pthread_mutex_t _file_mutex;
 
-#  define FILE_LOCK()         pthread_mutex_lock(&_file_mutex)
-#  define FILE_UNLOCK()       pthread_mutex_unlock(&_file_mutex)
-#  define FILE_INIT()        \
+#define FILE_LOCK()         pthread_mutex_lock(&_file_mutex)
+#define FILE_UNLOCK()       pthread_mutex_unlock(&_file_mutex)
+#define FILE_INIT()        \
    if ( _file_init == false ) pthread_once(&_file_init_thread, file_initialize)
 
 #else
 
-#  define FILE_LOCK()
-#  define FILE_UNLOCK()
-#  define FILE_INIT()        \
+#define FILE_LOCK()
+#define FILE_UNLOCK()
+#define FILE_INIT()        \
    if ( _file_init == false ) file_initialize()
 
 #endif
@@ -122,8 +121,8 @@ enum F_I_L_E_Flags
 static bool FileInfo = false;
 
 
-#if ! defined (MIN_BUF_SIZE)
-#  define  MIN_BUF_SIZE  131072L
+#ifndef MIN_BUF_SIZE
+#define  MIN_BUF_SIZE  131072L
 #endif
 
 
@@ -256,7 +255,10 @@ int file_from_pointer(bfile_t *ptr)
 	    Message("Pointer %p has idx %d from file list", ptr, idx);
 	}
       else
-	Warning("Too many open files (limit is %d)!", _file_max);
+        {
+          Warning("Too many open files (limit is %d)!", _file_max);
+          idx = -2;
+        }
 
       FILE_UNLOCK();
     }
@@ -331,7 +333,7 @@ const char *fileLibraryVersion(void)
 static
 int pagesize(void)
 {
-#if defined(_SC_PAGESIZE)
+#ifdef _SC_PAGESIZE
   return (int) sysconf(_SC_PAGESIZE);
 #else
 #ifndef POSIXIO_DEFAULT_PAGESIZE
@@ -392,7 +394,7 @@ int fileSetBufferType(int fileID, int type)
 	}
     }
 
-#if ! defined (HAVE_MMAP)
+#ifndef HAVE_MMAP
   if ( type == FILE_BUFTYPE_MMAP ) ret = 1;
 #endif
 
@@ -672,7 +674,7 @@ void file_initialize(void)
 {
   long value;
 
-#if  defined  (HAVE_LIBPTHREAD)
+#ifdef HAVE_LIBPTHREAD
   /* initialize global API mutex lock */
   pthread_mutex_init(&_file_mutex, NULL);
 #endif
@@ -724,19 +726,19 @@ void file_initialize(void)
 	}
     }
 
-#if defined (O_NONBLOCK)
+#ifdef O_NONBLOCK
   FileFlagWrite = O_NONBLOCK;
 #endif
   char *envString = getenv("FILE_FLAG_WRITE");
   if ( envString )
     {
-#if defined (O_NONBLOCK)
+#ifdef O_NONBLOCK
       if ( strcmp(envString, "NONBLOCK") == 0 ) FileFlagWrite = O_NONBLOCK;
 #endif
     }
 
   value = file_getenv("FILE_BUFTYPE");
-#if ! defined (HAVE_MMAP)
+#ifndef HAVE_MMAP
   if ( value == FILE_BUFTYPE_MMAP )
     {
       Warning("MMAP not available!");
@@ -856,7 +858,7 @@ int file_fill_buffer(bfile_t *fileptr)
 
   int fd = fileptr->fd;
 
-#if defined (HAVE_MMAP)
+#ifdef HAVE_MMAP
   if ( fileptr->bufferType == FILE_BUFTYPE_MMAP )
     {
       if ( fileptr->bufferPos >= fileptr->size )
@@ -1084,7 +1086,7 @@ int fileOpen_serial(const char *filename, const char *mode)
       fileptr->mode = fmode;
       fileptr->name = strdupx(filename);
 
-#if defined (HAVE_STRUCT_STAT_ST_BLKSIZE)
+#ifdef HAVE_STRUCT_STAT_ST_BLKSIZE
       fileptr->blockSize = (size_t) filestat.st_blksize;
 #else
       fileptr->blockSize = (size_t) 4096;
@@ -1155,7 +1157,7 @@ int fileClose_serial(int fileID)
 
       if ( sizeof(off_t) > sizeof(long) )
 	{
-#if defined (_WIN32)
+#ifdef _WIN32
 	  fprintf(stderr, " file size        : %I64d\n", (long long) fileptr->size);
 	  if ( fileptr->type == FILE_TYPE_OPEN )
 	    fprintf(stderr, " file position    : %I64d\n", (long long) fileptr->position);
@@ -1201,7 +1203,7 @@ int fileClose_serial(int fileID)
     }
   else
     {
-#if defined (HAVE_MMAP)
+#ifdef HAVE_MMAP
       if ( fileptr->buffer && fileptr->mappedSize )
 	{
 	  ret = munmap(fileptr->buffer, fileptr->mappedSize);

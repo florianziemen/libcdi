@@ -3,6 +3,43 @@
         * using CGRIBEX library version 1.9.1
 	* Version 1.9.5 released
 
+2018-07-10  Uwe Schulzweida
+
+	* Added global option CDI_read_cell_corners
+
+2018-07-09  Uwe Schulzweida
+
+	* grib reduced_gg: gribapi gridType detector doesn't like lonIncr
+
+2018-07-06  Uwe Schulzweida
+
+	* set_gridtype: ignore attribute CDI_grid_type for curvilinear and unstructured grids
+
+2018-07-03  Uwe Schulzweida
+
+	* gridCompare: bug fix comparing uuid of unstructured grid
+
+2018-07-02  Uwe Schulzweida
+
+	* reshGetStatus: applied patch from Kalle+Thomas
+
+2018-06-23  Uwe Schulzweida
+
+	* NetCDF dimension IDs do not have to start at 0 and their increment can not be equal to 1! (bug fix)
+
+2018-05-31  Uwe Schulzweida
+
+	* Limit chunksizehint to filesize
+
+2018-05-30  Uwe Schulzweida
+
+	* Added error code CDI_ETMOF (Too many open files)
+	* file.c set default of MAX_FILES to 8192
+
+2018-05-23  Uwe Schulzweida
+
+	* gribapiGetKeys: get MPIM local section
+
 2018-05-11  Uwe Schulzweida
 
 	* taxis: changed type of date to int64_t

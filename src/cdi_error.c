@@ -10,6 +10,7 @@
 const char *cdiStringError(int cdiErrno)
 {
   static const char UnknownError[] = "Unknown Error";
+  static const char _ETMOF[]       = "Too many open files";
   static const char _EISDIR[]      = "Is a directory";
   static const char _EISEMPTY[]    = "File is empty";
   static const char _EUFTYPE[]     = "Unsupported file type";
@@ -26,6 +27,7 @@ const char *cdiStringError(int cdiErrno)
       if ( cp == NULL ) break;
       return cp;
     }
+  case CDI_ETMOF:      return _ETMOF;
   case CDI_EISDIR:     return _EISDIR;
   case CDI_EISEMPTY:   return _EISEMPTY;
   case CDI_EUFTYPE:    return _EUFTYPE;

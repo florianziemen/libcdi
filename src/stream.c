@@ -89,6 +89,7 @@ int cdiGetFiletype(const char *filename, int *byteorder)
       else
 	return CDI_ESYSTEM;
     }
+  else if ( fileID == -2 ) return CDI_ETMOF;
 
   char buffer[8];
   if ( fileRead(fileID, buffer, 8) != 8 )

@@ -35,6 +35,7 @@ extern "C" {
 
 #define	 CDI_NOERR        	    0   // No Error
 #define  CDI_EEOF                  -1   // The end of file was encountered
+#define  CDI_ETMOF                 -9   // Too many open files
 #define  CDI_ESYSTEM              -10   // Operating system error
 #define  CDI_EINVAL               -20   // Invalid argument
 #define  CDI_EISDIR               -21   // Is a directory
