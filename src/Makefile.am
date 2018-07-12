@@ -4,12 +4,20 @@ EXTRA_DIST = cdilib.c mo_cdi.f90
 
 noinst_LTLIBRARIES = libcdiresunpack.la
 
+include_HEADERS =
+lib_LTLIBRARIES =
+
 if ENABLE_CDI_LIB
-  lib_LTLIBRARIES = libcdi.la
-  include_HEADERS = cdi.h cdi.inc
+  lib_LTLIBRARIES += libcdi.la
+  include_HEADERS += cdi.h
+# add cdi.inc only if cfortran interface is required
+if USE_FC
+  include_HEADERS += cdi.inc
+endif
 else
   noinst_LTLIBRARIES += libcdi.la
 endif
+
 
 AM_CFLAGS = $(PPM_CORE_CFLAGS) $(YAXT_CFLAGS) $(MPI_C_INCLUDE)
 
@@ -241,7 +249,8 @@ endif
 endif
 
 if CREATE_ISOC
-LOCALTARGETS += mo_cdi.$(OBJEXT)
+  LOCALTARGETS += mo_cdi.$(OBJEXT)
+  include_HEADERS += mo_cdi.$(FCMODEXT) 
 endif
 #
 mo_cdi.f90: $(top_srcdir)/src/cdi.h $(top_srcdir)/interfaces/f2003/bindGen.rb
@@ -249,6 +258,7 @@ mo_cdi.f90: $(top_srcdir)/src/cdi.h $(top_srcdir)/interfaces/f2003/bindGen.rb
 #
 mo_cdi.$(OBJEXT): mo_cdi.f90
 	$(FC) $(FCFLAGS) -c $(FCFLAGS_f90) $<
+mo_cdi.$(FCMODEXT): mo_cdi.$(OBJEXT)
 #
 pkgconfig/cdi.pc: pkgconfig/cdi.pc.in ../config.status
 	(cd .. ; ./config.status src/pkgconfig/cdi.pc)
