@@ -89,25 +89,30 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-@ENABLE_CDI_LIB_FALSE@am__append_1 = libcdi.la
-@USE_FC_TRUE@am__append_2 = \
+@ENABLE_CDI_LIB_TRUE@am__append_1 = libcdi.la
+@ENABLE_CDI_LIB_TRUE@am__append_2 = cdi.h
+# add cdi.inc only if cfortran interface is required
+@ENABLE_CDI_LIB_TRUE@@USE_FC_TRUE@am__append_3 = cdi.inc
+@ENABLE_CDI_LIB_FALSE@am__append_4 = libcdi.la
+@USE_FC_TRUE@am__append_5 = \
 @USE_FC_TRUE@	$(libcdi_la_USE_FC_extra_sources)
 
-@HAVE_LIBGRIB_API_TRUE@am__append_3 = \
+@HAVE_LIBGRIB_API_TRUE@am__append_6 = \
 @HAVE_LIBGRIB_API_TRUE@	$(libcdi_la_HAVE_LIBGRIB_API_extra_sources)
 
-@ENABLE_CDI_LIB_TRUE@@USE_MPI_TRUE@am__append_4 = libcdipio.la
-@ENABLE_CDI_LIB_TRUE@@USE_MPI_TRUE@am__append_5 = cdipio.h cdipio.inc
-@ENABLE_CDI_LIB_FALSE@@USE_MPI_TRUE@am__append_6 = libcdipio.la
-@HAVE_PARALLEL_NC4_TRUE@@USE_MPI_TRUE@am__append_7 = $(libcdipio_la_HAVE_PARALLEL_NC4_extra_sources)
-@ENABLE_CDI_LIB_TRUE@am__append_8 = pkgconfig/cdi.pc
-@ENABLE_CDI_LIB_TRUE@@USE_MPI_TRUE@am__append_9 = pkgconfig/cdipio.pc
-@CREATE_ISOC_TRUE@am__append_10 = mo_cdi.$(OBJEXT)
+@ENABLE_CDI_LIB_TRUE@@USE_MPI_TRUE@am__append_7 = libcdipio.la
+@ENABLE_CDI_LIB_TRUE@@USE_MPI_TRUE@am__append_8 = cdipio.h cdipio.inc
+@ENABLE_CDI_LIB_FALSE@@USE_MPI_TRUE@am__append_9 = libcdipio.la
+@HAVE_PARALLEL_NC4_TRUE@@USE_MPI_TRUE@am__append_10 = $(libcdipio_la_HAVE_PARALLEL_NC4_extra_sources)
+@ENABLE_CDI_LIB_TRUE@am__append_11 = pkgconfig/cdi.pc
+@ENABLE_CDI_LIB_TRUE@@USE_MPI_TRUE@am__append_12 = pkgconfig/cdipio.pc
+@CREATE_ISOC_TRUE@am__append_13 = mo_cdi.$(OBJEXT)
+@CREATE_ISOC_TRUE@am__append_14 = mo_cdi.$(FCMODEXT) 
 #CLEANFILES += cdilib.c
-@CREATE_ISOC_TRUE@am__append_11 = mo_cdi.$(FCMODEXT) mo_cdi.$(OBJEXT)
-@ENABLE_CDI_LIB_TRUE@am__append_12 = pkgconfig/cdi.pc
-@ENABLE_CDI_LIB_TRUE@@USE_MPI_TRUE@am__append_13 = pkgconfig/cdipio.pc
-@ENABLE_CDI_LIB_TRUE@@USE_MPI_TRUE@am__append_14 = pkgconfig/cdipio.pc
+@CREATE_ISOC_TRUE@am__append_15 = mo_cdi.$(FCMODEXT) mo_cdi.$(OBJEXT)
+@ENABLE_CDI_LIB_TRUE@am__append_16 = pkgconfig/cdi.pc
+@ENABLE_CDI_LIB_TRUE@@USE_MPI_TRUE@am__append_17 = pkgconfig/cdipio.pc
+@ENABLE_CDI_LIB_TRUE@@USE_MPI_TRUE@am__append_18 = pkgconfig/cdipio.pc
 subdir = src
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps =  \
@@ -302,7 +307,8 @@ am__can_run_installinfo = \
     n|no|NO) false;; \
     *) (install-info --version) >/dev/null 2>&1;; \
   esac
-am__include_HEADERS_DIST = cdi.h cdi.inc cdipio.h cdipio.inc
+am__include_HEADERS_DIST = cdi.h cdi.inc cdipio.h cdipio.inc \
+	mo_cdi.$(FCMODEXT)
 HEADERS = $(include_HEADERS)
 am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) \
 	$(LISP)config.h.in
@@ -528,10 +534,11 @@ top_srcdir = @top_srcdir@
 EXTRA_DIST = cdilib.c mo_cdi.f90 $(libcdi_la_USE_FC_extra_sources) \
 	$(libcdi_la_HAVE_LIBGRIB_API_extra_sources) \
 	$(libcdipio_la_HAVE_PARALLEL_NC4_extra_sources)
-noinst_LTLIBRARIES = libcdiresunpack.la $(am__append_1) \
-	$(am__append_6)
-@ENABLE_CDI_LIB_TRUE@lib_LTLIBRARIES = libcdi.la $(am__append_4)
-@ENABLE_CDI_LIB_TRUE@include_HEADERS = cdi.h cdi.inc $(am__append_5)
+noinst_LTLIBRARIES = libcdiresunpack.la $(am__append_4) \
+	$(am__append_9)
+include_HEADERS = $(am__append_2) $(am__append_3) $(am__append_8) \
+	$(am__append_14)
+lib_LTLIBRARIES = $(am__append_1) $(am__append_7)
 AM_CFLAGS = $(PPM_CORE_CFLAGS) $(YAXT_CFLAGS) $(MPI_C_INCLUDE)
 libcdi_la_SOURCES = basetime.c basetime.h binary.c binary.h calendar.c \
 	calendar.h cdf.c cdf.h cdf_config.h cdf_int.c cdf_int.h \
@@ -557,7 +564,7 @@ libcdi_la_SOURCES = basetime.c basetime.h binary.c binary.h calendar.c \
 	vlist_var.c vlist_var.h zaxis.c zaxis.h stream.c \
 	stream_write.c stream_read.c swap.c iterator.c iterator.h \
 	iterator_fallback.c iterator_fallback.h iterator_grib.c \
-	iterator_grib.h $(am__append_2) $(am__append_3)
+	iterator_grib.h $(am__append_5) $(am__append_6)
 
 # cfortran.h is an optional part of libcdi
 libcdi_la_USE_FC_extra_sources = \
@@ -581,7 +588,7 @@ libcdipio_la_SOURCES = cdipio.h cdipioFortran.c cfortran.h pio.c pio.h \
 	resource_unpack.h resource_unpack.c pio_client.c pio_client.h \
 	pio_roles.c pio_rpc.c pio_rpc.h pio_server.c pio_server.h \
 	pio_serialize.h pio_serialize.c pio_util.c pio_util.h \
-	pio_cdf_int.h $(am__append_7)
+	pio_cdf_int.h $(am__append_10)
 libcdipio_la_HAVE_PARALLEL_NC4_extra_sources = \
 	pio_cdf_int.c
 
@@ -593,12 +600,12 @@ libcdi_la_LIBADD = $(UUID_C_LIB)
 #
 #cdilib.o: cdilib.c
 #	$(COMPILE) -c $<
-LOCALTARGETS = $(am__append_8) $(am__append_9) $(am__append_10)
+LOCALTARGETS = $(am__append_11) $(am__append_12) $(am__append_13)
 #
-CLEANFILES = `ls *~` $(am__append_11) $(am__append_12) \
-	$(am__append_13)
+CLEANFILES = `ls *~` $(am__append_15) $(am__append_16) \
+	$(am__append_17)
 @ENABLE_CDI_LIB_TRUE@PKGCONFIG_FILES = pkgconfig/cdi.pc \
-@ENABLE_CDI_LIB_TRUE@	$(am__append_14)
+@ENABLE_CDI_LIB_TRUE@	$(am__append_18)
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -969,8 +976,8 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
-@ENABLE_CDI_LIB_FALSE@install-exec-local:
 @ENABLE_CDI_LIB_FALSE@uninstall-local:
+@ENABLE_CDI_LIB_FALSE@install-exec-local:
 clean: clean-am
 
 clean-am: clean-generic clean-libLTLIBRARIES clean-libtool \
@@ -1073,6 +1080,7 @@ mo_cdi.f90: $(top_srcdir)/src/cdi.h $(top_srcdir)/interfaces/f2003/bindGen.rb
 #
 mo_cdi.$(OBJEXT): mo_cdi.f90
 	$(FC) $(FCFLAGS) -c $(FCFLAGS_f90) $<
+mo_cdi.$(FCMODEXT): mo_cdi.$(OBJEXT)
 #
 pkgconfig/cdi.pc: pkgconfig/cdi.pc.in ../config.status
 	(cd .. ; ./config.status src/pkgconfig/cdi.pc)
