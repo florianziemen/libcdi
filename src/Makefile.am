@@ -236,8 +236,6 @@ endif
 
 libcdipio_la_LIBADD    = libcdi.la $(PPM_CORE_LIBS) $(YAXT_LIBS) $(MPI_C_LIB)
 
-libcdi_la_LIBADD    = $(UUID_C_LIB)
-
 libcdi_f2003_la_SOURCES = mo_cdi.f90
 libcdi_f2003_la_LIBADD = libcdi.la
 
