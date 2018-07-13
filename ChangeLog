@@ -13,7 +13,7 @@
 
 2018-07-06  Uwe Schulzweida
 
-	* set_gridtype: ignore attribute CDI_grid_type for curvilinear and unstructured grids
+	* set_gridtype: ignore attribute CDI_grid_type for curvilinear grids
 
 2018-07-03  Uwe Schulzweida
 
