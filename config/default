@@ -163,21 +163,22 @@ case "${HOSTNAME}" in
         CDILIBS="--with-eccodes=/sw/jessie-x64/eccodes/eccodes-2.4.1-gccsys \
                  --with-netcdf=/sw/jessie-x64/netcdf-4.3.3.1-gccsys"
         PREFIX="--prefix=$(pwd)/build/${COMP}"
+        LD_ADD="-Wl,-rpath,/sw/jessie-x64/eccodes/eccodes-2.4.1-gccsys/lib"
 
         if  test "$COMP" = intel ; then
-          ${CONFPATH}configure $CONFIG_OPTS $PREFIX $CDILIBS \
+          ${CONFPATH}configure $CONFIG_OPTS $PREFIX $CDILIBS LDFLAGS="$LD_ADD $LDFLAGS" \
                     CC=icc FC=ifort CFLAGS="-g -Wall -O2 -qopt-report=5 -march=native"
         elif  test "$COMP" = gnu ; then
-          ${CONFPATH}configure $CONFIG_OPTS $PREFIX $CDILIBS \
+          ${CONFPATH}configure $CONFIG_OPTS $PREFIX $CDILIBS $LDFLAGS\
                     CC=gcc FC=gfortran F77=gfortran CFLAGS="-g -Wall -O2 -march=native"
         elif  test "$COMP" = pgi ; then
-          ${CONFPATH}configure $CONFIG_OPTS $PREFIX $CDILIBS \
+          ${CONFPATH}configure $CONFIG_OPTS $PREFIX $CDILIBS $LDFLAGS\
                     CC=pgcc FC=pgf90 F77=pgf90 CFLAGS="-g"
         elif  test "$COMP" = clang ; then
-          ${CONFPATH}configure $CONFIG_OPTS $PREFIX $CDILIBS \
+          ${CONFPATH}configure $CONFIG_OPTS $PREFIX $CDILIBS $LDFLAGS\
                     CC=clang FC=gfortran CFLAGS="-g -O2"
         elif  test "$COMP" = nag ; then
-          ${CONFPATH}configure $CONFIG_OPTS $PREFIX $CDILIBS \
+          ${CONFPATH}configure $CONFIG_OPTS $PREFIX $CDILIBS LDFLAGS="$LD_ADD $LDFLAGS" \
                     CC=gcc FC=nagfor F77=nagfor CFLAGS="-g -O2"
         elif  test "$COMP" = nagClang ; then
           ${CONFPATH}configure $CONFIG_OPTS $PREFIX $CDILIBS \
@@ -189,8 +190,7 @@ case "${HOSTNAME}" in
       ;;
     mlogin*)
         CDILIBS="--with-eccodes=/sw/rhel6-x64/eccodes/eccodes-2.3.0-gcc48 \
-                 --with-netcdf=/sw/rhel6-x64/netcdf/netcdf_c-4.3.2-gcc48 \
-                 --with-hdf5=/sw/rhel6-x64/hdf5/hdf5-1.8.14-threadsafe-gcc48"
+                 --with-netcdf=/sw/rhel6-x64/netcdf/netcdf_c-4.3.2-gcc48"
         PREFIX="--prefix=$(pwd)/build/${COMP}"
 
         if  test "$COMP" = intel ; then
