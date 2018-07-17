@@ -101,11 +101,11 @@ case "${HOSTNAME}" in
                     --with-szlib=$HOME/local/etch-ia32 \
 	            CC=gcc CFLAGS="-g -O2 -Wall -W -Wfloat-equal -pedantic"
 	;;
-    thingol)
+    melian)
       ${CONFPATH}configure --prefix=`pwd`/build \
-	            --with-netcdf=$HOME/builds/libs4cdo \
-                     --with-szlib=$HOME/builds/libs4cdo \
-                  --with-grib_api=$HOME/builds/libs4cdo \
+	            --with-netcdf \
+                     --with-szlib \
+                  --with-eccodes \
                       --with-pic --enable-swig --enable-ruby --enable-python \
                       CC=gcc CFLAGS="-g -O2 -Wall" LIBS=-lopenjpeg
 	;;
