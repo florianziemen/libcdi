@@ -12,9 +12,6 @@ require 'logger'
 @rcLocal     = "#{pwd}/.rake.json"
 # local config file has precedence
 @rc          = @rcLocal if File.exist?(@rcLocal)
-puts '#=========================='
-pp @rc
-puts '#=========================='
 @userConfig = ( File.exist?(@rc) ) ? JSON.load(File.open(@rc)) : {}
 if @userConfig.empty? then
   warn "No host information!!"
@@ -178,8 +175,9 @@ def builder2task(builder,useHostAsName=false,syncSource=true)
 
   @_help[:reconf] = "create configure script on host" unless @_help.has_key?(:reconf)
   task toDo[:reconf] do |t|
-    dbg("call 'autoreconf -v -i'")
-    execute("autoreconf -v -i",builder)
+    cmd = "[[ -f autogen.sh ]] && ./autogen.sh || autoreconf -vfi"
+    dbg(cmd)
+    execute(cmd,builder)
   end
 
   @_help[:conf]= \
