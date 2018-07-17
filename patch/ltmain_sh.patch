@@ -1,15 +1,15 @@
 diff --git a/config/ltmain.sh b/config/ltmain.sh
-index b6f3fcbb..4facc967 100644
+index 857338f..e582496 100644
 --- a/config/ltmain.sh
 +++ b/config/ltmain.sh
-@@ -7861,6 +7861,13 @@ func_mode_link ()
+@@ -8078,6 +8078,13 @@ func_mode_link ()
  	# Read the .la file
  	func_source "$lib"
  
 +	# Change -pthread to -Wl,-pthread for nagfor
 +	if test -n "$inherited_linker_flags"; then
 +	  case $CC in
-+	    nagfor*) inherited_linker_flags=`$ECHO "$inherited_linker_flags" | $SED 's/ -pthread/ -Wl,-pthread/g'` ;;
++	    */nagfor*) inherited_linker_flags=`$ECHO "$inherited_linker_flags" | $SED 's/ -pthread/ -Wl,-pthread/g'` ;;
 +	  esac
 +	fi
 +
