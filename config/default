@@ -8,13 +8,25 @@ if [ "$CONFPATH" != "../../" ] ; then
   CONFPATH='./'
 fi
 #
-if test -z "$1" ; then
-  HOSTNAME=`hostname`
-else
-  HOSTNAME=$1
-fi
-#
 set -x
+
+HOSTNAME=`hostname`
+#
+while test $# != 0
+do
+  case $1 in
+    CC=?*)
+      COMP=`expr "X$1" : 'X[^=]*=\(.*\)'`
+      ;;
+    CONFIG_OPTS=?*)
+      CONFIG_OPTS=`expr "X$1" : 'X[^=]*=\(.*\)'`
+      ;;
+    *)
+          HOSTNAME=$1
+          ;;
+  esac
+  shift
+done
 #
 case "${HOSTNAME}" in
 # i386-apple-darwin10
@@ -147,6 +159,34 @@ case "${HOSTNAME}" in
                     FCFLAGS="-qsuffix=cpp=f90 -qextname" \
                     SHELL=/bin/bash
         ;;
+    breeze*)
+        CDILIBS="--with-eccodes=/sw/jessie-x64/eccodes/eccodes-2.4.1-gccsys \
+                 --with-netcdf=/sw/jessie-x64/netcdf-4.3.3.1-gccsys"
+        PREFIX="--prefix=$(pwd)/build/${COMP}"
+
+        if  test "$COMP" = icc ; then
+          ${CONFPATH}configure $CONFIG_OPTS $PREFIX $CDILIBS \
+                    CC=icc FC=ifort CFLAGS="-g -Wall -O2 -qopt-report=5 -march=native"
+        elif  test "$COMP" = gcc ; then
+          ${CONFPATH}configure $CONFIG_OPTS $PREFIX $CDILIBS \
+                    CC=gcc FC=gfortran F77=gfortran CFLAGS="-g -Wall -O2 -march=native"
+        elif  test "$COMP" = pgcc ; then
+          ${CONFPATH}configure $CONFIG_OPTS $PREFIX $CDILIBS \
+                    CC=pgcc FC=pgf90 F77=pgf90 CFLAGS="-g"
+        elif  test "$COMP" = clang ; then
+          ${CONFPATH}configure $CONFIG_OPTS $PREFIX $CDILIBS \
+                    CC=clang FC=gfortran CFLAGS="-g -O2"
+        elif  test "$COMP" = nag ; then
+          ${CONFPATH}configure $CONFIG_OPTS $PREFIX $CDILIBS \
+                    CC=gcc FC=nagfor F77=nagfor CFLAGS="-g -O2"
+        elif  test "$COMP" = nagClang ; then
+          ${CONFPATH}configure $CONFIG_OPTS $PREFIX $CDILIBS \
+                    CC=clang FC=nagfor F77=nagfor CFLAGS="-g -Wall -02"
+        else
+          echo "no config found for host: $HOSTNAME, COMP: $COMP !!"
+        fi;
+
+      ;;
     *)
 	echo "configuration for hostname $HOSTNAME not found!"
 	;;
