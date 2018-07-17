@@ -1,0 +1,21 @@
+{ "hosts": {
+    "luthien": {
+      "hostname": "localhost",
+      "dir": "/home/ram/builds/cdi/auto",
+      "CC": ["gcc"]
+    },
+    "breeze": {
+      "hostname": "breeze.mpimet.mpg.de",
+      "dir": "/home/mpim/$USER/builds/remote/cdi",
+      "envConfigFiles": ["/etc/profile","~/.profile"],
+      "CC": ["nagClang","gnu","nag","clang","intel"]
+    },
+    "mistral": {
+      "hostname": "mistral.dkrz.de",
+      "dir": "/work/mh0287/users/ralf/builds/remote/cdi",
+      "envConfigFiles": ["/etc/profile",".profile"],
+      "CC": ["intel","pgi","gnu_pic","gnu"]
+    }
+  },
+  "remoteUser": "m300064"
+}
