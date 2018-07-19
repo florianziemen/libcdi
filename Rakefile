@@ -175,7 +175,7 @@ def builder2task(builder,useHostAsName=false,syncSource=true)
 
   @_help[:reconf] = "create configure script on host" unless @_help.has_key?(:reconf)
   task toDo[:reconf] do |t|
-    cmd = "[[ -f autogen.sh ]] && ./autogen.sh || autoreconf -vfi"
+    cmd = "test -f autogen.sh && ./autogen.sh || autoreconf -vfi"
     dbg(cmd)
     execute(cmd,builder)
   end
