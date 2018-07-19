@@ -1,5 +1,5 @@
 { "hosts": {
-    "luthien": {
+    "melian": {
       "hostname": "localhost",
       "dir": "/home/ram/builds/cdi/auto",
       "CC": ["gcc"]
@@ -17,5 +17,22 @@
       "CC": ["intel","pgi","gnu_pic","gnu"]
     }
   },
-  "remoteUser": "m300064"
+  "remoteUser": "m300064",
+
+  "builders": {
+    "melianNagNoThreads" : {
+      "hostname":"melian",
+      "preCommands":"export NAG_KUSARI_FILE=/home/ram/.nag/license.txt; PATH=/home/ram/local/nag-6.0:$PATH",
+      "configureCall":"/home/ram/src/cimd/cdo/libcdi/configure --disable-cf-interface --without-threads FCFLAGS='-Qpath /home/ram/local/nag-6.0/lib' FC=nagfor CC=gcc F77=nagfor",
+      "makeCall":"make -j 8",
+      "sync": false
+    },
+    "melianNagWithThreads" : {
+      "hostname":"melian",
+      "preCommands":"export NAG_KUSARI_FILE=/home/ram/.nag/license.txt; PATH=/home/ram/local/nag-6.0:$PATH",
+      "configureCall":"/home/ram/src/cimd/cdo/libcdi/configure --disable-cf-interface --without-threads FCFLAGS='-Qpath /home/ram/local/nag-6.0/lib' FC=nagfor CC=gcc F77=nagfor --with-threads",
+      "makeCall":"make -j 8",
+      "sync": false
+    }
+  }
 }
