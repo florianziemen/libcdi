@@ -27538,7 +27538,9 @@ else
 fi
              cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
+#include <uuid.h>
 $ac_includes_default
+
 #include <uuid.h>
 _ACEOF
 if ac_fn_c_try_compile "$LINENO"; then :
@@ -27694,13 +27696,15 @@ ac_link="./libtool --mode=link --tag=CC $ac_link"
          CPPFLAGS="${CPPFLAGS+$CPPFLAGS }$OSSP_UUID_C_INCLUDE"
          for ac_header in uuid.h
 do :
-  ac_fn_c_check_header_mongrel "$LINENO" "uuid.h" "ac_cv_header_uuid_h" "$ac_includes_default"
+  ac_fn_c_check_header_compile "$LINENO" "uuid.h" "ac_cv_header_uuid_h" "#include <uuid.h>
+$ac_includes_default
+"
 if test "x$ac_cv_header_uuid_h" = xyes; then :
   cat >>confdefs.h <<_ACEOF
 #define HAVE_UUID_H 1
 _ACEOF
- ac_fn_c_check_decl "$LINENO" "uuid_create" "ac_cv_have_decl_uuid_create" "$ac_includes_default
-#include <uuid.h>
+ ac_fn_c_check_decl "$LINENO" "uuid_create" "ac_cv_have_decl_uuid_create" "#include <uuid.h>
+$ac_includes_default
 "
 if test "x$ac_cv_have_decl_uuid_create" = xyes; then :
   ac_have_decl=1
@@ -27712,8 +27716,8 @@ cat >>confdefs.h <<_ACEOF
 #define HAVE_DECL_UUID_CREATE $ac_have_decl
 _ACEOF
 if test $ac_have_decl = 1; then :
-  ac_fn_c_check_decl "$LINENO" "UUID_MAKE_V5" "ac_cv_have_decl_UUID_MAKE_V5" "$ac_includes_default
-#include <uuid.h>
+  ac_fn_c_check_decl "$LINENO" "UUID_MAKE_V5" "ac_cv_have_decl_UUID_MAKE_V5" "#include <uuid.h>
+$ac_includes_default
 "
 if test "x$ac_cv_have_decl_UUID_MAKE_V5" = xyes; then :
   ac_have_decl=1
@@ -27742,8 +27746,9 @@ done
 
          CPPFLAGS=$acx_save_CPPFLAGS
 fi
-else
-  have_ossp_uuid_c_bindings=no
+elif have_ossp_uuid_c_bindings=no; then :
+  #include <uuid.h>
+$ac_includes_default
 fi
    # check for DCE uuid_create if util-linux and OSSP variants cannot be found
    if test x"$enable_dce_uuid" != xno -a x"$have_util_linux_uuid_c_bindings$have_ossp_uuid_c_bindings" = xnono; then :

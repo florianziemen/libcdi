@@ -3,6 +3,10 @@
         * using CGRIBEX library version 1.9.1
 	* Version 1.9.5 released
 
+2018-07-19  Florian Prill
+
+	* Added function cdiIterator_inqFiletype()
+
 2018-07-10  Uwe Schulzweida
 
 	* Added global option CDI_read_cell_corners
