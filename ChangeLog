@@ -1,3 +1,7 @@
+2018-07-19  Florian Prill
+
+	* Added function cdiIterator_inqFiletype()
+
 2017-05-??  Uwe Schulzweida
 
 	* Version 1.8.2 released
