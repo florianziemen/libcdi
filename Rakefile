@@ -1,4 +1,4 @@
-require '~/.rake/CdoCdi'
+require 'CdoCdiBuild'
 class CdiBuild < CdoCdiBuild
   def generateTasks
     super
@@ -11,5 +11,5 @@ class CdiBuild < CdoCdiBuild
   end
 end
 
-build = CdiBuild.new('~/.rake_cdi.json')
+build = CdiBuild.new(ENV['HOME']+'/.rake_cdi.json')
 build.generateTasks

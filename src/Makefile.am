@@ -20,6 +20,9 @@ if CREATE_ISOC
 endif
 else
   noinst_LTLIBRARIES += libcdi.la
+if CREATE_ISOC
+  noinst_LTLIBRARIES += libcdi_f2003.la
+endif
 endif
 
 
@@ -174,6 +177,9 @@ EXTRA_DIST += \
 
 
 
+libcdi_f2003_la_SOURCES = mo_cdi.f90
+libcdi_f2003_la_LIBADD = libcdi.la
+
 libcdiresunpack_la_SOURCES = \
 	resource_unpack.c
 
@@ -235,9 +241,6 @@ endif
 endif
 
 libcdipio_la_LIBADD    = libcdi.la $(PPM_CORE_LIBS) $(YAXT_LIBS) $(MPI_C_LIB)
-
-libcdi_f2003_la_SOURCES = mo_cdi.f90
-libcdi_f2003_la_LIBADD = libcdi.la
 
 #
 #cdilib.c:
