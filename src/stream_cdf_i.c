@@ -1857,6 +1857,8 @@ void verify_coordinate_vars_1(int ncid, int ndims, ncdim_t *ncdims, ncvar_t *ncv
                     strcmp(ncvars[ncvarid].longname, "generalized height") == 0) &&
                    strcmp(ncvars[ncvarid].stdname, "height") == 0 )
                   ncvars[ncvarid].zaxistype = ZAXIS_REFERENCE;
+              else if ( str_is_equal(ncvars[ncvarid].stdname, "air_pressure") )
+		  ncvars[ncvarid].zaxistype = ZAXIS_PRESSURE;
             }
 
 	  if ( !ncvars[ncvarid].islon && ncvars[ncvarid].longname[0] != 0 &&
@@ -1961,6 +1963,8 @@ void verify_coordinate_vars_2(int nvars, ncvar_t *ncvars)
             {
               ncvars[ncvarid].isc = true;
             }
+          else if ( str_is_equal(ncvars[ncvarid].stdname, "air_pressure") )
+	    ncvars[ncvarid].zaxistype = ZAXIS_PRESSURE;
 
 	  /* not needed anymore for rotated grids */
 	  if ( !ncvars[ncvarid].islon && ncvars[ncvarid].longname[0] != 0 &&
@@ -2722,7 +2726,7 @@ int cdf_define_all_grids(ncgrid_t *ncgrid, int vlistID, ncdim_t *ncdims, int nva
 
 	  if ( number_of_grid_used != CDI_UNDEFID &&
                (grid->type == CDI_UNDEFID || grid->type == GRID_GENERIC) &&
-               xdimid != CDI_UNDEFID && xsize > 9999 )
+               xdimid != CDI_UNDEFID && xsize > 999 )
             grid->type = GRID_UNSTRUCTURED;
 
           if ( grid->type == GRID_UNSTRUCTURED )

@@ -455,6 +455,7 @@ int cdiIterator_inqTileCount(CdiIterator *me, int *outTileCount, int *outTileAtt
 CdiParam cdiIterator_inqParam(CdiIterator *me);
 void cdiIterator_inqParamParts(CdiIterator *me, int *outDiscipline, int *outCategory, int *outNumber);	//Some FORTRAN compilers produce wrong code for the cdiIterator_inqParam()-wrapper, rendering it unusable from FORTRAN. This function is the workaround.
 int cdiIterator_inqDatatype(CdiIterator *me);
+int cdiIterator_inqFiletype(CdiIterator *me);
 int cdiIterator_inqTsteptype(CdiIterator *me);
 char *cdiIterator_inqVariableName(CdiIterator *me);        //The caller is responsible to Free() the returned buffer.
 int cdiIterator_inqGridId(CdiIterator *me);         //The returned id is only valid until the next call to cdiIteratorNextField().

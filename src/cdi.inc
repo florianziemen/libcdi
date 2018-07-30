@@ -1,10 +1,10 @@
 ! This file was automatically generated, don't edit!
 !
-! Fortran interface for CDI library version 1.9.5rc1
+! Fortran interface for CDI library version 1.9.5
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   May 2018
+! Uwe Schulzweida, MPI-MET, Hamburg,   July 2018
 !
 
       INTEGER    CDI_MAX_NAME
@@ -35,6 +35,8 @@
       PARAMETER (CDI_NOERR              =  0)
       INTEGER    CDI_EEOF
       PARAMETER (CDI_EEOF               = -1)
+      INTEGER    CDI_ETMOF
+      PARAMETER (CDI_ETMOF              = -9)
       INTEGER    CDI_ESYSTEM
       PARAMETER (CDI_ESYSTEM            = -10)
       INTEGER    CDI_EINVAL
