@@ -144,7 +144,7 @@ void cdiCreateUUID(unsigned char *uuid)
   static const char error_stage[][16]
     = { "uuid_create", "uuid_create", "uuid_load", "uuid_make", "uuid_export",
         "uuid_destroy1", "uuid_destroy2" };
-  uuid_t *objuuid, *nsuuid;
+  uuid_t *objuuid = NULL, *nsuuid = NULL;
   int stage = 0;
   uuid_rc_t status;
   if ((status = uuid_create(&objuuid)) == UUID_RC_OK)
