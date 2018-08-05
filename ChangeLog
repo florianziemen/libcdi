@@ -1,7 +1,11 @@
-2018-07-30  Uwe Schulzweida
+2018-08-09  Uwe Schulzweida
 
         * using CGRIBEX library version 1.9.1
 	* Version 1.9.5 released
+
+2018-08-05  Uwe Schulzweida
+
+	* taxisCopyTimestep: delete target units if reference time differ (bug fix)
 
 2018-07-19  Florian Prill
 
