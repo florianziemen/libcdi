@@ -598,6 +598,15 @@ void taxisCopyTimestep(int taxisID2, int taxisID1)
 
   reshLock();
 
+  if (taxisptr2->units && taxisptr2->rdate != CDI_UNDEFID)
+    {
+      if (taxisptr2->rdate != taxisptr1->rdate || taxisptr2->rtime != taxisptr1->rtime)
+        {
+          delete_refcount_string(taxisptr2->units);
+          taxisptr2->units = NULL;
+        }
+    }
+
   taxisptr2->rdate = taxisptr1->rdate;
   taxisptr2->rtime = taxisptr1->rtime;
 
