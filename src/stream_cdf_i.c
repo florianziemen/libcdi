@@ -842,7 +842,8 @@ bool isHybridSigmaPressureCoordinate(int ncid, int ncvarid, ncvar_t *ncvars, con
                   if ( p0varid1 != -1 && p0varid1 == p0varid2 )
                     cdf_get_var_double(ncid, p0varid2, &px);
 
-                  double abuf[dimlen*2], bbuf[dimlen*2];
+                  double *abuf = (double*) Malloc(dimlen*2*sizeof(double));
+                  double *bbuf = (double*) Malloc(dimlen*2*sizeof(double));
                   cdf_get_var_double(ncid, avarid2, abuf);
                   cdf_get_var_double(ncid, bvarid2, bbuf);
 
@@ -866,6 +867,9 @@ bool isHybridSigmaPressureCoordinate(int ncid, int ncvarid, ncvar_t *ncvars, con
                           vct[i+dimlen+1] = bbuf[i];
                         }
                     }
+
+                  Free(abuf);
+                  Free(bbuf);
 
                   if ( p0varid1 != -1 && IS_NOT_EQUAL(px, 1) )
                     for ( size_t i = 0; i < dimlen+1; ++i ) vct[i] *= px;
@@ -892,7 +896,7 @@ void cdf_set_cdi_attr(int ncid, int ncvarid, int attnum, int cdiID, int varID)
   cdf_inq_atttype(ncid, ncvarid, attname, &atttype);
   if ( xtypeIsInt(atttype) )
     {
-      int attint[attlen];
+      int *attint = (int*) Malloc(attlen*sizeof(int));
       cdfGetAttInt(ncid, ncvarid, attname, attlen, attint);
       int datatype = (atttype == NC_SHORT)  ? CDI_DATATYPE_INT16 :
                      (atttype == NC_BYTE)   ? CDI_DATATYPE_INT8 :
@@ -903,13 +907,15 @@ void cdf_set_cdi_attr(int ncid, int ncvarid, int attnum, int cdiID, int varID)
 #endif
                      CDI_DATATYPE_INT32;
       cdiDefAttInt(cdiID, varID, attname, datatype, (int)attlen, attint);
+      Free(attint);
     }
   else if ( xtypeIsFloat(atttype) )
     {
-      double attflt[attlen];
+      double *attflt = (double*) Malloc(attlen*sizeof(double));
       cdfGetAttDouble(ncid, ncvarid, attname, attlen, attflt);
       int datatype = (atttype == NC_FLOAT) ? CDI_DATATYPE_FLT32 : CDI_DATATYPE_FLT64;
       cdiDefAttFlt(cdiID, varID, attname, datatype, (int)attlen, attflt);
+      Free(attflt);
     }
   else if ( xtypeIsText(atttype) )
     {

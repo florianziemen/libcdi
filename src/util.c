@@ -1,5 +1,5 @@
-#if defined (HAVE_CONFIG_H)
-#  include "config.h"
+#ifdef HAVE_CONFIG_H
+#include "config.h"
 #endif
 
 #define _XOPEN_SOURCE 600
@@ -10,7 +10,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/types.h>
 
 #include "cdi.h"
 #include "cdi_int.h"
@@ -109,8 +108,10 @@ char* cdiUnescapeSpaces(const char* string, const char** outStringEnd)
   return result;
 }
 
-#if defined (HAVE_DECL_UUID_GENERATE) && defined (HAVE_UUID_UUID_H)
+#if defined(HAVE_DECL_UUID_GENERATE) && defined(HAVE_UUID_UUID_H)
+#ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
+#endif
 #include <uuid/uuid.h>
 void cdiCreateUUID(unsigned char *uuid)
 {
@@ -194,7 +195,9 @@ void cdiCreateUUID(unsigned char *uuid)
 }
 #  endif
 #else
+#ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
+#endif
 void cdiCreateUUID(unsigned char *uuid)
 {
   static int uuid_seeded = 0;
@@ -205,6 +208,7 @@ void cdiCreateUUID(unsigned char *uuid)
     caller_rand_state = setstate(uuid_rand_state);
   else
     {
+#ifdef HAVE_SYS_TIME_H
       struct timeval tv;
       int status = gettimeofday(&tv, NULL);
       if (status != 0)
@@ -213,6 +217,9 @@ void cdiCreateUUID(unsigned char *uuid)
           exit(1);
         }
       unsigned seed = tv.tv_sec ^ tv.tv_usec;
+#else
+      unsigned seed = 0;
+#endif
       caller_rand_state = initstate(seed, uuid_rand_state,
                                     sizeof (uuid_rand_state));
       uuid_seeded = 1;
@@ -225,6 +232,7 @@ void cdiCreateUUID(unsigned char *uuid)
     static unsigned short our_rand_state[3];
     if (!uuid_seeded)
       {
+#ifdef HAVE_SYS_TIME_H
         struct timeval tv;
         int status = gettimeofday(&tv, NULL);
         if (status != 0)
@@ -233,6 +241,9 @@ void cdiCreateUUID(unsigned char *uuid)
             exit(1);
           }
         unsigned seed = tv.tv_sec ^ tv.tv_usec;
+#else
+        unsigned seed = 0;
+#endif
         our_rand_state[0] = 0x330E;
         our_rand_state[1] = (unsigned short)(seed & 0xFFFFU);
         our_rand_state[2] = (unsigned short)((seed >> 16) & 0xFFFFU);

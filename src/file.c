@@ -2,6 +2,10 @@
 #include "config.h"
 #endif
 
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>
@@ -12,10 +16,12 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
-#include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+
+#ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>  // gettimeofday()
+#endif
 
 #include "dmemory.h"
 #include "error.h"
@@ -346,10 +352,14 @@ int pagesize(void)
 static
 double file_time()
 {
+#ifdef HAVE_SYS_TIME_H
   struct timeval mytime;
   gettimeofday(&mytime, NULL);
   double tseconds = (double) mytime.tv_sec + (double) mytime.tv_usec*1.0e-6;
   return tseconds;
+#else
+  return 0;
+#endif
 }
 
 void fileDebug(int debug)

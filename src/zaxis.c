@@ -832,7 +832,7 @@ void zaxisDefLevel(int zaxisID, int levelID, double level)
 }
 
 
-void zaxisDefNlevRef(int zaxisID, const int nhlev)
+void zaxisDefNlevRef(int zaxisID, int nhlev)
 {
   zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
   if (zaxisptr->nhlev != nhlev)
@@ -853,7 +853,7 @@ int zaxisInqNlevRef(int zaxisID)
 @Function  zaxisDefNumber
 @Title     Define the reference number for a generalized Z-axis
 
-@Prototype void zaxisDefNumber(int zaxisID, const int number)
+@Prototype void zaxisDefNumber(int zaxisID, int number)
 @Parameter
     @Item  zaxisID     Z-axis ID, from a previous call to @fref{zaxisCreate}.
     @Item  number      Reference number for a generalized Z-axis.
@@ -863,7 +863,7 @@ The function @func{zaxisDefNumber} defines the reference number for a generalize
 
 @EndFunction
 */
-void zaxisDefNumber(int zaxisID, const int number)
+void zaxisDefNumber(int zaxisID, int number)
 {
   zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
   if (zaxisptr->number != number)
