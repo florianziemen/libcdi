@@ -39,6 +39,7 @@ int cdiSkipRecords          = 0;
 int cdiConvention           = CDI_CONVENTION_ECHAM;
 int cdiInventoryMode        = 1;
 int CDI_Version_Info        = 1;
+int CDI_read_cell_corners   = 1;
 int CDI_cmor_mode           = 0;
 int CDI_reduce_dim          = 0;
 size_t CDI_netcdf_hdr_pad   = 0UL;
@@ -340,6 +341,9 @@ void cdiInitialize(void)
       value = cdiGetenvInt("CDI_GRIBAPI_DEBUG");
       if ( value >= 0 ) cdiGribApiDebug = (int) value;
 
+      value = cdiGetenvInt("CDI_READ_CELL_CORNERS");
+      if ( value >= 0 ) CDI_read_cell_corners = (int) value;
+
       value = cdiGetenvInt("CDI_RECOPT");
       if ( value >= 0 ) CDI_Recopt = (int) value;
 
@@ -478,6 +482,7 @@ void cdiDefGlobal(const char *string, int val)
   else if ( strcmp(string, "SORTPARAM")        == 0 ) cdiSortParam = val;
   else if ( strcmp(string, "HAVE_MISSVAL")     == 0 ) cdiHaveMissval = val;
   else if ( strcmp(string, "NC_CHUNKSIZEHINT") == 0 ) cdiNcChunksizehint = val;
+  else if ( strcmp(string, "READ_CELL_CORNERS")== 0 ) CDI_read_cell_corners = val;
   else if ( strcmp(string, "CMOR_MODE")        == 0 ) CDI_cmor_mode = val;
   else if ( strcmp(string, "REDUCE_DIM")       == 0 ) CDI_reduce_dim = val;
   else if ( strcmp(string, "NETCDF_HDR_PAD")   == 0 ) CDI_netcdf_hdr_pad = (size_t) val;

@@ -1,10 +1,10 @@
 ! This file was automatically generated, don't edit!
 !
-! Fortran interface for CDI library version 1.9.4rc1
+! Fortran interface for CDI library version 1.9.5
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   February 2018
+! Uwe Schulzweida, MPI-MET, Hamburg,   July 2018
 !
 
       INTEGER    CDI_MAX_NAME
@@ -35,6 +35,8 @@
       PARAMETER (CDI_NOERR              =  0)
       INTEGER    CDI_EEOF
       PARAMETER (CDI_EEOF               = -1)
+      INTEGER    CDI_ETMOF
+      PARAMETER (CDI_ETMOF              = -9)
       INTEGER    CDI_ESYSTEM
       PARAMETER (CDI_ESYSTEM            = -10)
       INTEGER    CDI_EINVAL
@@ -1587,6 +1589,12 @@
       PARAMETER (CDI_KEY_REVSTATUS      = 816)
       INTEGER    CDI_KEY_REVNUMBER
       PARAMETER (CDI_KEY_REVNUMBER      = 817)
+      INTEGER    CDI_KEY_GRIB2LOCALSECTIONNUMBER
+      PARAMETER (CDI_KEY_GRIB2LOCALSECTIONNUMBER = 818)
+      INTEGER    CDI_KEY_SECTION2PADDINGLENGTH
+      PARAMETER (CDI_KEY_SECTION2PADDINGLENGTH = 819)
+      INTEGER    CDI_KEY_SECTION2PADDING
+      PARAMETER (CDI_KEY_SECTION2PADDING = 820)
       INTEGER         cdiDefKeyInt
 !                                    (INTEGER         cdiID,
 !                                     INTEGER         varID,
@@ -1601,35 +1609,12 @@
 !                                     INTEGER         value)
       EXTERNAL        cdiInqKeyInt
 
-      INTEGER         cdiDefKeyBytes
-!                                    (INTEGER         cdiID,
-!                                     INTEGER         varID,
-!                                     INTEGER         key,
-!                                     INTEGER*1(*)    bytes,
-!                                     INTEGER         length)
-      EXTERNAL        cdiDefKeyBytes
-
-      INTEGER         cdiInqKeyBytes
-!                                    (INTEGER         cdiID,
-!                                     INTEGER         varID,
-!                                     INTEGER         key,
-!                                     INTEGER*1(*)    bytes,
-!                                     INTEGER         length)
-      EXTERNAL        cdiInqKeyBytes
-
       INTEGER         cdiDefKeyString
 !                                    (INTEGER         cdiID,
 !                                     INTEGER         varID,
 !                                     INTEGER         key,
 !                                     CHARACTER*(*)   string)
       EXTERNAL        cdiDefKeyString
-
-      INTEGER         cdiInqKeyLen
-!                                    (INTEGER         cdiID,
-!                                     INTEGER         varID,
-!                                     INTEGER         key,
-!                                     INTEGER         length)
-      EXTERNAL        cdiInqKeyLen
 
       INTEGER         cdiInqKeyString
 !                                    (INTEGER         cdiID,
@@ -1638,6 +1623,13 @@
 !                                     CHARACTER*(*)   string,
 !                                     INTEGER         length)
       EXTERNAL        cdiInqKeyString
+
+      INTEGER         cdiInqKeyLen
+!                                    (INTEGER         cdiID,
+!                                     INTEGER         varID,
+!                                     INTEGER         key,
+!                                     INTEGER         length)
+      EXTERNAL        cdiInqKeyLen
 
       INTEGER         cdiCopyKeys
 !                                    (INTEGER         cdiID1,
@@ -1975,6 +1967,13 @@
 !                                     DOUBLEPRECISION xbounds(*))
       EXTERNAL        gridInqXbounds
 
+      INTEGER         gridInqXboundsPart
+!                                    (INTEGER         gridID,
+!                                     INTEGER         start,
+!                                     INTEGER         size,
+!                                     DOUBLEPRECISION xbounds(*))
+      EXTERNAL        gridInqXboundsPart
+
 !                     gridDefYbounds
 !                                    (INTEGER         gridID,
 !                                     DOUBLEPRECISION ybounds(*))
@@ -1984,6 +1983,13 @@
 !                                    (INTEGER         gridID,
 !                                     DOUBLEPRECISION ybounds(*))
       EXTERNAL        gridInqYbounds
+
+      INTEGER         gridInqYboundsPart
+!                                    (INTEGER         gridID,
+!                                     INTEGER         start,
+!                                     INTEGER         size,
+!                                     DOUBLEPRECISION ybounds(*))
+      EXTERNAL        gridInqYboundsPart
 
 !                     gridDefRowlon
 !                                    (INTEGER         gridID,

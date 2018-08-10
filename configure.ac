@@ -4,7 +4,7 @@
 #  autoconf 2.68
 #  libtool  2.4.2
 
-AC_INIT([cdi], [1.9.4], [http://mpimet.mpg.de/cdi])
+AC_INIT([cdi], [1.9.5], [http://mpimet.mpg.de/cdi])
 
 AC_DEFINE_UNQUOTED(CDI, ["$PACKAGE_VERSION"], [CDI version])
 
@@ -68,6 +68,8 @@ AC_CHECK_MEMBERS([struct stat.st_blksize])
 #  ----------------------------------------------------------------------
 # Checks for header files
 AC_CHECK_HEADERS([malloc.h])
+AC_CHECK_HEADERS([unistd.h])
+AC_CHECK_HEADERS([sys/time.h])
 AX_EXECINFO
 #  ----------------------------------------------------------------------
 # Checks for the availability of functions
@@ -401,7 +403,8 @@ AC_CONFIG_FILES([tests/test_cksum_grib \
 
 AC_OUTPUT([Makefile src/Makefile interfaces/Makefile app/Makefile \
 	tests/Makefile examples/Makefile cdi.settings \
-	examples/pio/Makefile src/pkgconfig/cdi.pc src/pkgconfig/cdipio.pc])
+	examples/pio/Makefile src/pkgconfig/cdi.pc src/pkgconfig/cdipio.pc \
+        src/pkgconfig/cdi_f2003.pc])
 
 #  ----------------------------------------------------------------------
 #  Show configuration

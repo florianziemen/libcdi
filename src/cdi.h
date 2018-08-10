@@ -8,6 +8,7 @@
 #define  CDI_H_
 
 #include <stdio.h>
+#include <stdint.h>    // int64_t
 #include <sys/types.h>
 
 #ifdef __cplusplus
@@ -34,6 +35,7 @@ extern "C" {
 
 #define	 CDI_NOERR        	    0   // No Error
 #define  CDI_EEOF                  -1   // The end of file was encountered
+#define  CDI_ETMOF                 -9   // Too many open files
 #define  CDI_ESYSTEM              -10   // Operating system error
 #define  CDI_EINVAL               -20   // Invalid argument
 #define  CDI_EISDIR               -21   // Is a directory
@@ -322,8 +324,8 @@ int     cdiEncodeParam(int pnum, int pcat, int pdis);
 /* date format:  YYYYMMDD */
 /* time format:    hhmmss */
 
-void    cdiDecodeDate(int date, int *year, int *month, int *day);
-int     cdiEncodeDate(int year, int month, int day);
+void    cdiDecodeDate(int64_t date, int *year, int *month, int *day);
+int64_t cdiEncodeDate(int year, int month, int day);
 
 void    cdiDecodeTime(int time, int *hour, int *minute, int *second);
 int     cdiEncodeTime(int hour, int minute, int second);
@@ -453,6 +455,7 @@ int cdiIterator_inqTileCount(CdiIterator *me, int *outTileCount, int *outTileAtt
 CdiParam cdiIterator_inqParam(CdiIterator *me);
 void cdiIterator_inqParamParts(CdiIterator *me, int *outDiscipline, int *outCategory, int *outNumber);	//Some FORTRAN compilers produce wrong code for the cdiIterator_inqParam()-wrapper, rendering it unusable from FORTRAN. This function is the workaround.
 int cdiIterator_inqDatatype(CdiIterator *me);
+int cdiIterator_inqFiletype(CdiIterator *me);
 int cdiIterator_inqTsteptype(CdiIterator *me);
 char *cdiIterator_inqVariableName(CdiIterator *me);        //The caller is responsible to Free() the returned buffer.
 int cdiIterator_inqGridId(CdiIterator *me);         //The returned id is only valid until the next call to cdiIteratorNextField().
@@ -1145,37 +1148,37 @@ void    taxisCopyTimestep(int taxisIDdes, int taxisIDsrc);
 void    taxisDefType(int taxisID, int type);
 
 /*      taxisDefVdate: Define the verification date */
-void    taxisDefVdate(int taxisID, int date);
+void    taxisDefVdate(int taxisID, int64_t date);
 
 /*      taxisDefVtime: Define the verification time */
 void    taxisDefVtime(int taxisID, int time);
 
 /*      taxisInqVdate: Get the verification date */
-int     taxisInqVdate(int taxisID);
+int64_t taxisInqVdate(int taxisID);
 
 /*      taxisInqVtime: Get the verification time */
 int     taxisInqVtime(int taxisID);
 
 /*      taxisDefRdate: Define the reference date */
-void    taxisDefRdate(int taxisID, int date);
+void    taxisDefRdate(int taxisID, int64_t date);
 
 /*      taxisDefRtime: Define the reference time */
 void    taxisDefRtime(int taxisID, int time);
 
 /*      taxisInqRdate: Get the reference date */
-int     taxisInqRdate(int taxisID);
+int64_t taxisInqRdate(int taxisID);
 
 /*      taxisInqRtime: Get the reference time */
 int     taxisInqRtime(int taxisID);
 
 /*      taxisDefFdate: Define the forecast reference date */
-void    taxisDefFdate(int taxisID, int date);
+void    taxisDefFdate(int taxisID, int64_t date);
 
 /*      taxisDefFtime: Define the forecast reference time */
 void    taxisDefFtime(int taxisID, int time);
 
 /*      taxisInqFdate: Get the forecast reference date */
-int     taxisInqFdate(int taxisID);
+int64_t taxisInqFdate(int taxisID);
 
 /*      taxisInqFtime: Get the forecast reference time */
 int     taxisInqFtime(int taxisID);
@@ -1185,11 +1188,11 @@ void    taxisWithBounds(int taxisID);
 
 void    taxisDeleteBounds(int taxisID);
 
-void    taxisDefVdateBounds(int taxisID, int vdate_lb, int vdate_ub);
+void    taxisDefVdateBounds(int taxisID, int64_t vdate_lb, int64_t vdate_ub);
 
 void    taxisDefVtimeBounds(int taxisID, int vtime_lb, int vtime_ub);
 
-void    taxisInqVdateBounds(int taxisID, int *vdate_lb, int *vdate_ub);
+void    taxisInqVdateBounds(int taxisID, int64_t *vdate_lb, int64_t *vdate_ub);
 
 void    taxisInqVtimeBounds(int taxisID, int *vtime_lb, int *vtime_ub);
 

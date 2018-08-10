@@ -1034,7 +1034,7 @@ taxisDefRdate
 \fi
 }}
 \begin{verbatim}
-    void taxisDefRdate(int taxisID, int rdate);
+    void taxisDefRdate(int taxisID, int64_t rdate);
 \end{verbatim}
 
 Define the reference date
@@ -1064,7 +1064,7 @@ taxisDefVdate
 \fi
 }}
 \begin{verbatim}
-    void taxisDefVdate(int taxisID, int vdate);
+    void taxisDefVdate(int taxisID, int64_t vdate);
 \end{verbatim}
 
 Define the verification date
@@ -1124,7 +1124,7 @@ taxisInqRdate
 \fi
 }}
 \begin{verbatim}
-    int taxisInqRdate(int taxisID);
+    int64_t taxisInqRdate(int taxisID);
 \end{verbatim}
 
 Get the reference date
@@ -1154,7 +1154,7 @@ taxisInqVdate
 \fi
 }}
 \begin{verbatim}
-    int taxisInqVdate(int taxisID);
+    int64_t taxisInqVdate(int taxisID);
 \end{verbatim}
 
 Get the verification date

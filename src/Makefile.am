@@ -1,15 +1,30 @@
 ## Process this file with automake to produce Makefile.in
 #
-EXTRA_DIST = cdilib.c mo_cdi.f90
+EXTRA_DIST = cdilib.c
 
 noinst_LTLIBRARIES = libcdiresunpack.la
 
+include_HEADERS =
+lib_LTLIBRARIES =
+
 if ENABLE_CDI_LIB
-  lib_LTLIBRARIES = libcdi.la
-  include_HEADERS = cdi.h cdi.inc
+  lib_LTLIBRARIES += libcdi.la
+  include_HEADERS += cdi.h
+# add cdi.inc only if cfortran interface is required
+if USE_FC
+  include_HEADERS += cdi.inc
+endif
+if CREATE_ISOC
+  lib_LTLIBRARIES += libcdi_f2003.la
+  include_HEADERS += mo_cdi.$(FCMODEXT)
+endif
 else
   noinst_LTLIBRARIES += libcdi.la
+if CREATE_ISOC
+  noinst_LTLIBRARIES += libcdi_f2003.la
 endif
+endif
+
 
 AM_CFLAGS = $(PPM_CORE_CFLAGS) $(YAXT_CFLAGS) $(MPI_C_INCLUDE)
 
@@ -162,6 +177,9 @@ EXTRA_DIST += \
 
 
 
+libcdi_f2003_la_SOURCES = mo_cdi.f90
+libcdi_f2003_la_LIBADD = libcdi.la
+
 libcdiresunpack_la_SOURCES = \
 	resource_unpack.c
 
@@ -224,7 +242,6 @@ endif
 
 libcdipio_la_LIBADD    = libcdi.la $(PPM_CORE_LIBS) $(YAXT_LIBS) $(MPI_C_LIB)
 
-libcdi_la_LIBADD    = $(UUID_C_LIB)
 #
 #cdilib.c:
 #	$(top_srcdir)/src/make_cdilib $(top_srcdir)/src
@@ -238,23 +255,26 @@ LOCALTARGETS += pkgconfig/cdi.pc
 if USE_MPI
 LOCALTARGETS += pkgconfig/cdipio.pc
 endif
+if CREATE_ISOC
+LOCALTARGETS += pkgconfig/cdi_f2003.pc
+endif
 endif
 
-if CREATE_ISOC
-LOCALTARGETS += mo_cdi.$(OBJEXT)
-endif
 #
 mo_cdi.f90: $(top_srcdir)/src/cdi.h $(top_srcdir)/interfaces/f2003/bindGen.rb
 	$(RUBY) $(top_srcdir)/interfaces/f2003/bindGen.rb $(top_srcdir)/src/cdi.h $@
-#
-mo_cdi.$(OBJEXT): mo_cdi.f90
-	$(FC) $(FCFLAGS) -c $(FCFLAGS_f90) $<
+mo_cdi.$(FCMODEXT): mo_cdi.lo
+	@if test ! -f $@; then rm -f $<; $(MAKE) $<; fi
 #
 pkgconfig/cdi.pc: pkgconfig/cdi.pc.in ../config.status
 	(cd .. ; ./config.status src/pkgconfig/cdi.pc)
 
 pkgconfig/cdipio.pc: pkgconfig/cdipio.pc.in ../config.status
 	(cd .. ; ./config.status src/pkgconfig/cdipio.pc)
+
+pkgconfig/cdi_f2003.pc: pkgconfig/cdi_f2003.pc.in ../config.status
+	(cd .. ; ./config.status src/pkgconfig/cdi_f2003.pc)
+
 cdilib.c: 
 	(cd $(top_srcdir)/src ; ./make_cdilib )
 #
@@ -263,15 +283,19 @@ all-local: $(LOCALTARGETS)
 CLEANFILES  = `ls *~`
 #CLEANFILES += cdilib.c
 if CREATE_ISOC
-CLEANFILES += mo_cdi.$(FCMODEXT) mo_cdi.$(OBJEXT)
+CLEANFILES += mo_cdi.$(FCMODEXT)
 endif
 
 if ENABLE_CDI_LIB
 PKGCONFIG_FILES = pkgconfig/cdi.pc
 CLEANFILES += pkgconfig/cdi.pc
 if USE_MPI
-CLEANFILES += pkgconfig/cdipio.pc
 PKGCONFIG_FILES += pkgconfig/cdipio.pc
+CLEANFILES += pkgconfig/cdipio.pc
+endif
+if CREATE_ISOC
+PKGCONFIG_FILES += pkgconfig/cdi_f2003.pc
+CLEANFILES += pkgconfig/cdi_f2003.pc
 endif
 
 install-exec-local: $(PKGCONFIG_FILES)

@@ -118,7 +118,8 @@ AC_DEFUN([ACX_UUID],
          CPPFLAGS=$acx_save_CPPFLAGS])],
      [have_util_linux_uuid_c_bindings=no])
    AS_IF([test x"$enable_ossp_uuid" != xno -a x"$have_util_linux_uuid_c_bindings" = xno],
-     [ACX_C_PACKAGE([ossp-uuid],[uuid.h],,,[],
+     [ACX_C_PACKAGE([ossp-uuid],[uuid.h],[@%:@include <uuid.h>
+AC_INCLUDES_DEFAULT],,[],
         [uuid_create],[[ossp-uuid] [uuid]],,,[],,[[/usr/include/ossp]])
       AS_IF([test x"$have_ossp_uuid_c_bindings" = xyes],
         [acx_save_CPPFLAGS=$CPPFLAGS
@@ -126,12 +127,14 @@ AC_DEFUN([ACX_UUID],
          AC_CHECK_HEADERS([uuid.h],
            [AC_CHECK_DECLS([uuid_create],
               [AC_CHECK_DECLS([UUID_MAKE_V5],,[have_ossp_uuid_c_bindings=no],
-                 [AC_INCLUDES_DEFAULT
-@%:@include <uuid.h>])],[have_ossp_uuid_c_bindings=no],
-                 [AC_INCLUDES_DEFAULT
-@%:@include <uuid.h>])],[have_ossp_uuid_c_bindings=no])
+                 [@%:@include <uuid.h>
+AC_INCLUDES_DEFAULT])],[have_ossp_uuid_c_bindings=no],
+                 [@%:@include <uuid.h>
+AC_INCLUDES_DEFAULT])],[have_ossp_uuid_c_bindings=no],[@%:@include <uuid.h>
+AC_INCLUDES_DEFAULT])
          CPPFLAGS=$acx_save_CPPFLAGS])],
-     [have_ossp_uuid_c_bindings=no])
+     [have_ossp_uuid_c_bindings=no], [@%:@include <uuid.h>
+AC_INCLUDES_DEFAULT])
    # check for DCE uuid_create if util-linux and OSSP variants cannot be found
    AS_IF([test x"$enable_dce_uuid" != xno -a x"$have_util_linux_uuid_c_bindings$have_ossp_uuid_c_bindings" = xnono],
      [ACX_C_PACKAGE([dce-uuid],[uuid.h],,,[],

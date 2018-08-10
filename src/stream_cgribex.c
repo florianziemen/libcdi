@@ -1,4 +1,4 @@
-#if defined (HAVE_CONFIG_H)
+#ifdef HAVE_CONFIG_H
 #  include "config.h"
 #endif
 
@@ -15,7 +15,7 @@
 #include "stream_grb.h"
 #include "stream_cgribex.h"
 
-#if  defined  (HAVE_LIBCGRIBEX)
+#ifdef HAVE_LIBCGRIBEX
 #  include "cgribex.h"
 #endif
 
@@ -187,7 +187,13 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid, i
           {
             bool recompinc = true;
 
-            if ( ISEC2_LastLon < ISEC2_FirstLon ) ISEC2_LastLon += 360000;
+            if ( ISEC2_LastLon < ISEC2_FirstLon )
+              {
+                if ( ISEC2_FirstLon >= 180000 )
+                  ISEC2_FirstLon -= 360000;
+                else
+                  ISEC2_LastLon += 360000;
+              }
 
             if ( ijDirectionIncrementGiven && ISEC2_LonIncr > 0 )
               {
@@ -1432,7 +1438,8 @@ int cgribexDefTimerange(int tsteptype, int factor, int calendar,
 			int rdate, int rtime, int vdate, int vtime, int *pip1, int *pip2)
 {
   int year, month, day, hour, minute, second;
-  int julday1, secofday1, julday2, secofday2, days, secs;
+  int64_t julday1, julday2, days;
+  int secofday1, secofday2, secs;
 
   cdiDecodeDate(rdate, &year, &month, &day);
   cdiDecodeTime(rtime, &hour, &minute, &second);
@@ -1569,7 +1576,14 @@ void cgribexDefTime(int *isec1, int vdate, int vtime, int tsteptype, int numavg,
 	  if ( ip1 < 0 || ip1 > 0xFF   ) timetype = TAXIS_ABSOLUTE;
 	  if ( ip2 < 0 || ip2 > 0xFF   ) timetype = TAXIS_ABSOLUTE;
 	}
-
+      /*
+      static bool lwarn = true;
+      if ( lwarn && timetype == TAXIS_ABSOLUTE )
+        {
+          lwarn = false;
+          Warning("Can't store forecast time %ld %d relative to %ld %d, converted to absolute time!", (long)vdate, vtime, (long)rdate, rtime);
+        }
+      */
       ISEC1_TimeRange   = timerange;
       ISEC1_TimePeriod1 = ip1;
       ISEC1_TimePeriod2 = ip2;
@@ -1645,7 +1659,7 @@ void cgribexDefGridRegular(int *isec2, double *fsec2, int gridID, int gridtype, 
     {
       ISEC2_FirstLon = 0;
       ISEC2_LastLon  = (int)lround(1000*(360.-360./(nlat*2)));
-      ISEC2_LonIncr  = (int)lround(1000*360./(nlat*2));
+      //ISEC2_LonIncr  = (int)lround(1000*360./(nlat*2)); // gribapi gridType detector doesn't like lonIncr
     }
   else
     {

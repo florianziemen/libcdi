@@ -587,7 +587,15 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
           {
             if ( editionNumber <= 1 )
               {
-                /* correct xinc if necessary */
+                if ( grid->x.last < grid->x.first )
+                  {
+                    if ( grid->x.first >= 180 )
+                      grid->x.first -= 360;
+                    else
+                      grid->x.last += 360;
+                  }
+
+                // correct xinc if necessary
                 if ( IS_EQUAL(grid->x.first, 0) && grid->x.last > 354 )
                   {
                     double xinc = 360. / grid->x.size;

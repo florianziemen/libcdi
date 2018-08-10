@@ -13,7 +13,7 @@ int gribapiDecode(void *gribbuffer, size_t gribsize, double *data, size_t datasi
 		  int unreduced, size_t *nmiss, double missval, int vlistID, int varID);
 
 size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisID,
-		     int vdate, int vtime, int tsteptype, int numavg,
+		     int64_t vdate, int vtime, int tsteptype, int numavg,
 		     size_t datasize, const double *data, size_t nmiss, void **gribbuffer, size_t *gribbuffersize,
 		     int ljpeg, void *gribContainer);
 

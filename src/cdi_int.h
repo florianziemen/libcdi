@@ -52,13 +52,13 @@ bool str_is_equal(const char *vstr, const char *cstr);
 #ifndef _BASETIME_H
 #  include "basetime.h"
 #endif
-#ifndef _TIMEBASE_H
+#ifndef TIMEBASE_H
 #  include "timebase.h"
 #endif
-#ifndef  _TAXIS_H
+#ifndef TAXIS_H
 #  include "taxis.h"
 #endif
-#ifndef  CDI_LIMITS_H
+#ifndef CDI_LIMITS_H
 #  include "cdi_limits.h"
 #endif
 #ifndef  _SERVICE_H
@@ -346,6 +346,7 @@ extern int cdiSkipRecords;
 extern int cdiConvention;
 extern int cdiInventoryMode;
 extern int CDI_Version_Info;
+extern int CDI_read_cell_corners;
 extern int CDI_cmor_mode;
 extern int CDI_reduce_dim;
 extern size_t CDI_netcdf_hdr_pad;

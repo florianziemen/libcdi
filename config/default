@@ -8,13 +8,25 @@ if [ "$CONFPATH" != "../../" ] ; then
   CONFPATH='./'
 fi
 #
-if test -z "$1" ; then
-  HOSTNAME=`hostname`
-else
-  HOSTNAME=$1
-fi
-#
 set -x
+
+HOSTNAME=`hostname`
+#
+while test $# != 0
+do
+  case $1 in
+    CC=?*)
+      COMP=`expr "X$1" : 'X[^=]*=\(.*\)'`
+      ;;
+    CONFIG_OPTS=?*)
+      CONFIG_OPTS=`expr "X$1" : 'X[^=]*=\(.*\)'`
+      ;;
+    *)
+          HOSTNAME=$1
+          ;;
+  esac
+  shift
+done
 #
 case "${HOSTNAME}" in
 # i386-apple-darwin10
@@ -89,11 +101,11 @@ case "${HOSTNAME}" in
                     --with-szlib=$HOME/local/etch-ia32 \
 	            CC=gcc CFLAGS="-g -O2 -Wall -W -Wfloat-equal -pedantic"
 	;;
-    thingol)
+    melian)
       ${CONFPATH}configure --prefix=`pwd`/build \
-	            --with-netcdf=$HOME/builds/libs4cdo \
-                     --with-szlib=$HOME/builds/libs4cdo \
-                  --with-grib_api=$HOME/builds/libs4cdo \
+	            --with-netcdf \
+                     --with-szlib \
+                  --with-eccodes \
                       --with-pic --enable-swig --enable-ruby --enable-python \
                       CC=gcc CFLAGS="-g -O2 -Wall" LIBS=-lopenjpeg
 	;;
@@ -147,6 +159,62 @@ case "${HOSTNAME}" in
                     FCFLAGS="-qsuffix=cpp=f90 -qextname" \
                     SHELL=/bin/bash
         ;;
+    breeze*)
+        CDILIBS="--with-eccodes=/sw/jessie-x64/eccodes/eccodes-2.4.1-gccsys \
+                 --with-netcdf=/sw/jessie-x64/netcdf-4.3.3.1-gccsys"
+        PREFIX="--prefix=$(pwd)/build/${COMP}"
+        LD_ADD="-Wl,-rpath,/sw/jessie-x64/eccodes/eccodes-2.4.1-gccsys/lib"
+
+        if  test "$COMP" = intel ; then
+          ${CONFPATH}configure $CONFIG_OPTS $PREFIX $CDILIBS LDFLAGS="$LD_ADD $LDFLAGS" \
+                    CC=icc FC=ifort CFLAGS="-g -Wall -O2 -qopt-report=5 -march=native"
+        elif  test "$COMP" = gnu ; then
+          ${CONFPATH}configure $CONFIG_OPTS $PREFIX $CDILIBS $LDFLAGS\
+                    CC=gcc FC=gfortran F77=gfortran CFLAGS="-g -Wall -O2 -march=native"
+        elif  test "$COMP" = pgi ; then
+          ${CONFPATH}configure $CONFIG_OPTS $PREFIX $CDILIBS $LDFLAGS\
+                    CC=pgcc FC=pgf90 F77=pgf90 CFLAGS="-g"
+        elif  test "$COMP" = clang ; then
+          ${CONFPATH}configure $CONFIG_OPTS $PREFIX $CDILIBS $LDFLAGS\
+                    CC=clang FC=gfortran CFLAGS="-g -O2"
+        elif  test "$COMP" = nag ; then
+          ${CONFPATH}configure $CONFIG_OPTS $PREFIX $CDILIBS LDFLAGS="$LD_ADD $LDFLAGS" \
+                    CC=gcc FC=nagfor F77=nagfor CFLAGS="-g -O2"
+        elif  test "$COMP" = nagClang ; then
+          ${CONFPATH}configure $CONFIG_OPTS $PREFIX $CDILIBS \
+                    CC=clang FC=nagfor F77=nagfor CFLAGS="-g -Wall -02"
+        else
+          echo "no config found for host: $HOSTNAME, COMP: $COMP !!"
+        fi;
+
+      ;;
+    mlogin*)
+        CDILIBS="--with-eccodes=/sw/rhel6-x64/eccodes/eccodes-2.3.0-gcc48 \
+                 --with-netcdf=/sw/rhel6-x64/netcdf/netcdf_c-4.3.2-gcc48"
+        PREFIX="--prefix=$(pwd)/build/${COMP}"
+
+        if  test "$COMP" = intel ; then
+          ${CONFPATH}configure $PREFIX $CONFIG_OPTS $CDILIBS \
+                    LDFLAGS="-Wl,-rpath,/sw/rhel6-x64/eccodes/eccodes-2.3.0-gcc48/lib" \
+                    F77=ifort FC=ifort FFLAGS="-g -O2" \
+	            CC=icc   CFLAGS="-g -Wall -O2 -qopt-report=5 -march=core-avx2"
+        elif  test "$COMP" = pgi ; then
+          ${CONFPATH}configure  $PREFIX $CONFIG_OPTS $CDILIBS \
+                    LDFLAGS="-Wl,-rpath,/sw/rhel6-x64/eccodes/eccodes-2.3.0-gcc48/lib" \
+	            CXX=pgc++ CXXFLAGS="-g -fast" \
+	            CC=pgcc   CFLAGS="-g -fast"
+        elif  test "$COMP" = gnu_pic ; then
+          ${CONFPATH}configure $PREFIX $CONFIG_OPTS $CDILIBS \
+                    LDFLAGS="-Wl,-rpath,/sw/rhel6-x64/eccodes/eccodes-2.3.0-gcc48/lib" \
+                    FC=gfortran F77=gfortran FFLAGS="-g -O2" \
+                    CC=gcc  CFLAGS='-g -Wall -O3 -march=native -mavx2 -fPIC'
+	else
+          ${CONFPATH}configure $PREFIX $CONFIG_OPTS  $CDILIBS \
+                    LDFLAGS="-Wl,-rpath,/sw/rhel6-x64/eccodes/eccodes-2.3.0-gcc48/lib" \
+                    FC=gfortran F77=gfortran FFLAGS="-g -O2" \
+                    CC=gcc  CFLAGS='-g -Wall -O3 -march=native -mavx2'
+	fi
+	;;
     *)
 	echo "configuration for hostname $HOSTNAME not found!"
 	;;

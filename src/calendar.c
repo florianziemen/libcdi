@@ -93,9 +93,9 @@ static void decode_day(int dpy, int days, int *year, int *month, int *day)
 }
 
 
-static int encode_day(int dpy, int year, int month, int day)
+static int64_t encode_day(int dpy, int year, int month, int day)
 {
-  long rval = (long)dpy * year + day;
+  int64_t rval = (int64_t)dpy * year + day;
 
   const int *dpm = NULL;
   if      ( dpy == 360 ) dpm = month_360;
@@ -103,15 +103,14 @@ static int encode_day(int dpy, int year, int month, int day)
   else if ( dpy == 366 ) dpm = month_366;
 
   if ( dpm ) for ( int i = 0; i < month-1; i++ ) rval += dpm[i];
-  if ( rval > INT_MAX || rval < INT_MIN )
-    Error("Unhandled date: %ld", rval);
+  if ( rval > LONG_MAX || rval < LONG_MIN ) Error("Unhandled date: %lld", rval);
 
-  return (int)rval;
+  return rval;
 }
 
 
 void encode_caldaysec(int calendar, int year, int month, int day, int hour, int minute, int second,
-		      int *julday, int *secofday)
+		      int64_t *julday, int *secofday)
 {
   int dpy = calendar_dpy(calendar);
 
@@ -124,7 +123,7 @@ void encode_caldaysec(int calendar, int year, int month, int day, int hour, int 
 }
 
 
-void decode_caldaysec(int calendar, int julday, int secofday,
+void decode_caldaysec(int calendar, int64_t julday, int secofday,
 		      int *year, int *month, int *day, int *hour, int *minute, int *second)
 {
   int dpy = calendar_dpy(calendar);
@@ -178,8 +177,8 @@ int main(void)
 {
   int calendar = CALENDAR_STANDARD;
   int nmin;
-  int vdate0, vtime0;
-  int vdate, vtime;
+  int64_t vdate0, vdate;
+  int vtime0, vtime;
   int ijulinc;
   int i, j = 0;
   int year, mon, day, hour, minute, second;
