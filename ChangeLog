@@ -1,7 +1,11 @@
-2018-08-09  Uwe Schulzweida
+2018-08-10  Uwe Schulzweida
 
         * using CGRIBEX library version 1.9.1
 	* Version 1.9.5 released
+
+2018-08-10  Uwe Schulzweida
+
+	* cgribexGetGrid: if firstLon >= 180 sub 360
 
 2018-08-05  Uwe Schulzweida
 

@@ -68,6 +68,8 @@ AC_CHECK_MEMBERS([struct stat.st_blksize])
 #  ----------------------------------------------------------------------
 # Checks for header files
 AC_CHECK_HEADERS([malloc.h])
+AC_CHECK_HEADERS([unistd.h])
+AC_CHECK_HEADERS([sys/time.h])
 AX_EXECINFO
 #  ----------------------------------------------------------------------
 # Checks for the availability of functions
