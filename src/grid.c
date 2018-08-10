@@ -359,6 +359,8 @@ void cdiGridTypeInit(grid_t *gridptr, int gridtype, size_t size)
 // used also in CDO
 void gridGenXvals(int xsize, double xfirst, double xlast, double xinc, double *restrict xvals)
 {
+  if (xsize > 1 && xfirst >= xlast && xfirst >= 180 && xlast > 0) xfirst -= 360;
+
   if ( (! (fabs(xinc) > 0)) && xsize > 1 )
     {
       if ( xfirst >= xlast )
