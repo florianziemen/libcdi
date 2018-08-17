@@ -1833,8 +1833,11 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
       }
     default:
       {
+        static bool lwarn = true;
         ISEC1_Sec2Or3Flag = 0;
-	Warning("CGRIBEX library doesn't support %s grids, grid information will be lost!", gridNamePtr(gridtype));
+        if (lwarn)
+          Warning("CGRIBEX library doesn't support %s grids, grid information will be lost!", gridNamePtr(gridtype));
+        lwarn = false;
 	break;
       }
     }
