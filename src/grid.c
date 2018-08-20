@@ -94,7 +94,7 @@ bool cdiInqAttConvertedToFloat(int gridID, int atttype, const char *attname, int
 
   if ( atttype == CDI_DATATYPE_INT32 )
     {
-      int attint[attlen];
+      int attint[64];
       cdiInqAttInt(gridID, CDI_GLOBAL, attname, attlen, attint);
       for ( int i = 0; i < attlen; ++i ) attflt[i] = (double)attint[i];
     }
@@ -2370,6 +2370,7 @@ bool gridCompare(int gridID, const grid_t *grid, bool coord_compare)
                gridID, grid->scanningMode, gridInqScanningMode(gridID), grid->uvRelativeToGrid, gridInqUvRelativeToGrid(gridID) );
 #endif // HIRLAM_EXTENSIONS
     }
+
   return differ;
 }
 
@@ -3981,7 +3982,7 @@ The function @func{gridDefNumber} defines the reference number for an unstructur
 
 @EndFunction
 */
-void gridDefNumber(int gridID, const int number)
+void gridDefNumber(int gridID, int number)
 {
   grid_t *gridptr = grid_to_pointer(gridID);
 

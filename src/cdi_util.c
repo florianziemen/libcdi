@@ -1,12 +1,14 @@
-#if defined (HAVE_CONFIG_H)
-#  include "config.h"
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
 #endif
 
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-
 #include "cdi.h"
 #include "cdi_int.h"
 

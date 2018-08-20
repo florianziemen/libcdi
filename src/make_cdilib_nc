@@ -36,16 +36,27 @@ cat > ${PROG} << EOR
 
 #define HAVE_LIBNETCDF
 
+#if defined(_WIN32) || defined(_WIN64)
+#define restrict
+#define ssize_t long
+#else
+#define HAVE_UNISTD_H
+#endif
+
 #ifdef _ARCH_PWR6
 #pragma options nostrict
 #endif
 
-#if  defined  (HAVE_CONFIG_H)
-#  include "config.h"
+#ifdef  HAVE_CONFIG_H
+#include "config.h"
 #endif
 
 #ifndef _XOPEN_SOURCE
 #define _XOPEN_SOURCE 600
+#endif
+
+#ifdef  HAVE_UNISTD_H
+#include <unistd.h>
 #endif
 
 #include <stdio.h>
@@ -60,27 +71,23 @@ cat > ${PROG} << EOR
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <unistd.h>
-#ifndef _SX
-#include <aio.h>
-#endif
 #include <stdbool.h>
 #include <assert.h>
 
-#if  defined  (HAVE_LIBGRIB_API)
-#  include <grib_api.h>
+#ifdef HAVE_LIBGRIB_API
+#include <grib_api.h>
 #endif
 
-#if  defined  (HAVE_MMAP)
-#  include <sys/mman.h> /* mmap() is defined in this header */
+#ifdef HAVE_MMAP
+#include <sys/mman.h> /* mmap() is defined in this header */
 #endif
 
-#if  defined  (HAVE_LIBPTHREAD)
-#  include <pthread.h>
+#ifdef HAVE_LIBPTHREAD
+#include <pthread.h>
 #endif
 
-#if  defined  (HAVE_LIBSZ)
-#  include <szlib.h>
+#ifdef HAVE_LIBSZ
+#include <szlib.h>
 #endif
 
 static void tableDefault(void) {}
