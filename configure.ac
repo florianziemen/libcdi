@@ -250,7 +250,7 @@ AC_ARG_ENABLE([iso-c-interface],
               [enable_isoc=${enableval}],[enable_isoc=no])
 AS_IF([test x"$enable_isoc" = xyes],
   [ACX_FC_CHECK_STRPTR_CONVERT(,[enable_isoc=no])],[enable_isoc=no])
-AM_CONDITIONAL([CREATE_ISOC],[test $enable_isoc = 'yes'])
+AM_CONDITIONAL([CREATE_ISOC],[test "x$enable_isoc" = 'xyes'])
 AC_SUBST([ENABLE_F2003_ISOC],[$enable_isoc])
 AM_SUBST_NOTMAKE([ENABLE_F2003_ISOC])
 # in case the Fortran interface uses the more modern F90-style interface,
