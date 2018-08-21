@@ -16,7 +16,6 @@ if USE_FC
 endif
 if CREATE_ISOC
   lib_LTLIBRARIES += libcdi_f2003.la
-  include_HEADERS += mo_cdi.$(FCMODEXT)
 endif
 else
   noinst_LTLIBRARIES += libcdi.la
@@ -24,6 +23,9 @@ if CREATE_ISOC
   noinst_LTLIBRARIES += libcdi_f2003.la
 endif
 endif
+
+
+include_HEADERS  += $(iso_c_modfile)
 
 
 AM_CFLAGS = $(PPM_CORE_CFLAGS) $(YAXT_CFLAGS) $(MPI_C_INCLUDE)
@@ -178,6 +180,11 @@ EXTRA_DIST += \
 
 
 libcdi_f2003_la_SOURCES = mo_cdi.f90
+libcdi_f2003_ladir = $(includedir)
+nodist_libcdi_f2003_la_HEADERS =
+if CREATE_ISOC
+nodist_libcdi_f2003_la_HEADERS += mo_cdi.$(FCMODEXT)
+endif
 libcdi_f2003_la_LIBADD = libcdi.la
 
 libcdiresunpack_la_SOURCES = \
@@ -280,7 +287,7 @@ cdilib.c:
 #
 all-local: $(LOCALTARGETS)
 #
-CLEANFILES  = `ls *~`
+CLEANFILES  := `ls *~`
 #CLEANFILES += cdilib.c
 if CREATE_ISOC
 CLEANFILES += mo_cdi.$(FCMODEXT)
