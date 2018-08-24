@@ -921,11 +921,9 @@ void cdf_set_cdi_attr(int ncid, int ncvarid, int attnum, int cdiID, int varID)
     }
   else if ( xtypeIsText(atttype) )
     {
-      char attstring[256];
-      char *pattstring = attlen > sizeof(attstring) ? (char*) malloc(attlen*sizeof(char)) : attstring;
-      cdfGetAttText(ncid, ncvarid, attname, attlen, pattstring);
-      cdiDefAttTxt(cdiID, varID, attname, (int)attlen, pattstring);
-      if (attlen > sizeof(attstring)) free(pattstring);
+      char attstring[8192];
+      cdfGetAttText(ncid, ncvarid, attname, sizeof(attstring), attstring);
+      cdiDefAttTxt(cdiID, varID, attname, (int)attlen, attstring);
     }
 }
 
