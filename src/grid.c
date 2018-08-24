@@ -96,8 +96,8 @@ bool cdiInqAttConvertedToFloat(int gridID, int atttype, const char *attname, int
     {
       int attint;
       int *pattint = attlen > 1 ? (int*) malloc(attlen*sizeof(int)) : &attint;
-      cdiInqAttInt(gridID, CDI_GLOBAL, attname, attlen, attint);
-      for ( int i = 0; i < attlen; ++i ) attflt[i] = (double)attint[i];
+      cdiInqAttInt(gridID, CDI_GLOBAL, attname, attlen, pattint);
+      for ( int i = 0; i < attlen; ++i ) attflt[i] = (double)pattint[i];
       if (attlen > 1) free(pattint);
     }
   else if ( atttype == CDI_DATATYPE_FLT32 || atttype == CDI_DATATYPE_FLT64 )
