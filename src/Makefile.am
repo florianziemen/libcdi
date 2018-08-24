@@ -24,10 +24,6 @@ if CREATE_ISOC
 endif
 endif
 
-
-include_HEADERS  += $(iso_c_modfile)
-
-
 AM_CFLAGS = $(PPM_CORE_CFLAGS) $(YAXT_CFLAGS) $(MPI_C_INCLUDE)
 
 libcdi_la_SOURCES = 	 \
