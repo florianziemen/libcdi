@@ -896,8 +896,9 @@ void cdf_set_cdi_attr(int ncid, int ncvarid, int attnum, int cdiID, int varID)
   cdf_inq_atttype(ncid, ncvarid, attname, &atttype);
   if ( xtypeIsInt(atttype) )
     {
-      int *attint = (int*) Malloc(attlen*sizeof(int));
-      cdfGetAttInt(ncid, ncvarid, attname, attlen, attint);
+      int attint;
+      int *pattint = attlen > 1 ? (int*) malloc(attlen*sizeof(int)) : &attint;
+      cdfGetAttInt(ncid, ncvarid, attname, attlen, pattint);
       int datatype = (atttype == NC_SHORT)  ? CDI_DATATYPE_INT16 :
                      (atttype == NC_BYTE)   ? CDI_DATATYPE_INT8 :
 #ifdef HAVE_NETCDF4
@@ -906,22 +907,25 @@ void cdf_set_cdi_attr(int ncid, int ncvarid, int attnum, int cdiID, int varID)
                      (atttype == NC_UINT)   ? CDI_DATATYPE_UINT32 :
 #endif
                      CDI_DATATYPE_INT32;
-      cdiDefAttInt(cdiID, varID, attname, datatype, (int)attlen, attint);
-      Free(attint);
+      cdiDefAttInt(cdiID, varID, attname, datatype, (int)attlen, pattint);
+      if (attlen > 1) free(pattint);
     }
   else if ( xtypeIsFloat(atttype) )
     {
-      double *attflt = (double*) Malloc(attlen*sizeof(double));
-      cdfGetAttDouble(ncid, ncvarid, attname, attlen, attflt);
+      double attflt;
+      double *pattflt = attlen > 1 ? (double*) malloc(attlen*sizeof(double)) : &attflt;
+      cdfGetAttDouble(ncid, ncvarid, attname, attlen, pattflt);
       int datatype = (atttype == NC_FLOAT) ? CDI_DATATYPE_FLT32 : CDI_DATATYPE_FLT64;
-      cdiDefAttFlt(cdiID, varID, attname, datatype, (int)attlen, attflt);
-      Free(attflt);
+      cdiDefAttFlt(cdiID, varID, attname, datatype, (int)attlen, pattflt);
+      if (attlen > 1) free(pattflt);
     }
   else if ( xtypeIsText(atttype) )
     {
-      char attstring[8192];
-      cdfGetAttText(ncid, ncvarid, attname, sizeof(attstring), attstring);
-      cdiDefAttTxt(cdiID, varID, attname, (int)attlen, attstring);
+      char attstring[256];
+      char *pattstring = attlen > sizeof(attstring) ? (char*) malloc(attlen*sizeof(char)) : attstring;
+      cdfGetAttText(ncid, ncvarid, attname, attlen, pattstring);
+      cdiDefAttTxt(cdiID, varID, attname, (int)attlen, pattstring);
+      if (attlen > sizeof(attstring)) free(pattstring);
     }
 }
 
