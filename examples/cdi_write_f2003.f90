@@ -1,6 +1,7 @@
       PROGRAM CDIWRITEF2003
 
       USE iso_c_binding
+      USE iso_fortran_env, ONLY : int64
       USE mo_cdi
 
       IMPLICIT NONE
@@ -72,7 +73,7 @@
 !     Loop over the number of time steps
       DO tsID = 0, nts-1
 !        Set the verification date to 1985-01-01 + tsID
-         CALL taxisDefVdate(taxisID, INT(19850101+tsID,8))
+         CALL taxisDefVdate(taxisID, 19850101_int64+tsID)
 !        Set the verification time to 12:00:00
          CALL taxisDefVtime(taxisID, 120000)
 !        Define the time step
