@@ -3915,7 +3915,7 @@ int gridVerifyGribParamLCC(double missval, double *lon_0, double *lat_0, double 
       if ( IS_EQUAL(*lon_0, missval) ) { Warning("%s mapping parameter %s missing!", projection, "longitude_of_central_meridian"); }
       if ( IS_EQUAL(*lat_0, missval) ) { Warning("%s mapping parameter %s missing!", projection, "latitude_of_central_meridian"); }
       if ( IS_EQUAL(*lat_1, missval) ) { Warning("%s mapping parameter %s missing!", projection, "standard_parallel"); }
-      if ( IS_NOT_EQUAL(*x_0, missval) && IS_NOT_EQUAL(*y_0, grid_missval) && (IS_EQUAL(*xval_0, missval) || IS_EQUAL(*yval_0, missval)) )
+      if ( IS_NOT_EQUAL(*x_0, missval) && IS_NOT_EQUAL(*y_0, missval) && (IS_EQUAL(*xval_0, missval) || IS_EQUAL(*yval_0, missval)) )
         {
           if ( proj_lcc_to_lonlat_func )
             {
