@@ -1029,7 +1029,7 @@ void cdf_write_var(stream_t *streamptr, int varID, int memtype, const void *data
   int zaxisindex = vlistZaxisIndex(vlistID, zaxisID);
   int zid = streamptr->zaxisID[zaxisindex];
 
-  if ( timetype != TIME_CONSTANT )
+  if ( vlistHasTime(vlistID) && timetype != TIME_CONSTANT )
     {
       start[ndims] = (size_t)ntsteps - 1;
       count[ndims] = 1;
@@ -1123,7 +1123,7 @@ void cdf_write_var_chunk(stream_t *streamptr, int varID, int memtype,
   int zaxisindex = vlistZaxisIndex(vlistID, zaxisID);
   int zid = streamptr->zaxisID[zaxisindex];
 
-  if ( timetype != TIME_CONSTANT )
+  if ( vlistHasTime(vlistID) && timetype != TIME_CONSTANT )
     {
       start[ndims] = (size_t)ntsteps - 1;
       count[ndims] = 1;
@@ -1222,7 +1222,7 @@ void cdf_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
   bool swapxy = (dimorder[2] == 2 || dimorder[0] == 1) && xid != CDI_UNDEFID && yid != CDI_UNDEFID;
 
   size_t ndims = 0;
-  if ( timetype != TIME_CONSTANT )
+  if ( vlistHasTime(vlistID) && timetype != TIME_CONSTANT )
     {
       start[ndims] = (size_t)ntsteps - 1;
       count[ndims] = 1;
