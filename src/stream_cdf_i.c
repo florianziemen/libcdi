@@ -795,6 +795,37 @@ void scan_hybrid_formulaterms(int ncid, int ncfvarid, int *avarid, int *bvarid, 
 }
 
 static
+void readVCT(int ncid, int ndims2, size_t dimlen, size_t dimlen2, int avarid2, int bvarid2, double *vct)
+{
+  double *abuf = (double*) Malloc(dimlen*2*sizeof(double));
+  double *bbuf = (double*) Malloc(dimlen*2*sizeof(double));
+  cdf_get_var_double(ncid, avarid2, abuf);
+  cdf_get_var_double(ncid, bvarid2, bbuf);
+
+  if ( ndims2 == 2 )
+    {
+      for ( size_t i = 0; i < dimlen; ++i )
+        {
+          vct[i] = abuf[i*2];
+          vct[i+dimlen+1] = bbuf[i*2];
+        }
+      vct[dimlen]     = abuf[dimlen*2-1];
+      vct[dimlen*2+1] = bbuf[dimlen*2-1];
+    }
+  else
+    {
+      for ( size_t i = 0; i < dimlen2; ++i )
+        {
+          vct[i] = abuf[i];
+          vct[i+dimlen+1] = bbuf[i];
+        }
+    }
+
+  Free(abuf);
+  Free(bbuf);
+}
+
+static
 bool isHybridSigmaPressureCoordinate(int ncid, int ncvarid, ncvar_t *ncvars, const ncdim_t *ncdims)
 {
   bool status = false;
@@ -842,34 +873,10 @@ bool isHybridSigmaPressureCoordinate(int ncid, int ncvarid, ncvar_t *ncvars, con
                   if ( p0varid1 != -1 && p0varid1 == p0varid2 )
                     cdf_get_var_double(ncid, p0varid2, &px);
 
-                  double *abuf = (double*) Malloc(dimlen*2*sizeof(double));
-                  double *bbuf = (double*) Malloc(dimlen*2*sizeof(double));
-                  cdf_get_var_double(ncid, avarid2, abuf);
-                  cdf_get_var_double(ncid, bvarid2, bbuf);
-
                   size_t vctsize = (dimlen+1)*2;
                   double *vct = (double *) Malloc(vctsize*sizeof(double));
-                  if ( ndims2 == 2 )
-                    {
-                      for ( size_t i = 0; i < dimlen; ++i )
-                        {
-                          vct[i] = abuf[i*2];
-                          vct[i+dimlen+1] = bbuf[i*2];
-                        }
-                      vct[dimlen]     = abuf[dimlen*2-1];
-                      vct[dimlen*2+1] = bbuf[dimlen*2-1];
-                    }
-                  else
-                    {
-                       for ( size_t i = 0; i < dimlen2; ++i )
-                        {
-                          vct[i] = abuf[i];
-                          vct[i+dimlen+1] = bbuf[i];
-                        }
-                    }
 
-                  Free(abuf);
-                  Free(bbuf);
+                  readVCT(ncid, ndims2, dimlen, dimlen2, avarid2, bvarid2, vct);
 
                   if ( p0varid1 != -1 && IS_NOT_EQUAL(px, 1) )
                     for ( size_t i = 0; i < dimlen+1; ++i ) vct[i] *= px;
