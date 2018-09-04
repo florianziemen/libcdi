@@ -1,3 +1,11 @@
+2018-11-08  Uwe Schulzweida
+
+	* Version 1.9.6 released
+
+2018-09-04  Uwe Schulzweida
+
+	* NetCDF: added support for single scalar variable 
+
 2018-08-10  Uwe Schulzweida
 
         * using CGRIBEX library version 1.9.1

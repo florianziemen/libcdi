@@ -3639,10 +3639,9 @@ int cdf_check_vars(int nvars, ncvar_t *ncvars, size_t ntsteps, int timedimid)
 	  cdf_set_var(ncvars, ncvarid, TRUE);
 
       if ( ncvars[ncvarid].isvar == -1 && ncvars[ncvarid].ndims == 0 )
-	cdf_set_var(ncvars, ncvarid, FALSE);
+        cdf_set_var(ncvars, ncvarid, nvars == 1 ? TRUE : FALSE);
 
-      //if ( ncvars[ncvarid].isvar == -1 && ncvars[ncvarid].ndims > 1 )
-      if ( ncvars[ncvarid].isvar == -1 && ncvars[ncvarid].ndims >= 1 )
+      if ( ncvars[ncvarid].isvar == -1 && ncvars[ncvarid].ndims > 0 )
 	cdf_set_var(ncvars, ncvarid, TRUE);
 
       if ( ncvars[ncvarid].isvar == -1 )
