@@ -2,6 +2,10 @@
 
 	* Version 1.9.6 released
 
+2018-09-05  Uwe Schulzweida
+
+        * GRIB2: correct longitudeOfFirstGridPoint if necessary (bug fix)
+
 2018-09-04  Uwe Schulzweida
 
 	* CDI_reduce_dim: wrong result when reduce time dimension (bug fix)
