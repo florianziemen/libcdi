@@ -10,7 +10,6 @@
 #include "stream_ext.h"
 #include "stream_ieg.h"
 #include "dmemory.h"
-#include "namespace.h"
 
 
 /* the single image implementation */

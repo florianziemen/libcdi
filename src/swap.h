@@ -1,6 +1,11 @@
+#ifndef  SWAP_H_
+#define  SWAP_H_
 
 void swap4byte(void *ptr, size_t size);
 void swap8byte(void *ptr, size_t size);
+
+#endif
+
 /*
  * Local Variables:
  * c-file-style: "Java"

@@ -1,5 +1,5 @@
-#if defined (HAVE_CONFIG_H)
-#  include "config.h"
+#ifdef HAVE_CONFIG_H
+#include "config.h"
 #endif
 
 #include <float.h>
@@ -14,11 +14,10 @@
 #include "datetime.h"
 #include "ieg.h"
 #include "stream_ieg.h"
-#include "vlist.h"
 #include "exse.h"
 
 
-#if defined (HAVE_LIBIEG)
+#ifdef HAVE_LIBIEG
 
 typedef struct {
   int param;

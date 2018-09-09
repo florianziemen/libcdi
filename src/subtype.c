@@ -29,10 +29,6 @@
 /*                 .  |--- atts              [subtype_attr_t]          */
 /*                 .                                                   */
 
-#if defined (HAVE_CONFIG_H)
-#  include "config.h"
-#endif
-
 #include "cdi.h"
 #include "cdi_int.h"
 #include "dmemory.h"

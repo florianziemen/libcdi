@@ -1,7 +1,3 @@
-#if defined (HAVE_CONFIG_H)
-#  include "config.h"
-#endif
-
 #include <limits.h>
 
 #include "dmemory.h"

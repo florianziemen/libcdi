@@ -1,5 +1,5 @@
-#if defined (HAVE_CONFIG_H)
-#  include "config.h"
+#ifdef HAVE_CONFIG_H
+#include "config.h"
 #endif
 
 
@@ -11,7 +11,6 @@
 #include "resource_handle.h"
 #include "varscan.h"
 #include "vlist.h"
-#include "grid.h"
 #include "zaxis.h"
 #include "subtype.h"
 

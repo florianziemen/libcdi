@@ -5,7 +5,6 @@
 #define _XOPEN_SOURCE 600
 
 #include <errno.h>
-#include <float.h>
 #include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -15,7 +14,6 @@
 #include "cdi_int.h"
 #include "cdi_uuid.h"
 #include "dmemory.h"
-#include "binary.h"
 
 
 static const char uuidFmt[] = "%02hhx%02hhx%02hhx%02hhx-"

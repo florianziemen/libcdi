@@ -1,5 +1,5 @@
-#if defined (HAVE_CONFIG_H)
-#  include "config.h"
+#ifdef HAVE_CONFIG_H
+#include "config.h"
 #endif
 
 #include <string.h>
@@ -14,7 +14,6 @@
 #include "cdi_uuid.h"
 #include "resource_handle.h"
 #include "resource_unpack.h"
-#include "varscan.h"
 #include "namespace.h"
 #include "serialize.h"
 #include "zaxis.h"
