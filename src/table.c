@@ -1,5 +1,6 @@
 #include <stddef.h>
 #include <string.h>
+#include <ctype.h>
 
 #include "dmemory.h"
 #include "cdi.h"
