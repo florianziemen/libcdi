@@ -3930,6 +3930,135 @@ int gridVerifyGribParamLCC(double missval, double *lon_0, double *lat_0, double 
   return 0;
 }
 
+/*
+@Function  gridDefParamSTERE
+@Title     Define the parameter of a Polar stereographic grid
+
+@Prototype void gridDefParamSTERE(int gridID, double missval, double lon_0, double lat_0, double lat_1, double lat_2, double a, double rf, double xval_0, double yval_0, double x_0, double y_0)
+@Parameter
+    @Item  gridID    Grid ID, from a previous call to @fref{gridCreate}.
+    @Item  missval   Missing value
+    @Item  lon_0     The East longitude of the meridian which is parallel to the Y-axis.
+    @Item  lat_0     Latitude of the projection origin
+    @Item  lat_1     First latitude from the pole at which the secant cone cuts the sphere.
+    @Item  lat_2     Second latitude at which the secant cone cuts the sphere.
+    @Item  a         Earth radius in metres (optional).
+    @Item  rf        Inverse flattening (1/f) (optional).
+    @Item  xval_0    Longitude of the first grid point in degree (optional).
+    @Item  yval_0    Latitude of the first grid point in degree (optional).
+    @Item  x_0       False easting (optional).
+    @Item  y_0       False northing (optional).
+
+@Description
+The function @func{gridDefParamSTERE} defines the parameter of a Polar stereographic grid.
+
+@EndFunction
+*/
+void gridDefParamSTERE(int gridID, double missval, double lon_0, double lat_0, double lat_1, double lat_2,
+                         double a, double rf, double xval_0, double yval_0, double x_0, double y_0)
+{
+  (void)lat_0;
+  cdiGridDefKeyStr(gridID, CDI_KEY_MAPPING, CDI_MAX_NAME, "Polar_Stereographic");
+
+  const char *mapname = "polar_stereographic";
+  cdiGridDefKeyStr(gridID, CDI_KEY_MAPNAME, CDI_MAX_NAME, mapname);
+  cdiDefAttTxt(gridID, CDI_GLOBAL, "grid_mapping_name", (int)(strlen(mapname)), mapname);
+  int nlats = 0;
+  double lats[2];
+  lats[nlats++] = lat_1;
+  if ( IS_NOT_EQUAL(lat_1, lat_2) ) lats[nlats++] = lat_2;
+  cdiDefAttFlt(gridID, CDI_GLOBAL, "standard_parallel", CDI_DATATYPE_FLT64, nlats, lats);
+  cdiDefAttFlt(gridID, CDI_GLOBAL, "longitude_of_central_meridian", CDI_DATATYPE_FLT64, 1, &lon_0);
+  cdiDefAttFlt(gridID, CDI_GLOBAL, "latitude_of_projection_origin", CDI_DATATYPE_FLT64, 1, &lat_2);
+  if ( a > 0 ) cdiDefAttFlt(gridID, CDI_GLOBAL, "earth_radius", CDI_DATATYPE_FLT64, 1, &a);
+  if ( rf > 0 ) cdiDefAttFlt(gridID, CDI_GLOBAL, "inverse_flattening", CDI_DATATYPE_FLT64, 1, &rf);
+  if ( IS_NOT_EQUAL(x_0, missval) ) cdiDefAttFlt(gridID, CDI_GLOBAL, "false_easting", CDI_DATATYPE_FLT64, 1, &x_0);
+  if ( IS_NOT_EQUAL(y_0, missval) ) cdiDefAttFlt(gridID, CDI_GLOBAL, "false_northing", CDI_DATATYPE_FLT64, 1, &y_0);
+  if ( IS_NOT_EQUAL(xval_0, missval) ) cdiDefAttFlt(gridID, CDI_GLOBAL, "longitudeOfFirstGridPointInDegrees", CDI_DATATYPE_FLT64, 1, &xval_0);
+  if ( IS_NOT_EQUAL(yval_0, missval) ) cdiDefAttFlt(gridID, CDI_GLOBAL, "latitudeOfFirstGridPointInDegrees", CDI_DATATYPE_FLT64, 1, &yval_0);
+
+  grid_t *gridptr = grid_to_pointer(gridID);
+  gridptr->projtype = CDI_PROJ_STERE;
+
+  gridVerifyProj(gridID);
+}
+
+/*
+@Function  gridInqParamSTERE
+@Title     Get the parameter of a Polar stereographic grid
+
+@Prototype void gridInqParamSTERE(int gridID, double missval, double *lon_0, double *lat_0, double *lat_1, double *lat_2, double *a, double *rf, double *xval_0, double *yval_0, double *x_0, double *y_0)
+@Parameter
+    @Item  gridID    Grid ID, from a previous call to @fref{gridCreate} or @fref{vlistInqVarGrid}.
+    @Item  missval   Missing value
+    @Item  lon_0     The East longitude of the meridian which is parallel to the Y-axis.
+    @Item  lat_0     Latitude of the projection origin
+    @Item  lat_1     First latitude from the pole at which the secant cone cuts the sphere.
+    @Item  lat_2     Second latitude at which the secant cone cuts the sphere.
+    @Item  a         Earth radius in metres (optional).
+    @Item  rf        Inverse flattening (1/f) (optional).
+    @Item  xval_0    Longitude of the first grid point in degree (optional).
+    @Item  yval_0    Latitude of the first grid point in degree (optional).
+    @Item  x_0       False easting (optional).
+    @Item  y_0       False northing (optional).
+
+@Description
+The function @func{gridInqParamSTERE} returns the parameter of a Polar stereographic grid.
+
+@EndFunction
+*/
+int gridInqParamSTERE(int gridID, double missval, double *lon_0, double *lat_0, double *lat_1, double *lat_2,
+                        double *a, double *rf, double *xval_0, double *yval_0, double *x_0, double *y_0)
+{
+  *a = 0; *rf = 0;
+  *lon_0 = missval; *lat_0 = missval, *lat_1 = missval, *lat_2 = missval;
+  *xval_0 = missval; *yval_0 = missval; *x_0 = missval, *y_0 = missval;
+
+  int status = -1;
+  if ( gridInqType(gridID) != GRID_PROJECTION ) return status;
+
+  status = -2;
+  const char *projection = "polar_stereographic";
+  char mapname[CDI_MAX_NAME]; mapname[0] = 0;
+  cdiGridInqKeyStr(gridID, CDI_KEY_MAPNAME, CDI_MAX_NAME, mapname);
+  if ( mapname[0] && strcmp(mapname, projection) == 0 )
+    {
+      int atttype, attlen;
+      char attname[CDI_MAX_NAME+1];
+
+      int natts;
+      cdiInqNatts(gridID, CDI_GLOBAL, &natts);
+
+      if ( natts ) status = 0;
+
+      for ( int iatt = 0; iatt < natts; ++iatt )
+        {
+          cdiInqAtt(gridID, CDI_GLOBAL, iatt, attname, &atttype, &attlen);
+          if ( attlen > 2 ) continue;
+
+          double attflt[2];
+          if ( cdiInqAttConvertedToFloat(gridID, atttype, attname, attlen, attflt) )
+            {
+              if      ( strcmp(attname, "earth_radius") == 0 )                       *a      = attflt[0];
+              else if ( strcmp(attname, "inverse_flattening") == 0 )                 *rf     = attflt[0];
+              else if ( strcmp(attname, "longitude_of_central_meridian") == 0 )      *lon_0  = attflt[0];
+              else if ( strcmp(attname, "latitude_of_projection_origin") == 0 )      *lat_0  = attflt[0];
+              else if ( strcmp(attname, "false_easting")  == 0 )                     *x_0    = attflt[0];
+              else if ( strcmp(attname, "false_northing") == 0 )                     *y_0    = attflt[0];
+              else if ( strcmp(attname, "longitudeOfFirstGridPointInDegrees") == 0 ) *xval_0 = attflt[0];
+              else if ( strcmp(attname, "latitudeOfFirstGridPointInDegrees")  == 0 ) *yval_0 = attflt[0];
+              else if ( strcmp(attname, "standard_parallel") == 0 )
+                {
+                  *lat_1 = attflt[0];
+                  *lat_2 = (attlen == 2) ? attflt[1] : attflt[0];
+                }
+            }
+        }
+    }
+
+  return status;
+}
+
 
 void gridDefComplexPacking(int gridID, int lcomplex)
 {
@@ -4860,8 +4989,7 @@ struct addIfNewRes cdiVlistAddGridIfNew(int vlistID, grid_t *grid, int mode)
               }
           }
         else
-          Error("Internal problem: undefined gridID in vlist "
-                "%d, position %u!", vlistID, index);
+          Error("Internal problem: undefined gridID in vlist %d, position %u!", vlistID, index);
       }
 
   if ( ! griddefined )
