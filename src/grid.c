@@ -1007,7 +1007,6 @@ int gridInqProjType(int gridID)
   grid_t *gridptr = grid_to_pointer(gridID);
 
   int projtype = gridptr->projtype;
-
   if ( projtype == -1 )
     {
       char mapping[CDI_MAX_NAME]; mapping[0] = 0;
@@ -1018,6 +1017,7 @@ int gridInqProjType(int gridID)
           else if ( strcmp(mapping, "lambert_azimuthal_equal_area") == 0 ) projtype = CDI_PROJ_LAEA;
           else if ( strcmp(mapping, "lambert_conformal_conic") == 0 )      projtype = CDI_PROJ_LCC;
           else if ( strcmp(mapping, "sinusoidal") == 0 )                   projtype = CDI_PROJ_SINU;
+          else if ( strcmp(mapping, "polar_stereographic") == 0 )          projtype = CDI_PROJ_STERE;
 
           gridptr->projtype = projtype;
         }

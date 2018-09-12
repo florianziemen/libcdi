@@ -38,7 +38,7 @@ int cgribexGetGridType(int *isec2)
     {
     case  GRIB1_GTYPE_LATLON:     { gridtype = GRID_LONLAT;     break; }
     case  GRIB1_GTYPE_LATLON_ROT: { gridtype = GRID_PROJECTION; break; }
-    case  GRIB1_GTYPE_LCC:        { gridtype = GRID_LCC;        break; }
+    case  GRIB1_GTYPE_LCC:        { gridtype = CDI_PROJ_LCC;    break; }
     case  GRIB1_GTYPE_GAUSSIAN:   { gridtype = ISEC2_Reduced ? GRID_GAUSSIAN_REDUCED : GRID_GAUSSIAN; break; }
     case  GRIB1_GTYPE_SPECTRAL:   { gridtype = GRID_SPECTRAL;   break; }
     case  GRIB1_GTYPE_GME:        { gridtype = GRID_GME;        break; }
@@ -141,10 +141,10 @@ void cgribexGetGrid(stream_t *streamptr, int *isec2, int *isec4, grid_t *grid, i
   bool compyinc = true;
   int gridtype = cgribexGetGridType(isec2);
   int projtype = (gridtype == GRID_PROJECTION && cgribexGetIsRotated(isec2)) ? CDI_PROJ_RLL : CDI_UNDEFID;
-  if ( gridtype == GRID_LCC )
+  if ( gridtype == CDI_PROJ_LCC )
     {
+      projtype = gridtype;
       gridtype = GRID_PROJECTION;
-      projtype = CDI_PROJ_LCC;
     }
 
   if ( streamptr->unreduced && gridtype == GRID_GAUSSIAN_REDUCED && iret != -801 )
@@ -1811,7 +1811,7 @@ void cgribexDefGrid(int *isec1, int *isec2, double *fsec2, int *isec4, int gridI
         cgribexDefGridRegular(isec2, fsec2, gridID, gridtype, gridIsRotated, gridIsCurvilinear);
 	break;
       }
-    case GRID_LCC:
+    case CDI_PROJ_LCC:
       {
         cgribexDefGridLambert(isec2, gridID);
 	break;

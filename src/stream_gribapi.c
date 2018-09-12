@@ -2277,7 +2277,7 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
         gribapiDefGridRegular(gh, gridID, gridtype, gridIsRotated, gridIsCurvilinear);
 	break;
       }
-    case GRID_LCC:
+    case CDI_PROJ_LCC:
       {
         gribapiDefGridLambert(gh, editionNumber, gridID);
 	break;

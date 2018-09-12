@@ -489,8 +489,8 @@ int gribapiGetGridType(grib_handle *gh)
         gridtype = ( gribGetLong(gh, "Ni") == (long) GRIB_MISSING_LONG ) ? GRID_GAUSSIAN_REDUCED : GRID_GAUSSIAN;
         break;
       case GRIB2_GTYPE_LATLON_ROT:   gridtype = GRID_PROJECTION; break;
-      case GRIB2_GTYPE_LCC:          gridtype = GRID_LCC; break;
-      case GRIB2_GTYPE_STERE:      gridtype = CDI_PROJ_STERE; break;
+      case GRIB2_GTYPE_LCC:          gridtype = CDI_PROJ_LCC; break;
+      case GRIB2_GTYPE_STERE:        gridtype = CDI_PROJ_STERE; break;
       case GRIB2_GTYPE_SPECTRAL:     gridtype = GRID_SPECTRAL; break;
       case GRIB2_GTYPE_GME:          gridtype = GRID_GME; break;
       case GRIB2_GTYPE_UNSTRUCTURED: gridtype = GRID_UNSTRUCTURED; break;
@@ -788,14 +788,9 @@ void gribapiGetGrid(grib_handle *gh, grid_t *grid)
   long editionNumber = gribEditionNumber(gh);
   int gridtype = gribapiGetGridType(gh);
   int projtype = (gridtype == GRID_PROJECTION && gribapiGetIsRotated(gh)) ? CDI_PROJ_RLL : CDI_UNDEFID;
-  if ( gridtype == GRID_LCC )
+  if (gridtype == CDI_PROJ_LCC || gridtype == CDI_PROJ_STERE)
     {
-      gridtype = GRID_PROJECTION;
-      projtype = CDI_PROJ_LCC;
-    }
-  else if (gridtype == CDI_PROJ_STERE)
-    {
-      projtype = CDI_PROJ_STERE;
+      projtype = gridtype;
       gridtype = GRID_PROJECTION;
     }
   /*
