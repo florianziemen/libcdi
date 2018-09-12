@@ -733,7 +733,7 @@ void cdfReadVarSliceDPPart(stream_t *streamptr, int varID, int levelID, int varT
   start[position] = start[position]+startpoint;
   count[position] = length;
 
-  if ( vlistInqVarDatatype(vlistID, varID) == DATATYPE_FLT32 )
+  if ( vlistInqVarDatatype(vlistID, varID) == CDI_DATATYPE_FLT32 )
     {      
       float *data_fp = (float *) Malloc(length*sizeof(*data_fp));
       cdf_get_vara_float(fileID, ncvarid, start, count, data_fp);
@@ -802,7 +802,7 @@ void cdfReadVarSliceSPPart(stream_t *streamptr, int varID, int levelID, int varT
   start[position] = start[position]+startpoint;
   count[position] = length;
 
-  if ( vlistInqVarDatatype(vlistID, varID) == DATATYPE_FLT32 )
+  if ( vlistInqVarDatatype(vlistID, varID) == CDI_DATATYPE_FLT32 )
     {      
       float *data_fp = (float *) Malloc(length*sizeof(*data_fp));
       cdf_get_vara_float(fileID, ncvarid, start, count, data_fp);
