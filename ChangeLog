@@ -2,6 +2,10 @@
 
 	* Version 1.9.6 released
 
+2018-09-12  Uwe Schulzweida
+
+	* Removed obsolete flags DATATYPE_* and FILETYPE_*
+
 2018-09-05  Uwe Schulzweida
 
         * GRIB2: correct longitudeOfFirstGridPoint if necessary (bug fix)
