@@ -114,14 +114,6 @@ extern "C" {
 #define  CDI_DATATYPE_UINT16      316
 #define  CDI_DATATYPE_UINT32      332
 
-#define  DATATYPE_PACK            0
-#define  DATATYPE_PACK8           8
-#define  DATATYPE_PACK16         16
-#define  DATATYPE_PACK24         24
-#define  DATATYPE_FLT32         132
-#define  DATATYPE_FLT64         164
-#define  DATATYPE_INT32         232
-
 /* internal data types */
 #define  CDI_DATATYPE_INT         251
 #define  CDI_DATATYPE_FLT         252
@@ -130,13 +122,6 @@ extern "C" {
 #define  CDI_DATATYPE_UCHAR       255
 #define  CDI_DATATYPE_LONG        256
 #define  CDI_DATATYPE_UINT        257
-
-#define  DATATYPE_INT           251
-#define  DATATYPE_FLT           252
-#define  DATATYPE_TXT           253
-#define  DATATYPE_CPX           254
-#define  DATATYPE_UCHAR         255
-#define  DATATYPE_LONG          256
 
 /* Chunks */
 
