@@ -60,16 +60,6 @@ extern "C" {
 #define  CDI_FILETYPE_EXT           9   // File type EXTRA
 #define  CDI_FILETYPE_IEG          10   // File type IEG
 
-#define  FILETYPE_GRB           1
-#define  FILETYPE_GRB2          2
-#define  FILETYPE_NC            3
-#define  FILETYPE_NC2           4
-#define  FILETYPE_NC4           5
-#define  FILETYPE_NC4C          6
-#define  FILETYPE_SRV           7
-#define  FILETYPE_EXT           8
-#define  FILETYPE_IEG           9
-
 /* Compress types */
 
 #define  CDI_COMPRESS_NONE          0

@@ -88,7 +88,7 @@ void cdfGetSlapDescription(stream_t *streamptr, int varID, size_t (*start)[4], s
 //Returns the number of missing + out-of-range values encountered.
 static
 size_t cdfDoInputDataTransformationDP(size_t valueCount, double *data, bool haveMissVal, double missVal, double scaleFactor, double offset, double validMin, double validMax)
- {
+{
   const bool haveOffset   = IS_NOT_EQUAL(offset, 0);
   const bool haveScaleFactor = IS_NOT_EQUAL(scaleFactor, 1);
   size_t missValCount = 0;
@@ -860,15 +860,16 @@ int cdiStreamReadVarSlicePart(int streamID, int varID, int levelID, int varType,
   switch (filetype)
     {
 #if defined (HAVE_LIBNETCDF)
-    case FILETYPE_NC:
-    case FILETYPE_NC2:
-    case FILETYPE_NC4:
-    case FILETYPE_NC4C:
+    case CDI_FILETYPE_NC:
+    case CDI_FILETYPE_NC2:
+    case CDI_FILETYPE_NC4:
+    case CDI_FILETYPE_NC4C:
+    case CDI_FILETYPE_NC5:
       {
         if ( memtype == MEMTYPE_FLOAT )
-        cdfReadVarSliceSPPart(streamptr, varID, levelID, varType, start, size, (float *)data, nmiss);
+          cdfReadVarSliceSPPart(streamptr, varID, levelID, varType, start, size, (float *)data, nmiss);
         else
-        cdfReadVarSliceDPPart(streamptr, varID, levelID, varType, start, size, (double *)data, nmiss);
+          cdfReadVarSliceDPPart(streamptr, varID, levelID, varType, start, size, (double *)data, nmiss);
         break;
       }
 #endif
@@ -990,15 +991,16 @@ void cdiStreamReadVarPart(int streamID, int varID, int varType, int start, size_
   switch (filetype)
     {
 #if defined (HAVE_LIBNETCDF)
-    case FILETYPE_NC:
-    case FILETYPE_NC2:
-    case FILETYPE_NC4:
-    case FILETYPE_NC4C:
+    case CDI_FILETYPE_NC:
+    case CDI_FILETYPE_NC2:
+    case CDI_FILETYPE_NC4:
+    case CDI_FILETYPE_NC4C:
+    case CDI_FILETYPE_NC5:
       {
         if ( memtype == MEMTYPE_FLOAT )
-        cdfReadVarSPPart(streamptr, varID, varType, start, size, (float *)data, nmiss);
+          cdfReadVarSPPart(streamptr, varID, varType, start, size, (float *)data, nmiss);
         else
-        cdfReadVarDPPart(streamptr, varID, varType, start, size, (double *)data, nmiss);
+          cdfReadVarDPPart(streamptr, varID, varType, start, size, (double *)data, nmiss);
 
         break;
       }
@@ -1025,3 +1027,4 @@ void streamReadVarPart(int streamID, int varID, int varType, int start, size_t s
 }
 
 #endif
+
