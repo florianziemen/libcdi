@@ -9,6 +9,8 @@
 extern double grid_missval;
 extern int (*proj_lonlat_to_lcc_func)();
 extern int (*proj_lcc_to_lonlat_func)();
+extern int (*proj_lonlat_to_stere_func)();
+extern int (*proj_stere_to_lonlat_func)();
 
 typedef unsigned char mask_t;
 

@@ -540,36 +540,32 @@ void gribapiDefProjLCC(grib_handle *gh, int gridID)
 static
 void gribapiDefProjSTERE(grib_handle *gh, int gridID)
 {
-  /*
-  double a = 6367470., rf = 0;
-  long earthIsOblate;
-  grib_get_long(gh, "earthIsOblate", &earthIsOblate);
-  if ( earthIsOblate ) { a = 6378160.; rf = 297.0; }
-  */
-  double lon_0, lat_1, lat_2, xval_0, yval_0;
-  long projflag = 0, southPoleOnProjectionPlane;
+  long shapeOfTheEarth;
+  grib_get_long(gh, "shapeOfTheEarth", &shapeOfTheEarth);
+  double a = (shapeOfTheEarth == 6) ? 6371229 : 6367470;
+
+  double lon_0, lat_ts, xval_0, yval_0;
   grib_get_double(gh, "longitudeOfFirstGridPointInDegrees", &xval_0);
   grib_get_double(gh, "latitudeOfFirstGridPointInDegrees", &yval_0);
-  grib_get_double(gh, "LaDInDegrees", &lat_1);
-  grib_get_double(gh, "orientationOfTheGridInDegrees", &lat_2);
-  grib_get_long(gh, "projectionCentreFlag", &projflag);
-  grib_get_long(gh, "southPoleOnProjectionPlane", &southPoleOnProjectionPlane);
-  bool lsouth = gribbyte_get_bit((int)projflag, 1);
-  if ( lsouth ) { lat_1 = -lat_1; lat_2 = -lat_2; }
+  grib_get_double(gh, "LaDInDegrees", &lat_ts);
+  grib_get_double(gh, "orientationOfTheGridInDegrees", &lon_0);
 
-  double lat_0 = lat_2;
+  long southPoleOnProjectionPlane;
+  grib_get_long(gh, "southPoleOnProjectionPlane", &southPoleOnProjectionPlane);
+  double lat_0 = southPoleOnProjectionPlane ? -90 : 90;
+
   double x_0 = grid_missval;
   double y_0 = grid_missval;
-  /*
-  if ( proj_lonlat_to_lcc_func )
+
+  if ( proj_lonlat_to_stere_func )
     {
       x_0 = xval_0; y_0 = yval_0;
-      proj_lonlat_to_lcc_func(grid_missval, lon_0, lat_0, lat_1, lat_2, a, rf, (size_t)1, &x_0, &y_0);
+      // proj_lonlat_to_stere_func(grid_missval, lon_0, lat_0, lat_1, lat_2, a, rf, (size_t)1, &x_0, &y_0);
       if ( IS_NOT_EQUAL(x_0, grid_missval) && IS_NOT_EQUAL(y_0, grid_missval) )
         { x_0 = -x_0; y_0 = -y_0; }
     }
-  gridDefParamLCC(gridID, grid_missval, lon_0, lat_0, lat_1, lat_2, a, rf, xval_0, yval_0, x_0, y_0);
-  */
+
+  gridDefParamSTERE(gridID, grid_missval, lon_0, lat_ts, lat_0, a, xval_0, yval_0, x_0, y_0);
 }
 
 static
@@ -2042,14 +2038,10 @@ void gribapiDefGridRegular(grib_handle *gh, int gridID, int gridtype, bool gridI
   GRIB_CHECK(my_grib_set_double(gh, "latitudeOfFirstGridPointInDegrees",  yfirst), 0);
   GRIB_CHECK(my_grib_set_double(gh, "latitudeOfLastGridPointInDegrees",   ylast), 0);
 
-  {
-    long iscan = xfirst > xlast;
-    GRIB_CHECK(my_grib_set_long(gh, "iScansNegatively", iscan), 0);
-  }
-  {
-    long jscan = yfirst < ylast;
-    GRIB_CHECK(my_grib_set_long(gh, "jScansPositively", jscan), 0);
-  }
+  long xscan = xfirst > xlast;
+  GRIB_CHECK(my_grib_set_long(gh, "iScansNegatively", xscan), 0);
+  xscan = yfirst < ylast;
+  GRIB_CHECK(my_grib_set_long(gh, "jScansPositively", xscan), 0);
 
   if ( gridtype == GRID_GAUSSIAN || gridtype == GRID_GAUSSIAN_REDUCED )
     {
@@ -2080,10 +2072,10 @@ void gribapiDefGridRegular(grib_handle *gh, int gridID, int gridtype, bool gridI
 }
 
 static
-void gribapiDefGridLambert(grib_handle *gh, int editionNumber, int gridID)
+void gribapiDefGridLCC(grib_handle *gh, int editionNumber, int gridID)
 {
-  int xsize = (int) gridInqXsize(gridID);
-  int ysize = (int) gridInqYsize(gridID);
+  long xsize = (long) gridInqXsize(gridID);
+  long ysize = (long) gridInqYsize(gridID);
 
   double lon_0, lat_0, lat_1, lat_2, a, rf, xval_0, yval_0, x_0, y_0;
   gridInqParamLCC(gridID, grid_missval, &lon_0, &lat_0, &lat_1, &lat_2, &a, &rf, &xval_0, &yval_0, &x_0, &y_0);
@@ -2121,6 +2113,45 @@ void gribapiDefGridLambert(grib_handle *gh, int editionNumber, int gridID)
   gribbyte_set_bit(&scanflag, 2);
   if ( editionNumber <= 1 )
     GRIB_CHECK(my_grib_set_long(gh, "scanningMode", (long)scanflag), 0);
+}
+
+static
+void gribapiDefGridSTERE(grib_handle *gh, int editionNumber, int gridID)
+{
+  long xsize = (long) gridInqXsize(gridID);
+  long ysize = (long) gridInqYsize(gridID);
+
+  double lon_0, lat_ts, lat_0, a, xval_0, yval_0, x_0, y_0;
+  gridInqParamSTERE(gridID, grid_missval, &lon_0, &lat_ts, &lat_0, &a, &xval_0, &yval_0, &x_0, &y_0);
+  // gridVerifyGribParamSTERE(grid_missval, &lon_0, &lat_ts, &lat_0, &a, &xval_0, &yval_0, &x_0, &y_0);
+  if ( xval_0 < 0 ) xval_0 += 360;
+  int projflag = 0;
+
+  double xinc = gridInqXinc(gridID);
+  double yinc = gridInqYinc(gridID);
+
+  static const char mesg[] = "polar_stereographic";
+  size_t len = sizeof(mesg) -1;
+  GRIB_CHECK(my_grib_set_string(gh, "gridType", mesg, &len), 0);
+
+  GRIB_CHECK(my_grib_set_long(gh, "Nx", xsize), 0);
+  GRIB_CHECK(my_grib_set_long(gh, "Ny", ysize), 0);
+  GRIB_CHECK(my_grib_set_long(gh, "DxInMetres", lround(xinc)), 0);
+  GRIB_CHECK(my_grib_set_long(gh, "DyInMetres", lround(yinc)), 0);
+  GRIB_CHECK(my_grib_set_double(gh, "longitudeOfFirstGridPointInDegrees", xval_0), 0);
+  GRIB_CHECK(my_grib_set_double(gh, "latitudeOfFirstGridPointInDegrees", yval_0), 0);
+  GRIB_CHECK(my_grib_set_double(gh, "LaDInDegrees", lat_ts), 0);
+  GRIB_CHECK(my_grib_set_double(gh, "orientationOfTheGridInDegrees", lon_0), 0);
+  long southPoleOnProjectionPlane = IS_EQUAL(lat_0, -90.);
+  GRIB_CHECK(my_grib_set_double(gh, "southPoleOnProjectionPlane", southPoleOnProjectionPlane), 0);
+  GRIB_CHECK(my_grib_set_long(gh, "projectionCentreFlag", projflag), 0);
+
+  long shapeOfTheEarth = IS_EQUAL(a, 6371229.) ? 6 : 0;
+  if ( shapeOfTheEarth ) GRIB_CHECK(my_grib_set_long(gh, "shapeOfTheEarth", shapeOfTheEarth), 0);
+
+  GRIB_CHECK(my_grib_set_long(gh, "resolutionAndComponentFlags", 8), 0);
+  GRIB_CHECK(my_grib_set_long(gh, "iScansNegatively", 0), 0);
+  GRIB_CHECK(my_grib_set_long(gh, "jScansPositively", 1), 0);
 }
 
 static
@@ -2279,7 +2310,12 @@ void gribapiDefGrid(int editionNumber, grib_handle *gh, int gridID, int comptype
       }
     case CDI_PROJ_LCC:
       {
-        gribapiDefGridLambert(gh, editionNumber, gridID);
+        gribapiDefGridLCC(gh, editionNumber, gridID);
+	break;
+      }
+    case CDI_PROJ_STERE:
+      {
+        gribapiDefGridSTERE(gh, editionNumber, gridID);
 	break;
       }
     case GRID_SPECTRAL:
@@ -2665,7 +2701,8 @@ void gribapiSetScanningMode(grib_handle *gh, int scanningMode)
 }
 
 
-static void gribapiSetUvRelativeToGrid(grib_handle *gh, int mode)
+static
+void gribapiSetUvRelativeToGrid(grib_handle *gh, int mode)
 {
   long uvRelativeToGridMode = mode;
   long uvRelativeToGridModeOld;
@@ -2981,8 +3018,16 @@ void gribapiSetExtMode(grib_handle *gh, int gridID, size_t datasize, const doubl
   (void)datasize;
 #endif
   int gridtype = gridInqType(gridID);
+  if ( gridtype == GRID_PROJECTION )
+    {
+      int projtype = gridInqProjType(gridID);
+      if      ( projtype == CDI_PROJ_RLL )   gridtype = GRID_LONLAT;
+      else if ( projtype == CDI_PROJ_LCC )   gridtype = CDI_PROJ_LCC;
+      else if ( projtype == CDI_PROJ_STERE ) gridtype = CDI_PROJ_STERE;
+    }
+
   if ( gridtype == GRID_GENERIC || gridtype == GRID_LONLAT || gridtype == GRID_GAUSSIAN ||
-       gridtype == GRID_GAUSSIAN_REDUCED || gridtype == GRID_PROJECTION )
+       gridtype == GRID_GAUSSIAN_REDUCED || gridtype == CDI_PROJ_LCC )
     {
 #ifdef HIRLAM_EXTENSIONS
       int scanModeIN = gridInqScanningMode(gridID);

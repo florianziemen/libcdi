@@ -437,14 +437,19 @@ int grbGetGridtype(int gridID, size_t gridsize, bool *gridIsRotated, bool *gridI
 
   if ( gridtype == GRID_PROJECTION )
     {
-      if ( gridInqProjType(gridID) == CDI_PROJ_RLL )
+      int projtype = gridInqProjType(gridID);
+      if ( projtype == CDI_PROJ_RLL )
         {
           gridtype = GRID_LONLAT;
           *gridIsRotated = true;
         }
-      else if ( gridInqProjType(gridID) == CDI_PROJ_LCC )
+      else if ( projtype == CDI_PROJ_LCC )
         {
           gridtype = CDI_PROJ_LCC;
+        }
+      else if ( projtype == CDI_PROJ_STERE )
+        {
+          gridtype = CDI_PROJ_STERE;
         }
     }
 
