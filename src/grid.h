@@ -166,6 +166,8 @@ struct addIfNewRes cdiVlistAddGridIfNew(int vlistID, grid_t *grid, int mode);
 
 int gridVerifyGribParamLCC(double missval, double *lon_0, double *lat_0, double *lat_1, double *lat_2,
                            double *a, double *rf, double *xval_0, double *yval_0, double *x_0, double *y_0);
+int gridVerifyGribParamSTERE(double missval, double *lon_0, double *lat_ts, double *lat_0,
+                             double *a, double *xval_0, double *yval_0, double *x_0, double *y_0);
 
 #endif
 /*

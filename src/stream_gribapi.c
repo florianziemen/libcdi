@@ -279,16 +279,25 @@ double grib2ScaleFactor(long factor)
   switch(factor)
     {
       case GRIB_MISSING_LONG: return 1;
-      case 0: return 1;
-      case 1: return 0.1;
-      case 2: return 0.01;
-      case 3: return 0.001;
-      case 4: return 0.0001;
-      case 5: return 0.00001;
-      case 6: return 0.000001;
-      case 7: return 0.0000001;
-      case 8: return 0.00000001;
-      case 9: return 0.000000001;
+      case -9: return 1000000000;
+      case -8: return 100000000;
+      case -7: return 10000000;
+      case -6: return 1000000;
+      case -5: return 100000;
+      case -4: return 10000;
+      case -3: return 1000;
+      case -2: return 100;
+      case -1: return 10;
+      case  0: return 1;
+      case  1: return 0.1;
+      case  2: return 0.01;
+      case  3: return 0.001;
+      case  4: return 0.0001;
+      case  5: return 0.00001;
+      case  6: return 0.000001;
+      case  7: return 0.0000001;
+      case  8: return 0.00000001;
+      case  9: return 0.000000001;
       default: return 0;
     }
 }
@@ -318,8 +327,6 @@ void grib2GetLevel(grib_handle *gh, int *leveltype1, int *leveltype2, int *lboun
   int status = grib_get_long(gh, "typeOfFirstFixedSurface", &lpar); //1 byte
   if ( status == 0 )
     {
-      long llevel;
-
       *leveltype1 = (int) lpar;
 
       status = grib_get_long(gh, "typeOfSecondFixedSurface", &lpar); //1 byte
@@ -349,7 +356,7 @@ void grib2GetLevel(grib_handle *gh, int *leveltype1, int *leveltype2, int *lboun
             break;
         }
 
-      long factor;
+      long factor, llevel;
       GRIB_CHECK(grib_get_long(gh, "scaleFactorOfFirstFixedSurface", &factor), 0);      //1 byte
       GRIB_CHECK(grib_get_long(gh, "scaledValueOfFirstFixedSurface", &llevel), 0);      //4 byte
       *level1 = calcLevel(*level_sf, factor, llevel);
@@ -560,7 +567,7 @@ void gribapiDefProjSTERE(grib_handle *gh, int gridID)
   if ( proj_lonlat_to_stere_func )
     {
       x_0 = xval_0; y_0 = yval_0;
-      // proj_lonlat_to_stere_func(grid_missval, lon_0, lat_0, lat_1, lat_2, a, rf, (size_t)1, &x_0, &y_0);
+      proj_lonlat_to_stere_func(grid_missval, lon_0, lat_ts, lat_0, a, (size_t)1, &x_0, &y_0);
       if ( IS_NOT_EQUAL(x_0, grid_missval) && IS_NOT_EQUAL(y_0, grid_missval) )
         { x_0 = -x_0; y_0 = -y_0; }
     }
@@ -2123,7 +2130,7 @@ void gribapiDefGridSTERE(grib_handle *gh, int editionNumber, int gridID)
 
   double lon_0, lat_ts, lat_0, a, xval_0, yval_0, x_0, y_0;
   gridInqParamSTERE(gridID, grid_missval, &lon_0, &lat_ts, &lat_0, &a, &xval_0, &yval_0, &x_0, &y_0);
-  // gridVerifyGribParamSTERE(grid_missval, &lon_0, &lat_ts, &lat_0, &a, &xval_0, &yval_0, &x_0, &y_0);
+  gridVerifyGribParamSTERE(grid_missval, &lon_0, &lat_ts, &lat_0, &a, &xval_0, &yval_0, &x_0, &y_0);
   if ( xval_0 < 0 ) xval_0 += 360;
   int projflag = 0;
 

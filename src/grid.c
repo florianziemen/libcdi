@@ -3932,6 +3932,34 @@ int gridVerifyGribParamLCC(double missval, double *lon_0, double *lat_0, double 
   return 0;
 }
 
+
+int gridVerifyGribParamSTERE(double missval, double *lon_0, double *lat_ts, double *lat_0,
+                             double *a, double *xval_0, double *yval_0, double *x_0, double *y_0)
+{
+  static bool lwarn = true;
+
+  if ( lwarn )
+    {
+      // lwarn = false;
+      const char *projection = "lambert_conformal_conic";
+      if ( IS_EQUAL(*lon_0, missval) ) { Warning("%s mapping parameter %s missing!", projection, "straight_vertical_longitude_from_pole"); }
+      if ( IS_EQUAL(*lat_0, missval) ) { Warning("%s mapping parameter %s missing!", projection, "latitude_of_projection_origin"); }
+      if ( IS_EQUAL(*lat_ts, missval) ) { Warning("%s mapping parameter %s missing!", projection, "standard_parallel"); }
+      if ( IS_NOT_EQUAL(*x_0, missval) && IS_NOT_EQUAL(*y_0, missval) && (IS_EQUAL(*xval_0, missval) || IS_EQUAL(*yval_0, missval)) )
+        {
+          if ( proj_stere_to_lonlat_func )
+            {
+              *xval_0 = -(*x_0); *yval_0 = -(*y_0);
+              proj_stere_to_lonlat_func(missval, *lon_0, *lat_ts, *lat_0, *a, 0.0, 0.0, (size_t)1, xval_0, yval_0);
+            }
+          if ( IS_EQUAL(*xval_0, missval) || IS_EQUAL(*yval_0, missval) )
+            Warning("%s mapping parameter %s missing!", projection, "longitudeOfFirstGridPointInDegrees and latitudeOfFirstGridPointInDegrees");
+        }
+    }
+
+  return 0;
+}
+
 /*
 @Function  gridDefParamSTERE
 @Title     Define the parameter of a Polar stereographic grid

@@ -4,6 +4,7 @@
 
 2018-09-13  Uwe Schulzweida
 
+	* Added support for polar stereographic projection
 	* grib2ScaleFactor: added support for negative scale factor (bug fix)
 
 2018-09-12  Uwe Schulzweida
