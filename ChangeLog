@@ -2,6 +2,10 @@
 
 	* Version 1.9.6 released
 
+2018-09-13  Uwe Schulzweida
+
+	* grib2ScaleFactor: added support for negative scale factor (bug fix)
+
 2018-09-12  Uwe Schulzweida
 
 	* Removed obsolete flags DATATYPE_* and FILETYPE_*
