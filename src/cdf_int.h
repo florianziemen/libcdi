@@ -1,7 +1,7 @@
 #ifndef  CDF_INT_H
 #define  CDF_INT_H
 
-#if  defined  (HAVE_LIBNETCDF)
+#ifdef HAVE_LIBNETCDF
 
 #include <netcdf.h>
 

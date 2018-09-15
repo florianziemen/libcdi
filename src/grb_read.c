@@ -12,7 +12,6 @@
 #include "stream_gribapi.h"
 #include "file.h"
 #include "cgribex.h"  /* gribZip gribGetZip gribGinfo */
-#include "namespace.h"
 
 
 static
@@ -21,10 +20,10 @@ int grbDecode(int filetype, int memtype, void *gribbuffer, size_t gribsize, void
 {
   int status = 0;
 
-#if  defined  (HAVE_LIBCGRIBEX)
+#ifdef HAVE_LIBCGRIBEX
   if ( filetype == CDI_FILETYPE_GRB )
     {
-#if  defined  (HAVE_LIBGRIB_API)
+#ifdef HAVE_LIBGRIB_API
       extern int cdiNAdditionalGRIBKeys;
       if ( cdiNAdditionalGRIBKeys > 0 )
 	Error("CGRIBEX decode does not support reading of additional GRIB keys!");

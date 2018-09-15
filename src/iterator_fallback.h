@@ -8,7 +8,7 @@
 #ifndef INCLUDE_GUARD_CDI_ITERATOR_FALLBACK_H
 #define INCLUDE_GUARD_CDI_ITERATOR_FALLBACK_H
 
-#if defined (HAVE_CONFIG_H)
+#ifdef HAVE_CONFIG_H
 #  include "config.h"
 #endif
 

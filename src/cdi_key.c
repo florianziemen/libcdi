@@ -1,12 +1,6 @@
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "cdi.h"
 #include "cdi_int.h"
 #include "vlist.h"
-#include "grid.h"
-#include "zaxis.h"
 #include "resource_unpack.h"
 
 enum  {KEY_INT = 1, KEY_FLOAT, KEY_BYTES};

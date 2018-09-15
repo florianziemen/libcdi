@@ -1101,7 +1101,7 @@ void varDefKeyBytes(int varID, int key, const unsigned char *bytes, int length)
 }
 
 
-#if  defined  (HAVE_LIBGRIB_API)
+#ifdef HAVE_LIBGRIB_API
 /* Resizes and initializes opt_grib_kvpair data structure. */
 static
 void resize_vartable_opt_grib_entries(vartable_t *var, int nentries)
@@ -1136,7 +1136,7 @@ void resize_vartable_opt_grib_entries(vartable_t *var, int nentries)
 }
 #endif
 
-#if  defined  (HAVE_LIBGRIB_API)
+#ifdef HAVE_LIBGRIB_API
 void varDefOptGribInt(int varID, int tile_index, long lval, const char *keyword)
 {
   int idx = -1;
@@ -1167,7 +1167,7 @@ void varDefOptGribInt(int varID, int tile_index, long lval, const char *keyword)
 #endif
 
 
-#if  defined  (HAVE_LIBGRIB_API)
+#ifdef HAVE_LIBGRIB_API
 void varDefOptGribDbl(int varID, int tile_index, double dval, const char *keyword)
 {
   int idx = -1;
@@ -1198,7 +1198,7 @@ void varDefOptGribDbl(int varID, int tile_index, double dval, const char *keywor
 #endif
 
 
-#if  defined  (HAVE_LIBGRIB_API)
+#ifdef HAVE_LIBGRIB_API
 int varOptGribNentries(int varID)
 {
   int nentries = vartable[varID].opt_grib_nentries;

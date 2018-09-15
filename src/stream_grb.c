@@ -254,7 +254,7 @@ int grbScanTimestep1(stream_t * streamptr)
 {
   int status = CDI_EUFTYPE;
 
-#if  defined  (HAVE_LIBCGRIBEX)
+#ifdef HAVE_LIBCGRIBEX
   int filetype  = streamptr->filetype;
 
   if ( filetype == CDI_FILETYPE_GRB )
@@ -275,7 +275,7 @@ int grbScanTimestep2(stream_t * streamptr)
 {
   int status = CDI_EUFTYPE;
 
-#if  defined  (HAVE_LIBCGRIBEX)
+#ifdef HAVE_LIBCGRIBEX
   int filetype = streamptr->filetype;
 
   if ( filetype == CDI_FILETYPE_GRB )
@@ -296,7 +296,7 @@ int grbScanTimestep(stream_t * streamptr)
 {
   int status = CDI_EUFTYPE;
 
-#if  defined  (HAVE_LIBCGRIBEX)
+#ifdef HAVE_LIBCGRIBEX
   int filetype  = streamptr->filetype;
 
   if ( filetype == CDI_FILETYPE_GRB )

@@ -1,12 +1,11 @@
-#if defined (HAVE_CONFIG_H)
-#  include "config.h"
+#ifdef HAVE_CONFIG_H
+#include "config.h"
 #endif
 
 #include "iterator_grib.h"
 
 #include "cdi.h"
 #include "cdi_int.h"
-#include "cgribex.h"
 #include "dmemory.h"
 #include "error.h"
 #include "gribapi.h"

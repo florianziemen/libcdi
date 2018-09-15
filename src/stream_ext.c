@@ -1,5 +1,5 @@
-#if defined (HAVE_CONFIG_H)
-#  include "config.h"
+#ifdef HAVE_CONFIG_H
+#include "config.h"
 #endif
 
 #include "dmemory.h"
@@ -12,11 +12,10 @@
 #include "varscan.h"
 #include "datetime.h"
 #include "extra.h"
-#include "vlist.h"
 #include "exse.h"
 
 
-#if defined (HAVE_LIBEXTRA)
+#ifdef HAVE_LIBEXTRA
 
 typedef struct {
   int param;

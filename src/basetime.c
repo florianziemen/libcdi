@@ -1,8 +1,4 @@
-#if defined (HAVE_CONFIG_H)
-#  include "config.h"
-#endif
-
-
+#include <stddef.h>  // for NULL
 #include "cdi.h"
 #include "basetime.h"
 #include "error.h"
@@ -20,6 +16,7 @@ void basetimeInit(basetime_t *basetime)
   basetime->lwrf          = false;
   basetime->timevar_cache = NULL;
 }
+
 /*
  * Local Variables:
  * c-file-style: "Java"

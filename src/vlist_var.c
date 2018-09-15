@@ -1,4 +1,4 @@
-#if defined (HAVE_CONFIG_H)
+#ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
@@ -12,11 +12,6 @@
 #include "namespace.h"
 #include "serialize.h"
 #include "error.h"
-
-#if  defined  (HAVE_LIBGRIB_API)
-#include "file.h"
-#include <grib_api.h>
-#endif
 
 
 static
@@ -95,8 +90,7 @@ int vlistvarNewEntry(int vlistID)
   */
   if ( varID == vlistvarSize )
     {
-      vlistvar = (var_t *) Realloc(vlistvar,
-                                   (size_t)(vlistvarSize *= 2) * sizeof(var_t));
+      vlistvar = (var_t *) Realloc(vlistvar, (size_t)(vlistvarSize *= 2) * sizeof(var_t));
       for ( int i = varID; i < vlistvarSize; i++ )
 	vlistvar[i].isUsed = false;
     }
@@ -1671,7 +1665,7 @@ int vlistInqVarXYZ(int vlistID, int varID)
 /* vlistDefVarIntKey: Set an arbitrary keyword/integer value pair for GRIB API */
 void vlistDefVarIntKey(int vlistID, int varID, const char *name, int value)
 {
-#if  defined  (HAVE_LIBGRIB_API)
+#ifdef HAVE_LIBGRIB_API
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
   if (vlistptr == NULL)  Error("Internal error!");
   int idx;
@@ -1734,7 +1728,7 @@ void vlistDefVarIntKey(int vlistID, int varID, const char *name, int value)
 /* vlistDefVarDblKey: Set an arbitrary keyword/double value pair for GRIB API */
 void vlistDefVarDblKey(int vlistID, int varID, const char *name, double value)
 {
-#if  defined  (HAVE_LIBGRIB_API)
+#ifdef HAVE_LIBGRIB_API
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
   if (vlistptr == NULL)  Error("Internal error!");
   int idx;
@@ -1798,7 +1792,7 @@ void vlistDefVarDblKey(int vlistID, int varID, const char *name, double value)
 /* cdiClearAdditionalKeys: Clears the list of additional GRIB keys. */
 void cdiClearAdditionalKeys()
 {
-#if  defined  (HAVE_LIBGRIB_API)
+#ifdef HAVE_LIBGRIB_API
   for (int i=0; i<cdiNAdditionalGRIBKeys; i++)  Free(cdiAdditionalGRIBKeys[i]);
   cdiNAdditionalGRIBKeys = 0;
 #endif
@@ -1807,7 +1801,7 @@ void cdiClearAdditionalKeys()
 /* cdiDefAdditionalKey: Register an additional GRIB key which is read when file is opened. */
 void cdiDefAdditionalKey(const char *name)
 {
-#if  defined  (HAVE_LIBGRIB_API)
+#ifdef HAVE_LIBGRIB_API
   int idx = cdiNAdditionalGRIBKeys;
   cdiNAdditionalGRIBKeys++;
   if ( idx >= MAX_OPT_GRIB_ENTRIES ) Error("Too many additional keywords!");
@@ -1823,7 +1817,7 @@ void cdiDefAdditionalKey(const char *name)
 /* vlistHasVarKey: returns 1 if meta-data key was read, 0 otherwise. */
 int vlistHasVarKey(int vlistID, int varID, const char* name)
 {
-#if  defined  (HAVE_LIBGRIB_API)
+#ifdef HAVE_LIBGRIB_API
   /* check if the GRIB key was previously read and is stored */
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
@@ -1844,7 +1838,7 @@ int vlistHasVarKey(int vlistID, int varID, const char* name)
 double vlistInqVarDblKey(int vlistID, int varID, const char* name)
 {
   double value = 0;
-#if  defined  (HAVE_LIBGRIB_API)
+#ifdef HAVE_LIBGRIB_API
   /* check if the GRIB key was previously read and is stored in "opt_grib_dbl_val" */
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 
@@ -1869,7 +1863,7 @@ double vlistInqVarDblKey(int vlistID, int varID, const char* name)
 int vlistInqVarIntKey(int vlistID, int varID, const char* name)
 {
   long value = 0;
-#if  defined  (HAVE_LIBGRIB_API)
+#ifdef HAVE_LIBGRIB_API
   /* check if the GRIB key was previously read and is stored in "opt_grib_int_val" */
   vlist_t *vlistptr = vlist_to_pointer(vlistID);
 

@@ -1,4 +1,4 @@
-#if defined (HAVE_CONFIG_H)
+#ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
@@ -9,7 +9,6 @@
 #include "cdi_uuid.h"
 #include "stream_cdf.h"
 #include "cdf_int.h"
-#include "varscan.h"
 #include "vlist.h"
 #include "zaxis.h"
 

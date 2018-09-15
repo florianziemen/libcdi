@@ -5,7 +5,6 @@
 #define _XOPEN_SOURCE 600
 
 #include <errno.h>
-#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -128,8 +127,7 @@ void cdiCreateUUID(unsigned char *uuid)
           exit(1);
         }
       unsigned seed = (unsigned)(tv.tv_sec ^ tv.tv_usec);
-      caller_rand_state = initstate(seed, uuid_rand_state,
-                                    sizeof (uuid_rand_state));
+      caller_rand_state = initstate(seed, uuid_rand_state, sizeof (uuid_rand_state));
       uuid_seeded = 1;
     }
   uuid_generate(uuid);
@@ -155,14 +153,12 @@ void cdiCreateUUID(unsigned char *uuid)
           if ((status = uuid_load(nsuuid, "ns:OID")) == UUID_RC_OK)
             {
               ++stage;
-              if ((status = uuid_make(objuuid, UUID_MAKE_V5,
-                                      nsuuid, cdiLibraryVersion()))
+              if ((status = uuid_make(objuuid, UUID_MAKE_V5, nsuuid, cdiLibraryVersion()))
                   == UUID_RC_OK)
                 {
                   ++stage;
                   size_t datalen = CDI_UUID_SIZE;
-                  status = uuid_export(objuuid, UUID_FMT_BIN, &uuid,
-                                       &datalen);
+                  status = uuid_export(objuuid, UUID_FMT_BIN, &uuid, &datalen);
                 }
             }
         }
@@ -177,10 +173,11 @@ void cdiCreateUUID(unsigned char *uuid)
     Error("failed to generate UUID at stage %s\n", error_stage[stage]);
 }
 #  else
+#include <inttypes.h>
 typedef uint8_t u_int8_t;
 typedef uint16_t u_int16_t;
 typedef uint32_t u_int32_t;
-#    include <uuid.h>
+#include <uuid.h>
 void cdiCreateUUID(unsigned char *uuid)
 {
   uint32_t status;

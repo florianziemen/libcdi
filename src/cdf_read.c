@@ -11,7 +11,6 @@
 #include "cdi.h"
 #include "cdi_int.h"
 #include "stream_cdf.h"
-#include "cdf.h"
 #include "cdf_int.h"
 #include "vlist.h"
 #include "vlist_var.h"

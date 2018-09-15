@@ -204,7 +204,7 @@ void vlistAdd2SubtypeIDs(vlist_t *vlistptr, int subtypeID)
 
 
 
-#if  defined  (HAVE_LIBGRIB_API)
+#ifdef HAVE_LIBGRIB_API
 extern int   cdiNAdditionalGRIBKeys;
 extern char* cdiAdditionalGRIBKeys[];
 #endif

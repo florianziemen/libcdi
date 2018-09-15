@@ -1,5 +1,5 @@
-#if defined (HAVE_CONFIG_H)
-#  include "config.h"
+#ifdef HAVE_CONFIG_H
+#include "config.h"
 #endif
 
 #ifndef _XOPEN_SOURCE
@@ -7,7 +7,6 @@
 #endif
 
 #include <limits.h>
-#include <stdlib.h>
 #include <stdio.h>
 
 #include "cdi.h"

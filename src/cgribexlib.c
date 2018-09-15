@@ -43,7 +43,7 @@
 #ifndef GRIB_INT_H
 #define GRIB_INT_H
 
-#if defined (HAVE_CONFIG_H)
+#ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
@@ -3708,7 +3708,7 @@ void gribPrintSec4Wave(int *isec4)
       fprintf(grprsm, "%20.10f\n", *ptemp);
     }
 }
-#if defined (HAVE_CONFIG_H)
+#ifdef HAVE_CONFIG_H
 #endif
 
 #include <string.h>
@@ -5766,7 +5766,7 @@ void gribRepair1(int nrec, long recsize, unsigned char *gribbuffer)
 #include <stdio.h>
 #include <string.h>
 
-#if defined (HAVE_CONFIG_H)
+#ifdef HAVE_CONFIG_H
 #endif
 
 #if  defined (HAVE_LIBSZ)

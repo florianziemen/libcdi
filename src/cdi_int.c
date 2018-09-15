@@ -2,7 +2,6 @@
 #include "config.h"
 #endif
 
-#include <stdarg.h>
 #include <ctype.h>
 
 #include "binary.h"
@@ -12,11 +11,6 @@
 #include "dmemory.h"
 #include "file.h"
 #include "gribapi.h"
-#ifdef  HAVE_LIBNETCDF
-#include "stream_cdf.h"
-#endif
-#include "namespace.h"
-#include "resource_handle.h"
 
 #ifdef  HAVE_LIBCGRIBEX
 #include "cgribex.h"
@@ -209,19 +203,19 @@ void cdiDebug(int level)
 
   if ( level == 1 || (level & 16) )
     {
-#if  defined  (HAVE_LIBCGRIBEX)
+#ifdef HAVE_LIBCGRIBEX
       gribSetDebug(1);
 #endif
-#if  defined  (HAVE_LIBNETCDF)
+#ifdef HAVE_LIBNETCDF
       cdfDebug(1);
 #endif
-#if  defined  (HAVE_LIBSERVICE)
+#ifdef HAVE_LIBSERVICE
       srvDebug(1);
 #endif
-#if  defined  (HAVE_LIBEXTRA)
+#ifdef HAVE_LIBEXTRA
       extDebug(1);
 #endif
-#if  defined  (HAVE_LIBIEG)
+#ifdef HAVE_LIBIEG
       iegDebug(1);
 #endif
     }
@@ -250,7 +244,7 @@ int cdiHaveFiletype(int filetype)
     case CDI_FILETYPE_IEG:  status = 1; break;
 #endif
 #ifdef  HAVE_LIBGRIB
-#if  defined  (HAVE_LIBGRIB_API) || defined  (HAVE_LIBCGRIBEX)
+#if  defined  HAVE_LIBGRIB_API || defined  HAVE_LIBCGRIBEX
     case CDI_FILETYPE_GRB:  status = 1; break;
 #endif
 #ifdef  HAVE_LIBGRIB_API

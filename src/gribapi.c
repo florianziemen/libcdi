@@ -1,8 +1,8 @@
-#if defined (HAVE_CONFIG_H)
+#ifdef HAVE_CONFIG_H
 #  include "config.h"
 #endif
 
-#if  defined  (HAVE_LIBGRIB_API)
+#ifdef HAVE_LIBGRIB_API
 #  include <grib_api.h>
 #endif
 
@@ -14,14 +14,14 @@
 #include "dmemory.h"
 
 static char gribapi_libvers[64] = "";
-#if  defined  (HAVE_LIBGRIB_API)
+#ifdef HAVE_LIBGRIB_API
 static bool gribapi_libvers_init;
 #endif
 
 
 void gribapiLibraryVersion(int* major_version, int* minor_version, int* revision_version)
 {
-#if  defined  (HAVE_LIBGRIB_API)
+#ifdef HAVE_LIBGRIB_API
   long version = grib_get_api_version();
   (*major_version)    = (int)(version/10000);
   (*minor_version)    = (int)((version-(*major_version)*10000)/100);
@@ -35,7 +35,7 @@ void gribapiLibraryVersion(int* major_version, int* minor_version, int* revision
 
 const char *gribapiLibraryVersionString(void)
 {
-#if  defined  (HAVE_LIBGRIB_API)
+#ifdef HAVE_LIBGRIB_API
   if (!gribapi_libvers_init)
     {
       int major_version, minor_version, revision_version;
@@ -55,7 +55,7 @@ void gribContainersNew(stream_t * streamptr)
 {
   int editionNumber = (streamptr->filetype == CDI_FILETYPE_GRB) ? 1 : 2;
 
-#if  defined  (HAVE_LIBCGRIBEX)
+#ifdef HAVE_LIBCGRIBEX
   if ( editionNumber == 1 )
     {
     }

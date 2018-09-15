@@ -1,5 +1,5 @@
-#ifdef HAVE_CONFIG_H
-#  include "config.h"
+#if HAVE_CONFIG_H
+#include "config.h"
 #endif
 
 #include <limits.h>
@@ -11,12 +11,11 @@
 #include "file.h"
 #include "varscan.h"
 #include "datetime.h"
-#include "vlist.h"
 #include "stream_grb.h"
 #include "stream_cgribex.h"
 
 #ifdef HAVE_LIBCGRIBEX
-#  include "cgribex.h"
+#include "cgribex.h"
 #endif
 
 typedef struct {
@@ -28,7 +27,7 @@ typedef struct {
 } compvar_t;
 
 
-#if  defined  (HAVE_LIBCGRIBEX)
+#ifdef HAVE_LIBCGRIBEX
 static
 int cgribexGetGridType(int *isec2)
 {
@@ -587,8 +586,7 @@ cgribexVarCompare(compvar_t compVar, record_t record, int flag)
 #define gribWarning(text, nrecs, timestep, paramstr, level1, level2) \
             Warning("Record %2d (id=%s lev1=%d lev2=%d) timestep %d: %s", nrecs, paramstr, level1, level2, timestep, text)
 
-#if  defined  (HAVE_LIBCGRIBEX)
-
+#ifdef HAVE_LIBCGRIBEX
 static inline void
 cgribexScanTsFixNtsteps(stream_t *streamptr, off_t recpos)
 {
@@ -1064,7 +1062,7 @@ int cgribexScanTimestep2(stream_t * streamptr)
 #endif
 
 
-#if  defined  (HAVE_LIBCGRIBEX)
+#ifdef HAVE_LIBCGRIBEX
 int cgribexScanTimestep(stream_t * streamptr)
 {
   int rstatus = 0;
@@ -1329,7 +1327,7 @@ int cgribexScanTimestep(stream_t * streamptr)
 #undef gribWarning
 #endif
 
-#if  defined  (HAVE_LIBCGRIBEX)
+#ifdef HAVE_LIBCGRIBEX
 int cgribexDecode(int memtype, void *gribbuffer, size_t gribsize, void *data, size_t datasize,
 		  int unreduced, size_t *nmiss, double missval)
 {
@@ -1385,7 +1383,7 @@ int cgribexDecode(int memtype, void *gribbuffer, size_t gribsize, void *data, si
 #endif
 
 
-#if  defined  (HAVE_LIBCGRIBEX)
+#ifdef HAVE_LIBCGRIBEX
 static
 void cgribexDefInstitut(int *isec1, int vlistID, int varID)
 {
@@ -2056,7 +2054,7 @@ void cgribexDefEnsembleVar(int *isec1, int vlistID, int varID)
 #endif
 
 
-#if  defined  (HAVE_LIBCGRIBEX)
+#ifdef HAVE_LIBCGRIBEX
 size_t cgribexEncode(int memtype, int varID, int levelID, int vlistID, int gridID, int zaxisID,
 		     int vdate, int vtime, int tsteptype, int numavg,
 		     size_t datasize, const void *data, size_t nmiss, void *gribbuffer, size_t gribbuffersize)

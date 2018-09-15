@@ -43,7 +43,7 @@ int cdiStreamWriteVar_(int streamID, int varID, int memtype, const void *data, s
 	break;
       }
 #endif
-#if  defined  (HAVE_LIBSERVICE)
+#ifdef HAVE_LIBSERVICE
     case CDI_FILETYPE_SRV:
       {
         if ( memtype == MEMTYPE_FLOAT ) return 1;
@@ -51,7 +51,7 @@ int cdiStreamWriteVar_(int streamID, int varID, int memtype, const void *data, s
 	break;
       }
 #endif
-#if  defined  (HAVE_LIBEXTRA)
+#ifdef HAVE_LIBEXTRA
     case CDI_FILETYPE_EXT:
       {
         if ( memtype == MEMTYPE_FLOAT ) return 1;
@@ -59,7 +59,7 @@ int cdiStreamWriteVar_(int streamID, int varID, int memtype, const void *data, s
 	break;
       }
 #endif
-#if  defined  (HAVE_LIBIEG)
+#ifdef HAVE_LIBIEG
     case CDI_FILETYPE_IEG:
       {
         if ( memtype == MEMTYPE_FLOAT ) return 1;
@@ -67,7 +67,7 @@ int cdiStreamWriteVar_(int streamID, int varID, int memtype, const void *data, s
 	break;
       }
 #endif
-#if  defined  (HAVE_LIBNETCDF)
+#ifdef HAVE_LIBNETCDF
     case CDI_FILETYPE_NC:
     case CDI_FILETYPE_NC2:
     case CDI_FILETYPE_NC4:
@@ -180,7 +180,7 @@ int cdiStreamWriteVarSlice(int streamID, int varID, int levelID, int memtype, co
 	break;
       }
 #endif
-#if  defined  (HAVE_LIBSERVICE)
+#ifdef HAVE_LIBSERVICE
     case CDI_FILETYPE_SRV:
       {
         if ( memtype == MEMTYPE_FLOAT ) return 1;
@@ -188,7 +188,7 @@ int cdiStreamWriteVarSlice(int streamID, int varID, int levelID, int memtype, co
 	break;
       }
 #endif
-#if  defined  (HAVE_LIBEXTRA)
+#ifdef HAVE_LIBEXTRA
     case CDI_FILETYPE_EXT:
       {
         if ( memtype == MEMTYPE_FLOAT ) return 1;
@@ -196,7 +196,7 @@ int cdiStreamWriteVarSlice(int streamID, int varID, int levelID, int memtype, co
 	break;
       }
 #endif
-#if  defined  (HAVE_LIBIEG)
+#ifdef HAVE_LIBIEG
     case CDI_FILETYPE_IEG:
       {
         if ( memtype == MEMTYPE_FLOAT ) return 1;
@@ -204,7 +204,7 @@ int cdiStreamWriteVarSlice(int streamID, int varID, int levelID, int memtype, co
 	break;
       }
 #endif
-#if  defined  (HAVE_LIBNETCDF)
+#ifdef HAVE_LIBNETCDF
     case CDI_FILETYPE_NC:
     case CDI_FILETYPE_NC2:
     case CDI_FILETYPE_NC4:
@@ -320,7 +320,7 @@ void cdiStreamWriteVarChunk_(int streamID, int varID, int memtype,
              strfiletype(filetype));
       break;
 #endif
-#if  defined  (HAVE_LIBNETCDF)
+#ifdef HAVE_LIBNETCDF
     case CDI_FILETYPE_NC:
     case CDI_FILETYPE_NC2:
     case CDI_FILETYPE_NC4:
@@ -354,25 +354,25 @@ int stream_write_record(int streamID, int memtype, const void *data, size_t nmis
       grb_write_record(streamptr, memtype, data, nmiss);
       break;
 #endif
-#if  defined  (HAVE_LIBSERVICE)
+#ifdef HAVE_LIBSERVICE
     case CDI_FILETYPE_SRV:
       if ( memtype == MEMTYPE_FLOAT ) return 1;
       srvWriteRecord(streamptr, (const double *)data);
       break;
 #endif
-#if  defined  (HAVE_LIBEXTRA)
+#ifdef HAVE_LIBEXTRA
     case CDI_FILETYPE_EXT:
       if ( memtype == MEMTYPE_FLOAT ) return 1;
       extWriteRecord(streamptr, (const double *)data);
       break;
 #endif
-#if  defined  (HAVE_LIBIEG)
+#ifdef HAVE_LIBIEG
     case CDI_FILETYPE_IEG:
       if ( memtype == MEMTYPE_FLOAT ) return 1;
       iegWriteRecord(streamptr, (const double *)data);
       break;
 #endif
-#if  defined  (HAVE_LIBNETCDF)
+#ifdef HAVE_LIBNETCDF
     case CDI_FILETYPE_NC:
     case CDI_FILETYPE_NC2:
     case CDI_FILETYPE_NC4:

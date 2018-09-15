@@ -1,13 +1,8 @@
-#if defined (HAVE_CONFIG_H)
-#  include "config.h"
-#endif
-
 #include "iterator_fallback.h"
 
 #include "cdi.h"
 #include "cdi_int.h"
 #include "dmemory.h"
-#include "vlist.h"      //Required for vlist_t, which we require because there is no safe function available to access a variable name.
 
 #include <assert.h>
 #include <limits.h>
