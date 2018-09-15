@@ -1115,7 +1115,7 @@ void    zaxisChangeType(int zaxisID, int zaxistype);
 /* TAXIS routines */
 
 /*      taxisCreate: Create a Time axis */
-int     taxisCreate(int timetype);
+int     taxisCreate(int taxistype);
 
 /*      taxisDestroy: Destroy a Time axis */
 void    taxisDestroy(int taxisID);
@@ -1124,7 +1124,8 @@ int     taxisDuplicate(int taxisID);
 
 void    taxisCopyTimestep(int taxisIDdes, int taxisIDsrc);
 
-void    taxisDefType(int taxisID, int type);
+void    taxisDefType(int taxisID, int taxistype);
+int     taxisInqType(int taxisID);
 
 /*      taxisDefVdate: Define the verification date */
 void    taxisDefVdate(int taxisID, int64_t date);
@@ -1191,9 +1192,6 @@ void    taxisDefForecastPeriod(int taxisID, double fc_period);
 double  taxisInqForecastPeriod(int taxisID);
 
 void    taxisDefNumavg(int taxisID, int numavg);
-
-int     taxisInqType(int taxisID);
-
 int     taxisInqNumavg(int taxisID);
 
 const char *tunitNamePtr(int tunitID);

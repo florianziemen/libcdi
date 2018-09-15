@@ -208,8 +208,7 @@ The function @func{taxisCreate} creates a Time axis.
 @func{taxisCreate} returns an identifier to the Time axis.
 
 @Example
-Here is an example using @func{taxisCreate} to create a relative T-axis
-with a standard calendar.
+Here is an example using @func{taxisCreate} to create a relative T-axis with a standard calendar.
 
 @Source
 #include "cdi.h"
@@ -239,6 +238,7 @@ int taxisCreate(int taxistype)
 
   return taxisID;
 }
+
 
 void taxisDestroyKernel(taxis_t *taxisptr)
 {
@@ -288,13 +288,13 @@ int taxisDuplicate(int taxisID1)
 }
 
 
-void taxisDefType(int taxisID, int type)
+void taxisDefType(int taxisID, int taxistype)
 {
   taxis_t *taxisptr = (taxis_t *) reshGetVal(taxisID, &taxisOps);
 
-  if ( taxisptr->type != type )
+  if ( taxisptr->type != taxistype )
     {
-      taxisptr->type = type;
+      taxisptr->type = taxistype;
       if ( taxisptr->units )
         {
           delete_refcount_string(taxisptr->units);
