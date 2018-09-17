@@ -31,7 +31,7 @@ bool cdiCoordinatesLonLat    = false;
 bool cdiIgnoreValidRange     = false;
 int cdiSkipRecords          = 0;
 int cdiConvention           = CDI_CONVENTION_ECHAM;
-int cdiInventoryMode        = 1;
+int CDI_inventory_mode        = 1;
 int CDO_version_info        = 1;
 int CDI_read_cell_corners   = 1;
 int CDI_cmor_mode           = 0;
@@ -407,7 +407,7 @@ void cdiInitialize(void)
 	{
 	  if ( strncmp(envstr, "time", 4) == 0 )
 	    {
-	      cdiInventoryMode = 2;
+	      CDI_inventory_mode = 2;
 	      if ( CDI_Debug )
 		Message("Inventory mode was set to timestep!");
 	    }

@@ -22,7 +22,7 @@
 
 #include <grib_api.h>
 
-extern int cdiInventoryMode;
+extern int CDI_inventory_mode;
 
 static const var_tile_t dummy_tiles = { 0, -1, -1, -1, -1, -1 };
 
@@ -887,7 +887,7 @@ static checkTimeResult checkTime(stream_t* streamptr, compvar2_t compVar, const 
   int consistentTime = !memcmp(verificationTime, expectedVTime, sizeof(*verificationTime));
 
   // Finally, we make a decision.
-  if ( cdiInventoryMode == 1 )
+  if ( CDI_inventory_mode == 1 )
     {
       if ( recordExists ) return CHECKTIME_STOP;
       if ( !consistentTime ) return CHECKTIME_INCONSISTENT;
@@ -1238,7 +1238,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
 
       if ( streamptr->tsteps[tsID].records[recID].used )
         {
-          if ( cdiInventoryMode == 1 ) break;
+          if ( CDI_inventory_mode == 1 ) break;
           else
 	    {
 	      if ( datetimeCmp(datetime, datetime0) != 0 ) break;
@@ -1469,13 +1469,13 @@ int gribapiScanTimestep(stream_t * streamptr)
 	    {
 	      gribWarning("Parameter not defined at timestep 1!", nrecs_scanned, tsID+1, varname, param, level1, level2);
 
-	      if ( cdiInventoryMode == 1 )
+	      if ( CDI_inventory_mode == 1 )
 		return CDI_EUFSTRUCT;
 	      else
 		continue;
 	    }
 
-	  if ( cdiInventoryMode != 1 )
+	  if ( CDI_inventory_mode != 1 )
 	    {
 	      if ( streamptr->tsteps[tsID].records[recID].used )
 		{

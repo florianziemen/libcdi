@@ -738,7 +738,7 @@ int cgribexScanTimestep1(stream_t *streamptr)
 	      if ( cgribexVarCompare(compVar, streamptr->tsteps[0].records[recID], 0) == 0 ) break;
 	    }
 
-	  if ( cdiInventoryMode == 1 )
+	  if ( CDI_inventory_mode == 1 )
 	    {
 	      if ( recID < nrecs ) break;
 	      if ( warn_time )
@@ -977,7 +977,7 @@ int cgribexScanTimestep2(stream_t * streamptr)
 	  return CDI_EUFSTRUCT;
 	}
 
-      if ( cdiInventoryMode == 1 )
+      if ( CDI_inventory_mode == 1 )
 	{
 	  if ( streamptr->tsteps[tsID].records[recID].used )
 	    {
@@ -1228,13 +1228,13 @@ int cgribexScanTimestep(stream_t * streamptr)
 	    {
 	      gribWarning("Parameter not defined at timestep 1!", nrecs_scanned, tsID+1, paramstr, level1, level2);
 
-	      if ( cdiInventoryMode == 1 )
+	      if ( CDI_inventory_mode == 1 )
 		return CDI_EUFSTRUCT;
 	      else
 		continue;
 	    }
 
-	  if ( cdiInventoryMode == 1 )
+	  if ( CDI_inventory_mode == 1 )
 	    {
 	      streamptr->tsteps[tsID].records[recID].used = true;
 	      streamptr->tsteps[tsID].recIDs[rindex] = recID;

@@ -345,7 +345,7 @@ extern bool cdiCoordinatesLonLat;
 extern bool cdiIgnoreValidRange;
 extern int cdiSkipRecords;
 extern int cdiConvention;
-extern int cdiInventoryMode;
+extern int CDI_inventory_mode;
 extern int CDO_version_info;
 extern int CDI_read_cell_corners;
 extern int CDI_cmor_mode;
