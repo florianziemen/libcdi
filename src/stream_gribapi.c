@@ -955,7 +955,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
       gh = gribapiGetDiskRepresentation(recsize, &buffersize, &gribbuffer, &datatype, &comptype, &unzipsize);
 
       nrecs_scanned++;
-      GRIB_CHECK(my_grib_set_double(gh, "missingValue", cdiDefaultMissval), 0);
+      GRIB_CHECK(my_grib_set_double(gh, "missingValue", CDO_default_missval), 0);
 
       int param = gribapiGetParam(gh);
       int leveltype1 = -1, leveltype2 = -1, lbounds, level_sf, level_unit;
@@ -1168,7 +1168,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
 
       nrecs_scanned++;
       gh = grib_handle_new_from_message(NULL, gribbuffer, recsize);
-      GRIB_CHECK(my_grib_set_double(gh, "missingValue", cdiDefaultMissval), 0);
+      GRIB_CHECK(my_grib_set_double(gh, "missingValue", CDO_default_missval), 0);
 
       int param = gribapiGetParam(gh);
       int level1 = 0, level2 = 0, leveltype1, leveltype2, lbounds, level_sf, level_unit;
@@ -1398,7 +1398,7 @@ int gribapiScanTimestep(stream_t * streamptr)
 
           nrecs_scanned++;
 	  gh = grib_handle_new_from_message(NULL, gribbuffer, recsize);
-	  GRIB_CHECK(my_grib_set_double(gh, "missingValue", cdiDefaultMissval), 0);
+	  GRIB_CHECK(my_grib_set_double(gh, "missingValue", CDO_default_missval), 0);
 
           int param = gribapiGetParam(gh);
           int level1 = 0, level2 = 0, leveltype1, leveltype2 = -1, lbounds, level_sf, level_unit;

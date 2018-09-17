@@ -36,7 +36,7 @@ void vlistvarInitEntry(int vlistID, int varID)
   vlistptr->vars[varID].modelID       = CDI_UNDEFID;
   vlistptr->vars[varID].tableID       = CDI_UNDEFID;
   vlistptr->vars[varID].missvalused   = false;
-  vlistptr->vars[varID].missval       = cdiDefaultMissval;
+  vlistptr->vars[varID].missval       = CDO_default_missval;
   vlistptr->vars[varID].addoffset     = 0.0;
   vlistptr->vars[varID].scalefactor   = 1.0;
   vlistptr->vars[varID].name          = NULL;
