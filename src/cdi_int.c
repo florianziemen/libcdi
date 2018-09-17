@@ -32,7 +32,7 @@ bool cdiIgnoreValidRange     = false;
 int cdiSkipRecords          = 0;
 int cdiConvention           = CDI_CONVENTION_ECHAM;
 int cdiInventoryMode        = 1;
-int CDI_Version_Info        = 1;
+int CDO_version_info        = 1;
 int CDI_read_cell_corners   = 1;
 int CDI_cmor_mode           = 0;
 int CDI_reduce_dim          = 0;
@@ -419,9 +419,9 @@ void cdiInitialize(void)
           int ival = atoi(envstr);
           if ( ival == 0 || ival == 1 )
             {
-              CDI_Version_Info = ival;
+              CDO_version_info = ival;
               if ( CDI_Debug )
-                Message("CDI_Version_Info = %s", envstr);
+                Message("CDO_version_info = %s", envstr);
             }
         }
 
