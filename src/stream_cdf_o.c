@@ -1382,7 +1382,7 @@ static
 void cdf_def_zaxis_hybrid(stream_t *streamptr, int type, int *ncvarid, int zaxisID, int zaxisindex, int xtype, size_t dimlen, int *dimID, char *axisname)
 {
   void (*def_zaxis_hybrid_delegate)(stream_t *streamptr, int type, int *ncvarid, int zaxisID, int zaxisindex, int xtype, size_t dimlen, int *dimID, char *axisname)
-    = ( (!CDI_cmor_mode && cdiConvention == CDI_CONVENTION_ECHAM)
+    = ( (!CDI_cmor_mode && CDI_convention == CDI_CONVENTION_ECHAM)
         || type == ZAXIS_HYBRID_HALF )
     ? cdf_def_zaxis_hybrid_echam : cdf_def_zaxis_hybrid_cf;
   def_zaxis_hybrid_delegate(streamptr, type, ncvarid, zaxisID, zaxisindex, xtype, dimlen, dimID, axisname);

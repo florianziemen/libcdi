@@ -30,7 +30,7 @@ bool cdiIgnoreAttCoordinates = false;
 bool cdiCoordinatesLonLat    = false;
 bool cdiIgnoreValidRange     = false;
 int cdiSkipRecords          = 0;
-int cdiConvention           = CDI_CONVENTION_ECHAM;
+int CDI_convention           = CDI_CONVENTION_ECHAM;
 int CDI_inventory_mode        = 1;
 int CDO_version_info        = 1;
 int CDI_read_cell_corners   = 1;
@@ -396,7 +396,7 @@ void cdiInitialize(void)
 	{
 	  if ( strcmp(envstr, "CF") == 0 || strcmp(envstr, "cf") == 0 )
 	    {
-	      cdiConvention = CDI_CONVENTION_CF;
+	      CDI_convention = CDI_CONVENTION_CF;
 	      if ( CDI_Debug )
 		Message("CDI convention was set to CF!");
 	    }

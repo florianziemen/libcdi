@@ -833,7 +833,7 @@ bool isHybridSigmaPressureCoordinate(int ncid, int ncvarid, ncvar_t *ncvars, con
 
   if ( strcmp(ncvar->stdname, "atmosphere_hybrid_sigma_pressure_coordinate") == 0 )
     {
-      cdiConvention = CDI_CONVENTION_CF;
+      CDI_convention = CDI_CONVENTION_CF;
 
       status = true;
       ncvar->zaxistype = ZAXIS_HYBRID;
