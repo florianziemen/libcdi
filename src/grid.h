@@ -6,7 +6,6 @@
 
 #include "cdi_att.h"
 
-extern double grid_missval;
 extern int (*proj_lonlat_to_lcc_func)();
 extern int (*proj_lcc_to_lonlat_func)();
 extern int (*proj_lonlat_to_stere_func)();

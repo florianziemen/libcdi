@@ -529,18 +529,18 @@ void gribapiDefProjLCC(grib_handle *gh, int gridID)
   if ( lsouth ) { lat_1 = -lat_1; lat_2 = -lat_2; }
 
   double lat_0 = lat_2;
-  double x_0 = grid_missval;
-  double y_0 = grid_missval;
+  double x_0 = CDI_grid_missval;
+  double y_0 = CDI_grid_missval;
 
   if ( proj_lonlat_to_lcc_func )
     {
       x_0 = xval_0; y_0 = yval_0;
-      proj_lonlat_to_lcc_func(grid_missval, lon_0, lat_0, lat_1, lat_2, a, rf, (size_t)1, &x_0, &y_0);
-      if ( IS_NOT_EQUAL(x_0, grid_missval) && IS_NOT_EQUAL(y_0, grid_missval) )
+      proj_lonlat_to_lcc_func(CDI_grid_missval, lon_0, lat_0, lat_1, lat_2, a, rf, (size_t)1, &x_0, &y_0);
+      if ( IS_NOT_EQUAL(x_0, CDI_grid_missval) && IS_NOT_EQUAL(y_0, CDI_grid_missval) )
         { x_0 = -x_0; y_0 = -y_0; }
     }
 
-  gridDefParamLCC(gridID, grid_missval, lon_0, lat_0, lat_1, lat_2, a, rf, xval_0, yval_0, x_0, y_0);
+  gridDefParamLCC(gridID, CDI_grid_missval, lon_0, lat_0, lat_1, lat_2, a, rf, xval_0, yval_0, x_0, y_0);
 }
 
 
@@ -561,18 +561,18 @@ void gribapiDefProjSTERE(grib_handle *gh, int gridID)
   grib_get_long(gh, "southPoleOnProjectionPlane", &southPoleOnProjectionPlane);
   double lat_0 = southPoleOnProjectionPlane ? -90 : 90;
 
-  double x_0 = grid_missval;
-  double y_0 = grid_missval;
+  double x_0 = CDI_grid_missval;
+  double y_0 = CDI_grid_missval;
 
   if ( proj_lonlat_to_stere_func )
     {
       x_0 = xval_0; y_0 = yval_0;
-      proj_lonlat_to_stere_func(grid_missval, lon_0, lat_ts, lat_0, a, (size_t)1, &x_0, &y_0);
-      if ( IS_NOT_EQUAL(x_0, grid_missval) && IS_NOT_EQUAL(y_0, grid_missval) )
+      proj_lonlat_to_stere_func(CDI_grid_missval, lon_0, lat_ts, lat_0, a, (size_t)1, &x_0, &y_0);
+      if ( IS_NOT_EQUAL(x_0, CDI_grid_missval) && IS_NOT_EQUAL(y_0, CDI_grid_missval) )
         { x_0 = -x_0; y_0 = -y_0; }
     }
 
-  gridDefParamSTERE(gridID, grid_missval, lon_0, lat_ts, lat_0, a, xval_0, yval_0, x_0, y_0);
+  gridDefParamSTERE(gridID, CDI_grid_missval, lon_0, lat_ts, lat_0, a, xval_0, yval_0, x_0, y_0);
 }
 
 static
@@ -2085,8 +2085,8 @@ void gribapiDefGridLCC(grib_handle *gh, int editionNumber, int gridID)
   long ysize = (long) gridInqYsize(gridID);
 
   double lon_0, lat_0, lat_1, lat_2, a, rf, xval_0, yval_0, x_0, y_0;
-  gridInqParamLCC(gridID, grid_missval, &lon_0, &lat_0, &lat_1, &lat_2, &a, &rf, &xval_0, &yval_0, &x_0, &y_0);
-  gridVerifyGribParamLCC(grid_missval, &lon_0, &lat_0, &lat_1, &lat_2, &a, &rf, &xval_0, &yval_0, &x_0, &y_0);
+  gridInqParamLCC(gridID, CDI_grid_missval, &lon_0, &lat_0, &lat_1, &lat_2, &a, &rf, &xval_0, &yval_0, &x_0, &y_0);
+  gridVerifyGribParamLCC(CDI_grid_missval, &lon_0, &lat_0, &lat_1, &lat_2, &a, &rf, &xval_0, &yval_0, &x_0, &y_0);
   if ( xval_0 < 0 ) xval_0 += 360;
   bool lsouth = (lat_1 < 0);
   if ( lsouth ) { lat_1 = -lat_2; lat_2 = -lat_2; }
@@ -2129,8 +2129,8 @@ void gribapiDefGridSTERE(grib_handle *gh, int editionNumber, int gridID)
   long ysize = (long) gridInqYsize(gridID);
 
   double lon_0, lat_ts, lat_0, a, xval_0, yval_0, x_0, y_0;
-  gridInqParamSTERE(gridID, grid_missval, &lon_0, &lat_ts, &lat_0, &a, &xval_0, &yval_0, &x_0, &y_0);
-  gridVerifyGribParamSTERE(grid_missval, &lon_0, &lat_ts, &lat_0, &a, &xval_0, &yval_0, &x_0, &y_0);
+  gridInqParamSTERE(gridID, CDI_grid_missval, &lon_0, &lat_ts, &lat_0, &a, &xval_0, &yval_0, &x_0, &y_0);
+  gridVerifyGribParamSTERE(CDI_grid_missval, &lon_0, &lat_ts, &lat_0, &a, &xval_0, &yval_0, &x_0, &y_0);
   if ( xval_0 < 0 ) xval_0 += 360;
   int projflag = 0;
 

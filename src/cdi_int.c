@@ -43,6 +43,7 @@ char *cdiPartabPath   = NULL;
 int   cdiPartabIntern = 1;
 
 double cdiDefaultMissval = -9.E33;
+double CDI_grid_missval = -9999.;
 
 static const char Filetypes[][9] = {
   "UNKNOWN",
@@ -495,6 +496,14 @@ void cdiDefMissval(double missval)
 
 
 double cdiInqMissval(void)
+{
+  cdiInitialize();
+
+  return cdiDefaultMissval;
+}
+
+
+double cdiInqGridMissval(void)
 {
   cdiInitialize();
 

@@ -1,5 +1,5 @@
 #ifdef HAVE_CONFIG_H
-#  include "config.h"
+#include "config.h"
 #endif
 
 #include <assert.h>
@@ -18,7 +18,6 @@
 #include "serialize.h"
 #include "vlist.h"
 
-double grid_missval = -9999.;
 int (*proj_lonlat_to_lcc_func)() = NULL;
 int (*proj_lcc_to_lonlat_func)() = NULL;
 int (*proj_lonlat_to_stere_func)() = NULL;
