@@ -26,7 +26,7 @@ static int extDefaultNumber = EXT_REAL;
  * A version string.
  */
 #undef  LIBVERSION
-#define LIBVERSION      1.4.0
+#define LIBVERSION      1.4.1
 #define XSTRING(x)	#x
 #define STRING(x)	XSTRING(x)
 static const char ext_libvers[] = STRING(LIBVERSION);
@@ -43,9 +43,7 @@ static int EXT_Debug = 0;    /* If set to 1, debugging */
 void extDebug(int debug)
 {
   EXT_Debug = debug;
-
-  if ( EXT_Debug )
-    Message("debug level %d", debug);
+  if (EXT_Debug) Message("debug level %d", debug);
 }
 
 
@@ -141,10 +139,9 @@ int extCheckFiletype(int fileID, int *swap)
   size_t fact = 0;
   size_t data =  0;
   size_t dimxy = 0;
-  int found = 0;
   unsigned char buffer[40], *pbuf;
 
-  if ( fileRead(fileID, buffer, 4) != 4 ) return found;
+  if ( fileRead(fileID, buffer, 4) != 4 ) return 0;
 
   size_t blocklen  = (size_t) get_UINT32(buffer);
   size_t sblocklen = (size_t) get_SUINT32(buffer);
@@ -156,7 +153,7 @@ int extCheckFiletype(int fileID, int *swap)
     {
      *swap = 0;
       fact = blocklen/4;
-      if ( fileRead(fileID, buffer, blocklen+8) != blocklen+8 ) return found;
+      if ( fileRead(fileID, buffer, blocklen+8) != blocklen+8 ) return 0;
       pbuf = buffer+3*fact;      dimxy = (size_t) get_UINT32(pbuf);
       pbuf = buffer+blocklen+4;  data  = (size_t) get_UINT32(pbuf);
     }
@@ -164,7 +161,7 @@ int extCheckFiletype(int fileID, int *swap)
     {
      *swap = 0;
       fact = blocklen/4;
-      if ( fileRead(fileID, buffer, blocklen+8) != blocklen+8 ) return found;
+      if ( fileRead(fileID, buffer, blocklen+8) != blocklen+8 ) return 0;
       pbuf = buffer+3*fact;      dimxy = (size_t) get_UINT64(pbuf);
       pbuf = buffer+blocklen+4;  data  = (size_t) get_UINT32(pbuf);
     }
@@ -172,7 +169,7 @@ int extCheckFiletype(int fileID, int *swap)
     {
      *swap = 1;
       fact = sblocklen/4;
-      if ( fileRead(fileID, buffer, sblocklen+8) != sblocklen+8 ) return found;
+      if ( fileRead(fileID, buffer, sblocklen+8) != sblocklen+8 ) return 0;
       pbuf = buffer+3*fact;       dimxy = (size_t) get_SUINT32(pbuf);
       pbuf = buffer+sblocklen+4;  data  = (size_t) get_SUINT32(pbuf);
     }
@@ -180,15 +177,12 @@ int extCheckFiletype(int fileID, int *swap)
     {
      *swap = 1;
       fact = sblocklen/4;
-      if ( fileRead(fileID, buffer, sblocklen+8) != sblocklen+8 ) return found;
+      if ( fileRead(fileID, buffer, sblocklen+8) != sblocklen+8 ) return 0;
       pbuf = buffer+3*fact;       dimxy = (size_t) get_SUINT64(pbuf);
       pbuf = buffer+sblocklen+4;  data  = (size_t) get_SUINT32(pbuf);
     }
 
   fileRewind(fileID);
-
-  if      ( data && dimxy*fact   == data ) found = 1;
-  else if ( data && dimxy*fact*2 == data ) found = 1;
 
   if ( EXT_Debug )
     {
@@ -196,6 +190,7 @@ int extCheckFiletype(int fileID, int *swap)
       Message("dimxy = %lu data = %lu", dimxy, data);
     }
 
+  int found = data && (dimxy*fact == data || dimxy*fact*2 == data);
   return found;
 }
 
@@ -204,8 +199,7 @@ int extInqHeader(void *ext, int *header)
 {
   extrec_t *extp = (extrec_t *) ext;
 
-  for ( size_t i = 0; i < EXT_HEADER_LEN; i++ )
-    header[i] = extp->header[i];
+  for (size_t i = 0; i < EXT_HEADER_LEN; i++) header[i] = extp->header[i];
 
   if ( EXT_Debug ) Message("datasize = %lu", extp->datasize);
 
@@ -217,13 +211,12 @@ int extDefHeader(void *ext, const int *header)
 {
   extrec_t *extp = (extrec_t *) ext;
 
-  for ( size_t i = 0; i < EXT_HEADER_LEN; i++ )
-    extp->header[i] = header[i];
+  for (size_t i = 0; i < EXT_HEADER_LEN; i++) extp->header[i] = header[i];
 
   extp->datasize = (size_t)header[3];
   if ( extp->number == EXT_COMP ) extp->datasize *= 2;
 
-  if ( EXT_Debug ) Message("datasize = %lu", extp->datasize);
+  if (EXT_Debug) Message("datasize = %lu", extp->datasize);
 
   return 0;
 }
@@ -231,7 +224,6 @@ int extDefHeader(void *ext, const int *header)
 static
 int extInqData(extrec_t *extp, int prec, void *data)
 {
-  size_t i;
   int ierr = 0;
   int byteswap = extp->byteswap;
   size_t datasize = extp->datasize;
@@ -249,7 +241,7 @@ int extInqData(extrec_t *extp, int prec, void *data)
 	    if ( rprec == prec )
 	      memcpy(data, buffer, datasize*sizeof(FLT32));
 	    else
-	      for ( i = 0; i < datasize; ++i )
+	      for (size_t i = 0; i < datasize; ++i)
 		((double *) data)[i] = (double) ((float *) buffer)[i];
 	  }
 	else
@@ -266,7 +258,7 @@ int extInqData(extrec_t *extp, int prec, void *data)
 	    if ( rprec == prec )
 	      memcpy(data, buffer, datasize*sizeof(FLT64));
 	    else
-	      for ( i = 0; i < datasize; ++i )
+	      for (size_t i = 0; i < datasize; ++i)
 		((float *) data)[i] = (float) ((double *) buffer)[i];
 	  }
 	else
@@ -300,16 +292,9 @@ int extInqDataDP(void *ext, double *data)
 static int extDefData(void *ext, int prec, const void *data)
 {
   extrec_t *extp = (extrec_t *) ext;
-  size_t i;
-  int rprec;
-  void *buffer;
 
-  if ( extDefaultPrec ) rprec = extDefaultPrec;
-  else                  rprec = extp->prec;
-
-  if ( ! rprec ) rprec = prec;
-
-  extp->prec = rprec;
+  int rprec = extDefaultPrec ? extDefaultPrec : extp->prec;
+  extp->prec = rprec ? rprec : prec;
 
   int *header = extp->header;
 
@@ -319,18 +304,16 @@ static int extDefData(void *ext, int prec, const void *data)
 
   extp->datasize = datasize;
 
+  void *buffer = extp->buffer;
   size_t buffersize = extp->buffersize;
 
   if ( buffersize != blocklen )
     {
       buffersize = blocklen;
-      buffer = extp->buffer;
       buffer = Realloc(buffer, buffersize);
       extp->buffer = buffer;
       extp->buffersize = buffersize;
     }
-  else
-    buffer = extp->buffer;
 
   switch ( rprec )
     {
@@ -339,7 +322,7 @@ static int extDefData(void *ext, int prec, const void *data)
 	if ( rprec == prec )
 	  memcpy(buffer, data, datasize*sizeof(FLT32));
 	else
-	  for ( i = 0; i < datasize; i++ )
+	  for (size_t i = 0; i < datasize; i++)
 	    ((float *) buffer)[i] = (float) ((double *) data)[i];
 
 	break;
@@ -349,7 +332,7 @@ static int extDefData(void *ext, int prec, const void *data)
 	if ( rprec == prec )
 	  memcpy(buffer, data, datasize*sizeof(FLT64));
 	else
-	  for ( i = 0; i < datasize; i++ )
+	  for (size_t i = 0; i < datasize; i++)
 	    ((double *) buffer)[i] = (double) ((float *) data)[i];
 
 	break;
@@ -380,8 +363,6 @@ int extDefDataDP(void *ext, const double *data)
 int extRead(int fileID, void *ext)
 {
   extrec_t *extp = (extrec_t *) ext;
-  size_t i;
-  void *buffer;
   int status;
 
   if ( ! extp->checked )
@@ -398,8 +379,7 @@ int extRead(int fileID, void *ext)
 
   if ( fileEOF(fileID) ) return -1;
 
-  if ( EXT_Debug )
-    Message("blocklen = %lu", blocklen);
+  if ( EXT_Debug ) Message("blocklen = %lu", blocklen);
 
   size_t hprec = blocklen / EXT_HEADER_LEN;
 
@@ -412,7 +392,7 @@ int extRead(int fileID, void *ext)
         INT32 tempheader[4];
 	binReadInt32(fileID, byteswap, EXT_HEADER_LEN, tempheader);
 
-	for ( i = 0; i < EXT_HEADER_LEN; i++ )
+	for (size_t i = 0; i < EXT_HEADER_LEN; i++)
           extp->header[i] = (int)tempheader[i];
 
 	break;
@@ -422,7 +402,7 @@ int extRead(int fileID, void *ext)
         INT64 tempheader[4];
 	binReadInt64(fileID, byteswap, EXT_HEADER_LEN, tempheader);
 
-	for ( i = 0; i < EXT_HEADER_LEN; i++ )
+	for (size_t i = 0; i < EXT_HEADER_LEN; i++)
           extp->header[i] = (int)tempheader[i];
 
 	break;
@@ -448,18 +428,16 @@ int extRead(int fileID, void *ext)
 
   blocklen = binReadF77Block(fileID, byteswap);
 
+  void *buffer = extp->buffer;
   size_t buffersize = (size_t)extp->buffersize;
 
   if ( buffersize < blocklen )
     {
       buffersize = blocklen;
-      buffer = extp->buffer;
       buffer = Realloc(buffer, buffersize);
       extp->buffer = buffer;
       extp->buffersize = buffersize;
     }
-  else
-    buffer = extp->buffer;
 
   size_t dprec = blocklen / extp->datasize;
 
@@ -497,7 +475,6 @@ int extRead(int fileID, void *ext)
 int extWrite(int fileID, void *ext)
 {
   extrec_t *extp = (extrec_t *) ext;
-  size_t i;
   union { INT32 i32[EXT_HEADER_LEN]; INT64 i64[EXT_HEADER_LEN]; } tempheader;
   int byteswap = extp->byteswap;
   int rprec  = extp->prec;
@@ -513,7 +490,7 @@ int extWrite(int fileID, void *ext)
     {
     case EXSE_SINGLE_PRECISION:
       {
-	for ( i = 0; i < EXT_HEADER_LEN; i++ )
+	for (size_t i = 0; i < EXT_HEADER_LEN; i++)
           tempheader.i32[i] = (INT32) header[i];
 
 	binWriteInt32(fileID, byteswap, EXT_HEADER_LEN, tempheader.i32);
@@ -522,7 +499,7 @@ int extWrite(int fileID, void *ext)
       }
     case EXSE_DOUBLE_PRECISION:
       {
-	for ( i = 0; i < EXT_HEADER_LEN; i++ )
+	for (size_t i = 0; i < EXT_HEADER_LEN; i++)
           tempheader.i64[i] = (INT64) header[i];
 
 	binWriteInt64(fileID, byteswap, EXT_HEADER_LEN, tempheader.i64);

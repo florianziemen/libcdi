@@ -1,7 +1,3 @@
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -31,7 +27,7 @@ static int srvDefaultDprec = 0;
  * A version string.
  */
 #undef  LIBVERSION
-#define LIBVERSION      1.4.0
+#define LIBVERSION      1.4.1
 #define XSTRING(x)	#x
 #define STRING(x)	XSTRING(x)
 static const char srv_libvers[] = STRING(LIBVERSION);
@@ -48,9 +44,7 @@ static int SRV_Debug = 0;    /* If set to 1, debugging */
 void srvDebug(int debug)
 {
   SRV_Debug = debug;
-
-  if ( SRV_Debug )
-    Message("debug level %d", debug);
+  if (SRV_Debug) Message("debug level %d", debug);
 }
 
 static
@@ -145,10 +139,9 @@ int srvCheckFiletype(int fileID, int *swap)
   size_t data = 0;
   size_t dimx = 0, dimy = 0;
   size_t fact = 0;
-  int found = 0;
   unsigned char buffer[72], *pbuf;
 
-  if ( fileRead(fileID, buffer, 4) != 4 ) return found;
+  if ( fileRead(fileID, buffer, 4) != 4 ) return 0;
 
   size_t blocklen  = (size_t) get_UINT32(buffer);
   size_t sblocklen = (size_t) get_SUINT32(buffer);
@@ -160,7 +153,7 @@ int srvCheckFiletype(int fileID, int *swap)
     {
      *swap = 0;
       fact = blocklen>>3;
-      if ( fileRead(fileID, buffer, blocklen+8) != blocklen+8 ) return found;
+      if ( fileRead(fileID, buffer, blocklen+8) != blocklen+8 ) return 0;
       pbuf = buffer+4*fact;      dimx = (size_t) get_UINT32(pbuf);
       pbuf = buffer+5*fact;      dimy = (size_t) get_UINT32(pbuf);
       pbuf = buffer+blocklen+4;  data = (size_t) get_UINT32(pbuf);
@@ -169,7 +162,7 @@ int srvCheckFiletype(int fileID, int *swap)
     {
      *swap = 0;
       fact = blocklen>>3;
-      if ( fileRead(fileID, buffer, blocklen+8) != blocklen+8 ) return found;
+      if ( fileRead(fileID, buffer, blocklen+8) != blocklen+8 ) return 0;
       pbuf = buffer+4*fact;      dimx = (size_t) get_UINT64(pbuf);
       pbuf = buffer+5*fact;      dimy = (size_t) get_UINT64(pbuf);
       pbuf = buffer+blocklen+4;  data = (size_t) get_UINT32(pbuf);
@@ -178,7 +171,7 @@ int srvCheckFiletype(int fileID, int *swap)
     {
      *swap = 1;
       fact = sblocklen>>3;
-      if ( fileRead(fileID, buffer, sblocklen+8) != sblocklen+8 ) return found;
+      if ( fileRead(fileID, buffer, sblocklen+8) != sblocklen+8 ) return 0;
       pbuf = buffer+4*fact;       dimx = (size_t) get_SUINT32(pbuf);
       pbuf = buffer+5*fact;       dimy = (size_t) get_SUINT32(pbuf);
       pbuf = buffer+sblocklen+4;  data = (size_t) get_SUINT32(pbuf);
@@ -187,7 +180,7 @@ int srvCheckFiletype(int fileID, int *swap)
     {
      *swap = 1;
       fact = sblocklen>>3;
-      if ( fileRead(fileID, buffer, sblocklen+8) != sblocklen+8 ) return found;
+      if ( fileRead(fileID, buffer, sblocklen+8) != sblocklen+8 ) return 0;
       pbuf = buffer+4*fact;       dimx = (size_t) get_SUINT64(pbuf);
       pbuf = buffer+5*fact;       dimy = (size_t) get_SUINT64(pbuf);
       pbuf = buffer+sblocklen+4;  data = (size_t) get_SUINT32(pbuf);
@@ -195,15 +188,13 @@ int srvCheckFiletype(int fileID, int *swap)
 
   fileRewind(fileID);
 
-  if      ( data && dimx*dimy*fact == data ) found = 1;
-  else if ( data && dimx*dimy*8    == data ) found = 1;
-
   if ( SRV_Debug )
     {
       Message("swap = %d fact = %d", *swap, fact);
       Message("dimx = %lu dimy = %lu data = %lu", dimx, dimy, data);
     }
 
+  int found = data && (dimx*dimy*fact == data || dimx*dimy*8 == data);
   return found;
 }
 
@@ -212,11 +203,9 @@ int srvInqHeader(void *srv, int *header)
 {
   srvrec_t *srvp = (srvrec_t *) srv;
 
-  for ( size_t i = 0; i < SRV_HEADER_LEN; i++ )
-    header[i] = srvp->header[i];
+  for (size_t i = 0; i < SRV_HEADER_LEN; i++) header[i] = srvp->header[i];
 
-  if ( SRV_Debug )
-    Message("datasize = %lu", srvp->datasize);
+  if (SRV_Debug) Message("datasize = %lu", srvp->datasize);
 
   return 0;
 }
@@ -226,13 +215,11 @@ int srvDefHeader(void *srv, const int *header)
 {
   srvrec_t *srvp = (srvrec_t *) srv;
 
-  for ( size_t i = 0; i < SRV_HEADER_LEN; i++ )
-    srvp->header[i] = header[i];
+  for (size_t i = 0; i < SRV_HEADER_LEN; i++) srvp->header[i] = header[i];
 
   srvp->datasize = (size_t)(header[4] * header[5]);
 
-  if ( SRV_Debug )
-    Message("datasize = %lu", srvp->datasize);
+  if (SRV_Debug) Message("datasize = %lu", srvp->datasize);
 
   return 0;
 }
@@ -240,7 +227,6 @@ int srvDefHeader(void *srv, const int *header)
 static
 int srvInqData(srvrec_t *srvp, int prec, void *data)
 {
-  size_t i;
   int ierr = 0;
   int byteswap = srvp->byteswap;
   size_t datasize = srvp->datasize;
@@ -258,7 +244,7 @@ int srvInqData(srvrec_t *srvp, int prec, void *data)
 	    if ( dprec == prec )
 	      memcpy(data, buffer, datasize*sizeof(FLT32));
 	    else
-	      for ( i = 0; i < datasize; i++ )
+	      for (size_t i = 0; i < datasize; i++)
 		((double *) data)[i] = (double) ((float *) buffer)[i];
 	  }
 	else
@@ -275,7 +261,7 @@ int srvInqData(srvrec_t *srvp, int prec, void *data)
 	    if ( dprec == prec )
 	      memcpy(data, buffer, datasize*sizeof(FLT64));
 	    else
-	      for ( i = 0; i < datasize; i++ )
+	      for (size_t i = 0; i < datasize; i++)
 		((float *) data)[i] = (float) ((double *) buffer)[i];
 	  }
 	else
@@ -310,23 +296,12 @@ static int
 srvDefData(void *srv, int prec, const void *data)
 {
   srvrec_t *srvp = (srvrec_t *) srv;
-  size_t i;
-  int dprec, hprec;
-  void *buffer;
 
-  if ( srvDefaultDprec ) dprec = srvDefaultDprec;
-  else                   dprec = srvp->dprec;
+  int dprec = srvDefaultDprec ? srvDefaultDprec : srvp->dprec;
+  srvp->dprec = dprec ? dprec : prec;
 
-  if ( ! dprec ) dprec = prec;
-
-  srvp->dprec = dprec;
-
-  if ( srvDefaultHprec ) hprec = srvDefaultHprec;
-  else                   hprec = srvp->hprec;
-
-  if ( ! hprec ) hprec = dprec;
-
-  srvp->hprec = hprec;
+  int hprec = srvDefaultHprec ? srvDefaultHprec : srvp->hprec;
+  srvp->hprec = hprec ? hprec : dprec;
 
   int *header = srvp->header;
 
@@ -335,18 +310,15 @@ srvDefData(void *srv, int prec, const void *data)
 
   srvp->datasize = datasize;
 
+  void *buffer = srvp->buffer;
   size_t buffersize = srvp->buffersize;
-
   if ( buffersize != blocklen )
     {
       buffersize = blocklen;
-      buffer = srvp->buffer;
       buffer = Realloc(buffer, buffersize);
       srvp->buffer = buffer;
       srvp->buffersize = buffersize;
     }
-  else
-    buffer = srvp->buffer;
 
   switch ( dprec )
     {
@@ -355,7 +327,7 @@ srvDefData(void *srv, int prec, const void *data)
 	if ( dprec == prec )
 	  memcpy(buffer, data, datasize*sizeof(FLT32));
 	else
-	  for ( i = 0; i < datasize; i++ )
+	  for (size_t i = 0; i < datasize; i++)
 	    ((float *) buffer)[i] = (float) ((double *) data)[i];
 
 	break;
@@ -365,7 +337,7 @@ srvDefData(void *srv, int prec, const void *data)
 	if ( dprec == prec )
 	  memcpy(buffer, data, datasize*sizeof(FLT64));
 	else
-	  for ( i = 0; i < datasize; i++ )
+	  for (size_t i = 0; i < datasize; i++)
 	    ((double *) buffer)[i] = (double) ((float *) data)[i];
 
 	break;
@@ -396,12 +368,10 @@ int srvDefDataDP(void *srv, const double *data)
 int srvRead(int fileID, void *srv)
 {
   srvrec_t *srvp = (srvrec_t *) srv;
-  size_t i;
   union {
     INT32 i32[SRV_HEADER_LEN];
     INT64 i64[SRV_HEADER_LEN];
   } tempheader;
-  void *buffer;
   int status;
 
   if ( ! srvp->checked )
@@ -418,8 +388,7 @@ int srvRead(int fileID, void *srv)
 
   if ( fileEOF(fileID) ) return -1;
 
-  if ( SRV_Debug )
-    Message("blocklen = %lu", blocklen);
+  if ( SRV_Debug ) Message("blocklen = %lu", blocklen);
 
   size_t hprec = blocklen / SRV_HEADER_LEN;
 
@@ -431,7 +400,7 @@ int srvRead(int fileID, void *srv)
       {
 	binReadInt32(fileID, byteswap, SRV_HEADER_LEN, tempheader.i32);
 
-	for ( i = 0; i < SRV_HEADER_LEN; i++ )
+	for (size_t i = 0; i < SRV_HEADER_LEN; i++)
           srvp->header[i] = (int)tempheader.i32[i];
 
 	break;
@@ -440,7 +409,7 @@ int srvRead(int fileID, void *srv)
       {
 	binReadInt64(fileID, byteswap, SRV_HEADER_LEN, tempheader.i64);
 
-	for ( i = 0; i < SRV_HEADER_LEN; i++ )
+	for (size_t i = 0; i < SRV_HEADER_LEN; i++)
           srvp->header[i] = (int)tempheader.i64[i];
 
 	break;
@@ -462,23 +431,20 @@ int srvRead(int fileID, void *srv)
 
   srvp->datasize = (size_t)(srvp->header[4] * srvp->header[5]);
 
-  if ( SRV_Debug )
-    Message("datasize = %lu", srvp->datasize);
+  if ( SRV_Debug ) Message("datasize = %lu", srvp->datasize);
 
   blocklen = binReadF77Block(fileID, byteswap);
 
+  void *buffer = srvp->buffer;
   size_t buffersize = srvp->buffersize;
 
   if ( buffersize < blocklen )
     {
       buffersize = blocklen;
-      buffer = srvp->buffer;
       buffer = Realloc(buffer, buffersize);
       srvp->buffer = buffer;
       srvp->buffersize = buffersize;
     }
-  else
-    buffer = srvp->buffer;
 
   size_t datasize = srvp->datasize;
 
@@ -509,7 +475,6 @@ int srvRead(int fileID, void *srv)
 void srvWrite(int fileID, void *srv)
 {
   srvrec_t *srvp = (srvrec_t *) srv;
-  size_t i;
   union
   {
     INT32 i32[SRV_HEADER_LEN];
@@ -529,7 +494,7 @@ void srvWrite(int fileID, void *srv)
     {
     case EXSE_SINGLE_PRECISION:
       {
-	for (i = 0; i < SRV_HEADER_LEN; i++)
+	for (size_t i = 0; i < SRV_HEADER_LEN; i++)
           tempheader.i32[i] = (INT32) header[i];
 
 	binWriteInt32(fileID, byteswap, SRV_HEADER_LEN, tempheader.i32);
@@ -538,7 +503,7 @@ void srvWrite(int fileID, void *srv)
       }
     case EXSE_DOUBLE_PRECISION:
       {
-	for (i = 0; i < SRV_HEADER_LEN; i++)
+	for (size_t i = 0; i < SRV_HEADER_LEN; i++)
           tempheader.i64[i] = (INT64) header[i];
 
 	binWriteInt64(fileID, byteswap, SRV_HEADER_LEN, tempheader.i64);

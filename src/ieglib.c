@@ -1,7 +1,3 @@
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -24,7 +20,7 @@ static int iegDefaultDprec = 0;
  * A version string.
  */
 #undef  LIBVERSION
-#define LIBVERSION      1.4.0
+#define LIBVERSION      1.4.1
 #define XSTRING(x)	#x
 #define STRING(x)	XSTRING(x)
 static const char ieg_libvers[] = STRING(LIBVERSION);
@@ -80,9 +76,7 @@ void iegLibInit(void)
 void iegDebug(int debug)
 {
   IEG_Debug = debug;
-
-  if ( IEG_Debug )
-    Message("debug level %d", debug);
+  if (IEG_Debug) Message("debug level %d", debug);
 }
 
 static
@@ -145,8 +139,7 @@ int iegCheckFiletype(int fileID, int *swap)
   size_t blocklen  = get_UINT32(buffer);
   size_t sblocklen = get_SUINT32(buffer);
 
-  if ( IEG_Debug )
-    Message("blocklen = %d sblocklen = %d", blocklen, sblocklen);
+  if ( IEG_Debug ) Message("blocklen = %d sblocklen = %d", blocklen, sblocklen);
 
   if ( blocklen == 636 || blocklen == 640 )
     {
@@ -187,14 +180,13 @@ int iegCheckFiletype(int fileID, int *swap)
 
   fileRewind(fileID);
 
-  int found = data && (dimx*dimy*fact == data || dimx*dimy*8 == data);
-
   if ( IEG_Debug )
     {
       Message("swap = %d fact = %d", *swap, fact);
       Message("dimx = %lu dimy = %lu data = %lu", dimx, dimy, data);
     }
 
+  int found = data && (dimx*dimy*fact == data || dimx*dimy*8 == data);
   return found;
 }
 
@@ -237,8 +229,7 @@ int iegInqData(void *ieg, int prec, void *data)
               {
                 const float *restrict p = (float *)buffer;
                 double *restrict q = (double *)data;
-                for ( size_t i = 0; i < datasize; i++)
-                  q[i] = p[i];
+                for (size_t i = 0; i < datasize; i++) q[i] = p[i];
               }
 	  }
 	else
@@ -258,8 +249,7 @@ int iegInqData(void *ieg, int prec, void *data)
               {
                 const double *restrict p = (double *)buffer;
                 float *restrict q = (float *)data;
-                for ( size_t i = 0; i < datasize; i++)
-                  q[i] = (float)p[i];
+                for (size_t i = 0; i < datasize; i++) q[i] = (float)p[i];
               }
 	  }
 	else
@@ -294,17 +284,15 @@ static int
 iegDefData(iegrec_t *iegp, int prec, const void *data)
 {
   int dprec = iegDefaultDprec ? iegDefaultDprec : iegp->dprec;
-
-  iegp->dprec = dprec = dprec ? dprec : prec;
+  iegp->dprec = dprec ? dprec : prec;
 
   size_t datasize = (size_t)IEG_G_NumLon(iegp->igdb) * (size_t)IEG_G_NumLat(iegp->igdb);
   size_t blocklen = datasize * (size_t)dprec;
 
   iegp->datasize = datasize;
 
-  size_t buffersize = iegp->buffersize;
-
   void *buffer = iegp->buffer;
+  size_t buffersize = iegp->buffersize;
   if ( buffersize != blocklen )
     {
       buffersize = blocklen;
@@ -323,8 +311,7 @@ iegDefData(iegrec_t *iegp, int prec, const void *data)
           {
             const double *restrict p = (const double *)data;
             float *restrict q = (float *)buffer;
-            for (size_t i = 0; i < datasize; i++)
-              q[i] = (float)p[i];
+            for (size_t i = 0; i < datasize; i++) q[i] = (float)p[i];
           }
 	break;
       }
@@ -336,8 +323,7 @@ iegDefData(iegrec_t *iegp, int prec, const void *data)
           {
             const float *restrict p = (const float *)data;
             double *restrict q = (double *)buffer;
-            for ( size_t i = 0; i < datasize; i++)
-              q[i] = p[i];
+            for ( size_t i = 0; i < datasize; i++) q[i] = p[i];
           }
 	break;
       }
@@ -436,20 +422,6 @@ int iegRead(int fileID, void *ieg)
 	iegp->vct[i] = buf.d[i];
     }
 
-  /*
-  fprintf(stderr, "refval %g\n", iegp->refval);
-
-  for ( size_t i = 0; i < 100; i++ )
-    fprintf(stderr, "%3d %g\n", i, iegp->vct[i]);
-
-  {
-    int i;
-    for ( size_t i = 0; i < 37; i++ )
-      fprintf(stderr, "pdb: %d %d\n", i, iegp->ipdb[i]);
-    for ( size_t i = 0; i < 22; i++ )
-      fprintf(stderr, "gdb: %d %d\n", i, iegp->igdb[i]);
-  }
-  */
   size_t blocklen2 = binReadF77Block(fileID, byteswap);
 
   if ( blocklen2 != blocklen )
@@ -461,11 +433,9 @@ int iegRead(int fileID, void *ieg)
   size_t datasize = iegp->datasize
     = (size_t)IEG_G_NumLon(iegp->igdb) * (size_t)IEG_G_NumLat(iegp->igdb);
 
-  if ( IEG_Debug )
-    Message("datasize = %lu", iegp->datasize);
+  if ( IEG_Debug ) Message("datasize = %lu", iegp->datasize);
 
   blocklen = binReadF77Block(fileID, byteswap);
-
 
   void *buffer = iegp->buffer;
   if ( iegp->buffersize < blocklen )
