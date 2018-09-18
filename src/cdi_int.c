@@ -42,7 +42,7 @@ bool CDI_netcdf_lazy_grid_load = false;
 char *cdiPartabPath   = NULL;
 int   cdiPartabIntern = 1;
 
-double CDO_default_missval = -9.E33;
+double CDI_default_missval = -9.E33;
 double CDI_grid_missval = -9999.;
 
 static const char Filetypes[][9] = {
@@ -114,7 +114,7 @@ cdiPrintDefaults(void)
           "default modelID    :  %d\n"
           "default tableID    :  %d\n"
           "default missval    :  %g\n", cdiDefaultInstID,
-          cdiDefaultModelID, cdiDefaultTableID, CDO_default_missval);
+          cdiDefaultModelID, cdiDefaultTableID, CDI_default_missval);
 }
 
 void cdiPrintVersion(void)
@@ -361,7 +361,7 @@ void cdiInitialize(void)
       if ( value >= 0 ) CDI_netcdf_hdr_pad = (size_t) value;
 
       envstr = getenv("CDI_MISSVAL");
-      if ( envstr ) CDO_default_missval = atof(envstr);
+      if ( envstr ) CDI_default_missval = atof(envstr);
       /*
       envstr = getenv("NC_MISSING_VALUE");
       if ( envstr ) cdiNcMissingValue = atoi(envstr);
@@ -491,7 +491,7 @@ void cdiDefMissval(double missval)
 {
   cdiInitialize();
 
-  CDO_default_missval = missval;
+  CDI_default_missval = missval;
 }
 
 
@@ -499,7 +499,7 @@ double cdiInqMissval(void)
 {
   cdiInitialize();
 
-  return CDO_default_missval;
+  return CDI_default_missval;
 }
 
 
@@ -507,7 +507,7 @@ double cdiInqGridMissval(void)
 {
   cdiInitialize();
 
-  return CDO_default_missval;
+  return CDI_default_missval;
 }
 
 /*
