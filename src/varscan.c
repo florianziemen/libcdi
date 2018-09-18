@@ -582,12 +582,51 @@ void varCopyKeys(int vlistID, int varID)
 }
 
 
+struct cdi_generate_varinfo
+{
+  int        varid;
+  const char *name;
+};
+
+static
+int cdi_generate_cmp_varname(const void *s1, const void *s2)
+{
+  const struct cdi_generate_varinfo *x = (const struct cdi_generate_varinfo *)s1,
+                                    *y = (const struct cdi_generate_varinfo *)s2;
+  return strcmp(x->name, y->name);
+}
+
 void cdi_generate_vars(stream_t *streamptr)
 {
   int vlistID = streamptr->vlistID;
 
   int *varids = (int *) Malloc(varTableUsed*sizeof(int));
   for ( size_t varID = 0; varID < varTableUsed; varID++ ) varids[varID] = (int)varID;
+
+  if ( streamptr->sortname )
+    {
+      size_t varID;
+      for ( varID = 0; varID < varTableUsed; varID++ )
+        if (!vartable[varID].name) break;
+
+      if ( varID == varTableUsed )
+        {
+          struct cdi_generate_varinfo *varInfo
+            = (struct cdi_generate_varinfo *) Malloc((size_t)varTableUsed * sizeof(struct cdi_generate_varinfo));
+
+          for ( size_t varID = 0; varID < varTableUsed; varID++ )
+            {
+              varInfo[varID].varid = varids[varID];
+              varInfo[varID].name = vartable[varids[varID]].name;
+            }
+          qsort(varInfo, varTableUsed, sizeof(varInfo[0]), cdi_generate_cmp_varname);
+          for ( size_t varID = 0; varID < varTableUsed; varID++ )
+            {
+              varids[varID] = varInfo[varID].varid;
+            }
+          Free(varInfo);
+        }
+    }
   /*
   if ( streamptr->sortparam )
     {
