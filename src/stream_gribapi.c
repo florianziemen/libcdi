@@ -604,17 +604,8 @@ void gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh,
   record->gridsize  = gribapiGetGridsize(gh);
   record->tiles = tiles ? *tiles : dummy_tiles;
 
-  //FIXME: This may leave the variable name unterminated (which is the behavior that I found in the code).
-  //       I don't know precisely how this field is used, so I did not change this behavior to avoid regressions,
-  //       but I think that it would be better to at least add a line
-  //
-  //           record->varname[sizeof(record->varname) - 1] = 0;`
-  //
-  //       after the `strncpy()` call.
-  //
-  //       I would consider using strdup() (that requires POSIX-2008 compliance, though), or a similar homebrew approach.
-  //       I. e. kick the fixed size array and allocate enough space, whatever that may be.
-  strncpy(record->varname, varname, sizeof(record->varname));
+  strncpy(record->varname, varname, sizeof(record->varname)-1);
+  record->varname[sizeof(record->varname) - 1] = 0;
 
   grid_t *grid = (grid_t *)Malloc(sizeof(*grid));
   gribapiGetGrid(gh, grid);
