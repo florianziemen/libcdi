@@ -1299,7 +1299,10 @@ void cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int *ncvaridp, int z
   int ncbvarid = CDI_UNDEFID;
   int nvdimID = CDI_UNDEFID;
 
-  double lbounds[dimlen], ubounds[dimlen], levels[dimlen];
+  double *buffer = (double *) malloc(4*dimlen*sizeof(double));
+  double *levels = buffer;
+  double *lbounds = buffer + 2*dimlen;
+  double *ubounds = buffer + 3*dimlen;
 
   if ( zaxisInqLevels(zaxisID, NULL) )
     zaxisInqLevels(zaxisID, levels);
@@ -1362,7 +1365,7 @@ void cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int *ncvaridp, int z
 
   if ( ncbvarid != CDI_UNDEFID )
     {
-      double zbounds[2*dimlen];
+      double *zbounds = buffer;
       for ( size_t i = 0; i < dimlen; ++i )
         {
           zbounds[2*i  ] = lbounds[i];
@@ -1376,6 +1379,8 @@ void cdf_def_zaxis_hybrid_cf(stream_t *streamptr, int type, int *ncvaridp, int z
   if ( *dimID == CDI_UNDEFID )
     streamptr->zaxisID[zaxisindex] = type == ZAXIS_HYBRID
       ? streamptr->vct.mlevID : streamptr->vct.ilevID;
+
+  free(buffer);
 }
 
 static
