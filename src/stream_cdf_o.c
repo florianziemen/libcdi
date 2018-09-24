@@ -1416,7 +1416,7 @@ void cdfDefZaxisChar(stream_t *streamptr, int zaxisID, char *axisname, int *dimI
   if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
   /* Check StrlenID */
-  char strlen[7] = "strlen\0";
+  char strlen[8] = "strlen\0";
   size_t clen = (size_t) zaxisInqCLen(zaxisID);
   if ( clen == 0 )
     Error("Maximal string length value is 0.\nA given character axis requires a dimension to save the maximal string length.");
