@@ -52,8 +52,7 @@ int recordNewEntry(stream_t *streamptr, int tsID)
     }
   else
     {
-      while ( recordID < recordSize
-              && records[recordID].used != CDI_UNDEFID )
+      while ( recordID < recordSize && records[recordID].used != CDI_UNDEFID )
         ++recordID;
     }
   /*
@@ -67,8 +66,7 @@ int recordNewEntry(stream_t *streamptr, int tsID)
         recordSize = INT_MAX;
       else
         Error("Cannot handle this many records!\n");
-      records = (record_t *) Realloc(records,
-                                     recordSize * sizeof (record_t));
+      records = (record_t *) Realloc(records, recordSize * sizeof (record_t));
 
       for ( size_t i = recordID; i < recordSize; i++ )
 	records[i].used = CDI_UNDEFID;

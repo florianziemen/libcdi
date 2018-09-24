@@ -459,40 +459,43 @@ void gribapiGetKeys(grib_handle *gh, int varID)
     }
 
   long section2Length;
-  grib_get_long(gh, "section2Length", &section2Length);
-  if ( section2Length > 0 )
+  int status = grib_get_long(gh, "section2Length", &section2Length);
+  if (status == 0 && section2Length > 0)
     {
       long grib2LocalSectionNumber;
       long mpimType, mpimClass, mpimUser;
-      grib_get_long(gh, "grib2LocalSectionNumber", &grib2LocalSectionNumber);
-      size_t section2PaddingLength = 0;
-      int status = grib_get_size(gh, "section2Padding", &section2PaddingLength);
-      if ( status == 0 && section2PaddingLength > 0 )
+      status = grib_get_long(gh, "grib2LocalSectionNumber", &grib2LocalSectionNumber);
+      if (status == 0)
         {
-          varDefKeyInt(varID, CDI_KEY_GRIB2LOCALSECTIONNUMBER, (int) grib2LocalSectionNumber);
-          varDefKeyInt(varID, CDI_KEY_SECTION2PADDINGLENGTH, (int) section2PaddingLength);
-          unsigned char *section2Padding = (unsigned char*) Malloc(section2PaddingLength);
-          grib_get_bytes(gh, "section2Padding", section2Padding, &section2PaddingLength);
-          varDefKeyBytes(varID, CDI_KEY_SECTION2PADDING, section2Padding, (int)section2PaddingLength);
-          Free(section2Padding);
+          size_t section2PaddingLength = 0;
+          status = grib_get_size(gh, "section2Padding", &section2PaddingLength);
+          if (status == 0 && section2PaddingLength > 0)
+            {
+              varDefKeyInt(varID, CDI_KEY_GRIB2LOCALSECTIONNUMBER, (int) grib2LocalSectionNumber);
+              varDefKeyInt(varID, CDI_KEY_SECTION2PADDINGLENGTH, (int) section2PaddingLength);
+              unsigned char *section2Padding = (unsigned char*) Malloc(section2PaddingLength);
+              grib_get_bytes(gh, "section2Padding", section2Padding, &section2PaddingLength);
+              varDefKeyBytes(varID, CDI_KEY_SECTION2PADDING, section2Padding, (int)section2PaddingLength);
+              Free(section2Padding);
+            }
+          else if ( grib_get_long(gh, "mpimType", &mpimType) == 0 &&
+                    grib_get_long(gh, "mpimClass", &mpimClass) == 0 &&
+                    grib_get_long(gh, "mpimUser", &mpimUser) == 0)
+            {
+              varDefKeyInt(varID, CDI_KEY_MPIMTYPE, mpimType);
+              varDefKeyInt(varID, CDI_KEY_MPIMCLASS, mpimClass);
+              varDefKeyInt(varID, CDI_KEY_MPIMUSER, mpimUser);
+
+              size_t revNumLen = 20;
+              unsigned char revNumber[revNumLen];
+              if ( grib_get_bytes(gh, "revNumber", revNumber, &revNumLen) == 0 )
+                varDefKeyBytes(varID, CDI_KEY_REVNUMBER, revNumber, (int)revNumLen);
+
+              long revStatus;
+              grib_get_long(gh, "revStatus", &revStatus);
+              varDefKeyInt(varID, CDI_KEY_REVSTATUS, revStatus);
+            }
         }
-      else if ( grib_get_long(gh, "mpimType", &mpimType) == 0 &&
-                grib_get_long(gh, "mpimClass", &mpimClass) == 0 &&
-                grib_get_long(gh, "mpimUser", &mpimUser) == 0)
-        {
-          varDefKeyInt(varID, CDI_KEY_MPIMTYPE, mpimType);
-          varDefKeyInt(varID, CDI_KEY_MPIMCLASS, mpimClass);
-          varDefKeyInt(varID, CDI_KEY_MPIMUSER, mpimUser);
-
-          size_t revNumLen = 20;
-          unsigned char revNumber[revNumLen];
-          if ( grib_get_bytes(gh, "revNumber", revNumber, &revNumLen) == 0 )
-            varDefKeyBytes(varID, CDI_KEY_REVNUMBER, revNumber, (int)revNumLen);
-
-          long revStatus;
-          grib_get_long(gh, "revStatus", &revStatus);
-          varDefKeyInt(varID, CDI_KEY_REVSTATUS, revStatus);
-       }
     }
 }
 
@@ -604,17 +607,8 @@ void gribapiAddRecord(stream_t *streamptr, int param, grib_handle *gh,
   record->gridsize  = gribapiGetGridsize(gh);
   record->tiles = tiles ? *tiles : dummy_tiles;
 
-  //FIXME: This may leave the variable name unterminated (which is the behavior that I found in the code).
-  //       I don't know precisely how this field is used, so I did not change this behavior to avoid regressions,
-  //       but I think that it would be better to at least add a line
-  //
-  //           record->varname[sizeof(record->varname) - 1] = 0;`
-  //
-  //       after the `strncpy()` call.
-  //
-  //       I would consider using strdup() (that requires POSIX-2008 compliance, though), or a similar homebrew approach.
-  //       I. e. kick the fixed size array and allocate enough space, whatever that may be.
-  strncpy(record->varname, varname, sizeof(record->varname));
+  strncpy(record->varname, varname, sizeof(record->varname)-1);
+  record->varname[sizeof(record->varname) - 1] = 0;
 
   grid_t *grid = (grid_t *)Malloc(sizeof(*grid));
   gribapiGetGrid(gh, grid);
@@ -955,7 +949,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
       gh = gribapiGetDiskRepresentation(recsize, &buffersize, &gribbuffer, &datatype, &comptype, &unzipsize);
 
       nrecs_scanned++;
-      GRIB_CHECK(my_grib_set_double(gh, "missingValue", CDO_default_missval), 0);
+      GRIB_CHECK(my_grib_set_double(gh, "missingValue", CDI_default_missval), 0);
 
       int param = gribapiGetParam(gh);
       int leveltype1 = -1, leveltype2 = -1, lbounds, level_sf, level_unit;
@@ -1168,7 +1162,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
 
       nrecs_scanned++;
       gh = grib_handle_new_from_message(NULL, gribbuffer, recsize);
-      GRIB_CHECK(my_grib_set_double(gh, "missingValue", CDO_default_missval), 0);
+      GRIB_CHECK(my_grib_set_double(gh, "missingValue", CDI_default_missval), 0);
 
       int param = gribapiGetParam(gh);
       int level1 = 0, level2 = 0, leveltype1, leveltype2, lbounds, level_sf, level_unit;
@@ -1398,7 +1392,7 @@ int gribapiScanTimestep(stream_t * streamptr)
 
           nrecs_scanned++;
 	  gh = grib_handle_new_from_message(NULL, gribbuffer, recsize);
-	  GRIB_CHECK(my_grib_set_double(gh, "missingValue", CDO_default_missval), 0);
+	  GRIB_CHECK(my_grib_set_double(gh, "missingValue", CDI_default_missval), 0);
 
           int param = gribapiGetParam(gh);
           int level1 = 0, level2 = 0, leveltype1, leveltype2 = -1, lbounds, level_sf, level_unit;

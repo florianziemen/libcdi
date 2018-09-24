@@ -535,46 +535,6 @@ int cmpLevelTableInv(const void* s1, const void* s2)
 }
 
 
-struct paraminfo
-{
-  int varid, param, ltype;
-};
-
-static
-int cmp_param(const void* s1, const void* s2)
-{
-  const struct paraminfo *x = (const struct paraminfo*) s1;
-  const struct paraminfo *y = (const struct paraminfo*) s2;
-
-  int cmp = (( x->param > y->param ) - ( x->param < y->param )) * 2
-           + ( x->ltype > y->ltype ) - ( x->ltype < y->ltype );
-
-  return cmp;
-}
-
-struct varinfo
-{
-  int        varid;
-  const char *name;
-};
-/*
-static
-int cmp_varname(const void *s1, const void *s2)
-{
-  const struct varinfo *x = (const struct varinfo *)s1,
-                       *y = (const struct varinfo *)s2;
-  return strcmp(x->name, y->name);
-}
-*/
-static
-int cmp_varname(const void *s1, const void *s2)
-{
-  const vartable_t *x = (const vartable_t *)s1,
-                   *y = (const vartable_t *)s2;
-  return strcmp(x->name, y->name);
-}
-
-
 void varCopyKeys(int vlistID, int varID)
 {
   cdi_keys_t *keysp = &(vartable[varID].keys);
@@ -582,36 +542,54 @@ void varCopyKeys(int vlistID, int varID)
 }
 
 
+struct cdi_generate_varinfo
+{
+  int        varid;
+  const char *name;
+};
+
+static
+int cdi_generate_cmp_varname(const void *s1, const void *s2)
+{
+  const struct cdi_generate_varinfo *x = (const struct cdi_generate_varinfo *)s1,
+                                    *y = (const struct cdi_generate_varinfo *)s2;
+  return strcmp(x->name, y->name);
+}
+
 void cdi_generate_vars(stream_t *streamptr)
 {
   int vlistID = streamptr->vlistID;
 
   int *varids = (int *) Malloc(varTableUsed*sizeof(int));
   for ( size_t varID = 0; varID < varTableUsed; varID++ ) varids[varID] = (int)varID;
+
   /*
-  if ( streamptr->sortparam )
-    {
-      struct paraminfo *varInfo = (struct paraminfo *) Malloc((size_t)varTableUsed * sizeof(struct paraminfo));
-
-      for ( unsigned varID = 0; varID < varTableUsed; varID++ )
-	{
-	  varInfo[varID].varid = varids[varID];
-	  varInfo[varID].param = vartable[varID].param;
-	  varInfo[varID].ltype = vartable[varID].ltype1;
-	}
-      qsort(varInfo, (size_t)varTableUsed, sizeof(struct paraminfo), cmp_param);
-      for ( unsigned varID = 0; varID < varTableUsed; varID++ )
-	{
-	  varids[varID] = varInfo[varID].varid;
-	}
-      Free(varInfo);
-    }
-
   if ( streamptr->sortname )
     {
-      qsort(vartable, (size_t)varTableUsed, sizeof(vartable_t), cmp_varname);
+      size_t varID;
+      for ( varID = 0; varID < varTableUsed; varID++ )
+        if (!vartable[varID].name) break;
+
+      if ( varID == varTableUsed )
+        {
+          struct cdi_generate_varinfo *varInfo
+            = (struct cdi_generate_varinfo *) Malloc((size_t)varTableUsed * sizeof(struct cdi_generate_varinfo));
+
+          for ( size_t varID = 0; varID < varTableUsed; varID++ )
+            {
+              varInfo[varID].varid = varids[varID];
+              varInfo[varID].name = vartable[varids[varID]].name;
+            }
+          qsort(varInfo, varTableUsed, sizeof(varInfo[0]), cdi_generate_cmp_varname);
+          for ( size_t varID = 0; varID < varTableUsed; varID++ )
+            {
+              varids[varID] = varInfo[varID].varid;
+            }
+          Free(varInfo);
+        }
     }
   */
+
   for ( size_t index = 0; index < varTableUsed; index++ )
     {
       int varid      = varids[index];
@@ -830,10 +808,8 @@ void cdi_generate_vars(stream_t *streamptr)
       unsigned nsub = vartable[varid].nsubtypes >= 0 ? (unsigned)vartable[varid].nsubtypes : 0U;
       for ( size_t isub = 0; isub < nsub; isub++ )
         {
-          sleveltable_t *restrict streamRecordTable
-            = streamptr->vars[index].recordTable + isub;
-          leveltable_t *restrict vartableLevelTable
-            = vartable[varid].recordTable[isub].levelTable;
+          sleveltable_t *restrict streamRecordTable = streamptr->vars[index].recordTable + isub;
+          leveltable_t *restrict vartableLevelTable = vartable[varid].recordTable[isub].levelTable;
           for ( unsigned levelID = 0; levelID < nlevels; levelID++ )
             {
               streamRecordTable->recordID[levelID] = vartableLevelTable[levelID].recID;
