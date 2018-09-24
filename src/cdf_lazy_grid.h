@@ -12,6 +12,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #endif
+
 #ifdef HAVE_LIBPTHREAD
 #include <pthread.h>
 #endif
@@ -22,19 +23,23 @@
 #include "cdf_int.h"
 #include "grid.h"
 
+struct xyValGet {
+  double scalefactor, addoffset;
+  size_t start[3], count[3], size, dimsize;
+  int datasetNCId, varNCId;
+  short ndims;
+};
+
+struct cdfLazyGridIds {
+  int datasetNCId, varNCId;
+};
+
 struct cdfLazyGrid
 {
   grid_t base;
   const struct gridVirtTable *baseVtable;
-  struct cdfLazyGridIds {
-    int datasetNCId, varNCId;
-  } cellAreaGet, xBoundsGet, yBoundsGet;
-  struct xyValGet {
-    double scalefactor, addoffset;
-    size_t start[3], count[3], size, dimsize;
-    int datasetNCId, varNCId;
-    short ndims;
-  } xValsGet, yValsGet;
+  struct cdfLazyGridIds cellAreaGet, xBoundsGet, yBoundsGet;
+  struct xyValGet xValsGet, yValsGet;
 #ifdef HAVE_LIBPTHREAD
   pthread_mutex_t loadSerialize;
 #endif
