@@ -3330,6 +3330,28 @@ void cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int model
 }
 
 static
+void cdf_copy_attint(int fileID, int vlistID, nc_type xtype, size_t attlen, char *attname)
+{
+  int attint[8];
+  int *pattint = (attlen > 8) ? (int*) malloc(attlen*sizeof(int)) : attint;
+  cdfGetAttInt(fileID, NC_GLOBAL, attname, attlen, pattint);
+  int datatype = (xtype == NC_SHORT) ? CDI_DATATYPE_INT16 : CDI_DATATYPE_INT32;
+  cdiDefAttInt(vlistID, CDI_GLOBAL, attname, datatype, (int)attlen, pattint);
+  if (attlen > 8) free(pattint);
+}
+
+static
+void cdf_copy_attflt(int fileID, int vlistID, nc_type xtype, size_t attlen, char *attname)
+{
+  double attflt[8];
+  double *pattflt = (attlen > 8) ? (double*) malloc(attlen*sizeof(int)) : attflt;
+  cdfGetAttDouble(fileID, NC_GLOBAL, attname, attlen, pattflt);
+  int datatype = (xtype == NC_FLOAT) ? CDI_DATATYPE_FLT32 : CDI_DATATYPE_FLT64;
+  cdiDefAttFlt(vlistID, CDI_GLOBAL, attname, datatype, (int)attlen, pattflt);
+  if (attlen > 8) free(pattflt);
+}
+
+static
 void cdf_scan_global_attr(int fileID, int vlistID, stream_t *streamptr, int ngatts, int *instID, int *modelID, bool *ucla_les, unsigned char *uuidOfHGrid, unsigned char *uuidOfVGrid, char *gridfile, int *number_of_grid_used)
 {
   nc_type xtype;
@@ -3422,18 +3444,12 @@ void cdf_scan_global_attr(int fileID, int vlistID, stream_t *streamptr, int ngat
 	    }
  	  else
             {
-              int attint[attlen];
-              cdfGetAttInt(fileID, NC_GLOBAL, attname, attlen, attint);
-              int datatype = (xtype == NC_SHORT) ? CDI_DATATYPE_INT16 : CDI_DATATYPE_INT32;
-              cdiDefAttInt(vlistID, CDI_GLOBAL, attname, datatype, (int)attlen, attint);
+              cdf_copy_attint(fileID, vlistID, xtype, attlen, attname);
             }
         }
       else if ( xtype == NC_FLOAT || xtype == NC_DOUBLE )
 	{
-	  double attflt[attlen];
-	  cdfGetAttDouble(fileID, NC_GLOBAL, attname, attlen, attflt);
-          int datatype = (xtype == NC_FLOAT) ? CDI_DATATYPE_FLT32 : CDI_DATATYPE_FLT64;
-          cdiDefAttFlt(vlistID, CDI_GLOBAL, attname, datatype, (int)attlen, attflt);
+          cdf_copy_attflt(fileID, vlistID, xtype, attlen, attname);
 	}
     }
 }
