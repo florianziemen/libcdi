@@ -1713,7 +1713,7 @@ void cdfDefCharacter(stream_t *streamptr, int gridID, int gridindex, int xory, i
   char axisname[CDI_MAX_NAME]; axisname[0] = 0;
   char **cvals = (char **) Malloc(dimlen * sizeof(char *));
   for ( size_t i = 0; i < dimlen; i++ )
-    cvals[i] = Malloc(strlen * sizeof(char) );
+    cvals[i] = (char*) Malloc(strlen * sizeof(char));
   int ncaxisid;
   if ( xory == 0 )
     {

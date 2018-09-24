@@ -646,7 +646,7 @@ void vlistCopyFlag(int vlistID2, int vlistID1)
                     for ( int levID = 0; levID < nlevs; ++levID )
                       if ( vars1[varID].levinfo[levID].flag )
                         {
-                          cvals2[levID2] = Malloc((size_t)(clen2) * sizeof (char));
+                          cvals2[levID2] = (char*) Malloc((size_t)(clen2) * sizeof(char));
                           memcpy(cvals2[levID2], cvals1[levID], clen2*sizeof(char));
                           levID2++;
                         }

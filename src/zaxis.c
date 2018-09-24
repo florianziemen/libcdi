@@ -790,8 +790,8 @@ void zaxisDefCvals(int zaxisID, const char **cvals, int clen)
 
       for ( int ilev = 0; ilev < size; ++ilev )
         {
-          zaxisptr->cvals[ilev] = Malloc((size_t)clen*sizeof(char));
-          memcpy(zaxisptr->cvals[ilev],cvals[ilev], (size_t)clen*sizeof(char));
+          zaxisptr->cvals[ilev] = (char*) Malloc((size_t)clen*sizeof(char));
+          memcpy(zaxisptr->cvals[ilev], cvals[ilev], (size_t)clen*sizeof(char));
         }
       reshSetStatus(zaxisID, &zaxisOps, RESH_DESYNC_IN_USE);
     }
@@ -1046,19 +1046,18 @@ int zaxisInqCLen(int zaxisID)
 int zaxisInqCVals(int zaxisID, char ***clevels)
 {
   int size = 0;
-  size_t clen = 0;
   zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
 
   if ( zaxisptr->cvals )
     {
       size = zaxisptr->size;
-      clen = zaxisptr->clength;
+      size_t clen = zaxisptr->clength;
       if ( size && clen )
         {
-          (*clevels) = Malloc(size*sizeof(char*));
+          (*clevels) = (char**) Malloc(size*sizeof(char*));
           for ( int i = 0; i < size; i++ )
             {
-              (*clevels)[i] = Malloc(clen*sizeof(char));
+              (*clevels)[i] = (char*) Malloc(clen*sizeof(char));
               memcpy((*clevels)[i], zaxisptr->cvals[i], clen*sizeof(char));
             }
           }

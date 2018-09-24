@@ -34,9 +34,7 @@ int grbDecode(int filetype, int memtype, void *gribbuffer, size_t gribsize, void
 #endif
 #ifdef HAVE_LIBGRIB_API
     {
-      void *datap = data;
-      if ( memtype == MEMTYPE_FLOAT )
-        datap = Malloc(datasize*sizeof(double));
+      void *datap = (memtype == MEMTYPE_FLOAT) ? Malloc(datasize*sizeof(double)) : data;
 
       status = gribapiDecode(gribbuffer, gribsize, datap, datasize, unreduced, nmiss, missval, vlistID, varID);
 
