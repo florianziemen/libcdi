@@ -494,7 +494,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
         {
           if ( iz ) sprintf(varname2, "_%u", iz+1);
 
-          if ( nc_inq_varid(fileID, varname2, &ncvarid) != NC_NOERR ) break;
+          if ( nc_inq_varid(fileID, varname, &ncvarid) != NC_NOERR ) break;
 
           ++iz;
         }
