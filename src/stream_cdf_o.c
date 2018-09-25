@@ -140,7 +140,7 @@ struct idSearch
 };
 
 static inline struct idSearch
-cdfSearchIDBySize(size_t startIdx, size_t numIDs, const ncgrid_t ncgrid[numIDs],
+cdfSearchIDBySize(size_t startIdx, size_t numIDs, const ncgrid_t ncgrid[/*numIDs*/],
                   int ncIDType, int searchType, int searchSize,
                   int (*typeInq)(int id), size_t (*sizeInq)(int id))
 {
@@ -383,12 +383,12 @@ void checkGridName(char *axisname, int fileID)
 
   size_t axisnameLen = strlen(axisname);
   memcpy(axisname2, axisname, axisnameLen + 1);
+
   do
     {
       if ( iz ) sprintf(axisname2 + axisnameLen, "_%u", iz+1);
 
-      int status = nc_inq_varid(fileID, axisname2, &ncdimid);
-      if ( status != NC_NOERR ) break;
+      if ( nc_inq_varid(fileID, axisname2, &ncdimid) != NC_NOERR ) break;
 
       ++iz;
     }
@@ -494,19 +494,15 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridindex, int ndims,
       int keyname = (axisLetter == 'X') ? CDI_KEY_XNAME : CDI_KEY_YNAME;
       gridAxisInq->axisName(gridID, keyname, CDI_MAX_NAME, axisname);
       if ( axisname[0] == 0 ) Error("axis name undefined!");
-      size_t axisnameLen = strlen(axisname);
 
-      /* enough to append _ plus up to 100 decimal and trailing \0 */
-      char extendedAxisname[axisnameLen + 4 + 1];
-      memcpy(extendedAxisname, axisname, axisnameLen + 1);
-      checkGridName(extendedAxisname, fileID);
-      size_t extendedAxisnameLen = axisnameLen + strlen(extendedAxisname + axisnameLen);
+      checkGridName(axisname, fileID);
+      size_t axisnameLen = strlen(axisname);
 
       if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
 
       if ( ndims )
         {
-          if ( dimname[0] == 0 ) strcpy(dimname, extendedAxisname);
+          if ( dimname[0] == 0 ) strcpy(dimname, axisname);
           dimID = checkDimName(fileID, dimlen, dimname);
 
           if ( dimID == CDI_UNDEFID ) cdf_def_dim(fileID, dimname, dimlen, &dimID);
@@ -517,7 +513,7 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridindex, int ndims,
       double *pbounds = NULL;
       if ( pvals )
         {
-          cdf_def_var(fileID, extendedAxisname, xtype, ndims, &dimID, &ncvarid);
+          cdf_def_var(fileID, axisname, xtype, ndims, &dimID, &ncvarid);
 
           cdfPutGridStdAtts(fileID, ncvarid, gridID, axisLetter, gridAxisInq);
           {
@@ -547,13 +543,13 @@ cdfDefAxisCommon(stream_t *streamptr, int gridID, int gridindex, int ndims,
             }
           if ( pbounds && nvdimID != CDI_UNDEFID )
             {
-              char boundsname[extendedAxisnameLen + 1 + sizeof(bndsName)];
-              memcpy(boundsname, axisname, extendedAxisnameLen);
-              boundsname[extendedAxisnameLen] = '_';
-              memcpy(boundsname + extendedAxisnameLen + 1, bndsName, sizeof bndsName);
+              char boundsname[CDI_MAX_NAME];
+              memcpy(boundsname, axisname, axisnameLen);
+              boundsname[axisnameLen] = '_';
+              memcpy(boundsname + axisnameLen + 1, bndsName, sizeof(bndsName));
               int dimIDs[2] = { dimID, nvdimID };
               cdf_def_var(fileID, boundsname, xtype, 2, dimIDs, &ncbvarid);
-              cdf_put_att_text(fileID, ncvarid, "bounds", extendedAxisnameLen + sizeof (bndsName), boundsname);
+              cdf_put_att_text(fileID, ncvarid, "bounds", axisnameLen + sizeof(bndsName), boundsname);
             }
         }
 
@@ -1124,13 +1120,13 @@ void cdf_def_vct_cf(stream_t *streamptr, int zaxisID, int nclevID, int ncbndsID,
       streamptr->ncmode = 2;
 
       int vctsize = zaxisInqVctSize(zaxisID);
-      double vct[vctsize];
+      double *vct = (double*) malloc(vctsize*sizeof(double));;
       zaxisInqVct(zaxisID, vct);
 
       if ( p0status == 0 && IS_NOT_EQUAL(p0value,0) )
         for ( int i = 0; i < vctsize/2; ++i ) vct[i] /= p0value;
 
-      double tarray[ilev*2];
+      double *tarray = (double*) malloc(ilev*2*sizeof(double));
 
       if ( ncbndsID != -1 )
         {
@@ -1156,6 +1152,9 @@ void cdf_def_vct_cf(stream_t *streamptr, int zaxisID, int nclevID, int ncbndsID,
       for ( int i = 0; i < mlev; ++i )
         tarray[i] = (vct[ilev+i] + vct[ilev+i+1]) * 0.5;
       cdf_put_var_double(fileID, hybmid, tarray);
+
+      free(tarray);
+      free(vct);
     }
 }
 
@@ -1612,7 +1611,10 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
 
               if ( ncbvarid != CDI_UNDEFID )
                 {
-                  double lbounds[dimlen], ubounds[dimlen], zbounds[2*dimlen];
+                  double *buffer = (double *) malloc(4*dimlen*sizeof(double));
+                  double *zbounds = buffer;
+                  double *lbounds = buffer + 2*dimlen;
+                  double *ubounds = buffer + 3*dimlen;
                   zaxisInqLbounds(zaxisID, lbounds);
                   zaxisInqUbounds(zaxisID, ubounds);
                   for ( size_t i = 0; i < dimlen; ++i )
@@ -1622,6 +1624,8 @@ void cdfDefZaxis(stream_t *streamptr, int zaxisID)
                     }
 
                   cdf_put_var_double(fileID, ncbvarid, zbounds);
+
+                  free(buffer);
                 }
 
               if ( ndims == 0 ) streamptr->nczvarID[zaxisindex] = ncvarid;

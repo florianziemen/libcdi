@@ -220,9 +220,11 @@ void cdfDefineAttributes(int cdiID, int varID, int fileID, int ncvarID)
           len = (size_t)attlen;
           if ( atttype == CDI_DATATYPE_FLT32 )
             {
-              float attflt_sp[len];
-              for ( size_t i = 0; i < len; ++i ) attflt_sp[i] = (float)attflt[i];
-              cdf_put_att_float(fileID, ncvarID, attname, NC_FLOAT, len, attflt_sp);
+              float attflt_sp[8];
+              float *pattflt_sp = (len > 8) ? (float*) malloc(len*sizeof(float)) : attflt_sp;
+              for ( size_t i = 0; i < len; ++i ) pattflt_sp[i] = (float)attflt[i];
+              cdf_put_att_float(fileID, ncvarID, attname, NC_FLOAT, len, pattflt_sp);
+              if (len > 8) free(pattflt_sp);
             }
           else
             cdf_put_att_double(fileID, ncvarID, attname, NC_DOUBLE, len, attflt);
@@ -455,29 +457,23 @@ int cdfDefVar(stream_t *streamptr, int varID)
   if ( name[0] )
     {
       sprintf(varname, "%s", name);
+      char *varname2 = varname+strlen(varname);
+      unsigned iz = 0;
 
-      bool checkname = true;
-      int iz = 0;
-
-      while ( checkname )
+      do
         {
-          if ( iz ) sprintf(varname, "%s_%d", name, iz+1);
+          if ( iz ) sprintf(varname2, "_%u", iz+1);
 
-          int status = nc_inq_varid(fileID, varname, &ncvarid);
-          if ( status != NC_NOERR ) checkname = false;
+          if ( nc_inq_varid(fileID, varname2, &ncvarid) != NC_NOERR ) break;
 
-          if ( checkname ) iz++;
-
-          if ( iz >= CDI_MAX_NAME ) Error("Double entry of variable name '%s'!", name);
+          ++iz;
         }
+      while ( iz <= 99 );
+
+      if (iz > 99) Error("Variable name %s already exsist!", name);
 
       if ( strcmp(name, varname) != 0 )
-        {
-          if ( iz == 1 )
-            Warning("Changed double entry of variable name '%s' to '%s'!", name, varname);
-          else
-            Warning("Changed multiple entry of variable name '%s' to '%s'!", name, varname);
-        }
+        Warning("Changed %s entry of variable name '%s' to '%s'!", (iz==1)?"double":"multiple", name, varname);
 
       strcpy(name, varname);
     }
@@ -492,21 +488,19 @@ int cdfDefVar(stream_t *streamptr, int varID)
 	sprintf(varname, "param%d.%d.%d", pnum, pcat, pdis);
 
       char *varname2 = varname+strlen(varname);
+      unsigned iz = 0;
 
-      bool checkname = true;
-      int iz = 0;
-
-      while ( checkname )
+      do
         {
-          if ( iz ) sprintf(varname2, "_%d", iz+1);
+          if ( iz ) sprintf(varname2, "_%u", iz+1);
 
-          int status = nc_inq_varid(fileID, varname, &ncvarid);
-          if ( status != NC_NOERR ) checkname = false;
+          if ( nc_inq_varid(fileID, varname2, &ncvarid) != NC_NOERR ) break;
 
-          if ( checkname ) iz++;
-
-          if ( iz >= CDI_MAX_NAME ) break;
+          ++iz;
         }
+      while ( iz <= 99 );
+
+      if (iz > 99) Error("Variable name %s already exsist!", name);
 
       strcpy(name, varname);
       code = 0;
