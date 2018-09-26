@@ -3,6 +3,10 @@
         * using EXSE library version 1.4.1
 	* Version 1.9.6 released
 
+2018-09-26  Uwe Schulzweida
+
+	* Added gridInqXvalsPart() and gridInqYvalsPart() [patch from: Niklas Röber]
+
 2018-09-17  Uwe Schulzweida
 
 	* Added function cdiInqGridMissval()

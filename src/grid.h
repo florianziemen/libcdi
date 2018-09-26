@@ -31,9 +31,11 @@ struct gridVirtTable
   double (*inqXVal)(grid_t *gridptr, size_t index);
   double (*inqYVal)(grid_t *gridptr, size_t index);
   size_t (*inqXVals)(grid_t *gridptr, double *xvals);
+  size_t (*inqXValsPart)(grid_t *gridptr, int start, size_t length, double *xvals);
   size_t (*inqXCvals)(grid_t *gridptr, char **xcvals);
   int (*inqXIsc)(grid_t *gridptr);
   size_t (*inqYVals)(grid_t *gridptr, double *yvals);
+  size_t (*inqYValsPart)(grid_t *gridptr, int start, size_t length, double *yvals);
   size_t (*inqYCvals)(grid_t *gridptr, char **ycvals);
   int (*inqYIsc)(grid_t *gridptr);
   const double *(*inqXValsPtr)(grid_t *gridptr);

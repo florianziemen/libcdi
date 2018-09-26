@@ -760,6 +760,7 @@ void    gridDefXvals(int gridID, const double xvals[]);
 
 /*      gridInqXvals: Get all values of a X-axis */
 size_t  gridInqXvals(int gridID, double xvals[]);
+size_t  gridInqXvalsPart(int gridID, int start, size_t size, double xvals[]);
 
 /*      gridInqXIsc: Find out whether X-coordinate is of type CHAR */
 int     gridInqXIsc(int gridID);
@@ -772,6 +773,7 @@ void    gridDefYvals(int gridID, const double yvals[]);
 
 /*      gridInqYvals: Get all values of a Y-axis */
 size_t  gridInqYvals(int gridID, double yvals[]);
+size_t  gridInqYvalsPart(int gridID, int start, size_t size, double yvals[]);
 
 /*      gridInqYIsc: Find out whether Y-coordinate is of type CHAR */
 int     gridInqYIsc(int gridID);

@@ -1543,6 +1543,32 @@ size_t gridInqXValsSerial(grid_t *gridptr, double *xvals)
 }
 
 static
+size_t gridInqXValsPartSerial(grid_t *gridptr, int start, size_t length, double *xvals)
+{
+  size_t size;
+  if ( gridptr->type == GRID_CURVILINEAR || gridptr->type == GRID_UNSTRUCTURED )
+    size = gridptr->size;
+  else if ( gridptr->type == GRID_GAUSSIAN_REDUCED )
+    size = 2;
+  else
+    size = gridptr->x.size;
+
+  if ( CDI_Debug && size == 0 )
+    Warning("size undefined for gridID = %d", gridptr->self);
+
+  if ( gridptr->x.vals )
+    {
+      if ( size && xvals )
+        {
+          const double *gridptr_xvals = gridptr->vtable->inqXValsPtr(gridptr);
+          memcpy(xvals, gridptr_xvals+start, length * sizeof (double));
+        }
+    }
+  else
+    size = 0;
+}
+
+static
 size_t gridInqXCvalsSerial(grid_t *gridptr, char **xcvals)
 {
   if ( gridptr->type != GRID_CHARXY )
@@ -1597,6 +1623,13 @@ size_t gridInqXvals(int gridID, double *xvals)
 {
   grid_t *gridptr = grid_to_pointer(gridID);
   return gridptr->vtable->inqXVals(gridptr, xvals);
+}
+
+
+size_t gridInqXvalsPart(int gridID, int start, size_t length, double *xvals)
+{
+  grid_t *gridptr = grid_to_pointer(gridID);
+  return gridptr->vtable->inqXValsPart(gridptr, start, length, xvals);
 }
 
 
@@ -1712,6 +1745,30 @@ size_t gridInqYValsSerial(grid_t *gridptr, double *yvals)
   return size;
 }
 
+static
+size_t gridInqYValsPartSerial(grid_t *gridptr, int start, size_t length, double *yvals)
+{
+  int gridtype = gridptr->type;
+  size_t size = (gridtype == GRID_CURVILINEAR || gridtype == GRID_UNSTRUCTURED)
+            ? gridptr->size : gridptr->y.size;
+
+  if ( CDI_Debug && size == 0 )
+    Warning("size undefined for gridID = %d!", gridptr->self);
+
+  if ( gridptr->y.vals )
+    {
+      if ( size && yvals )
+        {
+          const double *gridptr_yvals = gridptr->vtable->inqYValsPtr(gridptr);
+          memcpy(yvals, gridptr_yvals+start, length * sizeof (double));
+        }
+    }
+  else
+    size = 0;
+
+  return size;
+}
+
 /*
 @Function  gridInqYvals
 @Title     Get all values of a Y-axis
@@ -1736,6 +1793,13 @@ size_t gridInqYvals(int gridID, double *yvals)
 {
   grid_t *gridptr = grid_to_pointer(gridID);
   return gridptr->vtable->inqYVals(gridptr, yvals);
+}
+
+
+size_t gridInqYvalsPart(int gridID, int start, size_t size, double *yvals)
+{
+  grid_t *gridptr = grid_to_pointer(gridID);
+  return gridptr->vtable->inqYValsPart(gridptr, start, size, yvals);
 }
 
 
@@ -5057,9 +5121,11 @@ const struct gridVirtTable cdiGridVtable
   .inqXVal = gridInqXValSerial,
   .inqYVal = gridInqYValSerial,
   .inqXVals = gridInqXValsSerial,
+  .inqXValsPart = gridInqXValsPartSerial,
   .inqXCvals = gridInqXCvalsSerial,
   .inqXIsc = gridInqXIscSerial,
   .inqYVals = gridInqYValsSerial,
+  .inqYValsPart = gridInqYValsPartSerial,
   .inqYCvals = gridInqYCvalsSerial,
   .inqYIsc = gridInqYIscSerial,
   .inqXValsPtr = gridInqXValsPtrSerial,
