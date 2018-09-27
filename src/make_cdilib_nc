@@ -153,7 +153,7 @@ listIncludes () {
 
 scanlist="$files"
 fileList=
-until test "foo$scanlist" = "foo" ; do
+until test "x$scanlist" = "x" ; do
     curFile="$(car $scanlist)"
     scanlist="$(cdr $scanlist)"
     case $curFile in
@@ -175,7 +175,7 @@ echo file list:
 echo $fileList
 
 for file in $fileList ; do
-  if [ "$file" = "config.h" -o "$file" = "cgribex.h" -o "$file" = "gribapi.h" -o "$file" = "table.h" ] ; then
+  if [ "$file" = "config.h" -o "$file" = "cgribex.h" -o "$file" = "gribapi.h" -o "$file" = "table.h" -o "$file" = "exse.h" -o "$file" = "extra.h" -o "$file" = "ieg.h" -o "$file" = "service.h" -o "$file" = "stream_ext.h" -o "$file" = "stream_ieg.h" -o "$file" = "stream_srv.h" ] ; then
     echo "skipped file: $file"
   else
     cat $srcdir/$file | grep -v '^ *# *include  *"'  >> ${PROG}
