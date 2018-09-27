@@ -4,7 +4,7 @@
 !
 ! Author:
 ! -------
-! Uwe Schulzweida, MPI-MET, Hamburg,   July 2018
+! Uwe Schulzweida, MPI-MET, Hamburg,   September 2018
 !
 
       INTEGER    CDI_MAX_NAME
@@ -80,24 +80,6 @@
       PARAMETER (CDI_FILETYPE_EXT       =  9)
       INTEGER    CDI_FILETYPE_IEG
       PARAMETER (CDI_FILETYPE_IEG       = 10)
-      INTEGER    FILETYPE_GRB
-      PARAMETER (FILETYPE_GRB           =  1)
-      INTEGER    FILETYPE_GRB2
-      PARAMETER (FILETYPE_GRB2          =  2)
-      INTEGER    FILETYPE_NC
-      PARAMETER (FILETYPE_NC            =  3)
-      INTEGER    FILETYPE_NC2
-      PARAMETER (FILETYPE_NC2           =  4)
-      INTEGER    FILETYPE_NC4
-      PARAMETER (FILETYPE_NC4           =  5)
-      INTEGER    FILETYPE_NC4C
-      PARAMETER (FILETYPE_NC4C          =  6)
-      INTEGER    FILETYPE_SRV
-      PARAMETER (FILETYPE_SRV           =  7)
-      INTEGER    FILETYPE_EXT
-      PARAMETER (FILETYPE_EXT           =  8)
-      INTEGER    FILETYPE_IEG
-      PARAMETER (FILETYPE_IEG           =  9)
 !
 !  Compress types
 !
@@ -200,20 +182,6 @@
       PARAMETER (CDI_DATATYPE_UINT16    = 316)
       INTEGER    CDI_DATATYPE_UINT32
       PARAMETER (CDI_DATATYPE_UINT32    = 332)
-      INTEGER    DATATYPE_PACK
-      PARAMETER (DATATYPE_PACK          =  0)
-      INTEGER    DATATYPE_PACK8
-      PARAMETER (DATATYPE_PACK8         =  8)
-      INTEGER    DATATYPE_PACK16
-      PARAMETER (DATATYPE_PACK16        = 16)
-      INTEGER    DATATYPE_PACK24
-      PARAMETER (DATATYPE_PACK24        = 24)
-      INTEGER    DATATYPE_FLT32
-      PARAMETER (DATATYPE_FLT32         = 132)
-      INTEGER    DATATYPE_FLT64
-      PARAMETER (DATATYPE_FLT64         = 164)
-      INTEGER    DATATYPE_INT32
-      PARAMETER (DATATYPE_INT32         = 232)
 !
 !  internal data types
 !
@@ -231,18 +199,6 @@
       PARAMETER (CDI_DATATYPE_LONG      = 256)
       INTEGER    CDI_DATATYPE_UINT
       PARAMETER (CDI_DATATYPE_UINT      = 257)
-      INTEGER    DATATYPE_INT
-      PARAMETER (DATATYPE_INT           = 251)
-      INTEGER    DATATYPE_FLT
-      PARAMETER (DATATYPE_FLT           = 252)
-      INTEGER    DATATYPE_TXT
-      PARAMETER (DATATYPE_TXT           = 253)
-      INTEGER    DATATYPE_CPX
-      PARAMETER (DATATYPE_CPX           = 254)
-      INTEGER    DATATYPE_UCHAR
-      PARAMETER (DATATYPE_UCHAR         = 255)
-      INTEGER    DATATYPE_LONG
-      PARAMETER (DATATYPE_LONG          = 256)
 !
 !  Chunks
 !
@@ -275,8 +231,6 @@
       PARAMETER (GRID_UNSTRUCTURED      =  9)
       INTEGER    GRID_CURVILINEAR
       PARAMETER (GRID_CURVILINEAR       = 10)
-      INTEGER    GRID_LCC
-      PARAMETER (GRID_LCC               = 11)
       INTEGER    GRID_PROJECTION
       PARAMETER (GRID_PROJECTION        = 12)
       INTEGER    GRID_CHARXY
@@ -289,6 +243,8 @@
       PARAMETER (CDI_PROJ_LAEA          = 23)
       INTEGER    CDI_PROJ_SINU
       PARAMETER (CDI_PROJ_SINU          = 24)
+      INTEGER    CDI_PROJ_STERE
+      PARAMETER (CDI_PROJ_STERE         = 25)
 !
 !  ZAXIS types
 !
@@ -487,6 +443,9 @@
 
       DOUBLEPRECISION cdiInqMissval
       EXTERNAL        cdiInqMissval
+
+      DOUBLEPRECISION cdiInqGridMissval
+      EXTERNAL        cdiInqGridMissval
 
 !                     cdiDefGlobal
 !                                    (CHARACTER*(*)   string,
@@ -1537,6 +1496,13 @@
 !                                     DOUBLEPRECISION xvals(*))
       EXTERNAL        gridInqXvals
 
+      INTEGER         gridInqXvalsPart
+!                                    (INTEGER         gridID,
+!                                     INTEGER         start,
+!                                     INTEGER         size,
+!                                     DOUBLEPRECISION xvals(*))
+      EXTERNAL        gridInqXvalsPart
+
       INTEGER         gridInqXIsc
 !                                    (INTEGER         gridID)
       EXTERNAL        gridInqXIsc
@@ -1550,6 +1516,13 @@
 !                                    (INTEGER         gridID,
 !                                     DOUBLEPRECISION yvals(*))
       EXTERNAL        gridInqYvals
+
+      INTEGER         gridInqYvalsPart
+!                                    (INTEGER         gridID,
+!                                     INTEGER         start,
+!                                     INTEGER         size,
+!                                     DOUBLEPRECISION yvals(*))
+      EXTERNAL        gridInqYvalsPart
 
       INTEGER         gridInqYIsc
 !                                    (INTEGER         gridID)
@@ -1902,7 +1875,7 @@
       EXTERNAL        gridInqParamGME
 
 !
-!  Lambert Conformal Conic grid (GRIB version)
+!  Lambert Conformal Conic grid
 !
 !                     gridDefParamLCC
 !                                    (INTEGER         gridID,
@@ -1933,6 +1906,35 @@
 !                                     DOUBLEPRECISION x_0,
 !                                     DOUBLEPRECISION y_0)
       EXTERNAL        gridInqParamLCC
+
+!
+!  Polar stereographic grid
+!
+!                     gridDefParamSTERE
+!                                    (INTEGER         gridID,
+!                                     DOUBLEPRECISION missval,
+!                                     DOUBLEPRECISION lon_0,
+!                                     DOUBLEPRECISION lat_ts,
+!                                     DOUBLEPRECISION lat_0,
+!                                     DOUBLEPRECISION a,
+!                                     DOUBLEPRECISION xval_0,
+!                                     DOUBLEPRECISION yval_0,
+!                                     DOUBLEPRECISION x_0,
+!                                     DOUBLEPRECISION y_0)
+      EXTERNAL        gridDefParamSTERE
+
+      INTEGER         gridInqParamSTERE
+!                                    (INTEGER         gridID,
+!                                     DOUBLEPRECISION missval,
+!                                     DOUBLEPRECISION lon_0,
+!                                     DOUBLEPRECISION lat_ts,
+!                                     DOUBLEPRECISION lat_0,
+!                                     DOUBLEPRECISION a,
+!                                     DOUBLEPRECISION xval_0,
+!                                     DOUBLEPRECISION yval_0,
+!                                     DOUBLEPRECISION x_0,
+!                                     DOUBLEPRECISION y_0)
+      EXTERNAL        gridInqParamSTERE
 
 !                     gridDefArea
 !                                    (INTEGER         gridID,
@@ -2258,7 +2260,7 @@
 !  TAXIS routines
 !
       INTEGER         taxisCreate
-!                                    (INTEGER         timetype)
+!                                    (INTEGER         taxistype)
       EXTERNAL        taxisCreate
 
 !                     taxisDestroy
@@ -2276,8 +2278,12 @@
 
 !                     taxisDefType
 !                                    (INTEGER         taxisID,
-!                                     INTEGER         type)
+!                                     INTEGER         taxistype)
       EXTERNAL        taxisDefType
+
+      INTEGER         taxisInqType
+!                                    (INTEGER         taxisID)
+      EXTERNAL        taxisInqType
 
 !                     taxisDefVdate
 !                                    (INTEGER         taxisID,
@@ -2409,10 +2415,6 @@
 !                                    (INTEGER         taxisID,
 !                                     INTEGER         numavg)
       EXTERNAL        taxisDefNumavg
-
-      INTEGER         taxisInqType
-!                                    (INTEGER         taxisID)
-      EXTERNAL        taxisInqType
 
       INTEGER         taxisInqNumavg
 !                                    (INTEGER         taxisID)

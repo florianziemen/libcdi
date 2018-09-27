@@ -114,6 +114,7 @@ FCALLSCSUB0 (cdiPrintVersion, CDIPRINTVERSION, cdiprintversion)
 FCALLSCFUN1 (INT, cdiHaveFiletype, CDIHAVEFILETYPE, cdihavefiletype, INT)
 FCALLSCSUB1 (cdiDefMissval, CDIDEFMISSVAL, cdidefmissval, DOUBLE)
 FCALLSCFUN0 (DOUBLE, cdiInqMissval, CDIINQMISSVAL, cdiinqmissval)
+FCALLSCFUN0 (DOUBLE, cdiInqGridMissval, CDIINQGRIDMISSVAL, cdiinqgridmissval)
 FCALLSCSUB2 (cdiDefGlobal, CDIDEFGLOBAL, cdidefglobal, STRING, INT)
 FCALLSCFUN0 (INT, namespaceNew, NAMESPACENEW, namespacenew)
 FCALLSCSUB1 (namespaceSetActive, NAMESPACESETACTIVE, namespacesetactive, INT)
@@ -477,6 +478,13 @@ static int gridInqXvals_fwrap(int gridID, double xvals[])
   return size_t_c2f(v);
 }
 FCALLSCFUN2 (INT, gridInqXvals_fwrap, GRIDINQXVALS, gridinqxvals, INT, DOUBLEV)
+static int gridInqXvalsPart_fwrap(int gridID, int start, int size, double xvals[])
+{
+  size_t v;
+  v = gridInqXvalsPart(gridID, start, (size_t)size, xvals);
+  return size_t_c2f(v);
+}
+FCALLSCFUN4 (INT, gridInqXvalsPart_fwrap, GRIDINQXVALSPART, gridinqxvalspart, INT, INT, INT, DOUBLEV)
 FCALLSCFUN1 (INT, gridInqXIsc, GRIDINQXISC, gridinqxisc, INT)
 FCALLSCSUB2 (gridDefYvals, GRIDDEFYVALS, griddefyvals, INT, DOUBLEV)
 static int gridInqYvals_fwrap(int gridID, double yvals[])
@@ -486,6 +494,13 @@ static int gridInqYvals_fwrap(int gridID, double yvals[])
   return size_t_c2f(v);
 }
 FCALLSCFUN2 (INT, gridInqYvals_fwrap, GRIDINQYVALS, gridinqyvals, INT, DOUBLEV)
+static int gridInqYvalsPart_fwrap(int gridID, int start, int size, double yvals[])
+{
+  size_t v;
+  v = gridInqYvalsPart(gridID, start, (size_t)size, yvals);
+  return size_t_c2f(v);
+}
+FCALLSCFUN4 (INT, gridInqYvalsPart_fwrap, GRIDINQYVALSPART, gridinqyvalspart, INT, INT, INT, DOUBLEV)
 FCALLSCFUN1 (INT, gridInqYIsc, GRIDINQYISC, gridinqyisc, INT)
 FCALLSCFUN4 (INT, cdiDefKeyInt, CDIDEFKEYINT, cdidefkeyint, INT, INT, INT, INT)
 FCALLSCFUN4 (INT, cdiInqKeyInt, CDIINQKEYINT, cdiinqkeyint, INT, INT, INT, PINT)
@@ -556,10 +571,15 @@ FCALLSCSUB4 (gridInqParamRLL, GRIDINQPARAMRLL, gridinqparamrll, INT, PDOUBLE, PD
 FCALLSCSUB5 (gridDefParamGME, GRIDDEFPARAMGME, griddefparamgme, INT, INT, INT, INT, INT)
 FCALLSCSUB5 (gridInqParamGME, GRIDINQPARAMGME, gridinqparamgme, INT, PINT, PINT, PINT, PINT)
 
-/*  Lambert Conformal Conic grid (GRIB version)  */
+/*  Lambert Conformal Conic grid  */
 
 FCALLSCSUB12 (gridDefParamLCC, GRIDDEFPARAMLCC, griddefparamlcc, INT, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE)
 FCALLSCFUN12 (INT, gridInqParamLCC, GRIDINQPARAMLCC, gridinqparamlcc, INT, DOUBLE, PDOUBLE, PDOUBLE, PDOUBLE, PDOUBLE, PDOUBLE, PDOUBLE, PDOUBLE, PDOUBLE, PDOUBLE, PDOUBLE)
+
+/*  Polar stereographic grid  */
+
+FCALLSCSUB10 (gridDefParamSTERE, GRIDDEFPARAMSTERE, griddefparamstere, INT, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE)
+FCALLSCFUN10 (INT, gridInqParamSTERE, GRIDINQPARAMSTERE, gridinqparamstere, INT, DOUBLE, PDOUBLE, PDOUBLE, PDOUBLE, PDOUBLE, PDOUBLE, PDOUBLE, PDOUBLE, PDOUBLE)
 FCALLSCSUB2 (gridDefArea, GRIDDEFAREA, griddefarea, INT, DOUBLEV)
 FCALLSCSUB2 (gridInqArea, GRIDINQAREA, gridinqarea, INT, DOUBLEV)
 FCALLSCFUN1 (INT, gridHasArea, GRIDHASAREA, gridhasarea, INT)
@@ -661,6 +681,7 @@ FCALLSCSUB1 (taxisDestroy, TAXISDESTROY, taxisdestroy, INT)
 FCALLSCFUN1 (INT, taxisDuplicate, TAXISDUPLICATE, taxisduplicate, INT)
 FCALLSCSUB2 (taxisCopyTimestep, TAXISCOPYTIMESTEP, taxiscopytimestep, INT, INT)
 FCALLSCSUB2 (taxisDefType, TAXISDEFTYPE, taxisdeftype, INT, INT)
+FCALLSCFUN1 (INT, taxisInqType, TAXISINQTYPE, taxisinqtype, INT)
 static void taxisDefVdate_fwrap(int taxisID, int date)
 {
   taxisDefVdate(taxisID, (int64_t)date);
@@ -733,7 +754,6 @@ FCALLSCFUN1 (INT, taxisInqForecastTunit, TAXISINQFORECASTTUNIT, taxisinqforecast
 FCALLSCSUB2 (taxisDefForecastPeriod, TAXISDEFFORECASTPERIOD, taxisdefforecastperiod, INT, DOUBLE)
 FCALLSCFUN1 (DOUBLE, taxisInqForecastPeriod, TAXISINQFORECASTPERIOD, taxisinqforecastperiod, INT)
 FCALLSCSUB2 (taxisDefNumavg, TAXISDEFNUMAVG, taxisdefnumavg, INT, INT)
-FCALLSCFUN1 (INT, taxisInqType, TAXISINQTYPE, taxisinqtype, INT)
 FCALLSCFUN1 (INT, taxisInqNumavg, TAXISINQNUMAVG, taxisinqnumavg, INT)
 FCALLSCFUN1 (STRING, tunitNamePtr, TUNITNAMEPTR, tunitnameptr, INT)
 
