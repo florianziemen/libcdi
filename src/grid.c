@@ -1558,7 +1558,7 @@ size_t gridInqXValsPartSerial(grid_t *gridptr, int start, size_t length, double 
 
   if ( gridptr->x.vals )
     {
-      if ( size && xvals )
+      if ( size && xvals && length <= size )
         {
           const double *gridptr_xvals = gridptr->vtable->inqXValsPtr(gridptr);
           memcpy(xvals, gridptr_xvals+start, length * sizeof (double));
@@ -1566,6 +1566,8 @@ size_t gridInqXValsPartSerial(grid_t *gridptr, int start, size_t length, double 
     }
   else
     size = 0;
+
+  return size;
 }
 
 static
@@ -1757,7 +1759,7 @@ size_t gridInqYValsPartSerial(grid_t *gridptr, int start, size_t length, double 
 
   if ( gridptr->y.vals )
     {
-      if ( size && yvals )
+      if ( size && yvals && length <= size )
         {
           const double *gridptr_yvals = gridptr->vtable->inqYValsPtr(gridptr);
           memcpy(yvals, gridptr_yvals+start, length * sizeof (double));
