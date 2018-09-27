@@ -54,15 +54,6 @@ module mo_cdi
   integer(c_int), public, parameter :: CDI_FILETYPE_SRV = 8
   integer(c_int), public, parameter :: CDI_FILETYPE_EXT = 9
   integer(c_int), public, parameter :: CDI_FILETYPE_IEG = 10
-  integer(c_int), public, parameter :: FILETYPE_GRB = 1
-  integer(c_int), public, parameter :: FILETYPE_GRB2 = 2
-  integer(c_int), public, parameter :: FILETYPE_NC = 3
-  integer(c_int), public, parameter :: FILETYPE_NC2 = 4
-  integer(c_int), public, parameter :: FILETYPE_NC4 = 5
-  integer(c_int), public, parameter :: FILETYPE_NC4C = 6
-  integer(c_int), public, parameter :: FILETYPE_SRV = 7
-  integer(c_int), public, parameter :: FILETYPE_EXT = 8
-  integer(c_int), public, parameter :: FILETYPE_IEG = 9
   integer(c_int), public, parameter :: CDI_COMPRESS_NONE = 0
   integer(c_int), public, parameter :: CDI_COMPRESS_SZIP = 1
   integer(c_int), public, parameter :: CDI_COMPRESS_AEC = 2
@@ -111,13 +102,6 @@ module mo_cdi
   integer(c_int), public, parameter :: CDI_DATATYPE_UINT8 = 308
   integer(c_int), public, parameter :: CDI_DATATYPE_UINT16 = 316
   integer(c_int), public, parameter :: CDI_DATATYPE_UINT32 = 332
-  integer(c_int), public, parameter :: DATATYPE_PACK = 0
-  integer(c_int), public, parameter :: DATATYPE_PACK8 = 8
-  integer(c_int), public, parameter :: DATATYPE_PACK16 = 16
-  integer(c_int), public, parameter :: DATATYPE_PACK24 = 24
-  integer(c_int), public, parameter :: DATATYPE_FLT32 = 132
-  integer(c_int), public, parameter :: DATATYPE_FLT64 = 164
-  integer(c_int), public, parameter :: DATATYPE_INT32 = 232
   integer(c_int), public, parameter :: CDI_DATATYPE_INT = 251
   integer(c_int), public, parameter :: CDI_DATATYPE_FLT = 252
   integer(c_int), public, parameter :: CDI_DATATYPE_TXT = 253
@@ -125,12 +109,6 @@ module mo_cdi
   integer(c_int), public, parameter :: CDI_DATATYPE_UCHAR = 255
   integer(c_int), public, parameter :: CDI_DATATYPE_LONG = 256
   integer(c_int), public, parameter :: CDI_DATATYPE_UINT = 257
-  integer(c_int), public, parameter :: DATATYPE_INT = 251
-  integer(c_int), public, parameter :: DATATYPE_FLT = 252
-  integer(c_int), public, parameter :: DATATYPE_TXT = 253
-  integer(c_int), public, parameter :: DATATYPE_CPX = 254
-  integer(c_int), public, parameter :: DATATYPE_UCHAR = 255
-  integer(c_int), public, parameter :: DATATYPE_LONG = 256
   integer(c_int), public, parameter :: CDI_CHUNK_AUTO = 1
   integer(c_int), public, parameter :: CDI_CHUNK_GRID = 2
   integer(c_int), public, parameter :: CDI_CHUNK_LINES = 3
@@ -144,13 +122,13 @@ module mo_cdi
   integer(c_int), public, parameter :: GRID_TRAJECTORY = 8
   integer(c_int), public, parameter :: GRID_UNSTRUCTURED = 9
   integer(c_int), public, parameter :: GRID_CURVILINEAR = 10
-  integer(c_int), public, parameter :: GRID_LCC = 11
   integer(c_int), public, parameter :: GRID_PROJECTION = 12
   integer(c_int), public, parameter :: GRID_CHARXY = 13
   integer(c_int), public, parameter :: CDI_PROJ_RLL = 21
   integer(c_int), public, parameter :: CDI_PROJ_LCC = 22
   integer(c_int), public, parameter :: CDI_PROJ_LAEA = 23
   integer(c_int), public, parameter :: CDI_PROJ_SINU = 24
+  integer(c_int), public, parameter :: CDI_PROJ_STERE = 25
   integer(c_int), public, parameter :: ZAXIS_SURFACE = 0
   integer(c_int), public, parameter :: ZAXIS_GENERIC = 1
   integer(c_int), public, parameter :: ZAXIS_HYBRID = 2
@@ -242,6 +220,7 @@ module mo_cdi
   public :: cdiHaveFiletype
   public :: cdiDefMissval
   public :: cdiInqMissval
+  public :: cdiInqGridMissval
   public :: cdiDefGlobal
   public :: namespaceNew
   public :: namespaceSetActive
@@ -469,9 +448,11 @@ module mo_cdi
   public :: gridInqNP
   public :: gridDefXvals
   public :: gridInqXvals
+  public :: gridInqXvalsPart
   public :: gridInqXIsc
   public :: gridDefYvals
   public :: gridInqYvals
+  public :: gridInqYvalsPart
   public :: gridInqYIsc
   integer(c_int), public, parameter :: CDI_KEY_TABLESVERSION = 801
   integer(c_int), public, parameter :: CDI_KEY_LOCALTABLESVERSION = 802
@@ -563,6 +544,8 @@ module mo_cdi
   public :: gridInqParamGME
   public :: gridDefParamLCC
   public :: gridInqParamLCC
+  public :: gridDefParamSTERE
+  public :: gridInqParamSTERE
   public :: gridDefArea
   public :: gridInqArea
   public :: gridHasArea
@@ -635,6 +618,7 @@ module mo_cdi
   public :: taxisDuplicate
   public :: taxisCopyTimestep
   public :: taxisDefType
+  public :: taxisInqType
   public :: taxisDefVdate
   public :: taxisDefVtime
   public :: taxisInqVdate
@@ -663,7 +647,6 @@ module mo_cdi
   public :: taxisDefForecastPeriod
   public :: taxisInqForecastPeriod
   public :: taxisDefNumavg
-  public :: taxisInqType
   public :: taxisInqNumavg
   public :: tunitNamePtr
   public :: institutDef
@@ -729,6 +712,12 @@ module mo_cdi
       import c_double
       real(c_double) :: f_result
     end function cdiInqMissval
+
+    function cdiInqGridMissval() bind(c, name = 'cdiInqGridMissval')&
+    & result(f_result)
+      import c_double
+      real(c_double) :: f_result
+    end function cdiInqGridMissval
 
     function namespaceNew() bind(c, name = 'namespaceNew') result(f_result)
       import c_int
@@ -1901,6 +1890,16 @@ module mo_cdi
       integer(c_size_t) :: f_result
     end function gridInqXvals
 
+    function gridInqXvalsPart(gridID_dummy, start_dummy, size_dummy,&
+    & xvals_dummy) bind(c, name = 'gridInqXvalsPart') result(f_result)
+      import c_double, c_int, c_size_t
+      integer(c_int), value :: gridID_dummy
+      integer(c_int), value :: start_dummy
+      integer(c_size_t), value :: size_dummy
+      real(c_double), intent(inout) :: xvals_dummy(*)
+      integer(c_size_t) :: f_result
+    end function gridInqXvalsPart
+
     function gridInqXIsc(gridID_dummy) bind(c, name = 'gridInqXIsc')&
     & result(f_result)
       import c_int
@@ -1922,6 +1921,16 @@ module mo_cdi
       real(c_double), intent(inout) :: yvals_dummy(*)
       integer(c_size_t) :: f_result
     end function gridInqYvals
+
+    function gridInqYvalsPart(gridID_dummy, start_dummy, size_dummy,&
+    & yvals_dummy) bind(c, name = 'gridInqYvalsPart') result(f_result)
+      import c_double, c_int, c_size_t
+      integer(c_int), value :: gridID_dummy
+      integer(c_int), value :: start_dummy
+      integer(c_size_t), value :: size_dummy
+      real(c_double), intent(inout) :: yvals_dummy(*)
+      integer(c_size_t) :: f_result
+    end function gridInqYvalsPart
 
     function gridInqYIsc(gridID_dummy) bind(c, name = 'gridInqYIsc')&
     & result(f_result)
@@ -2192,6 +2201,40 @@ module mo_cdi
       real(c_double), intent(inout) :: y_0_dummy
       integer(c_int) :: f_result
     end function gridInqParamLCC
+
+    subroutine gridDefParamSTERE(gridID_dummy, missval_dummy, lon_0_dummy,&
+    & lat_ts_dummy, lat_0_dummy, a_dummy, xval_0_dummy, yval_0_dummy,&
+    & x_0_dummy, y_0_dummy) bind(c, name = 'gridDefParamSTERE')
+      import c_double, c_int
+      integer(c_int), value :: gridID_dummy
+      real(c_double), value :: missval_dummy
+      real(c_double), value :: lon_0_dummy
+      real(c_double), value :: lat_ts_dummy
+      real(c_double), value :: lat_0_dummy
+      real(c_double), value :: a_dummy
+      real(c_double), value :: xval_0_dummy
+      real(c_double), value :: yval_0_dummy
+      real(c_double), value :: x_0_dummy
+      real(c_double), value :: y_0_dummy
+    end subroutine gridDefParamSTERE
+
+    function gridInqParamSTERE(gridID_dummy, missval_dummy, lon_0_dummy,&
+    & lat_ts_dummy, lat_0_dummy, a_dummy, xval_0_dummy, yval_0_dummy,&
+    & x_0_dummy, y_0_dummy) bind(c, name = 'gridInqParamSTERE')&
+    & result(f_result)
+      import c_double, c_int
+      integer(c_int), value :: gridID_dummy
+      real(c_double), value :: missval_dummy
+      real(c_double), intent(inout) :: lon_0_dummy
+      real(c_double), intent(inout) :: lat_ts_dummy
+      real(c_double), intent(inout) :: lat_0_dummy
+      real(c_double), intent(inout) :: a_dummy
+      real(c_double), intent(inout) :: xval_0_dummy
+      real(c_double), intent(inout) :: yval_0_dummy
+      real(c_double), intent(inout) :: x_0_dummy
+      real(c_double), intent(inout) :: y_0_dummy
+      integer(c_int) :: f_result
+    end function gridInqParamSTERE
 
     subroutine gridDefArea(gridID_dummy, area_dummy) bind(c, name =&
     & 'gridDefArea')
@@ -2588,10 +2631,10 @@ module mo_cdi
       integer(c_int), value :: zaxistype_dummy
     end subroutine zaxisChangeType
 
-    function taxisCreate(timetype_dummy) bind(c, name = 'taxisCreate')&
+    function taxisCreate(taxistype_dummy) bind(c, name = 'taxisCreate')&
     & result(f_result)
       import c_int
-      integer(c_int), value :: timetype_dummy
+      integer(c_int), value :: taxistype_dummy
       integer(c_int) :: f_result
     end function taxisCreate
 
@@ -2614,12 +2657,19 @@ module mo_cdi
       integer(c_int), value :: taxisIDsrc_dummy
     end subroutine taxisCopyTimestep
 
-    subroutine taxisDefType(taxisID_dummy, type_dummy) bind(c, name =&
+    subroutine taxisDefType(taxisID_dummy, taxistype_dummy) bind(c, name =&
     & 'taxisDefType')
       import c_int
       integer(c_int), value :: taxisID_dummy
-      integer(c_int), value :: type_dummy
+      integer(c_int), value :: taxistype_dummy
     end subroutine taxisDefType
+
+    function taxisInqType(taxisID_dummy) bind(c, name = 'taxisInqType')&
+    & result(f_result)
+      import c_int
+      integer(c_int), value :: taxisID_dummy
+      integer(c_int) :: f_result
+    end function taxisInqType
 
     subroutine taxisDefVdate(taxisID_dummy, date_dummy) bind(c, name =&
     & 'taxisDefVdate')
@@ -2817,13 +2867,6 @@ module mo_cdi
       integer(c_int), value :: taxisID_dummy
       integer(c_int), value :: numavg_dummy
     end subroutine taxisDefNumavg
-
-    function taxisInqType(taxisID_dummy) bind(c, name = 'taxisInqType')&
-    & result(f_result)
-      import c_int
-      integer(c_int), value :: taxisID_dummy
-      integer(c_int) :: f_result
-    end function taxisInqType
 
     function taxisInqNumavg(taxisID_dummy) bind(c, name = 'taxisInqNumavg')&
     & result(f_result)
