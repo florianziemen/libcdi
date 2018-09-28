@@ -700,6 +700,13 @@ int cdfDefVar(stream_t *streamptr, int varID)
       if ( laddoffset || lscalefactor )
         {
           nc_type astype = (xtype == NC_FLOAT) ? NC_FLOAT : NC_DOUBLE;
+          if ( (astype == NC_DOUBLE) &&
+               IS_EQUAL(addoffset,   (double) ((float) addoffset)) &&
+               IS_EQUAL(scalefactor, (double) ((float) scalefactor)) )
+            {
+              astype = NC_FLOAT;
+            }
+
           cdf_put_att_double(fileID, ncvarid, "add_offset",   astype, 1, &addoffset);
           cdf_put_att_double(fileID, ncvarid, "scale_factor", astype, 1, &scalefactor);
         }
