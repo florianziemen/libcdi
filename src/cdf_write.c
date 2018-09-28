@@ -38,9 +38,9 @@ void cdfDefVarDeflate(int ncid, int ncvarid, int deflate_level)
 #endif
 }
 
-int cdfDefDatatype(int datatype, stream_t *streamptr)
+nc_type cdfDefDatatype(int datatype, stream_t *streamptr)
 {
-  int xtype = NC_FLOAT;
+  nc_type xtype = NC_FLOAT;
 
   if ( streamptr->filetype == CDI_FILETYPE_NC4 )
     {
@@ -92,7 +92,7 @@ void cdfDefVarMissval(stream_t *streamptr, int varID, int dtype, int lcheck)
 
       if ( lcheck && streamptr->ncmode == 2 ) cdf_redef(fileID);
 
-      int xtype = cdfDefDatatype(dtype, streamptr);
+      nc_type xtype = cdfDefDatatype(dtype, streamptr);
 
       if ( xtype == NC_BYTE && missval > 127 && missval < 256 ) xtype = NC_INT;
 
@@ -101,9 +101,9 @@ void cdfDefVarMissval(stream_t *streamptr, int varID, int dtype, int lcheck)
            streamptr->filetype == CDI_FILETYPE_NC ||
            streamptr->filetype == CDI_FILETYPE_NC2||
            streamptr->filetype == CDI_FILETYPE_NC5 )
-        cdf_put_att_double(fileID, ncvarid, "_FillValue", (nc_type) xtype, 1, &missval);
+        cdf_put_att_double(fileID, ncvarid, "_FillValue", xtype, 1, &missval);
 
-      cdf_put_att_double(fileID, ncvarid, "missing_value", (nc_type) xtype, 1, &missval);
+      cdf_put_att_double(fileID, ncvarid, "missing_value", xtype, 1, &missval);
 
       if ( lcheck && streamptr->ncmode == 2 ) cdf_enddef(fileID);
 
@@ -510,9 +510,9 @@ int cdfDefVar(stream_t *streamptr, int varID)
   /* if ( streamptr->ncmode == 2 ) cdf_redef(fileID); */
 
   int dtype = vlistInqVarDatatype(vlistID, varID);
-  int xtype = cdfDefDatatype(dtype, streamptr);
+  nc_type xtype = cdfDefDatatype(dtype, streamptr);
 
-  cdf_def_var(fileID, name, (nc_type) xtype, ndims, dims, &ncvarid);
+  cdf_def_var(fileID, name, xtype, ndims, dims, &ncvarid);
 
 #if  defined  (HAVE_NETCDF4)
   if ( lchunk && (streamptr->filetype == CDI_FILETYPE_NC4 || streamptr->filetype == CDI_FILETYPE_NC4C) )
@@ -692,8 +692,6 @@ int cdfDefVar(stream_t *streamptr, int varID)
 
   /*  if ( xtype == NC_BYTE || xtype == NC_SHORT || xtype == NC_INT ) */
     {
-      int astype = NC_DOUBLE;
-
       double addoffset   = vlistInqVarAddoffset(vlistID, varID);
       double scalefactor = vlistInqVarScalefactor(vlistID, varID);
       bool laddoffset   = IS_NOT_EQUAL(addoffset, 0);
@@ -701,16 +699,9 @@ int cdfDefVar(stream_t *streamptr, int varID)
 
       if ( laddoffset || lscalefactor )
         {
-          if ( IS_EQUAL(addoffset,   (double) ((float) addoffset)) &&
-               IS_EQUAL(scalefactor, (double) ((float) scalefactor)) )
-            {
-              astype = NC_FLOAT;
-            }
-
-          if ( xtype == (int) NC_FLOAT ) astype = NC_FLOAT;
-
-          cdf_put_att_double(fileID, ncvarid, "add_offset",   (nc_type) astype, 1, &addoffset);
-          cdf_put_att_double(fileID, ncvarid, "scale_factor", (nc_type) astype, 1, &scalefactor);
+          nc_type astype = (xtype == NC_FLOAT) ? NC_FLOAT : NC_DOUBLE;
+          cdf_put_att_double(fileID, ncvarid, "add_offset",   astype, 1, &addoffset);
+          cdf_put_att_double(fileID, ncvarid, "scale_factor", astype, 1, &scalefactor);
         }
     }
 
