@@ -282,6 +282,7 @@ void streamDefByteorder(int streamID, int byteorder)
       }
 #endif
     }
+
   reshSetStatus(streamID, &streamOps, RESH_DESYNC_IN_USE);
 }
 
@@ -429,11 +430,12 @@ int cdiInqContents(stream_t *streamptr)
   return status;
 }
 
-int cdiStreamOpenDefaultDelegate(const char *filename, char filemode,
-                                 int filetype, stream_t *streamptr,
-                                 int recordBufIsToBeCreated)
+
+int cdiStreamOpenDefaultDelegate(const char *filename, char filemode, int filetype, stream_t *streamptr, int recordBufIsToBeCreated)
 {
   int fileID;
+  char temp[2] = { filemode, 0 };
+
   switch (filetype)
     {
 #ifdef  HAVE_LIBGRIB
@@ -442,12 +444,7 @@ int cdiStreamOpenDefaultDelegate(const char *filename, char filemode,
     case CDI_FILETYPE_GRB2:
 #endif
       {
-#ifndef __cplusplus
-        fileID = gribOpen(filename, (char [2]){filemode, 0});
-#else
-        char temp[2] = { filemode, 0 };
         fileID = gribOpen(filename, temp);
-#endif
         if ( fileID < 0 ) fileID = CDI_ESYSTEM;
         if (recordBufIsToBeCreated)
           {
@@ -460,12 +457,7 @@ int cdiStreamOpenDefaultDelegate(const char *filename, char filemode,
 #ifdef  HAVE_LIBSERVICE
     case CDI_FILETYPE_SRV:
       {
-#ifndef __cplusplus
-        fileID = fileOpen(filename, (char [2]){filemode, 0});
-#else
-        char temp[2] = { filemode, 0 };
         fileID = fileOpen(filename, temp);
-#endif
         if ( fileID < 0 ) fileID = CDI_ESYSTEM;
         if (recordBufIsToBeCreated)
           {
@@ -479,13 +471,7 @@ int cdiStreamOpenDefaultDelegate(const char *filename, char filemode,
 #ifdef  HAVE_LIBEXTRA
     case CDI_FILETYPE_EXT:
       {
-#ifndef __cplusplus
-        fileID = fileOpen(filename, (char [2]){filemode, 0});
-#else
-        char temp[2] = { filemode, 0 };
         fileID = fileOpen(filename, temp);
-#endif
-
         if ( fileID < 0 ) fileID = CDI_ESYSTEM;
         if (recordBufIsToBeCreated)
           {
@@ -499,12 +485,7 @@ int cdiStreamOpenDefaultDelegate(const char *filename, char filemode,
 #ifdef  HAVE_LIBIEG
     case CDI_FILETYPE_IEG:
       {
-#ifndef __cplusplus
-        fileID = fileOpen(filename, (char [2]){filemode, 0});
-#else
-        char temp[2] = { filemode, 0 };
         fileID = fileOpen(filename, temp);
-#endif
         if ( fileID < 0 ) fileID = CDI_ESYSTEM;
         if (recordBufIsToBeCreated)
           {
@@ -520,23 +501,13 @@ int cdiStreamOpenDefaultDelegate(const char *filename, char filemode,
     case CDI_FILETYPE_NC2:
     case CDI_FILETYPE_NC5:
       {
-#ifndef __cplusplus
-        fileID = cdfOpen(filename, (char [2]){filemode, 0}, filetype);
-#else
-        char temp[2] = { filemode, 0 };
         fileID = cdfOpen(filename, temp, filetype);
-#endif
         break;
       }
     case CDI_FILETYPE_NC4:
     case CDI_FILETYPE_NC4C:
       {
-#ifndef __cplusplus
-        fileID = cdf4Open(filename, (char [2]){filemode, 0}, &filetype);
-#else
-        char temp[2] = { filemode, 0 };
         fileID = cdf4Open(filename, temp, &filetype);
-#endif
         break;
       }
 #endif
