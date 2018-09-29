@@ -28,6 +28,69 @@ typedef struct {
 
 
 #ifdef HAVE_LIBCGRIBEX
+
+typedef struct
+{
+  void *gribbuffer;
+  size_t gribbuffersize;
+  unsigned char *pds;
+  unsigned char *gds;
+  unsigned char *bms;
+  unsigned char *bds;
+} cgribex_handle;
+
+
+int grib1Sections(unsigned char *gribbuffer, long gribbufsize, unsigned char **pdsp,
+		  unsigned char **gdsp, unsigned char **bmsp, unsigned char **bdsp, long *gribrecsize);
+
+long cgribexSection2Length(void *gribbuffer, size_t gribbuffersize)
+{
+  long sec2len = 0;
+
+  if ( gribbuffersize && gribbuffer )
+    {
+      unsigned char *pds = NULL, *gds = NULL, *bms = NULL, *bds = NULL;
+      long gribrecsize;
+      int status = grib1Sections((unsigned char *)gribbuffer, (long)gribbuffersize, &pds, &gds, &bms, &bds, &gribrecsize);
+      if (status >= 0 && gds != NULL) sec2len = (unsigned) ((gds[0] << 16) + (gds[1] << 8)  + (gds[3]));
+    }
+
+  return sec2len;
+}
+
+
+void *cgribex_handle_new_from_meassage(void *gribbuffer, size_t gribbuffersize)
+{
+  cgribex_handle *gh = (cgribex_handle*) Malloc(sizeof(cgribex_handle));
+  gh->gribbuffer = NULL;
+  gh->gribbuffersize = 0;
+  gh->pds = NULL;
+
+  if ( gribbuffersize && gribbuffer )
+    {
+      unsigned char *pds = NULL, *gds = NULL, *bms = NULL, *bds = NULL;
+      long gribrecsize;
+      int status = grib1Sections((unsigned char *)gribbuffer, (long)gribbuffersize, &pds, &gds, &bms, &bds, &gribrecsize);
+      if ( status >= 0 )
+        {
+          gh->gribbuffer = gribbuffer;
+          gh->gribbuffersize = gribbuffersize;
+          gh->pds = pds;
+          gh->gds = gds;
+          gh->bms = bms;
+          gh->bds = bds;
+        }
+    }
+
+  return (void*)gh;
+}
+
+
+void cgribex_handle_delete(void *gh)
+{
+  if ( gh ) Free(gh);
+}
+
 static
 int cgribexGetGridType(int *isec2)
 {
@@ -655,32 +718,28 @@ int cgribexScanTimestep1(stream_t *streamptr)
   int tsID  = tstepsNewEntry(streamptr);
   taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
 
-  if ( tsID != 0 )
-    Error("Internal problem! tstepsNewEntry returns %d", tsID);
+  if (tsID != 0) Error("Internal problem! tstepsNewEntry returns %d", tsID);
 
   int fileID = streamptr->fileID;
 
-  while ( nskip-- > 0 )
+  while (nskip-- > 0)
     {
       recsize = gribGetSize(fileID);
-      if ( recsize == 0 )
-	Error("Skipping of %d records failed!", cdiSkipRecords);
+      if (recsize == 0) Error("Skipping of %d records failed!", cdiSkipRecords);
 
-      recpos  = fileGetPos(fileID);
+      recpos = fileGetPos(fileID);
       fileSetPos(fileID, (off_t)recsize, SEEK_CUR);
     }
 
   unsigned nrecs = 0;
-  while ( true )
+  while (true)
     {
       recsize = gribGetSize(fileID);
       recpos  = fileGetPos(fileID);
 
       if ( recsize == 0 )
 	{
-	  if ( nrecs == 0 )
-	    Error("No GRIB records found!");
-
+	  if ( nrecs == 0 ) Error("No GRIB records found!");
 	  streamptr->ntsteps = 1;
 	  break;
 	}
@@ -705,6 +764,8 @@ int cgribexScanTimestep1(stream_t *streamptr)
 	      gribbuffer = Realloc(gribbuffer, buffersize);
 	    }
 	}
+
+      long sec2len = cgribexSection2Length(gribbuffer, buffersize);
 
       nrecs_scanned++;
       cgribexDecodeHeader(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, fsec4,
@@ -1333,7 +1394,7 @@ int cgribexDecode(int memtype, void *gribbuffer, size_t gribsize, void *data, si
 {
   int status = 0;
   int iret = 0, iword = 0;
-  int isec0[2], isec1[4096], isec2[4096], isec3[2], isec4[512];
+  int isec0[2], isec1[4096], isec2[8192], isec3[2], isec4[512];
   float fsec2f[512], fsec3f[2];
   double fsec2[512], fsec3[2];
   char hoper[2];
@@ -2127,53 +2188,6 @@ size_t cgribexEncode(int memtype, int varID, int levelID, int vlistID, int gridI
 
   size_t nbytes = (size_t)iword * sizeof(int);
   return nbytes;
-}
-
-
-typedef struct
-{
-  void *gribbuffer;
-  size_t gribbuffersize;
-  unsigned char *pds;
-  unsigned char *gds;
-  unsigned char *bms;
-  unsigned char *bds;
-} cgribex_handle;
-
-
-int grib1Sections(unsigned char *gribbuffer, long gribbufsize, unsigned char **pdsp,
-		  unsigned char **gdsp, unsigned char **bmsp, unsigned char **bdsp, long *gribrecsize);
-
-void *cgribex_handle_new_from_meassage(void *gribbuffer, size_t gribbuffersize)
-{
-  cgribex_handle *gh = (cgribex_handle*) Malloc(sizeof(cgribex_handle));
-  gh->gribbuffer = NULL;
-  gh->gribbuffersize = 0;
-  gh->pds = NULL;
-
-  if ( gribbuffersize && gribbuffer )
-    {
-      unsigned char *pds = NULL, *gds = NULL, *bms = NULL, *bds = NULL;
-      long gribrecsize;
-      int status = grib1Sections((unsigned char *)gribbuffer, (long)gribbuffersize, &pds, &gds, &bms, &bds, &gribrecsize);
-      if ( status >= 0 )
-        {
-          gh->gribbuffer = gribbuffer;
-          gh->gribbuffersize = gribbuffersize;
-          gh->pds = pds;
-          gh->gds = gds;
-          gh->bms = bms;
-          gh->bds = bds;
-        }
-    }
-
-  return (void*)gh;
-}
-
-
-void cgribex_handle_delete(void *gh)
-{
-  if ( gh ) Free(gh);
 }
 
 

@@ -29,21 +29,21 @@ int cdiSplitLtype105   = CDI_UNDEFID;
 bool cdiIgnoreAttCoordinates = false;
 bool cdiCoordinatesLonLat    = false;
 bool cdiIgnoreValidRange     = false;
-int cdiSkipRecords          = 0;
+int cdiSkipRecords           = 0;
 int CDI_convention           = CDI_CONVENTION_ECHAM;
-int CDI_inventory_mode        = 1;
-int CDO_version_info        = 1;
-int CDI_read_cell_corners   = 1;
-int CDI_cmor_mode           = 0;
-int CDI_reduce_dim          = 0;
-size_t CDI_netcdf_hdr_pad   = 0UL;
+int CDI_inventory_mode       = 1;
+int CDO_version_info         = 1;
+int CDI_read_cell_corners    = 1;
+int CDI_cmor_mode            = 0;
+int CDI_reduce_dim           = 0;
+size_t CDI_netcdf_hdr_pad    = 0UL;
 bool CDI_netcdf_lazy_grid_load = false;
 
 char *cdiPartabPath   = NULL;
 int   cdiPartabIntern = 1;
 
 double CDI_default_missval = -9.E33;
-double CDI_grid_missval = -9999.;
+double CDI_grid_missval    = -9999.;
 
 static const char Filetypes[][9] = {
   "UNKNOWN",
@@ -60,8 +60,8 @@ static const char Filetypes[][9] = {
   "HDF5",
 };
 
-int CDI_Debug   = 0;    /* If set to 1, debugging           */
-int CDI_Recopt = 0;
+int CDI_Debug   = 0;    // If set to 1, debugging
+int CDI_Recopt  = 0;
 
 int cdiGribApiDebug     = 0;
 int cdiDefaultLeveltype = -1;
@@ -71,7 +71,8 @@ int cdiSortParam = 0;
 int cdiHaveMissval = 0;
 
 
-static long cdiGetenvInt(const char *envName)
+static
+long cdiGetenvInt(const char *envName)
 {
   long envValue = -1;
 
@@ -107,8 +108,8 @@ static long cdiGetenvInt(const char *envName)
   return envValue;
 }
 
-static void
-cdiPrintDefaults(void)
+static
+void cdiPrintDefaults(void)
 {
   fprintf(stderr, "default instID     :  %d\n"
           "default modelID    :  %d\n"
@@ -135,21 +136,11 @@ void cdiPrintVersion(void)
 #ifdef  HAVE_LIBSERVICE
   fprintf(stderr, "    EXSE library version : %s\n", srvLibraryVersion());
 #endif
-  /*
-#ifdef  HAVE_LIBSERVICE
-  fprintf(stderr, " SERVICE library version : %s\n", srvLibraryVersion());
-#endif
-#ifdef  HAVE_LIBEXTRA
-  fprintf(stderr, "   EXTRA library version : %s\n", extLibraryVersion());
-#endif
-#ifdef  HAVE_LIBIEG
-  fprintf(stderr, "     IEG library version : %s\n", iegLibraryVersion());
-#endif
-  */
   fprintf(stderr, "    FILE library version : %s\n", fileLibraryVersion());
 }
 
-static void cdiPrintDatatypes(void)
+static
+void cdiPrintDatatypes(void)
 {
 #define XSTRING(x)	#x
 #define STRING(x)	XSTRING(x)
@@ -271,6 +262,7 @@ int cdiHaveFiletype(int filetype)
   return status;
 }
 
+
 void cdiDefTableID(int tableID)
 {
   cdiDefaultTableID = tableID;
@@ -281,29 +273,11 @@ void cdiDefTableID(int tableID)
 static
 void cdiSetChunk(const char *chunkAlgo)
 {
-  //char *pch;
-  //size_t len = strlen(chunkAlgo);
   int algo = -1;
 
-  if      ( strcmp("auto",  chunkAlgo)   == 0 ) algo = CDI_CHUNK_AUTO;
-  else if ( strcmp("grid",  chunkAlgo)   == 0 ) algo = CDI_CHUNK_GRID;
-  else if ( strcmp("lines", chunkAlgo)   == 0 ) algo = CDI_CHUNK_LINES;
-  /*
-  else if ( (pch = strstr(chunkAlgo,"x")) != 0 )
-    {
-      int ix, iy;
-      ix = atoi(chunkAlgo);
-      iy = atoi(pch+1);
-      if ( ix > 0 && iy > 0 )
-        {
-          cdiChunkX = ix;
-          cdiChunkY = iy;
-          algo = CHUNK_USER;
-        }
-      else
-        Warning("Invalid environment variable CDI_CHUNK_ALGO: %s", chunkAlgo);
-    }
-  */
+  if      ( strcmp("auto",  chunkAlgo) == 0 ) algo = CDI_CHUNK_AUTO;
+  else if ( strcmp("grid",  chunkAlgo) == 0 ) algo = CDI_CHUNK_GRID;
+  else if ( strcmp("lines", chunkAlgo) == 0 ) algo = CDI_CHUNK_LINES;
   else
     Warning("Invalid environment variable CDI_CHUNK_ALGO: %s", chunkAlgo);
 

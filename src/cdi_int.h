@@ -114,23 +114,23 @@ bool str_is_equal(const char *vstr, const char *cstr);
 
 typedef struct
 {
-  void     *buffer;             /* gribapi, cgribex */
-  size_t    buffersize;         /* gribapi, cgribex */
-  off_t     position;           /* ieg */
-  int       param;              /* srv */
-  int       level;              /* ext, srv */
-  int       date;               /* ext, srv */
-  int       time;               /* srv */
-  int       gridID;             /* ieg, ext */
-  int       varID;              /* ieg */
-  int       levelID;            /* ieg  */
-  int       prec;               /* ext, srv */
-  int       sec0[2];            /* cgribex */
-  int       sec1[1024];         /* cgribex */
-  int       sec2[4096];         /* cgribex */
-  int       sec3[2];            /* cgribex */
-  int       sec4[512];          /* cgribex */
-  void     *exsep;              /* ieg, ext, srv */
+  void     *buffer;             // gribapi, cgribex
+  size_t    buffersize;         // gribapi, cgribex
+  off_t     position;           // file position
+  int       param;
+  int       level;
+  int       date;
+  int       time;
+  int       gridID;
+  int       varID;
+  int       levelID;
+  int       prec;               // ext, srv
+  int       sec0[2];            // cgribex
+  int       sec1[1024];         // cgribex
+  int       sec2[8192];         // cgribex
+  int       sec3[2];            // cgribex
+  int       sec4[512];          // cgribex
+  void     *exsep;              // ieg, ext, srv
 }
 Record;
 
@@ -169,23 +169,23 @@ typedef struct
   short     varID;
   short     levelID;
   short     used;
-  char      varname[32]; /* needed for grib decoding with GRIB_API */
-  var_tile_t tiles;      /* tile-related meta-data, currently for GRIB-API only. */
+  char      varname[32]; // needed for grib decoding with GRIB_API
+  var_tile_t tiles;      // tile-related meta-data, currently for GRIB-API only.
 }
 record_t;
 
 
 typedef struct {
   record_t *records;
-  int      *recIDs;      /* IDs of non constant records           */
-  int       recordSize;  /* number of allocated records           */
-  int       nrecs;       /* number of used records                */
-                         /* tsID=0 nallrecs                       */
-                         /* tsID>0 number of non constant records */
-  int       nallrecs;    /* number of all records                 */
-  int       curRecID;    /* current record ID                     */
+  int      *recIDs;      // IDs of non constant records
+  int       recordSize;  // number of allocated records
+  int       nrecs;       // number of used records
+                         // tsID=0 nallrecs
+                         // tsID>0 number of non constant records
+  int       nallrecs;    // number of all records
+  int       curRecID;    // current record ID
   bool      next;
-  off_t     position;    /* timestep file position                */
+  off_t     position;    // timestep file position
   taxis_t   taxis;
 }
 tsteps_t;
@@ -193,9 +193,9 @@ tsteps_t;
 
 typedef struct {
   int       nlevs;
-  int       subtypeIndex; /* corresponding tile in subtype_t structure (subtype->self) */
-  int      *recordID;     /* record IDs: [nlevs] */
-  int      *lindex;       /* level index */
+  int       subtypeIndex; // corresponding tile in subtype_t structure (subtype->self)
+  int      *recordID;     // record IDs: [nlevs]
+  int      *lindex;       // level index
 } sleveltable_t;
 
 
@@ -240,22 +240,22 @@ ncgrid_t;
 
 typedef struct {
   int         self;
-  int         accesstype;   /* TYPE_REC or TYPE_VAR */
+  int         accesstype;   // TYPE_REC or TYPE_VAR
   int         accessmode;
   int         filetype;
   int         byteorder;
   int         fileID;
   int         filemode;
-  int         nrecs;        /* number of records                  */
+  int         nrecs;        // number of records
   size_t      numvals;
   char       *filename;
   Record     *record;
   svarinfo_t *vars;
-  int         nvars;        /* number of variables                */
+  int         nvars;        // number of variables
   int         varsAllocated;
-  int         curTsID;      /* current timestep ID */
-  int         rtsteps;      /* number of tsteps accessed       */
-  long        ntsteps;      /* number of tsteps : only set if all records accessed */
+  int         curTsID;      // current timestep ID
+  int         rtsteps;      // number of tsteps accessed
+  long        ntsteps;      // number of tsteps : only set if all records accessed
   tsteps_t   *tsteps;
   int         tstepsTableSize;
   int         tstepsNextID;
@@ -264,7 +264,7 @@ typedef struct {
   int         vlistID;
 #ifdef HAVE_LIBNETCDF
   ncgrid_t    ncgrid[MAX_GRIDS_PS];
-  int         zaxisID[MAX_ZAXES_PS];	//Warning: synchronous array to vlist_to_pointer(vlistID)->zaxisIDs
+  int         zaxisID[MAX_ZAXES_PS];	// Warning: synchronous array to vlist_to_pointer(vlistID)->zaxisIDs
   int         nczvarID[MAX_ZAXES_PS];
   VCT         vct;
 #endif
@@ -293,24 +293,24 @@ stream_t;
 
 enum cdi_convention {CDI_CONVENTION_ECHAM, CDI_CONVENTION_CF};
 
-/* Data type specification for optional key/value pairs (GRIB) */
+// Data type specification for optional key/value pairs (GRIB)
 typedef enum {
   t_double = 0,
   t_int    = 1
 } key_val_pair_datatype;
 
-/* Data structure holding optional key/value pairs for GRIB */
+// Data structure holding optional key/value pairs for GRIB
 typedef struct
 {
-  char*                  keyword;        /* keyword string */
+  char*                  keyword;        // keyword string
   bool                   update;
-  key_val_pair_datatype  data_type;      /* data type of this key/value pair */
-  double                 dbl_val;        /* double value (data_type == t_double) */
-  int                    int_val;        /* integer value (data_type == t_int) */
-  int                    subtype_index;  /* tile index for this key-value pair */
+  key_val_pair_datatype  data_type;      // data type of this key/value pair
+  double                 dbl_val;        // double value (data_type == t_double)
+  int                    int_val;        // integer value (data_type == t_int)
+  int                    subtype_index;  // tile index for this key-value pair
 } opt_key_val_pair_t;
 
-//enum for differenciating between the different times that we handle
+// enum for differenciating between the different times that we handle
 typedef enum {
   kCdiTimeType_referenceTime,
   kCdiTimeType_startTime,
@@ -318,11 +318,11 @@ typedef enum {
 } CdiTimeType;
 
 
-#define  CDI_FILETYPE_UNDEF          -1   /* Unknown/not yet defined file type */
+#define  CDI_FILETYPE_UNDEF          -1   // Unknown/not yet defined file type
 
 
 extern int cdiDebugExt;
-extern int CDI_Debug;      /* If set to 1, debuggig (default 0)            */
+extern int CDI_Debug;      // If set to 1, debuggig (default 0)
 extern int CDI_Recopt;
 extern int cdiGribApiDebug;
 extern double CDI_default_missval;
@@ -385,7 +385,7 @@ void    streamDefineTaxis(int streamID);
 int     streamsNewEntry(int filetype);
 void    streamsInitEntry(int streamID);
 void    cdiStreamSetupVlist(stream_t *streamptr, int vlistID);
-/* default implementation of the overridable function */
+// default implementation of the overridable function
 void    cdiStreamSetupVlist_(stream_t *streamptr, int vlistID);
 int     stream_new_var(stream_t *streamptr, int gridID, int zaxisID, int tilesetID);
 
@@ -466,7 +466,7 @@ void cdiStreamSync_(stream_t *streamptr);
 const char *cdiUnitNamePtr(int cdi_unit);
 
 enum {
-  /* 8192 is known to work on most systems (4096 isn't on Alpha) */
+  // 8192 is known to work on most systems (4096 isn't on Alpha)
   commonPageSize = 8192,
 };
 
