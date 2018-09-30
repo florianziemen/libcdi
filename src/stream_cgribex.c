@@ -20,6 +20,8 @@
 
 
 typedef struct {
+  double   fsec2[512];
+  double   fsec3[2];
   int       sec0[2];
   int       sec1[1024];
   size_t    sec2len;
@@ -637,7 +639,7 @@ void MCH_get_undef(int *isec1, double *undef_pds, double *undef_eps)
 
 static
 void cgribexDecodeHeader(int *isec0, int *isec1, int *isec2, double *fsec2,
-			 int *isec3, double *fsec3, int *isec4, double *fsec4,
+			 int *isec3, double *fsec3, int *isec4,
 			 int *gribbuffer, int recsize, int *lmv, int *iret)
 {
   int ipunp = 0, iword = 0;
@@ -645,6 +647,7 @@ void cgribexDecodeHeader(int *isec0, int *isec1, int *isec2, double *fsec2,
   memset(isec1, 0, 256*sizeof(int));
   memset(isec2, 0, 32*sizeof(int));
 
+  double *fsec4 = NULL;
   gribExDP(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, fsec4,
 	   ipunp, (int *) gribbuffer, recsize, &iword, "J", iret);
 
@@ -726,7 +729,7 @@ cgribexScanTsConstAdjust(stream_t *streamptr, taxis_t *taxis)
 
 int cgribexScanTimestep1(stream_t *streamptr)
 {
-  double fsec2[512], fsec3[2], *fsec4 = NULL;
+  double fsec2[512], fsec3[2];
   int lmv = 0, iret = 0;
   off_t recpos = 0;
   void *gribbuffer = NULL;
@@ -819,7 +822,7 @@ int cgribexScanTimestep1(stream_t *streamptr)
       int *isec4 = cgribexp->sec4;
 
       nrecs_scanned++;
-      cgribexDecodeHeader(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, fsec4,
+      cgribexDecodeHeader(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4,
 			  (int *) gribbuffer, (int)recsize, &lmv, &iret);
 
       param = cdiEncodeParam(ISEC1_Parameter, ISEC1_CodeTable, 255);
@@ -937,7 +940,7 @@ int cgribexScanTimestep1(stream_t *streamptr)
 int cgribexScanTimestep2(stream_t * streamptr)
 {
   int rstatus = 0;
-  double fsec2[512], fsec3[2], *fsec4 = NULL;
+  double fsec2[512], fsec3[2];
   int lmv = 0, iret = 0;
   off_t recpos = 0;
   int param = 0;
@@ -1024,7 +1027,7 @@ int cgribexScanTimestep2(stream_t * streamptr)
 	    }
 	}
 
-      cgribexDecodeHeader(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, fsec4,
+      cgribexDecodeHeader(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4,
 			  (int *) gribbuffer, (int)recsize, &lmv, &iret);
 
       nrecs_scanned++;
@@ -1177,7 +1180,7 @@ int cgribexScanTimestep2(stream_t * streamptr)
 int cgribexScanTimestep(stream_t * streamptr)
 {
   int rstatus = 0;
-  double fsec2[512], fsec3[2], *fsec4 = NULL;
+  double fsec2[512], fsec3[2];
   int lmv = 0, iret = 0;
   size_t recsize = 0;
   off_t recpos = 0;
@@ -1273,7 +1276,7 @@ int cgribexScanTimestep(stream_t * streamptr)
 		}
 	    }
 
-	  cgribexDecodeHeader(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, fsec4,
+	  cgribexDecodeHeader(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4,
 			      (int *) gribbuffer, (int)recsize, &lmv, &iret);
 
           nrecs_scanned++;
