@@ -20,14 +20,14 @@
 
 
 typedef struct {
-  double   fsec2[512];
-  double   fsec3[2];
   int       sec0[2];
   int       sec1[1024];
   size_t    sec2len;
   int      *sec2;
   int       sec3[2];
   int       sec4[512];
+  double   fsec2[512];
+  double   fsec3[2];
 }
 cgribexrec_t;
 
@@ -462,9 +462,12 @@ void cgribexGetLevel(int *isec1, int *leveltype, int *level1, int *level2)
 }
 
 static
-void cgribexAddRecord(stream_t * streamptr, int param, int *isec1, int *isec2, double *fsec2, double *fsec3,
+void cgribexAddRecord(stream_t *streamptr, cgribexrec_t *cgribexp, int param, int *isec1, int *isec2,
 		      int *isec4, size_t recsize, off_t position, int datatype, int comptype, int lmv, int iret)
 {
+  double *fsec2 = cgribexp->fsec2;
+  double *fsec3 = cgribexp->fsec3;
+
   int varID;
   int levelID = 0;
 
@@ -638,10 +641,13 @@ void MCH_get_undef(int *isec1, double *undef_pds, double *undef_eps)
 }
 
 static
-void cgribexDecodeHeader(int *isec0, int *isec1, int *isec2, double *fsec2,
-			 int *isec3, double *fsec3, int *isec4,
+void cgribexDecodeHeader(cgribexrec_t *cgribexp,
+                         int *isec0, int *isec1, int *isec2, int *isec3, int *isec4,
 			 int *gribbuffer, int recsize, int *lmv, int *iret)
 {
+  double *fsec2 = cgribexp->fsec2;
+  double *fsec3 = cgribexp->fsec3;
+
   int ipunp = 0, iword = 0;
 
   memset(isec1, 0, 256*sizeof(int));
@@ -729,7 +735,6 @@ cgribexScanTsConstAdjust(stream_t *streamptr, taxis_t *taxis)
 
 int cgribexScanTimestep1(stream_t *streamptr)
 {
-  double fsec2[512], fsec3[2];
   int lmv = 0, iret = 0;
   off_t recpos = 0;
   void *gribbuffer = NULL;
@@ -822,7 +827,7 @@ int cgribexScanTimestep1(stream_t *streamptr)
       int *isec4 = cgribexp->sec4;
 
       nrecs_scanned++;
-      cgribexDecodeHeader(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4,
+      cgribexDecodeHeader(cgribexp, isec0, isec1, isec2, isec3, isec4,
 			  (int *) gribbuffer, (int)recsize, &lmv, &iret);
 
       param = cdiEncodeParam(ISEC1_Parameter, ISEC1_CodeTable, 255);
@@ -893,7 +898,7 @@ int cgribexScanTimestep1(stream_t *streamptr)
       if ( CDI_Debug )
 	Message("Read record %2d (id=%s lev1=%d lev2=%d) %8d %6d", nrecs_scanned, paramstr, level1, level2, vdate, vtime);
 
-      cgribexAddRecord(streamptr, param, isec1, isec2, fsec2, fsec3,
+      cgribexAddRecord(streamptr, cgribexp, param, isec1, isec2,
 		       isec4, recsize, recpos, datatype, comptype, lmv, iret);
     }
 
@@ -940,7 +945,6 @@ int cgribexScanTimestep1(stream_t *streamptr)
 int cgribexScanTimestep2(stream_t * streamptr)
 {
   int rstatus = 0;
-  double fsec2[512], fsec3[2];
   int lmv = 0, iret = 0;
   off_t recpos = 0;
   int param = 0;
@@ -1027,7 +1031,7 @@ int cgribexScanTimestep2(stream_t * streamptr)
 	    }
 	}
 
-      cgribexDecodeHeader(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4,
+      cgribexDecodeHeader(cgribexp, isec0, isec1, isec2, isec3, isec4,
 			  (int *) gribbuffer, (int)recsize, &lmv, &iret);
 
       nrecs_scanned++;
@@ -1180,7 +1184,6 @@ int cgribexScanTimestep2(stream_t * streamptr)
 int cgribexScanTimestep(stream_t * streamptr)
 {
   int rstatus = 0;
-  double fsec2[512], fsec3[2];
   int lmv = 0, iret = 0;
   size_t recsize = 0;
   off_t recpos = 0;
@@ -1276,7 +1279,7 @@ int cgribexScanTimestep(stream_t * streamptr)
 		}
 	    }
 
-	  cgribexDecodeHeader(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4,
+	  cgribexDecodeHeader(cgribexp, isec0, isec1, isec2, isec3, isec4,
 			      (int *) gribbuffer, (int)recsize, &lmv, &iret);
 
           nrecs_scanned++;
@@ -1451,8 +1454,7 @@ int cgribexDecode(int memtype, void *gribbuffer, size_t gribsize, void *data, si
   double fsec2[512], fsec3[2];
   char hoper[2];
 
-  if ( unreduced ) strcpy(hoper, "R");
-  else             strcpy(hoper, "D");
+  strcpy(hoper, unreduced ? "R" : "D");
 
   FSEC3_MissVal = missval;
 
@@ -1475,7 +1477,7 @@ int cgribexDecode(int memtype, void *gribbuffer, size_t gribsize, void *data, si
         {
           float *restrict dataf = (float*) data;
           for ( size_t i = 0; i < datasize; i++ )
-            if ( (fabs(dataf[i]-undef_pds) < undef_eps) || IS_EQUAL(dataf[i],FSEC3_MissVal) ) {
+            if ( (fabs(dataf[i]-undef_pds) < undef_eps) || IS_EQUAL(dataf[i], FSEC3_MissVal) ) {
               dataf[i] = (float)missval;
               (*nmiss)++;
             }
@@ -1484,7 +1486,7 @@ int cgribexDecode(int memtype, void *gribbuffer, size_t gribsize, void *data, si
         {
           double *restrict datad = (double*) data;
           for ( size_t i = 0; i < datasize; i++ )
-            if ( (fabs(datad[i]-undef_pds) < undef_eps) || IS_EQUAL(datad[i],FSEC3_MissVal) ) {
+            if ( (fabs(datad[i]-undef_pds) < undef_eps) || IS_EQUAL(datad[i], FSEC3_MissVal) ) {
               datad[i] = missval;
               (*nmiss)++;
             }
@@ -2169,7 +2171,7 @@ size_t cgribexEncode(int memtype, int varID, int levelID, int vlistID, int gridI
 		     size_t datasize, const void *data, size_t nmiss, void *gribbuffer, size_t gribbuffersize)
 {
   int iret = 0, iword = 0;
-  int isec0[2], isec1[4096], isec2[4096], isec3[2], isec4[512];
+  int isec0[2], isec1[4096], isec2[8192], isec3[2], isec4[512];
   float fsec2f[512], fsec3f[2];
   double fsec2[512], fsec3[2];
 
