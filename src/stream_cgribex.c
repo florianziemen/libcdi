@@ -15,8 +15,20 @@
 #include "stream_cgribex.h"
 
 #ifdef HAVE_LIBCGRIBEX
+
 #include "cgribex.h"
-#endif
+
+
+typedef struct {
+  int       sec0[2];
+  int       sec1[1024];
+  size_t    sec2len;
+  int      *sec2;
+  int       sec3[2];
+  int       sec4[512];
+}
+cgribexrec_t;
+
 
 typedef struct {
   int param;
@@ -26,8 +38,6 @@ typedef struct {
   int tsteptype;
 } compvar_t;
 
-
-#ifdef HAVE_LIBCGRIBEX
 
 typedef struct
 {
@@ -40,10 +50,38 @@ typedef struct
 } cgribex_handle;
 
 
+
+static
+void cgribexInit(cgribexrec_t *cgribexp)
+{
+  cgribexp->sec2len = 4096;
+  cgribexp->sec2 = (int *) Malloc(cgribexp->sec2len*sizeof(int));
+}
+
+
+void *cgribexNew()
+{
+  cgribexrec_t *cgribexp = (cgribexrec_t *) Malloc(sizeof(cgribexrec_t));
+  cgribexInit(cgribexp);
+  return (void*)cgribexp;
+}
+
+
+void cgribexDelete(void *cgribex)
+{
+  cgribexrec_t *cgribexp = (cgribexrec_t *) cgribex;
+  if (cgribexp)
+    {
+      if (cgribexp->sec2) Free(cgribexp->sec2);
+      Free(cgribexp);
+    }
+}
+
+
 int grib1Sections(unsigned char *gribbuffer, long gribbufsize, unsigned char **pdsp,
 		  unsigned char **gdsp, unsigned char **bmsp, unsigned char **bdsp, long *gribrecsize);
 
-long cgribexSection2Length(void *gribbuffer, size_t gribbuffersize)
+size_t cgribexSection2Length(void *gribbuffer, size_t gribbuffersize)
 {
   long sec2len = 0;
 
@@ -66,12 +104,12 @@ void *cgribex_handle_new_from_meassage(void *gribbuffer, size_t gribbuffersize)
   gh->gribbuffersize = 0;
   gh->pds = NULL;
 
-  if ( gribbuffersize && gribbuffer )
+  if (gribbuffersize && gribbuffer)
     {
       unsigned char *pds = NULL, *gds = NULL, *bms = NULL, *bds = NULL;
       long gribrecsize;
       int status = grib1Sections((unsigned char *)gribbuffer, (long)gribbuffersize, &pds, &gds, &bms, &bds, &gribrecsize);
-      if ( status >= 0 )
+      if (status >= 0)
         {
           gh->gribbuffer = gribbuffer;
           gh->gribbuffersize = gribbuffersize;
@@ -88,7 +126,7 @@ void *cgribex_handle_new_from_meassage(void *gribbuffer, size_t gribbuffersize)
 
 void cgribex_handle_delete(void *gh)
 {
-  if ( gh ) Free(gh);
+  if (gh) Free(gh);
 }
 
 static
@@ -96,6 +134,7 @@ int cgribexGetGridType(int *isec2)
 {
   int gridtype = GRID_GENERIC;
 
+  // clang-format off
   switch (ISEC2_GridType)
     {
     case  GRIB1_GTYPE_LATLON:     { gridtype = GRID_LONLAT;     break; }
@@ -105,6 +144,7 @@ int cgribexGetGridType(int *isec2)
     case  GRIB1_GTYPE_SPECTRAL:   { gridtype = GRID_SPECTRAL;   break; }
     case  GRIB1_GTYPE_GME:        { gridtype = GRID_GME;        break; }
     }
+  // clang-format on
 
   return gridtype;
 }
@@ -120,6 +160,7 @@ int cgribexGetZaxisHasBounds(int grb_ltype)
 {
   int lbounds = 0;
 
+  // clang-format off
   switch (grb_ltype)
     {
     case GRIB1_LTYPE_SIGMA_LAYER:
@@ -130,6 +171,7 @@ int cgribexGetZaxisHasBounds(int grb_ltype)
 	break;
       }
     }
+  // clang-format on
 
   return lbounds;
 }
@@ -140,6 +182,7 @@ int cgribexGetTimeUnit(int *isec1)
   int timeunit = TUNIT_HOUR;
   static bool lprint = true;
 
+  // clang-format off
   switch ( ISEC1_TimeUnit )
     {
     case ISEC1_TABLE4_MINUTE:    timeunit = TUNIT_MINUTE;    break;
@@ -158,6 +201,7 @@ int cgribexGetTimeUnit(int *isec1)
 	}
       break;
     }
+  // clang-format on
 
   return timeunit;
 }
@@ -175,6 +219,7 @@ int cgribexGetTsteptype(int timerange)
 {
   static bool lprint = true;
 
+  // clang-format off
   int tsteptype = TSTEP_INSTANT;
   switch ( timerange )
     {
@@ -193,6 +238,7 @@ int cgribexGetTsteptype(int timerange)
 	}
       break;
     }
+  // clang-format on
 
   return tsteptype;
 }
@@ -644,12 +690,10 @@ cgribexVarCompare(compvar_t compVar, record_t record, int flag)
     |           tstepDiff;
   return rstatus;
 }
-#endif
 
 #define gribWarning(text, nrecs, timestep, paramstr, level1, level2) \
             Warning("Record %2d (id=%s lev1=%d lev2=%d) timestep %d: %s", nrecs, paramstr, level1, level2, timestep, text)
 
-#ifdef HAVE_LIBCGRIBEX
 static inline void
 cgribexScanTsFixNtsteps(stream_t *streamptr, off_t recpos)
 {
@@ -709,11 +753,7 @@ int cgribexScanTimestep1(stream_t *streamptr)
 
   streamptr->curTsID = 0;
 
-  int *isec0 = streamptr->record->sec0;
-  int *isec1 = streamptr->record->sec1;
-  int *isec2 = streamptr->record->sec2;
-  int *isec3 = streamptr->record->sec3;
-  int *isec4 = streamptr->record->sec4;
+  cgribexrec_t *cgribexp = (cgribexrec_t *) streamptr->record->cgribexp;
 
   int tsID  = tstepsNewEntry(streamptr);
   taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
@@ -765,7 +805,18 @@ int cgribexScanTimestep1(stream_t *streamptr)
 	    }
 	}
 
-      long sec2len = cgribexSection2Length(gribbuffer, buffersize);
+      size_t sec2len = cgribexSection2Length(gribbuffer, buffersize);
+      if (sec2len > cgribexp->sec2len)
+        {
+          cgribexp->sec2len = sec2len;
+          cgribexp->sec2 = (int *) Realloc(cgribexp->sec2, sec2len*sizeof(int));
+        }
+
+      int *isec0 = cgribexp->sec0;
+      int *isec1 = cgribexp->sec1;
+      int *isec2 = cgribexp->sec2;
+      int *isec3 = cgribexp->sec3;
+      int *isec4 = cgribexp->sec4;
 
       nrecs_scanned++;
       cgribexDecodeHeader(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, fsec4,
@@ -903,11 +954,12 @@ int cgribexScanTimestep2(stream_t * streamptr)
 
   streamptr->curTsID = 1;
 
-  int *isec0 = streamptr->record->sec0;
-  int *isec1 = streamptr->record->sec1;
-  int *isec2 = streamptr->record->sec2;
-  int *isec3 = streamptr->record->sec3;
-  int *isec4 = streamptr->record->sec4;
+  cgribexrec_t *cgribexp = (cgribexrec_t *) streamptr->record->cgribexp;
+  int *isec0 = cgribexp->sec0;
+  int *isec1 = cgribexp->sec1;
+  int *isec2 = cgribexp->sec2;
+  int *isec3 = cgribexp->sec3;
+  int *isec4 = cgribexp->sec4;
 
   int fileID  = streamptr->fileID;
   int vlistID = streamptr->vlistID;
@@ -1120,10 +1172,8 @@ int cgribexScanTimestep2(stream_t * streamptr)
 
   return rstatus;
 }
-#endif
 
 
-#ifdef HAVE_LIBCGRIBEX
 int cgribexScanTimestep(stream_t * streamptr)
 {
   int rstatus = 0;
@@ -1155,11 +1205,12 @@ int cgribexScanTimestep(stream_t * streamptr)
       Message("nts = %d", streamptr->ntsteps);
     }
   */
-  int *isec0 = streamptr->record->sec0;
-  int *isec1 = streamptr->record->sec1;
-  int *isec2 = streamptr->record->sec2;
-  int *isec3 = streamptr->record->sec3;
-  int *isec4 = streamptr->record->sec4;
+  cgribexrec_t *cgribexp = (cgribexrec_t *) streamptr->record->cgribexp;
+  int *isec0 = cgribexp->sec0;
+  int *isec1 = cgribexp->sec1;
+  int *isec2 = cgribexp->sec2;
+  int *isec3 = cgribexp->sec3;
+  int *isec4 = cgribexp->sec4;
 
   int tsID  = streamptr->rtsteps;
   taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
@@ -1382,13 +1433,11 @@ int cgribexScanTimestep(stream_t * streamptr)
 
   return rstatus;
 }
-#endif
 
 #ifdef gribWarning
 #undef gribWarning
 #endif
 
-#ifdef HAVE_LIBCGRIBEX
 int cgribexDecode(int memtype, void *gribbuffer, size_t gribsize, void *data, size_t datasize,
 		  int unreduced, size_t *nmiss, double missval)
 {
@@ -1441,10 +1490,8 @@ int cgribexDecode(int memtype, void *gribbuffer, size_t gribsize, void *data, si
 
   return status;
 }
-#endif
 
 
-#ifdef HAVE_LIBCGRIBEX
 static
 void cgribexDefInstitut(int *isec1, int vlistID, int varID)
 {
@@ -2112,10 +2159,8 @@ void cgribexDefEnsembleVar(int *isec1, int vlistID, int varID)
         }
     }
 }
-#endif
 
 
-#ifdef HAVE_LIBCGRIBEX
 size_t cgribexEncode(int memtype, int varID, int levelID, int vlistID, int gridID, int zaxisID,
 		     int vdate, int vtime, int tsteptype, int numavg,
 		     size_t datasize, const void *data, size_t nmiss, void *gribbuffer, size_t gribbuffersize)

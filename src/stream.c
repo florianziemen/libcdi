@@ -16,6 +16,7 @@
 #include "cdf.h"
 #include "dmemory.h"
 #include "error.h"
+#include "stream_cgribex.h"
 #include "stream_grb.h"
 #include "stream_cdf.h"
 #include "stream_srv.h"
@@ -440,12 +441,26 @@ int cdiStreamOpenDefaultDelegate(const char *filename, char filemode, int filety
     {
 #ifdef  HAVE_LIBGRIB
     case CDI_FILETYPE_GRB:
-#ifdef  HAVE_LIBGRIB_API
-    case CDI_FILETYPE_GRB2:
-#endif
       {
         fileID = gribOpen(filename, temp);
-        if ( fileID < 0 ) fileID = CDI_ESYSTEM;
+        if ( fileID < 0 ) return CDI_ESYSTEM;
+        if (recordBufIsToBeCreated)
+          {
+            streamptr->record = (Record *) Malloc(sizeof(Record));
+            streamptr->record->buffer = NULL;
+#ifdef  HAVE_LIBCGRIBEX
+            streamptr->record->cgribexp = cgribexNew();
+#else
+            streamptr->record->cgribexp = NULL;
+#endif
+          }
+        break;
+      }
+#ifdef  HAVE_LIBGRIB_API
+    case CDI_FILETYPE_GRB2:
+      {
+        fileID = gribOpen(filename, temp);
+        if ( fileID < 0 ) return CDI_ESYSTEM;
         if (recordBufIsToBeCreated)
           {
             streamptr->record = (Record *) Malloc(sizeof(Record));
@@ -454,16 +469,17 @@ int cdiStreamOpenDefaultDelegate(const char *filename, char filemode, int filety
         break;
       }
 #endif
+#endif
 #ifdef  HAVE_LIBSERVICE
     case CDI_FILETYPE_SRV:
       {
         fileID = fileOpen(filename, temp);
-        if ( fileID < 0 ) fileID = CDI_ESYSTEM;
+        if ( fileID < 0 ) return CDI_ESYSTEM;
         if (recordBufIsToBeCreated)
           {
             streamptr->record = (Record *) Malloc(sizeof(Record));
             streamptr->record->buffer = NULL;
-            streamptr->record->exsep  = srvNew();
+            streamptr->record->exsep = srvNew();
           }
         break;
       }
@@ -472,12 +488,12 @@ int cdiStreamOpenDefaultDelegate(const char *filename, char filemode, int filety
     case CDI_FILETYPE_EXT:
       {
         fileID = fileOpen(filename, temp);
-        if ( fileID < 0 ) fileID = CDI_ESYSTEM;
+        if ( fileID < 0 ) return CDI_ESYSTEM;
         if (recordBufIsToBeCreated)
           {
             streamptr->record = (Record *) Malloc(sizeof(Record));
             streamptr->record->buffer = NULL;
-            streamptr->record->exsep  = extNew();
+            streamptr->record->exsep = extNew();
           }
         break;
       }
@@ -486,12 +502,12 @@ int cdiStreamOpenDefaultDelegate(const char *filename, char filemode, int filety
     case CDI_FILETYPE_IEG:
       {
         fileID = fileOpen(filename, temp);
-        if ( fileID < 0 ) fileID = CDI_ESYSTEM;
+        if ( fileID < 0 ) return CDI_ESYSTEM;
         if (recordBufIsToBeCreated)
           {
             streamptr->record = (Record *) Malloc(sizeof(Record));
             streamptr->record->buffer = NULL;
-            streamptr->record->exsep  = iegNew();
+            streamptr->record->exsep = iegNew();
           }
         break;
       }
@@ -527,8 +543,7 @@ int cdiStreamOpenDefaultDelegate(const char *filename, char filemode, int filety
 int streamOpenID(const char *filename, char filemode, int filetype, int resH)
 {
   if ( CDI_Debug )
-    Message("Open %s mode %c file %s", strfiletype(filetype), filemode,
-            filename?filename:"(NUL)");
+    Message("Open %s mode %c file %s", strfiletype(filetype), filemode, filename?filename:"(NUL)");
 
   if ( ! filename || filetype < 0 ) return CDI_EINVAL;
 
@@ -923,10 +938,18 @@ void cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDelet
       {
 #ifdef  HAVE_LIBGRIB
       case CDI_FILETYPE_GRB:
+        {
+          gribClose(fileID);
+          if (recordBufIsToBeDeleted) gribContainersDelete(streamptr);
+#ifdef  HAVE_LIBCGRIBEX
+          if (recordBufIsToBeDeleted) cgribexDelete(streamptr->record->cgribexp);
+#endif
+          break;
+        }
       case CDI_FILETYPE_GRB2:
         {
           gribClose(fileID);
-          if ( recordBufIsToBeDeleted ) gribContainersDelete(streamptr);
+          if (recordBufIsToBeDeleted) gribContainersDelete(streamptr);
           break;
         }
 #endif
@@ -934,7 +957,7 @@ void cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDelet
       case CDI_FILETYPE_SRV:
         {
           fileClose(fileID);
-          if ( recordBufIsToBeDeleted ) srvDelete(streamptr->record->exsep);
+          if (recordBufIsToBeDeleted) srvDelete(streamptr->record->exsep);
           break;
         }
 #endif
@@ -942,7 +965,7 @@ void cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDelet
       case CDI_FILETYPE_EXT:
         {
           fileClose(fileID);
-          if ( recordBufIsToBeDeleted ) extDelete(streamptr->record->exsep);
+          if (recordBufIsToBeDeleted) extDelete(streamptr->record->exsep);
           break;
         }
 #endif
@@ -950,7 +973,7 @@ void cdiStreamCloseDefaultDelegate(stream_t *streamptr, int recordBufIsToBeDelet
       case CDI_FILETYPE_IEG:
         {
           fileClose(fileID);
-          if ( recordBufIsToBeDeleted ) iegDelete(streamptr->record->exsep);
+          if (recordBufIsToBeDeleted) iegDelete(streamptr->record->exsep);
           break;
         }
 #endif

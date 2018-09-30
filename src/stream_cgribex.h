@@ -1,6 +1,9 @@
 #ifndef STREAM_CGRIBEX_H
 #define STREAM_CGRIBEX_H
 
+void *cgribexNew();
+void cgribexDelete(void *cgribexp);
+
 int cgribexScanTimestep1(stream_t *streamptr);
 int cgribexScanTimestep2(stream_t *streamptr);
 int cgribexScanTimestep(stream_t *streamptr);

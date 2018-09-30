@@ -125,12 +125,10 @@ typedef struct
   int       varID;
   int       levelID;
   int       prec;               // ext, srv
-  int       sec0[2];            // cgribex
-  int       sec1[1024];         // cgribex
-  int       sec2[8192];         // cgribex
-  int       sec3[2];            // cgribex
-  int       sec4[512];          // cgribex
-  void     *exsep;              // ieg, ext, srv
+  void     *exsep;              // ieg, ext, srv container
+#ifdef HAVE_LIBCGRIBEX
+  void     *cgribexp;           // cgribex container
+#endif
 }
 Record;
 
