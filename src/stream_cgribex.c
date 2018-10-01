@@ -950,7 +950,6 @@ int cgribexScanTimestep2(stream_t * streamptr)
   int nrecs, recID;
   size_t recsize = 0;
   bool warn_numavg = true;
-  int tsteptype;
   size_t unzipsize;
   char paramstr[32];
 
@@ -1054,7 +1053,7 @@ int cgribexScanTimestep2(stream_t * streamptr)
 	  datetime0.time = vtime;
 	}
 
-      tsteptype = cgribexGetTsteptype(ISEC1_TimeRange);
+      int tsteptype = cgribexGetTsteptype(ISEC1_TimeRange);
 
       if ( ISEC1_AvgNum )
 	{
@@ -1553,6 +1552,7 @@ int cgribexDefTimerange(int tsteptype, int factor, int calendar,
 
       if ( (ip > 255) && (tsteptype == TSTEP_INSTANT) ) tsteptype = TSTEP_INSTANT3;
 
+      // clang-format off
       switch ( tsteptype )
 	{
 	case TSTEP_INSTANT:  timerange =  0; ip1 = ip; ip2 = 0;  break;
@@ -1564,6 +1564,7 @@ int cgribexDefTimerange(int tsteptype, int factor, int calendar,
 	case TSTEP_INSTANT3:
 	default:             timerange = 10; ip1 = ip/256; ip2 = ip%256; break;
 	}
+      // clang-format on
     }
 
   *pip1 = ip1;
@@ -1606,6 +1607,7 @@ int cgribexDefDateTime(int *isec1, int timeunit, int date, int time)
   ISEC1_Century = century;
 
   int factor = 1;
+  // clang-format off
   switch (timeunit)
     {
     case TUNIT_MINUTE:    factor =    60; ISEC1_TimeUnit = ISEC1_TABLE4_MINUTE;    break;
@@ -1618,6 +1620,7 @@ int cgribexDefDateTime(int *isec1, int timeunit, int date, int time)
     case TUNIT_DAY:       factor = 86400; ISEC1_TimeUnit = ISEC1_TABLE4_DAY;       break;
     default:              factor =  3600; ISEC1_TimeUnit = ISEC1_TABLE4_HOUR;      break;
     }
+  // clang-format on
 
   return factor;
 }
@@ -1690,8 +1693,7 @@ void cgribexDefTime(int *isec1, int vdate, int vtime, int tsteptype, int numavg,
 	ISEC1_TimeRange = 0;
       else
       */
-      if ( ISEC1_TimeRange != 3 )
-	ISEC1_TimeRange   = 10;
+      if ( ISEC1_TimeRange != 3 ) ISEC1_TimeRange = 10;
 
       ISEC1_TimePeriod1 = 0;
       ISEC1_TimePeriod2 = 0;
@@ -2047,9 +2049,11 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
 	zaxisInqUnits(zaxisID, units);
         if ( units[1] == 'm' && !units[2] )
           {
+            // clang-format off
             if      ( units[0] == 'c' ) level *= 0.01;
             else if ( units[0] == 'd' ) level *= 0.1;
             else if ( units[0] == 'k' ) level *= 1000;
+            // clang-format on
           }
 
         isec1DefLevel(isec1, grib_ltype, (int) level, 0);
@@ -2070,9 +2074,11 @@ void cgribexDefLevel(int *isec1, int *isec2, double *fsec2, int zaxisID, int lev
 	zaxisInqUnits(zaxisID, units);
 
 	double factor = 100; // default: meter
+        // clang-format off
         if      ( units[0] == 'm' && units[1] == 'm' ) factor =   0.1;
         else if ( units[0] == 'c' && units[1] == 'm' ) factor =   1;
         else if ( units[0] == 'd' && units[1] == 'm' ) factor =  10;
+        // clang-format on
 
 	if ( zaxisInqLbounds(zaxisID, NULL) && zaxisInqUbounds(zaxisID, NULL) )
           isec1DefLevel(isec1, GRIB1_LTYPE_LANDDEPTH_LAYER, (int) (factor*zaxisInqLbound(zaxisID, levelID)),
