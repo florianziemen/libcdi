@@ -463,13 +463,15 @@ void cgribexGetLevel(int *isec1, int *leveltype, int *level1, int *level2)
 
 static
 void cgribexAddRecord(stream_t *streamptr, cgribexrec_t *cgribexp, int param, size_t recsize,
-                      off_t position, int datatype, int comptype, int lmv, int iret)
+                      off_t position, int comptype, int lmv, int iret)
 {
   int *isec1 = cgribexp->sec1;
   int *isec2 = cgribexp->sec2;
   int *isec4 = cgribexp->sec4;
   double *fsec2 = cgribexp->fsec2;
   double *fsec3 = cgribexp->fsec3;
+
+  int datatype = (ISEC4_NumBits > 0 && ISEC4_NumBits <= 32) ? ISEC4_NumBits : CDI_DATATYPE_PACK;
 
   int varID;
   int levelID = 0;
@@ -552,7 +554,6 @@ void cgribexAddRecord(stream_t *streamptr, cgribexrec_t *cgribexp, int param, si
     {
       size_t vctsize = (size_t)ISEC2_NumVCP;
       double *vctptr = &fsec2[10];
-
       varDefVCT(vctsize, vctptr);
     }
 
@@ -691,8 +692,8 @@ compvar_t cgribexVarSet(int param, int level1, int level2, int leveltype, int tr
   return compVar;
 }
 
-static inline int
-cgribexVarCompare(compvar_t compVar, record_t record, int flag)
+static inline
+int cgribexVarCompare(compvar_t compVar, record_t record, int flag)
 {
   bool vinst = compVar.tsteptype == TSTEP_INSTANT || compVar.tsteptype == TSTEP_INSTANT2 || compVar.tsteptype == TSTEP_INSTANT3;
   bool rinst = record.tsteptype == TSTEP_INSTANT || record.tsteptype == TSTEP_INSTANT2 || record.tsteptype == TSTEP_INSTANT3;
@@ -709,8 +710,8 @@ cgribexVarCompare(compvar_t compVar, record_t record, int flag)
 #define gribWarning(text, nrecs, timestep, paramstr, level1, level2) \
             Warning("Record %2d (id=%s lev1=%d lev2=%d) timestep %d: %s", nrecs, paramstr, level1, level2, timestep, text)
 
-static inline void
-cgribexScanTsFixNtsteps(stream_t *streamptr, off_t recpos)
+static inline
+void cgribexScanTsFixNtsteps(stream_t *streamptr, off_t recpos)
 {
   if ( streamptr->ntsteps == -1 )
     {
@@ -723,8 +724,8 @@ cgribexScanTsFixNtsteps(stream_t *streamptr, off_t recpos)
     }
 }
 
-static inline void
-cgribexScanTsConstAdjust(stream_t *streamptr, taxis_t *taxis)
+static inline
+void cgribexScanTsConstAdjust(stream_t *streamptr, taxis_t *taxis)
 {
   int vlistID = streamptr->vlistID;
   if ( streamptr->ntsteps == 1 )
@@ -746,13 +747,11 @@ int cgribexScanTimestep1(stream_t *streamptr)
   void *gribbuffer = NULL;
   size_t buffersize = 0;
   int rstatus;
-  int param = 0;
   int leveltype = 0, level1 = 0, level2 = 0, vdate = 0, vtime = 0;
   DateTime datetime, datetime0 = { LONG_MIN, LONG_MIN };
   size_t readsize;
   unsigned nrecords, recID;
   int nrecs_scanned = 0;
-  int datatype;
   size_t recsize = 0;
   bool warn_time = true;
   bool warn_numavg = true;
@@ -760,7 +759,6 @@ int cgribexScanTimestep1(stream_t *streamptr)
   int rdate = 0, rtime = 0, tunit = 0;
   bool fcast = false;
   int vlistID;
-  int comptype;
   size_t unzipsize;
   char paramstr[32];
   int nskip = cdiSkipRecords;
@@ -807,7 +805,7 @@ int cgribexScanTimestep1(stream_t *streamptr)
       rstatus = gribRead(fileID, (unsigned char *)gribbuffer, &readsize);
       if ( rstatus ) break;
 
-      comptype = CDI_COMPRESS_NONE;
+      int comptype = CDI_COMPRESS_NONE;
       if ( gribGetZip(recsize, (unsigned char *)gribbuffer, &unzipsize) > 0 )
 	{
 	  comptype = CDI_COMPRESS_SZIP;
@@ -827,19 +825,16 @@ int cgribexScanTimestep1(stream_t *streamptr)
         }
 
       int *isec1 = cgribexp->sec1;
-      int *isec4 = cgribexp->sec4;
 
       nrecs_scanned++;
       cgribexDecodeHeader(cgribexp, (int *) gribbuffer, (int)recsize, &lmv, &iret);
 
-      param = cdiEncodeParam(ISEC1_Parameter, ISEC1_CodeTable, 255);
+      int param = cdiEncodeParam(ISEC1_Parameter, ISEC1_CodeTable, 255);
       cdiParamToString(param, paramstr, sizeof(paramstr));
 
       cgribexGetLevel(isec1, &leveltype, &level1, &level2);
 
       gribDateTime(isec1, &vdate, &vtime);
-
-      datatype = (ISEC4_NumBits > 0 && ISEC4_NumBits <= 32) ? ISEC4_NumBits : CDI_DATATYPE_PACK;
 
       if ( nrecs == 0 )
 	{
@@ -900,7 +895,7 @@ int cgribexScanTimestep1(stream_t *streamptr)
       if ( CDI_Debug )
 	Message("Read record %2d (id=%s lev1=%d lev2=%d) %8d %6d", nrecs_scanned, paramstr, level1, level2, vdate, vtime);
 
-      cgribexAddRecord(streamptr, cgribexp, param, recsize, recpos, datatype, comptype, lmv, iret);
+      cgribexAddRecord(streamptr, cgribexp, param, recsize, recpos, comptype, lmv, iret);
     }
 
   streamptr->rtsteps = 1;
@@ -948,7 +943,6 @@ int cgribexScanTimestep2(stream_t * streamptr)
   int rstatus = 0;
   int lmv = 0, iret = 0;
   off_t recpos = 0;
-  int param = 0;
   int leveltype = 0, level1 = 0, level2 = 0, vdate = 0, vtime = 0;
   DateTime datetime, datetime0 = { LONG_MIN, LONG_MIN };
   int varID, gridID;
@@ -965,7 +959,6 @@ int cgribexScanTimestep2(stream_t * streamptr)
   cgribexrec_t *cgribexp = (cgribexrec_t *) streamptr->record->cgribexp;
   int *isec1 = cgribexp->sec1;
   int *isec2 = cgribexp->sec2;
-  int *isec4 = cgribexp->sec4;
 
   int fileID  = streamptr->fileID;
   int vlistID = streamptr->vlistID;
@@ -1034,7 +1027,7 @@ int cgribexScanTimestep2(stream_t * streamptr)
 
       nrecs_scanned++;
 
-      param = cdiEncodeParam(ISEC1_Parameter, ISEC1_CodeTable, 255);
+      int param = cdiEncodeParam(ISEC1_Parameter, ISEC1_CodeTable, 255);
       cdiParamToString(param, paramstr, sizeof(paramstr));
 
       cgribexGetLevel(isec1, &leveltype, &level1, &level2);
@@ -1065,12 +1058,10 @@ int cgribexScanTimestep2(stream_t * streamptr)
 
       if ( ISEC1_AvgNum )
 	{
-	  if (  taxis->numavg && warn_numavg &&
-        	(taxis->numavg != ISEC1_AvgNum) )
+	  if ( taxis->numavg && warn_numavg &&
+               (taxis->numavg != ISEC1_AvgNum) )
 	    {
-	  /*
-	      Warning("Changing numavg from %d to %d not supported!", taxis->numavg, ISEC1_AvgNum);
-	  */
+              // Warning("Changing numavg from %d to %d not supported!", taxis->numavg, ISEC1_AvgNum);
 	      warn_numavg = false;
 	    }
 	  else
@@ -1130,8 +1121,7 @@ int cgribexScanTimestep2(stream_t * streamptr)
 
       if ( cgribexVarCompare(compVar, streamptr->tsteps[tsID].records[recID], 0) != 0 )
 	{
-	  Message("tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d",
-		  tsID, recID,
+	  Message("tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d", tsID, recID,
 		  streamptr->tsteps[tsID].records[recID].param, param,
 		  streamptr->tsteps[tsID].records[recID].ilevel, level1);
 	  return CDI_EUFSTRUCT;
@@ -1188,7 +1178,6 @@ int cgribexScanTimestep(stream_t * streamptr)
   void *gribbuffer;
   size_t buffersize = 0;
   int fileID;
-  int param = 0;
   int leveltype = 0, level1 = 0, level2 = 0, vdate = 0, vtime = 0;
   DateTime datetime, datetime0 = { LONG_MIN, LONG_MIN };
   int vrecID, recID;
@@ -1211,7 +1200,6 @@ int cgribexScanTimestep(stream_t * streamptr)
   */
   cgribexrec_t *cgribexp = (cgribexrec_t *) streamptr->record->cgribexp;
   int *isec1 = cgribexp->sec1;
-  int *isec4 = cgribexp->sec4;
 
   int tsID  = streamptr->rtsteps;
   taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
@@ -1278,7 +1266,7 @@ int cgribexScanTimestep(stream_t * streamptr)
 
           nrecs_scanned++;
 
-	  param = cdiEncodeParam(ISEC1_Parameter, ISEC1_CodeTable, 255);
+	  int param = cdiEncodeParam(ISEC1_Parameter, ISEC1_CodeTable, 255);
           cdiParamToString(param, paramstr, sizeof(paramstr));
 
           cgribexGetLevel(isec1, &leveltype, &level1, &level2);
@@ -1377,8 +1365,7 @@ int cgribexScanTimestep(stream_t * streamptr)
 
 	  if ( cgribexVarCompare(compVar, streamptr->tsteps[tsID].records[recID], 0) != 0 )
 	    {
-	      Message("tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d",
-		      tsID, recID,
+	      Message("tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d", tsID, recID,
 		      streamptr->tsteps[tsID].records[recID].param, param,
 		      streamptr->tsteps[tsID].records[recID].ilevel, level1);
 	      Error("Invalid, unsupported or inconsistent record structure");
@@ -1471,19 +1458,21 @@ int cgribexDecode(int memtype, void *gribbuffer, size_t gribsize, void *data, si
         {
           float *restrict dataf = (float*) data;
           for ( size_t i = 0; i < datasize; i++ )
-            if ( (fabs(dataf[i]-undef_pds) < undef_eps) || IS_EQUAL(dataf[i], FSEC3_MissVal) ) {
-              dataf[i] = (float)missval;
-              (*nmiss)++;
-            }
+            if ( (fabs(dataf[i]-undef_pds) < undef_eps) || IS_EQUAL(dataf[i], FSEC3_MissVal) )
+              {
+                dataf[i] = (float)missval;
+                (*nmiss)++;
+              }
         }
       else
         {
           double *restrict datad = (double*) data;
           for ( size_t i = 0; i < datasize; i++ )
-            if ( (fabs(datad[i]-undef_pds) < undef_eps) || IS_EQUAL(datad[i], FSEC3_MissVal) ) {
-              datad[i] = missval;
-              (*nmiss)++;
-            }
+            if ( (fabs(datad[i]-undef_pds) < undef_eps) || IS_EQUAL(datad[i], FSEC3_MissVal) )
+              {
+                datad[i] = missval;
+                (*nmiss)++;
+              }
         }
     }
 
@@ -1654,15 +1643,13 @@ void cgribexDefTime(int *isec1, int vdate, int vtime, int tsteptype, int numavg,
 
       int factor = cgribexDefDateTime(isec1, timeunit, rdate, rtime);
       int ip1 = 0, ip2 = 0;
-      timerange = cgribexDefTimerange(tsteptype, factor, calendar,
-				      rdate, rtime, vdate, vtime, &ip1, &ip2);
+      timerange = cgribexDefTimerange(tsteptype, factor, calendar, rdate, rtime, vdate, vtime, &ip1, &ip2);
 
       if ( ip2 > 0xFF && timeunit < TUNIT_YEAR )
         {
           timeunit++;
           factor = cgribexDefDateTime(isec1, timeunit, rdate, rtime);
-          timerange = cgribexDefTimerange(tsteptype, factor, calendar,
-                                          rdate, rtime, vdate, vtime, &ip1, &ip2);
+          timerange = cgribexDefTimerange(tsteptype, factor, calendar, rdate, rtime, vdate, vtime, &ip1, &ip2);
         }
 
       if ( timerange == -1 || timerange == 3 )
