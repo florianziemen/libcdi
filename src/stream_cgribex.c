@@ -1424,20 +1424,29 @@ int cgribexScanTimestep(stream_t * streamptr)
 #undef gribWarning
 #endif
 
-int cgribexDecode(int memtype, void *gribbuffer, size_t gribsize, void *data, size_t datasize,
+int cgribexDecode(int memtype, void *cgribex, void *gribbuffer, size_t gribsize, void *data, size_t datasize,
 		  int unreduced, size_t *nmiss, double missval)
 {
   int status = 0;
-  int iret = 0, iword = 0;
-  int isec0[2], isec1[4096], isec2[8192], isec3[2], isec4[512];
-  float fsec2f[512], fsec3f[2];
-  double fsec2[512], fsec3[2];
-  char hoper[2];
 
+  cgribexrec_t *cgribexp = (cgribexrec_t *) cgribex;
+
+  int *isec0 = cgribexp->sec0;
+  int *isec1 = cgribexp->sec1;
+  int *isec2 = cgribexp->sec2;
+  int *isec3 = cgribexp->sec3;
+  int *isec4 = cgribexp->sec4;
+  double *fsec2 = cgribexp->fsec2;
+  double *fsec3 = cgribexp->fsec3;
+  float fsec2f[sizeof(cgribexp->fsec2)/sizeof(double)];
+  float fsec3f[sizeof(cgribexp->fsec3)/sizeof(double)];
+
+  char hoper[2];
   strcpy(hoper, unreduced ? "R" : "D");
 
   FSEC3_MissVal = missval;
 
+  int iret = 0, iword = 0;
   if ( memtype == MEMTYPE_FLOAT )
     gribExSP(isec0, isec1, isec2, fsec2f, isec3, fsec3f, isec4, (float*) data,
              (int) datasize, (int*) gribbuffer, (int)gribsize, &iword, hoper, &iret);

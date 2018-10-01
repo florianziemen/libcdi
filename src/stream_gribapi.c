@@ -1578,7 +1578,7 @@ int gribapiDecode(void *gribbuffer, size_t gribsize, double *data, size_t gridsi
   grib_handle *gh = grib_handle_new_from_message(NULL, gribbuffer, recsize);
   GRIB_CHECK(my_grib_set_double(gh, "missingValue", missval), 0);
 
-  /* get the size of the values array*/
+  // get the size of the values array
   size_t datasize;
   GRIB_CHECK(grib_get_size(gh, "values", &datasize), 0);
   // long numberOfPoints;
