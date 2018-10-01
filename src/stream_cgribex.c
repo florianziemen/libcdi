@@ -462,10 +462,12 @@ void cgribexGetLevel(int *isec1, int *leveltype, int *level1, int *level2)
 }
 
 static
-void cgribexAddRecord(stream_t *streamptr, cgribexrec_t *cgribexp, int param, int *isec1,
-		      int *isec4, size_t recsize, off_t position, int datatype, int comptype, int lmv, int iret)
+void cgribexAddRecord(stream_t *streamptr, cgribexrec_t *cgribexp, int param, size_t recsize,
+                      off_t position, int datatype, int comptype, int lmv, int iret)
 {
+  int *isec1 = cgribexp->sec1;
   int *isec2 = cgribexp->sec2;
+  int *isec4 = cgribexp->sec4;
   double *fsec2 = cgribexp->fsec2;
   double *fsec3 = cgribexp->fsec3;
 
@@ -897,8 +899,7 @@ int cgribexScanTimestep1(stream_t *streamptr)
       if ( CDI_Debug )
 	Message("Read record %2d (id=%s lev1=%d lev2=%d) %8d %6d", nrecs_scanned, paramstr, level1, level2, vdate, vtime);
 
-      cgribexAddRecord(streamptr, cgribexp, param, isec1,
-		       isec4, recsize, recpos, datatype, comptype, lmv, iret);
+      cgribexAddRecord(streamptr, cgribexp, param, recsize, recpos, datatype, comptype, lmv, iret);
     }
 
   streamptr->rtsteps = 1;
