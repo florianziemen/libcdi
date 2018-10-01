@@ -2157,10 +2157,24 @@ size_t cgribexEncode(int memtype, int varID, int levelID, int vlistID, int gridI
 		     int vdate, int vtime, int tsteptype, int numavg,
 		     size_t datasize, const void *data, size_t nmiss, void *gribbuffer, size_t gribbuffersize)
 {
-  int iret = 0, iword = 0;
-  int isec0[2], isec1[4096], isec2[8192], isec3[2], isec4[512];
-  float fsec2f[512], fsec3f[2];
-  double fsec2[512], fsec3[2];
+  cgribexrec_t *cgribexp = (cgribexrec_t *)cgribexNew();
+
+  size_t sec2len = 1024 + 2*gridInqYsize(gridID); // Gaussian reduced grid
+  if (sec2len > cgribexp->sec2len)
+    {
+      cgribexp->sec2len = sec2len;
+      cgribexp->sec2 = (int *) Realloc(cgribexp->sec2, sec2len*sizeof(int));
+    }
+
+  int *isec0 = cgribexp->sec0;
+  int *isec1 = cgribexp->sec1;
+  int *isec2 = cgribexp->sec2;
+  int *isec3 = cgribexp->sec3;
+  int *isec4 = cgribexp->sec4;
+  double *fsec2 = cgribexp->fsec2;
+  double *fsec3 = cgribexp->fsec3;
+  float fsec2f[sizeof(cgribexp->fsec2)/sizeof(double)];
+  float fsec3f[sizeof(cgribexp->fsec3)/sizeof(double)];
 
   memset(isec1, 0, 256*sizeof(int));
   fsec2[0] = 0; fsec2[1] = 0;
@@ -2209,17 +2223,20 @@ size_t cgribexEncode(int memtype, int varID, int levelID, int vlistID, int gridI
 
   if ( memtype == MEMTYPE_FLOAT )
     {
-      size_t numVCP = ISEC2_NumVCP > 0 ? (size_t)ISEC2_NumVCP : (size_t)0;
-      for ( size_t i = 0; i < numVCP; ++i ) fsec2f[10+i] = (float)fsec2[10+i];
+      int numVCP = (ISEC2_NumVCP > 0) ? ISEC2_NumVCP : 0;
+      for ( int i = 0; i < numVCP; ++i ) fsec2f[10+i] = (float)fsec2[10+i];
       fsec3f[ 1] = (float)fsec3[ 1];
     }
 
+  int iret = 0, iword = 0;
   if ( memtype == MEMTYPE_FLOAT )
     gribExSP(isec0, isec1, isec2, fsec2f, isec3, fsec3f, isec4, (float*) data,
              (int) datasize, (int*) gribbuffer, gribsize, &iword, "C", &iret);
   else
     gribExDP(isec0, isec1, isec2, fsec2, isec3, fsec3, isec4, (double*) data,
              (int) datasize, (int*) gribbuffer, gribsize, &iword, "C", &iret);
+
+  cgribexDelete(cgribexp);
 
   if ( iret ) Error("Problem during GRIB encode (errno = %d)!", iret);
 
