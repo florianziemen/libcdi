@@ -3188,7 +3188,7 @@ void cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int model
 
       const int *dimids = ncvars[ncvarid].dimids;
 
-      if ( gridInqType(gridID) == GRID_UNSTRUCTURED && ndims-iodim <= 2 && ydimid == xdimid )
+      if ( gridInqType(gridID) == GRID_UNSTRUCTURED && ndims-iodim <= 2 && (ydimid == xdimid || ydimid == CDI_UNDEFID) )
         {
           ixyz = (xdimid == dimids[ndims-1]) ? 321 : 213;
         }
