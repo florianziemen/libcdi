@@ -3,6 +3,10 @@
         * using EXSE library version 1.4.1
 	* Version 1.9.6 released
 
+2018-10-08  Uwe Schulzweida
+
+	* NetCDF: Fix xyz dim order for unstructured grids without coordinates
+
 2018-09-30  Uwe Schulzweida
 
 	* cgribex: make section2 length dynamic (bug fix for large Gaussian reduced grids)
