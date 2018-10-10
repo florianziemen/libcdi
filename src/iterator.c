@@ -890,6 +890,25 @@ int cdiIterator_inqDatatype(CdiIterator* me)
 }
 
 /*
+@Function cdiIterator_inqFiletype
+@Title Get the filetype of the current field
+
+@Prototype int cdiIterator_inqFiletype(CdiIterator* iterator)
+@Parameter
+    @item iterator The iterator to operate on.
+
+@Result The filetype that is used to store this field on disk.
+
+@Description
+    Simple metadata inspection function.
+*/
+int cdiIterator_inqFiletype(CdiIterator* me)
+{
+  sanityCheck(me);
+  return me->filetype;
+}
+
+/*
 @Function cdiIterator_inqTsteptype
 @Title Get the timestep type
 

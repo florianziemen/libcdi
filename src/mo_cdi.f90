@@ -301,6 +301,7 @@ module mo_cdi
   public :: cdiIterator_inqParam
   public :: cdiIterator_inqParamParts
   public :: cdiIterator_inqDatatype
+  public :: cdiIterator_inqFiletype
   public :: cdiIterator_inqTsteptype
   public :: cdiIterator_inqVariableName
   public :: cdiIterator_inqGridId
@@ -3577,6 +3578,20 @@ contains
     end interface
     f_result = lib_cdiIterator_inqDatatype(me_dummy%ptr)
   end function cdiIterator_inqDatatype
+
+  function cdiIterator_inqFiletype(me_dummy) result(f_result)
+    integer(c_int) :: f_result
+    type(t_CdiIterator), intent(in) :: me_dummy
+    interface
+      function lib_cdiIterator_inqFiletype(me_dummy) bind(c, name =&
+      & 'cdiIterator_inqFiletype') result(c_result)
+        import c_int, c_ptr
+        integer(c_int) :: c_result
+        type(c_ptr), value :: me_dummy
+      end function lib_cdiIterator_inqFiletype
+    end interface
+    f_result = lib_cdiIterator_inqFiletype(me_dummy%ptr)
+  end function cdiIterator_inqFiletype
 
   function cdiIterator_inqTsteptype(me_dummy) result(f_result)
     integer(c_int) :: f_result
