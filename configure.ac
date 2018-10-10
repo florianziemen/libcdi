@@ -1,10 +1,10 @@
 #  Process this file with autoconf to produce a configure script.
 #
-#  automake 1.14
-#  autoconf 2.68
-#  libtool  2.4.2
+#  automake 1.16.1
+#  autoconf 2.69
+#  libtool  2.4.6
 
-AC_INIT([cdi], [1.8.2], [http://mpimet.mpg.de/cdi])
+AC_INIT([cdi], [1.8.3rc], [http://mpimet.mpg.de/cdi])
 
 AC_DEFINE_UNQUOTED(CDI, ["$PACKAGE_VERSION"], [CDI version])
 
