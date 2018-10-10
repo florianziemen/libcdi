@@ -84,7 +84,8 @@ DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/tables/gen_tableheaderfile.in \
 	$(top_srcdir)/util/serialrun.in $(srcdir)/cdi.settings.in \
 	$(top_srcdir)/src/pkgconfig/cdi.pc.in \
-	$(top_srcdir)/src/pkgconfig/cdipio.pc.in AUTHORS COPYING \
+	$(top_srcdir)/src/pkgconfig/cdipio.pc.in \
+	$(top_srcdir)/src/pkgconfig/cdi_f2003.pc.in AUTHORS COPYING \
 	ChangeLog INSTALL NEWS README config/compile \
 	config/config.guess config/config.sub config/depcomp \
 	config/install-sh config/missing config/mkinstalldirs \
@@ -133,7 +134,8 @@ am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/config.h
 CONFIG_CLEAN_FILES = tables/gen_tableheaderfile util/serialrun \
-	cdi.settings src/pkgconfig/cdi.pc src/pkgconfig/cdipio.pc
+	cdi.settings src/pkgconfig/cdi.pc src/pkgconfig/cdipio.pc \
+	src/pkgconfig/cdi_f2003.pc
 CONFIG_CLEAN_VPATH_FILES =
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -486,6 +488,8 @@ cdi.settings: $(top_builddir)/config.status $(srcdir)/cdi.settings.in
 src/pkgconfig/cdi.pc: $(top_builddir)/config.status $(top_srcdir)/src/pkgconfig/cdi.pc.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 src/pkgconfig/cdipio.pc: $(top_builddir)/config.status $(top_srcdir)/src/pkgconfig/cdipio.pc.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+src/pkgconfig/cdi_f2003.pc: $(top_builddir)/config.status $(top_srcdir)/src/pkgconfig/cdi_f2003.pc.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 
 mostlyclean-libtool:
