@@ -1,0 +1,19 @@
+diff --git a/config/ltmain.sh b/config/ltmain.sh
+index 857338f..c19bbcc 100644
+--- a/config/ltmain.sh
++++ b/config/ltmain.sh
+@@ -8078,6 +8078,14 @@ func_mode_link ()
+ 	# Read the .la file
+ 	func_source "$lib"
+ 
++	# Change -pthread to -Wl,-pthread for nagfor
++        if test -n "$inherited_linker_flags"; then
++          func_cc_basename "$CC"
++          case $func_cc_basename_result in
++            nagfor*) inherited_linker_flags=`$ECHO "$inherited_linker_flags" | $SED 's/ -pthread/ -Wl,-pthread/g'` ;;
++          esac
++        fi
++
+ 	# Convert "-framework foo" to "foo.ltframework"
+ 	if test -n "$inherited_linker_flags"; then
+ 	  tmp_inherited_linker_flags=`$ECHO "$inherited_linker_flags" | $SED 's/-framework \([^ $]*\)/\1.ltframework/g'`
