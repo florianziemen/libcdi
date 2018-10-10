@@ -39,6 +39,7 @@ module mo_cdi
   integer(c_int), public, parameter :: CDI_ELIBNAVAIL = -22
   integer(c_int), public, parameter :: CDI_EUFSTRUCT = -23
   integer(c_int), public, parameter :: CDI_EUNC4 = -24
+  integer(c_int), public, parameter :: CDI_EDIMSIZE = -25
   integer(c_int), public, parameter :: CDI_ELIMIT = -99
   integer(c_int), public, parameter :: CDI_FILETYPE_GRB = 1
   integer(c_int), public, parameter :: CDI_FILETYPE_GRB2 = 2
@@ -141,6 +142,7 @@ module mo_cdi
   integer(c_int), public, parameter :: GRID_CURVILINEAR = 10
   integer(c_int), public, parameter :: GRID_LCC = 11
   integer(c_int), public, parameter :: GRID_PROJECTION = 12
+  integer(c_int), public, parameter :: GRID_CHARXY = 13
   integer(c_int), public, parameter :: CDI_PROJ_RLL = 21
   integer(c_int), public, parameter :: CDI_PROJ_LCC = 22
   integer(c_int), public, parameter :: CDI_PROJ_LAEA = 23
@@ -171,6 +173,7 @@ module mo_cdi
   integer(c_int), public, parameter :: ZAXIS_SEDIMENT_BOTTOM_TW = 23
   integer(c_int), public, parameter :: ZAXIS_MIX_LAYER = 24
   integer(c_int), public, parameter :: ZAXIS_REFERENCE = 25
+  integer(c_int), public, parameter :: ZAXIS_CHAR = 26
   integer(c_int), public, parameter :: MAX_KV_PAIRS_MATCH = 10
   integer(c_int), public, parameter :: TIME_CONSTANT = 0
   integer(c_int), public, parameter :: TIME_VARIABLE = 1
@@ -469,8 +472,10 @@ module mo_cdi
   public :: gridInqNP
   public :: gridDefXvals
   public :: gridInqXvals
+  public :: gridInqXIsc
   public :: gridDefYvals
   public :: gridInqYvals
+  public :: gridInqYIsc
   integer(c_int), public, parameter :: CDI_KEY_XNAME = 901
   integer(c_int), public, parameter :: CDI_KEY_XDIMNAME = 902
   integer(c_int), public, parameter :: CDI_KEY_XLONGNAME = 903
@@ -1925,6 +1930,13 @@ module mo_cdi
       integer(c_int) :: f_result
     end function gridInqXvals
 
+    function gridInqXIsc(gridID_dummy) bind(c, name = 'gridInqXIsc')&
+    & result(f_result)
+      import c_int
+      integer(c_int), value :: gridID_dummy
+      integer(c_int) :: f_result
+    end function gridInqXIsc
+
     subroutine gridDefYvals(gridID_dummy, yvals_dummy) bind(c, name =&
     & 'gridDefYvals')
       import c_double, c_int
@@ -1939,6 +1951,13 @@ module mo_cdi
       real(c_double), intent(inout) :: yvals_dummy(*)
       integer(c_int) :: f_result
     end function gridInqYvals
+
+    function gridInqYIsc(gridID_dummy) bind(c, name = 'gridInqYIsc')&
+    & result(f_result)
+      import c_int
+      integer(c_int), value :: gridID_dummy
+      integer(c_int) :: f_result
+    end function gridInqYIsc
 
     function cdiZaxisDefKeyFlt(zaxisID_dummy, key_dummy, value_dummy) bind(c,&
     & name = 'cdiZaxisDefKeyFlt') result(f_result)
