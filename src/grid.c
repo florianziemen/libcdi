@@ -3099,8 +3099,7 @@ gridDefBoundsGeneric(grid_t *gridptr, const double *bounds, size_t regularSize,
   size_t nvertex = (size_t)gridptr->nvertex;
   if ( nvertex == 0 )
     {
-      Warning("nvertex undefined for gridID = %d. Cannot define bounds!",
-              gridptr->self);
+      Warning("nvertex undefined for gridID = %d. Cannot define bounds!", gridptr->self);
       return;
     }
   size_t size = nvertex * (irregular ? gridptr->size : regularSize);

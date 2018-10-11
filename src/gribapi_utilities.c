@@ -523,19 +523,19 @@ void gribapiGetGridGaussianReduced(grib_handle *gh, grid_t *grid, int editionNum
   grid->np = (int)lpar;
 
   FAIL_ON_GRIB_ERROR(grib_get_long, gh, "Nj", &lpar);
-  int nlat = (int)lpar;
+  size_t nlat = (size_t)lpar;
 
   grid->size = numberOfPoints;
 
-  grid->nrowlon = nlat;
-  grid->rowlon = (int *) Malloc((size_t)nlat * sizeof (int));
-  long *pl     = (long *) Malloc((size_t)nlat * sizeof (long));
-  size_t dummy = (size_t)nlat;
+  grid->nrowlon = (int)nlat;
+  grid->rowlon = (int *) Malloc(nlat * sizeof(int));
+  long *pl     = (long *) Malloc(nlat * sizeof(long));
+  size_t dummy = nlat;
   FAIL_ON_GRIB_ERROR(grib_get_long_array, gh, "pl", pl, &dummy);
-  for ( int i = 0; i < nlat; ++i ) grid->rowlon[i] = (int)pl[i];
+  for ( size_t i = 0; i < nlat; ++i ) grid->rowlon[i] = (int)pl[i];
   Free(pl);
 
-  grid->y.size  = (size_t)nlat;
+  grid->y.size  = nlat;
   grid->x.inc   = 0;
   grid->y.inc   = 0;
   grid->x.flag  = 0;

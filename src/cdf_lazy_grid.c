@@ -78,7 +78,7 @@ cdfLazyGridInqAreaPtr(grid_t *grid)
   lock_lazy_load(lazyGrid);
   if (grid->area == cdfPendingLoad)
     {
-      grid->area = (double *)Malloc((size_t)grid->size * sizeof(double));
+      grid->area = (double *)Malloc(grid->size * sizeof(double));
       cdf_get_var_double(lazyGrid->cellAreaGet.datasetNCId,
                          lazyGrid->cellAreaGet.varNCId, grid->area);
     }
@@ -151,8 +151,8 @@ cdfLazyGridInqXYVal(grid_t *grid, size_t index,
             }
           else if ( valsGet->ndims == 2)
             {
-              indexND[0] = index / (size_t)grid->x.size;
-              indexND[1] = index % (size_t)grid->x.size;
+              indexND[0] = index / grid->x.size;
+              indexND[1] = index % grid->x.size;
             }
           else
             indexND[0] = index;
@@ -168,6 +168,7 @@ cdfLazyGridInqXYVal(grid_t *grid, size_t index,
     v = vals[index];
   else
     v = 0.0;
+
   return v;
 }
 
@@ -271,8 +272,7 @@ cdfLazyGridInqXBoundsPtr(grid_t *grid)
   lock_lazy_load(lazyGrid);
   if (grid->x.bounds == cdfPendingLoad)
     {
-      grid->x.bounds = (double *)Malloc((size_t)grid->nvertex
-                                       * (size_t)grid->size * sizeof(double));
+      grid->x.bounds = (double *)Malloc((size_t)grid->nvertex * grid->size * sizeof(double));
       cdf_get_var_double(lazyGrid->xBoundsGet.datasetNCId,
                          lazyGrid->xBoundsGet.varNCId, grid->x.bounds);
     }
@@ -313,10 +313,8 @@ cdfLazyGridInqYBoundsPtr(grid_t *grid)
   lock_lazy_load(lazyGrid);
   if (grid->y.bounds == cdfPendingLoad)
     {
-      grid->y.bounds = (double *)Malloc((size_t)grid->nvertex
-                                       * (size_t)grid->size * sizeof(double));
-      cdf_get_var_double(lazyGrid->yBoundsGet.datasetNCId,
-                         lazyGrid->yBoundsGet.varNCId, grid->y.bounds);
+      grid->y.bounds = (double *)Malloc((size_t)grid->nvertex * grid->size * sizeof(double));
+      cdf_get_var_double(lazyGrid->yBoundsGet.datasetNCId, lazyGrid->yBoundsGet.varNCId, grid->y.bounds);
     }
   unlock_lazy_load(lazyGrid);
   return lazyGrid->baseVtable->inqYBoundsPtr(grid);
@@ -341,9 +339,10 @@ static void
 cdfLazyGridCopyArrayFields(grid_t *gridptrOrig, grid_t *gridptrDup)
 {
   size_t nrowlon = (size_t)gridptrOrig->nrowlon;
-  size_t gridsize = (size_t)gridptrOrig->size;
+  size_t gridsize = gridptrOrig->size;
   int gridtype = gridptrOrig->type;
   int irregular = gridtype == GRID_CURVILINEAR || gridtype == GRID_UNSTRUCTURED;
+
   if ( nrowlon )
     {
       gridptrDup->rowlon = (int *)Malloc(nrowlon * sizeof (int));
@@ -352,34 +351,28 @@ cdfLazyGridCopyArrayFields(grid_t *gridptrOrig, grid_t *gridptrDup)
 
   if ( gridptrOrig->x.vals != NULL && gridptrOrig->x.vals != cdfPendingLoad )
     {
-      size_t size  = irregular ? gridsize : (size_t)gridptrOrig->x.size;
-
+      size_t size  = irregular ? gridsize : gridptrOrig->x.size;
       gridptrDup->x.vals = (double *)Malloc(size * sizeof (double));
       memcpy(gridptrDup->x.vals, gridptrOrig->x.vals, size * sizeof (double));
     }
 
   if ( gridptrOrig->y.vals != NULL && gridptrOrig->y.vals != cdfPendingLoad )
     {
-      size_t size  = irregular ? gridsize : (size_t)gridptrOrig->y.size;
-
+      size_t size  = irregular ? gridsize : gridptrOrig->y.size;
       gridptrDup->y.vals = (double *)Malloc(size * sizeof (double));
       memcpy(gridptrDup->y.vals, gridptrOrig->y.vals, size * sizeof (double));
     }
 
   if ( gridptrOrig->x.bounds != NULL && gridptrOrig->x.bounds != cdfPendingLoad )
     {
-      size_t size  = (irregular ? gridsize : (size_t)gridptrOrig->x.size)
-        * (size_t)gridptrOrig->nvertex;
-
+      size_t size  = (irregular ? gridsize : gridptrOrig->x.size) * (size_t)gridptrOrig->nvertex;
       gridptrDup->x.bounds = (double *)Malloc(size * sizeof (double));
       memcpy(gridptrDup->x.bounds, gridptrOrig->x.bounds, size * sizeof (double));
     }
 
   if ( gridptrOrig->y.bounds != NULL && gridptrOrig->y.bounds != cdfPendingLoad )
     {
-      size_t size = (irregular ? gridsize : (size_t)gridptrOrig->y.size)
-        * (size_t)gridptrOrig->nvertex;
-
+      size_t size = (irregular ? gridsize : gridptrOrig->y.size) * (size_t)gridptrOrig->nvertex;
       gridptrDup->y.bounds = (double *)Malloc(size * sizeof (double));
       memcpy(gridptrDup->y.bounds, gridptrOrig->y.bounds, size * sizeof (double));
     }
@@ -388,7 +381,6 @@ cdfLazyGridCopyArrayFields(grid_t *gridptrOrig, grid_t *gridptrDup)
     if ( gridptrOrig->area != NULL && gridptrOrig->area != cdfPendingLoad )
       {
         size_t size = gridsize;
-
         gridptrDup->area = (double *)Malloc(size * sizeof (double));
         memcpy(gridptrDup->area, gridptrOrig->area, size * sizeof (double));
       }
@@ -397,7 +389,6 @@ cdfLazyGridCopyArrayFields(grid_t *gridptrOrig, grid_t *gridptrDup)
   if ( gridptrOrig->mask != NULL )
     {
       size_t size = gridsize;
-
       gridptrDup->mask = (mask_t *)Malloc(size * sizeof(mask_t));
       memcpy(gridptrDup->mask, gridptrOrig->mask, size * sizeof (mask_t));
     }
@@ -405,7 +396,6 @@ cdfLazyGridCopyArrayFields(grid_t *gridptrOrig, grid_t *gridptrDup)
   if ( gridptrOrig->mask_gme != NULL )
     {
       size_t size = gridsize;
-
       gridptrDup->mask_gme = (mask_t *)Malloc(size * sizeof (mask_t));
       memcpy(gridptrDup->mask_gme, gridptrOrig->mask_gme, size * sizeof(mask_t));
     }
@@ -414,8 +404,7 @@ cdfLazyGridCopyArrayFields(grid_t *gridptrOrig, grid_t *gridptrDup)
 static grid_t *
 cdfLazyGridCopy(grid_t *gridptrOrig)
 {
-  struct cdfLazyGrid *lazyGridDup
-    = (struct cdfLazyGrid *)Malloc(sizeof (*lazyGridDup));
+  struct cdfLazyGrid *lazyGridDup = (struct cdfLazyGrid *)Malloc(sizeof (*lazyGridDup));
   gridptrOrig->vtable->copyScalarFields(gridptrOrig, &lazyGridDup->base);
   gridptrOrig->vtable->copyArrayFields(gridptrOrig, &lazyGridDup->base);
   return &lazyGridDup->base;

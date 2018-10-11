@@ -496,7 +496,7 @@ void cdfReadVarDP(stream_t *streamptr, int varID, double *data, size_t *nmiss)
 
   cdf_get_vara_double(fileID, ncvarid, start, count, data);
 
-  size_t size = gridInqSize(gridID)*(size_t)zaxisInqSize(zaxisID);
+  size_t size = gridInqSize(gridID) * (size_t)zaxisInqSize(zaxisID);
   double missval = vlistInqVarMissval(vlistID, varID);
   const bool haveMissVal = vlistInqVarMissvalUsed(vlistID, varID);
   double validRange[2];
@@ -704,9 +704,9 @@ void cdfReadVarSliceDPPart(stream_t *streamptr, int varID, int levelID, int varT
   int ncvarid = streamptr->vars[varID].ncvarid;
   int gridId = vlistInqVarGrid(vlistID, varID);
   //int time = vlistInqVarTsteptype(vlistID, varID);
-  size_t gridsize = (size_t)gridInqSize(gridId);
-  size_t xsize = (size_t)gridInqXsize(gridId);
-  size_t ysize = (size_t)gridInqYsize(gridId);
+  size_t gridsize = gridInqSize(gridId);
+  size_t xsize = gridInqXsize(gridId);
+  size_t ysize = gridInqYsize(gridId);
 
   unsigned int position = 0; 
   for (int i=0 ; i<4 ; i++)
@@ -771,9 +771,9 @@ void cdfReadVarSliceSPPart(stream_t *streamptr, int varID, int levelID, int varT
   int ncvarid = streamptr->vars[varID].ncvarid;
   int gridId = vlistInqVarGrid(vlistID, varID);
   // int time = vlistInqVarTsteptype(vlistID, varID);
-  size_t gridsize = (size_t)gridInqSize(gridId);
-  size_t xsize = (size_t)gridInqXsize(gridId);
-  size_t ysize = (size_t)gridInqYsize(gridId);
+  size_t gridsize = gridInqSize(gridId);
+  size_t xsize = gridInqXsize(gridId);
+  size_t ysize = gridInqYsize(gridId);
 
   unsigned int position = 0; 
   for (int i=0 ; i<4 ; i++)
@@ -895,7 +895,7 @@ void cdfReadVarDPPart(stream_t *streamptr, int varID, int varType, int startpoin
 
   cdf_get_vara_double(fileID, ncvarid, start, count, data);
 
-  size_t size = (size_t)gridInqSize(gridID)*(size_t)zaxisInqSize(zaxisID);
+  size_t size = gridInqSize(gridID) * (size_t)zaxisInqSize(zaxisID);
   double missval = vlistInqVarMissval(vlistID, varID);
   const bool haveMissVal = vlistInqVarMissvalUsed(vlistID, varID);
   double validRange[2];
@@ -937,7 +937,7 @@ void cdfReadVarSPPart(stream_t *streamptr, int varID, int varType, int startpoin
 
   cdf_get_vara_float(fileID, ncvarid, start, count, data);
 
-  size_t size = (size_t)gridInqSize(gridID)*(size_t)zaxisInqSize(zaxisID);
+  size_t size = gridInqSize(gridID) * (size_t)zaxisInqSize(zaxisID);
   float missval = vlistInqVarMissval(vlistID, varID);
   const bool haveMissVal = vlistInqVarMissvalUsed(vlistID, varID);
   double validRange[2];
