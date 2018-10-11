@@ -3,6 +3,10 @@
         * using EXSE library version 1.4.1
 	* Version 1.9.6 released
 
+2018-10-11  Uwe Schulzweida
+
+	* cdf_read: removed limitation of nmiss_ to INT_MAX [Bug #8691]
+
 2018-10-08  Uwe Schulzweida
 
 	* NetCDF: Fix xyz dim order for unstructured grids without coordinates

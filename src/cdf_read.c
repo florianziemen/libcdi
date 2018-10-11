@@ -504,9 +504,7 @@ void cdfReadVarDP(stream_t *streamptr, int varID, double *data, size_t *nmiss)
     validRange[0] = DBL_MIN, validRange[1] = DBL_MAX;
   double addoffset   = vlistInqVarAddoffset(vlistID, varID);
   double scalefactor = vlistInqVarScalefactor(vlistID, varID);
-  size_t nmiss_ = cdfDoInputDataTransformationDP(size, data, haveMissVal, missval, scalefactor, addoffset, validRange[0], validRange[1]);
-  assert(nmiss_ <= INT_MAX);
-  *nmiss = (int)nmiss_;
+  *nmiss = cdfDoInputDataTransformationDP(size, data, haveMissVal, missval, scalefactor, addoffset, validRange[0], validRange[1]);
 }
 
 static
@@ -536,9 +534,7 @@ void cdfReadVarSP(stream_t *streamptr, int varID, float *data, size_t *nmiss)
     validRange[0] = DBL_MIN, validRange[1] = DBL_MAX;
   double addoffset   = vlistInqVarAddoffset(vlistID, varID);
   double scalefactor = vlistInqVarScalefactor(vlistID, varID);
-  size_t nmiss_ = cdfDoInputDataTransformationSP(size, data, haveMissVal, missval, scalefactor, addoffset, validRange[0], validRange[1]);
-  assert(nmiss_ <= INT_MAX);
-  *nmiss = (int)nmiss_;
+  *nmiss = cdfDoInputDataTransformationSP(size, data, haveMissVal, missval, scalefactor, addoffset, validRange[0], validRange[1]);
 }
 
 
@@ -602,9 +598,7 @@ void cdfReadVarSliceDP(stream_t *streamptr, int varID, int levelID, double *data
     validRange[0] = DBL_MIN, validRange[1] = DBL_MAX;
   double addoffset   = vlistInqVarAddoffset(vlistID, varID);
   double scalefactor = vlistInqVarScalefactor(vlistID, varID);
-  size_t nmiss_ = cdfDoInputDataTransformationDP(gridsize, data, haveMissVal, missval, scalefactor, addoffset, validRange[0], validRange[1]);
-  assert(nmiss_ <= INT_MAX);
-  *nmiss = (int)nmiss_;
+  *nmiss = cdfDoInputDataTransformationDP(gridsize, data, haveMissVal, missval, scalefactor, addoffset, validRange[0], validRange[1]);
 }
 
 static
@@ -659,9 +653,7 @@ void cdfReadVarSliceSP(stream_t *streamptr, int varID, int levelID, float *data,
     validRange[0] = DBL_MIN, validRange[1] = DBL_MAX;
   double addoffset   = vlistInqVarAddoffset(vlistID, varID);
   double scalefactor = vlistInqVarScalefactor(vlistID, varID);
-  size_t nmiss_ = cdfDoInputDataTransformationSP(gridsize, data, haveMissVal, missval, scalefactor, addoffset, validRange[0], validRange[1]);
-  assert(nmiss_ <= INT_MAX);
-  *nmiss = (int)nmiss_;
+  *nmiss = cdfDoInputDataTransformationSP(gridsize, data, haveMissVal, missval, scalefactor, addoffset, validRange[0], validRange[1]);
 }
 
 
@@ -758,9 +750,7 @@ void cdfReadVarSliceDPPart(stream_t *streamptr, int varID, int levelID, int varT
     validRange[0] = DBL_MIN, validRange[1] = DBL_MAX;
   double addoffset = vlistInqVarAddoffset(vlistID, varID);
   double scalefactor = vlistInqVarScalefactor(vlistID, varID);
-  size_t nmiss_ = cdfDoInputDataTransformationDP(length, data, haveMissVal, missval, scalefactor, addoffset, validRange[0], validRange[1]);
-  assert(nmiss_ <= INT_MAX);
-  *nmiss = (size_t)nmiss_;
+  *nmiss = cdfDoInputDataTransformationDP(length, data, haveMissVal, missval, scalefactor, addoffset, validRange[0], validRange[1]);
 }
 
 void cdfReadVarSliceSPPart(stream_t *streamptr, int varID, int levelID, int varType, int startpoint, size_t length, float *data, size_t *nmiss)
@@ -827,9 +817,7 @@ void cdfReadVarSliceSPPart(stream_t *streamptr, int varID, int levelID, int varT
     validRange[0] = DBL_MIN, validRange[1] = DBL_MAX;
   float addoffset = vlistInqVarAddoffset(vlistID, varID);
   float scalefactor = vlistInqVarScalefactor(vlistID, varID);
-  size_t nmiss_ = cdfDoInputDataTransformationSP(length, data, haveMissVal, missval, scalefactor, addoffset, validRange[0], validRange[1]);
-  assert(nmiss_ <= INT_MAX);
-  *nmiss = (size_t)nmiss_;
+  *nmiss = cdfDoInputDataTransformationSP(length, data, haveMissVal, missval, scalefactor, addoffset, validRange[0], validRange[1]);
 }
 
 static
@@ -915,9 +903,7 @@ void cdfReadVarDPPart(stream_t *streamptr, int varID, int varType, int startpoin
     validRange[0] = DBL_MIN, validRange[1] = DBL_MAX;
   double addoffset = vlistInqVarAddoffset(vlistID, varID);
   double scalefactor = vlistInqVarScalefactor(vlistID, varID);
-  size_t nmiss_ = cdfDoInputDataTransformationDP(size, data, haveMissVal, missval, scalefactor, addoffset, validRange[0], validRange[1]);
-  assert(nmiss_ <= INT_MAX);
-  *nmiss = (size_t)nmiss_;
+  *nmiss = cdfDoInputDataTransformationDP(size, data, haveMissVal, missval, scalefactor, addoffset, validRange[0], validRange[1]);
 }
 
 void cdfReadVarSPPart(stream_t *streamptr, int varID, int varType, int startpoint, size_t length, float *data, size_t *nmiss)
@@ -959,9 +945,7 @@ void cdfReadVarSPPart(stream_t *streamptr, int varID, int varType, int startpoin
     validRange[0] = DBL_MIN, validRange[1] = DBL_MAX;
   float addoffset = vlistInqVarAddoffset(vlistID, varID);
   float scalefactor = vlistInqVarScalefactor(vlistID, varID);
-  size_t nmiss_ = cdfDoInputDataTransformationSP(size, data, haveMissVal, missval, scalefactor, addoffset, validRange[0], validRange[1]);
-  assert(nmiss_ <= INT_MAX);
-  *nmiss = (size_t)nmiss_;
+  *nmiss = cdfDoInputDataTransformationSP(size, data, haveMissVal, missval, scalefactor, addoffset, validRange[0], validRange[1]);
 }
 
 static
