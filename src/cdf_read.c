@@ -86,9 +86,19 @@ void cdfGetSlapDescription(stream_t *streamptr, int varID, size_t (*start)[4], s
 //Scans the data array for missVals, optionally applying first a scale factor and then an offset.
 //Returns the number of missing + out-of-range values encountered.
 static
-size_t cdfDoInputDataTransformationDP(size_t valueCount, double *data, bool haveMissVal, double missVal, double scaleFactor, double offset, double validMin, double validMax)
+size_t cdfDoInputDataTransformationDP(int vlistID, int varID, size_t valueCount, double *data)
 {
-  const bool haveOffset   = IS_NOT_EQUAL(offset, 0);
+  double missVal = vlistInqVarMissval(vlistID, varID);
+  const bool haveMissVal = vlistInqVarMissvalUsed(vlistID, varID);
+  double validRange[2];
+  if (!(haveMissVal && vlistInqVarValidrange(vlistID, varID, validRange)))
+    validRange[0] = DBL_MIN, validRange[1] = DBL_MAX;
+  double validMin = validRange[0];
+  double validMax = validRange[1];
+  double offset = vlistInqVarAddoffset(vlistID, varID);
+  double scaleFactor = vlistInqVarScalefactor(vlistID, varID);
+
+  const bool haveOffset = IS_NOT_EQUAL(offset, 0);
   const bool haveScaleFactor = IS_NOT_EQUAL(scaleFactor, 1);
   size_t missValCount = 0;
 
@@ -183,9 +193,19 @@ size_t cdfDoInputDataTransformationDP(size_t valueCount, double *data, bool have
 }
 
 static
-size_t cdfDoInputDataTransformationSP(size_t valueCount, float *data, bool haveMissVal, double missVal, double scaleFactor, double offset, double validMin, double validMax)
+size_t cdfDoInputDataTransformationSP(int vlistID, int varID, size_t valueCount, float *data)
  {
-  const bool haveOffset   = IS_NOT_EQUAL(offset, 0);
+  double missVal = vlistInqVarMissval(vlistID, varID);
+  const bool haveMissVal = vlistInqVarMissvalUsed(vlistID, varID);
+  double validRange[2];
+  if (!(haveMissVal && vlistInqVarValidrange(vlistID, varID, validRange)))
+    validRange[0] = DBL_MIN, validRange[1] = DBL_MAX;
+  double validMin = validRange[0];
+  double validMax = validRange[1];
+  double offset = vlistInqVarAddoffset(vlistID, varID);
+  double scaleFactor = vlistInqVarScalefactor(vlistID, varID);
+
+  const bool haveOffset = IS_NOT_EQUAL(offset, 0);
   const bool haveScaleFactor = IS_NOT_EQUAL(scaleFactor, 1);
   size_t missValCount = 0;
 
@@ -286,8 +306,11 @@ size_t min_size(size_t a, size_t b)
 }
 
 static
-void transpose2dArrayDP(size_t inWidth, size_t inHeight, double *data)
+void transpose2dArrayDP(int gridId, double *data)
 {
+  size_t inWidth = gridInqYsize(gridId);
+  size_t inHeight = gridInqXsize(gridId);
+  
   const size_t cacheBlockSize = 256;   // Purely an optimization parameter. Current value of 32 means we are handling 8kB blocks,
                                        // which should be a decent compromise on many architectures.
   double **out = (double**) malloc(inWidth*sizeof(double*));
@@ -317,8 +340,11 @@ void transpose2dArrayDP(size_t inWidth, size_t inHeight, double *data)
 }
 
 static
-void transpose2dArraySP(size_t inWidth, size_t inHeight, float *data)
+void transpose2dArraySP(size_t gridId, float *data)
 {
+  size_t inWidth = gridInqYsize(gridId);
+  size_t inHeight = gridInqXsize(gridId);
+
   const size_t cacheBlockSize = 256;   // Purely an optimization parameter. Current value of 32 means we are handling 8kB blocks,
                                        // which should be a decent compromise on many architectures.
   float **out = (float**) malloc(inWidth*sizeof(float*));
@@ -380,12 +406,14 @@ int cdfGetSkipDim(int fileId, int ncvarid, int (*dimIds)[3])
 {
   if((*dimIds)[0] != CDI_UNDEFID) return 0;
   if((*dimIds)[1] != CDI_UNDEFID) return 0;
+
   int nvdims;
   cdf_inq_varndims(fileId, ncvarid, &nvdims);
   if(nvdims != 3) return 0;
 
   int varDimIds[3];
   cdf_inq_vardimid(fileId, ncvarid, varDimIds);
+
   size_t size = 0;
   if ( (*dimIds)[2] == varDimIds[2] )
     {
@@ -397,6 +425,7 @@ int cdfGetSkipDim(int fileId, int ncvarid, int (*dimIds)[3])
       cdf_inq_dimlen(fileId, varDimIds[2], &size);
       if ( size == 1 ) return 2;
     }
+
   return 0;
 }
 
@@ -478,33 +507,114 @@ void cdfGetSliceSlapDescription(stream_t *streamptr, int varId, int levelId, boo
 }
 
 static
+size_t getSizeVar3D(int vlistID, int varID)
+{
+  int gridID  = vlistInqVarGrid(vlistID, varID);
+  int zaxisID = vlistInqVarZaxis(vlistID, varID);
+  return gridInqSize(gridID) * (size_t)zaxisInqSize(zaxisID);
+}
+
+
+static
+void cdfReadDataSliceSP2DP(int fileID, int ncvarid, size_t length, size_t start[4], size_t count[4], double *data)
+{
+  float *data_fp = (float *) Malloc(length*sizeof(*data_fp));
+  cdf_get_vara_float(fileID, ncvarid, start, count, data_fp);
+  for ( size_t i = 0; i < length; i++ ) data[i] = (double) data_fp[i];
+  Free(data_fp);
+}
+
+static
+void cdfReadDataSliceDP2SP(int fileID, int ncvarid, size_t length, size_t start[4], size_t count[4], float *data)
+{
+  double *data_dp = (double *) Malloc(length*sizeof(*data_dp));
+  cdf_get_vara_double(fileID, ncvarid, start, count, data_dp);
+  for ( size_t i = 0; i < length; i++ ) data[i] = (float) data_dp[i];
+  Free(data_dp);
+}
+
+static
+void cdfCheckDataDP_UINT8(int fileID, int ncvarid, int vlistID, int varID, size_t length, double *data)
+{
+  if ( vlistInqVarDatatype(vlistID, varID) == CDI_DATATYPE_UINT8 )
+    {
+      nc_type xtype;
+      cdf_inq_vartype(fileID, ncvarid, &xtype);
+      if ( xtype == NC_BYTE )
+        {
+          for ( size_t i = 0; i < length; i++ )
+            if ( data[i] < 0 ) data[i] += 256;
+        }
+    }
+}
+
+static
+void cdfCheckDataSP_UINT8(int fileID, int ncvarid, int vlistID, int varID, size_t length, float *data)
+{
+  if ( vlistInqVarDatatype(vlistID, varID) == CDI_DATATYPE_UINT8 )
+    {
+      nc_type xtype;
+      cdf_inq_vartype(fileID, ncvarid, &xtype);
+      if ( xtype == NC_BYTE )
+        {
+          for ( size_t i = 0; i < length; i++ )
+            if ( data[i] < 0 ) data[i] += 256;
+        }
+    }
+}
+
+static
+void cdfReadDataDP(stream_t *streamptr, int varID, size_t length, size_t start[4], size_t count[4], double *data)
+{
+  int vlistID = streamptr->vlistID;
+  int fileID = streamptr->fileID;
+  int ncvarid = streamptr->vars[varID].ncvarid;
+
+  if ( vlistInqVarDatatype(vlistID, varID) == CDI_DATATYPE_FLT32 )
+    {
+      cdfReadDataSliceSP2DP(fileID, ncvarid, length, start, count, data);
+    }
+  else
+    {
+      cdf_get_vara_double(fileID, ncvarid, start, count, data);
+      
+      cdfCheckDataDP_UINT8(fileID, ncvarid, vlistID, varID, length, data);
+    }
+}
+
+static
+void cdfReadDataSP(stream_t *streamptr, int varID, size_t length, size_t start[4], size_t count[4], float *data)
+{
+  int vlistID = streamptr->vlistID;
+  int fileID = streamptr->fileID;
+  int ncvarid = streamptr->vars[varID].ncvarid;
+
+  if ( vlistInqVarDatatype(vlistID, varID) == CDI_DATATYPE_FLT64 )
+    {
+      cdfReadDataSliceDP2SP(fileID, ncvarid, length, start, count, data);
+    }
+  else
+    {
+      cdf_get_vara_float(fileID, ncvarid, start, count, data);
+      
+      cdfCheckDataSP_UINT8(fileID, ncvarid, vlistID, varID, length, data);
+    }
+}
+
+static
 void cdfReadVarDP(stream_t *streamptr, int varID, double *data, size_t *nmiss)
 {
   if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamptr->self, varID);
 
   int vlistID = streamptr->vlistID;
-  int fileID  = streamptr->fileID;
 
-  int ncvarid = streamptr->vars[varID].ncvarid;
-
-  int gridID  = vlistInqVarGrid(vlistID, varID);
-  int zaxisID = vlistInqVarZaxis(vlistID, varID);
-
-  size_t start[4];
-  size_t count[4];
+  size_t start[4], count[4];
   cdfGetSlapDescription(streamptr, varID, &start, &count);
 
-  cdf_get_vara_double(fileID, ncvarid, start, count, data);
+  size_t length = getSizeVar3D(vlistID, varID);
+  cdfReadDataDP(streamptr, varID, length, start, count, data);
 
-  size_t size = gridInqSize(gridID) * (size_t)zaxisInqSize(zaxisID);
-  double missval = vlistInqVarMissval(vlistID, varID);
-  const bool haveMissVal = vlistInqVarMissvalUsed(vlistID, varID);
-  double validRange[2];
-  if (!(haveMissVal && vlistInqVarValidrange(vlistID, varID, validRange)))
-    validRange[0] = DBL_MIN, validRange[1] = DBL_MAX;
-  double addoffset   = vlistInqVarAddoffset(vlistID, varID);
-  double scalefactor = vlistInqVarScalefactor(vlistID, varID);
-  *nmiss = cdfDoInputDataTransformationDP(size, data, haveMissVal, missval, scalefactor, addoffset, validRange[0], validRange[1]);
+  *nmiss = cdfDoInputDataTransformationDP(vlistID, varID, length, data);
 }
 
 static
@@ -513,28 +623,14 @@ void cdfReadVarSP(stream_t *streamptr, int varID, float *data, size_t *nmiss)
   if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamptr->self, varID);
 
   int vlistID = streamptr->vlistID;
-  int fileID  = streamptr->fileID;
 
-  int ncvarid = streamptr->vars[varID].ncvarid;
-
-  int gridID  = vlistInqVarGrid(vlistID, varID);
-  int zaxisID = vlistInqVarZaxis(vlistID, varID);
-
-  size_t start[4];
-  size_t count[4];
+  size_t start[4], count[4];
   cdfGetSlapDescription(streamptr, varID, &start, &count);
 
-  cdf_get_vara_float(fileID, ncvarid, start, count, data);
+  size_t length = getSizeVar3D(vlistID, varID);
+  cdfReadDataSP(streamptr, varID, length, start, count, data);
 
-  size_t size = gridInqSize(gridID) * (size_t)zaxisInqSize(zaxisID);
-  double missval = vlistInqVarMissval(vlistID, varID);
-  const bool haveMissVal = vlistInqVarMissvalUsed(vlistID, varID);
-  double validRange[2];
-  if (!(haveMissVal && vlistInqVarValidrange(vlistID, varID, validRange)))
-    validRange[0] = DBL_MIN, validRange[1] = DBL_MAX;
-  double addoffset   = vlistInqVarAddoffset(vlistID, varID);
-  double scalefactor = vlistInqVarScalefactor(vlistID, varID);
-  *nmiss = cdfDoInputDataTransformationSP(size, data, haveMissVal, missval, scalefactor, addoffset, validRange[0], validRange[1]);
+  *nmiss = cdfDoInputDataTransformationSP(vlistID, varID, length, data);
 }
 
 
@@ -552,53 +648,18 @@ void cdfReadVarSliceDP(stream_t *streamptr, int varID, int levelID, double *data
   if ( CDI_Debug )
     Message("streamID = %d  varID = %d  levelID = %d", streamptr->self, varID, levelID);
 
-  int vlistID = streamptr->vlistID;
-  int fileID = streamptr->fileID;
-
-  size_t start[4], count[4];
   bool swapxy;
+  size_t start[4], count[4];
   cdfGetSliceSlapDescription(streamptr, varID, levelID, &swapxy, &start, &count);
 
-  int ncvarid = streamptr->vars[varID].ncvarid;
+  int vlistID = streamptr->vlistID;
   int gridId = vlistInqVarGrid(vlistID, varID);
-  size_t gridsize = gridInqSize(gridId);
-  size_t xsize = gridInqXsize(gridId);
-  size_t ysize = gridInqYsize(gridId);
+  size_t length = gridInqSize(gridId);
+  cdfReadDataDP(streamptr, varID, length, start, count, data);
 
-  if ( vlistInqVarDatatype(vlistID, varID) == CDI_DATATYPE_FLT32 )
-    {
-      float *data_fp = (float *) Malloc(gridsize*sizeof(*data_fp));
-      cdf_get_vara_float(fileID, ncvarid, start, count, data_fp);
-      for ( size_t i = 0; i < gridsize; i++ )
-        data[i] = (double) data_fp[i];
-      Free(data_fp);
-    }
-  else
-    {
-      cdf_get_vara_double(fileID, ncvarid, start, count, data);
-      
-      if ( vlistInqVarDatatype(vlistID, varID) == CDI_DATATYPE_UINT8 )
-        {
-          nc_type xtype;
-          cdf_inq_vartype(fileID, ncvarid, &xtype);
-          if ( xtype == NC_BYTE )
-            {
-              for ( size_t i = 0; i < gridsize; i++ )
-                if ( data[i] < 0 ) data[i] += 256;
-            }
-        }
-    }
+  if ( swapxy ) transpose2dArrayDP(gridId, data);
 
-  if ( swapxy ) transpose2dArrayDP(ysize, xsize, data);
-
-  double missval = vlistInqVarMissval(vlistID, varID);
-  const bool haveMissVal = vlistInqVarMissvalUsed(vlistID, varID);
-  double validRange[2];
-  if (!(haveMissVal && vlistInqVarValidrange(vlistID, varID, validRange)))
-    validRange[0] = DBL_MIN, validRange[1] = DBL_MAX;
-  double addoffset   = vlistInqVarAddoffset(vlistID, varID);
-  double scalefactor = vlistInqVarScalefactor(vlistID, varID);
-  *nmiss = cdfDoInputDataTransformationDP(gridsize, data, haveMissVal, missval, scalefactor, addoffset, validRange[0], validRange[1]);
+  *nmiss = cdfDoInputDataTransformationDP(vlistID, varID, length, data);
 }
 
 static
@@ -607,53 +668,18 @@ void cdfReadVarSliceSP(stream_t *streamptr, int varID, int levelID, float *data,
   if ( CDI_Debug )
     Message("streamID = %d  varID = %d  levelID = %d", streamptr->self, varID, levelID);
 
-  int vlistID = streamptr->vlistID;
-  int fileID = streamptr->fileID;
-
-  size_t start[4], count[4];
   bool swapxy;
+  size_t start[4], count[4];
   cdfGetSliceSlapDescription(streamptr, varID, levelID, &swapxy, &start, &count);
 
-  int ncvarid = streamptr->vars[varID].ncvarid;
+  int vlistID = streamptr->vlistID;
   int gridId = vlistInqVarGrid(vlistID, varID);
-  size_t gridsize = gridInqSize(gridId);
-  size_t xsize = gridInqXsize(gridId);
-  size_t ysize = gridInqYsize(gridId);
+  size_t length = gridInqSize(gridId);
+  cdfReadDataSP(streamptr, varID, length, start, count, data);
 
-  if ( vlistInqVarDatatype(vlistID, varID) == CDI_DATATYPE_FLT64 )
-    {
-      double *data_dp = (double *) Malloc(gridsize*sizeof(*data_dp));
-      cdf_get_vara_double(fileID, ncvarid, start, count, data_dp);
-      for ( size_t i = 0; i < gridsize; i++ )
-        data[i] = (float) data_dp[i];
-      Free(data_dp);
-    }
-  else
-    {
-      cdf_get_vara_float(fileID, ncvarid, start, count, data);
+  if ( swapxy ) transpose2dArraySP(gridId, data);
 
-      if ( vlistInqVarDatatype(vlistID, varID) == CDI_DATATYPE_UINT8 )
-        {
-          nc_type xtype;
-          cdf_inq_vartype(fileID, ncvarid, &xtype);
-          if ( xtype == NC_BYTE )
-            {
-              for ( size_t i = 0; i < gridsize; i++ )
-                if ( data[i] < 0 ) data[i] += 256;
-            }
-        }
-    }
-
-  if ( swapxy ) transpose2dArraySP(ysize, xsize, data);
-
-  double missval = vlistInqVarMissval(vlistID, varID);
-  bool haveMissVal = vlistInqVarMissvalUsed(vlistID, varID);
-  double validRange[2];
-  if (!(haveMissVal && vlistInqVarValidrange(vlistID, varID, validRange)))
-    validRange[0] = DBL_MIN, validRange[1] = DBL_MAX;
-  double addoffset   = vlistInqVarAddoffset(vlistID, varID);
-  double scalefactor = vlistInqVarScalefactor(vlistID, varID);
-  *nmiss = cdfDoInputDataTransformationSP(gridsize, data, haveMissVal, missval, scalefactor, addoffset, validRange[0], validRange[1]);
+  *nmiss = cdfDoInputDataTransformationSP(vlistID, varID, length, data);
 }
 
 
@@ -689,24 +715,19 @@ void cdf_read_record(stream_t *streamptr, int memtype, void *data, size_t *nmiss
 void cdfReadVarSliceDPPart(stream_t *streamptr, int varID, int levelID, int varType, int startpoint, size_t length, double *data, size_t *nmiss)
 {
   (void)(varType);
-  size_t start[4];
-  size_t count[4];
 
   if ( CDI_Debug )
     Message("streamID = %d  varID = %d  levelID = %d", streamptr->self, varID, levelID);
 
   int vlistID = streamptr->vlistID;
-  int fileID = streamptr->fileID;
 
   bool swapxy;
+  size_t start[4], count[4];
   cdfGetSliceSlapDescription(streamptr, varID, levelID, &swapxy, &start, &count);
 
-  int ncvarid = streamptr->vars[varID].ncvarid;
   int gridId = vlistInqVarGrid(vlistID, varID);
   //int time = vlistInqVarTsteptype(vlistID, varID);
   size_t gridsize = gridInqSize(gridId);
-  size_t xsize = gridInqXsize(gridId);
-  size_t ysize = gridInqYsize(gridId);
 
   unsigned int position = 0; 
   for (int i=0 ; i<4 ; i++)
@@ -716,64 +737,29 @@ void cdfReadVarSliceDPPart(stream_t *streamptr, int varID, int levelID, int varT
   start[position] = start[position]+startpoint;
   count[position] = length;
 
-  if ( vlistInqVarDatatype(vlistID, varID) == CDI_DATATYPE_FLT32 )
-    {      
-      float *data_fp = (float *) Malloc(length*sizeof(*data_fp));
-      cdf_get_vara_float(fileID, ncvarid, start, count, data_fp);
-    
-      for ( size_t i = 0; i < length; i++ )
-        data[i] = (double) data_fp[i];
+  cdfReadDataDP(streamptr, varID, length, start, count, data);
 
-      Free(data_fp);
-    }
-  else if ( vlistInqVarDatatype(vlistID, varID) == CDI_DATATYPE_UINT8 )
-    {
-      nc_type xtype;
-      cdf_inq_vartype(fileID, ncvarid, &xtype);
-      if ( xtype == NC_BYTE )
-        {
-          for ( size_t i = 0; i < length; i++ )
-            if ( data[i] < 0 ) data[i] += 256;
-        }
-    }
-  else
-    {
-      cdf_get_vara_double(fileID, ncvarid, start, count, data);
-    }
+  if ( swapxy ) transpose2dArrayDP(gridId, data);
 
-  if ( swapxy ) transpose2dArrayDP(ysize, xsize, data);
-
-  double missval = vlistInqVarMissval(vlistID, varID);
-  const bool haveMissVal = vlistInqVarMissvalUsed(vlistID, varID);
-  double validRange[2];
-  if (!(haveMissVal && vlistInqVarValidrange(vlistID, varID, validRange)))
-    validRange[0] = DBL_MIN, validRange[1] = DBL_MAX;
-  double addoffset = vlistInqVarAddoffset(vlistID, varID);
-  double scalefactor = vlistInqVarScalefactor(vlistID, varID);
-  *nmiss = cdfDoInputDataTransformationDP(length, data, haveMissVal, missval, scalefactor, addoffset, validRange[0], validRange[1]);
+  *nmiss = cdfDoInputDataTransformationDP(vlistID, varID, length, data);
 }
 
 void cdfReadVarSliceSPPart(stream_t *streamptr, int varID, int levelID, int varType, int startpoint, size_t length, float *data, size_t *nmiss)
 {
   (void)(varType);
-  size_t start[4];
-  size_t count[4];
 
   if ( CDI_Debug )
     Message("streamID = %d  varID = %d  levelID = %d", streamptr->self, varID, levelID);
 
   int vlistID = streamptr->vlistID;
-  int fileID = streamptr->fileID;
 
   bool swapxy;
+  size_t start[4], count[4];
   cdfGetSliceSlapDescription(streamptr, varID, levelID, &swapxy, &start, &count);
 
-  int ncvarid = streamptr->vars[varID].ncvarid;
   int gridId = vlistInqVarGrid(vlistID, varID);
   // int time = vlistInqVarTsteptype(vlistID, varID);
   size_t gridsize = gridInqSize(gridId);
-  size_t xsize = gridInqXsize(gridId);
-  size_t ysize = gridInqYsize(gridId);
 
   unsigned int position = 0; 
   for (int i=0 ; i<4 ; i++)
@@ -783,41 +769,11 @@ void cdfReadVarSliceSPPart(stream_t *streamptr, int varID, int levelID, int varT
   start[position] = start[position]+startpoint;
   count[position] = length;
 
-  if ( vlistInqVarDatatype(vlistID, varID) == CDI_DATATYPE_FLT32 )
-    {      
-      float *data_fp = (float *) Malloc(length*sizeof(*data_fp));
-      cdf_get_vara_float(fileID, ncvarid, start, count, data_fp);
-    
-      for ( size_t i = 0; i < length; i++ )
-        data[i] = (float) data_fp[i];
+  cdfReadDataSP(streamptr, varID, length, start, count, data);
 
-      Free(data_fp);
-    }
-  else if ( vlistInqVarDatatype(vlistID, varID) == CDI_DATATYPE_UINT8 )
-    {
-      nc_type xtype;
-      cdf_inq_vartype(fileID, ncvarid, &xtype);
-      if ( xtype == NC_BYTE )
-        {
-          for ( size_t i = 0; i < length; i++ )
-            if ( data[i] < 0 ) data[i] += 256;
-        }
-    }
-  else
-    {
-      cdf_get_vara_float(fileID, ncvarid, start, count, data);
-    }
+  if ( swapxy ) transpose2dArraySP(gridId, data);
 
-  if ( swapxy ) transpose2dArraySP(ysize, xsize, data);
-
-  float missval = vlistInqVarMissval(vlistID, varID);
-  const bool haveMissVal = vlistInqVarMissvalUsed(vlistID, varID);
-  double validRange[2];
-  if (!(haveMissVal && vlistInqVarValidrange(vlistID, varID, validRange)))
-    validRange[0] = DBL_MIN, validRange[1] = DBL_MAX;
-  float addoffset = vlistInqVarAddoffset(vlistID, varID);
-  float scalefactor = vlistInqVarScalefactor(vlistID, varID);
-  *nmiss = cdfDoInputDataTransformationSP(length, data, haveMissVal, missval, scalefactor, addoffset, validRange[0], validRange[1]);
+  *nmiss = cdfDoInputDataTransformationSP(vlistID, varID, length, data);
 }
 
 static
@@ -870,15 +826,9 @@ void cdfReadVarDPPart(stream_t *streamptr, int varID, int varType, int startpoin
   if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamptr->self, varID);
 
   int vlistID = streamptr->vlistID;
-  int fileID = streamptr->fileID;
-
   int ncvarid = streamptr->vars[varID].ncvarid;
 
-  int gridID = vlistInqVarGrid(vlistID, varID);
-  int zaxisID = vlistInqVarZaxis(vlistID, varID);
-
-  size_t start[4];
-  size_t count[4];
+  size_t start[4], count[4];
   cdfGetSlapDescription(streamptr, varID, &start, &count);
 
   int time = vlistInqVarTimetype(vlistID, varID);
@@ -893,17 +843,9 @@ void cdfReadVarDPPart(stream_t *streamptr, int varID, int varType, int startpoin
       count[1] = length;
     } 
 
-  cdf_get_vara_double(fileID, ncvarid, start, count, data);
+  cdf_get_vara_double(streamptr->fileID, ncvarid, start, count, data);
 
-  size_t size = gridInqSize(gridID) * (size_t)zaxisInqSize(zaxisID);
-  double missval = vlistInqVarMissval(vlistID, varID);
-  const bool haveMissVal = vlistInqVarMissvalUsed(vlistID, varID);
-  double validRange[2];
-  if (!(haveMissVal && vlistInqVarValidrange(vlistID, varID, validRange)))
-    validRange[0] = DBL_MIN, validRange[1] = DBL_MAX;
-  double addoffset = vlistInqVarAddoffset(vlistID, varID);
-  double scalefactor = vlistInqVarScalefactor(vlistID, varID);
-  *nmiss = cdfDoInputDataTransformationDP(size, data, haveMissVal, missval, scalefactor, addoffset, validRange[0], validRange[1]);
+  *nmiss = cdfDoInputDataTransformationDP(vlistID, varID, length, data);
 }
 
 void cdfReadVarSPPart(stream_t *streamptr, int varID, int varType, int startpoint, size_t length, float *data, size_t *nmiss)
@@ -912,15 +854,9 @@ void cdfReadVarSPPart(stream_t *streamptr, int varID, int varType, int startpoin
   if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamptr->self, varID);
 
   int vlistID = streamptr->vlistID;
-  int fileID = streamptr->fileID;
-
   int ncvarid = streamptr->vars[varID].ncvarid;
 
-  int gridID = vlistInqVarGrid(vlistID, varID);
-  int zaxisID = vlistInqVarZaxis(vlistID, varID);
-
-  size_t start[4];
-  size_t count[4];
+  size_t start[4], count[4];
   cdfGetSlapDescription(streamptr, varID, &start, &count);
 
   int time = vlistInqVarTimetype(vlistID, varID);
@@ -935,17 +871,9 @@ void cdfReadVarSPPart(stream_t *streamptr, int varID, int varType, int startpoin
       count[1] = length;
     } 
 
-  cdf_get_vara_float(fileID, ncvarid, start, count, data);
+  cdf_get_vara_float(streamptr->fileID, ncvarid, start, count, data);
 
-  size_t size = gridInqSize(gridID) * (size_t)zaxisInqSize(zaxisID);
-  float missval = vlistInqVarMissval(vlistID, varID);
-  const bool haveMissVal = vlistInqVarMissvalUsed(vlistID, varID);
-  double validRange[2];
-  if (!(haveMissVal && vlistInqVarValidrange(vlistID, varID, validRange)))
-    validRange[0] = DBL_MIN, validRange[1] = DBL_MAX;
-  float addoffset = vlistInqVarAddoffset(vlistID, varID);
-  float scalefactor = vlistInqVarScalefactor(vlistID, varID);
-  *nmiss = cdfDoInputDataTransformationSP(size, data, haveMissVal, missval, scalefactor, addoffset, validRange[0], validRange[1]);
+  *nmiss = cdfDoInputDataTransformationSP(vlistID, varID, length, data);
 }
 
 static
