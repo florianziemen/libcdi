@@ -126,9 +126,7 @@ typedef struct
   int       levelID;
   int       prec;               // ext, srv
   void     *exsep;              // ieg, ext, srv container
-#ifdef HAVE_LIBCGRIBEX
   void     *cgribexp;           // cgribex container
-#endif
 }
 Record;
 
