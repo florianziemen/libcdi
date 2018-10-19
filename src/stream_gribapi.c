@@ -255,9 +255,11 @@ void grib1GetLevel(grib_handle *gh, int *leveltype, int *lbounds, int *level1, i
       if ( *lbounds )
 	{
 	  GRIB_CHECK(grib_get_long(gh, "topLevel", &lpar), 0);  //1 byte
+          if (lpar == GRIB_MISSING_LONG) lpar = 0;
 	  *level1 = (int)lpar;
 	  GRIB_CHECK(grib_get_long(gh, "bottomLevel", &lpar), 0);       //1 byte
-	  *level2 = (int)lpar;
+          if (lpar == GRIB_MISSING_LONG) lpar = 0;
+ 	  *level2 = (int)lpar;
 	}
       else
 	{
