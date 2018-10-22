@@ -22,7 +22,7 @@ AC_CANONICAL_HOST
 AC_CANONICAL_BUILD
 
 
-AM_INIT_AUTOMAKE([foreign serial-tests])
+AM_INIT_AUTOMAKE([1.16.1 foreign serial-tests])
 AC_CONFIG_HEADERS([src/config.h])
 AM_MAINTAINER_MODE([disable])
 
