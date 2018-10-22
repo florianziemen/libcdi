@@ -30454,7 +30454,7 @@ fi
 
      break
    done
-   rm -f conftest*
+   rm -f conftest* CONFTEST*
    ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -30469,7 +30469,7 @@ $as_echo "$acx_cv_fc_mod_name" >&6; }
    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for suffix of module files" >&5
 $as_echo_n "checking for suffix of module files... " >&6; }
    ac_fc_mod_uppercase=no
-   case "$acx_cv_fc_mod_name" in #(
+   case $acx_cv_fc_mod_name in #(
   conftest_module.$FCMODEXT) :
     : ;; #(
   CONFTEST_MODULE.$FCMODEXT) :

@@ -76,12 +76,12 @@ AC_DEFUN([ACX_SL_FC_MOD_SUFFIX],
      ])
      break
    done
-   rm -f conftest*
+   rm -f conftest* CONFTEST*
    AC_LANG_POP([Fortran])])
 dnl
    AC_MSG_CHECKING([for suffix of module files])
    ac_fc_mod_uppercase=no
-   AS_CASE(["$acx_cv_fc_mod_name"],
+   AS_CASE([$acx_cv_fc_mod_name],
      [conftest_module.$FCMODEXT], [:],
      [CONFTEST_MODULE.$FCMODEXT], [ac_fc_mod_uppercase=yes],
      [conftest_module.mod], [FCMODEXT=mod],
