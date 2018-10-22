@@ -70,13 +70,13 @@ AC_DEFUN([ACX_SL_FC_MOD_SUFFIX],
      acx_fc_mod_name=
    m4_foreach([acx_fc_mod_name],dnl
      [[conftest.$FCMODEXT], [conftest.mod], [conftest.MOD], [conftest.M],
-      [CONFTEST.MOD]],dnl
+      [CONFTEST.MOD], [CONFTEST.mod]],dnl
      [AS_IF([test -n "acx_fc_mod_name" -a -f "acx_fc_mod_name"],dnl
         [[acx_fc_mod_name]="acx_fc_mod_name" ; break])
      ])
      break
    done
-   rm -f conftest*
+   rm -f conftest* CONFTEST*
    AC_LANG_POP([Fortran])
 dnl
    AS_CASE(["$acx_fc_mod_name"],dnl
@@ -86,6 +86,8 @@ dnl
      [conftest.MOD], [FCMODEXT=MOD],
      [conftest.M], [FCMODEXT=M],
      [CONFTEST.MOD], [FCMODEXT=MOD
+        ac_fc_mod_uppercase=yes],
+     [CONFTEST.mod], [FCMODEXT=mod
         ac_fc_mod_uppercase=yes])
    AC_MSG_RESULT([${FCMODEXT-not found}])
    AS_VAR_TEST_SET([FCMODEXT], [$1], [m4_ifval([$2],[$2],dnl
