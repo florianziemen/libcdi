@@ -42,6 +42,7 @@ lt~obsolete.m4
 config/config.guess
 config/config.sub
 Makefile.in
+aclocal.m4
 #=================================
 *.in
 compile
