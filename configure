@@ -662,6 +662,8 @@ ENABLE_RUBY_TRUE
 ENABLE_SWIG_FALSE
 ENABLE_SWIG_TRUE
 SWIG
+FORTRAN_MOD_UC_FALSE
+FORTRAN_MOD_UC_TRUE
 FCMODCASE
 FCMODEXT
 CDI_F90_INTERFACE_FCFLAGS
@@ -16286,10 +16288,11 @@ if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
     case $prev$p in
 
     -L* | -R* | -l*)
-       # Some compilers place space between "-{L,R}" and the path.
+       # Some compilers place space between "-{L,R,l}" and the path (value).
        # Remove the space.
-       if test x-L = "$p" ||
-          test x-R = "$p"; then
+       if test x-L = x"$p" ||
+          test x-R = x"$p" ||
+          test x-l = x"$p"; then
 	 prev=$p
 	 continue
        fi
@@ -21185,10 +21188,11 @@ if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
     case $prev$p in
 
     -L* | -R* | -l*)
-       # Some compilers place space between "-{L,R}" and the path.
+       # Some compilers place space between "-{L,R,l}" and the path (value).
        # Remove the space.
-       if test x-L = "$p" ||
-          test x-R = "$p"; then
+       if test x-L = x"$p" ||
+          test x-R = x"$p" ||
+          test x-l = x"$p"; then
 	 prev=$p
 	 continue
        fi
@@ -30190,10 +30194,13 @@ fi
           if test -n "CONFTEST.MOD" -a -f "CONFTEST.MOD"; then :
           acx_fc_mod_name="CONFTEST.MOD" ; break
 fi
+          if test -n "CONFTEST.mod" -a -f "CONFTEST.mod"; then :
+          acx_fc_mod_name="CONFTEST.mod" ; break
+fi
 
      break
    done
-   rm -f conftest*
+   rm -f conftest* CONFTEST*
    ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -30215,6 +30222,9 @@ ac_link="./libtool --mode=link --tag=CC $ac_link"
   CONFTEST.MOD) :
     FCMODEXT=MOD
         ac_fc_mod_uppercase=yes ;; #(
+  CONFTEST.mod) :
+    FCMODEXT=mod
+        ac_fc_mod_uppercase=yes ;; #(
   *) :
      ;;
 esac
@@ -30230,6 +30240,14 @@ else
 fi
 
 
+
+    if test "x$FCMODCASE" = "xuc"; then
+  FORTRAN_MOD_UC_TRUE=
+  FORTRAN_MOD_UC_FALSE='#'
+else
+  FORTRAN_MOD_UC_TRUE='#'
+  FORTRAN_MOD_UC_FALSE=
+fi
 
 fi
 # -----------------------------------------------------------------------
@@ -31166,6 +31184,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${CREATE_ISOC_TRUE}" && test -z "${CREATE_ISOC_FALSE}"; then
   as_fn_error $? "conditional \"CREATE_ISOC\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${FORTRAN_MOD_UC_TRUE}" && test -z "${FORTRAN_MOD_UC_FALSE}"; then
+  as_fn_error $? "conditional \"FORTRAN_MOD_UC\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${ENABLE_SWIG_TRUE}" && test -z "${ENABLE_SWIG_FALSE}"; then
