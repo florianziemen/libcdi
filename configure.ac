@@ -1,8 +1,11 @@
 #  Process this file with autoconf to produce a configure script.
 #
-#  automake 1.14
-#  autoconf 2.68
-#  libtool  2.4.2
+#  automake 1.16.1
+#  autoconf 2.69
+#  libtool  2.4.6
+
+AC_PREREQ([2.69])
+LT_PREREQ([2.4.6])
 
 AC_INIT([cdi], [1.9.6rc2], [http://mpimet.mpg.de/cdi])
 

@@ -1,8 +1,8 @@
 diff --git a/config/ltmain.sh b/config/ltmain.sh
-index 857338f..c19bbcc 100644
+index 0f0a2da..4126a5b 100644
 --- a/config/ltmain.sh
 +++ b/config/ltmain.sh
-@@ -8078,6 +8078,14 @@ func_mode_link ()
+@@ -7859,6 +7859,14 @@ func_mode_link ()
  	# Read the .la file
  	func_source "$lib"
  
