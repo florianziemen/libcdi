@@ -3084,7 +3084,7 @@ int cdf_cmp_varname(const void *s1, const void *s2)
   return strcmp(x->name, y->name);
 }
 
-/* define all input data variables */
+// define all input data variables
 static
 void cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int modelID, int *varids, int nvars, int num_ncvars, ncvar_t *ncvars)
 {
@@ -3710,6 +3710,44 @@ int cdf_check_vars(int nvars, ncvar_t *ncvars, size_t ntsteps, int timedimid)
   return timedimid;
 }
 
+static
+void cdfVerifyVars(int nvars, ncvar_t *ncvars, ncdim_t *ncdims)
+{
+  for ( int ncvarid = 0; ncvarid < nvars; ncvarid++ )
+    {
+      if (ncvars[ncvarid].isvar == 1 && ncvars[ncvarid].ndims > 0 )
+        {
+          int ndims = 0;
+          for (int i = 0; i < ncvars[ncvarid].ndims; ++i)
+            {
+              if      (ncvars[ncvarid].dimtype[i] == T_AXIS) ndims++;
+              else if (ncvars[ncvarid].dimtype[i] == Z_AXIS) ndims++;
+              else if (ncvars[ncvarid].dimtype[i] == Y_AXIS) ndims++;
+              else if (ncvars[ncvarid].dimtype[i] == X_AXIS) ndims++;
+            }
+
+          if ( ncvars[ncvarid].ndims != ndims )
+            {
+              ncvars[ncvarid].isvar = 0;
+              Warning("Inconsistent number of dimensions, skipped variable %s!", ncvars[ncvarid].name);
+            }
+
+          int zdimid = -1;
+          for (int i = 0; i < ncvars[ncvarid].ndims; ++i)
+            {
+              if (ncvars[ncvarid].dimtype[i] == Z_AXIS) zdimid = ncvars[ncvarid].dimids[i];
+            }
+
+          int zaxisID = ncvars[ncvarid].zaxisID;
+          if (zaxisInqScalar(zaxisID) && zdimid != -1)
+            {
+              ncvars[ncvarid].isvar = 0;
+              Warning("Unsupported dimension >%s<, skipped variable %s!", ncdims[zdimid].name, ncvars[ncvarid].name);
+            }
+        }
+    }
+}
+
 
 int cdfInqContents(stream_t *streamptr)
 {
@@ -3966,6 +4004,8 @@ int cdfInqContents(stream_t *streamptr)
   if ( vct ) Free(vct);
   if ( status < 0 ) return status;
 
+  // verify vars
+  cdfVerifyVars(nvars, ncvars, ncdims);
 
   // select vars
   varids = (int *) Malloc((size_t)nvars * sizeof (int));
@@ -3983,6 +4023,7 @@ int cdfInqContents(stream_t *streamptr)
   if ( nvars_data == 0 )
     {
       streamptr->ntsteps = 0;
+      Warning("No data arrays found!");
       return CDI_EUFSTRUCT;
     }
 
