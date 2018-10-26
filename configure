@@ -696,6 +696,8 @@ MPI_C_INCLUDE
 MPIROOT
 ENABLE_NETCDF_FALSE
 ENABLE_NETCDF_TRUE
+ENABLE_CDI_APP_FALSE
+ENABLE_CDI_APP_TRUE
 ENABLE_HIRLAM_EXTENSIONS_FALSE
 ENABLE_HIRLAM_EXTENSIONS_TRUE
 ENABLE_ALL_STATIC_FALSE
@@ -892,6 +894,7 @@ enable_extra
 enable_ieg
 enable_all_static
 enable_hirlam_extensions
+enable_cdi_app
 enable_mpi
 with_mpi_root
 with_mpi_include
@@ -1588,6 +1591,7 @@ Optional Features:
                           [default=no]
   --enable-hirlam-extensions
                           HIRLAM extensions [default=no]
+  --enable-cdi-app        build and install CDI application [default=yes]
   --enable-mpi            Compile with MPI compiler [default=no]
   --enable-iso-c-interface
                           Create Fortran Interface via iso_c_bindings facility
@@ -28951,6 +28955,23 @@ else
   ENABLE_HIRLAM_EXTENSIONS_FALSE=
 fi
 
+# ----------------------------------------------------------------------
+# Build CDI application
+# Check whether --enable-cdi-app was given.
+if test "${enable_cdi_app+set}" = set; then :
+  enableval=$enable_cdi_app;
+else
+  enable_cdi_app=yes
+fi
+
+ if test x$enable_cdi_app = 'xyes'; then
+  ENABLE_CDI_APP_TRUE=
+  ENABLE_CDI_APP_FALSE='#'
+else
+  ENABLE_CDI_APP_TRUE='#'
+  ENABLE_CDI_APP_FALSE=
+fi
+
 #
 
  if test x$ENABLE_NETCDF = xyes; then
@@ -31164,6 +31185,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${ENABLE_HIRLAM_EXTENSIONS_TRUE}" && test -z "${ENABLE_HIRLAM_EXTENSIONS_FALSE}"; then
   as_fn_error $? "conditional \"ENABLE_HIRLAM_EXTENSIONS\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${ENABLE_CDI_APP_TRUE}" && test -z "${ENABLE_CDI_APP_FALSE}"; then
+  as_fn_error $? "conditional \"ENABLE_CDI_APP\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${ENABLE_NETCDF_TRUE}" && test -z "${ENABLE_NETCDF_FALSE}"; then

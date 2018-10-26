@@ -13,7 +13,6 @@
 # PARTICULAR PURPOSE.
 
 @SET_MAKE@
-
 VPATH = @srcdir@
 am__is_gnu_make = { \
   if test -z '$(MAKELEVEL)'; then \
@@ -88,7 +87,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-noinst_PROGRAMS = collectData$(EXEEXT) collectDataNStreams$(EXEEXT) \
+check_PROGRAMS = collectData$(EXEEXT) collectDataNStreams$(EXEEXT) \
 	$(am__EXEEXT_1) $(am__EXEEXT_2)
 @USE_MPI_TRUE@am__append_1 = compareResourcesArray
 @USE_MPI_TRUE@am__append_2 = $(FPP_DEFOPT)USE_MPI
@@ -132,7 +131,6 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 @USE_MPI_TRUE@am__EXEEXT_1 = compareResourcesArray$(EXEEXT)
 @USE_FC_TRUE@am__EXEEXT_2 = collectData2003$(EXEEXT)
-PROGRAMS = $(noinst_PROGRAMS)
 am_collectData_OBJECTS = collectData.$(OBJEXT)
 collectData_OBJECTS = $(am_collectData_OBJECTS)
 collectData_LDADD = $(LDADD)
@@ -488,8 +486,8 @@ $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
 
-clean-noinstPROGRAMS:
-	@list='$(noinst_PROGRAMS)'; test -n "$$list" || exit 0; \
+clean-checkPROGRAMS:
+	@list='$(check_PROGRAMS)'; test -n "$$list" || exit 0; \
 	echo " rm -f" $$list; \
 	rm -f $$list || exit $$?; \
 	test -n "$(EXEEXT)" || exit 0; \
@@ -651,8 +649,9 @@ distdir-am: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
+	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS)
 check: check-am
-all-am: Makefile $(PROGRAMS)
+all-am: Makefile
 installdirs:
 install: install-am
 install-exec: install-exec-am
@@ -686,7 +685,7 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-generic clean-libtool clean-local clean-noinstPROGRAMS \
+clean-am: clean-checkPROGRAMS clean-generic clean-libtool clean-local \
 	mostlyclean-am
 
 distclean: distclean-am
@@ -759,10 +758,10 @@ ps-am:
 
 uninstall-am:
 
-.MAKE: install-am install-strip
+.MAKE: check-am install-am install-strip
 
 .PHONY: CTAGS GTAGS TAGS all all-am am--depfiles check check-am clean \
-	clean-generic clean-libtool clean-local clean-noinstPROGRAMS \
+	clean-checkPROGRAMS clean-generic clean-libtool clean-local \
 	cscopelist-am ctags ctags-am distclean distclean-compile \
 	distclean-generic distclean-libtool distclean-tags distdir dvi \
 	dvi-am html html-am info info-am install install-am \
