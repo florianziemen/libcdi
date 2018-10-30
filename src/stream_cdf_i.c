@@ -3644,7 +3644,7 @@ void cdf_set_ucla_dimtype(int ndims, ncdim_t *ncdims, ncvar_t *ncvars)
 }
 
 static
-int cdf_check_vars(int nvars, ncvar_t *ncvars, size_t ntsteps, int timedimid)
+int cdfCheckVars(int nvars, ncvar_t *ncvars, size_t ntsteps, int timedimid)
 {
   for ( int ncvarid = 0; ncvarid < nvars; ncvarid++ )
     {
@@ -3686,6 +3686,7 @@ int cdf_check_vars(int nvars, ncvar_t *ncvars, size_t ntsteps, int timedimid)
       if ( xtypeIsText(ncvars[ncvarid].xtype) )
 	{
 	  ncvars[ncvarid].isvar = 0;
+	  Warning("Unsupported data type, skipped variable %s!", ncvars[ncvarid].name);
 	  continue;
 	}
 
@@ -3922,7 +3923,7 @@ int cdfInqContents(stream_t *streamptr)
   if ( leadtime_id != CDI_UNDEFID ) ncvars[leadtime_id].isvar = FALSE;
 
   // check ncvars
-  timedimid = cdf_check_vars(nvars, ncvars, ntsteps, timedimid);
+  timedimid = cdfCheckVars(nvars, ncvars, ntsteps, timedimid);
 
   // verify coordinate vars - first scan (dimname == varname)
   bool lhybrid_cf = false;
