@@ -80,7 +80,7 @@ long cdiGetenvInt(const char *envName)
   char *envString = getenv(envName);
   if ( envString )
     {
-      long fact = 0;
+      long fact = 1;
       int len = (int) strlen(envString);
       for ( int loop = 0; loop < len; loop++ )
 	{
