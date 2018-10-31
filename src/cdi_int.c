@@ -63,7 +63,7 @@ static const char Filetypes[][9] = {
 int CDI_Debug   = 0;    // If set to 1, debugging
 int CDI_Recopt  = 0;
 
-int cdiGribApiDebug     = 0;
+int CDI_gribapi_debug     = 0;
 int cdiDefaultLeveltype = -1;
 int cdiDataUnreduced = 0;
 int cdiSortName = 0;
@@ -308,7 +308,7 @@ void cdiInitialize(void)
       if ( value >= 0 ) CDI_Debug = (int) value;
 
       value = cdiGetenvInt("CDI_GRIBAPI_DEBUG");
-      if ( value >= 0 ) cdiGribApiDebug = (int) value;
+      if ( value >= 0 ) CDI_gribapi_debug = (int) value;
 
       value = cdiGetenvInt("CDI_READ_CELL_CORNERS");
       if ( value >= 0 ) CDI_read_cell_corners = (int) value;
@@ -399,27 +399,19 @@ void cdiInitialize(void)
             }
         }
 
-
       envstr = getenv("CDI_CALENDAR");
       if ( envstr )
 	{
-	  if      ( strncmp(envstr, "standard", 8) == 0 )
-	    cdiDefaultCalendar = CALENDAR_STANDARD;
-	  else if ( strncmp(envstr, "gregorian", 9) == 0 )
-	    cdiDefaultCalendar = CALENDAR_GREGORIAN;
-	  else if ( strncmp(envstr, "proleptic", 9) == 0 )
-	    cdiDefaultCalendar = CALENDAR_PROLEPTIC;
-	  else if ( strncmp(envstr, "360days", 7) == 0 )
-	    cdiDefaultCalendar = CALENDAR_360DAYS;
-	  else if ( strncmp(envstr, "365days", 7) == 0 )
-	    cdiDefaultCalendar = CALENDAR_365DAYS;
-	  else if ( strncmp(envstr, "366days", 7) == 0 )
-	    cdiDefaultCalendar = CALENDAR_366DAYS;
-	  else if ( strncmp(envstr, "none", 4) == 0 )
-	    cdiDefaultCalendar = CALENDAR_NONE;
-
-	  if ( CDI_Debug )
-	    Message("Default calendar set to %s!", envstr);
+          // clang-format off
+	  if      (strncmp(envstr, "standard", 8)  == 0) cdiDefaultCalendar = CALENDAR_STANDARD;
+	  else if (strncmp(envstr, "gregorian", 9) == 0) cdiDefaultCalendar = CALENDAR_GREGORIAN;
+	  else if (strncmp(envstr, "proleptic", 9) == 0) cdiDefaultCalendar = CALENDAR_PROLEPTIC;
+	  else if (strncmp(envstr, "360days", 7)   == 0) cdiDefaultCalendar = CALENDAR_360DAYS;
+	  else if (strncmp(envstr, "365days", 7)   == 0) cdiDefaultCalendar = CALENDAR_365DAYS;
+	  else if (strncmp(envstr, "366days", 7)   == 0) cdiDefaultCalendar = CALENDAR_366DAYS;
+	  else if (strncmp(envstr, "none", 4)      == 0) cdiDefaultCalendar = CALENDAR_NONE;
+          // clang-format on
+	  if ( CDI_Debug ) Message("Default calendar set to %s!", envstr);
 	}
 #ifdef  HAVE_LIBCGRIBEX
       gribSetCalendar(cdiDefaultCalendar);
@@ -445,19 +437,21 @@ const char *strfiletype(int filetype)
 
 void cdiDefGlobal(const char *string, int val)
 {
-  if      ( strcmp(string, "REGULARGRID")      == 0 ) cdiDataUnreduced = val;
-  else if ( strcmp(string, "GRIBAPI_DEBUG")    == 0 ) cdiGribApiDebug = val;
-  else if ( strcmp(string, "SORTNAME")         == 0 ) cdiSortName = val;
-  else if ( strcmp(string, "SORTPARAM")        == 0 ) cdiSortParam = val;
-  else if ( strcmp(string, "HAVE_MISSVAL")     == 0 ) cdiHaveMissval = val;
-  else if ( strcmp(string, "NC_CHUNKSIZEHINT") == 0 ) cdiNcChunksizehint = val;
-  else if ( strcmp(string, "READ_CELL_CORNERS")== 0 ) CDI_read_cell_corners = val;
-  else if ( strcmp(string, "CMOR_MODE")        == 0 ) CDI_cmor_mode = val;
-  else if ( strcmp(string, "REDUCE_DIM")       == 0 ) CDI_reduce_dim = val;
-  else if ( strcmp(string, "NETCDF_HDR_PAD")   == 0 ) CDI_netcdf_hdr_pad = (size_t) val;
-  else if ( strcmp(string, "NETCDF_LAZY_GRID_LOAD") == 0)
-    CDI_netcdf_lazy_grid_load = (bool)val;
+  // clang-format off
+  if      (strcmp(string, "REGULARGRID")           == 0) cdiDataUnreduced = val;
+  else if (strcmp(string, "GRIBAPI_DEBUG")         == 0) CDI_gribapi_debug = val;
+  else if (strcmp(string, "GRIBAPI_GRIB1")         == 0) cdiGribapiGRIB1 = (bool) val;
+  else if (strcmp(string, "SORTNAME")              == 0) cdiSortName = val;
+  else if (strcmp(string, "SORTPARAM")             == 0) cdiSortParam = val;
+  else if (strcmp(string, "HAVE_MISSVAL")          == 0) cdiHaveMissval = val;
+  else if (strcmp(string, "NC_CHUNKSIZEHINT")      == 0) cdiNcChunksizehint = val;
+  else if (strcmp(string, "READ_CELL_CORNERS")     == 0) CDI_read_cell_corners = val;
+  else if (strcmp(string, "CMOR_MODE")             == 0) CDI_cmor_mode = val;
+  else if (strcmp(string, "REDUCE_DIM")            == 0) CDI_reduce_dim = val;
+  else if (strcmp(string, "NETCDF_HDR_PAD")        == 0) CDI_netcdf_hdr_pad = (size_t) val;
+  else if (strcmp(string, "NETCDF_LAZY_GRID_LOAD") == 0) CDI_netcdf_lazy_grid_load = (bool) val;
   else Warning("Unsupported global key: %s", string);
+  // clang-format on
 }
 
 

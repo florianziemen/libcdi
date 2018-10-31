@@ -313,7 +313,7 @@ int grbScanTimestep(stream_t * streamptr)
 }
 
 
-#if  defined  (HAVE_LIBGRIB)
+#ifdef HAVE_LIBGRIB
 int grbInqContents(stream_t * streamptr)
 {
   streamptr->curTsID = 0;
@@ -362,7 +362,7 @@ int grbInqTimestep(stream_t * streamptr, int tsID)
   return nrecs;
 }
 
-
+// used in CDO!!!
 void streamInqGRIBinfo(int streamID, int *intnum, float *fltnum, off_t *bignum)
 {
   stream_t *streamptr = stream_to_pointer(streamID);

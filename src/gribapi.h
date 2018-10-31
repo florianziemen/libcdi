@@ -61,7 +61,7 @@ void gribContainersDelete(stream_t * streamptr);
 #ifdef HAVE_LIBGRIB_API
 static inline int my_grib_set_double(grib_handle* h, const char* key, double val)
 {
-  if ( cdiGribApiDebug )
+  if ( CDI_gribapi_debug )
     fprintf(stderr, "grib_set_double(\tgrib_handle* h, \"%s\", %f)\n", key, val);
 
   int ret_val = grib_set_double(h, key, val);
@@ -72,7 +72,7 @@ static inline int my_grib_set_double(grib_handle* h, const char* key, double val
 
 static inline int my_grib_set_long(grib_handle* h, const char* key, long val)
 {
-  if ( cdiGribApiDebug )
+  if ( CDI_gribapi_debug )
     fprintf(stderr, "grib_set_long(  \tgrib_handle* h, \"%s\", %ld)\n", key, val);
 
   int ret_val = grib_set_long(h, key, val);
@@ -83,7 +83,7 @@ static inline int my_grib_set_long(grib_handle* h, const char* key, long val)
 
 static inline int my_grib_set_string(grib_handle* h, const char* key, const char* val, size_t* length)
 {
-  if ( cdiGribApiDebug )
+  if ( CDI_gribapi_debug )
     fprintf(stderr, "grib_set_string(\tgrib_handle* h, \"%s\", \"%s\")\n", key, val);
 
   int ret_val = grib_set_string(h, key, val, length);

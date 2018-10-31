@@ -320,7 +320,7 @@ typedef enum {
 extern int cdiDebugExt;
 extern int CDI_Debug;      // If set to 1, debuggig (default 0)
 extern int CDI_Recopt;
-extern int cdiGribApiDebug;
+extern int CDI_gribapi_debug;
 extern double CDI_default_missval;
 extern double CDI_grid_missval;
 extern int cdiDefaultInstID;
