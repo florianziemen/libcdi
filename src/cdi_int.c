@@ -63,7 +63,8 @@ static const char Filetypes[][9] = {
 int CDI_Debug   = 0;    // If set to 1, debugging
 int CDI_Recopt  = 0;
 
-int CDI_gribapi_debug     = 0;
+bool CDI_gribapi_debug  = false;
+bool CDI_gribapi_grib1  = false;
 int cdiDefaultLeveltype = -1;
 int cdiDataUnreduced = 0;
 int cdiSortName = 0;
@@ -79,7 +80,7 @@ long cdiGetenvInt(const char *envName)
   char *envString = getenv(envName);
   if ( envString )
     {
-      long fact = 1;
+      long fact = 0;
       int len = (int) strlen(envString);
       for ( int loop = 0; loop < len; loop++ )
 	{
@@ -308,7 +309,10 @@ void cdiInitialize(void)
       if ( value >= 0 ) CDI_Debug = (int) value;
 
       value = cdiGetenvInt("CDI_GRIBAPI_DEBUG");
-      if ( value >= 0 ) CDI_gribapi_debug = (int) value;
+      if ( value >= 0 ) CDI_gribapi_debug = (bool) value;
+
+      value = cdiGetenvInt("CDI_GRIBAPI_GRIB1");
+      if ( value >= 0 ) CDI_gribapi_grib1 = (bool) value;
 
       value = cdiGetenvInt("CDI_READ_CELL_CORNERS");
       if ( value >= 0 ) CDI_read_cell_corners = (int) value;
@@ -429,9 +433,7 @@ void cdiInitialize(void)
 const char *strfiletype(int filetype)
 {
   int size = (int) (sizeof(Filetypes)/sizeof(char *));
-  const char *name = (filetype > 0 && filetype < size) ? Filetypes[filetype] : Filetypes[0];
-
-  return name;
+  return (filetype > 0 && filetype < size) ? Filetypes[filetype] : Filetypes[0];
 }
 
 
@@ -439,8 +441,8 @@ void cdiDefGlobal(const char *string, int val)
 {
   // clang-format off
   if      (strcmp(string, "REGULARGRID")           == 0) cdiDataUnreduced = val;
-  else if (strcmp(string, "GRIBAPI_DEBUG")         == 0) CDI_gribapi_debug = val;
-  else if (strcmp(string, "GRIBAPI_GRIB1")         == 0) cdiGribapiGRIB1 = (bool) val;
+  else if (strcmp(string, "GRIBAPI_DEBUG")         == 0) CDI_gribapi_debug = (bool) val;
+  else if (strcmp(string, "GRIBAPI_GRIB1")         == 0) CDI_gribapi_grib1 = (bool) val;
   else if (strcmp(string, "SORTNAME")              == 0) cdiSortName = val;
   else if (strcmp(string, "SORTPARAM")             == 0) cdiSortParam = val;
   else if (strcmp(string, "HAVE_MISSVAL")          == 0) cdiHaveMissval = val;
