@@ -290,6 +290,19 @@ void cdiSetChunk(const char *chunkAlgo)
 }
 
 
+void cdiSetGribapiGrib1(bool value)
+{
+#ifndef HAVE_LIBGRIB_API
+  if (value)
+    {
+      Warning("%s: GRIB_API support not compiled in, used CGRIBEX to decode GRIB1 record!", __func__);
+      value = false;
+    }
+#endif
+  CDI_gribapi_grib1 = value;
+}
+
+
 void cdiInitialize(void)
 {
   static bool Init_CDI = false;
@@ -312,7 +325,7 @@ void cdiInitialize(void)
       if ( value >= 0 ) CDI_gribapi_debug = (bool) value;
 
       value = cdiGetenvInt("CDI_GRIBAPI_GRIB1");
-      if ( value >= 0 ) CDI_gribapi_grib1 = (bool) value;
+      if ( value >= 0 ) cdiSetGribapiGrib1((bool) value);
 
       value = cdiGetenvInt("CDI_READ_CELL_CORNERS");
       if ( value >= 0 ) CDI_read_cell_corners = (int) value;
@@ -437,21 +450,21 @@ const char *strfiletype(int filetype)
 }
 
 
-void cdiDefGlobal(const char *string, int val)
+void cdiDefGlobal(const char *string, int value)
 {
   // clang-format off
-  if      (strcmp(string, "REGULARGRID")           == 0) cdiDataUnreduced = val;
-  else if (strcmp(string, "GRIBAPI_DEBUG")         == 0) CDI_gribapi_debug = (bool) val;
-  else if (strcmp(string, "GRIBAPI_GRIB1")         == 0) CDI_gribapi_grib1 = (bool) val;
-  else if (strcmp(string, "SORTNAME")              == 0) cdiSortName = val;
-  else if (strcmp(string, "SORTPARAM")             == 0) cdiSortParam = val;
-  else if (strcmp(string, "HAVE_MISSVAL")          == 0) cdiHaveMissval = val;
-  else if (strcmp(string, "NC_CHUNKSIZEHINT")      == 0) cdiNcChunksizehint = val;
-  else if (strcmp(string, "READ_CELL_CORNERS")     == 0) CDI_read_cell_corners = val;
-  else if (strcmp(string, "CMOR_MODE")             == 0) CDI_cmor_mode = val;
-  else if (strcmp(string, "REDUCE_DIM")            == 0) CDI_reduce_dim = val;
-  else if (strcmp(string, "NETCDF_HDR_PAD")        == 0) CDI_netcdf_hdr_pad = (size_t) val;
-  else if (strcmp(string, "NETCDF_LAZY_GRID_LOAD") == 0) CDI_netcdf_lazy_grid_load = (bool) val;
+  if      (strcmp(string, "REGULARGRID")           == 0) cdiDataUnreduced = value;
+  else if (strcmp(string, "GRIBAPI_DEBUG")         == 0) CDI_gribapi_debug = (bool) value;
+  else if (strcmp(string, "GRIBAPI_GRIB1")         == 0) cdiSetGribapiGrib1((bool) value);
+  else if (strcmp(string, "SORTNAME")              == 0) cdiSortName = value;
+  else if (strcmp(string, "SORTPARAM")             == 0) cdiSortParam = value;
+  else if (strcmp(string, "HAVE_MISSVAL")          == 0) cdiHaveMissval = value;
+  else if (strcmp(string, "NC_CHUNKSIZEHINT")      == 0) cdiNcChunksizehint = value;
+  else if (strcmp(string, "READ_CELL_CORNERS")     == 0) CDI_read_cell_corners = value;
+  else if (strcmp(string, "CMOR_MODE")             == 0) CDI_cmor_mode = value;
+  else if (strcmp(string, "REDUCE_DIM")            == 0) CDI_reduce_dim = value;
+  else if (strcmp(string, "NETCDF_HDR_PAD")        == 0) CDI_netcdf_hdr_pad = (size_t) value;
+  else if (strcmp(string, "NETCDF_LAZY_GRID_LOAD") == 0) CDI_netcdf_lazy_grid_load = (bool) value;
   else Warning("Unsupported global key: %s", string);
   // clang-format on
 }

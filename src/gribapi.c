@@ -1,9 +1,9 @@
 #ifdef HAVE_CONFIG_H
-#  include "config.h"
+#include "config.h"
 #endif
 
 #ifdef HAVE_LIBGRIB_API
-#  include <grib_api.h>
+#include <grib_api.h>
 #endif
 
 #include <stdio.h>
@@ -56,7 +56,7 @@ void gribContainersNew(stream_t * streamptr)
   int editionNumber = (streamptr->filetype == CDI_FILETYPE_GRB) ? 1 : 2;
 
 #ifdef HAVE_LIBCGRIBEX
-  if ( editionNumber == 1 )
+  if ( editionNumber == 1 && !CDI_gribapi_grib1 )
     {
     }
   else

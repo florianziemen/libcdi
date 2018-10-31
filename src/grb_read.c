@@ -21,7 +21,7 @@ int grbDecode(int filetype, int memtype, void *cgribexp, void *gribbuffer, size_
   int status = 0;
 
 #ifdef HAVE_LIBCGRIBEX
-  if ( filetype == CDI_FILETYPE_GRB )
+  if ( filetype == CDI_FILETYPE_GRB && !CDI_gribapi_grib1 )
     {
 #ifdef HAVE_LIBGRIB_API
       extern int cdiNAdditionalGRIBKeys;

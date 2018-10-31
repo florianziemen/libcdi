@@ -25,7 +25,7 @@ size_t grbEncode(int filetype, int memtype, int varID, int levelID, int vlistID,
   size_t nbytes = 0;
 
 #ifdef HAVE_LIBCGRIBEX
-  if ( filetype == CDI_FILETYPE_GRB )
+  if ( filetype == CDI_FILETYPE_GRB && !CDI_gribapi_grib1 )
     {
       size_t gribbuffersize = datasize*4+3000;
       *gribbuffer = Malloc(gribbuffersize);
@@ -116,23 +116,37 @@ void grbCopyRecord(stream_t * streamptr2, stream_t * streamptr1)
 
   size_t nbytes = recsize;
 
-  if ( filetype == CDI_FILETYPE_GRB )
+#ifdef HAVE_LIBCGRIBEX
+  if ( filetype == CDI_FILETYPE_GRB && !CDI_gribapi_grib1 )
     {
       if ( cdiGribChangeParameterID.active )
         {
           // Even if you are stream-copy records you might need to change a bit of grib-header !
-#if defined HAVE_LIBCGRIBEX
           void *gh = cgribex_handle_new_from_meassage((void*) gribbuffer, recsize);
           cgribexChangeParameterIdentification(gh, cdiGribChangeParameterID.code, cdiGribChangeParameterID.ltype, cdiGribChangeParameterID.lev);
           cgribex_handle_delete(gh);
-#elif defined HAVE_LIBGRIB_API
-          void *gh = (void*)grib_handle_new_from_message(NULL, (void*) gribbuffer, recsize);
-          gribapiChangeParameterIdentification(gh, cdiGribChangeParameterID.code, cdiGribChangeParameterID.ltype, cdiGribChangeParameterID.lev);
-          grib_handle_delete(gh);
-#endif
           cdiGribChangeParameterID.active = false; // after grib attributes have been changed turn it off again
         }
     }
+  else
+#endif
+#ifdef HAVE_LIBGRIB_API
+    {
+      if ( cdiGribChangeParameterID.active )
+        {
+          // Even if you are stream-copy records you might need to change a bit of grib-header !
+          void *gh = (void*)grib_handle_new_from_message(NULL, (void*) gribbuffer, recsize);
+          gribapiChangeParameterIdentification(gh, cdiGribChangeParameterID.code, cdiGribChangeParameterID.ltype, cdiGribChangeParameterID.lev);
+          grib_handle_delete(gh);
+          cdiGribChangeParameterID.active = false; // after grib attributes have been changed turn it off again
+        }
+    }
+#else
+    {
+      (void)vlistID; (void)varID;
+      Error("GRIB_API support not compiled in!");
+    }
+#endif
 
 #ifdef HIRLAM_EXTENSIONS
   // Even if you are stream-copy records you might need to change a bit of grib-header !
@@ -240,7 +254,7 @@ void grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
   size_t datasize = gridInqSize(gridID);
 
 #ifdef HAVE_LIBCGRIBEX
-  if ( filetype == CDI_FILETYPE_GRB )
+  if ( filetype == CDI_FILETYPE_GRB && !CDI_gribapi_grib1 )
     {
     }
   else
@@ -257,7 +271,7 @@ void grb_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
 
   if ( comptype != CDI_COMPRESS_JPEG && comptype != CDI_COMPRESS_SZIP && comptype != CDI_COMPRESS_AEC ) comptype = CDI_COMPRESS_NONE;
 
-  if ( filetype == CDI_FILETYPE_GRB && comptype == CDI_COMPRESS_JPEG )
+  if ( filetype == CDI_FILETYPE_GRB && !CDI_gribapi_grib1 && comptype == CDI_COMPRESS_JPEG )
     {
       static int ljpeg_warn = 1;
       if ( ljpeg_warn ) Warning("JPEG compression of GRIB1 records not available!");

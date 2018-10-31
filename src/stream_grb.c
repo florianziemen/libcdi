@@ -64,7 +64,7 @@ int  streamGrbInqDataScanningMode(void)
 int grib1ltypeToZaxisType(int grib_ltype)
 {
   int zaxistype = ZAXIS_GENERIC;
-
+  // clang-format off
   switch ( grib_ltype )
     {
     case GRIB1_LTYPE_SURFACE:            zaxistype = ZAXIS_SURFACE;                break;
@@ -94,7 +94,7 @@ int grib1ltypeToZaxisType(int grib_ltype)
     case GRIB1_LTYPE_SEDIMENT_BOTTOM_TW: zaxistype = ZAXIS_SEDIMENT_BOTTOM_TW;     break;
     case GRIB1_LTYPE_MIX_LAYER:          zaxistype = ZAXIS_MIX_LAYER;              break;
     }
-
+  // clang-format on
   return zaxistype;
 }
 
@@ -102,7 +102,7 @@ int grib1ltypeToZaxisType(int grib_ltype)
 int grib2ltypeToZaxisType(int grib_ltype)
 {
   int zaxistype = ZAXIS_GENERIC;
-
+  // clang-format off
   switch ( grib_ltype )
     {
     case GRIB2_LTYPE_SURFACE:            zaxistype = ZAXIS_SURFACE;                break;
@@ -131,7 +131,7 @@ int grib2ltypeToZaxisType(int grib_ltype)
     case GRIB2_LTYPE_MIX_LAYER:          zaxistype = ZAXIS_MIX_LAYER;              break;
     case GRIB2_LTYPE_REFERENCE:          zaxistype = ZAXIS_REFERENCE;              break;
     }
-
+  // clang-format on
   return zaxistype;
 }
 
@@ -139,7 +139,7 @@ int grib2ltypeToZaxisType(int grib_ltype)
 int zaxisTypeToGrib1ltype(int zaxistype)
 {
   int grib_ltype = -1;
-
+  // clang-format off
   switch (zaxistype)
     {
     case ZAXIS_SURFACE:               grib_ltype = GRIB1_LTYPE_SURFACE;            break;
@@ -169,7 +169,7 @@ int zaxisTypeToGrib1ltype(int zaxistype)
     case ZAXIS_MIX_LAYER:             grib_ltype = GRIB1_LTYPE_MIX_LAYER;          break;
     case ZAXIS_REFERENCE:             grib_ltype = -1;                             break;
     }
-
+  // clang-format on
   return grib_ltype;
 }
 
@@ -177,7 +177,7 @@ int zaxisTypeToGrib1ltype(int zaxistype)
 int zaxisTypeToGrib2ltype(int zaxistype)
 {
   int grib_ltype = -1;
-
+  // clang-format off
   switch (zaxistype)
     {
     case ZAXIS_SURFACE:               grib_ltype = GRIB2_LTYPE_SURFACE;            break;
@@ -207,7 +207,7 @@ int zaxisTypeToGrib2ltype(int zaxistype)
     case ZAXIS_MIX_LAYER:             grib_ltype = GRIB2_LTYPE_MIX_LAYER;          break;
     case ZAXIS_REFERENCE:             grib_ltype = GRIB2_LTYPE_REFERENCE;          break;
     }
-
+  // clang-format on
   return grib_ltype;
 }
 
@@ -257,14 +257,14 @@ int grbScanTimestep1(stream_t * streamptr)
 #ifdef HAVE_LIBCGRIBEX
   int filetype  = streamptr->filetype;
 
-  if ( filetype == CDI_FILETYPE_GRB )
+  if ( filetype == CDI_FILETYPE_GRB && !CDI_gribapi_grib1 )
     status = cgribexScanTimestep1(streamptr);
-#endif
-#if defined(HAVE_LIBCGRIBEX) && defined (HAVE_LIBGRIB_API)
   else
 #endif
 #ifdef HAVE_LIBGRIB_API
     status = gribapiScanTimestep1(streamptr);
+#else
+    Error("Sufficient GRIB support unavailable!");
 #endif
 
   return status;
@@ -278,14 +278,14 @@ int grbScanTimestep2(stream_t * streamptr)
 #ifdef HAVE_LIBCGRIBEX
   int filetype = streamptr->filetype;
 
-  if ( filetype == CDI_FILETYPE_GRB )
+  if ( filetype == CDI_FILETYPE_GRB && !CDI_gribapi_grib1 )
     status = cgribexScanTimestep2(streamptr);
-#endif
-#if defined(HAVE_LIBCGRIBEX) && defined (HAVE_LIBGRIB_API)
   else
 #endif
 #ifdef HAVE_LIBGRIB_API
     status = gribapiScanTimestep2(streamptr);
+#else
+    Error("Sufficient GRIB support unavailable!");
 #endif
 
   return status;
@@ -299,7 +299,7 @@ int grbScanTimestep(stream_t * streamptr)
 #ifdef HAVE_LIBCGRIBEX
   int filetype  = streamptr->filetype;
 
-  if ( filetype == CDI_FILETYPE_GRB )
+  if ( filetype == CDI_FILETYPE_GRB && !CDI_gribapi_grib1 )
     status = cgribexScanTimestep(streamptr);
   else
 #endif
@@ -369,7 +369,8 @@ void streamInqGRIBinfo(int streamID, int *intnum, float *fltnum, off_t *bignum)
 
   int filetype = streamptr->filetype;
 
-  if ( filetype == CDI_FILETYPE_GRB )
+#ifdef HAVE_LIBCGRIBEX
+  if ( filetype == CDI_FILETYPE_GRB && !CDI_gribapi_grib1 )
     {
       int tsID     = streamptr->curTsID;
       int vrecID   = streamptr->tsteps[tsID].curRecID;
@@ -385,6 +386,13 @@ void streamInqGRIBinfo(int streamID, int *intnum, float *fltnum, off_t *bignum)
       else
         grib_info_for_grads(recpos, (long)gribbuffersize, (unsigned char *) gribbuffer, intnum, fltnum, bignum);
     }
+  else if (CDI_gribapi_grib1)
+    {
+      Error("CGRIBEX support deactivated!");
+    }
+#else
+  Error("CGRIBEX support not compiled in!");
+#endif
 }
 
 

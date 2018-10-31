@@ -32,7 +32,7 @@ int cdiStreamReadVar(int streamID, int varID, int memtype, void *data, size_t *n
 
   switch (filetype)
     {
-#if  defined  (HAVE_LIBGRIB)
+#ifdef HAVE_LIBGRIB
     case CDI_FILETYPE_GRB:
     case CDI_FILETYPE_GRB2:
       {
@@ -159,7 +159,7 @@ int cdiStreamReadVarSlice(int streamID, int varID, int levelID, int memtype, voi
 
   switch (filetype)
     {
-#if  defined  (HAVE_LIBGRIB)
+#ifdef HAVE_LIBGRIB
     case CDI_FILETYPE_GRB:
     case CDI_FILETYPE_GRB2:
       {
@@ -289,7 +289,7 @@ int stream_read_record(int streamID, int memtype, void *data, size_t *nmiss)
 
   switch (streamptr->filetype)
     {
-#if  defined  (HAVE_LIBGRIB)
+#ifdef HAVE_LIBGRIB
     case CDI_FILETYPE_GRB:
     case CDI_FILETYPE_GRB2:
       grb_read_record(streamptr, memtype, data, nmiss);
