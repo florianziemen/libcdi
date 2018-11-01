@@ -290,12 +290,12 @@ void cdiSetChunk(const char *chunkAlgo)
 }
 
 
-void cdiSetGribapiGrib1(bool value)
+void cdiSetEccodesGrib1(bool value)
 {
 #ifndef HAVE_LIBGRIB_API
   if (value)
     {
-      Warning("%s: GRIB_API support not compiled in, used CGRIBEX to decode GRIB1 record!", __func__);
+      Warning("ecCodes support not compiled in, used CGRIBEX to decode/encode GRIB1 records!");
       value = false;
     }
 #endif
@@ -324,8 +324,11 @@ void cdiInitialize(void)
       value = cdiGetenvInt("CDI_GRIBAPI_DEBUG");
       if ( value >= 0 ) CDI_gribapi_debug = (bool) value;
 
-      value = cdiGetenvInt("CDI_GRIBAPI_GRIB1");
-      if ( value >= 0 ) cdiSetGribapiGrib1((bool) value);
+      value = cdiGetenvInt("CDI_ECCODES_DEBUG");
+      if ( value >= 0 ) CDI_gribapi_debug = (bool) value;
+
+      value = cdiGetenvInt("CDI_ECCODES_GRIB1");
+      if ( value >= 0 ) cdiSetEccodesGrib1((bool) value);
 
       value = cdiGetenvInt("CDI_READ_CELL_CORNERS");
       if ( value >= 0 ) CDI_read_cell_corners = (int) value;
@@ -454,8 +457,8 @@ void cdiDefGlobal(const char *string, int value)
 {
   // clang-format off
   if      (strcmp(string, "REGULARGRID")           == 0) cdiDataUnreduced = value;
-  else if (strcmp(string, "GRIBAPI_DEBUG")         == 0) CDI_gribapi_debug = (bool) value;
-  else if (strcmp(string, "GRIBAPI_GRIB1")         == 0) cdiSetGribapiGrib1((bool) value);
+  else if (strcmp(string, "ECCODES_DEBUG")         == 0) CDI_gribapi_debug = (bool) value;
+  else if (strcmp(string, "ECCODES_GRIB1")         == 0) cdiSetEccodesGrib1((bool) value);
   else if (strcmp(string, "SORTNAME")              == 0) cdiSortName = value;
   else if (strcmp(string, "SORTPARAM")             == 0) cdiSortParam = value;
   else if (strcmp(string, "HAVE_MISSVAL")          == 0) cdiHaveMissval = value;
