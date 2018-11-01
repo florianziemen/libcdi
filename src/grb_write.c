@@ -143,7 +143,6 @@ void grbCopyRecord(stream_t * streamptr2, stream_t * streamptr1)
     }
 #else
     {
-      (void)vlistID; (void)varID;
       Error("GRIB_API support not compiled in!");
     }
 #endif
