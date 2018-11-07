@@ -39,7 +39,7 @@ char *strdup(const char *s);
 #endif
 
 char *strToLower(char *str);
-bool str_is_equal(const char *vstr, const char *cstr);
+bool strIsEqual(const char *vstr, const char *cstr);
 
 #ifndef  M_PI
 #define  M_PI        3.14159265358979323846  /* pi */

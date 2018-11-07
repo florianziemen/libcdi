@@ -222,7 +222,7 @@ int setBaseTime(const char *timeunits, taxis_t *taxis)
     {
       while ( isspace(tu[pos]) ) ++pos;
 
-      if ( str_is_equal(tu+pos, "since") )
+      if ( strIsEqual(tu+pos, "since") )
         taxistype = TAXIS_RELATIVE;
 
       while ( pos < len && !isspace(tu[pos]) ) ++pos;
@@ -234,7 +234,7 @@ int setBaseTime(const char *timeunits, taxis_t *taxis)
             {
               if ( timeunit == TUNIT_DAY )
                 {
-                  if ( !str_is_equal(tu+pos, "%y%m%d.%f") )
+                  if ( !strIsEqual(tu+pos, "%y%m%d.%f") )
                     {
                       Message("Unsupported format %s for TIMEUNIT day!", tu+pos);
                       timeunit = -1;
@@ -242,7 +242,7 @@ int setBaseTime(const char *timeunits, taxis_t *taxis)
                 }
               else if ( timeunit == TUNIT_MONTH )
                 {
-                  if ( !str_is_equal(tu+pos, "%y%m.%f") )
+                  if ( !strIsEqual(tu+pos, "%y%m.%f") )
                     {
                       Message("Unsupported format %s for TIMEUNIT month!", tu+pos);
                       timeunit = -1;
@@ -584,7 +584,7 @@ int cdf_time_dimid(int fileID, int ndims, int nvars, ncdim_t *ncdims)
     {
       dimname[0] = 0;
       cdf_inq_dimname(fileID, ncdims[dimid].dimid, dimname);
-      if ( str_is_equal(dimname, "time") || str_is_equal(dimname, "Time") ) return dimid;
+      if ( strIsEqual(dimname, "time") || strIsEqual(dimname, "Time") ) return dimid;
     }
 
   for ( int varid = 0; varid < nvars; ++varid )
@@ -1070,7 +1070,7 @@ int cdf_get_cell_varid(char *attstring, int ncid)
     printf("cell_measures >%s<\n", cell_measures);
     printf("cell_var >%s<\n", cell_var);
   */
-  if ( str_is_equal(cell_measures, "area") )
+  if ( strIsEqual(cell_measures, "area") )
     {
       int nc_var_id;
       int status = nc_inq_varid(ncid, cell_var, &nc_var_id);
@@ -1245,7 +1245,7 @@ void cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int 
             }
           else if ( isText && strcmp(attname, "trunc_type") == 0 )
             {
-              if ( str_is_equal(attstring, "Triangular") )
+              if ( strIsEqual(attstring, "Triangular") )
                 ncvars[ncvarid].gridtype = GRID_SPECTRAL;
             }
           else if ( isText && (strcmp(attname, "grid_type") == 0 || strcmp(attname, "CDI_grid_type") == 0) )
@@ -1449,8 +1449,8 @@ void cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int 
             {
               strToLower(attstring);
 
-              if      ( str_is_equal(attstring, "down") ) ncvars[ncvarid].positive = POSITIVE_DOWN;
-              else if ( str_is_equal(attstring, "up")   ) ncvars[ncvarid].positive = POSITIVE_UP;
+              if      ( strIsEqual(attstring, "down") ) ncvars[ncvarid].positive = POSITIVE_DOWN;
+              else if ( strIsEqual(attstring, "up")   ) ncvars[ncvarid].positive = POSITIVE_UP;
 
               if ( ncvars[ncvarid].ndims == 1 )
                 {
@@ -1525,7 +1525,7 @@ void cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int 
             {
               strToLower(attstring);
 
-              if ( str_is_equal(attstring, "true") )
+              if ( strIsEqual(attstring, "true") )
                 {
                   ncvars[ncvarid].lunsigned = true;
                   /*
@@ -1540,7 +1540,7 @@ void cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int 
             {
 	      strToLower(attstring);
 
-	      if ( str_is_equal(attstring, "ignore") )
+	      if ( strIsEqual(attstring, "ignore") )
 		{
 		  ncvars[ncvarid].ignore = true;
 		  cdf_set_var(ncvars, ncvarid, FALSE);
@@ -1901,14 +1901,14 @@ void verify_coordinate_vars_1(int ncid, int ndims, ncdim_t *ncdims, ncvar_t *ncv
                     strcmp(ncvars[ncvarid].longname, "generalized height") == 0) &&
                    strcmp(ncvars[ncvarid].stdname, "height") == 0 )
                   ncvars[ncvarid].zaxistype = ZAXIS_REFERENCE;
-              else if ( str_is_equal(ncvars[ncvarid].stdname, "air_pressure") )
+              else if ( strIsEqual(ncvars[ncvarid].stdname, "air_pressure") )
 		  ncvars[ncvarid].zaxistype = ZAXIS_PRESSURE;
             }
 
 	  if ( !ncvars[ncvarid].islon && ncvars[ncvarid].longname[0] != 0 &&
                !ncvars[ncvarid].islat && ncvars[ncvarid].longname[1] != 0 )
 	    {
-	      if ( str_is_equal(ncvars[ncvarid].longname+1, "ongitude") )
+	      if ( strIsEqual(ncvars[ncvarid].longname+1, "ongitude") )
 		{
 		  ncvars[ncvarid].islon = true;
 		  cdf_set_var(ncvars, ncvarid, FALSE);
@@ -1916,7 +1916,7 @@ void verify_coordinate_vars_1(int ncid, int ndims, ncdim_t *ncdims, ncvar_t *ncv
 		  ncdims[ncdimid].dimtype = X_AXIS;
 		  continue;
 		}
-	      else if ( str_is_equal(ncvars[ncvarid].longname+1, "atitude") )
+	      else if ( strIsEqual(ncvars[ncvarid].longname+1, "atitude") )
 		{
 		  ncvars[ncvarid].islat = true;
 		  cdf_set_var(ncvars, ncvarid, FALSE);
@@ -2007,19 +2007,19 @@ void verify_coordinate_vars_2(int nvars, ncvar_t *ncvars)
             {
               ncvars[ncvarid].isc = true;
             }
-          else if ( str_is_equal(ncvars[ncvarid].stdname, "air_pressure") )
+          else if ( strIsEqual(ncvars[ncvarid].stdname, "air_pressure") )
 	    ncvars[ncvarid].zaxistype = ZAXIS_PRESSURE;
 
 	  /* not needed anymore for rotated grids */
 	  if ( !ncvars[ncvarid].islon && ncvars[ncvarid].longname[0] != 0 &&
                !ncvars[ncvarid].islat && ncvars[ncvarid].longname[1] != 0 )
 	    {
-	      if ( str_is_equal(ncvars[ncvarid].longname+1, "ongitude") )
+	      if ( strIsEqual(ncvars[ncvarid].longname+1, "ongitude") )
 		{
 		  ncvars[ncvarid].islon = true;
 		  continue;
 		}
-	      else if ( str_is_equal(ncvars[ncvarid].longname+1, "atitude") )
+	      else if ( strIsEqual(ncvars[ncvarid].longname+1, "atitude") )
 		{
 		  ncvars[ncvarid].islat = true;
 		  continue;
@@ -3292,7 +3292,7 @@ void cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int model
 	  size_t len = strlen(name);
 	  if ( len > 3 && isdigit((int) name[3]) )
 	    {
-	      if ( str_is_equal(name, "var") )
+	      if ( strIsEqual(name, "var") )
 		{
 		  vlistDefVarCode(vlistID, varID, atoi(name+3));
                   // vlistDestroyVarName(vlistID, varID);
@@ -3300,7 +3300,7 @@ void cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int model
 	    }
 	  else if ( len > 4 && isdigit((int) name[4]) )
 	    {
-	      if ( str_is_equal(name, "code") )
+	      if ( strIsEqual(name, "code") )
 		{
 		  vlistDefVarCode(vlistID, varID, atoi(name+4));
 		  // vlistDestroyVarName(vlistID, varID);
@@ -3308,7 +3308,7 @@ void cdf_define_all_vars(stream_t *streamptr, int vlistID, int instID, int model
 	    }
 	  else if ( len > 5 && isdigit((int) name[5]) )
 	    {
-	      if ( str_is_equal(name, "param") )
+	      if ( strIsEqual(name, "param") )
 		{
 		  int pnum = -1, pcat = 255, pdis = 255;
 		  sscanf(name+5, "%d.%d.%d", &pnum, &pcat, &pdis);
