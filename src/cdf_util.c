@@ -6,11 +6,13 @@
 #include "error.h"
 
 
-void strToLower(char *str)
+char *strToLower(char *str)
 {
-  if ( str )
-    for ( size_t i = 0; str[i]; ++i )
+  if (str)
+    for (size_t i = 0; str[i]; ++i)
       str[i] = (char)tolower((int)str[i]);
+
+  return str;
 }
 
 
