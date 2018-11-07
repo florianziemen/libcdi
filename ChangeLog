@@ -3,6 +3,10 @@
         * using EXSE library version 1.4.1
 	* Version 1.9.6 released
 
+2018-11-07  Uwe Schulzweida
+
+	* NetCDF attribute axis:  leave unchanged
+
 2018-10-31  Uwe Schulzweida
 
 	* Added environment  variable CDI_GRIBAPI_GRIB1 to set GRIB1 decoder/encoder to GRIBAPI
