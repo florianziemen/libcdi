@@ -1078,7 +1078,7 @@ int cdf_get_cell_varid(char *attstring, int ncid)
 }
 
 static
-void cdf_scan_var_attr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timedimid, int modelID, int format)
+void cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int timedimid, int modelID, int format)
 {
   int ncdimid;
   int nvdims, nvatts;
@@ -3881,10 +3881,10 @@ int cdfInqContents(stream_t *streamptr)
         ncdims[ncdimid].dimtype = T_AXIS;
     }
 
-  if ( CDI_Debug ) cdf_print_vars(ncvars, nvars, "cdf_scan_var_attr");
+  if ( CDI_Debug ) cdf_print_vars(ncvars, nvars, "cdfScanVarAttr");
 
   // scan attributes of all variables
-  cdf_scan_var_attr(nvars, ncvars, ndims, ncdims, timedimid, modelID, format);
+  cdfScanVarAttr(nvars, ncvars, ndims, ncdims, timedimid, modelID, format);
 
 
   if ( CDI_Debug ) cdf_print_vars(ncvars, nvars, "find coordinate vars");
