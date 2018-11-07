@@ -6,6 +6,7 @@
 2018-11-07  Uwe Schulzweida
 
 	* NetCDF attribute axis:  leave unchanged
+	* NetCDF attribute standard_name:  leave unchanged
 
 2018-10-31  Uwe Schulzweida
 

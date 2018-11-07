@@ -1210,10 +1210,6 @@ void cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int 
             {
               memcpy(ncvars[ncvarid].longname, attstring, attstringsize);
             }
-          else if ( isText && strcmp(attname, "standard_name") == 0 )
-            {
-              memcpy(ncvars[ncvarid].stdname, attstring, attstringsize);
-            }
           else if ( isText && strcmp(attname, "units") == 0 )
             {
               memcpy(ncvars[ncvarid].units, attstring, attstringsize);
@@ -1633,13 +1629,16 @@ void cdfVerifyVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims)
               cdfGetAttText(ncid, ncvarid, attname, sizeof(attstring), attstring);
               attstringsize = strlen(attstring) + 1;
               if (attstringsize > CDI_MAX_NAME) attstringsize = CDI_MAX_NAME;
-            }
 
-          if (isText && strcmp(attname, "axis") == 0)
-            {
-              strToLower(attstring);
-              cdfScanAttrAxis(ncvars, ncdims, ncvarid, attstring, nvdims, dimidsp);
-	    }
+              if (strcmp(attname, "axis") == 0)
+                {
+                  cdfScanAttrAxis(ncvars, ncdims, ncvarid, strToLower(attstring), nvdims, dimidsp);
+                }
+              else if (strcmp(attname, "standard_name") == 0)
+                {
+                  memcpy(ncvars[ncvarid].stdname, attstring, attstringsize);
+                }
+            }
         }
     }
 }
