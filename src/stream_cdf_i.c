@@ -1329,29 +1329,6 @@ void cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int 
               ncvars[nc_cell_id].isvar = FALSE;
               cdf_set_var(ncvars, ncvarid, TRUE);
             }
-          /*
-          else if ( strIsEqual(attname, "coordinates") )
-            {
-              char *pstring, *xvarname = NULL, *yvarname = NULL;
-              pstring = attstring;
-
-              while ( isspace((int) *pstring) ) pstring++;
-              xvarname = pstring;
-              while ( isgraph((int) *pstring) ) pstring++;
-              *pstring++ = 0;
-              while ( isspace((int) *pstring) ) pstring++;
-              yvarname = pstring;
-              while ( isgraph((int) *pstring) ) pstring++;
-              *pstring++ = 0;
-
-              cdf_inq_varid(ncid, xvarname, &ncvars[ncvarid].xvarid);
-              cdf_inq_varid(ncid, yvarname, &ncvars[ncvarid].yvarid);
-
-              cdf_set_var(ncvars, ncvars[ncvarid].xvarid, FALSE);
-              cdf_set_var(ncvars, ncvars[ncvarid].yvarid, FALSE);
-              cdf_set_var(ncvars, ncvarid, TRUE);
-            }
-          */
           else if ( isText && (strIsEqual(attname, "associate") || strIsEqual(attname, "coordinates")) )
             {
               bool lstop = false;
