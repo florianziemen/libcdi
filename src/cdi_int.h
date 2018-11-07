@@ -38,7 +38,7 @@ char *strdup(const char *s);
 */
 #endif
 
-void str_tolower(char *str);
+void strToLower(char *str);
 bool str_is_equal(const char *vstr, const char *cstr);
 
 #ifndef  M_PI

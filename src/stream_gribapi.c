@@ -3267,8 +3267,8 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
           char grb_name[256];          grb_name[0] = 0;
           vlistInqVarName(vlistID, varID, cdi_name);
           gribapiGetString(gh, "shortName", grb_name, sizeof(grb_name));
-          str_tolower(cdi_name);
-          str_tolower(grb_name);
+          strToLower(cdi_name);
+          strToLower(grb_name);
           if ( (strlen(cdi_name) != strlen(grb_name)) || !str_is_equal(cdi_name, grb_name) )
             Message("*** GRIB2 shortName does not correspond to chosen variable name: \"%s\" (\"%s\").",
                     grb_name[0]?grb_name:"unknown", cdi_name);

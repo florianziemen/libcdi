@@ -610,7 +610,7 @@ int cdf_time_dimid(int fileID, int ndims, int nvars, ncdim_t *ncdims)
               if ( strncmp(sbuf, "units", 5) == 0 )
                 {
                   cdfGetAttText(fileID, varid, "units", sizeof(sbuf), sbuf);
-                  str_tolower(sbuf);
+                  strToLower(sbuf);
 
                   if ( is_time_units(sbuf) ) return dimids[0];
                 }
@@ -1010,7 +1010,7 @@ void cdfScanAttrAxis(ncvar_t *ncvars, ncdim_t *ncdims, int ncvarid, const char *
 
   while (attlen--)
     {
-      int attchr = attstring[attlen];
+      const int attchr = attstring[attlen];
       if (attchr == 't')
         {
           if (attlen != 0) Warning("axis attribute 't' not on first position!");
@@ -1254,13 +1254,13 @@ void cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int 
             }
           else if ( isText && (strcmp(attname, "grid_type") == 0 || strcmp(attname, "CDI_grid_type") == 0) )
             {
-              str_tolower(attstring);
+              strToLower(attstring);
               set_gridtype(attstring, &ncvars[ncvarid].gridtype);
               cdf_set_var(ncvars, ncvarid, TRUE);
             }
           else if ( isText && strcmp(attname, "level_type") == 0 )
             {
-              str_tolower(attstring);
+              strToLower(attstring);
               set_zaxistype(attstring, &ncvars[ncvarid].zaxistype);
               cdf_set_var(ncvars, ncvarid, TRUE);
             }
@@ -1451,7 +1451,7 @@ void cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int 
             }
           else if ( isText && strcmp(attname, "positive") == 0 )
             {
-              str_tolower(attstring);
+              strToLower(attstring);
 
               if      ( str_is_equal(attstring, "down") ) ncvars[ncvarid].positive = POSITIVE_DOWN;
               else if ( str_is_equal(attstring, "up")   ) ncvars[ncvarid].positive = POSITIVE_UP;
@@ -1527,7 +1527,7 @@ void cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int 
             }
           else if ( isText && strcmp(attname, "_Unsigned") == 0 )
             {
-              str_tolower(attstring);
+              strToLower(attstring);
 
               if ( str_is_equal(attstring, "true") )
                 {
@@ -1542,7 +1542,7 @@ void cdfScanVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims, int 
             }
           else if ( isText && strcmp(attname, "cdi") == 0 )
             {
-	      str_tolower(attstring);
+	      strToLower(attstring);
 
 	      if ( str_is_equal(attstring, "ignore") )
 		{
@@ -1637,7 +1637,7 @@ void cdfVerifyVarAttr(int nvars, ncvar_t *ncvars, int ndims, ncdim_t *ncdims)
 
           if (isText && strcmp(attname, "axis") == 0)
             {
-              str_tolower(attstring);
+              strToLower(attstring);
               cdfScanAttrAxis(ncvars, ncdims, ncvarid, attstring, nvdims, dimidsp);
 	    }
         }
@@ -3519,7 +3519,7 @@ void find_time_vars(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimid, 
               if ( ncvars[ncvarid].units[0] )
                 {
                   strcpy(timeunits, ncvars[ncvarid].units);
-                  str_tolower(timeunits);
+                  strToLower(timeunits);
 
                   if ( is_time_units(timeunits) )
                     {
@@ -4124,7 +4124,7 @@ int cdfInqContents(stream_t *streamptr)
       {
         char attstring[1024];
 	cdfGetAttText(fileID, nctimevarid, "calendar", sizeof(attstring), attstring);
-	str_tolower(attstring);
+	strToLower(attstring);
         set_calendar(attstring, &calendar);
       }
 
