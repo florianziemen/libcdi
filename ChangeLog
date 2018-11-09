@@ -3,6 +3,10 @@
         * using EXSE library version 1.4.1
 	* Version 1.9.6 released
 
+2018-11-09  Uwe Schulzweida
+
+	* Added check for unsupported NetCDF4/HDF5 library combination (NetCDF  <= 4.4.0 with libhdf5 >= 1.10.0)
+
 2018-11-07  Uwe Schulzweida
 
 	* NetCDF attribute axis:  leave unchanged

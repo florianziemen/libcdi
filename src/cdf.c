@@ -33,15 +33,19 @@ const char *hdfLibraryVersion(void)
 {
 #ifdef  HAVE_H5GET_LIBVERSION
   static char hdf_libvers[256];
-  unsigned majnum, minnum, relnum;
-
-  H5get_libversion(&majnum, &minnum, &relnum);
-
+  static int linit = 0;
+  if (!linit)
+    {
+      linit = 1;
+      unsigned majnum, minnum, relnum;
+      H5get_libversion(&majnum, &minnum, &relnum);
 #ifdef  HAVE_NC4HDF5_THREADSAFE
-  sprintf(hdf_libvers, "%u.%u.%u threadsafe", majnum, minnum, relnum);
+      sprintf(hdf_libvers, "%u.%u.%u threadsafe", majnum, minnum, relnum);
 #else
-  sprintf(hdf_libvers, "%u.%u.%u", majnum, minnum, relnum);
+      sprintf(hdf_libvers, "%u.%u.%u", majnum, minnum, relnum);
 #endif
+    }
+
   return hdf_libvers;
 #else
   return "library undefined";
@@ -172,14 +176,47 @@ int cdfOpen(const char *filename, const char *mode, int filetype)
   return fileID;
 }
 
+#ifdef  HAVE_NETCDF4
+static
+int cdf4CheckLibVersions(void)
+{
+  int status = 0;
+#ifdef HAVE_H5GET_LIBVERSION
+  static int checked = 0;
+  if (!checked)
+    {
+      checked = 1;
+      unsigned majnum, minnum, relnum;
+
+      sscanf(nc_inq_libvers(), "%u.%u.%u", &majnum, &minnum, &relnum);
+      //printf("netCDF %u.%u.%u\n", majnum, minnum, relnum);
+      const unsigned ncmaxver = 4 * 1000000 + 4 * 1000;
+      const unsigned nclibver = majnum * 1000000 + minnum * 1000 + relnum;
+
+      if (nclibver <= ncmaxver)
+        {
+          H5get_libversion(&majnum, &minnum, &relnum);
+          const unsigned hdf5maxver = 1 * 1000000 + 10 * 1000;
+          const unsigned hdf5libver = majnum * 1000000 + minnum * 1000 + relnum;
+
+          if (hdf5libver >= hdf5maxver)
+            {
+              fprintf(stderr, "NetCDF library 4.4.0 or earlier, combined with libhdf5 1.10.0 or greater not supported!\n");
+              status = 1;
+            }
+        }
+    }
+#endif
+  return status;
+}
+#endif
 
 int cdf4Open(const char *filename, const char *mode, int *filetype)
 {
   int fileID = -1;
   bool open_file = false;
 
-  if ( CDF_Debug )
-    Message("Open %s with mode %c", filename, *mode);
+  if ( CDF_Debug ) Message("Open %s with mode %c", filename, *mode);
 
 #ifdef  HAVE_NETCDF4
   open_file = true;
@@ -187,10 +224,15 @@ int cdf4Open(const char *filename, const char *mode, int *filetype)
 
   if ( open_file )
     {
-      fileID = cdfOpenFile(filename, mode, filetype);
-
-      if ( CDF_Debug )
-	Message("File %s opened with id %d", filename, fileID);
+      if (cdf4CheckLibVersions() == 0)
+        {
+          fileID = cdfOpenFile(filename, mode, filetype);
+          if ( CDF_Debug ) Message("File %s opened with id %d", filename, fileID);
+        }
+      else
+        {
+          fileID = CDI_EUFTYPE;
+        }
     }
   else
     {
