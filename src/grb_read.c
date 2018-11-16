@@ -49,7 +49,7 @@ int grbDecode(int filetype, int memtype, void *cgribexp, void *gribbuffer, size_
 #else
     {
       (void)vlistID; (void)varID;
-      Error("GRIB_API support not compiled in!");
+      Error("ecCodes support not compiled in!");
     }
 #endif
 

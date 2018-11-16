@@ -57,7 +57,7 @@ size_t grbEncode(int filetype, int memtype, int varID, int levelID, int vlistID,
     }
 #else
     {
-      Error("GRIB_API support not compiled in!");
+      Error("ecCodes support not compiled in!");
       (void)gribContainer;
       (void)comptype;
     }
@@ -143,7 +143,7 @@ void grbCopyRecord(stream_t * streamptr2, stream_t * streamptr1)
     }
 #else
     {
-      Error("GRIB_API support not compiled in!");
+      Error("ecCodes support not compiled in!");
     }
 #endif
 
