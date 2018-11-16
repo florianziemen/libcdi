@@ -1505,7 +1505,7 @@ int gribapiScanTimestep(stream_t * streamptr)
 	  if ( CDI_Debug )
 	    Message("%4d %8d %4d %8d %8lld %6d", rindex, (int)recpos, param, level1, vdate, vtime);
 
-	  grib_handle_delete(gh);
+          grib_handle_delete(gh);
 	  gh = NULL;
 
 	  rindex++;
@@ -3160,6 +3160,7 @@ size_t gribapiEncode(int varID, int levelID, int vlistID, int gridID, int zaxisI
       int shapeOfTheEarth = 0;
       cdiInqKeyInt(vlistID, varID, CDI_KEY_SHAPEOFTHEEARTH, &shapeOfTheEarth);
       GRIB_CHECK(my_grib_set_long(gh, "shapeOfTheEarth", (long)shapeOfTheEarth), 0);
+      GRIB_CHECK(my_grib_set_long(gh, "grib2LocalSectionPresent", 0), 0);
 
       int grib2LocalSectionNumber, section2PaddingLength;
       int mpimType, mpimClass, mpimUser;
