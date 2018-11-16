@@ -153,15 +153,8 @@ typedef struct
   int       ilevel;
   int       ilevel2;
   int       ltype;
+  short     perturbationNumber;
   short     tsteptype;
-#ifdef HIRLAM_EXTENSIONS
-    // NOTE: tsteptype MUST be part of attributes used to compare variables!
-    // Modern NWP models (HARMONIE, HIRLAM) use timeRangeIndicator to specify
-    // if the field is instantanous or accumulated.
-    // Both types are typically in the same GRIB-file.
-    // (181; 105, 0, timeRangeIndicator=0) .. instantanous rain
-    // (181; 105, 0, timeRangeIndicator=4) .. accumulated rain  .. both can be in the same grib file
-#endif // HIRLAM_EXTENSIONS
   short     varID;
   short     levelID;
   short     used;

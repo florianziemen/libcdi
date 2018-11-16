@@ -26,6 +26,7 @@ void recordInitEntry(record_t *record)
   record->ilevel    = CDI_UNDEFID;
   record->used      = false;
   record->tsteptype = CDI_UNDEFID;
+  record->perturbationNumber = 0;
   record->varID     = CDI_UNDEFID;
   record->levelID   = CDI_UNDEFID;
   memset(record->varname, 0, sizeof(record->varname));

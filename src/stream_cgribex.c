@@ -564,7 +564,7 @@ void cgribexAddRecord(stream_t *streamptr, cgribexrec_t *cgribexp, int param, si
 
   varAddRecord(recID, param, gridID, zaxistype, lbounds, level1, level2, 0, 0,
 	       datatype, &varID, &levelID, tsteptype, numavg, leveltype, -1,
-               NULL, NULL, NULL, NULL, NULL, NULL);
+               NULL, NULL, NULL, NULL, NULL, NULL, 0);
 
   record->varID   = (short)varID;
   record->levelID = (short)levelID;

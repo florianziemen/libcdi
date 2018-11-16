@@ -49,6 +49,7 @@ typedef struct
   int            param;
   int            prec;
   int            tsteptype;
+  int            perturbationNumber;
   int            gridID;
   int            zaxistype;
   int            ltype1;     /* GRIB first level type */
@@ -98,6 +99,7 @@ void paramInitEntry(unsigned varID, int param)
   vartable[varID].param          = param;
   vartable[varID].prec           = 0;
   vartable[varID].tsteptype      = TSTEP_INSTANT;
+  vartable[varID].perturbationNumber = 0;
   vartable[varID].timave         = 0;
   vartable[varID].gridID         = CDI_UNDEFID;
   vartable[varID].zaxistype      = 0;
@@ -125,10 +127,9 @@ void paramInitEntry(unsigned varID, int param)
   vartable[varID].tiles          = NULL;
 }
 
-/* Test if a variable specified by the given meta-data has already
- * been registered in "vartable". */
+/* Test if a variable specified by the given meta-data has already been registered in "vartable". */
 static unsigned
-varGetEntry(int param, int gridID, int zaxistype, int ltype1, int tsteptype, const char *name, const var_tile_t *tiles)
+varGetEntry(int param, int gridID, int zaxistype, int ltype1, int tsteptype, const char *name, const var_tile_t *tiles, int perturbationNumber)
 {
   for ( unsigned varID = 0; varID < varTablesize; varID++ )
     {
@@ -145,6 +146,7 @@ varGetEntry(int param, int gridID, int zaxistype, int ltype1, int tsteptype, con
           if ( (vartable[varID].zaxistype  == zaxistype)               &&
                (vartable[varID].ltype1     == ltype1   )               &&
                (vartable[varID].tsteptype  == tsteptype)               &&
+               (vartable[varID].perturbationNumber == perturbationNumber)  &&
                (vartable[varID].gridID     == gridID   )               &&
                (vt_no_of_tiles == no_of_tiles) )
             {
@@ -425,10 +427,10 @@ void varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds,
 		  int level1, int level2, int level_sf, int level_unit, int prec,
 		  int *pvarID, int *plevelID, int tsteptype, int numavg, int ltype1, int ltype2,
 		  const char *name, const char *stdname, const char *longname, const char *units,
-                  const var_tile_t *tiles, int *tile_index)
+                  const var_tile_t *tiles, int *tile_index, int perturbationNumber)
 {
   unsigned varID = (cdiSplitLtype105 != 1 || zaxistype != ZAXIS_HEIGHT) ?
-    varGetEntry(param, gridID, zaxistype, ltype1, tsteptype, name, tiles) : (unsigned) CDI_UNDEFID;
+    varGetEntry(param, gridID, zaxistype, ltype1, tsteptype, name, tiles, perturbationNumber) : (unsigned) CDI_UNDEFID;
 
   if ( varID == (unsigned) CDI_UNDEFID )
     {
@@ -442,6 +444,7 @@ void varAddRecord(int recID, int param, int gridID, int zaxistype, int lbounds,
       vartable[varID].level_sf   = level_sf;
       vartable[varID].level_unit = level_unit;
       vartable[varID].tsteptype  = tsteptype;
+      vartable[varID].perturbationNumber = perturbationNumber;
 
       if ( numavg ) vartable[varID].timave = 1;
 
