@@ -11,8 +11,10 @@ TESTS = cksum_verify \
 	pio_cksum_mpi_fw_at_all \
 	pio_cksum_mpi_fw_at_reblock \
 	test_resource_copy_run pio_write_deco2d_run \
-	test_f2003 test_cdf_transformation test_cdf_const \
+	test_f2003 test_cdf_transformation \
 	test_table_run test_byteswap_run
+
+#test_cdf_const: deactivated (depends on app/cdi)
 
 check_PROGRAMS = cksum_verify test_grib cksum_write cksum_read pio_write \
 	test_resource_copy cksum_write_chunk pio_write_deco2d test_table \
