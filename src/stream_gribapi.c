@@ -1902,12 +1902,12 @@ int gribapiDefDateTimeRel(int editionNumber, grib_handle *gh, int64_t rdate, int
   if ( !(int)(fmod(days*86400.0 + secs, factor)))
     {
       int proDefTempNum = gribapiDefSteptype(editionNumber, gh, productDefinitionTemplate, typeOfGeneratingProcess, tsteptype, gcinit);
-
       gribapiDefStepUnits(editionNumber, gh, timeunit, proDefTempNum, gcinit);
 
       long startStep = 0;
       double endStepF = (days*86400.0 + secs)/factor;
-      if ( endStepF > INT_MAX ) return status;
+      long maxStep = (editionNumber > 1) ? INT_MAX : 65000;
+      if (endStepF > maxStep) return status;
       long endStep = (long) endStepF;
 
       if ( editionNumber > 1 ) GRIB_CHECK(my_grib_set_long(gh, "significanceOfReferenceTime", 1), 0);
