@@ -369,8 +369,7 @@ void streamInqGRIBinfo(int streamID, int *intnum, float *fltnum, off_t *bignum)
 
   int filetype = streamptr->filetype;
 
-#ifdef HAVE_LIBCGRIBEX
-  if ( filetype == CDI_FILETYPE_GRB && !CDI_gribapi_grib1 )
+  if ( filetype == CDI_FILETYPE_GRB )
     {
       int tsID     = streamptr->curTsID;
       int vrecID   = streamptr->tsteps[tsID].curRecID;
@@ -386,13 +385,6 @@ void streamInqGRIBinfo(int streamID, int *intnum, float *fltnum, off_t *bignum)
       else
         grib_info_for_grads(recpos, (long)gribbuffersize, (unsigned char *) gribbuffer, intnum, fltnum, bignum);
     }
-  else if (CDI_gribapi_grib1)
-    {
-      Error("CGRIBEX support deactivated!");
-    }
-#else
-  Error("CGRIBEX support not compiled in!");
-#endif
 }
 
 
