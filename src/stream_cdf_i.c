@@ -3505,8 +3505,7 @@ void find_time_vars(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimid, 
               {
                 streamptr->basetime.ncvarid = ncvarid;
                 ltimevar = true;
-                if ( CDI_Debug )
-                  fprintf(stderr, "timevar %s\n", ncvars[ncvarid].name);
+                if ( CDI_Debug ) fprintf(stderr, "timevar %s\n", ncvars[ncvarid].name);
               }
             else
               {
@@ -3514,22 +3513,23 @@ void find_time_vars(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimid, 
               }
           }
 
-      if ( ltimevar == false ) /* search for WRF time description */
+      if ( ltimevar == false ) // search for WRF time description
         {
           for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
             if ( ncvarid != streamptr->basetime.ncvarid &&
                  ncvars[ncvarid].ndims == 2 &&
                  timedimid == ncvars[ncvarid].dimids[0] &&
                  xtypeIsText(ncvars[ncvarid].xtype) &&
-                 ncdims[ncvars[ncvarid].dimids[1]].len == 19 )
+                 (ncdims[ncvars[ncvarid].dimids[1]].len == 19 || ncdims[ncvars[ncvarid].dimids[1]].len == 64))
               {
+                ncvars[ncvarid].istime = true;
                 streamptr->basetime.ncvarid = ncvarid;
                 streamptr->basetime.lwrf    = true;
                 break;
               }
         }
 
-      /* time varID */
+      // time varID
       ncvarid = streamptr->basetime.ncvarid;
 
       if ( ncvarid == CDI_UNDEFID )
@@ -3538,7 +3538,7 @@ void find_time_vars(int nvars, ncvar_t *ncvars, ncdim_t *ncdims, int timedimid, 
         }
     }
 
-  /* time varID */
+  // time varID
   ncvarid = streamptr->basetime.ncvarid;
 
   if ( ncvarid != CDI_UNDEFID && streamptr->basetime.lwrf == false )
@@ -3630,6 +3630,12 @@ int cdfCheckVars(int nvars, ncvar_t *ncvars, size_t ntsteps, int timedimid)
 {
   for ( int ncvarid = 0; ncvarid < nvars; ncvarid++ )
     {
+      if (ncvars[ncvarid].istime && ncvars[ncvarid].ndims == 2)
+        {
+          ncvars[ncvarid].isvar = 0;
+          continue;
+        }
+
       if ( timedimid != CDI_UNDEFID )
 	if ( ncvars[ncvarid].isvar == -1 &&
 	     ncvars[ncvarid].ndims > 1   &&
@@ -4026,6 +4032,8 @@ int cdfInqContents(stream_t *streamptr)
   // time varID
   int nctimevarid = streamptr->basetime.ncvarid;
 
+  if (!time_has_units || streamptr->basetime.lwrf) ncvars[nctimevarid].units[0] = 0;
+
   if ( time_has_units )
     {
       taxis_t *taxis = &streamptr->tsteps[0].taxis;
@@ -4141,7 +4149,7 @@ static
 void wrf_read_timestep(int fileID, int nctimevarid, int tsID, taxis_t *taxis)
 {
   size_t start[2], count[2];
-  char stvalue[32];
+  char stvalue[128];
   start[0] = (size_t) tsID; start[1] = 0;
   count[0] = 1; count[1] = 19;
   stvalue[0] = 0;
