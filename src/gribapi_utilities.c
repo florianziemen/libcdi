@@ -494,7 +494,13 @@ int gribapiGetGridType(grib_handle *gh)
       case GRIB2_GTYPE_SPECTRAL:     gridtype = GRID_SPECTRAL; break;
       case GRIB2_GTYPE_GME:          gridtype = GRID_GME; break;
       case GRIB2_GTYPE_UNSTRUCTURED: gridtype = GRID_UNSTRUCTURED; break;
-      default: Warning("gridDefinitionTemplateNumber %d unsupported!", gridDefinitionTemplateNumber);
+      default:
+        {
+          char mesg[256];
+          size_t len = sizeof(mesg);
+          if (grib_get_string(gh, "gridType", mesg, &len) != 0) mesg[0] = 0;
+          Warning("gridDefinitionTemplateNumber %d unsupported (gridType=%s)!", gridDefinitionTemplateNumber, mesg);
+        }
     }
 
   return gridtype;
