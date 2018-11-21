@@ -4,6 +4,10 @@
         * using EXSE library version 1.4.1
 	* Version 1.9.6 released
 
+2018-11-21  Uwe Schulzweida
+
+	* scanning of attribute associate* failed (bug fix)
+
 2018-11-19  Uwe Schulzweida
 
 	* grib1/ecCodes: set maxStep to 65000 (bug fix)
