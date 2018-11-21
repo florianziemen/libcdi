@@ -41,6 +41,13 @@ char *strdup(const char *s);
 char *strToLower(char *str);
 bool strStartsWith(const char *vstr, const char *cstr);
 
+inline bool
+strIsEqual(const char *x, const char *y) 
+{
+  return (*x == *y) && strcmp(x, y) == 0;
+}
+
+
 #ifndef  M_PI
 #define  M_PI        3.14159265358979323846  /* pi */
 #endif

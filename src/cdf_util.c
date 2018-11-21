@@ -19,10 +19,10 @@ char *strToLower(char *str)
 bool strStartsWith(const char *vstr, const char *cstr)
 {
   bool is_equal = false;
-  if (vstr && *vstr)
+  if (vstr && cstr)
     {
-      size_t clen = (cstr != NULL) ? strlen(cstr) : 0;
-      size_t vlen = (vstr != NULL) ? strlen(vstr) : 0;
+      size_t clen = strlen(cstr);
+      size_t vlen = strlen(vstr);
       if (clen <= vlen) is_equal = (memcmp(vstr, cstr, clen) == 0);
     }
   return is_equal;
