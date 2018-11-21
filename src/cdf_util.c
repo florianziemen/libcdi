@@ -16,13 +16,15 @@ char *strToLower(char *str)
 }
 
 
-bool strIsEqual(const char *vstr, const char *cstr)
+bool strStartsWith(const char *vstr, const char *cstr)
 {
   bool is_equal = false;
-  size_t clen = (cstr != NULL) ? strlen(cstr) : 0;
-
-  if ( vstr && *vstr ) is_equal = (memcmp(vstr, cstr, clen) == 0);
-
+  if (vstr && *vstr)
+    {
+      size_t clen = (cstr != NULL) ? strlen(cstr) : 0;
+      size_t vlen = (vstr != NULL) ? strlen(vstr) : 0;
+      if (clen <= vlen) is_equal = (memcmp(vstr, cstr, clen) == 0);
+    }
   return is_equal;
 }
 
@@ -34,13 +36,13 @@ int get_timeunit(size_t len, const char *ptu)
 
   if ( len > 2 )
     {
-      if      ( strIsEqual(ptu, "sec") )            timeunit = TUNIT_SECOND;
-      else if ( strIsEqual(ptu, "minute") )         timeunit = TUNIT_MINUTE;
-      else if ( strIsEqual(ptu, "hour") )           timeunit = TUNIT_HOUR;
-      else if ( strIsEqual(ptu, "day") )            timeunit = TUNIT_DAY;
-      else if ( strIsEqual(ptu, "month") )          timeunit = TUNIT_MONTH;
-      else if ( strIsEqual(ptu, "calendar_month") ) timeunit = TUNIT_MONTH;
-      else if ( strIsEqual(ptu, "year") )           timeunit = TUNIT_YEAR;
+      if      ( strStartsWith(ptu, "sec") )            timeunit = TUNIT_SECOND;
+      else if ( strStartsWith(ptu, "minute") )         timeunit = TUNIT_MINUTE;
+      else if ( strStartsWith(ptu, "hour") )           timeunit = TUNIT_HOUR;
+      else if ( strStartsWith(ptu, "day") )            timeunit = TUNIT_DAY;
+      else if ( strStartsWith(ptu, "month") )          timeunit = TUNIT_MONTH;
+      else if ( strStartsWith(ptu, "calendar_month") ) timeunit = TUNIT_MONTH;
+      else if ( strStartsWith(ptu, "year") )           timeunit = TUNIT_YEAR;
     }
   else if ( len == 1 && ptu[0] == 's' )  timeunit = TUNIT_SECOND;
 
@@ -52,13 +54,13 @@ bool is_time_units(const char *timeunits)
 {
   while ( isspace(*timeunits) ) timeunits++; 
 
-  bool status = strIsEqual(timeunits, "sec")
-             || strIsEqual(timeunits, "minute")
-             || strIsEqual(timeunits, "hour")
-             || strIsEqual(timeunits, "day")
-             || strIsEqual(timeunits, "month")
-             || strIsEqual(timeunits, "calendar_month")
-             || strIsEqual(timeunits, "year");
+  bool status = strStartsWith(timeunits, "sec")
+             || strStartsWith(timeunits, "minute")
+             || strStartsWith(timeunits, "hour")
+             || strStartsWith(timeunits, "day")
+             || strStartsWith(timeunits, "month")
+             || strStartsWith(timeunits, "calendar_month")
+             || strStartsWith(timeunits, "year");
 
   return status;
 }
@@ -83,8 +85,8 @@ bool is_timeaxis_units(const char *timeunits)
         {
           while ( isspace(*ptu) ) ptu++;
 
-          int timetype = strIsEqual(ptu, "as") ? TAXIS_ABSOLUTE :
-                         strIsEqual(ptu, "since") ? TAXIS_RELATIVE : -1;
+          int timetype = strStartsWith(ptu, "as") ? TAXIS_ABSOLUTE :
+                         strStartsWith(ptu, "since") ? TAXIS_RELATIVE : -1;
 
           status = timetype != -1;
         }
@@ -192,14 +194,14 @@ bool is_lon_axis(const char *units, const char *stdname)
   lc_units[15] = 0;
   strToLower(lc_units);
 
-  if ( (strIsEqual(lc_units, "degree") || strIsEqual(lc_units, "radian")) &&
-       (strIsEqual(stdname, "grid_longitude") || strIsEqual(stdname, "longitude")) )
+  if ( (strStartsWith(lc_units, "degree") || strStartsWith(lc_units, "radian")) &&
+       (strStartsWith(stdname, "grid_longitude") || strStartsWith(stdname, "longitude")) )
     {
       status = true;
     }
-  else if ( strIsEqual(lc_units, "degree")
-            && !strIsEqual(stdname, "grid_latitude")
-            && !strIsEqual(stdname, "latitude") )
+  else if ( strStartsWith(lc_units, "degree")
+            && !strStartsWith(stdname, "grid_latitude")
+            && !strStartsWith(stdname, "latitude") )
     {
       int ioff = 6;
       if ( lc_units[ioff] == 's' ) ioff++;
@@ -221,14 +223,14 @@ bool is_lat_axis(const char *units, const char *stdname)
   lc_units[15] = 0;
   strToLower(lc_units);
 
-  if ( (strIsEqual(lc_units, "degree") || strIsEqual(lc_units, "radian")) &&
-        (strIsEqual(stdname, "grid_latitude") || strIsEqual(stdname, "latitude")) )
+  if ( (strStartsWith(lc_units, "degree") || strStartsWith(lc_units, "radian")) &&
+        (strStartsWith(stdname, "grid_latitude") || strStartsWith(stdname, "latitude")) )
     {
       status = true;
     }
-  else if ( strIsEqual(lc_units, "degree")
-            && !strIsEqual(stdname, "grid_longitude")
-            && !strIsEqual(stdname, "longitude") )
+  else if ( strStartsWith(lc_units, "degree")
+            && !strStartsWith(stdname, "grid_longitude")
+            && !strStartsWith(stdname, "longitude") )
     {
       int ioff = 6;
       if ( lc_units[ioff] == 's' ) ioff++;
@@ -324,21 +326,21 @@ void set_zaxistype(const char *attstring, int *zaxistype)
 
 void set_calendar(const char *attstring, int *calendar)
 {
-  if ( strIsEqual(attstring, "standard") )
+  if ( strStartsWith(attstring, "standard") )
     *calendar = CALENDAR_STANDARD;
-  else if ( strIsEqual(attstring, "gregorian") )
+  else if ( strStartsWith(attstring, "gregorian") )
     *calendar = CALENDAR_GREGORIAN;
-  else if ( strIsEqual(attstring, "none") )
+  else if ( strStartsWith(attstring, "none") )
     *calendar = CALENDAR_NONE;
-  else if ( strIsEqual(attstring, "proleptic") )
+  else if ( strStartsWith(attstring, "proleptic") )
     *calendar = CALENDAR_PROLEPTIC;
-  else if ( strIsEqual(attstring, "360") )
+  else if ( strStartsWith(attstring, "360") )
     *calendar = CALENDAR_360DAYS;
-  else if ( strIsEqual(attstring, "365") ||
-            strIsEqual(attstring, "noleap") )
+  else if ( strStartsWith(attstring, "365") ||
+            strStartsWith(attstring, "noleap") )
     *calendar = CALENDAR_365DAYS;
-  else if ( strIsEqual(attstring, "366") ||
-            strIsEqual(attstring, "all_leap") )
+  else if ( strStartsWith(attstring, "366") ||
+            strStartsWith(attstring, "all_leap") )
     *calendar = CALENDAR_366DAYS;
   else
     Warning("calendar >%s< unsupported!", attstring);
