@@ -176,11 +176,11 @@ int cdfOpen(const char *filename, const char *mode, int filetype)
   return fileID;
 }
 
-#ifdef  HAVE_NETCDF4
 static
 int cdf4CheckLibVersions(void)
 {
   int status = 0;
+#ifdef HAVE_NETCDF4
 #ifdef HAVE_H5GET_LIBVERSION
   static int checked = 0;
   if (!checked)
@@ -207,9 +207,9 @@ int cdf4CheckLibVersions(void)
         }
     }
 #endif
+#endif
   return status;
 }
-#endif
 
 int cdf4Open(const char *filename, const char *mode, int *filetype)
 {

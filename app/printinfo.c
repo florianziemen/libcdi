@@ -51,7 +51,7 @@ datetime2str(int64_t date, int time, char *datetimestr, int maxlen)
   int hour, minute, second;
   cdiDecodeTime(time, &hour, &minute, &second);
 
-  int len = sprintf(datetimestr, DATE_FORMAT "T" TIME_FORMAT, year, month, day, hour, minute, second);
+  const int len = sprintf(datetimestr, DATE_FORMAT "T" TIME_FORMAT, year, month, day, hour, minute, second);
   if (len > (maxlen - 1)) fprintf(stderr, "Internal problem (%s): sizeof input string is too small!\n", __func__);
 }
 
@@ -61,7 +61,7 @@ date2str(int64_t date, char *datestr, int maxlen)
   int year, month, day;
   cdiDecodeDate(date, &year, &month, &day);
 
-  int len = sprintf(datestr, DATE_FORMAT, year, month, day);
+  const int len = sprintf(datestr, DATE_FORMAT, year, month, day);
   if (len > (maxlen - 1)) fprintf(stderr, "Internal problem (%s): sizeof input string is too small!\n", __func__);
 }
 
@@ -71,7 +71,7 @@ time2str(int time, char *timestr, int maxlen)
   int hour, minute, second;
   cdiDecodeTime(time, &hour, &minute, &second);
 
-  int len = sprintf(timestr, TIME_FORMAT, hour, minute, second);
+  const int len = sprintf(timestr, TIME_FORMAT, hour, minute, second);
   if (len > (maxlen - 1)) fprintf(stderr, "Internal problem (%s): sizeof input string is too small!\n", __func__);
 }
 
@@ -88,7 +88,7 @@ comp_name(int comptype)
 void
 printFiletype(int streamID, int vlistID)
 {
-  int filetype = streamInqFiletype(streamID);
+  const int filetype = streamInqFiletype(streamID);
 
   // clang-format off
   switch ( filetype )
@@ -117,13 +117,13 @@ printFiletype(int streamID, int vlistID)
     }
   // clang-format on
 
-  int nvars = vlistNvars(vlistID);
-  int comps[] = { CDI_COMPRESS_ZIP, CDI_COMPRESS_JPEG, CDI_COMPRESS_SZIP, CDI_COMPRESS_AEC };
+  const int nvars = vlistNvars(vlistID);
+  const int comps[] = { CDI_COMPRESS_ZIP, CDI_COMPRESS_JPEG, CDI_COMPRESS_SZIP, CDI_COMPRESS_AEC };
   unsigned kk = 0;
   for (unsigned k = 0; k < sizeof(comps) / sizeof(int); ++k)
     for (int varID = 0; varID < nvars; varID++)
       {
-        int comptype = vlistInqVarCompType(vlistID, varID);
+        const int comptype = vlistInqVarCompType(vlistID, varID);
         if (comptype == comps[k])
           {
             if (kk++ == 0)
@@ -141,16 +141,16 @@ printFiletype(int streamID, int vlistID)
 static void
 print_xvals(int gridID, int dig)
 {
-  size_t xsize = gridInqXsize(gridID);
+  const size_t xsize = gridInqXsize(gridID);
   if (xsize > 0 && gridInqXvals(gridID, NULL))
     {
       char xname[CDI_MAX_NAME], xunits[CDI_MAX_NAME];
       gridInqXname(gridID, xname);
       gridInqXunits(gridID, xunits);
 
-      double xfirst = gridInqXval(gridID, 0);
-      double xlast = gridInqXval(gridID, xsize - 1);
-      double xinc = gridInqXinc(gridID);
+      const double xfirst = gridInqXval(gridID, 0);
+      const double xlast = gridInqXval(gridID, xsize - 1);
+      const double xinc = gridInqXinc(gridID);
       fprintf(stdout, "%33s : %.*g", xname, dig, xfirst);
       if (xsize > 1)
         {
@@ -166,20 +166,20 @@ print_xvals(int gridID, int dig)
 static void
 print_yvals(int gridID, int dig)
 {
-  size_t ysize = gridInqYsize(gridID);
+  const size_t ysize = gridInqYsize(gridID);
   if (ysize > 0 && gridInqYvals(gridID, NULL))
     {
       char yname[CDI_MAX_NAME], yunits[CDI_MAX_NAME];
       gridInqYname(gridID, yname);
       gridInqYunits(gridID, yunits);
 
-      double yfirst = gridInqYval(gridID, 0);
-      double ylast = gridInqYval(gridID, ysize - 1);
-      double yinc = gridInqYinc(gridID);
+      const double yfirst = gridInqYval(gridID, 0);
+      const double ylast = gridInqYval(gridID, ysize - 1);
+      const double yinc = gridInqYinc(gridID);
       fprintf(stdout, "%33s : %.*g", yname, dig, yfirst);
       if (ysize > 1)
         {
-          int gridtype = gridInqType(gridID);
+          const int gridtype = gridInqType(gridID);
           fprintf(stdout, " to %.*g", dig, ylast);
           if (IS_NOT_EQUAL(yinc, 0) && gridtype != GRID_GAUSSIAN && gridtype != GRID_GAUSSIAN_REDUCED)
             fprintf(stdout, " by %.*g", dig, yinc);
@@ -200,7 +200,7 @@ print_xyvals2D(int gridID, int dig)
       gridInqXunits(gridID, xunits);
       gridInqYunits(gridID, yunits);
 
-      size_t gridsize = gridInqSize(gridID);
+      const size_t gridsize = gridInqSize(gridID);
       double *xvals2D = (double *) malloc(gridsize * sizeof(double));
       double *yvals2D = (double *) malloc(gridsize * sizeof(double));
 
@@ -224,8 +224,8 @@ print_xyvals2D(int gridID, int dig)
       int gridtype = gridInqType(gridID);
       if (gridtype == GRID_CURVILINEAR)
         {
-          size_t xsize = gridInqXsize(gridID);
-          size_t ysize = gridInqYsize(gridID);
+          const size_t xsize = gridInqXsize(gridID);
+          const size_t ysize = gridInqYsize(gridID);
           if (xsize > 1)
             {
               double *xvals = (double *) malloc((size_t) xsize * sizeof(double));
@@ -316,10 +316,10 @@ printGridInfoKernel(int gridID, int index, bool lproj)
   if (lproj && gridtype != GRID_PROJECTION)
     fprintf(stderr, "Internal problem (%s): sub grid not equal GRID_PROJECTION!\n", __func__);
 
-  int trunc = gridInqTrunc(gridID);
-  size_t gridsize = gridInqSize(gridID);
-  size_t xsize = gridInqXsize(gridID);
-  size_t ysize = gridInqYsize(gridID);
+  const int trunc = gridInqTrunc(gridID);
+  const size_t gridsize = gridInqSize(gridID);
+  const size_t xsize = gridInqXsize(gridID);
+  const size_t ysize = gridInqYsize(gridID);
 
   // int prec     = gridInqDatatype(gridID);
   // int dig = (prec == CDI_DATATYPE_FLT64) ? 15 : 7;
@@ -428,8 +428,8 @@ printGridInfoKernel(int gridID, int index, bool lproj)
 
       if (gridtype == GRID_UNSTRUCTURED)
         {
-          int number = gridInqNumber(gridID);
-          int position = gridInqPosition(gridID);
+          const int number = gridInqNumber(gridID);
+          const int position = gridInqPosition(gridID);
           if (number > 0) fprintf(stdout, "%33s : number=%d  position=%d\n", "grid", number, position);
 
           if (gridInqReference(gridID, NULL))
@@ -482,81 +482,76 @@ printGridInfoKernel(int gridID, int index, bool lproj)
 void
 printGridInfo(int vlistID)
 {
-  int ngrids = vlistNgrids(vlistID);
+  const int ngrids = vlistNgrids(vlistID);
   for (int index = 0; index < ngrids; index++)
     {
-      int gridID = vlistGrid(vlistID, index);
+      const int gridID = vlistGrid(vlistID, index);
       printGridInfoKernel(gridID, index, false);
-      int projID = gridInqProj(gridID);
+      const int projID = gridInqProj(gridID);
       if (projID != CDI_UNDEFID) printGridInfoKernel(projID, index, true);
     }
 }
 
 static void
-printZaxisBoundsInfo(int zaxisID, int dig, int levelsize, double zinc, char *zunits)
+printZaxisBoundsInfo(const int zaxisID, const int dig, const int levelsize, const double zinc, const char *zunits)
 {
-  {
-    double level1, level2;
-    fprintf(stdout, "%33s : ", "bounds");
+  fprintf(stdout, "%33s : ", "bounds");
 
-    level1 = zaxisInqLbound(zaxisID, 0);
-    level2 = zaxisInqUbound(zaxisID, 0);
-    fprintf(stdout, "%.*g-%.*g", dig, level1, dig, level2);
-    if (levelsize > 1)
-      {
-        level1 = zaxisInqLbound(zaxisID, levelsize - 1);
-        level2 = zaxisInqUbound(zaxisID, levelsize - 1);
-        fprintf(stdout, " to %.*g-%.*g", dig, level1, dig, level2);
-        if (IS_NOT_EQUAL(zinc, 0)) fprintf(stdout, " by %.*g", dig, zinc);
-      }
-    fprintf(stdout, " %s", zunits);
-    fprintf(stdout, "\n");
-  }
+  double level1 = zaxisInqLbound(zaxisID, 0);
+  double level2 = zaxisInqUbound(zaxisID, 0);
+  fprintf(stdout, "%.*g-%.*g", dig, level1, dig, level2);
+  if (levelsize > 1)
+    {
+      level1 = zaxisInqLbound(zaxisID, levelsize - 1);
+      level2 = zaxisInqUbound(zaxisID, levelsize - 1);
+      fprintf(stdout, " to %.*g-%.*g", dig, level1, dig, level2);
+      if (IS_NOT_EQUAL(zinc, 0)) fprintf(stdout, " by %.*g", dig, zinc);
+    }
+  fprintf(stdout, " %s", zunits);
+  fprintf(stdout, "\n");
 }
 
 static void
-printZaxisLevelInfo(int levelsize, int zaxisID, int zaxistype, double zinc, int dig, char *zname, char *zunits)
+printZaxisLevelInfo(const int levelsize, const int zaxisID, const int zaxistype, double zinc, const int dig, const char *zname, const char *zunits)
 {
-  {
-    double *levels = (double *) malloc((size_t) levelsize * sizeof(double));
-    zaxisInqLevels(zaxisID, levels);
+  double *levels = (double *) malloc((size_t) levelsize * sizeof(double));
+  zaxisInqLevels(zaxisID, levels);
 
-    if (!(zaxistype == ZAXIS_SURFACE && levelsize == 1 && !(fabs(levels[0]) > 0)))
-      {
-        double zfirst = levels[0];
-        double zlast = levels[levelsize - 1];
-        if (levelsize > 2)
-          {
-            zinc = (levels[levelsize - 1] - levels[0]) / (levelsize - 1);
-            for (int levelID = 2; levelID < levelsize; ++levelID)
-              if (fabs(fabs(levels[levelID] - levels[levelID - 1]) - zinc) > 0.001 * zinc)
-                {
-                  zinc = 0;
-                  break;
-                }
-          }
+  if (!(zaxistype == ZAXIS_SURFACE && levelsize == 1 && !(fabs(levels[0]) > 0)))
+    {
+      const double zfirst = levels[0];
+      const double zlast = levels[levelsize - 1];
+      if (levelsize > 2)
+        {
+          zinc = (levels[levelsize - 1] - levels[0]) / (levelsize - 1);
+          for (int levelID = 2; levelID < levelsize; ++levelID)
+            if (fabs(fabs(levels[levelID] - levels[levelID - 1]) - zinc) > 0.001 * zinc)
+              {
+                zinc = 0;
+                break;
+              }
+        }
 
-        fprintf(stdout, "%33s : %.*g", zname, dig, zfirst);
-        if (levelsize > 1)
-          {
-            fprintf(stdout, " to %.*g", dig, zlast);
-            if (IS_NOT_EQUAL(zinc, 0)) fprintf(stdout, " by %.*g", dig, zinc);
-          }
-        fprintf(stdout, " %s", zunits);
-        fprintf(stdout, "\n");
-      }
+      fprintf(stdout, "%33s : %.*g", zname, dig, zfirst);
+      if (levelsize > 1)
+        {
+          fprintf(stdout, " to %.*g", dig, zlast);
+          if (IS_NOT_EQUAL(zinc, 0)) fprintf(stdout, " by %.*g", dig, zinc);
+        }
+      fprintf(stdout, " %s", zunits);
+      fprintf(stdout, "\n");
+    }
 
-    free(levels);
-  }
+  free(levels);
 }
 
 static void
-printZaxisHybridInfo(int zaxisID)
+printZaxisHybridInfo(const int zaxisID)
 {
   char psname[CDI_MAX_NAME];
   psname[0] = 0;
   cdiZaxisInqKeyStr(zaxisID, CDI_KEY_PSNAME, CDI_MAX_NAME, psname);
-  int vctsize = zaxisInqVctSize(zaxisID);
+  const int vctsize = zaxisInqVctSize(zaxisID);
   if (vctsize || psname[0])
     {
       fprintf(stdout, "%33s :", "available");
@@ -567,7 +562,7 @@ printZaxisHybridInfo(int zaxisID)
 }
 
 static void
-printZaxisGenericInfo(int ltype, int zaxistype, char *zaxisname)
+printZaxisGenericInfo(const int ltype, const int zaxistype, const char *zaxisname)
 {
   if (zaxistype == ZAXIS_GENERIC && ltype != 0)
     {
@@ -580,10 +575,9 @@ printZaxisGenericInfo(int ltype, int zaxistype, char *zaxisname)
 }
 
 static void
-printZaxisReferenceInfo(int zaxisID)
+printZaxisReferenceInfo(const int zaxisID)
 {
-  int number = zaxisInqNumber(zaxisID);
-
+  const int number = zaxisInqNumber(zaxisID);
   if (number > 0)
     {
       fprintf(stdout, "%33s : ", "zaxis");
@@ -609,7 +603,7 @@ printZaxisInfo(int vlistID)
 {
   char zaxisname[CDI_MAX_NAME], zname[CDI_MAX_NAME], zunits[CDI_MAX_NAME];
 
-  int nzaxis = vlistNzaxis(vlistID);
+  const int nzaxis = vlistNzaxis(vlistID);
   for (int index = 0; index < nzaxis; index++)
     {
       int dig = 7;
@@ -619,10 +613,10 @@ printZaxisInfo(int vlistID)
 #endif
       //______________________________________________________--
       double zinc = 0;
-      int zaxisID = vlistZaxis(vlistID, index);
-      int zaxistype = zaxisInqType(zaxisID);
-      int ltype = zaxisInqLtype(zaxisID);
-      int levelsize = zaxisInqSize(zaxisID);
+      const int zaxisID = vlistZaxis(vlistID, index);
+      const int zaxistype = zaxisInqType(zaxisID);
+      const int ltype = zaxisInqLtype(zaxisID);
+      const int levelsize = zaxisInqSize(zaxisID);
       // int prec      = zaxisInqDatatype(zaxisID);
       // int dig = (prec == CDI_DATATYPE_FLT64) ? 15 : 7;
 
@@ -645,7 +639,7 @@ printZaxisInfo(int vlistID)
       set_text_color(stdout, RESET, GREEN);
 #endif
       fprintf(stdout, " levels=%d", levelsize);
-      bool zscalar = (levelsize == 1) ? zaxisInqScalar(zaxisID) : false;
+      const bool zscalar = (levelsize == 1) ? zaxisInqScalar(zaxisID) : false;
       if (zscalar) fprintf(stdout, "  scalar");
       my_reset_text_color(stdout);
       fprintf(stdout, "\n");
@@ -660,26 +654,20 @@ printZaxisInfo(int vlistID)
           printZaxisBoundsInfo(zaxisID, dig, levelsize, zinc, zunits);
         }
 
-      if (zaxistype == ZAXIS_HYBRID)
-        {
-          printZaxisHybridInfo(zaxisID);
-        }
+      if (zaxistype == ZAXIS_HYBRID) printZaxisHybridInfo(zaxisID);
 
-      if (zaxistype == ZAXIS_REFERENCE)
-        {
-          printZaxisReferenceInfo(zaxisID);
-        }
+      if (zaxistype == ZAXIS_REFERENCE) printZaxisReferenceInfo(zaxisID);
     }
 }
 
 void
 printSubtypeInfo(int vlistID)
 {
-  int nsubtypes = vlistNsubtypes(vlistID);
+  const int nsubtypes = vlistNsubtypes(vlistID);
   for (int index = 0; index < nsubtypes; index++)
     {
-      int subtypeID = vlistSubtype(vlistID, index);
-      int subtypesize = subtypeInqSize(subtypeID);
+      const int subtypeID = vlistSubtype(vlistID, index);
+      const int subtypesize = subtypeInqSize(subtypeID);
       // subtypePrint(subtypeID);
       fprintf(stdout, "  %4d : %-24s :", vlistSubtypeIndex(vlistID, subtypeID) + 1, "tiles");
       fprintf(stdout, " ntiles=%d", subtypesize);
@@ -688,7 +676,7 @@ printSubtypeInfo(int vlistID)
 }
 
 static int
-printDateTime(int ntimeout, int64_t vdate, int vtime)
+printDateTime(int ntimeout, const int64_t vdate, const int vtime)
 {
   char vdatestr[32], vtimestr[32];
 
@@ -763,11 +751,11 @@ printTimesteps(int streamID, int taxisID, int verbose)
     {
 #ifdef CDO
       dtlist.taxisInqTimestep(taxisID, 0);
-      int64_t vdate = dtlist.getVdate(0);
-      int vtime = dtlist.getVtime(0);
+      const int64_t vdate = dtlist.getVdate(0);
+      const int vtime = dtlist.getVtime(0);
 #else
-      int64_t vdate = taxisInqVdate(taxisID);
-      int vtime = taxisInqVtime(taxisID);
+      const int64_t vdate = taxisInqVdate(taxisID);
+      const int vtime = taxisInqVtime(taxisID);
 #endif
 
       if (verbose || tsID < NUM_TIMESTEP)
@@ -810,8 +798,8 @@ printTimesteps(int streamID, int taxisID, int verbose)
         }
       for (int i = toff; i < nvdatetime; ++i)
         {
-          int64_t vdate = next_vdatetime->vdate;
-          int vtime = next_vdatetime->vtime;
+          const int64_t vdate = next_vdatetime->vdate;
+          const int vtime = next_vdatetime->vtime;
           ntimeout = printDateTime(ntimeout, vdate, vtime);
           next_vdatetime = next_vdatetime->next;
         }
