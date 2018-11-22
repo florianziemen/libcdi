@@ -123,51 +123,12 @@ void scanTimeString(const char *ptu, int64_t *rdate, int *rtime)
   int hour = 0, minute = 0, second = 0;
   int v1 = 1, v2 = 1, v3 = 1;
 
-  *rdate = 0;
-  *rtime = 0;
-
-  if ( *ptu )
-    {
-      v1 = atoi(ptu);
-      if ( v1 < 0 ) ptu++;
-      while ( isdigit((int) *ptu) ) ptu++;
-      if ( *ptu )
-        {
-          v2 = atoi(++ptu);
-          while ( isdigit((int) *ptu) ) ptu++;
-          if ( *ptu )
-            {
-              v3 = atoi(++ptu);
-              while ( isdigit((int) *ptu) ) ptu++;
-            }
-        }
-    }
+  if ( *ptu ) sscanf(ptu, "%d-%d-%d %d:%d:%d", &v1, &v2, &v3, &hour, &minute, &second);
 
   if ( v3 > 999 && v1 < 32 )
     { year = v3; month = v2; day = v1; }
   else
     { year = v1; month = v2; day = v3; }
-
-  while ( isspace((int) *ptu) ) ptu++;
-
-  if ( *ptu )
-    {
-      while ( ! isdigit((int) *ptu) ) ptu++;
-
-      hour = atoi(ptu);
-      while ( isdigit((int) *ptu) ) ptu++;
-      if ( *ptu == ':' )
-        {
-          ptu++;
-          minute = atoi(ptu);
-          while ( isdigit((int) *ptu) ) ptu++;
-          if ( *ptu == ':' )
-            {
-              ptu++;
-              second = atoi(ptu);
-            }
-        }
-    }
 
   *rdate = cdiEncodeDate(year, month, day);
   *rtime = cdiEncodeTime(hour, minute, second);
