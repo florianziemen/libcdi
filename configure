@@ -30262,7 +30262,8 @@ fi
 
 
 
-    if test "x$FCMODCASE" = "xuc"; then
+fi
+ if test "x$FCMODCASE" = "xuc"; then
   FORTRAN_MOD_UC_TRUE=
   FORTRAN_MOD_UC_FALSE='#'
 else
@@ -30270,7 +30271,6 @@ else
   FORTRAN_MOD_UC_FALSE=
 fi
 
-fi
 # -----------------------------------------------------------------------
 # Check for SWIG - Generator for script-language bindings
 # Check whether --enable-swig was given.
