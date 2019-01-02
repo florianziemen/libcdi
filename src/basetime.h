@@ -19,7 +19,7 @@ typedef struct {
   int   ncdimid;
   int   ncvarboundsid;
   int   leadtimeid;
-  bool  lwrf;     /* true for time axis in WRF format */
+  bool  lwrf;     // true for time axis in WRF format
   timecache_t *timevar_cache;
 }
 basetime_t;

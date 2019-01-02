@@ -3699,8 +3699,6 @@ int cdfInqContents(stream_t *streamptr)
 {
   int ndims, nvars, ngatts, unlimdimid;
   int ncvarid;
-  int *varids;
-  int nvarids;
   bool time_has_units = false;
   bool time_has_bounds = false;
   bool time_climatology = false;
@@ -3956,8 +3954,8 @@ int cdfInqContents(stream_t *streamptr)
   cdfVerifyVars(nvars, ncvars, ncdims);
 
   // select vars
-  varids = (int *) Malloc((size_t)nvars * sizeof (int));
-  nvarids = 0;
+  int *varids = (int *) Malloc((size_t)nvars * sizeof (int));
+  int nvarids = 0;
   for ( ncvarid = 0; ncvarid < nvars; ncvarid++ )
     if ( ncvars[ncvarid].isvar == TRUE ) varids[nvarids++] = ncvarid;
 
@@ -3966,7 +3964,6 @@ int cdfInqContents(stream_t *streamptr)
   if ( CDI_Debug ) Message("time varid = %d", streamptr->basetime.ncvarid);
   if ( CDI_Debug ) Message("ntsteps = %zu", ntsteps);
   if ( CDI_Debug ) Message("nvars_data = %d", nvars_data);
-
 
   if ( nvars_data == 0 )
     {
@@ -4140,7 +4137,6 @@ double get_timevalue(int fileID, int nctimevarid, int tsID, timecache_t *tcache)
           for ( int ival = 0; ival < maxvals; ++ival )
             {
               cdf_get_var1_double(fileID, nctimevarid, &index, &timevalue);
-              if ( timevalue >= NC_FILL_DOUBLE || timevalue < -NC_FILL_DOUBLE ) timevalue = 0;
               tcache->cache[ival] = timevalue;
               index++;
             }
@@ -4152,8 +4148,9 @@ double get_timevalue(int fileID, int nctimevarid, int tsID, timecache_t *tcache)
     {
       size_t index = (size_t) tsID;
       cdf_get_var1_double(fileID, nctimevarid, &index, &timevalue);
-      if ( timevalue >= NC_FILL_DOUBLE || timevalue < -NC_FILL_DOUBLE ) timevalue = 0;
     }
+
+  if ( timevalue >= NC_FILL_DOUBLE || timevalue < -NC_FILL_DOUBLE ) timevalue = 0;
 
   return timevalue;
 }
