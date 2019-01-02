@@ -7,9 +7,9 @@
 #define MAX_TIMECACHE_SIZE 1024
 
 typedef struct {
-  int size;
-  int startid;
-  int maxvals;
+  size_t size;
+  size_t startid;
+  size_t maxvals;
   double cache[MAX_TIMECACHE_SIZE];
 }
 timecache_t;

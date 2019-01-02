@@ -4128,13 +4128,14 @@ double get_timevalue(int fileID, int nctimevarid, int tsID, timecache_t *tcache)
     {
       if ( tcache->size == 0 || (tsID < tcache->startid || tsID > (tcache->startid+tcache->size-1)) )
         {
-          int maxvals = MAX_TIMECACHE_SIZE;
+          size_t maxvals = MAX_TIMECACHE_SIZE;
           tcache->startid = (tsID/MAX_TIMECACHE_SIZE)*MAX_TIMECACHE_SIZE;
           if ( (tcache->startid + maxvals) > tcache->maxvals ) maxvals = (tcache->maxvals)%MAX_TIMECACHE_SIZE;
           tcache->size = maxvals;
-          size_t index = (size_t) tcache->startid;
-          // fprintf(stderr, "fill time cache: %d %d %d %d %d\n", tcache->maxvals, tsID, tcache->startid, tcache->startid+maxvals-1, maxvals);
-          for ( int ival = 0; ival < maxvals; ++ival )
+          //fprintf(stderr, "fill time cache: %d %d %d %d %d\n", tcache->maxvals, tsID, tcache->startid, tcache->startid+maxvals-1, maxvals);
+          //cdf_get_vara_double(fileID, nctimevarid, &tcache->startid, &maxvals, tcache->cache);
+          size_t index = tcache->startid;
+          for ( size_t ival = 0; ival < maxvals; ++ival )
             {
               cdf_get_var1_double(fileID, nctimevarid, &index, &timevalue);
               tcache->cache[ival] = timevalue;
