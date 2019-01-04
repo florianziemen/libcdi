@@ -15,13 +15,12 @@
 void cdiDecodeParam(int param, int *pnum, int *pcat, int *pdis)
 {
   unsigned uparam = (unsigned)param;
-  unsigned upnum;
 
-  *pdis = 0xff   & uparam;
-  *pcat = 0xff   & uparam >> 8;
-  upnum = 0xffff & uparam >> 16;
+  *pdis = (int) (0xffU & uparam);
+  *pcat = (int) (0xffU & (uparam >> 8));
+  unsigned upnum = 0xffffU & (uparam >> 16);
   if ( upnum > 0x7fffU ) upnum = 0x8000U - upnum;
-  *pnum = (int)upnum;
+  *pnum = (int) upnum;
 }
 
 
@@ -33,7 +32,7 @@ int cdiEncodeParam(int pnum, int pcat, int pdis)
   unsigned upnum = (unsigned)pnum;
   if ( pnum < 0 ) upnum = (unsigned)(0x8000 - pnum);
 
-  unsigned uparam = upnum << 16 | (unsigned)(pcat << 8) | (unsigned)pdis;
+  unsigned uparam = (upnum << 16) | (((unsigned)pcat) << 8) | (unsigned)pdis;
 
   return (int)uparam;
 }

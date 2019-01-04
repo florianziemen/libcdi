@@ -10,11 +10,11 @@ UINT32 get_UINT32(unsigned char *x)
   switch (HOST_ENDIANNESS)
     {
     case CDI_BIGENDIAN:
-      return ((UINT32)(((UINT32)x[0]<<24)+((UINT32)x[1]<<16)+((UINT32)x[2]<< 8)+ (UINT32)x[3]));
+      return (((UINT32)x[0])<<24) + (((UINT32)x[1])<<16) + (((UINT32)x[2])<< 8) + (UINT32)x[3];
     case CDI_LITTLEENDIAN:
-      return ((UINT32)(((UINT32)x[3]<<24)+((UINT32)x[2]<<16)+((UINT32)x[1]<< 8)+ (UINT32)x[0]));
+      return (((UINT32)x[3])<<24) + (((UINT32)x[2])<<16) + (((UINT32)x[1])<< 8) + (UINT32)x[0];
     default:
-      Error("unhandled endianness %d", HOST_ENDIANNESS);
+      Error("Unhandled endianness %d", HOST_ENDIANNESS);
       return UINT32_C(0xFFFFFFFF);
     }
 }
@@ -25,11 +25,11 @@ UINT32 get_SUINT32(unsigned char *x)
   switch (HOST_ENDIANNESS)
     {
     case CDI_BIGENDIAN:
-      return ((UINT32)(((UINT32)x[3]<<24)+((UINT32)x[2]<<16)+((UINT32)x[1]<< 8)+ (UINT32)x[0]));
+      return (((UINT32)x[3])<<24) + (((UINT32)x[2])<<16) + (((UINT32)x[1])<< 8) + (UINT32)x[0];
     case CDI_LITTLEENDIAN:
-      return ((UINT32)(((UINT32)x[0]<<24)+((UINT32)x[1]<<16)+((UINT32)x[2]<< 8)+ (UINT32)x[3]));
+      return (((UINT32)x[0])<<24) + (((UINT32)x[1])<<16) + (((UINT32)x[2])<< 8) + (UINT32)x[3];
     default:
-      Error("unhandled endianness %d", HOST_ENDIANNESS);
+      Error("Unhandled endianness %d", HOST_ENDIANNESS);
       return UINT32_C(0xFFFFFFFF);
     }
 }
@@ -40,13 +40,13 @@ UINT64 get_UINT64(unsigned char *x)
   switch (HOST_ENDIANNESS)
     {
     case CDI_BIGENDIAN:
-      return ((UINT64)(((UINT64)x[0]<<56)+((UINT64)x[1]<<48)+((UINT64)x[2]<<40)+((UINT64)x[3]<<32)+
-                       ((UINT64)x[4]<<24)+((UINT64)x[5]<<16)+((UINT64)x[6]<< 8)+ (UINT64)x[7]));
+      return (((UINT64)x[0])<<56) + (((UINT64)x[1])<<48) + (((UINT64)x[2])<<40) + (((UINT64)x[3])<<32) +
+             (((UINT64)x[4])<<24) + (((UINT64)x[5])<<16) + (((UINT64)x[6])<< 8) + (UINT64)x[7];
     case CDI_LITTLEENDIAN:
-      return ((UINT64)(((UINT64)x[7]<<56)+((UINT64)x[6]<<48)+((UINT64)x[5]<<40)+((UINT64)x[4]<<32)+
-                       ((UINT64)x[3]<<24)+((UINT64)x[2]<<16)+((UINT64)x[1]<< 8)+ (UINT64)x[0]));
+      return (((UINT64)x[7])<<56) + (((UINT64)x[6])<<48) + (((UINT64)x[5])<<40) + (((UINT64)x[4])<<32) +
+             (((UINT64)x[3])<<24) + (((UINT64)x[2])<<16) + (((UINT64)x[1])<< 8) + (UINT64)x[0];
     default:
-      Error("unhandled endianness %d", HOST_ENDIANNESS);
+      Error("Unhandled endianness %d", HOST_ENDIANNESS);
       return UINT64_C(0xFFFFFFFFFFFFFFFF);
     }
 }
@@ -57,13 +57,13 @@ UINT64 get_SUINT64(unsigned char *x)
   switch (HOST_ENDIANNESS)
     {
     case CDI_BIGENDIAN:
-      return ((UINT64)(((UINT64)x[7]<<56)+((UINT64)x[6]<<48)+((UINT64)x[5]<<40)+((UINT64)x[4]<<32)+
-                       ((UINT64)x[3]<<24)+((UINT64)x[2]<<16)+((UINT64)x[1]<< 8)+ (UINT64)x[0]));
+      return (((UINT64)x[7])<<56) + (((UINT64)x[6])<<48) + (((UINT64)x[5])<<40) + (((UINT64)x[4])<<32) +
+             (((UINT64)x[3])<<24) + (((UINT64)x[2])<<16) + (((UINT64)x[1])<< 8) + (UINT64)x[0];
     case CDI_LITTLEENDIAN:
-      return ((UINT64)(((UINT64)x[0]<<56)+((UINT64)x[1]<<48)+((UINT64)x[2]<<40)+((UINT64)x[3]<<32)+
-                       ((UINT64)x[4]<<24)+((UINT64)x[5]<<16)+((UINT64)x[6]<< 8)+ (UINT64)x[7]));
+      return (((UINT64)x[0])<<56) + (((UINT64)x[1])<<48) + (((UINT64)x[2])<<40) + (((UINT64)x[3])<<32) +
+             (((UINT64)x[4])<<24) + (((UINT64)x[5])<<16) + (((UINT64)x[6])<< 8) + (UINT64)x[7];
     default:
-      Error("unhandled endianness %d", HOST_ENDIANNESS);
+      Error("Unhandled endianness %d", HOST_ENDIANNESS);
       return UINT64_C(0xFFFFFFFFFFFFFFFF);
     }
 }
@@ -76,18 +76,17 @@ size_t binReadF77Block(int fileID, int byteswap)
 
   if ( fileRead(fileID, f77block, 4) == 4 )
     {
-      if ( byteswap )
-	blocklen = get_SUINT32(f77block);
-      else
-	blocklen =  get_UINT32(f77block);
+      blocklen = byteswap ? get_SUINT32(f77block) : get_UINT32(f77block);
     }
 
-  return (blocklen);
+  return blocklen;
 }
 
 
 void binWriteF77Block(int fileID, int byteswap, size_t blocksize)
 {
+  static unsigned int s[4] = {0, 8, 16, 24};
+  unsigned long ublocksize = (unsigned long) blocksize;
   unsigned char f77block[4];
 
   switch (HOST_ENDIANNESS)
@@ -95,169 +94,117 @@ void binWriteF77Block(int fileID, int byteswap, size_t blocksize)
     case CDI_BIGENDIAN:
       if ( byteswap )
 	{
-	  f77block[0] = (unsigned char) (blocksize);
-	  f77block[1] = (unsigned char) (blocksize >>  8);
-	  f77block[2] = (unsigned char) (blocksize >> 16);
-	  f77block[3] = (unsigned char) (blocksize >> 24);
+          for (int i = 0; i <= 3; ++i) f77block[i] = (unsigned char) (ublocksize >> s[i]);
 	}
       else
 	{
-	  f77block[3] = (unsigned char) (blocksize);
-	  f77block[2] = (unsigned char) (blocksize >>  8);
-	  f77block[1] = (unsigned char) (blocksize >> 16);
-	  f77block[0] = (unsigned char) (blocksize >> 24);
+          for (int i = 3; i >= 0; --i) f77block[i] = (unsigned char) (ublocksize >> s[i]);
 	}
       break;
     case CDI_LITTLEENDIAN:
       if ( byteswap )
 	{
-	  f77block[3] = (unsigned char) (blocksize);
-	  f77block[2] = (unsigned char) (blocksize >>  8);
-	  f77block[1] = (unsigned char) (blocksize >> 16);
-	  f77block[0] = (unsigned char) (blocksize >> 24);
+          for (int i = 3; i >= 0; --i) f77block[i] = (unsigned char) (ublocksize >> s[i]);
 	}
       else
 	{
-	  f77block[0] = (unsigned char) (blocksize);
-	  f77block[1] = (unsigned char) (blocksize >>  8);
-	  f77block[2] = (unsigned char) (blocksize >> 16);
-	  f77block[3] = (unsigned char) (blocksize >> 24);
+          for (int i = 0; i <= 3; ++i) f77block[i] = (unsigned char) (ublocksize >> s[i]);
 	}
       break;
     default:
-      Error("unhandled endianness %d", HOST_ENDIANNESS);
+      Error("Unhandled endianness %d", HOST_ENDIANNESS);
     }
 
   if ( fileWrite(fileID, f77block, 4) != 4 )
-    Error("write failed on %s", fileInqName(fileID));
+    Error("Write failed on %s", fileInqName(fileID));
 }
 
 
 int binReadInt32(int fileID, int byteswap, size_t size, INT32 *ptr)
 {
-  if ( sizeof(INT32) == 4 )
-    {
-      fileRead(fileID, (void *) ptr, 4*size);
-      if ( byteswap ) swap4byte(ptr, size);
-    }
-  else
-    {
-      Error("not implemented for %d byte integer", sizeof(INT32));
-    }
+  if ( sizeof(INT32) != 4 ) Error("Not implemented for %d byte integer!", sizeof(INT32));
 
-  return (0);
+  fileRead(fileID, (void *) ptr, 4*size);
+  if ( byteswap ) swap4byte(ptr, size);
+
+  return 0;
 }
 
 
 int binReadInt64(int fileID, int byteswap, size_t size, INT64 *ptr)
 {
-  if ( sizeof(INT64) == 8 )
-    {
-      fileRead(fileID, (void *) ptr, 8*size);
-      if ( byteswap ) swap8byte(ptr, size);
-    }
-  else
-    {
-      Error("not implemented for %d byte integer", sizeof(INT64));
-    }
+  if ( sizeof(INT64) != 8 ) Error("Not implemented for %d byte integer!", sizeof(INT64));
 
-  return (0);
+  fileRead(fileID, (void *) ptr, 8*size);
+  if ( byteswap ) swap8byte(ptr, size);
+
+  return 0;
 }
 
 
 int binReadFlt32(int fileID, int byteswap, size_t size, FLT32 *ptr)
 {
-  if ( sizeof(FLT32) == 4 )
-    {
-      fileRead(fileID, (void *) ptr, 4*size);
-      if ( byteswap ) swap4byte(ptr, size);
-    }
-  else
-    {
-      Error("not implemented for %d byte float", sizeof(FLT32));
-    }
+  if ( sizeof(FLT32) != 4 ) Error("Not implemented for %d byte float!", sizeof(FLT32));
 
-  return (0);
+  fileRead(fileID, (void *) ptr, 4*size);
+  if ( byteswap ) swap4byte(ptr, size);
+
+  return 0;
 }
 
 
 int binReadFlt64(int fileID, int byteswap, size_t size, FLT64 *ptr)
 {
-  if ( sizeof(FLT64) == 8 )
-    {
-      fileRead(fileID, (void *) ptr, 8*size);
-      if ( byteswap ) swap8byte(ptr, size);
-    }
-  else
-    {
-      Error("not implemented for %d byte float", sizeof(FLT64));
-    }
+  if ( sizeof(FLT64) != 8 ) Error("Not implemented for %d byte float!", sizeof(FLT64));
 
-  return (0);
+  fileRead(fileID, (void *) ptr, 8*size);
+  if ( byteswap ) swap8byte(ptr, size);
+
+  return 0;
 }
 
 
 int binWriteInt32(int fileID, int byteswap, size_t size, INT32 *ptr)
 {
-  if ( sizeof(INT32) == 4 )
-    {
-      if ( byteswap ) swap4byte(ptr, size);
-      fileWrite(fileID, (void *) ptr, 4*size);
-    }
-  else
-    {
-      Error("not implemented for %d byte integer", sizeof(INT32));
-    }
+  if ( sizeof(INT32) != 4 ) Error("Not implemented for %d byte integer!", sizeof(INT32));
 
-  return (0);
+  if ( byteswap ) swap4byte(ptr, size);
+  fileWrite(fileID, (void *) ptr, 4*size);
+
+  return 0;
 }
 
 
 int binWriteInt64(int fileID, int byteswap, size_t size, INT64 *ptr)
 {
-  if ( sizeof(INT64) == 8 )
-    {
-      if ( byteswap ) swap8byte(ptr, size);
-      fileWrite(fileID, (void *) ptr, 8*size);
-    }
-  else
-    {
-      Error("not implemented for %d byte integer", sizeof(INT64));
-    }
+  if ( sizeof(INT64) != 8 ) Error("Not implemented for %d byte integer!", sizeof(INT64));
 
-  return (0);
+  if ( byteswap ) swap8byte(ptr, size);
+  fileWrite(fileID, (void *) ptr, 8*size);
+
+  return 0;
 }
 
 
 int binWriteFlt32(int fileID, int byteswap, size_t size, FLT32 *ptr)
 {
-  if ( sizeof(FLT32) == 4 )
-    {
-      if ( byteswap ) swap4byte(ptr, size);
-      fileWrite(fileID, (void *) ptr, 4*size);
-    }
-  else
-    {
-      Error("not implemented for %d byte float", sizeof(FLT32));
-    }
+  if ( sizeof(FLT32) != 4 ) Error("Not implemented for %d byte float!", sizeof(FLT32));
 
-  return (0);
+  if ( byteswap ) swap4byte(ptr, size);
+  fileWrite(fileID, (void *) ptr, 4*size);
+
+  return 0;
 }
 
 
 int binWriteFlt64(int fileID, int byteswap, size_t size, FLT64 *ptr)
 {
-  if ( sizeof(FLT64) == 8 )
-    {
-      if ( byteswap ) swap8byte(ptr, size);
-      fileWrite(fileID, (void *) ptr, 8*size);
-    }
-  else
-    {
-      Error("not implemented for %d byte float", sizeof(FLT64));
-    }
+  if ( sizeof(FLT64) != 8 ) Error("Not implemented for %d byte float!", sizeof(FLT64));
 
-  return (0);
+  if ( byteswap ) swap8byte(ptr, size);
+  fileWrite(fileID, (void *) ptr, 8*size);
+
+  return 0;
 }
 /*
  * Local Variables:

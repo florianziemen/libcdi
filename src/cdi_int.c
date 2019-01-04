@@ -186,15 +186,17 @@ void cdiPrintDatatypes(void)
 
 void cdiDebug(int level)
 {
-  if ( level == 1 || (level &  2) ) CDI_Debug = 1;
+  unsigned ulevel = (unsigned) level;
+
+  if ( ulevel == 1 || (ulevel &  2) ) CDI_Debug = 1;
 
   if ( CDI_Debug ) Message("debug level %d", level);
 
-  if ( level == 1 || (level &  4) ) memDebug(1);
+  if ( ulevel == 1 || (ulevel &  4) ) memDebug(1);
 
-  if ( level == 1 || (level &  8) ) fileDebug(1);
+  if ( ulevel == 1 || (ulevel &  8) ) fileDebug(1);
 
-  if ( level == 1 || (level & 16) )
+  if ( ulevel == 1 || (ulevel & 16) )
     {
 #ifdef HAVE_LIBCGRIBEX
       gribSetDebug(1);
