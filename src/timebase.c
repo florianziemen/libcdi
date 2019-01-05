@@ -28,43 +28,22 @@ void decode_julday(int calendar,
 }
 
 
-/* convert year, month, day into Julian calendar day */
+// convert year, month, day into Julian calendar day
 int64_t encode_julday(int calendar, int year, int month, int day)
 {
-  int iy;
-  int im;
-  int ib;
-
-  if ( month <= 2 )
-    {
-      iy = year  - 1;
-      im = month + 12;
-    }
-  else
-    {
-      iy = year;
-      im = month;
-    }
-
-
-  if ( iy < 0 )
-    ib = (int)((iy+1)/400) - (int)((iy+1)/100);
-  else
-    ib = (int)(iy/400) - (int)(iy/100);
+  int iy = (month <= 2) ? year  - 1 : year;
+  int im = (month <= 2) ? month + 12 : month;
+  int ib = (iy < 0) ? ((iy+1)/400 - (iy+1)/100) : (iy/400 - iy/100);
 
   if ( calendar == CALENDAR_STANDARD || calendar == CALENDAR_GREGORIAN )
     {
       if ( year > 1582 || (year == 1582 && (month > 10 || (month == 10 && day >= 15))) )
 	{
-	  /*
-	  ** 15th October 1582 AD or later
-	  */
+	  // 15th October 1582 AD or later
 	}
       else
 	{
-	  /*
-	  ** 4th October 1582 AD or earlier
-	  */
+	  // 4th October 1582 AD or earlier
 	  ib = -2;
 	}
     }

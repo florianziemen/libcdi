@@ -578,7 +578,7 @@ void cdiAttUnpack(int cdiID, int varID, void *buf, int size, int *position, void
     xabort("Unknown datatype encountered in attribute %s: %d\n",
            attName, tempbuf[2]);
   }
-  void *attData = (void *) Malloc(elemSize * (size_t)tempbuf[3]);
+  void *attData = Malloc(elemSize * (size_t)tempbuf[3]);
   serializeUnpack(buf, size, position, attData, tempbuf[3], attVDt, context);
   cdi_def_att(tempbuf[2], tempbuf[1], cdiID, varID, attName,
               (size_t)tempbuf[3], (size_t)tempbuf[3] * elemSize, attData);

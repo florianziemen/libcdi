@@ -2952,8 +2952,8 @@ void gridCompress(int gridID)
 	  size_t nv = (size_t)gridptr->nvertex;
           double *restrict area
             = (double *)gridptr->vtable->inqAreaPtr(gridptr),
-            *restrict xvals = (double *)gridptr->vtable->inqXValsPtr((grid_t *)gridptr),
-            *restrict yvals = (double *)gridptr->vtable->inqYValsPtr((grid_t *)gridptr),
+            *restrict xvals = (double *)gridptr->vtable->inqXValsPtr(gridptr),
+            *restrict yvals = (double *)gridptr->vtable->inqYValsPtr(gridptr),
             *restrict xbounds = (double *)gridptr->vtable->inqXBoundsPtr(gridptr),
             *restrict ybounds = (double *)gridptr->vtable->inqYBoundsPtr(gridptr);
           mask_t *restrict mask_gme = gridptr->mask_gme;

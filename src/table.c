@@ -322,7 +322,7 @@ int tableRead(const char *tablefile)
   FILE *tablefp = fopen(tablefile, "r");
   if ( tablefp == NULL ) return tableID;
 
-  char *tablename = (char* )strrchr(tablefile, '/');
+  char *tablename = strrchr(tablefile, '/');
   if ( tablename == 0 ) tablename = (char *) tablefile;
   else                  tablename++;
 

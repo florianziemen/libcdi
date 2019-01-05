@@ -249,7 +249,7 @@ void cdiDefVarKeyBytes(cdi_keys_t *keysp, int key, const unsigned char *bytes, i
         }
       if ( keyp->length == 0 )
         {
-          keyp->v.s = (unsigned char *) malloc(length);
+          keyp->v.s = (unsigned char *) malloc((size_t) length);
           keyp->length = length;
         }
 
