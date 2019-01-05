@@ -517,7 +517,7 @@ printZaxisLevelInfo(const int levelsize, const int zaxisID, const int zaxistype,
   double *levels = (double *) malloc((size_t) levelsize * sizeof(double));
   zaxisInqLevels(zaxisID, levels);
 
-  if (!(zaxistype == ZAXIS_SURFACE && levelsize == 1 && !(fabs(levels[0]) > 0)))
+  if (!(zaxistype == ZAXIS_SURFACE && levelsize == 1 && fabs(levels[0]) <= 0))
     {
       const double zfirst = levels[0];
       const double zlast = levels[levelsize - 1];
