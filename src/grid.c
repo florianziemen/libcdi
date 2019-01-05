@@ -362,7 +362,7 @@ void cdiGridTypeInit(grid_t *gridptr, int gridtype, size_t size)
 // used also in CDO
 void gridGenXvals(int xsize, double xfirst, double xlast, double xinc, double *restrict xvals)
 {
-  if ( (! (fabs(xinc) > 0)) && xsize > 1 )
+  if (fabs(xinc) <= 0 && xsize > 1)
     {
       if ( xfirst >= xlast )
         {
@@ -458,7 +458,7 @@ void gridGenYvals(int gridtype, int ysize, double yfirst, double ylast, double y
   /*     else if ( gridtype == GRID_LONLAT || gridtype == GRID_GENERIC ) */
   else
     {
-      if ( (! (fabs(yinc) > 0)) && ysize > 1 )
+      if (fabs(yinc) <= 0 && ysize > 1)
         {
           if ( IS_EQUAL(yfirst, ylast) && IS_NOT_EQUAL(yfirst, 0) ) ylast *= -1;
 
@@ -1929,7 +1929,7 @@ double gridInqXinc(int gridID)
   grid_t *gridptr = grid_to_pointer(gridID);
   const double *restrict xvals = gridptr->vtable->inqXValsPtr(gridptr);
 
-  if ( (! (fabs(gridptr->x.inc) > 0)) && xvals )
+  if (fabs(gridptr->x.inc) <= 0 && xvals)
     {
       size_t xsize = gridptr->x.size;
       if ( xsize > 1 ) gridptr->x.inc = grid_calc_increment(xsize, xvals);
@@ -1953,7 +1953,7 @@ double gridInqYinc(int gridID)
   grid_t *gridptr = grid_to_pointer(gridID);
   const double *yvals = gridptr->vtable->inqYValsPtr(gridptr);
 
-  if ( (! (fabs(gridptr->y.inc) > 0)) && yvals )
+  if (fabs(gridptr->y.inc) <= 0 && yvals)
     {
       size_t ysize = gridptr->y.size;
       if ( ysize > 1 ) gridptr->y.inc = grid_calc_increment(ysize, yvals);

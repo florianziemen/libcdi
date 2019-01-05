@@ -1680,7 +1680,7 @@ void confp3(double pval, int *kexp, int *kmant, int kbits, int kround)
   /*   Section 2 . Convert value of zero.                              */
   /* ----------------------------------------------------------------- */
 
-  if ( ! (fabs(pval) > 0))
+  if (fabs(pval) <= 0)
     {
       *kexp  = 0;
       *kmant = 0;
