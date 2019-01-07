@@ -153,7 +153,8 @@ AC_CHECK_LIB(m, floor)
 ACX_OPTIONS
 AM_CONDITIONAL([ENABLE_NETCDF],[test x$ENABLE_NETCDF = xyes])
 AC_CHECK_FUNCS([grib_get_length])
-AS_IF([test "x$with_grib_api" != 'x' -a "x$with_grib_api" != 'xno' ],
+AS_IF([test x"$with_grib_api" != x -a "x$with_grib_api" != xno \
+            -o x"$with_eccodes" != x -a x"$with_eccodes" != xno],
   [ENABLE_LIBGRIB_API=yes],[ENABLE_LIBGRIB_API=no])
 AC_SUBST([ENABLE_LIBGRIB_API])
 AM_SUBST_NOTMAKE([ENABLE_LIBGRIB_API])
