@@ -830,7 +830,8 @@ countVarChunkMissingVals(int vlistID, int varID, struct streamMapping *mapping, 
 static inline void
 destructRetained(struct cacheRedist *restrict retained, size_t numRetained)
 {
-  for (size_t i = 0; i < (size_t) numRetained; ++i) xt_redist_delete(retained[i].redist);
+  for (size_t i = 0; i < (size_t) numRetained; ++i)
+    if (retained[i].redist) xt_redist_delete(retained[i].redist);
 }
 
 /* return true if the new mapping for stream streamIdx is unchanged
@@ -846,7 +847,7 @@ handleRedistCache(size_t streamIdx, struct streamMapping *restrict mapping, size
   bool reuseRedists = false;
   if (!rxWin[streamIdx].retained)
     {
-      rxWin[streamIdx].retained = Malloc(numPasses * sizeof(*rxWin[streamIdx].retained));
+      rxWin[streamIdx].retained = Calloc(numPasses, sizeof(*rxWin[streamIdx].retained));
       rxWin[streamIdx].numRetained = numPasses;
       rxWin[streamIdx].prevLayout = mapping->layout;
       mapping->layout = NULL;
@@ -870,6 +871,7 @@ handleRedistCache(size_t streamIdx, struct streamMapping *restrict mapping, size
         {
           destructRetained(rxWin[streamIdx].retained, rxWin[streamIdx].numRetained);
           rxWin[streamIdx].retained = Realloc(rxWin[streamIdx].retained, numPasses * sizeof(*rxWin[streamIdx].retained));
+          for (size_t i = 0; i < numPasses; ++i) rxWin[streamIdx].retained[i].redist = NULL;
           rxWin[streamIdx].numRetained = numPasses;
         }
     }
