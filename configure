@@ -28645,7 +28645,8 @@ _ACEOF
 fi
 done
 
-if test "x$with_grib_api" != 'x' -a "x$with_grib_api" != 'xno' ; then :
+if test x"$with_grib_api" != x -a "x$with_grib_api" != xno \
+            -o x"$with_eccodes" != x -a x"$with_eccodes" != xno; then :
   ENABLE_LIBGRIB_API=yes
 else
   ENABLE_LIBGRIB_API=no
