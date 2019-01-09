@@ -55,7 +55,7 @@ int cdfDefTimeBounds(int fileID, int nctimevarid, int nctimedimid, const char *t
 }
 
 static
-void cdfDefTimeUnits(char *unitstr, taxis_t *taxis0, taxis_t *taxis)
+void cdfDefTimeUnits(char *unitstr, taxis_t *taxis)
 {
   if ( taxis->units && taxis->units[0] )
     {
@@ -65,14 +65,14 @@ void cdfDefTimeUnits(char *unitstr, taxis_t *taxis0, taxis_t *taxis)
     {
       unitstr[0] = 0;
 
-      if ( taxis0->type == TAXIS_ABSOLUTE )
+      if ( taxis->type == TAXIS_ABSOLUTE )
         {
           static const char *const unitstrfmt[3]
             = { "year as %Y.%f",
                 "month as %Y%m.%f",
                 "day as %Y%m%d.%f" };
-          size_t fmtidx = (taxis0->unit == TUNIT_YEAR ? 0
-                           : (taxis0->unit == TUNIT_MONTH ? 1
+          size_t fmtidx = (taxis->unit == TUNIT_YEAR ? 0
+                           : (taxis->unit == TUNIT_MONTH ? 1
                               : 2));
           strcpy(unitstr, unitstrfmt[fmtidx]);
         }
@@ -186,7 +186,7 @@ void cdfDefTime(stream_t* streamptr)
 
   {
     char unitstr[CDI_MAX_NAME];
-    cdfDefTimeUnits(unitstr, &streamptr->tsteps[0].taxis, taxis);
+    cdfDefTimeUnits(unitstr, taxis);
     size_t len = strlen(unitstr);
     if ( len )
       {
