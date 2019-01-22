@@ -380,7 +380,7 @@ void gribGetLevel(grib_handle *gh, int* leveltype1, int* leveltype2, int* lbound
       grib2GetLevel(gh, leveltype1, leveltype2, lbounds, level1, level2, level_sf, level_unit);
 
       /* read in tiles attributes (if there are any) */
-      tiles->tileindex = (int)gribGetLongDefault(gh, cdiSubtypeAttributeName[SUBTYPE_ATT_TILEINDEX], -1);
+      tiles->tileindex = (int)gribGetLongDefault(gh, cdiSubtypeAttributeName[SUBTYPE_ATT_TILEINDEX], 0);
       tiles->totalno_of_tileattr_pairs = (int)gribGetLongDefault(gh, cdiSubtypeAttributeName[SUBTYPE_ATT_TOTALNO_OF_TILEATTR_PAIRS], -1);
       tiles->tileClassification = (int)gribGetLongDefault(gh, cdiSubtypeAttributeName[SUBTYPE_ATT_TILE_CLASSIFICATION], -1);
       tiles->numberOfTiles = (int)gribGetLongDefault(gh, cdiSubtypeAttributeName[SUBTYPE_ATT_NUMBER_OF_TILES], -1);
@@ -1041,11 +1041,10 @@ int gribapiScanTimestep1(stream_t * streamptr)
           char paramstr[32];
           cdiParamToString(param, paramstr, sizeof(paramstr));
           Message("%4u %8d name=%s id=%s ltype=%d lev1=%d lev2=%d vdate=%lld vtime=%d",
-                nrecs, (int)recpos, varname, paramstr, leveltype1, level1, level2, vdate, vtime);
+                  nrecs, (int)recpos, varname, paramstr, leveltype1, level1, level2, vdate, vtime);
         }
 
-      var_tile_t *ptiles = NULL;
-      if ( memcmp(&tiles, &dummy_tiles, sizeof(var_tile_t)) != 0 ) ptiles = &tiles;
+      var_tile_t *ptiles = memcmp(&tiles, &dummy_tiles, sizeof(var_tile_t)) ? &tiles : NULL;
       gribapiAddRecord(streamptr, param, gh, recsize, recpos, datatype, comptype, varname,
                        leveltype1, leveltype2, lbounds, level1, level2, level_sf, level_unit, ptiles, perturbationNumber, 1);
 

@@ -133,8 +133,7 @@ varGetEntry(int param, int gridID, int zaxistype, int ltype1, int tsteptype, con
 {
   for ( unsigned varID = 0; varID < varTablesize; varID++ )
     {
-      /* testing for "param" implicitly checks if we are beyond the
-       * current vartable size: */
+      /* testing for "param" implicitly checks if we are beyond the current vartable size: */
       if ( vartable[varID].param == param )
         {
           int no_of_tiles = -1;
