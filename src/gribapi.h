@@ -97,7 +97,8 @@ static inline void *gribHandleNew(int editionNumber)
   grib_handle *gh = grib_handle_new_from_samples(NULL, (editionNumber == 1) ? "GRIB1" : "GRIB2");
   if ( gh == NULL ) Error("grib_handle_new_from_samples failed!");
 
-  if ( editionNumber > 1 ) GRIB_CHECK(my_grib_set_long(gh, "numberOfValues", 0L), 0);
+  if ( editionNumber == 1 ) GRIB_CHECK(my_grib_set_long(gh, "deleteLocalDefinition", 1L), 0);
+  if ( editionNumber == 2 ) GRIB_CHECK(my_grib_set_long(gh, "numberOfValues", 0L), 0);
 
   return gh;
 }
