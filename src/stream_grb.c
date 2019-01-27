@@ -30,6 +30,21 @@ void ensureBufferSize(size_t requiredSize, size_t *curSize, void **buffer)
     }
 }
 
+int grbDecompress(size_t recsize, size_t *buffersize, void **gribbuffer)
+{
+  int comptype = CDI_COMPRESS_NONE;
+
+  size_t unzipsize;
+  if ( gribGetZip(recsize, (unsigned char *)*gribbuffer, &unzipsize) > 0 )
+    {
+      comptype = CDI_COMPRESS_SZIP;
+      unzipsize += 100; /* need 0 to 1 bytes for rounding of bds */
+      ensureBufferSize(unzipsize, buffersize, gribbuffer);
+    }
+
+  return comptype;
+}
+
 
 // Regarding operation to change parameter identification:
 // change if cdiGribChangeParameterID.active

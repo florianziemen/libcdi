@@ -817,22 +817,11 @@ int gribapiVarCompare(compvar2_t compVar, record_t record, int flag)
 }
 
 static
-grib_handle *gribapiGetDiskRepresentation(size_t recsize, size_t *buffersize, void **gribbuffer, int *outDatatype, int *outCompressionType, size_t *outUnzipsize)
+grib_handle *gribapiGetDiskRepresentation(size_t recsize, size_t *buffersize, void **gribbuffer, int *outDatatype, int *outCompressionType)
 {
   const int gribversion = (int)((char*)*gribbuffer)[7];
 
-  if ( gribversion <= 1 )
-    {
-      if ( gribGetZip(recsize, *gribbuffer, outUnzipsize) > 0 )
-        {
-          *outCompressionType = CDI_COMPRESS_SZIP;
-          ensureBufferSize(*outUnzipsize + 100, buffersize, gribbuffer);
-        }
-      else
-        {
-          *outCompressionType = CDI_COMPRESS_NONE;
-        }
-    }
+  if ( gribversion <= 1 ) *outCompressionType = grbDecompress(recsize, buffersize, gribbuffer);
 
   grib_handle *gh = grib_handle_new_from_message(NULL, *gribbuffer, recsize);
 
@@ -943,6 +932,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
           streamptr->ntsteps = 1;
           break;
         }
+
       ensureBufferSize(recsize, &buffersize, &gribbuffer);
 
       size_t readsize = recsize;
@@ -950,8 +940,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
       if ( rstatus ) break;
 
       int datatype, comptype = 0;
-      size_t unzipsize;
-      gh = gribapiGetDiskRepresentation(recsize, &buffersize, &gribbuffer, &datatype, &comptype, &unzipsize);
+      gh = gribapiGetDiskRepresentation(recsize, &buffersize, &gribbuffer, &datatype, &comptype);
 
       nrecs_scanned++;
       GRIB_CHECK(my_grib_set_double(gh, "missingValue", CDI_default_missval), 0);
@@ -1157,15 +1146,14 @@ int gribapiScanTimestep2(stream_t * streamptr)
 	  streamptr->ntsteps = 2;
 	  break;
 	}
+
       ensureBufferSize(recsize, &buffersize, &gribbuffer);
 
       size_t readsize = recsize;
       rstatus = gribRead(fileID, gribbuffer, &readsize);
       if ( rstatus ) break;
 
-      size_t unzipsize;
-      if ( gribGetZip(recsize, gribbuffer, &unzipsize) > 0 )
-        ensureBufferSize(unzipsize + 100, &buffersize, &gribbuffer);
+      grbDecompress(recsize, &buffersize, &gribbuffer);
 
       nrecs_scanned++;
       gh = grib_handle_new_from_message(NULL, gribbuffer, recsize);
@@ -1395,9 +1383,7 @@ int gribapiScanTimestep(stream_t * streamptr)
 	      break;
 	    }
 
-          size_t unzipsize;
-	  if ( gribGetZip(recsize, gribbuffer, &unzipsize) > 0 )
-            ensureBufferSize(unzipsize + 100, &buffersize, &gribbuffer);
+          grbDecompress(recsize, &buffersize, &gribbuffer);
 
           nrecs_scanned++;
 	  gh = grib_handle_new_from_message(NULL, gribbuffer, recsize);

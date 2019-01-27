@@ -2,6 +2,7 @@
 #define STREAM_GRB_H
 
 void ensureBufferSize(size_t requiredSize, size_t *curSize, void **buffer);
+int grbDecompress(size_t recsize, size_t *buffersize, void **gribbuffer);
 
 static inline bool gribbyte_get_bit(int number, int bit) { return (bool)((number >> (8-bit)) & 1); }
 static inline void gribbyte_set_bit(int *number, int bit) { *number |= 1 << (8-bit); }
