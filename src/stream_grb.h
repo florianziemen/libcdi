@@ -1,5 +1,7 @@
-#ifndef _STREAM_GRB_H
-#define _STREAM_GRB_H
+#ifndef STREAM_GRB_H
+#define STREAM_GRB_H
+
+void ensureBufferSize(size_t requiredSize, size_t *curSize, void **buffer);
 
 static inline bool gribbyte_get_bit(int number, int bit) { return (bool)((number >> (8-bit)) & 1); }
 static inline void gribbyte_set_bit(int *number, int bit) { *number |= 1 << (8-bit); }
@@ -58,7 +60,7 @@ void streamGrbChangeModeUvRelativeToGrid(int mode);
 void streamGrbDefDataScanningMode(int scanmode);
 int  streamGrbInqDataScanningMode(void);
 
-#endif  /* _STREAM_GRB_H */
+#endif  /* STREAM_GRB_H */
 /*
  * Local Variables:
  * c-file-style: "Java"

@@ -2,6 +2,7 @@
 #include "config.h"
 #endif
 
+#include "dmemory.h"
 #include "cdi.h"
 #include "cdi_int.h"
 #include "stream_cgribex.h"
@@ -18,6 +19,16 @@ int cdiGribUseTimeRangeIndicator        = 0;       // normaly cdo looks in grib 
                                                    // but NWP models such as Harmonie 37h1.2, use "timeRangeIndicator"
                                                    // where:  0: for instanteneous fields; 4: for accumulated fields
 #endif // HIRLAM_EXTENSIONS
+
+
+void ensureBufferSize(size_t requiredSize, size_t *curSize, void **buffer)
+{
+  if ( *curSize < requiredSize )
+    {
+      *curSize = requiredSize;
+      *buffer = Realloc(*buffer, *curSize);
+    }
+}
 
 
 // Regarding operation to change parameter identification:

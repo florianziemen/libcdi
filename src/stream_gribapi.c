@@ -817,19 +817,9 @@ int gribapiVarCompare(compvar2_t compVar, record_t record, int flag)
 }
 
 static
-void ensureBufferSize(size_t requiredSize, size_t *curSize, void **buffer)
-{
-  if ( *curSize < requiredSize )
-    {
-      *curSize = requiredSize;
-      *buffer = Realloc(*buffer, *curSize);
-    }
-}
-
-static
 grib_handle *gribapiGetDiskRepresentation(size_t recsize, size_t *buffersize, void **gribbuffer, int *outDatatype, int *outCompressionType, size_t *outUnzipsize)
 {
-  int gribversion = (int)((char*)*gribbuffer)[7];
+  const int gribversion = (int)((char*)*gribbuffer)[7];
 
   if ( gribversion <= 1 )
     {
