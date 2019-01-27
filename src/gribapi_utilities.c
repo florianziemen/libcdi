@@ -17,7 +17,7 @@
 
 #define FAIL_ON_GRIB_ERROR(function, gribHandle, key, ...) do\
 {\
-  int errorCode = (int)function(gribHandle, key, __VA_ARGS__);  \
+  const int errorCode = (int)function(gribHandle, key, __VA_ARGS__);  \
   if(errorCode)\
     {\
       fprintf(stderr, "%s:%d: Error in function `%s`: `%s` returned error code %d for key \"%s\"", __FILE__, __LINE__, __func__, #function, errorCode, key);\
@@ -88,15 +88,7 @@ bool gribCheckString(grib_handle* gribHandle, const char* key, const char* expec
   Free(value);
 #else
   char *value = gribCopyString(gribHandle, key);
-  int rc;
-  if (value)
-  {
-    rc = strlen(value) + 1 == expectedLength ?
-      !strcmp(value, expectedValue)
-      : false;
-  }
-  else
-    rc = false;
+  int rc = value ? (strlen(value) + 1 == expectedLength ? !strcmp(value, expectedValue) : false) : false;
   Free(value);
 #endif
   return rc;
@@ -261,8 +253,7 @@ static int addToDate(struct tm* me, long long amount, long unit)
 
 static char* makeDateString(struct tm* me)
 {
-  char *result
-    = (char *) Malloc(       4+1+ 2+1+ 2+1+ 2+1+ 2+1+ 2+ 4+ 1);
+  char *result= (char *) Malloc(4+1+ 2+1+ 2+1+ 2+1+ 2+1+ 2+ 4+ 1);
   sprintf(result, "%04d-%02d-%02dT%02d:%02d:%02d.000", me->tm_year + 1900, me->tm_mon + 1, me->tm_mday, me->tm_hour, me->tm_min, me->tm_sec);
   return result;
 }
@@ -367,16 +358,14 @@ struct cdiGribAPI_ts_str_map_elem cdiGribAPI_ts_str_map[] = {
 //Fetches the value of the "stepType" key and converts it into a constant in the TSTEP_* range.
 int gribapiGetTsteptype(grib_handle *gh)
 {
+  size_t len = 256;
+  char stepType[256];
   int tsteptype = TSTEP_INSTANT;
   static bool lprint = true;
 
   if ( gribapiTimeIsFC(gh) )
     {
-      int status;
-      size_t len = 256;
-      char stepType[256];
-
-      status = grib_get_string(gh, "stepType", stepType, &len);
+      const int status = grib_get_string(gh, "stepType", stepType, &len);
       if ( status == 0 && len > 1 && len < 256 )
         {
           for (int i = TSTEP_INSTANT; cdiGribAPI_ts_str_map[i].sname[0]; ++i)
@@ -393,6 +382,7 @@ int gribapiGetTsteptype(grib_handle *gh)
             }
           // printf("stepType: %s %ld %d\n", stepType, len, tsteptype);
         }
+
 #ifdef HIRLAM_EXTENSIONS
       {
       // Normaly cdo looks in grib for attribute called "stepType", see above.
@@ -409,8 +399,8 @@ int gribapiGetTsteptype(grib_handle *gh)
       int rc = grib_get_long(gh, "timeRangeIndicator", &timeRangeIND);
       if (rc != 0) {
             //if ( lprint )
-            Warning("Could not get 'stepType' either 'timeRangeIndicator'. Using defualt!");
-            return (tsteptype);
+            Warning("Could not get 'stepType' either 'timeRangeIndicator'. Using default!");
+            return tsteptype;
       }
       extern int cdiGribUseTimeRangeIndicator;
       cdiGribUseTimeRangeIndicator = 1;
@@ -436,6 +426,7 @@ int gribapiGetTsteptype(grib_handle *gh)
       }
 #endif // HIRLAM_EXTENSIONS
     }
+
   tsteptypeFound:
   return tsteptype;
 }
@@ -479,7 +470,7 @@ int gribapiGetParam(grib_handle *gh)
 int gribapiGetGridType(grib_handle *gh)
 {
   int gridtype = GRID_GENERIC;
-  long gridDefinitionTemplateNumber = gribGetLongDefault(gh, "gridDefinitionTemplateNumber", -1);
+  const long gridDefinitionTemplateNumber = gribGetLongDefault(gh, "gridDefinitionTemplateNumber", -1);
   switch (gridDefinitionTemplateNumber)
     {
       case  GRIB2_GTYPE_LATLON:
@@ -524,7 +515,6 @@ static
 void gribapiGetGridGaussianReduced(grib_handle *gh, grid_t *grid, int editionNumber, size_t numberOfPoints)
 {
   long lpar;
-
   FAIL_ON_GRIB_ERROR(grib_get_long, gh, "numberOfParallelsBetweenAPoleAndTheEquator", &lpar);
   grid->np = (int)lpar;
 
@@ -593,9 +583,9 @@ void gribapiGetGridRegular(grib_handle *gh, grid_t *grid, int editionNumber, int
 {
   long lpar;
   FAIL_ON_GRIB_ERROR(grib_get_long, gh, "Ni", &lpar);
-  size_t nlon = (size_t) lpar;
+  const size_t nlon = (size_t) lpar;
   FAIL_ON_GRIB_ERROR(grib_get_long, gh, "Nj", &lpar);
-  size_t nlat = (size_t) lpar;
+  const size_t nlat = (size_t) lpar;
 
   if ( gridtype == GRID_GAUSSIAN )
     {
@@ -676,11 +666,10 @@ static
 void gribapiGetGridProj(grib_handle *gh, grid_t *grid, size_t numberOfPoints)
 {
   long lpar;
-
   FAIL_ON_GRIB_ERROR(grib_get_long, gh, "Nx", &lpar);
-  size_t nlon = (size_t)lpar;
+  const size_t nlon = (size_t)lpar;
   FAIL_ON_GRIB_ERROR(grib_get_long, gh, "Ny", &lpar);
-  size_t nlat = (size_t)lpar;
+  const size_t nlat = (size_t)lpar;
 
   if ( numberOfPoints != nlon*nlat )
     Error("numberOfPoints (%zu) and gridSize (%zu) differ!", numberOfPoints, nlon*nlat);
@@ -706,8 +695,6 @@ void gribapiGetGridProj(grib_handle *gh, grid_t *grid, size_t numberOfPoints)
 static
 void gribapiGetGridSpectral(grib_handle *gh, grid_t *grid, size_t datasize)
 {
-  long lpar;
-
   size_t len = 256;
   char typeOfPacking[256];
   FAIL_ON_GRIB_ERROR(grib_get_string, gh, "packingType", typeOfPacking, &len);
@@ -716,6 +703,7 @@ void gribapiGetGridSpectral(grib_handle *gh, grid_t *grid, size_t datasize)
 
   grid->size = datasize;
 
+  long lpar;
   FAIL_ON_GRIB_ERROR(grib_get_long, gh, "J", &lpar);
   grid->trunc = (int)lpar;
 }
@@ -723,9 +711,9 @@ void gribapiGetGridSpectral(grib_handle *gh, grid_t *grid, size_t datasize)
 static
 void gribapiGetGridGME(grib_handle *gh, grid_t *grid, size_t numberOfPoints)
 {
-  long lpar;
-
   grid->size = numberOfPoints;
+
+  long lpar;
   if ( grib_get_long(gh, "nd", &lpar) == 0 ) grid->gme.nd  = (int)lpar;
   if ( grib_get_long(gh, "Ni", &lpar) == 0 ) grid->gme.ni  = (int)lpar;
   if ( grib_get_long(gh, "n2", &lpar) == 0 ) grid->gme.ni2 = (int)lpar;
@@ -735,8 +723,6 @@ void gribapiGetGridGME(grib_handle *gh, grid_t *grid, size_t numberOfPoints)
 static
 void gribapiGetGridUnstructured(grib_handle *gh, grid_t *grid, size_t numberOfPoints)
 {
-  long lpar;
-
   unsigned char uuid[CDI_UUID_SIZE];
   /*
     char reference_link[8192];
@@ -745,6 +731,7 @@ void gribapiGetGridUnstructured(grib_handle *gh, grid_t *grid, size_t numberOfPo
   */
   grid->size = numberOfPoints;
 
+  long lpar;
   if ( grib_get_long(gh, "numberOfGridUsed", &lpar) == 0 )
     {
       grid->number   = (int)lpar;
@@ -758,10 +745,7 @@ void gribapiGetGridUnstructured(grib_handle *gh, grid_t *grid, size_t numberOfPo
         }
       */
       size_t len = (size_t)CDI_UUID_SIZE;
-      if ( grib_get_bytes(gh, "uuidOfHGrid", uuid, &len) == 0)
-        {
-          memcpy(grid->uuid, uuid, CDI_UUID_SIZE);
-        }
+      if ( grib_get_bytes(gh, "uuidOfHGrid", uuid, &len) == 0) memcpy(grid->uuid, uuid, CDI_UUID_SIZE);
     }
 }
 
@@ -769,29 +753,20 @@ static
 void gribapiGetGridGeneric(grib_handle *gh, grid_t *grid, size_t numberOfPoints)
 {
   long lpar;
-
-  size_t nlon = 0, nlat = 0;
-  if ( grib_get_long(gh, "Ni", &lpar) == 0 ) nlon = (size_t)lpar;
-  if ( grib_get_long(gh, "Nj", &lpar) == 0 ) nlat = (size_t)lpar;
+  const size_t nlon = (grib_get_long(gh, "Ni", &lpar) == 0) ? (size_t)lpar : 0;
+  const size_t nlat = (grib_get_long(gh, "Nj", &lpar) == 0) ? (size_t)lpar : 0;
 
   grid->size = numberOfPoints;
 
-  if ( nlon > 0 && nlat > 0 && nlon*nlat == grid->size )
-    {
-      grid->x.size = nlon;
-      grid->y.size = nlat;
-    }
-  else
-    {
-      grid->x.size = 0;
-      grid->y.size = 0;
-    }
+  const bool lgeneric = (nlon > 0 && nlat > 0 && nlon*nlat == numberOfPoints);
+  grid->x.size = lgeneric ? nlon : 0;
+  grid->y.size = lgeneric ? nlat : 0;
 }
 
 //TODO: Simplify by use of the convenience functions (gribGetLong(), gribGetLongDefault(), etc.).
 void gribapiGetGrid(grib_handle *gh, grid_t *grid)
 {
-  long editionNumber = gribEditionNumber(gh);
+  const long editionNumber = gribEditionNumber(gh);
   int gridtype = gribapiGetGridType(gh);
   int projtype = (gridtype == GRID_PROJECTION && gribapiGetIsRotated(gh)) ? CDI_PROJ_RLL : CDI_UNDEFID;
   if (gridtype == CDI_PROJ_LCC || gridtype == CDI_PROJ_STERE)
