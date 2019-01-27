@@ -751,13 +751,10 @@ int cgribexScanTimestep1(stream_t *streamptr)
   off_t recpos = 0;
   void *gribbuffer = NULL;
   size_t buffersize = 0;
-  int rstatus;
   int leveltype = 0, level1 = 0, level2 = 0, vdate = 0, vtime = 0;
   DateTime datetime, datetime0 = { LONG_MIN, LONG_MIN };
-  size_t readsize;
   unsigned nrecords, recID;
   int nrecs_scanned = 0;
-  size_t recsize = 0;
   bool warn_time = true;
   bool warn_numavg = true;
   int taxisID = -1;
@@ -782,7 +779,7 @@ int cgribexScanTimestep1(stream_t *streamptr)
   unsigned nrecs = 0;
   while (true)
     {
-      recsize = gribGetSize(fileID);
+      size_t recsize = gribGetSize(fileID);
       recpos  = fileGetPos(fileID);
 
       if ( recsize == 0 )
@@ -794,9 +791,9 @@ int cgribexScanTimestep1(stream_t *streamptr)
 
       ensureBufferSize(recsize, &buffersize, &gribbuffer);
 
-      readsize = recsize;
-      rstatus = gribRead(fileID, (unsigned char *)gribbuffer, &readsize);
-      if ( rstatus ) break;
+      size_t readsize = recsize;
+      // Search for next 'GRIB', read the following record, and position file offset after it.
+      if (gribRead(fileID, gribbuffer, &readsize)) break;
 
       const int comptype = grbDecompress(recsize, &buffersize, &gribbuffer);
 
@@ -928,9 +925,7 @@ int cgribexScanTimestep2(stream_t * streamptr)
   off_t recpos = 0;
   int leveltype = 0, level1 = 0, level2 = 0, vdate = 0, vtime = 0;
   DateTime datetime, datetime0 = { LONG_MIN, LONG_MIN };
-  size_t readsize;
   int nrecs, recID;
-  size_t recsize = 0;
   bool warn_numavg = true;
   char paramstr[32];
 
@@ -974,7 +969,7 @@ int cgribexScanTimestep2(stream_t * streamptr)
     {
       if ( rindex > nrecords ) break;
 
-      recsize = gribGetSize(fileID);
+      size_t recsize = gribGetSize(fileID);
       recpos  = fileGetPos(fileID);
       if ( recsize == 0 )
 	{
@@ -984,9 +979,8 @@ int cgribexScanTimestep2(stream_t * streamptr)
 
       ensureBufferSize(recsize, &buffersize, &gribbuffer);
 
-      readsize = recsize;
-      rstatus = gribRead(fileID, (unsigned char *)gribbuffer, &readsize);
-      if ( rstatus ) break;
+      size_t readsize = recsize;
+      if (gribRead(fileID, gribbuffer, &readsize)) break;
 
       grbDecompress(recsize, &buffersize, &gribbuffer);
 
@@ -1139,30 +1133,15 @@ int cgribexScanTimestep(stream_t * streamptr)
 {
   int rstatus = 0;
   int lmv = 0, iret = 0;
-  size_t recsize = 0;
   off_t recpos = 0;
-  void *gribbuffer;
-  size_t buffersize = 0;
-  int fileID;
   int leveltype = 0, level1 = 0, level2 = 0, vdate = 0, vtime = 0;
   DateTime datetime, datetime0 = { LONG_MIN, LONG_MIN };
   int vrecID, recID;
   bool warn_numavg = true;
-  size_t readsize;
   int taxisID = -1;
-  int rindex, nrecs = 0;
-  int nrecs_scanned;
+  int nrecs = 0;
   char paramstr[32];
 
-  /*
-  if ( CDI_Debug )
-    {
-      Message("streamID = %d", streamptr->self);
-      Message("cts = %d", streamptr->curTsID);
-      Message("rts = %d", streamptr->rtsteps);
-      Message("nts = %d", streamptr->ntsteps);
-    }
-  */
   cgribexrec_t *cgribexp = (cgribexrec_t *) streamptr->record->cgribexp;
   int *isec1 = cgribexp->sec1;
 
@@ -1171,8 +1150,8 @@ int cgribexScanTimestep(stream_t * streamptr)
 
   if ( streamptr->tsteps[tsID].recordSize == 0 )
     {
-      gribbuffer = streamptr->record->buffer;
-      buffersize = streamptr->record->buffersize;
+      void *gribbuffer = streamptr->record->buffer;
+      size_t buffersize = streamptr->record->buffersize;
 
       cdi_create_records(streamptr, tsID);
 
@@ -1183,17 +1162,17 @@ int cgribexScanTimestep(stream_t * streamptr)
       for ( recID = 0; recID < nrecs; recID++ )
 	streamptr->tsteps[tsID].recIDs[recID] = streamptr->tsteps[1].recIDs[recID];
 
-      fileID = streamptr->fileID;
+      int fileID = streamptr->fileID;
 
       fileSetPos(fileID, streamptr->tsteps[tsID].position, SEEK_SET);
 
-      nrecs_scanned = streamptr->tsteps[0].nallrecs + streamptr->tsteps[1].nrecs*(tsID-1);
-      rindex = 0;
+      int nrecs_scanned = streamptr->tsteps[0].nallrecs + streamptr->tsteps[1].nrecs*(tsID-1);
+      int rindex = 0;
       while ( true )
 	{
 	  if ( rindex > nrecs ) break;
 
-	  recsize = gribGetSize(fileID);
+	  size_t recsize = gribGetSize(fileID);
 	  recpos  = fileGetPos(fileID);
 	  if ( recsize == 0 )
 	    {
@@ -1201,11 +1180,12 @@ int cgribexScanTimestep(stream_t * streamptr)
 	      break;
 	    }
 
+          if ( rindex >= nrecs ) break;
+
           ensureBufferSize(recsize, &buffersize, &gribbuffer);
 
-	  readsize = recsize;
-	  rstatus = gribRead(fileID, (unsigned char *)gribbuffer, &readsize);
-	  if ( rstatus )
+	  size_t readsize = recsize;
+	  if (gribRead(fileID, gribbuffer, &readsize))
 	    {
 	      Warning("Inconsistent timestep %d (GRIB record %d/%d)!", tsID+1, rindex+1,
                       streamptr->tsteps[tsID].recordSize);
@@ -1264,8 +1244,8 @@ int cgribexScanTimestep(stream_t * streamptr)
 		}
 	    }
 
-	  datetime.date  = vdate;
-	  datetime.time  = vtime;
+	  datetime.date = vdate;
+	  datetime.time = vtime;
 
 	  compvar_t compVar = cgribexVarSet(param, level1, level2, leveltype, ISEC1_TimeRange);
 

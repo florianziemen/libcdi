@@ -936,8 +936,8 @@ int gribapiScanTimestep1(stream_t * streamptr)
       ensureBufferSize(recsize, &buffersize, &gribbuffer);
 
       size_t readsize = recsize;
-      int rstatus = gribRead(fileID, gribbuffer, &readsize); //Search for next 'GRIB', read the following record, and position file offset after it.
-      if ( rstatus ) break;
+      // Search for next 'GRIB', read the following record, and position file offset after it.
+      if (gribRead(fileID, gribbuffer, &readsize)) break;
 
       int datatype, comptype = 0;
       gh = gribapiGetDiskRepresentation(recsize, &buffersize, &gribbuffer, &datatype, &comptype);
@@ -1150,8 +1150,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
       ensureBufferSize(recsize, &buffersize, &gribbuffer);
 
       size_t readsize = recsize;
-      rstatus = gribRead(fileID, gribbuffer, &readsize);
-      if ( rstatus ) break;
+      if (gribRead(fileID, gribbuffer, &readsize)) break;
 
       grbDecompress(recsize, &buffersize, &gribbuffer);
 
@@ -1323,14 +1322,6 @@ int gribapiScanTimestep(stream_t * streamptr)
   //bool warn_numavg = true;
   int nrecs = 0;
   int vlistID = streamptr->vlistID;
-
-  if ( CDI_Debug )
-    {
-      Message("streamID = %d", streamptr->self);
-      Message("cts = %d", streamptr->curTsID);
-      Message("rts = %d", streamptr->rtsteps);
-      Message("nts = %d", streamptr->ntsteps);
-    }
 
   int tsID  = streamptr->rtsteps;
   taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
