@@ -348,6 +348,32 @@ void cdfDefVarCompression(const stream_t *streamptr, int ncvarid, bool lchunk)
 }
 
 static
+void cdfDefVarPacking(const stream_t *streamptr, int ncvarid, nc_type xtype, int vlistID, int varID)
+{
+  /*  if ( xtype == NC_BYTE || xtype == NC_SHORT || xtype == NC_INT ) */
+    {
+      const double addoffset   = vlistInqVarAddoffset(vlistID, varID);
+      const double scalefactor = vlistInqVarScalefactor(vlistID, varID);
+      const bool laddoffset   = IS_NOT_EQUAL(addoffset, 0);
+      const bool lscalefactor = IS_NOT_EQUAL(scalefactor, 1);
+
+      if ( laddoffset || lscalefactor )
+        {
+          nc_type astype = (xtype == NC_FLOAT) ? NC_FLOAT : NC_DOUBLE;
+          if ( (astype == NC_DOUBLE) &&
+               IS_EQUAL(addoffset,   (double) ((float) addoffset)) &&
+               IS_EQUAL(scalefactor, (double) ((float) scalefactor)) )
+            {
+              astype = NC_FLOAT;
+            }
+
+          cdf_put_att_double(streamptr->fileID, ncvarid, "add_offset",   astype, 1, &addoffset);
+          cdf_put_att_double(streamptr->fileID, ncvarid, "scale_factor", astype, 1, &scalefactor);
+        }
+    }
+}
+
+static
 int cdfDefVar(stream_t *streamptr, int varID)
 {
   int ncvarid = -1;
@@ -695,27 +721,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
   size_t len = strlen(coordinates);
   if ( len ) cdf_put_att_text(fileID, ncvarid, "coordinates", len, coordinates);
 
-  /*  if ( xtype == NC_BYTE || xtype == NC_SHORT || xtype == NC_INT ) */
-    {
-      const double addoffset   = vlistInqVarAddoffset(vlistID, varID);
-      const double scalefactor = vlistInqVarScalefactor(vlistID, varID);
-      const bool laddoffset   = IS_NOT_EQUAL(addoffset, 0);
-      const bool lscalefactor = IS_NOT_EQUAL(scalefactor, 1);
-
-      if ( laddoffset || lscalefactor )
-        {
-          nc_type astype = (xtype == NC_FLOAT) ? NC_FLOAT : NC_DOUBLE;
-          if ( (astype == NC_DOUBLE) &&
-               IS_EQUAL(addoffset,   (double) ((float) addoffset)) &&
-               IS_EQUAL(scalefactor, (double) ((float) scalefactor)) )
-            {
-              astype = NC_FLOAT;
-            }
-
-          cdf_put_att_double(fileID, ncvarid, "add_offset",   astype, 1, &addoffset);
-          cdf_put_att_double(fileID, ncvarid, "scale_factor", astype, 1, &scalefactor);
-        }
-    }
+  cdfDefVarPacking(streamptr, ncvarid, xtype, vlistID, varID);
 
   if ( dtype == CDI_DATATYPE_UINT8 && xtype == NC_BYTE )
     {
