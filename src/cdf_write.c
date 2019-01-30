@@ -324,6 +324,30 @@ int nc_grid_index(stream_t *streamptr, int gridID)
 }
 
 static
+void cdfDefVarCompression(const stream_t *streamptr, int ncvarid, bool lchunk)
+{
+  if ( streamptr->comptype == CDI_COMPRESS_ZIP )
+    {
+      if ( lchunk && (streamptr->filetype == CDI_FILETYPE_NC4 || streamptr->filetype == CDI_FILETYPE_NC4C) )
+        {
+          cdfDefVarDeflate(streamptr->fileID, ncvarid, streamptr->complevel);
+        }
+      else
+        {
+          if ( lchunk )
+            {
+              static bool lwarn = true;
+              if ( lwarn )
+                {
+                  lwarn = false;
+                  Warning("Deflate compression is only available for NetCDF4!");
+                }
+            }
+        }
+    }
+}
+
+static
 int cdfDefVar(stream_t *streamptr, int varID)
 {
   int ncvarid = -1;
@@ -519,25 +543,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
     cdf_def_var_chunking(fileID, ncvarid, NC_CHUNKED, chunks);
 #endif
 
-  if ( streamptr->comptype == CDI_COMPRESS_ZIP )
-    {
-      if ( lchunk && (streamptr->filetype == CDI_FILETYPE_NC4 || streamptr->filetype == CDI_FILETYPE_NC4C) )
-        {
-          cdfDefVarDeflate(fileID, ncvarid, streamptr->complevel);
-        }
-      else
-        {
-          if ( lchunk )
-            {
-              static bool lwarn = true;
-              if ( lwarn )
-                {
-                  lwarn = false;
-                  Warning("Deflate compression is only available for NetCDF4!");
-                }
-            }
-        }
-    }
+  cdfDefVarCompression(streamptr, ncvarid, lchunk);
 
   if ( *stdname )  cdf_put_att_text(fileID, ncvarid, "standard_name", strlen(stdname), stdname);
   if ( *longname ) cdf_put_att_text(fileID, ncvarid, "long_name", strlen(longname), longname);
