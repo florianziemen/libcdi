@@ -1610,8 +1610,6 @@ void resize_opt_grib_entries(var_t *var, int nentries)
 {
   if (var->opt_grib_kvpair_size >= nentries)
     {
-      if ( CDI_Debug )
-        Message("data structure has size %d, no resize to %d needed.", var->opt_grib_kvpair_size, nentries);
       return;   /* nothing to do; array is still large enough */
     }
   else

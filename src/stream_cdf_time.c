@@ -144,7 +144,7 @@ void cdfDefTime(stream_t* streamptr)
 
   if ( streamptr->basetime.ncvarid != CDI_UNDEFID ) return;
 
-  int fileID = streamptr->fileID;
+  const int fileID = streamptr->fileID;
 
   if ( streamptr->ncmode == 0 ) streamptr->ncmode = 1;
   if ( streamptr->ncmode == 2 ) cdf_redef(fileID);
@@ -152,12 +152,10 @@ void cdfDefTime(stream_t* streamptr)
   taxis_t *taxis = &streamptr->tsteps[0].taxis;
 
   const char *taxis_name = (taxis->name && taxis->name[0]) ? taxis->name : default_name ;
-
   cdf_def_dim(fileID, taxis_name, NC_UNLIMITED, &time_dimid);
   streamptr->basetime.ncdimid = time_dimid;
 
-  nc_type xtype = (taxis->datatype == CDI_DATATYPE_FLT32) ? NC_FLOAT : NC_DOUBLE;
-
+  const nc_type xtype = (taxis->datatype == CDI_DATATYPE_FLT32) ? NC_FLOAT : NC_DOUBLE;
   cdf_def_var(fileID, taxis_name, xtype, 1, &time_dimid, &time_varid);
 
   streamptr->basetime.ncvarid = time_varid;
@@ -165,15 +163,13 @@ void cdfDefTime(stream_t* streamptr)
 #if  defined  (HAVE_NETCDF4)
   if ( streamptr->filetype == CDI_FILETYPE_NC4 || streamptr->filetype == CDI_FILETYPE_NC4C )
     {
-      size_t chunk = 512;
+      const size_t chunk = 512;
       cdf_def_var_chunking(fileID, time_varid, NC_CHUNKED, &chunk);
     }
 #endif
 
-  {
-    static const char timeStr[] = "time";
-    cdf_put_att_text(fileID, time_varid, "standard_name", sizeof(timeStr) - 1, timeStr);
-  }
+  static const char timeStr[] = "time";
+  cdf_put_att_text(fileID, time_varid, "standard_name", sizeof(timeStr) - 1, timeStr);
 
   if ( taxis->longname && taxis->longname[0] )
     cdf_put_att_text(fileID, time_varid, "long_name", strlen(taxis->longname), taxis->longname);
@@ -184,27 +180,16 @@ void cdfDefTime(stream_t* streamptr)
       streamptr->basetime.ncvarboundsid = time_bndsid;
     }
 
-  {
-    char unitstr[CDI_MAX_NAME];
-    cdfDefTimeUnits(unitstr, taxis);
-    size_t len = strlen(unitstr);
-    if ( len )
-      {
-        cdf_put_att_text(fileID, time_varid, "units", len, unitstr);
-        /*
-          if ( taxis->has_bounds )
-          cdf_put_att_text(fileID, time_bndsid, "units", len, unitstr);
-        */
-      }
-  }
+  char unitstr[CDI_MAX_NAME];
+  cdfDefTimeUnits(unitstr, taxis);
+  size_t len = strlen(unitstr);
+  if (len) cdf_put_att_text(fileID, time_varid, "units", len, unitstr);
+  // if ( len && taxis->has_bounds ) cdf_put_att_text(fileID, time_bndsid, "units", len, unitstr);
 
   if ( taxis->calendar != -1 )
     {
       cdfDefCalendar(fileID, time_varid, taxis->calendar);
-      /*
-      if ( taxis->has_bounds )
-        cdfDefCalendar(fileID, time_bndsid, taxis->calendar);
-      */
+      // ( taxis->has_bounds ) cdfDefCalendar(fileID, time_bndsid, taxis->calendar);
     }
 
   if ( taxis->type == TAXIS_FORECAST )
@@ -213,23 +198,15 @@ void cdfDefTime(stream_t* streamptr)
       cdf_def_var(fileID, "leadtime", xtype, 1, &time_dimid, &leadtimeid);
       streamptr->basetime.leadtimeid = leadtimeid;
 
-      {
-        static const char stdname[] = "forecast_period";
-        cdf_put_att_text(fileID, leadtimeid, "standard_name", sizeof(stdname) - 1, stdname);
-      }
+      static const char stdname[] = "forecast_period";
+      cdf_put_att_text(fileID, leadtimeid, "standard_name", sizeof(stdname) - 1, stdname);
 
-      {
-        static const char lname[] = "Time elapsed since the start of the forecast";
-        cdf_put_att_text(fileID, leadtimeid, "long_name", sizeof(lname) - 1, lname);
-      }
+      static const char lname[] = "Time elapsed since the start of the forecast";
+      cdf_put_att_text(fileID, leadtimeid, "long_name", sizeof(lname) - 1, lname);
 
-      {
-          char unitstr[CDI_MAX_NAME];
-          cdfDefForecastTimeUnits(unitstr, taxis->fc_unit);
-          size_t len = strlen(unitstr);
-          if ( len )
-            cdf_put_att_text(fileID, leadtimeid, "units", len, unitstr);
-      }
+      cdfDefForecastTimeUnits(unitstr, taxis->fc_unit);
+      len = strlen(unitstr);
+      if ( len ) cdf_put_att_text(fileID, leadtimeid, "units", len, unitstr);
     }
 
   cdf_put_att_text(fileID, time_varid, "axis", 1, "T");

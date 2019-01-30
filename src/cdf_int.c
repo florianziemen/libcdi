@@ -1,5 +1,5 @@
 #ifdef HAVE_CONFIG_H
-#  include "config.h"
+#include "config.h"
 #endif
 
 #include <sys/stat.h>
@@ -11,40 +11,11 @@
 #include "namespace.h"
 
 #ifdef HAVE_LIBNETCDF
-/*
-#if ! defined (MIN_BUF_SIZE)
-#  define  MIN_BUF_SIZE  131072L
-#endif
 
-static size_t ChunkSizeMin = MIN_BUF_SIZE;
-*/
 void cdf_create(const char *path, int cmode, int *ncidp)
 {
-  int oldfill;
   size_t initialsz = 0, chunksizehint = 0;
-  /*
-#if defined (HAVE_STRUCT_STAT_ST_BLKSIZE)
-  struct stat filestat;
-  char basename[1024];
-  char *pend;
 
-  pend = strrchr(path, '/');
-  if ( pend == 0 )
-    strcpy(basename, "./");
-  else
-    {
-      memcpy(basename, path, pend-path);
-      basename[pend-path] = 0;
-    }
-
-  if ( stat(basename, &filestat) != 0 )
-    SysError(basename);
-
-  chunksizehint = (size_t) filestat.st_blksize * 4;
-#endif
-
-  if ( chunksizehint < ChunkSizeMin ) chunksizehint = ChunkSizeMin;
-  */
 #if defined(__SX__) || defined(ES)
   chunksizehint = 16777216; /* 16 MB */
 #endif
@@ -57,13 +28,11 @@ void cdf_create(const char *path, int cmode, int *ncidp)
   int status = my_nc__create(path, cmode, initialsz, &chunksizehint, ncidp);
 
   if ( CDF_Debug || status != NC_NOERR )
-    Message("ncid = %d  mode = %d  file = %s", *ncidp, cmode, path);
-
-  if ( CDF_Debug || status != NC_NOERR )
-    Message("chunksizehint %d", chunksizehint);
+    Message("ncid = %d  mode = %d  chunksizehint = %zu file = %s", *ncidp, cmode, chunksizehint, path);
 
   if ( status != NC_NOERR ) Error("%s: %s", path, nc_strerror(status));
 
+  int oldfill;
   status = nc_set_fill(*ncidp, NC_NOFILL, &oldfill);
 
   if ( status != NC_NOERR ) Error("%s: %s", path, nc_strerror(status));
@@ -74,8 +43,6 @@ int cdf_open(const char *path, int omode, int *ncidp)
 {
   int status = 0;
   bool dapfile = false;
-  struct stat filestat;
-  size_t chunksizehint = 0;
 
 #ifdef HAVE_LIBNC_DAP
   if ( strncmp(path, "http:", 5) == 0 || strncmp(path, "https:", 6) == 0 ) dapfile = true;
@@ -87,8 +54,10 @@ int cdf_open(const char *path, int omode, int *ncidp)
     }
   else
     {
+      struct stat filestat;
       if ( stat(path, &filestat) != 0 ) SysError(path);
 
+      size_t chunksizehint = 0;
 #ifdef HAVE_STRUCT_STAT_ST_BLKSIZE
       chunksizehint = (size_t) filestat.st_blksize * 4;
       if ( chunksizehint > (size_t) filestat.st_size ) chunksizehint = (size_t) filestat.st_size;
@@ -140,11 +109,11 @@ void cdf_enddef(int ncid)
 
 void cdf__enddef(const int ncid, const size_t hdr_pad)
 {
-  const size_t v_align   = 4UL; /* [B] Alignment of beginning of data section for fixed variables */
-  const size_t v_minfree = 0UL; /* [B] Pad at end of data section for fixed size variables */
-  const size_t r_align   = 4UL; /* [B] Alignment of beginning of data section for record variables */
+  const size_t v_align   = 4UL; // [B] Alignment of beginning of data section for fixed variables
+  const size_t v_minfree = 0UL; // [B] Pad at end of data section for fixed size variables
+  const size_t r_align   = 4UL; // [B] Alignment of beginning of data section for record variables
 
-  /* nc_enddef(ncid) is equivalent to nc__enddef(ncid, 0, 4, 0, 4) */
+  // nc_enddef(ncid) is equivalent to nc__enddef(ncid, 0, 4, 0, 4)
   int status = nc__enddef(ncid, hdr_pad, v_align, v_minfree, r_align);
 
   if ( status != NC_NOERR ) Error("%s", nc_strerror(status));
@@ -490,8 +459,7 @@ void  cdf_put_vara_float(int ncid, int varid, const size_t start[],
 }
 
 
-void  cdf_get_vara_int(int ncid, int varid, const size_t start[],
-                       const size_t count[], int *dp)
+void  cdf_get_vara_int(int ncid, int varid, const size_t start[], const size_t count[], int *dp)
 {
   int status = nc_get_vara_int(ncid, varid, start, count, dp);
 
@@ -502,8 +470,7 @@ void  cdf_get_vara_int(int ncid, int varid, const size_t start[],
 }
 
 
-void  cdf_get_vara_double(int ncid, int varid, const size_t start[],
-                          const size_t count[], double *dp)
+void  cdf_get_vara_double(int ncid, int varid, const size_t start[], const size_t count[], double *dp)
 {
   int status = nc_get_vara_double(ncid, varid, start, count, dp);
 
@@ -514,8 +481,7 @@ void  cdf_get_vara_double(int ncid, int varid, const size_t start[],
 }
 
 
-void  cdf_get_vara_float(int ncid, int varid, const size_t start[],
-                         const size_t count[], float *fp)
+void  cdf_get_vara_float(int ncid, int varid, const size_t start[], const size_t count[], float *fp)
 {
   int status = nc_get_vara_float(ncid, varid, start, count, fp);
 
@@ -526,8 +492,7 @@ void  cdf_get_vara_float(int ncid, int varid, const size_t start[],
 }
 
 
-void  cdf_get_vara_text(int ncid, int varid, const size_t start[],
-			const size_t count[], char *tp)
+void  cdf_get_vara_text(int ncid, int varid, const size_t start[], const size_t count[], char *tp)
 {
   int status = nc_get_vara_text(ncid, varid, start, count, tp);
 
@@ -659,8 +624,7 @@ void cdf_get_var_double(int ncid, int varid, double *dp)
 }
 
 
-void cdf_copy_att(int ncid_in, int varid_in, const char *name, int ncid_out,
-		  int varid_out)
+void cdf_copy_att(int ncid_in, int varid_in, const char *name, int ncid_out, int varid_out)
 {
   int status = nc_copy_att(ncid_in, varid_in, name, ncid_out, varid_out);
 
@@ -671,8 +635,7 @@ void cdf_copy_att(int ncid_in, int varid_in, const char *name, int ncid_out,
 }
 
 
-void cdf_put_att_text(int ncid, int varid, const char *name, size_t len,
-		      const char *tp)
+void cdf_put_att_text(int ncid, int varid, const char *name, size_t len, const char *tp)
 {
   int status = nc_put_att_text(ncid, varid, name, len, tp);
 
@@ -683,8 +646,7 @@ void cdf_put_att_text(int ncid, int varid, const char *name, size_t len,
 }
 
 
-void cdf_put_att_int(int ncid, int varid, const char *name, nc_type xtype,
-		     size_t len, const int *ip)
+void cdf_put_att_int(int ncid, int varid, const char *name, nc_type xtype, size_t len, const int *ip)
 {
   int status = nc_put_att_int(ncid, varid, name, xtype, len, ip);
 
@@ -695,8 +657,7 @@ void cdf_put_att_int(int ncid, int varid, const char *name, nc_type xtype,
 }
 
 
-void cdf_put_att_float(int ncid, int varid, const char *name, nc_type xtype,
-                       size_t len, const float *dp)
+void cdf_put_att_float(int ncid, int varid, const char *name, nc_type xtype, size_t len, const float *dp)
 {
   int status = nc_put_att_float(ncid, varid, name, xtype, len, dp);
 
@@ -707,8 +668,7 @@ void cdf_put_att_float(int ncid, int varid, const char *name, nc_type xtype,
 }
 
 
-void cdf_put_att_double(int ncid, int varid, const char *name, nc_type xtype,
-			size_t len, const double *dp)
+void cdf_put_att_double(int ncid, int varid, const char *name, nc_type xtype, size_t len, const double *dp)
 {
   int status = nc_put_att_double(ncid, varid, name, xtype, len, dp);
 
@@ -728,6 +688,7 @@ void cdf_get_att_text(int ncid, int varid, const char *name, char *tp)
 
   if ( status != NC_NOERR ) Error("%s", nc_strerror(status));
 }
+
 
 void cdf_get_att_string(int ncid, int varid, const char *name, char **tp)
 {
@@ -779,8 +740,7 @@ void cdf_get_att_double(int ncid, int varid, const char *name, double *dp)
 }
 
 
-void cdf_inq_att(int ncid, int varid, const char *name, nc_type *xtypep,
-		 size_t *lenp)
+void cdf_inq_att(int ncid, int varid, const char *name, nc_type *xtypep, size_t *lenp)
 {
   int status = nc_inq_att(ncid, varid, name, xtypep, lenp);
 
