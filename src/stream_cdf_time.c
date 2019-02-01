@@ -82,7 +82,7 @@ void cdfDefTimeUnits(char *unitstr, taxis_t *taxis)
           cdiDecodeDate(taxis->rdate, &year, &month, &day);
           cdiDecodeTime(taxis->rtime, &hour, &minute, &second);
 
-          int timeunit = taxis->unit  != -1 ? taxis->unit  : TUNIT_HOUR;
+          int timeunit = (taxis->unit != -1) ? taxis->unit : TUNIT_HOUR;
           if      ( timeunit == TUNIT_QUARTER   ) timeunit = TUNIT_MINUTE;
           else if ( timeunit == TUNIT_30MINUTES ) timeunit = TUNIT_MINUTE;
           else if (    timeunit == TUNIT_3HOURS

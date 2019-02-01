@@ -594,6 +594,7 @@ void taxisCopyTimestep(int taxisID2, int taxisID1)
 
   reshLock();
 
+  /* reference date/time and units can't be changed after streamDefVlist().
   if (taxisptr2->units && taxisptr2->rdate != CDI_UNDEFID)
     {
       if (taxisptr2->rdate != taxisptr1->rdate || taxisptr2->rtime != taxisptr1->rtime)
@@ -605,7 +606,7 @@ void taxisCopyTimestep(int taxisID2, int taxisID1)
 
   taxisptr2->rdate = taxisptr1->rdate;
   taxisptr2->rtime = taxisptr1->rtime;
-
+  */
   taxisptr2->vdate = taxisptr1->vdate;
   taxisptr2->vtime = taxisptr1->vtime;
 

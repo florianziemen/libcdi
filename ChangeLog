@@ -4,6 +4,10 @@
         * using EXSE library version 1.4.1
 	* Version 1.9.6 released
 
+2019-02-01  Uwe Schulzweida
+
+	* taxisCopyTimestep: don't copy rdate/rtime (bug fix)
+
 2019-01-26  Uwe Schulzweida
 
 	* ecCodes: deleteLocalDefinition for GRIB1.tmpl
