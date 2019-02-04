@@ -1,6 +1,23 @@
 CDI NEWS
 --------
 
+Version 1.9.6 (07 February 2019):
+
+   New features:
+     * Added support for polar stereographic projection
+     * grib2: Added support for variables with different perturbationNumber
+     * Added check for unsupported NetCDF4/HDF5 library combination (NetCDF  <= 4.4.0 with libhdf5 >= 1.10.0)
+     * NetCDF: added support for single scalar variable
+   Fixed bugs:
+     * ecCodes: deleteLocalDefinition for GRIB1.tmpl
+     * taxisCopyTimestep: don't copy rdate/rtime (bug fix)
+     * scanning of attribute associate* failed (bug fix)
+     * grib1/ecCodes: set maxStep to 65000 (bug fix)
+     * cdf_read: removed limitation of nmiss_ to INT_MAX [Bug #8691]
+     * cgribex: make section2 length dynamic (bug fix for large Gaussian reduced grids)
+     * GRIB2: correct longitudeOfFirstGridPoint if necessary (bug fix)
+     * CDI_reduce_dim: wrong result when reduce time dimension (bug fix)
+
 Version 1.8.0 (14 February 2017):
 
    New features:
