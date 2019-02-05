@@ -205,6 +205,7 @@ static int fcMPINONB(int fileID)
   xmpiStat(MPI_Wait(&(of->request), &status), &status);
   /* remove file element */
   int iret = destroyAFiledataMPINONB(of);
+  --openFilesFill;
   return iret;
 }
 
@@ -236,8 +237,7 @@ fowMPINONB(const char *filename, const char *mode)
       openFilesSize = openFilesSize ? openFilesSize * 2 : 4;
       if (openFilesSize > (size_t)INT_MAX + 1)
         openFilesSize = (size_t)INT_MAX + 1;
-      openFiles = Realloc(openFiles, sizeof (*openFiles)
-                                * openFilesSize);
+      openFiles = Realloc(openFiles, sizeof (*openFiles) * openFilesSize);
       for (size_t i = fileID; i < openFilesSize; ++i)
         openFiles[i].name = NULL;
     }
@@ -251,6 +251,7 @@ fowMPINONB(const char *filename, const char *mode)
           }
     }
   struct fileMPIFWS *of = openFiles + fileID;
+  ++openFilesFill;
   initAFiledataMPINONB(of, filename, conf->writeAggBufLim);
   return (int)fileID;
 }
