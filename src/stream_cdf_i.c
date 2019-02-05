@@ -3986,7 +3986,7 @@ int cdfInqContents(stream_t *streamptr)
   // time varID
   int nctimevarid = streamptr->basetime.ncvarid;
 
-  if (!time_has_units || streamptr->basetime.lwrf) ncvars[nctimevarid].units[0] = 0;
+  if (nctimevarid != CDI_UNDEFID && (!time_has_units || streamptr->basetime.lwrf)) ncvars[nctimevarid].units[0] = 0;
 
   if ( time_has_units )
     {
