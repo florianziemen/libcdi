@@ -111,6 +111,7 @@ fcFileWriteAtAll(int fileID)
   assert(fileID >= 0 && (size_t) fileID < openFilesSize && openFiles[fileID].name);
   struct fileMPIFWAA *of = openFiles + fileID;
   int iret = destroyAFiledataFileWriteAtAll(of);
+  --openFilesFill;
   return iret;
 }
 
@@ -154,6 +155,7 @@ fowFileWriteAtAll(const char *filename, const char *mode)
           }
     }
   struct fileMPIFWAA *of = openFiles + fileID;
+  ++openFilesFill;
   initAFiledataFileWriteAtAll(of, filename, conf->writeAggBufLim);
   return (int) fileID;
 }

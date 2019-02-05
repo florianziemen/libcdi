@@ -417,6 +417,7 @@ fcFileWriteAtReblock(int fileID)
   assert(fileID >= 0 && (size_t) fileID < openFilesSize && openFiles[fileID].name);
   struct fileMPIFWAR *of = openFiles + fileID;
   int iret = destroyAFiledataFileWriteAtReblock(of);
+  --openFilesFill;
   return iret;
 }
 
@@ -460,6 +461,7 @@ fowFileWriteAtReblock(const char *filename, const char *mode)
           }
     }
   struct fileMPIFWAR *of = openFiles + fileID;
+  ++openFilesFill;
   initAFiledataFileWriteAtReblock(of, filename, conf);
   return (int) fileID;
 }
