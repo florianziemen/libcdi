@@ -104,6 +104,7 @@ static int fcFileWriteOrdered(int fileID)
          && openFiles[fileID].name);
   struct fileMPIFWO *of = openFiles + fileID;
   int iret = destroyAFiledataFileWriteOrdered(of);
+  --openFilesFill;
   return iret;
 }
 
@@ -140,6 +141,7 @@ fowFileWriteOrdered(const char *filename, const char *mode)
           }
     }
   struct fileMPIFWO *of = openFiles + fileID;
+  ++openFilesFill;
   initAFiledataFileWriteOrdered(of, filename, conf->writeAggBufLim);
   return (int)fileID;
 }
