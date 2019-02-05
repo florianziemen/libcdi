@@ -449,6 +449,7 @@ static int fcFileWriteAtReblock(int fileID)
          && openFiles[fileID].name);
   struct fileMPIFWAR *of = openFiles + fileID;
   int iret = destroyAFiledataFileWriteAtReblock(of);
+  --openFilesFill;
   return iret;
 }
 
@@ -480,8 +481,7 @@ fowFileWriteAtReblock(const char *filename, const char *mode)
       openFilesSize = openFilesSize ? openFilesSize * 2 : 4;
       if (openFilesSize > (size_t)INT_MAX + 1)
         openFilesSize = (size_t)INT_MAX + 1;
-      openFiles = Realloc(openFiles, sizeof (*openFiles)
-                                * openFilesSize);
+      openFiles = Realloc(openFiles, sizeof (*openFiles) * openFilesSize);
       for (size_t i = fileID; i < openFilesSize; ++i)
         openFiles[i].name = NULL;
     }
@@ -495,6 +495,7 @@ fowFileWriteAtReblock(const char *filename, const char *mode)
           }
     }
   struct fileMPIFWAR *of = openFiles + fileID;
+  ++openFilesFill;
   initAFiledataFileWriteAtReblock(of, filename, conf);
   return (int)fileID;
 }

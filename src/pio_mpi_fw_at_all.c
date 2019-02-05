@@ -122,6 +122,7 @@ static int fcFileWriteAtAll(int fileID)
          && openFiles[fileID].name);
   struct fileMPIFWAA *of = openFiles + fileID;
   int iret = destroyAFiledataFileWriteAtAll(of);
+  --openFilesFill;
   return iret;
 }
 
@@ -153,8 +154,7 @@ fowFileWriteAtAll(const char *filename, const char *mode)
       openFilesSize = openFilesSize ? openFilesSize * 2 : 4;
       if (openFilesSize > (size_t)INT_MAX + 1)
         openFilesSize = (size_t)INT_MAX + 1;
-      openFiles = Realloc(openFiles, sizeof (*openFiles)
-                                * openFilesSize);
+      openFiles = Realloc(openFiles, sizeof (*openFiles) * openFilesSize);
       for (size_t i = fileID; i < openFilesSize; ++i)
         openFiles[i].name = NULL;
     }
@@ -168,6 +168,7 @@ fowFileWriteAtAll(const char *filename, const char *mode)
           }
     }
   struct fileMPIFWAA *of = openFiles + fileID;
+  ++openFilesFill;
   initAFiledataFileWriteAtAll(of, filename, conf->writeAggBufLim);
   return (int)fileID;
 }
