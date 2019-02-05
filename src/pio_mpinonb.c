@@ -194,6 +194,7 @@ fcMPINONB(int fileID)
   xmpiStat(MPI_Wait(&(of->request), &status), &status);
   /* remove file element */
   int iret = destroyAFiledataMPINONB(of);
+  --openFilesFill;
   return iret;
 }
 
@@ -237,6 +238,7 @@ fowMPINONB(const char *filename, const char *mode)
           }
     }
   struct fileMPIFWS *of = openFiles + fileID;
+  ++openFilesFill;
   initAFiledataMPINONB(of, filename, conf->writeAggBufLim);
   return (int) fileID;
 }
