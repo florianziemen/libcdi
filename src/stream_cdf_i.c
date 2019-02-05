@@ -237,9 +237,9 @@ int setBaseTime(const char *timeunits, taxis_t *taxis)
 static
 bool xtypeIsText(int xtype)
 {
-  bool isText = ( xtype == NC_CHAR )
+  bool isText = (xtype == NC_CHAR)
 #ifdef HAVE_NETCDF4
-    || ( xtype == NC_STRING )
+    || (xtype == NC_STRING)
 #endif
     ;
   return isText;
@@ -3599,24 +3599,26 @@ int cdfCheckVars(int nvars, ncvar_t *ncvars, size_t ntsteps, int timedimid)
 	     timedimid == ncvars[ncvarid].dimids[0] )
 	  cdf_set_var(ncvars, ncvarid, TRUE);
 
-      if ( ncvars[ncvarid].isvar == -1 && ncvars[ncvarid].ndims == 0 )
-        cdf_set_var(ncvars, ncvarid, nvars == 1 ? TRUE : FALSE);
-
-      if ( ncvars[ncvarid].isvar == -1 && ncvars[ncvarid].ndims > 0 )
-	cdf_set_var(ncvars, ncvarid, TRUE);
-
       if ( ncvars[ncvarid].isvar == -1 )
-	{
-	  ncvars[ncvarid].isvar = 0;
-	  Warning("Variable %s has an unknown type, skipped!", ncvars[ncvarid].name);
-	  continue;
-	}
+        {
+          if ( ncvars[ncvarid].ndims == 0 )
+            cdf_set_var(ncvars, ncvarid, nvars == 1 ? TRUE : FALSE);
+          else if ( ncvars[ncvarid].ndims > 0 )
+            cdf_set_var(ncvars, ncvarid, TRUE);
+          else
+            {
+              ncvars[ncvarid].isvar = 0;
+              Warning("Variable %s has an unknown type, skipped!", ncvars[ncvarid].name);
+            }
+        }
+
+      if ( ncvars[ncvarid].isvar == 0 ) continue;
 
       if ( ncvars[ncvarid].ndims > 4 )
 	{
 	  ncvars[ncvarid].isvar = 0;
 	  Warning("%d dimensional variables are not supported, skipped variable %s!",
-		ncvars[ncvarid].ndims, ncvars[ncvarid].name);
+                  ncvars[ncvarid].ndims, ncvars[ncvarid].name);
 	  continue;
 	}
 
@@ -3624,14 +3626,15 @@ int cdfCheckVars(int nvars, ncvar_t *ncvars, size_t ntsteps, int timedimid)
 	{
 	  ncvars[ncvarid].isvar = 0;
 	  Warning("%d dimensional variables without time dimension are not supported, skipped variable %s!",
-		ncvars[ncvarid].ndims, ncvars[ncvarid].name);
+                  ncvars[ncvarid].ndims, ncvars[ncvarid].name);
 	  continue;
 	}
 
       if ( xtypeIsText(ncvars[ncvarid].xtype) )
 	{
+          printf("ncvars[ncvarid].isvar %d\n", ncvars[ncvarid].isvar);
 	  ncvars[ncvarid].isvar = 0;
-	  Warning("Unsupported data type, skipped variable %s!", ncvars[ncvarid].name);
+	  Warning("Unsupported data type (char/string), skipped variable %s!", ncvars[ncvarid].name);
 	  continue;
 	}
 
