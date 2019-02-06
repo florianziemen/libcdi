@@ -268,8 +268,6 @@ void zaxisDestroyKernel( zaxis_t * zaxisptr )
 {
   xassert ( zaxisptr );
 
-  int id = zaxisptr->self;
-
   if ( zaxisptr->vals )    Free( zaxisptr->vals );
   if ( zaxisptr->lbounds ) Free( zaxisptr->lbounds );
   if ( zaxisptr->ubounds ) Free( zaxisptr->ubounds );
@@ -278,7 +276,6 @@ void zaxisDestroyKernel( zaxis_t * zaxisptr )
 
   Free( zaxisptr );
 
-  reshRemove ( id, &zaxisOps );
 }
 
 /*
@@ -295,6 +292,7 @@ void zaxisDestroy(int zaxisID)
 {
   zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
   zaxisDestroyKernel(zaxisptr);
+  reshRemove(zaxisID, &zaxisOps);
 }
 
 

@@ -130,16 +130,12 @@ vlist_t *vlist_new_entry(cdiResH resH)
 }
 
 static
-void vlist_delete_entry(vlist_t *vlistptr)
+void vlist_delete_entry(int vlistID)
 {
-  int idx = vlistptr->self;
-
-  reshRemove(idx, &vlistOps );
-
-  Free(vlistptr);
+  reshRemove(vlistID, &vlistOps);
 
   if ( VLIST_Debug )
-    Message("Removed idx %d from vlist list", idx);
+    Message("Removed idx %d from vlist list", vlistID);
 }
 
 static
@@ -242,13 +238,13 @@ vlist_delete(vlist_t *vlistptr)
       vlistptr->vars[varID].opt_grib_nentries    = 0;
       vlistptr->vars[varID].opt_grib_kvpair_size = 0;
       vlistptr->vars[varID].opt_grib_kvpair      = NULL;
-
+      
       cdiDelAtts(vlistID, varID);
     }
 
   if ( vars ) Free(vars);
 
-  vlist_delete_entry(vlistptr);
+  Free(vlistptr);
 }
 
 // destroy a vlist object, should always be called through namespace lookup
@@ -265,7 +261,10 @@ void cdiVlistDestroy_(int vlistID, bool assertInternal)
   static const char *const wText[2]
     = { warningTextUserByInternal, warningTextInternalByUser };
   if (vlistptr->internal == assertInternal)
-    vlist_delete(vlistptr);
+    {
+      vlist_delete(vlistptr);
+      vlist_delete_entry(vlistID);
+    }
   else
     Warning(wText[!assertInternal], vlistID);
 }
