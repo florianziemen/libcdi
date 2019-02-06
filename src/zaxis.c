@@ -280,8 +280,6 @@ zaxisDestroyKernel(zaxis_t *zaxisptr)
   cdiDeleteAtts(id, CDI_GLOBAL);
 
   Free(zaxisptr);
-
-  reshRemove(id, &zaxisOps);
 }
 
 /*
@@ -299,6 +297,7 @@ zaxisDestroy(int zaxisID)
 {
   zaxis_t *zaxisptr = zaxis_to_pointer(zaxisID);
   zaxisDestroyKernel(zaxisptr);
+  reshRemove(zaxisID, &zaxisOps);
 }
 
 static void
