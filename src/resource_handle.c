@@ -163,6 +163,8 @@ reshListCreate(int namespaceID)
 
 
 /**************************************************************/
+static void
+reshRemove_(int nsp, int idx);
 
 void
 reshListDestruct(int namespaceID)
@@ -177,8 +179,10 @@ reshListDestruct(int namespaceID)
         {
           listElem_t *listElem = resHList[namespaceID].resources + j;
           if (listElem->status & RESH_IN_USE_BIT)
-            listElem->res.v.ops->valDestroy(listElem->res.v.val);
-          listElem->status = RESH_UNUSED;
+            {
+              listElem->res.v.ops->valDestroy(listElem->res.v.val);
+              reshRemove_(namespaceID, j);
+            }
         }
       Free(resHList[namespaceID].resources);
       resHList[namespaceID].resources = NULL;
@@ -712,7 +716,8 @@ int reshGetStatus ( cdiResH resH, const resOps * ops )
     {
       listElem_t *listElem = resHList[nsp].resources + nspT.idx;
       const resOps *elemOps = listElem->res.v.ops;
-      xassert(listElem && (!(listElem->status & RESH_IN_USE_BIT) || elemOps == ops || !ops));
+      xassert(listElem && (!(listElem->status & RESH_IN_USE_BIT)
+                           || elemOps == ops || !ops));
       status = listElem->status;
     }
 
