@@ -537,12 +537,8 @@ gridDestroyKernel(grid_t *gridptr)
 {
   xassert(gridptr);
 
-  const int id = gridptr->self;
-
   grid_free_components(gridptr);
   Free(gridptr);
-
-  reshRemove(id, &gridOps);
 }
 
 /*
@@ -563,6 +559,7 @@ gridDestroy(int gridID)
 
   grid_t *gridptr = grid_to_pointer(gridID);
   gridptr->vtable->destroy(gridptr);
+  reshRemove(gridID, &gridOps);
 }
 
 static void

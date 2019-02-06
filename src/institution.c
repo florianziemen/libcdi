@@ -205,11 +205,8 @@ static void
 instituteDestroyP(institute_t *instituteptr)
 {
   xassert(instituteptr);
-
-  int instituteID = instituteptr->self;
   Free(instituteptr->name);
   Free(instituteptr->longname);
-  reshRemove(instituteID, &instituteOps);
   Free(instituteptr);
 }
 
