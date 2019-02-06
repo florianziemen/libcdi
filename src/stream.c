@@ -39,7 +39,6 @@
 #include "async_worker.h"
 
 static stream_t *stream_new_entry(int resH);
-static void stream_delete_entry(stream_t *streamptr);
 static int streamCompareP(void *streamptr1, void *streamptr2);
 static void streamDestroyP(void *streamptr);
 static void streamPrintP(void *streamptr, FILE *fp);
@@ -634,7 +633,7 @@ streamOpenID(const char *filename, char filemode, int filetype, int resH)
     {
       streamID = fileID;
       if (streamptr->record) Free(streamptr->record);
-      stream_delete_entry(streamptr);
+      reshRemove(streamptr->self, &streamOps);
     }
   else
     {
@@ -831,7 +830,7 @@ streamOpenRead(const char *filename)
         {
           streamID = status;
           if (streamptr->record) Free(streamptr->record);
-          stream_delete_entry(streamptr);
+          reshRemove(streamptr->self, &streamOps);
         }
     }
 
@@ -858,7 +857,7 @@ streamOpenReadQuery(const char *filename, const CdiQuery *query)
         {
           streamID = status;
           if (streamptr->record) Free(streamptr->record);
-          stream_delete_entry(streamptr);
+          reshRemove(streamptr->self, &streamOps);
         }
     }
 
@@ -1135,26 +1134,10 @@ deallocate_sleveltable_t(sleveltable_t *entry)
   entry->lindex = NULL;
 }
 
-/*
-@Function  streamClose
-@Title     Close an open dataset
-
-@Prototype  void streamClose(int streamID)
-@Parameter
-    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead} or @fref{streamOpenWrite}.
-
-@Description
-The function @func{streamClose} closes an open dataset.
-
-@EndFunction
-*/
-void
-streamClose(int streamID)
+static void
+streamDestroy(stream_t *streamptr)
 {
-  stream_t *streamptr = stream_to_pointer(streamID);
-
-  if (CDI_Debug) Message("streamID = %d filename = %s", streamID, streamptr->filename);
-
+  xassert(streamptr);
   const int vlistID = streamptr->vlistID;
 
   void (*streamCloseDelegate)(stream_t * streamptr, int recordBufIsToBeDeleted)
@@ -1211,19 +1194,37 @@ streamClose(int streamID)
   if (streamptr->jobs) free(streamptr->jobs);
   if (streamptr->jobManager) AsyncWorker_finalize((AsyncManager *) streamptr->jobManager);
 
-  stream_delete_entry(streamptr);
+  Free(streamptr);
 }
 
 static void
-stream_delete_entry(stream_t *streamptr)
+streamDestroyP(void *streamptr)
 {
-  xassert(streamptr);
+  streamDestroy(streamptr);
+}
 
-  const int idx = streamptr->self;
-  Free(streamptr);
-  reshRemove(idx, &streamOps);
+/*
+@Function  streamClose
+@Title     Close an open dataset
 
-  if (CDI_Debug) Message("Removed idx %d from stream list", idx);
+@Prototype  void streamClose(int streamID)
+@Parameter
+    @Item  streamID  Stream ID, from a previous call to @fref{streamOpenRead} or @fref{streamOpenWrite}.
+
+@Description
+The function @func{streamClose} closes an open dataset.
+
+@EndFunction
+*/
+void
+streamClose(int streamID)
+{
+  stream_t *streamptr = stream_to_pointer(streamID);
+
+  if (CDI_Debug) Message("streamID = %d filename = %s", streamID, streamptr->filename);
+  streamDestroy(streamptr);
+  reshRemove(streamID, &streamOps);
+  if (CDI_Debug) Message("Removed stream %d from stream list", streamID);
 }
 
 void
@@ -1831,17 +1832,6 @@ streamCompareP(void *streamptr1, void *streamptr2)
     return differ;
 
   return equal;
-}
-
-void
-streamDestroyP(void *streamptr)
-{
-  stream_t *sp = (stream_t *) streamptr;
-
-  xassert(sp);
-
-  int id = sp->self;
-  streamClose(id);
 }
 
 void
