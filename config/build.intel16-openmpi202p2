@@ -1,0 +1,46 @@
+#!/bin/bash
+. /etc/profile
+
+BUILD_DIR=`pwd`/build-cdi-openmpi-2.0.2p2
+INST_DIR=`pwd`/inst-cdi-openmpi-2.0.2p2
+SRC_DIR=`pwd`/cdi
+
+
+AEC_DIR=/sw/rhel6-x64/sys/libaec-0.3.2-intel14
+NETCDFC_DIR=/sw/rhel6-x64/netcdf/netcdf_c-4.4.0-parallel-openmpi2-intel14
+PNETCDF_DIR=/sw/rhel6-x64/netcdf/parallel_netcdf-1.6.1-openmpi2-intel14
+ECCODES_DIR=/sw/rhel6-x64/eccodes/eccodes-2.6.0-gcc64
+HDF5_DIR=/sw/rhel6-x64/hdf5/hdf5-1.8.18-parallel-openmpi2-intel14
+
+LIBSDIR='/work/k20200/k202125/opt/libs'
+SCALES_PPM_DIR=${LIBSDIR}/ppm-intel16-openmpi-2.0.2p2
+YAXT_DIR=${LIBSDIR}/yaxt-intel16-openmpi-2.0.2p2
+
+export PKG_CONFIG_PATH="${SCALES_PPM_DIR}/lib/pkgconfig:${YAXT_DIR}/lib/pkgconfig${PKG_CONFIG_PATH+:$PKG_CONFIG_PATH}"
+export ROMIO_HINTS="${SRC_DIR}/bullxmpi-lustre-fail-workaround-romio-hints.txt"
+
+
+
+module load intel/16.0 openmpi/2.0.2p2_hpcx-intel14
+
+
+CDI_SRC=${CDI_SRC:-.}
+${CDI_SRC}/configure CC=mpicc \
+                   CFLAGS="-g -fp-model precise -fno-math-errno -march=native" \
+                   CPPFLAGS=-I/usr/include/jasper \
+                   FC=mpif90 \
+                   F77=mpif77 \
+                   FCFLAGS="-g -fp-model precise -fno-math-errno -march=native" \
+                   CXX=mpic++ \
+                   CXXFLAGS="-g -fp-model precise -fno-math-errno -march=native" \
+                   LDFLAGS=-g \
+                   MPI_LAUNCH=`which mpirun` \
+                   LIBS=-Wl,-rpath,$NETCDFC_DIR/lib:$HDF5_DIR/lib:$PNETCDF_DIR/lib:$ECCODES_DIR/lib:$AEC_DIR/lib \
+                   --enable-mpi \
+                   --with-hdf5=$HDF5_DIR \
+                   --with-netcdf=$NETCDFC_DIR \
+                   --with-szlib=$AEC_DIR \
+                   --with-eccodes=$ECCODES_DIR \
+                   --with-jasper \
+                   --enable-iso-c-interface \
+                   --prefix=$INST_DIR

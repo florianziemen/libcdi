@@ -1,0 +1,20 @@
+ SPACKENV_SH=/work/k20200/k202125/src/spack/share/spack/setup-env.sh;
+SPACKENV_CSH=/work/k20200/k202125/src/spack/share/spack/setup-env.sh;
+if test "x${SHELL}" = 'xtcsh'; then source ${SPACKENV_CSH}; else source ${SPACKENV_SH}; fi;
+CDI_SRC=${CDI_SRC:-.}
+spack load -r /ochh3qn;
+spack load -r /u7pouu7;
+spack load -r /cyq76so;
+${CDI_SRC}/configure  \
+--prefix=/work/k20200/k202125/opt/spack/linux-rhel6-x86_64/gcc-7.1.0/libcdi-1.9.5-vilwh7b72cg47de4aeilad4bbffibynw  \
+--enable-service --enable-extra --enable-ieg  \
+--disable-hirlam-extensions --disable-swig --disable-ruby  \
+--disable-python  \
+--with-netcdf=/work/k20200/k202125/opt/spack/linux-rhel6-x86_64/gcc-7.1.0/netcdf-4.6.2-cyq76so2nfl7umlltb2uv2rtxpmvxyq2  \
+--with-threads --without-grib_api --enable-cgribex --without-szlib  \
+--enable-iso-c-interface --enable-cf-interface --enable-mpi  \
+CC=/work/k20200/k202125/opt/spack/linux-rhel6-x86_64/gcc-7.1.0/openmpi-2.0.2p3-qigwpmjhtg443dv3lpkivhqq3xnqecbu/bin/mpicc  \
+FC=/work/k20200/k202125/opt/spack/linux-rhel6-x86_64/gcc-7.1.0/openmpi-2.0.2p3-qigwpmjhtg443dv3lpkivhqq3xnqecbu/bin/mpif90  \
+F77=/work/k20200/k202125/opt/spack/linux-rhel6-x86_64/gcc-7.1.0/openmpi-2.0.2p3-qigwpmjhtg443dv3lpkivhqq3xnqecbu/bin/mpif90  \
+MPI_LAUNCH=/work/k20200/k202125/opt/spack/linux-rhel6-x86_64/gcc-7.1.0/openmpi-2.0.2p3-qigwpmjhtg443dv3lpkivhqq3xnqecbu/bin/mpirun  \
+PKG_CONFIG_PATH=/work/k20200/k202125/opt/spack/linux-rhel6-x86_64/gcc-7.1.0/ppm-1.0.5p1-mbebe2mmgb2ov7epwh26d7pmsdscthzd/lib/pkgconfig:/work/k20200/k202125/opt/spack/linux-rhel6-x86_64/gcc-7.1.0/yaxt-0.6.0-jo7fx5yoera7exefxchgnevnncpm42sh/lib/pkgconfig
