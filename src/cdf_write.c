@@ -758,8 +758,6 @@ int cdfDefVar(stream_t *streamptr, int varID)
   // Attributes
   cdfDefineAttributes(vlistID, varID, fileID, ncvarid);
 
-  /* if ( streamptr->ncmode == 2 ) cdf_enddef(fileID); */
-
   return ncvarid;
 }
 
@@ -1011,9 +1009,7 @@ void cdf_write_var(stream_t *streamptr, int varID, int memtype, const void *data
 
   size_t xsize = 0, ysize = 0;
   size_t size;
-  size_t start[5];
-  size_t count[5];
-  bool swapxy = false;
+  size_t start[5], count[5];
   size_t ndims = 0;
 
   if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamptr->self, varID);
@@ -1081,6 +1077,7 @@ void cdf_write_var(stream_t *streamptr, int varID, int memtype, const void *data
 
   const size_t nvals = gridInqSize(gridID) * (size_t)(zaxisInqSize(zaxisID));
 
+  bool swapxy = false;
   cdf_write_var_data(fileID, vlistID, varID, ncvarid, dtype, nvals, xsize, ysize, swapxy, start, count, memtype, data, nmiss);
 }
 
@@ -1091,9 +1088,7 @@ void cdf_write_var_chunk(stream_t *streamptr, int varID, int memtype,
   if ( streamptr->accessmode == 0 ) cdfEndDef(streamptr);
 
   size_t xsize = 0, ysize = 0;
-  size_t start[5];
-  size_t count[5];
-  bool swapxy = false;
+  size_t start[5],  count[5];
   size_t ndims = 0;
   const int streamID = streamptr->self;
 
@@ -1164,21 +1159,17 @@ void cdf_write_var_chunk(stream_t *streamptr, int varID, int memtype,
 
   const size_t nvals = gridInqSize(gridID) * (size_t)(zaxisInqSize(zaxisID));
 
+  bool swapxy = false;
   cdf_write_var_data(fileID, vlistID, varID, ncvarid, dtype, nvals,
                      xsize, ysize, swapxy, start, count, memtype, data, nmiss);
 }
 
-
-void cdf_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, const void *data, size_t nmiss)
+static
+void cdfDefineStartAndCountSlice(stream_t *streamptr, int varID, int levelID, int dimorder[3], int xid, int yid, int zid, size_t start[5], size_t count[5], size_t *xsize, size_t *ysize)
 {
-  if ( streamptr->accessmode == 0 ) cdfEndDef(streamptr);
-
-  size_t xsize = 0, ysize = 0;
-  size_t start[5];
-  size_t count[5];
-  int dimorder[3];
-
-  if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamptr->self, varID);
+  size_t ndims = 0;
+  *xsize = 0;
+  *ysize = 0;
 
   const int vlistID = streamptr->vlistID;
   const int fileID  = streamptr->fileID;
@@ -1186,19 +1177,8 @@ void cdf_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
   const long ntsteps = streamptr->ntsteps;
   if ( CDI_Debug ) Message("ntsteps = %ld", ntsteps);
 
-  const int ncvarid = cdfDefVar(streamptr, varID);
-
-  const int gridID   = vlistInqVarGrid(vlistID, varID);
-  const int zaxisID  = vlistInqVarZaxis(vlistID, varID);
   const int timetype = vlistInqVarTimetype(vlistID, varID);
-  vlistInqVarDimorder(vlistID, varID, &dimorder);
 
-  int xid, yid, zid;
-  cdfGetXYZid(streamptr, gridID, zaxisID, &xid, &yid, &zid);
-
-  const bool swapxy = (dimorder[2] == 2 || dimorder[0] == 1) && xid != CDI_UNDEFID && yid != CDI_UNDEFID;
-
-  size_t ndims = 0;
   if ( vlistHasTime(vlistID) && timetype != TIME_CONSTANT )
     {
       start[ndims] = (size_t)ntsteps - 1;
@@ -1217,15 +1197,15 @@ void cdf_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
       else if ( dimorder[id] == 2 && yid != CDI_UNDEFID )
         {
           start[ndims] = 0;
-          cdf_inq_dimlen(fileID, yid, &ysize);
-          count[ndims] = ysize;
+          cdf_inq_dimlen(fileID, yid, ysize);
+          count[ndims] = *ysize;
           ndims++;
         }
       else if ( dimorder[id] == 1 && xid != CDI_UNDEFID )
         {
           start[ndims] = 0;
-          cdf_inq_dimlen(fileID, xid, &xsize);
-          count[ndims] = xsize;
+          cdf_inq_dimlen(fileID, xid, xsize);
+          count[ndims] = *xsize;
           ndims++;
         }
     }
@@ -1233,6 +1213,35 @@ void cdf_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
   if ( CDI_Debug )
     for (size_t idim = 0; idim < ndims; idim++)
       Message("dim = %d  start = %d  count = %d", idim, start[idim], count[idim]);
+}
+
+void cdf_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtype, const void *data, size_t nmiss)
+{
+  if ( streamptr->accessmode == 0 ) cdfEndDef(streamptr);
+
+  if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamptr->self, varID);
+
+  const int vlistID = streamptr->vlistID;
+  const int fileID  = streamptr->fileID;
+
+  const long ntsteps = streamptr->ntsteps;
+  if ( CDI_Debug ) Message("ntsteps = %ld", ntsteps);
+
+  const int ncvarid = cdfDefVar(streamptr, varID);
+
+  const int gridID   = vlistInqVarGrid(vlistID, varID);
+  const int zaxisID  = vlistInqVarZaxis(vlistID, varID);
+
+  int xid, yid, zid;
+  cdfGetXYZid(streamptr, gridID, zaxisID, &xid, &yid, &zid);
+
+  int dimorder[3];
+  vlistInqVarDimorder(vlistID, varID, &dimorder);
+  const bool swapxy = (dimorder[2] == 2 || dimorder[0] == 1) && xid != CDI_UNDEFID && yid != CDI_UNDEFID;
+
+  size_t xsize, ysize;
+  size_t start[5], count[5];
+  cdfDefineStartAndCountSlice(streamptr, varID, levelID, dimorder, xid, yid, zid, start, count, &xsize, &ysize);
 
   const int dtype = vlistInqVarDatatype(vlistID, varID);
 
