@@ -983,6 +983,27 @@ void cdf_write_var_data(int fileID, int vlistID, int varID, int ncvarid, int dty
   if ( sdata_sp ) Free(sdata_sp);
 }
 
+static
+void cdfGetXYZid(stream_t *streamptr, int gridID, int zaxisID, int *xid, int *yid, int *zid)
+{
+  *xid = CDI_UNDEFID;
+  *yid = CDI_UNDEFID;
+
+  if (gridInqType(gridID) == GRID_TRAJECTORY)
+    {
+      cdfWriteGridTraj(streamptr, gridID);
+    }
+  else
+    {
+      const int gridindex = nc_grid_index(streamptr, gridID);
+      *xid = streamptr->ncgrid[gridindex].ncIDs[CDF_DIMID_X];
+      *yid = streamptr->ncgrid[gridindex].ncIDs[CDF_DIMID_Y];
+    }
+
+  const int vlistID = streamptr->vlistID;
+  const int zaxisindex = vlistZaxisIndex(vlistID, zaxisID);
+  *zid = streamptr->zaxisID[zaxisindex];
+}
 
 void cdf_write_var(stream_t *streamptr, int varID, int memtype, const void *data, size_t nmiss)
 {
@@ -1009,20 +1030,8 @@ void cdf_write_var(stream_t *streamptr, int varID, int memtype, const void *data
   const int zaxisID  = vlistInqVarZaxis(vlistID, varID);
   const int timetype = vlistInqVarTimetype(vlistID, varID);
 
-  int xid = CDI_UNDEFID, yid = CDI_UNDEFID;
-  if ( gridInqType(gridID) == GRID_TRAJECTORY )
-    {
-      cdfWriteGridTraj(streamptr, gridID);
-    }
-  else
-    {
-      const int gridindex = nc_grid_index(streamptr, gridID);
-      xid = streamptr->ncgrid[gridindex].ncIDs[CDF_DIMID_X];
-      yid = streamptr->ncgrid[gridindex].ncIDs[CDF_DIMID_Y];
-    }
-
-  const int zaxisindex = vlistZaxisIndex(vlistID, zaxisID);
-  const int zid = streamptr->zaxisID[zaxisindex];
+  int xid, yid, zid;
+  cdfGetXYZid(streamptr, gridID, zaxisID, &xid, &yid, &zid);
 
   if ( vlistHasTime(vlistID) && timetype != TIME_CONSTANT )
     {
@@ -1081,7 +1090,6 @@ void cdf_write_var_chunk(stream_t *streamptr, int varID, int memtype,
 {
   if ( streamptr->accessmode == 0 ) cdfEndDef(streamptr);
 
-  int xid = CDI_UNDEFID, yid = CDI_UNDEFID;
   size_t xsize = 0, ysize = 0;
   size_t start[5];
   size_t count[5];
@@ -1104,19 +1112,8 @@ void cdf_write_var_chunk(stream_t *streamptr, int varID, int memtype,
   const int zaxisID  = vlistInqVarZaxis(vlistID, varID);
   const int timetype = vlistInqVarTimetype(vlistID, varID);
 
-  if ( gridInqType(gridID) == GRID_TRAJECTORY )
-    {
-      cdfWriteGridTraj(streamptr, gridID);
-    }
-  else
-    {
-      const int gridindex = nc_grid_index(streamptr, gridID);
-      xid = streamptr->ncgrid[gridindex].ncIDs[CDF_DIMID_X];
-      yid = streamptr->ncgrid[gridindex].ncIDs[CDF_DIMID_Y];
-    }
-
-  const int zaxisindex = vlistZaxisIndex(vlistID, zaxisID);
-  const int zid = streamptr->zaxisID[zaxisindex];
+  int xid, yid, zid;
+  cdfGetXYZid(streamptr, gridID, zaxisID, &xid, &yid, &zid);
 
   if ( vlistHasTime(vlistID) && timetype != TIME_CONSTANT )
     {
@@ -1180,7 +1177,6 @@ void cdf_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
   size_t start[5];
   size_t count[5];
   int dimorder[3];
-  int xid = CDI_UNDEFID, yid = CDI_UNDEFID;
 
   if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamptr->self, varID);
 
@@ -1197,19 +1193,8 @@ void cdf_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
   const int timetype = vlistInqVarTimetype(vlistID, varID);
   vlistInqVarDimorder(vlistID, varID, &dimorder);
 
-  if ( gridInqType(gridID) == GRID_TRAJECTORY )
-    {
-      cdfWriteGridTraj(streamptr, gridID);
-    }
-  else
-    {
-      const int gridindex = nc_grid_index(streamptr, gridID);
-      xid = streamptr->ncgrid[gridindex].ncIDs[CDF_DIMID_X];
-      yid = streamptr->ncgrid[gridindex].ncIDs[CDF_DIMID_Y];
-    }
-
-  const int zaxisindex = vlistZaxisIndex(vlistID, zaxisID);
-  const int zid = streamptr->zaxisID[zaxisindex];
+  int xid, yid, zid;
+  cdfGetXYZid(streamptr, gridID, zaxisID, &xid, &yid, &zid);
 
   const bool swapxy = (dimorder[2] == 2 || dimorder[0] == 1) && xid != CDI_UNDEFID && yid != CDI_UNDEFID;
 
@@ -1263,7 +1248,6 @@ void cdf_write_record(stream_t *streamptr, int memtype, const void *data, size_t
 {
   const int varID   = streamptr->record->varID;
   const int levelID = streamptr->record->levelID;
-
   cdf_write_var_slice(streamptr, varID, levelID, memtype, data, nmiss);
 }
 
