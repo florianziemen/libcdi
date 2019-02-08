@@ -1067,9 +1067,6 @@ void cdf_write_var(stream_t *streamptr, int varID, int memtype, const void *data
   const int vlistID = streamptr->vlistID;
   const int fileID  = streamptr->fileID;
 
-  const long ntsteps = streamptr->ntsteps;
-  if ( CDI_Debug ) Message("ntsteps = %ld", ntsteps);
-
   const int ncvarid = cdfDefVar(streamptr, varID);
 
   const int gridID   = vlistInqVarGrid(vlistID, varID);
@@ -1098,34 +1095,20 @@ void cdf_write_var(stream_t *streamptr, int varID, int memtype, const void *data
   cdf_write_var_data(fileID, vlistID, varID, ncvarid, dtype, nvals, xsize, ysize, swapxy, start, count, memtype, data, nmiss);
 }
 
-
-void cdf_write_var_chunk(stream_t *streamptr, int varID, int memtype,
-                         const int rect[][2], const void *data, size_t nmiss)
+static
+void cdfDefineStartAndCountChunk(stream_t *streamptr, const int rect[][2], int varID, int xid, int yid, int zid, size_t start[5], size_t count[5], size_t *xsize, size_t *ysize)
 {
-  if ( streamptr->accessmode == 0 ) cdfEndDef(streamptr);
-
-  size_t xsize = 0, ysize = 0;
-  size_t start[5],  count[5];
   size_t ndims = 0;
-  const int streamID = streamptr->self;
+  *xsize = 0;
+  *ysize = 0;
 
-  if ( CDI_Debug )
-    Message("streamID = %d  varID = %d", streamID, varID);
-
-  const int vlistID = streamInqVlist(streamID);
-  const int fileID  = streamInqFileID(streamID);
+  const int vlistID = streamptr->vlistID;
+  const int fileID  = streamptr->fileID;
 
   const long ntsteps = streamptr->ntsteps;
   if ( CDI_Debug ) Message("ntsteps = %ld", ntsteps);
 
-  const int ncvarid = cdfDefVar(streamptr, varID);
-
-  const int gridID   = vlistInqVarGrid(vlistID, varID);
-  const int zaxisID  = vlistInqVarZaxis(vlistID, varID);
   const int timetype = vlistInqVarTimetype(vlistID, varID);
-
-  int xid, yid, zid;
-  cdfGetXYZid(streamptr, gridID, zaxisID, &xid, &yid, &zid);
 
   if ( vlistHasTime(vlistID) && timetype != TIME_CONSTANT )
     {
@@ -1133,14 +1116,17 @@ void cdf_write_var_chunk(stream_t *streamptr, int varID, int memtype,
       count[ndims] = 1;
       ndims++;
     }
+
   if ( zid != CDI_UNDEFID )
     {
+      const int zaxisID  = vlistInqVarZaxis(vlistID, varID);
       int size = zaxisInqSize(zaxisID);
       xassert(rect[2][0] >= 0 && rect[2][0] <= rect[2][1] && rect[2][1] <= size);
       start[ndims] = (size_t)rect[2][0];
       count[ndims] = (size_t)rect[2][1] - (size_t)rect[2][0] + 1;
       ndims++;
     }
+
   if ( yid != CDI_UNDEFID )
     {
       size_t size;
@@ -1150,6 +1136,7 @@ void cdf_write_var_chunk(stream_t *streamptr, int varID, int memtype,
       count[ndims] = (size_t)rect[1][1] - (size_t)rect[1][0] + 1;
       ndims++;
     }
+
   if ( xid != CDI_UNDEFID )
     {
       size_t size;
@@ -1163,6 +1150,32 @@ void cdf_write_var_chunk(stream_t *streamptr, int varID, int memtype,
   if ( CDI_Debug )
     for (size_t idim = 0; idim < ndims; idim++)
       Message("dim = %d  start = %d  count = %d", idim, start[idim], count[idim]);
+}
+
+void cdf_write_var_chunk(stream_t *streamptr, int varID, int memtype,
+                         const int rect[][2], const void *data, size_t nmiss)
+{
+  if ( streamptr->accessmode == 0 ) cdfEndDef(streamptr);
+
+  const int streamID = streamptr->self;
+
+  if ( CDI_Debug )
+    Message("streamID = %d  varID = %d", streamID, varID);
+
+  const int vlistID = streamInqVlist(streamID);
+  const int fileID  = streamInqFileID(streamID);
+
+  const int ncvarid = cdfDefVar(streamptr, varID);
+
+  const int gridID   = vlistInqVarGrid(vlistID, varID);
+  const int zaxisID  = vlistInqVarZaxis(vlistID, varID);
+
+  int xid, yid, zid;
+  cdfGetXYZid(streamptr, gridID, zaxisID, &xid, &yid, &zid);
+
+  size_t xsize, ysize;
+  size_t start[5], count[5];
+  cdfDefineStartAndCountChunk(streamptr, rect, varID, xid, yid, zid, start, count, &xsize, &ysize);
 
   if ( streamptr->ncmode == 1 )
     {
@@ -1240,9 +1253,6 @@ void cdf_write_var_slice(stream_t *streamptr, int varID, int levelID, int memtyp
 
   const int vlistID = streamptr->vlistID;
   const int fileID  = streamptr->fileID;
-
-  const long ntsteps = streamptr->ntsteps;
-  if ( CDI_Debug ) Message("ntsteps = %ld", ntsteps);
 
   const int ncvarid = cdfDefVar(streamptr, varID);
 
