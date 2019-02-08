@@ -384,6 +384,94 @@ void cdfAppendCoordinates(int fileID, int ncvarid, char coordinates[CDI_MAX_NAME
 }
 
 static
+void cdfDefineCoordinates(const stream_t *streamptr, int fileID, int ncvarid, int nczvarID, int gridtype, int gridID, int gridindex, int xid, int yid, size_t gridsize, char axis[5], size_t iax)
+{
+  char coordinates[CDI_MAX_NAME]; coordinates[0] = 0;
+
+  if (nczvarID != CDI_UNDEFID) cdfAppendCoordinates(fileID, nczvarID, coordinates);
+
+  if ( gridtype != GRID_GENERIC && gridtype != GRID_LONLAT && gridtype != GRID_GAUSSIAN &&
+       gridtype != GRID_PROJECTION && gridtype != GRID_CURVILINEAR && gridtype != GRID_CHARXY )
+    {
+      const size_t len = strlen(gridNamePtr(gridtype));
+      if ( len > 0 ) cdf_put_att_text(fileID, ncvarid, "CDI_grid_type", len, gridNamePtr(gridtype));
+    }
+
+  char gmapvarname[CDI_MAX_NAME]; gmapvarname[0] = 0;
+  cdf_get_gmapvarname(gridID, gmapvarname);
+  if ( gmapvarname[0] ) cdf_put_att_text(fileID, ncvarid, "grid_mapping", strlen(gmapvarname), gmapvarname);
+
+  if ( gridtype == GRID_TRAJECTORY )
+    {
+      cdf_put_att_text(fileID, ncvarid, "coordinates", 9, "tlon tlat" );
+    }
+  else if ( gridtype == GRID_LONLAT && xid == CDI_UNDEFID && yid == CDI_UNDEFID && gridsize == 1 )
+    {
+      const int ncxvarID = streamptr->ncgrid[gridindex].ncIDs[CDF_VARID_X];
+      const int ncyvarID = streamptr->ncgrid[gridindex].ncIDs[CDF_VARID_Y];
+      cdfAppendCoordinates(fileID, ncyvarID, coordinates);
+      cdfAppendCoordinates(fileID, ncxvarID, coordinates);
+    }
+  else if ( gridtype == GRID_UNSTRUCTURED || gridtype == GRID_CURVILINEAR )
+    {
+      char cellarea[CDI_MAX_NAME] = "area: ";
+      const int ncxvarID = streamptr->ncgrid[gridindex].ncIDs[CDF_VARID_X];
+      const int ncyvarID = streamptr->ncgrid[gridindex].ncIDs[CDF_VARID_Y];
+      const int ncavarID = streamptr->ncgrid[gridindex].ncIDs[CDF_VARID_A];
+      // CMOR order: coordinates = "lat lon"
+      if ( cdiCoordinatesLonLat )
+        {
+          cdfAppendCoordinates(fileID, ncxvarID, coordinates);
+          cdfAppendCoordinates(fileID, ncyvarID, coordinates);
+        }
+      else
+        {
+          cdfAppendCoordinates(fileID, ncyvarID, coordinates);
+          cdfAppendCoordinates(fileID, ncxvarID, coordinates);
+        }
+
+      if ( ncavarID != CDI_UNDEFID )
+        {
+          size_t len = strlen(cellarea);
+          cdf_inq_varname(fileID, ncavarID, cellarea+len);
+          len = strlen(cellarea);
+          cdf_put_att_text(fileID, ncvarid, "cell_measures", len, cellarea);
+        }
+
+      if ( gridtype == GRID_UNSTRUCTURED )
+        {
+          int position = gridInqPosition(gridID);
+          if ( position > 0 )
+            cdf_put_att_int(fileID, ncvarid, "number_of_grid_in_reference", NC_INT, 1, &position);
+        }
+    }
+  else if ( gridtype == GRID_SPECTRAL || gridtype == GRID_FOURIER )
+    {
+      axis[iax++] = '-';
+      axis[iax++] = '-';
+      cdf_put_att_text(fileID, ncvarid, "axis", iax, axis);
+      int gridTruncation = gridInqTrunc(gridID);
+      cdf_put_att_int(fileID, ncvarid, "truncation", NC_INT, 1, &gridTruncation);
+    }
+  else if ( gridtype == GRID_CHARXY )
+    {
+      if ( gridInqXIsc(gridID) )
+        {
+          const int ncxvarID = streamptr->ncgrid[gridindex].ncIDs[CDF_VARID_X];
+          cdfAppendCoordinates(fileID, ncxvarID, coordinates);
+        }
+      else if ( gridInqYIsc(gridID) )
+        {
+          const int ncyvarID = streamptr->ncgrid[gridindex].ncIDs[CDF_VARID_Y];
+          cdfAppendCoordinates(fileID, ncyvarID, coordinates);
+        }
+    }
+
+  size_t len = strlen(coordinates);
+  if ( len ) cdf_put_att_text(fileID, ncvarid, "coordinates", len, coordinates);
+}
+
+static
 int cdfDefVar(stream_t *streamptr, int varID)
 {
   int ncvarid = -1;
@@ -430,6 +518,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
       if ( yid != CDI_UNDEFID ) cdf_inq_dimlen(fileID, yid, &ysize);
     }
 
+  const int zaxistype = zaxisInqType(zaxisID);
   const int zaxisindex = vlistZaxisIndex(vlistID, zaxisID);
   const int zid = streamptr->zaxisID[zaxisindex];
   bool zaxis_is_scalar = false;
@@ -602,93 +691,9 @@ int cdfDefVar(stream_t *streamptr, int varID)
         cdf_put_att_int(fileID, ncvarid, "table", NC_INT, 1, &tablenum);
     }
 
-  char coordinates[CDI_MAX_NAME]; coordinates[0] = 0;
+  const int nczvarID = (zaxis_is_scalar || zaxistype == ZAXIS_CHAR) ? streamptr->nczvarID[zaxisindex] : CDI_UNDEFID;
 
-  if ( zaxis_is_scalar || zaxisInqType(zaxisID) == ZAXIS_CHAR )
-    {
-      const int nczvarID = streamptr->nczvarID[zaxisindex];
-      cdfAppendCoordinates(fileID, nczvarID, coordinates);
-    }
-
-  if ( gridtype != GRID_GENERIC && gridtype != GRID_LONLAT && gridtype != GRID_GAUSSIAN &&
-       gridtype != GRID_PROJECTION && gridtype != GRID_CURVILINEAR && gridtype != GRID_CHARXY )
-    {
-      const size_t len = strlen(gridNamePtr(gridtype));
-      if ( len > 0 ) cdf_put_att_text(fileID, ncvarid, "CDI_grid_type", len, gridNamePtr(gridtype));
-    }
-
-  char gmapvarname[CDI_MAX_NAME]; gmapvarname[0] = 0;
-  cdf_get_gmapvarname(gridID, gmapvarname);
-  if ( gmapvarname[0] ) cdf_put_att_text(fileID, ncvarid, "grid_mapping", strlen(gmapvarname), gmapvarname);
-
-  if ( gridtype == GRID_TRAJECTORY )
-    {
-      cdf_put_att_text(fileID, ncvarid, "coordinates", 9, "tlon tlat" );
-    }
-  else if ( gridtype == GRID_LONLAT && xid == CDI_UNDEFID && yid == CDI_UNDEFID && gridsize == 1 )
-    {
-      const int ncxvarID = streamptr->ncgrid[gridindex].ncIDs[CDF_VARID_X];
-      const int ncyvarID = streamptr->ncgrid[gridindex].ncIDs[CDF_VARID_Y];
-      cdfAppendCoordinates(fileID, ncyvarID, coordinates);
-      cdfAppendCoordinates(fileID, ncxvarID, coordinates);
-    }
-  else if ( gridtype == GRID_UNSTRUCTURED || gridtype == GRID_CURVILINEAR )
-    {
-      char cellarea[CDI_MAX_NAME] = "area: ";
-      const int ncxvarID = streamptr->ncgrid[gridindex].ncIDs[CDF_VARID_X];
-      const int ncyvarID = streamptr->ncgrid[gridindex].ncIDs[CDF_VARID_Y];
-      const int ncavarID = streamptr->ncgrid[gridindex].ncIDs[CDF_VARID_A];
-      // CMOR order: coordinates = "lat lon"
-      if ( cdiCoordinatesLonLat )
-        {
-          cdfAppendCoordinates(fileID, ncxvarID, coordinates);
-          cdfAppendCoordinates(fileID, ncyvarID, coordinates);
-        }
-      else
-        {
-          cdfAppendCoordinates(fileID, ncyvarID, coordinates);
-          cdfAppendCoordinates(fileID, ncxvarID, coordinates);
-        }
-
-      if ( ncavarID != CDI_UNDEFID )
-        {
-          size_t len = strlen(cellarea);
-          cdf_inq_varname(fileID, ncavarID, cellarea+len);
-          len = strlen(cellarea);
-          cdf_put_att_text(fileID, ncvarid, "cell_measures", len, cellarea);
-        }
-
-      if ( gridtype == GRID_UNSTRUCTURED )
-        {
-          int position = gridInqPosition(gridID);
-          if ( position > 0 )
-            cdf_put_att_int(fileID, ncvarid, "number_of_grid_in_reference", NC_INT, 1, &position);
-        }
-    }
-  else if ( gridtype == GRID_SPECTRAL || gridtype == GRID_FOURIER )
-    {
-      const int gridTruncation = gridInqTrunc(gridID);
-      axis[iax++] = '-';
-      axis[iax++] = '-';
-      cdf_put_att_text(fileID, ncvarid, "axis", iax, axis);
-      cdf_put_att_int(fileID, ncvarid, "truncation", NC_INT, 1, &gridTruncation);
-    }
-  else if ( gridtype == GRID_CHARXY )
-    {
-      if ( gridInqXIsc(gridID) )
-        {
-          const int ncxvarID = streamptr->ncgrid[gridindex].ncIDs[CDF_VARID_X];
-          cdfAppendCoordinates(fileID, ncxvarID, coordinates);
-        }
-      else if ( gridInqYIsc(gridID) )
-        {
-          const int ncyvarID = streamptr->ncgrid[gridindex].ncIDs[CDF_VARID_Y];
-          cdfAppendCoordinates(fileID, ncyvarID, coordinates);
-        }
-    }
-
-  size_t len = strlen(coordinates);
-  if ( len ) cdf_put_att_text(fileID, ncvarid, "coordinates", len, coordinates);
+  cdfDefineCoordinates(streamptr, fileID, ncvarid, nczvarID, gridtype, gridID, gridindex, xid, yid, gridsize, axis, iax);
 
   cdfDefVarPacking(streamptr, ncvarid, xtype, vlistID, varID);
 
@@ -706,17 +711,17 @@ int cdfDefVar(stream_t *streamptr, int varID)
 
   if ( zid == -1 )
     {
-      if ( zaxisInqType(zaxisID) == ZAXIS_CLOUD_BASE          ||
-           zaxisInqType(zaxisID) == ZAXIS_CLOUD_TOP           ||
-           zaxisInqType(zaxisID) == ZAXIS_ISOTHERM_ZERO       ||
-           zaxisInqType(zaxisID) == ZAXIS_TOA                 ||
-           zaxisInqType(zaxisID) == ZAXIS_SEA_BOTTOM          ||
-           zaxisInqType(zaxisID) == ZAXIS_LAKE_BOTTOM         ||
-           zaxisInqType(zaxisID) == ZAXIS_SEDIMENT_BOTTOM     ||
-           zaxisInqType(zaxisID) == ZAXIS_SEDIMENT_BOTTOM_TA  ||
-           zaxisInqType(zaxisID) == ZAXIS_SEDIMENT_BOTTOM_TW  ||
-           zaxisInqType(zaxisID) == ZAXIS_MIX_LAYER           ||
-           zaxisInqType(zaxisID) == ZAXIS_ATMOSPHERE )
+      if ( zaxistype == ZAXIS_CLOUD_BASE          ||
+           zaxistype == ZAXIS_CLOUD_TOP           ||
+           zaxistype == ZAXIS_ISOTHERM_ZERO       ||
+           zaxistype == ZAXIS_TOA                 ||
+           zaxistype == ZAXIS_SEA_BOTTOM          ||
+           zaxistype == ZAXIS_LAKE_BOTTOM         ||
+           zaxistype == ZAXIS_SEDIMENT_BOTTOM     ||
+           zaxistype == ZAXIS_SEDIMENT_BOTTOM_TA  ||
+           zaxistype == ZAXIS_SEDIMENT_BOTTOM_TW  ||
+           zaxistype == ZAXIS_MIX_LAYER           ||
+           zaxistype == ZAXIS_ATMOSPHERE )
         {
           zaxisInqName(zaxisID, varname);
           cdf_put_att_text(fileID, ncvarid, "level_type", strlen(varname), varname);
