@@ -472,6 +472,26 @@ void cdfDefineCoordinates(const stream_t *streamptr, int fileID, int ncvarid, in
 }
 
 static
+void cdfDefineAttrLeveltype(int fileID, int ncvarid, int zaxisID, int zaxistype, char varname[CDI_MAX_NAME])
+{
+  if ( zaxistype == ZAXIS_CLOUD_BASE          ||
+       zaxistype == ZAXIS_CLOUD_TOP           ||
+       zaxistype == ZAXIS_ISOTHERM_ZERO       ||
+       zaxistype == ZAXIS_TOA                 ||
+       zaxistype == ZAXIS_SEA_BOTTOM          ||
+       zaxistype == ZAXIS_LAKE_BOTTOM         ||
+       zaxistype == ZAXIS_SEDIMENT_BOTTOM     ||
+       zaxistype == ZAXIS_SEDIMENT_BOTTOM_TA  ||
+       zaxistype == ZAXIS_SEDIMENT_BOTTOM_TW  ||
+       zaxistype == ZAXIS_MIX_LAYER           ||
+       zaxistype == ZAXIS_ATMOSPHERE )
+    {
+      zaxisInqName(zaxisID, varname);
+      cdf_put_att_text(fileID, ncvarid, "level_type", strlen(varname), varname);
+    }
+}
+
+static
 int cdfDefVar(stream_t *streamptr, int varID)
 {
   int ncvarid = -1;
@@ -521,8 +541,6 @@ int cdfDefVar(stream_t *streamptr, int varID)
   const int zaxistype = zaxisInqType(zaxisID);
   const int zaxisindex = vlistZaxisIndex(vlistID, zaxisID);
   const int zid = streamptr->zaxisID[zaxisindex];
-  bool zaxis_is_scalar = false;
-  if ( zid == CDI_UNDEFID ) zaxis_is_scalar = zaxisInqScalar(zaxisID) > 0;
 
   if ( dimorder[0] != 3 ) lchunk = false; /* ZYX and ZXY */
 
@@ -691,7 +709,8 @@ int cdfDefVar(stream_t *streamptr, int varID)
         cdf_put_att_int(fileID, ncvarid, "table", NC_INT, 1, &tablenum);
     }
 
-  const int nczvarID = (zaxis_is_scalar || zaxistype == ZAXIS_CHAR) ? streamptr->nczvarID[zaxisindex] : CDI_UNDEFID;
+  bool zaxisIsScalar = (zid == CDI_UNDEFID) ? (zaxisInqScalar(zaxisID) > 0) : false;
+  const int nczvarID = (zaxisIsScalar || zaxistype == ZAXIS_CHAR) ? streamptr->nczvarID[zaxisindex] : CDI_UNDEFID;
 
   cdfDefineCoordinates(streamptr, fileID, ncvarid, nczvarID, gridtype, gridID, gridindex, xid, yid, gridsize, axis, iax);
 
@@ -709,24 +728,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
   if ( vlistInqVarMissvalUsed(vlistID, varID) )
     cdfDefVarMissval(streamptr, varID, vlistInqVarDatatype(vlistID, varID), 0);
 
-  if ( zid == -1 )
-    {
-      if ( zaxistype == ZAXIS_CLOUD_BASE          ||
-           zaxistype == ZAXIS_CLOUD_TOP           ||
-           zaxistype == ZAXIS_ISOTHERM_ZERO       ||
-           zaxistype == ZAXIS_TOA                 ||
-           zaxistype == ZAXIS_SEA_BOTTOM          ||
-           zaxistype == ZAXIS_LAKE_BOTTOM         ||
-           zaxistype == ZAXIS_SEDIMENT_BOTTOM     ||
-           zaxistype == ZAXIS_SEDIMENT_BOTTOM_TA  ||
-           zaxistype == ZAXIS_SEDIMENT_BOTTOM_TW  ||
-           zaxistype == ZAXIS_MIX_LAYER           ||
-           zaxistype == ZAXIS_ATMOSPHERE )
-        {
-          zaxisInqName(zaxisID, varname);
-          cdf_put_att_text(fileID, ncvarid, "level_type", strlen(varname), varname);
-        }
-    }
+  if ( zid == -1 ) cdfDefineAttrLeveltype(fileID, ncvarid, zaxisID, zaxistype, varname);
 
   int perturbationNumber, numberOfForecastsInEnsemble, typeOfEnsembleForecast;
   if ( cdiInqKeyInt(vlistID, varID, CDI_KEY_PERTURBATIONNUMBER, &perturbationNumber) == 0 )
