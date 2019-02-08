@@ -492,6 +492,18 @@ void cdfDefineAttrLeveltype(int fileID, int ncvarid, int zaxisID, int zaxistype,
 }
 
 static
+void cdfDefineAttrEnsemble(int fileID, int ncvarid, int vlistID, int varID)
+{
+  int perturbationNumber, numberOfForecastsInEnsemble, typeOfEnsembleForecast;
+  if ( cdiInqKeyInt(vlistID, varID, CDI_KEY_PERTURBATIONNUMBER, &perturbationNumber) == 0 )
+    cdf_put_att_int(fileID, ncvarid, "realization", NC_INT, 1, &perturbationNumber);
+  if ( cdiInqKeyInt(vlistID, varID, CDI_KEY_NUMBEROFFORECASTSINENSEMBLE, &numberOfForecastsInEnsemble) == 0 )
+    cdf_put_att_int(fileID, ncvarid, "ensemble_members", NC_INT, 1, &numberOfForecastsInEnsemble);
+  if ( cdiInqKeyInt(vlistID, varID, CDI_KEY_TYPEOFENSEMBLEFORECAST, &typeOfEnsembleForecast) == 0 )
+    cdf_put_att_int(fileID, ncvarid, "forecast_init_type", NC_INT, 1, &typeOfEnsembleForecast);
+}
+
+static
 int cdfDefVar(stream_t *streamptr, int varID)
 {
   int ncvarid = -1;
@@ -730,13 +742,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
 
   if ( zid == -1 ) cdfDefineAttrLeveltype(fileID, ncvarid, zaxisID, zaxistype, varname);
 
-  int perturbationNumber, numberOfForecastsInEnsemble, typeOfEnsembleForecast;
-  if ( cdiInqKeyInt(vlistID, varID, CDI_KEY_PERTURBATIONNUMBER, &perturbationNumber) == 0 )
-    cdf_put_att_int(fileID, ncvarid, "realization", NC_INT, 1, &perturbationNumber);
-  if ( cdiInqKeyInt(vlistID, varID, CDI_KEY_NUMBEROFFORECASTSINENSEMBLE, &numberOfForecastsInEnsemble) == 0 )
-    cdf_put_att_int(fileID, ncvarid, "ensemble_members", NC_INT, 1, &numberOfForecastsInEnsemble);
-  if ( cdiInqKeyInt(vlistID, varID, CDI_KEY_TYPEOFENSEMBLEFORECAST, &typeOfEnsembleForecast) == 0 )
-    cdf_put_att_int(fileID, ncvarid, "forecast_init_type", NC_INT, 1, &typeOfEnsembleForecast);
+  cdfDefineAttrEnsemble(fileID, ncvarid, vlistID, varID);
 
   // Attributes
   cdfDefineAttributes(vlistID, varID, fileID, ncvarid);
