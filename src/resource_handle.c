@@ -167,7 +167,7 @@ reshListCreate(int namespaceID)
 }
 
 /**************************************************************/
-static void reshRemove_(int nsp, int idx);
+static void reshRemove_(int nsp, int idx, const char *caller);
 
 void
 reshListDestruct(int namespaceID)
@@ -184,7 +184,7 @@ reshListDestruct(int namespaceID)
           if (listElem->status & RESH_IN_USE_BIT)
             {
               listElem->res.v.ops->valDestroy(listElem->res.v.val);
-              reshRemove_(namespaceID, j);
+              reshRemove_(namespaceID, j, __func__);
             }
         }
       Free(resHList[namespaceID].resources);
@@ -298,10 +298,11 @@ reshPut(void *p, const resOps *ops)
 /**************************************************************/
 
 static void
-reshRemove_(int nsp, int idx)
+reshRemove_(int nsp, int idx, const char *caller)
 {
   int curFree = resHList[nsp].freeHead;
   listElem_t *r = resHList[nsp].resources;
+  if (!(r[idx].status & RESH_IN_USE_BIT)) xabortC(caller, "Attempting to remove an item that is already removed.");
   r[idx].res.free.next = curFree;
   r[idx].res.free.prev = -1;
   if (curFree != -1) r[curFree].res.free.prev = idx;
@@ -323,7 +324,7 @@ reshDestroy(cdiResH resH)
 
   xassert(nspT.nsp == nsp && nspT.idx >= 0 && nspT.idx < resHList[nsp].size && resHList[nsp].resources[nspT.idx].res.v.ops);
 
-  if (resHList[nsp].resources[nspT.idx].status & RESH_IN_USE_BIT) reshRemove_(nsp, nspT.idx);
+  if (resHList[nsp].resources[nspT.idx].status & RESH_IN_USE_BIT) reshRemove_(nsp, nspT.idx, __func__);
 
   LIST_UNLOCK();
 }
@@ -344,7 +345,7 @@ reshRemove(cdiResH resH, const resOps *ops)
           && (resHList[nsp].resources[nspT.idx].status & RESH_IN_USE_BIT) && resHList[nsp].resources[nspT.idx].res.v.ops
           && resHList[nsp].resources[nspT.idx].res.v.ops == ops);
 
-  reshRemove_(nsp, nspT.idx);
+  reshRemove_(nsp, nspT.idx, __func__);
 
   LIST_UNLOCK();
 }
@@ -364,7 +365,7 @@ reshReplace(cdiResH resH, void *p, const resOps *ops)
   if (q->status & RESH_IN_USE_BIT)
     {
       q->res.v.ops->valDestroy(q->res.v.val);
-      reshRemove_(nsp, nspT.idx);
+      reshRemove_(nsp, nspT.idx, __func__);
     }
   reshPut_(nsp, nspT.idx, p, ops);
   LIST_UNLOCK();
