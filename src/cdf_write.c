@@ -504,16 +504,78 @@ void cdfDefineAttrEnsemble(int fileID, int ncvarid, int vlistID, int varID)
 }
 
 static
+void cdfCheckVarname(int fileID, char name[CDI_MAX_NAME])
+{
+  if ( name[0] )
+    {
+      int ncvarid;
+      char varname[CDI_MAX_NAME];
+      sprintf(varname, "%s", name);
+      char *varname2 = varname+strlen(varname);
+      unsigned iz = 0;
+
+      do
+        {
+          if ( iz ) sprintf(varname2, "_%u", iz+1);
+
+          if ( nc_inq_varid(fileID, varname, &ncvarid) != NC_NOERR ) break;
+
+          ++iz;
+        }
+      while ( iz <= 99 );
+
+      if (iz > 99) Error("Variable name %s already exsist!", name);
+
+      if ( strcmp(name, varname) != 0 )
+        Warning("Changed %s entry of variable name '%s' to '%s'!", (iz==1)?"double":"multiple", name, varname);
+
+      strcpy(name, varname);
+    }
+}
+
+static
+void cdfGenVarname(int fileID, char name[CDI_MAX_NAME], int pnum, int pcat, int *pdis, int *pcode)
+{
+  char varname[CDI_MAX_NAME];
+
+  int code = *pcode;
+  if ( code < 0 ) code = -code;
+  if ( pnum < 0 ) pnum = -pnum;
+
+  if ( *pdis == 255 )
+    sprintf(varname, "var%d", code);
+  else
+    sprintf(varname, "param%d.%d.%d", pnum, pcat, *pdis);
+
+  char *varname2 = varname+strlen(varname);
+  int ncvarid;
+  unsigned iz = 0;
+
+  do
+    {
+      if ( iz ) sprintf(varname2, "_%u", iz+1);
+
+      if ( nc_inq_varid(fileID, varname, &ncvarid) != NC_NOERR ) break;
+
+      ++iz;
+    }
+  while ( iz <= 99 );
+
+  if (iz > 99) Error("Variable name %s already exsist!", name);
+
+  strcpy(name, varname);
+  *pcode = 0;
+  *pdis = 255;
+}
+
+static
 int cdfDefVar(stream_t *streamptr, int varID)
 {
   int ncvarid = -1;
   int xid = CDI_UNDEFID, yid = CDI_UNDEFID;
   size_t xsize = 0, ysize = 0;
   int dims[4];
-  size_t chunks[4] = {0,0,0,0};
   int ndims = 0;
-  int tablenum;
-  int dimorder[3];
   size_t iax = 0;
   char axis[5];
 
@@ -534,12 +596,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
   int pnum, pcat, pdis;
   cdiDecodeParam(param, &pnum, &pcat, &pdis);
 
-  int chunktype = vlistInqVarChunkType(vlistID, varID);
-
-  vlistInqVarDimorder(vlistID, varID, &dimorder);
-
   const size_t gridsize = gridInqSize(gridID);
-  bool lchunk = (gridsize >= 16);
   const int gridtype = gridInqType(gridID);
   const int gridindex = nc_grid_index(streamptr, gridID);
   if ( gridtype != GRID_TRAJECTORY )
@@ -554,7 +611,9 @@ int cdfDefVar(stream_t *streamptr, int varID)
   const int zaxisindex = vlistZaxisIndex(vlistID, zaxisID);
   const int zid = streamptr->zaxisID[zaxisindex];
 
-  if ( dimorder[0] != 3 ) lchunk = false; /* ZYX and ZXY */
+  int dimorder[3]; // ZYX and ZXY
+  vlistInqVarDimorder(vlistID, varID, &dimorder);
+  const bool lchunk = (dimorder[0] == 3) ? (gridsize >= 16) : false;
 
   if ( ((dimorder[0]>0)+(dimorder[1]>0)+(dimorder[2]>0)) < ((xid!=CDI_UNDEFID)+(yid!=CDI_UNDEFID)+(zid!=CDI_UNDEFID)) )
     {
@@ -562,11 +621,11 @@ int cdfDefVar(stream_t *streamptr, int varID)
       Error("Internal problem, dimension order missing!");
     }
 
-  const int tid = streamptr->basetime.ncdimid;
-
+  size_t chunks[4] = {0,0,0,0};
   if ( vlistHasTime(vlistID) && timetype != TIME_CONSTANT )
     {
-      if ( tid == CDI_UNDEFID ) Error("Internal problem, time undefined!");
+      const int tid = streamptr->basetime.ncdimid;
+      if (tid == CDI_UNDEFID) Error("Internal problem, time undefined!");
       chunks[ndims] = 1;
       dims[ndims++] = tid;
       axis[iax++] = 'T';
@@ -582,6 +641,8 @@ int cdfDefVar(stream_t *streamptr, int varID)
   if ( xid != CDI_UNDEFID ) chunks[ndims] = xsize;
   if ( xid != CDI_UNDEFID ) dims[ndims++] = xid;
   */
+
+  int chunktype = vlistInqVarChunkType(vlistID, varID);
   size_t chunk_size_max = 65536;
   if ( chunktype != CDI_CHUNK_LINES && gridsize > INT32_MAX )
     {
@@ -632,59 +693,9 @@ int cdfDefVar(stream_t *streamptr, int varID)
   vlistInqVarUnits(vlistID, varID, units);
 
   const int tableID  = vlistInqVarTable(vlistID, varID);
-  if ( !name[0] ) tableInqEntry(tableID, code, -1, name, longname, units);
-  if ( name[0] )
-    {
-      sprintf(varname, "%s", name);
-      char *varname2 = varname+strlen(varname);
-      unsigned iz = 0;
-
-      do
-        {
-          if ( iz ) sprintf(varname2, "_%u", iz+1);
-
-          if ( nc_inq_varid(fileID, varname, &ncvarid) != NC_NOERR ) break;
-
-          ++iz;
-        }
-      while ( iz <= 99 );
-
-      if (iz > 99) Error("Variable name %s already exsist!", name);
-
-      if ( strcmp(name, varname) != 0 )
-        Warning("Changed %s entry of variable name '%s' to '%s'!", (iz==1)?"double":"multiple", name, varname);
-
-      strcpy(name, varname);
-    }
-  else
-    {
-      if ( code < 0 ) code = -code;
-      if ( pnum < 0 ) pnum = -pnum;
-
-      if ( pdis == 255 )
-	sprintf(varname, "var%d", code);
-      else
-	sprintf(varname, "param%d.%d.%d", pnum, pcat, pdis);
-
-      char *varname2 = varname+strlen(varname);
-      unsigned iz = 0;
-
-      do
-        {
-          if ( iz ) sprintf(varname2, "_%u", iz+1);
-
-          if ( nc_inq_varid(fileID, varname, &ncvarid) != NC_NOERR ) break;
-
-          ++iz;
-        }
-      while ( iz <= 99 );
-
-      if (iz > 99) Error("Variable name %s already exsist!", name);
-
-      strcpy(name, varname);
-      code = 0;
-      pdis = 255;
-    }
+  if (!name[0]) tableInqEntry(tableID, code, -1, name, longname, units);
+  if (name[0]) cdfCheckVarname(fileID, name);
+  else         cdfGenVarname(fileID, name, pnum, pcat, &pdis, &code);
 
   /* if ( streamptr->ncmode == 2 ) cdf_redef(fileID); */
 
@@ -716,9 +727,8 @@ int cdfDefVar(stream_t *streamptr, int varID)
 
   if ( tableID != CDI_UNDEFID )
     {
-      tablenum = tableInqNum(tableID);
-      if ( tablenum > 0 )
-        cdf_put_att_int(fileID, ncvarid, "table", NC_INT, 1, &tablenum);
+      int tablenum = tableInqNum(tableID);
+      if (tablenum > 0) cdf_put_att_int(fileID, ncvarid, "table", NC_INT, 1, &tablenum);
     }
 
   bool zaxisIsScalar = (zid == CDI_UNDEFID) ? (zaxisInqScalar(zaxisID) > 0) : false;
