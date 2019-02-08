@@ -1003,14 +1003,64 @@ void cdfGetXYZid(stream_t *streamptr, int gridID, int zaxisID, int *xid, int *yi
   *zid = streamptr->zaxisID[zaxisindex];
 }
 
+static
+void cdfDefineStartAndCount(stream_t *streamptr, int varID, int xid, int yid, int zid, size_t start[5], size_t count[5], size_t *xsize, size_t *ysize)
+{
+  size_t ndims = 0;
+  *xsize = 0;
+  *ysize = 0;
+
+  const int vlistID = streamptr->vlistID;
+  const int fileID  = streamptr->fileID;
+
+  const long ntsteps = streamptr->ntsteps;
+  if ( CDI_Debug ) Message("ntsteps = %ld", ntsteps);
+
+  const int timetype = vlistInqVarTimetype(vlistID, varID);
+
+  if ( vlistHasTime(vlistID) && timetype != TIME_CONSTANT )
+    {
+      start[ndims] = (size_t)ntsteps - 1;
+      count[ndims] = 1;
+      ndims++;
+    }
+
+  if ( zid != CDI_UNDEFID )
+    {
+      const int zaxisID = vlistInqVarZaxis(vlistID, varID);
+      start[ndims] = 0;
+      count[ndims] = (size_t)zaxisInqSize(zaxisID);
+      ndims++;
+    }
+
+  if ( yid != CDI_UNDEFID )
+    {
+      start[ndims] = 0;
+      size_t size;
+      cdf_inq_dimlen(fileID, yid, &size);
+      /*      count[ndims] = gridInqYsize(gridID); */
+      count[ndims] = size;
+      ndims++;
+    }
+
+  if ( xid != CDI_UNDEFID )
+    {
+      start[ndims] = 0;
+      size_t size;
+      cdf_inq_dimlen(fileID, xid, &size);
+      /*      count[ndims] = gridInqXsize(gridID); */
+      count[ndims] = size;
+      ndims++;
+    }
+
+  if ( CDI_Debug )
+    for (size_t idim = 0; idim < ndims; idim++)
+      Message("dim = %d  start = %d  count = %d", idim, start[idim], count[idim]);
+}
+
 void cdf_write_var(stream_t *streamptr, int varID, int memtype, const void *data, size_t nmiss)
 {
   if ( streamptr->accessmode == 0 ) cdfEndDef(streamptr);
-
-  size_t xsize = 0, ysize = 0;
-  size_t size;
-  size_t start[5], count[5];
-  size_t ndims = 0;
 
   if ( CDI_Debug ) Message("streamID = %d  varID = %d", streamptr->self, varID);
 
@@ -1024,46 +1074,13 @@ void cdf_write_var(stream_t *streamptr, int varID, int memtype, const void *data
 
   const int gridID   = vlistInqVarGrid(vlistID, varID);
   const int zaxisID  = vlistInqVarZaxis(vlistID, varID);
-  const int timetype = vlistInqVarTimetype(vlistID, varID);
 
   int xid, yid, zid;
   cdfGetXYZid(streamptr, gridID, zaxisID, &xid, &yid, &zid);
 
-  if ( vlistHasTime(vlistID) && timetype != TIME_CONSTANT )
-    {
-      start[ndims] = (size_t)ntsteps - 1;
-      count[ndims] = 1;
-      ndims++;
-    }
-
-  if ( zid != CDI_UNDEFID )
-    {
-      start[ndims] = 0;
-      count[ndims] = (size_t)zaxisInqSize(zaxisID);
-      ndims++;
-    }
-
-  if ( yid != CDI_UNDEFID )
-    {
-      start[ndims] = 0;
-      cdf_inq_dimlen(fileID, yid, &size);
-      /*      count[ndims] = gridInqYsize(gridID); */
-      count[ndims] = size;
-      ndims++;
-    }
-
-  if ( xid != CDI_UNDEFID )
-    {
-      start[ndims] = 0;
-      cdf_inq_dimlen(fileID, xid, &size);
-      /*      count[ndims] = gridInqXsize(gridID); */
-      count[ndims] = size;
-      ndims++;
-    }
-
-  if ( CDI_Debug )
-    for (size_t idim = 0; idim < ndims; idim++)
-      Message("dim = %d  start = %d  count = %d", idim, start[idim], count[idim]);
+  size_t xsize, ysize;
+  size_t start[5], count[5];
+  cdfDefineStartAndCount(streamptr, varID, xid, yid, zid, start, count, &xsize, &ysize);
 
   if ( streamptr->ncmode == 1 )
     {
