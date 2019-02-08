@@ -373,6 +373,17 @@ void cdfDefVarPacking(const stream_t *streamptr, int ncvarid, nc_type xtype, int
 }
 
 static
+void cdfAppendCoordinates(int fileID, int ncvarid, char coordinates[CDI_MAX_NAME])
+{
+  if (ncvarid != CDI_UNDEFID)
+    {
+      size_t len = strlen(coordinates);
+      if (len) coordinates[len++] = ' ';
+      cdf_inq_varname(fileID, ncvarid, coordinates+len);
+    }
+}
+
+static
 int cdfDefVar(stream_t *streamptr, int varID)
 {
   int ncvarid = -1;
@@ -595,13 +606,8 @@ int cdfDefVar(stream_t *streamptr, int varID)
 
   if ( zaxis_is_scalar || zaxisInqType(zaxisID) == ZAXIS_CHAR )
     {
-      int nczvarID = streamptr->nczvarID[zaxisindex];
-      if ( nczvarID != CDI_UNDEFID )
-        {
-          size_t len = strlen(coordinates);
-          if ( len ) coordinates[len++] = ' ';
-          cdf_inq_varname(fileID, nczvarID, coordinates+len);
-        }
+      const int nczvarID = streamptr->nczvarID[zaxisindex];
+      cdfAppendCoordinates(fileID, nczvarID, coordinates);
     }
 
   if ( gridtype != GRID_GENERIC && gridtype != GRID_LONLAT && gridtype != GRID_GAUSSIAN &&
@@ -612,9 +618,7 @@ int cdfDefVar(stream_t *streamptr, int varID)
     }
 
   char gmapvarname[CDI_MAX_NAME]; gmapvarname[0] = 0;
-
   cdf_get_gmapvarname(gridID, gmapvarname);
-
   if ( gmapvarname[0] ) cdf_put_att_text(fileID, ncvarid, "grid_mapping", strlen(gmapvarname), gmapvarname);
 
   if ( gridtype == GRID_TRAJECTORY )
@@ -625,18 +629,8 @@ int cdfDefVar(stream_t *streamptr, int varID)
     {
       const int ncxvarID = streamptr->ncgrid[gridindex].ncIDs[CDF_VARID_X];
       const int ncyvarID = streamptr->ncgrid[gridindex].ncIDs[CDF_VARID_Y];
-      if ( ncyvarID != CDI_UNDEFID )
-        {
-          size_t len = strlen(coordinates);
-          if ( len ) coordinates[len++] = ' ';
-          cdf_inq_varname(fileID, ncyvarID, coordinates+len);
-        }
-      if ( ncxvarID != CDI_UNDEFID )
-        {
-          size_t len = strlen(coordinates);
-          if ( len ) coordinates[len++] = ' ';
-          cdf_inq_varname(fileID, ncxvarID, coordinates+len);
-        }
+      cdfAppendCoordinates(fileID, ncyvarID, coordinates);
+      cdfAppendCoordinates(fileID, ncxvarID, coordinates);
     }
   else if ( gridtype == GRID_UNSTRUCTURED || gridtype == GRID_CURVILINEAR )
     {
@@ -647,33 +641,13 @@ int cdfDefVar(stream_t *streamptr, int varID)
       // CMOR order: coordinates = "lat lon"
       if ( cdiCoordinatesLonLat )
         {
-          if ( ncxvarID != CDI_UNDEFID )
-            {
-              size_t len = strlen(coordinates);
-              if ( len ) coordinates[len++] = ' ';
-              cdf_inq_varname(fileID, ncxvarID, coordinates+len);
-            }
-          if ( ncyvarID != CDI_UNDEFID )
-            {
-              size_t len = strlen(coordinates);
-              if ( len ) coordinates[len++] = ' ';
-              cdf_inq_varname(fileID, ncyvarID, coordinates+len);
-            }
+          cdfAppendCoordinates(fileID, ncxvarID, coordinates);
+          cdfAppendCoordinates(fileID, ncyvarID, coordinates);
         }
       else
         {
-          if ( ncyvarID != CDI_UNDEFID )
-            {
-              size_t len = strlen(coordinates);
-              if ( len ) coordinates[len++] = ' ';
-              cdf_inq_varname(fileID, ncyvarID, coordinates+len);
-            }
-          if ( ncxvarID != CDI_UNDEFID )
-            {
-              size_t len = strlen(coordinates);
-              if ( len ) coordinates[len++] = ' ';
-              cdf_inq_varname(fileID, ncxvarID, coordinates+len);
-            }
+          cdfAppendCoordinates(fileID, ncyvarID, coordinates);
+          cdfAppendCoordinates(fileID, ncxvarID, coordinates);
         }
 
       if ( ncavarID != CDI_UNDEFID )
@@ -704,16 +678,12 @@ int cdfDefVar(stream_t *streamptr, int varID)
       if ( gridInqXIsc(gridID) )
         {
           const int ncxvarID = streamptr->ncgrid[gridindex].ncIDs[CDF_VARID_X];
-          size_t len = strlen(coordinates);
-          if ( len ) coordinates[len++] = ' ';
-          cdf_inq_varname(fileID, ncxvarID, coordinates+len);
+          cdfAppendCoordinates(fileID, ncxvarID, coordinates);
         }
       else if ( gridInqYIsc(gridID) )
         {
           const int ncyvarID = streamptr->ncgrid[gridindex].ncIDs[CDF_VARID_Y];
-          size_t len = strlen(coordinates);
-          if ( len ) coordinates[len++] = ' ';
-          cdf_inq_varname(fileID, ncyvarID, coordinates+len);
+          cdfAppendCoordinates(fileID, ncyvarID, coordinates);
         }
     }
 
