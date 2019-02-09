@@ -426,13 +426,18 @@ void reshDestroy(cdiResH resH)
 
   nspT = namespaceResHDecode ( resH );
 
+  listElem_t *r = resHList[nsp].resources + nspT.idx;
+
   xassert ( nspT.nsp == nsp
             && nspT.idx >= 0
             && nspT.idx < resHList[nsp].size
-            && resHList[nsp].resources[nspT.idx].res.v.ops);
+            && r->res.v.ops);
 
-  if (resHList[nsp].resources[nspT.idx].status & RESH_IN_USE_BIT)
-    reshRemove_(nsp, nspT.idx, __func__);
+  if (r->status & RESH_IN_USE_BIT)
+    {
+      r->res.v.ops->valDestroy(r->res.v.val);
+      reshRemove_(nsp, nspT.idx, __func__);
+    }
 
   LIST_UNLOCK();
 }
