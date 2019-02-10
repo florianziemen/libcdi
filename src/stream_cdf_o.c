@@ -613,13 +613,10 @@ void cdfGridCompress(int fileID, int ncvarid, size_t gridsize, int filetype, int
 static
 void cdfDefGridReference(stream_t *streamptr, int gridID)
 {
-  int fileID  = streamptr->fileID;
-  int number = gridInqNumber(gridID);
+  const int fileID = streamptr->fileID;
 
-  if ( number > 0 )
-    {
-      cdf_put_att_int(fileID, NC_GLOBAL, "number_of_grid_used", NC_INT, 1, &number);
-    }
+  const int number = gridInqNumber(gridID);
+  if ( number > 0 ) cdf_put_att_int(fileID, NC_GLOBAL, "number_of_grid_used", NC_INT, 1, &number);
 
   const char *gridfile = gridInqReferencePtr(gridID);
   if ( gridfile && gridfile[0] != 0 )
@@ -1980,13 +1977,12 @@ void cdfDefHistory(stream_t *streamptr, int size, const char *history)
 
 void cdfDefVars(stream_t *streamptr)
 {
-  int vlistID = streamptr->vlistID;
-  if ( vlistID == CDI_UNDEFID )
-    Error("Internal problem! vlist undefined for streamptr %p", streamptr);
+  const int vlistID = streamptr->vlistID;
+  if ( vlistID == CDI_UNDEFID ) Error("Internal problem! vlist undefined for streamptr %p", streamptr);
 
   if ( vlistHasTime(vlistID) ) cdfDefTime(streamptr);
 
-  int ngrids = vlistNgrids(vlistID);
+  const int ngrids = vlistNgrids(vlistID);
   if ( 2*ngrids > MAX_GRIDS_PS ) Error("Internal problem! Too many grids per stream (max=%d)\n", MAX_GRIDS_PS);
   for ( int index = 0; index < 2*ngrids; ++index )
     {
@@ -1997,7 +1993,7 @@ void cdfDefVars(stream_t *streamptr)
 
   for ( int index = 0; index < ngrids; ++index )
     {
-      int gridID = vlistGrid(vlistID, index);
+      const int gridID = vlistGrid(vlistID, index);
       cdfDefGrid(streamptr, gridID, index);
     }
   {
@@ -2009,10 +2005,10 @@ void cdfDefVars(stream_t *streamptr)
         if ( projID != CDI_UNDEFID ) cdfDefGrid(streamptr, projID, ++index);
       }
   }
-  int nzaxis = vlistNzaxis(vlistID);
+  const int nzaxis = vlistNzaxis(vlistID);
   for ( int index = 0; index < nzaxis; ++index )
     {
-      int zaxisID = vlistZaxis(vlistID, index);
+      const int zaxisID = vlistZaxis(vlistID, index);
       if ( streamptr->zaxisID[index] == CDI_UNDEFID ) cdfDefZaxis(streamptr, zaxisID);
     }
 

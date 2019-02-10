@@ -86,7 +86,6 @@ int cdf_open(const char *path, int omode, int *ncidp)
 void cdf_close(int ncid)
 {
   int status = nc_close(ncid);
-
   if ( status != NC_NOERR ) Error("%s", nc_strerror(status));
 }
 
@@ -94,7 +93,6 @@ void cdf_close(int ncid)
 void cdf_redef(int ncid)
 {
   int status = nc_redef(ncid);
-
   if ( status != NC_NOERR ) Error("%s", nc_strerror(status));
 }
 
@@ -102,7 +100,6 @@ void cdf_redef(int ncid)
 void cdf_enddef(int ncid)
 {
   int status = nc_enddef(ncid);
-
   if ( status != NC_NOERR ) Error("%s", nc_strerror(status));
 }
 
@@ -115,7 +112,6 @@ void cdf__enddef(const int ncid, const size_t hdr_pad)
 
   // nc_enddef(ncid) is equivalent to nc__enddef(ncid, 0, 4, 0, 4)
   int status = nc__enddef(ncid, hdr_pad, v_align, v_minfree, r_align);
-
   if ( status != NC_NOERR ) Error("%s", nc_strerror(status));
 }
 
@@ -123,7 +119,6 @@ void cdf__enddef(const int ncid, const size_t hdr_pad)
 void cdf_sync(int ncid)
 {
   int status = nc_sync(ncid);
-
   if ( status != NC_NOERR ) Error("%s", nc_strerror(status));
 }
 
