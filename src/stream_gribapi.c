@@ -8,6 +8,7 @@
 #include "cdi_int.h"
 #include "file.h"
 #include "gribapi_utilities.h"
+#include "stream_scan.h"
 #include "stream_grb.h"
 #include "stream_gribapi.h"
 #include "varscan.h"
@@ -93,14 +94,11 @@ static
 int gribapiGetTimeUnits(grib_handle *gh)
 {
   long unitsOfTime = -1;
-
   grib_get_long(gh, "indicatorOfUnitOfTimeRange", &unitsOfTime);
 
   GRIB_CHECK(my_grib_set_long(gh, "stepUnits", unitsOfTime), 0);
 
-  int timeunits = getTimeunits(unitsOfTime);
-
-  return timeunits;
+  return getTimeunits(unitsOfTime);
 }
 
 static
@@ -1078,15 +1076,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
       streamptr->tsteps[tsID].position = recpos;
     }
 
-  if ( streamptr->ntsteps == 1 )
-    {
-      if ( taxis->vdate == 0 && taxis->vtime == 0 )
-        {
-          streamptr->ntsteps = 0;
-          for ( int varID = 0; varID < streamptr->nvars; varID++ )
-            vlistDefVarTimetype(vlistID, varID, TIME_CONSTANT);
-        }
-    }
+  streamScanTimeConstAdjust(streamptr, taxis);
 
   return 0;
 }

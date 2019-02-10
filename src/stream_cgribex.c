@@ -11,6 +11,7 @@
 #include "file.h"
 #include "varscan.h"
 #include "datetime.h"
+#include "stream_scan.h"
 #include "stream_grb.h"
 #include "stream_cgribex.h"
 
@@ -716,21 +717,6 @@ void cgribexScanTsFixNtsteps(stream_t *streamptr, off_t recpos)
     }
 }
 
-static inline
-void cgribexScanTsConstAdjust(stream_t *streamptr, taxis_t *taxis)
-{
-  const int vlistID = streamptr->vlistID;
-  if ( streamptr->ntsteps == 1 )
-    {
-      if ( taxis->vdate == 0 && taxis->vtime == 0 )
-	{
-	  streamptr->ntsteps = 0;
-	  for ( int varID = 0; varID < streamptr->nvars; varID++ )
-            vlistDefVarTimetype(vlistID, varID, TIME_CONSTANT);
-	}
-    }
-}
-
 static
 void cgribexSkipRecords(const int fileID)
 {
@@ -899,7 +885,7 @@ int cgribexScanTimestep1(stream_t *streamptr)
     {
       streamptr->tsteps[0].recordSize = (int)nrecords;
       streamptr->tsteps[0].records =
-      (record_t *) Realloc(streamptr->tsteps[0].records, nrecords*sizeof(record_t));
+        (record_t *) Realloc(streamptr->tsteps[0].records, nrecords*sizeof(record_t));
     }
 
   streamptr->tsteps[0].recIDs = (int *) Malloc(nrecords*sizeof(int));
@@ -911,7 +897,7 @@ int cgribexScanTimestep1(stream_t *streamptr)
   streamptr->record->buffersize = buffersize;
 
   cgribexScanTsFixNtsteps(streamptr, recpos);
-  cgribexScanTsConstAdjust(streamptr, taxis);
+  streamScanTimeConstAdjust(streamptr, taxis);
 
   return 0;
 }

@@ -11,6 +11,7 @@
 #include "varscan.h"
 #include "datetime.h"
 #include "service.h"
+#include "stream_scan.h"
 #include "stream_srv.h"
 #include "exse.h"
 
@@ -314,15 +315,7 @@ void srvScanTimestep1(stream_t *streamptr)
       streamptr->tsteps[tsID].position = recpos;
     }
 
-  if ( streamptr->ntsteps == 1 )
-    {
-      if ( taxis->vdate == 0 && taxis->vtime == 0 )
-	{
-	  streamptr->ntsteps = 0;
-	  for ( int varID = 0; varID < streamptr->nvars; varID++ )
-            vlistDefVarTimetype(vlistID, varID, TIME_CONSTANT);
-	}
-    }
+  streamScanTimeConstAdjust(streamptr, taxis);
 }
 
 static
