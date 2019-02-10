@@ -867,18 +867,7 @@ int cgribexScanTimestep1(stream_t *streamptr)
   int vlistID = streamptr->vlistID;
   vlistDefTaxis(vlistID, taxisID);
 
-  unsigned nrecords = (unsigned)streamptr->tsteps[0].nallrecs;
-  if ( nrecords < (unsigned)streamptr->tsteps[0].recordSize )
-    {
-      streamptr->tsteps[0].recordSize = (int)nrecords;
-      streamptr->tsteps[0].records =
-        (record_t *) Realloc(streamptr->tsteps[0].records, nrecords*sizeof(record_t));
-    }
-
-  streamptr->tsteps[0].recIDs = (int *) Malloc(nrecords*sizeof(int));
-  streamptr->tsteps[0].nrecs = (int)nrecords;
-  for ( recID = 0; recID < nrecords; recID++ )
-    streamptr->tsteps[0].recIDs[recID] = (int)recID;
+  streamScanResizeRecords(streamptr);
 
   streamptr->record->buffer     = gribbuffer;
   streamptr->record->buffersize = buffersize;

@@ -1050,18 +1050,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
   int vlistID = streamptr->vlistID;
   vlistDefTaxis(vlistID, taxisID);
 
-  int nrecords = streamptr->tsteps[0].nallrecs;
-  if ( nrecords < streamptr->tsteps[0].recordSize )
-    {
-      streamptr->tsteps[0].recordSize = nrecords;
-      streamptr->tsteps[0].records =
-        (record_t *) Realloc(streamptr->tsteps[0].records, (size_t)nrecords*sizeof(record_t));
-    }
-
-  streamptr->tsteps[0].recIDs = (int *) Malloc((size_t)nrecords*sizeof(int));
-  streamptr->tsteps[0].nrecs = nrecords;
-  for ( int recID = 0; recID < nrecords; recID++ )
-    streamptr->tsteps[0].recIDs[recID] = recID;
+  streamScanResizeRecords(streamptr);
 
   streamptr->record->buffer     = gribbuffer;
   streamptr->record->buffersize = buffersize;

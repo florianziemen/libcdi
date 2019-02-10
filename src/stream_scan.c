@@ -1,4 +1,22 @@
+#include "dmemory.h"
 #include "stream_scan.h"
+
+
+void streamScanResizeRecords(stream_t *streamptr)
+{
+  int nrecords = streamptr->tsteps[0].nallrecs;
+  if (nrecords < streamptr->tsteps[0].recordSize)
+    {
+      streamptr->tsteps[0].recordSize = nrecords;
+      streamptr->tsteps[0].records =
+        (record_t *) Realloc(streamptr->tsteps[0].records, (size_t)nrecords*sizeof(record_t));
+    }
+
+  streamptr->tsteps[0].recIDs = (int *) Malloc((size_t)nrecords*sizeof(int));
+  streamptr->tsteps[0].nrecs = nrecords;
+  for (int recID = 0; recID < nrecords; ++recID)
+    streamptr->tsteps[0].recIDs[recID] = recID;
+}
 
 
 void streamScanTimeConstAdjust(stream_t *streamptr, const taxis_t *taxis)
