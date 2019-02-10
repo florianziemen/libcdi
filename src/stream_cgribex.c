@@ -753,14 +753,13 @@ int cgribexScanTimestep1(stream_t *streamptr)
   size_t buffersize = 0;
   int leveltype = 0, level1 = 0, level2 = 0, vdate = 0, vtime = 0;
   DateTime datetime, datetime0 = { LONG_MIN, LONG_MIN };
-  unsigned nrecords, recID;
+  unsigned recID;
   int nrecs_scanned = 0;
   bool warn_time = true;
   bool warn_numavg = true;
   int taxisID = -1;
   int rdate = 0, rtime = 0, tunit = 0;
   bool fcast = false;
-  int vlistID;
   char paramstr[32];
 
   streamptr->curTsID = 0;
@@ -892,10 +891,10 @@ int cgribexScanTimestep1(stream_t *streamptr)
   taxis->vdate = (int)datetime0.date;
   taxis->vtime = (int)datetime0.time;
 
-  vlistID = streamptr->vlistID;
+  int vlistID = streamptr->vlistID;
   vlistDefTaxis(vlistID, taxisID);
 
-  nrecords = (unsigned)streamptr->tsteps[0].nallrecs;
+  unsigned nrecords = (unsigned)streamptr->tsteps[0].nallrecs;
   if ( nrecords < (unsigned)streamptr->tsteps[0].recordSize )
     {
       streamptr->tsteps[0].recordSize = (int)nrecords;
@@ -970,7 +969,7 @@ int cgribexScanTimestep2(stream_t * streamptr)
       if ( rindex > nrecords ) break;
 
       size_t recsize = gribGetSize(fileID);
-      recpos  = fileGetPos(fileID);
+      recpos = fileGetPos(fileID);
       if ( recsize == 0 )
 	{
 	  streamptr->ntsteps = 2;

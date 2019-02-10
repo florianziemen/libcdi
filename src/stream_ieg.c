@@ -57,8 +57,7 @@ void iegReadRecord(stream_t *streamptr, double *data, size_t *nmiss)
 
   void *iegp = streamptr->record->exsep;
   int status = iegRead(fileID, iegp);
-  if ( status != 0 )
-    Error("Could not read IEG record!");
+  if ( status != 0 ) Error("Could not read IEG record!");
 
   iegInqDataDP(iegp, data);
 
@@ -448,7 +447,6 @@ void iegCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
 void iegDefRecord(stream_t *streamptr)
 {
   Record *record = streamptr->record;
-  iegrec_t *iegp = (iegrec_t*) record->exsep;
 
   int vlistID = streamptr->vlistID;
   int byteorder = streamptr->byteorder;
@@ -460,6 +458,7 @@ void iegDefRecord(stream_t *streamptr)
   int gridID  = vlistInqVarGrid(vlistID, varID);
   int zaxisID = vlistInqVarZaxis(vlistID, varID);
 
+  iegrec_t *iegp = (iegrec_t*) record->exsep;
   iegInitMem(iegp);
   for ( int i = 0; i < 37; i++ ) iegp->ipdb[i] = -1;
 
@@ -616,8 +615,7 @@ void iegAddRecord(stream_t *streamptr, int param, int *pdb, int *gdb, double *vc
 
   int datatype = iegInqDatatype(prec);
 
-  int varID;
-  int levelID = 0;
+  int varID, levelID = 0;
   varAddRecord(recID, param, gridID, leveltype, lbounds, level1, level2, 0, 0,
 	       datatype, &varID, &levelID, TSTEP_INSTANT, 0, 0, -1,
                NULL, NULL, NULL, NULL, NULL, NULL, 0);
@@ -687,10 +685,9 @@ void iegScanTimestep1(stream_t *streamptr)
   streamptr->curTsID = 0;
 
   int tsID = tstepsNewEntry(streamptr);
-  taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
-
   if ( tsID != 0 )
     Error("Internal problem! tstepsNewEntry returns %d", tsID);
+  taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
 
   int fileID = streamptr->fileID;
 
@@ -781,7 +778,7 @@ void iegScanTimestep1(stream_t *streamptr)
 
   if ( streamptr->ntsteps == -1 )
     {
-      tsID = tstepsNewEntry(streamptr);
+      int tsID = tstepsNewEntry(streamptr);
       if ( tsID != streamptr->rtsteps )
 	Error("Internal error. tsID = %d", tsID);
 
@@ -937,7 +934,7 @@ int iegScanTimestep2(stream_t *streamptr)
 
   if ( streamptr->ntsteps == -1 )
     {
-      tsID = tstepsNewEntry(streamptr);
+      int tsID = tstepsNewEntry(streamptr);
       if ( tsID != streamptr->rtsteps )
 	Error("Internal error. tsID = %d", tsID);
 
@@ -951,16 +948,13 @@ int iegScanTimestep2(stream_t *streamptr)
 
 int iegInqContents(stream_t *streamptr)
 {
-  int fileID = streamptr->fileID;
-
   streamptr->curTsID = 0;
 
   iegScanTimestep1(streamptr);
 
-  int status = 0;
-  if ( streamptr->ntsteps == -1 ) status = iegScanTimestep2(streamptr);
+  int status = (streamptr->ntsteps == -1) ? iegScanTimestep2(streamptr) : 0;
 
-  fileSetPos(fileID, 0, SEEK_SET);
+  fileSetPos(streamptr->fileID, 0, SEEK_SET);
 
   return status;
 }

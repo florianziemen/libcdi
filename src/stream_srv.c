@@ -92,8 +92,7 @@ void srvReadRecord(stream_t *streamptr, double *data, size_t *nmiss)
 
   void *srvp = streamptr->record->exsep;
   int status = srvRead(fileID, srvp);
-  if ( status != 0 )
-    Error("Failed to read record from SRV file");
+  if ( status != 0 ) Error("Failed to read record from SRV file");
 
   int header[8];
   srvInqHeader(srvp, header);
@@ -124,7 +123,6 @@ void srvCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
 void srvDefRecord(stream_t *streamptr)
 {
   Record *record = streamptr->record;
-  srvrec_t *srvp = (srvrec_t*) record->exsep;
 
   int pdis, pcat, pnum;
   cdiDecodeParam(record->param, &pnum, &pcat, &pdis);
@@ -154,8 +152,8 @@ void srvDefRecord(stream_t *streamptr)
   header[6] = 0;
   header[7] = 0;
 
-  int datatype = record->prec;
-  srvp->dprec = srvDefDatatype(datatype);
+  srvrec_t *srvp = (srvrec_t*) record->exsep;
+  srvp->dprec = srvDefDatatype(record->prec);
 
   srvDefHeader(srvp, header);
 }
@@ -163,11 +161,9 @@ void srvDefRecord(stream_t *streamptr)
 
 void srvWriteRecord(stream_t *streamptr, const double *data)
 {
-  int fileID = streamptr->fileID;
   void *srvp = streamptr->record->exsep;
-
   srvDefDataDP(srvp, data);
-  srvWrite(fileID, srvp);
+  srvWrite(streamptr->fileID, srvp);
 }
 
 static
@@ -192,16 +188,11 @@ void srv_add_record(stream_t *streamptr, int param, int level, size_t xsize, siz
   struct addIfNewRes gridAdded = cdiVlistAddGridIfNew(vlistID, grid, 0);
   int gridID = gridAdded.Id;
   if (!gridAdded.isNew) Free(grid);
-  /*
-  if ( level == 0 ) leveltype = ZAXIS_SURFACE;
-  else              leveltype = ZAXIS_GENERIC;
-  */
-  int leveltype = ZAXIS_GENERIC;
 
+  int leveltype = ZAXIS_GENERIC;
   int datatype = srvInqDatatype(prec);
 
-  int levelID = 0;
-  int varID;
+  int varID, levelID = 0;
   varAddRecord(recID, param, gridID, leveltype, 0, level, 0, 0, 0,
 	       datatype, &varID, &levelID, TSTEP_INSTANT, 0, 0, -1,
                NULL, NULL, NULL, NULL, NULL, NULL, 0);
@@ -222,17 +213,14 @@ void srvScanTimestep1(stream_t *streamptr)
 {
   DateTime datetime0 = { LONG_MIN, LONG_MIN };
   off_t recpos;
-  taxis_t *taxis;
   srvrec_t *srvp = (srvrec_t*) streamptr->record->exsep;
 
   streamptr->curTsID = 0;
 
-  {
-    int tsID  = tstepsNewEntry(streamptr);
-    if ( tsID != 0 )
-      Error("Internal problem! tstepsNewEntry returns %d", tsID);
-    taxis = &streamptr->tsteps[tsID].taxis;
-  }
+  int tsID  = tstepsNewEntry(streamptr);
+  if ( tsID != 0 )
+    Error("Internal problem! tstepsNewEntry returns %d", tsID);
+  taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
 
   int fileID = streamptr->fileID;
 
@@ -407,7 +395,7 @@ int srvScanTimestep2(stream_t *streamptr)
       int recID;
       for ( recID = 0; recID < nrecords; recID++ )
 	{
-	  compVar0.param  = streamptr->tsteps[tsID].records[recID].param;
+	  compVar0.param = streamptr->tsteps[tsID].records[recID].param;
 	  compVar0.level = streamptr->tsteps[tsID].records[recID].ilevel;
 
 	  if ( memcmp(&compVar0, &compVar, sizeof(srvcompvar_t)) == 0 )
@@ -437,7 +425,7 @@ int srvScanTimestep2(stream_t *streamptr)
 
       streamptr->tsteps[tsID].records[recID].size = recsize;
 
-      compVar0.param  = streamptr->tsteps[tsID].records[recID].param;
+      compVar0.param = streamptr->tsteps[tsID].records[recID].param;
       compVar0.level = streamptr->tsteps[tsID].records[recID].ilevel;
 
       if ( memcmp(&compVar0, &compVar, sizeof(srvcompvar_t)) != 0 )
@@ -471,7 +459,7 @@ int srvScanTimestep2(stream_t *streamptr)
 
   if ( streamptr->ntsteps == -1 )
     {
-      tsID = tstepsNewEntry(streamptr);
+      int tsID = tstepsNewEntry(streamptr);
       if ( tsID != streamptr->rtsteps )
 	Error("Internal error. tsID = %d", tsID);
 
@@ -489,11 +477,9 @@ int srvInqContents(stream_t *streamptr)
 
   srvScanTimestep1(streamptr);
 
-  int status = 0;
-  if ( streamptr->ntsteps == -1 ) status = srvScanTimestep2(streamptr);
+  int status = (streamptr->ntsteps == -1) ? srvScanTimestep2(streamptr) : 0;
 
-  int fileID = streamptr->fileID;
-  fileSetPos(fileID, 0, SEEK_SET);
+  fileSetPos(streamptr->fileID, 0, SEEK_SET);
 
   return status;
 }
@@ -502,20 +488,10 @@ static
 long srvScanTimestep(stream_t *streamptr)
 {
   int header[8];
-  /* int rxsize = 0, rysize = 0; */
   off_t recpos = 0;
   int recID;
   int nrecs = 0;
   void *srvp = streamptr->record->exsep;
-  /*
-  if ( CDI_Debug )
-    {
-      Message("streamID = %d", streamptr->self);
-      Message("cts = %d", streamptr->curTsID);
-      Message("rts = %d", streamptr->rtsteps);
-      Message("nts = %d", streamptr->ntsteps);
-    }
-  */
 
   int tsID  = streamptr->rtsteps;
   taxis_t *taxis = &streamptr->tsteps[tsID].taxis;

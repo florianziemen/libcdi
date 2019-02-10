@@ -141,30 +141,30 @@ void extCopyRecord(stream_t *streamptr2, stream_t *streamptr1)
 
 void extDefRecord(stream_t *streamptr)
 {
+  Record *record = streamptr->record;
+
   int pdis, pcat, pnum;
-  cdiDecodeParam(streamptr->record->param, &pnum, &pcat, &pdis);
+  cdiDecodeParam(record->param, &pnum, &pcat, &pdis);
 
   int header[4];
-  header[0] = streamptr->record->date;
+  header[0] = record->date;
   header[1] = pnum;
-  header[2] = streamptr->record->level;
-  int gridID = streamptr->record->gridID;
+  header[2] = record->level;
+  int gridID = record->gridID;
   cdi_check_gridsize_int_limit("EXTRA", gridInqSize(gridID));
   header[3] = (int) gridInqSize(gridID);
 
-  extrec_t *extp = (extrec_t*) streamptr->record->exsep;
-  extDefDatatype(streamptr->record->prec, &extp->prec, &extp->number);
+  extrec_t *extp = (extrec_t*) record->exsep;
+  extDefDatatype(record->prec, &extp->prec, &extp->number);
   extDefHeader(extp, header);
 }
 
 
 void extWriteRecord(stream_t *streamptr, const double *data)
 {
-  int fileID = streamptr->fileID;
   void *extp = streamptr->record->exsep;
-
   extDefDataDP(extp, data);
-  extWrite(fileID, extp);
+  extWrite(streamptr->fileID, extp);
 }
 
 static
@@ -189,16 +189,15 @@ void extAddRecord(stream_t *streamptr, int param, int level, size_t xysize,
   struct addIfNewRes gridAdded = cdiVlistAddGridIfNew(vlistID, grid, 0);
   int gridID = gridAdded.Id;
   if (!gridAdded.isNew) Free(grid);
-  /*
-  if ( level == 0 ) leveltype = ZAXIS_SURFACE;
-  else              leveltype = ZAXIS_GENERIC;
-  */
+
   int leveltype = ZAXIS_GENERIC;
+  int datatype = extInqDatatype(prec, number);
 
   int varID, levelID = 0;
   varAddRecord(recID, param, gridID, leveltype, 0, level, 0, 0, 0,
-               extInqDatatype(prec, number), &varID, &levelID, TSTEP_INSTANT, 0, 0, -1,
+               datatype, &varID, &levelID, TSTEP_INSTANT, 0, 0, -1,
                NULL, NULL, NULL, NULL, NULL, NULL, 0);
+
   record->varID   = (short)varID;
   record->levelID = (short)levelID;
 
@@ -214,9 +213,7 @@ void extScanTimestep1(stream_t *streamptr)
 {
   int header[4];
   DateTime datetime0 = { LONG_MIN, LONG_MIN };
-  int varID;
   off_t recpos = 0;
-  long recsize;
   int recID;
   extcompvar_t compVar, compVar0;
   extrec_t *extp = (extrec_t*) streamptr->record->exsep;
@@ -224,10 +221,9 @@ void extScanTimestep1(stream_t *streamptr)
   streamptr->curTsID = 0;
 
   int tsID  = tstepsNewEntry(streamptr);
-  taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
-
   if ( tsID != 0 )
     Error("Internal problem! tstepsNewEntry returns %d", tsID);
+  taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
 
   int fileID = streamptr->fileID;
 
@@ -241,7 +237,7 @@ void extScanTimestep1(stream_t *streamptr)
 	  streamptr->ntsteps = 1;
 	  break;
 	}
-      recsize = fileGetPos(fileID) - recpos;
+      size_t recsize = (size_t)(fileGetPos(fileID) - recpos);
 
       extInqHeader(extp, header);
 
@@ -264,7 +260,7 @@ void extScanTimestep1(stream_t *streamptr)
           compVar.level = rlevel;
 	  for ( recID = 0; recID < nrecs; recID++ )
 	    {
-	      compVar0.param  = streamptr->tsteps[0].records[recID].param;
+	      compVar0.param = streamptr->tsteps[0].records[recID].param;
 	      compVar0.level = streamptr->tsteps[0].records[recID].ilevel;
 
 	      if ( memcmp(&compVar0, &compVar, sizeof(extcompvar_t)) == 0 ) break;
@@ -280,7 +276,7 @@ void extScanTimestep1(stream_t *streamptr)
       if ( CDI_Debug )
 	Message("%4d%8d%4d%8d%8d%6d", nrecs, (int)recpos, rcode, rlevel, vdate, vtime);
 
-      extAddRecord(streamptr, param, rlevel, rxysize, (size_t)recsize, recpos, extp->prec, extp->number);
+      extAddRecord(streamptr, param, rlevel, rxysize, recsize, recpos, extp->prec, extp->number);
     }
 
   streamptr->rtsteps = 1;
@@ -309,12 +305,12 @@ void extScanTimestep1(stream_t *streamptr)
 
   streamptr->tsteps[0].recIDs = (int *) Malloc((size_t)nrecords * sizeof (int));
   streamptr->tsteps[0].nrecs = nrecords;
-  for ( recID = 0; recID < nrecords; recID++ )
+  for ( int recID = 0; recID < nrecords; recID++ )
     streamptr->tsteps[0].recIDs[recID] = recID;
 
   if ( streamptr->ntsteps == -1 )
     {
-      tsID = tstepsNewEntry(streamptr);
+      int tsID = tstepsNewEntry(streamptr);
       if ( tsID != streamptr->rtsteps )
 	Error("Internal error. tsID = %d", tsID);
 
@@ -327,7 +323,7 @@ void extScanTimestep1(stream_t *streamptr)
       if ( taxis->vdate == 0 && taxis->vtime == 0 )
 	{
 	  streamptr->ntsteps = 0;
-	  for ( varID = 0; varID < streamptr->nvars; varID++ )
+	  for ( int varID = 0; varID < streamptr->nvars; varID++ )
             vlistDefVarTimetype(vlistID, varID, TIME_CONSTANT);
 	}
     }
@@ -337,7 +333,6 @@ static
 int extScanTimestep2(stream_t *streamptr)
 {
   int header[4];
-  int varID;
   off_t recpos = 0;
   extcompvar_t compVar, compVar0;
   void *extp = streamptr->record->exsep;
@@ -348,8 +343,7 @@ int extScanTimestep2(stream_t *streamptr)
   int vlistID = streamptr->vlistID;
 
   int tsID = streamptr->rtsteps;
-  if ( tsID != 1 )
-    Error("Internal problem! unexpected timestep %d", tsID+1);
+  if ( tsID != 1 ) Error("Internal problem! unexpected timestep %d", tsID+1);
 
   taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
 
@@ -365,7 +359,6 @@ int extScanTimestep2(stream_t *streamptr)
 
   for ( int recID = 0; recID < nrecords; recID++ )
     {
-      varID = streamptr->tsteps[0].records[recID].varID;
       streamptr->tsteps[tsID].records[recID].position =
 	streamptr->tsteps[0].records[recID].position;
       streamptr->tsteps[tsID].records[recID].size     =
@@ -456,7 +449,7 @@ int extScanTimestep2(stream_t *streamptr)
     {
       if ( ! streamptr->tsteps[tsID].records[recID].used )
 	{
-	  varID = streamptr->tsteps[tsID].records[recID].varID;
+	  int varID = streamptr->tsteps[tsID].records[recID].varID;
           vlistDefVarTimetype(vlistID, varID, TIME_CONSTANT);
 	}
       else
@@ -470,7 +463,7 @@ int extScanTimestep2(stream_t *streamptr)
 
   if ( streamptr->ntsteps == -1 )
     {
-      tsID = tstepsNewEntry(streamptr);
+      int tsID = tstepsNewEntry(streamptr);
       if ( tsID != streamptr->rtsteps )
 	Error("Internal error. tsID = %d", tsID);
 
@@ -488,11 +481,9 @@ int extInqContents(stream_t *streamptr)
 
   extScanTimestep1(streamptr);
 
-  int status = 0;
-  if ( streamptr->ntsteps == -1 ) status = extScanTimestep2(streamptr);
+  int status = (streamptr->ntsteps == -1) ? extScanTimestep2(streamptr) : 0;
 
-  int fileID = streamptr->fileID;
-  fileSetPos(fileID, 0, SEEK_SET);
+  fileSetPos(streamptr->fileID, 0, SEEK_SET);
 
   return status;
 }
@@ -506,15 +497,6 @@ long extScanTimestep(stream_t *streamptr)
   int nrecs = 0;
   extcompvar_t compVar, compVar0;
   void *extp = streamptr->record->exsep;
-  /*
-  if ( CDI_Debug )
-    {
-      Message("streamID = %d", streamptr->self);
-      Message("cts = %d", streamptr->curTsID);
-      Message("rts = %d", streamptr->rtsteps);
-      Message("nts = %d", streamptr->ntsteps);
-    }
-  */
 
   int tsID  = streamptr->rtsteps;
   taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
