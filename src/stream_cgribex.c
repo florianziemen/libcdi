@@ -802,9 +802,10 @@ int cgribexScanTimestep1(stream_t *streamptr)
 	  datetime.date = vdate;
 	  datetime.time = vtime;
 	  compvar_t compVar = cgribexVarSet(param, level1, level2, leveltype, ISEC1_TimeRange);
+          record_t *records = streamptr->tsteps[tsID].records;
 	  for ( recID = 0; recID < nrecs; recID++ )
 	    {
-	      if ( cgribexVarCompare(compVar, streamptr->tsteps[0].records[recID], 0) == 0 ) break;
+	      if ( cgribexVarCompare(compVar, records[recID], 0) == 0 ) break;
 	    }
 
 	  if ( CDI_inventory_mode == 1 )
@@ -864,7 +865,7 @@ int cgribexScanTimestep1(stream_t *streamptr)
   taxis->vdate = (int)datetime0.date;
   taxis->vtime = (int)datetime0.time;
 
-  int vlistID = streamptr->vlistID;
+  const int vlistID = streamptr->vlistID;
   vlistDefTaxis(vlistID, taxisID);
 
   streamScanResizeRecords1(streamptr);
@@ -881,12 +882,11 @@ int cgribexScanTimestep1(stream_t *streamptr)
 
 int cgribexScanTimestep2(stream_t * streamptr)
 {
-  int rstatus = 0;
   int lmv = 0, iret = 0;
   off_t recpos = 0;
   int leveltype = 0, level1 = 0, level2 = 0, vdate = 0, vtime = 0;
   DateTime datetime, datetime0 = { LONG_MIN, LONG_MIN };
-  int nrecs, recID;
+  int nrecs, recID = 0;
   bool warn_numavg = true;
   char paramstr[32];
 
@@ -911,6 +911,7 @@ int cgribexScanTimestep2(stream_t * streamptr)
   fileSetPos(fileID, streamptr->tsteps[tsID].position, SEEK_SET);
 
   cdi_create_records(streamptr, tsID);
+  record_t *records = streamptr->tsteps[tsID].records;
 
   const int nrecords = streamScanInitRecords2(streamptr);
 
@@ -988,7 +989,7 @@ int cgribexScanTimestep2(stream_t * streamptr)
 
       for ( recID = 0; recID < nrecords; recID++ )
 	{
-	  if ( cgribexVarCompare(compVar, streamptr->tsteps[tsID].records[recID], 0) == 0 ) break;
+	  if ( cgribexVarCompare(compVar, records[recID], 0) == 0 ) break;
 	}
 
       if ( recID == nrecords )
@@ -999,19 +1000,19 @@ int cgribexScanTimestep2(stream_t * streamptr)
 
       if ( CDI_inventory_mode == 1 )
 	{
-	  if ( streamptr->tsteps[tsID].records[recID].used )
+	  if ( records[recID].used )
 	    {
 	      break;
 	    }
 	  else
 	    {
-	      streamptr->tsteps[tsID].records[recID].used = true;
+	      records[recID].used = true;
 	      streamptr->tsteps[tsID].recIDs[rindex] = recID;
 	    }
 	}
       else
 	{
-	  if ( streamptr->tsteps[tsID].records[recID].used )
+	  if ( records[recID].used )
 	    {
 	      if ( datetimeCmp(datetime, datetime0) != 0 ) break;
 
@@ -1020,7 +1021,7 @@ int cgribexScanTimestep2(stream_t * streamptr)
 	    }
 	  else
 	    {
-	      streamptr->tsteps[tsID].records[recID].used = true;
+	      records[recID].used = true;
 	      streamptr->tsteps[tsID].recIDs[rindex] = recID;
 	    }
 	}
@@ -1028,18 +1029,17 @@ int cgribexScanTimestep2(stream_t * streamptr)
       if ( CDI_Debug )
 	Message("Read record %2d (id=%s lev1=%d lev2=%d) %8d %6d", nrecs_scanned, paramstr, level1, level2, vdate, vtime);
 
-      streamptr->tsteps[tsID].records[recID].size = recsize;
-
       if ( cgribexVarCompare(compVar, streamptr->tsteps[tsID].records[recID], 0) != 0 )
 	{
-	  Message("tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d", tsID, recID,
-		  streamptr->tsteps[tsID].records[recID].param, param,
-		  streamptr->tsteps[tsID].records[recID].ilevel, level1);
+	  Message("tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d",
+                  tsID, recID, records[recID].param, param, records[recID].ilevel, level1);
 	  return CDI_EUFSTRUCT;
 	}
 
-      streamptr->tsteps[1].records[recID].position = recpos;
-      const int varID = streamptr->tsteps[tsID].records[recID].varID;
+      records[recID].position = recpos;
+      records[recID].size = recsize;
+
+      const int varID = records[recID].varID;
       const int gridID = vlistInqVarGrid(vlistID, varID);
       if ( gridInqSize(gridID) == 1 && gridInqType(gridID) == GRID_LONLAT )
 	{
@@ -1057,10 +1057,9 @@ int cgribexScanTimestep2(stream_t * streamptr)
   nrecs = 0;
   for ( recID = 0; recID < nrecords; recID++ )
     {
-      if ( ! streamptr->tsteps[tsID].records[recID].used )
+      if ( ! records[recID].used )
 	{
-	  const int varID = streamptr->tsteps[tsID].records[recID].varID;
-          vlistDefVarTimetype(vlistID, varID, TIME_CONSTANT);
+          vlistDefVarTimetype(vlistID, records[recID].varID, TIME_CONSTANT);
 	}
       else
 	{
@@ -1076,18 +1075,17 @@ int cgribexScanTimestep2(stream_t * streamptr)
   streamptr->record->buffer     = gribbuffer;
   streamptr->record->buffersize = buffersize;
 
-  return rstatus;
+  return 0;
 }
 
 
 int cgribexScanTimestep(stream_t * streamptr)
 {
-  int rstatus = 0;
   int lmv = 0, iret = 0;
   off_t recpos = 0;
   int leveltype = 0, level1 = 0, level2 = 0, vdate = 0, vtime = 0;
   DateTime datetime, datetime0 = { LONG_MIN, LONG_MIN };
-  int vrecID, recID;
+  int vrecID, recID = 0;
   bool warn_numavg = true;
   int taxisID = -1;
   int nrecs = 0;
@@ -1105,6 +1103,7 @@ int cgribexScanTimestep(stream_t * streamptr)
       size_t buffersize = streamptr->record->buffersize;
 
       cdi_create_records(streamptr, tsID);
+      record_t *records = streamptr->tsteps[tsID].records;
 
       nrecs = streamScanInitRecords(streamptr, tsID);
 
@@ -1118,7 +1117,7 @@ int cgribexScanTimestep(stream_t * streamptr)
 	{
 	  if ( rindex > nrecs ) break;
 
-	  size_t recsize = gribGetSize(fileID);
+	  const size_t recsize = gribGetSize(fileID);
 	  recpos  = fileGetPos(fileID);
 	  if ( recsize == 0 )
 	    {
@@ -1198,7 +1197,7 @@ int cgribexScanTimestep(stream_t * streamptr)
 	  for ( vrecID = 0; vrecID < nrecs; vrecID++ )
 	    {
 	      recID = streamptr->tsteps[1].recIDs[vrecID];
-	      if ( cgribexVarCompare(compVar, streamptr->tsteps[tsID].records[recID], 0) == 0 ) break;
+	      if ( cgribexVarCompare(compVar, records[recID], 0) == 0 ) break;
 	    }
 
 	  if ( vrecID == nrecs )
@@ -1213,12 +1212,12 @@ int cgribexScanTimestep(stream_t * streamptr)
 
 	  if ( CDI_inventory_mode == 1 )
 	    {
-	      streamptr->tsteps[tsID].records[recID].used = true;
+	      records[recID].used = true;
 	      streamptr->tsteps[tsID].recIDs[rindex] = recID;
 	    }
 	  else
 	    {
-	      if ( streamptr->tsteps[tsID].records[recID].used )
+	      if ( records[recID].used )
 		{
 		  char paramstr_[32];
 		  cdiParamToString(param, paramstr_, sizeof(paramstr_));
@@ -1232,7 +1231,7 @@ int cgribexScanTimestep(stream_t * streamptr)
 		}
 	      else
 		{
-		  streamptr->tsteps[tsID].records[recID].used = true;
+		  records[recID].used = true;
 		  streamptr->tsteps[tsID].recIDs[rindex] = recID;
 		}
 	    }
@@ -1240,16 +1239,15 @@ int cgribexScanTimestep(stream_t * streamptr)
 	  if ( CDI_Debug )
             Message("Read record %2d (id=%s lev1=%d lev2=%d) %8d %6d", nrecs_scanned, paramstr, level1, level2, vdate, vtime);
 
-	  if ( cgribexVarCompare(compVar, streamptr->tsteps[tsID].records[recID], 0) != 0 )
+	  if ( cgribexVarCompare(compVar, records[recID], 0) != 0 )
 	    {
-	      Message("tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d", tsID, recID,
-		      streamptr->tsteps[tsID].records[recID].param, param,
-		      streamptr->tsteps[tsID].records[recID].ilevel, level1);
+	      Message("tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d",
+                      tsID, recID, records[recID].param, param, records[recID].ilevel, level1);
 	      Error("Invalid, unsupported or inconsistent record structure");
 	    }
 
-	  streamptr->tsteps[tsID].records[recID].position = recpos;
-	  streamptr->tsteps[tsID].records[recID].size = recsize;
+	  records[recID].position = recpos;
+	  records[recID].size = recsize;
 
 	  rindex++;
 	}
@@ -1257,14 +1255,14 @@ int cgribexScanTimestep(stream_t * streamptr)
       for ( vrecID = 0; vrecID < nrecs; vrecID++ )
 	{
 	  recID = streamptr->tsteps[tsID].recIDs[vrecID];
-	  if ( ! streamptr->tsteps[tsID].records[recID].used ) break;
+	  if ( ! records[recID].used ) break;
 	}
 
       if ( vrecID < nrecs )
 	{
-	  cdiParamToString(streamptr->tsteps[tsID].records[recID].param, paramstr, sizeof(paramstr));
+	  cdiParamToString(records[recID].param, paramstr, sizeof(paramstr));
 	  gribWarning("Paramameter not found!", nrecs_scanned, tsID+1, paramstr,
-                      streamptr->tsteps[tsID].records[recID].ilevel, streamptr->tsteps[tsID].records[recID].ilevel2);
+                      records[recID].ilevel, records[recID].ilevel2);
 	  return CDI_EUFSTRUCT;
 	}
 
@@ -1293,9 +1291,7 @@ int cgribexScanTimestep(stream_t * streamptr)
       streamptr->ntsteps = tsID;
     }
 
-  rstatus = (int)streamptr->ntsteps;
-
-  return rstatus;
+  return streamptr->ntsteps;
 }
 
 #ifdef gribWarning

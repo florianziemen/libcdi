@@ -18,12 +18,6 @@
 
 #ifdef HAVE_LIBSERVICE
 
-typedef struct {
-  int param;
-  int level;
-} srvcompvar_t;
-
-
 static
 int srvInqDatatype(int prec)
 {
@@ -219,36 +213,34 @@ void srvScanTimestep1(stream_t *streamptr)
   streamptr->curTsID = 0;
 
   int tsID  = tstepsNewEntry(streamptr);
-  if ( tsID != 0 )
-    Error("Internal problem! tstepsNewEntry returns %d", tsID);
+  if ( tsID != 0 ) Error("Internal problem! tstepsNewEntry returns %d", tsID);
   taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
 
-  int fileID = streamptr->fileID;
+  const int fileID = streamptr->fileID;
 
   int nrecs = 0;
   while ( true )
     {
-      int header[8];
       recpos = fileGetPos(fileID);
-      int status = srvRead(fileID, srvp);
-      if ( status != 0 )
+      if ( srvRead(fileID, srvp) != 0 )
 	{
 	  streamptr->ntsteps = 1;
 	  break;
 	}
-      size_t recsize = (size_t)(fileGetPos(fileID) - recpos);
 
+      const size_t recsize = (size_t)(fileGetPos(fileID) - recpos);
+
+      int header[8];
       srvInqHeader(srvp, header);
 
-      int prec   = srvp->dprec;
-      int rcode  = header[0];
-      int rlevel = header[1];
-      int vdate  = header[2];
-      int vtime  = header[3];
-      int rxsize = header[4];
-      int rysize = header[5];
-
-      int param = cdiEncodeParam(rcode, 255, 255);
+      const int prec   = srvp->dprec;
+      const int rcode  = header[0];
+      const int rlevel = header[1];
+      const int vdate  = header[2];
+      const int vtime  = header[3];
+      const int rxsize = header[4];
+      const int rysize = header[5];
+      const int param  = cdiEncodeParam(rcode, 255, 255);
 
       if ( nrecs == 0 )
 	{
@@ -257,10 +249,11 @@ void srvScanTimestep1(stream_t *streamptr)
 	}
       else
 	{
+          record_t *records = streamptr->tsteps[tsID].records;
 	  for ( int recID = 0; recID < nrecs; recID++ )
-            if (    streamptr->tsteps[0].records[recID].param  == param
-                 && streamptr->tsteps[0].records[recID].ilevel == rlevel )
+            if ( param == records[recID].param && rlevel == records[recID].ilevel )
               goto tstepScanLoopFinished;
+
 	  DateTime datetime = { .date = vdate, .time = vtime };
 	  if ( datetimeCmp(datetime, datetime0) )
 	    Warning("Inconsistent verification time for code %d level %d", rcode, rlevel);
@@ -279,14 +272,14 @@ void srvScanTimestep1(stream_t *streamptr)
 
   cdi_generate_vars(streamptr);
 
-  int taxisID = taxisCreate(TAXIS_ABSOLUTE);
+  const int taxisID = taxisCreate(TAXIS_ABSOLUTE);
   taxis->type = TAXIS_ABSOLUTE;
   taxis->vdate = (int)datetime0.date;
   taxis->vtime = (int)datetime0.time;
   taxis->rdate = taxis->vdate;
   taxis->rtime = taxis->vtime;
 
-  int vlistID = streamptr->vlistID;
+  const int vlistID = streamptr->vlistID;
   vlistDefTaxis(vlistID, taxisID);
 
   vlist_check_contents(vlistID);
@@ -302,45 +295,43 @@ int srvScanTimestep2(stream_t *streamptr)
 {
   int header[8];
   off_t recpos = 0;
-  srvcompvar_t compVar, compVar0;
   void *srvp = streamptr->record->exsep;
 
   streamptr->curTsID = 1;
 
-  int vlistID = streamptr->vlistID;
-  int fileID  = streamptr->fileID;
+  const int vlistID = streamptr->vlistID;
+  const int fileID  = streamptr->fileID;
 
-  int tsID = streamptr->rtsteps;
-  if ( tsID != 1 )
-    Error("Internal problem! unexpected timestep %d", tsID+1);
+  const int tsID = streamptr->rtsteps;
+  if ( tsID != 1 ) Error("Internal problem! unexpected timestep %d", tsID+1);
 
   taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
 
   fileSetPos(fileID, streamptr->tsteps[tsID].position, SEEK_SET);
 
   cdi_create_records(streamptr, tsID);
+  record_t *records = streamptr->tsteps[tsID].records;
 
   const int nrecords = streamScanInitRecords2(streamptr);
 
   for ( int rindex = 0; rindex <= nrecords; rindex++ )
     {
       recpos = fileGetPos(fileID);
-      int status = srvRead(fileID, srvp);
-      if ( status != 0 )
+      if ( srvRead(fileID, srvp) != 0 )
 	{
 	  streamptr->ntsteps = 2;
 	  break;
 	}
-      size_t recsize = (size_t)(fileGetPos(fileID) - recpos);
+
+      const size_t recsize = (size_t)(fileGetPos(fileID) - recpos);
 
       srvInqHeader(srvp, header);
 
-      int rcode  = header[0];
-      int rlevel = header[1];
-      int vdate  = header[2];
-      int vtime  = header[3];
-
-      int param = cdiEncodeParam(rcode, 255, 255);
+      const int rcode  = header[0];
+      const int rlevel = header[1];
+      const int vdate  = header[2];
+      const int vtime  = header[3];
+      const int param  = cdiEncodeParam(rcode, 255, 255);
 
       if ( rindex == 0 )
 	{
@@ -349,24 +340,19 @@ int srvScanTimestep2(stream_t *streamptr)
 	  taxis->vtime = vtime;
 	}
 
-      compVar.param = param;
-      compVar.level = rlevel;
       bool nextstep = false;
       int recID;
       for ( recID = 0; recID < nrecords; recID++ )
 	{
-	  compVar0.param = streamptr->tsteps[tsID].records[recID].param;
-	  compVar0.level = streamptr->tsteps[tsID].records[recID].ilevel;
-
-	  if ( memcmp(&compVar0, &compVar, sizeof(srvcompvar_t)) == 0 )
+	  if ( param == records[recID].param && rlevel == records[recID].ilevel )
 	    {
-	      if ( streamptr->tsteps[tsID].records[recID].used )
+	      if ( records[recID].used )
 		{
 		  nextstep = true;
 		}
 	      else
 		{
-		  streamptr->tsteps[tsID].records[recID].used = true;
+		  records[recID].used = true;
 		  streamptr->tsteps[tsID].recIDs[rindex] = recID;
 		}
 	      break;
@@ -383,30 +369,23 @@ int srvScanTimestep2(stream_t *streamptr)
       if ( CDI_Debug )
 	Message("%4d%8d%4d%8d%8d%6d", rindex+1, (int)recpos, rcode, rlevel, vdate, vtime);
 
-      streamptr->tsteps[tsID].records[recID].size = recsize;
-
-      compVar0.param = streamptr->tsteps[tsID].records[recID].param;
-      compVar0.level = streamptr->tsteps[tsID].records[recID].ilevel;
-
-      if ( memcmp(&compVar0, &compVar, sizeof(srvcompvar_t)) != 0 )
+      if ( param != records[recID].param || rlevel != records[recID].ilevel )
 	{
 	  Message("tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d",
-		  tsID, recID,
-		  streamptr->tsteps[tsID].records[recID].param, param,
-		  streamptr->tsteps[tsID].records[recID].ilevel, rlevel);
+		  tsID, recID, records[recID].param, param, records[recID].ilevel, rlevel);
 	  return CDI_EUFSTRUCT;
 	}
 
-      streamptr->tsteps[1].records[recID].position = recpos;
+      records[recID].position = recpos;
+      records[recID].size = recsize;
     }
 
   int nrecs = 0;
   for ( int recID = 0; recID < nrecords; recID++ )
     {
-      if ( ! streamptr->tsteps[tsID].records[recID].used )
+      if ( ! records[recID].used )
 	{
-	  int varID = streamptr->tsteps[tsID].records[recID].varID;
-          vlistDefVarTimetype(vlistID, varID, TIME_CONSTANT);
+          vlistDefVarTimetype(vlistID, records[recID].varID, TIME_CONSTANT);
 	}
       else
 	{
@@ -429,7 +408,7 @@ int srvInqContents(stream_t *streamptr)
 
   srvScanTimestep1(streamptr);
 
-  int status = (streamptr->ntsteps == -1) ? srvScanTimestep2(streamptr) : 0;
+  const int status = (streamptr->ntsteps == -1) ? srvScanTimestep2(streamptr) : 0;
 
   fileSetPos(streamptr->fileID, 0, SEEK_SET);
 
@@ -444,12 +423,13 @@ long srvScanTimestep(stream_t *streamptr)
   int nrecs = 0;
   void *srvp = streamptr->record->exsep;
 
-  int tsID  = streamptr->rtsteps;
+  int tsID = streamptr->rtsteps;
   taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
 
   if ( streamptr->tsteps[tsID].recordSize == 0 )
     {
       cdi_create_records(streamptr, tsID);
+      record_t *records = streamptr->tsteps[tsID].records;
 
       nrecs = streamScanInitRecords(streamptr, tsID);
 
@@ -460,24 +440,21 @@ long srvScanTimestep(stream_t *streamptr)
       for ( int rindex = 0; rindex <= nrecs; rindex++ )
 	{
 	  recpos = fileGetPos(fileID);
-	  int status = srvRead(fileID, srvp);
-	  if ( status != 0 )
+	  if ( srvRead(fileID, srvp) != 0 )
 	    {
 	      streamptr->ntsteps = streamptr->rtsteps + 1;
 	      break;
 	    }
-	  size_t recsize = (size_t)(fileGetPos(fileID) - recpos);
+
+	  const size_t recsize = (size_t)(fileGetPos(fileID) - recpos);
 
 	  srvInqHeader(srvp, header);
 
-	  int rcode  = header[0];
-	  int rlevel = header[1];
-	  int vdate  = header[2];
-	  int vtime  = header[3];
-          /* rxsize = header[4]; */
-          /* rysize = header[5]; */
-
-	  int param = cdiEncodeParam(rcode, 255, 255);
+	  const int rcode  = header[0];
+	  const int rlevel = header[1];
+	  const int vdate  = header[2];
+	  const int vtime  = header[3];
+	  const int param  = cdiEncodeParam(rcode, 255, 255);
 
 	  // if ( rindex == nrecs ) break; gcc-4.5 internal compiler error
 	  if ( rindex == nrecs ) continue;
@@ -490,18 +467,15 @@ long srvScanTimestep(stream_t *streamptr)
 	      taxis->vtime = vtime;
 	    }
 
-          if (    param  != streamptr->tsteps[tsID].records[recID].param
-               || rlevel != streamptr->tsteps[tsID].records[recID].ilevel )
+          if ( param != records[recID].param || rlevel != records[recID].ilevel )
 	    {
 	      Message("tsID = %d recID = %d param = %3d new %3d  level = %3d new %3d",
-		      tsID, recID,
-		      streamptr->tsteps[tsID].records[recID].param, param,
-		      streamptr->tsteps[tsID].records[recID].ilevel, rlevel);
+		      tsID, recID, records[recID].param, param, records[recID].ilevel, rlevel);
 	      Error("Invalid, unsupported or inconsistent record structure!");
 	    }
 
-	  streamptr->tsteps[tsID].records[recID].position = recpos;
-	  streamptr->tsteps[tsID].records[recID].size = recsize;
+	  records[recID].position = recpos;
+	  records[recID].size = recsize;
 
 	  if ( CDI_Debug )
 	    Message("%4d%8d%4d%8d%8d%6d", rindex, (int)recpos, rcode, rlevel, vdate, vtime);
