@@ -40,13 +40,15 @@ int streamScanInitRecords2(stream_t *streamptr)
 
 int streamScanInitRecords(stream_t *streamptr, int tsID)
 {
-  const nrecs = streamptr->tsteps[1].nrecs;
+  const int nrecs = streamptr->tsteps[1].nrecs;
 
   streamptr->tsteps[tsID].nrecs = nrecs;
   streamptr->tsteps[tsID].recIDs = (int *) Malloc((size_t)nrecs*sizeof(int));
 
   for (int recID = 0; recID < nrecs; ++recID)
     streamptr->tsteps[tsID].recIDs[recID] = streamptr->tsteps[1].recIDs[recID];
+
+  return nrecs;
 }
 
 
