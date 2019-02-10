@@ -867,7 +867,7 @@ int cgribexScanTimestep1(stream_t *streamptr)
   int vlistID = streamptr->vlistID;
   vlistDefTaxis(vlistID, taxisID);
 
-  streamScanResizeRecords(streamptr);
+  streamScanResizeRecords1(streamptr);
 
   streamptr->record->buffer     = gribbuffer;
   streamptr->record->buffersize = buffersize;
@@ -1106,14 +1106,9 @@ int cgribexScanTimestep(stream_t * streamptr)
 
       cdi_create_records(streamptr, tsID);
 
-      nrecs = streamptr->tsteps[1].nrecs;
+      nrecs = streamScanInitRecords(streamptr, tsID);
 
-      streamptr->tsteps[tsID].nrecs = nrecs;
-      streamptr->tsteps[tsID].recIDs = (int *) Malloc((size_t)nrecs * sizeof (int));
-      for ( recID = 0; recID < nrecs; recID++ )
-	streamptr->tsteps[tsID].recIDs[recID] = streamptr->tsteps[1].recIDs[recID];
-
-      int fileID = streamptr->fileID;
+      const int fileID = streamptr->fileID;
 
       fileSetPos(fileID, streamptr->tsteps[tsID].position, SEEK_SET);
 
@@ -1202,7 +1197,7 @@ int cgribexScanTimestep(stream_t * streamptr)
 
 	  for ( vrecID = 0; vrecID < nrecs; vrecID++ )
 	    {
-	      recID   = streamptr->tsteps[1].recIDs[vrecID];
+	      recID = streamptr->tsteps[1].recIDs[vrecID];
 	      if ( cgribexVarCompare(compVar, streamptr->tsteps[tsID].records[recID], 0) == 0 ) break;
 	    }
 
@@ -1261,7 +1256,7 @@ int cgribexScanTimestep(stream_t * streamptr)
 
       for ( vrecID = 0; vrecID < nrecs; vrecID++ )
 	{
-	  recID   = streamptr->tsteps[tsID].recIDs[vrecID];
+	  recID = streamptr->tsteps[tsID].recIDs[vrecID];
 	  if ( ! streamptr->tsteps[tsID].records[recID].used ) break;
 	}
 

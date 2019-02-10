@@ -296,7 +296,7 @@ void extScanTimestep1(stream_t *streamptr)
 
   vlist_check_contents(vlistID);
 
-  streamScanResizeRecords(streamptr);
+  streamScanResizeRecords1(streamptr);
 
   streamScanTsFixNtsteps(streamptr, recpos);
   streamScanTimeConstAdjust(streamptr, taxis);
@@ -446,26 +446,20 @@ long extScanTimestep(stream_t *streamptr)
 {
   int header[4];
   off_t recpos = 0;
-  int recID;
   int nrecs = 0;
   extcompvar_t compVar, compVar0;
   void *extp = streamptr->record->exsep;
 
-  int tsID  = streamptr->rtsteps;
+  int tsID = streamptr->rtsteps;
   taxis_t *taxis = &streamptr->tsteps[tsID].taxis;
 
   if ( streamptr->tsteps[tsID].recordSize == 0 )
     {
       cdi_create_records(streamptr, tsID);
 
-      nrecs = streamptr->tsteps[1].nrecs;
+      nrecs = streamScanInitRecords(streamptr, tsID);
 
-      streamptr->tsteps[tsID].nrecs = nrecs;
-      streamptr->tsteps[tsID].recIDs = (int *) Malloc((size_t)nrecs * sizeof (int));
-      for ( recID = 0; recID < nrecs; recID++ )
-	streamptr->tsteps[tsID].recIDs[recID] = streamptr->tsteps[1].recIDs[recID];
-
-      int fileID = streamptr->fileID;
+      const int fileID = streamptr->fileID;
 
       fileSetPos(fileID, streamptr->tsteps[tsID].position, SEEK_SET);
 
@@ -492,7 +486,7 @@ long extScanTimestep(stream_t *streamptr)
 
 	  // if ( rindex == nrecs ) break; gcc-4.5 internal compiler error
 	  if ( rindex == nrecs ) continue;
-	  recID = streamptr->tsteps[tsID].recIDs[rindex];
+	  const int recID = streamptr->tsteps[tsID].recIDs[rindex];
 
 	  if ( rindex == 0 )
 	    {
@@ -582,7 +576,7 @@ void extReadVarSliceDP(stream_t *streamptr, int varID, int levID, double *data, 
   /* NOTE: tiles are not supported here! */
   double missval = vlistInqVarMissval(vlistID, varID);
   size_t gridsize = gridInqSize(vlistInqVarGrid(vlistID, varID));
-  int tsid     = streamptr->curTsID;
+  int tsid = streamptr->curTsID;
 
   off_t currentfilepos = fileGetPos(fileID);
 

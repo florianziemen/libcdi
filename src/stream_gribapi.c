@@ -1050,7 +1050,7 @@ int gribapiScanTimestep1(stream_t * streamptr)
   int vlistID = streamptr->vlistID;
   vlistDefTaxis(vlistID, taxisID);
 
-  streamScanResizeRecords(streamptr);
+  streamScanResizeRecords1(streamptr);
 
   streamptr->record->buffer     = gribbuffer;
   streamptr->record->buffersize = buffersize;
@@ -1270,7 +1270,7 @@ int gribapiScanTimestep2(stream_t * streamptr)
 
 int gribapiScanTimestep(stream_t * streamptr)
 {
-  int vrecID, recID;
+  int vrecID, recID = -1;
   //bool warn_numavg = true;
   int nrecs = 0;
   int vlistID = streamptr->vlistID;
@@ -1285,14 +1285,9 @@ int gribapiScanTimestep(stream_t * streamptr)
 
       cdi_create_records(streamptr, tsID);
 
-      nrecs = streamptr->tsteps[1].nrecs;
+      nrecs = streamScanInitRecords(streamptr, tsID);
 
-      streamptr->tsteps[tsID].nrecs = nrecs;
-      streamptr->tsteps[tsID].recIDs = (int *) Malloc((size_t)nrecs*sizeof(int));
-      for ( recID = 0; recID < nrecs; recID++ )
-	streamptr->tsteps[tsID].recIDs[recID] = streamptr->tsteps[1].recIDs[recID];
-
-      int fileID = streamptr->fileID;
+      const int fileID = streamptr->fileID;
 
       fileSetPos(fileID, streamptr->tsteps[tsID].position, SEEK_SET);
 
@@ -1394,7 +1389,7 @@ int gribapiScanTimestep(stream_t * streamptr)
 
 	  for ( vrecID = 0; vrecID < nrecs; vrecID++ )
 	    {
-	      recID   = streamptr->tsteps[1].recIDs[vrecID];
+	      recID = streamptr->tsteps[1].recIDs[vrecID];
 	      if ( gribapiVarCompare(compVar, streamptr->tsteps[tsID].records[recID], 0) == 0 ) break;
 	    }
 

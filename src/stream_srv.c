@@ -291,7 +291,7 @@ void srvScanTimestep1(stream_t *streamptr)
 
   vlist_check_contents(vlistID);
 
-  streamScanResizeRecords(streamptr);
+  streamScanResizeRecords1(streamptr);
 
   streamScanTsFixNtsteps(streamptr, recpos);
   streamScanTimeConstAdjust(streamptr, taxis);
@@ -441,7 +441,6 @@ long srvScanTimestep(stream_t *streamptr)
 {
   int header[8];
   off_t recpos = 0;
-  int recID;
   int nrecs = 0;
   void *srvp = streamptr->record->exsep;
 
@@ -452,14 +451,9 @@ long srvScanTimestep(stream_t *streamptr)
     {
       cdi_create_records(streamptr, tsID);
 
-      nrecs = streamptr->tsteps[1].nrecs;
+      nrecs = streamScanInitRecords(streamptr, tsID);
 
-      streamptr->tsteps[tsID].nrecs = nrecs;
-      streamptr->tsteps[tsID].recIDs = (int *) Malloc((size_t)nrecs * sizeof (int));
-      for ( recID = 0; recID < nrecs; recID++ )
-	streamptr->tsteps[tsID].recIDs[recID] = streamptr->tsteps[1].recIDs[recID];
-
-      int fileID = streamptr->fileID;
+      const int fileID = streamptr->fileID;
 
       fileSetPos(fileID, streamptr->tsteps[tsID].position, SEEK_SET);
 
@@ -487,7 +481,7 @@ long srvScanTimestep(stream_t *streamptr)
 
 	  // if ( rindex == nrecs ) break; gcc-4.5 internal compiler error
 	  if ( rindex == nrecs ) continue;
-	  recID = streamptr->tsteps[tsID].recIDs[rindex];
+	  const int recID = streamptr->tsteps[tsID].recIDs[rindex];
 
 	  if ( rindex == 0 )
 	    {
