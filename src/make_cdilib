@@ -129,6 +129,7 @@ files="basetime.c \
    resource_handle.c \
    serialize.c \
    servicelib.c \
+   stream_scan.c \
    stream.c \
    stream_write.c \
    stream_read.c \
