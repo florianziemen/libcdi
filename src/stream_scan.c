@@ -2,9 +2,28 @@
 #include "stream_scan.h"
 
 
+int streamScanInitRecords2(stream_t *streamptr)
+{
+  const int nrecords = streamptr->tsteps[1].nallrecs;
+  streamptr->tsteps[1].recIDs = (int *) Malloc((size_t)nrecords*sizeof(int));
+  streamptr->tsteps[1].nrecs = 0;
+
+  for (int recID = 0; recID < nrecords; ++recID)
+    streamptr->tsteps[1].recIDs[recID] = -1;
+
+  for (int recID = 0; recID < nrecords; ++recID)
+    {
+      streamptr->tsteps[1].records[recID].position = streamptr->tsteps[0].records[recID].position;
+      streamptr->tsteps[1].records[recID].size     = streamptr->tsteps[0].records[recID].size;
+    }
+
+  return nrecords;
+}
+
+
 void streamScanResizeRecords(stream_t *streamptr)
 {
-  int nrecords = streamptr->tsteps[0].nallrecs;
+  const int nrecords = streamptr->tsteps[0].nallrecs;
   if (nrecords < streamptr->tsteps[0].recordSize)
     {
       streamptr->tsteps[0].recordSize = nrecords;

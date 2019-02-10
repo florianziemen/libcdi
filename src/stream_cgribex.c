@@ -912,17 +912,7 @@ int cgribexScanTimestep2(stream_t * streamptr)
 
   cdi_create_records(streamptr, tsID);
 
-  const int nrecords = streamptr->tsteps[tsID].nallrecs;
-  if ( nrecords ) streamptr->tsteps[1].recIDs = (int *) Malloc((size_t)nrecords * sizeof(int));
-  streamptr->tsteps[1].nrecs = 0;
-  for ( recID = 0; recID < nrecords; recID++ )
-    streamptr->tsteps[1].recIDs[recID] = -1;
-
-  for ( recID = 0; recID < nrecords; recID++ )
-    {
-      streamptr->tsteps[tsID].records[recID].position =	streamptr->tsteps[0].records[recID].position;
-      streamptr->tsteps[tsID].records[recID].size     =	streamptr->tsteps[0].records[recID].size;
-    }
+  const int nrecords = streamScanInitRecords2(streamptr);
 
   int nrecs_scanned = nrecords;
   int rindex = 0;
